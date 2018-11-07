@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <OutDir>$(ProjectDir)bin\</OutDir>
+    <IntDir>$(ProjectDir)build\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(ProjectDir)include\;x:\include\;</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>IW_WINDOWS</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies />
+      <AdditionalLibraryDirectories>$(ProjectDir)lib\;x:\lib\$(PlatformName)\$(PlatformTarget)\</AdditionalLibraryDirectories>
+    </Link>
+    <PostBuildEvent>
+      <Command>xcopy "$(OutputPath)$(TargetName).dll" "x:\bin\$(PlatformName)\$(PlatformTarget)\" /y
+xcopy "$(OutputPath)$(TargetName).lib" "x:\lib\$(PlatformName)\$(PlatformTarget)\" /y
+xcopy "$(ProjectDir)include\*" "x:\include\$(ProjectName)\" /y</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup />
+</Project>
