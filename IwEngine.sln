@@ -10,8 +10,14 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IwInput", "IwInput\IwInput.vcxproj", "{1C0B15BE-E5B8-4F71-95F7-2DE903E73156}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Sandbox", "Sandbox\Sandbox.vcxproj", "{300D9CCE-3AEC-4085-B34C-59F4EE28011B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8594EE42-41B3-47B8-90BF-E667014120E2} = {8594EE42-41B3-47B8-90BF-E667014120E2}
+		{3453D68A-9F63-44A3-9168-131C620F0359} = {3453D68A-9F63-44A3-9168-131C620F0359}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IwEngine", "IwEngine\IwEngine.vcxproj", "{8594EE42-41B3-47B8-90BF-E667014120E2}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IwEcs", "IwEcs\IwEcs.vcxproj", "{5824F947-D1A3-46C1-94E7-4C8CD5A1CDEE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -61,6 +67,14 @@ Global
 		{8594EE42-41B3-47B8-90BF-E667014120E2}.Release|x64.Build.0 = Release|x64
 		{8594EE42-41B3-47B8-90BF-E667014120E2}.Release|x86.ActiveCfg = Release|Win32
 		{8594EE42-41B3-47B8-90BF-E667014120E2}.Release|x86.Build.0 = Release|Win32
+		{5824F947-D1A3-46C1-94E7-4C8CD5A1CDEE}.Debug|x64.ActiveCfg = Debug|x64
+		{5824F947-D1A3-46C1-94E7-4C8CD5A1CDEE}.Debug|x64.Build.0 = Debug|x64
+		{5824F947-D1A3-46C1-94E7-4C8CD5A1CDEE}.Debug|x86.ActiveCfg = Debug|Win32
+		{5824F947-D1A3-46C1-94E7-4C8CD5A1CDEE}.Debug|x86.Build.0 = Debug|Win32
+		{5824F947-D1A3-46C1-94E7-4C8CD5A1CDEE}.Release|x64.ActiveCfg = Release|x64
+		{5824F947-D1A3-46C1-94E7-4C8CD5A1CDEE}.Release|x64.Build.0 = Release|x64
+		{5824F947-D1A3-46C1-94E7-4C8CD5A1CDEE}.Release|x86.ActiveCfg = Release|Win32
+		{5824F947-D1A3-46C1-94E7-4C8CD5A1CDEE}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

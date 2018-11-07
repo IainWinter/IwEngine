@@ -34,6 +34,8 @@
 	typedef void* IWI_HANDLE;
 #endif
 
+namespace iwi {}
+
 #define iwinput iwi
 
 typedef unsigned int uint;

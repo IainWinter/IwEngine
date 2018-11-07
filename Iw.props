@@ -18,7 +18,7 @@
     <PostBuildEvent>
       <Command>xcopy "$(OutputPath)$(TargetName).dll" "x:\bin\$(PlatformName)\$(PlatformTarget)\" /y
 xcopy "$(OutputPath)$(TargetName).lib" "x:\lib\$(PlatformName)\$(PlatformTarget)\" /y
-xcopy "$(ProjectDir)include\*" "x:\include\$(ProjectName)\" /y</Command>
+xcopy "$(ProjectDir)include\*" "x:\include\$(ProjectName)\" /ye</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup />

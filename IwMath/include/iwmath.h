@@ -8,6 +8,7 @@
 #	endif
 #endif
 
+namespace iwm {}
 #define iwmath iwm
 
 namespace iwmath {
