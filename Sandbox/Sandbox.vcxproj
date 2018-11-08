@@ -85,11 +85,13 @@
       <Command />
     </PostBuildEvent>
     <Link>
-      <AdditionalDependencies>iwengine.lib;iwmath.lib</AdditionalDependencies>
+      <AdditionalDependencies>iwengine.lib;iwmath.lib;iwinput.lib;iwecs.lib</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>xcopy "x:\bin\$(PlatformName)\$(PlatformTarget)\IwMath.dll" "$(OutputPath)" /y
-xcopy "x:\bin\$(PlatformName)\$(PlatformTarget)\IwEngine.dll" "$(OutputPath)" /y</Command>
+xcopy "x:\bin\$(PlatformName)\$(PlatformTarget)\IwEngine.dll" "$(OutputPath)" /y
+xcopy "x:\bin\$(PlatformName)\$(PlatformTarget)\IwInput.dll" "$(OutputPath)" /y
+xcopy "x:\bin\$(PlatformName)\$(PlatformTarget)\IwEcs.dll" "$(OutputPath)" /y</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -103,11 +105,13 @@ xcopy "x:\bin\$(PlatformName)\$(PlatformTarget)\IwEngine.dll" "$(OutputPath)" /y
       <Command />
     </PostBuildEvent>
     <Link>
-      <AdditionalDependencies>iwengine.lib;iwmath.lib</AdditionalDependencies>
+      <AdditionalDependencies>iwengine.lib;iwmath.lib;iwinput.lib;iwecs.lib</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>xcopy "x:\bin\$(PlatformName)\$(PlatformTarget)\IwMath.dll" "$(OutputPath)" /y
-xcopy "x:\bin\$(PlatformName)\$(PlatformTarget)\IwEngine.dll" "$(OutputPath)" /y</Command>
+xcopy "x:\bin\$(PlatformName)\$(PlatformTarget)\IwEngine.dll" "$(OutputPath)" /y
+xcopy "x:\bin\$(PlatformName)\$(PlatformTarget)\IwInput.dll" "$(OutputPath)" /y
+xcopy "x:\bin\$(PlatformName)\$(PlatformTarget)\IwEcs.dll" "$(OutputPath)" /y</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -122,14 +126,16 @@ xcopy "x:\bin\$(PlatformName)\$(PlatformTarget)\IwEngine.dll" "$(OutputPath)" /y
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>iwengine.lib;iwmath.lib</AdditionalDependencies>
+      <AdditionalDependencies>iwengine.lib;iwmath.lib;iwinput.lib;iwecs.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command />
     </PostBuildEvent>
     <PreBuildEvent>
       <Command>xcopy "x:\bin\$(PlatformName)\$(PlatformTarget)\IwMath.dll" "$(OutputPath)" /y
-xcopy "x:\bin\$(PlatformName)\$(PlatformTarget)\IwEngine.dll" "$(OutputPath)" /y</Command>
+xcopy "x:\bin\$(PlatformName)\$(PlatformTarget)\IwEngine.dll" "$(OutputPath)" /y
+xcopy "x:\bin\$(PlatformName)\$(PlatformTarget)\IwInput.dll" "$(OutputPath)" /y
+xcopy "x:\bin\$(PlatformName)\$(PlatformTarget)\IwEcs.dll" "$(OutputPath)" /y</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -144,14 +150,16 @@ xcopy "x:\bin\$(PlatformName)\$(PlatformTarget)\IwEngine.dll" "$(OutputPath)" /y
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>iwengine.lib;iwmath.lib</AdditionalDependencies>
+      <AdditionalDependencies>iwengine.lib;iwmath.lib;iwinput.lib;iwecs.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command />
     </PostBuildEvent>
     <PreBuildEvent>
       <Command>xcopy "x:\bin\$(PlatformName)\$(PlatformTarget)\IwMath.dll" "$(OutputPath)" /y
-xcopy "x:\bin\$(PlatformName)\$(PlatformTarget)\IwEngine.dll" "$(OutputPath)" /y</Command>
+xcopy "x:\bin\$(PlatformName)\$(PlatformTarget)\IwEngine.dll" "$(OutputPath)" /y
+xcopy "x:\bin\$(PlatformName)\$(PlatformTarget)\IwInput.dll" "$(OutputPath)" /y
+xcopy "x:\bin\$(PlatformName)\$(PlatformTarget)\IwEcs.dll" "$(OutputPath)" /y</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

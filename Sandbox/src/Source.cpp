@@ -3,23 +3,16 @@
 #include "IwMath/vector2.h"
 #include "IwEngine/IwEngine.h"
 
+#include "IwEcs/memory_chunk.h"
+
 class Game : public IwEngine::Application {
 public:
 	Game() {}
 	~Game() {}
 
 	void Run() override {
-		iwm::vector2 xy = iwm::vector2();
-		iwm::vector2 v  = iwm::vector2(1, 2);
-
-		bool running = true;
-		while (running) {
-			std::cout << xy << std::endl;
-			xy += v;
-			if (std::cin.get() == 'A') {
-				running = false;
-			}
-		}
+		memory_chunk<int> c = memory_chunk<int>(64);
+		while (c.alloc(5)) {};
 	}
 };
 

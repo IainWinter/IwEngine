@@ -21,15 +21,9 @@
     <ClInclude Include="include\memory_chunk.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\ecs_manager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\archtype.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\ecs_manager.cpp">
+    <ClCompile Include="src\memory_chunk.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

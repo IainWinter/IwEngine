@@ -5,3 +5,5 @@
 #else
 #	define IWECS_API __declspec(dllimport)
 #endif
+
+namespace iwecs {}
