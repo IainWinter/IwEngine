@@ -5,8 +5,17 @@
 
 namespace iwecs {
 	class iarchtype {
+	protected:
+		std::size_t m_id;
 	public:
+		iarchtype(unsigned int id)
+			: m_id(id) {}
+
 		virtual ~iarchtype() {}
+
+		std::size_t id() {
+			return m_id;
+		}
 	};
 
 	template<typename... T>
@@ -16,8 +25,9 @@ namespace iwecs {
 		std::size_t m_entities_pre_count;
 	public:
 		archtype(std::size_t entities_pre_chunk)
-			: m_chunks(),
-			m_entities_pre_count(entities_pre_chunk)
+		  : iarchtype(typeid(this).hash_code()),
+			m_chunks(),
+			m_entities_pre_count(entities_pre_chunk) 
 		{
 			add_chunk();
 		}

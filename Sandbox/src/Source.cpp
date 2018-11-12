@@ -1,10 +1,7 @@
 #include <iostream>
 
-#include "IwMath/vector2.h"
 #include "IwEngine/IwEngine.h"
-
-#include "IwEcs/component_registry.h"
-#include <tuple>
+#include "IwEcs/ecs_manager.h"
 
 class Game : public IwEngine::Application {
 public:
@@ -14,12 +11,16 @@ public:
 	void Run() override {
 		iwecs::component_registry c = iwecs::component_registry();
 		c.add_archtype<int, float>();
+
+		//iwecs::ecs_manager m = iwecs::ecs_manager();
+		//iwecs::entity e = m.create_entity();
 	}
 };
 
 IwEngine::Application* CreateApplication() {
 	return new Game();
 }
+
 
 //iwm	iwmath
 //iwecs	iwecs

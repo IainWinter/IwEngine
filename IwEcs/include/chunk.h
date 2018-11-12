@@ -21,11 +21,12 @@ namespace iwecs {
 		unsigned int m_count;
 	public:
 		chunk(int count)
-			: m_size(count * sizeof(tup_t)),
-			m_memory(new tup_t[count]),
+		  : m_memory(new tup_t[count]),
 			m_free(m_memory),
-			m_end(m_memory + count) {
-		}
+			m_end(m_memory + count),
+			m_size(count * sizeof(tup_t)), 
+			m_count(0)
+		{}
 
 		~chunk() {
 			delete[] m_memory;
