@@ -18,10 +18,13 @@
     <ClInclude Include="include\iwecs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\memory_chunk.h">
+    <ClInclude Include="include\ecs_manager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\ecs_manager.h">
+    <ClInclude Include="include\chunk.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\component_registry.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\archtype.h">

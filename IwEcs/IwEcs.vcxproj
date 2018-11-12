@@ -124,9 +124,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\archtype.h" />
+    <ClInclude Include="include\component_registry.h" />
     <ClInclude Include="include\ecs_manager.h" />
     <ClInclude Include="include\iwecs.h" />
-    <ClInclude Include="include\memory_chunk.h" />
+    <ClInclude Include="include\chunk.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\ecs_manager.cpp" />
