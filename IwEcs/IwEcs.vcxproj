@@ -128,7 +128,6 @@
     <ClInclude Include="include\ecs_manager.h" />
     <ClInclude Include="include\iwecs.h" />
     <ClInclude Include="include\chunk.h" />
-    <ClInclude Include="include\type_identifier.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\ecs_manager.cpp" />

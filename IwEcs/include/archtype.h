@@ -5,18 +5,12 @@
 #include "IwUtil/identifiable.h"
 
 namespace iwecs {
-	class iarchtype : iwutil::identifiable {
-	protected:
-		std::size_t m_id;
+	class iarchtype : public iwutil::identifiable {
 	public:
-		iarchtype(unsigned int id)
-			: m_id(id) {}
-
 		virtual ~iarchtype() {}
 
-		std::size_t id() {
-			return m_id;
-		}
+		virtual void add_chunk() = 0;
+		virtual entity create_entity() = 0;
 	};
 
 	template<typename... T>
@@ -26,8 +20,7 @@ namespace iwecs {
 		std::size_t m_entities_pre_count;
 	public:
 		archtype(std::size_t entities_pre_chunk)
-		  : iarchtype(typeid(this).hash_code()),
-			m_chunks(),
+		  : m_chunks(),
 			m_entities_pre_count(entities_pre_chunk) 
 		{
 			add_chunk();
@@ -35,11 +28,11 @@ namespace iwecs {
 
 		~archtype() {}
 
-		void add_chunk() {
+		void add_chunk() override {
 			m_chunks.push_back(chunk<T...>(m_entities_pre_count));
 		}
 
-		entity create_entity() {
+		entity create_entity() override {
 			return 0;
 		}
 	};

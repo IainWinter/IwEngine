@@ -6,14 +6,15 @@ namespace iwutil {
 	class identifiable {
 	private:
 		static id_t m_next_id;
-		id_t m_id = ++m_next_id;
+		static id_t m_id;
 	public:
-		id_t id() {
+		static id_t id() {
 			return m_id;
 		}
 	};
 
 	id_t identifiable::m_next_id = 0;
+	id_t identifiable::m_next_id = ++identifiable::m_next_id;
 }
 
 //

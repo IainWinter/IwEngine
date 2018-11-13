@@ -30,9 +30,6 @@
     <ClInclude Include="include\archtype.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\type_identifier.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\ecs_manager.cpp">

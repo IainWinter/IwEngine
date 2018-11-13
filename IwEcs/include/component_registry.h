@@ -11,12 +11,13 @@ namespace iwecs {
 		std::unordered_map<iwutil::id_t, iarchtype*> m_archtypes;
 
 		template<typename... T>
-		archtype<T...>& ensure_archtype() {
-			archtype<T...>* a = new archtype<T...>(8);
-			iwutil::id_t id = a->id();
-			m_archtypes.emplace(id, a);
+		iarchtype& ensure_archtype() {
+			iwutil::id_t id = archtype<T...>::id();
+			if (m_archtypes.find(id) == m_archtypes.end()) {
+				m_archtypes.emplace(id, new archtype<T...>(8));
+			}
 
-			return *a;
+			return *m_archtypes[id];
 		}
 	public:
 		component_registry() {}
@@ -24,7 +25,7 @@ namespace iwecs {
 
 		template<typename... T>
 		entity create_entity() {
-			archtype<T...>& a = ensure_archtype<T...>();
+			iarchtype& a = ensure_archtype<T...>();
 			return a.create_entity();
 		}
 	};
