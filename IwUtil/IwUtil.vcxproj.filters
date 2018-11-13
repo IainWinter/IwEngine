@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\type_identifier.h">
+    <ClInclude Include="include\identifiable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -8,23 +8,24 @@
 namespace iwecs {
 	class component_registry {
 	private:
-		using typeid_t = unsigned int;
+		std::unordered_map<iwutil::id_t, iarchtype*> m_archtypes;
 
-		std::unordered_map<typeid_t, iarchtype*> m_archtypes;
+		template<typename... T>
+		archtype<T...>& ensure_archtype() {
+			archtype<T...>* a = new archtype<T...>(8);
+			iwutil::id_t id = a->id();
+			m_archtypes.emplace(id, a);
+
+			return *a;
+		}
 	public:
 		component_registry() {}
 		~component_registry() {}
 
 		template<typename... T>
-		void add_archtype() {
-			iarchtype* a = new archtype<T...>(8);
-			typeid_t id = a.id();
-			m_archtypes.emplace(id, a);
-		}
-
-		template<typename... T>
-		entity add_entity() {
-			return 0;
+		entity create_entity() {
+			archtype<T...>& a = ensure_archtype<T...>();
+			return a.create_entity();
 		}
 	};
 }

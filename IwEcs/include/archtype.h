@@ -2,9 +2,10 @@
 
 #include <vector>
 #include "chunk.h"
+#include "IwUtil/identifiable.h"
 
 namespace iwecs {
-	class iarchtype {
+	class iarchtype : iwutil::identifiable {
 	protected:
 		std::size_t m_id;
 	public:
@@ -36,6 +37,10 @@ namespace iwecs {
 
 		void add_chunk() {
 			m_chunks.push_back(chunk<T...>(m_entities_pre_count));
+		}
+
+		entity create_entity() {
+			return 0;
 		}
 	};
 }

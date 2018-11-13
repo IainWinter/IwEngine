@@ -13,7 +13,7 @@ namespace iwecs {
 
 		template<typename... T>
 		entity create_entity() {
-			return c.add_entity<T...>();
+			return c.create_entity<T...>();
 		}
 	};
 }

@@ -10,7 +10,7 @@ public:
 
 	void Run() override {
 		iwecs::component_registry c = iwecs::component_registry();
-		c.add_archtype<int, float>();
+		c.create_entity<int, float>();
 
 		//iwecs::ecs_manager m = iwecs::ecs_manager();
 		//iwecs::entity e = m.create_entity();
