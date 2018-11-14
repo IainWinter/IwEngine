@@ -16,8 +16,16 @@ namespace iwecs {
 	template<typename... T>
 	class archtype : public iarchtype {
 	private:
-		std::vector<chunk<T...>> m_chunks;
-		std::size_t m_entities_pre_count;
+		using chunk_t = chunk<T...>;
+
+		std::vector<chunk_t> m_chunks;
+		std::size_t m_free_chunk;
+
+		chunk_t& ensure_chunk() {
+			if (m_free_chunk == -1) {
+				m_chunks.push_back(new chunk_t(8));
+			}
+		}
 	public:
 		archtype(std::size_t entities_pre_chunk)
 		  : m_chunks(),

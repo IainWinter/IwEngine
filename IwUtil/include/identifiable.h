@@ -14,7 +14,7 @@ namespace iwutil {
 	};
 
 	id_t identifiable::m_next_id = 0;
-	id_t identifiable::m_next_id = ++identifiable::m_next_id;
+	id_t identifiable::m_id = ++identifiable::m_next_id;
 }
 
 //

@@ -9,3 +9,19 @@
 namespace iwecs {
 	using entity = unsigned int;
 }
+
+
+
+
+/*
+ecs_manager
+ |- component_registry
+     |- map of archtype id to component_data
+ component_data
+  |- vector of chunks
+
+
+
+
+
+*/
