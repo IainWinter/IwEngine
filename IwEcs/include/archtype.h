@@ -5,15 +5,15 @@
 #include "IwUtil/identifiable.h"
 
 namespace iwecs {
-	template<typename... _ts>
+	template<typename... _components_t>
 	class archtype : public iwutil::identifiable {
 	private:
-		using tup_t = std::tuple<_ts...>;
+		using tup_t = std::tuple<_components_t...>;
 
 		tup_t m_components;
 	public:
-		archtype(_ts&&... args)
-			: m_components(std::forward<_ts&&>(args)...) {}
+		archtype(_components_t&&... args)
+			: m_components(std::forward<_components_t&&>(args)...) {}
 
 		tup_t& components() {
 			return m_components;

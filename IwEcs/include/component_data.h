@@ -7,8 +7,6 @@ namespace iwecs {
 	class icomponent_data {
 	public:
 		virtual ~icomponent_data() {}
-
-		virtual entity create_entity() = 0;
 		//function for getting iterator
 	};
 
@@ -34,9 +32,12 @@ namespace iwecs {
 			return *m_working_chunk;
 		}
 	public:
-		entity create_entity() {
+		entity create_entity(_components_t&&... args) {
 			chunk_t& chunk = ensure_free_chunk();
-			//alloc data in chunk
+			chunk.push_back(
+				archtype_t(std::forward<_components_t>(args)...)
+			);
+
 			return 0;
 		}
 	};

@@ -10,22 +10,30 @@ namespace iwecs {
 	private:
 		std::unordered_map<iwutil::id_t, icomponent_data*> m_cdata;
 
-		template<typename... _ts>
-		icomponent_data& ensure_component_data() {
-			using cdata_t = component_data<_ts...>;
+		template<typename... _components_t>
+		component_data<_components_t...>& ensure_cdata() {
+			using cdata_t = component_data<_components_t...>;
 
+			cdata_t* cdata_ptr;
 			iwutil::id_t id = cdata_t::archtype_t::id();
 			if (m_cdata.find(id) == m_cdata.end()) {
-				m_cdata.emplace(id, new cdata_t());
+				cdata_ptr = new cdata_t();
+				m_cdata.emplace(id, cdata_ptr);
+			} else {
+				cdata_ptr = (cdata_t*)m_cdata[id];
 			}
 
-			return *m_cdata[id];
+			return *cdata_ptr;
 		}
 	public:
-		template<typename... _ts>
-		entity create_entity() {
-			icomponent_data& cdata = ensure_component_data<_ts...>();
-			return cdata.create_entity();
+		template<typename... _components_t>
+		entity create_entity(_components_t&&... args) {
+			using cdata_t = component_data<_components_t...>;
+
+			cdata_t& cdata = ensure_cdata<_components_t...>();
+			return cdata.create_entity(
+				std::forward<_components_t>(args)...
+			);
 		}
 	};
 }

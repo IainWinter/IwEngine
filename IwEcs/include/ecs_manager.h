@@ -11,9 +11,11 @@ namespace iwecs {
 		ecs_manager();
 		~ecs_manager();
 
-		template<typename... _ts>
-		entity create_entity() {
-			return c.create_entity<_ts...>();
+		template<typename... _components_t>
+		entity create_entity(_components_t&&... args) {
+			return c.create_entity<_components_t...>(
+				std::forward<_components_t>(args)...
+			);
 		}
 	};
 }

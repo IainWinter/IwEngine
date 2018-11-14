@@ -10,7 +10,9 @@ public:
 
 	void Run() override {
 		iwecs::component_registry c = iwecs::component_registry();
-		c.create_entity<int, float>();
+		c.create_entity<int, float>(1, 2.0f);
+		c.create_entity<int, float>(3, 4.0f);
+		c.create_entity<int, float>(5, 6.0f);
 	}
 };
 
