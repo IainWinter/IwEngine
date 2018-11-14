@@ -11,9 +11,9 @@ namespace iwecs {
 		ecs_manager();
 		~ecs_manager();
 
-		template<typename... T>
+		template<typename... _ts>
 		entity create_entity() {
-			return c.create_entity<T...>();
+			return c.create_entity<_ts...>();
 		}
 	};
 }

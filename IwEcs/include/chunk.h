@@ -4,60 +4,29 @@
 #include <tuple>
 
 namespace iwecs {
-	class ichunk {
-	public:
-		virtual ~ichunk() {}
-	};
-
-	template<typename... T>
-	class chunk : public ichunk {
+	//Switch to using a memory manager system. This is pritty much a linear allocator
+	template<typename _t>
+	class chunk {
 	private:
-		using tup_t = std::tuple<T...>;
-
-		tup_t* m_memory;
-		tup_t* m_free;
-		tup_t* m_end;
-		unsigned int m_size;
-		unsigned int m_count;
+		std::size_t m_size;
+		std::size_t m_capacity;
+		_t* m_start;
+		_t* m_end;
+		_t* m_pointer;
 	public:
-		chunk(int count)
-		  : m_memory(new tup_t[count]),
-			m_free(m_memory),
-			m_end(m_memory + count),
-			m_size(count * sizeof(tup_t)), 
-			m_count(0)
-		{}
+		chunk(std::size_t prefered_size)
+		  : m_size    (prefered_size - prefered_size % sizeof(_t)),
+			m_capacity(m_size / sizeof(_t)),
+			m_start   ((_t*)malloc(m_size)),
+			m_end     (m_start + m_capacity),
+			m_pointer (m_start) {}
 
 		~chunk() {
-			delete[] m_memory;
+			delete[] m_start;
 		}
 
-		bool alloc(T&&... data) {
-			if (m_free != m_end) {
-				*m_free = std::make_tuple(std::move(data)...);
-				m_free++;
-				m_count++;
-
-				return true;
-			}
-
-			return false;
-		}
-
-		bool alloc(const T&... data) {
-			if (m_free != m_end) {
-				*m_free = std::make_tuple(data...);
-				m_free++;
-				m_count++;
-
-				return true;
-			}
-
-			return false;
-		}
-
-		void dealloc() {
-
+		bool is_full() {
+			return m_pointer == m_end;
 		}
 	};
 }

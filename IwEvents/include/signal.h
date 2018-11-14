@@ -14,40 +14,40 @@ namespace iwevents {
 	* to the signal, all subscribed functions are notified. Only functions that
 	* have the signals arguments can be added!
 	*
-	* @param Args The arguments of the functions that can be subscribed to the signal.
+	* @tparam _args_t The arguments of the functions that can be subscribed to the signal.
 	*/
-	template<typename... Args>
+	template<typename... _args_t>
 	class signal {
 	private:
-		using invoke_type = bool(*)(std::weak_ptr<void>&, Args...);
-		using func_type = std::pair<std::weak_ptr<void>, invoke_type>;
+		using invoke_t = bool(*)(std::weak_ptr<void>&, _args_t...);
+		using func_t = std::pair<std::weak_ptr<void>, invoke_t>;
 
-		std::vector<func_type> m_functions;
+		std::vector<func_t> m_functions;
 
-		template<void(*Function)(Args...)>
-		static bool invoke(std::weak_ptr<void>&, Args... args) {
-			Function(args...);
+		template<void(*_function)(_args_t...)>
+		static bool invoke(std::weak_ptr<void>&, _args_t... args) {
+			_function(args...);
 			return true; //No instance so can not expire.
 		}
 
-		template<typename T, void(T::*Function)(Args...)>
-		static bool invoke(std::weak_ptr<void>& instance, Args... args) {
+		template<typename T, void(T::*_function)(_args_t...)>
+		static bool invoke(std::weak_ptr<void>& instance, _args_t... args) {
 			bool not_expired = !instance.expired();
 			if (not_expired) {
 				std::shared_ptr<T> instance_ptr = std::static_pointer_cast<T>(instance.lock());
-				(instance_ptr.get()->*Function)(args...);
+				(instance_ptr.get()->*_function)(args...);
 			}
 
 			return not_expired;
 		}
 
-		void remove_function(std::function<bool(const func_type&)> find_function_to_remove) {
+		void remove_function(std::function<bool(const func_t&)> find_function_to_remove) {
 			auto function_to_remove = std::remove_if(m_functions.begin(), m_functions.end(), find_function_to_remove);
 			m_functions.erase(function_to_remove, m_functions.end());
 		}
 	public:
 		signal() {
-			m_functions = std::vector<func_type>();
+			m_functions = std::vector<func_t>();
 		}
 
 		/**
@@ -57,9 +57,9 @@ namespace iwevents {
 		*
 		* @param args The arguments to be passed into the subscribed functions.
 		*/
-		void publish(Args... args) {
+		void publish(_args_t... args) {
 			size_t f_count = m_functions.size();
-			std::vector<func_type> non_expired_functions = std::vector<func_type>();
+			std::vector<func_t> non_expired_functions = std::vector<func_t>();
 			non_expired_functions.reserve(f_count);
 
 			for (size_t i = 0; i < f_count; i++) {
@@ -79,12 +79,12 @@ namespace iwevents {
 		* Subscribes a function to the signal. It will be called 
 		* whenever arguments get published to the signal.
 		*
-		* @param Function A function pointer to be subscribed to the signal.
+		* @tparam _function A function pointer to be subscribed to the signal.
 		*/
-		template<void(*Function)(Args...)>
+		template<void(*_function)(_args_t...)>
 		void subscribe() {
-			unsubscribe<Function>();
-			m_functions.emplace_back(std::weak_ptr<void>(), &invoke<Function>);
+			unsubscribe<_function>();
+			m_functions.emplace_back(std::weak_ptr<void>(), &invoke<_function>);
 		}
 
 		/**
@@ -94,13 +94,13 @@ namespace iwevents {
 		* instance is deleted, the signal with forget about 
 		* the function automaticly.
 		*
-		* @param ClassType The type of instance.
-		* @param Function A member function pointer to be subscribed to the signal.
+		* @tparam _class_t The type of instance.
+		* @tparam _function A member function pointer to be subscribed to the signal.
 		*/
-		template<typename ClassType, void(ClassType::*Function)(Args...)>
-		void subscribe(std::shared_ptr<ClassType> instance) {
-			unsubscribe<ClassType, Function>(instance);
-			m_functions.emplace_back(std::move(instance), &invoke<ClassType, Function>);
+		template<typename _class_t, void(_class_t::*_function)(_args_t...)>
+		void subscribe(std::shared_ptr<_class_t> instance) {
+			unsubscribe<_class_t, _function>(instance);
+			m_functions.emplace_back(std::move(instance), &invoke<_class_t, _function>);
 		}
 
 		/**
@@ -108,12 +108,12 @@ namespace iwevents {
 		*
 		* Unsubscribes a free function from the signal.
 		*
-		* @param Function A pointer to a free function to the subscribed to the signal.
+		* @tparam _function A pointer to a free function to the subscribed to the signal.
 		*/
-		template<void(*Function)(Args...)>
+		template<void(*_function)(_args_t...)>
 		void unsubscribe() {
-			remove_function([](const func_type& func_type) {
-				return func_type.second == &invoke<Function> && !func_type.first.lock();
+			remove_function([](const func_t& func_t) {
+				return func_t.second == &invoke<_function> && !func_t.first.lock();
 			});
 		}
 
@@ -122,13 +122,13 @@ namespace iwevents {
 		*
 		* Unsubscribes a public member function from the signal.
 		*
-		* @param ClassType The type of instance.
-		* @param instance The instance of ClassType to be subscribed to the signal.
+		* @tparam _class_t The type of instance.
+		* @param instance The instance of _class_t to be subscribed to the signal.
 		*/
-		template<typename ClassType, void(ClassType::*Function)(Args...)>
-		void unsubscribe(std::shared_ptr<ClassType> instance) {
-			remove_function([instance{ std::move(instance) }](const func_type& func_type) {
-				return func_type.second == &invoke<ClassType, Function> && func_type.first.lock() == instance;
+		template<typename _class_t, void(_class_t::*_function)(_args_t...)>
+		void unsubscribe(std::shared_ptr<_class_t> instance) {
+			remove_function([instance{ std::move(instance) }](const func_t& func_t) {
+				return func_t.second == &invoke<_class_t, _function> && func_t.first.lock() == instance;
 			});
 		}
 
@@ -137,13 +137,13 @@ namespace iwevents {
 		*
 		* Unsubscribes all public member function from the instance from the signal.
 		*
-		* @param ClassType The type of instance.
-		* @param instance The instance of ClassType to be subscribed to the signal.
+		* @tparam _class_t The type of instance.
+		* @param instance The instance of _class_t to be subscribed to the signal.
 		*/
-		template<typename ClassType>
-		void unsubscribe(std::shared_ptr<ClassType> instance) {
-			remove_function([instance{ std::move(instance) }](const func_type& func_type) {
-				return func_type.first.lock() == instance;
+		template<typename _class_t>
+		void unsubscribe(std::shared_ptr<_class_t> instance) {
+			remove_function([instance{ std::move(instance) }](const func_t& func_t) {
+				return func_t.first.lock() == instance;
 			});
 		}
 	};

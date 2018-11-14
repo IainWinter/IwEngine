@@ -9,42 +9,35 @@ namespace iwecs {
 		virtual ~icomponent_data() {}
 
 		virtual entity create_entity() = 0;
-		//getting iterator
+		//function for getting iterator
 	};
 
 	template<typename... _components_t>
 	class component_data : public icomponent_data {
-	private:
+	public:
 		using archtype_t = archtype<_components_t...>;
 		using chunk_t = chunk<archtype_t>;
-
+	private:
 		std::vector<chunk_t> m_chunks;
-		std::size_t m_free_index;
+		chunk_t* m_working_chunk; //Cannot ensure that pointer is valid. Use ensure_free_chunk.
 
 		void add_chunk() {
-			m_chunks.push_back(chunk_t());
-			m_free_index = m_chunks.size() - 1;
+			m_chunks.push_back(chunk_t(12)); //TODO: test value
+			m_working_chunk = &m_chunks.back();
 		}
 
 		chunk_t& ensure_free_chunk() {
-			if (m_free_index == -1) {
+			if (m_working_chunk == nullptr || m_working_chunk->is_full()) {
 				add_chunk();
 			}
 
-			if (m_chunks.size() - 1 == m_free_index) {
-
-			}
-
-			m_chunks[m_working_chunk]
+			return *m_working_chunk;
 		}
 	public:
-		component_data()
-			: m_working_chunk(-1) {}
-
-		~component_data() {}
-
 		entity create_entity() {
-
+			chunk_t& chunk = ensure_free_chunk();
+			//alloc data in chunk
+			return 0;
 		}
 	};
 }
