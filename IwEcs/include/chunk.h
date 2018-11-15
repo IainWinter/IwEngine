@@ -11,7 +11,7 @@ namespace iwecs {
 	private:
 		std::size_t m_size;
 		std::size_t m_capacity;
-		std::shared_ptr<_t> m_start;
+		_t* m_start;
 		_t* m_end;
 		_t* m_pointer;
 	public:
