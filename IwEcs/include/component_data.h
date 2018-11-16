@@ -2,6 +2,7 @@
 
 #include "iwecs.h"
 #include "archtype.h"
+#include <iostream>
 
 namespace iwecs {
 	class icomponent_data {
@@ -20,7 +21,7 @@ namespace iwecs {
 		chunk_t* m_working_chunk; //Cannot ensure that pointer is valid. Use ensure_free_chunk.
 
 		void add_chunk() {
-			m_chunks.push_back(chunk_t(12)); //TODO: test value
+			m_chunks.push_back(chunk_t(64)); //TODO: test value
 			m_working_chunk = &m_chunks.back();
 		}
 
@@ -37,6 +38,12 @@ namespace iwecs {
 			chunk.push_back(
 				archtype_t(std::forward<_components_t>(args)...)
 			);
+
+			typename chunk_t::iterator itr = chunk.begin();
+			typename chunk_t::iterator end = chunk.end();
+			for (; itr != end; itr++) {
+				std::cout << std::get<0>(itr->components()) << std::endl;
+			}
 
 			return 0;
 		}

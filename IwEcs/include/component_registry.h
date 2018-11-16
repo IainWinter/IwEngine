@@ -8,14 +8,14 @@
 namespace iwecs {
 	class component_registry {
 	private:
-		std::unordered_map<iwutil::id_t, icomponent_data*> m_cdata;
+		std::unordered_map<std::size_t, icomponent_data*> m_cdata;
 
 		template<typename... _components_t>
 		component_data<_components_t...>& ensure_cdata() {
 			using cdata_t = component_data<_components_t...>;
 
 			cdata_t* cdata_ptr;
-			iwutil::id_t id = cdata_t::archtype_t::id();
+			std::size_t id = typeid(cdata_t).hash_code();
 			if (m_cdata.find(id) == m_cdata.end()) {
 				cdata_ptr = new cdata_t();
 				m_cdata.emplace(id, cdata_ptr);

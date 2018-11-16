@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\identifiable.h">
+    <ClInclude Include="include\input_iterator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

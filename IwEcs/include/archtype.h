@@ -2,11 +2,10 @@
 
 #include <vector>
 #include "chunk.h"
-#include "IwUtil/identifiable.h"
 
 namespace iwecs {
 	template<typename... _components_t>
-	class archtype : public iwutil::identifiable {
+	class archtype {
 	private:
 		using tup_t = std::tuple<_components_t...>;
 
