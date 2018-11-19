@@ -8,6 +8,7 @@
 namespace iwecs {
 	class component_registry {
 	private:
+		entity m_next_entity;
 		std::unordered_map<std::size_t, icomponent_data*> m_cdata;
 
 		template<typename... _components_t>
@@ -31,9 +32,12 @@ namespace iwecs {
 			using cdata_t = component_data<_components_t...>;
 
 			cdata_t& cdata = ensure_cdata<_components_t...>();
-			return cdata.create_entity(
+			cdata.attach_components(
+				m_next_entity,
 				std::forward<_components_t>(args)...
 			);
+
+			return m_next_entity++;
 		}
 	};
 }

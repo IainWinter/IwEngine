@@ -17,12 +17,12 @@ namespace iwecs {
 		using archtype_t = archtype<_components_t...>;
 		using chunk_t = chunk<archtype_t>;
 	private:
-		std::vector<chunk_t> m_chunks;
+		std::vector<chunk_t*> m_chunks;
 		chunk_t* m_working_chunk; //Cannot ensure that pointer is valid. Use ensure_free_chunk.
 
 		void add_chunk() {
-			m_chunks.push_back(chunk_t(64)); //TODO: test value
-			m_working_chunk = &m_chunks.back();
+			m_chunks.push_back(new chunk_t(640)); //TODO: test value
+			m_working_chunk = m_chunks.back();
 		}
 
 		chunk_t& ensure_free_chunk() {
@@ -33,19 +33,12 @@ namespace iwecs {
 			return *m_working_chunk;
 		}
 	public:
-		entity create_entity(_components_t&&... args) {
+		void attach_components(entity entity, _components_t&&... args) {
 			chunk_t& chunk = ensure_free_chunk();
-			chunk.push_back(
+			chunk.insert(
+				entity,
 				archtype_t(std::forward<_components_t>(args)...)
 			);
-
-			typename chunk_t::iterator itr = chunk.begin();
-			typename chunk_t::iterator end = chunk.end();
-			for (; itr != end; itr++) {
-				std::cout << std::get<0>(itr->components()) << std::endl;
-			}
-
-			return 0;
 		}
 	};
 }

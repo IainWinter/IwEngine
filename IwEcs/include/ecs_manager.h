@@ -6,7 +6,9 @@
 namespace iwecs {
 	class IWECS_API ecs_manager {
 	private:
-		component_registry c;
+		struct {
+			component_registry c;
+		};
 	public:
 		ecs_manager();
 		~ecs_manager();

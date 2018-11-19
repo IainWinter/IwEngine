@@ -31,12 +31,12 @@ public:
 	~Game() {}
 
 	void Run() override {
-		iwecs::component_registry c = iwecs::component_registry();
+		iwecs::ecs_manager m = iwecs::ecs_manager();
 
-		c.create_entity<int, float>(1, 2.0f);
-		c.create_entity<int, float>(3, 4.0f);
-		c.create_entity<double, float>(5, 6.0f);
-
+		for (int i = 0; i < 100; i++) {
+			m.create_entity<int, float>(1, 2.0f);
+		}
+		
 		intfloat_system ifs = intfloat_system();
 		ifs.update();
 	}
