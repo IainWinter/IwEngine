@@ -18,5 +18,8 @@
     <ClInclude Include="include\input_iterator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\bimap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

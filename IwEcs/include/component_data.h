@@ -2,13 +2,14 @@
 
 #include "iwecs.h"
 #include "archtype.h"
-#include <iostream>
+#include "chunk.h"
 
 namespace iwecs {
 	class icomponent_data {
 	public:
 		virtual ~icomponent_data() {}
-		//function for getting iterator
+
+		virtual bool destroy_components(entity entity) = 0;
 	};
 
 	template<typename... _components_t>
@@ -17,11 +18,11 @@ namespace iwecs {
 		using archtype_t = archtype<_components_t...>;
 		using chunk_t = chunk<archtype_t>;
 	private:
-		std::vector<chunk_t*> m_chunks;
+		std::vector<chunk_t*> m_chunks; //prob not gonig to be the final data structure to use. Chunks should not be continguious in memory.
 		chunk_t* m_working_chunk; //Cannot ensure that pointer is valid. Use ensure_free_chunk.
 
 		void add_chunk() {
-			m_chunks.push_back(new chunk_t(640)); //TODO: test value
+ 			m_chunks.push_back(new chunk_t(640));
 			m_working_chunk = m_chunks.back();
 		}
 
@@ -39,6 +40,17 @@ namespace iwecs {
 				entity,
 				archtype_t(std::forward<_components_t>(args)...)
 			);
+		}
+
+		bool destroy_components(entity entity) {
+			for (auto& chunk : m_chunks) {
+				if (chunk->remove(entity)) {
+					m_working_chunk = chunk;
+					return true;
+				}
+			}
+
+			return false;
 		}
 	};
 }

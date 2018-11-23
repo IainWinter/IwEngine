@@ -27,6 +27,8 @@ namespace iwecs {
 			return *cdata_ptr;
 		}
 	public:
+		component_registry() : m_next_entity(1) {}
+
 		template<typename... _components_t>
 		entity create_entity(_components_t&&... args) {
 			using cdata_t = component_data<_components_t...>;
@@ -38,6 +40,14 @@ namespace iwecs {
 			);
 
 			return m_next_entity++;
+		}
+
+		bool destroy_entity(entity entity) {
+			for (auto& cdata : m_cdata) {
+				cdata.second->destroy_components(entity);
+			}
+
+			return false;
 		}
 	};
 }

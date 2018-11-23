@@ -1,7 +1,6 @@
 #pragma once
 
-#include <vector>
-#include "chunk.h"
+#include <tuple>
 
 namespace iwecs {
 	template<typename... _components_t>
@@ -17,6 +16,7 @@ namespace iwecs {
 		archtype(_components_t&&... args)
 			: m_components(std::forward<_components_t&&>(args)...) {}
 
+		//might need to be a tuple of references
 		tup_t& components() {
 			return m_components;
 		}

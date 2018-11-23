@@ -10,7 +10,7 @@
 class intfloat_system {
 public:
 	void update() {
-		std::vector<int> ints;
+		std::vector<int> ints = std::vector<int>();
 
 		ints.push_back(1);
 		ints.push_back(2);
@@ -31,12 +31,15 @@ public:
 	~Game() {}
 
 	void Run() override {
-		iwecs::ecs_manager m = iwecs::ecs_manager();
-
+		iwecs::component_registry cr = iwecs::component_registry();
 		for (int i = 0; i < 100; i++) {
-			m.create_entity<int, float>(1, 2.0f);
+			cr.create_entity<int, float>(1, 2.0f);
 		}
-		
+
+		cr.destroy_entity(1);
+
+		cr.create_entity<int, float>(3, 4.0f);
+
 		intfloat_system ifs = intfloat_system();
 		ifs.update();
 	}

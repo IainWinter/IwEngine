@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\bimap.h" />
     <ClInclude Include="include\input_iterator.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
