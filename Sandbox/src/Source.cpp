@@ -32,11 +32,12 @@ public:
 
 	void Run() override {
 		iwecs::component_registry cr = iwecs::component_registry();
-		for (int i = 0; i < 100; i++) {
-			cr.create_entity<int, float>(1, 2.0f);
+		for (int i = 0; i < 30; i++) {
+			float f = i + 1;
+			cr.create_entity2<int, float>(i, f);
 		}
 
-		cr.destroy_entity(1);
+		cr.destroy_entity(5);
 
 		cr.create_entity<int, float>(3, 4.0f);
 
