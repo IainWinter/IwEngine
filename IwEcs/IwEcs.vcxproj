@@ -127,6 +127,7 @@
     <ClInclude Include="include\component_data.h" />
     <ClInclude Include="include\component_registry.h" />
     <ClInclude Include="include\ecs_manager.h" />
+    <ClInclude Include="include\entity_manager.h" />
     <ClInclude Include="include\iwecs.h" />
     <ClInclude Include="include\chunk.h" />
   </ItemGroup>

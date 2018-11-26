@@ -33,7 +33,7 @@ public:
 	void Run() override {
 		iwecs::component_registry cr = iwecs::component_registry();
 		for (int i = 0; i < 30; i++) {
-			float f = i + 1;
+			float f = i + 1.0f;
 			cr.create_entity2<int, float>(i, f);
 		}
 

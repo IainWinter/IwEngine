@@ -9,7 +9,7 @@ namespace iwecs {
 	public:
 		virtual ~icomponent_data() {}
 
-		virtual bool destroy_components(entity entity) = 0;
+		virtual bool destroy_components(entity_t entity) = 0;
 	};
 
 	template<typename... _components_t>
@@ -18,11 +18,11 @@ namespace iwecs {
 		using archtype_t = archtype<_components_t...>;
 		using chunk_t = chunk<_components_t...>;
 	private:
-		std::vector<chunk_t*> m_chunks; //prob not gonig to be the final data structure to use. Chunks should not be continguious in memory.
+		std::vector<chunk_t*> m_chunks; //Should be in linked list
 		chunk_t* m_working_chunk; //Cannot ensure that pointer is valid. Use ensure_free_chunk.
 
 		void add_chunk() {
- 			m_chunks.push_back(new chunk_t(640));
+ 			m_chunks.push_back(new chunk_t(640)); //640 as temp value
 			m_working_chunk = m_chunks.back();
 		}
 
@@ -34,14 +34,14 @@ namespace iwecs {
 			return *m_working_chunk;
 		}
 	public:
-		void attach_components(entity entity, _components_t&&... args) {
+		void attach_components(entity_t entity, _components_t&&... args) {
 			chunk_t& chunk = ensure_free_chunk();
-			chunk.insert(
+			return chunk.insert(
 				std::forward<_components_t>(args)...
 			);
 		}
 
-		bool destroy_components(entity entity) {
+		bool destroy_components(entity_t entity) {
 			for (auto& chunk : m_chunks) {
 				if (chunk->remove(entity)) {
 					m_working_chunk = chunk;

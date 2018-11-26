@@ -8,7 +8,7 @@
 namespace iwecs {
 	class component_registry {
 	private:
-		entity m_next_entity;
+		entity_t m_next_entity;
 		std::unordered_map<std::size_t, icomponent_data*> m_cdata;
 
 		template<typename... _components_t>
@@ -30,7 +30,7 @@ namespace iwecs {
 		component_registry() : m_next_entity(1) {}
 
 		template<typename... _components_t>
-		entity create_entity(_components_t&&... args) {
+		entity_t create_entity(_components_t&&... args) {
 			using cdata_t = component_data<_components_t...>;
 
 			cdata_t& cdata = ensure_cdata<_components_t...>();
@@ -43,7 +43,7 @@ namespace iwecs {
 		}
 
 		template<typename... _components_t>
-		entity create_entity2(_components_t&... args) {
+		entity_t create_entity2(_components_t&... args) {
 			using cdata_t = component_data<_components_t...>;
 
 			cdata_t& cdata = ensure_cdata<_components_t...>();
@@ -55,7 +55,7 @@ namespace iwecs {
 			return m_next_entity++;
 		}
 
-		bool destroy_entity(entity entity) {
+		bool destroy_entity(entity_t entity) {
 			for (auto& cdata : m_cdata) {
 				cdata.second->destroy_components(entity);
 			}

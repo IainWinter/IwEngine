@@ -14,7 +14,7 @@ namespace iwecs {
 		~ecs_manager();
 
 		template<typename... _components_t>
-		entity create_entity(_components_t&&... args) {
+		entity_t create_entity(_components_t&&... args) {
 			return c.create_entity<_components_t...>(
 				std::forward<_components_t>(args)...
 			);
