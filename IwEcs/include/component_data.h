@@ -34,11 +34,10 @@ namespace iwecs {
 			return *m_working_chunk;
 		}
 	public:
-		void attach_components(entity_t entity, _components_t&&... args) {
+		entity_data attach_components(_components_t&&... args) {
 			chunk_t& chunk = ensure_free_chunk();
-			return chunk.insert(
-				std::forward<_components_t>(args)...
-			);
+			entity_component_data data = chunk.insert(std::forward<_components_t>(args)...);
+
 		}
 
 		bool destroy_components(entity_t entity) {

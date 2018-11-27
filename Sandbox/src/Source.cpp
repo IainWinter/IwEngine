@@ -31,15 +31,16 @@ public:
 	~Game() {}
 
 	void Run() override {
-		iwecs::component_registry cr = iwecs::component_registry();
+		iwecs::ecs_manager m = iwecs::ecs_manager();
+		
 		for (int i = 0; i < 30; i++) {
 			float f = i + 1.0f;
-			cr.create_entity2<int, float>(i, f);
+			m.create_entity<int, float>(1, 2.3f);
 		}
 
-		cr.destroy_entity(5);
+		//m.destroy_entity(5);
 
-		cr.create_entity<int, float>(3, 4.0f);
+		//cr.create_entity<int, float>(3, 4.0f);
 
 		intfloat_system ifs = intfloat_system();
 		ifs.update();

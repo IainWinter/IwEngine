@@ -31,21 +31,26 @@ namespace iwecs {
 		std::size_t m_count;
 
 		template<std::size_t... _tuple_index>
-		void insert_into_streams(std::index_sequence<_tuple_index...>, _components&&... data) {
-			int expanded[] = {(
-				std::get<_tuple_index>(m_streams)[m_count] = data, 0)... 
+		entity_component_data insert_into_streams(std::index_sequence<_tuple_index...>, _components&&... data) {
+			int expanded[] = {
+				(std::get<_tuple_index>(m_streams)[m_count] = data, 0)... 
 			};
+
+			void* v[] = {
+				(void*)&std::get<_tuple_index>(m_streams)[m_count]...
+			};
+
+			return entity_component_data(sizeof...(_tuple_index), v);
 		}
 
-		void insert_into_streams(_components&&... data) {
-			insert_into_streams(std::make_index_sequence<sizeof...(_components)>{}, std::forward<_components>(data)...);
+		entity_component_data insert_into_streams(_components&&... data) {
+			return insert_into_streams(std::make_index_sequence<sizeof...(_components)>{}, std::forward<_components>(data)...);
 		}
 
 		template<std::size_t... _tuple_index>
 		void remove_from_streams(std::index_sequence<_tuple_index...>, std::size_t remove_index) {
-			entity_data ed = entity_data(malloc(4), 4);
-			int expanded[] = {(
-				std::get<_tuple_index>(m_streams)[remove_index] = std::get<_tuple_index>(m_streams)[m_count - 1], 0)...
+			int expanded[] = {
+				(std::get<_tuple_index>(m_streams)[remove_index] = std::get<_tuple_index>(m_streams)[m_count - 1], 0)...
 			};
 		}
 
@@ -61,11 +66,14 @@ namespace iwecs {
 			m_count = 0;
 		}
 
-		void insert(_components&&... data) {
+		entity_component_data insert(_components&&... components) {
+			entity_component_data data;
 			if (!is_full()) {
-				insert_into_streams(std::forward<_components>(data)...);
+				data = insert_into_streams(std::forward<_components>(components)...);
 				m_count++;
 			}
+
+			return data;
 		}
 
 		bool remove(std::size_t index) {
