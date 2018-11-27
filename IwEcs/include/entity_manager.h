@@ -13,7 +13,7 @@ namespace iwecs {
 			: m_next_id(0) {}
 
 		entity_t add_entity(const entity_data& data) {
-			m_entities.emplace(m_next_id++, data);
+			m_entities.emplace(++m_next_id, data);
 			return m_next_id;
 		}
 	};
