@@ -21,5 +21,8 @@
     <ClInclude Include="include\bimap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\iwutil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "iwecs.h"
-#include <forward_list>
+#include <unordered_map>
 #include "archtype.h"
 #include "chunk.h"
 
@@ -9,7 +9,6 @@ namespace iwecs {
 	class icomponent_data {
 	public:
 		virtual ~icomponent_data() {}
-
 		virtual bool destroy_components(entity_t entity) = 0;
 	};
 
@@ -17,21 +16,25 @@ namespace iwecs {
 	class component_data : public icomponent_data {
 	public:
 		using archtype_t = archtype<_components_t...>;
-		using chunk_t = chunk<_components_t...>;
+		using chunk_t	 = chunk<640, _components_t...>; //640 as temp value
 	private:
 		std::unordered_map<std::size_t, chunk_t*> m_chunks;
 		std::size_t m_working_chunk_id;
 		std::size_t m_next_id;
-		const std::size_t m_chunk_size;
 
 		void add_chunk() {
- 			m_chunks.emplace(++m_next_id, new chunk_t(m_chunk_size)); //640 as temp value
 			m_working_chunk_id = m_next_id;
+ 			m_chunks.emplace(m_next_id++, new chunk_t());
 		}
 
 		chunk_t& ensure_free_chunk() {
-			if (m_working_chunk == nullptr || m_working_chunk->is_full()) {
-				add_chunk();
+			if (m_chunks.find(m_working_chunk_id) == m_chunks.end()) {
+				chunk_t& chunk = &m_chunks[m_working_chunk_id];
+				if (chunk->is_full()) {
+					add_chunk();
+				}
+
+				return chunk;
 			}
 
 			return &m_chunks[m_working_chunk_id];
@@ -44,17 +47,11 @@ namespace iwecs {
 		entity_data attach_components(_components_t&&... args) {
 			chunk_t& chunk = ensure_free_chunk();
 			entity_component_data data = chunk.insert(std::forward<_components_t>(args)...);
-			return 
+			return entity_data(0, data);
 		}
 
 		bool destroy_components(entity_t entity) {
-			for (auto& chunk : m_chunks) {
-				if (chunk->remove(entity)) {
-					m_working_chunk = chunk;
-					return true;
-				}
-			}
-
+			//get id from entity_data 
 			return false;
 		}
 	};
