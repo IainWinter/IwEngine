@@ -8,24 +8,36 @@ namespace iwecs {
 	class IWECS_API ecs_manager {
 	private:
 		struct {
-			component_registry component_reg;
-			entity_manager entity_mgr;
+			component_registry m_component_reg;
+			entity_manager m_entity_mgr;
 		};
 	public:
 		ecs_manager();
 		~ecs_manager();
 
 		template<typename... _components_t>
-		entity_t create_entity(_components_t&&... args) {
-			entity_data data = component_reg.create_entity<_components_t...>(
+		entity_t create_entity(
+			_components_t&&... args) 
+		{
+			ientity_data data = m_component_reg.create_entity<_components_t...>(
 				std::forward<_components_t>(args)...
 			);
 
-			return entity_mgr.add_entity(data);
+			return m_entity_mgr.add_entity(data);
 		}
 
-		void destroy_entity(entity_t entity) {
-			component_reg.destroy_entity(entity);
+		template<typename... _components_t>
+		entity_t create_entity(
+			_components_t&... args)
+		{
+			return create_entity(std::forward<_components_t>(args)...);
+		}
+
+		void destroy_entity(
+			entity_t entity) 
+		{
+			ientity_data data = m_entity_mgr.get_entity_data(entity);
+			m_component_reg.destroy_entity(data.index);
 		}
 	};
 }

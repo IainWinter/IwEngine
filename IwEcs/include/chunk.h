@@ -9,26 +9,33 @@ namespace iwecs {
 	class chunk {
 	public:
 		using archtype_t = archtype<_components_t...>;
+		using entity_data_t = entity_data<archtype_t::size>;
+
+		static constexpr std::size_t capacity = _size_in_bytes / archtype_t::size;
 	private:
 		using streams_t = std::tuple<_components_t*...>;
 		std::size_t m_count;
-		std::size_t m_capacity;
 		streams_t   m_streams;
 
 	public:
 		chunk() 
 		  : m_count(0),
-		    m_capacity(_size_in_bytes / archtype_t::size),
-		    m_streams(streams_t(new _components_t[m_capacity]...)) {}
+			m_streams(streams_t(new _components_t[capacity]...)) {}
+
+		chunk(const chunk& copy) = delete;
+		chunk(chunk&& copy) = delete;
 
 		~chunk() {
 			delete_streams();
 		}
 
-		entity_component_data insert(
+		chunk& operator=(const chunk& copy) = delete;
+		chunk& operator=(chunk&& copy) = delete;
+
+		entity_data_t insert(
 			_components_t&&... components)
 		{
-			entity_component_data data;
+			entity_data_t data;
 			if (!is_full()) {
 				data = insert_into_streams(std::forward<_components_t>(components)...);
 				m_count++;
@@ -53,11 +60,11 @@ namespace iwecs {
 		}
 
 		bool is_full() {
-			return m_count == m_capacity;
+			return m_count == capacity;
 		}
 	private:
 		template<std::size_t... _tuple_index>
-		entity_component_data insert_into_streams(
+		entity_data_t insert_into_streams(
 			std::index_sequence<_tuple_index...>,
 			_components_t&&... data)
 		{
@@ -65,13 +72,17 @@ namespace iwecs {
 				(std::get<_tuple_index>(m_streams)[m_count] = data, 0)...
 			};
 
-			return entity_component_data(
-				sizeof...(_tuple_index),
-				{ (void*)&std::get<_tuple_index>(m_streams)[m_count]... }
+			const void* components[archtype_t::size] = {
+				(const void*)&std::get<_tuple_index>(m_streams)[m_count]...
+			};
+
+			return entity_data_t(
+				m_count,
+				components
 			);
 		}
 
-		entity_component_data insert_into_streams(
+		entity_data_t insert_into_streams(
 			_components_t&&... data) 
 		{
 			return insert_into_streams(

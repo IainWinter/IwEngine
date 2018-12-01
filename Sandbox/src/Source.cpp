@@ -34,13 +34,12 @@ public:
 		iwecs::ecs_manager m = iwecs::ecs_manager();
 		
 		for (int i = 0; i < 30; i++) {
-			float f = i + 1.0f;
-			m.create_entity<int, float>(1, 2.3f);
+			float f = i + .1f;
+			m.create_entity<int, float>(i, f);
 		}
 
-		//m.destroy_entity(5);
-
-		//cr.create_entity<int, float>(3, 4.0f);
+		m.destroy_entity(5);
+		m.create_entity<int, float>(2, 2.3f);
 
 		intfloat_system ifs = intfloat_system();
 		ifs.update();

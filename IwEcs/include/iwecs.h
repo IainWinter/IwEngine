@@ -10,31 +10,31 @@
 
 namespace iwecs {
 	using entity_t = std::size_t;
+	using index_t = std::size_t;
 
-	class entity_component_data {
-	private:
-		std::vector<const void*> m_components;
-	public:
-		entity_component_data() {}
+	struct ientity_data {
+		index_t index;
 
-		entity_component_data(std::size_t index, std::size_t size, void** components) {
-			for (std::size_t i = 0; i < size; i++) {
-				m_components.push_back(components[i]);
-			}
+		ientity_data(index_t index)
+			: index(index) {
 		}
+
+		virtual ~ientity_data() {}
 	};
 
-	class entity_data {
-	private:
-		entity_component_data m_components;
-		std::size_t m_index;
-	public:
-		entity_data()
-			: m_index(0) {}
+	template<std::size_t _size>
+	struct entity_data : ientity_data {
+		const void* components[_size];
 
-		entity_data(std::size_t index, entity_component_data components) {
-			m_index = index;
-			m_components = components;
+		entity_data()
+		  : ientity_data(0) {}
+
+		entity_data(
+			index_t index,
+			const void* components_[_size])
+		  : ientity_data(index)
+		{
+			memcpy(components, components_, _size);
 		}
 	};
 }
