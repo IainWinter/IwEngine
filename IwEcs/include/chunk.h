@@ -18,8 +18,8 @@ namespace iwecs {
 	public:
 		chunk() 
 		  : m_count(0),
-			m_capacity(_size_in_bytes / archtype_t::size),
-			m_streams(streams_t(new _components_t[m_capacity]...)) {}
+		    m_capacity(_size_in_bytes / archtype_t::size),
+		    m_streams(streams_t(new _components_t[m_capacity]...)) {}
 
 		~chunk() {
 			delete_streams();
