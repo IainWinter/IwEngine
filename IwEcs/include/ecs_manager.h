@@ -37,7 +37,7 @@ namespace iwecs {
 			entity_t entity) 
 		{
 			ientity_data data = m_entity_mgr.get_entity_data(entity);
-			m_component_reg.destroy_entity(data.index);
+			m_component_reg.destroy_entity(data.index, data.archetype_id);
 		}
 	};
 }

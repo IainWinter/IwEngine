@@ -6,7 +6,7 @@
 #	define IWECS_API __declspec(dllimport)
 #endif
 
-#include <vector>
+#include "IwUtil/type_id.h"
 
 namespace iwecs {
 	using entity_t = std::size_t;
@@ -14,10 +14,11 @@ namespace iwecs {
 
 	struct ientity_data {
 		index_t index;
+		iwutil::type_id_t archetype_id;
 
-		ientity_data(index_t index)
-			: index(index) {
-		}
+		ientity_data(index_t index, iwutil::type_id_t archetype_id)
+		  : index(index),
+			archetype_id(archetype_id) {}
 
 		virtual ~ientity_data() {}
 	};
@@ -27,12 +28,12 @@ namespace iwecs {
 		const void* components[_size];
 
 		entity_data()
-		  : ientity_data(0) {}
+		  : ientity_data(0, 0) {}
 
 		entity_data(
 			index_t index,
 			const void* components_[_size])
-		  : ientity_data(index)
+		  : ientity_data(index, 0)
 		{
 			memcpy(components, components_, _size);
 		}

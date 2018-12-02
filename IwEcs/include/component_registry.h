@@ -1,20 +1,19 @@
 #pragma once
 
 #include <unordered_map>
-#include <typeinfo>
 #include "iwecs.h"
 #include "component_data.h"
+#include "IwUtil/type_id.h"
 
 namespace iwecs {
 	class component_registry {
 	private:
-		std::unordered_map<std::size_t, icomponent_data*> m_cdata;
+		std::unordered_map<iwutil::type_id_t, icomponent_data*> m_cdata;
 
 	public:
 		template<typename... _components_t>
 		ientity_data create_entity(
-			_components_t&&... args) 
-		{
+			_components_t&&... args) {
 			using cdata_t = component_data<_components_t...>;
 
 			cdata_t& cdata = ensure_cdata<_components_t...>();
@@ -24,45 +23,48 @@ namespace iwecs {
 		}
 
 		bool destroy_entity(
-			index_t index) 
+			index_t index,
+			iwutil::type_id_t archetype_id)
 		{
-			//Way better way to do this but it works for now
-			for (auto& cdata : m_cdata) {
-				bool destroyed = cdata.second->destroy_components(index);
-				if  (destroyed) return true;
+			if (no_cdata(archetype_id)) {
+				return false;
 			}
 
-			return false;
+			return m_cdata.at(archetype_id)->destroy_components(index);
 		}
 	private:
 		template<typename... _components_t>
 		component_data<_components_t...>& ensure_cdata() {
-			std::size_t id = typeid(archtype<_components_t...>).hash_code(); //use archtype somehow
-			if (no_cdata(id)) {
-				return add_cdata<_components_t...>(id);
-			}	
+			using cdata_t = component_data<_components_t...>;
 
-			return get_cdata<_components_t...>(id);
+			if (no_cdata(cdata_t::archtype_t::id)) {
+				return add_cdata<_components_t...>();
+			}
+
+			return get_cdata<_components_t...>();
 		}
 
 		template<typename... _components_t>
-		component_data<_components_t...>& add_cdata(index_t index)
-		{
+		component_data<_components_t...>& add_cdata() {
 			using cdata_t = component_data<_components_t...>;
 
 			cdata_t* cdata = new cdata_t();
-			m_cdata.emplace(index, cdata);
+			m_cdata.emplace(cdata_t::archtype_t::id, cdata);
 
 			return *cdata;
 		}
 
 		template<typename... _components_t>
-		component_data<_components_t...>& get_cdata(index_t index) {
-			return (component_data<_components_t...>&)*m_cdata[index];
+		component_data<_components_t...>& get_cdata() {
+			using cdata_t = component_data<_components_t...>;
+
+			return (component_data<_components_t...>&)
+				*m_cdata[cdata_t::archtype_t::id];
 		}
 
-		bool no_cdata(index_t index) {
-			return m_cdata.find(index) == m_cdata.end();
+		template<typename... _components_t>
+		bool no_cdata(iwutil::type_id_t id) {
+			return m_cdata.find(id) == m_cdata.end();
 		}
 	};
 }

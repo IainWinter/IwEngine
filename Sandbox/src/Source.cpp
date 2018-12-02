@@ -6,7 +6,6 @@
 #include <vector>
 #include <iostream>
 
-
 class intfloat_system {
 public:
 	void update() {
@@ -33,12 +32,14 @@ public:
 	void Run() override {
 		iwecs::ecs_manager m = iwecs::ecs_manager();
 		
-		for (int i = 0; i < 30; i++) {
+		for (int i = 0; i < 500; i++) {
 			float f = i + .1f;
 			m.create_entity<int, float>(i, f);
 		}
 
 		m.destroy_entity(5);
+		m.destroy_entity(200);
+		m.destroy_entity(300);
 		m.create_entity<int, float>(2, 2.3f);
 
 		intfloat_system ifs = intfloat_system();

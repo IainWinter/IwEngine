@@ -21,7 +21,10 @@
     <ClInclude Include="include\bimap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\iwutil.h">
+    <ClInclude Include="include\type_id.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\compiled_sequence.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

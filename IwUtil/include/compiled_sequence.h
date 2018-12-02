@@ -14,7 +14,7 @@ namespace iwutil {
 	};
 
 	template<typename... _t>
-	constexpr std::size_t sizeof_all() {
+	constexpr std::size_t sizeof_sum() {
 		return sum<sizeof(_t)...>::value;
 	}
 }

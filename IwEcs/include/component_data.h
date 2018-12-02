@@ -36,6 +36,7 @@ namespace iwecs {
 
 			entity_data_t data = chunk.insert(std::forward<_components_t>(args)...);
 			data.index += m_working_chunk_id;
+			data.archetype_id = archtype_t::id;
 
 			return data;
 		}

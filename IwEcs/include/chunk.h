@@ -14,6 +14,7 @@ namespace iwecs {
 		static constexpr std::size_t capacity = _size_in_bytes / archtype_t::size;
 	private:
 		using streams_t = std::tuple<_components_t*...>;
+
 		std::size_t m_count;
 		streams_t   m_streams;
 

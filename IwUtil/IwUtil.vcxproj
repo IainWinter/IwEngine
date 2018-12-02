@@ -20,8 +20,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\bimap.h" />
+    <ClInclude Include="include\compiled_sequence.h" />
     <ClInclude Include="include\input_iterator.h" />
-    <ClInclude Include="include\iwutil.h" />
+    <ClInclude Include="include\type_id.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
