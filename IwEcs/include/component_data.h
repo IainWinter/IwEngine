@@ -38,6 +38,10 @@ namespace iwecs {
 			data.index += m_working_chunk_id;
 			data.archetype_id = archtype_t::id;
 
+			typename chunk_t::iterator itr = chunk.begin();
+			typename chunk_t::iterator itr = chunk.end();
+
+
 			return data;
 		}
 
