@@ -124,6 +124,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\archtype.h" />
+    <ClInclude Include="include\chunk_iterator.h" />
     <ClInclude Include="include\component_data.h" />
     <ClInclude Include="include\component_registry.h" />
     <ClInclude Include="include\ecs_manager.h" />

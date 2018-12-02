@@ -10,6 +10,7 @@ namespace iwecs {
 	public:
 		using archtype_t = archtype<_components_t...>;
 		using entity_data_t = entity_data<archtype_t::size>;
+		using iterator = std::tuple<iwutil::input_iterator<_components_t>...>;
 
 		static constexpr std::size_t capacity = _size_in_bytes / archtype_t::size;
 	private:
@@ -62,6 +63,14 @@ namespace iwecs {
 		bool is_full() {
 			return m_count == capacity;
 		}
+
+		iterator begin() {
+			return get_iterator();
+		}
+
+		iterator end() {
+			return get_iterator_end();
+		}
 	private:
 		template<std::size_t... _tuple_index>
 		entity_data_t insert_into_streams(
@@ -106,7 +115,7 @@ namespace iwecs {
 			std::size_t remove_index) 
 		{
 			remove_from_streams(
-				std::make_index_sequence<sizeof...(_components_t)>{},
+				std::make_index_sequence<archtype_t::size>{},
 				remove_index
 			);
 		}
@@ -121,9 +130,23 @@ namespace iwecs {
 		}
 
 		void delete_streams() {
-			delete_streams(
-				std::make_index_sequence<sizeof...(_components_t)>{}
-			);
+			delete_streams(std::make_index_sequence<archtype_t::size>{});
+		}
+
+		template<std::size_t... _tuple_index>
+		iterator get_iterator(
+			std::index_sequence<_tuple_index...>,
+			index_t index)
+		{
+			return iterator(std::get<_tuple_index>(m_streams) + index...);
+		}
+
+		iterator get_iterator() {
+			return get_iterator(std::make_index_sequence<archtype_t::size>{}, 0);
+		}
+
+		iterator get_iterator_end() {
+			return get_iterator(std::make_index_sequence<archtype_t::size>{}, m_count - 1);
 		}
 	};
 }

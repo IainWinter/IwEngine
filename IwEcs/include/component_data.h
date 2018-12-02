@@ -37,6 +37,10 @@ namespace iwecs {
 			entity_data_t data = chunk.insert(std::forward<_components_t>(args)...);
 			data.index += m_working_chunk_id;
 
+			typename chunk_t::iterator itr = chunk.begin();
+			typename chunk_t::iterator itr = chunk.end();
+
+
 			return data;
 		}
 
