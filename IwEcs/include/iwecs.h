@@ -25,15 +25,16 @@ namespace iwecs {
 
 	template<std::size_t _size>
 	struct entity_data : ientity_data {
-		const void* components[_size];
+		void* components[_size];
 
 		entity_data()
 		  : ientity_data(0, 0) {}
 
 		entity_data(
 			index_t index,
-			const void* components_[_size])
-		  : ientity_data(index, 0)
+			iwutil::type_id_t archetype_id,
+			void* components_[_size])
+		  : ientity_data(index, archetype_id)
 		{
 			memcpy(components, components_, _size);
 		}

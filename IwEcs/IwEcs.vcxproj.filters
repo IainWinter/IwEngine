@@ -30,13 +30,13 @@
     <ClInclude Include="include\archtype.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\component_data.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\entity_manager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\chunk_iterator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\component_array.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

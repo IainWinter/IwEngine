@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include "IwUtil/compiled_sequence.h"
 #include "IwUtil/type_id.h"
 

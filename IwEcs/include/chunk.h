@@ -5,16 +5,32 @@
 #include <tuple>
 
 namespace iwecs {
-	template<std::size_t _size_in_bytes, typename... _components_t>
+	template<std::size_t _size>
+	struct chunk_data {
+		std::size_t index;
+		void* data[_size];
+
+		chunk_data()
+		  : index(0) {}
+
+		chunk_data(
+			index_t index_,
+			void* data_[_size])
+		  : index(index_)
+		{
+			memcpy(data, data_, _size * sizeof(void*));
+		}
+	};
+
+	template<std::size_t _size_in_bytes, typename... _t>
 	class chunk {
 	public:
-		using archtype_t = archtype<_components_t...>;
-		using entity_data_t = entity_data<archtype_t::size>;
-		using iterator = std::tuple<iwutil::input_iterator<_components_t>...>;
+		using archtype_t = archtype<_t...>;
+		using data_t     = chunk_data<archtype_t::size>;
 
-		static constexpr std::size_t capacity = _size_in_bytes / archtype_t::size;
+		static constexpr std::size_t capacity = _size_in_bytes / archtype_t::size_in_bytes;
 	private:
-		using streams_t = std::tuple<_components_t*...>;
+		using streams_t = std::tuple<_t*...>;
 
 		std::size_t m_count;
 		streams_t   m_streams;
@@ -22,7 +38,7 @@ namespace iwecs {
 	public:
 		chunk() 
 		  : m_count(0),
-			m_streams(streams_t(new _components_t[capacity]...)) {}
+			m_streams(streams_t(new _t[capacity]...)) {}
 
 		chunk(const chunk& copy) = delete;
 		chunk(chunk&& copy) = delete;
@@ -34,12 +50,12 @@ namespace iwecs {
 		chunk& operator=(const chunk& copy) = delete;
 		chunk& operator=(chunk&& copy) = delete;
 
-		entity_data_t insert(
-			_components_t&&... components)
+		data_t insert(
+			_t&&... components)
 		{
-			entity_data_t data;
+			data_t data;
 			if (!is_full()) {
-				data = insert_into_streams(std::forward<_components_t>(components)...);
+				data = insert_into_streams(std::forward<_t>(components)...);
 				m_count++;
 			}
 
@@ -49,8 +65,8 @@ namespace iwecs {
 		bool remove(
 			std::size_t index) 
 		{
-			if (index > 0 && index < m_count) {
-				if (index < m_count - 1) {
+			if (index >= 0 && index < m_count) {
+				if (index <= m_count - 1) {
 					remove_from_streams(index);
 				}
 
@@ -65,39 +81,36 @@ namespace iwecs {
 			return m_count == capacity;
 		}
 
-		iterator begin() {
-			return get_iterator();
-		}
+		//iterator begin() {
+		//	return get_iterator();
+		//}
 
-		iterator end() {
-			return get_iterator_end();
-		}
+		//iterator end() {
+		//	return get_iterator_end();
+		//}
 	private:
 		template<std::size_t... _tuple_index>
-		entity_data_t insert_into_streams(
+		data_t insert_into_streams(
 			std::index_sequence<_tuple_index...>,
-			_components_t&&... data)
+			_t&&... data)
 		{
 			int expanded[] = {
 				(std::get<_tuple_index>(m_streams)[m_count] = data, 0)...
 			};
 
-			const void* components[archtype_t::size] = {
-				(const void*)&std::get<_tuple_index>(m_streams)[m_count]...
+			void* components[archtype_t::size] = {
+				(void*)&std::get<_tuple_index>(m_streams)[m_count]...
 			};
 
-			return entity_data_t(
-				m_count,
-				components
-			);
+			return data_t(m_count, components);
 		}
 
-		entity_data_t insert_into_streams(
-			_components_t&&... data) 
+		data_t insert_into_streams(
+			_t&&... data) 
 		{
 			return insert_into_streams(
-				std::make_index_sequence<sizeof...(_components_t)>{},
-				std::forward<_components_t>(data)...
+				std::make_index_sequence<sizeof...(_t)>{},
+				std::forward<_t>(data)...
 			);
 		}
 
@@ -134,20 +147,20 @@ namespace iwecs {
 			delete_streams(std::make_index_sequence<archtype_t::size>{});
 		}
 
-		template<std::size_t... _tuple_index>
-		iterator get_iterator(
-			std::index_sequence<_tuple_index...>,
-			index_t index)
-		{
-			return iterator(std::get<_tuple_index>(m_streams) + index...);
-		}
+		//template<std::size_t... _tuple_index>
+		//iterator get_iterator(
+		//	std::index_sequence<_tuple_index...>,
+		//	index_t index)
+		//{
+		//	return iterator(std::get<_tuple_index>(m_streams) + index...);
+		//}
 
-		iterator get_iterator() {
-			return get_iterator(std::make_index_sequence<archtype_t::size>{}, 0);
-		}
+		//iterator get_iterator() {
+		//	return get_iterator(std::make_index_sequence<archtype_t::size>{}, 0);
+		//}
 
-		iterator get_iterator_end() {
-			return get_iterator(std::make_index_sequence<archtype_t::size>{}, m_count - 1);
-		}
+		//iterator get_iterator_end() {
+		//	return get_iterator(std::make_index_sequence<archtype_t::size>{}, m_count - 1);
+		//}
 	};
 }
