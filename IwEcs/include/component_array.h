@@ -15,29 +15,27 @@ namespace iwecs {
 	template<typename... _components_t>
 	class component_array : public icomponent_array {
 	public:
-		using archtype_t = archtype<_components_t...>;
-		using chunk_t = chunk<640, _components_t...>; //640 as temp value
+		using archtype_t       = archtype<_components_t...>;
+		using chunk_t          = chunk<640, _components_t...>; //640 as temp value
 		using component_data_t = typename chunk_t::data_t;
-		using entity_data_t = typename entity_data<archtype_t::size>;
+		using entity_data_t    = typename entity_data<archtype_t::size>;
+		using chunk_list_t     = std::list<chunk_t*>;
+		using chunk_list_itr_t = typename chunk_list_t::iterator;
 	private:
-		std::list<chunk_t*> m_chunks;
-		//std::unordered_map<std::size_t, chunk_t*> m_chunks;
-		std::size_t m_working_chunk_index;
-		std::size_t m_next_index;
+		chunk_list_t m_chunks;
+		chunk_list_itr_t m_working_chunk;
+		std::size_t m_working_index;
+		//std::size_t m_next_index;
 
 	public:
-		component_array()
-		  : m_working_chunk_index(0),
-			m_next_index(0) {}
-
-		entity_data_t attach_components(
+	entity_data_t attach_components(
 			_components_t&&... args)
 		{
-			chunk_t& chunk = ensure_free_chunk();
+			ensure_free_working_chunk();
 			component_data_t data = chunk.insert(std::forward<_components_t>(args)...);
 
 			return entity_data_t(
-				data.index + chunk_t::capacity * m_working_chunk_index,
+				data.index + chunk_t::capacity * m_working_index,
 				archtype_t::id,
 				data.data
 			);
@@ -48,16 +46,25 @@ namespace iwecs {
 		{
 			index_t chunk_index = index / chunk_t::capacity;
 			index_t component_index = index % chunk_t::capacity;
+			if (chunk_index == m_working_index) {
+				return m_working_chunk->remove(component_index);
+			}
 
-			return m_chunks[chunk_index]->remove(component_index);
+			return get_chunk(chunk_index).remove(component_index);
 		}
 	private:
-		chunk_t& ensure_free_chunk() {
+		void ensure_free_working_chunk() {
+			//If no chunks
+			// set new chunk
+			//Else
+			//	get_first_free_chunk
+			
+
 			if (no_free_chunks()) {
 				return add_chunk();
 			}
 
-			chunk_t& chunk = get_working_chunk();
+			chunk_t& chunk = get_first_free_chunk();
 			if (chunk.is_full()) {
 				return add_chunk();
 			}
@@ -76,11 +83,20 @@ namespace iwecs {
 		}
 
 		chunk_t& get_working_chunk() {
-			return *m_chunks[m_working_chunk_index];
+			return *m_working_chunk;
+		}
+
+		chunk_t& get_chunk(
+			index_t index)
+		{
+			auto& itr = m_chunks.begin();
+			std::advance(itr, index);
+			
+			return *itr;
 		}
 
 		bool no_free_chunks() {
-			return m_chunks.find(m_working_chunk_index) == m_chunks.end();
+			return m_working_chunk == m_chunks.end();
 		}
 	};
 }
