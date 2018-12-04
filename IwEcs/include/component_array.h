@@ -25,14 +25,15 @@ namespace iwecs {
 		chunk_list_t m_chunks;
 		chunk_list_itr_t m_working_chunk;
 		std::size_t m_working_index;
+		std::size_t m_chunk_count;
 		//std::size_t m_next_index;
 
 	public:
-	entity_data_t attach_components(
+		entity_data_t attach_components(
 			_components_t&&... args)
 		{
 			ensure_free_working_chunk();
-			component_data_t data = chunk.insert(std::forward<_components_t>(args)...);
+			component_data_t data = get_working_chunk().insert(std::forward<_components_t>(args)...);
 
 			return entity_data_t(
 				data.index + chunk_t::capacity * m_working_index,
@@ -47,56 +48,91 @@ namespace iwecs {
 			index_t chunk_index = index / chunk_t::capacity;
 			index_t component_index = index % chunk_t::capacity;
 			if (chunk_index == m_working_index) {
-				return m_working_chunk->remove(component_index);
+				return get_working_chunk().remove(component_index);
 			}
 
 			return get_chunk(chunk_index).remove(component_index);
 		}
 	private:
 		void ensure_free_working_chunk() {
-			//If no chunks
-			// set new chunk
-			//Else
-			//	get_first_free_chunk
-			
-
-			if (no_free_chunks()) {
-				return add_chunk();
+			if (no_chunks() || no_free_chunks() ) {
+				add_chunk();
 			}
-
-			chunk_t& chunk = get_first_free_chunk();
-			if (chunk.is_full()) {
-				return add_chunk();
-			}
-
-			return chunk;
 		}
 
-		chunk_t& add_chunk() {
-			m_working_chunk_index = m_next_index;
-
+		void add_chunk() {
 			chunk_t* chunk = new chunk_t();
 			m_chunks.push_back(chunk);
-			m_next_index++;
 
-			return *chunk;
+			m_working_chunk = m_chunks.end()--;
+			m_working_index++;
+			m_chunk_count++;
 		}
 
 		chunk_t& get_working_chunk() {
-			return *m_working_chunk;
+			return **m_working_chunk;
+		}
+
+		chunk_t& get_chunk(
+			chunk_list_itr_t itr)
+		{
+			return **itr;
 		}
 
 		chunk_t& get_chunk(
 			index_t index)
 		{
-			auto& itr = m_chunks.begin();
+			auto itr = m_chunks.begin();
 			std::advance(itr, index);
 			
-			return *itr;
+			return **itr;
+		}
+
+		bool no_chunks() {
+			return m_chunk_count == 0;
 		}
 
 		bool no_free_chunks() {
-			return m_working_chunk == m_chunks.end();
+			if (!get_working_chunk().is_full()) {
+				return false;
+			}
+
+			bool has_found = false;
+			chunk_list_itr_t found_itr;
+			chunk_list_itr_t itr = m_working_chunk;
+			std::size_t index    = m_working_index - 1;
+			while (index > 0) {
+				itr--;
+				index--;
+				if (!get_chunk(itr).is_full()) {
+					found_itr = itr;
+					has_found = true;
+				}
+			}
+
+			if (has_found) {
+				m_working_chunk = found_itr;
+				m_working_index = index;
+				return false;
+			}
+
+			itr = m_working_chunk;
+			while (index > 0) {
+				itr++;
+				index++;
+				if (!get_chunk(itr).is_full()) {
+					found_itr = itr;
+					has_found = true;
+				}
+			}
+
+			if (has_found) {
+				m_working_chunk = found_itr;
+				m_working_index = index;
+				return false;
+			}
+
+			return true;
 		}
 	};
 }
