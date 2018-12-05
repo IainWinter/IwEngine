@@ -38,8 +38,11 @@ public:
 		}
 
 		m.destroy_entity(5);
+		m.destroy_entity(85);
+		m.destroy_entity(320);
+		m.destroy_entity(199);
 
-		for (int i = 0; i < 500; i++) {
+		for (int i = 0; i < 60; i++) {
 			float f = i + .1f;
 			iwecs::entity_t e = m.create_entity<int, float>(i, f);
 		}

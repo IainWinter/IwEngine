@@ -32,17 +32,17 @@ namespace iwecs {
 	private:
 		using streams_t = std::tuple<_t*...>;
 
-		std::size_t m_count;
+		std::size_t m_size;
 		streams_t   m_streams;
 
 	public:
 		chunk() 
-		  : m_count(0),
+		  : m_size(0),
 			m_streams(streams_t(new _t[capacity]...)) {}
 
 		chunk(
 			const chunk& copy)
-		  : m_count(copy.m_count),
+		  : m_size(copy.m_size),
 			m_streams(streams_t(new _t[capacity]...)) 
 		{
 			copy_streams(copy.m_streams);
@@ -50,7 +50,7 @@ namespace iwecs {
 
 		chunk(
 			chunk&& copy)
-		  : m_count(copy.m_count),
+		  : m_size(copy.m_size),
 			m_streams(streams_t(new _t[capacity]...)) 
 		{
 			copy_streams(copy.m_streams);
@@ -63,7 +63,7 @@ namespace iwecs {
 		chunk& operator=(
 			const chunk& copy)
 		{
-			m_count = copy.m_count;
+			m_size = copy.m_size;
 			m_streams = streams_t(new _t[capacity]...);
 			copy_streams(copy.m_streams);
 		}
@@ -71,7 +71,7 @@ namespace iwecs {
 		chunk& operator=(
 			chunk&& copy)
 		{
-			m_count = copy.m_count;
+			m_size = copy.m_size;
 			m_streams = streams_t(new _t[capacity]...);
 			copy_streams(copy.m_streams);
 		}
@@ -82,7 +82,7 @@ namespace iwecs {
 			data_t data;
 			if (!is_full()) {
 				data = insert_into_streams(std::forward<_t>(components)...);
-				m_count++;
+				m_size++;
 			}
 
 			return data;
@@ -91,12 +91,12 @@ namespace iwecs {
 		bool remove(
 			std::size_t index) 
 		{
-			if (index >= 0 && index < m_count) {
-				if (index <= m_count - 1) {
+			if (index >= 0 && index < m_size) {
+				if (index <= m_size - 1) {
 					remove_from_streams(index);
 				}
 
-				m_count--;
+				m_size--;
 				return true;
 			}
 
@@ -104,7 +104,11 @@ namespace iwecs {
 		}
 
 		bool is_full() {
-			return m_count == capacity;
+			return m_size == capacity;
+		}
+
+		std::size_t size() {
+			return m_size;
 		}
 
 		//iterator begin() {
@@ -121,14 +125,14 @@ namespace iwecs {
 			_t&&... data)
 		{
 			int expanded[] = {
-				(std::get<_tuple_index>(m_streams)[m_count] = data, 0)...
+				(std::get<_tuple_index>(m_streams)[m_size] = data, 0)...
 			};
 
 			void* components[archtype_t::size] = {
-				(void*)&std::get<_tuple_index>(m_streams)[m_count]...
+				(void*)&std::get<_tuple_index>(m_streams)[m_size]...
 			};
 
-			return data_t(m_count, components);
+			return data_t(m_size, components);
 		}
 
 		data_t insert_into_streams(
@@ -147,7 +151,7 @@ namespace iwecs {
 		{
 			int expanded[] = {
 				(std::get<_tuple_index>(m_streams)[remove_index]
-					= std::get<_tuple_index>(m_streams)[m_count - 1], 0)...
+					= std::get<_tuple_index>(m_streams)[m_size - 1], 0)...
 			};
 		}
 

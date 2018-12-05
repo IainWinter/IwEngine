@@ -1,9 +1,11 @@
 #pragma once
 
 #include "iwecs.h"
-#include <unordered_map>
+#include <list>
 #include "archtype.h"
 #include "chunk.h"
+
+#include <iostream>
 
 namespace iwecs {
 	class icomponent_array {
@@ -33,6 +35,9 @@ namespace iwecs {
 			_components_t&&... args)
 		{
 			ensure_free_working_chunk();
+
+			std::cout << m_working_chunk->size() + chunk_t::capacity * m_working_index << std::endl;
+
 			component_data_t data = m_working_chunk->insert(std::forward<_components_t>(args)...);
 
 			return entity_data_t(
@@ -55,7 +60,7 @@ namespace iwecs {
 		}
 	private:
 		void ensure_free_working_chunk() {
-			if (no_chunks() || no_free_chunks() ) {
+			if (no_chunks() || find_free_chunk()) {
 				add_chunk();
 			}
 		}
@@ -83,7 +88,7 @@ namespace iwecs {
 			return m_chunk_count == 0;
 		}
 
-		bool no_free_chunks() {
+		bool find_free_chunk() {
 			if (!m_working_chunk->is_full()) {
 				return false;
 			}
@@ -91,7 +96,7 @@ namespace iwecs {
 			bool has_found = false;
 			chunk_list_itr_t found_itr;
 			chunk_list_itr_t itr = m_working_chunk;
-			int index = m_working_index - 1;
+			int index = m_working_index;
 			while (index > 0) {
 				itr--;
 				index--;
@@ -108,20 +113,16 @@ namespace iwecs {
 			}
 
 			itr   = m_working_chunk;
-			index = m_working_index + 1;
-			while (index < m_chunk_count) {
+			index = m_working_index;
+			while (index < m_chunk_count - 1) {
 				itr++;
 				index++;
 				if (!itr->is_full()) {
-					found_itr = itr;
-					has_found = true;
-				}
-			}
+					m_working_chunk = itr;
+					m_working_index = index;
 
-			if (has_found) {
-				m_working_chunk = found_itr;
-				m_working_index = index;
-				return false;
+					return false;
+				}
 			}
 
 			return true;

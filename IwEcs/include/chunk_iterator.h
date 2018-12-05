@@ -7,7 +7,7 @@ namespace iwecs {
 	template<typename... _components_t>
 	class chunk_iterator {
 	public:
-		using tuple_t           = std::tuple< _components_t...>;
+		using tuple_t           = std::tuple<_components_t...>;
 		using iterator_category = std::chunk_iterator_tag;
 		using value_type        = std::remove_cv_t<tuple_t>;
 		using difference_type   = std::ptrdiff_t;
