@@ -40,15 +40,41 @@ namespace iwecs {
 		  : m_count(0),
 			m_streams(streams_t(new _t[capacity]...)) {}
 
-		chunk(const chunk& copy) = delete;
-		chunk(chunk&& copy) = delete;
+		chunk(
+			const chunk& copy)
+		  : m_count(copy.m_count),
+			m_streams(streams_t(new _t[capacity]...)) 
+		{
+			copy_streams(copy.m_streams);
+		}
+
+		chunk(
+			chunk&& copy)
+		  : m_count(copy.m_count),
+			m_streams(streams_t(new _t[capacity]...)) 
+		{
+			copy_streams(copy.m_streams);
+		}
 
 		~chunk() {
 			delete_streams();
 		}
 
-		chunk& operator=(const chunk& copy) = delete;
-		chunk& operator=(chunk&& copy) = delete;
+		chunk& operator=(
+			const chunk& copy)
+		{
+			m_count = copy.m_count;
+			m_streams = streams_t(new _t[capacity]...);
+			copy_streams(copy.m_streams);
+		}
+
+		chunk& operator=(
+			chunk&& copy)
+		{
+			m_count = copy.m_count;
+			m_streams = streams_t(new _t[capacity]...);
+			copy_streams(copy.m_streams);
+		}
 
 		data_t insert(
 			_t&&... components)
@@ -145,6 +171,25 @@ namespace iwecs {
 
 		void delete_streams() {
 			delete_streams(std::make_index_sequence<archtype_t::size>{});
+		}
+
+		template<std::size_t... _tuple_index>
+		void copy_streams(
+			std::index_sequence<_tuple_index...>,
+			const streams_t& copy)
+		{
+			int expanded[] = {
+				(memcpy(
+					std::get<_tuple_index>(m_streams), 
+					std::get<_tuple_index>(copy),
+					capacity), 0)...
+			};
+		}
+
+		void copy_streams(
+			const streams_t& copy)
+		{
+			copy_streams(std::make_index_sequence<archtype_t::size>{}, copy);
 		}
 
 		//template<std::size_t... _tuple_index>

@@ -19,7 +19,7 @@ namespace iwecs {
 		using chunk_t          = chunk<640, _components_t...>; //640 as temp value
 		using component_data_t = typename chunk_t::data_t;
 		using entity_data_t    = typename entity_data<archtype_t::size>;
-		using chunk_list_t     = std::list<chunk_t*>;
+		using chunk_list_t     = std::list<chunk_t>;
 		using chunk_list_itr_t = typename chunk_list_t::iterator;
 	private:
 		chunk_list_t m_chunks;
@@ -33,7 +33,7 @@ namespace iwecs {
 			_components_t&&... args)
 		{
 			ensure_free_working_chunk();
-			component_data_t data = get_working_chunk().insert(std::forward<_components_t>(args)...);
+			component_data_t data = m_working_chunk->insert(std::forward<_components_t>(args)...);
 
 			return entity_data_t(
 				data.index + chunk_t::capacity * m_working_index,
@@ -48,7 +48,7 @@ namespace iwecs {
 			index_t chunk_index = index / chunk_t::capacity;
 			index_t component_index = index % chunk_t::capacity;
 			if (chunk_index == m_working_index) {
-				return get_working_chunk().remove(component_index);
+				return m_working_chunk->remove(component_index);
 			}
 
 			return get_chunk(chunk_index).remove(component_index);
@@ -61,22 +61,13 @@ namespace iwecs {
 		}
 
 		void add_chunk() {
-			chunk_t* chunk = new chunk_t();
-			m_chunks.push_back(chunk);
+			m_chunks.push_back(chunk_t());
 
-			m_working_chunk = m_chunks.end()--;
-			m_working_index++;
+			m_working_chunk = m_chunks.end();
+			m_working_chunk--;
+
 			m_chunk_count++;
-		}
-
-		chunk_t& get_working_chunk() {
-			return **m_working_chunk;
-		}
-
-		chunk_t& get_chunk(
-			chunk_list_itr_t itr)
-		{
-			return **itr;
+			m_working_index = m_chunk_count - 1;
 		}
 
 		chunk_t& get_chunk(
@@ -85,7 +76,7 @@ namespace iwecs {
 			auto itr = m_chunks.begin();
 			std::advance(itr, index);
 			
-			return **itr;
+			return *itr;
 		}
 
 		bool no_chunks() {
@@ -93,18 +84,18 @@ namespace iwecs {
 		}
 
 		bool no_free_chunks() {
-			if (!get_working_chunk().is_full()) {
+			if (!m_working_chunk->is_full()) {
 				return false;
 			}
 
 			bool has_found = false;
 			chunk_list_itr_t found_itr;
 			chunk_list_itr_t itr = m_working_chunk;
-			std::size_t index    = m_working_index - 1;
+			int index = m_working_index - 1;
 			while (index > 0) {
 				itr--;
 				index--;
-				if (!get_chunk(itr).is_full()) {
+				if (!itr->is_full()) {
 					found_itr = itr;
 					has_found = true;
 				}
@@ -116,11 +107,12 @@ namespace iwecs {
 				return false;
 			}
 
-			itr = m_working_chunk;
-			while (index > 0) {
+			itr   = m_working_chunk;
+			index = m_working_index + 1;
+			while (index < m_chunk_count) {
 				itr++;
 				index++;
-				if (!get_chunk(itr).is_full()) {
+				if (!itr->is_full()) {
 					found_itr = itr;
 					has_found = true;
 				}
