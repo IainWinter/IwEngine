@@ -2,7 +2,7 @@
 
 #include "iwecs.h"
 #include <list>
-#include "archtype.h"
+#include "IwUtil/archtype.h"
 #include "chunk.h"
 
 #include <iostream>
@@ -17,7 +17,7 @@ namespace iwecs {
 	template<typename... _components_t>
 	class component_array : public icomponent_array {
 	public:
-		using archtype_t       = archtype<_components_t...>;
+		using archtype_t       = iwutil::archtype<_components_t...>;
 		using chunk_t          = chunk<640, _components_t...>; //640 as temp value
 		using component_data_t = typename chunk_t::data_t;
 		using entity_data_t    = typename entity_data<archtype_t::size>;

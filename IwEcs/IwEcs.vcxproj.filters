@@ -27,9 +27,6 @@
     <ClInclude Include="include\component_registry.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\archtype.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\entity_manager.h">
       <Filter>Header Files</Filter>
     </ClInclude>

@@ -123,7 +123,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="include\archtype.h" />
     <ClInclude Include="include\chunk_iterator.h" />
     <ClInclude Include="include\component_array.h" />
     <ClInclude Include="include\component_registry.h" />

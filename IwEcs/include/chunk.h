@@ -2,10 +2,12 @@
 
 #include "iwecs.h"
 #include "IwUtil/input_iterator.h"
+#include "IwUtil/archtype.h"
 #include <tuple>
 
 namespace iwecs {
-	template<std::size_t _size>
+	template<
+		std::size_t _size>
 	struct chunk_data {
 		std::size_t index;
 		void* data[_size];
@@ -22,13 +24,16 @@ namespace iwecs {
 		}
 	};
 
-	template<std::size_t _size_in_bytes, typename... _t>
+	template<
+		std::size_t _size_in_bytes, 
+		typename... _t>
 	class chunk {
 	public:
-		using archtype_t = archtype<_t...>;
+		using archtype_t = iwutil::archtype<_t...>;
 		using data_t     = chunk_data<archtype_t::size>;
 
-		static constexpr std::size_t capacity = _size_in_bytes / archtype_t::size_in_bytes;
+		static constexpr std::size_t capacity = _size_in_bytes
+			/ archtype_t::size_in_bytes;
 	private:
 		using streams_t = std::tuple<_t*...>;
 
@@ -119,12 +124,13 @@ namespace iwecs {
 		//	return get_iterator_end();
 		//}
 	private:
-		template<std::size_t... _tuple_index>
+		template<
+			std::size_t... _tuple_index>
 		data_t insert_into_streams(
 			std::index_sequence<_tuple_index...>,
 			_t&&... data)
 		{
-			int expanded[] = {
+			auto e = {
 				(std::get<_tuple_index>(m_streams)[m_size] = data, 0)...
 			};
 
@@ -144,12 +150,13 @@ namespace iwecs {
 			);
 		}
 
-		template<std::size_t... _tuple_index>
+		template<
+			std::size_t... _tuple_index>
 		void remove_from_streams(
 			std::index_sequence<_tuple_index...>,
-			std::size_t remove_index) 
+			std::size_t remove_index)
 		{
-			int expanded[] = {
+			auto e = {
 				(std::get<_tuple_index>(m_streams)[remove_index]
 					= std::get<_tuple_index>(m_streams)[m_size - 1], 0)...
 			};
@@ -164,12 +171,14 @@ namespace iwecs {
 			);
 		}
 
-		template<std::size_t... _tuple_index>
+		template<
+			std::size_t... _tuple_index>
 		void delete_streams(
 			std::index_sequence<_tuple_index...>)
 		{
-			int expanded[] = {
-				(delete[] std::get<_tuple_index>(m_streams), 0)...
+			auto e = {(
+				delete[] std::get<_tuple_index>(m_streams),
+				0)...
 			};
 		}
 
@@ -177,16 +186,18 @@ namespace iwecs {
 			delete_streams(std::make_index_sequence<archtype_t::size>{});
 		}
 
-		template<std::size_t... _tuple_index>
+		template<
+			std::size_t... _tuple_index>
 		void copy_streams(
 			std::index_sequence<_tuple_index...>,
 			const streams_t& copy)
 		{
-			int expanded[] = {
-				(memcpy(
+			auto e = {(
+				memcpy(
 					std::get<_tuple_index>(m_streams), 
 					std::get<_tuple_index>(copy),
-					capacity), 0)...
+					capacity),
+				0)... //capacity might be wrong. May need size in bytes
 			};
 		}
 

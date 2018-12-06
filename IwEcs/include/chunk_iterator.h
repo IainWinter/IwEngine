@@ -3,68 +3,76 @@
 #include <iterator>
 #include <tuple>
 
-namespace iwecs {
-	template<typename... _components_t>
-	class chunk_iterator {
-	public:
-		using tuple_t           = std::tuple<_components_t...>;
-		using iterator_category = std::chunk_iterator_tag;
-		using value_type        = std::remove_cv_t<tuple_t>;
-		using difference_type   = std::ptrdiff_t;
-		using pointer           = tuple_t*;
-		using reference         = tuple_t&;
+namespace iwutil {
+	template<typename... T>
+	class tuple {
 	private:
-		pointer m_ptr;
-	
+		using tuple_t = std::tuple<T...>;
+
+		tuple_t m_data;
+
+		template<typename F, int... Index>
+		void foreach(F functor, std::index_sequence<Index...>) {
+			auto l = { (functor(std::get<Index>(m_data)), 0)... };
+		}
 	public:
-		chunk_iterator()
-			: m_ptr() {}
+		dynamic_tuple() = default;
 
-		chunk_iterator(pointer ptr)
-		  : m_ptr(ptr) {}
+		dynamic_tuple(T&&... args)
+			: m_data(std::forward<T>(args)...) {}
 
-		chunk_iterator(
-			const chunk_iterator& copy)
-		  : m_ptr(copy.m_ptr) {}
-
-		chunk_iterator& operator=(
-			const chunk_iterator& copy)
-		{
-			m_ptr = copy.m_ptr;
+		dynamic_tuple& operator=(dynamic_tuple& copy) {
+			m_data = std::tuple<T...>(copy.m_data);
 			return *this;
 		}
 
-		chunk_iterator& operator++() {
-			++m_ptr;
-			return *this;
+		bool operator==(const dynamic_tuple& tup) const {
+			return m_data == tup.m_data;
 		}
 
-		chunk_iterator operator++(
-			int) 
-		{
-			chunk_iterator tmp(*this);
-			++*this;
-			return tmp;
+		bool operator!=(const dynamic_tuple& tup) const {
+			return m_data != tup.m_data;
 		}
 
-		bool operator==(
-			const chunk_iterator& itr) const 
-		{
-			return m_ptr == itr.m_ptr;
+		template<typename K>
+		K& get() {
+			constexpr std::size_t index = this->get_type_id<K>();
+			return std::get<index>(m_data);
 		}
 
-		bool operator!=(
-			const chunk_iterator& itr) const
-		{
-			return m_ptr != itr.m_ptr;
+		template<typename K>
+		void set(K&& value) {
+			get<K>() = value;
 		}
 
-		reference operator*() {
-			return *m_ptr;
+		template<typename S>
+		S as_struct() {
+			return make_struct<S, tuple_t>(m_data);
 		}
 
-		pointer operator->() {
-			return m_ptr;
+		void forall(void(*func)(T&...)) {
+			func(get<T>()...);
+		}
+
+		template<typename F>
+		void foreach(F&& functor) {
+			foreach(std::move(functor), std::make_index_sequence<sizeof...(T)>());
 		}
 	};
+
+	namespace functors {
+		struct increment {
+			template<typename T>
+			void operator () (T&& t) {
+				t++;
+			}
+		};
+
+		struct decrement {
+			template<typename T>
+			void operator () (T&& t) {
+				t--;
+			}
+		};
+	}
 }
