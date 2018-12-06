@@ -1,8 +1,9 @@
 #pragma once
 
 #include "iwecs.h"
-#include "IwUtil/input_iterator.h"
+#include "IwUtil/pack_input_iterator.h"
 #include "IwUtil/archtype.h"
+#include "IwUtil/tuple_iteration.h"
 #include <tuple>
 
 namespace iwecs {
@@ -32,8 +33,11 @@ namespace iwecs {
 		using archtype_t = iwutil::archtype<_t...>;
 		using data_t     = chunk_data<archtype_t::size>;
 
-		static constexpr std::size_t capacity = _size_in_bytes
-			/ archtype_t::size_in_bytes;
+		using iterator       = iwutil::pack_input_iterator<_t...>;
+		using const_iterator = iwutil::pack_input_iterator<const _t...>;
+
+		static constexpr std::size_t capacity 
+			= _size_in_bytes / archtype_t::size_in_bytes;
 	private:
 		using streams_t = std::tuple<_t*...>;
 
@@ -116,14 +120,38 @@ namespace iwecs {
 			return m_size;
 		}
 
-		//iterator begin() {
-		//	return get_iterator();
-		//}
+		iterator begin() {
+			return get_iterator();
+		}
 
-		//iterator end() {
-		//	return get_iterator_end();
-		//}
+		iterator end() {
+			return get_iterator_end();
+		}
 	private:
+		struct collapse_array {
+			template<
+				typename _t>
+			void operator()(
+				_t&& stream,
+				std::size_t index,
+				std::size_t end_index)
+			{
+				stream[index] = stream[end_index];
+			}
+		};
+
+		struct insert_array {
+			template<
+				typename _t>
+			void operator()(
+				_t&& stream,
+				_t&& data,
+				std::size_t index)
+			{
+				stream[index] = data;
+			}
+		};
+
 		template<
 			std::size_t... _tuple_index>
 		data_t insert_into_streams(
@@ -144,46 +172,24 @@ namespace iwecs {
 		data_t insert_into_streams(
 			_t&&... data) 
 		{
-			return insert_into_streams(
-				std::make_index_sequence<sizeof...(_t)>{},
-				std::forward<_t>(data)...
-			);
-		}
+			using ref_t = std::tuple<_t&...>;
+			ref_t r = std::make_tuple(data...);
 
-		template<
-			std::size_t... _tuple_index>
-		void remove_from_streams(
-			std::index_sequence<_tuple_index...>,
-			std::size_t remove_index)
-		{
-			auto e = {
-				(std::get<_tuple_index>(m_streams)[remove_index]
-					= std::get<_tuple_index>(m_streams)[m_size - 1], 0)...
-			};
+			iwutil::foreach<insert_array, streams_t, ref_t, archtype_t::size>(m_streams, r, m_size);
+			//return insert_into_streams(
+			//	std::make_index_sequence<sizeof...(_t)>{},
+			//	std::forward<_t>(data)...
+			//);
 		}
 
 		void remove_from_streams(
 			std::size_t remove_index) 
 		{
-			remove_from_streams(
-				std::make_index_sequence<archtype_t::size>{},
-				remove_index
-			);
-		}
-
-		template<
-			std::size_t... _tuple_index>
-		void delete_streams(
-			std::index_sequence<_tuple_index...>)
-		{
-			auto e = {(
-				delete[] std::get<_tuple_index>(m_streams),
-				0)...
-			};
+			iwutil::foreach<collapse_array, streams_t, archtype_t::size>(m_streams, remove_index, m_size - 1);
 		}
 
 		void delete_streams() {
-			delete_streams(std::make_index_sequence<archtype_t::size>{});
+			iwutil::foreach<functors::erase_array, streams_t, archtype_t::size>(m_streams);
 		}
 
 		template<
@@ -207,20 +213,20 @@ namespace iwecs {
 			copy_streams(std::make_index_sequence<archtype_t::size>{}, copy);
 		}
 
-		//template<std::size_t... _tuple_index>
-		//iterator get_iterator(
-		//	std::index_sequence<_tuple_index...>,
-		//	index_t index)
-		//{
-		//	return iterator(std::get<_tuple_index>(m_streams) + index...);
-		//}
+		template<std::size_t... _tuple_index>
+		iterator get_iterator(
+			std::index_sequence<_tuple_index...>,
+			index_t index)
+		{
+			return iterator(std::get<_tuple_index>(m_streams) + index...);
+		}
 
-		//iterator get_iterator() {
-		//	return get_iterator(std::make_index_sequence<archtype_t::size>{}, 0);
-		//}
+		iterator get_iterator() {
+			return get_iterator(std::make_index_sequence<archtype_t::size>{}, 0);
+		}
 
-		//iterator get_iterator_end() {
-		//	return get_iterator(std::make_index_sequence<archtype_t::size>{}, m_count - 1);
-		//}
+		iterator get_iterator_end() {
+			return get_iterator(std::make_index_sequence<archtype_t::size>{}, m_size);
+		}
 	};
 }

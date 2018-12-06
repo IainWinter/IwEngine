@@ -31,24 +31,6 @@ public:
 	~Game() {}
 
 	void Run() override {
-		int ints[] = {
-			1, 2, 3, 4, 5
-		};
-
-		double doubles[] = {
-			1, 2, 3, 4, 5
-		};
-
-		iwutil::pack_input_iterator<int, double> id(ints, doubles);
-		id++;
-
-		auto i = id;
-		id++;
-
-		auto d = *id;
-
-		return;
-
 		iwecs::ecs_manager m = iwecs::ecs_manager();
 		
 		for (int i = 0; i < 500; i++) {

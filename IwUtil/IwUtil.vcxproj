@@ -24,7 +24,6 @@
     <ClInclude Include="include\ct_iteration.h" />
     <ClInclude Include="include\input_iterator.h" />
     <ClInclude Include="include\pack_input_iterator.h" />
-    <ClInclude Include="include\tuple.h" />
     <ClInclude Include="include\tuple_iteration.h" />
     <ClInclude Include="include\type_id.h" />
   </ItemGroup>

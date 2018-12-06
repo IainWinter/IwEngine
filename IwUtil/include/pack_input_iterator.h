@@ -55,17 +55,23 @@ namespace iwutil {
 			return *this;
 		}
 
-		pack_input_iterator operator++(int) {
+		pack_input_iterator operator++(
+			int)
+		{
 			pack_input_iterator tmp(*this);
 			++*this;
 			return tmp;
 		}
 
-		bool operator==(const pack_input_iterator& itr) const {
+		bool operator==(
+			const pack_input_iterator& itr) const
+		{
 			return m_ptrs == itr.m_ptrs;
 		}
 
-		bool operator!=(const pack_input_iterator& itr) const {
+		bool operator!=(
+			const pack_input_iterator& itr) const
+		{
 			return m_ptrs != itr.m_ptrs;
 		}
 

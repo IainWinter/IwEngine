@@ -33,9 +33,6 @@
     <ClInclude Include="include\archtype.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\tuple.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\tuple_iteration.h">
       <Filter>Header Files</Filter>
     </ClInclude>

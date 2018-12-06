@@ -12,38 +12,6 @@ namespace iwutil {
 	void foreach(
 		_functor&& functor,
 		_tuple& tuple,
-		_arg_tuple& args,
-		std::index_sequence<_index...>)
-	{
-		auto e = {(
-			functor(std::get<_index>(tuple), std::get<_index>(args)),
-			0)...
-		};
-	}
-
-	// n arg with n element
-	template<
-		typename _functor,
-		typename _tuple,
-		typename _arg_tuple,
-		std::size_t _size>
-	void foreach(
-		_tuple& tuple,
-		_arg_tuple& arg_tuple)
-	{
-		foreach(_functor(), tuple, arg_tuple,
-			std::make_index_sequence<_size>{});
-	}
-
-	// n arg with n element
-	template<
-		typename _functor,
-		typename _tuple,
-		typename _arg_tuple,
-		std::size_t... _index>
-	void foreach(
-		_functor&& functor,
-		_tuple& tuple,
 		const _arg_tuple& args,
 		std::index_sequence<_index...>)
 	{
@@ -170,8 +138,44 @@ namespace iwutil {
 		foreach(_functor(), tuple, std::make_index_sequence<_size>{});
 	}
 
+	// n arg and all fixed args with n element
+	template<
+		typename _functor,
+		typename _tuple,
+		typename _arg_tuple,
+		typename... _fixed_args,
+		std::size_t... _index>
+		void foreach(
+			_functor&& functor,
+			_tuple& tuple,
+			const _arg_tuple& args,
+			const _fixed_args&... fixed_args,
+			std::index_sequence<_index...>)
+	{
+		auto e = { (
+			functor(std::get<_index>(tuple), std::get<_index>(args), fixed_args...),
+			0)...
+		};
+	}
 
-// return
+	// n arg and all fixed args with n element
+	template<
+		typename _functor,
+		typename _tuple,
+		typename _arg_tuple,
+		std::size_t _size,
+		typename... _fixed_args>
+		void foreach(
+			_tuple& tuple,
+			const _arg_tuple& arg_tuple,
+			const _fixed_args&... fixed_args)
+	{
+		foreach(_functor(), tuple, arg_tuple, fixed_args...,
+			std::make_index_sequence<_size>{});
+	}
+
+
+// returning foreach //
 
 // no args
 	template<
@@ -205,7 +209,9 @@ namespace functors {
 	struct increment {
 		template<
 			typename _t>
-			void operator()(_t&& t) {
+		void operator()(
+			_t&& t)
+		{
 			t++;
 		}
 	};
@@ -213,15 +219,17 @@ namespace functors {
 	struct decrement {
 		template<
 			typename _t>
-			void operator()(_t&& t) {
+		void operator()(_t&& t)
+		{
 			t--;
 		}
 	};
 
 	struct erase {
-		template<
-			typename _t>
-			void operator()(_t&& t) {
+		template<typename _t>
+		void operator()(
+			_t&& t)
+		{
 			delete t;
 		}
 	};
@@ -229,7 +237,9 @@ namespace functors {
 	struct erase_array {
 		template<
 			typename _t>
-			void operator()(_t&& t) {
+		void operator()(
+			_t&& t)
+		{
 			delete[] t;
 		}
 	};
@@ -248,7 +258,8 @@ namespace functors {
 	struct reference {
 		template<
 			typename _t>
-		typename std::remove_pointer<typename std::remove_reference<_t>::type>::type& operator()(
+		typename std::remove_pointer<typename std::remove_reference<_t>
+			::type>::type& operator()(
 			_t&& t)
 		{
 			return *std::forward<_t>(t);

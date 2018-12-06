@@ -5,8 +5,6 @@
 #include "IwUtil/archtype.h"
 #include "chunk.h"
 
-#include <iostream>
-
 namespace iwecs {
 	class icomponent_array {
 	public:
@@ -35,9 +33,6 @@ namespace iwecs {
 			_components_t&&... args)
 		{
 			ensure_free_working_chunk();
-
-			std::cout << m_working_chunk->size() + chunk_t::capacity * m_working_index << std::endl;
-
 			component_data_t data = m_working_chunk->insert(std::forward<_components_t>(args)...);
 
 			return entity_data_t(
