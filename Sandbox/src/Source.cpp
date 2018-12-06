@@ -45,6 +45,8 @@ public:
 		auto i = id;
 		id++;
 
+		auto d = *id;
+
 		return;
 
 		iwecs::ecs_manager m = iwecs::ecs_manager();

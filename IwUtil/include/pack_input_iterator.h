@@ -2,7 +2,7 @@
 
 #include <iostream>
 #include "archtype.h"
-#include "ct_iteration.h"
+#include "tuple_iteration.h"
 
 namespace iwutil {
 	template<typename... _t>
@@ -70,49 +70,25 @@ namespace iwutil {
 		}
 
 		reference operator*() {
-			//return get data ;
+			return reference_itrs();
 		}
 
 		pointer operator->() {
 			return m_ptrs;
 		}
 	private:
-		template<
-			std::size_t... _tuple_index>
-		void increment_itrs(
-			std::index_sequence<_tuple_index...>) {
-			auto e = {
-				(std::get<_tuple_index>(m_ptrs)++, 0)...
-			};
-		}
-
 		void increment_itrs() {
-			increment_itrs(std::make_index_sequence<archtype_t::size>{});
-		}
-
-		template<
-			std::size_t... _tuple_index>
-		void copy_ptrs(
-			std::index_sequence<_tuple_index...>,
-			pointer&& copy)
-		{
-			auto e = {
-				(std::get<_tuple_index>(m_ptrs)
-					= std::get<_tuple_index>(std::forward<pointer>(copy)), 0)...
-			};
+			foreach<functors::increment, pointer, archtype_t::size>(m_ptrs);
 		}
 
 		void copy_ptrs(
-			pointer&& copy)
+			const pointer& copy)
 		{
-			copy_ptrs(std::make_index_sequence<archtype_t::size>{},
-				std::forward<pointer>(copy));
+			foreach<functors::assign, pointer, pointer, archtype_t::size>(m_ptrs, copy);
 		}
 
-		void copy_ptrs(
-			const pointer& copy) 
-		{
-			copy_ptrs(std::make_index_sequence<archtype_t::size>{}, copy);
+		reference reference_itrs() {
+			return geteach<functors::reference, pointer, reference, archtype_t::size>(m_ptrs);
 		}
 	};
 }
