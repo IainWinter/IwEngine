@@ -158,6 +158,10 @@ namespace iwecs {
 			std::index_sequence<_tuple_index...>,
 			_t&&... data)
 		{
+
+			iwutil::foreach<insert_array, streams_t, std::tuple<_t&&...>, archtype_t::size>(insert_array(), m_streams, std::forward_as_tuple<_t...>(data...));
+
+
 			auto e = {
 				(std::get<_tuple_index>(m_streams)[m_size] = data, 0)...
 			};

@@ -26,7 +26,7 @@ namespace iwutil {
 		auto e = {(
 			functor(std::get<_index>(std::forward(tuple))),
 			0)...
-		}
+		};
 	}
 
 	//Tuple args &&
@@ -45,9 +45,9 @@ namespace iwutil {
 		auto e = { (
 			functor(
 				std::get<_index>(std::forward(tuple)), 
-				std::get<_index>(std::forward(tuple_args)),
+				std::get<_index>(std::forward(tuple_args))),
 			0)...
-		}
+		};
 	}
 
 	//Tuple args const &
@@ -68,10 +68,10 @@ namespace iwutil {
 				std::get<_index>(std::forward(tuple)),
 				std::get<_index>(tuple_args)),
 			0)...
-		}
+		};
 	}
 
-	//Tuple args &
+	//Tuple args &&
 	//Args &&
 	//No return
 	template<
@@ -87,13 +87,241 @@ namespace iwutil {
 			_fixed_args&&... fixed_args,
 			std::index_sequence<_index...>)
 	{
+		auto e = {(
+			functor(
+				std::get<_index>(std::forward(tuple)),
+				std::get<_index>(tuple_args),
+				std::forward<_fixed_args>(fixed_args)...),
+			0)...
+		};
+	}
+
+	//Tuple args const &
+	//Args const &
+	//No return
+	template<
+		typename _functor,
+		typename _tuple,
+		typename _tuple_args,
+		typename... _fixed_args,
+		std::size_t... _index>
+	void foreach(
+		_functor&& functor,
+		_tuple&& tuple,
+		const _tuple_args& tuple_args,
+		const _fixed_args&... fixed_args,
+		std::index_sequence<_index...>)
+	{
 		auto e = { (
 			functor(
 				std::get<_index>(std::forward(tuple)),
-				std::get<_index>(tuple_args)),
-				std::forward<_fixed_args>(fixed_args)...
+				tuple_args,
+				fixed_args...),
 			0)...
-		}
+		};
+	}
+
+	//No args
+	//Return
+	template<
+		typename _functor,
+		typename _tuple,
+		typename _return_tuple,
+		std::size_t... _index>
+	_return_tuple foreach(
+		_functor&& functor,
+		_tuple&& tuple,
+		std::index_sequence<_index...>)
+	{
+		return _return_tuple(
+			functor(
+				std::get<_index>(std::forward(tuple)))...);
+	}
+
+	//Tuple args &&
+	//Return
+	template<
+		typename _functor,
+		typename _tuple,
+		typename _tuple_return,
+		typename _tuple_args,
+		std::size_t... _index>
+	_tuple_return foreach(
+		_functor&& functor,
+		_tuple&& tuple,
+		_tuple_args&& tuple_args,
+		std::index_sequence<_index...>)
+	{
+		return _tuple_return(
+			functor(
+				std::get<_index>(std::forward(tuple)),
+				std::get<_index>(std::forward(tuple_args)))...);
+	}
+
+	//Tuple args const &
+	//Return
+	template<
+		typename _functor,
+		typename _tuple,
+		typename _tuple_return,
+		typename _tuple_args,
+		std::size_t... _index>
+	_tuple_return foreach(
+		_functor&& functor,
+		_tuple&& tuple,
+		const _tuple_args& tuple_args,
+		std::index_sequence<_index...>)
+	{
+		return _tuple_return(
+			functor(
+				std::get<_index>(std::forward(tuple)),
+				std::get<_index>(tuple_args))...);
+	}
+
+	//Tuple args &&
+	//Args &&
+	//Return
+	template<
+		typename _functor,
+		typename _tuple,
+		typename _tuple_return,
+		typename _tuple_args,
+		typename... _fixed_args,
+		std::size_t... _index>
+	_tuple_return foreach(
+		_functor&& functor,
+		_tuple&& tuple,
+		_tuple_args&& tuple_args,
+		_fixed_args&&... fixed_args,
+		std::index_sequence<_index...>)
+	{
+		return _tuple_return(
+			functor(
+				std::get<_index>(std::forward(tuple)),
+				std::get<_index>(tuple_args),
+				std::forward<_fixed_args>(fixed_args)...)...);
+	}
+
+	//Tuple args const &
+	//Args const &
+	//Return
+	template<
+		typename _functor,
+		typename _tuple,
+		typename _return_tuple,
+		typename _tuple_args,
+		typename... _fixed_args,
+		std::size_t... _index>
+	_return_tuple foreach(
+		_functor&& functor,
+		_tuple&& tuple,
+		const _tuple_args& tuple_args,
+		const _fixed_args&... fixed_args,
+		std::index_sequence<_index...>)
+	{
+		return _return_tuple(
+			functor(
+				std::get<_index>(std::forward(tuple)),
+				tuple_args,
+				fixed_args...)...);
+	}
+
+	//Helper functions
+
+	//No args
+	//No return
+	template<
+		typename _functor,
+		typename _tuple,
+		std::size_t _size>
+	void foreach(
+		_functor&& functor,
+		_tuple&& tuple)
+	{
+		foreach<_functor, _tuple>(
+			std::forward(functor),
+			std::forward(tuple),
+			std::integer_sequence<_size>{});
+	}
+
+	//Tuple args &&
+	//No return
+	template<
+		typename _functor,
+		typename _tuple,
+		typename _tuple_args,
+		std::size_t _size>
+	void foreach(
+		_functor&& functor,
+		_tuple&& tuple,
+		_tuple_args&& tuple_args)
+	{
+		foreach<_functor, _tuple, _tuple_args>(
+			std::forward(functor),
+			std::forward(tuple),
+			std::forward(tuple_args),
+			std::index_sequence<_size>{});
+	}
+
+	//Tuple args &
+	//No return
+	template<
+		typename _functor,
+		typename _tuple,
+		typename _tuple_args,
+		std::size_t _size>
+	void foreach(
+		_functor&& functor,
+		_tuple& tuple,
+		_tuple_args& tuple_args)
+	{
+		foreach<_functor, _tuple, _tuple_args>(
+			std::forward(functor),
+			std::forward(tuple),
+			std::forward(tuple_args),
+			std::index_sequence<_size>{});
+	}
+
+	//Tuple args const &
+	//No return
+	template<
+		typename _functor,
+		typename _tuple,
+		typename _tuple_args,
+		std::size_t _size>
+	void foreach(
+		_functor&& functor,
+		_tuple&& tuple,
+		const _tuple_args& tuple_args)
+	{
+		foreach<_functor, _tuple, _tuple_args>(
+			std::forward(functor),
+			std::forward(tuple),
+			tuple_args,
+			std::index_sequence<_size>{});
+	}
+
+	//Tuple args &&
+	//Args &&
+	//No return
+	template<
+		typename _functor,
+		typename _tuple,
+		typename _tuple_args,
+		std::size_t _size,
+		typename... _fixed_args>
+	void foreach(
+		_functor&& functor,
+		_tuple&& tuple,
+		_tuple_args&& tuple_args,
+		_fixed_args&&... fixed_args)
+	{
+		foreach<_functor, _tuple, _tuple_args, _fixed_args...>(
+			std::forward(functor),
+			std::forward(tuple),
+			std::forward(tuple_args),
+			std::forward(fixed_args)...,
+			std::index_sequence<_size>{});
 	}
 
 	//Tuple args &
@@ -103,227 +331,44 @@ namespace iwutil {
 		typename _functor,
 		typename _tuple,
 		typename _tuple_args,
-		typename... _fixed_args,
-		std::size_t... _index>
-		void foreach(
-			_functor&& functor,
-			_tuple&& tuple,
-			_tuple_args&& tuple_args,
-			_fixed_args&&... fixed_args,
-			std::index_sequence<_index...>)
-	{
-		auto e = { (
-			functor(
-				std::get<_index>(std::forward(tuple)),
-				std::get<_index>(tuple_args)),
-				std::forward<_fixed_args>(fixed_args)...
-			0)...
-		}
-	}
-
-
-
-	//////////
-
-	// n arg with n element
-	template<
-		typename _functor,
-		typename _tuple,
-		typename _arg_tuple,
-		std::size_t... _index>
-	void foreach(
-		_functor&& functor,
-		_tuple& tuple,
-		const _arg_tuple& args,
-		std::index_sequence<_index...>)
-	{
-		auto e = {(
-			functor(std::get<_index>(tuple), std::get<_index>(args)),
-			0)...
-		};
-	}
-
-	// n arg with n element
-	template<
-		typename _functor,
-		typename _tuple,
-		typename _arg_tuple,
-		std::size_t _size>
-	void foreach(
-		_tuple& tuple,
-		const _arg_tuple& arg_tuple)
-	{
-		foreach(_functor(), tuple, arg_tuple,
-			std::make_index_sequence<_size>{});
-	}
-
-	// all args with n element
-	template<
-		typename _functor,
-		typename _tuple,
-		typename... _args,
-		std::size_t... _index>
-	void foreach(
-		_functor&& functor,
-		_tuple & tuple,
-		_args&&... args,
-		std::index_sequence<_index...>)
-	{
-		auto e = {(
-			functor(std::get<_index>(tuple), std::forward<_args>(args)...),
-			0)...
-		};
-	}
-
-	// all args with n element
-	template<
-		typename _functor,
-		typename _tuple,
-		typename... _args,
-		std::size_t... _index>
-	void foreach(
-		_functor&& functor,
-		_tuple & tuple,
-		const _args&... args,
-		std::index_sequence<_index...>)
-	{
-		auto e = {(
-			functor(std::get<_index>(tuple), args...),
-			0)...
-		};
-	}
-
-	// all args with n element
-	template<
-		typename _functor,
-		typename _tuple,
-		std::size_t _size,
-		typename... _args>
-	void foreach(
-		_tuple& tuple,
-		_args&&... args)
-	{
-		foreach(_functor(), tuple, std::forward<_args>(args)...,
-			std::make_index_sequence<_size>{});
-	}
-
-	// all args with n element
-	template<typename _functor,
-		typename _tuple,
-		std::size_t _size,
-		typename... _args>
-	void foreach(
-		_tuple& tuple, 
-		_args&... args)
-	{
-		foreach(_functor(), tuple, std::forward<_args>(args)...,
-			std::make_index_sequence<_size>{});
-	}
-
-	// all args with n element
-	template<typename _functor,
-		typename _tuple,
-		std::size_t _size,
-		typename... _args>
-	void foreach(
-		_tuple& tuple, 
-		const _args&... args)
-	{
-		foreach(_functor(), tuple, args...,
-			std::make_index_sequence<_size>{});
-	}
-
-	// no args
-	template<
-		typename _functor,
-		typename _tuple,
-		std::size_t... _index>
-	void foreach(
-		_functor&& functor,
-		_tuple& tuple,
-		std::index_sequence<_index...>)
-	{
-		auto e = {(
-			functor(std::get<_index>(tuple)),
-			0)...
-		};
-	}
-
-	// no args
-	template<
-		typename _functor,
-		typename _tuple,
-		std::size_t _size>
-	void foreach(
-		_tuple& tuple)
-	{
-		foreach(_functor(), tuple, std::make_index_sequence<_size>{});
-	}
-
-	// n arg and all fixed args with n element
-	template<
-		typename _functor,
-		typename _tuple,
-		typename _arg_tuple,
-		typename... _fixed_args,
-		std::size_t... _index>
-	void foreach(
-		_functor&& functor,
-		_tuple& tuple,
-		const _arg_tuple& args,
-		const _fixed_args&... fixed_args,
-		std::index_sequence<_index...>)
-	{
-		auto e = { (
-			functor(std::get<_index>(tuple), std::get<_index>(args), fixed_args...),
-			0)...
-		};
-	}
-
-	// n arg and all fixed args with n element
-	template<
-		typename _functor,
-		typename _tuple,
-		typename _arg_tuple,
 		std::size_t _size,
 		typename... _fixed_args>
 	void foreach(
-		_tuple& tuple,
-		const _arg_tuple& arg_tuple,
-		const _fixed_args&... fixed_args)
+		_functor&& functor,
+		_tuple&& tuple,
+		_tuple_args& tuple_args,
+		_fixed_args&... fixed_args)
 	{
-		foreach(_functor(), tuple, arg_tuple, fixed_args...,
-			std::make_index_sequence<_size>{});
+		foreach<_functor, _tuple, _tuple_args, _fixed_args...>(
+			std::forward(functor),
+			std::forward(tuple),
+			std::forward(tuple_args),
+			std::forward(fixed_args)...,
+			std::index_sequence<_size>{});
 	}
 
-
-// returning foreach //
-
-// no args
+	//Tuple args const &
+	//Args const &
+	//No return
 	template<
 		typename _functor,
 		typename _tuple,
-		typename _return_tuple,
+		typename _tuple_args,
+		typename... _fixed_args,
 		std::size_t... _index>
-	_return_tuple geteach(
+	void foreach(
 		_functor&& functor,
-		_tuple& tuple,
+		_tuple&& tuple,
+		const _tuple_args& tuple_args,
+		const _fixed_args&... fixed_args,
 		std::index_sequence<_index...>)
 	{
-		return _return_tuple(functor(std::get<_index>(tuple))...);
-	}
-
-	// no args
-	template<
-		typename _functor,
-		typename _tuple,
-		typename _return_tuple,
-		std::size_t _size>
-	_return_tuple geteach(
-		_tuple& tuple)
-	{
-		return geteach<_functor, _tuple, _return_tuple>(_functor(), tuple,
-			std::make_index_sequence<_size>{});
+		foreach<_functor, _tuple, _tuple_args, _fixed_args...>(
+			std::forward(functor),
+			std::forward(tuple),
+			tuple_args,
+			fixed_args...,
+			std::index_sequence<_size>{});
 	}
 }
 
