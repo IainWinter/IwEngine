@@ -172,10 +172,7 @@ namespace iwecs {
 		data_t insert_into_streams(
 			_t&&... data) 
 		{
-			using ref_t = std::tuple<_t&...>;
-			ref_t r = std::make_tuple(data...);
-
-			iwutil::foreach<insert_array, streams_t, ref_t, archtype_t::size>(m_streams, r, m_size);
+			iwutil::foreach<insert_array, streams_t, std::tuple<_t...>, archtype_t::size>(m_streams, std::forward_as_tuple(data...), m_size);
 			//return insert_into_streams(
 			//	std::make_index_sequence<sizeof...(_t)>{},
 			//	std::forward<_t>(data)...
