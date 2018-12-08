@@ -159,7 +159,7 @@ namespace iwecs {
 			_t&&... data)
 		{
 
-			iwutil::foreach<insert_array, streams_t, std::tuple<_t&&...>, archtype_t::size>(insert_array(), m_streams, std::forward_as_tuple<_t...>(data...));
+			//iwutil::foreach<insert_array, streams_t, std::tuple<_t&&...>, archtype_t::size>(m_streams, std::forward_as_tuple<_t...>(data...));
 
 
 			auto e = {
@@ -176,11 +176,11 @@ namespace iwecs {
 		data_t insert_into_streams(
 			_t&&... data) 
 		{
-			iwutil::foreach<insert_array, streams_t, std::tuple<_t...>, archtype_t::size>(m_streams, std::forward_as_tuple(data...), m_size);
-			//return insert_into_streams(
-			//	std::make_index_sequence<sizeof...(_t)>{},
-			//	std::forward<_t>(data)...
-			//);
+			//iwutil::foreach<insert_array, streams_t, std::tuple<_t&&...>, archtype_t::size>(m_streams, std::forward_as_tuple(data...), m_size);
+			return insert_into_streams(
+				std::make_index_sequence<sizeof...(_t)>{},
+				std::forward<_t>(data)...
+			);
 		}
 
 		void remove_from_streams(

@@ -91,7 +91,7 @@ namespace iwecs {
 			bool has_found = false;
 			chunk_list_itr_t found_itr;
 			chunk_list_itr_t itr = m_working_chunk;
-			int index = m_working_index;
+			std::size_t index = m_working_index; //Check this
 			while (index > 0) {
 				itr--;
 				index--;
