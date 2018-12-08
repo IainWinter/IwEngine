@@ -94,7 +94,7 @@ namespace iwutil {
 		}
 
 		reference reference_itrs() {
-			return foreach<functors::reference, pointer, reference, archtype_t::size>(m_ptrs);
+			return geteach<functors::reference, pointer, reference, archtype_t::size>(m_ptrs);
 		}
 	};
 }

@@ -159,6 +159,8 @@ namespace iwecs {
 			_t&&... data)
 		{
 
+			void* components[archtype_t::size] = iwutil::geteach<insert_array, streams_t, void*[archtype_t::size], std::tuple<_t&&...>, archtype_t::size>(m_streams, std::forward_as_tuple<_t...>(data), m_size);
+
 			//iwutil::foreach<insert_array, streams_t, std::tuple<_t&&...>, archtype_t::size>(m_streams, std::forward_as_tuple<_t...>(data...));
 
 

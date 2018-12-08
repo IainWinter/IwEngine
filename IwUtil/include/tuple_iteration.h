@@ -709,7 +709,7 @@ namespace iwutil {
 		typename _tuple_return,
 		std::size_t _size>
 	_tuple_return geteach(
-			_tuple&& tuple)
+			_tuple& tuple)
 	{
 		return geteach_na_indexed<
 			_functor,
@@ -1103,7 +1103,7 @@ namespace functors {
 		template<
 			typename _t>
 		void operator()(
-			_t& t,
+			_t&& t,
 			const _t& d)
 		{
 			t = d;
@@ -1114,7 +1114,7 @@ namespace functors {
 		template<
 			typename _t>
 		typename std::remove_pointer<typename std::remove_reference<_t>
-			::type>::type& operator()(
+		::type>::type& operator()(
 			_t&& t)
 		{
 			return *std::forward<_t>(t);

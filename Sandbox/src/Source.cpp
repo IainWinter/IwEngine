@@ -30,21 +30,7 @@ public:
 	Game() {}
 	~Game() {}
 
-	struct test {
-		template<typename _t>
-		void operator()(_t& t, _t t1, int i) {
-			t += t1 * i;
-		}
-	};
-
 	void Run() override {
-		using tup_t = std::tuple<int, double>;
-
-		tup_t id = tup_t(1, 2);
-		tup_t id_r = tup_t(2, 1);
-
-		iwutil::foreach<test, tup_t, tup_t, 2>(id, id_r, 5);
-
 		iwecs::ecs_manager m = iwecs::ecs_manager();
 		
 		for (int i = 0; i < 500; i++) {
