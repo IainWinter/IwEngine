@@ -1,8 +1,8 @@
 #pragma once
 
-#include "iwecs.h"
 #include <list>
 #include "IwUtil/archtype.h"
+#include "iwecs.h"
 #include "chunk.h"
 
 namespace iwecs {

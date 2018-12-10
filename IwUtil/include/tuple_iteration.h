@@ -23,7 +23,7 @@ namespace iwutil {
 	}
 #pragma endregion
 
-#pragma region no_return_tuple_args
+#pragma region no_tuple_return_args
 	template<
 		typename _functor,
 		typename _tuple,
@@ -72,8 +72,8 @@ namespace iwutil {
 	void foreach_fa_indexed(
 		_functor&& functor,
 		_tuple&& tuple,
-		_fixed_args&&... fixed_args,
-		std::index_sequence<_index...>)
+		std::index_sequence<_index...>,
+		_fixed_args&&... fixed_args)
 	{
 		auto e = {(
 			functor(
@@ -91,8 +91,8 @@ namespace iwutil {
 	void foreach_fa_indexed(
 		_functor&& functor,
 		_tuple&& tuple,
-		const _fixed_args&... fixed_args,
-		std::index_sequence<_index...>)
+		std::index_sequence<_index...>,
+		const _fixed_args&... fixed_args)
 	{
 		auto e = {(
 			functor(
@@ -103,7 +103,7 @@ namespace iwutil {
 	}
 #pragma endregion
 
-#pragma region no_return_tuple_args_and_fixed_args
+#pragma region no_tuple_return_args_and_fixed_args
 	template<
 		typename _functor,
 		typename _tuple,
@@ -114,8 +114,8 @@ namespace iwutil {
 		_functor&& functor,
 		_tuple&& tuple,
 		_tuple_args&& tuple_args,
-		_fixed_args&&... fixed_args,
-		std::index_sequence<_index...>)
+		std::index_sequence<_index...>,
+		_fixed_args&&... fixed_args)
 	{
 		auto e = {(
 			functor(
@@ -136,13 +136,13 @@ namespace iwutil {
 		_functor&& functor,
 		_tuple&& tuple,
 		const _tuple_args& tuple_args,
-		const _fixed_args&... fixed_args,
-		std::index_sequence<_index...>)
+		std::index_sequence<_index...>,
+		const _fixed_args&... fixed_args)
 	{
 		auto e = { (
 			functor(
 				std::get<_index>(std::forward<_tuple>(tuple)),
-				tuple_args,
+				std::get<_index>(tuple_args),
 				fixed_args...),
 			0)...
 		};
@@ -158,13 +158,13 @@ namespace iwutil {
 		_functor&& functor,
 		_tuple&& tuple,
 		const _tuple_args& tuple_args,
-		_fixed_args&&... fixed_args,
-		std::index_sequence<_index...>)
+		std::index_sequence<_index...>,
+		_fixed_args&&... fixed_args)
 	{
 		auto e = { (
 			functor(
 				std::get<_index>(std::forward<_tuple>(tuple)),
-				tuple_args,
+				std::get<_index>(tuple_args),
 				std::forward<_fixed_args>(fixed_args)...),
 			0)...
 		};
@@ -180,8 +180,8 @@ namespace iwutil {
 		_functor&& functor,
 		_tuple&& tuple,
 		_tuple_args&& tuple_args,
-		const _fixed_args&... fixed_args,
-		std::index_sequence<_index...>)
+		std::index_sequence<_index...>,
+		const _fixed_args&... fixed_args)
 	{
 		auto e = { (
 			functor(
@@ -204,9 +204,10 @@ namespace iwutil {
 		_tuple&& tuple,
 		std::index_sequence<_index...>)
 	{
-		return _tuple_return(
+		return {
 			functor(
-				std::get<_index>(std::forward<_tuple>(tuple)))...);
+				std::get<_index>(std::forward<_tuple>(tuple)))...
+		};
 	}
 #pragma endregion
 
@@ -223,10 +224,11 @@ namespace iwutil {
 		_tuple_args&& tuple_args,
 		std::index_sequence<_index...>)
 	{
-		return _tuple_return(
+		return {
 			functor(
 				std::get<_index>(std::forward<_tuple>(tuple)),
-				std::get<_index>(std::forward(tuple_args)))...);
+				std::get<_index>(std::forward(tuple_args)))...
+		};
 	}
 
 	template<
@@ -241,10 +243,11 @@ namespace iwutil {
 		const _tuple_args& tuple_args,
 		std::index_sequence<_index...>)
 	{
-		return _tuple_return(
+		return {
 			functor(
 				std::get<_index>(std::forward<_tuple>(tuple)),
-				std::get<_index>(tuple_args))...);
+				std::get<_index>(tuple_args))...
+		};
 	}
 #pragma endregion
 
@@ -258,13 +261,14 @@ namespace iwutil {
 	_tuple_return geteach_fa_indexed(
 		_functor&& functor,
 		_tuple&& tuple,
-		_fixed_args&&... fixed_args,
-		std::index_sequence<_index...>)
+		std::index_sequence<_index...>,
+		_fixed_args&&... fixed_args)
 	{
-		return _tuple_return(
+		return {
 			functor(
 				std::get<_index>(std::forward<_tuple>(tuple)),
-				std::forward<_fixed_args>(fixed_args)...)...);
+				std::forward<_fixed_args>(fixed_args)...)...
+		};
 	}
 
 	template<
@@ -276,13 +280,14 @@ namespace iwutil {
 	_tuple_return geteach_fa_indexed(
 		_functor&& functor,
 		_tuple&& tuple,
-		const _fixed_args&... fixed_args,
-		std::index_sequence<_index...>)
+		std::index_sequence<_index...>,
+		const _fixed_args&... fixed_args)
 	{
-		return _tuple_return(
+		return {
 			functor(
 				std::get<_index>(std::forward<_tuple>(tuple)),
-				fixed_args...)...);
+				fixed_args...)...
+		};
 	}
 #pragma endregion
 
@@ -298,77 +303,81 @@ namespace iwutil {
 		_functor&& functor,
 		_tuple&& tuple,
 		_tuple_args&& tuple_args,
-		_fixed_args&&... fixed_args,
-		std::index_sequence<_index...>)
+		std::index_sequence<_index...>,
+		_fixed_args&&... fixed_args)
 	{
-		return _tuple_return(
+		return {
 			functor(
 				std::get<_index>(std::forward<_tuple>(tuple)),
 				std::get<_index>(tuple_args),
-				std::forward<_fixed_args>(fixed_args)...)...);
+				std::forward<_fixed_args>(fixed_args)...)...
+		};
 	}
 
 	template<
 		typename _functor,
 		typename _tuple,
-		typename _return_tuple,
+		typename _tuple_return,
 		typename _tuple_args,
 		typename... _fixed_args,
 		std::size_t... _index>
-	_return_tuple geteach_ta_fa_indexed(
+	_tuple_return geteach_ta_fa_indexed(
 		_functor&& functor,
 		_tuple&& tuple,
 		const _tuple_args& tuple_args,
-		const _fixed_args&... fixed_args,
-		std::index_sequence<_index...>)
+		std::index_sequence<_index...>,
+		const _fixed_args&... fixed_args)
 	{
-		return _return_tuple(
+		return {
 			functor(
 				std::get<_index>(std::forward<_tuple>(tuple)),
 				tuple_args,
-				fixed_args...)...);
+				fixed_args...)...
+		};
 	}
 
 	template<
 		typename _functor,
 		typename _tuple,
-		typename _return_tuple,
+		typename _tuple_return,
 		typename _tuple_args,
 		typename... _fixed_args,
 		std::size_t... _index>
-	_return_tuple geteach_ta_fa_indexed(
+	_tuple_return geteach_ta_fa_indexed(
 		_functor&& functor,
 		_tuple&& tuple,
 		const _tuple_args& tuple_args,
-		_fixed_args&&... fixed_args,
-		std::index_sequence<_index...>)
+		std::index_sequence<_index...>,
+		_fixed_args&&... fixed_args)
 	{
-		return _return_tuple(
+		return {
 			functor(
 				std::get<_index>(std::forward<_tuple>(tuple)),
 				tuple_args,
-				std::forward<_fixed_args>(fixed_args)...)...);
+				std::forward<_fixed_args>(fixed_args)...)...
+		};
 	}
 
 	template<
 		typename _functor,
 		typename _tuple,
-		typename _return_tuple,
+		typename _tuple_return,
 		typename _tuple_args,
 		typename... _fixed_args,
 		std::size_t... _index>
-	_return_tuple geteach_ta_fa_indexed(
+	_tuple_return geteach_ta_fa_indexed(
 		_functor&& functor,
 		_tuple&& tuple,
 		_tuple_args&& tuple_args,
-		const _fixed_args&... fixed_args,
-		std::index_sequence<_index...>)
+		std::index_sequence<_index...>,
+		const _fixed_args&... fixed_args)
 	{
-		return _return_tuple(
+		return {
 			functor(
 				std::get<_index>(std::forward<_tuple>(tuple)),
 				std::forward<_tuple_args>(tuple_args),
-				(fixed_args)...)...);
+				(fixed_args)...)...
+		};
 	}
 #pragma endregion
 	
@@ -395,7 +404,7 @@ namespace iwutil {
 	}
 #pragma endregion
 
-#pragma region no_return_tuple_args
+#pragma region no_tuple_return_args
 	template<
 		typename _functor,
 		typename _tuple,
@@ -477,8 +486,8 @@ namespace iwutil {
 		(
 			_functor(),
 			std::forward<_tuple>(tuple),
-			std::forward<_fixed_args>(fixed_args)...,
-			std::make_index_sequence<_size>{}
+			std::make_index_sequence<_size>{},
+			std::forward<_fixed_args>(fixed_args)...
 		);
 	}
 
@@ -498,8 +507,8 @@ namespace iwutil {
 		(
 			_functor(),
 			std::forward<_tuple>(tuple),
-			std::forward<_fixed_args>(fixed_args)...,
-			std::make_index_sequence<_size>{}
+			std::make_index_sequence<_size>{},
+			std::forward<_fixed_args>(fixed_args)...
 		);
 	}
 
@@ -519,13 +528,13 @@ namespace iwutil {
 		(
 			_functor(),
 			std::forward<_tuple>(tuple),
-			fixed_args...,
-			std::make_index_sequence<_size>{}
+			std::make_index_sequence<_size>{},
+			fixed_args...
 		);
 	}
 #pragma endregion
 
-#pragma region no_return_tuple_args_and_fixed_args
+#pragma region no_tuple_return_args_and_fixed_args
 	template<
 		typename _functor,
 		typename _tuple,
@@ -546,8 +555,8 @@ namespace iwutil {
 			_functor(),
 			std::forward<_tuple>(tuple),
 			std::forward<_tuple_args>(tuple_args),
-			std::forward<_fixed_args>(fixed_args)...,
-			std::make_index_sequence<_size>{}
+			std::make_index_sequence<_size>{},
+			std::forward<_fixed_args>(fixed_args)...
 		);
 	}
 
@@ -571,8 +580,8 @@ namespace iwutil {
 			_functor(),
 			std::forward<_tuple>(tuple),
 			std::forward<_tuple_args>(tuple_args),
-			std::forward<_fixed_args>(fixed_args)...,
-			std::make_index_sequence<_size>{}
+			std::make_index_sequence<_size>{},
+			std::forward<_fixed_args>(fixed_args)...
 		);
 	}
 
@@ -596,8 +605,8 @@ namespace iwutil {
 			_functor(),
 			std::forward<_tuple>(tuple),
 			std::forward<_tuple_args>(tuple_args),
-			std::forward<_fixed_args>(fixed_args)...,
-			std::make_index_sequence<_size>{}
+			std::make_index_sequence<_size>{},
+			std::forward<_fixed_args>(fixed_args)...
 		);
 	}
 
@@ -621,8 +630,8 @@ namespace iwutil {
 			_functor(),
 			std::forward<_tuple>(tuple),
 			std::forward<_tuple_args>(tuple_args),
-			fixed_args...,
-			std::make_index_sequence<_size>{}
+			std::make_index_sequence<_size>{},
+			fixed_args...
 		);
 	}
 
@@ -646,8 +655,8 @@ namespace iwutil {
 			_functor(),
 			std::forward<_tuple>(tuple),
 			std::forward<_tuple_args>(tuple_args),
-			fixed_args...,
-			std::make_index_sequence<_size>{}
+			std::make_index_sequence<_size>{},
+			fixed_args...
 		);
 	}
 
@@ -671,8 +680,8 @@ namespace iwutil {
 			_functor(),
 			std::forward<_tuple>(tuple),
 			tuple_args,
-			std::forward<_fixed_args>(fixed_args)...,
-			std::make_index_sequence<_size>{}
+			std::make_index_sequence<_size>{},
+			std::forward<_fixed_args>(fixed_args)...
 		);
 	}
 
@@ -696,8 +705,8 @@ namespace iwutil {
 			_functor(),
 			std::forward<_tuple>(tuple),
 			tuple_args,
-			std::forward<_fixed_args>(fixed_args)...,
-			std::make_index_sequence<_size>{}
+			std::make_index_sequence<_size>{},
+			std::forward<_fixed_args>(fixed_args)...
 		);
 	}
 #pragma endregion
@@ -813,8 +822,8 @@ namespace iwutil {
 		(
 			_functor(),
 			std::forward<_tuple>(tuple),
-			std::forward<_fixed_args>(fixed_args)...,
-			std::make_index_sequence<_size>{}
+			std::make_index_sequence<_size>{},
+			std::forward<_fixed_args>(fixed_args)...
 		);
 	}
 
@@ -836,8 +845,8 @@ namespace iwutil {
 		(
 			_functor(),
 			std::forward<_tuple>(tuple),
-			std::forward<_fixed_args>(fixed_args)...,
-			std::make_index_sequence<_size>{}
+			std::make_index_sequence<_size>{},
+			std::forward<_fixed_args>(fixed_args)...
 		);
 	}
 
@@ -859,8 +868,8 @@ namespace iwutil {
 		(
 			_functor(),
 			std::forward<_tuple>(tuple),
-			fixed_args...,
-			std::make_index_sequence<_size>{}
+			std::make_index_sequence<_size>{},
+			fixed_args...
 		);
 	}
 #pragma endregion
@@ -888,8 +897,8 @@ namespace iwutil {
 			_functor(),
 			std::forward<_tuple>(tuple),
 			std::forward<_tuple_args>(tuple_args),
-			std::forward<_fixed_args>(fixed_args)...,
-			std::make_index_sequence<_size>{}
+			std::make_index_sequence<_size>{},
+			std::forward<_fixed_args>(fixed_args)...
 		);
 	}
 
@@ -915,8 +924,8 @@ namespace iwutil {
 			_functor(),
 			std::forward<_tuple>(tuple),
 			std::forward<_tuple_args>(tuple_args),
-			std::forward<_fixed_args>(fixed_args)...,
-			std::make_index_sequence<_size>{}
+			std::make_index_sequence<_size>{},
+			std::forward<_fixed_args>(fixed_args)...
 		);
 	}
 
@@ -942,8 +951,8 @@ namespace iwutil {
 			_functor(),
 			std::forward<_tuple>(tuple),
 			std::forward<_tuple_args>(tuple_args),
-			std::forward<_fixed_args>(fixed_args)...,
-			std::make_index_sequence<_size>{}
+			std::make_index_sequence<_size>{},
+			std::forward<_fixed_args>(fixed_args)...
 		);
 	}
 
@@ -969,8 +978,8 @@ namespace iwutil {
 			_functor(),
 			std::forward<_tuple>(tuple),
 			std::forward<_tuple_args>(tuple_args),
-			fixed_args...,
-			std::make_index_sequence<_size>{}
+			std::make_index_sequence<_size>{},
+			fixed_args...
 		);
 	}
 
@@ -996,8 +1005,8 @@ namespace iwutil {
 			_functor(),
 			std::forward<_tuple>(tuple),
 			std::forward<_tuple_args>(tuple_args),
-			fixed_args...,
-			std::make_index_sequence<_size>{}
+			std::make_index_sequence<_size>{},
+			fixed_args...
 		);
 	}
 
@@ -1023,8 +1032,8 @@ namespace iwutil {
 			_functor(),
 			std::forward<_tuple>(tuple),
 			tuple_args,
-			std::forward<_fixed_args>(fixed_args)...,
-			std::make_index_sequence<_size>{}
+			std::make_index_sequence<_size>{},
+			std::forward<_fixed_args>(fixed_args)...
 		);
 	}
 
@@ -1050,8 +1059,8 @@ namespace iwutil {
 			_functor(),
 			std::forward<_tuple>(tuple),
 			tuple_args,
-			std::forward<_fixed_args>(fixed_args)...,
-			std::make_index_sequence<_size>{}
+			std::make_index_sequence<_size>{},
+			std::forward<_fixed_args>(fixed_args)...
 		);
 	}
 #pragma endregion
@@ -1061,6 +1070,7 @@ namespace iwutil {
 }
 
 namespace functors {
+	//Calls operator++()
 	struct increment {
 		template<
 			typename _t>
@@ -1071,6 +1081,7 @@ namespace functors {
 		}
 	};
 
+	//Calls operator--()
 	struct decrement {
 		template<
 			typename _t>
@@ -1080,6 +1091,7 @@ namespace functors {
 		}
 	};
 
+	//Calls delete
 	struct erase {
 		template<typename _t>
 		void operator()(
@@ -1089,6 +1101,7 @@ namespace functors {
 		}
 	};
 
+	//Calls delete[]
 	struct erase_array {
 		template<
 			typename _t>
@@ -1099,6 +1112,7 @@ namespace functors {
 		}
 	};
 
+	//Calls operator=(const _t&)
 	struct assign {
 		template<
 			typename _t>
@@ -1110,6 +1124,7 @@ namespace functors {
 		}
 	};
 
+	//Calls operator*()
 	struct reference {
 		template<
 			typename _t>

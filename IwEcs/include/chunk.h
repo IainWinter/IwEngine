@@ -5,6 +5,7 @@
 #include "IwUtil/archtype.h"
 #include "IwUtil/tuple_iteration.h"
 #include <tuple>
+#include <array>
 
 namespace iwecs {
 	template<
@@ -18,7 +19,7 @@ namespace iwecs {
 
 		chunk_data(
 			index_t index_,
-			void* data_[_size])
+			void* (&data_)[_size])
 		  : index(index_)
 		{
 			memcpy(data, data_, _size * sizeof(void*));
@@ -142,94 +143,121 @@ namespace iwecs {
 
 		struct insert_array {
 			template<
-				typename _t>
-			void operator()(
+				typename _t,
+				typename _d>
+			void* operator()(
 				_t&& stream,
-				_t&& data,
+				_d&& data,
 				std::size_t index)
 			{
 				stream[index] = data;
+				return (void*)stream;
 			}
 		};
 
-		template<
-			std::size_t... _tuple_index>
-		data_t insert_into_streams(
-			std::index_sequence<_tuple_index...>,
-			_t&&... data)
-		{
+		struct copy_array {
+			template<
+				typename _t,
+				typename _d>
+			void operator()(
+				_t&& stream,
+				_d&& copy,
+				std::size_t count)
+			{
+				memcpy(stream, copy, count * sizeof(_t));
+			}
+		};
 
-			void* components[archtype_t::size] = iwutil::geteach<insert_array, streams_t, void*[archtype_t::size], std::tuple<_t&&...>, archtype_t::size>(m_streams, std::forward_as_tuple<_t...>(data), m_size);
-
-			//iwutil::foreach<insert_array, streams_t, std::tuple<_t&&...>, archtype_t::size>(m_streams, std::forward_as_tuple<_t...>(data...));
-
-
-			auto e = {
-				(std::get<_tuple_index>(m_streams)[m_size] = data, 0)...
-			};
-
-			void* components[archtype_t::size] = {
-				(void*)&std::get<_tuple_index>(m_streams)[m_size]...
-			};
-
-			return data_t(m_size, components);
-		}
+		struct get {
+			template<
+				typename _t>
+			_t operator()(
+				_t&& stream,
+				std::size_t index)
+			{
+				return stream + index;
+			}
+		};
 
 		data_t insert_into_streams(
 			_t&&... data) 
 		{
-			//iwutil::foreach<insert_array, streams_t, std::tuple<_t&&...>, archtype_t::size>(m_streams, std::forward_as_tuple(data...), m_size);
-			return insert_into_streams(
-				std::make_index_sequence<sizeof...(_t)>{},
-				std::forward<_t>(data)...
+			std::array<void*, archtype_t::size> components = iwutil::geteach<
+				insert_array,
+				streams_t,
+				std::array<void*, archtype_t::size>,
+				std::tuple<_t&&...>,
+				archtype_t::size>
+			(
+				m_streams,
+				std::forward_as_tuple<_t...>(std::forward<_t>(data)...),
+				m_size
 			);
+
+			return data_t(m_size, components._Elems);
 		}
 
 		void remove_from_streams(
 			std::size_t remove_index) 
 		{
-			iwutil::foreach<collapse_array, streams_t, archtype_t::size>(m_streams, remove_index, m_size - 1);
+			iwutil::foreach<
+				collapse_array,
+				streams_t,
+				archtype_t::size>
+			(
+				m_streams,
+				remove_index,
+				m_size - 1
+			);
 		}
 
 		void delete_streams() {
-			iwutil::foreach<functors::erase_array, streams_t, archtype_t::size>(m_streams);
-		}
-
-		template<
-			std::size_t... _tuple_index>
-		void copy_streams(
-			std::index_sequence<_tuple_index...>,
-			const streams_t& copy)
-		{
-			auto e = {(
-				memcpy(
-					std::get<_tuple_index>(m_streams), 
-					std::get<_tuple_index>(copy),
-					capacity),
-				0)... //capacity might be wrong. May need size in bytes
-			};
+			iwutil::foreach<
+				functors::erase_array,
+				streams_t,
+				archtype_t::size>
+			(
+				m_streams
+			);
 		}
 
 		void copy_streams(
 			const streams_t& copy)
 		{
-			copy_streams(std::make_index_sequence<archtype_t::size>{}, copy);
-		}
-
-		template<std::size_t... _tuple_index>
-		iterator get_iterator(
-			std::index_sequence<_tuple_index...>,
-			index_t index)
-		{
-			return iterator(std::get<_tuple_index>(m_streams) + index...);
+			iwutil::foreach<
+				copy_array,
+				streams_t,
+				streams_t,
+				archtype_t::size>
+			(
+				m_streams,
+				copy,
+				capacity
+			);
 		}
 
 		iterator get_iterator() {
-			return get_iterator(std::make_index_sequence<archtype_t::size>{}, 0);
+			return iwutil::geteach<
+				get,
+				streams_t,
+				iterator,
+				archtype_t::size>
+			(
+				m_streams,
+				0
+			);
 		}
 
 		iterator get_iterator_end() {
-			return get_iterator(std::make_index_sequence<archtype_t::size>{}, m_size);
+			return iwutil::geteach<
+				get,
+				streams_t,
+				iterator,
+				archtype_t::size>
+			(
+				m_streams,
+				m_size
+			);
 		}
 	};
 }

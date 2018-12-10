@@ -84,17 +84,38 @@ namespace iwutil {
 		}
 	private:
 		void increment_itrs() {
-			foreach<functors::increment, pointer, archtype_t::size>(m_ptrs);
+			foreach<
+				functors::increment,
+				pointer,
+				archtype_t::size>
+			(
+				m_ptrs
+			);
 		}
 
 		void copy_ptrs(
 			const pointer& copy)
 		{
-			foreach<functors::assign, pointer, pointer, archtype_t::size>(m_ptrs, copy);
+			foreach<
+				functors::assign,
+				pointer,
+				pointer,
+				archtype_t::size>
+			(
+				m_ptrs,
+				copy
+			);
 		}
 
 		reference reference_itrs() {
-			return geteach<functors::reference, pointer, reference, archtype_t::size>(m_ptrs);
+			return geteach<
+				functors::reference,
+				pointer,
+				reference,
+				archtype_t::size>
+			(
+				m_ptrs
+			);
 		}
 	};
 }
