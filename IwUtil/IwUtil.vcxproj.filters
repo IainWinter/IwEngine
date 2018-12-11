@@ -27,13 +27,13 @@
     <ClInclude Include="include\ct_iteration.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\pack_input_iterator.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\archtype.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\tuple_iteration.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\input_iterator_pack.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

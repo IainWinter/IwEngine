@@ -1,12 +1,11 @@
 #pragma once
 
-#include <iostream>
 #include "archtype.h"
 #include "tuple_iteration.h"
 
 namespace iwutil {
 	template<typename... _t>
-	class pack_input_iterator {
+	class input_iterator_pack {
 	public:
 		using archtype_t        = archtype<_t...>;
 		using iterator_category = std::input_iterator_tag;
@@ -18,59 +17,59 @@ namespace iwutil {
 		pointer m_ptrs;
 
 	public:
-		pack_input_iterator()
+		input_iterator_pack()
 		  : m_ptrs() {}
 
-		pack_input_iterator(_t*... itrs)
+		input_iterator_pack(_t*... itrs)
 		  : m_ptrs(itrs...) {}
 
-		pack_input_iterator(
-			const pack_input_iterator& copy)
+		input_iterator_pack(
+			const input_iterator_pack& copy)
 		{
 			copy_ptrs(copy.m_ptrs);
 		}
 
-		pack_input_iterator(
-			pack_input_iterator&& copy)
+		input_iterator_pack(
+			input_iterator_pack&& copy)
 		{
 			copy_ptrs(copy.m_ptrs);
 		}
 
-		pack_input_iterator& operator=(
-			const pack_input_iterator& copy)
-		{
-			copy_ptrs(copy.m_ptrs);
-			return *this;
-		}
-
-		pack_input_iterator& operator=(
-			pack_input_iterator&& copy)
+		input_iterator_pack& operator=(
+			const input_iterator_pack& copy)
 		{
 			copy_ptrs(copy.m_ptrs);
 			return *this;
 		}
 
-		pack_input_iterator& operator++() {
+		input_iterator_pack& operator=(
+			input_iterator_pack&& copy)
+		{
+			copy_ptrs(copy.m_ptrs);
+			return *this;
+		}
+
+		input_iterator_pack& operator++() {
 			increment_itrs();
 			return *this;
 		}
 
-		pack_input_iterator operator++(
+		input_iterator_pack operator++(
 			int)
 		{
-			pack_input_iterator tmp(*this);
+			input_iterator_pack tmp(*this);
 			++*this;
 			return tmp;
 		}
 
 		bool operator==(
-			const pack_input_iterator& itr) const
+			const input_iterator_pack& itr) const
 		{
 			return m_ptrs == itr.m_ptrs;
 		}
 
 		bool operator!=(
-			const pack_input_iterator& itr) const
+			const input_iterator_pack& itr) const
 		{
 			return m_ptrs != itr.m_ptrs;
 		}

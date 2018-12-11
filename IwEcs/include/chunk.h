@@ -31,11 +31,10 @@ namespace iwecs {
 		typename... _t>
 	class chunk {
 	public:
-		using archtype_t = iwutil::archtype<_t...>;
-		using data_t     = chunk_data<archtype_t::size>;
-
-		using iterator       = iwutil::pack_input_iterator<_t...>;
-		using const_iterator = iwutil::pack_input_iterator<const _t...>;
+		using archtype_t     = iwutil::archtype<_t...>;
+		using data_t         = chunk_data<archtype_t::size>;
+		using iterator       = iwutil::input_iterator_pack<_t...>;
+		using const_iterator = iwutil::input_iterator_pack<const _t...>;
 
 		static constexpr std::size_t capacity 
 			= _size_in_bytes / archtype_t::size_in_bytes;
@@ -48,7 +47,8 @@ namespace iwecs {
 	public:
 		chunk() 
 		  : m_size(0),
-			m_streams(streams_t(new _t[capacity]...)) {}
+			m_streams(streams_t(new _t[capacity]...)) 
+		{}
 
 		chunk(
 			const chunk& copy)

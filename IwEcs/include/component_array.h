@@ -16,24 +16,25 @@ namespace iwecs {
 	class component_array : public icomponent_array {
 	public:
 		using archtype_t       = iwutil::archtype<_components_t...>;
+	private:
 		using chunk_t          = chunk<640, _components_t...>; //640 as temp value
 		using component_data_t = typename chunk_t::data_t;
 		using entity_data_t    = typename entity_data<archtype_t::size>;
 		using chunk_list_t     = std::list<chunk_t>;
 		using chunk_list_itr_t = typename chunk_list_t::iterator;
-	private:
+
 		chunk_list_t m_chunks;
 		chunk_list_itr_t m_working_chunk;
 		std::size_t m_working_index;
 		std::size_t m_chunk_count;
-		//std::size_t m_next_index;
 
 	public:
 		entity_data_t attach_components(
 			_components_t&&... args)
 		{
 			ensure_free_working_chunk();
-			component_data_t data = m_working_chunk->insert(std::forward<_components_t>(args)...);
+			component_data_t data = m_working_chunk->insert(
+				std::forward<_components_t>(args)...);
 
 			return entity_data_t(
 				data.index + chunk_t::capacity * m_working_index,
@@ -54,7 +55,7 @@ namespace iwecs {
 			return get_chunk(chunk_index).remove(component_index);
 		}
 	private:
-		void ensure_free_working_chunk() {
+		void ensure_free_working_chunk(){
 			if (no_chunks() || find_free_chunk()) {
 				add_chunk();
 			}
