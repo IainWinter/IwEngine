@@ -2,7 +2,7 @@
 
 #include "IwEngine/IwEngine.h"
 #include "IwEcs/ecs_manager.h"
-#include "IwUtil/pack_input_iterator.h"
+#include "IwUtil/input_iterator_pack.h"
 
 #include <vector>
 #include <iostream>

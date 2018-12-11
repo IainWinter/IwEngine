@@ -1,7 +1,7 @@
 #pragma once
 
 #include "iwecs.h"
-#include "IwUtil/pack_input_iterator.h"
+#include "IwUtil/input_iterator_pack.h"
 #include "IwUtil/archtype.h"
 #include "IwUtil/tuple_iteration.h"
 #include <tuple>
