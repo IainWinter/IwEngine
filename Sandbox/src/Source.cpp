@@ -1,29 +1,30 @@
 #include <iostream>
 
 #include "IwEngine/IwEngine.h"
-#include "IwEcs/ecs_manager.h"
-#include "IwUtil/input_iterator_pack.h"
+//#include "IwEcs/ecs_manager.h"
+//#include "IwUtil/input_iterator_pack.h"
 
 #include <vector>
 #include <iostream>
+#include <list>
 
-class intfloat_system {
-public:
-	void update() {
-		std::vector<int> ints = std::vector<int>();
-
-		ints.push_back(1);
-		ints.push_back(2);
-		ints.push_back(3);
-
-		std::vector<int>::iterator itr = ints.begin();
-		std::vector<int>::iterator end = ints.end();
-
-		for (; itr != end; itr++) {
-			std::cout << *itr << std::endl;
-		}
-	}
-};
+//class intfloat_system {
+//public:
+//	void update() {
+//		std::vector<int> ints = std::vector<int>();
+//
+//		ints.push_back(1);
+//		ints.push_back(2);
+//		ints.push_back(3);
+//
+//		std::vector<int>::iterator itr = ints.begin();
+//		std::vector<int>::iterator end = ints.end();
+//
+//		for (; itr != end; itr++) {
+//			std::cout << *itr << std::endl;
+//		}
+//	}
+//};
 
 class Game : public IwEngine::Application {
 public:
@@ -31,27 +32,27 @@ public:
 	~Game() {}
 
 	void Run() override {
-		iwecs::ecs_manager m = iwecs::ecs_manager();
-		
-		for (int i = 0; i < 500; i++) {
-			float f = i + .1f;
-			iwecs::entity_t e = m.create_entity<int, float>(i, f);
-		}
+		//iwecs::ecs_manager m = iwecs::ecs_manager();
+		//
+		//for (int i = 0; i < 500; i++) {
+		//	float f = i + .1f;
+		//	iwecs::entity_t e = m.create_entity<int, float>(i, f);
+		//}
 
-		m.destroy_entity(5);
-		m.destroy_entity(85);
-		m.destroy_entity(320);
-		m.destroy_entity(199);
+		//m.destroy_entity(5);
+		//m.destroy_entity(85);
+		//m.destroy_entity(320);
+		//m.destroy_entity(199);
 
-		for (int i = 0; i < 60; i++) {
-			float f = i + .1f;
-			iwecs::entity_t e = m.create_entity<int, float>(i, f);
-		}
+		//for (int i = 0; i < 60; i++) {
+		//	float f = i + .1f;
+		//	iwecs::entity_t e = m.create_entity<int, float>(i, f);
+		//}
 
-		m.create_entity<int, float>(2, 2.3f);
+		//m.create_entity<int, float>(2, 2.3f);
 
-		intfloat_system ifs = intfloat_system();
-		ifs.update();
+		//intfloat_system ifs = intfloat_system();
+		//ifs.update();
 	}
 };
 

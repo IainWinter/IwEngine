@@ -16,15 +16,15 @@ namespace iwecs {
 	class component_array : public icomponent_array {
 	public:
 		using archtype_t       = iwutil::archtype<_components_t...>;
-	private:
 		using chunk_t          = chunk<640, _components_t...>; //640 as temp value
+		using iterator         = typename std::list<chunk_t>::iterator;
+	private:
 		using component_data_t = typename chunk_t::data_t;
 		using entity_data_t    = typename entity_data<archtype_t::size>;
 		using chunk_list_t     = std::list<chunk_t>;
-		using chunk_list_itr_t = typename chunk_list_t::iterator;
 
 		chunk_list_t m_chunks;
-		chunk_list_itr_t m_working_chunk;
+		iterator m_working_chunk;
 		std::size_t m_working_index;
 		std::size_t m_chunk_count;
 
@@ -35,6 +35,12 @@ namespace iwecs {
 			ensure_free_working_chunk();
 			component_data_t data = m_working_chunk->insert(
 				std::forward<_components_t>(args)...);
+
+			for (iterator i = m_chunks.begin(); i != m_chunks.end(); i++) {
+				for (typename chunk_t::iterator j = i->begin(); j != i->end(); j++) {
+					;
+				}
+			}
 
 			return entity_data_t(
 				data.index + chunk_t::capacity * m_working_index,
@@ -53,6 +59,10 @@ namespace iwecs {
 			}
 
 			return get_chunk(chunk_index).remove(component_index);
+		}
+
+		iterator begin() {
+
 		}
 	private:
 		void ensure_free_working_chunk(){
@@ -90,9 +100,9 @@ namespace iwecs {
 			}
 
 			bool has_found = false;
-			chunk_list_itr_t found_itr;
-			chunk_list_itr_t itr = m_working_chunk;
-			std::size_t index = m_working_index; //Check this
+			iterator found_itr;
+			iterator itr = m_working_chunk;
+			std::size_t index = m_working_index;
 			while (index > 0) {
 				itr--;
 				index--;
