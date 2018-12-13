@@ -2,10 +2,24 @@
 
 project(IwEngine)
 
+#Options for every project
 option(IW_BUILD_SANDBOX "Build Sandbox.exe" ON)
 
-add_subdirectory(IwEngine)
+if(${CMAKE_SIZEOF_VOID_P} EQUAL 8)
+	set(ARCHITECTURE "x64")
+else()
+	set(ARCHITECTURE "x86")
+endif()
 
+set(POST_INSTALL "${ARCHITECTURE}")
+
+#Add libraries to build
+add_subdirectory(IwEngine)
+add_subdirectory(IwMath)
+add_subdirectory(IwEvents)
+add_subdirectory(IwInput)
+
+#Only build the sandbox for testing
 if(IW_BUILD_SANDBOX)
 	add_subdirectory(Sandbox)
 endif()

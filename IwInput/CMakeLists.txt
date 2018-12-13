@@ -1,26 +1,39 @@
-﻿cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.8)
 
-project(IwEngine)
+project(IwInput)
 
 #Set source variables
 set(SRC 
-	"src/Application.cpp")
+	"src/input_manager.cpp"
+	"src/impl/impl_input_context.cpp"
+	"src/impl/impl_input_device.cpp"
+	"src/impl/impl_input_manager.cpp"
+	"src/impl/impl_input_state.cpp"
+	"src/impl/keyboard/impl_keyboard_win.cpp"
+	"src/impl/mouse/impl_mouse_win.cpp"
+	"src/impl/mouse/impl_mouse_winraw.cpp")
 set(HEADERS
-	"include/IwEngine.h"
-	"include/Core.h"
-	"include/Core/Application.h"
-	"include/Core/EntryPoint.h")
+	"include/input_context.h"
+	"include/input_device.h"
+	"include/input_manager.h"
+	"include/input_state.h"
+	"include/iwinput.h"
+	"include/keyboard.h"
+	"include/mouse.h")
 set(POST_INSTALL_INCLUDE "${PROJECT_NAME}")
 
 #Add libraries
 add_library(${PROJECT_NAME} SHARED ${SRC})
-add_library(Iw::Engine ALIAS ${PROJECT_NAME})
+add_library(Iw::Input ALIAS ${PROJECT_NAME})
 
 #Set include directorys
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
 #Set target include directory for client
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/include)
+
+#Link libraries
+target_link_libraries(${PROJECT_NAME} Iw::Events)
 
 #Set target compile time constants
 if(WIN32)

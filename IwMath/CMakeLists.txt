@@ -1,20 +1,31 @@
-﻿cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.8)
 
-project(IwEngine)
+project(IwMath)
 
 #Set source variables
-set(SRC 
-	"src/Application.cpp")
+set(SRC
+	"src/iwmath.cpp"
+	"src/matrix2.cpp"
+	"src/matrix3.cpp"
+	"src/matrix4.cpp"
+	"src/quaternion.cpp"
+	"src/vector2.cpp"
+	"src/vector3.cpp"
+	"src/vector4.cpp")
 set(HEADERS
-	"include/IwEngine.h"
-	"include/Core.h"
-	"include/Core/Application.h"
-	"include/Core/EntryPoint.h")
+	"include/iwmath.h"
+	"include/matrix2.h"
+	"include/matrix3.h"
+	"include/matrix4.h"
+	"include/quaternion.h"
+	"include/vector2.h"
+	"include/vector3.h"
+	"include/vector4.h")
 set(POST_INSTALL_INCLUDE "${PROJECT_NAME}")
 
 #Add libraries
 add_library(${PROJECT_NAME} SHARED ${SRC})
-add_library(Iw::Engine ALIAS ${PROJECT_NAME})
+add_library(Iw::Math ALIAS ${PROJECT_NAME})
 
 #Set include directorys
 include_directories(${PROJECT_SOURCE_DIR}/include)
