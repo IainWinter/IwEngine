@@ -4,7 +4,7 @@
 
 extern IwEngine::Application* CreateApplication();
 
-#ifdef IW_WINDOWS
+#ifdef IW_PLATFORM_WINDOWS
 
 int main() {
 	IwEngine::Application* app = CreateApplication();

@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef IWENGINE_EXPORT
+#ifdef IW_BUILD_DLL
 #	define IWENGINE_API __declspec(dllexport)
 #else
 #	define IWENGINE_API __declspec(dllimport)

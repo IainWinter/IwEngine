@@ -1,0 +1,19 @@
+{
+  "version": "0.2.1",
+  "defaults": {},
+  "configurations": [
+    {
+      "type": "dll",
+      "exe": "",
+      "project": "CMakeLists.txt",
+      "projectTarget": "(IwEngine) IwEngine.dll (bin\\IwEngine.dll)",
+      "name": "(IwEngine) IwEngine.dll (bin\\IwEngine.dll)"
+    },
+    {
+      "type": "default",
+      "project": "CMakeLists.txt",
+      "projectTarget": "(IwEngine) Sandbox.exe (Sandbox\\Sandbox.exe)",
+      "name": "(IwEngine) Sandbox.exe (Sandbox\\Sandbox.exe)"
+    }
+  ]
+}
