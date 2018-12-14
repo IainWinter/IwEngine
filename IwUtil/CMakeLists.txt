@@ -3,21 +3,24 @@ cmake_minimum_required(VERSION 3.8)
 project(IwUtil)
 
 #Set source variables
+set(INCLUDE_DIR
+	"${PROJECT_SOURCE_DIR}/include/")
 set(HEADERS
 	"include/archetype.h"
 	"include/input_iterator.h"
-	"include/input_iterator_pack.h"
-	"include/pack_iteration.h"
 	"include/tuple_iteration.h"
-	"include/type_id.h")
-set(POST_INSTALL_INCLUDE "${PROJECT_NAME}")
-
+	"include/type_id.h"
+	"include/array_pack.h"
+	"include/input_iterator_pack.h"
+	"include/pack_iteration.h")
+set(POST_INSTALL_INCLUDE
+	"${PROJECT_NAME}")
 #Add libraries
-add_library(${PROJECT_NAME} INTERFACE ${SRC})
+add_library(${PROJECT_NAME} INTERFACE)
 add_library(Iw::Util ALIAS ${PROJECT_NAME})
 
 #Set target include directory for client
-target_include_directories(${PROJECT_NAME} INTERFACE ${PROJECT_SOURCE_DIR}/include)
+target_include_directories(${PROJECT_NAME} INTERFACE ${INCLUDE_DIR})
 
 #Set target compile time constants
 if(WIN32)

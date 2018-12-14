@@ -6,7 +6,7 @@
 #	define IWECS_API __declspec(dllimport)
 #endif
 
-#include "IwUtil/type_id.h"
+#include "type_id.h"
 
 namespace iwecs {
 	using entity_t = std::size_t;

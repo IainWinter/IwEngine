@@ -1,101 +1,77 @@
 #pragma once
 
-#include "iwecs.h"
-#include "IwUtil/input_iterator_pack.h"
-#include "IwUtil/archetype.h"
-#include "IwUtil/tuple_iteration.h"
+#include "input_iterator_pack.h"
+#include "archetype.h"
+#include "tuple_iteration.h"
 #include <tuple>
 #include <array>
 
-namespace iwecs {
+namespace iwutil {
 	template<
-		std::size_t _size>
-	struct chunk_data {
-		std::size_t index;
-		void* data[_size];
-
-		chunk_data()
-		  : index(0) {}
-
-		chunk_data(
-			index_t index_,
-			void* (&data_)[_size])
-		  : index(index_)
-		{
-			memcpy(data, data_, _size * sizeof(void*));
-		}
-	};
-
-	template<
-		std::size_t _size_in_bytes, 
+		std::size_t _size_in_bytes,
 		typename... _t>
-	class chunk {
+	class array_pack {
 	public:
-		using archetype_t     = iwutil::archetype<_t...>;
-		using data_t         = chunk_data<archetype_t::size>;
+		using archetype_t    = archetype<_t...>;
 		using iterator       = iwutil::input_iterator_pack<_t...>;
 		using const_iterator = iwutil::input_iterator_pack<const _t...>;
-
-		static constexpr std::size_t capacity 
-			= _size_in_bytes / archetype_t::size_in_bytes;
 	private:
-		using streams_t = std::tuple<_t*...>;
+		using arrays_t = std::tuple<_t*...>;
+
+		static constexpr std::size_t m_capacity
+			= _size_in_bytes / archetype_t::size_in_bytes;
 
 		std::size_t m_size;
-		streams_t   m_streams;
+		arrays_t   m_arrays;
 
 	public:
-		chunk() 
+		array_pack() 
 		  : m_size(0),
-			m_streams(streams_t(new _t[capacity]...)) 
-		{}
+			m_arrays(arrays_t(new _t[m_capacity]...)) {}
 
-		chunk(
-			const chunk& copy)
+		array_pack(
+			const array_pack& copy)
 		  : m_size(copy.m_size),
-			m_streams(streams_t(new _t[capacity]...)) 
+			m_arrays(arrays_t(new _t[m_capacity]...)) 
 		{
-			copy_streams(copy.m_streams);
+			copy_streams(copy.m_arrays);
 		}
 
-		chunk(
-			chunk&& copy)
+		array_pack(
+			array_pack&& copy)
 		  : m_size(copy.m_size),
-			m_streams(streams_t(new _t[capacity]...)) 
+			m_arrays(arrays_t(new _t[m_capacity]...)) 
 		{
-			copy_streams(copy.m_streams);
+			copy_streams(copy.m_arrays);
 		}
 
-		~chunk() {
+		~array_pack() {
 			delete_streams();
 		}
 
-		chunk& operator=(
-			const chunk& copy)
+		array_pack& operator=(
+			const array_pack& copy)
 		{
 			m_size = copy.m_size;
-			m_streams = streams_t(new _t[capacity]...);
-			copy_streams(copy.m_streams);
+			m_arrays = arrays_t(new _t[m_capacity]...);
+			copy_streams(copy.m_arrays);
 		}
 
-		chunk& operator=(
-			chunk&& copy)
+		array_pack& operator=(
+			array_pack&& copy)
 		{
 			m_size = copy.m_size;
-			m_streams = streams_t(new _t[capacity]...);
-			copy_streams(copy.m_streams);
+			m_arrays = arrays_t(new _t[m_capacity]...);
+			copy_streams(copy.m_arrays);
 		}
 
-		data_t insert(
+		void insert(
 			_t&&... components)
 		{
-			data_t data;
 			if (!is_full()) {
 				data = insert_into_streams(std::forward<_t>(components)...);
 				m_size++;
 			}
-
-			return data;
 		}
 
 		bool remove(
@@ -114,11 +90,15 @@ namespace iwecs {
 		}
 
 		bool is_full() {
-			return m_size == capacity;
+			return m_size == m_capacity;
 		}
 
 		std::size_t size() {
 			return m_size;
+		}
+
+		std::size_t capacity() {
+			return m_capacity;
 		}
 
 		iterator begin() {
@@ -145,13 +125,12 @@ namespace iwecs {
 			template<
 				typename _t,
 				typename _d>
-			void* operator()(
+			void operator()(
 				_t&& stream,
 				_d&& data,
 				std::size_t index)
 			{
 				stream[index] = data;
-				return (void*)stream;
 			}
 		};
 
@@ -168,33 +147,19 @@ namespace iwecs {
 			}
 		};
 
-		struct get {
-			template<
-				typename _t>
-			_t operator()(
-				_t&& stream,
-				std::size_t index)
-			{
-				return stream + index;
-			}
-		};
-
-		data_t insert_into_streams(
+		void insert_into_streams(
 			_t&&... data) 
 		{
-			std::array<void*, archetype_t::size> components = iwutil::geteach<
+			iwutil::foreach<
 				insert_array,
-				streams_t,
-				std::array<void*, archetype_t::size>,
+				arrays_t,
 				std::tuple<_t&&...>,
 				archetype_t::size>
 			(
-				m_streams,
+				m_arrays,
 				std::forward_as_tuple<_t...>(std::forward<_t>(data)...),
 				m_size
 			);
-
-			return data_t(m_size, components._Elems);
 		}
 
 		void remove_from_streams(
@@ -202,10 +167,10 @@ namespace iwecs {
 		{
 			iwutil::foreach<
 				collapse_array,
-				streams_t,
+				arrays_t,
 				archetype_t::size>
 			(
-				m_streams,
+				m_arrays,
 				remove_index,
 				m_size - 1
 			);
@@ -214,48 +179,48 @@ namespace iwecs {
 		void delete_streams() {
 			iwutil::foreach<
 				functors::erase_array,
-				streams_t,
+				arrays_t,
 				archetype_t::size>
 			(
-				m_streams
+				m_arrays
 			);
 		}
 
 		void copy_streams(
-			const streams_t& copy)
+			const arrays_t& copy)
 		{
 			iwutil::foreach<
 				copy_array,
-				streams_t,
-				streams_t,
+				arrays_t,
+				arrays_t,
 				archetype_t::size>
 			(
-				m_streams,
+				m_arrays,
 				copy,
-				capacity
+				m_capacity
 			);
 		}
 
 		iterator get_iterator() {
 			return iwutil::geteach<
-				get,
-				streams_t,
+				functors::index,
+				arrays_t,
 				iterator,
 				archetype_t::size>
 			(
-				m_streams,
+				m_arrays,
 				0
 			);
 		}
 
 		iterator get_iterator_end() {
 			return iwutil::geteach<
-				get,
-				streams_t,
+				functors::index,
+				arrays_t,
 				iterator,
 				archetype_t::size>
 			(
-				m_streams,
+				m_arrays,
 				m_size
 			);
 		}

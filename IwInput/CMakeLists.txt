@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.8)
 project(IwInput)
 
 #Set source variables
+set(INCLUDE_DIR
+	"${PROJECT_SOURCE_DIR}/include/")
 set(SRC 
 	"src/input_manager.cpp"
 	"src/impl/impl_input_context.cpp"
@@ -20,17 +22,18 @@ set(HEADERS
 	"include/iwinput.h"
 	"include/keyboard.h"
 	"include/mouse.h")
-set(POST_INSTALL_INCLUDE "${PROJECT_NAME}")
+set(POST_INSTALL_INCLUDE
+	"${PROJECT_NAME}")
 
 #Add libraries
 add_library(${PROJECT_NAME} SHARED ${SRC})
 add_library(Iw::Input ALIAS ${PROJECT_NAME})
 
 #Set include directorys
-include_directories(${PROJECT_SOURCE_DIR}/include)
+include_directories(${INCLUDE_DIR})
 
 #Set target include directory for client
-target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/include)
+target_include_directories(${PROJECT_NAME} PUBLIC ${INCLUDE_DIR})
 
 #Link libraries
 target_link_libraries(${PROJECT_NAME} Iw::Events)

@@ -1,9 +1,9 @@
 #pragma once
 
 #include <list>
-#include "IwUtil/archetype.h"
+#include "archetype.h"
 #include "iwecs.h"
-#include "chunk.h"
+#include "array_pack.h"
 
 namespace iwecs {
 	class icomponent_array {
@@ -12,13 +12,14 @@ namespace iwecs {
 		virtual bool destroy_components(entity_t entity) = 0;
 	};
 
-	template<typename... _components_t>
+	template<
+		typename... _components_t>
 	class component_array : public icomponent_array {
 	public:
-		using archetype_t       = iwutil::archetype<_components_t...>;
+		using archetype_t      = iwutil::archetype<_components_t...>;
 	private:
-		using chunk_t          = chunk<640, _components_t...>; //640 as temp value
-		using component_data_t = typename chunk_t::data_t;
+		//640 as temp value
+		using chunk_t          = iwutil::array_pack<640, _components_t...>
 		using entity_data_t    = typename entity_data<archetype_t::size>;
 		using chunk_list_t     = std::list<chunk_t>;
 		using chunk_list_itr_t = typename chunk_list_t::iterator;
@@ -29,18 +30,15 @@ namespace iwecs {
 		std::size_t m_chunk_count;
 
 	public:
-		entity_data_t attach_components(
+		entity_t attach_components(
 			_components_t&&... args)
 		{
 			ensure_free_working_chunk();
-			component_data_t data = m_working_chunk->insert(
-				std::forward<_components_t>(args)...);
-
-			return entity_data_t(
-				data.index + chunk_t::capacity * m_working_index,
-				archetype_t::id,
-				data.data
-			);
+			m_working_chunk->insert(std::forward<_components_t>(args)...);
+			
+			return m_working_chunk->size() 
+				+ m_working_chunk->capacity()
+				* m_working_index;
 		}
 
 		bool destroy_components(

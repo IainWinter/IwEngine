@@ -3,7 +3,8 @@
 #include <cstddef>
 
 namespace iwutil {
-	template<typename>
+	template<
+		typename>
 	void type_id() {}
 
 	using type_id_t = void(*)();

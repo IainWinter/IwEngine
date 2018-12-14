@@ -3,12 +3,12 @@
 #include <unordered_map>
 #include "iwecs.h"
 #include "component_array.h"
-#include "IwUtil/type_id.h"
+#include "type_id.h"
 
 namespace iwecs {
 	class component_registry {
 	private:
-		std::unordered_map<iwutil::type_id_t, icomponent_array*> m_cdata;
+		std::unordered_map<iwutil::type_id_t, icomponent_array*> m_carray;
 
 	public:
 		template<
@@ -16,10 +16,10 @@ namespace iwecs {
 		ientity_data create_entity(
 			_components_t&&... args)
 		{
-			using cdata_t = component_array<_components_t...>;
+			using carray_t = component_array<_components_t...>;
 
-			cdata_t& cdata = ensure_cdata<_components_t...>();
-			return cdata.attach_components(
+			carray_t& carray = ensure_carray<_components_t...>();
+			return carray.attach_components(
 				std::forward<_components_t>(args)...
 			);
 		}
@@ -28,11 +28,11 @@ namespace iwecs {
 			index_t index,
 			iwutil::type_id_t archetype_id)
 		{
-			if (no_cdata(archetype_id)) {
+			if (no_carray(archetype_id)) {
 				return false;
 			}
 
-			return m_cdata.at(archetype_id)->destroy_components(index);
+			return m_carray.at(archetype_id)->destroy_components(index);
 		}
 
 		template<
@@ -42,42 +42,42 @@ namespace iwecs {
 		}
 	private:
 		template<typename... _components_t>
-		component_array<_components_t...>& ensure_cdata() {
-			using cdata_t = component_array<_components_t...>;
+		component_array<_components_t...>& ensure_carray() {
+			using carray_t = component_array<_components_t...>;
 
-			if (no_cdata(cdata_t::archetype_t::id)) {
-				return add_cdata<_components_t...>();
+			if (no_carray(carray_t::archetype_t::id)) {
+				return add_carray<_components_t...>();
 			}
 
-			return get_cdata<_components_t...>();
+			return get_carray<_components_t...>();
 		}
 
 		template<
 			typename... _components_t>
-		component_array<_components_t...>& add_cdata() {
-			using cdata_t = component_array<_components_t...>;
+		component_array<_components_t...>& add_carray() {
+			using carray_t = component_array<_components_t...>;
 
-			cdata_t* cdata = new cdata_t();
-			m_cdata.emplace(cdata_t::archetype_t::id, cdata);
+			carray_t* carray = new carray_t();
+			m_carray.emplace(carray_t::archetype_t::id, carray);
 
-			return *cdata;
+			return *carray;
 		}
 
 		template<
 			typename... _components_t>
-		component_array<_components_t...>& get_cdata() {
-			using cdata_t = component_array<_components_t...>;
+		component_array<_components_t...>& get_carray() {
+			using carray_t = component_array<_components_t...>;
 
 			return (component_array<_components_t...>&)
-				*m_cdata[cdata_t::archetype_t::id];
+				*m_carray[carray_t::archetype_t::id];
 		}
 
 		template<
 			typename... _components_t>
-		bool no_cdata(
+		bool no_carray(
 			iwutil::type_id_t id) 
 		{
-			return m_cdata.find(id) == m_cdata.end();
+			return m_carray.find(id) == m_carray.end();
 		}
 	};
 }

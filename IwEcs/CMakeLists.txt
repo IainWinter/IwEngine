@@ -3,10 +3,11 @@ cmake_minimum_required(VERSION 3.8)
 project(IwEcs)
 
 #Set source variables
+set(INCLUDE_DIR
+	"${PROJECT_SOURCE_DIR}/include/")
 set(SRC
 	"src/ecs_manager.cpp")
 set(HEADERS
-	"include/chunk.h"
 	"include/component_array.h"
 	"include/component_registry.h"
 	"include/component_view.h"
@@ -20,11 +21,10 @@ add_library(${PROJECT_NAME} SHARED ${SRC})
 add_library(Iw::Ecs ALIAS ${PROJECT_NAME})
 
 #Set include directorys
-include_directories(${PROJECT_SOURCE_DIR}/include)
-include_directories("X:/include")
+include_directories(${INCLUDE_DIR})
 
 #Set target include directory for client
-target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/include)
+target_include_directories(${PROJECT_NAME} PUBLIC ${INCLUDE_DIR})
 
 #Set target compile time constants
 if(WIN32)
@@ -35,6 +35,9 @@ elseif(APPLE)
 elseif(UNIX AND NOT APPLE)
 	target_compile_definitions(${PROJECT_NAME} PUBLIC  IW_PLATFORM_UNIX=1)
 endif()
+
+#Link libraries
+target_link_libraries(${PROJECT_NAME} Iw::Util)
 
 #Set target compile features
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_11)

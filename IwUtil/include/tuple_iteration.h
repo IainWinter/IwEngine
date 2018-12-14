@@ -1124,6 +1124,18 @@ namespace functors {
 		}
 	};
 
+	//Returns t[index]
+	struct index {
+		template<
+			typename _t>
+			_t operator()(
+				_t&& t,
+				std::size_t index)
+		{
+			return t[index];
+		}
+	};
+
 	//Calls operator*()
 	struct reference {
 		template<
