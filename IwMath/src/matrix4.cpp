@@ -7,7 +7,9 @@ namespace iwmath {
 		memset(elements, 0, 4 * 4 * sizeof(float));
 	}
 
-	matrix4::matrix4(float diagonal) {
+	matrix4::matrix4(
+		float diagonal)
+	{
 		memset(elements, 0, 4 * 4 * sizeof(float));
 		elements[0 + 0 * 4] = diagonal;
 		elements[1 + 1 * 4] = diagonal;
@@ -15,25 +17,38 @@ namespace iwmath {
 		elements[3 + 3 * 4] = diagonal;
 	}
 
-	matrix4::matrix4(float* elements) {
+	matrix4::matrix4(
+		float* elements)
+	{
 		memcpy(this->elements, elements, 4 * 4 * sizeof(float));
 	}
 
-	matrix4::matrix4(const matrix3& rot_and_scale) {
+	matrix4::matrix4(
+		const matrix3& rot_and_scale)
+	{
 		rows[0] = rot_and_scale.rows[0];
 		rows[1] = rot_and_scale.rows[1];
 		rows[2] = rot_and_scale.rows[2];
 		rows[3] = vector4::unit_w;
 	}
 
-	matrix4::matrix4(vector3 row0, vector3 row1, vector3 row2) {
+	matrix4::matrix4(
+		vector3 row0,
+		vector3 row1,
+		vector3 row2)
+	{
 		rows[0] = row0;
 		rows[1] = row1;
 		rows[2] = row2;
 		rows[3] = vector4::unit_w;
 	}
 
-	matrix4::matrix4(vector4 row0, vector4 row1, vector4 row2, vector4 row3) {
+	matrix4::matrix4(
+		vector4 row0,
+		vector4 row1,
+		vector4 row2,
+		vector4 row3)
+	{
 		rows[0] = row0;
 		rows[1] = row1;
 		rows[2] = row2;
@@ -43,38 +58,59 @@ namespace iwmath {
 	matrix4::matrix4(
 		float m00, float m01, float m02,
 		float m10, float m11, float m12,
-		float m20, float m21, float m22) {
-		elements[0] = m00; elements[1] = m01; elements[2] = m02; elements[3] = 0;
-		elements[4] = m10; elements[5] = m11; elements[6] = m12; elements[7] = 0;
-		elements[8] = m20; elements[9] = m21; elements[10] = m22; elements[11] = 0;
-		elements[12] = 0; elements[13] = 0; elements[14] = 0; elements[15] = 1;
+		float m20, float m21, float m22)
+	{
+		elements[0]  = m00; elements[1]  = m01;
+		elements[2]  = m02; elements[3]  = 0;
+		elements[4]  = m10; elements[5]  = m11;
+		elements[6]  = m12; elements[7]  = 0;
+		elements[8]  = m20; elements[9]  = m21;
+		elements[10] = m22; elements[11] = 0;
+		elements[12] = 0;   elements[13] = 0;
+		elements[14] = 0;   elements[15] = 1;
 	}
 
 	matrix4::matrix4(
 		float m00, float m01, float m02, float m03,
 		float m10, float m11, float m12, float m13,
 		float m20, float m21, float m22, float m23,
-		float m30, float m31, float m32, float m33) {
-		elements[0] = m00; elements[1] = m01; elements[2] = m02; elements[3] = m03;
-		elements[4] = m10; elements[5] = m11; elements[6] = m12; elements[7] = m13;
-		elements[8] = m20; elements[9] = m21; elements[10] = m22; elements[11] = m23;
-		elements[12] = m30; elements[13] = m31; elements[14] = m32; elements[15] = m33;
+		float m30, float m31, float m32, float m33)
+	{
+		elements[0]  = m00; elements[1]  = m01;
+		elements[2]  = m02; elements[3]  = m03;
+		elements[4]  = m10; elements[5]  = m11;
+		elements[6]  = m12; elements[7]  = m13;
+		elements[8]  = m20; elements[9]  = m21;
+		elements[10] = m22; elements[11] = m23;
+		elements[12] = m30; elements[13] = m31;
+		elements[14] = m32; elements[15] = m33;
 	}
 
 	float matrix4::determinant() const {
-		return
-			rows[0].x * rows[1].y * rows[2].z * rows[3].z - rows[0].x * rows[1].y * rows[2].w * rows[3].z
-			+ rows[0].x * rows[1].z * rows[2].w * rows[3].y - rows[0].x * rows[1].z * rows[2].y * rows[3].z
-			+ rows[0].x * rows[1].w * rows[2].y * rows[3].z - rows[0].x * rows[1].w * rows[2].z * rows[3].y
-			- rows[0].y * rows[1].z * rows[2].w * rows[3].x + rows[0].y * rows[1].z * rows[2].x * rows[3].z
-			- rows[0].y * rows[1].w * rows[2].x * rows[3].z + rows[0].y * rows[1].w * rows[2].z * rows[3].x
-			- rows[0].y * rows[1].x * rows[2].z * rows[3].z + rows[0].y * rows[1].x * rows[2].w * rows[3].z
-			+ rows[0].z * rows[1].w * rows[2].x * rows[3].y - rows[0].z * rows[1].w * rows[2].y * rows[3].x
-			+ rows[0].z * rows[1].x * rows[2].y * rows[3].z - rows[0].z * rows[1].x * rows[2].w * rows[3].y
-			+ rows[0].z * rows[1].y * rows[2].w * rows[3].x - rows[0].z * rows[1].y * rows[2].x * rows[3].z
-			- rows[0].w * rows[1].x * rows[2].y * rows[3].z + rows[0].w * rows[1].x * rows[2].z * rows[3].y
-			- rows[0].w * rows[1].y * rows[2].z * rows[3].x + rows[0].w * rows[1].y * rows[2].x * rows[3].z
-			- rows[0].w * rows[1].z * rows[2].x * rows[3].y + rows[0].w * rows[1].z * rows[2].y * rows[3].x;
+		return rows[0].x * rows[1].y * rows[2].z * rows[3].z
+			 - rows[0].x * rows[1].y * rows[2].w * rows[3].z
+			 + rows[0].x * rows[1].z * rows[2].w * rows[3].y
+			 - rows[0].x * rows[1].z * rows[2].y * rows[3].z
+			 + rows[0].x * rows[1].w * rows[2].y * rows[3].z
+			 - rows[0].x * rows[1].w * rows[2].z * rows[3].y
+			 - rows[0].y * rows[1].z * rows[2].w * rows[3].x
+			 + rows[0].y * rows[1].z * rows[2].x * rows[3].z
+			 - rows[0].y * rows[1].w * rows[2].x * rows[3].z
+			 + rows[0].y * rows[1].w * rows[2].z * rows[3].x
+			 - rows[0].y * rows[1].x * rows[2].z * rows[3].z
+			 + rows[0].y * rows[1].x * rows[2].w * rows[3].z
+			 + rows[0].z * rows[1].w * rows[2].x * rows[3].y
+			 - rows[0].z * rows[1].w * rows[2].y * rows[3].x
+			 + rows[0].z * rows[1].x * rows[2].y * rows[3].z
+			 - rows[0].z * rows[1].x * rows[2].w * rows[3].y
+			 + rows[0].z * rows[1].y * rows[2].w * rows[3].x
+			 - rows[0].z * rows[1].y * rows[2].x * rows[3].z
+			 - rows[0].w * rows[1].x * rows[2].y * rows[3].z
+			 + rows[0].w * rows[1].x * rows[2].z * rows[3].y
+			 - rows[0].w * rows[1].y * rows[2].z * rows[3].x
+			 + rows[0].w * rows[1].y * rows[2].x * rows[3].z
+			 - rows[0].w * rows[1].z * rows[2].x * rows[3].y
+			 + rows[0].w * rows[1].z * rows[2].y * rows[3].x;
 	}
 
 	float matrix4::trace() const {
@@ -140,7 +176,8 @@ namespace iwmath {
 	void matrix4::invert() {
 		float det = determinant();
 		if (det == 0) {
-			throw std::invalid_argument("Determinant is zero, therefore inverse matrix doesn't exist.");
+			throw std::invalid_argument("Determinant is zero, "
+				"therefore inverse matrix doesn't exist.");
 		}
 
 		float invDet = 1 / det;
@@ -163,22 +200,38 @@ namespace iwmath {
 		float m33 = elements[15];
 
 		*this = matrix4(
-			invDet *  (m11 * (m22 * m33 - m23 * m32) - m12 * (m21 * m33 - m23 * m31) + m13 * (m21 * m32 - m22 * m31)),
-			invDet * -(m01 * (m22 * m33 - m23 * m32) - m02 * (m21 * m33 - m23 * m31) + m03 * (m21 * m32 - m22 * m31)),
-			invDet *  (m01 * (m12 * m33 - m13 * m32) - m02 * (m11 * m33 - m13 * m31) + m03 * (m11 * m32 - m12 * m31)),
-			invDet * -(m01 * (m12 * m23 - m13 * m22) - m02 * (m11 * m23 - m13 * m21) + m03 * (m11 * m22 - m12 * m21)),
-			invDet * -(m10 * (m22 * m33 - m23 * m32) - m12 * (m20 * m33 - m23 * m30) + m13 * (m20 * m32 - m22 * m30)),
-			invDet *  (m00 * (m22 * m33 - m23 * m32) - m02 * (m20 * m33 - m23 * m30) + m03 * (m20 * m32 - m22 * m30)),
-			invDet * -(m00 * (m12 * m33 - m13 * m32) - m02 * (m10 * m33 - m13 * m30) + m03 * (m10 * m32 - m12 * m30)),
-			invDet *  (m00 * (m12 * m23 - m13 * m22) - m02 * (m10 * m23 - m13 * m20) + m03 * (m10 * m22 - m12 * m20)),
-			invDet *  (m10 * (m21 * m33 - m23 * m31) - m11 * (m20 * m33 - m23 * m30) + m13 * (m20 * m31 - m21 * m30)),
-			invDet * -(m00 * (m21 * m33 - m23 * m31) - m01 * (m20 * m33 - m23 * m30) + m03 * (m20 * m31 - m21 * m30)),
-			invDet *  (m00 * (m11 * m33 - m13 * m31) - m01 * (m10 * m33 - m13 * m30) + m03 * (m10 * m31 - m11 * m30)),
-			invDet * -(m00 * (m11 * m23 - m13 * m21) - m01 * (m10 * m23 - m13 * m20) + m03 * (m10 * m21 - m11 * m20)),
-			invDet * -(m10 * (m21 * m32 - m22 * m31) - m11 * (m20 * m32 - m22 * m30) + m12 * (m20 * m31 - m21 * m30)),
-			invDet *  (m00 * (m21 * m32 - m22 * m31) - m01 * (m20 * m32 - m22 * m30) + m02 * (m20 * m31 - m21 * m30)),
-			invDet * -(m00 * (m11 * m32 - m12 * m31) - m01 * (m10 * m32 - m12 * m30) + m02 * (m10 * m31 - m11 * m30)),
-			invDet *  (m00 * (m11 * m22 - m12 * m21) - m01 * (m10 * m22 - m12 * m20) + m02 * (m10 * m21 - m11 * m20))
+			invDet *  (m11 * (m22 * m33 - m23 * m32) - m12
+				* (m21 * m33 - m23 * m31) + m13 * (m21 * m32 - m22 * m31)),
+			invDet * -(m01 * (m22 * m33 - m23 * m32) - m02
+				* (m21 * m33 - m23 * m31) + m03 * (m21 * m32 - m22 * m31)),
+			invDet *  (m01 * (m12 * m33 - m13 * m32) - m02
+				* (m11 * m33 - m13 * m31) + m03 * (m11 * m32 - m12 * m31)),
+			invDet * -(m01 * (m12 * m23 - m13 * m22) - m02
+				* (m11 * m23 - m13 * m21) + m03 * (m11 * m22 - m12 * m21)),
+			invDet * -(m10 * (m22 * m33 - m23 * m32) - m12
+				* (m20 * m33 - m23 * m30) + m13 * (m20 * m32 - m22 * m30)),
+			invDet *  (m00 * (m22 * m33 - m23 * m32) - m02
+				* (m20 * m33 - m23 * m30) + m03 * (m20 * m32 - m22 * m30)),
+			invDet * -(m00 * (m12 * m33 - m13 * m32) - m02
+				* (m10 * m33 - m13 * m30) + m03 * (m10 * m32 - m12 * m30)),
+			invDet *  (m00 * (m12 * m23 - m13 * m22) - m02
+				* (m10 * m23 - m13 * m20) + m03 * (m10 * m22 - m12 * m20)),
+			invDet *  (m10 * (m21 * m33 - m23 * m31) - m11
+				* (m20 * m33 - m23 * m30) + m13 * (m20 * m31 - m21 * m30)),
+			invDet * -(m00 * (m21 * m33 - m23 * m31) - m01
+				* (m20 * m33 - m23 * m30) + m03 * (m20 * m31 - m21 * m30)),
+			invDet *  (m00 * (m11 * m33 - m13 * m31) - m01
+				* (m10 * m33 - m13 * m30) + m03 * (m10 * m31 - m11 * m30)),
+			invDet * -(m00 * (m11 * m23 - m13 * m21) - m01
+				* (m10 * m23 - m13 * m20) + m03 * (m10 * m21 - m11 * m20)),
+			invDet * -(m10 * (m21 * m32 - m22 * m31) - m11
+				* (m20 * m32 - m22 * m30) + m12 * (m20 * m31 - m21 * m30)),
+			invDet *  (m00 * (m21 * m32 - m22 * m31) - m01
+				* (m20 * m32 - m22 * m30) + m02 * (m20 * m31 - m21 * m30)),
+			invDet * -(m00 * (m11 * m32 - m12 * m31) - m01
+				* (m10 * m32 - m12 * m30) + m02 * (m10 * m31 - m11 * m30)),
+			invDet *  (m00 * (m11 * m22 - m12 * m21) - m01
+				* (m10 * m22 - m12 * m20) + m02 * (m10 * m21 - m11 * m20))
 		);
 	}
 
@@ -231,7 +284,11 @@ namespace iwmath {
 		return rows[3].xyz();
 	}
 
-	void matrix4::look_at(const vector3& eye, const vector3& target, const vector3& up) {
+	void matrix4::look_at(
+		const vector3& eye,
+		const vector3& target,
+		const vector3& up)
+	{
 		vector3 z = (eye - target).normalized();
 		vector3 x = up.cross(z).normalized();
 		vector3 y = z.cross(x).normalized();
@@ -246,15 +303,21 @@ namespace iwmath {
 			1);
 	}
 
-	float& matrix4::operator()(int row, int col) {
+	float& matrix4::operator()(
+		int row,
+		int col)
+	{
 		if (row > 4 || col > 4 || 0 > row || 0 > col) {
-			throw std::out_of_range("Row/Col is outside the bounds of this maxtrix.");
+			throw std::out_of_range("Row/Col is outside the "
+				"bounds of this maxtrix.");
 		}
 
 		return elements[col + row * 4];
 	}
 
-	matrix4 matrix4::operator+(const matrix4& other) const {
+	matrix4 matrix4::operator+(
+		const matrix4& other) const
+	{
 		return matrix4(
 			rows[0] + other.rows[0],
 			rows[1] + other.rows[1],
@@ -263,7 +326,9 @@ namespace iwmath {
 		);
 	}
 
-	matrix4 matrix4::operator-(const matrix4& other) const {
+	matrix4 matrix4::operator-(
+		const matrix4& other) const
+	{
 		return matrix4(
 			rows[0] - other.rows[0],
 			rows[1] - other.rows[1],
@@ -272,15 +337,27 @@ namespace iwmath {
 		);
 	}
 
-	matrix4 matrix4::operator*(const matrix4& other) const {
-		float lM11 = rows[0].x, lM12 = rows[0].y, lM13 = rows[0].z, lM14 = rows[0].w,
-			lM21 = rows[1].x, lM22 = rows[1].y, lM23 = rows[1].z, lM24 = rows[1].w,
-			lM31 = rows[2].x, lM32 = rows[2].y, lM33 = rows[2].z, lM34 = rows[2].w,
-			lM41 = rows[3].x, lM42 = rows[3].y, lM43 = rows[3].z, lM44 = rows[3].w,
-			rM11 = other.rows[0].x, rM12 = other.rows[0].y, rM13 = other.rows[0].z, rM14 = other.rows[0].w,
-			rM21 = other.rows[1].x, rM22 = other.rows[1].y, rM23 = other.rows[1].z, rM24 = other.rows[1].w,
-			rM31 = other.rows[2].x, rM32 = other.rows[2].y, rM33 = other.rows[2].z, rM34 = other.rows[2].w,
-			rM41 = other.rows[3].x, rM42 = other.rows[3].y, rM43 = other.rows[3].z, rM44 = other.rows[3].w;
+	matrix4 matrix4::operator*(
+		const matrix4& other) const
+	{
+		float 
+			lM11 = rows[0].x, lM12 = rows[0].y,
+			lM13 = rows[0].z, lM14 = rows[0].w,
+			lM21 = rows[1].x, lM22 = rows[1].y,
+			lM23 = rows[1].z, lM24 = rows[1].w,
+			lM31 = rows[2].x, lM32 = rows[2].y,
+			lM33 = rows[2].z, lM34 = rows[2].w,
+			lM41 = rows[3].x, lM42 = rows[3].y,
+			lM43 = rows[3].z, lM44 = rows[3].w,
+
+			rM11 = other.rows[0].x, rM12 = other.rows[0].y,
+			rM13 = other.rows[0].z, rM14 = other.rows[0].w,
+			rM21 = other.rows[1].x, rM22 = other.rows[1].y,
+			rM23 = other.rows[1].z, rM24 = other.rows[1].w,
+			rM31 = other.rows[2].x, rM32 = other.rows[2].y,
+			rM33 = other.rows[2].z, rM34 = other.rows[2].w,
+			rM41 = other.rows[3].x, rM42 = other.rows[3].y,
+			rM43 = other.rows[3].z, rM44 = other.rows[3].w;
 
 		return matrix4(
 			(((lM11 * rM11) + (lM12 * rM21)) + (lM13 * rM31)) + (lM14 * rM41),
@@ -301,19 +378,27 @@ namespace iwmath {
 			(((lM41 * rM14) + (lM42 * rM24)) + (lM43 * rM34)) + (lM44 * rM44));
 	}
 
-	matrix4 matrix4::operator+=(const matrix4& other) {
+	matrix4 matrix4::operator+=(
+		const matrix4& other)
+	{
 		return *this = *this + other;
 	}
 
-	matrix4 matrix4::operator-=(const matrix4& other) {
+	matrix4 matrix4::operator-=(
+		const matrix4& other)
+	{
 		return *this = *this - other;
 	}
 
-	matrix4 matrix4::operator*=(const matrix4& other) {
+	matrix4 matrix4::operator*=(
+		const matrix4& other)
+	{
 		return *this = *this * other;
 	}
 
-	matrix4 matrix4::operator+(float other) const {
+	matrix4 matrix4::operator+(
+		float other) const
+	{
 		return matrix4(
 			rows[0] + other,
 			rows[1] + other,
@@ -322,7 +407,9 @@ namespace iwmath {
 		);
 	}
 
-	matrix4 matrix4::operator-(float other) const {
+	matrix4 matrix4::operator-(
+		float other) const
+	{
 		return matrix4(
 			rows[0] - other,
 			rows[1] - other,
@@ -331,7 +418,9 @@ namespace iwmath {
 		);
 	}
 
-	matrix4 matrix4::operator*(float other) const {
+	matrix4 matrix4::operator*(
+		float other) const
+	{
 		return matrix4(
 			rows[0] * other,
 			rows[1] * other,
@@ -341,7 +430,9 @@ namespace iwmath {
 	}
 
 
-	matrix4 matrix4::operator/(float other) const {
+	matrix4 matrix4::operator/(
+		float other) const
+	{
 		return matrix4(
 			rows[0] / other,
 			rows[1] / other,
@@ -350,92 +441,145 @@ namespace iwmath {
 		);
 	}
 
-	matrix4 matrix4::operator+=(float other) {
+	matrix4 matrix4::operator+=(
+		float other)
+	{
 		return *this = *this + other;
 	}
 
-	matrix4 matrix4::operator-=(float other) {
+	matrix4 matrix4::operator-=(
+		float other)
+	{
 		return *this = *this - other;
 	}
 
-	matrix4 matrix4::operator*=(float other) {
+	matrix4 matrix4::operator*=(
+		float other)
+	{
 		return *this = *this * other;
 	}
 
-	matrix4 matrix4::operator/=(float other) {
+	matrix4 matrix4::operator/=(
+		float other)
+	{
 		return *this = *this / other;
 	}
 
-	matrix4 matrix4::operator-() const {
+	matrix4 matrix4::operator-() const
+	{
 		return matrix4(-rows[0], -rows[1], -rows[2], -rows[3]);
 	}
 
-	bool matrix4::operator==(const matrix4& other) const {
+	bool matrix4::operator==(
+		const matrix4& other) const
+	{
 		return rows[0] == other.rows[0]
 			&& rows[1] == other.rows[1]
 			&& rows[2] == other.rows[2]
 			&& rows[3] == other.rows[3];
 	}
 
-	bool matrix4::operator!=(const matrix4& other) const {
+	bool matrix4::operator!=(
+		const matrix4& other) const
+	{
 		return !operator==(other);
 	}
 
-	matrix4 matrix4::create_from_axis_angle(const vector4& axis_angle) {
-		return create_from_axis_angle(axis_angle.x, axis_angle.y, axis_angle.z, axis_angle.w);
+	matrix4 matrix4::create_from_axis_angle(
+		const vector4& axis_angle)
+	{
+		return create_from_axis_angle(
+			axis_angle.x, axis_angle.y, axis_angle.z, axis_angle.w);
 	}
 
-	matrix4 matrix4::create_from_axis_angle(const vector3& axis, float angle) {
-		return create_from_axis_angle(axis.x, axis.y, axis.z, angle);
+	matrix4 matrix4::create_from_axis_angle(
+		const vector3& axis,
+		float angle)
+	{
+		return create_from_axis_angle(
+			axis.x, axis.y, axis.z, angle);
 	}
 
-	matrix4 matrix4::create_from_axis_angle(float x, float y, float z, float angle) {
+	matrix4 matrix4::create_from_axis_angle(
+		float x,
+		float y,
+		float z,
+		float angle)
+	{
 		return matrix3::create_from_axis_angle(x, y, z, angle);
 	}
 
-	matrix4 matrix4::create_from_quaternion(const quaternion& quaternion) {
+	matrix4 matrix4::create_from_quaternion(
+		const quaternion& quaternion)
+	{
 		return matrix3::create_from_quaternion(quaternion);
 	}
 
-	matrix4 matrix4::create_rotation_x(float angle) {
+	matrix4 matrix4::create_rotation_x(
+		float angle)
+	{
 		return matrix3::create_rotation_x(angle);
 	}
 
-	matrix4 matrix4::create_rotation_y(float angle) {
+	matrix4 matrix4::create_rotation_y(
+		float angle)
+	{
 		return matrix3::create_rotation_y(angle);
 
 	}
 
-	matrix4 matrix4::create_rotation_z(float angle) {
+	matrix4 matrix4::create_rotation_z(
+		float angle)
+	{
 		return matrix3::create_rotation_z(angle);
 
 	}
 
-	matrix4 matrix4::create_rotation(const vector3& angles) {
+	matrix4 matrix4::create_rotation(
+		const vector3& angles)
+	{
 		return matrix4::create_rotation(angles.x, angles.y, angles.z);
 	}
 
-	matrix4 matrix4::create_rotation(float x, float y, float z) {
+	matrix4 matrix4::create_rotation(
+		float x,
+		float y,
+		float z)
+	{
 		return matrix3::create_rotation(x, y, z);
 	}
 
-	matrix4 matrix4::create_translation(const vector3& translation) {
+	matrix4 matrix4::create_translation(
+		const vector3& translation)
+	{
 		return create_translation(translation.x, translation.y, translation.z);
 	}
 
-	matrix4 matrix4::create_scale(float scale) {
+	matrix4 matrix4::create_scale(
+		float scale)
+	{
 		return create_scale(scale, scale, scale);
 	}
 
-	matrix4 matrix4::create_scale(const vector3& scale) {
+	matrix4 matrix4::create_scale(
+		const vector3& scale)
+	{
 		return create_scale(scale.x, scale.y, scale.z);
 	}
 
-	matrix4 matrix4::create_scale(float x, float y, float z) {
+	matrix4 matrix4::create_scale(
+		float x,
+		float y,
+		float z)
+	{
 		return matrix3::create_scale(x, y, z);
 	}
 
-	matrix4 matrix4::create_translation(float x, float y, float z) {
+	matrix4 matrix4::create_translation(
+		float x,
+		float y,
+		float z)
+	{
 		return matrix4(
 			1, 0, 0, 0,
 			0, 1, 0, 0,
@@ -444,11 +588,29 @@ namespace iwmath {
 		);
 	}
 
-	matrix4 matrix4::create_orthographic(float width, float height, float zNear, float zFar) {
-		return create_orthographic_off_center(-width / 2, width / 2, -height / 2, height / 2, zNear, zFar);
+	matrix4 matrix4::create_orthographic(
+		float width,
+		float height,
+		float zNear,
+		float zFar)
+	{
+		return create_orthographic_off_center(
+			-width  / 2,
+			width   / 2,
+			-height / 2,
+			height  / 2,
+			zNear,
+			zFar);
 	}
 
-	matrix4 matrix4::create_orthographic_off_center(float left, float right, float bottom, float top, float zNear, float zFar) {
+	matrix4 matrix4::create_orthographic_off_center(
+		float left,
+		float right,
+		float bottom,
+		float top,
+		float zNear,
+		float zFar)
+	{
 		matrix4 out = matrix4::identity;
 
 		float invRL = 1.0f / (right - left);
@@ -465,7 +627,12 @@ namespace iwmath {
 		return out;
 	}
 
-	matrix4 matrix4::create_perspective_field_of_view(float fov, float aspect, float zNear, float zFar) {
+	matrix4 matrix4::create_perspective_field_of_view(
+		float fov,
+		float aspect,
+		float zNear,
+		float zFar)
+	{
 		if (fov <= 0 || fov > IW_PI) {
 			throw std::invalid_argument("fovy is not betwwen 0 and pi.");
 		}
@@ -487,10 +654,18 @@ namespace iwmath {
 		float xMin = yMin * aspect;
 		float xMax = yMax * aspect;
 
-		return create_perspective_off_center(xMin, xMax, yMin, yMax, zNear, zFar);
+		return create_perspective_off_center(
+			xMin, xMax, yMin, yMax, zNear, zFar);
 	}
 
-	matrix4 matrix4::create_perspective_off_center(float left, float right, float bottom, float top, float zNear, float zFar) {
+	matrix4 matrix4::create_perspective_off_center(
+		float left,
+		float right,
+		float bottom,
+		float top,
+		float zNear,
+		float zFar)
+	{
 		if (zNear <= 0) {
 			throw std::invalid_argument("zNear is not greater than 0.");
 		}
@@ -514,13 +689,24 @@ namespace iwmath {
 		);
 	}
 
-	matrix4 matrix4::create_look_at(const vector3& eye, const vector3& target, const vector3& up) {
+	matrix4 matrix4::create_look_at(
+		const vector3& eye,
+		const vector3& target,
+		const vector3& up)
+	{
 		matrix4 mat = matrix4();
 		mat.look_at(eye, target, up);
 		return mat;
 	}
 
-	std::ostream& iwmath::operator<<(std::ostream& ostream, const matrix4& a) {
-		return ostream << a.rows[0] << std::endl << a.rows[1] << std::endl << a.rows[2] << std::endl << a.rows[3];
+	std::ostream& iwmath::operator<<(
+		std::ostream& ostream,
+		const matrix4& a)
+	{
+		return ostream
+			<< a.rows[0] << std::endl
+			<< a.rows[1] << std::endl
+			<< a.rows[2] << std::endl
+			<< a.rows[3];
 	}
 }

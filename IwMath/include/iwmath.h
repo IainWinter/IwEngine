@@ -37,7 +37,8 @@ namespace iwmath {
 	*
 	* @param value Value to inverse square root.
 	*/
-	IWMATH_API float inv_sqrt(float value);
+	IWMATH_API float inv_sqrt(
+		float value);
 
 	/**
 	* Returns if 2 floating point numbers are equal to a specified accuracy.
@@ -46,5 +47,8 @@ namespace iwmath {
 	* @param b A floating point number.
 	* @param accuracy Number of decimals to compare.
 	*/
-	IWMATH_API bool almost_equal(float a, float b, unsigned int accuracy);
+	IWMATH_API bool almost_equal(
+		float a, 
+		float b, 
+		unsigned int accuracy);
 }

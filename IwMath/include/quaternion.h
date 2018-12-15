@@ -15,9 +15,18 @@ namespace iwmath {
 		float x, y, z, w;
 
 		quaternion();
-		quaternion(float x, float y, float z, float w);
-		quaternion(const vector3& xyz, float w);
-		quaternion(const vector4& xyzw);
+
+		quaternion(
+			float x,
+			float y,
+			float z,
+			float w);
+
+		quaternion(
+			const vector3& xyz, float w);
+
+		quaternion(
+			const vector4& xyzw);
 
 		/**
 		* Returns the length of the quaternion.
@@ -25,12 +34,14 @@ namespace iwmath {
 		float length() const;
 
 		/**
-		* Returns the squared length of the quaternion. Use this for length comparisons.
+		* Returns the squared length of the quaternion.
+		*	Use this for length comparisons.
 		*/
 		float length_squared() const;
 
 		/**
-		* Returns the length of the quaternion using the inv_sqrt function. This is much faster, and accurate enough in most cases.
+		* Returns the length of the quaternion using the inv_sqrt function.
+		*	This is much faster, and accurate enough in most cases.
 		*/
 		float length_fast() const;
 
@@ -40,7 +51,9 @@ namespace iwmath {
 		quaternion normalized() const;
 
 		/**
-		* Returns the normalized version of the quaternion using the inv_sqrt function. This is much faster, and accurate enough in most cases.
+		* Returns the normalized version of the quaternion using 
+		*	the inv_sqrt function. This is much faster, 
+		*	and accurate enough in most cases.
 		*/
 		quaternion normalized_fast() const;
 
@@ -60,7 +73,8 @@ namespace iwmath {
 		void normalize();
 
 		/**
-		* Normalizes the quaternion using the inv_sqrt function. This is much faster, and accurate enough in most cases.
+		* Normalizes the quaternion using the inv_sqrt function.
+		*	This is much faster, and accurate enough in most cases.
 		*/
 		void normalize_fast();
 
@@ -75,7 +89,8 @@ namespace iwmath {
 		void conjugate();
 
 		/**
-		* Returns the axis and the angle of the quaternion. X, Y, Z is the axis, and W is the angle.
+		* Returns the axis and the angle of the quaternion. 
+		*	X, Y, Z is the axis, and W is the angle.
 		*/
 		vector4 axis_angle() const;
 
@@ -94,23 +109,43 @@ namespace iwmath {
 		//*/
 		//matrix4 matrix4() const;
 
-		quaternion operator+ (const quaternion& other) const;
-		quaternion operator- (const quaternion& other) const;
-		quaternion operator* (const quaternion& other) const;
-		quaternion operator+=(const quaternion& other);
-		quaternion operator-=(const quaternion& other);
-		quaternion operator*=(const quaternion& other);
-		quaternion operator* (float other) const;
-		quaternion operator*=(float other);
-		bool operator==(const quaternion& other) const;
-		bool operator!=(const quaternion& other) const;
+		quaternion operator+ (
+			const quaternion& other) const;
+
+		quaternion operator- (
+			const quaternion& other) const;
+
+		quaternion operator* (
+			const quaternion& other) const;
+
+		quaternion operator+=(
+			const quaternion& other);
+
+		quaternion operator-=(
+			const quaternion& other);
+
+		quaternion operator*=(
+			const quaternion& other);
+
+		quaternion operator* (
+			float other) const;
+
+		quaternion operator*=(
+			float other);
+
+		bool operator==(
+			const quaternion& other) const;
+
+		bool operator!=(
+			const quaternion& other) const;
 
 		/**
 		* Returns a matrix with a specified rotation around an axis.
 		*
 		* @param axisAngle Axis and angle of rotation in one vector.
 		*/
-		static quaternion create_from_axis_angle(const vector4& axisAngle);
+		static quaternion create_from_axis_angle(
+			const vector4& axisAngle);
 
 		/**
 		* Returns a matrix with a specified rotation around an axis.
@@ -118,7 +153,9 @@ namespace iwmath {
 		* @param axis Axis vector
 		* @param angle Angle of rotation around the axis in radians.
 		*/
-		static quaternion create_from_axis_angle(const vector3& axis, float angle);
+		static quaternion create_from_axis_angle(
+			const vector3& axis,
+			float angle);
 
 		/**
 		* Returns a matrix with a specified rotation around an axis.
@@ -128,14 +165,19 @@ namespace iwmath {
 		* @param z X component of the axis vector.
 		* @param angle Angle of rotation around the axis in radians.
 		*/
-		static quaternion create_from_axis_angle(float x, float y, float z, float angle);
+		static quaternion create_from_axis_angle(
+			float x,
+			float y,
+			float z,
+			float angle);
 
 		/**
 		* Returns a quaternion from euler angles.
 		*
 		* @param angles Euler angles in radians.
 		*/
-		static quaternion create_from_euler_angles(const vector3& angles);
+		static quaternion create_from_euler_angles(
+			const vector3& angles);
 
 		/**
 		* Returns a quaternion from euler angles.
@@ -144,9 +186,17 @@ namespace iwmath {
 		* @param yaw Rotation around the y axis in radians.
 		* @param roll Rotation around the z axis in radians.
 		*/
-		static quaternion create_from_euler_angles(float x, float y, float z);
+		static quaternion create_from_euler_angles(
+			float x,
+			float y,
+			float z);
 
-		friend IWMATH_API std::ostream& operator<<(std::ostream& stream, const quaternion& a);
-		friend IWMATH_API vector3 operator*(const vector3& left, const quaternion& right);
+		friend IWMATH_API std::ostream& operator<<(
+			std::ostream& stream,
+			const quaternion& a);
+
+		friend IWMATH_API vector3 operator*(
+			const vector3& left,
+			const quaternion& right);
 	};
 }

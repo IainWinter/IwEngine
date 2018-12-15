@@ -8,18 +8,26 @@ namespace iwmath {
 		memset(elements, 0, 3 * 3 * sizeof(float));
 	}
 
-	matrix3::matrix3(float diagonal) {
+	matrix3::matrix3(
+		float diagonal)
+	{
 		memset(elements, 0, 3 * 3 * sizeof(float));
 		elements[0 + 0 * 3] = diagonal;
 		elements[1 + 1 * 3] = diagonal;
 		elements[2 + 2 * 3] = diagonal;
 	}
 
-	matrix3::matrix3(float* elements) {
+	matrix3::matrix3(
+		float* elements)
+	{
 		memcpy(this->elements, elements, 3 * 3 * sizeof(float));
 	}
 
-	matrix3::matrix3(vector3 row0, vector3 row1, vector3 row2) {
+	matrix3::matrix3(
+		vector3 row0,
+		vector3 row1,
+		vector3 row2)
+	{
 		rows[0] = row0;
 		rows[1] = row1;
 		rows[2] = row2;
@@ -28,17 +36,17 @@ namespace iwmath {
 	matrix3::matrix3(
 		float m00, float m01, float m02,
 		float m10, float m11, float m12,
-		float m20, float m21, float m22) {
+		float m20, float m21, float m22)
+	{
 		elements[0] = m00; elements[1] = m01; elements[2] = m02;
 		elements[3] = m10; elements[4] = m11; elements[5] = m12;
 		elements[6] = m20; elements[7] = m21; elements[8] = m22;
 	}
 
 	float matrix3::determinant() const {
-		return
-			rows[0].x * (rows[1].y * rows[2].z - rows[1].z * rows[2].y)
-			- rows[0].y * (rows[1].x * rows[2].z - rows[1].z * rows[2].x)
-			+ rows[0].z * (rows[1].x * rows[2].y - rows[1].y * rows[2].x);
+		return rows[0].x * (rows[1].y * rows[2].z - rows[1].z * rows[2].y)
+			 - rows[0].y * (rows[1].x * rows[2].z - rows[1].z * rows[2].x)
+			 + rows[0].z * (rows[1].x * rows[2].y - rows[1].y * rows[2].x);
 	}
 
 	float matrix3::trace() const {
@@ -48,30 +56,35 @@ namespace iwmath {
 	matrix3 matrix3::transposed() const {
 		matrix3 tmp = *this;
 		tmp.transpose();
+		
 		return tmp;
 	}
 
 	matrix3 matrix3::inverted() const {
 		matrix3 tmp = *this;
 		tmp.invert();
+
 		return tmp;
 	}
 
 	matrix3 matrix3::normalized() const {
 		matrix3 tmp = *this;
 		tmp.normalize();
+
 		return tmp;
 	}
 
 	matrix3 matrix3::cleared_rotation() const {
 		matrix3 tmp = *this;
 		tmp.clear_rotation();
+
 		return tmp;
 	}
 
 	matrix3 matrix3::cleared_scale() const {
 		matrix3 tmp = *this;
 		tmp.clear_scale();
+
 		return tmp;
 	}
 
@@ -91,7 +104,8 @@ namespace iwmath {
 	void matrix3::invert() {
 		float det = determinant();
 		if (almost_equal(det, 0, 6)) {
-			throw std::invalid_argument("Determinant is zero, therefore inverse matrix doesn't exist.");
+			throw std::invalid_argument("Determinant is zero, "
+				"therefore inverse matrix doesn't exist.");
 		}
 
 		float invDet = 1 / det;
@@ -145,7 +159,8 @@ namespace iwmath {
 		quaternion q = quaternion::identity;
 
 		if (tr > 0) {
-			float scale = sqrt(tr + 1) * 2; // S=4*qw 
+			//scale = 4*qw
+			float scale = sqrt(tr + 1) * 2;
 			q.w = scale / 4;
 			q.x = (rot(2, 1) - rot(1, 2)) / scale;
 			q.y = (rot(0, 2) - rot(2, 0)) / scale;
@@ -153,7 +168,8 @@ namespace iwmath {
 		}
 
 		else if (rot(0, 0) > rot(1, 1) && rot(0, 0) > rot(2, 2)) {
-			float scale = sqrt(1 + rot(0, 0) - rot(1, 1) - rot(2, 2)) * 2; // S=4*qx 
+			//scale = 4*qx
+			float scale = sqrt(1 + rot(0, 0) - rot(1, 1) - rot(2, 2)) * 2;
 			q.w = (rot(2, 1) - rot(1, 2)) / scale;
 			q.x = scale / 4;
 			q.y = (rot(0, 1) + rot(1, 0)) / scale;
@@ -161,7 +177,8 @@ namespace iwmath {
 		}
 
 		else if (rot(1, 1) > rot(2, 2)) {
-			float scale = sqrt(1 + rot(1, 1) - rot(0, 0) - rot(2, 2)) * 2; // S=4*qy
+			//scale = 4*qy
+			float scale = sqrt(1 + rot(1, 1) - rot(0, 0) - rot(2, 2)) * 2;
 			q.w = (rot(0, 2) - rot(2, 0)) / scale;
 			q.x = (rot(0, 1) + rot(1, 0)) / scale;
 			q.y = scale / 4;
@@ -169,7 +186,8 @@ namespace iwmath {
 		}
 
 		else {
-			float scale = sqrt(1 + rot(2, 2) - rot(0, 0) - rot(1, 1)) * 2; // S=4*qz
+			//scale = 4*qz
+			float scale = sqrt(1 + rot(2, 2) - rot(0, 0) - rot(1, 1)) * 2;
 			q.w = (rot(1, 0) - rot(0, 1)) / scale;
 			q.x = (rot(0, 2) + rot(2, 0)) / scale;
 			q.y = (rot(1, 2) + rot(2, 1)) / scale;
@@ -261,7 +279,9 @@ namespace iwmath {
 		return vector3(rows[0].length(), rows[1].length(), rows[2].length());
 	}
 
-	matrix3 matrix3::operator+(const matrix3& other) const {
+	matrix3 matrix3::operator+(
+		const matrix3& other) const
+	{
 		return matrix3(
 			rows[0] + other.rows[0],
 			rows[1] + other.rows[1],
@@ -269,7 +289,9 @@ namespace iwmath {
 		);
 	}
 
-	matrix3 matrix3::operator-(const matrix3& other) const {
+	matrix3 matrix3::operator-(
+		const matrix3& other) const
+	{
 		return matrix3(
 			rows[0] - other.rows[0],
 			rows[1] - other.rows[1],
@@ -277,7 +299,9 @@ namespace iwmath {
 		);
 	}
 
-	matrix3 matrix3::operator*(const matrix3& other) const {
+	matrix3 matrix3::operator*(
+		const matrix3& other) const
+	{
 		float a00 = rows[0].x;
 		float a10 = rows[0].y;
 		float a20 = rows[0].z;
@@ -310,19 +334,27 @@ namespace iwmath {
 			a02 * b20 + a12 * b21 + a22 * b22);
 	}
 
-	matrix3 matrix3::operator+=(const matrix3& other) {
+	matrix3 matrix3::operator+=(
+		const matrix3& other)
+	{
 		return *this = (*this) + other;
 	}
 
-	matrix3 matrix3::operator-=(const matrix3& other) {
+	matrix3 matrix3::operator-=(
+		const matrix3& other)
+	{
 		return *this = (*this) - other;
 	}
 
-	matrix3 matrix3::operator*=(const matrix3& other) {
+	matrix3 matrix3::operator*=(
+		const matrix3& other)
+	{
 		return *this = (*this) * other;
 	}
 
-	matrix3 matrix3::operator+(float other) const {
+	matrix3 matrix3::operator+(
+		float other) const
+	{
 		return matrix3(
 			rows[0] + other,
 			rows[1] + other,
@@ -330,7 +362,9 @@ namespace iwmath {
 		);
 	}
 
-	matrix3 matrix3::operator-(float other) const {
+	matrix3 matrix3::operator-(
+		float other) const
+	{
 		return matrix3(
 			rows[0] - other,
 			rows[1] - other,
@@ -338,7 +372,9 @@ namespace iwmath {
 		);
 	}
 
-	matrix3 matrix3::operator*(float other) const {
+	matrix3 matrix3::operator*(
+		float other) const
+	{
 		return matrix3(
 			rows[0] * other,
 			rows[1] * other,
@@ -347,7 +383,9 @@ namespace iwmath {
 	}
 
 
-	matrix3 matrix3::operator/(float other) const {
+	matrix3 matrix3::operator/(
+		float other) const
+	{
 		return matrix3(
 			rows[0] / other,
 			rows[1] / other,
@@ -355,51 +393,81 @@ namespace iwmath {
 		);
 	}
 
-	matrix3 matrix3::operator+=(float other) {
+	matrix3 matrix3::operator+=(
+		float other)
+	{
 		return *this = (*this) + other;
 	}
 
-	matrix3 matrix3::operator-=(float other) {
+	matrix3 matrix3::operator-=(
+		float other)
+	{
 		return *this = (*this) - other;
 	}
 
-	matrix3 matrix3::operator*=(float other) {
+	matrix3 matrix3::operator*=(
+		float other)
+	{
 		return *this = (*this) * other;
 	}
 
-	matrix3 matrix3::operator/=(float other) {
+	matrix3 matrix3::operator/=(
+		float other)
+	{
 		return *this = (*this) / other;
 	}
 
-	matrix3 matrix3::operator-() const {
+	matrix3 matrix3::operator-() const
+	{
 		return matrix3(-rows[0], -rows[1], -rows[2]);
 	}
 
-	float& matrix3::operator()(int row, int col) {
+	float& matrix3::operator()(
+		int row,
+		int col)
+	{
 		if (row > 3 || col > 3 || 0 > row || 0 > col) {
-			throw std::out_of_range("Row/Col is outside the bounds of this maxtrix.");
+			throw std::out_of_range("Row/Col is outside the "
+				"bounds of this maxtrix.");
 		}
 
 		return elements[col + row * 3];
 	}
 
-	bool matrix3::operator==(const matrix3& other) const {
-		return rows[0] == other.rows[0] && rows[1] == other.rows[1] && rows[2] == other.rows[2];
+	bool matrix3::operator==(
+		const matrix3& other) const
+	{
+		return rows[0] == other.rows[0]
+			&& rows[1] == other.rows[1]
+			&& rows[2] == other.rows[2];
 	}
 
-	bool matrix3::operator!=(const matrix3& other) const {
+	bool matrix3::operator!=(
+		const matrix3& other) const
+	{
 		return !operator==(other);
 	}
 
-	matrix3 matrix3::create_from_axis_angle(const vector4& axis_angle) {
-		return create_from_axis_angle(axis_angle.x, axis_angle.y, axis_angle.z, axis_angle.w);
+	matrix3 matrix3::create_from_axis_angle(
+		const vector4& axis_angle)
+	{
+		return create_from_axis_angle(
+			axis_angle.x, axis_angle.y, axis_angle.z, axis_angle.w);
 	}
 
-	matrix3 matrix3::create_from_axis_angle(const vector3& axis, float angle) {
+	matrix3 matrix3::create_from_axis_angle(
+		const vector3& axis,
+		float angle)
+	{
 		return create_from_axis_angle(axis.x, axis.y, axis.z, angle);
 	}
 
-	matrix3 matrix3::create_from_axis_angle(float x, float y, float z, float angle) {
+	matrix3 matrix3::create_from_axis_angle(
+		float x,
+		float y,
+		float z,
+		float angle)
+	{
 		vector3 axis = vector3(x, y, z);
 		axis.normalize();
 
@@ -425,7 +493,9 @@ namespace iwmath {
 		);
 	}
 
-	matrix3 matrix3::create_from_quaternion(const quaternion& rotation) {
+	matrix3 matrix3::create_from_quaternion(
+		const quaternion& rotation)
+	{
 		quaternion q = rotation;
 		if (!almost_equal(q.length_squared(), 1, 6)) {
 			q.normalize();
@@ -458,7 +528,9 @@ namespace iwmath {
 		);
 	}
 
-	matrix3 matrix3::create_rotation_x(float angle) {
+	matrix3 matrix3::create_rotation_x(
+		float angle)
+	{
 		float cos = cosf(angle);
 		float sin = sinf(angle);
 
@@ -469,7 +541,9 @@ namespace iwmath {
 		);
 	}
 
-	matrix3 matrix3::create_rotation_y(float angle) {
+	matrix3 matrix3::create_rotation_y(
+		float angle)
+	{
 		float cos = cosf(angle);
 		float sin = sinf(angle);
 
@@ -482,7 +556,9 @@ namespace iwmath {
 		);
 	}
 
-	matrix3 matrix3::create_rotation_z(float angle) {
+	matrix3 matrix3::create_rotation_z(
+		float angle)
+	{
 		float cos = cosf(angle);
 		float sin = sinf(angle);
 
@@ -495,23 +571,39 @@ namespace iwmath {
 		);
 	}
 
-	matrix3 matrix3::create_rotation(const vector3& angles) {
+	matrix3 matrix3::create_rotation(
+		const vector3& angles)
+	{
 		return matrix3::create_rotation(angles.x, angles.y, angles.z);
 	}
 
-	matrix3 matrix3::create_rotation(float x, float y, float z) {
-		return matrix3::create_rotation_x(x) * matrix3::create_rotation_y(y) * matrix3::create_rotation_z(z);
+	matrix3 matrix3::create_rotation(
+		float x,
+		float y,
+		float z)
+	{
+		return matrix3::create_rotation_x(x)
+			* matrix3::create_rotation_y(y)
+			* matrix3::create_rotation_z(z);
 	}
 
-	matrix3 matrix3::create_scale(float scale) {
+	matrix3 matrix3::create_scale(
+		float scale)
+	{
 		return create_scale(scale, scale, scale);
 	}
 
-	matrix3 matrix3::create_scale(const vector3& scale) {
+	matrix3 matrix3::create_scale(
+		const vector3& scale)
+	{
 		return create_scale(scale.x, scale.y, scale.z);
 	}
 
-	matrix3 matrix3::create_scale(float x, float y, float z) {
+	matrix3 matrix3::create_scale(
+		float x,
+		float y,
+		float z)
+	{
 		return matrix3(
 			x, 0, 0,
 			0, y, 0,
@@ -519,7 +611,13 @@ namespace iwmath {
 		);
 	}
 
-	std::ostream& iwmath::operator<<(std::ostream& stream, const matrix3& a) {
-		return stream << a.rows[0] << std::endl << a.rows[1] << std::endl << a.rows[2];
+	std::ostream& iwmath::operator<<(
+		std::ostream& stream,
+		const matrix3& a)
+	{
+		return stream 
+			<< a.rows[0] << std::endl
+			<< a.rows[1] << std::endl
+			<< a.rows[2];
 	}
 }

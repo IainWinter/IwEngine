@@ -21,9 +21,15 @@ namespace iwmath {
 		};
 
 		matrix3();
-		matrix3(float diagonal);
-		matrix3(float* elements);
+
+		matrix3(
+			float diagonal);
+
+		matrix3(
+			float* elements);
+
 		matrix3(vector3 row0, vector3 row1, vector3 row2);
+
 		matrix3(
 			float m00, float m01, float m02,
 			float m10, float m11, float m12,
@@ -110,31 +116,68 @@ namespace iwmath {
 		*/
 		vector3 scale() const;
 
-		matrix3 operator+ (const matrix3& other) const;
-		matrix3 operator- (const matrix3& other) const;
-		matrix3 operator* (const matrix3& other) const;
-		matrix3 operator+=(const matrix3& other);
-		matrix3 operator-=(const matrix3& other);
-		matrix3 operator*=(const matrix3& other);
-		matrix3 operator+ (float other) const;
-		matrix3 operator- (float other) const;
-		matrix3 operator* (float other) const;
-		matrix3 operator/ (float other) const;
-		matrix3 operator+=(float other);
-		matrix3 operator-=(float other);
-		matrix3 operator*=(float other);
-		matrix3 operator/=(float other);
+		matrix3 operator+ (
+			const matrix3& other) const;
+
+		matrix3 operator- (
+			const matrix3& other) const;
+
+		matrix3 operator* (
+			const matrix3& other) const;
+
+		matrix3 operator+=(
+			const matrix3& other);
+
+		matrix3 operator-=(
+			const matrix3& other);
+
+		matrix3 operator*=(
+			const matrix3& other);
+
+		matrix3 operator+ (
+			float other) const;
+
+		matrix3 operator- (
+			float other) const;
+
+		matrix3 operator* (
+			float other) const;
+
+		matrix3 operator/ (
+			float other) const;
+
+		matrix3 operator+=(
+			float other);
+
+		matrix3 operator-=(
+			float other);
+
+		matrix3 operator*=(
+			float other);
+
+		matrix3 operator/=(
+			float other);
+
 		matrix3 operator-() const;
-		float& operator()(int row, int col);
-		bool operator==(const matrix3& other) const;
-		bool operator!=(const matrix3& other) const;
+
+		float& operator()(
+			int row,
+			int col);
+
+		bool operator==(
+			const matrix3& other) const;
+
+		bool operator!=(
+			const matrix3& other) const;
+
 
 		/**
 		* Returns a matrix with a specified rotation around an axis.
 		*
 		* @param axisAngle Axis and angle of rotation in one vector.
 		*/
-		static matrix3 create_from_axis_angle(const vector4& axisAngle);
+		static matrix3 create_from_axis_angle(
+			const vector4& axisAngle);
 
 		/**
 		* Returns a matrix with a specified rotation around an axis.
@@ -142,7 +185,9 @@ namespace iwmath {
 		* @param axis Axis vector
 		* @param angle Angle of rotation around the axis in radians.
 		*/
-		static matrix3 create_from_axis_angle(const vector3& axis, float angle);
+		static matrix3 create_from_axis_angle(
+			const vector3& axis,
+			float angle);
 
 		/**
 		* Returns a matrix with a specified rotation around an axis.
@@ -152,42 +197,51 @@ namespace iwmath {
 		* @param z X component of the axis vector.
 		* @param angle Angle of rotation around the axis in radians.
 		*/
-		static matrix3 create_from_axis_angle(float x, float y, float z, float angle);
+		static matrix3 create_from_axis_angle(
+			float x,
+			float y,
+			float z,
+			float angle);
 
 		/**
 		* Returns a matrix with a specified rotation.
 		*
 		* @param quaternion Quaternion to create matrix from.
 		*/
-		static matrix3 create_from_quaternion(const quaternion& quaternion);
+		static matrix3 create_from_quaternion(
+			const quaternion& quaternion);
 
 		/**
 		* Returns a matrix with a specified rotation around the x axis.
 		*
 		* @param angle Angle around the x axis in radians.
 		*/
-		static matrix3 create_rotation_x(float angle);
+		static matrix3 create_rotation_x(
+			float angle);
 
 		/**
 		* Returns a matrix with a specified rotation around the y axis.
 		*
 		* @param angle Angle around the y axis in radians.
 		*/
-		static matrix3 create_rotation_y(float angle);
+		static matrix3 create_rotation_y(
+			float angle);
 
 		/**
 		* Returns a matrix with a specified rotation around the z axis.
 		*
 		* @param angle Angle around the z axis in radians.
 		*/
-		static matrix3 create_rotation_z(float angle);
+		static matrix3 create_rotation_z(
+			float angle);
 
 		/**
 		* Returns a matrix with a specified rotation.
 		*
 		* @param angles Euler angles in radians.
 		*/
-		static matrix3 create_rotation(const vector3& angles);
+		static matrix3 create_rotation(
+			const vector3& angles);
 
 		/**
 		* Returns a matrix with a specified rotation.
@@ -196,21 +250,26 @@ namespace iwmath {
 		* @param y Angle around the y axis in radians.
 		* @param z Angle around the z axis in radians.
 		*/
-		static matrix3 create_rotation(float x, float y, float z);
+		static matrix3 create_rotation(
+			float x,
+			float y,
+			float z);
 
 		/**
 		* Returns a matrix with a specified scale.
 		*
 		* @param scale Scale in the x, y, and z dimensions.
 		*/
-		static matrix3 create_scale(float scale);
+		static matrix3 create_scale(
+			float scale);
 
 		/**
 		* Returns a matrix with a specified scale.
 		*
 		* @param scale Scale in the x, y, and z dimensions as a vector3.
 		*/
-		static matrix3 create_scale(const vector3& scale);
+		static matrix3 create_scale(
+			const vector3& scale);
 
 		/**
 		* Returns a matrix with a specified scale.
@@ -219,8 +278,13 @@ namespace iwmath {
 		* @param y Scale in the y dimension.
 		* @param z Scale in the z dimension.
 		*/
-		static matrix3 create_scale(float x, float y, float z);
+		static matrix3 create_scale(
+			float x,
+			float y,
+			float z);
 
-		friend IWMATH_API std::ostream& operator<<(std::ostream& stream, const matrix3&matrix);
+		friend IWMATH_API std::ostream& operator<<(
+			std::ostream& stream,
+			const matrix3&matrix);
 	};
 }

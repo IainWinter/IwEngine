@@ -4,7 +4,7 @@
 #include "iwmath.h"
 
 namespace iwmath {
-	/** 
+	/**
 	* Represents a vector or point in 2D.
 	*/
 	struct IWMATH_API vector2 {
@@ -31,8 +31,13 @@ namespace iwmath {
 		float x, y;
 
 		vector2();
-		vector2(float xy);
-		vector2(float x, float y);
+
+		vector2(
+			float xy);
+
+		vector2(
+			float x,
+			float y);
 
 		/**
 		* Returns the length of the vector.
@@ -40,12 +45,14 @@ namespace iwmath {
 		float length() const;
 
 		/**
-		* Returns the squared length of the vector. Use this for length comparisons.
+		* Returns the squared length of the vector. 
+		*	Use this for length comparisons.
 		*/
 		float length_squared() const;
 
 		/**
-		* Returns the length of the vector using the inv_sqrt function. This is much faster, and accurate enough in most cases.
+		* Returns the length of the vector using the inv_sqrt function.
+		*	This is much faster, and accurate enough in most cases.
 		*/
 		float length_fast() const;
 
@@ -54,14 +61,17 @@ namespace iwmath {
 		*
 		* @param other Vector to dot with.
 		*/
-		float dot(const vector2& other) const;
+		float dot(
+			const vector2& other) const;
 
 		/**
-		* Returns the length of the would be vector created from a cross product in 3D.
+		* Returns the length of the would be vector created 
+		*	from a cross product in 3D.
 		*
 		* @param other Vector to cross with.
 		*/
-		float cross_length(const vector2& other) const;
+		float cross_length(
+			const vector2& other) const;
 
 		/**
 		* Returns the normalized version of the vector.
@@ -69,7 +79,9 @@ namespace iwmath {
 		vector2 normalized() const;
 
 		/**
-		* Returns the normalized version of the vector using the inv_sqrt function. This is much faster, and accurate enough in most cases.
+		* Returns the normalized version of the vector 
+		*	using the inv_sqrt function. This is much faster, 
+		*	and accurate enough in most cases.
 		*/
 		vector2 normalized_fast() const;
 
@@ -79,33 +91,80 @@ namespace iwmath {
 		void normalize();
 
 		/**
-		* Normalizes the vector using the inv_sqrt function. This is much faster, and accurate enough in most cases.
+		* Normalizes the vector using the inv_sqrt function. 
+		*	This is much faster, and accurate enough in most cases.
 		*/
 		void normalize_fast();
 
-		vector2 operator+ (const vector2& other) const;
-		vector2 operator- (const vector2& other) const;
-		vector2 operator* (const vector2& other) const;
-		vector2 operator/ (const vector2& other) const;
-		vector2 operator+=(const vector2& other);
-		vector2 operator-=(const vector2& other);
-		vector2 operator*=(const vector2& other);
-		vector2 operator/=(const vector2& other);
-		vector2 operator+ (float other) const;
-		vector2 operator- (float other) const;
-		vector2 operator* (float other) const;
-		vector2 operator/ (float other) const;
-		vector2 operator+=(float other);
-		vector2 operator-=(float other);
-		vector2 operator*=(float other);
-		vector2 operator/=(float other);
-		vector2 operator-() const;
-		float& operator[](std::size_t index);
-		bool operator==(const vector2& other) const;
-		bool operator!=(const vector2& other) const;
+		vector2 operator+ (
+			const vector2& other) const;
 
-		friend IWMATH_API std::ostream& operator<<(std::ostream& stream, const vector2& vector);
-		friend IWMATH_API vector2 operator+(float left, const vector2& right);
-		friend IWMATH_API vector2 operator*(float left, const vector2& right);
+		vector2 operator- (
+			const vector2& other) const;
+
+		vector2 operator* (
+			const vector2& other) const;
+
+		vector2 operator/ (
+			const vector2& other) const;
+
+		vector2 operator+=(
+			const vector2& other);
+
+		vector2 operator-=(
+			const vector2& other);
+
+		vector2 operator*=(
+			const vector2& other);
+
+		vector2 operator/=(
+			const vector2& other);
+
+		vector2 operator+ (
+			float other) const;
+
+		vector2 operator- (
+			float other) const;
+
+		vector2 operator* (
+			float other) const;
+
+		vector2 operator/ (
+			float other) const;
+
+		vector2 operator+=(
+			float other);
+
+		vector2 operator-=(
+			float other);
+
+		vector2 operator*=(
+			float other);
+
+		vector2 operator/=(
+			float other);
+
+		vector2 operator-() const;
+
+		float& operator[](
+			std::size_t index);
+
+		bool operator==(
+			const vector2& other) const;
+
+		bool operator!=(
+			const vector2& other) const;
+
+		friend IWMATH_API std::ostream& operator<<(
+			std::ostream& stream,
+			const vector2& vector);
+
+		friend IWMATH_API vector2 operator+(
+			float left,
+			const vector2& right);
+
+		friend IWMATH_API vector2 operator*(
+			float left,
+			const vector2& right);
 	};
 }

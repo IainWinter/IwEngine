@@ -20,9 +20,17 @@ namespace iwmath {
 		};
 
 		matrix2();
-		matrix2(float diagonal);
-		matrix2(float* elements);
-		matrix2(vector2 row0, vector2 row1);
+
+		matrix2(
+			float diagonal);
+
+		matrix2(
+			float* elements);
+
+		matrix2(
+			vector2 row0,
+			vector2 row1);
+
 		matrix2(
 			float m00, float m01,
 			float m10, float m11
@@ -68,45 +76,84 @@ namespace iwmath {
 		*/
 		void normalize();
 
-		matrix2 operator+ (const matrix2& other) const;
-		matrix2 operator- (const matrix2& other) const;
-		matrix2 operator* (const matrix2& other) const;
-		matrix2 operator+=(const matrix2& other);
-		matrix2 operator-=(const matrix2& other);
-		matrix2 operator*=(const matrix2& other);
-		matrix2 operator+ (float other) const;
-		matrix2 operator- (float other) const;
-		matrix2 operator* (float other) const;
-		matrix2 operator/ (float other) const;
-		matrix2 operator+=(float other);
-		matrix2 operator-=(float other);
-		matrix2 operator*=(float other);
-		matrix2 operator/=(float other);
+		matrix2 operator+ (
+			const matrix2& other) const;
+
+		matrix2 operator- (
+			const matrix2& other) const;
+
+		matrix2 operator* (
+			const matrix2& other) const;
+
+		matrix2 operator+=(
+			const matrix2& other);
+
+		matrix2 operator-=(
+			const matrix2& other);
+
+		matrix2 operator*=(
+			const matrix2& other);
+
+		matrix2 operator+ (
+			float other) const;
+
+		matrix2 operator- (
+			float other) const;
+
+		matrix2 operator* (
+			float other) const;
+
+		matrix2 operator/ (
+			float other) const;
+
+		matrix2 operator+=(
+			float other);
+
+		matrix2 operator-=(
+			float other);
+
+		matrix2 operator*=(
+			float other);
+
+		matrix2 operator/=(
+			float other);
+
 		matrix2 operator-() const;
-		float& operator()(int x, int y);
-		bool operator==(const matrix2& other) const;
-		bool operator!=(const matrix2& other) const;
+
+		float& operator()(
+			int x,
+			int y);
+
+		bool operator==(
+			const matrix2& other) const;
+
+		bool operator!=(
+			const matrix2& other) const;
+
 
 		/**
 		* Returns a matrix with a specified rotation.
 		*
 		* @param angle Rotation in radians.
 		*/
-		static matrix2 create_rotation(float angle);
+		static matrix2 create_rotation(
+			float angle);
 
 		/**
 		* Returns a matrix with a specified scale.
 		*
 		* @param scale Scale in the x and y dimensions.
 		*/
-		static matrix2 create_scale(float scale);
+		static matrix2 create_scale(
+			float scale);
 
 		/**
 		* Returns a matrix with a specified scale.
 		*
 		* @param scale Scale in the x and y dimensions as a vector2.
 		*/
-		static matrix2 create_scale(const vector2& scale);
+		static matrix2 create_scale(
+			const vector2& scale);
 
 		/**
 		* Returns a matrix with a specified scale.
@@ -114,8 +161,12 @@ namespace iwmath {
 		* @param x Scale in the x dimension.
 		* @param y Scale in the y dimension.
 		*/
-		static matrix2 create_scale(float x, float y);
+		static matrix2 create_scale(
+			float x,
+			float y);
 
-		friend IWMATH_API std::ostream& operator<<(std::ostream& stream, const matrix2& matrix);
+		friend IWMATH_API std::ostream& operator<<(
+			std::ostream& stream,
+			const matrix2& matrix);
 	};
 }

@@ -3,26 +3,39 @@
 namespace iwmath {
 	const matrix2 matrix2::identity = matrix2(1.0f);
 
-	matrix2::matrix2() {
+	matrix2::matrix2()
+	{
 		memset(elements, 0, 2 * 2 * sizeof(float));
 	}
 
-	matrix2::matrix2(float diagonal) {
+	matrix2::matrix2(
+		float diagonal)
+	{
 		memset(elements, 0, 2 * 2 * sizeof(float));
 		elements[0 + 0 * 2] = diagonal;
 		elements[1 + 1 * 2] = diagonal;
 	}
 
-	matrix2::matrix2(float* elements) {
+	matrix2::matrix2(
+		float* elements)
+	{
 		memcpy(this->elements, elements, 2 * 2 * sizeof(float));
 	}
 
-	matrix2::matrix2(vector2 row0, vector2 row1) {
+	matrix2::matrix2(
+		vector2 row0,
+		vector2 row1)
+	{
 		rows[0] = row0;
 		rows[1] = row1;
 	}
 
-	matrix2::matrix2(float m00, float m01, float m10, float m11) {
+	matrix2::matrix2(
+		float m00,
+		float m01,
+		float m10,
+		float m11)
+	{
 		elements[0] = m00;
 		elements[1] = m01;
 		elements[2] = m10;
@@ -65,7 +78,8 @@ namespace iwmath {
 	void matrix2::invert() {
 		float det = determinant();
 		if (almost_equal(det, 0, 6)) {
-			std::invalid_argument("Determinant is zero, therefore inverse matrix doesn't exist.");
+			std::invalid_argument("Determinant is zero, "
+				"therefore inverse matrix doesn't exist.");
 		}
 
 		float invDet = 1.0f / det;
@@ -86,21 +100,27 @@ namespace iwmath {
 		*this /= det;
 	}
 
-	matrix2 matrix2::operator+(const matrix2& other) const {
+	matrix2 matrix2::operator+(
+		const matrix2& other) const
+	{
 		return matrix2(
 			rows[0] + other.rows[0],
 			rows[1] + other.rows[1]
 		);
 	}
 
-	matrix2 matrix2::operator-(const matrix2& other) const {
+	matrix2 matrix2::operator-(
+		const matrix2& other) const
+	{
 		return matrix2(
 			rows[0] - other.rows[0],
 			rows[1] - other.rows[1]
 		);
 	}
 
-	matrix2 matrix2::operator*(const matrix2& other) const {
+	matrix2 matrix2::operator*(
+		const matrix2& other) const
+	{
 		float a00 = rows[0].x;
 		float a10 = rows[0].y;
 		float a01 = rows[1].x;
@@ -119,59 +139,81 @@ namespace iwmath {
 		);
 	}
 
-	matrix2 matrix2::operator+=(const matrix2& other) {
+	matrix2 matrix2::operator+=(
+		const matrix2& other)
+	{
 		return *this = *this + other;
 	}
 
-	matrix2 matrix2::operator-=(const matrix2& other) {
+	matrix2 matrix2::operator-=(
+		const matrix2& other)
+	{
 		return *this = *this - other;
 	}
 
-	matrix2 matrix2::operator*=(const matrix2& other) {
+	matrix2 matrix2::operator*=(
+		const matrix2& other)
+	{
 		return *this = *this * other;
 	}
 
-	matrix2 matrix2::operator+(float other) const {
+	matrix2 matrix2::operator+(
+		float other) const
+	{
 		return matrix2(
 			rows[0] + other,
 			rows[1] + other
 		);
 	}
 
-	matrix2 matrix2::operator-(float other) const {
+	matrix2 matrix2::operator-(
+		float other) const
+	{
 		return matrix2(
 			rows[0] - other,
 			rows[1] - other
 		);
 	}
 
-	matrix2 matrix2::operator*(float other) const {
+	matrix2 matrix2::operator*(
+		float other) const
+	{
 		return matrix2(
 			rows[0] * other,
 			rows[1] * other
 		);
 	}
 
-	matrix2 matrix2::operator/(float other) const {
+	matrix2 matrix2::operator/(
+		float other) const
+	{
 		return matrix2(
 			rows[0] / other,
 			rows[1] / other
 		);
 	}
 
-	matrix2 matrix2::operator+=(float other) {
+	matrix2 matrix2::operator+=(
+		float other)
+	{
 		return *this = *this + other;
 	}
 
-	matrix2 matrix2::operator-=(float other) {
+	matrix2 matrix2::operator-=(
+		float other)
+	{
 		return *this = *this - other;
 	}
 
-	matrix2 matrix2::operator*=(float other) {
+	matrix2 matrix2::operator*=(
+		float other)
+	{
 		return *this = *this * other;
 	}
 
-	matrix2 matrix2::operator/=(float other) {
+	matrix2 matrix2::operator/=(
+		float other)
+	{
 		return *this = *this / other;
 	}
 
@@ -179,23 +221,33 @@ namespace iwmath {
 		return matrix2(-rows[0], -rows[1]);
 	}
 
-	float& matrix2::operator()(int row, int col) {
+	float& matrix2::operator()(
+		int row,
+		int col)
+	{
 		if (row > 2 || col > 2 || 0 > row || 0 > col) {
-			throw std::out_of_range("Row/Col is outside the bounds of this maxtrix.");
+			throw std::out_of_range("Row/Col is outside the "
+				"bounds of this maxtrix.");
 		}
 
 		return elements[col + row * 2];
 	}
 
-	bool matrix2::operator==(const matrix2& other) const {
+	bool matrix2::operator==(
+		const matrix2& other) const
+	{
 		return rows[0] == other.rows[0] && rows[1] == other.rows[1];
 	}
 
-	bool matrix2::operator!=(const matrix2& other) const {
+	bool matrix2::operator!=(
+		const matrix2& other) const
+	{
 		return !operator==(other);
 	}
 
-	matrix2 matrix2::create_rotation(float angle) {
+	matrix2 matrix2::create_rotation(
+		float angle)
+	{
 		float cos = cosf(angle);
 		float sin = sinf(angle);
 
@@ -205,22 +257,32 @@ namespace iwmath {
 		);
 	}
 
-	matrix2 matrix2::create_scale(float scale) {
+	matrix2 matrix2::create_scale(
+		float scale)
+	{
 		return create_scale(scale, scale);
 	}
 
-	matrix2 matrix2::create_scale(const vector2& scale) {
+	matrix2 matrix2::create_scale(
+		const vector2& scale)
+	{
 		return create_scale(scale.x, scale.y);
 	}
 
-	matrix2 matrix2::create_scale(float x, float y) {
+	matrix2 matrix2::create_scale(
+		float x, 
+		float y)
+	{
 		return matrix2(
 			x, 0,
 			0, y
 		);
 	}
 
-	std::ostream& iwmath::operator<<(std::ostream& ostream, const matrix2& a) {
+	std::ostream& iwmath::operator<<(
+		std::ostream& ostream, 
+		const matrix2& a)
+	{
 		return ostream << a.rows[0] << std::endl << a.rows[1];
 	}
 }

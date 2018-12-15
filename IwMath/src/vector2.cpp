@@ -7,16 +7,19 @@ namespace iwmath {
 	const vector2 vector2::unit_y = vector2(0, 1);
 
 	vector2::vector2()
-		: x(0), y(0) {
-	}
+		: x(0)
+		, y(0) {}
 
-	vector2::vector2(float xy)
-		: x(xy), y(xy) {
-	}
+	vector2::vector2(
+		float xy)
+		: x(xy)
+		, y(xy) {}
 
-	vector2::vector2(float x, float y)
-		: x(x), y(y) {
-	}
+	vector2::vector2(
+		float x,
+		float y)
+		: x(x)
+		, y(y) {}
 
 	float vector2::length() const {
 		return sqrtf(x * x + y * y);
@@ -30,11 +33,15 @@ namespace iwmath {
 		return 1 / inv_sqrt(x * x + y * y);
 	}
 
-	float vector2::dot(const vector2 & other) const {
+	float vector2::dot(
+		const vector2 & other) const
+	{
 		return x * other.x + y * other.y;
 	}
 
-	float vector2::cross_length(const vector2 & other) const {
+	float vector2::cross_length(
+		const vector2 & other) const
+	{
 		return x * other.y - y * other.x;
 	}
 
@@ -66,73 +73,106 @@ namespace iwmath {
 		y /= scale;
 	}
 
-	float& iwmath::vector2::operator[](std::size_t index) {
+	float& iwmath::vector2::operator[](
+		std::size_t index)
+	{
 		if (index == 0) return x;
 		else if (index == 1) return y;
 		throw std::out_of_range("Index out of bounds");
 	}
 
-	vector2 vector2::operator+(const vector2& other) const {
+	vector2 vector2::operator+(
+		const vector2& other) const
+	{
 		return vector2(x + other.x, y + other.y);
 	}
 
-	vector2 vector2::operator-(const vector2& other) const {
+	vector2 vector2::operator-(
+		const vector2& other) const
+	{
 		return vector2(x - other.x, y - other.y);
 	}
 
-	vector2 vector2::operator*(const vector2& other) const {
+	vector2 vector2::operator*(
+		const vector2& other) const
+	{
 		return vector2(x * other.x, y * other.y);
 	}
 
-	vector2 vector2::operator/(const vector2& other) const {
+	vector2 vector2::operator/(
+		const vector2& other) const
+	{
 		return vector2(x / other.x, y / other.y);
 	}
 
-	vector2 vector2::operator+=(const vector2& other) {
+	vector2 vector2::operator+=(
+		const vector2& other)
+	{
 		return *this = (*this) + other;
 	}
 
-	vector2 vector2::operator-=(const vector2& other) {
+	vector2 vector2::operator-=(
+		const vector2& other)
+	{
 		return *this = (*this) - other;
 	}
 
-	vector2 vector2::operator*=(const vector2& other) {
+	vector2 vector2::operator*=(
+		const vector2& other)
+	{
 		return *this = (*this) * other;
 	}
 
-	vector2 vector2::operator/=(const vector2& other) {
+	vector2 vector2::operator/=(const vector2& other)
+	{
 		return *this = (*this) / other;
 	}
 
-	vector2 vector2::operator+(float other) const {
+	vector2 vector2::operator+(
+		float other) const
+	{
 		return vector2(x + other, y + other);
 	}
 
-	vector2 vector2::operator-(float other) const {
+	vector2 vector2::operator-(
+		float other) const
+	{
 		return vector2(x - other, y - other);
 	}
 
-	vector2 vector2::operator*(float other) const {
+	vector2 vector2::operator*(
+		float other) const
+	{
 		return vector2(x * other, y * other);
 	}
 
-	vector2 vector2::operator/(float other) const {
+	vector2 vector2::operator/(
+		float other) const
+	{
 		return vector2(x / other, y / other);
 	}
 
-	vector2 vector2::operator+=(float other) {
+	vector2 vector2::operator+=(
+		float other)
+	{
 		return *this = (*this) + other;
 	}
 
-	vector2 vector2::operator-=(float other) {
+	vector2 vector2::operator-=(
+		float other)
+	{
 		return *this = (*this) - other;
 	}
 
-	vector2 vector2::operator*=(float other) {
+	vector2 vector2::operator*=(
+		float other)
+	{
 		return *this = (*this) * other;
 	}
 
-	vector2 vector2::operator/=(float other) {
+	vector2 vector2::operator/=(
+		float other)
+	{
 		return *this = (*this) / other;
 	}
 
@@ -140,23 +180,39 @@ namespace iwmath {
 		return vector2(-x, -y);
 	}
 
-	bool vector2::operator==(const vector2 & other) const {
-		return almost_equal(x, other.x, 6) && almost_equal(y, other.y, 6);
+	bool vector2::operator==(
+		const vector2 & other) const
+	{
+		return almost_equal(x, other.x, 6)
+			&& almost_equal(y, other.y, 6);
 	}
 
-	bool vector2::operator!=(const vector2 & other) const {
+	bool vector2::operator!=(
+		const vector2 & other) const
+	{
 		return !operator==(other);
 	}
 
-	std::ostream& iwmath::operator<<(std::ostream& ostream, const vector2& vector) {
-		return ostream << "(" << vector.x << ", " << vector.y << ")";
+	std::ostream& iwmath::operator<<(
+		std::ostream& ostream,
+		const vector2& vector)
+	{
+		return ostream << "("
+			<< vector.x << ", "
+			<< vector.y << ")";
 	}
 
-	vector2 iwmath::operator+(float left, const vector2& right) {
+	vector2 iwmath::operator+(
+		float left,
+		const vector2& right)
+	{
 		return right + left;
 	}
 
-	vector2 iwmath::operator*(float left, const vector2& right) {
+	vector2 iwmath::operator*(
+		float left,
+		const vector2& right)
+	{
 		return right * left;
 	}
 }

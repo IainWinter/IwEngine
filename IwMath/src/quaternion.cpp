@@ -5,20 +5,35 @@ namespace iwmath {
 	const quaternion quaternion::identity = quaternion(0, 0, 0, 1);
 
 	quaternion::quaternion()
-		: x(0), y(0), z(0), w(1) {
-	}
+		: x(0)
+		, y(0)
+		, z(0)
+		, w(1) {}
 
-	quaternion::quaternion(float x, float y, float z, float w)
-		: x(x), y(y), z(z), w(w) {
-	}
+	quaternion::quaternion(
+		float x,
+		float y,
+		float z,
+		float w)
+		: x(x)
+		, y(y)
+		, z(z)
+		, w(w) {}
 
-	quaternion::quaternion(const vector3& xyz, float w)
-		: x(xyz.x), y(xyz.y), z(xyz.z), w(w) {
-	}
+	quaternion::quaternion(
+		const vector3& xyz,
+		float w)
+		: x(xyz.x)
+		, y(xyz.y)
+		, z(xyz.z)
+		, w(w) {}
 
-	quaternion::quaternion(const vector4& xyzw)
-		: x(xyzw.x), y(xyzw.y), z(xyzw.z), w(xyzw.w) {
-	}
+	quaternion::quaternion(
+		const vector4& xyzw)
+		: x(xyzw.x)
+		, y(xyzw.y)
+		, z(xyzw.z)
+		, w(xyzw.w) {}
 
 	float quaternion::length() const {
 		return sqrtf(x * x + y * y + z * z + w * w);
@@ -120,22 +135,34 @@ namespace iwmath {
 			q.normalize();
 		}
 
-		float vz = atan2f(-2 * (q.x * q.y - q.w * q.z), q.w * q.w + q.x * q.x - q.y * q.y - q.z * q.z);
+		float vz = atan2f(
+			-2 * (q.x * q.y - q.w * q.z), 
+			q.w * q.w + q.x * q.x - q.y * q.y - q.z * q.z);
+
 		float vy = asinf(2 * (q.x * q.z + q.w * q.y));
-		float vx = atan2f(-2 * (q.y * q.z - q.w * q.x), q.w * q.w - q.x * q.x - q.y * q.y + q.z * q.z);
+
+		float vx = atan2f(
+			-2 * (q.y * q.z - q.w * q.x),
+			q.w * q.w - q.x * q.x - q.y * q.y + q.z * q.z);
 
 		return vector3(vx, vy, vz);
 	}
 
-	quaternion quaternion::operator+(const quaternion& other) const {
+	quaternion quaternion::operator+(
+		const quaternion& other) const
+	{
 		return quaternion(x + other.x, y + other.y, z + other.z, w + other.w);
 	}
 
-	quaternion quaternion::operator-(const quaternion& other) const {
+	quaternion quaternion::operator-(
+		const quaternion& other) const
+	{
 		return quaternion(x - other.x, y - other.y, z - other.z, w - other.w);
 	}
 
-	quaternion quaternion::operator*(const quaternion& other) const {
+	quaternion quaternion::operator*(
+		const quaternion& other) const
+	{
 		return quaternion(
 			other.w * x + other.x * w - other.y * z + other.z * y,
 			other.w * y + other.x * z + other.y * w - other.z * x,
@@ -143,46 +170,71 @@ namespace iwmath {
 			other.w * w - other.x * x - other.y * y - other.z * z);
 	}
 
-	quaternion quaternion::operator+=(const quaternion& other) {
+	quaternion quaternion::operator+=(
+		const quaternion& other)
+	{
 		return *this = *this + other;
 	}
 
-	quaternion quaternion::operator-=(const quaternion& other) {
+	quaternion quaternion::operator-=(
+		const quaternion& other)
+	{
 		return *this = *this - other;
 	}
 
-	quaternion quaternion::operator*=(const quaternion& other) {
+	quaternion quaternion::operator*=(
+		const quaternion& other)
+	{
 		return *this = *this * other;
 	}
 
-	quaternion quaternion::operator*(float other) const {
+	quaternion quaternion::operator*(
+		float other) const
+	{
 		return quaternion(x * other, y * other, z * other, w * other);
 	}
 
-	quaternion quaternion::operator*=(float other) {
+	quaternion quaternion::operator*=(
+		float other)
+	{
 		return *this = *this * other;
 	}
 
-	bool quaternion::operator==(const quaternion& other) const {
+	bool quaternion::operator==(
+		const quaternion& other) const
+	{
 		return almost_equal(x, other.x, 6)
 			&& almost_equal(y, other.y, 6)
 			&& almost_equal(z, other.z, 6)
 			&& almost_equal(w, other.w, 6);
 	}
 
-	bool quaternion::operator!=(const quaternion& other) const {
+	bool quaternion::operator!=(
+		const quaternion& other) const
+	{
 		return !operator==(other);
 	}
 
-	quaternion quaternion::create_from_axis_angle(const vector4& axis_angle) {
-		return create_from_axis_angle(axis_angle.x, axis_angle.y, axis_angle.z, axis_angle.w);
+	quaternion quaternion::create_from_axis_angle(
+		const vector4& axis_angle)
+	{
+		return create_from_axis_angle(
+			axis_angle.x, axis_angle.y, axis_angle.z, axis_angle.w);
 	}
 
-	quaternion quaternion::create_from_axis_angle(const vector3& axis, float angle) {
+	quaternion quaternion::create_from_axis_angle(
+		const vector3& axis,
+		float angle)
+	{
 		return create_from_axis_angle(axis.x, axis.y, axis.z, angle);
 	}
 
-	quaternion quaternion::create_from_axis_angle(float x, float y, float z, float angle) {
+	quaternion quaternion::create_from_axis_angle(
+		float x,
+		float y,
+		float z,
+		float angle)
+	{
 		vector3 axis = vector3(x, y, z);
 		float length = axis.length_squared();
 
@@ -198,11 +250,17 @@ namespace iwmath {
 		return quaternion(axis * sin(a), cos(a));
 	}
 
-	quaternion quaternion::create_from_euler_angles(const vector3& angles) {
+	quaternion quaternion::create_from_euler_angles(
+		const vector3& angles)
+	{
 		return create_from_euler_angles(angles.x, angles.y, angles.z);
 	}
 
-	quaternion quaternion::create_from_euler_angles(float x, float y, float z) {
+	quaternion quaternion::create_from_euler_angles(
+		float x,
+		float y,
+		float z)
+	{
 		x /= 2;
 		y /= 2;
 		z /= 2;
@@ -222,11 +280,21 @@ namespace iwmath {
 		);
 	}
 
-	std::ostream& iwmath::operator<<(std::ostream& ostream, const quaternion& quaternion) {
-		return ostream << "(" << quaternion.x << ", " << quaternion.y << ", " << quaternion.z << ", " << quaternion.w << ")";
+	std::ostream& iwmath::operator<<(
+		std::ostream& ostream,
+		const quaternion& quaternion)
+	{
+		return ostream << "("
+			<< quaternion.x << ", "
+			<< quaternion.y << ", "
+			<< quaternion.z << ", "
+			<< quaternion.w << ")";
 	}
 
-	vector3 iwmath::operator*(const iwmath::vector3& left, const quaternion& right) {
+	vector3 iwmath::operator*(
+		const iwmath::vector3& left,
+		const quaternion& right)
+	{
 		vector3 v = vector3(right.x, right.y, right.z);
 		float s = right.w;
 

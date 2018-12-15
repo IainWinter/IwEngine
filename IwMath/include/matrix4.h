@@ -23,16 +23,33 @@ namespace iwmath {
 		};
 
 		matrix4();
-		matrix4(float diagonal);
-		matrix4(float* elements);
-		matrix4(const matrix3& rot_and_scale);
-		matrix4(vector3 row0, vector3 row1, vector3 row2);
-		matrix4(vector4 row0, vector4 row1, vector4 row2, vector4 row3);
+
+		matrix4(
+			float diagonal);
+
+		matrix4(
+			float* elements);
+
+		matrix4(
+			const matrix3& rot_and_scale);
+
+		matrix4(
+			vector3 row0,
+			vector3 row1,
+			vector3 row2);
+
+		matrix4(
+			vector4 row0,
+			vector4 row1,
+			vector4 row2,
+			vector4 row3);
+
 		matrix4(
 			float m00, float m01, float m02,
 			float m10, float m11, float m12,
 			float m20, float m21, float m22
 		);
+
 		matrix4(
 			float m00, float m01, float m02, float m03,
 			float m10, float m11, float m12, float m13,
@@ -121,7 +138,8 @@ namespace iwmath {
 		quaternion rotation() const;
 
 		/**
-		* Returns the axis and angle of rotation. X, Y, Z is the axis, and W is the angle.
+		* Returns the axis and angle of rotation.
+		*	X, Y, Z is the axis, and W is the angle.
 		*/
 		vector4 axis_angle() const;
 
@@ -143,33 +161,71 @@ namespace iwmath {
 		/**
 		* Rotates the matrix to face a specified point in worldspace.
 		*/
-		void look_at(const vector3& eye, const vector3& target, const vector3& up);
+		void look_at(
+			const vector3& eye,
+			const vector3& target,
+			const vector3& up);
 
-		matrix4 operator+ (const matrix4& other) const;
-		matrix4 operator- (const matrix4& other) const;
-		matrix4 operator* (const matrix4& other) const;
-		matrix4 operator+=(const matrix4& other);
-		matrix4 operator-=(const matrix4& other);
-		matrix4 operator*=(const matrix4& other);
-		matrix4 operator+ (float other) const;
+		matrix4 operator+ (
+			const matrix4& other) const;
+
+		matrix4 operator- (
+			const matrix4& other) const;
+
+		matrix4 operator* (
+			const matrix4& other) const;
+
+		matrix4 operator+=(
+			const matrix4& other);
+
+		matrix4 operator-=(
+			const matrix4& other);
+
+		matrix4 operator*=(
+			const matrix4& other);
+
+		matrix4 operator+ (
+			float other) const;
+
 		matrix4 operator- (float other) const;
-		matrix4 operator* (float other) const;
-		matrix4 operator/ (float other) const;
-		matrix4 operator+=(float other);
-		matrix4 operator-=(float other);
-		matrix4 operator*=(float other);
-		matrix4 operator/=(float other);
+
+		matrix4 operator* (
+			float other) const;
+
+		matrix4 operator/ (
+			float other) const;
+
+		matrix4 operator+=(
+			float other);
+
+		matrix4 operator-=(
+			float other);
+
+		matrix4 operator*=(
+			float other);
+
+		matrix4 operator/=(
+			float other);
+
 		matrix4 operator-() const;
-		float& operator()(int row, int col);
-		bool operator==(const matrix4& other) const;
-		bool operator!=(const matrix4& other) const;
+
+		float& operator()(
+			int row,
+			int col);
+
+		bool operator==(
+			const matrix4& other) const;
+
+		bool operator!=(
+			const matrix4& other) const;
 
 		/**
 		* Returns a matrix with a specified rotation around an axis.
 		*
 		* @param axisAngle Axis and angle of rotation in one vector.
 		*/
-		static matrix4 create_from_axis_angle(const vector4& axis_angle);
+		static matrix4 create_from_axis_angle(
+			const vector4& axis_angle);
 
 		/**
 		* Returns a matrix with a specified rotation around an axis.
@@ -177,7 +233,9 @@ namespace iwmath {
 		* @param axis Axis vector
 		* @param angle Angle of rotation around the axis in radians.
 		*/
-		static matrix4 create_from_axis_angle(const vector3& axis, float angle);
+		static matrix4 create_from_axis_angle(
+			const vector3& axis,
+			float angle);
 
 		/**
 		* Returns a matrix with a specified rotation around an axis.
@@ -187,42 +245,51 @@ namespace iwmath {
 		* @param z X component of the axis vector.
 		* @param angle Angle of rotation around the axis in radians.
 		*/
-		static matrix4 create_from_axis_angle(float x, float y, float z, float angle);
+		static matrix4 create_from_axis_angle(
+			float x,
+			float y,
+			float z,
+			float angle);
 
 		/**
 		* Returns a matrix with a specified rotation.
 		*
 		* @param quaternion Quaternion to create matrix from.
 		*/
-		static matrix4 create_from_quaternion(const quaternion& quaternion);
+		static matrix4 create_from_quaternion(
+			const quaternion& quaternion);
 
 		/**
 		* Returns a matrix with a specified rotation around the x axis.
 		*
 		* @param angle Angle around the x axis in radians.
 		*/
-		static matrix4 create_rotation_x(float angle);
+		static matrix4 create_rotation_x(
+			float angle);
 
 		/**
 		* Returns a matrix with a specified rotation around the y axis.
 		*
 		* @param angle Angle around the y axis in radians.
 		*/
-		static matrix4 create_rotation_y(float angle);
+		static matrix4 create_rotation_y(
+			float angle);
 
 		/**
 		* Returns a matrix with a specified rotation around the z axis.
 		*
 		* @param angle Angle around the z axis in radians.
 		*/
-		static matrix4 create_rotation_z(float angle);
+		static matrix4 create_rotation_z(
+			float angle);
 
 		/**
 		* Returns a matrix with a specified rotation.
 		*
 		* @param angles Euler angles in radians.
 		*/
-		static matrix4 create_rotation(const vector3& angles);
+		static matrix4 create_rotation(
+			const vector3& angles);
 
 		/**
 		* Returns a matrix with a specified rotation.
@@ -231,21 +298,26 @@ namespace iwmath {
 		* @param y Angle around the y axis in radians.
 		* @param z Angle around the z axis in radians.
 		*/
-		static matrix4 create_rotation(float x, float y, float z);
+		static matrix4 create_rotation(
+			float x,
+			float y,
+			float z);
 
 		/**
 		* Returns a matrix with a specified scale.
 		*
 		* @param scale Scale in the x, y, and z dimensions.
 		*/
-		static matrix4 create_scale(float scale);
+		static matrix4 create_scale(
+			float scale);
 
 		/**
 		* Returns a matrix with a specified scale.
 		*
 		* @param scale Scale in the x, y, and z dimensions as a vector3.
 		*/
-		static matrix4 create_scale(const vector3& scale);
+		static matrix4 create_scale(
+			const vector3& scale);
 
 		/**
 		* Returns a matrix with a specified scale.
@@ -254,14 +326,18 @@ namespace iwmath {
 		* @param y Scale in the y dimension.
 		* @param z Scale in the z dimension.
 		*/
-		static matrix4 create_scale(float x, float y, float z);
+		static matrix4 create_scale(
+			float x,
+			float y,
+			float z);
 
 		/**
 		* Returns a matrix with a specified translation.
 		*
 		* @param translation Translation along the x, y, and z axes as a vector3.
 		*/
-		static matrix4 create_translation(const vector3& translation);
+		static matrix4 create_translation(
+			const vector3& translation);
 
 		/**
 		* Returns a matrix with a specified translation.
@@ -270,18 +346,25 @@ namespace iwmath {
 		* @param y Translation along the in the y axis.
 		* @param z Translation along the in the z axis.
 		*/
-		static matrix4 create_translation(float x, float y, float z);
+		static matrix4 create_translation(
+			float x,
+			float y,
+			float z);
 
-		/** 
-		* Returns a matrix with an orthographic view. 
+		/**
+		* Returns a matrix with an orthographic view.
 		*
 		* @param width Width of the viewing volume.
 		* @param height Height of the viewing volume.
 		* @param zNear Min clipping distance of the viewing volume.
 		* @param zFar Max clipping distance of the viewing volume.
 		*/
-		static matrix4 create_orthographic(float width, float height, float zNear, float zFar);
-		
+		static matrix4 create_orthographic(
+			float width,
+			float height,
+			float zNear,
+			float zFar);
+
 		/**
 		* Returns a matrix with an orthographic view.
 		*
@@ -292,8 +375,14 @@ namespace iwmath {
 		* @param zNear Min clipping distance of the viewing volume.
 		* @param zFar Max clipping distance of the viewing volume.
 		*/
-		static matrix4 create_orthographic_off_center(float left, float right, float bottom, float top, float zNear, float zFar);
-		
+		static matrix4 create_orthographic_off_center(
+			float left,
+			float right,
+			float bottom,
+			float top,
+			float zNear,
+			float zFar);
+
 		/**
 		* Returns a matrix with an perspective view.
 		*
@@ -302,7 +391,11 @@ namespace iwmath {
 		* @param zNear Min clipping distance of the viewing volume.
 		* @param zFar Max clipping distance of the viewing volume.
 		*/
-		static matrix4 create_perspective_field_of_view(float fov, float aspect, float zNear, float zFar);
+		static matrix4 create_perspective_field_of_view(
+			float fov,
+			float aspect,
+			float zNear,
+			float zFar);
 
 		/**
 		* Returns a matrix with an perspective view.
@@ -314,17 +407,29 @@ namespace iwmath {
 		* @param zNear Min clipping distance of the viewing volume.
 		* @param zFar Max clipping distance of the viewing volume.
 		*/
-		static matrix4 create_perspective_off_center(float left, float right, float bottom, float top, float zNear, float zFar);
+		static matrix4 create_perspective_off_center(
+			float left,
+			float right,
+			float bottom,
+			float top,
+			float zNear,
+			float zFar);
 
 		/**
-		* Returns a matrix that is rotated to face a target in space relitive to 'eye' and 'up'.
+		* Returns a matrix that is rotated to face a target
+		*	in space relitive to 'eye' and 'up'.
 		*
 		* @param eye Position of eye.
 		* @param target Position to point towards.
 		* @param up Vector of the upward direction.
 		*/
-		static matrix4 create_look_at(const vector3& eye, const vector3& target, const vector3& up);
+		static matrix4 create_look_at(
+			const vector3& eye,
+			const vector3& target,
+			const vector3& up);
 
-		friend IWMATH_API std::ostream& operator<<(std::ostream& stream, const matrix4& a);
+		friend IWMATH_API std::ostream& operator<<(
+			std::ostream& stream,
+			const matrix4& a);
 	};
 }

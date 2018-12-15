@@ -8,16 +8,23 @@ namespace iwmath {
 	const vector3 vector3::unit_z = vector3(0, 0, 1);
 
 	vector3::vector3()
-		: x(0), y(0), z(0) {
-	}
+		: x(0)
+		, y(0)
+		, z(0) {}
 
-	vector3::vector3(float xyz)
-		: x(xyz), y(xyz), z(xyz) {
-	}
+	vector3::vector3(
+		float xyz)
+		: x(xyz)
+		, y(xyz)
+		, z(xyz) {}
 
-	vector3::vector3(float x, float y, float z)
-		: x(x), y(y), z(z) {
-	}
+	vector3::vector3(
+		float x,
+		float y,
+		float z)
+		: x(x)
+		, y(y)
+		, z(z) {}
 
 	float vector3::length() const {
 		return sqrtf(x * x + y * y + z * z);
@@ -31,11 +38,15 @@ namespace iwmath {
 		return 1 / inv_sqrt(x * x + y * y + z * z);
 	}
 
-	float vector3::dot(const vector3 & other) const {
+	float vector3::dot(
+		const vector3 & other) const
+	{
 		return x * other.x + y * other.y + z * other.z;
 	}
 
-	vector3 vector3::cross(const vector3 & other) const {
+	vector3 vector3::cross(
+		const vector3 & other) const
+	{
 		return vector3(
 			y * other.z - z * other.y,
 			z * other.x - x * other.z,
@@ -76,74 +87,108 @@ namespace iwmath {
 		z /= scale;
 	}
 
-	float& vector3::operator[](std::size_t index) {
+	float& vector3::operator[](
+		std::size_t index)
+	{
 		if (index == 0) return x;
 		else if (index == 1) return y;
 		else if (index == 2) return z;
 		throw std::out_of_range("Index out of bounds");
 	}
 
-	vector3 vector3::operator+(const vector3& other) const {
+	vector3 vector3::operator+(
+		const vector3& other) const
+	{
 		return vector3(x + other.x, y + other.y, z + other.z);
 	}
 
-	vector3 vector3::operator-(const vector3& other) const {
+	vector3 vector3::operator-(
+		const vector3& other) const
+	{
 		return vector3(x - other.x, y - other.y, z - other.z);
 	}
 
-	vector3 vector3::operator*(const vector3& other) const {
+	vector3 vector3::operator*(
+		const vector3& other) const
+	{
 		return vector3(x * other.x, y * other.y, z * other.z);
 	}
 
-	vector3 vector3::operator/(const vector3& other) const {
+	vector3 vector3::operator/(
+		const vector3& other) const
+	{
 		return vector3(x / other.x, y / other.y, z / other.z);
 	}
 
-	vector3 vector3::operator+=(const vector3& other) {
+	vector3 vector3::operator+=(
+		const vector3& other)
+	{
 		return *this = (*this) + other;
 	}
 
-	vector3 vector3::operator-=(const vector3& other) {
+	vector3 vector3::operator-=(
+		const vector3& other)
+	{
 		return *this = (*this) - other;
 	}
 
-	vector3 vector3::operator*=(const vector3& other) {
+	vector3 vector3::operator*=(
+		const vector3& other)
+	{
 		return *this = (*this) * other;
 	}
 
-	vector3 vector3::operator/=(const vector3& other) {
+	vector3 vector3::operator/=(
+		const vector3& other)
+	{
 		return *this = (*this) / other;
 	}
 
-	vector3 vector3::operator+(float other) const {
+	vector3 vector3::operator+(
+		float other) const
+	{
 		return vector3(x + other, y + other, z + other);
 	}
 
-	vector3 vector3::operator-(float other) const {
+	vector3 vector3::operator-(
+		float other) const
+	{
 		return vector3(x - other, y - other, z - other);
 	}
 
-	vector3 vector3::operator*(float other) const {
+	vector3 vector3::operator*(
+		float other) const
+	{
 		return vector3(x * other, y * other, z * other);
 	}
 
-	vector3 vector3::operator/(float other) const {
+	vector3 vector3::operator/(
+		float other) const
+	{
 		return vector3(x / other, y / other, z / other);
 	}
 
-	vector3 vector3::operator+=(float other) {
+	vector3 vector3::operator+=(
+		float other)
+	{
 		return *this = (*this) + other;
 	}
 
-	vector3 vector3::operator-=(float other) {
+	vector3 vector3::operator-=(
+		float other)
+	{
 		return *this = (*this) - other;
 	}
 
-	vector3 vector3::operator*=(float other) {
+	vector3 vector3::operator*=(
+		float other)
+	{
 		return *this = (*this) * other;
 	}
 
-	vector3 vector3::operator/=(float other) {
+	vector3 vector3::operator/=(
+		float other)
+	{
 		return *this = (*this) / other;
 	}
 
@@ -151,23 +196,41 @@ namespace iwmath {
 		return vector3(-x, -y, -z);
 	}
 
-	bool vector3::operator==(const vector3 & other) const {
-		return almost_equal(x, other.x, 6) && almost_equal(y, other.y, 6) && almost_equal(z, other.z, 6);
+	bool vector3::operator==(
+		const vector3 & other) const
+	{
+		return almost_equal(x, other.x, 6)
+			&& almost_equal(y, other.y, 6)
+			&& almost_equal(z, other.z, 6);
 	}
 
-	bool vector3::operator!=(const vector3 & other) const {
+	bool vector3::operator!=(
+		const vector3 & other) const
+	{
 		return !operator==(other);
 	}
 
-	std::ostream& iwmath::operator<<(std::ostream& ostream, const vector3& vector) {
-		return ostream << "(" << vector.x << ", " << vector.y << ", " << vector.z << ")";
+	std::ostream& iwmath::operator<<(
+		std::ostream& ostream,
+		const vector3& vector)
+	{
+		return ostream << "("
+			<< vector.x << ", "
+			<< vector.y << ", "
+			<< vector.z << ")";
 	}
 
-	vector3 iwmath::operator+(float left, const vector3& right) {
+	vector3 iwmath::operator+(
+		float left,
+		const vector3& right)
+	{
 		return right + left;
 	}
 
-	vector3 iwmath::operator*(float left, const vector3& right) {
+	vector3 iwmath::operator*(
+		float left,
+		const vector3& right)
+	{
 		return right * left;
 	}
 }

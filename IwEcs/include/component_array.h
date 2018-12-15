@@ -19,8 +19,7 @@ namespace iwecs {
 		using archetype_t      = iwutil::archetype<_components_t...>;
 	private:
 		//640 as temp value
-		using chunk_t          = iwutil::array_pack<640, _components_t...>
-		using entity_data_t    = typename entity_data<archetype_t::size>;
+		using chunk_t          = iwutil::array_pack<640, _components_t...>;
 		using chunk_list_t     = std::list<chunk_t>;
 		using chunk_list_itr_t = typename chunk_list_t::iterator;
 
