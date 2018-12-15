@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.8)
 project(IwEvents)
 
 #Set source variables
-set(INCLUDE_DIR
+set(INCLUDE_DIRS
 	"${PROJECT_SOURCE_DIR}/include/")
 set(HEADERS
 	"include/event_bus.h"
@@ -17,7 +17,7 @@ add_library(${PROJECT_NAME} INTERFACE)
 add_library(Iw::Events ALIAS ${PROJECT_NAME})
 
 #Set target include directory for client
-target_include_directories(${PROJECT_NAME} INTERFACE ${INCLUDE_DIR})
+target_include_directories(${PROJECT_NAME} INTERFACE ${INCLUDE_DIRS})
 
 #Set target compile time constants
 if(WIN32)

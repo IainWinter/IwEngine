@@ -3,7 +3,8 @@ cmake_minimum_required (VERSION 3.8)
 project(Sandbox)
 
 #Source cpps
-set(SRC "src/Source.cpp")
+set(SRC
+	"src/Source.cpp")
 
 #Add executable
 add_executable (${PROJECT_NAME} ${SRC})

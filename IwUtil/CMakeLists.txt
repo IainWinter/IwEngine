@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.8)
 project(IwUtil)
 
 #Set source variables
-set(INCLUDE_DIR
+set(INCLUDE_DIRS
 	"${PROJECT_SOURCE_DIR}/include/")
 set(HEADERS
 	"include/archetype.h"
@@ -15,12 +15,13 @@ set(HEADERS
 	"include/pack_iteration.h")
 set(POST_INSTALL_INCLUDE
 	"${PROJECT_NAME}")
+
 #Add libraries
 add_library(${PROJECT_NAME} INTERFACE)
 add_library(Iw::Util ALIAS ${PROJECT_NAME})
 
 #Set target include directory for client
-target_include_directories(${PROJECT_NAME} INTERFACE ${INCLUDE_DIR})
+target_include_directories(${PROJECT_NAME} INTERFACE ${INCLUDE_DIRS})
 
 #Set target compile time constants
 if(WIN32)

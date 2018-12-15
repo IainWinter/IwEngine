@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.8)
 project(IwMath)
 
 #Set source variables
-set(INCLUDE_DIR
+set(INCLUDE_DIRS
 	"${PROJECT_SOURCE_DIR}/include/")
 set(SRC
 	"src/iwmath.cpp"
@@ -31,10 +31,10 @@ add_library(${PROJECT_NAME} SHARED ${SRC})
 add_library(Iw::Math ALIAS ${PROJECT_NAME})
 
 #Set include directorys
-include_directories(${INCLUDE_DIR})
+include_directories(${INCLUDE_DIRS})
 
 #Set target include directory for client
-target_include_directories(${PROJECT_NAME} PUBLIC ${INCLUDE_DIR})
+target_include_directories(${PROJECT_NAME} PUBLIC ${INCLUDE_DIRS})
 
 #Set target compile time constants
 if(WIN32)

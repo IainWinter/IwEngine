@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.8)
 project(IwEcs)
 
 #Set source variables
-set(INCLUDE_DIR
+set(INCLUDE_DIRS
 	"${PROJECT_SOURCE_DIR}/include/")
 set(SRC
 	"src/ecs_manager.cpp")
@@ -14,17 +14,18 @@ set(HEADERS
 	"include/ecs_manager.h"
 	"include/entity_manager.h"
 	"include/iwecs.h")
-set(POST_INSTALL_INCLUDE "${PROJECT_NAME}")
+set(POST_INSTALL_INCLUDE
+	"${PROJECT_NAME}")
 
 #Add libraries
 add_library(${PROJECT_NAME} SHARED ${SRC})
 add_library(Iw::Ecs ALIAS ${PROJECT_NAME})
 
 #Set include directorys
-include_directories(${INCLUDE_DIR})
+include_directories(${INCLUDE_DIRS})
 
 #Set target include directory for client
-target_include_directories(${PROJECT_NAME} PUBLIC ${INCLUDE_DIR})
+target_include_directories(${PROJECT_NAME} PUBLIC ${INCLUDE_DIRS})
 
 #Set target compile time constants
 if(WIN32)
