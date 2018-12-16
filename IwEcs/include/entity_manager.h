@@ -4,21 +4,27 @@
 #include <unordered_map>
 
 namespace iwecs {
-	class entity_manager {
+	using entity_t = std::size_t;
+
+	struct entity_data {
+		std::size_t archetype_id;
+		std::size_t component_index;
+	};
+
+	class IWECS_API entity_manager {
 	private:
-		std::unordered_map<entity_t, ientity_data> m_entities;
-		entity_t m_next_id;
+		struct {
+			std::unordered_map<entity_t, entity_data> m_entities;
+			entity_t m_next_id;
+		};
 	public:
-		entity_manager()
-			: m_next_id(0) {}
+		entity_manager();
 
-		entity_t add_entity(const ientity_data& data) {
-			m_entities.emplace(++m_next_id, data);
-			return m_next_id;
-		}
+		entity_t add_entity(
+			std::size_t archetype_id,
+			std::size_t component_index);
 
-		ientity_data& get_entity_data(entity_t entity) {
-			return m_entities.at(entity);
-		}
+		entity_data& get_entity_data(
+			entity_t entity);
 	};
 }

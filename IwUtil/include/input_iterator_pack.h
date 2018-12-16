@@ -4,10 +4,13 @@
 #include "tuple_iteration.h"
 
 namespace iwutil {
-	template<typename... _t>
+
+
+	template<
+		typename... _t>
 	class input_iterator_pack {
 	public:
-		using archetype_t        = archetype<_t...>;
+		using archetype_t       = archetype<_t...>;
 		using iterator_category = std::input_iterator_tag;
 		using value_type        = std::tuple<std::remove_cv_t<_t>...>;
 		using difference_type   = std::ptrdiff_t;
@@ -18,10 +21,11 @@ namespace iwutil {
 
 	public:
 		input_iterator_pack()
-		  : m_ptrs() {}
+			: m_ptrs() {}
 
-		input_iterator_pack(_t*... itrs)
-		  : m_ptrs(itrs...) {}
+		input_iterator_pack(
+			_t*... itrs)
+			: m_ptrs(itrs...) {}
 
 		input_iterator_pack(
 			const input_iterator_pack& copy)

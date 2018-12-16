@@ -2,31 +2,30 @@
 
 #include <unordered_map>
 #include "iwecs.h"
-#include "component_array.h"
-#include "type_id.h"
+#include "component_list.h"
 
 namespace iwecs {
 	class component_registry {
 	private:
-		std::unordered_map<iwutil::type_id_t, icomponent_array*> m_carray;
+		std::unordered_map<std::size_t, icomponent_list*> m_component_lists;
 
 	public:
 		template<
 			typename... _components_t>
-		ientity_data create_entity(
+		std::size_t create(
 			_components_t&&... args)
 		{
-			using carray_t = component_array<_components_t...>;
+			component_list<_components_t...>& component_list
+				= ensure_component_list<_components_t...>();
 
-			carray_t& carray = ensure_carray<_components_t...>();
-			return carray.attach_components(
+			return component_list.attach_components(
 				std::forward<_components_t>(args)...
 			);
 		}
 
-		bool destroy_entity(
-			index_t index,
-			iwutil::type_id_t archetype_id)
+		bool destroy(
+			std::size_t index,
+			std::size_t archetype_id)
 		{
 			if (no_carray(archetype_id)) {
 				return false;
@@ -42,8 +41,8 @@ namespace iwecs {
 		}
 	private:
 		template<typename... _components_t>
-		component_array<_components_t...>& ensure_carray() {
-			using carray_t = component_array<_components_t...>;
+		component_list<_components_t...>& ensure_carray() {
+			using carray_t = component_list<_components_t...>;
 
 			if (no_carray(carray_t::archetype_t::id)) {
 				return add_carray<_components_t...>();
@@ -54,8 +53,8 @@ namespace iwecs {
 
 		template<
 			typename... _components_t>
-		component_array<_components_t...>& add_carray() {
-			using carray_t = component_array<_components_t...>;
+		component_list<_components_t...>& add_carray() {
+			using carray_t = component_list<_components_t...>;
 
 			carray_t* carray = new carray_t();
 			m_carray.emplace(carray_t::archetype_t::id, carray);
@@ -65,10 +64,10 @@ namespace iwecs {
 
 		template<
 			typename... _components_t>
-		component_array<_components_t...>& get_carray() {
-			using carray_t = component_array<_components_t...>;
+		component_list<_components_t...>& get_carray() {
+			using carray_t = component_list<_components_t...>;
 
-			return (component_array<_components_t...>&)
+			return (component_list<_components_t...>&)
 				*m_carray[carray_t::archetype_t::id];
 		}
 

@@ -1,11 +1,6 @@
 #include <iostream>
-
 #include "Core/EntryPoint.h"
 #include "ecs_manager.h"
-
-#include <vector>
-#include <iostream>
-#include <list>
 
 class Game : public IwEngine::Application {
 public:

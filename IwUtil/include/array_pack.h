@@ -1,14 +1,14 @@
 #pragma once
 
-#include "input_iterator_pack.h"
-#include "archetype.h"
-#include "tuple_iteration.h"
 #include <tuple>
 #include <array>
+#include "archetype.h"
+#include "tuple_iteration.h"
+#include "input_iterator_pack.h"
 
 namespace iwutil {
 	template<
-		std::size_t _size_in_bytes,
+		std::size_t _capacity,
 		typename... _t>
 	class array_pack {
 	public:
@@ -18,21 +18,18 @@ namespace iwutil {
 	private:
 		using arrays_t = std::tuple<_t*...>;
 
-		static constexpr std::size_t m_capacity
-			= _size_in_bytes / archetype_t::size_in_bytes;
-
 		std::size_t m_size;
 		arrays_t   m_arrays;
 
 	public:
 		array_pack() 
 		  : m_size(0),
-			m_arrays(arrays_t(new _t[m_capacity]...)) {}
+			m_arrays(arrays_t(new _t[_capacity]...)) {}
 
 		array_pack(
 			const array_pack& copy)
 		  : m_size(copy.m_size),
-			m_arrays(arrays_t(new _t[m_capacity]...)) 
+			m_arrays(arrays_t(new _t[_capacity]...)) 
 		{
 			copy_streams(copy.m_arrays);
 		}
@@ -40,7 +37,7 @@ namespace iwutil {
 		array_pack(
 			array_pack&& copy)
 		  : m_size(copy.m_size),
-			m_arrays(arrays_t(new _t[m_capacity]...)) 
+			m_arrays(arrays_t(new _t[_capacity]...)) 
 		{
 			copy_streams(copy.m_arrays);
 		}
@@ -53,7 +50,7 @@ namespace iwutil {
 			const array_pack& copy)
 		{
 			m_size = copy.m_size;
-			m_arrays = arrays_t(new _t[m_capacity]...);
+			m_arrays = arrays_t(new _t[_capacity]...);
 			copy_streams(copy.m_arrays);
 		}
 
@@ -61,7 +58,7 @@ namespace iwutil {
 			array_pack&& copy)
 		{
 			m_size = copy.m_size;
-			m_arrays = arrays_t(new _t[m_capacity]...);
+			m_arrays = arrays_t(new _t[_capacity]...);
 			copy_streams(copy.m_arrays);
 		}
 
@@ -90,7 +87,7 @@ namespace iwutil {
 		}
 
 		bool is_full() {
-			return m_size == m_capacity;
+			return m_size == _capacity;
 		}
 
 		std::size_t size() {
@@ -98,7 +95,7 @@ namespace iwutil {
 		}
 
 		std::size_t capacity() {
-			return m_capacity;
+			return _capacity;
 		}
 
 		iterator begin() {
@@ -197,7 +194,7 @@ namespace iwutil {
 			(
 				m_arrays,
 				copy,
-				m_capacity
+				_capacity
 			);
 		}
 

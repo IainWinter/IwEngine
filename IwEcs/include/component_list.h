@@ -1,25 +1,27 @@
 #pragma once
 
 #include <list>
-#include "archetype.h"
 #include "iwecs.h"
+#include "archetype.h"
 #include "array_pack.h"
 
 namespace iwecs {
-	class icomponent_array {
+	class icomponent_list {
 	public:
-		virtual ~icomponent_array() {}
+		virtual ~icomponent_list() {}
 		virtual bool destroy_components(entity_t entity) = 0;
 	};
 
 	template<
 		typename... _components_t>
-	class component_array : public icomponent_array {
+	class component_list : public icomponent_list {
 	public:
-		using archetype_t      = iwutil::archetype<_components_t...>;
+		using archetype_t = iwutil::archetype<_components_t...>;
 	private:
 		//640 as temp value
-		using chunk_t          = iwutil::array_pack<640, _components_t...>;
+		constexpr std::size_t capacity = 640 / archetype_t::size_in_bytes;
+
+		using chunk_t          = iwutil::array_pack<capacity, _components_t...>;
 		using chunk_list_t     = std::list<chunk_t>;
 		using chunk_list_itr_t = typename chunk_list_t::iterator;
 
@@ -43,8 +45,8 @@ namespace iwecs {
 		bool destroy_components(
 			index_t index)
 		{
-			index_t chunk_index = index / chunk_t::capacity;
-			index_t component_index = index % chunk_t::capacity;
+			std::size_t chunk_index     = index / chunk_t::capacity;
+			std::size_t component_index = index % chunk_t::capacity;
 			if (chunk_index == m_working_index) {
 				return m_working_chunk->remove(component_index);
 			}
@@ -73,7 +75,7 @@ namespace iwecs {
 		{
 			auto itr = m_chunks.begin();
 			std::advance(itr, index);
-			
+
 			return *itr;
 		}
 
@@ -89,7 +91,7 @@ namespace iwecs {
 			bool has_found = false;
 			chunk_list_itr_t found_itr;
 			chunk_list_itr_t itr = m_working_chunk;
-			std::size_t index = m_working_index; //Check this
+			std::size_t index    = m_working_index; //Check this
 			while (index > 0) {
 				itr--;
 				index--;

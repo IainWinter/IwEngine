@@ -5,7 +5,8 @@
 #include "type_id.h"
 
 namespace iwutil {
-	template<typename... _components_t>
+	template<
+		typename... _components_t>
 	struct archetype {
 		static constexpr std::size_t size          = sizeof...(_components_t);
 		static constexpr std::size_t size_in_bytes = iwutil::sizeof_pack<_components_t...>();

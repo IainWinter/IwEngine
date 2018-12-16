@@ -56,35 +56,30 @@ namespace iwmath {
 	matrix3 matrix3::transposed() const {
 		matrix3 tmp = *this;
 		tmp.transpose();
-		
 		return tmp;
 	}
 
 	matrix3 matrix3::inverted() const {
 		matrix3 tmp = *this;
 		tmp.invert();
-
 		return tmp;
 	}
 
 	matrix3 matrix3::normalized() const {
 		matrix3 tmp = *this;
 		tmp.normalize();
-
 		return tmp;
 	}
 
 	matrix3 matrix3::cleared_rotation() const {
 		matrix3 tmp = *this;
 		tmp.clear_rotation();
-
 		return tmp;
 	}
 
 	matrix3 matrix3::cleared_scale() const {
 		matrix3 tmp = *this;
 		tmp.clear_scale();
-
 		return tmp;
 	}
 
