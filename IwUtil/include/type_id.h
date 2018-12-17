@@ -6,10 +6,20 @@ namespace iwutil {
 		static size_t m_counter;
 
 	public:
-		template<typename T>
-		static size_t value()
-		{
+		template<
+			typename _t>
+		static size_t value() {
 			static size_t id = m_counter++;
+			return id;
+		}
+
+		template<
+			typename _t,
+			typename... _others_t>
+		static size_t value() {
+			static size_t id = m_counter + value<_others_t...>();
+			m_counter++;
+
 			return id;
 		}
 	};

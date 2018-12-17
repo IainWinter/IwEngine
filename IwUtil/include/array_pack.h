@@ -23,21 +23,21 @@ namespace iwutil {
 
 	public:
 		array_pack() 
-		  : m_size(0),
-			m_arrays(arrays_t(new _t[_capacity]...)) {}
+			: m_size(0)
+			, m_arrays(arrays_t(new _t[_capacity]...)) {}
 
 		array_pack(
 			const array_pack& copy)
-		  : m_size(copy.m_size),
-			m_arrays(arrays_t(new _t[_capacity]...)) 
+			: m_size(copy.m_size)
+			, m_arrays(arrays_t(new _t[_capacity]...)) 
 		{
 			copy_streams(copy.m_arrays);
 		}
 
 		array_pack(
 			array_pack&& copy)
-		  : m_size(copy.m_size),
-			m_arrays(arrays_t(new _t[_capacity]...)) 
+			: m_size(copy.m_size)
+			, m_arrays(arrays_t(new _t[_capacity]...)) 
 		{
 			copy_streams(copy.m_arrays);
 		}
@@ -67,6 +67,21 @@ namespace iwutil {
 		{
 			if (!is_full()) {
 				data = insert_into_streams(std::forward<_t>(components)...);
+				m_size++;
+			}
+		}
+
+		void insert(
+			_t&... components)
+		{
+			insert(std::forward<_t>(components)...);
+		}
+
+		void insert(
+			const _t&... components)
+		{
+			if (!is_full()) {
+				data = insert_into_streams(components...);
 				m_size++;
 			}
 		}
@@ -131,6 +146,19 @@ namespace iwutil {
 			}
 		};
 
+		struct insert_array_const {
+			template<
+				typename _t,
+				typename _d>
+				void operator()(
+					_t&& stream,
+					const _d& data,
+					std::size_t index)
+			{
+				stream[index] = data;
+			}
+		};
+
 		struct copy_array {
 			template<
 				typename _t,
@@ -155,6 +183,21 @@ namespace iwutil {
 			(
 				m_arrays,
 				std::forward_as_tuple<_t...>(std::forward<_t>(data)...),
+				m_size
+			);
+		}
+
+		void insert_into_streams(
+			const _t&... data) 
+		{
+			iwutil::foreach<
+				insert_array_const,
+				arrays_t,
+				std::tuple<const _t&...>,
+				archetype_t::size>
+			(
+				m_arrays,
+				std::tuple<const _t&...>(data...),
 				m_size
 			);
 		}

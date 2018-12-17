@@ -4,10 +4,12 @@
 
 #pragma warning(suppress: 4251)
 
-#ifdef IW_BUILD_DLL
-#	define IWINPUT_API __declspec(dllexport)
-#else
-#	define IWINPUT_API __declspec(dllimport)
+#ifdef IW_PLATFORM_WINDOWS
+#	ifdef IW_BUILD_DLL
+#		define IWINPUT_API __declspec(dllexport)
+#	else
+#		define IWINPUT_API __declspec(dllimport)
+#	endif
 #endif
 
 #ifdef IW_PLATFORM_WINDOWS
@@ -18,7 +20,7 @@
 #	define IWI_DEBUG 1
 #else
 #	define IWI_RELEASE 1
-#endif /* IWDEBUG */
+#endif
 
 #ifdef IW_PLATFORM_WINDOWS
 	typedef HWND IWI_HANDLE;
@@ -32,7 +34,6 @@
 #endif
 
 namespace iwi {}
-
 #define iwinput iwi
 
 typedef unsigned int uint;

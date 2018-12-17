@@ -9,7 +9,7 @@ namespace iwecs {
 	class icomponent_list {
 	public:
 		virtual ~icomponent_list() {}
-		virtual bool destroy_components(entity_t entity) = 0;
+		virtual bool erase(std::size_t index) = 0;
 	};
 
 	template<
@@ -19,7 +19,7 @@ namespace iwecs {
 		using archetype_t = iwutil::archetype<_components_t...>;
 	private:
 		//640 as temp value
-		constexpr std::size_t capacity = 640 / archetype_t::size_in_bytes;
+		static constexpr std::size_t capacity = 640 / archetype_t::size_in_bytes;
 
 		using chunk_t          = iwutil::array_pack<capacity, _components_t...>;
 		using chunk_list_t     = std::list<chunk_t>;
@@ -31,19 +31,19 @@ namespace iwecs {
 		std::size_t m_chunk_count;
 
 	public:
-		entity_t attach_components(
+		std::size_t push_back(
 			_components_t&&... args)
 		{
 			ensure_free_working_chunk();
 			m_working_chunk->insert(std::forward<_components_t>(args)...);
 			
-			return m_working_chunk->size() 
+			return m_working_chunk->size()
 				+ m_working_chunk->capacity()
 				* m_working_index;
 		}
 
-		bool destroy_components(
-			index_t index)
+		bool erase(
+			std::size_t index)
 		{
 			std::size_t chunk_index     = index / chunk_t::capacity;
 			std::size_t component_index = index % chunk_t::capacity;
@@ -54,7 +54,7 @@ namespace iwecs {
 			return get_chunk(chunk_index).remove(component_index);
 		}
 	private:
-		void ensure_free_working_chunk(){
+		void ensure_free_working_chunk() {
 			if (no_chunks() || find_free_chunk()) {
 				add_chunk();
 			}
@@ -71,7 +71,7 @@ namespace iwecs {
 		}
 
 		chunk_t& get_chunk(
-			index_t index)
+			std::size_t index)
 		{
 			auto itr = m_chunks.begin();
 			std::advance(itr, index);

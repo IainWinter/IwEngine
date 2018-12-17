@@ -6,10 +6,18 @@
 
 namespace iwutil {
 	template<
-		typename... _components_t>
+		typename... _t>
 	struct archetype {
-		static constexpr std::size_t size          = sizeof...(_components_t);
-		static constexpr std::size_t size_in_bytes = iwutil::sizeof_pack<_components_t...>();
-		static constexpr iwutil::type_id_t id      = iwutil::type_id<archetype<_components_t...>>;
+		//Number of types in the pack
+		static constexpr std::size_t size
+			= sizeof...(_t);
+
+		//Sum of the size of each type
+		static constexpr std::size_t size_in_bytes
+			= iwutil::sizeof_pack<_t...>();
+
+		//Sum of the id of each type
+		static constexpr std::size_t id
+			= iwutil::type_id::value<_t...>();
 	};
 }
