@@ -7,9 +7,11 @@ namespace iwutil {
 		typename _t>
 	class input_iterator {
 	public:
-		using value_type = std::remove_cv_t<_t>;
-		using pointer    = _t*;
-		using reference  = _t&;
+		using iterator_category = std::input_iterator_tag;
+		using value_type        = std::remove_cv_t<_t>;
+		using difference_type   = std::ptrdiff_t;
+		using pointer           = _t*;
+		using reference         = _t&;
 	private:
 		pointer m_ptr;
 	public:

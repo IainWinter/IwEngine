@@ -4,8 +4,6 @@
 #include "tuple_iteration.h"
 
 namespace iwutil {
-
-
 	template<
 		typename... _t>
 	class input_iterator_pack {
