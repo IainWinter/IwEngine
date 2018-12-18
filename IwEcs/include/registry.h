@@ -8,12 +8,13 @@ namespace iwecs {
 	public:
 	private:
 		struct entity_data {
-			size_t archetype_id;
-			size_t component_index;
+			std:: archetype_id;
+			std::size_t component_index;
 		};
 
-		std::unordered_map<size_t, icomponent_list> m_components;
-		std::unordered_map<size_t, entity_data> m_entities;
+		std::unordered_map<std::size_t, icomponent_list> m_components;
+		std::unordered_map<std::size_t, entity_data> m_entities;
+		std::size_t m_next_entity_id;
 	public:
 		registry() = default;
 
@@ -22,6 +23,19 @@ namespace iwecs {
 
 		registry& operator=(const registry& copy) = delete;
 		registry& operator=(registry&& copy) = default;
+
+		template<
+			typename... _components_t>
+			std::size_t create(
+			_components_t&&... components)
+		{
+			using list_t = component_list<_components_t...>;
+
+			list_t& list = ensure_list<_components_t...>();
+			list.push_back(std::forward<_components_t>(components)...);
+			
+			m_entities.emplace(++m_next_entity_id, )
+		}
 
 		//entity_t create<_components>(_components)
 		//	check components for list matching the archetype id
@@ -40,7 +54,7 @@ namespace iwecs {
 		//		if there is no match: create a new one with the new archetype
 		//		if there is a  match: get it
 		//	get data from old list
-		//	add 
+		//	add old data + new component to list
 
 		//void assign<_component, _args>(entity_id, const args&)
 		//void assign<_component, _args>(entity_id, args&&)  
@@ -48,6 +62,28 @@ namespace iwecs {
 		//bool destroy<_component>(entity_id)
 		//view view<_components>()
 	private:
+		//ensure_list()
 
+		icomponent_list& ensure_list(
+			std::size_t archetype_id)
+		{
+			return m_components[archetype_id];
+		}
+
+		template<
+			typename... _components_t>
+		component_list<_components_t...>& ensure_list() {
+			std::size_t id = iwutil::archetype<_components_t>::id;
+			return (component_list<_components_t...>&)ensure_list(id);
+		}
 	};
 }
+
+
+//  p v m
+//  1 1 1
+//  1 1 1
+//
+//
+//
+//

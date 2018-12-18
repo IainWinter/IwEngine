@@ -1,6 +1,5 @@
 #pragma once
 
-#include <cstddef>
 #include "pack_iteration.h"
 #include "type_id.h"
 
