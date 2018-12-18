@@ -72,12 +72,6 @@ namespace iwutil {
 		}
 
 		void insert(
-			_t&... components)
-		{
-			insert(std::forward<_t>(components)...);
-		}
-
-		void insert(
 			const _t&... components)
 		{
 			if (!is_full()) {
