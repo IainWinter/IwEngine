@@ -26,7 +26,7 @@ namespace iwecs {
 
 		template<
 			typename... _components_t>
-			std::size_t create(
+		std::size_t create(
 			_components_t&&... components)
 		{
 			using list_t = component_list<_components_t...>;
