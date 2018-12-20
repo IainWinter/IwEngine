@@ -84,7 +84,7 @@ namespace iwutil {
 			std::size_t index) 
 		{
 			if (index >= 0 && index < m_size) {
-				if (index <= m_size - 1) {
+				if (index == m_size - 1) {
 					remove_from_streams(index);
 				}
 

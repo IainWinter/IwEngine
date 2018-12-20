@@ -12,6 +12,8 @@ set(HEADERS
 	"include/component_registry.h"
 	"include/component_view.h"
 	"include/ecs_manager.h"
+	"include/system.h"
+	"include/system_manager.h"
 	"include/entity_manager.h")
 set(POST_INSTALL_INCLUDE
 	"${PROJECT_NAME}")

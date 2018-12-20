@@ -8,13 +8,13 @@ namespace iwecs {
 	public:
 	private:
 		struct entity_data {
-			std:: archetype_id;
+			std::size_t archetype_id;
 			std::size_t component_index;
 		};
 
-		std::unordered_map<std::size_t, icomponent_list> m_components;
+		std::size_t m_next_entity;
 		std::unordered_map<std::size_t, entity_data> m_entities;
-		std::size_t m_next_entity_id;
+		std::unordered_map<std::size_t, icomponent_list> m_components;
 	public:
 		registry() = default;
 
@@ -31,10 +31,39 @@ namespace iwecs {
 		{
 			using list_t = component_list<_components_t...>;
 
-			list_t& list = ensure_list<_components_t...>();
+			std::size_t id = iwutil::archetype<_components_t...>::id;
+			list_t& list = ensure_list(id);
 			list.push_back(std::forward<_components_t>(components)...);
 			
-			m_entities.emplace(++m_next_entity_id, )
+			entity_data data = {
+				id,
+				list.size() - 1
+			};
+
+			m_entities.emplace(++m_next_entity, data);
+
+			return m_next_entity;
+		}
+
+		template<
+			typename... _components_t>
+		std::size_t create(
+			const _components_t&... components)
+		{
+			using list_t = component_list<_components_t...>;
+
+			std::size_t id = iwutil::archetype<_components_t...>::id;
+			list_t& list = ensure_list(id);
+			list.push_back(components...);
+
+			entity_data data = {
+				id,
+				list.size() - 1
+			};
+
+			m_entities.emplace(++m_next_entity, data);
+
+			return m_next_entity;
 		}
 
 		//entity_t create<_components>(_components)
@@ -45,6 +74,19 @@ namespace iwecs {
 		//	creates entity_data with the archetype id and size of the list - 1
 		//	adds the entity_data and the next entity id to entities vector
 		//	return entity id
+
+		template<
+			typename _component>
+		void assign(
+			std::size_t entity,
+			_component&& component)
+		{
+			if (m_entities.find(entity) == m_entities.end())
+				return;
+
+			entity_data& data = m_entities.at(entity);
+			icomponent_list& = m_components[data.archetype_id].
+		}
 
 		//void assign<_component>(entity_id, const _component&)
 		//	get entity_data from entity_id
