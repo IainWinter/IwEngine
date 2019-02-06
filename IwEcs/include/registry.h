@@ -76,10 +76,10 @@ namespace iwecs {
 		//	return entity id
 
 		template<
-			typename _component>
+			typename _component_t>
 		void assign(
 			std::size_t entity,
-			_component&& component)
+			_component_t&& component)
 		{
 			if (m_entities.find(entity) == m_entities.end())
 				return;

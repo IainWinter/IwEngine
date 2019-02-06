@@ -6,16 +6,8 @@ project(IwUtil)
 set(INCLUDE_DIRS
 	"${PROJECT_SOURCE_DIR}/include/")
 set(HEADERS
-	"include/archetype.h"
-	"include/array_pack.h"
+	"include/compact_array.h"
 	"include/input_iterator.h"
-	"include/input_iterator_pack.h"
-	"include/pack_iteration.h"
-	"include/sparse_set.h"
-	"include/tight_array.h"
-	"include/tight_container.h"
-	"include/tight_vector.h"
-	"include/tuple_iterator.h"
 	"include/type_id.h")
 set(POST_INSTALL_INCLUDE
 	"${PROJECT_NAME}")

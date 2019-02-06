@@ -389,7 +389,7 @@ namespace iwutil {
 	template<
 		typename _functor,
 		typename _tuple,
-		std::size_t _size>
+		std::size_t _capacity>
 	void foreach(
 		_tuple& tuple)
 	{
@@ -399,7 +399,7 @@ namespace iwutil {
 		(
 			_functor(),
 			std::forward<_tuple>(tuple),
-			std::make_index_sequence<_size>{}
+			std::make_index_sequence<_capacity>{}
 		);
 	}
 #pragma endregion
@@ -409,7 +409,7 @@ namespace iwutil {
 		typename _functor,
 		typename _tuple,
 		typename _tuple_args,
-		std::size_t _size>
+		std::size_t _capacity>
 	void foreach(
 		_tuple& tuple,
 		_tuple_args&& tuple_args)
@@ -422,7 +422,7 @@ namespace iwutil {
 			_functor(),
 			std::forward<_tuple>(tuple),
 			std::forward<_tuple_args>(tuple_args),
-			std::make_index_sequence<_size>{}
+			std::make_index_sequence<_capacity>{}
 		);
 	}
 
@@ -430,7 +430,7 @@ namespace iwutil {
 		typename _functor,
 		typename _tuple,
 		typename _tuple_args,
-		std::size_t _size>
+		std::size_t _capacity>
 	void foreach(
 		_tuple& tuple,
 		_tuple_args& tuple_args)
@@ -443,7 +443,7 @@ namespace iwutil {
 			_functor(),
 			std::forward<_tuple>(tuple),
 			std::forward<_tuple_args>(tuple_args),
-			std::make_index_sequence<_size>{}
+			std::make_index_sequence<_capacity>{}
 		);
 	}
 
@@ -451,7 +451,7 @@ namespace iwutil {
 		typename _functor,
 		typename _tuple,
 		typename _tuple_args,
-		std::size_t _size>
+		std::size_t _capacity>
 	void foreach(
 		_tuple& tuple,
 		const _tuple_args& tuple_args)
@@ -464,7 +464,7 @@ namespace iwutil {
 			_functor(),
 			std::forward<_tuple>(tuple),
 			tuple_args,
-			std::make_index_sequence<_size>{}
+			std::make_index_sequence<_capacity>{}
 		);
 	}
 #pragma endregion
@@ -473,7 +473,7 @@ namespace iwutil {
 	template<
 		typename _functor,
 		typename _tuple,
-		std::size_t _size,
+		std::size_t _capacity,
 		typename... _fixed_args>
 	void foreach(
 		_tuple& tuple,
@@ -486,7 +486,7 @@ namespace iwutil {
 		(
 			_functor(),
 			std::forward<_tuple>(tuple),
-			std::make_index_sequence<_size>{},
+			std::make_index_sequence<_capacity>{},
 			std::forward<_fixed_args>(fixed_args)...
 		);
 	}
@@ -494,7 +494,7 @@ namespace iwutil {
 	template<
 		typename _functor,
 		typename _tuple,
-		std::size_t _size,
+		std::size_t _capacity,
 		typename... _fixed_args>
 	void foreach(
 		_tuple& tuple,
@@ -507,7 +507,7 @@ namespace iwutil {
 		(
 			_functor(),
 			std::forward<_tuple>(tuple),
-			std::make_index_sequence<_size>{},
+			std::make_index_sequence<_capacity>{},
 			std::forward<_fixed_args>(fixed_args)...
 		);
 	}
@@ -515,7 +515,7 @@ namespace iwutil {
 	template<
 		typename _functor,
 		typename _tuple,
-		std::size_t _size,
+		std::size_t _capacity,
 		typename... _fixed_args>
 	void foreach(
 		_tuple& tuple,
@@ -528,7 +528,7 @@ namespace iwutil {
 		(
 			_functor(),
 			std::forward<_tuple>(tuple),
-			std::make_index_sequence<_size>{},
+			std::make_index_sequence<_capacity>{},
 			fixed_args...
 		);
 	}
@@ -539,7 +539,7 @@ namespace iwutil {
 		typename _functor,
 		typename _tuple,
 		typename _tuple_args,
-		std::size_t _size,
+		std::size_t _capacity,
 		typename... _fixed_args>
 	void foreach(
 		_tuple& tuple,
@@ -555,7 +555,7 @@ namespace iwutil {
 			_functor(),
 			std::forward<_tuple>(tuple),
 			std::forward<_tuple_args>(tuple_args),
-			std::make_index_sequence<_size>{},
+			std::make_index_sequence<_capacity>{},
 			std::forward<_fixed_args>(fixed_args)...
 		);
 	}
@@ -564,7 +564,7 @@ namespace iwutil {
 		typename _functor,
 		typename _tuple,
 		typename _tuple_args,
-		std::size_t _size,
+		std::size_t _capacity,
 		typename... _fixed_args>
 	void foreach(
 		_tuple& tuple,
@@ -580,7 +580,7 @@ namespace iwutil {
 			_functor(),
 			std::forward<_tuple>(tuple),
 			std::forward<_tuple_args>(tuple_args),
-			std::make_index_sequence<_size>{},
+			std::make_index_sequence<_capacity>{},
 			std::forward<_fixed_args>(fixed_args)...
 		);
 	}
@@ -589,7 +589,7 @@ namespace iwutil {
 		typename _functor,
 		typename _tuple,
 		typename _tuple_args,
-		std::size_t _size,
+		std::size_t _capacity,
 		typename... _fixed_args>
 	void foreach(
 		_tuple& tuple,
@@ -605,7 +605,7 @@ namespace iwutil {
 			_functor(),
 			std::forward<_tuple>(tuple),
 			std::forward<_tuple_args>(tuple_args),
-			std::make_index_sequence<_size>{},
+			std::make_index_sequence<_capacity>{},
 			std::forward<_fixed_args>(fixed_args)...
 		);
 	}
@@ -614,7 +614,7 @@ namespace iwutil {
 		typename _functor,
 		typename _tuple,
 		typename _tuple_args,
-		std::size_t _size,
+		std::size_t _capacity,
 		typename... _fixed_args>
 	void foreach(
 		_tuple& tuple,
@@ -630,7 +630,7 @@ namespace iwutil {
 			_functor(),
 			std::forward<_tuple>(tuple),
 			std::forward<_tuple_args>(tuple_args),
-			std::make_index_sequence<_size>{},
+			std::make_index_sequence<_capacity>{},
 			fixed_args...
 		);
 	}
@@ -639,7 +639,7 @@ namespace iwutil {
 		typename _functor,
 		typename _tuple,
 		typename _tuple_args,
-		std::size_t _size,
+		std::size_t _capacity,
 		typename... _fixed_args>
 	void foreach(
 		_tuple& tuple,
@@ -655,7 +655,7 @@ namespace iwutil {
 			_functor(),
 			std::forward<_tuple>(tuple),
 			std::forward<_tuple_args>(tuple_args),
-			std::make_index_sequence<_size>{},
+			std::make_index_sequence<_capacity>{},
 			fixed_args...
 		);
 	}
@@ -664,7 +664,7 @@ namespace iwutil {
 		typename _functor,
 		typename _tuple,
 		typename _tuple_args,
-		std::size_t _size,
+		std::size_t _capacity,
 		typename... _fixed_args>
 	void foreach(
 		_tuple& tuple,
@@ -680,7 +680,7 @@ namespace iwutil {
 			_functor(),
 			std::forward<_tuple>(tuple),
 			tuple_args,
-			std::make_index_sequence<_size>{},
+			std::make_index_sequence<_capacity>{},
 			std::forward<_fixed_args>(fixed_args)...
 		);
 	}
@@ -689,7 +689,7 @@ namespace iwutil {
 		typename _functor,
 		typename _tuple,
 		typename _tuple_args,
-		std::size_t _size,
+		std::size_t _capacity,
 		typename... _fixed_args>
 	void foreach(
 		_tuple& tuple,
@@ -705,7 +705,7 @@ namespace iwutil {
 			_functor(),
 			std::forward<_tuple>(tuple),
 			tuple_args,
-			std::make_index_sequence<_size>{},
+			std::make_index_sequence<_capacity>{},
 			std::forward<_fixed_args>(fixed_args)...
 		);
 	}
@@ -716,7 +716,7 @@ namespace iwutil {
 		typename _functor,
 		typename _tuple,
 		typename _tuple_return,
-		std::size_t _size>
+		std::size_t _capacity>
 	_tuple_return geteach(
 			_tuple& tuple)
 	{
@@ -727,7 +727,7 @@ namespace iwutil {
 		(
 			_functor(),
 			std::forward<_tuple>(tuple),
-			std::make_index_sequence<_size>{}
+			std::make_index_sequence<_capacity>{}
 		);
 	}
 #pragma endregion
@@ -738,7 +738,7 @@ namespace iwutil {
 		typename _tuple,
 		typename _tuple_return,
 		typename _tuple_args,
-		std::size_t _size>
+		std::size_t _capacity>
 	_tuple_return geteach(
 		_tuple& tuple,
 		_tuple_args&& tuple_args)
@@ -752,7 +752,7 @@ namespace iwutil {
 			_functor(),
 			std::forward<_tuple>(tuple),
 			std::forward<_tuple_args>(tuple_args),
-			std::make_index_sequence<_size>{}
+			std::make_index_sequence<_capacity>{}
 		);
 	}
 
@@ -761,7 +761,7 @@ namespace iwutil {
 		typename _tuple,
 		typename _tuple_return,
 		typename _tuple_args,
-		std::size_t _size>
+		std::size_t _capacity>
 	_tuple_return geteach(
 		_tuple& tuple,
 		_tuple_args& tuple_args)
@@ -775,7 +775,7 @@ namespace iwutil {
 			_functor(),
 			std::forward<_tuple>(tuple),
 			std::forward<_tuple_args>(tuple_args),
-			std::make_index_sequence<_size>{}
+			std::make_index_sequence<_capacity>{}
 		);
 	}
 
@@ -784,7 +784,7 @@ namespace iwutil {
 		typename _tuple,
 		typename _tuple_return,
 		typename _tuple_args,
-		std::size_t _size>
+		std::size_t _capacity>
 	_tuple_return geteach(
 		_tuple& tuple,
 		const _tuple_args& tuple_args)
@@ -798,7 +798,7 @@ namespace iwutil {
 			_functor(),
 			std::forward<_tuple>(tuple),
 			tuple_args,
-			std::make_index_sequence<_size>{}
+			std::make_index_sequence<_capacity>{}
 		);
 	}
 #pragma endregion
@@ -808,7 +808,7 @@ namespace iwutil {
 		typename _functor,
 		typename _tuple,
 		typename _tuple_return,
-		std::size_t _size,
+		std::size_t _capacity,
 		typename... _fixed_args>
 	_tuple_return geteach(
 		_tuple& tuple,
@@ -822,7 +822,7 @@ namespace iwutil {
 		(
 			_functor(),
 			std::forward<_tuple>(tuple),
-			std::make_index_sequence<_size>{},
+			std::make_index_sequence<_capacity>{},
 			std::forward<_fixed_args>(fixed_args)...
 		);
 	}
@@ -831,7 +831,7 @@ namespace iwutil {
 		typename _functor,
 		typename _tuple,
 		typename _tuple_return,
-		std::size_t _size,
+		std::size_t _capacity,
 		typename... _fixed_args>
 	_tuple_return geteach(
 		_tuple& tuple,
@@ -845,7 +845,7 @@ namespace iwutil {
 		(
 			_functor(),
 			std::forward<_tuple>(tuple),
-			std::make_index_sequence<_size>{},
+			std::make_index_sequence<_capacity>{},
 			std::forward<_fixed_args>(fixed_args)...
 		);
 	}
@@ -854,7 +854,7 @@ namespace iwutil {
 		typename _functor,
 		typename _tuple,
 		typename _tuple_return,
-		std::size_t _size,
+		std::size_t _capacity,
 		typename... _fixed_args>
 	_tuple_return geteach(
 		_tuple& tuple,
@@ -868,7 +868,7 @@ namespace iwutil {
 		(
 			_functor(),
 			std::forward<_tuple>(tuple),
-			std::make_index_sequence<_size>{},
+			std::make_index_sequence<_capacity>{},
 			fixed_args...
 		);
 	}
@@ -880,7 +880,7 @@ namespace iwutil {
 		typename _tuple,
 		typename _tuple_return,
 		typename _tuple_args,
-		std::size_t _size,
+		std::size_t _capacity,
 		typename... _fixed_args>
 	_tuple_return geteach(
 		_tuple& tuple,
@@ -897,7 +897,7 @@ namespace iwutil {
 			_functor(),
 			std::forward<_tuple>(tuple),
 			std::forward<_tuple_args>(tuple_args),
-			std::make_index_sequence<_size>{},
+			std::make_index_sequence<_capacity>{},
 			std::forward<_fixed_args>(fixed_args)...
 		);
 	}
@@ -907,7 +907,7 @@ namespace iwutil {
 		typename _tuple,
 		typename _tuple_return,
 		typename _tuple_args,
-		std::size_t _size,
+		std::size_t _capacity,
 		typename... _fixed_args>
 	_tuple_return geteach(
 		_tuple& tuple,
@@ -924,7 +924,7 @@ namespace iwutil {
 			_functor(),
 			std::forward<_tuple>(tuple),
 			std::forward<_tuple_args>(tuple_args),
-			std::make_index_sequence<_size>{},
+			std::make_index_sequence<_capacity>{},
 			std::forward<_fixed_args>(fixed_args)...
 		);
 	}
@@ -934,7 +934,7 @@ namespace iwutil {
 		typename _tuple,
 		typename _tuple_return,
 		typename _tuple_args,
-		std::size_t _size,
+		std::size_t _capacity,
 		typename... _fixed_args>
 	_tuple_return geteach(
 		_tuple& tuple,
@@ -951,7 +951,7 @@ namespace iwutil {
 			_functor(),
 			std::forward<_tuple>(tuple),
 			std::forward<_tuple_args>(tuple_args),
-			std::make_index_sequence<_size>{},
+			std::make_index_sequence<_capacity>{},
 			std::forward<_fixed_args>(fixed_args)...
 		);
 	}
@@ -961,7 +961,7 @@ namespace iwutil {
 		typename _tuple,
 		typename _tuple_return,
 		typename _tuple_args,
-		std::size_t _size,
+		std::size_t _capacity,
 		typename... _fixed_args>
 	_tuple_return geteach(
 		_tuple& tuple,
@@ -978,7 +978,7 @@ namespace iwutil {
 			_functor(),
 			std::forward<_tuple>(tuple),
 			std::forward<_tuple_args>(tuple_args),
-			std::make_index_sequence<_size>{},
+			std::make_index_sequence<_capacity>{},
 			fixed_args...
 		);
 	}
@@ -988,7 +988,7 @@ namespace iwutil {
 		typename _tuple,
 		typename _tuple_return,
 		typename _tuple_args,
-		std::size_t _size,
+		std::size_t _capacity,
 		typename... _fixed_args>
 	_tuple_return geteach(
 		_tuple& tuple,
@@ -1005,7 +1005,7 @@ namespace iwutil {
 			_functor(),
 			std::forward<_tuple>(tuple),
 			std::forward<_tuple_args>(tuple_args),
-			std::make_index_sequence<_size>{},
+			std::make_index_sequence<_capacity>{},
 			fixed_args...
 		);
 	}
@@ -1015,7 +1015,7 @@ namespace iwutil {
 		typename _tuple,
 		typename _tuple_return,
 		typename _tuple_args,
-		std::size_t _size,
+		std::size_t _capacity,
 		typename... _fixed_args>
 	_tuple_return geteach(
 		_tuple& tuple,
@@ -1032,7 +1032,7 @@ namespace iwutil {
 			_functor(),
 			std::forward<_tuple>(tuple),
 			tuple_args,
-			std::make_index_sequence<_size>{},
+			std::make_index_sequence<_capacity>{},
 			std::forward<_fixed_args>(fixed_args)...
 		);
 	}
@@ -1042,7 +1042,7 @@ namespace iwutil {
 		typename _tuple,
 		typename _tuple_return,
 		typename _tuple_args,
-		std::size_t _size,
+		std::size_t _capacity,
 		typename... _fixed_args>
 	_tuple_return geteach(
 		_tuple& tuple,
@@ -1059,7 +1059,7 @@ namespace iwutil {
 			_functor(),
 			std::forward<_tuple>(tuple),
 			tuple_args,
-			std::make_index_sequence<_size>{},
+			std::make_index_sequence<_capacity>{},
 			std::forward<_fixed_args>(fixed_args)...
 		);
 	}

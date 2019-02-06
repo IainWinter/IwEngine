@@ -1,51 +1,13 @@
-#include <iostream>
 #include "Core/EntryPoint.h"
-#include "ecs_manager.h"
-#include "tight_array.h"
-#include "system_manager.h"
+#include "component/component_map.h"
 
 struct Position {
-	float x, y, z;
-	float rotation;
+	float x, y;
 };
 
 struct Velocity {
-	float x, y, z;
+	float x, y;
 };
-
-struct Mesh {
-	int vert_count;
-};
-
-struct Collider {
-	int vert_count;
-};
-
-struct Player {
-	int speed;
-};
-
-struct Asteriod {
-	int level;
-};
-
-struct Bullet {
-	float spawn_time;
-	int speed;
-};
-
-class MovementSystem 
-	: iwecs::system<Position, Velocity>
-{
-	void update(
-		view<Position, Velocity> view)
-	{
-		for (auto& c : view) {
-			
-		}
-	}
-};
-
 
 class Game : public IwEngine::Application {
 public:
@@ -53,48 +15,12 @@ public:
 	~Game() {}
 
 	void Run() override {
-		iwecs::registry registry = iwecs::registry();
+		iwecs::component_map world = iwecs::component_map();
 
-		//Player
-		auto player = registry.create();
-		registry.assign<Position>(player);
-		registry.assign<Velocity>(player);
-		registry.assign<Mesh>(player);
-		registry.assign<Collider>(player);
-		registry.assign<Player>(player);
-		std::min
-
-
-		//Physics system
-		registry.view<Position, Velocity, Collider>();
-
-		//Player system
-		registry.view<Collider, Velocity, Player>();
-
-		//Asteroid
-		registry.view<Collider, Asteriod>();
-
-		//Bullet
-		registry.view<Collider, Bullet>();
-
-	//	iwecs::ecs_manager m = iwecs::ecs_manager();
-	//	
-	//	for (int i = 0; i < 500; i++) {
-	//		float f = i + .1f;
-	//		iwecs::entity_t e = m.create_entity<int, float>(i, f);
-	//	}
-
-	//	m.destroy_entity(5);
-	//	m.destroy_entity(85);
-	//	m.destroy_entity(320);
-	//	m.destroy_entity(199);
-
-	//	for (int i = 0; i < 60; i++) {
-	//		float f = i + .1f;
-	//		iwecs::entity_t e = m.create_entity<int, float>(i, f);
-	//	}
-
-	//	m.create_entity<int, float>(2, 2.3f);
+		world.emplace<Position>(0, Position {1, 2});
+		//world.erase<Position>(0);
+		//world.emplace<Position, Velocity>(0, Position{ 1, 2 }, Velocity{3, 4});
+		//world.erase(0);
 	}
 };
 

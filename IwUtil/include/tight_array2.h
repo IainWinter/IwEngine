@@ -27,7 +27,7 @@ namespace iwutil {
 		tight_array(
 			const tight_array& copy)
 		{
-			m_array = new _t[_size];
+			m_array = new _t[_capacity];
 			m_size  = copy.m_size;
 			std::copy(m_array, copy.m_array, _capacity * sizeof(_t));
 		}
@@ -55,7 +55,7 @@ namespace iwutil {
 		{
 			if (this != &copy) {
 				delete[] m_array;
-				m_array = new _t[_size];
+				m_array = new _t[_capacity];
 				m_size  = copy.m_size;
 				std::copy(m_array, copy.m_array, _capacity * sizeof(_t));
 			}
