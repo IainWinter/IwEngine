@@ -27,7 +27,6 @@ namespace iwecs {
 			}
 
 			group_t* group = reinterpret_cast<group_t*>(itr->second);
-
 			group->insert(std::forward<_component_t>(component));
 		}
 
