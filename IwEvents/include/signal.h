@@ -4,9 +4,8 @@
 #include <memory>
 #include <algorithm>
 #include <functional>
-#include "iwevents.h"
 
-namespace iwevents {
+namespace iwevt {
 	/**
 	* @breif Signals can be used to call many functions at once with the same arguments.
 	*
