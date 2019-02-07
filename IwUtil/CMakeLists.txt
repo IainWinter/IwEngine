@@ -6,9 +6,8 @@ project(IwUtil)
 set(INCLUDE_DIRS
 	"${PROJECT_SOURCE_DIR}/include/")
 set(HEADERS
-	"include/compact_array.h"
-	"include/input_iterator.h"
-	"include/type_id.h")
+	"include/set/sparse_set.h"
+	"include/type/type_id.h")
 set(POST_INSTALL_INCLUDE
 	"${PROJECT_NAME}")
 
