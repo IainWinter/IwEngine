@@ -15,7 +15,6 @@ namespace iwinput {
 		rid[0].hwndTarget = NULL; // For current window
 
 		if (!RegisterRawInputDevices(rid, 1, sizeof(rid[0]))) {
-			std::cout << "d";
 			//Set some flag to indicate a bad registration.
 		}
 
@@ -37,7 +36,7 @@ namespace iwinput {
 		static BYTE lpb[40];
 
 		if (GetRawInputData(hri, RID_INPUT, lpb, &dw_size, rih_size) != dw_size) {
-			std::cout << "GetRawInputData does not return correct size!" << std::endl;
+			//std::cout << "GetRawInputData does not return correct size!" << std::endl;
 		}
 
 		RAWINPUT* raw = (RAWINPUT*)lpb;
