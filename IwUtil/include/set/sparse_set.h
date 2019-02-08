@@ -3,9 +3,10 @@
 #include <vector>
 #include <algorithm>
 #include <assert.h>
+#include "iwutil.h"
 #include "type/type_traits.h"
 
-namespace iwu {
+namespace iwutil {
 	template<typename...>
 	class sparse_set;
 

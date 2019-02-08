@@ -1,8 +1,9 @@
 #pragma once
 
 #include <stdint.h>
+#include "iwutil.h"
 
-namespace iwu {
+namespace iwutil {
 	template<typename>
 	struct type_traits;
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include "iwutil.h"
 
 namespace iwutil {
 	using typeid_t = void(*)();
