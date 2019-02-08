@@ -28,9 +28,9 @@ namespace iwu {
 		public:
 			using index_type        = _t;
 			using direct_type       = std::vector<index_type>;
+			using difference_type   = typename type_traits<_t>::difference_type;
 			using iterator_category = std::random_access_iterator_tag;
 			using value_type        = std::remove_cv_t<index_type>;
-			using difference_type   = typename type_traits<_t>::difference_type;
 			using pointer           = index_type*;
 			using reference         = index_type&;
 
@@ -374,12 +374,14 @@ namespace iwu {
 			bool _const>
 		class iterator_ {
 			public:
-				using index_type        = _index_t;
-				using item_type         = std::conditional_t<_const, const _item_t, _item_t>;
+				using index_type = _index_t;
+				using item_type         
+					= std::conditional_t<_const, const _item_t, _item_t>;
+				using difference_type
+					= typename type_traits<index_type>::difference_type;
 				using direct_type       = std::vector<item_type>;
 				using iterator_category = std::random_access_iterator_tag;
 				using value_type        = std::remove_cv_t<item_type>;
-				using difference_type   = typename type_traits<index_type>::difference_type;
 				using pointer           = item_type*;
 				using reference         = item_type&;
 
