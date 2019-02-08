@@ -2,7 +2,7 @@
 
 #include "signal.h"
 
-namespace iwevt {
+namespace iwevents {
 	/*
 	Fixes doxygen problem where it does not detect that event_bus<_event_t, _others_t...> 
 	inherits from event_bus<_event_t> and event_bus<_others_t>....

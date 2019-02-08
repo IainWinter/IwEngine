@@ -5,7 +5,9 @@
 #include <algorithm>
 #include <functional>
 
-namespace iwevt {
+#define iwevents iwevt
+
+namespace iwevents {
 	/**
 	* @breif Signals can be used to call many functions at once with the same arguments.
 	*
