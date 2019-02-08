@@ -2,7 +2,7 @@
 
 #include <unordered_map>
 #include "component_group.h"
-#include "type_id.h"
+#include "type/type_id.h"
 
 namespace iwecs {
 	class component_map {

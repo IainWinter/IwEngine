@@ -1,6 +1,6 @@
 #pragma once
 
-#include "compact_array.h"
+#include "set/sparse_set.h"
 
 namespace iwecs {
 	class icomponent_group {
@@ -34,11 +34,11 @@ namespace iwecs {
 		: public icomponent_group
 	{
 	private:
-		iwutil::compact_array<_component_t, 5> _components;
+		iwu::sparse_set<std::size_t, _component_t> _components;
 
 	public:
 		void insert(_component_t&& component) {
-			_components.push_back(std::forward<_component_t>(component));
+			_components.insert(0, std::forward<_component_t>(component));
 		}
 	};
 }

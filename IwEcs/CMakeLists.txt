@@ -34,7 +34,7 @@ endif()
 target_link_libraries(${PROJECT_NAME} INTERFACE Iw::Util)
 
 #Set target compile features
-target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_11)
+target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_17)
 
 #Install locations
 install(FILES ${HEADERS} DESTINATION include/${POST_INSTALL_INCLUDE})
