@@ -7,7 +7,7 @@ set(INCLUDE_DIRS
 	"${PROJECT_SOURCE_DIR}/include/")
 set(HEADERS
 	"include/set/sparse_set.h"
-	"include/type/type_id.h"
+	"include/type/type_group.h"
 	"include/type/type_traits.h")
 set(POST_INSTALL_INCLUDE
 	"${PROJECT_NAME}")

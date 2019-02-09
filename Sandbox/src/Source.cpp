@@ -1,9 +1,15 @@
 #include "Core/EntryPoint.h"
-#include "component/component_map.h"
+#include "component/bag.h"
+
+#include "type/type_group.h"
 
 #include <iostream>
 
 struct Position {
+	int x, y;
+};
+
+struct Velocity {
 	int x, y;
 };
 
@@ -13,12 +19,17 @@ public:
 	~Game() {}
 
 	void Run() override {
-		iwecs::component_map world = iwecs::component_map();
+		iwecs::bag<size_t> world = iwecs::bag<size_t>();
 
-		world.emplace<Position>(0, Position {1, 2});
-		//world.erase<Position>(0);
-		//world.emplace<Position, Velocity>(0, Position{ 1, 2 }, Velocity{3, 4});
-		//world.erase(0);
+		world.emplace<Position>(0, Position{ 1, 2 });
+		world.emplace<Velocity>(0, Velocity{ 1, 2 });
+
+		world.emplace<Position>(1, Position{ 1, 2 });
+		
+		world.emplace<Velocity>(2, Velocity{ 1, 2 });
+		world.emplace<Position>(2, Position{ 1, 2 });
+
+		auto view = world.view<Position, Velocity>();
 
 		std::cin.get();
 	}

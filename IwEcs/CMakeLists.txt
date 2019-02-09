@@ -6,8 +6,8 @@ project(IwEcs)
 set(INCLUDE_DIRS
 	"${PROJECT_SOURCE_DIR}/include/")
 set(HEADERS
-	"include/component/component_map.h"
-	"include/component/component_group.h")
+	"include/component/bag.h"
+	"include/component/bag_view.h")
 set(POST_INSTALL_INCLUDE
 	"${PROJECT_NAME}")
 

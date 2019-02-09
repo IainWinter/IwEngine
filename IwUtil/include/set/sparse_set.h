@@ -195,7 +195,7 @@ namespace iwutil {
 		*
 		* @param x The number to insert.
 		*/
-		void insert(
+		void emplace(
 			_t x)
 		{
 			assert(!contains(x));
@@ -242,7 +242,7 @@ namespace iwutil {
 		* @param a The first number to swap.
 		* @param b The second number to swap.
 		*/
-		void swap(
+		virtual void swap(
 			_t a,
 			_t b)
 		{
@@ -307,7 +307,7 @@ namespace iwutil {
 		/**
 		* @breif Clears the set.
 		*/
-		void clear() {
+		virtual void clear() {
 			m_direct.clear();
 			m_sparse.clear();
 		}
@@ -368,7 +368,7 @@ namespace iwutil {
 		typename _index_t,
 		typename _item_t>
 	class sparse_set<_index_t, _item_t>
-		: private sparse_set<_index_t>
+		: public sparse_set<_index_t>
 	{
 	public:
 		template<
@@ -539,7 +539,7 @@ namespace iwutil {
 
 	public:
 		/**
-		* @breif Inserts an item into the set at an index.
+		* @breif Constructs an item inplace at an index.
 		*
 		* @note
 		* Items are constructed in-place if they are an aggregate
@@ -557,17 +557,17 @@ namespace iwutil {
 		*/
 		template<
 			typename... _args_t>
-		void insert(
+		void emplace(
 			_index_t index,
 			_args_t&&... args)
 		{
 			if constexpr (std::is_aggregate_v<_item_t>) {
-				m_items.emplace_back(_item_t{std::forward<_args_t>(args)...});
+				m_items.emplace_back(_item_t{ std::forward<_args_t>(args)... });
 			} else {
-				m_items.emplace_back(_item_t(std::forward<_args_t>(args)...));
+				m_items.emplace_back(std::forward<_args_t>(args)...);
 			}
 
-			base_t::insert(index);
+			base_t::emplace(index);
 		}
 
 		/**
@@ -581,7 +581,7 @@ namespace iwutil {
 		* @param index The index of the element to remove.
 		*/
 		void erase(
-			_index_t index)
+			_index_t index) override
 		{
 			_item_t back = std::move(m_items.back());
 			m_items[base_t::at(index)] = std::move(back);
@@ -602,12 +602,20 @@ namespace iwutil {
 		*/
 		void swap(
 			_index_t a,
-			_index_t b)
+			_index_t b) override
 		{
 			_item_t item = std::move(m_items[base_t::at(a)]);
 			m_items[base_t::at(a)] = std::move(m_items[base_t::at(b)]);
 			m_items[base_t::at(b)] = std::move(item);
 			base_t::swap(a, b);
+		}
+
+		/**
+		* @breif Clears the set.
+		*/
+		void clear() override {
+			m_items.clear();
+			base_t::clear();
 		}
 
 		/**
@@ -648,45 +656,6 @@ namespace iwutil {
 			const _index_t& index)
 		{
 			return contains(index) ? end() - base_t::at(index) : end();
-		}
-
-		/**
-		* @breif Checks the set for an index.
-		*
-		* @param index The index to check for.
-		*
-		* @return True if the set contains the index, false otherwise.
-		*/
-		bool contains(
-			_index_t index) const
-		{
-			return base_t::contains(index);
-		}
-
-		/**
-		* @breif Clears the set.
-		*/
-		void clear() {
-			m_items.clear();
-			base_t::clear();
-		}
-
-		/**
-		* @breif Checks if the set is empty.
-		*
-		* @return True if the set is empty, false otherwise.
-		*/
-		bool empty() const {
-			return base_t::empty();
-		}
-
-		/**
-		* @breif Returns the size of the set.
-		*
-		* @return The size of the set.
-		*/
-		std::size_t size() const {
-			return base_t::size();
 		}
 
 		/**
