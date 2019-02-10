@@ -9,6 +9,17 @@ namespace iwecs {
 		typename... _components_t>
 	class bag_view {
 	public:
+		template<
+			bool _const>
+		class iterator {
+		public:
+		private:
+
+		public:
+		private:
+
+		};
+
 	private:
 		template<typename _t>
 		using set_t = iwutil::sparse_set<_index_t, _t>;

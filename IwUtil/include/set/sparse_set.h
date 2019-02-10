@@ -22,8 +22,11 @@ namespace iwutil {
 	*
 	* @tparam _t The type of interger to store.
 	*/
-	template<typename _t>
-	class sparse_set<_t> {
+	template<
+		typename _t>
+	class sparse_set<
+		_t>
+	{
 	public:
 		class iterator {
 		public:
@@ -45,7 +48,8 @@ namespace iwutil {
 				index_type index,
 				direct_type* direct)
 				: m_index(index)
-				, m_direct(direct) {}
+				, m_direct(direct)
+			{}
 
 		public:
 			iterator() = default;
@@ -367,7 +371,9 @@ namespace iwutil {
 	template<
 		typename _index_t,
 		typename _item_t>
-	class sparse_set<_index_t, _item_t>
+	class sparse_set<
+		_index_t,
+		_item_t>
 		: public sparse_set<_index_t>
 	{
 	public:
@@ -396,7 +402,8 @@ namespace iwutil {
 					index_type index,
 					direct_type* direct)
 					: m_index(index)
-					, m_direct(direct) {}
+					, m_direct(direct)
+				{}
 
 			public:
 				iterator_() = default;
@@ -539,6 +546,27 @@ namespace iwutil {
 
 	public:
 		/**
+		* @breif Inserts an item into the set.
+		*
+		*
+		* @warning
+		* Inserting at a duplicate index results in undefined
+		* behaviour. An assertion will check for duplicates
+		* at at runtime if in debug mode.
+		*
+		*
+		* @param index The index to insert at.
+		* @param item The item to insert.
+		*/
+		void insert(
+			_index_t index,
+			_item_t&& item)
+		{
+			m_items.push_back(std::forward<_item_t>(item));
+			base_t::emplace(index);
+		}
+
+		/**
 		* @breif Constructs an item inplace at an index.
 		*
 		* @note
@@ -563,7 +591,9 @@ namespace iwutil {
 		{
 			if constexpr (std::is_aggregate_v<_item_t>) {
 				m_items.emplace_back(_item_t{ std::forward<_args_t>(args)... });
-			} else {
+			}
+
+			else {
 				m_items.emplace_back(std::forward<_args_t>(args)...);
 			}
 
