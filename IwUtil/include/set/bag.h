@@ -50,8 +50,9 @@ namespace iwutil {
 			typename _t>
 		set_t<_t>& ensure_set() {
 			int index = set_group_t::type<_t>;
-			if (index == m_sets.size()) {
+			if (index >= m_sets.size()) {
 				m_sets.push_back(new set_t<_t>());
+				index = m_sets.size() - 1;
 			}
 
 			return static_cast<set_t<_t>&>(*m_sets[index]);

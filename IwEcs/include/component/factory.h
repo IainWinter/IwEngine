@@ -1,6 +1,10 @@
 #pragma once
 
+namespace iwecs {
+	class factory {
 
+	};
+}
 
 
 

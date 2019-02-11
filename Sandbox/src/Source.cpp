@@ -85,10 +85,10 @@ struct Score    { int score; };
 class Game : public IwEngine::Application {
 public:
 	void Run() override {
-		iwecs::archetype a1 = iwecs::make_archetype<Position, Velocity, Mesh, Collider, Player>();
-		iwecs::archetype a2 = iwecs::make_archetype<Position, Velocity, Mesh, Collider, Asteroid>();
-		iwecs::archetype a3 = iwecs::make_archetype<Position, Velocity, Mesh, Collider, Bullet>();
-		iwecs::archetype a4 = iwecs::make_archetype<Position, Mesh, Score>();
+		iwecs::reg reg;
+		auto e = reg.create();
+		reg.assign<Position>(e, 1, 2);
+		reg.assign<Velocity>(e, 1, 2);
 
 		std::cin.get();
 	}
