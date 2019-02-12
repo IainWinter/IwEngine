@@ -1,5 +1,5 @@
 #include "Core/EntryPoint.h"
-#include "iwecs.h"
+#include "iwent.h"
 
 #include <iostream>
 
@@ -50,13 +50,11 @@ struct Score    { int score; };
 // Bullet 2:   pos vel mesh col                 bullet
 // Bullet 3:   pos vel mesh col                 bullet
 // Score:      pos     mesh                            score
-
 //archetypes
 // group 1: pos vel mesh col player
 // group 2: pos vel mesh col asteroid
 // group 3: pos vel mesh col bullet
 // group 4: pos mesh score
-
 //data layout
 //
 // group 1
@@ -85,10 +83,15 @@ struct Score    { int score; };
 class Game : public IwEngine::Application {
 public:
 	void Run() override {
-		iwecs::reg reg;
-		auto e = reg.create();
-		reg.assign<Position>(e, 1, 2);
-		reg.assign<Velocity>(e, 1, 2);
+		iwent::space space;
+		space.divide(iwent::make_archetype<int, Velocity, Collider>());
+		space.divide(iwent::make_archetype<int, Position, Collider>());
+
+
+		//iwecs::reg reg;
+		//auto e = reg.create();
+		//reg.assign<Position>(e, 1, 2);
+		//reg.assign<Velocity>(e, 1, 2);
 
 		std::cin.get();
 	}

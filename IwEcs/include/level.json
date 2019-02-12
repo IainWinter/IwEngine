@@ -1,0 +1,16 @@
+{
+	"Name": "Space",
+	"Common Space": {
+		"Archetype": 3
+	},
+	"Subspaces": [
+		{
+			"Name": "Physics",
+			"Archetype": 485
+		},
+		{
+			"Name": "Graphics",
+			"Archetype": 491521
+		}
+	]
+}

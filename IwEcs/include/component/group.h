@@ -10,6 +10,7 @@ namespace iwecs {
 	class group {
 	public:
 		using entity_type = _entity_t;
+
 	private:
 		template<typename _t>
 		using set_t = iwutil::sparse_set<entity_type, _t>;
@@ -18,8 +19,6 @@ namespace iwecs {
 		iwutil::sparse_set<size_t, iwutil::sparse_set<entity_type>*> m_components;
 
 	public:
-		group() = default;
-
 		group(archetype archetype)
 			: m_archetype(archetype)
 		{}
