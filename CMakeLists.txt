@@ -14,12 +14,12 @@ endif()
 set(POST_INSTALL "${ARCHITECTURE}")
 
 #Add libraries to build
-add_subdirectory(IwEcs)
-add_subdirectory(IwEngine)
-add_subdirectory(IwEvents)
-add_subdirectory(IwInput)
 add_subdirectory(IwMath)
 add_subdirectory(IwUtil)
+add_subdirectory(IwEvents)
+add_subdirectory(IwEcs)
+add_subdirectory(IwInput)
+add_subdirectory(IwEngine)
 
 #Only build the sandbox for testing
 if(IW_BUILD_SANDBOX)

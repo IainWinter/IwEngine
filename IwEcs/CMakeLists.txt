@@ -9,7 +9,10 @@ set(HEADERS
 	"include/component/component_bag.h"
 	"include/component/view.h"
 	"include/component/archetype.h"
-	"include/entity/registry.h")
+	"include/entity/registry.h"
+	"include/entity/entity_traits.h"
+	"include/space/space.h"
+	"include/space/subspace.h")
 set(POST_INSTALL_INCLUDE
 	"${PROJECT_NAME}")
 
@@ -23,6 +26,11 @@ include_directories(${INCLUDE_DIRS})
 #Set target include directory for client
 target_include_directories(${PROJECT_NAME} INTERFACE ${INCLUDE_DIRS})
 
+#Link libraries
+target_link_libraries(${PROJECT_NAME} 
+	INTERFACE Iw::Util
+	INTERFACE Iw::Events)
+
 #Set target compile time constants
 if(WIN32)
 	target_compile_definitions(${PROJECT_NAME} INTERFACE IW_PLATFORM_WINDOWS = 1)
@@ -31,9 +39,6 @@ elseif(APPLE)
 elseif(UNIX AND NOT APPLE)
 	target_compile_definitions(${PROJECT_NAME} INTERFACE IW_PLATFORM_UNIX = 1)
 endif()
-
-#Link libraries
-target_link_libraries(${PROJECT_NAME} INTERFACE Iw::Util)
 
 #Set target compile features
 target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_17)

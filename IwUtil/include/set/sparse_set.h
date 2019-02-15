@@ -31,16 +31,16 @@ namespace iwutil {
 		class iterator {
 		public:
 			using index_type        = _t;
-			using direct_type       = std::vector<index_type>;
+			using direct_type       = const std::vector<index_type>;
 			using difference_type   = typename type_traits<_t>::difference_type;
 			using iterator_category = std::random_access_iterator_tag;
 			using value_type        = std::remove_cv_t<index_type>;
-			using pointer           = index_type*;
-			using reference         = index_type&;
+			using pointer           = const index_type*;
+			using reference         = const index_type&;
 
 		private:
 			index_type m_index;
-			direct_type* m_direct;
+			const direct_type* m_direct;
 
 			friend class sparse_set<index_type>;
 
@@ -339,7 +339,7 @@ namespace iwutil {
 		*
 		* @return An iterator to the first element of the set.
 		*/
-		iterator begin() {
+		iterator begin() const {
 			return iterator(0, &m_direct);
 		}
 
@@ -348,7 +348,7 @@ namespace iwutil {
 		*
 		* @return An iterator to the element after the end of the set.
 		*/
-		iterator end() {
+		iterator end() const {
 			return iterator(size(), &m_direct);
 		}
 	};

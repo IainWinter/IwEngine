@@ -1,10 +1,11 @@
 #pragma once
 
-#include <initializer_list>
 #include "type/type_group.h"
 
 namespace iwent {
 	using archetype = size_t;
+
+	constexpr size_t archetype_size = sizeof(archetype) * 8;
 
 	archetype add_type(
 		archetype& a,
@@ -27,17 +28,24 @@ namespace iwent {
 		return a & 1UL << type_id;
 	}
 
+	bool is_active(
+		archetype a,
+		size_t offset)
+	{
+		return a & 1UL << offset == true;
+	}
+
 	bool is_empty(
 		archetype a)
 	{
-		return a == 0;
+		return a == false;
 	}
 
 	bool has_any(
 		archetype a,
 		archetype b)
 	{
-		return (a & b) != 0;
+		return (a & b) != false;
 	}
 
 	template<
@@ -46,7 +54,7 @@ namespace iwent {
 	archetype add_type(
 		archetype& a)
 	{
-		return add_type(a, iwutil::type_group<_type_group>::type<_t>);
+		return add_type(a, type_id<_type_group, _types>());
 	}
 
 	template<
@@ -55,7 +63,7 @@ namespace iwent {
 	archetype remove_type(
 		archetype& a)
 	{
-		return has_type(a, iwutil::type_group<_type_group>::type<_t>);
+		return has_type(a, type_id<_type_group, _types>());
 	}
 
 	template<
@@ -64,83 +72,20 @@ namespace iwent {
 	archetype has_type(
 		archetype a)
 	{
-		return has_type(a, iwutil::type_group<_type_group>::type<_t>);
+		return has_type(a, type_id<_type_group, _types>());
 	}
 
 	template<
 		typename _type_group,
 		typename... _types>
 	archetype make_archetype() {
-		return ((archetype(1) << iwutil::type_group<_type_group>::type<_types>) | ...);
+		return ((archetype(1) << type_id<_type_group, _types>()) | ...);
 	}
-
-	/*template<
-		typename _type_group>
-	struct archetype {
-	private:
-		using type_group = iwutil::type_group<archetype<_type_group>>;
-
-		size_t m_id;
-
-	public:
-		archetype()
-			: m_id(0)
-		{}
-
-		archetype(
-			std::initializer_list<size_t> components)
-			: m_id()
-		{
-			for (auto c : components) {
-				m_id |= size_t(1) << c;
-			}
-		}
-
-		bool operator<(
-			const archetype& other) const
-		{
-			return m_id < other.m_id;
-		}
-
-		template<
-			typename _t>
-		void add_type() {
-			m_id |= 1UL << type_group::type<_t>;
-		}
-
-		template<
-			typename _t>
-		void remove_type() {
-			m_id &= ~(1UL << type_group::type<_t>);
-		}
-
-		template<
-			typename _t>
-		bool contains_type() {
-			return m_id & 1UL << type_group::type<_t>;
-		}
-
-		bool contains_type(
-			size_t id)
-		{
-			return m_id & 1UL << id;
-		}
-
-		template<
-			typename _t>
-		size_t id() {
-			return type_group::type<_t>;
-		}
-
-		bool is_empty() {
-			return m_id == 0;
-		}
-	};
 
 	template<
 		typename _type_group,
-		typename... _types>
-	archetype<_type_group> make_archetype() {
-		return { iwutil::type_group<archetype<_type_group>>::type<_types>... };
-	}*/
+		typename _t>
+	size_t type_id() {
+		return iwutil::type_group<_type_group>::type<_t>;
+	}
 }

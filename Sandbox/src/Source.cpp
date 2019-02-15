@@ -1,5 +1,5 @@
 #include "Core/EntryPoint.h"
-#include "iwent.h"
+#include "space/space.h"
 
 #include <iostream>
 
@@ -12,86 +12,27 @@ struct Bullet   {};
 struct Asteroid { int level; };
 struct Score    { int score; };
 
-// components
-// pos
-// vel
-// mesh
-// col
-// player
-// asteroid
-// score
-// bullet
-//
-// groups
-// pos, vel, col
-// pos, mesh
-//
-// views
-// vel, player
-// pos, asteroid
-// score
-// bullet
-//
-// systems
-// u pos, vel, col
-// u pos, mesh
-// u vel, player
-// r pos, asteroid
-// r score
-// r bullet
-//
-// entities
-// Player:     pos vel mesh col player
-// Asteroid 1: pos vel mesh col        asteroid
-// Asteroid 2: pos vel mesh col        asteroid
-// Asteroid 3: pos vel mesh col        asteroid
-// Asteroid 4: pos vel mesh col        asteroid
-// Bullet 1:   pos vel mesh col                 bullet
-// Bullet 2:   pos vel mesh col                 bullet
-// Bullet 3:   pos vel mesh col                 bullet
-// Score:      pos     mesh                            score
-//archetypes
-// group 1: pos vel mesh col player
-// group 2: pos vel mesh col asteroid
-// group 3: pos vel mesh col bullet
-// group 4: pos mesh score
-//data layout
-//
-// group 1
-// Player: pos vel mesh col player
-//
-// group 2
-// Asteroid 1: pos vel mesh col asteroid
-// Asteroid 2: pos vel mesh col asteroid
-// Asteroid 3: pos vel mesh col asteroid
-// Asteroid 4: pos vel mesh col asteroid
-//
-// group 3
-// Bullet 1: pos vel mesh col bullet
-// Bullet 2: pos vel mesh col bullet
-// Bullet 3: pos vel mesh col bullet
-//
-// group 4:
-// Score: pos mesh score
-//
-//
-//
-//
-// 
-//
-
 class Game : public IwEngine::Application {
 public:
 	void Run() override {
-		iwent::space space;
-		space.divide(iwent::make_archetype<int, Velocity, Collider>());
-		space.divide(iwent::make_archetype<int, Position, Collider>());
+		iwent::space<Game> space;
+		space.make_common<Position>();
+		space.make_sspace<Velocity, Collider, Player, Asteroid>();
+		space.make_sspace<Mesh>();
 
+		auto e = space.create();
+		space.assign<Position>(e, Position{ 1, 2 });
+		space.assign<Velocity>(e, Velocity{ 1, 2 });
+		space.assign<Collider>(e, Collider{ 5 });
 
-		//iwecs::reg reg;
-		//auto e = reg.create();
-		//reg.assign<Position>(e, 1, 2);
-		//reg.assign<Velocity>(e, 1, 2);
+		auto e1 = space.create();
+		space.assign<Position>(e1, Position{ 1, 2 });
+		space.assign<Velocity>(e1, Velocity{ 1, 2 });
+		space.assign<Mesh>(e1, Mesh{ 5 });
+
+		space.destroy<Collider>(e);
+
+		space.destroy(e1);
 
 		std::cin.get();
 	}

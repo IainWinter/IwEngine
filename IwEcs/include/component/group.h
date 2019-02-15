@@ -1,49 +1,25 @@
 #pragma once
 
-#include <vector>
+#include <tuple>
 #include "archetype.h"
+#include "entity/entity_traits.h"
 #include "set/sparse_set.h"
+#include "type/type_index.h"
 
-namespace iwecs {
+namespace iwent {
 	template<
-		typename _entity_t>
+		typename... _components_t>
 	class group {
-	public:
-		using entity_type = _entity_t;
-
 	private:
-		template<typename _t>
-		using set_t = iwutil::sparse_set<entity_type, _t>;
+		template<
+			typename _component_t>
+		using set_t = iwutil::sparse_set<entity_type, _component_t>;
 
-		archetype m_archetype;
-		iwutil::sparse_set<size_t, iwutil::sparse_set<entity_type>*> m_components;
+		std::tuple<set_t<_components_t>*...> m_components;
 
 	public:
-		group(archetype archetype)
-			: m_archetype(archetype)
+		group(set_t<_components_t>*... components)
+			: m_components(components...)
 		{}
-
-		template<
-			typename _t,
-			typename... _args_t>
-		void create(
-			entity_type entity,
-			_args_t&&... args)
-		{
-			if (m_archetype.contains_type<_t>()) {
-				ensure_set<_t>().emplace(entity, std::forward<_args_t>(args)...);
-			}
-		}
-	private:
-		template<
-			typename _t>
-		set_t<_t>& ensure_set() {
-			int index = m_archetype.id<_t>();
-			if (!m_components.contains(index)) {
-				m_components.emplace(index, new set_t<_t>());
-			}
-
-			return static_cast<set_t<_t>&>(*m_components.at(index));
-		}
 	};
 }

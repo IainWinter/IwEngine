@@ -10,6 +10,7 @@ set(HEADERS
 	"include/set/bag.h"
 	"include/set/sparse_set.h"
 	"include/type/type_group.h"
+	"include/type/type_index.h"
 	"include/type/type_traits.h")
 set(POST_INSTALL_INCLUDE
 	"${PROJECT_NAME}")
