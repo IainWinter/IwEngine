@@ -12,27 +12,25 @@ struct Bullet   {};
 struct Asteroid { int level; };
 struct Score    { int score; };
 
+void physics_update(iwent::view<Position, Velocity, Collider>& view) {
+	
+}
+
 class Game : public IwEngine::Application {
 public:
 	void Run() override {
 		iwent::space<Game> space;
 		space.make_common<Position>();
-		space.make_sspace<Velocity, Collider, Player, Asteroid>();
-		space.make_sspace<Mesh>();
+		space.make_subspace<Velocity, Collider, Player, Asteroid>();
+		space.make_subspace<Mesh>();
+
+		space.make_action<Position, Velocity, Collider>(physics_update);
 
 		auto e = space.create();
 		space.assign<Position>(e, Position{ 1, 2 });
 		space.assign<Velocity>(e, Velocity{ 1, 2 });
 		space.assign<Collider>(e, Collider{ 5 });
-
-		auto e1 = space.create();
-		space.assign<Position>(e1, Position{ 1, 2 });
-		space.assign<Velocity>(e1, Velocity{ 1, 2 });
-		space.assign<Mesh>(e1, Mesh{ 5 });
-
-		space.destroy<Collider>(e);
-
-		space.destroy(e1);
+		space.assign<Mesh>    (e, Mesh{ 5 });
 
 		std::cin.get();
 	}

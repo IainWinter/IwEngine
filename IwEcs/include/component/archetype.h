@@ -7,14 +7,14 @@ namespace iwent {
 
 	constexpr size_t archetype_size = sizeof(archetype) * 8;
 
-	archetype add_type(
+	archetype& add_type(
 		archetype& a,
 		size_t type_id)
 	{
 		return a |= 1UL << type_id;
 	}
 
-	archetype remove_type(
+	archetype& remove_type(
 		archetype& a,
 		size_t type_id)
 	{
@@ -32,7 +32,7 @@ namespace iwent {
 		archetype a,
 		size_t offset)
 	{
-		return a & 1UL << offset == true;
+		return (a & 1UL << offset) == true;
 	}
 
 	bool is_empty(
@@ -51,19 +51,19 @@ namespace iwent {
 	template<
 		typename _type_group,
 		typename _t>
-	archetype add_type(
+	archetype& add_type(
 		archetype& a)
 	{
-		return add_type(a, type_id<_type_group, _types>());
+		return add_type(a, type_id<_type_group, _t>());
 	}
 
 	template<
 		typename _type_group,
 		typename _t>
-	archetype remove_type(
+	archetype& remove_type(
 		archetype& a)
 	{
-		return has_type(a, type_id<_type_group, _types>());
+		return remove_type(a, type_id<_type_group, _t>());
 	}
 
 	template<
@@ -72,14 +72,14 @@ namespace iwent {
 	archetype has_type(
 		archetype a)
 	{
-		return has_type(a, type_id<_type_group, _types>());
+		return has_type(a, type_id<_type_group, _t>());
 	}
 
 	template<
 		typename _type_group,
-		typename... _types>
+		typename... _t>
 	archetype make_archetype() {
-		return ((archetype(1) << type_id<_type_group, _types>()) | ...);
+		return ((archetype(1) << type_id<_type_group, _t>()) | ...);
 	}
 
 	template<

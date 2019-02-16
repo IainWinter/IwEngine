@@ -37,13 +37,13 @@ namespace iwent {
 			typename _component_t>
 		void make_common() {
 			group<_component_t> group(ensure<_component_t>());
-			m_common = new subspace<_component_t>(get_id<_component_t>(), group);
+			m_common = new subspace<_component_t>(get_archetype<_component_t>(), group);
 		}
 
 		template<
 			typename... _components_t>
-		void make_sspace() {
-			archetype a = get_id<_components_t...>();
+		void make_subspace() {
+			archetype a = get_archetype<_components_t...>();
 
 			assert(!m_common->is_similar(a));
 			for (auto sub : m_subspaces) {
@@ -52,6 +52,19 @@ namespace iwent {
 
 			group<_components_t...> group(ensure<_components_t>()...);
 			m_subspaces.push_back(new subspace<_components_t...>(a, group));
+		}
+
+		template<
+			typename... _components_t>
+		void make_action() {
+			archetype a = get_archetype<_components_t...>();
+
+			assert(m_common->is_similar(a));
+			for (auto sub : m_subspaces) {
+				if (sub->is_similar(a)) {
+
+				}
+			}
 		}
 
 		//Creates an empty entity
@@ -80,7 +93,7 @@ namespace iwent {
 			_args_t&&... args)
 		{
 			assert(valid(entity));
-			ensure<_component_t>()->emplace(entity, std::forward<_args_t>(args)...);
+			add_component<_component_t>(entity);
 		}
 
 		//Erases a component on an entity
@@ -90,7 +103,7 @@ namespace iwent {
 			entity_type entity)
 		{
 			assert(valid(entity));
-			ensure<_component_t>()->erase(entity);
+			remove_component<_component_t>(entity);
 		}
 
 		//Destroys an entitiy and all its components
@@ -99,9 +112,15 @@ namespace iwent {
 		{
 			assert(valid(entity));
 			m_expired.push_back(entity);
+			m_entities[entity] = archetype();
 
+			size_t type_id = 0;
 			for (auto set : m_components) {
-				set->erase(entity);
+				if (has_type(m_entities[entity], type_id)) {
+					set->erase(entity);
+				}
+
+				type_id++;
 			}
 		}
 
@@ -111,19 +130,12 @@ namespace iwent {
 		{
 			return entity >= 0 && entity < m_entities.size();
 		}
-
-		//Makes an archetype from the types
-		template<
-			typename... _t>
-		archetype get_id() const {
-			return iwent::make_archetype<group_type, _t...>();
-		}
 	private:
 		//Ensures a set of type _component_t
 		template<
 			typename _component_t>
 		set_t<_component_t>* ensure() {
-			size_t id = type_id<group_type, _component_t>();
+			size_t id = component_id<_component_t>();
 			if (id >= m_components.size()) {
 				m_components.resize(id + 1);
 			}
@@ -134,6 +146,42 @@ namespace iwent {
 			}
 
 			return static_cast<set_t<_component_t>*>(*itr);
+		}
+
+		template<
+			typename _component_t>
+		size_t component_id()
+			const
+		{
+			return type_id<group_type, _component_t>();
+		}
+
+		template<
+			typename... _components_t>
+		archetype get_archetype()
+			const
+		{
+			return make_archetype<group_type, _components_t...>();
+		}
+
+		template<
+			typename _component_t,
+			typename... _args_t>
+		void add_component(
+			entity_type entity,
+			_args_t&&... args)
+		{
+			add_type<group_type, _component_t>(m_entities[entity]);
+			ensure<_component_t>()->emplace(entity, std::forward<_args_t>(args)...);
+		}
+
+		template<
+			typename _component_t>
+			void remove_component(
+				entity_type entity)
+		{
+			remove_type<group_type, _component_t>(m_entities[entity]);
+			ensure<_component_t>()->erase(entity);
 		}
 	};
 }
