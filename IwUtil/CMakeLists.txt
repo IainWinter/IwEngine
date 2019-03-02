@@ -7,7 +7,7 @@ set(INCLUDE_DIRS
 	"${PROJECT_SOURCE_DIR}/include/")
 set(HEADERS
 	"include/iwutil.h"
-	"include/set/bag.h"
+	"include/action.h"
 	"include/set/sparse_set.h"
 	"include/type/type_group.h"
 	"include/type/type_index.h"
