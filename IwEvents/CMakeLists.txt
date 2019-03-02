@@ -7,7 +7,6 @@ set(INCLUDE_DIRS
 	"${PROJECT_SOURCE_DIR}/include/")
 set(HEADERS
 	"include/event_bus.h"
-	"include/iwevents.h"
 	"include/signal.h")
 set(POST_INSTALL_INCLUDE
 	"${PROJECT_NAME}")
