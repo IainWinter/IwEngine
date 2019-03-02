@@ -32,20 +32,20 @@ namespace iwent {
 		archetype a,
 		size_t offset)
 	{
-		return (a & 1UL << offset) == true;
+		return (a & 1UL << offset) == 1;
 	}
 
 	bool is_empty(
 		archetype a)
 	{
-		return a == false;
+		return a == 0;
 	}
 
 	bool has_any(
 		archetype a,
 		archetype b)
 	{
-		return (a & b) != false;
+		return (a & b) != 0;
 	}
 
 	template<
@@ -79,13 +79,19 @@ namespace iwent {
 		typename _type_group,
 		typename... _t>
 	archetype make_archetype() {
-		return ((archetype(1) << type_id<_type_group, _t>()) | ...);
+		if constexpr (sizeof...(_t) > 1) {
+			return ((archetype(1) << type_id<_type_group, _t>()) | ...);
+		}
+
+		else {
+			return archetype(1) << type_id<_type_group, _t...>();
+		}
 	}
 
 	template<
 		typename _type_group,
-		typename _t>
+		typename... _t>
 	size_t type_id() {
-		return iwutil::type_group<_type_group>::type<_t>;
+		return iwutil::type_group<_type_group>::type<_t...>;
 	}
 }

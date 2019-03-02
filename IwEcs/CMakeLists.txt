@@ -6,11 +6,11 @@ project(IwEcs)
 set(INCLUDE_DIRS
 	"${PROJECT_SOURCE_DIR}/include/")
 set(HEADERS
-	"include/component/component_bag.h"
-	"include/component/view.h"
 	"include/component/archetype.h"
-	"include/entity/registry.h"
+	"include/component/view.h"
+	"include/component/group.h"
 	"include/entity/entity_traits.h"
+	"include/space/active_subspace.h"
 	"include/space/space.h"
 	"include/space/subspace.h")
 set(POST_INSTALL_INCLUDE
