@@ -8,4 +8,6 @@
 #	endif
 #endif
 
-namespace IwEngine {}
+#ifdef IW_PLATFORM_WINDOWS
+#	include <Windows.h>
+#endif

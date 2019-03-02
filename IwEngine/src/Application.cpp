@@ -1,14 +1,28 @@
-#include "Core/Application.h"
-#include <iostream>
+#include "Application.h"
 
-IwEngine::Application::Application() {
-	std::cout << "Constructing application" << std::endl;
-}
+namespace IwEngine {
+	Application::Application()
+		: m_window(Window::Create())
+		, window(*m_window)
+	{}
 
-IwEngine::Application::~Application() {
-	std::cout << "Deconstructing application" << std::endl;
-}
+	Application::~Application() {
+		delete m_window;
+	}
 
-void IwEngine::Application::Run() {
-	std::cout << "Running application" << std::endl;
+	void Application::Initilize() {
+		window.Open();
+	}
+
+	void Application::Start() {
+		
+	}
+
+	void Application::Stop() {
+
+	}
+
+	void Application::Destroy() {
+		window.Close();
+	}
 }

@@ -6,14 +6,19 @@ project(IwEngine)
 set(INCLUDE_DIRS
 	"${PROJECT_SOURCE_DIR}/include/")
 set(SRC 
-	"src/Application.cpp")
+	"src/Application.cpp"
+	"src/Platform/WindowsWindow.cpp")
 set(HEADERS
-	"include/IwEngine.h"
+	"include/Application.h"
 	"include/Core.h"
-	"include/Core/Application.h"
-	"include/Core/EntryPoint.h")
+	"include/EntryPoint.h"
+	"include/Window.h"
+	"include/Platform/Windows/WindowsWindow.h")
 set(POST_INSTALL_INCLUDE
 	"${PROJECT_NAME}")
+
+find_package(OpenGL)
+find_package(GLEW)
 
 #Add libraries
 add_library(${PROJECT_NAME} SHARED ${SRC})
@@ -24,6 +29,12 @@ include_directories(${INCLUDE_DIRS})
 
 #Set target include directory for client
 target_include_directories(${PROJECT_NAME} PUBLIC ${INCLUDE_DIRS})
+
+#Set target link libraries
+target_link_libraries(
+    ${PROJECT_NAME}
+    ${OPENGL_gl_LIBRARY}
+    ${GLEW_LIBRARY} )
 
 #Set target compile time constants
 if(WIN32)
