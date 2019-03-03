@@ -15,10 +15,25 @@ int CALLBACK WinMain(
 	IwEngine::Application* app = CreateApplication();
 	app->Initilize();
 	app->Start();
-	app->Run();
-	app->Stop();
-	app->Destroy();
 	delete app;
 }
 
 #endif
+
+// Application Life Cycle
+//
+//  Constructor
+//       |
+//   Initilize
+//       |
+//     Start
+//       |   
+//      Run<---
+//       |--->^
+//       |
+//     Stop
+//       |
+//    Destroy
+//       |
+//   Destructor
+//

@@ -4,56 +4,51 @@
 #include <cstdio>
 #include <iostream>
 
-LRESULT CALLBACK WinProc(
-	HWND hwnd,
-	UINT msg,
-	WPARAM wparam,
-	LPARAM lparam);
-
 ATOM RegClass(
-	HINSTANCE instance);
+	HINSTANCE instance,
+	WNDPROC wndproc);
 
 namespace IwEngine {
 	Window* Window::Create() {
 		return new WindowsWindow();
 	}
 
-	int WindowsWindow::Open() {
-		//if (console) {
-		//	AllocConsole();
-		//	FILE* fp;
-		//	freopen_s(&fp, "CONOUT$", "w", stdout);
-		//}
+	int WindowsWindow::Initilize() {
+		AllocConsole();
+		FILE* fp;
+		freopen_s(&fp, "CONOUT$", "w", stdout);
 
-		LPTSTR window = MAKEINTATOM(RegClass(m_handle));
+		//LPTSTR window = 
+		MAKEINTATOM(RegClass(m_instance, _WndProc));
 
-		HWND fake_h_wnd = CreateWindow(
+		HWND fake_hwnd = CreateWindow(
 			"Core", "Fake Window",
 			WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
 			0, 0,
 			1, 1,
 			NULL, NULL,
-			m_handle, NULL);
+			m_instance, NULL);
 
-		HDC fake_dc = GetDC(fake_h_wnd);
+		HDC fake_dc = GetDC(fake_hwnd);
 
 		PIXELFORMATDESCRIPTOR fake_pfd;
 		ZeroMemory(&fake_pfd, sizeof(fake_pfd));
 		fake_pfd.nSize = sizeof(fake_pfd);
 		fake_pfd.nVersion = 1;
-		fake_pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+		fake_pfd.dwFlags = PFD_DRAW_TO_WINDOW
+			| PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
 		fake_pfd.iPixelType = PFD_TYPE_RGBA;
 		fake_pfd.cColorBits = 32;
 		fake_pfd.cAlphaBits = 8;
 		fake_pfd.cDepthBits = 24;
 
-		int fake_pfd_id = ChoosePixelFormat(fake_dc, &fake_pfd);
-		if (fake_pfd_id == 0) {
+		INT fake_pfdId = ChoosePixelFormat(fake_dc, &fake_pfd);
+		if (fake_pfdId == 0) {
 			std::cout << "ChoosePixelFormat() failed!";
 			return 1;
 		}
 
-		if (!SetPixelFormat(fake_dc, fake_pfd_id, &fake_pfd)) {
+		if (!SetPixelFormat(fake_dc, fake_pfdId, &fake_pfd)) {
 			std::cout << "SetPixelFormat() failed!";
 			return 1;
 		}
@@ -74,17 +69,19 @@ namespace IwEngine {
 			return 1;
 		}
 
-		HWND h_wnd = CreateWindow(
+		m_window = CreateWindow(
 			"Core", "Space",
 			WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
 			100, 100,
 			1280, 720,
 			NULL, NULL,
-			m_handle, NULL);
+			m_instance, NULL);
 
-		HDC dc = GetDC(h_wnd);
+		SetWindowLongPtr(m_window, GWLP_USERDATA, (LONG_PTR)this);
 
-		const int pixelAttribs[] = {
+		m_device = GetDC(m_window);
+
+		CONST INT pixelAttribs[] = {
 			WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,
 			WGL_SUPPORT_OPENGL_ARB, GL_TRUE,
 			WGL_DOUBLE_BUFFER_ARB, GL_TRUE,
@@ -99,87 +96,126 @@ namespace IwEngine {
 			0
 		};
 
-		int pfid;
-		UINT format_count;
-		bool status = wglChoosePixelFormatARB(dc, pixelAttribs, NULL, 1, &pfid, &format_count);
+		INT pfid;
+		UINT formatCount;
+		BOOL status = wglChoosePixelFormatARB(m_device, pixelAttribs,
+			NULL, 1, &pfid, &formatCount);
 
-		if (status == false || format_count == 0) {
+		if (status == FALSE || formatCount == 0) {
 			std::cout << "wglChoosePixelFormatARB() failed!";
 			return 1;
 		}
 
 		PIXELFORMATDESCRIPTOR pfd;
-		DescribePixelFormat(dc, pfid, sizeof(pfd), &pfd);
-		SetPixelFormat(dc, pfid, &pfd);
+		DescribePixelFormat(m_device, pfid, sizeof(pfd), &pfd);
+		SetPixelFormat(m_device, pfid, &pfd);
 
-		const int major = 4, minor = 5;
-		int context_attribs[] = {
+		CONST INT major = 4, minor = 5;
+		INT contextAttribs[] = {
 			WGL_CONTEXT_MAJOR_VERSION_ARB, major,
 			WGL_CONTEXT_MINOR_VERSION_ARB, minor,
 			WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
 			0
 		};
 
-		HGLRC rc = wglCreateContextAttribsARB(dc, 0, context_attribs);
-		if (rc == NULL) {
+		m_context = wglCreateContextAttribsARB(m_device, 0, contextAttribs);
+		if (m_context == NULL) {
 			std::cout << "wglCreateContextAttribsARB() failed!";
 			return 1;
 		}
 
 		wglMakeCurrent(NULL, NULL);
 		wglDeleteContext(fake_rc);
-		ReleaseDC(fake_h_wnd, fake_dc);
-		DestroyWindow(fake_h_wnd);
-		if (!wglMakeCurrent(dc, rc)) {
+		ReleaseDC(fake_hwnd, fake_dc);
+		DestroyWindow(fake_hwnd);
+		if (!wglMakeCurrent(m_device, m_context)) {
 			std::cout << "wglMakeCurrent() failed.";
 			return 1;
 		}
+		
+		DrawCursor(false);
+		Show();
 
-		ShowWindow(h_wnd, 0);
-		ShowCursor(0);
+		return 0;
+	}
 
+	void WindowsWindow::Show() {
+		ShowWindow(m_window, SW_RESTORE);
+	}
+
+	void WindowsWindow::Minimize() {
+		CloseWindow(m_window);
+	}
+
+	void WindowsWindow::Destroy() {
+		wglMakeCurrent(NULL, NULL);
+		wglDeleteContext(m_context);
+		ReleaseDC(m_window, m_device);
+		DestroyWindow(m_window);
+	}
+
+	void WindowsWindow::Update() {
 		MSG msg;
-		while (PeekMessage(&msg, h_wnd, 0, 0, PM_REMOVE)) {
+		while (PeekMessage(&msg, m_window, 0, 0, PM_REMOVE)) {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
 	}
 
-	void WindowsWindow::Close() {
-		//if (console) {
-		//	fclose(fp);
-		//	FreeConsole();
-		//}
+	void WindowsWindow::DrawCursor(
+		bool show)
+	{
+		ShowCursor(show);
 	}
-}
 
-LRESULT CALLBACK WinProc(
-	HWND hwnd,
-	UINT msg,
-	WPARAM wparam,
-	LPARAM lparam)
-{
-	switch (msg) {
-	case WM_DESTROY:
-		PostQuitMessage(wparam);
-		break;
-	case WM_CLOSE:
-		break;
-	default:
+	void WindowsWindow::SetCallback(
+		EventCallback callback)
+	{
+		m_callback = callback;
+	}
+
+	LRESULT CALLBACK WindowsWindow::_WndProc(
+		HWND hwnd,
+		UINT msg,
+		WPARAM wparam,
+		LPARAM lparam)
+	{
+		WindowsWindow* me = reinterpret_cast<WindowsWindow*>(
+			GetWindowLongPtr(hwnd, GWLP_USERDATA));
+		if (me) {
+			return me->WndProc(hwnd, msg, wparam, lparam);
+		}
+
 		return DefWindowProc(hwnd, msg, wparam, lparam);
 	}
 
-	return 0;
+	LRESULT CALLBACK WindowsWindow::WndProc(
+		HWND hwnd,
+		UINT msg,
+		WPARAM wparam,
+		LPARAM lparam)
+	{
+		Event e = { false, msg };
+		
+		m_callback(e);
+
+		if (!e.handled) {
+			return DefWindowProc(hwnd, msg, wparam, lparam);
+		}
+
+		return 0;
+	}
 }
 
 ATOM RegClass(
-	HINSTANCE instance)
+	HINSTANCE instance,
+	WNDPROC wndproc)
 {
 	WNDCLASSEX wcex;
 	ZeroMemory(&wcex, sizeof(wcex));
 	wcex.cbSize = sizeof(wcex);
 	wcex.style = CS_HREDRAW | CS_OWNDC;
-	wcex.lpfnWndProc = WinProc;
+	wcex.lpfnWndProc = wndproc;
 	wcex.hInstance = instance;
 	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wcex.lpszClassName = "Core";

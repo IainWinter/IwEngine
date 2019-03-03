@@ -7,20 +7,40 @@ namespace IwEngine {
 	class WindowsWindow
 		: public Window
 	{
-	public:
 	private:
-		HINSTANCE m_handle;
-		bool console;
+		HINSTANCE     m_instance;
+		HWND          m_window;
+		HDC           m_device;
+		HGLRC         m_context;
+		EventCallback m_callback;
 
 	public:
 		WindowsWindow() {
-			m_handle = GetModuleHandle(NULL); //this probaly work but maybe not
+			m_instance = GetModuleHandle(NULL); //this probaly works but maybe not
 		}
 
-		int Open();
-		void Close();
+		int Initilize()   override;
+		void Show()       override;
+		void Minimize()   override;
+		void Destroy()    override;
+		void Update()     override;
 
+		void DrawCursor(
+			bool show) override;
+
+		void SetCallback(
+			EventCallback callback) override;
+
+		static LRESULT CALLBACK _WndProc(
+			HWND hwnd,
+			UINT msg,
+			WPARAM wparam,
+			LPARAM lparam);
 	private:
-
+		LRESULT CALLBACK WndProc(
+			HWND hwnd,
+			UINT msg,
+			WPARAM wparam,
+			LPARAM lparam);
 	};
 }

@@ -1,4 +1,5 @@
 #include "Application.h"
+#include <iostream>
 
 namespace IwEngine {
 	Application::Application()
@@ -11,18 +12,37 @@ namespace IwEngine {
 	}
 
 	void Application::Initilize() {
-		window.Open();
+		window.SetCallback(std::bind(&Application::OnEvent, this, std::placeholders::_1));
+		window.Initilize();
 	}
 
 	void Application::Start() {
-		
+		m_running = true;
+		Run();
 	}
 
 	void Application::Stop() {
-
+		m_running = false;
 	}
 
 	void Application::Destroy() {
-		window.Close();
+		window.Destroy();
+	}
+
+	void Application::Run() {
+		while (m_running) {
+			window.Update();
+		}
+	}
+
+	void Application::OnEvent(Event& e) {
+		if (e.type == WM_DESTROY) {
+			Stop();
+		}
+
+		else if (e.type == WM_CLOSE) {
+			Destroy();
+			e.handled = true;
+		}
 	}
 }

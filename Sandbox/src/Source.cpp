@@ -1,36 +1,15 @@
 #include <iostream>
 #include "EntryPoint.h"
-
 #include "logger.h"
+
+#include "input_manager.h"
 
 class Game : public IwEngine::Application {
 public:
 	Game() {}
 
-	void Initilize() {
-		IwEngine::Application::Initilize();
-	}
-
-	void Start() {
-		IwEngine::Application::Start();
-	}
-
-	void Stop() {
-		IwEngine::Application::Stop();
-	}
-
-	void Destroy() {
-		IwEngine::Application::Destroy();
-	}
-
-	void Run() override {
-		window.Open();
-
-		MiniLog::current_level() = logINFO;
-		MINILOG(logDEBUG) << "DEBUG Log message";
-		MINILOG(logINFO) << "INFO Log message";
-
-		std::cin.get();
+	void OnEvent(IwEngine::Event& e) override {
+		IwEngine::Application::OnEvent(e);
 	}
 };
 
