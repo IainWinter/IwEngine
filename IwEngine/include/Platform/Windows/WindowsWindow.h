@@ -16,20 +16,21 @@ namespace IwEngine {
 
 	public:
 		WindowsWindow() {
-			m_instance = GetModuleHandle(NULL); //this probaly works but maybe not
+			m_instance = GetModuleHandle(NULL);
 		}
 
 		int Initilize()   override;
-		void Show()       override;
-		void Minimize()   override;
 		void Destroy()    override;
 		void Update()     override;
 
-		void DrawCursor(
-			bool show) override;
+		virtual void SetDisplayState(
+			DisplayState state) override;
 
 		void SetCallback(
 			EventCallback callback) override;
+
+		void DrawCursor(
+			bool show) override;
 
 		static LRESULT CALLBACK _WndProc(
 			HWND hwnd,

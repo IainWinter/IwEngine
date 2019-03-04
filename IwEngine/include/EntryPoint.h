@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Application.h"
+#include "log.h"
 
 extern IwEngine::Application* CreateApplication();
 
@@ -13,8 +14,16 @@ int CALLBACK WinMain(
 	int cmdshow)
 {
 	IwEngine::Application* app = CreateApplication();
-	app->Initilize();
-	app->Start();
+	int status = app->Initilize();
+
+	if (status == 0) {
+		app->Start();
+	}
+
+	else {
+		//std::cout << "Application Initilization failed!" << std::endl;
+	}
+
 	delete app;
 }
 

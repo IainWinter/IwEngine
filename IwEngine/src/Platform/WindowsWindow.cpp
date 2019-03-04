@@ -134,17 +134,9 @@ namespace IwEngine {
 		}
 		
 		DrawCursor(false);
-		Show();
+		SetDisplayState(NORMAL);
 
 		return 0;
-	}
-
-	void WindowsWindow::Show() {
-		ShowWindow(m_window, SW_RESTORE);
-	}
-
-	void WindowsWindow::Minimize() {
-		CloseWindow(m_window);
 	}
 
 	void WindowsWindow::Destroy() {
@@ -162,16 +154,32 @@ namespace IwEngine {
 		}
 	}
 
-	void WindowsWindow::DrawCursor(
-		bool show)
+	void WindowsWindow::SetDisplayState(
+		DisplayState state)
 	{
-		ShowCursor(show);
+		int wstate = -1;
+		switch (state) {
+		case HIDDEN:    wstate = SW_HIDE;       break;
+		case MINIMIZED: wstate = SW_MINIMIZE;   break;
+		case MAXIMIZED: wstate = SW_MAXIMIZE;   break;
+		case NORMAL:    wstate = SW_SHOWNORMAL; break;
+		}
+
+		if (wstate != -1) {
+			ShowWindow(m_window, wstate);
+		}
 	}
 
 	void WindowsWindow::SetCallback(
 		EventCallback callback)
 	{
 		m_callback = callback;
+	}
+
+	void WindowsWindow::DrawCursor(
+		bool show)
+	{
+		ShowCursor(show);
 	}
 
 	LRESULT CALLBACK WindowsWindow::_WndProc(
@@ -196,7 +204,7 @@ namespace IwEngine {
 		LPARAM lparam)
 	{
 		Event e = { false, msg };
-		
+
 		m_callback(e);
 
 		if (!e.handled) {

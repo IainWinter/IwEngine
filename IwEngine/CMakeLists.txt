@@ -34,7 +34,8 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${INCLUDE_DIRS})
 target_link_libraries(
     ${PROJECT_NAME}
     ${OPENGL_gl_LIBRARY}
-    ${GLEW_LIBRARY} )
+    ${GLEW_LIBRARY}
+	"Iw::Log")
 
 #Set target compile time constants
 if(WIN32)

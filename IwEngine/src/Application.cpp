@@ -1,19 +1,27 @@
 #include "Application.h"
-#include <iostream>
+#include "log.h"
 
 namespace IwEngine {
 	Application::Application()
-		: m_window(Window::Create())
-		, window(*m_window)
+		: m_running(false)
+		, m_window (Window::Create())
+		, window   (*m_window)
 	{}
 
 	Application::~Application() {
 		delete m_window;
 	}
 
-	void Application::Initilize() {
+	int Application::Initilize() {
+		LOG_START(iwlog::IW_DEBUG);
+
 		window.SetCallback(std::bind(&Application::OnEvent, this, std::placeholders::_1));
-		window.Initilize();
+		if (window.Initilize()) {
+			LOG_ERROR("Window failed to initilize!");
+			return 1;
+		}
+
+		return 0;
 	}
 
 	void Application::Start() {
