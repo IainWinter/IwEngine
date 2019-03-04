@@ -1,15 +1,16 @@
-#include <iostream>
 #include "EntryPoint.h"
-#include "logger.h"
+#include "log.h"
 
-#include "input_manager.h"
+#include <iostream>
 
 class Game : public IwEngine::Application {
 public:
 	Game() {}
 
-	void OnEvent(IwEngine::Event& e) override {
-		IwEngine::Application::OnEvent(e);
+	void Start() override {
+		LOG_INFO("This is a test");
+
+		IwEngine::Application::Start();
 	}
 };
 
