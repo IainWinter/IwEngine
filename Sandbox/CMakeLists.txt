@@ -11,10 +11,10 @@ add_executable(${PROJECT_NAME} WIN32 ${SRC})
 
 #Link libraries
 target_link_libraries(${PROJECT_NAME} 
-	PRIVATE IwEngine
-	PRIVATE IwInput
-	PRIVATE IwEcs
-	PRIVATE IwLog)
+	PRIVATE Iw::Engine
+	PRIVATE Iw::Input
+	PRIVATE Iw::Ecs
+	PRIVATE Iw::Log)
 
 #Set compile features
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_11)
