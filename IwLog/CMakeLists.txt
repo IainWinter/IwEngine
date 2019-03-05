@@ -6,16 +6,21 @@ project(IwLog)
 set(INCLUDE_DIRS
 	"${PROJECT_SOURCE_DIR}/include/")
 set(SRC 
-	"src/log.cpp")
+	"src/logger.cpp"
+	"src/sink/file_sink.cpp"
+	"src/sink/std_sink.cpp")
 set(HEADERS
-	"include/iwlog.h"
-	"include/log.h")
+	"src/iwlog.h"
+	"src/logger.h"
+	"src/sink/file_sink.h"
+	"src/sink/sink.h"
+	"src/sink/std_sink.h")
 set(POST_INSTALL_INCLUDE
 	"${PROJECT_NAME}")
 
 #Add libraries
 add_library(${PROJECT_NAME} SHARED ${SRC})
-add_library(Iw::Log ALIAS ${PROJECT_NAME})
+add_library("Iw::Log" ALIAS ${PROJECT_NAME})
 
 #Set include directorys
 include_directories(${INCLUDE_DIRS})

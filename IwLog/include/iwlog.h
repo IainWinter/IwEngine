@@ -9,3 +9,13 @@
 #endif
 
 #define iwlog iwl
+
+namespace iwlog {
+	enum loglevel {
+		INFO,
+		DEBUG,
+		WARN,
+		ERR,
+		TRACE
+	};
+}
