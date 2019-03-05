@@ -1,8 +1,8 @@
 #include "Platform/Windows/WindowsWindow.h"
-#include "gl/glew.h"
-#include "gl/wglew.h"
+#include "logger.h"
+#include <gl/glew.h>
+#include <gl/wglew.h>
 #include <cstdio>
-#include <iostream>
 
 ATOM RegClass(
 	HINSTANCE instance,
@@ -13,11 +13,7 @@ namespace IwEngine {
 		return new WindowsWindow();
 	}
 
-	int WindowsWindow::Initilize() {
-		AllocConsole();
-		FILE* fp;
-		freopen_s(&fp, "CONOUT$", "w", stdout);
-
+	int WindowsWindow::Initilize(WindowOptions& options) {
 		//LPTSTR window = 
 		MAKEINTATOM(RegClass(m_instance, _WndProc));
 
@@ -44,28 +40,28 @@ namespace IwEngine {
 
 		INT fake_pfdId = ChoosePixelFormat(fake_dc, &fake_pfd);
 		if (fake_pfdId == 0) {
-			std::cout << "ChoosePixelFormat() failed!";
+			LOG_ERROR << "ChoosePixelFormat() failed!";
 			return 1;
 		}
 
 		if (!SetPixelFormat(fake_dc, fake_pfdId, &fake_pfd)) {
-			std::cout << "SetPixelFormat() failed!";
+			LOG_ERROR << "SetPixelFormat() failed!";
 			return 1;
 		}
 
 		HGLRC fake_rc = wglCreateContext(fake_dc);
 		if (fake_rc == 0) {
-			std::cout << "wglCreateContext() failed!";
+			LOG_ERROR << "wglCreateContext() failed!";
 			return 1;
 		}
 
 		if (!wglMakeCurrent(fake_dc, fake_rc)) {
-			std::cout << "wglMakeCurrent() failed!";
+			LOG_ERROR << "wglMakeCurrent() failed!";
 			return 1;
 		}
 
 		if (glewInit() != GLEW_OK) {
-			std::cout << "glewInit() failed!";
+			LOG_ERROR << "glewInit() failed!";
 			return 1;
 		}
 
@@ -73,7 +69,7 @@ namespace IwEngine {
 			"Core", "Space",
 			WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
 			100, 100,
-			1280, 720,
+			options.width, options.height,
 			NULL, NULL,
 			m_instance, NULL);
 
@@ -102,7 +98,7 @@ namespace IwEngine {
 			NULL, 1, &pfid, &formatCount);
 
 		if (status == FALSE || formatCount == 0) {
-			std::cout << "wglChoosePixelFormatARB() failed!";
+			LOG_ERROR << "wglChoosePixelFormatARB() failed!";
 			return 1;
 		}
 
@@ -120,7 +116,7 @@ namespace IwEngine {
 
 		m_context = wglCreateContextAttribsARB(m_device, 0, contextAttribs);
 		if (m_context == NULL) {
-			std::cout << "wglCreateContextAttribsARB() failed!";
+			LOG_ERROR << "wglCreateContextAttribsARB() failed!";
 			return 1;
 		}
 
@@ -129,12 +125,12 @@ namespace IwEngine {
 		ReleaseDC(fake_hwnd, fake_dc);
 		DestroyWindow(fake_hwnd);
 		if (!wglMakeCurrent(m_device, m_context)) {
-			std::cout << "wglMakeCurrent() failed.";
+			LOG_ERROR << "wglMakeCurrent() failed.";
 			return 1;
 		}
 		
-		DrawCursor(false);
-		SetDisplayState(NORMAL);
+		DrawCursor(options.cursor);
+		SetDisplayState(options.state);
 
 		return 0;
 	}
@@ -155,19 +151,21 @@ namespace IwEngine {
 	}
 
 	void WindowsWindow::SetDisplayState(
-		DisplayState state)
+		IwEngine::DisplayState state)
 	{
 		int wstate = -1;
 		switch (state) {
-		case HIDDEN:    wstate = SW_HIDE;       break;
-		case MINIMIZED: wstate = SW_MINIMIZE;   break;
-		case MAXIMIZED: wstate = SW_MAXIMIZE;   break;
-		case NORMAL:    wstate = SW_SHOWNORMAL; break;
+			case HIDDEN:    wstate = SW_HIDE;       break;
+			case MINIMIZED: wstate = SW_MINIMIZE;   break;
+			case MAXIMIZED: wstate = SW_MAXIMIZE;   break;
+			case NORMAL:    wstate = SW_SHOWNORMAL; break;
 		}
 
 		if (wstate != -1) {
 			ShowWindow(m_window, wstate);
 		}
+
+		m_options.state = state;
 	}
 
 	void WindowsWindow::SetCallback(
@@ -180,6 +178,7 @@ namespace IwEngine {
 		bool show)
 	{
 		ShowCursor(show);
+		m_options.cursor = show;
 	}
 
 	LRESULT CALLBACK WindowsWindow::_WndProc(

@@ -35,7 +35,7 @@ target_link_libraries(
     ${PROJECT_NAME}
     ${OPENGL_gl_LIBRARY}
     ${GLEW_LIBRARY}
-	"Iw::Log")
+	Iw::Log)
 
 #Set target compile time constants
 if(WIN32)

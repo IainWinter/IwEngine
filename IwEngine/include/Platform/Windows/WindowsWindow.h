@@ -13,24 +13,25 @@ namespace IwEngine {
 		HDC           m_device;
 		HGLRC         m_context;
 		EventCallback m_callback;
+		WindowOptions m_options;
 
 	public:
 		WindowsWindow() {
 			m_instance = GetModuleHandle(NULL);
 		}
 
-		int Initilize()   override;
-		void Destroy()    override;
-		void Update()     override;
+		int Initilize(WindowOptions& options) override;
+		void Destroy() override;
+		void Update()  override;
 
-		virtual void SetDisplayState(
-			DisplayState state) override;
+		void SetDisplayState(IwEngine::DisplayState state) override;
+		void SetCallback(EventCallback callback) override;
+		void DrawCursor(bool show) override;
 
-		void SetCallback(
-			EventCallback callback) override;
-
-		void DrawCursor(
-			bool show) override;
+		inline unsigned int Width()                  { return m_options.width;   }
+		inline unsigned int Height()                 { return m_options.height;  }
+		inline IwEngine::DisplayState DisplayState() { return m_options.state;   }
+		inline bool Cursor()                         { return m_options.cursor;  }
 
 		static LRESULT CALLBACK _WndProc(
 			HWND hwnd,

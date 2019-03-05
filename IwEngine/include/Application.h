@@ -15,7 +15,7 @@ namespace IwEngine {
 		Application();
 		virtual ~Application();
 
-		virtual int Initilize();
+		virtual int  Initilize(WindowOptions& windowOptions);
 		virtual void Start();
 		virtual void Stop();
 		virtual void Destroy();

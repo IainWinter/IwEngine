@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Application.h"
-#include "log.h"
+#include "logger.h"
 
 extern IwEngine::Application* CreateApplication();
 
@@ -13,18 +13,24 @@ int CALLBACK WinMain(
 	LPSTR cmdline,
 	int cmdshow)
 {
+	bool console = true;
+	if (console) {
+		AllocConsole();
+		FILE *fo, *fe;
+		freopen_s(&fo, "CONOUT$", "w", stdout);
+		freopen_s(&fe, "CONERR$", "w", stderr);
+	}
+
 	IwEngine::Application* app = CreateApplication();
-	int status = app->Initilize();
-
-	if (status == 0) {
-		app->Start();
-	}
-
-	else {
-		//std::cout << "Application Initilization failed!" << std::endl;
-	}
+	app->Start();
 
 	delete app;
+
+	LOG_FLUSH();
+
+	if (console) {
+		FreeConsole();
+	}
 }
 
 #endif
