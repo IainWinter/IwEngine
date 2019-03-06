@@ -7,11 +7,17 @@ set(INCLUDE_DIRS
 	"${PROJECT_SOURCE_DIR}/include/")
 set(SRC 
 	"src/Application.cpp"
+	"src/Layer.cpp"
+	"src/LayerStack.cpp"
 	"src/Platform/WindowsWindow.cpp")
 set(HEADERS
 	"include/Application.h"
 	"include/Core.h"
 	"include/EntryPoint.h"
+	"include/Event.h"
+	"include/Layer.h"
+	"include/LayerStack.h"
+	"include/Space.h"
 	"include/Window.h"
 	"include/Platform/Windows/WindowsWindow.h")
 set(POST_INSTALL_INCLUDE
