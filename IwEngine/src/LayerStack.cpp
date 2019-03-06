@@ -39,7 +39,7 @@ namespace IwEngine {
 	{
 		iterator itr = std::find(begin(), end(), overlay);
 		if (itr != end()) {
-			(*itr)->Stop();
+			overlay->Stop();
 			m_layers.erase(itr);
 		}
 	}
