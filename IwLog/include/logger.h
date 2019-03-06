@@ -33,7 +33,7 @@ namespace iwlog {
 			typename _t>
 		void log(
 			loglevel level,
-			_t& obj)
+			const _t& obj)
 		{
 			std::stringstream string;
 			string << obj;
@@ -63,9 +63,9 @@ namespace iwlog {
 		template<
 			typename _t>
 		log_view& operator<<(
-			_t&& msg)
+			const _t& msg)
 		{
-			logger::instance().log(m_level, std::forward<_t>(msg));
+			logger::instance().log(m_level, msg);
 			return *this;
 		}
 	};
