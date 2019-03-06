@@ -6,6 +6,7 @@ namespace IwEngine {
 		: m_running(false)
 		, m_window (Window::Create())
 		, window   (*m_window)
+		, space    ("Root")
 	{}
 
 	Application::~Application() {
@@ -50,6 +51,7 @@ namespace IwEngine {
 		LOG_DEBUG << "Running application...";
 		while (m_running) {
 			window.Update();
+			space.Update();
 		}
 	}
 

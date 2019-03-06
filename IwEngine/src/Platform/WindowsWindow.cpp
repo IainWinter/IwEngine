@@ -128,7 +128,7 @@ namespace IwEngine {
 			LOG_ERROR << "wglMakeCurrent() failed.";
 			return 1;
 		}
-		
+
 		DrawCursor(options.cursor);
 		SetDisplayState(options.state);
 
@@ -179,6 +179,10 @@ namespace IwEngine {
 	{
 		ShowCursor(show);
 		m_options.cursor = show;
+	}
+
+	void WindowsWindow::Render() {
+		SwapBuffers(m_device);
 	}
 
 	LRESULT CALLBACK WindowsWindow::_WndProc(

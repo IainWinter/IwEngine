@@ -1,19 +1,14 @@
-﻿cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.8)
 
-project(IwEngine)
+project(IwGraphics)
 
 #Set source variables
 set(INCLUDE_DIRS
 	"${PROJECT_SOURCE_DIR}/include/")
-set(SRC 
-	"src/Application.cpp"
-	"src/Platform/WindowsWindow.cpp")
+set(SRC
+	"src/renderer.cpp")
 set(HEADERS
-	"include/Application.h"
-	"include/Core.h"
-	"include/EntryPoint.h"
-	"include/Window.h"
-	"include/Platform/Windows/WindowsWindow.h")
+	"include/renderer.h")
 set(POST_INSTALL_INCLUDE
 	"${PROJECT_NAME}")
 
@@ -22,7 +17,7 @@ find_package(GLEW)
 
 #Add libraries
 add_library(${PROJECT_NAME} SHARED ${SRC})
-add_library(Iw::Engine ALIAS ${PROJECT_NAME})
+add_library(Iw::Graphics ALIAS ${PROJECT_NAME})
 
 #Set include directorys
 include_directories(${INCLUDE_DIRS})
@@ -32,14 +27,13 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${INCLUDE_DIRS})
 
 #Set target link libraries
 target_link_libraries(
-    ${PROJECT_NAME}
-    ${OPENGL_gl_LIBRARY}
-    ${GLEW_LIBRARY}
-	"Iw::Log"
-	Iw::Graphics)
+	${PROJECT_NAME}
+	${OPENGL_gl_LIBRARY}
+	${GLEW_LIBRARY}
+	Iw::Log)
 
 #Set target compile time constants
-if(WIN32)
+if (WIN32)
 	target_compile_definitions(${PROJECT_NAME} PUBLIC  IW_PLATFORM_WINDOWS = 1)
 	target_compile_definitions(${PROJECT_NAME} PRIVATE IW_BUILD_DLL = 1)
 elseif(APPLE)

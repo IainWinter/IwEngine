@@ -2,6 +2,7 @@
 
 #include "Core.h"
 #include "Window.h"
+#include "Space.h"
 
 namespace IwEngine {
 	class IWENGINE_API Application {
@@ -10,6 +11,7 @@ namespace IwEngine {
 		bool m_running;
 	protected:
 		Window& window;
+		Space space;
 
 	public:
 		Application();

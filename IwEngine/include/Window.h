@@ -9,8 +9,8 @@ namespace IwEngine {
 		HIDDEN,
 		MINIMIZED,
 		MAXIMIZED,
-		FULLSCREEN,
-		BORDERLESS
+		FULLSCREEN, //Dont work
+		BORDERLESS // Dont work
 	};
 
 	struct WindowOptions {
@@ -38,6 +38,8 @@ namespace IwEngine {
 		virtual unsigned int Height()       = 0;
 		virtual DisplayState DisplayState() = 0;
 		virtual bool Cursor()               = 0;
+
+		virtual void Render() = 0;
 
 		static Window* Create();
 	};

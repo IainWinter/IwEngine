@@ -28,10 +28,12 @@ namespace IwEngine {
 		void SetCallback(EventCallback callback) override;
 		void DrawCursor(bool show) override;
 
-		inline unsigned int Width()                  { return m_options.width;   }
-		inline unsigned int Height()                 { return m_options.height;  }
-		inline IwEngine::DisplayState DisplayState() { return m_options.state;   }
-		inline bool Cursor()                         { return m_options.cursor;  }
+		void Render();
+
+		inline unsigned int Width()                  { return m_options.width;  }
+		inline unsigned int Height()                 { return m_options.height; }
+		inline IwEngine::DisplayState DisplayState() { return m_options.state;  }
+		inline bool Cursor()                         { return m_options.cursor; }
 
 		static LRESULT CALLBACK _WndProc(
 			HWND hwnd,

@@ -14,10 +14,11 @@ endif()
 set(POST_INSTALL "${ARCHITECTURE}")
 
 #Add libraries to build
-add_subdirectory(IwMath)
-add_subdirectory(IwUtil)
 add_subdirectory(IwLog)
+add_subdirectory(IwUtil)
 add_subdirectory(IwEvents)
+add_subdirectory(IwMath)
+add_subdirectory(IwGraphics)
 add_subdirectory(IwEcs)
 add_subdirectory(IwInput)
 add_subdirectory(IwEngine)
