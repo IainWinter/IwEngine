@@ -20,16 +20,16 @@ public:
 	}
 
 	int Initilize() override {
-		glClearColor(0.5f, 0.3f, 0.87f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
-
 		return 0;
 	}
 
 	void Update() override {
+		glClearColor(r, g, b, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
+
 		r += .001f;
-		g += .003f;
-		b += .002f;
+		g += .002f;
+		b += .003f;
 
 		if (r > 1.0f) r = 0;
 		if (g > 1.0f) g = 0;
@@ -40,8 +40,9 @@ public:
 		IwEngine::Event& e) override
 	{
 		if (e.Type == IwEngine::MouseMoved) {
-			glClearColor(r, g, b, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT);
+			r = 0;
+			g = 0;
+			b = 0;
 		}
 	}
 };
