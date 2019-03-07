@@ -6,14 +6,17 @@ project(IwEvents)
 set(INCLUDE_DIRS
 	"${PROJECT_SOURCE_DIR}/include/")
 set(HEADERS
-	"include/event_bus.h"
-	"include/signal.h")
+	"include/iw/event_bus.h"
+	"include/iw/iwevents.h"
+	"include/iw/signal.h"
+	"include/iw/functional/binding.h"
+	"include/iw/functional/callback.h"
+	"include/iw/functional/signal.h")
 set(POST_INSTALL_INCLUDE
 	"${PROJECT_NAME}")
 
 #Add libraries
 add_library(${PROJECT_NAME} INTERFACE)
-add_library(Iw::Events ALIAS ${PROJECT_NAME})
 
 #Set target include directory for client
 target_include_directories(${PROJECT_NAME} INTERFACE ${INCLUDE_DIRS})

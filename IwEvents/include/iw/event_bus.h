@@ -15,7 +15,7 @@ namespace iwevents {
 	*
 	* The event bus allows member functions to be added and removed from many
 	* signals at once. Classes must publicly expose functions of the
-	* signature 'void _class_t::process(const Event&)' to be added. Free functions can
+	* signature 'void _t::process(const Event&)' to be added. Free functions can
 	* also be added, but do not need any specific name.
 	*
 	* When events are published, the event bus notifies all of the event
@@ -30,13 +30,13 @@ namespace iwevents {
 		* @breif Subscribes a class instance to the event bus.
 		*
 		* Subscribes all public member functions of the signature 
-		* 'void _class_t::process(const Event&)' to the event bus.
+		* 'void _t::process(const Event&)' to the event bus.
 		*
-		* @tparam _class_t The type of instance.
-		* @param instance An instance of '_class_t' to be subscribed to the event bus.
+		* @tparam _t The type of instance.
+		* @param instance An instance of '_t' to be subscribed to the event bus.
 		*/
-		template<typename _class_t>
-		void subscribe(std::shared_ptr<_class_t> instance) {
+		template<typename _t>
+		void subscribe(std::shared_ptr<_t> instance) {
 			using expanded_events = int[];
 			expanded_events{
 				(event_bus<_event_t>::subscribe(instance), 0),
@@ -63,13 +63,13 @@ namespace iwevents {
 		* @breif Unsubscribes a class instance from the event bus.
 		*
 		* Unsubscribes all public member functions of the signature
-		* 'void _class_t::process(const Event&)' from the event bus.
+		* 'void _t::process(const Event&)' from the event bus.
 		*
-		* @tparam _class_t The type of instance.
-		* @param instance An instance of '_class_t' to be subscribed to the event bus.
+		* @tparam _t The type of instance.
+		* @param instance An instance of '_t' to be subscribed to the event bus.
 		*/
-		template<typename _class_t>
-		void unsubscribe(std::shared_ptr<_class_t> instance) {
+		template<typename _t>
+		void unsubscribe(std::shared_ptr<_t> instance) {
 			using expanded_events = int[];
 			expanded_events{
 				(event_bus<_event_t>::template unsubscribe(instance), 0),
@@ -111,7 +111,7 @@ namespace iwevents {
 	*
 	* The event bus allows member functions to be added and removed from its
 	* signal. Classes must publicly expose functions of the
-	* signature 'void _class_t::process(const Event&)' to be added. Free functions can
+	* signature 'void _t::process(const Event&)' to be added. Free functions can
 	* also be added, but do not need any specific name.
 	*
 	* When events are published, the event bus notifies all of the event
@@ -171,13 +171,13 @@ namespace iwevents {
 		* @breif Subscribes a class instance to the event bus.
 		*
 		* Subscribes a public member function of the signature
-		* 'void _class_t::process(const Event&)' to the event bus.
+		* 'void _t::process(const Event&)' to the event bus.
 		*
-		* @tparam _class_t The type of instance.
+		* @tparam _t The type of instance.
 		* @param instance An instance of 'ClasType' to be subscribed to the event bus.
 		*/
-		template<typename _class_t>
-		void subscribe(std::shared_ptr<_class_t> instance) {
+		template<typename _t>
+		void subscribe(std::shared_ptr<_t> instance) {
 			subscribe_func(instance);
 		}
 
@@ -199,13 +199,13 @@ namespace iwevents {
 		* @breif Unsubscribes a class instance from the event bus.
 		*
 		* Unsubscribes the public member function of the signature
-		* 'void _class_t::process(const Event&)' from the event bus.
+		* 'void _t::process(const Event&)' from the event bus.
 		*
-		* @tparam _class_t Type of instance.
-		* @param instance Instance of _class_t to be subscribed to the event bus.
+		* @tparam _t Type of instance.
+		* @param instance Instance of _t to be subscribed to the event bus.
 		*/
-		template<typename _class_t>
-		void unsubscribe(std::shared_ptr<_class_t> instance) {
+		template<typename _t>
+		void unsubscribe(std::shared_ptr<_t> instance) {
 			unsubscribe_func(instance);
 		}
 	};
