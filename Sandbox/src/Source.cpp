@@ -3,71 +3,56 @@
 #include <gl/glew.h>
 #include <gl/wglew.h>
 
-class TestLayer : public IwEngine::Layer {
+#include "iw/signal.h"
+#include "iw/functional/callback.h"
+#include "iw/functional/signal.h"
+
+class TestLayer
+	: public IwEngine::Layer
+{
+private:
+	float r, g, b;
 public:
 	TestLayer()
 		: IwEngine::Layer("Test") 
-	{}
+	{
+		r = g = b = 0;
+	}
 
 	int Initilize() override {
-		LOG_DEBUG << "Test Layer initilizing";
+		glClearColor(0.5f, 0.3f, 0.87f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
+
 		return 0;
 	}
 
-	void Start() override {
-		LOG_DEBUG << "Test Layer started";
-	}
-
-	void Stop() override {
-		LOG_DEBUG << "Test Layer stopped";
-	}
-
-	void Destroy() override {
-		LOG_DEBUG << "Test Layer destroyed";
-	}
-
 	void Update() override {
-		LOG_INFO << "Test Layer updated";
+		r += .001f;
+		g += .003f;
+		b += .002f;
+
+		if (r > 1.0f) r = 0;
+		if (g > 1.0f) g = 0;
+		if (b > 1.0f) b = 0;
 	}
 
-	void OnEvent(IwEngine::Event& e) override {
-		LOG_DEBUG << "Test Layer received event " << e.type;
+	void OnEvent(
+		IwEngine::Event& e) override
+	{
+		if (e.Type == IwEngine::MouseMoved) {
+			glClearColor(r, g, b, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT);
+		}
 	}
 };
 
 class Game : public IwEngine::Application {
 public:
-	int Initilize(
-		IwEngine::WindowOptions& options) override
-	{
+	Game() {
 		PushLayer(new TestLayer());
-
-		return Application::Initilize(options);
-	}
-
-	void Start() override {
-		glClearColor(0.5, 0.3, 0.87, 1.0);
-		glClear(GL_COLOR_BUFFER_BIT);
-
-		window.Render();
-
-
-		IwEngine::Application::Start();
 	}
 };
 
 IwEngine::Application* CreateApplication() {
-	IwEngine::WindowOptions options {
-		1280,
-		720,
-		IwEngine::NORMAL,
-		true,
-	};
-
-	Game* game = new Game();
-	game->Initilize(options); //Not where it should be
-
-	return game;
+	return new Game();
 }
-
-
