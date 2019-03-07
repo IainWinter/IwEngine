@@ -27,7 +27,6 @@ set(POST_INSTALL_INCLUDE
 
 #Add libraries
 add_library(${PROJECT_NAME} SHARED ${SRC})
-add_library(Iw::Input ALIAS ${PROJECT_NAME})
 
 #Set include directorys
 include_directories(${INCLUDE_DIRS})
@@ -36,7 +35,9 @@ include_directories(${INCLUDE_DIRS})
 target_include_directories(${PROJECT_NAME} PUBLIC ${INCLUDE_DIRS})
 
 #Link libraries
-target_link_libraries(${PROJECT_NAME} Iw::Events)
+target_link_libraries(
+	${PROJECT_NAME}
+	IwEvents)
 
 #Set target compile time constants
 if(WIN32)

@@ -17,7 +17,6 @@ set(POST_INSTALL_INCLUDE
 
 #Add libraries
 add_library(${PROJECT_NAME} INTERFACE)
-add_library(Iw::Util ALIAS ${PROJECT_NAME})
 
 #Set target include directory for client
 target_include_directories(${PROJECT_NAME} INTERFACE ${INCLUDE_DIRS})

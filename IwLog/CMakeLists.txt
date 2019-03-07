@@ -20,7 +20,6 @@ set(POST_INSTALL_INCLUDE
 
 #Add libraries
 add_library(${PROJECT_NAME} SHARED ${SRC})
-add_library("Iw::Log" ALIAS ${PROJECT_NAME})
 
 #Set include directorys
 include_directories(${INCLUDE_DIRS})

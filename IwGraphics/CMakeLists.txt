@@ -17,7 +17,6 @@ find_package(GLEW)
 
 #Add libraries
 add_library(${PROJECT_NAME} SHARED ${SRC})
-add_library(Iw::Graphics ALIAS ${PROJECT_NAME})
 
 #Set include directorys
 include_directories(${INCLUDE_DIRS})
@@ -30,7 +29,7 @@ target_link_libraries(
 	${PROJECT_NAME}
 	${OPENGL_gl_LIBRARY}
 	${GLEW_LIBRARY}
-	Iw::Log)
+	IwLog)
 
 #Set target compile time constants
 if (WIN32)
