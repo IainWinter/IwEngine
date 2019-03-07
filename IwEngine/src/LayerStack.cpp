@@ -28,7 +28,6 @@ namespace IwEngine {
 	{
 		iterator itr = std::find(begin(), end(), layer);
 		if (itr != end()) {
-			layer->Stop();
 			m_layers.erase(itr);
 			m_insert--;
 		}
@@ -39,7 +38,6 @@ namespace IwEngine {
 	{
 		iterator itr = std::find(begin(), end(), overlay);
 		if (itr != end()) {
-			overlay->Stop();
 			m_layers.erase(itr);
 		}
 	}

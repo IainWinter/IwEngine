@@ -12,10 +12,6 @@ namespace IwEngine {
 		return 0;
 	}
 
-	void Layer::Start() {}
-
-	void Layer::Stop() {}
-
 	void Layer::Destroy() {}
 
 	void Layer::Update() {}

@@ -20,20 +20,38 @@ namespace IwEngine {
 			m_instance = GetModuleHandle(NULL);
 		}
 
-		int Initilize(WindowOptions& options) override;
+		int Initilize(
+			WindowOptions& options) override;
+
 		void Destroy() override;
 		void Update()  override;
 
-		void SetDisplayState(IwEngine::DisplayState state) override;
-		void SetCallback(EventCallback callback) override;
-		void DrawCursor(bool show) override;
+		void SetDisplayState(
+			IwEngine::DisplayState state) override;
+
+		void SetCallback(
+			EventCallback callback) override;
+
+		void DrawCursor(
+			bool show) override;
 
 		void Render();
 
-		inline unsigned int Width()                  { return m_options.width;  }
-		inline unsigned int Height()                 { return m_options.height; }
-		inline IwEngine::DisplayState DisplayState() { return m_options.state;  }
-		inline bool Cursor()                         { return m_options.cursor; }
+		inline unsigned int Width() {
+			return m_options.width;
+		}
+
+		inline unsigned int Height() {
+			return m_options.height;
+		}
+
+		inline IwEngine::DisplayState DisplayState() {
+			return m_options.state;
+		}
+
+		inline bool Cursor() {
+			return m_options.cursor;
+		}
 
 		static LRESULT CALLBACK _WndProc(
 			HWND hwnd,
@@ -41,7 +59,7 @@ namespace IwEngine {
 			WPARAM wparam,
 			LPARAM lparam);
 	private:
-		LRESULT CALLBACK WndProc(
+		LRESULT CALLBACK HandleEvent(
 			HWND hwnd,
 			UINT msg,
 			WPARAM wparam,

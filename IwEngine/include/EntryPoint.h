@@ -7,6 +7,8 @@ extern IwEngine::Application* CreateApplication();
 
 #ifdef IW_PLATFORM_WINDOWS
 
+#include <Windows.h>
+
 int CALLBACK WinMain(
 	HINSTANCE handle,
 	HINSTANCE prevhandle,
@@ -21,8 +23,24 @@ int CALLBACK WinMain(
 		freopen_s(&fe, "CONERR$", "w", stderr);
 	}
 
+	IwEngine::WindowOptions options{
+		1280,
+		720,
+		IwEngine::NORMAL,
+		true,
+	};
+
 	IwEngine::Application* app = CreateApplication();
-	app->Start();
+	int status;
+	if (status = app->Initilize(options)) {
+		LOG_ERROR
+			<< "Application initilization failed with error code "
+			<< status;
+	}
+
+	else {
+		app->Run();
+	}
 
 	delete app;
 

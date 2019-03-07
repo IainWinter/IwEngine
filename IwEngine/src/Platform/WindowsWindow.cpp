@@ -13,7 +13,9 @@ namespace IwEngine {
 		return new WindowsWindow();
 	}
 
-	int WindowsWindow::Initilize(WindowOptions& options) {
+	int WindowsWindow::Initilize(
+		WindowOptions& options)
+	{
 		//LPTSTR window = 
 		MAKEINTATOM(RegClass(m_instance, _WndProc));
 
@@ -130,7 +132,6 @@ namespace IwEngine {
 		}
 
 		DrawCursor(options.cursor);
-		SetDisplayState(options.state);
 
 		return 0;
 	}
@@ -194,23 +195,28 @@ namespace IwEngine {
 		WindowsWindow* me = reinterpret_cast<WindowsWindow*>(
 			GetWindowLongPtr(hwnd, GWLP_USERDATA));
 		if (me) {
-			return me->WndProc(hwnd, msg, wparam, lparam);
+			return me->HandleEvent(hwnd, msg, wparam, lparam);
 		}
 
 		return DefWindowProc(hwnd, msg, wparam, lparam);
 	}
 
-	LRESULT CALLBACK WindowsWindow::WndProc(
+	LRESULT CALLBACK WindowsWindow::HandleEvent(
 		HWND hwnd,
 		UINT msg,
 		WPARAM wparam,
 		LPARAM lparam)
 	{
-		Event e = { false, msg };
+		Event e;
+		switch (msg) {
+			case WM_CLOSE:     e.Type = WindowClosed; break;
+			case WM_MOUSEMOVE: e.Type = MouseMoved;   break;
+			default:           e.Type = (EventType)msg;
+		}
 
 		m_callback(e);
 
-		if (!e.handled) {
+		if (!e.Handled) {
 			return DefWindowProc(hwnd, msg, wparam, lparam);
 		}
 

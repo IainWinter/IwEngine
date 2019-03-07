@@ -8,6 +8,8 @@
 #	endif
 #endif
 
-#ifdef IW_PLATFORM_WINDOWS
-#	include <Windows.h>
+#ifdef IW_DEBUG
+	#define IF_DEBUG(x) x
+#else
+	#define IF_DEBUG(x)
 #endif

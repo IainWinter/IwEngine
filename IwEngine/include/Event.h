@@ -1,8 +1,17 @@
 #pragma once
 
 namespace IwEngine {
+	enum EventType : unsigned int {
+		WindowClosed,
+		MouseMoved
+	};
+
 	struct Event {
-		bool handled;
-		unsigned int type;
+		bool Handled;
+		EventType Type;
+
+		Event() {
+			Handled = false;
+		}
 	};
 }

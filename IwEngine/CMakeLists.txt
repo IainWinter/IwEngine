@@ -28,7 +28,6 @@ find_package(GLEW)
 
 #Add libraries
 add_library(${PROJECT_NAME} SHARED ${SRC})
-add_library(Iw::Engine ALIAS ${PROJECT_NAME})
 
 #Set include directorys
 include_directories(${INCLUDE_DIRS})
@@ -41,10 +40,15 @@ target_link_libraries(
     ${PROJECT_NAME}
     ${OPENGL_gl_LIBRARY}
     ${GLEW_LIBRARY}
-	"Iw::Log"
-	Iw::Graphics)
+	IwLog
+	IwEvents
+	IwGraphics)
 
 #Set target compile time constants
+if(${CMAKE_BUILD_TYPE} EQUAL "DEBUG")
+	target_compile_definitions(${PROJECT_NAME} PRIVATE IW_DEBUG = 1)
+endif()
+
 if(WIN32)
 	target_compile_definitions(${PROJECT_NAME} PUBLIC  IW_PLATFORM_WINDOWS = 1)
 	target_compile_definitions(${PROJECT_NAME} PRIVATE IW_BUILD_DLL = 1)

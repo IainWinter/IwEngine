@@ -1,7 +1,7 @@
 #pragma once
 
-#include <functional>
 #include "Event.h"
+#include "iw/functional/callback.h"
 
 namespace IwEngine {
 	enum DisplayState {
@@ -9,30 +9,37 @@ namespace IwEngine {
 		HIDDEN,
 		MINIMIZED,
 		MAXIMIZED,
-		FULLSCREEN, //Dont work
-		BORDERLESS // Dont work
+		FULLSCREEN, //Don't work
+		BORDERLESS // Don't work
 	};
 
 	struct WindowOptions {
 		unsigned int width;
 		unsigned int height;
 		DisplayState state;
-		bool cursor; 
+		bool cursor;
 	};
 
 	class Window {
 	public:
-		using EventCallback = std::function<void(Event&)>;
+		using EventCallback = iwevents::callback<Event&>;
 
 		virtual ~Window() {}
 
-		virtual int  Initilize(WindowOptions& options) = 0;
+		virtual int  Initilize(
+			WindowOptions& options) = 0;
+
 		virtual void Destroy() = 0;
 		virtual void Update()  = 0;
 
-		virtual void SetDisplayState(DisplayState state) = 0;
-		virtual void SetCallback(EventCallback callback) = 0;
-		virtual void DrawCursor(bool show)               = 0;
+		virtual void SetDisplayState(
+			DisplayState state) = 0;
+
+		virtual void SetCallback(
+			EventCallback callback) = 0;
+
+		virtual void DrawCursor(
+			bool show) = 0;
 
 		virtual unsigned int Width()        = 0;
 		virtual unsigned int Height()       = 0;

@@ -11,12 +11,20 @@ namespace IwEngine {
 		Window* m_window;
 		bool m_running;
 		LayerStack m_layerStack;
-	protected:
-		Window& window;
 
 	public:
 		Application();
 		virtual ~Application();
+
+		virtual int Initilize(
+			WindowOptions& windowOptions);
+
+		virtual void Run();
+		virtual void Destroy();
+		virtual void Update();
+
+		virtual void OnEvent(
+			Event& e);
 
 		void PushLayer(
 			Layer* layer);
@@ -30,18 +38,16 @@ namespace IwEngine {
 		void PopOverlay(
 			Layer* overlay);
 
-		virtual int Initilize(
-			WindowOptions& windowOptions);
-
-		virtual void Start();
-		virtual void Stop();
-		virtual void Destroy();
-
-		virtual void OnEvent(
-			Event& e);
+		inline Window& GetWindow() {
+			return *m_window;
+		}
 	private:
-		void Run();
-	};
+		void InitilizeLayer(
+			Layer* layer);
 
-	Application* CreateApplication();
+		void DestroyLayer(
+			Layer* layer);
+	};
 }
+
+IwEngine::Application* CreateApplication();

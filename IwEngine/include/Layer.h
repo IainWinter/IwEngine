@@ -15,8 +15,6 @@ namespace IwEngine {
 		virtual ~Layer();
 
 		virtual int  Initilize();
-		virtual void Start();
-		virtual void Stop();
 		virtual void Destroy();
 		virtual void Update();
 
