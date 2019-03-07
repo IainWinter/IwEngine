@@ -18,7 +18,6 @@ set(POST_INSTALL_INCLUDE
 
 #Add libraries
 add_library(${PROJECT_NAME} INTERFACE)
-add_library(Iw::Ecs ALIAS ${PROJECT_NAME})
 
 #Set include directorys
 include_directories(${INCLUDE_DIRS})
@@ -28,8 +27,8 @@ target_include_directories(${PROJECT_NAME} INTERFACE ${INCLUDE_DIRS})
 
 #Link libraries
 target_link_libraries(${PROJECT_NAME} 
-	INTERFACE Iw::Util
-	INTERFACE Iw::Events)
+	INTERFACE IwUtil
+	INTERFACE IwEvents)
 
 #Set target compile time constants
 if(WIN32)
