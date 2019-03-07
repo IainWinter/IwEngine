@@ -11,7 +11,7 @@ namespace IwEngine {
 	private:
 		struct {
 			std::vector<Layer*> m_layers;
-			iterator m_insert;
+			unsigned int m_insertIndex;
 		};
 
 	public:

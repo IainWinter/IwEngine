@@ -1,9 +1,7 @@
 #include "LayerStack.h"
 
 namespace IwEngine {
-	LayerStack::LayerStack() {
-		m_insert = m_layers.begin();
-	}
+	LayerStack::LayerStack() {}
 
 	LayerStack::~LayerStack() {
 		for (Layer* l : m_layers) {
@@ -14,7 +12,8 @@ namespace IwEngine {
 	void LayerStack::PushLayer(
 		Layer* layer)
 	{
-		m_insert = m_layers.emplace(m_insert, layer);
+		m_layers.emplace(begin() + m_insertIndex, layer);
+		m_insertIndex++;
 	}
 
 	void LayerStack::PushOverlay(
@@ -29,7 +28,7 @@ namespace IwEngine {
 		iterator itr = std::find(begin(), end(), layer);
 		if (itr != end()) {
 			m_layers.erase(itr);
-			m_insert--;
+			m_insertIndex--;
 		}
 	}
 
