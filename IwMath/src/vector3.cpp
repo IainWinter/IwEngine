@@ -1,4 +1,4 @@
-#include "vector3.h"
+#include "iw/vector3.h"
 
 namespace iwmath {
 	const vector3 vector3::zero   = vector3(0, 0, 0);

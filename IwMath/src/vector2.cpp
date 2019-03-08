@@ -1,4 +1,4 @@
-#include "vector2.h"
+#include "iw/vector2.h"
 
 namespace iwmath {
 	const vector2 vector2::zero   = vector2(0, 0);

@@ -1,4 +1,4 @@
-#include "matrix2.h"
+#include "iw/matrix2.h"
 
 namespace iwmath {
 	const matrix2 matrix2::identity = matrix2(1.0f);
@@ -78,7 +78,7 @@ namespace iwmath {
 	void matrix2::invert() {
 		float det = determinant();
 		if (almost_equal(det, 0, 6)) {
-			std::invalid_argument("Determinant is zero, "
+			throw std::invalid_argument("Determinant is zero, "
 				"therefore inverse matrix doesn't exist.");
 		}
 

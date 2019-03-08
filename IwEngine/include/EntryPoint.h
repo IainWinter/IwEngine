@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Application.h"
-#include "logger.h"
+#include "iw/logger.h"
 
 extern IwEngine::Application* CreateApplication();
 

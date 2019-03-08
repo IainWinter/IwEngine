@@ -1,8 +1,6 @@
 #include "Application.h"
-#include "logger.h"
+#include "iw/logger.h"
 #include "iw/functional/callback.h"
-
-#include "imgui.h"
 
 namespace IwEngine {
 	Application::Application()

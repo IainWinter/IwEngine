@@ -3,7 +3,7 @@
 #include "Core.h"
 #include <vector>
 #include <string>
-#include "logger.h"
+#include "iw\logger.h"
 
 namespace IwEngine {
 	class Subspace {

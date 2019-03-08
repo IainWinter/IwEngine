@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="set">
+      <UniqueIdentifier>{91A9880B-FDB2-887C-862E-9F7CF236947C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="type">
+      <UniqueIdentifier>{07BD9E7C-F3F3-9F0D-9CE0-851088F61B0F}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\iw\action.h" />
+    <ClInclude Include="include\iw\iwutil.h" />
+    <ClInclude Include="include\iw\set\sparse_set.h">
+      <Filter>set</Filter>
+    </ClInclude>
+    <ClInclude Include="include\iw\type\type_group.h">
+      <Filter>type</Filter>
+    </ClInclude>
+    <ClInclude Include="include\iw\type\type_index.h">
+      <Filter>type</Filter>
+    </ClInclude>
+    <ClInclude Include="include\iw\type\type_traits.h">
+      <Filter>type</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

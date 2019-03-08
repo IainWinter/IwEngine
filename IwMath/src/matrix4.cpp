@@ -1,4 +1,4 @@
-#include "matrix4.h"
+#include "iw/matrix4.h"
 
 namespace iwmath {
 	const matrix4 matrix4::identity = matrix4(1.0f);

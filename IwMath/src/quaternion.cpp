@@ -1,5 +1,5 @@
-#include "quaternion.h"
-#include "matrix3.h"
+#include "iw/quaternion.h"
+#include "iw/matrix3.h"
 
 namespace iwmath {
 	const quaternion quaternion::identity = quaternion(0, 0, 0, 1);

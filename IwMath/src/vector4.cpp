@@ -1,5 +1,5 @@
 #include <cmath>
-#include "vector4.h"
+#include "iw/vector4.h"
 
 namespace iwmath {
 	const vector4 vector4::zero   = vector4(0, 0, 0, 0);

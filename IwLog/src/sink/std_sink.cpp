@@ -1,4 +1,4 @@
-#include "sink/std_sink.h"
+#include "iw/sink/std_sink.h"
 #include <iostream>
 
 namespace iwlog {

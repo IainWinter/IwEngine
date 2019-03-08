@@ -1,8 +1,9 @@
 #include "Platform/Windows/WindowsWindow.h"
-#include "logger.h"
-#include <gl/glew.h>
-#include <gl/wglew.h>
+#include "iw/logger.h"
+#include "gl/glew.h"
+#include "gl/wglew.h"
 #include <cstdio>
+#include <Tchar.h>
 
 ATOM RegClass(
 	HINSTANCE instance,
@@ -20,7 +21,7 @@ namespace IwEngine {
 		MAKEINTATOM(RegClass(m_instance, _WndProc));
 
 		HWND fake_hwnd = CreateWindow(
-			"Core", "Fake Window",
+			_T("Core"), _T("Fake Window"),
 			WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
 			0, 0,
 			1, 1,
@@ -68,7 +69,7 @@ namespace IwEngine {
 		}
 
 		m_window = CreateWindow(
-			"Core", "Space",
+			_T("Core"), _T("Space"),
 			WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
 			100, 100,
 			options.width, options.height,
@@ -235,7 +236,7 @@ ATOM RegClass(
 	wcex.lpfnWndProc = wndproc;
 	wcex.hInstance = instance;
 	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wcex.lpszClassName = "Core";
+	wcex.lpszClassName = _T("Core");
 
 	return RegisterClassEx(&wcex);
 }

@@ -1,5 +1,5 @@
-#include "matrix3.h"
-#include "matrix2.h"
+#include "iw/matrix3.h"
+#include "iw/matrix2.h"
 
 namespace iwmath {
 	const matrix3 matrix3::identity = matrix3(1.0f);
