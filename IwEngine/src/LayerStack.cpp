@@ -1,7 +1,9 @@
 #include "LayerStack.h"
 
 namespace IwEngine {
-	LayerStack::LayerStack() {}
+	LayerStack::LayerStack()
+		: m_insertIndex(0)
+	{}
 
 	LayerStack::~LayerStack() {
 		for (Layer* l : m_layers) {

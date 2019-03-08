@@ -10,11 +10,11 @@ set(SRC
 	"src/sink/file_sink.cpp"
 	"src/sink/std_sink.cpp")
 set(HEADERS
-	"src/iwlog.h"
-	"src/logger.h"
-	"src/sink/file_sink.h"
-	"src/sink/sink.h"
-	"src/sink/std_sink.h")
+	"include/iwlog.h"
+	"include/logger.h"
+	"include/sink/file_sink.h"
+	"include/sink/sink.h"
+	"include/sink/std_sink.h")
 set(POST_INSTALL_INCLUDE
 	"${PROJECT_NAME}")
 

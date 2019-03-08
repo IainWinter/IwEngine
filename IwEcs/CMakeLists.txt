@@ -32,11 +32,11 @@ target_link_libraries(${PROJECT_NAME}
 
 #Set target compile time constants
 if(WIN32)
-	target_compile_definitions(${PROJECT_NAME} INTERFACE IW_PLATFORM_WINDOWS = 1)
+	target_compile_definitions(${PROJECT_NAME} INTERFACE IW_PLATFORM_WINDOWS)
 elseif(APPLE)
-	target_compile_definitions(${PROJECT_NAME} INTERFACE IW_PLATFORM_APPLE = 1)
+	target_compile_definitions(${PROJECT_NAME} INTERFACE IW_PLATFORM_APPLE)
 elseif(UNIX AND NOT APPLE)
-	target_compile_definitions(${PROJECT_NAME} INTERFACE IW_PLATFORM_UNIX = 1)
+	target_compile_definitions(${PROJECT_NAME} INTERFACE IW_PLATFORM_UNIX)
 endif()
 
 #Set target compile features

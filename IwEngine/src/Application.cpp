@@ -2,6 +2,8 @@
 #include "logger.h"
 #include "iw/functional/callback.h"
 
+#include "imgui.h"
+
 namespace IwEngine {
 	Application::Application()
 		: m_running(false)

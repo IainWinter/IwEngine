@@ -1,14 +1,25 @@
-cmake_minimum_required(VERSION 3.8)
+﻿cmake_minimum_required(VERSION 3.8)
 
-project(IwGraphics)
+project(IwEngine)
 
 #Set source variables
 set(INCLUDE_DIRS
 	"${PROJECT_SOURCE_DIR}/include/")
-set(SRC
-	"src/renderer.cpp")
+set(SRC 
+	"src/Application.cpp"
+	"src/Layer.cpp"
+	"src/LayerStack.cpp"
+	"src/Platform/WindowsWindow.cpp")
 set(HEADERS
-	"include/renderer.h")
+	"include/Application.h"
+	"include/Core.h"
+	"include/EntryPoint.h"
+	"include/Event.h"
+	"include/Layer.h"
+	"include/LayerStack.h"
+	"include/Space.h"
+	"include/Window.h"
+	"include/Platform/Windows/WindowsWindow.h")
 set(POST_INSTALL_INCLUDE
 	"${PROJECT_NAME}")
 
@@ -26,13 +37,20 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${INCLUDE_DIRS})
 
 #Set target link libraries
 target_link_libraries(
-	${PROJECT_NAME}
-	${OPENGL_gl_LIBRARY}
-	${GLEW_LIBRARY}
-	IwLog)
+    ${PROJECT_NAME}
+    ${OPENGL_gl_LIBRARY}
+    ${GLEW_LIBRARY}
+	imgui
+	IwLog
+	IwEvents
+	IwGraphics)
 
 #Set target compile time constants
-if (WIN32)
+if(${CMAKE_BUILD_TYPE} EQUAL "DEBUG")
+	target_compile_definitions(${PROJECT_NAME} PRIVATE IW_DEBUG)
+endif()
+
+if(WIN32)
 	target_compile_definitions(${PROJECT_NAME} PUBLIC  IW_PLATFORM_WINDOWS)
 	target_compile_definitions(${PROJECT_NAME} PRIVATE IW_BUILD_DLL)
 elseif(APPLE)

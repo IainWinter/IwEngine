@@ -1,6 +1,6 @@
 ﻿cmake_minimum_required(VERSION 3.8)
 
-project(IwEngine)
+project(IwEngine VERSION 1.0.0 LANGUAGES CXX)
 
 #Options for every project
 option(IW_BUILD_SANDBOX "Build Sandbox.exe" ON)
@@ -12,6 +12,9 @@ else()
 endif()
 
 set(POST_INSTALL "${ARCHITECTURE}")
+
+add_subdirectory(vendor/glew/build/cmake)
+add_subdirectory(vendor/imgui)
 
 #Add libraries to build
 add_subdirectory(IwLog)

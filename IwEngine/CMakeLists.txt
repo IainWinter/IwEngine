@@ -1,74 +1,54 @@
-﻿cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.8)
 
-project(IwEngine)
+project(IwEngine 
+	VERSION 1.0.0
+	LANGUAGES CXX)
 
-#Set source variables
-set(INCLUDE_DIRS
-	"${PROJECT_SOURCE_DIR}/include/")
-set(SRC 
+add_library(${PROJECT_NAME} SHARED
+	"src/Platform/WindowsWindow.cpp"
 	"src/Application.cpp"
 	"src/Layer.cpp"
-	"src/LayerStack.cpp"
-	"src/Platform/WindowsWindow.cpp")
-set(HEADERS
-	"include/Application.h"
-	"include/Core.h"
-	"include/EntryPoint.h"
-	"include/Event.h"
-	"include/Layer.h"
-	"include/LayerStack.h"
-	"include/Space.h"
-	"include/Window.h"
-	"include/Platform/Windows/WindowsWindow.h")
-set(POST_INSTALL_INCLUDE
-	"${PROJECT_NAME}")
+	"src/LayerStack.cpp")
 
-find_package(OpenGL)
-find_package(GLEW)
+target_include_directories(${PROJECT_NAME}
+	PUBLIC
+		$<INSTALL_INTERFACE:include>
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+	PRIVATE
+		${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-#Add libraries
-add_library(${PROJECT_NAME} SHARED ${SRC})
-
-#Set include directorys
-include_directories(${INCLUDE_DIRS})
-
-#Set target include directory for client
-target_include_directories(${PROJECT_NAME} PUBLIC ${INCLUDE_DIRS})
-
-#Set target link libraries
-target_link_libraries(
-    ${PROJECT_NAME}
-    ${OPENGL_gl_LIBRARY}
-    ${GLEW_LIBRARY}
-	IwLog
-	IwEvents
-	IwGraphics)
-
-#Set target compile time constants
 if(${CMAKE_BUILD_TYPE} EQUAL "DEBUG")
-	target_compile_definitions(${PROJECT_NAME} PRIVATE IW_DEBUG = 1)
+	target_compile_definitions(${PROJECT_NAME}
+		PRIVATE IW_DEBUG)
 endif()
 
 if(WIN32)
-	target_compile_definitions(${PROJECT_NAME} PUBLIC  IW_PLATFORM_WINDOWS = 1)
-	target_compile_definitions(${PROJECT_NAME} PRIVATE IW_BUILD_DLL = 1)
+	target_compile_definitions(${PROJECT_NAME}
+		PUBLIC  IW_PLATFORM_WINDOWS
+		PRIVATE IW_BUILD_DLL)
 elseif(APPLE)
-	target_compile_definitions(${PROJECT_NAME} PUBLIC  IW_PLATFORM_APPLE = 1)
+	target_compile_definitions(${PROJECT_NAME}
+		PUBLIC IW_PLATFORM_APPLE)
 elseif(UNIX AND NOT APPLE)
-	target_compile_definitions(${PROJECT_NAME} PUBLIC  IW_PLATFORM_UNIX = 1)
+	target_compile_definitions(${PROJECT_NAME}
+		PUBLIC IW_PLATFORM_UNIX)
 endif()
 
-#Set target compile features
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_11)
 
-#Set target properties
-set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${HEADERS}")
+find_package(OpenGL     REQUIRED)
+find_package(GLEW       REQUIRED)
+find_package(imgui      REQUIRED)
+#find_package(IwLog      REQUIRED)
+#find_package(IwEvents   REQUIRED)
+#find_package(IwGraphics REQUIRED)
 
-#Install locations
-install(TARGETS ${PROJECT_NAME}
-	RUNTIME       DESTINATION bin/${POST_INSTALL}
-	LIBRARY       DESTINATION bin/${POST_INSTALL}
-	ARCHIVE       DESTINATION lib/${POST_INSTALL}
-	FRAMEWORK     DESTINATION lib/${POST_INSTALL}
-	BUNDLE        DESTINATION bin/${POST_INSTALL}
-	PUBLIC_HEADER DESTINATION include/${POST_INSTALL_INCLUDE})
+target_link_libraries( ${PROJECT_NAME}
+    PRIVATE
+		${OPENGL_gl_LIBRARY}
+		${GLEW_LIBRARY}
+		#imgui
+		#IwLog
+		#IwEvents
+		#IwGraphics)
+		)
