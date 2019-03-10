@@ -1,11 +1,5 @@
-#include "EntryPoint.h"
-
-#include <gl/glew.h>
-#include <gl/wglew.h>
-
-#include "iw/signal.h"
-#include "iw/functional/callback.h"
-#include "iw/functional/signal.h"
+#include "iw/engine/EntryPoint.h"
+#include "gl/glew.h"
 
 class TestLayer
 	: public IwEngine::Layer
@@ -27,9 +21,9 @@ public:
 		glClearColor(r, g, b, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		r += .001f;
-		g += .002f;
-		b += .003f;
+		r += .0001f;
+		g += .0002f;
+		b += .0003f;
 
 		if (r > 1.0f) r = 0;
 		if (g > 1.0f) g = 0;
