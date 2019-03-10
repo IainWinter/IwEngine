@@ -6,7 +6,7 @@ imguidir = iwengdir .. "/extern/imgui"
 cfgname = "%{cfg.buildcfg}.%{cfg.system}.%{cfg.architecture}"
 bindir  = "/bin/" .. cfgname
 libdir  = "/lib/" .. cfgname
-blddir  = "/bld"
+blddir  = "/build"
 
 glewinclude  = glewdir .. "/include"
 imguiinclude = imguidir

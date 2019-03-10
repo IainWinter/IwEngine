@@ -1,20 +1,19 @@
 project "ImGui"
     kind "StaticLib"
     language "C++"
-    location  (imguidir .. blddir)
-	targetdir (imguidir .. libdir)
-	objdir    (imguidir .. blddir)
+    location  (blddir)
+	targetdir (libdir)
+	objdir    (blddir)
 
     files {
-        "imconfig.h",
-        "imgui.h",
-        "imgui.cpp",
-        "imgui_draw.cpp",
-        "imgui_internal.h",
-        "imgui_widgets.cpp",
-        "imstb_rectpack.h",
-        "imstb_textedit.h",
-        "imstb_truetype.h"
+        "include/imgui/*.h",
+        "src/*.h",
+        "src/imgui.cpp",
+        "src/imgui_draw.cpp"
+    }
+
+    includedirs {
+        "include"
     }
 
 	filter "configurations:Debug"

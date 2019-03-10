@@ -1,18 +1,18 @@
 project "GLEW"
     kind "SharedLib"
     language "C++"
-	location  (glewdir .. blddir)
-	targetdir (glewdir .. bindir)
-	implibdir (glewdir .. libdir)
-	objdir    (glewdir .. blddir)
-
-    includedirs {
-        "include"
-    }
+	location  (blddir)
+	targetdir (bindir)
+	implibdir (libdir)
+	objdir    (blddir)
         
     files { 
         "include/gl/*.h",
         "src/*.c"
+    }
+
+    includedirs {
+        "include"
     }
     
     excludes {
