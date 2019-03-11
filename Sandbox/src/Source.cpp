@@ -1,53 +1,81 @@
 #include "iw/engine/EntryPoint.h"
-#include "gl/glew.h"
+#include "iw/engine/ImGui/ImGuiLayer.h"
 
-class TestLayer
-	: public IwEngine::Layer
-{
-private:
-	float r, g, b;
+#include "iw/events/functional/eventbus.h"
+#include "iw/engine/Events/Event.h"
+
+using namespace iwevt::functional;
+
+using Bus = eventbus<
+	IwEngine::Event&,
+	IwEngine::WindowResizedEvent&,
+	IwEngine::MouseButtonEvent&,
+	IwEngine::MouseMovedEvent&>;
+
+class Test {
 public:
-	TestLayer()
-		: IwEngine::Layer("Test") 
+	int t = 5;
+
+	void BindEvents(Bus& bus) {
+		bus.subscribe<IwEngine::WindowResizedEvent&>(this, &Test::OnWindowResized);
+		bus.subscribe<IwEngine::MouseButtonEvent&>(this, &Test::OnMouseButton);
+		bus.subscribe<IwEngine::MouseMovedEvent&>(this, &Test::OnMouseMoved);
+	}
+
+private:
+	void OnWindowResized(
+		IwEngine::WindowResizedEvent& e)
 	{
-		r = g = b = 0;
+		LOG_DEBUG << "Window resized " 
+			<< e.Width << ", " << e.Height;
 	}
 
-	int Initilize() override {
-		return 0;
-	}
-
-	void Update() override {
-		glClearColor(r, g, b, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
-
-		r += .0001f;
-		g += .0002f;
-		b += .0003f;
-
-		if (r > 1.0f) r = 0;
-		if (g > 1.0f) g = 0;
-		if (b > 1.0f) b = 0;
-	}
-
-	void OnEvent(
-		IwEngine::Event& e) override
+	void OnMouseButton(
+		IwEngine::MouseButtonEvent& e)
 	{
-		if (e.Type == IwEngine::MouseMoved) {
-			r = 0;
-			g = 0;
-			b = 0;
-		}
+		LOG_DEBUG << "Mouse button "
+			<< e.Button << " " << e.State;
+	}
+
+	void OnMouseMoved(
+		IwEngine::MouseMovedEvent& e) 
+	{
+		LOG_DEBUG << "Mouse moved " 
+			<< e.X << ", " << e.Y;
 	}
 };
 
 class Game : public IwEngine::Application {
 public:
 	Game() {
-		PushLayer(new TestLayer());
+		PushOverlay(new IwEngine::ImGuiLayer());
+	}
+
+	void Run() override {		
+		Bus b;
+
+		Test* t = new Test();
+		t->BindEvents(b);
+
+		IwEngine::WindowResizedEvent e(100, 200);
+		b.emit<IwEngine::WindowResizedEvent&>(e);
+
+		Application::Run();
 	}
 };
 
 IwEngine::Application* CreateApplication() {
 	return new Game();
 }
+
+//Update loop
+
+//Application update
+//-> Update layers
+//-> Update window
+//   -> Get raw event 
+//   -> Translate to engine event 
+//   -> Pass to application
+//-> Pass to Layer bus
+//   -> Dispatch to correct layers in correct order
+//-> Render window
