@@ -8,15 +8,11 @@ bindir  = "/bin/" .. cfgname
 libdir  = "/lib/" .. cfgname
 blddir  = "/build"
 
-glewinclude  = glewdir .. "/include"
-imguiinclude = imguidir
-
 workspace "IwEngine"
 	configurations { "Debug", "Release" }
 	platforms { "x32", "x64" }
 	startproject "Sandbox"
 	location (iwengdir .. blddir)
-
 
 include (glewdir)
 include (imguidir)
@@ -31,19 +27,25 @@ project "IwEngine"
 
 	files {
 		iwengdir .. "/include/**.h",
+		iwengdir .. "/src/**.h",
 		iwengdir .. "/src/**.cpp"
 	}
 
 	includedirs {
 		iwengdir .. "/include",
-		glewinclude,
-		imguiinclude
+		iwengdir .. "/src/engine/Platform",
+		glewdir  .. "/include",
+		imguidir .. "/include"
 	}
 
 	links {
 		"GLEW",
 		"ImGui",
 		"opengl32.lib"
+	}
+
+	defines {
+		"IMGUI_IMPL_OPENGL_LOADER_GLEW"
 	}
 
 	filter "system:windows"
@@ -76,13 +78,11 @@ project "Sandbox"
 	}
 
 	includedirs {
-		iwengdir .. "/include",
-		glewinclude
+		iwengdir .. "/include"
 	}
 
 	links {
 		"IwEngine",
-		"GLEW",
 		"opengl32.lib"
 	}
 
@@ -92,8 +92,7 @@ project "Sandbox"
 		defines "IW_PLATFORM_WINDOWS"
 
 		prebuildcommands {
-			"xcopy /q /y /f \"" .. iwengdir .. bindir .. "/IwEngine.dll\" \"" .. sndbxdir .. bindir .. "\"",
-			"xcopy /q /y /f \"" .. glewdir  .. bindir .. "/GLEW.dll\" \""     .. sndbxdir .. bindir .. "\""
+			"xcopy /q /y /f \"" .. iwengdir .. bindir .. "/IwEngine.dll\" \"" .. sndbxdir .. bindir .. "\""
 		}
 
 	filter "configurations:Debug"
