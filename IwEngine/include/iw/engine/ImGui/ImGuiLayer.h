@@ -1,9 +1,11 @@
 #include "iw/engine/Layer.h"
 
 namespace IwEngine {
-	class ImGuiLayer
+	class IWENGINE_API ImGuiLayer
 		: public Layer
 	{
+	private:
+		int counter = 0;
 	public:
 		ImGuiLayer();
 		~ImGuiLayer();
@@ -14,5 +16,11 @@ namespace IwEngine {
 
 		void OnEvent(
 			Event& e);
+	private:
+		//bool OnMouseButtonDown();
+		//bool OnMouseButtonUp();
+		//bool OnKeyButtonDown();
+		//bool OnKeyButtonUp();
+		//bool OnWindowResized();
 	};
 }

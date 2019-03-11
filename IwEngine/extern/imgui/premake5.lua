@@ -8,8 +8,11 @@ project "ImGui"
     files {
         "include/imgui/*.h",
         "src/*.h",
-        "src/imgui.cpp",
-        "src/imgui_draw.cpp"
+        "src/*.cpp"
+    }
+
+    excludes {
+        "src/imgui_demo.cpp"
     }
 
     includedirs {

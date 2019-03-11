@@ -22,19 +22,25 @@ namespace IwEngine {
 		m_window->SetCallback(
 			iwevents::make_callback(&Application::OnEvent, this));
 		int status;
+		LOG_DEBUG << "Initilizing window...";
 		if (status = m_window->Initilize(windowOptions)) {
 			LOG_ERROR << "Window failed to initilize with error code "
 				<< status;
 			return status;
 		}
 
+		LOG_DEBUG << "Done!";
+
 		for (Layer* layer : m_layerStack) {
+			LOG_DEBUG << "Initilizing " << layer->Name() << " layer...";
 			if (status = layer->Initilize()) {
 				LOG_ERROR << layer->Name()
 					<< " layer initilization failed with error code "
 					<< status;
 				return status;
 			}
+
+			LOG_DEBUG << "Done!";
 		}
 
 		m_window->SetDisplayState(windowOptions.state);
@@ -50,11 +56,11 @@ namespace IwEngine {
 	}
 
 	void Application::Update() {
-		m_window->Update();
 		for (Layer* layer : m_layerStack) {
 			layer->Update();
 		}
 
+		m_window->Update();
 		m_window->Render();
 	}
 

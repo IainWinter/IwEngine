@@ -210,7 +210,11 @@ namespace IwEngine {
 	{
 		Event e;
 		switch (msg) {
+			case 
+
+
 			case WM_CLOSE:     e.Type = WindowClosed; break;
+			case WM_DESTROY:   e.Type = WindowDestroyed; break;
 			case WM_MOUSEMOVE: e.Type = MouseMoved;   break;
 			default:           e.Type = (EventType)msg;
 		}
