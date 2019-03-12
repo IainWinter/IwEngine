@@ -1,4 +1,5 @@
 #include "iw/engine/ImGui/ImGuiLayer.h"
+#include "iw/log/logger.h"
 #include "imgui/imgui.h"
 #include "OpenGL/imgui_impl_opengl3.h"
 
@@ -15,9 +16,6 @@ namespace IwEngine {
 		ImGui::StyleColorsDark();
 		ImGui_ImplOpenGL3_Init("#version 410");
 
-		auto& io = ImGui::GetIO();
-		io.DisplaySize = {1280, 720};
-		
 		return 0;
 	}
 
@@ -46,9 +44,41 @@ namespace IwEngine {
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	}
 
-	void ImGuiLayer::OnEvent(
-		Event& e)
+	bool ImGuiLayer::On(
+		WindowResizedEvent& e)
 	{
+		auto& io = ImGui::GetIO();
+		io.DisplaySize.x = e.Width;
+		io.DisplaySize.y = e.Height;
+		
+		return false;
+	}
 
+	bool ImGuiLayer::On(
+		MouseMovedEvent& event)
+	{
+		auto& io = ImGui::GetIO();
+		io.MousePos.x = event.X;
+		io.MousePos.y = event.Y;
+
+		return false;
+	}
+
+	bool ImGuiLayer::On(
+		MouseButtonPressedEvent& event)
+	{
+		auto& io = ImGui::GetIO();
+		io.MouseDown[event.Button] = true;
+
+		return false;
+	}
+
+	bool ImGuiLayer::On(
+		MouseButtonReleasedEvent& event)
+	{
+		auto& io = ImGui::GetIO();
+		io.MouseDown[event.Button] = false;
+
+		return false;
 	}
 }
