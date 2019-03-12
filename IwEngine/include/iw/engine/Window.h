@@ -2,6 +2,7 @@
 
 #include "Events/Event.h"
 #include "iw/events/functional/callback.h"
+#include "iw/input/input_manager.h"
 
 namespace IwEngine {
 	enum DisplayState {
@@ -20,34 +21,79 @@ namespace IwEngine {
 		bool cursor;
 	};
 
-	class Window {
+	class IWindow {
 	public:
 		using EventCallback = iwevents::callback<Event&>;
 
-		virtual ~Window() {}
+		virtual ~IWindow() {}
 
 		virtual int Initilize(
-			WindowOptions& options) = 0;
+			const WindowOptions& options) = 0;
 
-		virtual void Destroy() = 0;
-		virtual void Update()  = 0;
+		virtual void Destroy()   = 0;
+		virtual void Update()    = 0;
+		virtual void Render()    = 0;
 
-		virtual void SetDisplayState(
+		virtual void SetState(
 			DisplayState state) = 0;
+
+		virtual void SetCursor(
+			bool show) = 0;
 
 		virtual void SetCallback(
 			EventCallback callback) = 0;
 
-		virtual void DrawCursor(
+		virtual unsigned int Width()  = 0;
+		virtual unsigned int Height() = 0;
+		virtual DisplayState State()  = 0;
+		virtual bool         Cursor() = 0;
+
+		static IWindow* Create();
+	};
+
+	class Window
+		: public IWindow
+	{
+	protected:
+		EventCallback callback;
+		WindowOptions options;
+
+	public:
+		virtual ~Window() {}
+
+		virtual int Initilize(
+			const WindowOptions& options) = 0;
+
+		virtual void Destroy()   = 0;
+		virtual void Update()    = 0;
+		virtual void Render()    = 0;
+
+		virtual void SetState(
+			DisplayState state) = 0;
+
+		virtual void SetCursor(
 			bool show) = 0;
 
-		virtual unsigned int Width()        = 0;
-		virtual unsigned int Height()       = 0;
-		virtual DisplayState DisplayState() = 0;
-		virtual bool Cursor()               = 0;
+		inline void SetCallback(
+			EventCallback callback)
+		{
+			this->callback = callback;
+		}
 
-		virtual void Render() = 0;
+		inline DisplayState State() {
+			return options.state;
+		}
 
-		static Window* Create();
+		inline bool Cursor() {
+			return options.cursor;
+		}
+
+		inline unsigned int Width() {
+			return options.width;
+		}
+
+		inline unsigned int Height() {
+			return options.height;
+		}
 	};
 }

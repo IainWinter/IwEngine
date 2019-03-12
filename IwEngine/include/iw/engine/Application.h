@@ -7,7 +7,7 @@
 namespace IwEngine {
 	class IWENGINE_API Application {
 	private:
-		Window* m_window;
+		IWindow* m_window;
 		bool m_running;
 		LayerStack m_layerStack;
 
@@ -16,13 +16,13 @@ namespace IwEngine {
 		virtual ~Application();
 
 		virtual int Initilize(
-			WindowOptions& windowOptions);
+			const WindowOptions& windowOptions);
 
 		virtual void Run();
 		virtual void Destroy();
 		virtual void Update();
 
-		virtual void OnEvent(
+		virtual void HandleEvent(
 			Event& e);
 
 		void PushLayer(
@@ -37,15 +37,9 @@ namespace IwEngine {
 		void PopOverlay(
 			Layer* overlay);
 
-		inline Window& GetWindow() {
+		inline IWindow& GetWindow() {
 			return *m_window;
 		}
-	private:
-		void InitilizeLayer(
-			Layer* layer);
-
-		void DestroyLayer(
-			Layer* layer);
 	};
 }
 
