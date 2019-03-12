@@ -13,10 +13,29 @@ namespace IwEngine {
 	}
 
 	void Layer::Destroy() {}
-
 	void Layer::Update() {}
 
-	void Layer::OnEvent(
-		Event& e) 
-	{}
+	bool Layer::On(
+		WindowResizedEvent& event)
+	{
+		return false;
+	}
+
+	bool Layer::On(
+		MouseMovedEvent& event)
+	{
+		return false;
+	}
+
+	bool Layer::On(
+		MouseButtonPressedEvent& event)
+	{
+		return false;
+	}
+
+	bool Layer::On(
+		MouseButtonReleasedEvent& event)
+	{
+		return false;
+	}
 }

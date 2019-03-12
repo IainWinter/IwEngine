@@ -1,4 +1,5 @@
 #include "iw/engine/Platform/Windows/WindowsWindow.h"
+#include "EventTranslator.h"
 #include "iw/log/logger.h"
 #include "gl/glew.h"
 #include "gl/wglew.h"
@@ -10,14 +11,14 @@ ATOM RegClass(
 	WNDPROC wndproc);
 
 namespace IwEngine {
-	Window* Window::Create() {
+	IWindow* IWindow::Create() {
 		return new WindowsWindow();
 	}
 
 	int WindowsWindow::Initilize(
-		WindowOptions& options)
+		const WindowOptions& options)
 	{
-		//LPTSTR window = 
+		m_instance = GetModuleHandle(NULL);
 		MAKEINTATOM(RegClass(m_instance, _WndProc));
 
 		HWND fake_hwnd = CreateWindow(
@@ -132,7 +133,7 @@ namespace IwEngine {
 			return 1;
 		}
 
-		DrawCursor(options.cursor);
+		SetCursor(options.cursor);
 
 		return 0;
 	}
@@ -152,8 +153,8 @@ namespace IwEngine {
 		}
 	}
 
-	void WindowsWindow::SetDisplayState(
-		IwEngine::DisplayState state)
+	void WindowsWindow::SetState(
+		DisplayState state)
 	{
 		int wstate = -1;
 		switch (state) {
@@ -167,20 +168,15 @@ namespace IwEngine {
 			ShowWindow(m_window, wstate);
 		}
 
-		m_options.state = state;
+		options.state = state;
 	}
 
-	void WindowsWindow::SetCallback(
-		EventCallback callback)
-	{
-		m_callback = callback;
-	}
 
-	void WindowsWindow::DrawCursor(
+	void WindowsWindow::SetCursor(
 		bool show)
 	{
 		ShowCursor(show);
-		m_options.cursor = show;
+		options.cursor = show;
 	}
 
 	void WindowsWindow::Render() {
@@ -190,42 +186,43 @@ namespace IwEngine {
 	LRESULT CALLBACK WindowsWindow::_WndProc(
 		HWND hwnd,
 		UINT msg,
-		WPARAM wparam,
-		LPARAM lparam)
+		WPARAM wParam,
+		LPARAM lParam)
 	{
 		WindowsWindow* me = reinterpret_cast<WindowsWindow*>(
 			GetWindowLongPtr(hwnd, GWLP_USERDATA));
 		if (me) {
-			return me->HandleEvent(hwnd, msg, wparam, lparam);
+			return me->HandleEvent(hwnd, msg, wParam, lParam);
 		}
 
-		return DefWindowProc(hwnd, msg, wparam, lparam);
+		return DefWindowProc(hwnd, msg, wParam, lParam);
 	}
 
 	LRESULT CALLBACK WindowsWindow::HandleEvent(
 		HWND hwnd,
 		UINT msg,
-		WPARAM wparam,
-		LPARAM lparam)
+		WPARAM wParam,
+		LPARAM lParam)
 	{
-		Event e;
+		Event* e;
 		switch (msg) {
-			case 
-
-
-			case WM_CLOSE:     e.Type = WindowClosed; break;
-			case WM_DESTROY:   e.Type = WindowDestroyed; break;
-			case WM_MOUSEMOVE: e.Type = MouseMoved;   break;
-			default:           e.Type = (EventType)msg;
+			case WM_SIZE:
+				e = &Translate<WindowResizedEvent>(msg, wParam, lParam);
+				callback(*e);
+				break;
+			
+			//case WM_DESTROY:   e.Type = WindowDestroyed; break;
+			//case WM_MOUSEMOVE: e.Type = MouseMoved;   break;
+			//default:           e.Type = (EventType)msg;
 		}
 
-		m_callback(e);
+		//m_callback(e);
 
-		if (!e.Handled) {
-			return DefWindowProc(hwnd, msg, wparam, lparam);
-		}
+		//if (!e->Handled) {
+			return DefWindowProc(hwnd, msg, wParam, lParam);
+		//}
 
-		return 0;
+		//return 0;
 	}
 }
 

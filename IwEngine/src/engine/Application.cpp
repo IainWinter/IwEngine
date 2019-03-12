@@ -5,7 +5,7 @@
 namespace IwEngine {
 	Application::Application()
 		: m_running(false)
-		, m_window (Window::Create())
+		, m_window (IWindow::Create())
 	{}
 
 	Application::~Application() {
@@ -13,14 +13,14 @@ namespace IwEngine {
 	}
 
 	int Application::Initilize(
-		WindowOptions& windowOptions)
+		const WindowOptions& windowOptions)
 	{
 		LOG_SINK(iwlog::stdout_sink, iwlog::INFO);
 		LOG_SINK(iwlog::stderr_sink, iwlog::ERR);
 		LOG_SINK(iwlog::file_sink,   iwlog::DEBUG, "sandbox.log");
 
 		m_window->SetCallback(
-			iwevents::make_callback(&Application::OnEvent, this));
+			iwevents::make_callback(&Application::HandleEvent, this));
 		int status;
 		LOG_DEBUG << "Initilizing window...";
 		if (status = m_window->Initilize(windowOptions)) {
@@ -43,7 +43,7 @@ namespace IwEngine {
 			LOG_DEBUG << "Done!";
 		}
 
-		m_window->SetDisplayState(windowOptions.state);
+		m_window->SetState(windowOptions.state);
 
 		return 0;
 	}
@@ -72,11 +72,13 @@ namespace IwEngine {
 		}
 	}
 
-	void Application::OnEvent(Event& e) {
-		for (Layer* layer : m_layerStack) {
-			layer->OnEvent(e);
-			if (e.Handled) {
-				break;
+	void Application::HandleEvent(Event& e) {
+		if (e.Type == WindowResized) {
+			for (Layer* layer : m_layerStack) {
+				layer->On((WindowResizedEvent&)e);
+				if (e.Handled) {
+					break;
+				}
 			}
 		}
 
