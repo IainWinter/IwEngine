@@ -1,9 +1,9 @@
 project "ImGui"
     kind "StaticLib"
     language "C++"
-    location  (blddir)
-	targetdir (libdir)
-	objdir    (blddir)
+    location  (imguidir .. blddir)
+	targetdir (imguidir .. libdir)
+	objdir    (imguidir .. blddir)
 
     files {
         "include/imgui/*.h",
