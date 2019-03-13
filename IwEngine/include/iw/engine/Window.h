@@ -40,6 +40,9 @@ namespace IwEngine {
 		virtual void SetCursor(
 			bool show) = 0;
 
+		virtual void SetInputManager(
+			iwinput::input_manager& inputManager) = 0;
+
 		virtual void SetCallback(
 			EventCallback callback) = 0;
 
@@ -73,6 +76,9 @@ namespace IwEngine {
 
 		virtual void SetCursor(
 			bool show) = 0;
+
+		virtual void SetInputManager(
+			iwinput::input_manager& inputManager) = 0;
 
 		inline void SetCallback(
 			EventCallback callback)

@@ -3,13 +3,15 @@
 #include "Core.h"
 #include "Window.h"
 #include "LayerStack.h"
+#include "iw/input/input_manager.h"
 
 namespace IwEngine {
 	class IWENGINE_API Application {
 	private:
 		IWindow* m_window;
-		bool m_running;
 		LayerStack m_layerStack;
+		iwinput::input_manager m_inputManager;
+		bool m_running;
 
 	public:
 		Application();

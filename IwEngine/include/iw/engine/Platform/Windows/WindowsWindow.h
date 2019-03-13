@@ -27,6 +27,9 @@ namespace IwEngine {
 		void SetCursor(
 			bool show) override;
 
+		virtual void SetInputManager(
+			iwinput::input_manager& inputManager) = 0;
+
 		static LRESULT CALLBACK _WndProc(
 			HWND hwnd,
 			UINT msg,

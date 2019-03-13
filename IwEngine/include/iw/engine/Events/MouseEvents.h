@@ -4,43 +4,48 @@
 #include "iw/input/input_ids.h"
 
 namespace IwEngine {
-	struct MouseMovedEvent
+	struct MouseMovedEvent {
+		
+	};
+
+	struct MouseButtonEvent
 		: Event
 	{
+		iwi::mouse_input Button;
 		int X;
 		int Y;
 
-		MouseMovedEvent(
+		MouseButtonEvent(
+			EventType type,
+			iwinput::mouse_input button,
 			int x,
 			int y)
-			: Event(MouseMoved)
+			: Event(type)
+			, Button(button)
 			, X(x)
 			, Y(y)
 		{}
 	};
 
 	struct MouseButtonPressedEvent
-		: Event
+		: MouseButtonEvent
 	{
-		iwi::mouse_input Button;
-
 		MouseButtonPressedEvent(
-			bool state,
-		iwi::mouse_input button)
-			: Event(MouseButtonPressed)
-			, Button(button)
+			int x,
+			int y,
+			iwi::mouse_input button)
+			: MouseButtonEvent(MouseButtonPressed, button, x, y)
 		{}
 	};
 
-	struct MouseButtonReleasedEvent
-		: Event
+	struct MouseButtonPressedEvent
+		: MouseButtonEvent
 	{
-		iwi::mouse_input Button;
-
-		MouseButtonReleasedEvent(
+		MouseButtonPressedEvent(
+			int x,
+			int y,
 			iwi::mouse_input button)
-			: Event(MouseButtonReleased)
-			, Button(button)
+			: MouseButtonEvent(MouseButtonReleased, button, x, y)
 		{}
 	};
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "iw/engine/Events/Event.h"
+#include "iw/engine/Events/AllEvents.h"
 #include "iw/log/logger.h"
 #include "iw/engine/Platform.h"
 
@@ -25,5 +25,17 @@ namespace IwEngine {
 		long lParam)
 	{
 		return WindowResizedEvent(LOWORD(lParam), HIWORD(lParam));
+	}
+
+	template<>
+	MouseButtonPressedEvent Translate(
+		int event,
+		int wParam,
+		long lParam)
+	{
+		if (event == WM_LBUTTONDOWN) {
+			return MouseButtonPressedEvent(GET_X_LPARAM())
+		}
+		return MouseButtonPressedEvent(LOWORD(lParam), HIWORD(lParam));
 	}
 }

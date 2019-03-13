@@ -4,8 +4,8 @@
 
 namespace IwEngine {
 	Application::Application()
-		: m_running(false)
-		, m_window (IWindow::Create())
+		: m_window (IWindow::Create())
+		, m_running(false)
 	{}
 
 	Application::~Application() {
@@ -28,6 +28,12 @@ namespace IwEngine {
 				<< status;
 			return status;
 		}
+
+		LOG_DEBUG << "Done!";
+
+		LOG_DEBUG << "Bindin input manager to window...";
+
+		m_window->SetInputManager(m_inputManager);
 
 		LOG_DEBUG << "Done!";
 

@@ -8,18 +8,13 @@ namespace IwEngine {
 	};
 
 	struct Event {
-		bool Handled;
 		EventType Type;
-
-		Event()
-			: Handled(false)
-			, Type(NOT_HANDLED)
-		{}
+		bool Handled;
 
 		Event(
 			EventType type)
-			: Handled(false)
-			, Type(type)
+			: Type(type)
+			, Handled(false)
 		{}
 	};
 

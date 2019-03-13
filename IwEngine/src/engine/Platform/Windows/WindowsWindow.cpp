@@ -153,6 +153,10 @@ namespace IwEngine {
 		}
 	}
 
+	void WindowsWindow::Render() {
+		SwapBuffers(m_device);
+	}
+
 	void WindowsWindow::SetState(
 		DisplayState state)
 	{
@@ -179,8 +183,10 @@ namespace IwEngine {
 		options.cursor = show;
 	}
 
-	void WindowsWindow::Render() {
-		SwapBuffers(m_device);
+	void WindowsWindow::SetInputManager(
+		iwinput::input_manager& inputManager)
+	{
+		inputManager.set_window_info(m_window);
 	}
 
 	LRESULT CALLBACK WindowsWindow::_WndProc(
@@ -208,21 +214,37 @@ namespace IwEngine {
 		switch (msg) {
 			case WM_SIZE:
 				e = &Translate<WindowResizedEvent>(msg, wParam, lParam);
-				callback(*e);
 				break;
-			
-			//case WM_DESTROY:   e.Type = WindowDestroyed; break;
+			case WM_CLOSE:
+				e = &Event(WindowClosed);
+				break;
+			case WM_DESTROY:
+				e = &Event(WindowDestroyed);
+				break;
+			case WM_LBUTTONDOWN:
+			case WM_RBUTTONDOWN:
+			case WM_MBUTTONDOWN:
+			case WM_XBUTTONDOWN:
+				e = &Translate<MouseButtonPressedEvent>(msg, wParam, lParam);
+				break;
+			default:
+				e = &Event(NOT_HANDLED);
+				break;
 			//case WM_MOUSEMOVE: e.Type = MouseMoved;   break;
 			//default:           e.Type = (EventType)msg;
 		}
 
-		//m_callback(e);
-
-		//if (!e->Handled) {
+		if (e->Type == NOT_HANDLED) {
 			return DefWindowProc(hwnd, msg, wParam, lParam);
-		//}
+		}
 
-		//return 0;
+		callback(*e);
+
+		if (!e->Handled) {
+			return DefWindowProc(hwnd, msg, wParam, lParam);
+		}
+
+		return 0;
 	}
 }
 
