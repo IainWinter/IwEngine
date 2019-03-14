@@ -78,6 +78,6 @@ namespace iwlog {
 
 #define LOG_INFO    iwlog::log_view(iwlog::INFO)
 #define LOG_DEBUG   iwlog::log_view(iwlog::DEBUG)
-#define LOW_WARNING iwlog::log_view(iwlog::WARNING)
+#define LOG_WARNING iwlog::log_view(iwlog::WARN)
 #define LOG_ERROR   iwlog::log_view(iwlog::ERR)
 #define LOG_TRACE   iwlog::log_view(iwlog::TRACE)
