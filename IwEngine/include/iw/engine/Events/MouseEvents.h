@@ -1,11 +1,26 @@
 #pragma once
 
 #include "Event.h"
-#include "iw/input/input_ids.h"
+
+namespace iwi {
+	using mouse_input = int;
+}
 
 namespace IwEngine {
-	struct MouseMovedEvent {
-		
+	struct MouseMovedEvent
+		: Event
+	{
+		int X;
+		int Y;
+
+		MouseMovedEvent(
+			EventType type,
+			int x,
+			int y)
+			: Event(type)
+			, X(x)
+			, Y(y)
+		{}
 	};
 
 	struct MouseButtonEvent
@@ -17,7 +32,7 @@ namespace IwEngine {
 
 		MouseButtonEvent(
 			EventType type,
-			iwinput::mouse_input button,
+			iwi::mouse_input button,
 			int x,
 			int y)
 			: Event(type)
@@ -38,10 +53,10 @@ namespace IwEngine {
 		{}
 	};
 
-	struct MouseButtonPressedEvent
+	struct MouseButtonReleasedEvent
 		: MouseButtonEvent
 	{
-		MouseButtonPressedEvent(
+		MouseButtonReleasedEvent(
 			int x,
 			int y,
 			iwi::mouse_input button)

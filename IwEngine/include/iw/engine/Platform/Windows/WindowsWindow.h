@@ -8,10 +8,10 @@ namespace IwEngine {
 		: public Window
 	{
 	private:
-		HINSTANCE     m_instance;
-		HWND          m_window;
-		HDC           m_device;
-		HGLRC         m_context;
+		HINSTANCE m_instance;
+		HWND      m_window;
+		HDC       m_device;
+		HGLRC     m_context;
 
 	public:
 		int Initilize(
@@ -26,9 +26,6 @@ namespace IwEngine {
 
 		void SetCursor(
 			bool show) override;
-
-		virtual void SetInputManager(
-			iwinput::input_manager& inputManager) = 0;
 
 		static LRESULT CALLBACK _WndProc(
 			HWND hwnd,

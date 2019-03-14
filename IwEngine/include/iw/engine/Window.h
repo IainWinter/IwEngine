@@ -2,7 +2,7 @@
 
 #include "Events/Event.h"
 #include "iw/events/functional/callback.h"
-#include "iw/input/input_manager.h"
+#include "iw/input/InputManager.h"
 
 namespace IwEngine {
 	enum DisplayState {
@@ -41,11 +41,12 @@ namespace IwEngine {
 			bool show) = 0;
 
 		virtual void SetInputManager(
-			iwinput::input_manager& inputManager) = 0;
+			IwInput::InputManager& inputManager) = 0;
 
 		virtual void SetCallback(
 			EventCallback callback) = 0;
 
+		virtual unsigned int Id()     = 0;
 		virtual unsigned int Width()  = 0;
 		virtual unsigned int Height() = 0;
 		virtual DisplayState State()  = 0;
@@ -60,6 +61,7 @@ namespace IwEngine {
 	protected:
 		EventCallback callback;
 		WindowOptions options;
+		IwInput::InputManager* inputManager;
 
 	public:
 		virtual ~Window() {}
@@ -77,8 +79,11 @@ namespace IwEngine {
 		virtual void SetCursor(
 			bool show) = 0;
 
-		virtual void SetInputManager(
-			iwinput::input_manager& inputManager) = 0;
+		inline void SetInputManager(
+			IwInput::InputManager& inputManager)
+		{
+			this->inputManager = &inputManager;
+		}
 
 		inline void SetCallback(
 			EventCallback callback)
@@ -92,6 +97,11 @@ namespace IwEngine {
 
 		inline bool Cursor() {
 			return options.cursor;
+		}
+
+		inline unsigned int Id() {
+			static unsigned int m_next_id = 0;
+			return m_next_id++;
 		}
 
 		inline unsigned int Width() {
