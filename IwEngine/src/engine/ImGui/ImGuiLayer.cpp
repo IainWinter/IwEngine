@@ -48,8 +48,8 @@ namespace IwEngine {
 		WindowResizedEvent& e)
 	{
 		auto& io = ImGui::GetIO();
-		io.DisplaySize.x = e.Width;
-		io.DisplaySize.y = e.Height;
+		io.DisplaySize.x = (float)e.Width;
+		io.DisplaySize.y = (float)e.Height;
 		
 		return false;
 	}
@@ -58,8 +58,8 @@ namespace IwEngine {
 		MouseMovedEvent& event)
 	{
 		auto& io = ImGui::GetIO();
-		io.MousePos.x = event.X;
-		io.MousePos.y = event.Y;
+		io.MousePos.x = (float)event.X;
+		io.MousePos.y = (float)event.Y;
 
 		return false;
 	}

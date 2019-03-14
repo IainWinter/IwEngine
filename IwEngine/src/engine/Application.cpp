@@ -31,7 +31,7 @@ namespace IwEngine {
 
 		LOG_DEBUG << "Done!";
 
-		LOG_DEBUG << "Bindin input manager to window...";
+		LOG_DEBUG << "Binding input manager to window...";
 
 		m_window->SetInputManager(m_inputManager);
 
