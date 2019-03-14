@@ -183,12 +183,6 @@ namespace IwEngine {
 		options.cursor = show;
 	}
 
-	void WindowsWindow::SetInputManager(
-		iwinput::input_manager& inputManager)
-	{
-		inputManager.set_window_info(m_window);
-	}
-
 	LRESULT CALLBACK WindowsWindow::_WndProc(
 		HWND hwnd,
 		UINT msg,
@@ -210,6 +204,13 @@ namespace IwEngine {
 		WPARAM wParam,
 		LPARAM lParam)
 	{
+		//Input events
+		switch (msg) {
+		case WM_INPUT:
+			inputManager->HandleEvent(Id(), msg, wParam, lParam);
+			return 0;
+		}
+
 		Event* e;
 		switch (msg) {
 			case WM_SIZE:
@@ -221,17 +222,9 @@ namespace IwEngine {
 			case WM_DESTROY:
 				e = &Event(WindowDestroyed);
 				break;
-			case WM_LBUTTONDOWN:
-			case WM_RBUTTONDOWN:
-			case WM_MBUTTONDOWN:
-			case WM_XBUTTONDOWN:
-				e = &Translate<MouseButtonPressedEvent>(msg, wParam, lParam);
-				break;
 			default:
 				e = &Event(NOT_HANDLED);
 				break;
-			//case WM_MOUSEMOVE: e.Type = MouseMoved;   break;
-			//default:           e.Type = (EventType)msg;
 		}
 
 		if (e->Type == NOT_HANDLED) {

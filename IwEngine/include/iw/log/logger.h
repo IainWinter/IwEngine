@@ -18,12 +18,12 @@ namespace iwlog {
 	public:
 		template<
 			typename _sink_t,
-			typename... _args_t>
+			typename... _Args_T>
 		void make_sink(
 			loglevel level,
-			_args_t&& ... args)
+			_Args_T&& ... args)
 		{
-			_sink_t* sink = new _sink_t(level, std::forward<_args_t>(args)...);
+			_sink_t* sink = new _sink_t(level, std::forward<_Args_T>(args)...);
 			m_sinks.push_back(sink);
 
 			sink->log(preamble);
@@ -78,6 +78,6 @@ namespace iwlog {
 
 #define LOG_INFO    iwlog::log_view(iwlog::INFO)
 #define LOG_DEBUG   iwlog::log_view(iwlog::DEBUG)
-#define LOW_WARNING iwlog::log_view(iwlog::WARNING)
+#define LOG_WARNING iwlog::log_view(iwlog::WARN)
 #define LOG_ERROR   iwlog::log_view(iwlog::ERR)
 #define LOG_TRACE   iwlog::log_view(iwlog::TRACE)

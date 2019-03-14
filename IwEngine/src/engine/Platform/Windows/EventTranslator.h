@@ -33,9 +33,6 @@ namespace IwEngine {
 		int wParam,
 		long lParam)
 	{
-		if (event == WM_LBUTTONDOWN) {
-			return MouseButtonPressedEvent(GET_X_LPARAM())
-		}
-		return MouseButtonPressedEvent(LOWORD(lParam), HIWORD(lParam));
+		return MouseButtonPressedEvent(LOWORD(lParam), HIWORD(lParam), event);
 	}
 }

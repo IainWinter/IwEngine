@@ -44,12 +44,16 @@ project "IwEngine"
 		"opengl32.lib"
 	}
 
+	disablewarnings { 
+		"26495" 
+	}
+
 	defines {
 		"IMGUI_IMPL_OPENGL_LOADER_GLEW"
 	}
 
 	filter "system:windows"
-		cppdialect "C++11"
+		cppdialect "C++17"
 		systemversion "latest"
 		defines {
 			"IW_PLATFORM_WINDOWS",
@@ -87,7 +91,7 @@ project "Sandbox"
 	}
 
 	filter "system:windows"
-		cppdialect "C++11"
+		cppdialect "C++17"
 		systemversion "latest"
 		defines "IW_PLATFORM_WINDOWS"
 
