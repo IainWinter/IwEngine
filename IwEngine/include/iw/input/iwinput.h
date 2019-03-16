@@ -11,11 +11,20 @@
 #ifdef IW_PLATFORM_WINDOWS
 namespace IwInput {
 	enum DeviceType {
-		KEYBOARD,
-		MOUSE
+		MOUSE,
+		KEYBOARD
 	};
 
 	enum InputName : unsigned int {
+		MOUSE_L_BUTTON,
+		MOUSE_R_BUTTON,
+		MOUSE_M_BUTTON,
+		MOUSE_X1_BUTTON,
+		MOUSE_X2_BUTTON,
+		MOUSE_X_AXIS,
+		MOUSE_Y_AXIS,
+		MOUSE_WHEEL,
+
 		BACKSPACE,
 		TAB,
 		CLEAR,
@@ -135,16 +144,6 @@ namespace IwInput {
 
 		LEFT_WIN,
 		RIGHT_WIN,
-
-
-		MOUSE_L_BUTTON,
-		MOUSE_R_BUTTON,
-		MOUSE_M_BUTTON,
-		MOUSE_X1_BUTTON,
-		MOUSE_X2_BUTTON,
-		MOUSE_X_AXIS,
-		MOUSE_Y_AXIS,
-		MOUSE_WHEEL,
 
 		INPUT_COUNT
 	};

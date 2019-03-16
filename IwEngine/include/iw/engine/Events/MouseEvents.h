@@ -1,10 +1,7 @@
 #pragma once
 
 #include "Event.h"
-
-namespace iwi {
-	using mouse_input = int;
-}
+#include "iw/input/IwInput.h"
 
 namespace IwEngine {
 	struct MouseWheelEvent
@@ -22,26 +19,26 @@ namespace IwEngine {
 	struct MouseMovedEvent
 		: Event
 	{
-		float X;
-		float Y;
+		float DeltaX;
+		float DeltaY;
 
 		MouseMovedEvent(
 			float x,
 			float y)
 			: Event(MouseMoved)
-			, X(x)
-			, Y(y)
+			, DeltaX(x)
+			, DeltaY(y)
 		{}
 	};
 
 	struct MouseButtonEvent
 		: Event
 	{
-		iwi::mouse_input Button;
+		IwInput::InputName Button;
 		bool State;
 
 		MouseButtonEvent(
-			iwi::mouse_input button,
+			IwInput::InputName button,
 			bool state)
 			: Event(MouseButton)
 			, Button(button)

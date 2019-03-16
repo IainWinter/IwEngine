@@ -58,8 +58,8 @@ namespace IwEngine {
 		MouseMovedEvent& event)
 	{
 		auto& io = ImGui::GetIO();
-		io.MousePos.x = (float)event.X;
-		io.MousePos.y = (float)event.Y;
+		io.MousePos.x = (float)event.DeltaX;
+		io.MousePos.y = (float)event.DeltaY;
 
 		return false;
 	}
