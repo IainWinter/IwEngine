@@ -135,6 +135,8 @@ namespace IwEngine {
 
 		SetCursor(options.cursor);
 
+		this->options = options;
+
 		return 0;
 	}
 
@@ -162,7 +164,7 @@ namespace IwEngine {
 	{
 		inputManager = &manager;
 
-		manager.CreateContext(Id());
+		manager.CreateContext(Id(), Width(), Height());
 
 		manager.SetMouseWheelCallback(Id(), 
 			iwevents::make_callback(&WindowsWindow::HandleMouseWheel, this));
@@ -229,6 +231,9 @@ namespace IwEngine {
 		case WM_INPUT:
 			inputManager->HandleEvent(Id(), msg, wParam, lParam);
 			return 0;
+		case WM_SIZE:
+			LOG_INFO << msg;
+			break;
 		}
 
 		Event* e;
@@ -270,13 +275,16 @@ namespace IwEngine {
 	}
 
 	void WindowsWindow::HandleMouseMoved(
-		float deltaX, 
+		float X, 
+		float Y,
+		float deltaX,
 		float deltaY)
 	{
-		MouseMovedEvent e(deltaX, deltaY);
+		MouseMovedEvent e(X, Y, deltaX, deltaY);
 		callback(e);
 
-		LOG_INFO << "Mouse moved " << deltaX << ", " << deltaY;
+		//LOG_INFO << "Mouse moved " << deltaX << ", " << deltaY 
+		//	<< " to " << X << ", " << Y;
 	}
 	
 	void WindowsWindow::HandleMouseButton(
@@ -286,14 +294,16 @@ namespace IwEngine {
 		MouseButtonEvent e(button, down);
 		callback(e);
 
-		LOG_INFO << "Mouse button " << button << (down ? " pressed" : " released");
+		LOG_INFO << "Mouse button " << button <<
+			(down ? " pressed" : " released");
 	}
 
 	void WindowsWindow::HandleKey(
 		IwInput::InputName button,
 		bool down)
 	{
-		LOG_INFO << "Key " << button << (down ? " pressed" : " released");
+		LOG_INFO << "Key " << button <<
+			(down ? " pressed" : " released");
 	}
 }
 
