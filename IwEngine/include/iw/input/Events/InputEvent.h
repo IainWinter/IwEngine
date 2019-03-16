@@ -29,7 +29,7 @@ namespace IwInput {
 
 	using InputCallback       = iwevents::callback<InputEvent&>;
 	using MouseWheelCallback  = iwevents::callback<float>;
-	using MouseMovedCallback  = iwevents::callback<float, float>;
+	using MouseMovedCallback  = iwevents::callback<float, float, float, float>;
 	using MouseButtonCallback = iwevents::callback<InputName, bool>;
 	using KeyCallback         = iwevents::callback<InputName, bool>;
 }

@@ -2,20 +2,30 @@
 
 namespace IwInput {
 	void ContextManager::CreateContext(
-		unsigned int windowId)
+		unsigned int windowId,
+		float width,
+		float height)
 	{
-		m_contexts.emplace(windowId);
+		m_contexts.emplace(windowId, width, height);
 	}
 
 	void ContextManager::HandleInput(
 		InputEvent& input)
 	{
 		Context& context = m_contexts[input.WindowId];
+		if (input.Name == MOUSE_X_AXIS) {
+			context.States[MOUSE_X_POS] += input.State;
+		}
+
+		else if (input.Name == MOUSE_Y_AXIS) {
+			context.States[MOUSE_Y_POS] += input.State;
+		}
+
 		context.States[input.Name] = input.State;
 		if (input.Device == KEYBOARD) {
 			context.KeyCallback(input.Name, input.State);
 		}
-		
+
 		else if (input.Device == MOUSE) {
 			if (input.Name == MOUSE_WHEEL) {
 				context.MouseWheelCallback(input.State);
@@ -23,6 +33,7 @@ namespace IwInput {
 
 			else if (input.Name == MOUSE_Y_AXIS) {
 				context.MouseMovedCallback(
+					context.States[MOUSE_X_POS],  context.States[MOUSE_Y_POS],
 					context.States[MOUSE_X_AXIS], context.States[MOUSE_Y_AXIS]);
 			}
 
@@ -30,7 +41,6 @@ namespace IwInput {
 				context.MouseButtonCallback(input.Name, input.State);
 			}
 		}
-
 	}
 
 	void ContextManager::SetMouseWheelCallback(

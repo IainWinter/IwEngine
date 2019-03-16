@@ -34,14 +34,14 @@ namespace IwEngine {
 		virtual void Update()    = 0;
 		virtual void Render()    = 0;
 
+		virtual void SetInputManager(
+			IwInput::InputManager& inputManager) = 0;
+
 		virtual void SetState(
 			DisplayState state) = 0;
 
 		virtual void SetCursor(
 			bool show) = 0;
-
-		virtual void SetInputManager(
-			IwInput::InputManager& inputManager) = 0;
 
 		virtual void SetCallback(
 			EventCallback callback) = 0;

@@ -14,7 +14,15 @@ namespace IwInput {
 	void InputManager::CreateContext(
 		unsigned int windowId)
 	{
-		m_contextManager.CreateContext(windowId);
+		CreateContext(windowId, NO_WIDTH, NO_HEIGHT);
+	}
+
+	void InputManager::CreateContext(
+		unsigned int windowId,
+		float width,
+		float height)
+	{
+		m_contextManager.CreateContext(windowId, width, height);
 	}
 
 	template<>

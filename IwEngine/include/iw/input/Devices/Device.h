@@ -31,7 +31,7 @@ namespace IwInput {
 		}
 	protected:
 		void Callback(
-			InputEvent event)
+			InputEvent& event)
 		{
 			m_callback(event);
 		}

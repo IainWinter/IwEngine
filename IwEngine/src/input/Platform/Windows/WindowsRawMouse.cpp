@@ -31,9 +31,6 @@ namespace IwInput {
 
 	Translation Mouse::CreateTranslation() {
 		Translation translation;
-		translation.emplace(VK_LBUTTON, MOUSE_L_BUTTON);
-		translation.emplace(VK_RBUTTON, MOUSE_R_BUTTON);
-
 		return translation;
 	}
 
@@ -82,17 +79,22 @@ namespace IwInput {
 
 			if (mouse.usButtonFlags == RI_MOUSE_WHEEL) {
 				event.Name  = MOUSE_WHEEL;
-				event.State = mouse.usButtonData;
+				event.State = (short)LOWORD(mouse.usButtonData) / (float)WHEEL_DELTA;
+				Callback(event);
 			}
 
 			if (mouse.usFlags == MOUSE_MOVE_RELATIVE) {
 				event.Name  = MOUSE_X_AXIS;
 				event.State = (float)mouse.lLastX;
-				Callback(event);
+				if (event.State != 0) {
+					Callback(event);
+				}
 
 				event.Name  = MOUSE_Y_AXIS;
 				event.State = (float)mouse.lLastY;
-				Callback(event);
+				if (event.State != 0) {
+					Callback(event);
+				}
 			}
 		}
 	}

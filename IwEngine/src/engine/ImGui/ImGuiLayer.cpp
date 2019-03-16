@@ -2,6 +2,7 @@
 #include "iw/log/logger.h"
 #include "imgui/imgui.h"
 #include "OpenGL/imgui_impl_opengl3.h"
+#include "gl/glew.h" //Get this outta here
 
 namespace IwEngine {
 	ImGuiLayer::ImGuiLayer()
@@ -25,14 +26,16 @@ namespace IwEngine {
 	}
 
 	void ImGuiLayer::Update() {
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //Get this outta here
+
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui::NewFrame();
 
-		ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+		ImGui::Begin("Hello, world!");
 
-		ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
+		ImGui::Text("This is some useful text.");
 
-		if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+		if (ImGui::Button("Button"))
 			counter++;
 		ImGui::SameLine();
 		ImGui::Text("counter = %d", counter);
@@ -50,7 +53,7 @@ namespace IwEngine {
 		auto& io = ImGui::GetIO();
 		io.DisplaySize.x = (float)e.Width;
 		io.DisplaySize.y = (float)e.Height;
-		
+
 		return false;
 	}
 
@@ -58,8 +61,8 @@ namespace IwEngine {
 		MouseMovedEvent& event)
 	{
 		auto& io = ImGui::GetIO();
-		io.MousePos.x = (float)event.DeltaX;
-		io.MousePos.y = (float)event.DeltaY;
+		io.MousePos.x = (float)event.X;
+		io.MousePos.y = (float)event.Y;
 
 		return false;
 	}

@@ -96,7 +96,8 @@ project "Sandbox"
 		defines "IW_PLATFORM_WINDOWS"
 
 		prebuildcommands {
-			"xcopy /q /y /f \"" .. iwengdir .. bindir .. "/IwEngine.dll\" \"" .. sndbxdir .. bindir .. "\""
+			"xcopy /q /y /f \"" .. iwengdir .. bindir .. "/IwEngine.dll\" \"" .. sndbxdir .. bindir .. "\"",
+			"xcopy /q /y /f \"" .. glewdir  .. bindir .. "/GLEW.dll\" \""     .. sndbxdir .. bindir .. "\""
 		}
 
 	filter "configurations:Debug"

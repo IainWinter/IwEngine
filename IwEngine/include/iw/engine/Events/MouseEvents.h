@@ -19,15 +19,21 @@ namespace IwEngine {
 	struct MouseMovedEvent
 		: Event
 	{
+		float X;
+		float Y;
 		float DeltaX;
 		float DeltaY;
 
 		MouseMovedEvent(
 			float x,
-			float y)
+			float y,
+			float deltaX,
+			float deltaY)
 			: Event(MouseMoved)
-			, DeltaX(x)
-			, DeltaY(y)
+			, X(x)
+			, Y(y)
+			, DeltaX(deltaX)
+			, DeltaY(deltaY)
 		{}
 	};
 

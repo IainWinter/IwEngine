@@ -8,7 +8,9 @@
 #	endif
 #endif
 
-#ifdef IW_PLATFORM_WINDOWS
+#define NO_WIDTH  -1.0f
+#define NO_HEIGHT -1.0f
+
 namespace IwInput {
 	enum DeviceType {
 		MOUSE,
@@ -21,9 +23,11 @@ namespace IwInput {
 		MOUSE_M_BUTTON,
 		MOUSE_X1_BUTTON,
 		MOUSE_X2_BUTTON,
+		MOUSE_WHEEL,
 		MOUSE_X_AXIS,
 		MOUSE_Y_AXIS,
-		MOUSE_WHEEL,
+		MOUSE_X_POS,
+		MOUSE_Y_POS,
 
 		BACKSPACE,
 		TAB,
@@ -148,4 +152,3 @@ namespace IwInput {
 		INPUT_COUNT
 	};
 }
-#endif

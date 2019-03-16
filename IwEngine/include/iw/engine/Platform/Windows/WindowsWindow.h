@@ -46,6 +46,8 @@ namespace IwEngine {
 			float delta);
 
 		void HandleMouseMoved(
+			float X,
+			float Y,
 			float deltaX,
 			float deltaY);
 

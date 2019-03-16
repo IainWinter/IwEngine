@@ -25,6 +25,11 @@ namespace IwInput {
 		void CreateContext(
 			unsigned int windowId);
 
+		void CreateContext(
+			unsigned int windowId,
+			float width,
+			float height);
+
 		template<
 			typename _device_T>
 		void CreateDevice()
