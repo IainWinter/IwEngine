@@ -1,4 +1,4 @@
-#include "iw/input/Platform/Window/WindowsRawMouse.h"
+#include "iw/input/Platform/Windows/WindowsRawMouse.h"
 #include "iw/log/logger.h"
 #include <Windows.h>
 
