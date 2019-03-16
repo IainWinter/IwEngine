@@ -22,19 +22,19 @@ namespace IwEngine {
 	}
 
 	bool Layer::On(
+		MouseWheelEvent& event)
+	{
+		return false;
+	}
+
+	bool Layer::On(
 		MouseMovedEvent& event)
 	{
 		return false;
 	}
 
 	bool Layer::On(
-		MouseButtonPressedEvent& event)
-	{
-		return false;
-	}
-
-	bool Layer::On(
-		MouseButtonReleasedEvent& event)
+		MouseButtonEvent& event)
 	{
 		return false;
 	}

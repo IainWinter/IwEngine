@@ -1,18 +1,15 @@
 #pragma once
 
 #include "DeviceManager.h"
+#include "ContextManager.h"
 #include "Events/InputEvent.h"
 #include "iw/events/functional/callback.h"
 
 namespace IwInput {
 	class IWINPUT_API InputManager {
-	public:
-		using InputCallback = iwevents::callback<InputEvent&>; //temp
 	private:
-		DeviceManager m_deviceManager;
-		struct {
-			InputCallback m_callback;
-		};
+		DeviceManager  m_deviceManager;
+		ContextManager m_contextManager;
 
 	public:
 		InputManager() = default;
@@ -25,15 +22,36 @@ namespace IwInput {
 			int lParam);
 #endif
 
-		void HandleInput(
-			InputEvent input);
+		void CreateContext(
+			unsigned int windowId);
 
-		inline void SetCallback(
-			InputCallback callback)
+		template<
+			typename _device_T>
+		void CreateDevice()
 		{
-			m_callback = callback;
+			LOG_WARNING << "Attempted to create invalid device!";
 		}
 
-	private:
+		template<>
+		void CreateDevice<Mouse>();
+
+		template<>
+		void CreateDevice<Keyboard>();
+
+		void SetMouseWheelCallback(
+			unsigned int windowId,
+			MouseWheelCallback callback);
+
+		void SetMouseMovedCallback(
+			unsigned int windowId,
+			MouseMovedCallback callback);
+
+		void SetMouseButtonCallback(
+			unsigned int windowId,
+			MouseButtonCallback callback);
+
+		void SetKeyCallback(
+			unsigned int windowId,
+			KeyCallback callback);
 	};
 }

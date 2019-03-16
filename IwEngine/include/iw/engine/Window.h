@@ -73,17 +73,15 @@ namespace IwEngine {
 		virtual void Update()    = 0;
 		virtual void Render()    = 0;
 
+		virtual void SetInputManager(
+			IwInput::InputManager& manager) = 0;
+
 		virtual void SetState(
 			DisplayState state) = 0;
 
 		virtual void SetCursor(
 			bool show) = 0;
 
-		inline void SetInputManager(
-			IwInput::InputManager& inputManager)
-		{
-			this->inputManager = &inputManager;
-		}
 
 		inline void SetCallback(
 			EventCallback callback)
@@ -100,8 +98,9 @@ namespace IwEngine {
 		}
 
 		inline unsigned int Id() {
-			static unsigned int m_next_id = 0;
-			return m_next_id++;
+			static unsigned int nextId = 0;
+			static unsigned int id = nextId++;
+			return id;
 		}
 
 		inline unsigned int Width() {

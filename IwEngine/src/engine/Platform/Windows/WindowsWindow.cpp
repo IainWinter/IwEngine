@@ -157,6 +157,26 @@ namespace IwEngine {
 		SwapBuffers(m_device);
 	}
 
+	void WindowsWindow::SetInputManager(
+		IwInput::InputManager& manager)
+	{
+		inputManager = &manager;
+
+		manager.CreateContext(Id());
+
+		manager.SetMouseWheelCallback(Id(), 
+			iwevents::make_callback(&WindowsWindow::HandleMouseWheel, this));
+
+		manager.SetMouseMovedCallback(Id(), 
+			iwevents::make_callback(&WindowsWindow::HandleMouseMoved, this));
+
+		manager.SetMouseButtonCallback(Id(), 
+			iwevents::make_callback(&WindowsWindow::HandleMouseButton, this));
+
+		manager.SetKeyCallback(Id(),         
+			iwevents::make_callback(&WindowsWindow::HandleKey, this));
+	}
+
 	void WindowsWindow::SetState(
 		DisplayState state)
 	{
@@ -238,6 +258,42 @@ namespace IwEngine {
 		}
 
 		return 0;
+	}
+
+	void WindowsWindow::HandleMouseWheel(
+		float delta)
+	{
+		MouseWheelEvent e(delta);
+		callback(e);
+
+		LOG_INFO << "Mouse wheel moved " << delta;
+	}
+
+	void WindowsWindow::HandleMouseMoved(
+		float deltaX, 
+		float deltaY)
+	{
+		MouseMovedEvent e(deltaX, deltaY);
+		callback(e);
+
+		LOG_INFO << "Mouse moved " << deltaX << ", " << deltaY;
+	}
+	
+	void WindowsWindow::HandleMouseButton(
+		IwInput::InputName button,
+		bool down)
+	{
+		MouseButtonEvent e(button, down);
+		callback(e);
+
+		LOG_INFO << "Mouse button " << button << (down ? " pressed" : " released");
+	}
+
+	void WindowsWindow::HandleKey(
+		IwInput::InputName button,
+		bool down)
+	{
+		LOG_INFO << "Key " << button << (down ? " pressed" : " released");
 	}
 }
 

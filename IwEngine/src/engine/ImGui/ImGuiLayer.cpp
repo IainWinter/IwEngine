@@ -65,19 +65,10 @@ namespace IwEngine {
 	}
 
 	bool ImGuiLayer::On(
-		MouseButtonPressedEvent& event)
+		MouseButtonEvent& event)
 	{
 		auto& io = ImGui::GetIO();
-		io.MouseDown[event.Button] = true;
-
-		return false;
-	}
-
-	bool ImGuiLayer::On(
-		MouseButtonReleasedEvent& event)
-	{
-		auto& io = ImGui::GetIO();
-		io.MouseDown[event.Button] = false;
+		io.MouseDown[event.Button] = event.State;
 
 		return false;
 	}

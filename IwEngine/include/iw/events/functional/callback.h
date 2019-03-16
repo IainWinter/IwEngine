@@ -26,7 +26,9 @@ namespace iwevents {
 		{}
 
 		void operator()(_args_t... arg) {
-			m_callback(arg...);
+			if (m_callback) {
+				m_callback(arg...);
+			}
 		}
 	};
 

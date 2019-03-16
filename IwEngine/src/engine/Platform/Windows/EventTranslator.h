@@ -27,12 +27,4 @@ namespace IwEngine {
 		return WindowResizedEvent(LOWORD(lParam), HIWORD(lParam));
 	}
 
-	template<>
-	MouseButtonPressedEvent Translate(
-		int event,
-		int wParam,
-		long lParam)
-	{
-		return MouseButtonPressedEvent(LOWORD(lParam), HIWORD(lParam), event);
-	}
 }

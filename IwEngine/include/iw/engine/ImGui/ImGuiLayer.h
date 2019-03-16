@@ -14,10 +14,9 @@ namespace IwEngine {
 		void Destroy();
 		void Update();
 
-		bool On(WindowResizedEvent&       event);
-		bool On(MouseMovedEvent&          event);
-		bool On(MouseButtonPressedEvent&  event);
-		bool On(MouseButtonReleasedEvent& event);
+		bool On(WindowResizedEvent& event);
+		bool On(MouseMovedEvent&    event);
+		bool On(MouseButtonEvent&   event);
 	private:
 		//bool OnMouseButtonDown();
 		//bool OnMouseButtonUp();

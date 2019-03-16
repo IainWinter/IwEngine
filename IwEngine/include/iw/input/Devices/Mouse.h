@@ -4,11 +4,16 @@
 #include "iw/input/Events/InputEvent.h"
 
 namespace IwInput {
-	class IMouse
-		: public IDevice
+	class MouseBase
+		: public Device
 	{
 	public:
-		virtual ~IMouse() {}
+		MouseBase(
+			InputCallback& callback)
+			: Device(callback)
+		{}
+
+		virtual ~MouseBase() {}
 
 		virtual void HandleEvent(
 			OsEvent& event) = 0;
@@ -22,19 +27,26 @@ namespace IwInput {
 	};
 
 	class Mouse
-		: public Device
+		: public MouseBase
 	{
 	private:
 		float m_width;
 		float m_height;
+	protected:
+		static Translation CreateTranslation();
 
 	public:
+		Mouse(
+			InputCallback& callback)
+			: MouseBase(callback)
+		{}
+
 		virtual ~Mouse() {}
 
 		virtual void HandleEvent(
 			OsEvent& event) = 0;
 
-		virtual void SetDimensions(
+		inline void SetDimensions(
 			float width,
 			float height)
 		{
@@ -49,5 +61,11 @@ namespace IwInput {
 		inline float Height() {
 			return m_height;
 		}
+
+		static InputName Translate(
+			unsigned int oskey);
+
+		static Mouse* Create(
+			InputCallback& callback);
 	};
 }

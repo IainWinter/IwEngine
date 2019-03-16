@@ -29,13 +29,11 @@ namespace IwEngine {
 			return status;
 		}
 
-		LOG_DEBUG << "Done!";
-
 		LOG_DEBUG << "Binding input manager to window...";
 
 		m_window->SetInputManager(m_inputManager);
-
-		LOG_DEBUG << "Done!";
+		m_inputManager.CreateDevice<IwInput::Mouse>();
+		m_inputManager.CreateDevice<IwInput::Keyboard>();
 
 		for (Layer* layer : m_layerStack) {
 			LOG_DEBUG << "Initilizing " << layer->Name() << " layer...";
@@ -45,8 +43,6 @@ namespace IwEngine {
 					<< status;
 				return status;
 			}
-
-			LOG_DEBUG << "Done!";
 		}
 
 		m_window->SetState(windowOptions.state);
@@ -82,6 +78,33 @@ namespace IwEngine {
 		if (e.Type == WindowResized) {
 			for (Layer* layer : m_layerStack) {
 				layer->On((WindowResizedEvent&)e);
+				if (e.Handled) {
+					break;
+				}
+			}
+		}
+
+		else if (e.Type == MouseWheel) {
+			for (Layer* layer : m_layerStack) {
+				layer->On((MouseWheelEvent&)e);
+				if (e.Handled) {
+					break;
+				}
+			}
+		}
+
+		else if (e.Type == MouseMoved) {
+			for (Layer* layer : m_layerStack) {
+				layer->On((MouseMovedEvent&)e);
+				if (e.Handled) {
+					break;
+				}
+			}
+		}
+
+		else if (e.Type == MouseButton) {
+			for (Layer* layer : m_layerStack) {
+				layer->On((MouseButtonEvent&)e);
 				if (e.Handled) {
 					break;
 				}

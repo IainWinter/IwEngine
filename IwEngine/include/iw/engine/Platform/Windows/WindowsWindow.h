@@ -21,6 +21,9 @@ namespace IwEngine {
 		void Update()  override;
 		void Render()  override;
 
+		void SetInputManager(
+			IwInput::InputManager& manager);
+
 		void SetState(
 			DisplayState state) override;
 
@@ -38,5 +41,20 @@ namespace IwEngine {
 			UINT msg,
 			WPARAM wparam,
 			LPARAM lparam);
+
+		void HandleMouseWheel(
+			float delta);
+
+		void HandleMouseMoved(
+			float deltaX,
+			float deltaY);
+
+		void HandleMouseButton(
+			IwInput::InputName button,
+			bool down);
+
+		void HandleKey(
+			IwInput::InputName button,
+			bool down);
 	};
 }

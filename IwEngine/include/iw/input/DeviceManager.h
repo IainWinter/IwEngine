@@ -2,6 +2,8 @@
 
 #include "IwInput.h"
 #include "Devices/Device.h"
+#include "Devices/Mouse.h"
+#include "Devices/Keyboard.h"
 #include "Events/InputEvent.h"
 #include "iw/log/logger.h"
 #include <vector>
@@ -10,22 +12,27 @@ namespace IwInput {
 	class IWINPUT_API DeviceManager {
 	private:
 		struct{
-			std::vector<IDevice*> m_devices;
+			std::vector<Device*> m_devices;
 		};
 
 	public:
+		void HandleEvent(
+			OsEvent event);
+
 		template<
 			typename _Device_T>
-		void CreateDevice() {
-			LOG_WARNING << "Attempted to create invalid device.";
+		void CreateDevice(
+			InputCallback callback)
+		{
+			LOG_WARNING << "Attempted to create invalid device!";
 		}
 
-		void HandleEvent(
-			OsEvent event)
-		{
-			for (IDevice* device : m_devices) {
-				device->HandleEvent(event);
-			}
-		}
+		template<>
+		void CreateDevice<Mouse>(
+			InputCallback callback);
+
+		template<>
+		void CreateDevice<Keyboard>(
+			InputCallback callback);
 	};
 }

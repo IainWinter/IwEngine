@@ -18,10 +18,10 @@ namespace IwEngine {
 		virtual void Destroy();
 		virtual void Update();
 
-		virtual bool On(WindowResizedEvent&       event);
-		virtual bool On(MouseMovedEvent&          event);
-		virtual bool On(MouseButtonPressedEvent&  event);
-		virtual bool On(MouseButtonReleasedEvent& event);
+		virtual bool On(WindowResizedEvent& event);
+		virtual bool On(MouseWheelEvent&    event);
+		virtual bool On(MouseMovedEvent&    event);
+		virtual bool On(MouseButtonEvent&   event);
 
 		inline const char* Name() {
 			return m_name;

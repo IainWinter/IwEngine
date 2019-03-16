@@ -673,6 +673,18 @@ namespace iwutil {
 			return m_items[base_t::at(index)];
 		}
 
+		_item_t& operator[](
+			_index_t index)
+		{
+			return at(index);
+		}
+
+		const _item_t& operator[](
+			_index_t index) const
+		{
+			return at(index);
+		}
+
 		/**
 		* @breif Finds an item in the set at an index.
 		*

@@ -7,17 +7,28 @@ namespace iwi {
 }
 
 namespace IwEngine {
+	struct MouseWheelEvent
+		: Event
+	{
+		float Delta;
+
+		MouseWheelEvent(
+			float delta)
+			: Event(MouseWheel)
+			, Delta(delta)
+		{}
+	};
+
 	struct MouseMovedEvent
 		: Event
 	{
-		int X;
-		int Y;
+		float X;
+		float Y;
 
 		MouseMovedEvent(
-			EventType type,
-			int x,
-			int y)
-			: Event(type)
+			float x,
+			float y)
+			: Event(MouseMoved)
 			, X(x)
 			, Y(y)
 		{}
@@ -27,40 +38,14 @@ namespace IwEngine {
 		: Event
 	{
 		iwi::mouse_input Button;
-		int X;
-		int Y;
+		bool State;
 
 		MouseButtonEvent(
-			EventType type,
 			iwi::mouse_input button,
-			int x,
-			int y)
-			: Event(type)
+			bool state)
+			: Event(MouseButton)
 			, Button(button)
-			, X(x)
-			, Y(y)
-		{}
-	};
-
-	struct MouseButtonPressedEvent
-		: MouseButtonEvent
-	{
-		MouseButtonPressedEvent(
-			int x,
-			int y,
-			iwi::mouse_input button)
-			: MouseButtonEvent(MouseButtonPressed, button, x, y)
-		{}
-	};
-
-	struct MouseButtonReleasedEvent
-		: MouseButtonEvent
-	{
-		MouseButtonReleasedEvent(
-			int x,
-			int y,
-			iwi::mouse_input button)
-			: MouseButtonEvent(MouseButtonReleased, button, x, y)
+			, State(state)
 		{}
 	};
 }
