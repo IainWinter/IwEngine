@@ -1,7 +1,9 @@
 #pragma once
 
+#include "IwGraphics.h"
+
 namespace IwGraphics {
-	class IndexBuffer {
+	class IWGRAPHICS_API IndexBuffer {
 	private:
 		unsigned int m_renderId;
 		const void* m_data;

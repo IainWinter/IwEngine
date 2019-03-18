@@ -1,10 +1,10 @@
 #pragma once
 
+#include "IwGraphics.h"
 #include <vector>
-#include "GL\glew.h"
 
 namespace IwGraphics {
-	struct VertexBufferLayoutElement {
+	struct IWGRAPHICS_API VertexBufferLayoutElement {
 		unsigned int Type;
 		unsigned int Count;
 		unsigned char Normalized;
@@ -13,7 +13,7 @@ namespace IwGraphics {
 			unsigned int glType);
 	};
 
-	class VertexBufferLayout {
+	class IWGRAPHICS_API VertexBufferLayout {
 	private:
 		std::vector<VertexBufferLayoutElement> m_elements;
 		unsigned int m_stride;
@@ -31,30 +31,15 @@ namespace IwGraphics {
 
 		template<>
 		void Push<float>(
-			unsigned int count)
-		{
-			m_elements.push_back({ GL_FLOAT, count, GL_FALSE });
-			m_stride += count * VertexBufferLayoutElement
-				::GetSizeOfType(GL_FLOAT);
-		}
+			unsigned int count);
 
 		template<>
 		void Push<unsigned int>(
-			unsigned int count)
-		{
-			m_elements.push_back({ GL_UNSIGNED_INT, count, GL_FALSE });
-			m_stride += count * VertexBufferLayoutElement
-				::GetSizeOfType(GL_UNSIGNED_INT);
-		}
+			unsigned int count);
 
 		template<>
 		void Push<unsigned char>(
-			unsigned int count)
-		{
-			m_elements.push_back({ GL_UNSIGNED_BYTE, count, GL_TRUE });
-			m_stride += count * VertexBufferLayoutElement
-				::GetSizeOfType(GL_UNSIGNED_BYTE);
-		}
+			unsigned int count);
 
 		inline const
 		std::vector<VertexBufferLayoutElement>& GetElements() const {

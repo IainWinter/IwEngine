@@ -1,7 +1,9 @@
 #pragma once
 
+#include "IwGraphics.h"
+
 namespace IwGraphics {
-	class VertexBuffer {
+	class IWGRAPHICS_API VertexBuffer {
 	private:
 		unsigned int m_renderId;
 		const void* m_data;

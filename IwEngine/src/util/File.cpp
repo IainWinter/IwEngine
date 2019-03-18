@@ -1,7 +1,8 @@
 #include "iw/util/io/File.h"
+#include "iw/log/logger.h"
 #include <cstdio>
 #include <cerrno>
-#include <iostream>
+#include <string>
 
 #define MAX_LINE_LENGTH 1000
 
@@ -22,7 +23,7 @@ namespace IwUtil {
 		error.append("): ");
 		error.append(info);
 
-		std::cout << error << std::endl;
+		LOG_WARNING << error;
 	}
 
 	std::string ReadFile(
@@ -92,7 +93,7 @@ namespace IwUtil {
 	uintmax_t GetFileSize(
 		const char* filePath)
 	{
-		uintmax_t bytes;
+		uintmax_t bytes = 0u;
 		FILE* file;
 		errno_t errorCode = fopen_s(&file, filePath, "rb");
 		if (file) {

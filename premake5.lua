@@ -6,6 +6,7 @@ imguidir = iwengdir .. "/extern/imgui"
 cfgname = "%{cfg.buildcfg}.%{cfg.system}.%{cfg.architecture}"
 bindir  = "/bin/" .. cfgname
 libdir  = "/lib/" .. cfgname
+resdir  = "/res"
 blddir  = "/build"
 
 workspace "IwEngine"
@@ -96,8 +97,9 @@ project "Sandbox"
 		defines "IW_PLATFORM_WINDOWS"
 
 		prebuildcommands {
-			"xcopy /q /y /f \"" .. iwengdir .. bindir .. "/IwEngine.dll\" \"" .. sndbxdir .. bindir .. "\"",
-			"xcopy /q /y /f \"" .. glewdir  .. bindir .. "/GLEW.dll\" \""     .. sndbxdir .. bindir .. "\""
+			"xcopy /q /y /f \"" .. iwengdir  .. bindir .. "/IwEngine.dll\" \"" .. sndbxdir .. bindir .. "\"",
+			"xcopy /q /y /f \"" .. glewdir   .. bindir .. "/GLEW.dll\" \""     .. sndbxdir .. bindir .. "\"",
+			"xcopy /q /y /f \"" .. sndbxdir  .. resdir .. "\" \""                .. sndbxdir .. blddir .. "\""
 		}
 
 	filter "configurations:Debug"

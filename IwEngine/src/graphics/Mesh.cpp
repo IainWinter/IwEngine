@@ -11,9 +11,29 @@ namespace IwGraphics {
 		, m_indexBuffer(ib) 
 	{}
 
+	Mesh::Mesh(
+		const Mesh& copy)
+	{
+
+	}
+
+	Mesh::Mesh(Mesh&& copy)
+	{
+	}
+
 	Mesh::~Mesh() {
 		delete m_vertexArray;
 		delete m_indexBuffer;
+	}
+
+	Mesh& Mesh::operator=(const Mesh& copy)
+	{
+		// TODO: insert return statement here
+	}
+
+	Mesh& Mesh::operator=(Mesh&& copy)
+	{
+		// TODO: insert return statement here
 	}
 
 	void Mesh::Draw(

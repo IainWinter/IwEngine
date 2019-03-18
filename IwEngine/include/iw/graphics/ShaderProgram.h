@@ -1,10 +1,11 @@
 #pragma once
 
+#include "IwGraphics.h"
 #include <string>
 
 namespace IwGraphics {
 	struct ShaderProgramSource;
-	class ShaderProgram {
+	class IWGRAPHICS_API ShaderProgram {
 	private:
 		unsigned int m_renderId;
 
