@@ -159,6 +159,10 @@ namespace IwEngine {
 		SwapBuffers(m_device);
 	}
 
+	void WindowsWindow::Clear() {
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
+
 	void WindowsWindow::SetInputManager(
 		IwInput::InputManager& manager)
 	{
@@ -276,8 +280,8 @@ namespace IwEngine {
 		MouseMovedEvent e(X, Y, deltaX, deltaY);
 		callback(e);
 
-		LOG_INFO << "Mouse moved " << deltaX << ", " << deltaY 
-			<< " to " << X << ", " << Y;
+		//LOG_INFO << "Mouse moved " << deltaX << ", " << deltaY 
+		//	<< " to " << X << ", " << Y;
 	}
 	
 	void WindowsWindow::HandleMouseButton(

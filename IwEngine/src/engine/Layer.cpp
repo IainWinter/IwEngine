@@ -38,4 +38,10 @@ namespace IwEngine {
 	{
 		return false;
 	}
+
+	bool Layer::On(
+		KeyEvent& event)
+	{
+		return false;
+	}
 }

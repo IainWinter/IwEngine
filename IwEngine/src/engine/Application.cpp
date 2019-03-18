@@ -58,6 +58,8 @@ namespace IwEngine {
 	}
 
 	void Application::Update() {
+		m_window->Clear();
+
 		for (Layer* layer : m_layerStack) {
 			layer->Update();
 		}
@@ -76,42 +78,26 @@ namespace IwEngine {
 
 	void Application::HandleEvent(Event& e) {
 		if (e.Type == WindowResized) {
-			for (Layer* layer : m_layerStack) {
-				layer->On((WindowResizedEvent&)e);
-				if (e.Handled) {
-					break;
-				}
-			}
+			DispatchEvent((WindowResizedEvent&)e);
 		}
 
 		else if (e.Type == MouseWheel) {
-			for (Layer* layer : m_layerStack) {
-				layer->On((MouseWheelEvent&)e);
-				if (e.Handled) {
-					break;
-				}
-			}
+			DispatchEvent((MouseWheelEvent&)e);
 		}
 
 		else if (e.Type == MouseMoved) {
-			for (Layer* layer : m_layerStack) {
-				layer->On((MouseMovedEvent&)e);
-				if (e.Handled) {
-					break;
-				}
-			}
+			DispatchEvent((MouseMovedEvent&)e);
 		}
 
 		else if (e.Type == MouseButton) {
-			for (Layer* layer : m_layerStack) {
-				layer->On((MouseButtonEvent&)e);
-				if (e.Handled) {
-					break;
-				}
-			}
+			DispatchEvent((MouseButtonEvent&)e);
 		}
 
-		if (e.Type == WindowClosed) {
+		else if (e.Type == Key) {
+			DispatchEvent((KeyEvent&)e);
+		}
+
+		else if (e.Type == WindowClosed) {
 			Destroy();
 		}
 	}

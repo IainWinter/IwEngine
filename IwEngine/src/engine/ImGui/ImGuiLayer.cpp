@@ -17,6 +17,9 @@ namespace IwEngine {
 		ImGui::StyleColorsDark();
 		ImGui_ImplOpenGL3_Init("#version 410");
 
+		auto& io = ImGui::GetIO();
+		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
 		return 0;
 	}
 
@@ -26,8 +29,6 @@ namespace IwEngine {
 	}
 
 	void ImGuiLayer::Update() {
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //Get this outta here
-
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui::NewFrame();
 
