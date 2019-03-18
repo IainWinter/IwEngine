@@ -8,35 +8,25 @@ namespace IwInput {
 		RI_MOUSE_RIGHT_BUTTON_DOWN,
 		RI_MOUSE_MIDDLE_BUTTON_DOWN,
 		RI_MOUSE_BUTTON_4_DOWN,
-		RI_MOUSE_BUTTON_5_DOWN };
+		RI_MOUSE_BUTTON_5_DOWN
+	};
 
 	unsigned int WindowsRawMouse::maskup[5] = {
 		RI_MOUSE_LEFT_BUTTON_UP,
 		RI_MOUSE_RIGHT_BUTTON_UP,
 		RI_MOUSE_MIDDLE_BUTTON_UP,
 		RI_MOUSE_BUTTON_4_UP,
-		RI_MOUSE_BUTTON_5_UP };
+		RI_MOUSE_BUTTON_5_UP 
+	};
 
-	Mouse* Mouse::Create(
+	RawMouse* RawMouse::Create(
 		InputCallback& callback) {
 		return new WindowsRawMouse(callback);
 	}
 
-	InputName Mouse::Translate(
-		unsigned int oskey)
-	{
-		static Translation translation = Mouse::CreateTranslation();
-		return translation.at(oskey);
-	}
-
-	Translation Mouse::CreateTranslation() {
-		Translation translation;
-		return translation;
-	}
-
 	WindowsRawMouse::WindowsRawMouse(
 		InputCallback& callback) 
-		: Mouse(callback)
+		: RawMouse(callback)
 	{
 		RAWINPUTDEVICE rid[1];
 		rid[0].usUsagePage = 1;	  // Generic input device
@@ -61,39 +51,39 @@ namespace IwInput {
 		if (raw->header.dwType == RIM_TYPEMOUSE) {
 			RAWMOUSE mouse = raw->data.mouse;
 
-			InputEvent event(MOUSE, event.WindowId);
-			event.Name = MOUSE_L_BUTTON;
+			InputEvent input(MOUSE, event.WindowId);
+			input.Name = MOUSE_L_BUTTON;
 			for (int i = 0; i < 5; i++) {
 				if (maskdown[i] & mouse.usButtonFlags) {
-					event.State = 1;
-					Callback(event);
+					input.State = 1;
+					Callback(input);
 				}
 
 				else if (maskup[i] & mouse.usButtonFlags) {
-					event.State = 0;
-					Callback(event);
+					input.State = 0;
+					Callback(input);
 				}
 
-				event.Name = (InputName)(event.Name + 1);
+				input.Name = (InputName)(input.Name + 1);
 			}
 
 			if (mouse.usButtonFlags == RI_MOUSE_WHEEL) {
-				event.Name  = MOUSE_WHEEL;
-				event.State = (short)LOWORD(mouse.usButtonData) / (float)WHEEL_DELTA;
-				Callback(event);
+				input.Name  = MOUSE_WHEEL;
+				input.State = (short)LOWORD(mouse.usButtonData) / (float)WHEEL_DELTA;
+				Callback(input);
 			}
 
 			if (mouse.usFlags == MOUSE_MOVE_RELATIVE) {
-				event.Name  = MOUSE_X_AXIS;
-				event.State = (float)mouse.lLastX;
-				if (event.State != 0) {
-					Callback(event);
+				input.Name  = MOUSE_X_AXIS;
+				input.State = (float)mouse.lLastX;
+				if (input.State != 0) {
+					Callback(input);
 				}
 
-				event.Name  = MOUSE_Y_AXIS;
-				event.State = (float)mouse.lLastY;
-				if (event.State != 0) {
-					Callback(event);
+				input.Name  = MOUSE_Y_AXIS;
+				input.State = (float)mouse.lLastY;
+				if (input.State != 0) {
+					Callback(input);
 				}
 			}
 		}

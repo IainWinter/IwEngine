@@ -7,8 +7,8 @@ namespace IwInput {
 		: public Mouse
 	{
 	private:
-		static unsigned int maskdown[5];
-		static unsigned int maskup[5];
+		static unsigned int buttonMask[5];
+
 	public:
 		WindowsMouse(
 			InputCallback& callback);

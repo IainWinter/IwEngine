@@ -34,5 +34,11 @@ namespace IwInput {
 		template<>
 		void CreateDevice<Keyboard>(
 			InputCallback callback);
+
+#ifdef IW_PLATFORM_WINDOWS
+		template<>
+		void CreateDevice<RawMouse>(
+			InputCallback callback);
+#endif
 	};
 }

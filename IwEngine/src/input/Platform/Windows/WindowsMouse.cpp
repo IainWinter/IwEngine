@@ -2,51 +2,88 @@
 #include <Windows.h>
 
 namespace IwInput {
+	unsigned int WindowsMouse::buttonMask[5] = {
+		MK_LBUTTON,
+		MK_MBUTTON,
+		MK_RBUTTON,
+		MK_XBUTTON1,
+		MK_XBUTTON2
+	};
+
+	Mouse* Mouse::Create(
+		InputCallback& callback)
+	{
+		return new WindowsMouse(callback);
+	}
+
+	WindowsMouse::WindowsMouse(
+		InputCallback& callback) 
+		: Mouse(callback)
+	{}
+
 	void WindowsMouse::HandleEvent(
 		OsEvent& event)
 	{
-		POINT p;
-		int button = 0;
-		bool down = false;
-
+		InputEvent input(MOUSE, event.WindowId);
+		short buttons = 0;
 		switch (event.Message) {
-		case WM_MOUSEMOVE:
-			p = {
-				event.LParam & 0xffff,
-				(event.LParam >> 16) & 0xffff
-			};
-			break;
 		case WM_LBUTTONDOWN:
 		case WM_RBUTTONDOWN:
-			button = event.Message;
-			down = true;
+		case WM_MBUTTONDOWN:
+			buttons = event.WParam;
+			input.State = true;
+			break;
+		case WM_XBUTTONDOWN:
+			buttons = LOWORD(event.WParam);
+			input.State = true;
 			break;
 		case WM_LBUTTONUP:
-		case WM_RBUTTONUP:
-			button = event.Message;
-			down = false;
+			buttons = MK_LBUTTON | event.WParam;
+			input.State = false;
 			break;
-		default:
-			return;
+		case WM_RBUTTONUP:
+			buttons = MK_RBUTTON | event.WParam;
+			input.State = false;
+			break;
+		case WM_MBUTTONUP:
+			buttons = MK_MBUTTON | event.WParam;
+			input.State = false;
+			break;
+		case WM_XBUTTONUP:
+			buttons = LOWORD(event.WParam)
+				| event.WParam;
+			input.State = false;
+			break;
 		}
 
-		if (button) {
-			InputName mouse_button = translation[button];
-			Callback(mouse_button, down);
+		if (buttons) {
+			input.Name = MOUSE_L_BUTTON;
+			for (int i = 0; i < 5; i++) {
+				if (buttonMask[i] & buttons) {
+					Callback(input);
+				}
+
+				input.Name = (InputName)(input.Name + 1);
+			}
 		}
-		else {
-			float pos_x = p.x / m_width;
-			float pos_y = p.y / m_height;
-			float speed_x = pos_x - m_last_pos_x;
-			float speed_y = pos_y - m_last_pos_y;
 
-			m_last_pos_x = pos_x;
-			m_last_pos_y = pos_y;
+		if (event.Message == WM_MOUSEWHEEL) {
+			input.Name = MOUSE_WHEEL;
+			input.State = (short)HIWORD(event.WParam) / (float)WHEEL_DELTA;
+			Callback(input);
+		}
 
-			handle_state_change(id(), X_POSITION, pos_x);
-			handle_state_change(id(), Y_POSITION, pos_y);
-			handle_state_change(id(), X_SPEED, speed_x);
-			handle_state_change(id(), Y_SPEED, speed_y);
+		if (   buttons 
+			|| event.Message == WM_MOUSEMOVE
+			|| event.Message == WM_MOUSEWHEEL)
+		{
+			input.Name = MOUSE_X_POS;
+			input.State = LOWORD(event.LParam);
+			Callback(input);
+
+			input.Name = MOUSE_Y_POS;
+			input.State = HIWORD(event.LParam);
+			Callback(input);
 		}
 	}
 }

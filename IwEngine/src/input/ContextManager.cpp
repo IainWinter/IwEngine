@@ -21,6 +21,16 @@ namespace IwInput {
 			context.States[MOUSE_Y_POS] += input.State;
 		}
 
+		else if (input.Name == MOUSE_X_POS) {
+			context.States[MOUSE_X_AXIS] = 
+				input.State - context.States[MOUSE_X_POS];
+		}
+
+		else if (input.Name == MOUSE_Y_POS) {
+			context.States[MOUSE_Y_AXIS] =
+				input.State - context.States[MOUSE_Y_POS];
+		}
+
 		context.States[input.Name] = input.State;
 		if (input.Device == KEYBOARD) {
 			context.KeyCallback(input.Name, input.State);
@@ -31,13 +41,17 @@ namespace IwInput {
 				context.MouseWheelCallback(input.State);
 			}
 
-			else if (input.Name == MOUSE_Y_AXIS) {
+			else if (input.Name == MOUSE_Y_AXIS 
+				 || input.Name == MOUSE_Y_POS)
+			{
 				context.MouseMovedCallback(
 					context.States[MOUSE_X_POS],  context.States[MOUSE_Y_POS],
 					context.States[MOUSE_X_AXIS], context.States[MOUSE_Y_AXIS]);
 			}
 
-			else if (input.Name != MOUSE_X_AXIS) {
+			else if (input.Name != MOUSE_X_AXIS
+				 && input.Name != MOUSE_X_POS)
+			{
 				context.MouseButtonCallback(input.Name, input.State);
 			}
 		}

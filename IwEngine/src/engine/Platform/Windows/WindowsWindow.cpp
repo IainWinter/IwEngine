@@ -227,15 +227,8 @@ namespace IwEngine {
 		LPARAM lParam)
 	{
 		//Input events
-		switch (msg) {
-		case WM_INPUT:
-			inputManager->HandleEvent(Id(), msg, wParam, lParam);
-			return 0;
-		case WM_SIZE:
-			LOG_INFO << msg;
-			break;
-		}
-
+		inputManager->HandleEvent(Id(), msg, wParam, lParam);
+		
 		Event* e;
 		switch (msg) {
 			case WM_SIZE:
@@ -283,8 +276,8 @@ namespace IwEngine {
 		MouseMovedEvent e(X, Y, deltaX, deltaY);
 		callback(e);
 
-		//LOG_INFO << "Mouse moved " << deltaX << ", " << deltaY 
-		//	<< " to " << X << ", " << Y;
+		LOG_INFO << "Mouse moved " << deltaX << ", " << deltaY 
+			<< " to " << X << ", " << Y;
 	}
 	
 	void WindowsWindow::HandleMouseButton(

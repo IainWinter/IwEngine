@@ -27,6 +27,15 @@ namespace IwInput {
 	}
 
 #ifdef IW_PLATFORM_WINDOWS
+	template<>
+	void DeviceManager::CreateDevice<RawMouse>(
+		InputCallback callback)
+	{
+		m_devices.emplace_back(RawMouse::Create(callback));
+	}
+#endif
+
+#ifdef IW_PLATFORM_WINDOWS
 #include <Windows.h>
 	void SpecialProcess(OsEvent& event) {
 		if (event.Message != WM_INPUT) {
