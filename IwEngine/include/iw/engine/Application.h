@@ -42,6 +42,19 @@ namespace IwEngine {
 		inline IWindow& GetWindow() {
 			return *m_window;
 		}
+	private:
+		template<
+			typename _event_t>
+		void DispatchEvent(
+			_event_t& event)
+		{
+			for (Layer* layer : m_layerStack) {
+				layer->On(event);
+				if (event.Handled) {
+					break;
+				}
+			}
+		}
 	};
 }
 

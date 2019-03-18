@@ -30,9 +30,10 @@ namespace IwEngine {
 		virtual int Initilize(
 			const WindowOptions& options) = 0;
 
-		virtual void Destroy()   = 0;
-		virtual void Update()    = 0;
-		virtual void Render()    = 0;
+		virtual void Destroy() = 0;
+		virtual void Update()  = 0;
+		virtual void Render()  = 0;
+		virtual void Clear()   = 0;
 
 		virtual void SetInputManager(
 			IwInput::InputManager& inputManager) = 0;

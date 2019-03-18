@@ -2,15 +2,20 @@
 
 #include "iw/engine/Layer.h"
 
+#include "iw/graphics/Mesh.h"
+#include "iw/graphics/ShaderProgram.h"
+
 namespace IwEngine {
-	class IWENGINE_API ImGuiLayer
+	class IWENGINE_API EntityLayer
 		: public Layer
 	{
 	private:
-		int counter = 0;
+		IwGraphics::Mesh mesh;
+		IwGraphics::ShaderProgram shader;
+
 	public:
-		ImGuiLayer();
-		~ImGuiLayer();
+		EntityLayer();
+		~EntityLayer();
 
 		int Initilize();
 		void Destroy();

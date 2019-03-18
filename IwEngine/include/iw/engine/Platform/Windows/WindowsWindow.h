@@ -20,6 +20,7 @@ namespace IwEngine {
 		void Destroy() override;
 		void Update()  override;
 		void Render()  override;
+		void Clear()   override;
 
 		void SetInputManager(
 			IwInput::InputManager& manager);

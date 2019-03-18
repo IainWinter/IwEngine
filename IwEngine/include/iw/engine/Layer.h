@@ -22,7 +22,8 @@ namespace IwEngine {
 		virtual bool On(MouseWheelEvent&    event);
 		virtual bool On(MouseMovedEvent&    event);
 		virtual bool On(MouseButtonEvent&   event);
-
+		virtual bool On(KeyEvent&           event);
+	
 		inline const char* Name() {
 			return m_name;
 		}
