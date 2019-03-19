@@ -1,5 +1,6 @@
 #include "iw/graphics/ShaderProgram.h"
 #include "iw/util/io/File.h"
+#include "iw/log/logger.h"
 #include "gl/glew.h"
 #include <sstream>
 #include <vector>
@@ -77,6 +78,8 @@ namespace IwGraphics {
 
 			char* message = (char*)_malloca(length * sizeof(char));
 			glGetShaderInfoLog(id, length, &length, message);
+
+			LOG_ERROR << "Error compiling shader " << message;
 
 			glDeleteShader(id);
 

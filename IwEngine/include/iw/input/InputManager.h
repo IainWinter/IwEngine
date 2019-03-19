@@ -18,8 +18,8 @@ namespace IwInput {
 		void HandleEvent(
 			int wid,
 			int msg,
-			short wParam,
-			int lParam);
+			unsigned int wParam,
+			unsigned long lParam);
 #endif
 
 		void CreateContext(

@@ -5,8 +5,8 @@ namespace IwInput {
 	void InputManager::HandleEvent(
 		int wid,
 		int msg,
-		short wParam,
-		int lParam)
+		unsigned int wParam,
+		unsigned long lParam)
 	{
 		m_deviceManager.HandleEvent({ wid, msg, wParam, lParam });
 	}

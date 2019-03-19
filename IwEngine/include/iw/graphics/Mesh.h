@@ -21,18 +21,18 @@ namespace IwGraphics {
 			IwGraphics::IndexBuffer* ib);
 
 		Mesh(
-			const Mesh& copy);
+			const Mesh& copy) noexcept;
 
 		Mesh(
-			Mesh&& copy);
+			Mesh&& copy) noexcept;
 
 		~Mesh();
 
 		Mesh& operator=(
-			const Mesh& copy);
+			const Mesh& copy) noexcept;
 
 		Mesh& operator=(
-			Mesh&& copy);
+			Mesh&& copy) noexcept;
 
 		void Draw(
 			const iwmath::vector3& position,

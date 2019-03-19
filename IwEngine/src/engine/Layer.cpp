@@ -14,6 +14,7 @@ namespace IwEngine {
 
 	void Layer::Destroy() {}
 	void Layer::Update() {}
+	void Layer::ImGui() {}
 
 	bool Layer::On(
 		WindowResizedEvent& event)

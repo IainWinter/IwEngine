@@ -5,6 +5,8 @@
 #include "gl/wglew.h"
 #include <cstdio>
 #include <Tchar.h>
+#include "../../../../include/iw/graphics/Mesh.h"
+#include "../../../../include/iw/graphics/ShaderProgram.h"
 
 ATOM RegClass(
 	HINSTANCE instance,
@@ -110,7 +112,7 @@ namespace IwEngine {
 		DescribePixelFormat(m_device, pfid, sizeof(pfd), &pfd);
 		SetPixelFormat(m_device, pfid, &pfd);
 
-		CONST INT major = 4, minor = 5;
+		CONST INT major = 4, minor = 4;
 		INT contextAttribs[] = {
 			WGL_CONTEXT_MAJOR_VERSION_ARB, major,
 			WGL_CONTEXT_MINOR_VERSION_ARB, minor,
@@ -136,6 +138,10 @@ namespace IwEngine {
 		SetCursor(options.cursor);
 
 		this->options = options;
+
+		glClearColor(78 / 255.0f, 48 / 255.0f, 130 / 255.0f, 1.0f);
+		glDisable(GL_CULL_FACE);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 		return 0;
 	}

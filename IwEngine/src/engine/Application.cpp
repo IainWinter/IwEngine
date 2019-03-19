@@ -35,6 +35,9 @@ namespace IwEngine {
 		m_inputManager.CreateDevice<IwInput::Mouse>();
 		m_inputManager.CreateDevice<IwInput::Keyboard>();
 
+		m_imguiLayer = new ImGuiLayer();
+		m_layerStack.PushOverlay(m_imguiLayer);
+
 		for (Layer* layer : m_layerStack) {
 			LOG_DEBUG << "Initilizing " << layer->Name() << " layer...";
 			if (status = layer->Initilize()) {
@@ -60,12 +63,18 @@ namespace IwEngine {
 	void Application::Update() {
 		m_window->Clear();
 
-		for (Layer* layer : m_layerStack) {
+		for (Layer* layer : m_layerStack) {	
 			layer->Update();
 		}
 
-		m_window->Update();
+		m_imguiLayer->Begin();
+		for (Layer* layer : m_layerStack) {
+			layer->ImGui();
+		}
+		m_imguiLayer->End();
+
 		m_window->Render();
+		m_window->Update();
 	}
 
 	void Application::Destroy() {
@@ -83,6 +92,7 @@ namespace IwEngine {
 
 		else if (e.Type == MouseWheel) {
 			DispatchEvent((MouseWheelEvent&)e);
+			e.Handled = true;
 		}
 
 		else if (e.Type == MouseMoved) {

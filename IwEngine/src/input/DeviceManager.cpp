@@ -6,9 +6,11 @@ namespace IwInput {
 	void DeviceManager::HandleEvent(
 		OsEvent event)
 	{
-		SpecialProcess(event);
-		for (Device* device : m_devices) {
-			device->HandleEvent(event);
+		if (this) {
+			SpecialProcess(event);
+			for (Device* device : m_devices) {
+				device->HandleEvent(event);
+			}
 		}
 	}
 

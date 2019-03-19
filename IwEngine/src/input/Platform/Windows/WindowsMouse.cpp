@@ -1,11 +1,13 @@
 #include "iw/input/Platform/Windows/WindowsMouse.h"
 #include <Windows.h>
 
+#include "iw/log/logger.h"
+
 namespace IwInput {
 	unsigned int WindowsMouse::buttonMask[5] = {
 		MK_LBUTTON,
-		MK_MBUTTON,
 		MK_RBUTTON,
+		MK_MBUTTON,
 		MK_XBUTTON1,
 		MK_XBUTTON2
 	};
@@ -50,8 +52,7 @@ namespace IwInput {
 			input.State = false;
 			break;
 		case WM_XBUTTONUP:
-			buttons = LOWORD(event.WParam)
-				| event.WParam;
+			buttons = MK_XBUTTON1 | MK_XBUTTON2 | LOWORD(event.WParam);
 			input.State = false;
 			break;
 		}
@@ -70,6 +71,7 @@ namespace IwInput {
 		if (event.Message == WM_MOUSEWHEEL) {
 			input.Name = MOUSE_WHEEL;
 			input.State = (short)HIWORD(event.WParam) / (float)WHEEL_DELTA;
+
 			Callback(input);
 		}
 

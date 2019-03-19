@@ -5,7 +5,6 @@
 class Game : public IwEngine::Application {
 public:
 	Game() {
-		PushOverlay(new IwEngine::ImGuiLayer());
 		PushLayer(new IwEngine::EntityLayer());
 	}
 };

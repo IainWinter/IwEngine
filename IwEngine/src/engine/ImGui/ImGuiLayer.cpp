@@ -28,10 +28,7 @@ namespace IwEngine {
 		ImGui::DestroyContext();
 	}
 
-	void ImGuiLayer::Update() {
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui::NewFrame();
-
+	void ImGuiLayer::ImGui() {
 		ImGui::Begin("Hello, world!");
 
 		ImGui::Text("This is some useful text.");
@@ -43,7 +40,14 @@ namespace IwEngine {
 
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		ImGui::End();
+	}
 
+	void ImGuiLayer::Begin() {
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui::NewFrame();
+	}
+
+	void ImGuiLayer::End() {
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	}
