@@ -17,6 +17,7 @@ namespace IwEngine {
 		virtual int  Initilize();
 		virtual void Destroy();
 		virtual void Update();
+		virtual void ImGui();
 
 		virtual bool On(WindowResizedEvent& event);
 		virtual bool On(MouseWheelEvent&    event);

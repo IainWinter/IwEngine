@@ -4,12 +4,14 @@
 #include "Window.h"
 #include "LayerStack.h"
 #include "iw/input/InputManager.h"
+#include "ImGui/ImGuiLayer.h"
 
 namespace IwEngine {
 	class IWENGINE_API Application {
 	private:
-		IWindow* m_window;
+		IWindow*  m_window;
 		LayerStack m_layerStack;
+		ImGuiLayer* m_imguiLayer;
 		IwInput::InputManager m_inputManager;
 		bool m_running;
 

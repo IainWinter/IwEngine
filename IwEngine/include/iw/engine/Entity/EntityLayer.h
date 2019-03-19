@@ -10,19 +10,24 @@ namespace IwEngine {
 		: public Layer
 	{
 	private:
+		iwm::vector3 pos;
+		iwm::vector3 vel;
+		float rot;
 		IwGraphics::Mesh mesh;
-		IwGraphics::ShaderProgram shader;
+		IwGraphics::ShaderProgram* shader;
 
 	public:
 		EntityLayer();
 		~EntityLayer();
 
-		int Initilize();
-		void Destroy();
-		void Update();
+		int Initilize() override;
+		void Destroy() override;
+		void Update() override;
+		void ImGui() override;
 
 		bool On(WindowResizedEvent& event);
 		bool On(MouseMovedEvent&    event);
-		bool On(MouseButtonEvent&   event);
+		bool On(MouseButtonEvent&  event);
+		bool On(MouseWheelEvent&   event);
 	};
 }

@@ -12,9 +12,12 @@ namespace IwEngine {
 		ImGuiLayer();
 		~ImGuiLayer();
 
-		int Initilize();
-		void Destroy();
-		void Update();
+		int Initilize() override;
+		void Destroy() override;
+		void ImGui() override;
+
+		void Begin();
+		void End();
 
 		bool On(WindowResizedEvent& event);
 		bool On(MouseMovedEvent&    event);
