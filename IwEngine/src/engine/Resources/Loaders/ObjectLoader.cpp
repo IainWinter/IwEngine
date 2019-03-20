@@ -1,4 +1,4 @@
-#include "iw/engine/Resources/Loaders/ObjLoader.h"
+#include "iw/engine/Resources/Loaders/ObjectLoader.h"
 #include "iw/util/io/File.h"
 #include "iw/log/logger.h"
 
@@ -14,10 +14,10 @@ void ReadFace(
 	int& index);
 
 template<>
-IwEngine::Obj IwUtil::Load<IwEngine::Obj>(
+IwEngine::Object IwUtil::Load<IwEngine::Object>(
 	const char* fileName)
 {
-	IwEngine::Obj obj(fileName);
+	IwEngine::Object obj(fileName);
 
 	std::vector<std::string> lines = IwUtil::ReadFileLines(fileName);
 
@@ -68,16 +68,10 @@ IwEngine::Obj IwUtil::Load<IwEngine::Obj>(
 		}
 
 		else if (token[0] == 'v') {
-			if (token[1] == 't') {
-				obj.Uvs[ti++] = ReadVector2(token);
-			}
-			
-			else if (token[1] == 'n') {
-				obj.Normals[ni++] = ReadVector3(token);
-			}
-
-			else {
-				obj.Vertices[vi++] = ReadVector3(token);
+			switch (token[1]) {
+				case 't': obj.Uvs[ti++]      = ReadVector2(token); break;
+				case 'n': obj.Normals[ni++]  = ReadVector3(token); break;
+				default:  obj.Vertices[vi++] = ReadVector3(token); break;
 			}
 		}
 

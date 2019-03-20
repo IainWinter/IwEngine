@@ -139,9 +139,9 @@ namespace IwEngine {
 
 		this->options = options;
 
-		glClearColor(78 / 255.0f, 48 / 255.0f, 130 / 255.0f, 1.0f);
-		glDisable(GL_CULL_FACE);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glClearColor(70 / 255.0f, 85 / 255.0f, 100 / 255.0f, 1.0f);
+		glEnable(GL_DEPTH_TEST);
+		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 		return 0;
 	}

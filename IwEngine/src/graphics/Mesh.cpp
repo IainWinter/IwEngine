@@ -23,11 +23,6 @@ namespace IwGraphics {
 		, m_indexBuffer(copy.m_indexBuffer)
 	{}
 
-	Mesh::~Mesh() {
-		delete m_vertexArray;
-		delete m_indexBuffer;
-	}
-
 	Mesh& Mesh::operator=(
 		const Mesh& copy) noexcept
 	{
@@ -53,7 +48,7 @@ namespace IwGraphics {
 		iwmath::matrix4 world = iwm::matrix4::identity;
 
 		iwmath::matrix4 view = iwmath::matrix4::create_perspective_field_of_view(
-			1.19f, 1.777f, .01f, 1000.0f);
+			1.2f, 1.777f, .01f, 1000.0f);
 
 		iwmath::matrix4 proj
 			= iwmath::matrix4::create_from_quaternion(rotation)

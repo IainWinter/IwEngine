@@ -1,6 +1,8 @@
 #include "iw/engine/Entity/EntityLayer.h"
-#include "iw/engine/Resources/Loaders/ObjLoader.h" 
+#include "iw/engine/Resources/Loaders/ObjectLoader.h" 
+#include "iw/log/logger.h"
 #include "imgui/imgui.h"
+#include "tinyobjloader/tiny_obj_loader.h"
 
 namespace IwEngine {
 	EntityLayer::EntityLayer()
@@ -11,35 +13,53 @@ namespace IwEngine {
 	}
 
 	int EntityLayer::Initilize() {
-		Obj object = IwUtil::Load<Obj>("res/test.obj");
+		std::string inputfile = "res/Bear.obj";
 
-		IwGraphics::VertexBufferLayout* vbl 
-			= new IwGraphics::VertexBufferLayout();
-		vbl->Push<float>(3);
-		vbl->Push<float>(2);
-		vbl->Push<float>(3);
+		std::string warn;
+		std::string err;
+		bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, inputfile.c_str());
+		
+		if (!warn.empty()) {
+			LOG_WARNING << warn;
+		}
+
+		if (!err.empty()) {
+			LOG_ERROR << err;
+		}
+
+		for (int i = 0; i < attrib.vertices.size(); i += 3) {
+			vertBuffer.push_back(attrib.vertices[i]);
+			vertBuffer.push_back(attrib.vertices[i + 1]);
+			vertBuffer.push_back(attrib.vertices[i + 2]);
+			vertBuffer.push_back(attrib.colors[i]);
+			vertBuffer.push_back(attrib.colors[i + 1]);
+			vertBuffer.push_back(attrib.colors[i + 2]);
+		}
+
+		for (auto& x : shapes[0].mesh.indices) {
+			vertIndex.push_back(x.vertex_index);
+		}
 
 		IwGraphics::VertexArray* va = new IwGraphics::VertexArray();
+
 		IwGraphics::IndexBuffer* ib = new IwGraphics::IndexBuffer(
-			object.Faces, 72);
+			&vertIndex[0], vertIndex.size());
 
-		IwGraphics::VertexBuffer* vbv = new IwGraphics::VertexBuffer(
-			object.Vertices, sizeof(iwm::vector3) * 8);
+		IwGraphics::VertexBufferLayout* vbl
+			= new IwGraphics::VertexBufferLayout();
 
-		IwGraphics::VertexBuffer* vbu = new IwGraphics::VertexBuffer(
-			object.Uvs, sizeof(iwm::vector2) * 5);
+		vbl->Push<float>(3);
+		vbl->Push<float>(3);
 
-		IwGraphics::VertexBuffer* vbn = new IwGraphics::VertexBuffer(
-			object.Normals, sizeof(iwm::vector3) * 6);
+		IwGraphics::VertexBuffer* vb = new IwGraphics::VertexBuffer(
+			&vertBuffer[0], sizeof(float) * vertBuffer.size());
 
-		va->AddBuffer(vbv, vbl);
-		va->AddBuffer(vbu, vbl);
-		va->AddBuffer(vbn, vbl);
+		va->AddBuffer(vb, vbl);
 
 		mesh = IwGraphics::Mesh(va, ib);
 		shader = new IwGraphics::ShaderProgram("res/default.shader");
 		
-		pos = { -.5f, -.5f, -3 };
+		pos = { -.5f, -.5f, -5 };
 		vel = { 0, 0, 0 };
 		rot = 0;
 

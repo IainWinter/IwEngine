@@ -14,7 +14,6 @@ namespace IwGraphics {
 
 	VertexBuffer::~VertexBuffer() {
 		glDeleteBuffers(1, &m_renderId);
-		delete m_data;
 	}
 
 	void VertexBuffer::Bind() const {

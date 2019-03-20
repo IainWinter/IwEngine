@@ -10,13 +10,12 @@ namespace IwGraphics {
 	{
 		glGenBuffers(1, &m_renderId);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_renderId);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, count 
-			* sizeof(unsigned int), data, GL_STATIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, 
+			count * sizeof(unsigned int), data, GL_STATIC_DRAW);
 	}
 
 	IndexBuffer::~IndexBuffer() {
 		glDeleteBuffers(1, &m_renderId);
-		delete m_data;
 	}
 
 	void IndexBuffer::Bind() const {

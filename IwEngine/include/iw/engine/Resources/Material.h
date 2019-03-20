@@ -3,10 +3,10 @@
 #include "Resource.h"
 
 namespace IwEngine {
-	struct Mtl
+	struct Material
 		: Resource
 	{
-		Mtl(const char* path)
+		Material(const char* path)
 			: Resource(path)
 		{}
 	};

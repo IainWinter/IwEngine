@@ -4,6 +4,8 @@ namespace IwEngine {
 	struct Resource {
 		const char* Path;
 
-		Resource(const char* path);
+		Resource(const char* path)
+			: Path(path)
+		{}
 	};
 }

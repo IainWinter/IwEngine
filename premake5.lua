@@ -2,6 +2,7 @@ iwengdir = path.getabsolute("IwEngine")
 sndbxdir = path.getabsolute("Sandbox")
 glewdir  = iwengdir .. "/extern/glew"
 imguidir = iwengdir .. "/extern/imgui"
+tobjldir = iwengdir .. "/extern/tinyobjloader"
 
 cfgname = "%{cfg.buildcfg}.%{cfg.system}.%{cfg.architecture}"
 bindir  = "/bin/" .. cfgname
@@ -17,6 +18,7 @@ workspace "IwEngine"
 
 include (glewdir)
 include (imguidir)
+include (tobjldir)
 
 project "IwEngine"
 	kind "SharedLib"
@@ -36,12 +38,14 @@ project "IwEngine"
 		iwengdir .. "/include",
 		iwengdir .. "/src/engine/Platform",
 		glewdir  .. "/include",
-		imguidir .. "/include"
+		imguidir .. "/include",
+		tobjldir .. "/include"
 	}
 
 	links {
 		"GLEW",
 		"ImGui",
+		"tinyobjloader",
 		"opengl32.lib"
 	}
 
@@ -83,7 +87,8 @@ project "Sandbox"
 	}
 
 	includedirs {
-		iwengdir .. "/include"
+		iwengdir .. "/include",
+		tobjldir .. "/include"
 	}
 
 	links {

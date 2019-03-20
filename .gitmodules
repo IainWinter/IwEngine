@@ -1,3 +1,6 @@
 [submodule "vendor/imgui"]
 	path = vendor/imgui
 	url = https://github.com/IainWinter/imgui
+[submodule "IwEngine/extern/tinyobjloader"]
+	path = IwEngine/extern/tinyobjloader
+	url = https://github.com/IainWinter/tinyobjloader

@@ -1,22 +1,22 @@
 #pragma once
 
 #include "Resource.h"
-#include "Mtl.h"
+#include "Material.h"
 #include "iw/math/vector2.h"
 #include "iw/math/vector3.h"
 #include <vector>
 
 namespace IwEngine {
-	struct Obj
+	struct Object
 		: Resource
 	{
 		iwm::vector3* Vertices;
 		iwm::vector2* Uvs;
 		iwm::vector3* Normals;
 		unsigned int* Faces;
-		Mtl* Materials;
+		Material* Materials;
 
-		Obj(
+		Object(
 			const char* path)
 			: Resource(path)
 		{}
