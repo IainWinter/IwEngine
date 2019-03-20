@@ -2,7 +2,7 @@ iwengdir = path.getabsolute("IwEngine")
 sndbxdir = path.getabsolute("Sandbox")
 glewdir  = iwengdir .. "/extern/glew"
 imguidir = iwengdir .. "/extern/imgui"
-tobjldir = iwengdir .. "/extern/tinyobjloader"
+assimpdir = iwengdir .. "/extern/assimp"
 
 cfgname = "%{cfg.buildcfg}.%{cfg.system}.%{cfg.architecture}"
 bindir  = "/bin/" .. cfgname
@@ -18,7 +18,8 @@ workspace "IwEngine"
 
 include (glewdir)
 include (imguidir)
-include (tobjldir)
+
+os.execute ("cmake " .. assimpdir)
 
 project "IwEngine"
 	kind "SharedLib"
@@ -39,7 +40,7 @@ project "IwEngine"
 		iwengdir .. "/src/engine/Platform",
 		glewdir  .. "/include",
 		imguidir .. "/include",
-		tobjldir .. "/include"
+		assimpdir .. "/include"
 	}
 
 	links {
@@ -87,8 +88,7 @@ project "Sandbox"
 	}
 
 	includedirs {
-		iwengdir .. "/include",
-		tobjldir .. "/include"
+		iwengdir .. "/include"
 	}
 
 	links {
