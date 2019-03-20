@@ -10,10 +10,11 @@ namespace IwEngine {
 	struct Object
 		: Resource
 	{
-		iwm::vector3* Vertices;
-		iwm::vector2* Uvs;
-		iwm::vector3* Normals;
-		unsigned int* Faces;
+		std::vector<iwm::vector3> Vertices;
+		std::vector<iwm::vector3> Normals;
+		std::vector<iwm::vector3> Colors;
+		std::vector<iwm::vector2> TexCoords;
+		std::vector<unsigned int> Faces;
 		Material* Materials;
 
 		Object(

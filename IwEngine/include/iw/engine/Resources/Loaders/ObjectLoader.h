@@ -1,8 +1,17 @@
 #pragma once
 
+#include "Loader.h"
 #include "iw/engine/Resources/Object.h"
-#include "iw/util/io/Loader.h"
 
-template<>
-IwEngine::Object IwUtil::Load<IwEngine::Object>(
-	const char* fileName);
+namespace IwEngine {
+	class ObjLoader
+		: Loader<Object>
+	{
+	public:
+		Object* Load(
+			const char* path);
+
+		void Release(
+			Object* resource);
+	};
+}

@@ -2,6 +2,7 @@
 #include "iw/engine/Resources/Loaders/ObjectLoader.h" 
 #include "iw/log/logger.h"
 #include "imgui/imgui.h"
+
 #include "tinyobjloader/tiny_obj_loader.h"
 
 namespace IwEngine {
@@ -13,46 +14,21 @@ namespace IwEngine {
 	}
 
 	int EntityLayer::Initilize() {
-		std::string inputfile = "res/Bear.obj";
-
-		std::string warn;
-		std::string err;
-		bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, inputfile.c_str());
-		
-		if (!warn.empty()) {
-			LOG_WARNING << warn;
-		}
-
-		if (!err.empty()) {
-			LOG_ERROR << err;
-		}
-
-		for (int i = 0; i < attrib.vertices.size(); i += 3) {
-			vertBuffer.push_back(attrib.vertices[i]);
-			vertBuffer.push_back(attrib.vertices[i + 1]);
-			vertBuffer.push_back(attrib.vertices[i + 2]);
-			vertBuffer.push_back(attrib.colors[i]);
-			vertBuffer.push_back(attrib.colors[i + 1]);
-			vertBuffer.push_back(attrib.colors[i + 2]);
-		}
-
-		for (auto& x : shapes[0].mesh.indices) {
-			vertIndex.push_back(x.vertex_index);
-		}
+		ObjLoader loader;
+		Object* obj = loader.Load("res/Bear.obj");
 
 		IwGraphics::VertexArray* va = new IwGraphics::VertexArray();
 
 		IwGraphics::IndexBuffer* ib = new IwGraphics::IndexBuffer(
-			&vertIndex[0], vertIndex.size());
+			&obj->Faces[0], obj->Faces.size());
 
 		IwGraphics::VertexBufferLayout* vbl
 			= new IwGraphics::VertexBufferLayout();
 
 		vbl->Push<float>(3);
-		vbl->Push<float>(3);
 
 		IwGraphics::VertexBuffer* vb = new IwGraphics::VertexBuffer(
-			&vertBuffer[0], sizeof(float) * vertBuffer.size());
+			&obj->Vertices[0], sizeof(iwm::vector3) * obj->Vertices.size());
 
 		va->AddBuffer(vb, vbl);
 

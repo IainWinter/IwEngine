@@ -4,7 +4,6 @@
 
 #include "iw/graphics/Mesh.h"
 #include "iw/graphics/ShaderProgram.h"
-#include "tinyobjloader/tiny_obj_loader.h"
 
 namespace IwEngine {
 	class IWENGINE_API EntityLayer
@@ -16,11 +15,6 @@ namespace IwEngine {
 		float rot;
 		IwGraphics::Mesh mesh;
 		IwGraphics::ShaderProgram* shader;
-		tinyobj::attrib_t attrib;
-		std::vector<tinyobj::shape_t> shapes;
-		std::vector<tinyobj::material_t> materials;
-		std::vector<unsigned int> vertIndex;
-		std::vector<float> vertBuffer;
 
 	public:
 		EntityLayer();
