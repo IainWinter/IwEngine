@@ -1,7 +1,7 @@
-iwengdir = path.getabsolute("IwEngine")
-sndbxdir = path.getabsolute("Sandbox")
-glewdir  = iwengdir .. "/extern/glew"
-imguidir = iwengdir .. "/extern/imgui"
+iwengdir  = path.getabsolute("IwEngine")
+sndbxdir  = path.getabsolute("Sandbox")
+glewdir   = iwengdir .. "/extern/glew"
+imguidir  = iwengdir .. "/extern/imgui"
 assimpdir = iwengdir .. "/extern/assimp"
 
 cfgname = "%{cfg.buildcfg}.%{cfg.system}.%{cfg.architecture}"
@@ -18,8 +18,7 @@ workspace "IwEngine"
 
 include (glewdir)
 include (imguidir)
-
-os.execute ("cmake " .. assimpdir)
+os.execute ("cmake -S " .. assimpdir .. " -B " .. assimpdir)
 
 project "IwEngine"
 	kind "SharedLib"
@@ -36,17 +35,21 @@ project "IwEngine"
 	}
 
 	includedirs {
-		iwengdir .. "/include",
-		iwengdir .. "/src/engine/Platform",
-		glewdir  .. "/include",
-		imguidir .. "/include",
+		iwengdir  .. "/include",
+		iwengdir  .. "/src/engine/Platform",
+		glewdir   .. "/include",
+		imguidir  .. "/include",
 		assimpdir .. "/include"
+	}
+
+	libdirs {
+		assimpdir .. "/lib/%{cfg.buildcfg}"
 	}
 
 	links {
 		"GLEW",
 		"ImGui",
-		"tinyobjloader",
+		"assimp-vc140-mt",
 		"opengl32.lib"
 	}
 
@@ -102,10 +105,11 @@ project "Sandbox"
 		defines "IW_PLATFORM_WINDOWS"
 
 		prebuildcommands {
-			"xcopy /q /y /f \"" .. iwengdir .. bindir .. "/IwEngine.dll\" \"" .. sndbxdir .. bindir .. "\"",
-			"xcopy /q /y /f \"" .. glewdir  .. bindir .. "/GLEW.dll\" \""     .. sndbxdir .. bindir .. "\"",
-			"xcopy /q /y /f /i \"" .. sndbxdir .. resdir .. "\" \""              .. sndbxdir .. blddir .. resdir .. "\"",
-			"xcopy /q /y /f /i \"" .. sndbxdir .. resdir .. "\" \""              .. sndbxdir .. bindir .. resdir .. "\""
+			"xcopy /q /y /f \"" .. assimpdir  .. "/bin/%{cfg.buildcfg}/assimp-vc140-mt.dll\" \"" .. sndbxdir .. bindir .. "\"",
+			"xcopy /q /y /f \"" .. iwengdir   .. bindir .. "/IwEngine.dll\" \""                  .. sndbxdir .. bindir .. "\"",
+			"xcopy /q /y /f \"" .. glewdir    .. bindir .. "/GLEW.dll\" \""                      .. sndbxdir .. bindir .. "\"",
+			"xcopy /q /y /f /i \"" .. sndbxdir .. resdir .. "\" \"" .. sndbxdir .. blddir .. resdir .. "\"",
+			"xcopy /q /y /f /i \"" .. sndbxdir .. resdir .. "\" \"" .. sndbxdir .. bindir .. resdir .. "\""
 		}
 
 	filter "configurations:Debug"

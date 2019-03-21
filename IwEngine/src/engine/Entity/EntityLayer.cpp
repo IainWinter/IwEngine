@@ -1,9 +1,7 @@
 #include "iw/engine/Entity/EntityLayer.h"
-#include "iw/engine/Resources/Loaders/ObjectLoader.h" 
+#include "iw/engine/Resources/Loaders/ModelLoader.h" 
 #include "iw/log/logger.h"
 #include "imgui/imgui.h"
-
-#include "tinyobjloader/tiny_obj_loader.h"
 
 namespace IwEngine {
 	EntityLayer::EntityLayer()
@@ -14,28 +12,27 @@ namespace IwEngine {
 	}
 
 	int EntityLayer::Initilize() {
-		ObjLoader loader;
-		Object* obj = loader.Load("res/Bear.obj");
+		ModelLoader loader;
+		Model* obj = loader.Load("res/bear.obj");
 
 		IwGraphics::VertexArray* va = new IwGraphics::VertexArray();
 
 		IwGraphics::IndexBuffer* ib = new IwGraphics::IndexBuffer(
-			&obj->Faces[0], obj->Faces.size());
-
-		IwGraphics::VertexBufferLayout* vbl
-			= new IwGraphics::VertexBufferLayout();
-
+			obj->Indices[0].Faces, obj->Indices[0].FaceCount);
+		
+		IwGraphics::VertexBufferLayout* vbl = new IwGraphics::VertexBufferLayout();
+		vbl->Push<float>(3);
 		vbl->Push<float>(3);
 
-		IwGraphics::VertexBuffer* vb = new IwGraphics::VertexBuffer(
-			&obj->Vertices[0], sizeof(iwm::vector3) * obj->Vertices.size());
+		IwGraphics::VertexBuffer* vbv = new IwGraphics::VertexBuffer(
+			obj->Meshes[0].Vertices, sizeof(iwm::vector3) * obj->Meshes[0].VertexCount);
 
-		va->AddBuffer(vb, vbl);
+		va->AddBuffer(vbv, vbl);
 
 		mesh = IwGraphics::Mesh(va, ib);
 		shader = new IwGraphics::ShaderProgram("res/default.shader");
 		
-		pos = { -.5f, -.5f, -5 };
+		pos = { -.5f, -.5f, -7 };
 		vel = { 0, 0, 0 };
 		rot = 0;
 

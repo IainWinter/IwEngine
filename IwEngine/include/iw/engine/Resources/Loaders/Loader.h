@@ -6,8 +6,8 @@ namespace IwEngine {
 	template<
 		typename _resource_t>
 	class Loader {
-	private:
-		std::vector< _resource_t*> m_loaded;
+	protected:
+		std::vector<_resource_t*> loaded;
 		
 	public:
 		virtual _resource_t* Load(const char* path) = 0;
