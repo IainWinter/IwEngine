@@ -1,7 +1,7 @@
-#include "iw/graphics/IndexBuffer.h"
+#include "iw/renderer/IndexBuffer.h"
 #include "gl/glew.h"
 
-namespace IwGraphics {
+namespace IwRenderer {
 	IndexBuffer::IndexBuffer(
 		const void* data, 
 		unsigned int count) 
@@ -26,7 +26,7 @@ namespace IwGraphics {
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
 
-	void IwGraphics::IndexBuffer::Draw() const {
+	void IndexBuffer::Draw() const {
 		glDrawElements(GL_TRIANGLES, m_count, GL_UNSIGNED_INT, nullptr);
 	}
 }

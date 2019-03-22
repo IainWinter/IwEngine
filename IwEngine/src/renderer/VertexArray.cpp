@@ -1,7 +1,7 @@
-#include "iw/graphics/VertexArray.h"
+#include "iw/renderer/VertexArray.h"
 #include "gl/glew.h"
 
-namespace IwGraphics {
+namespace IwRenderer {
 	VertexArray::VertexArray() {
 		glGenVertexArrays(1, &m_renderId);
 		glBindVertexArray(m_renderId);

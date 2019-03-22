@@ -2,8 +2,8 @@
 
 #include "iw/engine/Layer.h"
 
-#include "iw/graphics/Mesh.h"
-#include "iw/graphics/ShaderProgram.h"
+#include "iw/renderer/Mesh.h"
+#include "iw/renderer/Renderer.h"
 
 namespace IwEngine {
 	class IWENGINE_API EntityLayer
@@ -13,8 +13,10 @@ namespace IwEngine {
 		iwm::vector3 pos;
 		iwm::vector3 vel;
 		float rot;
-		std::vector<IwGraphics::Mesh> model;
-		IwGraphics::ShaderProgram* shader;
+		std::vector<IwRenderer::Mesh> model;
+		IwRenderer::ShaderProgram* shader;
+		IwRenderer::Renderer renderer;
+		iwm::matrix4 camera;
 
 	public:
 		EntityLayer();

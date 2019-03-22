@@ -1,7 +1,7 @@
 #pragma once
 
 #include "iw/util/io/Loader.h"
-#include "iw/graphics/Model.h"
+#include "iw/graphics/ModelData.h"
 
 namespace IwGraphics {
 	class ModelLoader

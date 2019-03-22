@@ -1,9 +1,9 @@
-#include "iw/graphics/Mesh.h"
-#include "iw/graphics/IndexBuffer.h"
+#include "iw/renderer/Mesh.h"
+#include "iw/renderer/IndexBuffer.h"
 #include "iw/math/matrix4.h"
 #include "gl/glew.h"
 
-namespace IwGraphics {
+namespace IwRenderer {
 	Mesh::Mesh(
 		VertexArray* va,
 		IndexBuffer* ib)
@@ -42,13 +42,8 @@ namespace IwGraphics {
 	}
 
 	void Mesh::Draw(
-		const iwmath::vector3& position,
-		const iwmath::quaternion& rotation) const
+		const iwmath::matrix4& model) const
 	{
-		iwmath::matrix4 model
-			= iwmath::matrix4::create_from_quaternion(rotation)
-			* iwmath::matrix4::create_translation(position);
-
 		iwmath::matrix4 view = iwm::matrix4::identity;
 
 		iwmath::matrix4 projection 

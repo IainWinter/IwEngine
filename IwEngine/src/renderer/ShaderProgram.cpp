@@ -1,11 +1,11 @@
-#include "iw/graphics/ShaderProgram.h"
+#include "iw/renderer/ShaderProgram.h"
 #include "iw/util/io/File.h"
 #include "iw/log/logger.h"
 #include "gl/glew.h"
 #include <sstream>
 #include <vector>
 
-namespace IwGraphics {
+namespace IwRenderer {
 	ShaderProgram::ShaderProgram(
 		const char* fileName)
 	{
@@ -89,7 +89,7 @@ namespace IwGraphics {
 		return id;
 	}
 
-	void ShaderProgram::Use() {
+	void ShaderProgram::Use() const {
 		glUseProgram(m_renderId);
 	}
 

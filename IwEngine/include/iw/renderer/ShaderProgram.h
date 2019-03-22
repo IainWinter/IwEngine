@@ -1,11 +1,11 @@
 #pragma once
 
-#include "IwGraphics.h"
+#include "IwRenderer.h"
 #include <string>
 
-namespace IwGraphics {
+namespace IwRenderer {
 	struct ShaderProgramSource;
-	class IWGRAPHICS_API ShaderProgram {
+	class IWRENDERER_API ShaderProgram {
 	private:
 		unsigned int m_renderId;
 
@@ -17,7 +17,7 @@ namespace IwGraphics {
 
 		~ShaderProgram();
 
-		void Use();
+		void Use() const;
 		void Delete();
 	private:
 		ShaderProgramSource ReadShader(

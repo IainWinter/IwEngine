@@ -1,10 +1,11 @@
 #pragma once
 
-#include "IwGraphics.h"
+#include "IwRenderer.h"
+#include "iw/log/logger.h"
 #include <vector>
 
-namespace IwGraphics {
-	struct IWGRAPHICS_API VertexBufferLayoutElement {
+namespace IwRenderer {
+	struct IWRENDERER_API VertexBufferLayoutElement {
 		unsigned int Type;
 		unsigned int Count;
 		unsigned char Normalized;
@@ -13,7 +14,7 @@ namespace IwGraphics {
 			unsigned int glType);
 	};
 
-	class IWGRAPHICS_API VertexBufferLayout {
+	class IWRENDERER_API VertexBufferLayout {
 	private:
 		std::vector<VertexBufferLayoutElement> m_elements;
 		unsigned int m_stride;
@@ -26,6 +27,7 @@ namespace IwGraphics {
 		void Push(
 			unsigned int count)
 		{
+			LOG_ERROR << "Cannot push invalid buffer type!";
 			static_assert(false);
 		}
 

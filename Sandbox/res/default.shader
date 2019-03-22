@@ -28,8 +28,8 @@ layout(location = 0) out vec4 FragColor;
 void main() {
 	float ambientStrength = 0.1;
 	float specularStrength = .5f;
-	vec3 objectColor = vec3(1, 1, 1);
-	vec3 lightColor = vec3(.2, .2, .6);
+	vec3 objectColor = vec3(.3, .1, .7);
+	vec3 lightColor = vec3(.6, .4, .2);
 	vec3 lightPos = vec3(5, 0, -5);
 	vec3 viewPos = vec3(0, 0, 0);
 

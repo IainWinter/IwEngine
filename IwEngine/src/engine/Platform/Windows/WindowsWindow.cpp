@@ -5,8 +5,6 @@
 #include "gl/wglew.h"
 #include <cstdio>
 #include <Tchar.h>
-#include "../../../../include/iw/graphics/Mesh.h"
-#include "../../../../include/iw/graphics/ShaderProgram.h"
 
 ATOM RegClass(
 	HINSTANCE instance,

@@ -1,11 +1,11 @@
 #pragma once
 
-#include "IwGraphics.h"
+#include "IwRenderer.h"
 #include "VertexBufferLayout.h"
 #include "VertexBuffer.h"
 
-namespace IwGraphics {
-	class IWGRAPHICS_API VertexArray {
+namespace IwRenderer {
+	class IWRENDERER_API VertexArray {
 	private:
 		unsigned int m_renderId;
 		std::vector<VertexBuffer*> m_buffers;

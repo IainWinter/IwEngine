@@ -1,7 +1,7 @@
-#include "iw/graphics/VertexBufferLayout.h"
+#include "iw/renderer/VertexBufferLayout.h"
 #include "gl/glew.h"
 
-namespace IwGraphics {
+namespace IwRenderer {
 	VertexBufferLayout::VertexBufferLayout()
 		: m_stride(0)
 	{}

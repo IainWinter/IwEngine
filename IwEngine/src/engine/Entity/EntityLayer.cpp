@@ -12,33 +12,36 @@ namespace IwEngine {
 	}
 
 	int EntityLayer::Initilize() {
+		camera = iwmath::matrix4::create_rotation(0, rot, 0)
+			* iwmath::matrix4::create_translation(pos);
+
 		IwGraphics::ModelLoader loader;
 
 		IwGraphics::ModelData* obj = loader.Load("res/lamp.obj");
 
 		for (size_t i = 0; i < obj->MeshCount; i++) {
-			IwGraphics::VertexArray* va = new IwGraphics::VertexArray();
+			IwRenderer::VertexArray* va = new IwRenderer::VertexArray();
 
-			IwGraphics::IndexBuffer* ib = new IwGraphics::IndexBuffer(
+			IwRenderer::IndexBuffer* ib = new IwRenderer::IndexBuffer(
 				obj->Indices[i].Faces, obj->Indices[i].FaceCount);
 		
-			IwGraphics::VertexBufferLayout* vbl 
-				= new IwGraphics::VertexBufferLayout();
+			IwRenderer::VertexBufferLayout* vbl
+				= new IwRenderer::VertexBufferLayout();
 			vbl->Push<float>(3);
 			vbl->Push<float>(3);
 
-			IwGraphics::VertexBuffer* vbv = new IwGraphics::VertexBuffer(
-				obj->Meshes[i].Vertices, sizeof(IwGraphics::Vertex) 
-				* obj->Meshes[i].VertexCount);
+			IwRenderer::VertexBuffer* vbv = new IwRenderer::VertexBuffer(
+				obj->Meshes[i].Vertices, 
+				sizeof(IwGraphics::Vertex) * obj->Meshes[i].VertexCount);
 
 			va->AddBuffer(vbv, vbl);
 
-			model.push_back(IwGraphics::Mesh(va, ib));
+			model.push_back(IwRenderer::Mesh(va, ib));
 		}
 
-		shader = new IwGraphics::ShaderProgram("res/default.shader");
+		shader = new IwRenderer::ShaderProgram("res/default.shader");
 		
-		pos = { 0, 0, -5 };
+		pos = { 0, 0, -10 };
 		vel = { 0, 0, 0 };
 		rot = 0;
 
@@ -49,9 +52,13 @@ namespace IwEngine {
 	}
 
 	void EntityLayer::Update() {
-		shader->Use();
 		for (auto& mesh : model) {
-			mesh.Draw(pos, iwm::quaternion::create_from_euler_angles(0, rot, 0));
+			IwRenderer::DrawItem draw;
+			draw.State.Mesh = &mesh;
+			draw.State.ShaderProgram = shader;
+			draw.State.Transformation = &camera;
+
+			renderer.Submit(draw);
 		}
 
 		pos += vel;
