@@ -274,7 +274,7 @@ namespace IwEngine {
 		MouseWheelEvent e(delta);
 		callback(e);
 
-		LOG_INFO << "Mouse wheel moved " << delta;
+		//LOG_INFO << "Mouse wheel moved " << delta;
 	}
 
 	void WindowsWindow::HandleMouseMoved(

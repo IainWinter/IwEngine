@@ -1,23 +1,16 @@
 #pragma once
 
+#include <vector>
+
 namespace IwUtil {
-	class ILoader {
-	public:
-		virtual ~ILoader() {}
-	};
-
 	template<
-		typename _t>
-	class Loader 
-		: public ILoader
-	{
-	public:
-		_t Load(const char* fileName);
-	};
+		typename _resource_t>
+		class Loader {
+		protected:
+			std::vector<_resource_t*> loaded;
 
-	template<
-		typename _t>
-	_t Load(const char* filePath) {
-		return _t();
-	}
+		public:
+			virtual _resource_t* Load(const char* path) = 0;
+			virtual void Release(_resource_t* resource) = 0;
+	};
 }

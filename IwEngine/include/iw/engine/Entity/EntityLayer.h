@@ -13,7 +13,7 @@ namespace IwEngine {
 		iwm::vector3 pos;
 		iwm::vector3 vel;
 		float rot;
-		IwGraphics::Mesh mesh;
+		std::vector<IwGraphics::Mesh> model;
 		IwGraphics::ShaderProgram* shader;
 
 	public:

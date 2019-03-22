@@ -1,5 +1,5 @@
 #include "iw/engine/Entity/EntityLayer.h"
-#include "iw/engine/Resources/Loaders/ModelLoader.h" 
+#include "iw/graphics/Loaders/ModelLoader.h"
 #include "iw/log/logger.h"
 #include "imgui/imgui.h"
 
@@ -12,27 +12,33 @@ namespace IwEngine {
 	}
 
 	int EntityLayer::Initilize() {
-		ModelLoader loader;
-		Model* obj = loader.Load("res/bear.obj");
+		IwGraphics::ModelLoader loader;
 
-		IwGraphics::VertexArray* va = new IwGraphics::VertexArray();
+		IwGraphics::ModelData* obj = loader.Load("res/lamp.obj");
 
-		IwGraphics::IndexBuffer* ib = new IwGraphics::IndexBuffer(
-			obj->Indices[0].Faces, obj->Indices[0].FaceCount);
+		for (size_t i = 0; i < obj->MeshCount; i++) {
+			IwGraphics::VertexArray* va = new IwGraphics::VertexArray();
+
+			IwGraphics::IndexBuffer* ib = new IwGraphics::IndexBuffer(
+				obj->Indices[i].Faces, obj->Indices[i].FaceCount);
 		
-		IwGraphics::VertexBufferLayout* vbl = new IwGraphics::VertexBufferLayout();
-		vbl->Push<float>(3);
-		vbl->Push<float>(3);
+			IwGraphics::VertexBufferLayout* vbl 
+				= new IwGraphics::VertexBufferLayout();
+			vbl->Push<float>(3);
+			vbl->Push<float>(3);
 
-		IwGraphics::VertexBuffer* vbv = new IwGraphics::VertexBuffer(
-			obj->Meshes[0].Vertices, sizeof(iwm::vector3) * obj->Meshes[0].VertexCount);
+			IwGraphics::VertexBuffer* vbv = new IwGraphics::VertexBuffer(
+				obj->Meshes[i].Vertices, sizeof(IwGraphics::Vertex) 
+				* obj->Meshes[i].VertexCount);
 
-		va->AddBuffer(vbv, vbl);
+			va->AddBuffer(vbv, vbl);
 
-		mesh = IwGraphics::Mesh(va, ib);
+			model.push_back(IwGraphics::Mesh(va, ib));
+		}
+
 		shader = new IwGraphics::ShaderProgram("res/default.shader");
 		
-		pos = { -.5f, -.5f, -7 };
+		pos = { 0, 0, -5 };
 		vel = { 0, 0, 0 };
 		rot = 0;
 
@@ -44,7 +50,9 @@ namespace IwEngine {
 
 	void EntityLayer::Update() {
 		shader->Use();
-		mesh.Draw(pos, iwm::quaternion::create_from_euler_angles(0, rot, 0));
+		for (auto& mesh : model) {
+			mesh.Draw(pos, iwm::quaternion::create_from_euler_angles(0, rot, 0));
+		}
 
 		pos += vel;
 	}
