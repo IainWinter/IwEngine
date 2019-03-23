@@ -1,12 +1,12 @@
-#include "iw/renderer/IndexBuffer.h"
+#include "iw/renderer/Platform/OpenGL/GLIndexBuffer.h"
 #include "gl/glew.h"
 
 namespace IwRenderer {
-	IndexBuffer::IndexBuffer(
-		const void* data, 
-		unsigned int count) 
-		: m_count(count)
-		, m_data(data) 
+	GLIndexBuffer::GLIndexBuffer(
+		unsigned int count, 
+		const void* data)
+		: m_data(data) 
+		, m_count(count)
 	{
 		glGenBuffers(1, &m_renderId);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_renderId);
@@ -14,19 +14,15 @@ namespace IwRenderer {
 			count * sizeof(unsigned int), data, GL_STATIC_DRAW);
 	}
 
-	IndexBuffer::~IndexBuffer() {
+	GLIndexBuffer::~GLIndexBuffer() {
 		glDeleteBuffers(1, &m_renderId);
 	}
 
-	void IndexBuffer::Bind() const {
+	void GLIndexBuffer::Bind() const {
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_renderId);
 	}
 
-	void IndexBuffer::Unbind() const {
+	void GLIndexBuffer::Unbind() const {
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	}
-
-	void IndexBuffer::Draw() const {
-		glDrawElements(GL_TRIANGLES, m_count, GL_UNSIGNED_INT, nullptr);
 	}
 }

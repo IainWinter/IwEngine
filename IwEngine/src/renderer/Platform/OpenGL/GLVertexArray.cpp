@@ -1,33 +1,33 @@
-#include "iw/renderer/VertexArray.h"
+#include "iw/renderer/Platform/OpenGL/GLVertexArray.h"
 #include "gl/glew.h"
 
 namespace IwRenderer {
-	VertexArray::VertexArray() {
+	GLVertexArray::GLVertexArray() {
 		glGenVertexArrays(1, &m_renderId);
 		glBindVertexArray(m_renderId);
 	}
 
-	VertexArray::~VertexArray() {
+	GLVertexArray::~GLVertexArray() {
 		glDeleteVertexArrays(1, &m_renderId);
 
-		for (std::vector<VertexBuffer*>::iterator it 
+		for (std::vector<GLVertexBuffer*>::iterator it 
 			= m_buffers.begin(); it != m_buffers.end(); ++it) 
 		{
 			delete (*it);
 		}
 
-		//for (std::vector<VertexBufferLayout*>::iterator it 
-		//	= m_layouts.begin(); it != m_layouts.end(); ++it) 
-		//{
-		//	delete (*it);
-		//}
+		for (std::vector<VertexBufferLayout*>::iterator it 
+			= m_layouts.begin(); it != m_layouts.end(); ++it) 
+		{
+			delete (*it);
+		}
 
 		m_buffers.clear();
 		m_layouts.clear();
 	}
 
-	void VertexArray::AddBuffer(
-		VertexBuffer* vb, 
+	void GLVertexArray::AddBuffer(
+		GLVertexBuffer* vb, 
 		VertexBufferLayout* layout) 
 	{
 		Bind();
@@ -47,11 +47,11 @@ namespace IwRenderer {
 		m_layouts.push_back(layout);
 	}
 
-	void VertexArray::Bind() const {
+	void GLVertexArray::Bind() const {
 		glBindVertexArray(m_renderId);
 	}
 
-	void VertexArray::Unbind() const {
+	void GLVertexArray::Unbind() const {
 		glBindVertexArray(0);
 	}
 }

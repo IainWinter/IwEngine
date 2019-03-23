@@ -1,26 +1,27 @@
-#include "iw/renderer/VertexBuffer.h"
+#include "iw/renderer/Platform/OpenGL/GLVertexBuffer.h"
 #include "gl/glew.h"
 
 namespace IwRenderer {
-	VertexBuffer::VertexBuffer(
-		const void* data, 
-		unsigned int size) 
-		: m_data(data) 
+	GLVertexBuffer::GLVertexBuffer(
+		unsigned int size,
+		const void* data)
+		: m_size(size)
+		, m_data(data)
 	{
 		glGenBuffers(1, &m_renderId);
 		glBindBuffer(GL_ARRAY_BUFFER, m_renderId);
 		glBufferData(GL_ARRAY_BUFFER, size, data, GL_DYNAMIC_DRAW);
 	}
 
-	VertexBuffer::~VertexBuffer() {
+	GLVertexBuffer::~GLVertexBuffer() {
 		glDeleteBuffers(1, &m_renderId);
 	}
 
-	void VertexBuffer::Bind() const {
+	void GLVertexBuffer::Bind() const {
 		glBindBuffer(GL_ARRAY_BUFFER, m_renderId);
 	}
 
-	void VertexBuffer::Unbind() const {
+	void GLVertexBuffer::Unbind() const {
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 }

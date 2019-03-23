@@ -1,5 +1,6 @@
 #include "iw/engine/Entity/EntityLayer.h"
 #include "iw/graphics/Loaders/ModelLoader.h"
+#include "iw/renderer/Platform/OpenGL/GLDevice.h"
 #include "iw/log/logger.h"
 #include "imgui/imgui.h"
 
@@ -12,35 +13,33 @@ namespace IwEngine {
 	}
 
 	int EntityLayer::Initilize() {
-		camera = iwmath::matrix4::create_rotation(0, rot, 0)
-			* iwmath::matrix4::create_translation(pos);
+		device = new IwRenderer::GLDevice();
 
 		IwGraphics::ModelLoader loader;
-
 		IwGraphics::ModelData* obj = loader.Load("res/lamp.obj");
 
 		for (size_t i = 0; i < obj->MeshCount; i++) {
-			IwRenderer::VertexArray* va = new IwRenderer::VertexArray();
+			IwRenderer::IndexBuffer* ib = device->CreateIndexBuffer(
+				obj->Indices[i].FaceCount, 
+				obj->Indices[i].Faces);
 
-			IwRenderer::IndexBuffer* ib = new IwRenderer::IndexBuffer(
-				obj->Indices[i].Faces, obj->Indices[i].FaceCount);
-		
-			IwRenderer::VertexBufferLayout* vbl
+			IwRenderer::VertexBufferLayout* vbl 
 				= new IwRenderer::VertexBufferLayout();
 			vbl->Push<float>(3);
 			vbl->Push<float>(3);
 
-			IwRenderer::VertexBuffer* vbv = new IwRenderer::VertexBuffer(
-				obj->Meshes[i].Vertices, 
-				sizeof(IwGraphics::Vertex) * obj->Meshes[i].VertexCount);
+			IwRenderer::VertexBuffer* vb = device->CreateVertexBuffer(
+				obj->Meshes[i].VertexCount * sizeof(IwGraphics::Vertex),
+				obj->Meshes[i].Vertices);
 
-			va->AddBuffer(vbv, vbl);
+			IwRenderer::VertexArray* va 
+				= device->CreateVertexArray(1, &vb, &vbl);
 
-			model.push_back(IwRenderer::Mesh(va, ib));
+			model.push_back({ va, ib, obj->Indices[i].FaceCount });
 		}
 
 		shader = new IwRenderer::ShaderProgram("res/default.shader");
-		
+
 		pos = { 0, 0, -10 };
 		vel = { 0, 0, 0 };
 		rot = 0;
@@ -52,13 +51,14 @@ namespace IwEngine {
 	}
 
 	void EntityLayer::Update() {
-		for (auto& mesh : model) {
-			IwRenderer::DrawItem draw;
-			draw.State.Mesh = &mesh;
-			draw.State.ShaderProgram = shader;
-			draw.State.Transformation = &camera;
+		transform = iwm::matrix4::create_rotation_y(rot)
+			* iwm::matrix4::create_translation(pos.x - 5, pos.y, pos.z);
 
-			renderer.Submit(draw);
+		shader->Use();
+		for (auto& mesh : model) {
+			device->SetVertexArray(mesh.Vertices);
+			device->SetIndexBuffer(mesh.Indices);
+			device->DrawElements(mesh.Count, 0);
 		}
 
 		pos += vel;

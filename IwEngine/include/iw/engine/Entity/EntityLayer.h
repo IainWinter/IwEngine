@@ -3,9 +3,16 @@
 #include "iw/engine/Layer.h"
 
 #include "iw/renderer/Mesh.h"
-#include "iw/renderer/Renderer.h"
+#include "iw/renderer/Device.h"
+#include "iw/renderer/ShaderProgram.h"
 
 namespace IwEngine {
+	struct Mesh {
+		IwRenderer::VertexArray* Vertices;
+		IwRenderer::IndexBuffer* Indices;
+		unsigned int Count;
+	};
+
 	class IWENGINE_API EntityLayer
 		: public Layer
 	{
@@ -13,10 +20,10 @@ namespace IwEngine {
 		iwm::vector3 pos;
 		iwm::vector3 vel;
 		float rot;
-		std::vector<IwRenderer::Mesh> model;
+		std::vector<Mesh> model;
 		IwRenderer::ShaderProgram* shader;
-		IwRenderer::Renderer renderer;
-		iwm::matrix4 camera;
+		IwRenderer::Device* device;
+		iwm::matrix4 transform;
 
 	public:
 		EntityLayer();

@@ -40,23 +40,4 @@ namespace IwRenderer {
 		copy.m_indexBuffer = nullptr;
 		return *this;
 	}
-
-	void Mesh::Draw(
-		const iwmath::matrix4& model) const
-	{
-		iwmath::matrix4 view = iwm::matrix4::identity;
-
-		iwmath::matrix4 projection 
-			= iwmath::matrix4::create_perspective_field_of_view(
-				1.2f, 1.777f, 0.1f, 1000.0f);
-
-		glUniformMatrix4fv(0, 1, GL_FALSE, model.elements);
-		glUniformMatrix4fv(1, 1, GL_FALSE, view.elements);
-		glUniformMatrix4fv(2, 1, GL_FALSE, projection.elements);
-
-		m_vertexArray->Bind();
-		m_indexBuffer->Bind();
-
-		m_indexBuffer->Draw();
-	}
 }

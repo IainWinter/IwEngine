@@ -31,8 +31,5 @@ namespace IwRenderer {
 
 		Mesh& operator=(
 			Mesh&& copy) noexcept;
-
-		void Draw(
-			const iwmath::matrix4& model) const;
 	};
 }
