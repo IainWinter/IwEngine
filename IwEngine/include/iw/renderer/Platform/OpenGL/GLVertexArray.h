@@ -1,10 +1,9 @@
 #pragma once
 
+#include "GLVertexBuffer.h"
 #include "iw/renderer/IwRenderer.h"
 #include "iw/renderer/VertexArray.h"
 #include "iw/renderer/VertexBufferLayout.h"
-#include "iw/renderer/Platform/OpenGL/GLIndexBuffer.h"
-#include "iw/renderer/Platform/OpenGL/GLVertexBuffer.h"
 #include <vector>
 
 namespace IwRenderer {

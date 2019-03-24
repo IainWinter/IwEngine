@@ -1,29 +1,9 @@
-#shader vertex
 #version 430 core
 
-layout(location = 0) in vec3 aPosition;
-layout(location = 1) in vec3 aNormal;
+in vec3 FragPos;
+in vec3 Normal;
 
-layout(location = 0) out vec3 FragPos;
-layout(location = 1) out vec3 Normal;
-
-layout(location = 0) uniform mat4 u_model;
-layout(location = 1) uniform mat4 u_view;
-layout(location = 2) uniform mat4 u_projection;
-
-void main() {
-	gl_Position = u_projection * u_view * u_model * vec4(aPosition, 1);
-	FragPos = (u_model * vec4(aPosition, 1.0)).xyz;
-	Normal = mat3(transpose(inverse(u_model))) * aNormal;
-};
-
-#shader fragment
-#version 430 core
-
-layout(location = 0) in vec3 FragPos;
-layout(location = 1) in vec3 Normal;
-
-layout(location = 0) out vec4 FragColor;
+out vec4 FragColor;
 
 void main() {
 	float ambientStrength = 0.1;

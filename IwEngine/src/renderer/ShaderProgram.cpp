@@ -50,6 +50,7 @@ namespace IwRenderer {
 					mode = FRAGMENT;
 				}
 			}
+
 			else {
 				ss[mode] << line << std::endl;
 			}

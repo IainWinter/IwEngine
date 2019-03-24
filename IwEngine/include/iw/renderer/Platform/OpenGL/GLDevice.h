@@ -19,7 +19,7 @@ namespace IwRenderer {
 		void DestroyIndexBuffer(
 			IndexBuffer* indexBuffer) override;
 
-		Device* SetIndexBuffer(
+		void SetIndexBuffer(
 			IndexBuffer* indexBuffer) override;
 
 		//Vertex buffers
@@ -30,7 +30,7 @@ namespace IwRenderer {
 		void DestroyVertexBuffer(
 			VertexBuffer* vertexBuffer) override;
 
-		Device* SetVertexBuffer(
+		void SetVertexBuffer(
 			VertexBuffer* vertexBuffer) override;
 
 		//Vertex arrays
@@ -42,7 +42,32 @@ namespace IwRenderer {
 		void DestroyVertexArray(
 			VertexArray* vertexArray) override;
 
-		Device* SetVertexArray(
+		void SetVertexArray(
 			VertexArray* vertexArray) override;
+
+		//Vertex shader
+		VertexShader* CreateVertexShader(
+			const char* source) override;
+
+		void DestroyVertexArray(
+			VertexShader* vertexShader) override;
+
+		//Fragment shader
+		FragmentShader* CreateFragmentShader(
+			const char* source) override;
+
+		void DestroyFragmentShader(
+			FragmentShader* fragmentShader) override;
+
+		//Shader pipeline
+		Pipeline* CreatePipeline(
+			VertexShader* vertexShader,
+			FragmentShader* fragmentShader) override;
+
+		void DestroyPipeline(
+			Pipeline* pipeline) override;
+
+		void SetPipeline(
+			Pipeline* pipeline) override;
 	};
 }

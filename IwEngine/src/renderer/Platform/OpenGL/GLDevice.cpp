@@ -2,28 +2,21 @@
 #include "iw/renderer/Platform/OpenGL/GLIndexBuffer.h"
 #include "iw/renderer/Platform/OpenGL/GLVertexBuffer.h"
 #include "iw/renderer/Platform/OpenGL/GLVertexArray.h"
+#include "iw/renderer/Platform/OpenGL/GLVertexShader.h"
+#include "iw/renderer/Platform/OpenGL/GLFragmentShader.h"
+#include "iw/renderer/Platform/OpenGL/GLPipeline.h"
 #include "gl/glew.h"
-
-#include "iw/math/matrix4.h"
 
 namespace IwRenderer {
 	void GLDevice::DrawElements(
 		int count, 
 		long long offset)
 	{
-		iwmath::matrix4 model = iwm::matrix4::create_translation(0, -2.5f, -10);
-
-		iwmath::matrix4 view = iwm::matrix4::identity;
-
-		iwmath::matrix4 projection
-			= iwmath::matrix4::create_perspective_field_of_view(
-				1.2f, 1.777f, 0.1f, 1000.0f);
-
-		glUniformMatrix4fv(0, 1, GL_FALSE, model.elements);
-		glUniformMatrix4fv(1, 1, GL_FALSE, view.elements);
-		glUniformMatrix4fv(2, 1, GL_FALSE, projection.elements);
-
-		glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, reinterpret_cast<const void*>(offset));
+		glDrawElements(
+			GL_TRIANGLES, 
+			count, 
+			GL_UNSIGNED_INT, 
+			reinterpret_cast<const void*>(offset));
 	}
 
 	IndexBuffer* GLDevice::CreateIndexBuffer(
@@ -39,11 +32,10 @@ namespace IwRenderer {
 		delete indexBuffer;
 	}
 
-	Device* GLDevice::SetIndexBuffer(
+	void GLDevice::SetIndexBuffer(
 		IndexBuffer* indexBuffer)
 	{
 		static_cast<GLIndexBuffer*>(indexBuffer)->Bind();
-		return this;
 	}
 
 	VertexBuffer* GLDevice::CreateVertexBuffer(
@@ -59,11 +51,10 @@ namespace IwRenderer {
 		delete vertexBuffer;
 	}
 
-	Device* GLDevice::SetVertexBuffer(
+	void GLDevice::SetVertexBuffer(
 		VertexBuffer* vertexBuffer)
 	{
 		static_cast<GLVertexBuffer*>(vertexBuffer)->Bind();
-		return this;
 	}
 
 	VertexArray* GLDevice::CreateVertexArray(
@@ -73,7 +64,8 @@ namespace IwRenderer {
 	{
 		GLVertexArray* va = new GLVertexArray();
 		for (size_t i = 0; i < numBuffers; i++) {
-			va->AddBuffer(static_cast<GLVertexBuffer*>(vertexBuffers[i]),
+			va->AddBuffer(
+				static_cast<GLVertexBuffer*>(vertexBuffers[i]),
 				vertexLayouts[i]);
 		}
 
@@ -86,10 +78,54 @@ namespace IwRenderer {
 		delete vertexArray;
 	}
 
-	Device* GLDevice::SetVertexArray(
+	void GLDevice::SetVertexArray(
 		VertexArray* vertexArray) 
 	{
 		static_cast<GLVertexArray*>(vertexArray)->Bind();
-		return this;
+	}
+
+	VertexShader* GLDevice::CreateVertexShader(
+		const char* source) 
+	{
+		return new GLVertexShader(source);
+	}
+
+	void GLDevice::DestroyVertexArray(
+		VertexShader* vertexShader)
+	{
+		delete vertexShader;
+	}
+
+	FragmentShader* GLDevice::CreateFragmentShader(
+		const char* source)
+	{
+		return new GLFragmentShader(source);
+	}
+
+	void GLDevice::DestroyFragmentShader(
+		FragmentShader* fragmentShader)
+	{
+		delete fragmentShader;
+	}
+
+	Pipeline* GLDevice::CreatePipeline(
+		VertexShader* vertexShader, 
+		FragmentShader* fragmentShader)
+	{
+		return new GLPipeline(
+			static_cast<GLVertexShader*>(vertexShader),
+			static_cast<GLFragmentShader*>(fragmentShader));
+	}
+
+	void GLDevice::DestroyPipeline(
+		Pipeline* pipeline)
+	{
+		delete pipeline;
+	}
+
+	void GLDevice::SetPipeline(
+		Pipeline* pipeline)
+	{
+		static_cast<GLPipeline*>(pipeline)->Use();
 	}
 }

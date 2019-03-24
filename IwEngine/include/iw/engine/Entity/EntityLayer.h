@@ -4,7 +4,7 @@
 
 #include "iw/renderer/Mesh.h"
 #include "iw/renderer/Device.h"
-#include "iw/renderer/ShaderProgram.h"
+#include "iw/renderer/Pipeline.h"
 
 namespace IwEngine {
 	struct Mesh {
@@ -21,9 +21,11 @@ namespace IwEngine {
 		iwm::vector3 vel;
 		float rot;
 		std::vector<Mesh> model;
-		IwRenderer::ShaderProgram* shader;
 		IwRenderer::Device* device;
-		iwm::matrix4 transform;
+		IwRenderer::Pipeline* pipeline;
+		iwm::matrix4 modelTransform;
+		iwm::matrix4 viewTransform;
+		iwm::matrix4 projTransform;
 
 	public:
 		EntityLayer();
