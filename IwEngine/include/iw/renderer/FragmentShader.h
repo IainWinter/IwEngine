@@ -3,10 +3,10 @@
 #include "IwRenderer.h"
 
 namespace IwRenderer {
-	class IWRENDERER_API FragmentShader {
+	class IWRENDERER_API IFragmentShader {
 	public:
-		virtual ~FragmentShader() {}
+		virtual ~IFragmentShader() {}
 	protected:
-		FragmentShader() {}
+		IFragmentShader() {}
 	};
 }

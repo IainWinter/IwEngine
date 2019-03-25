@@ -4,7 +4,7 @@
 
 namespace IwRenderer {
 	class IWRENDERER_API GLVertexShader
-		: public VertexShader
+		: public IVertexShader
 	{
 	private:
 		unsigned int m_vertexShader;

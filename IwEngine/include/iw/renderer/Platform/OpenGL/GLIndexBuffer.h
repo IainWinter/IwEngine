@@ -4,7 +4,7 @@
 
 namespace IwRenderer {
 	class IWRENDERER_API GLIndexBuffer
-		: public IndexBuffer
+		: public IIndexBuffer
 	{
 	private:
 		unsigned int m_renderId;

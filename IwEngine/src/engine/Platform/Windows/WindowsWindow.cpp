@@ -64,11 +64,6 @@ namespace IwEngine {
 			return 1;
 		}
 
-		if (glewInit() != GLEW_OK) {
-			LOG_ERROR << "glewInit() failed!";
-			return 1;
-		}
-
 		m_window = CreateWindow(
 			_T("Core"), _T("Space"),
 			WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
@@ -80,6 +75,12 @@ namespace IwEngine {
 		SetWindowLongPtr(m_window, GWLP_USERDATA, (LONG_PTR)this);
 
 		m_device = GetDC(m_window);
+
+		//gl stuff
+		if (glewInit() != GLEW_OK) {
+			LOG_ERROR << "glewInit() failed!";
+			return 1;
+		}
 
 		CONST INT pixelAttribs[] = {
 			WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,

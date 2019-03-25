@@ -6,7 +6,7 @@ namespace IwRenderer {
 	GLFragmentShader::GLFragmentShader(
 		const char* source)
 	{
-		LOG_INFO << source;
+		LOG_INFO << "Loaded fragment shader...\n" << source;
 
 		m_fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 		glShaderSource(m_fragmentShader, 1, &source, nullptr);

@@ -8,7 +8,7 @@
 
 namespace IwRenderer {
 	class IWRENDERER_API GLVertexArray
-		: public VertexArray
+		: public IVertexArray
 	{
 	private:
 		unsigned int m_renderId;

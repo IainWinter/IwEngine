@@ -4,7 +4,7 @@
 
 namespace IwRenderer {
 	class IWRENDERER_API GLDevice
-		: public Device
+		: public IDevice
 	{
 	public:
 		void DrawElements(
@@ -12,62 +12,70 @@ namespace IwRenderer {
 			long long offset) override;
 
 		//Index buffers
-		IndexBuffer* CreateIndexBuffer(
+		IIndexBuffer* CreateIndexBuffer(
 			size_t size,
 			const void* data = nullptr) override;
 
 		void DestroyIndexBuffer(
-			IndexBuffer* indexBuffer) override;
+			IIndexBuffer* indexBuffer) override;
 
 		void SetIndexBuffer(
-			IndexBuffer* indexBuffer) override;
+			IIndexBuffer* indexBuffer) override;
 
 		//Vertex buffers
-		VertexBuffer* CreateVertexBuffer(
+		IVertexBuffer* CreateVertexBuffer(
 			size_t size,
 			const void* data = nullptr) override;
 
 		void DestroyVertexBuffer(
-			VertexBuffer* vertexBuffer) override;
+			IVertexBuffer* vertexBuffer) override;
 
 		void SetVertexBuffer(
-			VertexBuffer* vertexBuffer) override;
+			IVertexBuffer* vertexBuffer) override;
 
 		//Vertex arrays
-		VertexArray* CreateVertexArray(
+		IVertexArray* CreateVertexArray(
 			size_t numBuffers,
-			VertexBuffer** vertexBuffers,
+			IVertexBuffer** vertexBuffers,
 			VertexBufferLayout** vertexLayouts) override;
 
 		void DestroyVertexArray(
-			VertexArray* vertexArray) override;
+			IVertexArray* vertexArray) override;
 
 		void SetVertexArray(
-			VertexArray* vertexArray) override;
+			IVertexArray* vertexArray) override;
 
 		//Vertex shader
-		VertexShader* CreateVertexShader(
+		IVertexShader* CreateVertexShader(
 			const char* source) override;
 
 		void DestroyVertexArray(
-			VertexShader* vertexShader) override;
+			IVertexShader* vertexShader) override;
 
 		//Fragment shader
-		FragmentShader* CreateFragmentShader(
+		IFragmentShader* CreateFragmentShader(
 			const char* source) override;
 
 		void DestroyFragmentShader(
-			FragmentShader* fragmentShader) override;
+			IFragmentShader* fragmentShader) override;
+
+		//Geometry shader
+		IGeometryShader* CreateGeometryShader(
+			const char* source) override;
+
+		void DestroyGeometryShader(
+			IGeometryShader* geometryShader) override;
 
 		//Shader pipeline
-		Pipeline* CreatePipeline(
-			VertexShader* vertexShader,
-			FragmentShader* fragmentShader) override;
+		IPipeline* CreatePipeline(
+			IVertexShader* vertexShader,
+			IFragmentShader* fragmentShader,
+			IGeometryShader* geometryShader) override;
 
 		void DestroyPipeline(
-			Pipeline* pipeline) override;
+			IPipeline* pipeline) override;
 
 		void SetPipeline(
-			Pipeline* pipeline) override;
+			IPipeline* pipeline) override;
 	};
 }

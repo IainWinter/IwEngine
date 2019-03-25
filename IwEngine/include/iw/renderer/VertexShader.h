@@ -3,10 +3,10 @@
 #include "IwRenderer.h"
 
 namespace IwRenderer {
-	class IWRENDERER_API VertexShader {
+	class IWRENDERER_API IVertexShader {
 	public:
-		virtual ~VertexShader() {}
+		virtual ~IVertexShader() {}
 	protected:
-		VertexShader() {}
+		IVertexShader() {}
 	};
 }

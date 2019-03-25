@@ -3,10 +3,10 @@
 #include "IwRenderer.h"
 
 namespace IwRenderer {
-	class IWRENDERER_API VertexArray {
+	class IWRENDERER_API IVertexArray {
 	public:
-		virtual ~VertexArray() {}
+		virtual ~IVertexArray() {}
 	protected:
-		VertexArray() {}
+		IVertexArray() {}
 	};
 }

@@ -4,7 +4,7 @@
 
 namespace IwRenderer {
 	class IWRENDERER_API GLFragmentShader
-		: public FragmentShader
+		: public IFragmentShader
 	{
 	private:
 		unsigned int m_fragmentShader;

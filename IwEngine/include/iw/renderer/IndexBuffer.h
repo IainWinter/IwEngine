@@ -3,10 +3,10 @@
 #include "IwRenderer.h"
 
 namespace IwRenderer {
-	class IWRENDERER_API IndexBuffer {
+	class IWRENDERER_API IIndexBuffer {
 	public:
-		virtual ~IndexBuffer() {}
+		virtual ~IIndexBuffer() {}
 	protected:
-		IndexBuffer() {}
+		IIndexBuffer() {}
 	};
 }

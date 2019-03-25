@@ -4,6 +4,7 @@
 #include "iw/renderer/Platform/OpenGL/GLVertexArray.h"
 #include "iw/renderer/Platform/OpenGL/GLVertexShader.h"
 #include "iw/renderer/Platform/OpenGL/GLFragmentShader.h"
+#include "iw/renderer/Platform/OpenGL/GLGeometryShader.h"
 #include "iw/renderer/Platform/OpenGL/GLPipeline.h"
 #include "gl/glew.h"
 
@@ -19,7 +20,7 @@ namespace IwRenderer {
 			reinterpret_cast<const void*>(offset));
 	}
 
-	IndexBuffer* GLDevice::CreateIndexBuffer(
+	IIndexBuffer* GLDevice::CreateIndexBuffer(
 		size_t size,
 		const void* data)
 	{
@@ -27,18 +28,18 @@ namespace IwRenderer {
 	}
 
 	void GLDevice::DestroyIndexBuffer(
-		IndexBuffer* indexBuffer)
+		IIndexBuffer* indexBuffer)
 	{
 		delete indexBuffer;
 	}
 
 	void GLDevice::SetIndexBuffer(
-		IndexBuffer* indexBuffer)
+		IIndexBuffer* indexBuffer)
 	{
 		static_cast<GLIndexBuffer*>(indexBuffer)->Bind();
 	}
 
-	VertexBuffer* GLDevice::CreateVertexBuffer(
+	IVertexBuffer* GLDevice::CreateVertexBuffer(
 		size_t size,
 		const void* data)
 	{
@@ -46,20 +47,20 @@ namespace IwRenderer {
 	}
 
 	void GLDevice::DestroyVertexBuffer(
-		VertexBuffer* vertexBuffer)
+		IVertexBuffer* vertexBuffer)
 	{
 		delete vertexBuffer;
 	}
 
 	void GLDevice::SetVertexBuffer(
-		VertexBuffer* vertexBuffer)
+		IVertexBuffer* vertexBuffer)
 	{
 		static_cast<GLVertexBuffer*>(vertexBuffer)->Bind();
 	}
 
-	VertexArray* GLDevice::CreateVertexArray(
+	IVertexArray* GLDevice::CreateVertexArray(
 		size_t numBuffers,
-		VertexBuffer** vertexBuffers,
+		IVertexBuffer** vertexBuffers,
 		VertexBufferLayout** vertexLayouts)
 	{
 		GLVertexArray* va = new GLVertexArray();
@@ -73,58 +74,72 @@ namespace IwRenderer {
 	}
 
 	void GLDevice::DestroyVertexArray(
-		VertexArray* vertexArray) 
+		IVertexArray* vertexArray) 
 	{
 		delete vertexArray;
 	}
 
 	void GLDevice::SetVertexArray(
-		VertexArray* vertexArray) 
+		IVertexArray* vertexArray) 
 	{
 		static_cast<GLVertexArray*>(vertexArray)->Bind();
 	}
 
-	VertexShader* GLDevice::CreateVertexShader(
+	IVertexShader* GLDevice::CreateVertexShader(
 		const char* source) 
 	{
 		return new GLVertexShader(source);
 	}
 
 	void GLDevice::DestroyVertexArray(
-		VertexShader* vertexShader)
+		IVertexShader* vertexShader)
 	{
 		delete vertexShader;
 	}
 
-	FragmentShader* GLDevice::CreateFragmentShader(
+	IFragmentShader* GLDevice::CreateFragmentShader(
 		const char* source)
 	{
 		return new GLFragmentShader(source);
 	}
 
 	void GLDevice::DestroyFragmentShader(
-		FragmentShader* fragmentShader)
+		IFragmentShader* fragmentShader)
 	{
 		delete fragmentShader;
 	}
 
-	Pipeline* GLDevice::CreatePipeline(
-		VertexShader* vertexShader, 
-		FragmentShader* fragmentShader)
+	IGeometryShader* GLDevice::CreateGeometryShader(
+		const char* source)
+	{
+		return new GLGeometryShader(source);
+	}
+
+	void GLDevice::DestroyGeometryShader(
+		IGeometryShader* geometryShader)
+	{
+		delete geometryShader;
+	}
+
+	IPipeline* GLDevice::CreatePipeline(
+		IVertexShader* vertexShader, 
+		IFragmentShader* fragmentShader,
+		IGeometryShader* geometryShader)
 	{
 		return new GLPipeline(
 			static_cast<GLVertexShader*>(vertexShader),
-			static_cast<GLFragmentShader*>(fragmentShader));
+			static_cast<GLFragmentShader*>(fragmentShader),
+			static_cast<GLGeometryShader*>(geometryShader));
 	}
 
 	void GLDevice::DestroyPipeline(
-		Pipeline* pipeline)
+		IPipeline* pipeline)
 	{
 		delete pipeline;
 	}
 
 	void GLDevice::SetPipeline(
-		Pipeline* pipeline)
+		IPipeline* pipeline)
 	{
 		static_cast<GLPipeline*>(pipeline)->Use();
 	}

@@ -12,6 +12,12 @@ namespace IwEngine {
 		, viewTransform(iwm::matrix4::identity)
 		, projTransform(iwm::matrix4::create_perspective_field_of_view(
 			1.2f, 1.78f, 0.1f, 1000.0f))
+		, lightColor(iwm::vector3::one)
+		, lightAngle(0.0f)
+		, specularScale(0.0f)
+		, pos(0, -2, -10)
+		, vel(0)
+		, rot(0)
 	{}
 
 	EntityLayer::~EntityLayer() {}
@@ -20,10 +26,10 @@ namespace IwEngine {
 		device = new IwRenderer::GLDevice();
 
 		IwGraphics::ModelLoader loader;
-		IwGraphics::ModelData* obj = loader.Load("res/lamp.obj");
+		IwGraphics::ModelData* obj = loader.Load("res/tree.obj");
 
 		for (size_t i = 0; i < obj->MeshCount; i++) {
-			IwRenderer::IndexBuffer* ib = device->CreateIndexBuffer(
+			IwRenderer::IIndexBuffer* ib = device->CreateIndexBuffer(
 				obj->Indices[i].FaceCount,
 				obj->Indices[i].Faces);
 
@@ -32,27 +38,23 @@ namespace IwEngine {
 			vbl->Push<float>(3);
 			vbl->Push<float>(3);
 
-			IwRenderer::VertexBuffer* vb = device->CreateVertexBuffer(
+			IwRenderer::IVertexBuffer* vb = device->CreateVertexBuffer(
 				obj->Meshes[i].VertexCount * sizeof(IwGraphics::Vertex),
 				obj->Meshes[i].Vertices);
 
-			IwRenderer::VertexArray* va
+			IwRenderer::IVertexArray* va
 				= device->CreateVertexArray(1, &vb, &vbl);
 
 			model.push_back({ va, ib, obj->Indices[i].FaceCount });
 		}
 
-		IwRenderer::VertexShader* vs = device->CreateVertexShader(
+		IwRenderer::IVertexShader* vs = device->CreateVertexShader(
 			IwUtil::ReadFile("res/defaultvs.glsl").c_str());
 
-		IwRenderer::FragmentShader* fs = device->CreateFragmentShader(
+		IwRenderer::IFragmentShader* fs = device->CreateFragmentShader(
 			IwUtil::ReadFile("res/defaultfs.glsl").c_str());
 
 		pipeline = device->CreatePipeline(vs, fs);
-
-		pos = { 0, 0, -10 };
-		vel = { 0, 0, 0 };
-		rot = 0;
 
 		return 0;
 	}
@@ -62,21 +64,38 @@ namespace IwEngine {
 			device->DestroyVertexArray(mesh.Vertices);
 			device->DestroyIndexBuffer(mesh.Indices);
 		}
+
+		device->DestroyPipeline(pipeline);
 	}
 
 	void EntityLayer::Update() {
+		lightAngle += 0.005;
+
+		float x = cos(lightAngle) * 100;
+		float z = sin(lightAngle) * 100;
+
 		modelTransform = iwm::matrix4::create_rotation_y(rot)
-			* iwm::matrix4::create_translation(pos.x - 5, pos.y, pos.z);
+			* iwm::matrix4::create_translation(pos.x, pos.y, pos.z);
 
 		device->SetPipeline(pipeline);
 
-		IwRenderer::PipelineParam* umodel = pipeline->GetParam("model");
-		IwRenderer::PipelineParam* uview = pipeline->GetParam("view");
-		IwRenderer::PipelineParam* uproj = pipeline->GetParam("proj");
+		pipeline->GetParam("model")
+			->SetAsMat4(modelTransform);
 
-		umodel->SetAsMat4(modelTransform);
-		uview ->SetAsMat4(viewTransform);
-		uproj ->SetAsMat4(projTransform);
+		pipeline->GetParam("view")
+			->SetAsMat4(viewTransform);
+
+		pipeline->GetParam("proj")
+			->SetAsMat4(projTransform);
+
+		pipeline->GetParam("lightPos")
+			->SetAsVec3(iwm::vector3(x, 0, z));
+
+		pipeline->GetParam("lightColor")
+			->SetAsVec3(lightColor);
+
+		pipeline->GetParam("specularScale")
+			->SetAsFloat(specularScale);
 
 		for (auto& mesh : model) {
 			device->SetVertexArray(mesh.Vertices);
@@ -92,6 +111,9 @@ namespace IwEngine {
 
 		ImGui::Text("Pos (x, y, z): %f %f %f", pos.x, pos.y, pos.z);
 		ImGui::Text("Rot (y): %f", rot);
+
+		ImGui::SliderFloat3("Light color", &lightColor.x, 0, 1);
+		ImGui::SliderFloat("Specular scale", &specularScale, 0, 10);
 
 		ImGui::End();
 	}

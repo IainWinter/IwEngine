@@ -2,14 +2,13 @@
 
 #include "iw/engine/Layer.h"
 
-#include "iw/renderer/Mesh.h"
 #include "iw/renderer/Device.h"
 #include "iw/renderer/Pipeline.h"
 
 namespace IwEngine {
 	struct Mesh {
-		IwRenderer::VertexArray* Vertices;
-		IwRenderer::IndexBuffer* Indices;
+		IwRenderer::IVertexArray* Vertices;
+		IwRenderer::IIndexBuffer* Indices;
 		unsigned int Count;
 	};
 
@@ -19,10 +18,13 @@ namespace IwEngine {
 	private:
 		iwm::vector3 pos;
 		iwm::vector3 vel;
+		iwm::vector3 lightColor;
 		float rot;
+		float lightAngle;
+		float specularScale;
 		std::vector<Mesh> model;
-		IwRenderer::Device* device;
-		IwRenderer::Pipeline* pipeline;
+		IwRenderer::IDevice* device;
+		IwRenderer::IPipeline* pipeline;
 		iwm::matrix4 modelTransform;
 		iwm::matrix4 viewTransform;
 		iwm::matrix4 projTransform;

@@ -5,7 +5,7 @@
 
 namespace IwRenderer {
 	class IWRENDERER_API GLVertexBuffer
-		: public VertexBuffer
+		: public IVertexBuffer
 	{
 	private:
 		unsigned int m_renderId;

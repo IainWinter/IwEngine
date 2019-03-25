@@ -1,14 +1,15 @@
 #pragma once
 
 #include "GLVertexShader.h"
-#include "GlPipelineParam.h"
 #include "GLFragmentShader.h"
+#include "GLGeometryShader.h"
+#include "GlPipelineParam.h"
 #include "iw/renderer/Pipeline.h"
 #include "iw/util/set/sparse_set.h"
 
 namespace IwRenderer {
 	class IWRENDERER_API GLPipeline
-		: public Pipeline
+		: public IPipeline
 	{
 	private:
 		unsigned int m_program;
@@ -17,9 +18,12 @@ namespace IwRenderer {
 	public:
 		GLPipeline(
 			GLVertexShader* vertexShader,
-			GLFragmentShader* fragmentShader);
+			GLFragmentShader* fragmentShader,
+			GLGeometryShader* geometryShader);
 
-		PipelineParam* GetParam(
+		~GLPipeline();
+
+		IPipelineParam* GetParam(
 			const char* name);
 
 		void Use() const;

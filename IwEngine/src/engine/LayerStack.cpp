@@ -14,14 +14,13 @@ namespace IwEngine {
 	void LayerStack::PushLayer(
 		Layer* layer)
 	{
-		m_layers.emplace(begin() + m_insertIndex, layer);
-		m_insertIndex++;
+		m_layers.emplace_back(layer);
 	}
 
 	void LayerStack::PushOverlay(
 		Layer* overlay)
 	{
-		m_layers.emplace_back(overlay);
+		m_layers.insert(begin(), overlay);
 	}
 
 	void LayerStack::PopLayer(
@@ -30,7 +29,6 @@ namespace IwEngine {
 		iterator itr = std::find(begin(), end(), layer);
 		if (itr != end()) {
 			m_layers.erase(itr);
-			m_insertIndex--;
 		}
 	}
 

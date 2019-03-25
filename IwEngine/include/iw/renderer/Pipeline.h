@@ -4,11 +4,11 @@
 #include "iw/math/matrix4.h"
 
 namespace IwRenderer {
-	class IWRENDERER_API Pipeline {
+	class IWRENDERER_API IPipeline {
 	public:
-		virtual ~Pipeline() {}
+		virtual ~IPipeline() {}
 
-		virtual PipelineParam* GetParam(
+		virtual IPipelineParam* GetParam(
 			const char* name) = 0;
 	};
 }

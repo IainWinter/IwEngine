@@ -7,72 +7,81 @@
 #include "VertexBufferLayout.h"
 #include "VertexShader.h"
 #include "FragmentShader.h"
+#include "GeometryShader.h"
 #include "Pipeline.h"
 
 namespace IwRenderer {
-	class IWRENDERER_API Device {
+	class IWRENDERER_API IDevice {
 	public:
 		virtual void DrawElements(
 			int count,
 			long long offset) = 0;
 
 		//Index buffers
-		virtual IndexBuffer* CreateIndexBuffer(
+		virtual IIndexBuffer* CreateIndexBuffer(
 			size_t size,
 			const void* data = nullptr) = 0;
 
 		virtual void DestroyIndexBuffer(
-			IndexBuffer* indexBuffer) = 0;
+			IIndexBuffer* indexBuffer) = 0;
 
 		virtual void SetIndexBuffer(
-			IndexBuffer* indexBuffer) = 0;
+			IIndexBuffer* indexBuffer) = 0;
 
 		//Vertex buffers
-		virtual VertexBuffer* CreateVertexBuffer(
+		virtual IVertexBuffer* CreateVertexBuffer(
 			size_t size,
 			const void* data = nullptr) = 0;
 
 		virtual void DestroyVertexBuffer(
-			VertexBuffer* vertexBuffer) = 0;
+			IVertexBuffer* vertexBuffer) = 0;
 
 		virtual void SetVertexBuffer(
-			VertexBuffer* vertexBuffer) = 0;
+			IVertexBuffer* vertexBuffer) = 0;
 
 		//Vertex arrays
-		virtual VertexArray* CreateVertexArray(
+		virtual IVertexArray* CreateVertexArray(
 			size_t numBuffers,
-			VertexBuffer** vertexBuffers,
+			IVertexBuffer** vertexBuffers,
 			VertexBufferLayout** vertexLayouts) = 0;
 
 		virtual void DestroyVertexArray(
-			VertexArray* vertexArray) = 0;
+			IVertexArray* vertexArray) = 0;
 
 		virtual void SetVertexArray(
-			VertexArray* vertexArray) = 0;
+			IVertexArray* vertexArray) = 0;
 
 		//Vertex shader
-		virtual VertexShader* CreateVertexShader(
+		virtual IVertexShader* CreateVertexShader(
 			const char* source) = 0;
 
 		virtual void DestroyVertexArray(
-			VertexShader* vertexShader) = 0;
+			IVertexShader* vertexShader) = 0;
 
 		//Fragment shader
-		virtual FragmentShader* CreateFragmentShader(
+		virtual IFragmentShader* CreateFragmentShader(
 			const char* source) = 0;
 
 		virtual void DestroyFragmentShader(
-			FragmentShader* fragmentShader) = 0;
+			IFragmentShader* fragmentShader) = 0;
+
+		//Geometry shader
+		virtual IGeometryShader* CreateGeometryShader(
+			const char* source) = 0;
+
+		virtual void DestroyGeometryShader(
+			IGeometryShader* geometryShader) = 0;
 
 		//Shader pipeline
-		virtual Pipeline* CreatePipeline(
-			VertexShader* vertexShader,
-			FragmentShader* fragmentShader) = 0;
+		virtual IPipeline* CreatePipeline(
+			IVertexShader* vertexShader,
+			IFragmentShader* fragmentShader,
+			IGeometryShader* geometryShader = nullptr) = 0;
 
 		virtual void DestroyPipeline(
-			Pipeline* pipeline) = 0;
+			IPipeline* pipeline) = 0;
 
 		virtual void SetPipeline(
-			Pipeline* pipeline) = 0;
+			IPipeline* pipeline) = 0;
 	};
 }

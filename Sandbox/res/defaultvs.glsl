@@ -1,17 +1,19 @@
 #version 430 core
 
-in vec3 aPosition;
-in vec3 aNormal;
-
-out vec3 FragPos;
-out vec3 Normal;
-
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 proj;
 
+in vec3 position;
+in vec3 normal;
+
+out vData {
+	vec3 Position;
+	vec3 Normal;
+} vertex;
+
 void main() {
-	gl_Position = proj * view * model * vec4(aPosition, 1);
-	FragPos = (model * vec4(aPosition, 1.0)).xyz;
-	Normal = mat3(transpose(inverse(model))) * aNormal;
+	gl_Position = proj * view * model * vec4(position, 1);
+	vertex.Position = (model * vec4(position, 1.0)).xyz;
+	vertex.Normal = mat3(transpose(inverse(model))) * normal;
 }

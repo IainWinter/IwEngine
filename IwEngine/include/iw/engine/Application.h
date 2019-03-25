@@ -51,8 +51,8 @@ namespace IwEngine {
 			_event_t& event)
 		{
 			for (Layer* layer : m_layerStack) {
-				layer->On(event);
-				if (event.Handled) {
+				if (layer->On(event)) {
+					event.Handled = true;
 					break;
 				}
 			}
