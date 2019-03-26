@@ -23,7 +23,7 @@ namespace IwEngine {
 		device = new IwRenderer::GLDevice();
 
 		IwGraphics::ModelLoader loader;
-		IwGraphics::ModelData* obj = loader.Load("res/lamp.obj");
+		IwGraphics::ModelData* obj = loader.Load("res/bear.obj");
 
 		for (size_t i = 0; i < obj->MeshCount; i++) {
 			IwRenderer::IIndexBuffer* ib = device->CreateIndexBuffer(

@@ -2,6 +2,8 @@
 
 #include "iw/util/set/sparse_set.h"
 #include "iw/util/type/type_group.h"
+#include <vector>
+#include <list>
 
 //Idea board 
 //
@@ -15,10 +17,34 @@
 //	-> Chunk(Rigidbody)			-> nullptr
 //	-> Chunk(Velocity, Rigidbody) -> nullptr
 // -> Subspace(Graphics)
-//	-> Chunk(Mesh) -> 
+//	-> Chunk(Mesh)				-> nullptr
 //
 
 namespace IwEntity {
+	using Archetype = unsigned long long;
+	using Category  = unsigned int;
+
+	class Chunk {
+		Archetype archetype;
+
+		void* data;
+		std::size_t size;
+		std::size_t elementSize;
+	};
+
+	class Subspace {
+		Archetype archetype;
+		Category category;
+
+		std::list<Chunk> chunks;
+	};
+
+	class Space {
+		iwu::sparse_set<Category, Subspace*> subspaces;
+	};
+}
+
+namespace IwEntity2 {
 	using ComponentId = unsigned int;
 	using Entity      = unsigned int;
 	using Archetype   = unsigned long long;
