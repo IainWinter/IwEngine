@@ -52,6 +52,7 @@ namespace IwEngine {
 		{
 			for (Layer* layer : m_layerStack) {
 				if (layer->On(event)) {
+					LOG_INFO << "Event handled by " << layer->Name() << " layer";
 					event.Handled = true;
 					break;
 				}

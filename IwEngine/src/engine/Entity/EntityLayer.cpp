@@ -23,7 +23,7 @@ namespace IwEngine {
 		device = new IwRenderer::GLDevice();
 
 		IwGraphics::ModelLoader loader;
-		IwGraphics::ModelData* obj = loader.Load("res/tree.obj");
+		IwGraphics::ModelData* obj = loader.Load("res/lamp.obj");
 
 		for (size_t i = 0; i < obj->MeshCount; i++) {
 			IwRenderer::IIndexBuffer* ib = device->CreateIndexBuffer(
@@ -49,6 +49,8 @@ namespace IwEngine {
 		space.CreateComponent<Transform>(model);
 		space.CreateComponent<Velocity>(model);
 
+		space.GetComponent<Transform>(model).Position.y -= 2.5f;
+
 		IwRenderer::IVertexShader* vs = device->CreateVertexShader(
 			IwUtil::ReadFile("res/defaultvs.glsl").c_str());
 
@@ -72,7 +74,7 @@ namespace IwEngine {
 	}
 
 	void EntityLayer::Update() {
-		lightAngle += 0.005;
+		lightAngle += 0.001;
 
 		float x = cos(lightAngle) * 100;
 		float z = sin(lightAngle) * 100;
