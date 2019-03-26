@@ -4,8 +4,23 @@
 
 #include "iw/renderer/Device.h"
 #include "iw/renderer/Pipeline.h"
+#include "iw/entity/Space.h"
 
 namespace IwEngine {
+	struct Transform {
+		iwm::vector3 Position;
+		iwm::quaternion Rotation;
+
+		iwm::matrix4 GetTransformation() {
+			return iwm::matrix4::create_from_quaternion(Rotation)
+				* iwm::matrix4::create_translation(Position);
+		}
+	};
+
+	struct Velocity {
+		iwm::vector3 Velocity;
+	};
+
 	struct Mesh {
 		IwRenderer::IVertexArray* Vertices;
 		IwRenderer::IIndexBuffer* Indices;
@@ -16,16 +31,17 @@ namespace IwEngine {
 		: public Layer
 	{
 	private:
-		iwm::vector3 pos;
-		iwm::vector3 vel;
+		IwEntity::Space space;
+		IwEntity::Entity model;
+
 		iwm::vector3 lightColor;
-		float rot;
+
 		float lightAngle;
 		float specularScale;
-		std::vector<Mesh> model;
+		std::vector<Mesh> modelMeshes;
 		IwRenderer::IDevice* device;
 		IwRenderer::IPipeline* pipeline;
-		iwm::matrix4 modelTransform;
+
 		iwm::matrix4 viewTransform;
 		iwm::matrix4 projTransform;
 

@@ -15,9 +15,6 @@ namespace IwEngine {
 		, lightColor(iwm::vector3::one)
 		, lightAngle(0.0f)
 		, specularScale(0.0f)
-		, pos(0, -2, -10)
-		, vel(0)
-		, rot(0)
 	{}
 
 	EntityLayer::~EntityLayer() {}
@@ -45,8 +42,12 @@ namespace IwEngine {
 			IwRenderer::IVertexArray* va
 				= device->CreateVertexArray(1, &vb, &vbl);
 
-			model.push_back({ va, ib, obj->Indices[i].FaceCount });
+			modelMeshes.push_back({ va, ib, obj->Indices[i].FaceCount });
 		}
+
+		model = space.CreateEntity();
+		space.CreateComponent<Transform>(model);
+		space.CreateComponent<Velocity>(model);
 
 		IwRenderer::IVertexShader* vs = device->CreateVertexShader(
 			IwUtil::ReadFile("res/defaultvs.glsl").c_str());
@@ -60,12 +61,14 @@ namespace IwEngine {
 	}
 
 	void EntityLayer::Destroy() {
-		for (auto& mesh : model) {
+		for (auto& mesh : modelMeshes) {
 			device->DestroyVertexArray(mesh.Vertices);
 			device->DestroyIndexBuffer(mesh.Indices);
 		}
 
 		device->DestroyPipeline(pipeline);
+
+		space.DestroyEntity(model);
 	}
 
 	void EntityLayer::Update() {
@@ -74,13 +77,16 @@ namespace IwEngine {
 		float x = cos(lightAngle) * 100;
 		float z = sin(lightAngle) * 100;
 
-		modelTransform = iwm::matrix4::create_rotation_y(rot)
-			* iwm::matrix4::create_translation(pos.x, pos.y, pos.z);
+		Transform& modelTransform 
+			= space.GetComponent<Transform>(model);
+
+		Velocity& modelVelocity
+			= space.GetComponent<Velocity>(model);
 
 		device->SetPipeline(pipeline);
 
 		pipeline->GetParam("model")
-			->SetAsMat4(modelTransform);
+			->SetAsMat4(modelTransform.GetTransformation());
 
 		pipeline->GetParam("view")
 			->SetAsMat4(viewTransform);
@@ -97,20 +103,23 @@ namespace IwEngine {
 		pipeline->GetParam("specularScale")
 			->SetAsFloat(specularScale);
 
-		for (auto& mesh : model) {
+		for (auto& mesh : modelMeshes) {
 			device->SetVertexArray(mesh.Vertices);
 			device->SetIndexBuffer(mesh.Indices);
 			device->DrawElements(mesh.Count, 0);
 		}
 
-		pos += vel;
+		modelTransform.Position += modelVelocity.Velocity;
 	}
 
 	void EntityLayer::ImGui() {
 		ImGui::Begin("Entity layer");
 
-		ImGui::Text("Pos (x, y, z): %f %f %f", pos.x, pos.y, pos.z);
-		ImGui::Text("Rot (y): %f", rot);
+		Transform& transform
+			= space.GetComponent<Transform>(model);
+
+		ImGui::Text("Pos (x, y, z): %f %f %f", transform.Position);
+		ImGui::Text("Rot (y): %f", transform.Rotation.euler_angles().y);
 
 		ImGui::SliderFloat3("Light color", &lightColor.x, 0, 1);
 		ImGui::SliderFloat("Specular scale", &specularScale, 0, 10);
@@ -133,21 +142,24 @@ namespace IwEngine {
 	bool EntityLayer::On(
 		MouseButtonEvent& event)
 	{
+		Velocity& velocity
+			= space.GetComponent<Velocity>(model);
+
 		float speed = event.State ? .2f : 0.0f;
 		if (event.Button == IwInput::MOUSE_L_BUTTON) {
-			vel.z = -speed;
+			velocity.Velocity.z = -speed;
 		}
 
 		else if (event.Button == IwInput::MOUSE_R_BUTTON) {
-			vel.z = speed;
+			velocity.Velocity.z = speed;
 		}
 
 		else if (event.Button == IwInput::MOUSE_X1_BUTTON) {
-			vel.x = speed;
+			velocity.Velocity.x = speed;
 		}
 
 		else if (event.Button == IwInput::MOUSE_X2_BUTTON) {
-			vel.x = -speed;
+			velocity.Velocity.x = -speed;
 		}
 
 		return false;
@@ -156,7 +168,11 @@ namespace IwEngine {
 	bool EntityLayer::On(
 		MouseWheelEvent& event)
 	{
-		rot += event.Delta * .1f;
+		Transform& transform
+			= space.GetComponent<Transform>(model);
+
+		transform.Rotation *= iwm::quaternion::create_from_euler_angles(
+			0, event.Delta * .1f, 0);
 
 		return false;
 	}
