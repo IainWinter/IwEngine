@@ -4,6 +4,7 @@
 #include "iw/util/type/type_group.h"
 #include <vector>
 #include <list>
+#include <bitset>
 
 //Idea board 
 //
@@ -12,39 +13,69 @@
 //	i.e. if there are 3 possible components there will be 6 chunks -> 001 010 100 011 110 111
 // 
 // Space
-// -> Subspace(Physics)
-//	-> Chunk(Velocity)			-> Chunk(Velocity) -> nullptr
-//	-> Chunk(Rigidbody)			-> nullptr
-//	-> Chunk(Velocity, Rigidbody) -> nullptr
-// -> Subspace(Graphics)
-//	-> Chunk(Mesh)				-> nullptr
-//
+// -> Chunk(Velocity)  -> Chunk(Velocity) -> nullptr
+// -> Chunk(Rigidbody) -> nullptr
+// -> Chunk(Model)			-> nullptr
 
-namespace IwEntity {
-	using Archetype = unsigned long long;
-	using Category  = unsigned int;
+namespace IwEntity2 {
+	using Archetype = std::bitset<64>;
+	using Entity    = unsigned int;
 
-	class Chunk {
-		Archetype archetype;
-
-		void* data;
-		std::size_t size;
-		std::size_t elementSize;
-	};
-
-	class Subspace {
-		Archetype archetype;
-		Category category;
-
-		std::list<Chunk> chunks;
+	struct Chunk {
+		void* Data;
+		std::size_t Size;
+		std::size_t ElementSize;
 	};
 
 	class Space {
-		iwu::sparse_set<Category, Subspace*> subspaces;
+	private:
+		using ComponentId = iwu::type_group<Space>;;
+		using ChunkList   = std::list<Chunk>;
+
+		iwu::sparse_set<Archetype, ChunkList> m_chunks;
+		iwu::sparse_set<Entity, Archetype> m_entities;
+
+	public:
+		Entity CreateEntity() {
+			static Entity nextEntity = 0;
+			m_entities.emplace(++nextEntity, Archetype());
+
+			return nextEntity;
+		}
+
+		template<
+			typename _component_t>
+		void CreateComponent(
+			Entity entity)
+		{
+			if (!m_entities.contains(entity)) {
+				return;
+			}
+
+			Archetype& archetype = m_entities.at(entity);
+			//If entity isn't empty, need to copy old data into new chunk
+			archetype.set(ComponentId::type<_component_t>, true);
+
+			ChunkList& list = EnsureChunkList(archetype);
+
+
+			Subspace& subspace = EnsureSubspace(components.Category);
+			subspace.CreateComponent<_component_t>(entity);
+		}
+	private:
+		std::list<Chunk>& EnsureChunkList(
+			const Archetype& archetype)
+		{
+			if (!m_chunks.contains(archetype)) {
+				m_chunks.emplace(archetype);
+			}
+
+			return m_chunks.at(archetype);
+		}
 	};
 }
 
-namespace IwEntity2 {
+namespace IwEntity {
 	using ComponentId = unsigned int;
 	using Entity      = unsigned int;
 	using Archetype   = unsigned long long;

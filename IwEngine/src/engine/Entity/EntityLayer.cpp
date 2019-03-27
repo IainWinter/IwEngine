@@ -74,7 +74,7 @@ namespace IwEngine {
 	}
 
 	void EntityLayer::Update() {
-		lightAngle += 0.001;
+		lightAngle += 0.005;
 
 		float x = cos(lightAngle) * 100;
 		float z = sin(lightAngle) * 100;
