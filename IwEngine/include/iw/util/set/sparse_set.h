@@ -261,6 +261,15 @@ namespace iwutil {
 			bi = ai;
 		}
 
+		//add partial sort
+		virtual void sort()
+		{
+			std::sort(m_direct.begin(), m_direct.end());
+			for (_t i = 0; i < size(); i++) {
+				m_sparse[m_direct[i]] = i;
+			}
+		}
+
 		/**
 		* @breif Returns the number at an index.
 		*
