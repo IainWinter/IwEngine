@@ -1,76 +1,79 @@
 #pragma once
 
 #include "iw/util/set/sparse_set.h"
-#include "iw/util/type/type_group.h"
+#include "iw/util/type/family.h"
 #include <vector>
-#include <list>
-#include <bitset>
+#include <tuple>
 
-//Idea board 
-//
-// Space stores a map of subspaces with a category id
-// Subspaces store components of their category in diffrent chunks, 1 for each configuration.
-//	i.e. if there are 3 possible components there will be 6 chunks -> 001 010 100 011 110 111
-// 
-// Space
-// -> Chunk(Velocity)  -> Chunk(Velocity) -> nullptr
-// -> Chunk(Rigidbody) -> nullptr
-// -> Chunk(Model)			-> nullptr
-
-namespace IwEntity2 {
-	using Archetype = std::bitset<64>;
-	using Entity    = unsigned int;
-
-	struct Chunk {
-		void* Data;
-		std::size_t Size;
-		std::size_t ElementSize;
-	};
-
+namespace IwEntity5 {
 	class Space {
-	private:
-		using ComponentId = iwu::type_group<Space>;;
-		using ChunkList   = std::list<Chunk>;
+		using Entity          = unsigned int;
+		using ComponentId     = unsigned int;
+		using ComponentFamily = iwu::family<Space>;
+		using ComponentSet    = iwu::sparse_set<ComponentId>;
 
-		iwu::sparse_set<Archetype, ChunkList> m_chunks;
-		iwu::sparse_set<Entity, Archetype> m_entities;
+		template<
+			typename _component_t>
+		using ComponentSetT = iwu::sparse_set<ComponentId, _component_t>;
+
+	private:
+		std::vector<ComponentSet*> m_components;
 
 	public:
-		Entity CreateEntity() {
-			static Entity nextEntity = 0;
-			m_entities.emplace(++nextEntity, Archetype());
-
-			return nextEntity;
+		template<
+			typename _component_t,
+			typename... _args_t>
+		void CreateComponent(
+			Entity entity,
+			const _args_t&... args)
+		{
+			ComponentSetT<_component_t>& set = EnsureSet<_component_t>();
+			set.emplace(entity, args...);
 		}
 
 		template<
 			typename _component_t>
-		void CreateComponent(
-			Entity entity)
+		void DestroyComponent(
+				Entity entity)
 		{
-			if (!m_entities.contains(entity)) {
-				return;
+			ComponentSet* set = GetSet<_component_t>();
+			if (set) {
+				set->erase(entity);
 			}
-
-			Archetype& archetype = m_entities.at(entity);
-			//If entity isn't empty, need to copy old data into new chunk
-			archetype.set(ComponentId::type<_component_t>, true);
-
-			ChunkList& list = EnsureChunkList(archetype);
-
-
-			Subspace& subspace = EnsureSubspace(components.Category);
-			subspace.CreateComponent<_component_t>(entity);
 		}
 	private:
-		std::list<Chunk>& EnsureChunkList(
-			const Archetype& archetype)
-		{
-			if (!m_chunks.contains(archetype)) {
-				m_chunks.emplace(archetype);
+		template<
+			typename _component_t>
+		ComponentSetT<_component_t>& EnsureSet() {
+			using CSetType = ComponentSetT<_component_t>;
+
+			ComponentId id = ComponentFamily::type<_component_t>;
+			if (id == m_components.size()) {
+				CSetType* set = new CSetType();
+				m_components.push_back(set);
+				return *set;
 			}
 
-			return m_chunks.at(archetype);
+			return *static_cast<CSetType*>(m_components.at(id));
+		}
+
+		template<
+			typename _component_t>
+		ComponentSet* GetSet() {
+			using CSetType = ComponentSetT<_component_t>;
+
+			ComponentId id = ComponentFamily::type<_component_t>;
+			if (SetExists(id)) {
+				return static_cast<CSetType*>(m_components.at(id));
+			}
+
+			return nullptr;
+		}
+
+		bool SetExists(
+			ComponentId id)
+		{
+			return id < m_components.size();
 		}
 	};
 }
@@ -86,12 +89,12 @@ namespace IwEntity {
 
 		template<
 			typename _component_t>
-		using ComponentSet = iwu::sparse_set<Entity, _component_t>;
+			using ComponentSet = iwu::sparse_set<Entity, _component_t>;
 
 		using ComponentMap = iwu::sparse_set<ComponentId,
 			iwu::sparse_set<Entity>*>;
 
-		using ComponentGroup = iwu::type_group<Space>;
+		using ComponentGroup = iwu::family<Space>;
 
 		EntityMap    m_entities;
 		ComponentMap m_components;
@@ -126,9 +129,9 @@ namespace IwEntity {
 		template<
 			typename _component_t,
 			typename... _args_t>
-		void CreateComponent(
-			Entity entity,
-			const _args_t& ... args)
+			void CreateComponent(
+				Entity entity,
+				const _args_t& ... args)
 		{
 			AddComponentToArchetype<_component_t>(entity);
 			ComponentSet<_component_t>& set = EnsureSet<_component_t>();
@@ -137,8 +140,8 @@ namespace IwEntity {
 
 		template<
 			typename _component_t>
-		void DestroyComponent(
-			Entity entity)
+			void DestroyComponent(
+				Entity entity)
 		{
 			RemoveComponentFromArchetype<_component_t>(entity);
 			ComponentSet<_component_t>& set = EnsureSet<_component_t>();
@@ -149,8 +152,8 @@ namespace IwEntity {
 
 		template<
 			typename _component_t>
-		_component_t& GetComponent(
-			Entity entity)
+			_component_t& GetComponent(
+				Entity entity)
 		{
 			ComponentSet<_component_t>& set = EnsureSet<_component_t>();
 			return set.at(entity);
@@ -158,7 +161,7 @@ namespace IwEntity {
 	private:
 		template<
 			typename _component_t>
-		ComponentSet<_component_t>& EnsureSet() {
+			ComponentSet<_component_t>& EnsureSet() {
 			unsigned int id = ComponentGroup::type<_component_t>;
 			ComponentSet<_component_t>* set = nullptr;
 			if (m_components.contains(id)) {
@@ -176,8 +179,8 @@ namespace IwEntity {
 
 		template<
 			typename _component_t>
-		void AddComponentToArchetype(
-			Entity entity)
+			void AddComponentToArchetype(
+				Entity entity)
 		{
 			unsigned int id = ComponentGroup::type<_component_t>;
 			m_entities.at(entity) |= 1UL << id;
@@ -185,8 +188,8 @@ namespace IwEntity {
 
 		template<
 			typename _component_t>
-		void RemoveComponentFromArchetype(
-			Entity entity)
+			void RemoveComponentFromArchetype(
+				Entity entity)
 		{
 			unsigned int id = ComponentGroup::type<_component_t>;
 			m_entities.at(entity) &= ~(1UL << id);
