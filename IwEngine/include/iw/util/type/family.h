@@ -5,7 +5,7 @@
 namespace iwutil {
 	template<
 		typename...>
-	class type_group {
+	class family {
 		inline static std::size_t id;
 
 		template<
