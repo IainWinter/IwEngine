@@ -3,8 +3,6 @@
 #include "iw/engine/Entity/EntityLayer.h"
 #include "iw/entity/Space.h"
 
-#include "iw/util/set/sparse_set.h"
-
 struct AI        { int x; };
 struct Player    { float speed; };
 struct Collider  { int count; };
@@ -55,57 +53,50 @@ public:
 		//
 		//IwEntity3::Entity entity = space.CreateEntity();
 
-		struct Comparator {
-			bool operator()(
-				const int& a, 
-				const int& b) 
-			{
-				return a > b;
-			}
-		};
-
-		iwu::sparse_set<unsigned int> set;
-		
-		set.emplace(3);
-		set.emplace(7);
-		set.emplace(4);
-		set.emplace(1);
-		set.emplace(9);
-		set.sort(0, set.size() - 1, Comparator());
-
-		IwEntity5::Space space;
-		
-		space.CreateComponent<Player>(4, 4.0f);
-
-		space.CreateComponent<AI>(3, 3);
-
-		space.CreateComponent<Collider>(3, 3);
-		space.CreateComponent<Collider>(0, 0);
-		space.CreateComponent<Collider>(2, 2);
-		space.CreateComponent<Collider>(4, 4);
-		space.CreateComponent<Collider>(1, 1);
-
-		space.CreateComponent<Mesh>(1, 1);
-		space.CreateComponent<Mesh>(2, 2);
-		space.CreateComponent<Mesh>(4, 4);
-		space.CreateComponent<Mesh>(3, 3);
-		space.CreateComponent<Mesh>(0, 0);
-
-		space.CreateComponent<Velocity>(4, 4.0f, 4.0f, 4.0f);
-		space.CreateComponent<Velocity>(3, 3.0f, 3.0f, 3.0f);
-
-		space.CreateComponent<Transform>(2, 2.0f, 2.0f, 2.0f);
-		space.CreateComponent<Transform>(0, 0.0f, 0.0f, 0.0f);
-		space.CreateComponent<Transform>(4, 4.0f, 4.0f, 4.0f);
-		space.CreateComponent<Transform>(1, 1.0f, 1.0f, 1.0f);
-		space.CreateComponent<Transform>(3, 3.0f, 3.0f, 3.0f);
-
-		space.DestroyComponent<Mesh>(2);
-
 		PushLayer(new IwEngine::EntityLayer());
+	}
+ 
+	void Run() override {
+		IwEntity5::Space space;
+
+		IwEntity5::Entity player = space.CreateEntity();
+		space.CreateComponent<Player>(player, 4.0f);
+		space.CreateComponent<Collider>(player, 4);
+		space.CreateComponent<Mesh>(player, 4);
+		space.CreateComponent<Velocity>(player, 4.0f, 4.0f, 4.0f);
+		space.CreateComponent<Transform>(player, 4.0f, 4.0f, 4.0f);
+
+		for (int i = 0; i < 100; i++) {
+			IwEntity5::Entity e = space.CreateEntity();
+			space.CreateComponent<Transform>(e, 3.0f, 3.0f, 3.0f);
+
+			if (rand() / (float) RAND_MAX > 0.5f) {
+				space.CreateComponent<AI>(e, 3);
+				space.CreateComponent<Collider>(e, 3);
+				space.CreateComponent<Mesh>(e, 3);
+			}
+
+			else {
+				space.CreateComponent<Collider>(e, 0);
+				space.CreateComponent<Mesh>(e, 1);
+
+			}
+		}
+
+		space.Log();
+
+		space.Sort();
+
+		space.Log();
+
+		Application::Run();
 	}
 };
 
 IwEngine::Application* CreateApplication() {
 	return new Game();
 }
+
+//Space
+// Transform
+//  Entity: Value

@@ -4,11 +4,14 @@
 #include "iw/util/type/family.h"
 #include <vector>
 #include <tuple>
+#include <bitset>
+#include <cmath>
 
 namespace IwEntity5 {
+	using Entity          = unsigned int;
+	using ComponentId     = unsigned int;
+
 	class Space {
-		using Entity          = unsigned int;
-		using ComponentId     = unsigned int;
 		using ComponentFamily = iwu::family<Space>;
 		using ComponentSet    = iwu::sparse_set<ComponentId>;
 
@@ -18,8 +21,38 @@ namespace IwEntity5 {
 
 	private:
 		std::vector<ComponentSet*> m_components;
+		struct EntityVector {
+			std::vector<std::bitset<32>> Entities;
+
+			bool operator()(
+				int a,
+				int b) const
+			{
+				int count = Entities[a].count() - Entities[b].count();
+				if (count == 0) {
+					int size = Entities[a].to_ulong()
+						- Entities[b].to_ulong();
+
+					if (size == 0) {
+						return a < b;
+					}
+
+					return size < 0;
+				}
+
+				return count >= 0;
+			}
+		} m_entities;
 
 	public:
+		Entity CreateEntity() {
+			static Entity next = Entity();
+			m_entities.Entities.push_back(next);
+			m_entities.Entities.back().reset();
+
+			return next++;
+		}
+
 		template<
 			typename _component_t,
 			typename... _args_t>
@@ -28,6 +61,10 @@ namespace IwEntity5 {
 			const _args_t&... args)
 		{
 			ComponentSetT<_component_t>& set = EnsureSet<_component_t>();
+
+			m_entities.Entities[entity].set(
+				ComponentFamily::type<_component_t>, true);
+
 			set.emplace(entity, args...);
 		}
 
@@ -38,7 +75,32 @@ namespace IwEntity5 {
 		{
 			ComponentSet* set = GetSet<_component_t>();
 			if (set) {
+				m_entities.Entities[entity].set(
+					ComponentFamily::type<_component_t>, false);
+
 				set->erase(entity);
+			}
+		}
+
+		void Sort() {
+			for (auto& set : m_components) {
+				set->sort(m_entities);
+			}
+		}
+
+		//temp
+		void Log() {
+			LOG_DEBUG << "Space";
+			for (auto& set : m_components) {
+				LOG_DEBUG << " Set";
+				for (auto e : *set) {
+
+					switch ((int)abs(log10(e + 0.9)) + 1) {
+					case 1: LOG_DEBUG << "  " << e << "   :  " << m_entities.Entities[e]; break;
+					case 2: LOG_DEBUG << "  " << e << "  :  " << m_entities.Entities[e];  break;
+					case 3: LOG_DEBUG << "  " << e << " :  " << m_entities.Entities[e];   break;
+					}
+				}
 			}
 		}
 	private:

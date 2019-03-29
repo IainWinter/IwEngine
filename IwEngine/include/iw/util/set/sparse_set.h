@@ -183,7 +183,7 @@ namespace iwutil {
 				return (*m_direct)[m_index + index];
 			}
 		};
-	private:
+	protected:
 		std::vector<_t> m_sparse;
 		std::vector<_t> m_direct;
 
@@ -263,30 +263,32 @@ namespace iwutil {
 		}
 
 		/**
-		* @breif Sorts the dense part of the sparse set.
-		* Time complexity is that of std::sort
+		* @breif Sorts the sparse set.
+		* Time complexity is that of std::sort.
+		* End index of '0' will be interpreted as 'size()'
 		*
+		* @param comparator Comparison function.
 		* @param begin Index to begin at.
 		* @param end Index to end at.
 		*
 		*/
 		virtual void sort(
-			std::size_t begin,
-			std::size_t end,
-			std::function<bool> comparator)
+			std::function<bool(_t, _t)> comparator
+				= [](_t a, _t b) { return a < b; },
+			std::size_t begin = 0,
+			std::size_t end = 0)
 		{
-			std::sort(m_direct.begin() + begin, m_direct.begin() + end, comparator);
-			for (_t i = 0; i < size(); i++) {
+			if (end == 0) {
+				end = size();
+			}
+
+			std::sort(m_direct.begin() + begin,
+				m_direct.begin() + end, comparator);
+
+			_t count = size();
+			for (_t i = 0; i < count; i++) {
 				m_sparse[m_direct[i]] = i;
 			}
-		}
-
-		/**
-		* @breif Sorts the dense part of the sparse set.
-		* Time complexity is that of std::sort
-		*/
-		void sort() {
-			sort(0, m_direct.size() - 1);
 		}
 
 		/**
@@ -666,6 +668,47 @@ namespace iwutil {
 			m_items[base_t::at(a)] = std::move(m_items[base_t::at(b)]);
 			m_items[base_t::at(b)] = std::move(item);
 			base_t::swap(a, b);
+		}
+
+		/**
+		* @breif Sorts the sparse set.
+		* Time complexity is that of std::sort.
+		*
+		* @param comparator Comparison function.
+		* @param begin Index to begin at.
+		* @param end Index to end at.
+		*
+		*/
+		void sort(
+			std::function<bool(_index_t, _index_t)> comparator
+				= [](_index_t a, _index_t b) { return a < b; },
+			std::size_t begin = 0,
+			std::size_t end = 0) override 
+		{
+			std::vector<_index_t> direct(m_direct);
+			base_t::sort(comparator, begin, end);
+
+			size_t count = size();
+
+			bool sorting = true;
+			_index_t indexA = 0;
+			while (sorting) {
+				while (direct[indexA] == m_direct[indexA]) {
+					indexA++;
+					if (indexA == count) {
+						goto sorted;
+					}
+				}
+
+				_index_t indexB = m_sparse[direct[indexA]];
+
+				std::swap(m_items[indexA], m_items[indexB]);
+				std::swap(direct[indexA], direct[indexB]);
+
+				continue;
+			sorted:
+				sorting = false;
+			}
 		}
 
 		/**
