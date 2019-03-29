@@ -55,6 +55,15 @@ public:
 		//
 		//IwEntity3::Entity entity = space.CreateEntity();
 
+		struct Comparator {
+			bool operator()(
+				const int& a, 
+				const int& b) 
+			{
+				return a > b;
+			}
+		};
+
 		iwu::sparse_set<unsigned int> set;
 		
 		set.emplace(3);
@@ -62,7 +71,7 @@ public:
 		set.emplace(4);
 		set.emplace(1);
 		set.emplace(9);
-		set.sort();
+		set.sort(0, set.size() - 1, Comparator());
 
 		IwEntity5::Space space;
 		

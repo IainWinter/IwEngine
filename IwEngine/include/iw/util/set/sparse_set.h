@@ -5,6 +5,7 @@
 #include <vector>
 #include <algorithm>
 #include <assert.h>
+#include <functional>
 
 namespace iwutil {
 	template<typename...>
@@ -261,13 +262,31 @@ namespace iwutil {
 			bi = ai;
 		}
 
-		//add partial sort
-		virtual void sort()
+		/**
+		* @breif Sorts the dense part of the sparse set.
+		* Time complexity is that of std::sort
+		*
+		* @param begin Index to begin at.
+		* @param end Index to end at.
+		*
+		*/
+		virtual void sort(
+			std::size_t begin,
+			std::size_t end,
+			std::function<bool> comparator)
 		{
-			std::sort(m_direct.begin(), m_direct.end());
+			std::sort(m_direct.begin() + begin, m_direct.begin() + end, comparator);
 			for (_t i = 0; i < size(); i++) {
 				m_sparse[m_direct[i]] = i;
 			}
+		}
+
+		/**
+		* @breif Sorts the dense part of the sparse set.
+		* Time complexity is that of std::sort
+		*/
+		void sort() {
+			sort(0, m_direct.size() - 1);
 		}
 
 		/**
