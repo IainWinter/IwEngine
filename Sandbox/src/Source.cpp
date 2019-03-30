@@ -60,34 +60,33 @@ public:
 		IwEntity5::Space space;
 
 		IwEntity5::Entity player = space.CreateEntity();
-		space.CreateComponent<Player>(player, 4.0f);
+		space.CreateComponent<Transform>(player, 4.0f, 4.0f, 4.0f);
+		space.CreateComponent<Velocity>(player, 4.0f, 4.0f, 4.0f);
 		space.CreateComponent<Collider>(player, 4);
 		space.CreateComponent<Mesh>(player, 4);
-		space.CreateComponent<Velocity>(player, 4.0f, 4.0f, 4.0f);
-		space.CreateComponent<Transform>(player, 4.0f, 4.0f, 4.0f);
+		space.CreateComponent<Player>(player, 4.0f);
 
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < 10; i++) {
 			IwEntity5::Entity e = space.CreateEntity();
 			space.CreateComponent<Transform>(e, 3.0f, 3.0f, 3.0f);
 
-			if (rand() / (float) RAND_MAX > 0.5f) {
+			if (rand() / (float)RAND_MAX > 0.6f) {
 				space.CreateComponent<AI>(e, 3);
+			}
+
+			if (rand() / (float)RAND_MAX > 0.5f) {
 				space.CreateComponent<Collider>(e, 3);
+			}
+
+			if (rand() / (float)RAND_MAX > 0.5f) {
 				space.CreateComponent<Mesh>(e, 3);
-			}
-
-			else {
-				space.CreateComponent<Collider>(e, 0);
-				space.CreateComponent<Mesh>(e, 1);
-
-			}
+			}			
 		}
 
-		space.Log();
-
 		space.Sort();
-
 		space.Log();
+
+		auto itr = space.GetComponents<Transform, Collider>();
 
 		Application::Run();
 	}

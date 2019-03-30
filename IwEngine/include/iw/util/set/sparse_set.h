@@ -688,10 +688,12 @@ namespace iwutil {
 			std::vector<_index_t> direct(m_direct);
 			base_t::sort(comparator, begin, end);
 
-			size_t count = size();
+			_index_t indexA = 0;
+			std::size_t count = size();
+
+			int i = 0;
 
 			bool sorting = true;
-			_index_t indexA = 0;
 			while (sorting) {
 				while (direct[indexA] == m_direct[indexA]) {
 					indexA++;
@@ -699,6 +701,8 @@ namespace iwutil {
 						goto sorted;
 					}
 				}
+
+				i++;
 
 				_index_t indexB = m_sparse[direct[indexA]];
 
@@ -768,7 +772,7 @@ namespace iwutil {
 		iterator find(
 			const _index_t& index)
 		{
-			return contains(index) ? end() - base_t::at(index) : end();
+			return contains(index) ? begin() + base_t::at(index) : end();
 		}
 
 		/**
