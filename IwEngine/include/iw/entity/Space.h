@@ -154,16 +154,19 @@ namespace IwEntity5 {
 			ComponentSetT<_c>* set = GetSet<_c>();
 			assert(set != nullptr);
 
-			std::size_t count = m_entities.Entities.size();
-			for (Entity entity = 0; entity < count ; entity++) {
-				Archetype entityArchetype = m_entities.Entities[entity];
-				entityArchetype &= archetype;
-				if (entityArchetype == archetype) {
-					return set->find(entity);
+			auto itr = set->begin();
+			auto end = set->end();
+			while (itr != end) {
+				Archetype ea = m_entities.Entities[set->map(itr.index())];
+				ea &= archetype;
+				if (ea == archetype) {
+					return itr;
 				}
+
+				itr++;
 			}
 
-			return set->end();
+			return end;
 		}
 
 		bool SetExists(

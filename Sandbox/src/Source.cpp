@@ -80,13 +80,17 @@ public:
 
 			if (rand() / (float)RAND_MAX > 0.5f) {
 				space.CreateComponent<Mesh>(e, 3);
-			}			
+			}
+
+			if (rand() / (float)RAND_MAX > 0.5f) {
+				space.CreateComponent<Velocity>(e, 1.0f, 1.0f, 1.0f);
+			}
 		}
 
 		space.Sort();
 		space.Log();
 
-		auto itr = space.GetComponents<Transform, Collider>();
+		auto itr = space.GetComponents<AI, Transform>();
 
 		Application::Run();
 	}
