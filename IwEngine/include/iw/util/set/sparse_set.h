@@ -338,6 +338,12 @@ namespace iwutil {
 			return 0 <= val && val < m_sparse.size() && m_sparse[val] != EMPTY_VALUE;
 		}
 
+		_t map(
+			const _t& index)
+		{
+			return m_direct[index];
+		}
+
 		/**
 		* @breif Clears the set.
 		*/
@@ -564,6 +570,10 @@ namespace iwutil {
 					const index_type& index)
 				{
 					return (*m_direct)[m_index + index];
+				}
+
+				inline index_type index() {
+					return m_index;
 				}
 		};
 
