@@ -66,31 +66,31 @@ public:
 		space.CreateComponent<Mesh>(player, 4);
 		space.CreateComponent<Player>(player, 4.0f);
 
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 1000; i++) {
 			IwEntity5::Entity e = space.CreateEntity();
 			space.CreateComponent<Transform>(e, 3.0f, 3.0f, 3.0f);
 
-			if (rand() / (float)RAND_MAX > 0.6f) {
-				space.CreateComponent<AI>(e, 3);
+			if (rand() / (float)RAND_MAX > 0.5f) {
+				space.CreateComponent<Collider>(e, 1);
 			}
 
 			if (rand() / (float)RAND_MAX > 0.5f) {
-				space.CreateComponent<Collider>(e, 3);
-			}
-
-			if (rand() / (float)RAND_MAX > 0.5f) {
-				space.CreateComponent<Mesh>(e, 3);
+				space.CreateComponent<Mesh>(e, 1);
 			}
 
 			if (rand() / (float)RAND_MAX > 0.5f) {
 				space.CreateComponent<Velocity>(e, 1.0f, 1.0f, 1.0f);
+			}
+
+			if (rand() / (float)RAND_MAX > 0.96f) {
+				space.CreateComponent<AI>(e, 3);
 			}
 		}
 
 		space.Sort();
 		space.Log();
 
-		auto itr = space.GetComponents<AI, Transform>();
+		auto itr = space.GetComponents<AI, Velocity>();
 
 		Application::Run();
 	}

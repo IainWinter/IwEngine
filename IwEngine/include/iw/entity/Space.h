@@ -11,7 +11,7 @@
 namespace IwEntity5 {
 	using Entity      = unsigned int;
 	using ComponentId = unsigned int;
-	using Archetype   = std::bitset<32>;
+	using Archetype   = unsigned int;
 
 	class Space {
 		using ComponentFamily = iwu::family<Space>;
@@ -22,19 +22,23 @@ namespace IwEntity5 {
 		using ComponentSetT = iwu::sparse_set<ComponentId, _c>;
 
 	private:
-		std::vector<ComponentSet*> m_components;
-		struct EntityVector {
-			std::vector<Archetype> Entities;
+		struct EntityData {
+			Archetype Archetype;
+			std::size_t Count;
+		};
 
+		struct EntityVector {
+			std::vector<EntityData> Entities;
+
+			//Sorts size by greatest to least and then
+			//entity id from least to greatest
 			bool operator()(
 				int a,
 				int b) const
 			{
-				int count = Entities[a].count() - Entities[b].count();
+				int count = Entities[a].Count - Entities[b].Count;
 				if (count == 0) {
-					int size = Entities[a].to_ulong()
-						- Entities[b].to_ulong();
-
+					int size = Entities[a].Archetype - Entities[b].Archetype;
 					if (size == 0) {
 						return a < b;
 					}
@@ -44,14 +48,16 @@ namespace IwEntity5 {
 
 				return count >= 0;
 			}
-		} m_entities;
+		};
+
+		std::vector<ComponentSet*> m_components;
+		EntityVector m_entities;
 
 	public:
 		Entity CreateEntity() {
 			static Entity next = Entity();
 
-			m_entities.Entities.push_back(next);
-			m_entities.Entities.back().reset();
+			m_entities.Entities.push_back({ 0, 0 });
 
 			return next++;
 		}
@@ -65,8 +71,7 @@ namespace IwEntity5 {
 		{
 			ComponentSetT<_c>& set = EnsureSet<_c>();
 
-			m_entities.Entities[entity].set(
-				ComponentFamily::type<_c>, true);
+			m_entities.Entities[entity].Archetype |= GetArchetype<_c>();
 
 			set.emplace(entity, args...);
 		}
@@ -78,8 +83,8 @@ namespace IwEntity5 {
 		{
 			ComponentSet* set = GetSet<_c>();
 			if (set) {
-				m_entities.Entities[entity].set(
-					ComponentFamily::type<_c>, false);
+				m_entities.Entities[entity].Archetype
+					&= ~(GetArchetype<_c>());
 
 				set->erase(entity);
 			}
@@ -111,9 +116,9 @@ namespace IwEntity5 {
 
 				for (auto& e : *set) {
 					switch ((int)abs(log10(e + 0.9)) + 1) {
-					case 1: LOG_DEBUG << "  " << e << "   :  " << m_entities.Entities[e]; break;
-					case 2: LOG_DEBUG << "  " << e << "  :  " << m_entities.Entities[e];  break;
-					case 3: LOG_DEBUG << "  " << e << " :  " << m_entities.Entities[e];   break;
+					case 1: LOG_DEBUG << "  " << e << "   :  " << std::bitset<32>(m_entities.Entities[e].Archetype); break;
+					case 2: LOG_DEBUG << "  " << e << "  :  "  << std::bitset<32>(m_entities.Entities[e].Archetype); break;
+					case 3: LOG_DEBUG << "  " << e << " :  "   << std::bitset<32>(m_entities.Entities[e].Archetype); break;
 					}
 				}
 			}
@@ -157,9 +162,9 @@ namespace IwEntity5 {
 			auto itr = set->begin();
 			auto end = set->end();
 			while (itr != end) {
-				Archetype ea = m_entities.Entities[set->map(itr.index())];
-				ea &= archetype;
-				if (ea == archetype) {
+				EntityData ed = m_entities.Entities[set->map(itr.index())];
+				ed.Archetype &= archetype;
+				if (ed.Archetype == archetype) {
 					return itr;
 				}
 
@@ -180,8 +185,6 @@ namespace IwEntity5 {
 		Archetype GetArchetype() {
 			return ((1 << ComponentFamily::type<_components_t>) | ...);
 		}
-
-
 	};
 }
 
