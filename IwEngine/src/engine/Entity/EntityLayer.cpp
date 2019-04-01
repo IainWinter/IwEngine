@@ -19,7 +19,7 @@ namespace IwEngine {
 
 	EntityLayer::~EntityLayer() {}
 
-	int EntityLayer::Initilize() {
+	int EntityLayer::Initialize() {
 		device = new IwRenderer::GLDevice();
 
 		IwGraphics::ModelLoader loader;
@@ -49,7 +49,7 @@ namespace IwEngine {
 		space.CreateComponent<Transform>(model);
 		space.CreateComponent<Velocity>(model);
 
-		space.GetComponent<Transform>(model).Position.y -= 2.5f;
+		std::get<0>(space.GetComponents<Transform>())->Position.z -= 10.0f;
 
 		IwRenderer::IVertexShader* vs = device->CreateVertexShader(
 			IwUtil::ReadFile("res/defaultvs.glsl").c_str());
@@ -70,7 +70,7 @@ namespace IwEngine {
 
 		device->DestroyPipeline(pipeline);
 
-		space.DestroyEntity(model);
+		//space.DestroyEntity(model);
 	}
 
 	void EntityLayer::Update() {
@@ -79,11 +79,10 @@ namespace IwEngine {
 		float x = cos(lightAngle) * 100;
 		float z = sin(lightAngle) * 100;
 
-		Transform& modelTransform 
-			= space.GetComponent<Transform>(model);
+		auto components = space.GetComponents<Transform, Velocity>();
 
-		Velocity& modelVelocity
-			= space.GetComponent<Velocity>(model);
+		Transform& modelTransform = *std::get<0>(components);
+		Velocity&  modelVelocity  = *std::get<1>(components);
 
 		device->SetPipeline(pipeline);
 
@@ -117,8 +116,8 @@ namespace IwEngine {
 	void EntityLayer::ImGui() {
 		ImGui::Begin("Entity layer");
 
-		Transform& transform
-			= space.GetComponent<Transform>(model);
+		auto components = space.GetComponents<Transform>();
+		Transform& transform = *std::get<0>(components);
 
 		ImGui::Text("Pos (x, y, z): %f %f %f", transform.Position);
 		ImGui::Text("Rot (y): %f", transform.Rotation.euler_angles().y);
@@ -144,8 +143,8 @@ namespace IwEngine {
 	bool EntityLayer::On(
 		MouseButtonEvent& event)
 	{
-		Velocity& velocity
-			= space.GetComponent<Velocity>(model);
+		auto components = space.GetComponents<Velocity>();
+		Velocity& velocity = *std::get<0>(components);
 
 		float speed = event.State ? .2f : 0.0f;
 		if (event.Button == IwInput::MOUSE_L_BUTTON) {
@@ -170,8 +169,8 @@ namespace IwEngine {
 	bool EntityLayer::On(
 		MouseWheelEvent& event)
 	{
-		Transform& transform
-			= space.GetComponent<Transform>(model);
+		auto components = space.GetComponents<Transform>();
+		Transform& transform = *std::get<0>(components);
 
 		transform.Rotation *= iwm::quaternion::create_from_euler_angles(
 			0, event.Delta * .1f, 0);

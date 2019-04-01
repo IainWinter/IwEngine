@@ -1,6 +1,7 @@
 #include "iw/engine/Application.h"
 #include "iw/log/logger.h"
 #include "iw/events/functional/callback.h"
+#include "iw/engine/Time.h"
 
 namespace IwEngine {
 	Application::Application()
@@ -12,7 +13,7 @@ namespace IwEngine {
 		delete m_window;
 	}
 
-	int Application::Initilize(
+	int Application::Initialize(
 		const WindowOptions& windowOptions)
 	{
 		LOG_SINK(iwlog::stdout_sink, iwlog::INFO);
@@ -22,9 +23,9 @@ namespace IwEngine {
 		m_window->SetCallback(
 			iwevents::make_callback(&Application::HandleEvent, this));
 		int status;
-		LOG_DEBUG << "Initilizing window...";
-		if (status = m_window->Initilize(windowOptions)) {
-			LOG_ERROR << "Window failed to initilize with error code "
+		LOG_DEBUG << "Initializing window...";
+		if (status = m_window->Initialize(windowOptions)) {
+			LOG_ERROR << "Window failed to initialize with error code "
 				<< status;
 			return status;
 		}
@@ -39,10 +40,10 @@ namespace IwEngine {
 		m_layerStack.PushOverlay(m_imguiLayer);
 
 		for (Layer* layer : m_layerStack) {
-			LOG_DEBUG << "Initilizing " << layer->Name() << " layer...";
-			if (status = layer->Initilize()) {
+			LOG_DEBUG << "Initializing " << layer->Name() << " layer...";
+			if (status = layer->Initialize()) {
 				LOG_ERROR << layer->Name()
-					<< " layer initilization failed with error code "
+					<< " layer initialization failed with error code "
 					<< status;
 				return status;
 			}
@@ -60,7 +61,11 @@ namespace IwEngine {
 		}
 	}
 
+	long long time = 0;
+
 	void Application::Update() {
+		Time::Update();
+
 		m_window->Clear();
 
 		for (Layer* layer : m_layerStack) {	
@@ -75,6 +80,10 @@ namespace IwEngine {
 
 		m_window->Render();
 		m_window->Update();
+
+		time += Time::DeltaTime().count();
+
+		LOG_INFO << time / Time::Ticks() / 1000000000.0;
 	}
 
 	void Application::Destroy() {

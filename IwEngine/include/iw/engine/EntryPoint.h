@@ -32,7 +32,7 @@ int CALLBACK WinMain(
 
 	IwEngine::Application* app = CreateApplication();
 	int status;
-	if (status = app->Initilize(options)) {
+	if (status = app->Initialize(options)) {
 		LOG_ERROR
 			<< "Application initilization failed with error code "
 			<< status;
@@ -57,7 +57,7 @@ int CALLBACK WinMain(
 //
 //  Constructor
 //       |
-//   Initilize
+//   Initialize
 //       |
 //     Start
 //       |   

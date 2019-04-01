@@ -15,7 +15,7 @@ namespace IwEngine {
 		return new WindowsWindow();
 	}
 
-	int WindowsWindow::Initilize(
+	int WindowsWindow::Initialize(
 		const WindowOptions& options)
 	{
 		m_instance = GetModuleHandle(NULL);

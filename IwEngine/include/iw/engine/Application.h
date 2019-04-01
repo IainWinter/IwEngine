@@ -19,7 +19,7 @@ namespace IwEngine {
 		Application();
 		virtual ~Application();
 
-		virtual int Initilize(
+		virtual int Initialize(
 			const WindowOptions& windowOptions);
 
 		virtual void Run();

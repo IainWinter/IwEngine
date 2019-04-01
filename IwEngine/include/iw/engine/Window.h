@@ -27,7 +27,7 @@ namespace IwEngine {
 
 		virtual ~IWindow() {}
 
-		virtual int Initilize(
+		virtual int Initialize(
 			const WindowOptions& options) = 0;
 
 		virtual void Destroy() = 0;
@@ -67,7 +67,7 @@ namespace IwEngine {
 	public:
 		virtual ~Window() {}
 
-		virtual int Initilize(
+		virtual int Initialize(
 			const WindowOptions& options) = 0;
 
 		virtual void Destroy()   = 0;

@@ -11,7 +11,7 @@ namespace IwEngine {
 
 	ImGuiLayer::~ImGuiLayer() {}
 
-	int ImGuiLayer::Initilize() {
+	int ImGuiLayer::Initialize() {
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
 		ImGui::StyleColorsDark();

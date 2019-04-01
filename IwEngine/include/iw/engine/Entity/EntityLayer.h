@@ -33,15 +33,13 @@ namespace IwEngine {
 	private:
 		IwEntity::Space space;
 		IwEntity::Entity model;
-
-		iwm::vector3 lightColor;
-
-		float lightAngle;
-		float specularScale;
-		std::vector<Mesh> modelMeshes;
 		IwRenderer::IDevice* device;
 		IwRenderer::IPipeline* pipeline;
 
+		iwm::vector3 lightColor;
+		float lightAngle;
+		float specularScale;
+		std::vector<Mesh> modelMeshes;
 		iwm::matrix4 viewTransform;
 		iwm::matrix4 projTransform;
 
@@ -49,10 +47,10 @@ namespace IwEngine {
 		EntityLayer();
 		~EntityLayer();
 
-		int Initilize() override;
-		void Destroy() override;
-		void Update() override;
-		void ImGui() override;
+		int  Initialize() override;
+		void Destroy()   override;
+		void Update()    override;
+		void ImGui()     override;
 
 		bool On(WindowResizedEvent& event);
 		bool On(MouseMovedEvent&    event);

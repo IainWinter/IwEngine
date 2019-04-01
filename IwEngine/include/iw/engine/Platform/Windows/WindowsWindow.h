@@ -14,7 +14,7 @@ namespace IwEngine {
 		HGLRC     m_context;
 
 	public:
-		int Initilize(
+		int Initialize(
 			const WindowOptions& options) override;
 
 		void Destroy() override;
