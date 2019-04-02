@@ -112,7 +112,6 @@ namespace IwEngine {
 		}
 
 		modelTransform.Position += modelVelocity.Velocity;
-		LOG_INFO << modelVelocity.Velocity;
 	}
 
 	void EntityLayer::ImGui() {
