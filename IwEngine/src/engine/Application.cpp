@@ -58,14 +58,13 @@ namespace IwEngine {
 		m_running = true;
 		while (m_running) {
 			Update();
+			Time::Update();
 		}
 	}
 
 	long long time = 0;
 
 	void Application::Update() {
-		Time::Update();
-
 		m_window->Clear();
 
 		for (Layer* layer : m_layerStack) {	
@@ -80,10 +79,6 @@ namespace IwEngine {
 
 		m_window->Render();
 		m_window->Update();
-
-		time += Time::DeltaTime().count();
-
-		LOG_INFO << time / Time::Ticks() / 1000000000.0;
 	}
 
 	void Application::Destroy() {

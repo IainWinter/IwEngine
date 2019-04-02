@@ -12,9 +12,10 @@ namespace IwEngine {
 		ImGuiLayer();
 		~ImGuiLayer();
 
-		int Initialize() override;
-		void Destroy() override;
-		void ImGui() override;
+		int  Initialize() override;
+		void Update()     override;
+		void Destroy()    override;
+		void ImGui()      override;
 
 		void Begin();
 		void End();

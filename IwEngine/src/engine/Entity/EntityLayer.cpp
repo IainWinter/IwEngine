@@ -5,6 +5,7 @@
 #include "iw/log/logger.h"
 #include "imgui/imgui.h"
 #include "iw/util/io/File.h"
+#include "iw/engine/Time.h"
 
 namespace IwEngine {
 	EntityLayer::EntityLayer()
@@ -74,7 +75,7 @@ namespace IwEngine {
 	}
 
 	void EntityLayer::Update() {
-		lightAngle += 0.0005;
+		lightAngle += Time::DeltaTime();
 
 		float x = cos(lightAngle) * 100;
 		float z = sin(lightAngle) * 100;
@@ -111,6 +112,7 @@ namespace IwEngine {
 		}
 
 		modelTransform.Position += modelVelocity.Velocity;
+		LOG_INFO << modelVelocity.Velocity;
 	}
 
 	void EntityLayer::ImGui() {
@@ -146,7 +148,8 @@ namespace IwEngine {
 		auto components = space.GetComponents<Velocity>();
 		Velocity& velocity = *std::get<0>(components);
 
-		float speed = event.State ? .2f : 0.0f;
+		float speed = event.State ? Time::DeltaTime() * 15 : 0.0f;
+
 		if (event.Button == IwInput::MOUSE_L_BUTTON) {
 			velocity.Velocity.z = -speed;
 		}

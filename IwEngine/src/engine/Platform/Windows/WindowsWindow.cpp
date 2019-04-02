@@ -142,6 +142,8 @@ namespace IwEngine {
 		glEnable(GL_DEPTH_TEST);
 		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+		wglSwapIntervalEXT(0);
+		
 		return 0;
 	}
 

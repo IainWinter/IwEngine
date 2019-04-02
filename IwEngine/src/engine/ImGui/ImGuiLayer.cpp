@@ -2,7 +2,7 @@
 #include "iw/log/logger.h"
 #include "imgui/imgui.h"
 #include "OpenGL/imgui_impl_opengl3.h"
-#include "gl/glew.h" //Get this outta here
+#include "iw/engine/Time.h"
 
 namespace IwEngine {
 	ImGuiLayer::ImGuiLayer()
@@ -28,6 +28,10 @@ namespace IwEngine {
 		ImGui::DestroyContext();
 	}
 
+	void ImGuiLayer::Update() {
+		ImGui::GetIO().DeltaTime = Time::DeltaTime();
+	}
+
 	void ImGuiLayer::ImGui() {
 		ImGui::Begin("Hello, world!");
 
@@ -38,7 +42,9 @@ namespace IwEngine {
 		ImGui::SameLine();
 		ImGui::Text("counter = %d", counter);
 
-		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f
+			/ ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+
 		ImGui::End();
 	}
 

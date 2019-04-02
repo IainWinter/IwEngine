@@ -3,20 +3,22 @@
 namespace IwEngine {
 	namespace Time {
 		static Time time = std::chrono::high_resolution_clock::now();
+		static Duration deltaTime;
 		static int ticks = 0;
 
 		Time Update() {
 			ticks++;
+			deltaTime = std::chrono::high_resolution_clock::now() - time;
 			time = std::chrono::high_resolution_clock::now();
 			return time;
 		}
 
-		IWENGINE_API Tick Ticks() {
+		int Ticks() {
 			return ticks;
 		}
 
-		Duration DeltaTime() {
-			return std::chrono::high_resolution_clock::now() - time;
+		double DeltaTime() {
+			return deltaTime.count() / 1000000000.0;
 		}
 	}
 }
