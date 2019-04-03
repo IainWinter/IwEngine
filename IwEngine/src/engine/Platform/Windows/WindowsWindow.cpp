@@ -243,7 +243,9 @@ namespace IwEngine {
 		Event* e;
 		switch (msg) {
 			case WM_SIZE:
-				e = &Translate<WindowResizedEvent>(msg, wParam, lParam);
+				WindowResizedEvent* wre;
+				e = wre = &Translate<WindowResizedEvent>(msg, wParam, lParam);
+				glViewport(0, 0, wre->Width, wre->Height); //temp line
 				break;
 			case WM_CLOSE:
 				e = &Event(WindowClosed);

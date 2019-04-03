@@ -61,6 +61,14 @@ project "IwEngine"
 		"IMGUI_IMPL_OPENGL_LOADER_GLEW"
 	}
 
+	postbuildcommands  {
+		"xcopy /q /y /f \"" .. assimpdir  .. "/bin/%{cfg.buildcfg}/assimp-vc140-mt.dll\" \"" .. sndbxdir .. bindir .. "\"",
+		"xcopy /q /y /f \"" .. iwengdir   .. bindir .. "/IwEngine.dll\" \""                  .. sndbxdir .. bindir .. "\"",
+		"xcopy /q /y /f \"" .. glewdir    .. bindir .. "/GLEW.dll\" \""                      .. sndbxdir .. bindir .. "\"",
+		"xcopy /q /y /f /i \"" .. sndbxdir .. resdir .. "\" \"" .. sndbxdir .. blddir .. resdir .. "\"",
+		"xcopy /q /y /f /i \"" .. sndbxdir .. resdir .. "\" \"" .. sndbxdir .. bindir .. resdir .. "\""
+	}
+
 	filter "system:windows"
 		cppdialect "C++17"
 		systemversion "latest"
@@ -103,14 +111,6 @@ project "Sandbox"
 		cppdialect "C++17"
 		systemversion "latest"
 		defines "IW_PLATFORM_WINDOWS"
-
-		prebuildcommands {
-			"xcopy /q /y /f \"" .. assimpdir  .. "/bin/%{cfg.buildcfg}/assimp-vc140-mt.dll\" \"" .. sndbxdir .. bindir .. "\"",
-			"xcopy /q /y /f \"" .. iwengdir   .. bindir .. "/IwEngine.dll\" \""                  .. sndbxdir .. bindir .. "\"",
-			"xcopy /q /y /f \"" .. glewdir    .. bindir .. "/GLEW.dll\" \""                      .. sndbxdir .. bindir .. "\"",
-			"xcopy /q /y /f /i \"" .. sndbxdir .. resdir .. "\" \"" .. sndbxdir .. blddir .. resdir .. "\"",
-			"xcopy /q /y /f /i \"" .. sndbxdir .. resdir .. "\" \"" .. sndbxdir .. bindir .. resdir .. "\""
-		}
 
 	filter "configurations:Debug"
 		defines "IW_DEBUG"

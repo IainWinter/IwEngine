@@ -1,9 +1,10 @@
 #pragma once
 
+#include "iw./util/iwutil.h"
 #include <string>
 #include <vector>
 
-namespace IwUtil {
+namespace iwutil {
 	std::string ReadFile(
 		const char* filePath);
 

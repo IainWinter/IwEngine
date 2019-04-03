@@ -23,7 +23,7 @@ namespace IwInput {
 			DeviceType deviceType,
 			int windowId)
 			: Device(deviceType)
-			, Name(InputName::INPUT_COUNT)
+			, Name(INPUT_NONE)
 			, State(0.0f)
 			, WindowId(windowId)
 		{}

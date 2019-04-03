@@ -53,10 +53,10 @@ namespace IwEngine {
 		std::get<0>(space.GetComponents<Transform>())->Position.z -= 10.0f;
 
 		IwRenderer::IVertexShader* vs = device->CreateVertexShader(
-			IwUtil::ReadFile("res/defaultvs.glsl").c_str());
+			iwu::ReadFile("res/defaultvs.glsl").c_str());
 
 		IwRenderer::IFragmentShader* fs = device->CreateFragmentShader(
-			IwUtil::ReadFile("res/defaultfs.glsl").c_str());
+			iwu::ReadFile("res/defaultfs.glsl").c_str());
 
 		pipeline = device->CreatePipeline(vs, fs);
 
@@ -112,7 +112,6 @@ namespace IwEngine {
 		}
 
 		modelTransform.Position += modelVelocity.Velocity;
-		LOG_INFO << modelVelocity.Velocity;
 	}
 
 	void EntityLayer::ImGui() {

@@ -4,14 +4,6 @@
 #include "iw/log/logger.h"
 
 namespace IwInput {
-	unsigned int WindowsMouse::buttonMask[5] = {
-		MK_LBUTTON,
-		MK_RBUTTON,
-		MK_MBUTTON,
-		MK_XBUTTON1,
-		MK_XBUTTON2
-	};
-
 	Mouse* Mouse::Create(
 		InputCallback& callback)
 	{
@@ -27,63 +19,61 @@ namespace IwInput {
 		OsEvent& event)
 	{
 		InputEvent input(MOUSE, event.WindowId);
-		short buttons = 0;
 		switch (event.Message) {
 		case WM_LBUTTONDOWN:
+			input.Name  = MOUSE_L_BUTTON;
+			input.State = true;
+			break;
 		case WM_RBUTTONDOWN:
+			input.Name  = MOUSE_R_BUTTON;
+			input.State = true;
+			break;
 		case WM_MBUTTONDOWN:
-			buttons = event.WParam;
+			input.Name  = MOUSE_M_BUTTON;
 			input.State = true;
 			break;
 		case WM_XBUTTONDOWN:
-			buttons = LOWORD(event.WParam);
+			input.Name  = (InputName)(MOUSE_X1_BUTTON + HIWORD(event.WParam) - 1);
 			input.State = true;
 			break;
 		case WM_LBUTTONUP:
-			buttons = MK_LBUTTON | event.WParam;
+			input.Name  = MOUSE_L_BUTTON;
 			input.State = false;
 			break;
 		case WM_RBUTTONUP:
-			buttons = MK_RBUTTON | event.WParam;
+			input.Name  = MOUSE_R_BUTTON;
 			input.State = false;
 			break;
 		case WM_MBUTTONUP:
-			buttons = MK_MBUTTON | event.WParam;
+			input.Name  = MOUSE_M_BUTTON;
 			input.State = false;
 			break;
 		case WM_XBUTTONUP:
-			buttons = MK_XBUTTON1 | MK_XBUTTON2 | LOWORD(event.WParam);
+			input.Name  = (InputName)(MOUSE_X1_BUTTON + HIWORD(event.WParam) - 1);
 			input.State = false;
 			break;
 		}
 
-		if (buttons) {
-			input.Name = MOUSE_L_BUTTON;
-			for (int i = 0; i < 5; i++) {
-				if (buttonMask[i] & buttons) {
-					Callback(input);
-				}
-
-				input.Name = (InputName)(input.Name + 1);
-			}
+		if (input.Name != INPUT_NONE) {
+			Callback(input);
 		}
 
 		if (event.Message == WM_MOUSEWHEEL) {
-			input.Name = MOUSE_WHEEL;
+			input.Name  = MOUSE_WHEEL;
 			input.State = (short)HIWORD(event.WParam) / (float)WHEEL_DELTA;
 
 			Callback(input);
 		}
 
-		if (   buttons 
+		if (   input.Name != INPUT_NONE 
 			|| event.Message == WM_MOUSEMOVE
 			|| event.Message == WM_MOUSEWHEEL)
 		{
-			input.Name = MOUSE_X_POS;
+			input.Name  = MOUSE_X_POS;
 			input.State = LOWORD(event.LParam);
 			Callback(input);
 
-			input.Name = MOUSE_Y_POS;
+			input.Name  = MOUSE_Y_POS;
 			input.State = HIWORD(event.LParam);
 			Callback(input);
 		}

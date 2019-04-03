@@ -6,9 +6,6 @@ namespace IwInput {
 	class WindowsMouse
 		: public Mouse
 	{
-	private:
-		static unsigned int buttonMask[5];
-
 	public:
 		WindowsMouse(
 			InputCallback& callback);

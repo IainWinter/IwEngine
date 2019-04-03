@@ -1,8 +1,9 @@
 #pragma once
 
+#include "iw./util/iwutil.h"
 #include <vector>
 
-namespace IwUtil {
+namespace iwutil {
 	template<
 		typename _resource_t>
 		class Loader {

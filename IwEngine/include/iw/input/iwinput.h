@@ -149,6 +149,7 @@ namespace IwInput {
 		LEFT_WIN,
 		RIGHT_WIN,
 
-		INPUT_COUNT
+		INPUT_COUNT,
+		INPUT_NONE
 	};
 }

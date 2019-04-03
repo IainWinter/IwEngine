@@ -5,7 +5,7 @@
 
 namespace IwGraphics {
 	class ModelLoader
-		: IwUtil::Loader<ModelData>
+		: iwu::Loader<ModelData>
 	{
 	public:
 		ModelData* Load(
