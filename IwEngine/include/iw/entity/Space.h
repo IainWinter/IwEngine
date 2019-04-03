@@ -1,5 +1,7 @@
 #pragma once
 
+#include "IwEntity.h"
+#include "View.h"
 #include "iw/util/set/sparse_set.h"
 #include "iw/util/type/family.h"
 #include <assert.h>
@@ -9,18 +11,14 @@
 #include <cmath>
 
 namespace IwEntity {
-	using Entity      = unsigned int;
-	using ComponentId = unsigned int;
-	using Archetype   = unsigned int;
-
-	class Space {
+	class IWENTITY_API Space {
 	private:
 		using ComponentFamily = iwu::family<Space>;
-		using ComponentSet    = iwu::sparse_set<ComponentId>;
+		using ComponentSet    = iwu::sparse_set<Entity>;
 
 		template<
 			typename _c>
-		using ComponentSetT = iwu::sparse_set<ComponentId, _c>;
+		using ComponentSetT = iwu::sparse_set<Entity, _c>;
 
 		struct EntityData {
 			Archetype Archetype;
@@ -92,11 +90,9 @@ namespace IwEntity {
 
 		template<
 			typename... _components_t>
-		std::tuple<typename ComponentSetT<_components_t>::iterator...>
-		GetComponents()
-		{
+		View<_components_t...> GetComponents() {
 			Archetype archetype = GetArchetype<_components_t...>();
-			return std::make_tuple(GetSetItr<_components_t>(archetype)...);
+			return View(GetSetItr<_components_t>(archetype)...);
 		}
 
 		void Sort() {
