@@ -11,7 +11,7 @@ namespace IwEntity {
 	private:
 		template<
 			typename _c>
-		using ComponentItr = iwu::sparse_set<Entity, _c>::iterator;
+		using ComponentItr = typename iwu::sparse_set<Entity, _c>::iterator;
 
 		std::tuple<ComponentItr<_cs>...> m_itrs;
 

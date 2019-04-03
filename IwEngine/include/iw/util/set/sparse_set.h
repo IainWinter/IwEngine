@@ -12,16 +12,16 @@ namespace iwutil {
 	class sparse_set;
 
 	/**
-	* @breif Sparse set specilization for supported integer types.
+	* @brief Sparse set specialization for supported integer types.
 	*
 	* Sparse sets are useful when a sparse dataset needs to be 
-	* iterated over as efficiently as posible. 
+	* iterated over as efficiently as possible. 
 	*
 	* @note
 	* It should never be assumed that the order of insertion 
 	* will be the order of iteration.
 	*
-	* @tparam _t The type of interger to store.
+	* @tparam _t The type of integer to store.
 	*/
 	template<
 		typename _t>
@@ -191,11 +191,11 @@ namespace iwutil {
 
 	public:
 		/**
-		* @breif Inserts a number into the set.
+		* @brief Inserts a number into the set.
 		*
 		* @warning 
 		* Inserting a duplicate number into the set results
-		* in undefined behaviour. An assertion will check for 
+		* in undefined behavior. An assertion will check for 
 		* duplicates at at runtime if in debug mode.
 		*
 		* @param x The number to insert.
@@ -213,11 +213,11 @@ namespace iwutil {
 		}
 
 		/**
-		* @breif Removes a number from the set.
+		* @brief Removes a number from the set.
 		*
 		* @warning
 		* Removing a number that doesn't exist in the set results
-		* in undefined behaviour. An assertion will check the set 
+		* in undefined behavior. An assertion will check the set 
 		* for the number at runtime if in debug mode.
 		*
 		* @param x The number to remove.
@@ -237,11 +237,11 @@ namespace iwutil {
 		}
 
 		/**
-		* @breif Swaps two numbers in the set.
+		* @brief Swaps two numbers in the set.
 		*
 		* @warning
 		* Attempting to swap two numbers that don't exist in the 
-		* set results in undefined behaviour. An assertion will 
+		* set results in undefined behavior. An assertion will 
 		* check the set for the two numbers at runtime if in debug mode.
 		*
 		* @param a The first number to swap.
@@ -263,7 +263,7 @@ namespace iwutil {
 		}
 
 		/**
-		* @breif Sorts the sparse set.
+		* @brief Sorts the sparse set.
 		* Time complexity is that of std::sort.
 		* End index of '0' will be interpreted as 'size()'
 		*
@@ -292,11 +292,11 @@ namespace iwutil {
 		}
 
 		/**
-		* @breif Returns the number at an index.
+		* @brief Returns the number at an index.
 		*
 		* @warning
-		* Attemping to get a number that doesn't exist in the
-		* set results in undefined behaviour. An assertion will 
+		* attempting to get a number that doesn't exist in the
+		* set results in undefined behavior. An assertion will 
 		* check the set for the number at runtime if in debug mode.
 		*
 		* @param index The index of the number to get.
@@ -311,7 +311,7 @@ namespace iwutil {
 		}
 
 		/**
-		* @breif Finds a number in the set.
+		* @brief Finds a number in the set.
 		*
 		* Returns an iterator to the number or the end of the set.
 		*
@@ -326,7 +326,7 @@ namespace iwutil {
 		}
 
 		/**
-		* @breif Checks the set for a number.
+		* @brief Checks the set for a number.
 		*
 		* @param val The number to check for.
 		*
@@ -345,7 +345,7 @@ namespace iwutil {
 		}
 
 		/**
-		* @breif Clears the set.
+		* @brief Clears the set.
 		*/
 		virtual void clear() {
 			m_direct.clear();
@@ -353,7 +353,7 @@ namespace iwutil {
 		}
 
 		/**
-		* @breif Checks if the set is empty.
+		* @brief Checks if the set is empty.
 		*
 		* @return True if the set is empty, false otherwise.
 		*/
@@ -362,7 +362,7 @@ namespace iwutil {
 		}
 
 		/**
-		* @breif Returns the size of the set.
+		* @brief Returns the size of the set.
 		*
 		* @return The size of the set.
 		*/
@@ -371,7 +371,7 @@ namespace iwutil {
 		}
 
 		/**
-		* @breif Returns an iterator to the beginning.
+		* @brief Returns an iterator to the beginning.
 		*
 		* @return An iterator to the first element of the set.
 		*/
@@ -380,7 +380,7 @@ namespace iwutil {
 		}
 
 		/**
-		* @breif Returns an iterator to the end.
+		* @brief Returns an iterator to the end.
 		*
 		* @return An iterator to the element after the end of the set.
 		*/
@@ -390,18 +390,18 @@ namespace iwutil {
 	};
 
 	/**
-	* @breif Sparse set specilization for supported integer types used
+	* @brief Sparse set specialization for supported integer types used
 	* as an index to a dense array of items.
 	*
 	* Sparse sets are useful when a sparse dataset needs to be
-	* iterated over as efficiently as posible. This specilization
+	* iterated over as efficiently as possible. This specialization
 	* stores an additional array of items in a dense array.
 	*
 	* @note
 	* It should never be assumed that the order of insertion
 	* will be the order of iteration.
 	*
-	* @tparam _index_t The type of interger to use as an index.
+	* @tparam _index_t The type of integer to use as an index.
 	* @tparam _item_t  The type of item to store.
 	*/
 	template<
@@ -586,12 +586,12 @@ namespace iwutil {
 
 	public:
 		/**
-		* @breif Inserts an item into the set.
+		* @brief Inserts an item into the set.
 		*
 		*
 		* @warning
 		* Inserting at a duplicate index results in undefined
-		* behaviour. An assertion will check for duplicates
+		* behavior. An assertion will check for duplicates
 		* at at runtime if in debug mode.
 		*
 		*
@@ -607,7 +607,7 @@ namespace iwutil {
 		}
 
 		/**
-		* @breif Constructs an item inplace at an index.
+		* @brief Constructs an item in place at an index.
 		*
 		* @note
 		* Items are constructed in-place if they are an aggregate
@@ -615,7 +615,7 @@ namespace iwutil {
 		*
 		* @warning
 		* Inserting at a duplicate index results in undefined 
-		* behaviour. An assertion will check for duplicates 
+		* behavior. An assertion will check for duplicates 
 		* at at runtime if in debug mode.
 		*
 		* @tparam _args_t The types of arguments to construct the item.
@@ -625,7 +625,7 @@ namespace iwutil {
 		*/
 		template<
 			typename... _args_t>
-		void emplace(
+		_item_t& emplace(
 			_index_t index,
 			_args_t&&... args)
 		{
@@ -638,14 +638,16 @@ namespace iwutil {
 			}
 
 			base_t::emplace(index);
+
+			return m_items.back();
 		}
 
 		/**
-		* @breif Removes an item from the set.
+		* @brief Removes an item from the set.
 		*
 		* @warning
 		* Removing at an index that doesn't exist in the set results
-		* in undefined behaviour. An assertion will check the set
+		* in undefined behavior. An assertion will check the set
 		* for the index at runtime if in debug mode.
 		*
 		* @param index The index of the element to remove.
@@ -660,11 +662,11 @@ namespace iwutil {
 		}
 
 		/**
-		* @breif Swaps two items in the set.
+		* @brief Swaps two items in the set.
 		*
 		* @warning
 		* Attempting to swap two items that don't exist in the
-		* set results in undefined behaviour. An assertion will
+		* set results in undefined behavior. An assertion will
 		* check the set for the items at runtime if in debug mode.
 		*
 		* @param a The index of the first item to swap.
@@ -681,7 +683,7 @@ namespace iwutil {
 		}
 
 		/**
-		* @breif Sorts the sparse set.
+		* @brief Sorts the sparse set.
 		* Time complexity is that of std::sort.
 		*
 		* @param comparator Comparison function.
@@ -726,7 +728,7 @@ namespace iwutil {
 		}
 
 		/**
-		* @breif Clears the set.
+		* @brief Clears the set.
 		*/
 		void clear() override {
 			m_items.clear();
@@ -734,11 +736,11 @@ namespace iwutil {
 		}
 
 		/**
-		* @breif Returns the item at an index.
+		* @brief Returns the item at an index.
 		*
 		* @warning
-		* Attemping to get an item that doesn't exist in the
-		* set results in undefined behaviour. An assertion will
+		* attempting to get an item that doesn't exist in the
+		* set results in undefined behavior. An assertion will
 		* check the set for the item at runtime if in debug mode.
 		*
 		* @param index The index of the item to get.
@@ -771,7 +773,7 @@ namespace iwutil {
 		}
 
 		/**
-		* @breif Finds an item in the set at an index.
+		* @brief Finds an item in the set at an index.
 		*
 		* Returns an iterator to the item or the end of the set.
 		*
@@ -786,7 +788,7 @@ namespace iwutil {
 		}
 
 		/**
-		* @breif Returns an iterator to the beginning.
+		* @brief Returns an iterator to the beginning.
 		*
 		* @return An iterator to the first element of the set.
 		*/
@@ -795,7 +797,7 @@ namespace iwutil {
 		}
 
 		/**
-		* @breif Returns an iterator to the end.
+		* @brief Returns an iterator to the end.
 		*
 		* @return An iterator to the element after the end of the set.
 		*/

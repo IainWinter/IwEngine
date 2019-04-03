@@ -62,8 +62,6 @@ namespace IwEngine {
 		}
 	}
 
-	long long time = 0;
-
 	void Application::Update() {
 		m_window->Clear();
 

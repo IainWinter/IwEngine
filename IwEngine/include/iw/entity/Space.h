@@ -63,7 +63,7 @@ namespace IwEntity {
 		template<
 			typename _c,
 			typename... _args_t>
-		void CreateComponent(
+		_c& CreateComponent(
 			Entity entity,
 			const _args_t&... args)
 		{

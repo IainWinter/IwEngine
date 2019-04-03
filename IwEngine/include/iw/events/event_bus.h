@@ -11,7 +11,7 @@ namespace iwevents {
 	class event_bus;
 
 	/**
-	* @breif Event bus specilization for many event types.
+	* @brief Event bus specilization for many event types.
 	*
 	* The event bus allows member functions to be added and removed from many
 	* signals at once. Classes must publicly expose functions of the
@@ -27,7 +27,7 @@ namespace iwevents {
 	class event_bus<_event_t, _others_t...> : event_bus<_event_t>, event_bus<_others_t>... {
 	public:
 		/**
-		* @breif Subscribes a class instance to the event bus.
+		* @brief Subscribes a class instance to the event bus.
 		*
 		* Subscribes all public member functions of the signature 
 		* 'void _t::process(const Event&)' to the event bus.
@@ -45,7 +45,7 @@ namespace iwevents {
 		}
 
 		/**
-		* @breif Subscribes a free function to event bus.
+		* @brief Subscribes a free function to event bus.
 		*
 		* Subscribes a free function to the event bus. The function
 		* can have any name, but still needs to return 'void' and 
@@ -60,7 +60,7 @@ namespace iwevents {
 		}
 
 		/**
-		* @breif Unsubscribes a class instance from the event bus.
+		* @brief Unsubscribes a class instance from the event bus.
 		*
 		* Unsubscribes all public member functions of the signature
 		* 'void _t::process(const Event&)' from the event bus.
@@ -78,7 +78,7 @@ namespace iwevents {
 		}
 
 		/**
-		* @breif Unsubscribes a free function from event bus.
+		* @brief Unsubscribes a free function from event bus.
 		*
 		* Unsubscribes a free function from the event bus.
 		*
@@ -91,7 +91,7 @@ namespace iwevents {
 		}
 
 		/**
-		* @breif Publishes an event to the bus with the specified arguments.
+		* @brief Publishes an event to the bus with the specified arguments.
 		*
 		* Publishes an event to all of the event handlers that can 
 		* handle the type of event.
@@ -107,7 +107,7 @@ namespace iwevents {
 	};
 
 	/**
-	* @breif Event bus specilization for a sigle event type.
+	* @brief Event bus specilization for a sigle event type.
 	*
 	* The event bus allows member functions to be added and removed from its
 	* signal. Classes must publicly expose functions of the
@@ -140,7 +140,7 @@ namespace iwevents {
 		auto unsubscribe_func(...) -> void {};
 	public:
 		/**
-		* @breif Publishes an event to the bus with the specified arguments.
+		* @brief Publishes an event to the bus with the specified arguments.
 		*
 		* Publishes an event, constructed from the specified arguments, to all of
 		* the event handlers that can handle the spcified type of event.
@@ -154,7 +154,7 @@ namespace iwevents {
 		}
 
 		/**
-		* @breif Subscribes a free function to event bus.
+		* @brief Subscribes a free function to event bus.
 		*
 		* Subscribes a free function to the event bus. The function
 		* can have any name, but still needs to return 'void' and
@@ -168,7 +168,7 @@ namespace iwevents {
 		}
 
 		/**
-		* @breif Subscribes a class instance to the event bus.
+		* @brief Subscribes a class instance to the event bus.
 		*
 		* Subscribes a public member function of the signature
 		* 'void _t::process(const Event&)' to the event bus.
@@ -182,7 +182,7 @@ namespace iwevents {
 		}
 
 		/**
-		* @breif Unsubscribes a free function from event bus.
+		* @brief Unsubscribes a free function from event bus.
 		*
 		* Unsubscribes a free function from the event bus. The function
 		* can have any name, but still needs to return 'void' and
@@ -196,7 +196,7 @@ namespace iwevents {
 		}
 
 		/**
-		* @breif Unsubscribes a class instance from the event bus.
+		* @brief Unsubscribes a class instance from the event bus.
 		*
 		* Unsubscribes the public member function of the signature
 		* 'void _t::process(const Event&)' from the event bus.

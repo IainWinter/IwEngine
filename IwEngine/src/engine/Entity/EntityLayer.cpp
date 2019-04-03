@@ -21,8 +21,10 @@ namespace IwEngine {
 	EntityLayer::~EntityLayer() {}
 
 	int EntityLayer::Initialize() {
+		//Create rendering device
 		device = new IwRenderer::GLDevice();
 
+		//Create model
 		IwGraphics::ModelLoader loader;
 		IwGraphics::ModelData* obj = loader.Load("res/bear.obj");
 
@@ -46,12 +48,15 @@ namespace IwEngine {
 			modelMeshes.push_back({ va, ib, obj->Indices[i].FaceCount });
 		}
 
+		//Creating entity
 		model = space.CreateEntity();
-		space.CreateComponent<Transform>(model);
+
+		Transform& transform = space.CreateComponent<Transform>(model);
 		space.CreateComponent<Velocity>(model);
 
-		std::get<0>(space.GetComponents<Transform>())->Position.z -= 10.0f;
+		transform.Position.z = -20.0f;
 
+		//Creating shader pipeline
 		IwRenderer::IVertexShader* vs = device->CreateVertexShader(
 			iwu::ReadFile("res/defaultvs.glsl").c_str());
 
@@ -80,7 +85,9 @@ namespace IwEngine {
 		float x = cos(lightAngle) * 100;
 		float z = sin(lightAngle) * 100;
 
-		auto components = space.GetComponents<Transform, Velocity>();
+		auto view = space.GetComponents<Transform, Velocity>();
+
+
 
 		Transform& modelTransform = *std::get<0>(components);
 		Velocity&  modelVelocity  = *std::get<1>(components);

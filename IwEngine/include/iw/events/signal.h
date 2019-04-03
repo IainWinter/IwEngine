@@ -8,7 +8,7 @@
 
 namespace iwevents {
 	/**
-	* @breif Signals can be used to call many
+	* @brief Signals can be used to call many
 	* functions at once with the same arguments.
 	*
 	* Signals can link many functions together. When arguments gets published 
@@ -69,7 +69,7 @@ namespace iwevents {
 		}
 
 		/**
-		* @breif Publishes an event to the
+		* @brief Publishes an event to the
 		* signal with the specified arguments.
 		*
 		* Notifies all subscribed functions to the signal
@@ -98,7 +98,7 @@ namespace iwevents {
 		}
 
 		/**
-		* @breif Subscribes a free function to the signal.
+		* @brief Subscribes a free function to the signal.
 		*
 		* Subscribes a function to the signal. It will be called 
 		* whenever arguments get published to the signal.
@@ -113,7 +113,7 @@ namespace iwevents {
 		}
 
 		/**
-		* @breif Subscribes a public member function to the signal.
+		* @brief Subscribes a public member function to the signal.
 		*
 		* Subscribes a public member function to the signal. If the 
 		* instance is deleted, the signal with forget about 
@@ -133,7 +133,7 @@ namespace iwevents {
 		}
 
 		/**
-		* @breif Unsubscribes a free function from the signal.
+		* @brief Unsubscribes a free function from the signal.
 		*
 		* Unsubscribes a free function from the signal.
 		*
@@ -148,7 +148,7 @@ namespace iwevents {
 		}
 
 		/**
-		* @breif Unsubscribes a public member function from the signal.
+		* @brief Unsubscribes a public member function from the signal.
 		*
 		* Unsubscribes a public member function from the signal.
 		*
@@ -167,7 +167,7 @@ namespace iwevents {
 		}
 
 		/**
-		* @breif Unsubscribes all public member function from the instance from the signal.
+		* @brief Unsubscribes all public member function from the instance from the signal.
 		*
 		* Unsubscribes all public member function from the instance from the signal.
 		*
