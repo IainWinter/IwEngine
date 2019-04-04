@@ -16,8 +16,7 @@ namespace IwEntity {
 		using ComponentFamily = iwu::family<Space>;
 		using ComponentSet    = iwu::sparse_set<Entity>;
 
-		template<
-			typename _c>
+		template<typename _c>
 		using ComponentSetT = iwu::sparse_set<Entity, _c>;
 
 		struct EntityData {
@@ -72,6 +71,8 @@ namespace IwEntity {
 			m_entities.Entities[entity].Archetype |= GetArchetype<_c>();
 
 			set.emplace(entity, args...);
+
+			return set.at(entity);
 		}
 
 		template<
@@ -92,7 +93,8 @@ namespace IwEntity {
 			typename... _components_t>
 		View<_components_t...> GetComponents() {
 			Archetype archetype = GetArchetype<_components_t...>();
-			return View(GetSetItr<_components_t>(archetype)...);
+			return View<_components_t...>(
+				GetSetItr<_components_t>(archetype)...);
 		}
 
 		void Sort() {
