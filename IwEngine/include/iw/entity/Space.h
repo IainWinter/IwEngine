@@ -91,10 +91,11 @@ namespace IwEntity {
 
 		template<
 			typename... _components_t>
-		View<_components_t...> GetComponents() {
+		View<_components_t...> ViewComponents() {
 			Archetype archetype = GetArchetype<_components_t...>();
 			return View<_components_t...>(
-				GetSetItr<_components_t>(archetype)...);
+				GetSetBegin<_components_t>(archetype)...,
+				GetSetEnd  <_components_t>(archetype)...);
 		}
 
 		void Sort() {
@@ -137,8 +138,32 @@ namespace IwEntity {
 
 		template<
 			typename _c>
-		typename ComponentSetT<_c>::iterator GetSetItr(
+		typename ComponentSetT<_c>::iterator GetSetBegin(
 			Archetype archetype)
+		{
+			ComponentSetT<_c>* set = GetSet<_c>();
+			assert(set != nullptr);
+
+			auto itr = set->begin();
+			auto end = set->end();
+			while (itr != end) {
+				EntityData ed = m_entities.Entities[set->map(itr.index())];
+				ed.Archetype &= archetype;
+				if (ed.Archetype == archetype) {
+					return itr;
+				}
+
+				itr++;
+			}
+
+			return end;
+		}
+
+		template<
+			typename _c>
+		typename ComponentSetT<_c>::iterator GetSetEnd(
+			Archetype archetype,
+			std::size_t start)
 		{
 			ComponentSetT<_c>* set = GetSet<_c>();
 			assert(set != nullptr);
