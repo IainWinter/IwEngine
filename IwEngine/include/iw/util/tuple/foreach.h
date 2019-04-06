@@ -4,382 +4,381 @@
 #include <tuple>
 
 namespace iwutil {
-
 #pragma region Iteration
-
+	namespace detail {
 #pragma region no_return_no_args
-	template<
-		typename _functor,
-		typename _tuple,
-		std::size_t... _index>
-	void foreach_na_indexed(
-		_functor&& functor,
-		_tuple&& tuple,
-		std::index_sequence<_index...>)
-	{
-		auto e = { (
-			functor(std::get<_index>(std::forward<_tuple>(tuple))), 0)...
-		};
-	}
+		template<
+			typename _functor,
+			typename _tuple,
+			std::size_t... _index>
+		void foreach_na_indexed(
+			_functor&& functor,
+			_tuple&& tuple,
+			std::index_sequence<_index...>)
+		{
+			auto e = { (
+				functor(std::get<_index>(std::forward<_tuple>(tuple))), 0)...
+			};
+		}
 #pragma endregion
 
 #pragma region no_tuple_return_args
-	template<
-		typename _functor,
-		typename _tuple,
-		typename _tuple_args,
-		std::size_t... _index>
-	void foreach_ta_indexed(
-		_functor&& functor,
-		_tuple&& tuple,
-		_tuple_args&& tuple_args,
-		std::index_sequence<_index...>)
-	{
-		auto e = { (
-			functor(
-				std::get<_index>(std::forward<_tuple>(tuple)),
-				std::get<_index>(std::forward<_tuple_args>(tuple_args))),
-				0)...
-		};
-	}
+		template<
+			typename _functor,
+			typename _tuple,
+			typename _tuple_args,
+			std::size_t... _index>
+		void foreach_ta_indexed(
+			_functor&& functor,
+			_tuple&& tuple,
+			_tuple_args&& tuple_args,
+			std::index_sequence<_index...>)
+		{
+			auto e = { (
+				functor(
+					std::get<_index>(std::forward<_tuple>(tuple)),
+					std::get<_index>(std::forward<_tuple_args>(tuple_args))),
+					0)...
+			};
+		}
 
-	template<
-		typename _functor,
-		typename _tuple,
-		typename _tuple_args,
-		std::size_t... _index>
-	void foreach_ta_indexed(
-		_functor&& functor,
-		_tuple&& tuple,
-		const _tuple_args& tuple_args,
-		std::index_sequence<_index...>)
-	{
-		auto e = { (
-			functor(
-				std::get<_index>(std::forward<_tuple>(tuple)),
-				std::get<_index>(tuple_args)),
-				0)...
-		};
-	}
+		template<
+			typename _functor,
+			typename _tuple,
+			typename _tuple_args,
+			std::size_t... _index>
+		void foreach_ta_indexed(
+			_functor&& functor,
+			_tuple&& tuple,
+			const _tuple_args& tuple_args,
+			std::index_sequence<_index...>)
+		{
+			auto e = { (
+				functor(
+					std::get<_index>(std::forward<_tuple>(tuple)),
+					std::get<_index>(tuple_args)),
+					0)...
+			};
+		}
 #pragma endregion
 
 #pragma region no_return_fixed_args
-	template<
-		typename _functor,
-		typename _tuple,
-		typename... _fixed_args,
-		std::size_t... _index>
-	void foreach_fa_indexed(
-		_functor&& functor,
-		_tuple&& tuple,
-		std::index_sequence<_index...>,
-		_fixed_args&& ... fixed_args)
-	{
-		auto e = { (
-			functor(
-				std::get<_index>(std::forward<_tuple>(tuple)),
-				std::forward<_fixed_args>(fixed_args)...),
-				0)...
-		};
-	}
+		template<
+			typename _functor,
+			typename _tuple,
+			typename... _fixed_args,
+			std::size_t... _index>
+		void foreach_fa_indexed(
+			_functor&& functor,
+			_tuple&& tuple,
+			std::index_sequence<_index...>,
+			_fixed_args&& ... fixed_args)
+		{
+			auto e = { (
+				functor(
+					std::get<_index>(std::forward<_tuple>(tuple)),
+					std::forward<_fixed_args>(fixed_args)...),
+					0)...
+			};
+		}
 
-	template<
-		typename _functor,
-		typename _tuple,
-		typename... _fixed_args,
-		std::size_t... _index>
-	void foreach_fa_indexed(
-		_functor&& functor,
-		_tuple&& tuple,
-		std::index_sequence<_index...>,
-		const _fixed_args& ... fixed_args)
-	{
-		auto e = { (
-			functor(
-				std::get<_index>(std::forward<_tuple>(tuple)),
-				fixed_args...),
-				0)...
-		};
-	}
+		template<
+			typename _functor,
+			typename _tuple,
+			typename... _fixed_args,
+			std::size_t... _index>
+		void foreach_fa_indexed(
+			_functor&& functor,
+			_tuple&& tuple,
+			std::index_sequence<_index...>,
+			const _fixed_args& ... fixed_args)
+		{
+			auto e = { (
+				functor(
+					std::get<_index>(std::forward<_tuple>(tuple)),
+					fixed_args...),
+					0)...
+			};
+		}
 #pragma endregion
 
 #pragma region no_tuple_return_args_and_fixed_args
-	template<
-		typename _functor,
-		typename _tuple,
-		typename _tuple_args,
-		typename... _fixed_args,
-		std::size_t... _index>
-	void foreach_ta_fa_indexed(
-		_functor&& functor,
-		_tuple&& tuple,
-		_tuple_args&& tuple_args,
-		std::index_sequence<_index...>,
-		_fixed_args&& ... fixed_args)
-	{
-		auto e = { (
-			functor(
-				std::get<_index>(std::forward<_tuple>(tuple)),
-				std::get<_index>(tuple_args),
-				std::forward<_fixed_args>(fixed_args)...),
-				0)...
-		};
-	}
+		template<
+			typename _functor,
+			typename _tuple,
+			typename _tuple_args,
+			typename... _fixed_args,
+			std::size_t... _index>
+		void foreach_ta_fa_indexed(
+			_functor&& functor,
+			_tuple&& tuple,
+			_tuple_args&& tuple_args,
+			std::index_sequence<_index...>,
+			_fixed_args&& ... fixed_args)
+		{
+			auto e = { (
+				functor(
+					std::get<_index>(std::forward<_tuple>(tuple)),
+					std::get<_index>(tuple_args),
+					std::forward<_fixed_args>(fixed_args)...),
+					0)...
+			};
+		}
 
-	template<
-		typename _functor,
-		typename _tuple,
-		typename _tuple_args,
-		typename... _fixed_args,
-		std::size_t... _index>
-	void foreach_ta_fa_indexed(
-		_functor&& functor,
-		_tuple&& tuple,
-		const _tuple_args& tuple_args,
-		std::index_sequence<_index...>,
-		const _fixed_args& ... fixed_args)
-	{
-		auto e = { (
-			functor(
-				std::get<_index>(std::forward<_tuple>(tuple)),
-				std::get<_index>(tuple_args),
-				fixed_args...),
-				0)...
-		};
-	}
+		template<
+			typename _functor,
+			typename _tuple,
+			typename _tuple_args,
+			typename... _fixed_args,
+			std::size_t... _index>
+		void foreach_ta_fa_indexed(
+			_functor&& functor,
+			_tuple&& tuple,
+			const _tuple_args& tuple_args,
+			std::index_sequence<_index...>,
+			const _fixed_args& ... fixed_args)
+		{
+			auto e = { (
+				functor(
+					std::get<_index>(std::forward<_tuple>(tuple)),
+					std::get<_index>(tuple_args),
+					fixed_args...),
+					0)...
+			};
+		}
 
-	template<
-		typename _functor,
-		typename _tuple,
-		typename _tuple_args,
-		typename... _fixed_args,
-		std::size_t... _index>
-	void foreach_ta_fa_indexed(
-		_functor&& functor,
-		_tuple&& tuple,
-		const _tuple_args& tuple_args,
-		std::index_sequence<_index...>,
-		_fixed_args&& ... fixed_args)
-	{
-		auto e = { (
-			functor(
-				std::get<_index>(std::forward<_tuple>(tuple)),
-				std::get<_index>(tuple_args),
-				std::forward<_fixed_args>(fixed_args)...),
-				0)...
-		};
-	}
+		template<
+			typename _functor,
+			typename _tuple,
+			typename _tuple_args,
+			typename... _fixed_args,
+			std::size_t... _index>
+		void foreach_ta_fa_indexed(
+			_functor&& functor,
+			_tuple&& tuple,
+			const _tuple_args& tuple_args,
+			std::index_sequence<_index...>,
+			_fixed_args&& ... fixed_args)
+		{
+			auto e = { (
+				functor(
+					std::get<_index>(std::forward<_tuple>(tuple)),
+					std::get<_index>(tuple_args),
+					std::forward<_fixed_args>(fixed_args)...),
+					0)...
+			};
+		}
 
-	template<
-		typename _functor,
-		typename _tuple,
-		typename _tuple_args,
-		typename... _fixed_args,
-		std::size_t... _index>
-	void foreach_ta_fa_indexed(
-		_functor&& functor,
-		_tuple&& tuple,
-		_tuple_args&& tuple_args,
-		std::index_sequence<_index...>,
-		const _fixed_args& ... fixed_args)
-	{
-		auto e = {(
-			functor(
-				std::get<_index>(std::forward<_tuple>(tuple)),
-				std::forward<_tuple_args>(tuple_args),
-				fixed_args...),
-				0)...
-		};
-	}
+		template<
+			typename _functor,
+			typename _tuple,
+			typename _tuple_args,
+			typename... _fixed_args,
+			std::size_t... _index>
+		void foreach_ta_fa_indexed(
+			_functor&& functor,
+			_tuple&& tuple,
+			_tuple_args&& tuple_args,
+			std::index_sequence<_index...>,
+			const _fixed_args& ... fixed_args)
+		{
+			auto e = { (
+				functor(
+					std::get<_index>(std::forward<_tuple>(tuple)),
+					std::forward<_tuple_args>(tuple_args),
+					fixed_args...),
+					0)...
+			};
+		}
 #pragma endregion
 
 #pragma region return_no_args
-	template<
-		typename _functor,
-		typename _tuple,
-		typename _tuple_return,
-		std::size_t... _index>
-	_tuple_return geteach_na_indexed(
-		_functor&& functor,
-		_tuple&& tuple,
-		std::index_sequence<_index...>)
-	{
-		return {
-			functor(std::get<_index>(std::forward<_tuple>(tuple)))...
-		};
-	}
+		template<
+			typename _functor,
+			typename _tuple,
+			typename _tuple_return,
+			std::size_t... _index>
+		_tuple_return geteach_na_indexed(
+			_functor&& functor,
+			_tuple&& tuple,
+			std::index_sequence<_index...>)
+		{
+			return {
+				functor(std::get<_index>(std::forward<_tuple>(tuple)))...
+			};
+		}
 #pragma endregion
 
 #pragma region return_tuple_args
-	template<
-		typename _functor,
-		typename _tuple,
-		typename _tuple_return,
-		typename _tuple_args,
-		std::size_t... _index>
-	_tuple_return geteach_ta_indexed(
-		_functor&& functor,
-		_tuple&& tuple,
-		_tuple_args&& tuple_args,
-		std::index_sequence<_index...>)
-	{
-		return {
-			functor(
-				std::get<_index>(std::forward<_tuple>(tuple)),
-				std::get<_index>(std::forward(tuple_args)))...
-		};
-	}
+		template<
+			typename _functor,
+			typename _tuple,
+			typename _tuple_return,
+			typename _tuple_args,
+			std::size_t... _index>
+		_tuple_return geteach_ta_indexed(
+			_functor&& functor,
+			_tuple&& tuple,
+			_tuple_args&& tuple_args,
+			std::index_sequence<_index...>)
+		{
+			return {
+				functor(
+					std::get<_index>(std::forward<_tuple>(tuple)),
+					std::get<_index>(std::forward(tuple_args)))...
+			};
+		}
 
-	template<
-		typename _functor,
-		typename _tuple,
-		typename _tuple_return,
-		typename _tuple_args,
-		std::size_t... _index>
-	_tuple_return geteach_ta_indexed(
-		_functor&& functor,
-		_tuple&& tuple,
-		const _tuple_args& tuple_args,
-		std::index_sequence<_index...>)
-	{
-		return {
-			functor(
-				std::get<_index>(std::forward<_tuple>(tuple)),
-				std::get<_index>(tuple_args))...
-		};
-	}
+		template<
+			typename _functor,
+			typename _tuple,
+			typename _tuple_return,
+			typename _tuple_args,
+			std::size_t... _index>
+		_tuple_return geteach_ta_indexed(
+			_functor&& functor,
+			_tuple&& tuple,
+			const _tuple_args& tuple_args,
+			std::index_sequence<_index...>)
+		{
+			return {
+				functor(
+					std::get<_index>(std::forward<_tuple>(tuple)),
+					std::get<_index>(tuple_args))...
+			};
+		}
 #pragma endregion
 
 #pragma region return_fixed_args
-	template<
-		typename _functor,
-		typename _tuple,
-		typename _tuple_return,
-		typename... _fixed_args,
-		std::size_t... _index>
-	_tuple_return geteach_fa_indexed(
-		_functor&& functor,
-		_tuple&& tuple,
-		std::index_sequence<_index...>,
-		_fixed_args&& ... fixed_args)
-	{
-		return {
-			functor(
-				std::get<_index>(std::forward<_tuple>(tuple)),
-				std::forward<_fixed_args>(fixed_args)...)...
-		};
-	}
+		template<
+			typename _functor,
+			typename _tuple,
+			typename _tuple_return,
+			typename... _fixed_args,
+			std::size_t... _index>
+		_tuple_return geteach_fa_indexed(
+			_functor&& functor,
+			_tuple&& tuple,
+			std::index_sequence<_index...>,
+			_fixed_args&& ... fixed_args)
+		{
+			return {
+				functor(
+					std::get<_index>(std::forward<_tuple>(tuple)),
+					std::forward<_fixed_args>(fixed_args)...)...
+			};
+		}
 
-	template<
-		typename _functor,
-		typename _tuple,
-		typename _tuple_return,
-		typename... _fixed_args,
-		std::size_t... _index>
-	_tuple_return geteach_fa_indexed(
-		_functor&& functor,
-		_tuple&& tuple,
-		std::index_sequence<_index...>,
-		const _fixed_args& ... fixed_args)
-	{
-		return {
-			functor(
-				std::get<_index>(std::forward<_tuple>(tuple)),
-				fixed_args...)...
-		};
-	}
+		template<
+			typename _functor,
+			typename _tuple,
+			typename _tuple_return,
+			typename... _fixed_args,
+			std::size_t... _index>
+		_tuple_return geteach_fa_indexed(
+			_functor&& functor,
+			_tuple&& tuple,
+			std::index_sequence<_index...>,
+			const _fixed_args& ... fixed_args)
+		{
+			return {
+				functor(
+					std::get<_index>(std::forward<_tuple>(tuple)),
+					fixed_args...)...
+			};
+		}
 #pragma endregion
 
 #pragma region return_tuple_args_and_fixed_args
-	template<
-		typename _functor,
-		typename _tuple,
-		typename _tuple_return,
-		typename _tuple_args,
-		typename... _fixed_args,
-		std::size_t... _index>
-	_tuple_return geteach_ta_fa_indexed(
-		_functor&& functor,
-		_tuple&& tuple,
-		_tuple_args&& tuple_args,
-		std::index_sequence<_index...>,
-		_fixed_args&& ... fixed_args)
-	{
-		return {
-			functor(
-				std::get<_index>(std::forward<_tuple>(tuple)),
-				std::get<_index>(tuple_args),
-				std::forward<_fixed_args>(fixed_args)...)...
-		};
-	}
+		template<
+			typename _functor,
+			typename _tuple,
+			typename _tuple_return,
+			typename _tuple_args,
+			typename... _fixed_args,
+			std::size_t... _index>
+		_tuple_return geteach_ta_fa_indexed(
+			_functor&& functor,
+			_tuple&& tuple,
+			_tuple_args&& tuple_args,
+			std::index_sequence<_index...>,
+			_fixed_args&& ... fixed_args)
+		{
+			return {
+				functor(
+					std::get<_index>(std::forward<_tuple>(tuple)),
+					std::get<_index>(tuple_args),
+					std::forward<_fixed_args>(fixed_args)...)...
+			};
+		}
 
-	template<
-		typename _functor,
-		typename _tuple,
-		typename _tuple_return,
-		typename _tuple_args,
-		typename... _fixed_args,
-		std::size_t... _index>
-	_tuple_return geteach_ta_fa_indexed(
-		_functor&& functor,
-		_tuple&& tuple,
-		const _tuple_args& tuple_args,
-		std::index_sequence<_index...>,
-		const _fixed_args& ... fixed_args)
-	{
-		return {
-			functor(
-				std::get<_index>(std::forward<_tuple>(tuple)),
-				tuple_args,
-				fixed_args...)...
-		};
-	}
+		template<
+			typename _functor,
+			typename _tuple,
+			typename _tuple_return,
+			typename _tuple_args,
+			typename... _fixed_args,
+			std::size_t... _index>
+		_tuple_return geteach_ta_fa_indexed(
+			_functor&& functor,
+			_tuple&& tuple,
+			const _tuple_args& tuple_args,
+			std::index_sequence<_index...>,
+			const _fixed_args& ... fixed_args)
+		{
+			return {
+				functor(
+					std::get<_index>(std::forward<_tuple>(tuple)),
+					tuple_args,
+					fixed_args...)...
+			};
+		}
 
-	template<
-		typename _functor,
-		typename _tuple,
-		typename _tuple_return,
-		typename _tuple_args,
-		typename... _fixed_args,
-		std::size_t... _index>
-	_tuple_return geteach_ta_fa_indexed(
-		_functor&& functor,
-		_tuple&& tuple,
-		const _tuple_args& tuple_args,
-		std::index_sequence<_index...>,
-		_fixed_args&& ... fixed_args)
-	{
-		return {
-			functor(
-				std::get<_index>(std::forward<_tuple>(tuple)),
-				tuple_args,
-				std::forward<_fixed_args>(fixed_args)...)...
-		};
-	}
+		template<
+			typename _functor,
+			typename _tuple,
+			typename _tuple_return,
+			typename _tuple_args,
+			typename... _fixed_args,
+			std::size_t... _index>
+		_tuple_return geteach_ta_fa_indexed(
+			_functor&& functor,
+			_tuple&& tuple,
+			const _tuple_args& tuple_args,
+			std::index_sequence<_index...>,
+			_fixed_args&& ... fixed_args)
+		{
+			return {
+				functor(
+					std::get<_index>(std::forward<_tuple>(tuple)),
+					tuple_args,
+					std::forward<_fixed_args>(fixed_args)...)...
+			};
+		}
 
-	template<
-		typename _functor,
-		typename _tuple,
-		typename _tuple_return,
-		typename _tuple_args,
-		typename... _fixed_args,
-		std::size_t... _index>
-	_tuple_return geteach_ta_fa_indexed(
-		_functor&& functor,
-		_tuple&& tuple,
-		_tuple_args&& tuple_args,
-		std::index_sequence<_index...>,
-		const _fixed_args& ... fixed_args)
-	{
-		return {
-			functor(
-				std::get<_index>(std::forward<_tuple>(tuple)),
-				std::forward<_tuple_args>(tuple_args),
-				(fixed_args)...)...
-		};
-	}
+		template<
+			typename _functor,
+			typename _tuple,
+			typename _tuple_return,
+			typename _tuple_args,
+			typename... _fixed_args,
+			std::size_t... _index>
+		_tuple_return geteach_ta_fa_indexed(
+			_functor&& functor,
+			_tuple&& tuple,
+			_tuple_args&& tuple_args,
+			std::index_sequence<_index...>,
+			const _fixed_args& ... fixed_args)
+		{
+			return {
+				functor(
+					std::get<_index>(std::forward<_tuple>(tuple)),
+					std::forward<_tuple_args>(tuple_args),
+					(fixed_args)...)...
+			};
+		}
 #pragma endregion
-
+	}
 #pragma endregion
 
 #pragma region Helpers
@@ -392,7 +391,7 @@ namespace iwutil {
 	void foreach(
 		_tuple& tuple)
 	{
-		foreach_na_indexed<
+		detail::foreach_na_indexed<
 			_functor,
 			_tuple>
 		(
@@ -413,7 +412,7 @@ namespace iwutil {
 		_tuple& tuple,
 		_tuple_args&& tuple_args)
 	{
-		foreach_ta_indexed<
+		detail::foreach_ta_indexed<
 			_functor,
 			_tuple,
 			_tuple_args>
@@ -434,7 +433,7 @@ namespace iwutil {
 		_tuple& tuple,
 		_tuple_args& tuple_args)
 	{
-		foreach_ta_indexed<
+		detail::foreach_ta_indexed<
 			_functor,
 			_tuple,
 			_tuple_args>
@@ -455,7 +454,7 @@ namespace iwutil {
 		_tuple& tuple,
 		const _tuple_args& tuple_args)
 	{
-		foreach_ta_indexed<
+		detail::foreach_ta_indexed<
 			_functor,
 			_tuple,
 			_tuple_args>
@@ -478,7 +477,7 @@ namespace iwutil {
 		_tuple& tuple,
 		_fixed_args&& ... fixed_args)
 	{
-		foreach_fa_indexed<
+		detail::foreach_fa_indexed<
 			_functor,
 			_tuple,
 			_fixed_args...>
@@ -499,7 +498,7 @@ namespace iwutil {
 		_tuple& tuple,
 		_fixed_args& ... fixed_args)
 	{
-		foreach_fa_indexed<
+		detail::foreach_fa_indexed<
 			_functor,
 			_tuple,
 			_fixed_args...>
@@ -520,7 +519,7 @@ namespace iwutil {
 		_tuple& tuple,
 		const _fixed_args& ... fixed_args)
 	{
-		foreach_fa_indexed<
+		detail::foreach_fa_indexed<
 			_functor,
 			_tuple,
 			_fixed_args...>
@@ -545,7 +544,7 @@ namespace iwutil {
 		_tuple_args&& tuple_args,
 		_fixed_args&& ... fixed_args)
 	{
-		foreach_ta_fa_indexed<
+		detail::foreach_ta_fa_indexed<
 			_functor,
 			_tuple,
 			_tuple_args,
@@ -570,7 +569,7 @@ namespace iwutil {
 		_tuple_args& tuple_args,
 		_fixed_args&& ... fixed_args)
 	{
-		foreach_ta_fa_indexed<
+		detail::foreach_ta_fa_indexed<
 			_functor,
 			_tuple,
 			_tuple_args,
@@ -595,7 +594,7 @@ namespace iwutil {
 		_tuple_args&& tuple_args,
 		_fixed_args& ... fixed_args)
 	{
-		foreach_ta_fa_indexed<
+		detail::foreach_ta_fa_indexed<
 			_functor,
 			_tuple,
 			_tuple_args,
@@ -620,7 +619,7 @@ namespace iwutil {
 		_tuple_args&& tuple_args,
 		const _fixed_args& ... fixed_args)
 	{
-		foreach_ta_fa_indexed<
+		detail::foreach_ta_fa_indexed<
 			_functor,
 			_tuple,
 			_tuple_args,
@@ -645,7 +644,7 @@ namespace iwutil {
 		_tuple_args& tuple_args,
 		const _fixed_args& ... fixed_args)
 	{
-		foreach_ta_fa_indexed<
+		detail::foreach_ta_fa_indexed<
 			_functor,
 			_tuple,
 			_tuple_args,
@@ -670,7 +669,7 @@ namespace iwutil {
 		const _tuple_args& tuple_args,
 		_fixed_args&& ... fixed_args)
 	{
-		foreach_ta_fa_indexed<
+		detail::foreach_ta_fa_indexed<
 			_functor,
 			_tuple,
 			_tuple_args,
@@ -695,7 +694,7 @@ namespace iwutil {
 		const _tuple_args& tuple_args,
 		_fixed_args& ... fixed_args)
 	{
-		foreach_ta_fa_indexed<
+		detail::foreach_ta_fa_indexed<
 			_functor,
 			_tuple,
 			_tuple_args,
@@ -719,7 +718,7 @@ namespace iwutil {
 	_tuple_return geteach(
 		_tuple& tuple)
 	{
-		return geteach_na_indexed<
+		return detail::geteach_na_indexed<
 			_functor,
 			_tuple,
 			_tuple_return>
@@ -742,7 +741,7 @@ namespace iwutil {
 		_tuple& tuple,
 		_tuple_args&& tuple_args)
 	{
-		return geteach_ta_indexed<
+		return detail::geteach_ta_indexed<
 			_functor,
 			_tuple,
 			_tuple_return,
@@ -765,7 +764,7 @@ namespace iwutil {
 		_tuple& tuple,
 		_tuple_args& tuple_args)
 	{
-		return geteach_ta_indexed<
+		return detail::geteach_ta_indexed<
 			_functor,
 			_tuple,
 			_tuple_return,
@@ -788,7 +787,7 @@ namespace iwutil {
 		_tuple& tuple,
 		const _tuple_args& tuple_args)
 	{
-		return geteach_ta_indexed<
+		return detail::geteach_ta_indexed<
 			_functor,
 			_tuple,
 			_tuple_return,
@@ -813,7 +812,7 @@ namespace iwutil {
 		_tuple& tuple,
 		_fixed_args&& ... fixed_args)
 	{
-		return geteach_fa_indexed<
+		return detail::geteach_fa_indexed<
 			_functor,
 			_tuple,
 			_tuple_return,
@@ -836,7 +835,7 @@ namespace iwutil {
 		_tuple& tuple,
 		_fixed_args& ... fixed_args)
 	{
-		return geteach_fa_indexed<
+		return detail::geteach_fa_indexed<
 			_functor,
 			_tuple,
 			_tuple_return,
@@ -859,7 +858,7 @@ namespace iwutil {
 		_tuple& tuple,
 		const _fixed_args& ... fixed_args)
 	{
-		return geteach_fa_indexed<
+		return detail::geteach_fa_indexed<
 			_functor,
 			_tuple,
 			_tuple_return,
@@ -886,7 +885,7 @@ namespace iwutil {
 		_tuple_args&& tuple_args,
 		_fixed_args&& ... fixed_args)
 	{
-		return geteach_ta_fa_indexed<
+		return detail::geteach_ta_fa_indexed<
 			_functor,
 			_tuple,
 			_tuple_return,
@@ -913,7 +912,7 @@ namespace iwutil {
 		_tuple_args& tuple_args,
 		_fixed_args&& ... fixed_args)
 	{
-		return geteach_ta_fa_indexed<
+		return detail::geteach_ta_fa_indexed<
 			_functor,
 			_tuple,
 			_tuple_return,
@@ -940,7 +939,7 @@ namespace iwutil {
 		_tuple_args&& tuple_args,
 		_fixed_args& ... fixed_args)
 	{
-		return geteach_ta_fa_indexed<
+		return detail::geteach_ta_fa_indexed<
 			_functor,
 			_tuple,
 			_tuple_return,
@@ -967,7 +966,7 @@ namespace iwutil {
 		_tuple_args&& tuple_args,
 		const _fixed_args& ... fixed_args)
 	{
-		return geteach_ta_fa_indexed<
+		return detail::geteach_ta_fa_indexed<
 			_functor,
 			_tuple,
 			_tuple_return,
@@ -994,7 +993,7 @@ namespace iwutil {
 		_tuple_args& tuple_args,
 		const _fixed_args& ... fixed_args)
 	{
-		return geteach_ta_fa_indexed<
+		return detail::geteach_ta_fa_indexed<
 			_functor,
 			_tuple,
 			_tuple_return,
@@ -1021,7 +1020,7 @@ namespace iwutil {
 		const _tuple_args& tuple_args,
 		_fixed_args&& ... fixed_args)
 	{
-		return geteach_ta_fa_indexed<
+		return detail::geteach_ta_fa_indexed<
 			_functor,
 			_tuple,
 			_tuple_return,
@@ -1048,7 +1047,7 @@ namespace iwutil {
 		const _tuple_args& tuple_args,
 		_fixed_args& ... fixed_args)
 	{
-		return geteach_ta_fa_indexed<
+		return detail::geteach_ta_fa_indexed<
 			_functor,
 			_tuple,
 			_tuple_return,

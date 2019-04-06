@@ -162,25 +162,24 @@ namespace IwEntity {
 		template<
 			typename _c>
 		typename ComponentSetT<_c>::iterator GetSetEnd(
-			Archetype archetype,
-			std::size_t start)
+			Archetype archetype)
 		{
 			ComponentSetT<_c>* set = GetSet<_c>();
 			assert(set != nullptr);
 
-			auto itr = set->begin();
-			auto end = set->end();
-			while (itr != end) {
+			auto itr = set->end() - 1;
+			auto begin = set->begin();
+			while (itr != begin) {
 				EntityData ed = m_entities.Entities[set->map(itr.index())];
 				ed.Archetype &= archetype;
 				if (ed.Archetype == archetype) {
-					return itr;
+					return itr + 1;
 				}
 
-				itr++;
+				itr--;
 			}
 
-			return end;
+			return begin;
 		}
 
 		bool SetExists(

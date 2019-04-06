@@ -2,16 +2,17 @@
 //#include "iw/engine/Entity/EntityLayer.h"
 
 #include "iw/entity/Space.h"
-
 #include "iw/log/logger.h"
 
-#include <cstdlib>
+#include "iw/util/tuple/index.h"
 
 struct Transform { float x, y, z; };
 struct Velocity  { float vx, vy, vz; };
 struct Collider  { float count; };
 
-class Game : public IwEngine::Application {
+class Game 
+	: public IwEngine::Application
+{
 public:
 	Game() {
 		//PushLayer(new IwEngine::EntityLayer());
@@ -36,8 +37,8 @@ public:
 		auto view = space.ViewComponents<Transform, Velocity>();
 
 		for (auto entity : view) {
-			Transform& transform = std::get<0>(entity.m_components);
-			Velocity&  velocity  = std::get<1>(entity.m_components);
+			Transform& transform = entity.GetComponent<Transform>();
+			Velocity& velocity   = entity.GetComponent<Velocity>();
 
 			transform.x += velocity.vx;
 			transform.y += velocity.vy;

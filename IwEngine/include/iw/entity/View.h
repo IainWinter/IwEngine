@@ -3,6 +3,8 @@
 #include "IwEntity.h"
 #include "iw/util/set/sparse_set.h"
 #include "iw/util/tuple/foreach.h"
+#include "iw/util/tuple/index.h"
+#include "iw/util/type/family.h"
 #include <tuple>
 
 namespace IwEntity {
@@ -11,13 +13,24 @@ namespace IwEntity {
 	class View {
 	public:
 		class ComponentData {
-		public:
-			std::tuple<_cs&...> m_components;
+		private:
+			using ComponentFamily = iwu::family<View<_cs...>>;
+			using tuple_t = std::tuple<_cs&...>;
 
+			tuple_t m_components;
+
+		public:
 			ComponentData(
 				_cs&... components)
 				: m_components(components...)
 			{}
+
+			template<
+				typename _c>
+			_c& GetComponent() {
+				return std::get<iwu::index<_c&, tuple_t>::value>(
+					m_components);
+			}
 		};
 
 		class Iterator {
@@ -67,10 +80,12 @@ namespace IwEntity {
 			}
 		};
 	private:
-		template<typename _c>
+		template<
+			typename _c>
 		using ComponentSet = iwu::sparse_set<Entity, _c>;
 
-		template<typename _c>
+		template<
+			typename _c>
 		using ComponentItr = typename iwu::sparse_set<Entity, _c>::iterator;
 
 		Iterator m_begin;
