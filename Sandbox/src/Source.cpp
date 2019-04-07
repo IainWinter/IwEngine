@@ -26,6 +26,9 @@ public:
 
 			if (rand() > RAND_MAX / 2.0f) {
 				space.CreateComponent<Velocity>(e, (float)i, (float)i, (float)i);
+			}
+
+			if (rand() > RAND_MAX / 2.0f) {
 				space.CreateComponent<Collider>(e);
 			}
 

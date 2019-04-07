@@ -103,6 +103,25 @@ namespace IwEntity {
 				set->sort(m_entities);
 			}
 		}
+
+		//temp
+		void Log() {
+			LOG_DEBUG << "Space";
+			int i = 1;
+			for (auto& set : m_components) {
+				LOG_DEBUG << "";
+				LOG_DEBUG << " Set     " << std::bitset<32>(i);
+				i *= 2;
+
+				for (auto& e : *set) {
+					switch ((int)abs(log10(e + 0.9)) + 1) {
+					case 1: LOG_DEBUG << "  " << e << "   :  " << std::bitset<32>(m_entities.Entities[e].Archetype); break;
+					case 2: LOG_DEBUG << "  " << e << "  :  " << std::bitset<32>(m_entities.Entities[e].Archetype); break;
+					case 3: LOG_DEBUG << "  " << e << " :  " << std::bitset<32>(m_entities.Entities[e].Archetype); break;
+					}
+				}
+			}
+		}
 	private:
 		template<
 			typename _c>
