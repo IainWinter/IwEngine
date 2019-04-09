@@ -87,7 +87,7 @@ namespace IwEngine {
 
 		auto view = space.GetComponents<Transform, Velocity>();
 
-
+		
 
 		Transform& modelTransform = *std::get<0>(components);
 		Velocity&  modelVelocity  = *std::get<1>(components);
