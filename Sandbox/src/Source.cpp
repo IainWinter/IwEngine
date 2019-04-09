@@ -36,6 +36,7 @@ public:
 		}
 
 		space.Sort();
+		space.Log();
 
 		auto view = space.ViewComponents<Transform, Velocity>();
 

@@ -14,10 +14,27 @@ namespace IwEntity {
 	class IWENTITY_API Space {
 	private:
 		using ComponentFamily = iwu::family<Space>;
-		using ComponentSet    = iwu::sparse_set<Entity>;
 
-		template<typename _c>
-		using ComponentSetT = iwu::sparse_set<Entity, _c>;
+		struct ComponentChunk {
+			Archetype Archetype;
+			std::size_t Begin;
+			std::size_t End;
+		};
+
+		template<
+			typename _c>
+		using Set = iwu::sparse_set<Entity, _c>;
+
+		struct ComponentSet {
+			iwu::sparse_set<Entity>* Components;
+			std::vector<ComponentChunk> Chunks;
+
+			template<
+				typename _c>
+			Set<_c>* As() {
+				return static_cast<Set<_c>*>(Components);
+			}
+		};
 
 		struct EntityData {
 			Archetype Archetype;
@@ -47,7 +64,7 @@ namespace IwEntity {
 			}
 		};
 
-		std::vector<ComponentSet*> m_components;
+		std::vector<ComponentSet> m_components;
 		EntityVector m_entities;
 
 	public:
@@ -66,41 +83,42 @@ namespace IwEntity {
 			Entity entity,
 			const _args_t&... args)
 		{
-			ComponentSetT<_c>& set = EnsureSet<_c>();
+			ComponentSet& components = EnsureComponentSet<_c>();
+			Set<_c>* set = components.As<_c>();
 
 			m_entities.Entities[entity].Archetype |= GetArchetype<_c>();
 
-			set.emplace(entity, args...);
+			set->emplace(entity, args...);
 
-			return set.at(entity);
+			return set->at(entity);
 		}
 
 		template<
 			typename _c>
 		void DestroyComponent(
-				Entity entity)
+			Entity entity)
 		{
-			ComponentSet* set = GetSet<_c>();
-			if (set) {
+			ComponentSet* components = GetComponentSet<_c>();
+			if (components) {
 				m_entities.Entities[entity].Archetype
 					&= ~(GetArchetype<_c>());
 
-				set->erase(entity);
+				components->Components->erase(entity);
 			}
 		}
 
 		template<
-			typename... _components_t>
-		View<_components_t...> ViewComponents() {
-			Archetype archetype = GetArchetype<_components_t...>();
-			return View<_components_t...>(
-				GetSetBegin<_components_t>(archetype)...,
-				GetSetEnd  <_components_t>(archetype)...);
+			typename... _cs>
+		View<_cs...> ViewComponents() {
+			Archetype archetype = GetArchetype<_cs...>();
+			return View<_cs...>(
+				GetSetBegin<_cs>(archetype)...,
+				GetSetEnd  <_cs>(archetype)...);
 		}
 
 		void Sort() {
 			for (auto& set : m_components) {
-				set->sort(m_entities);
+				set.Components->sort(m_entities);
 			}
 		}
 
@@ -113,7 +131,7 @@ namespace IwEntity {
 				LOG_DEBUG << " Set     " << std::bitset<32>(i);
 				i *= 2;
 
-				for (auto& e : *set) {
+				for (auto& e : *set.Components) {
 					switch ((int)abs(log10(e + 0.9)) + 1) {
 					case 1: LOG_DEBUG << "  " << e << "   :  " << std::bitset<32>(m_entities.Entities[e].Archetype); break;
 					case 2: LOG_DEBUG << "  " << e << "  :  " << std::bitset<32>(m_entities.Entities[e].Archetype); break;
@@ -125,31 +143,27 @@ namespace IwEntity {
 	private:
 		template<
 			typename _c>
-		ComponentSetT<_c>& EnsureSet() {
-			using CSetType = ComponentSetT<_c>;
-
+		ComponentSet& EnsureComponentSet() {
 			ComponentId id = ComponentFamily::type<_c>;
 			if (id >= m_components.size()) {
 				m_components.resize(id + 1);
 			}
 
-			if (!m_components.at(id)) {
-				CSetType* set = new CSetType();
-				m_components.at(id) = set;
-				return *set;
+			ComponentSet& components = m_components.at(id);
+			if (!components.Components) {
+				Set<_c>* set = new Set<_c>();
+				components.Components = set;
 			}
 
-			return *static_cast<CSetType*>(m_components.at(id));
+			return components;
 		}
 
 		template<
 			typename _c>
-		ComponentSetT<_c>* GetSet() {
-			using CSetType = ComponentSetT<_c>;
-
+		ComponentSet* GetComponentSet() {
 			ComponentId id = ComponentFamily::type<_c>;
 			if (SetExists(id)) {
-				return static_cast<CSetType*>(m_components.at(id));
+				return static_cast<Set<_c>*>(m_components.at(id).Components);
 			}
 
 			return nullptr;
@@ -157,11 +171,13 @@ namespace IwEntity {
 
 		template<
 			typename _c>
-		typename ComponentSetT<_c>::iterator GetSetBegin(
+		typename iwu::sparse_set<Entity, _c>::iterator GetSetBegin(
 			Archetype archetype)
 		{
-			ComponentSetT<_c>* set = GetSet<_c>();
-			assert(set != nullptr);
+			ComponentSet* components = GetComponentSet<_c>();
+			Set<_c>* set = components->As<_c>();
+
+			assert(components != nullptr, "Component set does not exist!");
 
 			auto itr = set->begin();
 			auto end = set->end();
@@ -180,11 +196,13 @@ namespace IwEntity {
 
 		template<
 			typename _c>
-		typename ComponentSetT<_c>::iterator GetSetEnd(
+		typename iwu::sparse_set<Entity, _c>::iterator GetSetEnd(
 			Archetype archetype)
 		{
-			ComponentSetT<_c>* set = GetSet<_c>();
-			assert(set != nullptr);
+			ComponentSet* components = GetComponentSet<_c>();
+			Set<_c>* set = components->As<_c>();
+
+			assert(components != nullptr, "Component set does not exist!");
 
 			auto itr = set->end() - 1;
 			auto begin = set->begin();
