@@ -2,6 +2,8 @@
 
 #include "IwEntity.h"
 #include "View.h"
+#include "EntityData.h"
+#include "ComponentData.h"
 #include "iw/util/set/sparse_set.h"
 #include "iw/util/type/family.h"
 #include <assert.h>
@@ -10,67 +12,19 @@
 #include <bitset>
 #include <cmath>
 
+#include "iw/log/logger.h"
+
 namespace IwEntity {
 	class IWENTITY_API Space {
 	private:
 		using ComponentFamily = iwu::family<Space>;
 
-		struct ComponentChunk {
-			Archetype Archetype;
-			std::size_t Begin;
-			std::size_t End;
-		};
-
-		template<
-			typename _c>
-		using Set = iwu::sparse_set<Entity, _c>;
-
-		struct ComponentSet {
-			iwu::sparse_set<Entity>* Components;
-			std::vector<ComponentChunk> Chunks;
-
-			template<
-				typename _c>
-			Set<_c>* As() {
-				return static_cast<Set<_c>*>(Components);
-			}
-		};
-
-		struct EntityData {
-			Archetype Archetype;
-			std::size_t Count;
-		};
-
-		struct EntityVector {
-			std::vector<EntityData> Entities;
-
-			bool operator()(
-				int a,
-				int b) const
-			{
-				int count = Entities[a].Count - Entities[b].Count;
-				if (count == 0) {
-					int size = Entities[a].Archetype
-						- Entities[b].Archetype;
-
-					if (size == 0) {
-						return a < b;
-					}
-
-					return size >= 0;
-				}
-
-				return count >= 0;
-			}
-		};
-
-		std::vector<ComponentSet> m_components;
+		std::vector<IComponentData*> m_components;
 		EntityVector m_entities;
 
 	public:
 		Entity CreateEntity() {
 			static Entity next = Entity();
-
 			m_entities.Entities.push_back({ 0, 0 });
 
 			return next++;
@@ -81,143 +35,139 @@ namespace IwEntity {
 			typename... _args_t>
 		_c& CreateComponent(
 			Entity entity,
-			const _args_t&... args)
+			_args_t&&... args)
 		{
-			ComponentSet& components = EnsureComponentSet<_c>();
-			Set<_c>* set = components.As<_c>();
+			Archetype oldArchetype = m_entities.Entities.at(entity).Archetype;
+			Archetype& archetype   = m_entities.AssignComponent<_c>(entity);
 
-			m_entities.Entities[entity].Archetype |= GetArchetype<_c>();
-
-			set->emplace(entity, args...);
-
-			return set->at(entity);
-		}
-
-		template<
-			typename _c>
-		void DestroyComponent(
-			Entity entity)
-		{
-			ComponentSet* components = GetComponentSet<_c>();
-			if (components) {
-				m_entities.Entities[entity].Archetype
-					&= ~(GetArchetype<_c>());
-
-				components->Components->erase(entity);
+			std::size_t index = 0;
+			for (Archetype i = 1; i <= oldArchetype; i = i << 1, index++) {
+				if ((oldArchetype & i) == i) { //pretty sure set has to exist for archetype to exist
+					m_components.at(index)->UpdateChunk(entity, archetype);
+				}
 			}
+
+			return EnsureComponentData<_c>()
+				.CreateComponent(
+					entity,
+					archetype,
+					std::forward<_args_t>(args)...);
 		}
 
-		template<
-			typename... _cs>
-		View<_cs...> ViewComponents() {
-			Archetype archetype = GetArchetype<_cs...>();
-			return View<_cs...>(
-				GetSetBegin<_cs>(archetype)...,
-				GetSetEnd  <_cs>(archetype)...);
-		}
+		//template<
+		//	typename _c>
+		//void DestroyComponent(
+		//	Entity entity)
+		//{
+		//	ComponentData* components = GetComponentSet<_c>();
+		//	if (components) {
+		//		m_entities.Entities[entity].Archetype
+		//			&= ~(GetArchetype<_c>());
+
+		//		components->Components->erase(entity);
+		//	}
+		//}
+
+		//template<
+		//	typename... _cs>
+		//View<_cs...> ViewComponents() {
+		//	Archetype archetype = GetArchetype<_cs...>();
+		//	return View<_cs...>(
+		//		GetSetBegin<_cs>(archetype)...,
+		//		GetSetEnd  <_cs>(archetype)...);
+		//}
 
 		void Sort() {
-			for (auto& set : m_components) {
-				set.Components->sort(m_entities);
-			}
+			//for (auto& set : m_components) {
+			//	set.Components->sort(m_entities);
+			//}
 		}
 
 		//temp
 		void Log() {
-			LOG_DEBUG << "Space";
-			int i = 1;
-			for (auto& set : m_components) {
-				LOG_DEBUG << "";
-				LOG_DEBUG << " Set     " << std::bitset<32>(i);
-				i *= 2;
+			//LOG_DEBUG << "Space";
+			//int i = 1;
+			//for (auto& set : m_components) {
+			//	LOG_DEBUG << " Set     " << std::bitset<32>(i);
+			//	i *= 2;
 
-				for (auto& e : *set.Components) {
-					switch ((int)abs(log10(e + 0.9)) + 1) {
-					case 1: LOG_DEBUG << "  " << e << "   :  " << std::bitset<32>(m_entities.Entities[e].Archetype); break;
-					case 2: LOG_DEBUG << "  " << e << "  :  " << std::bitset<32>(m_entities.Entities[e].Archetype); break;
-					case 3: LOG_DEBUG << "  " << e << " :  " << std::bitset<32>(m_entities.Entities[e].Archetype); break;
-					}
-				}
-			}
+			//	for (auto& e : *set.Components) {
+			//		switch ((int)abs(log10(e + 0.9)) + 1) {
+			//		case 1: LOG_DEBUG << "  " << e << "   :  " << std::bitset<32>(m_entities.Entities[e].Archetype); break;
+			//		case 2: LOG_DEBUG << "  " << e << "  :  " << std::bitset<32>(m_entities.Entities[e].Archetype); break;
+			//		case 3: LOG_DEBUG << "  " << e << " :  " << std::bitset<32>(m_entities.Entities[e].Archetype); break;
+			//		}
+			//	}
+
+			//	LOG_DEBUG << "";
+			//}
 		}
 	private:
 		template<
 			typename _c>
-		ComponentSet& EnsureComponentSet() {
+		ComponentData<_c>& EnsureComponentData() {
 			ComponentId id = ComponentFamily::type<_c>;
 			if (id >= m_components.size()) {
 				m_components.resize(id + 1);
 			}
 
-			ComponentSet& components = m_components.at(id);
-			if (!components.Components) {
-				Set<_c>* set = new Set<_c>();
-				components.Components = set;
+			IComponentData*& cdata = m_components.at(id);
+			if (!cdata) {
+				cdata = new ComponentData<_c>();
 			}
 
-			return components;
+			return *static_cast<ComponentData<_c>*>(cdata);
 		}
 
-		template<
-			typename _c>
-		ComponentSet* GetComponentSet() {
-			ComponentId id = ComponentFamily::type<_c>;
-			if (SetExists(id)) {
-				return static_cast<Set<_c>*>(m_components.at(id).Components);
-			}
+		//template<
+		//	typename _c>
+		//typename iwu::sparse_set<Entity, _c>::iterator GetSetBegin(
+		//	Archetype archetype)
+		//{
+		//	ComponentData* components = GetComponentSet<_c>();
+		//	ComponentSet<_c>& set = components->SetAs<_c>();
 
-			return nullptr;
-		}
+		//	assert(components != nullptr, "Component set does not exist!");
 
-		template<
-			typename _c>
-		typename iwu::sparse_set<Entity, _c>::iterator GetSetBegin(
-			Archetype archetype)
-		{
-			ComponentSet* components = GetComponentSet<_c>();
-			Set<_c>* set = components->As<_c>();
+		//	auto itr = set.begin();
+		//	auto end = set.end();
+		//	while (itr != end) {
+		//		EntityData ed = m_entities.Entities[set.map(itr.index())];
+		//		ed.Archetype &= archetype;
+		//		if (ed.Archetype == archetype) {
+		//			return itr;
+		//		}
 
-			assert(components != nullptr, "Component set does not exist!");
+		//		itr++;
+		//	}
 
-			auto itr = set->begin();
-			auto end = set->end();
-			while (itr != end) {
-				EntityData ed = m_entities.Entities[set->map(itr.index())];
-				ed.Archetype &= archetype;
-				if (ed.Archetype == archetype) {
-					return itr;
-				}
+		//	return end;
+		//}
 
-				itr++;
-			}
+		//template<
+		//	typename _c>
+		//typename iwu::sparse_set<Entity, _c>::iterator GetSetEnd(
+		//	Archetype archetype)
+		//{
+		//	ComponentData* components = GetComponentSet<_c>();
+		//	ComponentSet<_c>& set = components->SetAs<_c>();
 
-			return end;
-		}
+		//	assert(components != nullptr, "Component set does not exist!");
 
-		template<
-			typename _c>
-		typename iwu::sparse_set<Entity, _c>::iterator GetSetEnd(
-			Archetype archetype)
-		{
-			ComponentSet* components = GetComponentSet<_c>();
-			Set<_c>* set = components->As<_c>();
+		//	auto itr = set.end() - 1;
+		//	auto begin = set.begin();
+		//	while (itr != begin) {
+		//		EntityData ed = m_entities.Entities[set.map(itr.index())];
+		//		ed.Archetype &= archetype;
+		//		if (ed.Archetype == archetype) {
+		//			return itr + 1;
+		//		}
 
-			assert(components != nullptr, "Component set does not exist!");
+		//		itr--;
+		//	}
 
-			auto itr = set->end() - 1;
-			auto begin = set->begin();
-			while (itr != begin) {
-				EntityData ed = m_entities.Entities[set->map(itr.index())];
-				ed.Archetype &= archetype;
-				if (ed.Archetype == archetype) {
-					return itr + 1;
-				}
-
-				itr--;
-			}
-
-			return begin;
-		}
+		//	return begin;
+		//}
 
 		bool SetExists(
 			ComponentId id)

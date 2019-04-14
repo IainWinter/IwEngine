@@ -8,8 +8,13 @@
 #	endif
 #endif
 
+#include "iw/util/type/family.h"
+
 namespace IwEntity {
+	struct ComponentFamilyTag {};
+
 	using Entity      = unsigned int;
 	using ComponentId = unsigned int;
 	using Archetype   = unsigned int;
+	using Family      = iwu::family<ComponentFamilyTag>;
 }

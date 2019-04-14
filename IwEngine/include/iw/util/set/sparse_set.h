@@ -335,7 +335,7 @@ namespace iwutil {
 		bool contains(
 			const _t& val) const
 		{
-			return 0 <= val && val < m_sparse.size() && m_sparse[val] != EMPTY_VALUE;
+			return val >= 0 && val < m_sparse.size() && m_sparse[val] != EMPTY_VALUE;
 		}
 
 		_t map(
@@ -785,6 +785,12 @@ namespace iwutil {
 			const _index_t& index)
 		{
 			return contains(index) ? begin() + base_t::at(index) : end();
+		}
+
+		_index_t at_index(
+			_index_t index)
+		{
+			return base_t::at(index);
 		}
 
 		/**
