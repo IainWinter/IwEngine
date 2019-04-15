@@ -4,22 +4,24 @@
 #include <vector>
 
 namespace IwEntity {
-	struct EntityData {
+	struct EntityArchetypeData {
 		Archetype Archetype;
 		std::size_t Count;
 	};
 
-	struct EntityVector {
-		std::vector<EntityData> Entities;
+	class EntityData {
+	private:
+		std::vector<EntityArchetypeData> m_entities;
 
+	public:
 		bool operator()(
 			int a,
 			int b) const
 		{
-			int count = Entities[a].Count - Entities[b].Count;
+			int count = m_entities[a].Count - m_entities[b].Count;
 			if (count == 0) {
-				int size = Entities[a].Archetype
-					- Entities[b].Archetype;
+				int size = m_entities[a].Archetype
+					- m_entities[b].Archetype;
 
 				if (size == 0) {
 					return a < b;
@@ -31,12 +33,31 @@ namespace IwEntity {
 			return count >= 0;
 		}
 
+		Entity CreateEntity() {
+			static Entity next = Entity();
+			m_entities.push_back({ 0, 0 });
+
+			return next++;
+		}
+
+		void DestroyEntity(
+			Entity entity)
+		{
+			m_entities.erase(m_entities.begin() + entity);
+		}
+
+		Archetype& ArchetypeOf(
+			Entity entity)
+		{
+			return m_entities.at(entity).Archetype;
+		}
+
 		template<
 			typename _c>
 		Archetype& AssignComponent(
 			Entity entity)
 		{
-			return Entities.at(entity).Archetype |= 1 << Family::type<_c>;
+			return ArchetypeOf(entity) |= 1 << Family::type<_c>;
 		}
 
 		template<
@@ -44,7 +65,7 @@ namespace IwEntity {
 		Archetype& UnassignComponent(
 			Entity entity)
 		{
-			return Entities.at(entity).Archetype = ~(Entities.at(entity).Archetype & 1 << Family::type<_c>);
+			return ArchetypeOf(entity) &= ~(ArchetypeOf(entity) & 1 << Family::type<_c>);
 		}
 	};
 }

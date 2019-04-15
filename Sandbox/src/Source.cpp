@@ -21,7 +21,7 @@ public:
 	void Run() override {
 		IwEntity::Space space;
 
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 100; i++) {
 			IwEntity::Entity e = space.CreateEntity();
 
 			space.CreateComponent<Transform>(e);
@@ -36,8 +36,9 @@ public:
 
 		}
 
-		//space.Sort();
-		//space.Log();
+		space.Sort();
+
+		space.DestroyEntity(2);
 
 		//auto view = space.ViewComponents<Transform, Velocity>();
 
