@@ -29,6 +29,7 @@ namespace IwEntity {
 			Entity entity)
 		{
 			m_entities.DestroyEntity(entity);
+
 			for (auto& set : m_components) {
 				if (set->HasEntity(entity)) {
 					set->DestroyComponent(entity);
@@ -44,12 +45,15 @@ namespace IwEntity {
 			_args_t&&... args)
 		{
 			Archetype oldArchetype = m_entities.ArchetypeOf(entity);
-			Archetype& archetype = m_entities.AssignComponent<_c>(entity);
+			Archetype& archetype   = m_entities.AssignComponent<_c>(entity);
 
 			UpdateComponentData(entity, archetype, oldArchetype);
 
-			return EnsureComponentData<_c>().CreateComponent(
-					entity, archetype, std::forward<_args_t>(args)...);
+			return EnsureComponentData<_c>()
+				.CreateComponent(
+					entity,
+					archetype,
+					std::forward<_args_t>(args)...);
 		}
 
 		template<
@@ -59,13 +63,13 @@ namespace IwEntity {
 		{
 			if (ComponentDataExists<_c>()) {
 				Archetype oldArchetype = m_entities.ArchetypeOf(entity);
-				Archetype& archetype = m_entities.UnassignComponent<_c>(
-					entity);
+				Archetype& archetype
+					= m_entities.UnassignComponent<_c>(entity);
 
 				UpdateComponentData(entity, archetype, oldArchetype);
 
-				GetComponentData<_c>()->DestroyComponent(
-					entity, archetype);
+				GetComponentData<_c>()
+					->DestroyComponent(entity, archetype);
 			}
 		}
 
@@ -87,7 +91,7 @@ namespace IwEntity {
 		template<
 			typename _c>
 		ComponentData<_c>& EnsureComponentData() {
-			ComponentId id = Family::type<_c>;
+			ComponentId id = ComponentFamily::type<_c>;
 			if (id >= m_components.size()) {
 				m_components.resize(id + 1);
 			}
@@ -106,8 +110,8 @@ namespace IwEntity {
 			Archetype oldArchetype)
 		{
 			std::size_t index = 0;
-			for (Archetype i = 1; i <= oldArchetype; i = i << 1, index++) {
-				if ((oldArchetype & i) == i) {
+			for (Archetype a = 1; a <= oldArchetype; a = a << 1, index++) {
+				if ((oldArchetype & a) == a) {
 					m_components.at(index)->UpdateChunk(
 						entity, oldArchetype, archetype);
 				}
@@ -118,13 +122,13 @@ namespace IwEntity {
 			typename _c>
 		ComponentData<_c>* GetComponentData() {
 			return static_cast<ComponentData<_c>*>(
-				m_components.at(Family::type<_c>));
+				m_components.at(ComponentFamily::type<_c>));
 		}
 
 		template<
 			typename _c>
 		bool ComponentDataExists() {
-			return Family::type<_c> < m_components.size();
+			return ComponentFamily::type<_c> < m_components.size();
 		}
 	};
 }

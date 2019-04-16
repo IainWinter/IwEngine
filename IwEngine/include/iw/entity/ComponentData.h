@@ -9,19 +9,19 @@ namespace IwEntity {
 	public:
 		virtual ~IComponentData() {}
 
-		virtual void UpdateChunk(
-			Entity entity,
-			Archetype oldArchetype,
-			Archetype archetype) = 0;
-
 		virtual void DestroyComponent(
+			Entity entity) = 0;
+
+		virtual bool HasEntity(
 			Entity entity) = 0;
 
 		virtual void Sort(
 			EntityData& entities) = 0;
 
-		virtual bool HasEntity(
-			Entity entity) = 0;
+		virtual void UpdateChunk(
+			Entity entity,
+			Archetype oldArchetype,
+			Archetype archetype) = 0;
 	};
 
 	template<
@@ -89,7 +89,7 @@ namespace IwEntity {
 		}
 
 		void DestroyComponent(
-			Entity entity)
+			Entity entity) override
 		{
 			auto begin = m_chunks.begin();
 			auto end = m_chunks.end();
@@ -108,8 +108,14 @@ namespace IwEntity {
 			m_set.erase(entity);
 		}
 
+		bool HasEntity(
+			Entity entity) override
+		{
+			return m_set.contains(entity);
+		}
+
 		void Sort(
-			EntityData& entities)
+			EntityData& entities) override
 		{
 			m_set.sort(entities);
 			m_chunks.clear();
@@ -134,12 +140,6 @@ namespace IwEntity {
 				lastEnd++;
 				lastArchetype = ea;
 			}
-		}
-
-		bool HasEntity(
-			Entity entity)
-		{
-			return m_set.contains(entity);
 		}
 
 		void UpdateChunk(

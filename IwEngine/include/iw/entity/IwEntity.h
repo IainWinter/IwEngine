@@ -16,5 +16,5 @@ namespace IwEntity {
 	using Entity      = unsigned int;
 	using ComponentId = unsigned int;
 	using Archetype   = unsigned int;
-	using Family      = iwu::family<ComponentFamilyTag>;
+	using ComponentFamily      = iwu::family<ComponentFamilyTag>;
 }

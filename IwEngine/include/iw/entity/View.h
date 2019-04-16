@@ -14,7 +14,6 @@ namespace IwEntity {
 	public:
 		class ComponentData {
 		private:
-			using ComponentFamily = iwu::family<View<_cs...>>;
 			using tuple_t = std::tuple<_cs&...>;
 
 			tuple_t m_components;

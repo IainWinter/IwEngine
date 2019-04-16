@@ -57,7 +57,7 @@ namespace IwEntity {
 		Archetype& AssignComponent(
 			Entity entity)
 		{
-			return ArchetypeOf(entity) |= 1 << Family::type<_c>;
+			return ArchetypeOf(entity) |= 1 << ComponentFamily::type<_c>;
 		}
 
 		template<
@@ -65,7 +65,7 @@ namespace IwEntity {
 		Archetype& UnassignComponent(
 			Entity entity)
 		{
-			return ArchetypeOf(entity) &= ~(ArchetypeOf(entity) & 1 << Family::type<_c>);
+			return ArchetypeOf(entity) &= ~(ArchetypeOf(entity) & 1 << ComponentFamily::type<_c>);
 		}
 	};
 }
