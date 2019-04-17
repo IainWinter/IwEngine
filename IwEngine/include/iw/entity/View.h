@@ -1,10 +1,7 @@
 #pragma once
 
 #include "IwEntity.h"
-#include "iw/util/set/sparse_set.h"
-#include "iw/util/tuple/foreach.h"
-#include "iw/util/tuple/index.h"
-#include "iw/util/type/family.h"
+#include "ComponentArray.h"
 #include <tuple>
 
 namespace IwEntity {
@@ -12,98 +9,119 @@ namespace IwEntity {
 		typename... _cs>
 	class View {
 	public:
-		class ComponentData {
-		private:
-			using tuple_t = std::tuple<_cs&...>;
-
-			tuple_t m_components;
-
-		public:
-			ComponentData(
-				_cs&... components)
-				: m_components(components...)
-			{}
-
-			template<
-				typename _c>
-			_c& GetComponent() {
-				return std::get<iwu::index<_c&, tuple_t>::value>(
-					m_components);
-			}
-		};
-
 		class Iterator {
 		private:
-			template<
-				typename _c>
-			using ComponentItr = typename iwu::sparse_set<Entity, _c>
-				::iterator;
-
-			using ComponentItrs = std::tuple<ComponentItr<_cs>...>;
-
-			static constexpr std::size_t ComponentCount = sizeof...(_cs);
-
-			ComponentItrs m_itrs;
+			std::tuple<ComponentArray<_cs>::ChunkListItr...> m_itrs;
 
 		public:
 			Iterator(
-				ComponentItr<_cs>& ... itrs)
-				: m_itrs(itrs...)
+				ComponentArray<_cs>::ChunkListItr... itrs)
+				: m_itrs(itrs)
 			{}
-
-			bool operator!=(const Iterator& itr) {
-				return m_itrs != itr.m_itrs;
-			}
-
-			Iterator& operator++() {
-				iwu::foreach<
-					functors::increment,
-					ComponentItrs,
-					ComponentCount>
-				(
-					m_itrs
-				);
-
-				return *this;
-			}
-
-			ComponentData operator*() {
-				return iwu::geteach<
-					functors::reference,
-					ComponentItrs,
-					ComponentData,
-					ComponentCount>
-				(
-					m_itrs
-				);
-			}
 		};
+
 	private:
-		template<
-			typename _c>
-		using ComponentSet = iwu::sparse_set<Entity, _c>;
-
-		template<
-			typename _c>
-		using ComponentItr = typename iwu::sparse_set<Entity, _c>::iterator;
-
-		Iterator m_begin;
-		Iterator m_end;
+		Archetype archetype;
+		Iterator  begin;
+		Iterator  end;
 
 	public:
 		View(
-			ComponentItr<_cs>&... begin,
-			ComponentItr<_cs>&... end)
-			: m_begin(begin...)
-			, m_end(end...)
+			typename ComponentArray<_cs>&... components)
+			: archetype(GetArchetype<_cs...>())
+			, begin(components.begin()...)
+			, end(components.end()...)
 		{}
-
-		Iterator begin() {
-			return m_begin;
-		}
-
-		Iterator end() {
-			return m_end;
-		}
 	};
 }
+
+//namespace IwEntity2 {
+//	template<
+//		typename... _cs>
+//	class View {
+//	public:
+//		class ComponentData {
+//		private:
+//			using tuple_t = std::tuple<_cs&...>;
+//
+//			tuple_t m_components;
+//
+//		public:
+//			ComponentData(
+//				_cs&... components)
+//				: m_components(components...)
+//			{}
+//
+//			template<
+//				typename _c>
+//			_c& GetComponent() {
+//				return std::get<iwu::index<_c&, tuple_t>::value>(
+//					m_components);
+//			}
+//		};
+//
+//		class Iterator {
+//		private:
+//			template<
+//				typename _c>
+//			using ComponentItr = typename iwu::sparse_set<Entity, _c>
+//				::iterator;
+//
+//			using ComponentItrs = std::tuple<ComponentItr<_cs>...>;
+//
+//			static constexpr std::size_t ComponentCount = sizeof...(_cs);
+//
+//			ComponentItrs m_itrs;
+//
+//		public:
+//			Iterator(
+//				ComponentItr<_cs>& ... itrs)
+//				: m_itrs(itrs...)
+//			{}
+//
+//			bool operator!=(const Iterator& itr) {
+//				return m_itrs != itr.m_itrs;
+//			}
+//
+//			Iterator& operator++() {
+//				iwu::foreach<
+//					functors::increment,
+//					ComponentItrs,
+//					ComponentCount>
+//				(
+//					m_itrs
+//				);
+//
+//				return *this;
+//			}
+//
+//			ComponentData operator*() {
+//				return iwu::geteach<
+//					functors::reference,
+//					ComponentItrs,
+//					ComponentData,
+//					ComponentCount>
+//				(
+//					m_itrs
+//				);
+//			}
+//		};
+//	private:
+//		Iterator m_begin;
+//		Iterator m_end;
+//
+//	public:
+//		View(
+//			typename ComponentArray<_cs>::ChunkList&... chunks)
+//			: m_begin(begin...)
+//		{}
+//
+//		Iterator begin() {
+//			return m_begin;
+//		}
+//
+//		Iterator end() {
+//			return m_end;
+//		}
+//	};
+//}

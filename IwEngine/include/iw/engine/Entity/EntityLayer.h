@@ -48,13 +48,13 @@ namespace IwEngine {
 		~EntityLayer();
 
 		int  Initialize() override;
-		void Destroy()   override;
-		void Update()    override;
-		void ImGui()     override;
+		void Destroy()    override;
+		void Update()     override;
+		void ImGui()      override;
 
 		bool On(WindowResizedEvent& event);
 		bool On(MouseMovedEvent&    event);
-		bool On(MouseButtonEvent&  event);
-		bool On(MouseWheelEvent&   event);
+		bool On(MouseButtonEvent&   event);
+		bool On(MouseWheelEvent&    event);
 	};
 }

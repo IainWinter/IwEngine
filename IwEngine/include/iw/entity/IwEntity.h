@@ -13,8 +13,14 @@
 namespace IwEntity {
 	struct ComponentFamilyTag {};
 
-	using Entity      = unsigned int;
-	using ComponentId = unsigned int;
-	using Archetype   = unsigned int;
-	using ComponentFamily      = iwu::family<ComponentFamilyTag>;
+	using Entity          = unsigned int;
+	using ComponentId     = unsigned int;
+	using Archetype       = unsigned int;
+	using ComponentFamily = iwu::family<ComponentFamilyTag>;
+
+	template<
+		typename... _cs>
+	Archetype GetArchetype() {
+		return ((1 << ComponentFamily::type<_cs>) | ...);
+	}
 }

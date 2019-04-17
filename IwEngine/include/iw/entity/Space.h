@@ -2,23 +2,17 @@
 
 #include "IwEntity.h"
 #include "View.h"
-#include "EntityData.h"
-#include "ComponentData.h"
+#include "EntityArray.h"
+#include "ComponentArray.h"
 #include "iw/util/set/sparse_set.h"
 #include "iw/util/type/family.h"
-#include <assert.h>
 #include <vector>
-#include <tuple>
-#include <bitset>
-#include <cmath>
-
-#include "iw/log/logger.h"
 
 namespace IwEntity {
 	class IWENTITY_API Space {
 	private:
-		std::vector<IComponentData*> m_components;
-		EntityData m_entities;
+		std::vector<IComponentArray*> m_components;
+		EntityArray m_entities;
 
 	public:
 		Entity CreateEntity() {
@@ -42,18 +36,16 @@ namespace IwEntity {
 			typename... _args_t>
 		_c& CreateComponent(
 			Entity entity,
-			_args_t&&... args)
+			_args_t&& ... args)
 		{
 			Archetype oldArchetype = m_entities.ArchetypeOf(entity);
-			Archetype& archetype   = m_entities.AssignComponent<_c>(entity);
+			Archetype& archetype = m_entities.AssignComponent<_c>(entity);
 
 			UpdateComponentData(entity, archetype, oldArchetype);
 
 			return EnsureComponentData<_c>()
 				.CreateComponent(
-					entity,
-					archetype,
-					std::forward<_args_t>(args)...);
+					entity, archetype, std::forward<_args_t>(args)...);
 		}
 
 		template<
@@ -68,19 +60,15 @@ namespace IwEntity {
 
 				UpdateComponentData(entity, archetype, oldArchetype);
 
-				GetComponentData<_c>()
-					->DestroyComponent(entity, archetype);
+				GetComponentData<_c>().DestroyComponent(entity, archetype);
 			}
 		}
 
-		//template<
-		//	typename... _cs>
-		//View<_cs...> ViewComponents() {
-		//	Archetype archetype = GetArchetype<_cs...>();
-		//	return View<_cs...>(
-		//		GetSetBegin<_cs>(archetype)...,
-		//		GetSetEnd  <_cs>(archetype)...);
-		//}
+		template<
+			typename... _cs>
+		View<_cs...> ViewComponents() {
+			return { GetComponentData<_cs>()... };
+		}
 
 		void Sort() {
 			for (auto& set : m_components) {
@@ -90,18 +78,18 @@ namespace IwEntity {
 	private:
 		template<
 			typename _c>
-		ComponentData<_c>& EnsureComponentData() {
+			ComponentArray<_c>& EnsureComponentData() {
 			ComponentId id = ComponentFamily::type<_c>;
 			if (id >= m_components.size()) {
 				m_components.resize(id + 1);
 			}
 
-			IComponentData*& cdata = m_components.at(id);
+			IComponentArray*& cdata = m_components.at(id);
 			if (!cdata) {
-				cdata = new ComponentData<_c>();
+				cdata = new ComponentArray<_c>();
 			}
 
-			return *static_cast<ComponentData<_c>*>(cdata);
+			return *static_cast<ComponentArray<_c>*>(cdata);
 		}
 
 		void UpdateComponentData(
@@ -120,8 +108,8 @@ namespace IwEntity {
 
 		template<
 			typename _c>
-		ComponentData<_c>* GetComponentData() {
-			return static_cast<ComponentData<_c>*>(
+		ComponentArray<_c>& GetComponentData() {
+			return *static_cast<ComponentArray<_c>*>(
 				m_components.at(ComponentFamily::type<_c>));
 		}
 

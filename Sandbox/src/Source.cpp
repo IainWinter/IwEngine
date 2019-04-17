@@ -38,9 +38,7 @@ public:
 
 		space.Sort();
 
-		space.DestroyEntity(2);
-
-		//auto view = space.ViewComponents<Transform, Velocity>();
+		auto view = space.ViewComponents<Transform, Velocity>();
 
 		//for (auto entity : view) {
 		//	Transform& transform = entity.GetComponent<Transform>();

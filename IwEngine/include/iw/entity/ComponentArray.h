@@ -1,33 +1,34 @@
 #pragma once
 
 #include "IwEntity.h"
+#include "EntityArray.h"
 #include "iw/util/set/sparse_set.h"
 #include <list>
 
 namespace IwEntity {
-	class IComponentData {
+	class IComponentArray {
 	public:
-		virtual ~IComponentData() {}
+		virtual ~IComponentArray() {}
 
 		virtual void DestroyComponent(
 			Entity entity) = 0;
 
-		virtual bool HasEntity(
-			Entity entity) = 0;
-
 		virtual void Sort(
-			EntityData& entities) = 0;
+			EntityArray& entities) = 0;
 
 		virtual void UpdateChunk(
 			Entity entity,
 			Archetype oldArchetype,
 			Archetype archetype) = 0;
+
+		virtual bool HasEntity(
+			Entity entity) = 0;
 	};
 
 	template<
 		typename _c>
-	class ComponentData
-		: public IComponentData
+	class ComponentArray
+		: public IComponentArray
 	{
 	public:
 		using RawSparseSet = iwutil::sparse_set<Entity>;
@@ -48,11 +49,10 @@ namespace IwEntity {
 			{}
 		};
 
-
-	private:
 		using ChunkList    = std::list<Chunk>;
 		using ChunkListItr = typename ChunkList::iterator;
 
+	private:
 		SparseSet m_set;
 		ChunkList m_chunks;
 
@@ -92,8 +92,8 @@ namespace IwEntity {
 			Entity entity) override
 		{
 			auto begin = m_chunks.begin();
-			auto end = m_chunks.end();
-			bool done = false;
+			auto end   = m_chunks.end();
+			bool done  = false;
 			for (auto chunk = begin; chunk != end; chunk++) {
 				if (    m_set.at_index(entity) >= chunk->Begin.index()
 					&& m_set.at_index(entity) <  chunk->End.index())
@@ -108,19 +108,13 @@ namespace IwEntity {
 			m_set.erase(entity);
 		}
 
-		bool HasEntity(
-			Entity entity) override
-		{
-			return m_set.contains(entity);
-		}
-
 		void Sort(
-			EntityData& entities) override
+			EntityArray& entities) override
 		{
 			m_set.sort(entities);
 			m_chunks.clear();
 
-			auto chunk = m_chunks.begin();
+			auto chunk   = m_chunks.begin();
 			auto lastEnd = m_set.begin();
 
 			// Regen chunks
@@ -207,7 +201,7 @@ namespace IwEntity {
 				else if (m_set.at_index(entity) > chunk->Begin.index()
 					 && m_set.at_index(entity) < chunk->End.index())
 				{
-					auto eitr = m_set.find(entity);
+					auto eitr   = m_set.find(entity);
 					auto nchunk = chunk;
 					nchunk++;
 
@@ -245,6 +239,20 @@ namespace IwEntity {
 				}
 			}
 		}
+
+		bool HasEntity(
+			Entity entity) override
+		{
+			return m_set.contains(entity);
+		}
+
+		ChunkListItr begin() {
+			return m_chunks.begin();
+		}
+
+		ChunkListItr end() {
+			return m_chunks.end();
+		}
 	private:
 		void CreateChunkBefore(
 			const ChunkListItr& chunk,
@@ -263,25 +271,6 @@ namespace IwEntity {
 
 			m_chunks.insert(
 				nchunk, { archetype, chunk->End - 1, chunk->End });
-
-			////Remove if replacing
-			//if (pchunk->Begin == pchunk->End) {
-			//	m_chunks.erase(pchunk);
-			//}
-
-			////Check if need to combine
-			//pchunk = chunk;
-			//pchunk--;
-			//if (pchunk->Archetype == chunk->Archetype) {
-			//	chunk->Begin = pchunk->Begin;
-			//	m_chunks.erase(pchunk);
-			//}
-		}
-
-		void RemoveChunkAndCombine(
-			ChunkListItr& chunk)
-		{
-
 		}
 	};
 }

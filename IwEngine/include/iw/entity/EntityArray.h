@@ -4,14 +4,14 @@
 #include <vector>
 
 namespace IwEntity {
-	struct EntityArchetypeData {
+	struct EntityData {
 		Archetype Archetype;
 		std::size_t Count;
 	};
 
-	class EntityData {
+	class EntityArray {
 	private:
-		std::vector<EntityArchetypeData> m_entities;
+		std::vector<EntityData> m_entities;
 
 	public:
 		bool operator()(
