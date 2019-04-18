@@ -91,7 +91,7 @@ namespace iwutil {
 			_functor&& functor,
 			_tuple&& tuple,
 			std::index_sequence<_index...>,
-			const _fixed_args& ... fixed_args)
+			const _fixed_args&... fixed_args)
 		{
 			auto e = { (
 				functor(
@@ -542,7 +542,7 @@ namespace iwutil {
 	void foreach(
 		_tuple& tuple,
 		_tuple_args&& tuple_args,
-		_fixed_args&& ... fixed_args)
+		_fixed_args&&... fixed_args)
 	{
 		detail::foreach_ta_fa_indexed<
 			_functor,
@@ -567,7 +567,7 @@ namespace iwutil {
 	void foreach(
 		_tuple& tuple,
 		_tuple_args& tuple_args,
-		_fixed_args&& ... fixed_args)
+		_fixed_args&&... fixed_args)
 	{
 		detail::foreach_ta_fa_indexed<
 			_functor,
@@ -592,7 +592,7 @@ namespace iwutil {
 	void foreach(
 		_tuple& tuple,
 		_tuple_args&& tuple_args,
-		_fixed_args& ... fixed_args)
+		_fixed_args&... fixed_args)
 	{
 		detail::foreach_ta_fa_indexed<
 			_functor,
@@ -642,7 +642,7 @@ namespace iwutil {
 	void foreach(
 		_tuple& tuple,
 		_tuple_args& tuple_args,
-		const _fixed_args& ... fixed_args)
+		const _fixed_args&... fixed_args)
 	{
 		detail::foreach_ta_fa_indexed<
 			_functor,
@@ -667,7 +667,7 @@ namespace iwutil {
 	void foreach(
 		_tuple& tuple,
 		const _tuple_args& tuple_args,
-		_fixed_args&& ... fixed_args)
+		_fixed_args&&... fixed_args)
 	{
 		detail::foreach_ta_fa_indexed<
 			_functor,
@@ -692,7 +692,7 @@ namespace iwutil {
 	void foreach(
 		_tuple& tuple,
 		const _tuple_args& tuple_args,
-		_fixed_args& ... fixed_args)
+		_fixed_args&... fixed_args)
 	{
 		detail::foreach_ta_fa_indexed<
 			_functor,
@@ -1072,8 +1072,8 @@ namespace functors {
 	struct increment {
 		template<
 			typename _t>
-			void operator()(
-				_t&& t)
+		void operator()(
+			_t&& t)
 		{
 			t++;
 		}
@@ -1083,7 +1083,8 @@ namespace functors {
 	struct decrement {
 		template<
 			typename _t>
-			void operator()(_t&& t)
+		void operator()(
+			_t&& t)
 		{
 			t--;
 		}
@@ -1103,8 +1104,8 @@ namespace functors {
 	struct erase_array {
 		template<
 			typename _t>
-			void operator()(
-				_t&& t)
+		void operator()(
+			_t&& t)
 		{
 			delete[] t;
 		}
@@ -1114,9 +1115,9 @@ namespace functors {
 	struct assign {
 		template<
 			typename _t>
-			void operator()(
-				_t&& t,
-				const _t& d)
+		void operator()(
+			_t&& t,
+			const _t& d)
 		{
 			t = d;
 		}

@@ -40,6 +40,12 @@ public:
 
 		auto view = space.ViewComponents<Transform, Velocity>();
 
+		auto itr = view.begin();
+
+		for(int i = 0; i < 100; i++)
+			++itr;
+
+
 		//for (auto entity : view) {
 		//	Transform& transform = entity.GetComponent<Transform>();
 		//	Velocity& velocity   = entity.GetComponent<Velocity>();

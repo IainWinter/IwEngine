@@ -33,16 +33,17 @@ namespace IwEntity {
 	public:
 		using RawSparseSet = iwutil::sparse_set<Entity>;
 		using SparseSet    = iwutil::sparse_set<Entity, _c>;
+		using SparseSetItr = typename SparseSet::iterator;
 
 		struct Chunk {
 			Archetype Archetype;
-			typename SparseSet::iterator Begin;
-			typename SparseSet::iterator End;
+			SparseSetItr Begin;
+			SparseSetItr End;
 
 			Chunk(
 				IwEntity::Archetype& archetype,
-				typename SparseSet::iterator begin,
-				typename SparseSet::iterator end)
+				SparseSetItr begin,
+				SparseSetItr end)
 				: Archetype(archetype)
 				, Begin(begin)
 				, End(end)
