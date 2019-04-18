@@ -94,7 +94,7 @@ namespace IwEntity {
 					ChunkListItrs,
 					SparseSetItrs,
 					ComponentCount,
-					Archetype>
+					const Archetype>
 				(
 					m_chunks,
 					m_itrs,

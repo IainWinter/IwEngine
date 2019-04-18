@@ -72,7 +72,7 @@ namespace iwutil {
 			_functor&& functor,
 			_tuple&& tuple,
 			std::index_sequence<_index...>,
-			_fixed_args&& ... fixed_args)
+			_fixed_args&&... fixed_args)
 		{
 			auto e = { (
 				functor(
@@ -114,7 +114,7 @@ namespace iwutil {
 			_tuple&& tuple,
 			_tuple_args&& tuple_args,
 			std::index_sequence<_index...>,
-			_fixed_args&& ... fixed_args)
+			_fixed_args&&... fixed_args)
 		{
 			auto e = { (
 				functor(
@@ -136,7 +136,7 @@ namespace iwutil {
 			_tuple&& tuple,
 			const _tuple_args& tuple_args,
 			std::index_sequence<_index...>,
-			const _fixed_args& ... fixed_args)
+			const _fixed_args&... fixed_args)
 		{
 			auto e = { (
 				functor(
@@ -158,7 +158,7 @@ namespace iwutil {
 			_tuple&& tuple,
 			const _tuple_args& tuple_args,
 			std::index_sequence<_index...>,
-			_fixed_args&& ... fixed_args)
+			_fixed_args&&... fixed_args)
 		{
 			auto e = { (
 				functor(
@@ -180,7 +180,7 @@ namespace iwutil {
 			_tuple&& tuple,
 			_tuple_args&& tuple_args,
 			std::index_sequence<_index...>,
-			const _fixed_args& ... fixed_args)
+			const _fixed_args&... fixed_args)
 		{
 			auto e = { (
 				functor(
@@ -260,7 +260,7 @@ namespace iwutil {
 			_functor&& functor,
 			_tuple&& tuple,
 			std::index_sequence<_index...>,
-			_fixed_args&& ... fixed_args)
+			_fixed_args&&... fixed_args)
 		{
 			return {
 				functor(
@@ -279,7 +279,7 @@ namespace iwutil {
 			_functor&& functor,
 			_tuple&& tuple,
 			std::index_sequence<_index...>,
-			const _fixed_args& ... fixed_args)
+			const _fixed_args&... fixed_args)
 		{
 			return {
 				functor(
@@ -302,7 +302,7 @@ namespace iwutil {
 			_tuple&& tuple,
 			_tuple_args&& tuple_args,
 			std::index_sequence<_index...>,
-			_fixed_args&& ... fixed_args)
+			_fixed_args&&... fixed_args)
 		{
 			return {
 				functor(
@@ -324,7 +324,7 @@ namespace iwutil {
 			_tuple&& tuple,
 			const _tuple_args& tuple_args,
 			std::index_sequence<_index...>,
-			const _fixed_args& ... fixed_args)
+			const _fixed_args&... fixed_args)
 		{
 			return {
 				functor(
@@ -346,7 +346,7 @@ namespace iwutil {
 			_tuple&& tuple,
 			const _tuple_args& tuple_args,
 			std::index_sequence<_index...>,
-			_fixed_args&& ... fixed_args)
+			_fixed_args&&... fixed_args)
 		{
 			return {
 				functor(
@@ -368,7 +368,7 @@ namespace iwutil {
 			_tuple&& tuple,
 			_tuple_args&& tuple_args,
 			std::index_sequence<_index...>,
-			const _fixed_args& ... fixed_args)
+			const _fixed_args&... fixed_args)
 		{
 			return {
 				functor(
@@ -475,7 +475,7 @@ namespace iwutil {
 		typename... _fixed_args>
 	void foreach(
 		_tuple& tuple,
-		_fixed_args&& ... fixed_args)
+		_fixed_args&&... fixed_args)
 	{
 		detail::foreach_fa_indexed<
 			_functor,
@@ -496,7 +496,7 @@ namespace iwutil {
 		typename... _fixed_args>
 	void foreach(
 		_tuple& tuple,
-		_fixed_args& ... fixed_args)
+		_fixed_args&... fixed_args)
 	{
 		detail::foreach_fa_indexed<
 			_functor,
@@ -517,7 +517,7 @@ namespace iwutil {
 		typename... _fixed_args>
 	void foreach(
 		_tuple& tuple,
-		const _fixed_args& ... fixed_args)
+		const _fixed_args&... fixed_args)
 	{
 		detail::foreach_fa_indexed<
 			_functor,
@@ -604,7 +604,7 @@ namespace iwutil {
 			std::forward<_tuple>(tuple),
 			std::forward<_tuple_args>(tuple_args),
 			std::make_index_sequence<_size>{},
-			std::forward<_fixed_args>(fixed_args)...
+			fixed_args...
 		);
 	}
 
@@ -617,7 +617,7 @@ namespace iwutil {
 	void foreach(
 		_tuple& tuple,
 		_tuple_args&& tuple_args,
-		const _fixed_args& ... fixed_args)
+		const _fixed_args&... fixed_args)
 	{
 		detail::foreach_ta_fa_indexed<
 			_functor,
@@ -704,7 +704,32 @@ namespace iwutil {
 			std::forward<_tuple>(tuple),
 			tuple_args,
 			std::make_index_sequence<_size>{},
-			std::forward<_fixed_args>(fixed_args)...
+			fixed_args...
+		);
+	}
+
+	template<
+		typename _functor,
+		typename _tuple,
+		typename _tuple_args,
+		std::size_t _size,
+		typename... _fixed_args>
+	void foreach(
+		_tuple& tuple,
+		const _tuple_args& tuple_args,
+		const _fixed_args&... fixed_args)
+	{
+		detail::foreach_ta_fa_indexed<
+			_functor,
+			_tuple,
+			_tuple_args,
+			_fixed_args...>
+		(
+			_functor(),
+			std::forward<_tuple>(tuple),
+			tuple_args,
+			std::make_index_sequence<_size>{},
+			fixed_args...
 		);
 	}
 #pragma endregion
@@ -810,7 +835,7 @@ namespace iwutil {
 		typename... _fixed_args>
 	_tuple_return geteach(
 		_tuple& tuple,
-		_fixed_args&& ... fixed_args)
+		_fixed_args&&... fixed_args)
 	{
 		return detail::geteach_fa_indexed<
 			_functor,
@@ -833,7 +858,7 @@ namespace iwutil {
 		typename... _fixed_args>
 	_tuple_return geteach(
 		_tuple& tuple,
-		_fixed_args& ... fixed_args)
+		_fixed_args&... fixed_args)
 	{
 		return detail::geteach_fa_indexed<
 			_functor,
@@ -856,7 +881,7 @@ namespace iwutil {
 		typename... _fixed_args>
 	_tuple_return geteach(
 		_tuple& tuple,
-		const _fixed_args& ... fixed_args)
+		const _fixed_args&... fixed_args)
 	{
 		return detail::geteach_fa_indexed<
 			_functor,
@@ -883,7 +908,7 @@ namespace iwutil {
 	_tuple_return geteach(
 		_tuple& tuple,
 		_tuple_args&& tuple_args,
-		_fixed_args&& ... fixed_args)
+		_fixed_args&&... fixed_args)
 	{
 		return detail::geteach_ta_fa_indexed<
 			_functor,
@@ -910,7 +935,7 @@ namespace iwutil {
 	_tuple_return geteach(
 		_tuple& tuple,
 		_tuple_args& tuple_args,
-		_fixed_args&& ... fixed_args)
+		_fixed_args&&... fixed_args)
 	{
 		return detail::geteach_ta_fa_indexed<
 			_functor,
@@ -937,7 +962,7 @@ namespace iwutil {
 	_tuple_return geteach(
 		_tuple& tuple,
 		_tuple_args&& tuple_args,
-		_fixed_args& ... fixed_args)
+		_fixed_args&... fixed_args)
 	{
 		return detail::geteach_ta_fa_indexed<
 			_functor,
@@ -964,7 +989,7 @@ namespace iwutil {
 	_tuple_return geteach(
 		_tuple& tuple,
 		_tuple_args&& tuple_args,
-		const _fixed_args& ... fixed_args)
+		const _fixed_args&... fixed_args)
 	{
 		return detail::geteach_ta_fa_indexed<
 			_functor,
@@ -991,7 +1016,7 @@ namespace iwutil {
 	_tuple_return geteach(
 		_tuple& tuple,
 		_tuple_args& tuple_args,
-		const _fixed_args& ... fixed_args)
+		const _fixed_args&... fixed_args)
 	{
 		return detail::geteach_ta_fa_indexed<
 			_functor,
@@ -1018,7 +1043,7 @@ namespace iwutil {
 	_tuple_return geteach(
 		_tuple& tuple,
 		const _tuple_args& tuple_args,
-		_fixed_args&& ... fixed_args)
+		_fixed_args&&... fixed_args)
 	{
 		return detail::geteach_ta_fa_indexed<
 			_functor,
@@ -1045,7 +1070,7 @@ namespace iwutil {
 	_tuple_return geteach(
 		_tuple& tuple,
 		const _tuple_args& tuple_args,
-		_fixed_args& ... fixed_args)
+		_fixed_args&... fixed_args)
 	{
 		return detail::geteach_ta_fa_indexed<
 			_functor,
