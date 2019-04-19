@@ -40,10 +40,10 @@ public:
 
 		auto view = space.ViewComponents<Transform, Velocity>();
 
-		auto itr = view.begin();
-
-		for(int i = 0; i < 100; i++)
-			++itr;
+		int i = 0;
+		for (auto v : view) {
+			LOG_INFO << i++;
+		}
 
 
 		//for (auto entity : view) {

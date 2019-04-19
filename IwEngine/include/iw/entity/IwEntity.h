@@ -28,6 +28,6 @@ namespace IwEntity {
 		Archetype a1,
 		Archetype a2)
 	{
-		return a1 & a2 == a2;
+		return (a1 & a2) == a2;
 	}
 }
