@@ -25,7 +25,7 @@ namespace iwutil {
 		}
 #pragma endregion
 
-#pragma region no_tuple_return_args
+#pragma region no_return_tuple_args
 		template<
 			typename _functor,
 			typename _tuple,
@@ -109,7 +109,7 @@ namespace iwutil {
 		}
 #pragma endregion
 
-#pragma region no_tuple_return_args_and_fixed_args
+#pragma region no_return_tuple_args_and_fixed_args
 		template<
 			typename _functor,
 			typename _tuple,
@@ -423,7 +423,7 @@ namespace iwutil {
 	}
 #pragma endregion
 
-#pragma region no_tuple_return_args
+#pragma region no_return_tuple_args
 	template<
 		typename _functor,
 		typename _tuple,
@@ -553,7 +553,7 @@ namespace iwutil {
 	}
 #pragma endregion
 
-#pragma region no_tuple_return_args_and_fixed_args
+#pragma region no_return_tuple_args_and_fixed_args
 	template<
 		typename _functor,
 		typename _tuple,
@@ -1177,6 +1177,19 @@ namespace functors {
 			_t&& t)
 		{
 			return *std::forward<_t>(t);
+		}
+	};
+
+	struct anyequals {
+		template<
+			typename _t,
+			typename _o>
+		void operator()(
+			_t&& t,
+			_o&& o,
+			bool& equals)
+		{
+			equals = t == o;
 		}
 	};
 }
