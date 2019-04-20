@@ -10,6 +10,6 @@ namespace IwEngine {
 
 		IWENGINE_API Time   Update();
 		IWENGINE_API int    Ticks();
-		IWENGINE_API double  DeltaTime(); //Returns time in seconds as a double
+		IWENGINE_API double DeltaTime(); //Returns time in seconds as a double
 	}
 }

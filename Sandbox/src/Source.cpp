@@ -4,6 +4,8 @@
 #include "iw/entity/Space.h"
 #include "iw/log/logger.h"
 
+#include "iw/engine/Time.h"
+
 struct Transform { float x, y, z; };
 struct Velocity  { float vx, vy, vz; };
 struct Collider  { float count; };
@@ -19,30 +21,34 @@ public:
 	void Run() override {
 		IwEntity::Space space;
 
-		for (int i = 0; i < 10000; i++) {
+		IwEngine::Time::Update();
+
+		for (int i = 0; i < 1000000; i++) {
 			IwEntity::Entity e = space.CreateEntity();
 
-			if (rand() > RAND_MAX / 4.0f) {
-				space.CreateComponent<Transform>(e);
-			}
+			//if (rand() > RAND_MAX / 4.0f) {
+				//space.CreateComponent<Transform>(e);
+			//}
 
-			else if (rand() > RAND_MAX / 4.0f) {
-				space.CreateComponent<Transform>(e);
-				space.CreateComponent<Velocity>(e, (float)i, (float)i, (float)i);
-			}
+			//else if (rand() > RAND_MAX / 4.0f) {
+			//	space.CreateComponent<Transform>(e);
+			//	space.CreateComponent<Velocity>(e, (float)i, (float)i, (float)i);
+			//}
 
-			else if (rand() > RAND_MAX / 4.0f) {
-				space.CreateComponent<Transform>(e);
-				space.CreateComponent<Collider>(e);
-			}
+			//else if (rand() > RAND_MAX / 4.0f) {
+			//	space.CreateComponent<Transform>(e);
+			//	space.CreateComponent<Collider>(e);
+			//}
 
-			else if (rand() > RAND_MAX / 4.0f) {
-				space.CreateComponent<Transform>(e);
-				space.CreateComponent<Velocity>(e, (float)i, (float)i, (float)i);
-				space.CreateComponent<Collider>(e);
-			}
+			//else if (rand() > RAND_MAX / 4.0f) {
+			//	space.CreateComponent<Transform>(e);
+			//	space.CreateComponent<Velocity>(e, (float)i, (float)i, (float)i);
+			//	space.CreateComponent<Collider>(e);
+			//}
 
 		}
+
+		LOG_INFO << IwEngine::Time::DeltaTime();
 
 		space.Sort();
 

@@ -16,6 +16,8 @@ namespace IwEngine {
 	int Application::Initialize(
 		const WindowOptions& windowOptions)
 	{
+		Time::Update();
+
 		LOG_SINK(iwlog::stdout_sink, iwlog::INFO);
 		LOG_SINK(iwlog::stderr_sink, iwlog::ERR);
 		LOG_SINK(iwlog::file_sink,   iwlog::DEBUG, "sandbox.log");
@@ -50,6 +52,8 @@ namespace IwEngine {
 		}
 
 		m_window->SetState(windowOptions.state);
+
+		Time::Update();
 
 		return 0;
 	}
