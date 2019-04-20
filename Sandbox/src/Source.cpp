@@ -4,8 +4,6 @@
 #include "iw/entity/Space.h"
 #include "iw/log/logger.h"
 
-#include "iw/util/tuple/index.h"
-
 struct Transform { float x, y, z; };
 struct Velocity  { float vx, vy, vz; };
 struct Collider  { float count; };
@@ -21,16 +19,26 @@ public:
 	void Run() override {
 		IwEntity::Space space;
 
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < 10000; i++) {
 			IwEntity::Entity e = space.CreateEntity();
 
-			space.CreateComponent<Transform>(e);
+			if (rand() > RAND_MAX / 4.0f) {
+				space.CreateComponent<Transform>(e);
+			}
 
-			if (rand() > RAND_MAX / 2.0f) {
+			else if (rand() > RAND_MAX / 4.0f) {
+				space.CreateComponent<Transform>(e);
 				space.CreateComponent<Velocity>(e, (float)i, (float)i, (float)i);
 			}
 
-			if (rand() > RAND_MAX / 2.0f) {
+			else if (rand() > RAND_MAX / 4.0f) {
+				space.CreateComponent<Transform>(e);
+				space.CreateComponent<Collider>(e);
+			}
+
+			else if (rand() > RAND_MAX / 4.0f) {
+				space.CreateComponent<Transform>(e);
+				space.CreateComponent<Velocity>(e, (float)i, (float)i, (float)i);
 				space.CreateComponent<Collider>(e);
 			}
 
@@ -40,22 +48,19 @@ public:
 
 		auto view = space.ViewComponents<Transform, Velocity>();
 
-		int i = 0;
-		for (auto v : view) {
-			LOG_INFO << i++;
+		auto begin = view.begin();
+		auto end   = view.end();
+
+		for (auto entity : view) {
+			Transform& transform = entity.GetComponent<Transform>();
+			Velocity& velocity = entity.GetComponent<Velocity>();
+
+			transform.x += velocity.vx;
+			transform.y += velocity.vy;
+			transform.z += velocity.vz;
+
+			LOG_INFO << transform.x << ", " << transform.y << ", " << transform.z;
 		}
-
-
-		//for (auto entity : view) {
-		//	Transform& transform = entity.GetComponent<Transform>();
-		//	Velocity& velocity   = entity.GetComponent<Velocity>();
-
-		//	transform.x += velocity.vx;
-		//	transform.y += velocity.vy;
-		//	transform.z += velocity.vz;
-
-		//	LOG_INFO << transform.x << ", " << transform.y << ", " << transform.z;
-		//}
 
 		Application::Run();
 	}

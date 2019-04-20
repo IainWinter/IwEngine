@@ -36,6 +36,8 @@ namespace IwEntity {
 		using SparseSetItr = typename SparseSet::iterator;
 
 		struct Chunk {
+			using Value = typename SparseSetItr::value_type;
+
 			Archetype Archetype;
 			SparseSetItr Begin;
 			SparseSetItr End;
