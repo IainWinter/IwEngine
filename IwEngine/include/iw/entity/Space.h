@@ -41,7 +41,7 @@ namespace IwEntity {
 			Archetype oldArchetype = m_entities.ArchetypeOf(entity);
 			Archetype& archetype = m_entities.AssignComponent<_c>(entity);
 
-			UpdateComponentData(entity, archetype, oldArchetype);
+			//UpdateComponentData(entity, archetype, oldArchetype);
 
 			return EnsureComponentData<_c>()
 				.CreateComponent(
@@ -58,7 +58,7 @@ namespace IwEntity {
 				Archetype& archetype
 					= m_entities.UnassignComponent<_c>(entity);
 
-				UpdateComponentData(entity, archetype, oldArchetype);
+				//UpdateComponentData(entity, archetype, oldArchetype);
 
 				GetComponentData<_c>().DestroyComponent(entity, archetype);
 			}
@@ -73,6 +73,13 @@ namespace IwEntity {
 		void Sort() {
 			for (auto& set : m_components) {
 				set->Sort(m_entities);
+			}
+		}
+
+		void Clear() {
+			m_entities.Clear();
+			for (auto& set : m_components) {
+				set->Clear();
 			}
 		}
 	private:

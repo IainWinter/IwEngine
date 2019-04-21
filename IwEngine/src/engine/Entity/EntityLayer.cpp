@@ -24,6 +24,14 @@ namespace IwEngine {
 		//Create rendering device
 		device = new IwRenderer::GLDevice();
 
+		//Creating entity
+		entity = space.CreateEntity();
+		
+		space.CreateComponent<Transform>(entity);
+		space.CreateComponent<Velocity>(entity);
+
+		Model& model = space.CreateComponent<Model>(entity);
+
 		//Create model
 		IwGraphics::ModelLoader loader;
 		IwGraphics::ModelData* obj = loader.Load("res/bear.obj");
@@ -45,16 +53,8 @@ namespace IwEngine {
 			IwRenderer::IVertexArray* va
 				= device->CreateVertexArray(1, &vb, &vbl);
 
-			modelMeshes.push_back({ va, ib, obj->Indices[i].FaceCount });
+			model.Meshes.push_back({ va, ib, obj->Indices[i].FaceCount });
 		}
-
-		//Creating entity
-		model = space.CreateEntity();
-
-		Transform& transform = space.CreateComponent<Transform>(model);
-		space.CreateComponent<Velocity>(model);
-
-		transform.Position.z = -20.0f;
 
 		//Creating shader pipeline
 		IwRenderer::IVertexShader* vs = device->CreateVertexShader(
@@ -69,74 +69,82 @@ namespace IwEngine {
 	}
 
 	void EntityLayer::Destroy() {
-		for (auto& mesh : modelMeshes) {
-			device->DestroyVertexArray(mesh.Vertices);
-			device->DestroyIndexBuffer(mesh.Indices);
+		auto view = space.ViewComponents<Model>();
+		for (auto entity : view) {
+			Model& model = entity.GetComponent<Model>();
+			for (auto& mesh : model.Meshes) {
+				device->DestroyVertexArray(mesh.Vertices);
+				device->DestroyIndexBuffer(mesh.Indices);
+			}
 		}
 
 		device->DestroyPipeline(pipeline);
 
-		//space.DestroyEntity(model);
+		space.DestroyEntity(entity);
 	}
 
 	void EntityLayer::Update() {
-		//lightAngle += Time::DeltaTime();
+		lightAngle += Time::DeltaTime();
 
-		//float x = cos(lightAngle) * 100;
-		//float z = sin(lightAngle) * 100;
+		float x = cos(lightAngle) * 100;
+		float z = sin(lightAngle) * 100;
 
-		//auto view = space.GetComponents<Transform, Velocity>();
+		auto view = space.ViewComponents<Transform, Velocity, Model>();
+		for (auto entity : view) {
+			Transform& transform = entity.GetComponent<Transform>();
+			Velocity& velocity = entity.GetComponent<Velocity>();
+			Model& model = entity.GetComponent<Model>();
 
-		//for (auto entity : view) {
-		//	Transform& transform = entity.GetComponent<Transform>();
-		//	Velocity&  velocity  = entity.GetComponent<Velocity>();
-		//}
+			device->SetPipeline(pipeline);
 
-		//Transform& modelTransform = *std::get<0>(components);
-		//Velocity&  modelVelocity  = *std::get<1>(components);
+			pipeline->GetParam("model")
+				->SetAsMat4(transform.GetTransformation());
 
-		//device->SetPipeline(pipeline);
+			pipeline->GetParam("view")
+				->SetAsMat4(viewTransform);
 
-		//pipeline->GetParam("model")
-		//	->SetAsMat4(modelTransform.GetTransformation());
+			pipeline->GetParam("proj")
+				->SetAsMat4(projTransform);
 
-		//pipeline->GetParam("view")
-		//	->SetAsMat4(viewTransform);
+			pipeline->GetParam("lightPos")
+				->SetAsVec3(iwm::vector3(x, 0, z));
 
-		//pipeline->GetParam("proj")
-		//	->SetAsMat4(projTransform);
+			pipeline->GetParam("lightColor")
+				->SetAsVec3(lightColor);
 
-		//pipeline->GetParam("lightPos")
-		//	->SetAsVec3(iwm::vector3(x, 0, z));
+			pipeline->GetParam("specularScale")
+				->SetAsFloat(specularScale);
 
-		//pipeline->GetParam("lightColor")
-		//	->SetAsVec3(lightColor);
+			for (auto& mesh : model.Meshes) {
+				device->SetVertexArray(mesh.Vertices);
+				device->SetIndexBuffer(mesh.Indices);
+				device->DrawElements(mesh.Count, 0);
+			}
 
-		//pipeline->GetParam("specularScale")
-		//	->SetAsFloat(specularScale);
-
-		//for (auto& mesh : modelMeshes) {
-		//	device->SetVertexArray(mesh.Vertices);
-		//	device->SetIndexBuffer(mesh.Indices);
-		//	device->DrawElements(mesh.Count, 0);
-		//}
-
-		//modelTransform.Position += modelVelocity.Velocity;
+			transform.Position += velocity.Velocity;
+		}
 	}
 
 	void EntityLayer::ImGui() {
-		//ImGui::Begin("Entity layer");
+		ImGui::Begin("Entity layer");
 
-		//auto components = space.GetComponents<Transform>();
-		//Transform& transform = *std::get<0>(components);
+		auto view = space.ViewComponents<Transform>();
+		for (auto entity : view) {
+			Transform& transform = entity.GetComponent<Transform>();
 
-		//ImGui::Text("Pos (x, y, z): %f %f %f", transform.Position);
-		//ImGui::Text("Rot (y): %f", transform.Rotation.euler_angles().y);
+			ImGui::Text("Pos (x, y, z): %f %f %f", 
+				transform.Position.x, 
+				transform.Position.y, 
+				transform.Position.z);
 
-		//ImGui::SliderFloat3("Light color", &lightColor.x, 0, 1);
-		//ImGui::SliderFloat("Specular scale", &specularScale, 0, 10);
+			ImGui::Text("Rot (y): %f", 
+				transform.Rotation.euler_angles().y);
+		}
 
-		//ImGui::End();
+		ImGui::SliderFloat3("Light color", &lightColor.x, 0, 1);
+		ImGui::SliderFloat("Specular scale", &specularScale, 0, 10);
+
+		ImGui::End();
 	}
 
 	bool EntityLayer::On(
@@ -154,26 +162,28 @@ namespace IwEngine {
 	bool EntityLayer::On(
 		MouseButtonEvent& event)
 	{
-		//auto components = space.GetComponents<Velocity>();
-		//Velocity& velocity = *std::get<0>(components);
+		float speed = event.State ? Time::DeltaTime() * 15 : 0.0f;
+		
+		auto view = space.ViewComponents<Velocity>();
+		for (auto entity : view) {
+			Velocity& velocity = entity.GetComponent<Velocity>();
 
-		//float speed = event.State ? Time::DeltaTime() * 15 : 0.0f;
+			if (event.Button == IwInput::MOUSE_L_BUTTON) {
+				velocity.Velocity.z = -speed;
+			}
 
-		//if (event.Button == IwInput::MOUSE_L_BUTTON) {
-		//	velocity.Velocity.z = -speed;
-		//}
+			else if (event.Button == IwInput::MOUSE_R_BUTTON) {
+				velocity.Velocity.z = speed;
+			}
 
-		//else if (event.Button == IwInput::MOUSE_R_BUTTON) {
-		//	velocity.Velocity.z = speed;
-		//}
+			else if (event.Button == IwInput::MOUSE_X1_BUTTON) {
+				velocity.Velocity.x = speed;
+			}
 
-		//else if (event.Button == IwInput::MOUSE_X1_BUTTON) {
-		//	velocity.Velocity.x = speed;
-		//}
-
-		//else if (event.Button == IwInput::MOUSE_X2_BUTTON) {
-		//	velocity.Velocity.x = -speed;
-		//}
+			else if (event.Button == IwInput::MOUSE_X2_BUTTON) {
+				velocity.Velocity.x = -speed;
+			}
+		}
 
 		return false;
 	}
@@ -181,11 +191,13 @@ namespace IwEngine {
 	bool EntityLayer::On(
 		MouseWheelEvent& event)
 	{
-		//auto components = space.GetComponents<Transform>();
-		//Transform& transform = *std::get<0>(components);
+		auto view = space.ViewComponents<Transform>();
+		for (auto entity : view) {
+			Transform& transform = entity.GetComponent<Transform>();
 
-		//transform.Rotation *= iwm::quaternion::create_from_euler_angles(
-		//	0, event.Delta * .1f, 0);
+			transform.Rotation *= iwm::quaternion::create_from_euler_angles(
+				0, event.Delta * .1f, 0);
+		}
 
 		return false;
 	}

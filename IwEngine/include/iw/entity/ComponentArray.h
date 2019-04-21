@@ -23,6 +23,8 @@ namespace IwEntity {
 
 		virtual bool HasEntity(
 			Entity entity) = 0;
+
+		virtual void Clear() = 0;
 	};
 
 	template<
@@ -96,7 +98,6 @@ namespace IwEntity {
 		{
 			auto begin = m_chunks.begin();
 			auto end   = m_chunks.end();
-			bool done  = false;
 			for (auto chunk = begin; chunk != end; chunk++) {
 				if (    m_set.at_index(entity) >= chunk->Begin.index()
 					&& m_set.at_index(entity) <  chunk->End.index())
@@ -105,6 +106,8 @@ namespace IwEntity {
 					if (chunk->Begin == chunk->End) {
 						chunk = m_chunks.erase(chunk);
 					}
+
+					break;
 				}
 			}
 
@@ -247,6 +250,11 @@ namespace IwEntity {
 			Entity entity) override
 		{
 			return m_set.contains(entity);
+		}
+
+		void Clear() override {
+			m_set.clear();
+			m_chunks.clear();
 		}
 
 		ChunkListItr begin() {

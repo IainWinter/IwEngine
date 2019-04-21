@@ -46,6 +46,10 @@ namespace IwEntity {
 			m_entities.erase(m_entities.begin() + entity);
 		}
 
+		void Clear() {
+			m_entities.clear();
+		}
+
 		Archetype& ArchetypeOf(
 			Entity entity)
 		{

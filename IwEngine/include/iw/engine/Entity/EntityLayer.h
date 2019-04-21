@@ -27,19 +27,23 @@ namespace IwEngine {
 		unsigned int Count;
 	};
 
+	struct Model {
+		std::vector<Mesh> Meshes;
+	};
+
 	class IWENGINE_API EntityLayer
 		: public Layer
 	{
 	private:
 		IwEntity::Space space;
-		IwEntity::Entity model;
+		IwEntity::Entity entity;
+
 		IwRenderer::IDevice* device;
 		IwRenderer::IPipeline* pipeline;
 
 		iwm::vector3 lightColor;
 		float lightAngle;
 		float specularScale;
-		std::vector<Mesh> modelMeshes;
 		iwm::matrix4 viewTransform;
 		iwm::matrix4 projTransform;
 
