@@ -1,5 +1,4 @@
 #include "iw/engine/Entity/EntityLayer.h"
-#include "iw/graphics/Loaders/ModelLoader.h"
 #include "iw/renderer/Platform/OpenGL/GLDevice.h"
 #include "iw/renderer/Platform/OpenGL/GLPipeline.h"
 #include "iw/log/logger.h"
@@ -20,21 +19,14 @@ namespace IwEngine {
 
 	EntityLayer::~EntityLayer() {}
 
-	int EntityLayer::Initialize() {
-		//Create rendering device
-		device = new IwRenderer::GLDevice();
+	Model LoadModel(
+		const char* name,
+		IwGraphics::ModelLoader& loader,
+		IwRenderer::IDevice* device) 
+	{
+		IwGraphics::ModelData* obj = loader.Load(name);
 
-		//Creating entity
-		entity = space.CreateEntity();
-		
-		space.CreateComponent<Transform>(entity);
-		space.CreateComponent<Velocity>(entity);
-
-		Model& model = space.CreateComponent<Model>(entity);
-
-		//Create model
-		IwGraphics::ModelLoader loader;
-		IwGraphics::ModelData* obj = loader.Load("res/bear.obj");
+		Mesh* meshes = new Mesh[obj->MeshCount];
 
 		for (size_t i = 0; i < obj->MeshCount; i++) {
 			IwRenderer::IIndexBuffer* ib = device->CreateIndexBuffer(
@@ -53,8 +45,37 @@ namespace IwEngine {
 			IwRenderer::IVertexArray* va
 				= device->CreateVertexArray(1, &vb, &vbl);
 
-			model.Meshes.push_back({ va, ib, obj->Indices[i].FaceCount });
+			meshes[i] = Mesh {va, ib, obj->Indices[i].FaceCount };
 		}
+
+		return { meshes, obj->MeshCount };
+	}
+
+	int EntityLayer::Initialize() {
+		//Create rendering device
+		device = new IwRenderer::GLDevice();
+
+		//Create models
+		Model lampModel = LoadModel("res/lamp.obj", loader, device);
+		Model bearModel = LoadModel("res/bear.obj", loader, device);
+
+		//Creating entity
+		IwEntity::Entity lamp = space.CreateEntity();
+		IwEntity::Entity bear = space.CreateEntity();
+
+		Transform& lampTransform = space.CreateComponent<Transform>(lamp);
+		lampTransform.Position.x += 20;
+
+		Transform& bearTransform = space.CreateComponent<Transform>(bear);
+		bearTransform.Position.x -= 20;
+
+		space.CreateComponent<Velocity>(lamp);
+		space.CreateComponent<Velocity>(bear);
+
+		space.CreateComponent<Model>(lamp, lampModel);
+		space.CreateComponent<Model>(bear, bearModel);
+
+		//space.Sort();
 
 		//Creating shader pipeline
 		IwRenderer::IVertexShader* vs = device->CreateVertexShader(
@@ -72,15 +93,13 @@ namespace IwEngine {
 		auto view = space.ViewComponents<Model>();
 		for (auto entity : view) {
 			Model& model = entity.GetComponent<Model>();
-			for (auto& mesh : model.Meshes) {
-				device->DestroyVertexArray(mesh.Vertices);
-				device->DestroyIndexBuffer(mesh.Indices);
+			for (int i = 0; i < model.MeshCount; i++) {
+				device->DestroyVertexArray(model.Meshes[i].Vertices);
+				device->DestroyIndexBuffer(model.Meshes[i].Indices);
 			}
 		}
 
 		device->DestroyPipeline(pipeline);
-
-		space.DestroyEntity(entity);
 	}
 
 	void EntityLayer::Update() {
@@ -115,10 +134,10 @@ namespace IwEngine {
 			pipeline->GetParam("specularScale")
 				->SetAsFloat(specularScale);
 
-			for (auto& mesh : model.Meshes) {
-				device->SetVertexArray(mesh.Vertices);
-				device->SetIndexBuffer(mesh.Indices);
-				device->DrawElements(mesh.Count, 0);
+			for (int i = 0; i < model.MeshCount; i++) {
+				device->SetVertexArray(model.Meshes[i].Vertices);
+				device->SetIndexBuffer(model.Meshes[i].Indices);
+				device->DrawElements(model.Meshes[i].Count, 0);
 			}
 
 			transform.Position += velocity.Velocity;

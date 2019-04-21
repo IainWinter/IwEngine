@@ -85,7 +85,7 @@ namespace IwEntity {
 	private:
 		template<
 			typename _c>
-			ComponentArray<_c>& EnsureComponentData() {
+		ComponentArray<_c>& EnsureComponentData() {
 			ComponentId id = ComponentFamily::type<_c>;
 			if (id >= m_components.size()) {
 				m_components.resize(id + 1);

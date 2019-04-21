@@ -2,9 +2,10 @@
 
 #include "iw/engine/Layer.h"
 
+#include "iw/entity/Space.h"
+#include "iw/graphics/Loaders/ModelLoader.h"
 #include "iw/renderer/Device.h"
 #include "iw/renderer/Pipeline.h"
-#include "iw/entity/Space.h"
 
 namespace IwEngine {
 	struct Transform {
@@ -28,7 +29,62 @@ namespace IwEngine {
 	};
 
 	struct Model {
-		std::vector<Mesh> Meshes;
+		Mesh* Meshes;
+		std::size_t MeshCount;
+
+		Model(
+			Mesh* meshes,
+			std::size_t count)
+			: Meshes(meshes)
+			, MeshCount(count)
+		{}
+
+		Model(
+			Model&& copy) noexcept
+			: Meshes(copy.Meshes)
+			, MeshCount(copy.MeshCount)
+		{
+			copy.Meshes = nullptr;
+			copy.MeshCount = 0;
+		}
+
+		Model(
+			const Model& copy)
+			: Meshes(new Mesh[copy.MeshCount])
+			, MeshCount(copy.MeshCount)
+		{
+			for (std::size_t i = 0; i < MeshCount; i++) {
+				Meshes[i] = copy.Meshes[i];
+			}
+		}
+
+		~Model() {
+			delete Meshes;
+		}
+
+		Model& operator=(
+			Model&& copy) noexcept
+		{
+			Meshes = copy.Meshes;
+			MeshCount = copy.MeshCount;
+
+			copy.Meshes = nullptr;
+			copy.MeshCount = 0;
+
+			return *this;
+		}
+
+		Model& operator=(
+			const Model& copy)
+		{
+			Meshes = new Mesh[copy.MeshCount];
+			MeshCount = copy.MeshCount;
+			for (std::size_t i = 0; i < MeshCount; i++) {
+				Meshes[i] = copy.Meshes[i];
+			}
+
+			return *this;
+		}
 	};
 
 	class IWENGINE_API EntityLayer
@@ -36,7 +92,8 @@ namespace IwEngine {
 	{
 	private:
 		IwEntity::Space space;
-		IwEntity::Entity entity;
+
+		IwGraphics::ModelLoader loader;
 
 		IwRenderer::IDevice* device;
 		IwRenderer::IPipeline* pipeline;
