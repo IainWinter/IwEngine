@@ -117,5 +117,7 @@ namespace IwEngine {
 		bool On(MouseMovedEvent&    event);
 		bool On(MouseButtonEvent&   event);
 		bool On(MouseWheelEvent&    event);
+	private:
+		void CreateCube(float x, float y);
 	};
 }

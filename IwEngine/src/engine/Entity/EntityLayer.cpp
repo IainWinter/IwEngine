@@ -51,31 +51,29 @@ namespace IwEngine {
 		return { meshes, obj->MeshCount };
 	}
 
+	void EntityLayer::CreateCube(float x, float y) {
+		IwEntity::Entity e = space.CreateEntity();
+		
+		Transform& lampTransform = space.CreateComponent<Transform>(e);
+		lampTransform.Position.x += x;
+		lampTransform.Position.y += y;
+
+		space.CreateComponent<Velocity>(e);
+
+		space.CreateComponent<Model>(e, LoadModel("res/cube.obj", loader, device));
+	}
+
 	int EntityLayer::Initialize() {
 		//Create rendering device
 		device = new IwRenderer::GLDevice();
 
-		//Create models
-		Model lampModel = LoadModel("res/lamp.obj", loader, device);
-		Model bearModel = LoadModel("res/bear.obj", loader, device);
-
-		//Creating entity
-		IwEntity::Entity lamp = space.CreateEntity();
-		IwEntity::Entity bear = space.CreateEntity();
-
-		Transform& lampTransform = space.CreateComponent<Transform>(lamp);
-		lampTransform.Position.x += 20;
-
-		Transform& bearTransform = space.CreateComponent<Transform>(bear);
-		bearTransform.Position.x -= 20;
-
-		space.CreateComponent<Velocity>(lamp);
-		space.CreateComponent<Velocity>(bear);
-
-		space.CreateComponent<Model>(lamp, lampModel);
-		space.CreateComponent<Model>(bear, bearModel);
-
-		//space.Sort();
+		for (float x = -10; x < 10; x += 1.5f) {
+			for (float y = -10; y < 10; y += 1.5f) {
+				CreateCube(x, y);
+			}
+		}
+		
+		space.Sort();
 
 		//Creating shader pipeline
 		IwRenderer::IVertexShader* vs = device->CreateVertexShader(
@@ -103,7 +101,7 @@ namespace IwEngine {
 	}
 
 	void EntityLayer::Update() {
-		lightAngle += Time::DeltaTime();
+		lightAngle += Time::DeltaTime() * .1f;
 
 		float x = cos(lightAngle) * 100;
 		float z = sin(lightAngle) * 100;
@@ -141,29 +139,36 @@ namespace IwEngine {
 			}
 
 			transform.Position += velocity.Velocity;
+
+			transform.Rotation *= iwm::quaternion::create_from_euler_angles(
+				Time::DeltaTime() * .1f, 0, Time::DeltaTime() * .1f);
 		}
 	}
 
 	void EntityLayer::ImGui() {
-		ImGui::Begin("Entity layer");
+		//ImGui::Begin("Entity layer");
 
-		auto view = space.ViewComponents<Transform>();
-		for (auto entity : view) {
-			Transform& transform = entity.GetComponent<Transform>();
+		//auto view = space.ViewComponents<Transform>();
+		//for (auto entity : view) {
+		//	Transform& transform = entity.GetComponent<Transform>();
 
-			ImGui::Text("Pos (x, y, z): %f %f %f", 
-				transform.Position.x, 
-				transform.Position.y, 
-				transform.Position.z);
+		//	ImGui::Text("Pos (x, y, z): %f %f %f", 
+		//		transform.Position.x, 
+		//		transform.Position.y, 
+		//		transform.Position.z);
 
-			ImGui::Text("Rot (y): %f", 
-				transform.Rotation.euler_angles().y);
-		}
+		//	iwm::vector3 rot = transform.Rotation.euler_angles();
 
-		ImGui::SliderFloat3("Light color", &lightColor.x, 0, 1);
-		ImGui::SliderFloat("Specular scale", &specularScale, 0, 10);
+		//	ImGui::Text("Rot (x, y, z): %f %f %f",
+		//		rot.x,
+		//		rot.y,
+		//		rot.z);
+		//}
 
-		ImGui::End();
+		//ImGui::SliderFloat3("Light color", &lightColor.x, 0, 1);
+		//ImGui::SliderFloat("Specular scale", &specularScale, 0, 10);
+
+		//ImGui::End();
 	}
 
 	bool EntityLayer::On(
