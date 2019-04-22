@@ -15,6 +15,7 @@ namespace IwEngine {
 		, lightColor(iwm::vector3::one)
 		, lightAngle(0.0f)
 		, specularScale(0.0f)
+		, view(space.ViewComponents<Transform, Velocity, Model>())
 	{}
 
 	EntityLayer::~EntityLayer() {}
@@ -51,29 +52,34 @@ namespace IwEngine {
 		return { meshes, obj->MeshCount };
 	}
 
-	void EntityLayer::CreateCube(float x, float y) {
+	void EntityLayer::CreateCube(float x, float y, Model& model) {
 		IwEntity::Entity e = space.CreateEntity();
 		
-		Transform& lampTransform = space.CreateComponent<Transform>(e);
-		lampTransform.Position.x += x;
-		lampTransform.Position.y += y;
+		Transform& transform = space.CreateComponent<Transform>(e);
+		transform.Position.x += x;
+		transform.Position.y += y;
+		transform.Position.z += 10;
 
 		space.CreateComponent<Velocity>(e);
 
-		space.CreateComponent<Model>(e, LoadModel("res/cube.obj", loader, device));
+		space.CreateComponent<Model>(e, model);
 	}
 
 	int EntityLayer::Initialize() {
 		//Create rendering device
 		device = new IwRenderer::GLDevice();
 
+		Model m = LoadModel("res/bear.obj", loader, device);
+
 		for (float x = -10; x < 10; x += 1.5f) {
 			for (float y = -10; y < 10; y += 1.5f) {
-				CreateCube(x, y);
+				CreateCube(x, y, m);
 			}
 		}
 		
 		space.Sort();
+
+		view = space.ViewComponents<Transform, Velocity, Model>();
 
 		//Creating shader pipeline
 		IwRenderer::IVertexShader* vs = device->CreateVertexShader(
@@ -106,7 +112,21 @@ namespace IwEngine {
 		float x = cos(lightAngle) * 100;
 		float z = sin(lightAngle) * 100;
 
-		auto view = space.ViewComponents<Transform, Velocity, Model>();
+		pipeline->GetParam("view")
+			->SetAsMat4(viewTransform);
+
+		pipeline->GetParam("proj")
+			->SetAsMat4(projTransform);
+
+		pipeline->GetParam("lightPos")
+			->SetAsVec3(iwm::vector3(x, 0, z));
+
+		pipeline->GetParam("lightColor")
+			->SetAsVec3(lightColor);
+
+		pipeline->GetParam("specularScale")
+			->SetAsFloat(specularScale);
+
 		for (auto entity : view) {
 			Transform& transform = entity.GetComponent<Transform>();
 			Velocity& velocity = entity.GetComponent<Velocity>();
@@ -117,21 +137,6 @@ namespace IwEngine {
 			pipeline->GetParam("model")
 				->SetAsMat4(transform.GetTransformation());
 
-			pipeline->GetParam("view")
-				->SetAsMat4(viewTransform);
-
-			pipeline->GetParam("proj")
-				->SetAsMat4(projTransform);
-
-			pipeline->GetParam("lightPos")
-				->SetAsVec3(iwm::vector3(x, 0, z));
-
-			pipeline->GetParam("lightColor")
-				->SetAsVec3(lightColor);
-
-			pipeline->GetParam("specularScale")
-				->SetAsFloat(specularScale);
-
 			for (int i = 0; i < model.MeshCount; i++) {
 				device->SetVertexArray(model.Meshes[i].Vertices);
 				device->SetIndexBuffer(model.Meshes[i].Indices);
@@ -139,7 +144,6 @@ namespace IwEngine {
 			}
 
 			transform.Position += velocity.Velocity;
-
 			transform.Rotation *= iwm::quaternion::create_from_euler_angles(
 				Time::DeltaTime() * .1f, 0, Time::DeltaTime() * .1f);
 		}
@@ -188,7 +192,6 @@ namespace IwEngine {
 	{
 		float speed = event.State ? Time::DeltaTime() * 15 : 0.0f;
 		
-		auto view = space.ViewComponents<Velocity>();
 		for (auto entity : view) {
 			Velocity& velocity = entity.GetComponent<Velocity>();
 
@@ -215,7 +218,6 @@ namespace IwEngine {
 	bool EntityLayer::On(
 		MouseWheelEvent& event)
 	{
-		auto view = space.ViewComponents<Transform>();
 		for (auto entity : view) {
 			Transform& transform = entity.GetComponent<Transform>();
 

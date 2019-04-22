@@ -14,6 +14,7 @@ namespace IwEngine {
 
 		iwm::matrix4 GetTransformation() {
 			return iwm::matrix4::create_from_quaternion(Rotation)
+				* iwm::matrix4::create_scale(.033f, .033f, .033f)
 				* iwm::matrix4::create_translation(Position);
 		}
 	};
@@ -92,6 +93,7 @@ namespace IwEngine {
 	{
 	private:
 		IwEntity::Space space;
+		IwEntity::View<Transform, Velocity, Model> view;
 
 		IwGraphics::ModelLoader loader;
 
@@ -118,6 +120,6 @@ namespace IwEngine {
 		bool On(MouseButtonEvent&   event);
 		bool On(MouseWheelEvent&    event);
 	private:
-		void CreateCube(float x, float y);
+		void CreateCube(float x, float y, Model& model);
 	};
 }

@@ -67,7 +67,7 @@ namespace IwEntity {
 		template<
 			typename... _cs>
 		View<_cs...> ViewComponents() {
-			return { GetComponentData<_cs>()... };
+			return { EnsureComponentData<_cs>()... };
 		}
 
 		void Sort() {

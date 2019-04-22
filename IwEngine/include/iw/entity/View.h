@@ -168,9 +168,9 @@ namespace IwEntity {
 		};
 
 	private:
-		const Archetype     m_archetype;
-		const ChunkListItrs m_begin;
-		const ChunkListItrs m_end;
+		Archetype     m_archetype;
+		ChunkListItrs m_begin;
+		ChunkListItrs m_end;
 	public:
 		View(
 			ComponentArray<_cs>&... components)
@@ -178,6 +178,40 @@ namespace IwEntity {
 			, m_begin(components.begin()...)
 			, m_end(components.end()...)
 		{}
+
+		View(
+			View&& copy)
+			: m_archetype(copy.m_archetype)
+			, m_begin(copy.m_begin)
+			, m_end(copy.m_end)
+		{}
+
+		View(
+			const View& copy)
+			: m_archetype(copy.m_archetype)
+			, m_begin(copy.m_begin)
+			, m_end(copy.m_end)
+		{}
+
+		View& operator=(
+			View&& copy)
+		{
+			m_archetype = copy.m_archetype;
+			m_begin = copy.m_begin;
+			m_end = copy.m_end;
+
+			return *this;
+		}
+
+		View& operator=(
+			const View& copy)
+		{
+			m_archetype = copy.m_archetype;
+			m_begin = copy.m_begin;
+			m_end = copy.m_end;
+
+			return *this;
+		}
 
 		Iterator begin() {
 			return Iterator(m_archetype, m_begin, m_end, true);
