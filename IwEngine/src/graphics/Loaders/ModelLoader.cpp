@@ -35,10 +35,11 @@ namespace IwGraphics {
 			constexpr size_t VEC3_SIZE = sizeof(iwm::vector3);
 
 			model->Indices[i].FaceCount = 0;
-			model->Indices[i].Faces = (size_t*)malloc(FACE_SIZE * aimesh->mNumFaces);
+			model->Indices[i].Faces 
+				= (unsigned int*)malloc(FACE_SIZE * aimesh->mNumFaces);
 
-			size_t* faces = model->Indices[i].Faces;
-			size_t& faceCount = model->Indices[i].FaceCount;
+			unsigned int* faces = model->Indices[i].Faces;
+			size_t& faceCount   = model->Indices[i].FaceCount;
 
 			if (faces) {
 				for (size_t t = 0; t < aimesh->mNumFaces; ++t) {

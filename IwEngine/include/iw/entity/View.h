@@ -107,8 +107,9 @@ namespace IwEntity {
 				, m_ends(end)
 				, m_chunks(isBegin ? begin : end)
 			{
-				if (isBegin) {
-					m_itrs = iwu::geteach<
+				if (m_begins != m_ends) {
+					if (isBegin) {
+						m_itrs = iwu::geteach<
 							GetBegin,
 							const ChunkListItrs,
 							SparseSetItrs,
@@ -116,10 +117,10 @@ namespace IwEntity {
 						(
 							begin
 						);
-				}
+					}
 
-				else {
-					m_itrs = iwu::geteach<
+					else {
+						m_itrs = iwu::geteach<
 							GetEnd,
 							const ChunkListItrs,
 							SparseSetItrs,
@@ -127,6 +128,7 @@ namespace IwEntity {
 						(
 							end
 						);
+					}
 				}
 			}
 

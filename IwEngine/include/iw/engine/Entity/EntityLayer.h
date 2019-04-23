@@ -14,7 +14,7 @@ namespace IwEngine {
 
 		iwm::matrix4 GetTransformation() {
 			return iwm::matrix4::create_from_quaternion(Rotation)
-				* iwm::matrix4::create_scale(.033f, .033f, .033f)
+				//* iwm::matrix4::create_scale(.033f, .033f, .033f)
 				* iwm::matrix4::create_translation(Position);
 		}
 	};
@@ -26,7 +26,7 @@ namespace IwEngine {
 	struct Mesh {
 		IwRenderer::IVertexArray* Vertices;
 		IwRenderer::IIndexBuffer* Indices;
-		unsigned int Count;
+		std::size_t Count;
 	};
 
 	struct Model {
@@ -120,6 +120,6 @@ namespace IwEngine {
 		bool On(MouseButtonEvent&   event);
 		bool On(MouseWheelEvent&    event);
 	private:
-		void CreateCube(float x, float y, Model& model);
+		void CreateCube(float x, float y, float z, Model& model);
 	};
 }

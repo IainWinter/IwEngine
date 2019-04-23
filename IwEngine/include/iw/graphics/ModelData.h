@@ -12,17 +12,17 @@ namespace IwGraphics {
 
 	struct MeshData {
 		Vertex* Vertices;
-		unsigned int VertexCount;
+		std::size_t VertexCount;
 	};
 
 	struct FaceIndex {
 		unsigned int* Faces;
-		unsigned int FaceCount;
+		std::size_t FaceCount;
 	};
 
 	struct ModelData {
 		MeshData* Meshes;
 		FaceIndex* Indices;
-		unsigned int MeshCount;
+		std::size_t MeshCount;
 	};
 }

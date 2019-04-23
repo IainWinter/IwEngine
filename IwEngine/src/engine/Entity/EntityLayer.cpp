@@ -52,13 +52,13 @@ namespace IwEngine {
 		return { meshes, obj->MeshCount };
 	}
 
-	void EntityLayer::CreateCube(float x, float y, Model& model) {
+	void EntityLayer::CreateCube(float x, float y, float z, Model& model) {
 		IwEntity::Entity e = space.CreateEntity();
 		
 		Transform& transform = space.CreateComponent<Transform>(e);
 		transform.Position.x += x;
 		transform.Position.y += y;
-		transform.Position.z += 10;
+		transform.Position.z += z;
 
 		space.CreateComponent<Velocity>(e);
 
@@ -69,17 +69,19 @@ namespace IwEngine {
 		//Create rendering device
 		device = new IwRenderer::GLDevice();
 
-		Model m = LoadModel("res/bear.obj", loader, device);
+		//Model m = LoadModel("res/cube.obj", loader, device);
 
-		for (float x = -10; x < 10; x += 1.5f) {
-			for (float y = -10; y < 10; y += 1.5f) {
-				CreateCube(x, y, m);
-			}
-		}
-		
-		space.Sort();
+		//for (float x = -10; x < 10; x += 1.5f) {
+		//	for (float y = -10; y < 10; y += 1.5f) {
+		//		for (float z = -10; z < 10; z += 1.5f) {
+		//			CreateCube(x, y, z, m);
+		//		}
+		//	}
+		//}
+		//
+		//space.Sort();
 
-		view = space.ViewComponents<Transform, Velocity, Model>();
+		//view = space.ViewComponents<Transform, Velocity, Model>();
 
 		//Creating shader pipeline
 		IwRenderer::IVertexShader* vs = device->CreateVertexShader(
@@ -112,6 +114,8 @@ namespace IwEngine {
 		float x = cos(lightAngle) * 100;
 		float z = sin(lightAngle) * 100;
 
+		device->SetPipeline(pipeline);
+		
 		pipeline->GetParam("view")
 			->SetAsMat4(viewTransform);
 
@@ -132,8 +136,6 @@ namespace IwEngine {
 			Velocity& velocity = entity.GetComponent<Velocity>();
 			Model& model = entity.GetComponent<Model>();
 
-			device->SetPipeline(pipeline);
-
 			pipeline->GetParam("model")
 				->SetAsMat4(transform.GetTransformation());
 
@@ -150,15 +152,15 @@ namespace IwEngine {
 	}
 
 	void EntityLayer::ImGui() {
-		//ImGui::Begin("Entity layer");
+		ImGui::Begin("Entity layer");
 
 		//auto view = space.ViewComponents<Transform>();
 		//for (auto entity : view) {
 		//	Transform& transform = entity.GetComponent<Transform>();
 
-		//	ImGui::Text("Pos (x, y, z): %f %f %f", 
-		//		transform.Position.x, 
-		//		transform.Position.y, 
+		//	ImGui::Text("Pos (x, y, z): %f %f %f",
+		//		transform.Position.x,
+		//		transform.Position.y,
 		//		transform.Position.z);
 
 		//	iwm::vector3 rot = transform.Rotation.euler_angles();
@@ -169,10 +171,10 @@ namespace IwEngine {
 		//		rot.z);
 		//}
 
-		//ImGui::SliderFloat3("Light color", &lightColor.x, 0, 1);
-		//ImGui::SliderFloat("Specular scale", &specularScale, 0, 10);
+		ImGui::SliderFloat3("Light color", &lightColor.x, 0, 1);
+		ImGui::SliderFloat("Specular scale", &specularScale, 0, 10);
 
-		//ImGui::End();
+		ImGui::End();
 	}
 
 	bool EntityLayer::On(
@@ -210,6 +212,14 @@ namespace IwEngine {
 			else if (event.Button == IwInput::MOUSE_X2_BUTTON) {
 				velocity.Velocity.x = -speed;
 			}
+		}
+
+		if (event.State && event.Button == IwInput::MOUSE_L_BUTTON) {
+			Model m = LoadModel("res/cube.obj", loader, device);
+			CreateCube(0, 0, -5, m);
+
+			space.Sort();
+			view = space.ViewComponents<Transform, Velocity, Model>();
 		}
 
 		return false;
