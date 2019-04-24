@@ -72,7 +72,9 @@ namespace IwEntity {
 
 		void Sort() {
 			for (auto& set : m_components) {
-				set->Sort(m_entities);
+				if (set) {
+					set->Sort(m_entities);
+				}
 			}
 		}
 

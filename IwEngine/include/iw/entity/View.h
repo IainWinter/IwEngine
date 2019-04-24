@@ -45,23 +45,35 @@ namespace IwEntity {
 		private:
 			struct GetBegin {
 				template<
-					typename _t>
-				SparseSetItr<typename _t::value_type::Value> operator()(
-					const _t& begin)
+					typename _c>
+				SparseSetItr<typename _c::value_type::Value> operator()(
+					const _c& chunk)
 				{
-					return begin->Begin;
+					return chunk->Begin;
 				}
 			};
 
 			struct GetEnd {
 				template<
-					typename _t>
-				SparseSetItr<typename _t::value_type::Value> operator()(
-					const _t& end)
+					typename _c>
+				SparseSetItr<typename _c::value_type::Value> operator()(
+					const _c& end)
 				{
-					_t last = end;
+					_c last = end;
 					--last;
 					return last->End;
+				}
+			};
+
+			struct AnyEqual {
+				template<
+					typename _c>
+				void operator()(
+					const _c& chunk1,
+					const _c& chunk2,
+					bool& notequal)
+				{
+					notequal |= chunk1 == chunk2;
 				}
 			};
 
@@ -107,11 +119,25 @@ namespace IwEntity {
 				, m_ends(end)
 				, m_chunks(isBegin ? begin : end)
 			{
-				if (m_begins != m_ends) {
+				bool equal = false;
+
+				iwu::foreach<
+					AnyEqual,
+					const ChunkListItrs&,
+					ComponentCount,
+					const ChunkListItrs&,
+					bool&>
+				(
+					m_begins,
+					m_ends,
+					equal
+				);
+
+				if (!equal) {
 					if (isBegin) {
 						m_itrs = iwu::geteach<
 							GetBegin,
-							const ChunkListItrs,
+							const ChunkListItrs&,
 							SparseSetItrs,
 							ComponentCount>
 						(
@@ -122,7 +148,7 @@ namespace IwEntity {
 					else {
 						m_itrs = iwu::geteach<
 							GetEnd,
-							const ChunkListItrs,
+							const ChunkListItrs&,
 							SparseSetItrs,
 							ComponentCount>
 						(
@@ -135,11 +161,11 @@ namespace IwEntity {
 			Iterator& operator++() {
 				iwu::formatrix<
 					Increment,
-					ChunkListItrs,
+					ChunkListItrs&,
 					ComponentCount,
-					const Archetype,
-					const ChunkListItrs,
-					SparseSetItrs>
+					const Archetype&,
+					const ChunkListItrs&,
+					SparseSetItrs&>
 				(
 					m_chunks,
 					m_archetype,
@@ -153,14 +179,27 @@ namespace IwEntity {
 			bool operator!=(
 				const Iterator& other) const
 			{
-				return !(m_chunks == other.m_chunks)
-				    && !(m_itrs == other.m_itrs);
+				bool equal = false;
+
+				iwu::foreach<
+					AnyEqual,
+					const ChunkListItrs&,
+					ComponentCount,
+					const ChunkListItrs&,
+					bool&>
+				(
+					m_chunks,
+					other.m_chunks,
+					equal
+				);
+
+				return !equal;
 			}
 
 			ComponentData operator*() {
 				return iwu::geteach<
 					functors::reference,
-					SparseSetItrs,
+					const SparseSetItrs&,
 					ComponentData,
 					ComponentCount>
 				(
@@ -170,6 +209,22 @@ namespace IwEntity {
 		};
 
 	private:
+		struct FindStart {
+			template<
+				typename _c>
+				void operator()(
+					_c& chunk,
+					const _c& end,
+					const Archetype& archetype)
+			{
+				while (chunk != end
+					&& !Similar(chunk->Archetype, archetype))
+				{
+					++chunk;
+				}
+			}
+		};
+
 		Archetype     m_archetype;
 		ChunkListItrs m_begin;
 		ChunkListItrs m_end;
@@ -179,7 +234,19 @@ namespace IwEntity {
 			: m_archetype(GetArchetype<_cs...>())
 			, m_begin(components.begin()...)
 			, m_end(components.end()...)
-		{}
+		{
+			iwu::foreach<
+				FindStart,
+				ChunkListItrs&,
+				ComponentCount,
+				const ChunkListItrs&,
+				const Archetype&>
+			(
+				m_begin,
+				m_end,
+				m_archetype
+			);
+		}
 
 		View(
 			View&& copy)

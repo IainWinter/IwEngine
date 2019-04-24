@@ -32,8 +32,7 @@ namespace IwInput {
 
 		template<
 			typename _device_T>
-		void CreateDevice()
-		{
+		void CreateDevice() {
 			LOG_WARNING << "Attempted to create invalid device!";
 		}
 

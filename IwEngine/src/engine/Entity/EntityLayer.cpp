@@ -6,12 +6,12 @@
 #include "iw/util/io/File.h"
 #include "iw/engine/Time.h"
 
+#include "iw/physics/Collision/BoxCollider.h"
+#include "iw/physics/Collision/Algorithm/GJK.h"
+
 namespace IwEngine {
 	EntityLayer::EntityLayer()
 		: Layer("Entity")
-		, viewTransform(iwm::matrix4::identity)
-		, projTransform(iwm::matrix4::create_perspective_field_of_view(
-			1.2f, 1.78f, 0.1f, 1000.0f))
 		, lightColor(iwm::vector3::one)
 		, lightAngle(0.0f)
 		, specularScale(0.0f)
@@ -56,32 +56,28 @@ namespace IwEngine {
 		IwEntity::Entity e = space.CreateEntity();
 		
 		Transform& transform = space.CreateComponent<Transform>(e);
-		transform.Position.x += x;
-		transform.Position.y += y;
-		transform.Position.z += z;
+		transform.Position.x = x;
+		transform.Position.y = y;
+		transform.Position.z = z;
 
 		space.CreateComponent<Velocity>(e);
-
 		space.CreateComponent<Model>(e, model);
+		space.CreateComponent<IwPhysics::BoxCollider>(
+			e, IwPhysics::AABB(iwm::vector3(0, 0, 0), 1));
 	}
 
 	int EntityLayer::Initialize() {
 		//Create rendering device
 		device = new IwRenderer::GLDevice();
 
-		//Model m = LoadModel("res/cube.obj", loader, device);
+		IwEntity::Entity camera = space.CreateEntity();
+		space.CreateComponent<Transform>(camera);
+		space.CreateComponent<Velocity>(camera);
+		space.CreateComponent<Camera>(camera, 
+			iwm::matrix4::create_perspective_field_of_view(
+				1.2f, 1.78f, 0.1f, 1000.0f));
 
-		//for (float x = -10; x < 10; x += 1.5f) {
-		//	for (float y = -10; y < 10; y += 1.5f) {
-		//		for (float z = -10; z < 10; z += 1.5f) {
-		//			CreateCube(x, y, z, m);
-		//		}
-		//	}
-		//}
-		//
-		//space.Sort();
-
-		//view = space.ViewComponents<Transform, Velocity, Model>();
+		space.Sort();
 
 		//Creating shader pipeline
 		IwRenderer::IVertexShader* vs = device->CreateVertexShader(
@@ -116,60 +112,66 @@ namespace IwEngine {
 
 		device->SetPipeline(pipeline);
 		
-		pipeline->GetParam("view")
-			->SetAsMat4(viewTransform);
+		for (auto movement : space.ViewComponents<Transform, Velocity>()) {
+			Transform& transform = movement.GetComponent<Transform>();
+			Velocity& velocity   = movement.GetComponent<Velocity>();
 
-		pipeline->GetParam("proj")
-			->SetAsMat4(projTransform);
+			transform.Position -= velocity.Velocity;
+		}
 
-		pipeline->GetParam("lightPos")
-			->SetAsVec3(iwm::vector3(x, 0, z));
+		for (auto players : space.ViewComponents<Transform, Camera>()) {
+			Transform& transform = players.GetComponent<Transform>();
+			Camera& camera       = players.GetComponent<Camera>();
 
-		pipeline->GetParam("lightColor")
-			->SetAsVec3(lightColor);
+			pipeline->GetParam("view")
+				->SetAsMat4(transform.GetTransformation());
 
-		pipeline->GetParam("specularScale")
-			->SetAsFloat(specularScale);
+			pipeline->GetParam("proj")
+				->SetAsMat4(camera.Projection);
 
-		for (auto entity : view) {
-			Transform& transform = entity.GetComponent<Transform>();
-			Velocity& velocity = entity.GetComponent<Velocity>();
+			pipeline->GetParam("lightPos")
+				->SetAsVec3(iwm::vector3(x, 0, z));
+
+			pipeline->GetParam("lightColor")
+				->SetAsVec3(lightColor);
+
+			pipeline->GetParam("specularScale")
+				->SetAsFloat(specularScale);
+		}
+
+		for (auto entity : space.ViewComponents<Transform, Model>()) {
+			Transform& t = entity.GetComponent<Transform>();
 			Model& model = entity.GetComponent<Model>();
 
 			pipeline->GetParam("model")
-				->SetAsMat4(transform.GetTransformation());
+				->SetAsMat4(t.GetTransformation());
 
 			for (int i = 0; i < model.MeshCount; i++) {
 				device->SetVertexArray(model.Meshes[i].Vertices);
 				device->SetIndexBuffer(model.Meshes[i].Indices);
 				device->DrawElements(model.Meshes[i].Count, 0);
 			}
-
-			transform.Position += velocity.Velocity;
-			transform.Rotation *= iwm::quaternion::create_from_euler_angles(
-				Time::DeltaTime() * .1f, 0, Time::DeltaTime() * .1f);
 		}
 	}
 
 	void EntityLayer::ImGui() {
 		ImGui::Begin("Entity layer");
 
-		//auto view = space.ViewComponents<Transform>();
-		//for (auto entity : view) {
-		//	Transform& transform = entity.GetComponent<Transform>();
+		for (auto entity : space.ViewComponents<Transform>()) {
+			Transform& transform = entity.GetComponent<Transform>();
 
-		//	ImGui::Text("Pos (x, y, z): %f %f %f",
-		//		transform.Position.x,
-		//		transform.Position.y,
-		//		transform.Position.z);
+			ImGui::Text("Pos (x, y, z): %f %f %f",
+				transform.Position.x,
+				transform.Position.y,
+				transform.Position.z);
 
-		//	iwm::vector3 rot = transform.Rotation.euler_angles();
+			iwm::vector3 rot = transform.Rotation.euler_angles();
 
-		//	ImGui::Text("Rot (x, y, z): %f %f %f",
-		//		rot.x,
-		//		rot.y,
-		//		rot.z);
-		//}
+			ImGui::Text("Rot (x, y, z): %f %f %f",
+				rot.x,
+				rot.y,
+				rot.z);
+		}
 
 		ImGui::SliderFloat3("Light color", &lightColor.x, 0, 1);
 		ImGui::SliderFloat("Specular scale", &specularScale, 0, 10);
@@ -186,39 +188,31 @@ namespace IwEngine {
 	bool EntityLayer::On(
 		MouseMovedEvent& event)
 	{
+		auto p = *space.ViewComponents<Transform, Camera>().begin();
+		Transform& transform = p.GetComponent<Transform>();
+
+		iwm::vector3 euler = transform.Rotation.euler_angles();
+		euler.y += event.DeltaX * Time::DeltaTime();
+		euler.x += event.DeltaY * Time::DeltaTime();
+
+		transform.Rotation = iwm::quaternion::create_from_euler_angles(euler);
+
 		return false;
 	}
 
 	bool EntityLayer::On(
 		MouseButtonEvent& event)
 	{
-		float speed = event.State ? Time::DeltaTime() * 15 : 0.0f;
-		
-		for (auto entity : view) {
-			Velocity& velocity = entity.GetComponent<Velocity>();
-
-			if (event.Button == IwInput::MOUSE_L_BUTTON) {
-				velocity.Velocity.z = -speed;
-			}
-
-			else if (event.Button == IwInput::MOUSE_R_BUTTON) {
-				velocity.Velocity.z = speed;
-			}
-
-			else if (event.Button == IwInput::MOUSE_X1_BUTTON) {
-				velocity.Velocity.x = speed;
-			}
-
-			else if (event.Button == IwInput::MOUSE_X2_BUTTON) {
-				velocity.Velocity.x = -speed;
-			}
-		}
-
 		if (event.State && event.Button == IwInput::MOUSE_L_BUTTON) {
 			Model m = LoadModel("res/cube.obj", loader, device);
-			CreateCube(0, 0, -5, m);
+
+			auto p = *space.ViewComponents<Transform, Camera>().begin();
+			Transform& transform = p.GetComponent<Transform>();
+
+			CreateCube(transform.Position.x, transform.Position.y, transform.Position.z - 5, m);
 
 			space.Sort();
+
 			view = space.ViewComponents<Transform, Velocity, Model>();
 		}
 
@@ -233,6 +227,52 @@ namespace IwEngine {
 
 			transform.Rotation *= iwm::quaternion::create_from_euler_angles(
 				0, event.Delta * .1f, 0);
+		}
+
+		return false;
+	}
+
+	bool EntityLayer::On(
+		KeyEvent& event)
+	{
+		float delta = event.State ? 15 * Time::DeltaTime() : 0;
+		for (auto players : space.ViewComponents<Transform, Velocity, Camera>()) {
+			Transform& transform = players.GetComponent<Transform>();
+			Velocity& velocity   = players.GetComponent<Velocity>();
+
+			if (event.Button == IwInput::W) {
+				velocity.Velocity = iwm::vector3::unit_z
+					* transform.Rotation
+					* delta;
+			}
+
+			if (event.Button == IwInput::S) {
+				velocity.Velocity = -iwm::vector3::unit_z
+					* transform.Rotation
+					* delta;
+			}
+
+			if (event.Button == IwInput::D) {
+				velocity.Velocity = iwm::vector3::unit_x
+					* transform.Rotation
+					* delta;
+			}
+
+			if (event.Button == IwInput::A) {
+				velocity.Velocity = -iwm::vector3::unit_x
+					* transform.Rotation
+					* delta;
+			}
+
+			if (event.Button == IwInput::SPACE) {
+				velocity.Velocity = iwm::vector3::unit_y
+					* delta;
+			}
+
+			if (event.Button == IwInput::SHIFT) {
+				velocity.Velocity = -iwm::vector3::unit_y
+					* delta;
+			}
 		}
 
 		return false;

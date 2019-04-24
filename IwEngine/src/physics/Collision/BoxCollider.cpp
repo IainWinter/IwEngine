@@ -1,6 +1,11 @@
 #include "iw/physics/Collision/BoxCollider.h"
 
 namespace IwPhysics {
+	BoxCollider::BoxCollider(
+		const AABB& bounds)
+		: Collider(bounds)
+	{}
+
 	iwm::vector3 BoxCollider::Support(
 		const iwm::matrix4& transformation) const
 	{

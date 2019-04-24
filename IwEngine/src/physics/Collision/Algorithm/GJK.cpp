@@ -2,17 +2,17 @@
 #include <vector>
 
 namespace IwPhysics {
-	CollisionData GJK(
+	bool GJK(
 		const Collider& collider1,
 		const Collider& collider2,
 		const iwm::matrix4& transformation1,
 		const iwm::matrix4& transformation2)
 	{
 		iwmath::vector3 points[4];
-		iwmath::vector3 direction = iwmath::vector3::unit_x;
-
+		iwmath::vector3 direction  = iwmath::vector3::unit_x;
 		iwmath::vector3 supportVec = Support(collider1, collider2, 
 			transformation1, transformation2, direction);
+
 		points[0] = supportVec;
 		direction = -supportVec;
 
@@ -51,7 +51,7 @@ namespace IwPhysics {
 			}
 		}
 
-		return { collider1, collider2, /*poi*/iwmath::vector3() };
+		return colliding;// { collider1, collider2, /*poi*/iwmath::vector3() };
 	}
 
 	bool SameDirection(

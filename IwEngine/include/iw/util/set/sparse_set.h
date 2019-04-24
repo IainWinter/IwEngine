@@ -697,6 +697,10 @@ namespace iwutil {
 			std::size_t begin = 0,
 			std::size_t end = 0) override 
 		{
+			if (size() == 0) {
+				return;
+			}
+
 			std::vector<_index_t> direct(m_direct);
 			base_t::sort(comparator, begin, end);
 

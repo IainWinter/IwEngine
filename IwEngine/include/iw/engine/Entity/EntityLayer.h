@@ -14,7 +14,6 @@ namespace IwEngine {
 
 		iwm::matrix4 GetTransformation() {
 			return iwm::matrix4::create_from_quaternion(Rotation)
-				//* iwm::matrix4::create_scale(.033f, .033f, .033f)
 				* iwm::matrix4::create_translation(Position);
 		}
 	};
@@ -88,6 +87,10 @@ namespace IwEngine {
 		}
 	};
 
+	struct Camera {
+		iwm::matrix4 Projection;
+	};
+
 	class IWENGINE_API EntityLayer
 		: public Layer
 	{
@@ -103,8 +106,6 @@ namespace IwEngine {
 		iwm::vector3 lightColor;
 		float lightAngle;
 		float specularScale;
-		iwm::matrix4 viewTransform;
-		iwm::matrix4 projTransform;
 
 	public:
 		EntityLayer();
@@ -119,6 +120,7 @@ namespace IwEngine {
 		bool On(MouseMovedEvent&    event);
 		bool On(MouseButtonEvent&   event);
 		bool On(MouseWheelEvent&    event);
+		bool On(KeyEvent&           event);
 	private:
 		void CreateCube(float x, float y, float z, Model& model);
 	};

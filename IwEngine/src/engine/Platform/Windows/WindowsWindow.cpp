@@ -305,10 +305,13 @@ namespace IwEngine {
 	}
 
 	void WindowsWindow::HandleKey(
-		IwInput::InputName button,
+		IwInput::InputName key,
 		bool down)
 	{
-		LOG_INFO << "Key " << button <<
+		KeyEvent e(key, down);
+		callback(e);
+
+		LOG_INFO << "Key " << key <<
 			(down ? " pressed" : " released");
 	}
 }

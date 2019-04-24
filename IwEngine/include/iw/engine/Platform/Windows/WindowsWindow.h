@@ -57,7 +57,7 @@ namespace IwEngine {
 			bool down);
 
 		void HandleKey(
-			IwInput::InputName button,
+			IwInput::InputName key,
 			bool down);
 	};
 }

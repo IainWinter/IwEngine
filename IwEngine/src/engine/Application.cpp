@@ -35,7 +35,7 @@ namespace IwEngine {
 		LOG_DEBUG << "Binding input manager to window...";
 
 		m_window->SetInputManager(m_inputManager);
-		m_inputManager.CreateDevice<IwInput::Mouse>();
+		m_inputManager.CreateDevice<IwInput::RawMouse>();
 		m_inputManager.CreateDevice<IwInput::Keyboard>();
 
 		m_imguiLayer = new ImGuiLayer();

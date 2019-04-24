@@ -150,7 +150,7 @@ namespace IwInput {
 	}
 
 	void WindowsRawKeyboard::HandleEvent(
-		OsEvent & event)
+		OsEvent& event)
 	{
 		if (event.Message != WM_INPUT) {
 			return;

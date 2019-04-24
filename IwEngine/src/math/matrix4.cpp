@@ -674,19 +674,32 @@ namespace iwmath {
 			throw std::invalid_argument("zFar is not greater than 0.");
 		}
 
-		float x = 2.0f * zNear / (right - left);
+		float x = 2 * zNear / (right - left);
 		float y = 2 * zNear / (top - bottom);
-		float a = -(zFar + zNear) / (zFar - zNear);
-		float b = -zNear * (right + left) / (right - left);
-		float c = -zNear * (top + bottom) / (top - bottom);
-		float d = 2 * zFar * zNear / (zNear - zFar);
+		float a = (right + left) / (right - left);
+		float b = (top + bottom) / (top - bottom);
+		float c = -(zFar + zNear) / (zFar - zNear);
+		float d = -2 * zFar * zNear / (zFar - zNear);
 
 		return matrix4(
 			x, 0, 0, 0,
 			0, y, 0, 0,
-			0, 0, a, -1,
-			b, c, d, 0
-		);
+			a, b, c, -1,
+			0, 0, d, 0);
+
+		//float x = 2.0f * zNear / (right - left);
+		//float y = 2 * zNear / (top - bottom);
+		//float a = -(zFar + zNear) / (zFar - zNear);
+		//float b = -zNear * (right + left) / (right - left);
+		//float c = -zNear * (top + bottom) / (top - bottom);
+		//float d = 2 * zFar * zNear / (zNear - zFar);
+
+		//return matrix4(
+		//	x, 0, 0, 0,
+		//	0, y, 0, 0,
+		//	0, 0, a, -1,
+		//	b, c, d, 0
+		//);
 	}
 
 	matrix4 matrix4::create_look_at(

@@ -7,7 +7,7 @@
 #include "iw/math/matrix4.h"
 
 namespace IwPhysics {
-	CollisionData IWPHYSICS_API GJK(
+	bool IWPHYSICS_API GJK(
 		const Collider& collider1,
 		const Collider& collider2,
 		const iwm::matrix4& transformation1,
