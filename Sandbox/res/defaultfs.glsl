@@ -2,6 +2,7 @@
 
 uniform vec3 lightPos;
 uniform vec3 lightColor;
+uniform vec3 objectColor;
 uniform float specularScale;
 
 in vData {
@@ -11,7 +12,6 @@ in vData {
 
 void main() {
 	float ambientStrength = 0.1;
-	vec3 objectColor = vec3(1, 1, 1);
 	
 	vec3 viewPos = vec3(0, 0, 0);
 

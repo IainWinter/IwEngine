@@ -289,6 +289,8 @@ namespace IwEngine {
 		MouseMovedEvent e(X, Y, deltaX, deltaY);
 		callback(e);
 
+		SetCursorPos(100, 100);
+
 		//LOG_INFO << "Mouse moved " << deltaX << ", " << deltaY 
 		//	<< " to " << X << ", " << Y;
 	}

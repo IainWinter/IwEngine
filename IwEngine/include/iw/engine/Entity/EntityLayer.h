@@ -16,6 +16,18 @@ namespace IwEngine {
 			return iwm::matrix4::create_from_quaternion(Rotation)
 				* iwm::matrix4::create_translation(Position);
 		}
+
+		iwm::vector3 Forward() {
+			return -(iwm::vector3::unit_z * Rotation);
+		}
+
+		iwm::vector3 Right() {
+			return iwm::vector3::unit_x * Rotation;
+		}
+
+		iwm::vector3 Up() {
+			return iwm::vector3::unit_y * Rotation;
+		}
 	};
 
 	struct Velocity {
@@ -31,27 +43,33 @@ namespace IwEngine {
 	struct Model {
 		Mesh* Meshes;
 		std::size_t MeshCount;
+		iwm::vector3 Color;
 
 		Model(
 			Mesh* meshes,
-			std::size_t count)
+			std::size_t count,
+			iwm::vector3 color)
 			: Meshes(meshes)
 			, MeshCount(count)
+			, Color(color)
 		{}
 
 		Model(
 			Model&& copy) noexcept
 			: Meshes(copy.Meshes)
 			, MeshCount(copy.MeshCount)
+			, Color(copy.Color)
 		{
 			copy.Meshes = nullptr;
 			copy.MeshCount = 0;
+			copy.Color = 0;
 		}
 
 		Model(
 			const Model& copy)
 			: Meshes(new Mesh[copy.MeshCount])
 			, MeshCount(copy.MeshCount)
+			, Color(copy.Color)
 		{
 			for (std::size_t i = 0; i < MeshCount; i++) {
 				Meshes[i] = copy.Meshes[i];
@@ -67,9 +85,11 @@ namespace IwEngine {
 		{
 			Meshes = copy.Meshes;
 			MeshCount = copy.MeshCount;
+			Color = copy.Color;
 
 			copy.Meshes = nullptr;
 			copy.MeshCount = 0;
+			copy.Color = 0;
 
 			return *this;
 		}
@@ -79,6 +99,7 @@ namespace IwEngine {
 		{
 			Meshes = new Mesh[copy.MeshCount];
 			MeshCount = copy.MeshCount;
+			Color = copy.Color;
 			for (std::size_t i = 0; i < MeshCount; i++) {
 				Meshes[i] = copy.Meshes[i];
 			}
@@ -96,7 +117,6 @@ namespace IwEngine {
 	{
 	private:
 		IwEntity::Space space;
-		IwEntity::View<Transform, Velocity, Model> view;
 
 		IwGraphics::ModelLoader loader;
 
@@ -104,22 +124,20 @@ namespace IwEngine {
 		IwRenderer::IPipeline* pipeline;
 
 		iwm::vector3 lightColor;
-		float lightAngle;
 		float specularScale;
 
 	public:
 		EntityLayer();
-		~EntityLayer();
 
 		int  Initialize() override;
 		void Destroy()    override;
 		void Update()     override;
 		void ImGui()      override;
 
-		bool On(WindowResizedEvent& event);
+		//bool On(WindowResizedEvent& event);
 		bool On(MouseMovedEvent&    event);
 		bool On(MouseButtonEvent&   event);
-		bool On(MouseWheelEvent&    event);
+		//bool On(MouseWheelEvent&    event);
 		bool On(KeyEvent&           event);
 	private:
 		void CreateCube(float x, float y, float z, Model& model);

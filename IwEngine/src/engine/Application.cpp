@@ -52,6 +52,7 @@ namespace IwEngine {
 		}
 
 		m_window->SetState(windowOptions.state);
+		m_window->SetCursor(false);
 
 		Time::Update();
 

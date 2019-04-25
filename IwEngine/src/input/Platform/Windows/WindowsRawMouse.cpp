@@ -76,15 +76,11 @@ namespace IwInput {
 			if (mouse.usFlags == MOUSE_MOVE_RELATIVE) {
 				input.Name  = MOUSE_X_AXIS;
 				input.State = (float)mouse.lLastX;
-				if (input.State != 0) {
-					Callback(input);
-				}
+				Callback(input);
 
 				input.Name  = MOUSE_Y_AXIS;
 				input.State = (float)mouse.lLastY;
-				if (input.State != 0) {
-					Callback(input);
-				}
+				Callback(input);
 			}
 		}
 	}
