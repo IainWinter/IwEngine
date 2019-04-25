@@ -65,6 +65,16 @@ namespace IwEntity {
 				}
 			};
 
+			struct GetReference {
+				template<
+					typename _c>
+					SparseSetItr<typename _c::value_type::Value> operator()(
+						const _c& chunk)
+				{
+					return *chunk;
+				}
+			};
+
 			struct AnyEqual {
 				template<
 					typename _c>
@@ -198,7 +208,7 @@ namespace IwEntity {
 
 			ComponentData operator*() {
 				return iwu::geteach<
-					functors::reference,
+					GetReference,
 					const SparseSetItrs&,
 					ComponentData,
 					ComponentCount>

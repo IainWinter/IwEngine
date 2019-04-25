@@ -9,10 +9,6 @@ class Game
 	: public IwEngine::Application
 {
 public:
-	void Run() override {
-		Application::Run();
-	}
-
 	Game() {
 		PushLayer(new IwEngine::EntityLayer());
 	}

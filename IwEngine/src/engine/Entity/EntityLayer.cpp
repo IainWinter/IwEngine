@@ -145,6 +145,27 @@ namespace IwEngine {
 				device->DrawElements(entityModel.Meshes[i].Count, 0);
 			}
 		}
+
+		for (auto entity1 : space.ViewComponents<Transform, Model, IwPhysics::BoxCollider>()) {
+			Transform& transform1             = entity1.GetComponent<Transform>();
+			Model& model1                     = entity1.GetComponent<Model>();
+			IwPhysics::BoxCollider& collider1 = entity1.GetComponent<IwPhysics::BoxCollider>();
+
+			for (auto entity2 : space.ViewComponents<Transform, Model, IwPhysics::BoxCollider>()) {
+				Transform& transform2             = entity2.GetComponent<Transform>();
+				Model& model2                     = entity2.GetComponent<Model>();
+				IwPhysics::BoxCollider& collider2 = entity2.GetComponent<IwPhysics::BoxCollider>();
+
+				if (entity1 != entity2) {
+					bool colliding = IwPhysics::GJK(collider1, collider2, transform1.GetTransformation(), transform2.GetTransformation());
+
+					if (colliding) {
+						model1.Color = iwm::vector3(.7f, .3f, .6f);
+						model2.Color = iwm::vector3(.7f, .3f, .6f);
+					}
+				}
+			}
+		}
 	}
 
 	void EntityLayer::ImGui() {
