@@ -51,7 +51,7 @@ namespace IwEngine {
 		IwEntity::Entity e = space.CreateEntity();
 
 		Transform& transform = space.CreateComponent<Transform>(e);
-		transform.Transformation += iwm::matrix4::create_translation(x, y, z);
+		transform.Position = iwm::vector3(x, y, z);
 
 		space.CreateComponent<Velocity>(e);
 		space.CreateComponent<Model>(e, model);
@@ -78,7 +78,7 @@ namespace IwEngine {
 
 		device->SetPipeline(pipeline);
 
-		CreateCube(0, 0, 5, LoadModel("res/cube.obj", loader, device));
+		CreateCube(0, 0, -5, LoadModel("res/cube.obj", loader, device));
 			
 		IwEntity::Entity camera = space.CreateEntity();
 		space.CreateComponent<Transform>(camera);
@@ -164,8 +164,10 @@ namespace IwEngine {
 							transform2.Transformation);
 
 						if (colliding) {
-							model1.Color = iwm::vector3(.7f, .3f, .6f);
-							model2.Color = iwm::vector3(.7f, .3f, .6f);
+							model1.Color = iwm::vector3(.3f, .9f, .3f);
+							model2.Color = iwm::vector3(.3f, .9f, .3f);
+
+							transform1.Position.y += .05f;
 						}
 					}
 				}
@@ -181,26 +183,26 @@ namespace IwEngine {
 	}
 
 	void EntityLayer::ImGui() {
-		//ImGui::Begin("Entity layer");
+		ImGui::Begin("Entity layer");
 
-		//for (auto entity : space.ViewComponents<Transform>()) {
-		//	Transform& transform = entity.GetComponent<Transform>();
-		//	ImGui::Text("Pos (x, y, z): %f %f %f",
-		//		transform.Position().x,
-		//		transform.Position().y,
-		//		transform.Position().z);
+		for (auto entity : space.ViewComponents<Transform>()) {
+			Transform& transform = entity.GetComponent<Transform>();
+			ImGui::Text("Pos (x, y, z): %f %f %f",
+				transform.Position.x,
+				transform.Position.y,
+				transform.Position.z);
 
-		//	iwm::vector3 rot = transform.Rotation().euler_angles();
-		//	ImGui::Text("Rot (x, y, z): %f %f %f",
-		//		rot.x,
-		//		rot.y,
-		//		rot.z);
-		//}
+			iwm::vector3 rot = transform.Rotation.euler_angles();
+			ImGui::Text("Rot (x, y, z): %f %f %f",
+				rot.x,
+				rot.y,
+				rot.z);
+		}
 
-		//ImGui::SliderFloat3("Light color", &lightColor.x, 0, 1);
-		//ImGui::SliderFloat("Specular scale", &specularScale, 0, 10);
+		ImGui::SliderFloat3("Light color", &lightColor.x, 0, 1);
+		ImGui::SliderFloat("Specular scale", &specularScale, 0, 10);
 
-		//ImGui::End();
+		ImGui::End();
 	}
 
 	bool EntityLayer::On(
