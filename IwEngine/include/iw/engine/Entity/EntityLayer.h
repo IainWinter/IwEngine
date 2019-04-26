@@ -11,14 +11,10 @@ namespace IwEngine {
 	struct Transform {
 		iwm::vector3 Position;
 		iwm::quaternion Rotation;
-
-		iwm::matrix4 GetTransformation() {
-			return iwm::matrix4::create_from_quaternion(Rotation)
-				* iwm::matrix4::create_translation(Position);
-		}
+		iwm::matrix4 Transformation;
 
 		iwm::vector3 Forward() {
-			return -(iwm::vector3::unit_z * Rotation);
+			return (iwm::vector3::unit_z * Rotation);
 		}
 
 		iwm::vector3 Right() {

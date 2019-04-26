@@ -164,6 +164,10 @@ namespace iwmath {
 			int row,
 			int col);
 
+		const float& operator()(
+			int row,
+			int col) const;
+
 		bool operator==(
 			const matrix3& other) const;
 

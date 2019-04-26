@@ -423,7 +423,19 @@ namespace iwmath {
 	{
 		if (row > 3 || col > 3 || 0 > row || 0 > col) {
 			throw std::out_of_range("Row/Col is outside the "
-				"bounds of this maxtrix.");
+				"bounds of this matrix.");
+		}
+
+		return elements[col + row * 3];
+	}
+
+	const float& matrix3::operator()(
+		int row,
+		int col) const
+	{
+		if (row > 3 || col > 3 || 0 > row || 0 > col) {
+			throw std::out_of_range("Row/Col is outside the "
+				"bounds of this matrix.");
 		}
 
 		return elements[col + row * 3];

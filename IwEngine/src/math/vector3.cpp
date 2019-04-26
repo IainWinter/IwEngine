@@ -1,4 +1,7 @@
 #include "iw/math/vector3.h"
+#include "iw/math/vector4.h"
+#include "iw/math/matrix3.h"
+#include "iw/math/matrix4.h"
 
 namespace iwmath {
 	const vector3 vector3::zero   = vector3(0, 0, 0);
@@ -190,6 +193,36 @@ namespace iwmath {
 		float other)
 	{
 		return *this = (*this) / other;
+	}
+
+	vector3 vector3::operator*(
+		const matrix3& mat) const
+	{
+		return iwm::vector3(
+			x * mat(0, 0) + y * mat(0, 1) + z * mat(0, 2),
+			x * mat(1, 0) + y * mat(1, 1) + z * mat(1, 2),
+			x * mat(2, 0) + y * mat(2, 1) + z * mat(2, 2));
+	}
+
+	vector3& vector3::operator*=(
+		const matrix3& mat)
+	{
+		return *this = iwm::vector3(
+			x * mat(0, 0) + y * mat(0, 1) + z * mat(0, 2),
+			x * mat(1, 0) + y * mat(1, 1) + z * mat(1, 2),
+			x * mat(2, 0) + y * mat(2, 1) + z * mat(2, 2));
+	}
+
+	vector3 vector3::operator*(
+		const matrix4& mat) const
+	{
+		return (vector4(*this, 1) * mat).xyz();
+	}
+
+	vector3& vector3::operator*=(
+		const matrix4& mat)
+	{
+		return *this = (vector4(*this, 1) * mat).xyz();
 	}
 
 	vector3 vector3::operator-() const {

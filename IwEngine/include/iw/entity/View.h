@@ -21,23 +21,32 @@ namespace IwEntity {
 		using SparseSetItr  = typename ComponentArray<_c>::SparseSetItr;
 		using SparseSetItrs = std::tuple<SparseSetItr<_cs>...>;
 
+		using ComponentTuple = std::tuple<_cs& ...>;
+
 		static constexpr std::size_t ComponentCount = sizeof...(_cs);
 	public:
 		struct ComponentData {
-			using Components = std::tuple<_cs& ...>;
-
-			Components m_components;
+			ComponentTuple   Components;
+			IwEntity::Entity Entity;
 
 			ComponentData(
-				_cs&... components)
-				: m_components(components...)
+				IwEntity::Entity entity,
+				ComponentTuple& components)
+				: Entity(entity)
+				, Components(components)
 			{}
+
+			bool operator!=(
+				const ComponentData& other) const
+			{
+				return Entity != other.Entity;
+			}
 
 			template<
 				typename _c>
 			_c& GetComponent() {
-				return std::get<iwu::index<_c&, Components>::value>(
-					m_components);
+				return std::get<iwu::index<_c&, ComponentTuple>::value>(
+					Components);
 			}
 		};
 
@@ -62,16 +71,6 @@ namespace IwEntity {
 					_c last = end;
 					--last;
 					return last->End;
-				}
-			};
-
-			struct GetReference {
-				template<
-					typename _c>
-					SparseSetItr<typename _c::value_type::Value> operator()(
-						const _c& chunk)
-				{
-					return *chunk;
 				}
 			};
 
@@ -207,14 +206,16 @@ namespace IwEntity {
 			}
 
 			ComponentData operator*() {
-				return iwu::geteach<
-					GetReference,
+				ComponentTuple components = iwu::geteach<
+					functors::reference,
 					const SparseSetItrs&,
-					ComponentData,
+					ComponentTuple,
 					ComponentCount>
 				(
 					m_itrs
 				);
+
+				return ComponentData(std::get<0>(m_itrs).index(), components);
 			}
 		};
 

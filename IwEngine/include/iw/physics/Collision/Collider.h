@@ -11,7 +11,16 @@ namespace IwPhysics {
 		Collider(
 			const AABB& bounds);
 
-		virtual iwm::vector3 Support(
-			const iwm::matrix4& transformation) const = 0;
+		inline AABB Translated(
+			iwm::matrix4 translation) const
+		{
+			return AABB(
+				Bounds.Min * translation,
+				Bounds.Max * translation);
+		}
+
+		virtual iwm::vector3 FurthestPoint(
+			const iwm::matrix4& transformation,
+			const iwmath::vector3& direction) const = 0;
 	};
 }

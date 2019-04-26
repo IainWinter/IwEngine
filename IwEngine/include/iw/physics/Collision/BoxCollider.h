@@ -10,7 +10,8 @@ namespace IwPhysics {
 		BoxCollider(
 			const AABB& bounds);
 
-		iwm::vector3 Support(
-			const iwm::matrix4& transformation) const override;
+		iwm::vector3 FurthestPoint(
+			const iwm::matrix4& transformation,
+			const iwmath::vector3& direction) const override;
 	};
 }

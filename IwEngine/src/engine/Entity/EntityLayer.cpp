@@ -51,9 +51,7 @@ namespace IwEngine {
 		IwEntity::Entity e = space.CreateEntity();
 
 		Transform& transform = space.CreateComponent<Transform>(e);
-		transform.Position.x = x;
-		transform.Position.y = y;
-		transform.Position.z = z;
+		transform.Transformation += iwm::matrix4::create_translation(x, y, z);
 
 		space.CreateComponent<Velocity>(e);
 		space.CreateComponent<Model>(e, model);
@@ -80,7 +78,7 @@ namespace IwEngine {
 
 		device->SetPipeline(pipeline);
 
-		CreateCube(0, 0, -15, LoadModel("res/bear.obj", loader, device));
+		CreateCube(0, 0, 5, LoadModel("res/cube.obj", loader, device));
 			
 		IwEntity::Entity camera = space.CreateEntity();
 		space.CreateComponent<Transform>(camera);
@@ -99,17 +97,17 @@ namespace IwEngine {
 	}
 
 	void EntityLayer::Update() {
-		auto player = *space.ViewComponents<Transform, Camera>().begin();
-		
-		Transform& playerTransform = player.GetComponent<Transform>();
-		Camera& playerCamera = player.GetComponent<Camera>();
+		for (auto entity : space.ViewComponents<Transform>()) {
+			Transform& transform = entity.GetComponent<Transform>();
 
-		for (auto entity : space.ViewComponents<Transform, Velocity>()) {
-			Transform& entityTransform = entity.GetComponent<Transform>();
-			Velocity& entityVelocity   = entity.GetComponent<Velocity>();
-
-			entityTransform.Position += entityVelocity.Velocity;
+			transform.Transformation
+				= iwm::matrix4::create_from_quaternion(transform.Rotation)
+				* iwm::matrix4::create_translation(transform.Position);
 		}
+
+		auto player = *space.ViewComponents<Transform, Camera>().begin();
+		Transform& playerTransform = player.GetComponent<Transform>();
+		Camera& playerCamera       = player.GetComponent<Camera>();
 
 		for (auto entity : space.ViewComponents<Transform, Model>()) {
 			Transform& entityTransform = entity.GetComponent<Transform>();
@@ -132,12 +130,12 @@ namespace IwEngine {
 
 			pipeline->GetParam("view")
 				->SetAsMat4(iwm::matrix4::create_look_at(
-					playerTransform.Position, 
-					playerTransform.Position + playerTransform.Forward(), 
+					playerTransform.Position,
+					playerTransform.Position + playerTransform.Forward(),
 					playerTransform.Up()));
 
 			pipeline->GetParam("model")
-				->SetAsMat4(entityTransform.GetTransformation());
+				->SetAsMat4(entityTransform.Transformation);
 
 			for (int i = 0; i < entityModel.MeshCount; i++) {
 				device->SetVertexArray(entityModel.Meshes[i].Vertices);
@@ -157,14 +155,28 @@ namespace IwEngine {
 				IwPhysics::BoxCollider& collider2 = entity2.GetComponent<IwPhysics::BoxCollider>();
 
 				if (entity1 != entity2) {
-					bool colliding = IwPhysics::GJK(collider1, collider2, transform1.GetTransformation(), transform2.GetTransformation());
+					if (collider1.Translated(transform1.Transformation).Intersects(
+						collider2.Translated(transform2.Transformation)))
+					{
+						bool colliding = IwPhysics::GJK(
+							collider1, collider2,
+							transform1.Transformation,
+							transform2.Transformation);
 
-					if (colliding) {
-						model1.Color = iwm::vector3(.7f, .3f, .6f);
-						model2.Color = iwm::vector3(.7f, .3f, .6f);
+						if (colliding) {
+							model1.Color = iwm::vector3(.7f, .3f, .6f);
+							model2.Color = iwm::vector3(.7f, .3f, .6f);
+						}
 					}
 				}
 			}
+		}
+
+		for (auto entity : space.ViewComponents<Transform, Velocity>()) {
+			Transform& entityTransform = entity.GetComponent<Transform>();
+			Velocity& entityVelocity = entity.GetComponent<Velocity>();
+
+			entityTransform.Position += entityVelocity.Velocity;
 		}
 	}
 
@@ -174,11 +186,11 @@ namespace IwEngine {
 		//for (auto entity : space.ViewComponents<Transform>()) {
 		//	Transform& transform = entity.GetComponent<Transform>();
 		//	ImGui::Text("Pos (x, y, z): %f %f %f",
-		//		transform.Position.x,
-		//		transform.Position.y,
-		//		transform.Position.z);
+		//		transform.Position().x,
+		//		transform.Position().y,
+		//		transform.Position().z);
 
-		//	iwm::vector3 rot = transform.Rotation.euler_angles();
+		//	iwm::vector3 rot = transform.Rotation().euler_angles();
 		//	ImGui::Text("Rot (x, y, z): %f %f %f",
 		//		rot.x,
 		//		rot.y,

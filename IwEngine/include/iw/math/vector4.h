@@ -5,6 +5,8 @@
 #include <ostream>
 
 namespace iwmath {
+	struct matrix4;
+
 	/**
 	* Represents a vector with 4 dimensions.
 	*/
@@ -124,51 +126,59 @@ namespace iwmath {
 			float y,
 			float z);
 
-		vector4 operator+ (
+		vector4 operator+(
 			const vector4& other) const;
 
-		vector4 operator- (
+		vector4 operator-(
 			const vector4& other) const;
 
-		vector4 operator* (
+		vector4 operator*(
 			const vector4& other) const;
 
-		vector4 operator/ (
+		vector4 operator/(
 			const vector4& other) const;
+
+		vector4& operator+=(
+			const vector4& other);
+
+		vector4& operator-=(
+			const vector4& other);
+
+		vector4& operator*=(
+			const vector4& other);
+
+		vector4& operator/=(
+			const vector4& other);
+
+		vector4 operator+(
+			const float& other) const;
+
+		vector4 operator-(
+			const float& other) const;
+
+		vector4 operator*(
+			const float& other) const;
+
+		vector4 operator/(
+			const float& other) const;
+
 		vector4 operator+=(
-			const vector4& other);
-
-		vector4 operator-=(
-			const vector4& other);
-
-		vector4 operator*=(
-			const vector4& other);
-
-		vector4 operator/=(
-			const vector4& other);
-		vector4 operator+ (
-			const float& other) const;
-
-		vector4 operator- (
-			const float& other) const;
-
-		vector4 operator* (
-			const float& other) const;
-
-		vector4 operator/ (
-			const float& other) const;
-
-		vector4 operator+=(
 			const float& other);
 
-		vector4 operator-=(
+		vector4& operator-=(
 			const float& other);
 
-		vector4 operator*=(
+		vector4& operator*=(
 			const float& other);
 
-		vector4 operator/=(
+		vector4& operator/=(
 			const float& other);
+
+		vector4 operator*(
+			const matrix4& mat) const;
+
+		vector4& operator*=(
+			const matrix4& mat);
 
 		vector4 operator-() const;
 

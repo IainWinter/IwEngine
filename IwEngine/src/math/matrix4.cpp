@@ -309,7 +309,19 @@ namespace iwmath {
 	{
 		if (row > 4 || col > 4 || 0 > row || 0 > col) {
 			throw std::out_of_range("Row/Col is outside the "
-				"bounds of this maxtrix.");
+				"bounds of this matrix.");
+		}
+
+		return elements[col + row * 4];
+	}
+
+	const float& matrix4::operator()(
+		int row, 
+		int col) const
+	{
+		if (row > 4 || col > 4 || 0 > row || 0 > col) {
+			throw std::out_of_range("Row/Col is outside the "
+				"bounds of this matrix.");
 		}
 
 		return elements[col + row * 4];

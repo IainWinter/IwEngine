@@ -4,6 +4,9 @@
 #include <ostream>
 
 namespace iwmath {
+	struct matrix3;
+	struct matrix4;
+
 	/**
 	* Represents a vector or point in 3D.
 	*/
@@ -146,6 +149,18 @@ namespace iwmath {
 
 		vector3 operator/=(
 			float other);
+
+		vector3 operator*(
+			const matrix3& mat) const;
+
+		vector3& operator*=(
+			const matrix3& mat);
+
+		vector3 operator*(
+			const matrix4& mat) const;
+
+		vector3& operator*=(
+			const matrix4& mat);
 
 		vector3 operator-() const;
 

@@ -1,5 +1,6 @@
 #include <cmath>
 #include "iw/math/vector4.h"
+#include "iw/math/matrix4.h"
 
 namespace iwmath {
 	const vector4 vector4::zero   = vector4(0, 0, 0, 0);
@@ -151,25 +152,25 @@ namespace iwmath {
 		return vector4(x / other.x, y / other.y, z / other.z, w / other.w);
 	}
 
-	vector4 vector4::operator+=(
+	vector4& vector4::operator+=(
 		const vector4& other)
 	{
 		return *this = (*this) + other;
 	}
 
-	vector4 vector4::operator-=(
+	vector4& vector4::operator-=(
 		const vector4& other)
 	{
 		return *this = (*this) - other;
 	}
 
-	vector4 vector4::operator*=(
+	vector4& vector4::operator*=(
 		const vector4& other)
 	{
 		return *this = (*this) * other;
 	}
 
-	vector4 vector4::operator/=(
+	vector4& vector4::operator/=(
 		const vector4& other)
 	{
 		return *this = (*this) / other;
@@ -205,22 +206,42 @@ namespace iwmath {
 		return *this = (*this) + other;
 	}
 
-	vector4 vector4::operator-=(
+	vector4& vector4::operator-=(
 		const float& other)
 	{
 		return *this = (*this) - other;
 	}
 
-	vector4 vector4::operator*=(
+	vector4& vector4::operator*=(
 		const float& other)
 	{
 		return *this = (*this) * other;
 	}
 
-	vector4 vector4::operator/=(
+	vector4& vector4::operator/=(
 		const float& other)
 	{
 		return *this = (*this) / other;
+	}
+
+	vector4 vector4::operator*(
+		const matrix4& mat) const
+	{
+		return iwm::vector4(
+			x * mat(0, 0) + y * mat(1, 0) + z * mat(2, 0) + w * mat(3, 0),
+			x * mat(0, 1) + y * mat(1, 1) + z * mat(2, 1) + w * mat(3, 1),
+			x * mat(0, 2) + y * mat(1, 2) + z * mat(2, 2) + w * mat(3, 2),
+			x * mat(0, 3) + y * mat(1, 3) + z * mat(2, 3) + w * mat(3, 3));
+	}
+
+	vector4& vector4::operator*=(
+		const matrix4& mat)
+	{
+		return *this = iwm::vector4(
+			x * mat(0, 0) + y * mat(1, 0) + z * mat(2, 0) + w * mat(3, 0),
+			x * mat(0, 1) + y * mat(1, 1) + z * mat(2, 1) + w * mat(3, 1),
+			x * mat(0, 2) + y * mat(1, 2) + z * mat(2, 2) + w * mat(3, 2),
+			x * mat(0, 3) + y * mat(1, 3) + z * mat(2, 3) + w * mat(3, 3));
 	}
 
 	vector4 vector4::operator-() const {
