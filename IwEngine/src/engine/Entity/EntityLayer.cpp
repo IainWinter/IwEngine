@@ -132,7 +132,7 @@ namespace IwEngine {
 				->SetAsMat4(iwm::matrix4::create_look_at(
 					playerTransform.Position,
 					playerTransform.Position + playerTransform.Forward(),
-					playerTransform.Up()));
+					iwm::vector3::unit_y));
 
 			pipeline->GetParam("model")
 				->SetAsMat4(entityTransform.Transformation);
@@ -145,13 +145,13 @@ namespace IwEngine {
 		}
 
 		for (auto entity1 : space.ViewComponents<Transform, Model, IwPhysics::BoxCollider>()) {
-			Transform& transform1             = entity1.GetComponent<Transform>();
-			Model& model1                     = entity1.GetComponent<Model>();
+			Transform& transform1 = entity1.GetComponent<Transform>();
+			Model& model1 = entity1.GetComponent<Model>();
 			IwPhysics::BoxCollider& collider1 = entity1.GetComponent<IwPhysics::BoxCollider>();
 
 			for (auto entity2 : space.ViewComponents<Transform, Model, IwPhysics::BoxCollider>()) {
-				Transform& transform2             = entity2.GetComponent<Transform>();
-				Model& model2                     = entity2.GetComponent<Model>();
+				Transform& transform2 = entity2.GetComponent<Transform>();
+				Model& model2 = entity2.GetComponent<Model>();
 				IwPhysics::BoxCollider& collider2 = entity2.GetComponent<IwPhysics::BoxCollider>();
 
 				if (entity1 != entity2) {
@@ -166,8 +166,6 @@ namespace IwEngine {
 						if (colliding) {
 							model1.Color = iwm::vector3(.3f, .9f, .3f);
 							model2.Color = iwm::vector3(.3f, .9f, .3f);
-
-							transform1.Position.y += .05f;
 						}
 					}
 				}
@@ -210,10 +208,21 @@ namespace IwEngine {
 	{
 		auto player = *space.ViewComponents<Transform, Camera>().begin();
 		Transform& transform = player.GetComponent<Transform>();
-		transform.Rotation *= iwm::quaternion::create_from_euler_angles(
-			event.DeltaY * Time::DeltaTime(),
-			event.DeltaX * Time::DeltaTime(),
-			transform.Rotation.z);
+		Camera& camera       = player.GetComponent<Camera>();
+
+		float pitch = event.DeltaY * Time::DeltaTime();
+		float yaw   = event.DeltaX * Time::DeltaTime();
+
+		iwm::quaternion rot = iwm::quaternion::create_from_euler_angles(pitch, yaw, 0);
+
+		transform.Rotation *= rot.inverted();
+
+		LOG_INFO << transform.Rotation.euler_angles();
+
+		//transform.Rotation.x = fmod(transform.Rotation.x, iwm::IW_2PI);
+		//transform.Rotation.y = fmod(transform.Rotation.y, iwm::IW_2PI);
+		//transform.Rotation.z = fmod(transform.Rotation.z, iwm::IW_2PI);
+		//transform.Rotation.w = fmod(transform.Rotation.w, iwm::IW_2PI);
 
 		return false;
 	}

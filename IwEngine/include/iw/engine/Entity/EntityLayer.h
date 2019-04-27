@@ -18,11 +18,11 @@ namespace IwEngine {
 		}
 
 		iwm::vector3 Right() {
-			return iwm::vector3::unit_x * Rotation;
+			return iwm::vector3::unit_y.cross(Forward()).normalized_fast();
 		}
 
 		iwm::vector3 Up() {
-			return iwm::vector3::unit_y * Rotation;
+			return -iwm::vector3::unit_x.cross(Forward()).normalized_fast();
 		}
 	};
 
@@ -106,6 +106,7 @@ namespace IwEngine {
 
 	struct Camera {
 		iwm::matrix4 Projection;
+		iwm::vector3 Rotation;
 	};
 
 	class IWENGINE_API EntityLayer

@@ -95,7 +95,7 @@ namespace iwmath {
 		vector4 axis_angle() const;
 
 		/**
-		* Returns the euler angle equivalent of the quaternion.
+		* Returns the Euler angle equivalent of the quaternion.
 		*/
 		vector3 euler_angles() const;
 
@@ -172,7 +172,7 @@ namespace iwmath {
 			float angle);
 
 		/**
-		* Returns a quaternion from euler angles.
+		* Returns a quaternion from Euler angles.
 		*
 		* @param angles Euler angles in radians.
 		*/
@@ -180,7 +180,7 @@ namespace iwmath {
 			const vector3& angles);
 
 		/**
-		* Returns a quaternion from euler angles.
+		* Returns a quaternion from Euler angles.
 		*
 		* @param pitch Rotation around the x axis in radians.
 		* @param yaw Rotation around the y axis in radians.
