@@ -14,15 +14,15 @@ namespace IwEngine {
 		iwm::matrix4 Transformation;
 
 		iwm::vector3 Forward() {
-			return -(iwm::vector3::unit_z * Rotation);
+			return -iwm::vector3::unit_z * Rotation;
 		}
 
 		iwm::vector3 Right() {
-			return iwm::vector3::unit_y.cross(Forward()).normalized_fast();
+			return iwm::vector3::unit_x * Rotation;
 		}
 
 		iwm::vector3 Up() {
-			return -iwm::vector3::unit_x.cross(Forward()).normalized_fast();
+			return iwm::vector3::unit_y * Rotation;
 		}
 	};
 

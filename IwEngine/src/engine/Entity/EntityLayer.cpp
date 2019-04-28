@@ -132,7 +132,7 @@ namespace IwEngine {
 				->SetAsMat4(iwm::matrix4::create_look_at(
 					playerTransform.Position,
 					playerTransform.Position + playerTransform.Forward(),
-					iwm::vector3::unit_y));
+					playerTransform.Up()));
 
 			pipeline->GetParam("model")
 				->SetAsMat4(entityTransform.Transformation);
@@ -178,12 +178,14 @@ namespace IwEngine {
 
 			entityTransform.Position += entityVelocity.Velocity;
 		}
+
+		//On(MouseMovedEvent(0, 0, 1, 1));
 	}
 
 	void EntityLayer::ImGui() {
 		ImGui::Begin("Entity layer");
 
-		for (auto entity : space.ViewComponents<Transform>()) {
+		for (auto entity : space.ViewComponents<Transform, Camera>()) {
 			Transform& transform = entity.GetComponent<Transform>();
 			ImGui::Text("Pos (x, y, z): %f %f %f",
 				transform.Position.x,
@@ -206,23 +208,19 @@ namespace IwEngine {
 	bool EntityLayer::On(
 		MouseMovedEvent& event)
 	{
+		//if (event.X != 0) return false;
+
 		auto player = *space.ViewComponents<Transform, Camera>().begin();
 		Transform& transform = player.GetComponent<Transform>();
-		Camera& camera       = player.GetComponent<Camera>();
 
-		float pitch = event.DeltaY * Time::DeltaTime();
-		float yaw   = event.DeltaX * Time::DeltaTime();
+		float pitch = -event.DeltaY * Time::DeltaTime();
+		float yaw   = -event.DeltaX * Time::DeltaTime();
 
-		iwm::quaternion rot = iwm::quaternion::create_from_euler_angles(pitch, yaw, 0);
+		iwm::quaternion deltaY = iwm::quaternion::create_from_axis_angle(transform.Right(), pitch);
+		iwm::quaternion deltaX = iwm::quaternion::create_from_axis_angle(transform.Up(), yaw);
 
-		transform.Rotation *= rot.inverted();
-
-		LOG_INFO << transform.Rotation.euler_angles();
-
-		//transform.Rotation.x = fmod(transform.Rotation.x, iwm::IW_2PI);
-		//transform.Rotation.y = fmod(transform.Rotation.y, iwm::IW_2PI);
-		//transform.Rotation.z = fmod(transform.Rotation.z, iwm::IW_2PI);
-		//transform.Rotation.w = fmod(transform.Rotation.w, iwm::IW_2PI);
+		transform.Rotation *= deltaY * deltaX;
+		transform.Rotation.normalized();
 
 		return false;
 	}
@@ -273,6 +271,10 @@ namespace IwEngine {
 
 			if (event.Button == IwInput::SHIFT) {
 				velocity.Velocity = -iwm::vector3::unit_y * delta;
+			}
+
+			if (event.Button == IwInput::B) {
+				transform.Rotation = iwm::quaternion::create_from_euler_angles(0, 0, 0);
 			}
 		}
 
