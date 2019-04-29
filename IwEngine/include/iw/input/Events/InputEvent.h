@@ -12,7 +12,6 @@ namespace IwInput {
 		unsigned long LParam;
 	};
 #endif
-
 	struct InputEvent {
 		DeviceType Device;
 		InputName  Name;
@@ -34,4 +33,5 @@ namespace IwInput {
 	using MouseMovedCallback  = iwevents::callback<float, float, float, float>;
 	using MouseButtonCallback = iwevents::callback<InputName, bool>;
 	using KeyCallback         = iwevents::callback<InputName, bool>;
+	using KeyTypedCallback    = iwevents::callback<InputName, char>;
 }

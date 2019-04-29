@@ -114,6 +114,10 @@ namespace IwEngine {
 			DispatchEvent((KeyEvent&)e);
 		}
 
+		else if (e.Type == KeyTyped) {
+			DispatchEvent((KeyTypedEvent&)e);
+		}
+
 		else if (e.Type == WindowClosed) {
 			Destroy();
 		}

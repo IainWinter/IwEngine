@@ -4,7 +4,7 @@ namespace IwEngine {
 	enum EventType : unsigned int {
 		WindowClosed, WindowDestroyed, WindowResized,
 		MouseWheel, MouseMoved, MouseButton,
-		Key,
+		Key, KeyTyped,
 		NOT_HANDLED
 	};
 

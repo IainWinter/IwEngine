@@ -12,6 +12,7 @@ namespace IwInput {
 		MouseMovedCallback  MouseMovedCallback;
 		MouseButtonCallback MouseButtonCallback;
 		KeyCallback         KeyCallback;
+		KeyTypedCallback    KeyTypedCallback;
 
 		Context(
 			float width,
@@ -54,5 +55,8 @@ namespace IwInput {
 			unsigned int windowId,
 			KeyCallback callback);
 
+		void SetKeyTypedCallback(
+			unsigned int windowId,
+			KeyTypedCallback callback);
 	};
 }

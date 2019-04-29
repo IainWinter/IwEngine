@@ -20,7 +20,8 @@ namespace IwInput {
 	};
 
 	RawMouse* RawMouse::Create(
-		InputCallback& callback) {
+		InputCallback& callback) 
+	{
 		return new WindowsRawMouse(callback);
 	}
 

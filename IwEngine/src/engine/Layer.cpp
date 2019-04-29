@@ -45,4 +45,10 @@ namespace IwEngine {
 	{
 		return false;
 	}
+
+	bool Layer::On(
+		KeyTypedEvent& event)
+	{
+		return false;
+	}
 }

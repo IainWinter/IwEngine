@@ -72,4 +72,11 @@ namespace IwInput {
 	{
 		m_contextManager.SetKeyCallback(windowId, callback);
 	}
+
+	void InputManager::SetKeyTypedCallback(
+		unsigned int windowId, 
+		KeyTypedCallback callback)
+	{
+		m_contextManager.SetKeyTypedCallback(windowId, callback);
+	}
 }

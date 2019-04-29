@@ -78,7 +78,7 @@ namespace IwEngine {
 
 		device->SetPipeline(pipeline);
 
-		CreateCube(0, 0, -5, LoadModel("res/cube.obj", loader, device));
+		CreateCube(0, 0, 5, LoadModel("res/cube.obj", loader, device));
 			
 		IwEntity::Entity camera = space.CreateEntity();
 		space.CreateComponent<Transform>(camera);
@@ -144,12 +144,14 @@ namespace IwEngine {
 			}
 		}
 
-		for (auto entity1 : space.ViewComponents<Transform, Model, IwPhysics::BoxCollider>()) {
+		auto v = space.ViewComponents<Transform, Model, IwPhysics::BoxCollider>();
+
+		for (auto entity1 : v) {
 			Transform& transform1 = entity1.GetComponent<Transform>();
 			Model& model1 = entity1.GetComponent<Model>();
 			IwPhysics::BoxCollider& collider1 = entity1.GetComponent<IwPhysics::BoxCollider>();
 
-			for (auto entity2 : space.ViewComponents<Transform, Model, IwPhysics::BoxCollider>()) {
+			for (auto entity2 : v) {
 				Transform& transform2 = entity2.GetComponent<Transform>();
 				Model& model2 = entity2.GetComponent<Model>();
 				IwPhysics::BoxCollider& collider2 = entity2.GetComponent<IwPhysics::BoxCollider>();
@@ -166,6 +168,8 @@ namespace IwEngine {
 						if (colliding) {
 							model1.Color = iwm::vector3(.3f, .9f, .3f);
 							model2.Color = iwm::vector3(.3f, .9f, .3f);
+
+							transform1.Position.y += Time::DeltaTime();
 						}
 					}
 				}
@@ -178,8 +182,6 @@ namespace IwEngine {
 
 			entityTransform.Position += entityVelocity.Velocity;
 		}
-
-		//On(MouseMovedEvent(0, 0, 1, 1));
 	}
 
 	void EntityLayer::ImGui() {
@@ -208,19 +210,16 @@ namespace IwEngine {
 	bool EntityLayer::On(
 		MouseMovedEvent& event)
 	{
-		//if (event.X != 0) return false;
-
 		auto player = *space.ViewComponents<Transform, Camera>().begin();
 		Transform& transform = player.GetComponent<Transform>();
 
-		float pitch = -event.DeltaY * Time::DeltaTime();
+		float pitch = event.DeltaY * Time::DeltaTime();
 		float yaw   = -event.DeltaX * Time::DeltaTime();
 
-		iwm::quaternion deltaY = iwm::quaternion::create_from_axis_angle(transform.Right(), pitch);
-		iwm::quaternion deltaX = iwm::quaternion::create_from_axis_angle(transform.Up(), yaw);
+		iwm::quaternion deltaP = iwm::quaternion::create_from_euler_angles(pitch, 0, 0);
+		iwm::quaternion deltaY = iwm::quaternion::create_from_euler_angles(0, yaw, 0);
 
-		transform.Rotation *= deltaY * deltaX;
-		transform.Rotation.normalized();
+		transform.Rotation = deltaY * transform.Rotation * deltaP;
 
 		return false;
 	}

@@ -162,7 +162,7 @@ namespace IwInput {
 
 			InputEvent event(KEYBOARD, event.WindowId);
 			event.Name  = Translate(keyboard.VKey);
-			event.State = keyboard.Message == WM_KEYDOWN;
+			event.State = !keyboard.Flags;
 
 			Callback(event);
 		}

@@ -62,5 +62,9 @@ namespace IwInput {
 		void SetKeyCallback(
 			unsigned int windowId,
 			KeyCallback callback);
+
+		void SetKeyTypedCallback(
+			unsigned int windowId,
+			KeyTypedCallback callback);
 	};
 }

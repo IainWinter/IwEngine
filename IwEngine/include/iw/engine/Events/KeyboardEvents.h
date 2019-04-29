@@ -18,4 +18,19 @@ namespace IwEngine {
 			, State(state)
 		{}
 	};
+
+	struct KeyTypedEvent
+		: Event
+	{
+		IwInput::InputName Button;
+		char Character;
+
+		KeyTypedEvent(
+			IwInput::InputName button,
+			char character)
+			: Event(Key)
+			, Button(button)
+			, Character(character)
+		{}
+	};
 }

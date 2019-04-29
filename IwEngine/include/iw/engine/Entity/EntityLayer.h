@@ -14,7 +14,7 @@ namespace IwEngine {
 		iwm::matrix4 Transformation;
 
 		iwm::vector3 Forward() {
-			return -iwm::vector3::unit_z * Rotation;
+			return iwm::vector3::unit_z * Rotation;
 		}
 
 		iwm::vector3 Right() {

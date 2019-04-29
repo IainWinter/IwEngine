@@ -31,12 +31,19 @@ namespace IwInput {
 				input.State - context.States[MOUSE_Y_POS];
 		}
 
-		context.States[input.Name] = input.State;
-		if (input.Device == KEYBOARD) {
-			context.KeyCallback(input.Name, input.State);
+		else if (input.Device == KEYBOARD) {
+			// Need way more key interpretation this doesn't even work \/
+			if (input.State) {
+				context.KeyTypedCallback(input.Name, KeyTranslation[input.Name]);
+			}
+			
+			if (input.State != context.States[input.Name]) {
+				context.KeyCallback(input.Name, input.State);
+			}
 		}
 
-		else if (input.Device == MOUSE) {
+		context.States[input.Name] = input.State;
+		if (input.Device == MOUSE) {
 			if (input.Name == MOUSE_WHEEL) {
 				context.MouseWheelCallback(input.State);
 			}
@@ -83,5 +90,12 @@ namespace IwInput {
 		KeyCallback callback)
 	{
 		m_contexts[windowId].KeyCallback = callback;
+	}
+
+	void ContextManager::SetKeyTypedCallback(
+		unsigned int windowId, 
+		KeyTypedCallback callback)
+	{
+		m_contexts[windowId].KeyTypedCallback = callback;
 	}
 }

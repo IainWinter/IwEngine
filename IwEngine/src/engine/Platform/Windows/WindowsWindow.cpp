@@ -188,6 +188,9 @@ namespace IwEngine {
 
 		manager.SetKeyCallback(Id(),         
 			iwevents::make_callback(&WindowsWindow::HandleKey, this));
+
+		manager.SetKeyTypedCallback(Id(),
+			iwevents::make_callback(&WindowsWindow::HandleKeyTyped, this));
 	}
 
 	void WindowsWindow::SetState(
@@ -315,6 +318,16 @@ namespace IwEngine {
 
 		LOG_INFO << "Key " << key <<
 			(down ? " pressed" : " released");
+	}
+
+	void WindowsWindow::HandleKeyTyped(
+		IwInput::InputName key, 
+		char character)
+	{
+		KeyTypedEvent e(key, character);
+		callback(e);
+
+		LOG_INFO << "Key " << character;
 	}
 }
 

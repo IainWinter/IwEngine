@@ -59,5 +59,9 @@ namespace IwEngine {
 		void HandleKey(
 			IwInput::InputName key,
 			bool down);
+
+		void HandleKeyTyped(
+			IwInput::InputName key,
+			char character);
 	};
 }
