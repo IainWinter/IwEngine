@@ -8,7 +8,9 @@
 #include "VertexShader.h"
 #include "FragmentShader.h"
 #include "GeometryShader.h"
+#include "ComputeShader.h"
 #include "Pipeline.h"
+#include "ComputePipeline.h"
 
 namespace IwRenderer {
 	class IWRENDERER_API IDevice {
@@ -72,6 +74,13 @@ namespace IwRenderer {
 		virtual void DestroyGeometryShader(
 			IGeometryShader* geometryShader) = 0;
 
+		//Compute shader
+		virtual IComputeShader* CreateComputeShader(
+			const char* source) = 0;
+
+		virtual void DestroyComputeShader(
+			IComputeShader* computeShader) = 0;
+
 		//Shader pipeline
 		virtual IPipeline* CreatePipeline(
 			IVertexShader* vertexShader,
@@ -83,5 +92,15 @@ namespace IwRenderer {
 
 		virtual void SetPipeline(
 			IPipeline* pipeline) = 0;
+
+		//Compute shader pipeline
+		virtual IComputePipeline* CreateComputePipeline(
+			IComputeShader* computeShader) = 0;
+
+		virtual void DestroyComputePipeline(
+			IComputePipeline* computePipeline) = 0;
+
+		virtual void SetComputePipeline(
+			IComputePipeline* computePipeline) = 0;
 	};
 }

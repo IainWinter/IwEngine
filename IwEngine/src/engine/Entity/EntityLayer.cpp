@@ -78,7 +78,7 @@ namespace IwEngine {
 
 		device->SetPipeline(pipeline);
 
-		CreateCube(0, 0, 5, LoadModel("res/cube.obj", loader, device));
+		CreateCube(0, 0, -5, LoadModel("res/cube.obj", loader, device));
 			
 		IwEntity::Entity camera = space.CreateEntity();
 		space.CreateComponent<Transform>(camera);
@@ -213,7 +213,7 @@ namespace IwEngine {
 		auto player = *space.ViewComponents<Transform, Camera>().begin();
 		Transform& transform = player.GetComponent<Transform>();
 
-		float pitch = event.DeltaY * Time::DeltaTime();
+		float pitch = -event.DeltaY * Time::DeltaTime();
 		float yaw   = -event.DeltaX * Time::DeltaTime();
 
 		iwm::quaternion deltaP = iwm::quaternion::create_from_euler_angles(pitch, 0, 0);

@@ -77,6 +77,7 @@ namespace IwGraphics {
 	void ModelLoader::Release(
 		ModelData* resource)
 	{
-		delete resource;
+		auto itr = std::find(loaded.begin(), loaded.end(), resource);
+		loaded.erase(itr);
 	}
 }

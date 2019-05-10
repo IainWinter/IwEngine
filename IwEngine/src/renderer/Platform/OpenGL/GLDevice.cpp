@@ -5,7 +5,9 @@
 #include "iw/renderer/Platform/OpenGL/GLVertexShader.h"
 #include "iw/renderer/Platform/OpenGL/GLFragmentShader.h"
 #include "iw/renderer/Platform/OpenGL/GLGeometryShader.h"
+#include "iw/renderer/Platform/OpenGL/GLComputeShader.h"
 #include "iw/renderer/Platform/OpenGL/GLPipeline.h"
+#include "iw/renderer/Platform/OpenGL/GLComputePipeline.h"
 #include "gl/glew.h"
 
 namespace IwRenderer {
@@ -121,6 +123,18 @@ namespace IwRenderer {
 		delete geometryShader;
 	}
 
+	IComputeShader* GLDevice::CreateComputeShader(
+		const char* source)
+	{
+		return new GLComputeShader(source);
+	}
+
+	void GLDevice::DestroyComputeShader(
+		IComputeShader* computeShader)
+	{
+		delete computeShader;
+	}
+
 	IPipeline* GLDevice::CreatePipeline(
 		IVertexShader* vertexShader, 
 		IFragmentShader* fragmentShader,
@@ -142,5 +156,24 @@ namespace IwRenderer {
 		IPipeline* pipeline)
 	{
 		static_cast<GLPipeline*>(pipeline)->Use();
+	}
+
+	IComputePipeline* GLDevice::CreateComputePipeline(
+		IComputeShader* computeShader)
+	{
+		return new GLComputePipeline(
+			static_cast<GLComputeShader*>(computeShader));
+	}
+
+	void GLDevice::DestroyComputePipeline(
+		IComputePipeline* computePipeline)
+	{
+		delete computePipeline;
+	}
+
+	void GLDevice::SetComputePipeline(
+		IComputePipeline* computePipeline)
+	{
+		static_cast<GLComputePipeline*>(computePipeline)->Use();
 	}
 }

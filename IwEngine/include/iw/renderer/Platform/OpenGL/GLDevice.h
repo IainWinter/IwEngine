@@ -66,6 +66,13 @@ namespace IwRenderer {
 		void DestroyGeometryShader(
 			IGeometryShader* geometryShader) override;
 
+		//Compute shader
+		virtual IComputeShader* CreateComputeShader(
+			const char* source) override;
+
+		virtual void DestroyComputeShader(
+			IComputeShader* computeShader) override;
+
 		//Shader pipeline
 		IPipeline* CreatePipeline(
 			IVertexShader* vertexShader,
@@ -77,5 +84,15 @@ namespace IwRenderer {
 
 		void SetPipeline(
 			IPipeline* pipeline) override;
+
+		//Compute shader pipeline
+		virtual IComputePipeline* CreateComputePipeline(
+			IComputeShader* computeShader) override;
+
+		virtual void DestroyComputePipeline(
+			IComputePipeline* computePipeline) override;
+
+		virtual void SetComputePipeline(
+			IComputePipeline* ComputePipeline) override;
 	};
 }
