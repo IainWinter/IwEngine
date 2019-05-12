@@ -243,7 +243,7 @@ namespace IwEngine {
 	bool EntityLayer::On(
 		KeyEvent& event)
 	{
-		float delta = event.State ? 15 * Time::DeltaTime() : 0;
+		float delta = event.State ? 5 * Time::DeltaTime() : 0;
 		for (auto players : space.ViewComponents<Transform, Velocity, Camera>()) {
 			Transform& transform = players.GetComponent<Transform>();
 			Velocity& velocity   = players.GetComponent<Velocity>();

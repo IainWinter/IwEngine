@@ -62,8 +62,8 @@ namespace IwEngine {
 	void Application::Run() {
 		m_running = true;
 		while (m_running) {
-			Update();
 			Time::Update();
+			Update();
 		}
 	}
 
