@@ -1,4 +1,4 @@
-#include "iw/physics/Collision/Algorithm/GJK.h"
+#include "iw/physics/3D/Collision/Algorithm/GJK.h"
 #include <vector>
 
 namespace IwPhysics {
@@ -16,9 +16,10 @@ namespace IwPhysics {
 		iwm::vector3 direction = -points[0];
 
 		bool colliding = false;
+		int tests = 0;
 		int count = 1;
 
-		while (!colliding) {
+		while (!colliding && tests < 5) {
 			iwm::vector3 a = Support(collider1, collider2, transformation1,
 				transformation2, direction);
 
@@ -26,6 +27,7 @@ namespace IwPhysics {
 				break;
 			}
 
+			tests++;
 			points[count++] = a;
 
 			//Simplex checks

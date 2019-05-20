@@ -213,8 +213,8 @@ namespace IwEngine {
 		auto player = *space.ViewComponents<Transform, Camera>().begin();
 		Transform& transform = player.GetComponent<Transform>();
 
-		float pitch = -event.DeltaY * Time::DeltaTime();
-		float yaw   = -event.DeltaX * Time::DeltaTime();
+		float pitch = -event.DeltaY * 0.0005f;
+		float yaw   = -event.DeltaX * 0.0005f;
 
 		iwm::quaternion deltaP = iwm::quaternion::create_from_euler_angles(pitch, 0, 0);
 		iwm::quaternion deltaY = iwm::quaternion::create_from_euler_angles(0, yaw, 0);
