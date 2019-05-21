@@ -6,8 +6,8 @@
 #include "iw/util/io/File.h"
 #include "iw/engine/Time.h"
 
-#include "iw/physics/Collision/BoxCollider.h"
-#include "iw/physics/Collision/Algorithm/GJK.h"
+//#include "iw/physics/Collision/BoxCollider.h"
+//#include "iw/physics/Collision/Algorithm/GJK.h"
 
 namespace IwEngine {
 	Model LoadModel(
@@ -55,8 +55,8 @@ namespace IwEngine {
 
 		space.CreateComponent<Velocity>(e);
 		space.CreateComponent<Model>(e, model);
-		space.CreateComponent<IwPhysics::BoxCollider>(
-			e, IwPhysics::AABB(iwm::vector3(0, 0, 0), 1));
+		//space.CreateComponent<IwPhysics::BoxCollider>(
+		//	e, IwPhysics::AABB(iwm::vector3(0, 0, 0), 1));
 	}
 
 	EntityLayer::EntityLayer()
@@ -144,7 +144,7 @@ namespace IwEngine {
 			}
 		}
 
-		auto v = space.ViewComponents<Transform, Model, IwPhysics::BoxCollider>();
+		/*auto v = space.ViewComponents<Transform, Model, IwPhysics::BoxCollider>();
 
 		for (auto entity1 : v) {
 			Transform& transform1 = entity1.GetComponent<Transform>();
@@ -174,7 +174,7 @@ namespace IwEngine {
 					}
 				}
 			}
-		}
+		}*/
 
 		for (auto entity : space.ViewComponents<Transform, Velocity>()) {
 			Transform& entityTransform = entity.GetComponent<Transform>();
