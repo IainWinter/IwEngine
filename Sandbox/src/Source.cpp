@@ -1,8 +1,6 @@
 #include "iw/engine/EntryPoint.h"
 #include "iw/engine/Entity/EntityLayer.h"
 
-#include "iw/physics/Collision/AABB.h"
-
 struct Transform { float x, y, z; };
 struct Velocity  { float vx, vy, vz; };
 struct Collider  { float count; };
@@ -17,8 +15,5 @@ public:
 };
 
 IwEngine::Application* CreateApplication() {
-
-	IwPhysics::AABB<float> f();
-
 	return new Game();
 }

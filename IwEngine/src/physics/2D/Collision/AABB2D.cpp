@@ -2,17 +2,17 @@
 
 namespace IwPhysics {
 	AABB2D::AABB2D(
-		iwm::vector2 center,
-		float scale)
-		: Min(center - scale / 2)
-		, Max(center + scale / 2)
-	{}
-
-	AABB2D::AABB2D(
 		iwm::vector2 min,
 		iwm::vector2 max)
 		: Min(min)
 		, Max(max)
+	{}
+
+	AABB2D::AABB2D(
+		iwm::vector2 center,
+		float scale)
+		: Min(center - scale / 2)
+		, Max(center + scale / 2)
 	{}
 
 	iwm::vector2 AABB2D::Mid() const {

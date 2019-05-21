@@ -8,13 +8,15 @@ namespace IwPhysics {
 		iwm::vector2 Min;
 		iwm::vector2 Max;
 
-		AABB2D(
-			iwm::vector2 center,
-			float scale);
+		AABB2D() = default;
 
 		AABB2D(
 			iwm::vector2 min,
 			iwm::vector2 max);
+
+		AABB2D(
+			iwm::vector2 center,
+			float scale);
 
 		iwm::vector2 Mid() const;
 

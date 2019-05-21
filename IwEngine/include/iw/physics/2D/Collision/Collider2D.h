@@ -8,6 +8,8 @@ namespace IwPhysics {
 	struct Collider2D {
 		AABB2D Bounds;
 
+		Collider2D() = default;
+
 		Collider2D(
 			const AABB2D& bounds);
 
