@@ -109,6 +109,10 @@ namespace IwEngine {
 		Transform& playerTransform = player.GetComponent<Transform>();
 		Camera& playerCamera       = player.GetComponent<Camera>();
 
+		playerTransform.Position += playerTransform.Forward() * input.z;
+		playerTransform.Position += playerTransform.Right()   * input.x;
+		playerTransform.Position += iwm::vector3::unit_y      * input.y;
+		
 		for (auto entity : space.ViewComponents<Transform, Model>()) {
 			Transform& entityTransform = entity.GetComponent<Transform>();
 			Model& entityModel = entity.GetComponent<Model>();
@@ -244,37 +248,32 @@ namespace IwEngine {
 		KeyEvent& event)
 	{
 		float delta = event.State ? 5 * Time::DeltaTime() : 0;
-		for (auto players : space.ViewComponents<Transform, Velocity, Camera>()) {
-			Transform& transform = players.GetComponent<Transform>();
-			Velocity& velocity   = players.GetComponent<Velocity>();
+		if (event.Button == IwInput::W) {
+			input.z = delta;
+		}
 
-			if (event.Button == IwInput::W) {
-				velocity.Velocity = transform.Forward() * delta;
-			}
+		if (event.Button == IwInput::S) {
+			input.z = -delta;
+		}
 
-			if (event.Button == IwInput::S) {
-				velocity.Velocity = -transform.Forward() * delta;
-			}
+		if (event.Button == IwInput::A) {
+			input.x = -delta;
 
-			if (event.Button == IwInput::D) {
-				velocity.Velocity = transform.Right() * delta;
+			if (event.State == false) {
+				LOG_INFO << "true";
 			}
+		}
 
-			if (event.Button == IwInput::A) {
-				velocity.Velocity = -transform.Right() * delta;
-			}
+		if (event.Button == IwInput::D) {
+			input.x = delta;
+		}
 
-			if (event.Button == IwInput::SPACE) {
-				velocity.Velocity = iwm::vector3::unit_y * delta;
-			}
+		if (event.Button == IwInput::SPACE) {
+			input.y = delta;
+		}
 
-			if (event.Button == IwInput::SHIFT) {
-				velocity.Velocity = -iwm::vector3::unit_y * delta;
-			}
-
-			if (event.Button == IwInput::B) {
-				transform.Rotation = iwm::quaternion::create_from_euler_angles(0, 0, 0);
-			}
+		if (event.Button == IwInput::SHIFT) {
+			input.y = -delta;
 		}
 
 		return false;

@@ -5,19 +5,20 @@
 
 namespace IwEngine {
 	struct MouseWheelEvent
-		: Event
+		: InputEvent
 	{
 		float Delta;
 
 		MouseWheelEvent(
+			IwInput::InputState inputState,
 			float delta)
-			: Event(MouseWheel)
+			: InputEvent(MouseWheel, inputState)
 			, Delta(delta)
 		{}
 	};
 
 	struct MouseMovedEvent
-		: Event
+		: InputEvent
 	{
 		float X;
 		float Y;
@@ -25,11 +26,12 @@ namespace IwEngine {
 		float DeltaY;
 
 		MouseMovedEvent(
+			IwInput::InputState inputState,
 			float x,
 			float y,
 			float deltaX,
 			float deltaY)
-			: Event(MouseMoved)
+			: InputEvent(MouseMoved, inputState)
 			, X(x)
 			, Y(y)
 			, DeltaX(deltaX)
@@ -38,15 +40,16 @@ namespace IwEngine {
 	};
 
 	struct MouseButtonEvent
-		: Event
+		: InputEvent
 	{
 		IwInput::InputName Button;
 		bool State;
 
 		MouseButtonEvent(
+			IwInput::InputState inputState,
 			IwInput::InputName button,
 			bool state)
-			: Event(MouseButton)
+			: InputEvent(MouseButton, InputState)
 			, Button(button)
 			, State(state)
 		{}

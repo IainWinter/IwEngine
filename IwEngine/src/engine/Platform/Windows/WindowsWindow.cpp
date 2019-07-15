@@ -275,21 +275,23 @@ namespace IwEngine {
 	}
 
 	void WindowsWindow::HandleMouseWheel(
+		IwInput::InputState inputState,
 		float delta)
 	{
-		MouseWheelEvent e(delta);
+		MouseWheelEvent e(inputState, delta);
 		callback(e);
 
 		//LOG_INFO << "Mouse wheel moved " << delta;
 	}
 
 	void WindowsWindow::HandleMouseMoved(
+		IwInput::InputState inputState,
 		float X, 
 		float Y,
 		float deltaX,
 		float deltaY)
 	{
-		MouseMovedEvent e(X, Y, deltaX, deltaY);
+		MouseMovedEvent e(inputState, X, Y, deltaX, deltaY);
 		callback(e);
 
 		SetCursorPos(200, 200);
@@ -299,10 +301,11 @@ namespace IwEngine {
 	}
 	
 	void WindowsWindow::HandleMouseButton(
+		IwInput::InputState inputState,
 		IwInput::InputName button,
 		bool down)
 	{
-		MouseButtonEvent e(button, down);
+		MouseButtonEvent e(inputState, button, down);
 		callback(e);
 
 		LOG_INFO << "Mouse button " << button <<
@@ -310,10 +313,11 @@ namespace IwEngine {
 	}
 
 	void WindowsWindow::HandleKey(
+		IwInput::InputState inputState,
 		IwInput::InputName key,
 		bool down)
 	{
-		KeyEvent e(key, down);
+		KeyEvent e(inputState, key, down);
 		callback(e);
 
 		LOG_INFO << "Key " << key <<
@@ -321,10 +325,11 @@ namespace IwEngine {
 	}
 
 	void WindowsWindow::HandleKeyTyped(
+		IwInput::InputState inputState,
 		IwInput::InputName key, 
 		char character)
 	{
-		KeyTypedEvent e(key, character);
+		KeyTypedEvent e(inputState, key, character);
 		callback(e);
 
 		LOG_INFO << "Key " << character;

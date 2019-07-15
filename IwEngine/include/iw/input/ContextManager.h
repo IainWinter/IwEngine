@@ -1,11 +1,12 @@
 #pragma once
 
+#include "InputState.h"
 #include "Events/InputEvent.h"
 #include "iw/util/set/sparse_set.h"
 
 namespace IwInput {
 	struct Context {
-		float               States[INPUT_COUNT];
+		InputState          State;
 		float               Width;
 		float               Height;
 		MouseWheelCallback  MouseWheelCallback;
@@ -18,10 +19,8 @@ namespace IwInput {
 			float width,
 			float height)
 			:Width(width)
-			,Height(height)
-		{
-			memset(States, 0.0f, INPUT_COUNT * sizeof(float));
-		}
+			, Height(height)
+		{}
 	};
 
 	class IWINPUT_API ContextManager {

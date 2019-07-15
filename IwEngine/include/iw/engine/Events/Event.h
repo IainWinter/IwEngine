@@ -1,5 +1,7 @@
 #pragma once
 
+#include "iw/input/InputState.h"
+
 namespace IwEngine {
 	enum EventType : unsigned int {
 		WindowClosed, WindowDestroyed, WindowResized,
@@ -16,6 +18,19 @@ namespace IwEngine {
 			EventType type)
 			: Type(type)
 			, Handled(false)
+		{}
+	};
+
+	struct InputEvent
+		: Event
+	{
+		IwInput::InputState InputState;
+
+		InputEvent(
+			EventType type,
+			IwInput::InputState inputState)
+			: Event(type)
+			, InputState(inputState)
 		{}
 	};
 

@@ -120,6 +120,8 @@ namespace IwEngine {
 		IwRenderer::IDevice* device;
 		IwRenderer::IPipeline* pipeline;
 
+		iwm::vector3 input;
+
 		iwm::vector3 lightColor;
 		float specularScale;
 

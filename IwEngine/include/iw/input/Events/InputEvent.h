@@ -1,6 +1,7 @@
 #pragma once
 
 #include "iw/input/IwInput.h"
+#include "iw/input/InputState.h"
 #include "iw/events/functional/callback.h"
 
 namespace IwInput {
@@ -29,9 +30,9 @@ namespace IwInput {
 	};
 
 	using InputCallback       = iwevents::callback<InputEvent&>;
-	using MouseWheelCallback  = iwevents::callback<float>;
-	using MouseMovedCallback  = iwevents::callback<float, float, float, float>;
-	using MouseButtonCallback = iwevents::callback<InputName, bool>;
-	using KeyCallback         = iwevents::callback<InputName, bool>;
-	using KeyTypedCallback    = iwevents::callback<InputName, char>;
+	using MouseWheelCallback  = iwevents::callback<InputState, float>;
+	using MouseMovedCallback  = iwevents::callback<InputState, float, float, float, float>;
+	using MouseButtonCallback = iwevents::callback<InputState, InputName, bool>;
+	using KeyCallback         = iwevents::callback<InputState, InputName, bool>;
+	using KeyTypedCallback    = iwevents::callback<InputState, InputName, char>;
 }

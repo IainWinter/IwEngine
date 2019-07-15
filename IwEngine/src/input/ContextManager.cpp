@@ -14,52 +14,52 @@ namespace IwInput {
 	{
 		Context& context = m_contexts[input.WindowId];
 		if (input.Name == MOUSE_X_AXIS) {
-			context.States[MOUSE_X_POS] += input.State;
+			context.State[MOUSE_X_POS] += input.State;
 		}
 
 		else if (input.Name == MOUSE_Y_AXIS) {
-			context.States[MOUSE_Y_POS] += input.State;
+			context.State[MOUSE_Y_POS] += input.State;
 		}
 
 		else if (input.Name == MOUSE_X_POS) {
-			context.States[MOUSE_X_AXIS] = 
-				input.State - context.States[MOUSE_X_POS];
+			context.State[MOUSE_X_AXIS] = 
+				input.State - context.State[MOUSE_X_POS];
 		}
 
 		else if (input.Name == MOUSE_Y_POS) {
-			context.States[MOUSE_Y_AXIS] =
-				input.State - context.States[MOUSE_Y_POS];
+			context.State[MOUSE_Y_AXIS] =
+				input.State - context.State[MOUSE_Y_POS];
 		}
 
 		else if (input.Device == KEYBOARD) {
 			// Need way more key interpretation this doesn't even work \/
 			if (input.State) {
-				context.KeyTypedCallback(input.Name, KeyTranslation[input.Name]);
+				context.KeyTypedCallback(context.State, input.Name, KeyTranslation[input.Name]);
 			}
 			
-			if (input.State != context.States[input.Name]) {
-				context.KeyCallback(input.Name, input.State);
+			if (input.State != context.State[input.Name]) {
+				context.KeyCallback(context.State, input.Name, input.State);
 			}
 		}
 
-		context.States[input.Name] = input.State;
+		context.State[input.Name] = input.State;
 		if (input.Device == MOUSE) {
 			if (input.Name == MOUSE_WHEEL) {
-				context.MouseWheelCallback(input.State);
+				context.MouseWheelCallback(context.State, input.State);
 			}
 
 			else if (input.Name == MOUSE_Y_AXIS 
 				 || input.Name == MOUSE_Y_POS)
 			{
-				context.MouseMovedCallback(
-					context.States[MOUSE_X_POS],  context.States[MOUSE_Y_POS],
-					context.States[MOUSE_X_AXIS], context.States[MOUSE_Y_AXIS]);
+				context.MouseMovedCallback(context.State,
+					context.State[MOUSE_X_POS],  context.State[MOUSE_Y_POS],
+					context.State[MOUSE_X_AXIS], context.State[MOUSE_Y_AXIS]);
 			}
 
 			else if (input.Name != MOUSE_X_AXIS
 				 && input.Name != MOUSE_X_POS)
 			{
-				context.MouseButtonCallback(input.Name, input.State);
+				context.MouseButtonCallback(context.State, input.Name, input.State);
 			}
 		}
 	}

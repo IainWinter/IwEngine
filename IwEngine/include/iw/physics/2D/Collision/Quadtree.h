@@ -20,6 +20,7 @@ namespace IwPhysics {
 		AABB2D m_bounds;
 		std::size_t m_size;
 		std::size_t m_height;
+
 		Quadtree<T>* m_northEast;
 		Quadtree<T>* m_northWest;
 		Quadtree<T>* m_southEast;

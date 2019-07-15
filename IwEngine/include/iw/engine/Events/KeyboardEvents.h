@@ -5,30 +5,32 @@
 
 namespace IwEngine {
 	struct KeyEvent
-		: Event
+		: InputEvent
 	{
 		IwInput::InputName Button;
 		bool State;
 
 		KeyEvent(
+			IwInput::InputState inputState,
 			IwInput::InputName button,
 			bool state)
-			: Event(Key)
+			: InputEvent(Key, inputState)
 			, Button(button)
 			, State(state)
 		{}
 	};
 
 	struct KeyTypedEvent
-		: Event
+		: InputEvent
 	{
 		IwInput::InputName Button;
 		char Character;
 
 		KeyTypedEvent(
+			IwInput::InputState inputState,
 			IwInput::InputName button,
 			char character)
-			: Event(Key)
+			: InputEvent(Key, inputState)
 			, Button(button)
 			, Character(character)
 		{}
