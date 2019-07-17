@@ -45,6 +45,9 @@ namespace IwInput {
 #ifdef IW_PLATFORM_WINDOWS
 		template<>
 		void CreateDevice<RawMouse>();
+
+		template<>
+		void CreateDevice<RawKeyboard>();
 #endif
 
 		void SetMouseWheelCallback(

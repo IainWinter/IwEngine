@@ -1,5 +1,6 @@
 #pragma once
 
+#ifdef IW_PLATFORM_WINDOWS
 #include "iw/input/Devices/Mouse.h"
 
 namespace IwInput {
@@ -14,3 +15,4 @@ namespace IwInput {
 			OsEvent& event);
 	};
 }
+#endif

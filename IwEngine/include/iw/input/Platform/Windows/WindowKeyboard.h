@@ -1,14 +1,14 @@
 #pragma once
 
-#ifdef IW_PLATFORM_WINDOWS
 #include "iw/input/Devices/Keyboard.h"
 
+#ifdef IW_PLATFORM_WINDOWS
 namespace IwInput {
-	class WindowsRawKeyboard
-		: public RawKeyboard
+	class WindowsKeyboard
+		: public Keyboard
 	{
 	public:
-		WindowsRawKeyboard(
+		WindowsKeyboard(
 			InputCallback& callback);
 
 		void HandleEvent(

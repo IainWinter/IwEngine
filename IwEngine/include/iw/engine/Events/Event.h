@@ -24,13 +24,13 @@ namespace IwEngine {
 	struct InputEvent
 		: Event
 	{
-		IwInput::InputState InputState;
+		IwInput::InputState InputStates;
 
 		InputEvent(
 			EventType type,
 			IwInput::InputState inputState)
 			: Event(type)
-			, InputState(inputState)
+			, InputStates(inputState)
 		{}
 	};
 

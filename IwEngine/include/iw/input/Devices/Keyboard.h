@@ -7,6 +7,11 @@ namespace IwInput {
 	class KeyboardBase
 		: public Device
 	{
+	protected:
+		static Translation translation;
+
+		static Translation CreateTranslation();
+
 	public:
 		KeyboardBase(
 			InputCallback& callback)
@@ -17,14 +22,17 @@ namespace IwInput {
 
 		virtual void HandleEvent(
 			OsEvent& event) = 0;
+
+		static unsigned int Translate(
+			InputName key);
+
+		static InputName Translate(
+			unsigned int oskey);
 	};
 
 	class Keyboard
 		: public KeyboardBase
 	{
-	protected:
-		static Translation CreateTranslation();
-
 	public:
 		Keyboard(
 			InputCallback& callback)
@@ -36,10 +44,30 @@ namespace IwInput {
 		virtual void HandleEvent(
 			OsEvent& event) = 0;
 
-		static InputName Translate(
-			unsigned int oskey);
-
 		static Keyboard* Create(
 			InputCallback& callback);
+
+		static bool KeyDown(
+			InputName key);
 	};
+
+#ifdef IW_PLATFORM_WINDOWS
+	class RawKeyboard
+		: public KeyboardBase
+	{
+	public:
+		RawKeyboard(
+			InputCallback& callback)
+			: KeyboardBase(callback)
+		{}
+
+		virtual ~RawKeyboard() {}
+
+		virtual void HandleEvent(
+			OsEvent& event) = 0;
+
+		static RawKeyboard* Create(
+			InputCallback& callback);
+	};
+#endif
 }

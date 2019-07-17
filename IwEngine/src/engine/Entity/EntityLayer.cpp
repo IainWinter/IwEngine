@@ -5,6 +5,7 @@
 #include "imgui/imgui.h"
 #include "iw/util/io/File.h"
 #include "iw/engine/Time.h"
+#include <iw\input\Devices\Keyboard.h>
 
 //#include "iw/physics/Collision/BoxCollider.h"
 //#include "iw/physics/Collision/Algorithm/GJK.h"
@@ -97,6 +98,8 @@ namespace IwEngine {
 	}
 
 	void EntityLayer::Update() {
+		LOG_INFO << IwInput::Keyboard::KeyDown(IwInput::SPACE);
+
 		for (auto entity : space.ViewComponents<Transform>()) {
 			Transform& transform = entity.GetComponent<Transform>();
 
@@ -108,6 +111,34 @@ namespace IwEngine {
 		auto player = *space.ViewComponents<Transform, Camera>().begin();
 		Transform& playerTransform = player.GetComponent<Transform>();
 		Camera& playerCamera       = player.GetComponent<Camera>();
+
+		iwm::vector3 input;
+		float delta = Time::DeltaTime() * 5;
+		LOG_INFO << IwInput::Keyboard::KeyDown(IwInput::W);
+
+		if (IwInput::Keyboard::KeyDown(IwInput::W)) {
+			input.z += delta;
+		}
+
+		if (IwInput::Keyboard::KeyDown(IwInput::S)) {
+			input.z -= delta;
+		}
+
+		if (IwInput::Keyboard::KeyDown(IwInput::D)) {
+			input.x += delta;
+		}
+
+		if (IwInput::Keyboard::KeyDown(IwInput::A)) {
+			input.x -= delta;
+		}
+
+		if (IwInput::Keyboard::KeyDown(IwInput::SPACE)) {
+			input.y += delta;
+		}
+
+		if (IwInput::Keyboard::KeyDown(IwInput::SHIFT)) {
+			input.y -= delta;
+		}
 
 		playerTransform.Position += playerTransform.Forward() * input.z;
 		playerTransform.Position += playerTransform.Right()   * input.x;
@@ -248,33 +279,29 @@ namespace IwEngine {
 		KeyEvent& event)
 	{
 		float delta = event.State ? 5 * Time::DeltaTime() : 0;
-		if (event.Button == IwInput::W) {
-			input.z = delta;
+		if (event.Button & IwInput::W | IwInput::S) {
+			input.z = delta 
+				* (event.InputStates[IwInput::W]
+				 - event.InputStates[IwInput::S]);
 		}
-
-		if (event.Button == IwInput::S) {
-			input.z = -delta;
-		}
-
+	
 		if (event.Button == IwInput::A) {
-			input.x = -delta;
-
-			if (event.State == false) {
-				LOG_INFO << "true";
-			}
+			input.x = -delta * event.InputStates[IwInput::A];
 		}
 
 		if (event.Button == IwInput::D) {
-			input.x = delta;
+			input.x = delta * event.InputStates[IwInput::D];
 		}
 
 		if (event.Button == IwInput::SPACE) {
-			input.y = delta;
+			input.y = delta * event.InputStates[IwInput::SPACE];
 		}
 
 		if (event.Button == IwInput::SHIFT) {
-			input.y = -delta;
+			input.y = -delta * event.InputStates[IwInput::SHIFT];
 		}
+
+		LOG_DEBUG << input;
 
 		return false;
 	}

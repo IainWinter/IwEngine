@@ -43,6 +43,12 @@ namespace IwInput {
 		m_deviceManager.CreateDevice<RawMouse>(iwevents::make_callback(
 			&ContextManager::HandleInput, &m_contextManager));
 	}
+
+	template<>
+	void InputManager::CreateDevice<RawKeyboard>() {
+		m_deviceManager.CreateDevice<RawKeyboard>(iwevents::make_callback(
+			&ContextManager::HandleInput, &m_contextManager));
+	}
 #endif
 
 	void InputManager::SetMouseWheelCallback(

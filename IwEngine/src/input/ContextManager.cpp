@@ -13,6 +13,10 @@ namespace IwInput {
 		InputEvent& input)
 	{
 		Context& context = m_contexts[input.WindowId];
+
+		float lastState = context.State[input.Name];
+		context.State[input.Name] = input.State;
+
 		if (input.Name == MOUSE_X_AXIS) {
 			context.State[MOUSE_X_POS] += input.State;
 		}
@@ -37,12 +41,12 @@ namespace IwInput {
 				context.KeyTypedCallback(context.State, input.Name, KeyTranslation[input.Name]);
 			}
 			
-			if (input.State != context.State[input.Name]) {
+			if (input.State != lastState) {
 				context.KeyCallback(context.State, input.Name, input.State);
 			}
 		}
 
-		context.State[input.Name] = input.State;
+
 		if (input.Device == MOUSE) {
 			if (input.Name == MOUSE_WHEEL) {
 				context.MouseWheelCallback(context.State, input.State);

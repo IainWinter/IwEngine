@@ -1,3 +1,4 @@
+#ifdef IW_PLATFORM_WINDOWS
 #include "iw/input/Platform/Windows/WindowsMouse.h"
 #include <Windows.h>
 
@@ -79,3 +80,4 @@ namespace IwInput {
 		}
 	}
 }
+#endif

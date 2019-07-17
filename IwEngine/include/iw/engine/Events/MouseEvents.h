@@ -49,7 +49,7 @@ namespace IwEngine {
 			IwInput::InputState inputState,
 			IwInput::InputName button,
 			bool state)
-			: InputEvent(MouseButton, InputState)
+			: InputEvent(MouseButton, InputStates)
 			, Button(button)
 			, State(state)
 		{}
