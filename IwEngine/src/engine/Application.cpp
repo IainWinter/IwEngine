@@ -36,7 +36,7 @@ namespace IwEngine {
 
 		m_window->SetInputManager(m_inputManager);
 		m_inputManager.CreateDevice<IwInput::RawMouse>();
-		m_inputManager.CreateDevice<IwInput::Keyboard>();
+		//m_inputManager.CreateDevice<IwInput::RawKeyboard>();
 
 		m_imguiLayer = new ImGuiLayer();
 		m_layerStack.PushOverlay(m_imguiLayer);

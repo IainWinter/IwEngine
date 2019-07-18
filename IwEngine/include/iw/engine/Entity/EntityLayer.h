@@ -41,6 +41,8 @@ namespace IwEngine {
 		std::size_t MeshCount;
 		iwm::vector3 Color;
 
+		Model() = default;
+
 		Model(
 			Mesh* meshes,
 			std::size_t count,
@@ -120,8 +122,10 @@ namespace IwEngine {
 		IwRenderer::IDevice* device;
 		IwRenderer::IPipeline* pipeline;
 
+		Model cube;
 		iwm::vector3 lightColor;
 		float specularScale;
+		int cubes = 1;
 
 	public:
 		EntityLayer();

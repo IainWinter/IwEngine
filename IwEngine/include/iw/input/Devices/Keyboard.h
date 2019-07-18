@@ -49,6 +49,9 @@ namespace IwInput {
 
 		static bool KeyDown(
 			InputName key);
+
+		static bool KeyUp(
+			InputName key);
 	};
 
 #ifdef IW_PLATFORM_WINDOWS

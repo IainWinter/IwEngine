@@ -7,6 +7,11 @@ namespace IwInput {
 	class MouseBase
 		: public Device
 	{
+	protected:
+		static Translation translation;
+
+		static Translation CreateTranslation();
+
 	public:
 		MouseBase(
 			InputCallback& callback)
@@ -17,6 +22,12 @@ namespace IwInput {
 
 		virtual void HandleEvent(
 			OsEvent& event) = 0;
+
+		static unsigned int Translate(
+			InputName key);
+
+		static InputName Translate(
+			unsigned int oskey);
 	};
 
 	class Mouse
@@ -35,6 +46,12 @@ namespace IwInput {
 
 		static Mouse* Create(
 			InputCallback& callback);
+
+		static bool ButtonDown(
+			InputName button);
+
+		static bool ButtonUp(
+			InputName button);
 	};
 
 #ifdef IW_PLATFORM_WINDOWS

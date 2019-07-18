@@ -11,6 +11,22 @@ namespace IwInput {
 		return new WindowsMouse(callback);
 	}
 
+	bool Mouse::ButtonDown(
+		InputName button)
+	{
+		SHORT state = GetKeyState(Translate(button));
+		bool  down = state & 0x8000;
+		//bool  toggled = state & 0x0008;
+
+		return down;
+	}
+
+	bool Mouse::ButtonUp(
+		InputName button)
+	{
+		return !ButtonDown(button);
+	}
+
 	WindowsMouse::WindowsMouse(
 		InputCallback& callback) 
 		: Mouse(callback)

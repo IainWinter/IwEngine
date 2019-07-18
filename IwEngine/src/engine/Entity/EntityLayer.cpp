@@ -5,7 +5,8 @@
 #include "imgui/imgui.h"
 #include "iw/util/io/File.h"
 #include "iw/engine/Time.h"
-#include <iw\input\Devices\Keyboard.h>
+#include "iw/input/Devices/Keyboard.h"
+#include "iw/input/Devices/Mouse.h"
 
 //#include "iw/physics/Collision/BoxCollider.h"
 //#include "iw/physics/Collision/Algorithm/GJK.h"
@@ -79,7 +80,8 @@ namespace IwEngine {
 
 		device->SetPipeline(pipeline);
 
-		CreateCube(0, 0, -5, LoadModel("res/cube.obj", loader, device));
+		cube = LoadModel("res/cube.obj", loader, device);
+		CreateCube(0, 0, -5, cube);
 			
 		IwEntity::Entity camera = space.CreateEntity();
 		space.CreateComponent<Transform>(camera);
@@ -140,30 +142,42 @@ namespace IwEngine {
 		playerTransform.Position += playerTransform.Right()   * input.x;
 		playerTransform.Position += iwm::vector3::unit_y      * input.y;
 		
+		if (IwInput::Mouse::ButtonDown(IwInput::MOUSE_L_BUTTON)) {
+			auto player = *space.ViewComponents<Transform, Camera>().begin();
+			Transform& transform = player.GetComponent<Transform>();
+
+			iwm::vector3 pos = transform.Position + transform.Forward() * 5;
+			CreateCube(pos.x, pos.y, pos.z, cube);
+			
+			cubes++;
+
+			space.Sort();
+		}
+
+		pipeline->GetParam("lightPos")
+			->SetAsVec3(playerTransform.Position);
+
+		pipeline->GetParam("lightColor")
+			->SetAsVec3(lightColor);
+
+		pipeline->GetParam("specularScale")
+			->SetAsFloat(specularScale);
+
+		pipeline->GetParam("proj")
+			->SetAsMat4(playerCamera.Projection);
+
+		pipeline->GetParam("view")
+			->SetAsMat4(iwm::matrix4::create_look_at(
+				playerTransform.Position,
+				playerTransform.Position + playerTransform.Forward(),
+				playerTransform.Up()));
+
 		for (auto entity : space.ViewComponents<Transform, Model>()) {
 			Transform& entityTransform = entity.GetComponent<Transform>();
 			Model& entityModel = entity.GetComponent<Model>();
 
-			pipeline->GetParam("lightPos")
-				->SetAsVec3(playerTransform.Position);
-
-			pipeline->GetParam("lightColor")
-				->SetAsVec3(lightColor);
-
 			pipeline->GetParam("objectColor")
 				->SetAsVec3(entityModel.Color);
-
-			pipeline->GetParam("specularScale")
-				->SetAsFloat(specularScale);
-
-			pipeline->GetParam("proj")
-				->SetAsMat4(playerCamera.Projection);
-
-			pipeline->GetParam("view")
-				->SetAsMat4(iwm::matrix4::create_look_at(
-					playerTransform.Position,
-					playerTransform.Position + playerTransform.Forward(),
-					playerTransform.Up()));
 
 			pipeline->GetParam("model")
 				->SetAsMat4(entityTransform.Transformation);
@@ -230,6 +244,8 @@ namespace IwEngine {
 				rot.x,
 				rot.y,
 				rot.z);
+
+			ImGui::Text("Cubes: %i", cubes);
 		}
 
 		ImGui::SliderFloat3("Light color", &lightColor.x, 0, 1);
@@ -258,15 +274,15 @@ namespace IwEngine {
 	bool EntityLayer::On(
 		MouseButtonEvent& event)
 	{
-		if (event.State && event.Button == IwInput::MOUSE_L_BUTTON) {
-			auto player = *space.ViewComponents<Transform, Camera>().begin();
-			Transform& transform = player.GetComponent<Transform>();
+		//if (event.State && event.Button == IwInput::MOUSE_L_BUTTON) {
+		//	auto player = *space.ViewComponents<Transform, Camera>().begin();
+		//	Transform& transform = player.GetComponent<Transform>();
 
-			iwm::vector3 pos = transform.Position + transform.Forward() * 5;
-			CreateCube(pos.x, pos.y, pos.z, LoadModel("res/cube.obj", loader, device));
+		//	iwm::vector3 pos = transform.Position + transform.Forward() * 5;
+		//	CreateCube(pos.x, pos.y, pos.z, LoadModel("res/cube.obj", loader, device));
 
-			space.Sort();
-		}
+		//	space.Sort();
+		//}
 
 		return false;
 	}

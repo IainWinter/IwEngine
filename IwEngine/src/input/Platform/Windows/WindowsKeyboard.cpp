@@ -24,11 +24,17 @@ namespace IwInput {
 	bool Keyboard::KeyDown(
 		InputName key)
 	{
-		SHORT state   = GetKeyState(Translate(key));
-		bool  down    = state & 0x8000;
+		SHORT state = GetKeyState(Translate(key));
+		bool  down  = state & 0x8000;
 		//bool  toggled = state & 0x0008;
 
 		return down;
+	}
+
+	bool Keyboard::KeyUp(
+		InputName key)
+	{
+		return !KeyDown(key);
 	}
 }
 #endif

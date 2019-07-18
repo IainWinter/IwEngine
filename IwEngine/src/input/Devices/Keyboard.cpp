@@ -5,7 +5,6 @@
 #endif
 
 namespace IwInput {
-#ifdef IW_PLATFORM_WINDOWS
 	Translation KeyboardBase::translation = CreateTranslation();
 
 	InputName KeyboardBase::Translate(
@@ -22,6 +21,8 @@ namespace IwInput {
 
 	Translation KeyboardBase::CreateTranslation() {
 		Translation translation;
+
+#ifdef IW_PLATFORM_WINDOWS
 		translation.insert(VK_BACK, BACKSPACE);
 		translation.insert(VK_TAB, TAB);
 		translation.insert(VK_CLEAR, CLEAR);
@@ -133,8 +134,9 @@ namespace IwInput {
 		translation.insert(VK_RMENU, RIGHT_MENU);
 		translation.insert(VK_LWIN, LEFT_WIN);
 		translation.insert(VK_RWIN, RIGHT_WIN);
+#endif
 
 		return translation;
 	}
-#endif
+
 }

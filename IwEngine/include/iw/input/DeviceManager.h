@@ -39,6 +39,10 @@ namespace IwInput {
 		template<>
 		void CreateDevice<RawMouse>(
 			InputCallback callback);
+
+		template<>
+		void CreateDevice<RawKeyboard>(
+			InputCallback callback);
 #endif
 	};
 }

@@ -35,6 +35,13 @@ namespace IwInput {
 	{
 		m_devices.emplace_back(RawMouse::Create(callback));
 	}
+
+	template<>
+	void DeviceManager::CreateDevice<RawKeyboard>(
+		InputCallback callback)
+	{
+		m_devices.emplace_back(RawKeyboard::Create(callback));
+	}
 #endif
 
 #ifdef IW_PLATFORM_WINDOWS
