@@ -196,7 +196,7 @@ namespace iwutil {
 		* @warning 
 		* Inserting a duplicate number into the set results
 		* in undefined behavior. An assertion will check for 
-		* duplicates at at runtime if in debug mode.
+		* duplicates at runtime if in debug mode.
 		*
 		* @param x The number to insert.
 		*/
@@ -295,7 +295,7 @@ namespace iwutil {
 		* @brief Returns the number at an index.
 		*
 		* @warning
-		* attempting to get a number that doesn't exist in the
+		* Attempting to get a number that doesn't exist in the
 		* set results in undefined behavior. An assertion will 
 		* check the set for the number at runtime if in debug mode.
 		*
@@ -307,6 +307,7 @@ namespace iwutil {
 			_t index) const
 		{
 			assert(contains(index));
+
 			return m_sparse[index];
 		}
 

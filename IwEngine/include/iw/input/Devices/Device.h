@@ -3,10 +3,10 @@
 #include "iw/input/IwInput.h"
 #include "iw/input/Events/InputEvent.h"
 #include "iw/events/functional/callback.h"
-#include "iw/util/set/sparse_set.h"
+#include "iw/util/set/tofrom_set.h"
 
 namespace IwInput {
-	using Translation = iwutil::sparse_set<unsigned int, InputName>;
+	using Translation = iwutil::tofrom_set<unsigned int, InputName>;
 
 	class Device
 	{

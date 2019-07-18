@@ -17,7 +17,7 @@ namespace IwInput {
 	unsigned int KeyboardBase::Translate(
 		InputName key)
 	{
-		return translation.
+		return 0;
 	}
 
 	Translation KeyboardBase::CreateTranslation() {
