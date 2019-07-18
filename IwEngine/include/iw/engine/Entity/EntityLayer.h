@@ -120,8 +120,6 @@ namespace IwEngine {
 		IwRenderer::IDevice* device;
 		IwRenderer::IPipeline* pipeline;
 
-		iwm::vector3 input;
-
 		iwm::vector3 lightColor;
 		float specularScale;
 
@@ -137,7 +135,7 @@ namespace IwEngine {
 		bool On(MouseMovedEvent&    event);
 		bool On(MouseButtonEvent&   event);
 		//bool On(MouseWheelEvent&    event);
-		bool On(KeyEvent&           event);
+		//bool On(KeyEvent&           event);
 	private:
 		void CreateCube(float x, float y, float z, Model& model);
 	};

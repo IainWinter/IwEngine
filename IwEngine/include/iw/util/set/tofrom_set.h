@@ -136,8 +136,8 @@ namespace iwutil {
 		using const_iterator = iterator_<true>;
 
 		std::list<pair_t>             m_items;
-		std::unordered_map<_t, const_iterator> m_tlookup;
-		std::unordered_map<_u, const_iterator> m_ulookup;
+		std::unordered_map<_t, itr_t> m_tlookup;
+		std::unordered_map<_u, itr_t> m_ulookup;
 
 	public:
 		/**
@@ -209,23 +209,23 @@ namespace iwutil {
 		*
 		* @return The number at the specified index.
 		*/
-		_u to(
-			_t val) const
+		const _u& to(
+			const _t& val) const
 		{
 			assert(contains(val));
 
-			return *m_tlookup[val].second;
+			return m_tlookup.at(val)->second;
 		}
 
 		/**
 		* @copydoc logger::to()
 		*/
-		_t from(
-			_u val) const
+		const _t& from(
+			const _u& val) const
 		{
-			assert(contains(val));
+			assert(contains_from(val));
 
-			return *m_ulookup[val].first;
+			return m_ulookup.at(val)->first;
 		}
 
 		/**

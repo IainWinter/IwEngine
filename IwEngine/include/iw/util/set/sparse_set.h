@@ -31,13 +31,13 @@ namespace iwutil {
 	public:
 		class iterator {
 		public:
-			using index_type        = _t;
-			using direct_type       = const std::vector<index_type>;
+			using index_type  = _t;
+			using value_type  = std::remove_cv_t<index_type>;
+			using direct_type = const std::vector<index_type>;
+			using pointer     = const index_type*;
+			using reference   = const index_type&;
 			using difference_type   = typename type_traits<_t>::difference_type;
 			using iterator_category = std::random_access_iterator_tag;
-			using value_type        = std::remove_cv_t<index_type>;
-			using pointer           = const index_type*;
-			using reference         = const index_type&;
 
 		private:
 			index_type m_index;
@@ -292,6 +292,14 @@ namespace iwutil {
 		}
 
 		/**
+		* @brief Clears the set.
+		*/
+		virtual void clear() {
+			m_direct.clear();
+			m_sparse.clear();
+		}
+
+		/**
 		* @brief Returns the number at an index.
 		*
 		* @warning
@@ -346,14 +354,6 @@ namespace iwutil {
 		}
 
 		/**
-		* @brief Clears the set.
-		*/
-		virtual void clear() {
-			m_direct.clear();
-			m_sparse.clear();
-		}
-
-		/**
 		* @brief Checks if the set is empty.
 		*
 		* @return True if the set is empty, false otherwise.
@@ -374,7 +374,7 @@ namespace iwutil {
 		/**
 		* @brief Returns an iterator to the beginning.
 		*
-		* @return An iterator to the first element of the set.
+		* @return An iterator to the first item of the set.
 		*/
 		iterator begin() const {
 			return iterator(0, &m_direct);
@@ -383,7 +383,7 @@ namespace iwutil {
 		/**
 		* @brief Returns an iterator to the end.
 		*
-		* @return An iterator to the element after the end of the set.
+		* @return An iterator to the item after the end of the set.
 		*/
 		iterator end() const {
 			return iterator(size(), &m_direct);
@@ -651,7 +651,7 @@ namespace iwutil {
 		* in undefined behavior. An assertion will check the set
 		* for the index at runtime if in debug mode.
 		*
-		* @param index The index of the element to remove.
+		* @param index The index of the item to remove.
 		*/
 		void erase(
 			_index_t index) override
@@ -801,7 +801,7 @@ namespace iwutil {
 		/**
 		* @brief Returns an iterator to the beginning.
 		*
-		* @return An iterator to the first element of the set.
+		* @return An iterator to the first item of the set.
 		*/
 		iterator begin() {
 			return iterator(0, &m_items);
@@ -810,7 +810,7 @@ namespace iwutil {
 		/**
 		* @brief Returns an iterator to the end.
 		*
-		* @return An iterator to the element after the end of the set.
+		* @return An iterator to the item after the end of the set.
 		*/
 		iterator end() {
 			return iterator(size(), &m_items);

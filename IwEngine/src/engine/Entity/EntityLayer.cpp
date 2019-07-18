@@ -98,8 +98,6 @@ namespace IwEngine {
 	}
 
 	void EntityLayer::Update() {
-		LOG_INFO << IwInput::Keyboard::KeyDown(IwInput::SPACE);
-
 		for (auto entity : space.ViewComponents<Transform>()) {
 			Transform& transform = entity.GetComponent<Transform>();
 
@@ -114,8 +112,6 @@ namespace IwEngine {
 
 		iwm::vector3 input;
 		float delta = Time::DeltaTime() * 5;
-		LOG_INFO << IwInput::Keyboard::KeyDown(IwInput::W);
-
 		if (IwInput::Keyboard::KeyDown(IwInput::W)) {
 			input.z += delta;
 		}
@@ -179,37 +175,37 @@ namespace IwEngine {
 			}
 		}
 
-		/*auto v = space.ViewComponents<Transform, Model, IwPhysics::BoxCollider>();
+		//auto v = space.ViewComponents<Transform, Model, IwPhysics::BoxCollider>();
 
-		for (auto entity1 : v) {
-			Transform& transform1 = entity1.GetComponent<Transform>();
-			Model& model1 = entity1.GetComponent<Model>();
-			IwPhysics::BoxCollider& collider1 = entity1.GetComponent<IwPhysics::BoxCollider>();
+		//for (auto entity1 : v) {
+		//	Transform& transform1 = entity1.GetComponent<Transform>();
+		//	Model& model1 = entity1.GetComponent<Model>();
+		//	IwPhysics::BoxCollider& collider1 = entity1.GetComponent<IwPhysics::BoxCollider>();
 
-			for (auto entity2 : v) {
-				Transform& transform2 = entity2.GetComponent<Transform>();
-				Model& model2 = entity2.GetComponent<Model>();
-				IwPhysics::BoxCollider& collider2 = entity2.GetComponent<IwPhysics::BoxCollider>();
+		//	for (auto entity2 : v) {
+		//		Transform& transform2 = entity2.GetComponent<Transform>();
+		//		Model& model2 = entity2.GetComponent<Model>();
+		//		IwPhysics::BoxCollider& collider2 = entity2.GetComponent<IwPhysics::BoxCollider>();
 
-				if (entity1 != entity2) {
-					if (collider1.Translated(transform1.Transformation).Intersects(
-						collider2.Translated(transform2.Transformation)))
-					{
-						bool colliding = IwPhysics::GJK(
-							collider1, collider2,
-							transform1.Transformation,
-							transform2.Transformation);
+		//		if (entity1 != entity2) {
+		//			if (collider1.Translated(transform1.Transformation).Intersects(
+		//				collider2.Translated(transform2.Transformation)))
+		//			{
+		//				bool colliding = IwPhysics::GJK(
+		//					collider1, collider2,
+		//					transform1.Transformation,
+		//					transform2.Transformation);
 
-						if (colliding) {
-							model1.Color = iwm::vector3(.3f, .9f, .3f);
-							model2.Color = iwm::vector3(.3f, .9f, .3f);
+		//				if (colliding) {
+		//					model1.Color = iwm::vector3(.3f, .9f, .3f);
+		//					model2.Color = iwm::vector3(.3f, .9f, .3f);
 
-							transform1.Position.y += Time::DeltaTime();
-						}
-					}
-				}
-			}
-		}*/
+		//					transform1.Position.y += Time::DeltaTime();
+		//				}
+		//			}
+		//		}
+		//	}
+		//}
 
 		for (auto entity : space.ViewComponents<Transform, Velocity>()) {
 			Transform& entityTransform = entity.GetComponent<Transform>();
@@ -271,37 +267,6 @@ namespace IwEngine {
 
 			space.Sort();
 		}
-
-		return false;
-	}
-
-	bool EntityLayer::On(
-		KeyEvent& event)
-	{
-		float delta = event.State ? 5 * Time::DeltaTime() : 0;
-		if (event.Button & IwInput::W | IwInput::S) {
-			input.z = delta 
-				* (event.InputStates[IwInput::W]
-				 - event.InputStates[IwInput::S]);
-		}
-	
-		if (event.Button == IwInput::A) {
-			input.x = -delta * event.InputStates[IwInput::A];
-		}
-
-		if (event.Button == IwInput::D) {
-			input.x = delta * event.InputStates[IwInput::D];
-		}
-
-		if (event.Button == IwInput::SPACE) {
-			input.y = delta * event.InputStates[IwInput::SPACE];
-		}
-
-		if (event.Button == IwInput::SHIFT) {
-			input.y = -delta * event.InputStates[IwInput::SHIFT];
-		}
-
-		LOG_DEBUG << input;
 
 		return false;
 	}
