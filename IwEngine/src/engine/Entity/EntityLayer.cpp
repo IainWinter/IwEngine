@@ -41,7 +41,7 @@ namespace IwEngine {
 			meshes[i] = Mesh{ va, ib, obj->Indices[i].FaceCount };
 		}
 
-		return { meshes, obj->MeshCount, iwm::vector3(rand() / (float)RAND_MAX, rand() / (float)RAND_MAX, rand() / (float)RAND_MAX) };
+		return { meshes, obj->MeshCount, iwm::vector3() };
 	}
 
 	void EntityLayer::CreateCube(
@@ -56,6 +56,7 @@ namespace IwEngine {
 		transform.Position = iwm::vector3(x, y, z);
 
 		space.CreateComponent<Velocity>(e);
+		model.Color = iwm::vector3(rand() / (float)RAND_MAX, rand() / (float)RAND_MAX, rand() / (float)RAND_MAX);
 		space.CreateComponent<Model>(e, model);
 		//space.CreateComponent<IwPhysics::BoxCollider>(
 		//	e, IwPhysics::AABB(iwm::vector3(0, 0, 0), 1));
@@ -108,8 +109,9 @@ namespace IwEngine {
 				* iwm::matrix4::create_translation(transform.Position);
 		}
 
-		auto player = *space.ViewComponents<Transform, Camera>().begin();
-		Transform& playerTransform = player.GetComponent<Transform>();
+		auto players = space.ViewComponents<Transform, Camera>();
+		auto player  = *players.begin();
+		Transform& playerTransform = std::get<0>(player.Components);
 		Camera& playerCamera       = player.GetComponent<Camera>();
 
 		iwm::vector3 input;
@@ -141,18 +143,23 @@ namespace IwEngine {
 		playerTransform.Position += playerTransform.Forward() * input.z;
 		playerTransform.Position += playerTransform.Right()   * input.x;
 		playerTransform.Position += iwm::vector3::unit_y      * input.y;
-		
+
 		if (IwInput::Mouse::ButtonDown(IwInput::MOUSE_L_BUTTON)) {
 			auto player = *space.ViewComponents<Transform, Camera>().begin();
 			Transform& transform = player.GetComponent<Transform>();
 
 			iwm::vector3 pos = transform.Position + transform.Forward() * 5;
 			CreateCube(pos.x, pos.y, pos.z, cube);
+			CreateCube(pos.x + 1.5f, pos.y + 1.5f, pos.z + 1.5f, cube);
+			CreateCube(pos.x - 1.5f, pos.y - 1.5f, pos.z - 1.5f, cube);
+			CreateCube(pos.x - 1.5f, pos.y - 1.5f, pos.z, cube);
+			CreateCube(pos.x - 1.5f, pos.y, pos.z - 1.5f, cube);
+			CreateCube(pos.x, pos.y - 1.5f, pos.z - 1.5f, cube);
 			
-			cubes++;
-
-			space.Sort();
+			cubes += 6;
 		}
+
+		float x = playerTransform.Position.x;
 
 		pipeline->GetParam("lightPos")
 			->SetAsVec3(playerTransform.Position);
@@ -267,22 +274,6 @@ namespace IwEngine {
 		iwm::quaternion deltaY = iwm::quaternion::create_from_euler_angles(0, yaw, 0);
 
 		transform.Rotation = deltaY * transform.Rotation * deltaP;
-
-		return false;
-	}
-
-	bool EntityLayer::On(
-		MouseButtonEvent& event)
-	{
-		//if (event.State && event.Button == IwInput::MOUSE_L_BUTTON) {
-		//	auto player = *space.ViewComponents<Transform, Camera>().begin();
-		//	Transform& transform = player.GetComponent<Transform>();
-
-		//	iwm::vector3 pos = transform.Position + transform.Forward() * 5;
-		//	CreateCube(pos.x, pos.y, pos.z, LoadModel("res/cube.obj", loader, device));
-
-		//	space.Sort();
-		//}
 
 		return false;
 	}

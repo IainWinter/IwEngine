@@ -41,7 +41,7 @@ namespace IwEntity {
 			Archetype oldArchetype = m_entities.ArchetypeOf(entity);
 			Archetype& archetype = m_entities.AssignComponent<_c>(entity);
 
-			//UpdateComponentData(entity, archetype, oldArchetype);
+			UpdateComponentData(entity, archetype, oldArchetype);
 
 			return EnsureComponentData<_c>()
 				.CreateComponent(
