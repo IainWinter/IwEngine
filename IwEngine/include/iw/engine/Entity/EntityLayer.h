@@ -117,6 +117,8 @@ namespace IwEngine {
 	private:
 		IwEntity::Space space;
 
+		Transform& playerTransform;
+
 		IwGraphics::ModelLoader loader;
 
 		IwRenderer::IDevice* device;

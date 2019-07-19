@@ -66,6 +66,7 @@ namespace IwEngine {
 		: Layer("Entity")
 		, lightColor(iwm::vector3::one)
 		, specularScale(0.0f)
+		, playerTransform(Transform())
 	{}
 
 	int EntityLayer::Initialize() {
@@ -85,7 +86,7 @@ namespace IwEngine {
 		CreateCube(0, 0, -5, cube);
 			
 		IwEntity::Entity camera = space.CreateEntity();
-		space.CreateComponent<Transform>(camera);
+		playerTransform = space.CreateComponent<Transform>(camera);
 		space.CreateComponent<Velocity>(camera);
 		space.CreateComponent<Camera>(camera, 
 			iwm::matrix4::create_perspective_field_of_view(
@@ -111,7 +112,6 @@ namespace IwEngine {
 
 		auto players = space.ViewComponents<Transform, Camera>();
 		auto player  = *players.begin();
-		Transform& playerTransform = std::get<0>(player.Components);
 		Camera& playerCamera       = player.GetComponent<Camera>();
 
 		iwm::vector3 input;
