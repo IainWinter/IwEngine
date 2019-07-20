@@ -41,7 +41,8 @@ namespace iwmath {
 		*/
 		static const vector4 unit_w;
 
-		float x, y, z, w;
+		iwm::vector3 xyz;
+		float w;
 
 		vector4();
 
@@ -59,6 +60,48 @@ namespace iwmath {
 			float y,
 			float z,
 			float w);
+
+		/**
+		* Returns the x component of the vector.
+		*/
+		inline float& x() {
+			return xyz.x;
+		}
+
+		/**
+		* Returns the y component of the vector.
+		*/
+		inline float& y() {
+			return xyz.y;
+		}
+
+		/**
+		* Returns the z component of the vector.
+		*/
+		inline float& z() {
+			return xyz.z;
+		}
+
+		/**
+		* Returns the x component of the vector as a constant.
+		*/
+		inline const float& x() const {
+			return xyz.x;
+		}
+
+		/**
+		* Returns the y component of the vector as a constant.
+		*/
+		inline const float& y() const {
+			return xyz.y;
+		}
+
+		/**
+		* Returns the z component of the vector as a constant.
+		*/
+		inline const float& z() const {
+			return xyz.z;
+		}
 
 		/**
 		* Returns the length of the vector.
@@ -106,25 +149,6 @@ namespace iwmath {
 		*	This is much faster, and accurate enough in most cases.
 		*/
 		void normalize_fast();
-
-		/**
-		* Returns the x, y, and z components in a vector3.
-		*/
-		vector3 xyz() const;
-
-		/**
-		* Sets the x, y, and z components in the vector4.
-		*/
-		void xyz(
-			const vector3& xyz);
-
-		/**
-		* Sets the x, y, and z components in the vector4.
-		*/
-		void xyz(
-			float x,
-			float y,
-			float z);
 
 		vector4 operator+(
 			const vector4& other) const;

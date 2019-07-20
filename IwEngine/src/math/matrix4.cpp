@@ -87,34 +87,34 @@ namespace iwmath {
 	}
 
 	float matrix4::determinant() const {
-		return rows[0].x * rows[1].y * rows[2].z * rows[3].z
-			 - rows[0].x * rows[1].y * rows[2].w * rows[3].z
-			 + rows[0].x * rows[1].z * rows[2].w * rows[3].y
-			 - rows[0].x * rows[1].z * rows[2].y * rows[3].z
-			 + rows[0].x * rows[1].w * rows[2].y * rows[3].z
-			 - rows[0].x * rows[1].w * rows[2].z * rows[3].y
-			 - rows[0].y * rows[1].z * rows[2].w * rows[3].x
-			 + rows[0].y * rows[1].z * rows[2].x * rows[3].z
-			 - rows[0].y * rows[1].w * rows[2].x * rows[3].z
-			 + rows[0].y * rows[1].w * rows[2].z * rows[3].x
-			 - rows[0].y * rows[1].x * rows[2].z * rows[3].z
-			 + rows[0].y * rows[1].x * rows[2].w * rows[3].z
-			 + rows[0].z * rows[1].w * rows[2].x * rows[3].y
-			 - rows[0].z * rows[1].w * rows[2].y * rows[3].x
-			 + rows[0].z * rows[1].x * rows[2].y * rows[3].z
-			 - rows[0].z * rows[1].x * rows[2].w * rows[3].y
-			 + rows[0].z * rows[1].y * rows[2].w * rows[3].x
-			 - rows[0].z * rows[1].y * rows[2].x * rows[3].z
-			 - rows[0].w * rows[1].x * rows[2].y * rows[3].z
-			 + rows[0].w * rows[1].x * rows[2].z * rows[3].y
-			 - rows[0].w * rows[1].y * rows[2].z * rows[3].x
-			 + rows[0].w * rows[1].y * rows[2].x * rows[3].z
-			 - rows[0].w * rows[1].z * rows[2].x * rows[3].y
-			 + rows[0].w * rows[1].z * rows[2].y * rows[3].x;
+		return rows[0].x() * rows[1].y() * rows[2].z() * rows[3].z()
+			 - rows[0].x() * rows[1].y() * rows[2].w * rows[3].z()
+			 + rows[0].x() * rows[1].z() * rows[2].w * rows[3].y()
+			 - rows[0].x() * rows[1].z() * rows[2].y() * rows[3].z()
+			 + rows[0].x() * rows[1].w * rows[2].y() * rows[3].z()
+			 - rows[0].x() * rows[1].w * rows[2].z() * rows[3].y()
+			 - rows[0].y() * rows[1].z() * rows[2].w * rows[3].x()
+			 + rows[0].y() * rows[1].z() * rows[2].x() * rows[3].z()
+			 - rows[0].y() * rows[1].w * rows[2].x() * rows[3].z()
+			 + rows[0].y() * rows[1].w * rows[2].z() * rows[3].x()
+			 - rows[0].y() * rows[1].x() * rows[2].z() * rows[3].z()
+			 + rows[0].y() * rows[1].x() * rows[2].w * rows[3].z()
+			 + rows[0].z() * rows[1].w * rows[2].x() * rows[3].y()
+			 - rows[0].z() * rows[1].w * rows[2].y() * rows[3].x()
+			 + rows[0].z() * rows[1].x() * rows[2].y() * rows[3].z()
+			 - rows[0].z() * rows[1].x() * rows[2].w * rows[3].y()
+			 + rows[0].z() * rows[1].y() * rows[2].w * rows[3].x()
+			 - rows[0].z() * rows[1].y() * rows[2].x() * rows[3].z()
+			 - rows[0].w * rows[1].x() * rows[2].y() * rows[3].z()
+			 + rows[0].w * rows[1].x() * rows[2].z() * rows[3].y()
+			 - rows[0].w * rows[1].y() * rows[2].z() * rows[3].x()
+			 + rows[0].w * rows[1].y() * rows[2].x() * rows[3].z()
+			 - rows[0].w * rows[1].z() * rows[2].x() * rows[3].y()
+			 + rows[0].w * rows[1].z() * rows[2].y() * rows[3].x();
 	}
 
 	float matrix4::trace() const {
-		return rows[0].x + rows[1].y + rows[2].z + rows[3].w;
+		return rows[0].x() + rows[1].y() + rows[2].z() + rows[3].w;
 	}
 
 	matrix4 matrix4::transposed() const {
@@ -155,21 +155,21 @@ namespace iwmath {
 
 	void matrix4::transpose() {
 		matrix4 tmp = *this;
-		rows[0].x = tmp.rows[0].x;
-		rows[0].y = tmp.rows[1].x;
-		rows[0].z = tmp.rows[2].x;
-		rows[0].w = tmp.rows[3].x;
-		rows[1].x = tmp.rows[0].y;
-		rows[1].y = tmp.rows[1].y;
-		rows[1].z = tmp.rows[2].y;
-		rows[1].w = tmp.rows[3].y;
-		rows[2].x = tmp.rows[0].z;
-		rows[2].y = tmp.rows[1].z;
-		rows[2].z = tmp.rows[2].z;
-		rows[2].w = tmp.rows[3].z;
-		rows[3].x = tmp.rows[0].w;
-		rows[3].y = tmp.rows[1].w;
-		rows[3].z = tmp.rows[2].w;
+		rows[0].x() = tmp.rows[0].x();
+		rows[0].y() = tmp.rows[1].x();
+		rows[0].z() = tmp.rows[2].x();
+		rows[0].w = tmp.rows[3].x();
+		rows[1].x() = tmp.rows[0].y();
+		rows[1].y() = tmp.rows[1].y();
+		rows[1].z() = tmp.rows[2].y();
+		rows[1].w = tmp.rows[3].y();
+		rows[2].x() = tmp.rows[0].z();
+		rows[2].y() = tmp.rows[1].z();
+		rows[2].z() = tmp.rows[2].z();
+		rows[2].w = tmp.rows[3].z();
+		rows[3].x() = tmp.rows[0].w;
+		rows[3].y() = tmp.rows[1].w;
+		rows[3].z() = tmp.rows[2].w;
 		rows[3].w = tmp.rows[3].w;
 	}
 
@@ -261,7 +261,7 @@ namespace iwmath {
 	}
 
 	matrix3 matrix4::rotation_and_scale() const {
-		return matrix3(rows[0].xyz(), rows[1].xyz(), rows[2].xyz());
+		return matrix3(rows[0].xyz, rows[1].xyz, rows[2].xyz);
 	}
 
 	quaternion matrix4::rotation() const {
@@ -276,12 +276,16 @@ namespace iwmath {
 		return rotation_and_scale().euler_angles();
 	}
 
-	vector3 matrix4::scale() const {
+	vector3& matrix4::scale() const {
 		return rotation_and_scale().scale();
 	}
 
-	vector3 matrix4::translation() const {
-		return rows[3].xyz();
+	vector3& matrix4::translation() {
+		return rows[3].xyz;
+	}
+
+	const vector3& matrix4::translation() const {
+		return rows[3].xyz;
 	}
 
 	void matrix4::look_at(
@@ -293,13 +297,13 @@ namespace iwmath {
 		vector3 x = up.cross(z).normalized();
 		vector3 y = z.cross(x).normalized();
 
-		rows[0] = vector4(x.x, y.x, z.x, 0);
-		rows[1] = vector4(x.y, y.y, z.y, 0);
+		rows[0] = vector4(x.x(), y.x(), z.x(), 0);
+		rows[1] = vector4(x.y(), y.y(), z.y(), 0);
 		rows[2] = vector4(x.z, y.z, z.z, 0);
 		rows[3] = vector4(
-			-((x.x * eye.x) + (x.y * eye.y) + (x.z * eye.z)),
-			-((y.x * eye.x) + (y.y * eye.y) + (y.z * eye.z)),
-			-((z.x * eye.x) + (z.y * eye.y) + (z.z * eye.z)),
+			-((x.x() * eye.x()) + (x.y() * eye.y()) + (x.z * eye.z)),
+			-((y.x() * eye.x()) + (y.y() * eye.y()) + (y.z * eye.z)),
+			-((z.x() * eye.x()) + (z.y() * eye.y()) + (z.z * eye.z)),
 			1);
 	}
 
@@ -353,23 +357,23 @@ namespace iwmath {
 		const matrix4& other) const
 	{
 		float 
-			lM11 = rows[0].x, lM12 = rows[0].y,
-			lM13 = rows[0].z, lM14 = rows[0].w,
-			lM21 = rows[1].x, lM22 = rows[1].y,
-			lM23 = rows[1].z, lM24 = rows[1].w,
-			lM31 = rows[2].x, lM32 = rows[2].y,
-			lM33 = rows[2].z, lM34 = rows[2].w,
-			lM41 = rows[3].x, lM42 = rows[3].y,
-			lM43 = rows[3].z, lM44 = rows[3].w,
+			lM11 = rows[0].x(), lM12 = rows[0].y(),
+			lM13 = rows[0].z(), lM14 = rows[0].w,
+			lM21 = rows[1].x(), lM22 = rows[1].y(),
+			lM23 = rows[1].z(), lM24 = rows[1].w,
+			lM31 = rows[2].x(), lM32 = rows[2].y(),
+			lM33 = rows[2].z(), lM34 = rows[2].w,
+			lM41 = rows[3].x(), lM42 = rows[3].y(),
+			lM43 = rows[3].z(), lM44 = rows[3].w,
 
-			rM11 = other.rows[0].x, rM12 = other.rows[0].y,
-			rM13 = other.rows[0].z, rM14 = other.rows[0].w,
-			rM21 = other.rows[1].x, rM22 = other.rows[1].y,
-			rM23 = other.rows[1].z, rM24 = other.rows[1].w,
-			rM31 = other.rows[2].x, rM32 = other.rows[2].y,
-			rM33 = other.rows[2].z, rM34 = other.rows[2].w,
-			rM41 = other.rows[3].x, rM42 = other.rows[3].y,
-			rM43 = other.rows[3].z, rM44 = other.rows[3].w;
+			rM11 = other.rows[0].x(), rM12 = other.rows[0].y(),
+			rM13 = other.rows[0].z(), rM14 = other.rows[0].w,
+			rM21 = other.rows[1].x(), rM22 = other.rows[1].y(),
+			rM23 = other.rows[1].z(), rM24 = other.rows[1].w,
+			rM31 = other.rows[2].x(), rM32 = other.rows[2].y(),
+			rM33 = other.rows[2].z(), rM34 = other.rows[2].w,
+			rM41 = other.rows[3].x(), rM42 = other.rows[3].y(),
+			rM43 = other.rows[3].z(), rM44 = other.rows[3].w;
 
 		return matrix4(
 			(((lM11 * rM11) + (lM12 * rM21)) + (lM13 * rM31)) + (lM14 * rM41),
@@ -501,7 +505,7 @@ namespace iwmath {
 		const vector4& axis_angle)
 	{
 		return create_from_axis_angle(
-			axis_angle.x, axis_angle.y, axis_angle.z, axis_angle.w);
+			axis_angle.x(), axis_angle.y(), axis_angle.z(), axis_angle.w);
 	}
 
 	matrix4 matrix4::create_from_axis_angle(
@@ -509,7 +513,7 @@ namespace iwmath {
 		float angle)
 	{
 		return create_from_axis_angle(
-			axis.x, axis.y, axis.z, angle);
+			axis.x(), axis.y(), axis.z, angle);
 	}
 
 	matrix4 matrix4::create_from_axis_angle(
@@ -550,7 +554,7 @@ namespace iwmath {
 	matrix4 matrix4::create_rotation(
 		const vector3& angles)
 	{
-		return matrix4::create_rotation(angles.x, angles.y, angles.z);
+		return matrix4::create_rotation(angles.x(), angles.y(), angles.z);
 	}
 
 	matrix4 matrix4::create_rotation(
@@ -564,7 +568,7 @@ namespace iwmath {
 	matrix4 matrix4::create_translation(
 		const vector3& translation)
 	{
-		return create_translation(translation.x, translation.y, translation.z);
+		return create_translation(translation.x(), translation.y(), translation.z);
 	}
 
 	matrix4 matrix4::create_scale(
@@ -576,7 +580,7 @@ namespace iwmath {
 	matrix4 matrix4::create_scale(
 		const vector3& scale)
 	{
-		return create_scale(scale.x, scale.y, scale.z);
+		return create_scale(scale.x(), scale.y(), scale.z);
 	}
 
 	matrix4 matrix4::create_scale(
@@ -629,12 +633,12 @@ namespace iwmath {
 		float invTB = 1.0f / (top - bottom);
 		float invFN = 1.0f / (zFar - zNear);
 
-		out.rows[0].x = 2 * invRL;
-		out.rows[1].y = 2 * invTB;
-		out.rows[2].z = -2 * invFN;
-		out.rows[3].x = -(right + left) * invRL;
-		out.rows[3].y = -(top + bottom) * invTB;
-		out.rows[3].z = -(zFar + zNear) * invFN;
+		out.rows[0].x() = 2 * invRL;
+		out.rows[1].y() = 2 * invTB;
+		out.rows[2].z() = -2 * invFN;
+		out.rows[3].x() = -(right + left) * invRL;
+		out.rows[3].y() = -(top + bottom) * invTB;
+		out.rows[3].z() = -(zFar + zNear) * invFN;
 
 		return out;
 	}

@@ -76,9 +76,11 @@ namespace iwmath {
 	float& iwmath::vector2::operator[](
 		std::size_t index)
 	{
-		if (index == 0) return x;
-		else if (index == 1) return y;
-		throw std::out_of_range("Index out of bounds");
+		switch (index) {
+			case 0:  return x;
+			case 1:  return y;
+			default: throw std::out_of_range("Index out of bounds");
+		}
 	}
 
 	vector2 vector2::operator+(

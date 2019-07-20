@@ -8,6 +8,8 @@ GameLayer::~GameLayer() {
 }
 
 int GameLayer::Initialize() {
+	IwEntity::Entity player = space.CreateEntity();
+	space.CreateComponent<Transform>(player);
 	return 0;
 }
 

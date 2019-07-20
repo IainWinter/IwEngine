@@ -44,13 +44,13 @@ namespace iwmath {
 	}
 
 	float matrix3::determinant() const {
-		return rows[0].x * (rows[1].y * rows[2].z - rows[1].z * rows[2].y)
-			 - rows[0].y * (rows[1].x * rows[2].z - rows[1].z * rows[2].x)
-			 + rows[0].z * (rows[1].x * rows[2].y - rows[1].y * rows[2].x);
+		return rows[0].x() * (rows[1].y() * rows[2].z - rows[1].z * rows[2].y())
+			 - rows[0].y() * (rows[1].x() * rows[2].z - rows[1].z * rows[2].x())
+			 + rows[0].z * (rows[1].x() * rows[2].y() - rows[1].y() * rows[2].x());
 	}
 
 	float matrix3::trace() const {
-		return rows[0].x + rows[1].y + rows[2].z;
+		return rows[0].x() + rows[1].y() + rows[2].z;
 	}
 
 	matrix3 matrix3::transposed() const {
@@ -85,14 +85,14 @@ namespace iwmath {
 
 	void matrix3::transpose() {
 		matrix3 tmp = *this;
-		rows[0].x = tmp.rows[0].x;
-		rows[0].y = tmp.rows[1].x;
-		rows[0].z = tmp.rows[2].x;
-		rows[1].x = tmp.rows[0].y;
-		rows[1].y = tmp.rows[1].y;
-		rows[1].z = tmp.rows[2].y;
-		rows[2].x = tmp.rows[0].z;
-		rows[2].y = tmp.rows[1].z;
+		rows[0].x() = tmp.rows[0].x();
+		rows[0].y() = tmp.rows[1].x();
+		rows[0].z = tmp.rows[2].x();
+		rows[1].x() = tmp.rows[0].y();
+		rows[1].y() = tmp.rows[1].y();
+		rows[1].z = tmp.rows[2].y();
+		rows[2].x() = tmp.rows[0].z;
+		rows[2].y() = tmp.rows[1].z;
 		rows[2].z = tmp.rows[2].z;
 	}
 
@@ -142,8 +142,8 @@ namespace iwmath {
 		c2.normalize();
 		c3.normalize();
 
-		rows[0] = vector3(c1.x, c2.x, c3.x);
-		rows[1] = vector3(c1.y, c2.y, c3.y);
+		rows[0] = vector3(c1.x(), c2.x(), c3.x());
+		rows[1] = vector3(c1.y(), c2.y(), c3.y());
 		rows[2] = vector3(c1.z, c2.z, c3.z);
 	}
 
@@ -201,9 +201,9 @@ namespace iwmath {
 		float scale = 1 / (2 * sinf(angle));
 
 		if (0 < angle && angle < IW_PI) {
-			v.x = rot(2, 1) - rot(1, 2);
-			v.y = rot(0, 2) - rot(2, 0);
-			v.z = rot(1, 0) - rot(0, 1);
+			v.x() = rot(2, 1) - rot(1, 2);
+			v.y() = rot(0, 2) - rot(2, 0);
+			v.z   = rot(1, 0) - rot(0, 1);
 		}
 
 		else if (almost_equal(angle, IW_PI, 6)) {
@@ -212,31 +212,31 @@ namespace iwmath {
 			float rot22 = rot(2, 2);
 
 			if (rot00 > rot11 && rot00 > rot22) {
-				v.x = rot00 + 1;
-				v.y = rot(0, 1);
-				v.z = rot(0, 2);
+				v.x() = rot00 + 1;
+				v.y() = rot(0, 1);
+				v.z   = rot(0, 2);
 			}
 
 			else if (rot11 > rot00 && rot11 > rot22) {
-				v.x = rot(1, 0);
-				v.y = rot11 + 1;
-				v.z = rot(1, 2);
+				v.x() = rot(1, 0);
+				v.y() = rot11 + 1;
+				v.z   = rot(1, 2);
 			}
 
 			else {
-				v.x = rot(2, 0);
-				v.y = rot(1, 1);
-				v.z = rot22 + 1;
+				v.x() = rot(2, 0);
+				v.y() = rot(1, 1);
+				v.z   = rot22 + 1;
 			}
 		}
 
-		v.x *= scale;
-		v.y *= scale;
-		v.z *= scale;
+		v.x() *= scale;
+		v.y() *= scale;
+		v.z   *= scale;
 
 		//Mirror axis and angle if axis is negitive
 		//TODO: I don't think this is needed
-		//if (0 >= v.x && 0 >= v.y && 0 >= v.z) {
+		//if (0 >= v.x() && 0 >= v.y() && 0 >= v.z) {
 		//	v = -v;
 		//	angle = -angle + IW_2PI;
 		//}
@@ -248,23 +248,22 @@ namespace iwmath {
 		matrix3 rot = cleared_scale();
 
 		vector3 v = vector3::zero;
-
 		float rot02 = rot(0, 2);
 
 		if (rot02 == -1) {
-			v.y = IW_PI / 2;
-			v.x = atan2(rot(1, 0), rot(2, 0));
+			v.y() = IW_PI / 2;
+			v.x() = atan2(rot(1, 0), rot(2, 0));
 		}
 
 		else if (rot02 == 1) {
-			v.y = -IW_PI / 2;
-			v.x = atan2(-rot(1, 0), -rot(2, 0));
+			v.y() = -IW_PI / 2;
+			v.x() = atan2(-rot(1, 0), -rot(2, 0));
 		}
 
 		else {
-			v.y = -asinf(rot02);
-			v.x = atan2f(rot(1, 2) / cosf(v.y), rot(2, 2) / cosf(v.y));
-			v.z = atan2f(rot(0, 1) / cosf(v.y), rot(0, 0) / cosf(v.y));
+			v.y() = -asinf(rot02);
+			v.x() = atan2f(rot(1, 2) / cosf(v.y()), rot(2, 2) / cosf(v.y()));
+			v.z = atan2f(rot(0, 1) / cosf(v.y()), rot(0, 0) / cosf(v.y()));
 		}
 
 		return v;
@@ -297,24 +296,24 @@ namespace iwmath {
 	matrix3 matrix3::operator*(
 		const matrix3& other) const
 	{
-		float a00 = rows[0].x;
-		float a10 = rows[0].y;
+		float a00 = rows[0].x();
+		float a10 = rows[0].y();
 		float a20 = rows[0].z;
-		float a01 = rows[1].x;
-		float a11 = rows[1].y;
+		float a01 = rows[1].x();
+		float a11 = rows[1].y();
 		float a21 = rows[1].z;
-		float a02 = rows[2].x;
-		float a12 = rows[2].y;
+		float a02 = rows[2].x();
+		float a12 = rows[2].y();
 		float a22 = rows[2].z;
 
-		float b00 = other.rows[0].x;
-		float b10 = other.rows[0].y;
+		float b00 = other.rows[0].x();
+		float b10 = other.rows[0].y();
 		float b20 = other.rows[0].z;
-		float b01 = other.rows[1].x;
-		float b11 = other.rows[1].y;
+		float b01 = other.rows[1].x();
+		float b11 = other.rows[1].y();
 		float b21 = other.rows[1].z;
-		float b02 = other.rows[2].x;
-		float b12 = other.rows[2].y;
+		float b02 = other.rows[2].x();
+		float b12 = other.rows[2].y();
 		float b22 = other.rows[2].z;
 
 		return matrix3(
@@ -459,14 +458,14 @@ namespace iwmath {
 		const vector4& axis_angle)
 	{
 		return create_from_axis_angle(
-			axis_angle.x, axis_angle.y, axis_angle.z, axis_angle.w);
+			axis_angle.x(), axis_angle.y(), axis_angle.z, axis_angle.w);
 	}
 
 	matrix3 matrix3::create_from_axis_angle(
 		const vector3& axis,
 		float angle)
 	{
-		return create_from_axis_angle(axis.x, axis.y, axis.z, angle);
+		return create_from_axis_angle(axis.x(), axis.y(), axis.z, angle);
 	}
 
 	matrix3 matrix3::create_from_axis_angle(
@@ -482,15 +481,15 @@ namespace iwmath {
 		float sin = sinf(-angle);
 		float t = 1.0f - cos;
 
-		float tXX = t * axis.x * axis.x;
-		float tXY = t * axis.x * axis.y;
-		float tXZ = t * axis.x * axis.z;
-		float tYY = t * axis.y * axis.y;
-		float tYZ = t * axis.y * axis.z;
+		float tXX = t * axis.x() * axis.x();
+		float tXY = t * axis.x() * axis.y();
+		float tXZ = t * axis.x() * axis.z;
+		float tYY = t * axis.y() * axis.y();
+		float tYZ = t * axis.y() * axis.z;
 		float tZZ = t * axis.z * axis.z;
 
-		float sinX = sin * axis.x;
-		float sinY = sin * axis.y;
+		float sinX = sin * axis.x();
+		float sinY = sin * axis.y();
 		float sinZ = sin * axis.z;
 
 		return matrix3(
@@ -581,7 +580,7 @@ namespace iwmath {
 	matrix3 matrix3::create_rotation(
 		const vector3& angles)
 	{
-		return matrix3::create_rotation(angles.x, angles.y, angles.z);
+		return matrix3::create_rotation(angles.x(), angles.y(), angles.z);
 	}
 
 	matrix3 matrix3::create_rotation(
@@ -603,7 +602,7 @@ namespace iwmath {
 	matrix3 matrix3::create_scale(
 		const vector3& scale)
 	{
-		return create_scale(scale.x, scale.y, scale.z);
+		return create_scale(scale.x(), scale.y(), scale.z);
 	}
 
 	matrix3 matrix3::create_scale(
