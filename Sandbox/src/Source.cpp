@@ -1,9 +1,5 @@
 #include "iw/engine/EntryPoint.h"
-#include "iw/engine/Entity/EntityLayer.h"
-
-#include "iw/entity/Space.h"
-
-#include "iw/engine/Time.h"
+#include "GameLayer.h"
 
 struct Transform { float x, y, z; };
 struct Velocity  { float vx, vy, vz; };
@@ -14,7 +10,7 @@ class Game
 {
 public:
 	Game() {
-		PushLayer(new IwEngine::EntityLayer());
+		PushLayer(new GameLayer());
 	}
 };
 
