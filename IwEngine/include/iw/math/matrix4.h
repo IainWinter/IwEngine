@@ -151,17 +151,12 @@ namespace iwmath {
 		/**
 		* Returns the scale of the matrix.
 		*/
-		vector3& scale() const;
+		vector3 scale() const;
 
 		/**
 		* Returns the translation of the matrix.
 		*/
-		vector3& translation();
-
-		/**
-		* Returns the translation of the matrix as a const.
-		*/
-		const vector3& translation() const;
+		vector3 translation() const;
 
 		/**
 		* Rotates the matrix to face a specified point in worldspace.

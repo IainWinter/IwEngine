@@ -1,7 +1,6 @@
 #pragma once
 
 #include "iwmath.h"
-#include "vector2.h"
 #include <ostream>
 
 namespace iwmath {
@@ -37,8 +36,7 @@ namespace iwmath {
 		*/
 		static const vector3 unit_z;
 
-		iwm::vector2 xy;
-		float z;
+		float x, y, z;
 
 		vector3();
 
@@ -49,34 +47,6 @@ namespace iwmath {
 			float x,
 			float y,
 			float z);
-
-		/**
-		* Returns the x component of the vector.
-		*/
-		inline float& x() {
-			return xy.x;
-		}
-
-		/**
-		* Returns the y component of the vector.
-		*/
-		inline float& y() {
-			return xy.y;
-		}
-
-		/**
-		* Returns the x component of the vector as a constant.
-		*/
-		inline const float& x() const {
-			return xy.x;
-		}
-
-		/**
-		* Returns the y component of the vector as a constant.
-		*/
-		inline const float& y() const {
-			return xy.y;
-		}
 
 		/**
 		* Returns the length of the vector.

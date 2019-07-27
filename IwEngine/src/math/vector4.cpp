@@ -11,23 +11,31 @@ namespace iwmath {
 	const vector4 vector4::unit_w = vector4(0, 0, 0, 1);
 
 	vector4::vector4()
-		: xyz(0)
+		: x(0)
+		, y(0)
+		, z(0)
 		, w(0) {}
 
 	vector4::vector4(
 		float xyzw)
-		: xyz(0)
+		: x(xyzw)
+		, y(xyzw)
+		, z(xyzw)
 		, w(xyzw) {}
 
 	vector4::vector4(
 		const vector3& xyz)
-		: xyz(xyz)
+		: x(xyz.x)
+		, y(xyz.y)
+		, z(xyz.z)
 		, w(0) {}
 
 	vector4::vector4(
 		const vector3& xyz,
 		float w)
-	    : xyz(xyz)
+	    : x(xyz.x)
+		, y(xyz.y)
+		, z(xyz.z)
 		, w(w) {}
 
 	vector4::vector4(
@@ -35,25 +43,27 @@ namespace iwmath {
 		float y,
 		float z,
 		float w)
-		: xyz(x, y, z)
+		: x(x)
+		, y(y)
+		, z(z)
 		, w(w) {}
 
 	float vector4::length() const {
-		return sqrtf(xyz.x * xyz.x + xyz.y * xyz.y + xyz.z * xyz.z + w * w);
+		return sqrtf(x * x + y * y + z * z + w * w);
 	}
 
 	float vector4::length_squared() const {
-		return xyz.x * xyz.x + xyz.y * xyz.y + xyz.z * xyz.z + w * w;
+		return x * x + y * y + z * z + w * w;
 	}
 
 	float vector4::length_fast() const {
-		return 1 / inv_sqrt(xyz.x * xyz.x + xyz.y * xyz.y + xyz.z * xyz.z + w * w);
+		return 1 / inv_sqrt(x * x + y * y + z * z + w * w);
 	}
 
 	float vector4::dot(
 		const vector4& other) const
 	{
-		return xyz.x * other.xyz.x + xyz.y * other.xyz.y + xyz.z * other.xyz.z + w * other.w;
+		return x * other.x + y * other.y + z * other.z + w * other.w;
 	}
 
 	vector4 vector4::normalized() const {
@@ -74,50 +84,72 @@ namespace iwmath {
 			return;
 		}
 
-		xyz /= scale;
-		w   /= scale;
+		x /= scale;
+		y /= scale;
+		z /= scale;
+		w /= scale;
 	}
 
 	void vector4::normalize_fast() {
 		float scale = length_fast();
-		xyz /= scale;
-		w   /= scale;
+		x /= scale;
+		y /= scale;
+		z /= scale;
+		w /= scale;
+	}
+
+	vector3 vector4::xyz() const {
+		return vector3(x, y, z);
+	}
+
+	void vector4::xyz(
+		const vector3& xyz)
+	{
+		vector4::xyz(xyz.x, xyz.y, xyz.z);
+	}
+
+	void vector4::xyz(
+		float x,
+		float y,
+		float z)
+	{
+		this->x = x;
+		this->y = y;
+		this->z = z;
 	}
 
 	float& iwmath::vector4::operator[](
 		std::size_t index)
 	{
-		switch (index) {
-			case 0:  return xyz.x;
-			case 1:  return xyz.y;
-			case 2:  return xyz.z;
-			case 3:  return w;
-			default: throw std::out_of_range("Index out of bounds");
-		}
+		if (index == 0) return x;
+		else if (index == 1) return y;
+		else if (index == 2) return z;
+		else if (index == 3) return w;
+		throw std::out_of_range("Index out of bounds");
 	}
 
 	vector4 vector4::operator+(
 		const vector4& other) const
 	{
-		return vector4(xyz.x + other.xyz.x, xyz.y + other.xyz.y, xyz.z + other.xyz.z, w + other.w);
+		return vector4(x + other.x, y + other.y, z + other.z, w + other.w);
 	}
 
 	vector4 vector4::operator-(
 		const vector4& other) const
 	{
-		return vector4(xyz.x - other.xyz.x, xyz.y - other.xyz.y, xyz.z - other.xyz.z, w - other.w);
+		return vector4(x - other.x, y - other.y, z - other.z, w - other.w);
 	}
 
 	vector4 vector4::operator*(
 		const vector4& other) const
 	{
-		return vector4(xyz.x * other.xyz.x, xyz.y * other.xyz.y, xyz.z * other.xyz.z, w * other.w);
+		return vector4(x * other.x, y * other.y, z * other.z, w * other.w);
 	}
 
 	vector4 vector4::operator/(
 		const vector4& other) const
 	{
-		return vector4(xyz.x / other.xyz.x, xyz.y / other.xyz.y, xyz.z / other.xyz.z, w / other.w);
+		return vector4(x / other.x, y / other.y, z / other.z, w / other.w);
 	}
 
 	vector4& vector4::operator+=(
@@ -147,25 +179,25 @@ namespace iwmath {
 	vector4 vector4::operator+(
 		const float& other) const
 	{
-		return vector4(xyz.x + other, xyz.y + other, xyz.z + other, w + other);
+		return vector4(x + other, y + other, z + other, w + other);
 	}
 
 	vector4 vector4::operator-(
 		const float& other) const
 	{
-		return vector4(xyz.x - other, xyz.y - other, xyz.z - other, w - other);
+		return vector4(x - other, y - other, z - other, w - other);
 	}
 
 	vector4 vector4::operator*(
 		const float& other) const
 	{
-		return vector4(xyz.x * other, xyz.y * other, xyz.z * other, w * other);
+		return vector4(x * other, y * other, z * other, w * other);
 	}
 
 	vector4 vector4::operator/(
 		const float& other) const
 	{
-		return vector4(xyz.x / other, xyz.y / other, xyz.z / other, w / other);
+		return vector4(x / other, y / other, z / other, w / other);
 	}
 
 	vector4 vector4::operator+=(
@@ -196,32 +228,32 @@ namespace iwmath {
 		const matrix4& mat) const
 	{
 		return iwm::vector4(
-			xyz.x * mat(0, 0) + xyz.y * mat(1, 0) + xyz.z * mat(2, 0) + w * mat(3, 0),
-			xyz.x * mat(0, 1) + xyz.y * mat(1, 1) + xyz.z * mat(2, 1) + w * mat(3, 1),
-			xyz.x * mat(0, 2) + xyz.y * mat(1, 2) + xyz.z * mat(2, 2) + w * mat(3, 2),
-			xyz.x * mat(0, 3) + xyz.y * mat(1, 3) + xyz.z * mat(2, 3) + w * mat(3, 3));
+			x * mat(0, 0) + y * mat(1, 0) + z * mat(2, 0) + w * mat(3, 0),
+			x * mat(0, 1) + y * mat(1, 1) + z * mat(2, 1) + w * mat(3, 1),
+			x * mat(0, 2) + y * mat(1, 2) + z * mat(2, 2) + w * mat(3, 2),
+			x * mat(0, 3) + y * mat(1, 3) + z * mat(2, 3) + w * mat(3, 3));
 	}
 
 	vector4& vector4::operator*=(
 		const matrix4& mat)
 	{
 		return *this = iwm::vector4(
-			xyz.x * mat(0, 0) + xyz.y * mat(1, 0) + xyz.z * mat(2, 0) + w * mat(3, 0),
-			xyz.x * mat(0, 1) + xyz.y * mat(1, 1) + xyz.z * mat(2, 1) + w * mat(3, 1),
-			xyz.x * mat(0, 2) + xyz.y * mat(1, 2) + xyz.z * mat(2, 2) + w * mat(3, 2),
-			xyz.x * mat(0, 3) + xyz.y * mat(1, 3) + xyz.z * mat(2, 3) + w * mat(3, 3));
+			x * mat(0, 0) + y * mat(1, 0) + z * mat(2, 0) + w * mat(3, 0),
+			x * mat(0, 1) + y * mat(1, 1) + z * mat(2, 1) + w * mat(3, 1),
+			x * mat(0, 2) + y * mat(1, 2) + z * mat(2, 2) + w * mat(3, 2),
+			x * mat(0, 3) + y * mat(1, 3) + z * mat(2, 3) + w * mat(3, 3));
 	}
 
 	vector4 vector4::operator-() const {
-		return vector4(-xyz, -w);
+		return vector4(-x, -y, -z, -w);
 	}
 
 	bool vector4::operator==(
 		const vector4& other) const
 	{
-		return almost_equal(xyz.x, other.xyz.x, 6)
-			&& almost_equal(xyz.y, other.xyz.y, 6)
-			&& almost_equal(xyz.z, other.xyz.z, 6)
+		return almost_equal(x, other.x, 6)
+			&& almost_equal(y, other.y, 6)
+			&& almost_equal(z, other.z, 6)
 			&& almost_equal(w, other.w, 6);
 	}
 
@@ -236,9 +268,9 @@ namespace iwmath {
 		const vector4& vector)
 	{
 		return ostream << "(" 
-			<< vector.xyz.x << ", " 
-			<< vector.xyz.y << ", " 
-			<< vector.xyz.z << ", " 
+			<< vector.x << ", " 
+			<< vector.y << ", " 
+			<< vector.z << ", " 
 			<< vector.w << ")";
 	}
 
