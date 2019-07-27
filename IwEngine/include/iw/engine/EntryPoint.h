@@ -26,8 +26,8 @@ int WINAPI WinMain(
 	IwEngine::WindowOptions options{
 		1280,
 		720,
-		IwEngine::NORMAL,
 		true,
+		IwEngine::NORMAL,
 	};
 
 	IwEngine::Application* app = CreateApplication();

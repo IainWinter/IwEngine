@@ -32,6 +32,10 @@ namespace IwEngine {
 		void SetCursor(
 			bool show) override;
 
+		void SetDimensions(
+			unsigned int width,
+			unsigned int height) override;
+
 		static LRESULT CALLBACK _WndProc(
 			HWND hwnd,
 			UINT msg,

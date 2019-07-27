@@ -84,7 +84,7 @@ namespace IwEngine {
 		auto& io = ImGui::GetIO();
 
 		if (io.WantCaptureMouse) {
-			io.MouseDown[event.Button] = event.State;
+			io.MouseDown[event.Button - IwInput::MOUSE_L_BUTTON] = event.State;
 			return true;
 		}
 

@@ -219,6 +219,15 @@ namespace IwEngine {
 		options.cursor = show;
 	}
 
+	void WindowsWindow::SetDimensions(
+		unsigned int width,
+		unsigned int height)
+	{
+		glViewport(0, 0, width, height);
+
+		LOG_INFO << "Window resized to " << width << ", " << height;
+	}
+
 	LRESULT CALLBACK WindowsWindow::_WndProc(
 		HWND hwnd,
 		UINT msg,
@@ -246,9 +255,7 @@ namespace IwEngine {
 		Event* e;
 		switch (msg) {
 			case WM_SIZE:
-				WindowResizedEvent* wre;
-				e = wre = &Translate<WindowResizedEvent>(msg, wParam, lParam);
-				glViewport(0, 0, wre->Width, wre->Height); //temp line
+				e = &Translate<WindowResizedEvent>(msg, wParam, lParam);
 				break;
 			case WM_CLOSE:
 				e = &Event(WindowClosed);
@@ -281,7 +288,7 @@ namespace IwEngine {
 		MouseWheelEvent e(inputState, delta);
 		callback(e);
 
-		//LOG_INFO << "Mouse wheel moved " << delta;
+		LOG_INFO << "Mouse wheel moved " << delta;
 	}
 
 	void WindowsWindow::HandleMouseMoved(
@@ -294,10 +301,8 @@ namespace IwEngine {
 		MouseMovedEvent e(inputState, X, Y, deltaX, deltaY);
 		callback(e);
 
-		SetCursorPos(200, 200);
-
-		//LOG_INFO << "Mouse moved " << deltaX << ", " << deltaY 
-		//	<< " to " << X << ", " << Y;
+		LOG_INFO << "Mouse moved " << deltaX << ", " << deltaY 
+			<< " to " << X << ", " << Y;
 	}
 	
 	void WindowsWindow::HandleMouseButton(

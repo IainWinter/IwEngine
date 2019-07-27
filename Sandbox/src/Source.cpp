@@ -10,6 +10,9 @@ class Game
 {
 public:
 	Game() {
+		InputManager.CreateDevice<IwInput::Mouse>();
+		//InputManager.CreateDevice<IwInput::RawKeyboard>();
+
 		PushLayer(new GameLayer());
 	}
 };

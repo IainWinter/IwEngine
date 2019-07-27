@@ -12,8 +12,10 @@ namespace IwEngine {
 		IWindow*  m_window;
 		LayerStack m_layerStack;
 		ImGuiLayer* m_imguiLayer;
-		IwInput::InputManager m_inputManager;
 		bool m_running;
+
+	protected:
+		IwInput::InputManager InputManager;
 
 	public:
 		Application();
@@ -50,6 +52,10 @@ namespace IwEngine {
 		void DispatchEvent(
 			_event_t& event)
 		{
+			if constexpr (std::is_same_v<WindowResizedEvent, _event_t>) {
+				m_window->SetDimensions(event.Width, event.Height);
+			}
+
 			for (Layer* layer : m_layerStack) {
 				if (layer->On(event)) {
 					LOG_INFO << "Event handled by " << layer->Name() << " layer";

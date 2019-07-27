@@ -17,8 +17,8 @@ namespace IwEngine {
 	struct WindowOptions {
 		unsigned int width;
 		unsigned int height;
+		bool         cursor;
 		DisplayState state;
-		bool cursor;
 	};
 
 	class IWindow {
@@ -44,14 +44,18 @@ namespace IwEngine {
 		virtual void SetCursor(
 			bool show) = 0;
 
+		virtual void SetDimensions(
+			unsigned int width,
+			unsigned int height) = 0;
+
 		virtual void SetCallback(
 			EventCallback callback) = 0;
 
 		virtual unsigned int Id()     = 0;
 		virtual unsigned int Width()  = 0;
 		virtual unsigned int Height() = 0;
-		virtual DisplayState State()  = 0;
 		virtual bool         Cursor() = 0;
+		virtual DisplayState State()  = 0;
 
 		static IWindow* Create();
 	};
@@ -67,35 +71,10 @@ namespace IwEngine {
 	public:
 		virtual ~Window() {}
 
-		virtual int Initialize(
-			const WindowOptions& options) = 0;
-
-		virtual void Destroy()   = 0;
-		virtual void Update()    = 0;
-		virtual void Render()    = 0;
-
-		virtual void SetInputManager(
-			IwInput::InputManager& manager) = 0;
-
-		virtual void SetState(
-			DisplayState state) = 0;
-
-		virtual void SetCursor(
-			bool show) = 0;
-
-
 		inline void SetCallback(
 			EventCallback callback)
 		{
 			this->callback = callback;
-		}
-
-		inline DisplayState State() {
-			return options.state;
-		}
-
-		inline bool Cursor() {
-			return options.cursor;
 		}
 
 		inline unsigned int Id() {
@@ -111,5 +90,14 @@ namespace IwEngine {
 		inline unsigned int Height() {
 			return options.height;
 		}
+
+		inline bool Cursor() {
+			return options.cursor;
+		}
+
+		inline DisplayState State() {
+			return options.state;
+		}
+
 	};
 }
