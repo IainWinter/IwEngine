@@ -10,7 +10,7 @@ namespace IwInput {
 
 	public:
 		InputState() {
-			memset(states, 0.0f, INPUT_COUNT * sizeof(float));
+			memset(states, (int)0.0f, INPUT_COUNT * sizeof(float));
 		}
 
 		inline const float* States() {

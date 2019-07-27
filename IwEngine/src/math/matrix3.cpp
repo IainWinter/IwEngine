@@ -421,7 +421,7 @@ namespace iwmath {
 		int row,
 		int col)
 	{
-		if (row > 3 || col > 3 || 0 > row || 0 > col) {
+		if (row > 2|| col > 2 || 0 > row || 0 > col) {
 			throw std::out_of_range("Row/Col is outside the "
 				"bounds of this matrix.");
 		}
@@ -433,7 +433,7 @@ namespace iwmath {
 		int row,
 		int col) const
 	{
-		if (row > 3 || col > 3 || 0 > row || 0 > col) {
+		if (row > 2 || col > 2 || 0 > row || 0 > col) {
 			throw std::out_of_range("Row/Col is outside the "
 				"bounds of this matrix.");
 		}

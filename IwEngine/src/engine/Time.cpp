@@ -17,8 +17,8 @@ namespace IwEngine {
 			return ticks;
 		}
 
-		double DeltaTime() {
-			return deltaTime.count() / 1000000000.0;
+		float DeltaTime() {
+			return deltaTime.count() / 1000000000.0f;
 		}
 	}
 }
