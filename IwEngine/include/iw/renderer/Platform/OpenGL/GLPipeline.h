@@ -12,8 +12,11 @@ namespace IwRenderer {
 		: public IPipeline
 	{
 	private:
+		struct {
+			iwutil::sparse_set<unsigned int, GLPipelineParam*> m_params;
+		};
+
 		unsigned int m_program;
-		iwutil::sparse_set<unsigned int, GLPipelineParam*> m_params;
 
 	public:
 		GLPipeline(

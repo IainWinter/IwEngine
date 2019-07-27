@@ -11,9 +11,12 @@ namespace IwRenderer {
 		: public IVertexArray
 	{
 	private:
+		struct {
+			std::vector<GLVertexBuffer*>     m_buffers;
+			std::vector<VertexBufferLayout*> m_layouts;
+		};
+
 		unsigned int m_renderId;
-		std::vector<GLVertexBuffer*> m_buffers;
-		std::vector<VertexBufferLayout*> m_layouts;
 
 	public:
 		GLVertexArray();

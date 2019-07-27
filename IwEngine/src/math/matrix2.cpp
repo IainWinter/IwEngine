@@ -225,7 +225,19 @@ namespace iwmath {
 		int row,
 		int col)
 	{
-		if (row > 2 || col > 2 || 0 > row || 0 > col) {
+		if (row > 1 || col > 1 || 0 > row || 0 > col) {
+			throw std::out_of_range("Row/Col is outside the "
+				"bounds of this maxtrix.");
+		}
+
+		return elements[col + row * 2];
+	}
+
+	const float& matrix2::operator()(
+		int row,
+		int col) const
+	{
+		if (row > 1 || col > 1 || 0 > row || 0 > col) {
 			throw std::out_of_range("Row/Col is outside the "
 				"bounds of this maxtrix.");
 		}

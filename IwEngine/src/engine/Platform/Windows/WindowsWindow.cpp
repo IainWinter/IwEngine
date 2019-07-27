@@ -175,7 +175,7 @@ namespace IwEngine {
 	{
 		inputManager = &manager;
 
-		manager.CreateContext(Id(), Width(), Height());
+		manager.CreateContext(Id(), (float)Width(), (float)Height());
 
 		manager.SetMouseWheelCallback(Id(), 
 			iwevents::make_callback(&WindowsWindow::HandleMouseWheel, this));

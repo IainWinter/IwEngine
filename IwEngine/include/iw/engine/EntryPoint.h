@@ -9,7 +9,7 @@ extern IwEngine::Application* CreateApplication();
 
 #include <Windows.h>
 
-int CALLBACK WinMain(
+int WINAPI WinMain(
 	HINSTANCE handle,
 	HINSTANCE prevhandle,
 	LPSTR cmdline,

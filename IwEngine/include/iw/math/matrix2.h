@@ -124,12 +124,15 @@ namespace iwmath {
 			int x,
 			int y);
 
+		const float& operator()(
+			int x,
+			int y) const;
+
 		bool operator==(
 			const matrix2& other) const;
 
 		bool operator!=(
 			const matrix2& other) const;
-
 
 		/**
 		* Returns a matrix with a specified rotation.

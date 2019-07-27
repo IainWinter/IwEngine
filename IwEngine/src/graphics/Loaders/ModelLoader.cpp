@@ -34,12 +34,13 @@ namespace IwGraphics {
 			constexpr size_t VERT_SIZE = sizeof(Vertex);
 			constexpr size_t VEC3_SIZE = sizeof(iwm::vector3);
 
-			model->Indices[i].FaceCount = 0;
-			model->Indices[i].Faces 
-				= (unsigned int*)malloc(FACE_SIZE * aimesh->mNumFaces);
+			FaceIndex& face = model->Indices[i];
 
-			unsigned int* faces = model->Indices[i].Faces;
-			size_t& faceCount   = model->Indices[i].FaceCount;
+			face.FaceCount = 0;
+			face.Faces = new unsigned int[aimesh->mNumFaces];
+
+			unsigned int* faces = face.Faces;
+			size_t& faceCount   = face.FaceCount;
 
 			if (faces) {
 				for (size_t t = 0; t < aimesh->mNumFaces; ++t) {
@@ -52,7 +53,7 @@ namespace IwGraphics {
 			MeshData& mesh = model->Meshes[i];
 
 			mesh.VertexCount = aimesh->mNumVertices;
-			mesh.Vertices = (Vertex*)malloc(VERT_SIZE * mesh.VertexCount);
+			mesh.Vertices = new Vertex[mesh.VertexCount];
 
 			if (mesh.Vertices) {
 				for (size_t i = 0; i < mesh.VertexCount; i++) {

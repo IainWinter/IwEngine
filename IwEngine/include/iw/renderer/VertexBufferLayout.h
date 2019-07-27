@@ -16,7 +16,10 @@ namespace IwRenderer {
 
 	class IWRENDERER_API VertexBufferLayout {
 	private:
-		std::vector<VertexBufferLayoutElement> m_elements;
+		struct {
+			std::vector<VertexBufferLayoutElement> m_elements;
+		};
+
 		unsigned int m_stride;
 
 	public:
