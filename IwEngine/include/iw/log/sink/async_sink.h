@@ -13,11 +13,17 @@ namespace iwlog {
 		iwu::blocking_queue<std::string> m_messages;
 		std::thread                      m_thread;
 
+	private:
+		void async_logger() {
+			while (true) {
+				async_log(m_messages.pop());
+			}
+		}
 	public:
 		async_sink(
 			loglevel level)
 			: sink(level)
-			, m_thread([this]() { while (true) { async_log(m_messages.pop()); } })
+			, m_thread([this]() { async_logger(); })
 		{}
 
 		virtual ~async_sink() {
