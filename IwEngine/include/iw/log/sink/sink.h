@@ -14,7 +14,9 @@ namespace iwlog {
 
 		virtual ~sink() {}
 
-		virtual void log(std::string& msg) = 0;
+		virtual void log(
+			std::string& msg) = 0;
+
 		virtual void flush() = 0;
 
 		inline bool should_log(

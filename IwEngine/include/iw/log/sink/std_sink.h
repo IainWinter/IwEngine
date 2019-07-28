@@ -7,9 +7,12 @@ namespace iwlog {
 		: public sink
 	{
 	public:
-		stdout_sink(loglevel level);
+		stdout_sink(
+			loglevel level);
 
-		void log(std::string& msg);
+		void log(
+			std::string& msg);
+
 		void flush();
 	};
 
@@ -17,9 +20,12 @@ namespace iwlog {
 		: public sink
 	{
 	public:
-		stderr_sink(loglevel level);
+		stderr_sink(
+			loglevel level);
 
-		void log(std::string& msg);
+		void log(
+			std::string& msg);
+
 		void flush();
 	};
 }

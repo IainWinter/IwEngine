@@ -18,7 +18,7 @@ workspace "IwEngine"
 
 include (glewdir)
 include (imguidir)
-os.execute ("cmake -S " .. assimpdir .. " -B " .. assimpdir)
+os.execute ("cmake -S " .. assimpdir .. " -B " .. assimpdir .. "/build")
 
 project "IwEngine"
 	kind "SharedLib"
@@ -43,7 +43,7 @@ project "IwEngine"
 	}
 
 	libdirs {
-		assimpdir .. "/lib/%{cfg.buildcfg}"
+		assimpdir .. "/build/code/%{cfg.buildcfg}"
 	}
 
 	links {
@@ -62,7 +62,7 @@ project "IwEngine"
 	}
 
 	postbuildcommands  {
-		"xcopy /q /y /f \"" .. assimpdir  .. "/bin/%{cfg.buildcfg}/assimp-vc140-mt.dll\" \"" .. sndbxdir .. bindir .. "\"",
+		"xcopy /q /y /f \"" .. assimpdir  .. "/build/code/%{cfg.buildcfg}/assimp-vc140-mt.dll\" \"" .. sndbxdir .. bindir .. "\"",
 		"xcopy /q /y /f \"" .. iwengdir   .. bindir .. "/IwEngine.dll\" \""                  .. sndbxdir .. bindir .. "\"",
 		"xcopy /q /y /f \"" .. glewdir    .. bindir .. "/GLEW.dll\" \""                      .. sndbxdir .. bindir .. "\"",
 		"xcopy /q /y /f /i \"" .. sndbxdir .. resdir .. "\" \"" .. sndbxdir .. blddir .. resdir .. "\"",

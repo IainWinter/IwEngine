@@ -17,7 +17,9 @@ namespace iwlog {
 			loglevel level,
 			const char* file);
 
-		void log(std::string& msg);
+		void log(
+			std::string& msg);
+
 		void flush();
 	};
 }

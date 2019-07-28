@@ -2,8 +2,6 @@
 
 #include "iwlog.h"
 #include "sink/sink.h"
-#include "sink/std_sink.h"
-#include "sink/file_sink.h"
 #include <vector>
 #include <sstream>
 

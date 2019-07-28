@@ -1,5 +1,7 @@
 #include "iw/engine/Application.h"
 #include "iw/log/logger.h"
+#include "iw/log/sink/async_std_sink.h"
+#include "iw/log/sink/file_sink.h"
 #include "iw/events/functional/callback.h"
 #include "iw/engine/Time.h"
 
@@ -18,8 +20,8 @@ namespace IwEngine {
 	{
 		Time::Update();
 
-		LOG_SINK(iwlog::stdout_sink, iwlog::INFO);
-		LOG_SINK(iwlog::stderr_sink, iwlog::ERR);
+		LOG_SINK(iwlog::async_stdout_sink, iwlog::INFO);
+		LOG_SINK(iwlog::async_stderr_sink, iwlog::ERR);
 		LOG_SINK(iwlog::file_sink,   iwlog::DEBUG, "sandbox.log");
 
 		m_window->SetCallback(
