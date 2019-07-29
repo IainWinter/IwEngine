@@ -39,7 +39,8 @@ project "IwEngine"
 		iwengdir  .. "/src/engine/Platform",
 		glewdir   .. "/include",
 		imguidir  .. "/include",
-		assimpdir .. "/include"
+		assimpdir .. "/include",
+		assimpdir .. blddir .. "/include"
 	}
 
 	libdirs {
