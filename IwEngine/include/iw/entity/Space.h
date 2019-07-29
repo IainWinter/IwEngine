@@ -15,21 +15,13 @@ namespace IwEntity {
 		EntityArray m_entities;
 
 	public:
-		Entity CreateEntity() {
-			return m_entities.CreateEntity();
-		}
+		Entity CreateEntity();
 
 		void DestroyEntity(
-			Entity entity)
-		{
-			m_entities.DestroyEntity(entity);
+			Entity entity);
 
-			for (auto& set : m_components) {
-				if (set->HasEntity(entity)) {
-					set->DestroyComponent(entity);
-				}
-			}
-		}
+		void Sort();
+		void Clear();
 
 		template<
 			typename _c,
@@ -69,28 +61,13 @@ namespace IwEntity {
 		View<_cs...> ViewComponents() {
 			return { EnsureComponentData<_cs>()... };
 		}
-
-		void Sort() {
-			for (auto& set : m_components) {
-				if (set) {
-					set->Sort(m_entities);
-				}
-			}
-		}
-
-		void Clear() {
-			m_entities.Clear();
-			for (auto& set : m_components) {
-				set->Clear();
-			}
-		}
 	private:
 		template<
 			typename _c>
 		ComponentArray<_c>& EnsureComponentData() {
 			ComponentId id = ComponentFamily::type<_c>;
 			if (id >= m_components.size()) {
-				m_components.resize(id + 1);
+				m_components.resize((std::size_t)(id + 1));
 			}
 
 			IComponentArray*& cdata = m_components.at(id);

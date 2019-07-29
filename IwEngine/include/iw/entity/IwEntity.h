@@ -24,7 +24,7 @@ namespace IwEntity {
 		return ((1 << ComponentFamily::type<_cs>) | ...);
 	}
 
-	bool Similar(
+	inline bool Similar(
 		Archetype a1,
 		Archetype a2)
 	{

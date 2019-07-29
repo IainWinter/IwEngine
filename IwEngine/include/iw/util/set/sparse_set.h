@@ -205,7 +205,7 @@ namespace iwutil {
 		{
 			assert(!contains(x));
 			if (x >= m_sparse.size()) {
-				m_sparse.resize(x + 1, EMPTY_VALUE);
+				m_sparse.resize(x + _t(1), EMPTY_VALUE);
 			}
 
 			m_sparse[x] = size();

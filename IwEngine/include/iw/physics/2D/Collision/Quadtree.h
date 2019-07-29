@@ -9,8 +9,8 @@ namespace IwPhysics {
 	private:
 		struct m_Item {
 			iwm::vector2 Position;
-			AABB2D Bounds;
-			T* Data;
+			AABB2D       Bounds;
+			T*           Data;
 		};
 
 		static constexpr float _Infinity
@@ -18,6 +18,7 @@ namespace IwPhysics {
 
 		m_Item m_items[8];
 		AABB2D m_bounds;
+
 		std::size_t m_size;
 		std::size_t m_height;
 

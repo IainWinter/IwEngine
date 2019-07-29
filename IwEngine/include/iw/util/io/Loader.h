@@ -8,10 +8,14 @@ namespace iwutil {
 		typename _resource_t>
 		class Loader {
 		protected:
-			std::vector<_resource_t*> loaded;
-
+			struct {
+				std::vector<_resource_t*> loaded;
+			};
 		public:
-			virtual _resource_t* Load(const char* path) = 0;
-			virtual void Release(_resource_t* resource) = 0;
+			virtual _resource_t* Load(
+				const char* path) = 0;
+
+			virtual void Release(
+				_resource_t* resource) = 0;
 	};
 }

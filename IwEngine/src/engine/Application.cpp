@@ -94,13 +94,13 @@ namespace IwEngine {
 
 	void Application::HandleEvent(Event& e) {
 		switch (e.Type) {
-			case WindowResized: DispatchEvent((WindowResizedEvent&)e); break;
-			case MouseWheel:    DispatchEvent((MouseWheelEvent&)e);    break;
-			case MouseMoved:    DispatchEvent((MouseMovedEvent&)e);    break;
-			case MouseButton:   DispatchEvent((MouseButtonEvent&)e);   break;
-			case Key:    	    DispatchEvent((KeyEvent&)e);           break;
-			case KeyTyped:      DispatchEvent((KeyTypedEvent&)e);      break;
-			case WindowClosed:  Destroy();                             break;
+			case WindowResized:    DispatchEvent((WindowResizedEvent&)e); break;
+			case MouseWheel:       DispatchEvent((MouseWheelEvent&)e);    break;
+			case MouseMoved:       DispatchEvent((MouseMovedEvent&)e);    break;
+			case MouseButton:      DispatchEvent((MouseButtonEvent&)e);   break;
+			case Key:    	       DispatchEvent((KeyEvent&)e);           break;
+			case KeyTyped:         DispatchEvent((KeyTypedEvent&)e);      break;
+			case WindowClosed:     Destroy();                             break;
 			default: LOG_WARNING << "Application mishandled event " + e.Type; break;
 		}
 	}

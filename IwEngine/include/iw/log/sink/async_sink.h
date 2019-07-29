@@ -23,7 +23,7 @@ namespace iwlog {
 		async_sink(
 			loglevel level)
 			: sink(level)
-			, m_thread([this]() { async_logger(); })
+			, m_thread([this] { async_logger(); })
 		{}
 
 		virtual ~async_sink() {

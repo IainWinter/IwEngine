@@ -1,11 +1,11 @@
-#include "iw/graphics/Loaders/ModelLoader.h"
+#include "iw/engine/Loaders/ModelLoader.h"
 #include "iw/log/logger.h"
 #include "assimp/Importer.hpp"
 #include "assimp/scene.h"
 #include "assimp/postprocess.h"
 #include <string>
 
-namespace IwGraphics {
+namespace IwEngine {
 	ModelData* ModelLoader::Load(
 		const char* path)
 	{
@@ -22,38 +22,32 @@ namespace IwGraphics {
 			return nullptr;
 		}
 
-		ModelData* model = new ModelData{
+		ModelData* model = new ModelData {
 			new MeshData[scene->mNumMeshes],
-			new FaceIndex[scene->mNumMeshes],
 			scene->mNumMeshes
 		};
 
 		for (size_t i = 0; i < scene->mNumMeshes; ++i) {
 			const aiMesh* aimesh = scene->mMeshes[i];
 			constexpr size_t FACE_SIZE = 3 * sizeof(size_t);
-			constexpr size_t VERT_SIZE = sizeof(Vertex);
+			constexpr size_t VERT_SIZE = sizeof(IwGraphics::Vertex);
 			constexpr size_t VEC3_SIZE = sizeof(iwm::vector3);
 
-			FaceIndex& face = model->Indices[i];
+			MeshData& mesh = model->Meshes[i];
+			
+			mesh.FaceCount = 0;
+			mesh.Faces = new unsigned int[aimesh->mNumFaces];
 
-			face.FaceCount = 0;
-			face.Faces = new unsigned int[aimesh->mNumFaces];
-
-			unsigned int* faces = face.Faces;
-			size_t& faceCount   = face.FaceCount;
-
-			if (faces) {
+			if (mesh.Faces) {
 				for (size_t t = 0; t < aimesh->mNumFaces; ++t) {
 					const aiFace* face = &aimesh->mFaces[t];
-					memcpy(&faces[faceCount], face->mIndices, FACE_SIZE);
-					faceCount += 3;
+					memcpy(&mesh.Faces[mesh.FaceCount], face->mIndices, FACE_SIZE);
+					mesh.FaceCount += 3;
 				}
 			}
 
-			MeshData& mesh = model->Meshes[i];
-
 			mesh.VertexCount = aimesh->mNumVertices;
-			mesh.Vertices = new Vertex[mesh.VertexCount];
+			mesh.Vertices = new IwGraphics::Vertex[mesh.VertexCount];
 
 			if (mesh.Vertices) {
 				for (size_t i = 0; i < mesh.VertexCount; i++) {

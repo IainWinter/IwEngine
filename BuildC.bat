@@ -1,1 +1,1 @@
-@c:/dev/tools/premake5.exe vs2017
+@c:/dev/tools/premake5.exe vs2019
