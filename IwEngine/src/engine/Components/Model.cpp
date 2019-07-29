@@ -4,7 +4,8 @@ namespace IwEngine {
 	Model::Model(
 		ModelData* data, 
 		IwRenderer::IDevice* device)
-		: Meshes(new Mesh[data->MeshCount])
+		: Data(data)
+		, Meshes(new Mesh[data->MeshCount])
 		, MeshCount(data->MeshCount)
 	{
 		for (size_t i = 0; i < MeshCount; i++) {

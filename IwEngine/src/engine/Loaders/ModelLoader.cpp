@@ -62,9 +62,9 @@ namespace IwEngine {
 			}
 		}
 
+		loaded.push_back(model);
 		importer.FreeScene();
 
-		loaded.push_back(model);
 
 		return model;
 	}

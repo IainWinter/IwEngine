@@ -6,13 +6,10 @@
 #include "Mesh.h"
 
 namespace IwEngine {
-	class IWENGINE_API Model {
-	public:
+	struct IWENGINE_API Model {
 		ModelData*  Data;
 		Mesh*       Meshes;
 		std::size_t MeshCount;
-
-		Model() = default;
 
 		Model(
 			ModelData* data,

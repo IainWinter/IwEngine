@@ -37,31 +37,31 @@ int GameLayer::Initialize() {
 }
 
 void GameLayer::Update() {
-	for (auto c : space.ViewComponents<IwEngine::Transform, IwEngine::Camera>()) {
-		auto transform = c.GetComponent<IwEngine::Transform>();
-		auto camera    = c.GetComponent<IwEngine::Camera>();
+	//for (auto c : space.ViewComponents<IwEngine::Transform, IwEngine::Camera>()) {
+	//	auto transform = c.GetComponent<IwEngine::Transform>();
+	//	auto camera    = c.GetComponent<IwEngine::Camera>();
 
-		pipeline->GetParam("proj")
-			->SetAsMat4(camera.Projection);
+	//	pipeline->GetParam("proj")
+	//		->SetAsMat4(camera.Projection);
 
-		pipeline->GetParam("view")
-			->SetAsMat4(iwm::matrix4::create_look_at(
-				transform.Position,
-				transform.Position + transform.Forward(),
-				transform.Up()));
-	}
+	//	pipeline->GetParam("view")
+	//		->SetAsMat4(iwm::matrix4::create_look_at(
+	//			transform.Position,
+	//			transform.Position + transform.Forward(),
+	//			transform.Up()));
+	//}
 
-	for (auto c : space.ViewComponents<IwEngine::Transform, IwEngine::Model>()) {
-		auto transform = c.GetComponent<IwEngine::Transform>();
-		auto model     = c.GetComponent<IwEngine::Model>();
+	//for (auto c : space.ViewComponents<IwEngine::Transform, IwEngine::Model>()) {
+	//	auto transform = c.GetComponent<IwEngine::Transform>();
+	//	auto model     = c.GetComponent<IwEngine::Model>();
 
-		pipeline->GetParam("model")
-			->SetAsMat4(transform.Transformation());
+	//	pipeline->GetParam("model")
+	//		->SetAsMat4(transform.Transformation());
 
-		for (int i = 0; i < model.MeshCount; i++) {
-			device->SetVertexArray(model.Meshes[i].VertexArray);
-			device->SetIndexBuffer(model.Meshes[i].IndexBuffer);
-			device->DrawElements  (model.Meshes[i].FaceCount, 0);
-		}
-	}
+	//	for (int i = 0; i < model.MeshCount; i++) {
+	//		device->SetVertexArray(model.Meshes[i].VertexArray);
+	//		device->SetIndexBuffer(model.Meshes[i].IndexBuffer);
+	//		device->DrawElements  (model.Meshes[i].FaceCount, 0);
+	//	}
+	//}
 }

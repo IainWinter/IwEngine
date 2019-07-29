@@ -269,7 +269,6 @@ namespace IwEngine {
 		}
 
 		if (e->Type == NOT_HANDLED) {
-			LOG_INFO << "Not handled";
 			return DefWindowProc(hwnd, msg, wParam, lParam);
 		}
 
