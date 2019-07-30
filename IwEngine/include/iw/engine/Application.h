@@ -27,6 +27,7 @@ namespace IwEngine {
 		virtual void Run();
 		virtual void Destroy();
 		virtual void Update();
+		virtual void FixedUpdate();
 
 		virtual void HandleEvent(
 			Event& e);

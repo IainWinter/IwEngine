@@ -10,7 +10,9 @@
 
 struct Player {
 	float Speed;
+	float DashSpeed;
 	int DashFramesTotal;
+	int CooldownFrames;
 	int DashFrames;
 };
 
@@ -28,7 +30,7 @@ GameLayer::~GameLayer() {
 int GameLayer::Initialize() {
 	device = new IwRenderer::GLDevice();
 
-	auto vs = device->CreateVertexShader  (iwu::ReadFile("res/sandboxvs.glsl").c_str());
+	auto vs = device->CreateVertexShader(iwu::ReadFile("res/sandboxvs.glsl").c_str());
 	auto fs = device->CreateFragmentShader(iwu::ReadFile("res/sandboxfs.glsl").c_str());
 
 	pipeline = device->CreatePipeline(vs, fs);
@@ -42,7 +44,7 @@ int GameLayer::Initialize() {
 	IwEntity::Entity player = space.CreateEntity();
 	space.CreateComponent<IwEngine::Transform>(player, iwm::vector3(0, 0, 1));
 	space.CreateComponent<IwEngine::Model>(player, loader.Load("res/quad.obj"), device);
-	space.CreateComponent<Player>(player, 10.0f, 500);
+	space.CreateComponent<Player>(player, 10.0f, 100.f, 20, 10);
 
 	return 0;
 }
@@ -70,12 +72,14 @@ void GameLayer::Update() {
 		}
 
 		if (player.DashFrames > 0) {
-			transform.Position += movement * player.Speed * player.DashFrames / 50 * IwEngine::Time::DeltaTime();
-			player.DashFrames--;
+			transform.Position += movement * player.DashSpeed * player.DashFrames / player.DashFramesTotal * IwEngine::Time::DeltaTime();
+			if (IwInput::Keyboard::KeyUp(IwInput::X)) {
+				player.DashFrames--;
+			}
 		}
 
 		else {
-			if (IwInput::Keyboard::KeyDown(IwInput::X)) {
+			if (player.DashFrames + player.CooldownFrames == 0 && IwInput::Keyboard::KeyDown(IwInput::X)) {
 				player.DashFrames = player.DashFramesTotal;
 			}
 
@@ -112,6 +116,16 @@ void GameLayer::Update() {
 			device->SetVertexArray(model.Meshes[i].VertexArray);
 			device->SetIndexBuffer(model.Meshes[i].IndexBuffer);
 			device->DrawElements(model.Meshes[i].FaceCount, 0);
+		}
+	}
+}
+
+void GameLayer::FixedUpdate() {
+	for (auto c : space.ViewComponents<Player>()) {
+		auto& player = c.GetComponent<Player>();
+
+		if (player.DashFrames > -player.CooldownFrames) {
+			player.DashFrames--;
 		}
 	}
 }

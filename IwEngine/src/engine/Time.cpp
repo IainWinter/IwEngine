@@ -2,19 +2,24 @@
 
 namespace IwEngine {
 	namespace Time {
-		static Time time = std::chrono::high_resolution_clock::now();
+		static Time now          = std::chrono::high_resolution_clock::now();
 		static Duration deltaTime = Duration::zero();
-		static int ticks = 0;
+		static int ticks          = 0;
+		static float time         = 0.0f;
 
-		Time Update() {
+		void Update() {
 			ticks++;
-			deltaTime = std::chrono::high_resolution_clock::now() - time;
-			time = std::chrono::high_resolution_clock::now();
-			return time;
+			time += DeltaTime();
+			deltaTime = std::chrono::high_resolution_clock::now() - now;
+			now = std::chrono::high_resolution_clock::now();
 		}
 
 		int Ticks() {
 			return ticks;
+		}
+
+		int TotalTime() {
+			return time * 1000;
 		}
 
 		float DeltaTime() {

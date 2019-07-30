@@ -19,6 +19,7 @@ public:
 	GameLayer();
 	~GameLayer();
 
-	int  Initialize() override;
-	void Update()     override;
+	int  Initialize()  override;
+	void Update()      override;
+	void FixedUpdate() override;
 };

@@ -65,6 +65,10 @@ namespace IwEngine {
 		while (m_running) {
 			Time::Update();
 			Update();
+
+			if (Time::TotalTime() % 17 == 0) {
+				FixedUpdate();
+			}
 		}
 	}
 
@@ -83,6 +87,12 @@ namespace IwEngine {
 
 		m_window->Render();
 		m_window->Update();
+	}
+
+	void Application::FixedUpdate() {
+		for (Layer* layer : m_layerStack) {
+			layer->FixedUpdate();
+		}
 	}
 
 	void Application::Destroy() {
