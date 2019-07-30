@@ -17,7 +17,11 @@ struct Player {
 	int DashFrames;
 };
 
-GameLayer::GameLayer() 
+struct Enemy {
+	float 
+};
+
+GameLayer::GameLayer()
 	: IwEngine::Layer("Game")
 	, device(nullptr)
 	, pipeline(nullptr)
@@ -47,7 +51,7 @@ int GameLayer::Initialize(
 	IwEntity::Entity player = space.CreateEntity();
 	space.CreateComponent<IwEngine::Transform>(player, iwm::vector3(0, 0, 1));
 	space.CreateComponent<IwEngine::Model>(player, loader.Load("res/quad.obj"), device);
-	space.CreateComponent<Player>(player, 10.0f, 100.f, 10, 30);
+	space.CreateComponent<Player>(player, 10.0f, 100.f, 10, 15);
 
 	return 0;
 }
@@ -138,8 +142,12 @@ void GameLayer::ImGui() {
 
 	for (auto entity : space.ViewComponents<Player>()) {
 		Player& player = entity.GetComponent<Player>();
+
 		ImGui::Text("Dash frames: %i",
-			player.DashFrames);
+			player.DashFrames > 0 ? player.DashFrames : 0);
+
+		ImGui::Text("Dash cooldown frames: %i",
+			player.CooldownFrames + player.DashFrames);
 	}
 
 	ImGui::End();
