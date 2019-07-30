@@ -56,6 +56,7 @@ namespace IwEngine {
 		m_window->SetCursor(false);
 
 		Time::Update();
+		Time::SetFixedTime(1 / 60.0f);
 
 		return 0;
 	}
@@ -65,10 +66,6 @@ namespace IwEngine {
 		while (m_running) {
 			Time::Update();
 			Update();
-
-			if (Time::TotalTime() % 17 == 0) {
-				FixedUpdate();
-			}
 		}
 	}
 
