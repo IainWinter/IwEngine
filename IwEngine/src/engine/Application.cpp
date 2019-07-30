@@ -63,8 +63,17 @@ namespace IwEngine {
 
 	void Application::Run() {
 		m_running = true;
+
+		float accumulatedTime = 0;
 		while (m_running) {
 			Time::Update();
+
+			accumulatedTime += Time::DeltaTime();
+			while (accumulatedTime >= Time::FixedTime()) {
+				FixedUpdate();
+				accumulatedTime -= Time::FixedTime();
+			}
+
 			Update();
 		}
 	}
