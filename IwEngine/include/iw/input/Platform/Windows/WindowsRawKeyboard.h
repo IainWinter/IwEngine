@@ -4,7 +4,7 @@
 #include "iw/input/Devices/Keyboard.h"
 
 namespace IwInput {
-	class WindowsRawKeyboard
+	class IWINPUT_API WindowsRawKeyboard
 		: public RawKeyboard
 	{
 	public:

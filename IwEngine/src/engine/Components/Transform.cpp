@@ -1,6 +1,15 @@
 #include "iw/engine/Components/Transform.h"
 
 namespace IwEngine {
+	Transform::Transform(
+		iwm::vector3 position,
+		iwm::vector3 scale,
+		iwm::quaternion rotation)
+		: Position(position)
+		, Scale(scale)
+		, Rotation(rotation)
+	{}
+
 	iwm::matrix4 Transform::Transformation() {
 		return iwm::matrix4::create_from_quaternion(Rotation)
 			 * iwm::matrix4::create_scale(Scale)

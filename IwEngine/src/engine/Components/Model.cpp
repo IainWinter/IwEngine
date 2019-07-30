@@ -26,4 +26,8 @@ namespace IwEngine {
 			Meshes[i] = { va, ib, data->Meshes[i].FaceCount };
 		}
 	}
+
+	Model::~Model() {
+		delete[] Meshes;
+	}
 }

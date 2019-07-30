@@ -31,12 +31,11 @@ namespace IwEntity {
 			_args_t&& ... args)
 		{
 			Archetype oldArchetype = m_entities.ArchetypeOf(entity);
-			Archetype& archetype = m_entities.AssignComponent<_c>(entity);
+			Archetype& archetype   = m_entities.AssignComponent<_c>(entity);
 
 			UpdateComponentData(entity, archetype, oldArchetype);
 
-			return EnsureComponentData<_c>()
-				.CreateComponent(
+			return EnsureComponentData<_c>().CreateComponent(
 					entity, archetype, std::forward<_args_t>(args)...);
 		}
 
@@ -50,9 +49,9 @@ namespace IwEntity {
 				Archetype& archetype
 					= m_entities.UnassignComponent<_c>(entity);
 
-				//UpdateComponentData(entity, archetype, oldArchetype);
+				UpdateComponentData(entity, archetype, oldArchetype);
 
-				GetComponentData<_c>().DestroyComponent(entity, archetype);
+				GetComponentData<_c>().DestroyComponent(entity);
 			}
 		}
 
@@ -67,7 +66,7 @@ namespace IwEntity {
 		ComponentArray<_c>& EnsureComponentData() {
 			ComponentId id = ComponentFamily::type<_c>;
 			if (id >= m_components.size()) {
-				m_components.resize((std::size_t)(id + 1));
+				m_components.resize((std::size_t)id + 1);
 			}
 
 			IComponentArray*& cdata = m_components.at(id);

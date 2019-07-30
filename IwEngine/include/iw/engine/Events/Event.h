@@ -14,6 +14,8 @@ namespace IwEngine {
 		EventType Type;
 		bool Handled;
 
+		Event() = default;
+
 		Event(
 			EventType type)
 			: Type(type)

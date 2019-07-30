@@ -4,7 +4,7 @@
 #include "iw/input/Events/InputEvent.h"
 
 namespace IwInput {
-	class KeyboardBase
+	class IWINPUT_API KeyboardBase
 		: public Device
 	{
 	protected:
@@ -30,7 +30,7 @@ namespace IwInput {
 			unsigned int oskey);
 	};
 
-	class Keyboard
+	class IWINPUT_API Keyboard
 		: public KeyboardBase
 	{
 	public:
@@ -55,7 +55,7 @@ namespace IwInput {
 	};
 
 #ifdef IW_PLATFORM_WINDOWS
-	class RawKeyboard
+	class IWINPUT_API RawKeyboard
 		: public KeyboardBase
 	{
 	public:

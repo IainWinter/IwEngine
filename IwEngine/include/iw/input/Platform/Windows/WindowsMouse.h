@@ -4,7 +4,7 @@
 #include "iw/input/Devices/Mouse.h"
 
 namespace IwInput {
-	class WindowsMouse
+	class IWINPUT_API WindowsMouse
 		: public Mouse
 	{
 	public:

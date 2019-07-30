@@ -4,7 +4,7 @@
 #include "iw/input/Devices/Mouse.h"
 
 namespace IwInput {
-	class WindowsRawMouse
+	class IWINPUT_API WindowsRawMouse
 		: public RawMouse
 	{
 	private:

@@ -4,7 +4,7 @@
 
 #ifdef IW_PLATFORM_WINDOWS
 namespace IwInput {
-	class WindowsKeyboard
+	class IWINPUT_API WindowsKeyboard
 		: public Keyboard
 	{
 	public:

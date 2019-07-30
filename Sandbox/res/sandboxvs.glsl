@@ -1,8 +1,8 @@
 #version 430 core
 
 uniform mat4 proj;
-uniform mat4 view;
 uniform mat4 model;
+uniform mat4 view;
 
 in vec3 position;
 

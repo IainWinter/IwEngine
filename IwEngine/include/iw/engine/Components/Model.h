@@ -14,5 +14,7 @@ namespace IwEngine {
 		Model(
 			ModelData* data,
 			IwRenderer::IDevice* device);
+
+		~Model();
 	};
 }

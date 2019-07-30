@@ -27,22 +27,26 @@ namespace IwEngine {
 			scene->mNumMeshes
 		};
 
-		for (size_t i = 0; i < scene->mNumMeshes; ++i) {
+		for (size_t i = 0; i < scene->mNumMeshes; i++) {
 			const aiMesh* aimesh = scene->mMeshes[i];
-			constexpr size_t FACE_SIZE = 3 * sizeof(size_t);
-			constexpr size_t VERT_SIZE = sizeof(IwGraphics::Vertex);
-			constexpr size_t VEC3_SIZE = sizeof(iwm::vector3);
+
+			size_t indexBufferSize = 0;
+			for (size_t t = 0; t < aimesh->mNumFaces; t++) {
+				indexBufferSize += aimesh->mFaces[t].mNumIndices;
+			}
 
 			MeshData& mesh = model->Meshes[i];
 			
 			mesh.FaceCount = 0;
-			mesh.Faces = new unsigned int[aimesh->mNumFaces];
+			mesh.Faces = new unsigned int[indexBufferSize];
 
 			if (mesh.Faces) {
-				for (size_t t = 0; t < aimesh->mNumFaces; ++t) {
-					const aiFace* face = &aimesh->mFaces[t];
-					memcpy(&mesh.Faces[mesh.FaceCount], face->mIndices, FACE_SIZE);
-					mesh.FaceCount += 3;
+				for (size_t t = 0; t < aimesh->mNumFaces; t++) {
+					const aiFace& face = aimesh->mFaces[t];
+					for (size_t f = 0; f < face.mNumIndices; f++) {
+						mesh.Faces[mesh.FaceCount] = face.mIndices[f];
+						mesh.FaceCount++;
+					}
 				}
 			}
 

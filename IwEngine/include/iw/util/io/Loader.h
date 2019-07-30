@@ -6,12 +6,18 @@
 namespace iwutil {
 	template<
 		typename _resource_t>
-		class Loader {
+	class IWUTIL_API Loader {
 		protected:
 			struct {
 				std::vector<_resource_t*> loaded;
 			};
 		public:
+			virtual ~Loader() {
+				for (_resource_t* r : loaded) {
+					delete r;
+				}
+			}
+
 			virtual _resource_t* Load(
 				const char* path) = 0;
 

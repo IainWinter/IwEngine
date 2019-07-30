@@ -4,7 +4,7 @@
 #include "iw/input/Events/InputEvent.h"
 
 namespace IwInput {
-	class MouseBase
+	class IWINPUT_API MouseBase
 		: public Device
 	{
 	protected:
@@ -30,7 +30,7 @@ namespace IwInput {
 			unsigned int oskey);
 	};
 
-	class Mouse
+	class IWINPUT_API Mouse
 		: public MouseBase
 	{
 	public:
@@ -55,7 +55,7 @@ namespace IwInput {
 	};
 
 #ifdef IW_PLATFORM_WINDOWS
-	class RawMouse
+	class IWINPUT_API RawMouse
 		: public MouseBase
 	{
 	public:

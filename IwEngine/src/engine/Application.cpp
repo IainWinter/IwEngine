@@ -22,10 +22,11 @@ namespace IwEngine {
 
 		LOG_SINK(iwlog::async_stdout_sink, iwlog::INFO);
 		LOG_SINK(iwlog::async_stderr_sink, iwlog::ERR);
-		LOG_SINK(iwlog::file_sink,   iwlog::DEBUG, "sandbox.log");
+		LOG_SINK(iwlog::file_sink,         iwlog::DEBUG, "sandbox.log");
 
 		m_window->SetCallback(
 			iwevents::make_callback(&Application::HandleEvent, this));
+
 		int status;
 		LOG_DEBUG << "Initializing window...";
 		if (status = m_window->Initialize(windowOptions)) {
@@ -100,7 +101,7 @@ namespace IwEngine {
 			case MouseButton:      DispatchEvent((MouseButtonEvent&)e);   break;
 			case Key:    	       DispatchEvent((KeyEvent&)e);           break;
 			case KeyTyped:         DispatchEvent((KeyTypedEvent&)e);      break;
-			case WindowClosed:     Destroy();                             break;
+			case WindowClosed:     Destroy();                                 break;
 			default: LOG_WARNING << "Application mishandled event " + e.Type; break;
 		}
 	}
