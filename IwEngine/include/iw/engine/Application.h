@@ -47,6 +47,10 @@ namespace IwEngine {
 		inline IWindow& GetWindow() {
 			return *m_window;
 		}
+
+		inline void* GetImGuiContext() {
+			return m_imguiLayer->GetContext();
+		}
 	private:
 		template<
 			typename _event_t>

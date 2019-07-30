@@ -6,6 +6,8 @@
 #include <thread>
 #include <vector>
 
+#include "imgui/imgui.h"
+
 struct Transform { float x, y, z; };
 struct Velocity  { float vx, vy, vz; };
 struct Collider  { float count; };
@@ -19,6 +21,16 @@ public:
 		//InputManager.CreateDevice<IwInput::RawKeyboard>();
 
 		PushLayer(new GameLayer());
+	}
+
+	int Initialize(
+		const IwEngine::WindowOptions& windowOptions) override
+	{
+		Application::Initialize(windowOptions);
+
+		ImGui::SetCurrentContext((ImGuiContext*)GetImGuiContext());
+
+		return 0;
 	}
 };
 

@@ -7,6 +7,7 @@
 #include "iw/util/io/File.h"
 #include "iw/input/Devices/Keyboard.h"
 #include "iw/input/Devices/Mouse.h"
+#include "imgui/imgui.h"
 
 struct Player {
 	float Speed;
@@ -44,7 +45,7 @@ int GameLayer::Initialize() {
 	IwEntity::Entity player = space.CreateEntity();
 	space.CreateComponent<IwEngine::Transform>(player, iwm::vector3(0, 0, 1));
 	space.CreateComponent<IwEngine::Model>(player, loader.Load("res/quad.obj"), device);
-	space.CreateComponent<Player>(player, 10.0f, 100.f, 20, 10);
+	space.CreateComponent<Player>(player, 10.0f, 100.f, 10, 30);
 
 	return 0;
 }
@@ -74,7 +75,7 @@ void GameLayer::Update() {
 		if (player.DashFrames > 0) {
 			transform.Position += movement * player.DashSpeed * player.DashFrames / player.DashFramesTotal * IwEngine::Time::DeltaTime();
 			if (IwInput::Keyboard::KeyUp(IwInput::X)) {
-				player.DashFrames--;
+				player.DashFrames = 0;
 			}
 		}
 
@@ -128,4 +129,16 @@ void GameLayer::FixedUpdate() {
 			player.DashFrames--;
 		}
 	}
+}
+
+void GameLayer::ImGui() {
+	ImGui::Begin("Game layer");
+
+	for (auto entity : space.ViewComponents<Player>()) {
+		Player& player = entity.GetComponent<Player>();
+		ImGui::Text("Dash frames: %i",
+			player.DashFrames);
+	}
+
+	ImGui::End();
 }

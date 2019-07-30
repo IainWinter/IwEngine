@@ -7,7 +7,10 @@ namespace IwEngine {
 		: public Layer
 	{
 	private:
-		int counter = 0;
+		void* m_context;
+		//test
+		int   counter = 0;
+
 	public:
 		ImGuiLayer();
 		~ImGuiLayer();
@@ -20,8 +23,17 @@ namespace IwEngine {
 		void Begin();
 		void End();
 
-		bool On(WindowResizedEvent& event);
-		bool On(MouseMovedEvent&    event);
-		bool On(MouseButtonEvent&   event);
+		inline void* GetContext() {
+			return m_context;
+		}
+
+		bool On(
+			WindowResizedEvent& event);
+
+		bool On(
+			MouseMovedEvent& event);
+
+		bool On(
+			MouseButtonEvent& event);
 	};
 }

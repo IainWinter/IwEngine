@@ -9,6 +9,7 @@ bindir  = "/bin/" .. cfgname
 libdir  = "/lib/" .. cfgname
 resdir  = "/res"
 blddir  = "/build"
+incdir  = "/include"
 
 workspace "IwEngine"
 	configurations { "Debug", "Release" }
@@ -18,7 +19,7 @@ workspace "IwEngine"
 
 include (glewdir)
 include (imguidir)
-os.execute ("cmake -S " .. assimpdir .. " -B " .. assimpdir .. "/build")
+os.execute ("cmake -S " .. assimpdir .. " -B " .. assimpdir .. blddir)
 
 project "IwEngine"
 	kind "SharedLib"
@@ -35,16 +36,16 @@ project "IwEngine"
 	}
 
 	includedirs {
-		iwengdir  .. "/include",
+		iwengdir  .. incdir,
 		iwengdir  .. "/src/engine/Platform",
-		glewdir   .. "/include",
-		imguidir  .. "/include",
-		assimpdir .. "/include",
-		assimpdir .. blddir .. "/include"
+		glewdir   .. incdir,
+		imguidir  .. incdir,
+		assimpdir .. incdir,
+		assimpdir .. blddir .. incdir
 	}
 
 	libdirs {
-		assimpdir .. "/build/code/%{cfg.buildcfg}"
+		assimpdir .. blddir .. "/code/%{cfg.buildcfg}"
 	}
 
 	links {
@@ -63,11 +64,11 @@ project "IwEngine"
 	}
 
 	postbuildcommands  {
-		"xcopy /q /y /f \"" .. assimpdir  .. "/build/code/%{cfg.buildcfg}/assimp-vc140-mt.dll\" \"" .. sndbxdir .. bindir .. "\"",
-		"xcopy /q /y /f \"" .. iwengdir   .. bindir .. "/IwEngine.dll\" \""                  .. sndbxdir .. bindir .. "\"",
-		"xcopy /q /y /f \"" .. glewdir    .. bindir .. "/GLEW.dll\" \""                      .. sndbxdir .. bindir .. "\"",
-		"xcopy /q /y /f /i \"" .. sndbxdir .. resdir .. "\" \"" .. sndbxdir .. blddir .. resdir .. "\"",
-		"xcopy /q /y /f /i \"" .. sndbxdir .. resdir .. "\" \"" .. sndbxdir .. bindir .. resdir .. "\""
+		"xcopy /q /y /f \""    .. assimpdir .. blddir .. "/code/%{cfg.buildcfg}/assimp-vc140-mt.dll\" \"" .. sndbxdir .. bindir .. "\"",
+		"xcopy /q /y /f \""    .. iwengdir  .. bindir .. "/IwEngine.dll\" \""  .. sndbxdir .. bindir .. "\"",
+		"xcopy /q /y /f \""    .. glewdir   .. bindir .. "/GLEW.dll\" \""      .. sndbxdir .. bindir .. "\"",
+		"xcopy /q /y /f /i \"" .. sndbxdir  .. resdir .. "\" \""               .. sndbxdir .. blddir .. resdir .. "\"",
+		"xcopy /q /y /f /i \"" .. sndbxdir  .. resdir .. "\" \""               .. sndbxdir .. bindir .. resdir .. "\""
 	}
 
 	filter "system:windows"
@@ -100,11 +101,13 @@ project "Sandbox"
 	}
 
 	includedirs {
-		iwengdir .. "/include"
+		iwengdir  .. incdir,
+		imguidir  .. incdir
 	}
 
 	links {
 		"IwEngine",
+                "ImGui",
 		"opengl32.lib"
 	}
 

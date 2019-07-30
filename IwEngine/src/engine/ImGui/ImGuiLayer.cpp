@@ -13,7 +13,8 @@ namespace IwEngine {
 
 	int ImGuiLayer::Initialize() {
 		IMGUI_CHECKVERSION();
-		ImGui::CreateContext();
+
+		m_context = ImGui::CreateContext();
 		ImGui::StyleColorsDark();
 		ImGui_ImplOpenGL3_Init("#version 410");
 
