@@ -16,7 +16,7 @@ namespace IwEngine {
 	}
 
 	int Application::Initialize(
-		const WindowOptions& windowOptions)
+		InitOptions& options)
 	{
 		Time::Update();
 
@@ -29,7 +29,7 @@ namespace IwEngine {
 
 		int status;
 		LOG_DEBUG << "Initializing window...";
-		if (status = m_window->Initialize(windowOptions)) {
+		if (status = m_window->Initialize(options.WindowOptions)) {
 			LOG_ERROR << "Window failed to initialize with error code "
 				<< status;
 			return status;
@@ -44,7 +44,7 @@ namespace IwEngine {
 
 		for (Layer* layer : m_layerStack) {
 			LOG_DEBUG << "Initializing " << layer->Name() << " layer...";
-			if (status = layer->Initialize()) {
+			if (status = layer->Initialize(options)) {
 				LOG_ERROR << layer->Name()
 					<< " layer initialization failed with error code "
 					<< status;
@@ -52,8 +52,8 @@ namespace IwEngine {
 			}
 		}
 
-		m_window->SetState(windowOptions.state);
-		m_window->SetCursor(false);
+		//Need to set after so window doesn't send events before imgui gets initialized 
+		m_window->SetState(options.WindowOptions.State);
 
 		Time::Update();
 		Time::SetFixedTime(1 / 60.0f);
@@ -109,7 +109,9 @@ namespace IwEngine {
 		}
 	}
 
-	void Application::HandleEvent(Event& e) {
+	void Application::HandleEvent(
+		Event& e)
+	{
 		switch (e.Type) {
 			case WindowResized:    DispatchEvent((WindowResizedEvent&)e); break;
 			case MouseWheel:       DispatchEvent((MouseWheelEvent&)e);    break;

@@ -24,16 +24,25 @@ public:
 	}
 
 	int Initialize(
-		const IwEngine::WindowOptions& windowOptions) override
+		IwEngine::InitOptions& options) override
 	{
-		Application::Initialize(windowOptions);
+		Application::Initialize(options);
 
-		ImGui::SetCurrentContext((ImGuiContext*)GetImGuiContext());
+		ImGui::SetCurrentContext((ImGuiContext*)options.ImGuiContext);
 
 		return 0;
 	}
 };
 
-IwEngine::Application* CreateApplication() {
+IwEngine::Application* CreateApplication(
+	IwEngine::InitOptions& options)
+{
+	options.WindowOptions = IwEngine::WindowOptions {
+		1280,
+		720,
+		true,
+		IwEngine::NORMAL,
+	};
+
 	return new Game();
 }

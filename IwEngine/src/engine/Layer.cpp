@@ -8,7 +8,9 @@ namespace IwEngine {
 
 	Layer::~Layer() {}
 
-	int Layer::Initialize() {
+	int Layer::Initialize(
+		InitOptions& options) 
+	{
 		return 0;
 	}
 

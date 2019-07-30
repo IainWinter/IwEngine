@@ -15,7 +15,9 @@ namespace IwEngine {
 		ImGuiLayer();
 		~ImGuiLayer();
 
-		int  Initialize() override;
+		int Initialize(
+			InitOptions& options) override;
+
 		void Update()     override;
 		void Destroy()    override;
 		void ImGui()      override;
@@ -28,12 +30,12 @@ namespace IwEngine {
 		}
 
 		bool On(
-			WindowResizedEvent& event);
+			WindowResizedEvent& event) override;
 
 		bool On(
-			MouseMovedEvent& event);
+			MouseMovedEvent& event) override;
 
 		bool On(
-			MouseButtonEvent& event);
+			MouseButtonEvent& event) override;
 	};
 }

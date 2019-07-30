@@ -3,24 +3,9 @@
 #include "Events/Event.h"
 #include "iw/events/functional/callback.h"
 #include "iw/input/InputManager.h"
+#include "WindowOptions.h"
 
 namespace IwEngine {
-	enum DisplayState {
-		NORMAL,
-		HIDDEN,
-		MINIMIZED,
-		MAXIMIZED,
-		FULLSCREEN, //Don't work
-		BORDERLESS // Don't work
-	};
-
-	struct WindowOptions {
-		unsigned int width;
-		unsigned int height;
-		bool         cursor;
-		DisplayState state;
-	};
-
 	class IWindow {
 	public:
 		using EventCallback = iwevents::callback<Event&>;
@@ -84,19 +69,19 @@ namespace IwEngine {
 		}
 
 		inline unsigned int Width() {
-			return options.width;
+			return options.Width;
 		}
 
 		inline unsigned int Height() {
-			return options.height;
+			return options.Height;
 		}
 
 		inline bool Cursor() {
-			return options.cursor;
+			return options.Cursor;
 		}
 
 		inline DisplayState State() {
-			return options.state;
+			return options.State;
 		}
 
 	};

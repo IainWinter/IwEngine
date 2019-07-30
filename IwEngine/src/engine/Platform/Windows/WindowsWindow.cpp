@@ -18,6 +18,8 @@ namespace IwEngine {
 	int WindowsWindow::Initialize(
 		const WindowOptions& options)
 	{
+		this->options = options;
+
 		m_instance = GetModuleHandle(NULL);
 		MAKEINTATOM(RegClass(m_instance, _WndProc));
 
@@ -68,7 +70,7 @@ namespace IwEngine {
 			_T("Core"), _T("Space"),
 			WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
 			100, 100,
-			options.width, options.height,
+			options.Width, options.Height,
 			NULL, NULL,
 			m_instance, NULL);
 
@@ -134,9 +136,8 @@ namespace IwEngine {
 			return 1;
 		}
 
-		SetCursor(options.cursor);
-
-		this->options = options;
+		SetCursor(options.Cursor);
+		//SetState(options.State);
 
 		glClearColor(70 / 255.0f, 85 / 255.0f, 100 / 255.0f, 1.0f);
 		glEnable(GL_DEPTH_TEST);
@@ -208,7 +209,7 @@ namespace IwEngine {
 			ShowWindow(m_window, wstate);
 		}
 
-		options.state = state;
+		options.State = state;
 	}
 
 
@@ -216,7 +217,7 @@ namespace IwEngine {
 		bool show)
 	{
 		ShowCursor(show);
-		options.cursor = show;
+		options.Cursor = show;
 	}
 
 	void WindowsWindow::SetDimensions(

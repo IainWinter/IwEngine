@@ -3,7 +3,8 @@
 #include "Application.h"
 #include "iw/log/logger.h"
 
-extern IwEngine::Application* CreateApplication();
+extern IwEngine::Application* CreateApplication(
+	IwEngine::InitOptions& options);
 
 #ifdef IW_PLATFORM_WINDOWS
 
@@ -23,14 +24,9 @@ int WINAPI WinMain(
 		freopen_s(&fe, "CONERR$", "w", stderr);
 	}
 
-	IwEngine::WindowOptions options{
-		1280,
-		720,
-		true,
-		IwEngine::NORMAL,
-	};
+	IwEngine::InitOptions options;
 
-	IwEngine::Application* app = CreateApplication();
+	IwEngine::Application* app = CreateApplication(options);
 	int status;
 	if (status = app->Initialize(options)) {
 		LOG_ERROR

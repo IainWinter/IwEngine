@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core.h"
+#include "InitOptions.h"
 #include "Events/AllEvents.h"
 
 namespace IwEngine {
@@ -14,7 +15,9 @@ namespace IwEngine {
 
 		virtual ~Layer();
 
-		virtual int  Initialize();
+		virtual int Initialize(
+			InitOptions& options);
+
 		virtual void Destroy();
 		virtual void Update();
 		virtual void FixedUpdate();

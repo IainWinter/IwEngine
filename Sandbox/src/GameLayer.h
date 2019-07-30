@@ -19,7 +19,9 @@ public:
 	GameLayer();
 	~GameLayer();
 
-	int  Initialize()  override;
+	int Initialize(
+		IwEngine::InitOptions& options)  override;
+
 	void Update()      override;
 	void FixedUpdate() override;
 	void ImGui()       override;

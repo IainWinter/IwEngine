@@ -28,7 +28,9 @@ GameLayer::~GameLayer() {
 	delete device;
 }
 
-int GameLayer::Initialize() {
+int GameLayer::Initialize(
+	IwEngine::InitOptions& options)
+{
 	device = new IwRenderer::GLDevice();
 
 	auto vs = device->CreateVertexShader(iwu::ReadFile("res/sandboxvs.glsl").c_str());

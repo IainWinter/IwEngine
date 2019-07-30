@@ -5,6 +5,7 @@
 #include "LayerStack.h"
 #include "iw/input/InputManager.h"
 #include "ImGui/ImGuiLayer.h"
+#include "InitOptions.h"
 
 namespace IwEngine {
 	class IWENGINE_API Application {
@@ -22,7 +23,7 @@ namespace IwEngine {
 		virtual ~Application();
 
 		virtual int Initialize(
-			const WindowOptions& windowOptions);
+			InitOptions& options);
 
 		virtual void Run();
 		virtual void Destroy();
@@ -47,10 +48,6 @@ namespace IwEngine {
 		inline IWindow& GetWindow() {
 			return *m_window;
 		}
-
-		inline void* GetImGuiContext() {
-			return m_imguiLayer->GetContext();
-		}
 	private:
 		template<
 			typename _event_t>
@@ -72,4 +69,5 @@ namespace IwEngine {
 	};
 }
 
-IwEngine::Application* CreateApplication();
+IwEngine::Application* CreateApplication(
+	IwEngine::InitOptions& options);
