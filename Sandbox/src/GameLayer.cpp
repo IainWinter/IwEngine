@@ -17,10 +17,6 @@ struct Player {
 	int DashFrames;
 };
 
-struct Enemy {
-	float 
-};
-
 GameLayer::GameLayer()
 	: IwEngine::Layer("Game")
 	, device(nullptr)
@@ -53,6 +49,10 @@ int GameLayer::Initialize(
 	space.CreateComponent<IwEngine::Model>(player, loader.Load("res/quad.obj"), device);
 	space.CreateComponent<Player>(player, 10.0f, 100.f, 10, 15);
 
+	IwEntity::Entity enemy = space.CreateEntity();
+	space.CreateComponent<IwEngine::Transform>(enemy, iwm::vector3(5, 0, 1));
+	//space.CreateComponent<IwEngine::Model>(enemy, loader.Load("res/quad.obj"), device);
+
 	return 0;
 }
 
@@ -60,6 +60,8 @@ void GameLayer::Update() {
 	for (auto c : space.ViewComponents<IwEngine::Transform, Player>()) {
 		auto& transform = c.GetComponent<IwEngine::Transform>();
 		auto& player    = c.GetComponent<Player>();
+
+		transform.Rotation *= iwm::quaternion::create_from_euler_angles(0, 0, IwEngine::Time::DeltaTime());
 
 		iwm::vector3 movement;
 		if (IwInput::Keyboard::KeyDown(IwInput::LEFT)) {
@@ -113,8 +115,6 @@ void GameLayer::Update() {
 	for (auto c : space.ViewComponents<IwEngine::Transform, IwEngine::Model>()) {
 		auto& transform = c.GetComponent<IwEngine::Transform>();
 		auto& model     = c.GetComponent<IwEngine::Model>();
-
-		transform.Rotation *= iwm::quaternion::create_from_euler_angles(0, 0, IwEngine::Time::DeltaTime());
 
 		pipeline->GetParam("model")
 			->SetAsMat4(transform.Transformation());
