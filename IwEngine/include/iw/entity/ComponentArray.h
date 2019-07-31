@@ -102,7 +102,7 @@ namespace IwEntity {
 				if (    m_set.at_index(entity) >= chunk->Begin.index()
 					&& m_set.at_index(entity) <  chunk->End.index())
 				{
-					chunk->End--;
+					chunk->Begin++; //Remove from beginning probly wrong
 					if (chunk->Begin == chunk->End) {
 						chunk = m_chunks.erase(chunk);
 					}
@@ -144,8 +144,8 @@ namespace IwEntity {
 
 		void UpdateChunk(
 			Entity entity,
-			Archetype oldArchetype,
-			Archetype archetype) override
+			Archetype archetype,
+			Archetype oldArchetype) override
 		{
 			auto begin = m_chunks.begin();
 			auto end   = m_chunks.end();

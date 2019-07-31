@@ -8,6 +8,8 @@ namespace IwEntity {
 	void Space::DestroyEntity(
 		Entity entity)
 	{
+		Archetype old = m_entities.ArchetypeOf(entity);
+
 		m_entities.DestroyEntity(entity);
 
 		for (auto& set : m_components) {
@@ -16,6 +18,7 @@ namespace IwEntity {
 			}
 		}
 	}
+
 	void Space::Sort() {
 		for (auto& set : m_components) {
 			if (set) {

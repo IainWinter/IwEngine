@@ -14,6 +14,7 @@ private:
 	IwEngine::ModelLoader  loader;
 	IwRenderer::IDevice*   device;
 	IwRenderer::IPipeline* pipeline;
+	std::vector<IwEntity::Entity> bulletsToDestroy;
 
 public:
 	GameLayer();

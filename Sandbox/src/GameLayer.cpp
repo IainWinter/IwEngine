@@ -164,7 +164,7 @@ void GameLayer::Update() {
 			enemy.TimeFrames = enemy.FireTimeTotal;
 			IwEntity::Entity bullet = space.CreateEntity();
 
-			LOG_INFO << bullet;
+			LOG_INFO << "Creating " << bullet;
 
 			space.CreateComponent<IwEngine::Transform>(bullet, transform);
 			space.CreateComponent<IwEngine::Model>(bullet, loader.Load("res/quad.obj"), device);
@@ -174,7 +174,6 @@ void GameLayer::Update() {
 		enemy.TimeFrames -= IwEngine::Time::DeltaTime();
 	}
 
-	std::vector<IwEntity::Entity> bulletsToDestroy;
 	for (auto c : space.ViewComponents<IwEngine::Transform, Bullet>()) {
 		auto& transform = c.GetComponent<IwEngine::Transform>();
 		auto& bullet    = c.GetComponent<Bullet>();
@@ -185,12 +184,16 @@ void GameLayer::Update() {
 
 		if (transform.Position.x > 15 || transform.Position.x < -15 || transform.Position.y > 15 || transform.Position.y < -15) {
 			bulletsToDestroy.push_back(c.Entity);
+
+			LOG_INFO << "Queuing " << c.Entity;
 		}
 	}
 
 	while (!bulletsToDestroy.empty()) {
 		IwEntity::Entity& e = bulletsToDestroy.back();
 		space.DestroyEntity(e);
+
+		LOG_INFO << "Deleting " << e;
 
 		bulletsToDestroy.pop_back();
 	}

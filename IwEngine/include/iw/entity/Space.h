@@ -86,7 +86,7 @@ namespace IwEntity {
 			for (Archetype a = 1; a <= oldArchetype; a = a << 1, index++) {
 				if ((oldArchetype & a) == a) {
 					m_components.at(index)->UpdateChunk(
-						entity, oldArchetype, archetype);
+						entity, archetype, oldArchetype);
 				}
 			}
 		}
