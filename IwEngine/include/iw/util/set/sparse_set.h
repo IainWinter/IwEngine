@@ -121,49 +121,49 @@ namespace iwutil {
 				return iterator(m_index - dif, m_direct);
 			}
 
-			difference_type operator+(
+			virtual difference_type operator+(
 				const iterator& itr)
 			{
 				return m_index + itr.m_index;
 			}
 
-			difference_type operator-(
+			virtual difference_type operator-(
 				const iterator& itr)
 			{
 				return m_index - itr.m_index;
 			}
 
-			bool operator==(
+			virtual bool operator==(
 				const iterator& itr) const
 			{
 				return m_index == itr.m_index;
 			}
 
-			bool operator!=(
+			virtual bool operator!=(
 				const iterator& itr) const
 			{
 				return !(m_index == itr.m_index);
 			}
 
-			bool operator>(
+			virtual bool operator>(
 				const iterator& itr) const
 			{
 				return m_index > itr.m_index;
 			}
 
-			bool operator<(
+			virtual bool operator<(
 				const iterator& itr) const
 			{
 				return m_index < itr.m_index;
 			}
 
-			bool operator>=(
+			virtual bool operator>=(
 				const iterator& itr) const
 			{
 				return !(m_index < itr.m_index);
 			}
 
-			bool operator<=(
+			virtual bool operator<=(
 				const iterator& itr) const
 			{
 				return !(m_index > itr.m_index);
@@ -180,7 +180,7 @@ namespace iwutil {
 			reference operator[](
 				const index_type& index)
 			{
-				return (*m_direct)[m_index + index];
+				return (*m_direct)[m_index + index]; //Can't remember why this would be an offset? Probly wrong
 			}
 		};
 	protected:
@@ -416,30 +416,28 @@ namespace iwutil {
 	public:
 		template<
 			bool _const>
-		class iterator_ {
+		class iterator_ 
+			: public iterator //This might be monkey shit but well see
+		{
 			public:
-				using index_type = _index_t;
 				using item_type         
 					= std::conditional_t<_const, const _item_t, _item_t>;
-				using difference_type
-					= typename type_traits<index_type>::difference_type;
-				using direct_type       = std::vector<item_type>;
-				using iterator_category = std::random_access_iterator_tag;
-				using value_type        = std::remove_cv_t<item_type>;
-				using pointer           = item_type*;
-				using reference         = item_type&;
+				using item_vec   = std::vector<item_type>;
+				using value_type = std::remove_cv_t<item_type>;
+				using pointer    = item_type*;
+				using reference  = item_type&;
 
 			private:
-				index_type m_index; //Gotta add sparse index
-				direct_type* m_direct;
+				item_vec* m_items;
 
 				friend class sparse_set<index_type, item_type>;
 
 				iterator_(
 					index_type index,
-					direct_type* direct)
-					: m_index(index)
-					, m_direct(direct)
+					const direct_type* direct,
+					const item_vec* items)
+					: iterator(index, direct)
+					, m_items(items)
 				{}
 
 			public:
@@ -458,7 +456,7 @@ namespace iwutil {
 
 				iterator_& operator=(
 					iterator_&& copy) = default;
-
+					
 				iterator_& operator++() {
 					++m_index;
 					return *this;
@@ -510,55 +508,7 @@ namespace iwutil {
 				{
 					return iterator_(m_index - dif, m_direct);
 				}
-
-				difference_type operator+(
-					const iterator_& itr)
-				{
-					return m_index + itr.m_index;
-				}
-
-				difference_type operator-(
-					const iterator_& itr)
-				{
-					return m_index - itr.m_index;
-				}
-
-				bool operator==(
-					const iterator_& itr) const
-				{
-					return m_index == itr.m_index;
-				}
-
-				bool operator!=(
-					const iterator_& itr) const
-				{
-					return !(m_index == itr.m_index);
-				}
-
-				bool operator>(
-					const iterator_& itr) const
-				{
-					return m_index > itr.m_index;
-				}
-
-				bool operator<(
-					const iterator_& itr) const
-				{
-					return m_index < itr.m_index;
-				}
-
-				bool operator>=(
-					const iterator_& itr) const
-				{
-					return !(m_index < itr.m_index);
-				}
-
-				bool operator<=(
-					const iterator_& itr) const
-				{
-					return !(m_index > itr.m_index);
-				}
-
+				
 				pointer operator->() {
 					return &(*m_direct)[m_index];
 				}
@@ -571,10 +521,6 @@ namespace iwutil {
 					const index_type& index)
 				{
 					return (*m_direct)[m_index + index];
-				}
-
-				inline index_type index() {
-					return m_index;
 				}
 		};
 
