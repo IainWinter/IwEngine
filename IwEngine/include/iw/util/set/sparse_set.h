@@ -430,7 +430,7 @@ namespace iwutil {
 				using reference         = item_type&;
 
 			private:
-				index_type m_index;
+				index_type m_index; //Gotta add sparse index
 				direct_type* m_direct;
 
 				friend class sparse_set<index_type, item_type>;

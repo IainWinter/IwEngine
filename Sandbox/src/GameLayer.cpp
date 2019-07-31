@@ -168,7 +168,7 @@ void GameLayer::Update() {
 
 			space.CreateComponent<IwEngine::Transform>(bullet, transform);
 			space.CreateComponent<IwEngine::Model>(bullet, loader.Load("res/quad.obj"), device);
-			space.CreateComponent<Bullet>(bullet, LINE, 10.0f);
+			space.CreateComponent<Bullet>(bullet, LINE, 4.0f);
 		}
 
 		enemy.TimeFrames -= IwEngine::Time::DeltaTime();

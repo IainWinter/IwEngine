@@ -9,6 +9,7 @@ namespace iwutil {
 	class IWUTIL_API Loader {
 		protected:
 			struct {
+				//Impl some caching by using path (name) and the resources?
 				std::vector<_resource_t*> loaded;
 			};
 		public:

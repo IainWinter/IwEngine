@@ -215,6 +215,7 @@ namespace IwEntity {
 					m_itrs
 				);
 
+				//getting wrong entity from. It's not the index!
 				return ComponentData(std::get<0>(m_itrs).index(), components);
 			}
 		};
