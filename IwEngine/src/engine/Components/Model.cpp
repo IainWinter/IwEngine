@@ -27,7 +27,50 @@ namespace IwEngine {
 		}
 	}
 
+	Model::Model(
+		Model&& copy)
+		: Meshes(copy.Meshes)
+		, MeshCount(copy.MeshCount)
+	{
+		copy.Meshes    = nullptr;
+		copy.MeshCount = 0;
+	}
+
+	Model::Model(
+		const Model& copy)
+		: Meshes(new Mesh[copy.MeshCount])
+		, MeshCount(copy.MeshCount)
+	{
+		for (std::size_t i = 0; i < MeshCount; i++) {
+			Meshes[i] = copy.Meshes[i];
+		}
+	}
+
 	Model::~Model() {
 		delete[] Meshes;
+	}
+
+	Model& Model::operator=(
+		Model&& copy)
+	{
+		Meshes    = copy.Meshes;
+		MeshCount = copy.MeshCount;
+
+		copy.Meshes    = nullptr;
+		copy.MeshCount = 0;
+
+		return *this;
+	}
+
+	Model& Model::operator=(
+		const Model& copy)
+	{
+		Meshes    = new Mesh[copy.MeshCount];
+		MeshCount = copy.MeshCount;
+		for (std::size_t i = 0; i < MeshCount; i++) {
+			Meshes[i] = copy.Meshes[i];
+		}
+
+		return *this;
 	}
 }

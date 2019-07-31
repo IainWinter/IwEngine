@@ -1,6 +1,5 @@
 #pragma once
 
-#include "iw/engine/Core.h"
 #include "iw/math/matrix4.h"
 
 namespace IwEngine {

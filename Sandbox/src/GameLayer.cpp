@@ -3,6 +3,7 @@
 #include "iw/engine/Components/Transform.h"
 #include "iw/engine/Components/Model.h"
 #include "iw/engine/Components/Camera.h"
+#include "iw/engine/Components/Destroy.h"
 #include "iw/renderer/Platform/OpenGL/GLDevice.h"
 #include "iw/util/io/File.h"
 #include "iw/input/Devices/Keyboard.h"
@@ -12,9 +13,29 @@
 struct Player {
 	float Speed;
 	float DashSpeed;
-	int DashFramesTotal;
-	int CooldownFrames;
-	int DashFrames;
+	float DashTimeTotal;
+	float DashCooldown;
+	float DashTime;
+};
+
+enum EnemyType {
+	SPIN
+};
+
+enum BulletType {
+	LINE
+};
+
+struct Enemy {
+	EnemyType Type;
+	float     FireTimeTotal;
+	float     TimeCooldown;
+	float     TimeFrames;
+};
+
+struct Bullet {
+	BulletType Type;
+	float      Speed;
 };
 
 GameLayer::GameLayer()
@@ -47,11 +68,12 @@ int GameLayer::Initialize(
 	IwEntity::Entity player = space.CreateEntity();
 	space.CreateComponent<IwEngine::Transform>(player, iwm::vector3(0, 0, 1));
 	space.CreateComponent<IwEngine::Model>(player, loader.Load("res/quad.obj"), device);
-	space.CreateComponent<Player>(player, 10.0f, 100.f, 10, 15);
+	space.CreateComponent<Player>(player, 10.0f, 100.0f, 0.1666f, 0.1f);
 
 	IwEntity::Entity enemy = space.CreateEntity();
 	space.CreateComponent<IwEngine::Transform>(enemy, iwm::vector3(5, 0, 1));
-	//space.CreateComponent<IwEngine::Model>(enemy, loader.Load("res/quad.obj"), device);
+	space.CreateComponent<IwEngine::Model>(enemy, loader.Load("res/quad.obj"), device);
+	space.CreateComponent<Enemy>(enemy, SPIN, 0.1f, 0.1f);
 
 	return 0;
 }
@@ -80,16 +102,16 @@ void GameLayer::Update() {
 			movement.y -= 1;
 		}
 
-		if (player.DashFrames > 0) {
-			transform.Position += movement * player.DashSpeed * player.DashFrames / player.DashFramesTotal * IwEngine::Time::DeltaTime();
+		if (player.DashTime > 0) {
+			transform.Position += movement * player.DashSpeed * player.DashTime / player.DashTimeTotal * IwEngine::Time::DeltaTime();
 			if (IwInput::Keyboard::KeyUp(IwInput::X)) {
-				player.DashFrames = 0;
+				player.DashTime = 0;
 			}
 		}
 
 		else {
-			if (player.DashFrames + player.CooldownFrames == 0 && IwInput::Keyboard::KeyDown(IwInput::X)) {
-				player.DashFrames = player.DashFramesTotal;
+			if (player.DashTime + player.DashCooldown <= 0 && IwInput::Keyboard::KeyDown(IwInput::X)) {
+				player.DashTime = player.DashTimeTotal;
 			}
 
 			else {
@@ -125,16 +147,57 @@ void GameLayer::Update() {
 			device->DrawElements(model.Meshes[i].FaceCount, 0);
 		}
 	}
-}
 
-void GameLayer::FixedUpdate() {
 	for (auto c : space.ViewComponents<Player>()) {
 		auto& player = c.GetComponent<Player>();
 
-		if (player.DashFrames > -player.CooldownFrames) {
-			player.DashFrames--;
+		if (player.DashTime > -player.DashCooldown) {
+			player.DashTime -= IwEngine::Time::DeltaTime();
 		}
 	}
+
+	for (auto c : space.ViewComponents<IwEngine::Transform, Enemy>()) {
+		auto& transform = c.GetComponent<IwEngine::Transform>();
+		auto& enemy     = c.GetComponent<Enemy>();
+
+		if (enemy.TimeFrames < 0) {
+			enemy.TimeFrames = enemy.FireTimeTotal;
+			IwEntity::Entity bullet = space.CreateEntity();
+
+			LOG_INFO << bullet;
+
+			space.CreateComponent<IwEngine::Transform>(bullet, transform);
+			space.CreateComponent<IwEngine::Model>(bullet, loader.Load("res/quad.obj"), device);
+			space.CreateComponent<Bullet>(bullet, LINE, 10.0f);
+		}
+
+		enemy.TimeFrames -= IwEngine::Time::DeltaTime();
+	}
+
+	std::vector<IwEntity::Entity> bulletsToDestroy;
+	for (auto c : space.ViewComponents<IwEngine::Transform, Bullet>()) {
+		auto& transform = c.GetComponent<IwEngine::Transform>();
+		auto& bullet    = c.GetComponent<Bullet>();
+
+		if (bullet.Type == LINE) {
+			transform.Position += iwm::vector3::one * transform.Rotation * bullet.Speed * IwEngine::Time::DeltaTime();
+		}
+
+		if (transform.Position.x > 15 || transform.Position.x < -15 || transform.Position.y > 15 || transform.Position.y < -15) {
+			bulletsToDestroy.push_back(c.Entity);
+		}
+	}
+
+	while (!bulletsToDestroy.empty()) {
+		IwEntity::Entity& e = bulletsToDestroy.back();
+		space.DestroyEntity(e);
+
+		bulletsToDestroy.pop_back();
+	}
+}
+
+void GameLayer::FixedUpdate() {
+
 }
 
 void GameLayer::ImGui() {
@@ -142,12 +205,14 @@ void GameLayer::ImGui() {
 
 	for (auto entity : space.ViewComponents<Player>()) {
 		Player& player = entity.GetComponent<Player>();
+		
+		float cooldown = player.DashCooldown + player.DashTime;
 
-		ImGui::Text("Dash frames: %i",
-			player.DashFrames > 0 ? player.DashFrames : 0);
+		ImGui::Text("Dash frames: %f",
+			player.DashTime > 0 ? player.DashTime : 0);
 
-		ImGui::Text("Dash cooldown frames: %i",
-			player.CooldownFrames + player.DashFrames);
+		ImGui::Text("Dash cooldown frames: %f",
+			cooldown > 0 ? cooldown : 0);
 	}
 
 	ImGui::End();

@@ -15,6 +15,18 @@ namespace IwEngine {
 			ModelData* data,
 			IwRenderer::IDevice* device);
 
+		Model(
+			Model&& copy);
+
+		Model(
+			const Model& copy);
+
 		~Model();
+
+		Model& operator=(
+			Model&& copy);
+
+		Model& operator=(
+			const Model& copy);
 	};
 }

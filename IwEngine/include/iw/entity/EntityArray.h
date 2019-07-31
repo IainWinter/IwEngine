@@ -6,7 +6,9 @@
 namespace IwEntity {
 	struct EntityData {
 		Archetype Archetype;
-		std::size_t Count;
+		unsigned int Count;
+		unsigned int Version;
+		bool Dead;
 	};
 
 	class EntityArray {
@@ -35,15 +37,31 @@ namespace IwEntity {
 
 		Entity CreateEntity() {
 			static Entity next = Entity();
-			m_entities.push_back({ 0, 0 });
+			Entity entity = next;
+			for (size_t e = 0; e < m_entities.size(); e++) {
+				if (m_entities.at(e).Dead) {
+					entity = e;
+					break;
+				}
+			}
 
-			return next++;
+			if (entity == next) {
+				m_entities.push_back({ 0, 0 });
+				return next++;
+			}
+
+			EntityData& ed = m_entities.at(entity);
+			ed.Dead      = false;
+			ed.Archetype = Archetype();
+			ed.Version++;
+
+			return entity;
 		}
 
 		void DestroyEntity(
 			Entity entity)
 		{
-			m_entities.erase(m_entities.begin() + entity);
+			m_entities.at(entity).Dead = true;
 		}
 
 		void Clear() {
