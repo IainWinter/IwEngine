@@ -102,7 +102,7 @@ namespace IwEntity {
 				if (    m_set.at_index(entity) >= chunk->Begin.index()
 					&& m_set.at_index(entity) <  chunk->End.index())
 				{
-					chunk->Begin++; //Remove from beginning probly wrong
+					chunk->End--; //Remove from beginning probly wrong
 					if (chunk->Begin == chunk->End) {
 						chunk = m_chunks.erase(chunk);
 					}
