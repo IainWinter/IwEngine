@@ -31,8 +31,8 @@ struct Enemy {
 	float     Speed;
 	float     FireTimeTotal;
 	float     TimeToShoot;
-	float     TimeCooldown;
-	float     TimeFrames;
+	float     FireCooldown;
+	float     FireTime;
 	bool      CanShoot;
 };
 
@@ -76,9 +76,9 @@ int GameLayer::Initialize(
 	for (size_t x = 0; x < 5; x++) {
 		for (size_t y = 0; y < 5; y++) {
 			IwEntity::Entity e = space.CreateEntity();
-			space.CreateComponent<IwEngine::Transform>(e, iwm::vector3(x * 2, y * 2, 1));
+			space.CreateComponent<IwEngine::Transform>(e, iwm::vector3(x * 3, y * 3, 1));
 			space.CreateComponent<IwEngine::Model>(e, loader.Load("res/quad.obj"), device);
-			space.CreateComponent<Enemy>(e, SPIN, 2.5f, 0.15f, 0.1f, 0.05f);
+			space.CreateComponent<Enemy>(e, SPIN, 5.0f, 0.1f, 0.05f, 0.05f);
 		}
 	}
 
@@ -167,24 +167,24 @@ void GameLayer::Update() {
 		auto& transform = c.GetComponent<IwEngine::Transform>();
 		auto& enemy     = c.GetComponent<Enemy>();
 
-		if (enemy.TimeFrames > enemy.FireTimeTotal) {
+		if (enemy.FireTime > enemy.FireTimeTotal) {
 			transform.Rotation *= iwm::quaternion::create_from_euler_angles(0, 0, enemy.Speed * IwEngine::Time::DeltaTime());
 		}
 
-		else if (enemy.TimeFrames <= 0) {
+		else if (enemy.FireTime <= 0) {
 			enemy.CanShoot    = true;
-			enemy.TimeFrames = enemy.FireTimeTotal + enemy.TimeCooldown;
+			enemy.FireTime = enemy.FireTimeTotal + enemy.FireCooldown;
 		}
 
-		else if (enemy.CanShoot && enemy.TimeFrames <= enemy.TimeToShoot) {
+		else if (enemy.CanShoot && enemy.FireTime <= enemy.TimeToShoot) {
 			enemy.CanShoot = false;
 			IwEntity::Entity bullet = space.CreateEntity();
-			space.CreateComponent<IwEngine::Transform>(bullet, transform.Position, transform.Scale, transform.Rotation.inverted());
+			space.CreateComponent<IwEngine::Transform>(bullet, transform.Position + iwm::vector3(1, 1, 0) * transform.Rotation.inverted(), transform.Scale, transform.Rotation.inverted());
 			space.CreateComponent<IwEngine::Model>(bullet, loader.Load("res/circle.obj"), device);
 			space.CreateComponent<Bullet>(bullet, LINE, 4.0f);
 		}
 
-		enemy.TimeFrames -= IwEngine::Time::DeltaTime();
+		enemy.FireTime -= IwEngine::Time::DeltaTime();
 	}
 
 	for (auto c : space.ViewComponents<IwEngine::Transform, Bullet>()) {
