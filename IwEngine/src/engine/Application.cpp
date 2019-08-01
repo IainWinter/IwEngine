@@ -91,8 +91,8 @@ namespace IwEngine {
 		}
 		m_imguiLayer->End();
 
-		m_window->Render();
 		m_window->Update();
+		m_window->Render();
 	}
 
 	void Application::FixedUpdate() {

@@ -114,6 +114,12 @@ namespace IwEntity {
 			m_set.erase(entity);
 		}
 
+		_c* GetComponent(
+			Entity entity)
+		{
+			return &m_set.at(entity);
+		}
+
 		void Sort(
 			EntityArray& entities) override
 		{

@@ -56,6 +56,16 @@ namespace IwEntity {
 		}
 
 		template<
+			typename _c>
+		_c* GetComponent(
+			Entity entity)
+		{
+			if (ComponentDataExists<_c>()) {
+				return GetComponentData<_c>().GetComponent(entity);
+			}
+		}
+
+		template<
 			typename... _cs>
 		View<_cs...> ViewComponents() {
 			return { EnsureComponentData<_cs>()... };

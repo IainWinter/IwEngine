@@ -28,9 +28,12 @@ enum BulletType {
 
 struct Enemy {
 	EnemyType Type;
+	float     Speed;
 	float     FireTimeTotal;
+	float     TimeToShoot;
 	float     TimeCooldown;
 	float     TimeFrames;
+	bool      CanShoot;
 };
 
 struct Bullet {
@@ -63,17 +66,21 @@ int GameLayer::Initialize(
 	IwEntity::Entity camera = space.CreateEntity();
 	space.CreateComponent<IwEngine::Transform>(camera);
 	float s = .05f;
-	space.CreateComponent<IwEngine::Camera>(camera, iwm::matrix4::create_orthographic(1280 * s, 720 * s, 0, 1000));
+	space.CreateComponent<IwEngine::Camera>(camera, iwm::matrix4::create_orthographic(1280 * s, 720 * s, 0, 1000)); //camera has flipped x axis
 
 	IwEntity::Entity player = space.CreateEntity();
 	space.CreateComponent<IwEngine::Transform>(player, iwm::vector3(0, 0, 1));
 	space.CreateComponent<IwEngine::Model>(player, loader.Load("res/quad.obj"), device);
 	space.CreateComponent<Player>(player, 10.0f, 100.0f, 0.1666f, 0.1f);
 
-	IwEntity::Entity enemy = space.CreateEntity();
-	space.CreateComponent<IwEngine::Transform>(enemy, iwm::vector3(5, 0, 1));
-	space.CreateComponent<IwEngine::Model>(enemy, loader.Load("res/quad.obj"), device);
-	space.CreateComponent<Enemy>(enemy, SPIN, 0.1f, 0.1f);
+	for (size_t x = 0; x < 5; x++) {
+		for (size_t y = 0; y < 5; y++) {
+			IwEntity::Entity e = space.CreateEntity();
+			space.CreateComponent<IwEngine::Transform>(e, iwm::vector3(x * 2, y * 2, 1));
+			space.CreateComponent<IwEngine::Model>(e, loader.Load("res/quad.obj"), device);
+			space.CreateComponent<Enemy>(e, SPIN, 2.5f, 0.15f, 0.1f, 0.05f);
+		}
+	}
 
 	return 0;
 }
@@ -160,14 +167,20 @@ void GameLayer::Update() {
 		auto& transform = c.GetComponent<IwEngine::Transform>();
 		auto& enemy     = c.GetComponent<Enemy>();
 
-		if (enemy.TimeFrames < 0) {
-			enemy.TimeFrames = enemy.FireTimeTotal;
+		if (enemy.TimeFrames > enemy.FireTimeTotal) {
+			transform.Rotation *= iwm::quaternion::create_from_euler_angles(0, 0, enemy.Speed * IwEngine::Time::DeltaTime());
+		}
+
+		else if (enemy.TimeFrames <= 0) {
+			enemy.CanShoot    = true;
+			enemy.TimeFrames = enemy.FireTimeTotal + enemy.TimeCooldown;
+		}
+
+		else if (enemy.CanShoot && enemy.TimeFrames <= enemy.TimeToShoot) {
+			enemy.CanShoot = false;
 			IwEntity::Entity bullet = space.CreateEntity();
-
-			LOG_INFO << "Creating " << bullet;
-
-			space.CreateComponent<IwEngine::Transform>(bullet, transform);
-			space.CreateComponent<IwEngine::Model>(bullet, loader.Load("res/quad.obj"), device);
+			space.CreateComponent<IwEngine::Transform>(bullet, transform.Position, transform.Scale, transform.Rotation.inverted());
+			space.CreateComponent<IwEngine::Model>(bullet, loader.Load("res/circle.obj"), device);
 			space.CreateComponent<Bullet>(bullet, LINE, 4.0f);
 		}
 
@@ -179,21 +192,25 @@ void GameLayer::Update() {
 		auto& bullet    = c.GetComponent<Bullet>();
 
 		if (bullet.Type == LINE) {
-			transform.Position += iwm::vector3::one * transform.Rotation * bullet.Speed * IwEngine::Time::DeltaTime();
+			transform.Position += iwm::vector3(1, 1, 0) * transform.Rotation * bullet.Speed * IwEngine::Time::DeltaTime();
 		}
 
-		if (transform.Position.x > 15 || transform.Position.x < -15 || transform.Position.y > 15 || transform.Position.y < -15) {
+		if (transform.Position.x > 65 || transform.Position.x < -65 || transform.Position.y > 36 || transform.Position.y < -36) {
 			bulletsToDestroy.push_back(c.Entity);
-
-			LOG_INFO << "Queuing " << c.Entity;
 		}
 	}
 
 	while (!bulletsToDestroy.empty()) {
 		IwEntity::Entity& e = bulletsToDestroy.back();
-		space.DestroyEntity(e);
+		auto model = space.GetComponent<IwEngine::Model>(e);
 
-		LOG_INFO << "Deleting " << e;
+		for (size_t i = 0; i < model->MeshCount; i++) {
+			IwEngine::Mesh& mesh = model->Meshes[i];
+			device->DestroyVertexArray(mesh.VertexArray);
+			device->DestroyIndexBuffer(mesh.IndexBuffer);
+		}
+
+		space.DestroyEntity(e);
 
 		bulletsToDestroy.pop_back();
 	}

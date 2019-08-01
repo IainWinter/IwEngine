@@ -38,19 +38,18 @@ namespace iwutil {
 			using reference   = const index_type&;
 			using difference_type   = typename type_traits<_t>::difference_type;
 			using iterator_category = std::random_access_iterator_tag;
-
-		private:
+		protected:
 			index_type m_index;
 			const direct_type* m_direct;
 
-			friend class sparse_set<index_type>;
-
 			iterator(
 				index_type index,
-				direct_type* direct)
+				const direct_type* direct)
 				: m_index(index)
 				, m_direct(direct)
 			{}
+		private:
+			friend class sparse_set<index_type>;
 
 		public:
 			iterator() = default;
@@ -170,7 +169,7 @@ namespace iwutil {
 			}
 
 			pointer operator->() {
-				return &(*m_direct)[m_index];
+				return &m_direct->at(m_index);
 			}
 
 			reference operator*() {
@@ -180,7 +179,15 @@ namespace iwutil {
 			reference operator[](
 				const index_type& index)
 			{
-				return (*m_direct)[m_index + index]; //Can't remember why this would be an offset? Probly wrong
+				return m_direct->at(m_index + index); //Can't remember why this would be an offset? Probly wrong
+			}
+
+			inline index_type index() {
+				return m_index;
+			}
+
+			inline index_type sparse_index() {
+				return m_direct->at(m_index);
 			}
 		};
 	protected:
@@ -417,7 +424,7 @@ namespace iwutil {
 		template<
 			bool _const>
 		class iterator_ 
-			: public iterator //This might be monkey shit but well see
+			: public sparse_set<_index_t>::iterator //This might be monkey shit but well see
 		{
 			public:
 				using item_type         
@@ -435,7 +442,7 @@ namespace iwutil {
 				iterator_(
 					index_type index,
 					const direct_type* direct,
-					const item_vec* items)
+					item_vec* items)
 					: iterator(index, direct)
 					, m_items(items)
 				{}
@@ -500,17 +507,17 @@ namespace iwutil {
 				iterator_ operator+(
 					const difference_type& dif)
 				{
-					return iterator_(m_index + dif, m_direct);
+					return iterator_(m_index + dif, m_direct, m_items);
 				}
 
 				iterator_ operator-(
 					const difference_type& dif)
 				{
-					return iterator_(m_index - dif, m_direct);
+					return iterator_(m_index - dif, m_direct, m_items);
 				}
 				
 				pointer operator->() {
-					return &(*m_direct)[m_index];
+					return &m_items->at(m_index);
 				}
 
 				reference operator*() {
@@ -520,7 +527,7 @@ namespace iwutil {
 				reference operator[](
 					const index_type& index)
 				{
-					return (*m_direct)[m_index + index];
+					return m_items->at(m_index + index);
 				}
 		};
 
@@ -750,7 +757,7 @@ namespace iwutil {
 		* @return An iterator to the first item of the set.
 		*/
 		iterator begin() {
-			return iterator(0, &m_items);
+			return iterator(0, &m_direct, &m_items);
 		}
 
 		/**
@@ -759,17 +766,17 @@ namespace iwutil {
 		* @return An iterator to the item after the end of the set.
 		*/
 		iterator end() {
-			return iterator(size(), &m_items);
+			return iterator(size(), &m_direct, &m_items);
 		}
 
 		/*! @copydoc begin */
 		const_iterator begin() const {
-			return const_iterator(0, &m_items);
+			return const_iterator(0, &m_direct, &m_items);
 		}
 
 		/*! @copydoc end */
 		const_iterator end() const {
-			return const_iterator(size(), &m_items);
+			return const_iterator(size(), &m_direct, &m_items);
 		}
 	};
 }

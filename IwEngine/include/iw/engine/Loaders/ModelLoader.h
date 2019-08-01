@@ -6,13 +6,10 @@
 
 namespace IwEngine {
 	class IWENGINE_API ModelLoader
-		: iwu::Loader<ModelData>
+		: public iwu::Loader<ModelData>
 	{
-	public:
-		ModelData* Load(
+	private:
+		ModelData* LoadAsset(
 			const char* path) override;
-
-		void Release(
-			ModelData* resource) override;
 	};
 }

@@ -6,7 +6,7 @@
 #include <string>
 
 namespace IwEngine {
-	ModelData* ModelLoader::Load(
+	ModelData* ModelLoader::LoadAsset(
 		const char* path)
 	{
 		Assimp::Importer importer;
@@ -66,17 +66,9 @@ namespace IwEngine {
 			}
 		}
 
-		loaded.push_back(model);
 		importer.FreeScene();
 
 
 		return model;
-	}
-
-	void ModelLoader::Release(
-		ModelData* resource)
-	{
-		auto itr = std::find(loaded.begin(), loaded.end(), resource);
-		loaded.erase(itr);
 	}
 }
