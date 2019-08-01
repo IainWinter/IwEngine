@@ -33,12 +33,22 @@ namespace iwmath {
 	constexpr float IW_PHI = 1.61803398875f;
 
 	/**
-	* Returns the inverse square root of the specified value.
+	* Returns an approximation of the inverse
+	*  square root of the specified value.
 	*
 	* @param value Value to inverse square root.
 	*/
-	IWMATH_API float inv_sqrt(
+	IWMATH_API float fast_inv_sqrt(
 		float value);
+
+	/**
+	* Returns an approximation of the \p a raised to the \p b
+	*
+	* @param a The base
+	* @param b The exponent
+	*/
+	IWMATH_API float fast_pow(
+		float base, float exponent);
 
 	/**
 	* Returns if 2 floating point numbers are equal to a specified accuracy.

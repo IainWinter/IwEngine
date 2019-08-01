@@ -57,7 +57,7 @@ namespace iwmath {
 	}
 
 	float vector4::length_fast() const {
-		return 1 / inv_sqrt(x * x + y * y + z * z + w * w);
+		return 1 / fast_inv_sqrt(x * x + y * y + z * z + w * w);
 	}
 
 	float vector4::dot(

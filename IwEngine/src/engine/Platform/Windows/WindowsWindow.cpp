@@ -143,7 +143,7 @@ namespace IwEngine {
 		glEnable(GL_DEPTH_TEST);
 		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-		wglSwapIntervalEXT(1); //-1 for adaptive vsync 0 for off 1 for on
+		wglSwapIntervalEXT(0); //-1 for adaptive vsync 0 for off 1 for on
 
 		return 0;
 	}

@@ -38,7 +38,7 @@ namespace iwmath {
 	}
 
 	float vector3::length_fast() const {
-		return 1 / inv_sqrt(x * x + y * y + z * z);
+		return 1 / fast_inv_sqrt(x * x + y * y + z * z);
 	}
 
 	float vector3::dot(
