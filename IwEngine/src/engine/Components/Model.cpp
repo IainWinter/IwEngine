@@ -28,7 +28,7 @@ namespace IwEngine {
 	}
 
 	Model::Model(
-		Model&& copy)
+		Model&& copy) noexcept
 		: Meshes(copy.Meshes)
 		, MeshCount(copy.MeshCount)
 	{
@@ -51,7 +51,7 @@ namespace IwEngine {
 	}
 
 	Model& Model::operator=(
-		Model&& copy)
+		Model&& copy) noexcept
 	{
 		Meshes    = copy.Meshes;
 		MeshCount = copy.MeshCount;

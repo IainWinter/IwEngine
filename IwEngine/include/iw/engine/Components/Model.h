@@ -16,7 +16,7 @@ namespace IwEngine {
 			IwRenderer::IDevice* device);
 
 		Model(
-			Model&& copy);
+			Model&& copy) noexcept;
 
 		Model(
 			const Model& copy);
@@ -24,7 +24,7 @@ namespace IwEngine {
 		~Model();
 
 		Model& operator=(
-			Model&& copy);
+			Model&& copy) noexcept;
 
 		Model& operator=(
 			const Model& copy);
