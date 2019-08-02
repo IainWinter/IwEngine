@@ -5,7 +5,7 @@
 #include "GLGeometryShader.h"
 #include "GlPipelineParam.h"
 #include "iw/renderer/Pipeline.h"
-#include "iw/util/set/sparse_set.h"
+#include <unordered_map>
 
 namespace IwRenderer {
 	class IWRENDERER_API GLPipeline
@@ -13,7 +13,7 @@ namespace IwRenderer {
 	{
 	private:
 		struct {
-			iwutil::sparse_set<unsigned int, GLPipelineParam*> m_params;
+			std::unordered_map<const char*, GLPipelineParam*> m_params;
 		};
 
 		unsigned int m_program;

@@ -32,20 +32,22 @@ namespace IwRenderer {
 	IPipelineParam* GLPipeline::GetParam(
 		const char* name)
 	{
-		int location = glGetUniformLocation(m_program, name);
-		if (location != -1) {
-			if (m_params.contains(location)) {
-				return m_params.at(location);
-			}
+		GLPipelineParam* param = nullptr;
 
-			else {
-				GLPipelineParam* param = new GLPipelineParam(location);
-				m_params.emplace(location, param);
-				return param;
+		auto itr = m_params.find(name);
+		if (itr != m_params.end()) {
+			param = itr->second;
+		}
+
+		else {
+			int location = glGetUniformLocation(m_program, name);
+			if (location != -1) {
+				param = new GLPipelineParam(location);
+				m_params.emplace(name, param);
 			}
 		}
 
-		return nullptr;
+		return param;
 	}
 
 	void GLPipeline::Use() const {

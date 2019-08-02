@@ -16,25 +16,6 @@ namespace IwRenderer {
 		glDeleteProgram(m_program);
 	}
 
-	IPipelineParam* GLComputePipeline::GetParam(
-		const char* name)
-	{
-		int location = glGetUniformLocation(m_program, name);
-		if (location != -1) {
-			if (m_params.contains(location)) {
-				return m_params.at(location);
-			}
-
-			else {
-				GLPipelineParam* param = new GLPipelineParam(location);
-				m_params.emplace(location, param);
-				return param;
-			}
-		}
-
-		return nullptr;
-	}
-
 	void GLComputePipeline::DispatchComputeShader(
 		int x,
 		int y,

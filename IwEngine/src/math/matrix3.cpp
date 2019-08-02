@@ -554,8 +554,6 @@ namespace iwmath {
 		float cos = cosf(angle);
 		float sin = sinf(angle);
 
-		matrix3 out = matrix3::identity;
-
 		return matrix3(
 			cos, 0, sin,
 			0, 1, 0,
@@ -568,8 +566,6 @@ namespace iwmath {
 	{
 		float cos = cosf(angle);
 		float sin = sinf(angle);
-
-		matrix3 out = matrix3::identity;
 
 		return matrix3(
 			cos, -sin, 0,
@@ -590,8 +586,8 @@ namespace iwmath {
 		float z)
 	{
 		return matrix3::create_rotation_x(x)
-			* matrix3::create_rotation_y(y)
-			* matrix3::create_rotation_z(z);
+			 * matrix3::create_rotation_y(y)
+			 * matrix3::create_rotation_z(z);
 	}
 
 	matrix3 matrix3::create_scale(
