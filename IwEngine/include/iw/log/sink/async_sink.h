@@ -10,9 +10,10 @@ namespace iwlog {
 		: public sink
 	{
 	private:
-		iwu::blocking_queue<std::string> m_messages;
-		std::thread                      m_thread;
-
+		struct {
+			iwu::blocking_queue<std::string> m_messages;
+			std::thread                      m_thread;
+		};
 	private:
 		void async_logger() {
 			while (true) {

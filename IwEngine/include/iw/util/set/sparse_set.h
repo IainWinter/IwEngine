@@ -52,7 +52,10 @@ namespace iwutil {
 			friend class sparse_set<index_type>;
 
 		public:
-			iterator() = default;
+			iterator()
+				: m_index(0)
+				, m_direct(nullptr)
+			{}
 
 			iterator(
 				const iterator& copy) = default;

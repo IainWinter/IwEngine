@@ -3,9 +3,10 @@
 #include "Core.h"
 #include "Window.h"
 #include "LayerStack.h"
-#include "iw/input/InputManager.h"
-#include "ImGui/ImGuiLayer.h"
 #include "InitOptions.h"
+#include "iw/input/InputManager.h"
+#include "iw/entity/Space.h"
+#include "ImGui/ImGuiLayer.h"
 
 namespace IwEngine {
 	class IWENGINE_API Application {
@@ -17,6 +18,7 @@ namespace IwEngine {
 
 	protected:
 		IwInput::InputManager InputManager;
+		IwEntity::Space Space;
 
 	public:
 		Application();

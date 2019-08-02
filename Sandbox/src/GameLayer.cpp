@@ -64,9 +64,9 @@ int GameLayer::Initialize(
 	device->SetPipeline(pipeline);
 
 	IwEntity::Entity camera = space.CreateEntity();
-	space.CreateComponent<IwEngine::Transform>(camera);
+	space.CreateComponent<IwEngine::Transform>(camera, iwm::vector3::zero, iwm::vector3::one, iwm::quaternion::create_from_euler_angles(0, iwm::IW_PI, 0));
 	float s = .05f;
-	space.CreateComponent<IwEngine::Camera>(camera, iwm::matrix4::create_orthographic(1280 * s, 720 * s, 0, 1000)); //camera has flipped x axis
+	space.CreateComponent<IwEngine::Camera>(camera, iwm::matrix4::create_orthographic(1280 * s, 720 * s, 0, -1000)); //camera has flipped x axis
 
 	IwEntity::Entity player = space.CreateEntity();
 	space.CreateComponent<IwEngine::Transform>(player, iwm::vector3(0, 0, 1));
@@ -78,7 +78,7 @@ int GameLayer::Initialize(
 			IwEntity::Entity e = space.CreateEntity();
 			space.CreateComponent<IwEngine::Transform>(e, iwm::vector3(x * 3, y * 3, 1));
 			space.CreateComponent<IwEngine::Model>(e, loader.Load("res/quad.obj"), device);
-			space.CreateComponent<Enemy>(e, SPIN, 5.0f, 0.1f, 0.05f, 0.05f);
+			space.CreateComponent<Enemy>(e, SPIN, 3.0f, 0.05f, 0.025f, 0.025f);
 		}
 	}
 
@@ -94,11 +94,11 @@ void GameLayer::Update() {
 
 		iwm::vector3 movement;
 		if (IwInput::Keyboard::KeyDown(IwInput::LEFT)) {
-			movement.x += 1;
+			movement.x -= 1;
 		}
 
 		if (IwInput::Keyboard::KeyDown(IwInput::RIGHT)) {
-			movement.x -= 1;
+			movement.x += 1;
 		}
 
 		if (IwInput::Keyboard::KeyDown(IwInput::UP)) {

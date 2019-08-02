@@ -8,7 +8,7 @@
 namespace IwInput {
 	using Translation = iwutil::tofrom_set<unsigned int, InputName>;
 
-	class Device
+	class IWINPUT_API Device
 	{
 	private:
 		InputCallback m_callback;
