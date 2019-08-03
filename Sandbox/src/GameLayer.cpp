@@ -159,17 +159,6 @@ void GameLayer::Update() {
 
 		enemy.FireTime -= IwEngine::Time::DeltaTime();
 	}
-
-	while (!bulletsToDestroy.empty()) {
-		IwEntity::Entity& e = bulletsToDestroy.back();
-		auto model = Space.GetComponent<IwEngine::Model>(e);
-
-
-
-		Space.DestroyEntity(e);
-
-		bulletsToDestroy.pop_back();
-	}
 }
 
 void GameLayer::FixedUpdate() {

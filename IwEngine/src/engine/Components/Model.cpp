@@ -47,13 +47,6 @@ namespace IwEngine {
 	}
 
 	Model::~Model() {
-		// This should be queued up in iwgraphics 
-		for (size_t i = 0; i < MeshCount; i++) {
-			IwEngine::Mesh& mesh = Meshes[i];
-			delete mesh.VertexArray;
-			delete mesh.IndexBuffer;
-		}
-
 		delete[] Meshes;
 	}
 

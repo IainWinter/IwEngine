@@ -10,5 +10,7 @@ namespace IwEngine {
 		IwRenderer::IVertexArray* VertexArray;
 		IwRenderer::IIndexBuffer* IndexBuffer;
 		std::size_t               FaceCount;
+
+		~Mesh();
 	};
 }
