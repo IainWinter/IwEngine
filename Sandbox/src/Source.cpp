@@ -1,5 +1,6 @@
 #include "iw/engine/EntryPoint.h"
 #include "GameLayer.h"
+#include "BulletSystem.h"
 
 #include "iw/util/queue/blocking_queue.h"
 
@@ -8,11 +9,7 @@
 
 #include "imgui/imgui.h"
 
-struct Transform { float x, y, z; };
-struct Velocity  { float vx, vy, vz; };
-struct Collider  { float count; };
-
-class Game 
+class Game
 	: public IwEngine::Application
 {
 public:
@@ -20,7 +17,8 @@ public:
 		InputManager.CreateDevice<IwInput::Mouse>();
 		//InputManager.CreateDevice<IwInput::RawKeyboard>();
 
-		PushLayer(new GameLayer());
+		PushLayer<GameLayer>();
+		PushSystem<BulletSystem>();
 	}
 
 	int Initialize(

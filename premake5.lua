@@ -10,6 +10,7 @@ libdir  = "/lib/" .. cfgname
 resdir  = "/res"
 blddir  = "/build"
 incdir  = "/include"
+srcdir  = "/src"
 
 workspace "IwEngine"
 	configurations { "Debug", "Release" }
@@ -30,14 +31,14 @@ project "IwEngine"
 	objdir    (iwengdir .. blddir)
 
 	files {
-		iwengdir .. "/include/**.h",
-		iwengdir .. "/src/**.h",
-		iwengdir .. "/src/**.cpp"
+		iwengdir .. incdir .. "/**.h",
+		iwengdir .. srcdir .. "/**.h",
+		iwengdir .. srcdir .. "/**.cpp"
 	}
 
 	includedirs {
 		iwengdir  .. incdir,
-		iwengdir  .. "/src/engine/Platform",
+		iwengdir  .. srcdir .. "/engine/Platform",
 		glewdir   .. incdir,
 		imguidir  .. incdir,
 		assimpdir .. incdir,
@@ -97,7 +98,9 @@ project "Sandbox"
 	objdir    (sndbxdir .. blddir)
 
 	files {
-		sndbxdir .. "/src/**.cpp"
+		sndbxdir .. incdir .. "/**.h",
+		sndbxdir .. srcdir .. "/**.h",
+		sndbxdir .. srcdir .. "/**.cpp"
 	}
 
 	includedirs {
@@ -107,7 +110,7 @@ project "Sandbox"
 
 	links {
 		"IwEngine",
-                "ImGui",
+		"ImGui",
 		"opengl32.lib"
 	}
 

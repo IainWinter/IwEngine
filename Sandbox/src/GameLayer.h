@@ -10,14 +10,14 @@ class GameLayer
 	: public IwEngine::Layer
 {
 private:
-	IwEntity::Space        space;
 	IwEngine::ModelLoader  loader;
 	IwRenderer::IDevice*   device;
 	IwRenderer::IPipeline* pipeline;
-	std::vector<IwEntity::Entity> bulletsToDestroy;
 
 public:
-	GameLayer();
+	GameLayer(
+		IwEntity::Space& space);
+
 	~GameLayer();
 
 	int Initialize(

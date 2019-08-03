@@ -9,7 +9,9 @@ namespace IwEngine {
 	Application::Application()
 		: m_window (IWindow::Create())
 		, m_running(false)
-	{}
+	{
+		m_imguiLayer = PushLayer<ImGuiLayer>();
+	}
 
 	Application::~Application() {
 		delete m_window;
@@ -39,10 +41,7 @@ namespace IwEngine {
 
 		m_window->SetInputManager(InputManager);
 
-		m_imguiLayer = new ImGuiLayer();
-		m_layerStack.PushOverlay(m_imguiLayer);
-
-		for (Layer* layer : m_layerStack) {
+		for (Layer* layer : m_layers) {
 			LOG_DEBUG << "Initializing " << layer->Name() << " layer...";
 			if (status = layer->Initialize(options)) {
 				LOG_ERROR << layer->Name()
@@ -81,12 +80,16 @@ namespace IwEngine {
 	void Application::Update() {
 		m_window->Clear();
 
-		for (Layer* layer : m_layerStack) {	
+		for (ISystem* system : m_systems) {
+			system->Update();
+		}
+
+		for (Layer* layer : m_layers) {
 			layer->Update();
 		}
 
 		m_imguiLayer->Begin();
-		for (Layer* layer : m_layerStack) {
+		for (Layer* layer : m_layers) {
 			layer->ImGui();
 		}
 		m_imguiLayer->End();
@@ -96,7 +99,7 @@ namespace IwEngine {
 	}
 
 	void Application::FixedUpdate() {
-		for (Layer* layer : m_layerStack) {
+		for (Layer* layer : m_layers) {
 			layer->FixedUpdate();
 		}
 	}
@@ -104,7 +107,7 @@ namespace IwEngine {
 	void Application::Destroy() {
 		m_running = false;
 		m_window->Destroy();
-		for (Layer* layer : m_layerStack) {
+		for (Layer* layer : m_layers) {
 			layer->Destroy();
 		}
 	}
@@ -122,29 +125,5 @@ namespace IwEngine {
 			case WindowClosed:     Destroy();                                 break;
 			default: LOG_WARNING << "Application mishandled event " + e.Type; break;
 		}
-	}
-
-	void Application::PushLayer(
-		Layer* layer)
-	{
-		m_layerStack.PushLayer(layer);
-	}
-
-	void Application::PushOverlay(
-		Layer* overlay)
-	{
-		m_layerStack.PushOverlay(overlay);
-	}
-
-	void Application::PopLayer(
-		Layer* layer)
-	{
-		m_layerStack.PopLayer(layer);
-	}
-
-	void Application::PopOverlay(
-		Layer* overlay)
-	{
-		m_layerStack.PopOverlay(overlay);
 	}
 }

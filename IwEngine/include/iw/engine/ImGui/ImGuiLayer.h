@@ -12,7 +12,9 @@ namespace IwEngine {
 		int   counter = 0;
 
 	public:
-		ImGuiLayer();
+		ImGuiLayer(
+			IwEntity::Space& space);
+
 		~ImGuiLayer();
 
 		int Initialize(

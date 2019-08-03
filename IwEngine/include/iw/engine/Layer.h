@@ -3,14 +3,19 @@
 #include "Core.h"
 #include "InitOptions.h"
 #include "Events/AllEvents.h"
+#include "iw/entity/Space.h"
 
 namespace IwEngine {
 	class IWENGINE_API Layer {
 	private:
 		const char* m_name;
 
+	protected:
+		IwEntity::Space& Space;
+
 	public:
 		Layer(
+			IwEntity::Space& space,
 			const char* name);
 
 		virtual ~Layer();

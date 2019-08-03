@@ -5,8 +5,9 @@
 #include "iw/engine/Time.h"
 
 namespace IwEngine {
-	ImGuiLayer::ImGuiLayer()
-		: Layer("ImGui")
+	ImGuiLayer::ImGuiLayer(
+		IwEntity::Space& space)
+		: Layer(space, "ImGui")
 	{}
 
 	ImGuiLayer::~ImGuiLayer() {}

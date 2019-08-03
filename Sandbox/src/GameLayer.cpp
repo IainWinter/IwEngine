@@ -1,4 +1,7 @@
 #include "GameLayer.h"
+#include "Components/Player.h"
+#include "Components/Enemy.h"
+#include "Components/Bullet.h"
 #include "iw/engine/Time.h"
 #include "iw/engine/Components/Transform.h"
 #include "iw/engine/Components/Model.h"
@@ -10,39 +13,9 @@
 #include "iw/input/Devices/Mouse.h"
 #include "imgui/imgui.h"
 
-struct Player {
-	float Speed;
-	float DashSpeed;
-	float DashTimeTotal;
-	float DashCooldown;
-	float DashTime;
-};
-
-enum EnemyType {
-	SPIN
-};
-
-enum BulletType {
-	LINE
-};
-
-struct Enemy {
-	EnemyType Type;
-	float     Speed;
-	float     FireTimeTotal;
-	float     TimeToShoot;
-	float     FireCooldown;
-	float     FireTime;
-	bool      CanShoot;
-};
-
-struct Bullet {
-	BulletType Type;
-	float      Speed;
-};
-
-GameLayer::GameLayer()
-	: IwEngine::Layer("Game")
+GameLayer::GameLayer(
+	IwEntity::Space& space)
+	: IwEngine::Layer(space, "Game")
 	, device(nullptr)
 	, pipeline(nullptr)
 {}
@@ -63,22 +36,22 @@ int GameLayer::Initialize(
 	pipeline = device->CreatePipeline(vs, fs);
 	device->SetPipeline(pipeline);
 
-	IwEntity::Entity camera = space.CreateEntity();
-	space.CreateComponent<IwEngine::Transform>(camera, iwm::vector3::zero, iwm::vector3::one, iwm::quaternion::create_from_euler_angles(0, iwm::IW_PI, 0));
+	IwEntity::Entity camera = Space.CreateEntity();
+	Space.CreateComponent<IwEngine::Transform>(camera, iwm::vector3::zero, iwm::vector3::one, iwm::quaternion::create_from_euler_angles(0, iwm::IW_PI, 0));
 	float s = .05f;
-	space.CreateComponent<IwEngine::Camera>(camera, iwm::matrix4::create_orthographic(1280 * s, 720 * s, 0, -1000)); //camera has flipped x axis
+	Space.CreateComponent<IwEngine::Camera>(camera, iwm::matrix4::create_orthographic(1280 * s, 720 * s, 0, -1000)); //camera has flipped x axis
 
-	IwEntity::Entity player = space.CreateEntity();
-	space.CreateComponent<IwEngine::Transform>(player, iwm::vector3(0, 0, 1));
-	space.CreateComponent<IwEngine::Model>(player, loader.Load("res/quad.obj"), device);
-	space.CreateComponent<Player>(player, 10.0f, 100.0f, 0.1666f, 0.1f);
+	IwEntity::Entity player = Space.CreateEntity();
+	Space.CreateComponent<IwEngine::Transform>(player, iwm::vector3(0, 0, 1));
+	Space.CreateComponent<IwEngine::Model>(player, loader.Load("res/quad.obj"), device);
+	Space.CreateComponent<Player>(player, 10.0f, 100.0f, 0.1666f, 0.1f);
 
 	for (size_t x = 0; x < 5; x++) {
 		for (size_t y = 0; y < 5; y++) {
-			IwEntity::Entity e = space.CreateEntity();
-			space.CreateComponent<IwEngine::Transform>(e, iwm::vector3(x * 3, y * 3, 1));
-			space.CreateComponent<IwEngine::Model>(e, loader.Load("res/quad.obj"), device);
-			space.CreateComponent<Enemy>(e, SPIN, 3.0f, 0.05f, 0.025f, 0.025f);
+			IwEntity::Entity e = Space.CreateEntity();
+			Space.CreateComponent<IwEngine::Transform>(e, iwm::vector3(x * 3, y * 3, 1));
+			Space.CreateComponent<IwEngine::Model>(e, loader.Load("res/quad.obj"), device);
+			Space.CreateComponent<Enemy>(e, SPIN, 3.0f, 0.05f, 0.025f, 0.025f);
 		}
 	}
 
@@ -86,7 +59,7 @@ int GameLayer::Initialize(
 }
 
 void GameLayer::Update() {
-	for (auto c : space.ViewComponents<IwEngine::Transform, Player>()) {
+	for (auto c : Space.ViewComponents<IwEngine::Transform, Player>()) {
 		auto& transform = c.GetComponent<IwEngine::Transform>();
 		auto& player    = c.GetComponent<Player>();
 
@@ -127,7 +100,7 @@ void GameLayer::Update() {
 		}
 	}
 
-	for (auto c : space.ViewComponents<IwEngine::Transform, IwEngine::Camera>()) {
+	for (auto c : Space.ViewComponents<IwEngine::Transform, IwEngine::Camera>()) {
 		auto& transform = c.GetComponent<IwEngine::Transform>();
 		auto& camera    = c.GetComponent<IwEngine::Camera>();
 
@@ -141,7 +114,7 @@ void GameLayer::Update() {
 				transform.Up()));
 	}
 
-	for (auto c : space.ViewComponents<IwEngine::Transform, IwEngine::Model>()) {
+	for (auto c : Space.ViewComponents<IwEngine::Transform, IwEngine::Model>()) {
 		auto& transform = c.GetComponent<IwEngine::Transform>();
 		auto& model     = c.GetComponent<IwEngine::Model>();
 
@@ -155,7 +128,7 @@ void GameLayer::Update() {
 		}
 	}
 
-	for (auto c : space.ViewComponents<Player>()) {
+	for (auto c : Space.ViewComponents<Player>()) {
 		auto& player = c.GetComponent<Player>();
 
 		if (player.DashTime > -player.DashCooldown) {
@@ -163,7 +136,7 @@ void GameLayer::Update() {
 		}
 	}
 
-	for (auto c : space.ViewComponents<IwEngine::Transform, Enemy>()) {
+	for (auto c : Space.ViewComponents<IwEngine::Transform, Enemy>()) {
 		auto& transform = c.GetComponent<IwEngine::Transform>();
 		auto& enemy     = c.GetComponent<Enemy>();
 
@@ -178,39 +151,22 @@ void GameLayer::Update() {
 
 		else if (enemy.CanShoot && enemy.FireTime <= enemy.TimeToShoot) {
 			enemy.CanShoot = false;
-			IwEntity::Entity bullet = space.CreateEntity();
-			space.CreateComponent<IwEngine::Transform>(bullet, transform.Position + iwm::vector3(1, 1, 0) * transform.Rotation.inverted(), transform.Scale, transform.Rotation.inverted());
-			space.CreateComponent<IwEngine::Model>(bullet, loader.Load("res/circle.obj"), device);
-			space.CreateComponent<Bullet>(bullet, LINE, 4.0f);
+			IwEntity::Entity bullet = Space.CreateEntity();
+			Space.CreateComponent<IwEngine::Transform>(bullet, transform.Position + iwm::vector3(1, 1, 0) * transform.Rotation.inverted(), transform.Scale, transform.Rotation.inverted());
+			Space.CreateComponent<IwEngine::Model>(bullet, loader.Load("res/circle.obj"), device);
+			Space.CreateComponent<Bullet>(bullet, LINE, 4.0f);
 		}
 
 		enemy.FireTime -= IwEngine::Time::DeltaTime();
 	}
 
-	for (auto c : space.ViewComponents<IwEngine::Transform, Bullet>()) {
-		auto& transform = c.GetComponent<IwEngine::Transform>();
-		auto& bullet    = c.GetComponent<Bullet>();
-
-		if (bullet.Type == LINE) {
-			transform.Position += iwm::vector3(1, 1, 0) * transform.Rotation * bullet.Speed * IwEngine::Time::DeltaTime();
-		}
-
-		if (transform.Position.x > 65 || transform.Position.x < -65 || transform.Position.y > 36 || transform.Position.y < -36) {
-			bulletsToDestroy.push_back(c.Entity);
-		}
-	}
-
 	while (!bulletsToDestroy.empty()) {
 		IwEntity::Entity& e = bulletsToDestroy.back();
-		auto model = space.GetComponent<IwEngine::Model>(e);
+		auto model = Space.GetComponent<IwEngine::Model>(e);
 
-		for (size_t i = 0; i < model->MeshCount; i++) {
-			IwEngine::Mesh& mesh = model->Meshes[i];
-			device->DestroyVertexArray(mesh.VertexArray);
-			device->DestroyIndexBuffer(mesh.IndexBuffer);
-		}
 
-		space.DestroyEntity(e);
+
+		Space.DestroyEntity(e);
 
 		bulletsToDestroy.pop_back();
 	}
@@ -223,7 +179,7 @@ void GameLayer::FixedUpdate() {
 void GameLayer::ImGui() {
 	ImGui::Begin("Game layer");
 
-	for (auto entity : space.ViewComponents<Player>()) {
+	for (auto entity : Space.ViewComponents<Player>()) {
 		Player& player = entity.GetComponent<Player>();
 		
 		float cooldown = player.DashCooldown + player.DashTime;

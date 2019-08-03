@@ -2,8 +2,10 @@
 
 namespace IwEngine {
 	Layer::Layer(
+		IwEntity::Space& space,
 		const char* name)
 		: m_name(name)
+		, Space(space)
 	{}
 
 	Layer::~Layer() {}

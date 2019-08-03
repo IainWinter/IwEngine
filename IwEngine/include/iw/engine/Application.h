@@ -2,23 +2,26 @@
 
 #include "Core.h"
 #include "Window.h"
-#include "LayerStack.h"
+#include "Stack.h"
+#include "System.h"
 #include "InitOptions.h"
 #include "iw/input/InputManager.h"
 #include "iw/entity/Space.h"
 #include "ImGui/ImGuiLayer.h"
+#include <vector>
 
 namespace IwEngine {
 	class IWENGINE_API Application {
 	private:
-		IWindow*  m_window;
-		LayerStack m_layerStack;
-		ImGuiLayer* m_imguiLayer;
-		bool m_running;
+		IWindow*        m_window;
+		ImGuiLayer*     m_imguiLayer;
+		bool            m_running;
+		Stack<Layer*>   m_layers;
+		Stack<ISystem*> m_systems;
+		IwEntity::Space m_space;
 
 	protected:
 		IwInput::InputManager InputManager;
-		IwEntity::Space Space;
 
 	public:
 		Application();
@@ -35,20 +38,57 @@ namespace IwEngine {
 		virtual void HandleEvent(
 			Event& e);
 
-		void PushLayer(
-			Layer* layer);
-
-		void PushOverlay(
-			Layer* overlay);
-
-		void PopLayer(
-			Layer* layer);
-
-		void PopOverlay(
-			Layer* overlay);
-
 		inline IWindow& GetWindow() {
 			return *m_window;
+		}
+
+		template<
+			typename L,
+			typename... Args>
+		L* PushLayer(
+			Args&&... args)
+		{
+			L* layer = new L(m_space, std::forward<Args>(args)...);
+			m_layers.PushBack(layer);
+			return layer;
+		}
+
+		template<
+			typename L,
+			typename... Args>
+		L* PushOverlay(
+				Args&& ... args)
+		{
+			L* layer = new L(m_space, std::forward<Args>(args)...);
+			m_layers.PushFront(layer);
+			return layer;
+		}
+
+		template<
+			typename L>
+		void PopLayer(
+			L* layer)
+		{
+			m_layers.Pop(layer);
+		}
+
+		template<
+			typename S,
+			typename... Args>
+		S* PushSystem(
+			Args&& ... args)
+		{
+			S* layer = new S(m_space, std::forward<Args>(args)...);
+			m_systems.PushBack(layer);
+			return layer;
+		}
+
+		template<
+			typename S>
+		void PopSystem(
+			S* system)
+		{
+			m_systems.Pop(system);
 		}
 	private:
 		template<
@@ -60,7 +100,7 @@ namespace IwEngine {
 				m_window->SetDimensions(event.Width, event.Height);
 			}
 
-			for (Layer* layer : m_layerStack) {
+			for (Layer* layer : m_layers) {
 				if (layer->On(event)) {
 					LOG_INFO << "Event handled by " << layer->Name() << " layer";
 					event.Handled = true;
