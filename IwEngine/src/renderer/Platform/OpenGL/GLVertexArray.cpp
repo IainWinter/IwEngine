@@ -37,7 +37,7 @@ namespace IwRenderer {
 		for (unsigned int i = 0; i < elements.size(); i++) {
 			const auto& element = elements[i];
 			glEnableVertexAttribArray(i);
-			glVertexAttribPointer(i, element.Count, element.Type, 
+			glVertexAttribPointer(i, element.Count, element.Type,
 				element.Normalized, layout->GetStride(), (const void*)offset);
 			offset += element.Count 
 				* VertexBufferLayoutElement::GetSizeOfType(element.Type);

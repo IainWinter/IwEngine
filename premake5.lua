@@ -104,8 +104,9 @@ project "Sandbox"
 	}
 
 	includedirs {
-		iwengdir  .. incdir,
-		imguidir  .. incdir
+		sndbxdir .. incdir,
+		iwengdir .. incdir,
+		imguidir .. incdir
 	}
 
 	links {

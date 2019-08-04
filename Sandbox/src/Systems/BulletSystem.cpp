@@ -1,9 +1,9 @@
-#include "BulletSystem.h"
+#include "Systems/BulletSystem.h"
 #include "iw/engine/Time.h"
 
 BulletSystem::BulletSystem(
 	IwEntity::Space& space)
-	: IwEngine::System<IwEngine::Transform, Bullet>(space, "Player")
+	: IwEngine::System<IwEngine::Transform, Bullet>(space, "Bullet")
 {}
 
 BulletSystem::~BulletSystem()
@@ -12,7 +12,7 @@ BulletSystem::~BulletSystem()
 }
 
 void BulletSystem::Update(
-	IwEntity::View<IwEngine::Transform, Bullet>& view)
+	View& view)
 {
 	for (auto components : view) {
 		auto& transform = components.GetComponent<IwEngine::Transform>();

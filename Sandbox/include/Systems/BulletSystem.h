@@ -14,5 +14,5 @@ public:
 	~BulletSystem();
 
 	void Update(
-		IwEntity::View<IwEngine::Transform, Bullet>& view) override;
+		View& view) override;
 };

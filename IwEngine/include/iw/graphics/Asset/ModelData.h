@@ -2,12 +2,12 @@
 
 #include "iw/graphics/Vertex.h"
 
-namespace IwEngine {
+namespace IwGraphics {
 	struct MeshData {
-		IwGraphics::Vertex* Vertices;
-		unsigned int*       Faces;
-		std::size_t         VertexCount;
-		std::size_t         FaceCount;
+		Vertex*       Vertices;
+		unsigned int* Faces;
+		std::size_t   VertexCount;
+		std::size_t   FaceCount;
 
 		~MeshData() {
 			delete[] Vertices;

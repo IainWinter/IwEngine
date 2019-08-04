@@ -1,11 +1,11 @@
-#include "iw/engine/Loaders/ModelLoader.h"
+#include "iw/graphics/Loaders/ModelLoader.h"
 #include "iw/log/logger.h"
 #include "assimp/Importer.hpp"
 #include "assimp/scene.h"
 #include "assimp/postprocess.h"
 #include <string>
 
-namespace IwEngine {
+namespace IwGraphics {
 	ModelData* ModelLoader::LoadAsset(
 		const char* path)
 	{
@@ -67,7 +67,6 @@ namespace IwEngine {
 		}
 
 		importer.FreeScene();
-
 
 		return model;
 	}

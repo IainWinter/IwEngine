@@ -1,19 +1,21 @@
 #pragma once
 
 #include "iw/engine/Core.h"
-#include "iw/engine/Asset/ModelData.h"
 #include "iw/renderer/Device.h"
-#include "Mesh.h"
+#include "iw/graphics/RenderQueue.h"
+#include "iw/graphics/Mesh.h"
+#include "iw/graphics/Asset/ModelData.h"
 
 namespace IwEngine {
 	struct IWENGINE_API Model {
-		ModelData*  Data;
-		Mesh*       Meshes;
-		std::size_t MeshCount;
+		IwGraphics::ModelData* Data;
+		IwGraphics::Mesh*      Meshes;
+		std::size_t            MeshCount;
+		bool                   Initialized;
 
 		Model(
-			ModelData* data,
-			IwRenderer::IDevice* device);
+			IwGraphics::ModelData* data,
+			IwGraphics::RenderQueue& RenderQueue);
 
 		Model(
 			Model&& copy) noexcept;

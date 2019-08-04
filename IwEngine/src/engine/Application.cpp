@@ -80,10 +80,6 @@ namespace IwEngine {
 	void Application::Update() {
 		m_window->Clear();
 
-		for (ISystem* system : m_systems) {
-			system->Update();
-		}
-
 		for (Layer* layer : m_layers) {
 			layer->Update();
 		}
@@ -96,6 +92,7 @@ namespace IwEngine {
 
 		m_window->Update();
 		m_window->Render();
+
 	}
 
 	void Application::FixedUpdate() {

@@ -1,6 +1,5 @@
 #include "iw/engine/EntryPoint.h"
-#include "GameLayer.h"
-#include "BulletSystem.h"
+#include "Layers/GameLayer.h"
 
 #include "iw/util/queue/blocking_queue.h"
 
@@ -18,7 +17,6 @@ public:
 		//InputManager.CreateDevice<IwInput::RawKeyboard>();
 
 		PushLayer<GameLayer>();
-		PushSystem<BulletSystem>();
 	}
 
 	int Initialize(

@@ -82,7 +82,7 @@ namespace IwRenderer {
 	}
 
 	void GLDevice::SetVertexArray(
-		IVertexArray* vertexArray) 
+		IVertexArray* vertexArray)
 	{
 		static_cast<GLVertexArray*>(vertexArray)->Bind();
 	}

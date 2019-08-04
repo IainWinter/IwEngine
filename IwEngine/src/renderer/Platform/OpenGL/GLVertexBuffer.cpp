@@ -10,7 +10,7 @@ namespace IwRenderer {
 	{
 		glGenBuffers(1, &m_renderId);
 		glBindBuffer(GL_ARRAY_BUFFER, m_renderId);
-		glBufferData(GL_ARRAY_BUFFER, size, data, GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW); // TODO: Add way to pass this as arg
 	}
 
 	GLVertexBuffer::~GLVertexBuffer() {

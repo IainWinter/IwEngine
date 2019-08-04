@@ -4,7 +4,7 @@
 #include "iw/entity/View.h"
 #include <queue>
 #include <thread>
-
+#include "Components/Model.h"
 
 namespace IwEngine {
 	class ISystem {
@@ -54,6 +54,14 @@ namespace IwEngine {
 			// Execute queues space operations
 			while (!m_delete.empty()) {
 				IwEntity::Entity& entity = m_delete.front();
+
+				//auto m = m_space.GetComponent<Model>(entity);
+
+				//for (size_t i = 0; i < m->MeshCount; i++) {
+				//	delete m->Meshes[i].VertexArray;
+				//	delete m->Meshes[i].IndexBuffer;
+				//}
+
 				m_space.DestroyEntity(entity);
 				m_delete.pop();
 			}

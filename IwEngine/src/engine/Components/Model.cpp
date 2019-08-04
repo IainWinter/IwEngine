@@ -2,28 +2,20 @@
 
 namespace IwEngine {
 	Model::Model(
-		ModelData* data, 
-		IwRenderer::IDevice* device)
+		IwGraphics::ModelData* data, 
+		IwGraphics::RenderQueue& RenderQueue)
 		: Data(data)
-		, Meshes(new Mesh[data->MeshCount])
+		, Meshes(new IwGraphics::Mesh[data->MeshCount])
 		, MeshCount(data->MeshCount)
+		, Initialized(false)
 	{
 		for (size_t i = 0; i < MeshCount; i++) {
-			auto vbl = new IwRenderer::VertexBufferLayout();
-			vbl->Push<float>(3);
-			vbl->Push<float>(3);
-
-			auto vb = device->CreateVertexBuffer(
-				data->Meshes[i].VertexCount * sizeof(IwGraphics::Vertex),
-				data->Meshes[i].Vertices);
-
-			auto va = device->CreateVertexArray(1, &vb, &vbl);
-
-			auto ib = device->CreateIndexBuffer(
-				data->Meshes[i].FaceCount,
-				data->Meshes[i].Faces);
-
-			Meshes[i] = { va, ib, data->Meshes[i].FaceCount };
+			IwGraphics::MeshData& meshData = data->Meshes[i];
+			Meshes[i] = RenderQueue.CreateMesh(
+				meshData.VertexCount, 
+				meshData.Vertices, 
+				meshData.FaceCount, 
+				meshData.Faces);
 		}
 	}
 
@@ -38,7 +30,7 @@ namespace IwEngine {
 
 	Model::Model(
 		const Model& copy)
-		: Meshes(new Mesh[copy.MeshCount])
+		: Meshes(new IwGraphics::Mesh[copy.MeshCount])
 		, MeshCount(copy.MeshCount)
 	{
 		for (std::size_t i = 0; i < MeshCount; i++) {
@@ -65,7 +57,7 @@ namespace IwEngine {
 	Model& Model::operator=(
 		const Model& copy)
 	{
-		Meshes    = new Mesh[copy.MeshCount];
+		Meshes    = new IwGraphics::Mesh[copy.MeshCount];
 		MeshCount = copy.MeshCount;
 		for (std::size_t i = 0; i < MeshCount; i++) {
 			Meshes[i] = copy.Meshes[i];

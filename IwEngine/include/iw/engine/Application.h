@@ -3,11 +3,10 @@
 #include "Core.h"
 #include "Window.h"
 #include "Stack.h"
-#include "System.h"
 #include "InitOptions.h"
 #include "iw/input/InputManager.h"
 #include "iw/entity/Space.h"
-#include "ImGui/ImGuiLayer.h"
+#include "Layers/ImGuiLayer.h"
 #include <vector>
 
 namespace IwEngine {
@@ -17,7 +16,6 @@ namespace IwEngine {
 		ImGuiLayer*     m_imguiLayer;
 		bool            m_running;
 		Stack<Layer*>   m_layers;
-		Stack<ISystem*> m_systems;
 		IwEntity::Space m_space;
 
 	protected:
@@ -70,25 +68,6 @@ namespace IwEngine {
 			L* layer)
 		{
 			m_layers.Pop(layer);
-		}
-
-		template<
-			typename S,
-			typename... Args>
-		S* PushSystem(
-			Args&& ... args)
-		{
-			S* layer = new S(m_space, std::forward<Args>(args)...);
-			m_systems.PushBack(layer);
-			return layer;
-		}
-
-		template<
-			typename S>
-		void PopSystem(
-			S* system)
-		{
-			m_systems.Pop(system);
 		}
 	private:
 		template<
