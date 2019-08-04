@@ -13,7 +13,8 @@ namespace IwEngine {
 
 	public:
 		ImGuiLayer(
-			IwEntity::Space& space);
+			IwEntity::Space& space,
+			IwGraphics::RenderQueue& renderQueue);
 
 		~ImGuiLayer();
 

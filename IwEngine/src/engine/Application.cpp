@@ -7,8 +7,10 @@
 
 namespace IwEngine {
 	Application::Application()
-		: m_window (IWindow::Create())
-		, m_running(false)
+		: m_running(false)
+		, m_window(IWindow::Create())
+		, m_device(IwRenderer::IDevice::Create())
+		, RenderQueue(*m_device)
 	{
 		m_imguiLayer = PushLayer<ImGuiLayer>();
 	}

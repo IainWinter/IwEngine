@@ -16,30 +16,30 @@
 #include "imgui/imgui.h"
 
 GameLayer::GameLayer(
-	IwEntity::Space& space)
-	: IwEngine::Layer(space, "Game")
-	, device(new IwRenderer::GLDevice())
+	IwEntity::Space& space,
+	IwGraphics::RenderQueue& renderQueue)
+	: IwEngine::Layer(space, renderQueue, "Game")
 	, pipeline(nullptr)
-	, RenderQueue(device)
 {
+	IwGraphics::ModelData* circle = loader.Load("res/circle.obj");
+
 	PushSystem<BulletSystem>();
-	PushSystem<EnemySystem>();
+	PushSystem<EnemySystem>(circle);
 	PushSystem<PlayerSystem>();
 }
 
 GameLayer::~GameLayer() {
-	device->DestroyPipeline(pipeline);
-	delete device;
+
 }
 
 int GameLayer::Initialize(
 	IwEngine::InitOptions& options)
 {
-	auto vs = device->CreateVertexShader(iwu::ReadFile("res/sandboxvs.glsl").c_str());
-	auto fs = device->CreateFragmentShader(iwu::ReadFile("res/sandboxfs.glsl").c_str());
+	auto vs = RenderQueue.Device().CreateVertexShader(iwu::ReadFile("res/sandboxvs.glsl").c_str());
+	auto fs = RenderQueue.Device().CreateFragmentShader(iwu::ReadFile("res/sandboxfs.glsl").c_str());
 
-	pipeline = device->CreatePipeline(vs, fs);
-	device->SetPipeline(pipeline);
+	pipeline = RenderQueue.Device().CreatePipeline(vs, fs);
+	RenderQueue.Device().SetPipeline(pipeline);
 
 	IwEntity::Entity camera = Space.CreateEntity();
 	Space.CreateComponent<IwEngine::Transform>(camera, iwm::vector3::zero, iwm::vector3::one, iwm::quaternion::create_from_euler_angles(0, iwm::IW_PI, 0));
@@ -90,9 +90,9 @@ void GameLayer::Update() {
 		for (int i = 0; i < model.MeshCount; i++) {
 			IwGraphics::Mesh& mesh = model.Meshes[i];
 			if (mesh.IndexBuffer.initialized() && mesh.VertexArray.initialized()) {
-				device->SetVertexArray(mesh.VertexArray.value());
-				device->SetIndexBuffer(mesh.IndexBuffer.value());
-				device->DrawElements(mesh.FaceCount, 0);
+				RenderQueue.Device().SetVertexArray(mesh.VertexArray.value());
+				RenderQueue.Device().SetIndexBuffer(mesh.IndexBuffer.value());
+				RenderQueue.Device().DrawElements(mesh.FaceCount, 0);
 			}
 		}
 	}

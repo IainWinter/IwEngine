@@ -3,9 +3,11 @@
 namespace IwEngine {
 	Layer::Layer(
 		IwEntity::Space& space,
+		IwGraphics::RenderQueue& renderQueue,
 		const char* name)
 		: m_name(name)
 		, Space(space)
+		, RenderQueue(renderQueue)
 	{}
 
 	Layer::~Layer() {}

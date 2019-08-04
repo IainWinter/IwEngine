@@ -83,6 +83,5 @@ namespace IwEngine {
 		inline DisplayState State() {
 			return options.State;
 		}
-
 	};
 }

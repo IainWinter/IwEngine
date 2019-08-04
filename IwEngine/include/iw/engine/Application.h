@@ -4,22 +4,25 @@
 #include "Window.h"
 #include "Stack.h"
 #include "InitOptions.h"
+#include "Layers/ImGuiLayer.h"
 #include "iw/input/InputManager.h"
 #include "iw/entity/Space.h"
-#include "Layers/ImGuiLayer.h"
+#include "iw/graphics/RenderQueue.h"
 #include <vector>
 
 namespace IwEngine {
 	class IWENGINE_API Application {
 	private:
-		IWindow*        m_window;
-		ImGuiLayer*     m_imguiLayer;
-		bool            m_running;
-		Stack<Layer*>   m_layers;
-		IwEntity::Space m_space;
+		bool                 m_running;
+		IWindow*             m_window;
+		ImGuiLayer*          m_imguiLayer;
+		Stack<Layer*>        m_layers;
+		IwRenderer::IDevice* m_device;
 
 	protected:
-		IwInput::InputManager InputManager;
+		IwEntity::Space         Space;
+		IwInput::InputManager   InputManager;
+		IwGraphics::RenderQueue RenderQueue;
 
 	public:
 		Application();
@@ -46,7 +49,7 @@ namespace IwEngine {
 		L* PushLayer(
 			Args&&... args)
 		{
-			L* layer = new L(m_space, std::forward<Args>(args)...);
+			L* layer = new L(Space, RenderQueue, std::forward<Args>(args)...);
 			m_layers.PushBack(layer);
 			return layer;
 		}
@@ -57,7 +60,7 @@ namespace IwEngine {
 		L* PushOverlay(
 				Args&& ... args)
 		{
-			L* layer = new L(m_space, std::forward<Args>(args)...);
+			L* layer = new L(Space, RenderQueue, std::forward<Args>(args)...);
 			m_layers.PushFront(layer);
 			return layer;
 		}

@@ -11,6 +11,10 @@
 #include "gl/glew.h"
 
 namespace IwRenderer {
+	IDevice* IDevice::Create() {
+		return new GLDevice();
+	}
+
 	void GLDevice::DrawElements(
 		int count, 
 		long long offset)

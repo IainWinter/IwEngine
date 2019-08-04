@@ -12,13 +12,12 @@ class GameLayer
 {
 private:
 	IwGraphics::ModelLoader loader;
-	IwRenderer::IDevice*    device;
 	IwRenderer::IPipeline*  pipeline;
-	IwGraphics::RenderQueue RenderQueue;
 
 public:
 	GameLayer(
-		IwEntity::Space& space);
+		IwEntity::Space& space,
+		IwGraphics::RenderQueue& renderQueue);
 
 	~GameLayer();
 

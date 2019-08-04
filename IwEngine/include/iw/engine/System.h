@@ -19,11 +19,13 @@ namespace IwEngine {
 	{
 	private:
 		const char*                  m_name;
-		IwEntity::Space&             m_space;
 		std::queue<std::thread>      m_threads;
 		std::queue<IwEntity::Entity> m_delete; // Probly make it so space can queue component creation at the ComponentArray level because of templated bs
 
 	protected:
+		IwEntity::Space&         Space;
+		IwGraphics::RenderQueue& RenderQueue;
+
 		using View = IwEntity::View<_cs...>;
 
 		virtual void Update(
@@ -37,16 +39,18 @@ namespace IwEngine {
 	public:
 		System(
 			IwEntity::Space& space,
+			IwGraphics::RenderQueue& renderQueue,
 			const char* name)
 			: m_name(name)
-			, m_space(space)
+			, Space(space)
+			, RenderQueue(renderQueue)
 		{}
 
 		virtual ~System() {}
 
 		void Update() override {
 			// Break up view into Viewlets to execute on seperate threads
-			View view = m_space.ViewComponents<_cs...>();
+			View view = Space.ViewComponents<_cs...>();
 
 			// Execute threads
 			Update(view);
@@ -62,7 +66,7 @@ namespace IwEngine {
 				//	delete m->Meshes[i].IndexBuffer;
 				//}
 
-				m_space.DestroyEntity(entity);
+				Space.DestroyEntity(entity);
 				m_delete.pop();
 			}
 		}

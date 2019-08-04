@@ -13,13 +13,15 @@ namespace IwEngine {
 		const char* m_name;
 		Stack<ISystem*> m_systems;
 	protected:
-		IwEntity::Space& Space;
+		IwEntity::Space&         Space;
+		IwGraphics::RenderQueue& RenderQueue;
 
 	protected:
 		void UpdateSystems();
 	public:
 		Layer(
 			IwEntity::Space& space,
+			IwGraphics::RenderQueue& renderQueue,
 			const char* name);
 
 		virtual ~Layer();
@@ -49,7 +51,7 @@ namespace IwEngine {
 		S* PushSystem(
 			Args&& ... args)
 		{
-			S* layer = new S(Space, std::forward<Args>(args)...);
+			S* layer = new S(Space, RenderQueue, std::forward<Args>(args)...);
 			m_systems.PushBack(layer);
 			return layer;
 		}

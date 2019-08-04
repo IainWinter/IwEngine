@@ -1,5 +1,11 @@
 #include "iw/graphics/RenderQueue.h"
 
+//Should probly be just a part in a renderer
+
+// Renderer - Immediate stuff
+/// RenderQueue - Async stuff
+//
+
 namespace IwGraphics {
 	RenderQueue::CVBA::CVBA(
 		iwu::potential<IwRenderer::IVertexBuffer*> buffer, 
@@ -31,7 +37,7 @@ namespace IwGraphics {
 	{}
 
 	RenderQueue::RenderQueue(
-		IwRenderer::IDevice* device)
+		IwRenderer::IDevice& device)
 		: m_device(device)
 	{}
 
@@ -48,12 +54,12 @@ namespace IwGraphics {
 			switch (op.Code) {
 				case CREATE_VERTEX_BUFFER: {
 					CVBA& args = *(CVBA*)op.Args;
-					args.Buffer.initialize(m_device->CreateVertexBuffer(args.Size, args.Data));
+					args.Buffer.initialize(m_device.CreateVertexBuffer(args.Size, args.Data));
 					break;
 				}
 				case CREATE_INDEX_BUFFER: {
 					CIBA& args = *(CIBA*)op.Args;
-					args.Buffer.initialize(m_device->CreateIndexBuffer(args.Count, args.Data));
+					args.Buffer.initialize(m_device.CreateIndexBuffer(args.Count, args.Data));
 					break;
 				}
 				case CREATE_VERTEX_ARRAY: {
@@ -64,7 +70,7 @@ namespace IwGraphics {
 						buffers[i] = args.Buffers[i].value();
 					}
 
-					args.Array.initialize(m_device->CreateVertexArray(args.Count, buffers, args.Layouts));
+					args.Array.initialize(m_device.CreateVertexArray(args.Count, buffers, args.Layouts));
 
 					delete[] buffers;
 

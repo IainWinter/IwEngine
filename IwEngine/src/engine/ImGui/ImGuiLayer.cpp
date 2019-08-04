@@ -6,8 +6,9 @@
 
 namespace IwEngine {
 	ImGuiLayer::ImGuiLayer(
-		IwEntity::Space& space)
-		: Layer(space, "ImGui")
+		IwEntity::Space& space,
+		IwGraphics::RenderQueue& renderQueue)
+		: Layer(space, renderQueue, "ImGui")
 	{}
 
 	ImGuiLayer::~ImGuiLayer() {}

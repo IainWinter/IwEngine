@@ -1,9 +1,13 @@
 #include "Systems/EnemySystem.h"
+#include "Components/Bullet.h"
 #include "iw/engine/Time.h"
 
 EnemySystem::EnemySystem(
-	IwEntity::Space& space)
-	: IwEngine::System<IwEngine::Transform, Enemy>(space, "Enemy")
+	IwEntity::Space& space,
+	IwGraphics::RenderQueue& renderQueue,
+	IwGraphics::ModelData* circle)
+	: IwEngine::System<IwEngine::Transform, Enemy>(space, renderQueue, "Enemy")
+	, Circle(circle)
 {}
 
 EnemySystem::~EnemySystem()
@@ -29,10 +33,10 @@ void EnemySystem::Update(
 
 		else if (enemy.CanShoot && enemy.FireTime <= enemy.TimeToShoot) {
 			enemy.CanShoot = false;
-			//IwEntity::Entity bullet = Space.CreateEntity();
-			//Space.CreateComponent<IwEngine::Transform>(bullet, transform.Position + iwm::vector3(1, 1, 0) * transform.Rotation.inverted(), transform.Scale, transform.Rotation.inverted());
-			//Space.CreateComponent<IwEngine::Model>(bullet, loader.Load("res/circle.obj"), device);
-			//Space.CreateComponent<Bullet>(bullet, LINE, 4.0f);
+			IwEntity::Entity bullet = Space.CreateEntity();
+			Space.CreateComponent<IwEngine::Transform>(bullet, transform.Position + iwm::vector3(1, 1, 0) * transform.Rotation.inverted(), transform.Scale, transform.Rotation.inverted());
+			Space.CreateComponent<IwEngine::Model>(bullet, Circle, RenderQueue);
+			Space.CreateComponent<Bullet>(bullet, LINE, 4.0f);
 		}
 
 		enemy.FireTime -= IwEngine::Time::DeltaTime();

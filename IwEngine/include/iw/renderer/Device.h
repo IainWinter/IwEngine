@@ -102,5 +102,7 @@ namespace IwRenderer {
 
 		virtual void SetComputePipeline(
 			IComputePipeline* computePipeline) = 0;
+
+		static IDevice* Create();
 	};
 }

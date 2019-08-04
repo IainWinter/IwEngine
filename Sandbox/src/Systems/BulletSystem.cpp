@@ -2,8 +2,9 @@
 #include "iw/engine/Time.h"
 
 BulletSystem::BulletSystem(
-	IwEntity::Space& space)
-	: IwEngine::System<IwEngine::Transform, Bullet>(space, "Bullet")
+	IwEntity::Space& space,
+	IwGraphics::RenderQueue& renderQueue)
+	: IwEngine::System<IwEngine::Transform, Bullet>(space, renderQueue, "Bullet")
 {}
 
 BulletSystem::~BulletSystem()

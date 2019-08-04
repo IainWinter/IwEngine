@@ -3,8 +3,9 @@
 #include "iw/input/Devices/Keyboard.h"
 
 PlayerSystem::PlayerSystem(
-	IwEntity::Space& space)
-	: IwEngine::System<IwEngine::Transform, Player>(space, "Player")
+	IwEntity::Space& space,
+	IwGraphics::RenderQueue& renderQueue)
+	: IwEngine::System<IwEngine::Transform, Player>(space, renderQueue, "Player")
 {}
 
 PlayerSystem::~PlayerSystem()

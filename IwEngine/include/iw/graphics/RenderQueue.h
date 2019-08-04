@@ -76,17 +76,21 @@ namespace IwGraphics {
 		};
 
 		std::vector<RenderOp> m_queue;
-		IwRenderer::IDevice*  m_device;
+		IwRenderer::IDevice&  m_device;
 
 	public:
 		RenderQueue(
-			IwRenderer::IDevice* device);
+			IwRenderer::IDevice& device);
 
 		void Push(
 			OpCode&& op,
 			Args* data);
 
 		void Execute();
+
+		inline IwRenderer::IDevice& Device() {
+			return m_device;
+		}
 
 		iwu::potential<IwRenderer::IVertexBuffer*> CreateVertexBuffer(
 			std::size_t size,
