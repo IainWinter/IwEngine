@@ -11,11 +11,11 @@ namespace IwEngine {
 	{
 		for (size_t i = 0; i < MeshCount; i++) {
 			IwGraphics::MeshData& meshData = data->Meshes[i];
-			Meshes[i] = RenderQueue.CreateMesh(
-				meshData.VertexCount, 
-				meshData.Vertices, 
-				meshData.FaceCount, 
-				meshData.Faces);
+			//Meshes[i] = RenderQueue.CreateMesh(
+			//	meshData.VertexCount, 
+			//	meshData.Vertices, 
+			//	meshData.FaceCount, 
+			//	meshData.Faces);
 		}
 	}
 

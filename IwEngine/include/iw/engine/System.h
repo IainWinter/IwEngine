@@ -58,6 +58,12 @@ namespace IwEngine {
 			// Execute queues space operations
 			while (!m_delete.empty()) {
 				IwEntity::Entity& entity = m_delete.front();
+
+				//todo: remove this
+				auto m = Space.GetComponent<IwEngine::Model>(entity);
+				RenderQueue.QueuedDevice.DestroyIndexBuffer(m->Meshes[0].IndexBuffer);
+				RenderQueue.QueuedDevice.DestroyVertexArray(m->Meshes[0].VertexArray);
+
 				Space.DestroyEntity(entity);
 				m_delete.pop();
 			}

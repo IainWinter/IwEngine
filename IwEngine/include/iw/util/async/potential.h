@@ -8,50 +8,50 @@ namespace iwutil {
 	template<
 		typename _t>
 	class potential {
-		std::shared_ptr<_t>   m_value;
-		std::shared_ptr<bool> m_initialized;
+		struct value_t {
+			_t   value;
+			bool initialized;
+
+			value_t(
+				_t v,
+				bool i)
+				: value(v)
+				, initialized(i)
+			{}
+		};
+
+		std::shared_ptr<value_t> m_ptr;
 
 	public:
 		potential()
-			: m_value(std::make_shared<_t>(_t()))
-			, m_initialized(std::make_shared<bool>(false))
+			: m_ptr(std::make_shared<value_t>(_t(), false))
 		{}
 
 		potential(
-			_t* value)
-			: m_value(std::make_shared(value))
-			, m_initialized(std::make_shared(true))
+			const _t& value)
+			: m_ptr(std::make_shared<value_t>(value, true))
 		{}
 
 		potential(potential&& copy) noexcept
-			: m_value(copy.m_value)
-			, m_initialized(copy.m_initialized)
+			: m_ptr(copy.m_ptr)
 		{
-			copy.m_value.reset();
-			copy.m_initialized.reset();
+			copy.m_ptr.reset();
 		}
 
 		potential(potential& copy)
-			: m_value(copy.m_value)
-			, m_initialized(copy.m_initialized)
+			: m_ptr(copy.m_ptr)
 		{}
 
 		~potential() {
-			m_value.reset();
-			m_initialized.reset();
+			m_ptr.reset();
 		}
 
 		potential& operator=(
 			potential&& copy) noexcept
 		{
-			m_value.reset();
-			m_initialized.reset();
-
-			m_value       = copy.m_value;
-			m_initialized = copy.m_initialized;
-
-			copy.m_value.reset();
-			copy.m_initialized.reset();
+			m_ptr.reset();
+			m_ptr = copy.m_value;
+			copy.m_ptr.reset();
 
 			return *this;
 		}
@@ -59,46 +59,36 @@ namespace iwutil {
 		potential& operator=(
 			potential& copy)
 		{
-			m_value       = copy.m_value;
-			m_initialized = copy.m_initialized;
+			m_ptr = copy.m_ptr;
 			 
 			return *this;
 		}
 
 		void release() {
-			m_value.reset();
-			m_initialized.reset();
+			m_ptr.reset();
 		}
 
 		void initialize(
 			const _t& value)
 		{
-			*m_value       = value;
-			*m_initialized = true;
+			m_ptr->value       = value;
+			m_ptr->initialized = true;
 		}
 
 		_t& value() {
-			return *m_value.get();
+			return m_ptr->value;
 		}
 
 		const _t& value() const {
-			return *m_value.get();
-		}
-
-		inline _t* ptr() {
-			return m_value;
-		}
-
-		inline const _t* ptr() const {
-			return m_value;
+			return m_ptr->value;
 		}
 
 		bool initialized() const {
-			return *m_initialized;
+			return m_ptr->initialized;
 		}
 
 		int use_count() const {
-			return m_value.use_count();
+			return m_ptr.use_count();
 		}
 	};
 }
