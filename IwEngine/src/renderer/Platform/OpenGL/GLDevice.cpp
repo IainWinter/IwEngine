@@ -67,13 +67,13 @@ namespace IwRenderer {
 	IVertexArray* GLDevice::CreateVertexArray(
 		size_t numBuffers,
 		IVertexBuffer** vertexBuffers,
-		VertexBufferLayout** vertexLayouts)
+		VertexBufferLayout* vertexLayouts)
 	{
 		GLVertexArray* va = new GLVertexArray();
 		for (size_t i = 0; i < numBuffers; i++) {
 			va->AddBuffer(
 				static_cast<GLVertexBuffer*>(vertexBuffers[i]),
-				vertexLayouts[i]);
+					vertexLayouts[i]);
 		}
 
 		return va;

@@ -35,11 +35,11 @@ GameLayer::~GameLayer() {
 int GameLayer::Initialize(
 	IwEngine::InitOptions& options)
 {
-	auto vs = RenderQueue.Device().CreateVertexShader(iwu::ReadFile("res/sandboxvs.glsl").c_str());
-	auto fs = RenderQueue.Device().CreateFragmentShader(iwu::ReadFile("res/sandboxfs.glsl").c_str());
+	auto vs = RenderQueue.Device.CreateVertexShader(iwu::ReadFile("res/sandboxvs.glsl").c_str());
+	auto fs = RenderQueue.Device.CreateFragmentShader(iwu::ReadFile("res/sandboxfs.glsl").c_str());
 
-	pipeline = RenderQueue.Device().CreatePipeline(vs, fs);
-	RenderQueue.Device().SetPipeline(pipeline);
+	pipeline = RenderQueue.Device.CreatePipeline(vs, fs);
+	RenderQueue.Device.SetPipeline(pipeline);
 
 	IwEntity::Entity camera = Space.CreateEntity();
 	Space.CreateComponent<IwEngine::Transform>(camera, iwm::vector3::zero, iwm::vector3::one, iwm::quaternion::create_from_euler_angles(0, iwm::IW_PI, 0));
@@ -90,9 +90,9 @@ void GameLayer::Update() {
 		for (int i = 0; i < model.MeshCount; i++) {
 			IwGraphics::Mesh& mesh = model.Meshes[i];
 			if (mesh.IndexBuffer.initialized() && mesh.VertexArray.initialized()) {
-				RenderQueue.Device().SetVertexArray(mesh.VertexArray.value());
-				RenderQueue.Device().SetIndexBuffer(mesh.IndexBuffer.value());
-				RenderQueue.Device().DrawElements(mesh.FaceCount, 0);
+				RenderQueue.Device.SetVertexArray(mesh.VertexArray.value());
+				RenderQueue.Device.SetIndexBuffer(mesh.IndexBuffer.value());
+				RenderQueue.Device.DrawElements(mesh.FaceCount, 0);
 			}
 		}
 	}

@@ -13,7 +13,7 @@ namespace IwRenderer {
 	private:
 		struct {
 			std::vector<GLVertexBuffer*>     m_buffers;
-			std::vector<VertexBufferLayout*> m_layouts;
+			std::vector<VertexBufferLayout>  m_layouts;
 		};
 
 		unsigned int m_renderId;
@@ -24,7 +24,7 @@ namespace IwRenderer {
 
 		void AddBuffer(
 			GLVertexBuffer* vb,
-			VertexBufferLayout* layout);
+			VertexBufferLayout layout);
 
 		void Bind() const;
 		void Unbind() const;

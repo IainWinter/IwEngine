@@ -8,6 +8,8 @@
 
 #include "imgui/imgui.h"
 
+#include "iw/util/memory/linear_allocator.h"
+
 class Game
 	: public IwEngine::Application
 {

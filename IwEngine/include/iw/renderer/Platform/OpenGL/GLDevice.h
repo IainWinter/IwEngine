@@ -37,7 +37,7 @@ namespace IwRenderer {
 		IVertexArray* CreateVertexArray(
 			size_t numBuffers,
 			IVertexBuffer** vertexBuffers,
-			VertexBufferLayout** vertexLayouts) override;
+			VertexBufferLayout* vertexLayouts) override;
 
 		void DestroyVertexArray(
 			IVertexArray* vertexArray) override;

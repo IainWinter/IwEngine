@@ -45,7 +45,7 @@ namespace IwRenderer {
 		virtual IVertexArray* CreateVertexArray(
 			size_t numBuffers,
 			IVertexBuffer** vertexBuffers,
-			VertexBufferLayout** vertexLayouts) = 0;
+			VertexBufferLayout* vertexLayouts) = 0;
 
 		virtual void DestroyVertexArray(
 			IVertexArray* vertexArray) = 0;

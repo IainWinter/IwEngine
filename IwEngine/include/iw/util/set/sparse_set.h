@@ -612,8 +612,11 @@ namespace iwutil {
 		void erase(
 			_index_t index) override
 		{
-			_item_t& back = m_items.back();
-			m_items[base_t::at(index)] = back;
+			_index_t loc = base_t::at(index);
+
+			m_items[loc].~_item_t();
+			m_items[loc] = std::move(m_items.back());
+
 			m_items.pop_back();
 			base_t::erase(index);
 		}

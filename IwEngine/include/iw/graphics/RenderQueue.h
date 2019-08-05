@@ -5,6 +5,7 @@
 #include "Vertex.h"
 #include "iw/log/logger.h"
 #include "iw/util/async/potential.h"
+#include "iw/util/memory/linear_allocator.h"
 #include "iw/renderer/VertexBufferLayout.h"
 #include "iw/renderer/VertexBuffer.h"
 #include "iw/renderer/VertexArray.h"
@@ -17,66 +18,42 @@ namespace IwGraphics {
 	private:
 		enum OpCode {
 			CREATE_VERTEX_BUFFER,
-			CREATE_INDEX_BUFFER,
 			CREATE_VERTEX_ARRAY,
+			CREATE_INDEX_BUFFER,
 			CREATE_MESH
 		};
 
 		// leakky as old man asshoul
 
-		struct Args {
-			virtual ~Args() { }
-		};
-
-		struct CVBA
-			: Args
-		{
+		struct CVBA {
 			iwu::potential<IwRenderer::IVertexBuffer*> Buffer;
 			std::size_t Size;
 			const void* Data;
-
-			CVBA(
-				iwu::potential<IwRenderer::IVertexBuffer*> buffer,
-				std::size_t size,
-				const void* data);
 		};
 
-		struct CIBA
-			: Args
-		{
+		struct CIBA {
 			iwu::potential<IwRenderer::IIndexBuffer*> Buffer;
 			std::size_t Count;
 			const void* Data;
-
-			CIBA(
-				iwu::potential<IwRenderer::IIndexBuffer*> buffer,
-				std::size_t count,
-				const void* data);
 		};
 
-		struct CVAA
-			: Args
-		{
+		struct CVAA {
 			iwu::potential<IwRenderer::IVertexArray*>   Array;
 			iwu::potential<IwRenderer::IVertexBuffer*>* Buffers;
-			IwRenderer::VertexBufferLayout** Layouts;
+			IwRenderer::VertexBufferLayout* Layouts;
 			std::size_t Count;
-
-			CVAA(
-				iwu::potential<IwRenderer::IVertexArray*> buffer,
-				std::size_t count,
-				iwu::potential<IwRenderer::IVertexBuffer*>* buffers,
-				IwRenderer::VertexBufferLayout** layouts);
 		};
 
 		struct RenderOp {
 			OpCode      Code;
-			const Args* Args;
+			const void* Args;
 			//RenderOp*   Next; //more complex ops probly need this
 		};
 
 		std::vector<RenderOp> m_queue;
-		IwRenderer::IDevice&  m_device;
+		iwu::linear_allocator m_scratch;
+	public:
+		IwRenderer::IDevice& Device;
 
 	public:
 		RenderQueue(
@@ -84,13 +61,9 @@ namespace IwGraphics {
 
 		void Push(
 			OpCode&& op,
-			Args* data);
+			void* data);
 
 		void Execute();
-
-		inline IwRenderer::IDevice& Device() {
-			return m_device;
-		}
 
 		iwu::potential<IwRenderer::IVertexBuffer*> CreateVertexBuffer(
 			std::size_t size,
@@ -104,7 +77,7 @@ namespace IwGraphics {
 		iwu::potential<IwRenderer::IVertexArray*> CreateVertexArray(
 			std::size_t count,
 			iwu::potential<IwRenderer::IVertexBuffer*>* buffers,
-			IwRenderer::VertexBufferLayout** layouts);
+			IwRenderer::VertexBufferLayout* layouts);
 
 		Mesh CreateMesh(
 			std::size_t vertexCount,

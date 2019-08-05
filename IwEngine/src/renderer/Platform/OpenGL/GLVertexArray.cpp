@@ -16,29 +16,23 @@ namespace IwRenderer {
 			delete (*it);
 		}
 
-		for (std::vector<VertexBufferLayout*>::iterator it 
-			= m_layouts.begin(); it != m_layouts.end(); ++it) 
-		{
-			delete (*it);
-		}
-
 		m_buffers.clear();
 		m_layouts.clear();
 	}
 
 	void GLVertexArray::AddBuffer(
 		GLVertexBuffer* vb, 
-		VertexBufferLayout* layout) 
+		VertexBufferLayout layout) 
 	{
 		Bind();
 		vb->Bind();
-		const auto& elements = layout->GetElements();
+		const auto& elements = layout.GetElements();
 		unsigned int offset = 0;
 		for (unsigned int i = 0; i < elements.size(); i++) {
 			const auto& element = elements[i];
 			glEnableVertexAttribArray(i);
 			glVertexAttribPointer(i, element.Count, element.Type,
-				element.Normalized, layout->GetStride(), (const void*)offset);
+				element.Normalized, layout.GetStride(), (const void*)offset);
 			offset += element.Count 
 				* VertexBufferLayoutElement::GetSizeOfType(element.Type);
 		}

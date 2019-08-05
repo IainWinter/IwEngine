@@ -21,16 +21,19 @@ namespace IwEngine {
 
 	Model::Model(
 		Model&& copy) noexcept
-		: Meshes(copy.Meshes)
+		: Data(copy.Data)
+		, Meshes(copy.Meshes)
 		, MeshCount(copy.MeshCount)
 	{
+		copy.Data      = nullptr;
 		copy.Meshes    = nullptr;
 		copy.MeshCount = 0;
 	}
 
 	Model::Model(
 		const Model& copy)
-		: Meshes(new IwGraphics::Mesh[copy.MeshCount])
+		: Data(copy.Data)
+		, Meshes(new IwGraphics::Mesh[copy.MeshCount])
 		, MeshCount(copy.MeshCount)
 	{
 		for (std::size_t i = 0; i < MeshCount; i++) {
@@ -45,9 +48,11 @@ namespace IwEngine {
 	Model& Model::operator=(
 		Model&& copy) noexcept
 	{
+		Data      = copy.Data;
 		Meshes    = copy.Meshes;
 		MeshCount = copy.MeshCount;
 
+		copy.Data      = nullptr;
 		copy.Meshes    = nullptr;
 		copy.MeshCount = 0;
 
@@ -57,8 +62,10 @@ namespace IwEngine {
 	Model& Model::operator=(
 		const Model& copy)
 	{
+		Data      = copy.Data;
 		Meshes    = new IwGraphics::Mesh[copy.MeshCount];
 		MeshCount = copy.MeshCount;
+
 		for (std::size_t i = 0; i < MeshCount; i++) {
 			Meshes[i] = copy.Meshes[i];
 		}
