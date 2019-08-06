@@ -4,11 +4,6 @@
 
 
 namespace IwGraphics {
-	using PIB = iwu::potential<IwRenderer::IIndexBuffer*>;
-	using PVB = iwu::potential<IwRenderer::IVertexBuffer*>;
-	using PVA = iwu::potential<IwRenderer::IVertexArray*>;
-	using VBL = IwRenderer::VertexBufferLayout;
-
 	struct CIB {
 		PIB         Buffer;
 		std::size_t Size;

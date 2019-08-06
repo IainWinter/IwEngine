@@ -9,7 +9,8 @@ class EnemySystem
 	: public IwEngine::System<IwEngine::Transform, Enemy>
 {
 private:
-	IwGraphics::ModelData* Circle;
+	IwGraphics::ModelData* CircleData;
+	IwGraphics::Mesh*      CircleMesh;
 
 public:
 	EnemySystem(
@@ -19,6 +20,10 @@ public:
 
 	~EnemySystem();
 
+	int Initialize() override;
+
 	void Update(
 		View& view) override;
+
+	void Destroy() override;
 };

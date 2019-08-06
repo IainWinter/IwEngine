@@ -21,10 +21,20 @@ namespace IwEngine {
 	int Layer::Initialize(
 		InitOptions& options) 
 	{
+		for (ISystem* s : m_systems) {
+			int e = s->Initialize();
+			if (e != 0) return e;
+		}
+
 		return 0;
 	}
 
-	void Layer::Destroy() {}
+	void Layer::Destroy() {
+		for (ISystem* s : m_systems) {
+			s->Destroy();
+		}
+	}
+
 	void Layer::Update() {}
 	void Layer::FixedUpdate() {}
 	void Layer::ImGui() {}

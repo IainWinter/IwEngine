@@ -7,6 +7,11 @@
 #include <queue>
 
 namespace IwGraphics {
+	using PIB = iwu::potential<IwRenderer::IIndexBuffer*>;
+	using PVB = iwu::potential<IwRenderer::IVertexBuffer*>;
+	using PVA = iwu::potential<IwRenderer::IVertexArray*>;
+	using VBL = IwRenderer::VertexBufferLayout;
+
 	class IWGRAPHICS_API QueuedDevice {
 	private:
 		enum Operation {
@@ -39,29 +44,29 @@ namespace IwGraphics {
 		void Execute();
 
 		//Index buffers
-		iwu::potential<IwRenderer::IIndexBuffer*> CreateIndexBuffer(
+		PIB CreateIndexBuffer(
 			std::size_t size,
 			const void* data = nullptr);
 
 		void DestroyIndexBuffer(
-			iwu::potential<IwRenderer::IIndexBuffer*> indexBuffer);
+			PIB indexBuffer);
 
 		//Vertex buffers
-		iwu::potential<IwRenderer::IVertexBuffer*> CreateVertexBuffer(
+		PVB CreateVertexBuffer(
 			std::size_t size,
 			const void* data = nullptr);
 
 		void DestroyVertexBuffer(
-			iwu::potential<IwRenderer::IVertexBuffer*> vertexBuffer);
+			PVB vertexBuffer);
 
 		//Vertex arrays
-		iwu::potential<IwRenderer::IVertexArray*> CreateVertexArray(
+		PVA CreateVertexArray(
 			std::size_t numBuffers,
-			iwu::potential<IwRenderer::IVertexBuffer*>* vertexBuffers,
-			IwRenderer::VertexBufferLayout* vertexLayouts);
+			PVB* vertexBuffers,
+			VBL* vertexLayouts);
 
 		void DestroyVertexArray(
-			iwu::potential<IwRenderer::IVertexArray*> vertexArray);
+			PVA vertexArray);
 
 		//Vertex shader
 		iwu::potential<IwRenderer::IVertexShader*> CreateVertexShader(

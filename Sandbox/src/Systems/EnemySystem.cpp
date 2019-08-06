@@ -6,9 +6,9 @@
 EnemySystem::EnemySystem(
 	IwEntity::Space& space,
 	IwGraphics::RenderQueue& renderQueue,
-	IwGraphics::ModelData* circle)
+	IwGraphics::ModelData* circleData)
 	: IwEngine::System<IwEngine::Transform, Enemy>(space, renderQueue, "Enemy")
-	, Circle(circle)
+	, CircleData(circleData)
 {}
 
 EnemySystem::~EnemySystem()
@@ -16,7 +16,27 @@ EnemySystem::~EnemySystem()
 
 }
 
-IwEntity::Entity max = 0;
+int EnemySystem::Initialize() {
+	IwGraphics::MeshData& meshData = CircleData->Meshes[0];
+
+	IwRenderer::VertexBufferLayout layouts[1];
+	layouts[0].Push<float>(3);
+	layouts[0].Push<float>(3);
+
+	iwu::potential<IwRenderer::IVertexBuffer*> buffers[1];
+	buffers[0] = RenderQueue.QueuedDevice.CreateVertexBuffer(meshData.VertexCount * sizeof(IwGraphics::Vertex), meshData.Vertices);
+
+	auto pib = RenderQueue.QueuedDevice.CreateIndexBuffer(meshData.FaceCount, meshData.Faces);
+	auto pva = RenderQueue.QueuedDevice.CreateVertexArray(1, buffers, layouts);
+
+	CircleMesh = new IwGraphics::Mesh{ pva, pib, meshData.FaceCount };
+}
+
+void EnemySystem::Destroy() {
+	RenderQueue.QueuedDevice.DestroyVertexArray(CircleMesh->VertexArray);
+	RenderQueue.QueuedDevice.DestroyIndexBuffer(CircleMesh->IndexBuffer);
+	delete CircleMesh;
+}
 
 void EnemySystem::Update(
 	View& view)
@@ -38,13 +58,12 @@ void EnemySystem::Update(
 			enemy.CanShoot = false;
 			IwEntity::Entity bullet = Space.CreateEntity();
 
-			if (max < bullet) {
-				max = bullet;
-				LOG_INFO << max;
-			}
-
 			Space.CreateComponent<IwEngine::Transform>(bullet, transform.Position + iwm::vector3(1, 1, 0) * transform.Rotation.inverted(), transform.Scale, transform.Rotation.inverted());
-			Space.CreateComponent<IwEngine::Model>(bullet, Circle, RenderQueue);
+			IwEngine::Model m = Space.CreateComponent<IwEngine::Model>(bullet); //heh
+			m.Data = CircleData;
+			m.Meshes = CircleMesh;
+			m.MeshCount = 1;
+
 			Space.CreateComponent<Bullet>(bullet, LINE, 4.0f);
 		}
 

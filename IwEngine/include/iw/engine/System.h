@@ -9,6 +9,8 @@
 namespace IwEngine {
 	class ISystem {
 	public:
+		virtual int  Initialize() = 0;
+		virtual void Destroy() = 0;
 		virtual void Update() = 0;
 	};
 
@@ -48,6 +50,12 @@ namespace IwEngine {
 
 		virtual ~System() {}
 
+		virtual int Initialize() {
+			return 0;
+		}
+
+		virtual void Destroy() {}
+
 		void Update() override {
 			// Break up view into Viewlets to execute on seperate threads
 			View view = Space.ViewComponents<_cs...>();
@@ -58,12 +66,6 @@ namespace IwEngine {
 			// Execute queues space operations
 			while (!m_delete.empty()) {
 				IwEntity::Entity& entity = m_delete.front();
-
-				////todo: remove this
-				auto m = Space.GetComponent<IwEngine::Model>(entity);
-				RenderQueue.QueuedDevice.DestroyIndexBuffer(m->Meshes[0].IndexBuffer);
-				RenderQueue.QueuedDevice.DestroyVertexArray(m->Meshes[0].VertexArray);
-
 				Space.DestroyEntity(entity);
 				m_delete.pop();
 			}
