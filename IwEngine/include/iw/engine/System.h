@@ -2,9 +2,9 @@
 
 #include "iw/entity/Space.h"
 #include "iw/entity/View.h"
+#include "iw/graphics/RenderQueue.h"
 #include <queue>
 #include <thread>
-#include "Components/Model.h"
 
 namespace IwEngine {
 	class ISystem {

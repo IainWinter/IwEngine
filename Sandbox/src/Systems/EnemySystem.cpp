@@ -1,6 +1,7 @@
 #include "Systems/EnemySystem.h"
 #include "Components/Bullet.h"
 #include "iw/engine/Time.h"
+#include "iw/engine/Components/Model.h"
 #include "iw/input/Devices/Keyboard.h"
 
 EnemySystem::EnemySystem(
@@ -9,10 +10,10 @@ EnemySystem::EnemySystem(
 	IwGraphics::ModelData* circleData)
 	: IwEngine::System<IwEngine::Transform, Enemy>(space, renderQueue, "Enemy")
 	, CircleData(circleData)
+	, CircleMesh(nullptr)
 {}
 
-EnemySystem::~EnemySystem()
-{
+EnemySystem::~EnemySystem() {
 
 }
 
@@ -30,6 +31,8 @@ int EnemySystem::Initialize() {
 	auto pva = RenderQueue.QueuedDevice.CreateVertexArray(1, buffers, layouts);
 
 	CircleMesh = new IwGraphics::Mesh{ pva, pib, meshData.FaceCount };
+
+	return 0;
 }
 
 void EnemySystem::Destroy() {
@@ -37,6 +40,8 @@ void EnemySystem::Destroy() {
 	RenderQueue.QueuedDevice.DestroyIndexBuffer(CircleMesh->IndexBuffer);
 	delete CircleMesh;
 }
+
+int max = 1;
 
 void EnemySystem::Update(
 	View& view)
@@ -59,11 +64,7 @@ void EnemySystem::Update(
 			IwEntity::Entity bullet = Space.CreateEntity();
 
 			Space.CreateComponent<IwEngine::Transform>(bullet, transform.Position + iwm::vector3(1, 1, 0) * transform.Rotation.inverted(), transform.Scale, transform.Rotation.inverted());
-			IwEngine::Model m = Space.CreateComponent<IwEngine::Model>(bullet); //heh
-			m.Data = CircleData;
-			m.Meshes = CircleMesh;
-			m.MeshCount = 1;
-
+			Space.CreateComponent<IwEngine::Model>(bullet, CircleData, CircleMesh, 1U);
 			Space.CreateComponent<Bullet>(bullet, LINE, 4.0f);
 		}
 

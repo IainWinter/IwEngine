@@ -14,6 +14,10 @@ private:
 	IwGraphics::ModelLoader loader;
 	IwRenderer::IPipeline*  pipeline;
 
+	//temp
+	IwGraphics::ModelData* QuadData;
+	IwGraphics::Mesh* QuadMesh;
+
 public:
 	GameLayer(
 		IwEntity::Space& space,

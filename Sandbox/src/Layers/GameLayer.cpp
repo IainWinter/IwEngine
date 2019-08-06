@@ -22,6 +22,7 @@ GameLayer::GameLayer(
 	, pipeline(nullptr)
 {
 	IwGraphics::ModelData* circle = loader.Load("res/circle.obj");
+	QuadData = loader.Load("res/quad.obj");
 
 	PushSystem<BulletSystem>();
 	PushSystem<EnemySystem>(circle);
@@ -35,6 +36,20 @@ GameLayer::~GameLayer() {
 int GameLayer::Initialize(
 	IwEngine::InitOptions& options)
 {
+	IwGraphics::MeshData& meshData = QuadData->Meshes[0];
+
+	IwRenderer::VertexBufferLayout layouts[1];
+	layouts[0].Push<float>(3);
+	layouts[0].Push<float>(3);
+
+	iwu::potential<IwRenderer::IVertexBuffer*> buffers[1];
+	buffers[0] = RenderQueue.QueuedDevice.CreateVertexBuffer(meshData.VertexCount * sizeof(IwGraphics::Vertex), meshData.Vertices);
+
+	auto pib = RenderQueue.QueuedDevice.CreateIndexBuffer(meshData.FaceCount, meshData.Faces);
+	auto pva = RenderQueue.QueuedDevice.CreateVertexArray(1, buffers, layouts);
+
+	QuadMesh = new IwGraphics::Mesh{ pva, pib, meshData.FaceCount };
+
 	auto vs = RenderQueue.QueuedDevice.Device.CreateVertexShader(iwu::ReadFile("res/sandboxvs.glsl").c_str());
 	auto fs = RenderQueue.QueuedDevice.Device.CreateFragmentShader(iwu::ReadFile("res/sandboxfs.glsl").c_str());
 
@@ -48,17 +63,13 @@ int GameLayer::Initialize(
 
 	IwEntity::Entity player = Space.CreateEntity();
 	Space.CreateComponent<IwEngine::Transform>(player, iwm::vector3(0, 0, 1));
-	Space.CreateComponent<IwEngine::Model>(player, loader.Load("res/quad.obj"), RenderQueue);
+	Space.CreateComponent<IwEngine::Model>(player, QuadData, QuadMesh, 1U);
 	Space.CreateComponent<Player>(player, 10.0f, 100.0f, 0.1666f, 0.1f);
 
-	for (size_t x = 0; x < 5; x++) {
-		for (size_t y = 0; y < 5; y++) {
-			IwEntity::Entity e = Space.CreateEntity();
-			Space.CreateComponent<IwEngine::Transform>(e, iwm::vector3(x * 3, y * 3, 1));
-			Space.CreateComponent<IwEngine::Model>(e, loader.Load("res/quad.obj"), RenderQueue);
-			Space.CreateComponent<Enemy>(e, SPIN, 3.0f, 0.05f, 0.025f, 0.025f);
-		}
-	}
+	IwEntity::Entity e = Space.CreateEntity();
+	Space.CreateComponent<IwEngine::Transform>(e, iwm::vector3(5, 0, 1));
+	Space.CreateComponent<IwEngine::Model>(e, QuadData, QuadMesh, 1U);
+	Space.CreateComponent<Enemy>(e, SPIN, 3.0f, 0.05f, 0.025f, 0.025f);
 
 	return Layer::Initialize(options);
 }

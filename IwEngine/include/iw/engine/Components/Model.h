@@ -1,8 +1,6 @@
 #pragma once
 
 #include "iw/engine/Core.h"
-#include "iw/renderer/Device.h"
-#include "iw/graphics/RenderQueue.h"
 #include "iw/graphics/Mesh.h"
 #include "iw/graphics/Asset/ModelData.h"
 

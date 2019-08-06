@@ -33,34 +33,6 @@ namespace iwutil {
 			: m_ptr(std::make_shared<value_t>(value, true))
 		{}
 
-		//potential(potential&& copy) noexcept
-		//	: m_ptr(copy.m_ptr)
-		//{}
-
-		//potential(potential& copy)
-		//	: m_ptr(copy.m_ptr)
-		//{}
-
-		//~potential() {
-		//	m_ptr.reset();
-		//}
-
-		//potential& operator=(
-		//	potential&& copy) noexcept
-		//{
-		//	m_ptr = copy.m_ptr;
-
-		//	return *this;
-		//}
-
-		//potential& operator=(
-		//	potential& copy)
-		//{
-		//	m_ptr = copy.m_ptr;
-		//	 
-		//	return *this;
-		//}
-
 		void release() {
 			m_ptr.reset();
 		}

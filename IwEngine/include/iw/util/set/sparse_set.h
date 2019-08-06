@@ -587,7 +587,7 @@ namespace iwutil {
 			_args_t&&... args)
 		{
 			if constexpr (std::is_aggregate_v<_item_t>) {
-				m_items.emplace_back(_item_t{ std::forward<_args_t>(args)... });
+				m_items.emplace_back(_item_t { std::forward<_args_t>(args)... });
 			}
 
 			else {
