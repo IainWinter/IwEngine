@@ -64,8 +64,6 @@ namespace IwEngine {
 				RenderQueue.QueuedDevice.DestroyIndexBuffer(m->Meshes[0].IndexBuffer);
 				RenderQueue.QueuedDevice.DestroyVertexArray(m->Meshes[0].VertexArray);
 
-				LOG_INFO << entity;
-
 				Space.DestroyEntity(entity);
 				m_delete.pop();
 			}

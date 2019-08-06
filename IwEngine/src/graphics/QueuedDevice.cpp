@@ -1,5 +1,8 @@
 #include "iw/graphics/QueuedDevice.h"
 
+// < Operation > 
+
+
 namespace IwGraphics {
 	using PIB = iwu::potential<IwRenderer::IIndexBuffer*>;
 	using PVB = iwu::potential<IwRenderer::IVertexBuffer*>;
@@ -53,7 +56,6 @@ namespace IwGraphics {
 	void QueuedDevice::Execute() {
 		while (!m_queue.empty()) {
 			DeviceOperation& op = m_queue.front();
-
 			switch (op.Operation) {
 				case CREATE_INDEX_BUFFER: {
 					CIB* args = (CIB*)op.Args;
@@ -71,12 +73,16 @@ namespace IwGraphics {
 					CVA* args = (CVA*)op.Args;
 					
 					IwRenderer::IVertexBuffer** buffers = m_scratch.alloc<IwRenderer::IVertexBuffer*>(args->Count);
-					for (size_t i = 0; i < args->Count; i++) {
+					for (std::size_t i = 0; i < args->Count; i++) {
 						buffers[i] = args->Buffers[i].consume();
 					}
 
 					args->Array.initialize(Device.CreateVertexArray(args->Count, buffers, args->Layouts));
 					args->Array.release();
+					for (std::size_t i = 0; i < args->Count; i++) {
+						args->Layouts[i].Clear();
+					}
+
 					break;
 				}
 				case DESTROY_INDEX_BUFFER: {
@@ -164,13 +170,13 @@ namespace IwGraphics {
 		VBL* layouts = m_scratch.alloc<VBL>(numBuffers);
 		for (size_t i = 0; i < numBuffers; i++) {
 			buffers[i] = vertexBuffers[i];
-			layouts[i] = vertexLayouts[i];
+			layouts[i] = vertexLayouts[i]; //Vector gets allocated on the scratch but puts an array on the heap
 		}
 
 		CVA* cva = m_scratch.alloc<CVA>();
 		cva->Array   = pva;
 		cva->Buffers = buffers;
-		cva->Layouts  = layouts;
+		cva->Layouts = layouts;
 		cva->Count   = numBuffers;
 
 		Push(CREATE_VERTEX_ARRAY, cva);
@@ -261,108 +267,3 @@ namespace IwGraphics {
 
 	}
 }
-
-//iwu::potential<IwRenderer::IVertexBuffer*> CreateVertexBuffer(
-//	std::size_t size,
-//	void* data);
-//
-//iwu::potential<IwRenderer::IIndexBuffer*> CreateIndexBuffer(
-//	std::size_t count,
-//	void* data);
-//
-//// TODO: Find out how this would work with multiple potential buffers
-//iwu::potential<IwRenderer::IVertexArray*> CreateVertexArray(
-//	std::size_t count,
-//	iwu::potential<IwRenderer::IVertexBuffer*>* buffers,
-//	IwRenderer::VertexBufferLayout* layouts);
-//
-//iwu::potential<IwRenderer::IVertexArray*> CreateVertexArray(
-//	std::size_t count,
-//	IwRenderer::IVertexBuffer** buffers,
-//	IwRenderer::VertexBufferLayout* layouts);
-//
-//Mesh CreateMesh(
-//	std::size_t vertexCount,
-//	Vertex* vertices,
-//	unsigned int indexCount,
-//	unsigned int* indices);
-//
-//iwu::potential<IwRenderer::IVertexBuffer*> RenderQueue::CreateVertexBuffer(
-//	std::size_t size,
-//	void* data)
-//{
-//	iwu::potential<IwRenderer::IVertexBuffer*> buffer;
-//	CVBA* args = m_scratch.alloc<CVBA>();
-//	args->Buffer = buffer;
-//	args->Size = size;
-//	args->Data = data;
-//
-//	Push(CREATE_VERTEX_BUFFER, args);
-//
-//	return buffer;
-//}
-//
-//iwu::potential<IwRenderer::IIndexBuffer*> RenderQueue::CreateIndexBuffer(
-//	std::size_t count,
-//	void* data)
-//{
-//	iwu::potential<IwRenderer::IIndexBuffer*> buffer;
-//	CIBA* args = m_scratch.alloc<CIBA>();
-//	args->Buffer = buffer;
-//	args->Count = count;
-//	args->Data = data;
-//
-//	Push(CREATE_INDEX_BUFFER, args);
-//
-//	return buffer;
-//}
-//
-//iwu::potential<IwRenderer::IVertexArray*> RenderQueue::CreateVertexArray(
-//	std::size_t count,
-//	iwu::potential<IwRenderer::IVertexBuffer*>* buffers,
-//	IwRenderer::VertexBufferLayout* layouts)
-//{
-//	iwu::potential<IwRenderer::IVertexArray*> array;
-//	CVAA* args = m_scratch.alloc<CVAA>();
-//	args->Array = array;
-//	args->Count = count;
-//	args->Buffers = buffers;
-//	args->Layouts = layouts;
-//
-//	Push(CREATE_VERTEX_ARRAY, args);
-//
-//	return array;
-//}
-//
-////TODO: test if this works
-//iwu::potential<IwRenderer::IVertexArray*> RenderQueue::CreateVertexArray(
-//	std::size_t count,
-//	IwRenderer::IVertexBuffer** buffers,
-//	IwRenderer::VertexBufferLayout* layouts)
-//{
-//	auto vbuffs = m_scratch.alloc<iwu::potential<IwRenderer::IVertexBuffer*>>();
-//	for (size_t i = 0; i < count; i++) {
-//		vbuffs[0].initialize(buffers[i]);
-//	}
-//
-//	return CreateVertexArray(count, vbuffs, layouts);
-//}
-//
-//Mesh RenderQueue::CreateMesh(
-//	std::size_t vertexCount,
-//	Vertex* vertices,
-//	unsigned int indexCount,
-//	unsigned int* indices)
-//{
-//	auto layouts = m_scratch.alloc<IwRenderer::VertexBufferLayout>();
-//	layouts[0].Push<float>(3);
-//	layouts[0].Push<float>(3);
-//
-//	auto pbuffs = m_scratch.alloc<iwu::potential<IwRenderer::IVertexBuffer*>>();
-//	pbuffs[0] = CreateVertexBuffer(vertexCount * sizeof(Vertex), vertices);
-//
-//	auto pib = CreateIndexBuffer(indexCount, indices);
-//	auto pva = CreateVertexArray(1, pbuffs, layouts);
-//
-//	return Mesh{ pva, pib, indexCount };
-//}

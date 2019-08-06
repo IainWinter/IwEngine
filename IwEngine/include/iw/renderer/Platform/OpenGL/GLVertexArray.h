@@ -24,7 +24,7 @@ namespace IwRenderer {
 
 		void AddBuffer(
 			GLVertexBuffer* vb,
-			VertexBufferLayout layout);
+			const VertexBufferLayout& layout);
 
 		void Bind() const;
 		void Unbind() const;

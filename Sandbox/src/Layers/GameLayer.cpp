@@ -51,8 +51,8 @@ int GameLayer::Initialize(
 	Space.CreateComponent<IwEngine::Model>(player, loader.Load("res/quad.obj"), RenderQueue);
 	Space.CreateComponent<Player>(player, 10.0f, 100.0f, 0.1666f, 0.1f);
 
-	for (size_t x = 0; x < 5; x++) {
-		for (size_t y = 0; y < 5; y++) {
+	for (size_t x = 0; x < 2; x++) {
+		for (size_t y = 0; y < 2; y++) {
 			IwEntity::Entity e = Space.CreateEntity();
 			Space.CreateComponent<IwEngine::Transform>(e, iwm::vector3(x * 3, y * 3, 1));
 			Space.CreateComponent<IwEngine::Model>(e, loader.Load("res/quad.obj"), RenderQueue);

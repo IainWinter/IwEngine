@@ -16,11 +16,11 @@ namespace IwEngine {
 			layouts[0].Push<float>(3);
 			layouts[0].Push<float>(3);
 
-			iwu::potential<IwRenderer::IVertexBuffer*> pbuffs[1];
-			pbuffs[0] = RenderQueue.QueuedDevice.CreateVertexBuffer(meshData.VertexCount * sizeof(IwGraphics::Vertex), meshData.Vertices);
+			iwu::potential<IwRenderer::IVertexBuffer*> buffers[1];
+			buffers[0] = RenderQueue.QueuedDevice.CreateVertexBuffer(meshData.VertexCount * sizeof(IwGraphics::Vertex), meshData.Vertices);
 
 			auto pib = RenderQueue.QueuedDevice.CreateIndexBuffer(meshData.FaceCount, meshData.Faces);
-			auto pva = RenderQueue.QueuedDevice.CreateVertexArray(1, pbuffs, layouts);
+			auto pva = RenderQueue.QueuedDevice.CreateVertexArray(1, buffers, layouts);
 
 			Meshes[i] = IwGraphics::Mesh { pva, pib, meshData.FaceCount };
 		}

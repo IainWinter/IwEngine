@@ -9,10 +9,7 @@ namespace IwRenderer {
 
 	GLVertexArray::~GLVertexArray() {
 		glDeleteVertexArrays(1, &m_renderId);
-
-		for (std::vector<GLVertexBuffer*>::iterator it 
-			= m_buffers.begin(); it != m_buffers.end(); ++it) 
-		{
+		for (auto it = m_buffers.begin(); it != m_buffers.end(); ++it) {
 			delete (*it);
 		}
 
@@ -22,19 +19,18 @@ namespace IwRenderer {
 
 	void GLVertexArray::AddBuffer(
 		GLVertexBuffer* vb, 
-		VertexBufferLayout layout) 
+		const VertexBufferLayout& layout) 
 	{
 		Bind();
 		vb->Bind();
 		const auto& elements = layout.GetElements();
 		unsigned int offset = 0;
 		for (unsigned int i = 0; i < elements.size(); i++) {
-			const auto& element = elements[i];
+			const auto& e = elements[i];
 			glEnableVertexAttribArray(i);
-			glVertexAttribPointer(i, element.Count, element.Type,
-				element.Normalized, layout.GetStride(), (const void*)offset);
-			offset += element.Count 
-				* VertexBufferLayoutElement::GetSizeOfType(element.Type);
+			glVertexAttribPointer(i, e.Count, e.Type, e.Normalized,
+				layout.GetStride(), (const void*)offset);
+			offset += e.Count * GetSizeOfType(e.Type);
 		}
 
 		m_buffers.push_back(vb);

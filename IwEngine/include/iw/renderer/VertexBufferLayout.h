@@ -5,37 +5,19 @@
 #include <vector>
 
 namespace IwRenderer {
-	struct IWRENDERER_API VertexBufferLayoutElement {
-		unsigned int Type;
-		unsigned int Count;
+	struct VertexBufferLayoutElement {
+		unsigned int  Type;
+		unsigned int  Count;
 		unsigned char Normalized;
-
-		static unsigned int GetSizeOfType(
-			unsigned int glType);
 	};
 
 	class IWRENDERER_API VertexBufferLayout {
 	private:
-		struct {
-			std::vector<VertexBufferLayoutElement> m_elements;
-		};
-
+		std::vector<VertexBufferLayoutElement> m_elements;
 		unsigned int m_stride;
 
 	public:
 		VertexBufferLayout();
-
-		VertexBufferLayout(
-			VertexBufferLayout&& copy) noexcept;
-
-		VertexBufferLayout(
-			const VertexBufferLayout& copy);
-
-		VertexBufferLayout& operator=(
-			VertexBufferLayout&& copy) noexcept;
-
-		VertexBufferLayout& operator=(
-			const VertexBufferLayout& copy);
 
 		template<
 			typename _t>
@@ -66,5 +48,13 @@ namespace IwRenderer {
 		inline unsigned int GetStride() const {
 			return m_stride;
 		}
+
+		void Clear() {
+			m_elements.clear();
+			m_elements.shrink_to_fit();
+		}
 	};
+
+	unsigned int GetSizeOfType(
+		unsigned int glType);
 }
