@@ -6,6 +6,36 @@ namespace IwRenderer {
 		: m_stride(0)
 	{}
 
+	VertexBufferLayout::VertexBufferLayout(
+		VertexBufferLayout&& copy) noexcept
+		: m_elements(copy.m_elements)
+		, m_stride(copy.m_stride)
+	{}
+
+	VertexBufferLayout::VertexBufferLayout(
+		const VertexBufferLayout& copy)
+		: m_elements(copy.m_elements)
+		, m_stride(copy.m_stride)
+	{}
+
+	VertexBufferLayout& VertexBufferLayout::operator=(
+		VertexBufferLayout&& copy) noexcept
+	{
+		m_elements = copy.m_elements;
+		m_stride   = copy.m_stride;
+		
+		return *this;
+	}
+
+	VertexBufferLayout& VertexBufferLayout::operator=(
+		const VertexBufferLayout& copy)
+	{
+		m_elements = copy.m_elements;
+		m_stride = copy.m_stride;
+
+		return *this;
+	}
+
 	unsigned int VertexBufferLayoutElement::GetSizeOfType(
 		unsigned int glType)
 	{

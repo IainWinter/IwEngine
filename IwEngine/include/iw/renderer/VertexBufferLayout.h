@@ -25,6 +25,18 @@ namespace IwRenderer {
 	public:
 		VertexBufferLayout();
 
+		VertexBufferLayout(
+			VertexBufferLayout&& copy) noexcept;
+
+		VertexBufferLayout(
+			const VertexBufferLayout& copy);
+
+		VertexBufferLayout& operator=(
+			VertexBufferLayout&& copy) noexcept;
+
+		VertexBufferLayout& operator=(
+			const VertexBufferLayout& copy);
+
 		template<
 			typename _t>
 		void Push(

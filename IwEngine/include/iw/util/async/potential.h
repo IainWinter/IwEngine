@@ -8,6 +8,7 @@ namespace iwutil {
 	template<
 		typename _t>
 	class potential {
+	private:
 		struct value_t {
 			_t   value;
 			bool initialized;
@@ -32,37 +33,33 @@ namespace iwutil {
 			: m_ptr(std::make_shared<value_t>(value, true))
 		{}
 
-		potential(potential&& copy) noexcept
-			: m_ptr(copy.m_ptr)
-		{
-			copy.m_ptr.reset();
-		}
+		//potential(potential&& copy) noexcept
+		//	: m_ptr(copy.m_ptr)
+		//{}
 
-		potential(potential& copy)
-			: m_ptr(copy.m_ptr)
-		{}
+		//potential(potential& copy)
+		//	: m_ptr(copy.m_ptr)
+		//{}
 
-		~potential() {
-			m_ptr.reset();
-		}
+		//~potential() {
+		//	m_ptr.reset();
+		//}
 
-		potential& operator=(
-			potential&& copy) noexcept
-		{
-			m_ptr.reset();
-			m_ptr = copy.m_value;
-			copy.m_ptr.reset();
+		//potential& operator=(
+		//	potential&& copy) noexcept
+		//{
+		//	m_ptr = copy.m_ptr;
 
-			return *this;
-		}
+		//	return *this;
+		//}
 
-		potential& operator=(
-			potential& copy)
-		{
-			m_ptr = copy.m_ptr;
-			 
-			return *this;
-		}
+		//potential& operator=(
+		//	potential& copy)
+		//{
+		//	m_ptr = copy.m_ptr;
+		//	 
+		//	return *this;
+		//}
 
 		void release() {
 			m_ptr.reset();
@@ -81,6 +78,13 @@ namespace iwutil {
 
 		const _t& value() const {
 			return m_ptr->value;
+		}
+
+		//TODO: Maybe check init?
+		_t consume() {
+			_t t = m_ptr->value;
+			release();
+			return t;
 		}
 
 		bool initialized() const {

@@ -11,11 +11,18 @@ namespace IwEngine {
 	{
 		for (size_t i = 0; i < MeshCount; i++) {
 			IwGraphics::MeshData& meshData = data->Meshes[i];
-			//Meshes[i] = RenderQueue.CreateMesh(
-			//	meshData.VertexCount, 
-			//	meshData.Vertices, 
-			//	meshData.FaceCount, 
-			//	meshData.Faces);
+
+			IwRenderer::VertexBufferLayout layouts[1];
+			layouts[0].Push<float>(3);
+			layouts[0].Push<float>(3);
+
+			iwu::potential<IwRenderer::IVertexBuffer*> pbuffs[1];
+			pbuffs[0] = RenderQueue.QueuedDevice.CreateVertexBuffer(meshData.VertexCount * sizeof(IwGraphics::Vertex), meshData.Vertices);
+
+			auto pib = RenderQueue.QueuedDevice.CreateIndexBuffer(meshData.FaceCount, meshData.Faces);
+			auto pva = RenderQueue.QueuedDevice.CreateVertexArray(1, pbuffs, layouts);
+
+			Meshes[i] = IwGraphics::Mesh { pva, pib, meshData.FaceCount };
 		}
 	}
 

@@ -1,32 +1,52 @@
-#include "QueuedDevice.h"
+#include "iw/graphics/QueuedDevice.h"
 
 namespace IwGraphics {
+	using PIB = iwu::potential<IwRenderer::IIndexBuffer*>;
+	using PVB = iwu::potential<IwRenderer::IVertexBuffer*>;
+	using PVA = iwu::potential<IwRenderer::IVertexArray*>;
+	using VBL = IwRenderer::VertexBufferLayout;
+
 	struct CIB {
-		iwu::potential<IwRenderer::IIndexBuffer*> Buffer;
+		PIB         Buffer;
 		std::size_t Size;
 		const void* Data;
 	};
 
 	struct CVB {
-		iwu::potential<IwRenderer::IVertexBuffer*> Buffer;
+		PVB         Buffer;
 		std::size_t Size;
 		const void* Data;
 	};
 
+	struct CVA {
+		PVA         Array;
+		PVB*        Buffers;
+		VBL*        Layouts;
+		std::size_t Count;
+	};
+
 	struct DIB {
-		iwu::potential<IwRenderer::IIndexBuffer*> Buffer;
+		PIB Buffer;
+	};
+
+	struct DVB {
+		PVB Buffer;
+	};
+
+	struct DVA {
+		PVA Array;
 	};
 
 	void QueuedDevice::Push(
-		Operation&& operation, 
+		Operation operation, 
 		void* args)
 	{
-		m_queue.emplace(std::forward<Operation>(operation), args);
+		m_queue.push({ operation, args });
 	}
 
 	QueuedDevice::QueuedDevice(
 		IwRenderer::IDevice& device) 
-		: m_scratch(1024 * 10)
+		: m_scratch(1024 * 1024)
 		, Device(device)
 	{}
 
@@ -38,11 +58,41 @@ namespace IwGraphics {
 				case CREATE_INDEX_BUFFER: {
 					CIB* args = (CIB*)op.Args;
 					args->Buffer.initialize(Device.CreateIndexBuffer(args->Size, args->Data));
+					args->Buffer.release();
+					break;
+				}
+				case CREATE_VERTEX_BUFFER: {
+					CVB* args = (CVB*)op.Args;
+					args->Buffer.initialize(Device.CreateVertexBuffer(args->Size, args->Data));
+					args->Buffer.release();
+					break;
+				}
+				case CREATE_VERTEX_ARRAY: {
+					CVA* args = (CVA*)op.Args;
+					
+					IwRenderer::IVertexBuffer** buffers = m_scratch.alloc<IwRenderer::IVertexBuffer*>(args->Count);
+					for (size_t i = 0; i < args->Count; i++) {
+						buffers[i] = args->Buffers[i].consume();
+					}
+
+					args->Array.initialize(Device.CreateVertexArray(args->Count, buffers, args->Layouts));
+					args->Array.release();
 					break;
 				}
 				case DESTROY_INDEX_BUFFER: {
 					DIB* args = (DIB*)op.Args;
-					Device.DestroyIndexBuffer(args->Buffer.value()); //could be uninitalized
+					Device.DestroyIndexBuffer(args->Buffer.consume()); //could be uninitalized
+					break;
+				}
+				case DESTROY_VERTEX_BUFFER: {
+					CVB* args = (CVB*)op.Args;
+					Device.DestroyVertexBuffer(args->Buffer.consume()); //could be uninitalized
+					break;
+				}
+				case DESTROY_VERTEX_ARRAY: {
+					CVA* args = (CVA*)op.Args;
+					Device.DestroyVertexArray(args->Array.consume()); //could be uninitalized
+					break;
 				}
 			}
 
@@ -52,24 +102,24 @@ namespace IwGraphics {
 		m_scratch.reset();
 	}
 
-	iwu::potential<IwRenderer::IIndexBuffer*> QueuedDevice::CreateIndexBuffer(
+	PIB QueuedDevice::CreateIndexBuffer(
 		std::size_t size, 
 		const void* data)
 	{
-		iwu::potential<IwRenderer::IIndexBuffer*> pb;
+		PIB pib;
 
 		CIB* cib = m_scratch.alloc<CIB>();
-		cib->Buffer = pb;
+		cib->Buffer = pib;
 		cib->Size   = size;
 		cib->Data   = data;
 
 		Push(CREATE_INDEX_BUFFER, cib);
 
-		return pb;
+		return pib;
 	}
 
 	void QueuedDevice::DestroyIndexBuffer(
-		iwu::potential<IwRenderer::IIndexBuffer*> indexBuffer)
+		PIB indexBuffer)
 	{
 		DIB* dib = m_scratch.alloc<DIB>();
 		dib->Buffer = indexBuffer;
@@ -77,34 +127,64 @@ namespace IwGraphics {
 		Push(DESTROY_INDEX_BUFFER, dib);
 	}
 
-	iwu::potential<IwRenderer::IVertexBuffer*> QueuedDevice::CreateVertexBuffer(
+	PVB QueuedDevice::CreateVertexBuffer(
 		std::size_t size, 
 		const void* data)
 	{
-		iwu::potential<IwRenderer::IVertexBuffer*> pb;
+		PVB pvb;
 
 		CVB* cib = m_scratch.alloc<CVB>();
-		cib->Buffer = pb;
+		cib->Buffer = pvb;
 		cib->Size = size;
 		cib->Data = data;
 
-		Push(CREATE_INDEX_BUFFER, cib);
+		Push(CREATE_VERTEX_BUFFER, cib);
 
-		return pb;
+		return pvb;
 	}
 
 	void QueuedDevice::DestroyVertexBuffer(
-		iwu::potential<IwRenderer::IVertexBuffer*> vertexBuffer)
+		PVB vertexBuffer)
 	{
+		DVB* dvb = m_scratch.alloc<DVB>();
+		dvb->Buffer = vertexBuffer;
 
+		Push(DESTROY_VERTEX_BUFFER, dvb);
 	}
 
-	iwu::potential<IwRenderer::IVertexArray*> QueuedDevice::CreateVertexArray(
+	PVA QueuedDevice::CreateVertexArray(
 		std::size_t numBuffers, 
-		iwu::potential<IwRenderer::IVertexBuffer*>* vertexBuffers, 
-		IwRenderer::VertexBufferLayout* vertexLayouts)
+		PVB* vertexBuffers, 
+		VBL* vertexLayouts)
 	{
+		PVA pva;
 
+		//Copy from stack to scratch
+		PVB* buffers = m_scratch.alloc<PVB>(numBuffers);
+		VBL* layouts = m_scratch.alloc<VBL>(numBuffers);
+		for (size_t i = 0; i < numBuffers; i++) {
+			buffers[i] = vertexBuffers[i];
+			layouts[i] = vertexLayouts[i];
+		}
+
+		CVA* cva = m_scratch.alloc<CVA>();
+		cva->Array   = pva;
+		cva->Buffers = buffers;
+		cva->Layouts  = layouts;
+		cva->Count   = numBuffers;
+
+		Push(CREATE_VERTEX_ARRAY, cva);
+
+		return pva;
+	}
+
+	void QueuedDevice::DestroyVertexArray(
+		PVA vertexArray)
+	{
+		DVA* dva = m_scratch.alloc<DVA>();
+		dva->Array = vertexArray;
+
+		Push(DESTROY_VERTEX_ARRAY, dva);
 	}
 
 	iwu::potential<IwRenderer::IVertexShader*> QueuedDevice::CreateVertexShader(
@@ -177,12 +257,6 @@ namespace IwGraphics {
 
 	void QueuedDevice::DestroyComputePipeline(
 		iwu::potential<IwRenderer::IComputePipeline*> computePipeline)
-	{
-
-	}
-
-	void QueuedDevice::DestroyVertexArray(
-		iwu::potential<IwRenderer::IVertexArray*> vertexArray)
 	{
 
 	}

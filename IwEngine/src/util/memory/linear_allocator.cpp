@@ -44,6 +44,8 @@ namespace iwutil {
 			m_peak = m_cursor;
 		}
 
+		memset((void*)caddress, 0, size + padding); //reset memory of alloc not nessesary but nice. TODO: lookout for preformance hit
+
 		return (void*)(caddress + padding);
 	}
 

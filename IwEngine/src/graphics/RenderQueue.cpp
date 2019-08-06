@@ -21,6 +21,8 @@ namespace IwGraphics {
 	}
 
 	void RenderQueue::Execute() {
+		QueuedDevice.Execute();
+
 		while (!m_queue.empty()) {
 			RenderOperation& op = m_queue.front();
 			switch (op.Operation) {
@@ -31,7 +33,5 @@ namespace IwGraphics {
 		}
 
 		m_scratch.reset();
-
-		LOG_INFO << m_scratch.peak();
 	}
 }

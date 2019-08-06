@@ -11,7 +11,11 @@ namespace IwGraphics {
 	private:
 		enum Operation {
 			CREATE_INDEX_BUFFER,
-			DESTROY_INDEX_BUFFER
+			CREATE_VERTEX_BUFFER,
+			CREATE_VERTEX_ARRAY,
+			DESTROY_INDEX_BUFFER,
+			DESTROY_VERTEX_BUFFER,
+			DESTROY_VERTEX_ARRAY
 		};
 
 		struct DeviceOperation {
@@ -26,7 +30,7 @@ namespace IwGraphics {
 
 	private:
 		void Push(
-			Operation&& operation,
+			Operation operation,
 			void* args);
 	public:
 		QueuedDevice(
