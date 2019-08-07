@@ -25,11 +25,11 @@ GameLayer::GameLayer(
 	IwGraphics::ModelData* circle = loader.Load("res/circle.obj");
 	QuadData = loader.Load("res/quad.obj");
 
+	PushSystem<IwEngine::PhysicsSystem>();
 	PushSystem<BulletSystem>();
 	PushSystem<EnemySystem>(circle);
 	PushSystem<PlayerSystem>();
 	PushSystem<PlayerSystem>();
-	PushSystem<IwEngine::PhysicsSystem>();
 }
 
 GameLayer::~GameLayer() {

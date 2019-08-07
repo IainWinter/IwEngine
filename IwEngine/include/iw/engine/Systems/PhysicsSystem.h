@@ -4,6 +4,7 @@
 #include "iw/engine/System.h"
 #include "iw/data/Components/Transform.h"
 #include "iw/physics/AABB.h"
+#include "iw/engine/Components/Model.h"
 
 namespace IwEngine {
 	class IWENGINE_API PhysicsSystem
@@ -15,6 +16,6 @@ namespace IwEngine {
 			IwGraphics::RenderQueue& renderQueue);
 
 		void Update(
-			View& view) override;
+			View& view);
 	};
 }
