@@ -1,16 +1,7 @@
 #include "iw/engine/EntryPoint.h"
 #include "Layers/GameLayer.h"
 
-#include "iw/util/queue/blocking_queue.h"
-
-#include <thread>
-#include <vector>
-
 #include "imgui/imgui.h"
-
-#include "iw/util/memory/linear_allocator.h"
-
-#include "iw/util/async/potential.h"
 
 class Game
 	: public IwEngine::Application

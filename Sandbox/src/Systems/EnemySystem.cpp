@@ -3,6 +3,7 @@
 #include "iw/engine/Time.h"
 #include "iw/engine/Components/Model.h"
 #include "iw/input/Devices/Keyboard.h"
+#include <iw\physics\AABB.h>
 
 EnemySystem::EnemySystem(
 	IwEntity::Space& space,
@@ -65,6 +66,7 @@ void EnemySystem::Update(
 
 			Space.CreateComponent<IwEngine::Transform>(bullet, transform.Position + iwm::vector3(1, 1, 0) * transform.Rotation.inverted(), transform.Scale, transform.Rotation.inverted());
 			Space.CreateComponent<IwEngine::Model>(bullet, CircleData, CircleMesh, 1U);
+			Space.CreateComponent<IwPhysics::AABB3D>(bullet, iwm::vector3::zero, 1.0f);
 			Space.CreateComponent<Bullet>(bullet, LINE, 4.0f);
 		}
 

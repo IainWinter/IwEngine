@@ -4,7 +4,7 @@
 #include "iw/entity/View.h"
 #include "iw/graphics/RenderQueue.h"
 #include <queue>
-#include <thread>
+//#include <thread>
 
 namespace IwEngine {
 	class ISystem {
@@ -21,7 +21,7 @@ namespace IwEngine {
 	{
 	private:
 		const char*                  m_name;
-		std::queue<std::thread>      m_threads;
+		//std::queue<std::thread>      m_threads;
 		std::queue<IwEntity::Entity> m_delete; // Probly make it so space can queue component creation at the ComponentArray level because of templated bs
 
 	protected:

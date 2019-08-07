@@ -6,9 +6,10 @@
 #include "Components/Enemy.h"
 #include "Components/Bullet.h"
 #include "iw/engine/Time.h"
-#include "iw/engine/Components/Transform.h"
+#include "iw/data/Components/Transform.h"
 #include "iw/engine/Components/Model.h"
 #include "iw/engine/Components/Camera.h"
+#include "iw/engine/Systems/PhysicsSystem.h"
 #include "iw/renderer/Platform/OpenGL/GLDevice.h"
 #include "iw/util/io/File.h"
 #include "iw/input/Devices/Keyboard.h"
@@ -27,6 +28,8 @@ GameLayer::GameLayer(
 	PushSystem<BulletSystem>();
 	PushSystem<EnemySystem>(circle);
 	PushSystem<PlayerSystem>();
+	PushSystem<PlayerSystem>();
+	PushSystem<IwEngine::PhysicsSystem>();
 }
 
 GameLayer::~GameLayer() {
@@ -65,11 +68,13 @@ int GameLayer::Initialize(
 	Space.CreateComponent<IwEngine::Transform>(player, iwm::vector3(0, 0, 1));
 	Space.CreateComponent<IwEngine::Model>(player, QuadData, QuadMesh, 1U);
 	Space.CreateComponent<Player>(player, 10.0f, 100.0f, 0.1666f, 0.1f);
+	Space.CreateComponent<IwPhysics::AABB3D>(player, iwm::vector3::zero, 1.0f);
 
-	IwEntity::Entity e = Space.CreateEntity();
-	Space.CreateComponent<IwEngine::Transform>(e, iwm::vector3(5, 0, 1));
-	Space.CreateComponent<IwEngine::Model>(e, QuadData, QuadMesh, 1U);
-	Space.CreateComponent<Enemy>(e, SPIN, 3.0f, 0.05f, 0.025f, 0.025f);
+	IwEntity::Entity enemy = Space.CreateEntity();
+	Space.CreateComponent<IwEngine::Transform>(enemy, iwm::vector3(3.5f, 0, 1));
+	Space.CreateComponent<IwEngine::Model>(enemy, QuadData, QuadMesh, 1U);
+	Space.CreateComponent<Enemy>(enemy, SPIN, 3.0f, 0.05f, 0.025f, 0.025f);
+	Space.CreateComponent<IwPhysics::AABB3D>(enemy, iwm::vector3::zero, 1.0f);
 
 	return Layer::Initialize(options);
 }
