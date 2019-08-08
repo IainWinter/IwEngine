@@ -86,6 +86,9 @@ namespace iwutil {
 
 		item* free = m_free;
 		m_free = m_free->Next;
+
+		memset(free->Ptr, 0, run); //reset memory of alloc not nessesary but nice. TODO: lookout for preformance hit
+
 		return free->Ptr;
 	}
 }

@@ -17,8 +17,8 @@ namespace IwEntity2 {
 	class ComponentArray {
 	private:
 		// meta
-		std::vector<Entity> m_entities;
-		iwu::pool_allocator m_pool;
+		std::unordered_map<Entity, void*> m_entities;
+		iwu::pool_allocator               m_pool;
 
 	public:
 		ComponentArray(size_t pageSize, size_t archetypeSize)
@@ -28,20 +28,28 @@ namespace IwEntity2 {
 		void* CreateComponents(
 			const Entity& entity)
 		{
-			auto itr = std::find(m_entities.begin(), m_entities.end(), entity);
+			auto itr = m_entities.find(entity);
 			if (itr == m_entities.end()) {
-				m_entities.insert(
-					std::upper_bound(m_entities.begin(), m_entities.end(), entity),
-					entity
-				);
-
-				return m_pool.alloc();
+				void* components = m_pool.alloc();
+				m_entities.emplace(entity, components);
+				return components;
 			}
 
 			return nullptr;
 		}
 
-		size_t ComponentsSize() const {
+		void* GetComponents(
+			const Entity& entity)
+		{
+			auto itr = m_entities.find(entity);
+			if (itr != m_entities.end()) {
+				return m_entities.at(entity);
+			}
+
+			return nullptr;
+		}
+
+		size_t ArchetypeSize() const {
 			return m_pool.item_size();
 		}
 	};
@@ -78,7 +86,7 @@ namespace IwEntity2 {
 
 		template<
 			typename _c>
-		void CreateComponent(
+		_c* CreateComponent(
 			const IwEntity::Entity& entity)
 		{
 			// Find if entity exists
@@ -86,7 +94,7 @@ namespace IwEntity2 {
 			//   No: exit
 			auto eitr = m_entities.find(entity);
 			if (eitr == m_entities.cend()) {
-				return;
+				return nullptr;
 			}
 
 			// Find archetype of entity
@@ -100,11 +108,12 @@ namespace IwEntity2 {
 			auto   citr  = m_components.find(archetype);
 			if (citr != m_components.cend()) {
 				ComponentArray& cary = m_components.at(archetype);
-				csize = cary.ComponentsSize();
+				csize = cary.ArchetypeSize();
 				cptr  = cary.GetComponents(entity);
 			}
 
 			// Append component to entity archetype
+			ComponentId cid = GetComponentId(typeid(_c));
 			archetype ^= cid; //find how to hash multiable ints
 
 			// Find if ComponentArray doesn't exists for new archetype
@@ -113,10 +122,10 @@ namespace IwEntity2 {
 			citr = m_components.find(archetype);
 			if (citr == m_components.cend()) {
 				citr = m_components.emplace(
-					archetype, ComponentArray(1024, sizeof(_c))).first;
+					archetype, ComponentArray(1024, csize + sizeof(_c))).first;
 			}
 
-			ComponentArray& cary = city->second;
+			ComponentArray& cary = citr->second;
 			void* components = cary.CreateComponents(entity);
 
 			if (cptr) {
@@ -129,19 +138,7 @@ namespace IwEntity2 {
 
 			// Alloc new components
 
-
-
-
-
-
-			ComponentId cid = GetComponentId(typeid(_c));
-
-
-
-			ComponentArray& chunk = citr->second;
-			_c* components = (_c*)chunk.CreateComponents();
-
-			LOG_INFO << "Got";
+			return (_c*)((size_t)components + csize);
 		}
 	};
 }
