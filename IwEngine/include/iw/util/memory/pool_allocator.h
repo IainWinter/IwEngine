@@ -66,5 +66,17 @@ namespace iwutil {
 		}
 
 		void* alloc();
+
+		inline std::size_t page_size() {
+			return m_pageSize;
+		}
+
+		inline std::size_t item_size() {
+			return m_itemSize;
+		}
+
+		inline std::size_t page_capacity() {
+			return m_pageSize / m_itemSize;
+		}
 	};
 }

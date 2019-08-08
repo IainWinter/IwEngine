@@ -7,18 +7,39 @@
 #include <malloc.h>
 #include <typeindex>
 #include <vector>
+#include <algorithm>
 
 namespace IwEntity2 {
 	using ComponentId = int;  
 	using Archetype   = int;
 	using Entity      = IwEntity::Entity;
 
-	struct ComponentArray {
-		iwu::pool_allocator Pool;
+	class ComponentArray {
+	private:
+		// meta
+		std::vector<Entity> m_entities;
+		iwu::pool_allocator m_pool;
 
+	public:
 		ComponentArray(std::size_t pageSize, std::size_t archetypeSize)
-			: Pool(pageSize, archetypeSize)
+			: m_pool(pageSize, archetypeSize)
 		{}
+
+		void* CreateComponents(
+			const Entity& entity)
+		{
+			auto itr = std::find(m_entities.begin(), m_entities.end(), entity);
+			if (itr == m_entities.end()) {
+				m_entities.insert(
+					std::upper_bound(m_entities.begin(), m_entities.end(), entity),
+					entity
+				);
+
+				return m_pool.alloc();
+			}
+
+			return nullptr;
+		}
 	};
 
 	class Space {
@@ -54,26 +75,65 @@ namespace IwEntity2 {
 		template<
 			typename _c>
 		void CreateComponent(
-			IwEntity::Entity entity)
+			const IwEntity::Entity& entity)
 		{
+			// Find if entity exists
+			//  Yes: contiune
+			//   No: exit
 			auto eitr = m_entities.find(entity);
 			if (eitr == m_entities.cend()) {
 				return;
 			}
 
-			Archetype& arch = eitr->second;
-			ComponentId cid = GetComponentId(typeid(_c));
+			// Find archetype of entity
+			Archetype& archetype  = eitr->second;
 
-			arch ^= cid; //find how to hash multiable ints
-
-			auto citr = m_components.find(arch);
-			if (citr == m_components.cend()) {
-				citr = m_components.emplace(
-					arch, ComponentArray(1024, sizeof(_c))).first;
+			// Find if ComponentArray exists for that archetype
+			//  Yes: Get ptr to components
+			//   No: Continue with null ptr
+			void* cptr = nullptr;
+			auto  citr = m_components.find(archetype);
+			if (citr != m_components.cend()) {
+				ComponentArray& cary = m_components.at(archetype);
+				cptr = cary.GetComponents(entity);
 			}
 
+			// Append component to entity archetype
+			archetype ^= cid; //find how to hash multiable ints
+
+			// Find if ComponentArray doesn't exists for new archetype
+			//  Yes: Create it
+			//   No: Get it
+			citr = m_components.find(archetype);
+			if (citr == m_components.cend()) {
+				citr = m_components.emplace(
+					archetype, ComponentArray(1024, sizeof(_c))).first;
+			}
+
+			ComponentArray& cary = city->second;
+			void* components = cary.CreateComponents(entity);
+
+			if (cptr) {
+				
+			}
+
+
+			// Alloc new components
+			// If ptr isn't null
+			//  Yes: Move data into new Componentarray
+			//   No: Do nothing
+
+
+
+
+
+
+			ComponentId cid = GetComponentId(typeid(_c));
+
+
+
 			ComponentArray& chunk = citr->second;
-			_c* component = chunk.Pool.alloc<_c>();
+			_c* components = (_c*)chunk.CreateComponents();
 
 			LOG_INFO << "Got";
 		}

@@ -30,7 +30,7 @@ GameLayer::GameLayer(
 	PushSystem<BulletSystem>();
 	PushSystem<EnemySystem>(circle);
 	PushSystem<PlayerSystem>();
-	PushSystem<IwEngine::PhysicsSystem>(50);
+	PushSystem<IwEngine::PhysicsSystem>();
 }
 
 GameLayer::~GameLayer() {

@@ -13,8 +13,7 @@ namespace IwEngine {
 	public:
 		PhysicsSystem(
 			IwEntity::Space& space,
-			IwGraphics::RenderQueue& renderQueue,
-			const int& test);
+			IwGraphics::RenderQueue& renderQueue);
 
 		void Update(
 			View& view);

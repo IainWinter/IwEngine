@@ -32,12 +32,23 @@ struct int3 {
 	int x, y, z;
 };
 
+struct float3 {
+	float x, y, z;
+};
+
+struct long3 {
+	long x, y, z;
+};
+
 IwEngine::Application* CreateApplication(
 	IwEngine::InitOptions& options)
 {
 	IwEntity2::Space space;
-	IwEntity2::Entity e = space.CreateEntity();
-	space.CreateComponent<int3>(e);
+	IwEntity2::Entity e1 = space.CreateEntity();
+	IwEntity2::Entity e2 = space.CreateEntity();
+	space.CreateComponent<int3>  (e1);
+	space.CreateComponent<float3>(e2);
+	space.CreateComponent<long3> (e2);
 
 	options.WindowOptions = IwEngine::WindowOptions {
 		1280,
