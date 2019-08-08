@@ -165,7 +165,7 @@ namespace iwmath {
 		vector3 operator-() const;
 
 		float& operator[](
-			std::size_t index);
+			size_t index);
 
 		bool operator==(
 			const vector3& other) const;

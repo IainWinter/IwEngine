@@ -42,7 +42,7 @@ namespace IwPhysics {
 			cell.Items.push_back(item);
 		}
 
-		std::size_t Size() {
+		size_t Size() {
 			return m_cells.size();
 		}
 	private:

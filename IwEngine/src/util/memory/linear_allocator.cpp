@@ -5,7 +5,7 @@
 
 namespace iwutil {
 	linear_allocator::linear_allocator(
-		std::size_t size)
+		size_t size)
 		: m_memory(malloc(size))
 		, m_capacity(size)
 		, m_peak(0)
@@ -21,12 +21,12 @@ namespace iwutil {
 	}
 
 	void* linear_allocator::alloc(
-		std::size_t size, 
-		std::size_t alignment)
+		size_t size, 
+		size_t alignment)
 	{
-		std::size_t padding  = 0;
-		std::size_t paddress = 0;
-		std::size_t caddress = (std::size_t)m_memory + m_cursor;
+		size_t padding  = 0;
+		size_t paddress = 0;
+		size_t caddress = (size_t)m_memory + m_cursor;
 		if (alignment != 0 && m_cursor % alignment != 0) {
 			padding = calc_padding(caddress, alignment);
 		}

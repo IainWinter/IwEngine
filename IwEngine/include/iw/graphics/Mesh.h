@@ -9,6 +9,6 @@ namespace IwGraphics {
 	struct Mesh {
 		iwu::potential<IwRenderer::IVertexArray*> VertexArray;
 		iwu::potential<IwRenderer::IIndexBuffer*> IndexBuffer;
-		std::size_t FaceCount;
+		size_t FaceCount;
 	};
 }

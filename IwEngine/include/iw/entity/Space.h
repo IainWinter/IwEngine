@@ -101,7 +101,7 @@ namespace IwEntity {
 		ComponentArray<_c>& EnsureComponentData() {
 			ComponentId id = ComponentFamily::type<_c>;
 			if (id >= m_components.size()) {
-				m_components.resize((std::size_t)id + 1);
+				m_components.resize((size_t)id + 1);
 			}
 
 			IComponentArray*& cdata = m_components.at(id);
@@ -117,7 +117,7 @@ namespace IwEntity {
 			Archetype archetype,
 			Archetype oldArchetype)
 		{
-			std::size_t index = 0;
+			size_t index = 0;
 			for (Archetype a = 1; a <= oldArchetype; a = a << 1, index++) {
 				if ((oldArchetype & a) == a) {
 					m_components.at(index)->UpdateChunk(

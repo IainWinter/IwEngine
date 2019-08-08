@@ -6,8 +6,8 @@ namespace IwGraphics {
 	struct MeshData {
 		Vertex*       Vertices;
 		unsigned int* Faces;
-		std::size_t   VertexCount;
-		std::size_t   FaceCount;
+		size_t   VertexCount;
+		size_t   FaceCount;
 
 		~MeshData() {
 			delete[] Vertices;
@@ -17,7 +17,7 @@ namespace IwGraphics {
 
 	struct ModelData {
 		MeshData*   Meshes;
-		std::size_t MeshCount;
+		size_t MeshCount;
 
 		~ModelData() {
 			delete[] Meshes;

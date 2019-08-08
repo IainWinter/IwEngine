@@ -2,12 +2,12 @@
 
 namespace iwutil {
 	pool_allocator::pool_allocator(
-		std::size_t pageSize, 
-		std::size_t itemSize)
+		size_t pageSize, 
+		size_t itemSize)
 		: m_pageSize(pageSize)
 		, m_itemSize(itemSize)
 	{
-		std::size_t r = pageSize % itemSize;
+		size_t r = pageSize % itemSize;
 		pageSize -= r;
 
 		m_root = new page(pageSize, pageSize / itemSize, itemSize);
@@ -44,15 +44,18 @@ namespace iwutil {
 
 	// Page 
 
-	pool_allocator::page::page(std::size_t size, std::size_t count, std::size_t run)
+	pool_allocator::page::page(
+		size_t size,
+		size_t count,
+		size_t run)
 		: m_memory(malloc(size))
 		, m_freelist(new item[count])
 		, m_next(nullptr)
 		, m_free(m_freelist)
 	{
 		if (m_memory) {
-			std::size_t addr = (std::size_t)m_memory;
-			for (std::size_t i = 1; i < count; i++) {
+			size_t addr = (size_t)m_memory;
+			for (size_t i = 1; i < count; i++) {
 				m_freelist[i - 1].Ptr = (void*)(addr);
 				m_freelist[i - 1].Next = &m_freelist[i];
 				addr += run;
@@ -70,8 +73,8 @@ namespace iwutil {
 	}
 
 	void* pool_allocator::page::alloc(
-		std::size_t size,
-		std::size_t run)
+		size_t size,
+		size_t run)
 	{
 		if (m_free == nullptr) {
 			if (m_next == nullptr) {

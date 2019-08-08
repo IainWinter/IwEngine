@@ -6,21 +6,21 @@
 namespace IwGraphics {
 	struct CIB {
 		PIB         Buffer;
-		std::size_t Size;
+		size_t      Size;
 		const void* Data;
 	};
 
 	struct CVB {
 		PVB         Buffer;
-		std::size_t Size;
+		size_t      Size;
 		const void* Data;
 	};
 
 	struct CVA {
-		PVA         Array;
-		PVB*        Buffers;
-		VBL*        Layouts;
-		std::size_t Count;
+		PVA    Array;
+		PVB*   Buffers;
+		VBL*   Layouts;
+		size_t Count;
 	};
 
 	struct DIB {
@@ -68,13 +68,13 @@ namespace IwGraphics {
 					CVA* args = (CVA*)op.Args;
 					
 					IwRenderer::IVertexBuffer** buffers = m_scratch.alloc<IwRenderer::IVertexBuffer*>(args->Count);
-					for (std::size_t i = 0; i < args->Count; i++) {
+					for (size_t i = 0; i < args->Count; i++) {
 						buffers[i] = args->Buffers[i].consume();
 					}
 
 					args->Array.initialize(Device.CreateVertexArray(args->Count, buffers, args->Layouts));
 					args->Array.release();
-					for (std::size_t i = 0; i < args->Count; i++) {
+					for (size_t i = 0; i < args->Count; i++) {
 						args->Layouts[i].Clear();
 					}
 
@@ -104,7 +104,7 @@ namespace IwGraphics {
 	}
 
 	PIB QueuedDevice::CreateIndexBuffer(
-		std::size_t size, 
+		size_t size, 
 		const void* data)
 	{
 		PIB pib;
@@ -129,7 +129,7 @@ namespace IwGraphics {
 	}
 
 	PVB QueuedDevice::CreateVertexBuffer(
-		std::size_t size, 
+		size_t size, 
 		const void* data)
 	{
 		PVB pvb;
@@ -154,7 +154,7 @@ namespace IwGraphics {
 	}
 
 	PVA QueuedDevice::CreateVertexArray(
-		std::size_t numBuffers, 
+		size_t numBuffers, 
 		PVB* vertexBuffers, 
 		VBL* vertexLayouts)
 	{

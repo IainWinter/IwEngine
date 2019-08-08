@@ -285,8 +285,8 @@ namespace iwutil {
 		virtual void sort(
 			std::function<bool(_t, _t)> comparator
 				= [](_t a, _t b) { return a < b; },
-			std::size_t begin = 0,
-			std::size_t end = 0)
+			size_t begin = 0,
+			size_t end = 0)
 		{
 			if (end == 0) {
 				end = size();
@@ -377,7 +377,7 @@ namespace iwutil {
 		*
 		* @return The size of the set.
 		*/
-		std::size_t size() const {
+		size_t size() const {
 			return m_direct.size();
 		}
 
@@ -654,8 +654,8 @@ namespace iwutil {
 		void sort(
 			std::function<bool(_index_t, _index_t)> comparator
 				= [](_index_t a, _index_t b) { return a < b; },
-			std::size_t begin = 0,
-			std::size_t end = 0) override 
+			size_t begin = 0,
+			size_t end = 0) override 
 		{
 			if (size() == 0) {
 				return;
@@ -665,7 +665,7 @@ namespace iwutil {
 			base_t::sort(comparator, begin, end);
 
 			_index_t indexA = 0;
-			std::size_t count = size();
+			size_t count = size();
 
 			int i = 0;
 

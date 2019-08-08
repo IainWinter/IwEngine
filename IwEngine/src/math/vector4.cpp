@@ -119,7 +119,7 @@ namespace iwmath {
 	}
 
 	float& iwmath::vector4::operator[](
-		std::size_t index)
+		size_t index)
 	{
 		if (index == 0) return x;
 		else if (index == 1) return y;

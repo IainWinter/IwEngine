@@ -8,6 +8,6 @@ namespace IwEngine {
 	struct Model {
 		IwGraphics::ModelData* Data;
 		IwGraphics::Mesh*      Meshes;
-		std::size_t            MeshCount;
+		size_t                 MeshCount;
 	};
 }

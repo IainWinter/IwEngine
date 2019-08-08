@@ -23,7 +23,7 @@ namespace IwEntity {
 
 			using ComponentTuple = std::tuple<_cs& ...>;
 
-			static constexpr std::size_t ComponentCount = sizeof...(_cs);
+			static constexpr size_t ComponentCount = sizeof...(_cs);
 		public:
 			struct ComponentData {
 				ComponentTuple   Components;

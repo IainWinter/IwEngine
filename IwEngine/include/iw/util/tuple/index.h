@@ -19,7 +19,7 @@ namespace iwutil {
 	{
 		static_assert(std::is_same_v<_t, _type>, "Type not found!");
 
-		static const std::size_t value = 0;
+		static const size_t value = 0;
 	};
 
 	template<
@@ -29,7 +29,7 @@ namespace iwutil {
 		_t,
 		std::tuple<_t, _types...>>
 	{
-		static const std::size_t value = 0;
+		static const size_t value = 0;
 	};
 
 	template<
@@ -40,7 +40,7 @@ namespace iwutil {
 		_t,
 		std::tuple<_u, _types...>>
 	{
-		static const std::size_t value = 1
+		static const size_t value = 1
 			+ index<_t, std::tuple<_types...>>::value;
 	};
 }

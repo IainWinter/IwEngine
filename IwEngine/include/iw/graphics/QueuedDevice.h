@@ -45,7 +45,7 @@ namespace IwGraphics {
 
 		//Index buffers
 		PIB CreateIndexBuffer(
-			std::size_t size,
+			size_t size,
 			const void* data = nullptr);
 
 		void DestroyIndexBuffer(
@@ -53,7 +53,7 @@ namespace IwGraphics {
 
 		//Vertex buffers
 		PVB CreateVertexBuffer(
-			std::size_t size,
+			size_t size,
 			const void* data = nullptr);
 
 		void DestroyVertexBuffer(
@@ -61,7 +61,7 @@ namespace IwGraphics {
 
 		//Vertex arrays
 		PVA CreateVertexArray(
-			std::size_t numBuffers,
+			size_t numBuffers,
 			PVB* vertexBuffers,
 			VBL* vertexLayouts);
 

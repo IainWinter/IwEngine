@@ -296,7 +296,7 @@ namespace iwutil {
 		*
 		* @return The size of the set.
 		*/
-		std::size_t size() const {
+		size_t size() const {
 			return m_direct.size();
 		}
 

@@ -21,7 +21,7 @@ namespace IwEntity2 {
 		iwu::pool_allocator m_pool;
 
 	public:
-		ComponentArray(std::size_t pageSize, std::size_t archetypeSize)
+		ComponentArray(size_t pageSize, size_t archetypeSize)
 			: m_pool(pageSize, archetypeSize)
 		{}
 
@@ -39,6 +39,10 @@ namespace IwEntity2 {
 			}
 
 			return nullptr;
+		}
+
+		size_t ComponentsSize() const {
+			return m_pool.item_size();
 		}
 	};
 
@@ -91,11 +95,13 @@ namespace IwEntity2 {
 			// Find if ComponentArray exists for that archetype
 			//  Yes: Get ptr to components
 			//   No: Continue with null ptr
-			void* cptr = nullptr;
-			auto  citr = m_components.find(archetype);
+			size_t csize = 0;
+			void*  cptr  = nullptr;
+			auto   citr  = m_components.find(archetype);
 			if (citr != m_components.cend()) {
 				ComponentArray& cary = m_components.at(archetype);
-				cptr = cary.GetComponents(entity);
+				csize = cary.ComponentsSize();
+				cptr  = cary.GetComponents(entity);
 			}
 
 			// Append component to entity archetype
@@ -114,14 +120,14 @@ namespace IwEntity2 {
 			void* components = cary.CreateComponents(entity);
 
 			if (cptr) {
-				
+				memcpy(components, cptr, csize);
 			}
 
-
-			// Alloc new components
 			// If ptr isn't null
 			//  Yes: Move data into new Componentarray
 			//   No: Do nothing
+
+			// Alloc new components
 
 
 

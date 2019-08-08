@@ -22,28 +22,28 @@ namespace iwutil {
 
 		public:
 			page(
-				std::size_t size,
-				std::size_t count,
-				std::size_t run);
+				size_t size,
+				size_t count,
+				size_t run);
 
 			~page();
 
 			void* alloc(
-				std::size_t size,
-				std::size_t run);
+				size_t size,
+				size_t run);
 
 			page(const page&)            = delete;
 			page& operator=(const page&) = delete;
 		};
 
 		page* m_root;
-		std::size_t m_pageSize;
-		std::size_t m_itemSize;
+		size_t m_pageSize;
+		size_t m_itemSize;
 
 	public:
 		pool_allocator(
-			std::size_t pageSize,
-			std::size_t itemSize);
+			size_t pageSize,
+			size_t itemSize);
 
 		pool_allocator(
 			pool_allocator&&) noexcept;
@@ -67,15 +67,15 @@ namespace iwutil {
 
 		void* alloc();
 
-		inline std::size_t page_size() {
+		inline size_t page_size() const {
 			return m_pageSize;
 		}
 
-		inline std::size_t item_size() {
+		inline size_t item_size() const {
 			return m_itemSize;
 		}
 
-		inline std::size_t page_capacity() {
+		inline size_t page_capacity() const {
 			return m_pageSize / m_itemSize;
 		}
 	};

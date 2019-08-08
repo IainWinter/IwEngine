@@ -9,7 +9,7 @@ namespace iwutil {
 		template<
 			typename _functor,
 			typename _tuple,
-			std::size_t... _i>
+			size_t... _i>
 		void foreach_na_indexed(
 			_functor&& functor,
 			_tuple tuple,
@@ -24,7 +24,7 @@ namespace iwutil {
 			typename _functor,
 			typename _tuple,
 			typename _tuple_args,
-			std::size_t... _i>
+			size_t... _i>
 		void foreach_ta_indexed(
 			_functor&& functor,
 			_tuple tuple,
@@ -42,7 +42,7 @@ namespace iwutil {
 			typename _functor,
 			typename _tuple,
 			typename... _fixed_args,
-			std::size_t... _i>
+			size_t... _i>
 		void foreach_fa_indexed(
 			_functor&& functor,
 			_tuple tuple,
@@ -61,7 +61,7 @@ namespace iwutil {
 			typename _tuple,
 			typename _tuple_args,
 			typename... _fixed_args,
-			std::size_t... _i>
+			size_t... _i>
 		void foreach_ta_fa_indexed(
 			_functor&& functor,
 			_tuple tuple,
@@ -82,7 +82,7 @@ namespace iwutil {
 			typename _tuple,
 			typename _fixed_arg,
 			typename... _tuple_args,
-			std::size_t... _i>
+			size_t... _i>
 		void foreach_ta_sfa_indexed(
 			_functor&& functor,
 			_tuple tuple,
@@ -108,7 +108,7 @@ namespace iwutil {
 		template<
 			typename _functor,
 			typename _tuple,
-			std::size_t _i,
+			size_t _i,
 			typename _fixed_arg,
 			typename... _tuple_args>
 		void call_ta_sfa(
@@ -132,7 +132,7 @@ namespace iwutil {
 			typename _functor,
 			typename _tuple,
 			typename _tuple_return,
-			std::size_t... _i>
+			size_t... _i>
 		_tuple_return geteach_na_indexed(
 			_functor&& functor,
 			_tuple tuple,
@@ -152,7 +152,7 @@ namespace iwutil {
 			typename _tuple,
 			typename _tuple_return,
 			typename _tuple_args,
-			std::size_t... _i>
+			size_t... _i>
 		_tuple_return geteach_ta_indexed(
 			_functor&& functor,
 			_tuple tuple,
@@ -174,7 +174,7 @@ namespace iwutil {
 			typename _tuple,
 			typename _tuple_return,
 			typename... _fixed_args,
-			std::size_t... _i>
+			size_t... _i>
 		_tuple_return geteach_fa_indexed(
 			_functor&& functor,
 			_tuple tuple,
@@ -197,7 +197,7 @@ namespace iwutil {
 			typename _tuple_return,
 			typename _tuple_args,
 			typename... _fixed_args,
-			std::size_t... _i>
+			size_t... _i>
 		_tuple_return geteach_ta_fa_indexed(
 			_functor&& functor,
 			_tuple tuple,
@@ -222,7 +222,7 @@ namespace iwutil {
 			typename _tuple_return,
 			typename _fixed_arg,
 			typename... _tuple_args,
-			std::size_t... _i>
+			size_t... _i>
 		void geteach_ta_sfa_indexed(
 			_functor&& functor,
 			_tuple tuple,
@@ -245,7 +245,7 @@ namespace iwutil {
 			typename _functor,
 			typename _tuple,
 			typename _tuple_return,
-			std::size_t _i,
+			size_t _i,
 			typename _fixed_arg,
 			typename... _tuple_args>
 		_tuple_return get_ta_sfa(
@@ -269,7 +269,7 @@ namespace iwutil {
 	template<
 		typename _functor,
 		typename _tuple,
-		std::size_t _size>
+		size_t _size>
 	void foreach(
 		_tuple tuple)
 	{
@@ -289,7 +289,7 @@ namespace iwutil {
 		typename _functor,
 		typename _tuple,
 		typename _tuple_args,
-		std::size_t _size>
+		size_t _size>
 	void foreach(
 		_tuple tuple,
 		_tuple_args tuple_args)
@@ -311,7 +311,7 @@ namespace iwutil {
 	template<
 		typename _functor,
 		typename _tuple,
-		std::size_t _size,
+		size_t _size,
 		typename... _fixed_args>
 	void foreach(
 		_tuple tuple,
@@ -334,7 +334,7 @@ namespace iwutil {
 	template<
 		typename _functor,
 		typename _tuple,
-		std::size_t _size,
+		size_t _size,
 		typename _tuple_args,
 		typename... _fixed_args>
 	void foreach(
@@ -361,7 +361,7 @@ namespace iwutil {
 	template<
 		typename _functor,
 		typename _tuple,
-		std::size_t _size,
+		size_t _size,
 		typename _fixed_arg,
 		typename... _tuple_args>
 	void formatrix(
@@ -389,7 +389,7 @@ namespace iwutil {
 		typename _functor,
 		typename _tuple,
 		typename _tuple_return,
-		std::size_t _size>
+		size_t _size>
 	_tuple_return geteach(
 		_tuple tuple)
 	{
@@ -411,7 +411,7 @@ namespace iwutil {
 		typename _tuple,
 		typename _tuple_return,
 		typename _tuple_args,
-		std::size_t _size>
+		size_t _size>
 	_tuple_return geteach(
 		_tuple tuple,
 		_tuple_args tuple_args)
@@ -435,7 +435,7 @@ namespace iwutil {
 		typename _functor,
 		typename _tuple,
 		typename _tuple_return,
-		std::size_t _size,
+		size_t _size,
 		typename... _fixed_args>
 	_tuple_return geteach(
 		_tuple tuple,
@@ -460,7 +460,7 @@ namespace iwutil {
 		typename _functor,
 		typename _tuple,
 		typename _tuple_return,
-		std::size_t _size,
+		size_t _size,
 		typename _tuple_args,
 		typename... _fixed_args>
 	_tuple_return geteach(
@@ -489,7 +489,7 @@ namespace iwutil {
 		typename _functor,
 		typename _tuple,
 		typename _tuple_return,
-		std::size_t _size,
+		size_t _size,
 		typename _fixed_arg,
 		typename... _tuple_args>
 	_tuple_return getmatrix(
