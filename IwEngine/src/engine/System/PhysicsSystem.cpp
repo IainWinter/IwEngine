@@ -4,9 +4,12 @@
 namespace IwEngine {
 	PhysicsSystem::PhysicsSystem(
 		IwEntity::Space& space,
-		IwGraphics::RenderQueue& renderQueue)
+		IwGraphics::RenderQueue& renderQueue,
+		const int& test)
 		: IwEngine::System<Transform, IwPhysics::AABB3D>(space, renderQueue, "Physics")
-	{}
+	{
+		LOG_INFO << test;
+	}
 
 	void PhysicsSystem::Update(
 		View& view)

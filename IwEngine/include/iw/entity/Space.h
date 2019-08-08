@@ -9,19 +9,44 @@
 #include <vector>
 
 namespace IwEntity {
-	class IWENTITY_API Space {
+	class Space {
 	private:
 		std::vector<IComponentArray*> m_components;
 		EntityArray m_entities;
 
 	public:
-		Entity CreateEntity();
+		Entity CreateEntity() {
+			return m_entities.CreateEntity();
+		}
 
 		void DestroyEntity(
-			Entity entity);
+			Entity entity)
+		{
+			Archetype old = m_entities.ArchetypeOf(entity);
 
-		void Sort();
-		void Clear();
+			m_entities.DestroyEntity(entity);
+
+			for (auto& set : m_components) {
+				if (set->HasEntity(entity)) {
+					set->DestroyComponent(entity);
+				}
+			}
+		}
+
+		void Sort() {
+			for (auto& set : m_components) {
+				if (set) {
+					set->Sort(m_entities);
+				}
+			}
+		}
+
+		void Clear() {
+			m_entities.Clear();
+			for (auto& set : m_components) {
+				set->Clear();
+			}
+		}
 
 		template<
 			typename _c,

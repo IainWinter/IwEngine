@@ -49,7 +49,7 @@ namespace IwEngine {
 			typename S,
 			typename... Args>
 		S* PushSystem(
-			Args&& ... args)
+			Args&&... args)
 		{
 			S* layer = new S(Space, RenderQueue, std::forward<Args>(args)...);
 			m_systems.PushBack(layer);

@@ -6,6 +6,7 @@ namespace iwutil {
 	template<
 		typename...>
 	class family {
+	private:
 		inline static std::size_t id;
 
 		template<

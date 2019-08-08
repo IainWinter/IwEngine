@@ -12,7 +12,8 @@ namespace IwEngine {
 	public:
 		PhysicsSystem(
 			IwEntity::Space& space,
-			IwGraphics::RenderQueue& renderQueue);
+			IwGraphics::RenderQueue& renderQueue,
+			const int& test);
 
 		void Update(
 			View& view) override;

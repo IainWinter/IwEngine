@@ -21,6 +21,8 @@ GameLayer::GameLayer(
 	IwGraphics::RenderQueue& renderQueue)
 	: IwEngine::Layer(space, renderQueue, "Game")
 	, pipeline(nullptr)
+	, QuadMesh(nullptr)
+	, QuadData(nullptr)
 {
 	IwGraphics::ModelData* circle = loader.Load("res/circle.obj");
 	QuadData = loader.Load("res/quad.obj");
@@ -28,8 +30,7 @@ GameLayer::GameLayer(
 	PushSystem<BulletSystem>();
 	PushSystem<EnemySystem>(circle);
 	PushSystem<PlayerSystem>();
-	PushSystem<PlayerSystem>();
-	PushSystem<IwEngine::PhysicsSystem>();
+	PushSystem<IwEngine::PhysicsSystem>(50);
 }
 
 GameLayer::~GameLayer() {
