@@ -17,9 +17,9 @@ namespace IwEngine {
 		IwPhysics::Grid<IwEntity::Entity> grid(iwm::vector3(2));
 		for (auto components : view) {
 			auto transform = components.GetComponent<Transform>();
-			auto aabb      = components.GetComponent<IwPhysics::AABB3D>();
+			//auto aabb      = components.GetComponent<IwPhysics::AABB3D>();
 
-			grid.Insert(components.Entity, transform, aabb);
+			//grid.Insert(components.Entity, transform, aabb);
 		}
 
 		LOG_INFO << grid.Size();
