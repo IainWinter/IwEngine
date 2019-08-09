@@ -3,22 +3,16 @@
 #include "iw/util/iwutil.h"
 #include <cstddef>
 #include <malloc.h>
-#include <list>
+#include <forward_list>
 
 namespace iwutil {
 	class IWUTIL_API pool_allocator {
 	private:
-		struct item {
-			void* Ptr;
-			item* Next;
-		};
-
 		class page {
 		private:
-			void* m_memory;
-			item* m_freelist;
-			item* m_free;
+			char* m_memory;
 			page* m_next;
+			std::forward_list<char*> m_freelist;
 
 		public:
 			page(
@@ -29,6 +23,11 @@ namespace iwutil {
 			~page();
 
 			void* alloc(
+				size_t size,
+				size_t run);
+
+			bool free(
+				void* addr,
 				size_t size,
 				size_t run);
 
@@ -66,6 +65,9 @@ namespace iwutil {
 		}
 
 		void* alloc();
+
+		bool free(
+			void* addr);
 
 		inline size_t page_size() const {
 			return m_pageSize;

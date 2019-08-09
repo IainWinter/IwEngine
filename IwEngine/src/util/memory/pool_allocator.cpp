@@ -38,6 +38,12 @@ namespace iwutil {
 		return *this;
 	}
 
+	bool pool_allocator::free(
+		void* addr)
+	{
+		return m_root->free(addr, m_pageSize, m_itemSize);
+	}
+
 	void* pool_allocator::alloc() {
 		return m_root->alloc(m_pageSize, m_itemSize);
 	}
@@ -48,27 +54,18 @@ namespace iwutil {
 		size_t size,
 		size_t count,
 		size_t run)
-		: m_memory(malloc(size))
-		, m_freelist(new item[count])
+		: m_memory((char*)malloc(size))
 		, m_next(nullptr)
-		, m_free(m_freelist)
 	{
 		if (m_memory) {
-			size_t addr = (size_t)m_memory;
-			for (size_t i = 1; i < count; i++) {
-				m_freelist[i - 1].Ptr = (void*)(addr);
-				m_freelist[i - 1].Next = &m_freelist[i];
-				addr += run;
+			for (char* addr = m_memory; addr < m_memory + size; addr += run) {
+				m_freelist.push_front(addr);
 			}
-
-			m_freelist[count - 1].Ptr = (void*)(addr);
-			m_freelist[count - 1].Next = nullptr;
 		}
 	}
 
 	pool_allocator::page::~page() {
 		delete[] m_memory;
-		delete[] m_freelist;
 		delete m_next;
 	}
 
@@ -76,7 +73,7 @@ namespace iwutil {
 		size_t size,
 		size_t run)
 	{
-		if (m_free == nullptr) {
+		if (m_freelist.empty()) {
 			if (m_next == nullptr) {
 				m_next = new page(size, size / run, run);
 			}
@@ -84,11 +81,29 @@ namespace iwutil {
 			return m_next->alloc(size, run);
 		}
 
-		item* free = m_free;
-		m_free = m_free->Next;
+		char* ptr = m_freelist.front();
+		m_freelist.pop_front();
 
-		memset(free->Ptr, 0, run); //reset memory of alloc not nessesary but nice. TODO: lookout for preformance hit
+		memset(ptr, 0, run); //reset memory of alloc not nessesary but nice. 
+							 //TODO: lookout for preformance hit
+		return ptr;
+	}
 
-		return free->Ptr;
+	bool pool_allocator::page::free(
+		void* addr,
+		size_t size,
+		size_t run)
+	{
+		if (addr >= m_memory && addr <= m_memory + size - run) {
+			m_freelist.push_front((char*)addr);
+		}
+
+		else {
+			if (m_next) {
+				return m_next->free(addr, size, run);
+			}
+		}
+
+		return false;
 	}
 }

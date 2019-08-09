@@ -46,13 +46,15 @@ IwEngine::Application* CreateApplication(
 	IwEntity2::Space space;
 	IwEntity2::Entity e1 = space.CreateEntity();
 	IwEntity2::Entity e2 = space.CreateEntity();
-	space.CreateComponent<int3>  (e1);
+	space.CreateComponent<int3>(e1);
 	float3* f = space.CreateComponent<float3>(e2);
 	f->x = 0.0f;
 	f->y = 1.0f;
 	f->z = 2.0f;
 	long3* l = space.CreateComponent<long3> (e2);
 	l->x = 100234234;
+
+	space.DestroyComponent<float3>(e2);
 
 	options.WindowOptions = IwEngine::WindowOptions {
 		1280,
