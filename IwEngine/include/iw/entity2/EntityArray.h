@@ -1,23 +1,24 @@
 #pragma once
 
-#include "iw/entity2/IwEntity.h"
-#include "iw/entity2/EntityData.h"
+#include "IwEntity.h"
+#include "EntityData.h"
+#include "iw/util/memory/pool_allocator.h"
 #include <vector>
 #include <queue>
 
 namespace IwEntity2 {
-	class EntityArray {
+	class IWENTITY2_API EntityArray {
 	private:
-		std::vector<EntityData> m_live;
-		std::queue<size_t>      m_dead;
+		std::vector<EntityData> m_entities;
+		std::queue<Entity>      m_dead;
 
 	public:
-		EntityData& CreateEntity();
-
-		EntityData& GetEntityData(
-			Entity entity);
+		Entity CreateEntity();
 
 		bool DestroyEntity(
+			Entity entity);
+
+		EntityData& GetEntityData(
 			Entity entity);
 
 		bool EntityExists(

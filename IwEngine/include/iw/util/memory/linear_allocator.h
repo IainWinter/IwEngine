@@ -6,7 +6,7 @@
 namespace iwutil {
 	class IWUTIL_API linear_allocator {
 	private:
-		void*       m_memory;
+		void*  m_memory;
 		size_t m_capacity;
 		size_t m_peak;
 		size_t m_cursor;

@@ -1,37 +1,34 @@
 #include "iw/entity2/EntityArray.h"
 
 namespace IwEntity2 {
-	EntityData& EntityArray::CreateEntity() {
-		static Entity ne = 1;
+	Entity EntityArray::CreateEntity() {
+		static Entity nextEntity = 1;
 
 		if (m_dead.empty()) {
-			EntityData ed{ ne++, Archetype(), 0, true };
-			return m_live.emplace_back(ed);
+			m_entities.emplace_back(nextEntity);
+
+			return nextEntity++;
 		}
 
-		size_t i = m_dead.front();
+		Entity e = m_dead.front();
 		m_dead.pop();
 
-		EntityData& e = m_live.at(i);
-		e.Version++;
-		e.Arch = Archetype();
+		EntityData& data = m_entities.at(e);
 
-		return e;
-	}
+		data.Version++;
+		data.Archetype = 0;
 
-	EntityData& EntityArray::GetEntityData(
-		Entity entity)
-	{
-		return m_live.at(entity - 1);
+		return data.Id;
 	}
 
 	bool EntityArray::DestroyEntity(
 		Entity entity)
 	{
-		if (EntityExists(entity - 1)) {
-			EntityData& data = GetEntityData(entity - 1);
+		if (EntityExists(entity)) {
+			EntityData& data = GetEntityData(entity);
 			data.Alive = false;
-			m_dead.push(data.Id - 1);
+
+			m_dead.push(entity - 1);
 
 			return true;
 		}
@@ -39,9 +36,15 @@ namespace IwEntity2 {
 		return false;
 	}
 
+	EntityData& EntityArray::GetEntityData(
+		Entity entity)
+	{
+		return m_entities.at(entity - 1);
+	}
+
 	bool EntityArray::EntityExists(
 		Entity entity) const
 	{
-		return entity - 1 < m_live.size();
+		return entity - 1 < m_entities.size();
 	}
 }

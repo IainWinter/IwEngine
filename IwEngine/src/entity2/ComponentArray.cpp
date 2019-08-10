@@ -14,17 +14,26 @@ namespace IwEntity2 {
 		if (itr == m_entities.end()) {
 			void* components = m_pool.alloc();
 			m_entities.emplace(entity, components);
+
 			return components;
 		}
 
 		return nullptr;
 	}
 
-	void ComponentArray::DestroyComponents(
+	bool ComponentArray::DestroyComponents(
 		Entity entity)
 	{
-		void* ptr = m_entities.at(entity);
-		m_pool.free(ptr);
+		auto itr = m_entities.find(entity);
+		if (itr != m_entities.end()) {
+			void* ptr = m_entities.at(entity);
+			m_entities.erase(entity);
+			m_pool.free(ptr);
+
+			return true;
+		}
+
+		return false;
 	}
 
 	void* ComponentArray::GetComponents(

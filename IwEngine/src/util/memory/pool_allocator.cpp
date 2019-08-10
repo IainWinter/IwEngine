@@ -84,8 +84,9 @@ namespace iwutil {
 		char* ptr = m_freelist.front();
 		m_freelist.pop_front();
 
-		memset(ptr, 0, run); //reset memory of alloc not nessesary but nice. 
-							 //TODO: lookout for preformance hit
+#ifdef IW_DEBUG
+		memset(ptr, 0, run); 
+#endif
 		return ptr;
 	}
 
@@ -96,6 +97,10 @@ namespace iwutil {
 	{
 		if (addr >= m_memory && addr <= m_memory + size - run) {
 			m_freelist.push_front((char*)addr);
+
+#ifdef IW_DEBUG
+			memset(addr, 0, run);
+#endif
 		}
 
 		else {

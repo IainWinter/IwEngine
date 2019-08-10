@@ -430,9 +430,11 @@ namespace iwutil {
 			: public sparse_set<_index_t>::iterator //This might be monkey shit but well see
 		{
 			public:
-				using item_type         
+				using item_vec_ = std::vector<_item_t>;
+				using item_type
 					= std::conditional_t<_const, const _item_t, _item_t>;
-				using item_vec   = std::vector<item_type>;
+				using item_vec
+					= std::conditional_t<_const, const item_vec_, item_vec_>;
 				using value_type = std::remove_cv_t<item_type>;
 				using pointer    = item_type*;
 				using reference  = item_type&;
@@ -440,7 +442,7 @@ namespace iwutil {
 			private:
 				item_vec* m_items;
 
-				friend class sparse_set<index_type, item_type>;
+				friend class sparse_set<_index_t, _item_t>;
 
 				iterator_(
 					index_type index,

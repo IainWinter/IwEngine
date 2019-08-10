@@ -37,6 +37,7 @@ namespace IwEntity {
 
 		Entity CreateEntity() {
 			static Entity next = Entity();
+
 			Entity entity = next;
 			for (size_t e = 0; e < m_entities.size(); e++) {
 				if (m_entities.at(e).Dead) {

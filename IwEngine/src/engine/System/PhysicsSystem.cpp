@@ -18,7 +18,5 @@ namespace IwEngine {
 
 			//grid.Insert(components.Entity, transform, aabb);
 		}
-
-		LOG_INFO << grid.Size();
 	}
 }
