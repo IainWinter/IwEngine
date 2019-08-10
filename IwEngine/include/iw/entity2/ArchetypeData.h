@@ -16,6 +16,10 @@ namespace IwEntity2 {
 		bool operator==(
 			const ArchetypeData& other) const;
 
+		bool EqualWith(
+			ArchetypeData& other,
+			Component id) const;
+
 		void AddComponent(
 			Component id,
 			size_t size);
@@ -24,7 +28,7 @@ namespace IwEntity2 {
 			Component id);
 
 		bool HasComponent(
-			Component id);
+			Component id) const;
 
 		size_t SizeBefore(
 			Component id) const;

@@ -4,13 +4,38 @@ namespace IwEntity2 {
 	bool ArchetypeData::operator==(
 		const ArchetypeData& other) const
 	{
-		if (m_components.size() == other.m_components.size()) {
-			auto itr  = m_components.begin();
-			auto oitr = other.m_components.begin();
-			for (; itr != m_components.end(); itr++, oitr++) {
-				if (itr.sparse_index() != itr.sparse_index()) {
-					return false;
-				}
+		if (Count() != other.Count()) {
+			return false;
+		}
+
+		auto itr  = m_components.begin();
+		auto oitr = other.m_components.begin();
+		for (; itr != m_components.end(); itr++, oitr++) {
+			if (itr.sparse_index() != itr.sparse_index()) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	bool ArchetypeData::EqualWith(
+		ArchetypeData& other,
+		Component id) const
+	{
+		if (Count() != 1 + other.Count()) {
+			return false;
+		}
+
+		auto itr  = m_components.begin();
+		auto oitr = other.m_components.begin();
+		for (; itr != m_components.end(); itr++, oitr++) {
+			if (itr.sparse_index() == id) {
+				continue;
+			}
+
+			else if (itr.sparse_index() != itr.sparse_index()) {
+				return false;
 			}
 		}
 
@@ -31,7 +56,7 @@ namespace IwEntity2 {
 	}
 
 	bool ArchetypeData::HasComponent(
-		Component id)
+		Component id) const
 	{
 		return m_components.contains(id);
 	}

@@ -46,19 +46,17 @@ public:
 
 		for (size_t i = 0; i < 1000000; i++) {
 			IwEntity2::Entity e = space.CreateEntity();
-			space.CreateComponent<int3>(e);
-			space.CreateComponent<float3>(e);
-			space.CreateComponent<long3>(e);
-
-/*
+			int3& dd = space.CreateComponent<int3>(e);
 			if (rand() < RAND_MAX / 2) {
 				space.CreateComponent<float3>(e);
 			}
 
 			if (rand() < RAND_MAX / 4) {
 				space.CreateComponent<long3>(e);
-			}*/
+			}
 		}
+
+		space.ViewComponents<int3, float3>();
 
 		IwEngine::Time::Update();
 		float t = IwEngine::Time::DeltaTime();

@@ -55,6 +55,10 @@ namespace IwEntity2 {
 			return *(_c*)GetComponent(entity, cid);
 		}
 
+		template<
+			typename... _cs>
+		_
+
 		IWENTITY2_API bool EntityExists(
 			Entity entity);
 	private:
