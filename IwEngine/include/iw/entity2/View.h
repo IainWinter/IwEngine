@@ -1,16 +1,21 @@
 #pragma once
 
+#include "IwEntity.h"
 #include "ComponentArray.h"
 
 namespace IwEntity2 {
 	class View {
 	private:
-		ComponentArray::iterator* m_componentArrays;
-		size_t          m_componentCount;
+		using Iterator = ComponentArray::iterator;
+
+		Iterator* m_componentArrays;
+		size_t    m_componentCount;
 
 	public:
 		View(
-			ComponentArray::iterator* componentArrays,
+			Iterator* componentArrays,
+			ComponentId* componentIds,
+			size_t componentArrayCount,
 			size_t componentCount);
 
 		~View();
