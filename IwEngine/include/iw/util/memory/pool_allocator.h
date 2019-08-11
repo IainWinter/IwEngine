@@ -39,16 +39,18 @@ namespace iwutil {
 			page& operator=(const page&) = delete;
 		};
 
-		class iterator {
+		template<
+			bool _const>
+		class iterator_ {
 		public:
 			using page_type   = page;
-			using value_type  = char*;
+			using value_type  = std::conditional_t<_const, const char*, char*>;
 			using pointer     = value_type*;
 			using reference   = value_type&;
 			using difference_type   = std::ptrdiff_t;
 			using iterator_category = std::random_access_iterator_tag;
 		private:
-			iterator(
+			iterator_(
 				page_type* page,
 				value_type addr,
 				value_type end)
@@ -64,70 +66,70 @@ namespace iwutil {
 			value_type m_end;
 
 		public:
-			iterator(
-				const iterator& copy) = default;
+			iterator_(
+				const iterator_& copy) = default;
 
-			iterator(
-				iterator&& copy) = default;
+			iterator_(
+				iterator_&& copy) = default;
 
-			~iterator() = default;
+			~iterator_() = default;
 
-			iterator& operator=(
-				const iterator& copy) = default;
+			iterator_& operator=(
+				const iterator_& copy) = default;
 
-			iterator& operator=(
-				iterator&& copy) = default;
+			iterator_& operator=(
+				iterator_&& copy) = default;
 
-			iterator& operator++() {
+			iterator_& operator++() {
 				++m_addr;
 				return *this;
 			}
 
-			iterator& operator--() {
+			iterator_& operator--() {
 				--m_addr;
 				return *this;
 			}
 
-			iterator operator++(
+			iterator_ operator++(
 				int)
 			{
-				iterator itr(*this);
+				iterator_ itr(*this);
 				++*this;
 				return itr;
 			}
 
-			iterator operator--(
+			iterator_ operator--(
 				int)
 			{
-				iterator itr(*this);
+				iterator_ itr(*this);
 				--*this;
 				return itr;
 			}
 
-			iterator& operator+=(
+			iterator_& operator+=(
 				const difference_type& value)
 			{
 				m_addr += value;
 				return *this;
 			}
 
-			iterator& operator-=(
+			iterator_& operator-=(
 				const difference_type& value)
 			{
 				m_addr -= value;
 				return *this;
 			}
 
-			iterator operator+(
+			iterator_ operator+(
 				const difference_type& dif)
 			{
-				return iterator(m_page, m_addr + dif, m_end);
+				return iterator_(m_page, m_addr + dif, m_end);
 			}
 
-			iterator operator-(
+			iterator_ operator-(
 				const difference_type& dif)
 			{
-				return iterator(m_page, m_addr - dif, m_end);
+				return iterator_(m_page, m_addr - dif, m_end);
 			}
 
 			//difference_type operator+(
@@ -143,37 +145,37 @@ namespace iwutil {
 			//}
 
 			bool operator==(
-				const iterator& itr) const
+				const iterator_& itr) const
 			{
 				return m_addr == itr.m_addr;
 			}
 
 			bool operator!=(
-				const iterator& itr) const
+				const iterator_& itr) const
 			{
 				return !(m_addr == itr.m_addr);
 			}
 
 			bool operator>(
-				const iterator& itr) const
+				const iterator_& itr) const
 			{
 				return m_addr > itr.m_addr;
 			}
 
 			bool operator<(
-				const iterator& itr) const
+				const iterator_& itr) const
 			{
 				return m_addr < itr.m_addr;
 			}
 
 			bool operator>=(
-				const iterator& itr) const
+				const iterator_& itr) const
 			{
 				return !(m_addr < itr.m_addr);
 			}
 
 			bool operator<=(
-				const iterator& itr) const
+				const iterator_& itr) const
 			{
 				return !(m_addr > itr.m_addr);
 			}
@@ -192,8 +194,11 @@ namespace iwutil {
 			//	return (char*)m_addr + index;
 			//}
 		};
+
+		using iterator       = iterator_<false>;
+		using const_iterator = iterator_<true>;
 	private:
-		page* m_root;
+		page*  m_root;
 		size_t m_pageSize;
 		size_t m_itemSize;
 
@@ -226,6 +231,22 @@ namespace iwutil {
 
 		bool free(
 			void* addr);
+
+		iterator begin() {
+			return iterator(m_root, m_root->memory(), m_root->memory() + m_pageSize);
+		}
+
+		iterator begin() {
+			return iterator(nullptr, nullptr, nullptr);
+		}
+
+		iterator begin() const {
+			return iterator(m_root, m_root->memory(), m_root->memory() + m_pageSize);
+		}
+
+		iterator begin() const {
+			return iterator(nullptr, nullptr, nullptr);
+		}
 
 		inline size_t page_size() const {
 			return m_pageSize;

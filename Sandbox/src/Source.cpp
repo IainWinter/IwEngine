@@ -56,7 +56,7 @@ public:
 			}
 		}
 
-		space.ViewComponents<int3, float3>();
+		//space.ViewComponents<int3, float3>();
 
 		IwEngine::Time::Update();
 		float t = IwEngine::Time::DeltaTime();

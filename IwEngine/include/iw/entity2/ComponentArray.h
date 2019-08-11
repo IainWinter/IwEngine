@@ -7,6 +7,8 @@
 
 namespace IwEntity2 {
 	class ComponentArray {
+	public:
+		using iterator = iwu::pool_allocator::iterator;
 	private:
 		iwu::sparse_set<Entity, void*> m_entities;
 		//std::unordered_map<Entity, void*> m_entities;
@@ -27,5 +29,13 @@ namespace IwEntity2 {
 			Entity entity);
 
 		size_t ArchetypeSize() const;
+
+		iterator begin() const {
+			m_pool.begin();
+		}
+
+		iterator begin() const {
+			m_pool.end();
+		}
 	};
 }

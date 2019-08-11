@@ -5,12 +5,12 @@
 namespace IwEntity2 {
 	class View {
 	private:
-		ComponentArray* m_componentArrays;
+		ComponentArray::iterator* m_componentArrays;
 		size_t          m_componentCount;
 
 	public:
 		View(
-			ComponentArray* componentArrays,
+			ComponentArray::iterator* componentArrays,
 			size_t componentCount);
 
 		~View();
@@ -18,7 +18,7 @@ namespace IwEntity2 {
 		template<
 			typename S>
 		S GetComponents() {
-
+			
 		}
 	};
 }
