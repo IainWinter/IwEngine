@@ -2,6 +2,7 @@
 
 #include "IwEntity.h"
 #include "ComponentArray.h"
+#include <initializer_list>
 
 namespace IwEntity2 {
 	class IWENTITY2_API View {
@@ -12,15 +13,17 @@ namespace IwEntity2 {
 		size_t    m_componentCount;
 
 	public:
+		View() = default;
+
 		View(
 			std::initializer_list<ComponentArray*> componentArrays);
 
 		~View();
 
-		template<
-			typename S>
-		S GetComponents() {
-			//
-		}
+		//template<
+		//	typename S>
+		//S GetComponents() {
+		//	//
+		//}
 	};
 }

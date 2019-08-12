@@ -56,13 +56,15 @@ namespace IwEntity2 {
 			return *(_c*)GetComponent(entity, cid);
 		}
 
-		template<
-			typename... _c>
-		View ViewComponents() {
-			return View {
-				m_components.at(GetComponentId(typeid(_c)))...
-			};
-		}
+		//template<
+		//	typename... _c>
+		//View ViewComponents() {
+		//	//return View {
+		//	//	//m_components.at(GetComponentId(typeid(_c)))...
+		//	//};
+
+		//	return View();
+		//}
 
 		IWENTITY2_API bool EntityExists(
 			Entity entity);
@@ -79,6 +81,9 @@ namespace IwEntity2 {
 		IWENTITY2_API void* GetComponent(
 			Entity entity,
 			Component componentId);
+
+		IWENTITY2_API View ViewComponents(
+			std::initializer_list<Component> componentIds);
 
 		IWENTITY2_API ComponentArray* GetComponentArray(
 			Archetype archetype);

@@ -141,7 +141,7 @@ namespace IwEntity2 {
 		ComponentArray* ca = GetComponentArray(archetype);
 		if (!ca) {
 			ArchetypeData& data = m_archetypes.GetArchetypeData(archetype);
-			ca = m_components.emplace(archetype, ComponentArray(6291456, data));
+			ca = m_components.emplace(archetype, new ComponentArray(6291456, data));
 		}
 
 		return *ca;

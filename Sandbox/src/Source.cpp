@@ -52,7 +52,7 @@ public:
 		IwEngine::Time::Update();
 		LOG_INFO << IwEngine::Time::DeltaTime();
 
-		IwEntity2::View view = space.ViewComponents<int3, long3>();
+		//IwEntity2::View view = space.ViewComponents<int3, long3>();
 
 		IwEngine::Time::Update();
 		LOG_INFO << IwEngine::Time::DeltaTime();
