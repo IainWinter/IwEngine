@@ -34,22 +34,19 @@ namespace IwEntity2 {
 			return nullptr;
 		}
 
-		Archetype& archetype = m_entities.GetEntityData(entity).Archetype;
+		Archetype& archetype   = m_entities.GetEntityData(entity).Archetype;
 
 		ComponentArray* oldca = GetComponentArray(archetype);
-
+		
 		m_archetypes.AddComponent(archetype, componentId, componentSize);
 
 		ComponentArray& newca = EnsureComponentArray(archetype);
 		
 		void* components = newca.CreateComponents(entity);
 
+
 		if (oldca) {
 			size_t olds  = oldca->Archetype().Size();
-			//size_t oldsb = oldca->Archetype().SizeBefore(componentId);
-			//size_t oldsa = oldca->Archetype().SizeAfter(componentId);
-
-			//size_t news  = newca.Archetype().Size();
 			size_t newsb = newca.Archetype().SizeBefore(componentId);
 			size_t newsa = newca.Archetype().SizeAfter(componentId);
 
@@ -94,14 +91,10 @@ namespace IwEntity2 {
 		if (archetype != 0) {
 			ComponentArray& newca = EnsureComponentArray(archetype);
 
-			size_t olds = oldca->Archetype().Size();
+			size_t olds  = oldca->Archetype().Size();
 			size_t oldsb = oldca->Archetype().SizeBefore(componentId);
 			size_t oldsa = oldca->Archetype().SizeAfter(componentId);
 			size_t oldcs = oldca->Archetype().ComponentSize(componentId);
-
-			//size_t news  = newca.Archetype().Size();
-			//size_t newsb = newca.Archetype().SizeBefore(componentId);
-			//size_t newsa = newca.Archetype().SizeAfter(componentId);
 
 			char* newcomponents = (char*)newca.CreateComponents(entity);
 			char* oldcomponents = (char*)oldca->GetComponents(entity);
@@ -136,7 +129,7 @@ namespace IwEntity2 {
 	{
 		auto itr = m_components.find(archetype);
 		if (itr != m_components.end()) {
-			return &itr->second;
+			return *itr;
 		}
 
 		return nullptr;
@@ -148,8 +141,7 @@ namespace IwEntity2 {
 		ComponentArray* ca = GetComponentArray(archetype);
 		if (!ca) {
 			ArchetypeData& data = m_archetypes.GetArchetypeData(archetype);
-			ca = &m_components.emplace(archetype, ComponentArray(6291456, data))
-				.first->second;
+			ca = m_components.emplace(archetype, ComponentArray(6291456, data));
 		}
 
 		return *ca;

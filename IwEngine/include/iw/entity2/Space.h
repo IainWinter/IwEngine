@@ -6,7 +6,8 @@
 #include "EntityData.h"
 #include "ArchetypeArray.h"
 #include "ArchetypeData.h"
-#include "iw/util/memory/pool_allocator.h"
+#include "View.h"
+#include "iw/util/set/sparse_set.h"
 #include <unordered_map>
 #include <cstddef>
 #include <malloc.h>
@@ -20,7 +21,7 @@ namespace IwEntity2 {
 		EntityArray    m_entities;
 		ArchetypeArray m_archetypes;
 		std::unordered_map<std::type_index, Component> m_componentIds;
-		std::unordered_map<Archetype, ComponentArray>  m_components;
+		iwu::sparse_set<Archetype, ComponentArray*>    m_components;
 
 	public:
 		IWENTITY2_API Entity CreateEntity();
@@ -53,6 +54,14 @@ namespace IwEntity2 {
 		{
 			Component cid = GetComponentId(typeid(_c));
 			return *(_c*)GetComponent(entity, cid);
+		}
+
+		template<
+			typename... _c>
+		View ViewComponents() {
+			return View {
+				m_components.at(GetComponentId(typeid(_c)))...
+			};
 		}
 
 		IWENTITY2_API bool EntityExists(

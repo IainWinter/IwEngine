@@ -10,7 +10,8 @@
 namespace IwEntity2 {
 	class ComponentArray {
 	public:
-		using iterator = iwu::pool_allocator::iterator;
+		using Iterator = iwu::pool_allocator::iterator;
+		using ConstIterator = iwu::pool_allocator::const_iterator;
 	private:
 		iwu::sparse_set<Entity, void*> m_entities;
 		ArchetypeData                  m_archetypeData;
@@ -34,12 +35,20 @@ namespace IwEntity2 {
 			ComponentArray& source,
 			Entity entity);
 
-		iterator begin() const {
-			m_pool.begin();
+		Iterator begin() {
+			return m_pool.begin();
 		}
 
-		iterator end() const {
-			m_pool.end();
+		Iterator end() {
+			return m_pool.end();
+		}
+
+		ConstIterator begin() const {
+			return m_pool.begin();
+		}
+
+		ConstIterator end() const {
+			return m_pool.end();
 		}
 
 		inline const ArchetypeData& Archetype() const {

@@ -66,6 +66,8 @@ namespace iwutil {
 			value_type m_end;
 
 		public:
+			iterator_() = default;
+
 			iterator_(
 				const iterator_& copy) = default;
 
@@ -240,12 +242,12 @@ namespace iwutil {
 			return iterator(nullptr, nullptr, nullptr);
 		}
 
-		iterator begin() const {
-			return iterator(m_root, m_root->memory(), m_root->memory() + m_pageSize);
+		const_iterator begin() const {
+			return const_iterator(m_root, m_root->memory(), m_root->memory() + m_pageSize);
 		}
 
-		iterator end() const {
-			return iterator(nullptr, nullptr, nullptr);
+		const_iterator end() const {
+			return const_iterator(nullptr, nullptr, nullptr);
 		}
 
 		inline size_t page_size() const {

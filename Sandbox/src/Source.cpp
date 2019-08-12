@@ -4,7 +4,6 @@
 #include "imgui/imgui.h"
 
 #include "iw/entity2/Space.h"
-#include "iw/util/memory/pool_allocator.h"
 
 #include "iw/engine/Time.h"
 
@@ -49,6 +48,11 @@ public:
 			space.CreateComponent<int3>(e);
 			space.CreateComponent<long3>(e);
 		}
+
+		IwEngine::Time::Update();
+		LOG_INFO << IwEngine::Time::DeltaTime();
+
+		IwEntity2::View view = space.ViewComponents<int3, long3>();
 
 		IwEngine::Time::Update();
 		LOG_INFO << IwEngine::Time::DeltaTime();
