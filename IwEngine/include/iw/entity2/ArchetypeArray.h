@@ -9,6 +9,8 @@ namespace IwEntity2 {
 	private:
 		iwu::sparse_set<Archetype, ArchetypeData> m_archetypes;
 
+		static Archetype nextArchetype;
+
 	public:
 		Archetype AddComponent(
 			Archetype& archetype,

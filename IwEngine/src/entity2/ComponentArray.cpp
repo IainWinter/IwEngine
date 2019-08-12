@@ -3,8 +3,9 @@
 namespace IwEntity2 {
 	ComponentArray::ComponentArray(
 		size_t pageSize,
-		size_t archetypeSize)
-		: m_pool(pageSize, archetypeSize)
+		const ArchetypeData& archetypeData)
+		: m_archetypeData(archetypeData)
+		, m_pool(pageSize, archetypeData.Size())
 	{}
 
 	void* ComponentArray::CreateComponents(
@@ -47,7 +48,20 @@ namespace IwEntity2 {
 		return nullptr;
 	}
 
-	size_t ComponentArray::ArchetypeSize() const {
-		return m_pool.item_size();
+	void* ComponentArray::CopyInto(
+		ComponentArray& source,
+		Entity entity)
+	{
+		auto& sarchetypeData = source.Archetype();
+		void* dcomponents    = GetComponents(entity);
+		void* scomponents    = source.GetComponents(entity);
+
+		//sarchetypeData.SizeBefore();
+
+		//for (auto itr = dlayout.begin(); itr != dlayout.end(); itr++) {
+		//	size_t ssize = slayout.at
+		//}
+
+		return nullptr;
 	}
 }

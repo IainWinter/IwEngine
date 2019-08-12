@@ -58,8 +58,9 @@ namespace iwutil {
 		, m_next(nullptr)
 	{
 		if (m_memory) {
-			for (char* addr = m_memory; addr < m_memory + size; addr += run) {
-				m_freelist.push_front(addr);
+			m_freelist.reserve(size);
+			for (size_t i = 0; i < size; i++) {
+				m_freelist.push_back(&m_memory[i]);
 			}
 		}
 	}
@@ -81,8 +82,8 @@ namespace iwutil {
 			return m_next->alloc(size, run);
 		}
 
-		char* ptr = m_freelist.front();
-		m_freelist.pop_front();
+		char* ptr = m_freelist.back();
+		m_freelist.pop_back();
 
 #ifdef IW_DEBUG
 		memset(ptr, 0, run); 
@@ -96,7 +97,7 @@ namespace iwutil {
 		size_t run)
 	{
 		if (addr >= m_memory && addr <= m_memory + size - run) {
-			m_freelist.push_front((char*)addr);
+			m_freelist.push_back((char*)addr);
 
 #ifdef IW_DEBUG
 			memset(addr, 0, run);

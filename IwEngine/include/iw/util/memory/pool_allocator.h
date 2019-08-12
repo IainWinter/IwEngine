@@ -3,7 +3,7 @@
 #include "iw/util/iwutil.h"
 #include <cstddef>
 #include <malloc.h>
-#include <forward_list>
+#include <vector>
 
 namespace iwutil {
 	class IWUTIL_API pool_allocator {
@@ -12,7 +12,7 @@ namespace iwutil {
 		private:
 			char* m_memory;
 			page* m_next;
-			std::forward_list<char*> m_freelist;
+			std::vector<char*> m_freelist;
 
 		public:
 			page(
@@ -236,7 +236,7 @@ namespace iwutil {
 			return iterator(m_root, m_root->memory(), m_root->memory() + m_pageSize);
 		}
 
-		iterator begin() {
+		iterator end() {
 			return iterator(nullptr, nullptr, nullptr);
 		}
 
@@ -244,7 +244,7 @@ namespace iwutil {
 			return iterator(m_root, m_root->memory(), m_root->memory() + m_pageSize);
 		}
 
-		iterator begin() const {
+		iterator end() const {
 			return iterator(nullptr, nullptr, nullptr);
 		}
 

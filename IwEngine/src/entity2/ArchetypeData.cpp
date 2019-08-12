@@ -8,9 +8,9 @@ namespace IwEntity2 {
 			return false;
 		}
 
-		auto itr  = m_components.begin();
-		auto oitr = other.m_components.begin();
-		for (; itr != m_components.end(); itr++, oitr++) {
+		auto itr  = m_layout.begin();
+		auto oitr = other.m_layout.begin();
+		for (; itr != m_layout.end(); itr++, oitr++) {
 			if (itr.sparse_index() != itr.sparse_index()) {
 				return false;
 			}
@@ -27,15 +27,46 @@ namespace IwEntity2 {
 			return false;
 		}
 
-		auto itr  = m_components.begin();
-		auto oitr = other.m_components.begin();
-		for (; itr != m_components.end(); itr++, oitr++) {
+		auto itr  = m_layout.begin();
+		auto end  = m_layout.end();
+		auto oitr = other.m_layout.begin();
+		auto oend = other.m_layout.end();
+		for (; itr != end && oitr != oend; itr++, oitr++) {
 			if (itr.sparse_index() == id) {
 				continue;
 			}
 
-			else if (itr.sparse_index() != itr.sparse_index()) {
+			else if (itr.sparse_index() != oitr.sparse_index()) {
 				return false;
+			}
+		}
+
+		return true;
+	}
+
+	bool ArchetypeData::EqualWithout(
+		ArchetypeData& other,
+		Component id) const
+	{
+		if (Count() !=  other.Count() - 1) {
+			return false;
+		}
+
+		auto itr  = m_layout.begin();
+		auto end  = m_layout.end();
+		auto oitr = other.m_layout.begin();
+		auto oend = other.m_layout.end();
+		for (;  oitr != oend; oitr++) {
+			if (oitr.sparse_index() == id) {
+				continue;
+			}
+
+			else if (itr.sparse_index() != oitr.sparse_index()) {
+				return false;
+			}
+
+			if (itr != end) {
+				itr++;
 			}
 		}
 
@@ -46,19 +77,26 @@ namespace IwEntity2 {
 		Component id,
 		size_t size)
 	{
-		m_components.emplace(id, size);
+		m_layout.emplace(id, size);
+		m_layout.sort();
 	}
 
 	void ArchetypeData::RemoveComponent(
 		Component id)
 	{
-		m_components.erase(id);
+		m_layout.erase(id);
 	}
 
 	bool ArchetypeData::HasComponent(
 		Component id) const
 	{
-		return m_components.contains(id);
+		return m_layout.contains(id);
+	}
+
+	size_t ArchetypeData::ComponentSize(
+		Component id) const
+	{
+		return m_layout.at(id);
 	}
 
 	size_t ArchetypeData::SizeBefore(
@@ -66,7 +104,7 @@ namespace IwEntity2 {
 	{
 		size_t size = 0;
 
-		for (auto itr = m_components.begin(); itr != m_components.end(); itr++) {
+		for (auto itr = m_layout.begin(); itr != m_layout.end(); itr++) {
 			if (id == itr.sparse_index()) {
 				break;
 			}
@@ -82,7 +120,7 @@ namespace IwEntity2 {
 	{
 		size_t size = 0;
 		bool after = false;
-		for (auto itr = m_components.begin(); itr != m_components.end(); itr++) {
+		for (auto itr = m_layout.begin(); itr != m_layout.end(); itr++) {
 			if (after) {
 				size += *itr;
 			}
@@ -98,7 +136,7 @@ namespace IwEntity2 {
 	size_t ArchetypeData::Size() const {
 		size_t size = 0;
 
-		for (size_t s : m_components) {
+		for (size_t s : m_layout) {
 			size += s;
 		}
 
@@ -106,7 +144,7 @@ namespace IwEntity2 {
 	}
 
 	size_t ArchetypeData::Count() const {
-		return m_components.size();
+		return m_layout.size();
 	}
 
 	bool ArchetypeData::Empty() const {
@@ -114,6 +152,6 @@ namespace IwEntity2 {
 	}
 
 	void ArchetypeData::Reset() {
-		m_components.clear();
+		m_layout.clear();
 	}
 }

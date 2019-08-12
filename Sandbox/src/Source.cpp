@@ -17,7 +17,7 @@ struct float3 {
 };
 
 struct long3 {
-	long x, y, z;
+	long long x, y, z;
 };
 
 
@@ -46,24 +46,19 @@ public:
 
 		for (size_t i = 0; i < 1000000; i++) {
 			IwEntity2::Entity e = space.CreateEntity();
-			int3& dd = space.CreateComponent<int3>(e);
-			if (rand() < RAND_MAX / 2) {
-				space.CreateComponent<float3>(e);
-			}
-
-			if (rand() < RAND_MAX / 4) {
-				space.CreateComponent<long3>(e);
-			}
+			space.CreateComponent<int3>(e);
+			space.CreateComponent<long3>(e);
 		}
 
-		//space.ViewComponents<int3, float3>();
+		IwEngine::Time::Update();
+		LOG_INFO << IwEngine::Time::DeltaTime();
+
+		for (size_t e =  1; e < 1000002; e++) {
+			space.DestroyComponent<int3>(e);
+		}
 
 		IwEngine::Time::Update();
-		float t = IwEngine::Time::DeltaTime();
-
-		LOG_INFO << t;
-
-		space.EntityExists(0);
+		LOG_INFO << IwEngine::Time::DeltaTime();
 
 		return 0;
 	}

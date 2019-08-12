@@ -1,13 +1,13 @@
 #include "iw/entity2/ArchetypeArray.h"
 
 namespace IwEntity2 {
+	Archetype ArchetypeArray::nextArchetype = 1;
+
 	Archetype ArchetypeArray::AddComponent(
 		Archetype& archetype,
 		Component componentId,
 		size_t componentSize)
 	{
-		static Archetype nextArchetype = 1;
-
 		// If a new archetype
 		if (archetype == 0) {
 			// If one already exists with only the new component return it
@@ -28,7 +28,7 @@ namespace IwEntity2 {
 			ArchetypeData& data = m_archetypes.at(archetype);
 
 			// Find archetype with all its components + the new component
-			auto itr = m_archetypes.find(archetype) + 1;   // See if this needs to start at the beginning. 
+			auto itr = m_archetypes.begin()/*(archetype) + 1*/;   // See if this needs to start at the beginning. 
 			for (; itr != m_archetypes.end(); itr++) {    //   If the archetypes are added sequentially, and never removed, then it probly doesn't?
 				if (itr->EqualWith(data, componentId)) {
 					return archetype = itr.sparse_index();
@@ -48,7 +48,32 @@ namespace IwEntity2 {
 		Archetype& archetype,
 		Component componentId)
 	{
-		return Archetype();
+		// If archetype is empty do nothing
+		if (archetype == 0) {
+			return archetype;
+		}
+
+		// If old archetype
+		else {
+			ArchetypeData& data = m_archetypes.at(archetype);
+			if (data.Count() == 1) {
+				return archetype = 0;
+			}
+
+			// Find archetype with all its components + the new component
+			auto itr = m_archetypes.begin()/*(archetype) + 1*/;   // See if this needs to start at the beginning. 
+			for (; itr != m_archetypes.end(); itr++) {    //   If the archetypes are added sequentially, and never removed, then it probly doesn't?
+				if (itr->EqualWithout(data, componentId)) {
+					return archetype = itr.sparse_index();
+				}
+			}
+
+			// If not make a new one
+			ArchetypeData& newdata = m_archetypes.emplace(nextArchetype, data);
+			newdata.RemoveComponent(componentId);
+		}
+
+		return archetype = nextArchetype++;
 	}
 
 	ArchetypeData& ArchetypeArray::GetArchetypeData(

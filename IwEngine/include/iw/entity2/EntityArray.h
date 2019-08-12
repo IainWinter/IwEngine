@@ -2,7 +2,6 @@
 
 #include "IwEntity.h"
 #include "EntityData.h"
-#include "iw/util/memory/pool_allocator.h"
 #include <vector>
 #include <queue>
 

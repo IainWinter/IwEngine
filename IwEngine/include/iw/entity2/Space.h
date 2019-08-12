@@ -75,8 +75,7 @@ namespace IwEntity2 {
 			Archetype archetype);
 
 		IWENTITY2_API ComponentArray& EnsureComponentArray(
-			Archetype archetype,
-			size_t archetypeSize);
+			Archetype archetype);
 
 		IWENTITY2_API Component GetComponentId(
 			std::type_index&& type);

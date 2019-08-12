@@ -36,28 +36,45 @@ namespace IwEntity2 {
 
 		Archetype& archetype = m_entities.GetEntityData(entity).Archetype;
 
-		size_t csize = 0;
-		void*  cptr  = nullptr;
-
-		ComponentArray* ca = GetComponentArray(archetype);
-		if (ca) {
-			csize = ca->ArchetypeSize();
-			cptr  = ca->GetComponents(entity);
-		}
+		ComponentArray* oldca = GetComponentArray(archetype);
 
 		m_archetypes.AddComponent(archetype, componentId, componentSize);
 
-		ComponentArray& newca = EnsureComponentArray(
-			archetype, componentSize + csize);
-
+		ComponentArray& newca = EnsureComponentArray(archetype);
+		
 		void* components = newca.CreateComponents(entity);
 
-		if (cptr) {
-			memmove(components, cptr, csize); // temp
-			ca->DestroyComponents(entity);
+		if (oldca) {
+			size_t olds  = oldca->Archetype().Size();
+			//size_t oldsb = oldca->Archetype().SizeBefore(componentId);
+			//size_t oldsa = oldca->Archetype().SizeAfter(componentId);
+
+			//size_t news  = newca.Archetype().Size();
+			size_t newsb = newca.Archetype().SizeBefore(componentId);
+			size_t newsa = newca.Archetype().SizeAfter(componentId);
+
+			char* newcomponents = (char*)components;
+			char* oldcomponents = (char*)oldca->GetComponents(entity);
+			
+			// New component is at the end
+			if (newsa == 0) {
+				memmove(newcomponents, oldcomponents, newsb);
+			}
+
+			// New component is at the start
+			else if (newsb == 0) {
+				memmove(newcomponents + componentSize, oldcomponents, olds);
+			}
+
+			else {
+				memmove(newcomponents, oldcomponents, newsb);
+				memmove(newcomponents + newsb + componentSize, oldcomponents + newsb, newsa);
+			}
+
+			return newcomponents + newsb;
 		}
 
-		return (char*)components + csize;
+		return components;
 	}
 
 	bool Space::DestroyComponent(
@@ -68,36 +85,32 @@ namespace IwEntity2 {
 			return false;
 		}
 
-		Archetype      archetype = m_entities.GetEntityData(entity).Archetype;
-		ArchetypeData& archedata = m_archetypes.GetArchetypeData(archetype);
+		Archetype& archetype = m_entities.GetEntityData(entity).Archetype;
 
-		ComponentArray* ca = GetComponentArray(archetype);
+		ComponentArray* oldca = GetComponentArray(archetype);
 
-		// If entity only has 1 component no need to copy data
-		if (archedata.Count() == 1) {
-			ca->DestroyComponents(entity);
-			archedata.RemoveComponent(componentId);
+		m_archetypes.RemoveComponent(archetype, componentId);
+
+		if (archetype != 0) {
+			ComponentArray& newca = EnsureComponentArray(archetype);
+
+			size_t olds = oldca->Archetype().Size();
+			size_t oldsb = oldca->Archetype().SizeBefore(componentId);
+			size_t oldsa = oldca->Archetype().SizeAfter(componentId);
+			size_t oldcs = oldca->Archetype().ComponentSize(componentId);
+
+			//size_t news  = newca.Archetype().Size();
+			//size_t newsb = newca.Archetype().SizeBefore(componentId);
+			//size_t newsa = newca.Archetype().SizeAfter(componentId);
+
+			char* newcomponents = (char*)newca.CreateComponents(entity);
+			char* oldcomponents = (char*)oldca->GetComponents(entity);
+
+			memmove(newcomponents, oldcomponents, oldsb);
+			memmove(newcomponents + oldsb, oldcomponents + oldsb + oldcs, oldsa);
 		}
 
-		else {
-			void* oldcomponents = ca->GetComponents(entity);
-
-			size_t size   = archedata.Size();
-			size_t before = archedata.SizeBefore(componentId);
-			size_t after  = archedata.SizeAfter(componentId);
-
-			m_archetypes.RemoveComponent(archetype, componentId);
-			
-			ComponentArray& newca = EnsureComponentArray(archetype, archedata.Size());
-
-			void* components = newca.CreateComponents(entity);
-			
-			// temp
-			memmove(components, oldcomponents, before);
-			memmove((char*)components + before, (char*)oldcomponents + size - before - after, after);
-
-			ca->DestroyComponents(entity);
-		}
+		oldca->DestroyComponents(entity);
 
 		return true;
 	}
@@ -130,13 +143,13 @@ namespace IwEntity2 {
 	}
 
 	ComponentArray& Space::EnsureComponentArray(
-		Archetype archetype,
-		size_t archetypeSize)
+		Archetype archetype)
 	{
 		ComponentArray* ca = GetComponentArray(archetype);
 		if (!ca) {
-			ca = &m_components.emplace(archetype, ComponentArray(
-				6 * 1024 * 1024, archetypeSize)).first->second;
+			ArchetypeData& data = m_archetypes.GetArchetypeData(archetype);
+			ca = &m_components.emplace(archetype, ComponentArray(6291456, data))
+				.first->second;
 		}
 
 		return *ca;

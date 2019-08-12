@@ -14,7 +14,7 @@ namespace IwEntity2 {
 	public:
 		View(
 			Iterator* componentArrays,
-			ComponentId* componentIds,
+			Component* componentIds,
 			size_t componentArrayCount,
 			size_t componentCount);
 
@@ -23,7 +23,8 @@ namespace IwEntity2 {
 		template<
 			typename S>
 		S GetComponents() {
-			
+
+			//
 		}
 	};
 }

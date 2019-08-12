@@ -5,9 +5,11 @@
 #include <type_traits>
 
 namespace IwEntity2 {
+	using ArchetypeLayout = iwu::sparse_set<Component, size_t>;
+
 	class IWENTITY2_API ArchetypeData {
 	private:
-		iwu::sparse_set<Component, size_t> m_components;
+		ArchetypeLayout m_layout;
 		//std::size_t            m_szie;
 
 		friend class std::hash<ArchetypeData>;
@@ -17,6 +19,10 @@ namespace IwEntity2 {
 			const ArchetypeData& other) const;
 
 		bool EqualWith(
+			ArchetypeData& other,
+			Component id) const;
+
+		bool EqualWithout(
 			ArchetypeData& other,
 			Component id) const;
 
@@ -30,6 +36,9 @@ namespace IwEntity2 {
 		bool HasComponent(
 			Component id) const;
 
+		size_t ComponentSize(
+			Component id) const;
+
 		size_t SizeBefore(
 			Component id) const;
 
@@ -40,6 +49,10 @@ namespace IwEntity2 {
 		size_t Count() const;
 		bool   Empty() const;
 		void   Reset();
+
+		inline const ArchetypeLayout& Layout() const {
+			return m_layout;
+		}
 	};
 }
 //

@@ -6,7 +6,6 @@ namespace IwEntity2 {
 
 		if (m_dead.empty()) {
 			m_entities.emplace_back(nextEntity);
-
 			return nextEntity++;
 		}
 
@@ -14,7 +13,6 @@ namespace IwEntity2 {
 		m_dead.pop();
 
 		EntityData& data = m_entities.at(e);
-
 		data.Version++;
 		data.Archetype = 0;
 
@@ -29,7 +27,6 @@ namespace IwEntity2 {
 			data.Alive = false;
 
 			m_dead.push(entity - 1);
-
 			return true;
 		}
 
