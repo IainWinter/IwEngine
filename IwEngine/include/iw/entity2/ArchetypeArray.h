@@ -3,6 +3,7 @@
 #include "IwEntity.h"
 #include "ArchetypeData.h"
 #include "iw/util/set/sparse_set.h"
+#include <vector>
 
 namespace IwEntity2 {
 	class ArchetypeArray {
@@ -23,6 +24,9 @@ namespace IwEntity2 {
 
 		ArchetypeData& GetArchetypeData(
 			Archetype archetype);
+
+		std::vector<Archetype> FindWith(
+			const std::vector<Component>& componentIds);
 
 		bool ArchetypeExists(
 			Archetype archetype);

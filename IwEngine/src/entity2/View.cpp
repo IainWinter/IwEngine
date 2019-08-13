@@ -2,17 +2,28 @@
 
 namespace IwEntity2 {
 	View::View(
-		std::initializer_list<ComponentArray*> componentArrays)
-		: m_componentArrays(new Iterator[componentArrays.size()])
-		, m_componentCount(componentArrays.size())
+		std::vector<ComponentArray*>&& componentArrays)
+		: m_componentArrays(std::move(componentArrays))
+	{}
+	View::Iterator::Iterator(std::vector<ComponentArray::Iterator>&& itrs)
 	{
-		auto itr = componentArrays.begin();
-		for (size_t i = 0; i < m_componentCount; i++, itr++) {
-			m_componentArrays[i] = (*itr)->begin();
-		}
 	}
 
-	View::~View() {
-		delete[] m_componentArrays;
+	View::Iterator View::begin() {
+		std::vector<ComponentArray::Iterator> itrs(m_componentArrays.size());
+		for (ComponentArray* ca : m_componentArrays) {
+			itrs.push_back(ca->begin());
+		}
+
+		return Iterator(std::move(itrs));
+	}
+
+	View::Iterator View::end() {
+		std::vector<ComponentArray::Iterator> itrs(m_componentArrays.size());
+		for (ComponentArray* ca : m_componentArrays) {
+			itrs.push_back(ca->end());
+		}
+
+		return Iterator(std::move(itrs));
 	}
 }

@@ -21,7 +21,7 @@ namespace IwEntity2 {
 		EntityArray    m_entities;
 		ArchetypeArray m_archetypes;
 		std::unordered_map<std::type_index, Component> m_componentIds;
-		iwu::sparse_set<Archetype, ComponentArray*>    m_components;
+		iwu::sparse_set<Archetype, ComponentArray*> m_components;
 
 	public:
 		IWENTITY2_API Entity CreateEntity();
@@ -56,15 +56,15 @@ namespace IwEntity2 {
 			return *(_c*)GetComponent(entity, cid);
 		}
 
-		//template<
-		//	typename... _c>
-		//View ViewComponents() {
-		//	//return View {
-		//	//	//m_components.at(GetComponentId(typeid(_c)))...
-		//	//};
+		template<
+			typename... _c>
+			View ViewComponents() {
+			std::vector<Component> ids = {
+				GetComponentId(typeid(_c))...
+			};
 
-		//	return View();
-		//}
+			return ViewComponents(ids);
+		}
 
 		IWENTITY2_API bool EntityExists(
 			Entity entity);
@@ -83,7 +83,7 @@ namespace IwEntity2 {
 			Component componentId);
 
 		IWENTITY2_API View ViewComponents(
-			std::initializer_list<Component> componentIds);
+			const std::vector<Component>& ids);
 
 		IWENTITY2_API ComponentArray* GetComponentArray(
 			Archetype archetype);

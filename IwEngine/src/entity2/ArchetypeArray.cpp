@@ -82,6 +82,27 @@ namespace IwEntity2 {
 		return m_archetypes.at(archetype);
 	}
 
+	std::vector<Archetype> ArchetypeArray::FindWith(
+		const std::vector<Component>& componentIds)
+	{
+		std::vector<Archetype> archetypes;
+		for (auto itr = m_archetypes.begin(); itr != m_archetypes.end(); itr++)
+		{
+			for (Component c : componentIds) {
+				if (!itr->HasComponent(c)) {
+					goto continueloop;
+				}
+			}
+
+			archetypes.push_back(itr.sparse_index());
+
+		continueloop:
+			continue;
+		}
+
+		return archetypes;
+	}
+
 	bool ArchetypeArray::ArchetypeExists(
 		Archetype archetype)
 	{

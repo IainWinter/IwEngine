@@ -124,6 +124,18 @@ namespace IwEntity2 {
 		return (char*)components + before;
 	}
 
+	View Space::ViewComponents(
+		const std::vector<Component>& ids)
+	{
+		std::vector<Archetype>       archetypes = m_archetypes.FindWith(ids);
+		std::vector<ComponentArray*> cas;
+		for (int i = 0; i < archetypes.size(); i++) {
+			cas.push_back(GetComponentArray(archetypes.at(i)));
+		}
+
+		return View(std::forward<std::vector<ComponentArray*>>(cas));
+	}
+
 	ComponentArray* Space::GetComponentArray(
 		Archetype archetype)
 	{

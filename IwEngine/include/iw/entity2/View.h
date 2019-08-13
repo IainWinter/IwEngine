@@ -2,24 +2,27 @@
 
 #include "IwEntity.h"
 #include "ComponentArray.h"
-#include <initializer_list>
 
 namespace IwEntity2 {
 	class IWENTITY2_API View {
-	private:
-		using Iterator = ComponentArray::Iterator;
+	public:
+		class Iterator {
+		private:
+			std::vector<ComponentArray::Iterator> m_itrs;
 
-		Iterator* m_componentArrays;
-		size_t    m_componentCount;
+		public:
+			Iterator(
+				std::vector<ComponentArray::Iterator>&& itrs);
+		};
+	private:
+		const std::vector<ComponentArray*> m_componentArrays;
 
 	public:
-		View() = default;
-
 		View(
-			std::initializer_list<ComponentArray*> componentArrays);
+			std::vector<ComponentArray*>&& componentArrays);
 
-		~View();
-
+		Iterator begin();
+		Iterator end();
 		//template<
 		//	typename S>
 		//S GetComponents() {
