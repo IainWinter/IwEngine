@@ -5,9 +5,11 @@ namespace IwEntity2 {
 		std::vector<ComponentArray*>&& componentArrays)
 		: m_componentArrays(std::move(componentArrays))
 	{}
-	View::Iterator::Iterator(std::vector<ComponentArray::Iterator>&& itrs)
-	{
-	}
+
+	View::Iterator::Iterator(
+		std::vector<ComponentArray::Iterator>&& itrs)
+		: m_itrs(std::move(itrs))
+	{}
 
 	View::Iterator View::begin() {
 		std::vector<ComponentArray::Iterator> itrs(m_componentArrays.size());

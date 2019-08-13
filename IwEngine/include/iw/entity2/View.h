@@ -13,6 +13,18 @@ namespace IwEntity2 {
 		public:
 			Iterator(
 				std::vector<ComponentArray::Iterator>&& itrs);
+
+			Iterator& operator++() {
+				for (ComponentArray::Iterator itr : m_itrs) {
+					itr++;
+				}
+			}
+
+			template<
+				typename S>
+			S GetComponents() {
+				for()
+			}
 		};
 	private:
 		const std::vector<ComponentArray*> m_componentArrays;
@@ -23,10 +35,5 @@ namespace IwEntity2 {
 
 		Iterator begin();
 		Iterator end();
-		//template<
-		//	typename S>
-		//S GetComponents() {
-		//	//
-		//}
 	};
 }
