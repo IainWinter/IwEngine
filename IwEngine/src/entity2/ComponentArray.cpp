@@ -1,10 +1,11 @@
 #include "iw/entity2/ComponentArray.h"
+#include "iw/entity2/ArchetypeData.h"
 
 namespace IwEntity2 {
 	ComponentArray::ComponentArray(
 		size_t pageSize,
 		const ArchetypeData& archetypeData)
-		: m_archetypeData(archetypeData)
+		: m_archetype(archetypeData)
 		, m_pool(pageSize, archetypeData.Size())
 	{}
 
@@ -63,5 +64,21 @@ namespace IwEntity2 {
 		//}
 
 		return nullptr;
+	}
+
+	ComponentArray::Iterator ComponentArray::begin() {
+		return Iterator(m_entities.begin(), &m_archetype);
+	}
+
+	ComponentArray::Iterator ComponentArray::end() {
+		return Iterator(m_entities.end(), &m_archetype);
+	}
+
+	ComponentArray::ConstIterator ComponentArray::begin() const {
+		return ConstIterator(m_entities.begin(), &m_archetype);
+	}
+
+	ComponentArray::ConstIterator ComponentArray::end() const {
+		return ConstIterator(m_entities.end(), &m_archetype);
 	}
 }

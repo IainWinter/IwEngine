@@ -12,7 +12,7 @@ namespace IwEntity2 {
 		ArchetypeLayout m_layout;
 		//std::size_t            m_szie;
 
-		friend class std::hash<ArchetypeData>;
+		//friend class std::hash<ArchetypeData>;
 
 	public:
 		bool operator==(
@@ -58,7 +58,7 @@ namespace IwEntity2 {
 //
 //namespace std {
 //	template<>
-//	struct hash<
+//	class hash<
 //		IwEntity2::ArchetypeData>
 //	{
 //		size_t operator()(

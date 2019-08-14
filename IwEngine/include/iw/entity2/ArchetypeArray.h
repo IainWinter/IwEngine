@@ -26,7 +26,7 @@ namespace IwEntity2 {
 			Archetype archetype);
 
 		std::vector<Archetype> FindWith(
-			const std::vector<Component>& componentIds);
+			std::initializer_list<Component> componentIds);
 
 		bool ArchetypeExists(
 			Archetype archetype);

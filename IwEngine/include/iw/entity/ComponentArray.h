@@ -4,6 +4,7 @@
 #include "EntityArray.h"
 #include "iw/util/set/sparse_set.h"
 #include <list>
+#include "..\entity2\ComponentArray.h"
 
 namespace IwEntity {
 	class IComponentArray {

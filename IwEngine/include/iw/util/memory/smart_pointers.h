@@ -1,9 +1,8 @@
 #pragma once
 
-#include "iw//util/iwutil.h"
 #include <memory>
 
-namespace iwutil {
+namespace std {
 	template<
 		typename _t>
 	using uptr = std::unique_ptr<_t>;

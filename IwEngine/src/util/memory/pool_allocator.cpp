@@ -58,9 +58,11 @@ namespace iwutil {
 		, m_next(nullptr)
 	{
 		if (m_memory) {
-			m_freelist.reserve(size);
-			for (size_t i = 0; i < size; i++) {
-				m_freelist.push_back(&m_memory[i]);
+			m_freelist.resize(count);
+			size_t offset = 0;
+			for (size_t i = count; i > 0; i--) {
+				m_freelist[i - 1] = m_memory + offset;
+				offset += run;
 			}
 		}
 	}

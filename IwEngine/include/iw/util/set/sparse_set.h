@@ -112,25 +112,25 @@ namespace iwutil {
 			}
 
 			iterator operator+(
-				const difference_type& dif)
+				const difference_type& dif) const
 			{
 				return iterator(m_index + dif, m_direct);
 			}
 
 			iterator operator-(
-				const difference_type& dif)
+				const difference_type& dif) const
 			{
 				return iterator(m_index - dif, m_direct);
 			}
 
 			virtual difference_type operator+(
-				const iterator& itr)
+				const iterator& itr) const
 			{
 				return m_index + itr.m_index;
 			}
 
 			virtual difference_type operator-(
-				const iterator& itr)
+				const iterator& itr) const
 			{
 				return m_index - itr.m_index;
 			}
@@ -171,25 +171,25 @@ namespace iwutil {
 				return !(m_index > itr.m_index);
 			}
 
-			pointer operator->() {
+			pointer operator->() const {
 				return &m_direct->at(m_index);
 			}
 
-			reference operator*() {
+			reference operator*() const {
 				return *operator->();
 			}
 
 			reference operator[](
-				const index_type& index)
+				const index_type& index) const
 			{
 				return m_direct->at(m_index + index); //Can't remember why this would be an offset? Probly wrong
 			}
 
-			inline index_type index() {
+			inline index_type index() const {
 				return m_index;
 			}
 
-			inline index_type sparse_index() {
+			inline index_type sparse_index() const {
 				return m_direct->at(m_index);
 			}
 		};
@@ -510,13 +510,13 @@ namespace iwutil {
 				}
 
 				iterator_ operator+(
-					const difference_type& dif)
+					const difference_type& dif) const
 				{
 					return iterator_(m_index + dif, m_direct, m_items);
 				}
 
 				iterator_ operator-(
-					const difference_type& dif)
+					const difference_type& dif) const
 				{
 					return iterator_(m_index - dif, m_direct, m_items);
 				}

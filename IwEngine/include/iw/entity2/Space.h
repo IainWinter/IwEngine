@@ -14,6 +14,7 @@
 #include <typeindex>
 #include <vector>
 #include <algorithm>
+#include <initializer_list>
 
 namespace IwEntity2 {
 	class Space {
@@ -21,12 +22,15 @@ namespace IwEntity2 {
 		EntityArray    m_entities;
 		ArchetypeArray m_archetypes;
 		std::unordered_map<std::type_index, Component> m_componentIds;
-		iwu::sparse_set<Archetype, ComponentArray*> m_components;
+		iwu::sparse_set<Archetype, ComponentArray*>    m_components;
 
 	public:
 		IWENTITY2_API Entity CreateEntity();
 
 		IWENTITY2_API bool DestroyEntity(
+			Entity entity);
+
+		IWENTITY2_API bool EntityExists(
 			Entity entity);
 
 		template<
@@ -58,16 +62,11 @@ namespace IwEntity2 {
 
 		template<
 			typename... _c>
-			View ViewComponents() {
-			std::vector<Component> ids = {
+		View ViewComponents() {
+			return ViewComponents({
 				GetComponentId(typeid(_c))...
-			};
-
-			return ViewComponents(ids);
+			});
 		}
-
-		IWENTITY2_API bool EntityExists(
-			Entity entity);
 	private:
 		IWENTITY2_API void* CreateComponent(
 			Entity entity,
@@ -83,7 +82,7 @@ namespace IwEntity2 {
 			Component componentId);
 
 		IWENTITY2_API View ViewComponents(
-			const std::vector<Component>& ids);
+			std::initializer_list<Component> ids);
 
 		IWENTITY2_API ComponentArray* GetComponentArray(
 			Archetype archetype);

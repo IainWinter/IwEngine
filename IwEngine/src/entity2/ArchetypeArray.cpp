@@ -12,10 +12,12 @@ namespace IwEntity2 {
 		if (archetype == 0) {
 			// If one already exists with only the new component return it
 			auto itr = m_archetypes.begin();
-			for (; itr != m_archetypes.end(); itr++) {
+			while (itr != m_archetypes.end()) {
 				if (itr->Count() == 1 && itr->HasComponent(componentId)) {
 					return archetype = itr.sparse_index();
 				}
+
+				++itr;
 			}
 
 			// If not make a new one
@@ -25,19 +27,21 @@ namespace IwEntity2 {
 
 		// If old archetype
 		else {
-			ArchetypeData& data = m_archetypes.at(archetype);
+			ArchetypeData& oldData = m_archetypes.at(archetype);
 
 			// Find archetype with all its components + the new component
 			auto itr = m_archetypes.begin()/*(archetype) + 1*/;   // See if this needs to start at the beginning. 
-			for (; itr != m_archetypes.end(); itr++) {    //   If the archetypes are added sequentially, and never removed, then it probly doesn't?
-				if (itr->EqualWith(data, componentId)) {
+			while (itr != m_archetypes.end()) {                    //   If the archetypes are added sequentially, and never removed, then it probly doesn't?
+				if (itr->EqualWith(oldData, componentId)) {
 					return archetype = itr.sparse_index();
 				}
+
+				++itr;
 			}
 
 			// If not make a new one
-			ArchetypeData& newdata = m_archetypes.emplace(nextArchetype, data);
-			newdata.AddComponent(componentId, componentSize);
+			ArchetypeData& data = m_archetypes.emplace(nextArchetype, oldData);
+			data.AddComponent(componentId, componentSize);
 		}
 
 		// Return the new archetyp
@@ -55,22 +59,24 @@ namespace IwEntity2 {
 
 		// If old archetype
 		else {
-			ArchetypeData& data = m_archetypes.at(archetype);
-			if (data.Count() == 1) {
+			ArchetypeData& oldData = m_archetypes.at(archetype);
+			if (oldData.Count() == 1) {
 				return archetype = 0;
 			}
 
 			// Find archetype with all its components + the new component
 			auto itr = m_archetypes.begin()/*(archetype) + 1*/;   // See if this needs to start at the beginning. 
-			for (; itr != m_archetypes.end(); itr++) {    //   If the archetypes are added sequentially, and never removed, then it probly doesn't?
-				if (itr->EqualWithout(data, componentId)) {
+			while(itr != m_archetypes.end()) {    //   If the archetypes are added sequentially, and never removed, then it probly doesn't?
+				if (itr->EqualWithout(oldData, componentId)) {
 					return archetype = itr.sparse_index();
 				}
+
+				++itr;
 			}
 
 			// If not make a new one
-			ArchetypeData& newdata = m_archetypes.emplace(nextArchetype, data);
-			newdata.RemoveComponent(componentId);
+			ArchetypeData& data = m_archetypes.emplace(nextArchetype, oldData);
+			data.RemoveComponent(componentId);
 		}
 
 		return archetype = nextArchetype++;
@@ -83,11 +89,11 @@ namespace IwEntity2 {
 	}
 
 	std::vector<Archetype> ArchetypeArray::FindWith(
-		const std::vector<Component>& componentIds)
+		std::initializer_list<Component> componentIds)
 	{
 		std::vector<Archetype> archetypes;
-		for (auto itr = m_archetypes.begin(); itr != m_archetypes.end(); itr++)
-		{
+		auto itr = m_archetypes.begin();
+		while(itr != m_archetypes.end()) {
 			for (Component c : componentIds) {
 				if (!itr->HasComponent(c)) {
 					goto continueloop;
@@ -96,7 +102,8 @@ namespace IwEntity2 {
 
 			archetypes.push_back(itr.sparse_index());
 
-		continueloop:
+continueloop:
+			++itr;
 			continue;
 		}
 

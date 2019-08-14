@@ -44,11 +44,10 @@ namespace IwEntity2 {
 		
 		void* components = newca.CreateComponents(entity);
 
-
 		if (oldca) {
 			size_t olds  = oldca->Archetype().Size();
-			size_t newsb = newca.Archetype().SizeBefore(componentId);
-			size_t newsa = newca.Archetype().SizeAfter(componentId);
+			size_t newsb = newca.Archetype() .SizeBefore(componentId);
+			size_t newsa = newca.Archetype() .SizeAfter(componentId);
 
 			char* newcomponents = (char*)components;
 			char* oldcomponents = (char*)oldca->GetComponents(entity);
@@ -67,6 +66,8 @@ namespace IwEntity2 {
 				memmove(newcomponents, oldcomponents, newsb);
 				memmove(newcomponents + newsb + componentSize, oldcomponents + newsb, newsa);
 			}
+
+			oldca->DestroyComponents(entity);
 
 			return newcomponents + newsb;
 		}
@@ -91,16 +92,16 @@ namespace IwEntity2 {
 		if (archetype != 0) {
 			ComponentArray& newca = EnsureComponentArray(archetype);
 
-			size_t olds  = oldca->Archetype().Size();
-			size_t oldsb = oldca->Archetype().SizeBefore(componentId);
-			size_t oldsa = oldca->Archetype().SizeAfter(componentId);
-			size_t oldcs = oldca->Archetype().ComponentSize(componentId);
+			size_t s  = oldca->Archetype().Size();
+			size_t sb = oldca->Archetype().SizeBefore(componentId);
+			size_t sa = oldca->Archetype().SizeAfter(componentId);
+			size_t cs = oldca->Archetype().ComponentSize(componentId);
 
 			char* newcomponents = (char*)newca.CreateComponents(entity);
 			char* oldcomponents = (char*)oldca->GetComponents(entity);
 
-			memmove(newcomponents, oldcomponents, oldsb);
-			memmove(newcomponents + oldsb, oldcomponents + oldsb + oldcs, oldsa);
+			memmove(newcomponents, oldcomponents, sb);
+			memmove(newcomponents + sb, oldcomponents + sb + cs, sa);
 		}
 
 		oldca->DestroyComponents(entity);
@@ -125,15 +126,16 @@ namespace IwEntity2 {
 	}
 
 	View Space::ViewComponents(
-		const std::vector<Component>& ids)
+		std::initializer_list<Component> ids)
 	{
-		std::vector<Archetype>       archetypes = m_archetypes.FindWith(ids);
+		std::vector<Archetype> archetypes = m_archetypes.FindWith(ids);
+
 		std::vector<ComponentArray*> cas;
 		for (int i = 0; i < archetypes.size(); i++) {
 			cas.push_back(GetComponentArray(archetypes.at(i)));
 		}
 
-		return View(std::forward<std::vector<ComponentArray*>>(cas));
+		return View(std::move(cas));
 	}
 
 	ComponentArray* Space::GetComponentArray(
@@ -152,8 +154,8 @@ namespace IwEntity2 {
 	{
 		ComponentArray* ca = GetComponentArray(archetype);
 		if (!ca) {
-			ArchetypeData& data = m_archetypes.GetArchetypeData(archetype);
-			ca = m_components.emplace(archetype, new ComponentArray(6291456, data));
+			ArchetypeData& archedata = m_archetypes.GetArchetypeData(archetype);
+			ca = m_components.emplace(archetype, new ComponentArray(6291456, archedata));
 		}
 
 		return *ca;

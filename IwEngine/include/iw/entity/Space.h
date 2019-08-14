@@ -95,6 +95,12 @@ namespace IwEntity {
 		View<_cs...> ViewComponents() {
 			return { EnsureComponentData<_cs>()... };
 		}
+
+		template<
+			typename _c>
+		ComponentId RegisterComponent() {
+			return ComponentFamily::type<_c>;
+		}
 	private:
 		template<
 			typename _c>

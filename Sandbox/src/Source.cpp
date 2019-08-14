@@ -19,7 +19,6 @@ struct long3 {
 	long long x, y, z;
 };
 
-
 class Game
 	: public IwEngine::Application
 {
@@ -43,26 +42,32 @@ public:
 
 		IwEngine::Time::Update();
 
-		for (size_t i = 0; i < 1000000; i++) {
+		for (size_t i = 0; i < 10; i++) {
 			IwEntity2::Entity e = space.CreateEntity();
 			space.CreateComponent<int3>(e);
 			space.CreateComponent<long3>(e);
 		}
 
-		IwEngine::Time::Update();
-		LOG_INFO << IwEngine::Time::DeltaTime();
-
 		IwEntity2::View view = space.ViewComponents<int3, long3>();
 
-		IwEngine::Time::Update();
-		LOG_INFO << IwEngine::Time::DeltaTime();
+		struct Componentsr {
+			int3&   Int3;
+			float3& Float3;
+		};
 
-		for (size_t e =  1; e < 1000002; e++) {
-			space.DestroyComponent<int3>(e);
+		struct Componentsp {
+			int3* Int3;
+			float3* Float3;
+		};
+
+		struct Components {
+			int3 Int3;
+			float3 Float3;
+		};
+
+		for (auto data : view) {
+			LOG_INFO << data;
 		}
-
-		IwEngine::Time::Update();
-		LOG_INFO << IwEngine::Time::DeltaTime();
 
 		return 0;
 	}
@@ -75,7 +80,7 @@ IwEngine::Application* CreateApplication(
 		1280,
 		720,
 		true,
-		IwEngine::NORMAL,
+		IwEngine::NORMAL
 	};
 
 	return new Game();
