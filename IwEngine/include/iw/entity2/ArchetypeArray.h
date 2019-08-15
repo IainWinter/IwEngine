@@ -24,8 +24,8 @@ namespace IwEntity2 {
 		Archetype& GetArchetype(
 			EntityArchetype entityArchetype);
 
-		std::vector<EntityArchetype> FindWith(
-			std::initializer_list<ComponentType> componentTypes);
+		std::vector<EntityArchetype> Query(
+			const Archetype& query);
 
 		bool ArchetypeExists(
 			EntityArchetype entityArchetype);

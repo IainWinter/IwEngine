@@ -123,10 +123,9 @@ namespace IwEntity2 {
 	}
 
 	View Space::ViewComponents(
-		std::initializer_list<ComponentType> componentTypes,
-		std::initializer_list<size_t> componentSizes)
+		const Archetype& query)
 	{
-		std::vector<EntityArchetype> archetypes = m_archetypes.FindWith(componentTypes);
+		std::vector<EntityArchetype> archetypes = m_archetypes.Query(query);
 
 		std::vector<ComponentArray*> cas;
 		for (int i = 0; i < archetypes.size(); i++) {
