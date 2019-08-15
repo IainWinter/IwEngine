@@ -4,10 +4,10 @@
 
 namespace IwEntity2 {
 	struct EntityData {
-		Entity       Id;
-		Archetype    Archetype;
-		unsigned int Version;
-		bool         Alive;
+		Entity          Id;
+		EntityArchetype Archetype;
+		unsigned int    Version;
+		bool            Alive;
 
 		EntityData(
 			Entity id)

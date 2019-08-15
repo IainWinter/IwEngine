@@ -66,7 +66,7 @@ public:
 		};
 
 		for (auto data : view) {
-			LOG_INFO << data;
+			//LOG_INFO << data;
 		}
 
 		return 0;

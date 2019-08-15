@@ -11,8 +11,8 @@ namespace IwEntity2 {
 
 		class ComponentData {
 		private:
-			void*                m_components;
-			const ArchetypeData* m_archetype;
+			void*            m_components;
+			const Archetype* m_archetype;
 
 		public:
 			const IwEntity2::Entity Entity;
@@ -23,7 +23,7 @@ namespace IwEntity2 {
 			ComponentData(
 				IwEntity2::Entity entity,
 				void* components,
-				const ArchetypeData* archetypes)
+				const Archetype* archetypes)
 				: Entity(entity)
 				, m_components(components)
 				, m_archetype(archetypes)
@@ -73,7 +73,7 @@ namespace IwEntity2 {
 
 			ComponentData operator*() {
 				CIterator& itr = m_itrs[m_current];
-				return ComponentData(itr.entity(), *itr, &itr.Archetype());
+				return ComponentData(itr.entity(), *itr, &itr.archetype());
 			}
 		};
 	private:

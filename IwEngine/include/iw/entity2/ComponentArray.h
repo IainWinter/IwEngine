@@ -1,12 +1,12 @@
 #pragma once
 
 #include "IwEntity.h"
-#include "ArchetypeData.h"
+#include "Archetype.h"
 #include "iw/util/memory/pool_allocator.h"
 #include "iw/util/set/sparse_set.h"
 
 namespace IwEntity2 {
-	class ComponentArray {
+	class IWENTITY2_API ComponentArray {
 	private:
 		template<
 			bool _const>
@@ -19,16 +19,17 @@ namespace IwEntity2 {
 			using iterator_category = std::bidirectional_iterator_tag;
 
 			iterator__ m_itr;
-			const ArchetypeData m_archetype;
+			const IwEntity2::Archetype& m_archetype;
 
 			friend class ComponentArray;
 
 			iterator_(
 				iterator__&& itr,
-				const ArchetypeData* archetype)
+				const IwEntity2::Archetype& archetype)
 				: m_itr(std::move(itr))
-				, m_archetype(*archetype)
+				, m_archetype(archetype)
 			{}
+
 		public:
 			iterator_() = default;
 
@@ -122,7 +123,7 @@ namespace IwEntity2 {
 				return m_itr.sparse_index();
 			}
 
-			const ArchetypeData& Archetype() const {
+			const IwEntity2::Archetype& archetype() const {
 				return m_archetype;
 			}
 		};
@@ -131,14 +132,14 @@ namespace IwEntity2 {
 		using Iterator      = iterator_<false>;
 		using ConstIterator = iterator_<true>;
 	private:
-		iwu::pool_allocator            m_pool;
-		const ArchetypeData&           m_archetype;
 		iwu::sparse_set<Entity, void*> m_entities;
+		iwu::pool_allocator m_pool;
+		const Archetype& m_archetype;
 
 	public:
 		ComponentArray(
 			size_t pageSize,
-			const ArchetypeData& archetypeData);
+			const Archetype& archetypeData);
 
 		void* CreateComponents(
 			Entity entity);
@@ -149,10 +150,6 @@ namespace IwEntity2 {
 		void* GetComponents(
 			Entity entity);
 
-		void* CopyInto(
-			ComponentArray& source,
-			Entity entity);
-
 		Iterator begin();
 
 		Iterator end();
@@ -161,7 +158,7 @@ namespace IwEntity2 {
 
 		ConstIterator end() const;
 
-		inline const ArchetypeData& Archetype() const {
+		inline const IwEntity2::Archetype& Archetype() const {
 			return m_archetype;
 		}
 	};

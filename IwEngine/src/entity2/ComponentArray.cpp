@@ -1,10 +1,9 @@
 #include "iw/entity2/ComponentArray.h"
-#include "iw/entity2/ArchetypeData.h"
 
 namespace IwEntity2 {
 	ComponentArray::ComponentArray(
 		size_t pageSize,
-		const ArchetypeData& archetypeData)
+		const IwEntity2::Archetype& archetypeData)
 		: m_archetype(archetypeData)
 		, m_pool(pageSize, archetypeData.Size())
 	{}
@@ -49,36 +48,19 @@ namespace IwEntity2 {
 		return nullptr;
 	}
 
-	void* ComponentArray::CopyInto(
-		ComponentArray& source,
-		Entity entity)
-	{
-		auto& sarchetypeData = source.Archetype();
-		void* dcomponents    = GetComponents(entity);
-		void* scomponents    = source.GetComponents(entity);
-
-		//sarchetypeData.SizeBefore();
-
-		//for (auto itr = dlayout.begin(); itr != dlayout.end(); itr++) {
-		//	size_t ssize = slayout.at
-		//}
-
-		return nullptr;
-	}
-
 	ComponentArray::Iterator ComponentArray::begin() {
-		return Iterator(m_entities.begin(), &m_archetype);
+		return Iterator(m_entities.begin(), m_archetype);
 	}
 
 	ComponentArray::Iterator ComponentArray::end() {
-		return Iterator(m_entities.end(), &m_archetype);
+		return Iterator(m_entities.end(), m_archetype);
 	}
 
 	ComponentArray::ConstIterator ComponentArray::begin() const {
-		return ConstIterator(m_entities.begin(), &m_archetype);
+		return ConstIterator(m_entities.begin(), m_archetype);
 	}
 
 	ComponentArray::ConstIterator ComponentArray::end() const {
-		return ConstIterator(m_entities.end(), &m_archetype);
+		return ConstIterator(m_entities.end(), m_archetype);
 	}
 }

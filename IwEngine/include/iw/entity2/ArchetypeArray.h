@@ -1,34 +1,33 @@
 #pragma once
 
 #include "IwEntity.h"
-#include "ArchetypeData.h"
-#include "iw/util/set/sparse_set.h"
+#include "Archetype.h"
 #include <vector>
 
 namespace IwEntity2 {
 	class ArchetypeArray {
 	private:
-		iwu::sparse_set<Archetype, ArchetypeData> m_archetypes;
+		std::vector<Archetype> m_archetypes;
 
-		static Archetype nextArchetype;
+		static EntityArchetype nextArchetype;
 
 	public:
-		Archetype AddComponent(
-			Archetype& archetype,
-			Component componentId,
+		EntityArchetype AddComponent(
+			EntityArchetype& entityArchetype,
+			ComponentType componentType,
 			size_t componentSize);
 
-		Archetype RemoveComponent(
-			Archetype& archetype,
-			Component componentId);
+		EntityArchetype RemoveComponent(
+			EntityArchetype& entityArchetype,
+			ComponentType componentType);
 
-		ArchetypeData& GetArchetypeData(
-			Archetype archetype);
+		Archetype& GetArchetype(
+			EntityArchetype entityArchetype);
 
-		std::vector<Archetype> FindWith(
-			std::initializer_list<Component> componentIds);
+		std::vector<EntityArchetype> FindWith(
+			std::initializer_list<ComponentType> componentTypes);
 
 		bool ArchetypeExists(
-			Archetype archetype);
+			EntityArchetype entityArchetype);
 	};
 }

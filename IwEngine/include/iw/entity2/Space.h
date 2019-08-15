@@ -5,7 +5,7 @@
 #include "EntityArray.h"
 #include "EntityData.h"
 #include "ArchetypeArray.h"
-#include "ArchetypeData.h"
+#include "Archetype.h"
 #include "View.h"
 #include "iw/util/set/sparse_set.h"
 #include <unordered_map>
@@ -21,8 +21,8 @@ namespace IwEntity2 {
 	private:
 		EntityArray    m_entities;
 		ArchetypeArray m_archetypes;
-		std::unordered_map<std::type_index, Component> m_componentIds;
-		iwu::sparse_set<Archetype, ComponentArray*>    m_components;
+		std::vector<ComponentArray*> m_components;
+		std::unordered_map<std::type_index, ComponentType> m_componentTypes;
 
 	public:
 		IWENTITY2_API Entity CreateEntity();
@@ -38,7 +38,7 @@ namespace IwEntity2 {
 		_c& CreateComponent(
 			Entity entity)
 		{
-			Component cid = GetComponentId(typeid(_c));
+			ComponentType cid = GetComponentId(typeid(_c));
 			return *(_c*)CreateComponent(entity, sizeof(_c), cid);
 		}
 
@@ -47,7 +47,7 @@ namespace IwEntity2 {
 		bool DestroyComponent(
 			Entity entity)
 		{
-			Component cid = GetComponentId(typeid(_c));
+			ComponentType cid = GetComponentId(typeid(_c));
 			return DestroyComponent(entity, cid);
 		}
 
@@ -56,7 +56,7 @@ namespace IwEntity2 {
 		_c& GetComponent(
 			Entity entity)
 		{
-			Component cid = GetComponentId(typeid(_c));
+			ComponentType cid = GetComponentId(typeid(_c));
 			return *(_c*)GetComponent(entity, cid);
 		}
 
@@ -71,26 +71,26 @@ namespace IwEntity2 {
 		IWENTITY2_API void* CreateComponent(
 			Entity entity,
 			size_t componentSize,
-			Component componentId);
+			ComponentType componentType);
 
 		IWENTITY2_API bool DestroyComponent(
 			Entity entity,
-			Component componentId);
+			ComponentType componentType);
 
 		IWENTITY2_API void* GetComponent(
 			Entity entity,
-			Component componentId);
+			ComponentType componentType);
 
 		IWENTITY2_API View ViewComponents(
-			std::initializer_list<Component> ids);
+			std::initializer_list<ComponentType> ids);
 
 		IWENTITY2_API ComponentArray* GetComponentArray(
-			Archetype archetype);
+			EntityArchetype archetype);
 
 		IWENTITY2_API ComponentArray& EnsureComponentArray(
-			Archetype archetype);
+			EntityArchetype archetype);
 
-		IWENTITY2_API Component GetComponentId(
+		IWENTITY2_API ComponentType GetComponentId(
 			std::type_index&& type);
 	};
 }
