@@ -1,6 +1,11 @@
 #include "iw/entity2/Archetype.h"
 
 namespace IwEntity2 {
+	Archetype::Archetype(
+		std::initializer_list<ComponentTypeInfo> types)
+		: m_layout(types)
+	{}
+
 	bool Archetype::operator==(
 		const Archetype& other) const
 	{
@@ -78,8 +83,9 @@ namespace IwEntity2 {
 		size_t size)
 	{
 		auto itr = m_layout.begin();
-		while (itr != m_layout.end()) {
+		while (itr != m_layout.end()) {        // Could be binary search
 			if (itr->Type == type) {
+				break;
 			}
 
 			++itr;
@@ -91,12 +97,15 @@ namespace IwEntity2 {
 	void Archetype::RemoveComponent(
 		ComponentType type)
 	{
-
 		auto itr = m_layout.begin();
-		
+		while (itr != m_layout.end()) {
+			if (itr->Type == type) {
+				break;
+			}
 
+			++itr;
+		}
 
-		auto itr = std::find(m_layout.begin(), m_layout.end(), type);
 		m_layout.erase(itr);
 	}
 

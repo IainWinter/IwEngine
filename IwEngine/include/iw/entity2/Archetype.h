@@ -1,7 +1,8 @@
 #pragma once
 
 #include "iw/entity2/IwEntity.h"
-#include "iw/util/set/sparse_set.h"
+#include <vector>
+#include <initializer_list>
 
 namespace IwEntity2 {
 	struct ComponentTypeInfo {
@@ -14,6 +15,9 @@ namespace IwEntity2 {
 		std::vector<ComponentTypeInfo> m_layout;
 
 	public:
+		Archetype(
+			std::initializer_list<ComponentTypeInfo> types);
+
 		bool operator==(
 			const Archetype& other) const;
 
