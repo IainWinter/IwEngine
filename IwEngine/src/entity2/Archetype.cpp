@@ -1,4 +1,5 @@
 #include "iw/entity2/Archetype.h"
+#include <algorithm>
 
 namespace IwEntity2 {
 	bool Archetype::operator==(
@@ -23,7 +24,7 @@ namespace IwEntity2 {
 		Archetype& other,
 		ComponentType type) const
 	{
-		if (Count() != 1 + other.Count()) {
+		if (Count() != other.Count() + 1) {
 			return false;
 		}
 
@@ -48,7 +49,7 @@ namespace IwEntity2 {
 		Archetype& other,
 		ComponentType type) const
 	{
-		if (Count() !=  other.Count() - 1) {
+		if (Count() != other.Count() - 1) {
 			return false;
 		}
 
@@ -77,39 +78,43 @@ namespace IwEntity2 {
 		ComponentType type,
 		size_t size)
 	{
-		auto itr = m_layout.begin();
-		while (itr != m_layout.end()) {
-			if (itr->Type == type) {
-			}
+		ComponentTypeInfo info = { type, size };
+		auto itr = std::upper_bound(m_layout.begin(), m_layout.end(), info, [](
+			ComponentTypeInfo a,
+			ComponentTypeInfo b)
+		{
+			return a.Type < b.Type;
+		});
 
-			++itr;
-		}
-
-		m_layout.emplace(itr, type, size);
+		m_layout.emplace(itr, std::move(info));
 	}
 
 	void Archetype::RemoveComponent(
 		ComponentType type)
 	{
+		ComponentTypeInfo info = { type, 0 };
+		auto itr = std::lower_bound(m_layout.begin(), m_layout.end(), info, [](
+			ComponentTypeInfo a,
+			ComponentTypeInfo b)
+		{
+			return a.Type < b.Type;
+		});
 
-		auto itr = m_layout.begin();
-		
-
-
-		auto itr = std::find(m_layout.begin(), m_layout.end(), type);
 		m_layout.erase(itr);
 	}
 
 	bool Archetype::HasComponent(
 		ComponentType type) const
 	{
-		for (ComponentTypeInfo info : m_layout) {
-			if (info.Type == type) {
-				return true;
-			}
-		}
+		ComponentTypeInfo info = { type, 0 };
+		bool success = std::binary_search(m_layout.begin(), m_layout.end(), info, [](
+			ComponentTypeInfo a,
+			ComponentTypeInfo b)
+		{
+			return a.Type < b.Type;
+		});	
 
-		return false;
+		return success;
 	}
 
 	size_t Archetype::ComponentSize(

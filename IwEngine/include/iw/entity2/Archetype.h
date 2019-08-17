@@ -9,6 +9,7 @@ namespace IwEntity2 {
 		size_t        Size;
 	};
 
+	// Todo: Make this an struct with an array and more info
 	class IWENTITY2_API Archetype {
 	private:
 		std::vector<ComponentTypeInfo> m_layout;

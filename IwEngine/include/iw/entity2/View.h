@@ -49,7 +49,7 @@ namespace IwEntity2 {
 
 		class Iterator {
 		private:
-			using CIterator = ComponentArray::Iterator;
+			using CIterator = ComponentManager::Iterator;
 
 			size_t m_current;
 			std::vector<CIterator> m_itrs;
@@ -77,11 +77,11 @@ namespace IwEntity2 {
 			}
 		};
 	private:
-		const std::vector<ComponentArray*> m_componentArrays;
+		const std::vector<ComponentManager*> m_componentArrays;
 
 	public:
 		View(
-			std::vector<ComponentArray*>&& componentArrays);
+			std::vector<ComponentManager*>&& componentArrays);
 
 		Iterator begin();
 		Iterator end();

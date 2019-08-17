@@ -1,16 +1,26 @@
-#include "iw/entity2/ComponentArray.h"
+#include "iw/entity2/ComponentManager.h"
 
 namespace IwEntity2 {
-	ComponentArray::ComponentArray(
-		size_t pageSize,
-		const IwEntity2::Archetype& archetypeData)
-		: m_archetype(archetypeData)
-		, m_pool(pageSize, archetypeData.Size())
+	ComponentManager::ComponentManager()
+		: m_allocator(Chunk::ChunkSize * 2, Chunk::ChunkSize)
 	{}
 
-	void* ComponentArray::CreateComponents(
-		Entity entity)
+	void* ComponentManager::CreateComponents(
+		Entity& entity)
 	{
+		Chunk* chunk = EnsureChunkWithEntity(entity);
+
+		char* components = chunk->Buffer + chunk->Count;
+
+		
+
+		while (head != nullptr) {
+
+
+			head = head->Next;
+		}
+
+
 		auto itr = m_entities.find(entity);
 		if (itr == m_entities.end()) {
 			void* components = m_pool.alloc();
@@ -22,8 +32,8 @@ namespace IwEntity2 {
 		return nullptr;
 	}
 
-	bool ComponentArray::DestroyComponents(
-		Entity entity)
+	bool ComponentManager::DestroyComponents(
+		Entity& entity)
 	{
 		auto itr = m_entities.find(entity);
 		if (itr != m_entities.end()) {
@@ -37,8 +47,8 @@ namespace IwEntity2 {
 		return false;
 	}
 
-	void* ComponentArray::GetComponents(
-		Entity entity)
+	void* ComponentManager::GetComponents(
+		Entity& entity)
 	{
 		auto itr = m_entities.find(entity);
 		if (itr != m_entities.end()) {
@@ -48,19 +58,38 @@ namespace IwEntity2 {
 		return nullptr;
 	}
 
-	ComponentArray::Iterator ComponentArray::begin() {
-		return Iterator(m_entities.begin(), m_archetype);
+	Chunk* ComponentManager::EnsureChunkWithEntity(
+		Entity& entity)
+	{
+		Chunk* chunk = FindChunkWithEntity(entity);
+		if (chunk == nullptr) {
+			Chunk*  newChunk = (Chunk*)malloc(Chunk::ChunkSize);
+			Chunk*& oldChunk = m_chunks.at(entity.Archetype);
+			newChunk->Next = oldChunk;
+			oldChunk       = newChunk;
+		}
+
+		return chunk;
 	}
 
-	ComponentArray::Iterator ComponentArray::end() {
-		return Iterator(m_entities.end(), m_archetype);
-	}
+	Chunk* ComponentManager::FindChunkWithEntity(
+		Entity& entity)
+	{
+		auto itr = m_chunks.find(entity.Archetype);
+		if (itr != m_chunks.end()) {
+			EntityIndex index = 0;
+			Chunk*      chunk = m_chunks.at(entity.Archetype);
+			while (chunk != nullptr) {
+				if (entity.Index >= index && entity.Index < index + chunk->Capacity) {
+					return chunk;
+				}
 
-	ComponentArray::ConstIterator ComponentArray::begin() const {
-		return ConstIterator(m_entities.begin(), m_archetype);
-	}
+				index += chunk->Capacity;
+				chunk =  chunk->Next;
+			}
 
-	ComponentArray::ConstIterator ComponentArray::end() const {
-		return ConstIterator(m_entities.end(), m_archetype);
+		}
+
+		return nullptr;
 	}
 }

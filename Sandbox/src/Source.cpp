@@ -3,7 +3,7 @@
 
 #include "imgui/imgui.h"
 
-#include "iw/entity2/Space.h"
+//#include "iw/entity2/Space.h"
 
 #include "iw/engine/Time.h"
 
@@ -23,7 +23,7 @@ class Game
 	: public IwEngine::Application
 {
 private:
-	IwEntity2::Space space;
+	//IwEntity2::Space space;
 
 public:
 	Game() {
@@ -40,34 +40,34 @@ public:
 
 		ImGui::SetCurrentContext((ImGuiContext*)options.ImGuiContext);
 
-		IwEngine::Time::Update();
+		//IwEngine::Time::Update();
 
-		for (size_t i = 0; i < 10; i++) {
-			IwEntity2::Entity e = space.CreateEntity();
-			space.CreateComponent<int3>(e);
-			space.CreateComponent<long3>(e);
-		}
+		//for (size_t i = 0; i < 1000000; i++) {
+		//	IwEntity2::Entity e = space.CreateEntity();
+		//	space.CreateComponent<int3>(e);
+		//	space.CreateComponent<long3>(e);
+		//}
 
-		IwEntity2::View view = space.ViewComponents<int3, long3>();
+		//IwEntity2::View view = space.ViewComponents<int3, long3>();
 
-		struct Componentsr {
-			int3&   Int3;
-			float3& Float3;
-		};
+		//struct Componentsr {
+		//	int3&   Int3;
+		//	float3& Float3;
+		//};
 
-		struct Componentsp {
-			int3* Int3;
-			float3* Float3;
-		};
+		//struct Componentsp {
+		//	int3* Int3;
+		//	float3* Float3;
+		//};
 
-		struct Components {
-			int3 Int3;
-			float3 Float3;
-		};
+		//struct Components {
+		//	int3 Int3;
+		//	float3 Float3;
+		//};
 
-		for (auto data : view) {
-			//LOG_INFO << data;
-		}
+		//for (auto data : view) {
+		//	//LOG_INFO << data;
+		//}
 
 		return 0;
 	}

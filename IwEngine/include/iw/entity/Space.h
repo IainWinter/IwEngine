@@ -2,7 +2,7 @@
 
 #include "IwEntity.h"
 #include "View.h"
-#include "EntityArray.h"
+#include "EntityManager.h"
 #include "ComponentArray.h"
 #include "iw/util/set/sparse_set.h"
 #include "iw/util/type/family.h"

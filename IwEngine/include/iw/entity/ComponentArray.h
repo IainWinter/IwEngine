@@ -1,7 +1,7 @@
 #pragma once
 
 #include "IwEntity.h"
-#include "EntityArray.h"
+#include "EntityManager.h"
 #include "iw/util/set/sparse_set.h"
 #include <list>
 #include "..\entity2\ComponentArray.h"

@@ -1,16 +1,16 @@
 #include "iw/entity2/Space.h"
 
 namespace IwEntity2 {
-	Entity Space::CreateEntity() {
+	EntityIndex Space::CreateEntity() {
 		return m_entities.CreateEntity();
 	}
 
 	bool Space::DestroyEntity(
-		Entity entity)
+		EntityIndex entity)
 	{
-		EntityData& data = m_entities.GetEntityData(entity);
+		Entity& data = m_entities.GetEntityData(entity);
 		if (data.Alive) {
-			ComponentArray* ca = GetComponentArray(data.Archetype);
+			ComponentManager* ca = GetComponentArray(data.Archetype);
 			ca->DestroyComponents(entity);
 		}
 
@@ -18,13 +18,13 @@ namespace IwEntity2 {
 	}
 
 	bool Space::EntityExists(
-		Entity entity)
+		EntityIndex entity)
 	{
 		return m_entities.EntityExists(entity);
 	}
 
 	void* Space::CreateComponent(
-		Entity entity,
+		EntityIndex entity,
 		size_t componentSize,
 		ComponentType componentType)
 	{
@@ -37,8 +37,8 @@ namespace IwEntity2 {
 
 		m_archetypes.AddComponent(newEntityArchetype, componentType, componentSize);
 
-		ComponentArray* oldca = GetComponentArray(oldEntityArchetype);
-		ComponentArray& newca = EnsureComponentArray(newEntityArchetype);
+		ComponentManager* oldca = GetComponentArray(oldEntityArchetype);
+		ComponentManager& newca = EnsureComponentArray(newEntityArchetype);
 		
 		void* components = newca.CreateComponents(entity);
 
@@ -75,7 +75,7 @@ namespace IwEntity2 {
 	}
 
 	bool Space::DestroyComponent(
-		Entity entity,
+		EntityIndex entity,
 		ComponentType componentType)
 	{
 		if (!EntityExists(entity)) {
@@ -84,12 +84,12 @@ namespace IwEntity2 {
 
 		EntityArchetype& entityArchetype = m_entities.GetEntityData(entity).Archetype;
 
-		ComponentArray* oldca = GetComponentArray(entityArchetype);
+		ComponentManager* oldca = GetComponentArray(entityArchetype);
 
 		m_archetypes.RemoveComponent(entityArchetype, componentType);
 
 		if (entityArchetype != 0) {
-			ComponentArray& newca = EnsureComponentArray(entityArchetype);
+			ComponentManager& newca = EnsureComponentArray(entityArchetype);
 
 			size_t s  = oldca->Archetype().Size();
 			size_t sb = oldca->Archetype().SizeBefore(componentType);
@@ -110,11 +110,11 @@ namespace IwEntity2 {
 	}
 
 	void* Space::GetComponent(
-		Entity entity,
+		EntityIndex entity,
 		ComponentType componentType)
 	{
 		EntityArchetype entityArchetype = m_entities.GetEntityData(entity).Archetype;
-		ComponentArray* componentArray  = GetComponentArray(entityArchetype);
+		ComponentManager* componentArray  = GetComponentArray(entityArchetype);
 		
 		void*  components = componentArray->GetComponents(entity);
 		size_t before     = componentArray->Archetype().SizeBefore(componentType);
@@ -127,7 +127,7 @@ namespace IwEntity2 {
 	{
 		std::vector<EntityArchetype> archetypes = m_archetypes.FindWith(ids);
 
-		std::vector<ComponentArray*> cas;
+		std::vector<ComponentManager*> cas;
 		for (int i = 0; i < archetypes.size(); i++) {
 			cas.push_back(GetComponentArray(archetypes.at(i)));
 		}
@@ -135,7 +135,7 @@ namespace IwEntity2 {
 		return View(std::move(cas));
 	}
 
-	ComponentArray* Space::GetComponentArray(
+	ComponentManager* Space::GetComponentArray(
 		EntityArchetype entityArchetype)
 	{
 		if (entityArchetype - 1 < m_components.size()) {
@@ -145,14 +145,14 @@ namespace IwEntity2 {
 		return nullptr;
 	}
 
-	ComponentArray& Space::EnsureComponentArray(
+	ComponentManager& Space::EnsureComponentArray(
 		EntityArchetype entityArchetype)
 	{
-		ComponentArray* ca = GetComponentArray(entityArchetype);
+		ComponentManager* ca = GetComponentArray(entityArchetype);
 		if (ca == nullptr) {
 			Archetype& archetype = m_archetypes.GetArchetype(entityArchetype);
 			
-			ca = new ComponentArray(6291456, archetype);
+			ca = new ComponentManager(16384, archetype);
 			m_components.emplace(m_components.begin() + (entityArchetype - 1), ca);
 		}
 

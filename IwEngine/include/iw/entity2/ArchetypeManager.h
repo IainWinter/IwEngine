@@ -2,14 +2,13 @@
 
 #include "IwEntity.h"
 #include "Archetype.h"
+#include "EntityArchetype.h"
 #include <vector>
 
 namespace IwEntity2 {
-	class ArchetypeArray {
+	class ArchetypeManager {
 	private:
 		std::vector<Archetype> m_archetypes;
-
-		static EntityArchetype nextArchetype;
 
 	public:
 		EntityArchetype AddComponent(

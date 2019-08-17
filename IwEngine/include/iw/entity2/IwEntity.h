@@ -9,7 +9,6 @@
 #endif
 
 namespace IwEntity2 {
-	using EntityArchetype = unsigned int;
 	using ComponentType   = unsigned int;
-	using Entity          = unsigned int;
+	using EntityIndex     = unsigned int;
 }

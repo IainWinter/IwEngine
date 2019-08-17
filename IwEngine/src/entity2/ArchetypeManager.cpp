@@ -1,9 +1,9 @@
-#include "iw/entity2/ArchetypeArray.h"
+#include "iw/entity2/ArchetypeManager.h"
 
 namespace IwEntity2 {
-	EntityArchetype ArchetypeArray::nextArchetype = 1;
+	EntityArchetype ArchetypeManager::nextArchetype = 1;
 
-	EntityArchetype ArchetypeArray::AddComponent(
+	EntityArchetype ArchetypeManager::AddComponent(
 		EntityArchetype& entityArchetype,
 		ComponentType componentType,
 		size_t componentSize)
@@ -44,7 +44,7 @@ namespace IwEntity2 {
 		return entityArchetype = nextArchetype++;
 	}
 
-	EntityArchetype ArchetypeArray::RemoveComponent(
+	EntityArchetype ArchetypeManager::RemoveComponent(
 		EntityArchetype& entityArchetype,
 		ComponentType componentType)
 	{
@@ -75,13 +75,13 @@ namespace IwEntity2 {
 		return entityArchetype = nextArchetype++;
 	}
 
-	Archetype& ArchetypeArray::GetArchetype(
+	Archetype& ArchetypeManager::GetArchetype(
 		EntityArchetype entityArchetype)
 	{
 		return m_archetypes.at(entityArchetype - 1);
 	}
 
-	std::vector<EntityArchetype> ArchetypeArray::FindWith(
+	std::vector<EntityArchetype> ArchetypeManager::FindWith(
 		std::initializer_list<ComponentType> componentTypes)
 	{
 		std::vector<EntityArchetype> archetypes;
@@ -102,7 +102,7 @@ continueloop:
 		return archetypes;
 	}
 
-	bool ArchetypeArray::ArchetypeExists(
+	bool ArchetypeManager::ArchetypeExists(
 		EntityArchetype entityArchetype)
 	{
 		return entityArchetype - 1 < m_archetypes.size();
