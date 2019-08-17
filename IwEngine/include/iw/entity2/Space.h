@@ -62,9 +62,14 @@ namespace IwEntity2 {
 		template<
 			typename... _c>
 		View ViewComponents() {
-			return ViewComponents({
-				GetComponentId(typeid(_c))...
-			});
+			Archetype query(
+				ComponentTypeInfo {
+					GetComponentId(typeid(_c)),
+					sizeof(_c)
+				}...
+			);
+
+			return ViewComponents(query);
 		}
 	private:
 		IWENTITY2_API void* CreateComponent(
@@ -81,7 +86,7 @@ namespace IwEntity2 {
 			ComponentType componentType);
 
 		IWENTITY2_API View ViewComponents(
-			std::initializer_list<ComponentType> ids);
+			const Archetype& query);
 
 		IWENTITY2_API ComponentManager* GetComponentArray(
 			EntityArchetype archetype);

@@ -123,9 +123,9 @@ namespace IwEntity2 {
 	}
 
 	View Space::ViewComponents(
-		std::initializer_list<ComponentType> ids)
+		const Archetype& query)
 	{
-		std::vector<EntityArchetype> archetypes = m_archetypes.FindWith(ids);
+		std::vector<EntityArchetype> archetypes = m_archetypes.Query(query);
 
 		std::vector<ComponentManager*> cas;
 		for (int i = 0; i < archetypes.size(); i++) {
