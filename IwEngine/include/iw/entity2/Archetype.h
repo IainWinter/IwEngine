@@ -3,59 +3,51 @@
 #include "iw/entity2/IwEntity.h"
 #include <vector>
 #include <initializer_list>
+#include <stdlib.h>
 
 namespace IwEntity2 {
 	struct ComponentTypeInfo {
 		ComponentType Type;
 		size_t        Size;
+		size_t        Offset;
 	};
 
 	// Todo: Make this an struct with an array and more info
-	class IWENTITY2_API Archetype {
-	private:
-		std::vector<ComponentTypeInfo> m_layout;
+	struct IWENTITY2_API Archetype {
+		size_t Count;
+		size_t Size;
 
-	public:
-		Archetype(
-			std::initializer_list<ComponentTypeInfo> types);
+		ComponentTypeInfo* Layout;
 
-		bool operator==(
-			const Archetype& other) const;
+		char Bitset[];
+
+		const static size_t ArchetypeHeaderSize;
+
+		ComponentTypeInfo GetTypeInfo(
+			ComponentType type) const;
 
 		bool EqualWith(
 			Archetype& other,
-			ComponentType id) const;
+			ComponentType type) const;
 
 		bool EqualWithout(
 			Archetype& other,
-			ComponentType id) const;
-
-		void AddComponent(
-			ComponentType id,
-			size_t size);
-
-		void RemoveComponent(
-			ComponentType id);
+			ComponentType type) const;
 
 		bool HasComponent(
-			ComponentType id) const;
-
-		size_t ComponentSize(
-			ComponentType id) const;
+			ComponentType type) const;
 
 		size_t SizeBefore(
-			ComponentType id) const;
+			ComponentType type) const;
 
 		size_t SizeAfter(
-			ComponentType id) const;
+			ComponentType type) const;
 
-		size_t Size()  const;
-		size_t Count() const;
-		bool   Empty() const;
-		void   Reset();
-
-		inline const std::vector<ComponentTypeInfo>& Layout() const {
-			return m_layout;
+		inline bool Empty() const {
+			return Count == 0;
 		}
+
+		static Archetype* MakeArchetype(
+			std::initializer_list<ComponentTypeInfo> layout);
 	};
 }

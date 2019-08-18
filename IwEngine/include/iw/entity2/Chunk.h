@@ -10,11 +10,11 @@ namespace IwEntity2 {
 		size_t Count;  // 8 | 16
 		size_t Capacity; // 12 | 24
 
-		char Buffer[sizeof(size_t)]; // Start of buffer
+		char Buffer[]; // Start of buffer
 
-		const static size_t ChunkSize       = 16 * 1024;
-		const static size_t ChunkHeaderSize = 32;
-		const static size_t BufferSize = ChunkSize - ChunkHeaderSize;
+		const static size_t ChunkSize;        //16 Kb
+		const static size_t ChunkHeaderSize; // Size of Chunk without buffer
+		const static size_t BufferSize;      // Size of Chunk without header
 
 		// Mad functions for getting streams and diffrent data from the buffer
 

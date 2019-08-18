@@ -1,6 +1,10 @@
 #include "iw/entity2/Chunk.h"
 
 namespace IwEntity2 {
+	const size_t Chunk::ChunkSize       = 16 * 1024;
+	const size_t Chunk::ChunkHeaderSize = sizeof(Chunk);
+	const size_t Chunk::BufferSize      = ChunkSize - ChunkHeaderSize;
+
 	size_t Chunk::EntityCapacity(
 		const Archetype& archetype)
 	{
