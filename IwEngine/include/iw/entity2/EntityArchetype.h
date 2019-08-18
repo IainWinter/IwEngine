@@ -3,7 +3,9 @@
 #include "Archetype.h"
 
 namespace IwEntity2 {
-	struct EntityArchetype {
+	using EntityArchetype = const Archetype*;
+
+	/*struct EntityArchetype {
 		const Archetype* Archetype;
-	};
+	};*/
 }

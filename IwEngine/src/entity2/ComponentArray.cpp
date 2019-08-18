@@ -1,17 +1,14 @@
 #include "iw/entity2/ComponentManager.h"
 
 namespace IwEntity2 {
-	ComponentManager::ComponentManager()
-		: m_allocator(Chunk::ChunkSize * 2, Chunk::ChunkSize)
-	{}
-
 	void* ComponentManager::CreateComponents(
 		Entity& entity)
 	{
 		Chunk* chunk = EnsureChunkWithEntity(entity);
-
-		char* components = chunk->Buffer + chunk->Count;
-
+	
+		for (ComponentTypeInfo info : entity.Archetype->Layout()) {
+			info.Type
+		}
 		
 
 		while (head != nullptr) {
@@ -63,10 +60,9 @@ namespace IwEntity2 {
 	{
 		Chunk* chunk = FindChunkWithEntity(entity);
 		if (chunk == nullptr) {
-			Chunk*  newChunk = (Chunk*)malloc(Chunk::ChunkSize);
-			Chunk*& oldChunk = m_chunks.at(entity.Archetype);
-			newChunk->Next = oldChunk;
-			oldChunk       = newChunk;
+			chunk = Chunk::MakeChunk(
+				*entity.Archetype.Archetype, 
+				m_chunks.at(entity.Archetype));
 		}
 
 		return chunk;
