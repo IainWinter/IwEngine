@@ -5,18 +5,16 @@
 
 //#include "iw/entity2/Space.h"
 
+#include "iw/entity/ComponentManager.h"
+
 #include "iw/engine/Time.h"
 
-struct int3 {
-	int x, y, z;
-};
-
-struct float3 {
+struct Position {
 	float x, y, z;
 };
 
-struct long3 {
-	long long x, y, z;
+struct Velocity {
+	float x, y, z;
 };
 
 class Game
@@ -39,36 +37,30 @@ public:
 		Application::Initialize(options);
 
 		ImGui::SetCurrentContext((ImGuiContext*)options.ImGuiContext);
+		
+		/*
+		IwEntity::Space space;
+		
+		// 1
 
-		//IwEngine::Time::Update();
+		Entity e = space.CreateEntity<Pos, Vel>();
 
-		//for (size_t i = 0; i < 1000000; i++) {
-		//	IwEntity2::Entity e = space.CreateEntity();
-		//	space.CreateComponent<int3>(e);
-		//	space.CreateComponent<long3>(e);
-		//}
+		// 2
 
-		//IwEntity2::View view = space.ViewComponents<int3, long3>();
+		Archetype a = space.CreateArchetype<Pos, Vel>();
+		Entity e = space.CreateEntity(a);
+		
 
-		//struct Componentsr {
-		//	int3&   Int3;
-		//	float3& Float3;
-		//};
+		
 
-		//struct Componentsp {
-		//	int3* Int3;
-		//	float3* Float3;
-		//};
+		IwEntity::EntityArchetype archetype = space.CreateArchetype<Position, Velocity>();
 
-		//struct Components {
-		//	int3 Int3;
-		//	float3 Float3;
-		//};
+		IwEntity::Enttiy entity = space.CreateEntity(archetype);
 
-		//for (auto data : view) {
-		//	//LOG_INFO << data;
-		//}
 
+
+		IwEntity::
+			*/
 		return 0;
 	}
 };
