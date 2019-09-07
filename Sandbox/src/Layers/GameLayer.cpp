@@ -60,22 +60,22 @@ int GameLayer::Initialize(
 	pipeline = RenderQueue.QueuedDevice.Device.CreatePipeline(vs, fs);
 	RenderQueue.QueuedDevice.Device.SetPipeline(pipeline);
 
-	IwEntity::Entity camera = Space.CreateEntity();
-	Space.CreateComponent<IwEngine::Transform>(camera, iwm::vector3::zero, iwm::vector3::one, iwm::quaternion::create_from_euler_angles(0, iwm::IW_PI, 0));
-	float s = .05f;
-	Space.CreateComponent<IwEngine::Camera>(camera, iwm::matrix4::create_orthographic(1280 * s, 720 * s, 0, -1000)); //camera has flipped x axis
+	//IwEntity::Entity camera = Space.CreateEntity();
+	//Space.CreateComponent<IwEngine::Transform>(camera, iwm::vector3::zero, iwm::vector3::one, iwm::quaternion::create_from_euler_angles(0, iwm::IW_PI, 0));
+	//float s = .05f;
+	//Space.CreateComponent<IwEngine::Camera>(camera, iwm::matrix4::create_orthographic(1280 * s, 720 * s, 0, -1000)); //camera has flipped x axis
 
-	IwEntity::Entity player = Space.CreateEntity();
-	Space.CreateComponent<IwEngine::Transform>(player, iwm::vector3(0, 0, 1));
-	Space.CreateComponent<IwEngine::Model>(player, QuadData, QuadMesh, 1U);
-	Space.CreateComponent<Player>(player, 10.0f, 100.0f, 0.1666f, 0.1f);
-	Space.CreateComponent<IwPhysics::AABB3D>(player, iwm::vector3::zero, 1.0f);
+	//IwEntity::Entity player = Space.CreateEntity();
+	//Space.CreateComponent<IwEngine::Transform>(player, iwm::vector3(0, 0, 1));
+	//Space.CreateComponent<IwEngine::Model>(player, QuadData, QuadMesh, 1U);
+	//Space.CreateComponent<Player>(player, 10.0f, 100.0f, 0.1666f, 0.1f);
+	//Space.CreateComponent<IwPhysics::AABB3D>(player, iwm::vector3::zero, 1.0f);
 
-	IwEntity::Entity enemy = Space.CreateEntity();
-	Space.CreateComponent<IwEngine::Transform>(enemy, iwm::vector3(3.5f, 0, 1));
-	Space.CreateComponent<IwEngine::Model>(enemy, QuadData, QuadMesh, 1U);
-	Space.CreateComponent<Enemy>(enemy, SPIN, 3.0f, 0.05f, 0.025f, 0.025f);
-	Space.CreateComponent<IwPhysics::AABB3D>(enemy, iwm::vector3::zero, 1.0f);
+	//IwEntity::Entity enemy = Space.CreateEntity();
+	//Space.CreateComponent<IwEngine::Transform>(enemy, iwm::vector3(3.5f, 0, 1));
+	//Space.CreateComponent<IwEngine::Model>(enemy, QuadData, QuadMesh, 1U);
+	//Space.CreateComponent<Enemy>(enemy, SPIN, 3.0f, 0.05f, 0.025f, 0.025f);
+	//Space.CreateComponent<IwPhysics::AABB3D>(enemy, iwm::vector3::zero, 1.0f);
 
 	return Layer::Initialize(options);
 }
@@ -83,7 +83,7 @@ int GameLayer::Initialize(
 void GameLayer::Update() {
 	UpdateSystems();
 
-	for (auto c : Space.ViewComponents<IwEngine::Transform, IwEngine::Camera>()) {
+	/*for (auto c : Space.ViewComponents<IwEngine::Transform, IwEngine::Camera>()) {
 		auto& transform = c.GetComponent<IwEngine::Transform>();
 		auto& camera    = c.GetComponent<IwEngine::Camera>();
 
@@ -112,7 +112,7 @@ void GameLayer::Update() {
 				RenderQueue.QueuedDevice.Device.DrawElements(mesh.FaceCount, 0);
 			}
 		}
-	}
+	}*/
 
 	RenderQueue.Execute();
 }
@@ -124,17 +124,17 @@ void GameLayer::FixedUpdate() {
 void GameLayer::ImGui() {
 	ImGui::Begin("Game layer");
 
-	for (auto entity : Space.ViewComponents<Player>()) {
-		Player& player = entity.GetComponent<Player>();
-		
-		float cooldown = player.DashCooldown + player.DashTime;
+	//for (auto entity : Space.ViewComponents<Player>()) {
+	//	Player& player = entity.GetComponent<Player>();
+	//	
+	//	float cooldown = player.DashCooldown + player.DashTime;
 
-		ImGui::Text("Dash frames: %f",
-			player.DashTime > 0 ? player.DashTime : 0);
+	//	ImGui::Text("Dash frames: %f",
+	//		player.DashTime > 0 ? player.DashTime : 0);
 
-		ImGui::Text("Dash cooldown frames: %f",
-			cooldown > 0 ? cooldown : 0);
-	}
+	//	ImGui::Text("Dash cooldown frames: %f",
+	//		cooldown > 0 ? cooldown : 0);
+	//}
 
 	ImGui::End();
 }

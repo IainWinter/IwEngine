@@ -5,6 +5,12 @@
 #include <memory>
 
 namespace IwEntity {
+	struct ArchetypeQuery {
+		size_t Count;
+		size_t Size;
+		const std::weak_ptr<Component> Components[];
+	};
+
 	struct ArchetypeLayout {
 		std::weak_ptr<Component> Component;
 		size_t Offset;
@@ -15,25 +21,29 @@ namespace IwEntity {
 		size_t Size;
 		size_t Count;
 		const ArchetypeLayout Layout[];
-
-		static Archetype* MakeArchetype(
-			ArchetypeQuery* query)
-		{
-			size_t size = sizeof(Archetype)
-				+ sizeof(ArchetypeLayout)
-				* query->Count;
-
-			Archetype* archetype = (Archetype*)malloc(size);
-			archetype->Count = query->Count;
-
-			for (size_t i = 0; i < archetype->Count; i++) {
-
-			}
-		}
 	};
 
-	struct ArchetypeQuery {
-		size_t Count;
-		const std::weak_ptr<Component> Components[];
+	struct EntityArchetype {
+		std::weak_ptr<Archetype> Archetype;
 	};
+
+	//static ArchetypeQuery* MakeArchetypeQuery(
+	//	std::initializer_list<ComponentType> components)
+	//{
+	//	size_t size = sizeof(ArchetypeQuery)
+	//		+ sizeof(ComponentType)
+	//		* components.size();
+
+	//	ArchetypeQuery* query = (ArchetypeQuery*)malloc(size);
+	//	if (query) {
+	//		query->Count = components.size();
+
+	//		auto itr = components.begin();
+	//		for (size_t i = 0; i < query->Count; i++, itr++) {
+	//			query->Components[0] = *itr;
+	//		}
+	//	}
+
+	//	return query;
+	//}
 }

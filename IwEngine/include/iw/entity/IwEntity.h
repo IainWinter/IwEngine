@@ -9,14 +9,16 @@
 #endif
 
 #include "iw/util/type/family.h"
+#include <typeindex>
 
 namespace IwEntity {
 	struct ComponentFamilyTag {};
 
 	using Entity          = unsigned int;
 	using ComponentId     = unsigned int;
-	using Archetype       = unsigned int;
 	using ComponentFamily = iwu::family<ComponentFamilyTag>;
+
+	using ComponentType = std::type_index;
 
 	template<
 		typename... _cs>

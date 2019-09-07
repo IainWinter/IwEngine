@@ -58,15 +58,15 @@ namespace IwEngine {
 
 		void Update() override {
 			// Break up view into Viewlets to execute on seperate threads
-			View view = Space.ViewComponents<_cs...>();
+			//View view = Space.ViewComponents<_cs...>();
 
 			// Execute threads
-			Update(view);
+			//Update(view);
 
 			// Execute queues space operations
 			while (!m_delete.empty()) {
 				IwEntity::Entity& entity = m_delete.front();
-				Space.DestroyEntity(entity);
+				//Space.DestroyEntity(entity);
 				m_delete.pop();
 			}
 		}

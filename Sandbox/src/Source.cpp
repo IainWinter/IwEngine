@@ -6,6 +6,7 @@
 //#include "iw/entity2/Space.h"
 
 #include "iw/entity/ComponentManager.h"
+#include "iw/entity/Archetype.h"
 
 #include "iw/engine/Time.h"
 
@@ -37,30 +38,32 @@ public:
 		Application::Initialize(options);
 
 		ImGui::SetCurrentContext((ImGuiContext*)options.ImGuiContext);
-		
-		/*
+
 		IwEntity::Space space;
-		
-		// 1
 
-		Entity e = space.CreateEntity<Pos, Vel>();
+		auto p  = space.RegisterComponent<Position>();
+		auto v  = space.RegisterComponent<Velocity>();
+		auto p2 = space.RegisterComponent(typeid(Position), sizeof(Position));
+		auto v2 = space.RegisterComponent(typeid(Velocity), sizeof(Velocity));
 
-		// 2
+		IwEntity::EntityArchetype a = space.CreateArchetype({ *p.lock(), *v.lock() });
+		//                          = space.CreateArchetype<Position, Velocity>();
 
-		Archetype a = space.CreateArchetype<Pos, Vel>();
-		Entity e = space.CreateEntity(a);
-		
+		//IwEntity::Entity e = space.CreateEntity(a);
+		////                 = space.CreateEntity<Position, Velocity>();
 
-		
+		//IwEntitiy::View view = space.QueryEntities<Position, Velocity>();
 
-		IwEntity::EntityArchetype archetype = space.CreateArchetype<Position, Velocity>();
+		//struct Components {
+		//	Position& Position;
+		//	Velocity& Velocity;
+		//};
 
-		IwEntity::Enttiy entity = space.CreateEntity(archetype);
+		//for (IwEntity::Entity entity : view) {
+		//	Components& c = entity.Components.Tie<Components>();
+		//	c.Position += c.Velocity;
+		//}
 
-
-
-		IwEntity::
-			*/
 		return 0;
 	}
 };
