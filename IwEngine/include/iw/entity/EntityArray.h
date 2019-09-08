@@ -5,7 +5,7 @@
 
 namespace IwEntity {
 	struct EntityData {
-		Archetype Archetype;
+		size_t Archetype;
 		unsigned int Count;
 		unsigned int Version;
 		bool Dead;
@@ -53,7 +53,7 @@ namespace IwEntity {
 
 			EntityData& ed = m_entities.at(entity);
 			ed.Dead      = false;
-			ed.Archetype = Archetype();
+			ed.Archetype = 0;
 			ed.Version++;
 
 			return entity;
@@ -69,7 +69,7 @@ namespace IwEntity {
 			m_entities.clear();
 		}
 
-		Archetype& ArchetypeOf(
+		size_t& ArchetypeOf(
 			Entity entity)
 		{
 			return m_entities.at(entity).Archetype;
@@ -77,7 +77,7 @@ namespace IwEntity {
 
 		template<
 			typename _c>
-		Archetype& AssignComponent(
+		size_t& AssignComponent(
 			Entity entity)
 		{
 			return ArchetypeOf(entity) |= 1 << ComponentFamily::type<_c>;
@@ -85,7 +85,7 @@ namespace IwEntity {
 
 		template<
 			typename _c>
-		Archetype& UnassignComponent(
+		size_t& UnassignComponent(
 			Entity entity)
 		{
 			return ArchetypeOf(entity) &= ~(ArchetypeOf(entity) & 1 << ComponentFamily::type<_c>);

@@ -46,11 +46,11 @@ public:
 		auto p2 = space.RegisterComponent(typeid(Position), sizeof(Position));
 		auto v2 = space.RegisterComponent(typeid(Velocity), sizeof(Velocity));
 
-		IwEntity::EntityArchetype a = space.CreateArchetype({ *p.lock(), *v.lock() });
-		//                          = space.CreateArchetype<Position, Velocity>();
+		IwEntity::EntityArchetype a  = space.CreateArchetype({ p, v });
+		IwEntity::EntityArchetype a1 = space.CreateArchetype<Position, Velocity>();
 
-		//IwEntity::Entity e = space.CreateEntity(a);
-		////                 = space.CreateEntity<Position, Velocity>();
+		IwEntity::Entity2 e  = space.CreateEntity(a);
+		IwEntity::Entity2 e1 = space.CreateEntity<Position, Velocity>();
 
 		//IwEntitiy::View view = space.QueryEntities<Position, Velocity>();
 

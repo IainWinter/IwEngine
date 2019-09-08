@@ -101,8 +101,7 @@ namespace IwEntity {
 							if (itr == chunk->End) {
 								do {
 									++chunk;
-								} while (chunk != end
-									&& !Similar(chunk->Archetype, archetype));
+								} while (chunk != end); // similar
 
 								if (chunk != end) {
 									itr = chunk->Begin;

@@ -7,6 +7,7 @@
 #include "ComponentArray.h"
 #include "ComponentManager.h"
 #include "ArchetypeManager.h"
+#include "EntityManager.h"
 #include "iw/util/set/sparse_set.h"
 #include "iw/util/type/family.h"
 #include <vector>
@@ -14,9 +15,9 @@
 namespace IwEntity {
 	class Space {
 	private:
-		ComponentManager m_components;
-		ArchetypeManager m_archetypes;
-		EntityArray m_entities;
+		ComponentManager m_componentManager;
+		ArchetypeManager m_archetypeManager;
+		EntityManager    m_entityManager;
 
 	public:
 		template<
@@ -29,35 +30,35 @@ namespace IwEntity {
 			std::type_index type,
 			size_t size)
 		{
-			return m_components.RegisterComponent(type, size);
+			return m_componentManager.RegisterComponent(type, size);
 		}
 
-		//template<
-		//	typename... _cs>
-		//EntityArchetype CreateArchetype() {
-		//	return CreateArchetype(RegisterComponent<_cs>()...);
-		//}
+		template<
+			typename... _cs>
+		EntityArchetype CreateArchetype() {
+			return CreateArchetype({ RegisterComponent<_cs>()... });
+		}
 
 		EntityArchetype CreateArchetype(
-			std::initializer_list<Component> components)
+			std::initializer_list<std::weak_ptr<Component>> components)
 		{
-			m_archetypes.CreateArchetype(components);
+			return m_archetypeManager.CreateArchetype(components);
 		}
 
-		//template<
-		//	typename... _cs>
-		//Entity& CreateEntity() {
-		//	return CreateEntity(CreateArchetype<_cs...>());
-		//}
+		template<
+			typename... _cs>
+		Entity2& CreateEntity() {
+			return CreateEntity(CreateArchetype<_cs...>());
+		}
 
-		//Entity& CreateEntity(
-		//	EntityArchetype archetype)
-		//{
-		//	Entity& entity = m_entities.CreateEntity(archetype);
-		//	entity.Components = m_components.CreateComponents(archetype);
+		Entity2& CreateEntity(
+			EntityArchetype archetype)
+		{
+			Entity2& entity = m_entityManager.CreateEntity(archetype);
+			m_componentManager.CreateComponents(entity);
 
-		//	return entity;
-		//}
+			return entity;
+		}
 
 
 		// kjhasdfkjhasdflkjhasdflkjhasdflkjhasdflkjhasdflkjhasdflkjhasdflkjhasdflkjhasdflkjhasdflkjhasdflkjhasdflkjhasdflkjhasdlfkjhasdflkjh

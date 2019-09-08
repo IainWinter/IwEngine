@@ -17,33 +17,18 @@ namespace IwEntity {
 		size_t Onset;
 	};
 
-	struct Archetype {
+	struct Archetype2 {
+		size_t Hash;
 		size_t Size;
 		size_t Count;
-		const ArchetypeLayout Layout[];
+		ArchetypeLayout Layout[];
 	};
 
 	struct EntityArchetype {
-		std::weak_ptr<Archetype> Archetype;
+		std::weak_ptr<Archetype2> Archetype;
+
+		Archetype2& Get() {
+			return *Archetype.lock();
+		}
 	};
-
-	//static ArchetypeQuery* MakeArchetypeQuery(
-	//	std::initializer_list<ComponentType> components)
-	//{
-	//	size_t size = sizeof(ArchetypeQuery)
-	//		+ sizeof(ComponentType)
-	//		* components.size();
-
-	//	ArchetypeQuery* query = (ArchetypeQuery*)malloc(size);
-	//	if (query) {
-	//		query->Count = components.size();
-
-	//		auto itr = components.begin();
-	//		for (size_t i = 0; i < query->Count; i++, itr++) {
-	//			query->Components[0] = *itr;
-	//		}
-	//	}
-
-	//	return query;
-	//}
 }

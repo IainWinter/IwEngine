@@ -14,22 +14,10 @@
 namespace IwEntity {
 	struct ComponentFamilyTag {};
 
+	using Archetype       = unsigned int;
 	using Entity          = unsigned int;
 	using ComponentId     = unsigned int;
 	using ComponentFamily = iwu::family<ComponentFamilyTag>;
 
 	using ComponentType = std::type_index;
-
-	template<
-		typename... _cs>
-	Archetype GetArchetype() {
-		return ((1 << ComponentFamily::type<_cs>) | ...);
-	}
-
-	inline bool Similar(
-		Archetype a1,
-		Archetype a2)
-	{
-		return (a1 & a2) == a2;
-	}
 }
