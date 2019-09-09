@@ -5,8 +5,7 @@
 
 namespace IwEntity {
 	struct ComponentData {
-		EntityArchetype Archetype;
-		size_t Count;
-
+		std::weak_ptr<Archetype2> Archetype;
+		void* Components[];
 	};
 }

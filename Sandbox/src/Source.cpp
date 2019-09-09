@@ -41,16 +41,24 @@ public:
 
 		IwEntity::Space space;
 
-		auto p  = space.RegisterComponent<Position>();
-		auto v  = space.RegisterComponent<Velocity>();
-		auto p2 = space.RegisterComponent(typeid(Position), sizeof(Position));
-		auto v2 = space.RegisterComponent(typeid(Velocity), sizeof(Velocity));
+		std::weak_ptr<IwEntity::Component> p  = space.RegisterComponent<Position>();
+		std::weak_ptr<IwEntity::Component> v  = space.RegisterComponent<Velocity>();
+		std::weak_ptr<IwEntity::Component> p2 = space.RegisterComponent(typeid(Position), sizeof(Position));
+		std::weak_ptr<IwEntity::Component> v2 = space.RegisterComponent(typeid(Velocity), sizeof(Velocity));
 
-		IwEntity::EntityArchetype a  = space.CreateArchetype({ p, v });
-		IwEntity::EntityArchetype a1 = space.CreateArchetype<Position, Velocity>();
+		std::weak_ptr<IwEntity::Archetype2> a  = space.CreateArchetype({ p, v });
+		std::weak_ptr<IwEntity::Archetype2> a1 = space.CreateArchetype<Position, Velocity>();
 
-		IwEntity::Entity2 e  = space.CreateEntity(a);
-		IwEntity::Entity2 e1 = space.CreateEntity<Position, Velocity>();
+		size_t e  = space.CreateEntity(a);
+		space.DestroyEntity(e);
+
+		size_t e1 = space.CreateEntity<Position, Velocity>();
+
+		/*Position* pos = (Position*)e.ComponentData->Components[0];
+		pos->x = 5;
+
+		Position* pos1 = (Position*)e1.ComponentData->Components[0];
+		pos1->x = 6;*/
 
 		//IwEntitiy::View view = space.QueryEntities<Position, Velocity>();
 

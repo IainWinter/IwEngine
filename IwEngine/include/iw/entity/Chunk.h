@@ -2,42 +2,32 @@
 
 #include "IwEntity.h"
 #include "Archetype.h"
+#include "Entity.h"
 
 namespace IwEntity {
 	struct Chunk {
 		Chunk* Next;
 
-		EntityArchetype Archetype;
+		std::weak_ptr<Archetype2> Archetype;
 
 		size_t Capacity;
 		size_t Count;
 
-		size_t NextFree;
+		size_t CurrentIndex;
 
 		char Buffer[];
 
-		static const size_t ChunkSize  = 6 * 1024;
-		static const size_t HeaderSize = 128;
-		static const size_t BufferSize = ChunkSize - HeaderSize;
+		static const size_t ChunkSize;
+		static const size_t HeaderSize;
+		static const size_t BufferSize;
+
+		char* GetStream(
+			const ArchetypeLayout& layout);
+
+		size_t AddEntity(
+			const Entity2& entity);
 
 		static size_t CalculateCapacity(
-			EntityArchetype archetype)
-		{
-			size_t size = archetype.Get().Size + sizeof(Entity);
-			return (BufferSize - BufferSize % size) / size;
-		}
-
-		void* GetStream(
-			const ArchetypeLayout& layout)
-		{
-			return Buffer + (layout.Offset + sizeof(Entity)) * Capacity;
-		}
-
-		void* GetNextFree(
-			const ArchetypeLayout& layout)
-		{
-			return Buffer + (layout.Offset + sizeof(Entity)) * Capacity
-				+ NextFree * layout.Component.lock()->Size;
-		}
+			std::weak_ptr<Archetype2> archetype);
 	};
 }

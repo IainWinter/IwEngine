@@ -23,12 +23,4 @@ namespace IwEntity {
 		size_t Count;
 		ArchetypeLayout Layout[];
 	};
-
-	struct EntityArchetype {
-		std::weak_ptr<Archetype2> Archetype;
-
-		Archetype2& Get() {
-			return *Archetype.lock();
-		}
-	};
 }
