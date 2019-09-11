@@ -49,10 +49,19 @@ public:
 		std::weak_ptr<IwEntity::Archetype2> a  = space.CreateArchetype({ p, v });
 		std::weak_ptr<IwEntity::Archetype2> a1 = space.CreateArchetype<Position, Velocity>();
 
-		size_t e  = space.CreateEntity(a);
-		space.DestroyEntity(e);
+		std::vector<std::weak_ptr<IwEntity::Entity2>> entities;
 
-		size_t e1 = space.CreateEntity<Position, Velocity>();
+		for (size_t i = 0; i < 100000; i++) {
+			entities.push_back(space.CreateEntity<Position, Velocity>());
+		}
+
+		for (size_t i = 0; i < 100000; i += rand() / RAND_MAX * 100) {
+			space.DestroyEntity(entities[i]);
+		}
+
+		for (size_t i = 0; i < 10; i++) {
+			entities.push_back(space.CreateEntity<Position, Velocity>());
+		}
 
 		/*Position* pos = (Position*)e.ComponentData->Components[0];
 		pos->x = 5;

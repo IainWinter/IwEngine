@@ -124,6 +124,8 @@ void GameLayer::FixedUpdate() {
 void GameLayer::ImGui() {
 	ImGui::Begin("Game layer");
 
+	ImGui::Text("sdfsdf");
+
 	//for (auto entity : Space.ViewComponents<Player>()) {
 	//	Player& player = entity.GetComponent<Player>();
 	//	

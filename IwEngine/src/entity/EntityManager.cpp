@@ -1,42 +1,51 @@
 #include "iw/entity/EntityManager.h"
+#include <assert.h>
 
 namespace IwEntity {
-	Entity2& EntityManager::CreateEntity(
+	std::weak_ptr<Entity2> EntityManager::CreateEntity(
 		std::weak_ptr<Archetype2> archetype)
 	{
 		if (!m_dead.empty()) {
-			Entity2& dead = m_entities.at(m_dead.front());
+			auto dead = m_entities.at(m_dead.front());
 			m_dead.pop();
 
-			dead.Alive = true;
-			dead.Version++;
-			
-			dead.Archetype = archetype;
-			dead.ComponentData.reset();
+			dead->ChunkIndex = 0;
+			dead->Alive = true;
+			dead->Version++;
+			dead->Archetype = archetype;
+			dead->ComponentData.reset();
 
 			return dead;
 		}
 
-		return m_entities.emplace_back(m_entities.size(), archetype);
+		size_t bufSize = sizeof(Entity2);
+
+		Entity2* buf = (Entity2*)malloc(bufSize); //todo: memory allocation
+		assert(buf);
+		memset(buf, 0, bufSize);
+
+		buf->Index = m_entities.size();
+		buf->Alive = true;
+		buf->Archetype = archetype;
+
+		return m_entities.emplace_back(buf);
 	}
 
 	bool EntityManager::DestroyEntity(
-		size_t index)
+		std::weak_ptr<Entity2> entity)
 	{
-		if (index < m_entities.size()) {
-			Entity2& entity = m_entities.at(index);
-			if (entity.Alive) {
-				entity.Alive = false;
-				m_dead.push(index);
+		auto dead = m_entities.at(entity.lock()->Index); // Make sure this entity is in the list probly needed?
+		if (dead->Alive) {
+			dead->Alive = false;
+			m_dead.push(dead->Index);
 
-				return true;
-			}
+			return true;
 		}
 
 		return false;
 	}
 
-	Entity2& EntityManager::GetEntity(
+	std::weak_ptr<Entity2> EntityManager::GetEntity(
 		size_t entityIndex)
 	{
 		return m_entities.at(entityIndex);

@@ -22,25 +22,16 @@ namespace IwEntity {
 		return component;
 	}
 
-	std::shared_ptr<ComponentData> ComponentManager::CreateComponents(
-		Entity2& entity)
+	void ComponentManager::ReserveComponents(
+		std::weak_ptr<Entity2> entity_)
 	{
-		std::shared_ptr<Archetype2> archetype = entity.Archetype.lock();
-		Chunk*& chunk = m_componentData[archetype->Hash];
-		if (!chunk) {
-			size_t bufSize = sizeof(Chunk)
-				+ sizeof(char)
-				* Chunk::ChunkSize; // chunk size
+		std::shared_ptr<Entity2>    entity    = entity_.lock();
+		std::shared_ptr<Archetype2> archetype = entity->Archetype.lock();
 
-			chunk = (Chunk*)malloc(bufSize);
-			assert(chunk);
-			memset(chunk, 0, bufSize);
+		ChunkList& list = FindOrCreateChunkList(archetype);
+		list.ReserveComponents(entity);
 
-			chunk->Archetype = entity.Archetype;
-			chunk->Capacity = Chunk::CalculateCapacity(entity.Archetype);
-		}
-
-		size_t bufSize = sizeof(ComponentData)
+		/*size_t bufSize = sizeof(ComponentData)
 			+ sizeof(void*)
 			* archetype->Count;
 
@@ -48,25 +39,51 @@ namespace IwEntity {
 		assert(buf);
 		memset(buf, 0, bufSize);
 
-		std::shared_ptr<ComponentData> data = std::shared_ptr<ComponentData>(buf);
-		data->Archetype = entity.Archetype;
-
-		size_t chunkIndex = chunk->AddEntity(entity);
+		entity->ComponentData = std::shared_ptr<ComponentData>(buf);
+		entity->ChunkIndex    = chunk->ReserveEntity(entity);
 
 		for (size_t i = 0; i < archetype->Count; i++) {
 			char* stream = chunk->GetStream(archetype->Layout[i])
 				+ archetype->Layout[i].Component.lock()->Size
-				* chunkIndex;
+				* entity->ChunkIndex;
 
-			data->Components[i] = stream;
-		}
-
-		return data;
+			entity->ComponentData->Components[i] = stream;
+		}*/
 	}
 
 	bool ComponentManager::DestroyComponents(
-		Entity2& entity)
+		std::weak_ptr<Entity2> entity_)
 	{
+		std::shared_ptr<Entity2>    entity    = entity_.lock();
+		std::shared_ptr<Archetype2> archetype = entity->Archetype.lock();
+
+		ChunkList* list = FindChunkList(archetype);
+		if (list) {
+			return list->FreeComponents(entity);
+		}
+
 		return false;
+	}
+
+	ChunkList* ComponentManager::FindChunkList(
+		std::shared_ptr<Archetype2> archetype)
+	{
+		auto itr = m_componentData.find(archetype->Hash);
+		if (itr == m_componentData.end()) {
+			return nullptr;
+		}
+
+		return &itr->second;
+	}
+
+	ChunkList& ComponentManager::FindOrCreateChunkList(
+		std::shared_ptr<Archetype2> archetype)
+	{
+		auto itr = m_componentData.find(archetype->Hash);
+		if (itr == m_componentData.end()) {
+			itr = m_componentData.emplace(archetype->Hash, ChunkList { archetype, m_chunkSize }).first;
+		}
+
+		return itr->second;
 	}
 }

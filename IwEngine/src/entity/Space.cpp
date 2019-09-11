@@ -16,20 +16,20 @@ namespace IwEntity {
 			return m_archetypeManager.CreateArchetype(components);
 		}
 
-		size_t Space::CreateEntity(
+		std::weak_ptr<Entity2> Space::CreateEntity(
 			std::weak_ptr<Archetype2> archetype)
 		{
-			Entity2& entity = m_entityManager.CreateEntity(archetype);
-			entity.ComponentData = m_componentManager.CreateComponents(entity);
+			std::weak_ptr<Entity2> entity = m_entityManager.CreateEntity(archetype);
+			
+			m_componentManager.ReserveComponents(entity);
 
-			return entity.Index;
+			return entity;
 		}
 
 		bool Space::DestroyEntity(
-			size_t entityIndex)
+			std::weak_ptr<Entity2> entity)
 		{
-			Entity2& entity = m_entityManager.GetEntity(entityIndex);
-			return  m_entityManager.DestroyEntity(entityIndex)
+			return m_entityManager.DestroyEntity(entity)
 				&& m_componentManager.DestroyComponents(entity);
 		}
 	}

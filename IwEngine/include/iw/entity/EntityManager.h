@@ -2,23 +2,24 @@
 
 #include "IwEntity.h"
 #include "Entity.h"
+#include <memory>
 #include <vector>
 #include <queue>
 
 namespace IwEntity {
 	class IWENTITY_API EntityManager {
 	private:
-		std::vector<Entity2> m_entities;
-		std::queue<size_t>  m_dead;
+		std::vector<std::shared_ptr<Entity2>> m_entities;
+		std::queue<size_t> m_dead;
 
 	public:
-		Entity2& CreateEntity(
+		std::weak_ptr<Entity2> CreateEntity(
 			std::weak_ptr<Archetype2> archetype);
 
 		bool DestroyEntity(
-			size_t index);
+			std::weak_ptr<Entity2> index);
 
-		Entity2& GetEntity(
+		std::weak_ptr<Entity2> GetEntity(
 			size_t entityIndex);
 	};
 }

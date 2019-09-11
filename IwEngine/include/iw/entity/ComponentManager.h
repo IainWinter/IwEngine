@@ -1,9 +1,9 @@
 #pragma once
 
 #include "IwEntity.h"
-#include "Chunk.h"
-#include "Entity.h"
+#include "ChunkList.h"
 #include "Component.h"
+#include "Entity.h"
 #include "ComponentData.h"
 #include <unordered_map>
 #include <memory>
@@ -12,17 +12,24 @@ namespace IwEntity {
 	class IWENTITY_API ComponentManager {
 	private:
 		std::unordered_map<ComponentType, std::shared_ptr<Component>> m_components;
-		std::unordered_map<size_t, Chunk*> m_componentData;
+		std::unordered_map<size_t, ChunkList> m_componentData;
+		const size_t m_chunkSize = 16 * 1024;
 
 	public:
 		std::weak_ptr<Component> RegisterComponent(
 			ComponentType type,
 			size_t size);
 
-		std::shared_ptr<ComponentData> CreateComponents(
-			Entity2& entity);
+		void ReserveComponents(
+			std::weak_ptr<Entity2> entity);
 
 		bool DestroyComponents(
-			Entity2& entity);
+			std::weak_ptr<Entity2> entity);
+	private:
+		ChunkList* FindChunkList(
+			std::shared_ptr<Archetype2> archetype);
+
+		ChunkList& FindOrCreateChunkList(
+			std::shared_ptr<Archetype2> archetype);
 	};
 }

@@ -7,6 +7,7 @@
 namespace IwEntity {
 	struct Entity2 {
 		size_t Index;
+		size_t ChunkIndex;
 
 		short Version;
 		bool  Alive;
@@ -16,11 +17,11 @@ namespace IwEntity {
 
 		Entity2(
 			size_t index,
-			const std::weak_ptr<Archetype2>& archetype)
+			std::weak_ptr<Archetype2> archetype)
 			: Index(index)
+			, Archetype(archetype)
 			, Version(0)
 			, Alive(true)
-			, Archetype(archetype)
 		{}
 	};
 }

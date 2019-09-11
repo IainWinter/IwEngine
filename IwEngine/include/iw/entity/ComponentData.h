@@ -4,8 +4,10 @@
 #include "Archetype.h"
 
 namespace IwEntity {
+	struct Chunk;
+
 	struct ComponentData {
-		std::weak_ptr<Archetype2> Archetype;
-		void* Components[];
+		Chunk* Chunk;
+		void*  Components[];
 	};
 }

@@ -28,7 +28,7 @@ namespace IwEntity {
 
 		template<
 			typename... _cs>
-		size_t CreateEntity() {
+		std::weak_ptr<IwEntity::Entity2> CreateEntity() {
 			return CreateEntity(CreateArchetype<_cs...>());
 		}
 
@@ -39,10 +39,10 @@ namespace IwEntity {
 		std::weak_ptr<Archetype2> CreateArchetype(
 			std::initializer_list<std::weak_ptr<Component>> components);
 
-		size_t CreateEntity(
+		std::weak_ptr<Entity2> CreateEntity(
 			std::weak_ptr<Archetype2> archetype);
 
 		bool DestroyEntity(
-			size_t entityIndex);
+			std::weak_ptr<Entity2> entityIndex);
 	};
 }

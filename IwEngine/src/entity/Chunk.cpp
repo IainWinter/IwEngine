@@ -1,30 +1,28 @@
 #include "iw/entity/Chunk.h"
 
 namespace IwEntity {
-	const size_t Chunk::ChunkSize  = 6 * 1024;
-	const size_t Chunk::HeaderSize = 128;
-	const size_t Chunk::BufferSize = ChunkSize - HeaderSize;
-
-	char* Chunk::GetStream(
-		const ArchetypeLayout& layout)
+	size_t Chunk::ReserveEntity(
+		std::weak_ptr<Entity2> entity)
 	{
-		return Buffer + (layout.Offset + sizeof(Entity2)) * Capacity;
+		Entity2* ptr = GetEntity(Count);
+		*ptr = *entity.lock();
+
+		return Count++;
 	}
 
-	size_t Chunk::AddEntity(
-		const Entity2& entity)
+	bool Chunk::FreeEntity(
+		size_t index)
 	{
-		Entity2* ptr = (Entity2*)Buffer + CurrentIndex;
-		*ptr = entity;
+		Entity2* entity = GetEntity(index);
 
-		Count++;
-		return CurrentIndex++;
+		Count--;
+
+		return entity;
 	}
 
-	size_t Chunk::CalculateCapacity(
-		std::weak_ptr<Archetype2> archetype)
+	Entity2* Chunk::GetEntity(
+		size_t index)
 	{
-		size_t size = archetype.lock()->Size + sizeof(Entity2);
-		return (BufferSize - BufferSize % size) / size;
+		return (Entity2*)Buffer + index;
 	}
 }
