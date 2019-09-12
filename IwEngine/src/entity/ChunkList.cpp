@@ -3,7 +3,7 @@
 
 namespace IwEntity {
 	ChunkList::ChunkList(
-		const std::weak_ptr<Archetype2> archetype,
+		iwu::ref<const Archetype2> archetype,
 		size_t chunkSize)
 		: m_root(nullptr)
 		, m_archetype(archetype)
@@ -11,20 +11,42 @@ namespace IwEntity {
 		, m_chunkCapacity(GetChunkCapacity(archetype))
 	{}
 
-	void ChunkList::ReserveComponents(
-		std::shared_ptr<Entity2> entity)
+	iwu::ref<ComponentData> ChunkList::ReserveComponents(
+		iwu::ref<const Entity2> entity)
 	{
+		size_t bufSize = sizeof(ComponentData)
+			+ sizeof(void*)
+			* entity->Archetype->Count;
+
+		ComponentData* buf = (ComponentData*)malloc(bufSize);
+		assert(buf);
+		memset(buf, 0, bufSize);
+
 		Chunk* chunk = FindOrCreateChunk();
-		entity->ChunkIndex = chunk->ReserveEntity(entity);
-		//entity->ComponentData = GetEntityComponentData(chunk, entity->ChunkIndex);
+		
+		buf->ChunkIndex = chunk->ReserveEntity(entity);
+		for (size_t i = 0; i < entity->Archetype->Count; i++) {
+			buf->Components[i] = GetComponentData(
+				chunk, entity->Archetype->Layout[i], buf->ChunkIndex);
+		}
+
+		return iwu::ref<ComponentData>(buf, free);
 	}
 
 	bool ChunkList::FreeComponents(
-		std::shared_ptr<Entity2> entity)
+		iwu::ref<const Entity2> entity)
 	{
-		Chunk* chunk = FindChunk(entity->ChunkIndex);
+		Chunk* chunk = FindChunk(entity->ComponentData->ChunkIndex);
 		if (chunk) {
-			return chunk->FreeEntity(entity->ChunkIndex);
+			chunk->FreeEntity(entity->ComponentData->ChunkIndex);
+
+			//If chunk is empty free it
+			if (chunk->Count == 0) {
+				chunk->Previous->Next = chunk->Next;
+				free(chunk);
+			}
+
+			return true;
 		}
 
 		return false;
@@ -63,28 +85,29 @@ namespace IwEntity {
 		else {
 			// Chunk is full 
 			if (ChunkIsFull(m_root)) {
-				// Chunk is full but there are others that have space
-				if (m_root->Next && !ChunkIsFull(m_root->Next)) {
-					// Move root to after the last free chunk
-					Chunk* itr = m_root->Next;
-					while (itr->Next && !ChunkIsFull(m_root->Next)) {
-						itr = itr->Next;
-					}
+				//// Chunk is full but there are others that have space
+				//if (m_root->Next && !ChunkIsFull(m_root->Next)) {
+				//	// Move root to after the last free chunk
+				//	Chunk* itr = m_root->Next;
+				//	while (itr->Next && !ChunkIsFull(m_root->Next)) {
+				//		itr = itr->Next;
+				//	}
 
-					if (itr) {
-						chunk = m_root->Next;
-						m_root->Next = itr->Next;
-						itr->Next = m_root;
-						m_root = chunk;
-					}
-				}
+				//	if (itr) {
+				//		chunk = m_root->Next;
+				//		m_root->Next = itr->Next;
+				//		itr->Next = m_root;
+				//		m_root = chunk;
+				//	}
+				//}
 
-				// Every chunk is full
-				else {
+				//// Every chunk is full
+				//else {
 					chunk = CreateChunk();
-					chunk->Next = m_root;
+					chunk->Next      = m_root;
+					m_root->Previous = chunk;
 					m_root = chunk;
-				}
+				//}
 			}
 
 			// Chunk is not full
@@ -97,9 +120,9 @@ namespace IwEntity {
 	}
 
 	size_t ChunkList::GetChunkCapacity(
-		std::weak_ptr<Archetype2> archetype)
+		iwu::ref<const Archetype2> archetype)
 	{
-		size_t archetypeSize = archetype.lock()->Size + sizeof(Entity2);
+		size_t archetypeSize = archetype->Size + sizeof(Entity2);
 		size_t bufSize       = m_chunkSize - sizeof(Chunk);
 		size_t padSize       = bufSize % archetypeSize;
 
@@ -112,5 +135,15 @@ namespace IwEntity {
 	{
 		size_t offset = layout.Offset + sizeof(Entity2);
 		return chunk->Buffer + offset * m_chunkCapacity;
+	}
+	
+	char* ChunkList::GetComponentData(
+		Chunk* chunk,
+		const ArchetypeLayout& layout,
+		size_t index)
+	{
+		return GetChunkStream(chunk, layout)
+			+ layout.Component.lock()->Size
+			* index;
 	}
 }

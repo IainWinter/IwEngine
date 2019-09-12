@@ -2,27 +2,26 @@
 
 namespace IwEntity {
 	size_t Chunk::ReserveEntity(
-		std::weak_ptr<Entity2> entity)
+		EntityComponentType entity)
 	{
-		Entity2* ptr = GetEntity(Count);
-		*ptr = *entity.lock();
+		EntityComponentType* ptr = GetEntity(Count);
+		*ptr = entity;
 
 		return Count++;
 	}
 
-	bool Chunk::FreeEntity(
+	void Chunk::FreeEntity(
 		size_t index)
 	{
-		Entity2* entity = GetEntity(index);
+		EntityComponentType* entity = GetEntity(index);
+		entity->reset();
 
 		Count--;
-
-		return entity;
 	}
 
-	Entity2* Chunk::GetEntity(
+	Chunk::EntityComponentType* Chunk::GetEntity(
 		size_t index)
 	{
-		return (Entity2*)Buffer + index;
+		return (EntityComponentType*)Buffer + index;
 	}
 }

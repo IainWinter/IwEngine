@@ -3,33 +3,33 @@
 #include "iw/entity/Space.h"
 
 namespace IwEntity {
-		std::weak_ptr<Component> Space::RegisterComponent(
+		iwu::ref<const Component> Space::RegisterComponent(
 			std::type_index type,
 			size_t size)
 		{
 			return m_componentManager.RegisterComponent(type, size);
 		}
 
-		std::weak_ptr<Archetype2> Space::CreateArchetype(
-			std::initializer_list<std::weak_ptr<Component>> components)
+		iwu::ref<const Archetype2> Space::CreateArchetype(
+			std::initializer_list<iwu::ref<const Component>> components)
 		{
 			return m_archetypeManager.CreateArchetype(components);
 		}
 
-		std::weak_ptr<Entity2> Space::CreateEntity(
-			std::weak_ptr<Archetype2> archetype)
+		std::shared_ptr<Entity2> Space::CreateEntity(
+			iwu::ref<const Archetype2> archetype)
 		{
-			std::weak_ptr<Entity2> entity = m_entityManager.CreateEntity(archetype);
-			
-			m_componentManager.ReserveComponents(entity);
+			auto entity = m_entityManager.CreateEntity();
+			entity->Archetype     = archetype;
+			entity->ComponentData = m_componentManager.ReserveComponents(entity);
 
 			return entity;
 		}
 
 		bool Space::DestroyEntity(
-			std::weak_ptr<Entity2> entity)
+			iwu::ref<const Entity2> entity)
 		{
-			return m_entityManager.DestroyEntity(entity)
+			return m_entityManager.DestroyEntity(entity->Index)
 				&& m_componentManager.DestroyComponents(entity);
 		}
 	}

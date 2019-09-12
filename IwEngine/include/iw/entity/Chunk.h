@@ -5,17 +5,20 @@
 
 namespace IwEntity {
 	struct Chunk {
+		using EntityComponentType = std::weak_ptr<const Entity2>;
+
 		Chunk* Next;
+		Chunk* Previous;
 		size_t Count;
 		char Buffer[];
 
 		size_t ReserveEntity(
-			std::weak_ptr<Entity2> entity);
+			EntityComponentType entity);
 
-		bool FreeEntity(
+		void FreeEntity(
 			size_t index);
 
-		Entity2* GetEntity(
+		EntityComponentType* GetEntity(
 			size_t index);
 	};
 }

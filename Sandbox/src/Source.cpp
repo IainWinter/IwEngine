@@ -41,21 +41,21 @@ public:
 
 		IwEntity::Space space;
 
-		std::weak_ptr<IwEntity::Component> p  = space.RegisterComponent<Position>();
-		std::weak_ptr<IwEntity::Component> v  = space.RegisterComponent<Velocity>();
-		std::weak_ptr<IwEntity::Component> p2 = space.RegisterComponent(typeid(Position), sizeof(Position));
-		std::weak_ptr<IwEntity::Component> v2 = space.RegisterComponent(typeid(Velocity), sizeof(Velocity));
+		iwu::ref<const IwEntity::Component> p  = space.RegisterComponent<Position>();
+		iwu::ref<const IwEntity::Component> v  = space.RegisterComponent<Velocity>();
+		iwu::ref<const IwEntity::Component> p2 = space.RegisterComponent(typeid(Position), sizeof(Position));
+		iwu::ref<const IwEntity::Component> v2 = space.RegisterComponent(typeid(Velocity), sizeof(Velocity));
 
-		std::weak_ptr<IwEntity::Archetype2> a  = space.CreateArchetype({ p, v });
-		std::weak_ptr<IwEntity::Archetype2> a1 = space.CreateArchetype<Position, Velocity>();
-
-		std::vector<std::weak_ptr<IwEntity::Entity2>> entities;
+		iwu::ref<const IwEntity::Archetype2> a  = space.CreateArchetype({ p, v });
+		iwu::ref<const IwEntity::Archetype2> a1 = space.CreateArchetype<Position, Velocity>();
+		
+		std::vector<std::shared_ptr<IwEntity::Entity2>> entities;
 
 		for (size_t i = 0; i < 100000; i++) {
 			entities.push_back(space.CreateEntity<Position, Velocity>());
 		}
 
-		for (size_t i = 0; i < 100000; i += rand() / RAND_MAX * 100) {
+		for (size_t i = 0; i < 100000; i++) {
 			space.DestroyEntity(entities[i]);
 		}
 

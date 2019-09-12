@@ -8,11 +8,11 @@ namespace IwEntity {
 	struct ArchetypeQuery {
 		size_t Count;
 		size_t Size;
-		const std::weak_ptr<Component> Components[];
+		iwu::weak<const Component> Components[];
 	};
 
 	struct ArchetypeLayout {
-		std::weak_ptr<Component> Component;
+		iwu::weak<const Component> Component;
 		size_t Offset;
 		size_t Onset;
 	};

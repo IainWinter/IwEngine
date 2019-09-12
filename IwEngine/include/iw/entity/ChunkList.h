@@ -8,23 +8,23 @@
 namespace IwEntity {
 	class ChunkList {
 	private:
-		std::vector<Chunk*> m_chunks;
 		Chunk* m_root;
+		std::vector<Chunk*> m_chunks;
 
-		const std::weak_ptr<Archetype2> m_archetype;
+		iwu::ref<const Archetype2> m_archetype;
 		const size_t m_chunkSize;
 		const size_t m_chunkCapacity;
 
 	public:
 		ChunkList(
-			const std::weak_ptr<Archetype2> archetype,
+			iwu::ref<const Archetype2> archetype,
 			size_t chunkSize);
 
-		void ReserveComponents(
-			std::shared_ptr<Entity2> entity);
+		std::shared_ptr<ComponentData> ReserveComponents(
+			iwu::ref<const Entity2> entity);
 
 		bool FreeComponents(
-			std::shared_ptr<Entity2> entity);
+			iwu::ref<const Entity2> entity);
 	private:
 		Chunk* FindChunk(
 			size_t index);
@@ -34,11 +34,16 @@ namespace IwEntity {
 		Chunk* FindOrCreateChunk();
 
 		size_t GetChunkCapacity(
-			std::weak_ptr<Archetype2> archetype);
+			iwu::ref<const Archetype2> archetype);
 
 		char* GetChunkStream(
 			Chunk* chunk,
 			const ArchetypeLayout& layout);
+
+		char* GetComponentData(
+			Chunk* chunk,
+			const ArchetypeLayout& layout,
+			size_t index);
 
 		inline bool ChunkIsFull(
 			const Chunk* chunk)

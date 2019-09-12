@@ -9,6 +9,7 @@
 #endif
 
 #include "iw/util/type/family.h"
+#include "iw/util/memory/smart_pointers.h"
 #include <typeindex>
 
 namespace IwEntity {

@@ -16,33 +16,33 @@ namespace IwEntity {
 	public:
 		template<
 			typename _c>
-		std::weak_ptr<Component> RegisterComponent() {
+		iwu::ref<const Component> RegisterComponent() {
 			return RegisterComponent(typeid(_c), sizeof(_c));
 		}
 
 		template<
 			typename... _cs>
-		std::weak_ptr<Archetype2> CreateArchetype() {
+		iwu::ref<const Archetype2> CreateArchetype() {
 			return CreateArchetype({ RegisterComponent<_cs>()... });
 		}
 
 		template<
 			typename... _cs>
-		std::weak_ptr<IwEntity::Entity2> CreateEntity() {
+		iwu::ref<IwEntity::Entity2> CreateEntity() {
 			return CreateEntity(CreateArchetype<_cs...>());
 		}
 
-		std::weak_ptr<Component> RegisterComponent(
+		iwu::ref<const Component> RegisterComponent(
 			std::type_index type,
 			size_t size);
 
-		std::weak_ptr<Archetype2> CreateArchetype(
-			std::initializer_list<std::weak_ptr<Component>> components);
+		iwu::ref<const Archetype2> CreateArchetype(
+			std::initializer_list<iwu::ref<const Component>> components);
 
-		std::weak_ptr<Entity2> CreateEntity(
-			std::weak_ptr<Archetype2> archetype);
+		iwu::ref<Entity2> CreateEntity(
+			iwu::ref<const Archetype2> archetype);
 
 		bool DestroyEntity(
-			std::weak_ptr<Entity2> entityIndex);
+			iwu::ref<const Entity2> entity);
 	};
 }

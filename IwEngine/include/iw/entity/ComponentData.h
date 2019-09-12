@@ -7,7 +7,8 @@ namespace IwEntity {
 	struct Chunk;
 
 	struct ComponentData {
-		Chunk* Chunk;
+		//Chunk* Chunk;
+		size_t ChunkIndex;
 		void*  Components[];
 	};
 }

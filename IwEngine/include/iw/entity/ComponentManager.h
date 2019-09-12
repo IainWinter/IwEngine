@@ -11,25 +11,25 @@
 namespace IwEntity {
 	class IWENTITY_API ComponentManager {
 	private:
-		std::unordered_map<ComponentType, std::shared_ptr<Component>> m_components;
+		std::unordered_map<ComponentType, iwu::ref<Component>> m_components;
 		std::unordered_map<size_t, ChunkList> m_componentData;
 		const size_t m_chunkSize = 16 * 1024;
 
 	public:
-		std::weak_ptr<Component> RegisterComponent(
+		iwu::ref<Component> RegisterComponent(
 			ComponentType type,
 			size_t size);
 
-		void ReserveComponents(
-			std::weak_ptr<Entity2> entity);
+		iwu::ref<ComponentData> ReserveComponents(
+			iwu::ref<const Entity2> entity);
 
 		bool DestroyComponents(
-			std::weak_ptr<Entity2> entity);
+			iwu::ref<const Entity2> entity);
 	private:
 		ChunkList* FindChunkList(
-			std::shared_ptr<Archetype2> archetype);
+			iwu::ref<const Archetype2> archetype);
 
 		ChunkList& FindOrCreateChunkList(
-			std::shared_ptr<Archetype2> archetype);
+			iwu::ref<const Archetype2> archetype);
 	};
 }

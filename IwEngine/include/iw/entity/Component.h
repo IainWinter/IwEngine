@@ -2,7 +2,7 @@
 
 #include "IwEntity.h"
 #include <initializer_list>
-#include <memory>
+#include <typeindex>
 
 namespace IwEntity {
 	using ComponentType = std::type_index;
@@ -13,6 +13,6 @@ namespace IwEntity {
 		const char* Name;
 
 		static size_t Hash(
-			std::initializer_list<std::weak_ptr<Component>> components);
+			std::initializer_list<iwu::ref<const Component>> components);
 	};
 }
