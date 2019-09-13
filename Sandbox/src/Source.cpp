@@ -49,27 +49,21 @@ public:
 		iwu::ref<const IwEntity::Archetype2> a  = space.CreateArchetype({ p, v });
 		iwu::ref<const IwEntity::Archetype2> a1 = space.CreateArchetype<Position, Velocity>();
 		
-		std::vector<iwu::ref<IwEntity::Entity2>> entities;
-
-		for (size_t i = 0; i < 100000; i++) {
-			entities.push_back(space.CreateEntity<Position, Velocity>());
-		}
 
 		struct Components {
 			Position* Position;
 			Velocity* Velocity;
 		};
 
-		for (iwu::ref<IwEntity::Entity2>& entity : entities) {
-			Components* components = (Components*)entity->ComponentData->Components;
-			components->Position->x = 1;
-			components->Position->y = 2;
-			components->Position->z = 3;
-			components->Velocity->y = 4;
-			components->Velocity->x = 5;
-			components->Velocity->z = 6;
+		IwEngine::Time::Update();
+
+		for (size_t i = 0; i < 1000000; i++) {
+			iwu::ref<IwEntity::Entity2> entity = space.CreateEntity<Position>();
 		}
-		
+
+		IwEngine::Time::Update();
+
+		LOG_INFO << IwEngine::Time::DeltaTime();
 
 		/*Position* pos = (Position*)e.ComponentData->Components[0];
 		pos->x = 5;

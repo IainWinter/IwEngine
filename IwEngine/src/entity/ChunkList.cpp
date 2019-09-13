@@ -159,6 +159,6 @@ namespace IwEntity {
 	{
 		return GetChunkStream(chunk, layout)
 			+ layout.Component.lock()->Size
-			* index;
+			* (index - chunk->EntityIndex);
 	}
 }

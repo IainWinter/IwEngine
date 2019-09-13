@@ -5,7 +5,7 @@
 
 namespace IwEntity {
 	struct Chunk {
-		using EntityComponentType = std::weak_ptr<const Entity2>;
+		using EntityComponentType = iwu::weak<const Entity2>;
 
 		Chunk* Next;
 		Chunk* Previous;
