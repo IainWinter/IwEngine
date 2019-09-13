@@ -29,7 +29,7 @@ namespace IwEntity {
 		bool Space::DestroyEntity(
 			iwu::ref<const Entity2> entity)
 		{
-			return m_entityManager.DestroyEntity(entity->Index)
-				&& m_componentManager.DestroyComponents(entity);
+			return m_componentManager.DestroyComponents(entity)
+				&& m_entityManager.DestroyEntity(entity->Index);
 		}
 	}

@@ -7,13 +7,13 @@ namespace IwEntity {
 		EntityComponentType* ptr = GetEntity(Count);
 		*ptr = entity;
 
-		return Count++;
+		return Count++ + EntityIndex;
 	}
 
 	void Chunk::FreeEntity(
 		size_t index)
 	{
-		EntityComponentType* entity = GetEntity(index);
+		EntityComponentType* entity = GetEntity(index - EntityIndex);
 		entity->reset();
 
 		Count--;

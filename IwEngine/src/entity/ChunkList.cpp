@@ -6,6 +6,7 @@ namespace IwEntity {
 		iwu::ref<const Archetype2> archetype,
 		size_t chunkSize)
 		: m_root(nullptr)
+		, m_count(0)
 		, m_archetype(archetype)
 		, m_chunkSize(chunkSize)
 		, m_chunkCapacity(GetChunkCapacity(archetype))
@@ -30,6 +31,8 @@ namespace IwEntity {
 				chunk, entity->Archetype->Layout[i], buf->ChunkIndex);
 		}
 
+		m_count++;
+
 		return iwu::ref<ComponentData>(buf, free);
 	}
 
@@ -42,7 +45,17 @@ namespace IwEntity {
 
 			//If chunk is empty free it
 			if (chunk->Count == 0) {
-				chunk->Previous->Next = chunk->Next;
+				if (chunk->Previous) {
+					chunk->Previous->Next = chunk->Next;
+				}
+
+				else {
+					m_root = nullptr;
+					m_chunks.clear(); // might need to delete sooner
+					m_chunks.shrink_to_fit();
+					m_count = 0;
+				}
+
 				free(chunk);
 			}
 
@@ -55,7 +68,7 @@ namespace IwEntity {
 	Chunk* ChunkList::FindChunk(
 		size_t index)
 	{
-		size_t chunkIndex = index % m_chunkCapacity;
+		size_t chunkIndex = index / m_chunkCapacity;
 		if (chunkIndex < m_chunks.size()) {
 			return m_chunks.at(chunkIndex);
 		}
@@ -67,6 +80,8 @@ namespace IwEntity {
 		Chunk* chunk = (Chunk*)malloc(m_chunkSize);
 		assert(chunk);
 		memset(chunk, 0, m_chunkSize);
+
+		chunk->EntityIndex = m_count;
 
 		m_chunks.push_back(chunk);
 
@@ -122,7 +137,7 @@ namespace IwEntity {
 	size_t ChunkList::GetChunkCapacity(
 		iwu::ref<const Archetype2> archetype)
 	{
-		size_t archetypeSize = archetype->Size + sizeof(Entity2);
+		size_t archetypeSize = archetype->Size + sizeof(Chunk::EntityComponentType);
 		size_t bufSize       = m_chunkSize - sizeof(Chunk);
 		size_t padSize       = bufSize % archetypeSize;
 
@@ -133,7 +148,7 @@ namespace IwEntity {
 		Chunk* chunk,
 		const ArchetypeLayout& layout)
 	{
-		size_t offset = layout.Offset + sizeof(Entity2);
+		size_t offset = layout.Offset + sizeof(Chunk::EntityComponentType);
 		return chunk->Buffer + offset * m_chunkCapacity;
 	}
 	

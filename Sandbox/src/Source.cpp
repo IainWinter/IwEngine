@@ -11,11 +11,11 @@
 #include "iw/engine/Time.h"
 
 struct Position {
-	float x, y, z;
+	int x, y, z;
 };
 
 struct Velocity {
-	float x, y, z;
+	int x, y, z;
 };
 
 class Game
@@ -49,19 +49,27 @@ public:
 		iwu::ref<const IwEntity::Archetype2> a  = space.CreateArchetype({ p, v });
 		iwu::ref<const IwEntity::Archetype2> a1 = space.CreateArchetype<Position, Velocity>();
 		
-		std::vector<std::shared_ptr<IwEntity::Entity2>> entities;
+		std::vector<iwu::ref<IwEntity::Entity2>> entities;
 
 		for (size_t i = 0; i < 100000; i++) {
 			entities.push_back(space.CreateEntity<Position, Velocity>());
 		}
 
-		for (size_t i = 0; i < 100000; i++) {
-			space.DestroyEntity(entities[i]);
-		}
+		struct Components {
+			Position* Position;
+			Velocity* Velocity;
+		};
 
-		for (size_t i = 0; i < 10; i++) {
-			entities.push_back(space.CreateEntity<Position, Velocity>());
+		for (iwu::ref<IwEntity::Entity2>& entity : entities) {
+			Components* components = (Components*)entity->ComponentData->Components;
+			components->Position->x = 1;
+			components->Position->y = 2;
+			components->Position->z = 3;
+			components->Velocity->y = 4;
+			components->Velocity->x = 5;
+			components->Velocity->z = 6;
 		}
+		
 
 		/*Position* pos = (Position*)e.ComponentData->Components[0];
 		pos->x = 5;

@@ -9,7 +9,10 @@ namespace IwEntity {
 
 		Chunk* Next;
 		Chunk* Previous;
+
 		size_t Count;
+		size_t EntityIndex;
+		
 		char Buffer[];
 
 		size_t ReserveEntity(

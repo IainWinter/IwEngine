@@ -11,6 +11,8 @@ namespace IwEntity {
 		Chunk* m_root;
 		std::vector<Chunk*> m_chunks;
 
+		size_t m_count;
+
 		iwu::ref<const Archetype2> m_archetype;
 		const size_t m_chunkSize;
 		const size_t m_chunkCapacity;
