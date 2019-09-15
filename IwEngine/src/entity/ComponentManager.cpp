@@ -40,6 +40,20 @@ namespace IwEntity {
 		return false;
 	}
 
+	EntityComponentArray ComponentManager::Query(
+		iwu::ref<ArchetypeQuery> query)
+	{
+		std::vector<ChunkList::iterator> matches;
+		for (size_t i = 0; i < query->Count; i++) {
+			auto itr = m_componentData.find(query->Hashes[i]);
+			if (itr != m_componentData.end()) {
+				matches.push_back(itr->second.begin());
+			}
+		}
+
+		return EntityComponentArray(matches);
+	}
+
 	ChunkList* ComponentManager::FindChunkList(
 		iwu::ref<const Archetype2> archetype)
 	{

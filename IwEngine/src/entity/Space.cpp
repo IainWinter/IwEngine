@@ -32,4 +32,10 @@ namespace IwEntity {
 			return m_componentManager.DestroyComponents(entity)
 				&& m_entityManager.DestroyEntity(entity->Index);
 		}
+
+		EntityComponentArray Space::Query(
+			const ComponentQuery& query)
+		{
+			return m_componentManager.Query(m_archetypeManager.MakeQuery(query));
+		}
 	}

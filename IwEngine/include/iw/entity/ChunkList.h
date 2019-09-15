@@ -7,8 +7,24 @@
 
 namespace IwEntity {
 	class ChunkList {
+	public:
+		class iterator {
+		public:
+		private:
+			Chunk* m_chunk;
+
+
+		public:
+		private:
+			friend class ChunkList;
+
+			iterator(
+				Chunk* chunk)
+				: m_chunk(chunk)
+			{}
+		};
 	private:
-		Chunk* m_root;
+		Chunk* m_current;
 		std::vector<Chunk*> m_chunks;
 
 		size_t m_count;
@@ -27,6 +43,14 @@ namespace IwEntity {
 
 		bool FreeComponents(
 			iwu::ref<const Entity2> entity);
+
+		iterator begin() {
+			return iterator(m_chunks.front());
+		}
+
+		iterator end() {
+			return iterator(m_chunks.back());
+		}
 	private:
 		Chunk* FindChunk(
 			size_t index);

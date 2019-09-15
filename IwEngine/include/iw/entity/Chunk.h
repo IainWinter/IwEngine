@@ -5,6 +5,11 @@
 
 namespace IwEntity {
 	struct Chunk {
+		class iterator {
+		private:
+			char* Components;
+		};
+
 		using EntityComponentType = iwu::weak<const Entity2>;
 
 		Chunk* Next;

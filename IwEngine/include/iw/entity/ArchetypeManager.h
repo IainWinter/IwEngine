@@ -9,10 +9,14 @@
 namespace IwEntity {
 	class IWENTITY_API ArchetypeManager {
 	private:
-		std::unordered_map<size_t, iwu::ref<Archetype2>> m_archetypes;
+		std::unordered_map<size_t, iwu::ref<Archetype2>> m_hashed;
+		std::vector<iwu::ref<const Archetype2>> m_archetypes;
 
 	public:
 		iwu::ref<Archetype2> CreateArchetype(
 			std::initializer_list<iwu::ref<const Component>> components);
+
+		iwu::ref<ArchetypeQuery> MakeQuery(
+			const ComponentQuery& query);
 	};
 }

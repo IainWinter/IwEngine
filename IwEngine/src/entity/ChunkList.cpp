@@ -5,7 +5,7 @@ namespace IwEntity {
 	ChunkList::ChunkList(
 		iwu::ref<const Archetype2> archetype,
 		size_t chunkSize)
-		: m_root(nullptr)
+		: m_current(nullptr)
 		, m_count(0)
 		, m_archetype(archetype)
 		, m_chunkSize(chunkSize)
@@ -50,7 +50,7 @@ namespace IwEntity {
 				}
 
 				else {
-					m_root = nullptr;
+					m_current = nullptr;
 					m_chunks.clear(); // might need to delete sooner
 					m_chunks.shrink_to_fit();
 					m_count = 0;
@@ -91,15 +91,15 @@ namespace IwEntity {
 	Chunk* ChunkList::FindOrCreateChunk() {
 		Chunk* chunk = nullptr;
 		// Chunk doesn't exist
-		if (!m_root) {
+		if (!m_current) {
 			chunk = CreateChunk();
-			m_root = chunk;
+			m_current = chunk;
 		}
 
 		// Chunk exists
 		else {
 			// Chunk is full 
-			if (ChunkIsFull(m_root)) {
+			if (ChunkIsFull(m_current)) {
 				//// Chunk is full but there are others that have space
 				//if (m_root->Next && !ChunkIsFull(m_root->Next)) {
 				//	// Move root to after the last free chunk
@@ -119,15 +119,15 @@ namespace IwEntity {
 				//// Every chunk is full
 				//else {
 					chunk = CreateChunk();
-					chunk->Next      = m_root;
-					m_root->Previous = chunk;
-					m_root = chunk;
+					chunk->Previous = m_current;
+					m_current->Next = chunk;
+					m_current = chunk;
 				//}
 			}
 
 			// Chunk is not full
 			else {
-				chunk = m_root;
+				chunk = m_current;
 			}
 		}
 
@@ -158,7 +158,7 @@ namespace IwEntity {
 		size_t index)
 	{
 		return GetChunkStream(chunk, layout)
-			+ layout.Component.lock()->Size
+			+ layout.Component->Size
 			* (index - chunk->EntityIndex);
 	}
 }

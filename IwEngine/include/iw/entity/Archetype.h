@@ -5,14 +5,8 @@
 #include <memory>
 
 namespace IwEntity {
-	struct ArchetypeQuery {
-		size_t Count;
-		size_t Size;
-		iwu::weak<const Component> Components[];
-	};
-
 	struct ArchetypeLayout {
-		iwu::weak<const Component> Component;
+		iwu::ref<const Component> Component;
 		size_t Offset;
 		size_t Onset;
 	};
@@ -22,5 +16,10 @@ namespace IwEntity {
 		size_t Size;
 		size_t Count;
 		ArchetypeLayout Layout[];
+	};
+
+	struct ArchetypeQuery {
+		size_t Count;
+		size_t Hashes[];
 	};
 }

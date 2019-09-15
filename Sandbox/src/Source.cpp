@@ -3,8 +3,6 @@
 
 #include "imgui/imgui.h"
 
-//#include "iw/entity2/Space.h"
-
 #include "iw/entity/ComponentManager.h"
 #include "iw/entity/Archetype.h"
 
@@ -47,8 +45,9 @@ public:
 		iwu::ref<const IwEntity::Component> v2 = space.RegisterComponent(typeid(Velocity), sizeof(Velocity));
 
 		iwu::ref<const IwEntity::Archetype2> a  = space.CreateArchetype({ p, v });
-		iwu::ref<const IwEntity::Archetype2> a1 = space.CreateArchetype<Position, Velocity>();
-		
+		iwu::ref<const IwEntity::Archetype2> a3 = space.CreateArchetype<Position, Velocity>();
+		iwu::ref<const IwEntity::Archetype2> a4 = space.CreateArchetype<Velocity, Position>();
+		iwu::ref<const IwEntity::Archetype2> a5 = space.CreateArchetype<Velocity, Velocity, Velocity>();
 
 		struct Components {
 			Position* Position;
@@ -58,8 +57,19 @@ public:
 		IwEngine::Time::Update();
 
 		for (size_t i = 0; i < 1000000; i++) {
-			iwu::ref<IwEntity::Entity2> entity = space.CreateEntity<Position>();
+			iwu::ref<IwEntity::Entity2> entity = space.CreateEntity<Position, Velocity>();
 		}
+
+		IwEntity::ComponentQuery q  = space.MakeQuery<Position, Velocity>();
+		IwEntity::EntityComponentArray r = space.Query(q);
+
+		//IwEntity::EntityQuery q1 = space.CreateQuery(
+		//	{ typeid(Position), typeid(Velocity) }
+		//);
+
+		//IwEntity::EntityArray array = space.ExecuteQuery(query);
+
+		//IwEntity::EntityComponentData data1 = space.ExecuteQuery<Position, Velocity>();
 
 		IwEngine::Time::Update();
 

@@ -4,6 +4,7 @@
 #include "ChunkList.h"
 #include "Component.h"
 #include "Entity.h"
+#include "EntityComponentArray.h"
 #include "ComponentData.h"
 #include <unordered_map>
 #include <memory>
@@ -25,6 +26,9 @@ namespace IwEntity {
 
 		bool DestroyComponents(
 			iwu::ref<const Entity2> entity);
+
+		EntityComponentArray Query(
+			iwu::ref<ArchetypeQuery> query);
 	private:
 		ChunkList* FindChunkList(
 			iwu::ref<const Archetype2> archetype);
