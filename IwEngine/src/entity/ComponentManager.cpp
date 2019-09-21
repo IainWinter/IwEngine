@@ -22,6 +22,17 @@ namespace IwEntity {
 		return component;
 	}
 
+	iwu::ref<Component> ComponentManager::GetComponent(
+		std::type_index index)
+	{
+		auto itr = m_components.find(index);
+		if (itr != m_components.end()) {
+			return itr->second;
+		}
+
+		return iwu::ref<Component>();
+	}
+
 	iwu::ref<ComponentData> ComponentManager::ReserveComponents(
 		iwu::ref<const Entity2> entity)
 	{

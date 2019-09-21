@@ -17,9 +17,16 @@ namespace IwEntity {
 		const size_t m_chunkSize = 16 * 1024;
 
 	public:
+		// Components
+
 		iwu::ref<Component> RegisterComponent(
 			ComponentType type,
 			size_t size);
+
+		iwu::ref<Component> GetComponent(
+			std::type_index index);
+
+		// Component Data
 
 		iwu::ref<ComponentData> ReserveComponents(
 			iwu::ref<const Entity2> entity);

@@ -60,7 +60,19 @@ public:
 			iwu::ref<IwEntity::Entity2> entity = space.CreateEntity<Position, Velocity>();
 		}
 
-		IwEntity::ComponentQuery q  = space.MakeQuery<Position, Velocity>();
+		// Component Query Description - type ids   - component manager
+		// Component Query             - components - component manager
+		// Archetype Query             - archetypes - archetype manager
+		// Entity Component Array      - result     - component manager
+
+		//IwEntity::ComponentQueryDescription desc;
+		//desc.All = {typeid(Position), typeid(Velocity) };
+
+		//IwEntity::ComponentQuery q1 = space.MakeQuery(desc);
+		IwEntity::ComponentQuery q = space.MakeQuery<Position, Velocity>();
+
+
+
 		IwEntity::EntityComponentArray r = space.Query(q);
 
 		//IwEntity::EntityQuery q1 = space.CreateQuery(

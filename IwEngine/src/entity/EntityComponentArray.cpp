@@ -3,6 +3,6 @@
 namespace IwEntity {
 	EntityComponentArray::EntityComponentArray(
 		std::vector<ChunkList::iterator> iterators)
-		: m_iterator(iterators)
+		: m_iterators(iterators)
 	{}
 }
