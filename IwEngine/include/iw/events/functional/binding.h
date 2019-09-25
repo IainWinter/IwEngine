@@ -1,7 +1,7 @@
 #pragma once
 
 #include <functional>
-#include "../iwevents.h"
+#include "iw/events/iwevents.h"
 
 namespace iwevents {
 	template<int N>
