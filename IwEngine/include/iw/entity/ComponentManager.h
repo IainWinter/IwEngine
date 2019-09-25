@@ -29,7 +29,7 @@ namespace IwEntity {
 		// Component Data
 
 		iwu::ref<ComponentData> ReserveComponents(
-			iwu::ref<const Entity2> entity);
+			iwu::ref<Entity2> entity);
 
 		bool DestroyComponents(
 			iwu::ref<const Entity2> entity);

@@ -12,15 +12,45 @@ namespace IwEntity {
 		public:
 		private:
 			Chunk* m_chunk;
-
+			size_t m_index;
 
 		public:
+			iterator& operator++() {
+				m_index++;
+
+				if (m_index == m_chunk->Count) {
+					if (m_chunk->Next) {
+						m_chunk = m_chunk->Next;
+						m_index = 0;
+					}
+				}
+
+				return *this;
+			}
+
+			bool operator==(
+				const iterator& itr)
+			{
+				return  this->m_chunk == itr.m_chunk
+					&& this->m_index == itr.m_index;
+			}
+
+			bool operator!=(
+				const iterator& itr)
+			{
+				return !operator==(itr);
+			}
+
+			Chunk::EntityComponentType& operator*() {
+				return *m_chunk->GetEntity(m_index);
+			}
 		private:
 			friend class ChunkList;
 
 			iterator(
 				Chunk* chunk)
 				: m_chunk(chunk)
+				, m_index(0)
 			{}
 		};
 	private:
@@ -39,7 +69,7 @@ namespace IwEntity {
 			size_t chunkSize);
 
 		std::shared_ptr<ComponentData> ReserveComponents(
-			iwu::ref<const Entity2> entity);
+			iwu::ref<Entity2> entity);
 
 		bool FreeComponents(
 			iwu::ref<const Entity2> entity);

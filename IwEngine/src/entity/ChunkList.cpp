@@ -13,7 +13,7 @@ namespace IwEntity {
 	{}
 
 	iwu::ref<ComponentData> ChunkList::ReserveComponents(
-		iwu::ref<const Entity2> entity)
+		iwu::ref<Entity2> entity)
 	{
 		size_t bufSize = sizeof(ComponentData)
 			+ sizeof(void*)

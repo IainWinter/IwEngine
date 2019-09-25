@@ -22,5 +22,12 @@ namespace IwEntity {
 			, Version(0)
 			, Alive(true)
 		{}
+
+
+		template<
+			typename _cs>
+		_cs GetComponents() {
+			return *reinterpret_cast<_cs*>(ComponentData->Components);
+		}
 	};
 }

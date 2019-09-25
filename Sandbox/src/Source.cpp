@@ -68,12 +68,33 @@ public:
 		//IwEntity::ComponentQueryDescription desc;
 		//desc.All = {typeid(Position), typeid(Velocity) };
 
-		//IwEntity::ComponentQuery q1 = space.MakeQuery(desc);
+		//IwEntity::ComponentQuery q1 = space.MakeQuery(desc);		
+		
+		IwEngine::Time::Update();
+
+		LOG_INFO << IwEngine::Time::DeltaTime();
+
 		IwEntity::ComponentQuery q = space.MakeQuery<Position, Velocity>();
+		
+		IwEntity::EntityComponentArray eca = space.Query(q);
 
 
+		IwEngine::Time::Update();
 
-		IwEntity::EntityComponentArray r = space.Query(q);
+		LOG_INFO << IwEngine::Time::DeltaTime();
+		int ii = 0;
+		for (auto entity : eca) {
+			Components components = entity->GetComponents<Components>();
+			components.Position->x = 1;
+			components.Position->y = 2;
+			components.Position->z = 3;
+			components.Velocity->x = 4;
+			components.Velocity->y = 5;
+			components.Velocity->z = 6;
+
+			ii++;
+		}
+		
 
 		//IwEntity::EntityQuery q1 = space.CreateQuery(
 		//	{ typeid(Position), typeid(Velocity) }
@@ -85,7 +106,7 @@ public:
 
 		IwEngine::Time::Update();
 
-		LOG_INFO << IwEngine::Time::DeltaTime();
+		LOG_INFO << IwEngine::Time::DeltaTime() << ii;
 
 		/*Position* pos = (Position*)e.ComponentData->Components[0];
 		pos->x = 5;

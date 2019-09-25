@@ -105,6 +105,8 @@ namespace IwEntity {
 			}
 		}
 
+		// TODO: replace with memory allocation, could have factory for 'array-header' structs
+
 		size_t bufSize = sizeof(ArchetypeQuery)
 			+ sizeof(size_t)
 			* matches.size();

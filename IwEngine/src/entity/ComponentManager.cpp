@@ -34,7 +34,7 @@ namespace IwEntity {
 	}
 
 	iwu::ref<ComponentData> ComponentManager::ReserveComponents(
-		iwu::ref<const Entity2> entity)
+		iwu::ref<Entity2> entity)
 	{
 		ChunkList& list = FindOrCreateChunkList(entity->Archetype);
 		return list.ReserveComponents(entity);
@@ -54,15 +54,17 @@ namespace IwEntity {
 	EntityComponentArray ComponentManager::Query(
 		iwu::ref<ArchetypeQuery> query)
 	{
-		std::vector<ChunkList::iterator> matches;
+		std::vector<ChunkList::iterator> begins;
+		std::vector<ChunkList::iterator> ends;
 		for (size_t i = 0; i < query->Count; i++) {
 			auto itr = m_componentData.find(query->Hashes[i]);
 			if (itr != m_componentData.end()) {
-				matches.push_back(itr->second.begin());
+				begins.push_back(itr->second.begin());
+				ends  .push_back(itr->second.end());
 			}
 		}
 
-		return EntityComponentArray(matches);
+		return EntityComponentArray(std::move(begins), std::move(ends));
 	}
 
 	ChunkList* ComponentManager::FindChunkList(

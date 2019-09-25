@@ -4,13 +4,13 @@
 #include "Entity.h"
 
 namespace IwEntity {
-	struct Chunk {
+	struct IWENTITY_API Chunk {
 		class iterator {
 		private:
 			char* Components;
 		};
 
-		using EntityComponentType = iwu::weak<const Entity2>;
+		using EntityComponentType = iwu::ref<Entity2>;
 
 		Chunk* Next;
 		Chunk* Previous;
@@ -21,7 +21,7 @@ namespace IwEntity {
 		char Buffer[];
 
 		size_t ReserveEntity(
-			EntityComponentType entity);
+			const EntityComponentType& entity);
 
 		void FreeEntity(
 			size_t index);

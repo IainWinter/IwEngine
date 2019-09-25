@@ -2,7 +2,7 @@
 
 namespace IwEntity {
 	size_t Chunk::ReserveEntity(
-		EntityComponentType entity)
+		const EntityComponentType& entity)
 	{
 		EntityComponentType* ptr = GetEntity(Count);
 		*ptr = entity;
