@@ -126,17 +126,17 @@ void GameLayer::ImGui() {
 
 	ImGui::Text("sdfsdf");
 
-	//for (auto entity : Space.ViewComponents<Player>()) {
-	//	Player& player = entity.GetComponent<Player>();
-	//	
-	//	float cooldown = player.DashCooldown + player.DashTime;
+	for (auto entity : Space.Query<Player>()) {
+		Player player = entity->Components->Tie<Player>();
+		
+		float cooldown = player.DashCooldown + player.DashTime;
 
-	//	ImGui::Text("Dash frames: %f",
-	//		player.DashTime > 0 ? player.DashTime : 0);
+		ImGui::Text("Dash frames: %f",
+			player.DashTime > 0 ? player.DashTime : 0);
 
-	//	ImGui::Text("Dash cooldown frames: %f",
-	//		cooldown > 0 ? cooldown : 0);
-	//}
+		ImGui::Text("Dash cooldown frames: %f",
+			cooldown > 0 ? cooldown : 0);
+	}
 
 	ImGui::End();
 }

@@ -21,7 +21,7 @@ namespace IwEntity {
 		{
 			auto entity = m_entityManager.CreateEntity();
 			entity->Archetype     = archetype;
-			entity->ComponentData = m_componentManager.ReserveComponents(entity);
+			entity->Components = m_componentManager.ReserveComponents(entity);
 
 			return entity;
 		}

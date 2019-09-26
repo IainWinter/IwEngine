@@ -28,7 +28,7 @@ namespace IwEngine {
 		IwEntity::Space&         Space;
 		IwGraphics::RenderQueue& RenderQueue;
 
-		using View = IwEntity::View<_cs...>;
+		using View = IwEntity::EntityComponentArray;
 
 		virtual void Update(
 			View& view) = 0;
@@ -57,11 +57,12 @@ namespace IwEngine {
 		virtual void Destroy() {}
 
 		void Update() override {
+			IwEntity::EntityComponentArray view = space.Query<_cs...>();
 			// Break up view into Viewlets to execute on seperate threads
 			//View view = Space.ViewComponents<_cs...>();
 
 			// Execute threads
-			//Update(view);
+			Update(view);
 
 			// Execute queues space operations
 			while (!m_delete.empty()) {

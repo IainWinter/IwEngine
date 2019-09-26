@@ -12,7 +12,7 @@ namespace IwEntity {
 		bool  Alive;
 
 		iwu::ref<const Archetype2> Archetype;
-		iwu::ref<ComponentData>    ComponentData;
+		iwu::ref<ComponentData>    Components;
 
 		Entity2(
 			size_t index,
@@ -22,12 +22,5 @@ namespace IwEntity {
 			, Version(0)
 			, Alive(true)
 		{}
-
-
-		template<
-			typename _cs>
-		_cs GetComponents() {
-			return *reinterpret_cast<_cs*>(ComponentData->Components);
-		}
 	};
 }

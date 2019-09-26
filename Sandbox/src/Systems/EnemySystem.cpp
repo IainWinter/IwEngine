@@ -5,6 +5,11 @@
 #include "iw/input/Devices/Keyboard.h"
 #include <iw\physics\AABB.h>
 
+struct Components {
+	IwEngine::Transform* Transform;
+	Enemy*               Enemy;
+};
+
 EnemySystem::EnemySystem(
 	IwEntity::Space& space,
 	IwGraphics::RenderQueue& renderQueue,
@@ -42,34 +47,31 @@ void EnemySystem::Destroy() {
 	delete CircleMesh;
 }
 
-int max = 1;
-
 void EnemySystem::Update(
 	View& view)
 {
-	for (auto components : view) {
-		auto& transform = components.GetComponent<IwEngine::Transform>();
-		auto& enemy = components.GetComponent<Enemy>();
+	for (auto entity : view) {
+		auto [transform, enemy ] = entity->Components->Tie<Components>();
 
-		if (enemy.FireTime > enemy.FireTimeTotal) {
-			transform.Rotation *= iwm::quaternion::create_from_euler_angles(0, 0, enemy.Speed * IwEngine::Time::DeltaTime());
+		if (enemy->FireTime > enemy->FireTimeTotal) {
+			transform->Rotation *= iwm::quaternion::create_from_euler_angles(0, 0, enemy->Speed * IwEngine::Time::DeltaTime());
 		}
 
-		else if (enemy.FireTime <= 0) {
-			enemy.CanShoot = true;
-			enemy.FireTime = enemy.FireTimeTotal + enemy.FireCooldown;
+		else if (enemy->FireTime <= 0) {
+			enemy->CanShoot = true;
+			enemy->FireTime = enemy->FireTimeTotal + enemy->FireCooldown;
 		}
 
-		else if (enemy.CanShoot && enemy.FireTime <= enemy.TimeToShoot) {
-			enemy.CanShoot = false;
-			//IwEntity::Entity bullet = Space.CreateEntity();
+		else if (enemy->CanShoot && enemy->FireTime <= enemy->TimeToShoot) {
+			enemy->CanShoot = false;
+			iwu::ref<IwEntity::Entity2> spawned = Space.CreateEntity<IwEngine::Transform, IwEngine::Model, Bullet>();
 
-			//Space.CreateComponent<IwEngine::Transform>(bullet, transform.Position + iwm::vector3(1, 1, 0) * transform.Rotation.inverted(), transform.Scale, transform.Rotation.inverted());
-			//Space.CreateComponent<IwEngine::Model>(bullet, CircleData, CircleMesh, 1U);
-			//Space.CreateComponent<IwPhysics::AABB3D>(bullet, iwm::vector3::zero, 1.0f);
-			//Space.CreateComponent<Bullet>(bullet, LINE, 4.0f);
+			auto [transform, model, bullet] = spawned->Components->Tie<IwEngine::Transform, IwEngine::Model, Bullet>();
+			transform = IwEngine::Transform { transform.Position + iwm::vector3(1, 1, 0) * transform.Rotation.inverted(), transform.Scale, transform.Rotation.inverted() };
+			model     = IwEngine::Model { CircleData, CircleMesh, 1U };
+			bullet    = Bullet { LINE, 4.0f };
 		}
 
-		enemy.FireTime -= IwEngine::Time::DeltaTime();
+		enemy->FireTime -= IwEngine::Time::DeltaTime();
 	}
 }

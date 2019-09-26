@@ -48,9 +48,10 @@ namespace IwEntity {
 			friend class ChunkList;
 
 			iterator(
-				Chunk* chunk)
+				Chunk* chunk,
+				size_t index)
 				: m_chunk(chunk)
-				, m_index(0)
+				, m_index(index)
 			{}
 		};
 	private:
@@ -75,11 +76,11 @@ namespace IwEntity {
 			iwu::ref<const Entity2> entity);
 
 		iterator begin() {
-			return iterator(m_chunks.front());
+			return iterator(m_chunks.front(), 0);
 		}
 
 		iterator end() {
-			return iterator(m_chunks.back());
+			return iterator(m_chunks.back(), m_chunks.back()->Count);
 		}
 	private:
 		Chunk* FindChunk(

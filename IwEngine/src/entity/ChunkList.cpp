@@ -39,9 +39,9 @@ namespace IwEntity {
 	bool ChunkList::FreeComponents(
 		iwu::ref<const Entity2> entity)
 	{
-		Chunk* chunk = FindChunk(entity->ComponentData->ChunkIndex);
+		Chunk* chunk = FindChunk(entity->Components->ChunkIndex);
 		if (chunk) {
-			chunk->FreeEntity(entity->ComponentData->ChunkIndex);
+			chunk->FreeEntity(entity->Components->ChunkIndex);
 
 			//If chunk is empty free it
 			if (chunk->Count == 0) {

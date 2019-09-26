@@ -32,7 +32,7 @@ namespace IwEntity {
 		if (dead->Alive) {
 			dead->Alive = false;
 			dead->Archetype.reset();
-			dead->ComponentData.reset();
+			dead->Components.reset();
 
 			// Should clean up if too many dead entities stick around
 			// Probly make it so each time a entity is created it also frees a dead entity from the back of the queue
