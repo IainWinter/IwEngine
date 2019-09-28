@@ -6,12 +6,12 @@
 
 namespace IwEntity {
 	struct ArchetypeLayout {
-		iwu::ref<const Component> Component;
+		iwu::ref<Component> Component;
 		size_t Offset;
 		size_t Onset;
 	};
 
-	struct Archetype2 {
+	struct Archetype {
 		size_t Hash;
 		size_t Size;
 		size_t Count;

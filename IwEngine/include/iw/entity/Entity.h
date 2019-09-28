@@ -5,22 +5,22 @@
 #include "ComponentData.h"
 
 namespace IwEntity {
-	struct Entity2 {
+	struct Entity {
 		size_t Index;
 
 		short Version;
-		bool  Alive;
+		//bool  Alive;
 
-		iwu::ref<const Archetype2> Archetype;
-		iwu::ref<ComponentData>    Components;
+		//iwu::ref<Archetype2> Archetype;
+		//iwu::ref<ComponentData>    Components;
 
-		Entity2(
-			size_t index,
-			iwu::ref<const Archetype2> archetype)
+		Entity(
+			size_t index)//,
+			//iwu::ref<Archetype2> archetype)
 			: Index(index)
-			, Archetype(archetype)
+			//, Archetype(archetype)
 			, Version(0)
-			, Alive(true)
+			//, Alive(true)
 		{}
 	};
 }

@@ -4,7 +4,6 @@
 #include "ComponentManager.h"
 #include "ArchetypeManager.h"
 #include "EntityManager.h"
-#include "View.h"
 
 namespace IwEntity {
 	class IWENTITY_API Space {
@@ -18,11 +17,11 @@ namespace IwEntity {
 
 		template<
 			typename _c>
-		iwu::ref<const Component> RegisterComponent() {
+		iwu::ref<Component> RegisterComponent() {
 			return RegisterComponent(typeid(_c), sizeof(_c));
 		}
 
-		iwu::ref<const Component> RegisterComponent(
+		iwu::ref<Component> RegisterComponent(
 			std::type_index type,
 			size_t size);
 
@@ -46,26 +45,26 @@ namespace IwEntity {
 
 		template<
 			typename... _cs>
-		iwu::ref<const Archetype2> CreateArchetype() {
+		iwu::ref<Archetype> CreateArchetype() {
 			return CreateArchetype({ RegisterComponent<_cs>()... });
 		}
 
-		iwu::ref<const Archetype2> CreateArchetype(
-			std::initializer_list<iwu::ref<const Component>> components);
+		iwu::ref<Archetype> CreateArchetype(
+			std::initializer_list<iwu::ref<Component>> components);
 
 		// Entities
 
 		template<
 			typename... _cs>
-		iwu::ref<Entity2> CreateEntity() {
+		iwu::ref<Entity> CreateEntity() {
 			return CreateEntity(CreateArchetype<_cs...>());
 		}
 
-		iwu::ref<Entity2> CreateEntity(
-			iwu::ref<const Archetype2> archetype);
+		iwu::ref<Entity> CreateEntity(
+			iwu::ref<Archetype> archetype);
 
 		bool DestroyEntity(
-			iwu::ref<const Entity2> entity);
+			iwu::ref<Entity> entity);
 
 		// Querying
 

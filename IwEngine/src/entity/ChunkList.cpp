@@ -3,7 +3,7 @@
 
 namespace IwEntity {
 	ChunkList::ChunkList(
-		iwu::ref<const Archetype2> archetype,
+		iwu::ref<Archetype> archetype,
 		size_t chunkSize)
 		: m_current(nullptr)
 		, m_count(0)
@@ -12,36 +12,21 @@ namespace IwEntity {
 		, m_chunkCapacity(GetChunkCapacity(archetype))
 	{}
 
-	iwu::ref<ComponentData> ChunkList::ReserveComponents(
-		iwu::ref<Entity2> entity)
+	void ChunkList::ReserveComponents(
+		iwu::ref<Entity> entity)
 	{
-		size_t bufSize = sizeof(ComponentData)
-			+ sizeof(void*)
-			* entity->Archetype->Count;
-
-		ComponentData* buf = (ComponentData*)malloc(bufSize);
-		assert(buf);
-		memset(buf, 0, bufSize);
-
-		Chunk* chunk = FindOrCreateChunk();
-		
-		buf->ChunkIndex = chunk->ReserveEntity(entity);
-		for (size_t i = 0; i < entity->Archetype->Count; i++) {
-			buf->Components[i] = GetComponentData(
-				chunk, entity->Archetype->Layout[i], buf->ChunkIndex);
-		}
+		Entity* ent = FindOrCreateChunk()->ReserveComponents();
+		*ent = *entity;
 
 		m_count++;
-
-		return iwu::ref<ComponentData>(buf, free);
 	}
 
 	bool ChunkList::FreeComponents(
-		iwu::ref<const Entity2> entity)
+		iwu::ref<Entity> entity)
 	{
-		Chunk* chunk = FindChunk(entity->Components->ChunkIndex);
+		Chunk* chunk = FindChunk(entity->Index);
 		if (chunk) {
-			chunk->FreeEntity(entity->Components->ChunkIndex);
+			chunk->FreeComponents();
 
 			//If chunk is empty free it
 			if (chunk->Count == 0) {
@@ -135,9 +120,9 @@ namespace IwEntity {
 	}
 
 	size_t ChunkList::GetChunkCapacity(
-		iwu::ref<const Archetype2> archetype)
+		iwu::ref<Archetype> archetype)
 	{
-		size_t archetypeSize = archetype->Size + sizeof(Chunk::EntityComponentType);
+		size_t archetypeSize = archetype->Size + sizeof(Entity);
 		size_t bufSize       = m_chunkSize - sizeof(Chunk);
 		size_t padSize       = bufSize % archetypeSize;
 
@@ -148,7 +133,7 @@ namespace IwEntity {
 		Chunk* chunk,
 		const ArchetypeLayout& layout)
 	{
-		size_t offset = layout.Offset + sizeof(Chunk::EntityComponentType);
+		size_t offset = layout.Offset + sizeof(Entity);
 		return chunk->Buffer + offset * m_chunkCapacity;
 	}
 	

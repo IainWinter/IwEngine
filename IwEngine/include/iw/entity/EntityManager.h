@@ -8,11 +8,11 @@
 namespace IwEntity {
 	class IWENTITY_API EntityManager {
 	private:
-		std::vector<iwu::ref<Entity2>> m_entities;
+		std::vector<iwu::ref<Entity>> m_entities;
 		std::deque<size_t> m_dead;
 
 	public:
-		iwu::ref<Entity2> CreateEntity();
+		iwu::ref<Entity> CreateEntity();
 
 		bool DestroyEntity(
 			size_t entityIndex);

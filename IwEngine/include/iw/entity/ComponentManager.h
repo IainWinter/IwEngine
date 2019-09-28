@@ -24,23 +24,24 @@ namespace IwEntity {
 			size_t size);
 
 		iwu::ref<Component> GetComponent(
-			std::type_index index);
+			ComponentType type);
 
 		// Component Data
 
-		iwu::ref<ComponentData> ReserveComponents(
-			iwu::ref<Entity2> entity);
+		void ReserveEntityComponents(
+			iwu::ref<Entity> entity,
+			iwu::ref<Archetype> archetype);
 
-		bool DestroyComponents(
-			iwu::ref<const Entity2> entity);
+		bool DestroyEntityComponents(
+			iwu::ref<Entity> entity);
 
 		EntityComponentArray Query(
 			iwu::ref<ArchetypeQuery> query);
 	private:
 		ChunkList* FindChunkList(
-			iwu::ref<const Archetype2> archetype);
+			iwu::ref<Archetype> archetype);
 
 		ChunkList& FindOrCreateChunkList(
-			iwu::ref<const Archetype2> archetype);
+			iwu::ref<Archetype> archetype);
 	};
 }

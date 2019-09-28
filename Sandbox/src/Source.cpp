@@ -25,7 +25,7 @@ private:
 public:
 	Game() {
 		InputManager.CreateDevice<IwInput::Mouse>();
-		//InputManager.CreateDevice<IwInput::RawKeyboard>();
+		InputManager.CreateDevice<IwInput::RawKeyboard>();
 
 		PushLayer<GameLayer>();
 	}
@@ -39,15 +39,15 @@ public:
 
 		IwEntity::Space space;
 
-		//iwu::ref<const IwEntity::Component> p  = space.RegisterComponent<Position>();
-		//iwu::ref<const IwEntity::Component> v  = space.RegisterComponent<Velocity>();
-		//iwu::ref<const IwEntity::Component> p2 = space.RegisterComponent(typeid(Position), sizeof(Position));
-		//iwu::ref<const IwEntity::Component> v2 = space.RegisterComponent(typeid(Velocity), sizeof(Velocity));
+		//iwu::ref<IwEntity::Component> p  = space.RegisterComponent<Position>();
+		//iwu::ref<IwEntity::Component> v  = space.RegisterComponent<Velocity>();
+		//iwu::ref<IwEntity::Component> p2 = space.RegisterComponent(typeid(Position), sizeof(Position));
+		//iwu::ref<IwEntity::Component> v2 = space.RegisterComponent(typeid(Velocity), sizeof(Velocity));
 
-		//iwu::ref<const IwEntity::Archetype2> a  = space.CreateArchetype({ p, v });
-		//iwu::ref<const IwEntity::Archetype2> a3 = space.CreateArchetype<Position, Velocity>();
-		//iwu::ref<const IwEntity::Archetype2> a4 = space.CreateArchetype<Velocity, Position>();
-		//iwu::ref<const IwEntity::Archetype2> a5 = space.CreateArchetype<Velocity, Velocity, Velocity>();
+		//iwu::ref<IwEntity::Archetype2> a  = space.CreateArchetype({ p, v });
+		//iwu::ref<IwEntity::Archetype2> a3 = space.CreateArchetype<Position, Velocity>();
+		//iwu::ref<IwEntity::Archetype2> a4 = space.CreateArchetype<Velocity, Position>();
+		//iwu::ref<IwEntity::Archetype2> a5 = space.CreateArchetype<Velocity, Velocity, Velocity>();
 
 		struct Components {
 			Position* Position;
@@ -56,8 +56,8 @@ public:
 
 		//IwEngine::Time::Update();
 
-		for (size_t i = 0; i < 1000000; i++) {
-			iwu::ref<IwEntity::Entity2> entity = space.CreateEntity<Position, Velocity>();
+		for (size_t i = 0; i < 1000; i++) {
+			iwu::ref<IwEntity::Entity> entity = space.CreateEntity<Position, Velocity>();
 		}
 
 		//// Component Query Description - type ids   - component manager
@@ -83,8 +83,10 @@ public:
 		//LOG_INFO << IwEngine::Time::DeltaTime();
 		//int ii = 0;
 		for (auto entity : eca) {
-			Components components = entity->Components->Tie<Components>();
-			Components components = entity->Components->Tie<Components>();
+			LOG_INFO << entity.Index << " ," << entity.Version;
+
+			//Components components = entity->Components->Tie<Components>();
+			//Components components = entity->Components->Tie<Components>();
 		//	components.Position->x = 1;
 		//	components.Position->y = 2;
 		//	components.Position->z = 3;

@@ -37,7 +37,7 @@ namespace IwEntity {
 				return !operator==(itr);
 			}
 
-			Chunk::EntityComponentType& operator*() {
+			Entity& operator*() {
 				return **m_iterator;
 			}
 		private:

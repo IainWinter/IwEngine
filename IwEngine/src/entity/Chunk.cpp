@@ -1,27 +1,15 @@
 #include "iw/entity/Chunk.h"
 
 namespace IwEntity {
-	size_t Chunk::ReserveEntity(
-		const EntityComponentType& entity)
-	{
-		EntityComponentType* ptr = GetEntity(Count);
-		*ptr = entity;
+	Entity* Chunk::ReserveComponents() {
+		Entity* entity = (Entity*)Buffer + CurrentIndex;
+		++CurrentIndex;
+		++Count;
 
-		return Count++ + EntityIndex;
+		return entity;
 	}
 
-	void Chunk::FreeEntity(
-		size_t index)
-	{
-		EntityComponentType* entity = GetEntity(index - EntityIndex);
-		entity->reset();
-
-		Count--;
-	}
-
-	Chunk::EntityComponentType* Chunk::GetEntity(
-		size_t index)
-	{
-		return (EntityComponentType*)Buffer + index;
+	void Chunk::FreeComponents() {
+		--Count;
 	}
 }

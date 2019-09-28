@@ -14,12 +14,12 @@ namespace IwEntity {
 		const char* Name;
 
 		static size_t Hash(
-			std::initializer_list<iwu::ref<const Component>> components);
+			std::initializer_list<iwu::ref<Component>> components);
 	};
 
 	struct ComponentQuery {
-		std::vector<iwu::ref<const Component>> All;
-		std::vector<iwu::ref<const Component>> None;
-		std::vector<iwu::ref<const Component>> Any;
+		std::vector<iwu::ref<Component>> All;
+		std::vector<iwu::ref<Component>> None;
+		std::vector<iwu::ref<Component>> Any;
 	};
 }

@@ -41,8 +41,8 @@ namespace IwEntity {
 				return !operator==(itr);
 			}
 
-			Chunk::EntityComponentType& operator*() {
-				return *m_chunk->GetEntity(m_index);
+			Entity& operator*() {
+				return *((Entity*)m_chunk->Buffer + m_index); // todo: temp
 			}
 		private:
 			friend class ChunkList;
@@ -60,20 +60,20 @@ namespace IwEntity {
 
 		size_t m_count;
 
-		iwu::ref<const Archetype2> m_archetype;
+		iwu::ref<Archetype> m_archetype;
 		const size_t m_chunkSize;
 		const size_t m_chunkCapacity;
 
 	public:
 		ChunkList(
-			iwu::ref<const Archetype2> archetype,
+			iwu::ref<Archetype> archetype,
 			size_t chunkSize);
 
-		std::shared_ptr<ComponentData> ReserveComponents(
-			iwu::ref<Entity2> entity);
+		void ReserveComponents(
+			iwu::ref<Entity> entity);
 
 		bool FreeComponents(
-			iwu::ref<const Entity2> entity);
+			iwu::ref<Entity> entity);
 
 		iterator begin() {
 			return iterator(m_chunks.front(), 0);
@@ -91,7 +91,7 @@ namespace IwEntity {
 		Chunk* FindOrCreateChunk();
 
 		size_t GetChunkCapacity(
-			iwu::ref<const Archetype2> archetype);
+			iwu::ref<Archetype> archetype);
 
 		char* GetChunkStream(
 			Chunk* chunk,
