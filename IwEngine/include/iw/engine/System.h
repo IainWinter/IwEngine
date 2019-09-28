@@ -1,7 +1,6 @@
 #pragma once
 
 #include "iw/entity/Space.h"
-#include "iw/entity/View.h"
 #include "iw/graphics/RenderQueue.h"
 #include <queue>
 //#include <thread>
@@ -57,12 +56,12 @@ namespace IwEngine {
 		virtual void Destroy() {}
 
 		void Update() override {
-			IwEntity::EntityComponentArray view = space.Query<_cs...>();
+			//IwEntity::EntityComponentArray view = space.Query<_cs...>();
 			// Break up view into Viewlets to execute on seperate threads
 			//View view = Space.ViewComponents<_cs...>();
 
 			// Execute threads
-			Update(view);
+			//Update(view);
 
 			// Execute queues space operations
 			while (!m_delete.empty()) {

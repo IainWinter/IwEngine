@@ -50,28 +50,28 @@ void EnemySystem::Destroy() {
 void EnemySystem::Update(
 	View& view)
 {
-	for (auto entity : view) {
-		auto [transform, enemy ] = entity->Components->Tie<Components>();
+	//for (auto entity : view) {
+	//	auto [transform, enemy ] = entity->Components->Tie<Components>();
 
-		if (enemy->FireTime > enemy->FireTimeTotal) {
-			transform->Rotation *= iwm::quaternion::create_from_euler_angles(0, 0, enemy->Speed * IwEngine::Time::DeltaTime());
-		}
+	//	if (enemy->FireTime > enemy->FireTimeTotal) {
+	//		transform->Rotation *= iwm::quaternion::create_from_euler_angles(0, 0, enemy->Speed * IwEngine::Time::DeltaTime());
+	//	}
 
-		else if (enemy->FireTime <= 0) {
-			enemy->CanShoot = true;
-			enemy->FireTime = enemy->FireTimeTotal + enemy->FireCooldown;
-		}
+	//	else if (enemy->FireTime <= 0) {
+	//		enemy->CanShoot = true;
+	//		enemy->FireTime = enemy->FireTimeTotal + enemy->FireCooldown;
+	//	}
 
-		else if (enemy->CanShoot && enemy->FireTime <= enemy->TimeToShoot) {
-			enemy->CanShoot = false;
-			iwu::ref<IwEntity::Entity2> spawned = Space.CreateEntity<IwEngine::Transform, IwEngine::Model, Bullet>();
+	//	else if (enemy->CanShoot && enemy->FireTime <= enemy->TimeToShoot) {
+	//		enemy->CanShoot = false;
+	//		iwu::ref<IwEntity::Entity2> spawned = Space.CreateEntity<IwEngine::Transform, IwEngine::Model, Bullet>();
 
-			auto [transform, model, bullet] = spawned->Components->Tie<IwEngine::Transform, IwEngine::Model, Bullet>();
-			transform = IwEngine::Transform { transform.Position + iwm::vector3(1, 1, 0) * transform.Rotation.inverted(), transform.Scale, transform.Rotation.inverted() };
-			model     = IwEngine::Model { CircleData, CircleMesh, 1U };
-			bullet    = Bullet { LINE, 4.0f };
-		}
+	//		auto [transform, model, bullet] = spawned->Components->Tie<IwEngine::Transform, IwEngine::Model, Bullet>();
+	//		transform = IwEngine::Transform { transform.Position + iwm::vector3(1, 1, 0) * transform.Rotation.inverted(), transform.Scale, transform.Rotation.inverted() };
+	//		model     = IwEngine::Model { CircleData, CircleMesh, 1U };
+	//		bullet    = Bullet { LINE, 4.0f };
+	//	}
 
-		enemy->FireTime -= IwEngine::Time::DeltaTime();
-	}
+	//	enemy->FireTime -= IwEngine::Time::DeltaTime();
+	//}
 }
