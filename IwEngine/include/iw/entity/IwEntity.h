@@ -8,16 +8,12 @@
 #	endif
 #endif
 
-#include "iw/util/type/family.h"
 #include "iw/util/memory/smart_pointers.h"
 #include <typeindex>
 
 namespace IwEntity {
-	struct ComponentFamilyTag {};
-
 	using EntityIndex     = unsigned int;
 	using ComponentId     = unsigned int;
-	using ComponentFamily = iwu::family<ComponentFamilyTag>;
 
 	using ComponentType = std::type_index;
 }

@@ -25,7 +25,7 @@ private:
 public:
 	Game() {
 		InputManager.CreateDevice<IwInput::Mouse>();
-		InputManager.CreateDevice<IwInput::RawKeyboard>();
+		//InputManager.CreateDevice<IwInput::RawKeyboard>();
 
 		PushLayer<GameLayer>();
 	}
@@ -37,7 +37,7 @@ public:
 
 		ImGui::SetCurrentContext((ImGuiContext*)options.ImGuiContext);
 
-		IwEntity::Space space;
+		IwEntity::Space* space = new IwEntity::Space();
 
 		//iwu::ref<IwEntity::Component> p  = space.RegisterComponent<Position>();
 		//iwu::ref<IwEntity::Component> v  = space.RegisterComponent<Velocity>();
@@ -54,10 +54,10 @@ public:
 			Velocity* Velocity;
 		};
 
-		//IwEngine::Time::Update();
+		IwEngine::Time::Update();
 
-		for (size_t i = 0; i < 1000; i++) {
-			iwu::ref<IwEntity::Entity> entity = space.CreateEntity<Position, Velocity>();
+		for (size_t i = 0; i < 1000000; i++) {
+			IwEntity::Entity entity = space->CreateEntity<Position, Velocity>();
 		}
 
 		//// Component Query Description - type ids   - component manager
@@ -70,20 +70,20 @@ public:
 
 		////IwEntity::ComponentQuery q1 = space.MakeQuery(desc);		
 		//
-		//IwEngine::Time::Update();
+		IwEngine::Time::Update();
 
-		//LOG_INFO << IwEngine::Time::DeltaTime();
+		LOG_INFO << IwEngine::Time::DeltaTime();
 
-		IwEntity::ComponentQuery q = space.MakeQuery<Position, Velocity>();
+		//IwEntity::ComponentQuery q = space.MakeQuery<Position, Velocity>();
 		//
-		IwEntity::EntityComponentArray eca = space.Query(q);
+		//IwEntity::EntityComponentArray eca = space.Query(q);
 
 		//IwEngine::Time::Update();
 
 		//LOG_INFO << IwEngine::Time::DeltaTime();
 		//int ii = 0;
-		for (auto entity : eca) {
-			LOG_INFO << entity.Index << " ," << entity.Version;
+		//for (auto entity : eca) {
+			//LOG_INFO << entity.Index << " ," << entity.Version;
 
 			//Components components = entity->Components->Tie<Components>();
 			//Components components = entity->Components->Tie<Components>();
@@ -95,7 +95,7 @@ public:
 		//	components.Velocity->z = 6;
 
 		//	ii++;
-		}
+		//}
 		//
 
 		////IwEntity::EntityQuery q1 = space.CreateQuery(

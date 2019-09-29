@@ -2,6 +2,7 @@
 
 #include "IwEntity.h"
 #include "Archetype.h"
+#include "EntityData.h"
 #include "Chunk.h"
 #include <vector>
 
@@ -66,14 +67,14 @@ namespace IwEntity {
 
 	public:
 		ChunkList(
-			iwu::ref<Archetype> archetype,
+			const iwu::ref<Archetype>& archetype,
 			size_t chunkSize);
 
-		void ReserveComponents(
-			iwu::ref<Entity> entity);
+		size_t ReserveComponents(
+			const Entity& entity);
 
 		bool FreeComponents(
-			iwu::ref<Entity> entity);
+			size_t index);
 
 		iterator begin() {
 			return iterator(m_chunks.front(), 0);
@@ -88,14 +89,10 @@ namespace IwEntity {
 		
 		Chunk* CreateChunk();
 
-		Chunk* FindOrCreateChunk();
+		Chunk& FindOrCreateChunk();
 
 		size_t GetChunkCapacity(
-			iwu::ref<Archetype> archetype);
-
-		char* GetChunkStream(
-			Chunk* chunk,
-			const ArchetypeLayout& layout);
+			const iwu::ref<Archetype>& archetype);
 
 		char* GetComponentData(
 			Chunk* chunk,

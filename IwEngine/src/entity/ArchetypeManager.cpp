@@ -2,11 +2,11 @@
 #include <assert.h>
 
 namespace IwEntity {
-	iwu::ref<Archetype> ArchetypeManager::CreateArchetype(
+	iwu::ref<Archetype>& ArchetypeManager::CreateArchetype(
 		std::initializer_list<iwu::ref<Component>> components)
 	{
 		size_t hash = Component::Hash(components);
-		auto& archetype = m_hashed[hash];
+		iwu::ref<Archetype>& archetype = m_hashed[hash];
 		if (!archetype) {
 			size_t bufSize = sizeof(Archetype)
 				+ sizeof(ArchetypeLayout)

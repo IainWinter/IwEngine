@@ -1,8 +1,6 @@
 #pragma once
 
 #include "IwEntity.h"
-#include "Archetype.h"
-#include "ComponentData.h"
 
 namespace IwEntity {
 	struct Entity {

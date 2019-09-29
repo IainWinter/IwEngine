@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IwEntity.h"
+#include "Archetype.h"
 #include "Entity.h"
 
 namespace IwEntity {
@@ -11,11 +12,18 @@ namespace IwEntity {
 		size_t Count;
 		size_t EntityIndex;
 		size_t CurrentIndex;
-		
+
 		char Buffer[];
 
-		Entity* ReserveComponents();
+		size_t ReserveComponents();
 
 		void FreeComponents();
+
+		Entity* GetEntity(
+			size_t index);
+
+		char* GetComponentStream(
+			size_t capacity,
+			const ArchetypeLayout& layout);
 	};
 }

@@ -13,7 +13,7 @@ namespace IwEntity {
 		std::vector<iwu::ref<Archetype>> m_archetypes;
 
 	public:
-		iwu::ref<Archetype> CreateArchetype(
+		iwu::ref<Archetype>& CreateArchetype(
 			std::initializer_list<iwu::ref<Component>> components);
 
 		iwu::ref<ArchetypeQuery> MakeQuery(

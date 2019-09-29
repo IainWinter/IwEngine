@@ -2,31 +2,31 @@
 #include <assert.h>
 
 namespace IwEntity {
-	iwu::ref<Entity> EntityManager::CreateEntity() {
+	iwu::ref<EntityData>& EntityManager::CreateEntity() {
 		if (!m_dead.empty()) {
-			iwu::ref<Entity>& dead = m_entities.at(m_dead.front());
+			iwu::ref<EntityData>& dead = m_entities.at(m_dead.front());
 			m_dead.pop_front();
 
-			dead->Version++;
+			dead->Entity.Version++;
 
 			return dead;
 		}
 
-		size_t bufSize = sizeof(Entity);
+		size_t bufSize = sizeof(EntityData);
 
-		Entity* entity = (Entity*)malloc(bufSize); //todo: memory allocation
-		assert(entity);
-		memset(entity, 0, bufSize);
+		EntityData* entityData = (EntityData*)malloc(bufSize); //todo: memory allocation
+		assert(entityData);
+		memset(entityData, 0, bufSize);
 
-		entity->Index = m_entities.size();
+		entityData->Entity.Index = m_entities.size();
 
-		return m_entities.emplace_back(entity);
+		return m_entities.emplace_back(entityData, free);
 	}
 
 	bool EntityManager::DestroyEntity(
-		size_t entityIndex)
+		const Entity& entity)
 	{
-		iwu::ref<Entity> dead = m_entities.at(entityIndex);
+		iwu::ref<EntityData>& dead = m_entities.at(entity.Index);
 		//if (dead->Alive) {
 			//dead->Alive = false;
 			//dead->Archetype.reset();
@@ -37,7 +37,7 @@ namespace IwEntity {
 			// Todo: Test which way is best to free the entities and chunks
 
 			//if (m_dead.size() < 1000) {
-				m_dead.push_back(dead->Index);
+				m_dead.push_back(dead->Entity.Index);
 			//}
 
 			//else {
@@ -55,5 +55,11 @@ namespace IwEntity {
 		//}
 
 		return false;
+	}
+
+	iwu::ref<EntityData>& EntityManager::GetEntityData(
+		const Entity& entity)
+	{
+		return m_entities.at(entity.Index);
 	}
 }

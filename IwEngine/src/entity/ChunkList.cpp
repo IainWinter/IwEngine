@@ -3,7 +3,7 @@
 
 namespace IwEntity {
 	ChunkList::ChunkList(
-		iwu::ref<Archetype> archetype,
+		const iwu::ref<Archetype>& archetype,
 		size_t chunkSize)
 		: m_current(nullptr)
 		, m_count(0)
@@ -12,19 +12,24 @@ namespace IwEntity {
 		, m_chunkCapacity(GetChunkCapacity(archetype))
 	{}
 
-	void ChunkList::ReserveComponents(
-		iwu::ref<Entity> entity)
+	size_t ChunkList::ReserveComponents(
+		const Entity& entity)
 	{
-		Entity* ent = FindOrCreateChunk()->ReserveComponents();
-		*ent = *entity;
+		Chunk& chunk = FindOrCreateChunk();
+		size_t chunkIndex = chunk.ReserveComponents();
+		Entity* entityComponent = chunk.GetEntity(chunkIndex);
+
+		*entityComponent = entity;
 
 		m_count++;
+
+		return chunkIndex;
 	}
 
 	bool ChunkList::FreeComponents(
-		iwu::ref<Entity> entity)
+		size_t index)
 	{
-		Chunk* chunk = FindChunk(entity->Index);
+		Chunk* chunk = FindChunk(index);
 		if (chunk) {
 			chunk->FreeComponents();
 
@@ -73,7 +78,7 @@ namespace IwEntity {
 		return chunk;
 	}
 
-	Chunk* ChunkList::FindOrCreateChunk() {
+	Chunk& ChunkList::FindOrCreateChunk() {
 		Chunk* chunk = nullptr;
 		// Chunk doesn't exist
 		if (!m_current) {
@@ -116,11 +121,11 @@ namespace IwEntity {
 			}
 		}
 
-		return chunk;
+		return *chunk;
 	}
 
 	size_t ChunkList::GetChunkCapacity(
-		iwu::ref<Archetype> archetype)
+		const iwu::ref<Archetype>& archetype)
 	{
 		size_t archetypeSize = archetype->Size + sizeof(Entity);
 		size_t bufSize       = m_chunkSize - sizeof(Chunk);
@@ -128,21 +133,13 @@ namespace IwEntity {
 
 		return (bufSize - padSize) / archetypeSize;
 	}
-
-	char* ChunkList::GetChunkStream(
-		Chunk* chunk,
-		const ArchetypeLayout& layout)
-	{
-		size_t offset = layout.Offset + sizeof(Entity);
-		return chunk->Buffer + offset * m_chunkCapacity;
-	}
 	
 	char* ChunkList::GetComponentData(
 		Chunk* chunk,
 		const ArchetypeLayout& layout,
 		size_t index)
 	{
-		return GetChunkStream(chunk, layout)
+		return chunk->GetComponentStream(m_chunkCapacity, layout)
 			+ layout.Component->Size
 			* (index - chunk->EntityIndex);
 	}

@@ -1,15 +1,25 @@
 #include "iw/entity/Chunk.h"
 
 namespace IwEntity {
-	Entity* Chunk::ReserveComponents() {
-		Entity* entity = (Entity*)Buffer + CurrentIndex;
-		++CurrentIndex;
+	size_t Chunk::ReserveComponents() {
 		++Count;
-
-		return entity;
+		return CurrentIndex++ + EntityIndex;
 	}
 
 	void Chunk::FreeComponents() {
 		--Count;
+	}
+
+	Entity* Chunk::GetEntity(
+		size_t index)
+	{
+		return (Entity*)Buffer + index - EntityIndex;
+	}
+
+	char* Chunk::GetComponentStream(
+		size_t capacity,
+		const ArchetypeLayout& layout)
+	{
+		return Buffer + (sizeof(Entity) + layout.Offset) * capacity;
 	}
 }

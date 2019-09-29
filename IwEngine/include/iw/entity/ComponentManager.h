@@ -19,29 +19,28 @@ namespace IwEntity {
 	public:
 		// Components
 
-		iwu::ref<Component> RegisterComponent(
+		iwu::ref<Component>& RegisterComponent(
 			ComponentType type,
 			size_t size);
 
-		iwu::ref<Component> GetComponent(
+		iwu::ref<Component>& GetComponent(
 			ComponentType type);
 
 		// Component Data
 
-		void ReserveEntityComponents(
-			iwu::ref<Entity> entity,
-			iwu::ref<Archetype> archetype);
+		size_t ReserveEntityComponents(
+			const iwu::ref<EntityData>& entityData);
 
 		bool DestroyEntityComponents(
-			iwu::ref<Entity> entity);
+			const iwu::ref<EntityData>& entityData);
 
 		EntityComponentArray Query(
-			iwu::ref<ArchetypeQuery> query);
+			const iwu::ref<ArchetypeQuery>& query);
 	private:
 		ChunkList* FindChunkList(
-			iwu::ref<Archetype> archetype);
+			const iwu::ref<Archetype>& archetype);
 
 		ChunkList& FindOrCreateChunkList(
-			iwu::ref<Archetype> archetype);
+			const iwu::ref<Archetype>& archetype);
 	};
 }

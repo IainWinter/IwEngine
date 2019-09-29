@@ -17,11 +17,11 @@ namespace IwEntity {
 
 		template<
 			typename _c>
-		iwu::ref<Component> RegisterComponent() {
+		iwu::ref<Component>& RegisterComponent() {
 			return RegisterComponent(typeid(_c), sizeof(_c));
 		}
 
-		iwu::ref<Component> RegisterComponent(
+		iwu::ref<Component>& RegisterComponent(
 			std::type_index type,
 			size_t size);
 
@@ -45,26 +45,26 @@ namespace IwEntity {
 
 		template<
 			typename... _cs>
-		iwu::ref<Archetype> CreateArchetype() {
+		iwu::ref<Archetype>& CreateArchetype() {
 			return CreateArchetype({ RegisterComponent<_cs>()... });
 		}
 
-		iwu::ref<Archetype> CreateArchetype(
+		iwu::ref<Archetype>& CreateArchetype(
 			std::initializer_list<iwu::ref<Component>> components);
 
 		// Entities
 
 		template<
 			typename... _cs>
-		iwu::ref<Entity> CreateEntity() {
+		Entity CreateEntity() {
 			return CreateEntity(CreateArchetype<_cs...>());
 		}
 
-		iwu::ref<Entity> CreateEntity(
-			iwu::ref<Archetype> archetype);
+		Entity CreateEntity(
+			const iwu::ref<Archetype>& archetype);
 
 		bool DestroyEntity(
-			iwu::ref<Entity> entity);
+			const Entity& entity);
 
 		// Querying
 
