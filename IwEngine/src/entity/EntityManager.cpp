@@ -7,6 +7,7 @@ namespace IwEntity {
 			iwu::ref<EntityData>& dead = m_entities.at(m_dead.front());
 			m_dead.pop_front();
 
+			dead->Entity.Alive = true;
 			dead->Entity.Version++;
 
 			return dead;
@@ -18,7 +19,11 @@ namespace IwEntity {
 		assert(entityData);
 		memset(entityData, 0, bufSize);
 
-		entityData->Entity.Index = m_entities.size();
+		entityData->Entity = Entity {
+			m_entities.size(),
+			0, 
+			true
+		};
 
 		return m_entities.emplace_back(entityData, free);
 	}
@@ -27,8 +32,8 @@ namespace IwEntity {
 		const Entity& entity)
 	{
 		iwu::ref<EntityData>& dead = m_entities.at(entity.Index);
-		//if (dead->Alive) {
-			//dead->Alive = false;
+		if (dead->Entity.Alive) {
+			dead->Entity.Alive = false;
 			//dead->Archetype.reset();
 			////dead->Components.reset();
 
@@ -52,7 +57,7 @@ namespace IwEntity {
 			//}
 
 			//return true;
-		//}
+		}
 
 		return false;
 	}

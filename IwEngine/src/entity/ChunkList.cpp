@@ -16,14 +16,27 @@ namespace IwEntity {
 		const Entity& entity)
 	{
 		Chunk& chunk = FindOrCreateChunk();
-		size_t chunkIndex = chunk.ReserveComponents();
-		Entity* entityComponent = chunk.GetEntity(chunkIndex);
+		size_t index = chunk.ReserveComponents();
 
+		Entity* entityComponent = chunk.GetEntity(index);
 		*entityComponent = entity;
 
 		m_count++;
 
-		return chunkIndex;
+		return index;
+	}
+
+	bool ChunkList::ReinstateComponents(
+		const iwu::ref<EntityData>& entityData)
+	{
+		Chunk* chunk = FindChunk(entityData->ChunkIndex);
+		if (chunk) {
+			chunk->ReinstateComponents();
+
+			return true;
+		}
+
+		return false;
 	}
 
 	bool ChunkList::FreeComponents(
@@ -33,14 +46,21 @@ namespace IwEntity {
 		if (chunk) {
 			chunk->FreeComponents();
 
+			Entity* entityComponent = chunk->GetEntity(index);
+			entityComponent->Alive = false;
+
 			//If chunk is empty free it
 			if (chunk->Count == 0) {
 				if (chunk->Previous) {
 					chunk->Previous->Next = chunk->Next;
 				}
 
+				else if (chunk->Next) {
+					chunk->Next->Previous = chunk->Previous;
+				}
+
 				else {
-					m_current = nullptr;
+					m_current = nullptr;   //This needs to be looked at, maybe 
 					m_chunks.clear(); // might need to delete sooner
 					m_chunks.shrink_to_fit();
 					m_count = 0;
@@ -53,6 +73,22 @@ namespace IwEntity {
 		}
 
 		return false;
+	}
+
+	ChunkList::iterator ChunkList::begin() {
+		if (m_chunks.size() == 0) {
+			return iterator(nullptr, 0);
+		}
+
+		return iterator(m_chunks.front(), 0);
+	}
+
+	ChunkList::iterator ChunkList::end() {
+		if (m_chunks.size() == 0) {
+			return iterator(nullptr, 0);
+		}
+
+		return iterator(m_chunks.back(), m_chunks.back()->Count);
 	}
 
 	Chunk* ChunkList::FindChunk(

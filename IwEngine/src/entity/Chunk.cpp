@@ -6,6 +6,10 @@ namespace IwEntity {
 		return CurrentIndex++ + EntityIndex;
 	}
 
+	void Chunk::ReinstateComponents() {
+		Count++;
+	}
+
 	void Chunk::FreeComponents() {
 		--Count;
 	}

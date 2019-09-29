@@ -17,6 +17,8 @@ namespace IwEntity {
 
 		size_t ReserveComponents();
 
+		void ReinstateComponents();
+
 		void FreeComponents();
 
 		Entity* GetEntity(

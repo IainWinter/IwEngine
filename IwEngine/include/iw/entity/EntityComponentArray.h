@@ -7,7 +7,7 @@
 namespace IwEntity {
 	class EntityComponentArray {
 	public:
-		class iterator {
+		class iterator { // move code to cpp
 		public:
 		private:
 			std::vector<ChunkList::iterator>::iterator m_iterator;

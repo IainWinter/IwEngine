@@ -31,6 +31,9 @@ namespace IwEntity {
 		size_t ReserveEntityComponents(
 			const iwu::ref<EntityData>& entityData);
 
+		bool ReinstateEntityComponents(
+			const iwu::ref<EntityData>& entityData);
+
 		bool DestroyEntityComponents(
 			const iwu::ref<EntityData>& entityData);
 

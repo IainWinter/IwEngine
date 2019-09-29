@@ -37,7 +37,7 @@ public:
 
 		ImGui::SetCurrentContext((ImGuiContext*)options.ImGuiContext);
 
-		IwEntity::Space* space = new IwEntity::Space();
+		IwEntity::Space space;
 
 		//iwu::ref<IwEntity::Component> p  = space.RegisterComponent<Position>();
 		//iwu::ref<IwEntity::Component> v  = space.RegisterComponent<Velocity>();
@@ -56,8 +56,16 @@ public:
 
 		IwEngine::Time::Update();
 
-		for (size_t i = 0; i < 1000000; i++) {
-			IwEntity::Entity entity = space->CreateEntity<Position, Velocity>();
+		std::vector<IwEntity::Entity> entities;
+
+		for (size_t i = 0; i < 1000; i++) {
+			entities.push_back(space.CreateEntity<Position, Velocity>());
+		}
+
+		for (size_t i = 0; i < 1000; i++) {
+			if (rand() > RAND_MAX / 2) {
+				space.DestroyEntity(entities.at(i));
+			}
 		}
 
 		//// Component Query Description - type ids   - component manager
@@ -74,16 +82,15 @@ public:
 
 		LOG_INFO << IwEngine::Time::DeltaTime();
 
-		//IwEntity::ComponentQuery q = space.MakeQuery<Position, Velocity>();
-		//
-		//IwEntity::EntityComponentArray eca = space.Query(q);
+		IwEntity::ComponentQuery       qry = space.MakeQuery<Position, Velocity>();
+		IwEntity::EntityComponentArray eca = space.Query(qry);
 
 		//IwEngine::Time::Update();
 
 		//LOG_INFO << IwEngine::Time::DeltaTime();
 		//int ii = 0;
-		//for (auto entity : eca) {
-			//LOG_INFO << entity.Index << " ," << entity.Version;
+		for (auto entity : eca) {
+			LOG_INFO << entity.Index << " ," << entity.Version;
 
 			//Components components = entity->Components->Tie<Components>();
 			//Components components = entity->Components->Tie<Components>();
@@ -95,7 +102,7 @@ public:
 		//	components.Velocity->z = 6;
 
 		//	ii++;
-		//}
+		}
 		//
 
 		////IwEntity::EntityQuery q1 = space.CreateQuery(

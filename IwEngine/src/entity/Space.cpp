@@ -20,8 +20,18 @@ namespace IwEntity {
 		const iwu::ref<Archetype>& archetype)
 	{
 		iwu::ref<EntityData>& entityData = m_entityManager.CreateEntity();
-		entityData->Archetype  = archetype;
-		entityData->ChunkIndex = m_componentManager.ReserveEntityComponents(entityData);
+		bool componentsExist = false;
+		if (entityData->Archetype && entityData->Archetype->Hash == archetype->Hash) {
+			componentsExist = m_componentManager.ReinstateEntityComponents(entityData);
+		}
+
+		else {
+			entityData->Archetype = archetype;
+		}
+
+		if (!componentsExist) {
+			entityData->ChunkIndex = m_componentManager.ReserveEntityComponents(entityData);
+		}
 
 		return entityData->Entity;
 	}

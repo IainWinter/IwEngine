@@ -9,8 +9,7 @@
 namespace IwEntity {
 	class ChunkList {
 	public:
-		class iterator {
-		public:
+		class iterator { // move code to cpp
 		private:
 			Chunk* m_chunk;
 			size_t m_index;
@@ -18,8 +17,11 @@ namespace IwEntity {
 		public:
 			iterator& operator++() {
 				m_index++;
+				while (!this->operator*().Alive && m_index != m_chunk->CurrentIndex) { // replace with free list like thing but for valid entities
+					m_index++;
+				}
 
-				if (m_index == m_chunk->Count) {
+				if (m_index == m_chunk->CurrentIndex) {
 					if (m_chunk->Next) {
 						m_chunk = m_chunk->Next;
 						m_index = 0;
@@ -73,16 +75,15 @@ namespace IwEntity {
 		size_t ReserveComponents(
 			const Entity& entity);
 
+		bool ReinstateComponents(
+			const iwu::ref<EntityData>& entityData);
+
 		bool FreeComponents(
 			size_t index);
 
-		iterator begin() {
-			return iterator(m_chunks.front(), 0);
-		}
+		iterator begin();
 
-		iterator end() {
-			return iterator(m_chunks.back(), m_chunks.back()->Count);
-		}
+		iterator end();
 	private:
 		Chunk* FindChunk(
 			size_t index);
