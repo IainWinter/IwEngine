@@ -38,6 +38,7 @@ namespace IwEntity {
 			const iwu::ref<EntityData>& entityData);
 
 		EntityComponentArray Query(
+			const iwu::ref<ComponentQuery>& components,
 			const iwu::ref<ArchetypeQuery>& query);
 	private:
 		ChunkList* FindChunkList(

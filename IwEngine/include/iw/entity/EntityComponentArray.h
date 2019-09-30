@@ -37,7 +37,7 @@ namespace IwEntity {
 				return !operator==(itr);
 			}
 
-			Entity& operator*() {
+			ComponentData& operator*() {
 				return **m_iterator;
 			}
 		private:

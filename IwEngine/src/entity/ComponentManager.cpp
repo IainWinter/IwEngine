@@ -59,19 +59,20 @@ namespace IwEntity {
 	}
 
 	EntityComponentArray ComponentManager::Query(
+		const iwu::ref<ComponentQuery>& components,
 		const iwu::ref<ArchetypeQuery>& query)
 	{
-		std::vector<ChunkList::iterator> begins;
-		std::vector<ChunkList::iterator> ends; // add vector for indices of components to be tied 
+		std::vector<ChunkList::iterator>  begins;
+		std::vector<ChunkList::iterator>  ends;
 		for (size_t i = 0; i < query->Count; i++) {
 			auto itr = m_componentData.find(query->Hashes[i]);
 			if (itr != m_componentData.end()) {
-				ChunkList::iterator bitr = itr->second.begin();
-				ChunkList::iterator eitr = itr->second.end();
-				if (bitr != eitr) {
-					begins.push_back(bitr);
-					ends  .push_back(eitr);
-				}
+				ChunkList::iterator bitr = itr->second.begin(components);
+				ChunkList::iterator eitr = itr->second.end(components);
+				//if (bitr != eitr) {
+					begins.emplace_back(std::move(bitr));
+					ends  .emplace_back(std::move(eitr));
+				//}
 			}
 		}
 

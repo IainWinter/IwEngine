@@ -18,8 +18,11 @@ namespace IwEntity {
 	};
 
 	struct ComponentQuery {
-		std::vector<iwu::ref<Component>> All;
-		std::vector<iwu::ref<Component>> None;
-		std::vector<iwu::ref<Component>> Any;
+		size_t Count;
+		iwu::ref<Component> Components[];
+
+		//std::vector<iwu::ref<Component>> All;
+		//std::vector<iwu::ref<Component>> None;
+		//std::vector<iwu::ref<Component>> Any;
 	};
 }

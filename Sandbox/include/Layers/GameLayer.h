@@ -26,7 +26,7 @@ public:
 	~GameLayer();
 
 	int Initialize(
-		IwEngine::InitOptions& options)  override;
+		IwEngine::InitOptions& options) override;
 
 	void Update()      override;
 	void FixedUpdate() override;

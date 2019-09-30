@@ -21,8 +21,8 @@ PlayerSystem::~PlayerSystem()
 void PlayerSystem::Update(
 	View& view)
 {
-	/*for (auto entity : view) {
-		auto [ transform, player ] = entity->Components->Tie<Components>();
+	for (auto entity : view) {
+		auto [ transform, player ] = entity.Tie<Components>();
 
 		transform->Rotation *= iwm::quaternion::create_from_euler_angles(0, 0, IwEngine::Time::DeltaTime());
 
@@ -63,5 +63,5 @@ void PlayerSystem::Update(
 		if (player->DashTime > -player->DashCooldown) {
 			player->DashTime -= IwEngine::Time::DeltaTime();
 		}
-	}*/
+	}
 }

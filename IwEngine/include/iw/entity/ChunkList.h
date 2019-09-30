@@ -1,61 +1,43 @@
 #pragma once
 
 #include "IwEntity.h"
-#include "Archetype.h"
-#include "EntityData.h"
 #include "Chunk.h"
+#include "EntityData.h"
+#include "Archetype.h"
+#include "Component.h"
+#include "ComponentData.h"
 #include <vector>
+#include <assert.h>
 
 namespace IwEntity {
-	class ChunkList {
+	class IWENTITY_API ChunkList {
 	public:
-		class iterator { // move code to cpp
+		class IWENTITY_API iterator { // move code to cpp
 		private:
 			Chunk* m_chunk;
 			size_t m_index;
+			iwu::ref<Archetype> m_archetype;
+			iwu::ref<ComponentDataIndices> m_indices;
+			iwu::ref<ComponentData> m_data;
 
 		public:
-			iterator& operator++() {
-				m_index++;
-				while (!this->operator*().Alive && m_index != m_chunk->CurrentIndex) { // replace with free list like thing but for valid entities
-					m_index++;
-				}
-
-				if (m_index == m_chunk->CurrentIndex) {
-					if (m_chunk->Next) {
-						m_chunk = m_chunk->Next;
-						m_index = 0;
-					}
-				}
-
-				return *this;
-			}
+			iterator& operator++();
 
 			bool operator==(
-				const iterator& itr)
-			{
-				return  this->m_chunk == itr.m_chunk
-					&& this->m_index == itr.m_index;
-			}
+				const iterator& itr);
 
 			bool operator!=(
-				const iterator& itr)
-			{
-				return !operator==(itr);
-			}
+				const iterator& itr);
 
-			Entity& operator*() {
-				return *((Entity*)m_chunk->Buffer + m_index); // todo: temp
-			}
+			ComponentData& operator*();
 		private:
 			friend class ChunkList;
 
 			iterator(
 				Chunk* chunk,
-				size_t index)
-				: m_chunk(chunk)
-				, m_index(index)
-			{}
+				size_t index,
+				const iwu::ref<Archetype>& archetype,
+				const iwu::ref<ComponentQuery>& query);
 		};
 	private:
 		Chunk* m_current;
@@ -81,9 +63,11 @@ namespace IwEntity {
 		bool FreeComponents(
 			size_t index);
 
-		iterator begin();
+		iterator begin(
+			const iwu::ref<ComponentQuery>& query);
 
-		iterator end();
+		iterator end(
+			const iwu::ref<ComponentQuery>& query);
 	private:
 		Chunk* FindChunk(
 			size_t index);

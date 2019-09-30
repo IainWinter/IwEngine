@@ -14,6 +14,16 @@ namespace IwEntity {
 		--Count;
 	}
 
+	bool Chunk::IsLast(
+		size_t index)
+	{
+		return index == LastIndex();
+	}
+
+	size_t Chunk::LastIndex() {
+		return EntityIndex + CurrentIndex - 1;
+	}
+
 	Entity* Chunk::GetEntity(
 		size_t index)
 	{
@@ -21,9 +31,17 @@ namespace IwEntity {
 	}
 
 	char* Chunk::GetComponentStream(
-		size_t capacity,
 		const ArchetypeLayout& layout)
 	{
-		return Buffer + (sizeof(Entity) + layout.Offset) * capacity;
+		return Buffer + (sizeof(Entity) + layout.Offset) * Capacity;
+	}
+
+	char* Chunk::GetComponentData(
+		const ArchetypeLayout& layout,
+		size_t index)
+	{
+		return GetComponentStream(layout)
+			+ layout.Component->Size
+			* (index - EntityIndex);
 	}
 }

@@ -35,11 +35,12 @@ namespace IwEntity {
 
 		template<
 			typename... _cs>
-		ComponentQuery MakeQuery() {
-			return ComponentQuery {
-				{ RegisterComponent<_cs>()... }
-			};
+		iwu::ref<ComponentQuery> MakeQuery() {
+			return MakeQuery({ RegisterComponent<_cs>()... });
 		}
+
+		iwu::ref<ComponentQuery> MakeQuery(
+			std::initializer_list<iwu::ref<Component>> components);
 
 		// Archetypes
 
@@ -75,6 +76,6 @@ namespace IwEntity {
 		}
 
 		EntityComponentArray Query(
-			const ComponentQuery& query);
+			const iwu::ref<ComponentQuery>& query);
 	};
 }

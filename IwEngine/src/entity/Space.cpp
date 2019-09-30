@@ -1,6 +1,7 @@
 #pragma once
 
 #include "iw/entity/Space.h"
+#include <assert.h>
 
 namespace IwEntity {
 	iwu::ref<Component>& Space::RegisterComponent(
@@ -8,6 +9,27 @@ namespace IwEntity {
 		size_t size)
 	{
 		return m_componentManager.RegisterComponent(type, size);
+	}
+
+	iwu::ref<ComponentQuery> Space::MakeQuery(
+		std::initializer_list<iwu::ref<Component>> components)
+	{
+		size_t bufSize = sizeof(ComponentQuery)
+			+ sizeof(iwu::ref<Component>)
+			* components.size();
+
+		ComponentQuery* buf = (ComponentQuery*)malloc(bufSize);
+		assert(buf);
+		memset(buf, 0, bufSize);
+
+		buf->Count = components.size();
+
+		size_t i = 0;
+		for (iwu::ref<Component> component : components) {
+			buf->Components[i++] = component;
+		}
+
+		return iwu::ref<ComponentQuery>(buf, free);
 	}
 
 	iwu::ref<Archetype>& Space::CreateArchetype(
@@ -46,8 +68,8 @@ namespace IwEntity {
 	}
 
 	EntityComponentArray Space::Query(
-		const ComponentQuery& query)
+		const iwu::ref<ComponentQuery>& query)
 	{
-		return m_componentManager.Query(m_archetypeManager.MakeQuery(query));
+		return m_componentManager.Query(query, m_archetypeManager.MakeQuery(query));
 	}
 }

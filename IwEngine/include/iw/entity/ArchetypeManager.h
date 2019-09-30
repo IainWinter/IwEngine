@@ -17,6 +17,6 @@ namespace IwEntity {
 			std::initializer_list<iwu::ref<Component>> components);
 
 		iwu::ref<ArchetypeQuery> MakeQuery(
-			const ComponentQuery& query);
+			const iwu::ref<ComponentQuery>& query);
 	};
 }

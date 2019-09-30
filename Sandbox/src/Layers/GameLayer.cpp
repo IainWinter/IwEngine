@@ -37,6 +37,22 @@ GameLayer::~GameLayer() {
 
 }
 
+struct CameraComponents {
+	IwEngine::Transform* Transform;
+	IwEngine::Camera* Camera;
+};
+
+struct PlayerComponents {
+	IwEngine::Transform* Transform;
+	IwEngine::Model* Model;
+	Player* Player;
+};
+
+struct ModelComponents {
+	IwEngine::Transform* Transform;
+	IwEngine::Model* Model;
+};
+
 int GameLayer::Initialize(
 	IwEngine::InitOptions& options)
 {
@@ -60,10 +76,21 @@ int GameLayer::Initialize(
 	pipeline = RenderQueue.QueuedDevice.Device.CreatePipeline(vs, fs);
 	RenderQueue.QueuedDevice.Device.SetPipeline(pipeline);
 
-	//IwEntity::Entity camera = Space.CreateEntity();
-	//Space.CreateComponent<IwEngine::Transform>(camera, iwm::vector3::zero, iwm::vector3::one, iwm::quaternion::create_from_euler_angles(0, iwm::IW_PI, 0));
+	//IwEntity::Entity camera = Space.CreateEntity<IwEngine::Transform, IwEngine::Camera>();
+	//IwEntity::EntityComponentArray eca1 = Space.Query<IwEngine::Transform, IwEngine::Camera>();
+	//auto [t1, c1] = (*eca1.begin()).Tie<CameraComponents>();
+
 	//float s = .05f;
-	//Space.CreateComponent<IwEngine::Camera>(camera, iwm::matrix4::create_orthographic(1280 * s, 720 * s, 0, -1000)); //camera has flipped x axis
+	//*t1 = IwEngine::Transform { iwm::vector3::zero, iwm::vector3::one, iwm::quaternion::create_from_euler_angles(0, iwm::IW_PI, 0) };
+	//*c1 = IwEngine::Camera    { iwm::matrix4::create_orthographic(1280 * s, 720 * s, 0, -1000) };
+
+	//IwEntity::Entity player = Space.CreateEntity<IwEngine::Transform, IwEngine::Model, Player>();
+	//IwEntity::EntityComponentArray eca2 = Space.Query<IwEngine::Transform, IwEngine::Model, Player>();
+	//auto [t2, m2, p2] = (*eca2.begin()).Tie<PlayerComponents>();
+
+	//*t2 = IwEngine::Transform{ iwm::vector3(0, 0, 1) };
+	//*m2 = IwEngine::Model    { QuadData, QuadMesh, 1U };
+	//*p2 = Player             { 10.0f, 100.0f, 0.1666f, 0.1f };
 
 	//IwEntity::Entity player = Space.CreateEntity();
 	//Space.CreateComponent<IwEngine::Transform>(player, iwm::vector3(0, 0, 1));
@@ -83,36 +110,34 @@ int GameLayer::Initialize(
 void GameLayer::Update() {
 	UpdateSystems();
 
-	/*for (auto c : Space.ViewComponents<IwEngine::Transform, IwEngine::Camera>()) {
-		auto& transform = c.GetComponent<IwEngine::Transform>();
-		auto& camera    = c.GetComponent<IwEngine::Camera>();
+	for (auto c : Space.Query<IwEngine::Transform, IwEngine::Camera>()) {
+		auto [transform, camera] = c.Tie<CameraComponents>();
 
 		pipeline->GetParam("proj")
-			->SetAsMat4(camera.Projection);
+			->SetAsMat4(camera->Projection);
 
 		pipeline->GetParam("view")
 			->SetAsMat4(iwm::matrix4::create_look_at(
-				transform.Position,
-				transform.Position - transform.Forward(),
-				transform.Up()));
+				transform->Position,
+				transform->Position - transform->Forward(),
+				transform->Up()));
 	}
 
-	for (auto c : Space.ViewComponents<IwEngine::Transform, IwEngine::Model>()) {
-		auto& transform = c.GetComponent<IwEngine::Transform>();
-		auto& model     = c.GetComponent<IwEngine::Model>();
+	for (auto c : Space.Query<IwEngine::Transform, IwEngine::Model>()) {
+		auto [transform, model] = c.Tie<ModelComponents>();
 
 		pipeline->GetParam("model")
-			->SetAsMat4(transform.Transformation());
+			->SetAsMat4(transform->Transformation());
 
-		for (int i = 0; i < model.MeshCount; i++) {
-			IwGraphics::Mesh& mesh = model.Meshes[i];
+		for (int i = 0; i < model->MeshCount; i++) {
+			IwGraphics::Mesh& mesh = model->Meshes[i];
 			if (mesh.IndexBuffer.initialized() && mesh.VertexArray.initialized()) {
 				RenderQueue.QueuedDevice.Device.SetVertexArray(mesh.VertexArray.value());
 				RenderQueue.QueuedDevice.Device.SetIndexBuffer(mesh.IndexBuffer.value());
 				RenderQueue.QueuedDevice.Device.DrawElements(mesh.FaceCount, 0);
 			}
 		}
-	}*/
+	}
 
 	RenderQueue.Execute();
 }
@@ -126,17 +151,17 @@ void GameLayer::ImGui() {
 
 	ImGui::Text("sdfsdf");
 
-	//for (auto entity : Space.Query<Player>()) {
-	//	Player player = entity->Components->Tie<Player>();
-	//	
-	//	float cooldown = player.DashCooldown + player.DashTime;
+	for (auto entity : Space.Query<Player>()) {
+		Player player = entity.Tie<Player>();
+		
+		float cooldown = player.DashCooldown + player.DashTime;
 
-	//	ImGui::Text("Dash frames: %f",
-	//		player.DashTime > 0 ? player.DashTime : 0);
+		ImGui::Text("Dash frames: %f",
+			player.DashTime > 0 ? player.DashTime : 0);
 
-	//	ImGui::Text("Dash cooldown frames: %f",
-	//		cooldown > 0 ? cooldown : 0);
-	//}
+		ImGui::Text("Dash cooldown frames: %f",
+			cooldown > 0 ? cooldown : 0);
+	}
 
 	ImGui::End();
 }

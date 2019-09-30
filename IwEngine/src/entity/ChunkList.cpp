@@ -1,7 +1,89 @@
 #include "iw/entity/ChunkList.h"
 #include <assert.h>
+#include "iw/log/logger.h"
 
 namespace IwEntity {
+	ChunkList::iterator& ChunkList::iterator::operator++() {
+		if (m_chunk->IsLast(m_index)) {
+			m_chunk = m_chunk->Next;
+		}
+		
+		m_index++;
+		while (!m_chunk->IsLast(m_index)
+			&& !m_chunk->GetEntity(m_index)->Alive)
+		{
+			m_index++;
+		}
+
+		// replace with free list like thing but for valid entities 
+		
+		return *this;
+	}
+
+	bool ChunkList::iterator::operator==(
+		const iterator& itr)
+	{
+		return this->m_chunk == itr.m_chunk
+			&& this->m_index == itr.m_index;
+	}
+
+	bool ChunkList::iterator::operator!=(
+		const iterator& itr)
+	{
+		return !operator==(itr);
+	}
+
+	ComponentData& ChunkList::iterator::operator*() {
+		for (size_t i = 0; i < m_indices->Count; i++) {
+			m_data->Components[i] = m_chunk->GetComponentData(
+				m_archetype->Layout[m_indices->Indices[i]], m_index);
+		}
+
+		return *m_data;
+
+		//return *((Entity*)m_chunk->Buffer + m_index); // todo: temp
+	}
+
+	ChunkList::iterator::iterator(
+		Chunk* chunk,
+		size_t index,
+		const iwu::ref<Archetype>& archetype,
+		const iwu::ref<ComponentQuery>& query)
+		: m_chunk(chunk)
+		, m_index(index)
+		, m_archetype(archetype)
+	{
+		size_t bufSize = sizeof(ComponentData)
+			+ sizeof(size_t)
+			* query->Count; // +1; // for entity
+
+		ComponentData* buf = (ComponentData*)malloc(bufSize);
+		assert(buf);
+		memset(buf, 0, bufSize);
+
+		m_data = iwu::ref<ComponentData>(buf, free);
+
+		size_t bufSize1 = sizeof(ComponentDataIndices)
+			+ sizeof(size_t)
+			* query->Count; // +1; // for entity
+
+		ComponentDataIndices* buf1 = (ComponentDataIndices*)malloc(bufSize);
+		assert(buf1);
+		memset(buf1, 0, bufSize1);
+
+		buf1->Count = query->Count;
+		for (size_t i = 0; i < query->Count; i++) {
+			for (size_t j = 0; j < archetype->Count; j++) {
+				if (query->Components[i]->Type == archetype->Layout[j].Component->Type) {
+					buf1->Indices[i] = j;
+					break;
+				}
+			}
+		}
+
+		m_indices = iwu::ref<ComponentDataIndices>(buf1, free);
+	}
+
 	ChunkList::ChunkList(
 		const iwu::ref<Archetype>& archetype,
 		size_t chunkSize)
@@ -60,8 +142,8 @@ namespace IwEntity {
 				}
 
 				else {
-					m_current = nullptr;   //This needs to be looked at, maybe 
-					m_chunks.clear(); // might need to delete sooner
+					m_current = nullptr; // This needs to be looked at, maybe 
+					m_chunks.clear();    //  might need to delete sooner
 					m_chunks.shrink_to_fit();
 					m_count = 0;
 				}
@@ -75,20 +157,25 @@ namespace IwEntity {
 		return false;
 	}
 
-	ChunkList::iterator ChunkList::begin() {
+	ChunkList::iterator ChunkList::begin(
+		const iwu::ref<ComponentQuery>& query)
+	{
 		if (m_chunks.size() == 0) {
-			return iterator(nullptr, 0);
+			return iterator(nullptr, 0, m_archetype, query);
 		}
 
-		return iterator(m_chunks.front(), 0);
+		return iterator(m_chunks.front(), 0, m_archetype, query);
 	}
 
-	ChunkList::iterator ChunkList::end() {
+	ChunkList::iterator ChunkList::end(
+		const iwu::ref<ComponentQuery>& query)
+	{
 		if (m_chunks.size() == 0) {
-			return iterator(nullptr, 0);
+			return iterator(nullptr, 0, m_archetype, query);
 		}
 
-		return iterator(m_chunks.back(), m_chunks.back()->Count);
+		Chunk* c = m_chunks.back();
+		return iterator(c, c->LastIndex(), m_archetype, query);
 	}
 
 	Chunk* ChunkList::FindChunk(
@@ -108,6 +195,7 @@ namespace IwEntity {
 		memset(chunk, 0, m_chunkSize);
 
 		chunk->EntityIndex = m_count;
+		chunk->Capacity    = m_chunkCapacity;
 
 		m_chunks.push_back(chunk);
 
@@ -175,7 +263,7 @@ namespace IwEntity {
 		const ArchetypeLayout& layout,
 		size_t index)
 	{
-		return chunk->GetComponentStream(m_chunkCapacity, layout)
+		return chunk->GetComponentStream(layout)
 			+ layout.Component->Size
 			* (index - chunk->EntityIndex);
 	}

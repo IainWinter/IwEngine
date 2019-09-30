@@ -46,15 +46,15 @@ namespace IwEntity {
 	}
 
 	iwu::ref<ArchetypeQuery> ArchetypeManager::MakeQuery(
-		const ComponentQuery& query)
+		const iwu::ref<ComponentQuery>& query)
 	{
 		std::vector<size_t> matches;
 		for (auto& archetype : m_archetypes) {
 			bool match = false;
-			for (size_t i = 0; i < query.All.size(); i++) {
+			for (size_t i = 0; i < query->Count; i++) {
 				bool hasComponent = false;
 				for (size_t j = 0; j < archetype->Count; j++) {
-					if (query.All[i] == archetype->Layout[j].Component) {
+					if (query->Components[i] == archetype->Layout[j].Component) {
 						hasComponent = true;
 						break;
 					}
@@ -67,38 +67,38 @@ namespace IwEntity {
 				}
 			}
 
-			if (query.Any.size() > 0) {
-				bool hasComponent = false;
-				for (size_t i = 0; i < query.Any.size(); i++) {
-					for (size_t j = 0; j < archetype->Count; j++) {
-						if (query.Any[j] == archetype->Layout[i].Component) {
-							hasComponent = true;
-							break;
-						}
-					}
-
-					if (hasComponent) {
-						break;
-					}
-				}
-
-				match = hasComponent;
-			}
-
-			if (query.None.size() > 0) {
-				for (size_t i = 0; i < query.None.size(); i++) {
-					for (size_t j = 0; j < archetype->Count; j++) {
-						if (query.Any[j] == archetype->Layout[i].Component) {
-							match = false;
-							break;
-						}
-					}
-
-					if (!match) {
-						break;
-					}
-				}
-			}
+			//if (query.Any.size() > 0) {
+			//	bool hasComponent = false;
+			//	for (size_t i = 0; i < query.Any.size(); i++) {
+			//		for (size_t j = 0; j < archetype->Count; j++) {
+			//			if (query.Any[j] == archetype->Layout[i].Component) {
+			//				hasComponent = true;
+			//				break;
+			//			}
+			//		}
+			//
+			//		if (hasComponent) {
+			//			break;
+			//		}
+			//	}
+			//
+			//	match = hasComponent;
+			//}
+			//
+			//if (query.None.size() > 0) {
+			//	for (size_t i = 0; i < query.None.size(); i++) {
+			//		for (size_t j = 0; j < archetype->Count; j++) {
+			//			if (query.Any[j] == archetype->Layout[i].Component) {
+			//				match = false;
+			//				break;
+			//			}
+			//		}
+			//
+			//		if (!match) {
+			//			break;
+			//		}
+			//	}
+			//}
 
 			if (match) {
 				matches.push_back(archetype->Hash);
