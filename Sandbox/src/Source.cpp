@@ -23,9 +23,6 @@ struct Mesh {
 class Game
 	: public IwEngine::Application
 {
-private:
-	//IwEntity2::Space space;
-
 public:
 	Game() {
 		InputManager.CreateDevice<IwInput::Mouse>();
@@ -56,23 +53,23 @@ public:
 		}
 
 		IwEngine::Time::Update();
-		LOG_INFO << "Create: " << IwEngine::Time::DeltaTime();
+		LOG_INFO << "Created in: " << IwEngine::Time::DeltaTime();
 
 		IwEntity::EntityComponentArray eca1 = space.Query<Position, Velocity>();
 
 		IwEngine::Time::Update();
-		LOG_INFO << "Query: " << IwEngine::Time::DeltaTime();
+		LOG_INFO << "Queried in: " << IwEngine::Time::DeltaTime();
 
-		int i = 0;
-		for (auto& components : eca1) {
-			auto [pos, vel] = components.Tie<PhysicalComponents>();
+		int i = 1;
+		for (auto entity : eca1) {
+			auto [pos, vel] = entity.Components.Tie<PhysicalComponents>();
 			pos->x = 1;
 			vel->x = 2;
 			i++;
 		}
 
 		IwEngine::Time::Update();
-		LOG_INFO << "Iterate: " << IwEngine::Time::DeltaTime();
+		LOG_INFO << "Iterated in: " << IwEngine::Time::DeltaTime();
 
 		LOG_INFO << i;
 

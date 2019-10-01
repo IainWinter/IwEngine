@@ -111,7 +111,7 @@ void GameLayer::Update() {
 	UpdateSystems();
 
 	for (auto c : Space.Query<IwEngine::Transform, IwEngine::Camera>()) {
-		auto [transform, camera] = c.Tie<CameraComponents>();
+		auto [transform, camera] = c.Components.Tie<CameraComponents>();
 
 		pipeline->GetParam("proj")
 			->SetAsMat4(camera->Projection);
@@ -124,7 +124,7 @@ void GameLayer::Update() {
 	}
 
 	for (auto c : Space.Query<IwEngine::Transform, IwEngine::Model>()) {
-		auto [transform, model] = c.Tie<ModelComponents>();
+		auto [transform, model] = c.Components.Tie<ModelComponents>();
 
 		pipeline->GetParam("model")
 			->SetAsMat4(transform->Transformation());
@@ -152,7 +152,7 @@ void GameLayer::ImGui() {
 	ImGui::Text("sdfsdf");
 
 	for (auto entity : Space.Query<Player>()) {
-		Player player = entity.Tie<Player>();
+		Player player = entity.Components.Tie<Player>();
 		
 		float cooldown = player.DashCooldown + player.DashTime;
 
