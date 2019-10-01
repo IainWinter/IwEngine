@@ -26,7 +26,7 @@ class Game
 public:
 	Game() {
 		InputManager.CreateDevice<IwInput::Mouse>();
-		//InputManager.CreateDevice<IwInput::RawKeyboard>();
+		InputManager.CreateDevice<IwInput::RawKeyboard>();
 
 		PushLayer<GameLayer>();
 	}
@@ -56,22 +56,18 @@ public:
 		LOG_INFO << "Created in: " << IwEngine::Time::DeltaTime();
 
 		IwEntity::EntityComponentArray eca1 = space.Query<Position, Velocity>();
-
+		
 		IwEngine::Time::Update();
 		LOG_INFO << "Queried in: " << IwEngine::Time::DeltaTime();
 
-		int i = 1;
-		for (auto entity : eca1) {
+		for (auto entity : space.Query<Position, Velocity>()) {
 			auto [pos, vel] = entity.Components.Tie<PhysicalComponents>();
 			pos->x = 1;
 			vel->x = 2;
-			i++;
 		}
 
 		IwEngine::Time::Update();
 		LOG_INFO << "Iterated in: " << IwEngine::Time::DeltaTime();
-
-		LOG_INFO << i;
 
 		return 0;
 	}

@@ -252,7 +252,7 @@ namespace IwEngine {
 	{
 		//Input events
 		inputManager->HandleEvent(Id(), msg, wParam, lParam);
-		
+
 		Event* e;
 		switch (msg) {
 			case WM_SIZE:

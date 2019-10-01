@@ -9,8 +9,8 @@ namespace IwEngine {
 		typename _event_t>
 	_event_t Translate(
 		int event,
-		int wParam,
-		long lParam)
+		size_t wParam,
+		size_t lParam)
 	{
 		LOW_WARNING << "No translation exists for event " << event
 			<< " {wParam = " << wParam << ", lParam" << lParam << "}";
@@ -21,10 +21,9 @@ namespace IwEngine {
 	template<>
 	WindowResizedEvent Translate(
 		int event,
-		int wParam,
-		long lParam)
+		size_t wParam,
+		size_t lParam)
 	{
 		return WindowResizedEvent(LOWORD(lParam), HIWORD(lParam));
 	}
-
 }

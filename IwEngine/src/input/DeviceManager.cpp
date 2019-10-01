@@ -46,7 +46,9 @@ namespace IwInput {
 
 #ifdef IW_PLATFORM_WINDOWS
 #include <Windows.h>
-	void SpecialProcess(OsEvent& event) {
+	void SpecialProcess(
+		OsEvent& event)
+	{
 		if (event.Message != WM_INPUT) {
 			return;
 		}
@@ -70,7 +72,7 @@ namespace IwInput {
 			return;
 		}
 
-		event.LParam = (long)lpb;
+		event.LParam = (size_t)lpb;
 	}
 #endif
 }

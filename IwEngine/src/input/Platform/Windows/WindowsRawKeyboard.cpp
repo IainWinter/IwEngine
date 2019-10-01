@@ -39,6 +39,11 @@ namespace IwInput {
 			RAWKEYBOARD keyboard = raw->data.keyboard;
 
 			InputEvent event(KEYBOARD, event.WindowId);
+
+			if (keyboard.VKey == VK_UP) {
+				LOG_INFO << keyboard.VKey;
+			}
+
 			event.Name  = Translate(keyboard.VKey);
 			event.State = !keyboard.Flags;
 

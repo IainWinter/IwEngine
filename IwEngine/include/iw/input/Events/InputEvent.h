@@ -7,10 +7,10 @@
 namespace IwInput {
 #ifdef IW_PLATFORM_WINDOWS
 	struct OsEvent {
-		int WindowId;
-		int Message;
-		unsigned int  WParam;
-		unsigned long LParam;
+		int    WindowId;
+		int    Message;
+		size_t WParam;
+		size_t LParam;
 	};
 #endif
 	struct InputEvent {
