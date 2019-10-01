@@ -5,13 +5,6 @@
 
 namespace IwEntity {
 	iwu::ref<Component>& Space::RegisterComponent(
-		std::type_index type,
-		size_t size)
-	{
-		return m_componentManager.RegisterComponent(type, size);
-	}
-
-	iwu::ref<Component>& Space::RegisterComponent(
 		ComponentType type,
 		size_t size)
 	{
@@ -21,7 +14,7 @@ namespace IwEntity {
 	iwu::ref<Component>& Space::GetComponent(
 		ComponentType type)
 	{
-		m_componentManager.GetComponent(type);
+		return m_componentManager.GetComponent(type);
 	}
 
 	iwu::ref<ComponentQuery> Space::MakeQuery(
