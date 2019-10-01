@@ -30,7 +30,7 @@ namespace IwEntity {
 			return itr->second;
 		}
 
-		return iwu::ref<Component>();
+		return iwu::ref<Component>(nullptr);
 	}
 
 	size_t ComponentManager::ReserveEntityComponents(
