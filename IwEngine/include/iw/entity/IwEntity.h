@@ -12,8 +12,5 @@
 #include <typeindex>
 
 namespace IwEntity {
-	using EntityIndex     = unsigned int;
-	using ComponentId     = unsigned int;
-
 	using ComponentType = std::type_index;
 }
