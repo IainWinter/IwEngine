@@ -64,6 +64,10 @@ namespace IwEntity {
 		bool FreeComponents(
 			size_t index);
 
+		void* GetComponentData(
+			const iwu::ref<Component>& component,
+			size_t index);
+
 		iterator begin(
 			const iwu::ref<ComponentQuery>& query);
 

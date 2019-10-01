@@ -76,17 +76,17 @@ int GameLayer::Initialize(
 	pipeline = RenderQueue.QueuedDevice.Device.CreatePipeline(vs, fs);
 	RenderQueue.QueuedDevice.Device.SetPipeline(pipeline);
 
-	//IwEntity::Entity camera = Space.CreateEntity<IwEngine::Transform, IwEngine::Camera>();
-	//IwEntity::EntityComponentArray eca1 = Space.Query<IwEngine::Transform, IwEngine::Camera>();
-	//auto [t1, c1] = (*eca1.begin()).Tie<CameraComponents>();
+	float s = .05f;
+	IwEntity::Entity camera = Space.CreateEntity<IwEngine::Transform, IwEngine::Camera>();
+	Space.SetComponentData<IwEngine::Transform>(camera, iwm::vector3::zero, iwm::vector3::one, iwm::quaternion::create_from_euler_angles(0, iwm::IW_PI, 0));
+	Space.SetComponentData<IwEngine::Camera>(camera, iwm::matrix4::create_orthographic(1280 * s, 720 * s, 0, -1000));
+	
+	
+	IwEntity::Entity player = Space.CreateEntity<IwEngine::Transform, IwEngine::Model, Player>();
+	Space.SetComponentData<IwEngine::Transform>(player, iwm::vector3(0, 0, 1));
+	Space.SetComponentData<IwEngine::Model>(player, QuadData, QuadMesh, 1U);
+	Space.SetComponentData<Player>(player, 10.0f, 100.0f, 0.1666f, 0.1f);
 
-	//float s = .05f;
-	//*t1 = IwEngine::Transform { iwm::vector3::zero, iwm::vector3::one, iwm::quaternion::create_from_euler_angles(0, iwm::IW_PI, 0) };
-	//*c1 = IwEngine::Camera    { iwm::matrix4::create_orthographic(1280 * s, 720 * s, 0, -1000) };
-
-	//IwEntity::Entity player = Space.CreateEntity<IwEngine::Transform, IwEngine::Model, Player>();
-	//IwEntity::EntityComponentArray eca2 = Space.Query<IwEngine::Transform, IwEngine::Model, Player>();
-	//auto [t2, m2, p2] = (*eca2.begin()).Tie<PlayerComponents>();
 
 	//*t2 = IwEngine::Transform{ iwm::vector3(0, 0, 1) };
 	//*m2 = IwEngine::Model    { QuadData, QuadMesh, 1U };

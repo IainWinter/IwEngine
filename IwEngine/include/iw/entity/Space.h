@@ -68,6 +68,23 @@ namespace IwEntity {
 		bool DestroyEntity(
 			const Entity& entity);
 
+		template<
+			typename _c,
+			typename... _args>
+		void SetComponentData(
+			const Entity& entity,
+			_args&&... args)
+		{
+			iwu::ref<EntityData>& entityData = m_entityManager.GetEntityData(entity);
+			iwu::ref<Component>&  component  = m_componentManager.GetComponent(typeid(_c));
+
+			_c* data = (_c*)m_componentManager.GetComponentData(entityData, component);
+
+			if (data) {
+				*data = _c{ std::forward<_args>(args)... };
+			}
+		}
+
 		// Querying
 
 		template<

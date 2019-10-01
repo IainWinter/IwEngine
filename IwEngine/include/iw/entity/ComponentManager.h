@@ -37,6 +37,10 @@ namespace IwEntity {
 		bool DestroyEntityComponents(
 			const iwu::ref<EntityData>& entityData);
 
+		void* GetComponentData(
+			const iwu::ref<EntityData>& entityData,
+			const iwu::ref<Component>& component);
+
 		EntityComponentArray Query(
 			const iwu::ref<ComponentQuery>& components,
 			const iwu::ref<ArchetypeQuery>& query);

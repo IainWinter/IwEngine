@@ -58,6 +58,18 @@ namespace IwEntity {
 		return false;
 	}
 
+	void* ComponentManager::GetComponentData(
+		const iwu::ref<EntityData>& entityData,
+		const iwu::ref<Component>& component)
+	{
+		ChunkList* list = FindChunkList(entityData->Archetype);
+		if (list) {
+			return list->GetComponentData(component, entityData->ChunkIndex);
+		}
+
+		return nullptr;
+	}
+
 	EntityComponentArray ComponentManager::Query(
 		const iwu::ref<ComponentQuery>& components,
 		const iwu::ref<ArchetypeQuery>& query)

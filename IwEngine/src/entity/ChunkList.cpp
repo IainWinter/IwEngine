@@ -159,6 +159,25 @@ namespace IwEntity {
 		return false;
 	}
 
+	void* ChunkList::GetComponentData(
+		const iwu::ref<Component>& component,
+		size_t index)
+	{
+		Chunk* chunk = FindChunk(index);
+		if (chunk) {
+			size_t i = 0;
+			for (; i < m_archetype->Count; i++) {
+				if (component->Type == m_archetype->Layout[i].Component->Type) {
+					break;
+				}
+			}
+
+			return chunk->GetComponentData(m_archetype->Layout[i], index);
+		}
+
+		return nullptr;
+	}
+
 	iterator ChunkList::begin(
 		const iwu::ref<ComponentQuery>& query)
 	{
