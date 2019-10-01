@@ -6,13 +6,14 @@
 #include "Archetype.h"
 #include "Component.h"
 #include "ComponentData.h"
+#include "EntityComponentData.h"
 #include <vector>
 #include <assert.h>
 
 namespace IwEntity {
 	class IWENTITY_API ChunkList {
 	public:
-		class IWENTITY_API iterator { // move code to cpp
+		class IWENTITY_API iterator {
 		private:
 			Chunk* m_chunk;
 			size_t m_index;
@@ -29,7 +30,7 @@ namespace IwEntity {
 			bool operator!=(
 				const iterator& itr);
 
-			ComponentData& operator*();
+			EntityComponentData operator*();
 		private:
 			friend class ChunkList;
 

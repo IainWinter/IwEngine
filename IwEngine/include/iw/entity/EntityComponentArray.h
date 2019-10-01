@@ -5,66 +5,44 @@
 #include <vector>
 
 namespace IwEntity {
-	class EntityComponentArray {
+	class IWENTITY_API EntityComponentArray {
+	private:
+		using ChunkListVec    = std::vector<ChunkList::iterator>;
+		using ChunkListVecItr = ChunkListVec::iterator;
 	public:
-		class iterator { // move code to cpp
+		class IWENTITY_API iterator {
 		public:
 		private:
-			std::vector<ChunkList::iterator>::iterator m_iterator;
-			std::vector<ChunkList::iterator>::iterator m_endIterator;
+			ChunkListVecItr m_iterator;
+			ChunkListVecItr m_endIterator;
 
 		public:
-			iterator& operator++() {
-				++*m_iterator;
-
-				if (*m_iterator == *m_endIterator) {
-					++m_iterator;
-					++m_endIterator;
-				}
-
-				return *this;
-			}
+			iterator& operator++();
 
 			bool operator==(
-				const iterator& itr)
-			{
-				return this->m_iterator == itr.m_iterator;
-			}
+				const iterator& itr);
 
 			bool operator!=(
-				const iterator& itr)
-			{
-				return !operator==(itr);
-			}
+				const iterator& itr);
 
-			ComponentData& operator*() {
-				return **m_iterator;
-			}
+			EntityComponentData operator*();
 		private:
 			friend class EntityComponentArray;
 
 			iterator(
-				const std::vector<ChunkList::iterator>::iterator& begin,
-				const std::vector<ChunkList::iterator>::iterator& end)
-				: m_iterator(begin)
-				, m_endIterator(end)
-			{}
+				const ChunkListVecItr& begin,
+				const ChunkListVecItr& end);
 		};
 	private:
-		std::vector<ChunkList::iterator> m_begins;
-		std::vector<ChunkList::iterator> m_ends;
+		ChunkListVec m_begins;
+		ChunkListVec m_ends;
 
 	public:
 		EntityComponentArray(
-			std::vector<ChunkList::iterator>&& begins,
-			std::vector<ChunkList::iterator>&& ends);
+			ChunkListVec&& begins,
+			ChunkListVec&& ends);
 
-		iterator begin() {
-			return iterator(m_begins.begin(), m_ends.begin());
-		}
-
-		iterator end() {
-			return iterator(m_begins.end(), m_ends.end());
-		}
+		iterator begin();
+		iterator end();
 	};
 }

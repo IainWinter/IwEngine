@@ -3,7 +3,9 @@
 #include "iw/log/logger.h"
 
 namespace IwEntity {
-	ChunkList::iterator& ChunkList::iterator::operator++() {
+	using iterator = ChunkList::iterator;
+
+	iterator& iterator::operator++() {
 		if (m_chunk->IsLast(m_index)) {
 			m_chunk = m_chunk->Next;
 		}
@@ -20,31 +22,31 @@ namespace IwEntity {
 		return *this;
 	}
 
-	bool ChunkList::iterator::operator==(
+	bool iterator::operator==(
 		const iterator& itr)
 	{
 		return this->m_chunk == itr.m_chunk
 			&& this->m_index == itr.m_index;
 	}
 
-	bool ChunkList::iterator::operator!=(
+	bool iterator::operator!=(
 		const iterator& itr)
 	{
 		return !operator==(itr);
 	}
 
-	ComponentData& ChunkList::iterator::operator*() {
+	EntityComponentData iterator::operator*() {
 		for (size_t i = 0; i < m_indices->Count; i++) {
 			m_data->Components[i] = m_chunk->GetComponentData(
 				m_archetype->Layout[m_indices->Indices[i]], m_index);
 		}
 
-		return *m_data;
+		Entity* entity = m_chunk->GetEntity(m_index);
 
-		//return *((Entity*)m_chunk->Buffer + m_index); // todo: temp
+		return EntityComponentData { entity->Index, entity->Version, *m_data };
 	}
 
-	ChunkList::iterator::iterator(
+	iterator::iterator(
 		Chunk* chunk,
 		size_t index,
 		const iwu::ref<Archetype>& archetype,
@@ -55,7 +57,7 @@ namespace IwEntity {
 	{
 		size_t bufSize = sizeof(ComponentData)
 			+ sizeof(size_t)
-			* query->Count; // +1; // for entity
+			* query->Count;
 
 		ComponentData* buf = (ComponentData*)malloc(bufSize);
 		assert(buf);
@@ -65,7 +67,7 @@ namespace IwEntity {
 
 		size_t bufSize1 = sizeof(ComponentDataIndices)
 			+ sizeof(size_t)
-			* query->Count; // +1; // for entity
+			* query->Count;
 
 		ComponentDataIndices* buf1 = (ComponentDataIndices*)malloc(bufSize);
 		assert(buf1);
@@ -157,7 +159,7 @@ namespace IwEntity {
 		return false;
 	}
 
-	ChunkList::iterator ChunkList::begin(
+	iterator ChunkList::begin(
 		const iwu::ref<ComponentQuery>& query)
 	{
 		if (m_chunks.size() == 0) {
@@ -167,7 +169,7 @@ namespace IwEntity {
 		return iterator(m_chunks.front(), 0, m_archetype, query);
 	}
 
-	ChunkList::iterator ChunkList::end(
+	iterator ChunkList::end(
 		const iwu::ref<ComponentQuery>& query)
 	{
 		if (m_chunks.size() == 0) {
