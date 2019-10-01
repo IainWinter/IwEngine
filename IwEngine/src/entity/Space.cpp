@@ -11,6 +11,19 @@ namespace IwEntity {
 		return m_componentManager.RegisterComponent(type, size);
 	}
 
+	iwu::ref<Component>& Space::RegisterComponent(
+		ComponentType type,
+		size_t size)
+	{
+		return m_componentManager.RegisterComponent(type, size);
+	}
+
+	iwu::ref<Component>& Space::GetComponent(
+		ComponentType type)
+	{
+		m_componentManager.GetComponent(type);
+	}
+
 	iwu::ref<ComponentQuery> Space::MakeQuery(
 		std::initializer_list<iwu::ref<Component>> components)
 	{

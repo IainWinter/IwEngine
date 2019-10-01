@@ -22,16 +22,17 @@ namespace IwEntity {
 		}
 
 		iwu::ref<Component>& RegisterComponent(
-			std::type_index type,
+			ComponentType type,
 			size_t size);
 
-		//template<
-		//	typename _c>
-		//iwu::ref<Component> GetComponent() {
-		//	return GetComponent(typeid(_c));
-		//}
+		template<
+			typename _c>
+		iwu::ref<Component>& GetComponent() {
+			return GetComponent(typeid(_c));
+		}
 
-		//iwu::ref<Component> GetComponent();
+		iwu::ref<Component>& GetComponent(
+			ComponentType type);
 
 		template<
 			typename... _cs>
