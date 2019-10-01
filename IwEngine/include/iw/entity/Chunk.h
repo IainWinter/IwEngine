@@ -5,7 +5,7 @@
 #include "Entity.h"
 
 namespace IwEntity {
-	struct Chunk {
+	struct IWENTITY_API Chunk {
 		Chunk* Next;
 		Chunk* Previous;
 

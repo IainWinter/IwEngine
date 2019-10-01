@@ -8,7 +8,7 @@
 namespace IwEntity {
 	using ComponentType = std::type_index;
 
-	struct Component {
+	struct IWENTITY_API Component {
 		size_t Type;
 		size_t Size;
 		const char* Name;
