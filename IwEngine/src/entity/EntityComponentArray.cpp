@@ -4,7 +4,7 @@ namespace IwEntity {
 	using iterator = EntityComponentArray::iterator;
 
 	iterator& iterator::operator++() {
-		++* m_iterator;
+		++*m_iterator;
 
 		if (*m_iterator == *m_endIterator) {
 			++m_iterator;

@@ -19,7 +19,7 @@ PlayerSystem::~PlayerSystem()
 }
 
 void PlayerSystem::Update(
-	View& view)
+	IwEntity::EntityComponentArray& view)
 {
 	for (auto entity : view) {
 		auto [ transform, player ] = entity.Components.Tie<Components>();

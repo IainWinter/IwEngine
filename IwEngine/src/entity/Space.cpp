@@ -65,12 +65,12 @@ namespace IwEntity {
 	}
 
 	bool Space::DestroyEntity(
-		const Entity& entity)
+		size_t index)
 	{
-		iwu::ref<EntityData>& entityData = m_entityManager.GetEntityData(entity);
+		iwu::ref<EntityData>& entityData = m_entityManager.GetEntityData(index);
 
 		return m_componentManager.DestroyEntityComponents(entityData)
-			&& m_entityManager.DestroyEntity(entity);
+			&& m_entityManager.DestroyEntity(index);
 	}
 
 	EntityComponentArray Space::Query(

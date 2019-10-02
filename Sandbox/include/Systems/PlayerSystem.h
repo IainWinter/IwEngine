@@ -15,5 +15,5 @@ public:
 	~PlayerSystem();
 
 	void Update(
-		View& view) override;
+		IwEntity::EntityComponentArray& view) override;
 };

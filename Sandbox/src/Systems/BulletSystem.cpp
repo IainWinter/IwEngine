@@ -18,17 +18,17 @@ BulletSystem::~BulletSystem()
 }
 
 void BulletSystem::Update(
-	View& view)
+	IwEntity::EntityComponentArray& view)
 {
-	//for (auto entity : view) {
-	//	auto [transform, bullet] = entity->Components->Tie<Components>();
+	for (auto entity : view) {
+		auto [transform, bullet] = entity.Components.Tie<Components>();
 
-	//	if (bullet->Type == LINE) {
-	//		transform->Position += iwm::vector3(1, 1, 0) * transform->Rotation * bullet->Speed * IwEngine::Time::DeltaTime();
-	//	}
+		if (bullet->Type == LINE) {
+			transform->Position += iwm::vector3(1, 1, 0) * transform->Rotation * bullet->Speed * IwEngine::Time::DeltaTime();
+		}
 
-	//	if (transform->Position.x > 65 || transform->Position.x < -65 || transform->Position.y > 36 || transform->Position.y < -36) {
-	//		QueueDestroyEntity(entity->Index);
-	//	}
-	//}
+		if (transform->Position.x > 65 || transform->Position.x < -65 || transform->Position.y > 36 || transform->Position.y < -36) {
+			QueueDestroyEntity(entity.Index);
+		}
+	}
 }

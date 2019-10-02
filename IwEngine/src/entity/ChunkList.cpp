@@ -9,12 +9,14 @@ namespace IwEntity {
 		if (m_chunk->IsLast(m_index)) {
 			m_chunk = m_chunk->Next;
 		}
-		
+
 		m_index++;
-		while (!m_chunk->IsLast(m_index)
-			&& !m_chunk->GetEntity(m_index)->Alive)
-		{
-			m_index++;
+		if (m_chunk) {
+			while (!m_chunk->IsLast(m_index)
+				&& !m_chunk->GetEntity(m_index)->Alive)
+			{
+				m_index++;
+			}
 		}
 
 		// replace with free list like thing but for valid entities 
@@ -117,6 +119,8 @@ namespace IwEntity {
 		if (chunk) {
 			chunk->ReinstateComponents();
 
+			m_count++;
+
 			return true;
 		}
 
@@ -129,6 +133,8 @@ namespace IwEntity {
 		Chunk* chunk = FindChunk(index);
 		if (chunk) {
 			chunk->FreeComponents();
+
+			LOG_INFO << chunk->Count;
 
 			Entity* entityComponent = chunk->GetEntity(index);
 			entityComponent->Alive = false;
@@ -152,6 +158,8 @@ namespace IwEntity {
 
 				free(chunk);
 			}
+
+			m_count--;
 
 			return true;
 		}
@@ -181,7 +189,7 @@ namespace IwEntity {
 	iterator ChunkList::begin(
 		const iwu::ref<ComponentQuery>& query)
 	{
-		if (m_chunks.size() == 0) {
+		if (m_chunks.size() == 0) { // todo: Make this code less ugly
 			return iterator(nullptr, 0, m_archetype, query);
 		}
 
@@ -195,14 +203,13 @@ namespace IwEntity {
 			return iterator(nullptr, 0, m_archetype, query);
 		}
 
-		Chunk* c = m_chunks.back();
-		return iterator(c, c->LastIndex(), m_archetype, query);
+		return iterator(nullptr, m_chunks.back()->LastIndex() + 1, m_archetype, query);
 	}
 
 	Chunk* ChunkList::FindChunk(
 		size_t index)
 	{
-		size_t chunkIndex = index / m_chunkCapacity;
+		size_t chunkIndex = index / m_chunkCapacity; 
 		if (chunkIndex < m_chunks.size()) {
 			return m_chunks.at(chunkIndex);
 		}

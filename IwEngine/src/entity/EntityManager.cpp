@@ -29,9 +29,9 @@ namespace IwEntity {
 	}
 
 	bool EntityManager::DestroyEntity(
-		const Entity& entity)
+		size_t index)
 	{
-		iwu::ref<EntityData>& dead = m_entities.at(entity.Index);
+		iwu::ref<EntityData>& dead = m_entities.at(index);
 		if (dead->Entity.Alive) {
 			dead->Entity.Alive = false;
 			//dead->Archetype.reset();
@@ -63,8 +63,8 @@ namespace IwEntity {
 	}
 
 	iwu::ref<EntityData>& EntityManager::GetEntityData(
-		const Entity& entity)
+		size_t index)
 	{
-		return m_entities.at(entity.Index);
+		return m_entities.at(index);
 	}
 }

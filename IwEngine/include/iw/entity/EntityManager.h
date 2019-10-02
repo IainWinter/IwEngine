@@ -15,9 +15,9 @@ namespace IwEntity {
 		iwu::ref<EntityData>& CreateEntity();
 
 		bool DestroyEntity(
-			const Entity& entity);
+			size_t index);
 
 		iwu::ref<EntityData>& GetEntityData(
-			const Entity& entity);
+			size_t index);
 	};
 }

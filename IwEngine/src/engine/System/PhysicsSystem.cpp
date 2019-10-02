@@ -9,7 +9,7 @@ namespace IwEngine {
 	{}
 
 	void PhysicsSystem::Update(
-		View& view)
+		IwEntity::EntityComponentArray& view)
 	{
 		IwPhysics::Grid<IwEntity::Entity> grid(iwm::vector3(2));
 		//for (auto components : view) {
