@@ -7,7 +7,7 @@ namespace IwEntity {
 	}
 
 	void Chunk::ReinstateComponents() {
-		Count++;
+		++Count;
 	}
 
 	void Chunk::FreeComponents() {

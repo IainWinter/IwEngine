@@ -66,7 +66,7 @@ namespace IwEntity {
 			const iwu::ref<Archetype>& archetype);
 
 		bool DestroyEntity(
-			const Entity& entity);
+			size_t index); // don't like this but idk how to delete from the iteration if not doing it like this
 
 		template<
 			typename _c,
@@ -75,13 +75,13 @@ namespace IwEntity {
 			const Entity& entity,
 			_args&&... args)
 		{
-			iwu::ref<EntityData>& entityData = m_entityManager.GetEntityData(entity);
+			iwu::ref<EntityData>& entityData = m_entityManager.GetEntityData(entity.Index);
 			iwu::ref<Component>&  component  = m_componentManager.GetComponent(typeid(_c));
 
 			_c* data = (_c*)m_componentManager.GetComponentData(entityData, component);
 
 			if (data) {
-				*data = _c{ std::forward<_args>(args)... };
+				*data = _c { std::forward<_args>(args)... };
 			}
 		}
 

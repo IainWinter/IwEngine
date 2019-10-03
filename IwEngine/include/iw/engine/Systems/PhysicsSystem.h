@@ -16,6 +16,6 @@ namespace IwEngine {
 			IwGraphics::RenderQueue& renderQueue);
 
 		void Update(
-			View& view);
+			IwEntity::EntityComponentArray& view);
 	};
 }

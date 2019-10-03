@@ -23,7 +23,7 @@ public:
 	int Initialize() override;
 
 	void Update(
-		View& view) override;
+		IwEntity::EntityComponentArray& view) override;
 
 	void Destroy() override;
 };

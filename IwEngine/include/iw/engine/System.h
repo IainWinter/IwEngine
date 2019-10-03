@@ -21,21 +21,19 @@ namespace IwEngine {
 	private:
 		const char*                  m_name;
 		//std::queue<std::thread>      m_threads;
-		std::queue<IwEntity::Entity> m_delete; // Probly make it so space can queue component creation at the ComponentArray level because of templated bs
+		std::queue<size_t> m_delete; // Probly make it so space can queue component creation at the ComponentArray level because of templated bs
 
 	protected:
 		IwEntity::Space&         Space;
 		IwGraphics::RenderQueue& RenderQueue;
 
-		using View = IwEntity::EntityComponentArray;
-
 		virtual void Update(
-			View& view) = 0;
+			IwEntity::EntityComponentArray& view) = 0;
 
 		void QueueDestroyEntity(
-			const IwEntity::Entity& entity)
+			size_t index)
 		{
-			m_delete.push(entity);
+			m_delete.push(index);
 		}
 	public:
 		System(
@@ -56,16 +54,16 @@ namespace IwEngine {
 		virtual void Destroy() {}
 
 		void Update() override {
-			IwEntity::EntityComponentArray view = Space.Query<_cs...>();
+			IwEntity::EntityComponentArray eca = Space.Query<_cs...>();
 			// Break up view into Viewlets to execute on seperate threads
 
 			// Execute threads
-			Update(view);
+			Update(eca);
 
 			// Execute queues space operations
 			while (!m_delete.empty()) {
-				IwEntity::Entity& entity = m_delete.front();
-				//Space.DestroyEntity(entity);
+				size_t index = m_delete.front() ;
+				Space.DestroyEntity(index);
 				m_delete.pop();
 			}
 		}
@@ -73,6 +71,5 @@ namespace IwEngine {
 		inline const char* Name() {
 			return m_name;
 		}
-	};
-		
+	};	
 }

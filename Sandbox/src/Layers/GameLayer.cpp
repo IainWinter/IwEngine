@@ -43,9 +43,7 @@ struct CameraComponents {
 };
 
 struct PlayerComponents {
-	IwEngine::Transform* Transform;
-	IwEngine::Model* Model;
-	Player* Player;
+	Player* Players;
 };
 
 struct ModelComponents {
@@ -79,30 +77,21 @@ int GameLayer::Initialize(
 	float s = .05f;
 	IwEntity::Entity camera = Space.CreateEntity<IwEngine::Transform, IwEngine::Camera>();
 	Space.SetComponentData<IwEngine::Transform>(camera, iwm::vector3::zero, iwm::vector3::one, iwm::quaternion::create_from_euler_angles(0, iwm::IW_PI, 0));
-	Space.SetComponentData<IwEngine::Camera>(camera, iwm::matrix4::create_orthographic(1280 * s, 720 * s, 0, -1000));
-	
+	Space.SetComponentData<IwEngine::Camera>   (camera, iwm::matrix4::create_orthographic(1280 * s, 720 * s, 0, -1000));
 	
 	IwEntity::Entity player = Space.CreateEntity<IwEngine::Transform, IwEngine::Model, Player>();
 	Space.SetComponentData<IwEngine::Transform>(player, iwm::vector3(0, 0, 1));
-	Space.SetComponentData<IwEngine::Model>(player, QuadData, QuadMesh, 1U);
-	Space.SetComponentData<Player>(player, 10.0f, 100.0f, 0.1666f, 0.1f);
+	Space.SetComponentData<IwEngine::Model>    (player, QuadData, QuadMesh, 1U);
+	Space.SetComponentData<Player>             (player, 10.0f, 100.0f, 0.1666f, 0.1f);
 
-
-	//*t2 = IwEngine::Transform{ iwm::vector3(0, 0, 1) };
-	//*m2 = IwEngine::Model    { QuadData, QuadMesh, 1U };
-	//*p2 = Player             { 10.0f, 100.0f, 0.1666f, 0.1f };
-
-	//IwEntity::Entity player = Space.CreateEntity();
-	//Space.CreateComponent<IwEngine::Transform>(player, iwm::vector3(0, 0, 1));
-	//Space.CreateComponent<IwEngine::Model>(player, QuadData, QuadMesh, 1U);
-	//Space.CreateComponent<Player>(player, 10.0f, 100.0f, 0.1666f, 0.1f);
-	//Space.CreateComponent<IwPhysics::AABB3D>(player, iwm::vector3::zero, 1.0f);
-
-	//IwEntity::Entity enemy = Space.CreateEntity();
-	//Space.CreateComponent<IwEngine::Transform>(enemy, iwm::vector3(3.5f, 0, 1));
-	//Space.CreateComponent<IwEngine::Model>(enemy, QuadData, QuadMesh, 1U);
-	//Space.CreateComponent<Enemy>(enemy, SPIN, 3.0f, 0.05f, 0.025f, 0.025f);
-	//Space.CreateComponent<IwPhysics::AABB3D>(enemy, iwm::vector3::zero, 1.0f);
+	for (float x = 0; x < 2; x++) {
+		for (float y = 0; y < 2; y++) {
+			IwEntity::Entity enemy = Space.CreateEntity<IwEngine::Transform, IwEngine::Model, Enemy>();
+			Space.SetComponentData<IwEngine::Transform>(enemy, iwm::vector3(x * 4 - 10, y * 4 - 10, 1));
+			Space.SetComponentData<IwEngine::Model>    (enemy, QuadData, QuadMesh, 1U);
+			Space.SetComponentData<Enemy>              (enemy, SPIN, 3.0f, 0.05f, 0.025f, 0.025f);
+		}
+	}
 
 	return Layer::Initialize(options);
 }
@@ -152,16 +141,23 @@ void GameLayer::ImGui() {
 	ImGui::Text("sdfsdf");
 
 	for (auto entity : Space.Query<Player>()) {
-		Player player = entity.Components.Tie<Player>();
+		auto [player] = entity.Components.TieTo<Player>();
 		
-		float cooldown = player.DashCooldown + player.DashTime;
+		float cooldown = player->DashCooldown + player->DashTime;
 
-		ImGui::Text("Dash frames: %f",
-			player.DashTime > 0 ? player.DashTime : 0);
+		ImGui::Text("Dash time: %f",
+			player->DashTime > 0 ? player->DashTime : 0);
 
-		ImGui::Text("Dash cooldown frames: %f",
+		ImGui::Text("Dash cooldown time: %f",
 			cooldown > 0 ? cooldown : 0);
 	}
+
+	int i = 0;
+	for (auto entity : Space.Query<Bullet>()) {
+		++i;
+	}
+
+	ImGui::Text("Bullet count: %i", i);
 
 	ImGui::End();
 }
