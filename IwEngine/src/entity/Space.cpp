@@ -1,6 +1,7 @@
 #pragma once
 
 #include "iw/entity/Space.h"
+#include "iw/log/logger.h"
 #include <assert.h>
 
 namespace IwEntity {
@@ -68,9 +69,13 @@ namespace IwEntity {
 		size_t index)
 	{
 		iwu::ref<EntityData>& entityData = m_entityManager.GetEntityData(index);
+		if (!entityData->Entity.Alive) {
+			LOG_WARNING << "Tried to delete dead entity!";
+			return false;
+		}
 
-		return m_componentManager.DestroyEntityComponents(entityData)
-			&& m_entityManager.DestroyEntity(index);
+		return m_entityManager.DestroyEntity(index)
+			&& m_componentManager.DestroyEntityComponents(entityData);
 	}
 
 	EntityComponentArray Space::Query(

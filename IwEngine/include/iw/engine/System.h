@@ -71,6 +71,5 @@ namespace IwEngine {
 		inline const char* Name() {
 			return m_name;
 		}
-	};
-		
+	};	
 }

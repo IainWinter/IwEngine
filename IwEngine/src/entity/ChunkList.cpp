@@ -12,8 +12,8 @@ namespace IwEntity {
 
 		m_index++;
 		if (m_chunk) {
-			while (!m_chunk->IsLast(m_index)
-				&& !m_chunk->GetEntity(m_index)->Alive)
+			while (!m_chunk->IsLast(m_index + 1)
+				&& !m_chunk->GetEntity(m_index)->Alive) // this might be wrong?
 			{
 				m_index++;
 			}
@@ -44,7 +44,6 @@ namespace IwEntity {
 		}
 
 		Entity* entity = m_chunk->GetEntity(m_index);
-
 		return EntityComponentData { entity->Index, entity->Version, *m_data };
 	}
 
@@ -119,6 +118,9 @@ namespace IwEntity {
 		if (chunk) {
 			chunk->ReinstateComponents();
 
+			Entity* entityComponent = chunk->GetEntity(entityData->ChunkIndex);
+			*entityComponent = entityData->Entity;
+
 			m_count++;
 
 			return true;
@@ -134,10 +136,10 @@ namespace IwEntity {
 		if (chunk) {
 			chunk->FreeComponents();
 
-			LOG_INFO << chunk->Count;
-
 			Entity* entityComponent = chunk->GetEntity(index);
 			entityComponent->Alive = false;
+
+			m_count--;
 
 			//If chunk is empty free it
 			if (chunk->Count == 0) {
@@ -159,7 +161,6 @@ namespace IwEntity {
 				free(chunk);
 			}
 
-			m_count--;
 
 			return true;
 		}

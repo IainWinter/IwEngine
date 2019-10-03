@@ -84,10 +84,14 @@ int GameLayer::Initialize(
 	Space.SetComponentData<IwEngine::Model>    (player, QuadData, QuadMesh, 1U);
 	Space.SetComponentData<Player>             (player, 10.0f, 100.0f, 0.1666f, 0.1f);
 
-	IwEntity::Entity enemy = Space.CreateEntity<IwEngine::Transform, IwEngine::Model, Enemy>();
-	Space.SetComponentData<IwEngine::Transform>(enemy, iwm::vector3(3.5f, 0, 1));
-	Space.SetComponentData<IwEngine::Model>    (enemy, QuadData, QuadMesh, 1U);
-	Space.SetComponentData<Enemy>              (enemy, SPIN, 3.0f, 0.05f, 0.025f, 0.025f);
+	for (float x = 0; x < 2; x++) {
+		for (float y = 0; y < 2; y++) {
+			IwEntity::Entity enemy = Space.CreateEntity<IwEngine::Transform, IwEngine::Model, Enemy>();
+			Space.SetComponentData<IwEngine::Transform>(enemy, iwm::vector3(x * 4 - 10, y * 4 - 10, 1));
+			Space.SetComponentData<IwEngine::Model>    (enemy, QuadData, QuadMesh, 1U);
+			Space.SetComponentData<Enemy>              (enemy, SPIN, 3.0f, 0.05f, 0.025f, 0.025f);
+		}
+	}
 
 	return Layer::Initialize(options);
 }
@@ -148,9 +152,9 @@ void GameLayer::ImGui() {
 			cooldown > 0 ? cooldown : 0);
 	}
 
-	int i = 1;
+	int i = 0;
 	for (auto entity : Space.Query<Bullet>()) {
-		i++;
+		++i;
 	}
 
 	ImGui::Text("Bullet count: %i", i);
