@@ -14,14 +14,23 @@ namespace IwEntity {
 		--Count;
 	}
 
-	bool Chunk::IsLast(
+	bool Chunk::IsEnd(
 		size_t index)
 	{
-		return index == LastIndex();
+		return index == EndIndex();
 	}
 
-	size_t Chunk::LastIndex() {
-		return EntityIndex + CurrentIndex - 1;
+	size_t Chunk::BeginIndex() {
+		size_t i = 0;
+		while (i != EndIndex() && !GetEntity(i)->Alive) {
+			i++;
+		}
+
+		return i;
+	}
+
+	size_t Chunk::EndIndex() {
+		return EntityIndex + CurrentIndex;
 	}
 
 	Entity* Chunk::GetEntity(

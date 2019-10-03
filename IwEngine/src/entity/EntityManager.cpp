@@ -56,7 +56,7 @@ namespace IwEntity {
 			//	m_entities.pop_back();
 			//}
 
-			//return true;
+			return true;
 		}
 
 		return false;

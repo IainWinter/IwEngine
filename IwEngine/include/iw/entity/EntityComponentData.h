@@ -10,6 +10,7 @@ namespace IwEntity {
 
 		size_t& Index;
 		short&  Version;
+		bool&   Alive;
 
 		ComponentData& Components;
 	};

@@ -79,8 +79,8 @@ namespace IwEntity {
 		for (size_t i = 0; i < query->Count; i++) {
 			auto itr = m_componentData.find(query->Hashes[i]);
 			if (itr != m_componentData.end()) {
-				ChunkList::iterator bitr = itr->second.begin(components);
-				ChunkList::iterator eitr = itr->second.end(components);
+				ChunkList::iterator bitr = itr->second.Begin(components);
+				ChunkList::iterator eitr = itr->second.End(components);
 				//if (bitr != eitr) {
 					begins.emplace_back(std::move(bitr));
 					ends  .emplace_back(std::move(eitr));

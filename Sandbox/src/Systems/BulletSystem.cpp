@@ -28,8 +28,6 @@ void BulletSystem::Update(
 		}
 
 		if (transform->Position.x > 65 || transform->Position.x < -65 || transform->Position.y > 36 || transform->Position.y < -36) {
-			LOG_INFO << entity.Index;
-
 			QueueDestroyEntity(entity.Index);
 		}
 	}

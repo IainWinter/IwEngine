@@ -68,10 +68,10 @@ namespace IwEntity {
 			const iwu::ref<Component>& component,
 			size_t index);
 
-		iterator begin(
+		iterator Begin(
 			const iwu::ref<ComponentQuery>& query);
 
-		iterator end(
+		iterator End(
 			const iwu::ref<ComponentQuery>& query);
 	private:
 		Chunk* FindChunk(

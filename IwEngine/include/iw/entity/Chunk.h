@@ -22,10 +22,11 @@ namespace IwEntity {
 
 		void FreeComponents();
 
-		bool IsLast(
+		bool IsEnd(
 			size_t index);
 
-		size_t LastIndex();
+		size_t BeginIndex();
+		size_t EndIndex();
 
 		Entity* GetEntity(
 			size_t index);

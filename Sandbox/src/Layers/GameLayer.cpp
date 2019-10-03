@@ -84,10 +84,10 @@ int GameLayer::Initialize(
 	Space.SetComponentData<IwEngine::Model>    (player, QuadData, QuadMesh, 1U);
 	Space.SetComponentData<Player>             (player, 10.0f, 100.0f, 0.1666f, 0.1f);
 
-	for (float x = 0; x < 2; x++) {
-		for (float y = 0; y < 2; y++) {
+	for (float x = 0; x < 10; x++) {
+		for (float y = 0; y < 10; y++) {
 			IwEntity::Entity enemy = Space.CreateEntity<IwEngine::Transform, IwEngine::Model, Enemy>();
-			Space.SetComponentData<IwEngine::Transform>(enemy, iwm::vector3(x * 4 - 10, y * 4 - 10, 1));
+			Space.SetComponentData<IwEngine::Transform>(enemy, iwm::vector3(x * 3 - 15, y * 3 - 15, 1));
 			Space.SetComponentData<IwEngine::Model>    (enemy, QuadData, QuadMesh, 1U);
 			Space.SetComponentData<Enemy>              (enemy, SPIN, 3.0f, 0.05f, 0.025f, 0.025f);
 		}

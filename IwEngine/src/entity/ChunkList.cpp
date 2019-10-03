@@ -6,18 +6,23 @@ namespace IwEntity {
 	using iterator = ChunkList::iterator;
 
 	iterator& iterator::operator++() {
-		if (m_chunk->IsLast(m_index)) {
-			m_chunk = m_chunk->Next;
-		}
-
-		m_index++;
-		if (m_chunk) {
-			while (!m_chunk->IsLast(m_index + 1)
-				&& !m_chunk->GetEntity(m_index)->Alive) // this might be wrong?
-			{
-				m_index++;
+		do {
+			m_index++;
+			if (m_chunk->IsEnd(m_index)) {
+				m_chunk = m_chunk->Next;
 			}
-		}
+		} while (m_chunk && !m_chunk->GetEntity(m_index)->Alive);
+
+		//
+
+		//m_index++;
+		//if (m_chunk) {
+		//	while (!m_chunk->IsLast(m_index)
+		//		&& !m_chunk->GetEntity(m_index)->Alive) // this might be wrong?
+		//	{
+		//		operator++();
+		//	}
+		//}
 
 		// replace with free list like thing but for valid entities 
 		
@@ -44,7 +49,7 @@ namespace IwEntity {
 		}
 
 		Entity* entity = m_chunk->GetEntity(m_index);
-		return EntityComponentData { entity->Index, entity->Version, *m_data };
+		return EntityComponentData { entity->Index, entity->Version, entity->Alive, *m_data };
 	}
 
 	iterator::iterator(
@@ -187,24 +192,26 @@ namespace IwEntity {
 		return nullptr;
 	}
 
-	iterator ChunkList::begin(
+	iterator ChunkList::Begin(
 		const iwu::ref<ComponentQuery>& query)
 	{
 		if (m_chunks.size() == 0) { // todo: Make this code less ugly
 			return iterator(nullptr, 0, m_archetype, query);
 		}
 
-		return iterator(m_chunks.front(), 0, m_archetype, query);
+		Chunk* chunk = m_chunks.front();
+		return iterator(chunk, chunk->BeginIndex(), m_archetype, query);
 	}
 
-	iterator ChunkList::end(
+	iterator ChunkList::End(
 		const iwu::ref<ComponentQuery>& query)
 	{
 		if (m_chunks.size() == 0) {
 			return iterator(nullptr, 0, m_archetype, query);
 		}
 
-		return iterator(nullptr, m_chunks.back()->LastIndex() + 1, m_archetype, query);
+		Chunk* chunk = m_chunks.back();
+		return iterator(nullptr, chunk->EndIndex(), m_archetype, query);
 	}
 
 	Chunk* ChunkList::FindChunk(
