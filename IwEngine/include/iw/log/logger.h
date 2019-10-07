@@ -40,6 +40,7 @@ namespace iwlog {
 		}
 
 		void flush();
+
 		static logger& instance();
 	private:
 		logger() = default;

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "iw/entity/Space.h"
-#include "iw/log/logger.h"
+//#include "iw/log/logger.h"
 #include <assert.h>
 
 namespace IwEntity {

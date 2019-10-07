@@ -6,13 +6,13 @@
 
 namespace IwEntity {
 	class IWENTITY_API EntityComponentArray {
-	private:
-		using ChunkListVec    = std::vector<ChunkList::iterator>;
-		using ChunkListVecItr = ChunkListVec::iterator;
 	public:
+		using ChunkListVec = std::vector<ChunkList::iterator>;
+
 		class IWENTITY_API iterator {
-		public:
 		private:
+			using ChunkListVecItr = ChunkListVec::iterator;
+
 			ChunkListVecItr m_iterator;
 			ChunkListVecItr m_endIterator;
 

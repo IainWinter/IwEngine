@@ -49,7 +49,7 @@ namespace IwEntity {
 		}
 
 		Entity* entity = m_chunk->GetEntity(m_index);
-		return EntityComponentData { entity->Index, entity->Version, entity->Alive, *m_data };
+		return EntityComponentData { entity->Index, entity->Version, *m_data };
 	}
 
 	iterator::iterator(

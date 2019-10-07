@@ -42,7 +42,7 @@ namespace IwPhysics {
 			cell.Items.push_back(item);
 		}
 
-		size_t Size() {
+		size_t CellCount() {
 			return m_cells.size();
 		}
 	private:

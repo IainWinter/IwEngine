@@ -4,6 +4,7 @@
 #include "ComponentManager.h"
 #include "ArchetypeManager.h"
 #include "EntityManager.h"
+#include "iw/log/logger.h"
 
 namespace IwEntity {
 	class IWENTITY_API Space {
@@ -78,10 +79,15 @@ namespace IwEntity {
 			iwu::ref<EntityData>& entityData = m_entityManager.GetEntityData(entity.Index);
 			iwu::ref<Component>&  component  = m_componentManager.GetComponent(typeid(_c));
 
-			_c* data = (_c*)m_componentManager.GetComponentData(entityData, component);
+			if (component) {
+				_c* data = (_c*)m_componentManager.GetComponentData(entityData, component);
+				if (data) {
+					*data = _c{ std::forward<_args>(args)... };
+				}
+			}
 
-			if (data) {
-				*data = _c { std::forward<_args>(args)... };
+			else {
+				LOG_WARNING << "Tried to set component data of non-registerd component! Entity: " << entity.Index; //not sure if logging should happen here...
 			}
 		}
 

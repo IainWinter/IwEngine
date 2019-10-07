@@ -74,18 +74,19 @@ int GameLayer::Initialize(
 	pipeline = RenderQueue.QueuedDevice.Device.CreatePipeline(vs, fs);
 	RenderQueue.QueuedDevice.Device.SetPipeline(pipeline);
 
-	float s = .05f;
+	float s = .1f;
 	IwEntity::Entity camera = Space.CreateEntity<IwEngine::Transform, IwEngine::Camera>();
 	Space.SetComponentData<IwEngine::Transform>(camera, iwm::vector3::zero, iwm::vector3::one, iwm::quaternion::create_from_euler_angles(0, iwm::IW_PI, 0));
 	Space.SetComponentData<IwEngine::Camera>   (camera, iwm::matrix4::create_orthographic(1280 * s, 720 * s, 0, -1000));
 	
-	IwEntity::Entity player = Space.CreateEntity<IwEngine::Transform, IwEngine::Model, Player>();
+	IwEntity::Entity player = Space.CreateEntity<IwEngine::Transform, IwEngine::Model, Player, IwPhysics::AABB3D>();
 	Space.SetComponentData<IwEngine::Transform>(player, iwm::vector3(0, 0, 1));
 	Space.SetComponentData<IwEngine::Model>    (player, QuadData, QuadMesh, 1U);
 	Space.SetComponentData<Player>             (player, 10.0f, 100.0f, 0.1666f, 0.1f);
+	Space.SetComponentData<IwPhysics::AABB3D>  (player, iwm::vector3(-1), iwm::vector3(1));
 
-	for (float x = 0; x < 10; x++) {
-		for (float y = 0; y < 10; y++) {
+	for (float x = 5; x < 6; x++) {
+		for (float y = 5; y < 6; y++) {
 			IwEntity::Entity enemy = Space.CreateEntity<IwEngine::Transform, IwEngine::Model, Enemy>();
 			Space.SetComponentData<IwEngine::Transform>(enemy, iwm::vector3(x * 3 - 15, y * 3 - 15, 1));
 			Space.SetComponentData<IwEngine::Model>    (enemy, QuadData, QuadMesh, 1U);
