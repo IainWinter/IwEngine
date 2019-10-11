@@ -65,15 +65,25 @@ void EnemySystem::Update(
 		else if (enemy->CanShoot && enemy->FireTime <= enemy->TimeToShoot) {
 			enemy->CanShoot = false;
 
-			IwEntity::Entity spawned = Space.CreateEntity<IwEngine::Transform, IwEngine::Model, Bullet, IwPhysics::AABB3D>();
+			IwEntity::Entity spawned = Space.CreateEntity<IwEngine::Transform, IwEngine::Model, Bullet, IwPhysics::AABB2D>();
 			Space.SetComponentData<IwEngine::Transform>(spawned, 
-				transform->Position + iwm::vector3(1, 1, 0) * transform->Rotation.inverted(), 
+				transform->Position + iwm::vector3(1, 1, 0) * transform->Rotation.inverted(),
 				transform->Scale, 
 				transform->Rotation.inverted());
 				
 			Space.SetComponentData<IwEngine::Model>  (spawned, CircleData, CircleMesh, 1U);
 			Space.SetComponentData<Bullet>           (spawned, LINE, 4.0f);
-			Space.SetComponentData<IwPhysics::AABB3D>(spawned, iwm::vector3(-0.5f), iwm::vector3(0.5f));
+			Space.SetComponentData<IwPhysics::AABB2D>(spawned, iwm::vector2(-0.5f), iwm::vector2(0.5f));
+
+			IwEntity::Entity spawned2 = Space.CreateEntity<IwEngine::Transform, IwEngine::Model, Bullet, IwPhysics::AABB2D>();
+			Space.SetComponentData<IwEngine::Transform>(spawned2,
+				transform->Position - iwm::vector3(1, 1, 0) * transform->Rotation.inverted(),
+				transform->Scale,
+				transform->Rotation.inverted());
+
+			Space.SetComponentData<IwEngine::Model>  (spawned2, CircleData, CircleMesh, 1U);
+			Space.SetComponentData<Bullet>           (spawned2, LINE, -4.0f);
+			Space.SetComponentData<IwPhysics::AABB2D>(spawned2, iwm::vector2(-0.5f), iwm::vector2(0.5f));
 		}
 
 		enemy->FireTime -= IwEngine::Time::DeltaTime();

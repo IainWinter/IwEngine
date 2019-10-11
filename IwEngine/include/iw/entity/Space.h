@@ -84,10 +84,16 @@ namespace IwEntity {
 				if (data) {
 					*data = _c{ std::forward<_args>(args)... };
 				}
+
+				else {
+					LOG_WARNING << "Tried to set component data of non-attached component! Entity: "
+						<< entity.Index << " Version: " << entity.Version;
+				}
 			}
 
 			else {
-				LOG_WARNING << "Tried to set component data of non-registerd component! Entity: " << entity.Index; //not sure if logging should happen here...
+				LOG_WARNING << "Tried to set component data of non-registerd component! Entity: "
+					<< entity.Index << " Version: " << entity.Version;
 			}
 		}
 

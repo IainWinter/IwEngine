@@ -186,6 +186,10 @@ namespace IwEntity {
 				}
 			}
 
+			if (i == m_archetype->Count) {
+				return nullptr;
+			}
+
 			return chunk->GetComponentData(m_archetype->Layout[i], index);
 		}
 
