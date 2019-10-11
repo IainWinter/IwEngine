@@ -31,7 +31,6 @@ namespace iwmath {
 		float b,
 		unsigned int accuracy)
 	{
-		float dif = fabsf(a - b);
-		return dif * fast_pow(10, accuracy) < 1; //didn't speed up much at all :c
+		return fabsf(a - b) * fast_pow(10, accuracy) < 1; //didn't speed up much at all :c
 	}
 }

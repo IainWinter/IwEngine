@@ -1,4 +1,5 @@
 #include "iw/math/vector3.h"
+#include "iw/math/vector2.h"
 #include "iw/math/vector4.h"
 #include "iw/math/matrix3.h"
 #include "iw/math/matrix4.h"
@@ -20,6 +21,25 @@ namespace iwmath {
 		: x(xyz)
 		, y(xyz)
 		, z(xyz) {}
+
+	vector3::vector3(
+		const vector4& xyz)
+		: x(xyz.x)
+		, y(xyz.y)
+		, z(xyz.z) {}
+
+	vector3::vector3(
+		const vector2& xy)
+		: x(xy.x)
+		, y(xy.y)
+		, z(0) {}
+
+	vector3::vector3(
+		const vector2& xy,
+		float z)
+		: x(xy.x)
+		, y(xy.y)
+		, z(z) {}
 
 	vector3::vector3(
 		float x,

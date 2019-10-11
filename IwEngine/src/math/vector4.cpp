@@ -1,6 +1,7 @@
-#include <cmath>
 #include "iw/math/vector4.h"
+#include "iw/math/vector2.h"
 #include "iw/math/matrix4.h"
+#include <cmath>
 
 namespace iwmath {
 	const vector4 vector4::zero   = vector4(0, 0, 0, 0);
@@ -22,6 +23,22 @@ namespace iwmath {
 		, y(xyzw)
 		, z(xyzw)
 		, w(xyzw) {}
+
+	vector4::vector4(
+		const vector2& xy)
+		: x(xy.x)
+		, y(xy.y)
+		, z(0)
+		, w(0) {}
+
+	vector4::vector4(
+		const vector2& xy,
+		float z,
+		float w)
+		: x(xy.x)
+		, y(xy.y)
+		, z(z)
+		, w(w) {}
 
 	vector4::vector4(
 		const vector3& xyz)

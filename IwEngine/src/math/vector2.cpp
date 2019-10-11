@@ -1,4 +1,6 @@
 #include "iw/math/vector2.h"
+#include "iw/math/vector3.h"
+#include "iw/math/vector4.h"
 
 namespace iwmath {
 	const vector2 vector2::zero   = vector2(0, 0);
@@ -14,6 +16,16 @@ namespace iwmath {
 		float xy)
 		: x(xy)
 		, y(xy) {}
+
+	vector2::vector2(
+		const vector3& xy)
+		: x(xy.x)
+		, y(xy.y) {}
+
+	vector2::vector2(
+		const vector4& xy)
+		: x(xy.x)
+		, y(xy.y) {}
 
 	vector2::vector2(
 		float x,

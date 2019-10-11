@@ -1,10 +1,11 @@
 #pragma once
 
 #include "iwmath.h"
-#include "vector3.h"
 #include <ostream>
 
 namespace iwmath {
+	struct vector2;
+	struct vector3;
 	struct matrix4;
 
 	/**
@@ -49,10 +50,19 @@ namespace iwmath {
 			float xyzw);
 
 		vector4(
+			const vector2& xy);
+
+		vector4(
+			const vector2& xy,
+			float z,
+			float w);
+
+		vector4(
 			const vector3& xyz);
 
 		vector4(
-			const vector3& xyz, float w);
+			const vector3& xyz,
+			float w);
 
 		vector4(
 			float x,

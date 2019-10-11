@@ -4,6 +4,8 @@
 #include <ostream>
 
 namespace iwmath {
+	struct vector2;
+	struct vector4;
 	struct matrix3;
 	struct matrix4;
 
@@ -42,6 +44,16 @@ namespace iwmath {
 
 		vector3(
 			float xyz);
+
+		vector3(
+			const vector4& xy);
+
+		vector3(
+			const vector2& xy);
+
+		vector3(
+			const vector2& xy,
+			float z);
 
 		vector3(
 			float x,

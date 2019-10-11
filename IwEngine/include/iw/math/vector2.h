@@ -4,6 +4,9 @@
 #include <ostream>
 
 namespace iwmath {
+	struct vector3;
+	struct vector4;
+
 	/**
 	* Represents a vector or point in 2D.
 	*/
@@ -34,6 +37,12 @@ namespace iwmath {
 
 		vector2(
 			float xy);
+
+		vector2(
+			const vector3& xy);
+
+		vector2(
+			const vector4& xy);
 
 		vector2(
 			float x,
