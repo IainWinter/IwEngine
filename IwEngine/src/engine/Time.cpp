@@ -3,11 +3,11 @@
 
 namespace IwEngine {
 	namespace Time {
-		static Time now           = std::chrono::high_resolution_clock::now();
+		static Time     now       = std::chrono::high_resolution_clock::now();
 		static Duration deltaTime = Duration::zero();
-		static int ticks          = 0;
-		static float time         = 0.0f;
-		static float fixedTime    = 0.2f;
+		static size_t ticks        = 0;
+		static float  time         = 0.0f;
+		static float  fixedTime    = 0.2f;
 
 		void SetFixedTime(
 			float duration) 
@@ -23,7 +23,7 @@ namespace IwEngine {
 			now = std::chrono::high_resolution_clock::now();
 		}
 
-		int Ticks() {
+		size_t Ticks() {
 			return ticks;
 		}
 
@@ -33,6 +33,11 @@ namespace IwEngine {
 
 		float DeltaTime() {
 			return deltaTime.count() / 1000000000.0f;
+		}
+
+		// Idk why this is like 1000 times slower
+		float DeltaTimeNow() {
+			return (std::chrono::high_resolution_clock::now() - now).count() / 1000000000.0f;
 		}
 
 		float FixedTime() {

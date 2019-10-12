@@ -14,22 +14,47 @@ namespace IwEngine {
 		IwPhysics::AABB2D* AABB;
 	};
 
-	float t = 0;
+	//float t = 0;
 
 	void PhysicsSystem::Update(
 		IwEntity::EntityComponentArray& eca)
 	{
-		IwPhysics::Grid<size_t, iwm::vector2> grid(iwm::vector2(10));
-		for (auto entity : eca) {
-			auto [transform, aabb] = entity.Components.Tie<Components>();
-			grid.Insert(entity.Index, *transform, *aabb);
+		//IwPhysics::Grid<size_t, iwm::vector2> grid(iwm::vector2(10));
+		for (auto entityA : eca) {
+			auto [transformA, aabbA] = entityA.Components.Tie<Components>();
+			for (auto entityB : eca) {
+				auto [transformB, aabbB] = entityB.Components.Tie<Components>();
+
+				IwPhysics::AABB2D a = {
+					aabbA->Min + transformA->Position,
+					aabbB->Max + transformA->Position
+				};
+
+				IwPhysics::AABB2D b = {
+					aabbA->Min + transformA->Position,
+					aabbB->Max + transformA->Position
+				};
+
+				if (a.Intersects(b)) {
+					
+					
+					//LOG_INFO << "Intersects";
+				}
+			}
+			//grid.Insert(entity.Index, transform->Position, *aabb);
 		}
 
-		t += Time::DeltaTime();
+		//for (auto entity : Space.Query<Transform, IwPhysics::AABB2D>()) {
+		//	auto [transform, aabb] = entity.Components.Tie<Components>();
+		//	grid.FindPairs(entity.Index, *transform, *aabb);
+
+		//}
+
+		/*t += Time::DeltaTime();
 
 		if (t > .1f) {
 			t = 0;
 			LOG_INFO << grid.CellCount();
-		}
+		}*/
 	}
 }

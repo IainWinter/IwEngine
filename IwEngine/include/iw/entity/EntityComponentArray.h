@@ -12,10 +12,9 @@ namespace IwEntity {
 		// !!! THIS MODIFIES OUTER CONTAINER :c !!!
 		class IWENTITY_API iterator {
 		private:
-			using ChunkListVecItr = ChunkListVec::iterator;
-
-			ChunkListVecItr m_iterator;
-			ChunkListVecItr m_endIterator;
+			ChunkListVec m_itrs;
+			ChunkListVec m_ends;
+			size_t m_index;
 
 		public:
 			iterator& operator++();
@@ -31,8 +30,9 @@ namespace IwEntity {
 			friend class EntityComponentArray;
 
 			iterator(
-				const ChunkListVecItr& begin,
-				const ChunkListVecItr& end);
+				const ChunkListVec& begins,
+				const ChunkListVec& ends,
+				size_t itrIndex);
 		};
 	private:
 		ChunkListVec m_begins;

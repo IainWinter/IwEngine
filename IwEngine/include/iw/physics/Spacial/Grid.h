@@ -1,7 +1,6 @@
 #pragma once
 
 #include "iw/physics/AABB.h"
-#include "iw/data/Components/Transform.h"
 #include <vector>
 #include <unordered_map>
 
@@ -29,10 +28,10 @@ namespace IwPhysics {
 
 		void Insert(
 			const T& item,
-			const IwEngine::Transform& transform,
+			const Dim& position,
 			const AABB& bounds)
 		{
-			Key key = GetKey<Dim>(transform.Position, bounds);
+			Key key = GetKey<Dim>(position, bounds);
 			auto itr = m_cells.find(key);
 			if (itr == m_cells.end()) {
 				itr = m_cells.insert(std::make_pair(key, Cell())).first;

@@ -4,11 +4,10 @@ namespace IwEntity {
 	using iterator = EntityComponentArray::iterator;
 
 	iterator& iterator::operator++() {
-		++*m_iterator;
+		++m_itrs[m_index];
 
-		if (*m_iterator == *m_endIterator) {
-			++m_iterator;
-			++m_endIterator;
+		if (m_itrs[m_index] == m_ends[m_index]) {
+			++m_index;
 		}
 
 		return *this;
@@ -17,7 +16,18 @@ namespace IwEntity {
 	bool iterator::operator==(
 		const iterator& itr)
 	{
-		return this->m_iterator == itr.m_iterator;
+		if (m_index == itr.m_index) {
+			if (m_itrs.size() < m_index) {
+				return m_itrs[m_index] == itr.m_itrs[m_index];
+			}
+
+			return true;
+		}
+
+		return false;
+
+		//return m_index == itr.m_index 
+		//	&& (m_itrs.size() == m_index || m_itrs[m_index] == itr.m_itrs[m_index]);
 	}
 
 	bool iterator::operator!=(
@@ -27,14 +37,16 @@ namespace IwEntity {
 	}
 
 	EntityComponentData iterator::operator*() {
-		return **m_iterator;
+		return *m_itrs[m_index];
 	}
 
 	iterator::iterator(
-		const ChunkListVecItr& begin,
-		const ChunkListVecItr& end)
-		: m_iterator(begin)
-		, m_endIterator(end)
+		const ChunkListVec& begins,
+		const ChunkListVec& ends,
+		size_t itrIndex)
+		: m_itrs(begins)
+		, m_ends(ends)
+		, m_index(itrIndex)
 	{}
 
 	EntityComponentArray::EntityComponentArray(
@@ -45,10 +57,10 @@ namespace IwEntity {
 	{}
 
 	iterator EntityComponentArray::begin() {
-		return iterator(m_begins.begin(), m_ends.begin());
+		return iterator(m_begins, m_ends, 0);
 	}
 
 	iterator EntityComponentArray::end() {
-		return iterator(m_begins.end(), m_ends.end());
+		return iterator(m_begins, m_ends, m_begins.size());
 	}
 }

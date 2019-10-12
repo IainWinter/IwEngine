@@ -30,14 +30,14 @@ namespace IwEntity {
 	}
 
 	bool iterator::operator==(
-		const iterator& itr)
+		const iterator& itr) const
 	{
 		return this->m_chunk == itr.m_chunk
 			&& this->m_index == itr.m_index;
 	}
 
 	bool iterator::operator!=(
-		const iterator& itr)
+		const iterator& itr) const
 	{
 		return !operator==(itr);
 	}

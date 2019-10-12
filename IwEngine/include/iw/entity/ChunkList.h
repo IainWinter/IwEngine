@@ -25,10 +25,10 @@ namespace IwEntity {
 			iterator& operator++();
 
 			bool operator==(
-				const iterator& itr);
+				const iterator& itr) const;
 
 			bool operator!=(
-				const iterator& itr);
+				const iterator& itr) const;
 
 			EntityComponentData operator*();
 		private:
