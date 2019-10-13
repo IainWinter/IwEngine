@@ -17,7 +17,7 @@ namespace IwEntity {
 		const iterator& itr)
 	{
 		if (m_index == itr.m_index) {
-			if (m_itrs.size() < m_index) {
+			if (m_itrs.size() > m_index) {
 				return m_itrs[m_index] == itr.m_itrs[m_index];
 			}
 
