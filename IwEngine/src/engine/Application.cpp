@@ -65,16 +65,26 @@ namespace IwEngine {
 	void Application::Run() {
 		m_running = true;
 
-		float accumulatedTime = 0;
-		while (m_running) {
-			Time::Update();
+		m_updateThread = std::thread([&] {
+			float accumulatedTime = 0;
+			while (m_running) {
+				Time::Update();
 
-			accumulatedTime += Time::DeltaTime();
-			while (accumulatedTime >= Time::FixedTime()) {
-				FixedUpdate();
-				accumulatedTime -= Time::FixedTime();
+				LOG_INFO << Time::DeltaTime();
+
+				accumulatedTime += Time::DeltaTime();
+				while (accumulatedTime >= Time::FixedTime()) {
+					FixedUpdate();
+					accumulatedTime -= Time::FixedTime();
+				}
+
+				for (Layer* layer : m_layers) {
+					layer->UpdateSystems();
+				}
 			}
+		});
 
+		while (m_running) {
 			Update();
 		}
 	}
@@ -94,7 +104,6 @@ namespace IwEngine {
 
 		m_window->Update();
 		m_window->Render();
-
 	}
 
 	void Application::FixedUpdate() {
@@ -115,13 +124,14 @@ namespace IwEngine {
 		Event& e)
 	{
 		switch (e.Type) {
-			case WindowResized:    DispatchEvent((WindowResizedEvent&)e); break;
-			case MouseWheel:       DispatchEvent((MouseWheelEvent&)e);    break;
-			case MouseMoved:       DispatchEvent((MouseMovedEvent&)e);    break;
-			case MouseButton:      DispatchEvent((MouseButtonEvent&)e);   break;
-			case Key:    	       DispatchEvent((KeyEvent&)e);           break;
-			case KeyTyped:         DispatchEvent((KeyTypedEvent&)e);      break;
-			case WindowClosed:     Destroy();                                 break;
+			case MouseWheel:    DispatchEvent((MouseWheelEvent&)e);    break;
+			case MouseMoved:    DispatchEvent((MouseMovedEvent&)e);    break;
+			case MouseButton:   DispatchEvent((MouseButtonEvent&)e);   break;
+			case Key:    	    DispatchEvent((KeyEvent&)e);           break;
+			case KeyTyped:      DispatchEvent((KeyTypedEvent&)e);      break;
+			case WindowResized: DispatchEvent((WindowResizedEvent&)e); break;
+			case WindowMoved:   /*dispatch event*/   break;
+			case WindowClosed:  Destroy(); break;
 			default: LOG_WARNING << "Application mishandled event " + e.Type; break;
 		}
 	}

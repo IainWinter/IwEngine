@@ -9,6 +9,7 @@
 #include "iw/entity/Space.h"
 #include "iw/graphics/RenderQueue.h"
 #include <vector>
+#include <thread>
 
 namespace IwEngine {
 	class IWENGINE_API Application {
@@ -18,6 +19,9 @@ namespace IwEngine {
 		ImGuiLayer*          m_imguiLayer;
 		Stack<Layer*>        m_layers;
 		IwRenderer::IDevice* m_device;
+
+		std::thread m_updateThread; // Update everything but window right now
+		std::thread m_windowThread; // Updates window
 
 	protected:
 		IwEntity::Space         Space;
@@ -35,6 +39,7 @@ namespace IwEngine {
 		virtual void Destroy();
 		virtual void Update();
 		virtual void FixedUpdate();
+		//virtual void Pause();
 
 		virtual void HandleEvent(
 			Event& e);

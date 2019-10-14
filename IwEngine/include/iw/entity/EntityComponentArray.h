@@ -9,7 +9,6 @@ namespace IwEntity {
 	public:
 		using ChunkListVec = std::vector<ChunkList::iterator>;
 
-		// !!! THIS MODIFIES OUTER CONTAINER :c !!!
 		class IWENTITY_API iterator {
 		private:
 			ChunkListVec m_itrs;

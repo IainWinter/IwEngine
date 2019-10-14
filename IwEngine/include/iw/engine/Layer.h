@@ -16,8 +16,6 @@ namespace IwEngine {
 		IwEntity::Space&         Space;
 		IwGraphics::RenderQueue& RenderQueue;
 
-	protected:
-		void UpdateSystems();
 	public:
 		Layer(
 			IwEntity::Space& space,
@@ -29,10 +27,12 @@ namespace IwEngine {
 		virtual int Initialize(
 			InitOptions& options);
 
+
 		virtual void Destroy();
+		virtual void ImGui();
 		virtual void Update();
 		virtual void FixedUpdate();
-		virtual void ImGui();
+
 
 		virtual bool On(WindowResizedEvent& event);
 		virtual bool On(MouseWheelEvent&    event);
@@ -40,6 +40,8 @@ namespace IwEngine {
 		virtual bool On(MouseButtonEvent&   event);
 		virtual bool On(KeyEvent&           event);
 		virtual bool On(KeyTypedEvent&      event);
+
+		void UpdateSystems();
 
 		inline const char* Name() {
 			return m_name;

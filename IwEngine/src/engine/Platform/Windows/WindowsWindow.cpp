@@ -157,10 +157,16 @@ namespace IwEngine {
 
 	void WindowsWindow::Update() {
 		MSG msg;
-		while (PeekMessage(&msg, m_window, 0, 0, PM_REMOVE)) {
+		LOG_INFO << "Begin peek";
+		if (PeekMessage(&msg, m_window, 0, 0, PM_REMOVE)) {
 			TranslateMessage(&msg);
+			LOG_INFO << "Dispatch peek";
+
 			DispatchMessage(&msg);
+
+			LOG_INFO << "Dispatched peek";
 		}
+		LOG_INFO << "End peek";
 	}
 
 	void WindowsWindow::Render() {
@@ -235,6 +241,7 @@ namespace IwEngine {
 		WPARAM wParam,
 		LPARAM lParam)
 	{
+		LOG_INFO << "m " << msg;
 		WindowsWindow* me = reinterpret_cast<WindowsWindow*>(
 			GetWindowLongPtr(hwnd, GWLP_USERDATA));
 		if (me) {
@@ -263,6 +270,9 @@ namespace IwEngine {
 				break;
 			case WM_DESTROY:
 				e = &Event(WindowDestroyed);
+				break;
+			case WM_MOVE:
+				e = &Event(WindowMoved);
 				break;
 			default:
 				e = &Event(NOT_HANDLED);

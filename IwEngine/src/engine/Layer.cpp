@@ -12,12 +12,6 @@ namespace IwEngine {
 
 	Layer::~Layer() {}
 
-	void Layer::UpdateSystems() {
-		for (ISystem* system : m_systems) {
-			system->Update();
-		}
-	}
-
 	int Layer::Initialize(
 		InitOptions& options) 
 	{
@@ -73,5 +67,11 @@ namespace IwEngine {
 		KeyTypedEvent& event)
 	{
 		return false;
+	}
+
+	void Layer::UpdateSystems() {
+		for (ISystem* system : m_systems) {
+			system->Update();
+		}
 	}
 }

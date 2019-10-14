@@ -67,7 +67,6 @@ int GameLayer::Initialize(
 	auto pva = RenderQueue.QueuedDevice.CreateVertexArray(1, buffers, layouts);
 
 	QuadMesh = new IwGraphics::Mesh{ pva, pib, meshData.FaceCount };
-
 	auto vs = RenderQueue.QueuedDevice.Device.CreateVertexShader(iwu::ReadFile("res/sandboxvs.glsl").c_str());
 	auto fs = RenderQueue.QueuedDevice.Device.CreateFragmentShader(iwu::ReadFile("res/sandboxfs.glsl").c_str());
 
@@ -99,8 +98,6 @@ int GameLayer::Initialize(
 }
 
 void GameLayer::Update() {
-	UpdateSystems();
-
 	for (auto c : Space.Query<IwEngine::Transform, IwEngine::Camera>()) {
 		auto [transform, camera] = c.Components.Tie<CameraComponents>();
 
