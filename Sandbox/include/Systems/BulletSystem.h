@@ -14,6 +14,8 @@ public:
 
 	~BulletSystem();
 
+	//void Sync();
+
 	void Update(
 		IwEntity::EntityComponentArray& view) override;
 };

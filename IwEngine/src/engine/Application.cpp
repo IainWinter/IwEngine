@@ -65,26 +65,20 @@ namespace IwEngine {
 	void Application::Run() {
 		m_running = true;
 
-		m_updateThread = std::thread([&] {
-			float accumulatedTime = 0;
-			while (m_running) {
-				Time::Update();
+		//m_updateThread = std::thread([&] {
 
-				LOG_INFO << Time::DeltaTime();
+		//});
 
-				accumulatedTime += Time::DeltaTime();
-				while (accumulatedTime >= Time::FixedTime()) {
-					FixedUpdate();
-					accumulatedTime -= Time::FixedTime();
-				}
-
-				for (Layer* layer : m_layers) {
-					layer->UpdateSystems();
-				}
-			}
-		});
-
+		float accumulatedTime = 0;
 		while (m_running) {
+			Time::Update();
+
+			accumulatedTime += Time::DeltaTime();
+			while (accumulatedTime >= Time::FixedTime()) {
+				FixedUpdate();
+				accumulatedTime -= Time::FixedTime();
+			}
+
 			Update();
 		}
 	}
@@ -94,6 +88,7 @@ namespace IwEngine {
 
 		for (Layer* layer : m_layers) {
 			layer->Update();
+			layer->UpdateSystems();
 		}
 
 		m_imguiLayer->Begin();
