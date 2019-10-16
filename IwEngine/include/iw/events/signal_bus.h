@@ -4,11 +4,11 @@
 
 namespace iwevents {
 	/*
-	Fixes doxygen problem where it does not detect that event_bus<_event_t, _others_t...> 
-	inherits from event_bus<_event_t> and event_bus<_others_t>....
+	Fixes doxygen problem where it does not detect that signal_bus<_event_t, _others_t...> 
+	inherits from signal_bus<_event_t> and signal_bus<_others_t>....
 	*/
 	template<typename... _events_t>
-	class event_bus;
+	class signal_bus;
 
 	/**
 	* @brief Event bus specilization for many event types.
@@ -24,7 +24,7 @@ namespace iwevents {
 	* @tparam _event_t The list of events managed by the event bus.
 	*/
 	template<typename _event_t, typename... _others_t>
-	class event_bus<_event_t, _others_t...> : event_bus<_event_t>, event_bus<_others_t>... {
+	class signal_bus<_event_t, _others_t...> : signal_bus<_event_t>, signal_bus<_others_t>... {
 	public:
 		/**
 		* @brief Subscribes a class instance to the event bus.
@@ -39,8 +39,8 @@ namespace iwevents {
 		void subscribe(std::shared_ptr<_t> instance) {
 			using expanded_events = int[];
 			expanded_events{
-				(event_bus<_event_t>::subscribe(instance), 0),
-				(event_bus<_others_t>::subscribe(instance), 0)...
+				(signal_bus<_event_t>::subscribe(instance), 0),
+				(signal_bus<_others_t>::subscribe(instance), 0)...
 			};
 		}
 
@@ -56,7 +56,7 @@ namespace iwevents {
 		*/
 		template<typename __event_t, void(*_function)(const __event_t&)>
 		void subscribe() {
-			event_bus<__event_t>::template subscribe<_function>();
+			signal_bus<__event_t>::template subscribe<_function>();
 		}
 
 		/**
@@ -72,8 +72,8 @@ namespace iwevents {
 		void unsubscribe(std::shared_ptr<_t> instance) {
 			using expanded_events = int[];
 			expanded_events{
-				(event_bus<_event_t>::template unsubscribe(instance), 0),
-				(event_bus<_others_t>::template unsubscribe(instance), 0)...
+				(signal_bus<_event_t>::template unsubscribe(instance), 0),
+				(signal_bus<_others_t>::template unsubscribe(instance), 0)...
 			};
 		}
 
@@ -87,7 +87,7 @@ namespace iwevents {
 		*/
 		template<typename __event_t, void(*_function)(const __event_t&)>
 		void unsubscribe() {
-			event_bus<__event_t>::template unsubscribe<_function>();
+			signal_bus<__event_t>::template unsubscribe<_function>();
 		}
 
 		/**
@@ -102,7 +102,7 @@ namespace iwevents {
 		*/
 		template<typename __event_t, typename... _args_t>
 		void publish(_args_t&&... args) {
-			event_bus<__event_t>::template publish(args...);
+			signal_bus<__event_t>::template publish(args...);
 		}
 	};
 
@@ -120,7 +120,7 @@ namespace iwevents {
 	* @tparam _event_t The type of event managed by this bus.
 	*/
 	template<typename _event_t>
-	class event_bus<_event_t> : signal<const _event_t&> {
+	class signal_bus<_event_t> : signal<const _event_t&> {
 	private:
 		using signal_type = signal<const _event_t&>;
 

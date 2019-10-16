@@ -8,6 +8,7 @@
 #include "iw/input/InputManager.h"
 #include "iw/entity/Space.h"
 #include "iw/graphics/RenderQueue.h"
+#include "iw/util/queue/blocking_queue.h"
 #include <vector>
 #include <thread>
 
@@ -20,8 +21,9 @@ namespace IwEngine {
 		Stack<Layer*>        m_layers;
 		IwRenderer::IDevice* m_device;
 
+		iwu::blocking_queue<Event*> m_workQueue;
+		
 		std::thread m_updateThread; // Update everything but window right now
-		std::thread m_windowThread; // Updates window
 
 	protected:
 		IwEntity::Space         Space;

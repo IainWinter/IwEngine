@@ -29,7 +29,9 @@ namespace IwEngine {
 		}
 	}
 
+	void Layer::PreUpdate() {}
 	void Layer::Update() {}
+	void Layer::PostUpdate() {}
 	void Layer::FixedUpdate() {}
 	void Layer::ImGui() {}
 

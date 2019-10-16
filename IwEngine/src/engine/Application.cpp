@@ -4,6 +4,7 @@
 #include "iw/log/sink/file_sink.h"
 #include "iw/events/functional/callback.h"
 #include "iw/engine/Time.h"
+#include <atomic>
 
 namespace IwEngine {
 	Application::Application()
@@ -65,40 +66,84 @@ namespace IwEngine {
 	void Application::Run() {
 		m_running = true;
 
-		//m_updateThread = std::thread([&] {
-
-		//});
-
+		std::atomic<int> threads = 0;
 		float accumulatedTime = 0;
+
+		m_updateThread = std::thread([&] {
+			while (true) {
+				LOG_INFO << m_workQueue.empty();
+				while (!m_workQueue.empty()) {
+					LOG_INFO << m_workQueue.pop()->Type;
+					//DispatchEvent(event);
+				}
+
+				for (Layer* layer : m_layers) {
+					layer->UpdateSystems();
+				}
+
+				threads = 0;
+			}
+		});
+
 		while (m_running) {
 			Time::Update();
 
-			accumulatedTime += Time::DeltaTime();
-			while (accumulatedTime >= Time::FixedTime()) {
-				FixedUpdate();
-				accumulatedTime -= Time::FixedTime();
+			m_window->Clear();
+
+			// Get SystemChains from layers
+			
+			// Clear work queue
+			m_workQueue.clear();
+
+			// PreUpdate
+			LOG_DEBUG << "Pre-Update";
+			for (Layer* layer : m_layers) {
+				layer->PreUpdate();
 			}
 
-			Update();
+			// Kick off threads with copy of work queue
+			threads = 1;
+			LOG_DEBUG << "Post start";
+			m_workQueue.push(new WindowResizedEvent(100, 100));
+
+			while (threads > 0) {
+			}
+
+			//m_updateThread.join();
+
+			// Update Layers
+			LOG_DEBUG << "Update";
+			for (Layer* layer : m_layers) {
+				layer->Update();
+			}
+
+			// Break until work threads are done?
+			LOG_DEBUG << "Post-Update";
+			for (Layer* layer : m_layers) {
+				layer->PostUpdate();
+			}
+
+			// ImGui render
+			m_imguiLayer->Begin();
+			for (Layer* layer : m_layers) {
+				layer->ImGui();
+			}
+			m_imguiLayer->End();
+			
+			// Execute render queue
+			m_window->Update();
+			m_window->Render();
+
+			//accumulatedTime += Time::DeltaTime();
+			//while (accumulatedTime >= Time::FixedTime()) {
+			//	FixedUpdate();
+			//	accumulatedTime -= Time::FixedTime();
+			//}
 		}
 	}
 
 	void Application::Update() {
-		m_window->Clear();
 
-		for (Layer* layer : m_layers) {
-			layer->Update();
-			layer->UpdateSystems();
-		}
-
-		m_imguiLayer->Begin();
-		for (Layer* layer : m_layers) {
-			layer->ImGui();
-		}
-		m_imguiLayer->End();
-
-		m_window->Update();
-		m_window->Render();
 	}
 
 	void Application::FixedUpdate() {

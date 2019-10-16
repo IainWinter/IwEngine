@@ -30,9 +30,10 @@ namespace IwEngine {
 
 		virtual void Destroy();
 		virtual void ImGui();
+		virtual void PreUpdate();
 		virtual void Update();
+		virtual void PostUpdate();
 		virtual void FixedUpdate();
-
 
 		virtual bool On(WindowResizedEvent& event);
 		virtual bool On(MouseWheelEvent&    event);

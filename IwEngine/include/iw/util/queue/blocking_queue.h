@@ -50,5 +50,17 @@ namespace iwutil {
 
 			return item;
 		}
+
+		void clear() {
+			std::unique_lock<std::mutex> lock(m_mutex);
+			m_queue = std::queue<_t>();
+
+			lock.unlock();
+			m_condition.notify_one();
+		}
+
+		bool empty() {
+			return m_queue.empty(); // not sure if this is thread safe?
+		}
 	};
 }
