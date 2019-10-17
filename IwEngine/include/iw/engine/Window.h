@@ -1,17 +1,12 @@
 #pragma once
 
-#include "Events/Event.h"
-#include "iw/events/functional/callback.h"
-#include "iw/input/InputManager.h"
+#include "EventBus.h"
 #include "WindowOptions.h"
-#include "iw/util/queue/blocking_queue.h"
-#include <thread>
+#include "iw/input/InputManager.h"
 
 namespace IwEngine {
 	class IWindow {
 	public:
-		using EventCallback = iwevents::callback<Event&>;
-
 		virtual ~IWindow() {}
 
 		virtual int Initialize(
@@ -27,6 +22,9 @@ namespace IwEngine {
 		virtual bool TakeOwnership()    = 0;
 		virtual bool ReleaseOwnership() = 0;
 
+		virtual void SetEventBus(
+			EventBus& bus) = 0;
+
 		virtual void SetInputManager(
 			IwInput::InputManager& inputManager) = 0;
 
@@ -39,9 +37,6 @@ namespace IwEngine {
 		virtual void SetDimensions(
 			unsigned int width,
 			unsigned int height) = 0;
-
-		virtual void SetCallback(
-			EventCallback callback) = 0;
 
 		virtual unsigned int Id()     = 0;
 		virtual unsigned int Width()  = 0;
@@ -56,20 +51,12 @@ namespace IwEngine {
 		: public IWindow
 	{
 	protected:
-		EventCallback callback;
-		WindowOptions options;
-		IwInput::InputManager* inputManager;
-		iwu::blocking_queue<Event*> events;
-		iwe::event_bus events;
+		WindowOptions Options;
+		IwInput::InputManager* InputManager;
+		EventBus* Bus;
 
 	public:
 		virtual ~Window() {}
-
-		inline void SetCallback(
-			EventCallback callback)
-		{
-			this->callback = callback;
-		}
 
 		inline unsigned int Id() {
 			static unsigned int nextId = 0;
@@ -78,19 +65,19 @@ namespace IwEngine {
 		}
 
 		inline unsigned int Width() {
-			return options.Width;
+			return Options.Width;
 		}
 
 		inline unsigned int Height() {
-			return options.Height;
+			return Options.Height;
 		}
 
 		inline bool Cursor() {
-			return options.Cursor;
+			return Options.Cursor;
 		}
 
 		inline DisplayState State() {
-			return options.State;
+			return Options.State;
 		}
 	};
 }

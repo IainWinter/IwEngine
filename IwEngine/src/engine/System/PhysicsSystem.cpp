@@ -17,10 +17,24 @@ namespace IwEngine {
 	void PhysicsSystem::Update(
 		IwEntity::EntityComponentArray& eca)
 	{
-		IwPhysics::Grid<size_t, iwm::vector2> grid(iwm::vector2(10));
+		//IwPhysics::Grid<size_t, iwm::vector2> grid(iwm::vector2(10));
+
 		for (auto entity : eca) {
-			auto [transform, aabb] = entity.Components.Tie<Components>();
-			grid.Insert(entity.Index, transform->Position, *aabb);
+			if (entity.Index == 1) {
+				for (auto entity2 : eca) {
+					if (entity2.Index == 1) continue;
+
+					auto [transform1, aabb1] = entity.Components.Tie<Components>();
+					auto [transform2, aabb2] = entity2.Components.Tie<Components>();
+
+					if (IwPhysics::AABB2D(transform1->Position + aabb1->Min, transform1->Position + aabb1->Max).Intersects(
+						IwPhysics::AABB2D(transform2->Position + aabb2->Min, transform2->Position + aabb2->Max)))
+					{
+						LOG_INFO << entity.Index << " colliding with " << entity2.Index;
+						QueueDestroyEntity(entity2.Index);
+					}
+				}
+			}
 		}
 
 		//for (auto entity : eca) {

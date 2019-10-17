@@ -19,7 +19,7 @@ namespace IwEngine {
 	int WindowsWindow::Initialize(
 		const WindowOptions& options)
 	{
-		this->options = options;
+		this->Options = options;
 
 		m_instance = GetModuleHandle(NULL);
 		MAKEINTATOM(RegClass(m_instance, _WndProc));
@@ -171,11 +171,7 @@ namespace IwEngine {
 	}
 
 	void WindowsWindow::PollEvents() {
-		while (!events.empty()) {
-			Event* e = events.pop();
-			callback(*e);
-			delete e;
-		}
+		Bus->publish();
 	}
 
 	bool WindowsWindow::TakeOwnership() {
@@ -196,10 +192,16 @@ namespace IwEngine {
 		return true;
 	}
 
+	void WindowsWindow::SetEventBus(
+		EventBus& bus)
+	{
+		Bus = &bus;
+	}
+
 	void WindowsWindow::SetInputManager(
 		IwInput::InputManager& manager)
 	{
-		inputManager = &manager;
+		InputManager = &manager;
 
 		manager.CreateContext(Id(), (float)Width(), (float)Height());
 
@@ -224,17 +226,17 @@ namespace IwEngine {
 	{
 		int wstate = -1;
 		switch (state) {
-			case HIDDEN:    wstate = SW_HIDE;       break;
-			case MINIMIZED: wstate = SW_MINIMIZE;   break;
-			case MAXIMIZED: wstate = SW_MAXIMIZE;   break;
-			case NORMAL:    wstate = SW_SHOWNORMAL; break;
+			case DisplayState::HIDDEN:    wstate = SW_HIDE;       break;
+			case DisplayState::MINIMIZED: wstate = SW_MINIMIZE;   break;
+			case DisplayState::MAXIMIZED: wstate = SW_MAXIMIZE;   break;
+			case DisplayState::NORMAL:    wstate = SW_SHOWNORMAL; break;
 		}
 
 		if (wstate != -1) {
 			ShowWindow(m_window, wstate);
 		}
 
-		options.State = state;
+		Options.State = state;
 	}
 
 
@@ -242,7 +244,7 @@ namespace IwEngine {
 		bool show)
 	{
 		ShowCursor(show);
-		options.Cursor = show;
+		Options.Cursor = show;
 	}
 
 	void WindowsWindow::SetDimensions(
@@ -276,7 +278,7 @@ namespace IwEngine {
 		LPARAM lParam)
 	{
 		//Input events
-		inputManager->HandleEvent(Id(), msg, wParam, lParam);
+		InputManager->HandleEvent(Id(), msg, wParam, lParam);
 
 		Event* e;
 		switch (msg) {
@@ -299,7 +301,7 @@ namespace IwEngine {
 			return DefWindowProc(hwnd, msg, wParam, lParam);
 		}
 
-		events.push(e);
+		Bus->push(e);
 		//callback(*e);
 
 		//if (!e->Handled) {
@@ -314,7 +316,7 @@ namespace IwEngine {
 		float delta)
 	{
 		MouseWheelEvent* e = new MouseWheelEvent(inputState, delta);
-		events.push(e);
+		Bus->push(e);
 		//callback(*e);
 
 		LOG_INFO << "Mouse wheel moved " << delta;
@@ -328,7 +330,7 @@ namespace IwEngine {
 		float deltaY)
 	{
 		MouseMovedEvent* e = new MouseMovedEvent(inputState, X, Y, deltaX, deltaY);
-		events.push(e);
+		Bus->push(e);
 		//callback(*e);
 
 		LOG_INFO << "Mouse moved " << deltaX << ", " << deltaY 
@@ -341,7 +343,7 @@ namespace IwEngine {
 		bool down)
 	{
 		MouseButtonEvent* e = new MouseButtonEvent(inputState, button, down);
-		events.push(e);
+		Bus->push(e);
 		//callback(*e);
 
 		LOG_INFO << "Mouse button " << button <<
@@ -354,7 +356,7 @@ namespace IwEngine {
 		bool down)
 	{
 		KeyEvent* e = new KeyEvent(inputState, key, down);
-		events.push(e);
+		Bus->push(e);
 		//callback(*e);
 
 		LOG_INFO << "Key " << key <<
@@ -367,7 +369,7 @@ namespace IwEngine {
 		char character)
 	{
 		KeyTypedEvent* e = new KeyTypedEvent(inputState, key, character);
-		events.push(e);
+		Bus->push(e);
 		//callback(*e);
 
 		LOG_INFO << "Key " << character;

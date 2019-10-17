@@ -49,7 +49,7 @@ IwEngine::Application* CreateApplication(
 		1280,
 		720,
 		true,
-		IwEngine::NORMAL
+		IwEngine::DisplayState::NORMAL
 	};
 
 	return new Game();

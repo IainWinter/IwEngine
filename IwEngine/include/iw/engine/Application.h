@@ -4,6 +4,7 @@
 #include "Window.h"
 #include "Stack.h"
 #include "Task.h"
+#include "EventBus.h"
 #include "InitOptions.h"
 #include "Layers/ImGuiLayer.h"
 #include "iw/input/InputManager.h"
@@ -22,8 +23,6 @@ namespace IwEngine {
 		Stack<Layer*>        m_layers;
 		IwRenderer::IDevice* m_device;
 
-		EventBus m_events;
-
 		std::thread  m_renderThread;
 		Task<void()> m_updateTask;
 
@@ -31,6 +30,7 @@ namespace IwEngine {
 		IwEntity::Space         Space;
 		IwInput::InputManager   InputManager;
 		IwGraphics::RenderQueue RenderQueue;
+		EventBus Bus;
 
 	public:
 		Application();

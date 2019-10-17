@@ -1,4 +1,4 @@
-#include "EventBus.h"
+#include "iw/engine/EventBus.h"
 
 namespace IwEngine {
 	void EventBus::subscribe(
@@ -11,18 +11,18 @@ namespace IwEngine {
 		lock.unlock();
 	}
 
-	void EventBus::unsubscribe(
-		const iwe::callback<Event&>& callback)
-	{
-		std::unique_lock<std::mutex> lock(m_mutex);
+	//void EventBus::unsubscribe(
+	//	const iwe::callback<Event&>& callback)
+	//{
+	//	std::unique_lock<std::mutex> lock(m_mutex);
 
-		m_callbacks.erase(std::find(m_callbacks.begin(), m_callbacks.end(), callback));
+	//	m_callbacks.erase(std::find(m_callbacks.begin(), m_callbacks.end(), callback));
 
-		lock.unlock();
-	}
+	//	lock.unlock();
+	//}
 
 	void EventBus::push(
-		const Event& event)
+		Event* event)
 	{
 		m_queue.push(event);
 	}
@@ -31,9 +31,9 @@ namespace IwEngine {
 		std::unique_lock<std::mutex> lock(m_mutex);
 
 		while (!m_queue.empty()) {
-			auto& event = m_queue.pop();
+			auto* event = m_queue.pop();
 			for (auto callback : m_callbacks) {
-				callback(event);
+				callback(*event);
 			}
 		}
 	}

@@ -79,7 +79,7 @@ int GameLayer::Initialize(
 	Space.SetComponentData<IwEngine::Camera>   (camera, iwm::matrix4::create_orthographic(1280 * s, 720 * s, 0, -1000));
 	
 	IwEntity::Entity player = Space.CreateEntity<IwEngine::Transform, IwEngine::Model, Player, IwPhysics::AABB2D>();
-	Space.SetComponentData<IwEngine::Transform>(player, iwm::vector3(0, 0, 1));
+	Space.SetComponentData<IwEngine::Transform>(player, iwm::vector3(10, 0, 1));
 	Space.SetComponentData<IwEngine::Model>    (player, QuadData, QuadMesh, 1U);
 	Space.SetComponentData<Player>             (player, 10.0f, 100.0f, 0.1666f, 0.1f);
 	Space.SetComponentData<IwPhysics::AABB2D>  (player, iwm::vector2(-1), iwm::vector2(1));

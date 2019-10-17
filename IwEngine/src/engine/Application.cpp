@@ -28,13 +28,27 @@ namespace IwEngine {
 	int Application::Initialize(
 		InitOptions& options)
 	{
+		// Time
+
 		Time::Update();
+
+		// Logging
 
 		LOG_SINK(iwlog::async_stdout_sink, iwlog::INFO);
 		LOG_SINK(iwlog::async_stderr_sink, iwlog::ERR);
 		LOG_SINK(iwlog::file_sink,         iwlog::DEBUG, "sandbox.log");
 
-		m_window->SetCallback(iwe::make_callback(&Application::HandleEvent, this));
+		// Events
+
+		Bus.subscribe(iwe::make_callback(&Application::HandleEvent, this));
+
+		// Window
+
+		LOG_DEBUG << "Setting window event bus...";
+		m_window->SetEventBus(Bus);
+		
+		LOG_DEBUG << "Setting window input manager...";
+		m_window->SetInputManager(InputManager);
 
 		int status;
 		LOG_DEBUG << "Initializing window...";
@@ -42,9 +56,6 @@ namespace IwEngine {
 			LOG_ERROR << "Window failed to initialize with error code " << status;
 			return status;
 		}
-
-		LOG_DEBUG << "Binding input manager to window...";
-		m_window->SetInputManager(InputManager);
 
 		for (Layer* layer : m_layers) {
 			LOG_DEBUG << "Initializing " << layer->Name() << " layer...";
@@ -56,6 +67,8 @@ namespace IwEngine {
 
 		//Need to set after so window doesn't send events before imgui gets initialized 
 		m_window->SetState(options.WindowOptions.State);
+
+		// Time again!
 
 		Time::Update();
 		Time::SetFixedTime(1 / 60.0f);
@@ -117,16 +130,16 @@ namespace IwEngine {
 		}
 
 		// Start Work (ASync)
-		m_updateTask.Run();
+		//m_updateTask.Run();
 
 		// Update layers (ASync)
 		for (Layer* layer : m_layers) {
-			//layer->UpdateSystems();
+			layer->UpdateSystems();
 			layer->Update();
 		}
 
 		// Pause until work is finished (ASync)
-		m_updateTask.Wait();
+		//m_updateTask.Wait();
 
 		// Post Update (Sync)
 		for (Layer* layer : m_layers) {
