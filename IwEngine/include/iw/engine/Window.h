@@ -4,6 +4,8 @@
 #include "iw/events/functional/callback.h"
 #include "iw/input/InputManager.h"
 #include "WindowOptions.h"
+#include "iw/util/queue/blocking_queue.h"
+#include <thread>
 
 namespace IwEngine {
 	class IWindow {
@@ -19,6 +21,11 @@ namespace IwEngine {
 		virtual void Update()  = 0;
 		virtual void Render()  = 0;
 		virtual void Clear()   = 0;
+
+		virtual void PollEvents() = 0;
+
+		virtual bool TakeOwnership()    = 0;
+		virtual bool ReleaseOwnership() = 0;
 
 		virtual void SetInputManager(
 			IwInput::InputManager& inputManager) = 0;
@@ -52,6 +59,7 @@ namespace IwEngine {
 		EventCallback callback;
 		WindowOptions options;
 		IwInput::InputManager* inputManager;
+		iwu::blocking_queue<Event*> events;
 
 	public:
 		virtual ~Window() {}

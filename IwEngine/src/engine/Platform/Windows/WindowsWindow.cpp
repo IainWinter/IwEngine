@@ -5,6 +5,7 @@
 #include "gl/wglew.h"
 #include <cstdio>
 #include <Tchar.h>
+#include <thread>
 
 ATOM RegClass(
 	HINSTANCE instance,
@@ -131,19 +132,17 @@ namespace IwEngine {
 		wglDeleteContext(fake_rc);
 		ReleaseDC(fake_hwnd, fake_dc);
 		DestroyWindow(fake_hwnd);
-		if (!wglMakeCurrent(m_device, m_context)) {
-			LOG_ERROR << "wglMakeCurrent() failed.";
-			return 1;
-		}
-
-		SetCursor(options.Cursor);
-		//SetState(options.State);
+		
+		TakeOwnership();
 
 		glClearColor(70 / 255.0f, 85 / 255.0f, 100 / 255.0f, 1.0f);
 		glEnable(GL_DEPTH_TEST);
 		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 		wglSwapIntervalEXT(0); //-1 for adaptive vsync 0 for off 1 for on
+
+		SetCursor(options.Cursor);
+		SetState(options.State);
 
 		return 0;
 	}
@@ -157,7 +156,7 @@ namespace IwEngine {
 
 	void WindowsWindow::Update() {
 		MSG msg;
-		if (PeekMessage(&msg, m_window, 0, 0, PM_REMOVE)) {
+		if (GetMessage(&msg, m_window, 0, 0)) {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
@@ -169,6 +168,32 @@ namespace IwEngine {
 
 	void WindowsWindow::Clear() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
+
+	void WindowsWindow::PollEvents() {
+		while (!events.empty()) {
+			Event* e = events.pop();
+			callback(*e);
+			delete e;
+		}
+	}
+
+	bool WindowsWindow::TakeOwnership() {
+		if (!wglMakeCurrent(m_device, m_context)) {
+			LOG_ERROR << "wglMakeCurrent(" << m_device << ", " << m_context << ") failed.";
+			return false;
+		}
+
+		return true;
+	}
+
+	bool WindowsWindow::ReleaseOwnership() {
+		if (!wglMakeCurrent(NULL, NULL)) {
+			LOG_ERROR << "wglMakeCurrent(NULL, NULL) failed.";
+			return false;
+		}
+
+		return true;
 	}
 
 	void WindowsWindow::SetInputManager(
@@ -256,31 +281,30 @@ namespace IwEngine {
 		Event* e;
 		switch (msg) {
 			case WM_SIZE:
-				e = &Translate<WindowResizedEvent>(msg, wParam, lParam);
+				e = Translate<WindowResizedEvent>(msg, wParam, lParam);
 				break;
 			case WM_CLOSE:
-				e = &Event(WindowClosed);
+				e = new Event(WindowClosed);
 				break;
 			case WM_DESTROY:
-				e = &Event(WindowDestroyed);
-				break;
-			case WM_MOVE:
-				e = &Event(WindowMoved);
+				e = new Event(WindowDestroyed);
 				break;
 			default:
-				e = &Event(NOT_HANDLED);
+				e = new Event(NOT_HANDLED);
 				break;
 		}
 
 		if (e->Type == NOT_HANDLED) {
+			delete e;
 			return DefWindowProc(hwnd, msg, wParam, lParam);
 		}
 
-		callback(*e);
+		events.push(e);
+		//callback(*e);
 
-		if (!e->Handled) {
-			return DefWindowProc(hwnd, msg, wParam, lParam);
-		}
+		//if (!e->Handled) {
+		//	return DefWindowProc(hwnd, msg, wParam, lParam);
+		//}
 
 		return 0;
 	}
@@ -289,8 +313,9 @@ namespace IwEngine {
 		IwInput::InputState inputState,
 		float delta)
 	{
-		MouseWheelEvent e(inputState, delta);
-		callback(e);
+		MouseWheelEvent* e = new MouseWheelEvent(inputState, delta);
+		events.push(e);
+		//callback(*e);
 
 		LOG_INFO << "Mouse wheel moved " << delta;
 	}
@@ -302,8 +327,9 @@ namespace IwEngine {
 		float deltaX,
 		float deltaY)
 	{
-		MouseMovedEvent e(inputState, X, Y, deltaX, deltaY);
-		callback(e);
+		MouseMovedEvent* e = new MouseMovedEvent(inputState, X, Y, deltaX, deltaY);
+		events.push(e);
+		//callback(*e);
 
 		LOG_INFO << "Mouse moved " << deltaX << ", " << deltaY 
 			<< " to " << X << ", " << Y;
@@ -314,8 +340,9 @@ namespace IwEngine {
 		IwInput::InputName button,
 		bool down)
 	{
-		MouseButtonEvent e(inputState, button, down);
-		callback(e);
+		MouseButtonEvent* e = new MouseButtonEvent(inputState, button, down);
+		events.push(e);
+		//callback(*e);
 
 		LOG_INFO << "Mouse button " << button <<
 			(down ? " pressed" : " released");
@@ -326,8 +353,9 @@ namespace IwEngine {
 		IwInput::InputName key,
 		bool down)
 	{
-		KeyEvent e(inputState, key, down);
-		callback(e);
+		KeyEvent* e = new KeyEvent(inputState, key, down);
+		events.push(e);
+		//callback(*e);
 
 		LOG_INFO << "Key " << key <<
 			(down ? " pressed" : " released");
@@ -338,8 +366,9 @@ namespace IwEngine {
 		IwInput::InputName key, 
 		char character)
 	{
-		KeyTypedEvent e(inputState, key, character);
-		callback(e);
+		KeyTypedEvent* e = new KeyTypedEvent(inputState, key, character);
+		events.push(e);
+		//callback(*e);
 
 		LOG_INFO << "Key " << character;
 	}

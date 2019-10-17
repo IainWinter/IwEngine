@@ -1,5 +1,5 @@
 #pragma once
 
-#define iwevents iwevt
+#define iwevents iwe
 
-namespace iwevents {}
+namespace iwe {}

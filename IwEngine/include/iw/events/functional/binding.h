@@ -40,4 +40,14 @@ namespace iwevents {
 		return bind(func, val,
 			std::make_integer_sequence<int, sizeof...(_args_t)>());
 	}
+
+	template<
+		typename _r,
+		typename _t>
+	std::function<_r()> bind(
+		std::function<_r(_t)> func,
+		_t val)
+	{
+		return std::bind(func, val);
+	}
 }

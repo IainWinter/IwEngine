@@ -28,7 +28,7 @@ public:
 	int Initialize(
 		IwEngine::InitOptions& options) override;
 
-	void Update()      override;
+	void PostUpdate()  override;
 	void FixedUpdate() override;
 	void ImGui()       override;
 };

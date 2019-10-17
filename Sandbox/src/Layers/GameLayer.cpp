@@ -97,7 +97,7 @@ int GameLayer::Initialize(
 	return Layer::Initialize(options);
 }
 
-void GameLayer::Update() {
+void GameLayer::PostUpdate() {
 	for (auto c : Space.Query<IwEngine::Transform, IwEngine::Camera>()) {
 		auto [transform, camera] = c.Components.Tie<CameraComponents>();
 

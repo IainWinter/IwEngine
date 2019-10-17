@@ -55,12 +55,12 @@ int WINAPI WinMain(
 //       |
 //   Initialize
 //       |
-//     Start
+//    xStartx
 //       |   
 //      Run<---
 //       |--->^
 //       |
-//     Stop
+//    xStopx
 //       |
 //    Destroy
 //       |

@@ -23,8 +23,13 @@ namespace IwEngine {
 		void Render()  override;
 		void Clear()   override;
 
+		void PollEvents() override;
+
+		bool TakeOwnership()    override;
+		bool ReleaseOwnership() override;
+
 		void SetInputManager(
-			IwInput::InputManager& manager);
+			IwInput::InputManager& manager) override;
 
 		void SetState(
 			DisplayState state) override;

@@ -3,6 +3,7 @@
 #include "Core.h"
 #include "Window.h"
 #include "Stack.h"
+#include "Task.h"
 #include "InitOptions.h"
 #include "Layers/ImGuiLayer.h"
 #include "iw/input/InputManager.h"
@@ -21,9 +22,8 @@ namespace IwEngine {
 		Stack<Layer*>        m_layers;
 		IwRenderer::IDevice* m_device;
 
-		iwu::blocking_queue<Event*> m_workQueue;
-		
-		std::thread m_updateThread; // Update everything but window right now
+		std::thread  m_renderThread;
+		Task<void()> m_updateTask;
 
 	protected:
 		IwEntity::Space         Space;
