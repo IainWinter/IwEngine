@@ -65,8 +65,6 @@ void EnemySystem::Update(
 		else if (enemy->CanShoot && enemy->FireTime <= enemy->TimeToShoot) {
 			enemy->CanShoot = false;
 
-			
-
 			IwEntity::Entity spawned = Space.CreateEntity<IwEngine::Transform, IwEngine::Model, Bullet, IwPhysics::AABB2D>();
 			Space.SetComponentData<IwEngine::Transform>(spawned,
 				transform->Position + iwm::vector3(1, 1, 0) * transform->Rotation.inverted(),
@@ -75,7 +73,7 @@ void EnemySystem::Update(
 				
 			Space.SetComponentData<IwEngine::Model>  (spawned, CircleData, CircleMesh, 1U);
 			Space.SetComponentData<Bullet>           (spawned, LINE, 4.0f);
-			Space.SetComponentData<IwPhysics::AABB2D>(spawned, iwm::vector2(-0.5f), iwm::vector2(0.5f));
+			Space.SetComponentData<IwPhysics::AABB2D>(spawned, iwm::vector2(-0.25f), iwm::vector2(0.25f));
 		}
 
 		enemy->FireTime -= IwEngine::Time::DeltaTime();
