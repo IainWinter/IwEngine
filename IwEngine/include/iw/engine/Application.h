@@ -22,6 +22,8 @@ namespace IwEngine {
 		Stack<Layer*>        m_layers;
 		IwRenderer::IDevice* m_device;
 
+		EventBus m_events;
+
 		std::thread  m_renderThread;
 		Task<void()> m_updateTask;
 

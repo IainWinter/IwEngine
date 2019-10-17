@@ -60,6 +60,7 @@ namespace IwEngine {
 		WindowOptions options;
 		IwInput::InputManager* inputManager;
 		iwu::blocking_queue<Event*> events;
+		iwe::event_bus events;
 
 	public:
 		virtual ~Window() {}

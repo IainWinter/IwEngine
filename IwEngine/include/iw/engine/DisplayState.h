@@ -1,7 +1,7 @@
 #pragma once
 
 namespace IwEngine {
-	enum DisplayState {
+	enum class DisplayState {
 		NORMAL,
 		HIDDEN,
 		MINIMIZED,
