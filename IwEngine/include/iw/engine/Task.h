@@ -43,16 +43,8 @@ namespace IwEngine {
 			});
 		}
 
-		Task(
-			const Task&) = delete;
-
-		Task(
-			Task&& copy)
-			: m_thread   (std::move(copy.m_thread))
-			, m_functor  (std::move(copy.m_functor))
-			, m_run      (false)
-			, m_joining  (false)
-		{}
+		Task(const Task&) = delete;
+		Task(Task&&) = delete;
 
 		~Task() {
 			if (m_thread.joinable()) {
@@ -66,24 +58,8 @@ namespace IwEngine {
 			}
 		}
 
-		Task& operator=(
-			const Task&) = delete;
-
-		Task& operator=(
-			Task&& copy)
-		{
-			if (copy.m_thread.joinable())
-				copy.Stop();
-
-			copy.Wait();
-
-			m_thread  = std::move(copy.m_thread);
-			m_functor = std::move(copy.m_functor);
-			m_run     = false;
-			m_joining = false;
-
-			return *this;
-		}
+		Task& operator=(const Task&) = delete;
+		Task& operator=(Task&&) = delete;
 
 		void Run() {
 			std::unique_lock<std::mutex> lock(m_mutex);

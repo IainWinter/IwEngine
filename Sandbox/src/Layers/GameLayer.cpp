@@ -84,8 +84,8 @@ int GameLayer::Initialize(
 	Space.SetComponentData<Player>             (player, 10.0f, 100.0f, 0.1666f, 0.1f);
 	Space.SetComponentData<IwPhysics::AABB2D>  (player, iwm::vector2(-1), iwm::vector2(1));
 
-	for (float x = 5; x < 6; x++) {
-		for (float y = 5; y < 6; y++) {
+	for (float x = 0; x < 10; x++) {
+		for (float y = 0; y < 10; y++) {
 			IwEntity::Entity enemy = Space.CreateEntity<IwEngine::Transform, IwEngine::Model, Enemy, IwPhysics::AABB2D>();
 			Space.SetComponentData<IwEngine::Transform>(enemy, iwm::vector3(x * 3 - 15, y * 3 - 15, 1));
 			Space.SetComponentData<IwEngine::Model>    (enemy, QuadData, QuadMesh, 1U);
@@ -157,6 +157,14 @@ void GameLayer::ImGui() {
 	}
 
 	ImGui::Text("Bullet count: %i", i);
+
+	i = 0;
+	for (auto entity : Space.Query<Enemy>()) {
+		++i;
+	}
+
+	ImGui::Text("Enemy count: %i", i);
+
 
 	ImGui::End();
 }
