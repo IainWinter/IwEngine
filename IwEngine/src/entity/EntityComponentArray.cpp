@@ -6,7 +6,9 @@ namespace IwEntity {
 	iterator& iterator::operator++() {
 		++m_itrs[m_index];
 
-		if (m_itrs[m_index] == m_ends[m_index]) {
+		while (m_index < m_itrs.size() 
+			&& m_itrs[m_index] == m_ends[m_index])
+		{
 			++m_index;
 		}
 
@@ -47,7 +49,13 @@ namespace IwEntity {
 		: m_itrs(begins)
 		, m_ends(ends)
 		, m_index(itrIndex)
-	{}
+	{
+		while (m_index < m_itrs.size()
+			&& m_itrs[m_index] == m_ends[m_index])
+		{
+			++m_index;
+		}
+	}
 
 	EntityComponentArray::EntityComponentArray(
 		ChunkListVec&& begins,

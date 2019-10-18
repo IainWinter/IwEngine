@@ -12,11 +12,6 @@ namespace IwEngine {
 		, m_window(IWindow::Create())
 		, m_device(IwRenderer::IDevice::Create())
 		, RenderQueue(*m_device)
-		, m_updateTask([&]() {
-				for (Layer* layer : m_layers) {
-					layer->UpdateSystems();
-				}
-			})
 	{
 		m_imguiLayer = PushLayer<ImGuiLayer>();
 	}
@@ -82,11 +77,11 @@ namespace IwEngine {
 
 		m_running = true;
 
-		//m_updateTask = Task<void()>([&]() {
-		//	for (Layer* layer : m_layers) {
-		//		layer->UpdateSystems();
-		//	}
-		//});
+		m_updateTask = Task<void()>([&]() {
+			for (Layer* layer : m_layers) {
+				layer->UpdateSystems();
+			}
+		});
 
 		// Render thread is the 'main' thread for the application (owns rendering context)
 		m_renderThread = std::thread([&]() {
