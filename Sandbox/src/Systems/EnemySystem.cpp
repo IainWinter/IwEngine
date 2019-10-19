@@ -76,6 +76,10 @@ void EnemySystem::Update(
 			Space.SetComponentData<IwPhysics::AABB2D>(spawned, iwm::vector2(-0.25f), iwm::vector2(0.25f));
 		}
 
+		if (IwInput::Keyboard::KeyDown(IwInput::SPACE)) {
+			QueueDestroyEntity(entity.Index);
+		}
+
 		enemy->FireTime -= IwEngine::Time::DeltaTime();
 	}
 }

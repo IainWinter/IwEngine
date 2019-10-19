@@ -111,8 +111,12 @@ void GameLayer::PostUpdate() {
 				transform->Up()));
 	}
 
-	for (auto c : Space.Query<IwEngine::Transform, IwEngine::Model>()) {
-		auto [transform, model] = c.Components.Tie<ModelComponents>();
+	auto eca = Space.Query<IwEngine::Transform, IwEngine::Model>();
+	auto itr = eca.begin();
+	auto end = eca.end();
+
+	for (; itr != end; ++itr) {
+		auto [transform, model] = (*itr).Components.Tie<ModelComponents>();
 
 		pipeline->GetParam("model")
 			->SetAsMat4(transform->Transformation());

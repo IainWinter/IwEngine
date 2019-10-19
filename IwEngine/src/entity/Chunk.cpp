@@ -1,4 +1,5 @@
 #include "iw/entity/Chunk.h"
+#include <iw\log\logger.h>
 
 namespace IwEntity {
 	size_t Chunk::ReserveComponents() {
@@ -21,16 +22,19 @@ namespace IwEntity {
 	}
 
 	size_t Chunk::BeginIndex() {
-		size_t i = 0;
+		size_t i = EntityIndex;
 		while (i != EndIndex() && !GetEntity(i)->Alive) {
 			i++;
 		}
+
+		LOG_INFO << "Beg " << i;
 
 		return i;
 	}
 
 	size_t Chunk::EndIndex() {
-		return EntityIndex + CurrentIndex;
+		LOG_INFO << "End " << CurrentIndex + EntityIndex;
+		return CurrentIndex + EntityIndex;
 	}
 
 	Entity* Chunk::GetEntity(

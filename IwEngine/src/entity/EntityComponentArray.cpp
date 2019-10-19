@@ -19,7 +19,7 @@ namespace IwEntity {
 		const iterator& itr)
 	{
 		if (m_index == itr.m_index) {
-			if (m_itrs.size() > m_index) {
+			if (m_index < m_itrs.size()) {
 				return m_itrs[m_index] == itr.m_itrs[m_index];
 			}
 
@@ -69,6 +69,6 @@ namespace IwEntity {
 	}
 
 	iterator EntityComponentArray::end() {
-		return iterator(m_begins, m_ends, m_begins.size());
+		return iterator(m_ends, m_ends, m_begins.size());
 	}
 }

@@ -149,11 +149,28 @@ namespace IwEntity {
 			//If chunk is empty free it
 			if (chunk->Count == 0) {
 				if (chunk->Previous) {
+					m_current = chunk->Previous;
 					chunk->Previous->Next = chunk->Next;
+
+					auto itr = std::find(m_chunks.begin(), m_chunks.end(), chunk);
+					for (auto i = itr; i != m_chunks.end(); i++) {
+						(*i)->EntityIndex -= m_chunkCapacity;
+					}
+
+					m_chunks.erase(itr);
+
 				}
 
 				else if (chunk->Next) {
+					m_current = chunk->Next;
 					chunk->Next->Previous = chunk->Previous;
+
+					auto itr = std::find(m_chunks.begin(), m_chunks.end(), chunk);
+					for (auto i = itr; i != m_chunks.begin(); i--) {
+						(*i)->EntityIndex += m_chunkCapacity;
+					}
+
+					m_chunks.erase(itr);
 				}
 
 				else {
@@ -210,7 +227,7 @@ namespace IwEntity {
 	iterator ChunkList::End(
 		const iwu::ref<ComponentQuery>& query)
 	{
-		if (m_chunks.size() == 0) {
+		if (m_chunks.size() == 0) { // <-0-00
 			return iterator(nullptr, 0, m_archetype, query);
 		}
 
