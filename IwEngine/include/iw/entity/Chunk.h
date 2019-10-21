@@ -11,22 +11,36 @@ namespace IwEntity {
 
 		size_t Count;
 		size_t Capacity;
-		size_t EntityIndex;
+		size_t IndexOffset;
 		size_t CurrentIndex;
 
 		char Buffer[];
 
-		size_t ReserveComponents();
+		inline size_t ReserveComponents() {
+			++Count;
+			return CurrentIndex++ + IndexOffset;
+		}
 
-		void ReinstateComponents();
+		inline void ReinstateComponents() {
+			++Count;
+		}
 
-		void FreeComponents();
+		inline void FreeComponents() {
+			--Count;
+		}
 
-		bool IsEnd(
-			size_t index);
+		inline bool ContainsIndex(
+			size_t index) const
+		{
+			return  IndexOffset <= index
+				&& IndexOffset + CurrentIndex > index;
+		}
+	
+		inline size_t EndIndex() {
+			return CurrentIndex + IndexOffset;
+		}
 
 		size_t BeginIndex();
-		size_t EndIndex();
 
 		Entity* GetEntity(
 			size_t index);

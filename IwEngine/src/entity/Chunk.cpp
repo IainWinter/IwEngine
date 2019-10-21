@@ -2,45 +2,19 @@
 #include <iw\log\logger.h>
 
 namespace IwEntity {
-	size_t Chunk::ReserveComponents() {
-		++Count;
-		return CurrentIndex++ + EntityIndex;
-	}
-
-	void Chunk::ReinstateComponents() {
-		++Count;
-	}
-
-	void Chunk::FreeComponents() {
-		--Count;
-	}
-
-	bool Chunk::IsEnd(
-		size_t index)
-	{
-		return index == EndIndex();
-	}
-
 	size_t Chunk::BeginIndex() {
-		size_t i = EntityIndex;
+		size_t i = IndexOffset;
 		while (i != EndIndex() && !GetEntity(i)->Alive) {
 			i++;
 		}
 
-		LOG_INFO << "Beg " << i;
-
 		return i;
 	}
-
-	size_t Chunk::EndIndex() {
-		LOG_INFO << "End " << CurrentIndex + EntityIndex;
-		return CurrentIndex + EntityIndex;
-	}
-
+	
 	Entity* Chunk::GetEntity(
 		size_t index)
 	{
-		return (Entity*)Buffer + index - EntityIndex;
+		return (Entity*)Buffer + index - IndexOffset;
 	}
 
 	char* Chunk::GetComponentStream(
@@ -55,6 +29,6 @@ namespace IwEntity {
 	{
 		return GetComponentStream(layout)
 			+ layout.Component->Size
-			* (index - EntityIndex);
+			* (index - IndexOffset);
 	}
 }

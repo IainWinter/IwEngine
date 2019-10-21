@@ -36,10 +36,5 @@ namespace IwEngine {
 				}
 			}
 		}
-
-		//for (auto entity : eca) {
-		//	auto [transform, aabb] = entity.Components.Tie<Components>();
-		//	grid.FindPairs(entity.Index, transform->Position, *aabb);
-		//}
 	}
 }

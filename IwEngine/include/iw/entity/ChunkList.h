@@ -41,10 +41,10 @@ namespace IwEntity {
 				const iwu::ref<ComponentQuery>& query);
 		};
 	private:
-		Chunk* m_current;
-		std::vector<Chunk*> m_chunks;
+		Chunk* m_root;
 
 		size_t m_count;
+		size_t m_chunkCount;
 
 		iwu::ref<Archetype> m_archetype;
 		const size_t m_chunkSize;
@@ -84,15 +84,10 @@ namespace IwEntity {
 		size_t GetChunkCapacity(
 			const iwu::ref<Archetype>& archetype);
 
-		char* GetComponentData(
-			Chunk* chunk,
-			const ArchetypeLayout& layout,
-			size_t index);
-
 		inline bool ChunkIsFull(
 			const Chunk* chunk)
 		{
-			return chunk->Count == m_chunkCapacity;
+			return chunk->CurrentIndex == m_chunkCapacity;
 		}
 	};
 }
