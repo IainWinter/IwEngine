@@ -7,6 +7,7 @@
 #include "iw/entity/Archetype.h"
 
 #include "iw/engine/Time.h"
+#include "iw/engine/Layers/DebugLayer.h"
 
 struct Position {
 	int x, y, z;
@@ -46,8 +47,8 @@ IwEngine::Application* CreateApplication(
 	IwEngine::InitOptions& options)
 {
 	options.WindowOptions = IwEngine::WindowOptions {
-		1280,
-		720,
+		1920,
+		1080,
 		true,
 		IwEngine::DisplayState::NORMAL
 	};

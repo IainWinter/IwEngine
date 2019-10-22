@@ -15,6 +15,7 @@ namespace IwEngine {
 	protected:
 		IwEntity::Space&         Space;
 		IwGraphics::RenderQueue& RenderQueue;
+		IwRenderer::IDevice& Device;
 
 	public:
 		Layer(

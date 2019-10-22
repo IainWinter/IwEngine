@@ -38,10 +38,6 @@ namespace IwEngine {
 	}
 
 	void ImGuiLayer::ImGui() {
-		ImGui::Begin("Hello, world!");
-
-		ImGui::Text("This is some useful text.");
-
 		if (ImGui::Button("Button"))
 			counter++;
 		ImGui::SameLine();

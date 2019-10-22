@@ -24,17 +24,19 @@ EnemySystem::~EnemySystem() {
 }
 
 int EnemySystem::Initialize() {
+	// Making circle mesh
 	IwGraphics::MeshData& meshData = CircleData->Meshes[0];
 
-	IwRenderer::VertexBufferLayout layouts[1];
-	layouts[0].Push<float>(3);
-	layouts[0].Push<float>(3);
+	IwRenderer::VertexBufferLayout layout;
+	layout.Push<float>(3);
+	layout.Push<float>(3);
 
-	iwu::potential<IwRenderer::IVertexBuffer*> buffers[1];
-	buffers[0] = RenderQueue.QueuedDevice.CreateVertexBuffer(meshData.VertexCount * sizeof(IwGraphics::Vertex), meshData.Vertices);
+	IwRenderer::IVertexBuffer* buffer = RenderQueue.QueuedDevice.Device.CreateVertexBuffer(
+		meshData.VertexCount * sizeof(IwGraphics::Vertex), meshData.Vertices);
 
-	auto pib = RenderQueue.QueuedDevice.CreateIndexBuffer(meshData.FaceCount, meshData.Faces);
-	auto pva = RenderQueue.QueuedDevice.CreateVertexArray(1, buffers, layouts);
+	IwRenderer::IIndexBuffer* pib = RenderQueue.QueuedDevice.Device.CreateIndexBuffer(meshData.FaceCount, meshData.Faces);
+	IwRenderer::IVertexArray* pva = RenderQueue.QueuedDevice.Device.CreateVertexArray();
+	pva->AddBuffer(buffer, layout);
 
 	CircleMesh = new IwGraphics::Mesh{ pva, pib, meshData.FaceCount };
 

@@ -8,6 +8,7 @@ namespace IwEngine {
 		: m_name(name)
 		, Space(space)
 		, RenderQueue(renderQueue)
+		, Device(renderQueue.QueuedDevice.Device)
 	{}
 
 	Layer::~Layer() {}

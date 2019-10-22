@@ -1,9 +1,10 @@
 #include "iw/engine/Application.h"
+#include "iw/engine/Layers/DebugLayer.h"
+#include "iw/engine/Time.h"
 #include "iw/log/logger.h"
 #include "iw/log/sink/async_std_sink.h"
 #include "iw/log/sink/file_sink.h"
 #include "iw/events/functional/callback.h"
-#include "iw/engine/Time.h"
 #include <atomic>
 
 namespace IwEngine {
@@ -19,6 +20,7 @@ namespace IwEngine {
 		})
 	{
 		m_imguiLayer = PushLayer<ImGuiLayer>();
+		PushLayer<DebugLayer>();
 	}
 
 	Application::~Application() {

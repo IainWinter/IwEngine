@@ -17,6 +17,7 @@ private:
 	//temp
 	IwGraphics::ModelData* QuadData;
 	IwGraphics::Mesh* QuadMesh;
+	IwGraphics::Mesh* LineMesh;
 
 public:
 	GameLayer(

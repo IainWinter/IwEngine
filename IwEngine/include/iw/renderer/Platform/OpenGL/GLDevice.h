@@ -8,6 +8,7 @@ namespace IwRenderer {
 	{
 	public:
 		void DrawElements(
+			MeshTopology topology,
 			int count,
 			long long offset) override;
 
@@ -34,10 +35,7 @@ namespace IwRenderer {
 			IVertexBuffer* vertexBuffer) override;
 
 		//Vertex arrays
-		IVertexArray* CreateVertexArray(
-			size_t numBuffers,
-			IVertexBuffer** vertexBuffers,
-			VertexBufferLayout* vertexLayouts) override;
+		IVertexArray* CreateVertexArray() override;
 
 		void DestroyVertexArray(
 			IVertexArray* vertexArray) override;

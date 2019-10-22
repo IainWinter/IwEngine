@@ -16,14 +16,23 @@ namespace IwRenderer {
 	}
 
 	void GLDevice::DrawElements(
+		MeshTopology topology,
 		int count, 
 		long long offset)
 	{
-		glDrawElements(
-			GL_TRIANGLES, 
-			count, 
-			GL_UNSIGNED_INT, 
-			reinterpret_cast<const void*>(offset));
+		GLenum gltopology = 0;
+		switch (topology) {
+			case TRIANGLES: gltopology = GL_TRIANGLES; break;
+			case LINES:     gltopology = GL_LINES;     break;
+		}
+
+		if (gltopology) {
+			glDrawElements(
+				gltopology,
+				count,
+				GL_UNSIGNED_INT,
+				reinterpret_cast<const void*>(offset));
+		}
 	}
 
 	IIndexBuffer* GLDevice::CreateIndexBuffer(
@@ -64,19 +73,8 @@ namespace IwRenderer {
 		static_cast<GLVertexBuffer*>(vertexBuffer)->Bind();
 	}
 
-	IVertexArray* GLDevice::CreateVertexArray(
-		size_t numBuffers,
-		IVertexBuffer** vertexBuffers,
-		VertexBufferLayout* vertexLayouts)
-	{
-		GLVertexArray* va = new GLVertexArray();
-		for (size_t i = 0; i < numBuffers; i++) {
-			va->AddBuffer(
-				static_cast<GLVertexBuffer*>(vertexBuffers[i]),
-					vertexLayouts[i]);
-		}
-
-		return va;
+	IVertexArray* GLDevice::CreateVertexArray() {
+		return new GLVertexArray();;
 	}
 
 	void GLDevice::DestroyVertexArray(

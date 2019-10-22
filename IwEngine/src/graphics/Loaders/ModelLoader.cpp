@@ -32,7 +32,7 @@ namespace IwGraphics {
 
 			size_t indexBufferSize = 0;
 			for (size_t t = 0; t < aimesh->mNumFaces; t++) {
-				indexBufferSize += aimesh->mFaces[t].mNumIndices;
+				indexBufferSize += aimesh->mFaces[t].mNumIndices; // could a face have diffrent incices?
 			}
 
 			MeshData& mesh = model->Meshes[i];

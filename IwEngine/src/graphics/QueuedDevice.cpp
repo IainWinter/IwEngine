@@ -72,7 +72,7 @@ namespace IwGraphics {
 						buffers[i] = args->Buffers[i].consume();
 					}
 
-					args->Array.initialize(Device.CreateVertexArray(args->Count, buffers, args->Layouts));
+					//args->Array.initialize(Device.CreateVertexArray(args->Count, buffers, args->Layouts));
 					args->Array.release();
 					for (size_t i = 0; i < args->Count; i++) {
 						args->Layouts[i].Clear();

@@ -139,7 +139,7 @@ namespace IwEngine {
 		glEnable(GL_DEPTH_TEST);
 		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-		wglSwapIntervalEXT(0); //-1 for adaptive vsync 0 for off 1 for on
+		wglSwapIntervalEXT(1); //-1 for adaptive vsync 0 for off 1 for on
 
 		SetCursor(options.Cursor);
 		SetState(options.State);
@@ -226,10 +226,19 @@ namespace IwEngine {
 	{
 		int wstate = -1;
 		switch (state) {
-			case DisplayState::HIDDEN:    wstate = SW_HIDE;       break;
-			case DisplayState::MINIMIZED: wstate = SW_MINIMIZE;   break;
-			case DisplayState::MAXIMIZED: wstate = SW_MAXIMIZE;   break;
-			case DisplayState::NORMAL:    wstate = SW_SHOWNORMAL; break;
+			case DisplayState::HIDDEN:     wstate = SW_HIDE;       break;
+			case DisplayState::MINIMIZED:  wstate = SW_MINIMIZE;   break;
+			case DisplayState::MAXIMIZED:  wstate = SW_MAXIMIZE;   break;
+			case DisplayState::NORMAL:     wstate = SW_SHOWNORMAL; break;
+			case DisplayState::BORDERLESS: {
+				int width  = GetSystemMetrics(SM_CXSCREEN);
+				int height = GetSystemMetrics(SM_CYSCREEN);
+
+				SetWindowLongPtr(m_window, GWL_STYLE, WS_VISIBLE | WS_POPUP);
+				SetWindowPos(m_window, HWND_TOP, 0, 0, width, height, SWP_FRAMECHANGED);
+
+				break;
+			}
 		}
 
 		if (wstate != -1) {

@@ -15,6 +15,7 @@
 #include "iw/input/Devices/Keyboard.h"
 #include "iw/input/Devices/Mouse.h"
 #include "imgui/imgui.h"
+#include "../../../IwEngine/extern/glew/include/gl/glew.h"
 
 GameLayer::GameLayer(
 	IwEntity::Space& space,
@@ -54,24 +55,66 @@ struct ModelComponents {
 int GameLayer::Initialize(
 	IwEngine::InitOptions& options)
 {
-	IwGraphics::MeshData& meshData = QuadData->Meshes[0];
+	IwRenderer::IDevice& Device = RenderQueue.QueuedDevice.Device;
 
-	IwRenderer::VertexBufferLayout layouts[1];
-	layouts[0].Push<float>(3);
-	layouts[0].Push<float>(3);
+	// Making line mesh
+	{
+		// Model data
 
-	iwu::potential<IwRenderer::IVertexBuffer*> buffers[1];
-	buffers[0] = RenderQueue.QueuedDevice.CreateVertexBuffer(meshData.VertexCount * sizeof(IwGraphics::Vertex), meshData.Vertices);
+		iwm::vector3 line[2] = {
+			iwm::vector2(0, 0),
+			iwm::vector2(2, 0)
+		};
 
-	auto pib = RenderQueue.QueuedDevice.CreateIndexBuffer(meshData.FaceCount, meshData.Faces);
-	auto pva = RenderQueue.QueuedDevice.CreateVertexArray(1, buffers, layouts);
+		unsigned int index[2] = {
+			0, 1
+		};
 
-	QuadMesh = new IwGraphics::Mesh{ pva, pib, meshData.FaceCount };
-	auto vs = RenderQueue.QueuedDevice.Device.CreateVertexShader(iwu::ReadFile("res/sandboxvs.glsl").c_str());
-	auto fs = RenderQueue.QueuedDevice.Device.CreateFragmentShader(iwu::ReadFile("res/sandboxfs.glsl").c_str());
+		IwRenderer::VertexBufferLayout layout;
+		layout.Push<float>(2);
 
-	pipeline = RenderQueue.QueuedDevice.Device.CreatePipeline(vs, fs);
-	RenderQueue.QueuedDevice.Device.SetPipeline(pipeline);
+		IwRenderer::MeshTopology top = IwRenderer::LINES;
+
+		// non async things
+
+		IwRenderer::IIndexBuffer*  ibuffer = Device.CreateIndexBuffer(2, index);
+		IwRenderer::IVertexBuffer* vbuffer = Device.CreateVertexBuffer(2 * sizeof(iwm::vector2), line);
+		IwRenderer::IVertexArray*  varray  = Device.CreateVertexArray();
+		varray->AddBuffer(vbuffer, layout);
+
+		// Mesh creation
+
+		LineMesh = new IwGraphics::Mesh { varray, ibuffer, 2 };
+	}
+
+	// Making quad mesh
+	{
+		IwGraphics::MeshData& meshData = QuadData->Meshes[0];
+
+		IwRenderer::VertexBufferLayout layout;
+		layout.Push<float>(3);
+		layout.Push<float>(3);
+
+		IwRenderer::IVertexBuffer* buffer = Device.CreateVertexBuffer(
+			meshData.VertexCount * sizeof(IwGraphics::Vertex), meshData.Vertices);
+
+		auto pva = Device.CreateVertexArray();
+		pva->AddBuffer(buffer, layout);
+
+		auto pib = Device.CreateIndexBuffer(meshData.FaceCount, meshData.Faces);
+
+		QuadMesh = new IwGraphics::Mesh { pva, pib, meshData.FaceCount };
+	}
+	
+	// Shader program
+
+	{
+		auto vs = Device.CreateVertexShader(iwu::ReadFile("res/sandboxvs.glsl").c_str());
+		auto fs = Device.CreateFragmentShader(iwu::ReadFile("res/sandboxfs.glsl").c_str());
+
+		pipeline = Device.CreatePipeline(vs, fs);
+		Device.SetPipeline(pipeline);
+	}
 
 	float s = .05f;
 	IwEntity::Entity camera = Space.CreateEntity<IwEngine::Transform, IwEngine::Camera>();
@@ -84,8 +127,8 @@ int GameLayer::Initialize(
 	Space.SetComponentData<Player>             (player, 10.0f, 100.0f, 0.1666f, 0.1f);
 	Space.SetComponentData<IwPhysics::AABB2D>  (player, iwm::vector2(-1), iwm::vector2(1));
 
-	for (float x = 0; x < 10; x++) {
-		for (float y = 0; y < 10; y++) {
+	for (float x = 4; x < 6; x++) {
+		for (float y = 5; y < 6; y++) {
 			IwEntity::Entity enemy = Space.CreateEntity<IwEngine::Transform, IwEngine::Model, Enemy, IwPhysics::AABB2D>();
 			Space.SetComponentData<IwEngine::Transform>(enemy, iwm::vector3(x * 3 - 15, y * 3 - 15, 1));
 			Space.SetComponentData<IwEngine::Model>    (enemy, QuadData, QuadMesh, 1U);
@@ -124,9 +167,13 @@ void GameLayer::PostUpdate() {
 		for (int i = 0; i < model->MeshCount; i++) {
 			IwGraphics::Mesh& mesh = model->Meshes[i];
 			if (mesh.IndexBuffer.initialized() && mesh.VertexArray.initialized()) {
-				RenderQueue.QueuedDevice.Device.SetVertexArray(mesh.VertexArray.value());
-				RenderQueue.QueuedDevice.Device.SetIndexBuffer(mesh.IndexBuffer.value());
-				RenderQueue.QueuedDevice.Device.DrawElements(mesh.FaceCount, 0);
+				Device.SetVertexArray(mesh.VertexArray.value());
+				Device.SetIndexBuffer(mesh.IndexBuffer.value());
+				Device.DrawElements(IwRenderer::TRIANGLES, mesh.ElementCount, 0);
+
+				Device.SetVertexArray(LineMesh->VertexArray.value());
+				Device.SetIndexBuffer(LineMesh->IndexBuffer.value());
+				Device.DrawElements(IwRenderer::LINES, LineMesh->ElementCount, 0);
 			}
 		}
 	}

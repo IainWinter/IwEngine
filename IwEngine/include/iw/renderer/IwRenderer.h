@@ -7,3 +7,10 @@
 #		define IWRENDERER_API __declspec(dllimport)
 #	endif
 #endif
+
+namespace IwRenderer {
+	enum MeshTopology {
+		TRIANGLES,
+		LINES
+	};
+}
