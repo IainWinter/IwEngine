@@ -6,8 +6,8 @@
 namespace IwEngine {
 	DebugLayer::DebugLayer(
 		IwEntity::Space& space,
-		IwGraphics::RenderQueue& renderQueue)
-		: Layer(space, renderQueue, "Debug")
+		IwGraphics::Renderer& renderer)
+		: Layer(space, renderer, "Debug")
 	{}
 
 	struct Components {

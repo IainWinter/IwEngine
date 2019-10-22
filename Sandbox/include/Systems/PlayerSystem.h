@@ -10,7 +10,7 @@ class PlayerSystem
 public:
 	PlayerSystem(
 		IwEntity::Space& space,
-		IwGraphics::RenderQueue& renderQueue);
+		IwGraphics::Renderer& renderer);
 
 	~PlayerSystem();
 

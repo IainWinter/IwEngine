@@ -22,7 +22,7 @@ private:
 public:
 	GameLayer(
 		IwEntity::Space& space,
-		IwGraphics::RenderQueue& renderQueue);
+		IwGraphics::Renderer& renderer);
 
 	~GameLayer();
 

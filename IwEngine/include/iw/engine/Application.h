@@ -9,7 +9,7 @@
 #include "Layers/ImGuiLayer.h"
 #include "iw/input/InputManager.h"
 #include "iw/entity/Space.h"
-#include "iw/graphics/RenderQueue.h"
+#include "iw/graphics/Renderer.h"
 #include "iw/util/queue/blocking_queue.h"
 #include <vector>
 #include <thread>
@@ -21,15 +21,16 @@ namespace IwEngine {
 		IWindow*             m_window;
 		ImGuiLayer*          m_imguiLayer;
 		Stack<Layer*>        m_layers;
-		IwRenderer::IDevice* m_device;
+
+		iwu::ref<IwRenderer::IDevice> m_device;
 
 		std::thread  m_renderThread;
 		Task<void()> m_updateTask;
 
 	protected:
-		IwEntity::Space         Space;
-		IwInput::InputManager   InputManager;
-		IwGraphics::RenderQueue RenderQueue;
+		IwEntity::Space       Space;
+		IwGraphics::Renderer  Renderer;
+		IwInput::InputManager InputManager;
 		EventBus Bus;
 
 	public:
@@ -58,7 +59,7 @@ namespace IwEngine {
 		L* PushLayer(
 			Args&&... args)
 		{
-			L* layer = new L(Space, RenderQueue, std::forward<Args>(args)...);
+			L* layer = new L(Space, Renderer, std::forward<Args>(args)...);
 			m_layers.PushBack(layer);
 			return layer;
 		}
@@ -69,7 +70,7 @@ namespace IwEngine {
 		L* PushOverlay(
 				Args&& ... args)
 		{
-			L* layer = new L(Space, RenderQueue, std::forward<Args>(args)...);
+			L* layer = new L(Space, Renderer, std::forward<Args>(args)...);
 			m_layers.PushFront(layer);
 			return layer;
 		}

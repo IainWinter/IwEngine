@@ -12,7 +12,7 @@ namespace IwEngine {
 		: m_running(false)
 		, m_window(IWindow::Create())
 		, m_device(IwRenderer::IDevice::Create())
-		, RenderQueue(*m_device)
+		, Renderer(m_device)
 		, m_updateTask([&]() {
 			for (Layer* layer : m_layers) {
 				layer->UpdateSystems();

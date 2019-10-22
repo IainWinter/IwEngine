@@ -9,7 +9,7 @@ namespace IwEngine {
 	public:
 		DebugLayer(
 			IwEntity::Space& space,
-			IwGraphics::RenderQueue& renderQueue);
+			IwGraphics::Renderer& renderer);
 
 		void PostUpdate() override;
 	};

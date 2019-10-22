@@ -7,8 +7,8 @@
 namespace IwEngine {
 	ImGuiLayer::ImGuiLayer(
 		IwEntity::Space& space,
-		IwGraphics::RenderQueue& renderQueue)
-		: Layer(space, renderQueue, "ImGui")
+		IwGraphics::Renderer& renderer)
+		: Layer(space, renderer, "ImGui")
 	{}
 
 	ImGuiLayer::~ImGuiLayer() {}
@@ -38,8 +38,11 @@ namespace IwEngine {
 	}
 
 	void ImGuiLayer::ImGui() {
+		ImGui::Begin("ImGui Layer");
+
 		if (ImGui::Button("Button"))
 			counter++;
+
 		ImGui::SameLine();
 		ImGui::Text("counter = %d", counter);
 

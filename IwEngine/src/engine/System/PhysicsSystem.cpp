@@ -5,8 +5,8 @@
 namespace IwEngine {
 	PhysicsSystem::PhysicsSystem(
 		IwEntity::Space& space,
-		IwGraphics::RenderQueue& renderQueue)
-		: IwEngine::System<Transform, IwPhysics::AABB2D>(space, renderQueue, "Physics")
+		IwGraphics::Renderer& renderer)
+		: IwEngine::System<Transform, IwPhysics::AABB2D>(space, renderer, "Physics")
 	{}
 
 	struct Components {

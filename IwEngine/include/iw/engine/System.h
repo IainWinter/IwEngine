@@ -1,7 +1,7 @@
 #pragma once
 
 #include "iw/entity/Space.h"
-#include "iw/graphics/RenderQueue.h"
+#include "iw/graphics/Renderer.h"
 #include <queue>
 //#include <thread>
 
@@ -24,8 +24,8 @@ namespace IwEngine {
 		std::queue<size_t> m_delete; // Probly make it so space can queue component creation at the ComponentArray level because of templated bs
 
 	protected:
-		IwEntity::Space&         Space;
-		IwGraphics::RenderQueue& RenderQueue;
+		IwEntity::Space& Space;
+		IwGraphics::Renderer& Renderer;
 
 		virtual void Update(
 			IwEntity::EntityComponentArray& view) = 0;
@@ -38,11 +38,11 @@ namespace IwEngine {
 	public:
 		System(
 			IwEntity::Space& space,
-			IwGraphics::RenderQueue& renderQueue,
+			IwGraphics::Renderer& renderer,
 			const char* name)
 			: m_name(name)
 			, Space(space)
-			, RenderQueue(renderQueue)
+			, Renderer(renderer)
 		{}
 
 		virtual ~System() {}

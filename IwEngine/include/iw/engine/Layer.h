@@ -6,6 +6,7 @@
 #include "InitOptions.h"
 #include "Events/AllEvents.h"
 #include "iw/entity/Space.h"
+#include "iw/graphics/Renderer.h"
 
 namespace IwEngine {
 	class IWENGINE_API Layer {
@@ -13,14 +14,13 @@ namespace IwEngine {
 		const char* m_name;
 		Stack<ISystem*> m_systems;
 	protected:
-		IwEntity::Space&         Space;
-		IwGraphics::RenderQueue& RenderQueue;
-		IwRenderer::IDevice& Device;
+		IwEntity::Space&      Space;
+		IwGraphics::Renderer& Renderer;
 
 	public:
 		Layer(
 			IwEntity::Space& space,
-			IwGraphics::RenderQueue& renderQueue,
+			IwGraphics::Renderer&,
 			const char* name);
 
 		virtual ~Layer();
@@ -55,7 +55,7 @@ namespace IwEngine {
 		S* PushSystem(
 			Args&&... args)
 		{
-			S* layer = new S(Space, RenderQueue, std::forward<Args>(args)...);
+			S* layer = new S(Space, Renderer, std::forward<Args>(args)...);
 			m_systems.PushBack(layer);
 			return layer;
 		}

@@ -12,9 +12,9 @@ struct Components {
 
 EnemySystem::EnemySystem(
 	IwEntity::Space& space,
-	IwGraphics::RenderQueue& renderQueue,
+	IwGraphics::Renderer& renderer,
 	IwGraphics::ModelData* circleData)
-	: IwEngine::System<IwEngine::Transform, Enemy>(space, renderQueue, "Enemy")
+	: IwEngine::System<IwEngine::Transform, Enemy>(space, renderer, "Enemy")
 	, CircleData(circleData)
 	, CircleMesh(nullptr)
 {}
@@ -26,26 +26,14 @@ EnemySystem::~EnemySystem() {
 int EnemySystem::Initialize() {
 	// Making circle mesh
 	IwGraphics::MeshData& meshData = CircleData->Meshes[0];
-
-	IwRenderer::VertexBufferLayout layout;
-	layout.Push<float>(3);
-	layout.Push<float>(3);
-
-	IwRenderer::IVertexBuffer* buffer = RenderQueue.QueuedDevice.Device.CreateVertexBuffer(
-		meshData.VertexCount * sizeof(IwGraphics::Vertex), meshData.Vertices);
-
-	IwRenderer::IIndexBuffer* pib = RenderQueue.QueuedDevice.Device.CreateIndexBuffer(meshData.FaceCount, meshData.Faces);
-	IwRenderer::IVertexArray* pva = RenderQueue.QueuedDevice.Device.CreateVertexArray();
-	pva->AddBuffer(buffer, layout);
-
-	CircleMesh = new IwGraphics::Mesh{ pva, pib, meshData.FaceCount };
+	CircleMesh = new IwGraphics::Mesh(Renderer.CreateMesh(meshData));
 
 	return 0;
 }
 
 void EnemySystem::Destroy() {
-	RenderQueue.QueuedDevice.DestroyVertexArray(CircleMesh->VertexArray);
-	RenderQueue.QueuedDevice.DestroyIndexBuffer(CircleMesh->IndexBuffer);
+	Renderer.Device->DestroyVertexArray(CircleMesh->VertexArray.value());
+	Renderer.Device->DestroyIndexBuffer(CircleMesh->IndexBuffer.value());
 	delete CircleMesh;
 }
 

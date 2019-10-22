@@ -15,7 +15,7 @@ private:
 public:
 	EnemySystem(
 		IwEntity::Space& space,
-		IwGraphics::RenderQueue& renderQueue,
+		IwGraphics::Renderer& renderer,
 		IwGraphics::ModelData* circle);
 
 	~EnemySystem();

@@ -10,7 +10,7 @@ class BulletSystem
 public:
 	BulletSystem(
 		IwEntity::Space& space,
-		IwGraphics::RenderQueue& renderQueue);
+		IwGraphics::Renderer& renderer);
 
 	~BulletSystem();
 
