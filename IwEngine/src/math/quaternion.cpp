@@ -261,23 +261,36 @@ namespace iwmath {
 		float y,
 		float z)
 	{
-		x /= 2;
-		y /= 2;
-		z /= 2;
-
-		float cx = cosf(x);
-		float sx = sinf(x);
-		float cy = cosf(y);
-		float sy = sinf(y);
-		float cz = cosf(z);
-		float sz = sinf(z);
+		float cy = cosf(z * 0.5f);
+		float sy = sinf(z * 0.5f);
+		float cp = cosf(y * 0.5f);
+		float sp = sinf(y * 0.5f);
+		float cr = cosf(x * 0.5f);
+		float sr = sinf(x * 0.5f);
 
 		return quaternion(
-			cz * cy * sx + sz * sy * cx,
-			cz * sy * cx - sz * cy * sx,
-			sz * cy * cx + cz * sy * sx,
-			cz * cy * cx - sz * sy * sx
-		);
+			cy * cp * sr - sy * sp * cr,
+			sy * cp * sr + cy * sp * cr,
+			sy * cp * cr - cy * sp * sr,
+			cy * cp * cr + sy * sp * sr);
+
+		//x /= 2;
+		//y /= 2;
+		//z /= 2;
+
+		//float cx = cosf(x);
+		//float sx = sinf(x);
+		//float cy = cosf(y);
+		//float sy = sinf(y);
+		//float cz = cosf(z);
+		//float sz = sinf(z);
+
+		//return quaternion(
+		//	cx * cy * cz + sx * sy * sz,
+		//	sx * cy * cz - cx * sy * sz,
+		//	cx * sy * cz + sx * cy * sz,
+		//	cx * cy * sz - sx * sy * cz
+		//);
 	}
 
 	std::ostream& iwmath::operator<<(
@@ -298,8 +311,8 @@ namespace iwmath {
 		vector3 v = vector3(right.x, right.y, right.z);
 		float s = right.w;
 
-		return  2.0f * v.dot(left) * v
-			+ (s*s - v.dot(v)) * left
-			+ 2.0f * s * v.cross(left);
+		return 2.0f * left.dot(v) * v
+			+ (s * s - v.dot(v)) * left
+			+ 2.0f * s * left.cross(v);
 	}
 }
