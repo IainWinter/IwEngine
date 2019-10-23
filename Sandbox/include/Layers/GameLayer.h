@@ -12,12 +12,15 @@ class GameLayer
 {
 private:
 	IwGraphics::ModelLoader loader;
-	IwRenderer::IPipeline*  pipeline;
+	IwRenderer::IPipeline* pipeline;
+	IwRenderer::IPipeline* pipeline_line;
 
 	//temp
 	IwGraphics::ModelData* QuadData;
 	IwGraphics::Mesh* QuadMesh;
 	IwGraphics::Mesh* LineMesh;
+
+	iwm::vector3* verts;
 
 public:
 	GameLayer(

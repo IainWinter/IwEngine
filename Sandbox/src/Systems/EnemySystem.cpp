@@ -25,8 +25,7 @@ EnemySystem::~EnemySystem() {
 
 int EnemySystem::Initialize() {
 	// Making circle mesh
-	IwGraphics::MeshData& meshData = CircleData->Meshes[0];
-	CircleMesh = new IwGraphics::Mesh(Renderer.CreateMesh(meshData));
+	CircleMesh = Renderer.CreateMesh(CircleData->Meshes[0]);
 
 	return 0;
 }
@@ -57,17 +56,13 @@ void EnemySystem::Update(
 
 			IwEntity::Entity spawned = Space.CreateEntity<IwEngine::Transform, IwEngine::Model, Bullet, IwPhysics::AABB2D>();
 			Space.SetComponentData<IwEngine::Transform>(spawned,
-				transform->Position + iwm::vector3(1, 1, 0) * transform->Rotation.inverted(),
-				transform->Scale, 
-				transform->Rotation.inverted());
+				transform->Position + iwm::vector3(sqrt(2), 0, 0) * transform->Rotation,
+				transform->Scale,
+				transform->Rotation);
 				
 			Space.SetComponentData<IwEngine::Model>  (spawned, CircleData, CircleMesh, 1U);
-			Space.SetComponentData<Bullet>           (spawned, LINE, 4.0f);
+			Space.SetComponentData<Bullet>           (spawned, LINE, 8.0f);
 			Space.SetComponentData<IwPhysics::AABB2D>(spawned, iwm::vector2(-0.25f), iwm::vector2(0.25f));
-		}
-
-		if (IwInput::Keyboard::KeyDown(IwInput::SPACE)) {
-			QueueDestroyEntity(entity.Index);
 		}
 
 		enemy->FireTime -= IwEngine::Time::DeltaTime();

@@ -24,8 +24,6 @@ void PlayerSystem::Update(
 	for (auto entity : view) {
 		auto [ transform, player ] = entity.Components.Tie<Components>();
 
-		transform->Rotation *= iwm::quaternion::create_from_euler_angles(0, 0, IwEngine::Time::DeltaTime());
-
 		iwm::vector3 movement;
 		if (IwInput::Keyboard::KeyDown(IwInput::LEFT)) {
 			movement.x -= 1;

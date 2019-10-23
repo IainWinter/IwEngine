@@ -15,6 +15,6 @@ namespace IwGraphics {
 		Renderer(
 			const iwu::ref<IwRenderer::IDevice>& device);
 
-		Mesh CreateMesh(const MeshData& meshData);
+		Mesh* CreateMesh(const MeshData& meshData);
 	};
 }

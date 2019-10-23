@@ -6,7 +6,7 @@ namespace IwGraphics {
 		: Device(device)
 	{}
 
-	Mesh Renderer::CreateMesh(
+	Mesh* Renderer::CreateMesh(
 		const MeshData& meshData)
 	{
 		IwRenderer::VertexBufferLayout layout;
@@ -21,6 +21,6 @@ namespace IwGraphics {
 		IwRenderer::IVertexArray* va = Device->CreateVertexArray();
 		va->AddBuffer(vb, layout);
 
-		return IwGraphics::Mesh { va, ib, meshData.FaceCount };
+		return new IwGraphics::Mesh { va, ib, meshData.FaceCount };
 	}
 }

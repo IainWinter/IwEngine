@@ -28,8 +28,13 @@ namespace IwRenderer {
 		for (unsigned int i = 0; i < elements.size(); i++) {
 			const auto& e = elements[i];
 			glEnableVertexAttribArray(i);
-			glVertexAttribPointer(i, e.Count, e.Type, e.Normalized,
-				layout.GetStride(), (const void*)offset);
+			glVertexAttribPointer(
+				i, 
+				e.Count, 
+				e.Type,
+				e.Normalized, 
+				layout.GetStride(), 
+				(const void*)offset);
 			offset += e.Count * GetSizeOfType(e.Type);
 		}
 

@@ -24,7 +24,7 @@ void BulletSystem::Update(
 		auto [transform, bullet] = entity.Components.Tie<Components>();
 
 		if (bullet->Type == LINE) {
-			transform->Position += iwm::vector3(1, 1, 0) * transform->Rotation * bullet->Speed * IwEngine::Time::DeltaTime();
+			transform->Position += iwm::vector3(1, 0, 0) * transform->Rotation * bullet->Speed * IwEngine::Time::DeltaTime();
 		}
 
 		if (transform->Position.x > 31 || transform->Position.x < -31 || transform->Position.y > 17 || transform->Position.y < -17) {

@@ -57,7 +57,8 @@ project "IwEngine"
 	}
 
 	disablewarnings { 
-		"26495" 
+		"26495",
+		"26812"
 	}
 
 	defines {
