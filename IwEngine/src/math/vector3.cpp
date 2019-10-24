@@ -245,6 +245,33 @@ namespace iwmath {
 		return *this = (vector4(*this, 1) * mat).xyz();
 	}
 
+	vector3 vector3::operator*(
+		const quaternion& quat) const
+	{
+		vector3 u = vector3(quat.x, quat.y, quat.z);
+		float s = quat.w;
+
+		const vector3& v = *this;
+
+		return 2.0f * u * v.dot(u)
+			 + 2.0f * s * v.cross(u) 
+			 + v * (s*s - u.dot(u));
+	}
+
+	vector3& vector3::operator*=(
+		const quaternion& quat)
+	{
+		vector3 u = vector3(quat.x, quat.y, quat.z);
+		float s = quat.w;
+
+		const vector3& v = *this;
+
+		return *this 
+			= 2.0f * u * v.dot(u)
+			+ 2.0f * s * v.cross(u)
+			+ v * (s*s - u.dot(u));
+	}
+
 	vector3 vector3::operator-() const {
 		return vector3(-x, -y, -z);
 	}

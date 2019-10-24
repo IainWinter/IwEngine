@@ -8,6 +8,7 @@ namespace iwmath {
 	struct vector4;
 	struct matrix3;
 	struct matrix4;
+	struct quaternion;
 
 	/**
 	* Represents a vector or point in 3D.
@@ -173,6 +174,12 @@ namespace iwmath {
 
 		vector3& operator*=(
 			const matrix4& mat);
+
+		vector3 operator*(
+			const quaternion& quat) const;
+
+		vector3& operator*=(
+			const quaternion& quat);
 
 		vector3 operator-() const;
 

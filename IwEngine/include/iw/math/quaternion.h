@@ -195,8 +195,8 @@ namespace iwmath {
 			std::ostream& stream,
 			const quaternion& a);
 
-		friend IWMATH_API vector3 operator*(
-			const vector3& left,
-			const quaternion& right);
+		//friend IWMATH_API vector3 operator*(
+		//	const vector3& left,
+		//	const quaternion& right);
 	};
 }

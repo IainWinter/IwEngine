@@ -303,16 +303,4 @@ namespace iwmath {
 			<< quaternion.z << ", "
 			<< quaternion.w << ")";
 	}
-
-	vector3 iwmath::operator*(
-		const iwmath::vector3& left,
-		const quaternion& right)
-	{
-		vector3 v = vector3(right.x, right.y, right.z);
-		float s = right.w;
-
-		return 2.0f * left.dot(v) * v
-			+ (s * s - v.dot(v)) * left
-			+ 2.0f * s * left.cross(v);
-	}
 }
