@@ -10,7 +10,9 @@
 
 namespace IwRenderer {
 	enum MeshTopology {
-		TRIANGLES,
-		LINES
+		POINTS    = 1,
+		LINES     = 2,
+		TRIANGLES = 3,
+		QUADS     = 4
 	};
 }

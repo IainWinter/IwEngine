@@ -51,17 +51,18 @@ namespace IwGraphics {
 			}
 
 			mesh.VertexCount = aimesh->mNumVertices;
-			mesh.Vertices = new IwGraphics::Vertex[mesh.VertexCount];
+			mesh.Vertices = new iwm::vector3[mesh.VertexCount];
+			mesh.Normals  = new iwm::vector3[mesh.VertexCount];
 
 			if (mesh.Vertices) {
 				for (size_t i = 0; i < mesh.VertexCount; i++) {
-					mesh.Vertices[i].Vertex.x = aimesh->mVertices[i].x;
-					mesh.Vertices[i].Vertex.y = aimesh->mVertices[i].y;
-					mesh.Vertices[i].Vertex.z = aimesh->mVertices[i].z;
+					mesh.Vertices[i].x = aimesh->mVertices[i].x;
+					mesh.Vertices[i].y = aimesh->mVertices[i].y;
+					mesh.Vertices[i].z = aimesh->mVertices[i].z;
 
-					mesh.Vertices[i].Normal.x = aimesh->mNormals[i].x;
-					mesh.Vertices[i].Normal.y = aimesh->mNormals[i].y;
-					mesh.Vertices[i].Normal.z = aimesh->mNormals[i].z;
+					mesh.Normals[i].x = aimesh->mNormals[i].x;
+					mesh.Normals[i].y = aimesh->mNormals[i].y;
+					mesh.Normals[i].z = aimesh->mNormals[i].z;
 				}
 			}
 		}

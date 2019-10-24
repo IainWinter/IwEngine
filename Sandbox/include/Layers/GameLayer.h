@@ -17,8 +17,8 @@ private:
 
 	//temp
 	IwGraphics::ModelData* QuadData;
-	IwGraphics::Mesh* QuadMesh;
-	IwGraphics::Mesh* LineMesh;
+	IwRenderer::Mesh* QuadMesh;
+	IwRenderer::Mesh* LineMesh;
 
 	iwm::vector3* verts;
 

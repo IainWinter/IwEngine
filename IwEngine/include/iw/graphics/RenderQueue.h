@@ -1,7 +1,7 @@
 #pragma once
 
 #include "IwGraphics.h"
-#include "Mesh.h"
+#include "iw/renderer/Mesh.h"
 #include "Vertex.h"
 #include "QueuedDevice.h"
 #include "iw/log/logger.h"

@@ -20,15 +20,17 @@ namespace IwRenderer {
 		int count, 
 		long long offset)
 	{
-		GLenum gltopology = 0;
+		GLenum glTopology = 0;
 		switch (topology) {
-			case TRIANGLES: gltopology = GL_TRIANGLES; break;
-			case LINES:     gltopology = GL_LINES;     break;
+			case POINTS:    glTopology = GL_POINTS;	   break;
+			case LINES:     glTopology = GL_LINES;     break;
+			case TRIANGLES: glTopology = GL_TRIANGLES; break;
+			case QUADS:     glTopology = GL_QUADS;	   break;
 		}
 
-		if (gltopology) {
+		if (glTopology) {
 			glDrawElements(
-				gltopology,
+				glTopology,
 				count,
 				GL_UNSIGNED_INT,
 				reinterpret_cast<const void*>(offset));
@@ -73,6 +75,10 @@ namespace IwRenderer {
 		static_cast<GLVertexBuffer*>(vertexBuffer)->Bind();
 	}
 
+	void GLDevice::UpdateVertexBufferData(IVertexBuffer* buffer, size_t size, const void* data)
+	{
+	}
+
 	IVertexArray* GLDevice::CreateVertexArray() {
 		return new GLVertexArray();;
 	}
@@ -87,6 +93,25 @@ namespace IwRenderer {
 		IVertexArray* vertexArray)
 	{
 		static_cast<GLVertexArray*>(vertexArray)->Bind();
+	}
+
+	void GLDevice::AddBufferToVertexArray(
+		IVertexArray* vertexArray,
+		IVertexBuffer* buffer,
+		const VertexBufferLayout& layout)
+	{
+		static_cast<GLVertexArray*>(vertexArray)
+			->AddBuffer(static_cast<GLVertexBuffer*>(buffer), layout);
+	}
+
+	void GLDevice::UpdateVertexArrayData(
+		IVertexArray* vertexArray, 
+		size_t bufferIndex, 
+		size_t size, 
+		const void* data)
+	{
+		static_cast<GLVertexArray*>(vertexArray)
+			->UpdateBuffer(bufferIndex, size, data);
 	}
 
 	IVertexShader* GLDevice::CreateVertexShader(

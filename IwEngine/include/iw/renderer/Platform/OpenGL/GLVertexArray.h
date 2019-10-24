@@ -26,12 +26,10 @@ namespace IwRenderer {
 			GLVertexBuffer* vb,
 			const VertexBufferLayout& layout);
 
-		void AddBuffer(
-			IVertexBuffer* vb,
-			const VertexBufferLayout& layout) override
-		{
-			AddBuffer((GLVertexBuffer*)vb, layout);
-		}
+		void UpdateBuffer(
+			size_t index,
+			size_t size,
+			const void* data);
 
 		void Bind() const;
 		void Unbind() const;

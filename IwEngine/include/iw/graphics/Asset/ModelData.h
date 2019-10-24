@@ -4,13 +4,16 @@
 
 namespace IwGraphics {
 	struct MeshData {
-		Vertex*       Vertices;
+		iwm::vector3* Vertices;
+		iwm::vector3* Normals;
+
 		unsigned int* Faces;
 		size_t VertexCount;
 		size_t FaceCount;
 
 		~MeshData() {
 			delete[] Vertices;
+			delete[] Normals;
 			delete[] Faces;
 		}
 	};

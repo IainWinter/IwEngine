@@ -23,23 +23,28 @@ namespace IwRenderer {
 	{
 		Bind();
 		vb->Bind();
-		const auto& elements = layout.GetElements();
+		
 		unsigned int offset = 0;
-		for (unsigned int i = 0; i < elements.size(); i++) {
-			const auto& e = elements[i];
-			glEnableVertexAttribArray(i);
-			glVertexAttribPointer(
-				i, 
-				e.Count, 
-				e.Type,
-				e.Normalized, 
-				layout.GetStride(), 
-				(const void*)offset);
-			offset += e.Count * GetSizeOfType(e.Type);
+		unsigned int index  = m_buffers.size();
+		for (auto& element : layout.GetElements()) {
+			glEnableVertexAttribArray(index);
+			glVertexAttribPointer(index, element.Count, element.Type,
+				element.Normalized, layout.GetStride(), (const void*)offset);
+
+			offset += element.Count * GetSizeOfType(element.Type);
+			++index;
 		}
 
 		m_buffers.push_back(vb);
 		m_layouts.push_back(layout);
+	}
+
+	void GLVertexArray::UpdateBuffer(
+		size_t index, 
+		size_t size, 
+		const void* data)
+	{
+		m_buffers[index]->UpdateData(size, data);
 	}
 
 	void GLVertexArray::Bind() const {

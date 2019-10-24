@@ -24,16 +24,19 @@ EnemySystem::~EnemySystem() {
 }
 
 int EnemySystem::Initialize() {
-	// Making circle mesh
-	CircleMesh = Renderer.CreateMesh(CircleData->Meshes[0]);
+	auto& data = CircleData->Meshes[0];
+
+	CircleMesh = new IwRenderer::Mesh();
+	CircleMesh->SetVertices(data.VertexCount, data.Vertices);
+	CircleMesh->SetNormals(data.VertexCount, data.Normals);
+	CircleMesh->SetIndices(data.FaceCount, data.Faces);
+	CircleMesh->Compile(Renderer.Device);
 
 	return 0;
 }
 
 void EnemySystem::Destroy() {
-	Renderer.Device->DestroyVertexArray(CircleMesh->VertexArray.value());
-	Renderer.Device->DestroyIndexBuffer(CircleMesh->IndexBuffer.value());
-	delete CircleMesh;
+	CircleMesh->Destroy(Renderer.Device);
 }
 
 void EnemySystem::Update(

@@ -19,6 +19,10 @@ namespace IwRenderer {
 
 		~GLVertexBuffer();
 
+		void UpdateData(
+			unsigned int size,
+			const void* data) const;
+
 		void Bind() const;
 		void Unbind() const;
 	};

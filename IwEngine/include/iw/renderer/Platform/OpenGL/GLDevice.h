@@ -34,6 +34,11 @@ namespace IwRenderer {
 		void SetVertexBuffer(
 			IVertexBuffer* vertexBuffer) override;
 
+		void UpdateVertexBufferData(
+			IVertexBuffer* buffer,
+			size_t size,
+			const void* data = nullptr) override;
+
 		//Vertex arrays
 		IVertexArray* CreateVertexArray() override;
 
@@ -42,6 +47,17 @@ namespace IwRenderer {
 
 		void SetVertexArray(
 			IVertexArray* vertexArray) override;
+
+		void AddBufferToVertexArray(
+			IVertexArray* vertexArray,
+			IVertexBuffer* buffer,
+			const VertexBufferLayout& layout) override;
+
+		void UpdateVertexArrayData(
+			IVertexArray* vertexArray,
+			size_t bufferIndex,
+			size_t size,
+			const void* data = nullptr) override;
 
 		//Vertex shader
 		IVertexShader* CreateVertexShader(

@@ -42,6 +42,11 @@ namespace IwRenderer {
 		virtual void SetVertexBuffer(
 			IVertexBuffer* vertexBuffer) = 0;
 
+		virtual void UpdateVertexBufferData(
+			IVertexBuffer* buffer,
+			size_t size,
+			const void* data = nullptr) = 0;
+
 		// Vertex arrays
 		virtual IVertexArray* CreateVertexArray() = 0;
 
@@ -50,6 +55,17 @@ namespace IwRenderer {
 
 		virtual void SetVertexArray(
 			IVertexArray* vertexArray) = 0;
+
+		virtual void AddBufferToVertexArray(
+			IVertexArray* vertexArray,
+			IVertexBuffer* buffer,
+			const VertexBufferLayout& layout) = 0;
+
+		virtual void UpdateVertexArrayData(
+			IVertexArray* vertexArray,
+			size_t bufferIndex,
+			size_t size,
+			const void* data = nullptr) = 0;
 
 		// Vertex shader
 		virtual IVertexShader* CreateVertexShader(

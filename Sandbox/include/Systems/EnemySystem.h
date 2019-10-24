@@ -10,7 +10,7 @@ class EnemySystem
 {
 private:
 	IwGraphics::ModelData* CircleData;
-	IwGraphics::Mesh*      CircleMesh;
+	IwRenderer::Mesh*      CircleMesh;
 
 public:
 	EnemySystem(

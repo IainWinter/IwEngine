@@ -17,6 +17,13 @@ namespace IwRenderer {
 		glDeleteBuffers(1, &m_renderId);
 	}
 
+	void GLVertexBuffer::UpdateData(
+		unsigned int size, 
+		const void* data) const
+	{
+		glNamedBufferSubData(m_renderId, 0, size, data);
+	}
+
 	void GLVertexBuffer::Bind() const {
 		glBindBuffer(GL_ARRAY_BUFFER, m_renderId);
 	}

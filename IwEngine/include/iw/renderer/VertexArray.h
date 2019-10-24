@@ -9,9 +9,6 @@ namespace IwRenderer {
 	public:
 		virtual ~IVertexArray() {}
 
-		virtual void AddBuffer(
-			IVertexBuffer* vbo,
-			const VertexBufferLayout& layout) = 0;  // Gives state to infterface?
 	protected:
 		IVertexArray() {}
 	};
