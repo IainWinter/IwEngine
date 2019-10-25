@@ -3,7 +3,7 @@
 // < Operation > 
 
 
-namespace IwGraphics {
+namespace IW {
 	struct CIB {
 		PIB         Buffer;
 		size_t      Size;
@@ -43,7 +43,7 @@ namespace IwGraphics {
 	}
 
 	QueuedDevice::QueuedDevice(
-		IwRenderer::IDevice& device) 
+		IW::IDevice& device) 
 		: m_scratch(1024 * 1024)
 		, Device(device)
 	{}
@@ -67,7 +67,7 @@ namespace IwGraphics {
 				case CREATE_VERTEX_ARRAY: {
 					CVA* args = (CVA*)op.Args;
 					
-					IwRenderer::IVertexBuffer** buffers = m_scratch.alloc<IwRenderer::IVertexBuffer*>(args->Count);
+					IW::IVertexBuffer** buffers = m_scratch.alloc<IW::IVertexBuffer*>(args->Count);
 					for (size_t i = 0; i < args->Count; i++) {
 						buffers[i] = args->Buffers[i].consume();
 					}
@@ -188,76 +188,76 @@ namespace IwGraphics {
 		Push(DESTROY_VERTEX_ARRAY, dva);
 	}
 
-	iwu::potential<IwRenderer::IVertexShader*> QueuedDevice::CreateVertexShader(
+	iwu::potential<IW::IVertexShader*> QueuedDevice::CreateVertexShader(
 		const char* source)
 	{
-		return iwu::potential<IwRenderer::IVertexShader*>();
+		return iwu::potential<IW::IVertexShader*>();
 	}
 
 	void QueuedDevice::DestroyVertexShader(
-		iwu::potential<IwRenderer::IVertexShader*> vertexShader)
+		iwu::potential<IW::IVertexShader*> vertexShader)
 	{
 
 	}
 
-	iwu::potential<IwRenderer::IFragmentShader*> QueuedDevice::CreateFragmentShader(
+	iwu::potential<IW::IFragmentShader*> QueuedDevice::CreateFragmentShader(
 		const char* source)
 	{
-		return iwu::potential<IwRenderer::IFragmentShader*>();
+		return iwu::potential<IW::IFragmentShader*>();
 	}
 
 	void QueuedDevice::DestroyFragmentShader(
-		iwu::potential<IwRenderer::IFragmentShader*> fragmentShader)
+		iwu::potential<IW::IFragmentShader*> fragmentShader)
 	{
 
 	}
 
-	iwu::potential<IwRenderer::IGeometryShader*> QueuedDevice::CreateGeometryShader(
+	iwu::potential<IW::IGeometryShader*> QueuedDevice::CreateGeometryShader(
 		const char* source)
 	{
-		return iwu::potential<IwRenderer::IGeometryShader*>();
+		return iwu::potential<IW::IGeometryShader*>();
 	}
 
 	void QueuedDevice::DestroyGeometryShader(
-		iwu::potential<IwRenderer::IGeometryShader*> geometryShader)
+		iwu::potential<IW::IGeometryShader*> geometryShader)
 	{
 
 	}
 
-	iwu::potential<IwRenderer::IComputeShader*> QueuedDevice::CreateComputeShader(
+	iwu::potential<IW::IComputeShader*> QueuedDevice::CreateComputeShader(
 		const char* source)
 	{
-		return iwu::potential<IwRenderer::IComputeShader*>();
+		return iwu::potential<IW::IComputeShader*>();
 	}
 
 	void QueuedDevice::DestroyComputeShader(
-		iwu::potential<IwRenderer::IComputeShader*> computeShader)
+		iwu::potential<IW::IComputeShader*> computeShader)
 	{
 
 	}
 
-	iwu::potential<IwRenderer::IPipeline*> QueuedDevice::CreatePipeline(
-		iwu::potential<IwRenderer::IVertexShader*> vertexShader, 
-		iwu::potential<IwRenderer::IFragmentShader*> fragmentShader, 
-		iwu::potential<IwRenderer::IGeometryShader*> geometryShader)
+	iwu::potential<IW::IPipeline*> QueuedDevice::CreatePipeline(
+		iwu::potential<IW::IVertexShader*> vertexShader, 
+		iwu::potential<IW::IFragmentShader*> fragmentShader, 
+		iwu::potential<IW::IGeometryShader*> geometryShader)
 	{
-		return iwu::potential<IwRenderer::IPipeline*>();
+		return iwu::potential<IW::IPipeline*>();
 	}
 
 	void QueuedDevice::DestroyPipeline(
-		iwu::potential<IwRenderer::IPipeline*> pipeline)
+		iwu::potential<IW::IPipeline*> pipeline)
 	{
 
 	}
 
-	iwu::potential<IwRenderer::IComputePipeline*> QueuedDevice::CreateComputePipeline(
-		iwu::potential<IwRenderer::IComputeShader*> computeShader)
+	iwu::potential<IW::IComputePipeline*> QueuedDevice::CreateComputePipeline(
+		iwu::potential<IW::IComputeShader*> computeShader)
 	{
-		return iwu::potential<IwRenderer::IComputePipeline*>();
+		return iwu::potential<IW::IComputePipeline*>();
 	}
 
 	void QueuedDevice::DestroyComputePipeline(
-		iwu::potential<IwRenderer::IComputePipeline*> computePipeline)
+		iwu::potential<IW::IComputePipeline*> computePipeline)
 	{
 
 	}

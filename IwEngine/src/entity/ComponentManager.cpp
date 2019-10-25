@@ -22,7 +22,7 @@ namespace IwEntity {
 		return component;
 	}
 
-	iwu::ref<Component>& ComponentManager::GetComponent(
+	iwu::ref<Component> ComponentManager::GetComponent(
 		ComponentType type)
 	{
 		auto itr = m_components.find(type);

@@ -8,7 +8,7 @@ struct Components {
 
 BulletSystem::BulletSystem(
 	IwEntity::Space& space,
-	IwGraphics::Renderer& renderer)
+	IW::Graphics::Renderer& renderer)
 	: IwEngine::System<IwEngine::Transform, Bullet>(space, renderer, "Bullet")
 {}
 

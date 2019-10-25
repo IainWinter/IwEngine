@@ -6,9 +6,9 @@
 /// RenderQueue - Async stuff
 //
 
-namespace IwGraphics {
+namespace IW {
 	RenderQueue::RenderQueue(
-		IwRenderer::IDevice& device)
+		IW::IDevice& device)
 		: QueuedDevice(device)
 		, m_scratch(1024 * 500)
 	{}
@@ -25,9 +25,6 @@ namespace IwGraphics {
 
 		while (!m_queue.empty()) {
 			RenderOperation& op = m_queue.front();
-			switch (op.Operation) {
-
-			}
 
 			m_queue.erase(m_queue.begin());
 		}

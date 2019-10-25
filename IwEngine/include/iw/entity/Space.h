@@ -28,11 +28,11 @@ namespace IwEntity {
 
 		template<
 			typename _c>
-		iwu::ref<Component>& GetComponent() {
+		iwu::ref<Component> GetComponent() {
 			return GetComponent(typeid(_c));
 		}
 
-		iwu::ref<Component>& GetComponent(
+		iwu::ref<Component> GetComponent(
 			ComponentType type);
 
 		template<
@@ -77,12 +77,18 @@ namespace IwEntity {
 			_args&&... args)
 		{
 			iwu::ref<EntityData>& entityData = m_entityManager.GetEntityData(entity.Index);
-			iwu::ref<Component>&  component  = m_componentManager.GetComponent(typeid(_c));
+			iwu::ref<Component>   component  = m_componentManager.GetComponent(typeid(_c));
 
 			if (component) {
 				_c* data = (_c*)m_componentManager.GetComponentData(entityData, component);
 				if (data) {
-					*data = _c{ std::forward<_args>(args)... };
+					if constexpr (std::is_aggregate_v<_c>) {
+						*data = _c { std::forward<_args>(args)... };
+					}
+
+					else {
+						*data = _c(std::forward<_args>(args)...);
+					}
 				}
 
 				else {

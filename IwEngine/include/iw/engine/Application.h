@@ -22,14 +22,14 @@ namespace IwEngine {
 		ImGuiLayer*          m_imguiLayer;
 		Stack<Layer*>        m_layers;
 
-		iwu::ref<IwRenderer::IDevice> m_device;
+		iwu::ref<IW::IDevice> m_device;
 
 		std::thread  m_renderThread;
 		Task<void()> m_updateTask;
 
 	protected:
 		IwEntity::Space       Space;
-		IwGraphics::Renderer  Renderer;
+		IW::Graphics::Renderer  Renderer;
 		IwInput::InputManager InputManager;
 		EventBus Bus;
 

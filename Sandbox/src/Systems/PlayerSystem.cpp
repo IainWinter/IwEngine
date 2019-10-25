@@ -9,7 +9,7 @@ struct Components {
 
 PlayerSystem::PlayerSystem(
 	IwEntity::Space& space,
-	IwGraphics::Renderer& renderer)
+	IW::Graphics::Renderer& renderer)
 	: IwEngine::System<IwEngine::Transform, Player>(space, renderer, "Player")
 {}
 

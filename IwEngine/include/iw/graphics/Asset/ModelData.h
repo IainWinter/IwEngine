@@ -2,7 +2,8 @@
 
 #include "iw/graphics/Vertex.h"
 
-namespace IwGraphics {
+namespace IW {
+inline namespace Graphics {
 	struct MeshData {
 		iwm::vector3* Vertices;
 		iwm::vector3* Normals;
@@ -26,4 +27,5 @@ namespace IwGraphics {
 			delete[] Meshes;
 		}
 	};
+}
 }

@@ -3,16 +3,23 @@
 #include "IwGraphics.h"
 #include "iw/renderer/Device.h"
 #include "iw/util/memory/smart_pointers.h"
-#include "iw/renderer/Mesh.h"
 #include "Asset/ModelData.h"
 
-namespace IwGraphics {
+namespace IW {
+inline namespace Graphics {
 	class IWGRAPHICS_API Renderer {
 	public:
-		iwu::ref<IwRenderer::IDevice> Device;
+		iwu::ref<IW::IDevice> Device;
 
 	public:
 		Renderer(
-			const iwu::ref<IwRenderer::IDevice>& device);
+			const iwu::ref<IW::IDevice>& device);
+
+		//void BeginScene(Camera*);
+		//void EndScene();
+
+		//void DrawMesh();
+
 	};
+}
 }

@@ -1,7 +1,7 @@
 #include "iw/renderer/VertexBufferLayout.h"
 #include "gl/glew.h"
 
-namespace IwRenderer {
+namespace IW {
 	VertexBufferLayout::VertexBufferLayout()
 		: m_stride(0)
 	{}
@@ -30,7 +30,7 @@ namespace IwRenderer {
 		m_stride += count * GetSizeOfType(GL_UNSIGNED_BYTE);
 	}
 
-	unsigned int GetSizeOfType(
+	unsigned int Renderer::GetSizeOfType(
 		unsigned int glType)
 	{
 		switch (glType) {

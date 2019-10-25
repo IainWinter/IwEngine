@@ -12,7 +12,7 @@ namespace IwEntity {
 		return m_componentManager.RegisterComponent(type, size);
 	}
 
-	iwu::ref<Component>& Space::GetComponent(
+	iwu::ref<Component> Space::GetComponent(
 		ComponentType type)
 	{
 		return m_componentManager.GetComponent(type);

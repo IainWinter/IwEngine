@@ -23,7 +23,7 @@ namespace IwEntity {
 			ComponentType type,
 			size_t size);
 
-		iwu::ref<Component>& GetComponent(
+		iwu::ref<Component> GetComponent(
 			ComponentType type);
 
 		// Component Data

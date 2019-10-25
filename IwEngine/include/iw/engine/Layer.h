@@ -15,12 +15,12 @@ namespace IwEngine {
 		Stack<ISystem*> m_systems;
 	protected:
 		IwEntity::Space&      Space;
-		IwGraphics::Renderer& Renderer;
+		IW::Graphics::Renderer& Renderer;
 
 	public:
 		Layer(
 			IwEntity::Space& space,
-			IwGraphics::Renderer&,
+			IW::Graphics::Renderer&,
 			const char* name);
 
 		virtual ~Layer();

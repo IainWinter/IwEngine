@@ -5,7 +5,7 @@
 namespace IwEngine {
 	PhysicsSystem::PhysicsSystem(
 		IwEntity::Space& space,
-		IwGraphics::Renderer& renderer)
+		IW::Graphics::Renderer& renderer)
 		: IwEngine::System<Transform, IwPhysics::AABB2D>(space, renderer, "Physics")
 	{}
 

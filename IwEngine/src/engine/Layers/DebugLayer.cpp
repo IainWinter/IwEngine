@@ -6,7 +6,7 @@
 namespace IwEngine {
 	DebugLayer::DebugLayer(
 		IwEntity::Space& space,
-		IwGraphics::Renderer& renderer)
+		IW::Graphics::Renderer& renderer)
 		: Layer(space, renderer, "Debug")
 	{}
 

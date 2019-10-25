@@ -12,28 +12,11 @@ struct Components {
 
 EnemySystem::EnemySystem(
 	IwEntity::Space& space,
-	IwGraphics::Renderer& renderer,
-	IwGraphics::ModelData* circleData)
+	IW::Graphics::Renderer& renderer,
+	IW::Mesh* circle)
 	: IwEngine::System<IwEngine::Transform, Enemy>(space, renderer, "Enemy")
-	, CircleData(circleData)
-	, CircleMesh(nullptr)
+	, CircleMesh(circle)
 {}
-
-EnemySystem::~EnemySystem() {
-
-}
-
-int EnemySystem::Initialize() {
-	auto& data = CircleData->Meshes[0];
-
-	CircleMesh = new IwRenderer::Mesh();
-	CircleMesh->SetVertices(data.VertexCount, data.Vertices);
-	CircleMesh->SetNormals(data.VertexCount, data.Normals);
-	CircleMesh->SetIndices(data.FaceCount, data.Faces);
-	CircleMesh->Compile(Renderer.Device);
-
-	return 0;
-}
 
 void EnemySystem::Destroy() {
 	CircleMesh->Destroy(Renderer.Device);
@@ -63,7 +46,7 @@ void EnemySystem::Update(
 				transform->Scale,
 				transform->Rotation);
 				
-			Space.SetComponentData<IwEngine::Model>  (spawned, CircleData, CircleMesh, 1U);
+			Space.SetComponentData<IwEngine::Model>  (spawned, CircleMesh, 1U);
 			Space.SetComponentData<Bullet>           (spawned, LINE, 8.0f);
 			Space.SetComponentData<IwPhysics::AABB2D>(spawned, iwm::vector2(-0.25f), iwm::vector2(0.25f));
 		}

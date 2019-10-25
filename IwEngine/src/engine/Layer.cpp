@@ -3,7 +3,7 @@
 namespace IwEngine {
 	Layer::Layer(
 		IwEntity::Space& space,
-		IwGraphics::Renderer& renderer,
+		IW::Graphics::Renderer& renderer,
 		const char* name)
 		: m_name(name)
 		, Space(space)

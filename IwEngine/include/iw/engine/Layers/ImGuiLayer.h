@@ -14,7 +14,7 @@ namespace IwEngine {
 	public:
 		ImGuiLayer(
 			IwEntity::Space& space,
-			IwGraphics::Renderer& renderer);
+			IW::Graphics::Renderer& renderer);
 
 		~ImGuiLayer();
 

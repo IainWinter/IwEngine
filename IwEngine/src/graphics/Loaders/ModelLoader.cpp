@@ -5,7 +5,7 @@
 #include "assimp/postprocess.h"
 #include <string>
 
-namespace IwGraphics {
+namespace IW {
 	ModelData* ModelLoader::LoadAsset(
 		const char* path)
 	{

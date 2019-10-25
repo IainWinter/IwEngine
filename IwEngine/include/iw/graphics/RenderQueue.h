@@ -1,7 +1,7 @@
 #pragma once
 
 #include "IwGraphics.h"
-#include "iw/renderer/Mesh.h"
+#include "iw/graphics/Mesh.h"
 #include "Vertex.h"
 #include "QueuedDevice.h"
 #include "iw/log/logger.h"
@@ -14,7 +14,8 @@
 #include "iw/renderer/Device.h"
 #include <queue>
 
-namespace IwGraphics {
+namespace IW {
+inline namespace Graphics {
 	class IWGRAPHICS_API RenderQueue {
 	private:
 		enum Operation {
@@ -34,7 +35,7 @@ namespace IwGraphics {
 
 	public:
 		RenderQueue(
-			IwRenderer::IDevice& device);
+			IW::IDevice& device);
 
 		void Push(
 			Operation&& op,
@@ -43,3 +44,4 @@ namespace IwGraphics {
 		void Execute();
 	};
 }
+	}

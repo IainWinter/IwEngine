@@ -25,7 +25,7 @@ namespace IwEngine {
 
 	protected:
 		IwEntity::Space& Space;
-		IwGraphics::Renderer& Renderer;
+		IW::Graphics::Renderer& Renderer;
 
 		virtual void Update(
 			IwEntity::EntityComponentArray& view) = 0;
@@ -38,7 +38,7 @@ namespace IwEngine {
 	public:
 		System(
 			IwEntity::Space& space,
-			IwGraphics::Renderer& renderer,
+			IW::Graphics::Renderer& renderer,
 			const char* name)
 			: m_name(name)
 			, Space(space)

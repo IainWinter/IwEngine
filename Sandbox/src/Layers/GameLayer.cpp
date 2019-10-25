@@ -8,7 +8,7 @@
 #include "iw/engine/Time.h"
 #include "iw/data/Components/Transform.h"
 #include "iw/engine/Components/Model.h"
-#include "iw/engine/Components/Camera.h"
+#include "iw/engine/Components/CameraController.h"
 #include "iw/engine/Systems/PhysicsSystem.h"
 #include "iw/renderer/Platform/OpenGL/GLDevice.h"
 #include "iw/util/io/File.h"
@@ -16,32 +16,24 @@
 #include "iw/input/Devices/Mouse.h"
 #include "imgui/imgui.h"
 
-#include "iw/renderer/Mesh.h"
+#include "iw/graphics/Mesh.h"
+
+#include "iw/graphics/Camera.h"
 
 GameLayer::GameLayer(
 	IwEntity::Space& space,
-	IwGraphics::Renderer& renderer)
+	IW::Graphics::Renderer& renderer)
 	: IwEngine::Layer(space, renderer, "Game")
 	, pipeline(nullptr)
-	, QuadMesh(nullptr)
-	, QuadData(nullptr)
 {
-	IwGraphics::ModelData* circle = loader.Load("res/circle.obj");
-	QuadData = loader.Load("res/quad.obj");
-
 	PushSystem<BulletSystem>();
-	PushSystem<EnemySystem>(circle);
 	PushSystem<PlayerSystem>();
 	PushSystem<IwEngine::PhysicsSystem>();
 }
 
-GameLayer::~GameLayer() {
-
-}
-
 struct CameraComponents {
 	IwEngine::Transform* Transform;
-	IwEngine::Camera* Camera;
+	IW::OrthographicCamera* Camera;
 };
 
 struct PlayerComponents {
@@ -58,64 +50,82 @@ int GameLayer::Initialize(
 {
 	auto& device = *Renderer.Device;
 
+	auto vs = device.CreateVertexShader(iwu::ReadFile("res/sandboxvs.glsl").c_str());
+	auto fs = device.CreateFragmentShader(iwu::ReadFile("res/sandboxfs.glsl").c_str());
+
+	pipeline = device.CreatePipeline(vs, fs/*, gs*/);
+
+	auto vs2 = device.CreateVertexShader(iwu::ReadFile("res/sandbox_line_vs.glsl").c_str());
+	auto fs2 = device.CreateFragmentShader(iwu::ReadFile("res/sandbox_line_fs.glsl").c_str());
+
+	pipeline_line = device.CreatePipeline(vs2, fs2);
+
 	// Making line mesh
-	{
-		// Model data
-		iwm::vector3* verts = new iwm::vector3[2] {
-			iwm::vector3(0, 0, -1), 
-			iwm::vector3(4, 0, -1)
-		};
+	// Model data
+	iwm::vector3* verts = new iwm::vector3[2] {
+		iwm::vector3(0, 0, -1), 
+		iwm::vector3(4, 0, -1)
+	};
 
-		iwm::vector3* color = new iwm::vector3[2] {
-			iwm::vector3(1, 0, 0),
-			iwm::vector3(1, 1, 1)
-		};
+	iwm::vector3* color = new iwm::vector3[2] {
+		iwm::vector3(1, 0, 0),
+		iwm::vector3(1, 1, 1)
+	};
 
-		unsigned int* index = new unsigned int[2] {
-			0, 1
-		};
+	unsigned int* index = new unsigned int[2] {
+		0, 1
+	};
 
-		LineMesh = new IwRenderer::Mesh(IwRenderer::LINES);
-		LineMesh->SetVertices(2, verts);
-		LineMesh->SetColors  (2, color);
-		LineMesh->SetIndices (2, index);
-		LineMesh->Compile(Renderer.Device);
-	}
+	iwu::ref<IW::Material> lineMaterial(new IW::Material(pipeline_line));
+
+	iwu::ref<IW::Material> quadMaterial(new IW::Material(pipeline));
+	quadMaterial->SetProperty("color", iwm::vector3(1, 0, 0));
+
+	iwu::ref<IW::Material> circleMaterial(new IW::Material(pipeline));
+	circleMaterial->SetProperty("color", iwm::vector3(1, 0, 1));
+
+	line = new IW::Mesh(IW::LINES);
+	line->SetMaterial(lineMaterial);
+	line->SetVertices(2, verts);
+	line->SetColors  (2, color);
+	line->SetIndices (2, index);
+	line->Compile(Renderer.Device);
 
 	// Making quad mesh
-	{
-		auto& data = QuadData->Meshes[0];
+	auto& qdata = loader.Load("res/quad.obj")->Meshes[0];
 
-		QuadMesh = new IwRenderer::Mesh();
-		QuadMesh->SetVertices(data.VertexCount, data.Vertices);
-		QuadMesh->SetNormals (data.VertexCount, data.Normals);
-		QuadMesh->SetIndices (data.FaceCount, data.Faces);
-		QuadMesh->Compile(Renderer.Device);
-	}
-	
+	IW::Mesh* quad = new IW::Mesh();
+	quad->SetMaterial(quadMaterial);
+	quad->SetVertices(qdata.VertexCount, qdata.Vertices);
+	quad->SetNormals (qdata.VertexCount, qdata.Normals);
+	quad->SetIndices (qdata.FaceCount,   qdata.Faces);
+	quad->Compile(Renderer.Device);
+
+	// Making circle mesh
+	auto& cdata = loader.Load("res/circle.obj")->Meshes[0];
+
+	IW::Mesh* circle = new IW::Mesh();	
+	circle->SetMaterial(circleMaterial);
+	circle->SetVertices(cdata.VertexCount, cdata.Vertices);
+	circle->SetNormals (cdata.VertexCount, cdata.Normals);
+	circle->SetIndices (cdata.FaceCount,   cdata.Faces);
+	circle->Compile(Renderer.Device);
+
+	// give enemy system circle mesh
+
+	PushSystem<EnemySystem>(circle);
+
 	// Shader program
 
-	{
-		auto vs = Renderer.Device->CreateVertexShader  (iwu::ReadFile("res/sandboxvs.glsl").c_str());
-		auto fs = Renderer.Device->CreateFragmentShader(iwu::ReadFile("res/sandboxfs.glsl").c_str());
-		auto gs = Renderer.Device->CreateGeometryShader(iwu::ReadFile("res/sandboxgs.glsl").c_str());
+	IW::Camera* cam = new IW::OrthographicCamera(64, 36, -100, 100);
+	cam->Rotation = iwm::quaternion::create_from_euler_angles(0, iwm::IW_PI, 0);
 
-		pipeline = Renderer.Device->CreatePipeline(vs, fs/*, gs*/);
-
-		auto vs2 = Renderer.Device->CreateVertexShader(iwu::ReadFile("res/sandbox_line_vs.glsl").c_str());
-		auto fs2 = Renderer.Device->CreateFragmentShader(iwu::ReadFile("res/sandbox_line_fs.glsl").c_str());
-
-		pipeline_line = Renderer.Device->CreatePipeline(vs2, fs2);
-	}
-
-	IwEntity::Entity camera = Space.CreateEntity<IwEngine::Transform, IwEngine::Camera>();
-	Space.SetComponentData<IwEngine::Transform>(camera, iwm::vector3::zero, iwm::vector3::one, iwm::quaternion::create_from_euler_angles(0, iwm::IW_PI, 0));
-	Space.SetComponentData<IwEngine::Camera>   (camera, iwm::matrix4::create_orthographic(64, 36, -100, 100));
-	//Space.SetComponentData<IwEngine::Camera>   (camera, iwm::matrix4::create_perspective_field_of_view(1.17f, 1.77f, 0.001f, 1000.0f));
+	IwEntity::Entity camera = Space.CreateEntity<IwEngine::CameraController>();
+	Space.SetComponentData<IwEngine::CameraController>(camera, cam);
 
 	IwEntity::Entity player = Space.CreateEntity<IwEngine::Transform, IwEngine::Model, Player, IwPhysics::AABB2D>();
 	Space.SetComponentData<IwEngine::Transform>(player, iwm::vector3(10, 0, 0));
-	Space.SetComponentData<IwEngine::Model>    (player, QuadData, QuadMesh, 1U);
+	Space.SetComponentData<IwEngine::Model>    (player, line, 1U);
 	Space.SetComponentData<Player>             (player, 10.0f, 100.0f, 0.1666f, 0.1f);
 	Space.SetComponentData<IwPhysics::AABB2D>  (player, iwm::vector2(-1), iwm::vector2(1));
 
@@ -123,7 +133,7 @@ int GameLayer::Initialize(
 		for (float y = 5; y < 6; y++) {
 			IwEntity::Entity enemy = Space.CreateEntity<IwEngine::Transform, IwEngine::Model, Enemy, IwPhysics::AABB2D>();
 			Space.SetComponentData<IwEngine::Transform>(enemy, iwm::vector3(x * 3 - 15, y * 3 - 15, 0));
-			Space.SetComponentData<IwEngine::Model>    (enemy, QuadData, QuadMesh, 1U);
+			Space.SetComponentData<IwEngine::Model>    (enemy, quad, 1U);
 			Space.SetComponentData<Enemy>              (enemy, SPIN, 3.0f, 0.05f, 0.025f, 0.025f);
 			Space.SetComponentData<IwPhysics::AABB2D>  (enemy, iwm::vector2(-1), iwm::vector2(1));
 		}
@@ -133,23 +143,29 @@ int GameLayer::Initialize(
 }
 
 void GameLayer::PostUpdate() {
-	LineMesh->Vertices[1] *= iwm::quaternion::create_from_euler_angles(0, 0, IwEngine::Time::DeltaTime());
+	line->Vertices[1] *= iwm::quaternion::create_from_euler_angles(0, 0, IwEngine::Time::DeltaTime());
+	line->Update(Renderer.Device);
 
-	LineMesh->Update(Renderer.Device);
+	//Renderer.BeginScene(Camera);
+
+	//Renderer.DrawMesh(Transform, Mesh);
+
+	//Renderer.EndScene();
+
+	//QuadMaterial.Use(Renderer.Device);
 
 	Renderer.Device->SetPipeline(pipeline);
 
-	for (auto c : Space.Query<IwEngine::Transform, IwEngine::Camera>()) {
-		auto [transform, camera] = c.Components.Tie<CameraComponents>();
+	for (auto c : Space.Query<IwEngine::CameraController>()) {
+		auto [controller] = c.Components.TieTo<IwEngine::CameraController>();
+
+		//Renderer.BeginScene(controller.Camera);
 
 		pipeline->GetParam("proj")
-			->SetAsMat4(camera->Projection);
+			->SetAsMat4(controller->Camera->GetProjection());
 
 		pipeline->GetParam("view")
-			->SetAsMat4(iwm::matrix4::create_look_at(
-				transform->Position,
-				transform->Position - transform->Forward(),
-				transform->Up()));
+			->SetAsMat4(controller->Camera->GetView());
 	}
 
 	for (auto entity : Space.Query<IwEngine::Transform, IwEngine::Model>()) {
@@ -159,37 +175,33 @@ void GameLayer::PostUpdate() {
 			->SetAsMat4(transform->Transformation());
 
 		for (int i = 0; i < model->MeshCount; i++) {
-			IwRenderer::Mesh& mesh = model->Meshes[i];
-			Renderer.Device->SetVertexArray(mesh.VertexArray);
-			Renderer.Device->SetIndexBuffer(mesh.IndexBuffer);
-			Renderer.Device->DrawElements(mesh.Topology, mesh.IndexCount, 0);
+			//Renderer.DrawMesh(transform, model->Meshes[i]);
+
+			model->Meshes[i].Draw(Renderer.Device);
 		}
 	}
 
+//	LineMaterial.Use(Renderer.Device);
+
 	Renderer.Device->SetPipeline(pipeline_line);
 
-	for (auto c : Space.Query<IwEngine::Transform, IwEngine::Camera>()) {
-		auto [transform, camera] = c.Components.Tie<CameraComponents>();
+	for (auto c : Space.Query<IwEngine::CameraController>()) {
+		auto [controller] = c.Components.TieTo<IwEngine::CameraController>();
 
-		pipeline->GetParam("proj")
-			->SetAsMat4(camera->Projection);
+		pipeline_line ->GetParam("proj")
+			->SetAsMat4(controller->Camera->GetProjection());
 
-		pipeline->GetParam("view")
-			->SetAsMat4(iwm::matrix4::create_look_at(
-				transform->Position,
-				transform->Position - transform->Forward(),
-				transform->Up()));
+		pipeline_line->GetParam("view")
+			->SetAsMat4(controller->Camera->GetView());
 	}
 
 	for (auto entity : Space.Query<IwEngine::Transform, Bullet>()) {
 		auto [transform] = entity.Components.TieTo<IwEngine::Transform>();
 
-		pipeline->GetParam("model")
+		pipeline_line->GetParam("model")
 			->SetAsMat4(transform->Transformation());
 
-		Renderer.Device->SetVertexArray(LineMesh->VertexArray);
-		Renderer.Device->SetIndexBuffer(LineMesh->IndexBuffer);
-		Renderer.Device->DrawElements(LineMesh->Topology, LineMesh->IndexCount, 0);
+		line->Draw(Renderer.Device);
 	}
 }
 

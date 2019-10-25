@@ -3,24 +3,19 @@
 #include "Components/Enemy.h"
 #include "iw/engine/System.h"
 #include "iw/data/Components/Transform.h"
-#include "iw/graphics/Asset/ModelData.h"
+#include "iw/graphics/Mesh.h"
 
 class EnemySystem
 	: public IwEngine::System<IwEngine::Transform, Enemy>
 {
 private:
-	IwGraphics::ModelData* CircleData;
-	IwRenderer::Mesh*      CircleMesh;
+	IW::Mesh* CircleMesh;
 
 public:
 	EnemySystem(
 		IwEntity::Space& space,
-		IwGraphics::Renderer& renderer,
-		IwGraphics::ModelData* circle);
-
-	~EnemySystem();
-
-	int Initialize() override;
+		IW::Graphics::Renderer& renderer,
+		IW::Mesh* circle);
 
 	void Update(
 		IwEntity::EntityComponentArray& view) override;

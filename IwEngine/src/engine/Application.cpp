@@ -11,7 +11,7 @@ namespace IwEngine {
 	Application::Application()
 		: m_running(false)
 		, m_window(IWindow::Create())
-		, m_device(IwRenderer::IDevice::Create())
+		, m_device(IW::IDevice::Create())
 		, Renderer(m_device)
 		, m_updateTask([&]() {
 			for (Layer* layer : m_layers) {
