@@ -3,7 +3,8 @@
 #include "iw/renderer/IwRenderer.h"
 #include "iw/renderer/VertexBuffer.h"
 
-namespace IwRenderer {
+namespace IW {
+inline namespace Renderer {
 	class IWRENDERER_API GLVertexBuffer
 		: public IVertexBuffer
 	{
@@ -26,4 +27,5 @@ namespace IwRenderer {
 		void Bind() const;
 		void Unbind() const;
 	};
+}
 }

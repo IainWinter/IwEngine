@@ -2,7 +2,8 @@
 
 #include "iw/renderer/IndexBuffer.h"
 
-namespace IwRenderer {
+namespace IW {
+inline namespace Renderer {
 	class IWRENDERER_API GLIndexBuffer
 		: public IIndexBuffer
 	{
@@ -25,4 +26,5 @@ namespace IwRenderer {
 			return m_count;
 		}
 	};
+}
 }

@@ -2,7 +2,7 @@
 #include "iw/renderer/Platform/OpenGL/GLPipelineParam.h"
 #include "gl/glew.h"
 
-namespace IwRenderer {
+namespace IW {
 	GLComputePipeline::GLComputePipeline(
 		GLComputeShader* computeShader)
 	{

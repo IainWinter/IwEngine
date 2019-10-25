@@ -1,7 +1,7 @@
 #include "iw/renderer/Platform/OpenGL/GLIndexBuffer.h"
 #include "gl/glew.h"
 
-namespace IwRenderer {
+namespace IW {
 	GLIndexBuffer::GLIndexBuffer(
 		unsigned int count, 
 		const void* data)

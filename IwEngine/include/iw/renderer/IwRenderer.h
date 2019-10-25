@@ -8,11 +8,13 @@
 #	endif
 #endif
 
-namespace IwRenderer {
+namespace IW {
+inline namespace Renderer {
 	enum MeshTopology {
-		POINTS    = 1,
-		LINES     = 2,
+		POINTS = 1,
+		LINES = 2,
 		TRIANGLES = 3,
-		QUADS     = 4
+		QUADS = 4
 	};
+}
 }

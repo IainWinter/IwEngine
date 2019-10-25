@@ -2,7 +2,7 @@
 #include "iw/log/logger.h"
 #include "gl/glew.h"
 
-namespace IwRenderer {
+namespace IW {
 	GLGeometryShader::GLGeometryShader(
 		const char* source)
 	{

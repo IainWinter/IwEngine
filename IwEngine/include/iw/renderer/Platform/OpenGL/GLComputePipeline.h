@@ -7,7 +7,8 @@
 #include "GlPipelineParam.h"
 #include "iw/renderer/ComputePipeline.h"
 
-namespace IwRenderer {
+namespace IW {
+inline namespace Renderer {
 	class IWRENDERER_API GLComputePipeline
 		: public IComputePipeline
 	{
@@ -27,4 +28,5 @@ namespace IwRenderer {
 
 		void Use() const;
 	};
+}
 }

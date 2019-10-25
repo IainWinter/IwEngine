@@ -2,7 +2,8 @@
 
 #include "iw/renderer/Device.h"
 
-namespace IwRenderer {
+namespace IW {
+inline namespace Renderer {
 	class IWRENDERER_API GLDevice
 		: public IDevice
 	{
@@ -109,4 +110,5 @@ namespace IwRenderer {
 		virtual void SetComputePipeline(
 			IComputePipeline* ComputePipeline) override;
 	};
+}
 }

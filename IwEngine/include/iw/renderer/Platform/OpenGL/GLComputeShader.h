@@ -2,7 +2,8 @@
 
 #include "iw/renderer/ComputeShader.h"
 
-namespace IwRenderer {
+namespace IW {
+inline namespace Renderer {
 	class IWRENDERER_API GLComputeShader
 		: public IComputeShader
 	{
@@ -19,4 +20,5 @@ namespace IwRenderer {
 			return m_computeShader;
 		}
 	};
+}
 }

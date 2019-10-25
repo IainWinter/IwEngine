@@ -2,7 +2,8 @@
 
 #include "iw/renderer/PipelineParam.h"
 
-namespace IwRenderer {
+namespace IW {
+inline namespace Renderer {
 	class IWRENDERER_API GLPipelineParam
 		: public IPipelineParam
 	{
@@ -32,4 +33,5 @@ namespace IwRenderer {
 		void SetAsMat4(
 			const iwm::matrix4& matrix);
 	};
+}
 }

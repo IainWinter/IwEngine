@@ -2,7 +2,8 @@
 
 #include "iw/renderer/VertexShader.h"
 
-namespace IwRenderer {
+namespace IW {
+inline namespace Renderer {
 	class IWRENDERER_API GLVertexShader
 		: public IVertexShader
 	{
@@ -19,4 +20,5 @@ namespace IwRenderer {
 			return m_vertexShader;
 		}
 	};
+}
 }

@@ -2,11 +2,13 @@
 
 #include "IwRenderer.h"
 
-namespace IwRenderer {
+namespace IW {
+inline namespace Renderer {
 	class IWRENDERER_API IIndexBuffer {
 	public:
 		virtual ~IIndexBuffer() {}
 	protected:
 		IIndexBuffer() {}
 	};
+}
 }

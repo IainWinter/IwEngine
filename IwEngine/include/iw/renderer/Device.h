@@ -12,7 +12,8 @@
 #include "Pipeline.h"
 #include "ComputePipeline.h"
 
-namespace IwRenderer {
+namespace IW {
+inline namespace Renderer {
 	class IWRENDERER_API IDevice {
 	public:
 		virtual void DrawElements(
@@ -119,4 +120,5 @@ namespace IwRenderer {
 
 		static IDevice* Create();
 	};
+}
 }

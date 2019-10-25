@@ -7,7 +7,8 @@
 #include "iw/renderer/Pipeline.h"
 #include <unordered_map>
 
-namespace IwRenderer {
+namespace IW {
+inline namespace Renderer {
 	class IWRENDERER_API GLPipeline
 		: public IPipeline
 	{
@@ -31,4 +32,5 @@ namespace IwRenderer {
 
 		void Use() const;
 	};
+}
 }

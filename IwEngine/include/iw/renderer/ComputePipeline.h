@@ -2,7 +2,8 @@
 
 #include "Pipeline.h"
 
-namespace IwRenderer {
+namespace IW {
+inline namespace Renderer {
 	class IWRENDERER_API IComputePipeline {
 	public:
 		virtual ~IComputePipeline() {}
@@ -12,4 +13,5 @@ namespace IwRenderer {
 			int y,
 			int z) = 0;
 	};
+}
 }

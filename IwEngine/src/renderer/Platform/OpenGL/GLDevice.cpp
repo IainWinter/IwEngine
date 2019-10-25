@@ -10,7 +10,7 @@
 #include "iw/renderer/Platform/OpenGL/GLComputePipeline.h"
 #include "gl/glew.h"
 
-namespace IwRenderer {
+namespace IW {
 	IDevice* IDevice::Create() {
 		return new GLDevice();
 	}

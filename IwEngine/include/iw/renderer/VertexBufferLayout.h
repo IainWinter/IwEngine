@@ -4,7 +4,8 @@
 #include "iw/log/logger.h"
 #include <vector>
 
-namespace IwRenderer {
+namespace IW {
+inline namespace Renderer {
 	struct VertexBufferLayoutElement {
 		unsigned int  Type;
 		unsigned int  Count;
@@ -57,4 +58,5 @@ namespace IwRenderer {
 
 	unsigned int GetSizeOfType(
 		unsigned int glType);
+}
 }

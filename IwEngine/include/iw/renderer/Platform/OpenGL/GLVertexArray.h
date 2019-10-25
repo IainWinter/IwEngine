@@ -6,7 +6,8 @@
 #include "iw/renderer/VertexBufferLayout.h"
 #include <vector>
 
-namespace IwRenderer {
+namespace IW {
+inline namespace Renderer {
 	class IWRENDERER_API GLVertexArray
 		: public IVertexArray
 	{
@@ -34,4 +35,5 @@ namespace IwRenderer {
 		void Bind() const;
 		void Unbind() const;
 	};
+}
 }

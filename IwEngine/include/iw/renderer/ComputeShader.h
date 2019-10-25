@@ -2,11 +2,13 @@
 
 #include "IwRenderer.h"
 
-namespace IwRenderer {
+namespace IW {
+inline namespace Renderer {
 	class IWRENDERER_API IComputeShader {
 	public:
 		virtual ~IComputeShader() {}
 	protected:
 		IComputeShader() {}
 	};
+}
 }

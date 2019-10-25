@@ -2,7 +2,7 @@
 #include "iw/log/logger.h"
 #include "gl/glew.h"
 
-namespace IwRenderer {
+namespace IW {
 	GLVertexShader::GLVertexShader(
 		const char* source)
 	{

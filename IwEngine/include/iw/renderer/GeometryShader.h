@@ -2,11 +2,13 @@
 
 #include "IwRenderer.h"
 
-namespace IwRenderer {
+namespace IW {
+inline namespace Renderer {
 	class IWRENDERER_API IGeometryShader {
 	public:
 		virtual ~IGeometryShader() {}
 	protected:
 		IGeometryShader() {}
 	};
+}
 }

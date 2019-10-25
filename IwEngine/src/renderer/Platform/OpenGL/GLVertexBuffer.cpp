@@ -1,7 +1,7 @@
 #include "iw/renderer/Platform/OpenGL/GLVertexBuffer.h"
 #include "gl/glew.h"
 
-namespace IwRenderer {
+namespace IW {
 	GLVertexBuffer::GLVertexBuffer(
 		unsigned int size,
 		const void* data)
