@@ -20,10 +20,10 @@ namespace IwEngine {
 
 		void Destroy() override;
 		void Update()  override;
-		void Render()  override;
-		void Clear()   override;
+		//void Clear()   override;
 
-		void PollEvents() override;
+		void SwapBuffers() override;
+		void PollEvents()  override;
 
 		bool TakeOwnership()    override;
 		bool ReleaseOwnership() override;

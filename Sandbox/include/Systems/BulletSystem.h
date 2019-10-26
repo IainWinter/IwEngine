@@ -5,7 +5,7 @@
 #include "iw/data/Components/Transform.h"
 
 class BulletSystem
-	: public IwEngine::System<IwEngine::Transform, Bullet>
+	: public IwEngine::System<IW::Transform, Bullet>
 {
 public:
 	BulletSystem(

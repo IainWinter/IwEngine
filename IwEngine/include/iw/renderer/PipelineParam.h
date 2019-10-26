@@ -10,7 +10,7 @@
 #include "iw/log/logger.h"
 
 namespace IW {
-inline namespace Renderer {
+inline namespace RenderAPI {
 	enum PipelineParamType {
 		FLOAT,
 		VEC2,

@@ -52,7 +52,7 @@ inline namespace Graphics {
 			const iwu::ref<IW::IDevice>& device);
 
 		void Draw(
-			const iwu::ref<IW::IDevice>& device);
+			const iwu::ref<IW::IDevice>& device) const;
 
 		inline size_t GetElementCount() {
 			return IndexCount / Topology;

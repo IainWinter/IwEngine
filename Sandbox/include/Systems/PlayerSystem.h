@@ -5,7 +5,7 @@
 #include "iw/data/Components/Transform.h"
 
 class PlayerSystem
-	: public IwEngine::System<IwEngine::Transform, Player>
+	: public IwEngine::System<IW::Transform, Player>
 {
 public:
 	PlayerSystem(

@@ -6,11 +6,11 @@ namespace IwEngine {
 	PhysicsSystem::PhysicsSystem(
 		IwEntity::Space& space,
 		IW::Graphics::Renderer& renderer)
-		: IwEngine::System<Transform, IwPhysics::AABB2D>(space, renderer, "Physics")
+		: IwEngine::System<IW::Transform, IwPhysics::AABB2D>(space, renderer, "Physics")
 	{}
 
 	struct Components {
-		Transform* Transform;
+		IW::Transform* Transform;
 		IwPhysics::AABB2D* AABB;
 	};
 

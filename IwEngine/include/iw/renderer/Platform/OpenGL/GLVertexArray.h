@@ -7,7 +7,7 @@
 #include <vector>
 
 namespace IW {
-inline namespace Renderer {
+inline namespace RenderAPI {
 	class IWRENDERER_API GLVertexArray
 		: public IVertexArray
 	{

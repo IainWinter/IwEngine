@@ -8,7 +8,7 @@
 #include <unordered_map>
 
 namespace IW {
-inline namespace Renderer {
+inline namespace RenderAPI {
 	class IWRENDERER_API GLPipeline
 		: public IPipeline
 	{
@@ -17,7 +17,8 @@ inline namespace Renderer {
 			std::unordered_map<const char*, GLPipelineParam*> m_params;
 		};
 
-		unsigned int m_program;
+		unsigned int m_bufferCount;
+		unsigned int m_programId;
 
 	public:
 		GLPipeline(
@@ -29,6 +30,10 @@ inline namespace Renderer {
 
 		IPipelineParam* GetParam(
 			const char* name);
+
+		void SetBuffer(
+			const char* name,
+			IUniformBuffer* buffer);
 
 		void Use() const;
 	};

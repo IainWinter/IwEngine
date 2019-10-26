@@ -24,7 +24,6 @@ GameLayer::GameLayer(
 	IwEntity::Space& space,
 	IW::Graphics::Renderer& renderer)
 	: IwEngine::Layer(space, renderer, "Game")
-	, pipeline(nullptr)
 {
 	PushSystem<BulletSystem>();
 	PushSystem<PlayerSystem>();
@@ -32,7 +31,7 @@ GameLayer::GameLayer(
 }
 
 struct CameraComponents {
-	IwEngine::Transform* Transform;
+	IW::Transform* Transform;
 	IW::OrthographicCamera* Camera;
 };
 
@@ -41,24 +40,17 @@ struct PlayerComponents {
 };
 
 struct ModelComponents {
-	IwEngine::Transform* Transform;
+	IW::Transform* Transform;
 	IwEngine::Model* Model;
 };
 
 int GameLayer::Initialize(
 	IwEngine::InitOptions& options)
 {
-	auto& device = *Renderer.Device;
+	//Renderer.AddPipeline("res/sandbox.glsl"); //  idealy we would only pass in a single file and parse out the seperate shaders
 
-	auto vs = device.CreateVertexShader(iwu::ReadFile("res/sandboxvs.glsl").c_str());
-	auto fs = device.CreateFragmentShader(iwu::ReadFile("res/sandboxfs.glsl").c_str());
-
-	pipeline = device.CreatePipeline(vs, fs/*, gs*/);
-
-	auto vs2 = device.CreateVertexShader(iwu::ReadFile("res/sandbox_line_vs.glsl").c_str());
-	auto fs2 = device.CreateFragmentShader(iwu::ReadFile("res/sandbox_line_fs.glsl").c_str());
-
-	pipeline_line = device.CreatePipeline(vs2, fs2);
+	iwu::ref<IW::IPipeline> shader = Renderer.CreatePipeline("res/sandboxvs.glsl", "res/sandboxfs.glsl");
+	iwu::ref<IW::IPipeline> shader_line = Renderer.CreatePipeline("res/sandbox_line_vs.glsl", "res/sandbox_line_fs.glsl");
 
 	// Making line mesh
 	// Model data
@@ -68,21 +60,21 @@ int GameLayer::Initialize(
 	};
 
 	iwm::vector3* color = new iwm::vector3[2] {
-		iwm::vector3(1, 0, 0),
-		iwm::vector3(1, 1, 1)
+		iwm::vector3(1, 1, 1),
+		iwm::vector3(70 / 255.0f, 85 / 255.0f, 100 / 255.0f)
 	};
 
 	unsigned int* index = new unsigned int[2] {
 		0, 1
 	};
 
-	iwu::ref<IW::Material> lineMaterial(new IW::Material(pipeline_line));
+	iwu::ref<IW::Material> lineMaterial(new IW::Material(shader_line));
 
-	iwu::ref<IW::Material> quadMaterial(new IW::Material(pipeline));
+	iwu::ref<IW::Material> quadMaterial(new IW::Material(shader));
 	quadMaterial->SetProperty("color", iwm::vector3(1, 0, 0));
 
-	iwu::ref<IW::Material> circleMaterial(new IW::Material(pipeline));
-	circleMaterial->SetProperty("color", iwm::vector3(1, 0, 1));
+	iwu::ref<IW::Material> circleMaterial(new IW::Material(shader));
+	circleMaterial->SetProperty("color", iwm::vector3(1, 1, 1));
 
 	line = new IW::Mesh(IW::LINES);
 	line->SetMaterial(lineMaterial);
@@ -123,16 +115,16 @@ int GameLayer::Initialize(
 	IwEntity::Entity camera = Space.CreateEntity<IwEngine::CameraController>();
 	Space.SetComponentData<IwEngine::CameraController>(camera, cam);
 
-	IwEntity::Entity player = Space.CreateEntity<IwEngine::Transform, IwEngine::Model, Player, IwPhysics::AABB2D>();
-	Space.SetComponentData<IwEngine::Transform>(player, iwm::vector3(10, 0, 0));
-	Space.SetComponentData<IwEngine::Model>    (player, line, 1U);
+	IwEntity::Entity player = Space.CreateEntity<IW::Transform, IwEngine::Model, Player, IwPhysics::AABB2D>();
+	Space.SetComponentData<IW::Transform>(player, iwm::vector3(10, 0, 0));
+	Space.SetComponentData<IwEngine::Model>    (player, quad, 1U);
 	Space.SetComponentData<Player>             (player, 10.0f, 100.0f, 0.1666f, 0.1f);
 	Space.SetComponentData<IwPhysics::AABB2D>  (player, iwm::vector2(-1), iwm::vector2(1));
 
 	for (float x = 4; x < 7; x++) {
 		for (float y = 5; y < 6; y++) {
-			IwEntity::Entity enemy = Space.CreateEntity<IwEngine::Transform, IwEngine::Model, Enemy, IwPhysics::AABB2D>();
-			Space.SetComponentData<IwEngine::Transform>(enemy, iwm::vector3(x * 3 - 15, y * 3 - 15, 0));
+			IwEntity::Entity enemy = Space.CreateEntity<IW::Transform, IwEngine::Model, Enemy, IwPhysics::AABB2D>();
+			Space.SetComponentData<IW::Transform>(enemy, iwm::vector3(x * 3 - 15, y * 3 - 15, 0));
 			Space.SetComponentData<IwEngine::Model>    (enemy, quad, 1U);
 			Space.SetComponentData<Enemy>              (enemy, SPIN, 3.0f, 0.05f, 0.025f, 0.025f);
 			Space.SetComponentData<IwPhysics::AABB2D>  (enemy, iwm::vector2(-1), iwm::vector2(1));
@@ -146,62 +138,24 @@ void GameLayer::PostUpdate() {
 	line->Vertices[1] *= iwm::quaternion::create_from_euler_angles(0, 0, IwEngine::Time::DeltaTime());
 	line->Update(Renderer.Device);
 
-	//Renderer.BeginScene(Camera);
+	for (auto camera : Space.Query<IwEngine::CameraController>()) {
+		auto [controller] = camera.Components.TieTo<IwEngine::CameraController>();
+		
+		Renderer.BeginScene(controller->Camera);
 
-	//Renderer.DrawMesh(Transform, Mesh);
-
-	//Renderer.EndScene();
-
-	//QuadMaterial.Use(Renderer.Device);
-
-	Renderer.Device->SetPipeline(pipeline);
-
-	for (auto c : Space.Query<IwEngine::CameraController>()) {
-		auto [controller] = c.Components.TieTo<IwEngine::CameraController>();
-
-		//Renderer.BeginScene(controller.Camera);
-
-		pipeline->GetParam("proj")
-			->SetAsMat4(controller->Camera->GetProjection());
-
-		pipeline->GetParam("view")
-			->SetAsMat4(controller->Camera->GetView());
-	}
-
-	for (auto entity : Space.Query<IwEngine::Transform, IwEngine::Model>()) {
-		auto [transform, model] = entity.Components.Tie<ModelComponents>();
-
-		pipeline->GetParam("model")
-			->SetAsMat4(transform->Transformation());
-
-		for (int i = 0; i < model->MeshCount; i++) {
-			//Renderer.DrawMesh(transform, model->Meshes[i]);
-
-			model->Meshes[i].Draw(Renderer.Device);
+		for (auto entity : Space.Query<IW::Transform, IwEngine::Model>()) {
+			auto [transform, model] = entity.Components.Tie<ModelComponents>();
+			for (int i = 0; i < model->MeshCount; i++) {
+				Renderer.DrawMesh(transform, model->Meshes);
+			}
 		}
-	}
 
-//	LineMaterial.Use(Renderer.Device);
+		for (auto entity : Space.Query<IW::Transform, Bullet>()) {
+			auto [transform] = entity.Components.TieTo<IW::Transform>();
+			Renderer.DrawMesh(transform, line);
+		}
 
-	Renderer.Device->SetPipeline(pipeline_line);
-
-	for (auto c : Space.Query<IwEngine::CameraController>()) {
-		auto [controller] = c.Components.TieTo<IwEngine::CameraController>();
-
-		pipeline_line ->GetParam("proj")
-			->SetAsMat4(controller->Camera->GetProjection());
-
-		pipeline_line->GetParam("view")
-			->SetAsMat4(controller->Camera->GetView());
-	}
-
-	for (auto entity : Space.Query<IwEngine::Transform, Bullet>()) {
-		auto [transform] = entity.Components.TieTo<IwEngine::Transform>();
-
-		pipeline_line->GetParam("model")
-			->SetAsMat4(transform->Transformation());
-
-		line->Draw(Renderer.Device);
+		Renderer.EndScene();
 	}
 }
 

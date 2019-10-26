@@ -6,7 +6,7 @@
 #include "iw/graphics/Mesh.h"
 
 class EnemySystem
-	: public IwEngine::System<IwEngine::Transform, Enemy>
+	: public IwEngine::System<IW::Transform, Enemy>
 {
 private:
 	IW::Mesh* CircleMesh;

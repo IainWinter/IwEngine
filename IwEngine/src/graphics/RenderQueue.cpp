@@ -2,7 +2,7 @@
 
 //Should probly be just a part in a renderer
 
-// Renderer - Immediate stuff
+// RenderAPI - Immediate stuff
 /// RenderQueue - Async stuff
 //
 

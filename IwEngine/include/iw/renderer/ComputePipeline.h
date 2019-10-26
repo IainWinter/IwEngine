@@ -3,7 +3,7 @@
 #include "Pipeline.h"
 
 namespace IW {
-inline namespace Renderer {
+inline namespace RenderAPI {
 	class IWRENDERER_API IComputePipeline {
 	public:
 		virtual ~IComputePipeline() {}

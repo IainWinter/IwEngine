@@ -151,9 +151,8 @@ namespace IW {
 	}
 
 	void Mesh::Draw(
-		const iwu::ref<IW::IDevice>& device)
+		const iwu::ref<IW::IDevice>& device) const
 	{
-		Material->Use(device);
 		device->SetVertexArray(VertexArray);
 		device->SetIndexBuffer(IndexBuffer);
 		device->DrawElements(Topology, IndexCount, 0);

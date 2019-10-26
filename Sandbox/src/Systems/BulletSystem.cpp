@@ -2,14 +2,14 @@
 #include "iw/engine/Time.h"
 
 struct Components {
-	IwEngine::Transform* Transform;
+	IW::Transform* Transform;
 	Bullet*              Bullet;
 };
 
 BulletSystem::BulletSystem(
 	IwEntity::Space& space,
 	IW::Graphics::Renderer& renderer)
-	: IwEngine::System<IwEngine::Transform, Bullet>(space, renderer, "Bullet")
+	: IwEngine::System<IW::Transform, Bullet>(space, renderer, "Bullet")
 {}
 
 BulletSystem::~BulletSystem()

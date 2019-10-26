@@ -5,7 +5,7 @@
 #include <vector>
 
 namespace IW {
-inline namespace Renderer {
+inline namespace RenderAPI {
 	struct VertexBufferLayoutElement {
 		unsigned int  Type;
 		unsigned int  Count;

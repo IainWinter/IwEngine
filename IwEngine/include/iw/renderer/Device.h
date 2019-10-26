@@ -3,6 +3,7 @@
 #include "IwRenderer.h"
 #include "IndexBuffer.h"
 #include "VertexBuffer.h"
+#include "UniformBuffer.h"
 #include "VertexArray.h"
 #include "VertexBufferLayout.h"
 #include "VertexShader.h"
@@ -13,7 +14,7 @@
 #include "ComputePipeline.h"
 
 namespace IW {
-inline namespace Renderer {
+inline namespace RenderAPI {
 	class IWRENDERER_API IDevice {
 	public:
 		virtual void DrawElements(
@@ -21,7 +22,10 @@ inline namespace Renderer {
 			int count,
 			long long offset) = 0;
 
+		virtual void Clear() = 0;
+
 		// Index buffers
+
 		virtual IIndexBuffer* CreateIndexBuffer(
 			size_t size,
 			const void* data = nullptr) = 0;
@@ -33,6 +37,7 @@ inline namespace Renderer {
 			IIndexBuffer* indexBuffer) = 0;
 
 		// Vertex buffers
+
 		virtual IVertexBuffer* CreateVertexBuffer(
 			size_t size,
 			const void* data = nullptr) = 0;
@@ -44,11 +49,28 @@ inline namespace Renderer {
 			IVertexBuffer* vertexBuffer) = 0;
 
 		virtual void UpdateVertexBufferData(
-			IVertexBuffer* buffer,
+			IVertexBuffer* vertexBuffer,
 			size_t size,
 			const void* data = nullptr) = 0;
 
+		// Uniform buffers
+
+		virtual IUniformBuffer* CreateUniformBuffer(
+			size_t size,
+			const void* data = nullptr) = 0;
+
+		virtual void DestroyUniformBuffer(
+			IUniformBuffer* uniformBuffer) = 0;
+
+		virtual void SetUniformBuffer(
+			IUniformBuffer* uniformBuffer) = 0;
+
+		virtual void UpdateUniformBufferData(
+			IUniformBuffer* uniformBuffer,
+			const void* data = nullptr) = 0;
+
 		// Vertex arrays
+
 		virtual IVertexArray* CreateVertexArray() = 0;
 
 		virtual void DestroyVertexArray(
@@ -69,6 +91,7 @@ inline namespace Renderer {
 			const void* data = nullptr) = 0;
 
 		// Vertex shader
+
 		virtual IVertexShader* CreateVertexShader(
 			const char* source) = 0;
 
@@ -76,6 +99,7 @@ inline namespace Renderer {
 			IVertexShader* vertexShader) = 0;
 
 		// Fragment shader
+
 		virtual IFragmentShader* CreateFragmentShader(
 			const char* source) = 0;
 
@@ -83,6 +107,7 @@ inline namespace Renderer {
 			IFragmentShader* fragmentShader) = 0;
 
 		// Geometry shader
+
 		virtual IGeometryShader* CreateGeometryShader(
 			const char* source) = 0;
 
@@ -90,6 +115,7 @@ inline namespace Renderer {
 			IGeometryShader* geometryShader) = 0;
 
 		// Compute shader
+
 		virtual IComputeShader* CreateComputeShader(
 			const char* source) = 0;
 
@@ -97,6 +123,7 @@ inline namespace Renderer {
 			IComputeShader* computeShader) = 0;
 
 		// Shader pipeline
+
 		virtual IPipeline* CreatePipeline(
 			IVertexShader* vertexShader,
 			IFragmentShader* fragmentShader,
@@ -109,6 +136,7 @@ inline namespace Renderer {
 			IPipeline* pipeline) = 0;
 
 		// Compute shader pipeline // prob doesnt do anyhting yet
+
 		virtual IComputePipeline* CreateComputePipeline(
 			IComputeShader* computeShader) = 0;
 

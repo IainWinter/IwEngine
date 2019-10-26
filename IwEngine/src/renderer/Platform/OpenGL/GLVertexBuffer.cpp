@@ -18,7 +18,7 @@ namespace IW {
 	}
 
 	void GLVertexBuffer::UpdateData(
-		unsigned int size, 
+		unsigned int size,
 		const void* data) const
 	{
 		glNamedBufferSubData(m_renderId, 0, size, data);

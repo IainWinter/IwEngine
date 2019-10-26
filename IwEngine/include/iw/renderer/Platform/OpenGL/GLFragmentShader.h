@@ -3,7 +3,7 @@
 #include "iw/renderer/FragmentShader.h"
 
 namespace IW {
-inline namespace Renderer {
+inline namespace RenderAPI {
 	class IWRENDERER_API GLFragmentShader
 		: public IFragmentShader
 	{

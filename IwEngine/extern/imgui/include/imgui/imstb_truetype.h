@@ -107,7 +107,7 @@
 //           stbtt_GetFontOffsetForIndex()        -- indexing for TTC font collections
 //           stbtt_GetNumberOfFonts()             -- number of fonts for TTC font collections
 //
-//   Render a unicode codepoint to a bitmap
+//   RenderAPI a unicode codepoint to a bitmap
 //           stbtt_GetCodepointBitmap()           -- allocates and returns a bitmap
 //           stbtt_MakeCodepointBitmap()          -- renders into bitmap you provide
 //           stbtt_GetCodepointBitmapBox()        -- how big the bitmap must be

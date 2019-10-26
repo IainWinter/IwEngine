@@ -9,7 +9,7 @@
 #endif
 
 namespace IW {
-inline namespace Renderer {
+inline namespace RenderAPI {
 	enum MeshTopology {
 		POINTS = 1,
 		LINES = 2,

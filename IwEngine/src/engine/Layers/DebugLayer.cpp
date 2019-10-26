@@ -11,12 +11,12 @@ namespace IwEngine {
 	{}
 
 	struct Components {
-		Transform* Transform;
+		IW::Transform* Transform;
 		VectorLog* Log;
 	};
 
 	void DebugLayer::PostUpdate() {
-		//for (auto entity : Space.Query<Transform, VectorLog>()) {
+		//for (auto entity : Space.Query<IW::Transform, VectorLog>()) {
 		//	auto [transform, log] = entity.Components.Tie<Components>();
 		//}
 	}

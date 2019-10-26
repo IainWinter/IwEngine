@@ -13,8 +13,6 @@ class GameLayer
 {
 private: // tmp
 	IW::ModelLoader loader;
-	IW::IPipeline* pipeline;  
-	IW::IPipeline* pipeline_line;
 
 	IW::Mesh* line;
 

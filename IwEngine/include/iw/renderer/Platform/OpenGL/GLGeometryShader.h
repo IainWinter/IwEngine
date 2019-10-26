@@ -3,7 +3,7 @@
 #include "iw/renderer/GeometryShader.h"
 
 namespace IW {
-inline namespace Renderer {
+inline namespace RenderAPI {
 	class IWRENDERER_API GLGeometryShader
 		: public IGeometryShader
 	{

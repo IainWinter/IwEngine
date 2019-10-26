@@ -3,7 +3,7 @@
 #include "iw/renderer/Device.h"
 
 namespace IW {
-inline namespace Renderer {
+inline namespace RenderAPI {
 	class IWRENDERER_API GLDevice
 		: public IDevice
 	{
@@ -13,7 +13,10 @@ inline namespace Renderer {
 			int count,
 			long long offset) override;
 
+		void Clear() override;
+
 		//Index buffers
+
 		IIndexBuffer* CreateIndexBuffer(
 			size_t size,
 			const void* data = nullptr) override;
@@ -25,6 +28,7 @@ inline namespace Renderer {
 			IIndexBuffer* indexBuffer) override;
 
 		//Vertex buffers
+
 		IVertexBuffer* CreateVertexBuffer(
 			size_t size,
 			const void* data = nullptr) override;
@@ -40,7 +44,25 @@ inline namespace Renderer {
 			size_t size,
 			const void* data = nullptr) override;
 
+
+		// Uniform buffers
+
+		IUniformBuffer* CreateUniformBuffer(
+			size_t size,
+			const void* data = nullptr) override;
+
+		void DestroyUniformBuffer(
+			IUniformBuffer* vertexBuffer) override;
+
+		void SetUniformBuffer(
+			IUniformBuffer* vertexBuffer) override;
+
+		void UpdateUniformBufferData(
+			IUniformBuffer* uniformBuffer,
+			const void* data = nullptr) override;
+
 		//Vertex arrays
+
 		IVertexArray* CreateVertexArray() override;
 
 		void DestroyVertexArray(
@@ -61,6 +83,7 @@ inline namespace Renderer {
 			const void* data = nullptr) override;
 
 		//Vertex shader
+
 		IVertexShader* CreateVertexShader(
 			const char* source) override;
 
@@ -68,6 +91,7 @@ inline namespace Renderer {
 			IVertexShader* vertexShader) override;
 
 		//Fragment shader
+
 		IFragmentShader* CreateFragmentShader(
 			const char* source) override;
 
@@ -75,6 +99,7 @@ inline namespace Renderer {
 			IFragmentShader* fragmentShader) override;
 
 		//Geometry shader
+
 		IGeometryShader* CreateGeometryShader(
 			const char* source) override;
 
@@ -82,6 +107,7 @@ inline namespace Renderer {
 			IGeometryShader* geometryShader) override;
 
 		//Compute shader
+
 		virtual IComputeShader* CreateComputeShader(
 			const char* source) override;
 
@@ -89,6 +115,7 @@ inline namespace Renderer {
 			IComputeShader* computeShader) override;
 
 		//Shader pipeline
+
 		IPipeline* CreatePipeline(
 			IVertexShader* vertexShader,
 			IFragmentShader* fragmentShader,
@@ -101,6 +128,7 @@ inline namespace Renderer {
 			IPipeline* pipeline) override;
 
 		//Compute shader pipeline
+
 		virtual IComputePipeline* CreateComputePipeline(
 			IComputeShader* computeShader) override;
 

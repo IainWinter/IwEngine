@@ -84,7 +84,7 @@ namespace IwEngine {
 
 		m_running = true;
 
-		// Render thread is the 'main' thread for the application (owns rendering context)
+		// RenderAPI thread is the 'main' thread for the application (owns rendering context)
 		m_renderThread = std::thread([&]() {
 			m_window->TakeOwnership();
 			
@@ -115,8 +115,10 @@ namespace IwEngine {
 		// Update time (Sync)
 		Time::Update();
 
+		Renderer.Begin();
+
 		// Clear window and poll events (Sync)
-		m_window->Clear();
+		//m_window->Clear();
 
 		//m_workQueue.clear();
 
@@ -151,8 +153,10 @@ namespace IwEngine {
 
 		// Run through render queue! (Sync)
 
+		Renderer.End();
+
 		// Swap buffers (Sync)
-		m_window->Render();
+		m_window->SwapBuffers();
 		m_window->PollEvents();
 	}
 

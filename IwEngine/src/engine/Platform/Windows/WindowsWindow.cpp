@@ -162,12 +162,8 @@ namespace IwEngine {
 		}
 	}
 
-	void WindowsWindow::Render() {
-		SwapBuffers(m_device);
-	}
-
-	void WindowsWindow::Clear() {
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	void WindowsWindow::SwapBuffers() {
+		::SwapBuffers(m_device);
 	}
 
 	void WindowsWindow::PollEvents() {

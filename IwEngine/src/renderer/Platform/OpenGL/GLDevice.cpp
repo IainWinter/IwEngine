@@ -1,6 +1,7 @@
 #include "iw/renderer/Platform/OpenGL/GLDevice.h"
 #include "iw/renderer/Platform/OpenGL/GLIndexBuffer.h"
 #include "iw/renderer/Platform/OpenGL/GLVertexBuffer.h"
+#include "iw/renderer/Platform/OpenGL/GLUniformBuffer.h"
 #include "iw/renderer/Platform/OpenGL/GLVertexArray.h"
 #include "iw/renderer/Platform/OpenGL/GLVertexShader.h"
 #include "iw/renderer/Platform/OpenGL/GLFragmentShader.h"
@@ -35,6 +36,10 @@ namespace IW {
 				GL_UNSIGNED_INT,
 				reinterpret_cast<const void*>(offset));
 		}
+	}
+
+	void GLDevice::Clear() {
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
 	IIndexBuffer* GLDevice::CreateIndexBuffer(
@@ -75,12 +80,41 @@ namespace IW {
 		static_cast<GLVertexBuffer*>(vertexBuffer)->Bind();
 	}
 
-	void GLDevice::UpdateVertexBufferData(IVertexBuffer* buffer, size_t size, const void* data)
+	void GLDevice::UpdateVertexBufferData(
+		IVertexBuffer* vertexBuffer, 
+		size_t size, 
+		const void* data)
 	{
+		static_cast<GLVertexBuffer*>(vertexBuffer)->UpdateData(size, data);
+	}
+
+	IUniformBuffer* GLDevice::CreateUniformBuffer(
+		size_t size, 
+		const void* data)
+	{
+		return new GLUniformBuffer(size, data);
+	}
+
+	void GLDevice::DestroyUniformBuffer(
+		IUniformBuffer* uniformBuffer)
+	{
+		delete uniformBuffer;
+	}
+
+	void GLDevice::SetUniformBuffer(
+		IUniformBuffer* uniformBuffer)
+	{
+		static_cast<GLUniformBuffer*>(uniformBuffer)->Bind();
+	}
+
+	void GLDevice::UpdateUniformBufferData(
+		IUniformBuffer* uniformBuffer, const void* data)
+	{
+		static_cast<GLUniformBuffer*>(uniformBuffer)->UpdateData(data);
 	}
 
 	IVertexArray* GLDevice::CreateVertexArray() {
-		return new GLVertexArray();;
+		return new GLVertexArray();
 	}
 
 	void GLDevice::DestroyVertexArray(

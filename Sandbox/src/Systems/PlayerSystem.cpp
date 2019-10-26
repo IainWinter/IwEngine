@@ -3,14 +3,14 @@
 #include "iw/input/Devices/Keyboard.h"
 
 struct Components {
-	IwEngine::Transform* Transform;
+	IW::Transform* Transform;
 	Player*              Player;
 };
 
 PlayerSystem::PlayerSystem(
 	IwEntity::Space& space,
 	IW::Graphics::Renderer& renderer)
-	: IwEngine::System<IwEngine::Transform, Player>(space, renderer, "Player")
+	: IwEngine::System<IW::Transform, Player>(space, renderer, "Player")
 {}
 
 PlayerSystem::~PlayerSystem()

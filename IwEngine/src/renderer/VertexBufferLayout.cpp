@@ -30,7 +30,7 @@ namespace IW {
 		m_stride += count * GetSizeOfType(GL_UNSIGNED_BYTE);
 	}
 
-	unsigned int Renderer::GetSizeOfType(
+	unsigned int RenderAPI::GetSizeOfType(
 		unsigned int glType)
 	{
 		switch (glType) {

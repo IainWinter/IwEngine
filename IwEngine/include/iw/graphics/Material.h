@@ -16,20 +16,22 @@ inline namespace Graphics {
 	};
 
 	class IWGRAPHICS_API Material {
+	public:
+		iwu::ref<IW::IPipeline> Pipeline;
+
 	private:
-		IW::IPipeline* m_pipeline;
 		std::vector<MaterialProperty> m_properties;
 
 	public:
 		Material();
 
 		Material(
-			IW::IPipeline* pipline);
+			iwu::ref<IW::IPipeline>& pipline);
 
 		~Material();
 
 		void Use(
-			const iwu::ref<IW::IDevice>& device);
+			const iwu::ref<IW::IDevice>& device) const;
 
 		template<
 			typename _p>

@@ -8,7 +8,7 @@
 
 namespace IwEngine {
 	class IWENGINE_API PhysicsSystem
-		: public System<Transform, IwPhysics::AABB2D>
+		: public System<IW::Transform, IwPhysics::AABB2D>
 	{
 	public:
 		PhysicsSystem(

@@ -2,12 +2,12 @@
 
 namespace IW {
 	Material::Material()
-		: m_pipeline(nullptr)
+		: Pipeline(nullptr)
 	{}
 
 	Material::Material(
-		IW::IPipeline* pipeline)
-		: m_pipeline(pipeline)
+		iwu::ref<IW::IPipeline>& pipeline)
+		: Pipeline(pipeline)
 	{}
 
 	Material::~Material() {
@@ -17,12 +17,12 @@ namespace IW {
 	}
 
 	void Material::Use(
-		const iwu::ref<IW::IDevice>& device)
+		const iwu::ref<IW::IDevice>& device) const 
 	{
-		device->SetPipeline(m_pipeline);
-		
-		for (MaterialProperty& property : m_properties) {
-			IW::IPipelineParam* param = m_pipeline->GetParam(property.Name);
+		device->SetPipeline(&*Pipeline);
+
+		for (const MaterialProperty& property : m_properties) {
+			IW::IPipelineParam* param = Pipeline->GetParam(property.Name);
 
 			if (!param) {
 				LOG_WARNING << "Invalid property in material: " << property.Name;
