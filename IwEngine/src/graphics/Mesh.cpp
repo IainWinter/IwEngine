@@ -84,6 +84,9 @@ namespace IW {
 		}
 
 		else {
+			IW::VertexBufferLayout layout4f;
+			layout4f.Push<float>(4);
+
 			IW::VertexBufferLayout layout3f;
 			layout3f.Push<float>(3);
 
@@ -104,8 +107,8 @@ namespace IW {
 			}
 
 			if (Colors) {
-				IW::IVertexBuffer* buffer = device->CreateVertexBuffer(ColorCount * sizeof(iwm::vector3), Colors);
-				device->AddBufferToVertexArray(VertexArray, buffer, layout3f);
+				IW::IVertexBuffer* buffer = device->CreateVertexBuffer(ColorCount * sizeof(iwm::vector4), Colors);
+				device->AddBufferToVertexArray(VertexArray, buffer, layout4f);
 			}
 
 			if (Uvs) {
@@ -132,7 +135,7 @@ namespace IW {
 		}
 
 		if (Colors) {
-			device->UpdateVertexArrayData(VertexArray, index, ColorCount * sizeof(iwm::vector3), Colors);
+			device->UpdateVertexArrayData(VertexArray, index, ColorCount * sizeof(iwm::vector4), Colors);
 			index++;
 		}
 

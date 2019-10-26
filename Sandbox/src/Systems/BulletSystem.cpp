@@ -27,7 +27,7 @@ void BulletSystem::Update(
 			transform->Position += iwm::vector3(1, 0, 0) * transform->Rotation * bullet->Speed * IwEngine::Time::DeltaTime();
 		}
 
-		if (transform->Position.x > 31 || transform->Position.x < -31 || transform->Position.y > 17 || transform->Position.y < -17) {
+		if (transform->Position.x > 32.25f || transform->Position.x < -32.25f || transform->Position.y > 18.25f || transform->Position.y < -18.25f) {
 			QueueDestroyEntity(entity.Index);
 		}
 	}

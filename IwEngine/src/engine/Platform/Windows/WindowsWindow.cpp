@@ -141,6 +141,9 @@ namespace IwEngine {
 
 		wglSwapIntervalEXT(0); //-1 for adaptive vsync 0 for off 1 for on
 
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_BLEND);
+
 		SetCursor(options.Cursor);
 		SetState(options.State);
 

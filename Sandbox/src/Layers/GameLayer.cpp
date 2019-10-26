@@ -60,9 +60,9 @@ int GameLayer::Initialize(
 		iwm::vector3(4, 0, -1)
 	};
 
-	iwm::vector3* color = new iwm::vector3[2] {
-		iwm::vector3(1, 1, 1),
-		iwm::vector3(70 / 255.0f, 85 / 255.0f, 100 / 255.0f)
+	iwm::vector4* color = new iwm::vector4[2] {
+		iwm::vector4(1, 1, 1, 1),
+		iwm::vector4(1, 1, 1, 0)
 	};
 
 	unsigned int* index = new unsigned int[2] {

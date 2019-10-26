@@ -16,7 +16,7 @@ inline namespace Graphics {
 	struct IWGRAPHICS_API Mesh {
 		iwm::vector3* Vertices;
 		iwm::vector3* Normals;
-		iwm::vector3* Colors;
+		iwm::vector4* Colors;
 		iwm::vector2* Uvs;
 		unsigned int* Indices;
 
@@ -78,7 +78,7 @@ inline namespace Graphics {
 
 		inline void SetColors(
 			size_t count,
-			iwm::vector3* colors)
+			iwm::vector4* colors)
 		{
 			Colors      = colors;
 			ColorCount  = count;

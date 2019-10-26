@@ -8,9 +8,9 @@ layout (std140, row_major) uniform Camera {
 uniform mat4 model;
 
 in vec3 position;
-in vec3 color;
+in vec4 color;
 
-out vec3 fragColor;
+out vec4 fragColor;
 
 void main() {
 	gl_Position = proj * view * model * vec4(position, 1);
