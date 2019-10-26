@@ -26,7 +26,7 @@ class Game
 {
 public:
 	Game() {
-		InputManager.CreateDevice<IwInput::RawMouse>();
+		InputManager.CreateDevice<IwInput::RawMouse>(); // causes imgui to crash on exit deff because events after destruction...
 		//InputManager.CreateDevice<IwInput::RawKeyboard>();
 
 		PushLayer<GameLayer3D>();
