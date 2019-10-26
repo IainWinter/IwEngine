@@ -28,7 +28,6 @@ namespace IwEngine {
 		virtual int Initialize(
 			InitOptions& options);
 
-
 		virtual void Destroy();
 		virtual void ImGui();
 		virtual void PreUpdate();

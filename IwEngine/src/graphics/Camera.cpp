@@ -33,7 +33,7 @@ namespace IW {
 	void Camera::RecalculateView() {
 		m_view = iwm::matrix4::create_look_at(
 			Position,
-			Position - -iwm::vector3::unit_z * Rotation,
+			Position + iwm::vector3::unit_z * Rotation,
 			iwm::vector3::unit_y * Rotation);
 
 		m_position = Position;

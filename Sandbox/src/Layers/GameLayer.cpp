@@ -24,6 +24,7 @@ GameLayer::GameLayer(
 	IwEntity::Space& space,
 	IW::Graphics::Renderer& renderer)
 	: IwEngine::Layer(space, renderer, "Game")
+	, line(nullptr)
 {
 	PushSystem<BulletSystem>();
 	PushSystem<PlayerSystem>();
@@ -107,27 +108,27 @@ int GameLayer::Initialize(
 
 	PushSystem<EnemySystem>(circle);
 
-	// Shader program
+	// Camera & entities
 
-	IW::Camera* cam = new IW::OrthographicCamera(64, 36, -100, 100);
-	cam->Rotation = iwm::quaternion::create_from_euler_angles(0, iwm::IW_PI, 0);
+	IW::Camera* ortho = new IW::OrthographicCamera(64, 36, -100, 100);
+	ortho->Rotation = iwm::quaternion::create_from_euler_angles(0, iwm::IW_PI, 0);
 
 	IwEntity::Entity camera = Space.CreateEntity<IwEngine::CameraController>();
-	Space.SetComponentData<IwEngine::CameraController>(camera, cam);
+	Space.SetComponentData<IwEngine::CameraController>(camera, ortho);
 
 	IwEntity::Entity player = Space.CreateEntity<IW::Transform, IwEngine::Model, Player, IwPhysics::AABB2D>();
-	Space.SetComponentData<IW::Transform>(player, iwm::vector3(10, 0, 0));
-	Space.SetComponentData<IwEngine::Model>    (player, quad, 1U);
-	Space.SetComponentData<Player>             (player, 10.0f, 100.0f, 0.1666f, 0.1f);
-	Space.SetComponentData<IwPhysics::AABB2D>  (player, iwm::vector2(-1), iwm::vector2(1));
+	Space.SetComponentData<IW::Transform>    (player, iwm::vector3(10, 0, 0));
+	Space.SetComponentData<IwEngine::Model>  (player, quad, 1U);
+	Space.SetComponentData<Player>           (player, 10.0f, 100.0f, 0.1666f, 0.1f);
+	Space.SetComponentData<IwPhysics::AABB2D>(player, iwm::vector2(-1), iwm::vector2(1));
 
 	for (float x = 4; x < 7; x++) {
 		for (float y = 5; y < 6; y++) {
 			IwEntity::Entity enemy = Space.CreateEntity<IW::Transform, IwEngine::Model, Enemy, IwPhysics::AABB2D>();
-			Space.SetComponentData<IW::Transform>(enemy, iwm::vector3(x * 3 - 15, y * 3 - 15, 0));
-			Space.SetComponentData<IwEngine::Model>    (enemy, quad, 1U);
-			Space.SetComponentData<Enemy>              (enemy, SPIN, 3.0f, 0.05f, 0.025f, 0.025f);
-			Space.SetComponentData<IwPhysics::AABB2D>  (enemy, iwm::vector2(-1), iwm::vector2(1));
+			Space.SetComponentData<IW::Transform>    (enemy, iwm::vector3(x * 3 - 15, y * 3 - 15, 0));
+			Space.SetComponentData<IwEngine::Model>  (enemy, quad, 1U);
+			Space.SetComponentData<Enemy>            (enemy, SPIN, 3.0f, 0.05f, 0.025f, 0.025f);
+			Space.SetComponentData<IwPhysics::AABB2D>(enemy, iwm::vector2(-1), iwm::vector2(1));
 		}
 	}
 

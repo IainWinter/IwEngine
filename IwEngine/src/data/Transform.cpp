@@ -8,7 +8,7 @@ namespace IW {
 	}
 
 	iwm::vector3 Transform::Forward() const {
-		return -iwm::vector3::unit_z * Rotation;
+		return iwm::vector3::unit_z * Rotation;
 	}
 
 	iwm::vector3 Transform::Right() const {
