@@ -42,6 +42,36 @@ inline namespace Graphics {
 
 		~Mesh();
 
+		void SetVertices(
+			size_t count,
+			iwm::vector3* vertices);
+
+		void SetNormals(
+			size_t count,
+			iwm::vector3* normals);
+
+		void SetColors(
+			size_t count,
+			iwm::vector4* colors);
+
+		void SetUVs(
+			size_t count,
+			iwm::vector2* uvs);
+
+		void SetIndices(
+			size_t count,
+			unsigned int* indices);
+
+		inline void SetMaterial(
+			iwu::ref<IW::Material>& material)
+		{
+			Material = material;
+		}
+
+		inline size_t GetElementCount() {
+			return IndexCount / Topology;
+		}
+
 		void Compile(
 			const iwu::ref<IW::IDevice>& device);
 
@@ -52,62 +82,7 @@ inline namespace Graphics {
 			const iwu::ref<IW::IDevice>& device);
 
 		void Draw(
-			const iwu::ref<IW::IDevice>& device) const;
-
-		inline size_t GetElementCount() {
-			return IndexCount / Topology;
-		}
-
-		inline void SetVertices(
-			size_t count,
-			iwm::vector3* vertices)
-		{
-			Vertices    = vertices;
-			VertexCount = count;
-			Outdated = true;
-		}
-
-		inline void SetNormals(
-			size_t count,
-			iwm::vector3* normals)
-		{
-			Normals     = normals;
-			NormalCount = count;
-			Outdated = true;
-		}
-
-		inline void SetColors(
-			size_t count,
-			iwm::vector4* colors)
-		{
-			Colors      = colors;
-			ColorCount  = count;
-			Outdated = true;
-		}
-
-		inline void SetUVs(
-			size_t count,
-			iwm::vector2* uvs)
-		{
-			Uvs      = uvs;
-			UvCount  = count;
-			Outdated = true;
-		}
-
-		inline void SetIndices(
-			size_t count,
-			unsigned int* indices)
-		{
-			Indices    = indices;
-			IndexCount = count;
-			Outdated = true;
-		}
-
-		inline void SetMaterial(
-			iwu::ref<IW::Material>& material)
-		{
-			Material = material;
-		}
+			const iwu::ref<IW::IDevice>& device) const;		
 	};
 }
 }

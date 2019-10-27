@@ -46,6 +46,71 @@ namespace IW {
 		delete[] Indices;
 	}
 
+	void Mesh::SetVertices(
+		size_t count,
+		iwm::vector3* vertices)
+	{
+		delete[] Vertices;
+
+		Vertices = new iwm::vector3[count];
+		VertexCount = count;
+		Outdated = true;
+
+		memcpy(Vertices, vertices, count * sizeof(iwm::vector3));
+	}
+
+	void Mesh::SetNormals(
+		size_t count,
+		iwm::vector3* normals)
+	{
+		delete[] Normals;
+
+		Normals = new iwm::vector3[count];
+		NormalCount = count;
+		Outdated = true;
+
+		memcpy(Normals, normals, count * sizeof(iwm::vector3));
+	}
+
+	void Mesh::SetColors(
+		size_t count,
+		iwm::vector4* colors)
+	{
+		delete[] Colors;
+
+		Colors = new iwm::vector4[count];
+		ColorCount = count;
+		Outdated = true;
+
+		memcpy(Colors, colors, count * sizeof(iwm::vector4));
+	}
+
+	void Mesh::SetUVs(
+		size_t count,
+		iwm::vector2* uvs)
+	{
+		delete[] Uvs;
+
+		Uvs = new iwm::vector2[count];
+		UvCount = count;
+		Outdated = true;
+
+		memcpy(Uvs, uvs, count * sizeof(iwm::vector2));
+	}
+
+	void Mesh::SetIndices(
+		size_t count,
+		unsigned int* indices)
+	{
+		delete[] Indices;
+
+		Indices = new unsigned int[count];
+		IndexCount = count;
+		Outdated = true;
+
+		memcpy(Indices, indices, count * sizeof(unsigned int));
+	}
+
 	void Mesh::Compile(
 		const iwu::ref<IW::IDevice>& device)
 	{

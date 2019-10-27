@@ -58,17 +58,17 @@ int GameLayer::Initialize(
 
 	// Making line mesh
 	// Model data
-	iwm::vector3* verts = new iwm::vector3[2] {
+	iwm::vector3 verts[2] = {
 		iwm::vector3(0, 0, -1), 
 		iwm::vector3(4, 0, -1)
 	};
 
-	iwm::vector4* color = new iwm::vector4[2] {
+	iwm::vector4 color[2] = {
 		iwm::vector4(1, 1, 1, 1),
 		iwm::vector4(1, 1, 1, 0)
 	};
 
-	unsigned int* index = new unsigned int[2] {
+	unsigned int index[2] = {
 		0, 1
 	};
 

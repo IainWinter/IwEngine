@@ -6,8 +6,7 @@ namespace IW {
 		const iwu::ref<IW::IDevice>& device)
 		: Device(device)
 		, m_camera(nullptr)
-	{
-	}
+	{}
 
 	iwu::ref<IW::IPipeline>& Renderer::CreatePipeline(
 		const char* vertex, 
