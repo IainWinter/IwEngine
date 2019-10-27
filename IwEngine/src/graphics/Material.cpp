@@ -19,7 +19,7 @@ namespace IW {
 	void Material::Use(
 		const iwu::ref<IW::IDevice>& device) const 
 	{
-		device->SetPipeline(&*Pipeline);
+		device->SetPipeline(Pipeline.get());
 
 		for (const MaterialProperty& property : m_properties) {
 			IW::IPipelineParam* param = Pipeline->GetParam(property.Name);

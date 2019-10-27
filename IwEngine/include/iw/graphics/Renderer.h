@@ -27,7 +27,12 @@ inline namespace Graphics {
 			const char* vertex,
 			const char* fragment);
 
-		//iwu::ref<IW::IUniformBuffer> SetUniformBuffer(const char* name);
+		iwu::ref<IW::Material> CreateMaterial(
+			const iwu::ref<IW::IPipeline>& pipeline);
+
+		iwu::ref<IW::Mesh> CreateMesh(
+			const IW::MeshData& data,
+			iwu::ref<IW::Material>& material);
 
 		void Begin();
 		void End();

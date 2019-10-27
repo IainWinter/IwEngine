@@ -3,11 +3,13 @@
 namespace IwEngine {
 	Layer::Layer(
 		IwEntity::Space& space,
-		IW::Graphics::Renderer& renderer,
+		IW::Renderer& renderer,
+		IW::AssetManager& asset,
 		const char* name)
 		: m_name(name)
 		, Space(space)
 		, Renderer(renderer)
+		, Asset(asset)
 	{}
 
 	Layer::~Layer() {}

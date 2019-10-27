@@ -7,6 +7,7 @@
 #include "EventBus.h"
 #include "InitOptions.h"
 #include "Layers/ImGuiLayer.h"
+#include "iw/asset/AssetManager.h"
 #include "iw/input/InputManager.h"
 #include "iw/entity/Space.h"
 #include "iw/graphics/Renderer.h"
@@ -28,10 +29,13 @@ namespace IwEngine {
 		Task<void()> m_updateTask;
 
 	protected:
-		IwEntity::Space       Space;
-		IW::Graphics::Renderer  Renderer;
+		IwEntity::Space Space;
 		IwInput::InputManager InputManager;
+
 		EventBus Bus;
+
+		IW::Renderer     Renderer;
+		IW::AssetManager Asset;
 
 	public:
 		Application();
@@ -59,7 +63,7 @@ namespace IwEngine {
 		L* PushLayer(
 			Args&&... args)
 		{
-			L* layer = new L(Space, Renderer, std::forward<Args>(args)...);
+			L* layer = new L(Space, Renderer, Asset, std::forward<Args>(args)...);
 			m_layers.PushBack(layer);
 			return layer;
 		}
@@ -70,7 +74,7 @@ namespace IwEngine {
 		L* PushOverlay(
 				Args&& ... args)
 		{
-			L* layer = new L(Space, Renderer, std::forward<Args>(args)...);
+			L* layer = new L(Space, Renderer, Asset, std::forward<Args>(args)...);
 			m_layers.PushFront(layer);
 			return layer;
 		}

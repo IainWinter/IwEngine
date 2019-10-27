@@ -2860,7 +2860,7 @@ bool ImGui::ShowStyleSelector(const char* label)
     return false;
 }
 
-// Demo helper function to select among loaded fonts.
+// Demo helper function to select among m_loaded fonts.
 // Here we use the regular BeginCombo()/EndCombo() api which is more the more flexible one.
 void ImGui::ShowFontSelector(const char* label)
 {

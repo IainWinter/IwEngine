@@ -15,7 +15,8 @@ private:
 public:
 	GameLayer3D(
 		IwEntity::Space& space,
-		IW::Renderer& renderer);
+		IW::Renderer& renderer,
+		IW::AssetManager& asset);
 
 	int Initialize(
 		IwEngine::InitOptions& options) override;

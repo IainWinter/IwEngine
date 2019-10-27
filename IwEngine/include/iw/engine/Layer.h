@@ -5,6 +5,7 @@
 #include "System.h"
 #include "InitOptions.h"
 #include "Events/AllEvents.h"
+#include "iw/asset/AssetManager.h"
 #include "iw/entity/Space.h"
 #include "iw/graphics/Renderer.h"
 
@@ -14,13 +15,15 @@ namespace IwEngine {
 		const char* m_name;
 		Stack<ISystem*> m_systems;
 	protected:
-		IwEntity::Space&      Space;
-		IW::Graphics::Renderer& Renderer;
+		IwEntity::Space&  Space;
+		IW::Renderer&     Renderer;
+		IW::AssetManager& Asset;
 
 	public:
 		Layer(
 			IwEntity::Space& space,
-			IW::Graphics::Renderer&,
+			IW::Renderer& renderer,
+			IW::AssetManager& asset,
 			const char* name);
 
 		virtual ~Layer();

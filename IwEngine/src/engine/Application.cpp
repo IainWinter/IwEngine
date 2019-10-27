@@ -5,6 +5,7 @@
 #include "iw/log/sink/async_std_sink.h"
 #include "iw/log/sink/file_sink.h"
 #include "iw/events/functional/callback.h"
+#include "iw/graphics/Loaders/ModelLoader.h"
 #include <atomic>
 
 namespace IwEngine {
@@ -43,6 +44,10 @@ namespace IwEngine {
 		// Events
 
 		Bus.subscribe(iwe::make_callback(&Application::HandleEvent, this));
+
+		// Asset Loader
+
+		Asset.SetLoader<IW::ModelLoader>();
 
 		// Window
 

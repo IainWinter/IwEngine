@@ -8,8 +8,9 @@
 
 GameLayer3D::GameLayer3D(
 	IwEntity::Space& space, 
-	IW::Renderer& renderer)
-	: Layer(space, renderer, "Game")
+	IW::Renderer& renderer,
+	IW::AssetManager& asset)
+	: Layer(space, renderer, asset, "Game")
 {}
 
 int GameLayer3D::Initialize(
@@ -17,7 +18,7 @@ int GameLayer3D::Initialize(
 {
 	iwu::ref<IW::IPipeline> pipeline = Renderer.CreatePipeline("res/sandboxvs.glsl", "res/sandboxfs.glsl");
 
-	IW::ModelData* treeData = loader.Load("res/tree.obj");
+	IW::ModelData* treeData = Asset.Load<IW::ModelData>("res/tree.obj");
 
 	iwu::ref<IW::Material> leafMaterial(new IW::Material(pipeline));
 	leafMaterial->SetProperty("color", iwm::vector3(.2, .6, .1));

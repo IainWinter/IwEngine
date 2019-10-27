@@ -22,8 +22,9 @@
 
 GameLayer::GameLayer(
 	IwEntity::Space& space,
-	IW::Graphics::Renderer& renderer)
-	: IwEngine::Layer(space, renderer, "Game")
+	IW::Renderer& renderer,
+	IW::AssetManager& asset)
+	: IwEngine::Layer(space, renderer, asset, "Game")
 	, line(nullptr)
 {
 	PushSystem<BulletSystem>();
@@ -49,6 +50,8 @@ int GameLayer::Initialize(
 	IwEngine::InitOptions& options)
 {
 	//Renderer.AddPipeline("res/sandbox.glsl"); //  idealy we would only pass in a single file and parse out the seperate shaders
+
+	
 
 	iwu::ref<IW::IPipeline> shader = Renderer.CreatePipeline("res/sandboxvs.glsl", "res/sandboxfs.glsl");
 	iwu::ref<IW::IPipeline> shader_line = Renderer.CreatePipeline("res/sandbox_line_vs.glsl", "res/sandbox_line_fs.glsl");
@@ -85,7 +88,7 @@ int GameLayer::Initialize(
 	line->Compile(Renderer.Device);
 
 	// Making quad mesh
-	auto& qdata = loader.Load("res/quad.obj")->Meshes[0];
+	auto& qdata = Asset.Load<IW::ModelData>("res/quad.obj")->Meshes[0];
 
 	IW::Mesh* quad = new IW::Mesh();
 	quad->SetMaterial(quadMaterial);
@@ -95,7 +98,7 @@ int GameLayer::Initialize(
 	quad->Compile(Renderer.Device);
 
 	// Making circle mesh
-	auto& cdata = loader.Load("res/circle.obj")->Meshes[0];
+	auto& cdata = Asset.Load<IW::ModelData>("res/circle.obj")->Meshes[0];
 
 	IW::Mesh* circle = new IW::Mesh();	
 	circle->SetMaterial(circleMaterial);
