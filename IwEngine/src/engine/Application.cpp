@@ -47,7 +47,7 @@ namespace IwEngine {
 
 		// Asset Loader
 
-		Asset.SetLoader<IW::ModelLoader>();
+		Asset.SetLoader<IW::MeshLoader>(m_device);
 
 		// Window
 

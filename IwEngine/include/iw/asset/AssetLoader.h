@@ -1,95 +1,101 @@
 #pragma once
 
 #include "IwAsset.h"
+#include "IAssetLoader.h"
+#include "AssetManager.h"
 #include "iw/util/memory/smart_pointers.h"
 #include "iw/log/logger.h"
 #include <unordered_map>
 #include <assert.h>
 
 namespace IW {
-	inline namespace Asset {
-		class IAssetLoader {
-		public:
-			//virtual po LoadAsync()
+inline namespace Asset {
+	template<
+		typename _r>
+	class AssetLoader
+		: public IAssetLoader
+	{
+	private:
+		std::unordered_map<const char*, _r*> m_loaded;
+	protected:
+		AssetManager& m_asset;
 
-			virtual ~IAssetLoader() {}
+	private:
+		virtual _r* LoadAsset(
+			const char* filepath) = 0;
+	public:
+		AssetLoader(
+			AssetManager& asset)
+			: m_asset(asset)
+		{}
 
-			virtual size_t GetType() = 0;
+		~AssetLoader() {
+			for (auto r : m_loaded) {
+				delete r.second;
+			}
+		}
 
-			virtual void* Load(
-				const char* filepath) = 0;
-		};
+		size_t GetType() override {
+			return typeid(_r).hash_code();
+		}
 
-		template<
-			typename _resource_t>
-		class AssetLoader
-			: public IAssetLoader
+		void* Load(
+			const char* filepath) override
 		{
-		private:
-			//Impl some caching by using path (name) and the resources?
-			std::unordered_map<const char*, _resource_t*> m_loaded;
+			_r* resource;
+			if (m_loaded.find(filepath) != m_loaded.end()) {
+				resource = m_loaded.at(filepath);
+			}
 
-			virtual _resource_t* LoadAsset(
-				const char* filepath) = 0;
-		public:
-			~AssetLoader() {
-				for (auto r : m_loaded) {
-					delete r.second;
+			else {
+				resource = LoadAsset(filepath);
+				if (resource == nullptr) {
+					LOG_ERROR << "Failed to load resource " << filepath << "!";
+					assert(false);
+				}
+
+				m_loaded.emplace(filepath, resource);
+			}
+
+			return resource;
+		}
+
+		void Give(
+			const char* name,
+			void* asset)
+		{
+			_r* resource = (_r*)malloc(sizeof(_r));
+			memmove(resource, asset, sizeof(_r));
+			m_loaded[name] = resource;
+		}
+
+		virtual void Release(
+			_r* resource)
+		{
+			for (auto it = m_loaded.begin(); it != m_loaded.end(); it++) {
+				if (it->second == resource) {
+					m_loaded.erase(it);
+					LOG_INFO << "Releasing " << it->first;
+					return; // Exit function if found
 				}
 			}
 
-			size_t GetType() override {
-				return typeid(_resource_t).hash_code();
+			LOG_WARNING << "Trying to release invalid resource at " << resource;
+		}
+
+		virtual void Release(
+			const char* name)
+		{
+			auto it = m_loaded.find(name);
+			if (it != m_loaded.end()) {
+				Release(it->second);
+				LOG_INFO << "Releasing " << name;
 			}
 
-			void* Load(
-				const char* filepath) override
-			{
-				_resource_t* resource;
-				if (m_loaded.find(filepath) != m_loaded.end()) {
-					resource = m_loaded.at(filepath);
-				}
-
-				else {
-					resource = LoadAsset(filepath);
-					if (resource == nullptr) {
-						LOG_ERROR << "Failed to load resource " << filepath << "!";
-						assert(false);
-					}
-
-					m_loaded.emplace(filepath, resource);
-				}
-
-				return resource;
+			else {
+				LOG_WARNING << "Trying to release non loaded resource " << name;
 			}
-
-			virtual void Release(
-				_resource_t* resource)
-			{
-				for (auto it = m_loaded.begin(); it != m_loaded.end(); it++) {
-					if (it->second == resource) {
-						m_loaded.erase(it);
-						LOG_INFO << "Releasing " << it->first;
-						return; // Exit function if found
-					}
-				}
-
-				LOG_WARNING << "Trying to release invalid resource at " << resource;
-			}
-
-			virtual void Release(
-				const char* name)
-			{
-				auto it = m_loaded.find(name);
-				if (it != m_loaded.end()) {
-					Release(it->second);
-					LOG_INFO << "Releasing " << name;
-				}
-
-				else {
-					LOG_WARNING << "Trying to release non loaded resource " << name;
-				}
-			}
-		};
-	}
+		}
+	};
+}
 }

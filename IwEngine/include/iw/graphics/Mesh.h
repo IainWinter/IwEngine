@@ -35,6 +35,9 @@ inline namespace Graphics {
 
 		bool Outdated;
 
+		//Mesh* Next;
+		//Mesh* Child;
+
 		Mesh();
 
 		Mesh(

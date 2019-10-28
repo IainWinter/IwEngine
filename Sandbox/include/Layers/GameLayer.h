@@ -12,8 +12,6 @@ class GameLayer
 	: public IwEngine::Layer
 {
 private: // tmp
-	IW::ModelLoader loader;
-
 	IW::Mesh* line;
 
 public:

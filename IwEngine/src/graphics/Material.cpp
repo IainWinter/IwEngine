@@ -16,6 +16,37 @@ namespace IW {
 		}
 	}
 
+	void Material::SetProperty(
+		const char* name, 
+		PipelineParamType type, 
+		const void* data, 
+		size_t size)
+	{
+		MaterialProperty* prop = nullptr;
+		for (MaterialProperty& p : m_properties) {
+			if (p.Name == name) {
+				prop = &p;
+				break;
+			}
+		}
+
+		if (prop) {
+			prop->Data = ;
+		}
+
+		else {
+			MaterialProperty property{
+				name,
+				malloc(sizeof(_p)),
+				IW::GetTypeOfParam<_p>()
+			};
+
+			*(_p*)prop.Data = value;
+
+			m_properties.push_back(property);
+		}
+	}
+
 	void Material::Use(
 		const iwu::ref<IW::IDevice>& device) const 
 	{

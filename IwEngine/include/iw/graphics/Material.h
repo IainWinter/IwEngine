@@ -30,6 +30,12 @@ inline namespace Graphics {
 
 		~Material();
 
+		void SetProperty(
+			const char* name,
+			PipelineParamType type,
+			const void* data,
+			size_t size);
+
 		void Use(
 			const iwu::ref<IW::IDevice>& device) const;
 
@@ -39,29 +45,7 @@ inline namespace Graphics {
 			const char* name,
 			const _p& value)
 		{
-			MaterialProperty* property = nullptr;
-			for (MaterialProperty& p : m_properties) {
-				if (p.Name == name) {
-					property = &p;
-					break;
-				}
-			}
-
-			if (property) {
-				*(_p*)property->Data = value;
-			}
-
-			else {
-				MaterialProperty property{
-					name,
-					malloc(sizeof(_p)),
-					IW::GetTypeOfParam<_p>()
-				};
-
-				*(_p*)property.Data = value;
-
-				m_properties.push_back(property);
-			}
+			SetProperty(name, IW::GetSizeOfType<_p>(), malloc(sizeof(_p)), sizeof(_p));
 		}
 	};
 }

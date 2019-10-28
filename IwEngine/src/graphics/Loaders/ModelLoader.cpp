@@ -1,4 +1,5 @@
 #include "iw/graphics/Loaders/ModelLoader.h"
+#include "iw/graphics/Mesh.h"
 #include "iw/log/logger.h"
 #include "assimp/Importer.hpp"
 #include "assimp/scene.h"
@@ -6,7 +7,14 @@
 #include <string>
 
 namespace IW {
-	ModelData* ModelLoader::LoadAsset(
+	MeshLoader::MeshLoader(
+		AssetManager& asset,
+		iwu::ref<IDevice>& device) 
+		: AssetLoader(asset)
+		, m_device(device)
+	{}
+
+	ModelData* MeshLoader::LoadAsset(
 		const char* path)
 	{
 		Assimp::Importer importer;
@@ -27,6 +35,27 @@ namespace IW {
 			scene->mNumMeshes
 		};
 
+		if (scene->HasMaterials()) {
+			for (size_t i = 0; i < scene->mNumMaterials; i++) {
+				aiMaterial* material = scene->mMaterials[i];
+
+				IW::Material mat;
+				for (size_t j = 0; j < material->mNumProperties; j++) {
+					mat.SetProperty(material->mProperties[j]->mKey, material->mProperties[j]->mData);
+				}
+
+
+				mat.SetProperty();
+
+				m_asset.Give<IW::Material>(material->GetName(), material);
+			}
+
+			
+
+			m_asset.Load<IW::Material>();
+		}
+
+		IW::Mesh* root = new IW::Mesh();
 		for (size_t i = 0; i < scene->mNumMeshes; i++) {
 			const aiMesh* aimesh = scene->mMeshes[i];
 
@@ -50,6 +79,10 @@ namespace IW {
 				}
 			}
 
+			IW::Mesh* mesh = root;
+
+			scene->mMeshes[0]->
+
 			mesh.VertexCount = aimesh->mNumVertices;
 			mesh.Vertices = new iwm::vector3[mesh.VertexCount];
 			mesh.Normals  = new iwm::vector3[mesh.VertexCount];
@@ -68,6 +101,15 @@ namespace IW {
 		}
 
 		importer.FreeScene();
+
+		IW::Mesh* mesh = new IW::Mesh[];
+
+		IW::Mesh* quad = new IW::Mesh();
+		quad->SetMaterial(quadMaterial);
+		quad->SetVertices(model.VertexCount, qdata.Vertices);
+		quad->SetNormals(qdata.VertexCount, qdata.Normals);
+		quad->SetIndices(qdata.FaceCount, qdata.Faces);
+		quad->Compile(Renderer.Device);
 
 		return model;
 	}

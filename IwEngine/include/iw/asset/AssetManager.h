@@ -1,7 +1,7 @@
 #pragma once
 
 #include "IwAsset.h"
-#include "AssetLoader.h"
+#include "IAssetLoader.h"
 #include <unordered_map>
 
 namespace IW {
@@ -25,7 +25,7 @@ namespace IW {
 				void SetLoader(
 					_args&&... args)
 			{
-				_l* loader = new _l(args...);
+				_l* loader = new _l(*this, args...);
 				m_loaders[loader->GetType()] = loader;
 			}
 
@@ -40,6 +40,18 @@ namespace IW {
 				}
 
 				return nullptr;
+			}
+
+			template<
+				typename _t>
+			void Give(
+				const char* filepath,
+				_t* asset)
+			{
+				auto itr = m_loaders.find(typeid(_t).hash_code());
+				if (itr != m_loaders.end()) {
+					itr->second->Give(filepath, asset);
+				}
 			}
 		};
 	}

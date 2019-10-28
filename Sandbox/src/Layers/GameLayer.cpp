@@ -49,9 +49,16 @@ struct ModelComponents {
 int GameLayer::Initialize(
 	IwEngine::InitOptions& options)
 {
-	//Renderer.AddPipeline("res/sandbox.glsl"); //  idealy we would only pass in a single file and parse out the seperate shaders
+	Asset.Load<IW::Mesh>("res/quad.obj");
+	//   |
+	//  \ /
+	//Asset.Load<IW::Material>("res/quad.mat");
+	//   |
+	//  \ /
+	//Asset.Load<IW::Shader>("res/sandbox.shader");
 
-	
+
+
 
 	iwu::ref<IW::IPipeline> shader = Renderer.CreatePipeline("res/sandboxvs.glsl", "res/sandboxfs.glsl");
 	iwu::ref<IW::IPipeline> shader_line = Renderer.CreatePipeline("res/sandbox_line_vs.glsl", "res/sandbox_line_fs.glsl");
