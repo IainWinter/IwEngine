@@ -49,7 +49,7 @@ struct ModelComponents {
 int GameLayer::Initialize(
 	IwEngine::InitOptions& options)
 {
-	Asset.Load<IW::Mesh>("res/quad.obj");
+	//Asset.Load<IW::Mesh>("res/quad.obj");
 	//   |
 	//  \ /
 	//Asset.Load<IW::Material>("res/quad.mat");
@@ -58,8 +58,7 @@ int GameLayer::Initialize(
 	//Asset.Load<IW::Shader>("res/sandbox.shader");
 
 
-
-
+	
 	iwu::ref<IW::IPipeline> shader = Renderer.CreatePipeline("res/sandboxvs.glsl", "res/sandboxfs.glsl");
 	iwu::ref<IW::IPipeline> shader_line = Renderer.CreatePipeline("res/sandbox_line_vs.glsl", "res/sandbox_line_fs.glsl");
 
@@ -82,10 +81,10 @@ int GameLayer::Initialize(
 	iwu::ref<IW::Material> lineMaterial(new IW::Material(shader_line));
 
 	iwu::ref<IW::Material> quadMaterial(new IW::Material(shader));
-	quadMaterial->SetProperty("color", iwm::vector3(1, 0, 0));
+	//quadMaterial->SetProperty("color", iwm::vector3(1, 0, 0));
 
 	iwu::ref<IW::Material> circleMaterial(new IW::Material(shader));
-	circleMaterial->SetProperty("color", iwm::vector3(1, 1, 1));
+	//circleMaterial->SetProperty("color", iwm::vector3(1, 1, 1));
 
 	line = new IW::Mesh(IW::LINES);
 	line->SetMaterial(lineMaterial);

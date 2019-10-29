@@ -18,15 +18,15 @@ int GameLayer3D::Initialize(
 {
 	iwu::ref<IW::IPipeline> pipeline = Renderer.CreatePipeline("res/sandboxvs.glsl", "res/sandboxfs.glsl");
 
-	IW::ModelData* treeData = Asset.Load<IW::ModelData>("res/tree.obj");
+	IW::ModelData* treeData = Asset.Load<IW::ModelData>("res/cube2.obj");
 
-	iwu::ref<IW::Material> leafMaterial(new IW::Material(pipeline));
-	leafMaterial->SetProperty("color", iwm::vector3(.2, .6, .1));
+	//iwu::ref<IW::Material> leafMaterial(new IW::Material(pipeline));
+	//leafMaterial->SetProperty("color", iwm::vector3(.2, .6, .1));
 
-	iwu::ref<IW::Material> treeMaterial(new IW::Material(pipeline));
-	treeMaterial->SetProperty("color", iwm::vector3(.6, .4, .3));
+	//iwu::ref<IW::Material> treeMaterial(new IW::Material(pipeline));
+	//treeMaterial->SetProperty("color", iwm::vector3(.6, .4, .3));
 
-	treeMeshs = new IW::Mesh[2];
+	treeMeshs = new IW::Mesh[3];
 	for (size_t i = 0; i < treeData->MeshCount; i++) {
 		treeMeshs[i].SetVertices(treeData->Meshes[i].VertexCount, treeData->Meshes[i].Vertices);
 		treeMeshs[i].SetNormals (treeData->Meshes[i].VertexCount, treeData->Meshes[i].Normals);
@@ -34,8 +34,9 @@ int GameLayer3D::Initialize(
 		treeMeshs[i].Compile(Renderer.Device);
 	}
 
-	treeMeshs[0].SetMaterial(treeMaterial);
-	treeMeshs[1].SetMaterial(leafMaterial);
+	//treeMeshs[0].SetMaterial(leafMaterial);
+	//treeMeshs[1].SetMaterial(leafMaterial);
+	//treeMeshs[2].SetMaterial(treeMaterial);
 	
 	IW::Camera* ortho = new IW::OrthographicCamera(64, 36, -100, 100);
 	ortho->Rotation = iwm::quaternion::create_from_euler_angles(0, iwm::IW_PI, 0);
@@ -49,7 +50,7 @@ int GameLayer3D::Initialize(
 
 	IwEntity::Entity tree = Space.CreateEntity<IW::Transform, IwEngine::Model>();
 	Space.SetComponentData<IW::Transform>(tree, iwm::vector3(0, 0, 5));
-	Space.SetComponentData<IwEngine::Model>(tree, treeMeshs, 2U);
+	Space.SetComponentData<IwEngine::Model>(tree, treeMeshs, 3U);
 
 	return 0;
 }
@@ -103,18 +104,12 @@ void GameLayer3D::PostUpdate() {
 			cooldown = 0.1f;
 			IwEntity::Entity tree = Space.CreateEntity<IW::Transform, IwEngine::Model>();
 			Space.SetComponentData<IW::Transform>  (tree, transform->Position + transform->Forward() * 4);
-			Space.SetComponentData<IwEngine::Model>(tree, treeMeshs, 2U);
+			Space.SetComponentData<IwEngine::Model>(tree, treeMeshs, 3U);
 		}
-
-		transform->Rotation *= iwm::quaternion::create_from_axis_angle(iwm::vector3::unit_y, mouse.x * IwEngine::Time::DeltaTime())
-			* iwm::quaternion::create_from_axis_angle(-iwm::vector3::unit_x, mouse.y * IwEngine::Time::DeltaTime());
-
-		mouse = 0;
 
 		transform->Position += movement * 5 * IwEngine::Time::DeltaTime();
 
 		controller->Camera->Position = transform->Position;
-		controller->Camera->Rotation = transform->Rotation;
 
 		Renderer.BeginScene(controller->Camera);
 
@@ -132,8 +127,20 @@ void GameLayer3D::PostUpdate() {
 bool GameLayer3D::On(
 	IwEngine::MouseMovedEvent& event)
 {
-	mouse.x = event.DeltaX;
-	mouse.y = event.DeltaY;
+	for (auto entity : Space.Query<IW::Transform, IwEngine::CameraController>()) {
+		auto [transform, controller] = entity.Components.Tie<PlayerComponents>();
+
+		float pitch = event.DeltaY * 0.0005f;
+		float yaw   = event.DeltaX * 0.0005f;
+
+		iwm::quaternion deltaP = iwm::quaternion::create_from_axis_angle(-transform->Right(), pitch);
+		iwm::quaternion deltaY = iwm::quaternion::create_from_axis_angle( iwm::vector3::unit_y, yaw);
+
+		transform->Rotation *= deltaP * deltaY;
+
+		controller->Camera->Rotation = transform->Rotation;
+	}
+
 	return false;
 }
 

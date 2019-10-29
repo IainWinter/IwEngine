@@ -37,22 +37,23 @@ namespace IW {
 
 		if (scene->HasMaterials()) {
 			for (size_t i = 0; i < scene->mNumMaterials; i++) {
-				aiMaterial* material = scene->mMaterials[i];
+				aiMaterial* aimaterial = scene->mMaterials[i];
 
-				IW::Material mat;
-				for (size_t j = 0; j < material->mNumProperties; j++) {
-					mat.SetProperty(material->mProperties[j]->mKey, material->mProperties[j]->mData);
-				}
+				Color ambient;
+				Color diffuse;
+				Color specular;
 
+				aiGetMaterialColor(aimaterial, AI_MATKEY_COLOR_AMBIENT,  (aiColor4D*)&ambient);
+				aiGetMaterialColor(aimaterial, AI_MATKEY_COLOR_DIFFUSE,  (aiColor4D*)&diffuse);
+				aiGetMaterialColor(aimaterial, AI_MATKEY_COLOR_SPECULAR, (aiColor4D*)&specular);				
 
-				mat.SetProperty();
+				IW::Material material;
+				material.SetColor("ambient",  ambient);
+				material.SetColor("diffuse",  diffuse);
+				material.SetColor("specular", specular);
 
-				m_asset.Give<IW::Material>(material->GetName(), material);
+				m_asset.Give<IW::Material>(aimaterial->GetName().C_Str(), &material);
 			}
-
-			
-
-			m_asset.Load<IW::Material>();
 		}
 
 		IW::Mesh* root = new IW::Mesh();
@@ -79,9 +80,9 @@ namespace IW {
 				}
 			}
 
-			IW::Mesh* mesh = root;
+			//IW::Mesh* mesh = root;
 
-			scene->mMeshes[0]->
+			//scene->mMeshes[0]->
 
 			mesh.VertexCount = aimesh->mNumVertices;
 			mesh.Vertices = new iwm::vector3[mesh.VertexCount];
@@ -102,14 +103,14 @@ namespace IW {
 
 		importer.FreeScene();
 
-		IW::Mesh* mesh = new IW::Mesh[];
+		//IW::Mesh* mesh = new IW::Mesh[];
 
-		IW::Mesh* quad = new IW::Mesh();
-		quad->SetMaterial(quadMaterial);
-		quad->SetVertices(model.VertexCount, qdata.Vertices);
-		quad->SetNormals(qdata.VertexCount, qdata.Normals);
-		quad->SetIndices(qdata.FaceCount, qdata.Faces);
-		quad->Compile(Renderer.Device);
+		//IW::Mesh* quad = new IW::Mesh();
+		//quad->SetMaterial(quadMaterial);
+		//quad->SetVertices(model.VertexCount, qdata.Vertices);
+		//quad->SetNormals(qdata.VertexCount, qdata.Normals);
+		//quad->SetIndices(qdata.FaceCount, qdata.Faces);
+		//quad->Compile(Renderer.Device);
 
 		return model;
 	}

@@ -11,39 +11,53 @@ namespace IW {
 	{}
 
 	Material::~Material() {
-		for (MaterialProperty& property : m_properties) {
-			free(property.Data);
+		for (BufferData& bufData : m_buffers) {
+			free(bufData.Buffer.Data);
 		}
 	}
 
-	void Material::SetProperty(
-		const char* name, 
-		PipelineParamType type, 
-		const void* data, 
-		size_t size)
-	{
-		MaterialProperty* prop = nullptr;
-		for (MaterialProperty& p : m_properties) {
-			if (p.Name == name) {
-				prop = &p;
-				break;
-			}
-		}
+	//void Material::SetScalar(
+	//	const char* name, 
+	//	Scalar scalar)
+	//{
+	//	auto itr = FindName(name, m_scalars);
+	//	if (itr == m_scalars.end()) {
+	//		m_scalars.emplace_back(name, scalar);
+	//	}
 
-		if (prop) {
-			prop->Data = ;
+	//	else {
+	//		itr->Value. = scalar;
+	//	}
+	//}
+
+	//void Material::SetBuffer(
+	//	const char* name,
+	//	size_t size,
+	//	Buffer buffer)
+	//{
+	//	auto itr = FindName(name, m_buffers);
+	//	if (itr == m_buffers.end()) {
+	//		m_buffers.emplace_back(name, size, malloc(size));
+	//	}
+
+	//	else {
+	//		free(itr->Buffer.Data);
+	//		itr->Buffer.Data = malloc(size);
+	//		memcpy(itr->Buffer.Data, buffer.Data, size);
+	//	}
+	//}
+
+	void Material::SetColor(
+		const char* name, 
+		Color color)
+	{
+		auto itr = FindName(name, m_colors);
+		if (itr == m_colors.end()) {
+			m_colors.push_back({ name, color });
 		}
 
 		else {
-			MaterialProperty property{
-				name,
-				malloc(sizeof(_p)),
-				IW::GetTypeOfParam<_p>()
-			};
-
-			*(_p*)prop.Data = value;
-
-			m_properties.push_back(property);
+			itr->Color = color;
 		}
 	}
 
@@ -52,23 +66,29 @@ namespace IW {
 	{
 		device->SetPipeline(Pipeline.get());
 
-		for (const MaterialProperty& property : m_properties) {
-			IW::IPipelineParam* param = Pipeline->GetParam(property.Name);
+		// this code is kinda anoyying
+
+		IW::IPipelineParam* param;
+		//for (const ScalarData& scalar : m_scalars) {
+		//	param = Pipeline->GetParam(scalar.Name);
+
+		//	if (!param) {
+		//		LOG_WARNING << "Invalid property in material: " << scalar.Name;
+		//		continue;
+		//	}
+
+		//	param->SetAsFloat(scalar.Value.Float);
+		//}
+
+		for (const ColorData& color : m_colors) {
+			param = Pipeline->GetParam(color.Name);
 
 			if (!param) {
-				LOG_WARNING << "Invalid property in material: " << property.Name;
-				return;
+				LOG_WARNING << "Invalid property in material: " << color.Name;
+				continue;
 			}
 
-			switch (property.Type) {
-				case IW::FLOAT: param->SetAsFloat(*(float*       )property.Data); break;
-				case IW::VEC2:  param->SetAsVec2 (*(iwm::vector2*)property.Data); break;
-				case IW::VEC3:  param->SetAsVec3 (*(iwm::vector3*)property.Data); break;
-				case IW::VEC4:  param->SetAsVec4 (*(iwm::vector4*)property.Data); break;
-				case IW::MAT2:  param->SetAsMat2 (*(iwm::matrix2*)property.Data); break;
-				case IW::MAT3:  param->SetAsMat3 (*(iwm::matrix3*)property.Data); break;
-				case IW::MAT4:  param->SetAsMat4 (*(iwm::matrix4*)property.Data); break;
-			}
+			param->SetAsVec4(color.Color.Vec());
 		}
 	}
 }

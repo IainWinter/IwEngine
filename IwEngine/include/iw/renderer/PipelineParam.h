@@ -13,6 +13,9 @@ namespace IW {
 inline namespace RenderAPI {
 	enum PipelineParamType {
 		FLOAT,
+		DOUBLE,
+		INT,
+		STRING,
 		VEC2,
 		VEC3,
 		VEC4,
