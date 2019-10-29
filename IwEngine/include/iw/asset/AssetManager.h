@@ -22,8 +22,8 @@ namespace IW {
 			template<
 				typename _l,
 				typename... _args>
-				void SetLoader(
-					_args&&... args)
+			void SetLoader(
+				_args&&... args)
 			{
 				_l* loader = new _l(*this, args...);
 				m_loaders[loader->GetType()] = loader;
