@@ -6,6 +6,7 @@
 #include "iw/log/sink/file_sink.h"
 #include "iw/events/functional/callback.h"
 #include "iw/graphics/Loaders/ModelLoader.h"
+#include "iw/graphics/Loaders/MaterialLoader.h"
 #include <atomic>
 
 namespace IwEngine {
@@ -47,7 +48,8 @@ namespace IwEngine {
 
 		// Asset Loader
 
-		Asset.SetLoader<IW::MeshLoader>(m_device);
+		Asset.SetLoader<IW::MeshLoader>();
+		Asset.SetLoader<IW::MaterialLoader>();
 
 		// Window
 

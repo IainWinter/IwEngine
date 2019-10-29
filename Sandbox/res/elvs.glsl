@@ -1,7 +1,10 @@
 #version 430 core
 
-uniform mat4 proj;
-uniform mat4 view;
+layout (std140, column_major) uniform Camera {
+	mat4 proj;
+	mat4 view;
+};
+
 uniform mat4 model;
 
 in vec3 position;

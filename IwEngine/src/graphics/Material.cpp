@@ -88,7 +88,7 @@ namespace IW {
 				continue;
 			}
 
-			param->SetAsVec4(color.Color.Vec());
+			param->SetAsVec4(color.Color);
 		}
 	}
 }

@@ -1,18 +1,19 @@
 #pragma once
 
+#include "iw/util/memory/smart_pointers.h"
+#include <string>
+
 namespace IW {
 inline namespace Asset {
 	class IAssetLoader {
 	public:
 		virtual ~IAssetLoader() {}
 
-		virtual size_t GetType() = 0;
-
-		virtual void* Load(
-			const char* filepath) = 0;
+		virtual iwu::ref<void> Load(
+			std::string filepath) = 0;
 
 		virtual void Give(
-			const char* filename,
+			std::string filename,
 			void* asset) = 0;
 	};
 }

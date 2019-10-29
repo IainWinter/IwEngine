@@ -25,29 +25,29 @@ namespace IW {
 		return m_pipelines.emplace_back(pipeline);
 	}
 
-	iwu::ref<IW::Mesh> Renderer::CreateMesh(
-		const IW::MeshData& data,
-		iwu::ref<IW::Material>& material)
-	{
-		IW::Mesh* mesh = new IW::Mesh();
-		mesh->SetMaterial(material);
+	//iwu::ref<IW::Mesh> Renderer::CreateMesh(
+	//	const IW::MeshData& data,
+	//	iwu::ref<IW::Material>& material)
+	//{
+	//	IW::Mesh* mesh = new IW::Mesh();
+	//	mesh->SetMaterial(material);
 
-		if (data.Vertices) {
-			mesh->SetVertices(data.VertexCount, data.Vertices);
-		}
+	//	if (data.Vertices) {
+	//		mesh->SetVertices(data.VertexCount, data.Vertices);
+	//	}
 
-		if (data.Normals) {
-			mesh->SetNormals(data.VertexCount, data.Normals);
-		}
+	//	if (data.Normals) {
+	//		mesh->SetNormals(data.VertexCount, data.Normals);
+	//	}
 
-		// color
-		// normal
-		
-		mesh->SetIndices(data.FaceCount, data.Faces);
-		mesh->Compile(Device);
+	//	// color
+	//	// normal
+	//	
+	//	mesh->SetIndices(data.FaceCount, data.Faces);
+	//	mesh->Compile(Device);
 
-		return iwu::ref<IW::Mesh>(mesh);
-	}
+	//	return iwu::ref<IW::Mesh>(mesh);
+	//}
 
 	void Renderer::Begin() {
 		Device->Clear();
@@ -76,6 +76,13 @@ namespace IW {
 		const IW::Transform* transform, 
 		const IW::Mesh* mesh)
 	{
+		const auto& material = mesh->Material;
+		
+		if(!material) {
+			// draw with default material
+			return;
+		}
+
 		IW::IPipeline* pipeline = &*mesh->Material->Pipeline;
 
 		mesh->Material->Use(Device);

@@ -6,6 +6,7 @@
 #include "iw/util/memory/smart_pointers.h"
 #include "iw/log/logger.h"
 #include <unordered_map>
+#include <string>
 #include <assert.h>
 
 namespace IW {
@@ -16,13 +17,13 @@ inline namespace Asset {
 		: public IAssetLoader
 	{
 	private:
-		std::unordered_map<const char*, _r*> m_loaded;
+		std::unordered_map<std::string, iwu::ref<_r>> m_loaded;
 	protected:
 		AssetManager& m_asset;
 
 	private:
 		virtual _r* LoadAsset(
-			const char* filepath) = 0;
+			std::string filepath) = 0;
 	public:
 		AssetLoader(
 			AssetManager& asset)
@@ -30,24 +31,16 @@ inline namespace Asset {
 		{}
 
 		~AssetLoader() {
-			for (auto r : m_loaded) {
-				delete r.second;
-			}
+			//for (auto r : m_loaded) {
+			//	// call unload or something, might need that?
+			//}
 		}
 
-		size_t GetType() override {
-			return typeid(_r).hash_code();
-		}
-
-		void* Load(
-			const char* filepath) override
+		iwu::ref<void> Load(
+			std::string filepath) override
 		{
 			_r* resource;
-			if (m_loaded.find(filepath) != m_loaded.end()) {
-				resource = m_loaded.at(filepath);
-			}
-
-			else {
+			if (m_loaded.find(filepath) == m_loaded.end()) {
 				resource = LoadAsset(filepath);
 				if (resource == nullptr) {
 					LOG_ERROR << "Failed to load resource " << filepath << "!";
@@ -57,20 +50,23 @@ inline namespace Asset {
 				m_loaded.emplace(filepath, resource);
 			}
 
-			return resource;
+			return m_loaded.at(filepath);
 		}
 
 		void Give(
-			const char* name,
+			std::string name,
 			void* asset)
 		{
 			_r* resource = (_r*)malloc(sizeof(_r));
-			memmove(resource, asset, sizeof(_r));
-			m_loaded[name] = resource;
+
+			memcpy(resource, asset, sizeof(_r));
+			memset(asset, 0, sizeof(_r));
+
+			m_loaded[name] = iwu::ref<_r>(resource);
 		}
 
 		virtual void Release(
-			_r* resource)
+			iwu::ref<_r> resource)
 		{
 			for (auto it = m_loaded.begin(); it != m_loaded.end(); it++) {
 				if (it->second == resource) {
@@ -95,6 +91,10 @@ inline namespace Asset {
 			else {
 				LOG_WARNING << "Trying to release non loaded resource " << name;
 			}
+		}
+
+		static size_t GetType() {
+			return typeid(_r).hash_code();
 		}
 	};
 }

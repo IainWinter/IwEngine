@@ -13,12 +13,16 @@ GameLayer3D::GameLayer3D(
 	: Layer(space, renderer, asset, "Game")
 {}
 
+iwu::ref<IW::IPipeline> pipeline;
+
 int GameLayer3D::Initialize(
 	IwEngine::InitOptions& options)
 {
-	iwu::ref<IW::IPipeline> pipeline = Renderer.CreatePipeline("res/sandboxvs.glsl", "res/sandboxfs.glsl");
+	pipeline = Renderer.CreatePipeline("res/elvs.glsl", "res/elfs.glsl");
 
-	IW::ModelData* treeData = Asset.Load<IW::ModelData>("res/cube2.obj");
+	iwu::ref<IW::ModelData> treeData     = Asset.Load<IW::ModelData>("res/tree2.obj");
+	iwu::ref<IW::Material>  treeMaterial = Asset.Load<IW::Material>("Trank_bark");
+	iwu::ref<IW::Material>  leafMaterial = Asset.Load<IW::Material>("polySurface1SG1");
 
 	//iwu::ref<IW::Material> leafMaterial(new IW::Material(pipeline));
 	//leafMaterial->SetProperty("color", iwm::vector3(.2, .6, .1));
@@ -26,7 +30,7 @@ int GameLayer3D::Initialize(
 	//iwu::ref<IW::Material> treeMaterial(new IW::Material(pipeline));
 	//treeMaterial->SetProperty("color", iwm::vector3(.6, .4, .3));
 
-	treeMeshs = new IW::Mesh[3];
+	treeMeshs = new IW::Mesh[2];
 	for (size_t i = 0; i < treeData->MeshCount; i++) {
 		treeMeshs[i].SetVertices(treeData->Meshes[i].VertexCount, treeData->Meshes[i].Vertices);
 		treeMeshs[i].SetNormals (treeData->Meshes[i].VertexCount, treeData->Meshes[i].Normals);
@@ -34,8 +38,11 @@ int GameLayer3D::Initialize(
 		treeMeshs[i].Compile(Renderer.Device);
 	}
 
-	//treeMeshs[0].SetMaterial(leafMaterial);
-	//treeMeshs[1].SetMaterial(leafMaterial);
+	treeMaterial->Pipeline = pipeline;
+	leafMaterial->Pipeline = pipeline;
+
+	treeMeshs[0].SetMaterial(treeMaterial);
+	treeMeshs[1].SetMaterial(leafMaterial);
 	//treeMeshs[2].SetMaterial(treeMaterial);
 	
 	IW::Camera* ortho = new IW::OrthographicCamera(64, 36, -100, 100);
@@ -50,7 +57,7 @@ int GameLayer3D::Initialize(
 
 	IwEntity::Entity tree = Space.CreateEntity<IW::Transform, IwEngine::Model>();
 	Space.SetComponentData<IW::Transform>(tree, iwm::vector3(0, 0, 5));
-	Space.SetComponentData<IwEngine::Model>(tree, treeMeshs, 3U);
+	Space.SetComponentData<IwEngine::Model>(tree, treeMeshs, 2U);
 
 	return 0;
 }
@@ -104,7 +111,7 @@ void GameLayer3D::PostUpdate() {
 			cooldown = 0.1f;
 			IwEntity::Entity tree = Space.CreateEntity<IW::Transform, IwEngine::Model>();
 			Space.SetComponentData<IW::Transform>  (tree, transform->Position + transform->Forward() * 4);
-			Space.SetComponentData<IwEngine::Model>(tree, treeMeshs, 3U);
+			Space.SetComponentData<IwEngine::Model>(tree, treeMeshs, 2U);
 		}
 
 		transform->Position += movement * 5 * IwEngine::Time::DeltaTime();
@@ -112,6 +119,9 @@ void GameLayer3D::PostUpdate() {
 		controller->Camera->Position = transform->Position;
 
 		Renderer.BeginScene(controller->Camera);
+
+		pipeline->GetParam("lightPos")->SetAsVec3(transform->Position);
+		pipeline->GetParam("viewPos")->SetAsVec3(transform->Position);
 
 		for (auto tree : Space.Query<IW::Transform, IwEngine::Model>()) {
 			auto [transform, model] = tree.Components.Tie<TreeComponents>();

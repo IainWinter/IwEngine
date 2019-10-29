@@ -3,6 +3,8 @@
 #include "IwAsset.h"
 #include "IAssetLoader.h"
 #include <unordered_map>
+#include <string>
+#include <memory>
 
 namespace IW {
 	inline namespace Asset {
@@ -22,21 +24,31 @@ namespace IW {
 			template<
 				typename _l,
 				typename... _args>
-				void SetLoader(
-					_args&&... args)
+			void SetLoader(
+				_args&&... args)
 			{
-				_l* loader = new _l(*this, args...);
-				m_loaders[loader->GetType()] = loader;
+				_l*    loader = new _l(*this, args...);
+				size_t type   = _l::GetType();
+
+				auto itr = m_loaders.find(type);
+				if (itr != m_loaders.end()) {
+					delete itr->second;
+					itr->second = loader;
+				}
+
+				else {
+					m_loaders.emplace(type, loader);
+				}
 			}
 
 			template<
 				typename _t>
-			_t* Load(
-				const char* filepath)
+			iwu::ref<_t> Load(
+				std::string filepath)
 			{
 				auto itr = m_loaders.find(typeid(_t).hash_code());
 				if (itr != m_loaders.end()) {
-					return (_t*)itr->second->Load(filepath);
+					return std::static_pointer_cast<_t, void>(itr->second->Load(filepath));
 				}
 
 				return nullptr;
@@ -45,12 +57,12 @@ namespace IW {
 			template<
 				typename _t>
 			void Give(
-				const char* filepath,
+				std::string name,
 				_t* asset)
 			{
 				auto itr = m_loaders.find(typeid(_t).hash_code());
 				if (itr != m_loaders.end()) {
-					itr->second->Give(filepath, asset);
+					itr->second->Give(name, asset);
 				}
 			}
 		};

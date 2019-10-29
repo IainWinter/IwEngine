@@ -8,14 +8,12 @@
 
 namespace IW {
 	MeshLoader::MeshLoader(
-		AssetManager& asset,
-		iwu::ref<IDevice>& device) 
+		AssetManager& asset) 
 		: AssetLoader(asset)
-		, m_device(device)
 	{}
 
 	ModelData* MeshLoader::LoadAsset(
-		const char* path)
+		std::string path)
 	{
 		Assimp::Importer importer;
 		const aiScene* scene = importer.ReadFile(path,
@@ -30,14 +28,11 @@ namespace IW {
 			return nullptr;
 		}
 
-		ModelData* model = new ModelData {
-			new MeshData[scene->mNumMeshes],
-			scene->mNumMeshes
-		};
-
+		std::vector<char*> materials(scene->mNumMaterials);
 		if (scene->HasMaterials()) {
 			for (size_t i = 0; i < scene->mNumMaterials; i++) {
 				aiMaterial* aimaterial = scene->mMaterials[i];
+				const char* ainame     = aimaterial->GetName().C_Str();
 
 				Color ambient;
 				Color diffuse;
@@ -47,16 +42,32 @@ namespace IW {
 				aiGetMaterialColor(aimaterial, AI_MATKEY_COLOR_DIFFUSE,  (aiColor4D*)&diffuse);
 				aiGetMaterialColor(aimaterial, AI_MATKEY_COLOR_SPECULAR, (aiColor4D*)&specular);				
 
+				aiGetMaterialFloat(aimaterial, AI_MATKEY_SHININESS, &specular.a);
+
+				specular.a /= 1000;
+
 				IW::Material material;
 				material.SetColor("ambient",  ambient);
 				material.SetColor("diffuse",  diffuse);
 				material.SetColor("specular", specular);
 
-				m_asset.Give<IW::Material>(aimaterial->GetName().C_Str(), &material);
+				size_t size = strlen(ainame) + 1;
+				char*  name = new char[size];
+
+				memcpy(name, ainame, size);
+
+				materials.push_back(name);
+
+				m_asset.Give<IW::Material>(name, &material);
 			}
 		}
 
-		IW::Mesh* root = new IW::Mesh();
+		ModelData* model = new ModelData{
+			new MeshData[scene->mNumMeshes],
+			scene->mNumMeshes
+		};
+
+		//IW::Mesh* root = new IW::Mesh();
 		for (size_t i = 0; i < scene->mNumMeshes; i++) {
 			const aiMesh* aimesh = scene->mMeshes[i];
 

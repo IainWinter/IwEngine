@@ -23,16 +23,17 @@ inline namespace Graphics {
 		Renderer(
 			const iwu::ref<IW::IDevice>& device);
 
+		// BADBADBADBAD
 		iwu::ref<IW::IPipeline>& CreatePipeline(
 			const char* vertex,
 			const char* fragment);
 
-		iwu::ref<IW::Material> CreateMaterial(
-			const iwu::ref<IW::IPipeline>& pipeline);
+		//iwu::ref<IW::Material> CreateMaterial(
+		//	const iwu::ref<IW::IPipeline>& pipeline);
 
-		iwu::ref<IW::Mesh> CreateMesh(
-			const IW::MeshData& data,
-			iwu::ref<IW::Material>& material);
+		//iwu::ref<IW::Mesh> CreateMesh(
+		//	const IW::MeshData& data,
+		//	iwu::ref<IW::Material>& material);
 
 		void Begin();
 		void End();
