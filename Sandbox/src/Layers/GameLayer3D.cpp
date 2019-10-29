@@ -18,11 +18,10 @@ iwu::ref<IW::IPipeline> pipeline;
 int GameLayer3D::Initialize(
 	IwEngine::InitOptions& options)
 {
-	pipeline = Renderer.CreatePipeline("res/elvs.glsl", "res/elfs.glsl");
+	pipeline = Renderer.CreatePipeline("res/elvs.glsl", "res/glfs.glsl");
 
-	iwu::ref<IW::ModelData> treeData     = Asset.Load<IW::ModelData>("res/tree2.obj");
-	iwu::ref<IW::Material>  treeMaterial = Asset.Load<IW::Material>("Trank_bark");
-	iwu::ref<IW::Material>  leafMaterial = Asset.Load<IW::Material>("polySurface1SG1");
+	iwu::ref<IW::ModelData> treeData     = Asset.Load<IW::ModelData>("res/cube2.obj");
+	iwu::ref<IW::Material>  treeMaterial = Asset.Load<IW::Material>("Material");
 
 	//iwu::ref<IW::Material> leafMaterial(new IW::Material(pipeline));
 	//leafMaterial->SetProperty("color", iwm::vector3(.2, .6, .1));
@@ -39,10 +38,10 @@ int GameLayer3D::Initialize(
 	}
 
 	treeMaterial->Pipeline = pipeline;
-	leafMaterial->Pipeline = pipeline;
+	//leafMaterial->Pipeline = pipeline;
 
 	treeMeshs[0].SetMaterial(treeMaterial);
-	treeMeshs[1].SetMaterial(leafMaterial);
+	//treeMeshs[1].SetMaterial(leafMaterial);
 	//treeMeshs[2].SetMaterial(treeMaterial);
 	
 	IW::Camera* ortho = new IW::OrthographicCamera(64, 36, -100, 100);
@@ -57,7 +56,7 @@ int GameLayer3D::Initialize(
 
 	IwEntity::Entity tree = Space.CreateEntity<IW::Transform, IwEngine::Model>();
 	Space.SetComponentData<IW::Transform>(tree, iwm::vector3(0, 0, 5));
-	Space.SetComponentData<IwEngine::Model>(tree, treeMeshs, 2U);
+	Space.SetComponentData<IwEngine::Model>(tree, treeMeshs, 1U);
 
 	return 0;
 }
@@ -111,7 +110,7 @@ void GameLayer3D::PostUpdate() {
 			cooldown = 0.1f;
 			IwEntity::Entity tree = Space.CreateEntity<IW::Transform, IwEngine::Model>();
 			Space.SetComponentData<IW::Transform>  (tree, transform->Position + transform->Forward() * 4);
-			Space.SetComponentData<IwEngine::Model>(tree, treeMeshs, 2U);
+			Space.SetComponentData<IwEngine::Model>(tree, treeMeshs, 1U);
 		}
 
 		transform->Position += movement * 5 * IwEngine::Time::DeltaTime();
