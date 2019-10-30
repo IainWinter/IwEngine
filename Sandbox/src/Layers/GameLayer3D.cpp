@@ -21,32 +21,31 @@ int GameLayer3D::Initialize(
 {
 	pipeline = Renderer.CreatePipeline("res/elvs.glsl", "res/elfs.glsl");
 
-	iwu::ref<IW::ModelData> treeData     = Asset.Load<IW::ModelData>("res/cube2.obj");
-	treeMaterial = Asset.Load<IW::Material>("Material");
-
-	treeMaterial->SetColor("diffuse", IW::Color(.67f, .3f, .4f, .6f));
-	treeMaterial->SetColor("specular", IW::Color(1.0f, 1.0f, 1.0f, .1f));
+	iwu::ref<IW::ModelData> data = Asset.Load<IW::ModelData>("res/cube2.obj");
+	material = Asset.Load<IW::Material>("Material");
+	material->SetColor("diffuse", IW::Color(.67f, .3f, .4f, .6f));
+	material->SetColor("specular", IW::Color(1.0f, 1.0f, 1.0f, .1f));
 
 	//iwu::ref<IW::Material> leafMaterial(new IW::Material(pipeline));
 	//leafMaterial->SetProperty("color", iwm::vector3(.2, .6, .1));
 
-	//iwu::ref<IW::Material> treeMaterial(new IW::Material(pipeline));
-	//treeMaterial->SetProperty("color", iwm::vector3(.6, .4, .3));
+	//iwu::ref<IW::Material> material(new IW::Material(pipeline));
+	//material->SetProperty("color", iwm::vector3(.6, .4, .3));
 
 	treeMeshs = new IW::Mesh[2];
-	for (size_t i = 0; i < treeData->MeshCount; i++) {
-		treeMeshs[i].SetVertices(treeData->Meshes[i].VertexCount, treeData->Meshes[i].Vertices);
-		treeMeshs[i].SetNormals (treeData->Meshes[i].VertexCount, treeData->Meshes[i].Normals);
-		treeMeshs[i].SetIndices (treeData->Meshes[i].FaceCount,   treeData->Meshes[i].Faces);
+	for (size_t i = 0; i < data->MeshCount; i++) {
+		treeMeshs[i].SetVertices(data->Meshes[i].VertexCount, data->Meshes[i].Vertices);
+		treeMeshs[i].SetNormals (data->Meshes[i].VertexCount, data->Meshes[i].Normals);
+		treeMeshs[i].SetIndices (data->Meshes[i].FaceCount,   data->Meshes[i].Faces);
 		treeMeshs[i].Compile(Renderer.Device);
 	}
 
-	treeMaterial->Pipeline = pipeline;
+	material->Pipeline = pipeline;
 	//leafMaterial->Pipeline = pipeline;
 
-	treeMeshs[0].SetMaterial(treeMaterial);
+	treeMeshs[0].SetMaterial(material);
 	//treeMeshs[1].SetMaterial(leafMaterial);
-	//treeMeshs[2].SetMaterial(treeMaterial);
+	//treeMeshs[2].SetMaterial(material);
 	
 	IW::Camera* ortho = new IW::OrthographicCamera(64, 36, -100, 100);
 	ortho->Rotation = iwm::quaternion::create_from_euler_angles(0, iwm::IW_PI, 0);
@@ -74,8 +73,6 @@ struct TreeComponents {
 	IW::Transform* Transform;
 	IwEngine::Model* Model;
 };
-
-float cooldown = 0.0f;
 
 void GameLayer3D::PostUpdate() {
 	for (auto entity : Space.Query<IW::Transform, IwEngine::CameraController>()) {
@@ -106,25 +103,13 @@ void GameLayer3D::PostUpdate() {
 			movement -= transform->Up();
 		}
 
-		if (cooldown > 0.0) {
-			cooldown -= IwEngine::Time::DeltaTime();
-		}
-
-		else if (IwInput::Mouse::ButtonDown(IwInput::MOUSE_L_BUTTON)) {
-			cooldown = 0.1f;
-			IwEntity::Entity tree = Space.CreateEntity<IW::Transform, IwEngine::Model>();
-			Space.SetComponentData<IW::Transform>  (tree, transform->Position + transform->Forward() * 4);
-			Space.SetComponentData<IwEngine::Model>(tree, treeMeshs, 1U);
-		}
-
 		transform->Position += movement * 5 * IwEngine::Time::DeltaTime();
-
 		controller->Camera->Position = transform->Position;
 
 		Renderer.BeginScene(controller->Camera);
 
 		pipeline->GetParam("lightPos")->SetAsVec3(transform->Position);
-		pipeline->GetParam("viewPos")->SetAsVec3(transform->Position);
+		pipeline->GetParam("viewPos") ->SetAsVec3(transform->Position);
 
 		for (auto tree : Space.Query<IW::Transform, IwEngine::Model>()) {
 			auto [transform, model] = tree.Components.Tie<TreeComponents>();
@@ -140,9 +125,9 @@ void GameLayer3D::PostUpdate() {
 void GameLayer3D::ImGui() {
 	ImGui::Begin("Game layer");
 
-	ImGui::ColorPicker4("Ambient Color", (float*)&treeMaterial->GetColor("ambient"));
-	ImGui::ColorPicker4("Diffuse Color", (float*)&treeMaterial->GetColor("diffuse"));
-	ImGui::ColorPicker4("Specular Color", (float*)&treeMaterial->GetColor("specular"));
+	ImGui::ColorPicker4("Ambient Color", (float*)&material->GetColor("ambient"));
+	ImGui::ColorPicker4("Diffuse Color", (float*)&material->GetColor("diffuse"));
+	ImGui::ColorPicker4("Specular Color", (float*)&material->GetColor("specular"));
 
 	ImGui::End();
 }

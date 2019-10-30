@@ -15,55 +15,37 @@
 namespace IW {
 inline namespace Graphics {
 	class IWGRAPHICS_API Material {
+	private:
+		enum MaterialPropertyType {
+			BOOL,
+			INT,
+			UINT,
+			FLOAT,
+			DOUBLE
+		};
+
+		struct MaterialProperty {
+			const char* Name;
+
+			size_t Size;
+			size_t Stride;
+
+			bool IsSample;
+			MaterialPropertyType Type;
+
+			void* Data;
+
+			~MaterialProperty() {
+				delete[] Name;
+				free(Data);
+			}
+		};
+
 	public:
 		iwu::ref<IW::IPipeline> Pipeline;
 
-		enum DataType {
-			Double,
-			Float,
-			Int
-		};
-
-		union Scalar {
-			double Double;
-			float  Float;
-			int    Int;
-		};
-
-		union Buffer {
-			char* String;
-			void* Data;
-		};
 	private:
-		// this is garbo but a lil more time on it will make it clean
-
-		struct ScalarData {
-			std::string Name;
-			DataType Type; 
-			Scalar Value;
-		};
-
-		struct BufferData {
-			std::string Name;
-			DataType Type;
-			size_t Size;
-			Buffer Buffer;
-		};
-
-		struct ColorData {
-			std::string Name;
-			Color Color;
-		};
-
-		struct TextureData {
-			std::string Name;
-			//IW::Texture Texture;
-		};
-
-		std::vector<ScalarData>  m_scalars;
-		std::vector<BufferData>  m_buffers;
-		std::vector<ColorData>   m_colors;
-		std::vector<TextureData> m_textures;
+		std::vector<MaterialProperty> m_scalars;
 
 	public:
 		Material();
@@ -73,12 +55,61 @@ inline namespace Graphics {
 
 		~Material();
 
-		Color& GetColor(
+		void SetBool(
+			const char* name,
+			bool value);
+
+		void SetBools(
+			const char* name,
+			bool* values,
+			size_t size,
+			size_t stride);
+
+		void SetInt(
+			const char* name,
+			int value);
+
+		void SetInts(
+			const char* name,
+			int* values,
+			size_t size,
+			size_t stride);
+
+		void SetUInt(
+			const char* name,
+			unsigned int value);
+
+		void SetUInts(
+			const char* name,
+			unsigned int* values,
+			size_t size,
+			size_t stride);
+
+		void SetFloat(
+			const char* name,
+			float value);
+
+		void SetFloats(
+			const char* name,
+			float* values,
+			size_t size,
+			size_t stride);
+
+		void SetDouble(
+			const char* name,
+			double value);
+
+		void SetDouble(
+			const char* name,
+			double* values,
+			size_t size,
+			size_t stride);
+
+		bool& GetBool(
 			const char* name);
 
-		void SetColor(
-			const char* name,
-			Color color);
+		bool*& GetBools(
+			const char* name);
 
 		/*void SetTexture(
 			const char* name,

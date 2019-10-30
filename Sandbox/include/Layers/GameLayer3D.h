@@ -7,7 +7,7 @@ class GameLayer3D
 {
 private:
 	IW::Mesh* treeMeshs;
-	iwu::ref<IW::Material>  treeMaterial;
+	iwu::ref<IW::Material>  material;
 	iwm::vector2 mouse;
 
 public:
