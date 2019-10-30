@@ -7,6 +7,7 @@ class GameLayer3D
 {
 private:
 	IW::Mesh* treeMeshs;
+	iwu::ref<IW::Material>  treeMaterial;
 	iwm::vector2 mouse;
 
 public:
@@ -19,6 +20,7 @@ public:
 		IwEngine::InitOptions& options) override;
 
 	void PostUpdate() override;
+	void ImGui() override;
 
 	bool On(
 		IwEngine::MouseMovedEvent& event) override;

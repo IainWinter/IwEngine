@@ -57,10 +57,12 @@ inline namespace Asset {
 			std::string name,
 			void* asset)
 		{
+			if (!asset) { return; }
 			_r* resource = (_r*)malloc(sizeof(_r));
+			new (resource) _r();
 
-			memcpy(resource, asset, sizeof(_r));
-			memset(asset, 0, sizeof(_r));
+			if (!resource) { return; }
+			*resource = std::forward<_r>(*(_r*)asset);
 
 			m_loaded[name] = iwu::ref<_r>(resource);
 		}

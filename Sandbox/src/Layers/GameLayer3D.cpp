@@ -5,6 +5,7 @@
 #include "iw/input/Devices/Keyboard.h"
 #include "iw/input/Devices/Mouse.h"
 #include "iw/engine/Time.h"
+#include "imgui/imgui.h"
 
 GameLayer3D::GameLayer3D(
 	IwEntity::Space& space, 
@@ -18,10 +19,13 @@ iwu::ref<IW::IPipeline> pipeline;
 int GameLayer3D::Initialize(
 	IwEngine::InitOptions& options)
 {
-	pipeline = Renderer.CreatePipeline("res/elvs.glsl", "res/glfs.glsl");
+	pipeline = Renderer.CreatePipeline("res/elvs.glsl", "res/elfs.glsl");
 
 	iwu::ref<IW::ModelData> treeData     = Asset.Load<IW::ModelData>("res/cube2.obj");
-	iwu::ref<IW::Material>  treeMaterial = Asset.Load<IW::Material>("Material");
+	treeMaterial = Asset.Load<IW::Material>("Material");
+
+	treeMaterial->SetColor("diffuse", IW::Color(.67f, .3f, .4f, .6f));
+	treeMaterial->SetColor("specular", IW::Color(1.0f, 1.0f, 1.0f, .1f));
 
 	//iwu::ref<IW::Material> leafMaterial(new IW::Material(pipeline));
 	//leafMaterial->SetProperty("color", iwm::vector3(.2, .6, .1));
@@ -131,6 +135,16 @@ void GameLayer3D::PostUpdate() {
 
 		Renderer.EndScene();
 	}
+}
+
+void GameLayer3D::ImGui() {
+	ImGui::Begin("Game layer");
+
+	ImGui::ColorPicker4("Ambient Color", (float*)&treeMaterial->GetColor("ambient"));
+	ImGui::ColorPicker4("Diffuse Color", (float*)&treeMaterial->GetColor("diffuse"));
+	ImGui::ColorPicker4("Specular Color", (float*)&treeMaterial->GetColor("specular"));
+
+	ImGui::End();
 }
 
 bool GameLayer3D::On(

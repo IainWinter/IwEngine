@@ -16,6 +16,12 @@ namespace IW {
 		}
 	}
 
+	Color& Material::GetColor(
+		const char* name)
+	{
+		return FindName(name, m_colors)->Color;
+	}
+
 	//void Material::SetScalar(
 	//	const char* name, 
 	//	Scalar scalar)
@@ -81,7 +87,7 @@ namespace IW {
 		//}
 
 		for (const ColorData& color : m_colors) {
-			param = Pipeline->GetParam(color.Name);
+			param = Pipeline->GetParam(color.Name.c_str());
 
 			if (!param) {
 				LOG_WARNING << "Invalid property in material: " << color.Name;

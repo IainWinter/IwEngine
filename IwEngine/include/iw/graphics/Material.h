@@ -10,6 +10,7 @@
 #include "iw/math/vector3.h"
 #include "iw/math/vector4.h"
 #include <vector>
+#include <string>
 
 namespace IW {
 inline namespace Graphics {
@@ -37,25 +38,25 @@ inline namespace Graphics {
 		// this is garbo but a lil more time on it will make it clean
 
 		struct ScalarData {
-			const char* Name;
+			std::string Name;
 			DataType Type; 
 			Scalar Value;
 		};
 
 		struct BufferData {
-			const char* Name;
+			std::string Name;
 			DataType Type;
 			size_t Size;
 			Buffer Buffer;
 		};
 
 		struct ColorData {
-			const char* Name;
+			std::string Name;
 			Color Color;
 		};
 
 		struct TextureData {
-			const char* Name;
+			std::string Name;
 			//IW::Texture Texture;
 		};
 
@@ -72,6 +73,9 @@ inline namespace Graphics {
 
 		~Material();
 
+		Color& GetColor(
+			const char* name);
+
 		void SetColor(
 			const char* name,
 			Color color);
@@ -86,7 +90,7 @@ inline namespace Graphics {
 		template<
 			typename _t>
 		typename std::vector<_t>::iterator FindName(
-			const char* name,
+			std::string name,
 			std::vector<_t>& vector)
 		{
 			auto itr = vector.begin();
