@@ -130,7 +130,7 @@ void GameLayer3D::PostUpdate() {
 		pipeline->GetParam("lightPositions")->SetAsFloats(&lightPositions, 4, 3);
 		pipeline->GetParam("lightColors")   ->SetAsFloats(&lightColors, 4, 3);
 
-		pipeline->GetParam("camPos") ->SetAsFloats(&transform->Position, 3);
+		pipeline->GetParam("camPos") ->SetAsFloats(&(transform->Position + transform->Forward()), 3);
 
 		for (auto tree : Space.Query<IW::Transform, IwEngine::Model>()) {
 			auto [transform, model] = tree.Components.Tie<TreeComponents>();
@@ -148,7 +148,7 @@ void GameLayer3D::ImGui() {
 
 	ImGui::ColorPicker3("Ambient Color", (float*)std::get<0>(material->GetFloats("albedo")));
 	ImGui::SliderFloat("Metallic", (float*)material->GetFloat("metallic"), 0, 1);
-	ImGui::SliderFloat("Roughness", (float*)material->GetFloat("roughness"), 0.087f, 1);
+	ImGui::SliderFloat("Roughness", (float*)material->GetFloat("roughness"), 0.3f, 1);
 	ImGui::SliderFloat("AO", (float*)material->GetFloat("ao"), 0, 1);
 	//ImGui::ColorPicker4("Diffuse Color", (float*)&material->GetColor("diffuse"));
 	//ImGui::ColorPicker4("Specular Color", (float*)&material->GetColor("specular"));
