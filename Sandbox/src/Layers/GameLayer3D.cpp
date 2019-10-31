@@ -8,6 +8,8 @@
 #include "imgui/imgui.h"
 #include "iw/graphics/MeshFactory.h"
 
+#include "iw/util/io/File.h"
+
 GameLayer3D::GameLayer3D(
 	IwEntity::Space& space, 
 	IW::Renderer& renderer,
@@ -22,32 +24,30 @@ int GameLayer3D::Initialize(
 {
 	pipeline = Renderer.CreatePipeline("res/pbr/pbrvs.glsl", "res/pbr/pbrfs.glsl");
 
-	//iwu::ref<IW::ModelData> data = Asset.Load<IW::ModelData>("res/cube2.obj");
-	//material = Asset.Load<IW::Material>("Material");
+	iwu::ref<IW::ModelData> data = Asset.Load<IW::ModelData>("res/cube2.obj");
+	material = Asset.Load<IW::Material>("Material");
 
-	//meshes = new IW::Mesh[2];
-	//for (size_t i = 0; i < data->MeshCount; i++) {
-	//	meshes[i].SetVertices(data->Meshes[i].VertexCount, data->Meshes[i].Vertices);
-	//	meshes[i].SetNormals (data->Meshes[i].VertexCount, data->Meshes[i].Normals);
-	//	meshes[i].SetIndices (data->Meshes[i].FaceCount,   data->Meshes[i].Faces);
-	//	meshes[i].Compile(Renderer.Device);
-	//}
+	meshes = new IW::Mesh[1];
+	for (size_t i = 0; i < data->MeshCount; i++) {
+		meshes[i].SetVertices(data->Meshes[i].VertexCount, data->Meshes[i].Vertices);
+		meshes[i].SetNormals (data->Meshes[i].VertexCount, data->Meshes[i].Normals);
+		meshes[i].SetIndices (data->Meshes[i].FaceCount,   data->Meshes[i].Faces);
+		meshes[i].Compile(Renderer.Device);
+	}
 
-	meshes = IW::mesh_factory::create_icosphere(5);
-	meshes->Compile(Renderer.Device);
+	//meshes = IW::mesh_factory::create_icosphere(5);
+	//meshes->Compile(Renderer.Device);
 
-	material = std::make_shared<IW::Material>(pipeline);
+	//material = std::make_shared<IW::Material>(pipeline);
 
-	material->SetFloats("albedo", &iwm::vector3(0), 3);
-	material->SetFloat ("metallic", 0.5f);
-	material->SetFloat ("roughness", 0.5f);
-	material->SetFloat ("ao", 0.5f);
+	//material->SetFloats("albedo", &iwm::vector3(1.0f, 0.85f, 0.57f), 3);
+	//material->SetFloat ("metallic", 1.0f);
+	//material->SetFloat ("roughness", 0.6f);
+	//material->SetFloat ("ao", 1.0f);
+
 	material->Pipeline = pipeline;
-	//leafMaterial->Pipeline = pipeline;
 
 	meshes[0].SetMaterial(material);
-	//meshes[1].SetMaterial(leafMaterial);
-	//meshes[2].SetMaterial(material);
 	
 	lightPositions[0] = iwm::vector3( 5,  5, -5);
 	lightPositions[1] = iwm::vector3(-5,  5, -5);
@@ -77,7 +77,6 @@ int GameLayer3D::Initialize(
 		}
 	}
 
-	
 	return 0;
 }
 
@@ -146,10 +145,10 @@ void GameLayer3D::PostUpdate() {
 void GameLayer3D::ImGui() {
 	ImGui::Begin("Game layer");
 
-	ImGui::ColorPicker3("Ambient Color", (float*)std::get<0>(material->GetFloats("albedo")));
-	ImGui::SliderFloat("Metallic", (float*)material->GetFloat("metallic"), 0, 1);
-	ImGui::SliderFloat("Roughness", (float*)material->GetFloat("roughness"), 0.3f, 1);
-	ImGui::SliderFloat("AO", (float*)material->GetFloat("ao"), 0, 1);
+	//ImGui::ColorPicker3("Color", (float*)std::get<0>(material->GetFloats("albedo")));
+	//ImGui::SliderFloat("Metallic", (float*)material->GetFloat("metallic"), 0, 1);
+	//ImGui::SliderFloat("Roughness", (float*)material->GetFloat("roughness"), 0.3f, 1);
+	//ImGui::SliderFloat("AO", (float*)material->GetFloat("ao"), 0, 1);
 	//ImGui::ColorPicker4("Diffuse Color", (float*)&material->GetColor("diffuse"));
 	//ImGui::ColorPicker4("Specular Color", (float*)&material->GetColor("specular"));
 

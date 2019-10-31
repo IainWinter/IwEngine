@@ -14,7 +14,7 @@
 
 namespace IW {
 inline namespace Graphics {
-	class IWGRAPHICS_API Material {
+	struct IWGRAPHICS_API Material {
 	private:
 		enum MaterialPropertyType {
 			BOOL,

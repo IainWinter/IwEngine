@@ -23,6 +23,10 @@ inline namespace Asset {
 	private:
 		virtual _r* LoadAsset(
 			std::string filepath) = 0;
+
+		virtual void FreeAsset(
+			_r* asset)
+		{}
 	public:
 		AssetLoader(
 			AssetManager& asset)
@@ -30,9 +34,9 @@ inline namespace Asset {
 		{}
 
 		~AssetLoader() {
-			//for (auto r : m_loaded) {
-			//	// call unload or something, might need that?
-			//}
+			for (auto r : m_loaded) {
+				FreeAsset(r.second.get());
+			}
 		}
 
 		iwu::ref<void> Load(
@@ -71,9 +75,10 @@ inline namespace Asset {
 		{
 			for (auto it = m_loaded.begin(); it != m_loaded.end(); it++) {
 				if (it->second == resource) {
+					FreeAsset(it->second.get());
 					m_loaded.erase(it);
 					LOG_INFO << "Releasing " << it->first;
-					return; // Exit function if found
+					return;
 				}
 			}
 
@@ -81,11 +86,12 @@ inline namespace Asset {
 		}
 
 		virtual void Release(
-			const char* name)
+			std::string name)
 		{
 			auto it = m_loaded.find(name);
 			if (it != m_loaded.end()) {
-				Release(it->second);
+				FreeAsset(it->second.get());
+				m_loaded.erase(it);
 				LOG_INFO << "Releasing " << name;
 			}
 

@@ -1,5 +1,6 @@
 #include "iw/graphics/Loaders/ModelLoader.h"
 #include "iw/graphics/Mesh.h"
+#include "iw/graphics/Texture.h"
 #include "iw/log/logger.h"
 #include "assimp/Importer.hpp"
 #include "assimp/scene.h"
@@ -21,7 +22,8 @@ namespace IW {
 			| aiProcess_Triangulate
 			| aiProcess_JoinIdenticalVertices
 			| aiProcess_SortByPType
-			| aiProcess_GenNormals);
+			| aiProcess_GenNormals
+			| aiProcess_FlipWindingOrder); // is this always needed?? this has to be the shader i think cus i had to flip the sphere normals too...
 
 		if (!scene) {
 			LOG_WARNING << importer.GetErrorString();
@@ -56,6 +58,15 @@ namespace IW {
 				material.SetFloat("metallic", metallic);
 				material.SetFloat("roughness", roughness);
 
+				aiString texturePath;
+				if (aimaterial->GetTextureCount(aiTextureType_DIFFUSE) > 0
+					&& aimaterial->GetTexture(aiTextureType_DIFFUSE, 0, &texturePath) == AI_SUCCESS)
+				{
+					//material.SetTexture?? 
+					texturePath.Set("res/" + std::string(texturePath.C_Str()));
+
+					m_asset.Load<IW::Texture>(texturePath.C_Str());
+				}
 
 				size_t size = strlen(ainame) + 1;
 				char*  name = new char[size];
@@ -66,6 +77,10 @@ namespace IW {
 				m_asset.Give<IW::Material>(name, &material);
 			}
 		}
+
+		//if (scene->HasTextures()) { // embedded textures?
+		//	aiTexture* texture = scene->mTextures[0];
+		//}
 
 		ModelData* model = new ModelData{
 			new MeshData[scene->mNumMeshes],
