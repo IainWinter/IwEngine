@@ -6,6 +6,7 @@
 #include "iw/input/Devices/Mouse.h"
 #include "iw/engine/Time.h"
 #include "imgui/imgui.h"
+#include "iw/graphics/MeshFactory.h"
 
 GameLayer3D::GameLayer3D(
 	IwEntity::Space& space, 
@@ -19,34 +20,45 @@ iwu::ref<IW::IPipeline> pipeline;
 int GameLayer3D::Initialize(
 	IwEngine::InitOptions& options)
 {
-	pipeline = Renderer.CreatePipeline("res/elvs.glsl", "res/elfs.glsl");
+	pipeline = Renderer.CreatePipeline("res/pbr/pbrvs.glsl", "res/pbr/pbrfs.glsl");
 
-	iwu::ref<IW::ModelData> data = Asset.Load<IW::ModelData>("res/cube2.obj");
-	material = Asset.Load<IW::Material>("Material");
-	material->SetColor("diffuse", IW::Color(.67f, .3f, .4f, .6f));
-	material->SetColor("specular", IW::Color(1.0f, 1.0f, 1.0f, .1f));
+	//iwu::ref<IW::ModelData> data = Asset.Load<IW::ModelData>("res/cube2.obj");
+	//material = Asset.Load<IW::Material>("Material");
 
-	//iwu::ref<IW::Material> leafMaterial(new IW::Material(pipeline));
-	//leafMaterial->SetProperty("color", iwm::vector3(.2, .6, .1));
+	//meshes = new IW::Mesh[2];
+	//for (size_t i = 0; i < data->MeshCount; i++) {
+	//	meshes[i].SetVertices(data->Meshes[i].VertexCount, data->Meshes[i].Vertices);
+	//	meshes[i].SetNormals (data->Meshes[i].VertexCount, data->Meshes[i].Normals);
+	//	meshes[i].SetIndices (data->Meshes[i].FaceCount,   data->Meshes[i].Faces);
+	//	meshes[i].Compile(Renderer.Device);
+	//}
 
-	//iwu::ref<IW::Material> material(new IW::Material(pipeline));
-	//material->SetProperty("color", iwm::vector3(.6, .4, .3));
+	meshes = IW::mesh_factory::create_icosphere(5);
+	meshes->Compile(Renderer.Device);
 
-	treeMeshs = new IW::Mesh[2];
-	for (size_t i = 0; i < data->MeshCount; i++) {
-		treeMeshs[i].SetVertices(data->Meshes[i].VertexCount, data->Meshes[i].Vertices);
-		treeMeshs[i].SetNormals (data->Meshes[i].VertexCount, data->Meshes[i].Normals);
-		treeMeshs[i].SetIndices (data->Meshes[i].FaceCount,   data->Meshes[i].Faces);
-		treeMeshs[i].Compile(Renderer.Device);
-	}
+	material = std::make_shared<IW::Material>(pipeline);
 
+	material->SetFloats("albedo", &iwm::vector3(0), 3);
+	material->SetFloat ("metallic", 0.5f);
+	material->SetFloat ("roughness", 0.5f);
+	material->SetFloat ("ao", 0.5f);
 	material->Pipeline = pipeline;
 	//leafMaterial->Pipeline = pipeline;
 
-	treeMeshs[0].SetMaterial(material);
-	//treeMeshs[1].SetMaterial(leafMaterial);
-	//treeMeshs[2].SetMaterial(material);
+	meshes[0].SetMaterial(material);
+	//meshes[1].SetMaterial(leafMaterial);
+	//meshes[2].SetMaterial(material);
 	
+	lightPositions[0] = iwm::vector3( 5,  5, -5);
+	lightPositions[1] = iwm::vector3(-5,  5, -5);
+	lightPositions[2] = iwm::vector3( 5, -5, -5);
+	lightPositions[3] = iwm::vector3(-5, -5, -5);
+
+	lightColors[0] = iwm::vector3(1);
+	lightColors[1] = iwm::vector3(1, 0, 0);
+	lightColors[2] = iwm::vector3(0, 1, 0);
+	lightColors[3] = iwm::vector3(0, 0, 1);
+
 	IW::Camera* ortho = new IW::OrthographicCamera(64, 36, -100, 100);
 	ortho->Rotation = iwm::quaternion::create_from_euler_angles(0, iwm::IW_PI, 0);
 
@@ -57,10 +69,15 @@ int GameLayer3D::Initialize(
 	Space.SetComponentData<IW::Transform>             (player, iwm::vector3(0, 0, 0));
 	Space.SetComponentData<IwEngine::CameraController>(player, camera);
 
-	IwEntity::Entity tree = Space.CreateEntity<IW::Transform, IwEngine::Model>();
-	Space.SetComponentData<IW::Transform>(tree, iwm::vector3(0, 0, 5));
-	Space.SetComponentData<IwEngine::Model>(tree, treeMeshs, 1U);
+	for (int x = -5; x < 10; x++) {
+		for (int y = -5; y < 10; y++) {
+			IwEntity::Entity tree = Space.CreateEntity<IW::Transform, IwEngine::Model>();
+			Space.SetComponentData<IW::Transform>(tree, iwm::vector3(x, y, 5), iwm::vector3(.5));
+			Space.SetComponentData<IwEngine::Model>(tree, meshes, 1U);
+		}
+	}
 
+	
 	return 0;
 }
 
@@ -106,10 +123,14 @@ void GameLayer3D::PostUpdate() {
 		transform->Position += movement * 5 * IwEngine::Time::DeltaTime();
 		controller->Camera->Position = transform->Position;
 
+		lightPositions[0] = transform->Position;
+
 		Renderer.BeginScene(controller->Camera);
 
-		pipeline->GetParam("lightPos")->SetAsVec3(transform->Position);
-		pipeline->GetParam("viewPos") ->SetAsVec3(transform->Position);
+		pipeline->GetParam("lightPositions")->SetAsFloats(&lightPositions, 4, 3);
+		pipeline->GetParam("lightColors")   ->SetAsFloats(&lightColors, 4, 3);
+
+		pipeline->GetParam("camPos") ->SetAsFloats(&transform->Position, 3);
 
 		for (auto tree : Space.Query<IW::Transform, IwEngine::Model>()) {
 			auto [transform, model] = tree.Components.Tie<TreeComponents>();
@@ -125,9 +146,12 @@ void GameLayer3D::PostUpdate() {
 void GameLayer3D::ImGui() {
 	ImGui::Begin("Game layer");
 
-	ImGui::ColorPicker4("Ambient Color", (float*)&material->GetColor("ambient"));
-	ImGui::ColorPicker4("Diffuse Color", (float*)&material->GetColor("diffuse"));
-	ImGui::ColorPicker4("Specular Color", (float*)&material->GetColor("specular"));
+	ImGui::ColorPicker3("Ambient Color", (float*)std::get<0>(material->GetFloats("albedo")));
+	ImGui::SliderFloat("Metallic", (float*)material->GetFloat("metallic"), 0, 1);
+	ImGui::SliderFloat("Roughness", (float*)material->GetFloat("roughness"), 0.087f, 1);
+	ImGui::SliderFloat("AO", (float*)material->GetFloat("ao"), 0, 1);
+	//ImGui::ColorPicker4("Diffuse Color", (float*)&material->GetColor("diffuse"));
+	//ImGui::ColorPicker4("Specular Color", (float*)&material->GetColor("specular"));
 
 	ImGui::End();
 }

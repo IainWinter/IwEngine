@@ -6,7 +6,6 @@
 #include "iw/util/memory/smart_pointers.h"
 #include "iw/log/logger.h"
 #include <unordered_map>
-#include <string>
 #include <assert.h>
 
 namespace IW {
@@ -58,11 +57,11 @@ inline namespace Asset {
 			void* asset)
 		{
 			if (!asset) { return; }
-			_r* resource = (_r*)malloc(sizeof(_r));
-			new (resource) _r();
 
-			if (!resource) { return; }
-			*resource = std::forward<_r>(*(_r*)asset);
+			_r* resource = (_r*)malloc(sizeof(_r));
+			assert(resource);
+
+			new (resource) _r(std::forward<_r>(*(_r*)asset));
 
 			m_loaded[name] = iwu::ref<_r>(resource);
 		}

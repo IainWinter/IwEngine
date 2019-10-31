@@ -4,11 +4,11 @@
 #include "assimp/Importer.hpp"
 #include "assimp/scene.h"
 #include "assimp/postprocess.h"
-#include <string>
+#include "assimp/pbrmaterial.h"
 
 namespace IW {
 	MeshLoader::MeshLoader(
-		AssetManager& asset) 
+		AssetManager& asset)
 		: AssetLoader(asset)
 	{}
 
@@ -21,7 +21,7 @@ namespace IW {
 			| aiProcess_Triangulate
 			| aiProcess_JoinIdenticalVertices
 			| aiProcess_SortByPType
-		    | aiProcess_GenNormals);
+			| aiProcess_GenNormals);
 
 		if (!scene) {
 			LOG_WARNING << importer.GetErrorString();
@@ -34,26 +34,31 @@ namespace IW {
 				aiMaterial* aimaterial = scene->mMaterials[i];
 				const char* ainame     = aimaterial->GetName().C_Str();
 
-				Color ambient;
-				Color diffuse;
-				Color specular;
+				Color albedo;
+				//Color emissiveColor;
+				float metallic;
+				float roughness = 0.2f;
+				//float ambientOcclusion;
 
-				aiGetMaterialColor(aimaterial, AI_MATKEY_COLOR_AMBIENT,  (aiColor4D*)&ambient);
-				aiGetMaterialColor(aimaterial, AI_MATKEY_COLOR_DIFFUSE,  (aiColor4D*)&diffuse);
-				aiGetMaterialColor(aimaterial, AI_MATKEY_COLOR_SPECULAR, (aiColor4D*)&specular);				
+				aiGetMaterialColor(aimaterial, AI_MATKEY_COLOR_DIFFUSE,  (aiColor4D*)&albedo);
+			//	aiGetMaterialColor(aimaterial, AI_MATKEY_COLOR_EMISSIVE, (aiColor4D*)&emissiveColor);
 
-				aiGetMaterialFloat(aimaterial, AI_MATKEY_SHININESS, &specular.a);
+				aiGetMaterialFloat(aimaterial, AI_MATKEY_SHININESS, &metallic);
+				//aiGetMaterialFloat(aimaterial, AI_MATKEY_SHININESS_STRENGTH, &roughness);
+				//aiGetMaterialFloat(aimaterial, AI_MATKEY_, &specular.a);
 
-				specular.a /= 1000;
+				metallic /= 4 * 128;
+				//roughness /= 4;
 
 				IW::Material material;
-				material.SetColor("ambient",  ambient);
-				material.SetColor("diffuse",  diffuse);
-				material.SetColor("specular", specular);
+				material.SetFloats("albedo", &albedo, 3);
+				//material.SetFloats("emissiveColor", &emissiveColor, 4);
+				material.SetFloat("metallic", metallic);
+				material.SetFloat("roughness", roughness);
+
 
 				size_t size = strlen(ainame) + 1;
 				char*  name = new char[size];
-
 				memcpy(name, ainame, size);
 
 				materials.push_back(name);
@@ -77,7 +82,7 @@ namespace IW {
 			}
 
 			MeshData& mesh = model->Meshes[i];
-			
+
 			mesh.FaceCount = 0;
 			mesh.Faces = new unsigned int[indexBufferSize];
 

@@ -3,32 +3,154 @@
 
 namespace IW {
 	GLPipelineParam::GLPipelineParam(
-		int location) 
+		int location)
 		: m_location(location)
 	{}
 
+	void GLPipelineParam::SetAsBool(
+		bool value)
+	{
+		SetAsInt(value);
+	}
+
+	void GLPipelineParam::SetAsBools(
+		const void* values,
+		size_t count,
+		size_t stride)
+	{
+		SetAsInts(values, count, stride);
+	}
+
+	void GLPipelineParam::SetAsInt(
+		int value)
+	{
+		glUniform1i(m_location, value);
+	}
+
+	void GLPipelineParam::SetAsInts(
+		const void* values,
+		size_t count,
+		size_t stride)
+	{
+		if (stride) {
+			switch (stride) {
+				case 1: glUniform1iv(m_location, count, (const GLint*)values); break;
+				case 2: glUniform2iv(m_location, count, (const GLint*)values); break;
+				case 3: glUniform3iv(m_location, count, (const GLint*)values); break;
+				case 4: glUniform4iv(m_location, count, (const GLint*)values); break;
+				default: LOG_WARNING << "Stride is too large (" << (stride) << ")"; break;
+			}
+		}
+
+		else {
+			const GLint* v = (const GLint*)values;
+			switch (count) {
+				case 1: glUniform1i(m_location, v[0]); break;
+				case 2: glUniform2i(m_location, v[0], v[1]); break;
+				case 3: glUniform3i(m_location, v[0], v[1], v[2]); break;
+				case 4: glUniform4i(m_location, v[0], v[1], v[2], v[3]); break;
+				default: LOG_WARNING << "Stride is too large (" << (stride) << ")"; break;
+			}
+		}
+	}
+
+	void GLPipelineParam::SetAsUInt(
+		unsigned int value)
+	{
+		glUniform1ui(m_location, value);
+	}
+
+	void GLPipelineParam::SetAsUInts(
+		const void* values,
+		size_t count,
+		size_t stride)
+	{
+		if (stride) {
+			switch (stride) {
+				case 1: glUniform1uiv(m_location, count, (const GLuint*)values); break;
+				case 2: glUniform2uiv(m_location, count, (const GLuint*)values); break;
+				case 3: glUniform3uiv(m_location, count, (const GLuint*)values); break;
+				case 4: glUniform4uiv(m_location, count, (const GLuint*)values); break;
+				default: LOG_WARNING << "Stride is too large (" << (stride) << ")"; break;
+			}
+		}
+
+		else {
+			const GLuint* v = (const GLuint*)values;
+			switch (count) {
+				case 1: glUniform1ui(m_location, v[0]); break;
+				case 2: glUniform2ui(m_location, v[0], v[1]); break;
+				case 3: glUniform3ui(m_location, v[0], v[1], v[2]); break;
+				case 4: glUniform4ui(m_location, v[0], v[1], v[2], v[3]); break;
+				default: LOG_WARNING << "Stride is too large (" << (stride) << ")"; break;
+			}
+		}
+	}
+
 	void GLPipelineParam::SetAsFloat(
-		const float& val)
+		float value)
 	{
-		glUniform1f(m_location, val);
+		glUniform1f(m_location, value);
 	}
 
-	void GLPipelineParam::SetAsVec2(
-		const iwm::vector2& vec)
+	void GLPipelineParam::SetAsFloats(
+		const void* values,
+		size_t count,
+		size_t stride)
 	{
-		glUniform2f(m_location, vec.x, vec.y);
+		if (stride) {
+			switch (stride) {
+				case 1: glUniform1fv(m_location, count, (const GLfloat*)values); break;
+				case 2: glUniform2fv(m_location, count, (const GLfloat*)values); break;
+				case 3: glUniform3fv(m_location, count, (const GLfloat*)values); break;
+				case 4: glUniform4fv(m_location, count, (const GLfloat*)values); break;
+				default: LOG_WARNING << "Stride is too large (" << (stride) << ")";  break;
+			}
+		}
+
+		else {
+			const GLfloat* v = (const GLfloat*)values;
+			switch (count) {
+				case 1: glUniform1f(m_location, v[0]); break;
+				case 2: glUniform2f(m_location, v[0], v[1]); break;
+				case 3: glUniform3f(m_location, v[0], v[1], v[2]); break;
+				case 4: glUniform4f(m_location, v[0], v[1], v[2], v[3]); break;
+				default: LOG_WARNING << "Stride is too large (" << (stride) << ")"; break;
+			}
+		}
 	}
 
-	void GLPipelineParam::SetAsVec3(
-		const iwm::vector3& vec)
+	void GLPipelineParam::SetAsDouble(
+		double value)
 	{
-		glUniform3f(m_location, vec.x, vec.y, vec.z);
+		glUniform1d(m_location, value);
 	}
 
-	void GLPipelineParam::SetAsVec4(
-		const iwm::vector4& vec) 
+	void GLPipelineParam::SetAsDoubles(
+		const void* values,
+		size_t count,
+		size_t stride)
 	{
-		glUniform4f(m_location, vec.x, vec.y, vec.z, vec.w);
+		if (stride) {
+			switch (stride) {
+				case 1: glUniform1dv(m_location, count, (const GLdouble*)values); break;
+				case 2: glUniform2dv(m_location, count, (const GLdouble*)values); break;
+				case 3: glUniform3dv(m_location, count, (const GLdouble*)values); break;
+				case 4: glUniform4dv(m_location, count, (const GLdouble*)values); break;
+				default: LOG_WARNING << "Stride is too large (" << (stride) << ")"; break;
+			}
+		}
+
+		else {
+			const GLdouble* v = (const GLdouble*)values;
+			switch (count) {
+				case 1: glUniform1d(m_location, v[0]); break;
+				case 2: glUniform2d(m_location, v[0], v[1]); break;
+				case 3: glUniform3d(m_location, v[0], v[1], v[2]); break;
+				case 4: glUniform4d(m_location, v[0], v[1], v[2], v[3]); break;
+				default: LOG_WARNING << "Stride is too large (" << (stride) << ")"; break;
+			}
+		}
 	}
 
 	void GLPipelineParam::SetAsMat2(

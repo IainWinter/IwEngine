@@ -12,26 +12,56 @@ inline namespace RenderAPI {
 	public:
 		GLPipelineParam(int location);
 
+		// Stride is 0 if there is only a single element
+
+		void SetAsBool(
+			bool value) override;
+
+		void SetAsBools(
+			const void* values,
+			size_t count,
+			size_t stride) override;
+
+		void SetAsInt(
+			int value) override;
+
+		void SetAsInts(
+			const void* values,
+			size_t count,
+			size_t stride) override;
+
+		void SetAsUInt(
+			unsigned int value) override;
+
+		void SetAsUInts(
+			const void* values,
+			size_t count,
+			size_t stride) override;
+
 		void SetAsFloat(
-			const float& val);
+			float value) override;
 
-		void SetAsVec2(
-			const iwm::vector2& vec);
+		void SetAsFloats(
+			const void* values,
+			size_t count,
+			size_t stride) override;
 
-		void SetAsVec3(
-			const iwm::vector3& vec);
+		void SetAsDouble(
+			double value) override;
 
-		void SetAsVec4(
-			const iwm::vector4& vec);
+		void SetAsDoubles(
+			const void* values,
+			size_t count,
+			size_t stride) override;
 
 		void SetAsMat2(
-			const iwm::matrix2& matrix);
+			const iwm::matrix2& matrix) override;
 
 		void SetAsMat3(
-			const iwm::matrix3& matrix);
+			const iwm::matrix3& matrix) override;
 
 		void SetAsMat4(
-			const iwm::matrix4& matrix);
+			const iwm::matrix4& matrix) override;
 	};
 }
 }

@@ -116,6 +116,8 @@ namespace IwEngine {
 		}
 
 		m_renderThread.join();
+		
+		Destroy();
 	}
 
 	void Application::Update() {
@@ -174,7 +176,6 @@ namespace IwEngine {
 	}
 
 	void Application::Destroy() {
-		m_running = false;
 		m_window->Destroy();
 		for (Layer* layer : m_layers) {
 			layer->Destroy();
@@ -191,7 +192,7 @@ namespace IwEngine {
 			case Key:    	    DispatchEvent((KeyEvent&)e);           break;
 			case KeyTyped:      DispatchEvent((KeyTypedEvent&)e);      break;
 			case WindowResized: DispatchEvent((WindowResizedEvent&)e); break;
-			case WindowClosed:  Destroy(); break;
+			case WindowClosed:  m_running = false; break;
 			default: LOG_WARNING << "Application mishandled event " + e.Type; break; // logs ppipction?
 		}
 	}
