@@ -3,6 +3,7 @@ sndbxdir  = path.getabsolute("Sandbox")
 glewdir   = iwengdir .. "/extern/glew"
 imguidir  = iwengdir .. "/extern/imgui"
 assimpdir = iwengdir .. "/extern/assimp"
+stbdir = iwengdir .. "/extern/stb"
 
 cfgname = "%{cfg.buildcfg}.%{cfg.system}.%{cfg.architecture}"
 bindir  = "/bin/" .. cfgname
@@ -42,7 +43,8 @@ project "IwEngine"
 		glewdir   .. incdir,
 		imguidir  .. incdir,
 		assimpdir .. incdir,
-		assimpdir .. blddir .. incdir
+		assimpdir .. blddir .. incdir,
+		stbdir .. incdir
 	}
 
 	libdirs {
