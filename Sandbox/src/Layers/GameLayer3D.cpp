@@ -24,16 +24,15 @@ int GameLayer3D::Initialize(
 {
 	pipeline = Renderer.CreatePipeline("res/pbr/pbrvs.glsl", "res/pbr/pbrfs.glsl");
 
-	iwu::ref<IW::ModelData> data = Asset.Load<IW::ModelData>("res/cube2.obj");
-	material = Asset.Load<IW::Material>("Material");
+	iwu::ref<IW::Model> model = Asset.Load<IW::Model>("res/cube2.obj");
 
-	meshes = new IW::Mesh[1];
-	for (size_t i = 0; i < data->MeshCount; i++) {
-		meshes[i].SetVertices(data->Meshes[i].VertexCount, data->Meshes[i].Vertices);
-		meshes[i].SetNormals (data->Meshes[i].VertexCount, data->Meshes[i].Normals);
-		meshes[i].SetIndices (data->Meshes[i].FaceCount,   data->Meshes[i].Faces);
-		meshes[i].Compile(Renderer.Device);
+	for (size_t i = 0; i < model->MeshCount; i++) {
+		model->Meshes[i].Compile(Renderer.Device);
+		model->Meshes[i].Material->Pipeline = pipeline;
 	}
+
+	material = model->Meshes[0].Material;
+	material->GetTexture("albedoMap")->Compile(Renderer.Device);
 
 	//meshes = IW::mesh_factory::create_icosphere(5);
 	//meshes->Compile(Renderer.Device);
@@ -44,15 +43,11 @@ int GameLayer3D::Initialize(
 	//material->SetFloat ("metallic", 1.0f);
 	//material->SetFloat ("roughness", 0.6f);
 	//material->SetFloat ("ao", 1.0f);
-
-	material->Pipeline = pipeline;
-
-	meshes[0].SetMaterial(material);
 	
-	lightPositions[0] = iwm::vector3( 5,  5, -5);
-	lightPositions[1] = iwm::vector3(-5,  5, -5);
-	lightPositions[2] = iwm::vector3( 5, -5, -5);
-	lightPositions[3] = iwm::vector3(-5, -5, -5);
+	lightPositions[0] = iwm::vector3( 5,  5, 0);
+	lightPositions[1] = iwm::vector3(-5,  5, 0);
+	lightPositions[2] = iwm::vector3( 5, -5, 0);
+	lightPositions[3] = iwm::vector3(-5, -5, 0);
 
 	lightColors[0] = iwm::vector3(1);
 	lightColors[1] = iwm::vector3(1, 0, 0);
@@ -72,8 +67,8 @@ int GameLayer3D::Initialize(
 	for (int x = -5; x < 10; x++) {
 		for (int y = -5; y < 10; y++) {
 			IwEntity::Entity tree = Space.CreateEntity<IW::Transform, IwEngine::Model>();
-			Space.SetComponentData<IW::Transform>(tree, iwm::vector3(x, y, 5), iwm::vector3(.5));
-			Space.SetComponentData<IwEngine::Model>(tree, meshes, 1U);
+			Space.SetComponentData<IW::Transform>(tree, iwm::vector3(x, y, 5), iwm::vector3(.5f));
+			Space.SetComponentData<IwEngine::Model>(tree, model->Meshes, 1U);
 		}
 	}
 
@@ -112,11 +107,11 @@ void GameLayer3D::PostUpdate() {
 		}
 
 		if (IwInput::Keyboard::KeyDown(IwInput::SPACE)) {
-			movement += transform->Up();
+			movement += iwm::vector3::unit_y;
 		}
 
 		if (IwInput::Keyboard::KeyDown(IwInput::LEFT_SHIFT)) {
-			movement -= transform->Up();
+			movement -= iwm::vector3::unit_y;
 		}
 
 		transform->Position += movement * 5 * IwEngine::Time::DeltaTime();
@@ -133,6 +128,9 @@ void GameLayer3D::PostUpdate() {
 
 		for (auto tree : Space.Query<IW::Transform, IwEngine::Model>()) {
 			auto [transform, model] = tree.Components.Tie<TreeComponents>();
+			
+			//transform->Rotation *= iwm::quaternion::create_from_euler_angles(IwEngine::Time::DeltaTime(), IwEngine::Time::DeltaTime(), IwEngine::Time::DeltaTime());
+
 			for (size_t i = 0; i < model->MeshCount; i++) {
 				Renderer.DrawMesh(transform, &model->Meshes[i]);
 			}
@@ -146,8 +144,8 @@ void GameLayer3D::ImGui() {
 	ImGui::Begin("Game layer");
 
 	//ImGui::ColorPicker3("Color", (float*)std::get<0>(material->GetFloats("albedo")));
-	//ImGui::SliderFloat("Metallic", (float*)material->GetFloat("metallic"), 0, 1);
-	//ImGui::SliderFloat("Roughness", (float*)material->GetFloat("roughness"), 0.3f, 1);
+	ImGui::SliderFloat("Metallic",  (float*)material->GetFloat("metallic"), 0, 1);
+	ImGui::SliderFloat("Roughness", (float*)material->GetFloat("roughness"), 0.3f, 1);
 	//ImGui::SliderFloat("AO", (float*)material->GetFloat("ao"), 0, 1);
 	//ImGui::ColorPicker4("Diffuse Color", (float*)&material->GetColor("diffuse"));
 	//ImGui::ColorPicker4("Specular Color", (float*)&material->GetColor("specular"));

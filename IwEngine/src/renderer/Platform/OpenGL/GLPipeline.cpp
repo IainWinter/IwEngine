@@ -9,6 +9,7 @@ namespace IW {
 		GLFragmentShader* fragmentShader,
 		GLGeometryShader* geometryShader)
 		: m_bufferCount(0)
+		, m_textureCount(0)
 	{
 		m_programId = glCreateProgram();
 		glAttachShader(m_programId, vertexShader->VertexShader());
@@ -48,7 +49,7 @@ namespace IW {
 			int location = glGetUniformLocation(m_programId, name);
 			
 			if (location != -1) {
-				param = new GLPipelineParam(location);
+				param = new GLPipelineParam(location, m_textureCount);
 				m_params.emplace(name, param);
 			}
 		}
@@ -68,7 +69,8 @@ namespace IW {
 		glUniformBlockBinding(m_programId, uniformIndex, index);
 	}
 
-	void GLPipeline::Use() const {
+	void GLPipeline::Use() {
+		m_textureCount = 0;
 		glUseProgram(m_programId);
 	}
 }

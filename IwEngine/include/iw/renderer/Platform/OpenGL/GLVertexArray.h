@@ -1,7 +1,6 @@
 #pragma once
 
 #include "GLVertexBuffer.h"
-#include "iw/renderer/IwRenderer.h"
 #include "iw/renderer/VertexArray.h"
 #include "iw/renderer/VertexBufferLayout.h"
 #include <vector>

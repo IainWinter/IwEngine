@@ -41,9 +41,8 @@ inline namespace RenderAPI {
 
 		void UpdateVertexBufferData(
 			IVertexBuffer* buffer,
-			size_t size,
-			const void* data = nullptr) override;
-
+			const void* data,
+			size_t size = 0) override;
 
 		// Uniform buffers
 
@@ -79,8 +78,8 @@ inline namespace RenderAPI {
 		void UpdateVertexArrayData(
 			IVertexArray* vertexArray,
 			size_t bufferIndex,
-			size_t size,
-			const void* data = nullptr) override;
+			const void* data,
+			size_t size = 0) override;
 
 		//Vertex shader
 
@@ -137,6 +136,27 @@ inline namespace RenderAPI {
 
 		virtual void SetComputePipeline(
 			IComputePipeline* ComputePipeline) override;
+
+		// Textures
+
+		virtual ITexture* CreateTexture(
+			int width,
+			int height,
+			int channels,
+			unsigned char* colors = nullptr) override;
+
+		virtual void DestroyTexture(
+			ITexture* texture)  override;
+
+		virtual void SetTexture(
+			ITexture* texture)  override;
+
+		virtual void UpdateTextureColors(
+			ITexture* texture,
+			unsigned char* colors,
+			int width = 0,
+			int height = 0,
+			int channels = 0) override;
 	};
 }
 }

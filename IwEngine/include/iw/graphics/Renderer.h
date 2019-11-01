@@ -5,7 +5,6 @@
 #include "iw/renderer/Device.h"
 #include "iw/util/memory/smart_pointers.h"
 #include "iw/data/Components/Transform.h"
-#include "Asset/ModelData.h"
 #include "iw/graphics/Mesh.h"
 #include <vector>
 
@@ -27,13 +26,6 @@ inline namespace Graphics {
 		iwu::ref<IW::IPipeline>& CreatePipeline(
 			const char* vertex,
 			const char* fragment);
-
-		//iwu::ref<IW::Material> CreateMaterial(
-		//	const iwu::ref<IW::IPipeline>& pipeline);
-
-		//iwu::ref<IW::Mesh> CreateMesh(
-		//	const IW::MeshData& data,
-		//	iwu::ref<IW::Material>& material);
 
 		void Begin();
 		void End();

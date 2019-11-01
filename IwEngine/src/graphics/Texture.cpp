@@ -2,13 +2,20 @@
 
 namespace IW {
 	Texture::Texture(
-		unsigned char* colors,
 		int width,
 		int height,
-		int channels)
-		: Colors(colors)
-		, Width(width)
+		int channels,
+		unsigned char* colors)
+		: Width(width)
 		, Height(height)
 		, Channels(channels)
+		, Colors(colors)
+		, Handle(nullptr)
 	{}
+
+	void Texture::Compile(
+		const iwu::ref<IDevice>& device)
+	{
+		Handle = device->CreateTexture(Width, Height, Channels, Colors);
+	}
 }

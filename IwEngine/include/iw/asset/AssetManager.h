@@ -42,28 +42,30 @@ namespace IW {
 			}
 
 			template<
-				typename _t>
-			iwu::ref<_t> Load(
+				typename _a>
+			iwu::ref<_a> Load(
 				std::string filepath)
 			{
-				auto itr = m_loaders.find(typeid(_t).hash_code());
+				auto itr = m_loaders.find(typeid(_a).hash_code());
 				if (itr != m_loaders.end()) {
-					return std::static_pointer_cast<_t, void>(itr->second->Load(filepath));
+					return std::static_pointer_cast<_a, void>(itr->second->Load(filepath));
 				}
 
-				return nullptr;
+				return iwu::ref<_a>(nullptr);
 			}
 
 			template<
-				typename _t>
-			void Give(
+				typename _a>
+			iwu::ref<_a> Give(
 				std::string name,
-				_t* asset)
+				_a* asset)
 			{
-				auto itr = m_loaders.find(typeid(_t).hash_code());
+				auto itr = m_loaders.find(typeid(_a).hash_code());
 				if (itr != m_loaders.end()) {
-					itr->second->Give(name, asset);
+					return std::static_pointer_cast<_a, void>(itr->second->Give(name, asset));
 				}
+
+				return iwu::ref<_a>(nullptr);
 			}
 		};
 	}

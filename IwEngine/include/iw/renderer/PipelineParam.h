@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IwRenderer.h"
+#include "Texture.h"
 #include "iw/math/matrix2.h"
 #include "iw/math/matrix3.h"
 #include "iw/math/matrix4.h"
@@ -64,6 +65,9 @@ inline namespace RenderAPI {
 
 		virtual void SetAsMat4(
 			const iwm::matrix4& matrix) = 0;
+
+		virtual void SetAsTexture(
+			const ITexture* texture) = 0;
 	};
 }
 }

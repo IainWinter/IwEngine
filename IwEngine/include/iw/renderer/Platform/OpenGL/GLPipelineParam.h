@@ -9,8 +9,12 @@ inline namespace RenderAPI {
 	{
 	private:
 		unsigned int m_location;
+		unsigned int& m_textureCount;
+
 	public:
-		GLPipelineParam(int location);
+		GLPipelineParam(
+			int location,
+			unsigned int& textureCount);
 
 		// Stride is 0 if there is only a single element
 
@@ -62,6 +66,9 @@ inline namespace RenderAPI {
 
 		void SetAsMat4(
 			const iwm::matrix4& matrix) override;
+
+		void SetAsTexture(
+			const ITexture* texture) override;
 	};
 }
 }

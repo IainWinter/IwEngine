@@ -6,6 +6,7 @@
 #include "assimp/scene.h"
 #include "assimp/postprocess.h"
 #include "assimp/pbrmaterial.h"
+#include <vector>
 
 namespace IW {
 	MeshLoader::MeshLoader(
@@ -13,7 +14,7 @@ namespace IW {
 		: AssetLoader(asset)
 	{}
 
-	ModelData* MeshLoader::LoadAsset(
+	Model* MeshLoader::LoadAsset(
 		std::string path)
 	{
 		Assimp::Importer importer;
@@ -22,15 +23,14 @@ namespace IW {
 			| aiProcess_Triangulate
 			| aiProcess_JoinIdenticalVertices
 			| aiProcess_SortByPType
-			| aiProcess_GenNormals
-			| aiProcess_FlipWindingOrder); // is this always needed?? this has to be the shader i think cus i had to flip the sphere normals too...
+			| aiProcess_GenNormals);
 
 		if (!scene) {
 			LOG_WARNING << importer.GetErrorString();
 			return nullptr;
 		}
 
-		std::vector<char*> materials(scene->mNumMaterials);
+		std::vector<iwu::ref<IW::Material>> materials;
 		if (scene->HasMaterials()) {
 			for (size_t i = 0; i < scene->mNumMaterials; i++) {
 				aiMaterial* aimaterial = scene->mMaterials[i];
@@ -46,35 +46,30 @@ namespace IW {
 			//	aiGetMaterialColor(aimaterial, AI_MATKEY_COLOR_EMISSIVE, (aiColor4D*)&emissiveColor);
 
 				aiGetMaterialFloat(aimaterial, AI_MATKEY_SHININESS, &metallic);
-				//aiGetMaterialFloat(aimaterial, AI_MATKEY_SHININESS_STRENGTH, &roughness);
-				//aiGetMaterialFloat(aimaterial, AI_MATKEY_, &specular.a);
 
-				metallic /= 4 * 128;
-				//roughness /= 4;
+				metallic /= 4 * 128; // obj files scale this by 4? and then opengl by 128???
 
 				IW::Material material;
-				material.SetFloats("albedo", &albedo, 3);
+				//material.SetFloats("albedo", &albedo, 3);
 				//material.SetFloats("emissiveColor", &emissiveColor, 4);
 				material.SetFloat("metallic", metallic);
 				material.SetFloat("roughness", roughness);
 
 				aiString texturePath;
-				if (aimaterial->GetTextureCount(aiTextureType_DIFFUSE) > 0
+				if (   aimaterial->GetTextureCount(aiTextureType_DIFFUSE) > 0
 					&& aimaterial->GetTexture(aiTextureType_DIFFUSE, 0, &texturePath) == AI_SUCCESS)
 				{
-					//material.SetTexture?? 
 					texturePath.Set("res/" + std::string(texturePath.C_Str()));
 
-					m_asset.Load<IW::Texture>(texturePath.C_Str());
+					iwu::ref<IW::Texture> texture = m_asset.Load<IW::Texture>(texturePath.C_Str());
+					material.SetTexture("albedoMap", texture);
 				}
 
 				size_t size = strlen(ainame) + 1;
 				char*  name = new char[size];
 				memcpy(name, ainame, size);
 
-				materials.push_back(name);
-
-				m_asset.Give<IW::Material>(name, &material);
+				materials.push_back(m_asset.Give<IW::Material>(name, &material));
 			}
 		}
 
@@ -82,12 +77,11 @@ namespace IW {
 		//	aiTexture* texture = scene->mTextures[0];
 		//}
 
-		ModelData* model = new ModelData{
-			new MeshData[scene->mNumMeshes],
+		Model* model = new Model{
+			new Mesh[scene->mNumMeshes],
 			scene->mNumMeshes
 		};
 
-		//IW::Mesh* root = new IW::Mesh();
 		for (size_t i = 0; i < scene->mNumMeshes; i++) {
 			const aiMesh* aimesh = scene->mMeshes[i];
 
@@ -96,17 +90,19 @@ namespace IW {
 				indexBufferSize += aimesh->mFaces[t].mNumIndices; // could a face have diffrent incices?
 			}
 
-			MeshData& mesh = model->Meshes[i];
+			Mesh& mesh = model->Meshes[i];
 
-			mesh.FaceCount = 0;
-			mesh.Faces = new unsigned int[indexBufferSize];
+			mesh.SetMaterial(materials.at(aimesh->mMaterialIndex));
 
-			if (mesh.Faces) {
+			mesh.IndexCount = 0;
+			mesh.Indices = new unsigned int[indexBufferSize];
+
+			if (mesh.Indices) {
 				for (size_t t = 0; t < aimesh->mNumFaces; t++) {
 					const aiFace& face = aimesh->mFaces[t];
 					for (size_t f = 0; f < face.mNumIndices; f++) {
-						mesh.Faces[mesh.FaceCount] = face.mIndices[f];
-						mesh.FaceCount++;
+						mesh.Indices[mesh.IndexCount] = face.mIndices[f];
+						mesh.IndexCount++;
 					}
 				}
 			}
@@ -116,8 +112,11 @@ namespace IW {
 			//scene->mMeshes[0]->
 
 			mesh.VertexCount = aimesh->mNumVertices;
+			mesh.NormalCount = aimesh->mNumVertices;
+			mesh.UvCount     = aimesh->mNumVertices;
 			mesh.Vertices = new iwm::vector3[mesh.VertexCount];
 			mesh.Normals  = new iwm::vector3[mesh.VertexCount];
+			mesh.Uvs      = new iwm::vector2[mesh.VertexCount];
 
 			if (mesh.Vertices) {
 				for (size_t i = 0; i < mesh.VertexCount; i++) {
@@ -128,6 +127,9 @@ namespace IW {
 					mesh.Normals[i].x = aimesh->mNormals[i].x;
 					mesh.Normals[i].y = aimesh->mNormals[i].y;
 					mesh.Normals[i].z = aimesh->mNormals[i].z;
+
+					mesh.Uvs[i].x = aimesh->mTextureCoords[0][i].x;
+					mesh.Uvs[i].y = aimesh->mTextureCoords[0][i].y;
 				}
 			}
 		}

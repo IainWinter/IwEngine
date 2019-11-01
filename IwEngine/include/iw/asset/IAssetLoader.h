@@ -12,7 +12,7 @@ inline namespace Asset {
 		virtual iwu::ref<void> Load(
 			std::string filepath) = 0;
 
-		virtual void Give(
+		virtual iwu::ref<void> Give(
 			std::string filename,
 			void* asset) = 0;
 	};

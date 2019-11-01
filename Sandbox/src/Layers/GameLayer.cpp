@@ -56,8 +56,6 @@ int GameLayer::Initialize(
 	//   |
 	//  \ /
 	//Asset.Load<IW::Shader>("res/sandbox.shader");
-
-
 	
 	iwu::ref<IW::IPipeline> shader = Renderer.CreatePipeline("res/sandboxvs.glsl", "res/sandboxfs.glsl");
 	iwu::ref<IW::IPipeline> shader_line = Renderer.CreatePipeline("res/sandbox_line_vs.glsl", "res/sandbox_line_fs.glsl");
@@ -94,28 +92,16 @@ int GameLayer::Initialize(
 	line->Compile(Renderer.Device);
 
 	// Making quad mesh
-	auto& qdata = Asset.Load<IW::ModelData>("res/quad.obj")->Meshes[0];
-
-	IW::Mesh* quad = new IW::Mesh();
-	quad->SetMaterial(quadMaterial);
-	quad->SetVertices(qdata.VertexCount, qdata.Vertices);
-	quad->SetNormals (qdata.VertexCount, qdata.Normals);
-	quad->SetIndices (qdata.FaceCount,   qdata.Faces);
-	quad->Compile(Renderer.Device);
+	auto qmodel = Asset.Load<IW::Model>("res/quad.obj");
+	qmodel->Meshes[0].Compile(Renderer.Device);
 
 	// Making circle mesh
-	auto& cdata = Asset.Load<IW::ModelData>("res/circle.obj")->Meshes[0];
-
-	IW::Mesh* circle = new IW::Mesh();	
-	circle->SetMaterial(circleMaterial);
-	circle->SetVertices(cdata.VertexCount, cdata.Vertices);
-	circle->SetNormals (cdata.VertexCount, cdata.Normals);
-	circle->SetIndices (cdata.FaceCount,   cdata.Faces);
-	circle->Compile(Renderer.Device);
+	auto cmodel = Asset.Load<IW::Model>("res/circle.obj");
+	cmodel->Meshes[0].Compile(Renderer.Device);
 
 	// give enemy system circle mesh
 
-	PushSystem<EnemySystem>(circle);
+	PushSystem<EnemySystem>(&cmodel->Meshes[0]);
 
 	// Camera & entities
 
@@ -127,7 +113,7 @@ int GameLayer::Initialize(
 
 	IwEntity::Entity player = Space.CreateEntity<IW::Transform, IwEngine::Model, Player, IwPhysics::AABB2D>();
 	Space.SetComponentData<IW::Transform>    (player, iwm::vector3(10, 0, 0));
-	Space.SetComponentData<IwEngine::Model>  (player, quad, 1U);
+	Space.SetComponentData<IwEngine::Model>  (player, &qmodel->Meshes[0], 1U);
 	Space.SetComponentData<Player>           (player, 10.0f, 100.0f, 0.1666f, 0.1f);
 	Space.SetComponentData<IwPhysics::AABB2D>(player, iwm::vector2(-1), iwm::vector2(1));
 
@@ -135,7 +121,7 @@ int GameLayer::Initialize(
 		for (float y = 5; y < 6; y++) {
 			IwEntity::Entity enemy = Space.CreateEntity<IW::Transform, IwEngine::Model, Enemy, IwPhysics::AABB2D>();
 			Space.SetComponentData<IW::Transform>    (enemy, iwm::vector3(x * 3 - 15, y * 3 - 15, 0));
-			Space.SetComponentData<IwEngine::Model>  (enemy, quad, 1U);
+			Space.SetComponentData<IwEngine::Model>  (enemy, &qmodel->Meshes[0], 1U);
 			Space.SetComponentData<Enemy>            (enemy, SPIN, 3.0f, 0.05f, 0.025f, 0.025f);
 			Space.SetComponentData<IwPhysics::AABB2D>(enemy, iwm::vector2(-1), iwm::vector2(1));
 		}

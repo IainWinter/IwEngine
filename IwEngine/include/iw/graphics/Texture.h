@@ -2,6 +2,9 @@
 
 #include "IwGraphics.h"
 #include "Color.h"
+#include "iw/renderer/Device.h"
+#include "iw/renderer/Texture.h"
+#include "iw/util/memory/smart_pointers.h"
 
 namespace IW {
 inline namespace Graphics {
@@ -12,11 +15,16 @@ inline namespace Graphics {
 		int Height;
 		int Channels;
 
+		ITexture* Handle;
+
 		Texture(
-			unsigned char* colors,
 			int width,
 			int height,
-			int channels);
+			int channels,
+			unsigned char* colors);
+
+		void Compile(
+			const iwu::ref<IDevice>& device);
 	};
 }
 }

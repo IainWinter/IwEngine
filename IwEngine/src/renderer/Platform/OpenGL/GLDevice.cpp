@@ -9,6 +9,7 @@
 #include "iw/renderer/Platform/OpenGL/GLComputeShader.h"
 #include "iw/renderer/Platform/OpenGL/GLPipeline.h"
 #include "iw/renderer/Platform/OpenGL/GLComputePipeline.h"
+#include "iw/renderer/Platform/OpenGL/GLTexture.h"
 #include "gl/glew.h"
 
 namespace IW {
@@ -81,9 +82,9 @@ namespace IW {
 	}
 
 	void GLDevice::UpdateVertexBufferData(
-		IVertexBuffer* vertexBuffer, 
-		size_t size, 
-		const void* data)
+		IVertexBuffer* vertexBuffer,
+		const void* data,
+		size_t size)
 	{
 		static_cast<GLVertexBuffer*>(vertexBuffer)->UpdateData(size, data);
 	}
@@ -141,8 +142,8 @@ namespace IW {
 	void GLDevice::UpdateVertexArrayData(
 		IVertexArray* vertexArray, 
 		size_t bufferIndex, 
-		size_t size, 
-		const void* data)
+		const void* data,
+		size_t size)
 	{
 		static_cast<GLVertexArray*>(vertexArray)
 			->UpdateBuffer(bufferIndex, size, data);
@@ -236,5 +237,37 @@ namespace IW {
 		IComputePipeline* computePipeline)
 	{
 		static_cast<GLComputePipeline*>(computePipeline)->Use();
+	}
+
+	ITexture* GLDevice::CreateTexture(
+		int width, 
+		int height, 
+		int channels, 
+		unsigned char* colors)
+	{
+		return new GLTexture(width, height, channels, colors);
+	}
+
+	void GLDevice::DestroyTexture(
+		ITexture* texture)
+	{
+		delete texture;
+	}
+
+	void GLDevice::SetTexture(
+		ITexture* texture)
+	{
+		static_cast<GLTexture*>(texture)->Bind();
+	}
+
+	void GLDevice::UpdateTextureColors(
+		ITexture* texture, 
+		unsigned char* colors,
+		int width,
+		int height, 
+		int channels)
+	{
+		static_cast<GLTexture*>(texture)->UpdateData(
+			colors, width, height, channels);
 	}
 }

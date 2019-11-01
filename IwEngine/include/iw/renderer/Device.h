@@ -12,6 +12,7 @@
 #include "ComputeShader.h"
 #include "Pipeline.h"
 #include "ComputePipeline.h"
+#include "Texture.h"
 
 namespace IW {
 inline namespace RenderAPI {
@@ -50,8 +51,8 @@ inline namespace RenderAPI {
 
 		virtual void UpdateVertexBufferData(
 			IVertexBuffer* vertexBuffer,
-			size_t size,
-			const void* data = nullptr) = 0;
+			const void* data,
+			size_t size = 0) = 0;
 
 		// Uniform buffers
 
@@ -67,7 +68,7 @@ inline namespace RenderAPI {
 
 		virtual void UpdateUniformBufferData(
 			IUniformBuffer* uniformBuffer,
-			const void* data = nullptr) = 0;
+			const void* data) = 0;
 
 		// Vertex arrays
 
@@ -87,8 +88,8 @@ inline namespace RenderAPI {
 		virtual void UpdateVertexArrayData(
 			IVertexArray* vertexArray,
 			size_t bufferIndex,
-			size_t size,
-			const void* data = nullptr) = 0;
+			const void* data,
+			size_t size = 0) = 0;
 
 		// Vertex shader
 
@@ -145,6 +146,27 @@ inline namespace RenderAPI {
 
 		virtual void SetComputePipeline(
 			IComputePipeline* computePipeline) = 0;
+
+		// Textures
+
+		virtual ITexture* CreateTexture(
+			int width,
+			int height,
+			int channels,
+			unsigned char* colors = nullptr) = 0;
+
+		virtual void DestroyTexture(
+			ITexture* texture) = 0;
+
+		virtual void SetTexture(
+			ITexture* texture) = 0;
+
+		virtual void UpdateTextureColors(
+			ITexture* texture,
+			unsigned char* colors,
+			int width = 0,
+			int height = 0,
+			int channels = 0) = 0;
 
 		static IDevice* Create();
 	};

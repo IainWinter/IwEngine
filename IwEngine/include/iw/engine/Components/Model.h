@@ -2,7 +2,7 @@
 
 #include "iw/engine/Core.h"
 #include "iw/graphics/Mesh.h"
-#include "iw/graphics/Asset/ModelData.h"
+#include "iw/graphics/Model.h"
 
 namespace IwEngine {
 	struct Model {

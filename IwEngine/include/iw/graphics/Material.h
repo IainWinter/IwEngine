@@ -2,6 +2,7 @@
 
 #include "IwGraphics.h"
 #include "Color.h"
+#include "Texture.h"
 #include "iw/renderer/Pipeline.h"
 #include "iw/renderer/Device.h"
 #include "iw/util/memory/smart_pointers.h"
@@ -21,7 +22,8 @@ inline namespace Graphics {
 			INT,
 			UINT,
 			FLOAT,
-			DOUBLE
+			DOUBLE,
+			SAMPLE
 		};
 
 		struct MaterialProperty {
@@ -115,6 +117,10 @@ inline namespace Graphics {
 			size_t count,
 			size_t stride = 0);
 
+		void SetTexture(
+			const char* name,
+			const iwu::ref<IW::Texture>& texture);
+
 		bool* GetBool(
 			const char* name);
 
@@ -145,9 +151,8 @@ inline namespace Graphics {
 		std::tuple<double*, size_t> GetDoubles(
 			const char* name);
 
-		/*void SetTexture(
-			const char* name,
-			IW::Testure texture);*/
+		IW::Texture* GetTexture(
+			const char* name);
 
 		void Use(
 			const iwu::ref<IW::IDevice>& device) const;

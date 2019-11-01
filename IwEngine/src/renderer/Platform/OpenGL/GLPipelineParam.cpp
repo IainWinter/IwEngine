@@ -1,10 +1,13 @@
 #include "iw/renderer/Platform/OpenGL/GLPipelineParam.h"
+#include "iw/renderer/Platform/OpenGL/GLTexture.h"
 #include "gl/glew.h"
 
 namespace IW {
 	GLPipelineParam::GLPipelineParam(
-		int location)
+		int location,
+		unsigned int& textureCount)
 		: m_location(location)
+		, m_textureCount(textureCount)
 	{}
 
 	void GLPipelineParam::SetAsBool(
@@ -169,5 +172,20 @@ namespace IW {
 		const iwm::matrix4& matrix)
 	{
 		glUniformMatrix4fv(m_location, 1, GL_FALSE, matrix.elements);
+	}
+
+	void GLPipelineParam::SetAsTexture(
+		const ITexture* texture)
+	{
+		if (m_textureCount > 32) {
+			LOG_WARNING << "Already bound 32 textures";
+			return;
+		}
+
+		glActiveTexture(m_textureCount);
+		static_cast<const GLTexture*>(texture)->Bind();
+		glUniform1i(m_location, m_textureCount);
+		
+		++m_textureCount; //  increment textures applied by 
 	}
 }

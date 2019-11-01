@@ -80,7 +80,7 @@ namespace IwEngine {
 		io.MousePos.x = (float)event.X;
 		io.MousePos.y = (float)event.Y;
 
-		return false;
+		return io.WantCaptureMouse;
 	}
 
 	bool ImGuiLayer::On(
@@ -93,6 +93,6 @@ namespace IwEngine {
 			return true;
 		}
 
-		return false;
+		return io.WantCaptureMouse;
 	}
 }

@@ -147,6 +147,13 @@ namespace IW {
 		CreateProperty(name, values, count, stride, false, DOUBLE, sizeof(double));
 	}
 
+	void Material::SetTexture(
+		const char* name, 
+		const iwu::ref<IW::Texture>& texture)
+	{
+		CreateProperty(name, texture.get(), 0, 0, true, SAMPLE, 0);
+	}
+
 	bool* Material::GetBool(
 		const char* name)
 	{
@@ -212,6 +219,12 @@ namespace IW {
 		return { (double*)std::get<0>(data), std::get<1>(data) };
 	}
 
+	IW::Texture* Material::GetTexture(
+		const char* name)
+	{
+		return (IW::Texture*)std::get<0>(GetData(name));
+	}
+
 	void Material::Use(
 		const iwu::ref<IW::IDevice>& device) const
 	{
@@ -226,7 +239,8 @@ namespace IW {
 			}
 
 			if (prop.IsSample) {
-				// do something with textures i guess
+				IW::Texture* texture = (IW::Texture*)prop.Data;
+				param->SetAsTexture(texture->Handle);
 			}
 
 			else {
@@ -275,15 +289,24 @@ namespace IW {
 		size_t size = count * typeSize;
 
 		if (prop) {
+			if (prop->IsSample) {
+				free(prop->Data);
+			}
+
 			prop->Size = size;
 			prop->Count = count;
 			prop->Stride = stride;
 			prop->IsSample = isSample;
 			prop->Type = type;
 
-			free(prop->Data);
-			prop->Data = malloc(size);
-			memcpy(prop->Data, values, size);
+			if (isSample) {
+				prop->Data = values;
+			}
+
+			else {
+				prop->Data = malloc(size);
+				memcpy(prop->Data, values, size);
+			}
 		}
 
 		else {
@@ -297,12 +320,15 @@ namespace IW {
 					stride,
 					isSample,
 					type,
-					malloc(size)
+					isSample ? values : malloc(size)
 				}
 			);
 
+			if (!isSample) {
+				memcpy(prop->Data, values, size);
+			}
+
 			memcpy(prop->Name, name, nameSize);
-			memcpy(prop->Data, values, size);
 		}
 	}
 }

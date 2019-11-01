@@ -11,21 +11,21 @@
 namespace IW {
 inline namespace Asset {
 	template<
-		typename _r>
+		typename _a>
 	class AssetLoader
 		: public IAssetLoader
 	{
 	private:
-		std::unordered_map<std::string, iwu::ref<_r>> m_loaded;
+		std::unordered_map<std::string, iwu::ref<_a>> m_loaded;
 	protected:
 		AssetManager& m_asset;
 
 	private:
-		virtual _r* LoadAsset(
+		virtual _a* LoadAsset(
 			std::string filepath) = 0;
 
 		virtual void FreeAsset(
-			_r* asset)
+			_a* asset)
 		{}
 	public:
 		AssetLoader(
@@ -42,36 +42,36 @@ inline namespace Asset {
 		iwu::ref<void> Load(
 			std::string filepath) override
 		{
-			_r* resource;
+			_a* asset;
 			if (m_loaded.find(filepath) == m_loaded.end()) {
-				resource = LoadAsset(filepath);
-				if (resource == nullptr) {
+				asset = LoadAsset(filepath);
+				if (asset == nullptr) {
 					LOG_ERROR << "Failed to load resource " << filepath << "!";
 					assert(false);
 				}
 
-				m_loaded.emplace(filepath, resource);
+				m_loaded.emplace(filepath, asset);
 			}
 
 			return m_loaded.at(filepath);
 		}
 
-		void Give(
+		iwu::ref<void> Give(
 			std::string name,
 			void* asset)
 		{
-			if (!asset) { return; }
+			_a* buf = (_a*)malloc(sizeof(_a));
+			assert(buf);
 
-			_r* resource = (_r*)malloc(sizeof(_r));
-			assert(resource);
+			new (buf) _a(std::forward<_a>(*(_a*)asset));
+			m_loaded[name] = iwu::ref<_a>(buf);
 
-			new (resource) _r(std::forward<_r>(*(_r*)asset));
+			return m_loaded.at(name);
 
-			m_loaded[name] = iwu::ref<_r>(resource);
 		}
 
 		virtual void Release(
-			iwu::ref<_r> resource)
+			iwu::ref<_a> resource)
 		{
 			for (auto it = m_loaded.begin(); it != m_loaded.end(); it++) {
 				if (it->second == resource) {
@@ -101,7 +101,7 @@ inline namespace Asset {
 		}
 
 		static size_t GetType() {
-			return typeid(_r).hash_code();
+			return typeid(_a).hash_code();
 		}
 	};
 }

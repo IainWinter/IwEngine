@@ -14,7 +14,7 @@ namespace IW {
 		std::string filepath)
 	{
 		int width, height, channels;
-		unsigned char* image = stbi_load(filepath.c_str(), &width, &height, &channels, STBI_rgb_alpha);
+		unsigned char* image = stbi_load(filepath.c_str(), &width, &height, &channels, STBI_rgb);
 
 		//if (stbi_failure_reason()) {
 		//	LOG_WARNING << stbi_failure_reason();
@@ -30,7 +30,7 @@ namespace IW {
 
 		stbi_image_free(image);
 
-		return new Texture(colors, width, height, channels);
+		return new Texture(width, height, channels, colors);
 	}
 
 	void TextureLoader::FreeAsset(

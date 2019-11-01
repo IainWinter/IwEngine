@@ -147,7 +147,7 @@ namespace IwEngine {
 		glEnable(GL_BLEND);
 
 		glEnable(GL_CULL_FACE);
-		glCullFace(GL_FRONT);
+		glCullFace(GL_BACK);
 
 		SetCursor(options.Cursor);
 		SetState(options.State);

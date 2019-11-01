@@ -115,15 +115,15 @@ namespace IW {
 		const iwu::ref<IW::IDevice>& device)
 	{
 		size_t min = VertexCount + NormalCount + ColorCount + UvCount;
-		if (VertexCount > 0 && VertexCount < min) min = VertexCount;
-		if (NormalCount > 0 && NormalCount < min) min = NormalCount;
-		if (ColorCount  > 0 && ColorCount  < min) min = ColorCount;
-		if (UvCount     > 0 && UvCount     < min) min = UvCount;
+		if (Vertices && VertexCount < min) min = VertexCount;
+		if (Normals  && NormalCount < min) min = NormalCount;
+		if (Colors   && ColorCount  < min) min = ColorCount;
+		if (Uvs      && UvCount     < min) min = UvCount;
 
-		if (VertexCount > 0) VertexCount = min;
-		if (NormalCount > 0) NormalCount = min;
-		if (ColorCount  > 0) ColorCount  = min;
-		if (UvCount     > 0) UvCount     = min;
+		if (Vertices) VertexCount = min;
+		if (Normals)  NormalCount = min;
+		if (Colors)   ColorCount  = min;
+		if (Uvs)      UvCount     = min;
 
 		if (VertexArray && Outdated) { // reset data not sub data
 			//int index = 0;
@@ -156,7 +156,7 @@ namespace IW {
 			layout3f.Push<float>(3);
 
 			IW::VertexBufferLayout layout2f;
-			layout2f.Push<float>(3);
+			layout2f.Push<float>(2);
 
 			VertexArray = device->CreateVertexArray();
 			IndexBuffer = device->CreateIndexBuffer(IndexCount, Indices);
@@ -190,22 +190,22 @@ namespace IW {
 	{
 		int index = 0;
 		if (Vertices) {
-			device->UpdateVertexArrayData(VertexArray, index, VertexCount * sizeof(iwm::vector3), Vertices);
+			device->UpdateVertexArrayData(VertexArray, index, Vertices, VertexCount * sizeof(iwm::vector3));
 			index++;
 		}
 
 		if (Normals) {
-			device->UpdateVertexArrayData(VertexArray, index, NormalCount * sizeof(iwm::vector3), Normals);
+			device->UpdateVertexArrayData(VertexArray, index, Normals, NormalCount * sizeof(iwm::vector3));
 			index++;
 		}
 
 		if (Colors) {
-			device->UpdateVertexArrayData(VertexArray, index, ColorCount * sizeof(iwm::vector4), Colors);
+			device->UpdateVertexArrayData(VertexArray, index, Colors, ColorCount * sizeof(iwm::vector4));
 			index++;
 		}
 
 		if (Uvs) {
-			device->UpdateVertexArrayData(VertexArray, index, UvCount * sizeof(iwm::vector2), Uvs);
+			device->UpdateVertexArrayData(VertexArray, index, Uvs, UvCount * sizeof(iwm::vector2));
 			index++;
 		}
 	}

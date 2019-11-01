@@ -18,6 +18,7 @@ inline namespace RenderAPI {
 		};
 
 		unsigned int m_bufferCount;
+		unsigned int m_textureCount;
 		unsigned int m_programId;
 
 	public:
@@ -35,7 +36,7 @@ inline namespace RenderAPI {
 			const char* name,
 			IUniformBuffer* buffer);
 
-		void Use() const;
+		void Use();
 	};
 }
 }
