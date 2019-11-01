@@ -1,11 +1,14 @@
 #version 430 core
 out vec4 FragColor;
-//in vec2 TexCoords;
+in vec2 TexCoords;
 in vec3 Normal;
 in vec3 WorldPos;
 
 // material parameters
-uniform vec3  albedo;
+//uniform vec3  albedo;
+
+uniform sampler2D albedoMap;
+
 uniform float metallic;
 uniform float roughness;
 uniform float ao;
@@ -56,6 +59,8 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0) {
 
 void main()
 {
+	vec3 albedo = texture(albedoMap, TexCoords).rgb;
+
 	vec3 N = normalize(Normal);
 	vec3 V = normalize(camPos - WorldPos);
 
@@ -66,7 +71,7 @@ void main()
 			   
 	// reflectance equation
 	vec3 Lo = vec3(0.0);
-	for(int i = 0; i < 1; ++i) 
+	for(int i = 0; i < 4; ++i) 
 	{
 		// calculate per-light radiance
 		vec3 L = normalize(lightPositions[i] - WorldPos);
@@ -100,4 +105,8 @@ void main()
 	color = pow(color, vec3(1.0/2.2));
    
 	FragColor = vec4(color, 1.0);
+
+	if(color == vec3(0.1)) {
+		FragColor = vec4(color, 1.0);
+	}
 } 
