@@ -23,19 +23,19 @@ namespace IW {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 		GLint format = 0;
+		GLint internalformat = 0;
 		switch (channels) {
-			case 3: format = GL_RGB;  break;
-			case 4: format = GL_RGBA; break;
+			case 1: internalformat = GL_R8; format = GL_RED; break;
+			case 3: internalformat = format = GL_RGB;  break;
+			case 4: internalformat = format = GL_RGBA; break;
 			default: 
 				LOG_ERROR << "No format for " 
 				<< channels 
 				<< " channels"; break;
 		}
 
-		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-
+		glTexImage2D(GL_TEXTURE_2D, 0, internalformat, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
-
 	}
 
 	GLTexture::~GLTexture() {

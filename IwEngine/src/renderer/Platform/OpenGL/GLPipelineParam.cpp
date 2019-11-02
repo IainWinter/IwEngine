@@ -182,10 +182,11 @@ namespace IW {
 			return;
 		}
 
-		glActiveTexture(m_textureCount);
-		static_cast<const GLTexture*>(texture)->Bind();
 		glUniform1i(m_location, m_textureCount);
-		
-		++m_textureCount; //  increment textures applied by 
+
+		glActiveTexture(GL_TEXTURE0 + m_textureCount);
+		static_cast<const GLTexture*>(texture)->Bind();
+
+		++m_textureCount;
 	}
 }
