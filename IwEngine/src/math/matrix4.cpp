@@ -645,7 +645,7 @@ namespace iwmath {
 		float zNear,
 		float zFar)
 	{
-		if (fov <= 0 || fov > IW_PI) {
+		if (fov <= 0 || fov > PI) {
 			throw std::invalid_argument("fovy is not betwwen 0 and pi.");
 		}
 

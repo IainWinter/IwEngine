@@ -200,13 +200,13 @@ namespace iwmath {
 		float angle = acosf((rot.trace() - 1) / 2);
 		float scale = 1 / (2 * sinf(angle));
 
-		if (0 < angle && angle < IW_PI) {
+		if (0 < angle && angle < PI) {
 			v.x = rot(2, 1) - rot(1, 2);
 			v.y = rot(0, 2) - rot(2, 0);
 			v.z = rot(1, 0) - rot(0, 1);
 		}
 
-		else if (almost_equal(angle, IW_PI, 6)) {
+		else if (almost_equal(angle, PI, 6)) {
 			float rot00 = rot(0, 0);
 			float rot11 = rot(1, 1);
 			float rot22 = rot(2, 2);
@@ -238,7 +238,7 @@ namespace iwmath {
 		//TODO: I don't think this is needed
 		//if (0 >= v.x && 0 >= v.y && 0 >= v.z) {
 		//	v = -v;
-		//	angle = -angle + IW_2PI;
+		//	angle = -angle + PI2;
 		//}
 
 		return vector4(v, angle);
@@ -252,12 +252,12 @@ namespace iwmath {
 		float rot02 = rot(0, 2);
 
 		if (rot02 == -1) {
-			v.y = IW_PI / 2;
+			v.y = PI / 2;
 			v.x = atan2(rot(1, 0), rot(2, 0));
 		}
 
 		else if (rot02 == 1) {
-			v.y = -IW_PI / 2;
+			v.y = -PI / 2;
 			v.x = atan2(-rot(1, 0), -rot(2, 0));
 		}
 
