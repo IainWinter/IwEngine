@@ -13,7 +13,7 @@ namespace IW {
 		, Handle(nullptr)
 	{}
 
-	void Texture::Compile(
+	void Texture::Initialize(
 		const iwu::ref<IDevice>& device)
 	{
 		Handle = device->CreateTexture(Width, Height, Channels, Colors);

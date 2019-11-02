@@ -23,7 +23,7 @@ inline namespace Graphics {
 			int channels,
 			unsigned char* colors);
 
-		void Compile(
+		void Initialize(
 			const iwu::ref<IDevice>& device);
 	};
 }

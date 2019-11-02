@@ -48,7 +48,7 @@ namespace IW {
 			{
 				auto itr = m_loaders.find(typeid(_a).hash_code());
 				if (itr != m_loaders.end()) {
-					return std::static_pointer_cast<_a, void>(itr->second->Load(filepath));
+					return std::static_pointer_cast<_a, void>(itr->second->Load("assets/" + filepath));
 				}
 
 				return iwu::ref<_a>(nullptr);

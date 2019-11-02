@@ -1,17 +1,22 @@
 #version 430 core
 out vec4 FragColor;
+in vec3 WorldPos;
 in vec2 TexCoords;
 in vec3 Normal;
-in vec3 WorldPos;
+in mat3 TBN;
 
 // material parameters
-//uniform vec3  albedo;
 
 uniform sampler2D albedoMap;
+uniform sampler2D normalMap;
+uniform sampler2D metallicMap;
+uniform sampler2D roughnessMap;
+uniform sampler2D aoMap;
 
-uniform float metallic;
-uniform float roughness;
-uniform float ao;
+//uniform vec3  albedo;
+//uniform float metallic;
+//uniform float roughness;
+//uniform float ao;
 
 // lights
 uniform vec3 lightPositions[4];
@@ -60,8 +65,14 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0) {
 void main()
 {
 	vec3 albedo = texture(albedoMap, TexCoords).rgb;
+	vec3 normal = texture(normalMap, TexCoords).rgb * 2.0 - 1.0;
+	float metallic  = texture(metallicMap, TexCoords).r;
+	float roughness = texture(roughnessMap, TexCoords).r;
+	float ao = texture(aoMap, TexCoords).r;
 
-	vec3 N = normalize(Normal);
+	normal = normalize(TBN * normal);
+
+	vec3 N = normalize(normal);
 	vec3 V = normalize(camPos - WorldPos);
 
 	vec3 F0 = vec3(0.04); 

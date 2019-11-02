@@ -22,50 +22,50 @@ iwu::ref<IW::IPipeline> pipeline;
 int GameLayer3D::Initialize(
 	IwEngine::InitOptions& options)
 {
-	pipeline = Renderer.CreatePipeline("res/pbr/pbrvs.glsl", "res/pbr/pbrfs.glsl");
+	pipeline = Renderer.CreatePipeline("assets/shaders/pbr/pbrvs.glsl", "assets/shaders/pbr/pbrfs.glsl");
 
 	//iwu::ref<IW::Model> model = Asset.Load<IW::Model>("res/cube2.obj");
 
 	//for (size_t i = 0; i < model->MeshCount; i++) {
-	//	model->Meshes[i].Compile(Renderer.Device);
+	//	model->Meshes[i].Initialize(Renderer.Device);
 	//	model->Meshes[i].Material->Pipeline = pipeline;
 	//}
 
 	//material = model->Meshes[0].Material;
-	//material->GetTexture("albedoMap")->Compile(Renderer.Device); // can look through properties that are samples and make them!!
+	//material->GetTexture("albedoMap")->Initialize(Renderer.Device); // can look through properties that are samples and make them!!
 
 	IW::Mesh* mesh = IW::mesh_factory::create_uvsphere(24, 48);
 	//mesh->SetNormals(0, nullptr);
 
 	mesh->GenTangents();
-	mesh->Compile(Renderer.Device);
+	mesh->Initialize(Renderer.Device);
 
 	material = std::make_shared<IW::Material>(pipeline);
 	mesh->SetMaterial(material);
 
-	iwu::ref<IW::Texture> albedo = Asset.Load<IW::Texture>("res/assets/tile2/albedo.png");
-	iwu::ref<IW::Texture> normal = Asset.Load<IW::Texture>("res/assets/tile2/normal.png");
-	iwu::ref<IW::Texture> height = Asset.Load<IW::Texture>("res/assets/tile2/height.png");
-	//iwu::ref<IW::Texture> metallic = Asset.Load<IW::Texture>("res/assets/rust/metallic.png");
-	//iwu::ref<IW::Texture> roughness = Asset.Load<IW::Texture>("res/assets/tile2/roughness.png");
-	iwu::ref<IW::Texture> ao = Asset.Load<IW::Texture>("res/assets/tile2/ao.png");
-	albedo->Compile(Renderer.Device);
-	normal->Compile(Renderer.Device);
-	height->Compile(Renderer.Device);
-	//metallic->Compile(Renderer.Device);
-	//roughness->Compile(Renderer.Device);
-	ao->Compile(Renderer.Device);
+	iwu::ref<IW::Texture> albedo = Asset.Load<IW::Texture>("textures/metal/albedo.jpg");
+	iwu::ref<IW::Texture> normal = Asset.Load<IW::Texture>("textures/metal/normal.jpg");
+	//iwu::ref<IW::Texture> height = Asset.Load<IW::Texture>("textures/metal/height.png");
+	iwu::ref<IW::Texture> metallic = Asset.Load<IW::Texture>("textures/metal/metallic.jpg");
+	iwu::ref<IW::Texture> roughness = Asset.Load<IW::Texture>("textures/metal/roughness.jpg");
+	iwu::ref<IW::Texture> ao = Asset.Load<IW::Texture>("textures/metal/ao.jpg");
+	albedo->Initialize(Renderer.Device);
+	normal->Initialize(Renderer.Device);
+	//height->Initialize(Renderer.Device);
+	metallic->Initialize(Renderer.Device);
+	roughness->Initialize(Renderer.Device);
+	ao->Initialize(Renderer.Device);
 
 	material->SetTexture("albedoMap", albedo);
 	material->SetTexture("normalMap", normal);
-	material->SetTexture("heightMap", height);
-	//material->SetTexture("metallicMap", metallic);
-	//material->SetTexture("roughnessMap", roughness);
+	//material->SetTexture("heightMap", height);
+	material->SetTexture("metallicMap", metallic);
+	material->SetTexture("roughnessMap", roughness);
 	material->SetTexture("aoMap", ao);
 
 	//material->SetFloats("albedo", &iwm::vector3(1.0f, 0.85f, 0.57f), 3);
-	material->SetFloat ("metallic", 1.0f);
-	material->SetFloat ("roughness", 0.6f);
+	//material->SetFloat ("metallic", 1.0f);
+	//material->SetFloat ("roughness", 0.6f);
 	//material->SetFloat ("ao", 1.0f);
 	material->Pipeline = pipeline;
 
@@ -166,16 +166,16 @@ void GameLayer3D::PostUpdate() {
 }
 
 void GameLayer3D::ImGui() {
-	ImGui::Begin("Game layer");
+	//ImGui::Begin("Game layer");
 
-	//ImGui::ColorPicker3("Color", (float*)std::get<0>(material->GetFloats("albedo")));
-	ImGui::SliderFloat("Metallic",  (float*)material->GetFloat("metallic"), 0, 1);
-	ImGui::SliderFloat("Roughness", (float*)material->GetFloat("roughness"), 0.3f, 1);
-	//ImGui::SliderFloat("AO", (float*)material->GetFloat("ao"), 0, 1);
-	//ImGui::ColorPicker4("Diffuse Color", (float*)&material->GetColor("diffuse"));
-	//ImGui::ColorPicker4("Specular Color", (float*)&material->GetColor("specular"));
+	////ImGui::ColorPicker3("Color", (float*)std::get<0>(material->GetFloats("albedo")));
+	//ImGui::SliderFloat("Metallic",  (float*)material->GetFloat("metallic"), 0, 1);
+	//ImGui::SliderFloat("Roughness", (float*)material->GetFloat("roughness"), 0.3f, 1);
+	////ImGui::SliderFloat("AO", (float*)material->GetFloat("ao"), 0, 1);
+	////ImGui::ColorPicker4("Diffuse Color", (float*)&material->GetColor("diffuse"));
+	////ImGui::ColorPicker4("Specular Color", (float*)&material->GetColor("specular"));
 
-	ImGui::End();
+	//ImGui::End();
 }
 
 bool GameLayer3D::On(

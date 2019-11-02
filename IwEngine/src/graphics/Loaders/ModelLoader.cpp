@@ -59,7 +59,7 @@ namespace IW {
 				if (   aimaterial->GetTextureCount(aiTextureType_DIFFUSE) > 0
 					&& aimaterial->GetTexture(aiTextureType_DIFFUSE, 0, &texturePath) == AI_SUCCESS)
 				{
-					texturePath.Set("res/" + std::string(texturePath.C_Str()));
+					texturePath.Set(std::string(texturePath.C_Str()));
 
 					iwu::ref<IW::Texture> texture = m_asset.Load<IW::Texture>(texturePath.C_Str());
 					material.SetTexture("albedoMap", texture);
@@ -112,23 +112,20 @@ namespace IW {
 			//scene->mMeshes[0]->
 
 			mesh.VertexCount = aimesh->mNumVertices;
-			mesh.Vertices = new iwm::vector3[mesh.VertexCount];
-			mesh.Normals  = new iwm::vector3[mesh.VertexCount];
-			mesh.Uvs      = new iwm::vector2[mesh.VertexCount];
+			if (aimesh->HasPositions()) {
+				mesh.Vertices = new iwm::vector3[mesh.VertexCount];
+				memcpy(mesh.Vertices, aimesh->mVertices, mesh.VertexCount * sizeof(iwm::vector3));
+			}
 
-			if (mesh.Vertices) {
-				for (size_t i = 0; i < mesh.VertexCount; i++) {
-					mesh.Vertices[i].x = aimesh->mVertices[i].x;
-					mesh.Vertices[i].y = aimesh->mVertices[i].y;
-					mesh.Vertices[i].z = aimesh->mVertices[i].z;
+			if (aimesh->HasNormals()) {
+				mesh.Normals = new iwm::vector3[mesh.VertexCount];
+				memcpy(mesh.Normals, aimesh->mNormals, mesh.VertexCount * sizeof(iwm::vector3));
+			}
 
-					mesh.Normals[i].x = aimesh->mNormals[i].x;
-					mesh.Normals[i].y = aimesh->mNormals[i].y;
-					mesh.Normals[i].z = aimesh->mNormals[i].z;
-
-					mesh.Uvs[i].x = aimesh->mTextureCoords[0][i].x;
-					mesh.Uvs[i].y = aimesh->mTextureCoords[0][i].y;
-				}
+			// Need to check for multiple channels i guess
+			if (aimesh->HasTextureCoords(0)) {
+				mesh.Uvs = new iwm::vector2[mesh.VertexCount];
+				memcpy(mesh.Uvs, aimesh->mTextureCoords[0], mesh.VertexCount * sizeof(iwm::vector2));
 			}
 		}
 

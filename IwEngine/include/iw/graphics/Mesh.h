@@ -81,7 +81,7 @@ inline namespace Graphics {
 			return IndexCount / Topology;
 		}
 
-		void Compile(
+		void Initialize(
 			const iwu::ref<IW::IDevice>& device);
 
 		void Update(

@@ -57,8 +57,8 @@ int GameLayer::Initialize(
 	//  \ /
 	//Asset.Load<IW::Shader>("res/sandbox.shader");
 	
-	iwu::ref<IW::IPipeline> shader = Renderer.CreatePipeline("res/sandboxvs.glsl", "res/sandboxfs.glsl");
-	iwu::ref<IW::IPipeline> shader_line = Renderer.CreatePipeline("res/sandbox_line_vs.glsl", "res/sandbox_line_fs.glsl");
+	iwu::ref<IW::IPipeline> shader = Renderer.CreatePipeline("assets/shaders/sandboxvs.glsl", "assets/shaders/sandboxfs.glsl");
+	iwu::ref<IW::IPipeline> shader_line = Renderer.CreatePipeline("assets/shaders/sandbox_line_vs.glsl", "assets/shaders/sandbox_line_fs.glsl");
 
 	// Making line mesh
 	// Model data
@@ -79,25 +79,28 @@ int GameLayer::Initialize(
 	iwu::ref<IW::Material> lineMaterial(new IW::Material(shader_line));
 
 	iwu::ref<IW::Material> quadMaterial(new IW::Material(shader));
-	//quadMaterial->SetProperty("color", iwm::vector3(1, 0, 0));
+	quadMaterial->SetFloats("color", &iwm::vector3(1, 0, 0), 3);
 
 	iwu::ref<IW::Material> circleMaterial(new IW::Material(shader));
-	//circleMaterial->SetProperty("color", iwm::vector3(1, 1, 1));
+	circleMaterial->SetFloats("color", &iwm::vector3(1, 1, 1), 3);
 
 	line = new IW::Mesh(IW::LINES);
 	line->SetMaterial(lineMaterial);
 	line->SetVertices(2, verts);
 	line->SetColors  (2, color);
 	line->SetIndices (2, index);
-	line->Compile(Renderer.Device);
+	line->Initialize(Renderer.Device);
 
 	// Making quad mesh
-	auto qmodel = Asset.Load<IW::Model>("res/quad.obj");
-	qmodel->Meshes[0].Compile(Renderer.Device);
+	auto qmodel = Asset.Load<IW::Model>("quad.obj");
+	qmodel->Meshes[0].Initialize(Renderer.Device);
 
 	// Making circle mesh
-	auto cmodel = Asset.Load<IW::Model>("res/circle.obj");
-	cmodel->Meshes[0].Compile(Renderer.Device);
+	auto cmodel = Asset.Load<IW::Model>("circle.obj");
+	cmodel->Meshes[0].Initialize(Renderer.Device);
+
+	qmodel->Meshes->SetMaterial(quadMaterial);
+	cmodel->Meshes->SetMaterial(circleMaterial);
 
 	// give enemy system circle mesh
 

@@ -1,4 +1,5 @@
 #include "iw/engine/EntryPoint.h"
+#include "Layers/GameLayer.h"
 #include "Layers/GameLayer3D.h"
 
 #include "imgui/imgui.h"
@@ -26,11 +27,11 @@ class Game
 {
 public:
 	Game() {
-		InputManager.CreateDevice<IwInput::Mouse>(); // causes imgui to crash on exit deff because events after destruction...
-		InputManager.CreateDevice<IwInput::RawMouse>(); // causes imgui to crash on exit deff because events after destruction...
+		InputManager.CreateDevice<IwInput::Mouse>();
+		InputManager.CreateDevice<IwInput::RawMouse>();
 		//InputManager.CreateDevice<IwInput::RawKeyboard>();
 
-		PushLayer<GameLayer3D>();
+		PushLayer<GameLayer>();
 	}
 
 	int Initialize(

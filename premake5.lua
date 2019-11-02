@@ -8,7 +8,7 @@ stbdir = iwengdir .. "/extern/stb"
 cfgname = "%{cfg.buildcfg}.%{cfg.system}.%{cfg.architecture}"
 bindir  = "/bin/" .. cfgname
 libdir  = "/lib/" .. cfgname
-resdir  = "/res"
+resdir  = "/assets"
 blddir  = "/build"
 incdir  = "/include"
 srcdir  = "/src"
@@ -68,11 +68,11 @@ project "IwEngine"
 	}
 
 	postbuildcommands  {
-		"xcopy /q /y /f \""    .. assimpdir .. blddir .. "/code/%{cfg.buildcfg}/assimp-vc140-mt.dll\" \"" .. sndbxdir .. bindir .. "\"",
-		"xcopy /q /y /f \""    .. iwengdir  .. bindir .. "/IwEngine.dll\" \""  .. sndbxdir .. bindir .. "\"",
-		"xcopy /q /y /f \""    .. glewdir   .. bindir .. "/GLEW.dll\" \""      .. sndbxdir .. bindir .. "\"",
-		"xcopy /q /y /f /i \"" .. sndbxdir  .. resdir .. "\" \""               .. sndbxdir .. blddir .. resdir .. "\"",
-		"xcopy /q /y /f /i \"" .. sndbxdir  .. resdir .. "\" \""               .. sndbxdir .. bindir .. resdir .. "\""
+		"xcopy /y /f \""    .. assimpdir .. blddir .. "/code/%{cfg.buildcfg}/assimp-vc140-mt.dll\" \"" .. sndbxdir .. bindir .. "\"",
+		"xcopy /y /f \""    .. iwengdir  .. bindir .. "/IwEngine.dll\" \""  .. sndbxdir .. bindir .. "\"",
+		"xcopy /y /f \""    .. glewdir   .. bindir .. "/GLEW.dll\" \""      .. sndbxdir .. bindir .. "\"",
+		"xcopy /e /y /f /i \"" .. sndbxdir  .. resdir .. "\" \""               .. sndbxdir .. blddir .. resdir .. "\"",
+		"xcopy /e /y /f /i \"" .. sndbxdir  .. resdir .. "\" \""               .. sndbxdir .. bindir .. resdir .. "\""
 	}
 
 	filter "system:windows"

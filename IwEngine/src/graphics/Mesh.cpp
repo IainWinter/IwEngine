@@ -6,6 +6,8 @@ namespace IW {
 	Mesh::Mesh()
 		: Vertices(nullptr)
 		, Normals(nullptr)
+		, Tangents(nullptr)
+		, BiTangents(nullptr)
 		, Colors(nullptr)
 		, Uvs(nullptr)
 		, Indices(nullptr)
@@ -21,6 +23,8 @@ namespace IW {
 		IW::MeshTopology topology)
 		: Vertices(nullptr)
 		, Normals(nullptr)
+		, Tangents(nullptr)
+		, BiTangents(nullptr)
 		, Colors(nullptr)
 		, Uvs(nullptr)
 		, Indices(nullptr)
@@ -181,7 +185,7 @@ namespace IW {
 		}
 	}
 
-	void Mesh::Compile(
+	void Mesh::Initialize(
 		const iwu::ref<IW::IDevice>& device)
 	{
 		if (VertexArray && Outdated) { // reset data not sub data
@@ -284,7 +288,6 @@ namespace IW {
 	{
 		device->DestroyVertexArray(VertexArray);
 		device->DestroyIndexBuffer(IndexBuffer);
-		delete this;
 	}
 
 	void Mesh::Draw(
