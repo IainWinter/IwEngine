@@ -9,9 +9,7 @@ private:
 	iwm::vector3 lightPositions[4];
 	iwm::vector3 lightColors[4];
 
-	IW::Mesh* meshes;
-	iwu::ref<IW::Material>  material;
-	iwm::vector2 mouse;
+	iwu::ref<IW::Material> material;
 
 public:
 	GameLayer3D(

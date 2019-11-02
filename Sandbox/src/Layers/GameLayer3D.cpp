@@ -24,26 +24,51 @@ int GameLayer3D::Initialize(
 {
 	pipeline = Renderer.CreatePipeline("res/pbr/pbrvs.glsl", "res/pbr/pbrfs.glsl");
 
-	iwu::ref<IW::Model> model = Asset.Load<IW::Model>("res/cube2.obj");
+	//iwu::ref<IW::Model> model = Asset.Load<IW::Model>("res/cube2.obj");
 
-	for (size_t i = 0; i < model->MeshCount; i++) {
-		model->Meshes[i].Compile(Renderer.Device);
-		model->Meshes[i].Material->Pipeline = pipeline;
-	}
+	//for (size_t i = 0; i < model->MeshCount; i++) {
+	//	model->Meshes[i].Compile(Renderer.Device);
+	//	model->Meshes[i].Material->Pipeline = pipeline;
+	//}
 
-	material = model->Meshes[0].Material;
-	material->GetTexture("albedoMap")->Compile(Renderer.Device);
+	//material = model->Meshes[0].Material;
+	//material->GetTexture("albedoMap")->Compile(Renderer.Device); // can look through properties that are samples and make them!!
 
-	//meshes = IW::mesh_factory::create_icosphere(5);
-	//meshes->Compile(Renderer.Device);
+	IW::Mesh* mesh = IW::mesh_factory::create_uvsphere(24, 48);
+	//mesh->SetNormals(0, nullptr);
 
-	//material = std::make_shared<IW::Material>(pipeline);
+	mesh->GenTangents();
+	mesh->Compile(Renderer.Device);
+
+	material = std::make_shared<IW::Material>(pipeline);
+	mesh->SetMaterial(material);
+
+	iwu::ref<IW::Texture> albedo = Asset.Load<IW::Texture>("res/assets/tile2/albedo.png");
+	iwu::ref<IW::Texture> normal = Asset.Load<IW::Texture>("res/assets/tile2/normal.png");
+	iwu::ref<IW::Texture> height = Asset.Load<IW::Texture>("res/assets/tile2/height.png");
+	//iwu::ref<IW::Texture> metallic = Asset.Load<IW::Texture>("res/assets/rust/metallic.png");
+	//iwu::ref<IW::Texture> roughness = Asset.Load<IW::Texture>("res/assets/tile2/roughness.png");
+	iwu::ref<IW::Texture> ao = Asset.Load<IW::Texture>("res/assets/tile2/ao.png");
+	albedo->Compile(Renderer.Device);
+	normal->Compile(Renderer.Device);
+	height->Compile(Renderer.Device);
+	//metallic->Compile(Renderer.Device);
+	//roughness->Compile(Renderer.Device);
+	ao->Compile(Renderer.Device);
+
+	material->SetTexture("albedoMap", albedo);
+	material->SetTexture("normalMap", normal);
+	material->SetTexture("heightMap", height);
+	//material->SetTexture("metallicMap", metallic);
+	//material->SetTexture("roughnessMap", roughness);
+	material->SetTexture("aoMap", ao);
 
 	//material->SetFloats("albedo", &iwm::vector3(1.0f, 0.85f, 0.57f), 3);
-	//material->SetFloat ("metallic", 1.0f);
-	//material->SetFloat ("roughness", 0.6f);
+	material->SetFloat ("metallic", 1.0f);
+	material->SetFloat ("roughness", 0.6f);
 	//material->SetFloat ("ao", 1.0f);
-	
+	material->Pipeline = pipeline;
+
 	lightPositions[0] = iwm::vector3( 5,  5, 0);
 	lightPositions[1] = iwm::vector3(-5,  5, 0);
 	lightPositions[2] = iwm::vector3( 5, -5, 0);
@@ -55,7 +80,7 @@ int GameLayer3D::Initialize(
 	lightColors[3] = iwm::vector3(0, 0, 1);
 
 	IW::Camera* ortho = new IW::OrthographicCamera(64, 36, -100, 100);
-	ortho->Rotation = iwm::quaternion::create_from_euler_angles(0, iwm::IW_PI, 0);
+	ortho->Rotation = iwm::quaternion::create_from_euler_angles(0, iwm::PI, 0);
 
 	IW::Camera* camera = new IW::PerspectiveCamera(1.17f, 1.778f, 0.001f, 1000.0f);
 	//camera->Rotation = iwm::quaternion::create_from_euler_angles(0, iwm::IW_PI, 0);
@@ -68,7 +93,7 @@ int GameLayer3D::Initialize(
 		for (int y = -5; y < 10; y++) {
 			IwEntity::Entity tree = Space.CreateEntity<IW::Transform, IwEngine::Model>();
 			Space.SetComponentData<IW::Transform>(tree, iwm::vector3(x, y, 5), iwm::vector3(.5f));
-			Space.SetComponentData<IwEngine::Model>(tree, model->Meshes, 1U);
+			Space.SetComponentData<IwEngine::Model>(tree, mesh, 1U);
 		}
 	}
 
@@ -121,10 +146,10 @@ void GameLayer3D::PostUpdate() {
 
 		Renderer.BeginScene(controller->Camera);
 
-		pipeline->GetParam("lightPositions")->SetAsFloats(&lightPositions, 4, 3);
+		pipeline->GetParam("lightPositions")->SetAsFloats(&lightPositions, 4, 3); // need better way to pass scene data
 		pipeline->GetParam("lightColors")   ->SetAsFloats(&lightColors, 4, 3);
 
-		pipeline->GetParam("camPos") ->SetAsFloats(&(transform->Position + transform->Forward()), 3);
+		pipeline->GetParam("camPos") ->SetAsFloats(&(transform->Position + transform->Forward() * 0.1f), 3);
 
 		for (auto tree : Space.Query<IW::Transform, IwEngine::Model>()) {
 			auto [transform, model] = tree.Components.Tie<TreeComponents>();

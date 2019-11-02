@@ -106,7 +106,7 @@ int GameLayer::Initialize(
 	// Camera & entities
 
 	IW::Camera* ortho = new IW::OrthographicCamera(64, 36, -100, 100);
-	ortho->Rotation = iwm::quaternion::create_from_euler_angles(0, iwm::IW_PI, 0);
+	ortho->Rotation = iwm::quaternion::create_from_euler_angles(0, iwm::PI, 0);
 
 	IwEntity::Entity camera = Space.CreateEntity<IwEngine::CameraController>();
 	Space.SetComponentData<IwEngine::CameraController>(camera, ortho);
