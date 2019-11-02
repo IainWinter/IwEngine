@@ -47,7 +47,7 @@ inline namespace Asset {
 				asset = LoadAsset(filepath);
 				if (asset == nullptr) {
 					LOG_ERROR << "Failed to load resource " << filepath << "!";
-					assert(false);
+					return nullptr;
 				}
 
 				m_loaded.emplace(filepath, asset);

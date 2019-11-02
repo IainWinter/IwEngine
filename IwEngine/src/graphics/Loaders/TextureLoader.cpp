@@ -14,12 +14,36 @@ namespace IW {
 		std::string filepath)
 	{
 		int width, height, channels;
-		unsigned char* image = stbi_load(filepath.c_str(), &width, &height, &channels, STBI_rgb);
+		stbi_info(filepath.c_str(), &width, &height, &channels);
 
-		//if (stbi_failure_reason()) {
-		//	LOG_WARNING << stbi_failure_reason();
-		//	return nullptr;
-		//}
+		unsigned char* image = nullptr;
+		if (channels == 1) {
+			image = stbi_load(filepath.c_str(), &width, &height, &channels, STBI_grey);
+		}
+
+		else if (channels == 2) {
+			image = stbi_load(filepath.c_str(), &width, &height, &channels, STBI_grey_alpha);
+		}
+
+		else if (channels == 3) {
+			image = stbi_load(filepath.c_str(), &width, &height, &channels, STBI_rgb);
+		}
+
+		else if (channels == 4) {
+			image = stbi_load(filepath.c_str(), &width, &height, &channels, STBI_rgb_alpha);
+		}
+
+		else {
+			LOG_ERROR << channels << " channels is not supported!";
+		}
+
+		if (stbi_failure_reason()) {
+			LOG_WARNING << stbi_failure_reason();
+		}
+
+		if (image == nullptr) {
+			return nullptr;
+		}
 
 		int size = width * height * channels;
 

@@ -112,8 +112,6 @@ namespace IW {
 			//scene->mMeshes[0]->
 
 			mesh.VertexCount = aimesh->mNumVertices;
-			mesh.NormalCount = aimesh->mNumVertices;
-			mesh.UvCount     = aimesh->mNumVertices;
 			mesh.Vertices = new iwm::vector3[mesh.VertexCount];
 			mesh.Normals  = new iwm::vector3[mesh.VertexCount];
 			mesh.Uvs      = new iwm::vector2[mesh.VertexCount];
