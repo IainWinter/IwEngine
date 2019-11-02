@@ -15,22 +15,22 @@ namespace iwmath {
 	/**
 	* Pi ~ 3.14
 	*/
-	constexpr float IW_PI = 3.14159265359f;
+	constexpr float PI = 3.14159265359f;
 
 	/**
 	* Pi ~ 6.28
 	*/
-	constexpr float IW_2PI = IW_PI * 2;
+	constexpr float PI2 = PI * 2;
 
 	/**
 	* e ~ 2.71
 	*/
-	constexpr float IW_E = 2.71828182846f;
+	constexpr float E = 2.71828182846f;
 
 	/**
 	* Phi ~ 1.62
 	*/
-	constexpr float IW_PHI = 1.61803398875f;
+	constexpr float PHI = 1.61803398875f;
 
 	/**
 	* Returns an approximation of the inverse
