@@ -11,25 +11,31 @@ inline namespace Graphics {
 		typedef std::unordered_map<index_pair, unsigned int, iwu::pair_hash> index_lookup_map;
 		typedef std::vector<iwm::vector3> vert_list;
 
-		static const unsigned int ico_vert_count;
-		static const unsigned int ico_index_count;
 		static const iwm::vector3* ico_verts;
 		static const unsigned int* ico_index;
+		static const size_t ico_vert_count;
+		static const size_t ico_index_count;
 
+	public:
+		static Mesh* create_icosphere(
+			size_t resolution);
+
+		static Mesh* create_uvsphere(
+			size_t latCount,
+			size_t lonCount);
+	private:
 		static void sub_devide(
 			iwmath::vector3* verts,
 			unsigned int* index,
-			unsigned int& current_index_count,
-			unsigned int& current_vert_count);
+			size_t& current_index_count,
+			size_t& current_vert_count);
 
 		static unsigned int create_vertex_for_edge(
 			index_lookup_map& lookup,
 			iwm::vector3* verts,
 			unsigned int first,
 			unsigned int second,
-			unsigned int& current_vert_count);
-	public:
-		static Mesh* create_icosphere(const unsigned int& resolution);
+			size_t& current_vert_count);
 	};
 }
 }

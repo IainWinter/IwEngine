@@ -14,16 +14,18 @@ inline namespace Graphics {
 	//    , but idk how bad that actually is cus I like the idea more...
 
 	struct IWGRAPHICS_API Mesh {
-		iwm::vector3* Vertices;
+		iwm::vector3* Vertices; // should combine
 		iwm::vector3* Normals;
+		iwm::vector3* Tangents;
+		iwm::vector3* BiTangents;
 		iwm::vector4* Colors;
 		iwm::vector2* Uvs;
 		unsigned int* Indices;
 
 		size_t VertexCount;
-		size_t NormalCount;
+		/*size_t NormalCount;
 		size_t ColorCount;
-		size_t UvCount;
+		size_t UvCount;*/
 		size_t IndexCount;
 
 		iwu::ref<Material> Material;
@@ -65,6 +67,10 @@ inline namespace Graphics {
 			size_t count,
 			unsigned int* indices);
 
+		void GenNormals();
+
+		void GenTangents(); 
+
 		inline void SetMaterial(
 			iwu::ref<IW::Material>& material)
 		{
@@ -85,7 +91,7 @@ inline namespace Graphics {
 			const iwu::ref<IW::IDevice>& device);
 
 		void Draw(
-			const iwu::ref<IW::IDevice>& device) const;		
+			const iwu::ref<IW::IDevice>& device) const;
 	};
 }
 }

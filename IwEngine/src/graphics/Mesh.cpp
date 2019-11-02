@@ -10,9 +10,6 @@ namespace IW {
 		, Uvs(nullptr)
 		, Indices(nullptr)
 		, VertexCount(0)
-		, NormalCount(0)
-		, ColorCount(0)
-		, UvCount(0)
 		, IndexCount(0)
 		, Topology(IW::TRIANGLES)
 		, VertexArray(nullptr)
@@ -28,9 +25,6 @@ namespace IW {
 		, Uvs(nullptr)
 		, Indices(nullptr)
 		, VertexCount(0)
-		, NormalCount(0)
-		, ColorCount(0)
-		, UvCount(0)
 		, IndexCount(0)
 		, Topology(topology)
 		, VertexArray(nullptr)
@@ -51,12 +45,15 @@ namespace IW {
 		iwm::vector3* vertices)
 	{
 		delete[] Vertices;
+		Vertices = nullptr;
 
-		Vertices = new iwm::vector3[count];
+		if (count > 0) {
+			Vertices = new iwm::vector3[count];
+			memcpy(Vertices, vertices, count * sizeof(iwm::vector3));
+		}
+
 		VertexCount = count;
 		Outdated = true;
-
-		memcpy(Vertices, vertices, count * sizeof(iwm::vector3));
 	}
 
 	void Mesh::SetNormals(
@@ -64,12 +61,14 @@ namespace IW {
 		iwm::vector3* normals)
 	{
 		delete[] Normals;
+		Normals = nullptr;
 
-		Normals = new iwm::vector3[count];
-		NormalCount = count;
+		if (count > 0) {
+			Normals = new iwm::vector3[count];
+			memcpy(Normals, normals, count * sizeof(iwm::vector3));
+		}
+
 		Outdated = true;
-
-		memcpy(Normals, normals, count * sizeof(iwm::vector3));
 	}
 
 	void Mesh::SetColors(
@@ -77,12 +76,14 @@ namespace IW {
 		iwm::vector4* colors)
 	{
 		delete[] Colors;
+		Colors = nullptr;
 
-		Colors = new iwm::vector4[count];
-		ColorCount = count;
+		if (count > 0) {
+			Colors = new iwm::vector4[count];
+			memcpy(Colors, colors, count * sizeof(iwm::vector4));
+		}
+
 		Outdated = true;
-
-		memcpy(Colors, colors, count * sizeof(iwm::vector4));
 	}
 
 	void Mesh::SetUVs(
@@ -90,12 +91,14 @@ namespace IW {
 		iwm::vector2* uvs)
 	{
 		delete[] Uvs;
+		Uvs = nullptr;
 
-		Uvs = new iwm::vector2[count];
-		UvCount = count;
+		if (count > 0) {
+			Uvs = new iwm::vector2[count];
+			memcpy(Uvs, uvs, count * sizeof(iwm::vector2));
+		}
+
 		Outdated = true;
-
-		memcpy(Uvs, uvs, count * sizeof(iwm::vector2));
 	}
 
 	void Mesh::SetIndices(
@@ -103,28 +106,84 @@ namespace IW {
 		unsigned int* indices)
 	{
 		delete[] Indices;
+		Indices = nullptr;
 
-		Indices = new unsigned int[count];
+		if (count > 0) {
+			Indices = new unsigned int[count];
+			memcpy(Indices, indices, count * sizeof(unsigned int));
+		}
+
 		IndexCount = count;
 		Outdated = true;
+	}
 
-		memcpy(Indices, indices, count * sizeof(unsigned int));
+	void Mesh::GenNormals() {
+		if (!Vertices) return;
+
+		Normals = new iwm::vector3[VertexCount];
+
+		for (size_t i = 0; i < IndexCount; i += 3) {
+			iwm::vector3& v1 = Vertices[Indices[i + 0]];
+			iwm::vector3& v2 = Vertices[Indices[i + 1]];
+			iwm::vector3& v3 = Vertices[Indices[i + 2]];
+
+			iwm::vector3 face = (v2 - v1).cross(v3 - v1).normalized();
+
+			Normals[Indices[i + 0]] = (Normals[Indices[i + 0]] + face).normalized();
+			Normals[Indices[i + 1]] = (Normals[Indices[i + 1]] + face).normalized();
+			Normals[Indices[i + 2]] = (Normals[Indices[i + 2]] + face).normalized();
+		}
+	}
+
+	void Mesh::GenTangents() {
+		if (!Uvs || !Vertices) return; // should just gen normals if they don't exist
+
+		if (!Normals) {
+			GenNormals();
+		}
+
+		Tangents   = new iwm::vector3[VertexCount];
+		BiTangents = new iwm::vector3[VertexCount];
+
+		size_t v = 0;
+		for (size_t i = 0; i < IndexCount; i += 3) {
+			iwm::vector3& norm = Normals [Indices[i + 0]]; // can use any normal
+			iwm::vector3& pos1 = Vertices[Indices[i + 0]];
+			iwm::vector3& pos2 = Vertices[Indices[i + 1]];
+			iwm::vector3& pos3 = Vertices[Indices[i + 2]];
+			iwm::vector2& uv1 = Uvs[Indices[i + 0]];
+			iwm::vector2& uv2 = Uvs[Indices[i + 1]];
+			iwm::vector2& uv3 = Uvs[Indices[i + 2]];
+
+			iwm::vector3 edge1 = pos2 - pos1;
+			iwm::vector3 edge2 = pos3 - pos1;
+			iwm::vector2 duv1  = uv2 - uv1;
+			iwm::vector2 duv2  = uv3 - uv1;
+
+			float f = 1.0f / duv1.cross_length(duv2);
+
+			iwm::vector3 tanget;
+			tanget.x = f * (duv2.y * edge1.x - duv1.y * edge2.x);
+			tanget.y = f * (duv2.y * edge1.y - duv1.y * edge2.y);
+			tanget.z = f * (duv2.y * edge1.z - duv1.y * edge2.z);
+			tanget.normalize();
+
+			iwm::vector3 bitanget = norm.cross(tanget);
+			bitanget.normalize();
+
+			Tangents[Indices[i + 0]] = tanget;
+			Tangents[Indices[i + 1]] = tanget;
+			Tangents[Indices[i + 2]] = tanget;
+
+			BiTangents[Indices[i + 0]] = bitanget;
+			BiTangents[Indices[i + 1]] = bitanget;
+			BiTangents[Indices[i + 2]] = bitanget;
+		}
 	}
 
 	void Mesh::Compile(
 		const iwu::ref<IW::IDevice>& device)
 	{
-		size_t min = VertexCount + NormalCount + ColorCount + UvCount;
-		if (Vertices && VertexCount < min) min = VertexCount;
-		if (Normals  && NormalCount < min) min = NormalCount;
-		if (Colors   && ColorCount  < min) min = ColorCount;
-		if (Uvs      && UvCount     < min) min = UvCount;
-
-		if (Vertices) VertexCount = min;
-		if (Normals)  NormalCount = min;
-		if (Colors)   ColorCount  = min;
-		if (Uvs)      UvCount     = min;
-
 		if (VertexArray && Outdated) { // reset data not sub data
 			//int index = 0;
 			//if (Vertices) {
@@ -167,17 +226,27 @@ namespace IW {
 			}
 
 			if (Normals) {
-				IW::IVertexBuffer* buffer = device->CreateVertexBuffer(NormalCount * sizeof(iwm::vector3), Normals);
+				IW::IVertexBuffer* buffer = device->CreateVertexBuffer(VertexCount * sizeof(iwm::vector3), Normals);
+				device->AddBufferToVertexArray(VertexArray, buffer, layout3f);
+			}
+
+			if (Tangents) {
+				IW::IVertexBuffer* buffer = device->CreateVertexBuffer(VertexCount * sizeof(iwm::vector3), Tangents);
+				device->AddBufferToVertexArray(VertexArray, buffer, layout3f);
+			}
+
+			if (BiTangents) {
+				IW::IVertexBuffer* buffer = device->CreateVertexBuffer(VertexCount * sizeof(iwm::vector3), BiTangents);
 				device->AddBufferToVertexArray(VertexArray, buffer, layout3f);
 			}
 
 			if (Colors) {
-				IW::IVertexBuffer* buffer = device->CreateVertexBuffer(ColorCount * sizeof(iwm::vector4), Colors);
+				IW::IVertexBuffer* buffer = device->CreateVertexBuffer(VertexCount * sizeof(iwm::vector4), Colors);
 				device->AddBufferToVertexArray(VertexArray, buffer, layout4f);
 			}
 
 			if (Uvs) {
-				IW::IVertexBuffer* buffer = device->CreateVertexBuffer(UvCount * sizeof(iwm::vector2), Uvs);
+				IW::IVertexBuffer* buffer = device->CreateVertexBuffer(VertexCount * sizeof(iwm::vector2), Uvs);
 				device->AddBufferToVertexArray(VertexArray, buffer, layout2f);
 			}
 		}
@@ -195,17 +264,17 @@ namespace IW {
 		}
 
 		if (Normals) {
-			device->UpdateVertexArrayData(VertexArray, index, Normals, NormalCount * sizeof(iwm::vector3));
+			device->UpdateVertexArrayData(VertexArray, index, Normals, VertexCount * sizeof(iwm::vector3));
 			index++;
 		}
 
 		if (Colors) {
-			device->UpdateVertexArrayData(VertexArray, index, Colors, ColorCount * sizeof(iwm::vector4));
+			device->UpdateVertexArrayData(VertexArray, index, Colors, VertexCount * sizeof(iwm::vector4));
 			index++;
 		}
 
 		if (Uvs) {
-			device->UpdateVertexArrayData(VertexArray, index, Uvs, UvCount * sizeof(iwm::vector2));
+			device->UpdateVertexArrayData(VertexArray, index, Uvs, VertexCount * sizeof(iwm::vector2));
 			index++;
 		}
 	}
