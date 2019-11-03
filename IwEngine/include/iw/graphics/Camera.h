@@ -69,8 +69,13 @@ inline namespace Graphics {
 	class IWGRAPHICS_API PerspectiveCamera
 		: public Camera
 	{
+	public:
+		/*float Fov; // something like this could be cool
+		float Aspect;*/
 	private:
 		iwm::matrix4 m_projection;
+		//float m_fov;
+		//float m_aspect;
 
 	public:
 		PerspectiveCamera(

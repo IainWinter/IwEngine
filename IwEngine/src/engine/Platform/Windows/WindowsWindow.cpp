@@ -332,7 +332,7 @@ namespace IwEngine {
 		Bus->push(e);
 		//callback(*e);
 
-		LOG_INFO << "Mouse wheel moved " << delta;
+		//LOG_INFO << "Mouse wheel moved " << delta;
 	}
 
 	void WindowsWindow::HandleMouseMoved(
@@ -346,8 +346,8 @@ namespace IwEngine {
 		Bus->push(e);
 		//callback(*e);
 
-		LOG_INFO << "Mouse moved " << deltaX << ", " << deltaY 
-			<< " to " << X << ", " << Y;
+		//LOG_INFO << "Mouse moved " << deltaX << ", " << deltaY 
+		//	<< " to " << X << ", " << Y;
 	}
 	
 	void WindowsWindow::HandleMouseButton(
@@ -359,8 +359,8 @@ namespace IwEngine {
 		Bus->push(e);
 		//callback(*e);
 
-		LOG_INFO << "Mouse button " << button <<
-			(down ? " pressed" : " released");
+		//LOG_INFO << "Mouse button " << button <<
+		//	(down ? " pressed" : " released");
 	}
 
 	void WindowsWindow::HandleKey(
@@ -372,8 +372,8 @@ namespace IwEngine {
 		Bus->push(e);
 		//callback(*e);
 
-		LOG_INFO << "Key " << key <<
-			(down ? " pressed" : " released");
+		//LOG_INFO << "Key " << key <<
+		//	(down ? " pressed" : " released");
 	}
 
 	void WindowsWindow::HandleKeyTyped(
@@ -385,7 +385,7 @@ namespace IwEngine {
 		Bus->push(e);
 		//callback(*e);
 
-		LOG_INFO << "Key " << character;
+		//LOG_INFO << "Key " << character;
 	}
 }
 
