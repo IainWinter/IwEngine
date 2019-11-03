@@ -10,12 +10,19 @@
 
 #include "iw/util/io/File.h"
 
+#include "Systems/BulletSystem.h"
+#include "Systems/PlayerSystem.h"
+#include "Systems/EnemySystem.h"
+
 GameLayer3D::GameLayer3D(
 	IwEntity::Space& space, 
 	IW::Renderer& renderer,
 	IW::AssetManager& asset)
 	: Layer(space, renderer, asset, "Game")
-{}
+{
+	PushSystem<BulletSystem>();
+	PushSystem<PlayerSystem>();
+}
 
 iwu::ref<IW::IPipeline> pipeline;
 
@@ -24,18 +31,7 @@ int GameLayer3D::Initialize(
 {
 	pipeline = Renderer.CreatePipeline("assets/shaders/pbr/pbrvs.glsl", "assets/shaders/pbr/pbrfs.glsl");
 
-	//iwu::ref<IW::Model> model = Asset.Load<IW::Model>("res/cube2.obj");
-
-	//for (size_t i = 0; i < model->MeshCount; i++) {
-	//	model->Meshes[i].Initialize(Renderer.Device);
-	//	model->Meshes[i].Material->Pipeline = pipeline;
-	//}
-
-	//material = model->Meshes[0].Material;
-	//material->GetTexture("albedoMap")->Initialize(Renderer.Device); // can look through properties that are samples and make them!!
-
 	IW::Mesh* mesh = IW::mesh_factory::create_uvsphere(24, 48);
-	//mesh->SetNormals(0, nullptr);
 
 	mesh->GenTangents();
 	mesh->Initialize(Renderer.Device);
@@ -55,6 +51,8 @@ int GameLayer3D::Initialize(
 	metallic->Initialize(Renderer.Device);
 	roughness->Initialize(Renderer.Device);
 	ao->Initialize(Renderer.Device);
+
+	PushSystem<EnemySystem>(mesh);
 
 	material->SetTexture("albedoMap", albedo);
 	material->SetTexture("normalMap", normal);
@@ -79,23 +77,25 @@ int GameLayer3D::Initialize(
 	lightColors[2] = iwm::vector3(0, 1, 0);
 	lightColors[3] = iwm::vector3(0, 0, 1);
 
-	IW::Camera* ortho = new IW::OrthographicCamera(64, 36, -100, 100);
-	ortho->Rotation = iwm::quaternion::create_from_euler_angles(0, iwm::PI, 0);
-
-	IW::Camera* camera = new IW::PerspectiveCamera(1.17f, 1.778f, 0.001f, 1000.0f);
+	IW::Camera* perspective = new IW::PerspectiveCamera(0.17f, 1.778f, 0.001f, 1000.0f);
 	//camera->Rotation = iwm::quaternion::create_from_euler_angles(0, iwm::IW_PI, 0);
 
-	IwEntity::Entity player = Space.CreateEntity<IW::Transform, IwEngine::CameraController>();
-	Space.SetComponentData<IW::Transform>             (player, iwm::vector3(0, 0, 0));
-	Space.SetComponentData<IwEngine::CameraController>(player, camera);
+	perspective->Position = iwm::vector3(0, 100, -5);
+	perspective->Rotation = iwm::quaternion::create_from_euler_angles(-1.39f, 0, 0);
 
-	for (int x = -5; x < 10; x++) {
-		for (int y = -5; y < 10; y++) {
-			IwEntity::Entity tree = Space.CreateEntity<IW::Transform, IwEngine::Model>();
-			Space.SetComponentData<IW::Transform>(tree, iwm::vector3(x, y, 5), iwm::vector3(.5f));
-			Space.SetComponentData<IwEngine::Model>(tree, mesh, 1U);
-		}
-	}
+	IwEntity::Entity camera = Space.CreateEntity<IW::Transform, IwEngine::CameraController>();
+
+	Space.SetComponentData<IwEngine::CameraController>(camera, perspective);
+
+	IwEntity::Entity player = Space.CreateEntity<IW::Transform, IwEngine::Model, Player>();
+	Space.SetComponentData<IW::Transform>(player, iwm::vector3(3, 0, 10));
+	Space.SetComponentData<IwEngine::Model>(player, mesh, 1U);
+	Space.SetComponentData<Player>(player, 10.0f, 100.0f, 0.1666f, 0.1f);
+
+	IwEntity::Entity enemy = Space.CreateEntity<IW::Transform, IwEngine::Model, Enemy>();
+	Space.SetComponentData<IW::Transform>  (enemy, iwm::vector3(0, 0, 10));
+	Space.SetComponentData<IwEngine::Model>(enemy, mesh, 1U);
+	Space.SetComponentData<Enemy>          (enemy, SPIN, 3.0f, 0.05f, 0.025f, 0.025f);
 
 	return 0;
 }
@@ -111,50 +111,18 @@ struct TreeComponents {
 };
 
 void GameLayer3D::PostUpdate() {
-	for (auto entity : Space.Query<IW::Transform, IwEngine::CameraController>()) {
-		auto [transform, controller] = entity.Components.Tie<PlayerComponents>();
-
-		iwm::vector3 movement;
-		if (IwInput::Keyboard::KeyDown(IwInput::W)) {
-			movement += transform->Forward();
-		}
-
-		if (IwInput::Keyboard::KeyDown(IwInput::S)) {
-			movement -= transform->Forward();
-		}
-
-		if (IwInput::Keyboard::KeyDown(IwInput::A)) {
-			movement += transform->Right();
-		}
-
-		if (IwInput::Keyboard::KeyDown(IwInput::D)) {
-			movement -= transform->Right();
-		}
-
-		if (IwInput::Keyboard::KeyDown(IwInput::SPACE)) {
-			movement += iwm::vector3::unit_y;
-		}
-
-		if (IwInput::Keyboard::KeyDown(IwInput::LEFT_SHIFT)) {
-			movement -= iwm::vector3::unit_y;
-		}
-
-		transform->Position += movement * 5 * IwEngine::Time::DeltaTime();
-		controller->Camera->Position = transform->Position;
-
-		lightPositions[0] = transform->Position;
+	for (auto entity : Space.Query<IwEngine::CameraController>()) {
+		auto [controller] = entity.Components.TieTo<IwEngine::CameraController>();
 
 		Renderer.BeginScene(controller->Camera);
 
 		pipeline->GetParam("lightPositions")->SetAsFloats(&lightPositions, 4, 3); // need better way to pass scene data
 		pipeline->GetParam("lightColors")   ->SetAsFloats(&lightColors, 4, 3);
 
-		pipeline->GetParam("camPos") ->SetAsFloats(&(transform->Position + transform->Forward() * 0.1f), 3);
+		pipeline->GetParam("camPos") ->SetAsFloats(&controller->Camera->Position, 3);
 
 		for (auto tree : Space.Query<IW::Transform, IwEngine::Model>()) {
 			auto [transform, model] = tree.Components.Tie<TreeComponents>();
-			
-			//transform->Rotation *= iwm::quaternion::create_from_euler_angles(IwEngine::Time::DeltaTime(), IwEngine::Time::DeltaTime(), IwEngine::Time::DeltaTime());
 
 			for (size_t i = 0; i < model->MeshCount; i++) {
 				Renderer.DrawMesh(transform, &model->Meshes[i]);
@@ -166,34 +134,34 @@ void GameLayer3D::PostUpdate() {
 }
 
 void GameLayer3D::ImGui() {
-	//ImGui::Begin("Game layer");
+	ImGui::Begin("Game layer");
 
-	////ImGui::ColorPicker3("Color", (float*)std::get<0>(material->GetFloats("albedo")));
+	//ImGui::ColorPicker3("Color", (float*)std::get<0>(material->GetFloats("albedo")));
 	//ImGui::SliderFloat("Metallic",  (float*)material->GetFloat("metallic"), 0, 1);
 	//ImGui::SliderFloat("Roughness", (float*)material->GetFloat("roughness"), 0.3f, 1);
-	////ImGui::SliderFloat("AO", (float*)material->GetFloat("ao"), 0, 1);
-	////ImGui::ColorPicker4("Diffuse Color", (float*)&material->GetColor("diffuse"));
-	////ImGui::ColorPicker4("Specular Color", (float*)&material->GetColor("specular"));
+	//ImGui::SliderFloat("AO", (float*)material->GetFloat("ao"), 0, 1);
+	//ImGui::ColorPicker4("Diffuse Color", (float*)&material->GetColor("diffuse"));
+	//ImGui::ColorPicker4("Specular Color", (float*)&material->GetColor("specular"));
 
-	//ImGui::End();
+	ImGui::End();
 }
 
 bool GameLayer3D::On(
 	IwEngine::MouseMovedEvent& event)
 {
-	for (auto entity : Space.Query<IW::Transform, IwEngine::CameraController>()) {
-		auto [transform, controller] = entity.Components.Tie<PlayerComponents>();
+	//for (auto entity : Space.Query<IW::Transform, IwEngine::CameraController>()) {
+	//	auto [transform, controller] = entity.Components.Tie<PlayerComponents>();
 
-		float pitch = event.DeltaY * 0.0005f;
-		float yaw   = event.DeltaX * 0.0005f;
+	//	float pitch = event.DeltaY * 0.0005f;
+	//	float yaw   = event.DeltaX * 0.0005f;
 
-		iwm::quaternion deltaP = iwm::quaternion::create_from_axis_angle(-transform->Right(), pitch);
-		iwm::quaternion deltaY = iwm::quaternion::create_from_axis_angle( iwm::vector3::unit_y, yaw);
+	//	iwm::quaternion deltaP = iwm::quaternion::create_from_axis_angle(-transform->Right(), pitch);
+	//	iwm::quaternion deltaY = iwm::quaternion::create_from_axis_angle( iwm::vector3::unit_y, yaw);
 
-		transform->Rotation *= deltaP * deltaY;
+	//	transform->Rotation *= deltaP * deltaY;
 
-		controller->Camera->Rotation = transform->Rotation;
-	}
+	//	controller->Camera->Rotation = transform->Rotation;
+	//}
 
 	return false;
 }

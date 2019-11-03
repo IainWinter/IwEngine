@@ -76,13 +76,17 @@ int GameLayer::Initialize(
 		0, 1
 	};
 
+	iwu::ref<IW::Texture> tex = Asset.Load<IW::Texture>("textures/metal/albedo.jpg");
+	tex->Initialize(Renderer.Device);
+
 	iwu::ref<IW::Material> lineMaterial(new IW::Material(shader_line));
 
 	iwu::ref<IW::Material> quadMaterial(new IW::Material(shader));
-	quadMaterial->SetFloats("color", &iwm::vector3(1, 0, 0), 3);
+	//quadMaterial->SetFloats("color", &iwm::vector3(1, 0, 0), 3);
+	quadMaterial->SetTexture("albedoMap", tex);
 
 	iwu::ref<IW::Material> circleMaterial(new IW::Material(shader));
-	circleMaterial->SetFloats("color", &iwm::vector3(1, 1, 1), 3);
+	//circleMaterial->SetFloats("color", &iwm::vector3(1, 1, 1), 3);
 
 	line = new IW::Mesh(IW::LINES);
 	line->SetMaterial(lineMaterial);
@@ -93,11 +97,20 @@ int GameLayer::Initialize(
 
 	// Making quad mesh
 	auto qmodel = Asset.Load<IW::Model>("quad.obj");
-	qmodel->Meshes[0].Initialize(Renderer.Device);
+	
+	iwm::vector2 uvs[4] = {
+		iwm::vector2(.1f, 0),
+		iwm::vector2(.1f, .1f),
+		iwm::vector2(0, .1f),
+		iwm::vector2(0, 0)
+	};
+
+	qmodel->Meshes->SetUVs(4, uvs);
+	qmodel->Meshes->Initialize(Renderer.Device);
 
 	// Making circle mesh
 	auto cmodel = Asset.Load<IW::Model>("circle.obj");
-	cmodel->Meshes[0].Initialize(Renderer.Device);
+	cmodel->Meshes->Initialize(Renderer.Device);
 
 	qmodel->Meshes->SetMaterial(quadMaterial);
 	cmodel->Meshes->SetMaterial(circleMaterial);
@@ -115,7 +128,7 @@ int GameLayer::Initialize(
 	Space.SetComponentData<IwEngine::CameraController>(camera, ortho);
 
 	IwEntity::Entity player = Space.CreateEntity<IW::Transform, IwEngine::Model, Player, IwPhysics::AABB2D>();
-	Space.SetComponentData<IW::Transform>    (player, iwm::vector3(10, 0, 0));
+	Space.SetComponentData<IW::Transform>    (player, iwm::vector3(10, 0, 0), iwm::vector3::one, iwm::quaternion::create_from_euler_angles(0, 0, 0));
 	Space.SetComponentData<IwEngine::Model>  (player, &qmodel->Meshes[0], 1U);
 	Space.SetComponentData<Player>           (player, 10.0f, 100.0f, 0.1666f, 0.1f);
 	Space.SetComponentData<IwPhysics::AABB2D>(player, iwm::vector2(-1), iwm::vector2(1));

@@ -29,7 +29,7 @@ void EnemySystem::Update(
 		auto [transform, enemy] = entity.Components.Tie<Components>();
 
 		if (enemy->FireTime > enemy->FireTimeTotal) {
-			transform->Rotation *= iwm::quaternion::create_from_euler_angles(0, 0, enemy->Speed * IwEngine::Time::DeltaTime());
+			transform->Rotation *= iwm::quaternion::create_from_euler_angles(0, enemy->Speed * IwEngine::Time::DeltaTime(), 0);
 		}
 
 		else if (enemy->FireTime <= 0) {
@@ -43,7 +43,7 @@ void EnemySystem::Update(
 			IwEntity::Entity spawned = Space.CreateEntity<IW::Transform, IwEngine::Model, Bullet, IwPhysics::AABB2D>();
 			Space.SetComponentData<IW::Transform>(spawned,
 				transform->Position + iwm::vector3(sqrt(2), 0, 0) * transform->Rotation,
-				transform->Scale,
+				iwm::vector3(.25f),
 				transform->Rotation);
 				
 			Space.SetComponentData<IwEngine::Model>  (spawned, CircleMesh, 1U);

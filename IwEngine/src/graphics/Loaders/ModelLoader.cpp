@@ -52,8 +52,8 @@ namespace IW {
 				IW::Material material;
 				//material.SetFloats("albedo", &albedo, 3);
 				//material.SetFloats("emissiveColor", &emissiveColor, 4);
-				material.SetFloat("metallic", metallic);
-				material.SetFloat("roughness", roughness);
+				//material.SetFloat("metallic", metallic);
+				//material.SetFloat("roughness", roughness);
 
 				aiString texturePath;
 				if (   aimaterial->GetTextureCount(aiTextureType_DIFFUSE) > 0

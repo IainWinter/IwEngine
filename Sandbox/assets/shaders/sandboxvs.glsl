@@ -8,7 +8,11 @@ layout (std140, column_major) uniform Camera {
 uniform mat4 model;
 
 in vec3 position;
+in vec2 texCoords;
+
+out vec2 TexCoords;
 
 void main() {
+	TexCoords = texCoords;
 	gl_Position =  proj * view * model * vec4(position, 1);
 }

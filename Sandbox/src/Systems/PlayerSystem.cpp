@@ -26,19 +26,19 @@ void PlayerSystem::Update(
 
 		iwm::vector3 movement;
 		if (IwInput::Keyboard::KeyDown(IwInput::LEFT)) {
-			movement.x -= 1;
-		}
-
-		if (IwInput::Keyboard::KeyDown(IwInput::RIGHT)) {
 			movement.x += 1;
 		}
 
+		if (IwInput::Keyboard::KeyDown(IwInput::RIGHT)) {
+			movement.x -= 1;
+		}
+
 		if (IwInput::Keyboard::KeyDown(IwInput::UP)) {
-			movement.y += 1;
+			movement.z += 1;
 		}
 
 		if (IwInput::Keyboard::KeyDown(IwInput::DOWN)) {
-			movement.y -= 1;
+			movement.z -= 1;
 		}
 
 		if (player->DashTime > 0) {
