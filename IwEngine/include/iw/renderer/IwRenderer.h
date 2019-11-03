@@ -16,5 +16,15 @@ inline namespace RenderAPI {
 		TRIANGLES = 3,
 		QUADS = 4
 	};
+
+	// also 16 bit versions I guess
+
+	enum TextureFormat {
+		ALPHA = 1,
+		RGB = 3,
+		RGBA = 4,
+		DEPTH,
+		STENCIL
+	};
 }
 }

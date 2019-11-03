@@ -10,6 +10,7 @@
 #include "iw/renderer/Platform/OpenGL/GLPipeline.h"
 #include "iw/renderer/Platform/OpenGL/GLComputePipeline.h"
 #include "iw/renderer/Platform/OpenGL/GLTexture.h"
+#include "iw/renderer/Platform/OpenGL/GLFrameBuffer.h"
 #include "gl/glew.h"
 
 namespace IW {
@@ -242,10 +243,10 @@ namespace IW {
 	ITexture* GLDevice::CreateTexture(
 		int width, 
 		int height, 
-		int channels, 
+		TextureFormat format, 
 		unsigned char* colors)
 	{
-		return new GLTexture(width, height, channels, colors);
+		return new GLTexture(width, height, format, colors);
 	}
 
 	void GLDevice::DestroyTexture(
@@ -270,4 +271,29 @@ namespace IW {
 		static_cast<GLTexture*>(texture)->UpdateData(
 			colors, width, height, channels);
 	}
+
+	IFrameBuffer* GLDevice::CreateFrameBuffer(
+		ITexture* texture)
+	{
+		return new GLFrameBuffer(texture);
+	}
+
+	void GLDevice::DestroyFrameBuffer(
+		IFrameBuffer* frameBuffer)
+	{
+		delete frameBuffer;
+	}
+
+	void GLDevice::SetFrameBuffer(
+		IFrameBuffer* frameBuffer)
+	{
+		if (!frameBuffer) {
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		}
+		else {
+			static_cast<GLFrameBuffer*>(frameBuffer)->Bind();
+		}
+	}
 }
+
+//http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-16-shadow-mapping/

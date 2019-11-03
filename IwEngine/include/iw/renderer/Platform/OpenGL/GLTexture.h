@@ -14,13 +14,13 @@ inline namespace RenderAPI {
 
 		int m_width;
 		int m_height;
-		int m_channels;
+		TextureFormat m_format;
 
 	public:
 		GLTexture(
 			int width,
 			int height,
-			int channels,
+			TextureFormat format,
 			const unsigned char* data);
 
 		~GLTexture();

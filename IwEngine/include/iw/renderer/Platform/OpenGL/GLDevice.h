@@ -142,7 +142,7 @@ inline namespace RenderAPI {
 		virtual ITexture* CreateTexture(
 			int width,
 			int height,
-			int channels,
+			TextureFormat format,
 			unsigned char* colors = nullptr) override;
 
 		virtual void DestroyTexture(
@@ -157,6 +157,17 @@ inline namespace RenderAPI {
 			int width = 0,
 			int height = 0,
 			int channels = 0) override;
+
+		// Frame buffers
+
+		IFrameBuffer* CreateFrameBuffer(
+			ITexture* texture) override;
+
+		void DestroyFrameBuffer(
+			IFrameBuffer* frameBuffer) override;
+
+		void SetFrameBuffer(
+			IFrameBuffer* frameBuffer) override;
 	};
 }
 }

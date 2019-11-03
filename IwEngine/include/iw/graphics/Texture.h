@@ -14,13 +14,14 @@ inline namespace Graphics {
 		int Width;
 		int Height;
 		int Channels;
+		TextureFormat Format;
 
 		ITexture* Handle;
 
 		Texture(
 			int width,
 			int height,
-			int channels,
+			TextureFormat format,
 			unsigned char* colors);
 
 		void Initialize(

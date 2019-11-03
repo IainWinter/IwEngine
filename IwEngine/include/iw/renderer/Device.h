@@ -13,6 +13,7 @@
 #include "Pipeline.h"
 #include "ComputePipeline.h"
 #include "Texture.h"
+#include "FrameBuffer.h"
 
 namespace IW {
 inline namespace RenderAPI {
@@ -152,7 +153,7 @@ inline namespace RenderAPI {
 		virtual ITexture* CreateTexture(
 			int width,
 			int height,
-			int channels,
+			TextureFormat format,
 			unsigned char* colors = nullptr) = 0;
 
 		virtual void DestroyTexture(
@@ -161,12 +162,24 @@ inline namespace RenderAPI {
 		virtual void SetTexture(
 			ITexture* texture) = 0;
 
+		// no imp and wrong function :.
 		virtual void UpdateTextureColors(
 			ITexture* texture,
 			unsigned char* colors,
 			int width = 0,
 			int height = 0,
 			int channels = 0) = 0;
+
+		// Frame buffers
+
+		virtual IFrameBuffer* CreateFrameBuffer(
+			ITexture* texture) = 0;
+
+		virtual void DestroyFrameBuffer(
+			IFrameBuffer* frameBuffer) = 0;
+
+		virtual void SetFrameBuffer(
+			IFrameBuffer* frameBuffer) = 0;
 
 		static IDevice* Create();
 	};

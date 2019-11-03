@@ -43,6 +43,13 @@ int GameLayer3D::Initialize(
 		iwm::vector2(0, 0)
 	};
 
+	IW::ITexture* texture = Renderer.Device->CreateTexture(1024, 1024, IW::DEPTH);
+	IW::IFrameBuffer* shadow = Renderer.Device->CreateFrameBuffer(texture);
+	Renderer.Device->SetFrameBuffer(nullptr);
+
+	Renderer.Device->CreateFrameBuffer(texture);
+
+
 	iwu::ref<IW::Model> floorMesh = Asset.Load<IW::Model>("quad.obj");
 	floorMesh->Meshes->SetUVs(4, uvs);
 	floorMesh->Meshes->GenTangents();
@@ -103,10 +110,10 @@ int GameLayer3D::Initialize(
 	lightPositions[2] = iwm::vector3( 5, 2, -5);
 	lightPositions[3] = iwm::vector3(-5, 2, 5);
 
-	lightColors[0] = iwm::vector3(1);
-	lightColors[1] = iwm::vector3(1, 0, 0);
-	lightColors[2] = iwm::vector3(0, 1, 0);
-	lightColors[3] = iwm::vector3(0, 0, 1);
+	lightColors[0] = iwm::vector3(10);
+	lightColors[1] = iwm::vector3(10, 0, 0);
+	lightColors[2] = iwm::vector3(0, 10, 0);
+	lightColors[3] = iwm::vector3(0, 0, 10);
 
 	IW::Camera* perspective = new IW::PerspectiveCamera(fov, 1.778f, 0.001f, 1000.0f);
 
