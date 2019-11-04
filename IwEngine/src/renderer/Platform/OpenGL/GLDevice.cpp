@@ -272,10 +272,8 @@ namespace IW {
 			colors, width, height, channels);
 	}
 
-	IFrameBuffer* GLDevice::CreateFrameBuffer(
-		ITexture* texture)
-	{
-		return new GLFrameBuffer(texture);
+	IFrameBuffer* GLDevice::CreateFrameBuffer() {
+		return new GLFrameBuffer();
 	}
 
 	void GLDevice::DestroyFrameBuffer(
@@ -290,9 +288,18 @@ namespace IW {
 		if (!frameBuffer) {
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		}
+
 		else {
 			static_cast<GLFrameBuffer*>(frameBuffer)->Bind();
 		}
+	}
+
+	void GLDevice::AttachTextureToFrameBuffer(
+		IFrameBuffer* frameBuffer,
+		ITexture* texture)
+	{
+		static_cast<GLFrameBuffer*>(frameBuffer)
+			->AttachTexture(static_cast<GLTexture*>(texture));
 	}
 }
 

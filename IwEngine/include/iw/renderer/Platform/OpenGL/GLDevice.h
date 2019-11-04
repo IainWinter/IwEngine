@@ -160,14 +160,17 @@ inline namespace RenderAPI {
 
 		// Frame buffers
 
-		IFrameBuffer* CreateFrameBuffer(
-			ITexture* texture) override;
+		IFrameBuffer* CreateFrameBuffer() override;
 
 		void DestroyFrameBuffer(
 			IFrameBuffer* frameBuffer) override;
 
 		void SetFrameBuffer(
 			IFrameBuffer* frameBuffer) override;
+
+		void AttachTextureToFrameBuffer(
+			IFrameBuffer* frameBuffer,
+			ITexture* texture) override;
 	};
 }
 }

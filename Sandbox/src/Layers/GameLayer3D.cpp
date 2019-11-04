@@ -25,16 +25,24 @@ GameLayer3D::GameLayer3D(
 }
 
 iwu::ref<IW::IPipeline> pipeline;
+iwu::ref<IW::IPipeline> shadowPipeline;
+iwu::ref<IW::Texture> shadowTexture;
+IW::IFrameBuffer* shadow;
+
+iwm::vector3 lightDirection;
+iwm::matrix4 lightMVP;
 
 float angle = 1.396263f;
 float distance = 100;
 float fov = 0.17f;
 float a, d, f;
 
+
 int GameLayer3D::Initialize(
 	IwEngine::InitOptions& options)
 {
 	pipeline = Renderer.CreatePipeline("assets/shaders/pbr/pbrvs.glsl", "assets/shaders/pbr/pbrfs.glsl");
+	shadowPipeline = Renderer.CreatePipeline("assets/shaders/shadows/directionalvs.glsl", "assets/shaders/shadows/directionalfs.glsl");
 
 	iwm::vector2 uvs[4] = {
 		iwm::vector2(1, 0),
@@ -43,12 +51,12 @@ int GameLayer3D::Initialize(
 		iwm::vector2(0, 0)
 	};
 
-	IW::ITexture* texture = Renderer.Device->CreateTexture(1024, 1024, IW::DEPTH);
-	IW::IFrameBuffer* shadow = Renderer.Device->CreateFrameBuffer(texture);
-	Renderer.Device->SetFrameBuffer(nullptr);
+	shadow = Renderer.Device->CreateFrameBuffer();
 
-	Renderer.Device->CreateFrameBuffer(texture);
+	shadowTexture = std::make_shared<IW::Texture>(1024, 1024, IW::DEPTH, nullptr);
+	shadowTexture->Initialize(Renderer.Device);
 
+	Renderer.Device->AttachTextureToFrameBuffer(shadow, shadowTexture->Handle);
 
 	iwu::ref<IW::Model> floorMesh = Asset.Load<IW::Model>("quad.obj");
 	floorMesh->Meshes->SetUVs(4, uvs);
@@ -92,7 +100,7 @@ int GameLayer3D::Initialize(
 	material->SetTexture("roughnessMap", roughness);
 	material->SetTexture("aoMap", ao);
 
-	floorMesh->Meshes[0].Material->SetTexture("albedoMap", talbedo);
+	floorMesh->Meshes[0].Material->SetTexture("albedoMap", shadowTexture);
 	floorMesh->Meshes[0].Material->SetTexture("normalMap", tnormal);
 	floorMesh->Meshes[0].Material->SetTexture("metallicMap", tmetallic);
 	floorMesh->Meshes[0].Material->SetTexture("roughnessMap", troughness);
@@ -111,9 +119,9 @@ int GameLayer3D::Initialize(
 	lightPositions[3] = iwm::vector3(-5, 2, 5);
 
 	lightColors[0] = iwm::vector3(10);
-	lightColors[1] = iwm::vector3(10, 0, 0);
-	lightColors[2] = iwm::vector3(0, 10, 0);
-	lightColors[3] = iwm::vector3(0, 0, 10);
+	lightColors[1] = iwm::vector3(1, 0, 0);
+	lightColors[2] = iwm::vector3(0, 1, 0);
+	lightColors[3] = iwm::vector3(0, 0, 1);
 
 	IW::Camera* perspective = new IW::PerspectiveCamera(fov, 1.778f, 0.001f, 1000.0f);
 
@@ -135,6 +143,8 @@ int GameLayer3D::Initialize(
 		iwm::quaternion::create_from_euler_angles(iwm::PI / 2, 0, 0));
 
 	Space.SetComponentData<IwEngine::Model>(floor, floorMesh->Meshes, 1U);
+
+	lightDirection = iwm::vector3(0.5f, 2, 2);
 
 	return 0;
 }
@@ -169,6 +179,32 @@ void GameLayer3D::PostUpdate() {
 
 		Renderer.BeginScene(controller->Camera);
 
+		// Lights
+
+		Renderer.Device->SetFrameBuffer(shadow);
+		Renderer.Device->SetPipeline(shadowPipeline.get());
+
+		Renderer.Device->Clear();
+		
+		iwm::matrix4 P = iwm::matrix4::create_orthographic(20, 20, -10, 20);
+		iwm::matrix4 V = iwm::matrix4::create_look_at(lightDirection, iwm::vector3::zero, iwm::vector3::unit_y);
+
+		for (auto tree : Space.Query<IW::Transform, IwEngine::Model>()) {
+			auto [transform, model] = tree.Components.Tie<TreeComponents>();
+
+			lightMVP = P * V * transform->Transformation();
+			shadowPipeline->GetParam("depthMVP")->SetAsMat4(lightMVP);
+
+			for (size_t i = 0; i < model->MeshCount; i++) {
+				model->Meshes[i].Draw(Renderer.Device);
+			}
+		}
+
+		Renderer.Device->SetFrameBuffer(nullptr);
+		Renderer.Device->SetPipeline(pipeline.get());
+
+		// Meshes
+
 		pipeline->GetParam("lightPositions")->SetAsFloats(&lightPositions, 4, 3); // need better way to pass scene data
 		pipeline->GetParam("lightColors")   ->SetAsFloats(&lightColors, 4, 3);
 
@@ -197,7 +233,7 @@ void GameLayer3D::ImGui() {
 	//ImGui::ColorPicker4("Specular Color", (float*)&material->GetColor("specular"));
 
 	ImGui::Text("Camera");
-	ImGui::SliderFloat("Angle", &angle, 0, iwm::PI / 2);
+	ImGui::SliderFloat("Angle", &angle, 0, iwm::PI);
 	ImGui::SliderFloat("Distance", &distance, 5, 500);
 	ImGui::SliderFloat("Fov", &fov, 0.001f, iwm::PI / 4);
 

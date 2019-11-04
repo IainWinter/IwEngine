@@ -10,12 +10,15 @@ inline namespace RenderAPI {
 	{
 	private:
 		unsigned int m_renderId;
+		unsigned int m_textureCount;
 
 	public:
-		GLFrameBuffer(
-			ITexture* texture);
+		GLFrameBuffer();
 
 		~GLFrameBuffer();
+
+		void AttachTexture(
+			GLTexture* texture);
 
 		void Bind() const;
 		void Unbind() const;

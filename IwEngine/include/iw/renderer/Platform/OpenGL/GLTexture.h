@@ -31,6 +31,26 @@ inline namespace RenderAPI {
 			int height,
 			int channels) const;
 
+		inline unsigned int Id() const {
+			return m_renderId;
+		}
+
+		inline const unsigned char* Pixels() const {
+			return m_data;
+		}
+
+		inline int Width() const {
+			return m_width;
+		}
+
+		inline int Height() const {
+			return m_height;
+		}
+
+		inline TextureFormat Format() const {
+			return m_format;
+		}
+
 		void Bind() const;
 		void Unbind() const;
 	};

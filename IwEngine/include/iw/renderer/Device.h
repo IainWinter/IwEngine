@@ -172,14 +172,17 @@ inline namespace RenderAPI {
 
 		// Frame buffers
 
-		virtual IFrameBuffer* CreateFrameBuffer(
-			ITexture* texture) = 0;
+		virtual IFrameBuffer* CreateFrameBuffer() = 0;
 
 		virtual void DestroyFrameBuffer(
 			IFrameBuffer* frameBuffer) = 0;
 
 		virtual void SetFrameBuffer(
 			IFrameBuffer* frameBuffer) = 0;
+
+		virtual void AttachTextureToFrameBuffer(
+			IFrameBuffer* frameBuffer,
+			ITexture* texture) = 0;
 
 		static IDevice* Create();
 	};

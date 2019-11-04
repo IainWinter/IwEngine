@@ -24,17 +24,18 @@ namespace IW {
 
 		GLint glformat = 0;
 		GLenum gltype  = GL_UNSIGNED_BYTE;
+		int channels = 0;
 		switch (format) {
-			case ALPHA:   glformat = GL_ALPHA; break;
-			case RGB:     glformat = GL_RGB;   break;
-			case RGBA:    glformat = GL_RGBA;  break;
-			case DEPTH:   glformat = GL_DEPTH_COMPONENT;    gltype = GL_FLOAT; break;
-			case STENCIL: glformat = GL_STENCIL_COMPONENTS; gltype = GL_FLOAT; break;
+			case ALPHA:   glformat = GL_ALPHA; channels = 1; break;
+			case RGB:     glformat = GL_RGB;   channels = 3; break;
+			case RGBA:    glformat = GL_RGBA;  channels = 4; break;
+			case DEPTH:   glformat = GL_DEPTH_COMPONENT;    gltype = GL_FLOAT; channels = 1; break;
+			case STENCIL: glformat = GL_STENCIL_COMPONENTS; gltype = GL_FLOAT; channels = 1; break;
 			default: LOG_ERROR << "Invalid format " << format << " channels"; break;
 		}
 
-		glTexImage2D(GL_TEXTURE_2D, 0, glformat, width, height, 0, glformat, gltype, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
+		glTexImage2D(GL_TEXTURE_2D, 0, glformat, m_width, m_height, 0, glformat, gltype, m_data);
+		//glGenerateMipmap(GL_TEXTURE_2D);
 	}
 
 	GLTexture::~GLTexture() {
