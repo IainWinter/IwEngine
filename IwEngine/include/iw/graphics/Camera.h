@@ -24,6 +24,12 @@ inline namespace Graphics {
 
 		virtual ~Camera() {}
 
+		void SetView(
+			const iwm::matrix4& view);
+
+		virtual void SetProjection(
+			const iwm::matrix4& projection) = 0;
+
 		iwm::matrix4 GetView();
 		iwm::matrix4 GetViewProjection();
 
@@ -61,6 +67,12 @@ inline namespace Graphics {
 			float zNear,
 			float zFar);
 
+		inline void SetProjection(
+			const iwm::matrix4& projection) override
+		{
+			m_projection = projection;
+		}
+
 		inline iwm::matrix4 GetProjection() const override {
 			return m_projection;
 		}
@@ -97,6 +109,12 @@ inline namespace Graphics {
 			float aspect,
 			float zNear,
 			float zFar);
+
+		inline void SetProjection(
+			const iwm::matrix4& projection) override
+		{
+			m_projection = projection;
+		}
 
 		inline iwm::matrix4 GetProjection() const override {
 			return m_projection;

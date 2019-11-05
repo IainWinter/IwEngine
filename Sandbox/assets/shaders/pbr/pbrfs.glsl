@@ -1,6 +1,9 @@
 #version 430 core
+
 out vec4 FragColor;
+
 in vec3 WorldPos;
+in vec4 LightPos;
 in vec2 TexCoords;
 in vec3 Normal;
 in mat3 TBN;
@@ -21,11 +24,29 @@ uniform sampler2D aoMap;
 // lights
 uniform vec3 lightPositions[4];
 uniform vec3 lightColors[4];
-
 uniform vec3 camPos;
 
+uniform vec3 sunDirection;
+uniform sampler2D shadowMap;
+
 const float PI = 3.14159265359;
-  
+ 
+float CalcShadow() {
+	vec3 projCoords = (LightPos.xyz / LightPos.w) * .5 + .5;
+	float closestDepth = texture(shadowMap, projCoords.xy).r;
+	float currentDepth = projCoords.z;
+
+	float bias = max(0.05 * -abs(dot(Normal, sunDirection)), 0.005);  
+
+	float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
+
+	if(bias == -100) {
+		shadow = -1;
+	}
+
+	return shadow;
+}
+
 float DistributionGGX(vec3 N, vec3 H, float roughness) {
 	float a	  = roughness*roughness;
 	float a2	 = a*a;
@@ -109,15 +130,15 @@ void main()
 		Lo += (kD * albedo / PI + specular) * radiance * NdotL; 
 	}   
   
-	vec3 ambient = vec3(.03) * albedo * ao;
-	vec3 color = ambient + Lo;
-	
+	vec3 ambient = vec3(.1) * albedo * ao;
+	vec3 color = ambient * (1 - CalcShadow()) + Lo;
+
 	color = color / (color + vec3(1.0));
 	color = pow(color, vec3(1.0/2.2));
-   
+
 	FragColor = vec4(color, 1.0);
 
-	if(color == vec3(0.1)) {
+	if(color == vec3(0.198734)) {
 		FragColor = vec4(color, 1.0);
 	}
 } 

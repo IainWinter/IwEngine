@@ -5,7 +5,7 @@
 namespace IW {
 inline namespace Graphics {
 	struct Model {
-		Mesh* Meshes;
+		Mesh*  Meshes;
 		size_t MeshCount;
 	};
 }

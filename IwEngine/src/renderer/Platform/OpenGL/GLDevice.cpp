@@ -44,6 +44,13 @@ namespace IW {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
+	void GLDevice::SetViewport(
+		int x, 
+		int y)
+	{
+		glViewport(0, 0, x, y);
+	}
+
 	IIndexBuffer* GLDevice::CreateIndexBuffer(
 		size_t size,
 		const void* data)
@@ -244,9 +251,10 @@ namespace IW {
 		int width, 
 		int height, 
 		TextureFormat format, 
+		TextureFormatType type,
 		unsigned char* colors)
 	{
-		return new GLTexture(width, height, format, colors);
+		return new GLTexture(width, height, format, type, colors);
 	}
 
 	void GLDevice::DestroyTexture(

@@ -2,7 +2,9 @@
 #include "gl/glew.h"
 
 namespace IW {
-	GLFrameBuffer::GLFrameBuffer() {
+	GLFrameBuffer::GLFrameBuffer() 
+		: m_textureCount(0)
+	{
 		glGenFramebuffers(1, &m_renderId);
 		Bind();
 	}
@@ -24,8 +26,9 @@ namespace IW {
 		Bind();
 		texture->Bind();
 
-		glFramebufferTexture(GL_FRAMEBUFFER, attachment, texture->Id(), 0);
-		glDrawBuffer(GL_NONE);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, texture->Id(), 0);
+		//glDrawBuffer(GL_NONE);
+		//glReadBuffer(GL_NONE);
 	}
 
 	void GLFrameBuffer::Bind() const {

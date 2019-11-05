@@ -26,6 +26,11 @@ inline namespace RenderAPI {
 
 		virtual void Clear() = 0;
 
+		// should be in frame buffer?
+		virtual void SetViewport(
+			int x,
+			int y) = 0;
+
 		// Index buffers
 
 		virtual IIndexBuffer* CreateIndexBuffer(
@@ -154,6 +159,7 @@ inline namespace RenderAPI {
 			int width,
 			int height,
 			TextureFormat format,
+			TextureFormatType type,
 			unsigned char* colors = nullptr) = 0;
 
 		virtual void DestroyTexture(

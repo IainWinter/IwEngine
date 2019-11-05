@@ -1,11 +1,11 @@
-#version 430 core
+#version 440 core
 
 in vec2 TexCoords;
 
 uniform sampler2D albedoMap;
 
 void main() {
-	vec3 color = texture(albedoMap, TexCoords).rgb;
+	float color = texture(albedoMap, TexCoords).r;
 
-	gl_FragColor = vec4(TexCoords, 1.0);
+	gl_FragColor = vec4(color, color, color, 1.0);
 }

@@ -21,6 +21,7 @@ inline namespace RenderAPI {
 			int width,
 			int height,
 			TextureFormat format,
+			TextureFormatType type,
 			const unsigned char* data);
 
 		~GLTexture();

@@ -17,12 +17,17 @@ inline namespace RenderAPI {
 		QUADS = 4
 	};
 
-	// also 16 bit versions I guess
+	enum TextureFormatType {
+		UBYTE,
+		FLOAT
+	};
 
+	// GL has types for every type of value in diffrent bit depths :c but they also dont work so...
 	enum TextureFormat {
 		ALPHA = 1,
-		RGB = 3,
-		RGBA = 4,
+		RG,
+		RGB,
+		RGBA,
 		DEPTH,
 		STENCIL
 	};

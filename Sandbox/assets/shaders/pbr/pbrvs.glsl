@@ -6,6 +6,7 @@ layout (std140, column_major) uniform Camera {
 };
 
 uniform mat4 model;
+uniform mat4 lightSpace;
 
 //uniform sampler2D heightMap;
 
@@ -16,12 +17,14 @@ in vec3 bitangent;
 in vec2 uv;
 
 out vec3 WorldPos;
+out vec4 LightPos;
 out vec2 TexCoords;
 out vec3 Normal;
 out mat3 TBN;
 
 void main() {
 	WorldPos  = (model * vec4(vert, 1)).xyz;
+	LightPos =  lightSpace * vec4(WorldPos, 1);
 	TexCoords = uv;
 
 	mat3 modelVector = transpose(inverse(mat3(model)));
@@ -33,6 +36,6 @@ void main() {
 
 	//float height = texture(heightMap, TexCoords).r;
 
-	Normal = normalize(modelVector* normal);
+	Normal = normalize(modelVector * normal);
 	gl_Position =  proj * view * model * vec4(vert, 1);
 }

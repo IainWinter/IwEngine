@@ -15,6 +15,10 @@ inline namespace RenderAPI {
 
 		void Clear() override;
 
+		void SetViewport(
+			int x,
+			int y) override;
+
 		//Index buffers
 
 		IIndexBuffer* CreateIndexBuffer(
@@ -143,6 +147,7 @@ inline namespace RenderAPI {
 			int width,
 			int height,
 			TextureFormat format,
+			TextureFormatType type,
 			unsigned char* colors = nullptr) override;
 
 		virtual void DestroyTexture(

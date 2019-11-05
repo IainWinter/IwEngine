@@ -17,13 +17,18 @@ namespace IW {
 		RecalculateView();
 	}
 
-	iwm::matrix4 Camera::GetView()
-	{
+	iwm::matrix4 Camera::GetView() {
 		if (Position != m_position || Rotation != m_rotation) {
 			RecalculateView();
 		}
 
 		return m_view;
+	}
+
+	void Camera::SetView(
+		const iwm::matrix4& view)
+	{
+		m_view = view;
 	}
 
 	iwm::matrix4 Camera::GetViewProjection() {

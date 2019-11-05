@@ -15,6 +15,7 @@ inline namespace Graphics {
 		int Height;
 		int Channels;
 		TextureFormat Format;
+		TextureFormatType FormatType;
 
 		ITexture* Handle;
 
@@ -22,6 +23,7 @@ inline namespace Graphics {
 			int width,
 			int height,
 			TextureFormat format,
+			TextureFormatType type,
 			unsigned char* colors);
 
 		void Initialize(
