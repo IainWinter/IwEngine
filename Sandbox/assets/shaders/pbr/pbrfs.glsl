@@ -26,25 +26,41 @@ uniform vec3 lightPositions[4];
 uniform vec3 lightColors[4];
 uniform vec3 camPos;
 
-uniform vec3 sunDirection;
+//uniform vec3 sunDirection;
 uniform sampler2D shadowMap;
 
 const float PI = 3.14159265359;
  
 float CalcShadow() {
-	vec3 projCoords = (LightPos.xyz / LightPos.w) * .5 + .5;
-	float closestDepth = texture(shadowMap, projCoords.xy).r;
-	float currentDepth = projCoords.z;
+	vec3 coords = LightPos.xyz / LightPos.w;
+	//vec2 moments = texture(shadowMap, coords.xy).rg;
+	float compare = coords.z;
 
-	float bias = max(0.05 * -abs(dot(Normal, sunDirection)), 0.005);  
+	//float p = step(compare, moments.x);
+	//float v = max(moments.y - moments.x * moments.x, 0.00002);
 
-	float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
+	//float d = compare - moments.x;
+	//float pMax = v / (v + d*d);
 
-	if(bias == -100) {
-		shadow = -1;
-	}
+	//return min(max(p, pMax), 1.0);
 
-	return shadow;
+	vec2 moments = texture2D(shadowMap, coords.xy).xy;
+	
+	float p = step(compare, moments.x);
+	float variance = moments.y - moments.x * moments.x;
+	
+	float d = compare - moments.x;
+	float pMax = variance / (variance + d*d);
+	
+	return min(max(p, pMax), 1.0);
+
+	//vec3 projCoords = (LightPos.xyz / LightPos.w) * .5 + .5;
+	//float closestDepth = texture(shadowMap, projCoords.xy).r;
+	//float currentDepth = projCoords.z;
+
+	//float shadow = currentDepth - 0.005 > closestDepth ? 1.0 : 0.0;
+
+	//return 1 - shadow;
 }
 
 float DistributionGGX(vec3 N, vec3 H, float roughness) {
@@ -131,7 +147,7 @@ void main()
 	}   
   
 	vec3 ambient = vec3(.1) * albedo * ao;
-	vec3 color = ambient * (1 - CalcShadow()) + Lo;
+	vec3 color = ambient * CalcShadow() + Lo;
 
 	color = color / (color + vec3(1.0));
 	color = pow(color, vec3(1.0/2.2));
