@@ -1,5 +1,11 @@
 #version 430 core
 
 void main() {
-	gl_FragColor = vec4(gl_FragCoord.z, gl_FragCoord.z * gl_FragCoord.z, 0, 1);
+	float depth = gl_FragCoord.z;
+
+	float dx = dFdx(depth);
+	float dy = dFdy(depth);
+	float bias = depth * depth + 0.25 * (dx * dx + dy * dy);
+
+	gl_FragColor = vec4(depth, bias, 0, 1);
 }

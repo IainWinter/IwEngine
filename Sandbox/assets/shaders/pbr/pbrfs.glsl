@@ -30,37 +30,23 @@ uniform vec3 camPos;
 uniform sampler2D shadowMap;
 
 const float PI = 3.14159265359;
- 
+
+float linstep(float l , float h, float v) {
+	return clamp((v - l) / (h - l), 0.0, 1.0);
+}
+
 float CalcShadow() {
-	vec3 coords = LightPos.xyz / LightPos.w;
-	//vec2 moments = texture(shadowMap, coords.xy).rg;
+	vec3 coords = (LightPos.xyz / LightPos.w) * 0.5 + 0.5;
+	vec2 moments = texture(shadowMap, coords.xy).rg;
 	float compare = coords.z;
 
-	//float p = step(compare, moments.x);
-	//float v = max(moments.y - moments.x * moments.x, 0.00002);
-
-	//float d = compare - moments.x;
-	//float pMax = v / (v + d*d);
-
-	//return min(max(p, pMax), 1.0);
-
-	vec2 moments = texture2D(shadowMap, coords.xy).xy;
-	
 	float p = step(compare, moments.x);
-	float variance = moments.y - moments.x * moments.x;
-	
+	float v = max(moments.y - moments.x * moments.x, 0.00002);
+
 	float d = compare - moments.x;
-	float pMax = variance / (variance + d*d);
-	
+	float pMax = linstep(0.2, 1.0, v / (v + d*d));
+
 	return min(max(p, pMax), 1.0);
-
-	//vec3 projCoords = (LightPos.xyz / LightPos.w) * .5 + .5;
-	//float closestDepth = texture(shadowMap, projCoords.xy).r;
-	//float currentDepth = projCoords.z;
-
-	//float shadow = currentDepth - 0.005 > closestDepth ? 1.0 : 0.0;
-
-	//return 1 - shadow;
 }
 
 float DistributionGGX(vec3 N, vec3 H, float roughness) {

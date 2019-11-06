@@ -27,7 +27,7 @@ GameLayer3D::GameLayer3D(
 iwu::ref<IW::IPipeline> pbr;
 iwu::ref<IW::IPipeline> pipeline;
 iwu::ref<IW::IPipeline> shadowPipeline;
-iwu::ref<IW::Mesh> shadowMesh;
+iwu::ref<IW::IPipeline> shadowFilter;
 iwu::ref<IW::Texture> shadowTexture;
 iwu::ref<IW::Texture> shadowTextureDepth;
 IW::IFrameBuffer* shadow;
@@ -48,6 +48,8 @@ int GameLayer3D::Initialize(
 	pbr = Renderer.CreatePipeline("assets/shaders/pbr/pbrvs.glsl", "assets/shaders/pbr/pbrfs.glsl");
 	pipeline = Renderer.CreatePipeline("assets/shaders/sandboxvs.glsl", "assets/shaders/sandboxfs.glsl");
 	shadowPipeline = Renderer.CreatePipeline("assets/shaders/shadows/directionalvs.glsl", "assets/shaders/shadows/directionalfs.glsl");
+	shadowFilter = Renderer.CreatePipeline("assets/shaders/filters/gausvs.glsl", "assets/shaders/shadows/gausfs.glsl");
+
 	iwm::vector2 uvs[4] = {
 		iwm::vector2(1, 0),
 		iwm::vector2(1, 1),
@@ -71,8 +73,6 @@ int GameLayer3D::Initialize(
 	floorMesh->Meshes->SetUVs(4, uvs);
 	floorMesh->Meshes->GenTangents();
 	floorMesh->Meshes->Initialize(Renderer.Device);
-
-	shadowMesh = std::make_shared<IW::Mesh>(*floorMesh->Meshes);
 	
 	IW::Mesh* mesh = IW::mesh_factory::create_uvsphere(24, 48);
 	mesh->GenTangents();
@@ -80,9 +80,6 @@ int GameLayer3D::Initialize(
 
 	material = std::make_shared<IW::Material>(pbr);
 	mesh->SetMaterial(material);
-
-	iwu::ref<IW::Material> shadowMaterial = std::make_shared<IW::Material>(pipeline);
-	shadowMesh->SetMaterial(shadowMaterial);
 
 	iwu::ref<IW::Texture> albedo = Asset.Load<IW::Texture>("textures/metal/albedo.jpg");
 	iwu::ref<IW::Texture> normal = Asset.Load<IW::Texture>("textures/metal/normal.jpg");
@@ -120,7 +117,6 @@ int GameLayer3D::Initialize(
 	floorMesh->Meshes[0].Material->SetTexture("aoMap", tao);
 	floorMesh->Meshes[0].Material->SetTexture("shadowMap", shadowTexture);
 
-	shadowMesh->Material->SetTexture("albedoMap", shadowTexture);
 
 	//material->SetFloats("albedo", &iwm::vector3(1.0f, 0.85f, 0.57f), 3);
 	//material->SetFloat ("metallic", 1.0f);
@@ -157,8 +153,11 @@ int GameLayer3D::Initialize(
 	IwEntity::Entity floor = Space.CreateEntity<IW::Transform, IwEngine::Model>();
 	Space.SetComponentData<IW::Transform>  (floor, iwm::vector3(0, -1, 0), iwm::vector3(10, 1, 10), 
 		iwm::quaternion::create_from_euler_angles(iwm::PI / 2, 0, 0));
-
 	Space.SetComponentData<IwEngine::Model>(floor, floorMesh->Meshes, 1U);
+
+	IwEntity::Entity f = Space.CreateEntity<IW::Transform, IwEngine::Model>();
+	Space.SetComponentData<IW::Transform>(f, iwm::vector3(5, 2, 2), iwm::vector3::one, iwm::quaternion::create_from_euler_angles(iwm::PI / 2, 0, 0));
+	Space.SetComponentData<IwEngine::Model>(f, floorMesh->Meshes, 1U);
 
 	lightDirection = iwm::vector3(0.5f, 2, 2);
 
@@ -199,7 +198,10 @@ void GameLayer3D::PostUpdate() {
 		iwm::matrix4 P = iwm::matrix4::create_orthographic(30, 30, -20, 20);
 		iwm::matrix4 V = iwm::matrix4::create_look_at(lightDirection, iwm::vector3::zero, iwm::vector3::unit_y);
 
-		iwm::matrix4 lightSpace = V * P;
+		iwm::matrix4 lightSpace = V * P;  //mvp
+
+		//cam->SetProjection(P);
+		//cam->SetView(V);
 
 		Renderer.BeginScene(cam);
 
@@ -224,8 +226,6 @@ void GameLayer3D::PostUpdate() {
 
 		Renderer.Device->SetFrameBuffer(nullptr);
 		Renderer.Device->SetViewport(1280, 720);
-
-		Renderer.DrawMesh(shadowTextureTransform, shadowMesh.get());
 
 		Renderer.Device->SetPipeline(pbr.get());
 
@@ -265,7 +265,7 @@ void GameLayer3D::ImGui() {
 	ImGui::SliderFloat("Fov", &fov, 0.001f, iwm::PI / 4);
 
 	ImGui::Text("Sun");
-	ImGui::SliderFloat3("XYZ", &lightDirection.x, -1, 10);
+	ImGui::SliderFloat3("XYZ", &lightDirection.x, -1, 1);
 
 	ImGui::End();
 }
