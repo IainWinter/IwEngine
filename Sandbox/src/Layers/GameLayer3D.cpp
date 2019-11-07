@@ -27,11 +27,11 @@ GameLayer3D::GameLayer3D(
 iwu::ref<IW::IPipeline> pbr;
 iwu::ref<IW::IPipeline> pipeline;
 iwu::ref<IW::IPipeline> shadowPipeline;
-iwu::ref<IW::IPipeline> shadowFilter;
-iwu::ref<IW::Texture> shadowTexture;
-iwu::ref<IW::Texture> shadowTextureDepth;
+iwu::ref<IW::IPipeline> nullFilter;
+iwu::ref<IW::IPipeline> gausFilter;
 IW::IFrameBuffer* shadow;
-IW::Transform* shadowTextureTransform;
+IW::RenderTarget* shadowTarget;
+IW::RenderTarget* shadowTargetBlur;
 
 iwm::vector3 lightDirection;
 iwm::matrix4 lightMVP;
@@ -40,7 +40,7 @@ float angle = 1.396263f;
 float distance = 100;
 float fov = 0.17f;
 float a, d, f;
-
+float blurAmount = 1;
 
 int GameLayer3D::Initialize(
 	IwEngine::InitOptions& options)
@@ -48,7 +48,8 @@ int GameLayer3D::Initialize(
 	pbr = Renderer.CreatePipeline("assets/shaders/pbr/pbrvs.glsl", "assets/shaders/pbr/pbrfs.glsl");
 	pipeline = Renderer.CreatePipeline("assets/shaders/sandboxvs.glsl", "assets/shaders/sandboxfs.glsl");
 	shadowPipeline = Renderer.CreatePipeline("assets/shaders/shadows/directionalvs.glsl", "assets/shaders/shadows/directionalfs.glsl");
-	shadowFilter = Renderer.CreatePipeline("assets/shaders/filters/gausvs.glsl", "assets/shaders/shadows/gausfs.glsl");
+	nullFilter = Renderer.CreatePipeline("assets/shaders/filters/nonevs.glsl", "assets/shaders/filters/nonefs.glsl");
+	gausFilter = Renderer.CreatePipeline("assets/shaders/filters/gaussianvs.glsl", "assets/shaders/filters/gaussianfs.glsl");
 
 	iwm::vector2 uvs[4] = {
 		iwm::vector2(1, 0),
@@ -57,17 +58,20 @@ int GameLayer3D::Initialize(
 		iwm::vector2(0, 0)
 	};
 
-	shadowTextureTransform = new IW::Transform{ iwm::vector3(4) };
+	shadowTarget     = new IW::RenderTarget(4096, 4096, { IW::RG, IW::DEPTH }, { IW::FLOAT, IW::FLOAT });
+	shadowTargetBlur = new IW::RenderTarget(4096, 4096, { IW::RG }, { IW::FLOAT });
+	shadowTarget->Initialize(Renderer.Device);
+	shadowTargetBlur->Initialize(Renderer.Device);
 
-	shadow = Renderer.Device->CreateFrameBuffer();
+	//shadow = Renderer.Device->CreateFrameBuffer();
 
-	shadowTexture = std::make_shared<IW::Texture>(1024, 1024, IW::RG, IW::FLOAT, nullptr);
-	shadowTextureDepth = std::make_shared<IW::Texture>(1024, 1024, IW::DEPTH, IW::FLOAT, nullptr);
-	shadowTexture->Initialize(Renderer.Device);
-	shadowTextureDepth->Initialize(Renderer.Device);
+	//shadowTexture = std::make_shared<IW::Texture>(1024, 1024, IW::RG, IW::FLOAT, nullptr);
+	//shadowTextureDepth = std::make_shared<IW::Texture>(1024, 1024, IW::DEPTH, IW::FLOAT, nullptr);
+	//shadowTexture->Initialize(Renderer.Device);
+	//shadowTextureDepth->Initialize(Renderer.Device);
 
-	Renderer.Device->AttachTextureToFrameBuffer(shadow, shadowTexture->Handle);
-	Renderer.Device->AttachTextureToFrameBuffer(shadow, shadowTextureDepth->Handle);
+	//Renderer.Device->AttachTextureToFrameBuffer(shadow, shadowTexture->Handle);
+	//Renderer.Device->AttachTextureToFrameBuffer(shadow, shadowTextureDepth->Handle);
 
 	iwu::ref<IW::Model> floorMesh = Asset.Load<IW::Model>("quad.obj");
 	floorMesh->Meshes->SetUVs(4, uvs);
@@ -108,14 +112,14 @@ int GameLayer3D::Initialize(
 	material->SetTexture("metallicMap", metallic);
 	material->SetTexture("roughnessMap", roughness);
 	material->SetTexture("aoMap", ao);
-	material->SetTexture("shadowMap", shadowTexture);
+	material->SetTexture("shadowMap", &shadowTarget->Textures[0]);
 
 	floorMesh->Meshes[0].Material->SetTexture("albedoMap", talbedo);
 	floorMesh->Meshes[0].Material->SetTexture("normalMap", tnormal);
 	floorMesh->Meshes[0].Material->SetTexture("metallicMap", tmetallic);
 	floorMesh->Meshes[0].Material->SetTexture("roughnessMap", troughness);
 	floorMesh->Meshes[0].Material->SetTexture("aoMap", tao);
-	floorMesh->Meshes[0].Material->SetTexture("shadowMap", shadowTexture);
+	floorMesh->Meshes[0].Material->SetTexture("shadowMap", &shadowTarget->Textures[0]);
 
 
 	//material->SetFloats("albedo", &iwm::vector3(1.0f, 0.85f, 0.57f), 3);
@@ -152,14 +156,14 @@ int GameLayer3D::Initialize(
 
 	IwEntity::Entity floor = Space.CreateEntity<IW::Transform, IwEngine::Model>();
 	Space.SetComponentData<IW::Transform>  (floor, iwm::vector3(0, -1, 0), iwm::vector3(10, 1, 10), 
-		iwm::quaternion::create_from_euler_angles(iwm::PI / 2, 0, 0));
+		iwm::quaternion::from_euler_angles(iwm::PI / 2, 0, 0));
 	Space.SetComponentData<IwEngine::Model>(floor, floorMesh->Meshes, 1U);
 
 	IwEntity::Entity f = Space.CreateEntity<IW::Transform, IwEngine::Model>();
-	Space.SetComponentData<IW::Transform>(f, iwm::vector3(5, 2, 2), iwm::vector3::one, iwm::quaternion::create_from_euler_angles(iwm::PI / 2, 0, 0));
+	Space.SetComponentData<IW::Transform>(f, iwm::vector3(5, 2, 2), iwm::vector3::one, iwm::quaternion::from_euler_angles(iwm::PI / 2, 0, 0));
 	Space.SetComponentData<IwEngine::Model>(f, floorMesh->Meshes, 1U);
 
-	lightDirection = iwm::vector3(0.5f, 2, 2);
+	lightDirection = iwm::vector3(1);
 
 	PushSystem<EnemySystem>(mesh);
 
@@ -186,7 +190,7 @@ void GameLayer3D::PostUpdate() {
 			a = angle;
 			d = distance;
 			cam->Position = iwm::vector3(0, sin(angle), cos(angle)) * distance;
-			cam->Rotation = iwm::quaternion::create_from_euler_angles(iwm::PI + angle, 0, iwm::PI);
+			cam->Rotation = iwm::quaternion::from_euler_angles(iwm::PI + angle, 0, iwm::PI);
 		}
 
 		if (f != fov) {
@@ -195,46 +199,43 @@ void GameLayer3D::PostUpdate() {
 
 		}
 
-		iwm::matrix4 P = iwm::matrix4::create_orthographic(30, 30, -20, 20);
-		iwm::matrix4 V = iwm::matrix4::create_look_at(lightDirection, iwm::vector3::zero, iwm::vector3::unit_y);
+		IW::OrthographicCamera lightCam = IW::OrthographicCamera(30, 30, -20, 20);
+		lightCam.Position = lightDirection;
+		lightCam.Rotation = iwm::quaternion::from_look_at(lightDirection);
 
-		iwm::matrix4 lightSpace = V * P;  //mvp
-
-		//cam->SetProjection(P);
-		//cam->SetView(V);
-
-		Renderer.BeginScene(cam);
-
-		// Lights
-		Renderer.Device->SetFrameBuffer(shadow);
-		Renderer.Device->SetViewport(1024, 1024);
-		Renderer.Device->Clear();
+		Renderer.BeginScene(&lightCam, shadowTarget);
 
 		Renderer.Device->SetPipeline(shadowPipeline.get());
-		
-		shadowPipeline->GetParam("lightSpace")->SetAsMat4(lightSpace);
 
 		for (auto tree : Space.Query<IW::Transform, IwEngine::Model>()) {
 			auto [transform, model] = tree.Components.Tie<TreeComponents>();
 
-			shadowPipeline->GetParam("model")->SetAsMat4(transform->Transformation());
+			shadowPipeline->GetParam("model")
+				->SetAsMat4(transform->Transformation());
 
 			for (size_t i = 0; i < model->MeshCount; i++) {
 				model->Meshes[i].Draw(Renderer.Device);
 			}
 		}
 
-		Renderer.Device->SetFrameBuffer(nullptr);
-		Renderer.Device->SetViewport(1280, 720);
+		Renderer.EndScene();
+
+		float blurw = 1.0f / (shadowTarget->Width  * blurAmount);
+		float blurh = 1.0f / (shadowTarget->Height * blurAmount);
+
+		gausFilter->GetParam("blurScale")->SetAsFloats(&iwm::vector3(blurw, 0, 0), 3);
+		Renderer.ApplyFilter(gausFilter, shadowTarget, shadowTargetBlur);
+
+		gausFilter->GetParam("blurScale")->SetAsFloats(&iwm::vector3(0, blurh, 0), 3);
+		Renderer.ApplyFilter(gausFilter, shadowTargetBlur, shadowTarget);
+
+		Renderer.BeginScene(cam);
 
 		Renderer.Device->SetPipeline(pbr.get());
-
-		// Meshes
-
 		pbr->GetParam("lightPositions")->SetAsFloats(&lightPositions, 4, 3); // need better way to pass scene data
 		pbr->GetParam("lightColors")->SetAsFloats(&lightColors, 4, 3);
 		pbr->GetParam("camPos")->SetAsFloats(&controller->Camera->Position, 3);
-		pbr->GetParam("lightSpace")->SetAsMat4(lightSpace);
+		pbr->GetParam("lightSpace")->SetAsMat4(lightCam.GetViewProjection());
 		//pbr->GetParam("sunDirection")->SetAsFloats(&lightPositions, 3);
 
 		for (auto tree : Space.Query<IW::Transform, IwEngine::Model>()) {
@@ -266,6 +267,7 @@ void GameLayer3D::ImGui() {
 
 	ImGui::Text("Sun");
 	ImGui::SliderFloat3("XYZ", &lightDirection.x, -1, 1);
+	ImGui::SliderFloat("Blur", &blurAmount, 0.001f, 1.0f);
 
 	ImGui::End();
 }
@@ -279,8 +281,8 @@ bool GameLayer3D::On(
 	//	float pitch = event.DeltaY * 0.0005f;
 	//	float yaw   = event.DeltaX * 0.0005f;
 
-	//	iwm::quaternion deltaP = iwm::quaternion::create_from_axis_angle(-transform->Right(), pitch);
-	//	iwm::quaternion deltaY = iwm::quaternion::create_from_axis_angle( iwm::vector3::unit_y, yaw);
+	//	iwm::quaternion deltaP = iwm::quaternion::from_axis_angle(-transform->Right(), pitch);
+	//	iwm::quaternion deltaY = iwm::quaternion::from_axis_angle( iwm::vector3::unit_y, yaw);
 
 	//	transform->Rotation *= deltaP * deltaY;
 

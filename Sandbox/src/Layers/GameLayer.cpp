@@ -122,13 +122,13 @@ int GameLayer::Initialize(
 	// Camera & entities
 
 	IW::Camera* ortho = new IW::OrthographicCamera(64, 36, -100, 100);
-	ortho->Rotation = iwm::quaternion::create_from_euler_angles(0, iwm::PI, 0);
+	ortho->Rotation = iwm::quaternion::from_euler_angles(0, iwm::PI, 0);
 
 	IwEntity::Entity camera = Space.CreateEntity<IwEngine::CameraController>();
 	Space.SetComponentData<IwEngine::CameraController>(camera, ortho);
 
 	IwEntity::Entity player = Space.CreateEntity<IW::Transform, IwEngine::Model, Player, IwPhysics::AABB2D>();
-	Space.SetComponentData<IW::Transform>    (player, iwm::vector3(10, 0, 0), iwm::vector3::one, iwm::quaternion::create_from_euler_angles(0, 0, 0));
+	Space.SetComponentData<IW::Transform>    (player, iwm::vector3(10, 0, 0), iwm::vector3::one, iwm::quaternion::from_euler_angles(0, 0, 0));
 	Space.SetComponentData<IwEngine::Model>  (player, &qmodel->Meshes[0], 1U);
 	Space.SetComponentData<Player>           (player, 10.0f, 100.0f, 0.1666f, 0.1f);
 	Space.SetComponentData<IwPhysics::AABB2D>(player, iwm::vector2(-1), iwm::vector2(1));
@@ -147,7 +147,7 @@ int GameLayer::Initialize(
 }
 
 void GameLayer::PostUpdate() {
-	line->Vertices[1] *= iwm::quaternion::create_from_euler_angles(0, 0, IwEngine::Time::DeltaTime());
+	line->Vertices[1] *= iwm::quaternion::from_euler_angles(0, 0, IwEngine::Time::DeltaTime());
 	line->Update(Renderer.Device);
 
 	for (auto camera : Space.Query<IwEngine::CameraController>()) {

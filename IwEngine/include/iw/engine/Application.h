@@ -93,7 +93,8 @@ namespace IwEngine {
 			_event_t& event)
 		{
 			if constexpr (std::is_same_v<WindowResizedEvent, _event_t>) {
-				m_window->SetDimensions(event.Width, event.Height);
+				Renderer.Width  = event.Width;
+				Renderer.Height = event.Height;
 			}
 
 			for (Layer* layer : m_layers) {

@@ -47,6 +47,8 @@ inline namespace Graphics {
 		iwm::matrix4 m_projection;
 
 	public:
+		OrthographicCamera() = default;
+
 		OrthographicCamera(
 			float width,
 			float height,
@@ -90,6 +92,9 @@ inline namespace Graphics {
 		//float m_aspect;
 
 	public:
+		PerspectiveCamera() = default;
+
+
 		PerspectiveCamera(
 			float fov,
 			float aspect,

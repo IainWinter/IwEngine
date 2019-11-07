@@ -260,15 +260,6 @@ namespace IwEngine {
 		Options.Cursor = show;
 	}
 
-	void WindowsWindow::SetDimensions(
-		unsigned int width,
-		unsigned int height)
-	{
-		glViewport(0, 0, width, height);
-
-		LOG_INFO << "Window resized to " << width << ", " << height;
-	}
-
 	LRESULT CALLBACK WindowsWindow::_WndProc(
 		HWND hwnd,
 		UINT msg,

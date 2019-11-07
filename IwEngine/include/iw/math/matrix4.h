@@ -228,7 +228,7 @@ namespace iwmath {
 		*
 		* @param axisAngle Axis and angle of rotation in one vector.
 		*/
-		static matrix4 create_from_axis_angle(
+		static matrix4 from_axis_angle(
 			const vector4& axis_angle);
 
 		/**
@@ -237,7 +237,7 @@ namespace iwmath {
 		* @param axis Axis vector
 		* @param angle Angle of rotation around the axis in radians.
 		*/
-		static matrix4 create_from_axis_angle(
+		static matrix4 from_axis_angle(
 			const vector3& axis,
 			float angle);
 
@@ -249,7 +249,7 @@ namespace iwmath {
 		* @param z X component of the axis vector.
 		* @param angle Angle of rotation around the axis in radians.
 		*/
-		static matrix4 create_from_axis_angle(
+		static matrix4 from_axis_angle(
 			float x,
 			float y,
 			float z,

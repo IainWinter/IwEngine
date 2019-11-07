@@ -497,28 +497,28 @@ namespace iwmath {
 		return !operator==(other);
 	}
 
-	matrix4 matrix4::create_from_axis_angle(
+	matrix4 matrix4::from_axis_angle(
 		const vector4& axis_angle)
 	{
-		return create_from_axis_angle(
+		return from_axis_angle(
 			axis_angle.x, axis_angle.y, axis_angle.z, axis_angle.w);
 	}
 
-	matrix4 matrix4::create_from_axis_angle(
+	matrix4 matrix4::from_axis_angle(
 		const vector3& axis,
 		float angle)
 	{
-		return create_from_axis_angle(
+		return from_axis_angle(
 			axis.x, axis.y, axis.z, angle);
 	}
 
-	matrix4 matrix4::create_from_axis_angle(
+	matrix4 matrix4::from_axis_angle(
 		float x,
 		float y,
 		float z,
 		float angle)
 	{
-		return matrix3::create_from_axis_angle(x, y, z, angle);
+		return matrix3::from_axis_angle(x, y, z, angle);
 	}
 
 	matrix4 matrix4::create_from_quaternion(

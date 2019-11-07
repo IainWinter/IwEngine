@@ -68,6 +68,8 @@ namespace IwEngine {
 			return status;
 		}
 
+		Renderer.Initialize();
+
 		for (Layer* layer : m_layers) {
 			LOG_DEBUG << "Initializing " << layer->Name() << " layer...";
 			if (status = layer->Initialize(options)) {

@@ -215,21 +215,21 @@ namespace iwmath {
 		return !operator==(other);
 	}
 
-	quaternion quaternion::create_from_axis_angle(
+	quaternion quaternion::from_axis_angle(
 		const vector4& axis_angle)
 	{
-		return create_from_axis_angle(
+		return from_axis_angle(
 			axis_angle.x, axis_angle.y, axis_angle.z, axis_angle.w);
 	}
 
-	quaternion quaternion::create_from_axis_angle(
+	quaternion quaternion::from_axis_angle(
 		const vector3& axis,
 		float angle)
 	{
-		return create_from_axis_angle(axis.x, axis.y, axis.z, angle);
+		return from_axis_angle(axis.x, axis.y, axis.z, angle);
 	}
 
-	quaternion quaternion::create_from_axis_angle(
+	quaternion quaternion::from_axis_angle(
 		float x,
 		float y,
 		float z,
@@ -250,13 +250,13 @@ namespace iwmath {
 		return quaternion(axis * sin(a), cos(a));
 	}
 
-	quaternion quaternion::create_from_euler_angles(
+	quaternion quaternion::from_euler_angles(
 		const vector3& angles)
 	{
-		return create_from_euler_angles(angles.x, angles.y, angles.z);
+		return from_euler_angles(angles.x, angles.y, angles.z);
 	}
 
-	quaternion quaternion::create_from_euler_angles(
+	quaternion quaternion::from_euler_angles(
 		float x,
 		float y,
 		float z)
@@ -291,6 +291,28 @@ namespace iwmath {
 		//	cx * sy * cz + sx * cy * sz,
 		//	cx * cy * sz - sx * sy * cz
 		//);
+	}
+
+	quaternion quaternion::from_look_at(
+		vector3 eye,
+		vector3 target,
+		vector3 up)
+	{
+		vector3 forward = (target - eye).normalized();
+		float dot = forward.dot(vector3::unit_z);
+
+		if (iwm::almost_equal(dot, -1.0f, 6.0f)) {
+			return quaternion(up, PI);
+		}
+
+		else if (iwm::almost_equal(dot, 1.0f, 6.0f)) {
+			return identity;
+		}
+
+		float angle = acos(dot);
+		vector3 axis = forward.cross(vector3::unit_z).normalized();
+
+		return from_axis_angle(axis, angle);
 	}
 
 	std::ostream& iwmath::operator<<(

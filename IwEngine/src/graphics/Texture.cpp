@@ -1,6 +1,15 @@
 #include "iw/graphics/Texture.h"
 
 namespace IW {
+	Texture::Texture()
+		: Width(0)
+		, Height(0)
+		, Format(ALPHA)
+		, FormatType(UBYTE)
+		, Colors(nullptr)
+		, Handle(nullptr)
+	{}
+
 	Texture::Texture(
 		int width,
 		int height,

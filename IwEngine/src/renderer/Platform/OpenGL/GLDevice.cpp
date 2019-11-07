@@ -252,9 +252,9 @@ namespace IW {
 		int height, 
 		TextureFormat format, 
 		TextureFormatType type,
-		unsigned char* colors)
+		const void* data)
 	{
-		return new GLTexture(width, height, format, type, colors);
+		return new GLTexture(width, height, format, type, data);
 	}
 
 	void GLDevice::DestroyTexture(
@@ -267,17 +267,6 @@ namespace IW {
 		ITexture* texture)
 	{
 		static_cast<GLTexture*>(texture)->Bind();
-	}
-
-	void GLDevice::UpdateTextureColors(
-		ITexture* texture, 
-		unsigned char* colors,
-		int width,
-		int height, 
-		int channels)
-	{
-		static_cast<GLTexture*>(texture)->UpdateData(
-			colors, width, height, channels);
 	}
 
 	IFrameBuffer* GLDevice::CreateFrameBuffer() {

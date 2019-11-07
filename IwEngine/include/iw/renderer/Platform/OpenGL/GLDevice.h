@@ -148,20 +148,13 @@ inline namespace RenderAPI {
 			int height,
 			TextureFormat format,
 			TextureFormatType type,
-			unsigned char* colors = nullptr) override;
+			const void* data = nullptr) override;
 
 		virtual void DestroyTexture(
 			ITexture* texture)  override;
 
 		virtual void SetTexture(
 			ITexture* texture)  override;
-
-		virtual void UpdateTextureColors(
-			ITexture* texture,
-			unsigned char* colors,
-			int width = 0,
-			int height = 0,
-			int channels = 0) override;
 
 		// Frame buffers
 

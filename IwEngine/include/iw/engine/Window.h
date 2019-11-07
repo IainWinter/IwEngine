@@ -34,9 +34,9 @@ namespace IwEngine {
 		virtual void SetCursor(
 			bool show) = 0;
 
-		virtual void SetDimensions(
-			unsigned int width,
-			unsigned int height) = 0;
+		//virtual void SetDimensions(
+		//	unsigned int width,
+		//	unsigned int height) = 0;
 
 		virtual unsigned int Id()     = 0;
 		virtual unsigned int Width()  = 0;

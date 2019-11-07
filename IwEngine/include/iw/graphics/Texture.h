@@ -19,6 +19,8 @@ inline namespace Graphics {
 
 		ITexture* Handle;
 
+		Texture();
+
 		Texture(
 			int width,
 			int height,

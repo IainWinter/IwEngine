@@ -29,7 +29,7 @@ void EnemySystem::Update(
 		auto [transform, enemy] = entity.Components.Tie<Components>();
 
 		if (enemy->FireTime > enemy->FireTimeTotal) {
-			transform->Rotation *= iwm::quaternion::create_from_euler_angles(0, enemy->Speed * IwEngine::Time::DeltaTime(), 0);
+			transform->Rotation *= iwm::quaternion::from_euler_angles(0, enemy->Speed * IwEngine::Time::DeltaTime(), 0);
 		}
 
 		else if (enemy->FireTime <= 0) {

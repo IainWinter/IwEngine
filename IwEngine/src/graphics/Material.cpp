@@ -149,9 +149,16 @@ namespace IW {
 
 	void Material::SetTexture(
 		const char* name, 
+		IW::Texture* texture)
+	{
+		CreateProperty(name, texture, 0, 0, true, SAMPLE, 0);
+	}
+
+	void Material::SetTexture(
+		const char* name,
 		const iwu::ref<IW::Texture>& texture)
 	{
-		CreateProperty(name, texture.get(), 0, 0, true, SAMPLE, 0);
+		SetTexture(name, texture.get());
 	}
 
 	bool* Material::GetBool(

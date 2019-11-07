@@ -455,21 +455,21 @@ namespace iwmath {
 		return !operator==(other);
 	}
 
-	matrix3 matrix3::create_from_axis_angle(
+	matrix3 matrix3::from_axis_angle(
 		const vector4& axis_angle)
 	{
-		return create_from_axis_angle(
+		return from_axis_angle(
 			axis_angle.x, axis_angle.y, axis_angle.z, axis_angle.w);
 	}
 
-	matrix3 matrix3::create_from_axis_angle(
+	matrix3 matrix3::from_axis_angle(
 		const vector3& axis,
 		float angle)
 	{
-		return create_from_axis_angle(axis.x, axis.y, axis.z, angle);
+		return from_axis_angle(axis.x, axis.y, axis.z, angle);
 	}
 
-	matrix3 matrix3::create_from_axis_angle(
+	matrix3 matrix3::from_axis_angle(
 		float x,
 		float y,
 		float z,

@@ -144,7 +144,7 @@ namespace iwmath {
 		*
 		* @param axisAngle Axis and angle of rotation in one vector.
 		*/
-		static quaternion create_from_axis_angle(
+		static quaternion from_axis_angle(
 			const vector4& axisAngle);
 
 		/**
@@ -153,7 +153,7 @@ namespace iwmath {
 		* @param axis Axis vector
 		* @param angle Angle of rotation around the axis in radians.
 		*/
-		static quaternion create_from_axis_angle(
+		static quaternion from_axis_angle(
 			const vector3& axis,
 			float angle);
 
@@ -165,7 +165,7 @@ namespace iwmath {
 		* @param z X component of the axis vector.
 		* @param angle Angle of rotation around the axis in radians.
 		*/
-		static quaternion create_from_axis_angle(
+		static quaternion from_axis_angle(
 			float x,
 			float y,
 			float z,
@@ -176,7 +176,7 @@ namespace iwmath {
 		*
 		* @param angles Euler angles in radians.
 		*/
-		static quaternion create_from_euler_angles(
+		static quaternion from_euler_angles(
 			const vector3& angles);
 
 		/**
@@ -186,10 +186,22 @@ namespace iwmath {
 		* @param yaw Rotation around the y axis in radians.
 		* @param roll Rotation around the z axis in radians.
 		*/
-		static quaternion create_from_euler_angles(
+		static quaternion from_euler_angles(
 			float x,
 			float y,
 			float z);
+
+		/**
+		* Returns a quaternion looking at a target from a source position.
+		*
+		* @param eye Source position.
+		* @param target Position to look at.
+		* @param up The local up direction.
+		*/
+		static quaternion from_look_at(
+			vector3 eye,
+			vector3 target = vector3::zero,
+			vector3 up     = vector3::unit_y);
 
 		friend IWMATH_API std::ostream& operator<<(
 			std::ostream& stream,

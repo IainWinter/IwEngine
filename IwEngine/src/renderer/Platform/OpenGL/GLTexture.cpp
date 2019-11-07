@@ -8,26 +8,69 @@ namespace IW {
 		int height,
 		TextureFormat format,
 		TextureFormatType type,
-		const unsigned char* data)
+		const void* data)
 		: m_data(data)
 		, m_width(width)
 		, m_height(height)
 		, m_format(format)
 	{
-		glGenTextures(1, &m_renderId);
-		Bind();
-
-		GLenum gltype  = -1;
+		GLenum gltype = -1;
 		GLint glformat = -1;
-		int channels   = -1;
 		switch (format) {
-			case ALPHA:   glformat = GL_RED;                channels = 1; break;
-			case RG:      glformat = GL_RG;                 channels = 2; break;
-			case RGB:     glformat = GL_RGB;                channels = 3; break;
-			case RGBA:    glformat = GL_RGBA;               channels = 4; break;
-			case DEPTH:   glformat = GL_DEPTH_COMPONENT;    channels = 1; break;
-			case STENCIL: glformat = GL_STENCIL_COMPONENTS; channels = 1; break;
-			default: LOG_ERROR << "Invalid texture pixel format " << format << " channels"; break;
+			case ALPHA: {
+				switch (type) {
+					case UBYTE: glformat = GL_RED;  break;
+					case FLOAT: glformat = GL_R32F; break;
+				}
+
+				break;
+			}
+
+			case RG: {
+				switch (type) {
+					case UBYTE: glformat = GL_RG;    break;
+					case FLOAT: glformat = GL_RG32F; break;
+				}
+
+				break;
+			}
+
+			case RGB: {
+				switch (type) {
+					case UBYTE: glformat = GL_RGB;    break;
+					case FLOAT: glformat = GL_RGB32F; break;
+				}
+
+				break;
+			}
+
+			case RGBA: {
+				switch (type) {
+					case UBYTE: glformat = GL_RGBA;    break;
+					case FLOAT: glformat = GL_RGBA32F; break;
+				}
+
+				break;
+			}
+
+			case DEPTH: {
+				switch (type) {
+					case UBYTE: glformat = GL_DEPTH_COMPONENT;    break;
+					case FLOAT: glformat = GL_DEPTH_COMPONENT32F; break;
+				}
+
+				break;
+			}
+
+			case STENCIL: {
+				glformat = GL_STENCIL_COMPONENTS;
+				break;
+			}
+
+			default: {
+				LOG_ERROR << "Invalid texture pixel format " << format << " channels";
+				break;
+			}
 		}
 
 		switch (type) {
@@ -36,7 +79,21 @@ namespace IW {
 			default: LOG_ERROR << "Invalid texture pixel type " << type;  break;
 		}
 
-		glTexImage2D(GL_TEXTURE_2D, 0, glformat, m_width, m_height, 0, glformat, gltype, m_data);
+		if (glformat == -1 || gltype == -1) {
+			return;
+		}
+
+		glGenTextures(1, &m_renderId);
+		Bind();
+
+		if (data == nullptr) {
+			glTexStorage2D(GL_TEXTURE_2D, 1, glformat, m_width, m_height);
+		}
+
+		else {
+			glTexImage2D(GL_TEXTURE_2D, 0, glformat, m_width, m_height, 0, glformat, gltype, m_data);
+		}
+
 		glGenerateMipmap(GL_TEXTURE_2D);
 
 		// Need to pass options for these
@@ -48,15 +105,6 @@ namespace IW {
 
 	GLTexture::~GLTexture() {
 		glDeleteTextures(1, &m_renderId);
-	}
-
-	void GLTexture::UpdateData(
-		const unsigned char* data,
-		int width,
-		int height,
-		int channels) const
-	{
-		//glTexSubImage2D();
 	}
 
 	void GLTexture::Bind() const {

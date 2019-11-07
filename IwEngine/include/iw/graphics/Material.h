@@ -119,6 +119,10 @@ inline namespace Graphics {
 
 		void SetTexture(
 			const char* name,
+			IW::Texture* texture);
+
+		void SetTexture(
+			const char* name,
 			const iwu::ref<IW::Texture>& texture);
 
 		bool* GetBool(

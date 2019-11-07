@@ -10,7 +10,7 @@ inline namespace RenderAPI {
 	{
 	private:
 		unsigned int m_renderId;
-		const unsigned char* m_data;
+		const void* m_data;
 
 		int m_width;
 		int m_height;
@@ -22,22 +22,12 @@ inline namespace RenderAPI {
 			int height,
 			TextureFormat format,
 			TextureFormatType type,
-			const unsigned char* data);
+			const void* data);
 
 		~GLTexture();
 
-		void UpdateData(
-			const unsigned char* data,
-			int width,
-			int height,
-			int channels) const;
-
 		inline unsigned int Id() const {
 			return m_renderId;
-		}
-
-		inline const unsigned char* Pixels() const {
-			return m_data;
 		}
 
 		inline int Width() const {
