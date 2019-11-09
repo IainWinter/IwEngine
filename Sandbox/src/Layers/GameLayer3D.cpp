@@ -77,8 +77,8 @@ int GameLayer3D::Initialize(
 		iwm::vector2(0, 0)
 	};
 
-	shadowTarget     = new IW::RenderTarget(1024, 1024, { IW::RG, IW::DEPTH }, { IW::FLOAT, IW::FLOAT });
-	shadowTargetBlur = new IW::RenderTarget(1024, 1024, { IW::RG }, { IW::FLOAT });
+	shadowTarget     = new IW::RenderTarget(2048, 2048, { IW::RG, IW::DEPTH }, { IW::FLOAT, IW::FLOAT });
+	shadowTargetBlur = new IW::RenderTarget(2048, 2048, { IW::RG }, { IW::FLOAT });
 	shadowTarget->Initialize(Renderer.Device);
 	shadowTargetBlur->Initialize(Renderer.Device);
 
@@ -146,7 +146,7 @@ int GameLayer3D::Initialize(
 	lightColors[2] = iwm::vector3(0, 1, 0);
 	lightColors[3] = iwm::vector3(0, 0, 1);
 
-	IW::Camera* perspective = new IW::PerspectiveCamera(fov, 1.778f, 0.001f, 1000.0f);
+	IW::Camera* perspective = new IW::PerspectiveCamera(fov, 1.778f, 100.0f, 120.0f);
 
 	IwEntity::Entity camera = Space.CreateEntity<IW::Transform, IwEngine::CameraController>();
 	Space.SetComponentData<IwEngine::CameraController>(camera, perspective);
@@ -202,7 +202,7 @@ void GameLayer3D::PostUpdate() {
 
 		if (f != fov) {
 			f = fov;
-			cam->SetProjection(fov, 1.778f, 0.001f, 1000.0f); // ew
+			cam->SetProjection(fov, 1.778f, 50.0f, 300.0f); // ew
 
 		}
 
