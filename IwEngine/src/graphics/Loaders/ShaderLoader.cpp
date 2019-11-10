@@ -1,8 +1,13 @@
-#include "iw/graphics/Loaders/PipelineLoader.h"
+#include "iw/graphics/Loaders/ShaderLoader.h"
 #include "iw/util/io/File.h"
 
 namespace IW {
-	Pipeline* PipelineLoader::LoadAsset(
+	ShaderLoader::ShaderLoader(
+		AssetManager& asset)
+		: AssetLoader(asset)
+	{}
+
+	Shader* ShaderLoader::LoadAsset(
 		std::string filepath)
 	{
 		std::string source = iwu::ReadFile(filepath);

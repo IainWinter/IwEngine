@@ -11,9 +11,9 @@
 #include <assert.h>
 
 namespace IwEntity {
-	class IWENTITY_API ChunkList {
+	class ChunkList {
 	public:
-		class IWENTITY_API iterator {
+		class iterator {
 		private:
 			Chunk* m_chunk;
 			size_t m_index;
@@ -22,15 +22,15 @@ namespace IwEntity {
 			iwu::ref<ComponentData> m_data;
 
 		public:
-			iterator& operator++();
+			IWENTITY_API iterator& operator++();
 
-			bool operator==(
+			IWENTITY_API bool operator==(
 				const iterator& itr) const;
 
-			bool operator!=(
+			IWENTITY_API bool operator!=(
 				const iterator& itr) const;
 
-			EntityComponentData operator*();
+			IWENTITY_API EntityComponentData operator*();
 		private:
 			friend class ChunkList;
 
@@ -51,27 +51,27 @@ namespace IwEntity {
 		const size_t m_chunkCapacity;
 
 	public:
-		ChunkList(
+		IWENTITY_API ChunkList(
 			const iwu::ref<Archetype>& archetype,
 			size_t chunkSize);
 
-		size_t ReserveComponents(
+		IWENTITY_API size_t ReserveComponents(
 			const Entity& entity);
 
-		bool ReinstateComponents(
+		IWENTITY_API bool ReinstateComponents(
 			const iwu::ref<EntityData>& entityData);
 
-		bool FreeComponents(
+		IWENTITY_API bool FreeComponents(
 			size_t index);
 
-		void* GetComponentData(
+		IWENTITY_API void* GetComponentData(
 			const iwu::ref<Component>& component,
 			size_t index);
 
-		iterator Begin(
+		IWENTITY_API iterator Begin(
 			const iwu::ref<ComponentQuery>& query);
 
-		iterator End(
+		IWENTITY_API iterator End(
 			const iwu::ref<ComponentQuery>& query);
 	private:
 		Chunk* FindChunk(

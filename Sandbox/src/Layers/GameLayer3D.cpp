@@ -7,8 +7,7 @@
 #include "iw/engine/Time.h"
 #include "imgui/imgui.h"
 #include "iw/graphics/MeshFactory.h"
-#include "iw/graphics/Pipeline.h"
-
+#include "iw/graphics/Shader.h"
 
 #include "iw/util/io/File.h"
 
@@ -26,10 +25,10 @@ GameLayer3D::GameLayer3D(
 	PushSystem<PlayerSystem>();
 }
 
-IW::Pipeline pbrPipeline;
-IW::Pipeline shadowPipeline;
-IW::Pipeline nullFilter;
-IW::Pipeline blurFilter;
+IW::Shader pbrPipeline;
+IW::Shader shadowPipeline;
+IW::Shader nullFilter;
+IW::Shader blurFilter;
 IW::IFrameBuffer* shadow;
 IW::RenderTarget* shadowTarget;
 IW::RenderTarget* shadowTargetBlur;
@@ -50,6 +49,8 @@ iwm::matrix4 camBuf[2];
 int GameLayer3D::Initialize(
 	IwEngine::InitOptions& options)
 {
+	//iwu::ref<IW::Shader> shader = Asset.Load<IW::Shader>("shaders/pbr.shader");
+
 	pbrPipeline.AddShader(IW::VERTEX,   iwu::ReadFile("assets/shaders/pbr/pbrvs.glsl").c_str());
 	pbrPipeline.AddShader(IW::FRAGMENT, iwu::ReadFile("assets/shaders/pbr/pbrfs.glsl").c_str());
 	pbrPipeline.Initialize(Renderer.Device);

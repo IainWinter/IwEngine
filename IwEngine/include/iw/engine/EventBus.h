@@ -9,9 +9,11 @@
 namespace IwEngine {
 	class IWENGINE_API EventBus {
 	private:
-		std::vector<iwe::callback<Event&>> m_callbacks;
-		iwu::blocking_queue<Event*> m_queue;
-		std::mutex m_mutex;
+		struct {
+			std::vector<iwe::callback<Event&>> m_callbacks;
+			iwu::blocking_queue<Event*> m_queue;
+			std::mutex m_mutex;
+		};
 
 	public:
 		void subscribe(

@@ -1,16 +1,19 @@
 #pragma once
 
 #include "iw/graphics/IwGraphics.h"
-#include "iw/graphics/Pipeline.h"
+#include "iw/graphics/Shader.h"
 #include "iw/asset/AssetLoader.h"
 
 namespace IW {
 	inline namespace Graphics {
-		class IWGRAPHICS_API PipelineLoader
-			: public AssetLoader<Pipeline>
+		class IWGRAPHICS_API ShaderLoader
+			: public AssetLoader<Shader>
 		{
+		public:
+			ShaderLoader(
+				AssetManager& asset);
 		private:
-			Pipeline* LoadAsset(
+			Shader* LoadAsset(
 				std::string filepath) override;
 		};
 	}

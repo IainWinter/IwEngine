@@ -8,6 +8,7 @@
 #include "iw/graphics/Loaders/ModelLoader.h"
 #include "iw/graphics/Loaders/MaterialLoader.h"
 #include "iw/graphics/Loaders/TextureLoader.h"
+#include "iw/graphics/Loaders/ShaderLoader.h"
 #include <atomic>
 
 namespace IwEngine {
@@ -52,6 +53,7 @@ namespace IwEngine {
 		Asset.SetLoader<IW::MeshLoader>();
 		Asset.SetLoader<IW::MaterialLoader>();
 		Asset.SetLoader<IW::TextureLoader>();
+		Asset.SetLoader<IW::ShaderLoader>();
 
 		// Window
 
