@@ -6,7 +6,7 @@ namespace IW {
 	GLGeometryShader::GLGeometryShader(
 		const char* source)
 	{
-		LOG_INFO << "Loaded geometry shader...\n" << source;
+		LOG_INFO << "Loaded geometry shader..."/* << source*/;
 
 		m_geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
 		glShaderSource(m_geometryShader, 1, &source, nullptr);
@@ -21,7 +21,7 @@ namespace IW {
 			char* message = new char[length];
 			glGetShaderInfoLog(m_geometryShader, length, &length, message);
 
-			LOG_ERROR << "Error compiling fragment shader " << message;
+			LOG_ERROR << "Error compiling geometry shader " << message;
 
 			delete[] message;
 			glDeleteShader(m_geometryShader);

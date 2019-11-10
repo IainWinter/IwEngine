@@ -1,35 +1,36 @@
-#include "iw/graphics/Pipeline.h"
+#include "iw/graphics/Shader.h"
 
 namespace IW {
-	Pipeline::Pipeline()
+	Shader::Shader()
 		: Handle(nullptr)
 	{}
 
-	void Pipeline::AddShader(
+	void Shader::AddShader(
 		ShaderType type, 
 		const char* source)
 	{
 		size_t size = strlen(source) + 1;
 
-		Shader shader = {
+		ShaderSource shader = {
 			size,
 			(char*)malloc(size),
 			type
 		};
 
+		if (!shader.Source) return;
 		memcpy(shader.Source, source, size);
 
-		m_shaders.push_back(shader);
+		m_source.push_back(shader);
 	}
 
-	void Pipeline::Initialize(
+	void Shader::Initialize(
 		const iwu::ref<IDevice>& device)
 	{
 		IVertexShader* vertex = nullptr;
 		IGeometryShader* geometry = nullptr;
 		IFragmentShader* fragment = nullptr;
 
-		for (Shader& shader : m_shaders) {
+		for (ShaderSource& shader : m_source) {
 			switch (shader.Type) {
 				case VERTEX:   vertex   = device->CreateVertexShader(shader.Source);   break;
 				case GEOMETRY: geometry = device->CreateGeometryShader(shader.Source); break;

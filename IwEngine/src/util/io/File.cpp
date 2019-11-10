@@ -27,11 +27,11 @@ namespace iwutil {
 	}
 
 	std::string ReadFile(
-		const char* filePath)
+		const std::string& filePath)
 	{
 		std::string contents;
 		FILE* file;
-		errno_t errorCode = fopen_s(&file, filePath, "rt");
+		errno_t errorCode = fopen_s(&file, filePath.c_str(), "rt");
 		if (file) {
 			fseek(file, 0, SEEK_END);
 			contents.resize(ftell(file));
@@ -39,6 +39,7 @@ namespace iwutil {
 			fread(&contents[0], 1, contents.size(), file);
 			fclose(file);
 		}
+
 		else {
 			ReportError(errorCode, filePath);
 		}
@@ -47,13 +48,13 @@ namespace iwutil {
 	}
 
 	std::vector<std::string> ReadFileLines(
-		const char* filePath)
+		const std::string& filePath)
 	{
 		std::vector<std::string> lines;
 		FILE* file;
-		errno_t errorCode = fopen_s(&file, filePath, "rt");
+		errno_t errorCode = fopen_s(&file, filePath.c_str(), "rt");
 		if (file) {
-			int lineCount = 0;
+			size_t lineCount = 0;
 			for (char c = getc(file); c != EOF; c = getc(file)) {
 				if (c == '\n') lineCount++;
 			}
@@ -71,6 +72,7 @@ namespace iwutil {
 				lines.push_back(line);
 			}
 		}
+
 		else {
 			ReportError(errorCode, filePath);
 		}
@@ -79,10 +81,10 @@ namespace iwutil {
 	}
 
 	bool FileExists(
-		const char* filePath)
+		const std::string& filePath)
 	{
 		FILE* file;
-		fopen_s(&file, filePath, "rb");
+		fopen_s(&file, filePath.c_str(), "rb");
 		if (file) {
 			fclose(file);
 		}
@@ -91,16 +93,17 @@ namespace iwutil {
 	}
 
 	uintmax_t GetFileSize(
-		const char* filePath)
+		const std::string& filePath)
 	{
 		uintmax_t bytes = 0u;
 		FILE* file;
-		errno_t errorCode = fopen_s(&file, filePath, "rb");
+		errno_t errorCode = fopen_s(&file, filePath.c_str(), "rb");
 		if (file) {
 			fseek(file, 0, SEEK_END);
 			bytes = ftell(file);
 			fclose(file);
 		}
+
 		else {
 			ReportError(errorCode, filePath);
 		}

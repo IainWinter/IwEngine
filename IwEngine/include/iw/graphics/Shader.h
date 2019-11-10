@@ -14,21 +14,21 @@ inline namespace Graphics {
 		FRAGMENT
 	};
 
-	struct IWGRAPHICS_API Pipeline {
+	struct IWGRAPHICS_API Shader {
 	private:
-		struct Shader {
+		struct ShaderSource {
 			size_t SourceSize;
 			char* Source;
 			ShaderType Type;
 		};
 
 	public:
-		iwu::ref<IPipeline> Handle;
+		iwu::ref<IPipeline> Handle; // not really sure of the name for Shader Program. Every engine just calls it Shader but thats wrong kinda?
 	private:
-		std::vector<Shader> m_shaders;
+		std::vector<ShaderSource> m_source;
 
 	public:
-		Pipeline();
+		Shader();
 
 		void AddShader(
 			ShaderType type,
