@@ -12,13 +12,36 @@ namespace IW {
 	{
 		std::string source = iwu::ReadFile(filepath);
 
-		std::vector<std::string> lines = iwu::ReadFileLines(filepath);
+		Shader* shader = new Shader();
 
+		size_t index = source.find("#shader");
+		while (index < source.size()) {
+			size_t start = source.find('\n', index);
+			size_t end   = source.find("#shader", start);
 
-		//Pipeline* pipeline = new Pipeline();
+			size_t offset = index + 8;
+			std::string name = source.substr(offset, start - offset);
+			
+			index = end;
 
-		//pipeline->AddShader();
+			ShaderType type;
+			if (name == "Vertex") {
+				type = VERTEX;
+			}
 
-		return nullptr;
+			else if (name == "Fragment") {
+				type = FRAGMENT;
+			}
+
+			else {
+				LOG_WARNING << "Invalid shader type " << name;
+				return nullptr;
+			}
+
+			std::string code = source.substr(start, end - start);
+			shader->AddShader(type, code.c_str());
+		}
+
+		return shader;
 	}
 }

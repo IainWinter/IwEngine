@@ -49,7 +49,7 @@ iwm::matrix4 camBuf[2];
 int GameLayer3D::Initialize(
 	IwEngine::InitOptions& options)
 {
-	//iwu::ref<IW::Shader> shader = Asset.Load<IW::Shader>("shaders/pbr.shader");
+	iwu::ref<IW::Shader> shader = Asset.Load<IW::Shader>("shaders/pbr.shader");
 
 	pbrPipeline.AddShader(IW::VERTEX,   iwu::ReadFile("assets/shaders/pbr/pbrvs.glsl").c_str());
 	pbrPipeline.AddShader(IW::FRAGMENT, iwu::ReadFile("assets/shaders/pbr/pbrfs.glsl").c_str());
