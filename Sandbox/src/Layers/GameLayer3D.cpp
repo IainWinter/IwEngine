@@ -25,10 +25,10 @@ GameLayer3D::GameLayer3D(
 	PushSystem<PlayerSystem>();
 }
 
-IW::Shader pbrPipeline;
-IW::Shader shadowPipeline;
-IW::Shader nullFilter;
-IW::Shader blurFilter;
+iwu::ref<IW::Shader> pbrPipeline;
+iwu::ref<IW::Shader> shadowPipeline;
+iwu::ref<IW::Shader> nullFilter;
+iwu::ref<IW::Shader> blurFilter;
 IW::IFrameBuffer* shadow;
 IW::RenderTarget* shadowTarget;
 IW::RenderTarget* shadowTargetBlur;
@@ -49,27 +49,21 @@ iwm::matrix4 camBuf[2];
 int GameLayer3D::Initialize(
 	IwEngine::InitOptions& options)
 {
-	iwu::ref<IW::Shader> shader = Asset.Load<IW::Shader>("shaders/pbr.shader");
+	pbrPipeline = Asset.Load<IW::Shader>("shaders/pbr.shader");
+	pbrPipeline->Initialize(Renderer.Device);
 
-	pbrPipeline.AddShader(IW::VERTEX,   iwu::ReadFile("assets/shaders/pbr/pbrvs.glsl").c_str());
-	pbrPipeline.AddShader(IW::FRAGMENT, iwu::ReadFile("assets/shaders/pbr/pbrfs.glsl").c_str());
-	pbrPipeline.Initialize(Renderer.Device);
+	shadowPipeline = Asset.Load<IW::Shader>("shaders/shadows/directional.shader");
+	shadowPipeline->Initialize(Renderer.Device);
 
-	shadowPipeline.AddShader(IW::VERTEX,   iwu::ReadFile("assets/shaders/shadows/directionalvs.glsl").c_str());
-	shadowPipeline.AddShader(IW::FRAGMENT, iwu::ReadFile("assets/shaders/shadows/directionalfs.glsl").c_str());
-	shadowPipeline.Initialize(Renderer.Device);
+	nullFilter = Asset.Load<IW::Shader>("shaders/filters/null.shader");
+	nullFilter->Initialize(Renderer.Device);
 
-	nullFilter.AddShader(IW::VERTEX,   iwu::ReadFile("assets/shaders/filters/nonevs.glsl").c_str());
-	nullFilter.AddShader(IW::FRAGMENT, iwu::ReadFile("assets/shaders/filters/nonefs.glsl").c_str());
-	nullFilter.Initialize(Renderer.Device);
-
-	blurFilter.AddShader(IW::VERTEX,   iwu::ReadFile("assets/shaders/filters/gaussianvs.glsl").c_str());
-	blurFilter.AddShader(IW::FRAGMENT, iwu::ReadFile("assets/shaders/filters/gaussianfs.glsl").c_str());
-	blurFilter.Initialize(Renderer.Device);
+	blurFilter = Asset.Load<IW::Shader>("shaders/filters/gaussian.shader");
+	blurFilter->Initialize(Renderer.Device);
 
 	cameraBuffer = Renderer.Device->CreateUniformBuffer(2 * sizeof(iwm::matrix4));
-	pbrPipeline.Handle->SetBuffer("Camera", cameraBuffer);
-	shadowPipeline.Handle->SetBuffer("Camera", cameraBuffer);
+	pbrPipeline->Handle->SetBuffer("Camera", cameraBuffer);
+	shadowPipeline->Handle->SetBuffer("Camera", cameraBuffer);
 
 	iwm::vector2 uvs[4] = {
 		iwm::vector2(1, 0),
@@ -92,7 +86,7 @@ int GameLayer3D::Initialize(
 	mesh->GenTangents();
 	mesh->Initialize(Renderer.Device);
 
-	material = std::make_shared<IW::Material>(pbrPipeline.Handle);
+	material = std::make_shared<IW::Material>(pbrPipeline->Handle);
 	mesh->SetMaterial(material);
 
 	iwu::ref<IW::Texture> albedo = Asset.Load<IW::Texture>("textures/metal/albedo.jpg");
@@ -135,7 +129,7 @@ int GameLayer3D::Initialize(
 	//material->SetFloat ("metallic", 1.0f);
 	//material->SetFloat ("roughness", 0.6f);
 	//material->SetFloat ("ao", 1.0f);
-	floorMesh->Meshes[0].Material->Pipeline = pbrPipeline.Handle;
+	floorMesh->Meshes[0].Material->Pipeline = pbrPipeline->Handle;
 
 	lightPositions[0] = iwm::vector3( 0, 5, 0);
 	lightPositions[1] = iwm::vector3( 5, 2, 5);
@@ -228,12 +222,12 @@ void GameLayer3D::PostUpdate() {
 
 		Renderer.BeginScene(shadowTarget);
 
-		Renderer.Device->SetPipeline(shadowPipeline.Handle.get());
+		Renderer.Device->SetPipeline(shadowPipeline->Handle.get());
 
 		for (auto tree : Space.Query<IW::Transform, IwEngine::Model>()) {
 			auto [transform, model] = tree.Components.Tie<TreeComponents>();
 
-			shadowPipeline.Handle->GetParam("model")
+			shadowPipeline->Handle->GetParam("model")
 				->SetAsMat4(transform->Transformation());
 
 			for (size_t i = 0; i < model->MeshCount; i++) {
@@ -248,11 +242,11 @@ void GameLayer3D::PostUpdate() {
 		float blurw = 1.0f / (shadowTarget->Width  * blurAmount);
 		float blurh = 1.0f / (shadowTarget->Height * blurAmount);
 
-		blurFilter.Handle->GetParam("blurScale")->SetAsFloats(&iwm::vector3(blurw, 0, 0), 3);
-		Renderer.ApplyFilter(blurFilter.Handle, shadowTarget, shadowTargetBlur);
+		blurFilter->Handle->GetParam("blurScale")->SetAsFloats(&iwm::vector3(blurw, 0, 0), 3);
+		Renderer.ApplyFilter(blurFilter->Handle, shadowTarget, shadowTargetBlur);
 
-		blurFilter.Handle->GetParam("blurScale")->SetAsFloats(&iwm::vector3(0, blurh, 0), 3);
-		Renderer.ApplyFilter(blurFilter.Handle, shadowTargetBlur, shadowTarget);
+		blurFilter->Handle->GetParam("blurScale")->SetAsFloats(&iwm::vector3(0, blurh, 0), 3);
+		Renderer.ApplyFilter(blurFilter->Handle, shadowTargetBlur, shadowTarget);
 		
 		// Draw actual scene 
 
@@ -262,11 +256,11 @@ void GameLayer3D::PostUpdate() {
 
 		Renderer.BeginScene();
 
-		Renderer.Device->SetPipeline(pbrPipeline.Handle.get());
-		pbrPipeline.Handle->GetParam("lightPositions")->SetAsFloats(&lightPositions, 4, 3); // need better way to pass scene data
-		pbrPipeline.Handle->GetParam("lightColors")->SetAsFloats(&lightColors, 4, 3);
-		pbrPipeline.Handle->GetParam("camPos")->SetAsFloats(&controller->Camera->Position, 3);
-		pbrPipeline.Handle->GetParam("lightSpace")->SetAsMat4(lightCam.GetViewProjection());
+		Renderer.Device->SetPipeline(pbrPipeline->Handle.get());
+		pbrPipeline->Handle->GetParam("lightPositions")->SetAsFloats(&lightPositions, 4, 3); // need better way to pass scene data
+		pbrPipeline->Handle->GetParam("lightColors")->SetAsFloats(&lightColors, 4, 3);
+		pbrPipeline->Handle->GetParam("camPos")->SetAsFloats(&controller->Camera->Position, 3);
+		pbrPipeline->Handle->GetParam("lightSpace")->SetAsMat4(lightCam.GetViewProjection());
 		//pbrPipeline->GetParam("sunDirection")->SetAsFloats(&lightPositions, 3);
 
 		for (auto tree : Space.Query<IW::Transform, IwEngine::Model>()) {

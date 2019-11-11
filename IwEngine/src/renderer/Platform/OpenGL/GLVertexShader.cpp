@@ -6,8 +6,6 @@ namespace IW {
 	GLVertexShader::GLVertexShader(
 		const char* source)
 	{
-		LOG_INFO << "Loaded vertex shader..."/* << source*/;
-
 		m_vertexShader = glCreateShader(GL_VERTEX_SHADER);
 		glShaderSource(m_vertexShader, 1, &source, nullptr);
 		glCompileShader(m_vertexShader);

@@ -6,8 +6,6 @@ namespace IW {
 	GLGeometryShader::GLGeometryShader(
 		const char* source)
 	{
-		LOG_INFO << "Loaded geometry shader..."/* << source*/;
-
 		m_geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
 		glShaderSource(m_geometryShader, 1, &source, nullptr);
 		glCompileShader(m_geometryShader);

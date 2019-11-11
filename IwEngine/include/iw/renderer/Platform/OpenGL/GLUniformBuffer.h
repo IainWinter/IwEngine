@@ -9,6 +9,8 @@ inline namespace RenderAPI {
 	{
 	private:
 		unsigned int m_renderId;
+		const void* m_buffer;
+
 		unsigned int m_size;
 		const void* m_data;
 

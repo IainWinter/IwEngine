@@ -16,11 +16,11 @@ namespace IW {
 
 		size_t index = source.find("#shader");
 		while (index < source.size()) {
-			size_t start = source.find('\n', index);
+			size_t start = source.find('\n', index) + 1;
 			size_t end   = source.find("#shader", start);
 
 			size_t offset = index + 8;
-			std::string name = source.substr(offset, start - offset);
+			std::string name = source.substr(offset, start - offset - 1);
 			
 			index = end;
 
@@ -34,7 +34,7 @@ namespace IW {
 			}
 
 			else {
-				LOG_WARNING << "Invalid shader type " << name;
+				LOG_WARNING << "Invalid shader type " << name << " from " << filepath << "@c" << offset;
 				return nullptr;
 			}
 

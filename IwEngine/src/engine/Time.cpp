@@ -13,7 +13,7 @@ namespace IwEngine {
 			float duration) 
 		{
 			fixedTime = duration;
-			LOG_INFO << "Set fixed timeset to " << duration << " seconds";
+			LOG_DEBUG << "Set fixed timeset to " << duration << " seconds";
 		}
 
 		void Update() {
