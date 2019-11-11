@@ -44,12 +44,15 @@ inline namespace Asset {
 		{
 			_a* asset;
 			if (m_loaded.find(filepath) == m_loaded.end()) {
-				LOG_INFO << "Loading asset from " << filepath;
+				LOG_INFO << "Loading asset from " << filepath << "...";
 				asset = LoadAsset(filepath);
-				LOG_INFO << "Done";
 				if (asset == nullptr) {
-					LOG_ERROR << "Failed to load resource " << filepath << "!";
+					LOG_ERROR << "Failed to load asset from " << filepath << "!";
 					return nullptr;
+				}
+
+				else {
+					LOG_INFO << "Done";
 				}
 
 				m_loaded.emplace(filepath, asset);
