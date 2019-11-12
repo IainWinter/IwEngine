@@ -10,7 +10,8 @@ namespace IW {
 		, m_data(data)
 	{
 		glGenBuffers(1, &m_renderId);
-		glBindBuffer(GL_UNIFORM_BUFFER, m_renderId);
+		Bind();
+
 		glBufferData(GL_UNIFORM_BUFFER, size, data, GL_DYNAMIC_DRAW); // TODO: Add way to pass this as arg
 	}
 

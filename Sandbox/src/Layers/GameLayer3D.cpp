@@ -198,7 +198,6 @@ void GameLayer3D::PostUpdate() {
 		if (f != fov) {
 			f = fov;
 			cam->SetProjection(fov, 1.778f, 50.0f, 300.0f); // ew
-
 		}
 
 		// What would be nice
@@ -277,13 +276,6 @@ void GameLayer3D::PostUpdate() {
 
 void GameLayer3D::ImGui() {
 	ImGui::Begin("Game layer");
-
-	//ImGui::ColorPicker3("Color", (float*)std::get<0>(material->GetFloats("albedo")));
-	//ImGui::SliderFloat("Metallic",  (float*)material->GetFloat("metallic"), 0, 1);
-	//ImGui::SliderFloat("Roughness", (float*)material->GetFloat("roughness"), 0.3f, 1);
-	//ImGui::SliderFloat("AO", (float*)material->GetFloat("ao"), 0, 1);
-	//ImGui::ColorPicker4("Diffuse Color", (float*)&material->GetColor("diffuse"));
-	//ImGui::ColorPicker4("Specular Color", (float*)&material->GetColor("specular"));
 
 	ImGui::Text("Camera");
 	ImGui::SliderFloat("Angle", &angle, 0, iwm::PI);
