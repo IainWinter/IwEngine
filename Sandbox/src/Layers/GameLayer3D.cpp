@@ -154,7 +154,7 @@ int GameLayer3D::Initialize(
 	IwEntity::Entity enemy = Space.CreateEntity<IW::Transform, IwEngine::Model, Enemy>();
 	Space.SetComponentData<IW::Transform>  (enemy, iwm::vector3(0, 0, 0));
 	Space.SetComponentData<IwEngine::Model>(enemy, mesh, 1U);
-	Space.SetComponentData<Enemy>          (enemy, SPIN, 3.0f, 0.05f, 0.025f, 0.025f);
+	Space.SetComponentData<Enemy>          (enemy, SPIN, 3.0f, 0.1f, 0.05f, 0.05f);
 
 	IwEntity::Entity floor = Space.CreateEntity<IW::Transform, IwEngine::Model>();
 	Space.SetComponentData<IW::Transform>  (floor, iwm::vector3(0, -1, 0), iwm::vector3(10, 1, 10), 
@@ -184,16 +184,27 @@ void GameLayer3D::PostUpdate() {
 
 		IW::PerspectiveCamera* cam = (IW::PerspectiveCamera*)controller->Camera;
 
+		bool needsUpdate = false;
 		if (a != angle || d != distance) {
 			a = angle;
 			d = distance;
 			cam->Position = iwm::vector3(0, sin(angle), cos(angle)) * distance;
 			cam->Rotation = iwm::quaternion::from_euler_angles(iwm::PI + angle, 0, iwm::PI);
+
+			camBuf[1] = cam->GetView();
+			needsUpdate = true;
 		}
 
 		if (f != fov) {
 			f = fov;
 			cam->SetProjection(fov, 1.778f, 50.0f, 300.0f); // ew
+
+			camBuf[0] = cam->GetProjection();
+			needsUpdate = true;
+		}
+
+		if (needsUpdate) {
+			Renderer.Device->UpdateUniformBufferData(cameraBuffer, camBuf);
 		}
 
 		// What would be nice
@@ -211,13 +222,12 @@ void GameLayer3D::PostUpdate() {
 		lightCam.Position = lightDirection;
 		lightCam.Rotation = iwm::quaternion::from_look_at(lightDirection);
 
-		camBuf[0] = lightCam.GetProjection();
-		camBuf[1] = lightCam.GetView();
-		Renderer.Device->UpdateUniformBufferData(cameraBuffer, camBuf);
-
 		Renderer.BeginScene(shadowTarget);
 
 		Renderer.Device->SetPipeline(shadowPipeline->Handle.get());
+
+		shadowPipeline->Handle->GetParam("viewProjection")
+			->SetAsMat4(lightCam.GetView() * lightCam.GetProjection());
 
 		for (auto tree : Space.Query<IW::Transform, IwEngine::Model>()) {
 			auto [transform, model] = tree.Components.Tie<TreeComponents>();
@@ -243,11 +253,7 @@ void GameLayer3D::PostUpdate() {
 		blurFilter->Handle->GetParam("blurScale")->SetAsFloats(&iwm::vector3(0, blurh, 0), 3);
 		Renderer.ApplyFilter(blurFilter->Handle, shadowTargetBlur, shadowTarget);
 		
-		// Draw actual scene 
-
-		camBuf[0] = cam->GetProjection();
-		camBuf[1] = cam->GetView();
-		Renderer.Device->UpdateUniformBufferData(cameraBuffer, camBuf);
+		// Draw actual scene
 
 		Renderer.BeginScene();
 

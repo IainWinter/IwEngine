@@ -40,6 +40,8 @@ namespace IW {
 
 			std::string code = source.substr(start, end - start);
 			shader->AddShader(type, code.c_str());
+
+			LOG_INFO << code;
 		}
 
 		return shader;
