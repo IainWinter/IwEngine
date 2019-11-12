@@ -161,10 +161,6 @@ int GameLayer3D::Initialize(
 		iwm::quaternion::from_euler_angles(iwm::PI / 2, 0, 0));
 	Space.SetComponentData<IwEngine::Model>(floor, floorMesh->Meshes, 1U);
 
-	IwEntity::Entity f = Space.CreateEntity<IW::Transform, IwEngine::Model>();
-	Space.SetComponentData<IW::Transform>(f, iwm::vector3(5, 2, 2), iwm::vector3::one, iwm::quaternion::from_euler_angles(iwm::PI / 2, 0, 0));
-	Space.SetComponentData<IwEngine::Model>(f, floorMesh->Meshes, 1U);
-
 	lightDirection = iwm::vector3(1);
 
 	PushSystem<EnemySystem>(mesh);
