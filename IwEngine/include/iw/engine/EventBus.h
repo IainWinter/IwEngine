@@ -7,24 +7,22 @@
 #include <vector>
 
 namespace IwEngine {
-	class IWENGINE_API EventBus {
+	class EventBus {
 	private:
-		struct {
-			std::vector<iwe::callback<Event&>> m_callbacks;
-			iwu::blocking_queue<Event*> m_queue;
-			std::mutex m_mutex;
-		};
+		std::vector<iwe::callback<Event&>> m_callbacks;
+		iwu::blocking_queue<Event*> m_queue;
+		std::mutex m_mutex;
 
 	public:
-		void subscribe(
+		IWENGINE_API void subscribe(
 			const iwe::callback<Event&>& callback);
 
 		//void unsubscribe(
 		//	const iwe::callback<Event&>& callback);
 
-		void push(
+		IWENGINE_API void push(
 			Event* event);
 
-		void publish();
+		IWENGINE_API void publish();
 	};
 }
