@@ -6,10 +6,10 @@ enum EnemyType {
 
 struct Enemy {
 	EnemyType Type;
-	float     Speed;
-	float     FireTimeTotal;
-	float     TimeToShoot;
-	float     FireCooldown;
-	float     FireTime;
-	bool      CanShoot;
+	float Speed;
+	float FireTime;
+	float CooldownTime;
+	float Timer;
+	float Rotation;
+	bool  HasShot;
 };

@@ -12,8 +12,6 @@ public:
 		IwEntity::Space& space,
 		IW::Graphics::Renderer& renderer);
 
-	~PlayerSystem();
-
 	void Update(
 		IwEntity::EntityComponentArray& view) override;
 };

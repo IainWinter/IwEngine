@@ -38,7 +38,7 @@ IW::IUniformBuffer* cameraBuffer;
 iwm::vector3 lightDirection;
 iwm::matrix4 lightMVP;
 
-float angle = 1.396263f;
+float angle = 1.57f;
 float distance = 100;
 float fov = 0.17f;
 float a, d, f;
@@ -72,8 +72,8 @@ int GameLayer3D::Initialize(
 		iwm::vector2(0, 0)
 	};
 
-	shadowTarget     = new IW::RenderTarget(2048, 2048, { IW::RG, IW::DEPTH }, { IW::FLOAT, IW::FLOAT });
-	shadowTargetBlur = new IW::RenderTarget(2048, 2048, { IW::RG }, { IW::FLOAT });
+	shadowTarget     = new IW::RenderTarget(1048, 1048, { IW::RG, IW::DEPTH }, { IW::FLOAT, IW::FLOAT });
+	shadowTargetBlur = new IW::RenderTarget(1048, 1048, { IW::ALPHA }, { IW::FLOAT });
 	shadowTarget->Initialize(Renderer.Device);
 	shadowTargetBlur->Initialize(Renderer.Device);
 
@@ -147,35 +147,47 @@ int GameLayer3D::Initialize(
 	Space.SetComponentData<IwEngine::CameraController>(camera, perspective);
 
 	IwEntity::Entity player = Space.CreateEntity<IW::Transform, IwEngine::Model, Player>();
-	Space.SetComponentData<IW::Transform>(player, iwm::vector3(3, 0, 0));
+	Space.SetComponentData<IW::Transform>(player, iwm::vector3(3, -0.25f, 0), iwm::vector3(0.75f));
 	Space.SetComponentData<IwEngine::Model>(player, mesh, 1U);
-	Space.SetComponentData<Player>(player, 10.0f, 100.0f, 0.1666f, 0.1f);
+	Space.SetComponentData<Player>(player, 4.0f, .15f, .05f);
 
 	IwEntity::Entity enemy = Space.CreateEntity<IW::Transform, IwEngine::Model, Enemy>();
-	Space.SetComponentData<IW::Transform>  (enemy, iwm::vector3(0, 0, 0));
+	Space.SetComponentData<IW::Transform>  (enemy, iwm::vector3(0, -0.25f, 0), iwm::vector3(0.75f));
 	Space.SetComponentData<IwEngine::Model>(enemy, mesh, 1U);
-	Space.SetComponentData<Enemy>          (enemy, SPIN, 3.0f, 0.1f, 0.05f, 0.05f);
+	Space.SetComponentData<Enemy>          (enemy, SPIN, 0.2617993f, .12f, 0.0f);
 
 	IwEntity::Entity floor = Space.CreateEntity<IW::Transform, IwEngine::Model>();
-	Space.SetComponentData<IW::Transform>  (floor, iwm::vector3(0, -1, 0), iwm::vector3(10, 1, 10), 
+	Space.SetComponentData<IW::Transform>  (floor, iwm::vector3(0, -1, 0), iwm::vector3(20, 1, 20), 
 		iwm::quaternion::from_euler_angles(iwm::PI / 2, 0, 0));
 	Space.SetComponentData<IwEngine::Model>(floor, floorMesh->Meshes, 1U);
 
-	lightDirection = iwm::vector3(1);
+	//IwEntity::Entity debug = Space.CreateEntity<IW::Transform, IW::DebugVector>();
+
+	lightDirection = iwm::vector3(0, 1, 0);
 
 	PushSystem<EnemySystem>(mesh);
 
 	return 0;
 }
 
-struct PlayerComponents {
+struct CameraComponents {
 	IW::Transform* Transform;
 	IwEngine::CameraController* Controller;
 };
 
-struct TreeComponents {
+struct ModelComponents {
 	IW::Transform* Transform;
 	IwEngine::Model* Model;
+};
+
+struct PlayerComponents {
+	IW::Transform* Transform;
+	Player* Player;
+};
+
+struct EnemyComponents {
+	IW::Transform* Transform;
+	Enemy* Enemy;
 };
 
 void GameLayer3D::PostUpdate() {
@@ -218,7 +230,7 @@ void GameLayer3D::PostUpdate() {
 
 		// Draw shadow texture
 
-		IW::OrthographicCamera lightCam = IW::OrthographicCamera(30, 30, -20, 20);
+		IW::OrthographicCamera lightCam = IW::OrthographicCamera(80, 80, -20, 80);
 		lightCam.Position = lightDirection;
 		lightCam.Rotation = iwm::quaternion::from_look_at(lightDirection);
 
@@ -230,7 +242,7 @@ void GameLayer3D::PostUpdate() {
 			->SetAsMat4(lightCam.GetView() * lightCam.GetProjection());
 
 		for (auto tree : Space.Query<IW::Transform, IwEngine::Model>()) {
-			auto [transform, model] = tree.Components.Tie<TreeComponents>();
+			auto [transform, model] = tree.Components.Tie<ModelComponents>();
 
 			shadowPipeline->Handle->GetParam("model")
 				->SetAsMat4(transform->Transformation());
@@ -265,7 +277,7 @@ void GameLayer3D::PostUpdate() {
 		//pbrPipeline->GetParam("sunDirection")->SetAsFloats(&lightPositions, 3);
 
 		for (auto tree : Space.Query<IW::Transform, IwEngine::Model>()) {
-			auto [transform, model] = tree.Components.Tie<TreeComponents>();
+			auto [transform, model] = tree.Components.Tie<ModelComponents>();
 
 			for (size_t i = 0; i < model->MeshCount; i++) {
 				Renderer.DrawMesh(transform, &model->Meshes[i]);
@@ -288,6 +300,35 @@ void GameLayer3D::ImGui() {
 	ImGui::SliderFloat3("XYZ", &lightDirection.x, -1, 1);
 	ImGui::SliderFloat("Blur", &blurAmount, 0.001f, 1.0f);
 
+	float* s = nullptr;
+
+	for (auto enemy : Space.Query<IW::Transform, Player>()) {
+		auto [t, p] = enemy.Components.Tie<PlayerComponents>();
+
+		s = &p->Speed;
+
+		ImGui::Text("Player");
+		ImGui::SliderFloat("Speed", &p->Speed, 0.1f, 5.0f);
+		ImGui::SliderFloat("Dash Time", &p->DashTime, 0, 1);
+		ImGui::SliderFloat("Dash Cooldown", &p->CooldownTime, 0, 1);
+		ImGui::Value("Dash Timer", p->Timer);
+	}
+
+	for (auto enemy : Space.Query<IW::Transform, Enemy>()) {
+		auto [t, e] = enemy.Components.Tie<EnemyComponents>();
+
+		if (s == &e->Speed) {
+			LOG_INFO << "ge";
+		}
+
+		ImGui::Value("Enemy", (unsigned int)enemy.Index);
+		ImGui::SliderFloat("Enemy Speed", &e->Speed, 0, 100, "%.3f", iwm::E);
+		ImGui::SliderFloat("Fire Time", &e->FireTime, 0, 1);
+		ImGui::SliderFloat("Cooldown Time", &e->CooldownTime, 0, 1);
+		ImGui::Value("Rotation", e->Rotation);
+		ImGui::Value("Fire Timer", e->Timer);
+	}
+
 	ImGui::End();
 }
 
@@ -295,7 +336,7 @@ bool GameLayer3D::On(
 	IwEngine::MouseMovedEvent& event)
 {
 	//for (auto entity : Space.Query<IW::Transform, IwEngine::CameraController>()) {
-	//	auto [transform, controller] = entity.Components.Tie<PlayerComponents>();
+	//	auto [transform, controller] = entity.Components.Tie<CameraComponents>();
 
 	//	float pitch = event.DeltaY * 0.0005f;
 	//	float yaw   = event.DeltaX * 0.0005f;

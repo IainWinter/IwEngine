@@ -37,7 +37,7 @@
 //	IW::OrthographicCamera* Camera;
 //};
 //
-//struct PlayerComponents {
+//struct CameraComponents {
 //	Player* Players;
 //};
 //

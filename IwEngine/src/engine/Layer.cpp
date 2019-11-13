@@ -78,4 +78,10 @@ namespace IwEngine {
 			system->Update();
 		}
 	}
+
+	void Layer::FixedUpdateSystems() {
+		for (ISystem* system : m_systems) {
+			system->FixedUpdate();
+		}
+	}
 }

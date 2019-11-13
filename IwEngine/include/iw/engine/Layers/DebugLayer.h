@@ -13,5 +13,6 @@ namespace IwEngine {
 			IW::AssetManager& asset);
 
 		void PostUpdate() override;
+		void ImGui() override;
 	};
 }

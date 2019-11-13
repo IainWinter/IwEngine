@@ -7,7 +7,7 @@
 
 struct Components {
 	IW::Transform* Transform;
-	Enemy*               Enemy;
+	Enemy*         Enemy;
 };
 
 EnemySystem::EnemySystem(
@@ -28,29 +28,32 @@ void EnemySystem::Update(
 	for (auto entity : view) {
 		auto [transform, enemy] = entity.Components.Tie<Components>();
 
-		if (enemy->FireTime > enemy->FireTimeTotal) {
-			transform->Rotation *= iwm::quaternion::from_euler_angles(0, enemy->Speed * IwEngine::Time::DeltaTime(), 0);
-		}
+		if (  !enemy->HasShot
+			&& enemy->Timer <= 0)
+		{
+			enemy->HasShot = true;
 
-		else if (enemy->FireTime <= 0) {
-			enemy->CanShoot = true;
-			enemy->FireTime = enemy->FireTimeTotal + enemy->FireCooldown;
-		}
-
-		else if (enemy->CanShoot && enemy->FireTime <= enemy->TimeToShoot) {
-			enemy->CanShoot = false;
+			enemy->Rotation = fmod(enemy->Rotation + enemy->Speed, iwm::PI2);
+			iwm::quaternion rot = iwm::quaternion::from_euler_angles(0, enemy->Rotation, 0);
 
 			IwEntity::Entity spawned = Space.CreateEntity<IW::Transform, IwEngine::Model, Bullet, IwPhysics::AABB2D>();
 			Space.SetComponentData<IW::Transform>(spawned,
-				transform->Position + iwm::vector3(sqrt(2), 0, 0) * transform->Rotation,
+				transform->Position + iwm::vector3(sqrt(2), 0, 0) * rot,
 				iwm::vector3(.25f),
-				transform->Rotation);
-				
-			Space.SetComponentData<IwEngine::Model>  (spawned, CircleMesh, 1U);
-			Space.SetComponentData<Bullet>           (spawned, LINE, 8.0f);
+				rot);
+
+			Space.SetComponentData<IwEngine::Model>(spawned, CircleMesh, 1U);
+			Space.SetComponentData<Bullet>(spawned, LINE, 5.0f);
 			Space.SetComponentData<IwPhysics::AABB2D>(spawned, iwm::vector2(-0.25f), iwm::vector2(0.25f));
 		}
 
-		enemy->FireTime -= IwEngine::Time::DeltaTime();
+		if (enemy->Timer <= -enemy->CooldownTime) {
+			enemy->HasShot = false;
+			enemy->Timer = enemy->FireTime;
+		}
+
+		if (enemy->Timer >= -enemy->CooldownTime) {
+			enemy->Timer -= IwEngine::Time::DeltaTime();
+		}
 	}
 }

@@ -84,6 +84,10 @@ float CalcShadow() {
 	vec2 moments = texture(shadowMap, coords.xy).rg;
 	float compare = coords.z;
 
+	if (compare > 1.0) {
+		return 1.0;
+	}
+
 	float p = step(compare, moments.x);
 	float v = max(moments.y - moments.x * moments.x, 0.00002);
 

@@ -11,6 +11,7 @@ namespace IwEngine {
 		virtual int  Initialize() = 0;
 		virtual void Destroy() = 0;
 		virtual void Update() = 0;
+		virtual void FixedUpdate() = 0;
 	};
 
 	template<
@@ -28,7 +29,12 @@ namespace IwEngine {
 		IW::Graphics::Renderer& Renderer;
 
 		virtual void Update(
-			IwEntity::EntityComponentArray& view) = 0;
+			IwEntity::EntityComponentArray& view)
+		{}
+
+		virtual void FixedUpdate(
+			IwEntity::EntityComponentArray& view)
+		{}
 
 		void QueueDestroyEntity(
 			size_t index)
@@ -53,6 +59,8 @@ namespace IwEngine {
 
 		virtual void Destroy() {}
 
+		// These wont have to be copies this is just temp
+
 		void Update() override {
 			IwEntity::EntityComponentArray eca = Space.Query<_cs...>();
 			// Break up view into Viewlets to execute on seperate threads
@@ -63,6 +71,21 @@ namespace IwEngine {
 			// Execute queues space operations
 			while (!m_delete.empty()) {
 				size_t index = m_delete.front() ;
+				Space.DestroyEntity(index);
+				m_delete.pop();
+			}
+		}
+
+		void FixedUpdate() override {
+			IwEntity::EntityComponentArray eca = Space.Query<_cs...>();
+			// Break up view into Viewlets to execute on seperate threads
+
+			// Execute threads
+			FixedUpdate(eca);
+
+			// Execute queues space operations
+			while (!m_delete.empty()) {
+				size_t index = m_delete.front();
 				Space.DestroyEntity(index);
 				m_delete.pop();
 			}

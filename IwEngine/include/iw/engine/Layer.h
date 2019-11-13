@@ -46,6 +46,7 @@ namespace IwEngine {
 		virtual bool On(KeyTypedEvent&      event);
 
 		void UpdateSystems();
+		void FixedUpdateSystems();
 
 		inline const char* Name() {
 			return m_name;

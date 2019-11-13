@@ -2,8 +2,7 @@
 
 struct Player {
 	float Speed;
-	float DashSpeed;
-	float DashTimeTotal;
-	float DashCooldown;
 	float DashTime;
+	float CooldownTime;
+	float Timer;
 };

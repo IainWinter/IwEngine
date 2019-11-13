@@ -13,11 +13,6 @@ PlayerSystem::PlayerSystem(
 	: IwEngine::System<IW::Transform, Player>(space, renderer, "Player")
 {}
 
-PlayerSystem::~PlayerSystem()
-{
-
-}
-
 void PlayerSystem::Update(
 	IwEntity::EntityComponentArray& view)
 {
@@ -41,25 +36,22 @@ void PlayerSystem::Update(
 			movement.z += 1;
 		}
 
-		if (player->DashTime > 0) {
-			transform->Position += movement * player->DashSpeed * player->DashTime / player->DashTimeTotal * IwEngine::Time::DeltaTime();
-			if (IwInput::Keyboard::KeyUp(IwInput::X)) {
-				player->DashTime = 0;
+		if (player->Timer <= -player->CooldownTime) {
+			if (IwInput::Keyboard::KeyDown(IwInput::X)) {
+				player->Timer = player->DashTime;
 			}
+		}
+
+		else if (player->Timer >= -player->CooldownTime) {
+			player->Timer -= IwEngine::Time::DeltaTime();
+		}
+
+		if (player->Timer > 0) {
+			transform->Position += movement * player->Speed * 10 * (player->Timer / player->DashTime) * IwEngine::Time::DeltaTime();
 		}
 
 		else {
-			if (player->DashTime + player->DashCooldown <= 0 && IwInput::Keyboard::KeyDown(IwInput::X)) {
-				player->DashTime = player->DashTimeTotal;
-			}
-
-			else {
-				transform->Position += movement * player->Speed * IwEngine::Time::DeltaTime();
-			}
-		}
-
-		if (player->DashTime > -player->DashCooldown) {
-			player->DashTime -= IwEngine::Time::DeltaTime();
+			transform->Position += movement * player->Speed * IwEngine::Time::DeltaTime();
 		}
 	}
 }

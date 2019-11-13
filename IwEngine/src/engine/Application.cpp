@@ -105,7 +105,9 @@ namespace IwEngine {
 			while (m_running) {
 				Update();
 
-				// Fixed update on layers (ASync) 
+				if (Time::FixedTime() == 0)
+					continue;
+
 				accumulatedTime += Time::DeltaTime();
 				while (m_running 
 					&& accumulatedTime >= Time::FixedTime())
@@ -177,6 +179,7 @@ namespace IwEngine {
 
 	void Application::FixedUpdate() {
 		for (Layer* layer : m_layers) { //Need fixed update for systems too
+			layer->FixedUpdateSystems();
 			layer->FixedUpdate();
 		}
 	}
