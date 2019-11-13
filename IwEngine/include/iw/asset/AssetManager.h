@@ -2,15 +2,31 @@
 
 #include "IwAsset.h"
 #include "IAssetLoader.h"
+#include "iw/util/queue/blocking_queue.h"
 #include <unordered_map>
 #include <string>
 #include <memory>
+#include <thread>
 
 namespace IW {
+	// Have the asset manager store laoding things, just give ref to loaders to load data into them
+	// 
+
 	inline namespace Asset {
 		class AssetManager {
 		private:
 			std::unordered_map<size_t, IAssetLoader*> m_loaders;
+			iwu::blocking_queue<std::pair<size_t, std::string>> m_toLoad;
+			std::vector<std::thread> m_threads;
+
+			void Worker() {
+				while (true) {
+					auto toLoad = m_toLoad.pop();
+
+					m_loaders.at(toLoad.first)->Load(toLoad.second);
+
+				}
+			}
 
 		public:
 			AssetManager() {}
