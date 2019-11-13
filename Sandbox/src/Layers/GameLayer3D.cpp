@@ -322,7 +322,7 @@ void GameLayer3D::ImGui() {
 		}
 
 		ImGui::Value("Enemy", (unsigned int)enemy.Index);
-		ImGui::SliderFloat("Enemy Speed", &e->Speed, 0, 100, "%.3f", iwm::E);
+		ImGui::SliderFloat("Enemy Speed", &e->Speed, 0, iwm::PI2);
 		ImGui::SliderFloat("Fire Time", &e->FireTime, 0, 1);
 		ImGui::SliderFloat("Cooldown Time", &e->CooldownTime, 0, 1);
 		ImGui::Value("Rotation", e->Rotation);
