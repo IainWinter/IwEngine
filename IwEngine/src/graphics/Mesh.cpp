@@ -90,7 +90,7 @@ namespace IW {
 		Outdated = true;
 	}
 
-	void Mesh::SetBitangents(
+	void Mesh::SetBiTangents(
 		size_t count, 
 		iwm::vector3* bitangents)
 	{

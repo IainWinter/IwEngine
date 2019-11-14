@@ -36,7 +36,7 @@ namespace IwEntity {
 				&& IndexOffset + CurrentIndex > index;
 		}
 	
-		inline size_t EndIndex() {
+		inline size_t EndIndex() const {
 			return CurrentIndex + IndexOffset;
 		}
 

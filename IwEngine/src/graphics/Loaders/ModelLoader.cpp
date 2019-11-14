@@ -146,13 +146,30 @@ namespace IW {
 				mesh.SetUVs(mesh.VertexCount, (iwm::vector2*)aimesh->mTextureCoords[0]);
 			}
 
-			//if (aimesh->HasBones()) {
-			//	aiBone* aibone = aimesh->mBones[i];
+			if (aimesh->HasBones()) {
+				aiBone* aibone = aimesh->mBones[i];
+				
+				aiVector3D pos;
+				aiVector3D rot;
+				aiVector3D scale;
 
-			//	aibone->mWeights
+				aibone->mOffsetMatrix.Decompose(scale, rot, pos);
 
-			//	aibone->mWeights[0].mVertexId
-			//}
+				Bone bone;
+				bone.Offset.Position = iwm::vector3(pos.x,     pos.y,   pos.z);
+				bone.Offset.Scale    = iwm::vector3(scale.x, scale.y, scale.z);
+				bone.Offset.Rotation = iwm::quaternion::from_euler_angles(rot.x, rot.y, rot.z);
+
+				bone.WeightCount = aibone->mNumWeights;
+				bone.Weights     = new VertexWeight[bone.WeightCount];
+
+				for (size_t i = 0; i < bone.WeightCount; i++) {
+					aiVertexWeight aiweight = aibone->mWeights[i];
+
+					bone.Weights[i].Index  = aiweight.mVertexId;
+					bone.Weights[i].Weight = aiweight.mWeight;
+				}
+			}
 		}
 
 		importer.FreeScene();

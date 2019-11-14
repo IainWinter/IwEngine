@@ -19,6 +19,7 @@ namespace IwEntity {
 			size_t m_index;
 			iwu::ref<Archetype> m_archetype;
 			iwu::ref<ComponentDataIndices> m_indices;
+
 			iwu::ref<ComponentData> m_data;
 
 		public:

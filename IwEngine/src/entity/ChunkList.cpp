@@ -5,10 +5,11 @@
 namespace IwEntity {
 	using iterator = ChunkList::iterator;
 
+	// replace with free list like thing but for valid entities 
 	iterator& iterator::operator++() {
 		do {
 			m_index++;
-			if (m_chunk->EndIndex() == m_index) {
+			if (m_index == m_chunk->EndIndex()) {
 				m_chunk = m_chunk->Next;
 				if (m_chunk) {
 					m_index = m_chunk->BeginIndex();
@@ -16,8 +17,6 @@ namespace IwEntity {
 			}
 		} while (m_chunk && !m_chunk->GetEntity(m_index)->Alive);
 
-		// replace with free list like thing but for valid entities 
-		
 		return *this;
 	}
 
@@ -41,6 +40,7 @@ namespace IwEntity {
 		}
 
 		Entity* entity = m_chunk->GetEntity(m_index);
+
 		return EntityComponentData { entity->Index, entity->Version, *m_data };
 	}
 
@@ -53,35 +53,35 @@ namespace IwEntity {
 		, m_index(index)
 		, m_archetype(archetype)
 	{
-		size_t bufSize = sizeof(ComponentData)
+		size_t cdSize = sizeof(ComponentData)
 			+ sizeof(size_t)
 			* query->Count;
 
-		ComponentData* buf = (ComponentData*)malloc(bufSize);
-		assert(buf);
-		memset(buf, 0, bufSize);
+		ComponentData* cd = (ComponentData*)malloc(cdSize);
+		assert(cd);
+		memset(cd, 0, cdSize);
 
-		m_data = iwu::ref<ComponentData>(buf, free);
+		m_data = iwu::ref<ComponentData>(cd, free);
 
-		size_t bufSize1 = sizeof(ComponentDataIndices)
+		size_t cdisSize = sizeof(ComponentDataIndices)
 			+ sizeof(size_t)
 			* query->Count;
 
-		ComponentDataIndices* buf1 = (ComponentDataIndices*)malloc(bufSize);
-		assert(buf1);
-		memset(buf1, 0, bufSize1);
+		ComponentDataIndices* cdis = (ComponentDataIndices*)malloc(cdisSize);
+		assert(cdis);
+		memset(cdis, 0, cdisSize);
 
-		buf1->Count = query->Count;
+		cdis->Count = query->Count;
 		for (size_t i = 0; i < query->Count; i++) {
 			for (size_t j = 0; j < archetype->Count; j++) {
 				if (query->Components[i]->Type == archetype->Layout[j].Component->Type) {
-					buf1->Indices[i] = j;
+					cdis->Indices[i] = j;
 					break;
 				}
 			}
 		}
 
-		m_indices = iwu::ref<ComponentDataIndices>(buf1, free);
+		m_indices = iwu::ref<ComponentDataIndices>(cdis, free);
 	}
 
 	ChunkList::ChunkList(
@@ -153,7 +153,12 @@ namespace IwEntity {
 					m_root = m_root->Next;
 				}
 
+				LOG_DEBUG << "Deleting Chunk " << chunk->IndexOffset / chunk->Capacity;
+
 				--m_chunkCount;
+
+				LOG_DEBUG << m_chunkCount;
+
 				free(chunk);
 			}
 
@@ -231,6 +236,8 @@ namespace IwEntity {
 
 		chunk->IndexOffset = m_chunkCapacity * m_chunkCount;
 		chunk->Capacity    = m_chunkCapacity;
+
+		LOG_DEBUG << "Creating Chunk " << chunk->IndexOffset / chunk->Capacity;
 
 		++m_chunkCount;
 

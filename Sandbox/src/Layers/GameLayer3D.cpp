@@ -78,8 +78,8 @@ int GameLayer3D::Initialize(
 	shadowTargetBlur->Initialize(Renderer.Device);
 
 	iwu::ref<IW::Model> floorMesh = Asset.Load<IW::Model>("quad.obj");
-	floorMesh->Meshes->SetUVs(4, uvs);
-	floorMesh->Meshes->GenTangents();
+	//floorMesh->Meshes->SetUVs(4, uvs);
+	//floorMesh->Meshes->GenTangents();
 	floorMesh->Meshes->Initialize(Renderer.Device);
 	
 	IW::Mesh* mesh = IW::mesh_factory::create_uvsphere(24, 48);
