@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IwGraphics.h"
+#include "Bone.h"
 #include "Material.h"
 #include "iw/renderer/VertexArray.h"
 #include "iw/renderer/IndexBuffer.h"
@@ -23,10 +24,10 @@ inline namespace Graphics {
 		unsigned int* Indices;
 
 		size_t VertexCount;
-		/*size_t NormalCount;
-		size_t ColorCount;
-		size_t UvCount;*/
 		size_t IndexCount;
+
+		Bone* Bones;
+		size_t BoneCount;
 
 		iwu::ref<Material> Material;
 
@@ -54,6 +55,14 @@ inline namespace Graphics {
 		void SetNormals(
 			size_t count,
 			iwm::vector3* normals);
+
+		void SetTangents(
+			size_t count,
+			iwm::vector3* tangents);
+
+		void SetBiTangents(
+			size_t count,
+			iwm::vector3* bitangents);
 
 		void SetColors(
 			size_t count,

@@ -4,7 +4,7 @@
 
 struct Components {
 	IW::Transform* Transform;
-	Player*              Player;
+	Player*        Player;
 };
 
 PlayerSystem::PlayerSystem(
@@ -47,11 +47,11 @@ void PlayerSystem::Update(
 		}
 
 		if (player->Timer > 0) {
-			transform->Position += movement * player->Speed * 10 * (player->Timer / player->DashTime) * IwEngine::Time::DeltaTime();
+			transform->Position += movement.normalized() * player->Speed * 10 * (player->Timer / player->DashTime) * IwEngine::Time::DeltaTime();
 		}
 
 		else {
-			transform->Position += movement * player->Speed * IwEngine::Time::DeltaTime();
+			transform->Position += movement.normalized() * player->Speed * IwEngine::Time::DeltaTime();
 		}
 	}
 }

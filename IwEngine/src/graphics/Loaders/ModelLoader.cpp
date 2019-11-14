@@ -73,6 +73,18 @@ namespace IW {
 			}
 		}
 
+		//if (scene->HasAnimations()) {
+		//	for (size_t i = 0; i < scene->mNumAnimations; i++) {
+		//		aiAnimation* aianimation = scene->mAnimations[i];
+
+		//		aianimation->mMorphMeshChannels
+
+		//		//aiNodeAnim* ainodeanim = aianimation->m
+
+		//		//aianimation->
+		//	}
+		//}
+
 		//if (scene->HasTextures()) { // embedded textures?
 		//	aiTexture* texture = scene->mTextures[0];
 		//}
@@ -113,20 +125,34 @@ namespace IW {
 
 			mesh.VertexCount = aimesh->mNumVertices;
 			if (aimesh->HasPositions()) {
-				mesh.Vertices = new iwm::vector3[mesh.VertexCount];
-				memcpy(mesh.Vertices, aimesh->mVertices, mesh.VertexCount * sizeof(iwm::vector3));
+				mesh.SetVertices(mesh.VertexCount, (iwm::vector3*)aimesh->mVertices);
 			}
 
 			if (aimesh->HasNormals()) {
-				mesh.Normals = new iwm::vector3[mesh.VertexCount];
-				memcpy(mesh.Normals, aimesh->mNormals, mesh.VertexCount * sizeof(iwm::vector3));
+				mesh.SetNormals(mesh.VertexCount, (iwm::vector3*)aimesh->mNormals);
+			}
+
+			if (aimesh->HasTangentsAndBitangents()) {
+				mesh.SetTangents  (mesh.VertexCount, (iwm::vector3*)aimesh->mTangents);
+				mesh.SetBiTangents(mesh.VertexCount, (iwm::vector3*)aimesh->mBitangents);
 			}
 
 			// Need to check for multiple channels i guess
-			if (aimesh->HasTextureCoords(0)) {
-				mesh.Uvs = new iwm::vector2[mesh.VertexCount];
-				memcpy(mesh.Uvs, aimesh->mTextureCoords[0], mesh.VertexCount * sizeof(iwm::vector2));
+			if (aimesh->HasVertexColors(0)) {
+				mesh.SetColors(mesh.VertexCount, (iwm::vector4*)aimesh->mColors[0]);
 			}
+
+			if (aimesh->HasTextureCoords(0)) {
+				mesh.SetUVs(mesh.VertexCount, (iwm::vector2*)aimesh->mTextureCoords[0]);
+			}
+
+			//if (aimesh->HasBones()) {
+			//	aiBone* aibone = aimesh->mBones[i];
+
+			//	aibone->mWeights
+
+			//	aibone->mWeights[0].mVertexId
+			//}
 		}
 
 		importer.FreeScene();

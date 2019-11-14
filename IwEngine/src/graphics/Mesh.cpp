@@ -75,6 +75,36 @@ namespace IW {
 		Outdated = true;
 	}
 
+	void Mesh::SetTangents(
+		size_t count, 
+		iwm::vector3* tangents)
+	{
+		delete[] Tangents;
+		Tangents = nullptr;
+
+		if (count > 0) {
+			Tangents = new iwm::vector3[count];
+			memcpy(Tangents, tangents, count * sizeof(iwm::vector3));
+		}
+
+		Outdated = true;
+	}
+
+	void Mesh::SetBitangents(
+		size_t count, 
+		iwm::vector3* bitangents)
+	{
+		delete[] BiTangents;
+		BiTangents = nullptr;
+
+		if (count > 0) {
+			BiTangents = new iwm::vector3[count];
+			memcpy(BiTangents, bitangents, count * sizeof(iwm::vector3));
+		}
+
+		Outdated = true;
+	}
+
 	void Mesh::SetColors(
 		size_t count,
 		iwm::vector4* colors)
@@ -121,6 +151,7 @@ namespace IW {
 		Outdated = true;
 	}
 
+	// Generate vertex normals by averaging the face normals of the surrounding faces
 	void Mesh::GenNormals() {
 		if (!Vertices) return;
 
@@ -139,12 +170,17 @@ namespace IW {
 		}
 	}
 
+	// Generate tangents and bitangents from vertex normals and uv corrds
+	// If there are no normals, they are generated along with the tangents
 	void Mesh::GenTangents() {
-		if (!Uvs || !Vertices) return; // should just gen normals if they don't exist
+		if (!Uvs || !Vertices) return;
 
 		if (!Normals) {
 			GenNormals();
 		}
+
+		delete[] Tangents;
+		delete[] BiTangents;
 
 		Tangents   = new iwm::vector3[VertexCount];
 		BiTangents = new iwm::vector3[VertexCount];
