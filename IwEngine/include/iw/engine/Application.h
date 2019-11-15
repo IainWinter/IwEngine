@@ -99,7 +99,7 @@ namespace IwEngine {
 
 			for (Layer* layer : m_layers) {
 				if (layer->On(event)) {
-					LOG_INFO << "Event handled by " << layer->Name() << " layer";
+					//LOG_INFO << "Event handled by " << layer->Name() << " layer";
 					event.Handled = true;
 					break;
 				}

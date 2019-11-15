@@ -4,8 +4,8 @@
 namespace IwEntity {
 	iwu::ref<EntityData>& EntityManager::CreateEntity() {
 		if (!m_dead.empty()) {
-			iwu::ref<EntityData>& dead = m_entities.at(m_dead.front());
-			m_dead.pop_front();
+			iwu::ref<EntityData>& dead = m_entities.at(m_dead.top());
+			m_dead.pop();
 
 			dead->Entity.Alive = true;
 			dead->Entity.Version++;
@@ -42,7 +42,7 @@ namespace IwEntity {
 			// Todo: Test which way is best to free the entities and chunks
 
 			//if (m_dead.size() < 1000) {
-				m_dead.push_back(dead->Entity.Index);
+				m_dead.push(dead->Entity.Index);
 			//}
 
 			//else {

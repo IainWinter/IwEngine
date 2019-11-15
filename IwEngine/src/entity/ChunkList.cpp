@@ -12,11 +12,10 @@ namespace IwEntity {
 			if (m_index == m_chunk->EndIndex()) {
 				do {
 					m_chunk = m_chunk->Next;
+					if (m_chunk) {
+						m_index = m_chunk->BeginIndex();
+					}
 				} while (m_chunk && m_chunk->Count == 0);
-				
-				if (m_chunk) {
-					m_index = m_chunk->BeginIndex();
-				}
 			}
 		} while (m_chunk && !m_chunk->GetEntity(m_index)->Alive);
 
@@ -169,9 +168,6 @@ namespace IwEntity {
 				LOG_DEBUG << "Deleting Chunk " << chunk->IndexOffset / chunk->Capacity;
 
 				--m_chunkCount;
-
-				LOG_DEBUG << m_chunkCount;
-
 				free(chunk);
 			}
 

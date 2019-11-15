@@ -3,13 +3,13 @@
 #include "IwEntity.h"
 #include "EntityData.h"
 #include <vector>
-#include <deque>
+#include <queue>
 
 namespace IwEntity {
 	class IWENTITY_API EntityManager {
 	private:
 		std::vector<iwu::ref<EntityData>> m_entities;
-		std::deque<size_t> m_dead;
+		std::priority_queue<size_t, std::vector<size_t>, std::greater<size_t>> m_dead;
 
 	public:
 		iwu::ref<EntityData>& CreateEntity();
