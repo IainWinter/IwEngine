@@ -10,7 +10,10 @@ namespace IwEntity {
 		do {
 			m_index++;
 			if (m_index == m_chunk->EndIndex()) {
-				m_chunk = m_chunk->Next;
+				do {
+					m_chunk = m_chunk->Next;
+				} while (m_chunk && m_chunk->Count == 0);
+				
 				if (m_chunk) {
 					m_index = m_chunk->BeginIndex();
 				}
@@ -40,6 +43,16 @@ namespace IwEntity {
 		}
 
 		Entity* entity = m_chunk->GetEntity(m_index);
+
+		if (   m_chunk 
+			&& m_index == m_chunk->EndIndex())
+		{
+			LOG_INFO << "dddd";
+		}
+
+		if (entity->Index > 98734259873) {
+			LOG_INFO << "dddd";
+		}
 
 		return EntityComponentData { entity->Index, entity->Version, *m_data };
 	}
@@ -194,11 +207,16 @@ namespace IwEntity {
 	iterator ChunkList::Begin(
 		const iwu::ref<ComponentQuery>& query)
 	{
+		Chunk* chunk = m_root;
 		size_t index = 0;
-		if (m_root) {
-			index = m_root->BeginIndex();
+		while (chunk && chunk->Count == 0) {
+			chunk = chunk->Next;
 		}
 		
+		if (chunk) {
+			index = chunk->BeginIndex();
+		}
+
 		return iterator(m_root, index, m_archetype, query);
 	}
 
