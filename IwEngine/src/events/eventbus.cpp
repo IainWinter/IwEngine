@@ -2,7 +2,7 @@
 
 namespace iw {
 	eventbus::eventbus()
-		: m_alloc(1024 * 8)
+		: m_alloc(1024 * 10)
 	{}
 
 	void eventbus::subscribe(
@@ -30,6 +30,5 @@ namespace iw {
 		}
 
 		m_alloc.reset();
-		LOG_INFO << m_alloc.peak();
 	}
 }
