@@ -1,24 +1,18 @@
 #pragma once
 
-#include "Core.h"
+#include "iw/events/event.h"
 #include <vector>
 
 namespace IwEngine {
 	template<
 		typename T>
-	class Stack {
+	class EventStack {
 	public:
 		using iterator = typename std::vector<T>::iterator;
 	private:
 		std::vector<T> m_items;
 
 	public:
-		Stack() = default;
-
-		~Stack() {
-			m_items.clear();
-		}
-
 		void PushBack(
 			T&& item)
 		{
@@ -48,6 +42,14 @@ namespace IwEngine {
 		{
 			iterator itr = std::find(begin(), end(), layer);
 			m_items.erase(itr);
+		}
+
+		void PublishEvent(
+			iw::event& event)
+		{
+			for (T& t : m_items) {
+				
+			}
 		}
 
 		iterator begin() {

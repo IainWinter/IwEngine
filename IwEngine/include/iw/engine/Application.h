@@ -97,6 +97,8 @@ namespace IwEngine {
 				Renderer.Height = event.Height;
 			}
 
+			m_layers.HandelEvent(event);
+
 			for (Layer* layer : m_layers) {
 				if (layer->On(event)) {
 					//LOG_INFO << "Event handled by " << layer->Name() << " layer";
