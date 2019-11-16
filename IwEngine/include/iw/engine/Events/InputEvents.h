@@ -13,11 +13,11 @@ inline namespace Engine {
 	struct InputEvent
 		: iw::event
 	{
-		IwInput::InputState InputStates;
+		IwInput::InputState* InputStates;
 
 		InputEvent(
 			InputEventType type,
-			IwInput::InputState inputState)
+			IwInput::InputState* inputState)
 			: iw::event(INPUT, type)
 			, InputStates(inputState)
 		{}
@@ -29,7 +29,7 @@ inline namespace Engine {
 		float Delta;
 
 		MouseWheelEvent(
-			IwInput::InputState inputState,
+			IwInput::InputState* inputState,
 			float delta)
 			: InputEvent(MouseWheel, inputState)
 			, Delta(delta)
@@ -45,7 +45,7 @@ inline namespace Engine {
 		float DeltaY;
 
 		MouseMovedEvent(
-			IwInput::InputState inputState,
+			IwInput::InputState* inputState,
 			float x,
 			float y,
 			float deltaX,
@@ -65,7 +65,7 @@ inline namespace Engine {
 		bool State;
 
 		MouseButtonEvent(
-			IwInput::InputState inputState,
+			IwInput::InputState* inputState,
 			IwInput::InputName button,
 			bool state)
 			: InputEvent(MouseButton, InputStates)
@@ -81,7 +81,7 @@ inline namespace Engine {
 		bool State;
 
 		KeyEvent(
-			IwInput::InputState inputState,
+			IwInput::InputState* inputState,
 			IwInput::InputName button,
 			bool state)
 			: InputEvent(Key, inputState)
@@ -97,7 +97,7 @@ inline namespace Engine {
 		char Character;
 
 		KeyTypedEvent(
-			IwInput::InputState inputState,
+			IwInput::InputState* inputState,
 			IwInput::InputName button,
 			char character)
 			: InputEvent(KeyTyped, inputState)

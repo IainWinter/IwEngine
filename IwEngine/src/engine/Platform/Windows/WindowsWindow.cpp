@@ -303,14 +303,14 @@ namespace IwEngine {
 	}
 
 	void WindowsWindow::HandleMouseWheel(
-		IwInput::InputState inputState,
+		IwInput::InputState* inputState,
 		float delta)
 	{
 		Bus->push(IW::MouseWheelEvent(inputState, delta));
 	}
 
 	void WindowsWindow::HandleMouseMoved(
-		IwInput::InputState inputState,
+		IwInput::InputState* inputState,
 		float X, 
 		float Y,
 		float deltaX,
@@ -320,7 +320,7 @@ namespace IwEngine {
 	}
 	
 	void WindowsWindow::HandleMouseButton(
-		IwInput::InputState inputState,
+		IwInput::InputState* inputState,
 		IwInput::InputName button,
 		bool down)
 	{
@@ -328,7 +328,7 @@ namespace IwEngine {
 	}
 
 	void WindowsWindow::HandleKey(
-		IwInput::InputState inputState,
+		IwInput::InputState* inputState,
 		IwInput::InputName key,
 		bool down)
 	{
@@ -336,7 +336,7 @@ namespace IwEngine {
 	}
 
 	void WindowsWindow::HandleKeyTyped(
-		IwInput::InputState inputState,
+		IwInput::InputState* inputState,
 		IwInput::InputName key, 
 		char character)
 	{

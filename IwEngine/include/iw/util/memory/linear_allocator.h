@@ -30,7 +30,11 @@ namespace iwutil {
 			size_t size,
 			size_t alignment = 0);
 
+		void resize(
+			size_t size);
+
 		void reset();
+
 
 		inline size_t peak() {
 			return m_peak;

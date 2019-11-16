@@ -53,28 +53,28 @@ namespace IwEngine {
 			LPARAM lparam);
 
 		void HandleMouseWheel(
-			IwInput::InputState inputState,
+			IwInput::InputState* inputState,
 			float delta);
 
 		void HandleMouseMoved(
-			IwInput::InputState inputState,
+			IwInput::InputState* inputState,
 			float X,
 			float Y,
 			float deltaX,
 			float deltaY);
 
 		void HandleMouseButton(
-			IwInput::InputState inputState,
+			IwInput::InputState* inputState,
 			IwInput::InputName button,
 			bool down);
 
 		void HandleKey(
-			IwInput::InputState inputState,
+			IwInput::InputState* inputState,
 			IwInput::InputName key,
 			bool down);
 
 		void HandleKeyTyped(
-			IwInput::InputState inputState,
+			IwInput::InputState* inputState,
 			IwInput::InputName key,
 			char character);
 	};

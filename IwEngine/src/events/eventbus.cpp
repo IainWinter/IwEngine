@@ -2,7 +2,7 @@
 
 namespace iw {
 	eventbus::eventbus()
-		: m_alloc(1024 * 10)
+		: m_alloc(1024)
 	{}
 
 	void eventbus::subscribe(

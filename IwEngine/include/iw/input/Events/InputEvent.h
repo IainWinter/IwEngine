@@ -30,9 +30,9 @@ namespace IwInput {
 	};
 
 	using InputCallback       = iw::callback<InputEvent&>;
-	using MouseWheelCallback  = iw::callback<InputState, float>;
-	using MouseMovedCallback  = iw::callback<InputState, float, float, float, float>;
-	using MouseButtonCallback = iw::callback<InputState, InputName, bool>;
-	using KeyCallback         = iw::callback<InputState, InputName, bool>;
-	using KeyTypedCallback    = iw::callback<InputState, InputName, char>;
+	using MouseWheelCallback  = iw::callback<InputState*, float>;
+	using MouseMovedCallback  = iw::callback<InputState*, float, float, float, float>;
+	using MouseButtonCallback = iw::callback<InputState*, InputName, bool>;
+	using KeyCallback         = iw::callback<InputState*, InputName, bool>;
+	using KeyTypedCallback    = iw::callback<InputState*, InputName, char>;
 }

@@ -38,24 +38,24 @@ namespace IwInput {
 		else if (input.Device == KEYBOARD) {
 			// Need way more key interpretation this doesn't even work \/
 			if (input.State) {
-				context.KeyTypedCallback(context.State, input.Name, KeyTranslation[input.Name]);
+				context.KeyTypedCallback(&context.State, input.Name, KeyTranslation[input.Name]);
 			}
 			
 			if (input.State != lastState) {
-				context.KeyCallback(context.State, input.Name, input.State);
+				context.KeyCallback(&context.State, input.Name, input.State);
 			}
 		}
 
 
 		if (input.Device == MOUSE) {
 			if (input.Name == MOUSE_WHEEL) {
-				context.MouseWheelCallback(context.State, input.State);
+				context.MouseWheelCallback(&context.State, input.State);
 			}
 
 			else if (input.Name == MOUSE_Y_AXIS 
 				 || input.Name == MOUSE_Y_POS)
 			{
-				context.MouseMovedCallback(context.State,
+				context.MouseMovedCallback(&context.State,
 					context.State[MOUSE_X_POS],  context.State[MOUSE_Y_POS],
 					context.State[MOUSE_X_AXIS], context.State[MOUSE_Y_AXIS]);
 			}
@@ -63,7 +63,7 @@ namespace IwInput {
 			else if (input.Name != MOUSE_X_AXIS
 				 && input.Name != MOUSE_X_POS)
 			{
-				context.MouseButtonCallback(context.State, input.Name, input.State);
+				context.MouseButtonCallback(&context.State, input.Name, input.State);
 			}
 		}
 	}
