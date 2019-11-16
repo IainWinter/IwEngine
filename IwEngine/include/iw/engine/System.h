@@ -12,6 +12,8 @@ namespace IwEngine {
 		virtual void Destroy() = 0;
 		virtual void Update() = 0;
 		virtual void FixedUpdate() = 0;
+
+		virtual const char* Name() const = 0;
 	};
 
 	template<
@@ -20,7 +22,7 @@ namespace IwEngine {
 		: public ISystem
 	{
 	private:
-		const char*                  m_name;
+		const char* m_name;
 		//std::queue<std::thread>      m_threads;
 		std::queue<size_t> m_delete; // Probly make it so space can queue component creation at the ComponentArray level because of templated bs
 
@@ -91,7 +93,7 @@ namespace IwEngine {
 			}
 		}
 
-		inline const char* Name() {
+		inline const char* Name() const override {
 			return m_name;
 		}
 	};	

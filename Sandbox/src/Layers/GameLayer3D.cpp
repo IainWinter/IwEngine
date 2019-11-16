@@ -16,7 +16,7 @@
 #include "Systems/EnemySystem.h"
 
 GameLayer3D::GameLayer3D(
-	IwEntity::Space& space, 
+	IwEntity::Space& space,
 	IW::Renderer& renderer,
 	IW::AssetManager& asset)
 	: Layer(space, renderer, asset, "Game")
@@ -49,21 +49,31 @@ iwm::matrix4 camBuf[2];
 int GameLayer3D::Initialize(
 	IwEngine::InitOptions& options)
 {
-	pbrPipeline = Asset.Load<IW::Shader>("shaders/pbr.shader");
-	pbrPipeline->Initialize(Renderer.Device);
+	// Loading shaders and filters
 
+	pbrPipeline    = Asset.Load<IW::Shader>("shaders/pbr.shader");
 	shadowPipeline = Asset.Load<IW::Shader>("shaders/shadows/directional.shader");
+	nullFilter     = Asset.Load<IW::Shader>("shaders/filters/null.shader");
+	blurFilter     = Asset.Load<IW::Shader>("shaders/filters/gaussian.shader");
+
+	pbrPipeline->Initialize(Renderer.Device);
 	shadowPipeline->Initialize(Renderer.Device);
-
-	nullFilter = Asset.Load<IW::Shader>("shaders/filters/null.shader");
 	nullFilter->Initialize(Renderer.Device);
-
-	blurFilter = Asset.Load<IW::Shader>("shaders/filters/gaussian.shader");
 	blurFilter->Initialize(Renderer.Device);
+
+	// Create uniform buffer for the camera and set it for the pipelines that need it
 
 	cameraBuffer = Renderer.Device->CreateUniformBuffer(2 * sizeof(iwm::matrix4));
 	pbrPipeline->Handle->SetBuffer("Camera", cameraBuffer);
-	shadowPipeline->Handle->SetBuffer("Camera", cameraBuffer);
+
+	// Setup render targets for shadow map and blur filter
+
+	shadowTarget     = new IW::RenderTarget(1048, 1048, { IW::RG, IW::DEPTH }, { IW::FLOAT, IW::FLOAT });
+	shadowTargetBlur = new IW::RenderTarget(1048, 1048, { IW::ALPHA }, { IW::FLOAT });
+	shadowTarget->Initialize(Renderer.Device);
+	shadowTargetBlur->Initialize(Renderer.Device);
+
+	iwu::ref<IW::Model> floorMesh = Asset.Load<IW::Model>("quad.obj");
 
 	iwm::vector2 uvs[4] = {
 		iwm::vector2(1, 0),
@@ -72,12 +82,6 @@ int GameLayer3D::Initialize(
 		iwm::vector2(0, 0)
 	};
 
-	shadowTarget     = new IW::RenderTarget(1048, 1048, { IW::RG, IW::DEPTH }, { IW::FLOAT, IW::FLOAT });
-	shadowTargetBlur = new IW::RenderTarget(1048, 1048, { IW::ALPHA }, { IW::FLOAT });
-	shadowTarget->Initialize(Renderer.Device);
-	shadowTargetBlur->Initialize(Renderer.Device);
-
-	iwu::ref<IW::Model> floorMesh = Asset.Load<IW::Model>("quad.obj");
 	floorMesh->Meshes->SetUVs(4, uvs);
 	floorMesh->Meshes->GenTangents();
 	floorMesh->Meshes->Initialize(Renderer.Device);
@@ -89,46 +93,42 @@ int GameLayer3D::Initialize(
 	material = std::make_shared<IW::Material>(pbrPipeline->Handle);
 	mesh->SetMaterial(material);
 
-	iwu::ref<IW::Texture> albedo = Asset.Load<IW::Texture>("textures/metal/albedo.jpg");
-	iwu::ref<IW::Texture> normal = Asset.Load<IW::Texture>("textures/metal/normal.jpg");
-	iwu::ref<IW::Texture> metallic = Asset.Load<IW::Texture>("textures/metal/metallic.jpg");
+	iwu::ref<IW::Texture> albedo    = Asset.Load<IW::Texture>("textures/metal/albedo.jpg");
+	iwu::ref<IW::Texture> normal    = Asset.Load<IW::Texture>("textures/metal/normal.jpg");
+	iwu::ref<IW::Texture> metallic  = Asset.Load<IW::Texture>("textures/metal/metallic.jpg");
 	iwu::ref<IW::Texture> roughness = Asset.Load<IW::Texture>("textures/metal/roughness.jpg");
-	iwu::ref<IW::Texture> ao = Asset.Load<IW::Texture>("textures/metal/ao.jpg");
-	albedo->Initialize(Renderer.Device);
-	normal->Initialize(Renderer.Device);
-	metallic->Initialize(Renderer.Device);
+	iwu::ref<IW::Texture> ao        = Asset.Load<IW::Texture>("textures/metal/ao.jpg");
+	albedo   ->Initialize(Renderer.Device);
+	normal   ->Initialize(Renderer.Device);
+	metallic ->Initialize(Renderer.Device);
 	roughness->Initialize(Renderer.Device);
-	ao->Initialize(Renderer.Device);
+	ao       ->Initialize(Renderer.Device);
 
-	iwu::ref<IW::Texture> talbedo = Asset.Load<IW::Texture>("textures/tile/albedo.png");
-	iwu::ref<IW::Texture> tnormal = Asset.Load<IW::Texture>("textures/tile/normal.png");
-	iwu::ref<IW::Texture> tmetallic = Asset.Load<IW::Texture>("textures/tile/metallic.jpg");
+	iwu::ref<IW::Texture> talbedo    = Asset.Load<IW::Texture>("textures/tile/albedo.png");
+	iwu::ref<IW::Texture> tnormal    = Asset.Load<IW::Texture>("textures/tile/normal.png");
+	iwu::ref<IW::Texture> tmetallic  = Asset.Load<IW::Texture>("textures/tile/metallic.jpg");
 	iwu::ref<IW::Texture> troughness = Asset.Load<IW::Texture>("textures/tile/roughness.png");
-	iwu::ref<IW::Texture> tao = Asset.Load<IW::Texture>("textures/tile/ao.png");
-	talbedo->Initialize(Renderer.Device);
-	tnormal->Initialize(Renderer.Device);
-	tmetallic->Initialize(Renderer.Device);
+	iwu::ref<IW::Texture> tao        = Asset.Load<IW::Texture>("textures/tile/ao.png");
+	talbedo   ->Initialize(Renderer.Device);
+	tnormal   ->Initialize(Renderer.Device);
+	tmetallic ->Initialize(Renderer.Device);
 	troughness->Initialize(Renderer.Device);
-	tao->Initialize(Renderer.Device);
+	tao       ->Initialize(Renderer.Device);
 
-	material->SetTexture("albedoMap", albedo);
-	material->SetTexture("normalMap", normal);
-	material->SetTexture("metallicMap", metallic);
+	material->SetTexture("albedoMap",    albedo);
+	material->SetTexture("normalMap",    normal);
+	material->SetTexture("metallicMap",  metallic);
 	material->SetTexture("roughnessMap", roughness);
-	material->SetTexture("aoMap", ao);
-	material->SetTexture("shadowMap", &shadowTarget->Textures[0]);
+	material->SetTexture("aoMap",        ao);
+	material->SetTexture("shadowMap",    &shadowTarget->Textures[0]);
 
-	floorMesh->Meshes[0].Material->SetTexture("albedoMap", talbedo);
-	floorMesh->Meshes[0].Material->SetTexture("normalMap", tnormal);
-	floorMesh->Meshes[0].Material->SetTexture("metallicMap", tmetallic);
+	floorMesh->Meshes[0].Material->SetTexture("albedoMap",    talbedo);
+	floorMesh->Meshes[0].Material->SetTexture("normalMap",    tnormal);
+	floorMesh->Meshes[0].Material->SetTexture("metallicMap",  tmetallic);
 	floorMesh->Meshes[0].Material->SetTexture("roughnessMap", troughness);
-	floorMesh->Meshes[0].Material->SetTexture("aoMap", tao);
-	floorMesh->Meshes[0].Material->SetTexture("shadowMap", &shadowTarget->Textures[0]);
+	floorMesh->Meshes[0].Material->SetTexture("aoMap",        tao);
+	floorMesh->Meshes[0].Material->SetTexture("shadowMap",    &shadowTarget->Textures[0]);
 
-	//material->SetFloats("albedo", &iwm::vector3(1.0f, 0.85f, 0.57f), 3);
-	//material->SetFloat ("metallic", 1.0f);
-	//material->SetFloat ("roughness", 0.6f);
-	//material->SetFloat ("ao", 1.0f);
 	floorMesh->Meshes[0].Material->Pipeline = pbrPipeline->Handle;
 
 	lightPositions[0] = iwm::vector3( 0, 5, 0);
@@ -141,24 +141,26 @@ int GameLayer3D::Initialize(
 	lightColors[2] = iwm::vector3(0, 1, 0);
 	lightColors[3] = iwm::vector3(0, 0, 1);
 
+	// Entities
+
 	IW::Camera* perspective = new IW::PerspectiveCamera(fov, 1.778f, 100.0f, 120.0f);
 
 	IwEntity::Entity camera = Space.CreateEntity<IW::Transform, IwEngine::CameraController>();
+	IwEntity::Entity player = Space.CreateEntity<IW::Transform, IwEngine::Model, Player>(); 
+	IwEntity::Entity enemy  = Space.CreateEntity<IW::Transform, IwEngine::Model, Enemy>();
+	IwEntity::Entity floor  = Space.CreateEntity<IW::Transform, IwEngine::Model>();
+	
 	Space.SetComponentData<IwEngine::CameraController>(camera, perspective);
 
-	IwEntity::Entity player = Space.CreateEntity<IW::Transform, IwEngine::Model, Player>();
-	Space.SetComponentData<IW::Transform>(player, iwm::vector3(3, -0.25f, 0), iwm::vector3(0.75f));
+	Space.SetComponentData<IW::Transform>  (player, iwm::vector3(3, -0.25f, 0), iwm::vector3(0.75f));
 	Space.SetComponentData<IwEngine::Model>(player, mesh, 1U);
-	Space.SetComponentData<Player>(player, 4.0f, .15f, .05f);
+	Space.SetComponentData<Player>         (player, 4.0f, .15f, .05f);
 
-	IwEntity::Entity enemy = Space.CreateEntity<IW::Transform, IwEngine::Model, Enemy>();
 	Space.SetComponentData<IW::Transform>  (enemy, iwm::vector3(0, -0.25f, 0), iwm::vector3(0.75f));
 	Space.SetComponentData<IwEngine::Model>(enemy, mesh, 1U);
 	Space.SetComponentData<Enemy>          (enemy, SPIN, 0.2617993f, .12f, 0.0f);
 
-	IwEntity::Entity floor = Space.CreateEntity<IW::Transform, IwEngine::Model>();
-	Space.SetComponentData<IW::Transform>  (floor, iwm::vector3(0, -1, 0), iwm::vector3(20, 1, 20), 
-		iwm::quaternion::from_euler_angles(iwm::PI / 2, 0, 0));
+	Space.SetComponentData<IW::Transform>  (floor, iwm::vector3(0, -1, 0), iwm::vector3(20, 1, 20), iwm::quaternion::from_euler_angles(iwm::PI / 2, 0, 0));
 	Space.SetComponentData<IwEngine::Model>(floor, floorMesh->Meshes, 1U);
 
 	//IwEntity::Entity debug = Space.CreateEntity<IW::Transform, IW::DebugVector>();

@@ -2,7 +2,7 @@
 
 #include "Core.h"
 #include "Window.h"
-#include "Stack.h"
+#include "EventStack.h"
 #include "Task.h"
 #include "iw/events/eventbus.h"
 #include "InitOptions.h"
@@ -21,7 +21,7 @@ namespace IwEngine {
 		bool                 m_running;
 		IWindow*             m_window;
 		ImGuiLayer*          m_imguiLayer;
-		Stack<Layer*>        m_layers;
+		EventStack<Layer*>   m_layers;
 
 		iwu::ref<IW::IDevice> m_device;
 
@@ -85,27 +85,6 @@ namespace IwEngine {
 			L* layer)
 		{
 			m_layers.Pop(layer);
-		}
-	private:
-		template<
-			typename _event_t>
-		void DispatchEvent(
-			_event_t& event)
-		{
-			if constexpr (std::is_same_v<IW::WindowResizedEvent, _event_t>) {
-				Renderer.Width  = event.Width;
-				Renderer.Height = event.Height;
-			}
-
-			m_layers.HandelEvent(event);
-
-			for (Layer* layer : m_layers) {
-				if (layer->On(event)) {
-					//LOG_INFO << "Event handled by " << layer->Name() << " layer";
-					event.Handled = true;
-					break;
-				}
-			}
 		}
 	};
 }

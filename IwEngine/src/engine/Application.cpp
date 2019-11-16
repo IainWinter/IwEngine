@@ -195,27 +195,29 @@ namespace IwEngine {
 		iw::event& e)
 	{
 		bool error = false;
-		if (e.Category == IW::INPUT) {
+		if (e.Category == IW::WINDOW) {
 			switch (e.Type) {
-				case IW::MouseWheel:  DispatchEvent((IW::MouseWheelEvent&)e);  break;
-				case IW::MouseMoved:  DispatchEvent((IW::MouseMovedEvent&)e);  break;
-				case IW::MouseButton: DispatchEvent((IW::MouseButtonEvent&)e); break;
-				case IW::Key:    	  DispatchEvent((IW::KeyEvent&)e);         break;
-				case IW::KeyTyped:    DispatchEvent((IW::KeyTypedEvent&)e);    break;
-				default: error = true;
-			}
-		}
-
-		else if (e.Category == IW::WINDOW) {
-			switch (e.Type) {
-				case IW::Resized: DispatchEvent((IW::WindowResizedEvent&)e); break;
-				case IW::Closed:  m_running = false;                         break;
-				default: error = true;
+				case IW::Closed: {
+					m_running = false;
+					e.Handled = true;
+					break;
+				}
+				case IW::Resized: {
+					Renderer.Width  = e.as<IW::WindowResizedEvent>().Width;
+					Renderer.Height = e.as<IW::WindowResizedEvent>().Height;
+					e.Handled = true;
+					break;
+				}
+				default: error = true; break;
 			}
 		}
 
 		if (error) {
-			LOG_WARNING << "Application mishandled event " + e.Type; // logs ppipction
+			LOG_WARNING << "Application mishandled event " + e.Type << "!";
+		}
+
+		else {
+			m_layers.DispatchEvent(e);
 		}
 	}
 }
