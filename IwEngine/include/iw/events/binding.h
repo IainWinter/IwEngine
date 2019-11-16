@@ -1,9 +1,10 @@
 #pragma once
 
-#include <functional>
 #include "iw/events/iwevents.h"
+#include <functional>
 
-namespace iwevents {
+namespace iw {
+inline namespace events {
 	template<int N>
 	struct placeholder { static placeholder ph; };
 
@@ -50,4 +51,5 @@ namespace iwevents {
 	{
 		return std::bind(func, val);
 	}
+}
 }

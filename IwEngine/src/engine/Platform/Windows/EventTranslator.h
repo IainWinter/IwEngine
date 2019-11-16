@@ -1,29 +1,31 @@
 #pragma once
 
-#include "iw/engine/Events/AllEvents.h"
+#include "iw/engine/Events/Events.h"
 #include "iw/log/logger.h"
 #include "iw/engine/Platform.h"
 
 namespace IwEngine {
 	template<
 		typename _event_t>
-	_event_t* Translate(
+	_event_t Translate(
 		int event,
+		int windowId,
 		size_t wParam,
 		size_t lParam)
 	{
 		LOW_WARNING << "No translation exists for event " << event
 			<< " {wParam = " << wParam << ", lParam" << lParam << "}";
 
-		return nullptr;
+		return _event_t();
 	}
 
 	template<>
-	WindowResizedEvent* Translate(
+	IW::WindowResizedEvent Translate(
 		int event,
+		int windowId,
 		size_t wParam,
 		size_t lParam)
 	{
-		return new WindowResizedEvent(LOWORD(lParam), HIWORD(lParam));
+		return IW::WindowResizedEvent(windowId, LOWORD(lParam), HIWORD(lParam));
 	}
 }

@@ -2,7 +2,7 @@
 
 #include "iw/input/IwInput.h"
 #include "iw/input/InputState.h"
-#include "iw/events/functional/callback.h"
+#include "iw/events/callback.h"
 
 namespace IwInput {
 #ifdef IW_PLATFORM_WINDOWS
@@ -29,10 +29,10 @@ namespace IwInput {
 		{}
 	};
 
-	using InputCallback       = iwevents::callback<InputEvent&>;
-	using MouseWheelCallback  = iwevents::callback<InputState, float>;
-	using MouseMovedCallback  = iwevents::callback<InputState, float, float, float, float>;
-	using MouseButtonCallback = iwevents::callback<InputState, InputName, bool>;
-	using KeyCallback         = iwevents::callback<InputState, InputName, bool>;
-	using KeyTypedCallback    = iwevents::callback<InputState, InputName, char>;
+	using InputCallback       = iw::callback<InputEvent&>;
+	using MouseWheelCallback  = iw::callback<InputState, float>;
+	using MouseMovedCallback  = iw::callback<InputState, float, float, float, float>;
+	using MouseButtonCallback = iw::callback<InputState, InputName, bool>;
+	using KeyCallback         = iw::callback<InputState, InputName, bool>;
+	using KeyTypedCallback    = iw::callback<InputState, InputName, char>;
 }

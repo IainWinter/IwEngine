@@ -28,8 +28,8 @@ namespace IwEngine {
 		bool TakeOwnership()    override;
 		bool ReleaseOwnership() override;
 
-		void SetEventBus(
-			EventBus& bus) override;
+		void SetEventbus(
+			iw::eventbus& bus) override;
 
 		void SetInputManager(
 			IwInput::InputManager& manager) override;

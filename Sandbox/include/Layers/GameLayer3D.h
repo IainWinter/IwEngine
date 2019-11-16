@@ -24,5 +24,5 @@ public:
 	void ImGui() override;
 
 	bool On(
-		IwEngine::MouseMovedEvent& event) override;
+		IW::MouseMovedEvent& event) override;
 };

@@ -64,7 +64,7 @@ namespace IwEngine {
 	}
 
 	bool ImGuiLayer::On(
-		WindowResizedEvent& e)
+		IW::WindowResizedEvent& e)
 	{
 		auto& io = ImGui::GetIO();
 		io.DisplaySize.x = (float)e.Width;
@@ -74,7 +74,7 @@ namespace IwEngine {
 	}
 
 	bool ImGuiLayer::On(
-		MouseMovedEvent& event)
+		IW::MouseMovedEvent& event)
 	{
 		auto& io = ImGui::GetIO();
 		io.MousePos.x = (float)event.X;
@@ -84,7 +84,7 @@ namespace IwEngine {
 	}
 
 	bool ImGuiLayer::On(
-		MouseButtonEvent& event)
+		IW::MouseButtonEvent& event)
 	{
 		auto& io = ImGui::GetIO();
 

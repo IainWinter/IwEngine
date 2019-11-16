@@ -4,7 +4,7 @@
 #include "iw/log/logger.h"
 #include "iw/log/sink/async_std_sink.h"
 #include "iw/log/sink/file_sink.h"
-#include "iw/events/functional/callback.h"
+#include "iw/events/callback.h"
 #include "iw/graphics/Loaders/ModelLoader.h"
 #include "iw/graphics/Loaders/MaterialLoader.h"
 #include "iw/graphics/Loaders/TextureLoader.h"
@@ -46,7 +46,7 @@ namespace IwEngine {
 
 		// Events
 
-		Bus.subscribe(iwe::make_callback(&Application::HandleEvent, this));
+		Bus.subscribe(iw::make_callback(&Application::HandleEvent, this));
 
 		// Asset Loader
 
@@ -58,7 +58,7 @@ namespace IwEngine {
 		// Window
 
 		LOG_DEBUG << "Setting window event bus...";
-		m_window->SetEventBus(Bus);
+		m_window->SetEventbus(Bus);
 		
 		LOG_DEBUG << "Setting window input manager...";
 		m_window->SetInputManager(InputManager);
@@ -192,17 +192,30 @@ namespace IwEngine {
 	}
 
 	void Application::HandleEvent(
-		Event& e)
+		iw::event& e)
 	{
-		switch (e.Type) {
-			case MouseWheel:    DispatchEvent((MouseWheelEvent&)e);    break;
-			case MouseMoved:    DispatchEvent((MouseMovedEvent&)e);    break;
-			case MouseButton:   DispatchEvent((MouseButtonEvent&)e);   break;
-			case Key:    	    DispatchEvent((KeyEvent&)e);           break;
-			case KeyTyped:      DispatchEvent((KeyTypedEvent&)e);      break;
-			case WindowResized: DispatchEvent((WindowResizedEvent&)e); break;
-			case WindowClosed:  m_running = false; break;
-			default: LOG_WARNING << "Application mishandled event " + e.Type; break; // logs ppipction?
+		bool error = false;
+		if (e.Category == IW::INPUT) {
+			switch (e.Type) {
+				case IW::MouseWheel:  DispatchEvent((IW::MouseWheelEvent&)e);  break;
+				case IW::MouseMoved:  DispatchEvent((IW::MouseMovedEvent&)e);  break;
+				case IW::MouseButton: DispatchEvent((IW::MouseButtonEvent&)e); break;
+				case IW::Key:    	  DispatchEvent((IW::KeyEvent&)e);         break;
+				case IW::KeyTyped:    DispatchEvent((IW::KeyTypedEvent&)e);    break;
+				default: error = true;
+			}
+		}
+
+		else if (e.Category == IW::WINDOW) {
+			switch (e.Type) {
+				case IW::Resized: DispatchEvent((IW::WindowResizedEvent&)e); break;
+				case IW::Closed:  m_running = false;                         break;
+				default: error = true;
+			}
+		}
+
+		if (error) {
+			LOG_WARNING << "Application mishandled event " + e.Type; // logs ppipction
 		}
 	}
 }

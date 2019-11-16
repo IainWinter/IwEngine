@@ -196,8 +196,8 @@ namespace IwEngine {
 		return true;
 	}
 
-	void WindowsWindow::SetEventBus(
-		EventBus& bus)
+	void WindowsWindow::SetEventbus(
+		iw::eventbus& bus)
 	{
 		Bus = &bus;
 	}
@@ -210,19 +210,19 @@ namespace IwEngine {
 		manager.CreateContext(Id(), (float)Width(), (float)Height());
 
 		manager.SetMouseWheelCallback(Id(), 
-			iwevents::make_callback(&WindowsWindow::HandleMouseWheel, this));
+			iw::make_callback(&WindowsWindow::HandleMouseWheel, this));
 
 		manager.SetMouseMovedCallback(Id(), 
-			iwevents::make_callback(&WindowsWindow::HandleMouseMoved, this));
+			iw::make_callback(&WindowsWindow::HandleMouseMoved, this));
 
 		manager.SetMouseButtonCallback(Id(), 
-			iwevents::make_callback(&WindowsWindow::HandleMouseButton, this));
+			iw::make_callback(&WindowsWindow::HandleMouseButton, this));
 
 		manager.SetKeyCallback(Id(),         
-			iwevents::make_callback(&WindowsWindow::HandleKey, this));
+			iw::make_callback(&WindowsWindow::HandleKey, this));
 
 		manager.SetKeyTypedCallback(Id(),
-			iwevents::make_callback(&WindowsWindow::HandleKeyTyped, this));
+			iw::make_callback(&WindowsWindow::HandleKeyTyped, this));
 	}
 
 	void WindowsWindow::SetState(
@@ -284,28 +284,27 @@ namespace IwEngine {
 		//Input events
 		InputManager->HandleEvent(Id(), msg, wParam, lParam);
 
-		Event* e;
+		iw::event* e;
 		switch (msg) {
 			case WM_SIZE:
-				e = Translate<WindowResizedEvent>(msg, wParam, lParam);
+				e = &Translate<IW::WindowResizedEvent>(msg, Id(), wParam, lParam);
 				break;
 			case WM_CLOSE:
-				e = new Event(WindowClosed);
+				e = &IW::WindowEvent(IW::Closed, Id());
 				break;
 			case WM_DESTROY:
-				e = new Event(WindowDestroyed);
+				e = &IW::WindowEvent(IW::Destroyed, Id());
 				break;
 			default:
-				e = new Event(NOT_HANDLED);
+				e = &iw::event(IW::NOT_HANDLED, 0);
 				break;
 		}
 
-		if (e->Type == NOT_HANDLED) {
-			delete e;
+		if (e->Category == IW::NOT_HANDLED) {
 			return DefWindowProc(hwnd, msg, wParam, lParam);
 		}
 
-		Bus->push(e);
+		Bus->push(*e);
 		//callback(*e);
 
 		//if (!e->Handled) {
@@ -319,7 +318,7 @@ namespace IwEngine {
 		IwInput::InputState inputState,
 		float delta)
 	{
-		MouseWheelEvent* e = new MouseWheelEvent(inputState, delta);
+		IW::MouseWheelEvent* e = new IW::MouseWheelEvent(inputState, delta);
 		Bus->push(e);
 		//callback(*e);
 
@@ -333,7 +332,7 @@ namespace IwEngine {
 		float deltaX,
 		float deltaY)
 	{
-		MouseMovedEvent* e = new MouseMovedEvent(inputState, X, Y, deltaX, deltaY);
+		IW::MouseMovedEvent* e = new IW::MouseMovedEvent(inputState, X, Y, deltaX, deltaY);
 		Bus->push(e);
 		//callback(*e);
 
@@ -346,7 +345,7 @@ namespace IwEngine {
 		IwInput::InputName button,
 		bool down)
 	{
-		MouseButtonEvent* e = new MouseButtonEvent(inputState, button, down);
+		IW::MouseButtonEvent* e = new IW::MouseButtonEvent(inputState, button, down);
 		Bus->push(e);
 		//callback(*e);
 
@@ -359,7 +358,7 @@ namespace IwEngine {
 		IwInput::InputName key,
 		bool down)
 	{
-		KeyEvent* e = new KeyEvent(inputState, key, down);
+		IW::KeyEvent* e = new IW::KeyEvent(inputState, key, down);
 		Bus->push(e);
 		//callback(*e);
 
@@ -372,7 +371,7 @@ namespace IwEngine {
 		IwInput::InputName key, 
 		char character)
 	{
-		KeyTypedEvent* e = new KeyTypedEvent(inputState, key, character);
+		IW::KeyTypedEvent* e = new IW::KeyTypedEvent(inputState, key, character);
 		Bus->push(e);
 		//callback(*e);
 

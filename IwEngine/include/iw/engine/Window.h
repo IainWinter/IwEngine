@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EventBus.h"
+#include "iw/events/eventbus.h"
 #include "WindowOptions.h"
 #include "iw/input/InputManager.h"
 
@@ -22,8 +22,8 @@ namespace IwEngine {
 		virtual bool TakeOwnership()    = 0;
 		virtual bool ReleaseOwnership() = 0;
 
-		virtual void SetEventBus(
-			EventBus& bus) = 0;
+		virtual void SetEventbus(
+			iw::eventbus& bus) = 0;
 
 		virtual void SetInputManager(
 			IwInput::InputManager& inputManager) = 0;
@@ -53,7 +53,7 @@ namespace IwEngine {
 	protected:
 		WindowOptions Options;
 		IwInput::InputManager* InputManager;
-		EventBus* Bus;
+		iw::eventbus* Bus;
 
 	public:
 		virtual ~Window() {}

@@ -34,12 +34,12 @@ namespace IwEngine {
 		}
 
 		bool On(
-			WindowResizedEvent& event) override;
+			IW::WindowResizedEvent& event) override;
 
 		bool On(
-			MouseMovedEvent& event) override;
+			IW::MouseMovedEvent& event) override;
 
 		bool On(
-			MouseButtonEvent& event) override;
+			IW::MouseButtonEvent& event) override;
 	};
 }

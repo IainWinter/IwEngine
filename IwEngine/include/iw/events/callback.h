@@ -1,9 +1,9 @@
 #pragma once
 
 #include "binding.h"
-#include <functional>
 
-namespace iwevents {
+namespace iw {
+inline namespace events {
 	template<
 		typename... _args_t>
 	class callback {
@@ -46,10 +46,11 @@ namespace iwevents {
 		typename _t,
 		typename... _args_t>
 	callback<_args_t...> make_callback(
-		void(_t::*function)(_args_t...),
+		void(_t::* function)(_args_t...),
 		_t* instance)
 	{
 		return callback<_args_t...>(
 			bind<void, _t*, _args_t...>(function, instance));
 	}
+}
 }

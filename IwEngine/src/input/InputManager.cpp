@@ -27,26 +27,26 @@ namespace IwInput {
 
 	template<>
 	void InputManager::CreateDevice<Mouse>() {
-		m_deviceManager.CreateDevice<Mouse>(iwevents::make_callback(
+		m_deviceManager.CreateDevice<Mouse>(iw::make_callback(
 			&ContextManager::HandleInput, &m_contextManager));
 	}
 
 	template<>
 	void InputManager::CreateDevice<Keyboard>() {
-		m_deviceManager.CreateDevice<Keyboard>(iwevents::make_callback(
+		m_deviceManager.CreateDevice<Keyboard>(iw::make_callback(
 			&ContextManager::HandleInput, &m_contextManager));
 	}
 
 #ifdef IW_PLATFORM_WINDOWS
 	template<>
 	void InputManager::CreateDevice<RawMouse>() {
-		m_deviceManager.CreateDevice<RawMouse>(iwevents::make_callback(
+		m_deviceManager.CreateDevice<RawMouse>(iw::make_callback(
 			&ContextManager::HandleInput, &m_contextManager));
 	}
 
 	template<>
 	void InputManager::CreateDevice<RawKeyboard>() {
-		m_deviceManager.CreateDevice<RawKeyboard>(iwevents::make_callback(
+		m_deviceManager.CreateDevice<RawKeyboard>(iw::make_callback(
 			&ContextManager::HandleInput, &m_contextManager));
 	}
 #endif

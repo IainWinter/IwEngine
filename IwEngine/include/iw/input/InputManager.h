@@ -3,7 +3,7 @@
 #include "DeviceManager.h"
 #include "ContextManager.h"
 #include "Events/InputEvent.h"
-#include "iw/events/functional/callback.h"
+#include "iw/events/callback.h"
 
 namespace IwInput {
 	class IWINPUT_API InputManager {

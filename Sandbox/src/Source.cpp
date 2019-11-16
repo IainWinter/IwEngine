@@ -10,6 +10,8 @@
 #include "iw/engine/Time.h"
 #include "iw/engine/Layers/DebugLayer.h"
 
+#include "iw/events/eventbus.h"
+
 struct Position {
 	int x, y, z;
 };

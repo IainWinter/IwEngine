@@ -4,7 +4,7 @@
 #include "Stack.h"
 #include "System.h"
 #include "InitOptions.h"
-#include "Events/AllEvents.h"
+#include "Events/Events.h"
 #include "iw/asset/AssetManager.h"
 #include "iw/entity/Space.h"
 #include "iw/graphics/Renderer.h"
@@ -38,12 +38,12 @@ namespace IwEngine {
 		virtual void PostUpdate();
 		virtual void FixedUpdate();
 
-		virtual bool On(WindowResizedEvent& event);
-		virtual bool On(MouseWheelEvent&    event);
-		virtual bool On(MouseMovedEvent&    event);
-		virtual bool On(MouseButtonEvent&   event);
-		virtual bool On(KeyEvent&           event);
-		virtual bool On(KeyTypedEvent&      event);
+		virtual bool On(IW::WindowResizedEvent& event);
+		virtual bool On(IW::MouseWheelEvent&    event);
+		virtual bool On(IW::MouseMovedEvent&    event);
+		virtual bool On(IW::MouseButtonEvent&   event);
+		virtual bool On(IW::KeyEvent&           event);
+		virtual bool On(IW::KeyTypedEvent&      event);
 
 		void UpdateSystems();
 		void FixedUpdateSystems();

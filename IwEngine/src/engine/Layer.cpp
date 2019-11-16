@@ -38,37 +38,37 @@ namespace IwEngine {
 	void Layer::ImGui() {}
 
 	bool Layer::On(
-		WindowResizedEvent& event)
+		IW::WindowResizedEvent& event)
 	{
 		return false;
 	}
 
 	bool Layer::On(
-		MouseWheelEvent& event)
+		IW::MouseWheelEvent& event)
 	{
 		return false;
 	}
 
 	bool Layer::On(
-		MouseMovedEvent& event)
+		IW::MouseMovedEvent& event)
 	{
 		return false;
 	}
 
 	bool Layer::On(
-		MouseButtonEvent& event)
+		IW::MouseButtonEvent& event)
 	{
 		return false;
 	}
 
 	bool Layer::On(
-		KeyEvent& event)
+		IW::KeyEvent& event)
 	{
 		return false;
 	}
 
 	bool Layer::On(
-		KeyTypedEvent& event)
+		IW::KeyTypedEvent& event)
 	{
 		return false;
 	}

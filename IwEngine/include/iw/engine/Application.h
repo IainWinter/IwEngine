@@ -4,7 +4,7 @@
 #include "Window.h"
 #include "Stack.h"
 #include "Task.h"
-#include "EventBus.h"
+#include "iw/events/eventbus.h"
 #include "InitOptions.h"
 #include "Layers/ImGuiLayer.h"
 #include "iw/asset/AssetManager.h"
@@ -32,7 +32,7 @@ namespace IwEngine {
 		IwEntity::Space Space;
 		IwInput::InputManager InputManager;
 
-		EventBus Bus;
+		iw::eventbus Bus;
 
 		IW::Renderer     Renderer;
 		IW::AssetManager Asset;
@@ -51,7 +51,7 @@ namespace IwEngine {
 		//virtual void Pause();
 
 		virtual void HandleEvent(
-			Event& e);
+			iw::event& e);
 
 		inline IWindow& GetWindow() {
 			return *m_window;
@@ -92,7 +92,7 @@ namespace IwEngine {
 		void DispatchEvent(
 			_event_t& event)
 		{
-			if constexpr (std::is_same_v<WindowResizedEvent, _event_t>) {
+			if constexpr (std::is_same_v<IW::WindowResizedEvent, _event_t>) {
 				Renderer.Width  = event.Width;
 				Renderer.Height = event.Height;
 			}

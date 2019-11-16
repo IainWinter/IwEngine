@@ -2,7 +2,7 @@
 
 #include "iw/input/IwInput.h"
 #include "iw/input/Events/InputEvent.h"
-#include "iw/events/functional/callback.h"
+#include "iw/events/callback.h"
 #include "iw/util/set/tofrom_set.h"
 
 namespace IwInput {
