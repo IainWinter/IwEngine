@@ -14,6 +14,7 @@
 #include "Systems/BulletSystem.h"
 #include "Systems/PlayerSystem.h"
 #include "Systems/EnemySystem.h"
+#include "iw/engine/Systems/PhysicsSystem.h"
 
 GameLayer3D::GameLayer3D(
 	IwEntity::Space& space, 
@@ -23,6 +24,7 @@ GameLayer3D::GameLayer3D(
 {
 	PushSystem<BulletSystem>();
 	PushSystem<PlayerSystem>();
+	PushSystem<IwEngine::PhysicsSystem>();
 }
 
 iwu::ref<IW::Shader> pbrPipeline;
@@ -146,15 +148,17 @@ int GameLayer3D::Initialize(
 	IwEntity::Entity camera = Space.CreateEntity<IW::Transform, IwEngine::CameraController>();
 	Space.SetComponentData<IwEngine::CameraController>(camera, perspective);
 
-	IwEntity::Entity player = Space.CreateEntity<IW::Transform, IwEngine::Model, Player>();
+	IwEntity::Entity player = Space.CreateEntity<IW::Transform, IwEngine::Model, Player, IwPhysics::AABB3D>();
 	Space.SetComponentData<IW::Transform>(player, iwm::vector3(3, -0.25f, 0), iwm::vector3(0.75f));
 	Space.SetComponentData<IwEngine::Model>(player, mesh, 1U);
 	Space.SetComponentData<Player>(player, 4.0f, .15f, .05f);
+	Space.SetComponentData<IwPhysics::AABB3D>(player, iwm::vector3(-1), iwm::vector3(1));
 
-	IwEntity::Entity enemy = Space.CreateEntity<IW::Transform, IwEngine::Model, Enemy>();
+	IwEntity::Entity enemy = Space.CreateEntity<IW::Transform, IwEngine::Model, Enemy, IwPhysics::AABB3D>();
 	Space.SetComponentData<IW::Transform>  (enemy, iwm::vector3(0, -0.25f, 0), iwm::vector3(0.75f));
 	Space.SetComponentData<IwEngine::Model>(enemy, mesh, 1U);
 	Space.SetComponentData<Enemy>          (enemy, SPIN, 0.2617993f, .12f, 0.0f);
+	Space.SetComponentData<IwPhysics::AABB3D>(enemy, iwm::vector3(-1), iwm::vector3(1));
 
 	IwEntity::Entity floor = Space.CreateEntity<IW::Transform, IwEngine::Model>();
 	Space.SetComponentData<IW::Transform>  (floor, iwm::vector3(0, -1, 0), iwm::vector3(20, 1, 20), 
