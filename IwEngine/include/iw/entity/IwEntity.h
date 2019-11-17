@@ -11,6 +11,8 @@
 #include "iw/util/memory/smart_pointers.h"
 #include <typeindex>
 
-namespace IwEntity {
+namespace IW {
+inline namespace ECS {
 	using ComponentType = std::type_index;
+}
 }

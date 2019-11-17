@@ -1,6 +1,6 @@
 #include "iw/math/matrix2.h"
 
-namespace iwmath {
+namespace iw {
 	const matrix2 matrix2::identity = matrix2(1.0f);
 
 	matrix2::matrix2()
@@ -291,7 +291,7 @@ namespace iwmath {
 		);
 	}
 
-	std::ostream& iwmath::operator<<(
+	std::ostream& iw::operator<<(
 		std::ostream& ostream, 
 		const matrix2& a)
 	{

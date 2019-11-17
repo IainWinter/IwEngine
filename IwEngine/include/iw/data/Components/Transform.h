@@ -8,14 +8,14 @@
 namespace IW {
 inline namespace Engine {
 	struct IWDATA_API Transform {
-		iwm::vector3    Position = iwm::vector3::zero;
-		iwm::vector3    Scale    = iwm::vector3::one;
-		iwm::quaternion Rotation = iwm::quaternion::identity;
+		iw::vector3    Position = iw::vector3::zero;
+		iw::vector3    Scale    = iw::vector3::one;
+		iw::quaternion Rotation = iw::quaternion::identity;
 
-		iwm::matrix4 Transformation() const;
-		iwm::vector3 Forward() const;
-		iwm::vector3 Right() const;
-		iwm::vector3 Up() const;
+		iw::matrix4 Transformation() const;
+		iw::vector3 Forward() const;
+		iw::vector3 Right() const;
+		iw::vector3 Up() const;
 	};
 }
 }

@@ -3,7 +3,7 @@
 #include "memory_util.h"
 #include <stdlib.h>
 
-namespace iwutil {
+namespace iw {
 	linear_allocator::linear_allocator(
 		size_t size)
 		: m_memory(malloc(size))

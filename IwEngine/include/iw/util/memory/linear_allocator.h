@@ -3,7 +3,8 @@
 #include "iw/util/iwutil.h"
 #include <cstddef>
 
-namespace iwutil {
+namespace iw {
+inline namespace util {
 	class IWUTIL_API linear_allocator {
 	private:
 		void*  m_memory;
@@ -48,4 +49,5 @@ namespace iwutil {
 			return m_capacity;
 		}
 	};
+}
 }

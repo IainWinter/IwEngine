@@ -1,6 +1,6 @@
 #include "iw/util/memory/pool_allocator.h"
 
-namespace iwutil {
+namespace iw {
 	pool_allocator::pool_allocator(
 		size_t pageSize, 
 		size_t itemSize)

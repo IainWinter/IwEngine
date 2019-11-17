@@ -8,50 +8,50 @@ struct Components {
 };
 
 PlayerSystem::PlayerSystem(
-	IwEntity::Space& space,
+	IW::Space& space,
 	IW::Graphics::Renderer& renderer)
-	: IwEngine::System<IW::Transform, Player>(space, renderer, "Player")
+	: IW::System<IW::Transform, Player>(space, renderer, "Player")
 {}
 
 void PlayerSystem::Update(
-	IwEntity::EntityComponentArray& view)
+	IW::EntityComponentArray& view)
 {
 	for (auto entity : view) {
 		auto [ transform, player ] = entity.Components.Tie<Components>();
 
-		iwm::vector3 movement;
-		if (IwInput::Keyboard::KeyDown(IwInput::LEFT)) {
+		iw::vector3 movement;
+		if (IW::Keyboard::KeyDown(IW::LEFT)) {
 			movement.x -= 1;
 		}
 
-		if (IwInput::Keyboard::KeyDown(IwInput::RIGHT)) {
+		if (IW::Keyboard::KeyDown(IW::RIGHT)) {
 			movement.x += 1;
 		}
 
-		if (IwInput::Keyboard::KeyDown(IwInput::UP)) {
+		if (IW::Keyboard::KeyDown(IW::UP)) {
 			movement.z -= 1;
 		}
 
-		if (IwInput::Keyboard::KeyDown(IwInput::DOWN)) {
+		if (IW::Keyboard::KeyDown(IW::DOWN)) {
 			movement.z += 1;
 		}
 
 		if (player->Timer <= -player->CooldownTime) {
-			if (IwInput::Keyboard::KeyDown(IwInput::X)) {
+			if (IW::Keyboard::KeyDown(IW::X)) {
 				player->Timer = player->DashTime;
 			}
 		}
 
 		else if (player->Timer >= -player->CooldownTime) {
-			player->Timer -= IwEngine::Time::DeltaTime();
+			player->Timer -= IW::Time::DeltaTime();
 		}
 
 		if (player->Timer > 0) {
-			transform->Position += movement.normalized() * player->Speed * 10 * (player->Timer*player->Timer / player->DashTime) * IwEngine::Time::DeltaTime();
+			transform->Position += movement.normalized() * player->Speed * 10 * (player->Timer*player->Timer / player->DashTime) * IW::Time::DeltaTime();
 		}
 
 		else {
-			transform->Position += movement.normalized() * player->Speed * IwEngine::Time::DeltaTime();
+			transform->Position += movement.normalized() * player->Speed * IW::Time::DeltaTime();
 		}
 	}
 }

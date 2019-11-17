@@ -29,7 +29,7 @@ inline namespace Graphics {
 			unsigned char* colors);
 
 		void Initialize(
-			const iwu::ref<IDevice>& device);
+			const iw::ref<IDevice>& device);
 	};
 }
 }

@@ -36,8 +36,8 @@ inline namespace Graphics {
 			, a(a)
 		{}
 
-		operator iwm::vector4() const {
-			return iwm::vector4(r, g, b, a);
+		operator iw::vector4() const {
+			return iw::vector4(r, g, b, a);
 		}
 	};
 }

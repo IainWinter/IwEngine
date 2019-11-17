@@ -8,9 +8,8 @@
 #	endif
 #endif
 
-#define iwlog iwl
-
-namespace iwlog {
+namespace iw {
+inline namespace log {
 	enum loglevel {
 		INFO,
 		DEBUG,
@@ -18,4 +17,5 @@ namespace iwlog {
 		ERR,
 		TRACE
 	};
+}
 }

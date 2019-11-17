@@ -11,7 +11,7 @@ ATOM RegClass(
 	HINSTANCE instance,
 	WNDPROC wndproc);
 
-namespace IwEngine {
+namespace IW {
 	IWindow* IWindow::Create() {
 		return new WindowsWindow();
 	}
@@ -203,7 +203,7 @@ namespace IwEngine {
 	}
 
 	void WindowsWindow::SetInputManager(
-		IwInput::InputManager& manager)
+		IW::InputManager& manager)
 	{
 		InputManager = &manager;
 
@@ -303,14 +303,14 @@ namespace IwEngine {
 	}
 
 	void WindowsWindow::HandleMouseWheel(
-		IwInput::InputState* inputState,
+		IW::InputState* inputState,
 		float delta)
 	{
 		Bus->push(IW::MouseWheelEvent(inputState, delta));
 	}
 
 	void WindowsWindow::HandleMouseMoved(
-		IwInput::InputState* inputState,
+		IW::InputState* inputState,
 		float X, 
 		float Y,
 		float deltaX,
@@ -320,24 +320,24 @@ namespace IwEngine {
 	}
 	
 	void WindowsWindow::HandleMouseButton(
-		IwInput::InputState* inputState,
-		IwInput::InputName button,
+		IW::InputState* inputState,
+		IW::InputName button,
 		bool down)
 	{
 		Bus->push(IW::MouseButtonEvent(inputState, button, down));
 	}
 
 	void WindowsWindow::HandleKey(
-		IwInput::InputState* inputState,
-		IwInput::InputName key,
+		IW::InputState* inputState,
+		IW::InputName key,
 		bool down)
 	{
 		Bus->push(IW::KeyEvent(inputState, key, down));
 	}
 
 	void WindowsWindow::HandleKeyTyped(
-		IwInput::InputState* inputState,
-		IwInput::InputName key, 
+		IW::InputState* inputState,
+		IW::InputName key, 
 		char character)
 	{
 		Bus->push(IW::KeyTypedEvent(inputState, key, character));

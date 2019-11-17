@@ -3,7 +3,8 @@
 #include "iw/util/iwutil.h"
 #include <memory>
 
-namespace iwutil {
+namespace iw {
+inline namespace util {
 	template<
 		typename _t>
 	using unique = std::unique_ptr<_t>;
@@ -15,4 +16,5 @@ namespace iwutil {
 	template<
 		typename _t>
 	using weak = std::weak_ptr<_t>;
+}
 }

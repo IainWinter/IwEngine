@@ -8,10 +8,8 @@
 #	endif
 #endif
 
-namespace iwm {}
-#define iwmath iwm
-
-namespace iwmath {
+namespace iw {
+inline namespace math {
 	/**
 	* Pi ~ 3.14
 	*/
@@ -61,4 +59,5 @@ namespace iwmath {
 		float a, 
 		float b, 
 		unsigned int accuracy);
+}
 }

@@ -3,7 +3,7 @@
 #ifdef IW_PLATFORM_WINDOWS
 #include <Windows.h>
 
-namespace IwInput {
+namespace IW {
 	Keyboard* Keyboard::Create(
 		InputCallback& callback)
 	{

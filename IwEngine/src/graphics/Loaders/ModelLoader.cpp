@@ -30,7 +30,7 @@ namespace IW {
 			return nullptr;
 		}
 
-		std::vector<iwu::ref<IW::Material>> materials;
+		std::vector<iw::ref<IW::Material>> materials;
 		if (scene->HasMaterials()) {
 			for (size_t i = 0; i < scene->mNumMaterials; i++) {
 				aiMaterial* aimaterial = scene->mMaterials[i];
@@ -61,7 +61,7 @@ namespace IW {
 				{
 					texturePath.Set(std::string(texturePath.C_Str()));
 
-					iwu::ref<IW::Texture> texture = m_asset.Load<IW::Texture>(texturePath.C_Str());
+					iw::ref<IW::Texture> texture = m_asset.Load<IW::Texture>(texturePath.C_Str());
 					material.SetTexture("albedoMap", texture);
 				}
 
@@ -125,25 +125,25 @@ namespace IW {
 
 			mesh.VertexCount = aimesh->mNumVertices;
 			if (aimesh->HasPositions()) {
-				mesh.SetVertices(mesh.VertexCount, (iwm::vector3*)aimesh->mVertices);
+				mesh.SetVertices(mesh.VertexCount, (iw::vector3*)aimesh->mVertices);
 			}
 
 			if (aimesh->HasNormals()) {
-				mesh.SetNormals(mesh.VertexCount, (iwm::vector3*)aimesh->mNormals);
+				mesh.SetNormals(mesh.VertexCount, (iw::vector3*)aimesh->mNormals);
 			}
 
 			if (aimesh->HasTangentsAndBitangents()) {
-				mesh.SetTangents  (mesh.VertexCount, (iwm::vector3*)aimesh->mTangents);
-				mesh.SetBiTangents(mesh.VertexCount, (iwm::vector3*)aimesh->mBitangents);
+				mesh.SetTangents  (mesh.VertexCount, (iw::vector3*)aimesh->mTangents);
+				mesh.SetBiTangents(mesh.VertexCount, (iw::vector3*)aimesh->mBitangents);
 			}
 
 			// Need to check for multiple channels i guess
 			if (aimesh->HasVertexColors(0)) {
-				mesh.SetColors(mesh.VertexCount, (iwm::vector4*)aimesh->mColors[0]);
+				mesh.SetColors(mesh.VertexCount, (iw::vector4*)aimesh->mColors[0]);
 			}
 
 			if (aimesh->HasTextureCoords(0)) {
-				mesh.SetUVs(mesh.VertexCount, (iwm::vector2*)aimesh->mTextureCoords[0]);
+				mesh.SetUVs(mesh.VertexCount, (iw::vector2*)aimesh->mTextureCoords[0]);
 			}
 
 			if (aimesh->HasBones()) {
@@ -156,9 +156,9 @@ namespace IW {
 				aibone->mOffsetMatrix.Decompose(scale, rot, pos);
 
 				Bone bone;
-				bone.Offset.Position = iwm::vector3(pos.x,     pos.y,   pos.z);
-				bone.Offset.Scale    = iwm::vector3(scale.x, scale.y, scale.z);
-				bone.Offset.Rotation = iwm::quaternion::from_euler_angles(rot.x, rot.y, rot.z);
+				bone.Offset.Position = iw::vector3(pos.x,     pos.y,   pos.z);
+				bone.Offset.Scale    = iw::vector3(scale.x, scale.y, scale.z);
+				bone.Offset.Rotation = iw::quaternion::from_euler_angles(rot.x, rot.y, rot.z);
 
 				bone.WeightCount = aibone->mNumWeights;
 				bone.Weights     = new VertexWeight[bone.WeightCount];

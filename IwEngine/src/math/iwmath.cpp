@@ -1,7 +1,8 @@
 #include "iw/math/iwmath.h"
 #include <cmath>
 
-namespace iwmath {
+namespace iw {
+inline namespace math {
 	float fast_inv_sqrt(
 		float x)
 	{
@@ -33,4 +34,5 @@ namespace iwmath {
 	{
 		return fabsf(a - b) * fast_pow(10, accuracy) < 1; //didn't speed up much at all :c
 	}
+}
 }

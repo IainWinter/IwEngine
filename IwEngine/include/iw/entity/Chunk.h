@@ -4,7 +4,8 @@
 #include "Archetype.h"
 #include "Entity.h"
 
-namespace IwEntity {
+namespace IW {
+inline namespace ECS {
 	struct IWENTITY_API Chunk {
 		Chunk* Next;
 		Chunk* Previous;
@@ -52,4 +53,5 @@ namespace IwEntity {
 			const ArchetypeLayout& layout,
 			size_t index);
 	};
+}
 }

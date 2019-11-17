@@ -5,7 +5,8 @@
 #include "vector4.h"
 #include <ostream>
 
-namespace iwmath {
+namespace iw {
+inline namespace math {
 	/**
 	* Represents a rotation in 3D.
 	*/
@@ -211,4 +212,5 @@ namespace iwmath {
 		//	const vector3& left,
 		//	const quaternion& right);
 	};
+}
 }

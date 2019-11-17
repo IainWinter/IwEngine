@@ -4,7 +4,8 @@
 #include <string>
 #include <vector>
 
-namespace iwutil {
+namespace iw {
+inline namespace util {
 	IWUTIL_API std::string ReadFile(
 		const std::string& filePath);
 
@@ -16,4 +17,5 @@ namespace iwutil {
 
 	IWUTIL_API uintmax_t GetFileSize(
 		const std::string& filePath);
+}
 }

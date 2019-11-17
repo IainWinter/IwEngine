@@ -7,7 +7,8 @@
 #include <assert.h>
 #include <functional>
 
-namespace iwutil {
+namespace iw {
+inline namespace util {
 	template<typename...>
 	class sparse_set;
 
@@ -787,4 +788,5 @@ namespace iwutil {
 			return const_iterator(size(), &m_direct, &m_items);
 		}
 	};
+}
 }

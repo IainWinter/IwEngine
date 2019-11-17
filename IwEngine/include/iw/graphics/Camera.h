@@ -7,33 +7,33 @@ namespace IW {
 inline namespace Graphics {
 	class IWGRAPHICS_API Camera {
 	public:
-		iwm::vector3    Position;
-		iwm::quaternion Rotation;
+		iw::vector3    Position;
+		iw::quaternion Rotation;
 	protected:
-		iwm::matrix4 m_view;
+		iw::matrix4 m_view;
 	private:
-		iwm::vector3    m_position;
-		iwm::quaternion m_rotation;
+		iw::vector3    m_position;
+		iw::quaternion m_rotation;
 
 	public:
 		Camera();
 
 		Camera(
-			const iwm::vector3& position,
-			const iwm::quaternion& rotation);
+			const iw::vector3& position,
+			const iw::quaternion& rotation);
 
 		virtual ~Camera() {}
 
 		void SetView(
-			const iwm::matrix4& view);
+			const iw::matrix4& view);
 
 		virtual void SetProjection(
-			const iwm::matrix4& projection) = 0;
+			const iw::matrix4& projection) = 0;
 
-		iwm::matrix4 GetView();
-		iwm::matrix4 GetViewProjection();
+		iw::matrix4 GetView();
+		iw::matrix4 GetViewProjection();
 
-		virtual iwm::matrix4 GetProjection() const = 0;
+		virtual iw::matrix4 GetProjection() const = 0;
 	private:
 		void RecalculateView();
 	};
@@ -44,7 +44,7 @@ inline namespace Graphics {
 		: public Camera
 	{
 	private:
-		iwm::matrix4 m_projection;
+		iw::matrix4 m_projection;
 
 	public:
 		OrthographicCamera() = default;
@@ -56,8 +56,8 @@ inline namespace Graphics {
 			float zFar);
 
 		OrthographicCamera(
-			const iwm::vector3& position,
-			const iwm::quaternion& rotation,
+			const iw::vector3& position,
+			const iw::quaternion& rotation,
 			float width,
 			float height,
 			float zNear,
@@ -70,12 +70,12 @@ inline namespace Graphics {
 			float zFar);
 
 		inline void SetProjection(
-			const iwm::matrix4& projection) override
+			const iw::matrix4& projection) override
 		{
 			m_projection = projection;
 		}
 
-		inline iwm::matrix4 GetProjection() const override {
+		inline iw::matrix4 GetProjection() const override {
 			return m_projection;
 		}
 	};
@@ -87,7 +87,7 @@ inline namespace Graphics {
 		/*float Fov; // something like this could be cool
 		float Aspect;*/
 	private:
-		iwm::matrix4 m_projection;
+		iw::matrix4 m_projection;
 		//float m_fov;
 		//float m_aspect;
 
@@ -102,8 +102,8 @@ inline namespace Graphics {
 			float zFar);
 
 		PerspectiveCamera(
-			const iwm::vector3& position,
-			const iwm::quaternion& rotation,
+			const iw::vector3& position,
+			const iw::quaternion& rotation,
 			float fov,
 			float aspect,
 			float zNear,
@@ -116,12 +116,12 @@ inline namespace Graphics {
 			float zFar);
 
 		inline void SetProjection(
-			const iwm::matrix4& projection) override
+			const iw::matrix4& projection) override
 		{
 			m_projection = projection;
 		}
 
-		inline iwm::matrix4 GetProjection() const override {
+		inline iw::matrix4 GetProjection() const override {
 			return m_projection;
 		}
 	};

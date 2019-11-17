@@ -7,7 +7,8 @@
 #include "matrix3.h"
 #include <ostream>
 
-namespace iwmath {
+namespace iw {
+inline namespace math {
 	/**
 	* Represents a 4x4 matrix.
 	*/
@@ -436,4 +437,5 @@ namespace iwmath {
 			std::ostream& stream,
 			const matrix4& a);
 	};
+}
 }

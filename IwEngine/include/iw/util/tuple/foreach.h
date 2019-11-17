@@ -3,7 +3,8 @@
 #include "iw/util/iwutil.h"
 #include <tuple>
 
-namespace iwutil {
+namespace iw {
+inline namespace util {
 	namespace detail {
 #pragma region no_return_no_args
 		template<
@@ -593,4 +594,5 @@ namespace functors {
 			equals = t == o;
 		}
 	};
+}
 }

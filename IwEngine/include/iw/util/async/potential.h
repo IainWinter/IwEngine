@@ -3,7 +3,8 @@
 #include "iw/util/iwutil.h"
 #include <memory>
 
-namespace iwutil {
+namespace iw {
+inline namespace util {
 	// Shared pointer for values not yet initialized
 	template<
 		typename _t>
@@ -67,4 +68,5 @@ namespace iwutil {
 			return m_ptr.use_count();
 		}
 	};
+}
 }

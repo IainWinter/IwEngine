@@ -4,7 +4,7 @@
 #include "iw/log/logger.h"
 #include "iw/engine/Platform.h"
 
-namespace IwEngine {
+namespace IW {
 	template<
 		typename _event_t>
 	_event_t Translate(

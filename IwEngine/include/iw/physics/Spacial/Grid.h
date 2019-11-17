@@ -7,7 +7,7 @@
 namespace IwPhysics {
 	template<
 		typename T,
-		typename Dim = iwm::vector3,
+		typename Dim = iw::vector3,
 		typename Key = int>
 	class Grid {
 	private:
@@ -52,11 +52,11 @@ namespace IwPhysics {
 			const AABB& bounds);
 
 		template<>
-		Key GetKey<iwm::vector2>(
+		Key GetKey<iw::vector2>(
 			const Dim& position,
 			const AABB& bounds)
 		{
-			iwm::vector3 key = (bounds.Center() + position) / m_cellDimensions;
+			iw::vector3 key = (bounds.Center() + position) / m_cellDimensions;
 			Key x = (Key)key.x;
 			Key y = (Key)key.y;
 
@@ -67,11 +67,11 @@ namespace IwPhysics {
 		}
 
 		template<>
-		Key GetKey<iwm::vector3>(
+		Key GetKey<iw::vector3>(
 			const Dim& position,
 			const AABB& bounds)
 		{
-			iwm::vector3 key = (bounds.Center() + position) / m_cellDimensions;
+			iw::vector3 key = (bounds.Center() + position) / m_cellDimensions;
 			Key x = (Key)key.x;
 			Key y = (Key)key.y;
 			Key z = (Key)key.z;
@@ -84,11 +84,11 @@ namespace IwPhysics {
 		}
 
 		template<>
-		Key GetKey<iwm::vector4>(
+		Key GetKey<iw::vector4>(
 			const Dim& position,
 			const AABB& bounds)
 		{
-			iwm::vector3 key = (bounds.Center() + position) / m_cellDimensions;
+			iw::vector3 key = (bounds.Center() + position) / m_cellDimensions;
 			Key x = (Key)key.x;
 			Key y = (Key)key.y;
 			Key z = (Key)key.z;

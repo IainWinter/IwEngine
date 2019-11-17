@@ -6,7 +6,7 @@ namespace IW {
 	{}
 
 	Material::Material(
-		iwu::ref<IW::IPipeline>& pipeline)
+		iw::ref<IW::IPipeline>& pipeline)
 		: Pipeline(pipeline)
 	{}
 
@@ -156,7 +156,7 @@ namespace IW {
 
 	void Material::SetTexture(
 		const char* name,
-		const iwu::ref<IW::Texture>& texture)
+		const iw::ref<IW::Texture>& texture)
 	{
 		SetTexture(name, texture.get());
 	}
@@ -233,7 +233,7 @@ namespace IW {
 	}
 
 	void Material::Use(
-		const iwu::ref<IW::IDevice>& device) const
+		const iw::ref<IW::IDevice>& device) const
 	{
 		device->SetPipeline(Pipeline.get());
 

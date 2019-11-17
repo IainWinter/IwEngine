@@ -5,7 +5,8 @@
 #include <queue>
 //#include <thread>
 
-namespace IwEngine {
+namespace IW {
+inline namespace Engine {
 	class ISystem {
 	public:
 		virtual int  Initialize() = 0;
@@ -27,15 +28,15 @@ namespace IwEngine {
 		std::queue<size_t> m_delete; // Probly make it so space can queue component creation at the ComponentArray level because of templated bs
 
 	protected:
-		IwEntity::Space& Space;
+		IW::Space& Space;
 		IW::Graphics::Renderer& Renderer;
 
 		virtual void Update(
-			IwEntity::EntityComponentArray& view)
+			IW::EntityComponentArray& view)
 		{}
 
 		virtual void FixedUpdate(
-			IwEntity::EntityComponentArray& view)
+			IW::EntityComponentArray& view)
 		{}
 
 		void QueueDestroyEntity(
@@ -45,7 +46,7 @@ namespace IwEngine {
 		}
 	public:
 		System(
-			IwEntity::Space& space,
+			IW::Space& space,
 			IW::Graphics::Renderer& renderer,
 			const char* name)
 			: m_name(name)
@@ -64,7 +65,7 @@ namespace IwEngine {
 		// These wont have to be copies this is just temp
 
 		void Update() override {
-			IwEntity::EntityComponentArray eca = Space.Query<_cs...>();
+			IW::EntityComponentArray eca = Space.Query<_cs...>();
 			// Break up view into Viewlets to execute on seperate threads
 
 			// Execute threads
@@ -79,7 +80,7 @@ namespace IwEngine {
 		}
 
 		void FixedUpdate() override {
-			IwEntity::EntityComponentArray eca = Space.Query<_cs...>();
+			IW::EntityComponentArray eca = Space.Query<_cs...>();
 			// Break up view into Viewlets to execute on seperate threads
 
 			// Execute threads
@@ -97,4 +98,5 @@ namespace IwEngine {
 			return m_name;
 		}
 	};	
+}
 }

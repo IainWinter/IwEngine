@@ -6,7 +6,8 @@
 
 #define MAX_LINE_LENGTH 1000
 
-namespace iwutil {
+namespace iw {
+inline namespace util {
 	static void ReportError(
 		int errerno,
 		const std::string& info)
@@ -110,4 +111,5 @@ namespace iwutil {
 
 		return bytes;
 	}
+}
 }

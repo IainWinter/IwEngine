@@ -2,7 +2,7 @@
 #include <assert.h>
 #include "iw/log/logger.h"
 
-namespace IwEntity {
+namespace IW {
 	using iterator = ChunkList::iterator;
 
 	// replace with free list like thing but for valid entities 
@@ -59,8 +59,8 @@ namespace IwEntity {
 	iterator::iterator(
 		Chunk* chunk,
 		size_t index,
-		const iwu::ref<Archetype>& archetype,
-		const iwu::ref<ComponentQuery>& query)
+		const iw::ref<Archetype>& archetype,
+		const iw::ref<ComponentQuery>& query)
 		: m_chunk(chunk)
 		, m_index(index)
 		, m_archetype(archetype)
@@ -73,7 +73,7 @@ namespace IwEntity {
 		assert(cd);
 		memset(cd, 0, cdSize);
 
-		m_data = iwu::ref<ComponentData>(cd, free);
+		m_data = iw::ref<ComponentData>(cd, free);
 
 		size_t cdisSize = sizeof(ComponentDataIndices)
 			+ sizeof(size_t)
@@ -93,11 +93,11 @@ namespace IwEntity {
 			}
 		}
 
-		m_indices = iwu::ref<ComponentDataIndices>(cdis, free);
+		m_indices = iw::ref<ComponentDataIndices>(cdis, free);
 	}
 
 	ChunkList::ChunkList(
-		const iwu::ref<Archetype>& archetype,
+		const iw::ref<Archetype>& archetype,
 		size_t chunkSize)
 		: m_root(nullptr)
 		, m_count(0)
@@ -122,7 +122,7 @@ namespace IwEntity {
 	}
 
 	bool ChunkList::ReinstateComponents(
-		const iwu::ref<EntityData>& entityData)
+		const iw::ref<EntityData>& entityData)
 	{
 		Chunk* chunk = FindChunk(entityData->ChunkIndex);
 		if (chunk) {
@@ -178,7 +178,7 @@ namespace IwEntity {
 	}
 
 	void* ChunkList::GetComponentData(
-		const iwu::ref<Component>& component,
+		const iw::ref<Component>& component,
 		size_t index)
 	{
 		Chunk* chunk = FindChunk(index);
@@ -201,7 +201,7 @@ namespace IwEntity {
 	}
 
 	iterator ChunkList::Begin(
-		const iwu::ref<ComponentQuery>& query)
+		const iw::ref<ComponentQuery>& query)
 	{
 		Chunk* chunk = m_root;
 		size_t index = 0;
@@ -217,7 +217,7 @@ namespace IwEntity {
 	}
 
 	iterator ChunkList::End(
-		const iwu::ref<ComponentQuery>& query)
+		const iw::ref<ComponentQuery>& query)
 	{
 		Chunk* chunk = m_root;
 		size_t index = 0;
@@ -277,7 +277,7 @@ namespace IwEntity {
 	}
 
 	size_t ChunkList::GetChunkCapacity(
-		const iwu::ref<Archetype>& archetype)
+		const iw::ref<Archetype>& archetype)
 	{
 		size_t archetypeSize = archetype->Size + sizeof(Entity);
 		size_t bufSize       = m_chunkSize - sizeof(Chunk);

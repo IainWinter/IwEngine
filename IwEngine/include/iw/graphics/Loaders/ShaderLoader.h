@@ -5,17 +5,16 @@
 #include "iw/asset/AssetLoader.h"
 
 namespace IW {
-	inline namespace Graphics {
-		class IWGRAPHICS_API ShaderLoader
-			: public AssetLoader<Shader>
-		{
-		public:
-			ShaderLoader(
-				AssetManager& asset);
-		private:
-			Shader* LoadAsset(
-				std::string filepath) override;
-		};
-	}
+inline namespace Graphics {
+	class IWGRAPHICS_API ShaderLoader
+		: public AssetLoader<Shader>
+	{
+	public:
+		ShaderLoader(
+			AssetManager& asset);
+	private:
+		Shader* LoadAsset(
+			std::string filepath) override;
+	};
 }
-
+}

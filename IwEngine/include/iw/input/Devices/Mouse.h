@@ -3,7 +3,8 @@
 #include "Device.h"
 #include "iw/input/Events/InputEvent.h"
 
-namespace IwInput {
+namespace IW {
+inline namespace Input {
 	class IWINPUT_API MouseBase
 		: public Device
 	{
@@ -73,4 +74,5 @@ namespace IwInput {
 			InputCallback& callback);
 	};
 #endif
+}
 }

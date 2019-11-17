@@ -1,7 +1,7 @@
 #include "iw/entity/Chunk.h"
 #include <iw\log\logger.h>
 
-namespace IwEntity {
+namespace IW {
 	size_t Chunk::BeginIndex() {
 		size_t i = IndexOffset;
 		while (i != EndIndex() && !GetEntity(i)->Alive) {

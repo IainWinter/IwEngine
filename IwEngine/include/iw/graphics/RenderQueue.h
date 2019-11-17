@@ -29,7 +29,7 @@ inline namespace Graphics {
 		};
 
 		std::vector<RenderOperation> m_queue;
-		iwu::linear_allocator        m_scratch;
+		iw::linear_allocator        m_scratch;
 	public:
 		QueuedDevice QueuedDevice;
 

@@ -40,7 +40,7 @@ inline namespace Graphics {
 		};
 
 	public:
-		iwu::ref<IW::IPipeline> Pipeline;
+		iw::ref<IW::IPipeline> Pipeline;
 
 	private:
 		std::vector<MaterialProperty> m_properties;
@@ -49,7 +49,7 @@ inline namespace Graphics {
 		Material();
 
 		Material(
-			iwu::ref<IW::IPipeline>& pipline);
+			iw::ref<IW::IPipeline>& pipline);
 
 		Material(
 			Material&&) noexcept = default;
@@ -123,7 +123,7 @@ inline namespace Graphics {
 
 		void SetTexture(
 			const char* name,
-			const iwu::ref<IW::Texture>& texture);
+			const iw::ref<IW::Texture>& texture);
 
 		bool* GetBool(
 			const char* name);
@@ -159,7 +159,7 @@ inline namespace Graphics {
 			const char* name);
 
 		void Use(
-			const iwu::ref<IW::IDevice>& device) const;
+			const iw::ref<IW::IDevice>& device) const;
 	private:
 		std::tuple<void*, size_t> GetData(
 			const char* name);

@@ -13,11 +13,11 @@ inline namespace Engine {
 	struct InputEvent
 		: iw::event
 	{
-		IwInput::InputState* InputStates;
+		IW::InputState* InputStates;
 
 		InputEvent(
 			InputEventType type,
-			IwInput::InputState* inputState)
+			IW::InputState* inputState)
 			: iw::event(INPUT, type)
 			, InputStates(inputState)
 		{}
@@ -29,7 +29,7 @@ inline namespace Engine {
 		float Delta;
 
 		MouseWheelEvent(
-			IwInput::InputState* inputState,
+			IW::InputState* inputState,
 			float delta)
 			: InputEvent(MouseWheel, inputState)
 			, Delta(delta)
@@ -45,7 +45,7 @@ inline namespace Engine {
 		float DeltaY;
 
 		MouseMovedEvent(
-			IwInput::InputState* inputState,
+			IW::InputState* inputState,
 			float x,
 			float y,
 			float deltaX,
@@ -61,12 +61,12 @@ inline namespace Engine {
 	struct MouseButtonEvent
 		: InputEvent
 	{
-		IwInput::InputName Button;
+		IW::InputName Button;
 		bool State;
 
 		MouseButtonEvent(
-			IwInput::InputState* inputState,
-			IwInput::InputName button,
+			IW::InputState* inputState,
+			IW::InputName button,
 			bool state)
 			: InputEvent(MouseButton, InputStates)
 			, Button(button)
@@ -77,12 +77,12 @@ inline namespace Engine {
 	struct KeyEvent
 		: InputEvent
 	{
-		IwInput::InputName Button;
+		IW::InputName Button;
 		bool State;
 
 		KeyEvent(
-			IwInput::InputState* inputState,
-			IwInput::InputName button,
+			IW::InputState* inputState,
+			IW::InputName button,
 			bool state)
 			: InputEvent(Key, inputState)
 			, Button(button)
@@ -93,12 +93,12 @@ inline namespace Engine {
 	struct KeyTypedEvent
 		: InputEvent
 	{
-		IwInput::InputName Button;
+		IW::InputName Button;
 		char Character;
 
 		KeyTypedEvent(
-			IwInput::InputState* inputState,
-			IwInput::InputName button,
+			IW::InputState* inputState,
+			IW::InputName button,
 			char character)
 			: InputEvent(KeyTyped, inputState)
 			, Button(button)

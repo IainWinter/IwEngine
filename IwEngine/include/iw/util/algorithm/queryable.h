@@ -4,7 +4,8 @@
 #include <functional>
 #include <vector>
 
-namespace iwutil {
+namespace iw {
+inline namespace util {
 	template<
 		typename _container>
 	class queryable {
@@ -37,4 +38,5 @@ namespace iwutil {
 			return queryable(result.begin(), result.end());
 		}
 	};
+}
 }

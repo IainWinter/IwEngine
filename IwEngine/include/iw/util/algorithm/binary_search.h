@@ -1,6 +1,7 @@
 #include "iw/util/iwutil.h"
 
-namespace iwutil {
+namespace iw {
+inline namespace util {
 	template<
 		typename _t,
 		typename _comparator>
@@ -22,4 +23,5 @@ namespace iwutil {
 		_comparator comparator) {
 
 	}
+}
 }

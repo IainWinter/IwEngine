@@ -5,13 +5,13 @@
 #include "iw/data/Components/Transform.h"
 
 class PlayerSystem
-	: public IwEngine::System<IW::Transform, Player>
+	: public IW::System<IW::Transform, Player>
 {
 public:
 	PlayerSystem(
-		IwEntity::Space& space,
+		IW::Space& space,
 		IW::Graphics::Renderer& renderer);
 
 	void Update(
-		IwEntity::EntityComponentArray& view) override;
+		IW::EntityComponentArray& view) override;
 };

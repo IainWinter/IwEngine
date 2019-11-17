@@ -11,7 +11,7 @@
 #include "iw/graphics/Loaders/ShaderLoader.h"
 #include <atomic>
 
-namespace IwEngine {
+namespace IW {
 	Application::Application()
 		: m_running(false)
 		, m_window(IWindow::Create())
@@ -36,13 +36,13 @@ namespace IwEngine {
 	{
 		// Time
 
-		Time::Update();
+		Time::UpdateTime();
 
 		// Logging
 
-		LOG_SINK(iwlog::async_stdout_sink, iwlog::INFO);
-		LOG_SINK(iwlog::async_stderr_sink, iwlog::ERR);
-		LOG_SINK(iwlog::file_sink,         iwlog::DEBUG, "sandbox.log");
+		LOG_SINK(iw::async_stdout_sink, iw::INFO);
+		LOG_SINK(iw::async_stderr_sink, iw::ERR);
+		LOG_SINK(iw::file_sink,         iw::DEBUG, "sandbox.log");
 
 		// Events
 
@@ -85,7 +85,7 @@ namespace IwEngine {
 
 		// Time again!
 
-		Time::Update();
+		Time::UpdateTime();
 		Time::SetFixedTime(1 / 60.0f);
 
 		return 0;
@@ -130,7 +130,7 @@ namespace IwEngine {
 
 	void Application::Update() {
 		// Update time (Sync)
-		Time::Update();
+		Time::UpdateTime();
 
 		Renderer.Begin();
 

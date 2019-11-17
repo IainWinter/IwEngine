@@ -2,22 +2,22 @@
 
 namespace IW {
 	Camera::Camera()
-		: Position(iwm::vector3::zero)
-		, Rotation(iwm::quaternion::identity) 
+		: Position(iw::vector3::zero)
+		, Rotation(iw::quaternion::identity) 
 	{
 		RecalculateView();
 	}
 
 	Camera::Camera(
-		const iwm::vector3& position,
-		const iwm::quaternion& rotation) 
+		const iw::vector3& position,
+		const iw::quaternion& rotation) 
 		: Position(position)
 		, Rotation(rotation)
 	{
 		RecalculateView();
 	}
 
-	iwm::matrix4 Camera::GetView() {
+	iw::matrix4 Camera::GetView() {
 		if (Position != m_position || Rotation != m_rotation) {
 			RecalculateView();
 		}
@@ -26,20 +26,20 @@ namespace IW {
 	}
 
 	void Camera::SetView(
-		const iwm::matrix4& view)
+		const iw::matrix4& view)
 	{
 		m_view = view;
 	}
 
-	iwm::matrix4 Camera::GetViewProjection() {
+	iw::matrix4 Camera::GetViewProjection() {
 		return GetView() * GetProjection();
 	}
 
 	void Camera::RecalculateView() {
-		m_view = iwm::matrix4::create_look_at(
+		m_view = iw::matrix4::create_look_at(
 			Position,
-			Position + iwm::vector3::unit_z * Rotation,
-			iwm::vector3::unit_y * Rotation);
+			Position + iw::vector3::unit_z * Rotation,
+			iw::vector3::unit_y * Rotation);
 
 		m_position = Position;
 		m_rotation = Rotation;
@@ -55,8 +55,8 @@ namespace IW {
 	}
 
 	OrthographicCamera::OrthographicCamera(
-		const iwm::vector3& position, 
-		const iwm::quaternion& rotation, 
+		const iw::vector3& position, 
+		const iw::quaternion& rotation, 
 		float width, 
 		float height, 
 		float zNear, 
@@ -72,7 +72,7 @@ namespace IW {
 		float zNear, 
 		float zFar)
 	{
-		m_projection = iwm::matrix4::create_orthographic(width, height, zNear, zFar);
+		m_projection = iw::matrix4::create_orthographic(width, height, zNear, zFar);
 	}
 	
 	PerspectiveCamera::PerspectiveCamera(
@@ -85,8 +85,8 @@ namespace IW {
 	}
 
 	PerspectiveCamera::PerspectiveCamera(
-		const iwm::vector3& position,
-		const iwm::quaternion& rotation,
+		const iw::vector3& position,
+		const iw::quaternion& rotation,
 		float fov,
 		float aspect,
 		float zNear,
@@ -102,6 +102,6 @@ namespace IW {
 		float zNear, 
 		float zFar)
 	{
-		m_projection = iwm::matrix4::create_perspective_field_of_view(fov, aspect, zNear, zFar);
+		m_projection = iw::matrix4::create_perspective_field_of_view(fov, aspect, zNear, zFar);
 	}
 }

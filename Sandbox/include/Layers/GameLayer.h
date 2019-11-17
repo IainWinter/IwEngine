@@ -9,19 +9,19 @@
 //#include "iw/graphics/Material.h"
 //
 //class GameLayer
-//	: public IwEngine::Layer
+//	: public IW::Layer
 //{
 //private: // tmp
 //	IW::Mesh* line;
 //
 //public:
 //	GameLayer(
-//		IwEntity::Space& space,
+//		IW::Space& space,
 //		IW::Renderer& renderer,
 //		IW::AssetManager& asset);
 //
 //	int Initialize(
-//		IwEngine::InitOptions& options) override;
+//		IW::InitOptions& options) override;
 //
 //	void PostUpdate()  override;
 //	void FixedUpdate() override;

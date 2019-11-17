@@ -8,34 +8,34 @@ namespace IwPhysics {
 	bool GJK(
 		const Collider& collider1, 
 		const Collider& collider2,
-		const iwm::matrix4& transformation1,
-		const iwm::matrix4& transformation2);
+		const iw::matrix4& transformation1,
+		const iw::matrix4& transformation2);
 
-	iwm::vector3 Support(
+	iw::vector3 Support(
 		const Collider& collider1,
 		const Collider& collider2,
-		const iwm::matrix4& transformation1,
-		const iwm::matrix4& transformation2,
-		const iwm::vector3& direction);
+		const iw::matrix4& transformation1,
+		const iw::matrix4& transformation2,
+		const iw::vector3& direction);
 
-	iwm::vector3 Simplex(
-		const iwm::vector3& a,
-		const iwm::vector3& b);
+	iw::vector3 Simplex(
+		const iw::vector3& a,
+		const iw::vector3& b);
 
-	iwm::vector3 Simplex(
-		const iwm::vector3& a,
-		const iwm::vector3& b,
-		const iwm::vector3& c);
+	iw::vector3 Simplex(
+		const iw::vector3& a,
+		const iw::vector3& b,
+		const iw::vector3& c);
 
-	iwm::vector3 Simplex(
-		const iwm::vector3& a,
-		const iwm::vector3& b,
-		const iwm::vector3& c,
-		const iwm::vector3& d);
+	iw::vector3 Simplex(
+		const iw::vector3& a,
+		const iw::vector3& b,
+		const iw::vector3& c,
+		const iw::vector3& d);
 
 	inline bool SameDirection(
-		const iwmath::vector3& direction,
-		const iwmath::vector3& ao)
+		const iw::vector3& direction,
+		const iw::vector3& ao)
 	{
 		return direction.dot(ao) > 0;
 	}

@@ -1,4 +1,4 @@
-#pragma once
+#pragma onceIW::
 
 #include "Core.h"
 #include "Window.h"
@@ -15,7 +15,8 @@
 #include <vector>
 #include <thread>
 
-namespace IwEngine {
+namespace IW {
+inline namespace Engine {
 	class IWENGINE_API Application {
 	private:
 		bool                 m_running;
@@ -23,14 +24,14 @@ namespace IwEngine {
 		ImGuiLayer*          m_imguiLayer;
 		EventStack<Layer*>   m_layers;
 
-		iwu::ref<IW::IDevice> m_device;
+		iw::ref<IW::IDevice> m_device;
 
 		std::thread  m_renderThread;
 		Task<void()> m_updateTask;
 
 	protected:
-		IwEntity::Space Space;
-		IwInput::InputManager InputManager;
+		IW::Space Space;
+		IW::InputManager InputManager;
 
 		iw::eventbus Bus;
 
@@ -88,6 +89,7 @@ namespace IwEngine {
 		}
 	};
 }
+}
 
-IwEngine::Application* CreateApplication(
-	IwEngine::InitOptions& options);
+IW::Application* CreateApplication(
+	IW::InitOptions& options);

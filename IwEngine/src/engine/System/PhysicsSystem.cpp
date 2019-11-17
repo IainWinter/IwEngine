@@ -2,11 +2,11 @@
 #include "iw/physics/Spacial/Grid.h"
 #include "iw/engine/Time.h"
 
-namespace IwEngine {
+namespace IW {
 	PhysicsSystem::PhysicsSystem(
-		IwEntity::Space& space,
+		IW::Space& space,
 		IW::Graphics::Renderer& renderer)
-		: IwEngine::System<IW::Transform, IwPhysics::AABB2D>(space, renderer, "Physics")
+		: IW::System<IW::Transform, IwPhysics::AABB2D>(space, renderer, "Physics")
 	{}
 
 	struct Components {
@@ -15,11 +15,11 @@ namespace IwEngine {
 	};
 
 	void PhysicsSystem::Update(
-		IwEntity::EntityComponentArray& eca)
+		IW::EntityComponentArray& eca)
 	{
 		// Loop through every 
 
-		//IwPhysics::Grid<size_t, iwm::vector2> grid(iwm::vector2(10));
+		//IwPhysics::Grid<size_t, iw::vector2> grid(iw::vector2(10));
 
 		//for (auto entity : eca) {
 		//	if (entity.Index == 1) {

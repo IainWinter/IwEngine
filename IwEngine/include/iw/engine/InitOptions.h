@@ -2,9 +2,11 @@
 
 #include "WindowOptions.h"
 
-namespace IwEngine {
+namespace IW {
+inline namespace Engine {
 	struct InitOptions {
 		WindowOptions WindowOptions;
 		void*         ImGuiContext; //ImGuiContext
 	};
+}
 }

@@ -25,19 +25,19 @@ struct Mesh {
 };
 
 class Game
-	: public IwEngine::Application
+	: public IW::Application
 {
 public:
 	Game() {
-		InputManager.CreateDevice<IwInput::Mouse>();
-		//InputManager.CreateDevice<IwInput::RawMouse>();
-		//InputManager.CreateDevice<IwInput::RawKeyboard>();
+		InputManager.CreateDevice<IW::Mouse>();
+		//InputManager.CreateDevice<IW::RawMouse>();
+		//InputManager.CreateDevice<IW::RawKeyboard>();
 
 		PushLayer<GameLayer3D>();
 	}
 
 	int Initialize(
-		IwEngine::InitOptions& options) override
+		IW::InitOptions& options) override
 	{
 		Application::Initialize(options);
 
@@ -47,14 +47,14 @@ public:
 	}
 };
 
-IwEngine::Application* CreateApplication(
-	IwEngine::InitOptions& options)
+IW::Application* CreateApplication(
+	IW::InitOptions& options)
 {
-	options.WindowOptions = IwEngine::WindowOptions {
+	options.WindowOptions = IW::WindowOptions {
 		1280,
 		720,
 		true,
-		IwEngine::DisplayState::NORMAL
+		IW::DisplayState::NORMAL
 	};
 
 	return new Game();

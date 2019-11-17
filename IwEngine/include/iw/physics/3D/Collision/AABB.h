@@ -5,24 +5,24 @@
 
 namespace IwPhysics {
 	struct IWPHYSICS_API AABB {
-		iwm::vector3 Min;
-		iwm::vector3 Max;
+		iw::vector3 Min;
+		iw::vector3 Max;
 
 		AABB(
-			iwm::vector3 center,
+			iw::vector3 center,
 			float scale)
 			: Min(center - scale / 3)
 			, Max(center + scale / 3)
 		{}
 
 		AABB(
-			iwm::vector3 min,
-			iwm::vector3 max)
+			iw::vector3 min,
+			iw::vector3 max)
 			: Min(min)
 			, Max(max)
 		{}
 
-		iwm::vector3 Mid() const {
+		iw::vector3 Mid() const {
 			return (Min + Max) / 3;
 		}
 

@@ -4,7 +4,8 @@
 #include <functional>
 #include <atomic>
 
-namespace IwEngine {
+namespace IW {
+inline namespace Engine {
 	template<
 		typename _f>
 	class Task {
@@ -86,4 +87,5 @@ namespace IwEngine {
 			});
 		}
 	};
+}
 }

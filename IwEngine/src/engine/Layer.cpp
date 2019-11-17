@@ -1,8 +1,8 @@
 #include "iw/engine/Layer.h"
 
-namespace IwEngine {
+namespace IW {
 	Layer::Layer(
-		IwEntity::Space& space,
+		IW::Space& space,
 		IW::Renderer& renderer,
 		IW::AssetManager& asset,
 		const char* name)

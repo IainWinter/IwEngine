@@ -4,7 +4,8 @@
 #include "iw/input/InputState.h"
 #include "iw/events/callback.h"
 
-namespace IwInput {
+namespace IW {
+inline namespace Input {
 #ifdef IW_PLATFORM_WINDOWS
 	struct OsEvent {
 		int    WindowId;
@@ -35,4 +36,5 @@ namespace IwInput {
 	using MouseButtonCallback = iw::callback<InputState*, InputName, bool>;
 	using KeyCallback         = iw::callback<InputState*, InputName, bool>;
 	using KeyTypedCallback    = iw::callback<InputState*, InputName, char>;
+}
 }

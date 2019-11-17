@@ -4,7 +4,7 @@
 
 #include "iw/log/logger.h"
 
-namespace IwInput {
+namespace IW {
 	Mouse* Mouse::Create(
 		InputCallback& callback)
 	{

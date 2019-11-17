@@ -59,13 +59,13 @@ inline namespace RenderAPI {
 			size_t stride) override;
 
 		void SetAsMat2(
-			const iwm::matrix2& matrix) override;
+			const iw::matrix2& matrix) override;
 
 		void SetAsMat3(
-			const iwm::matrix3& matrix) override;
+			const iw::matrix3& matrix) override;
 
 		void SetAsMat4(
-			const iwm::matrix4& matrix) override;
+			const iw::matrix4& matrix) override;
 
 		void SetAsTexture(
 			const ITexture* texture) override;

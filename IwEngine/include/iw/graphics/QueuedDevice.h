@@ -8,9 +8,9 @@
 
 namespace IW {
 inline namespace Graphics {
-	using PIB = iwu::potential<IW::IIndexBuffer*>;
-	using PVB = iwu::potential<IW::IVertexBuffer*>;
-	using PVA = iwu::potential<IW::IVertexArray*>;
+	using PIB = iw::potential<IW::IIndexBuffer*>;
+	using PVB = iw::potential<IW::IVertexBuffer*>;
+	using PVA = iw::potential<IW::IVertexArray*>;
 	using VBL = IW::VertexBufferLayout;
 
 	class IWGRAPHICS_API QueuedDevice {
@@ -30,7 +30,7 @@ inline namespace Graphics {
 		};
 
 		std::queue<DeviceOperation> m_queue;
-		iwu::linear_allocator       m_scratch;
+		iw::linear_allocator       m_scratch;
 	public:
 		IW::IDevice& Device;
 
@@ -70,48 +70,48 @@ inline namespace Graphics {
 			PVA vertexArray);
 
 		//Vertex shader
-		iwu::potential<IW::IVertexShader*> CreateVertexShader(
+		iw::potential<IW::IVertexShader*> CreateVertexShader(
 			const char* source);
 
 		void DestroyVertexShader(
-			iwu::potential<IW::IVertexShader*> vertexShader);
+			iw::potential<IW::IVertexShader*> vertexShader);
 
 		//Fragment shader
-		iwu::potential<IW::IFragmentShader*> CreateFragmentShader(
+		iw::potential<IW::IFragmentShader*> CreateFragmentShader(
 			const char* source);
 
 		void DestroyFragmentShader(
-			iwu::potential<IW::IFragmentShader*> fragmentShader);
+			iw::potential<IW::IFragmentShader*> fragmentShader);
 
 		//Geometry shader
-		iwu::potential<IW::IGeometryShader*> CreateGeometryShader(
+		iw::potential<IW::IGeometryShader*> CreateGeometryShader(
 			const char* source);
 
 		void DestroyGeometryShader(
-			iwu::potential<IW::IGeometryShader*> geometryShader);
+			iw::potential<IW::IGeometryShader*> geometryShader);
 
 		//Compute shader
-		iwu::potential<IW::IComputeShader*> CreateComputeShader(
+		iw::potential<IW::IComputeShader*> CreateComputeShader(
 			const char* source);
 
 		void DestroyComputeShader(
-			iwu::potential<IW::IComputeShader*> computeShader);
+			iw::potential<IW::IComputeShader*> computeShader);
 
 		//Shader pipeline
-		iwu::potential<IW::IPipeline*> CreatePipeline(
-			iwu::potential<IW::IVertexShader*>   vertexShader,
-			iwu::potential<IW::IFragmentShader*> fragmentShader,
-			iwu::potential<IW::IGeometryShader*> geometryShader = nullptr);
+		iw::potential<IW::IPipeline*> CreatePipeline(
+			iw::potential<IW::IVertexShader*>   vertexShader,
+			iw::potential<IW::IFragmentShader*> fragmentShader,
+			iw::potential<IW::IGeometryShader*> geometryShader = nullptr);
 
 		void DestroyPipeline(
-			iwu::potential<IW::IPipeline*> pipeline);
+			iw::potential<IW::IPipeline*> pipeline);
 
 		//Compute shader pipeline
-		iwu::potential<IW::IComputePipeline*> CreateComputePipeline(
-			iwu::potential<IW::IComputeShader*> computeShader);
+		iw::potential<IW::IComputePipeline*> CreateComputePipeline(
+			iw::potential<IW::IComputeShader*> computeShader);
 
 		void DestroyComputePipeline(
-			iwu::potential<IW::IComputePipeline*> computePipeline);
+			iw::potential<IW::IComputePipeline*> computePipeline);
 	};
 }
 }

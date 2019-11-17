@@ -5,7 +5,8 @@
 #include <malloc.h>
 #include <vector>
 
-namespace iwutil {
+namespace iw {
+inline namespace util {
 	class IWUTIL_API pool_allocator {
 	public:
 		class IWUTIL_API page {
@@ -85,4 +86,5 @@ namespace iwutil {
 			return m_pageSize / m_itemSize;
 		}
 	};
+}
 }

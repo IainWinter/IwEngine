@@ -8,7 +8,8 @@
 #include "iw/log/logger.h"
 #include <vector>
 
-namespace IwInput {
+namespace IW {
+inline namespace Input {
 	class IWINPUT_API DeviceManager {
 	private:
 		struct{
@@ -45,4 +46,5 @@ namespace IwInput {
 			InputCallback callback);
 #endif
 	};
+}
 }

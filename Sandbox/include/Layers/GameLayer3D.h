@@ -3,22 +3,22 @@
 #include "iw/engine/Layer.h"
 
 class GameLayer3D
-	: public IwEngine::Layer
+	: public IW::Layer
 {
 private:
-	iwm::vector3 lightPositions[4];
-	iwm::vector3 lightColors[4];
+	iw::vector3 lightPositions[4];
+	iw::vector3 lightColors[4];
 
-	iwu::ref<IW::Material> material;
+	iw::ref<IW::Material> material;
 
 public:
 	GameLayer3D(
-		IwEntity::Space& space,
+		IW::Space& space,
 		IW::Renderer& renderer,
 		IW::AssetManager& asset);
 
 	int Initialize(
-		IwEngine::InitOptions& options) override;
+		IW::InitOptions& options) override;
 
 	void PostUpdate() override;
 	void ImGui() override;

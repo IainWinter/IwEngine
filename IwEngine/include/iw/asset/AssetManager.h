@@ -16,7 +16,7 @@ namespace IW {
 		class AssetManager {
 		private:
 			std::unordered_map<size_t, IAssetLoader*> m_loaders;
-			iwu::blocking_queue<std::pair<size_t, std::string>> m_toLoad;
+			iw::blocking_queue<std::pair<size_t, std::string>> m_toLoad;
 			std::vector<std::thread> m_threads;
 
 			void Worker() {
@@ -59,7 +59,7 @@ namespace IW {
 
 			template<
 				typename _a>
-			iwu::ref<_a> Load(
+			iw::ref<_a> Load(
 				std::string filepath)
 			{
 				auto itr = m_loaders.find(typeid(_a).hash_code());
@@ -67,12 +67,12 @@ namespace IW {
 					return std::static_pointer_cast<_a, void>(itr->second->Load("assets/" + filepath));
 				}
 
-				return iwu::ref<_a>(nullptr);
+				return iw::ref<_a>(nullptr);
 			}
 
 			template<
 				typename _a>
-			iwu::ref<_a> Give(
+			iw::ref<_a> Give(
 				std::string name,
 				_a* asset)
 			{
@@ -81,7 +81,7 @@ namespace IW {
 					return std::static_pointer_cast<_a, void>(itr->second->Give(name, asset));
 				}
 
-				return iwu::ref<_a>(nullptr);
+				return iw::ref<_a>(nullptr);
 			}
 		};
 	}

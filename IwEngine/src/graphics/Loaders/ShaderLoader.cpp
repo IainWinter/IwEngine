@@ -10,7 +10,7 @@ namespace IW {
 	Shader* ShaderLoader::LoadAsset(
 		std::string filepath)
 	{
-		std::string source = iwu::ReadFile(filepath);
+		std::string source = iw::ReadFile(filepath);
 
 		Shader* shader = new Shader();
 

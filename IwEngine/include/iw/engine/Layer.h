@@ -9,19 +9,19 @@
 #include "iw/entity/Space.h"
 #include "iw/graphics/Renderer.h"
 
-namespace IwEngine {
+namespace IW {
 	class IWENGINE_API Layer {
 	private:
 		const char* m_name;
 		std::vector<ISystem*> m_systems; // layer doesnt own systems but prolly should
 	protected:
-		IwEntity::Space&  Space;
+		IW::Space&  Space;
 		IW::Renderer&     Renderer;
 		IW::AssetManager& Asset;
 
 	public:
 		Layer(
-			IwEntity::Space& space,
+			IW::Space& space,
 			IW::Renderer& renderer,
 			IW::AssetManager& asset,
 			const char* name);

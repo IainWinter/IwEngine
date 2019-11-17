@@ -6,12 +6,12 @@
 #include <assert.h>
 #include <memory>
 
-namespace IwEntity {
-	iwu::ref<Component>& ComponentManager::RegisterComponent(
+namespace IW {
+	iw::ref<Component>& ComponentManager::RegisterComponent(
 		ComponentType type,
 		size_t size)
 	{
-		iwu::ref<Component>& component = m_components[type];
+		iw::ref<Component>& component = m_components[type];
 		if (!component) {
 			component = std::make_shared<Component>();
 			component->Type = type.hash_code();
@@ -22,7 +22,7 @@ namespace IwEntity {
 		return component;
 	}
 
-	iwu::ref<Component> ComponentManager::GetComponent(
+	iw::ref<Component> ComponentManager::GetComponent(
 		ComponentType type)
 	{
 		auto itr = m_components.find(type);
@@ -30,25 +30,25 @@ namespace IwEntity {
 			return itr->second;
 		}
 
-		return iwu::ref<Component>(nullptr);
+		return iw::ref<Component>(nullptr);
 	}
 
 	size_t ComponentManager::ReserveEntityComponents(
-		const iwu::ref<EntityData>& entityData)
+		const iw::ref<EntityData>& entityData)
 	{
 		ChunkList& list = FindOrCreateChunkList(entityData->Archetype);
 		return list.ReserveComponents(entityData->Entity);
 	}
 
 	bool ComponentManager::ReinstateEntityComponents(
-		const iwu::ref<EntityData>& entityData)
+		const iw::ref<EntityData>& entityData)
 	{
 		ChunkList& list = FindOrCreateChunkList(entityData->Archetype);
 		return list.ReinstateComponents(entityData);
 	}
 
 	bool ComponentManager::DestroyEntityComponents( //todo: find way to get archetype to this function
-		const iwu::ref<EntityData>& entityData)
+		const iw::ref<EntityData>& entityData)
 	{
 		ChunkList* list = FindChunkList(entityData->Archetype);
 		if (list) {
@@ -59,8 +59,8 @@ namespace IwEntity {
 	}
 
 	void* ComponentManager::GetComponentData(
-		const iwu::ref<EntityData>& entityData,
-		const iwu::ref<Component>& component)
+		const iw::ref<EntityData>& entityData,
+		const iw::ref<Component>& component)
 	{
 		ChunkList* list = FindChunkList(entityData->Archetype);
 		if (list) {
@@ -71,8 +71,8 @@ namespace IwEntity {
 	}
 
 	EntityComponentArray ComponentManager::Query(
-		const iwu::ref<ComponentQuery>& components,
-		const iwu::ref<ArchetypeQuery>& query)
+		const iw::ref<ComponentQuery>& components,
+		const iw::ref<ArchetypeQuery>& query)
 	{
 		std::vector<ChunkList::iterator>  begins;
 		std::vector<ChunkList::iterator>  ends;
@@ -92,7 +92,7 @@ namespace IwEntity {
 	}
 
 	ChunkList* ComponentManager::FindChunkList(
-		const iwu::ref<Archetype>& archetype)
+		const iw::ref<Archetype>& archetype)
 	{
 		auto itr = m_componentData.find(archetype->Hash);
 		if (itr == m_componentData.end()) {
@@ -103,7 +103,7 @@ namespace IwEntity {
 	}
 
 	ChunkList& ComponentManager::FindOrCreateChunkList(
-		const iwu::ref<Archetype>& archetype)
+		const iw::ref<Archetype>& archetype)
 	{
 		auto itr = m_componentData.find(archetype->Hash);
 		if (itr == m_componentData.end()) {

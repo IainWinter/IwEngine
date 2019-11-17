@@ -1,13 +1,13 @@
 #include "iw/engine/Time.h"
 #include "iw/log/logger.h"
 
-namespace IwEngine {
+namespace IW {
 	namespace Time {
-		static Time     now       = std::chrono::high_resolution_clock::now();
-		static Duration deltaTime = Duration::zero();
-		static size_t ticks        = 0;
-		static float  time         = 0.0f;
-		static float  fixedTime    = 0.2f;
+		static TimePoint now       = std::chrono::high_resolution_clock::now();
+		static Duration  deltaTime = Duration::zero();
+		static size_t    ticks     = 0;
+		static float     time      = 0.0f;
+		static float     fixedTime = 0.2f;
 
 		void SetFixedTime(
 			float duration) 
@@ -16,7 +16,7 @@ namespace IwEngine {
 			LOG_DEBUG << "Set fixed timeset to " << duration << " seconds";
 		}
 
-		void Update() {
+		void UpdateTime() {
 			ticks++;
 			time += DeltaTime();
 			deltaTime = std::chrono::high_resolution_clock::now() - now;

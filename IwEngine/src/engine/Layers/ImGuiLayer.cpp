@@ -4,9 +4,9 @@
 #include "OpenGL/imgui_impl_opengl3.h"
 #include "iw/engine/Time.h"
 
-namespace IwEngine {
+namespace IW {
 	ImGuiLayer::ImGuiLayer(
-		IwEntity::Space& space,
+		IW::Space& space,
 		IW::Renderer& renderer,
 		IW::AssetManager& asset)
 		: Layer(space, renderer, asset, "ImGui")
@@ -89,7 +89,7 @@ namespace IwEngine {
 		auto& io = ImGui::GetIO();
 
 		if (io.WantCaptureMouse) {
-			io.MouseDown[event.Button - IwInput::MOUSE_L_BUTTON] = event.State;
+			io.MouseDown[event.Button - IW::MOUSE_L_BUTTON] = event.State;
 			return true;
 		}
 

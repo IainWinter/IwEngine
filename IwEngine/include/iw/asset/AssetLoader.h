@@ -16,7 +16,7 @@ inline namespace Asset {
 		: public IAssetLoader
 	{
 	private:
-		std::unordered_map<std::string, iwu::ref<_a>> m_loaded;
+		std::unordered_map<std::string, iw::ref<_a>> m_loaded;
 	protected:
 		AssetManager& m_asset;
 
@@ -39,7 +39,7 @@ inline namespace Asset {
 			}
 		}
 
-		iwu::ref<void> Load(
+		iw::ref<void> Load(
 			std::string filepath) override
 		{
 			_a* asset;
@@ -61,7 +61,7 @@ inline namespace Asset {
 			return m_loaded.at(filepath);
 		}
 
-		iwu::ref<void> Give(
+		iw::ref<void> Give(
 			std::string name,
 			void* asset)
 		{
@@ -69,14 +69,14 @@ inline namespace Asset {
 			assert(buf);
 
 			new (buf) _a(std::forward<_a>(*(_a*)asset));
-			m_loaded[name] = iwu::ref<_a>(buf);
+			m_loaded[name] = iw::ref<_a>(buf);
 
 			return m_loaded.at(name);
 
 		}
 
 		virtual void Release(
-			iwu::ref<_a> resource)
+			iw::ref<_a> resource)
 		{
 			for (auto it = m_loaded.begin(); it != m_loaded.end(); it++) {
 				if (it->second == resource) {

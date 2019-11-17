@@ -1,6 +1,6 @@
 #include "iw/input/ContextManager.h"
 
-namespace IwInput {
+namespace IW {
 	void ContextManager::CreateContext(
 		unsigned int windowId,
 		float width,

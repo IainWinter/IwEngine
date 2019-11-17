@@ -3,7 +3,8 @@
 #include "iw/events/event.h"
 #include <vector>
 
-namespace IwEngine {
+namespace IW {
+inline namespace Engine {
 	// T needs to have a 'const char* Name()' function
 	// and bool 'On(Event&)' functions for every event
 	template<
@@ -92,4 +93,5 @@ namespace IwEngine {
 			return m_items.end();
 		}
 	};
+}
 }

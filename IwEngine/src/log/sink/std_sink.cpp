@@ -1,7 +1,7 @@
 #include "iw/log/sink/std_sink.h"
 #include <iostream>
 
-namespace iwlog {
+namespace iw {
 	stdout_sink::stdout_sink(
 		loglevel level)
 		: sink(level)

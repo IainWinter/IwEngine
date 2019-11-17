@@ -1,5 +1,5 @@
 #include "iw/util/algorithm/binary_search.h"
 
-namespace iwutil {
+namespace iw {
 
 }

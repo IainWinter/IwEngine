@@ -4,7 +4,8 @@
 #include "iw/input/InputState.h"
 #include <Windows.h>
 
-namespace IwEngine {
+namespace IW {
+inline namespace Engine {
 	class WindowsWindow
 		: public Window
 	{
@@ -32,7 +33,7 @@ namespace IwEngine {
 			iw::eventbus& bus) override;
 
 		void SetInputManager(
-			IwInput::InputManager& manager) override;
+			IW::InputManager& manager) override;
 
 		void SetState(
 			DisplayState state) override;
@@ -53,29 +54,30 @@ namespace IwEngine {
 			LPARAM lparam);
 
 		void HandleMouseWheel(
-			IwInput::InputState* inputState,
+			IW::InputState* inputState,
 			float delta);
 
 		void HandleMouseMoved(
-			IwInput::InputState* inputState,
+			IW::InputState* inputState,
 			float X,
 			float Y,
 			float deltaX,
 			float deltaY);
 
 		void HandleMouseButton(
-			IwInput::InputState* inputState,
-			IwInput::InputName button,
+			IW::InputState* inputState,
+			IW::InputName button,
 			bool down);
 
 		void HandleKey(
-			IwInput::InputState* inputState,
-			IwInput::InputName key,
+			IW::InputState* inputState,
+			IW::InputName key,
 			bool down);
 
 		void HandleKeyTyped(
-			IwInput::InputState* inputState,
-			IwInput::InputName key,
+			IW::InputState* inputState,
+			IW::InputName key,
 			char character);
 	};
+}
 }
