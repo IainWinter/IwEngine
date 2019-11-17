@@ -3,7 +3,8 @@
 #include "sink.h"
 #include <fstream>
 
-namespace iwlog {
+namespace iw {
+inline namespace log {
 	class IWLOG_API file_sink final
 		: public sink
 	{
@@ -22,4 +23,5 @@ namespace iwlog {
 
 		void flush();
 	};
+}
 }

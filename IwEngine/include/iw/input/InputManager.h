@@ -5,7 +5,8 @@
 #include "Events/InputEvent.h"
 #include "iw/events/callback.h"
 
-namespace IwInput {
+namespace IW {
+inline namespace Input {
 	class IWINPUT_API InputManager {
 	private:
 		DeviceManager  m_deviceManager;
@@ -70,4 +71,5 @@ namespace IwInput {
 			unsigned int windowId,
 			KeyTypedCallback callback);
 	};
+}
 }

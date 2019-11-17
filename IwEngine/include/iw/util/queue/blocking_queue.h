@@ -4,7 +4,8 @@
 #include <mutex>
 #include <queue>
 
-namespace iwutil {
+namespace iw {
+inline namespace util {
 	/**
 	* @brief Super simple blocking queue.
 	*
@@ -63,4 +64,5 @@ namespace iwutil {
 			return m_queue.empty(); // not sure if this is thread safe?
 		}
 	};
+}
 }

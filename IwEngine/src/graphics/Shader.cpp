@@ -24,7 +24,7 @@ namespace IW {
 	}
 
 	void Shader::Initialize(
-		const iwu::ref<IDevice>& device)
+		const iw::ref<IDevice>& device)
 	{
 		IVertexShader* vertex = nullptr;
 		IGeometryShader* geometry = nullptr;
@@ -39,7 +39,7 @@ namespace IW {
 			}
 		}
 
-		Handle = iwu::ref<IPipeline>(device->CreatePipeline(vertex, fragment, geometry));
+		Handle = iw::ref<IPipeline>(device->CreatePipeline(vertex, fragment, geometry));
 	}
 }
 

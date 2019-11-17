@@ -10,17 +10,18 @@
 #include <vector>
 #include <assert.h>
 
-namespace IwEntity {
+namespace IW {
+inline namespace ECS {
 	class ChunkList {
 	public:
 		class iterator {
 		private:
 			Chunk* m_chunk;
 			size_t m_index;
-			iwu::ref<Archetype> m_archetype;
-			iwu::ref<ComponentDataIndices> m_indices;
+			iw::ref<Archetype> m_archetype;
+			iw::ref<ComponentDataIndices> m_indices;
 
-			iwu::ref<ComponentData> m_data;
+			iw::ref<ComponentData> m_data;
 
 		public:
 			IWENTITY_API iterator& operator++();
@@ -38,8 +39,8 @@ namespace IwEntity {
 			iterator(
 				Chunk* chunk,
 				size_t index,
-				const iwu::ref<Archetype>& archetype,
-				const iwu::ref<ComponentQuery>& query);
+				const iw::ref<Archetype>& archetype,
+				const iw::ref<ComponentQuery>& query);
 		};
 	private:
 		Chunk* m_root;
@@ -47,33 +48,33 @@ namespace IwEntity {
 		size_t m_count;
 		size_t m_chunkCount;
 
-		iwu::ref<Archetype> m_archetype;
+		iw::ref<Archetype> m_archetype;
 		const size_t m_chunkSize;
 		const size_t m_chunkCapacity;
 
 	public:
 		IWENTITY_API ChunkList(
-			const iwu::ref<Archetype>& archetype,
+			const iw::ref<Archetype>& archetype,
 			size_t chunkSize);
 
 		IWENTITY_API size_t ReserveComponents(
 			const Entity& entity);
 
 		IWENTITY_API bool ReinstateComponents(
-			const iwu::ref<EntityData>& entityData);
+			const iw::ref<EntityData>& entityData);
 
 		IWENTITY_API bool FreeComponents(
 			size_t index);
 
 		IWENTITY_API void* GetComponentData(
-			const iwu::ref<Component>& component,
+			const iw::ref<Component>& component,
 			size_t index);
 
 		IWENTITY_API iterator Begin(
-			const iwu::ref<ComponentQuery>& query);
+			const iw::ref<ComponentQuery>& query);
 
 		IWENTITY_API iterator End(
-			const iwu::ref<ComponentQuery>& query);
+			const iw::ref<ComponentQuery>& query);
 	private:
 		Chunk* FindChunk(
 			size_t index);
@@ -83,7 +84,7 @@ namespace IwEntity {
 		Chunk& FindOrCreateChunk();
 
 		size_t GetChunkCapacity(
-			const iwu::ref<Archetype>& archetype);
+			const iw::ref<Archetype>& archetype);
 
 		inline bool ChunkIsFull(
 			const Chunk* chunk)
@@ -91,4 +92,5 @@ namespace IwEntity {
 			return chunk->CurrentIndex == m_chunkCapacity;
 		}
 	};
+}
 }

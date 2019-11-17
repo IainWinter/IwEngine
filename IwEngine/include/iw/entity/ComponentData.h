@@ -2,7 +2,8 @@
 
 #include "IwEntity.h"
 
-namespace IwEntity {
+namespace IW {
+inline namespace ECS {
 	struct ComponentData {
 		void* Components[];
 
@@ -23,4 +24,5 @@ namespace IwEntity {
 		size_t Count;
 		size_t Indices[];
 	};
+}
 }

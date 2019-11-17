@@ -2,7 +2,8 @@
 
 #include "async_sink.h"
 
-namespace iwlog {
+namespace iw {
+inline namespace log {
 	class IWLOG_API async_stdout_sink final
 		: public async_sink
 	{
@@ -28,4 +29,5 @@ namespace iwlog {
 
 		void flush() override;
 	};
+}
 }

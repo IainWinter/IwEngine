@@ -1,12 +1,12 @@
 #include "iw/entity/ArchetypeManager.h"
 #include <assert.h>
 
-namespace IwEntity {
-	iwu::ref<Archetype>& ArchetypeManager::CreateArchetype(
-		std::initializer_list<iwu::ref<Component>> components)
+namespace IW {
+	iw::ref<Archetype>& ArchetypeManager::CreateArchetype(
+		std::initializer_list<iw::ref<Component>> components)
 	{
 		size_t hash = Component::Hash(components);
-		iwu::ref<Archetype>& archetype = m_hashed[hash];
+		iw::ref<Archetype>& archetype = m_hashed[hash];
 		if (!archetype) {
 			size_t bufSize = sizeof(Archetype)
 				+ sizeof(ArchetypeLayout)
@@ -16,7 +16,7 @@ namespace IwEntity {
 			assert(buf);
 			memset(buf, 0, bufSize);
 
-			archetype = iwu::ref<Archetype>(buf, free);
+			archetype = iw::ref<Archetype>(buf, free);
 			m_archetypes.push_back(archetype);
 
 			size_t totalSize = 0;
@@ -45,8 +45,8 @@ namespace IwEntity {
 		return archetype;
 	}
 
-	iwu::ref<ArchetypeQuery> ArchetypeManager::MakeQuery(
-		const iwu::ref<ComponentQuery>& query)
+	iw::ref<ArchetypeQuery> ArchetypeManager::MakeQuery(
+		const iw::ref<ComponentQuery>& query)
 	{
 		std::vector<size_t> matches;
 		for (auto& archetype : m_archetypes) {
@@ -120,6 +120,6 @@ namespace IwEntity {
 			buf->Hashes[i] = matches[i];
 		}
 
-		return iwu::ref<ArchetypeQuery>(buf, free);
+		return iw::ref<ArchetypeQuery>(buf, free);
 	}
 }

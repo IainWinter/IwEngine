@@ -6,7 +6,8 @@
 #include "EntityManager.h"
 #include "iw/log/logger.h"
 
-namespace IwEntity {
+namespace IW {
+inline namespace ECS {
 	class IWENTITY_API Space {
 	private:
 		ComponentManager m_componentManager;
@@ -18,42 +19,42 @@ namespace IwEntity {
 
 		template<
 			typename _c>
-		iwu::ref<Component>& RegisterComponent() {
+		iw::ref<Component>& RegisterComponent() {
 			return RegisterComponent(typeid(_c), sizeof(_c));
 		}
 
-		iwu::ref<Component>& RegisterComponent(
+		iw::ref<Component>& RegisterComponent(
 			ComponentType type,
 			size_t size);
 
 		template<
 			typename _c>
-		iwu::ref<Component> GetComponent() {
+		iw::ref<Component> GetComponent() {
 			return GetComponent(typeid(_c));
 		}
 
-		iwu::ref<Component> GetComponent(
+		iw::ref<Component> GetComponent(
 			ComponentType type);
 
 		template<
 			typename... _cs>
-		iwu::ref<ComponentQuery> MakeQuery() {
+		iw::ref<ComponentQuery> MakeQuery() {
 			return MakeQuery({ RegisterComponent<_cs>()... });
 		}
 
-		iwu::ref<ComponentQuery> MakeQuery(
-			std::initializer_list<iwu::ref<Component>> components);
+		iw::ref<ComponentQuery> MakeQuery(
+			std::initializer_list<iw::ref<Component>> components);
 
 		// Archetypes
 
 		template<
 			typename... _cs>
-		iwu::ref<Archetype>& CreateArchetype() {
+		iw::ref<Archetype>& CreateArchetype() {
 			return CreateArchetype({ RegisterComponent<_cs>()... });
 		}
 
-		iwu::ref<Archetype>& CreateArchetype(
-			std::initializer_list<iwu::ref<Component>> components);
+		iw::ref<Archetype>& CreateArchetype(
+			std::initializer_list<iw::ref<Component>> components);
 
 		// Entities
 
@@ -64,7 +65,7 @@ namespace IwEntity {
 		}
 
 		Entity CreateEntity(
-			const iwu::ref<Archetype>& archetype);
+			const iw::ref<Archetype>& archetype);
 
 		bool DestroyEntity(
 			size_t index); // don't like this but idk how to delete from the iteration if not doing it like this
@@ -76,8 +77,8 @@ namespace IwEntity {
 			const Entity& entity,
 			_args&&... args)
 		{
-			iwu::ref<EntityData>& entityData = m_entityManager.GetEntityData(entity.Index);
-			iwu::ref<Component>   component  = m_componentManager.GetComponent(typeid(_c));
+			iw::ref<EntityData>& entityData = m_entityManager.GetEntityData(entity.Index);
+			iw::ref<Component>   component  = m_componentManager.GetComponent(typeid(_c));
 
 			if (component) {
 				_c* data = (_c*)m_componentManager.GetComponentData(entityData, component);
@@ -112,6 +113,7 @@ namespace IwEntity {
 		}
 
 		EntityComponentArray Query(
-			const iwu::ref<ComponentQuery>& query);
+			const iw::ref<ComponentQuery>& query);
 	};
+}
 }

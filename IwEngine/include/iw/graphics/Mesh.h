@@ -15,12 +15,12 @@ inline namespace Graphics {
 	//    , but idk how bad that actually is cus I like the idea more...
 
 	struct IWGRAPHICS_API Mesh {
-		iwm::vector3* Vertices; // should combine
-		iwm::vector3* Normals;
-		iwm::vector3* Tangents;
-		iwm::vector3* BiTangents;
-		iwm::vector4* Colors;
-		iwm::vector2* Uvs;
+		iw::vector3* Vertices; // should combine
+		iw::vector3* Normals;
+		iw::vector3* Tangents;
+		iw::vector3* BiTangents;
+		iw::vector4* Colors;
+		iw::vector2* Uvs;
 		unsigned int* Indices;
 
 		size_t VertexCount;
@@ -29,7 +29,7 @@ inline namespace Graphics {
 		Bone* Bones;
 		size_t BoneCount;
 
-		iwu::ref<Material> Material;
+		iw::ref<Material> Material;
 
 		IW::MeshTopology Topology;
 
@@ -50,27 +50,27 @@ inline namespace Graphics {
 
 		void SetVertices(
 			size_t count,
-			iwm::vector3* vertices);
+			iw::vector3* vertices);
 
 		void SetNormals(
 			size_t count,
-			iwm::vector3* normals);
+			iw::vector3* normals);
 
 		void SetTangents(
 			size_t count,
-			iwm::vector3* tangents);
+			iw::vector3* tangents);
 
 		void SetBiTangents(
 			size_t count,
-			iwm::vector3* bitangents);
+			iw::vector3* bitangents);
 
 		void SetColors(
 			size_t count,
-			iwm::vector4* colors);
+			iw::vector4* colors);
 
 		void SetUVs(
 			size_t count,
-			iwm::vector2* uvs);
+			iw::vector2* uvs);
 
 		void SetIndices(
 			size_t count,
@@ -81,7 +81,7 @@ inline namespace Graphics {
 		void GenTangents(); 
 
 		inline void SetMaterial(
-			iwu::ref<IW::Material>& material)
+			iw::ref<IW::Material>& material)
 		{
 			Material = material;
 		}
@@ -91,16 +91,16 @@ inline namespace Graphics {
 		}
 
 		void Initialize(
-			const iwu::ref<IW::IDevice>& device);
+			const iw::ref<IW::IDevice>& device);
 
 		void Update(
-			const iwu::ref<IW::IDevice>& device);
+			const iw::ref<IW::IDevice>& device);
 
 		void Destroy(
-			const iwu::ref<IW::IDevice>& device);
+			const iw::ref<IW::IDevice>& device);
 
 		void Draw(
-			const iwu::ref<IW::IDevice>& device) const;
+			const iw::ref<IW::IDevice>& device) const;
 	};
 }
 }

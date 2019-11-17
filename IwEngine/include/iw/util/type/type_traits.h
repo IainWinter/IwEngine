@@ -3,7 +3,8 @@
 #include "iw/util/iwutil.h"
 #include <stdint.h>
 
-namespace iwutil {
+namespace iw {
+inline namespace util {
 	template<typename>
 	struct type_traits;
 
@@ -46,4 +47,5 @@ namespace iwutil {
 	struct type_traits<int64_t> {
 		using difference_type = int64_t;
 	};
+}
 }

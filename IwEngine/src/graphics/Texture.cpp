@@ -34,7 +34,7 @@ namespace IW {
 	}
 
 	void Texture::Initialize(
-		const iwu::ref<IDevice>& device)
+		const iw::ref<IDevice>& device)
 	{
 		Handle = device->CreateTexture(Width, Height, Format, FormatType, Colors);
 	}

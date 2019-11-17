@@ -2,7 +2,8 @@
 
 #include "iw/util/iwutil.h"
 
-namespace iwutil {
+namespace iw {
+inline namespace util {
 	class iaction {
 	public:
 		virtual ~iaction() {}
@@ -71,4 +72,5 @@ namespace iwutil {
 			m_action(member.m_args());
 		}
 	};
+}
 }

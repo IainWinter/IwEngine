@@ -3,7 +3,8 @@
 #include "iw/util/iwutil.h"
 #include <cstddef>
 
-namespace iwutil {
+namespace iw {
+inline namespace util {
 	class IWUTIL_API linear_allocator {
 	private:
 		void*  m_memory;
@@ -30,7 +31,11 @@ namespace iwutil {
 			size_t size,
 			size_t alignment = 0);
 
+		void resize(
+			size_t size);
+
 		void reset();
+
 
 		inline size_t peak() {
 			return m_peak;
@@ -44,4 +49,5 @@ namespace iwutil {
 			return m_capacity;
 		}
 	};
+}
 }

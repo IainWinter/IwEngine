@@ -3,21 +3,21 @@
 
 namespace IW {
 	Renderer::Renderer(
-		const iwu::ref<IW::IDevice>& device)
+		const iw::ref<IW::IDevice>& device)
 		: Device(device)
 	{
-		iwm::vector3 pos[4] = {
-			iwm::vector3(-1,  1, 0),
-			iwm::vector3(-1, -1, 0),
-			iwm::vector3( 1, -1, 0),
-			iwm::vector3( 1,  1, 0),
+		iw::vector3 pos[4] = {
+			iw::vector3(-1,  1, 0),
+			iw::vector3(-1, -1, 0),
+			iw::vector3( 1, -1, 0),
+			iw::vector3( 1,  1, 0),
 		};
 
-		iwm::vector2 uvs[4] = {
-			iwm::vector2(1, 0),
-			iwm::vector2(1, 1),
-			iwm::vector2(0, 1),
-			iwm::vector2(0, 0)
+		iw::vector2 uvs[4] = {
+			iw::vector2(1, 0),
+			iw::vector2(1, 1),
+			iw::vector2(0, 1),
+			iw::vector2(0, 0)
 		};
 
 		unsigned int tris[6] = {
@@ -88,7 +88,7 @@ namespace IW {
 	}
 
 	void Renderer::ApplyFilter(
-		iwu::ref<IW::IPipeline>& pipeline,
+		iw::ref<IW::IPipeline>& pipeline,
 		IW::RenderTarget* source,
 		IW::RenderTarget* dest)
 	{

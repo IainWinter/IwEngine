@@ -157,19 +157,19 @@ namespace IW {
 	}
 
 	void GLPipelineParam::SetAsMat2(
-		const iwm::matrix2& matrix)
+		const iw::matrix2& matrix)
 	{
 		glUniformMatrix2fv(m_location, 1, GL_FALSE, matrix.elements);
 	}
 
 	void GLPipelineParam::SetAsMat3(
-		const iwm::matrix3& matrix)
+		const iw::matrix3& matrix)
 	{
 		glUniformMatrix3fv(m_location, 1, GL_FALSE, matrix.elements);
 	}
 
 	void GLPipelineParam::SetAsMat4(
-		const iwm::matrix4& matrix)
+		const iw::matrix4& matrix)
 	{
 		glUniformMatrix4fv(m_location, 1, GL_FALSE, matrix.elements);
 	}

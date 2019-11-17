@@ -3,7 +3,7 @@
 #include "iw/log/logger.h"
 #include <Windows.h>
 
-namespace IwInput {
+namespace IW {
 	unsigned int WindowsRawMouse::maskdown[5] = {
 		RI_MOUSE_LEFT_BUTTON_DOWN,
 		RI_MOUSE_RIGHT_BUTTON_DOWN,

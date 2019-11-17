@@ -1,10 +1,10 @@
 #include "iw/entity/EntityManager.h"
 #include <assert.h>
 
-namespace IwEntity {
-	iwu::ref<EntityData>& EntityManager::CreateEntity() {
+namespace IW {
+	iw::ref<EntityData>& EntityManager::CreateEntity() {
 		if (!m_dead.empty()) {
-			iwu::ref<EntityData>& dead = m_entities.at(m_dead.top());
+			iw::ref<EntityData>& dead = m_entities.at(m_dead.top());
 			m_dead.pop();
 
 			dead->Entity.Alive = true;
@@ -31,7 +31,7 @@ namespace IwEntity {
 	bool EntityManager::DestroyEntity(
 		size_t index)
 	{
-		iwu::ref<EntityData>& dead = m_entities.at(index);
+		iw::ref<EntityData>& dead = m_entities.at(index);
 		if (dead->Entity.Alive) {
 			dead->Entity.Alive = false;
 			//dead->Archetype.reset();
@@ -46,7 +46,7 @@ namespace IwEntity {
 			//}
 
 			//else {
-			//	iwu::ref<Entity2>& back = m_entities.back();
+			//	iw::ref<Entity2>& back = m_entities.back();
 			//	
 			//	back->Index = dead->Index;
 			//	m_entities.at(entityIndex) = back;
@@ -62,7 +62,7 @@ namespace IwEntity {
 		return false;
 	}
 
-	iwu::ref<EntityData>& EntityManager::GetEntityData(
+	iw::ref<EntityData>& EntityManager::GetEntityData(
 		size_t index)
 	{
 		return m_entities.at(index);

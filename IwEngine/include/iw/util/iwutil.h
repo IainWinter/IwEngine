@@ -7,6 +7,3 @@
 #		define IWUTIL_API __declspec(dllimport)
 #	endif
 #endif
-
-namespace iwu {}
-#define iwutil iwu

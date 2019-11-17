@@ -2,7 +2,7 @@
 
 #include "iw/util/iwutil.h"
 
-namespace iwutil {
+namespace iw {
 	size_t calc_padding(
 		size_t address,
 		size_t alignment)

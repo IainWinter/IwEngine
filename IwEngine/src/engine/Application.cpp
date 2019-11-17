@@ -11,7 +11,7 @@
 #include "iw/graphics/Loaders/ShaderLoader.h"
 #include <atomic>
 
-namespace IwEngine {
+namespace IW {
 	Application::Application()
 		: m_running(false)
 		, m_window(IWindow::Create())
@@ -36,13 +36,13 @@ namespace IwEngine {
 	{
 		// Time
 
-		Time::Update();
+		Time::UpdateTime();
 
 		// Logging
 
-		LOG_SINK(iwlog::async_stdout_sink, iwlog::INFO);
-		LOG_SINK(iwlog::async_stderr_sink, iwlog::ERR);
-		LOG_SINK(iwlog::file_sink,         iwlog::DEBUG, "sandbox.log");
+		LOG_SINK(iw::async_stdout_sink, iw::INFO);
+		LOG_SINK(iw::async_stderr_sink, iw::ERR);
+		LOG_SINK(iw::file_sink,         iw::DEBUG, "sandbox.log");
 
 		// Events
 
@@ -85,7 +85,7 @@ namespace IwEngine {
 
 		// Time again!
 
-		Time::Update();
+		Time::UpdateTime();
 		Time::SetFixedTime(1 / 60.0f);
 
 		return 0;
@@ -130,7 +130,7 @@ namespace IwEngine {
 
 	void Application::Update() {
 		// Update time (Sync)
-		Time::Update();
+		Time::UpdateTime();
 
 		Renderer.Begin();
 
@@ -195,27 +195,29 @@ namespace IwEngine {
 		iw::event& e)
 	{
 		bool error = false;
-		if (e.Category == IW::INPUT) {
+		if (e.Category == IW::WINDOW) {
 			switch (e.Type) {
-				case IW::MouseWheel:  DispatchEvent((IW::MouseWheelEvent&)e);  break;
-				case IW::MouseMoved:  DispatchEvent((IW::MouseMovedEvent&)e);  break;
-				case IW::MouseButton: DispatchEvent((IW::MouseButtonEvent&)e); break;
-				case IW::Key:    	  DispatchEvent((IW::KeyEvent&)e);         break;
-				case IW::KeyTyped:    DispatchEvent((IW::KeyTypedEvent&)e);    break;
-				default: error = true;
-			}
-		}
-
-		else if (e.Category == IW::WINDOW) {
-			switch (e.Type) {
-				case IW::Resized: DispatchEvent((IW::WindowResizedEvent&)e); break;
-				case IW::Closed:  m_running = false;                         break;
-				default: error = true;
+				case IW::Closed: {
+					m_running = false;
+					e.Handled = true;
+					break;
+				}
+				case IW::Resized: {
+					Renderer.Width  = e.as<IW::WindowResizedEvent>().Width;
+					Renderer.Height = e.as<IW::WindowResizedEvent>().Height;
+					e.Handled = true;
+					break;
+				}
+				default: error = true; break;
 			}
 		}
 
 		if (error) {
-			LOG_WARNING << "Application mishandled event " + e.Type; // logs ppipction
+			LOG_WARNING << "Application mishandled event " + e.Type << "!";
+		}
+
+		else {
+			m_layers.DispatchEvent(e);
 		}
 	}
 }

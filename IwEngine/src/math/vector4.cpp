@@ -3,7 +3,7 @@
 #include "iw/math/matrix4.h"
 #include <cmath>
 
-namespace iwmath {
+namespace iw {
 	const vector4 vector4::zero   = vector4(0, 0, 0, 0);
 	const vector4 vector4::one    = vector4(1, 1, 1, 1);
 	const vector4 vector4::unit_x = vector4(1, 0, 0, 0);
@@ -135,7 +135,7 @@ namespace iwmath {
 		this->z = z;
 	}
 
-	float& iwmath::vector4::operator[](
+	float& iw::vector4::operator[](
 		size_t index)
 	{
 		if (index == 0) return x;
@@ -244,7 +244,7 @@ namespace iwmath {
 	vector4 vector4::operator*(
 		const matrix4& mat) const
 	{
-		return iwm::vector4(
+		return iw::vector4(
 			x * mat(0, 0) + y * mat(1, 0) + z * mat(2, 0) + w * mat(3, 0),
 			x * mat(0, 1) + y * mat(1, 1) + z * mat(2, 1) + w * mat(3, 1),
 			x * mat(0, 2) + y * mat(1, 2) + z * mat(2, 2) + w * mat(3, 2),
@@ -254,7 +254,7 @@ namespace iwmath {
 	vector4& vector4::operator*=(
 		const matrix4& mat)
 	{
-		return *this = iwm::vector4(
+		return *this = iw::vector4(
 			x * mat(0, 0) + y * mat(1, 0) + z * mat(2, 0) + w * mat(3, 0),
 			x * mat(0, 1) + y * mat(1, 1) + z * mat(2, 1) + w * mat(3, 1),
 			x * mat(0, 2) + y * mat(1, 2) + z * mat(2, 2) + w * mat(3, 2),
@@ -280,7 +280,7 @@ namespace iwmath {
 		return !operator==(other);
 	}
 
-	std::ostream& iwmath::operator<<(
+	std::ostream& iw::operator<<(
 		std::ostream& ostream,
 		const vector4& vector)
 	{
@@ -291,14 +291,14 @@ namespace iwmath {
 			<< vector.w << ")";
 	}
 
-	vector4 iwmath::operator+(
+	vector4 iw::operator+(
 		float left,
 		const vector4& right)
 	{
 		return right + left;
 	}
 
-	vector4 iwmath::operator*(
+	vector4 iw::operator*(
 		float left,
 		const vector4& right)
 	{

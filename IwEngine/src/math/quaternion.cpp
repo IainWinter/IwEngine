@@ -1,7 +1,7 @@
 #include "iw/math/quaternion.h"
 #include "iw/math/matrix3.h"
 
-namespace iwmath {
+namespace iw {
 	const quaternion quaternion::identity = quaternion(0, 0, 0, 1);
 
 	quaternion::quaternion()
@@ -301,11 +301,11 @@ namespace iwmath {
 		vector3 forward = (target - eye).normalized();
 		float dot = forward.dot(vector3::unit_z);
 
-		if (iwm::almost_equal(dot, -1.0f, 6.0f)) {
+		if (iw::almost_equal(dot, -1.0f, 6.0f)) {
 			return quaternion(up, PI);
 		}
 
-		else if (iwm::almost_equal(dot, 1.0f, 6.0f)) {
+		else if (iw::almost_equal(dot, 1.0f, 6.0f)) {
 			return identity;
 		}
 
@@ -315,7 +315,7 @@ namespace iwmath {
 		return from_axis_angle(axis, angle);
 	}
 
-	std::ostream& iwmath::operator<<(
+	std::ostream& iw::operator<<(
 		std::ostream& ostream,
 		const quaternion& quaternion)
 	{

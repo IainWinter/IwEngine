@@ -4,25 +4,25 @@
 //#include "iw/log/logger.h"
 #include <assert.h>
 
-namespace IwEntity {
-	iwu::ref<Component>& Space::RegisterComponent(
+namespace IW {
+	iw::ref<Component>& Space::RegisterComponent(
 		ComponentType type,
 		size_t size)
 	{
 		return m_componentManager.RegisterComponent(type, size);
 	}
 
-	iwu::ref<Component> Space::GetComponent(
+	iw::ref<Component> Space::GetComponent(
 		ComponentType type)
 	{
 		return m_componentManager.GetComponent(type);
 	}
 
-	iwu::ref<ComponentQuery> Space::MakeQuery(
-		std::initializer_list<iwu::ref<Component>> components)
+	iw::ref<ComponentQuery> Space::MakeQuery(
+		std::initializer_list<iw::ref<Component>> components)
 	{
 		size_t bufSize = sizeof(ComponentQuery)
-			+ sizeof(iwu::ref<Component>)
+			+ sizeof(iw::ref<Component>)
 			* components.size();
 
 		ComponentQuery* buf = (ComponentQuery*)malloc(bufSize);
@@ -32,23 +32,23 @@ namespace IwEntity {
 		buf->Count = components.size();
 
 		size_t i = 0;
-		for (iwu::ref<Component> component : components) {
+		for (iw::ref<Component> component : components) {
 			buf->Components[i++] = component;
 		}
 
-		return iwu::ref<ComponentQuery>(buf, free);
+		return iw::ref<ComponentQuery>(buf, free);
 	}
 
-	iwu::ref<Archetype>& Space::CreateArchetype(
-		std::initializer_list<iwu::ref<Component>> components)
+	iw::ref<Archetype>& Space::CreateArchetype(
+		std::initializer_list<iw::ref<Component>> components)
 	{
 		return m_archetypeManager.CreateArchetype(components);
 	}
 
 	Entity Space::CreateEntity(
-		const iwu::ref<Archetype>& archetype)
+		const iw::ref<Archetype>& archetype)
 	{
-		iwu::ref<EntityData>& entityData = m_entityManager.CreateEntity();
+		iw::ref<EntityData>& entityData = m_entityManager.CreateEntity();
 		bool componentsExist = false;
 		if (entityData->Archetype && entityData->Archetype->Hash == archetype->Hash) {
 			componentsExist = m_componentManager.ReinstateEntityComponents(entityData);
@@ -72,7 +72,7 @@ namespace IwEntity {
 	bool Space::DestroyEntity(
 		size_t index)
 	{
-		iwu::ref<EntityData>& entityData = m_entityManager.GetEntityData(index);
+		iw::ref<EntityData>& entityData = m_entityManager.GetEntityData(index);
 		if (!entityData->Entity.Alive) {
 			LOG_WARNING << "Tried to delete dead entity!";
 			return false;
@@ -85,7 +85,7 @@ namespace IwEntity {
 	}
 
 	EntityComponentArray Space::Query(
-		const iwu::ref<ComponentQuery>& query)
+		const iw::ref<ComponentQuery>& query)
 	{
 		return m_componentManager.Query(query, m_archetypeManager.MakeQuery(query));
 	}

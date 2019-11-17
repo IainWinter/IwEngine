@@ -5,9 +5,9 @@
 #include "imgui/imgui.h"
 #include <gl\glew.h>
 
-namespace IwEngine {
+namespace IW {
 	DebugLayer::DebugLayer(
-		IwEntity::Space& space,
+		IW::Space& space,
 		IW::Renderer& renderer,
 		IW::AssetManager& asset)
 		: Layer(space, renderer, asset, "Debug")
@@ -26,11 +26,11 @@ namespace IwEngine {
 	}
 
 	void DebugLayer::ImGui() {
-		float time = IwEngine::Time::FixedTime();
+		float time = IW::Time::FixedTime();
 		ImGui::SliderFloat("Fixed timestep", &time, 0, 1);
 
-		if (time != IwEngine::Time::FixedTime()) {
-			IwEngine::Time::SetFixedTime(time);
+		if (time != IW::Time::FixedTime()) {
+			IW::Time::SetFixedTime(time);
 		}
 	}
 }

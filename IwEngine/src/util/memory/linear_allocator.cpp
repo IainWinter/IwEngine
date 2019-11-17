@@ -3,7 +3,7 @@
 #include "memory_util.h"
 #include <stdlib.h>
 
-namespace iwutil {
+namespace iw {
 	linear_allocator::linear_allocator(
 		size_t size)
 		: m_memory(malloc(size))
@@ -47,6 +47,20 @@ namespace iwutil {
 		memset((void*)caddress, 0, size + padding); //reset memory of alloc not nessesary but nice. TODO: lookout for preformance hit
 
 		return (void*)(caddress + padding);
+	}
+
+	void linear_allocator::resize(
+		size_t size)
+	{
+		size_t sizeToCopy = size < m_cursor   ? size : m_cursor;
+
+		void* memory = malloc(size);
+		memcpy(memory, m_memory, sizeToCopy);
+
+		free(m_memory);
+		m_memory = memory;
+
+		m_capacity = size;
 	}
 
 	void linear_allocator::reset() {

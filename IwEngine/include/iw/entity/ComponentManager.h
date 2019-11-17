@@ -9,46 +9,48 @@
 #include <unordered_map>
 #include <memory>
 
-namespace IwEntity {
+namespace IW {
+inline namespace ECS {
 	class IWENTITY_API ComponentManager {
 	private:
-		std::unordered_map<ComponentType, iwu::ref<Component>> m_components;
+		std::unordered_map<ComponentType, iw::ref<Component>> m_components;
 		std::unordered_map<size_t, ChunkList> m_componentData;
 		const size_t m_chunkSize = 16 * 1024;
 
 	public:
 		// Components
 
-		iwu::ref<Component>& RegisterComponent(
+		iw::ref<Component>& RegisterComponent(
 			ComponentType type,
 			size_t size);
 
-		iwu::ref<Component> GetComponent(
+		iw::ref<Component> GetComponent(
 			ComponentType type);
 
 		// Component Data
 
 		size_t ReserveEntityComponents(
-			const iwu::ref<EntityData>& entityData);
+			const iw::ref<EntityData>& entityData);
 
 		bool ReinstateEntityComponents(
-			const iwu::ref<EntityData>& entityData);
+			const iw::ref<EntityData>& entityData);
 
 		bool DestroyEntityComponents(
-			const iwu::ref<EntityData>& entityData);
+			const iw::ref<EntityData>& entityData);
 
 		void* GetComponentData(
-			const iwu::ref<EntityData>& entityData,
-			const iwu::ref<Component>& component);
+			const iw::ref<EntityData>& entityData,
+			const iw::ref<Component>& component);
 
 		EntityComponentArray Query(
-			const iwu::ref<ComponentQuery>& components,
-			const iwu::ref<ArchetypeQuery>& query);
+			const iw::ref<ComponentQuery>& components,
+			const iw::ref<ArchetypeQuery>& query);
 	private:
 		ChunkList* FindChunkList(
-			const iwu::ref<Archetype>& archetype);
+			const iw::ref<Archetype>& archetype);
 
 		ChunkList& FindOrCreateChunkList(
-			const iwu::ref<Archetype>& archetype);
+			const iw::ref<Archetype>& archetype);
 	};
+}
 }

@@ -1,6 +1,6 @@
 #include "iw/input/DeviceManager.h"
 
-namespace IwInput {
+namespace IW {
 	void SpecialProcess(OsEvent& event);
 
 	void DeviceManager::HandleEvent(

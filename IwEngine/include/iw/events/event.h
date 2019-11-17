@@ -20,6 +20,12 @@ inline namespace events {
 			, Type(type)
 			, Handled(false)
 		{}
+
+		template<
+			typename _t>
+		_t& as() {
+			return *(_t*)this;
+		}
 	};
 }
 }

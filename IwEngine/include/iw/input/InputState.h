@@ -3,7 +3,8 @@
 #include "IwInput.h"
 #include <cstring>
 
-namespace IwInput {
+namespace IW {
+inline namespace Input {
 	class InputState {
 	private:
 		float states[INPUT_COUNT];
@@ -21,4 +22,5 @@ namespace IwInput {
 			return states[index];
 		}
 	};
+}
 }

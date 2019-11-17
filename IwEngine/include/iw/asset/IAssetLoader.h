@@ -9,10 +9,10 @@ inline namespace Asset {
 	public:
 		virtual ~IAssetLoader() {}
 
-		virtual iwu::ref<void> Load(
+		virtual iw::ref<void> Load(
 			std::string filepath) = 0;
 
-		virtual iwu::ref<void> Give(
+		virtual iw::ref<void> Give(
 			std::string filename,
 			void* asset) = 0;
 	};

@@ -1,7 +1,7 @@
 #include "iw/input/InputManager.h"
 #include"iw/input/Devices/Mouse.h"
 
-namespace IwInput {
+namespace IW {
 	void InputManager::HandleEvent(
 		int wid,
 		int msg,

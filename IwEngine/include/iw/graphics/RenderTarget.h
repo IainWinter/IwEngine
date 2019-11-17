@@ -24,10 +24,10 @@ inline namespace Graphics {
 			std::initializer_list<TextureFormatType> types);
 
 		void Initialize(
-			const iwu::ref<IW::IDevice>& device);
+			const iw::ref<IW::IDevice>& device);
 
 		void Use(
-			const iwu::ref<IW::IDevice>& device);
+			const iw::ref<IW::IDevice>& device);
 	};
 }
 }

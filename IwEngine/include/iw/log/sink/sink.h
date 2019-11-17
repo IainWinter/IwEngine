@@ -3,7 +3,8 @@
 #include "iw/log/iwlog.h"
 #include <string>
 
-namespace iwlog {
+namespace iw {
+inline namespace log {
 	class IWLOG_API sink {
 	protected:
 		loglevel min_level;
@@ -25,4 +26,5 @@ namespace iwlog {
 			return canidate >= min_level;
 		}
 	};
+}
 }

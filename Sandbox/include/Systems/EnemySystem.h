@@ -6,19 +6,19 @@
 #include "iw/graphics/Mesh.h"
 
 class EnemySystem
-	: public IwEngine::System<IW::Transform, Enemy>
+	: public IW::System<IW::Transform, Enemy>
 {
 private:
 	IW::Mesh* CircleMesh;
 
 public:
 	EnemySystem(
-		IwEntity::Space& space,
+		IW::Space& space,
 		IW::Graphics::Renderer& renderer,
 		IW::Mesh* circle);
 
 	void Update(
-		IwEntity::EntityComponentArray& view) override;
+		IW::EntityComponentArray& view) override;
 
 	void Destroy() override;
 };

@@ -5,8 +5,9 @@
 #include "iw/events/callback.h"
 #include "iw/util/set/tofrom_set.h"
 
-namespace IwInput {
-	using Translation = iwutil::tofrom_set<unsigned int, InputName>;
+namespace IW {
+inline namespace Input {
+	using Translation = iw::tofrom_set<unsigned int, InputName>;
 
 	class IWINPUT_API Device
 	{
@@ -36,4 +37,5 @@ namespace IwInput {
 			m_callback(event);
 		}
 	};
+}
 }

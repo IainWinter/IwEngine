@@ -1,7 +1,7 @@
 #include "iw/math/matrix3.h"
 #include "iw/math/matrix2.h"
 
-namespace iwmath {
+namespace iw {
 	const matrix3 matrix3::identity = matrix3(1.0f);
 
 	matrix3::matrix3() {
@@ -614,7 +614,7 @@ namespace iwmath {
 		);
 	}
 
-	std::ostream& iwmath::operator<<(
+	std::ostream& iw::operator<<(
 		std::ostream& stream,
 		const matrix3& a)
 	{

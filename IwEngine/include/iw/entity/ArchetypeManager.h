@@ -6,17 +6,19 @@
 #include <unordered_map>
 #include <memory>
 
-namespace IwEntity {
+namespace IW {
+inline namespace ECS {
 	class IWENTITY_API ArchetypeManager {
 	private:
-		std::unordered_map<size_t, iwu::ref<Archetype>> m_hashed;
-		std::vector<iwu::ref<Archetype>> m_archetypes;
+		std::unordered_map<size_t, iw::ref<Archetype>> m_hashed;
+		std::vector<iw::ref<Archetype>> m_archetypes;
 
 	public:
-		iwu::ref<Archetype>& CreateArchetype(
-			std::initializer_list<iwu::ref<Component>> components);
+		iw::ref<Archetype>& CreateArchetype(
+			std::initializer_list<iw::ref<Component>> components);
 
-		iwu::ref<ArchetypeQuery> MakeQuery(
-			const iwu::ref<ComponentQuery>& query);
+		iw::ref<ArchetypeQuery> MakeQuery(
+			const iw::ref<ComponentQuery>& query);
 	};
+}
 }

@@ -4,9 +4,10 @@
 #include "Component.h"
 #include <memory>
 
-namespace IwEntity {
+namespace IW {
+inline namespace ECS {
 	struct ArchetypeLayout {
-		iwu::ref<Component> Component;
+		iw::ref<Component> Component;
 		size_t Offset;
 		size_t Onset;
 	};
@@ -22,4 +23,5 @@ namespace IwEntity {
 		size_t Count;
 		size_t Hashes[];
 	};
+}
 }

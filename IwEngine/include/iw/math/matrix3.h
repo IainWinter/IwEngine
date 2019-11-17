@@ -5,7 +5,8 @@
 #include "quaternion.h"
 #include <ostream>
 
-namespace iwmath {
+namespace iw {
+inline namespace math {
 	/**
 	* Represents a 3x3 matrix.
 	*/
@@ -291,4 +292,5 @@ namespace iwmath {
 			std::ostream& stream,
 			const matrix3&matrix);
 	};
+}
 }

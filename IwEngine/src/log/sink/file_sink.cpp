@@ -1,6 +1,6 @@
 #include "iw/log/sink/file_sink.h"
 
-namespace iwlog {
+namespace iw {
 	file_sink::file_sink(
 		loglevel level,
 		const char* file)

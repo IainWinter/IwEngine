@@ -2,7 +2,8 @@
 
 #include "iw/engine/Layer.h"
 
-namespace IwEngine {
+namespace IW {
+inline namespace Engine {
 	class IWENGINE_API ImGuiLayer
 		: public Layer
 	{
@@ -13,7 +14,7 @@ namespace IwEngine {
 
 	public:
 		ImGuiLayer(
-			IwEntity::Space& space,
+			IW::Space& space,
 			IW::Renderer& renderer,
 			IW::AssetManager& asset);
 
@@ -42,4 +43,5 @@ namespace IwEngine {
 		bool On(
 			IW::MouseButtonEvent& event) override;
 	};
+}
 }

@@ -1,6 +1,6 @@
 #include "iw/log/sink/async_sink.h"
 
-namespace iwlog {
+namespace iw {
 	void async_sink::log(
 		std::string& msg)
 	{

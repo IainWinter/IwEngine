@@ -5,9 +5,9 @@
 namespace IW {
 inline namespace Graphics {
 	struct Vertex {
-		iwm::vector3 Vertex;
-		iwm::vector3 Normal;
-		//iwm::vector2 TextureCoord;
+		iw::vector3 Vertex;
+		iw::vector3 Normal;
+		//iw::vector2 TextureCoord;
 	};
 }
 }

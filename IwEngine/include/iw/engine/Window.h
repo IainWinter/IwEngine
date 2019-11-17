@@ -4,7 +4,8 @@
 #include "WindowOptions.h"
 #include "iw/input/InputManager.h"
 
-namespace IwEngine {
+namespace IW {
+inline namespace Engine {
 	class IWindow {
 	public:
 		virtual ~IWindow() {}
@@ -26,7 +27,7 @@ namespace IwEngine {
 			iw::eventbus& bus) = 0;
 
 		virtual void SetInputManager(
-			IwInput::InputManager& inputManager) = 0;
+			IW::InputManager& inputManager) = 0;
 
 		virtual void SetState(
 			DisplayState state) = 0;
@@ -52,7 +53,7 @@ namespace IwEngine {
 	{
 	protected:
 		WindowOptions Options;
-		IwInput::InputManager* InputManager;
+		IW::InputManager* InputManager;
 		iw::eventbus* Bus;
 
 	public:
@@ -80,4 +81,5 @@ namespace IwEngine {
 			return Options.State;
 		}
 	};
+}
 }

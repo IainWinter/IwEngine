@@ -5,7 +5,8 @@
 #include <typeindex>
 #include <vector>
 
-namespace IwEntity {
+namespace IW {
+inline namespace ECS {
 	using ComponentType = std::type_index;
 
 	struct IWENTITY_API Component {
@@ -14,15 +15,16 @@ namespace IwEntity {
 		const char* Name;
 
 		static size_t Hash(
-			std::initializer_list<iwu::ref<Component>> components);
+			std::initializer_list<iw::ref<Component>> components);
 	};
 
 	struct ComponentQuery {
 		size_t Count;
-		iwu::ref<Component> Components[];
+		iw::ref<Component> Components[];
 
-		//std::vector<iwu::ref<Component>> All;
-		//std::vector<iwu::ref<Component>> None;
-		//std::vector<iwu::ref<Component>> Any;
+		//std::vector<iw::ref<Component>> All;
+		//std::vector<iw::ref<Component>> None;
+		//std::vector<iw::ref<Component>> Any;
 	};
+}
 }

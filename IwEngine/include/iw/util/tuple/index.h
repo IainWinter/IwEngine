@@ -4,7 +4,8 @@
 #include <cstddef>
 #include <tuple>
 
-namespace iwutil {
+namespace iw {
+inline namespace util {
 	template<
 		class _t,
 		class _tuple>
@@ -43,4 +44,5 @@ namespace iwutil {
 		static const size_t value = 1
 			+ index<_t, std::tuple<_types...>>::value;
 	};
+}
 }

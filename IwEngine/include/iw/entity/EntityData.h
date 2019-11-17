@@ -4,10 +4,12 @@
 #include "Entity.h"
 #include "Archetype.h"
 
-namespace IwEntity {
+namespace IW {
+inline namespace ECS {
 	struct EntityData {
 		Entity Entity;
 		size_t ChunkIndex;
-		iwu::ref<Archetype> Archetype;
+		iw::ref<Archetype> Archetype;
 	};
+}
 }

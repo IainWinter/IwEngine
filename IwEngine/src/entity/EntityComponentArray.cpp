@@ -1,6 +1,6 @@
 #include "iw/entity/EntityComponentArray.h"
 
-namespace IwEntity {
+namespace IW {
 	using iterator = EntityComponentArray::iterator;
 
 	iterator& iterator::operator++() {

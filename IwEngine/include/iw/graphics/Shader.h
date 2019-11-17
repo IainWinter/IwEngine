@@ -23,7 +23,7 @@ inline namespace Graphics {
 		};
 
 	public:
-		iwu::ref<IPipeline> Handle; // not really sure of the name for Shader Program. Every engine just calls it Shader but thats wrong kinda?
+		iw::ref<IPipeline> Handle; // not really sure of the name for Shader Program. Every engine just calls it Shader but thats wrong kinda?
 	private:
 		std::vector<ShaderSource> m_source;
 
@@ -35,7 +35,7 @@ inline namespace Graphics {
 			const char* source);
 
 		void Initialize(
-			const iwu::ref<IDevice>& device);
+			const iw::ref<IDevice>& device);
 	};
 }
 }

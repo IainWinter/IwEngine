@@ -13,8 +13,8 @@ inline namespace events {
 	class eventbus {
 	private:
 		std::vector<iw::callback<event&>> m_callbacks;
-		iwu::linear_allocator m_alloc;
-		iwu::blocking_queue<event*> m_events;
+		iw::linear_allocator m_alloc;
+		iw::blocking_queue<event*> m_events;
 		std::mutex m_mutex;
 
 	public:
@@ -36,6 +36,11 @@ inline namespace events {
 			std::unique_lock<std::mutex> lock(m_mutex);
 
 			_e* e = m_alloc.alloc<_e>();
+			if (e == nullptr) {
+				m_alloc.resize(m_alloc.capacity() * 2);
+				e = m_alloc.alloc<_e>();
+			}
+
 			*e = event;
 
 			m_events.push((iw::event*)e);

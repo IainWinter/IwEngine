@@ -1,8 +1,8 @@
-#pragma once
+#pragma onceIW::
 
 #include "Core.h"
 #include "Window.h"
-#include "Stack.h"
+#include "EventStack.h"
 #include "Task.h"
 #include "iw/events/eventbus.h"
 #include "InitOptions.h"
@@ -15,22 +15,23 @@
 #include <vector>
 #include <thread>
 
-namespace IwEngine {
+namespace IW {
+inline namespace Engine {
 	class IWENGINE_API Application {
 	private:
 		bool                 m_running;
 		IWindow*             m_window;
 		ImGuiLayer*          m_imguiLayer;
-		Stack<Layer*>        m_layers;
+		EventStack<Layer*>   m_layers;
 
-		iwu::ref<IW::IDevice> m_device;
+		iw::ref<IW::IDevice> m_device;
 
 		std::thread  m_renderThread;
 		Task<void()> m_updateTask;
 
 	protected:
-		IwEntity::Space Space;
-		IwInput::InputManager InputManager;
+		IW::Space Space;
+		IW::InputManager InputManager;
 
 		iw::eventbus Bus;
 
@@ -86,27 +87,9 @@ namespace IwEngine {
 		{
 			m_layers.Pop(layer);
 		}
-	private:
-		template<
-			typename _event_t>
-		void DispatchEvent(
-			_event_t& event)
-		{
-			if constexpr (std::is_same_v<IW::WindowResizedEvent, _event_t>) {
-				Renderer.Width  = event.Width;
-				Renderer.Height = event.Height;
-			}
-
-			for (Layer* layer : m_layers) {
-				if (layer->On(event)) {
-					//LOG_INFO << "Event handled by " << layer->Name() << " layer";
-					event.Handled = true;
-					break;
-				}
-			}
-		}
 	};
 }
+}
 
-IwEngine::Application* CreateApplication(
-	IwEngine::InitOptions& options);
+IW::Application* CreateApplication(
+	IW::InitOptions& options);

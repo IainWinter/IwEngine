@@ -5,13 +5,14 @@
 #include "iw/util/queue/blocking_queue.h"
 #include <string>
 
-namespace iwlog {
+namespace iw {
+inline namespace log {
 	class IWLOG_API async_sink
 		: public sink
 	{
 	private:
 		struct {
-			iwu::blocking_queue<std::string> m_messages;
+			iw::blocking_queue<std::string> m_messages;
 			std::thread                      m_thread;
 		};
 	private:
@@ -37,4 +38,5 @@ namespace iwlog {
 		virtual void async_log(
 			std::string& msg) = 0;
 	};
+}
 }

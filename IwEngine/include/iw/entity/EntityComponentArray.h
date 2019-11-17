@@ -4,7 +4,8 @@
 #include "ChunkList.h"
 #include <vector>
 
-namespace IwEntity {
+namespace IW {
+inline namespace ECS {
 	class IWENTITY_API EntityComponentArray {
 	public:
 		using ChunkListVec = std::vector<ChunkList::iterator>;
@@ -45,4 +46,5 @@ namespace IwEntity {
 		iterator begin();
 		iterator end();
 	};
+}
 }

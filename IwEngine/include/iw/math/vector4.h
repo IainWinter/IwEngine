@@ -3,7 +3,8 @@
 #include "iwmath.h"
 #include <ostream>
 
-namespace iwmath {
+namespace iw {
+inline namespace math {
 	struct vector2;
 	struct vector3;
 	struct matrix4;
@@ -213,4 +214,5 @@ namespace iwmath {
 			float left,
 			const vector4& right);
 	};
+}
 }

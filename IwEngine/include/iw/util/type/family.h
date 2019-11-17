@@ -2,7 +2,8 @@
 
 #include "iw/util/iwutil.h"
 
-namespace iwutil {
+namespace iw {
+inline namespace util {
 	template<
 		typename...>
 	class family {
@@ -18,4 +19,5 @@ namespace iwutil {
 			typename... _t>
 		inline static const size_t type = inner_id<std::decay_t<_t>...>;
 	};
+}
 }

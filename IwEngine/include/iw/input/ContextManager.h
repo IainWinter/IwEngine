@@ -4,7 +4,8 @@
 #include "Events/InputEvent.h"
 #include "iw/util/set/sparse_set.h"
 
-namespace IwInput {
+namespace IW {
+inline namespace Input {
 	struct Context {
 		InputState          State;
 		float               Width;
@@ -26,7 +27,7 @@ namespace IwInput {
 	class IWINPUT_API ContextManager {
 	private:
 		struct {
-			iwutil::sparse_set<int, Context> m_contexts;
+			iw::sparse_set<int, Context> m_contexts;
 		};
 
 	public:
@@ -58,4 +59,5 @@ namespace IwInput {
 			unsigned int windowId,
 			KeyTypedCallback callback);
 	};
+}
 }

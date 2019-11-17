@@ -11,7 +11,7 @@ namespace IW {
 		std::string filepath)
 	{
 		LOG_INFO << "Loading " << filepath;
-		for (std::string line : iwu::ReadFileLines(filepath.c_str())) {
+		for (std::string line : iw::ReadFileLines(filepath.c_str())) {
 			LOG_INFO << line;
 		}
 

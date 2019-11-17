@@ -39,12 +39,12 @@ namespace IwPhysics {
 			const AABB& other) const;
 	};
 
-	using AABB2D = AABB<iwm::vector2>;
-	using AABB3D = AABB<iwm::vector3>;
-	using AABB4D = AABB<iwm::vector4>;
+	using AABB2D = AABB<iw::vector2>;
+	using AABB3D = AABB<iw::vector3>;
+	using AABB4D = AABB<iw::vector4>;
 
 	template<>
-	inline bool AABB<iwm::vector2>::Intersects(
+	inline bool AABB<iw::vector2>::Intersects(
 		const AABB& other) const
 	{
 		return  (Min.x <= other.Max.x && Max.x >= other.Min.x)
@@ -52,7 +52,7 @@ namespace IwPhysics {
 	}
 
 	template<>
-	inline bool AABB<iwm::vector3>::Intersects(
+	inline bool AABB<iw::vector3>::Intersects(
 		const AABB& other) const
 	{
 		return  (Min.x <= other.Max.x && Max.x >= other.Min.x)
@@ -61,7 +61,7 @@ namespace IwPhysics {
 	}
 
 	template<>
-	inline bool AABB<iwm::vector4>::Intersects(
+	inline bool AABB<iw::vector4>::Intersects(
 		const AABB& other) const
 	{
 		return  (Min.x <= other.Max.x && Max.x >= other.Min.x)
@@ -71,7 +71,7 @@ namespace IwPhysics {
 	}
 
 	template<>
-	inline bool AABB<iwm::vector2>::Fits(
+	inline bool AABB<iw::vector2>::Fits(
 		const AABB& other) const
 	{
 		return  (Min.x < other.Min.x && Max.x > other.Max.x)
@@ -79,7 +79,7 @@ namespace IwPhysics {
 	}
 
 	template<>
-	inline bool AABB<iwm::vector3>::Fits(
+	inline bool AABB<iw::vector3>::Fits(
 		const AABB& other) const
 	{
 		return  (Min.x < other.Min.x && Max.x > other.Max.x)
@@ -88,7 +88,7 @@ namespace IwPhysics {
 	}
 
 	template<>
-	inline bool AABB<iwm::vector4>::Fits(
+	inline bool AABB<iw::vector4>::Fits(
 		const AABB& other) const
 	{
 		return  (Min.x < other.Min.x && Max.x > other.Max.x)

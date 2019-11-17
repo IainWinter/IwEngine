@@ -4,7 +4,8 @@
 #include "vector2.h"
 #include <ostream>
 
-namespace iwmath {
+namespace iw {
+inline namespace math {
 	/**
 	* Represents a 2x2 matrix.
 	*/
@@ -172,4 +173,5 @@ namespace iwmath {
 			std::ostream& stream,
 			const matrix2& matrix);
 	};
+}
 }

@@ -1,7 +1,7 @@
 #include "iw/log/sink/async_std_sink.h"
 #include <iostream>
 
-namespace iwlog {
+namespace iw {
 	async_stdout_sink::async_stdout_sink(
 		loglevel level)
 		: async_sink(level)

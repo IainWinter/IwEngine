@@ -8,7 +8,8 @@
 #include <list>
 #include <unordered_map>
 
-namespace iwutil {
+namespace iw {
+inline namespace util {
     template<
 		typename _t,
 		typename _u>
@@ -336,4 +337,5 @@ namespace iwutil {
 			return const_iterator(m_items.end());
 		}
 	};
+}
 }

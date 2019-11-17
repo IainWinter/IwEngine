@@ -58,13 +58,13 @@ inline namespace RenderAPI {
 			size_t stride = 0) = 0;
 
 		virtual void SetAsMat2(
-			const iwm::matrix2& matrix) = 0;
+			const iw::matrix2& matrix) = 0;
 
 		virtual void SetAsMat3(
-			const iwm::matrix3& matrix) = 0;
+			const iw::matrix3& matrix) = 0;
 
 		virtual void SetAsMat4(
-			const iwm::matrix4& matrix) = 0;
+			const iw::matrix4& matrix) = 0;
 
 		virtual void SetAsTexture(
 			const ITexture* texture) = 0;

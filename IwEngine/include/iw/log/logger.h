@@ -5,7 +5,8 @@
 #include <vector>
 #include <sstream>
 
-namespace iwlog {
+namespace iw {
+inline namespace log {
 	class IWLOG_API logger {
 	private:
 		struct {
@@ -69,14 +70,14 @@ namespace iwlog {
 		}
 	};
 }
-
+}
 #define LOG_SINK(_type_, _level_, ...)                               \
-	iwlog::logger::instance().make_sink<_type_>(_level_, __VA_ARGS__)
+	iw::logger::instance().make_sink<_type_>(_level_, __VA_ARGS__)
 
-#define LOG_FLUSH   iwlog::logger::instance().flush
+#define LOG_FLUSH   iw::logger::instance().flush
 
-#define LOG_INFO    iwlog::log_view(iwlog::INFO)
-#define LOG_DEBUG   iwlog::log_view(iwlog::DEBUG)
-#define LOG_WARNING iwlog::log_view(iwlog::WARN)
-#define LOG_ERROR   iwlog::log_view(iwlog::ERR)
-#define LOG_TRACE   iwlog::log_view(iwlog::TRACE)
+#define LOG_INFO    iw::log_view(iw::INFO)
+#define LOG_DEBUG   iw::log_view(iw::DEBUG)
+#define LOG_WARNING iw::log_view(iw::WARN)
+#define LOG_ERROR   iw::log_view(iw::ERR)
+#define LOG_TRACE   iw::log_view(iw::TRACE)

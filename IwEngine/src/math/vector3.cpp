@@ -4,7 +4,7 @@
 #include "iw/math/matrix3.h"
 #include "iw/math/matrix4.h"
 
-namespace iwmath {
+namespace iw {
 	const vector3 vector3::zero   = vector3(0, 0, 0);
 	const vector3 vector3::one    = vector3(1, 1, 1);
 	const vector3 vector3::unit_x = vector3(1, 0, 0);
@@ -218,7 +218,7 @@ namespace iwmath {
 	vector3 vector3::operator*(
 		const matrix3& mat) const
 	{
-		return iwm::vector3(
+		return iw::vector3(
 			x * mat(0, 0) + y * mat(0, 1) + z * mat(0, 2),
 			x * mat(1, 0) + y * mat(1, 1) + z * mat(1, 2),
 			x * mat(2, 0) + y * mat(2, 1) + z * mat(2, 2));
@@ -227,7 +227,7 @@ namespace iwmath {
 	vector3& vector3::operator*=(
 		const matrix3& mat)
 	{
-		return *this = iwm::vector3(
+		return *this = iw::vector3(
 			x * mat(0, 0) + y * mat(0, 1) + z * mat(0, 2),
 			x * mat(1, 0) + y * mat(1, 1) + z * mat(1, 2),
 			x * mat(2, 0) + y * mat(2, 1) + z * mat(2, 2));
@@ -290,7 +290,7 @@ namespace iwmath {
 		return !operator==(other);
 	}
 
-	std::ostream& iwmath::operator<<(
+	std::ostream& iw::operator<<(
 		std::ostream& ostream,
 		const vector3& vector)
 	{
@@ -300,14 +300,14 @@ namespace iwmath {
 			<< vector.z << ")";
 	}
 
-	vector3 iwmath::operator+(
+	vector3 iw::operator+(
 		float left,
 		const vector3& right)
 	{
 		return right + left;
 	}
 
-	vector3 iwmath::operator*(
+	vector3 iw::operator*(
 		float left,
 		const vector3& right)
 	{

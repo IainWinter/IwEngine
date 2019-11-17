@@ -1,6 +1,6 @@
 #include "iw/math/matrix4.h"
 
-namespace iwmath {
+namespace iw {
 	const matrix4 matrix4::identity = matrix4(1.0f);
 
 	matrix4::matrix4() {
@@ -724,7 +724,7 @@ namespace iwmath {
 		return mat;
 	}
 
-	std::ostream& iwmath::operator<<(
+	std::ostream& iw::operator<<(
 		std::ostream& ostream,
 		const matrix4& a)
 	{

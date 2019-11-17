@@ -2,7 +2,7 @@
 #include "iw/math/vector3.h"
 #include "iw/math/vector4.h"
 
-namespace iwmath {
+namespace iw {
 	const vector2 vector2::zero   = vector2(0, 0);
 	const vector2 vector2::one    = vector2(1, 1);
 	const vector2 vector2::unit_x = vector2(1, 0);
@@ -85,7 +85,7 @@ namespace iwmath {
 		y /= scale;
 	}
 
-	float& iwmath::vector2::operator[](
+	float& iw::vector2::operator[](
 		size_t index)
 	{
 		if (index == 0) return x;
@@ -205,7 +205,7 @@ namespace iwmath {
 		return !operator==(other);
 	}
 
-	std::ostream& iwmath::operator<<(
+	std::ostream& iw::operator<<(
 		std::ostream& ostream,
 		const vector2& vector)
 	{
@@ -214,14 +214,14 @@ namespace iwmath {
 			<< vector.y << ")";
 	}
 
-	vector2 iwmath::operator+(
+	vector2 iw::operator+(
 		float left,
 		const vector2& right)
 	{
 		return right + left;
 	}
 
-	vector2 iwmath::operator*(
+	vector2 iw::operator*(
 		float left,
 		const vector2& right)
 	{

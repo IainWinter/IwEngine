@@ -1,6 +1,6 @@
 #include "iw/log/logger.h"
 
-namespace iwlog {
+namespace iw {
 	static std::string tags[5] = {
 		"[Info ] ",
 		"[Debug] ",

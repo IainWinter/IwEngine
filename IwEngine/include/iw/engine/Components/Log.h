@@ -2,7 +2,7 @@
 
 #include "iw/math/vector3.h"
 
-namespace IwEngine {
+namespace IW {
 	enum LogType {
 		INFO,
 		DEBUG,
@@ -17,6 +17,6 @@ namespace IwEngine {
 	struct VectorLog
 		: Log
 	{
-		iwm::vector3 Vector;
+		iw::vector3 Vector;
 	};
 }

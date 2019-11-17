@@ -4,7 +4,7 @@
 #ifdef IW_PLATFORM_WINDOWS
 #include <Windows.h>
 
-namespace IwInput {
+namespace IW {
 	RawKeyboard* RawKeyboard::Create(
 		InputCallback& callback)
 	{

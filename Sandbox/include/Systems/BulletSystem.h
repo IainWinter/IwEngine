@@ -5,11 +5,11 @@
 #include "iw/data/Components/Transform.h"
 
 class BulletSystem
-	: public IwEngine::System<IW::Transform, Bullet>
+	: public IW::System<IW::Transform, Bullet>
 {
 public:
 	BulletSystem(
-		IwEntity::Space& space,
+		IW::Space& space,
 		IW::Graphics::Renderer& renderer);
 
 	~BulletSystem();
@@ -17,5 +17,5 @@ public:
 	//void Sync();
 
 	void Update(
-		IwEntity::EntityComponentArray& view) override;
+		IW::EntityComponentArray& view) override;
 };

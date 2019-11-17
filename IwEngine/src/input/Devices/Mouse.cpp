@@ -4,7 +4,7 @@
 #include <Windows.h>
 #endif
 
-namespace IwInput {
+namespace IW {
 	Translation MouseBase::translation = CreateTranslation();
 
 	InputName MouseBase::Translate(

@@ -15,13 +15,13 @@ inline namespace Graphics {
 		int Width;
 		int Height;
 
-		iwu::ref<IW::IDevice> Device;
+		iw::ref<IW::IDevice> Device;
 	private:
 		IW::Mesh* m_filterMesh;
 
 	public:
 		Renderer(
-			const iwu::ref<IW::IDevice>& device);
+			const iw::ref<IW::IDevice>& device);
 
 		~Renderer();
 
@@ -39,7 +39,7 @@ inline namespace Graphics {
 			const IW::Mesh* mesh);
 
 		void ApplyFilter(
-			iwu::ref<IW::IPipeline>& pipeline,
+			iw::ref<IW::IPipeline>& pipeline,
 			IW::RenderTarget* source,
 			IW::RenderTarget* dest = nullptr);
 	};
