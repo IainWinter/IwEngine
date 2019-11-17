@@ -67,7 +67,13 @@ namespace IW {
 	void GLDevice::SetIndexBuffer(
 		IIndexBuffer* indexBuffer)
 	{
-		static_cast<GLIndexBuffer*>(indexBuffer)->Bind();
+		if (indexBuffer) {
+			static_cast<GLIndexBuffer*>(indexBuffer)->Bind();
+		}
+
+		else {
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		}
 	}
 
 	IVertexBuffer* GLDevice::CreateVertexBuffer(
@@ -135,7 +141,13 @@ namespace IW {
 	void GLDevice::SetVertexArray(
 		IVertexArray* vertexArray)
 	{
-		static_cast<GLVertexArray*>(vertexArray)->Bind();
+		if (vertexArray) {
+			static_cast<GLVertexArray*>(vertexArray)->Bind();
+		}
+
+		else {
+			glBindVertexArray(0);
+		}
 	}
 
 	void GLDevice::AddBufferToVertexArray(

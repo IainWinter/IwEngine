@@ -47,7 +47,7 @@ void PlayerSystem::Update(
 		}
 
 		if (player->Timer > 0) {
-			transform->Position += movement.normalized() * player->Speed * 10 * (player->Timer*player->Timer / player->DashTime) * IW::Time::DeltaTime();
+			transform->Position += movement.normalized() * player->Speed * 10 * (player->Timer / player->DashTime) * IW::Time::DeltaTime();
 		}
 
 		else {

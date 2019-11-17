@@ -38,11 +38,15 @@ IW::IUniformBuffer* cameraBuffer;
 iw::vector3 lightDirection;
 iw::matrix4 lightMVP;
 
+iw::matrix4 orth;
+float b, blend;
+
 float angle = 1.57f;
 float distance = 100;
 float fov = 0.17f;
 float a, d, f;
 float blurAmount = 1;
+iw::vector3 p;
 
 iw::matrix4 camBuf[2];
 
@@ -73,18 +77,17 @@ int GameLayer3D::Initialize(
 	shadowTarget->Initialize(Renderer.Device);
 	shadowTargetBlur->Initialize(Renderer.Device);
 
-	iw::ref<IW::Model> floorMesh = Asset.Load<IW::Model>("quad.obj");
+	iw::ref<IW::Model> floorMesh = Asset.Load<IW::Model>("thenewgoodone.obj");
 
-	iw::vector2 uvs[4] = {
-		iw::vector2(1, 0),
-		iw::vector2(1, 1),
-		iw::vector2(0, 1),
-		iw::vector2(0, 0)
-	};
+	//iw::vector2 uvs[4] = {
+	//	iw::vector2(1, 0),
+	//	iw::vector2(1, 1),
+	//	iw::vector2(0, 1),
+	//	iw::vector2(0, 0)
+	//};
 
-	floorMesh->Meshes->SetUVs(4, uvs);
+	//floorMesh->Meshes->SetUVs(4, uvs);
 	floorMesh->Meshes->GenTangents();
-	floorMesh->Meshes->Initialize(Renderer.Device);
 	
 	IW::Mesh* mesh = IW::mesh_factory::create_uvsphere(24, 48);
 	mesh->GenTangents();
@@ -122,14 +125,19 @@ int GameLayer3D::Initialize(
 	material->SetTexture("aoMap",        ao);
 	material->SetTexture("shadowMap",    &shadowTarget->Textures[0]);
 
-	floorMesh->Meshes[0].Material->SetTexture("albedoMap",    talbedo);
-	floorMesh->Meshes[0].Material->SetTexture("normalMap",    tnormal);
-	floorMesh->Meshes[0].Material->SetTexture("metallicMap",  tmetallic);
-	floorMesh->Meshes[0].Material->SetTexture("roughnessMap", troughness);
-	floorMesh->Meshes[0].Material->SetTexture("aoMap",        tao);
-	floorMesh->Meshes[0].Material->SetTexture("shadowMap",    &shadowTarget->Textures[0]);
+	for (size_t i = 0; i < floorMesh->MeshCount; i++) {
+		floorMesh->Meshes[i].Initialize(Renderer.Device);
 
-	floorMesh->Meshes[0].Material->Pipeline = pbrPipeline->Handle;
+		if (floorMesh->Meshes[i].Material->Pipeline != nullptr) continue;
+
+		floorMesh->Meshes[i].Material->SetTexture("albedoMap", talbedo);
+		floorMesh->Meshes[i].Material->SetTexture("normalMap", tnormal);
+		floorMesh->Meshes[i].Material->SetTexture("metallicMap", tmetallic);
+		floorMesh->Meshes[i].Material->SetTexture("roughnessMap", troughness);
+		floorMesh->Meshes[i].Material->SetTexture("aoMap", tao);
+		floorMesh->Meshes[i].Material->SetTexture("shadowMap", &shadowTarget->Textures[0]);
+		floorMesh->Meshes[i].Material->Pipeline = pbrPipeline->Handle;
+	}
 
 	lightPositions[0] = iw::vector3( 0, 5, 0);
 	lightPositions[1] = iw::vector3( 5, 2, 5);
@@ -143,7 +151,8 @@ int GameLayer3D::Initialize(
 
 	// Entities
 
-	IW::Camera* perspective = new IW::PerspectiveCamera(fov, 1.778f, 100.0f, 120.0f);
+	IW::Camera* perspective = new IW::PerspectiveCamera(fov, 1.778f, 10.0f, 200.0f);
+	orth                    = iw::matrix4::create_orthographic(35.56f, 20, 10.0f, 200.0f);
 
 	IW::Entity camera = Space.CreateEntity<IW::Transform, IW::CameraController>();
 	IW::Entity player = Space.CreateEntity<IW::Transform, IW::ModelComponent, Player>();
@@ -160,8 +169,8 @@ int GameLayer3D::Initialize(
 	Space.SetComponentData<IW::ModelComponent>(enemy, mesh, 1U);
 	Space.SetComponentData<Enemy>             (enemy, SPIN, 0.2617993f, .12f, 0.0f);
 
-	Space.SetComponentData<IW::Transform>     (floor, iw::vector3(0, -1, 0), iw::vector3(20, 1, 20), iw::quaternion::from_euler_angles(iw::PI / 2, 0, 0));
-	Space.SetComponentData<IW::ModelComponent>(floor, floorMesh->Meshes, 1U);
+	Space.SetComponentData<IW::Transform>     (floor, iw::vector3(0, -1, 0));
+	Space.SetComponentData<IW::ModelComponent>(floor, floorMesh->Meshes, floorMesh->MeshCount);
 
 	//IW::Entity debug = Space.CreateEntity<IW::Transform, IW::DebugVector>();
 
@@ -193,25 +202,43 @@ struct EnemyComponents {
 };
 
 void GameLayer3D::PostUpdate() {
+	iw::vector3 playerOffset;
+	for (auto entity : Space.Query<IW::Transform, Player>()) {
+		auto [transform, player] = entity.Components.Tie<PlayerComponents>();
+
+		playerOffset.x = transform->Position.x;
+		playerOffset.z = transform->Position.z;
+	}
+
 	for (auto entity : Space.Query<IW::CameraController>()) {
 		auto [controller] = entity.Components.TieTo<IW::CameraController>();
 
 		IW::PerspectiveCamera* cam = (IW::PerspectiveCamera*)controller->Camera;
 
 		bool needsUpdate = false;
-		if (a != angle || d != distance) {
+		if (a != angle || d != distance || p != playerOffset) {
 			a = angle;
 			d = distance;
-			cam->Position = iw::vector3(0, sin(angle), cos(angle)) * distance;
+			p = playerOffset;
+			cam->Position = iw::vector3(0, sin(angle), cos(angle)) * distance + playerOffset * 0.75f;
 			cam->Rotation = iw::quaternion::from_euler_angles(iw::PI + angle, 0, iw::PI);
 
 			camBuf[1] = cam->GetView();
 			needsUpdate = true;
 		}
 
-		if (f != fov) {
+		if (f != fov || b != blend) {
 			f = fov;
-			cam->SetProjection(fov, 1.778f, 50.0f, 300.0f); // ew
+			b = blend;
+
+			iw::matrix4 camA = iw::matrix4::create_perspective_field_of_view(fov, 1.778f, 0.1f, 200.0f); // ew
+
+			iw::matrix4 matrix;
+			for (size_t i = 0; i < 16; i++) {
+				matrix[i] = camA[i] + (orth[i] - camA[i]) * blend;
+			}
+
+			cam->SetProjection(matrix); // ew
 
 			camBuf[0] = cam->GetProjection();
 			needsUpdate = true;
@@ -297,6 +324,7 @@ void GameLayer3D::ImGui() {
 	ImGui::SliderFloat("Angle", &angle, 0, iw::PI);
 	ImGui::SliderFloat("Distance", &distance, 5, 500);
 	ImGui::SliderFloat("Fov", &fov, 0.001f, iw::PI / 4);
+	ImGui::SliderFloat("Blend", &blend, 0, 1);
 
 	ImGui::Text("Sun");
 	ImGui::SliderFloat3("XYZ", &lightDirection.x, -1, 1);
@@ -354,3 +382,12 @@ bool GameLayer3D::On(
 	return false;
 }
 
+bool GameLayer3D::On(
+	IW::KeyEvent& event)
+{
+	if (event.Button == IW::UP) {
+
+	}
+
+	return false;
+}

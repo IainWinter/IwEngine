@@ -13,9 +13,9 @@ namespace IW {
 	class IWENGINE_API Layer {
 	private:
 		const char* m_name;
-		std::vector<ISystem*> m_systems; // layer doesnt own systems but prolly should
+		EventStack<ISystem*> m_systems; // layer doesnt own systems but prolly should
 	protected:
-		IW::Space&  Space;
+		IW::Space&        Space;
 		IW::Renderer&     Renderer;
 		IW::AssetManager& Asset;
 
@@ -68,7 +68,7 @@ namespace IW {
 			Args&&... args)
 		{
 			S* layer = new S(Space, Renderer, std::forward<Args>(args)...);
-			m_systems.push_back(layer);
+			m_systems.PushBack(layer);
 			return layer;
 		}
 

@@ -303,6 +303,12 @@ namespace iw {
 			1);
 	}
 
+	float& matrix4::operator[](
+		int index)
+	{
+		return elements[index];
+	}
+
 	float& matrix4::operator()(
 		int row,
 		int col)

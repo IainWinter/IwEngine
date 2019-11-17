@@ -58,31 +58,46 @@ inline namespace Engine {
 		void DispatchEvent(
 			iw::event& e)
 		{
-			for (T& t : m_items) {
-				bool error = false;
-				if (e.Category == IW::INPUT) {
-					switch (e.Type) {
-					case IW::MouseWheel:  t->On((IW::MouseWheelEvent&)e);  break;
-					case IW::MouseMoved:  t->On((IW::MouseMovedEvent&)e);  break;
-					case IW::MouseButton: t->On((IW::MouseButtonEvent&)e); break;
-					case IW::Key:    	  t->On((IW::KeyEvent&)e);         break;
-					case IW::KeyTyped:    t->On((IW::KeyTypedEvent&)e);    break;
+			bool error = false;
+			if (e.Category == IW::INPUT) {
+				switch (e.Type) {
+					case IW::MouseWheel:  e.Handled = On((IW::MouseWheelEvent&) e); break;
+					case IW::MouseMoved:  e.Handled = On((IW::MouseMovedEvent&) e); break;
+					case IW::MouseButton: e.Handled = On((IW::MouseButtonEvent&)e); break;
+					case IW::Key:    	  e.Handled = On((IW::KeyEvent&)        e); break;
+					case IW::KeyTyped:    e.Handled = On((IW::KeyTypedEvent&)   e); break;
 					default: error = true;
-					}
-				}
-
-				else if (e.Category == IW::WINDOW) {
-					switch (e.Type) {
-					case IW::Resized: t->On((IW::WindowResizedEvent&)e); break;
-					case IW::Closed:  /*t.On((IW::WindowClosedEvent&)e;*/   break;
-					default: error = true;
-					}
-				}
-
-				if (error) {
-					LOG_WARNING << "Layer Stack mishandled event " + e.Type << "!";
 				}
 			}
+
+			else if (e.Category == IW::WINDOW) {
+				switch (e.Type) {
+					case IW::Resized: e.Handled = On((IW::WindowResizedEvent&)  e); break;
+					case IW::Closed:  /*t.On((IW::WindowClosedEvent&)e;*/   break;
+					default: error = true;
+				}
+			}
+
+			if (error) {
+				LOG_WARNING << "Layer Stack mishandled event " + e.Type << "!";
+			}
+		}
+
+
+		// Input events
+
+		template<
+			typename _e>
+		bool On(
+			_e& event)
+		{
+			for (T& t : m_items) {
+				if (t->On(event)) {
+					return true;
+				}
+			}
+
+			return false;
 		}
 
 		iterator begin() {

@@ -23,6 +23,6 @@ public:
 	void PostUpdate() override;
 	void ImGui() override;
 
-	bool On(
-		IW::MouseMovedEvent& event) override;
+	bool On(IW::MouseMovedEvent& event) override;
+	bool On(IW::KeyEvent& event) override;
 };

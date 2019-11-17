@@ -210,6 +210,9 @@ inline namespace math {
 
 		matrix4 operator-() const;
 
+		float& operator[](
+			int index);
+
 		float& operator()(
 			int row,
 			int col);

@@ -40,7 +40,7 @@ namespace IW {
 	bool Layer::On(
 		IW::WindowResizedEvent& event)
 	{
-		return false;
+		 return m_systems.On(event);
 	}
 
 	bool Layer::On(

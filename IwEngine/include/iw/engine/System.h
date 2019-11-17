@@ -2,6 +2,7 @@
 
 #include "iw/entity/Space.h"
 #include "iw/graphics/Renderer.h"
+#include "Events/Events.h"
 #include <queue>
 //#include <thread>
 
@@ -13,6 +14,18 @@ inline namespace Engine {
 		virtual void Destroy() = 0;
 		virtual void Update() = 0;
 		virtual void FixedUpdate() = 0;
+
+		// Input events
+
+		virtual bool On(IW::MouseWheelEvent& event) = 0;
+		virtual bool On(IW::MouseMovedEvent& event) = 0;
+		virtual bool On(IW::MouseButtonEvent& event) = 0;
+		virtual bool On(IW::KeyEvent& event) = 0;
+		virtual bool On(IW::KeyTypedEvent& event) = 0;
+
+		// Window events
+
+		virtual bool On(IW::WindowResizedEvent& event) = 0;
 
 		virtual const char* Name() const = 0;
 	};
@@ -93,6 +106,18 @@ inline namespace Engine {
 				m_delete.pop();
 			}
 		}
+
+		// Input events
+
+		virtual bool On(IW::MouseWheelEvent&    event) override { return false; }
+		virtual bool On(IW::MouseMovedEvent&    event) override { return false; }
+		virtual bool On(IW::MouseButtonEvent&   event) override { return false; }
+		virtual bool On(IW::KeyEvent&           event) override { return false; }
+		virtual bool On(IW::KeyTypedEvent&      event) override { return false; }
+
+		// Window events
+
+		virtual bool On(IW::WindowResizedEvent& event) override { return false; }
 
 		inline const char* Name() const override {
 			return m_name;
