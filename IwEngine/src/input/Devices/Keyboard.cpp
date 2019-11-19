@@ -1,7 +1,7 @@
 #include "iw/input/Devices/Keyboard.h"
 
 #ifdef IW_PLATFORM_WINDOWS
-	#include <Windows.h>
+#include <Windows.h>
 #endif
 
 namespace IW {
@@ -144,7 +144,7 @@ namespace IW {
 
 		translation.insert(VK_CAPITAL, CAPS_LOCK);
 		translation.insert(VK_NUMLOCK, NUM_LOCK);
-		translation.insert(VK_SCROLL,  SCROLL_LOCK);
+		translation.insert(VK_SCROLL, SCROLL_LOCK);
 
 		translation.insert(VK_SHIFT, SHIFT);
 		translation.insert(VK_LSHIFT, LSHIFT);
@@ -159,8 +159,56 @@ namespace IW {
 		translation.insert(VK_LWIN, LOS);
 		translation.insert(VK_RWIN, ROS);
 
+		translation.insert(VK_CANCEL, CANCEL);
+		translation.insert(VK_CONVERT, CONVERT);
+		translation.insert(VK_NONCONVERT, NONCONVERT);
+		translation.insert(VK_ACCEPT, ACCEPT);
+		translation.insert(VK_MODECHANGE, MODECHANGE);
 		translation.insert(VK_EXECUTE, EXECUTE);
-#endif
+
+		translation.insert(VK_BROWSER_BACK, BROWSER_BACK);
+		translation.insert(VK_BROWSER_BACK, BROWSER_FORWARD);
+		translation.insert(VK_BROWSER_BACK, BROWSER_REFRESH);
+		translation.insert(VK_BROWSER_BACK, BROWSER_STOP);
+		translation.insert(VK_BROWSER_SEARCH, BROWSER_SEARCH);
+		translation.insert(VK_BROWSER_FAVORITES, BROWSER_FAVORITES);
+		translation.insert(VK_BROWSER_HOME, BROWSER_HOME);
+
+		translation.insert(VK_VOLUME_MUTE, VOLUME_MUTE);
+		translation.insert(VK_VOLUME_DOWN, VOLUME_DOWN);
+		translation.insert(VK_VOLUME_UP, VOLUME_UP);
+
+		translation.insert(VK_MEDIA_NEXT_TRACK, MEDIA_NEXT_TRACK);
+		translation.insert(VK_MEDIA_PREV_TRACK, MEDIA_PREV_TRACK);
+		translation.insert(VK_MEDIA_STOP, MEDIA_STOP);
+		translation.insert(VK_MEDIA_PLAY_PAUSE, MEDIA_PLAY_PAUSE);
+
+		translation.insert(VK_LAUNCH_MAIL, LAUNCH_MAIL);
+		translation.insert(VK_LAUNCH_MEDIA_SELECT, LAUNCH_MEDIA_SELECT);
+		translation.insert(VK_LAUNCH_APP1, LAUNCH_APP1);
+		translation.insert(VK_LAUNCH_APP2, LAUNCH_APP2);
+
+		translation.insert(VK_OEM_102, OEM102);
+		translation.insert(VK_OEM_CLEAR, OEM_CLEAR);
+		translation.insert(VK_PROCESSKEY, PROCESSKEY);
+		translation.insert(VK_PACKET, PACKET);
+
+		translation.insert(VK_ATTN, ATTN);
+		translation.insert(VK_CRSEL, CRSEL);
+		translation.insert(VK_EXSEL, EXSEL);
+		translation.insert(VK_EREOF, EREOF);
+		translation.insert(VK_PLAY, PLAY);
+		translation.insert(VK_ZOOM, ZOOM);
+		translation.insert(VK_PA1, PA1);
+
+		translation.insert(VK_KANA, KANA);
+		translation.insert(VK_HANGEUL, HANGUEL);
+		translation.insert(VK_HANGEUL, HANGUL);
+		translation.insert(VK_JUNJA, JUNJA);
+		translation.insert(VK_FINAL, FINAL);
+		translation.insert(VK_HANJA, HANJA);
+		translation.insert(VK_KANJI, KANJI);
+#endif																					
 
 		return translation;
 	}
