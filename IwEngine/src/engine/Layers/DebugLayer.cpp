@@ -6,12 +6,8 @@
 #include <gl\glew.h>
 
 namespace IW {
-	DebugLayer::DebugLayer(
-		IW::Space& space,
-		IW::Renderer& renderer,
-		IW::AssetManager& asset,
-		iw::eventbus& bus)
-		: Layer(space, renderer, asset, bus, "Debug")
+	DebugLayer::DebugLayer()
+		: Layer("Debug")
 	{}
 
 	struct Components {

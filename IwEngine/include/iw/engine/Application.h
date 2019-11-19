@@ -30,13 +30,11 @@ inline namespace Engine {
 		Task<void()> m_updateTask;
 
 	protected:
-		IW::Space Space;
-		IW::InputManager InputManager;
-
-		iw::eventbus Bus;
-
-		IW::Renderer     Renderer;
-		IW::AssetManager Asset;
+		iw::ref<IW::Space>        Space;
+		iw::ref<IW::Renderer>     Renderer;
+		iw::ref<IW::AssetManager> Asset;
+		iw::ref<iw::eventbus>     Bus;
+		iw::ref<IW::InputManager> InputManager;
 
 	public:
 		Application();
@@ -64,7 +62,9 @@ inline namespace Engine {
 		L* PushLayer(
 			Args&&... args)
 		{
-			L* layer = new L(Space, Renderer, Asset, Bus, std::forward<Args>(args)...);
+			L* layer = new L(std::forward<Args>(args)...);
+			layer->SetApplicationVars(Space, Renderer, Asset, Bus);
+
 			m_layers.PushBack(layer);
 			return layer;
 		}
@@ -73,9 +73,11 @@ inline namespace Engine {
 			typename L,
 			typename... Args>
 		L* PushOverlay(
-				Args&& ... args)
+			Args&& ... args)
 		{
-			L* layer = new L(Space, Renderer, Asset, Bus, std::forward<Args>(args)...);
+			L* layer = new L(std::forward<Args>(args)...);
+			layer->SetApplicationVars(Space, Renderer, Asset, Bus);
+
 			m_layers.PushFront(layer);
 			return layer;
 		}

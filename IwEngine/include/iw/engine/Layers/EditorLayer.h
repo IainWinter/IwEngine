@@ -4,14 +4,17 @@
 
 namespace IW {
 inline namespace Engine {
-	class IWENGINE_API DebugLayer
+	class IWENGINE_API EditorLayer
 		: public Layer
 	{
 	private:
-		std::vector<std::string> logs;
 
 	public:
-		DebugLayer();
+		EditorLayer(
+			IW::Space& space,
+			IW::Renderer& renderer,
+			IW::AssetManager& asset,
+			iw::eventbus& bus);
 
 		void PostUpdate() override;
 		void ImGui() override;

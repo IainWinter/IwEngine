@@ -11,22 +11,21 @@
 #include "iw/events/eventbus.h"
 
 namespace IW {
+inline namespace Engine {
+	class Application;
+
 	class IWENGINE_API Layer {
 	private:
 		const char* m_name;
 		EventStack<ISystem*> m_systems; // layer doesnt own systems but prolly should
 	protected:
-		IW::Space&        Space;
-		IW::Renderer&     Renderer;
-		IW::AssetManager& Asset;
-		iw::eventbus&     Bus;
+		iw::ref<IW::Space>        Space;
+		iw::ref<IW::Renderer>     Renderer;
+		iw::ref<IW::AssetManager> Asset;
+		iw::ref<iw::eventbus>     Bus;
 
 	public:
 		Layer(
-			IW::Space& space,
-			IW::Renderer& renderer,
-			IW::AssetManager& asset,
-			iw::eventbus& bus,
 			const char* name);
 
 		virtual ~Layer();
@@ -91,5 +90,14 @@ namespace IW {
 				m_systems.erase(itr);
 			}
 		}
+	private:
+		friend class Application;
+
+		void SetApplicationVars(
+			iw::ref<IW::Space> space,
+			iw::ref<IW::Renderer> renderer,
+			iw::ref<IW::AssetManager> asset,
+			iw::ref<iw::eventbus> bus);
 	};
+}
 }

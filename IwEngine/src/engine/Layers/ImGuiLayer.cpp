@@ -5,12 +5,8 @@
 #include "iw/engine/Time.h"
 
 namespace IW {
-	ImGuiLayer::ImGuiLayer(
-		IW::Space& space,
-		IW::Renderer& renderer,
-		IW::AssetManager& asset,
-		iw::eventbus& bus)
-		: Layer(space, renderer, asset, bus, "ImGui")
+	ImGuiLayer::ImGuiLayer()
+		: Layer("ImGui")
 	{}
 
 	ImGuiLayer::~ImGuiLayer() {}

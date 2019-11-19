@@ -3,6 +3,7 @@
 #include "iw/events/eventbus.h"
 #include "WindowOptions.h"
 #include "iw/input/InputManager.h"
+#include "iw/util/memory/smart_pointers.h"
 
 namespace IW {
 inline namespace Engine {
@@ -23,10 +24,10 @@ inline namespace Engine {
 		virtual bool ReleaseOwnership() = 0;
 
 		virtual void SetEventbus(
-			iw::eventbus& bus) = 0;
+			iw::ref<iw::eventbus>& bus) = 0;
 
 		virtual void SetInputManager(
-			IW::InputManager& inputManager) = 0;
+			iw::ref<InputManager>& inputManager) = 0;
 
 		virtual void SetState(
 			DisplayState state) = 0;
@@ -52,8 +53,8 @@ inline namespace Engine {
 	{
 	protected:
 		WindowOptions Options;
-		IW::InputManager* InputManager;
-		iw::eventbus* Bus;
+		iw::ref<InputManager> Input;
+		iw::ref<iw::eventbus> Bus;
 
 	public:
 		virtual ~Window() {}

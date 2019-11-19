@@ -2,16 +2,8 @@
 
 namespace IW {
 	Layer::Layer(
-		IW::Space& space,
-		IW::Renderer& renderer,
-		IW::AssetManager& asset,
-		iw::eventbus& bus,
 		const char* name)
 		: m_name(name)
-		, Space(space)
-		, Renderer(renderer)
-		, Asset(asset)
-		, Bus(bus)
 	{}
 
 	Layer::~Layer() {}
@@ -85,5 +77,17 @@ namespace IW {
 		for (ISystem* system : m_systems) {
 			system->FixedUpdate();
 		}
+	}
+
+	void Layer::SetApplicationVars(
+		iw::ref<IW::Space> space,
+		iw::ref<IW::Renderer> renderer,
+		iw::ref<IW::AssetManager> asset,
+		iw::ref<iw::eventbus> bus)
+	{
+		Space    = space;
+		Renderer = renderer;
+		Asset    = asset;
+		Bus      = bus;
 	}
 }

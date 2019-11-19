@@ -193,32 +193,22 @@ namespace IW {
 	}
 
 	void WindowsWindow::SetEventbus(
-		iw::eventbus& bus)
+		iw::ref<iw::eventbus>& bus)
 	{
-		Bus = &bus;
+		Bus = bus;
 	}
 
 	void WindowsWindow::SetInputManager(
-		IW::InputManager& manager)
+		iw::ref<InputManager>& manager)
 	{
-		InputManager = &manager;
+		Input = manager;
 
-		manager.CreateContext(Id(), (float)Width(), (float)Height());
-
-		manager.SetMouseWheelCallback(Id(), 
-			iw::make_callback(&WindowsWindow::HandleMouseWheel, this));
-
-		manager.SetMouseMovedCallback(Id(), 
-			iw::make_callback(&WindowsWindow::HandleMouseMoved, this));
-
-		manager.SetMouseButtonCallback(Id(), 
-			iw::make_callback(&WindowsWindow::HandleMouseButton, this));
-
-		manager.SetKeyCallback(Id(),         
-			iw::make_callback(&WindowsWindow::HandleKey, this));
-
-		manager.SetKeyTypedCallback(Id(),
-			iw::make_callback(&WindowsWindow::HandleKeyTyped, this));
+		Input->CreateContext(         Id(), (float)Width(), (float)Height());
+		Input->SetMouseWheelCallback( Id(), iw::make_callback(&WindowsWindow::HandleMouseWheel,  this));
+		Input->SetMouseMovedCallback( Id(), iw::make_callback(&WindowsWindow::HandleMouseMoved,  this));
+		Input->SetMouseButtonCallback(Id(), iw::make_callback(&WindowsWindow::HandleMouseButton, this));
+		Input->SetKeyCallback(        Id(), iw::make_callback(&WindowsWindow::HandleKey,         this));
+		Input->SetKeyTypedCallback(   Id(), iw::make_callback(&WindowsWindow::HandleKeyTyped,    this));
 	}
 
 	void WindowsWindow::SetState(
@@ -278,7 +268,7 @@ namespace IW {
 		LPARAM lParam)
 	{
 		//Input events
-		InputManager->HandleEvent(Id(), msg, wParam, lParam);
+		Input->HandleEvent(Id(), msg, wParam, lParam);
 
 		switch (msg) {
 			case WM_SIZE:

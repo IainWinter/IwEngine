@@ -15,8 +15,12 @@ namespace IW {
 	Application::Application()
 		: m_running(false)
 		, m_window(IWindow::Create())
-		, m_device(IW::IDevice::Create())
-		, Renderer(m_device)
+		, m_device(IDevice::Create())
+		, Space(std::make_shared<IW::Space>())
+		, Renderer(std::make_shared<IW::Renderer>(m_device))
+		, Asset(std::make_shared<AssetManager>())
+		, Bus(std::make_shared<iw::eventbus>())
+		, InputManager(std::make_shared<IW::InputManager>())
 		, m_updateTask([&]() {
 			for (Layer* layer : m_layers) {
 				layer->UpdateSystems();
@@ -46,14 +50,14 @@ namespace IW {
 
 		// Events
 
-		Bus.subscribe(iw::make_callback(&Application::HandleEvent, this));
+		Bus->subscribe(iw::make_callback(&Application::HandleEvent, this));
 
 		// Asset Loader
 
-		Asset.SetLoader<IW::MeshLoader>();
-		Asset.SetLoader<IW::MaterialLoader>();
-		Asset.SetLoader<IW::TextureLoader>();
-		Asset.SetLoader<IW::ShaderLoader>();
+		Asset->SetLoader<IW::MeshLoader>();
+		Asset->SetLoader<IW::MaterialLoader>();
+		Asset->SetLoader<IW::TextureLoader>();
+		Asset->SetLoader<IW::ShaderLoader>();
 
 		// Window
 
@@ -70,7 +74,7 @@ namespace IW {
 			return status;
 		}
 
-		Renderer.Initialize();
+		Renderer->Initialize();
 
 		for (Layer* layer : m_layers) {
 			LOG_DEBUG << "Initializing " << layer->Name() << " layer...";
@@ -92,7 +96,7 @@ namespace IW {
 	}
 
 	void Application::Run() {
-		Bus.publish();
+		Bus->publish();
 		m_window->ReleaseOwnership();
 
 		m_running = true;
@@ -132,7 +136,7 @@ namespace IW {
 		// Update time (Sync)
 		Time::UpdateTime();
 
-		Renderer.Begin();
+		Renderer->Begin();
 
 		// Clear window and poll events (Sync)
 		//m_window->Clear();
@@ -170,11 +174,11 @@ namespace IW {
 
 		// Run through render queue! (Sync)
 
-		Renderer.End();
+		Renderer->End();
 
 		// Swap buffers (Sync)
 		m_window->SwapBuffers();
-		Bus.publish();
+		Bus->publish();
 	}
 
 	void Application::FixedUpdate() {
@@ -203,8 +207,8 @@ namespace IW {
 					break;
 				}
 				case IW::Resized: {
-					Renderer.Width  = e.as<IW::WindowResizedEvent>().Width;
-					Renderer.Height = e.as<IW::WindowResizedEvent>().Height;
+					Renderer->Width  = e.as<IW::WindowResizedEvent>().Width;
+					Renderer->Height = e.as<IW::WindowResizedEvent>().Height;
 					e.Handled = true;
 					break;
 				}

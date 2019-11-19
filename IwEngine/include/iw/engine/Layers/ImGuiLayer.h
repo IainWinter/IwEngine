@@ -13,11 +13,7 @@ inline namespace Engine {
 		int   counter = 0;
 
 	public:
-		ImGuiLayer(
-			IW::Space& space,
-			IW::Renderer& renderer,
-			IW::AssetManager& asset,
-			iw::eventbus& bus);
+		ImGuiLayer();
 
 		~ImGuiLayer();
 

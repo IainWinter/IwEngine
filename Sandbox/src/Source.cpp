@@ -12,6 +12,8 @@
 
 #include "iw/events/eventbus.h"
 
+#include "iw/engine/Layers/EditorLayer.h"
+
 struct Position {
 	int x, y, z;
 };
@@ -29,10 +31,11 @@ class Game
 {
 public:
 	Game() {
-		InputManager.CreateDevice<IW::Mouse>();
+		InputManager->CreateDevice<IW::Mouse>();
 		//InputManager.CreateDevice<IW::RawMouse>();
-		InputManager.CreateDevice<IW::RawKeyboard>();
+		InputManager->CreateDevice<IW::RawKeyboard>();
 
+		PushLayer<IW::EditorLayer>();
 		PushLayer<GameLayer3D>();
 	}
 

@@ -1,5 +1,6 @@
 iwengdir  = path.getabsolute("IwEngine")
 sndbxdir  = path.getabsolute("Sandbox")
+edtbxdir  = path.getabsolute("Editor")
 glewdir   = iwengdir .. "/extern/glew"
 imguidir  = iwengdir .. "/extern/imgui"
 assimpdir = iwengdir .. "/extern/assimp"
@@ -16,7 +17,7 @@ srcdir  = "/src"
 workspace "IwEngine"
 	configurations { "Debug", "Release" }
 	platforms { "x32", "x64" }
-	startproject "Sandbox"
+	startproject "Editor"
 	location (iwengdir .. blddir)
 
 include (glewdir)
@@ -67,14 +68,6 @@ project "IwEngine"
 		"IMGUI_IMPL_OPENGL_LOADER_GLEW"
 	}
 
-	postbuildcommands  {
-		"xcopy /y /f \""    .. assimpdir .. blddir .. "/code/%{cfg.buildcfg}/assimp-vc140-mt.dll\" \"" .. sndbxdir .. bindir .. "\"",
-		"xcopy /y /f \""    .. iwengdir  .. bindir .. "/IwEngine.dll\" \""  .. sndbxdir .. bindir .. "\"",
-		"xcopy /y /f \""    .. glewdir   .. bindir .. "/GLEW.dll\" \""      .. sndbxdir .. bindir .. "\"",
-		"xcopy /e /y /f /i \"" .. sndbxdir  .. resdir .. "\" \""               .. sndbxdir .. blddir .. resdir .. "\"",
-		"xcopy /e /y /f /i \"" .. sndbxdir  .. resdir .. "\" \""               .. sndbxdir .. bindir .. resdir .. "\""
-	}
-
 	filter "system:windows"
 		cppdialect "C++17"
 		systemversion "latest"
@@ -92,6 +85,55 @@ project "IwEngine"
 		defines "IW_RELEASE"
 		runtime "Release"
 		optimize "On"
+
+project "Editor"
+	kind "WindowedApp"
+	language "C++"
+	location  (edtbxdir .. blddir)
+	targetdir (edtbxdir .. bindir)
+	objdir    (edtbxdir .. blddir)
+
+	files {
+		edtbxdir .. incdir .. "/**.h",
+		edtbxdir .. srcdir .. "/**.h",
+		edtbxdir .. srcdir .. "/**.cpp"
+	}
+
+	includedirs {
+		edtbxdir .. incdir,
+		iwengdir .. incdir,
+		imguidir .. incdir
+	}
+
+	links {
+		"IwEngine",
+		"ImGui",
+		"opengl32.lib"
+	}
+
+	prebuildcommands  {
+		"xcopy /y /f \""    .. assimpdir .. blddir .. "/code/%{cfg.buildcfg}/assimp-vc140-mt.dll\" \"" .. edtbxdir .. bindir .. "\"",
+		"xcopy /y /f \""    .. iwengdir  .. bindir .. "/IwEngine.dll\" \"" .. edtbxdir .. bindir .. "\"",
+		"xcopy /y /f \""    .. glewdir   .. bindir .. "/GLEW.dll\" \""     .. edtbxdir .. bindir .. "\"",
+		"xcopy /e /y /f /i \"" .. sndbxdir  .. resdir .. "\" \""           .. edtbxdir .. blddir .. resdir .. "\"",
+		"xcopy /e /y /f /i \"" .. sndbxdir  .. resdir .. "\" \""           .. edtbxdir .. bindir .. resdir .. "\""
+	}
+
+	filter "system:windows"
+		cppdialect "C++17"
+		systemversion "latest"
+		defines "IW_PLATFORM_WINDOWS"
+
+	filter "configurations:Debug"
+		defines "IW_DEBUG"
+		runtime "Debug"
+		symbols "On"
+
+	filter "configurations:Release"
+		defines "IW_RELEASE"
+		runtime "Release"
+		optimize "On"
+
 
 project "Sandbox"
 	kind "WindowedApp"
@@ -116,6 +158,14 @@ project "Sandbox"
 		"IwEngine",
 		"ImGui",
 		"opengl32.lib"
+	}
+
+	prebuildcommands  {
+		"xcopy /y /f \""    .. assimpdir .. blddir .. "/code/%{cfg.buildcfg}/assimp-vc140-mt.dll\" \"" .. sndbxdir .. bindir .. "\"",
+		"xcopy /y /f \""    .. iwengdir  .. bindir .. "/IwEngine.dll\" \"" .. sndbxdir .. bindir .. "\"",
+		"xcopy /y /f \""    .. glewdir   .. bindir .. "/GLEW.dll\" \""     .. sndbxdir .. bindir .. "\"",
+		"xcopy /e /y /f /i \"" .. sndbxdir  .. resdir .. "\" \""           .. sndbxdir .. blddir .. resdir .. "\"",
+		"xcopy /e /y /f /i \"" .. sndbxdir  .. resdir .. "\" \""           .. sndbxdir .. bindir .. resdir .. "\""
 	}
 
 	filter "system:windows"
