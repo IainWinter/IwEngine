@@ -9,7 +9,6 @@ namespace IW {
 		InputManager->CreateDevice<Mouse>();
 		InputManager->CreateDevice<RawKeyboard>();
 
-		PushOverlay<ImGuiLayer>();
 		PushLayer<ToolLayer>();
 		PushLayer<SandboxLayer>();
 	}
@@ -17,11 +16,13 @@ namespace IW {
 	int App::Initialize(
 		IW::InitOptions& options)
 	{
-		Application::Initialize(options);
+		int err = Application::Initialize(options);
 
-		ImGui::SetCurrentContext((ImGuiContext*)options.ImGuiContext);
+		if (!err) {
+			ImGui::SetCurrentContext((ImGuiContext*)options.ImGuiContext);
+		}
 
-		return 0;
+		return err;
 	}
 }
 
