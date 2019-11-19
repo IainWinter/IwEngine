@@ -349,7 +349,7 @@ inline namespace Input {
 	{
 		bool shifted = shift;
 		if (name >= A && name <= Z) {
-			shifted |= caps;
+			shifted ^= caps;
 		}
 
 		if (name <= SPACE) {
