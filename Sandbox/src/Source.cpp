@@ -31,7 +31,7 @@ public:
 	Game() {
 		InputManager.CreateDevice<IW::Mouse>();
 		//InputManager.CreateDevice<IW::RawMouse>();
-		//InputManager.CreateDevice<IW::RawKeyboard>();
+		InputManager.CreateDevice<IW::RawKeyboard>();
 
 		PushLayer<GameLayer3D>();
 	}

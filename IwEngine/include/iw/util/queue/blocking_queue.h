@@ -20,7 +20,7 @@ inline namespace util {
 	private:
 		std::mutex              m_mutex;
 		std::condition_variable m_condition;
-		std::queue<_t>          m_queue;
+		std::deque<_t>          m_queue;
 
 	public:
 		/**
@@ -33,7 +33,7 @@ inline namespace util {
 		{
 			std::unique_lock<std::mutex> lock(m_mutex);
 
-			m_queue.push(item);
+			m_queue.push_back(item);
 
 			lock.unlock();
 			m_condition.notify_one();
@@ -47,14 +47,14 @@ inline namespace util {
 			m_condition.wait(lock, [=] { return !m_queue.empty(); });
 
 			_t item = std::move(m_queue.front());
-			m_queue.pop();
+			m_queue.pop_front();
 
 			return item;
 		}
 
 		void clear() {
 			std::unique_lock<std::mutex> lock(m_mutex);
-			m_queue = std::queue<_t>();
+			m_queue.clear();
 
 			lock.unlock();
 			m_condition.notify_one();

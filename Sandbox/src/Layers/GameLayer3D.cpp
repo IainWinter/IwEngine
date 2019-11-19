@@ -18,8 +18,9 @@
 GameLayer3D::GameLayer3D(
 	IW::Space& space,
 	IW::Renderer& renderer,
-	IW::AssetManager& asset)
-	: Layer(space, renderer, asset, "Game")
+	IW::AssetManager& asset,
+	iw::eventbus& bus)
+	: Layer(space, renderer, asset, bus, "Game")
 {
 	PushSystem<BulletSystem>();
 	PushSystem<PlayerSystem>();
@@ -39,11 +40,11 @@ iw::vector3 lightDirection;
 iw::matrix4 lightMVP;
 
 iw::matrix4 orth;
-float b, blend;
+float b, blend = .5f;
 
 float angle = 1.57f;
-float distance = 100;
-float fov = 0.17f;
+float distance = 20;
+float fov = 1.17f;
 float a, d, f;
 float blurAmount = 1;
 iw::vector3 p;
@@ -77,17 +78,7 @@ int GameLayer3D::Initialize(
 	shadowTarget->Initialize(Renderer.Device);
 	shadowTargetBlur->Initialize(Renderer.Device);
 
-	iw::ref<IW::Model> floorMesh = Asset.Load<IW::Model>("thenewgoodone.obj");
-
-	//iw::vector2 uvs[4] = {
-	//	iw::vector2(1, 0),
-	//	iw::vector2(1, 1),
-	//	iw::vector2(0, 1),
-	//	iw::vector2(0, 0)
-	//};
-
-	//floorMesh->Meshes->SetUVs(4, uvs);
-	floorMesh->Meshes->GenTangents();
+	iw::ref<IW::Model> floorMesh = Asset.Load<IW::Model>("quad.obj");
 	
 	IW::Mesh* mesh = IW::mesh_factory::create_uvsphere(24, 48);
 	mesh->GenTangents();
@@ -151,8 +142,8 @@ int GameLayer3D::Initialize(
 
 	// Entities
 
-	IW::Camera* perspective = new IW::PerspectiveCamera(fov, 1.778f, 10.0f, 200.0f);
-	orth                    = iw::matrix4::create_orthographic(35.56f, 20, 10.0f, 200.0f);
+	IW::Camera* perspective = new IW::PerspectiveCamera(fov, 1.778f, .01f, 200.0f);
+	orth                    = iw::matrix4::create_orthographic(35.56f, 20, -100.0f, 200.0f);
 
 	IW::Entity camera = Space.CreateEntity<IW::Transform, IW::CameraController>();
 	IW::Entity player = Space.CreateEntity<IW::Transform, IW::ModelComponent, Player>();
@@ -163,7 +154,7 @@ int GameLayer3D::Initialize(
 
 	Space.SetComponentData<IW::Transform>     (player, iw::vector3(3, -0.25f, 0), iw::vector3(0.75f));
 	Space.SetComponentData<IW::ModelComponent>(player, mesh, 1U);
-	Space.SetComponentData<Player>            (player, 4.0f, .15f, .05f);
+	Space.SetComponentData<Player>            (player, 4.0f, .18f, .08f);
 
 	Space.SetComponentData<IW::Transform>     (enemy, iw::vector3(0, -0.25f, 0), iw::vector3(0.75f));
 	Space.SetComponentData<IW::ModelComponent>(enemy, mesh, 1U);
@@ -206,8 +197,8 @@ void GameLayer3D::PostUpdate() {
 	for (auto entity : Space.Query<IW::Transform, Player>()) {
 		auto [transform, player] = entity.Components.Tie<PlayerComponents>();
 
-		playerOffset.x = transform->Position.x;
-		playerOffset.z = transform->Position.z;
+		playerOffset.x = transform->Position.x * .8f;
+		playerOffset.z = transform->Position.z * .8f;
 	}
 
 	for (auto entity : Space.Query<IW::CameraController>()) {
@@ -220,7 +211,7 @@ void GameLayer3D::PostUpdate() {
 			a = angle;
 			d = distance;
 			p = playerOffset;
-			cam->Position = iw::vector3(0, sin(angle), cos(angle)) * distance + playerOffset * 0.75f;
+			cam->Position = iw::vector3(0, sin(angle), cos(angle)) * distance + playerOffset;
 			cam->Rotation = iw::quaternion::from_euler_angles(iw::PI + angle, 0, iw::PI);
 
 			camBuf[1] = cam->GetView();
@@ -231,7 +222,7 @@ void GameLayer3D::PostUpdate() {
 			f = fov;
 			b = blend;
 
-			iw::matrix4 camA = iw::matrix4::create_perspective_field_of_view(fov, 1.778f, 0.1f, 200.0f); // ew
+			iw::matrix4 camA = iw::matrix4::create_perspective_field_of_view(fov, 1.778f, 0.01f, 200.0f); // ew
 
 			iw::matrix4 matrix;
 			for (size_t i = 0; i < 16; i++) {
@@ -322,9 +313,9 @@ void GameLayer3D::ImGui() {
 
 	ImGui::Text("Camera");
 	ImGui::SliderFloat("Angle", &angle, 0, iw::PI);
-	ImGui::SliderFloat("Distance", &distance, 5, 500);
-	ImGui::SliderFloat("Fov", &fov, 0.001f, iw::PI / 4);
-	ImGui::SliderFloat("Blend", &blend, 0, 1);
+	ImGui::SliderFloat("Distance", &distance, 5, 50);
+	ImGui::SliderFloat("Fov", &fov, 0.001f, iw::PI - 0.001f);
+	ImGui::SliderFloat("Blend", &blend, 0, 1, "%.3f", .5f);
 
 	ImGui::Text("Sun");
 	ImGui::SliderFloat3("XYZ", &lightDirection.x, -1, 1);
@@ -385,9 +376,5 @@ bool GameLayer3D::On(
 bool GameLayer3D::On(
 	IW::KeyEvent& event)
 {
-	if (event.Button == IW::UP) {
-
-	}
-
-	return false;
+	return Layer::On(event);
 }

@@ -64,7 +64,7 @@ inline namespace Engine {
 		L* PushLayer(
 			Args&&... args)
 		{
-			L* layer = new L(Space, Renderer, Asset, std::forward<Args>(args)...);
+			L* layer = new L(Space, Renderer, Asset, Bus, std::forward<Args>(args)...);
 			m_layers.PushBack(layer);
 			return layer;
 		}
@@ -75,7 +75,7 @@ inline namespace Engine {
 		L* PushOverlay(
 				Args&& ... args)
 		{
-			L* layer = new L(Space, Renderer, Asset, std::forward<Args>(args)...);
+			L* layer = new L(Space, Renderer, Asset, Bus, std::forward<Args>(args)...);
 			m_layers.PushFront(layer);
 			return layer;
 		}

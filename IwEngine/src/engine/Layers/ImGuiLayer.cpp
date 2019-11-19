@@ -8,8 +8,9 @@ namespace IW {
 	ImGuiLayer::ImGuiLayer(
 		IW::Space& space,
 		IW::Renderer& renderer,
-		IW::AssetManager& asset)
-		: Layer(space, renderer, asset, "ImGui")
+		IW::AssetManager& asset,
+		iw::eventbus& bus)
+		: Layer(space, renderer, asset, bus, "ImGui")
 	{}
 
 	ImGuiLayer::~ImGuiLayer() {}
@@ -89,7 +90,7 @@ namespace IW {
 		auto& io = ImGui::GetIO();
 
 		if (io.WantCaptureMouse) {
-			io.MouseDown[event.Button - IW::MOUSE_L_BUTTON] = event.State;
+			io.MouseDown[event.Button - IW::LMOUSE] = event.State;
 			return true;
 		}
 

@@ -38,35 +38,35 @@ namespace IW {
 		InputEvent input(MOUSE, event.WindowId);
 		switch (event.Message) {
 		case WM_LBUTTONDOWN:
-			input.Name  = MOUSE_L_BUTTON;
+			input.Name  = LMOUSE;
 			input.State = true;
 			break;
 		case WM_RBUTTONDOWN:
-			input.Name  = MOUSE_R_BUTTON;
+			input.Name  = RMOUSE;
 			input.State = true;
 			break;
 		case WM_MBUTTONDOWN:
-			input.Name  = MOUSE_M_BUTTON;
+			input.Name  = MMOUSE;
 			input.State = true;
 			break;
 		case WM_XBUTTONDOWN:
-			input.Name  = (InputName)(MOUSE_X1_BUTTON + HIWORD(event.WParam) - 1);
+			input.Name  = (InputName)(XMOUSE1 + HIWORD(event.WParam) - 1);
 			input.State = true;
 			break;
 		case WM_LBUTTONUP:
-			input.Name  = MOUSE_L_BUTTON;
+			input.Name  = LMOUSE;
 			input.State = false;
 			break;
 		case WM_RBUTTONUP:
-			input.Name  = MOUSE_R_BUTTON;
+			input.Name  = RMOUSE;
 			input.State = false;
 			break;
 		case WM_MBUTTONUP:
-			input.Name  = MOUSE_M_BUTTON;
+			input.Name  = MMOUSE;
 			input.State = false;
 			break;
 		case WM_XBUTTONUP:
-			input.Name  = (InputName)(MOUSE_X1_BUTTON + HIWORD(event.WParam) - 1);
+			input.Name  = (InputName)(XMOUSE1 + HIWORD(event.WParam) - 1);
 			input.State = false;
 			break;
 		}
@@ -76,7 +76,7 @@ namespace IW {
 		}
 
 		if (event.Message == WM_MOUSEWHEEL) {
-			input.Name  = MOUSE_WHEEL;
+			input.Name  = WHEEL;
 			input.State = (short)HIWORD(event.WParam) / (float)WHEEL_DELTA;
 
 			Callback(input);
@@ -86,11 +86,11 @@ namespace IW {
 			|| event.Message == WM_MOUSEMOVE
 			|| event.Message == WM_MOUSEWHEEL)
 		{
-			input.Name  = MOUSE_X_POS;
+			input.Name  = MOUSEX;
 			input.State = LOWORD(event.LParam);
 			Callback(input);
 
-			input.Name  = MOUSE_Y_POS;
+			input.Name  = MOUSEY;
 			input.State = HIWORD(event.LParam);
 			Callback(input);
 		}

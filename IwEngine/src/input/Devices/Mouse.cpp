@@ -23,11 +23,11 @@ namespace IW {
 		Translation translation;
 
 #ifdef IW_PLATFORM_WINDOWS
-		translation.insert(VK_LBUTTON,  MOUSE_L_BUTTON);
-		translation.insert(VK_RBUTTON,  MOUSE_R_BUTTON);
-		translation.insert(VK_MBUTTON,  MOUSE_M_BUTTON);
-		translation.insert(VK_XBUTTON1, MOUSE_X1_BUTTON);
-		translation.insert(VK_XBUTTON2, MOUSE_X2_BUTTON);
+		translation.insert(VK_LBUTTON,  LMOUSE);
+		translation.insert(VK_RBUTTON,  RMOUSE);
+		translation.insert(VK_MBUTTON,  MMOUSE);
+		translation.insert(VK_XBUTTON1, XMOUSE1);
+		translation.insert(VK_XBUTTON2, XMOUSE2);
 #endif
 
 		return translation;

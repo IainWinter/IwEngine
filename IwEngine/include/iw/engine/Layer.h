@@ -8,6 +8,7 @@
 #include "iw/asset/AssetManager.h"
 #include "iw/entity/Space.h"
 #include "iw/graphics/Renderer.h"
+#include "iw/events/eventbus.h"
 
 namespace IW {
 	class IWENGINE_API Layer {
@@ -18,12 +19,14 @@ namespace IW {
 		IW::Space&        Space;
 		IW::Renderer&     Renderer;
 		IW::AssetManager& Asset;
+		iw::eventbus&     Bus;
 
 	public:
 		Layer(
 			IW::Space& space,
 			IW::Renderer& renderer,
 			IW::AssetManager& asset,
+			iw::eventbus& bus,
 			const char* name);
 
 		virtual ~Layer();

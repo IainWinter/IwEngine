@@ -18,7 +18,7 @@ namespace IW {
 	void WindowsKeyboard::HandleEvent(
 		OsEvent& event)
 	{
-		Translate(VK_SPACE);
+		//Translate(VK_SPACE);
 	}
 
 	bool Keyboard::KeyDown(

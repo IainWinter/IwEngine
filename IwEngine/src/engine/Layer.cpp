@@ -5,11 +5,13 @@ namespace IW {
 		IW::Space& space,
 		IW::Renderer& renderer,
 		IW::AssetManager& asset,
+		iw::eventbus& bus,
 		const char* name)
 		: m_name(name)
 		, Space(space)
 		, Renderer(renderer)
 		, Asset(asset)
+		, Bus(bus)
 	{}
 
 	Layer::~Layer() {}
@@ -46,31 +48,31 @@ namespace IW {
 	bool Layer::On(
 		IW::MouseWheelEvent& event)
 	{
-		return false;
+		return m_systems.On(event);
 	}
 
 	bool Layer::On(
 		IW::MouseMovedEvent& event)
 	{
-		return false;
+		return m_systems.On(event);
 	}
 
 	bool Layer::On(
 		IW::MouseButtonEvent& event)
 	{
-		return false;
+		return m_systems.On(event);
 	}
 
 	bool Layer::On(
 		IW::KeyEvent& event)
 	{
-		return false;
+		return m_systems.On(event);
 	}
 
 	bool Layer::On(
 		IW::KeyTypedEvent& event)
 	{
-		return false;
+		return m_systems.On(event);
 	}
 
 	void Layer::UpdateSystems() {

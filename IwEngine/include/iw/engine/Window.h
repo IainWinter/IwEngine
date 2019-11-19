@@ -17,7 +17,6 @@ inline namespace Engine {
 		virtual void Update()  = 0;
 		//virtual void Clear() =   0;
 
-		virtual void PollEvents()  = 0;
 		virtual void SwapBuffers() = 0;
 
 		virtual bool TakeOwnership()    = 0;

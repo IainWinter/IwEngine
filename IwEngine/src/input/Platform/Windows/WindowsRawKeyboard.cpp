@@ -22,8 +22,7 @@ namespace IW {
 		rid[0].hwndTarget = NULL; // For current window // Seems risky
 
 		if (!RegisterRawInputDevices(rid, 1, sizeof(rid[0]))) {
-			LOG_WARNING << "Mouse failed to be created -- RAWINPUTDEVICE "
-				<< rid;
+			LOG_WARNING << "Mouse failed to be created -- RAWINPUTDEVICE " << rid;
 		}
 	}
 
@@ -38,16 +37,16 @@ namespace IW {
 		if (raw->header.dwType == RIM_TYPEKEYBOARD) {
 			RAWKEYBOARD keyboard = raw->data.keyboard;
 
-			InputEvent event(KEYBOARD, event.WindowId);
+			if (keyboard.VKey == 255) return;
 
-			if (keyboard.VKey == VK_UP) {
-				LOG_INFO << keyboard.VKey;
-			}
+			InputEvent e(KEYBOARD, event.WindowId);
+			e.Name  = Translate(keyboard.VKey);
+			e.State = !(keyboard.Flags & RI_KEY_BREAK);
 
-			event.Name  = Translate(keyboard.VKey);
-			event.State = !keyboard.Flags;
+			// ways to see if key is toggled, should replace caps system that is in
+			// context rn but that works for now just the states can be out of sync from the keyboard
 
-			Callback(event);
+			Callback(e);
 		}
 	}
 }

@@ -23,8 +23,8 @@ namespace IW {
 			}
 		})
 	{
-		m_imguiLayer = PushLayer<ImGuiLayer>();
-		PushLayer<DebugLayer>();
+		m_imguiLayer = PushOverlay<ImGuiLayer>();
+		PushOverlay<DebugLayer>();
 	}
 
 	Application::~Application() {
@@ -92,7 +92,7 @@ namespace IW {
 	}
 
 	void Application::Run() {
-		m_window->PollEvents();
+		Bus.publish();
 		m_window->ReleaseOwnership();
 
 		m_running = true;
@@ -174,7 +174,7 @@ namespace IW {
 
 		// Swap buffers (Sync)
 		m_window->SwapBuffers();
-		m_window->PollEvents();
+		Bus.publish();
 	}
 
 	void Application::FixedUpdate() {

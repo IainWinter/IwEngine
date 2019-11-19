@@ -24,7 +24,6 @@ inline namespace Engine {
 		//void Clear()   override;
 
 		void SwapBuffers() override;
-		void PollEvents()  override;
 
 		bool TakeOwnership()    override;
 		bool ReleaseOwnership() override;

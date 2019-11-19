@@ -1,4 +1,5 @@
 #include "iw/input/ContextManager.h"
+#include <iw\log\logger.h>
 
 namespace IW {
 	void ContextManager::CreateContext(
@@ -14,31 +15,54 @@ namespace IW {
 	{
 		Context& context = m_contexts[input.WindowId];
 
+		// Locks
+
+		if (!!input.State) {
+			switch (input.Name) {
+				case CAPS_LOCK:   context.State.ToggleLock(CAPS_LOCK);   break;
+				case NUM_LOCK:    context.State.ToggleLock(NUM_LOCK);    break;
+				case SCROLL_LOCK: context.State.ToggleLock(SCROLL_LOCK); break;
+			}
+		}
+
+		// States
+
 		float lastState = context.State[input.Name];
-		context.State[input.Name] = input.State;
 
-		if (input.Name == MOUSE_X_AXIS) {
-			context.State[MOUSE_X_POS] += input.State;
+		if (input.Name == MOUSEdX) {
+			context.State[MOUSEX] += input.State;
 		}
 
-		else if (input.Name == MOUSE_Y_AXIS) {
-			context.State[MOUSE_Y_POS] += input.State;
+		else if (input.Name == MOUSEdY) {
+			context.State[MOUSEY] += input.State;
 		}
 
-		else if (input.Name == MOUSE_X_POS) {
-			context.State[MOUSE_X_AXIS] = 
-				input.State - context.State[MOUSE_X_POS];
+		else if (input.Name == MOUSEX) {
+			context.State[MOUSEdX] = input.State - lastState;
+			context.State[MOUSEX]  = input.State;
 		}
 
-		else if (input.Name == MOUSE_Y_POS) {
-			context.State[MOUSE_Y_AXIS] =
-				input.State - context.State[MOUSE_Y_POS];
+		else if (input.Name == MOUSEY) {
+			context.State[MOUSEdY] = input.State - lastState;
+			context.State[MOUSEY]  = input.State;
 		}
 
-		else if (input.Device == KEYBOARD) {
-			// Need way more key interpretation this doesn't even work \/
+		else {
+			context.State[input.Name] = input.State;
+		}
+
+		// Dispatch of callbacks
+
+		if (input.Device == KEYBOARD) {
 			if (input.State) {
-				context.KeyTypedCallback(&context.State, input.Name, KeyTranslation[input.Name]);
+				bool shifted = !!context.State[SHIFT];
+				bool    caps = !!context.State.GetLock(CAPS_LOCK);
+
+				char character = GetCharacter(input.Name, shifted, caps);
+
+				if (character != '\0') {
+					context.KeyTypedCallback(&context.State, input.Name, character);
+				}
 			}
 			
 			if (input.State != lastState) {
@@ -47,22 +71,20 @@ namespace IW {
 		}
 
 
-		if (input.Device == MOUSE) {
-			if (input.Name == MOUSE_WHEEL) {
+		else if (input.Device == MOUSE) {
+			if (input.Name == WHEEL) {
 				context.MouseWheelCallback(&context.State, input.State);
 			}
 
-			else if (input.Name == MOUSE_Y_AXIS 
-				 || input.Name == MOUSE_Y_POS)
+			else if (input.Name == MOUSEdX || input.Name == MOUSEdY
+				  || input.Name == MOUSEX  || input.Name == MOUSEY)
 			{
 				context.MouseMovedCallback(&context.State,
-					context.State[MOUSE_X_POS],  context.State[MOUSE_Y_POS],
-					context.State[MOUSE_X_AXIS], context.State[MOUSE_Y_AXIS]);
+					context.State[MOUSEX],  context.State[MOUSEY],
+					context.State[MOUSEdX], context.State[MOUSEdY]);
 			}
 
-			else if (input.Name != MOUSE_X_AXIS
-				 && input.Name != MOUSE_X_POS)
-			{
+			else {
 				context.MouseButtonCallback(&context.State, input.Name, input.State);
 			}
 		}

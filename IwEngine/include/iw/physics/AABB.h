@@ -7,28 +7,28 @@
 
 namespace IwPhysics {
 	template<
-		typename _v>
+		typename V>
 	struct AABB {
-		_v Min;
-		_v Max;
+		V Min;
+		V Max;
 
 		AABB() = default;
 
 		AABB(
-			const _v& min,
-			const _v& max)
+			const V& min,
+			const V& max)
 			: Min(min)
 			, Max(max)
 		{}
 
 		AABB(
-			const _v& center,
+			const V& center,
 			float scale)
 			: Min(center - scale / 2)
 			, Max(center + scale / 2)
 		{}
 
-		_v Center() const {
+		V Center() const {
 			return (Min + Max) / 2;
 		}
 

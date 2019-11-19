@@ -11,6 +11,7 @@ PlayerSystem::PlayerSystem(
 	IW::Space& space,
 	IW::Graphics::Renderer& renderer)
 	: IW::System<IW::Transform, Player>(space, renderer, "Player")
+	, dash(false)
 {}
 
 void PlayerSystem::Update(
@@ -19,25 +20,8 @@ void PlayerSystem::Update(
 	for (auto entity : view) {
 		auto [ transform, player ] = entity.Components.Tie<Components>();
 
-		iw::vector3 movement;
-		if (IW::Keyboard::KeyDown(IW::LEFT)) {
-			movement.x -= 1;
-		}
-
-		if (IW::Keyboard::KeyDown(IW::RIGHT)) {
-			movement.x += 1;
-		}
-
-		if (IW::Keyboard::KeyDown(IW::UP)) {
-			movement.z -= 1;
-		}
-
-		if (IW::Keyboard::KeyDown(IW::DOWN)) {
-			movement.z += 1;
-		}
-
 		if (player->Timer <= -player->CooldownTime) {
-			if (IW::Keyboard::KeyDown(IW::X)) {
+			if (dash) {
 				player->Timer = player->DashTime;
 			}
 		}
@@ -54,4 +38,18 @@ void PlayerSystem::Update(
 			transform->Position += movement.normalized() * player->Speed * IW::Time::DeltaTime();
 		}
 	}
+}
+
+bool PlayerSystem::On(
+	IW::KeyEvent& event)
+{
+	switch (event.Button) {
+		case IW::UP:    movement.z -= event.State == 0 ? -1 : 1; break;
+		case IW::DOWN:  movement.z += event.State == 0 ? -1 : 1; break;
+		case IW::LEFT:  movement.x -= event.State == 0 ? -1 : 1; break;
+		case IW::RIGHT: movement.x += event.State == 0 ? -1 : 1; break;
+		case IW::X:     dash = event.State; break;
+	}
+
+	return true;
 }

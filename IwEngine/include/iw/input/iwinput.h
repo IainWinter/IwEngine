@@ -12,6 +12,7 @@
 #define NO_HEIGHT -1.0f
 
 namespace IW {
+inline namespace Input {
 	enum DeviceType {
 		MOUSE,
 		KEYBOARD
@@ -20,6 +21,8 @@ namespace IW {
 	enum InputName
 		: unsigned int
 	{
+		// Nice numbers and letters
+
 		ZERO,
 		ONE,
 		TWO,
@@ -30,7 +33,6 @@ namespace IW {
 		SEVEN,
 		EIGHT,
 		NINE,
-
 		A,
 		B,
 		C,
@@ -58,6 +60,8 @@ namespace IW {
 		Y,
 		Z,
 
+		// Num pad 
+
 		NUM0,
 		NUM1,
 		NUM2,
@@ -70,33 +74,41 @@ namespace IW {
 		NUM9,
 		ADD,
 		SUBTRACT,
-		DIVIDE,
 		MULTIPLY,
-		DECIAML,
-		SEPARATOR,
+		DIVIDE,
+		DECI,
+		//SEPARATOR, // never sent by keyboards?
 
-		BACKSPACE,
-		TAB,
-		CLEAR,
-		RETURN,
-		PAUSE,
-		ESCAPE,
+		// Oem versions of these are the same everywhere I guess
+
+		PLUS,
+		MINUS,
+		COMMA,
+		PERIOD,
+
+		// Oem keys like -=][';/.,`
+
+		OEM1,
+		OEM2,
+		OEM3,
+		OEM4,
+		OEM5,
+		OEM6,
+		OEM7,
+		OEM8,
+
+		// Space bar
+
 		SPACE,
-		PAGEUP,
-		PADEDOWN,
-		END,
-		HOME,
-		SELECT,
-		PRINT,
-		EXECUTE,
-		PRINTSCREEN,
-		DEL,
-		HELP,
 
-		LEFT,
+		// Arrow Keys
+
 		UP,
-		RIGHT,
+		LEFT,
 		DOWN,
+		RIGHT,
+
+		// Function keys
 
 		F1,
 		F2,
@@ -123,33 +135,131 @@ namespace IW {
 		F23,
 		F24,
 
+		// Formating keys
+
+		BACK,
+		TAB,
+		CLEAR,
+		RETURN,
+		ESCAPE,
+
+		// Func ass keys
+
+		SELECT,
+		PRINT,
+
+		SNAPSHOT,
+		INSERT,
+		DEL,
+		PRIOR,
+		NEXT,
+		HOME,
+		END,
+		HELP,
+		PAUSE,
+
+		APPS,
+
+		// Locks
+
 		CAPS_LOCK,
 		NUM_LOCK,
 		SCROLL_LOCK,
 
+		// Sys leys
+
 		SHIFT,
-		LEFT_SHIFT,
-		RIGHT_SHIFT,
+		LSHIFT,
+		RSHIFT,
 		CONTROL,
-		LEFT_CONTROL,
-		RIGHT_CONTROL,
+		LCONTROL,
+		RCONTROL,
 		MENU,
-		LEFT_MENU,
-		RIGHT_MENU,
+		LMENU,
+		RMENU,
 
-		LEFT_WIN,
-		RIGHT_WIN,
+		// Os keys
 
-		MOUSE_L_BUTTON,
-		MOUSE_R_BUTTON,
-		MOUSE_M_BUTTON,
-		MOUSE_X1_BUTTON,
-		MOUSE_X2_BUTTON,
-		MOUSE_WHEEL,
-		MOUSE_X_AXIS,
-		MOUSE_Y_AXIS,
-		MOUSE_X_POS,
-		MOUSE_Y_POS,
+		LOS,
+		ROS,
+
+		// weird keys i =dk
+
+		CANCEL,
+		CONVERT,
+		NONCONVERT,
+		ACCEPT,
+		MODECHANGE,
+		EXECUTE,
+
+		// browser keys ?
+
+		BROWSER_BACK,
+		BROWSER_FORWARD,
+		BROWSER_REFRESH,
+		BROWSER_STOP,
+		BROWSER_SEARCH,
+		BROWSER_FAVORITES,
+		BROWSER_HOME,
+
+		// Media keys
+
+		VOLUME_MUTE,
+		VOLUME_DOWN,
+		VOLUME_UP,
+
+		MEDIA_NEXT_TRACK,
+		MEDIA_PREV_TRACK,
+		MEDIA_STOP,
+		MEDIA_PLAY_PAUSE,
+
+		LAUNCH_MAIL,
+		LAUNCH_MEDIA_SELECT,
+		LAUNCH_APP1,
+		LAUNCH_APP2,
+
+		// Wak ass oem 
+
+		OEM102,
+		OEM_CLEAR,
+		PROCESSKEY,
+		PACKET,
+
+		// What the fuck ass keys are these
+
+		ATTN,
+		CRSEL,
+		EXSEL,
+		EREOF,
+		PLAY,
+		ZOOM,
+		//NONAME,
+		PA1,
+
+		// Other langs
+
+		KANA,
+		HANGUEL,
+		HANGUL,
+		JUNJA,
+		FINAL,
+		HANJA,
+		KANJI,
+
+		// Mouse
+
+		LMOUSE,
+		RMOUSE,
+		MMOUSE,
+		WHEEL,
+		XMOUSE1,
+		XMOUSE2,
+		MOUSEX,
+		MOUSEY,
+		MOUSEdX,
+		MOUSEdY,
+
+		// 200iq
 
 		INPUT_COUNT,
 		INPUT_NONE
@@ -157,58 +267,96 @@ namespace IW {
 
 	//Order of InputNames is important
 
-	constexpr char KeyTranslation[SEPARATOR + 1] = {
-		'0',
-		'1',
-		'2',
-		'3',
-		'4',
-		'5',
-		'6',
-		'7',
-		'8',
-		'9',
-		'A',
-		'B',
-		'C',
-		'D',
-		'E',
-		'F',
-		'G',
-		'H',
-		'I',
-		'J',
-		'K',
-		'L',
-		'M',
-		'N',
-		'O',
-		'P',
-		'Q',
-		'R',
-		'S',
-		'T',
-		'U',
-		'V',
-		'W',
-		'X',
-		'Y',
-		'Z',
-		'0',
-		'1',
-		'2',
-		'3',
-		'4',
-		'5',
-		'6',
-		'7',
-		'8',
-		'9',
-		'+',
-		'-',
-		'/',
-		'*',
-		'.',
-		'|'
+	constexpr char KeyTranslation[SPACE * 2 + 2] = {
+		// Numbers and letters
+
+		'0', ')',
+		'1',	'!',
+		'2',	'@',
+		'3',	'#',
+		'4',	'$',
+		'5',	'%',
+		'6',	'^',
+		'7',	'&',
+		'8',	'*',
+		'9',	'(',
+		'a',	'A',
+		'b',	'B',
+		'c',	'C',
+		'd',	'D',
+		'e',	'E',
+		'f',	'F',
+		'g',	'G',
+		'h',	'H',
+		'i',	'I',
+		'j',	'J',
+		'k',	'K',
+		'l',	'L',
+		'm',	'M',
+		'n',	'N',
+		'o',	'O',
+		'p',	'P',
+		'q',	'Q',
+		'r',	'R',
+		's',	'S',
+		't',	'T',
+		'u',	'U',
+		'v',	'V',
+		'w',	'W',
+		'x',	'X',
+		'y',	'Y',
+		'z',	'Z',
+
+		// Num pad
+
+		'0',	'\0',
+		'1',	'\0',
+		'2',	'\0',
+		'3',	'\0',
+		'4',	'\0',
+		'5',	'\0',
+		'6',	'\0',
+		'7',	'\0',
+		'8',	'\0',
+		'9',	'\0',
+		'+',	'+',
+		'-',	'-',
+		'*',	'*',
+		'/',	'/',
+		'.',	'\0',
+
+		// Oem keys
+
+		'=',	'+',
+		'-',	'_',
+		',',	'<',
+		'.',	'>',
+
+		';',':',
+		'/',	'?',
+		'`',	'~',
+		'[',	'{',
+		'\\','|',
+		']',	'}',
+		'\'','\"',
+		' ', ' '
 	};
+
+	static char GetCharacter(
+		InputName name,
+		bool shift = false,
+		bool caps = false)
+	{
+		bool shifted = shift;
+		if (name >= A && name <= Z) {
+			shifted |= caps;
+		}
+
+		if (name <= SPACE) {
+			return KeyTranslation[shifted ? name * 2 + 1 : name * 2];
+		}
+
+		return '\0';
+	}
+}
 }

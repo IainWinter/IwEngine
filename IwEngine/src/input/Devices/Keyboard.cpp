@@ -23,23 +23,6 @@ namespace IW {
 		Translation translation;
 
 #ifdef IW_PLATFORM_WINDOWS
-		translation.insert(VK_BACK, BACKSPACE);
-		translation.insert(VK_TAB, TAB);
-		translation.insert(VK_CLEAR, CLEAR);
-		translation.insert(VK_RETURN, RETURN);
-		translation.insert(VK_PAUSE, PAUSE);
-		translation.insert(VK_ESCAPE, ESCAPE);
-		translation.insert(VK_SPACE, SPACE);
-		translation.insert(VK_PRIOR, PAGEUP);
-		translation.insert(VK_NEXT, PADEDOWN);
-		translation.insert(VK_END, END);
-		translation.insert(VK_HOME, HOME);
-		translation.insert(VK_SELECT, SELECT);
-		translation.insert(VK_PRINT, PRINT);
-		translation.insert(VK_EXECUTE, EXECUTE);
-		translation.insert(VK_SNAPSHOT, PRINTSCREEN);
-		translation.insert(VK_DELETE, DEL);
-		translation.insert(VK_HELP, HELP);
 		translation.insert('0', ZERO);
 		translation.insert('1', ONE);
 		translation.insert('2', TWO);
@@ -76,6 +59,7 @@ namespace IW {
 		translation.insert('X', X);
 		translation.insert('Y', Y);
 		translation.insert('Z', Z);
+
 		translation.insert(VK_NUMPAD0, NUM0);
 		translation.insert(VK_NUMPAD1, NUM1);
 		translation.insert(VK_NUMPAD2, NUM2);
@@ -88,14 +72,30 @@ namespace IW {
 		translation.insert(VK_NUMPAD9, NUM9);
 		translation.insert(VK_ADD, ADD);
 		translation.insert(VK_SUBTRACT, SUBTRACT);
-		translation.insert(VK_DIVIDE, DIVIDE);
 		translation.insert(VK_MULTIPLY, MULTIPLY);
-		translation.insert(VK_DECIMAL, DECIAML);
-		translation.insert(VK_SEPARATOR, SEPARATOR);
-		translation.insert(VK_LEFT, LEFT);
+		translation.insert(VK_DIVIDE, DIVIDE);
+		translation.insert(VK_DECIMAL, DECI);
+
+		translation.insert(VK_OEM_PLUS, PLUS);
+		translation.insert(VK_OEM_MINUS, MINUS);
+		translation.insert(VK_OEM_COMMA, COMMA);
+		translation.insert(VK_OEM_PERIOD, PERIOD);
+
+		translation.insert(VK_OEM_1, OEM1);
+		translation.insert(VK_OEM_2, OEM2);
+		translation.insert(VK_OEM_3, OEM3);
+		translation.insert(VK_OEM_4, OEM4);
+		translation.insert(VK_OEM_5, OEM5);
+		translation.insert(VK_OEM_6, OEM6);
+		translation.insert(VK_OEM_7, OEM7);
+
+		translation.insert(VK_SPACE, SPACE);
+
 		translation.insert(VK_UP, UP);
-		translation.insert(VK_RIGHT, RIGHT);
+		translation.insert(VK_LEFT, LEFT);
 		translation.insert(VK_DOWN, DOWN);
+		translation.insert(VK_RIGHT, RIGHT);
+
 		translation.insert(VK_F1, F1);
 		translation.insert(VK_F2, F2);
 		translation.insert(VK_F3, F3);
@@ -120,20 +120,46 @@ namespace IW {
 		translation.insert(VK_F22, F22);
 		translation.insert(VK_F23, F23);
 		translation.insert(VK_F24, F24);
+
+		translation.insert(VK_BACK, BACK);
+		translation.insert(VK_TAB, TAB);
+		translation.insert(VK_CLEAR, CLEAR);
+		translation.insert(VK_RETURN, RETURN);
+		translation.insert(VK_ESCAPE, ESCAPE);
+
+		translation.insert(VK_SELECT, SELECT);
+		translation.insert(VK_PRINT, PRINT);
+
+		translation.insert(VK_SNAPSHOT, SNAPSHOT);
+		translation.insert(VK_INSERT, INSERT);
+		translation.insert(VK_DELETE, DEL); // Windows defines DELETE as a macro!
+		translation.insert(VK_PRIOR, PRIOR);
+		translation.insert(VK_NEXT, NEXT);
+		translation.insert(VK_HOME, HOME);
+		translation.insert(VK_END, END);
+		translation.insert(VK_HELP, HELP);
+		translation.insert(VK_PAUSE, PAUSE);
+
+		translation.insert(VK_APPS, APPS);
+
 		translation.insert(VK_CAPITAL, CAPS_LOCK);
 		translation.insert(VK_NUMLOCK, NUM_LOCK);
-		translation.insert(VK_SCROLL, SCROLL_LOCK);
+		translation.insert(VK_SCROLL,  SCROLL_LOCK);
+
 		translation.insert(VK_SHIFT, SHIFT);
-		translation.insert(VK_LSHIFT, LEFT_SHIFT);
-		translation.insert(VK_RSHIFT, RIGHT_SHIFT);
+		translation.insert(VK_LSHIFT, LSHIFT);
+		translation.insert(VK_RSHIFT, RSHIFT);
 		translation.insert(VK_CONTROL, CONTROL);
-		translation.insert(VK_LCONTROL, LEFT_CONTROL);
-		translation.insert(VK_RCONTROL, RIGHT_CONTROL);
+		translation.insert(VK_LCONTROL, LCONTROL);
+		translation.insert(VK_RCONTROL, RCONTROL);
 		translation.insert(VK_MENU, MENU);
-		translation.insert(VK_LMENU, LEFT_MENU);
-		translation.insert(VK_RMENU, RIGHT_MENU);
-		translation.insert(VK_LWIN, LEFT_WIN);
-		translation.insert(VK_RWIN, RIGHT_WIN);
+		translation.insert(VK_LMENU, LMENU);
+		translation.insert(VK_RMENU, RMENU);
+
+		translation.insert(VK_LWIN, LOS);
+		translation.insert(VK_RWIN, ROS);
+
+		translation.insert(VK_EXECUTE, EXECUTE);
 #endif
 
 		return translation;

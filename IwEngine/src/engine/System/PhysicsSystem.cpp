@@ -6,7 +6,7 @@ namespace IW {
 	PhysicsSystem::PhysicsSystem(
 		IW::Space& space,
 		IW::Graphics::Renderer& renderer)
-		: IW::System<IW::Transform, IwPhysics::AABB2D>(space, renderer, "Physics")
+		: IW::System<IW::Transform, IwPhysics::AABB3D>(space, renderer, "Physics")
 	{}
 
 	struct Components {

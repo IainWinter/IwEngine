@@ -54,7 +54,7 @@ namespace IW {
 			RAWMOUSE mouse = raw->data.mouse;
 
 			InputEvent input(MOUSE, event.WindowId);
-			input.Name = MOUSE_L_BUTTON;
+			input.Name = LMOUSE;
 			for (int i = 0; i < 5; i++) {
 				if (maskdown[i] & mouse.usButtonFlags) {
 					input.State = 1;
@@ -70,17 +70,17 @@ namespace IW {
 			}
 
 			if (mouse.usButtonFlags == RI_MOUSE_WHEEL) {
-				input.Name  = MOUSE_WHEEL;
+				input.Name  = WHEEL;
 				input.State = (short)LOWORD(mouse.usButtonData) / (float)WHEEL_DELTA;
 				Callback(input);
 			}
 
 			if (mouse.usFlags == MOUSE_MOVE_RELATIVE) {
-				input.Name  = MOUSE_X_AXIS;
+				input.Name  = MOUSEdX;
 				input.State = (float)mouse.lLastX;
 				Callback(input);
 
-				input.Name  = MOUSE_Y_AXIS;
+				input.Name  = MOUSEdY;
 				input.State = (float)mouse.lLastY;
 				Callback(input);
 			}

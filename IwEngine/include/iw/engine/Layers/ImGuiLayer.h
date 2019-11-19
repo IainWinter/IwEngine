@@ -16,7 +16,8 @@ inline namespace Engine {
 		ImGuiLayer(
 			IW::Space& space,
 			IW::Renderer& renderer,
-			IW::AssetManager& asset);
+			IW::AssetManager& asset,
+			iw::eventbus& bus);
 
 		~ImGuiLayer();
 

@@ -174,10 +174,6 @@ namespace IW {
 		::SwapBuffers(m_device);
 	}
 
-	void WindowsWindow::PollEvents() {
-		Bus->publish();
-	}
-
 	bool WindowsWindow::TakeOwnership() {
 		if (!wglMakeCurrent(m_device, m_context)) {
 			LOG_ERROR << "wglMakeCurrent(" << m_device << ", " << m_context << ") failed.";

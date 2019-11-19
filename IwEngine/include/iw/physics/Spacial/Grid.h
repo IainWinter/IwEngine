@@ -7,31 +7,31 @@
 namespace IwPhysics {
 	template<
 		typename T,
-		typename Dim = iw::vector3,
-		typename Key = int>
+		typename V = iw::vector3,
+		typename K = int>
 	class Grid {
 	private:
-		using AABB = AABB<Dim>;
+		using AABB = AABB<V>;
 
 		struct Cell {
 			std::vector<T> Items;
 		};
 
-		Dim m_cellDimensions;
-		std::unordered_map<Key, Cell> m_cells;
+		V m_cellDimensions;
+		std::unordered_map<K, Cell> m_cells;
 
 	public:
 		Grid(
-			Dim cellDimensions)
+			V cellDimensions)
 			: m_cellDimensions(cellDimensions)
 		{}
 
 		void Insert(
 			const T& item,
-			const Dim& position,
+			const V& position,
 			const AABB& bounds)
 		{
-			Key key = GetKey<Dim>(position, bounds);
+			K key = GetKey<V>(position, bounds);
 			auto itr = m_cells.find(key);
 			if (itr == m_cells.end()) {
 				itr = m_cells.insert(std::make_pair(key, Cell())).first;
@@ -47,36 +47,36 @@ namespace IwPhysics {
 	private:
 		template<
 			typename D>
-		Key GetKey(
-			const Dim& position,
+		K GetKey(
+			const V& position,
 			const AABB& bounds);
 
 		template<>
-		Key GetKey<iw::vector2>(
-			const Dim& position,
+		K GetKey<iw::vector2>(
+			const V& position,
 			const AABB& bounds)
 		{
 			iw::vector3 key = (bounds.Center() + position) / m_cellDimensions;
-			Key x = (Key)key.x;
-			Key y = (Key)key.y;
+			K x = (K)key.x;
+			K y = (K)key.y;
 
-			constexpr static unsigned char KEYPART = sizeof(Key) * 4 / 2;
+			constexpr static size_t KEYPART = sizeof(K) * 4 / 2;
 
 			return x << (KEYPART * 0)
 				+ y << (KEYPART * 1);
 		}
 
 		template<>
-		Key GetKey<iw::vector3>(
-			const Dim& position,
+		K GetKey<iw::vector3>(
+			const V& position,
 			const AABB& bounds)
 		{
 			iw::vector3 key = (bounds.Center() + position) / m_cellDimensions;
-			Key x = (Key)key.x;
-			Key y = (Key)key.y;
-			Key z = (Key)key.z;
+			K x = (K)key.x;
+			K y = (K)key.y;
+			K z = (K)key.z;
 
-			constexpr static unsigned char KEYPART = sizeof(Key) * 4 / 3;
+			constexpr static size_t KEYPART = sizeof(K) * 4 / 3;
 
 			return x << (KEYPART * 0)
 				+ y << (KEYPART * 1)
@@ -84,17 +84,17 @@ namespace IwPhysics {
 		}
 
 		template<>
-		Key GetKey<iw::vector4>(
-			const Dim& position,
+		K GetKey<iw::vector4>(
+			const V& position,
 			const AABB& bounds)
 		{
 			iw::vector3 key = (bounds.Center() + position) / m_cellDimensions;
-			Key x = (Key)key.x;
-			Key y = (Key)key.y;
-			Key z = (Key)key.z;
-			Key w = (Key)key.w;
+			K x = (K)key.x;
+			K y = (K)key.y;
+			K z = (K)key.z;
+			K w = (K)key.w;
 
-			constexpr static unsigned char KEYPART = sizeof(Key) * 4 / 4;
+			constexpr static size_t KEYPART = sizeof(K) * 4 / 4;
 
 			return x << (KEYPART * 0)
 				+ y << (KEYPART * 1)

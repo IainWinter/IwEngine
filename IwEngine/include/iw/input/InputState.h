@@ -4,23 +4,40 @@
 #include <cstring>
 
 namespace IW {
-inline namespace Input {
-	class InputState {
-	private:
-		float states[INPUT_COUNT];
+	inline namespace Input {
+		class InputState {
+		private:
+			float states[INPUT_COUNT];
+			bool  locks[3];
 
-	public:
-		InputState() {
-			memset(states, (int)0.0f, INPUT_COUNT * sizeof(float));
-		}
+		public:
+			InputState() {
+				memset(states, (int)0.0f, INPUT_COUNT * sizeof(float));
+				memset(locks, (int)false, 3 * sizeof(bool));
+			}
 
-		inline const float* States() {
-			return states;
-		}
+			inline const float* States() {
+				return states;
+			}
 
-		float& operator[](int index) {
-			return states[index];
-		}
-	};
-}
+			inline float& operator[](
+				int index)
+			{
+				return states[index];
+			}
+
+			inline bool& GetLock(
+				InputName lock)
+			{
+				return locks[lock - CAPS_LOCK];
+			}
+
+			inline void ToggleLock(
+				InputName lock)
+			{
+				bool& l = GetLock(lock);
+				l = !l;
+			}
+		};
+	}
 }

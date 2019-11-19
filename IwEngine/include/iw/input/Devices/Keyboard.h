@@ -11,7 +11,6 @@ inline namespace Input {
 	protected:
 		// Should just be in Device
 		static Translation translation;
-
 		static Translation CreateTranslation();
 
 	public:
