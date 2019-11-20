@@ -8,11 +8,11 @@ namespace IW {
 inline namespace Physics {
 	template<
 		typename V>
-	struct Segment {
+	struct Ray {
 		V A;
 		V B;
 
-		Segment(
+		Ray(
 			V a,
 			V b)
 			: A(a)
@@ -42,38 +42,27 @@ inline namespace Physics {
 			return iw::almost_equal(pa + pb, ab, 5);
 		}
 
+		//http://geomalgorithms.com/a05-_intersect-1.html#intersect2D_2Segments
+
+
 		//  0: Not intersecting
 		//  1: Same point
 		//  2: Intersecting (infront of  B)
 		//  3: Intersecting (behind  of  A)
 		//  4: Intersecting (inside  of AB)
-		// -1: Not intersecting (behind  of A)
-		// -2: Not intersecting (infront of B)
 		virtual int Intersects(
-			const Segment<V>& segment,
+			const Ray<V>& ray,
 			V* intersect    = nullptr,
 			V* intersectEnd = nullptr) const;
 	};
 
-	template<
-		typename V>
-	struct Line
-		: Segment<V>
-	{
-
-	};
-
-	template<
-		typename V>
-	struct Ray
-		: Segment<V>
-	{
-
-	};
+	using Ray2 = Ray<iw::vector2>;
+	using Ray3 = Ray<iw::vector3>;
+	using Ray4 = Ray<iw::vector4>;
 
 	template<typename V>
-	inline int Segment<V>::Intersects(
-		const Segment<V>& segment,
+	inline int Ray<V>::Intersects(
+		const Ray& ray,
 		V* intersect,
 		V* intersectEnd) const
 	{
@@ -81,16 +70,20 @@ inline namespace Physics {
 		return 0;
 	}
 
-	//http://geomalgorithms.com/a05-_intersect-1.html#intersect2D_2Segments
+	//  0: Not intersecting
+	//  1: Same point
+	//  2: Intersecting (behind  of  A)       l
+	//  3: Intersecting (infront of  B)    r  l
+	//  4: Intersecting (inside  of AB) s  r  l
 	template<>
-	inline int Segment<iw::vector2>::Intersects(
-		const Segment& segment,
+	inline int Ray<iw::vector2>::Intersects(
+		const Ray& ray,
 		iw::vector2* intersect,
 		iw::vector2* intersectEnd) const
 	{
 		iw::vector2 u = Vector();
-		iw::vector2 v = segment.Vector();
-		iw::vector2 w = A - segment.A;
+		iw::vector2 v = ray.Vector();
+		iw::vector2 w = A - ray.A;
 		float d = u.cross_length(v); // only vec2
 
 		iw::vector2 i, ie;
@@ -105,7 +98,7 @@ inline namespace Physics {
 				// both segments are points
 				if (du == 0 && dv == 0) {
 					// Same point
-					if (A == segment.A) {
+					if (A == ray.A) {
 						i = A;
 						o = 1; // same point
 					}
@@ -113,7 +106,7 @@ inline namespace Physics {
 
 				// 'this' is a point
 				else if (du == 0) {
-					if (segment.HasPoint(A)) {
+					if (ray.HasPoint(A)) {
 						i = A;
 						o = -324; // inside of AB WRONG CHECK DISTANCE
 					}
@@ -121,8 +114,8 @@ inline namespace Physics {
 
 				// 'segment' is a point
 				else if (dv == 0) {
-					if (HasPoint(segment.A)) {
-						i = segment.A;
+					if (HasPoint(ray.A)) {
+						i = ray.A;
 						o = -234; // inside of AB WRONG CHECK DISTANCE
 					}
 				}
@@ -130,7 +123,7 @@ inline namespace Physics {
 				// collinear
 				else {
 					float t0, t1;
-					iw::vector2 w2 = segment.B - A;
+					iw::vector2 w2 = ray.B - A;
 					if (v.x != 0) {
 						t0 = w.x / v.x;
 						t1 = w2.x / v.x;
@@ -155,13 +148,13 @@ inline namespace Physics {
 
 						// intersect is a point
 						if (t0 == t1) {
-							i = segment.A + t0 * v;
+							i = ray.A + t0 * v;
 						}
 
 						// intersect is a segment
 						else {
-							i = segment.A + t0 * v;
-							i = segment.A + t1 * v;
+							i = ray.A + t0 * v;
+							i = ray.A + t1 * v;
 						}
 					}
 				}
@@ -172,8 +165,8 @@ inline namespace Physics {
 		else {
 			float si = v.cross_length(w) / d;
 
-			if (si < 0) { o = 3; } // behind  of A
-			else if (si > 1) { o = 2; } // infront of B
+			if      (si < 0)           { o = 2; } // behind  of A
+			else if (si > 1)           { o = 3; } // infront of B
 			else if (si < 1 && si > 0) { o = 4; } // inside of AB
 
 			i = A + si * u;

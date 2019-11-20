@@ -23,12 +23,11 @@ namespace IW {
 			GetLayer<ImGuiLayer>("ImGui")->BindContext();
 		}
 
-	
-		Segment<iw::vector2> s  = Segment<iw::vector2>({ -1, -1}, {1, 1});
-		Segment<iw::vector2> s2 = Segment<iw::vector2>({ 0,  0}, {1, 0});
+		Ray2 r ({ -1, -1,}, {1, 1});
+		Ray2 r2({ -1, -1,}, {1, 1});
 
 		iw::vector2 i;
-		int ib = s.Intersects(s2, &i);
+		int ib = r.Intersects(r2, &i);
 
 		return err;
 	}
