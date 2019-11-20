@@ -236,15 +236,15 @@ inline namespace Input {
 		//NONAME,
 		PA1,
 
-		// Other langs
+		// Other langs but these are busted and some are the same so idk
 
-		KANA,
-		HANGUEL,
-		HANGUL,
-		JUNJA,
-		FINAL,
-		HANJA,
-		KANJI,
+		//KANA,
+		//HANGUEL,
+		//HANGUL,
+		//JUNJA,
+		//FINAL,
+		//HANJA,
+		//KANJI,
 
 		// Mouse
 
