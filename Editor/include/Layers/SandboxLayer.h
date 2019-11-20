@@ -8,5 +8,7 @@ namespace IW {
 	{
 	public:
 		SandboxLayer();
+
+		void PostUpdate() override;
 	};
 }

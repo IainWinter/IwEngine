@@ -1,8 +1,9 @@
 #include "App.h"
-#include "imgui/imgui.h"
 
 #include "Layers/ToolLayer.h"
 #include "Layers/SandboxLayer.h"
+
+#include "iw/physics/Line.h"
 
 namespace IW {
 	App::App() {
@@ -19,8 +20,15 @@ namespace IW {
 		int err = Application::Initialize(options);
 
 		if (!err) {
-			ImGui::SetCurrentContext((ImGuiContext*)options.ImGuiContext);
+			GetLayer<ImGuiLayer>("ImGui")->BindContext();
 		}
+
+	
+		Segment<iw::vector2> s  = Segment<iw::vector2>({ -1, -1}, {1, 1});
+		Segment<iw::vector2> s2 = Segment<iw::vector2>({ 0,  0}, {1, 0});
+
+		iw::vector2 i;
+		int ib = s.Intersects(s2, &i);
 
 		return err;
 	}
@@ -29,7 +37,7 @@ namespace IW {
 IW::Application* CreateApplication(
 	IW::InitOptions& options)
 {
-	options.WindowOptions = IW::WindowOptions{
+	options.WindowOptions = IW::WindowOptions {
 		1280,
 		720,
 		true,

@@ -1,44 +1,46 @@
 #pragma once
 
 #include "iw/engine/Layer.h"
+#include "imgui/imgui.h"
 
 namespace IW {
 inline namespace Engine {
-	class IWENGINE_API ImGuiLayer
+	class ImGuiLayer
 		: public Layer
 	{
 	private:
 		void* m_context;
-		//test
-		int   counter = 0;
 
 	public:
-		ImGuiLayer();
+		IWENGINE_API ImGuiLayer();
 
-		~ImGuiLayer();
+		IWENGINE_API ~ImGuiLayer();
 
-		int Initialize(
-			InitOptions& options) override;
+		IWENGINE_API int Initialize() override;
 
-		void Update()     override;
-		void Destroy()    override;
-		void ImGui()      override;
+		IWENGINE_API void Update()  override;
+		IWENGINE_API void Destroy() override;
+		IWENGINE_API void ImGui()   override;
 
-		void Begin();
-		void End();
+		IWENGINE_API bool On(
+			IW::WindowResizedEvent& event) override;
+
+		IWENGINE_API bool On(
+			IW::MouseMovedEvent& event) override;
+
+		IWENGINE_API bool On(
+			IW::MouseButtonEvent& event) override;
+
+		IWENGINE_API void Begin();
+		IWENGINE_API void End();
+
+		inline void BindContext() {
+			ImGui::SetCurrentContext((ImGuiContext*)m_context);
+		}
 
 		inline void* GetContext() {
 			return m_context;
 		}
-
-		bool On(
-			IW::WindowResizedEvent& event) override;
-
-		bool On(
-			IW::MouseMovedEvent& event) override;
-
-		bool On(
-			IW::MouseButtonEvent& event) override;
 	};
 }
 }

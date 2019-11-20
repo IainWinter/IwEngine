@@ -8,5 +8,9 @@ namespace IW {
 	{
 	public:
 		ToolLayer();
+
+		int Initialize() override;
+
+		void ImGui() override;
 	};
 }
