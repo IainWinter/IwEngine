@@ -12,14 +12,9 @@ private:
 	iw::ref<IW::Material> material;
 
 public:
-	GameLayer3D(
-		IW::Space& space,
-		IW::Renderer& renderer,
-		IW::AssetManager& asset,
-		iw::eventbus& bus);
+	GameLayer3D();
 
-	int Initialize(
-		IW::InitOptions& options) override;
+	int Initialize() override;
 
 	void PostUpdate() override;
 	void ImGui() override;

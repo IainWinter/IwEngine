@@ -30,8 +30,7 @@ inline namespace Engine {
 
 		virtual ~Layer();
 
-		virtual int Initialize(
-			InitOptions& options);
+		virtual int Initialize();
 
 		// Sync Updates
 
@@ -41,6 +40,7 @@ inline namespace Engine {
 		virtual void Update();
 		virtual void PostUpdate();
 		virtual void FixedUpdate();
+
 
 		// Input events
 
@@ -69,7 +69,9 @@ inline namespace Engine {
 		S* PushSystem(
 			Args&&... args)
 		{
-			S* layer = new S(Space, Renderer, std::forward<Args>(args)...);
+			S* layer = new S(std::forward<Args>(args)...);
+			layer->SetLayerVars(Space, Renderer);
+
 			m_systems.PushBack(layer);
 			return layer;
 		}

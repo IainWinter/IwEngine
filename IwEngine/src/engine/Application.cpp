@@ -27,8 +27,8 @@ namespace IW {
 			}
 		})
 	{
-		m_imguiLayer = PushOverlay<ImGuiLayer>();
 		PushOverlay<DebugLayer>();
+		PushOverlay<ImGuiLayer>();
 	}
 
 	Application::~Application() {
@@ -78,7 +78,7 @@ namespace IW {
 
 		for (Layer* layer : m_layers) {
 			LOG_DEBUG << "Initializing " << layer->Name() << " layer...";
-			if (status = layer->Initialize(options)) {
+			if (status = layer->Initialize()) {
 				LOG_ERROR << layer->Name() << " layer initialization failed with error code " << status;
 				return status;
 			}
@@ -86,6 +86,8 @@ namespace IW {
 
 		//Need to set after so window doesn't send events before imgui gets initialized 
 		m_window->SetState(options.WindowOptions.State);
+
+		m_imguiLayer = GetLayer<ImGuiLayer>("ImGui");
 
 		// Time again!
 
@@ -166,11 +168,13 @@ namespace IW {
 		}
 
 		// ImGui render (Sync)
-		m_imguiLayer->Begin();
-		for (Layer* layer : m_layers) {
-			layer->ImGui();
+		if (m_imguiLayer) {
+			m_imguiLayer->Begin();
+			for (Layer* layer : m_layers) {
+				layer->ImGui();
+			}
+			m_imguiLayer->End();
 		}
-		m_imguiLayer->End();
 
 		// Run through render queue! (Sync)
 

@@ -45,7 +45,7 @@ inline namespace Engine {
 		{
 			auto itr = m_items.begin();
 			for (; itr != m_items.end(); itr++;) {
-				if (strcmp((*itr)->Name(), name)) {
+				if (strcmp((*itr)->Name(), name) == 0) {
 					break;
 				}
 			}
@@ -53,6 +53,18 @@ inline namespace Engine {
 			if (itr != m_items.end()) {
 				m_items.erase(itr);
 			}
+		}
+
+		T Get(
+			const char* name)
+		{
+			for (auto itr = m_items.begin(); itr != m_items.end(); itr++) {
+				if (strcmp((*itr)->Name(), name) == 0) {
+					return *itr;
+				}
+			}
+
+			return nullptr;
 		}
 
 		void DispatchEvent(
@@ -82,7 +94,6 @@ inline namespace Engine {
 				LOG_WARNING << "Layer Stack mishandled event " + e.Type << "!";
 			}
 		}
-
 
 		// Input events
 

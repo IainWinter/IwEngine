@@ -12,8 +12,6 @@
 
 #include "iw/events/eventbus.h"
 
-#include "iw/engine/Layers/EditorLayer.h"
-
 struct Position {
 	int x, y, z;
 };
@@ -35,7 +33,6 @@ public:
 		//InputManager.CreateDevice<IW::RawMouse>();
 		InputManager->CreateDevice<IW::RawKeyboard>();
 
-		PushLayer<IW::EditorLayer>();
 		PushLayer<GameLayer3D>();
 	}
 
@@ -43,8 +40,7 @@ public:
 		IW::InitOptions& options) override
 	{
 		Application::Initialize(options);
-
-		ImGui::SetCurrentContext((ImGuiContext*)options.ImGuiContext);
+		GetLayer<IW::ImGuiLayer>("ImGui")->BindContext();
 
 		return 0;
 	}

@@ -3,10 +3,8 @@
 #include "iw/engine/Time.h"
 
 namespace IW {
-	PhysicsSystem::PhysicsSystem(
-		IW::Space& space,
-		IW::Graphics::Renderer& renderer)
-		: IW::System<IW::Transform, IwPhysics::AABB3D>(space, renderer, "Physics")
+	PhysicsSystem::PhysicsSystem()
+		: IW::System<IW::Transform, IwPhysics::AABB3D>("Physics")
 	{}
 
 	struct Components {

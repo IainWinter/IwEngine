@@ -8,9 +8,7 @@ namespace IW {
 
 	Layer::~Layer() {}
 
-	int Layer::Initialize(
-		InitOptions& options) 
-	{
+	int Layer::Initialize() {
 		for (ISystem* s : m_systems) {
 			int e = s->Initialize();
 			if (e != 0) return e;

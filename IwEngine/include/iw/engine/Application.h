@@ -1,4 +1,4 @@
-#pragma onceIW::
+#pragma once
 
 #include "Core.h"
 #include "Window.h"
@@ -21,13 +21,13 @@ inline namespace Engine {
 	private:
 		bool                 m_running;
 		IWindow*             m_window;
-		ImGuiLayer*          m_imguiLayer;
 		EventStack<Layer*>   m_layers;
 
 		iw::ref<IW::IDevice> m_device;
 
 		std::thread  m_renderThread;
 		Task<void()> m_updateTask;
+		ImGuiLayer*  m_imguiLayer;
 
 	protected:
 		iw::ref<IW::Space>        Space;
@@ -54,6 +54,14 @@ inline namespace Engine {
 
 		inline IWindow& GetWindow() {
 			return *m_window;
+		}
+
+		template<
+			typename L = Layer>
+		L* GetLayer(
+			const char* name)
+		{
+			return (L*)m_layers.Get(name);
 		}
 
 		template<
@@ -89,6 +97,7 @@ inline namespace Engine {
 		{
 			m_layers.Pop(layer);
 		}
+
 	};
 }
 }

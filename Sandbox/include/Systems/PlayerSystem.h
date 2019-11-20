@@ -12,9 +12,7 @@ private:
 	bool dash;
 
 public:
-	PlayerSystem(
-		IW::Space& space,
-		IW::Graphics::Renderer& renderer);
+	PlayerSystem();
 
 	void Update(
 		IW::EntityComponentArray& view) override;

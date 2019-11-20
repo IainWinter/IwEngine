@@ -12,9 +12,7 @@ inline namespace Engine {
 		: public System<IW::Transform, IwPhysics::AABB3D>
 	{
 	public:
-		PhysicsSystem(
-			IW::Space& space,
-			IW::Graphics::Renderer& renderer);
+		PhysicsSystem();
 
 		void Update(
 			IW::EntityComponentArray& view);

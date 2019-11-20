@@ -7,10 +7,8 @@ struct Components {
 	Player*        Player;
 };
 
-PlayerSystem::PlayerSystem(
-	IW::Space& space,
-	IW::Graphics::Renderer& renderer)
-	: IW::System<IW::Transform, Player>(space, renderer, "Player")
+PlayerSystem::PlayerSystem()
+	: IW::System<IW::Transform, Player>("Player")
 	, dash(false)
 {}
 

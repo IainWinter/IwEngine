@@ -13,8 +13,6 @@ private:
 
 public:
 	EnemySystem(
-		IW::Space& space,
-		IW::Graphics::Renderer& renderer,
 		IW::Mesh* circle);
 
 	void Update(

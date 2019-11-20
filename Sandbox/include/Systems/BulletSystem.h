@@ -8,9 +8,7 @@ class BulletSystem
 	: public IW::System<IW::Transform, Bullet>
 {
 public:
-	BulletSystem(
-		IW::Space& space,
-		IW::Graphics::Renderer& renderer);
+	BulletSystem();
 
 	~BulletSystem();
 
