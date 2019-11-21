@@ -77,7 +77,7 @@ namespace IW {
 			return;
 		}
 
-		IW::IPipeline* pipeline = &*mesh->Material->Pipeline;
+		IW::IPipeline* pipeline = &*mesh->Material->Shader->Program;
 
 		mesh->Material->Use(Device);
 

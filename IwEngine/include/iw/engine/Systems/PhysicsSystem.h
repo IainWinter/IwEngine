@@ -9,7 +9,7 @@
 namespace IW {
 inline namespace Engine {
 	class IWENGINE_API PhysicsSystem
-		: public System<IW::Transform, IwPhysics::AABB3D>
+		: public System<IW::Transform, IwPhysics::AABB3>
 	{
 	public:
 		PhysicsSystem();

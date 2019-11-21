@@ -3,8 +3,6 @@
 #include "Layers/ToolLayer.h"
 #include "Layers/SandboxLayer.h"
 
-#include "iw/physics/Line.h"
-
 namespace IW {
 	App::App() {
 		InputManager->CreateDevice<Mouse>();
@@ -22,12 +20,6 @@ namespace IW {
 		if (!err) {
 			GetLayer<ImGuiLayer>("ImGui")->BindContext();
 		}
-
-		Ray2 r ({ -1, -1,}, {1, 1});
-		Ray2 r2({ -1, -1,}, {1, 1});
-
-		iw::vector2 i;
-		int ib = r.Intersects(r2, &i);
 
 		return err;
 	}

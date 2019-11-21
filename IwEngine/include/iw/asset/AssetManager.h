@@ -16,17 +16,16 @@ namespace IW {
 		class AssetManager {
 		private:
 			std::unordered_map<size_t, IAssetLoader*> m_loaders;
-			iw::blocking_queue<std::pair<size_t, std::string>> m_toLoad;
-			std::vector<std::thread> m_threads;
+			//iw::blocking_queue<std::pair<size_t, std::string>> m_toLoad;
+			//std::vector<std::thread> m_threads;
 
-			void Worker() {
-				while (true) {
-					auto toLoad = m_toLoad.pop();
+			//void Worker() {
+			//	while (true) {
+			//		auto toLoad = m_toLoad.pop();
+			//		m_loaders.at(toLoad.first)->Load(toLoad.second);
 
-					m_loaders.at(toLoad.first)->Load(toLoad.second);
-
-				}
-			}
+			//	}
+			//}
 
 		public:
 			AssetManager() {}
@@ -67,7 +66,7 @@ namespace IW {
 					return std::static_pointer_cast<_a, void>(itr->second->Load("assets/" + filepath));
 				}
 
-				return iw::ref<_a>(nullptr);
+				return nullptr;
 			}
 
 			template<
@@ -78,10 +77,10 @@ namespace IW {
 			{
 				auto itr = m_loaders.find(typeid(_a).hash_code());
 				if (itr != m_loaders.end()) {
-					return std::static_pointer_cast<_a, void>(itr->second->Give(name, asset));
+					return std::static_pointer_cast<_a, void>(itr->second->Give("assets/" + name, asset));
 				}
 
-				return iw::ref<_a>(nullptr);
+				return nullptr;
 			}
 		};
 	}

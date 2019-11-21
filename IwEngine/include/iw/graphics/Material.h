@@ -3,6 +3,7 @@
 #include "IwGraphics.h"
 #include "Color.h"
 #include "Texture.h"
+#include "Shader.h"
 #include "iw/renderer/Pipeline.h"
 #include "iw/renderer/Device.h"
 #include "iw/util/memory/smart_pointers.h"
@@ -40,16 +41,16 @@ inline namespace Graphics {
 		};
 
 	public:
-		iw::ref<IW::IPipeline> Pipeline;
+		iw::ref<Shader> Shader;
 
 	private:
 		std::vector<MaterialProperty> m_properties;
 
 	public:
-		Material();
+		Material() = default;
 
 		Material(
-			iw::ref<IW::IPipeline>& pipline);
+			iw::ref<IW::Shader>& shader);
 
 		Material(
 			Material&&) noexcept = default;
@@ -64,6 +65,12 @@ inline namespace Graphics {
 
 		Material& operator=(
 			const Material& copy);
+
+		inline void SetShader(
+			iw::ref<IW::Shader>& shader)
+		{
+			Shader = shader;
+		}
 
 		void SetBool(
 			const char* name,

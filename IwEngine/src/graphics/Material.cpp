@@ -1,18 +1,14 @@
 #include "iw/graphics/Material.h"
 
 namespace IW {
-	Material::Material()
-		: Pipeline(nullptr)
-	{}
-
 	Material::Material(
-		iw::ref<IW::IPipeline>& pipeline)
-		: Pipeline(pipeline)
+		iw::ref<IW::Shader>& shader)
+		: Shader(shader)
 	{}
 
 	Material::Material(
 		const Material& copy)
-		: Pipeline(copy.Pipeline)
+		: Shader(copy.Shader)
 	{
 		for (const MaterialProperty& prop : copy.m_properties) {
 			size_t nameSize = strlen(prop.Name) + 1;
@@ -44,7 +40,7 @@ namespace IW {
 	Material& Material::operator=(
 		const Material& copy)
 	{
-		Pipeline = copy.Pipeline;
+		Shader = copy.Shader;
 		for (const MaterialProperty& prop : copy.m_properties) {
 			size_t nameSize = strlen(prop.Name) + 1;
 
@@ -235,10 +231,10 @@ namespace IW {
 	void Material::Use(
 		const iw::ref<IW::IDevice>& device) const
 	{
-		device->SetPipeline(Pipeline.get());
+		device->SetPipeline(Shader->Program);
 
 		for (const MaterialProperty& prop : m_properties) {
-			IW::IPipelineParam* param = Pipeline->GetParam(prop.Name);
+			IW::IPipelineParam* param = Shader->Program->GetParam(prop.Name);
 
 			if (!param) {
 				LOG_WARNING << "Invalid property in material: " << prop.Name;

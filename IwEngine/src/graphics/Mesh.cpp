@@ -11,6 +11,8 @@ namespace IW {
 		, Colors(nullptr)
 		, Uvs(nullptr)
 		, Indices(nullptr)
+		, Bones(nullptr)
+		, BoneCount(0)
 		, VertexCount(0)
 		, IndexCount(0)
 		, Topology(IW::TRIANGLES)
@@ -28,6 +30,8 @@ namespace IW {
 		, Colors(nullptr)
 		, Uvs(nullptr)
 		, Indices(nullptr)
+		, Bones(nullptr)
+		, BoneCount(0)
 		, VertexCount(0)
 		, IndexCount(0)
 		, Topology(topology)
@@ -42,6 +46,7 @@ namespace IW {
 		delete[] Colors;
 		delete[] Uvs;
 		delete[] Indices;
+		delete[] Bones;
 	}
 
 	void Mesh::SetVertices(
