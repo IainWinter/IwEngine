@@ -1,6 +1,7 @@
 #include "Layers/SandboxLayer.h"
 #include "iw/graphics/Model.h"
 #include "iw/engine/Components/CameraController.h"
+#include "iw/engine/Time.h"
 
 namespace IW {
 	struct ModelComponents {

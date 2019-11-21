@@ -13,7 +13,7 @@ inline namespace Engine {
 	struct InputEvent
 		: iw::event
 	{
-		IW::InputState* InputStates;
+		IW::InputState* InputStates; // this cant be a pointer or needs a function for getting states instead of operator
 
 		InputEvent(
 			InputEventType type,

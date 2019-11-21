@@ -84,7 +84,7 @@ namespace IW {
 			}
 		}
 
-		//Need to set after so window doesn't send events before imgui gets initialized 
+		//Need to set after so window doesn't send events before imgui gets initialized
 		m_window->SetState(options.WindowOptions.State);
 
 		m_imguiLayer = GetLayer<ImGuiLayer>("ImGui");

@@ -5,7 +5,8 @@
 
 namespace IW {
 	App::App() {
-		InputManager->CreateDevice<Mouse>();
+		//InputManager->CreateDevice<Mouse>();
+		InputManager->CreateDevice<RawMouse>();
 		InputManager->CreateDevice<RawKeyboard>();
 
 		PushLayer<ToolLayer>();

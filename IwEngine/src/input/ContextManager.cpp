@@ -29,27 +29,14 @@ namespace IW {
 
 		float lastState = context.State[input.Name];
 
-		if (input.Name == MOUSEdX) {
-			context.State[MOUSEX] += input.State;
+		switch (input.Name) {
+			case MOUSEdX: context.State[MOUSEX] += input.State; break;
+			case MOUSEdY: context.State[MOUSEY] += input.State; break;
+			case MOUSEX:  context.State[MOUSEdX] = input.State - lastState; break;
+			case MOUSEY:  context.State[MOUSEdY] = input.State - lastState; break;
 		}
 
-		else if (input.Name == MOUSEdY) {
-			context.State[MOUSEY] += input.State;
-		}
-
-		else if (input.Name == MOUSEX) {
-			context.State[MOUSEdX] = input.State - lastState;
-			context.State[MOUSEX]  = input.State;
-		}
-
-		else if (input.Name == MOUSEY) {
-			context.State[MOUSEdY] = input.State - lastState;
-			context.State[MOUSEY]  = input.State;
-		}
-
-		else {
-			context.State[input.Name] = input.State;
-		}
+		context.State[input.Name] = input.State;
 
 		// Dispatch of callbacks
 

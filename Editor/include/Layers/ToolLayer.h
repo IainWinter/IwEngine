@@ -11,6 +11,8 @@ namespace IW {
 
 		int Initialize() override;
 
+		void PostUpdate() override;
+
 		void ImGui() override;
 	};
 }

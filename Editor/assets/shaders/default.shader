@@ -18,8 +18,8 @@ void main() {
 #shader Fragment
 #version 440 core
 
-in vec3 norm;
+in vec3 oNorm;
 
 void main() {
-	gl_FragColor = vec4(norm * .5 + .5, 1.0);
+	gl_FragColor = vec4(oNorm * 0.5f + 0.5f, 1.0);
 }

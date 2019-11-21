@@ -5,11 +5,17 @@
 #include "iw/graphics/Shader.h"
 #include "iw/graphics/Camera.h"
 #include "iw/engine/Components/CameraController.h"
+#include "Systems/EditorCameraController.h"
 
 namespace IW {
-	struct Components {
+	struct ModelComponents {
 		Transform* Transform;
 		Model* Model;
+	};
+
+	struct CameraComponents {
+		Transform* Transform;
+		CameraController* Controller;
 	};
 
 	ToolLayer::ToolLayer()
@@ -30,14 +36,25 @@ namespace IW {
 
 		Model m { mesh, 1 };
 
-		iw::ref<Model> mm = Asset->Give<Model>("Sphere", &m);
+		iw::ref<Model> sphere = Asset->Give<Model>("Sphere", &m);
 
 		PerspectiveCamera* perspective = new PerspectiveCamera(1.17f, 1.778f, .01f, 200.0f);
 
-		IW::Entity camera = Space->CreateEntity<IW::Transform, CameraController>();
+		IW::Entity camera = Space->CreateEntity<Transform, CameraController>();
+		Space->SetComponentData<Transform>(camera);
 		Space->SetComponentData<CameraController>(camera, perspective);
 
+		Entity e = Space->CreateEntity<Transform, Model>();
+		Space->SetComponentData<Transform>(e, iw::vector3::zero);
+		Space->SetComponentData<Model>(e, sphere->Meshes, sphere->MeshCount);
+
+		PushSystem<EditorCameraController>();
+
 		return 0;
+	}
+
+	void ToolLayer::PostUpdate() {
+
 	}
 
 	void ToolLayer::ImGui() {
@@ -52,7 +69,7 @@ namespace IW {
 		}
 
 		for (auto entity : Space->Query<Transform, Model>()) {
-			auto [t, m] = entity.Components.Tie<Components>();
+			auto [t, m] = entity.Components.Tie<ModelComponents>();
 
 			std::stringstream s;
 			s << "Position ";
@@ -60,6 +77,12 @@ namespace IW {
 
 			ImGui::Value("Entity Index", (int)entity.Index);
 			ImGui::SliderFloat3(s.str().c_str(), (float*)&t->Position, -10, 10);
+		}
+
+		for (auto entity : Space->Query<Transform, CameraController>()) {
+			auto [t, m] = entity.Components.Tie<EditorCameraController::Components>();
+
+			ImGui::SliderFloat3("Pos", (float*)&t->Position, -10, 10);
 		}
 
 		ImGui::End();

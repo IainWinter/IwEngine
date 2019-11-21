@@ -35,7 +35,7 @@ inline namespace util {
 
 			m_queue.push_back(item);
 
-			lock.unlock();
+			//lock.unlock();
 			m_condition.notify_one();
 		}
 
@@ -56,7 +56,7 @@ inline namespace util {
 			std::unique_lock<std::mutex> lock(m_mutex);
 			m_queue.clear();
 
-			lock.unlock();
+			//lock.unlock();
 			m_condition.notify_one();
 		}
 
