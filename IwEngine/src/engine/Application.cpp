@@ -27,8 +27,8 @@ namespace IW {
 			}
 		})
 	{
-		PushOverlay<DebugLayer>();
 		PushOverlay<ImGuiLayer>();
+		PushOverlay<DebugLayer>();
 	}
 
 	Application::~Application() {

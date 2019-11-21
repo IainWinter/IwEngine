@@ -24,6 +24,7 @@ namespace IW {
 		mat->SetShader(shader);
 
 		Mesh* mesh = mesh_factory::create_uvsphere(25, 30);
+		mesh->GenNormals();
 		mesh->SetMaterial(mat);
 		mesh->Initialize(Renderer->Device);
 
