@@ -46,7 +46,7 @@ namespace IW {
 
 #ifdef IW_PLATFORM_WINDOWS
 #include <Windows.h>
-	void SpecialProcess(
+	void SpecialProcess( // hmm
 		OsEvent& event)
 	{
 		if (event.Message != WM_INPUT) {

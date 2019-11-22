@@ -2,87 +2,85 @@
 #include"iw/input/Devices/Mouse.h"
 
 namespace IW {
+#ifdef IW_PLATFORM_WINDOWS
 	void InputManager::HandleEvent(
 		int wid,
 		int msg,
 		size_t wParam,
 		size_t lParam)
 	{
-		m_deviceManager.HandleEvent({ wid, msg, wParam, lParam });
+		m_active->HandleOsEvent({ wid, msg, wParam, lParam });
 	}
+#endif
 
 	void InputManager::CreateContext(
-		unsigned int windowId)
-	{
-		CreateContext(windowId, NO_WIDTH, NO_HEIGHT);
-	}
-
-	void InputManager::CreateContext(
-		unsigned int windowId,
+		std::string name,
 		float width,
 		float height)
 	{
-		m_contextManager.CreateContext(windowId, width, height);
+		iw::ref<Context> context;
+		for (iw::ref<Context>& c : m_contexts) {
+			if (c->Name == name) {
+				context = c;
+				break;
+			}
+		}
+
+		if (!context) {
+			m_contexts.emplace_back(name, width, height);
+		}
 	}
 
 	template<>
-	void InputManager::CreateDevice<Mouse>() {
-		m_deviceManager.CreateDevice<Mouse>(iw::make_callback(
-			&ContextManager::HandleInput, &m_contextManager));
+	iw::ref<Device>& InputManager::CreateDevice<Mouse>(
+		std::string name)
+	{
+		iw::ref<Device> device(Mouse::Create(name));
+		return TryAddDevice(name, device) ? device : nullptr;
 	}
 
 	template<>
-	void InputManager::CreateDevice<Keyboard>() {
-		m_deviceManager.CreateDevice<Keyboard>(iw::make_callback(
-			&ContextManager::HandleInput, &m_contextManager));
+	iw::ref<Device>& InputManager::CreateDevice<Keyboard>(
+		std::string name)
+	{
+		iw::ref<Device> device(Keyboard::Create(name));
+		return TryAddDevice(name, device) ? device : nullptr;
 	}
 
 #ifdef IW_PLATFORM_WINDOWS
 	template<>
-	void InputManager::CreateDevice<RawMouse>() {
-		m_deviceManager.CreateDevice<RawMouse>(iw::make_callback(
-			&ContextManager::HandleInput, &m_contextManager));
+	iw::ref<Device>& InputManager::CreateDevice<RawMouse>(
+		std::string name)
+	{
+		iw::ref<Device> device(RawMouse::Create(name));
+		return TryAddDevice(name, device) ? device : nullptr;
 	}
 
 	template<>
-	void InputManager::CreateDevice<RawKeyboard>() {
-		m_deviceManager.CreateDevice<RawKeyboard>(iw::make_callback(
-			&ContextManager::HandleInput, &m_contextManager));
+	iw::ref<Device>& InputManager::CreateDevice<RawKeyboard>(
+		std::string name)
+	{
+		iw::ref<Device> device(RawKeyboard::Create(name));
+		return TryAddDevice(name, device) ? device : nullptr;
 	}
 #endif
 
-	void InputManager::SetMouseWheelCallback(
-		unsigned int windowId,
-		MouseWheelCallback callback)
+	bool InputManager::TryAddDevice(
+		std::string name,
+		iw::ref<Device>& device)
 	{
-		m_contextManager.SetMouseWheelCallback(windowId, callback);
-	}
+		iw::ref<Device> device;
+		for (iw::ref<Device>& d : m_devices) {
+			if (d->Name == name) {
+				device = d;
+				break;
+			}
+		}
 
-	void InputManager::SetMouseMovedCallback(
-		unsigned int windowId,
-		MouseMovedCallback callback)
-	{
-		m_contextManager.SetMouseMovedCallback(windowId, callback);
-	}
+		if (!device) {
+			m_devices.push_back(device);
+		}
 
-	void InputManager::SetMouseButtonCallback(
-		unsigned int windowId,
-		MouseButtonCallback callback)
-	{
-		m_contextManager.SetMouseButtonCallback(windowId, callback);
-	}
-
-	void InputManager::SetKeyCallback(
-		unsigned int windowId,
-		KeyCallback callback)
-	{
-		m_contextManager.SetKeyCallback(windowId, callback);
-	}
-
-	void InputManager::SetKeyTypedCallback(
-		unsigned int windowId, 
-		KeyTypedCallback callback)
-	{
-		m_contextManager.SetKeyTypedCallback(windowId, callback);
+		return device.use_count() == 0;
 	}
 }

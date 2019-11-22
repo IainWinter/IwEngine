@@ -5,9 +5,15 @@
 
 namespace IW {
 	App::App() {
-		//InputManager->CreateDevice<Mouse>();
-		InputManager->CreateDevice<RawMouse>();
-		InputManager->CreateDevice<RawKeyboard>();
+		Input->CreateContext("Toolbox UI");
+		Input->CreateContext("Sandbox");
+
+		Input->CreateDevice<Mouse>("Mouse");
+		Input->CreateDevice<RawMouse>("Raw Mouse");
+		Input->CreateDevice<RawKeyboard>("Keyboard");
+
+
+
 
 		PushLayer<ToolLayer>();
 		PushLayer<SandboxLayer>();

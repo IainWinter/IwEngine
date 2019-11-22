@@ -6,14 +6,14 @@
 
 namespace IW {
 	RawKeyboard* RawKeyboard::Create(
-		InputCallback& callback)
+		std::string name)
 	{
-		return new WindowsRawKeyboard(callback);
+		return new WindowsRawKeyboard(name);
 	}
 
 	WindowsRawKeyboard::WindowsRawKeyboard(
-		InputCallback& callback)
-		: RawKeyboard(callback)
+		std::string name)
+		: RawKeyboard(name)
 	{
 		RAWINPUTDEVICE rid[1];
 		rid[0].usUsagePage = 1;	  // Generic input device
@@ -26,8 +26,8 @@ namespace IW {
 		}
 	}
 
-	void WindowsRawKeyboard::HandleEvent(
-		OsEvent& event)
+	InputEvent WindowsRawKeyboard::TranslateOsEvent(
+		const OsEvent& event)
 	{
 		if (event.Message != WM_INPUT) {
 			return;
@@ -46,7 +46,7 @@ namespace IW {
 			// ways to see if key is toggled, should replace caps system that is in
 			// context rn but that works for now just the states can be out of sync from the keyboard
 
-			Callback(e);
+			return e;
 		}
 	}
 }

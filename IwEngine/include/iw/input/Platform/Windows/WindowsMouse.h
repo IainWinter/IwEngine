@@ -10,10 +10,10 @@ inline namespace Input {
 	{
 	public:
 		WindowsMouse(
-			InputCallback& callback);
+			std::string name);
 
-		void HandleEvent(
-			OsEvent& event);
+		InputEvent TranslateOsEvent(
+			const OsEvent& event) override;
 	};
 }
 }

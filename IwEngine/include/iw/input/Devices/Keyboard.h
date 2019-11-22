@@ -15,14 +15,9 @@ inline namespace Input {
 
 	public:
 		KeyboardBase(
-			InputCallback& callback)
-			: Device(callback)
-		{}
+			std::string name);
 
 		virtual ~KeyboardBase() {}
-
-		virtual void HandleEvent(
-			OsEvent& event) = 0;
 
 		static unsigned int Translate(
 			InputName key);
@@ -36,23 +31,18 @@ inline namespace Input {
 	{
 	public:
 		Keyboard(
-			InputCallback& callback)
-			: KeyboardBase(callback)
-		{}
+			std::string name);
 
 		virtual ~Keyboard() {}
-
-		virtual void HandleEvent(
-			OsEvent& event) = 0;
-
-		static Keyboard* Create(
-			InputCallback& callback);
 
 		static bool KeyDown(
 			InputName key);
 
 		static bool KeyUp(
 			InputName key);
+
+		static Keyboard* Create(
+			std::string name);
 	};
 
 #ifdef IW_PLATFORM_WINDOWS
@@ -61,17 +51,12 @@ inline namespace Input {
 	{
 	public:
 		RawKeyboard(
-			InputCallback& callback)
-			: KeyboardBase(callback)
-		{}
+			std::string name);
 
 		virtual ~RawKeyboard() {}
 
-		virtual void HandleEvent(
-			OsEvent& event) = 0;
-
 		static RawKeyboard* Create(
-			InputCallback& callback);
+			std::string name);
 	};
 #endif
 }

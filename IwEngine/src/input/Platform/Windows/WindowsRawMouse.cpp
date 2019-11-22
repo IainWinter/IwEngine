@@ -21,14 +21,14 @@ namespace IW {
 	};
 
 	RawMouse* RawMouse::Create(
-		InputCallback& callback) 
+		std::string name)
 	{
-		return new WindowsRawMouse(callback);
+		return new WindowsRawMouse(name);
 	}
 
 	WindowsRawMouse::WindowsRawMouse(
-		InputCallback& callback) 
-		: RawMouse(callback)
+		std::string name)
+		: RawMouse(name)
 	{
 		RAWINPUTDEVICE rid[1];
 		rid[0].usUsagePage = 1;	  // Generic input device
@@ -37,13 +37,12 @@ namespace IW {
 		rid[0].hwndTarget = NULL; // For current window // Seems risky
 
 		if (!RegisterRawInputDevices(rid, 1, sizeof(rid[0]))) {
-			LOG_WARNING << "Mouse failed to be created -- RAWINPUTDEVICE "
-				<< rid;
+			LOG_WARNING << "Mouse failed to be created -- RAWINPUTDEVICE " << rid;
 		}
 	}
 
-	void WindowsRawMouse::HandleEvent(
-		OsEvent& event)
+	InputEvent WindowsRawMouse::TranslateOsEvent(
+		const OsEvent& event)
 	{
 		if (event.Message != WM_INPUT) {
 			return;
@@ -58,12 +57,12 @@ namespace IW {
 			for (int i = 0; i < 5; i++) {
 				if (maskdown[i] & mouse.usButtonFlags) {
 					input.State = 1;
-					Callback(input);
+					return input;
 				}
 
 				else if (maskup[i] & mouse.usButtonFlags) {
 					input.State = 0;
-					Callback(input);
+					return input;
 				}
 
 				input.Name = (InputName)(input.Name + 1);
@@ -72,17 +71,16 @@ namespace IW {
 			if (mouse.usButtonFlags == RI_MOUSE_WHEEL) {
 				input.Name  = WHEEL;
 				input.State = (short)LOWORD(mouse.usButtonData) / (float)WHEEL_DELTA;
-				Callback(input);
+				return input;
 			}
 
 			if (mouse.usFlags == MOUSE_MOVE_RELATIVE) {
 				input.Name  = MOUSEdX;
 				input.State = (float)mouse.lLastX;
-				Callback(input);
 
 				input.Name  = MOUSEdY;
-				input.State = (float)mouse.lLastY;
-				Callback(input);
+				input.State2 = (float)mouse.lLastY; // xd
+				return input;
 			}
 		}
 	}

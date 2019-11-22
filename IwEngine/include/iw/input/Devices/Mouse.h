@@ -15,14 +15,9 @@ inline namespace Input {
 
 	public:
 		MouseBase(
-			InputCallback& callback)
-			: Device(callback)
-		{}
+			std::string name);
 
 		virtual ~MouseBase() {}
-
-		virtual void HandleEvent(
-			OsEvent& event) = 0;
 
 		static unsigned int Translate(
 			InputName key);
@@ -36,23 +31,18 @@ inline namespace Input {
 	{
 	public:
 		Mouse(
-			InputCallback& callback)
-			: MouseBase(callback)
-		{}
+			std::string name);
 
 		virtual ~Mouse() {}
-
-		virtual void HandleEvent(
-			OsEvent& event) = 0;
-
-		static Mouse* Create(
-			InputCallback& callback);
 
 		static bool ButtonDown(
 			InputName button);
 
 		static bool ButtonUp(
 			InputName button);
+
+		static Mouse* Create(
+			std::string name);
 	};
 
 #ifdef IW_PLATFORM_WINDOWS
@@ -61,17 +51,12 @@ inline namespace Input {
 	{
 	public:
 		RawMouse(
-			InputCallback& callback)
-			: MouseBase(callback)
-		{}
+			std::string name);
 
 		virtual ~RawMouse() {}
 
-		virtual void HandleEvent(
-			OsEvent& event) = 0;
-
 		static RawMouse* Create(
-			InputCallback& callback);
+			std::string name);
 	};
 #endif
 }

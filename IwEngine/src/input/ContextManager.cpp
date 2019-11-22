@@ -76,39 +76,4 @@ namespace IW {
 			}
 		}
 	}
-
-	void ContextManager::SetMouseWheelCallback(
-		unsigned int windowId,
-		MouseWheelCallback callback)
-	{
-		m_contexts[windowId].MouseWheelCallback = callback;
-	}
-
-	void ContextManager::SetMouseMovedCallback(
-		unsigned int windowId,
-		MouseMovedCallback callback)
-	{
-		m_contexts[windowId].MouseMovedCallback = callback;
-	}
-
-	void ContextManager::SetMouseButtonCallback(
-		unsigned int windowId,
-		MouseButtonCallback callback)
-	{
-		m_contexts[windowId].MouseButtonCallback = callback;
-	}
-
-	void ContextManager::SetKeyCallback(
-		unsigned int windowId,
-		KeyCallback callback)
-	{
-		m_contexts[windowId].KeyCallback = callback;
-	}
-
-	void ContextManager::SetKeyTypedCallback(
-		unsigned int windowId, 
-		KeyTypedCallback callback)
-	{
-		m_contexts[windowId].KeyTypedCallback = callback;
-	}
 }

@@ -9,33 +9,20 @@ namespace IW {
 inline namespace Input {
 	using Translation = iw::tofrom_set<unsigned int, InputName>;
 
-	class IWINPUT_API Device
-	{
-	private:
-		InputCallback m_callback;
+	class IWINPUT_API Device {
+	public:
+		std::string Name;
 
 	public:
 		Device(
-			InputCallback& callback)
-			: m_callback(callback)
+			std::string name)
+			: Name(name)
 		{}
 
 		virtual ~Device() {}
 
-		virtual void HandleEvent(
-			OsEvent& event) = 0;
-
-		inline void SetCallback(
-			InputCallback callback)
-		{
-			m_callback = callback;
-		}
-	protected:
-		void Callback(
-			InputEvent& event)
-		{
-			m_callback(event);
-		}
+		virtual InputEvent TranslateOsEvent(
+			const OsEvent& event) = 0;
 	};
 }
 }

@@ -5,20 +5,20 @@
 
 namespace IW {
 	Keyboard* Keyboard::Create(
-		InputCallback& callback)
+		std::string name)
 	{
-		return new WindowsKeyboard(callback);
+		return new WindowsKeyboard(name);
 	}
 
 	WindowsKeyboard::WindowsKeyboard(
-		InputCallback& callback)
-		: Keyboard(callback)
+		std::string name)
+		: Keyboard(name)
 	{}
 
-	void WindowsKeyboard::HandleEvent(
-		OsEvent& event)
+	InputEvent WindowsKeyboard::TranslateOsEvent(
+		const OsEvent& event)
 	{
-		//Translate(VK_SPACE);
+		return InputEvent(KEYBOARD, -1);
 	}
 
 	bool Keyboard::KeyDown(

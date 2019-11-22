@@ -18,6 +18,7 @@ inline namespace Input {
 		DeviceType Device;
 		InputName  Name;
 		float      State;
+		float      State2;
 		int        WindowId;
 
 		InputEvent(
@@ -26,6 +27,7 @@ inline namespace Input {
 			: Device(deviceType)
 			, Name(INPUT_NONE)
 			, State(0.0f)
+			, State2(0.0f)
 			, WindowId(windowId)
 		{}
 	};

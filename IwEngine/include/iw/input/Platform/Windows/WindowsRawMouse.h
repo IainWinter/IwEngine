@@ -14,10 +14,10 @@ inline namespace Input {
 
 	public:
 		WindowsRawMouse(
-			InputCallback& callback);
+			std::string name);
 
-		void HandleEvent(
-			OsEvent& event);
+		InputEvent TranslateOsEvent(
+			const OsEvent& event) override;
 	};
 }
 }

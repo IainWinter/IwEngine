@@ -6,10 +6,15 @@
 
 namespace IW {
 	Mouse* Mouse::Create(
-		InputCallback& callback)
+		std::string name)
 	{
-		return new WindowsMouse(callback);
+		return new WindowsMouse(name);
 	}
+
+	WindowsMouse::WindowsMouse(
+		std::string name)
+		: Mouse(name)
+	{}
 
 	bool Mouse::ButtonDown(
 		InputName button)
@@ -27,13 +32,8 @@ namespace IW {
 		return !ButtonDown(button);
 	}
 
-	WindowsMouse::WindowsMouse(
-		InputCallback& callback) 
-		: Mouse(callback)
-	{}
-
-	void WindowsMouse::HandleEvent(
-		OsEvent& event)
+	InputEvent WindowsMouse::TranslateOsEvent(
+		const OsEvent& event)
 	{
 		InputEvent input(MOUSE, event.WindowId);
 		switch (event.Message) {
@@ -72,14 +72,13 @@ namespace IW {
 		}
 
 		if (input.Name != INPUT_NONE) {
-			Callback(input);
+			return input;
 		}
 
 		if (event.Message == WM_MOUSEWHEEL) {
 			input.Name  = WHEEL;
 			input.State = (short)HIWORD(event.WParam) / (float)WHEEL_DELTA;
-
-			Callback(input);
+			return input;
 		}
 
 		if (   input.Name != INPUT_NONE 
@@ -88,11 +87,10 @@ namespace IW {
 		{
 			input.Name  = MOUSEX;
 			input.State = LOWORD(event.LParam);
-			Callback(input);
 
 			input.Name  = MOUSEY;
-			input.State = HIWORD(event.LParam);
-			Callback(input);
+			input.State2 = HIWORD(event.LParam);
+			return input;
 		}
 	}
 }

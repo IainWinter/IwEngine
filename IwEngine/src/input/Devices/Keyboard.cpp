@@ -7,6 +7,21 @@
 namespace IW {
 	Translation KeyboardBase::translation = CreateTranslation();
 
+	KeyboardBase::KeyboardBase(
+		std::string name)
+		: Device(name)
+	{}
+
+	Keyboard::Keyboard(
+		std::string name)
+		: KeyboardBase(name)
+	{}
+
+	RawKeyboard::RawKeyboard(
+		std::string name)
+		: KeyboardBase(name)
+	{}
+
 	InputName KeyboardBase::Translate(
 		unsigned int oskey)
 	{

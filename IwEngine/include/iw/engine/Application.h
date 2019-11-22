@@ -34,7 +34,7 @@ inline namespace Engine {
 		iw::ref<IW::Renderer>     Renderer;
 		iw::ref<IW::AssetManager> Asset;
 		iw::ref<iw::eventbus>     Bus;
-		iw::ref<IW::InputManager> InputManager;
+		iw::ref<IW::InputManager> Input;
 
 	public:
 		Application();
