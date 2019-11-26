@@ -100,10 +100,10 @@ inline namespace Engine {
 		template<
 			typename _e>
 		bool On(
-			_e& event)
+			_e& e)
 		{
 			for (T& t : m_items) {
-				if (t->On(event)) {
+				if (t->On(e)) {
 					return true;
 				}
 			}

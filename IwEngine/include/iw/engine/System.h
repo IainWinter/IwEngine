@@ -17,15 +17,15 @@ inline namespace Engine {
 
 		// Input events
 
-		virtual bool On(IW::MouseWheelEvent& event) = 0;
-		virtual bool On(IW::MouseMovedEvent& event) = 0;
-		virtual bool On(IW::MouseButtonEvent& event) = 0;
-		virtual bool On(IW::KeyEvent& event) = 0;
-		virtual bool On(IW::KeyTypedEvent& event) = 0;
+		virtual bool On(IW::MouseWheelEvent& e) = 0;
+		virtual bool On(IW::MouseMovedEvent& e) = 0;
+		virtual bool On(IW::MouseButtonEvent& e) = 0;
+		virtual bool On(IW::KeyEvent& e) = 0;
+		virtual bool On(IW::KeyTypedEvent& e) = 0;
 
 		// Window events
 
-		virtual bool On(IW::WindowResizedEvent& event) = 0;
+		virtual bool On(IW::WindowResizedEvent& e) = 0;
 
 		virtual const char* Name() const = 0;
 	};
@@ -105,15 +105,15 @@ inline namespace Engine {
 
 		// Input events
 
-		virtual bool On(IW::MouseWheelEvent&    event) override { return false; }
-		virtual bool On(IW::MouseMovedEvent&    event) override { return false; }
-		virtual bool On(IW::MouseButtonEvent&   event) override { return false; }
-		virtual bool On(IW::KeyEvent&           event) override { return false; }
-		virtual bool On(IW::KeyTypedEvent&      event) override { return false; }
+		virtual bool On(IW::MouseWheelEvent&    e) override { return false; }
+		virtual bool On(IW::MouseMovedEvent&    e) override { return false; }
+		virtual bool On(IW::MouseButtonEvent&   e) override { return false; }
+		virtual bool On(IW::KeyEvent&           e) override { return false; }
+		virtual bool On(IW::KeyTypedEvent&      e) override { return false; }
 
 		// Window events
 
-		virtual bool On(IW::WindowResizedEvent& event) override { return false; }
+		virtual bool On(IW::WindowResizedEvent& e) override { return false; }
 
 		inline const char* Name() const override {
 			return m_name;

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Device.h"
-#include "iw/input/Events/InputEvent.h"
 
 namespace IW {
 inline namespace Input {

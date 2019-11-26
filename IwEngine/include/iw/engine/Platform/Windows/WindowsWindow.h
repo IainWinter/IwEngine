@@ -28,12 +28,6 @@ inline namespace Engine {
 		bool TakeOwnership()    override;
 		bool ReleaseOwnership() override;
 
-		void SetEventbus(
-			iw::ref<iw::eventbus>& bus) override;
-
-		void SetInputManager(
-			iw::ref<InputManager>& manager) override;
-
 		void SetState(
 			DisplayState state) override;
 

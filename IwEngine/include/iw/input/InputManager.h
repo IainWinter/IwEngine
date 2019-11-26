@@ -4,8 +4,8 @@
 #include "Devices/Device.h"
 #include "Devices/Mouse.h"
 #include "Devices/Keyboard.h"
-#include "Events/InputEvent.h"
 #include "iw/util/memory/smart_pointers.h"
+#include "iw/events/eventbus.h"
 
 namespace IW {
 inline namespace Input {
@@ -15,16 +15,14 @@ inline namespace Input {
 		std::vector<iw::ref<Device>>  m_devices;
 		iw::ref<Context> m_active;
 
-	public:
-		InputManager() = default;
+		iw::ref<iw::eventbus> m_bus;
 
-#ifdef IW_PLATFORM_WINDOWS
+	public:
+		InputManager(
+			iw::ref<iw::eventbus>& bus);
+
 		void HandleEvent(
-			int wid,
-			int msg,
-			size_t wParam,
-			size_t lParam);
-#endif
+			iw::event& e);
 
 		void CreateContext(
 			std::string name,

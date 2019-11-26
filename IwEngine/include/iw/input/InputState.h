@@ -12,8 +12,8 @@ namespace IW {
 
 		public:
 			InputState() {
-				memset(states, (int)0.0f, INPUT_COUNT * sizeof(float));
-				memset(locks, (int)false, 3 * sizeof(bool));
+				memset(states, (int)0.0f, sizeof(states));
+				memset(locks,  (int)false, sizeof(locks));
 			}
 
 			inline const float* States() {

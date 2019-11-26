@@ -12,8 +12,8 @@ inline namespace Input {
 		WindowsRawKeyboard(
 			std::string name);
 
-		InputEvent TranslateOsEvent(
-			const OsEvent& event) override;
+		DeviceInput TranslateOsEvent(
+			const OsEvent& e) override;
 	};
 }
 }

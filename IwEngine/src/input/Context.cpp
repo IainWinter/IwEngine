@@ -20,13 +20,4 @@ namespace IW {
 		const iw::ref<Device>& device)
 	{
 	}
-
-	void Context::HandleOsEvent(
-		const OsEvent& input)
-	{
-		for (iw::ref<Device>& device : Devices) {
-			InputEvent e = device->TranslateOsEvent(input);
-		}
-	}
-
 }

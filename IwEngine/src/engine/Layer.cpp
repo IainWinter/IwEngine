@@ -30,39 +30,39 @@ namespace IW {
 	void Layer::ImGui() {}
 
 	bool Layer::On(
-		IW::WindowResizedEvent& event)
+		IW::WindowResizedEvent& e)
 	{
-		 return m_systems.On(event);
+		 return m_systems.On(e);
 	}
 
 	bool Layer::On(
-		IW::MouseWheelEvent& event)
+		IW::MouseWheelEvent& e)
 	{
-		return m_systems.On(event);
+		return m_systems.On(e);
 	}
 
 	bool Layer::On(
-		IW::MouseMovedEvent& event)
+		IW::MouseMovedEvent& e)
 	{
-		return m_systems.On(event);
+		return m_systems.On(e);
 	}
 
 	bool Layer::On(
-		IW::MouseButtonEvent& event)
+		IW::MouseButtonEvent& e)
 	{
-		return m_systems.On(event);
+		return m_systems.On(e);
 	}
 
 	bool Layer::On(
-		IW::KeyEvent& event)
+		IW::KeyEvent& e)
 	{
-		return m_systems.On(event);
+		return m_systems.On(e);
 	}
 
 	bool Layer::On(
-		IW::KeyTypedEvent& event)
+		IW::KeyTypedEvent& e)
 	{
-		return m_systems.On(event);
+		return m_systems.On(e);
 	}
 
 	void Layer::UpdateSystems() {

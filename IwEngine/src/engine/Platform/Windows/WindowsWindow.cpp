@@ -192,25 +192,6 @@ namespace IW {
 		return true;
 	}
 
-	void WindowsWindow::SetEventbus(
-		iw::ref<iw::eventbus>& bus)
-	{
-		Bus = bus;
-	}
-
-	void WindowsWindow::SetInputManager(
-		iw::ref<InputManager>& manager)
-	{
-		Input = manager;
-
-		Input->CreateContext(         Id(), (float)Width(), (float)Height());
-		Input->SetMouseWheelCallback( Id(), iw::make_callback(&WindowsWindow::HandleMouseWheel,  this));
-		Input->SetMouseMovedCallback( Id(), iw::make_callback(&WindowsWindow::HandleMouseMoved,  this));
-		Input->SetMouseButtonCallback(Id(), iw::make_callback(&WindowsWindow::HandleMouseButton, this));
-		Input->SetKeyCallback(        Id(), iw::make_callback(&WindowsWindow::HandleKey,         this));
-		Input->SetKeyTypedCallback(   Id(), iw::make_callback(&WindowsWindow::HandleKeyTyped,    this));
-	}
-
 	void WindowsWindow::SetState(
 		DisplayState state)
 	{
@@ -267,18 +248,17 @@ namespace IW {
 		WPARAM wParam,
 		LPARAM lParam)
 	{
-		//Input events
-		Input->HandleEvent(Id(), msg, wParam, lParam);
+		Bus->push<OsEvent>(Id(), msg, wParam, lParam);
 
 		switch (msg) {
 			case WM_SIZE:
-				Bus->push(Translate<IW::WindowResizedEvent>(msg, Id(), wParam, lParam));
+				Bus->push<WindowResizedEvent>(Translate<WindowResizedEvent>(msg, Id(), wParam, lParam));
 				break;
 			case WM_CLOSE:
-				Bus->push(IW::WindowEvent(IW::Closed, Id()));
+				Bus->push<WindowEvent>(IW::Closed, Id());
 				break;
 			case WM_DESTROY:
-				Bus->push(IW::WindowEvent(IW::Destroyed, Id()));
+				Bus->push<WindowEvent>(IW::Destroyed, Id());
 				break;
 			default:
 				Bus->push(iw::event(IW::NOT_HANDLED, 0));
@@ -286,47 +266,6 @@ namespace IW {
 		}
 
 		return 0;
-	}
-
-	void WindowsWindow::HandleMouseWheel(
-		IW::InputState* inputState,
-		float delta)
-	{
-		Bus->push(IW::MouseWheelEvent(inputState, delta));
-	}
-
-	void WindowsWindow::HandleMouseMoved(
-		IW::InputState* inputState,
-		float X, 
-		float Y,
-		float deltaX,
-		float deltaY)
-	{
-		Bus->push(IW::MouseMovedEvent(inputState, X, Y, deltaX, deltaY));
-	}
-	
-	void WindowsWindow::HandleMouseButton(
-		IW::InputState* inputState,
-		IW::InputName button,
-		bool down)
-	{
-		Bus->push(IW::MouseButtonEvent(inputState, button, down));
-	}
-
-	void WindowsWindow::HandleKey(
-		IW::InputState* inputState,
-		IW::InputName key,
-		bool down)
-	{
-		Bus->push(IW::KeyEvent(inputState, key, down));
-	}
-
-	void WindowsWindow::HandleKeyTyped(
-		IW::InputState* inputState,
-		IW::InputName key, 
-		char character)
-	{
-		Bus->push(IW::KeyTypedEvent(inputState, key, character));
 	}
 }
 

@@ -31,9 +31,6 @@ inline namespace Input {
 
 		void RemoveDevice(
 			const iw::ref<Device>& device);
-
-		void HandleOsEvent(
-			const OsEvent& e);
 	};
 }
 }

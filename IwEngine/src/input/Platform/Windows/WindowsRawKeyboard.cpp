@@ -26,20 +26,22 @@ namespace IW {
 		}
 	}
 
-	InputEvent WindowsRawKeyboard::TranslateOsEvent(
-		const OsEvent& event)
+	DeviceInput WindowsRawKeyboard::TranslateOsEvent(
+		const OsEvent& e)
 	{
-		if (event.Message != WM_INPUT) {
-			return;
+		if (e.Message != WM_INPUT) {
+			return DEVICE_NONE;
 		}
 
-		RAWINPUT* raw = (RAWINPUT*)event.LParam;
+		RAWINPUT* raw = (RAWINPUT*)e.LParam;
 		if (raw->header.dwType == RIM_TYPEKEYBOARD) {
 			RAWKEYBOARD keyboard = raw->data.keyboard;
 
-			if (keyboard.VKey == 255) return;
+			if (keyboard.VKey == 255) {
+				return DEVICE_NONE;
+			}
 
-			InputEvent e(KEYBOARD, event.WindowId);
+			DeviceInput e(KEYBOARD);
 			e.Name  = Translate(keyboard.VKey);
 			e.State = !(keyboard.Flags & RI_KEY_BREAK);
 

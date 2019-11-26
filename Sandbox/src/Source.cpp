@@ -29,9 +29,9 @@ class Game
 {
 public:
 	Game() {
-		InputManager->CreateDevice<IW::Mouse>();
+		Input->CreateDevice<IW::Mouse>("Mouse");
 		//InputManager.CreateDevice<IW::RawMouse>();
-		InputManager->CreateDevice<IW::RawKeyboard>();
+		Input->CreateDevice<IW::RawKeyboard>("rKeyboard");
 
 		PushLayer<GameLayer3D>();
 	}

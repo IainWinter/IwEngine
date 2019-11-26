@@ -32,66 +32,68 @@ namespace IW {
 		return !ButtonDown(button);
 	}
 
-	InputEvent WindowsMouse::TranslateOsEvent(
-		const OsEvent& event)
+	DeviceInput WindowsMouse::TranslateOsEvent(
+		const OsEvent& e)
 	{
-		InputEvent input(MOUSE, event.WindowId);
-		switch (event.Message) {
-		case WM_LBUTTONDOWN:
-			input.Name  = LMOUSE;
-			input.State = true;
-			break;
-		case WM_RBUTTONDOWN:
-			input.Name  = RMOUSE;
-			input.State = true;
-			break;
-		case WM_MBUTTONDOWN:
-			input.Name  = MMOUSE;
-			input.State = true;
-			break;
-		case WM_XBUTTONDOWN:
-			input.Name  = (InputName)(XMOUSE1 + HIWORD(event.WParam) - 1);
-			input.State = true;
-			break;
-		case WM_LBUTTONUP:
-			input.Name  = LMOUSE;
-			input.State = false;
-			break;
-		case WM_RBUTTONUP:
-			input.Name  = RMOUSE;
-			input.State = false;
-			break;
-		case WM_MBUTTONUP:
-			input.Name  = MMOUSE;
-			input.State = false;
-			break;
-		case WM_XBUTTONUP:
-			input.Name  = (InputName)(XMOUSE1 + HIWORD(event.WParam) - 1);
-			input.State = false;
-			break;
+		DeviceInput input(MOUSE);
+		switch (e.Message) {
+			case WM_LBUTTONDOWN:
+				input.Name  = LMOUSE;
+				input.State = true;
+				break;
+			case WM_RBUTTONDOWN:
+				input.Name  = RMOUSE;
+				input.State = true;
+				break;
+			case WM_MBUTTONDOWN:
+				input.Name  = MMOUSE;
+				input.State = true;
+				break;
+			case WM_XBUTTONDOWN:
+				input.Name  = (InputName)(XMOUSE1 + HIWORD(e.WParam) - 1);
+				input.State = true;
+				break;
+			case WM_LBUTTONUP:
+				input.Name  = LMOUSE;
+				input.State = false;
+				break;
+			case WM_RBUTTONUP:
+				input.Name  = RMOUSE;
+				input.State = false;
+				break;
+			case WM_MBUTTONUP:
+				input.Name  = MMOUSE;
+				input.State = false;
+				break;
+			case WM_XBUTTONUP:
+				input.Name  = (InputName)(XMOUSE1 + HIWORD(e.WParam) - 1);
+				input.State = false;
+				break;
 		}
 
 		if (input.Name != INPUT_NONE) {
 			return input;
 		}
 
-		if (event.Message == WM_MOUSEWHEEL) {
+		if (e.Message == WM_MOUSEWHEEL) {
 			input.Name  = WHEEL;
-			input.State = (short)HIWORD(event.WParam) / (float)WHEEL_DELTA;
+			input.State = (short)HIWORD(e.WParam) / (float)WHEEL_DELTA;
 			return input;
 		}
 
 		if (   input.Name != INPUT_NONE 
-			|| event.Message == WM_MOUSEMOVE
-			|| event.Message == WM_MOUSEWHEEL)
+			|| e.Message == WM_MOUSEMOVE
+			|| e.Message == WM_MOUSEWHEEL)
 		{
 			input.Name  = MOUSEX;
-			input.State = LOWORD(event.LParam);
+			input.State = LOWORD(e.LParam);
 
-			input.Name  = MOUSEY;
-			input.State2 = HIWORD(event.LParam);
+			input.Name2  = MOUSEY;
+			input.State2 = HIWORD(e.LParam);
 			return input;
 		}
+
+		return DEVICE_NONE;
 	}
 }
 #endif

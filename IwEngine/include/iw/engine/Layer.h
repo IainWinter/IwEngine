@@ -44,15 +44,15 @@ inline namespace Engine {
 
 		// Input events
 
-		virtual bool On(IW::MouseWheelEvent&    event);
-		virtual bool On(IW::MouseMovedEvent&    event);
-		virtual bool On(IW::MouseButtonEvent&   event);
-		virtual bool On(IW::KeyEvent&           event);
-		virtual bool On(IW::KeyTypedEvent&      event);
+		virtual bool On(IW::MouseWheelEvent&    e);
+		virtual bool On(IW::MouseMovedEvent&    e);
+		virtual bool On(IW::MouseButtonEvent&   e);
+		virtual bool On(IW::KeyEvent&           e);
+		virtual bool On(IW::KeyTypedEvent&      e);
 
 		// Window events
 
-		virtual bool On(IW::WindowResizedEvent& event);
+		virtual bool On(IW::WindowResizedEvent& e);
 
 		// System updates
 

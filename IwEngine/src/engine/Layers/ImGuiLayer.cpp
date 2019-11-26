@@ -68,22 +68,22 @@ namespace IW {
 	}
 
 	bool ImGuiLayer::On(
-		IW::MouseMovedEvent& event)
+		IW::MouseMovedEvent& e)
 	{
 		auto& io = ImGui::GetIO();
-		io.MousePos.x = (float)event.X;
-		io.MousePos.y = (float)event.Y;
+		io.MousePos.x = (float)e.X;
+		io.MousePos.y = (float)e.Y;
 
 		return io.WantCaptureMouse;
 	}
 
 	bool ImGuiLayer::On(
-		IW::MouseButtonEvent& event)
+		IW::MouseButtonEvent& e)
 	{
 		auto& io = ImGui::GetIO();
 
 		if (io.WantCaptureMouse) {
-			io.MouseDown[event.Button - IW::LMOUSE] = event.State;
+			io.MouseDown[e.Button - IW::LMOUSE] = e.State;
 			return true;
 		}
 

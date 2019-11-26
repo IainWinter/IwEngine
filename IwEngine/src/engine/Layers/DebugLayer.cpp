@@ -1,6 +1,6 @@
 #include "iw/engine/Layers/DebugLayer.h"
 #include "iw/engine/Components/Log.h"
-#include "iw/data/Components/Transform.h"
+#include "iw/common/Components/Transform.h"
 #include "iw/engine/Time.h"
 #include "imgui/imgui.h"
 #include <gl\glew.h>
@@ -45,55 +45,55 @@ namespace IW {
 	}
 
 	bool DebugLayer::On(
-		IW::MouseWheelEvent& event)
+		IW::MouseWheelEvent& e)
 	{
 		std::stringstream log;
-		log << "Mouse wheel .... delta: " << event.Delta;
+		log << "Mouse wheel .... delta: " << e.Delta;
 		logs.push_back(log.str());
 		return false;
 	}
 
 	bool DebugLayer::On(
-		IW::MouseMovedEvent& event)
+		IW::MouseMovedEvent& e)
 	{
 		std::stringstream log;
-		log << "Mouse moved .... X: " << event.X << " Y: " << event.Y << " dX: " << event.DeltaX << " dY : " << event.DeltaY;
+		log << "Mouse moved .... X: " << e.X << " Y: " << e.Y << " dX: " << e.DeltaX << " dY : " << e.DeltaY;
 		logs.push_back(log.str());
 		return false;
 	}
 
 	bool DebugLayer::On(
-		IW::MouseButtonEvent& event)
+		IW::MouseButtonEvent& e)
 	{
 		std::stringstream log;
-		log << "Mouse button ... Button: " << event.Button << " State: " << event.State;
+		log << "Mouse button ... Button: " << e.Button << " State: " << e.State;
 		logs.push_back(log.str());
 		return false;
 	}
 
 	bool DebugLayer::On(
-		IW::KeyEvent& event)
+		IW::KeyEvent& e)
 	{
 		std::stringstream log;
-		log << "Key button ..... Button: " << event.Button << " State: " << event.State;
+		log << "Key button ..... Button: " << e.Button << " State: " << e.State;
 		logs.push_back(log.str());
 		return false;
 	}
 
 	bool DebugLayer::On(
-		IW::KeyTypedEvent& event)
+		IW::KeyTypedEvent& e)
 	{
 		std::stringstream log;
-		log << "Key types ...... Button: " << event.Button << " Char: " << event.Character;
+		log << "Key types ...... Button: " << e.Button << " Char: " << e.Character;
 		logs.push_back(log.str());
 		return false;
 	}
 
 	bool DebugLayer::On(
-		IW::WindowResizedEvent& event)
+		IW::WindowResizedEvent& e)
 	{
 		std::stringstream log;
-		log << "Window resized . W: " << event.Width << " H: " << event.Height;
+		log << "Window resized . W: " << e.Width << " H: " << e.Height;
 		logs.push_back(log.str());
 		return false;
 	}
