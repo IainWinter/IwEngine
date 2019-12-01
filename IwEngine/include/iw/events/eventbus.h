@@ -29,22 +29,41 @@ inline namespace events {
 		IWEVENTS_API void publish();
 
 		template<
-			typename _e>
+			typename _e,
+			typename... _args>
 		void push(
-			const _e& event)
+			_args&&... args)
 		{
-			std::unique_lock<std::mutex> lock(m_mutex);
+			_e* e = alloc_event<_e>();
+			*e = _e{ std::forward<_args>(args)... };
+			m_events.push(e);
+		}
 
-			_e* e = m_alloc.alloc<_e>();
+		template<
+			typename _e,
+			typename... _args>
+		void send(
+			_args&&... args)
+		{
+			_e* e = alloc_event<_e>();
+			*e = _e{ std::forward<_args>(args)... };
+			publish_event(e);
+		}
+	private:
+		template<
+			typename _e>
+		_e* alloc_event() {
+			event* e = m_alloc.alloc<_e>();
 			if (e == nullptr) {
 				m_alloc.resize(m_alloc.capacity() * 2);
 				e = m_alloc.alloc<_e>();
 			}
 
-			*e = event;
-
-			m_events.push((iw::event*)e);
+			return (_e*)e;
 		}
+
+		void publish_event(
+			event* e);
 	};
 }
 }

@@ -11,7 +11,7 @@
 
 namespace IW {
 inline namespace ECS {
-	class IWENTITY_API ComponentManager {
+	class ComponentManager {
 	private:
 		std::unordered_map<ComponentType, iw::ref<Component>> m_components;
 		std::unordered_map<size_t, ChunkList> m_componentData;
@@ -24,6 +24,7 @@ inline namespace ECS {
 			ComponentType type,
 			size_t size);
 
+		IWENTITY_API
 		iw::ref<Component> GetComponent(
 			ComponentType type);
 
@@ -38,6 +39,7 @@ inline namespace ECS {
 		bool DestroyEntityComponents(
 			const iw::ref<EntityData>& entityData);
 
+		IWENTITY_API
 		void* GetComponentData(
 			const iw::ref<EntityData>& entityData,
 			const iw::ref<Component>& component);

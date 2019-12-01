@@ -14,7 +14,7 @@ namespace IW {
 inline namespace Engine {
 	class Application;
 
-	class IWENGINE_API Layer {
+	class Layer {
 	private:
 		const char* m_name;
 		EventStack<ISystem*> m_systems; // layer doesnt own systems but prolly should
@@ -25,38 +25,71 @@ inline namespace Engine {
 		iw::ref<iw::eventbus>     Bus;
 
 	public:
+		IWENGINE_API
 		Layer(
 			const char* name);
 
+		IWENGINE_API
 		virtual ~Layer();
 
+		IWENGINE_API
 		virtual int Initialize();
 
 		// Sync Updates
 
+		IWENGINE_API
 		virtual void Destroy();
-		virtual void ImGui();
-		virtual void PreUpdate();
-		virtual void Update();
-		virtual void PostUpdate();
-		virtual void FixedUpdate();
 
+		IWENGINE_API
+		virtual void ImGui();
+
+		IWENGINE_API
+		virtual void PreUpdate();
+
+		IWENGINE_API
+		virtual void Update();
+
+		IWENGINE_API
+		virtual void PostUpdate();
+
+		IWENGINE_API
+		virtual void FixedUpdate();
 
 		// Input events
 
-		virtual bool On(IW::MouseWheelEvent&    event);
-		virtual bool On(IW::MouseMovedEvent&    event);
-		virtual bool On(IW::MouseButtonEvent&   event);
-		virtual bool On(IW::KeyEvent&           event);
-		virtual bool On(IW::KeyTypedEvent&      event);
+		IWENGINE_API
+		virtual bool On(
+			MouseWheelEvent& e);
+
+		IWENGINE_API
+		virtual bool On(
+			MouseMovedEvent& e);
+
+		IWENGINE_API
+		virtual bool On(
+			MouseButtonEvent& e);
+
+		IWENGINE_API
+		virtual bool On(
+			KeyEvent& e);
+
+		IWENGINE_API
+		virtual bool On(
+			KeyTypedEvent& e);
+
 
 		// Window events
 
-		virtual bool On(IW::WindowResizedEvent& event);
+		IWENGINE_API
+		virtual bool On(
+			WindowResizedEvent& e);
 
 		// System updates
 
+		IWENGINE_API
 		void UpdateSystems();
+
+		IWENGINE_API
 		void FixedUpdateSystems();
 
 		inline const char* Name() {
@@ -95,6 +128,7 @@ inline namespace Engine {
 	private:
 		friend class Application;
 
+		IWENTITY_API
 		void SetApplicationVars(
 			iw::ref<IW::Space> space,
 			iw::ref<IW::Renderer> renderer,

@@ -6,14 +6,14 @@
 
 namespace IW {
 inline namespace Graphics {
-	class IWGRAPHICS_API MaterialLoader
+	class MaterialLoader
 		: public AssetLoader<Material>
 	{
 	public:
-		MaterialLoader(
+		IWGRAPHICS_API MaterialLoader(
 			AssetManager& asset);
 	private:
-		Material* LoadAsset(
+		IWGRAPHICS_API Material* LoadAsset(
 			std::string filepath) override;
 	};
 }

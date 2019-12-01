@@ -12,13 +12,13 @@ inline namespace RenderAPI {
 		unsigned char Normalized;
 	};
 
-	class IWRENDERER_API VertexBufferLayout {
+	class VertexBufferLayout {
 	private:
 		std::vector<VertexBufferLayoutElement> m_elements;
 		unsigned int m_stride;
 
 	public:
-		VertexBufferLayout();
+		IWRENDERER_API VertexBufferLayout();
 
 		template<
 			typename _t>
@@ -30,15 +30,15 @@ inline namespace RenderAPI {
 		}
 
 		template<>
-		void Push<float>(
+		IWRENDERER_API void Push<float>(
 			unsigned int count);
 
 		template<>
-		void Push<unsigned int>(
+		IWRENDERER_API void Push<unsigned int>(
 			unsigned int count);
 
 		template<>
-		void Push<unsigned char>(
+		IWRENDERER_API void Push<unsigned char>(
 			unsigned int count);
 
 		inline const
@@ -56,7 +56,7 @@ inline namespace RenderAPI {
 		}
 	};
 
-	unsigned int GetSizeOfType(
+	IWRENDERER_API unsigned int GetSizeOfType(
 		unsigned int glType);
 }
 }

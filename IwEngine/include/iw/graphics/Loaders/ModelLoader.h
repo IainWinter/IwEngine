@@ -6,14 +6,14 @@
 
 namespace IW {
 inline namespace Graphics {
-	class IWGRAPHICS_API MeshLoader
+	class MeshLoader
 		: public AssetLoader<Model>
 	{
 	public:
-		MeshLoader(
+		IWGRAPHICS_API MeshLoader(
 			AssetManager& asset);
 	private:
-		Model* LoadAsset(
+		IWGRAPHICS_API Model* LoadAsset(
 			std::string filepath) override;
 	};
 }

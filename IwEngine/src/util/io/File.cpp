@@ -17,7 +17,7 @@ inline namespace util {
 
 		strerror_s(&error[0], 100, errerno);
 
-		int i = error.find('\0');
+		size_t i = error.find('\0');
 		error = error.substr(0, i);
 		error.append(" (");
 		error.append(std::to_string(errerno));

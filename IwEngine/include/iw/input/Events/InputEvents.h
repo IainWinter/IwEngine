@@ -1,12 +1,14 @@
 #pragma once
 
-#include "EventGroup.h"
+#include "iw/common/Events/EventGroups.h"
 #include "iw/input/InputState.h"
 #include "iw/events/event.h"
 
 namespace IW {
 inline namespace Engine {
-	enum InputEventType {
+	enum class InputEventType
+		: short
+	{
 		MouseWheel, MouseMoved, MouseButton, Key, KeyTyped
 	};
 
@@ -18,7 +20,7 @@ inline namespace Engine {
 		InputEvent(
 			InputEventType type,
 			IW::InputState* inputState)
-			: iw::event(INPUT, type)
+			: iw::event(iw::val(EventGroup::INPUT), iw::val(type))
 			, InputStates(inputState)
 		{}
 	};
@@ -31,7 +33,7 @@ inline namespace Engine {
 		MouseWheelEvent(
 			IW::InputState* inputState,
 			float delta)
-			: InputEvent(MouseWheel, inputState)
+			: InputEvent(InputEventType::MouseWheel, inputState)
 			, Delta(delta)
 		{}
 	};
@@ -50,7 +52,7 @@ inline namespace Engine {
 			float y,
 			float deltaX,
 			float deltaY)
-			: InputEvent(MouseMoved, inputState)
+			: InputEvent(InputEventType::MouseMoved, inputState)
 			, X(x)
 			, Y(y)
 			, DeltaX(deltaX)
@@ -68,7 +70,7 @@ inline namespace Engine {
 			IW::InputState* inputState,
 			IW::InputName button,
 			bool state)
-			: InputEvent(MouseButton, InputStates)
+			: InputEvent(InputEventType::MouseButton, InputStates)
 			, Button(button)
 			, State(state)
 		{}
@@ -84,7 +86,7 @@ inline namespace Engine {
 			IW::InputState* inputState,
 			IW::InputName button,
 			bool state)
-			: InputEvent(Key, inputState)
+			: InputEvent(InputEventType::Key, inputState)
 			, Button(button)
 			, State(state)
 		{}
@@ -100,7 +102,7 @@ inline namespace Engine {
 			IW::InputState* inputState,
 			IW::InputName button,
 			char character)
-			: InputEvent(KeyTyped, inputState)
+			: InputEvent(InputEventType::KeyTyped, inputState)
 			, Button(button)
 			, Character(character)
 		{}

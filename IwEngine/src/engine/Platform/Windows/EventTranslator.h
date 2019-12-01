@@ -2,7 +2,7 @@
 
 #include "iw/engine/Events/Events.h"
 #include "iw/log/logger.h"
-#include "iw/engine/Platform.h"
+#include "iw/common/Platform.h"
 
 namespace IW {
 	template<

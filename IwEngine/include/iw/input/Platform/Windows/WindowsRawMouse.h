@@ -16,8 +16,8 @@ inline namespace Input {
 		WindowsRawMouse(
 			std::string name);
 
-		InputEvent TranslateOsEvent(
-			const OsEvent& event) override;
+		DeviceInput TranslateOsEvent(
+			const OsEvent& e) override;
 	};
 }
 }

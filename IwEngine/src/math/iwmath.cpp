@@ -24,7 +24,7 @@ inline namespace math {
 		} u = { base };
 		u.x[1] = (int)(exponent * (u.x[1] - 1072632447) + 1072632447);
 		u.x[0] = 0;
-		return u.d;
+		return (float)u.d;
 	}
 
 	bool almost_equal(

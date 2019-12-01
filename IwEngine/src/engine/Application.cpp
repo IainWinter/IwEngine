@@ -20,7 +20,7 @@ namespace IW {
 		, Renderer(std::make_shared<IW::Renderer>(m_device))
 		, Asset(std::make_shared<AssetManager>())
 		, Bus(std::make_shared<iw::eventbus>())
-		, Input(std::make_shared<IW::InputManager>())
+		, Input(std::make_shared<IW::InputManager>(Bus))
 		, m_updateTask([&]() {
 			for (Layer* layer : m_layers) {
 				layer->UpdateSystems();
@@ -50,7 +50,8 @@ namespace IW {
 
 		// Events
 
-		Bus->subscribe(iw::make_callback(&Application::HandleEvent, this));
+		Bus->subscribe(iw::make_callback(&Application ::HandleEvent, this));
+		Bus->subscribe(iw::make_callback(&InputManager::HandleEvent, Input.get()));
 
 		// Asset Loader
 
@@ -63,9 +64,6 @@ namespace IW {
 
 		LOG_DEBUG << "Setting window event bus...";
 		m_window->SetEventbus(Bus);
-		
-		LOG_DEBUG << "Setting window input manager...";
-		m_window->SetInputManager(InputManager);
 
 		int status;
 		LOG_DEBUG << "Initializing window...";
@@ -202,8 +200,10 @@ namespace IW {
 	void Application::HandleEvent(
 		iw::event& e)
 	{
+		LOG_INFO << e.Group << " " << e.Type;
+
 		bool error = false;
-		if (e.Category == IW::WINDOW) {
+		if (e.Group == iw::val(EventGroup::WINDOW)) {
 			switch (e.Type) {
 				case IW::Closed: {
 					m_running = false;

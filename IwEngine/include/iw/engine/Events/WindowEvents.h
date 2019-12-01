@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EventGroup.h"
+#include "iw/common/Events/EventGroups.h"
 #include "iw/events/event.h"
 
 namespace IW {
@@ -12,12 +12,12 @@ inline namespace Engine {
 	struct WindowEvent
 		: iw::event
 	{
-		int WindowId;
+		unsigned int WindowId;
 
 		WindowEvent(
 			WindowEventType type,
-			int windowId)
-			: iw::event(WINDOW, type)
+			unsigned int windowId)
+			: iw::event(iw::val(EventGroup::WINDOW), iw::val(type))
 			, WindowId(windowId)
 		{}
 	};
@@ -29,10 +29,10 @@ inline namespace Engine {
 		int Height;
 
 		WindowResizedEvent(
-			int id, 
+			unsigned int windowId,
 			int width,
 			int height)
-			: WindowEvent(Resized, id)
+			: WindowEvent(Resized, windowId)
 			, Width(width)
 			, Height(height)
 		{}

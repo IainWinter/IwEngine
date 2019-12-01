@@ -21,13 +21,14 @@ inline namespace Graphics {
 		iw::vector3* BiTangents;
 		iw::vector4* Colors;
 		iw::vector2* Uvs;
-		unsigned int* Indices;
 
-		size_t VertexCount;
-		size_t IndexCount;
+		unsigned* Indices;
 
 		Bone* Bones;
-		size_t BoneCount;
+
+		unsigned VertexCount;
+		unsigned IndexCount;
+		unsigned BoneCount;
 
 		iw::ref<Material> Material;
 
@@ -49,32 +50,32 @@ inline namespace Graphics {
 		~Mesh();
 
 		void SetVertices(
-			size_t count,
+			unsigned count,
 			iw::vector3* vertices);
 
 		void SetNormals(
-			size_t count,
+			unsigned count,
 			iw::vector3* normals);
 
 		void SetTangents(
-			size_t count,
+			unsigned count,
 			iw::vector3* tangents);
 
 		void SetBiTangents(
-			size_t count,
+			unsigned count,
 			iw::vector3* bitangents);
 
 		void SetColors(
-			size_t count,
+			unsigned count,
 			iw::vector4* colors);
 
 		void SetUVs(
-			size_t count,
+			unsigned count,
 			iw::vector2* uvs);
 
 		void SetIndices(
-			size_t count,
-			unsigned int* indices);
+			unsigned count,
+			unsigned* indices);
 
 		void GenNormals();
 

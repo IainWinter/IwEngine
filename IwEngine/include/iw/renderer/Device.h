@@ -21,8 +21,8 @@ inline namespace RenderAPI {
 	public:
 		virtual void DrawElements(
 			MeshTopology topology,
-			int count,
-			long long offset) = 0;
+			unsigned count,
+			ptrdiff_t offset) = 0;
 
 		virtual void Clear() = 0;
 

@@ -10,8 +10,8 @@ inline namespace RenderAPI {
 	public:
 		void DrawElements(
 			MeshTopology topology,
-			int count,
-			long long offset) override;
+			unsigned count,
+			ptrdiff_t offset) override;
 
 		void Clear() override;
 

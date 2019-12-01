@@ -20,8 +20,8 @@ namespace IW {
 
 	void GLDevice::DrawElements(
 		MeshTopology topology,
-		int count, 
-		long long offset)
+		unsigned count, 
+		ptrdiff_t offset)
 	{
 		GLenum glTopology = 0;
 		switch (topology) {
@@ -34,9 +34,9 @@ namespace IW {
 		if (glTopology) {
 			glDrawElements(
 				glTopology,
-				count,
+				(int)count,
 				GL_UNSIGNED_INT,
-				reinterpret_cast<const void*>(offset));
+				(const void*)offset);
 		}
 	}
 

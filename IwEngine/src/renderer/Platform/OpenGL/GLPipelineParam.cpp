@@ -18,8 +18,8 @@ namespace IW {
 
 	void GLPipelineParam::SetAsBools(
 		const void* values,
-		size_t count,
-		size_t stride)
+		unsigned count,
+		unsigned stride)
 	{
 		SetAsInts(values, count, stride);
 	}
@@ -32,8 +32,8 @@ namespace IW {
 
 	void GLPipelineParam::SetAsInts(
 		const void* values,
-		size_t count,
-		size_t stride)
+		unsigned count,
+		unsigned stride)
 	{
 		if (stride) {
 			switch (stride) {
@@ -65,8 +65,8 @@ namespace IW {
 
 	void GLPipelineParam::SetAsUInts(
 		const void* values,
-		size_t count,
-		size_t stride)
+		unsigned count,
+		unsigned stride)
 	{
 		if (stride) {
 			switch (stride) {
@@ -98,8 +98,8 @@ namespace IW {
 
 	void GLPipelineParam::SetAsFloats(
 		const void* values,
-		size_t count,
-		size_t stride)
+		unsigned count,
+		unsigned stride)
 	{
 		if (stride) {
 			switch (stride) {
@@ -131,8 +131,8 @@ namespace IW {
 
 	void GLPipelineParam::SetAsDoubles(
 		const void* values,
-		size_t count,
-		size_t stride)
+		unsigned count,
+		unsigned stride)
 	{
 		if (stride) {
 			switch (stride) {

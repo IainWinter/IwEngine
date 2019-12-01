@@ -4,7 +4,7 @@
 #include "Mesh.h"
 #include "RenderTarget.h"
 #include "iw/renderer/Device.h"
-#include "iw/data/Components/Transform.h"
+#include "iw/common/Components/Transform.h"
 #include "iw/util/memory/smart_pointers.h"
 #include <vector>
 

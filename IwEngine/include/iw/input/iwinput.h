@@ -15,7 +15,8 @@ namespace IW {
 inline namespace Input {
 	enum DeviceType {
 		MOUSE,
-		KEYBOARD
+		KEYBOARD,
+		DEVICE_NONE
 	};
 
 	enum InputName

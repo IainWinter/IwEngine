@@ -3,8 +3,8 @@
 #define ICO_Z .850650808352039932f
 
 namespace IW {
-	const size_t mesh_factory::ico_vert_count  = 12;
-	const size_t mesh_factory::ico_index_count = 60;
+	const unsigned mesh_factory::ico_vert_count  = 12;
+	const unsigned mesh_factory::ico_index_count = 60;
 
 	static const iw::vector3 ico_vert_data[] = {
 		iw::vector3(-ICO_X,  0,	    ICO_Z),
@@ -21,7 +21,7 @@ namespace IW {
 		iw::vector3(-ICO_Z, -ICO_X,  0)
 	};
 
-	static const unsigned int ico_index_data[] = {
+	static const unsigned ico_index_data[] = {
 		 1,  4,  0,
 		 4,  9,	 0,
 		 4,  5,	 9,
@@ -45,7 +45,7 @@ namespace IW {
 	};
 
 	// clock wise
-	//static const unsigned int ico_index_data[] = {
+	//static const unsigned ico_index_data[] = {
 	//	0,  4,  1,
 	//	0,  9,  4,
 	//	9,  5,  4,
@@ -69,26 +69,28 @@ namespace IW {
 	//};
 
 	const iw::vector3* mesh_factory::ico_verts = ico_vert_data;
-	const unsigned int* mesh_factory::ico_index = ico_index_data;
+	const unsigned* mesh_factory::ico_index = ico_index_data;
 
 	Mesh* mesh_factory::create_icosphere(
-		size_t resolution)
+		unsigned resolution)
 	{
+		unsigned res = (unsigned)pow(4, resolution);
+
 		Mesh* mesh = new Mesh();
-		mesh->VertexCount = 12 + (30 * pow(4, resolution));
-		mesh->IndexCount  = 60 * pow(4, resolution);
+		mesh->VertexCount = 12 + (30 * res);
+		mesh->IndexCount  = 60 * res;
 		mesh->Vertices = new iw::vector3[mesh->VertexCount];
 		mesh->Normals  = new iw::vector3[mesh->VertexCount];
-		mesh->Indices  = new unsigned int[mesh->IndexCount];
+		mesh->Indices  = new unsigned[mesh->IndexCount];
 
 		memcpy(mesh->Vertices, ico_verts, ico_vert_count  * sizeof(iw::vector3));
-		memcpy(mesh->Indices,  ico_index, ico_index_count * sizeof(unsigned int));
+		memcpy(mesh->Indices,  ico_index, ico_index_count * sizeof(unsigned));
 
 		// Verts & Index
 
-		size_t current_index_count = ico_index_count;
-		size_t current_vert_count  = ico_vert_count;
-		for (unsigned int i = 0; i < resolution; i++) {
+		unsigned current_index_count = ico_index_count;
+		unsigned current_vert_count  = ico_vert_count;
+		for (unsigned i = 0; i < resolution; i++) {
 			sub_devide(mesh->Vertices, mesh->Indices, current_index_count, current_vert_count);
 		}
 
@@ -99,9 +101,9 @@ namespace IW {
 		return mesh;
 	}
 
-	Mesh* Graphics::mesh_factory::create_uvsphere(
-		size_t latCount, 
-		size_t lonCount)
+	Mesh* mesh_factory::create_uvsphere(
+		unsigned latCount,
+		unsigned lonCount)
 	{
 		Mesh* mesh = new Mesh();
 		mesh->VertexCount = (latCount + 1) * (lonCount + 1);
@@ -109,16 +111,16 @@ namespace IW {
 		mesh->Vertices = new iw::vector3[mesh->VertexCount];
 		mesh->Normals  = new iw::vector3[mesh->VertexCount];
 		mesh->Uvs      = new iw::vector2[mesh->VertexCount];
-		mesh->Indices  = new unsigned int[mesh->IndexCount];
+		mesh->Indices  = new unsigned   [mesh->IndexCount];
 
 		// Verts
 
-		float lonStep = 2 * iw::PI / lonCount;
-		float latStep  = iw::PI / latCount;
+		float lonStep = iw::PI2 / lonCount;
+		float latStep = iw::PI  / latCount;
 
 		size_t vert = 0;
-		for (size_t lat = 0; lat <= latCount; lat++) {
-			for (size_t lon = 0; lon <= lonCount; lon++) {
+		for (unsigned lat = 0; lat <= latCount; lat++) {
+			for (unsigned lon = 0; lon <= lonCount; lon++) {
 				float y = sin(-iw::PI / 2 + lat * latStep);
 				float x = cos(lon * lonStep) * sin(lat * latStep);
 				float z = sin(lon * lonStep) * sin(lat * latStep);
@@ -137,16 +139,16 @@ namespace IW {
 		// Index
 
 		size_t index = 0;
-		float v = lonCount + 1;
-		for (size_t lon = 0; lon < lonCount; ++lon, v++) {
+		unsigned v = lonCount + 1;
+		for (unsigned lon = 0; lon < lonCount; ++lon, v++) {
 			mesh->Indices[index++] = lon;
 			mesh->Indices[index++] = v;
 			mesh->Indices[index++] = v + 1;
 		}
 
-		for (size_t lat = 1; lat < latCount - 1; lat++) {
+		for (unsigned lat = 1; lat < latCount - 1; lat++) {
 			v = lat * (lonCount + 1);
-			for (size_t lon = 0; lon < lonCount; lon++, v++) {
+			for (unsigned lon = 0; lon < lonCount; lon++, v++) {
 				mesh->Indices[index++] = v;
 				mesh->Indices[index++] = v + lonCount + 1;
 				mesh->Indices[index++] = v + 1;
@@ -157,7 +159,7 @@ namespace IW {
 		}
 
 		v = (latCount - 1) * (lonCount + 1);
-		for (size_t lon = 0; lon < lonCount; lon++, v++) {
+		for (unsigned lon = 0; lon < lonCount; lon++, v++) {
 			mesh->Indices[index++] = v;
 			mesh->Indices[index++] = v + lonCount + 1;
 			mesh->Indices[index++] = v + 1;
@@ -168,19 +170,19 @@ namespace IW {
 
 	void mesh_factory::sub_devide(
 		iw::vector3* verts,
-		unsigned int* index,
-		size_t& current_index_count,
-		size_t& current_vert_count)
+		unsigned* index,
+		unsigned& current_index_count,
+		unsigned& current_vert_count)
 	{
 		index_lookup_map lookup;
-		unsigned int* next_index = new unsigned int[16U * current_index_count];
-		unsigned int next_index_count = 0;
+		unsigned* next_index = new unsigned[16U * current_index_count];
+		unsigned next_index_count = 0;
 
-		unsigned int index_count = current_index_count;
-		for (unsigned int i = 0; i < index_count; i += 3) {
-			unsigned int mid0 = create_vertex_for_edge(lookup, verts, index[i],     index[i + ((i + 1) % 3)], current_vert_count);
-			unsigned int mid1 = create_vertex_for_edge(lookup, verts, index[i + 1], index[i + ((i + 2) % 3)], current_vert_count);
-			unsigned int mid2 = create_vertex_for_edge(lookup, verts, index[i + 2], index[i + ((i + 3) % 3)], current_vert_count);
+		unsigned index_count = current_index_count;
+		for (unsigned i = 0; i < index_count; i += 3) {
+			unsigned mid0 = create_vertex_for_edge(lookup, verts, index[i],     index[i + ((i + 1) % 3)], current_vert_count);
+			unsigned mid1 = create_vertex_for_edge(lookup, verts, index[i + 1], index[i + ((i + 2) % 3)], current_vert_count);
+			unsigned mid2 = create_vertex_for_edge(lookup, verts, index[i + 2], index[i + ((i + 3) % 3)], current_vert_count);
 
 			next_index[next_index_count++] = index[i];	   next_index[next_index_count++] = mid0; next_index[next_index_count++] = mid2;
 			next_index[next_index_count++] = index[i + 1]; next_index[next_index_count++] = mid1; next_index[next_index_count++] = mid0;
@@ -188,18 +190,18 @@ namespace IW {
 			next_index[next_index_count++] = mid0;	       next_index[next_index_count++] = mid1; next_index[next_index_count++] = mid2;
 		}
 
-		memcpy(index, next_index, next_index_count * sizeof(unsigned int));
+		memcpy(index, next_index, next_index_count * sizeof(unsigned));
 		current_index_count = next_index_count;
 
 		delete[] next_index;
 	}
 
-	unsigned int mesh_factory::create_vertex_for_edge(
+	unsigned mesh_factory::create_vertex_for_edge(
 		index_lookup_map& lookup,
 		iw::vector3* verts,
-		unsigned int first,
-		unsigned int second,
-		size_t& current_vert_count)
+		unsigned first,
+		unsigned second,
+		unsigned& current_vert_count)
 	{
 		index_pair key = first < second ? index_pair(first, second) : index_pair(second, first);
 

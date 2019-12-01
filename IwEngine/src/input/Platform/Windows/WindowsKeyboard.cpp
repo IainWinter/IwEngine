@@ -15,10 +15,10 @@ namespace IW {
 		: Keyboard(name)
 	{}
 
-	InputEvent WindowsKeyboard::TranslateOsEvent(
-		const OsEvent& event)
+	DeviceInput WindowsKeyboard::TranslateOsEvent(
+		const OsEvent& e)
 	{
-		return InputEvent(KEYBOARD, -1);
+		return DeviceInput(KEYBOARD);
 	}
 
 	bool Keyboard::KeyDown(

@@ -14,7 +14,7 @@ inline namespace Graphics {
 		FRAGMENT
 	};
 
-	struct IWGRAPHICS_API Shader {
+	struct Shader {
 	private:
 		struct ShaderSource {
 			size_t SourceSize;
@@ -28,12 +28,15 @@ inline namespace Graphics {
 		std::vector<ShaderSource> m_source;
 
 	public:
+		IWGRAPHICS_API
 		Shader();
 
+		IWGRAPHICS_API
 		void AddShader(
 			ShaderType type,
 			const char* source);
 
+		IWGRAPHICS_API
 		void Initialize(
 			const iw::ref<IDevice>& device);
 	};

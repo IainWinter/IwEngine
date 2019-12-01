@@ -2,7 +2,7 @@
 
 #include "Components/Bullet.h"
 #include "iw/engine/System.h"
-#include "iw/data/Components/Transform.h"
+#include "iw/common/Components/Transform.h"
 
 class BulletSystem
 	: public IW::System<IW::Transform, Bullet>

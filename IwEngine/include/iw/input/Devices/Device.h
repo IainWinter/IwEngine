@@ -1,8 +1,8 @@
 #pragma once
 
 #include "iw/input/IwInput.h"
-#include "iw/input/Events/InputEvent.h"
-#include "iw/events/callback.h"
+#include "iw/input/DeviceInput.h"
+#include "iw/common/Events/OSEvents.h"
 #include "iw/util/set/tofrom_set.h"
 
 namespace IW {
@@ -21,8 +21,8 @@ inline namespace Input {
 
 		virtual ~Device() {}
 
-		virtual InputEvent TranslateOsEvent(
-			const OsEvent& event) = 0;
+		virtual DeviceInput TranslateOsEvent(
+			const OsEvent& e) = 0;
 	};
 }
 }

@@ -41,18 +41,18 @@ namespace IW {
 		}
 	}
 
-	InputEvent WindowsRawMouse::TranslateOsEvent(
-		const OsEvent& event)
+	DeviceInput WindowsRawMouse::TranslateOsEvent(
+		const OsEvent& e)
 	{
-		if (event.Message != WM_INPUT) {
-			return;
+		if (e.Message != WM_INPUT) {
+			return DEVICE_NONE;
 		}
 
-		RAWINPUT* raw = (RAWINPUT*)event.LParam;
+		RAWINPUT* raw = (RAWINPUT*)e.LParam;
 		if (raw->header.dwType == RIM_TYPEMOUSE) {
 			RAWMOUSE mouse = raw->data.mouse;
 
-			InputEvent input(MOUSE, event.WindowId);
+			DeviceInput input(MOUSE);
 			input.Name = LMOUSE;
 			for (int i = 0; i < 5; i++) {
 				if (maskdown[i] & mouse.usButtonFlags) {
@@ -78,11 +78,13 @@ namespace IW {
 				input.Name  = MOUSEdX;
 				input.State = (float)mouse.lLastX;
 
-				input.Name  = MOUSEdY;
+				input.Name2  = MOUSEdY;
 				input.State2 = (float)mouse.lLastY; // xd
 				return input;
 			}
 		}
+
+		return DEVICE_NONE;
 	}
 }
 #endif
