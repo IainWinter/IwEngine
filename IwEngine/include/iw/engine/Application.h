@@ -19,9 +19,9 @@ namespace IW {
 inline namespace Engine {
 	class Application {
 	private:
-		bool                 m_running;
-		IWindow*             m_window;
-		EventStack<Layer*>   m_layers;
+		bool               m_running;
+		IWindow*           m_window;
+		EventStack<Layer*> m_layers;
 
 		iw::ref<IW::IDevice> m_device;
 
@@ -33,8 +33,8 @@ inline namespace Engine {
 		iw::ref<IW::Space>        Space;
 		iw::ref<IW::Renderer>     Renderer;
 		iw::ref<IW::AssetManager> Asset;
-		iw::ref<iw::eventbus>     Bus;
 		iw::ref<IW::InputManager> Input;
+		iw::ref<iw::eventbus>     Bus;
 
 	public:
 		IWENGINE_API
