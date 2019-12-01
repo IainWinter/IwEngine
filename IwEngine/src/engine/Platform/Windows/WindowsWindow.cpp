@@ -263,10 +263,10 @@ namespace IW {
 				Bus->push<WindowResizedEvent>(Translate<WindowResizedEvent>(msg, Id(), wParam, lParam));
 				break;
 			case WM_CLOSE:
-				Bus->push<WindowEvent>(IW::Closed, Id());
+				Bus->push<WindowEvent>(Closed, Id());
 				break;
 			case WM_DESTROY:
-				Bus->push<WindowEvent>(IW::Destroyed, Id());
+				Bus->push<WindowEvent>(Destroyed, Id());
 				break;
 			default:
 				//Bus->push(iw::event(IW::NOT_HANDLED, 0));

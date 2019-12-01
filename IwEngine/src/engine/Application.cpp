@@ -208,8 +208,9 @@ namespace IW {
 					break;
 				}
 				case IW::Resized: {
-					Renderer->Width  = e.as<IW::WindowResizedEvent>().Width;
-					Renderer->Height = e.as<IW::WindowResizedEvent>().Height;
+					WindowResizedEvent& wre = e.as<WindowResizedEvent>();
+					Renderer->Width  = wre.Width;
+					Renderer->Height = wre.Height;
 					e.Handled = true;
 					break;
 				}
