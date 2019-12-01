@@ -12,21 +12,25 @@ namespace iw {
 inline namespace events {
 	class eventbus {
 	private:
-		std::vector<iw::callback<event&>> m_callbacks;
-		iw::linear_allocator m_alloc;
-		iw::blocking_queue<event*> m_events;
+		linear_allocator m_alloc;
+		blocking_queue<event*> m_events;
+		std::vector<callback<event&>> m_callbacks;
 		std::mutex m_mutex;
 
 	public:
-		IWEVENTS_API eventbus();
+		IWEVENTS_API
+		eventbus();
 
-		IWEVENTS_API void subscribe(
-			const iw::callback<event&>& callback);
+		IWEVENTS_API
+		void subscribe(
+			const callback<event&>& callback);
 
-		IWEVENTS_API void unsubscribe(
-			const iw::callback<event&>& callback);
+		IWEVENTS_API
+		void unsubscribe(
+			const callback<event&>& callback);
 
-		IWEVENTS_API void publish();
+		IWEVENTS_API
+		void publish();
 
 		template<
 			typename _e,
@@ -50,6 +54,10 @@ inline namespace events {
 			publish_event(e);
 		}
 	private:
+		IWEVENTS_API
+		void publish_event(
+			event* e);
+
 		template<
 			typename _e>
 		_e* alloc_event() {
@@ -61,9 +69,6 @@ inline namespace events {
 
 			return (_e*)e;
 		}
-
-		void publish_event(
-			event* e);
 	};
 }
 }

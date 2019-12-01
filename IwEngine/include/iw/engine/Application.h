@@ -19,22 +19,21 @@ namespace IW {
 inline namespace Engine {
 	class Application {
 	private:
-		bool               m_running;
-		IWindow*           m_window;
+		IWindow* m_window;
+		iw::ref<IDevice> m_device;
+
+		ImGuiLayer* m_imguiLayer;
 		EventStack<Layer*> m_layers;
 
-		iw::ref<IW::IDevice> m_device;
-
-		std::thread  m_renderThread;
-		Task<void()> m_updateTask;
-		ImGuiLayer*  m_imguiLayer;
+		std::thread m_renderThread;
+		bool m_running;
 
 	protected:
-		iw::ref<IW::Space>        Space;
-		iw::ref<IW::Renderer>     Renderer;
-		iw::ref<IW::AssetManager> Asset;
-		iw::ref<IW::InputManager> Input;
-		iw::ref<iw::eventbus>     Bus;
+		iw::ref<Space>        Space;
+		iw::ref<Renderer>     Renderer;
+		iw::ref<AssetManager> Asset;
+		iw::ref<InputManager> Input;
+		iw::ref<iw::eventbus> Bus;
 
 	public:
 		IWENGINE_API

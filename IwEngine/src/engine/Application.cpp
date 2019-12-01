@@ -15,18 +15,15 @@ namespace IW {
 	Application::Application()
 		: m_running(false)
 		, m_window(IWindow::Create())
-		, m_device(IDevice::Create())
 		, Space(std::make_shared<IW::Space>())
-		, Renderer(std::make_shared<IW::Renderer>(m_device))
 		, Asset(std::make_shared<AssetManager>())
-		, Bus(std::make_shared<iw::eventbus>())
-		, Input(std::make_shared<IW::InputManager>(Bus))
-		, m_updateTask([&]() {
-			for (Layer* layer : m_layers) {
-				layer->UpdateSystems();
-			}
-		})
 	{
+		m_device = iw::ref<IDevice>(IDevice::Create());
+		Renderer = std::make_shared<IW::Renderer>(m_device);
+
+		Bus   = std::make_shared<iw::eventbus>();
+		Input = std::make_shared<IW::InputManager>(Bus);
+
 		PushOverlay<ImGuiLayer>();
 		PushOverlay<DebugLayer>();
 	}
