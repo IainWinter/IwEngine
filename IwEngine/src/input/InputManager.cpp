@@ -64,7 +64,8 @@ namespace IW {
 				continue;
 			}
 
-			bool active = !!input.State;
+			bool active  = !!input.State;
+			bool active2 = !!input.State2;
 
 			if (active) {
 				switch (input.Name) {
@@ -85,7 +86,20 @@ namespace IW {
 				case MOUSEY:  context.State[MOUSEdY] = input.State - lastState; break;
 			}
 
-			context.State[input.Name] = input.State;
+			context.State[input.Name]  = input.State;
+
+			if (active2) {
+				float lastState2 = context.State[input.Name2];
+
+				switch (input.Name2) {
+					case MOUSEdX: context.State[MOUSEX] += input.State2; break;
+					case MOUSEdY: context.State[MOUSEY] += input.State2; break;
+					case MOUSEX:  context.State[MOUSEdX] = input.State2 - lastState2; break;
+					case MOUSEY:  context.State[MOUSEdY] = input.State2 - lastState2; break;
+				}
+
+				context.State[input.Name2] = input.State2;
+			}
 
 			// Dispatch the event as a Mouse or Keyboard event
 			// Check actions table for a matching action event to also send out
