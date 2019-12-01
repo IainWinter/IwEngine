@@ -24,11 +24,17 @@ namespace iw {
 
 		while (!m_events.empty()) {
 			iw::event* event = m_events.pop();
-			for (auto& callback : m_callbacks) {
-				callback(*event);
-			}
+			publish_event(event);
 		}
 
 		m_alloc.reset();
+	}
+
+	void eventbus::publish_event(
+		event* e)
+	{
+		for (auto& callback : m_callbacks) {
+			callback(*e);
+		}
 	}
 }

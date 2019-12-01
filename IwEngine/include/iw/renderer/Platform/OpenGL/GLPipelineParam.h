@@ -23,40 +23,40 @@ inline namespace RenderAPI {
 
 		void SetAsBools(
 			const void* values,
-			size_t count,
-			size_t stride) override;
+			unsigned count,
+			unsigned stride) override;
 
 		void SetAsInt(
 			int value) override;
 
 		void SetAsInts(
 			const void* values,
-			size_t count,
-			size_t stride) override;
+			unsigned count,
+			unsigned stride) override;
 
 		void SetAsUInt(
 			unsigned int value) override;
 
 		void SetAsUInts(
 			const void* values,
-			size_t count,
-			size_t stride) override;
+			unsigned count,
+			unsigned stride) override;
 
 		void SetAsFloat(
 			float value) override;
 
 		void SetAsFloats(
 			const void* values,
-			size_t count,
-			size_t stride) override;
+			unsigned count,
+			unsigned stride) override;
 
 		void SetAsDouble(
 			double value) override;
 
 		void SetAsDoubles(
 			const void* values,
-			size_t count,
-			size_t stride) override;
+			unsigned count,
+			unsigned stride) override;
 
 		void SetAsMat2(
 			const iw::matrix2& matrix) override;

@@ -50,7 +50,7 @@ namespace IW {
 	}
 
 	void Mesh::SetVertices(
-		size_t count,
+		unsigned count,
 		iw::vector3* vertices)
 	{
 		delete[] Vertices;
@@ -66,7 +66,7 @@ namespace IW {
 	}
 
 	void Mesh::SetNormals(
-		size_t count,
+		unsigned count,
 		iw::vector3* normals)
 	{
 		delete[] Normals;
@@ -81,7 +81,7 @@ namespace IW {
 	}
 
 	void Mesh::SetTangents(
-		size_t count, 
+		unsigned count,
 		iw::vector3* tangents)
 	{
 		delete[] Tangents;
@@ -96,7 +96,7 @@ namespace IW {
 	}
 
 	void Mesh::SetBiTangents(
-		size_t count, 
+		unsigned count,
 		iw::vector3* bitangents)
 	{
 		delete[] BiTangents;
@@ -111,7 +111,7 @@ namespace IW {
 	}
 
 	void Mesh::SetColors(
-		size_t count,
+		unsigned count,
 		iw::vector4* colors)
 	{
 		delete[] Colors;
@@ -126,7 +126,7 @@ namespace IW {
 	}
 
 	void Mesh::SetUVs(
-		size_t count,
+		unsigned count,
 		iw::vector2* uvs)
 	{
 		delete[] Uvs;
@@ -141,15 +141,15 @@ namespace IW {
 	}
 
 	void Mesh::SetIndices(
-		size_t count,
-		unsigned int* indices)
+		unsigned count,
+		unsigned* indices)
 	{
 		delete[] Indices;
 		Indices = nullptr;
 
 		if (count > 0) {
-			Indices = new unsigned int[count];
-			memcpy(Indices, indices, count * sizeof(unsigned int));
+			Indices = new unsigned[count];
+			memcpy(Indices, indices, count * sizeof(unsigned));
 		}
 
 		IndexCount = count;
@@ -162,7 +162,7 @@ namespace IW {
 
 		Normals = new iw::vector3[VertexCount];
 
-		for (size_t i = 0; i < IndexCount; i += 3) {
+		for (unsigned i = 0; i < IndexCount; i += 3) {
 			iw::vector3& v1 = Vertices[Indices[i + 0]];
 			iw::vector3& v2 = Vertices[Indices[i + 1]];
 			iw::vector3& v3 = Vertices[Indices[i + 2]];
@@ -190,8 +190,8 @@ namespace IW {
 		Tangents   = new iw::vector3[VertexCount];
 		BiTangents = new iw::vector3[VertexCount];
 
-		size_t v = 0;
-		for (size_t i = 0; i < IndexCount; i += 3) {
+		unsigned v = 0;
+		for (unsigned i = 0; i < IndexCount; i += 3) {
 			iw::vector3& norm = Normals [Indices[i + 0]]; // can use any normal
 			iw::vector3& pos1 = Vertices[Indices[i + 0]];
 			iw::vector3& pos2 = Vertices[Indices[i + 1]];

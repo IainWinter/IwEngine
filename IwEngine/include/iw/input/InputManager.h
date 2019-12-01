@@ -9,21 +9,23 @@
 
 namespace IW {
 inline namespace Input {
-	class IWINPUT_API InputManager {
+	class InputManager {
 	private:
 		std::vector<iw::ref<Context>> m_contexts;
 		std::vector<iw::ref<Device>>  m_devices;
 		iw::ref<Context> m_active;
-
 		iw::ref<iw::eventbus> m_bus;
 
 	public:
+		IWINPUT_API
 		InputManager(
 			iw::ref<iw::eventbus>& bus);
 
+		IWINPUT_API
 		void HandleEvent(
 			iw::event& e);
 
+		IWINPUT_API
 		void CreateContext(
 			std::string name,
 			float width  = NO_WIDTH,
@@ -40,19 +42,23 @@ inline namespace Input {
 		}
 
 		template<>
+		IWINPUT_API
 		iw::ref<Device>& CreateDevice<Mouse>(
 			std::string name);
 
 		template<>
+		IWINPUT_API
 		iw::ref<Device>& CreateDevice<Keyboard>(
 			std::string name);
 
 #ifdef IW_PLATFORM_WINDOWS
 		template<>
+		IWINPUT_API
 		iw::ref<Device>& CreateDevice<RawMouse>(
 			std::string name);
 
 		template<>
+		IWINPUT_API
 		iw::ref<Device>& CreateDevice<RawKeyboard>(
 			std::string name);
 #endif

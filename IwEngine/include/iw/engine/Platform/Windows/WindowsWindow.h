@@ -45,32 +45,6 @@ inline namespace Engine {
 			UINT msg,
 			WPARAM wparam,
 			LPARAM lparam);
-
-		void HandleMouseWheel(
-			IW::InputState* inputState,
-			float delta);
-
-		void HandleMouseMoved(
-			IW::InputState* inputState,
-			float X,
-			float Y,
-			float deltaX,
-			float deltaY);
-
-		void HandleMouseButton(
-			IW::InputState* inputState,
-			IW::InputName button,
-			bool down);
-
-		void HandleKey(
-			IW::InputState* inputState,
-			IW::InputName key,
-			bool down);
-
-		void HandleKeyTyped(
-			IW::InputState* inputState,
-			IW::InputName key,
-			char character);
 	};
 }
 }

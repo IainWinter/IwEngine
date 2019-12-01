@@ -17,7 +17,7 @@ inline namespace Engine {
 		WindowEvent(
 			WindowEventType type,
 			unsigned int windowId)
-			: iw::event(WINDOW, type)
+			: iw::event(iw::val(EventGroup::WINDOW), iw::val(type))
 			, WindowId(windowId)
 		{}
 	};

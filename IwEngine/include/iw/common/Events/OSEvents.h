@@ -3,12 +3,18 @@
 #include "EventGroups.h"
 #include "iw/common/iwcommon.h"
 #include "iw/events/event.h"
-#include <vcruntime.h>
+#include "iw/util/enum/val.h"
+
+#define IW_PLATFORM_MIN 1
+#include "iw/common/Platform.h"
 
 namespace IW {
 inline namespace Engine {
-	enum OsEventType {
-		GENERIC
+	enum class OsEventType
+		: short
+	{
+		GENERIC,
+		INPUT
 	};
 
 	struct OsEvent
@@ -17,15 +23,15 @@ inline namespace Engine {
 #ifdef IW_PLATFORM_WINDOWS
 		unsigned int WindowId;
 		unsigned int Message;
-		size_t   WParam;
-		intptr_t LParam;
+		WPARAM WParam;
+		LPARAM LParam;
 
 		OsEvent(
 			unsigned int windowId,
 			unsigned int message,
-			size_t wparam,
-			intptr_t lparam)
-			: iw::event(OS, GENERIC)
+			WPARAM wparam,
+			LPARAM lparam)
+			: iw::event(iw::val(EventGroup::OS), iw::val(OsEventType::GENERIC))
 			, WindowId(windowId)
 			, Message(message)
 			, WParam(wparam)

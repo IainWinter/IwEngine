@@ -17,7 +17,7 @@
 
 namespace IW {
 inline namespace Engine {
-	class IWENGINE_API Application {
+	class Application {
 	private:
 		bool                 m_running;
 		IWindow*             m_window;
@@ -37,21 +37,34 @@ inline namespace Engine {
 		iw::ref<IW::InputManager> Input;
 
 	public:
+		IWENGINE_API
 		Application();
+
+		IWENGINE_API
 		virtual ~Application();
 
+		IWENGINE_API
 		virtual int Initialize(
 			InitOptions& options);
 
+		IWENGINE_API
 		virtual void Run();
+
+		IWENGINE_API
 		virtual void Destroy();
+
+		IWENGINE_API
 		virtual void Update();
+
+		IWENGINE_API
 		virtual void FixedUpdate();
 		//virtual void Pause();
 
+		IWENGINE_API
 		virtual void HandleEvent(
 			iw::event& e);
 
+		IWENGINE_API
 		inline IWindow& GetWindow() {
 			return *m_window;
 		}

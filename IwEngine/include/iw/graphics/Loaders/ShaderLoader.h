@@ -6,14 +6,14 @@
 
 namespace IW {
 inline namespace Graphics {
-	class IWGRAPHICS_API ShaderLoader
+	class ShaderLoader
 		: public AssetLoader<Shader>
 	{
 	public:
-		ShaderLoader(
+		IWGRAPHICS_API ShaderLoader(
 			AssetManager& asset);
 	private:
-		Shader* LoadAsset(
+		IWGRAPHICS_API Shader* LoadAsset(
 			std::string filepath) override;
 	};
 }

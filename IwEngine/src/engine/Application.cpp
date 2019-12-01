@@ -200,8 +200,10 @@ namespace IW {
 	void Application::HandleEvent(
 		iw::event& e)
 	{
+		LOG_INFO << e.Group << " " << e.Type;
+
 		bool error = false;
-		if (e.Category == IW::WINDOW) {
+		if (e.Group == iw::val(EventGroup::WINDOW)) {
 			switch (e.Type) {
 				case IW::Closed: {
 					m_running = false;

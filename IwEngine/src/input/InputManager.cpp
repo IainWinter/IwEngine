@@ -3,8 +3,37 @@
 #include "iw/input/Events/InputEvents.h"
 #include "iw/input/DeviceInput.h"
 #include "iw/common/Events/OSEvents.h"
+#include "iw/common/Platform.h"
 
 namespace IW {
+#ifdef IW_PLATFORM_WINDOWS
+	void SetRawInputEventLParam(
+		OsEvent& e)
+	{
+		const size_t rihSize = sizeof(RAWINPUTHEADER);
+		const HRAWINPUT rptr = (HRAWINPUT)e.LParam;
+
+		UINT dwSize = 0;
+		GetRawInputData(rptr, RID_INPUT, NULL, &dwSize, rihSize);
+
+		if (dwSize == 0) {
+			LOG_WARNING << "Invalid raw input device! HRAWINPUT " << e.LParam;
+			e.LParam = 0;
+			return;
+		}
+
+		LPBYTE lpb = new BYTE[dwSize];
+
+		if (GetRawInputData(rptr, RID_INPUT, lpb, &dwSize, rihSize) != dwSize) {
+			LOG_WARNING << "GetRawInputData does not return correct size!";
+			e.LParam = 0;
+			return;
+		}
+
+		e.LParam = (LPARAM)lpb;
+	}
+#endif
+
 	InputManager::InputManager(
 		iw::ref<iw::eventbus>& bus)
 		: m_bus(bus)
@@ -13,15 +42,20 @@ namespace IW {
 	void InputManager::HandleEvent(
 		iw::event& e)
 	{
-		if (e.Type != OS) {
+		if (e.Group != iw::val(EventGroup::OS) || !m_active) {
 			return;
 		}
 
 		OsEvent& osevent = (OsEvent&)e;
-
 		Context& context = *m_active.get();
 
-		LOG_INFO << e.Category;
+		if (e.Type == iw::val(OsEventType::INPUT)) {
+			SetRawInputEventLParam(osevent);
+		}
+		
+		if (osevent.LParam == 0) {
+			return;
+		}
 
 		for (iw::ref<Device>& device : context.Devices) {
 			DeviceInput input = device->TranslateOsEvent(osevent);

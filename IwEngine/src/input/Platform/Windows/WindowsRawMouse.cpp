@@ -83,6 +83,8 @@ namespace IW {
 				return input;
 			}
 		}
+
+		return DEVICE_NONE;
 	}
 }
 #endif

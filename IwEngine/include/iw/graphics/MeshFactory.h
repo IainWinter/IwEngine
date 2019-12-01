@@ -5,37 +5,38 @@
 
 namespace IW {
 inline namespace Graphics {
+	// why is this snek
 	class IWGRAPHICS_API mesh_factory {
 	private:
-		typedef std::pair<unsigned int, unsigned int> index_pair;
-		typedef std::unordered_map<index_pair, unsigned int, iw::pair_hash> index_lookup_map;
+		typedef std::pair<unsigned, unsigned> index_pair;
+		typedef std::unordered_map<index_pair, unsigned, iw::pair_hash> index_lookup_map;
 		typedef std::vector<iw::vector3> vert_list;
 
+		static const unsigned ico_vert_count;
+		static const unsigned ico_index_count;
+		static const unsigned*    ico_index;
 		static const iw::vector3* ico_verts;
-		static const unsigned int* ico_index;
-		static const size_t ico_vert_count;
-		static const size_t ico_index_count;
 
 	public:
 		static Mesh* create_icosphere(
-			size_t resolution);
+			unsigned resolution);
 
 		static Mesh* create_uvsphere(
-			size_t latCount,
-			size_t lonCount);
+			unsigned latCount,
+			unsigned lonCount);
 	private:
 		static void sub_devide(
 			iw::vector3* verts,
-			unsigned int* index,
-			size_t& current_index_count,
-			size_t& current_vert_count);
+			unsigned* index,
+			unsigned& current_index_count,
+			unsigned& current_vert_count);
 
 		static unsigned int create_vertex_for_edge(
 			index_lookup_map& lookup,
 			iw::vector3* verts,
-			unsigned int first,
-			unsigned int second,
-			size_t& current_vert_count);
+			unsigned first,
+			unsigned second,
+			unsigned& current_vert_count);
 	};
 }
 }

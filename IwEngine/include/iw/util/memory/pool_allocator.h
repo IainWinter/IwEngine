@@ -9,7 +9,7 @@ namespace iw {
 inline namespace util {
 	class IWUTIL_API pool_allocator {
 	public:
-		class IWUTIL_API page {
+		class page {
 		private:
 			char* m_memory;
 			page* m_next;

@@ -248,7 +248,15 @@ namespace IW {
 		WPARAM wParam,
 		LPARAM lParam)
 	{
-		Bus->push<OsEvent>(Id(), msg, wParam, lParam);
+		OsEvent ose(Id(), msg, wParam, lParam);
+		
+		switch (msg) {
+			case WM_INPUT: 
+				ose.Type = iw::val(OsEventType::INPUT);
+				break;
+		}
+
+		Bus->send<OsEvent>(ose);
 
 		switch (msg) {
 			case WM_SIZE:
@@ -261,7 +269,7 @@ namespace IW {
 				Bus->push<WindowEvent>(IW::Destroyed, Id());
 				break;
 			default:
-				Bus->push(iw::event(IW::NOT_HANDLED, 0));
+				//Bus->push(iw::event(IW::NOT_HANDLED, 0));
 				return DefWindowProc(hwnd, msg, wParam, lParam);
 		}
 

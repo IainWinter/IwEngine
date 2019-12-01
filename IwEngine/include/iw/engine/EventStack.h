@@ -71,21 +71,21 @@ inline namespace Engine {
 			iw::event& e)
 		{
 			bool error = false;
-			if (e.Category == IW::INPUT) {
+			if (e.Group == iw::val(EventGroup::INPUT)) {
 				switch (e.Type) {
-					case IW::MouseWheel:  e.Handled = On((IW::MouseWheelEvent&) e); break;
-					case IW::MouseMoved:  e.Handled = On((IW::MouseMovedEvent&) e); break;
-					case IW::MouseButton: e.Handled = On((IW::MouseButtonEvent&)e); break;
-					case IW::Key:    	  e.Handled = On((IW::KeyEvent&)        e); break;
-					case IW::KeyTyped:    e.Handled = On((IW::KeyTypedEvent&)   e); break;
+					case InputEventType::MouseWheel:  e.Handled = On((MouseWheelEvent&)e); break;
+					case InputEventType::MouseMoved:  e.Handled = On((MouseMovedEvent&) e); break;
+					case InputEventType::MouseButton: e.Handled = On((MouseButtonEvent&)e); break;
+					case InputEventType::Key:    	    e.Handled = On((KeyEvent&)        e); break;
+					case InputEventType::KeyTyped:    e.Handled = On((KeyTypedEvent&)   e); break;
 					default: error = true;
 				}
 			}
 
-			else if (e.Category == IW::WINDOW) {
+			else if (e.Group == iw::val(EventGroup::WINDOW)) {
 				switch (e.Type) {
-					case IW::Resized: e.Handled = On((IW::WindowResizedEvent&)  e); break;
-					case IW::Closed:  /*t.On((IW::WindowClosedEvent&)e;*/   break;
+					case WindowEventType::Resized: e.Handled = On((WindowResizedEvent&)e); break;
+					case WindowEventType::Closed:  /*t.On((WindowClosedEvent&)e;*/   break;
 					default: error = true;
 				}
 			}

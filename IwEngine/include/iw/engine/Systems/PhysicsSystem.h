@@ -8,12 +8,14 @@
 
 namespace IW {
 inline namespace Engine {
-	class IWENGINE_API PhysicsSystem
+	class PhysicsSystem
 		: public System<IW::Transform, IwPhysics::AABB3>
 	{
 	public:
+		IWENGINE_API
 		PhysicsSystem();
 
+		IWENGINE_API
 		void Update(
 			IW::EntityComponentArray& view);
 	};

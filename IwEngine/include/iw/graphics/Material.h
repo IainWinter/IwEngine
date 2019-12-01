@@ -16,7 +16,7 @@
 
 namespace IW {
 inline namespace Graphics {
-	struct IWGRAPHICS_API Material {
+	struct Material {
 	private:
 		enum MaterialPropertyType {
 			BOOL,
@@ -47,22 +47,29 @@ inline namespace Graphics {
 		std::vector<MaterialProperty> m_properties;
 
 	public:
+		IWGRAPHICS_API
 		Material() = default;
 
+		IWGRAPHICS_API
 		Material(
 			iw::ref<IW::Shader>& shader);
 
+		IWGRAPHICS_API
 		Material(
 			Material&&) noexcept = default;
 
+		IWGRAPHICS_API
 		Material(
 			const Material& copy);
 
+		IWGRAPHICS_API
 		~Material();
 
+		IWGRAPHICS_API
 		Material& operator=(
 			Material&&) noexcept = default;
 
+		IWGRAPHICS_API
 		Material& operator=(
 			const Material& copy);
 
@@ -72,99 +79,123 @@ inline namespace Graphics {
 			Shader = shader;
 		}
 
+		IWGRAPHICS_API
 		void SetBool(
 			const char* name,
 			bool value);
 
 		// Stride is 0 if there is only a single element
 
+		IWGRAPHICS_API
 		void SetBools(
 			const char* name,
 			void* values,
 			size_t count,
 			size_t stride = 0);
 
+		IWGRAPHICS_API
 		void SetInt(
 			const char* name,
 			int value);
 
+		IWGRAPHICS_API
 		void SetInts(
 			const char* name,
 			void* values,
 			size_t count,
 			size_t stride = 0);
 
+		IWGRAPHICS_API
 		void SetUInt(
 			const char* name,
 			unsigned int value);
 
+		IWGRAPHICS_API
 		void SetUInts(
 			const char* name,
 			void* values,
 			size_t count,
 			size_t stride = 0);
 
+		IWGRAPHICS_API
 		void SetFloat(
 			const char* name,
 			float value);
 
+		IWGRAPHICS_API
 		void SetFloats(
 			const char* name,
 			void* values,
 			size_t count,
 			size_t stride = 0);
 
+		IWGRAPHICS_API
 		void SetDouble(
 			const char* name,
 			double value);
 
+		IWGRAPHICS_API
 		void SetDoubles(
 			const char* name,
 			void* values,
 			size_t count,
 			size_t stride = 0);
 
+		IWGRAPHICS_API
 		void SetTexture(
 			const char* name,
 			IW::Texture* texture);
 
+		IWGRAPHICS_API
 		void SetTexture(
 			const char* name,
 			const iw::ref<IW::Texture>& texture);
 
+		IWGRAPHICS_API
 		bool* GetBool(
 			const char* name);
 
+		IWGRAPHICS_API
 		std::tuple<bool*, size_t> GetBools(
 			const char* name);
 
+		IWGRAPHICS_API
 		int* GetInt(
 			const char* name);
 
+		IWGRAPHICS_API
 		std::tuple<int*, size_t> GetInts(
 			const char* name);
 
+		IWGRAPHICS_API
 		unsigned int* GetUInt(
 			const char* name);
 
+		IWGRAPHICS_API
 		std::tuple<unsigned int*, size_t> GetUInts(
 			const char* name);
 
+		IWGRAPHICS_API
 		float* GetFloat(
 			const char* name);
 
+		IWGRAPHICS_API
 		std::tuple<float*, size_t> GetFloats(
 			const char* name);
 
+		IWGRAPHICS_API
 		double* GetDouble(
 			const char* name);
 
+		IWGRAPHICS_API
 		std::tuple<double*, size_t> GetDoubles(
 			const char* name);
 
+		IWGRAPHICS_API
 		IW::Texture* GetTexture(
 			const char* name);
 
+		IWGRAPHICS_API
 		void Use(
 			const iw::ref<IW::IDevice>& device) const;
 	private:

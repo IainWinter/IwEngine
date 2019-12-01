@@ -7,7 +7,7 @@
 
 namespace IW {
 inline namespace ECS {
-	class IWENTITY_API EntityManager {
+	class EntityManager {
 	private:
 		std::vector<iw::ref<EntityData>> m_entities;
 		std::priority_queue<size_t, std::vector<size_t>, std::greater<size_t>> m_dead;
@@ -18,6 +18,7 @@ inline namespace ECS {
 		bool DestroyEntity(
 			size_t index);
 
+		IWENTITY_API
 		iw::ref<EntityData>& GetEntityData(
 			size_t index);
 	};

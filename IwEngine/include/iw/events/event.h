@@ -3,12 +3,12 @@
 namespace iw {
 inline namespace events {
 	struct event {
-		short Category;
+		short Group;
 		short Type;
 		bool Handled;
 
 		event()
-			: Category(0)
+			: Group(0)
 			, Type(0)
 			, Handled(false)
 		{}
@@ -16,7 +16,7 @@ inline namespace events {
 		event(
 			short category,
 			short type)
-			: Category(category)
+			: Group(category)
 			, Type(type)
 			, Handled(false)
 		{}

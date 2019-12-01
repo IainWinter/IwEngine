@@ -50,6 +50,8 @@ namespace IW {
 
 			return e;
 		}
+
+		return DEVICE_NONE;
 	}
 }
 #endif
