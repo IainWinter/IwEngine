@@ -20,7 +20,7 @@ namespace IW {
 		, Renderer(std::make_shared<IW::Renderer>(m_device))
 		, Asset(std::make_shared<AssetManager>())
 		, Bus(std::make_shared<iw::eventbus>())
-		, InputManager(std::make_shared<IW::InputManager>())
+		, Input(std::make_shared<IW::InputManager>())
 		, m_updateTask([&]() {
 			for (Layer* layer : m_layers) {
 				layer->UpdateSystems();
