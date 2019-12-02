@@ -13,8 +13,7 @@ inline namespace Input {
 		static unsigned int maskup[5];
 
 	public:
-		WindowsRawMouse(
-			std::string name);
+		WindowsRawMouse();
 
 		DeviceInput TranslateOsEvent(
 			const OsEvent& e) override;

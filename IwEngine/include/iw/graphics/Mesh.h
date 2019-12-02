@@ -32,10 +32,10 @@ inline namespace Graphics {
 
 		iw::ref<Material> Material;
 
-		IW::MeshTopology Topology;
+		MeshTopology Topology;
 
-		IW::IVertexArray* VertexArray;
-		IW::IIndexBuffer* IndexBuffer;
+		IVertexArray* VertexArray;
+		IIndexBuffer* IndexBuffer;
 
 		bool Outdated;
 
@@ -45,7 +45,7 @@ inline namespace Graphics {
 		Mesh();
 
 		Mesh(
-			IW::MeshTopology topology);
+			MeshTopology topology);
 
 		~Mesh();
 
@@ -92,16 +92,16 @@ inline namespace Graphics {
 		}
 
 		void Initialize(
-			const iw::ref<IW::IDevice>& device);
+			const iw::ref<IDevice>& device);
 
 		void Update(
-			const iw::ref<IW::IDevice>& device);
+			const iw::ref<IDevice>& device);
 
 		void Destroy(
-			const iw::ref<IW::IDevice>& device);
+			const iw::ref<IDevice>& device);
 
 		void Draw(
-			const iw::ref<IW::IDevice>& device) const;
+			const iw::ref<IDevice>& device) const;
 	};
 }
 }

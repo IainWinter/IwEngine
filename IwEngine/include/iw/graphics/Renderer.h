@@ -15,13 +15,13 @@ inline namespace Graphics {
 		int Width;
 		int Height;
 
-		iw::ref<IW::IDevice> Device;
+		iw::ref<IDevice> Device;
 	private:
-		IW::Mesh* m_filterMesh;
+		Mesh* m_filterMesh;
 
 	public:
 		Renderer(
-			const iw::ref<IW::IDevice>& device);
+			const iw::ref<IDevice>& device);
 
 		~Renderer();
 
@@ -30,18 +30,18 @@ inline namespace Graphics {
 		void End();
 
 		void BeginScene(
-			IW::RenderTarget* target = nullptr);
+			RenderTarget* target = nullptr);
 
 		void EndScene();
 
 		void DrawMesh(
-			const IW::Transform* transform,
-			const IW::Mesh* mesh);
+			const Transform* transform,
+			const Mesh* mesh);
 
 		void ApplyFilter(
-			iw::ref<IW::IPipeline>& pipeline,
-			IW::RenderTarget* source,
-			IW::RenderTarget* dest = nullptr);
+			iw::ref<IPipeline>& pipeline,
+			RenderTarget* source,
+			RenderTarget* dest = nullptr);
 	};
 }
 }

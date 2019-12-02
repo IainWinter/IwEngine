@@ -5,7 +5,7 @@
 namespace IW {
 	EditorCameraController::EditorCameraController()
 		: System("Editor Camera Controller")
-		, speed(0)
+		, speed(10)
 	{}
 
 	void EditorCameraController::Update(
@@ -61,8 +61,10 @@ namespace IW {
 	bool EditorCameraController::On(
 		MouseMovedEvent& e)
 	{
-		rotation.x = e.DeltaY * 0.0005f;
-		rotation.y = e.DeltaX * 0.0005f; // sens?
+		if (e.Name == "Raw Mouse") {
+			rotation.x = e.DeltaY * 0.0005f;
+			rotation.y = e.DeltaX * 0.0005f; // sens?
+		}
 
 		return false;
 	}
@@ -70,9 +72,11 @@ namespace IW {
 	bool EditorCameraController::On(
 		MouseButtonEvent& e)
 	{
-		if (e.Button = RMOUSE) {
+		if (e.Name == "Raw Mouse" && e.Button == RMOUSE) {
 			speed = e.State ? 50 : 10;
 		}
+
+		LOG_INFO << speed;
 
 		return false;
 	}

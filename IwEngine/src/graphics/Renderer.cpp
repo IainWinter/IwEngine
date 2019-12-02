@@ -3,7 +3,7 @@
 
 namespace IW {
 	Renderer::Renderer(
-		const iw::ref<IW::IDevice>& device)
+		const iw::ref<IDevice>& device)
 		: Device(device)
 	{
 		iw::vector3 pos[4] = {
@@ -48,7 +48,7 @@ namespace IW {
 	}
 
 	void Renderer::BeginScene(
-		IW::RenderTarget* target)
+		RenderTarget* target)
 	{
 		if (target == nullptr) {
 			Device->SetViewport(Width, Height);
@@ -67,8 +67,8 @@ namespace IW {
 	}
 
 	void Renderer::DrawMesh(
-		const IW::Transform* transform, 
-		const IW::Mesh* mesh)
+		const Transform* transform, 
+		const Mesh* mesh)
 	{
 		const auto& material = mesh->Material;
 		
@@ -77,7 +77,7 @@ namespace IW {
 			return;
 		}
 
-		IW::IPipeline* pipeline = &*mesh->Material->Shader->Program;
+		IPipeline* pipeline = &*mesh->Material->Shader->Program;
 
 		mesh->Material->Use(Device);
 
@@ -88,9 +88,9 @@ namespace IW {
 	}
 
 	void Renderer::ApplyFilter(
-		iw::ref<IW::IPipeline>& pipeline,
-		IW::RenderTarget* source,
-		IW::RenderTarget* dest)
+		iw::ref<IPipeline>& pipeline,
+		RenderTarget* source,
+		RenderTarget* dest)
 	{
 		if (source == dest) return;
 		

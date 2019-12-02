@@ -144,12 +144,12 @@ inline namespace Graphics {
 		IWGRAPHICS_API
 		void SetTexture(
 			const char* name,
-			IW::Texture* texture);
+			Texture* texture);
 
 		IWGRAPHICS_API
 		void SetTexture(
 			const char* name,
-			const iw::ref<IW::Texture>& texture);
+			const iw::ref<Texture>& texture);
 
 		IWGRAPHICS_API
 		bool* GetBool(
@@ -192,12 +192,12 @@ inline namespace Graphics {
 			const char* name);
 
 		IWGRAPHICS_API
-		IW::Texture* GetTexture(
+		Texture* GetTexture(
 			const char* name);
 
 		IWGRAPHICS_API
 		void Use(
-			const iw::ref<IW::IDevice>& device) const;
+			const iw::ref<IDevice>& device) const;
 	private:
 		std::tuple<void*, size_t> GetData(
 			const char* name);

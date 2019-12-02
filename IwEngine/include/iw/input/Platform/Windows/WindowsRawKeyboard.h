@@ -9,8 +9,7 @@ inline namespace Input {
 		: public RawKeyboard
 	{
 	public:
-		WindowsRawKeyboard(
-			std::string name);
+		WindowsRawKeyboard();
 
 		DeviceInput TranslateOsEvent(
 			const OsEvent& e) override;

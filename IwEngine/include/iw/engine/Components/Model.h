@@ -6,7 +6,7 @@
 
 namespace IW {
 	struct ModelComponent {
-		IW::Mesh* Meshes;
+		Mesh* Meshes;
 		size_t    MeshCount;
 	};
 }

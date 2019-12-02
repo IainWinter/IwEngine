@@ -145,14 +145,14 @@ namespace IW {
 
 	void Material::SetTexture(
 		const char* name, 
-		IW::Texture* texture)
+		Texture* texture)
 	{
 		CreateProperty(name, texture, 0, 0, true, SAMPLE, 0);
 	}
 
 	void Material::SetTexture(
 		const char* name,
-		const iw::ref<IW::Texture>& texture)
+		const iw::ref<Texture>& texture)
 	{
 		SetTexture(name, texture.get());
 	}
@@ -222,19 +222,19 @@ namespace IW {
 		return { (double*)std::get<0>(data), std::get<1>(data) };
 	}
 
-	IW::Texture* Material::GetTexture(
+	Texture* Material::GetTexture(
 		const char* name)
 	{
-		return (IW::Texture*)std::get<0>(GetData(name));
+		return (Texture*)std::get<0>(GetData(name));
 	}
 
 	void Material::Use(
-		const iw::ref<IW::IDevice>& device) const
+		const iw::ref<IDevice>& device) const
 	{
 		device->SetPipeline(Shader->Program);
 
 		for (const MaterialProperty& prop : m_properties) {
-			IW::IPipelineParam* param = Shader->Program->GetParam(prop.Name);
+			IPipelineParam* param = Shader->Program->GetParam(prop.Name);
 
 			if (!param) {
 				LOG_WARNING << "Invalid property in material: " << prop.Name;
@@ -242,7 +242,7 @@ namespace IW {
 			}
 
 			if (prop.IsSample) {
-				IW::Texture* texture = (IW::Texture*)prop.Data;
+				Texture* texture = (Texture*)prop.Data;
 				param->SetAsTexture(texture->Handle);
 			}
 

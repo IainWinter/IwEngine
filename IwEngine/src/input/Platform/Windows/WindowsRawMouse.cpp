@@ -20,16 +20,11 @@ namespace IW {
 		RI_MOUSE_BUTTON_5_UP 
 	};
 
-	RawMouse* RawMouse::Create(
-		std::string name)
-	{
-		return new WindowsRawMouse(name);
+	RawMouse* RawMouse::Create() {
+		return new WindowsRawMouse();
 	}
 
-	WindowsRawMouse::WindowsRawMouse(
-		std::string name)
-		: RawMouse(name)
-	{
+	WindowsRawMouse::WindowsRawMouse() {
 		RAWINPUTDEVICE rid[1];
 		rid[0].usUsagePage = 1;	  // Generic input device
 		rid[0].usUsage = 2;		  // Mouse
@@ -44,15 +39,16 @@ namespace IW {
 	DeviceInput WindowsRawMouse::TranslateOsEvent(
 		const OsEvent& e)
 	{
+		DeviceInput input(DeviceType::RAW_MOUSE);
+		
 		if (e.Message != WM_INPUT) {
-			return DEVICE_NONE;
+			return input;
 		}
 
 		RAWINPUT* raw = (RAWINPUT*)e.LParam;
 		if (raw->header.dwType == RIM_TYPEMOUSE) {
 			RAWMOUSE mouse = raw->data.mouse;
 
-			DeviceInput input(MOUSE);
 			input.Name = LMOUSE;
 			for (int i = 0; i < 5; i++) {
 				if (maskdown[i] & mouse.usButtonFlags) {
@@ -84,7 +80,7 @@ namespace IW {
 			}
 		}
 
-		return DEVICE_NONE;
+		return input;
 	}
 }
 #endif

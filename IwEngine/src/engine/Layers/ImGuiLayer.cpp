@@ -58,7 +58,7 @@ namespace IW {
 	}
 
 	bool ImGuiLayer::On(
-		IW::WindowResizedEvent& e)
+		WindowResizedEvent& e)
 	{
 		auto& io = ImGui::GetIO();
 		io.DisplaySize.x = (float)e.Width;
@@ -68,7 +68,7 @@ namespace IW {
 	}
 
 	bool ImGuiLayer::On(
-		IW::MouseMovedEvent& e)
+		MouseMovedEvent& e)
 	{
 		auto& io = ImGui::GetIO();
 		io.MousePos.x = (float)e.X;
@@ -78,12 +78,11 @@ namespace IW {
 	}
 
 	bool ImGuiLayer::On(
-		IW::MouseButtonEvent& e)
+		MouseButtonEvent& e)
 	{
 		auto& io = ImGui::GetIO();
-
 		if (io.WantCaptureMouse) {
-			io.MouseDown[e.Button - IW::LMOUSE] = e.State;
+			io.MouseDown[e.Button - LMOUSE] = e.State;
 			return true;
 		}
 

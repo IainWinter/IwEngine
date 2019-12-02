@@ -30,7 +30,7 @@ namespace IW {
 			return nullptr;
 		}
 
-		std::vector<iw::ref<IW::Material>> materials;
+		std::vector<iw::ref<Material>> materials;
 		if (scene->HasMaterials()) {
 			for (size_t i = 0; i < scene->mNumMaterials; i++) {
 				aiMaterial* aimaterial = scene->mMaterials[i];
@@ -49,7 +49,7 @@ namespace IW {
 
 				metallic /= 4 * 128; // obj files scale this by 4? and then opengl by 128???
 
-				IW::Material material;
+				Material material;
 				//material.SetFloats("albedo", &albedo, 3);
 				//material.SetFloats("emissiveColor", &emissiveColor, 4);
 				//material.SetFloat("metallic", metallic);
@@ -61,7 +61,7 @@ namespace IW {
 				{
 					texturePath.Set(std::string(texturePath.C_Str()));
 
-					iw::ref<IW::Texture> texture = m_asset.Load<IW::Texture>(texturePath.C_Str());
+					iw::ref<Texture> texture = m_asset.Load<Texture>(texturePath.C_Str());
 					material.SetTexture("albedoMap", texture);
 				}
 
@@ -69,7 +69,7 @@ namespace IW {
 				char*  name = new char[size];
 				memcpy(name, ainame, size);
 
-				materials.push_back(m_asset.Give<IW::Material>(name, &material));
+				materials.push_back(m_asset.Give<Material>(name, &material));
 			}
 		}
 
@@ -119,7 +119,7 @@ namespace IW {
 				}
 			}
 
-			//IW::Mesh* mesh = root;
+			//Mesh* mesh = root;
 
 			//scene->mMeshes[0]->
 
@@ -174,9 +174,9 @@ namespace IW {
 
 		importer.FreeScene();
 
-		//IW::Mesh* mesh = new IW::Mesh[];
+		//Mesh* mesh = new Mesh[];
 
-		//IW::Mesh* quad = new IW::Mesh();
+		//Mesh* quad = new Mesh();
 		//quad->SetMaterial(quadMaterial);
 		//quad->SetVertices(model.VertexCount, qdata.Vertices);
 		//quad->SetNormals(qdata.VertexCount, qdata.Normals);

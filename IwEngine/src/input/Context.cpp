@@ -13,11 +13,15 @@ namespace IW {
 	void Context::AddDevice(
 		const iw::ref<Device>& device)
 	{
-		
+		Devices.push_back(device);
 	}
 
 	void Context::RemoveDevice(
 		const iw::ref<Device>& device)
 	{
+		auto itr = std::find(Devices.begin(), Devices.end(), device);
+		if (itr != Devices.end()) {
+			Devices.erase(itr);
+		}
 	}
 }

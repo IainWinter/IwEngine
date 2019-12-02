@@ -4,16 +4,9 @@
 #include <Windows.h>
 
 namespace IW {
-	Keyboard* Keyboard::Create(
-		std::string name)
-	{
-		return new WindowsKeyboard(name);
+	Keyboard* Keyboard::Create() {
+		return new WindowsKeyboard();
 	}
-
-	WindowsKeyboard::WindowsKeyboard(
-		std::string name)
-		: Keyboard(name)
-	{}
 
 	DeviceInput WindowsKeyboard::TranslateOsEvent(
 		const OsEvent& e)

@@ -26,16 +26,14 @@ inline namespace Input {
 			iw::event& e);
 
 		IWINPUT_API
-		void CreateContext(
+		iw::ref<Context>& CreateContext(
 			std::string name,
 			float width  = NO_WIDTH,
 			float height = NO_HEIGHT);
 
 		template<
 			typename _D>
-		iw::ref<Device>& CreateDevice(
-			std::string name)
-		{
+		iw::ref<Device>& CreateDevice() {
 			LOG_WARNING << "Attempted to create invalid device!";
 			assert(false);
 			return nullptr;
@@ -43,28 +41,21 @@ inline namespace Input {
 
 		template<>
 		IWINPUT_API
-		iw::ref<Device>& CreateDevice<Mouse>(
-			std::string name);
+		iw::ref<Device>& CreateDevice<Mouse>();
 
 		template<>
 		IWINPUT_API
-		iw::ref<Device>& CreateDevice<Keyboard>(
-			std::string name);
-
-#ifdef IW_PLATFORM_WINDOWS
-		template<>
-		IWINPUT_API
-		iw::ref<Device>& CreateDevice<RawMouse>(
-			std::string name);
+		iw::ref<Device>& CreateDevice<Keyboard>();
 
 		template<>
 		IWINPUT_API
-		iw::ref<Device>& CreateDevice<RawKeyboard>(
-			std::string name);
-#endif
+		iw::ref<Device>& CreateDevice<RawMouse>();
+
+		template<>
+		IWINPUT_API
+		iw::ref<Device>& CreateDevice<RawKeyboard>();
 	private:
 		bool TryAddDevice(
-			std::string name,
 			iw::ref<Device>& device);
 	};
 }

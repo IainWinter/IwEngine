@@ -7,21 +7,6 @@
 namespace IW {
 	Translation MouseBase::translation = CreateTranslation();
 
-	MouseBase::MouseBase(
-		std::string name)
-		: Device(name)
-	{}
-
-	Mouse::Mouse(
-		std::string name) 
-		: MouseBase(name)
-	{}
-
-	RawMouse::RawMouse(
-		std::string name)
-		: MouseBase(name)
-	{}
-
 	InputName MouseBase::Translate(
 		unsigned int oskey)
 	{

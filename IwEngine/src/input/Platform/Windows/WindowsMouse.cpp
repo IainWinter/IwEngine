@@ -5,16 +5,9 @@
 #include "iw/log/logger.h"
 
 namespace IW {
-	Mouse* Mouse::Create(
-		std::string name)
-	{
-		return new WindowsMouse(name);
+	Mouse* Mouse::Create() {
+		return new WindowsMouse();
 	}
-
-	WindowsMouse::WindowsMouse(
-		std::string name)
-		: Mouse(name)
-	{}
 
 	bool Mouse::ButtonDown(
 		InputName button)
@@ -35,7 +28,7 @@ namespace IW {
 	DeviceInput WindowsMouse::TranslateOsEvent(
 		const OsEvent& e)
 	{
-		DeviceInput input(MOUSE);
+		DeviceInput input(Name, MOUSE);
 		switch (e.Message) {
 			case WM_LBUTTONDOWN:
 				input.Name  = LMOUSE;
@@ -93,7 +86,7 @@ namespace IW {
 			return input;
 		}
 
-		return DEVICE_NONE;
+		return input;
 	}
 }
 #endif

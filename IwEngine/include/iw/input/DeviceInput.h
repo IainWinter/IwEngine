@@ -1,6 +1,7 @@
 #pragma once
 
 #include "iwinput.h"
+#include <string>
 
 namespace IW {
 inline namespace  {

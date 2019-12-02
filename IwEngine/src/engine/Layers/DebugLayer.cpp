@@ -11,12 +11,12 @@ namespace IW {
 	{}
 
 	struct Components {
-		IW::Transform* Transform;
+		Transform* Transform;
 		VectorLog* Log;
 	};
 
 	void DebugLayer::PostUpdate() {
-		//for (auto entity : Space.Query<IW::Transform, VectorLog>()) {
+		//for (auto entity : Space.Query<Transform, VectorLog>()) {
 		//	auto [transform, log] = entity.Components.Tie<Components>();
 		//}
 
@@ -29,11 +29,11 @@ namespace IW {
 		ImGui::Begin("Debug layer");
 
 
-		float time = IW::Time::FixedTime();
+		float time = Time::FixedTime();
 		ImGui::SliderFloat("Fixed timestep", &time, 0, 1);
 
-		if (time != IW::Time::FixedTime()) {
-			IW::Time::SetFixedTime(time);
+		if (time != Time::FixedTime()) {
+			Time::SetFixedTime(time);
 		}
 
 		ImGui::Text("Last 20 Events");
@@ -45,52 +45,52 @@ namespace IW {
 	}
 
 	bool DebugLayer::On(
-		IW::MouseWheelEvent& e)
+		MouseWheelEvent& e)
 	{
 		std::stringstream log;
-		log << "Mouse wheel .... delta: " << e.Delta;
+		log << "Mouse wheel .... delta: " << e.Delta << " Name: " << e.Name;
 		logs.push_back(log.str());
 		return false;
 	}
 
 	bool DebugLayer::On(
-		IW::MouseMovedEvent& e)
+		MouseMovedEvent& e)
 	{
 		std::stringstream log;
-		log << "Mouse moved .... X: " << e.X << " Y: " << e.Y << " dX: " << e.DeltaX << " dY : " << e.DeltaY;
+		log << "Mouse moved .... X: " << e.X << " Y: " << e.Y << " dX: " << e.DeltaX << " dY: " << e.DeltaY << " Name: " << e.Name;
 		logs.push_back(log.str());
 		return false;
 	}
 
 	bool DebugLayer::On(
-		IW::MouseButtonEvent& e)
+		MouseButtonEvent& e)
 	{
 		std::stringstream log;
-		log << "Mouse button ... Button: " << e.Button << " State: " << e.State;
+		log << "Mouse button ... Button: " << e.Button << " State: " << e.State << " Name: " << e.Name;
 		logs.push_back(log.str());
 		return false;
 	}
 
 	bool DebugLayer::On(
-		IW::KeyEvent& e)
+		KeyEvent& e)
 	{
 		std::stringstream log;
-		log << "Key button ..... Button: " << e.Button << " State: " << e.State;
+		log << "Key button ..... Button: " << e.Button << " State: " << e.State << " Name: " << e.Name;
 		logs.push_back(log.str());
 		return false;
 	}
 
 	bool DebugLayer::On(
-		IW::KeyTypedEvent& e)
+		KeyTypedEvent& e)
 	{
 		std::stringstream log;
-		log << "Key types ...... Button: " << e.Button << " Char: " << e.Character;
+		log << "Key types ...... Button: " << e.Button << " Char: " << e.Character << " Name: " << e.Name;
 		logs.push_back(log.str());
 		return false;
 	}
 
 	bool DebugLayer::On(
-		IW::WindowResizedEvent& e)
+		WindowResizedEvent& e)
 	{
 		std::stringstream log;
 		log << "Window resized . W: " << e.Width << " H: " << e.Height;

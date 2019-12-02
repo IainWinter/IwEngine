@@ -4,16 +4,16 @@
 
 namespace IW {
 	PhysicsSystem::PhysicsSystem()
-		: IW::System<IW::Transform, IwPhysics::AABB3>("Physics")
+		: System<Transform, IwPhysics::AABB3>("Physics")
 	{}
 
 	struct Components {
-		IW::Transform* Transform;
+		Transform* Transform;
 		IwPhysics::AABB2* AABB;
 	};
 
 	void PhysicsSystem::Update(
-		IW::EntityComponentArray& eca)
+		EntityComponentArray& eca)
 	{
 		// Loop through every 
 

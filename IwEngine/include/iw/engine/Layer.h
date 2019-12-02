@@ -19,9 +19,9 @@ inline namespace Engine {
 		const char* m_name;
 		EventStack<ISystem*> m_systems; // layer doesnt own systems but prolly should
 	protected:
-		iw::ref<IW::Space>        Space;
-		iw::ref<IW::Renderer>     Renderer;
-		iw::ref<IW::AssetManager> Asset;
+		iw::ref<Space>        Space;
+		iw::ref<Renderer>     Renderer;
+		iw::ref<AssetManager> Asset;
 		iw::ref<iw::eventbus>     Bus;
 
 	public:
@@ -132,7 +132,7 @@ inline namespace Engine {
 		void SetApplicationVars(
 			iw::ref<IW::Space> space,
 			iw::ref<IW::Renderer> renderer,
-			iw::ref<IW::AssetManager> asset,
+			iw::ref<AssetManager> asset,
 			iw::ref<iw::eventbus> bus);
 	};
 }

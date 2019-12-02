@@ -11,15 +11,15 @@ inline namespace Input {
 
 	class IWINPUT_API Device {
 	public:
-		std::string Name;
+		DeviceType Type;
 
 	public:
 		Device(
-			std::string name)
-			: Name(name)
+			DeviceType type)
+			: Type(type)
 		{}
 
-		virtual ~Device() {}
+		virtual ~Device() = default;
 
 		virtual DeviceInput TranslateOsEvent(
 			const OsEvent& e) = 0;

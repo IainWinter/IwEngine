@@ -30,37 +30,37 @@ namespace IW {
 	void Layer::ImGui() {}
 
 	bool Layer::On(
-		IW::WindowResizedEvent& e)
+		WindowResizedEvent& e)
 	{
 		 return m_systems.On(e);
 	}
 
 	bool Layer::On(
-		IW::MouseWheelEvent& e)
+		MouseWheelEvent& e)
 	{
 		return m_systems.On(e);
 	}
 
 	bool Layer::On(
-		IW::MouseMovedEvent& e)
+		MouseMovedEvent& e)
 	{
 		return m_systems.On(e);
 	}
 
 	bool Layer::On(
-		IW::MouseButtonEvent& e)
+		MouseButtonEvent& e)
 	{
 		return m_systems.On(e);
 	}
 
 	bool Layer::On(
-		IW::KeyEvent& e)
+		KeyEvent& e)
 	{
 		return m_systems.On(e);
 	}
 
 	bool Layer::On(
-		IW::KeyTypedEvent& e)
+		KeyTypedEvent& e)
 	{
 		return m_systems.On(e);
 	}
@@ -80,7 +80,7 @@ namespace IW {
 	void Layer::SetApplicationVars(
 		iw::ref<IW::Space> space,
 		iw::ref<IW::Renderer> renderer,
-		iw::ref<IW::AssetManager> asset,
+		iw::ref<AssetManager> asset,
 		iw::ref<iw::eventbus> bus)
 	{
 		Space    = space;

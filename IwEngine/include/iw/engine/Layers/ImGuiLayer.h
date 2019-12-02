@@ -22,9 +22,9 @@ inline namespace Engine {
 		IWENGINE_API void Destroy() override;
 		IWENGINE_API void ImGui()   override;
 
-		IWENGINE_API bool On(IW::WindowResizedEvent& e) override;
-		IWENGINE_API bool On(IW::MouseMovedEvent&    e) override;
-		IWENGINE_API bool On(IW::MouseButtonEvent&   e) override;
+		IWENGINE_API bool On(WindowResizedEvent& e) override;
+		IWENGINE_API bool On(MouseMovedEvent&    e) override;
+		IWENGINE_API bool On(MouseButtonEvent&   e) override;
 
 		IWENGINE_API void Begin();
 		IWENGINE_API void End();

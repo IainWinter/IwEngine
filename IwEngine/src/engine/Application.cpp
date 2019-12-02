@@ -22,7 +22,7 @@ namespace IW {
 		Renderer = std::make_shared<IW::Renderer>(m_device);
 
 		Bus   = std::make_shared<iw::eventbus>();
-		Input = std::make_shared<IW::InputManager>(Bus);
+		Input = std::make_shared<InputManager>(Bus);
 
 		PushOverlay<ImGuiLayer>();
 		PushOverlay<DebugLayer>();
@@ -52,10 +52,10 @@ namespace IW {
 
 		// Asset Loader
 
-		Asset->SetLoader<IW::MeshLoader>();
-		Asset->SetLoader<IW::MaterialLoader>();
-		Asset->SetLoader<IW::TextureLoader>();
-		Asset->SetLoader<IW::ShaderLoader>();
+		Asset->SetLoader<MeshLoader>();
+		Asset->SetLoader<MaterialLoader>();
+		Asset->SetLoader<TextureLoader>();
+		Asset->SetLoader<ShaderLoader>();
 
 		// Window
 
@@ -197,24 +197,25 @@ namespace IW {
 	void Application::HandleEvent(
 		iw::event& e)
 	{
-		LOG_INFO << e.Group << " " << e.Type;
-
 		bool error = false;
 		if (e.Group == iw::val(EventGroup::WINDOW)) {
 			switch (e.Type) {
-				case IW::Closed: {
+				case Closed: {
 					m_running = false;
 					e.Handled = true;
 					break;
 				}
-				case IW::Resized: {
+				case Resized: {
 					WindowResizedEvent& wre = e.as<WindowResizedEvent>();
 					Renderer->Width  = wre.Width;
 					Renderer->Height = wre.Height;
 					e.Handled = true;
 					break;
 				}
-				default: error = true; break;
+				default: {
+					error = true;
+					break;
+				}
 			}
 		}
 

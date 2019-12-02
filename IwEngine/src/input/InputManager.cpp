@@ -113,36 +113,37 @@ namespace IW {
 
 					char character = GetCharacter(input.Name, shifted, caps);
 					if (character != '\0') {
-						m_bus->push<KeyTypedEvent>(&context.State, input.Name, character);
+						m_bus->push<KeyTypedEvent>(input.Device, &context.State, input.Name, character);
 					}
 				}
 
 				if (input.State != lastState) {
-					m_bus->push<KeyEvent>(&context.State, input.Name, active);
+					m_bus->push<KeyEvent>(input.Device, &context.State, input.Name, active);
 				}
 			}
 
 			else if (input.Device == MOUSE) {
 				if (input.Name == WHEEL) {
-					m_bus->push<MouseWheelEvent>(&context.State, input.State);
+					m_bus->push<MouseWheelEvent>(input.Device, &context.State, input.State);
 				}
 
 				else if (input.Name == MOUSEdX || input.Name == MOUSEdY
 					  || input.Name == MOUSEX  || input.Name == MOUSEY)
 				{
-					m_bus->push<MouseMovedEvent>(&context.State,
+					m_bus->push<MouseMovedEvent>(
+						input.Device, &context.State,
 						context.State[MOUSEX],  context.State[MOUSEY],
 						context.State[MOUSEdX], context.State[MOUSEdY]);
 				}
 
 				else {
-					m_bus->push<MouseButtonEvent>(&context.State, input.Name, active);
+					m_bus->push<MouseButtonEvent>(input.Device, &context.State, input.Name, active);
 				}
 			}
 		}
 	}
 
-	void InputManager::CreateContext(
+	iw::ref<Context>& InputManager::CreateContext(
 		std::string name,
 		float width,
 		float height)
@@ -159,49 +160,40 @@ namespace IW {
 			context = std::make_shared<Context>(name, width, height);
 			m_active = m_contexts.emplace_back(context);
 		}
+
+		return context;
 	}
 
 	template<>
-	iw::ref<Device>& InputManager::CreateDevice<Mouse>(
-		std::string name)
-	{
-		iw::ref<Device> device(Mouse::Create(name));
-		return TryAddDevice(name, device) ? device : nullptr;
+	iw::ref<Device>& InputManager::CreateDevice<Mouse>() {
+		iw::ref<Device> device(Mouse::Create());
+		return TryAddDevice(device) ? device : nullptr;
 	}
 
 	template<>
-	iw::ref<Device>& InputManager::CreateDevice<Keyboard>(
-		std::string name)
-	{
-		iw::ref<Device> device(Keyboard::Create(name));
-		return TryAddDevice(name, device) ? device : nullptr;
-	}
-
-#ifdef IW_PLATFORM_WINDOWS
-	template<>
-	iw::ref<Device>& InputManager::CreateDevice<RawMouse>(
-		std::string name)
-	{
-		iw::ref<Device> device(RawMouse::Create(name));
-		return TryAddDevice(name, device) ? device : nullptr;
+	iw::ref<Device>& InputManager::CreateDevice<Keyboard>() {
+		iw::ref<Device> device(Keyboard::Create());
+		return TryAddDevice(device) ? device : nullptr;
 	}
 
 	template<>
-	iw::ref<Device>& InputManager::CreateDevice<RawKeyboard>(
-		std::string name)
-	{
-		iw::ref<Device> device(RawKeyboard::Create(name));
-		return TryAddDevice(name, device) ? device : nullptr;
+	iw::ref<Device>& InputManager::CreateDevice<RawMouse>() {
+		iw::ref<Device> device(RawMouse::Create());
+		return TryAddDevice(device) ? device : nullptr;
 	}
-#endif
+
+	template<>
+	iw::ref<Device>& InputManager::CreateDevice<RawKeyboard>() {
+		iw::ref<Device> device(RawKeyboard::Create());
+		return TryAddDevice(device) ? device : nullptr;
+	}
 
 	bool InputManager::TryAddDevice(
-		std::string name,
 		iw::ref<Device>& device)
 	{
 		iw::ref<Device> ret;
 		for (iw::ref<Device>& d : m_devices) {
-			if (d->Name == name) {
+			if (d->Type == device->Type) {
 				ret = d;
 				break;
 			}
@@ -209,7 +201,6 @@ namespace IW {
 
 		if (!ret) {
 			m_devices.push_back(device);
-			m_active->Devices.push_back(device);
 		}
 
 		return !!ret;

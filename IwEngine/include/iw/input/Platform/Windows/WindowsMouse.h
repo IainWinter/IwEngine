@@ -9,9 +9,6 @@ inline namespace Input {
 		: public Mouse
 	{
 	public:
-		WindowsMouse(
-			std::string name);
-
 		DeviceInput TranslateOsEvent(
 			const OsEvent& e) override;
 	};

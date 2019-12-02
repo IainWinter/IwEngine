@@ -9,9 +9,6 @@ inline namespace Input {
 		: public Keyboard
 	{
 	public:
-		WindowsKeyboard(
-			std::string name);
-
 		DeviceInput TranslateOsEvent(
 			const OsEvent& e) override;
 	};

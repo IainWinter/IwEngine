@@ -14,9 +14,11 @@ inline namespace Input {
 
 	public:
 		MouseBase(
-			std::string name);
+			DeviceType type)
+			: Device(type)
+		{}
 
-		virtual ~MouseBase() {}
+		virtual ~MouseBase() = default;
 
 		static unsigned int Translate(
 			InputName key);
@@ -29,10 +31,11 @@ inline namespace Input {
 		: public MouseBase
 	{
 	public:
-		Mouse(
-			std::string name);
+		Mouse()
+			: MouseBase(DeviceType::MOUSE)
+		{}
 
-		virtual ~Mouse() {}
+		virtual ~Mouse() = default;
 
 		static bool ButtonDown(
 			InputName button);
@@ -40,23 +43,20 @@ inline namespace Input {
 		static bool ButtonUp(
 			InputName button);
 
-		static Mouse* Create(
-			std::string name);
+		static Mouse* Create();
 	};
 
-#ifdef IW_PLATFORM_WINDOWS
 	class IWINPUT_API RawMouse
 		: public MouseBase
 	{
 	public:
-		RawMouse(
-			std::string name);
+		RawMouse()
+			: MouseBase(DeviceType::RAW_MOUSE)
+		{}
 
-		virtual ~RawMouse() {}
+		virtual ~RawMouse() = default;
 
-		static RawMouse* Create(
-			std::string name);
+		static RawMouse* Create();
 	};
-#endif
 }
 }

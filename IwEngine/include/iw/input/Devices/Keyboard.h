@@ -8,15 +8,17 @@ inline namespace Input {
 		: public Device
 	{
 	protected:
-		// Should just be in Device
-		static Translation translation;
+		static Translation translation; // Should just be in Device
+
 		static Translation CreateTranslation();
 
 	public:
 		KeyboardBase(
-			std::string name);
+			DeviceType type)
+			: Device(type)
+		{}
 
-		virtual ~KeyboardBase() {}
+		virtual ~KeyboardBase() = default;
 
 		static unsigned int Translate(
 			InputName key);
@@ -29,10 +31,11 @@ inline namespace Input {
 		: public KeyboardBase
 	{
 	public:
-		Keyboard(
-			std::string name);
+		Keyboard()
+			: KeyboardBase(DeviceType::KEYBOARD)
+		{}
 
-		virtual ~Keyboard() {}
+		virtual ~Keyboard() = default;
 
 		static bool KeyDown(
 			InputName key);
@@ -40,23 +43,20 @@ inline namespace Input {
 		static bool KeyUp(
 			InputName key);
 
-		static Keyboard* Create(
-			std::string name);
+		static Keyboard* Create();
 	};
 
-#ifdef IW_PLATFORM_WINDOWS
 	class IWINPUT_API RawKeyboard
 		: public KeyboardBase
 	{
 	public:
-		RawKeyboard(
-			std::string name);
+		RawKeyboard()
+			: KeyboardBase(DeviceType::RAW_KEYBOARD)
+		{}
 
-		virtual ~RawKeyboard() {}
+		virtual ~RawKeyboard() = default;
 
-		static RawKeyboard* Create(
-			std::string name);
+		static RawKeyboard* Create();
 	};
-#endif
 }
 }
