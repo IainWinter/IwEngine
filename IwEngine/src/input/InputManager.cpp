@@ -6,33 +6,8 @@
 #include "iw/common/Platform.h"
 
 namespace IW {
-#ifdef IW_PLATFORM_WINDOWS
 	void SetRawInputEventLParam(
-		OsEvent& e)
-	{
-		const size_t rihSize = sizeof(RAWINPUTHEADER);
-		const HRAWINPUT rptr = (HRAWINPUT)e.LParam;
-
-		UINT dwSize = 0;
-		GetRawInputData(rptr, RID_INPUT, NULL, &dwSize, rihSize);
-
-		if (dwSize == 0) {
-			LOG_WARNING << "Invalid raw input device! HRAWINPUT " << e.LParam;
-			e.LParam = 0;
-			return;
-		}
-
-		LPBYTE lpb = new BYTE[dwSize];
-
-		if (GetRawInputData(rptr, RID_INPUT, lpb, &dwSize, rihSize) != dwSize) {
-			LOG_WARNING << "GetRawInputData does not return correct size!";
-			e.LParam = 0;
-			return;
-		}
-
-		e.LParam = (LPARAM)lpb;
-	}
-#endif
+		OsEvent& e);
 
 	InputManager::InputManager(
 		iw::ref<iw::eventbus>& bus)
@@ -167,42 +142,75 @@ namespace IW {
 	template<>
 	iw::ref<Device>& InputManager::CreateDevice<Mouse>() {
 		iw::ref<Device> device(Mouse::Create());
-		return TryAddDevice(device) ? device : nullptr;
+		m_devices.push_back(device);
+		return device;
 	}
 
 	template<>
 	iw::ref<Device>& InputManager::CreateDevice<Keyboard>() {
 		iw::ref<Device> device(Keyboard::Create());
-		return TryAddDevice(device) ? device : nullptr;
+		m_devices.push_back(device);
+		return device;
 	}
 
 	template<>
 	iw::ref<Device>& InputManager::CreateDevice<RawMouse>() {
 		iw::ref<Device> device(RawMouse::Create());
-		return TryAddDevice(device) ? device : nullptr;
+		m_devices.push_back(device);
+		return device;
 	}
 
 	template<>
 	iw::ref<Device>& InputManager::CreateDevice<RawKeyboard>() {
 		iw::ref<Device> device(RawKeyboard::Create());
-		return TryAddDevice(device) ? device : nullptr;
+		m_devices.push_back(device);
+		return device;
 	}
 
-	bool InputManager::TryAddDevice(
-		iw::ref<Device>& device)
+	//bool InputManager::TryAddDevice(
+	//	iw::ref<Device>& device)
+	//{
+	//	iw::ref<Device> ret;
+	//	for (iw::ref<Device>& d : m_devices) {
+	//		if (d->Type == device->Type) {
+	//			ret = d;
+	//			break;
+	//		}
+	//	}
+
+	//	if (!ret) {
+	//		m_devices.push_back(device);
+	//	}
+
+	//	return !!ret;
+	//}
+
+
+#ifdef IW_PLATFORM_WINDOWS
+	void SetRawInputEventLParam(
+		OsEvent& e)
 	{
-		iw::ref<Device> ret;
-		for (iw::ref<Device>& d : m_devices) {
-			if (d->Type == device->Type) {
-				ret = d;
-				break;
-			}
+		const size_t rihSize = sizeof(RAWINPUTHEADER);
+		const HRAWINPUT rptr = (HRAWINPUT)e.LParam;
+
+		UINT dwSize = 0;
+		GetRawInputData(rptr, RID_INPUT, NULL, &dwSize, rihSize);
+
+		if (dwSize == 0) {
+			LOG_WARNING << "Invalid raw input device! HRAWINPUT " << e.LParam;
+			e.LParam = 0;
+			return;
 		}
 
-		if (!ret) {
-			m_devices.push_back(device);
+		LPBYTE lpb = new BYTE[dwSize];
+
+		if (GetRawInputData(rptr, RID_INPUT, lpb, &dwSize, rihSize) != dwSize) {
+			LOG_WARNING << "GetRawInputData does not return correct size!";
+			e.LParam = 0;
+			return;
 		}
 
-		return !!ret;
+		e.LParam = (LPARAM)lpb;
 	}
+#endif
 }

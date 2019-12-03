@@ -5,7 +5,8 @@
 #include "iw/math/vector4.h"
 #include "iw/log/logger.h"
 
-namespace IwPhysics {
+namespace IW {
+inline namespace Physics {
 	template<
 		typename V>
 	struct AABB {
@@ -96,4 +97,5 @@ namespace IwPhysics {
 			&& (Min.z < other.Min.z && Max.z > other.Max.z)
 			&& (Min.w < other.Min.w && Max.w > other.Max.w);
 	}
+}
 }

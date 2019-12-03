@@ -1,5 +1,6 @@
 #pragma once
 
+#include "iwinput.h"
 #include "Context.h"
 #include "Devices/Device.h"
 #include "Devices/Mouse.h"
@@ -55,8 +56,8 @@ inline namespace Input {
 		IWINPUT_API
 		iw::ref<Device>& CreateDevice<RawKeyboard>();
 	private:
-		bool TryAddDevice(
-			iw::ref<Device>& device);
+		//bool TryAddDevice(
+		//	iw::ref<Device>& device);
 	};
 }
 }

@@ -61,7 +61,7 @@ namespace IW {
 	bool EditorCameraController::On(
 		MouseMovedEvent& e)
 	{
-		if (e.Name == "Raw Mouse") {
+		if (e.Device == RAW_MOUSE) {
 			rotation.x = e.DeltaY * 0.0005f;
 			rotation.y = e.DeltaX * 0.0005f; // sens?
 		}
@@ -72,7 +72,7 @@ namespace IW {
 	bool EditorCameraController::On(
 		MouseButtonEvent& e)
 	{
-		if (e.Name == "Raw Mouse" && e.Button == RMOUSE) {
+		if (e.Device | e.Button == RAW_MOUSE | RMOUSE) {
 			speed = e.State ? 50 : 10;
 		}
 

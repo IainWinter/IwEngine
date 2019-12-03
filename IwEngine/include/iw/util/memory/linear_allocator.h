@@ -36,7 +36,6 @@ inline namespace util {
 
 		void reset();
 
-
 		inline size_t peak() {
 			return m_peak;
 		}

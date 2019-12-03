@@ -48,7 +48,7 @@ namespace IW {
 		MouseWheelEvent& e)
 	{
 		std::stringstream log;
-		log << "Mouse wheel .... delta: " << e.Delta << " Name: " << e.Name;
+		log << "Mouse wheel .... delta: " << e.Delta << " Name: " << e.Device;
 		logs.push_back(log.str());
 		return false;
 	}
@@ -57,7 +57,7 @@ namespace IW {
 		MouseMovedEvent& e)
 	{
 		std::stringstream log;
-		log << "Mouse moved .... X: " << e.X << " Y: " << e.Y << " dX: " << e.DeltaX << " dY: " << e.DeltaY << " Name: " << e.Name;
+		log << "Mouse moved .... X: " << e.X << " Y: " << e.Y << " dX: " << e.DeltaX << " dY: " << e.DeltaY << " Name: " << e.Device;
 		logs.push_back(log.str());
 		return false;
 	}
@@ -66,7 +66,7 @@ namespace IW {
 		MouseButtonEvent& e)
 	{
 		std::stringstream log;
-		log << "Mouse button ... Button: " << e.Button << " State: " << e.State << " Name: " << e.Name;
+		log << "Mouse button ... Button: " << e.Button << " State: " << e.State << " Name: " << e.Device;
 		logs.push_back(log.str());
 		return false;
 	}
@@ -75,7 +75,7 @@ namespace IW {
 		KeyEvent& e)
 	{
 		std::stringstream log;
-		log << "Key button ..... Button: " << e.Button << " State: " << e.State << " Name: " << e.Name;
+		log << "Key button ..... Button: " << e.Button << " State: " << e.State << " Name: " << e.Device;
 		logs.push_back(log.str());
 		return false;
 	}
@@ -84,7 +84,7 @@ namespace IW {
 		KeyTypedEvent& e)
 	{
 		std::stringstream log;
-		log << "Key types ...... Button: " << e.Button << " Char: " << e.Character << " Name: " << e.Name;
+		log << "Key types ...... Button: " << e.Button << " Char: " << e.Character << " Name: " << e.Device;
 		logs.push_back(log.str());
 		return false;
 	}

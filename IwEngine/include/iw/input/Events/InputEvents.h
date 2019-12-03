@@ -15,15 +15,15 @@ inline namespace Engine {
 	struct InputEvent
 		: iw::event
 	{
-		std::string Name;
+		DeviceType Device;
 		InputState* InputStates; // this cant be a pointer or needs a function for getting states instead of operator
 
 		InputEvent(
 			InputEventType type,
-			std::string name,
+			DeviceType device,
 			InputState* inputState)
 			: iw::event(iw::val(EventGroup::INPUT), iw::val(type))
-			, Name(name)
+			, Device(device)
 			, InputStates(inputState)
 		{}
 	};
@@ -34,10 +34,10 @@ inline namespace Engine {
 		float Delta;
 
 		MouseWheelEvent(
-			std::string name,
+			DeviceType device,
 			InputState* inputState,
 			float delta)
-			: InputEvent(InputEventType::MouseWheel, name, inputState)
+			: InputEvent(InputEventType::MouseWheel, device, inputState)
 			, Delta(delta)
 		{}
 	};
@@ -51,13 +51,13 @@ inline namespace Engine {
 		float DeltaY;
 
 		MouseMovedEvent(
-			std::string name,
+			DeviceType device,
 			InputState* inputState,
 			float x,
 			float y,
 			float deltaX,
 			float deltaY)
-			: InputEvent(InputEventType::MouseMoved, name, inputState)
+			: InputEvent(InputEventType::MouseMoved, device, inputState)
 			, X(x)
 			, Y(y)
 			, DeltaX(deltaX)
@@ -72,11 +72,11 @@ inline namespace Engine {
 		bool State;
 
 		MouseButtonEvent(
-			std::string name,
+			DeviceType device,
 			InputState* inputState,
 			InputName button,
 			bool state)
-			: InputEvent(InputEventType::MouseButton, name, inputState)
+			: InputEvent(InputEventType::MouseButton, device, inputState)
 			, Button(button)
 			, State(state)
 		{}
@@ -89,11 +89,11 @@ inline namespace Engine {
 		bool State;
 
 		KeyEvent(
-			std::string name,
+			DeviceType device,
 			InputState* inputState,
 			InputName button,
 			bool state)
-			: InputEvent(InputEventType::Key, name, inputState)
+			: InputEvent(InputEventType::Key, device, inputState)
 			, Button(button)
 			, State(state)
 		{}
@@ -106,11 +106,11 @@ inline namespace Engine {
 		char Character;
 
 		KeyTypedEvent(
-			std::string name,
+			DeviceType device,
 			InputState* inputState,
 			InputName button,
 			char character)
-			: InputEvent(InputEventType::KeyTyped, name, inputState)
+			: InputEvent(InputEventType::KeyTyped, device, inputState)
 			, Button(button)
 			, Character(character)
 		{}

@@ -12,10 +12,11 @@ namespace iw {
 inline namespace events {
 	class eventbus {
 	private:
+		std::mutex m_mutex;
+		std::vector<callback<event&>> m_callbacks;
 		linear_allocator m_alloc;
 		blocking_queue<event*> m_events;
-		std::vector<callback<event&>> m_callbacks;
-		std::mutex m_mutex;
+
 
 	public:
 		IWEVENTS_API
