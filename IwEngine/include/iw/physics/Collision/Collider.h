@@ -14,9 +14,9 @@ inline namespace Physics {
 		AABB<V> Bounds;
 		bool Outdated;
 
-		//IWPHYSICS_API
-		//virtual bool TestCollision(
-		//	/*BoxCollider<V> */) const = 0;
+		IWPHYSICS_API
+		virtual bool TestCollision(
+			BoxCollider<V> ) const = 0;
 
 		IWPHYSICS_API
 		virtual bool TestCollision(
@@ -27,8 +27,8 @@ inline namespace Physics {
 		//virtual bool TestCollision(
 		//	/*MeshColliderV */) const = 0;
 
-		//IWPHYSICS_API
-		//virtual AABB<V> GenAABB() const = 0;
+		IWPHYSICS_API
+		virtual AABB<V> GetAABB() const = 0;
 	};
 }
 }
