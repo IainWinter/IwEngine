@@ -4,6 +4,7 @@
 #include "Window.h"
 #include "EventStack.h"
 #include "Task.h"
+#include "Console.h"
 #include "iw/events/eventbus.h"
 #include "InitOptions.h"
 #include "Layers/ImGuiLayer.h"
@@ -33,6 +34,7 @@ inline namespace Engine {
 		iw::ref<Renderer>     Renderer;
 		iw::ref<AssetManager> Asset;
 		iw::ref<InputManager> Input;
+		iw::ref<Console>      Console;
 		iw::ref<iw::eventbus> Bus;
 
 	public:
@@ -62,6 +64,10 @@ inline namespace Engine {
 		IWENGINE_API
 		virtual void HandleEvent(
 			iw::event& e);
+
+		IWENGINE_API
+		virtual bool HandleCommand(
+			const Command& command);
 
 		IWENGINE_API
 		inline IWindow& GetWindow() {

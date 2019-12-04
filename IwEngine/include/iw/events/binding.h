@@ -4,7 +4,8 @@
 #include <functional>
 
 namespace iw {
-inline namespace events {
+namespace events {
+namespace impl {
 	template<int N>
 	struct placeholder { static placeholder ph; };
 
@@ -28,7 +29,10 @@ inline namespace events {
 	{
 		return std::bind(func, val, placeholder<indices_ + 1>::ph...);
 	}
+}
+}
 
+inline namespace events {
 	template<
 		typename _r,
 		typename _t,
@@ -38,7 +42,7 @@ inline namespace events {
 		std::function<_r(_t, _args_t...)> func,
 		_u val)
 	{
-		return bind(func, val,
+		return events::impl::bind(func, val,
 			std::make_integer_sequence<int, sizeof...(_args_t)>());
 	}
 

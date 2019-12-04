@@ -15,7 +15,9 @@ inline namespace Editor {
 
 		int Initialize(
 			IW::InitOptions& options) override;
-	private:
+
+		bool HandleCommand(
+			const Command& command) override;
 	};
 }
 }

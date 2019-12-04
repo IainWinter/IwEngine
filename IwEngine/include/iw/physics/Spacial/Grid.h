@@ -4,14 +4,15 @@
 #include <vector>
 #include <unordered_map>
 
-namespace IwPhysics {
+namespace IW {
+inline namespace Physics {
 	template<
 		typename T,
 		typename V = iw::vector3,
 		typename K = int>
 	class Grid {
 	private:
-		using AABB = AABB<V>;
+		using AABB = IW::AABB<V>;
 
 		struct Cell {
 			std::vector<T> Items;
@@ -102,4 +103,5 @@ namespace IwPhysics {
 				+ z << (KEYPART * 3);
 		}
 	};
+}
 }

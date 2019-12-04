@@ -2,52 +2,50 @@
 
 #include "Core.h"
 #include "iw/events/event.h"
+#include "iw/events/callback.h"
 #include "iw/util/queue/blocking_queue.h"
 #include "iw/util/memory/linear_allocator.h"
 #include <string>
-#include<functional>
+#include <functional>
 
 namespace IW {
 inline namespace Engine {
 	struct Token {
-		union Any {
-			float Float;
-			double Double;
-			int Int;
-			long long Long;
-			std::string String;
-		}* Value;
-
 		size_t Count;
+
+		union {
+			float Float;
+			long long Int;
+			char* String;
+		};
 	};
 
 	struct Command {
-		std::string* Verb;
-		Token* Tokens;
+		std::string Verb;
 		size_t TokenCount;
+		Token* Tokens; // size is token count
 	};
 
 	class Console {
-	private:
-		using handler_func = std::function<bool(const Command&)>;
+	public:
+		using HandlerFunc = iw::getback<bool, const Command&>;
 
+	private:
 		std::mutex m_mutex;
-		handler_func m_handler;
 		iw::linear_allocator m_alloc;
-		iw::blocking_queue<std::string> m_commands;
+		iw::linear_allocator m_strbuf;
+		iw::blocking_queue<Command> m_commands;
+
+		HandlerFunc m_handler;
 
 	public:
 		IWENGINE_API
 		Console(
-			const handler_func& handler);
+			const HandlerFunc& handler);
 
 		IWENGINE_API
 		void HandleEvent(
 			iw::event& e);
-
-		IWENGINE_API
-		void HandleCommand(
-			const std::string& command);
 
 		IWENGINE_API
 		void QueueCommand(
@@ -55,10 +53,12 @@ inline namespace Engine {
 
 		IWENGINE_API
 		void ExecuteQueue();
-
-		// operator <<
 	private:
-		
+		Command AllocCommand(
+			const std::string& command);
+
+		Token ParseToken(
+			const std::string& command);
 	};
 }
 }

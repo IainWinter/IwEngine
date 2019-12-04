@@ -4,12 +4,12 @@
 
 namespace IW {
 	PhysicsSystem::PhysicsSystem()
-		: System<Transform, IwPhysics::AABB3>("Physics")
+		: System<Transform, AABB3>("Physics")
 	{}
 
 	struct Components {
 		Transform* Transform;
-		IwPhysics::AABB2* AABB;
+		AABB2* AABB;
 	};
 
 	void PhysicsSystem::Update(
