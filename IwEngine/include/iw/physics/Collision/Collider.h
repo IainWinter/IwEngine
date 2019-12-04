@@ -1,5 +1,6 @@
 #pragma once
 
+#include "iw/physics/IwPhysics.h"
 #include "iw/physics/AABB.h"
 
 namespace IW  {

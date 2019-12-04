@@ -24,7 +24,7 @@ namespace IW {
 		Bus   = std::make_shared<iw::eventbus>();
 		Input = std::make_shared<InputManager>(Bus);
 
-		Console = std::make_shared<IW::Console>(std::bind(&Application::HandleCommand, this));
+		Console = std::make_shared<IW::Console>(iw::make_getback(&Application::HandleCommand, this));
 
 		PushOverlay<ImGuiLayer>();
 		PushOverlay<DebugLayer>();
@@ -233,6 +233,12 @@ namespace IW {
 	bool Application::HandleCommand(
 		const Command& command)
 	{
-		LOG_INFO << command.Verb;
+		if (command.Verb == "resize_window") {
+			LOG_INFO << "Resize Window" 
+				<< " " << command.Tokens[0].Int 
+				<< " " << command.Tokens[1].Int;
+		}
+
+		return true;
 	}
 }

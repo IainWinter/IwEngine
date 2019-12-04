@@ -10,7 +10,7 @@
 
 namespace IW {
 inline namespace Graphics {
-	class IWGRAPHICS_API Renderer {
+	class Renderer {
 	public:
 		int Width;
 		int Height;
@@ -20,24 +20,35 @@ inline namespace Graphics {
 		Mesh* m_filterMesh;
 
 	public:
+		IWGRAPHICS_API
 		Renderer(
 			const iw::ref<IDevice>& device);
 
+		IWGRAPHICS_API
 		~Renderer();
 
+		IWGRAPHICS_API
 		void Initialize();
+
+		IWGRAPHICS_API
 		void Begin();
+
+		IWGRAPHICS_API
 		void End();
 
+		IWGRAPHICS_API
 		void BeginScene(
 			RenderTarget* target = nullptr);
 
+		IWGRAPHICS_API
 		void EndScene();
 
+		IWGRAPHICS_API
 		void DrawMesh(
 			const Transform* transform,
 			const Mesh* mesh);
 
+		IWGRAPHICS_API
 		void ApplyFilter(
 			iw::ref<IPipeline>& pipeline,
 			RenderTarget* source,

@@ -24,10 +24,6 @@ namespace IW {
 
 		PushLayer<ToolLayer>();
 		PushLayer<SandboxLayer>();
-
-		std::string s = "resize_window 100 100";
-
-		Console->HandleCommand(s);
 	}
 
 	int App::Initialize(
@@ -39,7 +35,48 @@ namespace IW {
 			GetLayer<ImGuiLayer>("ImGui")->BindContext();
 		}
 
+		Console->QueueCommand("resize_window 100 100");
+		Console->QueueCommand("test 100.4 hello");
+		Console->QueueCommand("hello world 100");
+		Console->QueueCommand("this is a test 100 100");
+		Console->QueueCommand("lkjh 1sdf00 10f.00f0 0x500");
+		Console->ExecuteQueue();
+
 		return err;
+	}
+
+	bool App::HandleCommand(
+		const Command& command)
+	{
+		if (command.Verb == "test") {
+			LOG_INFO << "Test" 
+				<< " " << command.Tokens[0].Float
+				<< " " << command.Tokens[1].String;
+		}
+
+		else if (command.Verb == "hello") {
+			LOG_INFO << "Hello" 
+				<< " "<< command.Tokens[0].String 
+				<< " "<< command.Tokens[1].Int;
+		}
+
+		else if (command.Verb == "this") {
+			LOG_INFO << "This"
+				<< " "<< command.Tokens[0].String
+				<< " "<< command.Tokens[1].String
+				<< " "<< command.Tokens[2].String
+				<< " "<< command.Tokens[3].Int
+				<< " "<< command.Tokens[4].Int;
+		}
+
+		else if (command.Verb == "lkjh") {
+			LOG_INFO << "LKJH" 
+				<< " "<< command.Tokens[0].String
+				<< " "<< command.Tokens[1].String
+				<< " "<< command.Tokens[2].Float;
+		}
+
+		return Application::HandleCommand(command);
 	}
 }
 
