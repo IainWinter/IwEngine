@@ -4,18 +4,28 @@
 
 namespace IW {
 inline namespace Physics {
+	template<
+		typename V>
 	struct SphereCollider
-	: Collider<iw::vector3>
+	: Collider<V>
 	{
+		V Center;
 		float Radius;
 
 		SphereCollider(
-			iw::vector3 center,
-			float radius);
-
-		iw::vector3 Center() const;
+			V center,
+			float radius)
+			: Center(center)
+			, Radius(radius)
+		{}
 		
-		bool IsColliding(const SphereCollider& other) const override;
+		bool TestCollision(
+			const SphereCollider& other,
+			V* resolve = nullptr) const override
+		{
+			return Algo::TestCollision(*this, other, resolve);
+		}
+
 	};
 }
 }
