@@ -1,6 +1,6 @@
 iwengdir  = path.getabsolute("IwEngine")
 sndbxdir  = path.getabsolute("Sandbox")
-edtbxdir  = path.getabsolute("Editor")
+edtordir  = path.getabsolute("Editor")
 glewdir   = iwengdir .. "/extern/glew"
 imguidir  = iwengdir .. "/extern/imgui"
 assimpdir = iwengdir .. "/extern/assimp"
@@ -61,7 +61,8 @@ project "IwEngine"
 
 	disablewarnings { 
 		"26495",
-		"26812"
+		"26812",
+		"4200"
 	}
 
 	defines {
@@ -89,18 +90,18 @@ project "IwEngine"
 project "Editor"
 	kind "WindowedApp"
 	language "C++"
-	location  (edtbxdir .. blddir)
-	targetdir (edtbxdir .. bindir)
-	objdir    (edtbxdir .. blddir)
+	location  (edtordir .. blddir)
+	targetdir (edtordir .. bindir)
+	objdir    (edtordir .. blddir)
 
 	files {
-		edtbxdir .. incdir .. "/**.h",
-		edtbxdir .. srcdir .. "/**.h",
-		edtbxdir .. srcdir .. "/**.cpp"
+		edtordir .. incdir .. "/**.h",
+		edtordir .. srcdir .. "/**.h",
+		edtordir .. srcdir .. "/**.cpp"
 	}
 
 	includedirs {
-		edtbxdir .. incdir,
+		edtordir .. incdir,
 		iwengdir .. incdir,
 		imguidir .. incdir
 	}
@@ -112,11 +113,11 @@ project "Editor"
 	}
 
 	prebuildcommands  {
-		"xcopy /y /f \""    .. assimpdir .. blddir .. "/code/%{cfg.buildcfg}/assimp-vc140-mt.dll\" \"" .. edtbxdir .. bindir .. "\"",
-		"xcopy /y /f \""    .. iwengdir  .. bindir .. "/IwEngine.dll\" \"" .. edtbxdir .. bindir .. "\"",
-		"xcopy /y /f \""    .. glewdir   .. bindir .. "/GLEW.dll\" \""     .. edtbxdir .. bindir .. "\"",
-		"xcopy /e /y /f /i \"" .. sndbxdir  .. resdir .. "\" \""           .. edtbxdir .. blddir .. resdir .. "\"",
-		"xcopy /e /y /f /i \"" .. sndbxdir  .. resdir .. "\" \""           .. edtbxdir .. bindir .. resdir .. "\""
+		"xcopy /y /f \""    .. assimpdir .. blddir .. "/code/%{cfg.buildcfg}/assimp-vc140-mt.dll\" \"" .. edtordir .. bindir .. "\"",
+		"xcopy /y /f \""    .. iwengdir  .. bindir .. "/IwEngine.dll\" \"" .. edtordir .. bindir .. "\"",
+		"xcopy /y /f \""    .. glewdir   .. bindir .. "/GLEW.dll\" \""     .. edtordir .. bindir .. "\"",
+		"xcopy /e /y /f /i \"" .. edtordir  .. resdir .. "\" \""           .. edtordir .. blddir .. resdir .. "\"",
+		"xcopy /e /y /f /i \"" .. edtordir  .. resdir .. "\" \""           .. edtordir .. bindir .. resdir .. "\""
 	}
 
 	filter "system:windows"

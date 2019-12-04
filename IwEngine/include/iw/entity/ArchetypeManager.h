@@ -8,7 +8,7 @@
 
 namespace IW {
 inline namespace ECS {
-	class IWENTITY_API ArchetypeManager {
+	class ArchetypeManager {
 	private:
 		std::unordered_map<size_t, iw::ref<Archetype>> m_hashed;
 		std::vector<iw::ref<Archetype>> m_archetypes;

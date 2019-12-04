@@ -29,7 +29,7 @@ namespace IW {
 	}
 
 	void RenderTarget::Initialize(
-		const iw::ref<IW::IDevice>& device)
+		const iw::ref<IDevice>& device)
 	{
 		Frame = device->CreateFrameBuffer();
 		
@@ -40,7 +40,7 @@ namespace IW {
 	}
 
 	void RenderTarget::Use(
-		const iw::ref<IW::IDevice>& device)
+		const iw::ref<IDevice>& device)
 	{
 		device->SetFrameBuffer(Frame);
 		device->SetViewport(Width, Height);

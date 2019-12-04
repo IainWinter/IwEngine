@@ -2,7 +2,7 @@
 
 #include "Components/Enemy.h"
 #include "iw/engine/System.h"
-#include "iw/data/Components/Transform.h"
+#include "iw/common/Components/Transform.h"
 #include "iw/graphics/Mesh.h"
 
 class EnemySystem
@@ -13,8 +13,6 @@ private:
 
 public:
 	EnemySystem(
-		IW::Space& space,
-		IW::Graphics::Renderer& renderer,
 		IW::Mesh* circle);
 
 	void Update(

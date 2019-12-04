@@ -5,6 +5,6 @@
 
 namespace IW {
 	struct CameraController {
-		IW::Camera* Camera;
+		Camera* Camera;
 	};
 }

@@ -15,19 +15,16 @@ namespace IW {
 	Application::Application()
 		: m_running(false)
 		, m_window(IWindow::Create())
-		, m_device(IDevice::Create())
 		, Space(std::make_shared<IW::Space>())
-		, Renderer(std::make_shared<IW::Renderer>(m_device))
 		, Asset(std::make_shared<AssetManager>())
-		, Bus(std::make_shared<iw::eventbus>())
-		, InputManager(std::make_shared<IW::InputManager>())
-		, m_updateTask([&]() {
-			for (Layer* layer : m_layers) {
-				layer->UpdateSystems();
-			}
-		})
 	{
-		m_imguiLayer = PushOverlay<ImGuiLayer>();
+		m_device = iw::ref<IDevice>(IDevice::Create());
+		Renderer = std::make_shared<IW::Renderer>(m_device);
+
+		Bus   = std::make_shared<iw::eventbus>();
+		Input = std::make_shared<InputManager>(Bus);
+
+		PushOverlay<ImGuiLayer>();
 		PushOverlay<DebugLayer>();
 	}
 
@@ -50,22 +47,20 @@ namespace IW {
 
 		// Events
 
-		Bus->subscribe(iw::make_callback(&Application::HandleEvent, this));
+		Bus->subscribe(iw::make_callback(&Application ::HandleEvent, this));
+		Bus->subscribe(iw::make_callback(&InputManager::HandleEvent, Input.get()));
 
 		// Asset Loader
 
-		Asset->SetLoader<IW::MeshLoader>();
-		Asset->SetLoader<IW::MaterialLoader>();
-		Asset->SetLoader<IW::TextureLoader>();
-		Asset->SetLoader<IW::ShaderLoader>();
+		Asset->SetLoader<MeshLoader>();
+		Asset->SetLoader<MaterialLoader>();
+		Asset->SetLoader<TextureLoader>();
+		Asset->SetLoader<ShaderLoader>();
 
 		// Window
 
 		LOG_DEBUG << "Setting window event bus...";
 		m_window->SetEventbus(Bus);
-		
-		LOG_DEBUG << "Setting window input manager...";
-		m_window->SetInputManager(InputManager);
 
 		int status;
 		LOG_DEBUG << "Initializing window...";
@@ -78,14 +73,16 @@ namespace IW {
 
 		for (Layer* layer : m_layers) {
 			LOG_DEBUG << "Initializing " << layer->Name() << " layer...";
-			if (status = layer->Initialize(options)) {
+			if (status = layer->Initialize()) {
 				LOG_ERROR << layer->Name() << " layer initialization failed with error code " << status;
 				return status;
 			}
 		}
 
-		//Need to set after so window doesn't send events before imgui gets initialized 
+		//Need to set after so window doesn't send events before imgui gets initialized
 		m_window->SetState(options.WindowOptions.State);
+
+		m_imguiLayer = GetLayer<ImGuiLayer>("ImGui");
 
 		// Time again!
 
@@ -166,11 +163,13 @@ namespace IW {
 		}
 
 		// ImGui render (Sync)
-		m_imguiLayer->Begin();
-		for (Layer* layer : m_layers) {
-			layer->ImGui();
+		if (m_imguiLayer) {
+			m_imguiLayer->Begin();
+			for (Layer* layer : m_layers) {
+				layer->ImGui();
+			}
+			m_imguiLayer->End();
 		}
-		m_imguiLayer->End();
 
 		// Run through render queue! (Sync)
 
@@ -199,20 +198,24 @@ namespace IW {
 		iw::event& e)
 	{
 		bool error = false;
-		if (e.Category == IW::WINDOW) {
+		if (e.Group == iw::val(EventGroup::WINDOW)) {
 			switch (e.Type) {
-				case IW::Closed: {
+				case Closed: {
 					m_running = false;
 					e.Handled = true;
 					break;
 				}
-				case IW::Resized: {
-					Renderer->Width  = e.as<IW::WindowResizedEvent>().Width;
-					Renderer->Height = e.as<IW::WindowResizedEvent>().Height;
+				case Resized: {
+					WindowResizedEvent& wre = e.as<WindowResizedEvent>();
+					Renderer->Width  = wre.Width;
+					Renderer->Height = wre.Height;
 					e.Handled = true;
 					break;
 				}
-				default: error = true; break;
+				default: {
+					error = true;
+					break;
+				}
 			}
 		}
 

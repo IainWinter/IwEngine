@@ -6,10 +6,8 @@ struct Components {
 	Bullet*              Bullet;
 };
 
-BulletSystem::BulletSystem(
-	IW::Space& space,
-	IW::Graphics::Renderer& renderer)
-	: IW::System<IW::Transform, Bullet>(space, renderer, "Bullet")
+BulletSystem::BulletSystem()
+	: IW::System<IW::Transform, Bullet>("Bullet")
 {}
 
 BulletSystem::~BulletSystem()

@@ -6,7 +6,7 @@ namespace iw {
 	{}
 
 	void eventbus::subscribe(
-		const callback<event&> & callback)
+		const callback<event&>& callback)
 	{
 		std::unique_lock<std::mutex> lock(m_mutex);
 
@@ -14,7 +14,7 @@ namespace iw {
 	}
 
 	void eventbus::unsubscribe(
-		const iw::callback<event&>& callback)
+		const callback<event&>& callback)
 	{
 		std::unique_lock<std::mutex> lock(m_mutex);
 	}
@@ -23,12 +23,17 @@ namespace iw {
 		std::unique_lock<std::mutex> lock(m_mutex);
 
 		while (!m_events.empty()) {
-			iw::event* event = m_events.pop();
-			for (auto& callback : m_callbacks) {
-				callback(*event);
-			}
+			publish_event(m_events.pop());
 		}
 
 		m_alloc.reset();
+	}
+
+	void eventbus::publish_event(
+		event* e)
+	{
+		for (auto& callback : m_callbacks) {
+			callback(*e);
+		}
 	}
 }

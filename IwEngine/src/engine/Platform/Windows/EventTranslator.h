@@ -2,7 +2,7 @@
 
 #include "iw/engine/Events/Events.h"
 #include "iw/log/logger.h"
-#include "iw/engine/Platform.h"
+#include "iw/common/Platform.h"
 
 namespace IW {
 	template<
@@ -20,12 +20,12 @@ namespace IW {
 	}
 
 	template<>
-	IW::WindowResizedEvent Translate(
+	WindowResizedEvent Translate(
 		int event,
 		int windowId,
 		size_t wParam,
 		size_t lParam)
 	{
-		return IW::WindowResizedEvent(windowId, LOWORD(lParam), HIWORD(lParam));
+		return WindowResizedEvent(windowId, LOWORD(lParam), HIWORD(lParam));
 	}
 }

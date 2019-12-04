@@ -1,4 +1,4 @@
-#pragma onceIW::
+#pragma once
 
 #include "Core.h"
 #include "Window.h"
@@ -17,43 +17,63 @@
 
 namespace IW {
 inline namespace Engine {
-	class IWENGINE_API Application {
+	class Application {
 	private:
-		bool                 m_running;
-		IWindow*             m_window;
-		ImGuiLayer*          m_imguiLayer;
-		EventStack<Layer*>   m_layers;
+		IWindow* m_window;
+		iw::ref<IDevice> m_device;
 
-		iw::ref<IW::IDevice> m_device;
+		ImGuiLayer* m_imguiLayer;
+		EventStack<Layer*> m_layers;
 
-		std::thread  m_renderThread;
-		Task<void()> m_updateTask;
+		std::thread m_renderThread;
+		bool m_running;
 
 	protected:
-		iw::ref<IW::Space>        Space;
-		iw::ref<IW::Renderer>     Renderer;
-		iw::ref<IW::AssetManager> Asset;
-		iw::ref<iw::eventbus>     Bus;
-		iw::ref<IW::InputManager> InputManager;
+		iw::ref<Space>        Space;
+		iw::ref<Renderer>     Renderer;
+		iw::ref<AssetManager> Asset;
+		iw::ref<InputManager> Input;
+		iw::ref<iw::eventbus> Bus;
 
 	public:
+		IWENGINE_API
 		Application();
+
+		IWENGINE_API
 		virtual ~Application();
 
+		IWENGINE_API
 		virtual int Initialize(
 			InitOptions& options);
 
+		IWENGINE_API
 		virtual void Run();
+
+		IWENGINE_API
 		virtual void Destroy();
+
+		IWENGINE_API
 		virtual void Update();
+
+		IWENGINE_API
 		virtual void FixedUpdate();
 		//virtual void Pause();
 
+		IWENGINE_API
 		virtual void HandleEvent(
 			iw::event& e);
 
+		IWENGINE_API
 		inline IWindow& GetWindow() {
 			return *m_window;
+		}
+
+		template<
+			typename L = Layer>
+		L* GetLayer(
+			const char* name)
+		{
+			return (L*)m_layers.Get(name);
 		}
 
 		template<
@@ -89,6 +109,7 @@ inline namespace Engine {
 		{
 			m_layers.Pop(layer);
 		}
+
 	};
 }
 }

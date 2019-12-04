@@ -2,7 +2,7 @@
 
 #include "iw/graphics/IwGraphics.h"
 #include "iw/math/matrix4.h"
-#include "iw/data/Components/Transform.h"
+#include "iw/common/Components/Transform.h"
 
 namespace IW {
 inline namespace Graphics {

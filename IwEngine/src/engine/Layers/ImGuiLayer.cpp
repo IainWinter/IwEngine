@@ -1,22 +1,24 @@
-#include "iw/engine/Layers/ImGuiLayer.h"
+﻿#include "iw/engine/Layers/ImGuiLayer.h"
 #include "iw/log/logger.h"
-#include "imgui/imgui.h"
+
 #include "OpenGL/imgui_impl_opengl3.h"
 #include "iw/engine/Time.h"
+
 
 namespace IW {
 	ImGuiLayer::ImGuiLayer()
 		: Layer("ImGui")
+		, m_context(nullptr)
 	{}
 
 	ImGuiLayer::~ImGuiLayer() {}
 
-	int ImGuiLayer::Initialize(
-		InitOptions& options)
-	{
+	int ImGuiLayer::Initialize() {
 		IMGUI_CHECKVERSION();
 
-		options.ImGuiContext = ImGui::CreateContext();
+		m_context = ImGui::CreateContext();
+		//Bind();
+
 		ImGui::StyleColorsDark();
 		ImGui_ImplOpenGL3_Init("#version 410");
 
@@ -38,14 +40,9 @@ namespace IW {
 	void ImGuiLayer::ImGui() {
 		ImGui::Begin("ImGui Layer");
 
-		if (ImGui::Button("Button"))
-			counter++;
-
-		ImGui::SameLine();
-		ImGui::Text("counter = %d", counter);
-
-		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f
-			/ ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
+			1000.0f / ImGui::GetIO().Framerate,
+			ImGui::GetIO().Framerate);
 
 		ImGui::End();
 	}
@@ -61,7 +58,7 @@ namespace IW {
 	}
 
 	bool ImGuiLayer::On(
-		IW::WindowResizedEvent& e)
+		WindowResizedEvent& e)
 	{
 		auto& io = ImGui::GetIO();
 		io.DisplaySize.x = (float)e.Width;
@@ -71,22 +68,21 @@ namespace IW {
 	}
 
 	bool ImGuiLayer::On(
-		IW::MouseMovedEvent& event)
+		MouseMovedEvent& e)
 	{
 		auto& io = ImGui::GetIO();
-		io.MousePos.x = (float)event.X;
-		io.MousePos.y = (float)event.Y;
+		io.MousePos.x = (float)e.X;
+		io.MousePos.y = (float)e.Y;
 
 		return io.WantCaptureMouse;
 	}
 
 	bool ImGuiLayer::On(
-		IW::MouseButtonEvent& event)
+		MouseButtonEvent& e)
 	{
 		auto& io = ImGui::GetIO();
-
 		if (io.WantCaptureMouse) {
-			io.MouseDown[event.Button - IW::LMOUSE] = event.State;
+			io.MouseDown[e.Button - LMOUSE] = e.State;
 			return true;
 		}
 

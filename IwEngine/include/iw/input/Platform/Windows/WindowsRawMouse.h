@@ -13,11 +13,10 @@ inline namespace Input {
 		static unsigned int maskup[5];
 
 	public:
-		WindowsRawMouse(
-			InputCallback& callback);
+		WindowsRawMouse();
 
-		void HandleEvent(
-			OsEvent& event);
+		DeviceInput TranslateOsEvent(
+			const OsEvent& e) override;
 	};
 }
 }

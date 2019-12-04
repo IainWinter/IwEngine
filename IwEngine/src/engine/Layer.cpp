@@ -8,9 +8,7 @@ namespace IW {
 
 	Layer::~Layer() {}
 
-	int Layer::Initialize(
-		InitOptions& options) 
-	{
+	int Layer::Initialize() {
 		for (ISystem* s : m_systems) {
 			int e = s->Initialize();
 			if (e != 0) return e;
@@ -32,39 +30,39 @@ namespace IW {
 	void Layer::ImGui() {}
 
 	bool Layer::On(
-		IW::WindowResizedEvent& event)
+		WindowResizedEvent& e)
 	{
-		 return m_systems.On(event);
+		 return m_systems.On(e);
 	}
 
 	bool Layer::On(
-		IW::MouseWheelEvent& event)
+		MouseWheelEvent& e)
 	{
-		return m_systems.On(event);
+		return m_systems.On(e);
 	}
 
 	bool Layer::On(
-		IW::MouseMovedEvent& event)
+		MouseMovedEvent& e)
 	{
-		return m_systems.On(event);
+		return m_systems.On(e);
 	}
 
 	bool Layer::On(
-		IW::MouseButtonEvent& event)
+		MouseButtonEvent& e)
 	{
-		return m_systems.On(event);
+		return m_systems.On(e);
 	}
 
 	bool Layer::On(
-		IW::KeyEvent& event)
+		KeyEvent& e)
 	{
-		return m_systems.On(event);
+		return m_systems.On(e);
 	}
 
 	bool Layer::On(
-		IW::KeyTypedEvent& event)
+		KeyTypedEvent& e)
 	{
-		return m_systems.On(event);
+		return m_systems.On(e);
 	}
 
 	void Layer::UpdateSystems() {
@@ -82,7 +80,7 @@ namespace IW {
 	void Layer::SetApplicationVars(
 		iw::ref<IW::Space> space,
 		iw::ref<IW::Renderer> renderer,
-		iw::ref<IW::AssetManager> asset,
+		iw::ref<AssetManager> asset,
 		iw::ref<iw::eventbus> bus)
 	{
 		Space    = space;

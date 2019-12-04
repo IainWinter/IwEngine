@@ -167,9 +167,9 @@ namespace IW {
 		translation.insert(VK_EXECUTE, EXECUTE);
 
 		translation.insert(VK_BROWSER_BACK, BROWSER_BACK);
-		translation.insert(VK_BROWSER_BACK, BROWSER_FORWARD);
-		translation.insert(VK_BROWSER_BACK, BROWSER_REFRESH);
-		translation.insert(VK_BROWSER_BACK, BROWSER_STOP);
+		translation.insert(VK_BROWSER_FORWARD, BROWSER_FORWARD);
+		translation.insert(VK_BROWSER_REFRESH, BROWSER_REFRESH);
+		translation.insert(VK_BROWSER_STOP, BROWSER_STOP);
 		translation.insert(VK_BROWSER_SEARCH, BROWSER_SEARCH);
 		translation.insert(VK_BROWSER_FAVORITES, BROWSER_FAVORITES);
 		translation.insert(VK_BROWSER_HOME, BROWSER_HOME);
@@ -201,13 +201,13 @@ namespace IW {
 		translation.insert(VK_ZOOM, ZOOM);
 		translation.insert(VK_PA1, PA1);
 
-		translation.insert(VK_KANA, KANA);
-		translation.insert(VK_HANGEUL, HANGUEL);
-		translation.insert(VK_HANGEUL, HANGUL);
-		translation.insert(VK_JUNJA, JUNJA);
-		translation.insert(VK_FINAL, FINAL);
-		translation.insert(VK_HANJA, HANJA);
-		translation.insert(VK_KANJI, KANJI);
+		//translation.insert(VK_KANA, KANA);
+		//translation.insert(VK_HANGEUL, HANGUEL);
+		//translation.insert(VK_HANGUL, HANGUL);
+		//translation.insert(VK_JUNJA, JUNJA);
+		//translation.insert(VK_FINAL, FINAL);
+		//translation.insert(VK_HANJA, HANJA);
+		//translation.insert(VK_KANJI, KANJI);
 #endif																					
 
 		return translation;

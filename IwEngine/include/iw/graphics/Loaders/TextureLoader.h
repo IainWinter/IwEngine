@@ -6,18 +6,18 @@
 
 namespace IW {
 inline namespace Graphics {
-	class IWGRAPHICS_API TextureLoader
+	class TextureLoader
 		: public AssetLoader<Texture>
 	{
 	public:
-		TextureLoader(
+		IWGRAPHICS_API TextureLoader(
 			AssetManager& asset);
 
 	private:
-		Texture* LoadAsset(
+		IWGRAPHICS_API Texture* LoadAsset(
 			std::string filepath) override;
 
-		void FreeAsset(
+		IWGRAPHICS_API void FreeAsset(
 			Texture* texture) override;
 	};
 }

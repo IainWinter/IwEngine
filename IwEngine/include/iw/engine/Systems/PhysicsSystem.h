@@ -2,22 +2,22 @@
 
 #include "iw/engine/Core.h"
 #include "iw/engine/System.h"
-#include "iw/data/Components/Transform.h"
+#include "iw/common/Components/Transform.h"
 #include "iw/physics/AABB.h"
 #include "iw/engine/Components/Model.h"
 
 namespace IW {
 inline namespace Engine {
-	class IWENGINE_API PhysicsSystem
-		: public System<IW::Transform, IwPhysics::AABB3D>
+	class PhysicsSystem
+		: public System<Transform, IwPhysics::AABB3>
 	{
 	public:
-		PhysicsSystem(
-			IW::Space& space,
-			IW::Graphics::Renderer& renderer);
+		IWENGINE_API
+		PhysicsSystem();
 
+		IWENGINE_API
 		void Update(
-			IW::EntityComponentArray& view);
+			EntityComponentArray& view);
 	};
 }
 }

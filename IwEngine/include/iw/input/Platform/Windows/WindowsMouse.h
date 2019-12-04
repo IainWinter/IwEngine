@@ -9,11 +9,8 @@ inline namespace Input {
 		: public Mouse
 	{
 	public:
-		WindowsMouse(
-			InputCallback& callback);
-
-		void HandleEvent(
-			OsEvent& event);
+		DeviceInput TranslateOsEvent(
+			const OsEvent& e) override;
 	};
 }
 }

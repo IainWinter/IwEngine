@@ -2,7 +2,7 @@
 
 #include "Components/Player.h"
 #include "iw/engine/System.h"
-#include "iw/data/Components/Transform.h"
+#include "iw/common/Components/Transform.h"
 
 class PlayerSystem
 	: public IW::System<IW::Transform, Player>
@@ -12,9 +12,7 @@ private:
 	bool dash;
 
 public:
-	PlayerSystem(
-		IW::Space& space,
-		IW::Graphics::Renderer& renderer);
+	PlayerSystem();
 
 	void Update(
 		IW::EntityComponentArray& view) override;

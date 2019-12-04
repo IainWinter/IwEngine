@@ -22,40 +22,40 @@ inline namespace RenderAPI {
 
 		virtual void SetAsBools(
 			const void* values,
-			size_t count,
-			size_t stride = 0) = 0;
+			unsigned count,
+			unsigned stride = 0) = 0;
 
 		virtual void SetAsInt(
 			int value) = 0;
 
 		virtual void SetAsInts(
 			const void* values,
-			size_t count,
-			size_t stride = 0) = 0;
+			unsigned count,
+			unsigned stride = 0) = 0;
 
 		virtual void SetAsUInt(
 			unsigned int value) = 0;
 
 		virtual void SetAsUInts(
 			const void* values,
-			size_t count,
-			size_t stride = 0) = 0;
+			unsigned count,
+			unsigned stride = 0) = 0;
 
 		virtual void SetAsFloat(
 			float value) = 0;
 
 		virtual void SetAsFloats(
 			const void* values,
-			size_t count,
-			size_t stride = 0) = 0;
+			unsigned count,
+			unsigned stride = 0) = 0;
 
 		virtual void SetAsDouble(
 			double value) = 0;
 
 		virtual void SetAsDoubles(
 			const void* values,
-			size_t count,
-			size_t stride = 0) = 0;
+			unsigned count,
+			unsigned stride = 0) = 0;
 
 		virtual void SetAsMat2(
 			const iw::matrix2& matrix) = 0;

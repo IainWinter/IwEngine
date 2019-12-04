@@ -26,9 +26,6 @@ inline namespace Engine {
 		virtual void SetEventbus(
 			iw::ref<iw::eventbus>& bus) = 0;
 
-		virtual void SetInputManager(
-			iw::ref<InputManager>& inputManager) = 0;
-
 		virtual void SetState(
 			DisplayState state) = 0;
 
@@ -58,6 +55,12 @@ inline namespace Engine {
 
 	public:
 		virtual ~Window() {}
+
+		inline void SetEventbus(
+			iw::ref<iw::eventbus>& bus) override
+		{
+			Bus = bus;
+		}
 
 		inline unsigned int Id() {
 			static unsigned int nextId = 0;

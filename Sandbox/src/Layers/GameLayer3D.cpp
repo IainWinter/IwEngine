@@ -15,16 +15,9 @@
 #include "Systems/PlayerSystem.h"
 #include "Systems/EnemySystem.h"
 
-GameLayer3D::GameLayer3D(
-	IW::Space& space,
-	IW::Renderer& renderer,
-	IW::AssetManager& asset,
-	iw::eventbus& bus)
-	: Layer(space, renderer, asset, bus, "Game")
-{
-	PushSystem<BulletSystem>();
-	PushSystem<PlayerSystem>();
-}
+GameLayer3D::GameLayer3D()
+	: Layer("Game")
+{}
 
 iw::ref<IW::Shader> pbrPipeline;
 iw::ref<IW::Shader> shadowPipeline;
@@ -51,63 +44,62 @@ iw::vector3 p;
 
 iw::matrix4 camBuf[2];
 
-int GameLayer3D::Initialize(
-	IW::InitOptions& options)
+int GameLayer3D::Initialize()
 {
 	// Loading shaders and filters
 
-	pbrPipeline    = Asset.Load<IW::Shader>("shaders/pbr.shader");
-	shadowPipeline = Asset.Load<IW::Shader>("shaders/shadows/directional.shader");
-	nullFilter     = Asset.Load<IW::Shader>("shaders/filters/null.shader");
-	blurFilter     = Asset.Load<IW::Shader>("shaders/filters/gaussian.shader");
+	pbrPipeline    = Asset->Load<IW::Shader>("shaders/pbr.shader");
+	shadowPipeline = Asset->Load<IW::Shader>("shaders/shadows/directional.shader");
+	nullFilter     = Asset->Load<IW::Shader>("shaders/filters/null.shader");
+	blurFilter     = Asset->Load<IW::Shader>("shaders/filters/gaussian.shader");
 
-	pbrPipeline->Initialize(Renderer.Device);
-	shadowPipeline->Initialize(Renderer.Device);
-	nullFilter->Initialize(Renderer.Device);
-	blurFilter->Initialize(Renderer.Device);
+	pbrPipeline->Initialize(Renderer->Device);
+	shadowPipeline->Initialize(Renderer->Device);
+	nullFilter->Initialize(Renderer->Device);
+	blurFilter->Initialize(Renderer->Device);
 
 	// Create uniform buffer for the camera and set it for the pipelines that need it
 
-	cameraBuffer = Renderer.Device->CreateUniformBuffer(2 * sizeof(iw::matrix4));
+	cameraBuffer = Renderer->Device->CreateUniformBuffer(2 * sizeof(iw::matrix4));
 	pbrPipeline->Handle->SetBuffer("Camera", cameraBuffer);
 
 	// Setup render targets for shadow map and blur filter
 
 	shadowTarget     = new IW::RenderTarget(1048, 1048, { IW::RG, IW::DEPTH }, { IW::FLOAT, IW::FLOAT });
 	shadowTargetBlur = new IW::RenderTarget(1048, 1048, { IW::ALPHA }, { IW::FLOAT });
-	shadowTarget->Initialize(Renderer.Device);
-	shadowTargetBlur->Initialize(Renderer.Device);
+	shadowTarget->Initialize(Renderer->Device);
+	shadowTargetBlur->Initialize(Renderer->Device);
 
-	iw::ref<IW::Model> floorMesh = Asset.Load<IW::Model>("quad.obj");
+	iw::ref<IW::Model> floorMesh = Asset->Load<IW::Model>("quad.obj");
 	
 	IW::Mesh* mesh = IW::mesh_factory::create_uvsphere(24, 48);
 	mesh->GenTangents();
-	mesh->Initialize(Renderer.Device);
+	mesh->Initialize(Renderer->Device);
 
 	material = std::make_shared<IW::Material>(pbrPipeline->Handle);
 	mesh->SetMaterial(material);
 
-	iw::ref<IW::Texture> albedo    = Asset.Load<IW::Texture>("textures/metal/albedo.jpg");
-	iw::ref<IW::Texture> normal    = Asset.Load<IW::Texture>("textures/metal/normal.jpg");
-	iw::ref<IW::Texture> metallic  = Asset.Load<IW::Texture>("textures/metal/metallic.jpg");
-	iw::ref<IW::Texture> roughness = Asset.Load<IW::Texture>("textures/metal/roughness.jpg");
-	iw::ref<IW::Texture> ao        = Asset.Load<IW::Texture>("textures/metal/ao.jpg");
-	albedo   ->Initialize(Renderer.Device);
-	normal   ->Initialize(Renderer.Device);
-	metallic ->Initialize(Renderer.Device);
-	roughness->Initialize(Renderer.Device);
-	ao       ->Initialize(Renderer.Device);
+	iw::ref<IW::Texture> albedo    = Asset->Load<IW::Texture>("textures/metal/albedo.jpg");
+	iw::ref<IW::Texture> normal    = Asset->Load<IW::Texture>("textures/metal/normal.jpg");
+	iw::ref<IW::Texture> metallic  = Asset->Load<IW::Texture>("textures/metal/metallic.jpg");
+	iw::ref<IW::Texture> roughness = Asset->Load<IW::Texture>("textures/metal/roughness.jpg");
+	iw::ref<IW::Texture> ao        = Asset->Load<IW::Texture>("textures/metal/ao.jpg");
+	albedo   ->Initialize(Renderer->Device);
+	normal   ->Initialize(Renderer->Device);
+	metallic ->Initialize(Renderer->Device);
+	roughness->Initialize(Renderer->Device);
+	ao       ->Initialize(Renderer->Device);
 
-	iw::ref<IW::Texture> talbedo    = Asset.Load<IW::Texture>("textures/tile/albedo.png");
-	iw::ref<IW::Texture> tnormal    = Asset.Load<IW::Texture>("textures/tile/normal.png");
-	iw::ref<IW::Texture> tmetallic  = Asset.Load<IW::Texture>("textures/tile/metallic.jpg");
-	iw::ref<IW::Texture> troughness = Asset.Load<IW::Texture>("textures/tile/roughness.png");
-	iw::ref<IW::Texture> tao        = Asset.Load<IW::Texture>("textures/tile/ao.png");
-	talbedo   ->Initialize(Renderer.Device);
-	tnormal   ->Initialize(Renderer.Device);
-	tmetallic ->Initialize(Renderer.Device);
-	troughness->Initialize(Renderer.Device);
-	tao       ->Initialize(Renderer.Device);
+	iw::ref<IW::Texture> talbedo    = Asset->Load<IW::Texture>("textures/tile/albedo.png");
+	iw::ref<IW::Texture> tnormal    = Asset->Load<IW::Texture>("textures/tile/normal.png");
+	iw::ref<IW::Texture> tmetallic  = Asset->Load<IW::Texture>("textures/tile/metallic.jpg");
+	iw::ref<IW::Texture> troughness = Asset->Load<IW::Texture>("textures/tile/roughness.png");
+	iw::ref<IW::Texture> tao        = Asset->Load<IW::Texture>("textures/tile/ao.png");
+	talbedo   ->Initialize(Renderer->Device);
+	tnormal   ->Initialize(Renderer->Device);
+	tmetallic ->Initialize(Renderer->Device);
+	troughness->Initialize(Renderer->Device);
+	tao       ->Initialize(Renderer->Device);
 
 	material->SetTexture("albedoMap",    albedo);
 	material->SetTexture("normalMap",    normal);
@@ -117,7 +109,7 @@ int GameLayer3D::Initialize(
 	material->SetTexture("shadowMap",    &shadowTarget->Textures[0]);
 
 	for (size_t i = 0; i < floorMesh->MeshCount; i++) {
-		floorMesh->Meshes[i].Initialize(Renderer.Device);
+		floorMesh->Meshes[i].Initialize(Renderer->Device);
 
 		if (floorMesh->Meshes[i].Material->Pipeline != nullptr) continue;
 
@@ -145,29 +137,31 @@ int GameLayer3D::Initialize(
 	IW::Camera* perspective = new IW::PerspectiveCamera(fov, 1.778f, .01f, 200.0f);
 	orth                    = iw::matrix4::create_orthographic(35.56f, 20, -100.0f, 200.0f);
 
-	IW::Entity camera = Space.CreateEntity<IW::Transform, IW::CameraController>();
-	IW::Entity player = Space.CreateEntity<IW::Transform, IW::ModelComponent, Player>();
-	IW::Entity enemy  = Space.CreateEntity<IW::Transform, IW::ModelComponent, Enemy>();
-	IW::Entity floor  = Space.CreateEntity<IW::Transform, IW::ModelComponent>();
+	IW::Entity camera = Space->CreateEntity<IW::Transform, IW::CameraController>();
+	IW::Entity player = Space->CreateEntity<IW::Transform, IW::ModelComponent, Player>();
+	IW::Entity enemy  = Space->CreateEntity<IW::Transform, IW::ModelComponent, Enemy>();
+	IW::Entity floor  = Space->CreateEntity<IW::Transform, IW::ModelComponent>();
 	
-	Space.SetComponentData<IW::CameraController>(camera, perspective);
+	Space->SetComponentData<IW::CameraController>(camera, perspective);
 
-	Space.SetComponentData<IW::Transform>     (player, iw::vector3(3, -0.25f, 0), iw::vector3(0.75f));
-	Space.SetComponentData<IW::ModelComponent>(player, mesh, 1U);
-	Space.SetComponentData<Player>            (player, 4.0f, .18f, .08f);
+	Space->SetComponentData<IW::Transform>     (player, iw::vector3(3, -0.25f, 0), iw::vector3(0.75f));
+	Space->SetComponentData<IW::ModelComponent>(player, mesh, 1U);
+	Space->SetComponentData<Player>            (player, 4.0f, .18f, .08f);
 
-	Space.SetComponentData<IW::Transform>     (enemy, iw::vector3(0, -0.25f, 0), iw::vector3(0.75f));
-	Space.SetComponentData<IW::ModelComponent>(enemy, mesh, 1U);
-	Space.SetComponentData<Enemy>             (enemy, SPIN, 0.2617993f, .12f, 0.0f);
+	Space->SetComponentData<IW::Transform>     (enemy, iw::vector3(0, -0.25f, 0), iw::vector3(0.75f));
+	Space->SetComponentData<IW::ModelComponent>(enemy, mesh, 1U);
+	Space->SetComponentData<Enemy>             (enemy, SPIN, 0.2617993f, .12f, 0.0f);
 
-	Space.SetComponentData<IW::Transform>     (floor, iw::vector3(0, -1, 0));
-	Space.SetComponentData<IW::ModelComponent>(floor, floorMesh->Meshes, floorMesh->MeshCount);
+	Space->SetComponentData<IW::Transform>     (floor, iw::vector3(0, -1, 0));
+	Space->SetComponentData<IW::ModelComponent>(floor, floorMesh->Meshes, floorMesh->MeshCount);
 
-	//IW::Entity debug = Space.CreateEntity<IW::Transform, IW::DebugVector>();
+	//IW::Entity debug = Space->CreateEntity<IW::Transform, IW::DebugVector>();
 
 	lightDirection = iw::vector3(0, 1, 0);
 
 	PushSystem<EnemySystem>(mesh);
+	PushSystem<BulletSystem>();
+	PushSystem<PlayerSystem>();
 
 	return 0;
 }
@@ -194,14 +188,14 @@ struct EnemyComponents {
 
 void GameLayer3D::PostUpdate() {
 	iw::vector3 playerOffset;
-	for (auto entity : Space.Query<IW::Transform, Player>()) {
+	for (auto entity : Space->Query<IW::Transform, Player>()) {
 		auto [transform, player] = entity.Components.Tie<PlayerComponents>();
 
 		playerOffset.x = transform->Position.x * .8f;
 		playerOffset.z = transform->Position.z * .8f;
 	}
 
-	for (auto entity : Space.Query<IW::CameraController>()) {
+	for (auto entity : Space->Query<IW::CameraController>()) {
 		auto [controller] = entity.Components.TieTo<IW::CameraController>();
 
 		IW::PerspectiveCamera* cam = (IW::PerspectiveCamera*)controller->Camera;
@@ -236,15 +230,15 @@ void GameLayer3D::PostUpdate() {
 		}
 
 		if (needsUpdate) {
-			Renderer.Device->UpdateUniformBufferData(cameraBuffer, camBuf);
+			Renderer->Device->UpdateUniformBufferData(cameraBuffer, camBuf);
 		}
 
 		// What would be nice
-		// Renderer.BeginScene(scenedata -- for uniform buffer)
+		// Renderer->BeginScene(scenedata -- for uniform buffer)
 		// loop
-		//	Renderer.DrawMesh(mesh)
+		//	Renderer->DrawMesh(mesh)
 
-		//Renderer.End -- unbind stuff?
+		//Renderer->End -- unbind stuff?
 
 
 
@@ -254,25 +248,25 @@ void GameLayer3D::PostUpdate() {
 		lightCam.Position = lightDirection;
 		lightCam.Rotation = iw::quaternion::from_look_at(lightDirection);
 
-		Renderer.BeginScene(shadowTarget);
+		Renderer->BeginScene(shadowTarget);
 
-		Renderer.Device->SetPipeline(shadowPipeline->Handle.get());
+		Renderer->Device->SetPipeline(shadowPipeline->Handle.get());
 
 		shadowPipeline->Handle->GetParam("viewProjection")
 			->SetAsMat4(lightCam.GetView() * lightCam.GetProjection());
 
-		for (auto tree : Space.Query<IW::Transform, IW::ModelComponent>()) {
+		for (auto tree : Space->Query<IW::Transform, IW::ModelComponent>()) {
 			auto [transform, model] = tree.Components.Tie<ModelComponents>();
 
 			shadowPipeline->Handle->GetParam("model")
 				->SetAsMat4(transform->Transformation());
 
 			for (size_t i = 0; i < model->MeshCount; i++) {
-				model->Meshes[i].Draw(Renderer.Device);
+				model->Meshes[i].Draw(Renderer->Device);
 			}
 		}
 
-		Renderer.EndScene();
+		Renderer->EndScene();
 
 		// Blur shadow texture
 
@@ -280,31 +274,31 @@ void GameLayer3D::PostUpdate() {
 		float blurh = 1.0f / (shadowTarget->Height * blurAmount);
 
 		blurFilter->Handle->GetParam("blurScale")->SetAsFloats(&iw::vector3(blurw, 0, 0), 3);
-		Renderer.ApplyFilter(blurFilter->Handle, shadowTarget, shadowTargetBlur);
+		Renderer->ApplyFilter(blurFilter->Handle, shadowTarget, shadowTargetBlur);
 
 		blurFilter->Handle->GetParam("blurScale")->SetAsFloats(&iw::vector3(0, blurh, 0), 3);
-		Renderer.ApplyFilter(blurFilter->Handle, shadowTargetBlur, shadowTarget);
+		Renderer->ApplyFilter(blurFilter->Handle, shadowTargetBlur, shadowTarget);
 		
 		// Draw actual scene
 
-		Renderer.BeginScene();
+		Renderer->BeginScene();
 
-		Renderer.Device->SetPipeline(pbrPipeline->Handle.get());
+		Renderer->Device->SetPipeline(pbrPipeline->Handle.get());
 		pbrPipeline->Handle->GetParam("lightPositions")->SetAsFloats(&lightPositions, 4, 3); // need better way to pass scene data
 		pbrPipeline->Handle->GetParam("lightColors")->SetAsFloats(&lightColors, 4, 3);
 		pbrPipeline->Handle->GetParam("camPos")->SetAsFloats(&controller->Camera->Position, 3);
 		pbrPipeline->Handle->GetParam("lightSpace")->SetAsMat4(lightCam.GetViewProjection());
 		//pbrPipeline->GetParam("sunDirection")->SetAsFloats(&lightPositions, 3);
 
-		for (auto tree : Space.Query<IW::Transform, IW::ModelComponent>()) {
+		for (auto tree : Space->Query<IW::Transform, IW::ModelComponent>()) {
 			auto [transform, model] = tree.Components.Tie<ModelComponents>();
 
 			for (size_t i = 0; i < model->MeshCount; i++) {
-				Renderer.DrawMesh(transform, &model->Meshes[i]);
+				Renderer->DrawMesh(transform, &model->Meshes[i]);
 			}
 		}
 
-		Renderer.EndScene();
+		Renderer->EndScene();
 	}
 }
 
@@ -323,7 +317,7 @@ void GameLayer3D::ImGui() {
 
 	float* s = nullptr;
 
-	for (auto enemy : Space.Query<IW::Transform, Player>()) {
+	for (auto enemy : Space->Query<IW::Transform, Player>()) {
 		auto [t, p] = enemy.Components.Tie<PlayerComponents>();
 
 		s = &p->Speed;
@@ -335,7 +329,7 @@ void GameLayer3D::ImGui() {
 		ImGui::Value("Dash Timer", p->Timer);
 	}
 
-	for (auto enemy : Space.Query<IW::Transform, Enemy>()) {
+	for (auto enemy : Space->Query<IW::Transform, Enemy>()) {
 		auto [t, e] = enemy.Components.Tie<EnemyComponents>();
 
 		if (s == &e->Speed) {
@@ -356,7 +350,7 @@ void GameLayer3D::ImGui() {
 bool GameLayer3D::On(
 	IW::MouseMovedEvent& event)
 {
-	//for (auto entity : Space.Query<IW::Transform, IW::CameraController>()) {
+	//for (auto entity : Space->Query<IW::Transform, IW::CameraController>()) {
 	//	auto [transform, controller] = entity.Components.Tie<CameraComponents>();
 
 	//	float pitch = event.DeltaY * 0.0005f;

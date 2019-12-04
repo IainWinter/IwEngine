@@ -8,5 +8,11 @@ namespace IW {
 	{
 	public:
 		ToolLayer();
+
+		int Initialize() override;
+
+		void PostUpdate() override;
+
+		void ImGui() override;
 	};
 }

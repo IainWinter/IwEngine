@@ -1,75 +1,62 @@
 #pragma once
 
-#include "DeviceManager.h"
-#include "ContextManager.h"
-#include "Events/InputEvent.h"
-#include "iw/events/callback.h"
+#include "Context.h"
+#include "Devices/Device.h"
+#include "Devices/Mouse.h"
+#include "Devices/Keyboard.h"
+#include "iw/util/memory/smart_pointers.h"
+#include "iw/events/eventbus.h"
 
 namespace IW {
 inline namespace Input {
-	class IWINPUT_API InputManager {
+	class InputManager {
 	private:
-		DeviceManager  m_deviceManager;
-		ContextManager m_contextManager;
+		std::vector<iw::ref<Context>> m_contexts;
+		std::vector<iw::ref<Device>>  m_devices;
+		iw::ref<Context> m_active;
+		iw::ref<iw::eventbus> m_bus;
 
 	public:
-		InputManager() = default;
+		IWINPUT_API
+		InputManager(
+			iw::ref<iw::eventbus>& bus);
 
-#ifdef IW_PLATFORM_WINDOWS
+		IWINPUT_API
 		void HandleEvent(
-			int wid,
-			int msg,
-			size_t wParam,
-			size_t lParam);
-#endif
+			iw::event& e);
 
-		void CreateContext(
-			unsigned int windowId);
-
-		void CreateContext(
-			unsigned int windowId,
-			float width,
-			float height);
+		IWINPUT_API
+		iw::ref<Context>& CreateContext(
+			std::string name,
+			float width  = NO_WIDTH,
+			float height = NO_HEIGHT);
 
 		template<
-			typename _device_T>
-		void CreateDevice() {
+			typename _D>
+		iw::ref<Device>& CreateDevice() {
 			LOG_WARNING << "Attempted to create invalid device!";
+			assert(false);
+			return nullptr;
 		}
 
 		template<>
-		void CreateDevice<Mouse>();
+		IWINPUT_API
+		iw::ref<Device>& CreateDevice<Mouse>();
 
 		template<>
-		void CreateDevice<Keyboard>();
-
-#ifdef IW_PLATFORM_WINDOWS
-		template<>
-		void CreateDevice<RawMouse>();
+		IWINPUT_API
+		iw::ref<Device>& CreateDevice<Keyboard>();
 
 		template<>
-		void CreateDevice<RawKeyboard>();
-#endif
+		IWINPUT_API
+		iw::ref<Device>& CreateDevice<RawMouse>();
 
-		void SetMouseWheelCallback(
-			unsigned int windowId,
-			MouseWheelCallback callback);
-
-		void SetMouseMovedCallback(
-			unsigned int windowId,
-			MouseMovedCallback callback);
-
-		void SetMouseButtonCallback(
-			unsigned int windowId,
-			MouseButtonCallback callback);
-
-		void SetKeyCallback(
-			unsigned int windowId,
-			KeyCallback callback);
-
-		void SetKeyTypedCallback(
-			unsigned int windowId,
-			KeyTypedCallback callback);
+		template<>
+		IWINPUT_API
+		iw::ref<Device>& CreateDevice<RawKeyboard>();
+	private:
+		bool TryAddDevice(
+			iw::ref<Device>& device);
 	};
 }
 }

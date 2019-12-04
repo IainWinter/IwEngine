@@ -4,21 +4,14 @@
 #include <Windows.h>
 
 namespace IW {
-	Keyboard* Keyboard::Create(
-		InputCallback& callback)
-	{
-		return new WindowsKeyboard(callback);
+	Keyboard* Keyboard::Create() {
+		return new WindowsKeyboard();
 	}
 
-	WindowsKeyboard::WindowsKeyboard(
-		InputCallback& callback)
-		: Keyboard(callback)
-	{}
-
-	void WindowsKeyboard::HandleEvent(
-		OsEvent& event)
+	DeviceInput WindowsKeyboard::TranslateOsEvent(
+		const OsEvent& e)
 	{
-		//Translate(VK_SPACE);
+		return DeviceInput(KEYBOARD);
 	}
 
 	bool Keyboard::KeyDown(

@@ -1,13 +1,19 @@
 #include "App.h"
-#include "imgui/imgui.h"
 
 #include "Layers/ToolLayer.h"
 #include "Layers/SandboxLayer.h"
 
 namespace IW {
 	App::App() {
-		InputManager->CreateDevice<Mouse>();
-		InputManager->CreateDevice<RawKeyboard>();
+		iw::ref<Context>& c = Input->CreateContext("Sandbox");
+
+		auto m  = Input->CreateDevice<Mouse>();
+		auto rm = Input->CreateDevice<RawMouse>();
+		auto k  = Input->CreateDevice<RawKeyboard>();
+
+		c->AddDevice(m);
+		c->AddDevice(rm);
+		c->AddDevice(k);
 
 		PushLayer<ToolLayer>();
 		PushLayer<SandboxLayer>();
@@ -19,7 +25,7 @@ namespace IW {
 		int err = Application::Initialize(options);
 
 		if (!err) {
-			ImGui::SetCurrentContext((ImGuiContext*)options.ImGuiContext);
+			GetLayer<ImGuiLayer>("ImGui")->BindContext();
 		}
 
 		return err;
@@ -29,7 +35,7 @@ namespace IW {
 IW::Application* CreateApplication(
 	IW::InitOptions& options)
 {
-	options.WindowOptions = IW::WindowOptions{
+	options.WindowOptions = IW::WindowOptions {
 		1280,
 		720,
 		true,

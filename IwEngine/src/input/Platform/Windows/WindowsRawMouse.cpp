@@ -20,16 +20,11 @@ namespace IW {
 		RI_MOUSE_BUTTON_5_UP 
 	};
 
-	RawMouse* RawMouse::Create(
-		InputCallback& callback) 
-	{
-		return new WindowsRawMouse(callback);
+	RawMouse* RawMouse::Create() {
+		return new WindowsRawMouse();
 	}
 
-	WindowsRawMouse::WindowsRawMouse(
-		InputCallback& callback) 
-		: RawMouse(callback)
-	{
+	WindowsRawMouse::WindowsRawMouse() {
 		RAWINPUTDEVICE rid[1];
 		rid[0].usUsagePage = 1;	  // Generic input device
 		rid[0].usUsage = 2;		  // Mouse
@@ -37,33 +32,33 @@ namespace IW {
 		rid[0].hwndTarget = NULL; // For current window // Seems risky
 
 		if (!RegisterRawInputDevices(rid, 1, sizeof(rid[0]))) {
-			LOG_WARNING << "Mouse failed to be created -- RAWINPUTDEVICE "
-				<< rid;
+			LOG_WARNING << "Mouse failed to be created -- RAWINPUTDEVICE " << rid;
 		}
 	}
 
-	void WindowsRawMouse::HandleEvent(
-		OsEvent& event)
+	DeviceInput WindowsRawMouse::TranslateOsEvent(
+		const OsEvent& e)
 	{
-		if (event.Message != WM_INPUT) {
-			return;
+		DeviceInput input(DeviceType::RAW_MOUSE);
+		
+		if (e.Message != WM_INPUT) {
+			return input;
 		}
 
-		RAWINPUT* raw = (RAWINPUT*)event.LParam;
+		RAWINPUT* raw = (RAWINPUT*)e.LParam;
 		if (raw->header.dwType == RIM_TYPEMOUSE) {
 			RAWMOUSE mouse = raw->data.mouse;
 
-			InputEvent input(MOUSE, event.WindowId);
 			input.Name = LMOUSE;
 			for (int i = 0; i < 5; i++) {
 				if (maskdown[i] & mouse.usButtonFlags) {
 					input.State = 1;
-					Callback(input);
+					return input;
 				}
 
 				else if (maskup[i] & mouse.usButtonFlags) {
 					input.State = 0;
-					Callback(input);
+					return input;
 				}
 
 				input.Name = (InputName)(input.Name + 1);
@@ -72,19 +67,20 @@ namespace IW {
 			if (mouse.usButtonFlags == RI_MOUSE_WHEEL) {
 				input.Name  = WHEEL;
 				input.State = (short)LOWORD(mouse.usButtonData) / (float)WHEEL_DELTA;
-				Callback(input);
+				return input;
 			}
 
 			if (mouse.usFlags == MOUSE_MOVE_RELATIVE) {
 				input.Name  = MOUSEdX;
 				input.State = (float)mouse.lLastX;
-				Callback(input);
 
-				input.Name  = MOUSEdY;
-				input.State = (float)mouse.lLastY;
-				Callback(input);
+				input.Name2  = MOUSEdY;
+				input.State2 = (float)mouse.lLastY; // xd
+				return input;
 			}
 		}
+
+		return input;
 	}
 }
 #endif

@@ -6,7 +6,7 @@
 //#include "Components/Enemy.h"
 //#include "Components/Bullet.h"
 //#include "iw/engine/Time.h"
-//#include "iw/data/Components/Transform.h"
+//#include "iw/common/Components/Transform.h"
 //#include "iw/engine/Components/Model.h"
 //#include "iw/engine/Components/CameraController.h"
 //#include "iw/engine/Systems/PhysicsSystem.h"
@@ -49,16 +49,16 @@
 //int GameLayer::Initialize(
 //	IW::InitOptions& options)
 //{
-//	//Asset.Load<IW::Mesh>("res/quad.obj");
+//	//Asset->Load<IW::Mesh>("res/quad.obj");
 //	//   |
 //	//  \ /
-//	//Asset.Load<IW::Material>("res/quad.mat");
+//	//Asset->Load<IW::Material>("res/quad.mat");
 //	//   |
 //	//  \ /
-//	//Asset.Load<IW::Shader>("res/sandbox.shader");
+//	//Asset->Load<IW::Shader>("res/sandbox.shader");
 //	
-//	iw::ref<IW::IPipeline> shader = Renderer.CreatePipeline("assets/shaders/sandboxvs.glsl", "assets/shaders/sandboxfs.glsl");
-//	iw::ref<IW::IPipeline> shader_line = Renderer.CreatePipeline("assets/shaders/sandbox_line_vs.glsl", "assets/shaders/sandbox_line_fs.glsl");
+//	iw::ref<IW::IPipeline> shader = Renderer->CreatePipeline("assets/shaders/sandboxvs.glsl", "assets/shaders/sandboxfs.glsl");
+//	iw::ref<IW::IPipeline> shader_line = Renderer->CreatePipeline("assets/shaders/sandbox_line_vs.glsl", "assets/shaders/sandbox_line_fs.glsl");
 //
 //	// Making line mesh
 //	// Model data
@@ -76,8 +76,8 @@
 //		0, 1
 //	};
 //
-//	iw::ref<IW::Texture> tex = Asset.Load<IW::Texture>("textures/metal/albedo.jpg");
-//	tex->Initialize(Renderer.Device);
+//	iw::ref<IW::Texture> tex = Asset->Load<IW::Texture>("textures/metal/albedo.jpg");
+//	tex->Initialize(Renderer->Device);
 //
 //	iw::ref<IW::Material> lineMaterial(new IW::Material(shader_line));
 //
@@ -93,10 +93,10 @@
 //	line->SetVertices(2, verts);
 //	line->SetColors  (2, color);
 //	line->SetIndices (2, index);
-//	line->Initialize(Renderer.Device);
+//	line->Initialize(Renderer->Device);
 //
 //	// Making quad mesh
-//	auto qmodel = Asset.Load<IW::Model>("quad.obj");
+//	auto qmodel = Asset->Load<IW::Model>("quad.obj");
 //	
 //	iw::vector2 uvs[4] = {
 //		iw::vector2(.1f, 0),
@@ -106,11 +106,11 @@
 //	};
 //
 //	qmodel->Meshes->SetUVs(4, uvs);
-//	qmodel->Meshes->Initialize(Renderer.Device);
+//	qmodel->Meshes->Initialize(Renderer->Device);
 //
 //	// Making circle mesh
-//	auto cmodel = Asset.Load<IW::Model>("circle.obj");
-//	cmodel->Meshes->Initialize(Renderer.Device);
+//	auto cmodel = Asset->Load<IW::Model>("circle.obj");
+//	cmodel->Meshes->Initialize(Renderer->Device);
 //
 //	qmodel->Meshes->SetMaterial(quadMaterial);
 //	cmodel->Meshes->SetMaterial(circleMaterial);
@@ -124,22 +124,22 @@
 //	IW::Camera* ortho = new IW::OrthographicCamera(64, 36, -100, 100);
 //	ortho->Rotation = iw::quaternion::from_euler_angles(0, iw::PI, 0);
 //
-//	IW::Entity camera = Space.CreateEntity<IW::CameraController>();
-//	Space.SetComponentData<IW::CameraController>(camera, ortho);
+//	IW::Entity camera = Space->CreateEntity<IW::CameraController>();
+//	Space->SetComponentData<IW::CameraController>(camera, ortho);
 //
-//	IW::Entity player = Space.CreateEntity<IW::Transform, IW::Model, Player, IwPhysics::AABB2D>();
-//	Space.SetComponentData<IW::Transform>    (player, iw::vector3(10, 0, 0), iw::vector3::one, iw::quaternion::from_euler_angles(0, 0, 0));
-//	Space.SetComponentData<IW::Model>  (player, &qmodel->Meshes[0], 1U);
-//	Space.SetComponentData<Player>           (player, 10.0f, 100.0f, 0.1666f, 0.1f);
-//	Space.SetComponentData<IwPhysics::AABB2D>(player, iw::vector2(-1), iw::vector2(1));
+//	IW::Entity player = Space->CreateEntity<IW::Transform, IW::Model, Player, IwPhysics::AABB2D>();
+//	Space->SetComponentData<IW::Transform>    (player, iw::vector3(10, 0, 0), iw::vector3::one, iw::quaternion::from_euler_angles(0, 0, 0));
+//	Space->SetComponentData<IW::Model>  (player, &qmodel->Meshes[0], 1U);
+//	Space->SetComponentData<Player>           (player, 10.0f, 100.0f, 0.1666f, 0.1f);
+//	Space->SetComponentData<IwPhysics::AABB2D>(player, iw::vector2(-1), iw::vector2(1));
 //
 //	for (float x = 4; x < 7; x++) {
 //		for (float y = 5; y < 6; y++) {
-//			IW::Entity enemy = Space.CreateEntity<IW::Transform, IW::Model, Enemy, IwPhysics::AABB2D>();
-//			Space.SetComponentData<IW::Transform>    (enemy, iw::vector3(x * 3 - 15, y * 3 - 15, 0));
-//			Space.SetComponentData<IW::Model>  (enemy, &qmodel->Meshes[0], 1U);
-//			Space.SetComponentData<Enemy>            (enemy, SPIN, 3.0f, 0.05f, 0.025f, 0.025f);
-//			Space.SetComponentData<IwPhysics::AABB2D>(enemy, iw::vector2(-1), iw::vector2(1));
+//			IW::Entity enemy = Space->CreateEntity<IW::Transform, IW::Model, Enemy, IwPhysics::AABB2D>();
+//			Space->SetComponentData<IW::Transform>    (enemy, iw::vector3(x * 3 - 15, y * 3 - 15, 0));
+//			Space->SetComponentData<IW::Model>  (enemy, &qmodel->Meshes[0], 1U);
+//			Space->SetComponentData<Enemy>            (enemy, SPIN, 3.0f, 0.05f, 0.025f, 0.025f);
+//			Space->SetComponentData<IwPhysics::AABB2D>(enemy, iw::vector2(-1), iw::vector2(1));
 //		}
 //	}
 //
@@ -148,26 +148,26 @@
 //
 //void GameLayer::PostUpdate() {
 //	line->Vertices[1] *= iw::quaternion::from_euler_angles(0, 0, IW::Time::DeltaTime());
-//	line->Update(Renderer.Device);
+//	line->Update(Renderer->Device);
 //
-//	for (auto camera : Space.Query<IW::CameraController>()) {
+//	for (auto camera : Space->Query<IW::CameraController>()) {
 //		auto [controller] = camera.Components.TieTo<IW::CameraController>();
 //		
-//		Renderer.BeginScene(controller->Camera);
+//		Renderer->BeginScene(controller->Camera);
 //
-//		for (auto entity : Space.Query<IW::Transform, IW::Model>()) {
+//		for (auto entity : Space->Query<IW::Transform, IW::Model>()) {
 //			auto [transform, model] = entity.Components.Tie<ModelComponents>();
 //			for (int i = 0; i < model->MeshCount; i++) {
-//				Renderer.DrawMesh(transform, model->Meshes);
+//				Renderer->DrawMesh(transform, model->Meshes);
 //			}
 //		}
 //
-//		for (auto entity : Space.Query<IW::Transform, Bullet>()) {
+//		for (auto entity : Space->Query<IW::Transform, Bullet>()) {
 //			auto [transform] = entity.Components.TieTo<IW::Transform>();
-//			Renderer.DrawMesh(transform, line);
+//			Renderer->DrawMesh(transform, line);
 //		}
 //
-//		Renderer.EndScene();
+//		Renderer->EndScene();
 //	}
 //}
 //
@@ -180,7 +180,7 @@
 //
 //	ImGui::Text("sdfsdf");
 //
-//	for (auto entity : Space.Query<Player>()) {
+//	for (auto entity : Space->Query<Player>()) {
 //		auto [player] = entity.Components.TieTo<Player>();
 //		
 //		float cooldown = player->DashCooldown + player->DashTime;
@@ -193,14 +193,14 @@
 //	}
 //
 //	int i = 0;
-//	for (auto entity : Space.Query<Bullet>()) {
+//	for (auto entity : Space->Query<Bullet>()) {
 //		++i;
 //	}
 //
 //	ImGui::Text("Bullet count: %i", i);
 //
 //	i = 0;
-//	for (auto entity : Space.Query<Enemy>()) {
+//	for (auto entity : Space->Query<Enemy>()) {
 //		++i;
 //	}
 //

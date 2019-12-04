@@ -15,7 +15,7 @@ inline namespace Graphics {
 		Texture* Textures;
 		size_t TextureCount;
 
-		IW::IFrameBuffer* Frame;
+		IFrameBuffer* Frame;
 
 		RenderTarget(
 			int width,
@@ -24,10 +24,10 @@ inline namespace Graphics {
 			std::initializer_list<TextureFormatType> types);
 
 		void Initialize(
-			const iw::ref<IW::IDevice>& device);
+			const iw::ref<IDevice>& device);
 
 		void Use(
-			const iw::ref<IW::IDevice>& device);
+			const iw::ref<IDevice>& device);
 	};
 }
 }

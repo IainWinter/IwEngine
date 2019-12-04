@@ -2,7 +2,7 @@
 
 namespace IW {
 	Shader::Shader()
-		: Handle(nullptr)
+		: Program(nullptr)
 	{}
 
 	void Shader::AddShader(
@@ -39,7 +39,7 @@ namespace IW {
 			}
 		}
 
-		Handle = iw::ref<IPipeline>(device->CreatePipeline(vertex, fragment, geometry));
+		Program = device->CreatePipeline(vertex, fragment, geometry);
 	}
 }
 

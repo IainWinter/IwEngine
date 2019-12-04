@@ -285,7 +285,7 @@ namespace iw {
 	}
 
 	bool vector3::operator!=(
-		const vector3 & other) const
+		const vector3& other) const
 	{
 		return !operator==(other);
 	}

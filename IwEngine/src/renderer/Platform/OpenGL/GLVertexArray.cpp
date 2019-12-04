@@ -24,8 +24,8 @@ namespace IW {
 		Bind();
 		vb->Bind();
 		
-		unsigned int offset = 0;
-		unsigned int index  = m_buffers.size();
+		unsigned offset = 0;
+		unsigned index  = (unsigned)m_buffers.size();
 		for (auto& element : layout.GetElements()) {
 			glEnableVertexAttribArray(index);
 			glVertexAttribPointer(index, element.Count, element.Type,
@@ -41,7 +41,7 @@ namespace IW {
 
 	void GLVertexArray::UpdateBuffer(
 		size_t index, 
-		size_t size, 
+		unsigned size, 
 		const void* data)
 	{
 		m_buffers[index]->UpdateData(size, data);

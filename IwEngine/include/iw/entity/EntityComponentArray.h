@@ -6,25 +6,29 @@
 
 namespace IW {
 inline namespace ECS {
-	class IWENTITY_API EntityComponentArray {
+	class EntityComponentArray {
 	public:
 		using ChunkListVec = std::vector<ChunkList::iterator>;
 
-		class IWENTITY_API iterator {
+		class iterator {
 		private:
 			ChunkListVec m_itrs;
 			ChunkListVec m_ends;
 			size_t m_index;
 
 		public:
+			IWENTITY_API
 			iterator& operator++();
 
+			IWENTITY_API
 			bool operator==(
 				const iterator& itr);
 
+			IWENTITY_API
 			bool operator!=(
 				const iterator& itr);
 
+			IWENTITY_API
 			EntityComponentData operator*();
 		private:
 			friend class EntityComponentArray;
@@ -39,11 +43,15 @@ inline namespace ECS {
 		ChunkListVec m_ends;
 
 	public:
+		IWENTITY_API
 		EntityComponentArray(
 			ChunkListVec&& begins,
 			ChunkListVec&& ends);
 
+		IWENTITY_API
 		iterator begin();
+
+		IWENTITY_API
 		iterator end();
 	};
 }

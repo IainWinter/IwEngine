@@ -7,15 +7,12 @@
 
 namespace IW {
 inline namespace RenderAPI {
-	class IWRENDERER_API GLVertexArray
+	class GLVertexArray
 		: public IVertexArray
 	{
 	private:
-		struct {
-			std::vector<GLVertexBuffer*>     m_buffers;
-			std::vector<VertexBufferLayout>  m_layouts;
-		};
-
+		std::vector<GLVertexBuffer*>    m_buffers;
+		std::vector<VertexBufferLayout> m_layouts;
 		unsigned int m_renderId;
 
 	public:
@@ -28,7 +25,7 @@ inline namespace RenderAPI {
 
 		void UpdateBuffer(
 			size_t index,
-			size_t size,
+			unsigned size,
 			const void* data);
 
 		void Bind() const;

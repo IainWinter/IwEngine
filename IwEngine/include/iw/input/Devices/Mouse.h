@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Device.h"
-#include "iw/input/Events/InputEvent.h"
 
 namespace IW {
 inline namespace Input {
@@ -15,14 +14,11 @@ inline namespace Input {
 
 	public:
 		MouseBase(
-			InputCallback& callback)
-			: Device(callback)
+			DeviceType type)
+			: Device(type)
 		{}
 
-		virtual ~MouseBase() {}
-
-		virtual void HandleEvent(
-			OsEvent& event) = 0;
+		virtual ~MouseBase() = default;
 
 		static unsigned int Translate(
 			InputName key);
@@ -35,44 +31,32 @@ inline namespace Input {
 		: public MouseBase
 	{
 	public:
-		Mouse(
-			InputCallback& callback)
-			: MouseBase(callback)
+		Mouse()
+			: MouseBase(DeviceType::MOUSE)
 		{}
 
-		virtual ~Mouse() {}
-
-		virtual void HandleEvent(
-			OsEvent& event) = 0;
-
-		static Mouse* Create(
-			InputCallback& callback);
+		virtual ~Mouse() = default;
 
 		static bool ButtonDown(
 			InputName button);
 
 		static bool ButtonUp(
 			InputName button);
+
+		static Mouse* Create();
 	};
 
-#ifdef IW_PLATFORM_WINDOWS
 	class IWINPUT_API RawMouse
 		: public MouseBase
 	{
 	public:
-		RawMouse(
-			InputCallback& callback)
-			: MouseBase(callback)
+		RawMouse()
+			: MouseBase(DeviceType::RAW_MOUSE)
 		{}
 
-		virtual ~RawMouse() {}
+		virtual ~RawMouse() = default;
 
-		virtual void HandleEvent(
-			OsEvent& event) = 0;
-
-		static RawMouse* Create(
-			InputCallback& callback);
+		static RawMouse* Create();
 	};
-#endif
 }
 }

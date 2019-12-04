@@ -35,7 +35,7 @@ inline namespace Graphics {
 
 	public:
 		RenderQueue(
-			IW::IDevice& device);
+			IDevice& device);
 
 		void Push(
 			Operation&& op,

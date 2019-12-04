@@ -17,15 +17,15 @@ inline namespace Engine {
 
 		// Input events
 
-		virtual bool On(IW::MouseWheelEvent& event) = 0;
-		virtual bool On(IW::MouseMovedEvent& event) = 0;
-		virtual bool On(IW::MouseButtonEvent& event) = 0;
-		virtual bool On(IW::KeyEvent& event) = 0;
-		virtual bool On(IW::KeyTypedEvent& event) = 0;
+		virtual bool On(MouseWheelEvent& e) = 0;
+		virtual bool On(MouseMovedEvent& e) = 0;
+		virtual bool On(MouseButtonEvent& e) = 0;
+		virtual bool On(KeyEvent& e) = 0;
+		virtual bool On(KeyTypedEvent& e) = 0;
 
 		// Window events
 
-		virtual bool On(IW::WindowResizedEvent& event) = 0;
+		virtual bool On(WindowResizedEvent& e) = 0;
 
 		virtual const char* Name() const = 0;
 	};
@@ -41,15 +41,15 @@ inline namespace Engine {
 		std::queue<size_t> m_delete; // Probly make it so space can queue component creation at the ComponentArray level because of templated bs
 
 	protected:
-		IW::Space& Space;
-		IW::Graphics::Renderer& Renderer;
+		iw::ref<Space>    Space;
+		iw::ref<Renderer> Renderer;
 
 		virtual void Update(
-			IW::EntityComponentArray& view)
+			EntityComponentArray& view)
 		{}
 
 		virtual void FixedUpdate(
-			IW::EntityComponentArray& view)
+			EntityComponentArray& view)
 		{}
 
 		void QueueDestroyEntity(
@@ -59,12 +59,8 @@ inline namespace Engine {
 		}
 	public:
 		System(
-			IW::Space& space,
-			IW::Graphics::Renderer& renderer,
 			const char* name)
 			: m_name(name)
-			, Space(space)
-			, Renderer(renderer)
 		{}
 
 		virtual ~System() {}
@@ -78,7 +74,7 @@ inline namespace Engine {
 		// These wont have to be copies this is just temp
 
 		void Update() override {
-			IW::EntityComponentArray eca = Space.Query<_cs...>();
+			EntityComponentArray eca = Space->Query<_cs...>();
 			// Break up view into Viewlets to execute on seperate threads
 
 			// Execute threads
@@ -87,13 +83,13 @@ inline namespace Engine {
 			// Execute queues space operations
 			while (!m_delete.empty()) {
 				size_t index = m_delete.front() ;
-				Space.DestroyEntity(index);
+				Space->DestroyEntity(index);
 				m_delete.pop();
 			}
 		}
 
 		void FixedUpdate() override {
-			IW::EntityComponentArray eca = Space.Query<_cs...>();
+			EntityComponentArray eca = Space->Query<_cs...>();
 			// Break up view into Viewlets to execute on seperate threads
 
 			// Execute threads
@@ -102,25 +98,35 @@ inline namespace Engine {
 			// Execute queues space operations
 			while (!m_delete.empty()) {
 				size_t index = m_delete.front();
-				Space.DestroyEntity(index);
+				Space->DestroyEntity(index);
 				m_delete.pop();
 			}
 		}
 
 		// Input events
 
-		virtual bool On(IW::MouseWheelEvent&    event) override { return false; }
-		virtual bool On(IW::MouseMovedEvent&    event) override { return false; }
-		virtual bool On(IW::MouseButtonEvent&   event) override { return false; }
-		virtual bool On(IW::KeyEvent&           event) override { return false; }
-		virtual bool On(IW::KeyTypedEvent&      event) override { return false; }
+		virtual bool On(MouseWheelEvent&    e) override { return false; }
+		virtual bool On(MouseMovedEvent&    e) override { return false; }
+		virtual bool On(MouseButtonEvent&   e) override { return false; }
+		virtual bool On(KeyEvent&           e) override { return false; }
+		virtual bool On(KeyTypedEvent&      e) override { return false; }
 
 		// Window events
 
-		virtual bool On(IW::WindowResizedEvent& event) override { return false; }
+		virtual bool On(WindowResizedEvent& e) override { return false; }
 
 		inline const char* Name() const override {
 			return m_name;
+		}
+	private:
+		friend class Layer;
+
+		inline void SetLayerVars(
+			iw::ref<IW::Space>& space,
+			iw::ref<IW::Renderer>& renderer)
+		{
+			Space = space;
+			Renderer = renderer;
 		}
 	};	
 }

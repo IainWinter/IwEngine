@@ -2,6 +2,8 @@
 
 #include "iw/math/vector3.h"
 
+#undef ERROR
+
 namespace IW {
 	enum LogType {
 		INFO,

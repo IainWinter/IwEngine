@@ -12,7 +12,7 @@ namespace IW {
 	{
 		std::string source = iw::ReadFile(filepath);
 
-		Shader* shader = new Shader();
+		Shader* shader = nullptr;
 
 		size_t index = source.find("#shader");
 		while (index < source.size()) {
@@ -39,6 +39,12 @@ namespace IW {
 			}
 
 			std::string code = source.substr(start, end - start);
+			
+			// Only make this when we need to
+			if (shader == nullptr) {
+				shader = new Shader();
+			}
+
 			shader->AddShader(type, code.c_str());
 
 			LOG_INFO << code;

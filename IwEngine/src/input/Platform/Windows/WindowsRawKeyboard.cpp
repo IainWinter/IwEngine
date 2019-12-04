@@ -5,16 +5,11 @@
 #include <Windows.h>
 
 namespace IW {
-	RawKeyboard* RawKeyboard::Create(
-		InputCallback& callback)
-	{
-		return new WindowsRawKeyboard(callback);
+	RawKeyboard* RawKeyboard::Create() {
+		return new WindowsRawKeyboard();
 	}
 
-	WindowsRawKeyboard::WindowsRawKeyboard(
-		InputCallback& callback)
-		: RawKeyboard(callback)
-	{
+	WindowsRawKeyboard::WindowsRawKeyboard() {
 		RAWINPUTDEVICE rid[1];
 		rid[0].usUsagePage = 1;	  // Generic input device
 		rid[0].usUsage = 6;		  // Keyboard
@@ -26,28 +21,33 @@ namespace IW {
 		}
 	}
 
-	void WindowsRawKeyboard::HandleEvent(
-		OsEvent& event)
+	DeviceInput WindowsRawKeyboard::TranslateOsEvent(
+		const OsEvent& e)
 	{
-		if (event.Message != WM_INPUT) {
-			return;
+		DeviceInput input(DeviceType::RAW_KEYBOARD);
+
+		if (e.Message != WM_INPUT) {
+			return input;
 		}
 
-		RAWINPUT* raw = (RAWINPUT*)event.LParam;
+		RAWINPUT* raw = (RAWINPUT*)e.LParam;
 		if (raw->header.dwType == RIM_TYPEKEYBOARD) {
 			RAWKEYBOARD keyboard = raw->data.keyboard;
 
-			if (keyboard.VKey == 255) return;
+			if (keyboard.VKey == 255) {
+				return input;
+			}
 
-			InputEvent e(KEYBOARD, event.WindowId);
-			e.Name  = Translate(keyboard.VKey);
-			e.State = !(keyboard.Flags & RI_KEY_BREAK);
+			input.Name  = Translate(keyboard.VKey);
+			input.State = !(keyboard.Flags & RI_KEY_BREAK);
 
 			// ways to see if key is toggled, should replace caps system that is in
 			// context rn but that works for now just the states can be out of sync from the keyboard
 
-			Callback(e);
+			return input;
 		}
+
+		return input;
 	}
 }
 #endif

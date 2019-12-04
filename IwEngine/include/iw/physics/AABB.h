@@ -28,7 +28,7 @@ namespace IwPhysics {
 			, Max(center + scale / 2)
 		{}
 
-		V Center() const {
+		inline V Center() const {
 			return (Min + Max) / 2;
 		}
 
@@ -39,9 +39,9 @@ namespace IwPhysics {
 			const AABB& other) const;
 	};
 
-	using AABB2D = AABB<iw::vector2>;
-	using AABB3D = AABB<iw::vector3>;
-	using AABB4D = AABB<iw::vector4>;
+	using AABB2 = AABB<iw::vector2>;
+	using AABB3 = AABB<iw::vector3>;
+	using AABB4 = AABB<iw::vector4>;
 
 	template<>
 	inline bool AABB<iw::vector2>::Intersects(

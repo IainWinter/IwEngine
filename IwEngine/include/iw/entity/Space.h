@@ -8,7 +8,7 @@
 
 namespace IW {
 inline namespace ECS {
-	class IWENTITY_API Space {
+	class Space {
 	private:
 		ComponentManager m_componentManager;
 		ArchetypeManager m_archetypeManager;
@@ -23,6 +23,7 @@ inline namespace ECS {
 			return RegisterComponent(typeid(_c), sizeof(_c));
 		}
 
+		IWENTITY_API
 		iw::ref<Component>& RegisterComponent(
 			ComponentType type,
 			size_t size);
@@ -33,6 +34,7 @@ inline namespace ECS {
 			return GetComponent(typeid(_c));
 		}
 
+		IWENTITY_API
 		iw::ref<Component> GetComponent(
 			ComponentType type);
 
@@ -42,6 +44,7 @@ inline namespace ECS {
 			return MakeQuery({ RegisterComponent<_cs>()... });
 		}
 
+		IWENTITY_API
 		iw::ref<ComponentQuery> MakeQuery(
 			std::initializer_list<iw::ref<Component>> components);
 
@@ -53,6 +56,7 @@ inline namespace ECS {
 			return CreateArchetype({ RegisterComponent<_cs>()... });
 		}
 
+		IWENTITY_API
 		iw::ref<Archetype>& CreateArchetype(
 			std::initializer_list<iw::ref<Component>> components);
 
@@ -64,9 +68,11 @@ inline namespace ECS {
 			return CreateEntity(CreateArchetype<_cs...>());
 		}
 
+		IWENTITY_API
 		Entity CreateEntity(
 			const iw::ref<Archetype>& archetype);
 
+		IWENTITY_API
 		bool DestroyEntity(
 			size_t index); // don't like this but idk how to delete from the iteration if not doing it like this
 
@@ -112,6 +118,7 @@ inline namespace ECS {
 			return Query(MakeQuery<_cs...>());
 		}
 
+		IWENTITY_API
 		EntityComponentArray Query(
 			const iw::ref<ComponentQuery>& query);
 	};

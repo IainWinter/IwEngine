@@ -1,41 +1,28 @@
 #pragma once
 
 #include "iw/input/IwInput.h"
-#include "iw/input/Events/InputEvent.h"
-#include "iw/events/callback.h"
+#include "iw/input/DeviceInput.h"
+#include "iw/common/Events/OSEvents.h"
 #include "iw/util/set/tofrom_set.h"
 
 namespace IW {
 inline namespace Input {
 	using Translation = iw::tofrom_set<unsigned int, InputName>;
 
-	class IWINPUT_API Device
-	{
-	private:
-		InputCallback m_callback;
+	class IWINPUT_API Device {
+	public:
+		DeviceType Type;
 
 	public:
 		Device(
-			InputCallback& callback)
-			: m_callback(callback)
+			DeviceType type)
+			: Type(type)
 		{}
 
-		virtual ~Device() {}
+		virtual ~Device() = default;
 
-		virtual void HandleEvent(
-			OsEvent& event) = 0;
-
-		inline void SetCallback(
-			InputCallback callback)
-		{
-			m_callback = callback;
-		}
-	protected:
-		void Callback(
-			InputEvent& event)
-		{
-			m_callback(event);
-		}
+		virtual DeviceInput TranslateOsEvent(
+			const OsEvent& e) = 0;
 	};
 }
 }

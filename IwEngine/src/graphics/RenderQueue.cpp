@@ -8,7 +8,7 @@
 
 namespace IW {
 	RenderQueue::RenderQueue(
-		IW::IDevice& device)
+		IDevice& device)
 		: QueuedDevice(device)
 		, m_scratch(1024 * 500)
 	{}

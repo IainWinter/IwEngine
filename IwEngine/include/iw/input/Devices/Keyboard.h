@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Device.h"
-#include "iw/input/Events/InputEvent.h"
 
 namespace IW {
 inline namespace Input {
@@ -9,20 +8,17 @@ inline namespace Input {
 		: public Device
 	{
 	protected:
-		// Should just be in Device
-		static Translation translation;
+		static Translation translation; // Should just be in Device
+
 		static Translation CreateTranslation();
 
 	public:
 		KeyboardBase(
-			InputCallback& callback)
-			: Device(callback)
+			DeviceType type)
+			: Device(type)
 		{}
 
-		virtual ~KeyboardBase() {}
-
-		virtual void HandleEvent(
-			OsEvent& event) = 0;
+		virtual ~KeyboardBase() = default;
 
 		static unsigned int Translate(
 			InputName key);
@@ -35,44 +31,32 @@ inline namespace Input {
 		: public KeyboardBase
 	{
 	public:
-		Keyboard(
-			InputCallback& callback)
-			: KeyboardBase(callback)
+		Keyboard()
+			: KeyboardBase(DeviceType::KEYBOARD)
 		{}
 
-		virtual ~Keyboard() {}
-
-		virtual void HandleEvent(
-			OsEvent& event) = 0;
-
-		static Keyboard* Create(
-			InputCallback& callback);
+		virtual ~Keyboard() = default;
 
 		static bool KeyDown(
 			InputName key);
 
 		static bool KeyUp(
 			InputName key);
+
+		static Keyboard* Create();
 	};
 
-#ifdef IW_PLATFORM_WINDOWS
 	class IWINPUT_API RawKeyboard
 		: public KeyboardBase
 	{
 	public:
-		RawKeyboard(
-			InputCallback& callback)
-			: KeyboardBase(callback)
+		RawKeyboard()
+			: KeyboardBase(DeviceType::RAW_KEYBOARD)
 		{}
 
-		virtual ~RawKeyboard() {}
+		virtual ~RawKeyboard() = default;
 
-		virtual void HandleEvent(
-			OsEvent& event) = 0;
-
-		static RawKeyboard* Create(
-			InputCallback& callback);
+		static RawKeyboard* Create();
 	};
-#endif
 }
 }

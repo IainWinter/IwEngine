@@ -9,11 +9,8 @@ inline namespace Input {
 		: public Keyboard
 	{
 	public:
-		WindowsKeyboard(
-			InputCallback& callback);
-
-		void HandleEvent(
-			OsEvent& event);
+		DeviceInput TranslateOsEvent(
+			const OsEvent& e) override;
 	};
 }
 }

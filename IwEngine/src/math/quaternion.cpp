@@ -301,11 +301,11 @@ namespace iw {
 		vector3 forward = (target - eye).normalized();
 		float dot = forward.dot(vector3::unit_z);
 
-		if (iw::almost_equal(dot, -1.0f, 6.0f)) {
+		if (iw::almost_equal(dot, -1.0f, 6)) {
 			return quaternion(up, PI);
 		}
 
-		else if (iw::almost_equal(dot, 1.0f, 6.0f)) {
+		else if (iw::almost_equal(dot, 1.0f, 6)) {
 			return identity;
 		}
 
