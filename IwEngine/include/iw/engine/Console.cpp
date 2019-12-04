@@ -1,4 +1,5 @@
 #include "Console.h"
+#include <sstream>
 
 namespace IW {
 	Console::Console(
@@ -17,13 +18,13 @@ namespace IW {
 	void Console::HandleCommand(
 		const std::string& command)
 	{
-
+		AllocCommand(command);
 	}
 
 	void Console::QueueCommand(
 		const std::string& command)
 	{
-
+		
 	}
 
 	void Console::ExecuteQueue() {
@@ -34,5 +35,17 @@ namespace IW {
 		}
 
 		m_alloc.reset();
+	}
+
+	void Console::AllocCommand(
+		const std::string& command)
+	{
+		std::vector<std::string> tokens;
+
+		std::string token;
+		std::stringstream stream(command);
+		while (std::getline(stream, token, ' ')) {
+			tokens.push_back(token);
+		}
 	}
 }

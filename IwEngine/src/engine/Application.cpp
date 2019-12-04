@@ -24,6 +24,8 @@ namespace IW {
 		Bus   = std::make_shared<iw::eventbus>();
 		Input = std::make_shared<InputManager>(Bus);
 
+		Console = std::make_shared<IW::Console>(std::bind(&Application::HandleCommand, this));
+
 		PushOverlay<ImGuiLayer>();
 		PushOverlay<DebugLayer>();
 	}
@@ -226,5 +228,11 @@ namespace IW {
 		else {
 			m_layers.DispatchEvent(e);
 		}
+	}
+
+	bool Application::HandleCommand(
+		const Command& command)
+	{
+		LOG_INFO << command.Verb;
 	}
 }

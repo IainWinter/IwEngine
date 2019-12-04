@@ -58,7 +58,8 @@ inline namespace Engine {
 
 		// operator <<
 	private:
-		
+		void AllocCommand(
+			const std::string& command);
 	};
 }
 }

@@ -1,9 +1,14 @@
 #pragma once
 
+#include "iw/physics/IwPhysics.h"
 #include "iw/physics/AABB.h"
 
 namespace IW  {
 inline namespace Physics {
+	template<
+		typename V>
+	struct SphereCollider;
+
 	template<
 		typename V>
 	struct Collider {
@@ -12,11 +17,13 @@ inline namespace Physics {
 
 		IWPHYSICS_API
 		virtual bool TestCollision(
-			/*BoxCollider<V> */) const = 0;
+			/*BoxCollider<V> */,
+			V* resolve = nullptr) const = 0;
 
 		IWPHYSICS_API
 		virtual bool TestCollision(
-			/*SphereCollider<V> */) const = 0;
+			SphereCollider<V> other,
+			V* resolve = nullptr) const = 0;
 
 		IWPHYSICS_API
 		virtual bool TestCollision(

@@ -33,7 +33,7 @@ inline namespace Input {
 			float height = NO_HEIGHT);
 
 		template<
-			typename _D>
+			typename D>
 		iw::ref<Device>& CreateDevice() {
 			LOG_WARNING << "Attempted to create invalid device!";
 			assert(false);

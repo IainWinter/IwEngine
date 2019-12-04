@@ -5,14 +5,14 @@
 
 namespace IW {
 	App::App() {
-		iw::ref<Context>& context = Input->CreateContext("Sandbox");
-		
-		context = Input->GetContex("Sandbox");
+		//iw::ref<Context>& context = Input->CreateContext("Sandbox");
+		//
+		//context = Input->GetContex("Sandbox");
 
-		Input->MapButton("Sandbox", IW::SPACE, "+jump");
-		Input->MapButton("Sandbox", IW::SPACE, "+jump");
+		//Input->MapButton("Sandbox", IW::SPACE, "+jump");
+		//Input->MapButton("Sandbox", IW::SPACE, "+jump");
 
-		context.MapButton(IW::SPACE, "+jump");
+		//context.MapButton(IW::SPACE, "+jump");
 
 		//auto& m  = Input->CreateDevice<Mouse>();
 		//auto& rm = Input->CreateDevice<RawMouse>();
@@ -24,6 +24,10 @@ namespace IW {
 
 		PushLayer<ToolLayer>();
 		PushLayer<SandboxLayer>();
+
+		std::string s = "resize_window 100 100";
+
+		Console->HandleCommand(s);
 	}
 
 	int App::Initialize(
