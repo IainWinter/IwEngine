@@ -13,11 +13,7 @@ inline namespace Physics {
 	struct BoxCollider
 		: Collider<V>
 	{
-	private:
-		const size_t PointCount = impl::GetNumPoints<V>() + 1;
-
-	public:
-		V Points[PointCount];
+		V Center;
 		float Scale;
 
 		BoxCollider(
@@ -47,10 +43,5 @@ inline namespace Physics {
 			return new AABB<V>(Center, Scale);
 		}
 	};
-}
-}
-
-inline namespace Physics {
-
 }
 }
