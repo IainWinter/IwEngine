@@ -6,24 +6,19 @@
 #include <type_traits>
 
 namespace IW {
+namespace Physics {
 namespace impl {
-inline namespace Physics {
 	template<
 		typename V>
 	struct BoxCollider
 		: Collider<V>
 	{
-		V Center
 
-		V[3] Points;
-
-		float Scale;
+		V* Points;
 
 		BoxCollider(
-			V center,
-			float scale)
-			: Center(center)
-			, Scale(scale)
+			V* points)
+			: Points(points)
 		{
 			Bounds = AABB<V>(Center, scale);
 		}
@@ -45,6 +40,22 @@ inline namespace Physics {
 		AABB<V> GetAABB() const override {
 			return new AABB<V>(Center, Scale);
 		}
+
+		void ExtrapolatePoints(
+			V points
+		)
+		{
+
+		}
+
 	};
 }
+
+	using BoxCollider2 = impl::BoxCollider<iw::vector2>;
+	using BoxCollider = impl::BoxCollider<iw::vector3>;
+	using BoxCollider4 = impl::BoxCollider<iw::vector4>;
+}
+
+	using namespace Physics;
+
 }
