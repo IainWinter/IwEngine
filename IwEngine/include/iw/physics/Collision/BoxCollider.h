@@ -1,7 +1,9 @@
 #pragma once
+
 #include "Collider.h"
 #include "iw/math/vector3.h"
 #include "iw/physics/Collision/CollisionMath/CollisionTests.h"
+#include <type_traits>
 
 namespace IW {
 namespace Physics {
@@ -11,8 +13,11 @@ namespace impl {
 	struct BoxCollider
 		: Collider<V>
 	{
-		
-		V Center;
+	private:
+		const size_t PointCount = impl::GetNumPoints<V>() + 1;
+
+	public:
+		V Points[PointCount];
 		float Scale;
 
 		BoxCollider(
@@ -44,9 +49,8 @@ namespace impl {
 	};
 }
 }
+
 inline namespace Physics {
-	using BoxCollider2 = impl::BoxCollider<iw::vector2>;
-	using BoxCollider = impl::BoxCollider<iw::vector3>;
-	using BoxCollider4  = impl::BoxCollider<iw::vector4>;
+
 }
 }

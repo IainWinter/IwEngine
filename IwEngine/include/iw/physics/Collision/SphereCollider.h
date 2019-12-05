@@ -12,7 +12,7 @@ namespace impl {
 	struct SphereCollider
 		: Collider<V>
 	{
-		V Center; 
+		V Center;
 		float Radius;
 
 		SphereCollider(
@@ -41,8 +41,8 @@ namespace impl {
 }
 
 inline namespace Physics {
-	using SphereCollider2 = impl::SphereCollider<iw::vector2>;
-	using SphereCollider = impl::SphereCollider<iw::vector3>;
+	using CircleCollider  = impl::SphereCollider<iw::vector2>;
+	using SphereCollider  = impl::SphereCollider<iw::vector3>;
 	using SphereCollider4 = impl::SphereCollider<iw::vector4>;
 }
 }
