@@ -12,7 +12,7 @@ namespace impl {
 		struct SphereCollider
 			: Collider<V>
 		{
-			V Center;
+			V Center; 
 			float Radius;
 
 			SphereCollider(
