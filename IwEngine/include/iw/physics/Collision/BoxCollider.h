@@ -6,8 +6,8 @@
 #include <type_traits>
 
 namespace IW {
-namespace Physics {
 namespace impl {
+inline namespace Physics {
 	template<
 		typename V>
 	struct BoxCollider

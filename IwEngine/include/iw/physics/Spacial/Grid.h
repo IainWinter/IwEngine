@@ -5,14 +5,14 @@
 #include <unordered_map>
 
 namespace IW {
-inline namespace Physics {
+namespace Physics {
 	template<
 		typename T,
 		typename V = iw::vector3,
 		typename K = int>
 	class Grid {
 	private:
-		using AABB = IW::AABB<V>;
+		using AABB = impl::AABB<V>;
 
 		struct Cell {
 			std::vector<T> Items;
@@ -104,4 +104,6 @@ inline namespace Physics {
 		}
 	};
 }
+
+	using namespace Physics;
 }

@@ -6,7 +6,8 @@
 #include "iw/log/logger.h"
 
 namespace IW {
-inline namespace Physics {
+namespace Physics {
+namespace impl {
 	template<
 		typename V>
 	struct AABB {
@@ -39,11 +40,12 @@ inline namespace Physics {
 		bool Fits(
 			const AABB& other) const;
 	};
-
-	using AABB2 = AABB<iw::vector2>;
-	using AABB3 = AABB<iw::vector3>;
-	using AABB4 = AABB<iw::vector4>;
-
-	
 }
+
+	using AABB2 = impl::AABB<iw::vector2>;
+	using AABB  = impl::AABB<iw::vector3>;
+	using AABB4 = impl::AABB<iw::vector4>;
+}
+
+	using namespace Physics;
 }
