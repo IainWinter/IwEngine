@@ -38,11 +38,11 @@ namespace impl {
 
 	};
 }
-}
 
-inline namespace Physics {
-	using CircleCollider  = impl::SphereCollider<iw::vector2>;
+	using SphereCollider2 = impl::SphereCollider<iw::vector2>;
 	using SphereCollider  = impl::SphereCollider<iw::vector3>;
 	using SphereCollider4 = impl::SphereCollider<iw::vector4>;
 }
+
+	using namespace Physics;
 }

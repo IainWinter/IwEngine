@@ -4,8 +4,8 @@
 #include "iw/physics/Collision/SphereCollider.h"
 
 namespace IW {
-inline namespace Physics {
-inline namespace Algo {
+namespace Physics {
+namespace algo {
 	//template<
 	//	typename V>
 	//bool TestCollision(
@@ -39,4 +39,6 @@ inline namespace Algo {
 	//}
 }
 }
+
+	using namespace Physics;
 }

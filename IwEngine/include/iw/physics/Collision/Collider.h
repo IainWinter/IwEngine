@@ -13,24 +13,21 @@ namespace impl {
 	template<
 		typename V>
 	struct BoxCollider;
-}
-}
 
-inline namespace Physics {
 	template<
 		typename V>
 	struct Collider {
-		AABB<V> Bounds;
+		impl::AABB<V> Bounds;
 		bool Outdated;
 
 		IWPHYSICS_API
 		virtual bool TestCollision(
-			impl::BoxCollider<V> other,
+			IW::impl::BoxCollider<V> other,
 			V* resolve = nullptr) const = 0;
 
 		IWPHYSICS_API
 		virtual bool TestCollision(
-			impl::SphereCollider<V> other,
+			IW::impl::SphereCollider<V> other,
 			V* resolve = nullptr) const = 0;
 
 		//IWPHYSICS_API
@@ -38,7 +35,14 @@ inline namespace Physics {
 		//	/*MeshColliderV */) const = 0;
 
 		IWPHYSICS_API
-		virtual AABB<V> GetAABB() const = 0;
+		virtual IW::impl::AABB<V> GetAABB() const = 0;
 	};
 }
+
+	using Collider2 = impl::Collider<iw::vector2>;
+	using Collider  = impl::Collider<iw::vector3>;
+	using Collider4 = impl::Collider<iw::vector4>;
+}
+
+	using namespace Physics;
 }
