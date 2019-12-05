@@ -55,6 +55,8 @@ namespace IW {
 			case IW::SPACE: movement.y += e.State == 0 ? -1 : 1; break;
 		}
 
+		LOG_INFO << movement;
+
 		return false;
 	}
 
@@ -72,7 +74,7 @@ namespace IW {
 	bool EditorCameraController::On(
 		MouseButtonEvent& e)
 	{
-		if (e.Device | e.Button == RAW_MOUSE | RMOUSE) {
+		if (e.Device == RAW_MOUSE && e.Button == RMOUSE) {
 			speed = e.State ? 50 : 10;
 		}
 

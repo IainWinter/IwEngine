@@ -13,6 +13,8 @@ namespace IW {
 		//Input->MapButton("Sandbox", IW::SPACE, "+jump");
 
 		context->MapButton(IW::SPACE, "+jump");
+		context->MapButton(IW::SHIFT, "-jump");
+		context->MapButton(IW::E    , "use");
 
 		iw::ref<Device> m  = Input->CreateDevice<Mouse>();
 		iw::ref<Device> rm = Input->CreateDevice<RawMouse>();
@@ -49,6 +51,10 @@ namespace IW {
 			LOG_INFO << "Test" 
 				<< " " << command.Tokens[0].Float
 				<< " " << command.Tokens[1].String;
+		}
+
+		else if (command.Verb == "jump") {
+
 		}
 
 		return Application::HandleCommand(command);

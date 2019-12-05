@@ -179,6 +179,7 @@ namespace IW {
 
 		// Swap buffers (Sync)
 		m_window->SwapBuffers();
+		Console->ExecuteQueue(); 
 		Bus->publish();
 	}
 
@@ -200,7 +201,18 @@ namespace IW {
 		iw::event& e)
 	{
 		bool error = false;
-		if (e.Group == iw::val(EventGroup::WINDOW)) {
+		if (e.Group == iw::val(EventGroup::INPUT)) {
+			switch (e.Type) {
+				case iw::val(InputEventType::Command): {
+					InputCommandEvent& ice = e.as<InputCommandEvent>();
+					Console->ExecuteCommand(ice.Command);
+					e.Handled = true;
+					break;
+				}
+			}
+		}
+
+		else if (e.Group == iw::val(EventGroup::WINDOW)) {
 			switch (e.Type) {
 				case Closed: {
 					m_running = false;
@@ -242,6 +254,10 @@ namespace IW {
 			//Renderer->Height = command.Tokens[1].Int;
 		}
 
-		return true;
+		else {
+			LOG_INFO << command.Verb;
+		}
+
+		return false;
 	}
 }

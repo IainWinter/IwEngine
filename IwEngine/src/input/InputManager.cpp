@@ -81,7 +81,29 @@ namespace IW {
 
 			//ActionEvent action = context.Translator(input);
 
-			if (input.Device == KEYBOARD) {
+			auto itr = context.m_commands.find(input.Name);
+			if (itr != context.m_commands.end()) {
+				std::string command = itr->second;
+				if (command.length() > 0) {
+					if (command[0] == '+' || command[0] == '-') {
+						bool positive = command[0] == '+';
+						if (!active) {
+							positive = !positive;
+						}
+
+						std::stringstream cmd;
+						cmd << (positive ? '+' : '-') << command.substr(1);
+						
+						m_bus->send<InputCommandEvent>(cmd.str());
+					}
+
+					else if (active && input.State != lastState) {
+						m_bus->send<InputCommandEvent>(command);
+					}
+				}
+			}
+
+			if (input.Device == KEYBOARD || input.Device == RAW_KEYBOARD) {
 				if (active) {
 					bool shifted = !!context.State[SHIFT];
 					bool    caps = !!context.State.GetLock(CAPS_LOCK);
@@ -97,7 +119,7 @@ namespace IW {
 				}
 			}
 
-			else if (input.Device == MOUSE) {
+			else if (input.Device == MOUSE || input.Device == RAW_MOUSE) {
 				if (input.Name == WHEEL) {
 					m_bus->push<MouseWheelEvent>(input.Device, &context.State, input.State);
 				}

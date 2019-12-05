@@ -78,6 +78,7 @@ inline namespace Engine {
 					case InputEventType::MouseButton: e.Handled = On((MouseButtonEvent&)e); break;
 					case InputEventType::Key:    	    e.Handled = On((KeyEvent&)        e); break;
 					case InputEventType::KeyTyped:    e.Handled = On((KeyTypedEvent&)   e); break;
+					case InputEventType::Command: break;
 					default: error = true;
 				}
 			}

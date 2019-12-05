@@ -9,7 +9,7 @@ inline namespace Engine {
 	enum class InputEventType
 		: short
 	{
-		MouseWheel, MouseMoved, MouseButton, Key, KeyTyped
+		MouseWheel, MouseMoved, MouseButton, Key, KeyTyped, Command
 	};
 
 	struct InputEvent
@@ -25,6 +25,18 @@ inline namespace Engine {
 			: iw::event(iw::val(EventGroup::INPUT), iw::val(type))
 			, Device(device)
 			, InputStates(inputState)
+		{}
+	};
+
+	struct InputCommandEvent
+		: iw::event
+	{
+		std::string Command;
+
+		InputCommandEvent(
+			std::string command)
+			: iw::event(iw::val(EventGroup::INPUT), iw::val(InputEventType::Command))
+			, Command(command)
 		{}
 	};
 
