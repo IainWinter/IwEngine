@@ -48,6 +48,10 @@ inline namespace Engine {
 			iw::event& e);
 
 		IWENGINE_API
+		void ExecuteCommand(
+			const std::string& command);
+
+		IWENGINE_API
 		void QueueCommand(
 			const std::string& command);
 

@@ -17,6 +17,15 @@ namespace IW {
 
 	}
 
+	void Console::ExecuteCommand(
+		const std::string& command)
+	{
+		std::unique_lock<std::mutex> lock(m_mutex);
+
+		Command c = AllocCommand(command);
+		m_handler(c);
+	}
+
 	void Console::QueueCommand(
 		const std::string& command)
 	{

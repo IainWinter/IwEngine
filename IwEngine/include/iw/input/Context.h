@@ -16,8 +16,8 @@ inline namespace Input {
 	private:
 		friend class InputManager;
 
-		std::vector<iw::ref<Device>> Devices;
-		iw::callback<> Translator; // well this could also be somewhere with an event bus or 
+		std::vector<iw::ref<Device>> m_devices;
+		std::unordered_map<InputName, std::string> m_commands; // well this could also be somewhere with an event bus or 
 
 	public:
 		std::string Name;
@@ -25,8 +25,6 @@ inline namespace Input {
 		float Height;
 
 		InputState State;
-
-		Context() = default;
 
 		IWINPUT_API
 		Context(
@@ -36,11 +34,16 @@ inline namespace Input {
 
 		IWINPUT_API
 		void AddDevice(
-			const iw::ref<Device>& device);
+			iw::ref<Device>& device);
 
 		IWINPUT_API
 		void RemoveDevice(
-			const iw::ref<Device>& device);
+			iw::ref<Device>& device);
+
+		IWINPUT_API
+		void MapButton(
+			InputName input,
+			std::string command);
 	};
 }
 }

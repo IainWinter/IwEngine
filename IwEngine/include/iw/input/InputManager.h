@@ -7,6 +7,7 @@
 #include "Devices/Keyboard.h"
 #include "iw/util/memory/smart_pointers.h"
 #include "iw/events/eventbus.h"
+#include <vector>
 
 namespace IW {
 inline namespace Input {
@@ -27,14 +28,14 @@ inline namespace Input {
 			iw::event& e);
 
 		IWINPUT_API
-		iw::ref<Context>& CreateContext(
+		iw::ref<Context> CreateContext(
 			std::string name,
 			float width  = NO_WIDTH,
 			float height = NO_HEIGHT);
 
 		template<
 			typename D>
-		iw::ref<Device>& CreateDevice() {
+		iw::ref<Device> CreateDevice() {
 			LOG_WARNING << "Attempted to create invalid device!";
 			assert(false);
 			return nullptr;
@@ -42,19 +43,19 @@ inline namespace Input {
 
 		template<>
 		IWINPUT_API
-		iw::ref<Device>& CreateDevice<Mouse>();
+		iw::ref<Device> CreateDevice<Mouse>();
 
 		template<>
 		IWINPUT_API
-		iw::ref<Device>& CreateDevice<Keyboard>();
+		iw::ref<Device> CreateDevice<Keyboard>();
 
 		template<>
 		IWINPUT_API
-		iw::ref<Device>& CreateDevice<RawMouse>();
+		iw::ref<Device> CreateDevice<RawMouse>();
 
 		template<>
 		IWINPUT_API
-		iw::ref<Device>& CreateDevice<RawKeyboard>();
+		iw::ref<Device> CreateDevice<RawKeyboard>();
 	private:
 		//bool TryAddDevice(
 		//	iw::ref<Device>& device);

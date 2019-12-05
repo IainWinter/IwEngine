@@ -32,7 +32,7 @@ namespace IW {
 			return;
 		}
 
-		for (iw::ref<Device>& device : context.Devices) {
+		for (iw::ref<Device>& device : context.m_devices) {
 			DeviceInput input = device->TranslateOsEvent(osevent);
 
 			if (input.Name == INPUT_NONE) {
@@ -118,7 +118,7 @@ namespace IW {
 		}
 	}
 
-	iw::ref<Context>& InputManager::CreateContext(
+	iw::ref<Context> InputManager::CreateContext(
 		std::string name,
 		float width,
 		float height)
@@ -140,31 +140,27 @@ namespace IW {
 	}
 
 	template<>
-	iw::ref<Device>& InputManager::CreateDevice<Mouse>() {
+	iw::ref<Device> InputManager::CreateDevice<Mouse>() {
 		iw::ref<Device> device(Mouse::Create());
-		m_devices.push_back(device);
-		return device;
+		return m_devices.emplace_back(device);
 	}
 
 	template<>
-	iw::ref<Device>& InputManager::CreateDevice<Keyboard>() {
+	iw::ref<Device> InputManager::CreateDevice<Keyboard>() {
 		iw::ref<Device> device(Keyboard::Create());
-		m_devices.push_back(device);
-		return device;
+		return m_devices.emplace_back(device);
 	}
 
 	template<>
-	iw::ref<Device>& InputManager::CreateDevice<RawMouse>() {
+	iw::ref<Device> InputManager::CreateDevice<RawMouse>() {
 		iw::ref<Device> device(RawMouse::Create());
-		m_devices.push_back(device);
-		return device;
+		return m_devices.emplace_back(device);
 	}
 
 	template<>
-	iw::ref<Device>& InputManager::CreateDevice<RawKeyboard>() {
+	iw::ref<Device> InputManager::CreateDevice<RawKeyboard>() {
 		iw::ref<Device> device(RawKeyboard::Create());
-		m_devices.push_back(device);
-		return device;
+		return m_devices.emplace_back(device);
 	}
 
 	//bool InputManager::TryAddDevice(

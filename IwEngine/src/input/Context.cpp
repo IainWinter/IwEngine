@@ -11,17 +11,24 @@ namespace IW {
 	{}
 
 	void Context::AddDevice(
-		const iw::ref<Device>& device)
+		iw::ref<Device>& device)
 	{
-		Devices.push_back(device);
+		m_devices.emplace_back(device);
 	}
 
 	void Context::RemoveDevice(
-		const iw::ref<Device>& device)
+		iw::ref<Device>& device)
 	{
-		auto itr = std::find(Devices.begin(), Devices.end(), device);
-		if (itr != Devices.end()) {
-			Devices.erase(itr);
+		auto itr = std::find(m_devices.begin(), m_devices.end(), device);
+		if (itr != m_devices.end()) {
+			m_devices.erase(itr);
 		}
+	}
+
+	void Context::MapButton(
+		InputName input,
+		std::string command)
+	{
+		m_commands[input] = command;
 	}
 }

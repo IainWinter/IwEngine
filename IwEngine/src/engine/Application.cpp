@@ -237,6 +237,9 @@ namespace IW {
 			LOG_INFO << "Resize Window" 
 				<< " " << command.Tokens[0].Int 
 				<< " " << command.Tokens[1].Int;
+
+			//Renderer->Width = command.Tokens[0].Int;
+			//Renderer->Height = command.Tokens[1].Int;
 		}
 
 		return true;
