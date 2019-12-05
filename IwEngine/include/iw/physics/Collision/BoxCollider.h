@@ -7,7 +7,7 @@ namespace IW {
 inline namespace Physics {
 	template<
 		typename V>
-		struct BoxCollider
+	struct BoxCollider
 		: Collider<V>
 	{
 		V Center;
@@ -36,11 +36,9 @@ inline namespace Physics {
 			return Algo::TestCollision(*this, other, resolve);
 		}
 
-		AABB<V> GetAABB() const override
-		{
+		AABB<V> GetAABB() const override {
 			return new AABB<V>(Center, Scale);
 		}
-
 	};
 }
 }

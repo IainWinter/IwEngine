@@ -6,38 +6,37 @@
 namespace IW {
 inline namespace Physics {
 inline namespace Algo {
-	template<
-		typename V>
-	bool TestCollision(
-		const SphereCollider<V> &left,
-		const SphereCollider<V> &right,
-		V *resolve = nullptr)
-	{
-		double r = left.Radius + right.Radius;
-		V d = left.Center - right.Center;
-		if (d.length() < r) {
-			if(resolve != nullptr) *resolve = (d / d.length()) * (r - d.length());
-			return true;
-		}
-		return false;
-	}
+	//template<
+	//	typename V>
+	//bool TestCollision(
+	//	const SphereCollider &left,
+	//	const SphereCollider &right,
+	//	V *resolve = nullptr)
+	//{
+	//	double r = left.Radius + right.Radius;
+	//	V d = left.Center - right.Center;
+	//	if (d.length() < r) {
+	//		if(resolve != nullptr) *resolve = (d / d.length()) * (r - d.length());
+	//		return true;
+	//	}
+	//	return false;
+	//}
 
-	bool TestCollision(
-		const SphereCollider<iw::vector3>& left,
-		const SphereCollider<iw::vector2>& right,
-		iw::vector3* resolve = nullptr)
-	{
-		return false;
-	}
+	//bool TestCollision(
+	//	const SphereCollider& left,
+	//	const SphereCollider2& right,
+	//	iw::vector3* resolve = nullptr)
+	//{
+	//	return false;
+	//}
 
-	bool TestCollision(
-		const BoxCollider<iw::vector2>& left,
-		const BoxCollider<iw::vector2>& right,
-		iw::vector2 *resolve = nullptr)
-	{
-
-	}
-
+	//bool TestCollision(
+	//	const BoxCollider<iw::vector2>& left,
+	//	const BoxCollider<iw::vector2>& right,
+	//	iw::vector2 *resolve = nullptr)
+	//{
+	//	return false;
+	//}
 }
 }
 }

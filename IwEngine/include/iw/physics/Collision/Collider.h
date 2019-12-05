@@ -4,11 +4,19 @@
 #include "iw/physics/AABB.h"
 
 namespace IW  {
-inline namespace Physics {
+namespace Physics {
+namespace impl {
 	template<
 		typename V>
 	struct SphereCollider;
 
+	template<
+		typename V>
+	struct BoxCollider;
+}
+}
+
+inline namespace Physics {
 	template<
 		typename V>
 	struct Collider {
@@ -17,11 +25,12 @@ inline namespace Physics {
 
 		IWPHYSICS_API
 		virtual bool TestCollision(
-			BoxCollider<V> ) const = 0;
+			impl::BoxCollider<V> other,
+			V* resolve = nullptr) const = 0;
 
 		IWPHYSICS_API
 		virtual bool TestCollision(
-			SphereCollider<V> other,
+			impl::SphereCollider<V> other,
 			V* resolve = nullptr) const = 0;
 
 		//IWPHYSICS_API
