@@ -4,12 +4,14 @@
 #include "iw/physics/Collision/CollisionMath/CollisionTests.h"
 
 namespace IW {
-inline namespace Physics {
+namespace Physics {
+namespace impl {
 	template<
 		typename V>
 	struct BoxCollider
 		: Collider<V>
 	{
+		
 		V Center;
 		float Scale;
 
@@ -40,5 +42,11 @@ inline namespace Physics {
 			return new AABB<V>(Center, Scale);
 		}
 	};
+}
+}
+inline namespace Physics {
+	using BoxCollider2 = impl::BoxCollider<iw::vector2>;
+	using BoxCollider = impl::BoxCollider<iw::vector3>;
+	using BoxCollider4  = impl::BoxCollider<iw::vector4>;
 }
 }
