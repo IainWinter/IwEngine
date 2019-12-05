@@ -2,6 +2,7 @@
 
 #include "Layers/ToolLayer.h"
 #include "Layers/SandboxLayer.h"
+#include "Events/ActionEvents.h"
 
 namespace IW {
 	App::App() {
@@ -54,7 +55,11 @@ namespace IW {
 		}
 
 		else if (command.Verb == "jump") {
+			Bus->push<JumpEvent>((bool)command.Active);
+		}
 
+		else if (command.Verb == "use") {
+			//Bus->push<UseEvent>();
 		}
 
 		return Application::HandleCommand(command);

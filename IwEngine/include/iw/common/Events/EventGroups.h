@@ -10,6 +10,7 @@ inline namespace Engine {
 		OS,
 		WINDOW,
 		INPUT,
+		ACTION,
 		NOT_HANDLED
 	};
 }

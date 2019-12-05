@@ -57,8 +57,21 @@ namespace IW {
 			tokens.push_back(token);
 		}
 
-		char* verb = m_strbuf.alloc<char>(tokens[0].size() + 1);
-		strcpy(verb, tokens[0].c_str());
+		char* original = m_strbuf.alloc<char>(tokens[0].size() + 1);
+		strcpy(original, tokens[0].c_str());
+			 
+		int active = -1;
+		char* verb = nullptr;
+		if (tokens[0][0] == '+' || tokens[0][0] == '-') {
+			active = tokens[0][0] == '+';
+			verb = m_strbuf.alloc<char>(tokens[0].size() + 0);
+			strcpy(verb, tokens[0].substr(1).c_str());
+		}
+
+		else {
+			verb = m_strbuf.alloc<char>(tokens[0].size() + 1);
+			strcpy(verb, tokens[0].c_str());
+		}
 
 		Token* ts = nullptr;
 
@@ -114,7 +127,9 @@ namespace IW {
 		}
 
 		Command c {
-			std::string(verb), 
+			std::string(original),
+			std::string(verb),
+			active,
 			tcount - 1,
 			ts
 		};

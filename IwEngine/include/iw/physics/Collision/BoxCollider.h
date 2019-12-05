@@ -30,14 +30,14 @@ namespace impl {
 			const BoxCollider& other,
 			V* resolve = nullptr) const override
 		{
-			return Algo::TestCollision(*this, other, resolve);
+			return algo::TestCollision(*this, other, resolve);
 		}
 
 		bool TestCollision(
 			const SphereCollider& other,
 			V* resolve = nullptr) const override
 		{
-			return Algo::TestCollision(*this, other, resolve);
+			return algo::TestCollision(*this, other, resolve);
 		}
 
 		AABB<V> GetAABB() const override {

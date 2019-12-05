@@ -1,7 +1,7 @@
 #pragma once
 
-#include "EventGroups.h"
 #include "iw/common/iwcommon.h"
+#include "EventGroups.h"
 #include "iw/events/event.h"
 #include "iw/util/enum/val.h"
 
