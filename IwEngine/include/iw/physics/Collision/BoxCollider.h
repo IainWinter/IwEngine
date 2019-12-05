@@ -6,23 +6,24 @@
 #include <type_traits>
 
 namespace IW {
+namespace Physics {
 namespace impl {
-inline namespace Physics {
 	template<
 		typename V>
-	struct BoxCollider
+		struct BoxCollider
 		: Collider<V>
 	{
-		V Center;
-		float Scale;
+	private:
+		const size_t PointCount = impl::GetNumPoints<V>() + 1;
+
+	public:
+		V Points[PointCount];
 
 		BoxCollider(
 			V center,
 			float scale)
-			: Center(center)
-			, Scale(scale)
 		{
-			Bounds = AABB<V>(Center, scale);
+			// gen points
 		}
 
 		bool TestCollision(
@@ -44,4 +45,11 @@ inline namespace Physics {
 		}
 	};
 }
+
+	using BoxCollider2 = impl::BoxCollider<iw::vector2>;
+	using BoxCollider  = impl::BoxCollider<iw::vector3>;
+	using BoxCollider4 = impl::BoxCollider<iw::vector4>;
+}
+
+	using namespace Physics;
 }
