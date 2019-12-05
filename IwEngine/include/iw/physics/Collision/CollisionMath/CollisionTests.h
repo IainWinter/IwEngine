@@ -4,8 +4,8 @@
 #include "iw/physics/Collision/SphereCollider.h"
 
 namespace IW {
-namespace Physics {
-namespace algo {
+inline namespace Physics {
+inline namespace Algo {
 	//template<
 	//	typename V>
 	//bool TestCollision(
@@ -22,21 +22,14 @@ namespace algo {
 	//	return false;
 	//}
 
-	//bool TestCollision(
-	//	const SphereCollider& left,
-	//	const SphereCollider2& right,
-	//	iw::vector3* resolve = nullptr)
-	//{
-	//	return false;
-	//}
-
-	//bool TestCollision(
-	//	const BoxCollider<iw::vector2>& left,
-	//	const BoxCollider<iw::vector2>& right,
-	//	iw::vector2 *resolve = nullptr)
-	//{
-	//	return false;
-	//}
+	//Box2 - Box2
+	bool TestCollision(
+		const BoxCollider<iw::vector2>& left,
+		const BoxCollider<iw::vector2>& right,
+		iw::vector2 *resolve = nullptr)
+	{
+		
+	}
 }
 }
 
