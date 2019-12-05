@@ -13,7 +13,10 @@ namespace impl {
 	struct BoxCollider
 		: Collider<V>
 	{
-		V Center;
+		V Center
+
+		V[3] Points;
+
 		float Scale;
 
 		BoxCollider(
