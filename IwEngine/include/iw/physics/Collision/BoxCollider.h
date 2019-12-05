@@ -1,16 +1,23 @@
 #pragma once
+
 #include "Collider.h"
 #include "iw/math/vector3.h"
 #include "iw/physics/Collision/CollisionMath/CollisionTests.h"
+#include <type_traits>
 
 namespace IW {
-inline namespace Physics {
+namespace Physics {
+namespace impl {
 	template<
 		typename V>
 	struct BoxCollider
 		: Collider<V>
 	{
-		V Center;
+	private:
+		const size_t PointCount = impl::GetNumPoints<V>() + 1;
+
+	public:
+		V Points[PointCount];
 		float Scale;
 
 		BoxCollider(
@@ -40,5 +47,10 @@ inline namespace Physics {
 			return new AABB<V>(Center, Scale);
 		}
 	};
+}
+}
+
+inline namespace Physics {
+
 }
 }
