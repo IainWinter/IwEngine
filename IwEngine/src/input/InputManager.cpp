@@ -94,7 +94,9 @@ namespace IW {
 						std::stringstream cmd;
 						cmd << (positive ? '+' : '-') << command.substr(1);
 						
-						m_bus->send<InputCommandEvent>(cmd.str());
+						if (input.State != lastState) {
+							m_bus->send<InputCommandEvent>(cmd.str());
+						}
 					}
 
 					else if (active && input.State != lastState) {

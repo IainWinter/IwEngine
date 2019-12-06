@@ -1,6 +1,7 @@
-#include "..\..\include\Systems\EditorCameraController.h"
+#include "Systems/EditorCameraController.h"
+#include "Events/ActionEvents.h"
 #include "iw/engine/Time.h"
-#include <imgui\imgui.h>
+#include <imgui/imgui.h>
 
 namespace IW {
 	EditorCameraController::EditorCameraController()
@@ -44,18 +45,13 @@ namespace IW {
 	}
 
 	bool EditorCameraController::On(
-		KeyEvent& e)
+		ActionEvent& e)
 	{
-		switch (e.Button) {
-			case IW::W:     movement.z -= e.State == 0 ? -1 : 1; break;
-			case IW::S:     movement.z += e.State == 0 ? -1 : 1; break;
-			case IW::A:     movement.x -= e.State == 0 ? -1 : 1; break;
-			case IW::D:     movement.x += e.State == 0 ? -1 : 1; break;
-			case IW::SHIFT: movement.y -= e.State == 0 ? -1 : 1; break;
-			case IW::SPACE: movement.y += e.State == 0 ? -1 : 1; break;
+		switch (e.Action) {
+			case iw::val(Actions::JUMP):    movement.y += e.as<ToggleActionEvent>().Active ?  1 : -1; break;
+			case iw::val(Actions::RIGHT):   movement.x += e.as<ToggleActionEvent>().Active ?  1 : -1; break;
+			case iw::val(Actions::FORWARD): movement.z += e.as<ToggleActionEvent>().Active ? -1 :  1; break;
 		}
-
-		LOG_INFO << movement;
 
 		return false;
 	}

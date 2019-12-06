@@ -23,7 +23,7 @@ inline namespace Engine {
 	struct Command {
 		std::string Original;
 		std::string Verb;
-		int Active;
+		bool Active;
 		size_t TokenCount;
 		Token* Tokens; // size is token count
 	};

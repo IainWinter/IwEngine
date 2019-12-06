@@ -15,6 +15,10 @@ namespace IW {
 
 		context->MapButton(IW::SPACE, "+jump");
 		context->MapButton(IW::SHIFT, "-jump");
+		context->MapButton(IW::D    , "+right");
+		context->MapButton(IW::A    , "-right");
+		context->MapButton(IW::W    , "+forward");
+		context->MapButton(IW::S    , "-forward");
 		context->MapButton(IW::E    , "use");
 
 		iw::ref<Device> m  = Input->CreateDevice<Mouse>();
@@ -38,10 +42,6 @@ namespace IW {
 			GetLayer<ImGuiLayer>("ImGui")->BindContext();
 		}
 
-		Console->ExecuteCommand("resize_window 100 100");
-		Console->ExecuteCommand("test 100.4 hello");
-		//Console->ExecuteQueue();
-
 		return err;
 	}
 
@@ -55,11 +55,15 @@ namespace IW {
 		}
 
 		else if (command.Verb == "jump") {
-			Bus->push<JumpEvent>((bool)command.Active);
+			Bus->push<JumpEvent>(command.Active);
 		}
 
-		else if (command.Verb == "use") {
-			//Bus->push<UseEvent>();
+		else if (command.Verb == "right") {
+			Bus->push<RightEvent>(command.Active);
+		}
+
+		else if (command.Verb == "forward") {
+			Bus->push<ForwardEvent>(command.Active);
 		}
 
 		return Application::HandleCommand(command);

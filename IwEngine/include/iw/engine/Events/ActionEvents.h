@@ -20,7 +20,7 @@ namespace Engine {
 		ActionEvent(
 			ActionEventType type,
 			int action)
-			: iw::event(iw::val(EventGroup::INPUT), iw::val(type))
+			: iw::event(iw::val(EventGroup::ACTION), iw::val(type))
 			, Action(action)
 		{}
 	};

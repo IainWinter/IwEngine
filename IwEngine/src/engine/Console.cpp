@@ -60,7 +60,7 @@ namespace IW {
 		char* original = m_strbuf.alloc<char>(tokens[0].size() + 1);
 		strcpy(original, tokens[0].c_str());
 			 
-		int active = -1;
+		bool active = true;
 		char* verb = nullptr;
 		if (tokens[0][0] == '+' || tokens[0][0] == '-') {
 			active = tokens[0][0] == '+';

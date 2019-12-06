@@ -71,7 +71,12 @@ inline namespace Engine {
 			iw::event& e)
 		{
 			bool error = false;
-			if (e.Group == iw::val(EventGroup::INPUT)) {
+
+			if (e.Group == iw::val(EventGroup::ACTION)) {
+				e.Handled = On((ActionEvent&)e);
+			}
+
+			else if (e.Group == iw::val(EventGroup::INPUT)) {
 				switch (e.Type) {
 					case InputEventType::MouseWheel:  e.Handled = On((MouseWheelEvent&)e); break;
 					case InputEventType::MouseMoved:  e.Handled = On((MouseMovedEvent&) e); break;
