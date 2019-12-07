@@ -7,7 +7,7 @@
 #include "iw/log/logger.h"
 
 namespace IW {
-inline namespace ECS {
+namespace ECS {
 	class Space {
 	private:
 		ComponentManager m_componentManager;
@@ -123,4 +123,6 @@ inline namespace ECS {
 			const iw::ref<ComponentQuery>& query);
 	};
 }
+
+	using namespace ECS;
 }

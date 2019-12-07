@@ -5,7 +5,7 @@
 #include <vector>
 
 namespace IW {
-inline namespace ECS {
+namespace ECS {
 	class EntityComponentArray {
 	public:
 		using ChunkListVec = std::vector<ChunkList::iterator>;
@@ -55,4 +55,6 @@ inline namespace ECS {
 		iterator end();
 	};
 }
+
+	using namespace ECS;
 }

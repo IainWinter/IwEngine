@@ -5,7 +5,7 @@
 #include <atomic>
 
 namespace IW {
-inline namespace Engine {
+namespace Engine {
 	template<
 		typename _f>
 	class Task {
@@ -88,4 +88,6 @@ inline namespace Engine {
 		}
 	};
 }
+
+	using namespace Engine;
 }

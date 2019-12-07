@@ -11,7 +11,7 @@
 #include "iw/entity/Space.h"
 
 namespace IW {
-inline namespace Engine {
+namespace Engine {
 	class Application;
 
 	class Layer {
@@ -141,4 +141,6 @@ inline namespace Engine {
 			iw::ref<iw::eventbus> bus);
 	};
 }
+
+	using namespace Engine;
 }

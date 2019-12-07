@@ -3,7 +3,7 @@
 #include "IwRenderer.h"
 
 namespace IW {
-inline namespace RenderAPI {
+namespace RenderAPI {
 	class IWRENDERER_API ITexture {
 	public:
 		virtual ~ITexture() {}
@@ -12,4 +12,6 @@ inline namespace RenderAPI {
 		ITexture() {}
 	};
 }
+
+	using namespace RenderAPI;
 }

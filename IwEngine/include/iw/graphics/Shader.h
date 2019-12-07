@@ -7,7 +7,7 @@
 #include <vector>
 
 namespace IW {
-inline namespace Graphics {
+namespace Graphics {
 	enum ShaderType {
 		VERTEX,
 		GEOMETRY,
@@ -41,4 +41,6 @@ inline namespace Graphics {
 			const iw::ref<IDevice>& device);
 	};
 }
+
+	using namespace Graphics;
 }

@@ -28,7 +28,7 @@ namespace IW {
 	DeviceInput WindowsMouse::TranslateOsEvent(
 		const OsEvent& e)
 	{
-		DeviceInput input(MOUSE);
+		DeviceInput input(DeviceType::MOUSE);
 		switch (e.Message) {
 			case WM_LBUTTONDOWN:
 				input.Name  = LMOUSE;

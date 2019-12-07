@@ -7,7 +7,7 @@
 #include <queue>
 
 namespace IW {
-inline namespace Graphics {
+namespace Graphics {
 	using PIB = iw::potential<IIndexBuffer*>;
 	using PVB = iw::potential<IVertexBuffer*>;
 	using PVA = iw::potential<IVertexArray*>;
@@ -114,4 +114,6 @@ inline namespace Graphics {
 			iw::potential<IComputePipeline*> computePipeline);
 	};
 }
+
+	using namespace Graphics;
 }

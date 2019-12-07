@@ -3,7 +3,7 @@
 #include "iw/util/enum/val.h"
 
 namespace IW {
-inline namespace Engine {
+namespace Engine {
 	enum class EventGroup
 		: short
 	{
@@ -14,4 +14,6 @@ inline namespace Engine {
 		NOT_HANDLED
 	};
 }
+
+	using namespace Engine;
 }

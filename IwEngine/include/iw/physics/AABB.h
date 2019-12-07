@@ -1,8 +1,6 @@
 #pragma once
 
-#include "iw/math/vector2.h"
-#include "iw/math/vector3.h"
-#include "iw/math/vector4.h"
+#include "IwPhysics.h"
 #include "iw/log/logger.h"
 
 namespace IW {
@@ -34,9 +32,11 @@ namespace impl {
 			return (Min + Max) / 2;
 		}
 
+		IWPHYSICS_API
 		bool Intersects(
 			const AABB& other) const;
 
+		IWPHYSICS_API
 		bool Fits(
 			const AABB& other) const;
 	};

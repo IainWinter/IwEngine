@@ -10,7 +10,7 @@
 #include <vector>
 
 namespace IW {
-inline namespace Input {
+namespace Input {
 	class InputManager {
 	private:
 		std::vector<iw::ref<Context>> m_contexts;
@@ -61,4 +61,6 @@ inline namespace Input {
 		//	iw::ref<Device>& device);
 	};
 }
+
+	using namespace Input;
 }

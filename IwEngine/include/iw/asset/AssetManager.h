@@ -9,79 +9,81 @@
 #include <thread>
 
 namespace IW {
-	// Have the asset manager store laoding things, just give ref to loaders to load data into them
-	// 
+// Have the asset manager store laoding things, just give ref to loaders to load data into them
+// 
 
-	inline namespace Asset {
-		class AssetManager {
-		private:
-			std::unordered_map<size_t, IAssetLoader*> m_loaders;
-			//iw::blocking_queue<std::pair<size_t, std::string>> m_toLoad;
-			//std::vector<std::thread> m_threads;
+namespace Asset {
+	class AssetManager {
+	private:
+		std::unordered_map<size_t, IAssetLoader*> m_loaders;
+		//iw::blocking_queue<std::pair<size_t, std::string>> m_toLoad;
+		//std::vector<std::thread> m_threads;
 
-			//void Worker() {
-			//	while (true) {
-			//		auto toLoad = m_toLoad.pop();
-			//		m_loaders.at(toLoad.first)->Load(toLoad.second);
+		//void Worker() {
+		//	while (true) {
+		//		auto toLoad = m_toLoad.pop();
+		//		m_loaders.at(toLoad.first)->Load(toLoad.second);
 
-			//	}
-			//}
+		//	}
+		//}
 
-		public:
-			AssetManager() {}
+	public:
+		AssetManager() {}
 
-			~AssetManager() {
-				for (auto pair : m_loaders) {
-					delete pair.second;
-				}
+		~AssetManager() {
+			for (auto pair : m_loaders) {
+				delete pair.second;
+			}
+		}
+
+		template<
+			typename _l,
+			typename... _args>
+		void SetLoader(
+			_args&&... args)
+		{
+			_l*    loader = new _l(*this, args...);
+			size_t type   = _l::GetType();
+
+			auto itr = m_loaders.find(type);
+			if (itr != m_loaders.end()) {
+				delete itr->second;
+				itr->second = loader;
 			}
 
-			template<
-				typename _l,
-				typename... _args>
-			void SetLoader(
-				_args&&... args)
-			{
-				_l*    loader = new _l(*this, args...);
-				size_t type   = _l::GetType();
+			else {
+				m_loaders.emplace(type, loader);
+			}
+		}
 
-				auto itr = m_loaders.find(type);
-				if (itr != m_loaders.end()) {
-					delete itr->second;
-					itr->second = loader;
-				}
-
-				else {
-					m_loaders.emplace(type, loader);
-				}
+		template<
+			typename _a>
+		iw::ref<_a> Load(
+			std::string filepath)
+		{
+			auto itr = m_loaders.find(typeid(_a).hash_code());
+			if (itr != m_loaders.end()) {
+				return std::static_pointer_cast<_a, void>(itr->second->Load("assets/" + filepath));
 			}
 
-			template<
-				typename _a>
-			iw::ref<_a> Load(
-				std::string filepath)
-			{
-				auto itr = m_loaders.find(typeid(_a).hash_code());
-				if (itr != m_loaders.end()) {
-					return std::static_pointer_cast<_a, void>(itr->second->Load("assets/" + filepath));
-				}
+			return nullptr;
+		}
 
-				return nullptr;
+		template<
+			typename _a>
+		iw::ref<_a> Give(
+			std::string name,
+			_a* asset)
+		{
+			auto itr = m_loaders.find(typeid(_a).hash_code());
+			if (itr != m_loaders.end()) {
+				return std::static_pointer_cast<_a, void>(itr->second->Give("assets/" + name, asset));
 			}
 
-			template<
-				typename _a>
-			iw::ref<_a> Give(
-				std::string name,
-				_a* asset)
-			{
-				auto itr = m_loaders.find(typeid(_a).hash_code());
-				if (itr != m_loaders.end()) {
-					return std::static_pointer_cast<_a, void>(itr->second->Give("assets/" + name, asset));
-				}
+			return nullptr;
+		}
+	};
+}
 
-				return nullptr;
-			}
-		};
-	}
+	using namespace Asset;
 }

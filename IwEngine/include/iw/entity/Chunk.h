@@ -5,7 +5,7 @@
 #include "Entity.h"
 
 namespace IW {
-inline namespace ECS {
+namespace ECS {
 	struct IWENTITY_API Chunk {
 		Chunk* Next;
 		Chunk* Previous;
@@ -54,4 +54,6 @@ inline namespace ECS {
 			size_t index);
 	};
 }
+
+	using namespace ECS;
 }

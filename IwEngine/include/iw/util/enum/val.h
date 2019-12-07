@@ -3,7 +3,7 @@
 #include <type_traits>
 
 namespace iw {
-inline namespace util {
+namespace util {
 	template<
 		typename _e>
 	constexpr auto val(
@@ -12,4 +12,6 @@ inline namespace util {
 		return static_cast<std::underlying_type_t<_e>>(e);
 	}
 }
+
+	using namespace util;
 }

@@ -6,7 +6,7 @@
 #include <vector>
 
 namespace iw {
-inline namespace util {
+namespace util {
 	class IWUTIL_API pool_allocator {
 	public:
 		class page {
@@ -87,4 +87,6 @@ inline namespace util {
 		}
 	};
 }
+
+	using namespace util;
 }

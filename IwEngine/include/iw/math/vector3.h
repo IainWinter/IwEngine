@@ -4,7 +4,7 @@
 #include <ostream>
 
 namespace iw {
-inline namespace math {
+namespace math {
 	struct vector2;
 	struct vector4;
 	struct matrix3;
@@ -193,17 +193,22 @@ inline namespace math {
 		bool operator!=(
 			const vector3& other) const;
 
-		friend IWMATH_API std::ostream& operator<<(
+		IWMATH_API
+		friend std::ostream& operator<<(
 			std::ostream& stream,
 			const vector3& vector);
 
-		friend IWMATH_API vector3 operator+(
+		IWMATH_API
+		friend vector3 operator+(
 			float left,
 			const vector3& right);
 
-		friend IWMATH_API vector3 operator*(
+		IWMATH_API
+		friend vector3 operator*(
 			float left,
 			const vector3& right);
 	};
 }
+
+	using namespace math;
 }

@@ -4,7 +4,7 @@
 #include "iw/input/Devices/Mouse.h"
 
 namespace IW {
-inline namespace Input {
+namespace Input {
 	class IWINPUT_API WindowsRawMouse
 		: public RawMouse
 	{
@@ -19,5 +19,7 @@ inline namespace Input {
 			const OsEvent& e) override;
 	};
 }
+
+	using namespace Input;
 }
 #endif

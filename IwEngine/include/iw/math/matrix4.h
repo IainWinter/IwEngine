@@ -8,7 +8,7 @@
 #include <ostream>
 
 namespace iw {
-inline namespace math {
+namespace math {
 	/**
 	* Represents a 4x4 matrix.
 	*/
@@ -436,9 +436,12 @@ inline namespace math {
 			const vector3& target,
 			const vector3& up);
 
-		friend IWMATH_API std::ostream& operator<<(
+		IWMATH_API
+		friend std::ostream& operator<<(
 			std::ostream& stream,
 			const matrix4& a);
 	};
 }
+
+	using namespace math;
 }

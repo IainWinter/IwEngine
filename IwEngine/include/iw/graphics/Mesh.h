@@ -9,7 +9,7 @@
 #include "iw/util/memory/smart_pointers.h"
 
 namespace IW {
-inline namespace Graphics {
+namespace Graphics {
 	// Honestly have no clue on the best way to seperate this data...
 	// Seems like the worst case is to seperate the data into different VBOS which is whats going on here
 	//    , but idk how bad that actually is cus I like the idea more...
@@ -104,4 +104,6 @@ inline namespace Graphics {
 			const iw::ref<IDevice>& device) const;
 	};
 }
+
+	using namespace Graphics;
 }

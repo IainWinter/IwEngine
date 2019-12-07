@@ -15,7 +15,7 @@
 #include <tuple>
 
 namespace IW {
-inline namespace Graphics {
+namespace Graphics {
 	struct Material {
 	private:
 		enum MaterialPropertyType {
@@ -215,4 +215,6 @@ inline namespace Graphics {
 			size_t typeSize);
 	};
 }
+
+	using namespace Graphics;
 }

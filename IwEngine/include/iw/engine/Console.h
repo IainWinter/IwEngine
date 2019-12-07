@@ -9,7 +9,7 @@
 #include <functional>
 
 namespace IW {
-inline namespace Engine {
+namespace Engine {
 	struct Token {
 		size_t Count;
 
@@ -67,4 +67,6 @@ inline namespace Engine {
 			const std::string& command);
 	};
 }
+
+	using namespace Engine;
 }

@@ -5,7 +5,7 @@
 #include <memory>
 
 namespace IW {
-inline namespace ECS {
+namespace ECS {
 	struct ArchetypeLayout {
 		iw::ref<Component> Component;
 		size_t Offset;
@@ -24,4 +24,6 @@ inline namespace ECS {
 		size_t Hashes[];
 	};
 }
+
+	using namespace ECS;
 }

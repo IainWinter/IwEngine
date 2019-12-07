@@ -5,7 +5,7 @@
 #include "ComponentData.h"
 
 namespace IW {
-inline namespace ECS {
+namespace ECS {
 	struct EntityComponentData {
 		// Entity
 
@@ -15,4 +15,6 @@ inline namespace ECS {
 		ComponentData& Components;
 	};
 }
+
+	using namespace ECS;
 }

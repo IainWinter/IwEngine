@@ -193,19 +193,19 @@ namespace iw {
 	}
 
 	bool vector2::operator==(
-		const vector2 & other) const
+		const vector2& other) const
 	{
 		return almost_equal(x, other.x, 6)
 			&& almost_equal(y, other.y, 6);
 	}
 
 	bool vector2::operator!=(
-		const vector2 & other) const
+		const vector2& other) const
 	{
 		return !operator==(other);
 	}
 
-	std::ostream& iw::operator<<(
+	std::ostream& math::operator<<(
 		std::ostream& ostream,
 		const vector2& vector)
 	{
@@ -214,14 +214,14 @@ namespace iw {
 			<< vector.y << ")";
 	}
 
-	vector2 iw::operator+(
+	vector2 math::operator+(
 		float left,
 		const vector2& right)
 	{
 		return right + left;
 	}
 
-	vector2 iw::operator*(
+	vector2 math::operator*(
 		float left,
 		const vector2& right)
 	{

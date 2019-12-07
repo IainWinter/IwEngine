@@ -7,7 +7,7 @@
 //#include <thread>
 
 namespace IW {
-inline namespace Engine {
+namespace Engine {
 	class ISystem {
 	public:
 		virtual int  Initialize() = 0;
@@ -138,4 +138,6 @@ inline namespace Engine {
 		}
 	};	
 }
+
+	using namespace Engine;
 }

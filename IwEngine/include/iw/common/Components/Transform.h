@@ -6,7 +6,7 @@
 #include "iw/math/matrix4.h"
 
 namespace IW {
-inline namespace Engine {
+namespace Engine {
 	struct IWCOMMON_API Transform {
 		iw::vector3    Position = iw::vector3::zero;
 		iw::vector3    Scale    = iw::vector3::one;
@@ -18,4 +18,6 @@ inline namespace Engine {
 		iw::vector3 Up() const;
 	};
 }
+
+	using namespace Engine;
 }

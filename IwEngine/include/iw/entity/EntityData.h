@@ -5,11 +5,13 @@
 #include "Archetype.h"
 
 namespace IW {
-inline namespace ECS {
+namespace ECS {
 	struct EntityData {
 		Entity Entity;
 		size_t ChunkIndex;
 		iw::ref<Archetype> Archetype;
 	};
 }
+
+	using namespace ECS;
 }

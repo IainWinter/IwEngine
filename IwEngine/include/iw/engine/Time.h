@@ -4,7 +4,7 @@
 #include <chrono>
 
 namespace IW {
-inline namespace Time {
+namespace Time {
 	using TimePoint = std::chrono::time_point<std::chrono::steady_clock>;
 	using Duration  = std::chrono::high_resolution_clock::duration;
 
@@ -18,4 +18,6 @@ inline namespace Time {
 	IWENGINE_API float  DeltaTimeNow();
 	IWENGINE_API float  FixedTime();
 }
+
+	using namespace Time;
 }

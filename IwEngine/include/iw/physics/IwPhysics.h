@@ -9,6 +9,9 @@
 #endif
 
 #include <type_traits>
+#include "iw/math/vector2.h"
+#include "iw/math/vector3.h"
+#include "iw/math/vector4.h"
 
 namespace IW {
 namespace Physics {

@@ -48,9 +48,9 @@ namespace IW {
 		ActionEvent& e)
 	{
 		switch (e.Action) {
-			case iw::val(Actions::JUMP):    movement.y += e.as<ToggleActionEvent>().Active ?  1 : -1; break;
-			case iw::val(Actions::RIGHT):   movement.x += e.as<ToggleActionEvent>().Active ?  1 : -1; break;
-			case iw::val(Actions::FORWARD): movement.z += e.as<ToggleActionEvent>().Active ? -1 :  1; break;
+			case iw::val(Actions::JUMP):    movement.y += e.as<ToggleEvent>().Active ?  1 : -1; break;
+			case iw::val(Actions::RIGHT):   movement.x += e.as<ToggleEvent>().Active ?  1 : -1; break;
+			case iw::val(Actions::FORWARD): movement.z += e.as<ToggleEvent>().Active ? -1 :  1; break;
 		}
 
 		return false;
@@ -59,7 +59,7 @@ namespace IW {
 	bool EditorCameraController::On(
 		MouseMovedEvent& e)
 	{
-		if (e.Device == RAW_MOUSE) {
+		if (e.Device == DeviceType::RAW_MOUSE) {
 			rotation.x = e.DeltaY * 0.0005f;
 			rotation.y = e.DeltaX * 0.0005f; // sens?
 		}
@@ -70,7 +70,7 @@ namespace IW {
 	bool EditorCameraController::On(
 		MouseButtonEvent& e)
 	{
-		if (e.Device == RAW_MOUSE && e.Button == RMOUSE) {
+		if (e.Device == DeviceType::RAW_MOUSE && e.Button == RMOUSE) {
 			speed = e.State ? 50 : 10;
 		}
 

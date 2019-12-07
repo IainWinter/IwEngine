@@ -105,7 +105,9 @@ namespace IW {
 				}
 			}
 
-			if (input.Device == KEYBOARD || input.Device == RAW_KEYBOARD) {
+			if (input.Device == DeviceType::KEYBOARD
+			 || input.Device == DeviceType::RAW_KEYBOARD)
+			{
 				if (active) {
 					bool shifted = !!context.State[SHIFT];
 					bool    caps = !!context.State.GetLock(CAPS_LOCK);
@@ -121,7 +123,9 @@ namespace IW {
 				}
 			}
 
-			else if (input.Device == MOUSE || input.Device == RAW_MOUSE) {
+			else if (input.Device == DeviceType::MOUSE
+				  || input.Device == DeviceType::RAW_MOUSE)
+			{
 				if (input.Name == WHEEL) {
 					m_bus->push<MouseWheelEvent>(input.Device, &context.State, input.State);
 				}

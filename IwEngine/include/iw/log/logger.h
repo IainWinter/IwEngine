@@ -6,7 +6,7 @@
 #include <sstream>
 
 namespace iw {
-inline namespace log {
+namespace log {
 	class IWLOG_API logger {
 	private:
 		struct {
@@ -70,7 +70,10 @@ inline namespace log {
 		}
 	};
 }
+
+	using namespace log;
 }
+
 #define LOG_SINK(_type_, _level_, ...)                               \
 	iw::logger::instance().make_sink<_type_>(_level_, __VA_ARGS__)
 

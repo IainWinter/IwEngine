@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 namespace iw {
-inline namespace util {
+namespace util {
 	template<typename>
 	struct type_traits;
 
@@ -48,4 +48,6 @@ inline namespace util {
 		using difference_type = int64_t;
 	};
 }
+
+	using namespace util;
 }

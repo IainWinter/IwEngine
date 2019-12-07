@@ -15,7 +15,7 @@ namespace Engine {
 	struct ActionEvent
 		: iw::event
 	{
-		int  Action;
+		int Action;
 
 		ActionEvent(
 			ActionEventType type,
@@ -25,12 +25,12 @@ namespace Engine {
 		{}
 	};
 
-	struct ToggleActionEvent
+	struct ToggleEvent
 		: ActionEvent
 	{
 		bool Active;
 
-		ToggleActionEvent(
+		ToggleEvent(
 			int action,
 			bool active)
 			: ActionEvent(ActionEventType::TOGGLE, action)
@@ -38,10 +38,10 @@ namespace Engine {
 		{}
 	};
 
-	struct SingleActionEvent
+	struct SingleEvent
 		: ActionEvent
 	{
-		SingleActionEvent(
+		SingleEvent(
 			int action)
 			: ActionEvent(ActionEventType::SINGLE, action)
 		{}

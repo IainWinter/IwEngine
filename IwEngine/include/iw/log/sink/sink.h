@@ -4,7 +4,7 @@
 #include <string>
 
 namespace iw {
-inline namespace log {
+namespace log {
 	class IWLOG_API sink {
 	protected:
 		loglevel min_level;
@@ -27,4 +27,6 @@ inline namespace log {
 		}
 	};
 }
+
+	using namespace log;
 }

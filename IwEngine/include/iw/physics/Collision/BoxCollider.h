@@ -10,8 +10,9 @@ namespace Physics {
 namespace impl {
 	template<
 		typename V>
-		struct BoxCollider
+	struct BoxCollider
 		: Collider<V>
+		, ITransformable<BoxCollider<V>>
 	{
 	private:
 		const size_t PointCount = impl::GetNumPoints<V>() + 1;
@@ -27,21 +28,31 @@ namespace impl {
 		}
 
 		bool TestCollision(
-			const BoxCollider& other,
+			const BoxCollider<V>& other,
 			V* resolve = nullptr) const override
 		{
 			return algo::TestCollision(*this, other, resolve);
 		}
 
 		bool TestCollision(
-			const SphereCollider& other,
+			const SphereCollider<V>& other,
 			V* resolve = nullptr) const override
 		{
 			return algo::TestCollision(*this, other, resolve);
 		}
 
-		AABB<V> GetAABB() const override {
-			return new AABB<V>(Center, Scale);
+		bool TestRay(
+			Ray<V> ray,
+			V* poi = nullptr) const override
+		{
+			return algo::TestRay(*this, ray, poi);
+		}
+
+		//void Transform(
+		//	const IW::Transform& transform) override;
+
+		inline AABB<V> GetAABB() const override {
+			return AABB<V>(/*Center, Scale*/);
 		}
 	};
 }

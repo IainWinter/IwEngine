@@ -9,7 +9,7 @@
 #include <vector>
 
 namespace IW {
-inline namespace Graphics {
+namespace Graphics {
 	class Renderer {
 	public:
 		int Width;
@@ -55,4 +55,6 @@ inline namespace Graphics {
 			RenderTarget* dest = nullptr);
 	};
 }
+
+	using namespace Graphics;
 }

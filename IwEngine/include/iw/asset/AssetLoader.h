@@ -9,7 +9,7 @@
 #include <assert.h>
 
 namespace IW {
-inline namespace Asset {
+namespace Asset {
 	template<
 		typename _a>
 	class AssetLoader
@@ -110,4 +110,6 @@ inline namespace Asset {
 		}
 	};
 }
+
+	using namespace Asset;
 }

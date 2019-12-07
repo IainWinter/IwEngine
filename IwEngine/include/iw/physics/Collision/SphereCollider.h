@@ -11,6 +11,7 @@ namespace impl {
 		typename V>
 	struct SphereCollider
 		: Collider<V>
+		, ITransformable<SphereCollider<V>>
 	{
 		V Center;
 		float Radius;
@@ -26,7 +27,7 @@ namespace impl {
 			const SphereCollider& other,
 			V* resolve = nullptr) const override
 		{
-			return Algo::TestCollision(*this, other, resolve);
+			return algo::TestCollision(*this, other, resolve);
 		}
 
 		//bool TestCollision(
@@ -35,6 +36,9 @@ namespace impl {
 		//{
 		//	return Algo::TestCollision(*this, other, resolve);
 		//}
+
+				//void Transform(
+		//	const IW::Transform& transform) override;
 
 	};
 }

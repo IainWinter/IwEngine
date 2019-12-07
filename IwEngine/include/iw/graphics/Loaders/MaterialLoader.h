@@ -5,7 +5,7 @@
 #include "iw/asset/AssetLoader.h"
 
 namespace IW {
-inline namespace Graphics {
+namespace Graphics {
 	class MaterialLoader
 		: public AssetLoader<Material>
 	{
@@ -17,5 +17,7 @@ inline namespace Graphics {
 			std::string filepath) override;
 	};
 }
+
+	using namespace Graphics;
 }
 

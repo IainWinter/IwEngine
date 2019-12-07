@@ -6,7 +6,7 @@
 #include <string>
 
 namespace iw {
-inline namespace log {
+namespace log {
 	class IWLOG_API async_sink
 		: public sink
 	{
@@ -39,4 +39,6 @@ inline namespace log {
 			std::string& msg) = 0;
 	};
 }
+
+	using namespace log;
 }

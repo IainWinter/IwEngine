@@ -9,7 +9,7 @@
 #endif
 
 namespace iw {
-inline namespace math {
+namespace math {
 	/**
 	* Pi ~ 3.14
 	*/
@@ -60,4 +60,6 @@ inline namespace math {
 		float b, 
 		unsigned int accuracy);
 }
+
+	using namespace math;
 }

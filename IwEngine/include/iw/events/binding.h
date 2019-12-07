@@ -32,7 +32,7 @@ namespace impl {
 }
 }
 
-inline namespace events {
+namespace events {
 	template<
 		typename _r,
 		typename _t,
@@ -56,4 +56,6 @@ inline namespace events {
 		return std::bind(func, val);
 	}
 }
+
+	using namespace events;
 }

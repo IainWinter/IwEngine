@@ -10,37 +10,37 @@ namespace IW {
 	};
 
 	struct JumpEvent
-		: ToggleActionEvent
+		: ToggleEvent
 	{
 		JumpEvent(
 			bool active)
-			: ToggleActionEvent(iw::val(Actions::JUMP), active)
+			: ToggleEvent(iw::val(Actions::JUMP), active)
 		{}
 	};
 
 	struct RightEvent
-		: ToggleActionEvent
+		: ToggleEvent
 	{
 		RightEvent(
 			bool active)
-			: ToggleActionEvent(iw::val(Actions::RIGHT), active)
+			: ToggleEvent(iw::val(Actions::RIGHT), active)
 		{}
 	};
 
 	struct ForwardEvent
-		: ToggleActionEvent
+		: ToggleEvent
 	{
 		ForwardEvent(
 			bool active)
-			: ToggleActionEvent(iw::val(Actions::FORWARD), active)
+			: ToggleEvent(iw::val(Actions::FORWARD), active)
 		{}
 	};
 
 	struct UseEvent
-		: SingleActionEvent
+		: SingleEvent
 	{
 		UseEvent()
-			: SingleActionEvent(iw::val(Actions::USE))
+			: SingleEvent(iw::val(Actions::USE))
 		{}
 	};
 }

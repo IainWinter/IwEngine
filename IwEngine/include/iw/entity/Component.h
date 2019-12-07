@@ -6,7 +6,7 @@
 #include <vector>
 
 namespace IW {
-inline namespace ECS {
+namespace ECS {
 	using ComponentType = std::type_index;
 
 	struct IWENTITY_API Component {
@@ -27,4 +27,6 @@ inline namespace ECS {
 		//std::vector<iw::ref<Component>> Any;
 	};
 }
+
+	using namespace ECS;
 }

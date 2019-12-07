@@ -3,10 +3,12 @@
 #include "WindowOptions.h"
 
 namespace IW {
-inline namespace Engine {
+namespace Engine {
 	struct InitOptions {
 		WindowOptions WindowOptions;
 		void*         ImGuiContext; //ImGuiContext
 	};
 }
+
+	using namespace Engine;
 }

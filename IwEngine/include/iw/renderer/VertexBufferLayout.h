@@ -5,7 +5,7 @@
 #include <vector>
 
 namespace IW {
-inline namespace RenderAPI {
+namespace RenderAPI {
 	struct VertexBufferLayoutElement {
 		unsigned int  Type;
 		unsigned int  Count;
@@ -59,4 +59,6 @@ inline namespace RenderAPI {
 	IWRENDERER_API unsigned int GetSizeOfType(
 		unsigned int glType);
 }
+
+	using namespace RenderAPI;
 }

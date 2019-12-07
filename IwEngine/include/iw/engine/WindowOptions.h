@@ -3,7 +3,7 @@
 #include "DisplayState.h"
 
 namespace IW {
-inline namespace Engine {
+namespace Engine {
 	struct WindowOptions {
 		unsigned int Width;
 		unsigned int Height;
@@ -11,4 +11,6 @@ inline namespace Engine {
 		DisplayState State;
 	};
 }
+
+	using namespace Engine;
 }

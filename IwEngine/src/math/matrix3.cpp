@@ -614,7 +614,7 @@ namespace iw {
 		);
 	}
 
-	std::ostream& iw::operator<<(
+	std::ostream& math::operator<<(
 		std::ostream& stream,
 		const matrix3& a)
 	{

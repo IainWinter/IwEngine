@@ -4,7 +4,7 @@
 #include "iw/renderer/Texture.h"
 
 namespace IW {
-inline namespace RenderAPI {
+namespace RenderAPI {
 	class IWRENDERER_API GLTexture
 		: public ITexture
 	{
@@ -46,4 +46,6 @@ inline namespace RenderAPI {
 		void Unbind() const;
 	};
 }
+
+	using namespace RenderAPI;
 }

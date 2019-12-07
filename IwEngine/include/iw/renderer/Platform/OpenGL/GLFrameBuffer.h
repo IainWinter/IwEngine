@@ -4,7 +4,7 @@
 #include "iw/renderer/FrameBuffer.h"
 
 namespace IW {
-inline namespace RenderAPI {
+namespace RenderAPI {
 	class IWRENDERER_API GLFrameBuffer
 		: public IFrameBuffer
 	{
@@ -24,4 +24,6 @@ inline namespace RenderAPI {
 		void Unbind() const;
 	};
 }
+
+	using namespace RenderAPI;
 }

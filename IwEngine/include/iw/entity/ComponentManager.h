@@ -10,7 +10,7 @@
 #include <memory>
 
 namespace IW {
-inline namespace ECS {
+namespace ECS {
 	class ComponentManager {
 	private:
 		std::unordered_map<ComponentType, iw::ref<Component>> m_components;
@@ -55,4 +55,6 @@ inline namespace ECS {
 			const iw::ref<Archetype>& archetype);
 	};
 }
+
+	using namespace ECS;
 }

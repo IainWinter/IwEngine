@@ -3,7 +3,7 @@
 #include "sink.h"
 
 namespace iw {
-inline namespace log {
+namespace log {
 	class IWLOG_API stdout_sink final
 		: public sink
 	{
@@ -30,4 +30,6 @@ inline namespace log {
 		void flush();
 	};
 }
+
+	using namespace log;
 }

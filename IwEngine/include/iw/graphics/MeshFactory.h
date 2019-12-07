@@ -4,7 +4,7 @@
 #include <unordered_map>
 
 namespace IW {
-inline namespace Graphics {
+namespace Graphics {
 	// why is this snek
 	class IWGRAPHICS_API mesh_factory {
 	private:
@@ -39,4 +39,6 @@ inline namespace Graphics {
 			unsigned& current_vert_count);
 	};
 }
+
+	using namespace Graphics;
 }

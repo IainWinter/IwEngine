@@ -4,7 +4,7 @@
 #include <memory>
 
 namespace iw {
-inline namespace util {
+namespace util {
 	template<
 		typename _t>
 	using unique = std::unique_ptr<_t>;
@@ -17,4 +17,6 @@ inline namespace util {
 		typename _t>
 	using weak = std::weak_ptr<_t>;
 }
+
+	using namespace util;
 }

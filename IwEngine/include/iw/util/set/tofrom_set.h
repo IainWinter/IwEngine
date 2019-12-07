@@ -9,7 +9,7 @@
 #include <unordered_map>
 
 namespace iw {
-inline namespace util {
+namespace util {
     template<
 		typename _t,
 		typename _u>
@@ -338,4 +338,6 @@ inline namespace util {
 		}
 	};
 }
+
+	using namespace util;
 }

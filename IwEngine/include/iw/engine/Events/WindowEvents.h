@@ -4,7 +4,7 @@
 #include "iw/events/event.h"
 
 namespace IW {
-inline namespace Engine {
+namespace Engine {
 	enum WindowEventType {
 		Closed, Destroyed, Resized, Moved
 	};
@@ -38,4 +38,6 @@ inline namespace Engine {
 		{}
 	};
 }
+
+	using namespace Engine;
 }

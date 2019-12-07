@@ -5,7 +5,7 @@
 #include <Windows.h>
 
 namespace IW {
-inline namespace Engine {
+namespace Engine {
 	class WindowsWindow
 		: public Window
 	{
@@ -47,4 +47,6 @@ inline namespace Engine {
 			LPARAM lparam);
 	};
 }
+
+	using namespace Engine;
 }

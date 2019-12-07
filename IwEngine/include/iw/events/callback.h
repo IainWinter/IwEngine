@@ -3,7 +3,7 @@
 #include "binding.h"
 
 namespace iw {
-inline namespace events {
+namespace events {
 	template<
 		typename... _args_t>
 	class callback {
@@ -105,4 +105,6 @@ inline namespace events {
 			bind<_r, _t*, _args_t...>(function, instance));
 	}
 }
+
+	using namespace events;
 }

@@ -3,7 +3,7 @@
 #include "Device.h"
 
 namespace IW {
-inline namespace Input {
+namespace Input {
 	class IWINPUT_API MouseBase
 		: public Device
 	{
@@ -59,4 +59,6 @@ inline namespace Input {
 		static RawMouse* Create();
 	};
 }
+
+	using namespace Input;
 }

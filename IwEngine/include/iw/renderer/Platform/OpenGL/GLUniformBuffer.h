@@ -3,7 +3,7 @@
 #include "iw/renderer/UniformBuffer.h"
 
 namespace IW {
-inline namespace RenderAPI {
+namespace RenderAPI {
 	class IWRENDERER_API GLUniformBuffer
 		: public IUniformBuffer
 	{
@@ -31,4 +31,6 @@ inline namespace RenderAPI {
 		void Unbind() const;
 	};
 }
+
+	using namespace RenderAPI;
 }

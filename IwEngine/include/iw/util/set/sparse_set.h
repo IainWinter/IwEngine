@@ -8,7 +8,7 @@
 #include <functional>
 
 namespace iw {
-inline namespace util {
+namespace util {
 	template<typename...>
 	class sparse_set;
 
@@ -789,4 +789,6 @@ inline namespace util {
 		}
 	};
 }
+
+	using namespace util;
 }

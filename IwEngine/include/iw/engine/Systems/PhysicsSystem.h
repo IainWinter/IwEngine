@@ -7,7 +7,7 @@
 #include "iw/engine/Components/Model.h"
 
 namespace IW {
-inline namespace Engine {
+namespace Engine {
 	class PhysicsSystem
 		: public System<Transform, IW::Physics::AABB>
 	{
@@ -20,4 +20,6 @@ inline namespace Engine {
 			EntityComponentArray& view);
 	};
 }
+
+	using namespace Engine;
 }

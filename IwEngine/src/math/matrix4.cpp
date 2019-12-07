@@ -730,7 +730,7 @@ namespace iw {
 		return mat;
 	}
 
-	std::ostream& iw::operator<<(
+	std::ostream& math::operator<<(
 		std::ostream& ostream,
 		const matrix4& a)
 	{

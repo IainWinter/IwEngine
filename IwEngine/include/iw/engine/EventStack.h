@@ -4,7 +4,7 @@
 #include <vector>
 
 namespace IW {
-inline namespace Engine {
+namespace Engine {
 	// T needs to have a 'const char* Name()' function
 	// and bool 'On(Event&)' functions for every event
 	template<
@@ -126,4 +126,6 @@ inline namespace Engine {
 		}
 	};
 }
+
+	using namespace Engine;
 }

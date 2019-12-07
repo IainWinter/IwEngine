@@ -9,7 +9,7 @@
 #endif
 
 namespace iw {
-inline namespace log {
+namespace log {
 	enum loglevel {
 		INFO,
 		DEBUG,
@@ -18,4 +18,6 @@ inline namespace log {
 		TRACE
 	};
 }
+
+	using namespace log;
 }

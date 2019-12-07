@@ -315,7 +315,7 @@ namespace iw {
 		return from_axis_angle(axis, angle);
 	}
 
-	std::ostream& iw::operator<<(
+	std::ostream& math::operator<<(
 		std::ostream& ostream,
 		const quaternion& quaternion)
 	{

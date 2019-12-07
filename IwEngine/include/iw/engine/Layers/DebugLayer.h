@@ -3,7 +3,7 @@
 #include "iw/engine/Layer.h"
 
 namespace IW {
-inline namespace Engine {
+namespace Engine {
 	class DebugLayer
 		: public Layer
 	{
@@ -45,4 +45,6 @@ inline namespace Engine {
 			WindowResizedEvent& e) override;
 	};
 }
+
+	using namespace Engine;
 }

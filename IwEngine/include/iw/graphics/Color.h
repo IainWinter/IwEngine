@@ -4,7 +4,7 @@
 #include "iw/math/vector4.h"
 
 namespace IW {
-inline namespace Graphics {
+namespace Graphics {
 	struct Color {
 		float r, g, b, a;
 
@@ -41,4 +41,6 @@ inline namespace Graphics {
 		}
 	};
 }
+
+	using namespace Graphics;
 }

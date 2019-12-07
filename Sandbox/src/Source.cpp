@@ -29,9 +29,9 @@ class Game
 {
 public:
 	Game() {
-		Input->CreateDevice<IW::Mouse>("Mouse");
+		Input->CreateDevice<IW::Mouse>();
 		//InputManager.CreateDevice<IW::RawMouse>();
-		Input->CreateDevice<IW::RawKeyboard>("rKeyboard");
+		Input->CreateDevice<IW::RawKeyboard>();
 
 		PushLayer<GameLayer3D>();
 	}
@@ -49,7 +49,7 @@ public:
 IW::Application* CreateApplication(
 	IW::InitOptions& options)
 {
-	options.WindowOptions = IW::WindowOptions {
+	options.WindowOptions = {
 		1280,
 		720,
 		true,

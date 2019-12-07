@@ -5,7 +5,7 @@
 #include <tuple>
 
 namespace iw {
-inline namespace util {
+namespace util {
 	template<
 		class _t,
 		class _tuple>
@@ -45,4 +45,6 @@ inline namespace util {
 			+ index<_t, std::tuple<_types...>>::value;
 	};
 }
+
+	using namespace util;
 }
