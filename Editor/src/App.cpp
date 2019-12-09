@@ -4,6 +4,9 @@
 #include "Layers/SandboxLayer.h"
 #include "Events/ActionEvents.h"
 
+#include "iw/physics/Ray.h"
+#include "iw/physics/Collision/SphereCollider.h"
+
 namespace IW {
 	App::App() {
 		iw::ref<Context> context = Input->CreateContext("Sandbox");
@@ -28,6 +31,12 @@ namespace IW {
 		context->AddDevice(m);
 		context->AddDevice(rm);
 		context->AddDevice(k);
+
+		Ray r = iw::vector3(0, 0, -1);
+		r.Transformed(Transform{ iw::vector3(0, 0, 5) });
+
+		SphereCollider col(iw::vector3(0), 1);
+		col.TestRay(r);
 
 		PushLayer<ToolLayer>();
 		PushLayer<SandboxLayer>();
