@@ -32,11 +32,11 @@ namespace IW {
 		context->AddDevice(rm);
 		context->AddDevice(k);
 
-		Ray r = iw::vector3(0, 0, -1);
-		r.Transformed(Transform{ iw::vector3(0, 0, 5) });
+		//Ray r = iw::vector3(0, 0, -1);
+		//r.Transformed(Transform{ iw::vector3(0, 0, 5) });
 
-		SphereCollider col(iw::vector3(0), 1);
-		col.TestRay(r);
+		//SphereCollider col(iw::vector3(0), 1);
+		//col.TestRay(r);
 
 		PushLayer<ToolLayer>();
 		PushLayer<SandboxLayer>();
