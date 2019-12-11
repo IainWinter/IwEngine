@@ -6,8 +6,8 @@
 namespace IW {
 namespace Physics {
 	class CollisionObject {
-	private:
-		Transform m_transform;
+	protected:
+		Transform m_transform;     // Position, rotation, and scale
 
 	public:
 		const Transform& Trans() const;
@@ -15,9 +15,6 @@ namespace Physics {
 		IWPHYSICS_API
 		void SetTrans(
 			const Transform& transform);
-
-		// aabb
-		// transform
 	};
 }
 

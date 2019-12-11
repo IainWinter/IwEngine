@@ -2,21 +2,6 @@
 #include <assert.h>
 
 namespace IW {
-	void DynamicsSpace::SetGravity(
-		const iw::vector3& gravity)
-	{
-		m_gravity = gravity;
-		TrySetGravity();
-	}
-
-	void DynamicsSpace::ApplyGravity() {
-		for (Rigidbody* rigidbody : m_rigidbodies) {
-			if (rigidbody->SimGravity()) {
-				rigidbody->ApplyGravity();
-			}
-		}
-	}
-
 	void DynamicsSpace::AddRigidbody(
 		Rigidbody* rigidbody)
 	{
@@ -41,12 +26,24 @@ namespace IW {
 	void DynamicsSpace::Step(
 		float dt)
 	{
-		ApplyGravity();
-		// do the pos change
-
-		
+		for (Rigidbody* rigidbody : m_rigidbodies) {
+			if (rigidbody->SimGravity()) {
+				rigidbody->ApplyGravity();
+			}
+		}
 
 		ClearForces();
+	}
+
+	const iw::vector3& DynamicsSpace::Gravity() {
+		return m_gravity;
+	}
+
+	void DynamicsSpace::SetGravity(
+		const iw::vector3& gravity)
+	{
+		m_gravity = gravity;
+		TrySetGravity();
 	}
 
 	void DynamicsSpace::TrySetGravity() {

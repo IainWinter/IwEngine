@@ -16,17 +16,6 @@ namespace Physics {
 		iw::vector3 m_gravity;
 
 	public:
-		inline iw::vector3 Gravity() const {
-			return m_gravity;
-		}
-
-		IWPHYSICS_API
-		void SetGravity(
-			const iw::vector3& gravity);
-
-		IWPHYSICS_API
-		void ApplyGravity();
-
 		IWPHYSICS_API
 		virtual void AddRigidbody(
 			Rigidbody* rigidbody);
@@ -38,6 +27,12 @@ namespace Physics {
 		IWPHYSICS_API
 		virtual void Step(
 			float dt);
+
+		const iw::vector3& Gravity();
+
+		IWPHYSICS_API
+		void SetGravity(
+			const iw::vector3& gravity);
 	private:
 		void TrySetGravity();
 		void ClearForces();

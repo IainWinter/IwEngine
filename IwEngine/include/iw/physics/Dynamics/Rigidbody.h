@@ -22,6 +22,11 @@ namespace Physics {
 		IWPHYSICS_API
 		void ApplyGravity();
 
+		// Transforms the rigidbody by its center of mass (no torque)
+		IWPHYSICS_API
+		void TransCenterOfMass(
+			const Transform& to);
+
 		const iw::vector3& Gravity() const;
 		const iw::vector3& Force() const;
 		bool TakesGravity() const;

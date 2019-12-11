@@ -11,6 +11,12 @@ namespace IW {
 		ApplyForce(m_gravity);
 	}
 
+	void Rigidbody::TransCenterOfMass(
+		const Transform& to)
+	{
+		SetTrans(to); // not just this, calc velocity ?
+	}
+
 	const iw::vector3& Rigidbody::Gravity() const {
 		return m_gravity;
 	}
