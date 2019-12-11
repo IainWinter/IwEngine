@@ -4,6 +4,8 @@
 #include "Layers/SandboxLayer.h"
 #include "Events/ActionEvents.h"
 
+#include "iw/physics/Dynamics/DynamicsSpace.h"
+
 namespace IW {
 	App::App() {
 		iw::ref<Context> context = Input->CreateContext("Sandbox");
@@ -29,6 +31,15 @@ namespace IW {
 		context->AddDevice(rm);
 		context->AddDevice(k);
 
+		Rigidbody* object = new Rigidbody();
+		object->SetTakesGravity(true);
+		object->SetSimGravity(true);
+
+		DynamicsSpace space;
+		space.SetGravity(iw::vector3(0, -9.8f, 0));
+		space.AddRigidbody(object);
+		space.Step(1 / 60.0f);
+
 		PushLayer<ToolLayer>();
 		PushLayer<SandboxLayer>();
 	}
@@ -48,13 +59,7 @@ namespace IW {
 	bool App::HandleCommand(
 		const Command& command)
 	{
-		if (command.Verb == "test") {
-			LOG_INFO << "Test" 
-				<< " " << command.Tokens[0].Float
-				<< " " << command.Tokens[1].String;
-		}
-
-		else if (command.Verb == "jump") {
+		if (command.Verb == "jump") {
 			Bus->push<JumpEvent>(command.Active);
 		}
 

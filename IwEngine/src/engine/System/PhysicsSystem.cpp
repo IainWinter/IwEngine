@@ -15,6 +15,7 @@ namespace IW {
 	void PhysicsSystem::Update(
 		EntityComponentArray& eca)
 	{
+
 		// Loop through every 
 
 		//IwPhysics::Grid<size_t, iw::vector2> grid(iw::vector2(10));
