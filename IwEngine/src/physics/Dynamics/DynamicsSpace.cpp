@@ -26,6 +26,20 @@ namespace IW {
 	void DynamicsSpace::Step(
 		float dt)
 	{
+		// predict where the bodies will be
+
+		// sweep the object from the start to the end and test if there is a collision
+
+		// if there is no collision then the prediction was correct
+
+		// if not then go to the broadphase pair cache and see what other bodies it could be colliding with
+
+			// objects should take the average of all these forces? I think that you could just keep adding them together??
+
+
+		// At the end the forces should be cleared
+
+
 		for (Rigidbody* rigidbody : m_rigidbodies) {
 			if (rigidbody->SimGravity()) {
 				rigidbody->ApplyGravity();

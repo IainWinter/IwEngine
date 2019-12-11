@@ -33,6 +33,8 @@ namespace Physics {
 		IWPHYSICS_API
 		void SetGravity(
 			const iw::vector3& gravity);
+	protected:
+		
 	private:
 		void TrySetGravity();
 		void ClearForces();
