@@ -21,6 +21,8 @@ inline namespace Editor {
 	public:
 		EditorCameraController();
 
+
+
 		void Update(
 			EntityComponentArray& eca);
 

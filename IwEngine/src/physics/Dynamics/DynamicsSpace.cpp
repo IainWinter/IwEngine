@@ -1,6 +1,8 @@
 #include "iw/physics/Dynamics/DynamicsSpace.h"
 #include <assert.h>
 
+#include "iw/log/logger.h"
+
 namespace IW {
 	void DynamicsSpace::AddRigidbody(
 		Rigidbody* rigidbody)
@@ -11,6 +13,8 @@ namespace IW {
 		if (rigidbody->TakesGravity()) {
 			rigidbody->SetGravity(m_gravity);
 		}
+
+		AddCollisionObject(rigidbody);
 	}
 
 	void DynamicsSpace::RemoveRigidbody(
@@ -21,11 +25,25 @@ namespace IW {
 
 		assert(itr != m_rigidbodies.end());
 		m_rigidbodies.erase(itr);
+
+		RemoveCollisionObject(rigidbody);
 	}
 
 	void DynamicsSpace::Step(
-		float dt)
+		scalar dt)
 	{
+		for (Rigidbody* rigidbody : m_rigidbodies) {
+			if (rigidbody->SimGravity()) {
+				rigidbody->ApplyGravity();
+			}
+
+			if (TestObject(rigidbody)) {
+				LOG_INFO << "Collision";
+			}
+		}
+
+
+
 		// predict where the bodies will be
 
 		// sweep the object from the start to the end and test if there is a collision
@@ -38,13 +56,8 @@ namespace IW {
 
 
 		// At the end the forces should be cleared
+ 
 
-
-		for (Rigidbody* rigidbody : m_rigidbodies) {
-			if (rigidbody->SimGravity()) {
-				rigidbody->ApplyGravity();
-			}
-		}
 
 		ClearForces();
 	}

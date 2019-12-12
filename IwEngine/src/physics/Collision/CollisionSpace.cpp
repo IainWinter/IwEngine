@@ -18,4 +18,32 @@ namespace IW {
 		assert(itr != m_objects.end());
 		m_objects.erase(itr);
 	}
+
+	// going to need some sort of result to be returned. I like the idea of a lil iwcallback
+
+	bool CollisionSpace::TestObject(
+		CollisionObject* object)
+	{
+		assert(object);
+
+		bool col = false;
+		for (CollisionObject* other : m_objects) {
+			if (object == other) continue;
+
+			col |= TestObjects(object, other);
+
+			// Would invoke callback with results if there is a collision
+		}
+
+		return col;
+	}
+
+	bool CollisionSpace::TestObjects(
+		CollisionObject* object, 
+		CollisionObject* other)
+	{
+		assert(object && other);
+
+		return object->Col()->Bounds().Intersects(other->Col()->Bounds()); // non transformed aabb's always collide
+	}
 }

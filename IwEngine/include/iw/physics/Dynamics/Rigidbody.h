@@ -13,6 +13,7 @@ namespace Physics {
 		iw::vector3 m_force;       // Net force on the Rigidbody
 		bool m_takesGravity;       // If the Rigidbody will use its own gravity or take it from the space
 		bool m_simGravity;         // If the Rigidbody will simulate gravity
+		scalar m_mass;
 
 	public:
 		IWPHYSICS_API

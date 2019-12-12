@@ -1,7 +1,6 @@
 #pragma once
 
 #include "iw/physics/IwPhysics.h"
-#include "iw/physics/ITransformable.h"
 #include "iw/physics/AABB.h"
 #include "iw/physics/Ray.h"
 
@@ -10,39 +9,32 @@ namespace Physics {
 namespace impl {
 	template<
 		typename V>
-	struct SphereCollider;
-
-	template<
-		typename V>
-	struct BoxCollider;
-
-	template<
-		typename V>
 	struct Collider {
-		impl::AABB<V> Bounds;
-		bool Outdated;
+	protected:
+		AABB<V> m_bounds;
+		bool m_outdated;
 
-		IWPHYSICS_API
-		virtual bool TestCollision(
-			BoxCollider<V> other,
-			V* resolve = nullptr) const = 0;
-
-		IWPHYSICS_API
-		virtual bool TestCollision(
-			SphereCollider<V> other,
-			V* resolve = nullptr) const = 0;
-
-		IWPHYSICS_API
-		virtual bool TestRay(
-			Ray<V> ray,
-			V* poi = nullptr) const = 0;
-
+	public:
+		//IWPHYSICS_API
+		//virtual bool TestCollision(
+		//	BoxCollider<V> other,
+		//	V* resolve = nullptr) const = 0;
+		//
+		//IWPHYSICS_API
+		//virtual bool TestCollision(
+		//	SphereCollider<V> other,
+		//	V* resolve = nullptr) const = 0;
+		//
+		//IWPHYSICS_API
+		//virtual bool TestRay(
+		//	Ray<V> ray,
+		//	V* poi = nullptr) const = 0;
+		//
 		//IWPHYSICS_API
 		//virtual bool TestCollision(
 		//	/*MeshColliderV */) const = 0;
 
-		IWPHYSICS_API
-		virtual AABB<V> GetAABB() const = 0;
+		virtual const AABB<V>& Bounds() = 0;
 	};
 }
 

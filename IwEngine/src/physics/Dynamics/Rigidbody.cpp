@@ -14,7 +14,7 @@ namespace IW {
 	void Rigidbody::TransCenterOfMass(
 		const Transform& to)
 	{
-		SetTrans(to); // not just this, calc velocity ?
+		//SetTrans(to); // not just this, calc velocity ?
 	}
 
 	const iw::vector3& Rigidbody::Gravity() const {

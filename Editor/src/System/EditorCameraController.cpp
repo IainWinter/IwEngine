@@ -7,6 +7,7 @@ namespace IW {
 	EditorCameraController::EditorCameraController()
 		: System("Editor Camera Controller")
 		, speed(10)
+		, movement(0.00001f)
 	{}
 
 	void EditorCameraController::Update(

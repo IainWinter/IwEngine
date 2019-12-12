@@ -4,8 +4,6 @@
 #include "Layers/SandboxLayer.h"
 #include "Events/ActionEvents.h"
 
-#include "iw/physics/Dynamics/DynamicsSpace.h"
-
 namespace IW {
 	App::App() {
 		iw::ref<Context> context = Input->CreateContext("Sandbox");
@@ -30,15 +28,6 @@ namespace IW {
 		context->AddDevice(m);
 		context->AddDevice(rm);
 		context->AddDevice(k);
-
-		Rigidbody* object = new Rigidbody();
-		object->SetTakesGravity(true);
-		object->SetSimGravity(true);
-
-		DynamicsSpace space;
-		space.SetGravity(iw::vector3(0, -9.8f, 0));
-		space.AddRigidbody(object);
-		space.Step(1 / 60.0f);
 
 		PushLayer<ToolLayer>();
 		PushLayer<SandboxLayer>();

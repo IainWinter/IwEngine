@@ -15,6 +15,13 @@
 
 namespace IW {
 namespace Physics {
+
+#ifdef IW_DOUBLE_PRECISION
+	using scalar = long double;
+#else
+	using scalar = float;
+#endif
+
 namespace impl {
 	template<
 		typename V>

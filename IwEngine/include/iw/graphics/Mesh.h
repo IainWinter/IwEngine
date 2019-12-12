@@ -14,7 +14,7 @@ namespace Graphics {
 	// Seems like the worst case is to seperate the data into different VBOS which is whats going on here
 	//    , but idk how bad that actually is cus I like the idea more...
 
-	struct IWGRAPHICS_API Mesh {
+	struct Mesh {
 		iw::vector3* Vertices; // should combine
 		iw::vector3* Normals;
 		iw::vector3* Tangents;
@@ -42,64 +42,77 @@ namespace Graphics {
 		//Mesh* Next;
 		//Mesh* Child;
 
+		IWGRAPHICS_API
 		Mesh();
 
+		IWGRAPHICS_API
 		Mesh(
 			MeshTopology topology);
 
+		IWGRAPHICS_API
 		~Mesh();
 
+		IWGRAPHICS_API
 		void SetVertices(
 			unsigned count,
 			iw::vector3* vertices);
 
+		IWGRAPHICS_API
 		void SetNormals(
 			unsigned count,
 			iw::vector3* normals);
 
+		IWGRAPHICS_API
 		void SetTangents(
 			unsigned count,
 			iw::vector3* tangents);
 
+		IWGRAPHICS_API
 		void SetBiTangents(
 			unsigned count,
 			iw::vector3* bitangents);
 
+		IWGRAPHICS_API
 		void SetColors(
 			unsigned count,
 			iw::vector4* colors);
 
+		IWGRAPHICS_API
 		void SetUVs(
 			unsigned count,
 			iw::vector2* uvs);
 
+		IWGRAPHICS_API
 		void SetIndices(
 			unsigned count,
 			unsigned* indices);
 
+		IWGRAPHICS_API
 		void GenNormals();
 
+		IWGRAPHICS_API
 		void GenTangents(); 
 
-		inline void SetMaterial(
-			iw::ref<IW::Material>& material)
-		{
-			Material = material;
-		}
+		IWGRAPHICS_API
+		void SetMaterial(
+			iw::ref<IW::Material>& material);
 
-		inline size_t GetElementCount() {
-			return IndexCount / Topology;
-		}
+		IWGRAPHICS_API
+		size_t GetElementCount();
 
+		IWGRAPHICS_API
 		void Initialize(
 			const iw::ref<IDevice>& device);
 
+		IWGRAPHICS_API
 		void Update(
 			const iw::ref<IDevice>& device);
 
+		IWGRAPHICS_API
 		void Destroy(
 			const iw::ref<IDevice>& device);
 
+		IWGRAPHICS_API
 		void Draw(
 			const iw::ref<IDevice>& device) const;
 	};

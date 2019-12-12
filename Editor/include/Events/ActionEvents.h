@@ -6,7 +6,7 @@ namespace IW {
 	enum class Actions
 		: int
 	{
-		JUMP, RIGHT, FORWARD, USE
+		JUMP, RIGHT, FORWARD, USE, SPAWN_CIRCLE_TEMP
 	};
 
 	struct JumpEvent

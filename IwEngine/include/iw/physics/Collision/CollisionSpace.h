@@ -6,6 +6,9 @@
 #include <vector>
 
 
+// https://www.youtube.com/watch?v=1RphLzpQiJY  Debugging like this could be really cool
+// https://www.youtube.com/watch?v=SHinxAhv1ZE  I now understand the goal of this is to have basically a bunch of these constraint rules be applied on contact points
+
 namespace IW {
 namespace Physics {
 	class CollisionSpace {
@@ -20,6 +23,17 @@ namespace Physics {
 		IWPHYSICS_API
 		virtual void RemoveCollisionObject(
 			CollisionObject* object);
+
+		IWPHYSICS_API
+		bool TestObject(
+			CollisionObject* object);
+
+		IWPHYSICS_API
+		bool TestObjects(
+			CollisionObject* object,
+			CollisionObject* other);
+
+		// Collision calls
 	};
 }
 

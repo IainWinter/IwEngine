@@ -7,12 +7,10 @@
 
 namespace iw {
 namespace log {
-	class IWLOG_API logger {
+	class logger {
 	private:
-		struct {
-			std::vector<sink*> m_sinks;
-			std::string preamble = "[Pream] Start of log...";
-		};
+		std::vector<sink*> m_sinks;
+		std::string preamble = "[Pream] Start of log...";
 
 	public:
 		template<
@@ -40,25 +38,30 @@ namespace log {
 			sink_msg(level, string.str());
 		}
 
+		IWLOG_API
 		void flush();
 
+		IWLOG_API
 		static logger& instance();
 	private:
 		logger() = default;
-		logger(logger const& other) = delete;
-		logger(logger&& other) = delete;
+		logger(logger const&) = delete;
+		logger(logger&&) = delete;
 
+		IWLOG_API
 		void sink_msg(
 			loglevel level,
 			std::string string);
 	};
 
-	class IWLOG_API log_view {
+	class log_view {
 	private:
 		loglevel m_level;
 
 	public:
-		log_view(loglevel level);
+		IWLOG_API
+		log_view(
+			loglevel level);
 
 		template<
 			typename _t>
