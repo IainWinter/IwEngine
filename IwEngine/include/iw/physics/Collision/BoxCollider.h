@@ -23,7 +23,9 @@ namespace impl {
 			V center,
 			float scale)
 		{
-			// gen points
+			for (int i = 0; i < PointCount; i++) {
+				Points[i] = center + (iw::vector4(1)[i] * scale);
+			}
 		}
 
 		//bool TestCollision(
@@ -50,6 +52,10 @@ namespace impl {
 		AABB<V> GetAABB() const override {
 			return AABB<V>(/*Center, Scale*/);
 		}
+
+		V* Translate(
+
+
 	};
 }
 
