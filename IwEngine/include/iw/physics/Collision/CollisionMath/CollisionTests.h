@@ -24,8 +24,8 @@ inline namespace Algo {
 
 	//Box2 - Box2
 	bool TestCollision(
-		const BoxCollider<iw::vector2>& left,
-		const BoxCollider<iw::vector2>& right,
+		const BoxCollider2& left,
+		const BoxCollider2& right,
 		iw::vector2 *resolve = nullptr)
 	{
 		
