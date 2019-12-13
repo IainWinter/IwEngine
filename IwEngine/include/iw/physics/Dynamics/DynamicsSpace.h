@@ -42,8 +42,7 @@ namespace Physics {
 		void PredictTransforms(
 			scalar dt);
 
-		void SweepCastBodies(
-			scalar dt);
+		void SweepCastBodies();
 
 		void ClearForces();
 	};

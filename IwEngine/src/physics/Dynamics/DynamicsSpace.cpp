@@ -36,7 +36,11 @@ namespace IW {
 
 		PredictTransforms(dt);
 
-		//SweepCastBodies();  //CheckCollisions();
+		//SweepPredictedBodies();
+
+
+
+		//SweepCastBodies(); //CheckCollisions();
 
 		//StepTransforms();
 		
@@ -45,7 +49,7 @@ namespace IW {
 		for (Rigidbody* rigidbody : m_rigidbodies) {
 			iw::vector3 vel = dt * rigidbody->Force() / rigidbody->Mass() + rigidbody->Velocity();
 
-			if (rigidbody->Trans()->Position.y <= -10 || TestObject(rigidbody)) {
+			if (rigidbody->Trans()->Position.y <= -10) {
 				rigidbody->ApplyForce(-rigidbody->Mass() * vel / dt);
 			}
 
@@ -111,6 +115,12 @@ namespace IW {
 
 			t.Position += rigidbody->Velocity();
 			rigidbody->SetNextTrans(t);
+		}
+	}
+
+	void DynamicsSpace::SweepCastBodies() {
+		for (Rigidbody* rigidbody : m_rigidbodies) {
+			//ShapeCast(rigidbody, *rigidbody->Trans(), rigidbody->NextTrans());
 		}
 	}
 
