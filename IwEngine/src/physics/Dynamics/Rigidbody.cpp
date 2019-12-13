@@ -8,7 +8,7 @@ namespace IW {
 	}
 
 	void Rigidbody::ApplyGravity() {
-		ApplyForce(m_gravity);
+		ApplyForce(m_gravity * m_mass);
 	}
 
 	void Rigidbody::TransCenterOfMass(
@@ -25,12 +25,24 @@ namespace IW {
 		return m_force;
 	}
 
+	const iw::vector3& Rigidbody::Velocity() const {
+		return m_velocity;
+	}
+
+	scalar Rigidbody::Mass() const {
+		return m_mass;
+	}
+
 	bool Rigidbody::TakesGravity() const {
 		return m_takesGravity;
 	}
 
 	bool Rigidbody::SimGravity() const {
 		return m_simGravity;
+	}
+
+	const Transform& Rigidbody::NextTrans() const {
+		return m_nextTrans;
 	}
 
 	void Rigidbody::SetGravity(
@@ -45,6 +57,18 @@ namespace IW {
 		m_force = force;
 	}
 
+	void Rigidbody::SetVelocity(
+		const iw::vector3& velocity)
+	{
+		m_velocity = velocity;
+	}
+
+	void Rigidbody::SetMass(
+		scalar mass)
+	{
+		m_mass = mass;
+	}
+
 	void Rigidbody::SetTakesGravity(
 		bool takesGravity)
 	{
@@ -55,5 +79,11 @@ namespace IW {
 		bool simGravity)
 	{
 		m_simGravity = simGravity;
+	}
+	
+	void Rigidbody::SetNextTrans(
+		const Transform& nextTrans)
+	{
+		m_nextTrans = nextTrans;
 	}
 }

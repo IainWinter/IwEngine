@@ -24,8 +24,8 @@ namespace impl {
 		AABB(
 			const V& center,
 			float scale)
-			: Min(center - scale / 2)
-			, Max(center + scale / 2)
+			: Min(center - scale)
+			, Max(center + scale) // was / 2 before might be better
 		{}
 
 		inline V Center() const {

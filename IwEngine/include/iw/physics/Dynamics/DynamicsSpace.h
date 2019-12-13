@@ -26,7 +26,7 @@ namespace Physics {
 
 		IWPHYSICS_API
 		virtual void Step(
-			float dt);
+			scalar dt);
 
 		const iw::vector3& Gravity();
 
@@ -37,6 +37,14 @@ namespace Physics {
 		
 	private:
 		void TrySetGravity();
+		void TryApplyGravity();
+
+		void PredictTransforms(
+			scalar dt);
+
+		void SweepCastBodies(
+			scalar dt);
+
 		void ClearForces();
 	};
 }

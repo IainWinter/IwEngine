@@ -44,6 +44,6 @@ namespace IW {
 	{
 		assert(object && other);
 
-		return object->Col()->Bounds().Intersects(other->Col()->Bounds()); // non transformed aabb's always collide
+		return object->Bounds().Intersects(other->Bounds());
 	}
 }

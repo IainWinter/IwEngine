@@ -22,6 +22,9 @@ namespace Physics {
 		IWPHYSICS_API
 		void SetCol(
 			Collider* collider);
+
+		IWPHYSICS_API
+		AABB Bounds() const;
 	};
 }
 

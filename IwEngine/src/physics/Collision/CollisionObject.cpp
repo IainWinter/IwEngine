@@ -20,4 +20,12 @@ namespace IW {
 	{
 		m_collider = collider;
 	}
+
+	AABB CollisionObject::Bounds() const {
+		AABB bounds = Col()->Bounds();
+		bounds.Min += Trans()->Position;
+		bounds.Max += Trans()->Position;
+
+		return bounds;
+	}
 }

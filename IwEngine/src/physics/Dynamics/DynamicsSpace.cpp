@@ -32,15 +32,28 @@ namespace IW {
 	void DynamicsSpace::Step(
 		scalar dt)
 	{
+		TryApplyGravity();
+
+		PredictTransforms(dt);
+
+		//SweepCastBodies();  //CheckCollisions();
+
+		//StepTransforms();
+		
+		//ResolveTransforms();
+		
 		for (Rigidbody* rigidbody : m_rigidbodies) {
-			if (rigidbody->SimGravity()) {
-				rigidbody->ApplyGravity();
+			iw::vector3 vel = dt * rigidbody->Force() / rigidbody->Mass() + rigidbody->Velocity();
+
+			if (rigidbody->Trans()->Position.y <= -10 || TestObject(rigidbody)) {
+				rigidbody->ApplyForce(-rigidbody->Mass() * vel / dt);
 			}
 
-			if (TestObject(rigidbody)) {
-				LOG_INFO << "Collision";
-			}
+			rigidbody->SetVelocity(dt * rigidbody->Force() / rigidbody->Mass() + rigidbody->Velocity());
+
+			rigidbody->Trans()->Position += rigidbody->Velocity();
 		}
+
 
 
 
@@ -52,7 +65,6 @@ namespace IW {
 
 		// if not then go to the broadphase pair cache and see what other bodies it could be colliding with
 
-			// objects should take the average of all these forces? I think that you could just keep adding them together??
 
 
 		// At the end the forces should be cleared
@@ -78,6 +90,27 @@ namespace IW {
 			if (rigidbody->TakesGravity()) {
 				rigidbody->SetGravity(m_gravity);
 			}
+		}
+	}
+
+	void DynamicsSpace::TryApplyGravity() {
+		for (Rigidbody* rigidbody : m_rigidbodies) {
+			if (rigidbody->SimGravity()) {
+				rigidbody->ApplyGravity();
+			}
+		}
+	}
+
+	void DynamicsSpace::PredictTransforms(
+		scalar dt)
+	{
+		for (Rigidbody* rigidbody : m_rigidbodies) {
+			Transform t = *rigidbody->Trans();
+
+			rigidbody->SetVelocity(dt * rigidbody->Force() / rigidbody->Mass() + rigidbody->Velocity());
+
+			t.Position += rigidbody->Velocity();
+			rigidbody->SetNextTrans(t);
 		}
 	}
 

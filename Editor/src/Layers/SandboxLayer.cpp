@@ -23,7 +23,7 @@ namespace IW {
 	{}
 
 	int SandboxLayer::Initialize() {
-		space.SetGravity(iw::vector3(0, -9.8f, 0));
+		space.SetGravity(iw::vector3(0, -1.8f, 0));
 
 		return 0;
 	}
@@ -58,6 +58,8 @@ namespace IW {
 		space.Step(Time::FixedTime());
 	}
 
+	float z = 0;
+
 	bool SandboxLayer::On(
 		ActionEvent& e)
 	{
@@ -70,12 +72,14 @@ namespace IW {
 
 		Space->SetComponentData<Model>(ent, *sphere);
 
-		Transform*      t = Space->SetComponentData<Transform>     (ent, iw::vector3::zero);
+		Transform*      t = Space->SetComponentData<Transform>     (ent, iw::vector3(0, 0, z+= 0.1f));
 		SphereCollider* s = Space->SetComponentData<SphereCollider>(ent, iw::vector3::zero, 1.0f);
 		Rigidbody*      r = Space->SetComponentData<Rigidbody>     (ent);
 
 		r->SetTakesGravity(true);
 		r->SetSimGravity(true);
+		r->SetMass(1);
+		r->ApplyForce(iw::vector3(0, 30, 0));
 		r->SetCol(s);
 		r->SetTrans(t);
 

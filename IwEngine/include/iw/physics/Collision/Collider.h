@@ -34,6 +34,10 @@ namespace impl {
 		//virtual bool TestCollision(
 		//	/*MeshColliderV */) const = 0;
 
+		Collider()
+			: m_outdated(true)
+		{}
+
 		virtual const AABB<V>& Bounds() = 0;
 	};
 }
