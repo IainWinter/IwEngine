@@ -79,7 +79,7 @@ namespace IW {
 		r->SetTakesGravity(true);
 		r->SetSimGravity(true);
 		r->SetMass(1);
-		r->ApplyForce(iw::vector3(0, 30, 0));
+		r->ApplyForce(iw::vector3(cos(z) * 30, 30, sin(z += .5f) * 30));
 		r->SetCol(s);
 		r->SetTrans(t);
 
