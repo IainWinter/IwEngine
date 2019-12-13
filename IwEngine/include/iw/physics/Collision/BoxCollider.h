@@ -10,17 +10,20 @@ namespace Physics {
 namespace impl {
 	template<
 		typename V>
-	struct BoxCollider
+		struct BoxCollider
 		: Collider<V>
 	{
+	private:
+		const size_t PointCount = impl::GetNumPoints<V>() + 1;
 
-		V* Points;
+	public:
+		V Points[PointCount];
 
 		BoxCollider(
-			V* points)
-			: Points(points)
+			V center,
+			float scale)
 		{
-			Bounds = AABB<V>(Center, scale);
+			// gen points
 		}
 
 		bool TestCollision(
@@ -40,22 +43,13 @@ namespace impl {
 		AABB<V> GetAABB() const override {
 			return new AABB<V>(Center, Scale);
 		}
-
-		void ExtrapolatePoints(
-			V points
-		)
-		{
-
-		}
-
 	};
 }
 
 	using BoxCollider2 = impl::BoxCollider<iw::vector2>;
-	using BoxCollider = impl::BoxCollider<iw::vector3>;
+	using BoxCollider  = impl::BoxCollider<iw::vector3>;
 	using BoxCollider4 = impl::BoxCollider<iw::vector4>;
 }
 
 	using namespace Physics;
-
 }
