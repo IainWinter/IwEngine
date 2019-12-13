@@ -5,7 +5,7 @@
 #include "iw/asset/AssetLoader.h"
 
 namespace IW {
-inline namespace Graphics {
+namespace Graphics {
 	class TextureLoader
 		: public AssetLoader<Texture>
 	{
@@ -21,5 +21,7 @@ inline namespace Graphics {
 			Texture* texture) override;
 	};
 }
+
+	using namespace Graphics;
 }
 

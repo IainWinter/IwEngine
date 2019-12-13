@@ -3,7 +3,7 @@
 #include "iw/renderer/PipelineParam.h"
 
 namespace IW {
-inline namespace RenderAPI {
+namespace RenderAPI {
 	class IWRENDERER_API GLPipelineParam
 		: public IPipelineParam
 	{
@@ -71,4 +71,6 @@ inline namespace RenderAPI {
 			const ITexture* texture) override;
 	};
 }
+
+	using namespace RenderAPI;
 }

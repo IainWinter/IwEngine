@@ -3,7 +3,7 @@
 #include "iw/util/iwutil.h"
 
 namespace iw {
-inline namespace util {
+namespace util {
 	class iaction {
 	public:
 		virtual ~iaction() {}
@@ -73,4 +73,6 @@ inline namespace util {
 		}
 	};
 }
+
+	using namespace util;
 }

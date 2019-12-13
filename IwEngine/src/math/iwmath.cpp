@@ -2,7 +2,7 @@
 #include <cmath>
 
 namespace iw {
-inline namespace math {
+namespace math {
 	float fast_inv_sqrt(
 		float x)
 	{
@@ -35,4 +35,6 @@ inline namespace math {
 		return fabsf(a - b) * fast_pow(10, accuracy) < 1; //didn't speed up much at all :c
 	}
 }
+
+	using namespace math;
 }

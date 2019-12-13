@@ -5,7 +5,7 @@
 #include <queue>
 
 namespace iw {
-inline namespace util {
+namespace util {
 	/**
 	* @brief Super simple blocking queue.
 	*
@@ -65,4 +65,6 @@ inline namespace util {
 		}
 	};
 }
+
+	using namespace util;
 }

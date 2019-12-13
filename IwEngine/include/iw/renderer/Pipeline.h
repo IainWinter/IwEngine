@@ -5,7 +5,7 @@
 #include "iw/math/matrix4.h"
 
 namespace IW {
-inline namespace RenderAPI {
+namespace RenderAPI {
 	class IWRENDERER_API IPipeline {
 	public:
 		virtual ~IPipeline() {}
@@ -18,4 +18,6 @@ inline namespace RenderAPI {
 			IUniformBuffer* buffer) = 0;
 	};
 }
+
+	using namespace RenderAPI;
 }

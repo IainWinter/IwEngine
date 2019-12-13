@@ -1,9 +1,11 @@
 #pragma once
 
 namespace IW {
-inline namespace Physics {
+namespace Physics {
 	struct Plane {
 
 	};
 }
+
+	using namespace Physics;
 }

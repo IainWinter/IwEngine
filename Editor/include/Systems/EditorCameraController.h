@@ -21,12 +21,14 @@ inline namespace Editor {
 	public:
 		EditorCameraController();
 
+
+
 		void Update(
 			EntityComponentArray& eca);
 
-		bool On(KeyEvent& e);
-		bool On(MouseMovedEvent& e);
-		bool On(MouseButtonEvent& e);
+		bool On(ActionEvent& e) override;
+		bool On(MouseMovedEvent& e) override;
+		bool On(MouseButtonEvent& e) override;
 	};
 }
 }

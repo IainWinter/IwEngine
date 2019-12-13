@@ -5,7 +5,7 @@
 #include "iw/common/Components/Transform.h"
 
 namespace IW {
-inline namespace Graphics {
+namespace Graphics {
 	struct VertexWeight {
 		unsigned int Index;
 		float Weight;
@@ -18,4 +18,6 @@ inline namespace Graphics {
 		size_t WeightCount;
 	};
 }
+
+	using namespace Graphics;
 }

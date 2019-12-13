@@ -3,7 +3,7 @@
 #include "IwRenderer.h"
 
 namespace IW {
-inline namespace RenderAPI {
+namespace RenderAPI {
 	class IWRENDERER_API IGeometryShader {
 	public:
 		virtual ~IGeometryShader() {}
@@ -11,4 +11,6 @@ inline namespace RenderAPI {
 		IGeometryShader() {}
 	};
 }
+
+	using namespace RenderAPI;
 }

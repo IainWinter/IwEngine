@@ -10,7 +10,7 @@ namespace Physics {
 namespace impl {
 	template<
 		typename V>
-		struct BoxCollider
+	struct BoxCollider
 		: Collider<V>
 	{
 	private:
@@ -28,22 +28,29 @@ namespace impl {
 			}
 		}
 
-		bool TestCollision(
-			const BoxCollider& other,
-			V* resolve = nullptr) const override
-		{
-			return Algo::TestCollision(*this, other, resolve);
-		}
+		//bool TestCollision(
+		//	const BoxCollider<V>& other,
+		//	V* resolve = nullptr) const override
+		//{
+		//	return algo::TestCollision(*this, other, resolve);
+		//}
 
-		bool TestCollision(
-			const SphereCollider& other,
-			V* resolve = nullptr) const override
-		{
-			return Algo::TestCollision(*this, other, resolve);
-		}
+		//bool TestCollision(
+		//	const SphereCollider<V>& other,
+		//	V* resolve = nullptr) const override
+		//{
+		//	return algo::TestCollision(*this, other, resolve);
+		//}
+
+		//bool TestRay(
+		//	Ray<V> ray,
+		//	V* poi = nullptr) const override
+		//{
+		//	return algo::TestRay(*this, ray, poi);
+		//}
 
 		AABB<V> GetAABB() const override {
-			return new AABB<V>(Center, Scale);
+			return AABB<V>(/*Center, Scale*/);
 		}
 
 		V* Translate(

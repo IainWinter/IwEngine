@@ -12,8 +12,10 @@
 #define NO_HEIGHT -1.0f
 
 namespace IW {
-inline namespace Input {
-	enum DeviceType {
+namespace Input {
+	enum class DeviceType
+		: int
+	{
 		MOUSE,      RAW_MOUSE,
 		KEYBOARD,   RAW_KEYBOARD,
 		DEVICE_NONE
@@ -360,4 +362,6 @@ inline namespace Input {
 		return '\0';
 	}
 }
+
+	using namespace Input;
 }

@@ -9,7 +9,7 @@
 #endif
 
 namespace IW {
-inline namespace RenderAPI {
+namespace RenderAPI {
 	enum MeshTopology {
 		POINTS = 1,
 		LINES = 2,
@@ -32,4 +32,6 @@ inline namespace RenderAPI {
 		STENCIL
 	};
 }
+
+	using namespace RenderAPI;
 }

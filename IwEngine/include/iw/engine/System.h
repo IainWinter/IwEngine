@@ -7,13 +7,17 @@
 //#include <thread>
 
 namespace IW {
-inline namespace Engine {
+namespace Engine {
 	class ISystem {
 	public:
 		virtual int  Initialize() = 0;
 		virtual void Destroy() = 0;
 		virtual void Update() = 0;
 		virtual void FixedUpdate() = 0;
+
+		// Action events
+
+		virtual bool On(ActionEvent& e) = 0;
 
 		// Input events
 
@@ -103,13 +107,17 @@ inline namespace Engine {
 			}
 		}
 
+		// Action Events
+
+		virtual bool On(ActionEvent& e) override { return false; }
+
 		// Input events
 
-		virtual bool On(MouseWheelEvent&    e) override { return false; }
-		virtual bool On(MouseMovedEvent&    e) override { return false; }
-		virtual bool On(MouseButtonEvent&   e) override { return false; }
-		virtual bool On(KeyEvent&           e) override { return false; }
-		virtual bool On(KeyTypedEvent&      e) override { return false; }
+		virtual bool On(MouseWheelEvent&  e) override { return false; }
+		virtual bool On(MouseMovedEvent&  e) override { return false; }
+		virtual bool On(MouseButtonEvent& e) override { return false; }
+		virtual bool On(KeyEvent&         e) override { return false; }
+		virtual bool On(KeyTypedEvent&    e) override { return false; }
 
 		// Window events
 
@@ -130,4 +138,6 @@ inline namespace Engine {
 		}
 	};	
 }
+
+	using namespace Engine;
 }

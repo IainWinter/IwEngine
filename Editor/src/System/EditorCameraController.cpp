@@ -1,11 +1,13 @@
-#include "..\..\include\Systems\EditorCameraController.h"
+#include "Systems/EditorCameraController.h"
+#include "Events/ActionEvents.h"
 #include "iw/engine/Time.h"
-#include <imgui\imgui.h>
+#include <imgui/imgui.h>
 
 namespace IW {
 	EditorCameraController::EditorCameraController()
 		: System("Editor Camera Controller")
 		, speed(10)
+		, movement(0.00001f)
 	{}
 
 	void EditorCameraController::Update(
@@ -44,18 +46,13 @@ namespace IW {
 	}
 
 	bool EditorCameraController::On(
-		KeyEvent& e)
+		ActionEvent& e)
 	{
-		switch (e.Button) {
-			case IW::W:     movement.z -= e.State == 0 ? -1 : 1; break;
-			case IW::S:     movement.z += e.State == 0 ? -1 : 1; break;
-			case IW::A:     movement.x -= e.State == 0 ? -1 : 1; break;
-			case IW::D:     movement.x += e.State == 0 ? -1 : 1; break;
-			case IW::SHIFT: movement.y -= e.State == 0 ? -1 : 1; break;
-			case IW::SPACE: movement.y += e.State == 0 ? -1 : 1; break;
+		switch (e.Action) {
+			case iw::val(Actions::JUMP):    movement.y += e.as<ToggleEvent>().Active ?  1 : -1; break;
+			case iw::val(Actions::RIGHT):   movement.x += e.as<ToggleEvent>().Active ?  1 : -1; break;
+			case iw::val(Actions::FORWARD): movement.z += e.as<ToggleEvent>().Active ? -1 :  1; break;
 		}
-
-		LOG_INFO << movement;
 
 		return false;
 	}
@@ -63,7 +60,7 @@ namespace IW {
 	bool EditorCameraController::On(
 		MouseMovedEvent& e)
 	{
-		if (e.Device == RAW_MOUSE) {
+		if (e.Device == DeviceType::RAW_MOUSE) {
 			rotation.x = e.DeltaY * 0.0005f;
 			rotation.y = e.DeltaX * 0.0005f; // sens?
 		}
@@ -74,7 +71,7 @@ namespace IW {
 	bool EditorCameraController::On(
 		MouseButtonEvent& e)
 	{
-		if (e.Device == RAW_MOUSE && e.Button == RMOUSE) {
+		if (e.Device == DeviceType::RAW_MOUSE && e.Button == RMOUSE) {
 			speed = e.State ? 50 : 10;
 		}
 

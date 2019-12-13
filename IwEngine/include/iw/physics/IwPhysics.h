@@ -9,9 +9,19 @@
 #endif
 
 #include <type_traits>
+#include "iw/math/vector2.h"
+#include "iw/math/vector3.h"
+#include "iw/math/vector4.h"
 
 namespace IW {
 namespace Physics {
+
+#ifdef IW_DOUBLE_PRECISION
+	using scalar = long double;
+#else
+	using scalar = float;
+#endif
+
 namespace impl {
 	template<
 		typename V>

@@ -6,7 +6,7 @@
 #include <queue>
 
 namespace IW {
-inline namespace ECS {
+namespace ECS {
 	class EntityManager {
 	private:
 		std::vector<iw::ref<EntityData>> m_entities;
@@ -23,4 +23,6 @@ inline namespace ECS {
 			size_t index);
 	};
 }
+
+	using namespace ECS;
 }

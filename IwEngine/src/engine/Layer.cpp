@@ -30,9 +30,9 @@ namespace IW {
 	void Layer::ImGui() {}
 
 	bool Layer::On(
-		WindowResizedEvent& e)
+		ActionEvent& e)
 	{
-		 return m_systems.On(e);
+		return m_systems.On(e);
 	}
 
 	bool Layer::On(
@@ -61,6 +61,12 @@ namespace IW {
 
 	bool Layer::On(
 		KeyTypedEvent& e)
+	{
+		return m_systems.On(e);
+	}
+
+	bool Layer::On(
+		WindowResizedEvent& e)
 	{
 		return m_systems.On(e);
 	}

@@ -16,7 +16,7 @@
 #include "FrameBuffer.h"
 
 namespace IW {
-inline namespace RenderAPI {
+namespace RenderAPI {
 	class IWRENDERER_API IDevice {
 	public:
 		virtual void DrawElements(
@@ -185,4 +185,6 @@ inline namespace RenderAPI {
 		static IDevice* Create();
 	};
 }
+
+	using namespace RenderAPI;
 }

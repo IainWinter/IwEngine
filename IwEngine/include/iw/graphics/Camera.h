@@ -4,7 +4,7 @@
 #include "iw/math/matrix4.h"
 
 namespace IW {
-inline namespace Graphics {
+namespace Graphics {
 	class IWGRAPHICS_API Camera {
 	public:
 		iw::vector3    Position;
@@ -126,4 +126,6 @@ inline namespace Graphics {
 		}
 	};
 }
+
+	using namespace Graphics;
 }

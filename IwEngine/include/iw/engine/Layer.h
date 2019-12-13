@@ -6,12 +6,12 @@
 #include "InitOptions.h"
 #include "Events/Events.h"
 #include "iw/asset/AssetManager.h"
-#include "iw/entity/Space.h"
 #include "iw/graphics/Renderer.h"
 #include "iw/events/eventbus.h"
+#include "iw/entity/Space.h"
 
 namespace IW {
-inline namespace Engine {
+namespace Engine {
 	class Application;
 
 	class Layer {
@@ -55,6 +55,12 @@ inline namespace Engine {
 		IWENGINE_API
 		virtual void FixedUpdate();
 
+		// Action events
+
+		IWENGINE_API
+		virtual bool On(
+			ActionEvent& e);
+
 		// Input events
 
 		IWENGINE_API
@@ -76,7 +82,6 @@ inline namespace Engine {
 		IWENGINE_API
 		virtual bool On(
 			KeyTypedEvent& e);
-
 
 		// Window events
 
@@ -136,4 +141,6 @@ inline namespace Engine {
 			iw::ref<iw::eventbus> bus);
 	};
 }
+
+	using namespace Engine;
 }

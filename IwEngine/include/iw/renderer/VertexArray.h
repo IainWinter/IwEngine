@@ -5,7 +5,7 @@
 #include "VertexBufferLayout.h"
 
 namespace IW {
-inline namespace RenderAPI {
+namespace RenderAPI {
 	class IWRENDERER_API IVertexArray {
 	public:
 		virtual ~IVertexArray() {}
@@ -14,4 +14,6 @@ inline namespace RenderAPI {
 		IVertexArray() {}
 	};
 }
+
+	using namespace RenderAPI;
 }

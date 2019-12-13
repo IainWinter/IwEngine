@@ -7,6 +7,8 @@
 #include "iw/engine/Components/CameraController.h"
 #include "Systems/EditorCameraController.h"
 
+#include "Events/ActionEvents.h"
+
 namespace IW {
 	struct ModelComponents {
 		Transform* Transform;
@@ -41,12 +43,8 @@ namespace IW {
 		PerspectiveCamera* perspective = new PerspectiveCamera(1.17f, 1.778f, .01f, 200.0f);
 
 		IW::Entity camera = Space->CreateEntity<Transform, CameraController>();
-		Space->SetComponentData<Transform>(camera);
+		Space->SetComponentData<Transform>(camera, iw::vector3(0, 0, -5));
 		Space->SetComponentData<CameraController>(camera, perspective);
-
-		Entity e = Space->CreateEntity<Transform, Model>();
-		Space->SetComponentData<Transform>(e, iw::vector3::zero);
-		Space->SetComponentData<Model>(e, sphere->Meshes, sphere->MeshCount);
 
 		PushSystem<EditorCameraController>();
 
@@ -61,11 +59,7 @@ namespace IW {
 		ImGui::Begin("Toolbox");
 
 		if (ImGui::Button("Create Sphere")) {
-			iw::ref<Model> sphere = Asset->Load<Model>("Sphere");
-
-			Entity e = Space->CreateEntity<Transform, Model>();
-			Space->SetComponentData<Transform>(e, iw::vector3::zero);
-			Space->SetComponentData<Model>(e, sphere->Meshes, sphere->MeshCount);
+			Bus->push<SingleEvent>(iw::val(Actions::SPAWN_CIRCLE_TEMP));
 		}
 
 		for (auto entity : Space->Query<Transform, Model>()) {

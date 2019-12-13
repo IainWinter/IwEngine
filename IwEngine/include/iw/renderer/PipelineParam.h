@@ -8,7 +8,7 @@
 #include "iw/log/logger.h"
 
 namespace IW {
-inline namespace RenderAPI {
+namespace RenderAPI {
 	//leak that state
 
 	// if stride is 0 then count is used inplace
@@ -70,4 +70,6 @@ inline namespace RenderAPI {
 			const ITexture* texture) = 0;
 	};
 }
+	using namespace RenderAPI;
+
 }

@@ -4,7 +4,7 @@
 #include "imgui/imgui.h"
 
 namespace IW {
-inline namespace Engine {
+namespace Engine {
 	class ImGuiLayer
 		: public Layer
 	{
@@ -38,4 +38,6 @@ inline namespace Engine {
 		}
 	};
 }
+
+	using namespace Engine;
 }

@@ -9,7 +9,7 @@
 #include <string>
 
 namespace IW {
-inline namespace Input {
+namespace Input {
 	class InputManager;
 
 	struct Context {
@@ -46,4 +46,6 @@ inline namespace Input {
 			std::string command);
 	};
 }
+
+	using namespace Input;
 }

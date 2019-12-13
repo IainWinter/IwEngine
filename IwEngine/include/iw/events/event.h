@@ -1,7 +1,7 @@
 #pragma once
 
 namespace iw {
-inline namespace events {
+namespace events {
 	struct event {
 		short Group;
 		short Type;
@@ -28,4 +28,6 @@ inline namespace events {
 		}
 	};
 }
+
+	using namespace events;
 }

@@ -3,7 +3,7 @@
 #include "iw/renderer/Device.h"
 
 namespace IW {
-inline namespace RenderAPI {
+namespace RenderAPI {
 	class IWRENDERER_API GLDevice
 		: public IDevice
 	{
@@ -171,4 +171,6 @@ inline namespace RenderAPI {
 			ITexture* texture) override;
 	};
 }
+
+	using namespace RenderAPI;
 }

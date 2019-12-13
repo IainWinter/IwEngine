@@ -7,7 +7,7 @@
 #include "iw/log/logger.h"
 
 namespace IW {
-inline namespace ECS {
+namespace ECS {
 	class Space {
 	private:
 		ComponentManager m_componentManager;
@@ -79,7 +79,7 @@ inline namespace ECS {
 		template<
 			typename _c,
 			typename... _args>
-		void SetComponentData(
+		_c* SetComponentData(
 			const Entity& entity,
 			_args&&... args)
 		{
@@ -94,8 +94,10 @@ inline namespace ECS {
 					}
 
 					else {
-						*data = _c(std::forward<_args>(args)...);
+						new (data) _c(std::forward<_args>(args)...);
 					}
+
+					return data;
 				}
 
 				else {
@@ -108,6 +110,8 @@ inline namespace ECS {
 				LOG_WARNING << "Tried to set component data of non-registerd component! Entity: "
 					<< entity.Index << " Version: " << entity.Version;
 			}
+
+			return nullptr;
 		}
 
 		// Querying
@@ -123,4 +127,6 @@ inline namespace ECS {
 			const iw::ref<ComponentQuery>& query);
 	};
 }
+
+	using namespace ECS;
 }

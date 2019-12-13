@@ -6,7 +6,7 @@
 #include <vector>
 
 namespace IW {
-inline namespace RenderAPI {
+namespace RenderAPI {
 	class GLVertexArray
 		: public IVertexArray
 	{
@@ -32,4 +32,6 @@ inline namespace RenderAPI {
 		void Unbind() const;
 	};
 }
+
+	using namespace RenderAPI;
 }

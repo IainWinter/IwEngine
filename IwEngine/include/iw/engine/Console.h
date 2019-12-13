@@ -9,7 +9,7 @@
 #include <functional>
 
 namespace IW {
-inline namespace Engine {
+namespace Engine {
 	struct Token {
 		size_t Count;
 
@@ -21,7 +21,9 @@ inline namespace Engine {
 	};
 
 	struct Command {
+		std::string Original;
 		std::string Verb;
+		bool Active;
 		size_t TokenCount;
 		Token* Tokens; // size is token count
 	};
@@ -65,4 +67,6 @@ inline namespace Engine {
 			const std::string& command);
 	};
 }
+
+	using namespace Engine;
 }

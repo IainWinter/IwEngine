@@ -17,7 +17,7 @@
 #include <thread>
 
 namespace IW {
-inline namespace Engine {
+namespace Engine {
 	class Application {
 	private:
 		IWindow* m_window;
@@ -118,6 +118,8 @@ inline namespace Engine {
 
 	};
 }
+
+	using namespace Engine;
 }
 
 IW::Application* CreateApplication(

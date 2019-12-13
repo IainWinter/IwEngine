@@ -15,7 +15,7 @@
 #include <queue>
 
 namespace IW {
-inline namespace Graphics {
+namespace Graphics {
 	class IWGRAPHICS_API RenderQueue {
 	private:
 		enum Operation {
@@ -44,4 +44,6 @@ inline namespace Graphics {
 		void Execute();
 	};
 }
-	}
+
+	using namespace Graphics;
+}

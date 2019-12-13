@@ -8,7 +8,7 @@
 #include <unordered_map>
 
 namespace IW {
-inline namespace RenderAPI {
+namespace RenderAPI {
 	class IWRENDERER_API GLPipeline
 		: public IPipeline
 	{
@@ -39,4 +39,6 @@ inline namespace RenderAPI {
 		void Use();
 	};
 }
+
+	using namespace RenderAPI;
 }

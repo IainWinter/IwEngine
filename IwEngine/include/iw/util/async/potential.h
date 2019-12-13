@@ -4,7 +4,7 @@
 #include <memory>
 
 namespace iw {
-inline namespace util {
+namespace util {
 	// Shared pointer for values not yet initialized
 	template<
 		typename _t>
@@ -69,4 +69,6 @@ inline namespace util {
 		}
 	};
 }
+
+	using namespace util;
 }

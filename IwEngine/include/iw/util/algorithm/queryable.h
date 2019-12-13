@@ -5,7 +5,7 @@
 #include <vector>
 
 namespace iw {
-inline namespace util {
+namespace util {
 	template<
 		typename _container>
 	class queryable {
@@ -39,4 +39,6 @@ inline namespace util {
 		}
 	};
 }
+
+	using namespace util;
 }

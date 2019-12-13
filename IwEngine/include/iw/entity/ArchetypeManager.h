@@ -7,7 +7,7 @@
 #include <memory>
 
 namespace IW {
-inline namespace ECS {
+namespace ECS {
 	class ArchetypeManager {
 	private:
 		std::unordered_map<size_t, iw::ref<Archetype>> m_hashed;
@@ -21,4 +21,6 @@ inline namespace ECS {
 			const iw::ref<ComponentQuery>& query);
 	};
 }
+
+	using namespace ECS;
 }

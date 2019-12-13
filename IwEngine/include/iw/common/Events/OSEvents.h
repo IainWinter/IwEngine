@@ -1,7 +1,7 @@
 #pragma once
 
-#include "EventGroups.h"
 #include "iw/common/iwcommon.h"
+#include "EventGroups.h"
 #include "iw/events/event.h"
 #include "iw/util/enum/val.h"
 
@@ -9,7 +9,7 @@
 #include "iw/common/Platform.h"
 
 namespace IW {
-inline namespace Engine {
+namespace Engine {
 	enum class OsEventType
 		: short
 	{
@@ -40,4 +40,6 @@ inline namespace Engine {
 #endif
 	};
 }
+
+	using namespace Engine;
 }

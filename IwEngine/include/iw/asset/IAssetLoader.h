@@ -4,7 +4,7 @@
 #include <string>
 
 namespace IW {
-inline namespace Asset {
+namespace Asset {
 	class IAssetLoader {
 	public:
 		virtual ~IAssetLoader() {}
@@ -17,4 +17,6 @@ inline namespace Asset {
 			void* asset) = 0;
 	};
 }
+
+	using namespace Asset;
 }

@@ -12,7 +12,9 @@
 #include <typeindex>
 
 namespace IW {
-inline namespace ECS {
+namespace ECS {
 	using ComponentType = std::type_index;
 }
+
+	using namespace ECS;
 }

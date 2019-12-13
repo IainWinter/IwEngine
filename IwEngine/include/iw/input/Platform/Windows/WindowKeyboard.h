@@ -4,7 +4,7 @@
 #include "iw/input/Devices/Keyboard.h"
 
 namespace IW {
-inline namespace Input {
+namespace Input {
 	class IWINPUT_API WindowsKeyboard
 		: public Keyboard
 	{
@@ -13,5 +13,7 @@ inline namespace Input {
 			const OsEvent& e) override;
 	};
 }
+
+	using namespace Input;
 }
 #endif

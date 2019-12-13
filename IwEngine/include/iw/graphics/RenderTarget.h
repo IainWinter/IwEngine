@@ -7,7 +7,7 @@
 #include "Texture.h"
 
 namespace IW {
-inline namespace Graphics {
+namespace Graphics {
 	struct IWGRAPHICS_API RenderTarget {
 		int Width;
 		int Height;
@@ -30,4 +30,6 @@ inline namespace Graphics {
 			const iw::ref<IDevice>& device);
 	};
 }
+
+	using namespace Graphics;
 }

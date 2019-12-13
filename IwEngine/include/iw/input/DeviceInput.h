@@ -4,7 +4,7 @@
 #include <string>
 
 namespace IW {
-inline namespace  {
+namespace Input {
 	struct DeviceInput {
 		DeviceType Device;
 		InputName  Name;
@@ -22,4 +22,6 @@ inline namespace  {
 		{}
 	};
 }
+
+	using namespace Input;
 }

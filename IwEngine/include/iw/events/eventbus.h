@@ -9,7 +9,7 @@
 #include <mutex>
 
 namespace iw {
-inline namespace events {
+namespace events {
 	class eventbus {
 	private:
 		std::mutex m_mutex;
@@ -72,4 +72,6 @@ inline namespace events {
 		}
 	};
 }
+
+	using namespace events;
 }

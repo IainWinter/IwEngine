@@ -3,7 +3,7 @@
 #include "iw/util/iwutil.h"
 
 namespace iw {
-inline namespace util {
+namespace util {
 	struct pair_hash {
 		template<typename T1, typename T2>
 		size_t operator() (const std::pair<T1, T2>& pair) const {
@@ -11,4 +11,6 @@ inline namespace util {
 		}
 	};
 }
+
+	using namespace util;
 }

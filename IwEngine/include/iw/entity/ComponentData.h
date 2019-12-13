@@ -3,7 +3,7 @@
 #include "IwEntity.h"
 
 namespace IW {
-inline namespace ECS {
+namespace ECS {
 	struct ComponentData {
 		void* Components[];
 
@@ -25,4 +25,6 @@ inline namespace ECS {
 		size_t Indices[];
 	};
 }
+
+	using namespace ECS;
 }

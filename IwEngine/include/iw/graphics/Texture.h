@@ -7,7 +7,7 @@
 #include "iw/util/memory/smart_pointers.h"
 
 namespace IW {
-inline namespace Graphics {
+namespace Graphics {
 	struct IWGRAPHICS_API Texture {
 		unsigned char* Colors;
 
@@ -32,4 +32,6 @@ inline namespace Graphics {
 			const iw::ref<IDevice>& device);
 	};
 }
+
+	using namespace Graphics;
 }

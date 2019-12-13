@@ -4,7 +4,7 @@
 #include <tuple>
 
 namespace iw {
-inline namespace util {
+namespace util {
 	namespace detail {
 #pragma region no_return_no_args
 		template<
@@ -595,4 +595,6 @@ namespace functors {
 		}
 	};
 }
+
+	using namespace util;
 }

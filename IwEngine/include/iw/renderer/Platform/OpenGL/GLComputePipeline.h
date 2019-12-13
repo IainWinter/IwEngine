@@ -8,7 +8,7 @@
 #include "iw/renderer/ComputePipeline.h"
 
 namespace IW {
-inline namespace RenderAPI {
+namespace RenderAPI {
 	class IWRENDERER_API GLComputePipeline
 		: public IComputePipeline
 	{
@@ -29,4 +29,6 @@ inline namespace RenderAPI {
 		void Use() const;
 	};
 }
+
+	using namespace RenderAPI;
 }

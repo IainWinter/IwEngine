@@ -11,7 +11,7 @@
 #include <assert.h>
 
 namespace IW {
-inline namespace ECS {
+namespace ECS {
 	class ChunkList {
 	public:
 		class iterator {
@@ -93,4 +93,6 @@ inline namespace ECS {
 		}
 	};
 }
+
+	using namespace ECS;
 }

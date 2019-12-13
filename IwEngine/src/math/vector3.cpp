@@ -290,7 +290,7 @@ namespace iw {
 		return !operator==(other);
 	}
 
-	std::ostream& iw::operator<<(
+	std::ostream& math::operator<<(
 		std::ostream& ostream,
 		const vector3& vector)
 	{
@@ -300,14 +300,14 @@ namespace iw {
 			<< vector.z << ")";
 	}
 
-	vector3 iw::operator+(
+	vector3 math::operator+(
 		float left,
 		const vector3& right)
 	{
 		return right + left;
 	}
 
-	vector3 iw::operator*(
+	vector3 math::operator*(
 		float left,
 		const vector3& right)
 	{

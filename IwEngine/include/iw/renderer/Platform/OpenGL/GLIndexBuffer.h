@@ -3,7 +3,7 @@
 #include "iw/renderer/IndexBuffer.h"
 
 namespace IW {
-inline namespace RenderAPI {
+namespace RenderAPI {
 	class IWRENDERER_API GLIndexBuffer
 		: public IIndexBuffer
 	{
@@ -27,4 +27,6 @@ inline namespace RenderAPI {
 		}
 	};
 }
+
+	using namespace RenderAPI;
 }

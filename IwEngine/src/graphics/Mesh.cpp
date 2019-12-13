@@ -226,6 +226,16 @@ namespace IW {
 		}
 	}
 
+	void Mesh::SetMaterial(
+		iw::ref<IW::Material>& material)
+	{
+			Material = material;
+	}
+
+	size_t Mesh::GetElementCount() {
+			return IndexCount / Topology;
+	}
+
 	void Mesh::Initialize(
 		const iw::ref<IDevice>& device)
 	{

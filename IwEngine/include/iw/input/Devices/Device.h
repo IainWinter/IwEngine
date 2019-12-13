@@ -6,7 +6,7 @@
 #include "iw/util/set/tofrom_set.h"
 
 namespace IW {
-inline namespace Input {
+namespace Input {
 	using Translation = iw::tofrom_set<unsigned int, InputName>;
 
 	class IWINPUT_API Device {
@@ -25,4 +25,6 @@ inline namespace Input {
 			const OsEvent& e) = 0;
 	};
 }
+
+	using namespace Input;
 }

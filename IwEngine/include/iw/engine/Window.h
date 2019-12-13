@@ -6,7 +6,7 @@
 #include "iw/util/memory/smart_pointers.h"
 
 namespace IW {
-inline namespace Engine {
+namespace Engine {
 	class IWindow {
 	public:
 		virtual ~IWindow() {}
@@ -85,4 +85,6 @@ inline namespace Engine {
 		}
 	};
 }
+
+	using namespace Engine;
 }

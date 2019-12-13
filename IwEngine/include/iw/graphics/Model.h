@@ -3,10 +3,12 @@
 #include "Mesh.h"
 
 namespace IW {
-inline namespace Graphics {
+namespace Graphics {
 	struct Model {
 		Mesh*  Meshes;
 		size_t MeshCount;
 	};
 }
+
+	using namespace Graphics;
 }

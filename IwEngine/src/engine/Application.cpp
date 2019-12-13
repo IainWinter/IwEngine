@@ -246,17 +246,12 @@ namespace IW {
 		const Command& command)
 	{
 		if (command.Verb == "resize_window") {
-			LOG_INFO << "Resize Window" 
-				<< " " << command.Tokens[0].Int 
-				<< " " << command.Tokens[1].Int;
-
-			//Renderer->Width = command.Tokens[0].Int;
-			//Renderer->Height = command.Tokens[1].Int;
+			Bus->push<WindowResizedEvent>(m_window->Id(),
+				(int)command.Tokens[0].Int,
+				(int)command.Tokens[1].Int);
 		}
 
-		else {
-			LOG_INFO << command.Verb;
-		}
+		LOG_INFO << command.Original;
 
 		return false;
 	}

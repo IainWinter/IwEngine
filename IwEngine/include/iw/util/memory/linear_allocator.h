@@ -4,7 +4,7 @@
 #include <cstddef>
 
 namespace iw {
-inline namespace util {
+namespace util {
 	class IWUTIL_API linear_allocator {
 	private:
 		void*  m_memory;
@@ -49,4 +49,6 @@ inline namespace util {
 		}
 	};
 }
+
+	using namespace util;
 }

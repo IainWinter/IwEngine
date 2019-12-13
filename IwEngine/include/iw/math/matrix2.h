@@ -5,7 +5,7 @@
 #include <ostream>
 
 namespace iw {
-inline namespace math {
+namespace math {
 	/**
 	* Represents a 2x2 matrix.
 	*/
@@ -169,9 +169,12 @@ inline namespace math {
 			float x,
 			float y);
 
-		friend IWMATH_API std::ostream& operator<<(
+		IWMATH_API
+		friend std::ostream& operator<<(
 			std::ostream& stream,
 			const matrix2& matrix);
 	};
 }
+
+	using namespace math;
 }

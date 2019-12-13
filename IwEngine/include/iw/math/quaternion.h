@@ -6,7 +6,7 @@
 #include <ostream>
 
 namespace iw {
-inline namespace math {
+namespace math {
 	/**
 	* Represents a rotation in 3D.
 	*/
@@ -204,7 +204,8 @@ inline namespace math {
 			vector3 target = vector3::zero,
 			vector3 up     = vector3::unit_y);
 
-		friend IWMATH_API std::ostream& operator<<(
+		IWMATH_API
+		friend std::ostream& operator<<(
 			std::ostream& stream,
 			const quaternion& a);
 
@@ -213,4 +214,6 @@ inline namespace math {
 		//	const quaternion& right);
 	};
 }
+
+	using namespace math;
 }
