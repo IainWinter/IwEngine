@@ -2,6 +2,9 @@
 
 #include "iw/physics/IwPhysics.h"
 #include "iw/physics/Collision/SphereCollider.h"
+#include "iw/physics/Collision/Manifold.h"
+#include "iw/physics/Collision/CollisionObject.h"
+#include <tuple>
 
 namespace IW {
 namespace Physics {
@@ -39,6 +42,41 @@ namespace algo {
 	//{
 	//	return false;
 	//}
+
+	using ManifoldPointz = std::tuple<iw::vector3, iw::vector3>;
+
+	Manifold MakeManiFold(
+		const Rigidbody* a,
+		const Rigidbody* b)
+	{
+		ManifoldPointz pz = FindManifoldPoints(a->Col, b->Col);
+		return {
+			std::get<0>(pz),
+			std::get<1>(pz),
+			a,
+			b,
+			(std::get<0>(pz) - std::get<1>(pz)).length()
+		};
+
+	}
+
+	ManifoldPointz FindManifoldPoints(
+		const SphereCollider *a,
+		const SphereCollider *b)
+	{
+
+		iw::vector3 BtoA = a->Center - b->Center;
+		BtoA.normalize();
+		
+		iw::vector3 AtoB = b->Center - a->Center;
+		AtoB.normalize();
+
+		return {
+			AtoB * a->Radius,
+			BtoA * b->Radius
+		};
+	}
+
 }
 }
 
