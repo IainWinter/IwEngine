@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Collider.h"
-#include "CollisionMath/CollisionTests.h"
 #include "iw/math/vector3.h"
 
 namespace IW {
@@ -18,27 +17,10 @@ namespace impl {
 		SphereCollider(
 			V center,
 			float radius)
-			: Collider<V>()
+			: Collider<V>(ColliderShape::SPHERE)
 			, Center(center)
 			, Radius(radius)
 		{}
-
-		//bool TestCollision(
-		//	const SphereCollider& other,
-		//	V* resolve = nullptr) const override
-		//{
-		//	return algo::TestCollision(*this, other, resolve);
-		//}
-
-		//bool TestCollision(
-		//	const BoxCollider<V>& other,
-		//	V resolve = nullptr) const override
-		//{
-		//	return Algo::TestCollision(*this, other, resolve);
-		//}
-
-				//void Transform(
-		//	const IW::Transform& transform) override;
 
 		const AABB<V>& Bounds() override {
 			if (m_outdated) {

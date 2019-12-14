@@ -7,10 +7,10 @@
 namespace IW {
 namespace Physics {
 	struct Manifold {
+		const Rigidbody* BodyA;
+		const Rigidbody* BodyB;
 		iw::vector3 A;
 		iw::vector3 B;
-		const Rigidbody *BodyA;
-		const Rigidbody *BodyB;
 		scalar PenetrationDepth;
 	};
 }

@@ -17,6 +17,8 @@ namespace IW {
 		void PostUpdate() override;
 		void FixedUpdate() override;
 
+		void ImGui() override;
+
 		bool On(ActionEvent& e) override;
 	};
 }

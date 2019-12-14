@@ -40,7 +40,7 @@ namespace IW {
 
 		iw::ref<Model> sphere = Asset->Give<Model>("Sphere", &m);
 
-		PerspectiveCamera* perspective = new PerspectiveCamera(1.17f, 1.778f, .01f, 200.0f);
+		PerspectiveCamera* perspective = new PerspectiveCamera(1.17f, 1.778f, .01f, 2000.0f);
 
 		IW::Entity camera = Space->CreateEntity<Transform, CameraController>();
 		Space->SetComponentData<Transform>(camera, iw::vector3(0, 0, -5));
@@ -62,22 +62,27 @@ namespace IW {
 			Bus->push<SingleEvent>(iw::val(Actions::SPAWN_CIRCLE_TEMP));
 		}
 
+		int draws = 0;
 		for (auto entity : Space->Query<Transform, Model>()) {
 			auto [t, m] = entity.Components.Tie<ModelComponents>();
 
-			std::stringstream s;
-			s << "Position ";
-			s << entity.Index;
+			draws++;
 
-			ImGui::Value("Entity Index", (int)entity.Index);
-			ImGui::SliderFloat3(s.str().c_str(), (float*)&t->Position, -10, 10);
+			//std::stringstream s;
+			//s << "Position ";
+			//s << entity.Index;
+
+			//ImGui::Value("Entity Index", (int)entity.Index);
+			//ImGui::SliderFloat3(s.str().c_str(), (float*)&t->Position, -10, 10);
 		}
 
-		for (auto entity : Space->Query<Transform, CameraController>()) {
-			auto [t, m] = entity.Components.Tie<EditorCameraController::Components>();
+		ImGui::Value("Number of object", draws);
 
-			ImGui::SliderFloat3("Pos", (float*)&t->Position, -10, 10);
-		}
+		//for (auto entity : Space->Query<Transform, CameraController>()) {
+		//	auto [t, m] = entity.Components.Tie<EditorCameraController::Components>();
+
+		//	ImGui::SliderFloat3("Pos", (float*)&t->Position, -10, 10);
+		//}
 
 		ImGui::End();
 	}

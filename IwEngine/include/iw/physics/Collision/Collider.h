@@ -6,36 +6,28 @@
 
 namespace IW  {
 namespace Physics {
+	enum class ColliderShape {
+		CIRCLE, SPHERE,
+		BOX, CUBE,
+		MESH
+	};
+
 namespace impl {
 	template<
 		typename V>
 	struct Collider {
+	public:
+		ColliderShape Shape;
+
 	protected:
 		AABB<V> m_bounds;
 		bool m_outdated;
 
 	public:
-		//IWPHYSICS_API
-		//virtual bool TestCollision(
-		//	BoxCollider<V> other,
-		//	V* resolve = nullptr) const = 0;
-		//
-		//IWPHYSICS_API
-		//virtual bool TestCollision(
-		//	SphereCollider<V> other,
-		//	V* resolve = nullptr) const = 0;
-		//
-		//IWPHYSICS_API
-		//virtual bool TestRay(
-		//	Ray<V> ray,
-		//	V* poi = nullptr) const = 0;
-		//
-		//IWPHYSICS_API
-		//virtual bool TestCollision(
-		//	/*MeshColliderV */) const = 0;
-
-		Collider()
-			: m_outdated(true)
+		Collider(
+			ColliderShape shape)
+			: Shape(shape)
+			, m_outdated(true)
 		{}
 
 		virtual const AABB<V>& Bounds() = 0;

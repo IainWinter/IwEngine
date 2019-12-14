@@ -1,7 +1,8 @@
 #include "iw/physics/Dynamics/DynamicsSpace.h"
+#include "iw/physics/Collision/algo/ManifoldFactory.h"
+#include "iw/log/logger.h"
 #include <assert.h>
 
-#include "iw/log/logger.h"
 
 namespace IW {
 	void DynamicsSpace::AddRigidbody(
@@ -37,7 +38,6 @@ namespace IW {
 		PredictTransforms(dt);
 
 		//SweepPredictedBodies();
-
 
 
 		//SweepCastBodies(); //CheckCollisions();
