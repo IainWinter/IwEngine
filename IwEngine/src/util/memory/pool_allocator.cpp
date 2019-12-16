@@ -104,7 +104,7 @@ namespace iw {
 		}
 
 		else {
-			m_freelist.pop_front();
+			m_freelist.erase(itr);
 		}
 
 		memset(ptr, 0, size);
