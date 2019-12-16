@@ -1,7 +1,12 @@
 #include "iw/entity/ArchetypeManager.h"
+#include "iw/events/callback.h"
 #include <assert.h>
 
 namespace IW {
+	ArchetypeManager::ArchetypeManager()
+		: m_pool(1024)
+	{}
+
 	iw::ref<Archetype>& ArchetypeManager::CreateArchetype(
 		std::initializer_list<iw::ref<Component>> components)
 	{
@@ -12,12 +17,7 @@ namespace IW {
 				+ sizeof(ArchetypeLayout)
 				* components.size();
 
-			Archetype* buf = (Archetype*)malloc(bufSize); //todo: add custom memory allocation
-			assert(buf);
-			memset(buf, 0, bufSize);
-
-			archetype = iw::ref<Archetype>(buf, free);
-			m_archetypes.push_back(archetype);
+			archetype = m_pool.alloc_ref_t<Archetype>(bufSize);
 
 			size_t totalSize = 0;
 			for (auto& component : components) {
@@ -40,6 +40,8 @@ namespace IW {
 
 				i++;
 			}
+
+			archetype = m_archetypes.emplace_back(archetype);
 		}
 
 		return archetype;
@@ -105,21 +107,17 @@ namespace IW {
 			}
 		}
 
-		// TODO: replace with memory allocation, could have factory for 'array-header' structs
-
 		size_t bufSize = sizeof(ArchetypeQuery)
 			+ sizeof(size_t)
 			* matches.size();
 
-		ArchetypeQuery* buf = (ArchetypeQuery*)malloc(bufSize);
-		assert(buf);
-		memset(buf, 0, bufSize);
+		iw::ref<ArchetypeQuery> q = m_pool.alloc_ref_t<ArchetypeQuery>(bufSize);
 
-		buf->Count = matches.size();
-		for (size_t i = 0; i < buf->Count; i++) {
-			buf->Hashes[i] = matches[i];
+		q->Count = matches.size();
+		for (size_t i = 0; i < q->Count; i++) {
+			q->Hashes[i] = matches[i];
 		}
 
-		return iw::ref<ArchetypeQuery>(buf, free);
+		return q;
 	}
 }

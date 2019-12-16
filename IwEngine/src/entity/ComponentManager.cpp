@@ -7,13 +7,19 @@
 #include <memory>
 
 namespace IW {
+	ComponentManager::ComponentManager()
+		: m_itrPool(512)
+		, m_chunkPool(m_chunkSize)
+		, m_componentPool(512)
+	{}
+
 	iw::ref<Component>& ComponentManager::RegisterComponent(
 		ComponentType type,
 		size_t size)
 	{
 		iw::ref<Component>& component = m_components[type];
 		if (!component) {
-			component = std::make_shared<Component>();
+			component = m_componentPool.alloc_ref_t<Component>();
 			component->Type = type.hash_code();
 			component->Name = type.name();
 			component->Size = size;
@@ -108,7 +114,7 @@ namespace IW {
 		auto itr = m_componentData.find(archetype->Hash);
 		if (itr == m_componentData.end()) {
 			itr = m_componentData.emplace(
-				archetype->Hash, ChunkList(archetype, m_chunkSize)).first;
+				archetype->Hash, ChunkList(archetype, m_chunkSize, m_itrPool, m_chunkPool)).first;
 		}
 
 		return itr->second;

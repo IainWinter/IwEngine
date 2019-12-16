@@ -43,15 +43,15 @@ namespace IW {
 
 		Entity* entity = m_chunk->GetEntity(m_index);
 
-		if (   m_chunk 
-			&& m_index == m_chunk->EndIndex())
-		{
-			LOG_INFO << "dddd";
-		}
+		//if (   m_chunk 
+		//	&& m_index == m_chunk->EndIndex())
+		//{
+		//	LOG_INFO << "dddd";
+		//}
 
-		if (entity->Index > 98734259873) {
-			LOG_INFO << "dddd";
-		}
+		//if (entity->Index > 98734259873) {
+		//	LOG_INFO << "dddd";
+		//}
 
 		return EntityComponentData { entity->Index, entity->Version, *m_data };
 	}
@@ -60,7 +60,8 @@ namespace IW {
 		Chunk* chunk,
 		size_t index,
 		const iw::ref<Archetype>& archetype,
-		const iw::ref<ComponentQuery>& query)
+		const iw::ref<ComponentQuery>& query,
+		iw::pool_allocator& pool)
 		: m_chunk(chunk)
 		, m_index(index)
 		, m_archetype(archetype)
@@ -69,42 +70,38 @@ namespace IW {
 			+ sizeof(size_t)
 			* query->Count;
 
-		ComponentData* cd = (ComponentData*)malloc(cdSize);
-		assert(cd);
-		memset(cd, 0, cdSize);
-
-		m_data = iw::ref<ComponentData>(cd, free);
-
+		m_data = pool.alloc_ref_t<ComponentData>(cdSize);
+		
 		size_t cdisSize = sizeof(ComponentDataIndices)
 			+ sizeof(size_t)
 			* query->Count;
 
-		ComponentDataIndices* cdis = (ComponentDataIndices*)malloc(cdisSize);
-		assert(cdis);
-		memset(cdis, 0, cdisSize);
-
-		cdis->Count = query->Count;
+		m_indices = pool.alloc_ref_t<ComponentDataIndices>(cdisSize);
+	
+		m_indices->Count = query->Count;
 		for (size_t i = 0; i < query->Count; i++) {
 			for (size_t j = 0; j < archetype->Count; j++) {
 				if (query->Components[i]->Type == archetype->Layout[j].Component->Type) {
-					cdis->Indices[i] = j;
+					m_indices->Indices[i] = j;
 					break;
 				}
 			}
 		}
-
-		m_indices = iw::ref<ComponentDataIndices>(cdis, free);
 	}
 
 	ChunkList::ChunkList(
 		const iw::ref<Archetype>& archetype,
-		size_t chunkSize)
+		size_t chunkSize,
+		iw::pool_allocator& itrPool,
+		iw::pool_allocator& componentPool)
 		: m_root(nullptr)
 		, m_count(0)
 		, m_chunkCount(0)
 		, m_archetype(archetype)
 		, m_chunkSize(chunkSize)
 		, m_chunkCapacity(GetChunkCapacity(archetype))
+		, m_itrPool(itrPool)
+		, m_componentPool(componentPool)
 	{}
 
 	size_t ChunkList::ReserveComponents(
@@ -213,7 +210,7 @@ namespace IW {
 			index = chunk->BeginIndex();
 		}
 
-		return iterator(m_root, index, m_archetype, query);
+		return iterator(m_root, index, m_archetype, query, m_itrPool);
 	}
 
 	iterator ChunkList::End(
@@ -229,7 +226,7 @@ namespace IW {
 			index = chunk->EndIndex();
 		}
 
-		return iterator(nullptr, index, m_archetype, query);
+		return iterator(nullptr, index, m_archetype, query, m_itrPool);
 	}
 
 	Chunk* ChunkList::FindChunk(
@@ -244,9 +241,7 @@ namespace IW {
 	}
 
 	Chunk* ChunkList::CreateChunk() {
-		Chunk* chunk = (Chunk*)malloc(m_chunkSize);
-		assert(chunk);
-		memset(chunk, 0, m_chunkSize);
+		Chunk* chunk = m_componentPool.alloc_t<Chunk>(m_chunkSize);
 
 		chunk->IndexOffset = m_chunkCapacity * m_chunkCount;
 		chunk->Capacity    = m_chunkCapacity;

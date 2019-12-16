@@ -2,6 +2,10 @@
 #include <assert.h>
 
 namespace IW {
+	EntityManager::EntityManager()
+		: m_pool(1024)
+	{}
+
 	iw::ref<EntityData>& EntityManager::CreateEntity() {
 		if (!m_dead.empty()) {
 			iw::ref<EntityData>& dead = m_entities.at(m_dead.top());
@@ -13,19 +17,15 @@ namespace IW {
 			return dead;
 		}
 
-		size_t bufSize = sizeof(EntityData);
-
-		EntityData* entityData = (EntityData*)malloc(bufSize); //todo: memory allocation
-		assert(entityData);
-		memset(entityData, 0, bufSize);
+		iw::ref<EntityData> entityData = m_pool.alloc_ref_t<EntityData>();
 
 		entityData->Entity = Entity {
 			m_entities.size(),
-			0, 
+			0,
 			true
 		};
 
-		return m_entities.emplace_back(entityData, free);
+		return m_entities.emplace_back(entityData);
 	}
 
 	bool EntityManager::DestroyEntity(

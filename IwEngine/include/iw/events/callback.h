@@ -5,36 +5,6 @@
 namespace iw {
 namespace events {
 	template<
-		typename... _args_t>
-	class callback {
-	public:
-		using function_type = void(_args_t...);
-	private:
-		std::function<function_type> m_callback;
-
-	public:
-		callback() = default;
-
-		callback(
-			function_type callback)
-			: m_callback(callback)
-		{}
-
-		callback(
-			std::function<function_type> callback)
-			: m_callback(callback)
-		{}
-
-		void operator()(
-			_args_t... arg)
-		{
-			if (m_callback) {
-				m_callback(arg...);
-			}
-		}
-	};
-
-	template<
 		typename _r,
 		typename... _args_t>
 	class getback {
@@ -67,6 +37,10 @@ namespace events {
 
 	template<
 		typename... _args_t>
+	using callback = getback<void, _args_t...>;
+
+	template<
+		typename... _args_t>
 	callback<_args_t...> make_callback(
 		void(function)(_args_t...))
 	{
@@ -94,8 +68,8 @@ namespace events {
 	}
 
 	template<
-		typename _t,
 		typename _r,
+		typename _t,
 		typename... _args_t>
 	getback<_r, _args_t...> make_getback(
 		_r(_t::* function)(_args_t...),

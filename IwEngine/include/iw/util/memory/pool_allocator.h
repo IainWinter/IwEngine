@@ -1,9 +1,10 @@
 #pragma once
 
 #include "iw/util/iwutil.h"
+#include "iw/util/memory/smart_pointers.h"
 #include <cstddef>
 #include <malloc.h>
-#include <vector>
+#include <list>
 
 namespace iw {
 namespace util {
@@ -11,43 +12,53 @@ namespace util {
 	public:
 		class page {
 		private:
+			struct freemem {
+				char* mem;
+				size_t size;
+
+				freemem(
+					char* m,
+					size_t s)
+					: mem(m)
+					, size(s)
+				{}
+			};
+
 			char* m_memory;
+			size_t m_size;
 			page* m_next;
-			std::vector<char*> m_freelist;
+			std::list<freemem> m_freelist;
 
 		public:
 			page(
-				size_t size,
-				size_t count,
-				size_t run);
+				size_t size);
 
 			~page();
 
 			void* alloc(
-				size_t size,
-				size_t run);
+				size_t size);
 
 			bool free(
 				void* addr,
-				size_t size,
-				size_t run);
+				size_t size);
 
-			inline char* memory() const {
+			char* memory() const {
 				return m_memory;
 			}
 
-			page(const page&) = delete;
-			page& operator=(const page&) = delete;
+			//page(
+			//	const page&) = delete;
+
+			//page& operator=(
+			//	const page&) = delete;
 		};
 	private:
 		page*  m_root;
 		size_t m_pageSize;
-		size_t m_itemSize;
 
 	public:
 		pool_allocator(
-			size_t pageSize,
-			size_t itemSize);
+			size_t pageSize);
 
 		pool_allocator(
 			pool_allocator&&) noexcept;
@@ -63,28 +74,52 @@ namespace util {
 		pool_allocator& operator=(
 			const pool_allocator&) = delete;
 
-		template<
-			typename _t>
-		_t* alloc() {
-			return (_t*)alloc();
-		}
+		void* alloc(
+			size_t size);
 
-		void* alloc();
+		ref<void> alloc_ref(
+			size_t size);
 
 		bool free(
-			void* addr);
+			void* addr,
+			size_t size);
 
-		inline size_t page_size() const {
+		template<
+			typename _t>
+		_t* alloc_t(
+			size_t size = sizeof(_t))
+		{
+			return (_t*)alloc(size);
+		}
+
+		template<
+			typename _t>
+		ref<_t> alloc_ref_t(
+			size_t size = sizeof(_t))
+		{
+			return std::static_pointer_cast<_t, void>(alloc_ref(size));
+		}
+
+		template<
+			typename _t>
+		bool free_t(
+			_t* addr,
+			size_t size = sizeof(_t))
+		{
+			return free(addr, size);
+		}
+
+		size_t page_size() const {
 			return m_pageSize;
 		}
 
-		inline size_t item_size() const {
-			return m_itemSize;
-		}
+		//size_t item_size() const {
+		//	return m_itemSize;
+		//}
 
-		inline size_t page_capacity() const {
-			return m_pageSize / m_itemSize;
-		}
+		//size_t page_capacity() const {
+		//	return m_pageSize / m_itemSize;
+		//}
 	};
 }
 

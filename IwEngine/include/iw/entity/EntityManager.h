@@ -2,6 +2,7 @@
 
 #include "IwEntity.h"
 #include "EntityData.h"
+#include "iw/util/memory/pool_allocator.h"
 #include <vector>
 #include <queue>
 
@@ -11,8 +12,11 @@ namespace ECS {
 	private:
 		std::vector<iw::ref<EntityData>> m_entities;
 		std::priority_queue<size_t, std::vector<size_t>, std::greater<size_t>> m_dead;
+		iw::pool_allocator m_pool;
 
 	public:
+		EntityManager();
+
 		iw::ref<EntityData>& CreateEntity();
 
 		bool DestroyEntity(

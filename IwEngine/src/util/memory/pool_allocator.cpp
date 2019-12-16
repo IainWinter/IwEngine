@@ -1,25 +1,24 @@
 #include "iw/util/memory/pool_allocator.h"
+#include <functional>
+
+#include "iw/log/logger.h"
+
+using namespace std::placeholders;
 
 namespace iw {
 	pool_allocator::pool_allocator(
-		size_t pageSize, 
-		size_t itemSize)
-		: m_pageSize(pageSize)
-		, m_itemSize(itemSize)
-	{
-		size_t r = pageSize % itemSize;
-		pageSize -= r;
-
-		m_root = new page(pageSize, pageSize / itemSize, itemSize);
-	}
+		size_t pageSize)
+		: m_root(new page(pageSize))
+		, m_pageSize(pageSize)
+	{}
 
 	pool_allocator::pool_allocator(
 		pool_allocator&& copy) noexcept
 		: m_root(copy.m_root)
 		, m_pageSize(copy.m_pageSize)
-		, m_itemSize(copy.m_itemSize)
 	{
 		copy.m_root = nullptr;
+		copy.m_pageSize = 0;
 	}
 
 	pool_allocator::~pool_allocator() {
@@ -31,39 +30,46 @@ namespace iw {
 	{
 		m_root = copy.m_root;
 		m_pageSize = copy.m_pageSize;
-		m_itemSize = copy.m_itemSize;
 
 		copy.m_root = nullptr;
+		copy.m_pageSize = 0;
 
 		return *this;
 	}
 
-	bool pool_allocator::free(
-		void* addr)
+	void* pool_allocator::alloc(
+		size_t size)
 	{
-		return m_root->free(addr, m_pageSize, m_itemSize);
+		return m_root->alloc(size);
 	}
 
-	void* pool_allocator::alloc() {
-		return m_root->alloc(m_pageSize, m_itemSize);
+	ref<void> pool_allocator::alloc_ref(
+		size_t size)
+	{
+		return ref<void>(alloc(size), std::bind(&pool_allocator::free, this, _1, size));
+	}
+
+	bool pool_allocator::free(
+		void* addr,
+		size_t size)
+	{
+		return m_root->free(addr, size);
 	}
 
 	// Page 
 
 	pool_allocator::page::page(
-		size_t size,
-		size_t count,
-		size_t run)
+		size_t size)
 		: m_memory((char*)malloc(size))
+		, m_size(size)
 		, m_next(nullptr)
 	{
 		if (m_memory) {
-			m_freelist.resize(count);
-			size_t offset = 0;
-			for (size_t i = count; i > 0; i--) {
-				m_freelist[i - 1] = m_memory + offset;
-				offset += run;
-			}
+			m_freelist.emplace_back(m_memory, size);
+
+#ifdef IW_DEBUG
+			memset(m_memory, 0xcd, size);
+#endif
 		}
 	}
 
@@ -73,42 +79,70 @@ namespace iw {
 	}
 
 	void* pool_allocator::page::alloc(
-		size_t size,
-		size_t run)
+		size_t size)
 	{
-		if (m_freelist.empty()) {
+		if (   m_freelist.empty()
+			|| m_freelist.front().size < size)
+		{
 			if (m_next == nullptr) {
-				m_next = new page(size, size / run, run);
+				m_next = new page(m_size);
 			}
 
-			return m_next->alloc(size, run);
+			return m_next->alloc(size);
 		}
 
-		char* ptr = m_freelist.back();
-		m_freelist.pop_back();
+		auto itr = m_freelist.begin();
+		while (size > itr->size) {
+			++itr;
+		}
 
-#ifdef IW_DEBUG
-		memset(ptr, 0, run); 
-#endif
+		char* ptr  = itr->mem;
+
+		if (itr->size > size) {
+			itr->mem  += size;
+			itr->size -= size;
+		}
+
+		else {
+			m_freelist.pop_front();
+		}
+
+		memset(ptr, 0, size);
+
 		return ptr;
 	}
 
 	bool pool_allocator::page::free(
 		void* addr,
-		size_t size,
-		size_t run)
+		size_t size)
 	{
-		if (addr >= m_memory && addr <= m_memory + size - run) {
-			m_freelist.push_back((char*)addr);
+		if (   addr >= m_memory
+			&& addr <= m_memory + m_size - size)
+		{
+			auto itr = m_freelist.begin();
+			while (itr != m_freelist.end()
+				&& itr->mem != (char*)addr + size)
+			{
+				++itr;
+			}
+
+			if (itr != m_freelist.end()) {
+				itr->mem  -= size;
+				itr->size += size;
+			}
+			
+			else {
+				m_freelist.emplace_front((char*)addr, size);
+			}
 
 #ifdef IW_DEBUG
-			memset(addr, 0, run);
+			memset(addr, 0xff, size);
 #endif
 		}
 
 		else {
 			if (m_next) {
-				return m_next->free(addr, size, run);
+				return m_next->free(addr, size);
 			}
 		}
 

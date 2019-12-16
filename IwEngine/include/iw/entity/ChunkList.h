@@ -7,6 +7,7 @@
 #include "Component.h"
 #include "ComponentData.h"
 #include "EntityComponentData.h"
+#include "iw/util/memory/pool_allocator.h"
 #include <vector>
 #include <assert.h>
 
@@ -40,7 +41,8 @@ namespace ECS {
 				Chunk* chunk,
 				size_t index,
 				const iw::ref<Archetype>& archetype,
-				const iw::ref<ComponentQuery>& query);
+				const iw::ref<ComponentQuery>& query,
+				iw::pool_allocator& pool);
 		};
 	private:
 		Chunk* m_root;
@@ -52,28 +54,40 @@ namespace ECS {
 		const size_t m_chunkSize;
 		const size_t m_chunkCapacity;
 
-	public:
-		IWENTITY_API ChunkList(
-			const iw::ref<Archetype>& archetype,
-			size_t chunkSize);
+		iw::pool_allocator& m_itrPool;
+		iw::pool_allocator& m_componentPool;
 
-		IWENTITY_API size_t ReserveComponents(
+	public:
+		IWENTITY_API
+		ChunkList(
+			const iw::ref<Archetype>& archetype,
+			size_t chunkSize,
+			iw::pool_allocator& itrPool,
+			iw::pool_allocator& componentPool);
+
+		IWENTITY_API size_t
+		ReserveComponents(
 			const Entity& entity);
 
-		IWENTITY_API bool ReinstateComponents(
+		IWENTITY_API
+		bool ReinstateComponents(
 			const iw::ref<EntityData>& entityData);
 
-		IWENTITY_API bool FreeComponents(
+		IWENTITY_API
+		bool FreeComponents(
 			size_t index);
 
-		IWENTITY_API void* GetComponentData(
+		IWENTITY_API
+		void* GetComponentData(
 			const iw::ref<Component>& component,
 			size_t index);
 
-		IWENTITY_API iterator Begin(
+		IWENTITY_API
+		iterator Begin(
 			const iw::ref<ComponentQuery>& query);
 
-		IWENTITY_API iterator End(
+		IWENTITY_API
+		iterator End(
 			const iw::ref<ComponentQuery>& query);
 	private:
 		Chunk* FindChunk(

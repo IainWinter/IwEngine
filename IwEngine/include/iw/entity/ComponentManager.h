@@ -1,11 +1,12 @@
 #pragma once
 
 #include "IwEntity.h"
-#include "ChunkList.h"
-#include "Component.h"
 #include "Entity.h"
-#include "EntityComponentArray.h"
+#include "Component.h"
 #include "ComponentData.h"
+#include "ChunkList.h"
+#include "EntityComponentArray.h"
+#include "iw/util/memory/pool_allocator.h"
 #include <unordered_map>
 #include <memory>
 
@@ -13,11 +14,17 @@ namespace IW {
 namespace ECS {
 	class ComponentManager {
 	private:
-		std::unordered_map<ComponentType, iw::ref<Component>> m_components;
-		std::unordered_map<size_t, ChunkList> m_componentData;
 		const size_t m_chunkSize = 16 * 1024;
 
+		std::unordered_map<ComponentType, iw::ref<Component>> m_components;
+		std::unordered_map<size_t, ChunkList> m_componentData;
+		iw::pool_allocator m_itrPool;
+		iw::pool_allocator m_chunkPool;
+		iw::pool_allocator m_componentPool;
+
 	public:
+		ComponentManager();
+
 		// Components
 
 		iw::ref<Component>& RegisterComponent(
