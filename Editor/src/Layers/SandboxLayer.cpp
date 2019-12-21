@@ -25,7 +25,7 @@ namespace IW {
 	{}
 
 	int SandboxLayer::Initialize() {
-		space.SetGravity(iw::vector3(0, -1.8f, 0));
+		space.SetGravity(iw::vector3(0, -9.8f, 0));
 
 		return 0;
 	}
@@ -56,22 +56,21 @@ namespace IW {
 		Renderer->EndScene();
 	}
 
-	float t = .02f;
-
+	float ts = 0.1f;
+	
 	void SandboxLayer::FixedUpdate() {
-		space.Step(Time::FixedTime() * t);
+		space.Step(Time::FixedTime() * ts);
 	}
 
-	void SandboxLayer::ImGui()
-	{
+	void SandboxLayer::ImGui() {
 		ImGui::Begin("Sandbox");
 
-		ImGui::SliderFloat("Time scale", &t, 0, 1);
+		ImGui::SliderFloat("Time scale", &ts, 0.001f, 1);
 
 		ImGui::End();
 	}
 
-	float z = 0;
+	float x = 0;
 
 	bool SandboxLayer::On(
 		ActionEvent& e)
@@ -81,19 +80,20 @@ namespace IW {
 
 		iw::ref<Model> sphere = Asset->Load<Model>("Sphere");
 
-		for (size_t i = 0; i < 100; i++) {
+		for (size_t i = 0; i < 5; i++) {
 			Entity ent = Space->CreateEntity<Transform, Model, SphereCollider, Rigidbody>();
 
 			Space->SetComponentData<Model>(ent, *sphere);
 
-			Transform*      t = Space->SetComponentData<Transform>     (ent, iw::vector3(0, 0, z+= 0.1f));
+			Transform*      t = Space->SetComponentData<Transform>     (ent, iw::vector3(0, 0, 0));
 			SphereCollider* s = Space->SetComponentData<SphereCollider>(ent, iw::vector3::zero, 1.0f);
 			Rigidbody*      r = Space->SetComponentData<Rigidbody>     (ent);
 
 			r->SetTakesGravity(true);
 			r->SetSimGravity(true);
 			r->SetMass(1);
-			r->ApplyForce(iw::vector3(cos(z) * 30, 100, sin(z += iw::PI * 0.01f) * 30));
+			r->ApplyForce(iw::vector3(cos(x += .1f) * 50, 500, sin(x / .1f) * 50));
+			//r->ApplyForce(iw::vector3(cos(z) * 30, 100, sin(z += iw::PI * 0.01f) * 30));
 			r->SetCol(s);
 			r->SetTrans(t);
 

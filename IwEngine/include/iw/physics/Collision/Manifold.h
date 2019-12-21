@@ -12,6 +12,7 @@ namespace Physics {
 		iw::vector3 A;
 		iw::vector3 B;
 		scalar PenetrationDepth;
+		bool HasCollision;
 	};
 }
 

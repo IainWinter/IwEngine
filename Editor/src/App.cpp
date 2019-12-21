@@ -8,11 +8,6 @@ namespace IW {
 	App::App() {
 		iw::ref<Context> context = Input->CreateContext("Sandbox");
 		
-		//context = Input->GetContex("Sandbox");
-
-		//Input->MapButton("Sandbox", IW::SPACE, "+jump");
-		//Input->MapButton("Sandbox", IW::SPACE, "+jump");
-
 		context->MapButton(IW::SPACE, "+jump");
 		context->MapButton(IW::SHIFT, "-jump");
 		context->MapButton(IW::D    , "+right");

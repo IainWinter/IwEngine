@@ -2,7 +2,7 @@
 #include "iw/physics/Collision/algo/ManifoldFactory.h"
 #include "iw/log/logger.h"
 #include <assert.h>
-
+#include <vector>
 
 namespace IW {
 	void DynamicsSpace::AddRigidbody(
@@ -35,10 +35,9 @@ namespace IW {
 	{
 		TryApplyGravity();
 
-		PredictTransforms(dt);
+		//PredictTransforms(dt);
 
 		//SweepPredictedBodies();
-
 
 		//SweepCastBodies(); //CheckCollisions();
 
@@ -58,8 +57,22 @@ namespace IW {
 			rigidbody->Trans()->Position += rigidbody->Velocity();
 		}
 
+		std::vector<Manifold> manifolds;
+		for (Rigidbody* a : m_rigidbodies) {
+			for (Rigidbody* b : m_rigidbodies) {
+				if (a == b) continue;
 
+				Manifold m = algo::MakeManifold(a, b);
+				if (m.HasCollision) {
+					manifolds.push_back(m);
+				}
+			}
+		}
 
+		for (Manifold& manifold : manifolds) {
+			iw::vector3 resolution = manifold.B - manifold.A;
+			manifold.BodyA->Trans()->Position += resolution / 2;
+		}
 
 		// predict where the bodies will be
 
@@ -69,12 +82,8 @@ namespace IW {
 
 		// if not then go to the broadphase pair cache and see what other bodies it could be colliding with
 
-
-
 		// At the end the forces should be cleared
  
-
-
 		ClearForces();
 	}
 
