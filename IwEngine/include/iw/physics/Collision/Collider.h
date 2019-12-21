@@ -1,6 +1,5 @@
 #pragma once
 
-#include "iw/physics/IwPhysics.h"
 #include "iw/physics/AABB.h"
 #include "iw/physics/Ray.h"
 

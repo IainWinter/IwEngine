@@ -9,6 +9,8 @@
 
 #include "imgui/imgui.h"
 
+#include "iw/physics/Dynamics/ManifoldSolver.h"
+
 namespace IW {
 	struct ModelComponents {
 		Transform* Transform;
@@ -26,6 +28,7 @@ namespace IW {
 
 	int SandboxLayer::Initialize() {
 		space.SetGravity(iw::vector3(0, -9.8f, 0));
+		space.AddSolver(new ManifoldSolver());
 
 		return 0;
 	}

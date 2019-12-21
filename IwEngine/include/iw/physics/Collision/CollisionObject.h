@@ -1,6 +1,5 @@
 #pragma once
 
-#include "iw/physics/IwPhysics.h"
 #include "iw/common/Components/Transform.h"
 #include "iw/physics/Collision/Collider.h"
 

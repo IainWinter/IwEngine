@@ -30,6 +30,23 @@ namespace IW {
 		RemoveCollisionObject(rigidbody);
 	}
 
+	void DynamicsSpace::AddSolver(
+		RigidbodySolver* solver)
+	{
+		assert(solver);
+		m_rigidbodySolvers.push_back(solver);
+	}
+
+	void DynamicsSpace::RemoveSolver(
+		RigidbodySolver* solver)
+	{
+		assert(solver);
+		auto itr = std::find(m_rigidbodySolvers.begin(), m_rigidbodySolvers.end(), solver);
+
+		assert(itr != m_rigidbodySolvers.end());
+		m_rigidbodySolvers.erase(itr);
+	}
+
 	void DynamicsSpace::Step(
 		scalar dt)
 	{
@@ -57,21 +74,8 @@ namespace IW {
 			rigidbody->Trans()->Position += rigidbody->Velocity();
 		}
 
-		std::vector<Manifold> manifolds;
-		for (Rigidbody* a : m_rigidbodies) {
-			for (Rigidbody* b : m_rigidbodies) {
-				if (a == b) continue;
-
-				Manifold m = algo::MakeManifold(a, b);
-				if (m.HasCollision) {
-					manifolds.push_back(m);
-				}
-			}
-		}
-
-		for (Manifold& manifold : manifolds) {
-			iw::vector3 resolution = manifold.B - manifold.A;
-			manifold.BodyA->Trans()->Position += resolution / 2;
+		for (RigidbodySolver* solver : m_rigidbodySolvers) {
+			solver->Solve(m_rigidbodies);
 		}
 
 		// predict where the bodies will be

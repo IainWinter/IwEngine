@@ -1,10 +1,7 @@
 #pragma once
 
-#include "iw/physics/IwPhysics.h"
-#include "Rigidbody.h"
 #include "iw/physics/Collision/CollisionSpace.h"
-#include "iw/common/Components/Transform.h"
-#include <vector>
+#include "RigidbodySolver.h"
 
 namespace IW {
 namespace Physics {
@@ -13,8 +10,9 @@ namespace Physics {
 	{
 	private:
 		std::vector<Rigidbody*> m_rigidbodies;
+		std::vector<RigidbodySolver*> m_rigidbodySolvers;
 		iw::vector3 m_gravity;
-
+		
 	public:
 		IWPHYSICS_API
 		virtual void AddRigidbody(
@@ -23,6 +21,14 @@ namespace Physics {
 		IWPHYSICS_API
 		virtual void RemoveRigidbody(
 			Rigidbody* rigidbody);
+
+		IWPHYSICS_API
+		void AddSolver(
+			RigidbodySolver* solver);
+
+		IWPHYSICS_API
+		void RemoveSolver(
+			RigidbodySolver* solver);
 
 		IWPHYSICS_API
 		virtual void Step(
