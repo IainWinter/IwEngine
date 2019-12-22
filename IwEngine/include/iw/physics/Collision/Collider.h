@@ -8,6 +8,7 @@ namespace Physics {
 	enum class ColliderShape {
 		CIRCLE, SPHERE,
 		BOX, CUBE,
+		PLANE,
 		MESH
 	};
 

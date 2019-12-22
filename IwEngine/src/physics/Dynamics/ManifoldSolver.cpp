@@ -19,7 +19,9 @@ namespace IW {
 
 		for (Manifold& manifold : manifolds) {
 			iw::vector3 resolution = manifold.B - manifold.A;
-			manifold.BodyA->Trans()->Position += resolution / 4;
+			manifold.BodyA->Trans()->Position += resolution / 2;
 		}
+
+		//iw::vector3 impulse = -manifold.BodyB->Mass() * (resolution / 2 + (manifold.BodyB->Velocity() - manifold.BodyA->Velocity().length()));
 	}
 }

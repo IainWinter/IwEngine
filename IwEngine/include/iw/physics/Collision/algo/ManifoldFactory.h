@@ -2,6 +2,7 @@
 
 #include "iw/physics/IwPhysics.h"
 #include "iw/physics/Collision/SphereCollider.h"
+#include "iw/physics/Collision/PlaneCollider.h"
 #include "iw/physics/Collision/Manifold.h"
 #include "iw/physics/Collision/CollisionObject.h"
 
@@ -10,8 +11,8 @@ namespace Physics {
 namespace algo {
 	IWPHYSICS_API
 	Manifold MakeManifold(
-		const Rigidbody* a,
-		const Rigidbody* b);
+		Rigidbody* a,
+		Rigidbody* b);
 
 namespace detail {
 	struct ManifoldPoints {
@@ -21,12 +22,16 @@ namespace detail {
 	};
 
 	ManifoldPoints FindManifoldPoints(
-		const CollisionObject* a,
-		const CollisionObject* b);
+		CollisionObject* a,
+		CollisionObject* b);
 
 	ManifoldPoints FindSphereSphereMaifoldPoints(
-		const SphereCollider* a, const Transform* ta,
-		const SphereCollider* b, const Transform* tb);
+		SphereCollider* a, Transform* ta,
+		SphereCollider* b, Transform* tb);
+
+	ManifoldPoints FindSpherePlaneMaifoldPoints(
+		SphereCollider* a, Transform* ta,
+		PlaneCollider* b, Transform* tb);
 }
 }
 }

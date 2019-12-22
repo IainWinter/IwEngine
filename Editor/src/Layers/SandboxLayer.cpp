@@ -11,6 +11,11 @@
 
 #include "iw/physics/Dynamics/ManifoldSolver.h"
 
+#include "iw/physics/Collision/PlaneCollider.h"
+#include "iw/physics/Dynamics/Rigidbody.h"
+
+#include "iw/graphics/MeshFactory.h"
+
 namespace IW {
 	struct ModelComponents {
 		Transform* Transform;
@@ -29,6 +34,24 @@ namespace IW {
 	int SandboxLayer::Initialize() {
 		space.SetGravity(iw::vector3(0, -9.8f, 0));
 		space.AddSolver(new ManifoldSolver());
+
+		Entity ent = Space->CreateEntity<Transform, Model, PlaneCollider, Rigidbody>();
+
+		iw::ref<Model> plane = Asset->Load<Model>("Plane");
+
+		Space->SetComponentData<Model>(ent, *plane);
+
+		Transform*     t = Space->SetComponentData<Transform>(ent, iw::vector3(0, -1, 0), iw::vector3(15, 1, 15));
+		PlaneCollider* s = Space->SetComponentData<PlaneCollider>(ent, iw::vector3::unit_y, 0.0f);
+		Rigidbody*     r = Space->SetComponentData<Rigidbody>(ent);
+
+		r->SetTakesGravity(false);
+		r->SetSimGravity(false);
+		r->SetMass(1);
+		r->SetCol(s);
+		r->SetTrans(t);
+
+		space.AddRigidbody(r);
 
 		return 0;
 	}
@@ -74,6 +97,7 @@ namespace IW {
 	}
 
 	float x = 0;
+	int sc = 1;
 
 	bool SandboxLayer::On(
 		ActionEvent& e)
@@ -83,7 +107,7 @@ namespace IW {
 
 		iw::ref<Model> sphere = Asset->Load<Model>("Sphere");
 
-		for (size_t i = 0; i < 5; i++) {
+		for (size_t i = 0; i < sc; i++) {
 			Entity ent = Space->CreateEntity<Transform, Model, SphereCollider, Rigidbody>();
 
 			Space->SetComponentData<Model>(ent, *sphere);
@@ -95,8 +119,8 @@ namespace IW {
 			r->SetTakesGravity(true);
 			r->SetSimGravity(true);
 			r->SetMass(1);
-			r->ApplyForce(iw::vector3(cos(x += .1f) * 50, 500, sin(x / .1f) * 50));
-			//r->ApplyForce(iw::vector3(cos(z) * 30, 100, sin(z += iw::PI * 0.01f) * 30));
+			//r->ApplyForce(iw::vector3(cos(x += .1f) * 50, 500, sin(x / .1f) * 50));
+			r->ApplyForce(iw::vector3(cos(x) * 30, 100, sin(x += 2*iw::PI / sc) * 30));
 			r->SetCol(s);
 			r->SetTrans(t);
 

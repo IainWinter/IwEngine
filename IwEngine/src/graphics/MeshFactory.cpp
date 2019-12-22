@@ -1,12 +1,14 @@
 #include "iw/graphics/MeshFactory.h"
+
 #define ICO_X .525731112119133606f
 #define ICO_Z .850650808352039932f
 
 namespace IW {
-	const unsigned mesh_factory::ico_vert_count  = 12;
-	const unsigned mesh_factory::ico_index_count = 60;
+namespace Graphics {
+	const unsigned IcoVertCount  = 12;
+	const unsigned IcoIndexCount = 60;
 
-	static const iw::vector3 ico_vert_data[] = {
+	static const iw::vector3 IcoVertData[] = {
 		iw::vector3(-ICO_X,  0,	    ICO_Z),
 		iw::vector3(ICO_X,  0,	    ICO_Z),
 		iw::vector3(-ICO_X,  0,     -ICO_Z),
@@ -21,7 +23,7 @@ namespace IW {
 		iw::vector3(-ICO_Z, -ICO_X,  0)
 	};
 
-	static const unsigned ico_index_data[] = {
+	static const unsigned IcoIndexData[] = {
 		 1,  4,  0,
 		 4,  9,	 0,
 		 4,  5,	 9,
@@ -68,10 +70,10 @@ namespace IW {
 	//	7,  2, 11
 	//};
 
-	const iw::vector3* mesh_factory::ico_verts = ico_vert_data;
-	const unsigned* mesh_factory::ico_index = ico_index_data;
+	const iw::vector3* IcoVerts = IcoVertData;
+	const unsigned*    IcoIndex = IcoIndexData;
 
-	Mesh* mesh_factory::create_icosphere(
+	Mesh* MakeIcosphere(
 		unsigned resolution)
 	{
 		unsigned res = (unsigned)pow(4, resolution);
@@ -83,15 +85,15 @@ namespace IW {
 		mesh->Normals  = new iw::vector3[mesh->VertexCount];
 		mesh->Indices  = new unsigned[mesh->IndexCount];
 
-		memcpy(mesh->Vertices, ico_verts, ico_vert_count  * sizeof(iw::vector3));
-		memcpy(mesh->Indices,  ico_index, ico_index_count * sizeof(unsigned));
+		memcpy(mesh->Vertices, IcoVerts, IcoVertCount * sizeof(iw::vector3));
+		memcpy(mesh->Indices, IcoIndex, IcoIndexCount * sizeof(unsigned));
 
 		// Verts & Index
 
-		unsigned current_index_count = ico_index_count;
-		unsigned current_vert_count  = ico_vert_count;
+		unsigned indexCount = IcoIndexCount;
+		unsigned vertCount  = IcoVertCount;
 		for (unsigned i = 0; i < resolution; i++) {
-			sub_devide(mesh->Vertices, mesh->Indices, current_index_count, current_vert_count);
+			detail::SubDevide(mesh->Vertices, mesh->Indices, indexCount, vertCount);
 		}
 
 		// Normals
@@ -101,7 +103,7 @@ namespace IW {
 		return mesh;
 	}
 
-	Mesh* mesh_factory::create_uvsphere(
+	Mesh* MakeUvSphere(
 		unsigned latCount,
 		unsigned lonCount)
 	{
@@ -168,51 +170,106 @@ namespace IW {
 		return mesh;
 	}
 
-	void mesh_factory::sub_devide(
-		iw::vector3* verts,
-		unsigned* index,
-		unsigned& current_index_count,
-		unsigned& current_vert_count)
+	IWGRAPHICS_API
+	Mesh* MakePlane(
+		unsigned xCount,
+		unsigned zCount)
 	{
-		index_lookup_map lookup;
-		unsigned* next_index = new unsigned[16U * current_index_count];
-		unsigned next_index_count = 0;
+		Mesh* mesh = new Mesh();
+		mesh->VertexCount = (xCount + 1) * (zCount + 1);
+		mesh->IndexCount  = 6 * xCount * zCount;
+		mesh->Vertices = new iw::vector3[mesh->VertexCount];
+		mesh->Normals  = new iw::vector3[mesh->VertexCount];
+		mesh->Uvs      = new iw::vector2[mesh->VertexCount];
+		mesh->Indices  = new unsigned   [mesh->IndexCount];
 
-		unsigned index_count = current_index_count;
-		for (unsigned i = 0; i < index_count; i += 3) {
-			unsigned mid0 = create_vertex_for_edge(lookup, verts, index[i],     index[i + ((i + 1) % 3)], current_vert_count);
-			unsigned mid1 = create_vertex_for_edge(lookup, verts, index[i + 1], index[i + ((i + 2) % 3)], current_vert_count);
-			unsigned mid2 = create_vertex_for_edge(lookup, verts, index[i + 2], index[i + ((i + 3) % 3)], current_vert_count);
+		float stepX = 1.0f / xCount;
+		float stepZ = 1.0f / zCount;
 
-			next_index[next_index_count++] = index[i];	   next_index[next_index_count++] = mid0; next_index[next_index_count++] = mid2;
-			next_index[next_index_count++] = index[i + 1]; next_index[next_index_count++] = mid1; next_index[next_index_count++] = mid0;
-			next_index[next_index_count++] = index[i + 2]; next_index[next_index_count++] = mid2; next_index[next_index_count++] = mid1;
-			next_index[next_index_count++] = mid0;	       next_index[next_index_count++] = mid1; next_index[next_index_count++] = mid2;
+		float stepU = 1.0f / xCount;
+		float stepV = 1.0f / zCount;
+
+		iw::vector3 offset = (-iw::vector3::unit_x - iw::vector3::unit_z) / 2;
+
+		for (unsigned x = 0; x <= xCount; x++) {
+			for (unsigned z = 0; z <= zCount; z++) {
+				unsigned i = z + x * (zCount + 1);
+
+				mesh->Vertices[i] = offset + iw::vector3(x * stepX, 0, z * stepZ);
+				mesh->Normals[i]  = iw::vector3::unit_y;
+				mesh->Uvs[i]      = iw::vector2(x * stepU, z * stepV);
+			}
 		}
 
-		memcpy(index, next_index, next_index_count * sizeof(unsigned));
-		current_index_count = next_index_count;
+		unsigned i = 0, v = 0;
+		while(v <= mesh->VertexCount - (zCount + 3)) {
+			mesh->Indices[i++] = v;
+			mesh->Indices[i++] = v + 1;
+			mesh->Indices[i++] = v + zCount + 1;
+
+			mesh->Indices[i++] = v + 1;
+			mesh->Indices[i++] = v + zCount + 2;
+			mesh->Indices[i++] = v + zCount + 1;
+
+			v++;
+			if (   v != 0
+				&& (v + 1) % (zCount + 1) == 0)
+			{
+				v++;
+			}
+		}
+
+		return mesh;
+	}
+
+namespace detail {
+	void SubDevide(
+		iw::vector3* verts,
+		unsigned* index,
+		unsigned& currentIndexCount,
+		unsigned& currentVertCount)
+	{
+		IndexLookup lookup;
+		unsigned* next_index = new unsigned[size_t(16U) * currentIndexCount];
+		unsigned nextIndexCount = 0;
+
+		unsigned indexCount = currentIndexCount;
+		for (unsigned i = 0; i < indexCount; i += 3) {
+			unsigned mid0 = CreateVertexForEdge(lookup, verts, index[i],     index[i + ((i + 1) % 3)], currentVertCount);
+			unsigned mid1 = CreateVertexForEdge(lookup, verts, index[i + 1], index[i + ((i + 2) % 3)], currentVertCount);
+			unsigned mid2 = CreateVertexForEdge(lookup, verts, index[i + 2], index[i + ((i + 3) % 3)], currentVertCount);
+
+			next_index[nextIndexCount++] = index[i];	 next_index[nextIndexCount++] = mid0; next_index[nextIndexCount++] = mid2;
+			next_index[nextIndexCount++] = index[i + 1]; next_index[nextIndexCount++] = mid1; next_index[nextIndexCount++] = mid0;
+			next_index[nextIndexCount++] = index[i + 2]; next_index[nextIndexCount++] = mid2; next_index[nextIndexCount++] = mid1;
+			next_index[nextIndexCount++] = mid0;	     next_index[nextIndexCount++] = mid1; next_index[nextIndexCount++] = mid2;
+		}
+
+		memcpy(index, next_index, nextIndexCount * sizeof(unsigned));
+		currentIndexCount = nextIndexCount;
 
 		delete[] next_index;
 	}
 
-	unsigned mesh_factory::create_vertex_for_edge(
-		index_lookup_map& lookup,
+	unsigned CreateVertexForEdge(
+		IndexLookup& lookup,
 		iw::vector3* verts,
 		unsigned first,
 		unsigned second,
-		unsigned& current_vert_count)
+		unsigned& currentVertCount)
 	{
-		index_pair key = first < second ? index_pair(first, second) : index_pair(second, first);
+		IndexPair key = first < second ? IndexPair(first, second) : IndexPair(second, first);
 
-		auto inserted = lookup.insert({ key, current_vert_count });
+		auto inserted = lookup.insert({ key, currentVertCount });
 		if (inserted.second) {
 			auto& edge0 = verts[first];
 			auto& edge1 = verts[second];
 			auto point = (edge0 + edge1).normalized_fast();
-			verts[current_vert_count++] = point;
+			verts[currentVertCount++] = point;
 		}
 
 		return inserted.first->second;
 	}
+}
+}
 }

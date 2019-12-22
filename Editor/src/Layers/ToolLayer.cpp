@@ -31,14 +31,22 @@ namespace IW {
 		iw::ref<Material> mat = std::make_shared<Material>();
 		mat->SetShader(shader);
 
-		Mesh* mesh = mesh_factory::create_uvsphere(25, 30);
-		mesh->GenNormals();
-		mesh->SetMaterial(mat);
-		mesh->Initialize(Renderer->Device);
+		Mesh* smesh = MakeUvSphere(25, 30);
+		smesh->GenNormals();
+		smesh->SetMaterial(mat);
+		smesh->Initialize(Renderer->Device);
 
-		Model m { mesh, 1 };
+		Mesh* pmesh = MakePlane(15, 15);
+		pmesh->SetMaterial(mat);
+		pmesh->Initialize(Renderer->Device);
 
-		iw::ref<Model> sphere = Asset->Give<Model>("Sphere", &m);
+		Model pm { pmesh, 1 };
+
+		Asset->Give<Model>("Plane", &pm);
+
+		Model sm { smesh, 1 };
+
+		Asset->Give<Model>("Sphere", &sm);
 
 		PerspectiveCamera* perspective = new PerspectiveCamera(1.17f, 1.778f, .01f, 2000.0f);
 
