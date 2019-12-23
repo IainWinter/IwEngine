@@ -34,7 +34,7 @@ namespace impl {
 		}
 
 		float Distance() const {
-			return D / P.length_fast();
+			return D / P.length();
 		}
 	};
 }

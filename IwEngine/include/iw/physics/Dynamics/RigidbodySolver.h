@@ -12,7 +12,8 @@ namespace Physics {
 	public:
 		IWPHYSICS_API
 		virtual void Solve(
-			std::vector<Rigidbody*>& bodies) = 0;
+			std::vector<Rigidbody*>& bodies,
+			scalar dt) = 0;
 	};
 }
 

@@ -1,10 +1,10 @@
 #pragma once
 
 #include "iw/physics/IwPhysics.h"
+#include "iw/physics/Collision/CollisionObject.h"
 #include "iw/physics/Collision/SphereCollider.h"
 #include "iw/physics/Collision/PlaneCollider.h"
 #include "iw/physics/Collision/Manifold.h"
-#include "iw/physics/Collision/CollisionObject.h"
 
 namespace IW {
 namespace Physics {

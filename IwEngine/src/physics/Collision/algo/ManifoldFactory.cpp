@@ -10,7 +10,7 @@ namespace algo {
 		detail::ManifoldPoints points = detail::FindManifoldPoints(a, b);
 
 		if (points.NoContact) {
-			return { 0, 0, 0, 0, 0, false };
+			return { 0, 0, 0, 0, false };
 		}
 
 		return {
@@ -75,18 +75,18 @@ namespace detail {
 		Transform* tb)
 	{
 		iw::vector3 A = a->Center + ta->Position;
+		iw::vector3 N = b->Plane.P.normalized() * tb->Rotation + tb->Position;
+		iw::vector3 P = N * b->Plane.D;
 
-		iw::vector3 d = (b->Plane.P).dot(A) - b->Plane.D;
+		float d = (A - P).dot(N);
 
-		iw::vector3 poi = a->Center + d * b->Plane.P;
-
-		if (d.length() > a->Radius) {
+		if (d > a->Radius) {
 			return { 0, 0, true };
 		}
 
 		return {
-			poi,
-			A + d.normalized() * a->Radius,
+			A - N * a->Radius,
+			A - N * d,
 			false
 		};
 	}

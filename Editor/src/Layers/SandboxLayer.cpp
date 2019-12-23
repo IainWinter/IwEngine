@@ -16,6 +16,8 @@
 
 #include "iw/graphics/MeshFactory.h"
 
+#include "iw/input/Devices/Mouse.h"
+
 namespace IW {
 	struct ModelComponents {
 		Transform* Transform;
@@ -41,7 +43,7 @@ namespace IW {
 
 		Space->SetComponentData<Model>(ent, *plane);
 
-		Transform*     t = Space->SetComponentData<Transform>(ent, iw::vector3(0, -1, 0), iw::vector3(15, 1, 15));
+		Transform*     t = Space->SetComponentData<Transform>(ent, iw::vector3(0, 0, 0), iw::vector3(15, 1, 15), iw::quaternion::identity);
 		PlaneCollider* s = Space->SetComponentData<PlaneCollider>(ent, iw::vector3::unit_y, 0.0f);
 		Rigidbody*     r = Space->SetComponentData<Rigidbody>(ent);
 
@@ -79,6 +81,18 @@ namespace IW {
 			}
 		}
 
+		for (auto p_e : Space->Query<Transform, PlaneCollider>()) {
+			auto [p_t, p_p] = p_e.Components.TieTo<Transform, PlaneCollider>();
+
+			if (IW::Mouse::ButtonDown(IW::XMOUSE1)) {
+				p_t->Rotation *= iw::quaternion::from_euler_angles(iw::PI, 0, 0);
+			}
+
+			if (IW::Mouse::ButtonDown(IW::XMOUSE2)) {
+				p_t->Rotation *= iw::quaternion::from_euler_angles(iw::PI, 0, 0);
+			}
+		}
+
 		Renderer->EndScene();
 	}
 
@@ -112,7 +126,7 @@ namespace IW {
 
 			Space->SetComponentData<Model>(ent, *sphere);
 
-			Transform*      t = Space->SetComponentData<Transform>     (ent, iw::vector3(0, 0, 0));
+			Transform*      t = Space->SetComponentData<Transform>     (ent, iw::vector3(0, 5, 0));
 			SphereCollider* s = Space->SetComponentData<SphereCollider>(ent, iw::vector3::zero, 1.0f);
 			Rigidbody*      r = Space->SetComponentData<Rigidbody>     (ent);
 
@@ -120,7 +134,7 @@ namespace IW {
 			r->SetSimGravity(true);
 			r->SetMass(1);
 			//r->ApplyForce(iw::vector3(cos(x += .1f) * 50, 500, sin(x / .1f) * 50));
-			r->ApplyForce(iw::vector3(cos(x) * 30, 100, sin(x += 2*iw::PI / sc) * 30));
+			r->ApplyForce(iw::vector3(cos(x) * 30, 100, sin(x += 2 * iw::PI / sc) * 30));
 			r->SetCol(s);
 			r->SetTrans(t);
 

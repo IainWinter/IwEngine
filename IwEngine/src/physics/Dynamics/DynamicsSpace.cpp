@@ -52,7 +52,7 @@ namespace IW {
 	{
 		TryApplyGravity();
 
-		//PredictTransforms(dt);
+		PredictTransforms(dt);
 
 		//SweepPredictedBodies();
 
@@ -61,21 +61,14 @@ namespace IW {
 		//StepTransforms();
 		
 		//ResolveTransforms();
-		
-		for (Rigidbody* rigidbody : m_rigidbodies) {
-			iw::vector3 vel = dt * rigidbody->Force() / rigidbody->Mass() + rigidbody->Velocity();
-
-			if (rigidbody->Trans()->Position.y <= -10) {
-				rigidbody->ApplyForce(-rigidbody->Mass() * vel / dt);
-			}
-
-			rigidbody->SetVelocity(dt * rigidbody->Force() / rigidbody->Mass() + rigidbody->Velocity());
-
-			rigidbody->Trans()->Position += rigidbody->Velocity();
-		}
 
 		for (RigidbodySolver* solver : m_rigidbodySolvers) {
-			solver->Solve(m_rigidbodies);
+			solver->Solve(m_rigidbodies, dt);
+		}
+
+		for (Rigidbody* rigidbody : m_rigidbodies) {
+			rigidbody->SetVelocity(dt * rigidbody->Force() / rigidbody->Mass() + rigidbody->Velocity());
+			rigidbody->Trans()->Position += rigidbody->Velocity();
 		}
 
 		// predict where the bodies will be
@@ -124,9 +117,7 @@ namespace IW {
 		for (Rigidbody* rigidbody : m_rigidbodies) {
 			Transform t = *rigidbody->Trans();
 
-			rigidbody->SetVelocity(dt * rigidbody->Force() / rigidbody->Mass() + rigidbody->Velocity());
-
-			t.Position += rigidbody->Velocity();
+			t.Position += rigidbody->Velocity() + dt * rigidbody->Force() / rigidbody->Mass();
 			rigidbody->SetNextTrans(t);
 		}
 	}

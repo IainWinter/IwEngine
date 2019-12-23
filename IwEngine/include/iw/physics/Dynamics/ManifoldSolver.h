@@ -11,7 +11,8 @@ namespace Physics {
 	public:
 		IWPHYSICS_API
 		void Solve(
-			std::vector<Rigidbody*>& bodies) override;
+			std::vector<Rigidbody*>& bodies,
+			scalar dt) override;
 	};
 }
 

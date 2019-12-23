@@ -141,15 +141,16 @@ namespace math {
 		vector3 operator/=(
 			const vector3& other);
 
-		vector3 operator+ (
-			float other) const;
-		vector3 operator- (
+		vector3 operator+(
 			float other) const;
 
-		vector3 operator* (
+		vector3 operator-(
 			float other) const;
 
-		vector3 operator/ (
+		vector3 operator*(
+			float other) const;
+
+		vector3 operator/(
 			float other) const;
 
 		vector3 operator+=(
