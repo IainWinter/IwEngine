@@ -614,6 +614,34 @@ namespace iw {
 		);
 	}
 
+	matrix3 matrix3::create_tensor(
+		vector3 xyz, 
+		float m)
+	{
+		return create_tensor(xyz.x, xyz.y, xyz.z, m);
+	}
+
+	matrix3 matrix3::create_tensor(
+		float x, 
+		float y,
+		float z,
+		float m)
+	{
+		float xx = m * (x * x);
+		float yy = m * (y * y);
+		float zz = m * (z * z);
+
+		float xy = m * x * y;
+		float xz = m * x * z;
+		float yz = m * y * z;
+
+		return matrix3(
+			xx, xy, xz,
+			xy, yy, yz,
+			xz, yz, zz
+		);
+	}
+
 	std::ostream& math::operator<<(
 		std::ostream& stream,
 		const matrix3& a)

@@ -1,6 +1,13 @@
 #include "iw/physics/Dynamics/Rigidbody.h"
 
 namespace IW {
+	Rigidbody::Rigidbody(
+		bool isKinematic)
+		: m_takesGravity(true)
+		, m_simGravity(true)
+		, m_isKinematic(isKinematic)
+	{}
+
 	void Rigidbody::ApplyForce(
 		const iw::vector3& force)
 	{
@@ -45,6 +52,10 @@ namespace IW {
 		return m_simGravity;
 	}
 
+	bool Rigidbody::IsKinematic() const {
+		return m_isKinematic;
+	}
+
 	const Transform& Rigidbody::NextTrans() const {
 		return m_nextTrans;
 	}
@@ -83,6 +94,12 @@ namespace IW {
 		bool simGravity)
 	{
 		m_simGravity = simGravity;
+	}
+
+	void Rigidbody::SetIsKinematic(
+		bool isKinematic)
+	{
+		m_isKinematic = isKinematic;
 	}
 	
 	void Rigidbody::SetNextTrans(

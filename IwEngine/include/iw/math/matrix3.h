@@ -175,7 +175,6 @@ namespace math {
 		bool operator!=(
 			const matrix3& other) const;
 
-
 		/**
 		* Returns a matrix with a specified rotation around an axis.
 		*
@@ -287,6 +286,30 @@ namespace math {
 			float x,
 			float y,
 			float z);
+
+		/**
+		* Returns a 3x3 tensor.
+		*
+		* @param xyz Vector of rotation.
+		* @param m Scale of rotation.
+		*/
+		static matrix3 create_tensor(
+			iw::vector3 xyz,
+			float m);
+
+		/**
+		* Returns a 3x3 tensor.
+		*
+		* @param x X Component of vector of rotation.
+		* @param y Y Component of vector of rotation.
+		* @param z Z Component of vector of rotation.
+		* @param m Scale of rotation.
+		*/
+		static matrix3 create_tensor(
+			float x,
+			float y,
+			float z,
+			float m);
 
 		IWMATH_API
 		friend std::ostream& operator<<(

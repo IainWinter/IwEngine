@@ -15,10 +15,15 @@ namespace Physics {
 		scalar m_invMass;          // 1 / Mass of rigidbody
 		bool m_takesGravity;       // If the rigidbody will use its own gravity or take it from the space
 		bool m_simGravity;         // If the rigidbody will simulate gravity
+		bool m_isKinematic;        // If the rigidbody gets simulated. Still participates with collisions, but is unefected.
 
 		Transform  m_nextTrans;    // Where the rigidbody will be next step if there is no interference
 
 	public:
+		IWPHYSICS_API
+		Rigidbody(
+			bool isKinematic = true);
+
 		IWPHYSICS_API
 		void ApplyForce(
 			const iw::vector3& force);
@@ -38,6 +43,7 @@ namespace Physics {
 		scalar InvMass() const;
 		bool TakesGravity() const;
 		bool SimGravity() const;
+		bool IsKinematic() const;
 		const Transform& NextTrans() const;
 
 		IWPHYSICS_API
@@ -63,6 +69,11 @@ namespace Physics {
 		IWPHYSICS_API
 		void SetSimGravity(
 			bool simGravity);
+
+		IWPHYSICS_API
+		void SetIsKinematic(
+			bool isKinematic);
+
 
 		IWPHYSICS_API
 		void SetNextTrans(

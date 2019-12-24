@@ -67,10 +67,12 @@ namespace IW {
 		}
 
 		for (Rigidbody* rigidbody : m_rigidbodies) {
-			rigidbody->SetVelocity(dt * rigidbody->Force() * rigidbody->Mass() + rigidbody->Velocity());
-			rigidbody->Trans()->Position += rigidbody->Velocity();
+			if (rigidbody->IsKinematic()) {
+				rigidbody->SetVelocity(dt * rigidbody->Force() * rigidbody->Mass() + rigidbody->Velocity());
+				rigidbody->Trans()->Position += rigidbody->Velocity();
 
-			rigidbody->SetVelocity(rigidbody->Velocity() * .98f);
+				rigidbody->SetVelocity(rigidbody->Velocity() * .98f);
+			}
 		}
 
 		// predict where the bodies will be
@@ -99,7 +101,7 @@ namespace IW {
 
 	void DynamicsSpace::TrySetGravity() {
 		for (Rigidbody* rigidbody : m_rigidbodies) {
-			if (rigidbody->TakesGravity()) {
+			if (rigidbody->TakesGravity() && rigidbody->IsKinematic()) {
 				rigidbody->SetGravity(m_gravity);
 			}
 		}
@@ -107,7 +109,7 @@ namespace IW {
 
 	void DynamicsSpace::TryApplyGravity() {
 		for (Rigidbody* rigidbody : m_rigidbodies) {
-			if (rigidbody->SimGravity()) {
+			if (rigidbody->SimGravity() && rigidbody->IsKinematic()) {
 				rigidbody->ApplyGravity();
 			}
 		}
@@ -117,10 +119,12 @@ namespace IW {
 		scalar dt)
 	{
 		for (Rigidbody* rigidbody : m_rigidbodies) {
-			Transform t = *rigidbody->Trans();
+			if (rigidbody->IsKinematic()) {
+				Transform t = *rigidbody->Trans();
 
-			t.Position += rigidbody->Velocity() + dt * rigidbody->Force() / rigidbody->Mass();
-			rigidbody->SetNextTrans(t);
+				t.Position += rigidbody->Velocity() + dt * rigidbody->Force() / rigidbody->Mass();
+				rigidbody->SetNextTrans(t);
+			}
 		}
 	}
 
@@ -132,7 +136,9 @@ namespace IW {
 
 	void DynamicsSpace::ClearForces() {
 		for (Rigidbody* rigidbody : m_rigidbodies) {
-			rigidbody->SetForce(0.0f);
+			if (rigidbody->IsKinematic()) {
+				rigidbody->SetForce(0.0f);
+			}
 		}
 	}
 }

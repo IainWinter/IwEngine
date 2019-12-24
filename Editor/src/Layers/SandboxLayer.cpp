@@ -52,8 +52,7 @@ namespace IW {
 		PlaneCollider* s = Space->SetComponentData<PlaneCollider>(ent, iw::vector3::unit_y, 0.0f);
 		Rigidbody*     r = Space->SetComponentData<Rigidbody>(ent);
 
-		r->SetTakesGravity(false);
-		r->SetSimGravity(false);
+		r->SetIsKinematic(false);
 		r->SetMass(1);
 		r->SetCol(s);
 		r->SetTrans(t);
@@ -135,8 +134,6 @@ namespace IW {
 			SphereCollider* s = Space->SetComponentData<SphereCollider>(ent, iw::vector3::zero, 1.0f);
 			Rigidbody*      r = Space->SetComponentData<Rigidbody>     (ent);
 
-			r->SetTakesGravity(true);
-			r->SetSimGravity(true);
 			r->SetMass(2);
 			//r->ApplyForce(iw::vector3(cos(x += .1f) * 50, 500, sin(x / .1f) * 50));
 			r->ApplyForce(iw::vector3(cos(x) * 30, 100, sin(x += 2 * iw::PI / sc) * 30));

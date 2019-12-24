@@ -32,29 +32,25 @@ namespace IW {
 			iw::vector3 bVel = bBody->Velocity(); //bBody->NextTrans().Position - bBody->Trans()->Position;
 			scalar      rVel = (bVel - aVel).dot(manifold.Normal);
 
-			if (rVel > 0)
-				continue;
+			//if (rVel > 0)
+			//	continue;
 
-			scalar e = 1.0f;
+			scalar e = .0f;
 			scalar j = -(1.0f + e) * rVel / (aBody->InvMass() + bBody->InvMass());
 
 			iw::vector3 impluse = j * manifold.Normal;
 			iw::vector3 aImp = -impluse * aBody->InvMass() / dt;
 			iw::vector3 bImp =  impluse * bBody->InvMass() / dt;
 
-			if (bBody->Col()->Shape == ColliderShape::PLANE) {
-				aBody->ApplyForce(aImp);
+			float scale = aBody->IsKinematic() && bBody->IsKinematic() ? 0.5f : 1.0f;
 
-				aBody->Trans()->Position += resolution;
+			if (aBody->IsKinematic()) {
+				aBody->ApplyForce(aImp * scale);
+				aBody->Trans()->Position += resolution * scale;
 			}
 
-			else {
-				resolution /= 2;
-
-				aBody->ApplyForce(aImp / 2);
-				bBody->ApplyForce(bImp / 2);
-
-				aBody->Trans()->Position += resolution;
+			if (bBody->IsKinematic()) {
+				bBody->ApplyForce(bImp * scale);
 				bBody->Trans()->Position -= resolution;
 			}
 		}
