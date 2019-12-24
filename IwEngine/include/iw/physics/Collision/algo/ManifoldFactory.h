@@ -18,6 +18,7 @@ namespace detail {
 	struct ManifoldPoints {
 		iw::vector3 A;
 		iw::vector3 B;
+		iw::vector3 Normal;
 		bool NoContact;
 	};
 

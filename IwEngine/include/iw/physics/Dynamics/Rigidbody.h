@@ -12,7 +12,7 @@ namespace Physics {
 		iw::vector3 m_gravity;     // Gravitational force on the rigidbody
 		iw::vector3 m_force;       // Net force on the rigidbody
 		iw::vector3 m_velocity;    // Velocity of rigidbody
-		scalar m_mass;             // Mass of rigidbody
+		scalar m_invMass;          // 1 / Mass of rigidbody
 		bool m_takesGravity;       // If the rigidbody will use its own gravity or take it from the space
 		bool m_simGravity;         // If the rigidbody will simulate gravity
 
@@ -35,6 +35,7 @@ namespace Physics {
 		const iw::vector3& Force() const;
 		const iw::vector3& Velocity() const;
 		scalar Mass() const;
+		scalar InvMass() const;
 		bool TakesGravity() const;
 		bool SimGravity() const;
 		const Transform& NextTrans() const;

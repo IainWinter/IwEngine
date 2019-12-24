@@ -2,9 +2,9 @@
 
 namespace IW {
 	iw::matrix4 Transform::Transformation() const {
-		return iw::matrix4::create_from_quaternion(Rotation)
-			 * iw::matrix4::create_scale(Scale)
-			 * iw::matrix4::create_translation(Position);
+		return iw::matrix4::create_scale(Scale)
+			 * iw::matrix4::create_translation(Position)
+			 * iw::matrix4::create_from_quaternion(Rotation);
 	}
 
 	iw::vector3 Transform::Forward() const {

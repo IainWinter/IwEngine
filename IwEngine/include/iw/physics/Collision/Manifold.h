@@ -9,6 +9,7 @@ namespace Physics {
 		Rigidbody* BodyB;
 		iw::vector3 A;
 		iw::vector3 B;
+		iw::vector3 Normal;
 		scalar PenetrationDepth;
 		bool HasCollision;
 	};

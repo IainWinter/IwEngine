@@ -67,8 +67,10 @@ namespace IW {
 		}
 
 		for (Rigidbody* rigidbody : m_rigidbodies) {
-			rigidbody->SetVelocity(dt * rigidbody->Force() / rigidbody->Mass() + rigidbody->Velocity());
+			rigidbody->SetVelocity(dt * rigidbody->Force() * rigidbody->Mass() + rigidbody->Velocity());
 			rigidbody->Trans()->Position += rigidbody->Velocity();
+
+			rigidbody->SetVelocity(rigidbody->Velocity() * .98f);
 		}
 
 		// predict where the bodies will be

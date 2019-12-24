@@ -8,7 +8,7 @@ namespace IW {
 	}
 
 	void Rigidbody::ApplyGravity() {
-		ApplyForce(m_gravity * m_mass);
+		ApplyForce(m_gravity * Mass());
 	}
 
 	void Rigidbody::TransCenterOfMass(
@@ -30,7 +30,11 @@ namespace IW {
 	}
 
 	scalar Rigidbody::Mass() const {
-		return m_mass;
+		return 1.0f / m_invMass;
+	}
+
+	scalar Rigidbody::InvMass() const {
+		return m_invMass;
 	}
 
 	bool Rigidbody::TakesGravity() const {
@@ -66,7 +70,7 @@ namespace IW {
 	void Rigidbody::SetMass(
 		scalar mass)
 	{
-		m_mass = mass;
+		m_invMass = 1.0f / mass;
 	}
 
 	void Rigidbody::SetTakesGravity(

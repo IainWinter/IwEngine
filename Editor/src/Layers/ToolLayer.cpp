@@ -9,6 +9,8 @@
 
 #include "Events/ActionEvents.h"
 
+#include "iw/physics/Collision/PlaneCollider.h"
+
 namespace IW {
 	struct ModelComponents {
 		Transform* Transform;
@@ -36,7 +38,7 @@ namespace IW {
 		smesh->SetMaterial(mat);
 		smesh->Initialize(Renderer->Device);
 
-		Mesh* pmesh = MakePlane(15, 15);
+		Mesh* pmesh = MakePlane(1, 1);
 		pmesh->SetMaterial(mat);
 		pmesh->Initialize(Renderer->Device);
 

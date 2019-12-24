@@ -10,12 +10,13 @@ namespace algo {
 		detail::ManifoldPoints points = detail::FindManifoldPoints(a, b);
 
 		if (points.NoContact) {
-			return { 0, 0, 0, 0, false };
+			return { 0, 0, 0, 0, 0, false };
 		}
 
 		return {
 			a, b,
 			points.A, points.B,
+			points.Normal,
 			(points.B - points.A).length(),
 			true
 		};
@@ -42,7 +43,7 @@ namespace detail {
 				(PlaneCollider*)b->Col(), b->Trans());
 		}
 
-		return { 0, 0, true };
+		return { 0, 0, 0, true };
 	}
 
 	ManifoldPoints FindSphereSphereMaifoldPoints(
@@ -58,12 +59,13 @@ namespace detail {
 		if (   AtoB.length() > 2 * a->Radius /** ta->Scale*/
 			|| BtoA.length() > 2 * b->Radius /** ta->Scale*/) // cant compare spheres that are scaled non uniformly should be v > rad * scale
 		{
-			return { 0, 0, true };
+			return { 0, 0, 0, true };
 		}
 
 		return {
 			A + AtoB.normalized() * a->Radius,
 			B + BtoA.normalized() * b->Radius,
+			AtoB.normalized(),
 			false
 		};
 	}
@@ -81,12 +83,13 @@ namespace detail {
 		float d = (A - P).dot(N);
 
 		if (d > a->Radius) {
-			return { 0, 0, true };
+			return { 0, 0, 0, true };
 		}
 
 		return {
 			A - N * a->Radius,
 			A - N * d,
+			-N.normalized(),
 			false
 		};
 	}

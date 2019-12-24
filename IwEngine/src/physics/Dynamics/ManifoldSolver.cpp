@@ -24,28 +24,38 @@ namespace IW {
 
 			iw::vector3 resolution = manifold.B - manifold.A;
 
-			iw::vector3 aVel = aBody->NextTrans().Position - aBody->Trans()->Position;
-			iw::vector3 bVel = bBody->NextTrans().Position - bBody->Trans()->Position;
+			if (resolution == 0.0f) {
+				resolution = 0.1f; // if objects are exactly ontop of eachother nudge them a little
+			}
 
-			iw::vector3 rVel = (bVel - aVel) * resolution.normalized();
+			iw::vector3 aVel = aBody->Velocity(); // aBody->NextTrans().Position - aBody->Trans()->Position;
+			iw::vector3 bVel = bBody->Velocity(); //bBody->NextTrans().Position - bBody->Trans()->Position;
+			scalar      rVel = (bVel - aVel).dot(manifold.Normal);
 
-			iw::vector3 aImp =  rVel * manifold.BodyA->Mass() / dt;
-			iw::vector3 bImp = -rVel * manifold.BodyB->Mass() / dt;
+			if (rVel > 0)
+				continue;
+
+			scalar e = 1.0f;
+			scalar j = -(1.0f + e) * rVel / (aBody->InvMass() + bBody->InvMass());
+
+			iw::vector3 impluse = j * manifold.Normal;
+			iw::vector3 aImp = -impluse * aBody->InvMass() / dt;
+			iw::vector3 bImp =  impluse * bBody->InvMass() / dt;
 
 			if (bBody->Col()->Shape == ColliderShape::PLANE) {
 				aBody->ApplyForce(aImp);
-				aBody->Trans()->Position += resolution / 2;
 
-				//manifold.BodyA->Trans()->Position += resolution;
+				aBody->Trans()->Position += resolution;
 			}
 
 			else {
-				aBody->ApplyForce(aImp);
-				bBody->ApplyForce(bImp);
+				resolution /= 2;
 
-				aBody->Trans()->Position += resolution / 2;
-				bBody->Trans()->Position -= resolution / 2;
-				//manifold.BodyA->Trans()->Position += resolution / 2;
+				aBody->ApplyForce(aImp / 2);
+				bBody->ApplyForce(bImp / 2);
+
+				aBody->Trans()->Position += resolution;
+				bBody->Trans()->Position -= resolution;
 			}
 		}
 

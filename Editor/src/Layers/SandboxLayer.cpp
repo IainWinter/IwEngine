@@ -29,6 +29,11 @@ namespace IW {
 		CameraController* Controller;
 	};
 
+	struct PlaneComponents {
+		Transform* Transform;
+		PlaneCollider* Collider;
+	};
+
 	SandboxLayer::SandboxLayer()
 		: Layer("Sandbox")
 	{}
@@ -43,7 +48,7 @@ namespace IW {
 
 		Space->SetComponentData<Model>(ent, *plane);
 
-		Transform*     t = Space->SetComponentData<Transform>(ent, iw::vector3(0, 0, 0), iw::vector3(15, 1, 15), iw::quaternion::identity);
+		Transform*     t = Space->SetComponentData<Transform>(ent, iw::vector3(0, 0, 0), iw::vector3(150, 1, 150));
 		PlaneCollider* s = Space->SetComponentData<PlaneCollider>(ent, iw::vector3::unit_y, 0.0f);
 		Rigidbody*     r = Space->SetComponentData<Rigidbody>(ent);
 
@@ -82,14 +87,14 @@ namespace IW {
 		}
 
 		for (auto p_e : Space->Query<Transform, PlaneCollider>()) {
-			auto [p_t, p_p] = p_e.Components.TieTo<Transform, PlaneCollider>();
+			auto [p_t, p_p] = p_e.Components.Tie<PlaneComponents>();
 
 			if (IW::Mouse::ButtonDown(IW::XMOUSE1)) {
-				p_t->Rotation *= iw::quaternion::from_euler_angles(iw::PI, 0, 0);
+				p_t->Rotation *= iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::PI * Time::DeltaTime());
 			}
 
 			if (IW::Mouse::ButtonDown(IW::XMOUSE2)) {
-				p_t->Rotation *= iw::quaternion::from_euler_angles(iw::PI, 0, 0);
+				p_t->Rotation *= iw::quaternion::from_axis_angle(iw::vector3::unit_x, -iw::PI * Time::DeltaTime());
 			}
 		}
 
@@ -111,7 +116,7 @@ namespace IW {
 	}
 
 	float x = 0;
-	int sc = 1;
+	int sc = 5;
 
 	bool SandboxLayer::On(
 		ActionEvent& e)
@@ -126,13 +131,13 @@ namespace IW {
 
 			Space->SetComponentData<Model>(ent, *sphere);
 
-			Transform*      t = Space->SetComponentData<Transform>     (ent, iw::vector3(0, 5, 0));
+			Transform*      t = Space->SetComponentData<Transform>     (ent, iw::vector3(cos(x) * 5, 5, sin(x) * 5));
 			SphereCollider* s = Space->SetComponentData<SphereCollider>(ent, iw::vector3::zero, 1.0f);
 			Rigidbody*      r = Space->SetComponentData<Rigidbody>     (ent);
 
 			r->SetTakesGravity(true);
 			r->SetSimGravity(true);
-			r->SetMass(1);
+			r->SetMass(2);
 			//r->ApplyForce(iw::vector3(cos(x += .1f) * 50, 500, sin(x / .1f) * 50));
 			r->ApplyForce(iw::vector3(cos(x) * 30, 100, sin(x += 2 * iw::PI / sc) * 30));
 			r->SetCol(s);
