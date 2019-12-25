@@ -9,8 +9,6 @@ private:
 	iw::vector3 lightPositions[4];
 	iw::vector3 lightColors[4];
 
-	iw::ref<IW::Material> material;
-
 public:
 	GameLayer3D();
 

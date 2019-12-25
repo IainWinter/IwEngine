@@ -39,12 +39,21 @@ namespace IW {
 	{}
 
 	int SandboxLayer::Initialize() {
+		auto& directional = Asset->Load<IW::Shader>("shaders/shadows/directional.shader");
+		auto&  nullFilter = Asset->Load<IW::Shader>("shaders/shadows/directional.shader");
+		auto&  blurfilter = Asset->Load<IW::Shader>("shaders/shadows/directional.shader");
+
+		iw::ref<IW::Material> mat = std::make_shared<IW::Material>(directional);
+
+
+
 		space.SetGravity(iw::vector3(0, -9.8f, 0));
 		space.AddSolver(new ManifoldSolver());
 
 		Entity ent = Space->CreateEntity<Transform, Model, PlaneCollider, Rigidbody>();
 
 		iw::ref<Model> plane = Asset->Load<Model>("Plane");
+		
 
 		Space->SetComponentData<Model>(ent, *plane);
 

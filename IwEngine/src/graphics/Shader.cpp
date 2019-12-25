@@ -39,7 +39,7 @@ namespace IW {
 			}
 		}
 
-		Program = device->CreatePipeline(vertex, fragment, geometry);
+		Program = iw::ref<IPipeline>(device->CreatePipeline(vertex, fragment, geometry));
 	}
 }
 

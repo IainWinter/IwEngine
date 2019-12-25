@@ -5,6 +5,8 @@
 #include "iw/input/Devices/Keyboard.h"
 #include "iw/physics/AABB.h"
 
+#include "IW/physics/AABB.h";
+
 struct Components {
 	IW::Transform* Transform;
 	Enemy*         Enemy;
@@ -34,12 +36,12 @@ void EnemySystem::Update(
 			enemy->Rotation = fmod(enemy->Rotation + enemy->Speed, iw::PI2);
 			iw::quaternion rot = iw::quaternion::from_euler_angles(0, enemy->Rotation, 0);
 
-			IW::Entity spawned = Space->CreateEntity<IW::Transform, IW::ModelComponent, Bullet, IwPhysics::AABB2D>();
+			IW::Entity spawned = Space->CreateEntity<IW::Transform, IW::ModelComponent, Bullet, IW::AABB2>();
 			
 			Space->SetComponentData<IW::Transform>     (spawned, transform->Position + iw::vector3(sqrt(2), 0, 0) * rot, iw::vector3(.25f), rot);
 			Space->SetComponentData<IW::ModelComponent>(spawned, CircleMesh, 1U);
 			Space->SetComponentData<Bullet>            (spawned, LINE, 5.0f);
-			Space->SetComponentData<IwPhysics::AABB2D> (spawned, iw::vector2(-0.25f), iw::vector2(0.25f));
+			Space->SetComponentData<IW::AABB2> (spawned, iw::vector2(-0.25f), iw::vector2(0.25f));
 		}
 
 		if (enemy->Timer <= -enemy->CooldownTime) {

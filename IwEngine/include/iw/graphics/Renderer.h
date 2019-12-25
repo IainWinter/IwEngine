@@ -6,6 +6,7 @@
 #include "iw/renderer/Device.h"
 #include "iw/common/Components/Transform.h"
 #include "iw/util/memory/smart_pointers.h"
+#include <unordered_map>
 #include <vector>
 
 namespace IW {
@@ -18,7 +19,7 @@ namespace Graphics {
 		iw::ref<IDevice> Device;
 	private:
 		Mesh* m_filterMesh;
-
+		
 	public:
 		IWGRAPHICS_API
 		Renderer(
@@ -37,6 +38,17 @@ namespace Graphics {
 		void End();
 
 		IWGRAPHICS_API
+		void SetShader(
+			std::string name);
+
+		IWGRAPHICS_API
+		void SetShader(
+			iw::ref<Shader>& shader);
+
+		IWGRAPHICS_API
+		void RenderLight();
+
+		IWGRAPHICS_API
 		void BeginScene(
 			RenderTarget* target = nullptr);
 
@@ -50,7 +62,7 @@ namespace Graphics {
 
 		IWGRAPHICS_API
 		void ApplyFilter(
-			iw::ref<IPipeline>& pipeline,
+			iw::ref<Shader>& filter,
 			RenderTarget* source,
 			RenderTarget* dest = nullptr);
 	};

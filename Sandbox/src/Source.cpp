@@ -29,9 +29,23 @@ class Game
 {
 public:
 	Game() {
-		Input->CreateDevice<IW::Mouse>();
-		//InputManager.CreateDevice<IW::RawMouse>();
-		Input->CreateDevice<IW::RawKeyboard>();
+		iw::ref<IW::Context> context = Input->CreateContext("Sandbox");
+
+		context->MapButton(IW::SPACE, "+jump");
+		context->MapButton(IW::SHIFT, "-jump");
+		context->MapButton(IW::RIGHT, "+right");
+		context->MapButton(IW::LEFT,  "-right");
+		context->MapButton(IW::UP,    "+forward");
+		context->MapButton(IW::DOWN,  "-forward");
+		context->MapButton(IW::X,     "dssh");
+
+		iw::ref<IW::Device> m  = Input->CreateDevice<IW::Mouse>();
+		iw::ref<IW::Device> rm = Input->CreateDevice<IW::RawMouse>();
+		iw::ref<IW::Device> k  = Input->CreateDevice<IW::RawKeyboard>();
+
+		context->AddDevice(m);
+		context->AddDevice(rm);
+		context->AddDevice(k);
 
 		PushLayer<GameLayer3D>();
 	}

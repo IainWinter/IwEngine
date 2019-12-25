@@ -61,7 +61,7 @@ int GameLayer3D::Initialize()
 	// Create uniform buffer for the camera and set it for the pipelines that need it
 
 	cameraBuffer = Renderer->Device->CreateUniformBuffer(2 * sizeof(iw::matrix4));
-	pbrPipeline->Handle->SetBuffer("Camera", cameraBuffer);
+	pbrPipeline->Program->SetBuffer("Camera", cameraBuffer);
 
 	// Setup render targets for shadow map and blur filter
 
@@ -70,14 +70,19 @@ int GameLayer3D::Initialize()
 	shadowTarget->Initialize(Renderer->Device);
 	shadowTargetBlur->Initialize(Renderer->Device);
 
-	iw::ref<IW::Model> floorMesh = Asset->Load<IW::Model>("quad.obj");
+	IW::Mesh* floorMesh = IW::MakePlane(10, 10);
+	floorMesh->GenTangents();
+	floorMesh->Initialize(Renderer->Device);
 	
-	IW::Mesh* mesh = IW::mesh_factory::create_uvsphere(24, 48);
+	IW::Mesh* mesh = IW::MakeUvSphere(24, 48);
 	mesh->GenTangents();
 	mesh->Initialize(Renderer->Device);
 
-	material = std::make_shared<IW::Material>(pbrPipeline->Handle);
-	mesh->SetMaterial(material);
+	iw::ref<IW::Material> mat = std::make_shared<IW::Material>(pbrPipeline);
+	iw::ref<IW::Material> floorMat = std::make_shared<IW::Material>(pbrPipeline);
+
+	mesh->SetMaterial(mat);
+	floorMesh->SetMaterial(floorMat);
 
 	iw::ref<IW::Texture> albedo    = Asset->Load<IW::Texture>("textures/metal/albedo.jpg");
 	iw::ref<IW::Texture> normal    = Asset->Load<IW::Texture>("textures/metal/normal.jpg");
@@ -101,26 +106,19 @@ int GameLayer3D::Initialize()
 	troughness->Initialize(Renderer->Device);
 	tao       ->Initialize(Renderer->Device);
 
-	material->SetTexture("albedoMap",    albedo);
-	material->SetTexture("normalMap",    normal);
-	material->SetTexture("metallicMap",  metallic);
-	material->SetTexture("roughnessMap", roughness);
-	material->SetTexture("aoMap",        ao);
-	material->SetTexture("shadowMap",    &shadowTarget->Textures[0]);
+	mesh->Material->SetTexture("albedoMap",    albedo);
+	mesh->Material->SetTexture("normalMap",    normal);
+	mesh->Material->SetTexture("metallicMap",  metallic);
+	mesh->Material->SetTexture("roughnessMap", roughness);
+	mesh->Material->SetTexture("aoMap",        ao);
+	mesh->Material->SetTexture("shadowMap",    &shadowTarget->Textures[0]);
 
-	for (size_t i = 0; i < floorMesh->MeshCount; i++) {
-		floorMesh->Meshes[i].Initialize(Renderer->Device);
-
-		if (floorMesh->Meshes[i].Material->Pipeline != nullptr) continue;
-
-		floorMesh->Meshes[i].Material->SetTexture("albedoMap", talbedo);
-		floorMesh->Meshes[i].Material->SetTexture("normalMap", tnormal);
-		floorMesh->Meshes[i].Material->SetTexture("metallicMap", tmetallic);
-		floorMesh->Meshes[i].Material->SetTexture("roughnessMap", troughness);
-		floorMesh->Meshes[i].Material->SetTexture("aoMap", tao);
-		floorMesh->Meshes[i].Material->SetTexture("shadowMap", &shadowTarget->Textures[0]);
-		floorMesh->Meshes[i].Material->Pipeline = pbrPipeline->Handle;
-	}
+	floorMesh->Material->SetTexture("albedoMap", talbedo);
+	floorMesh->Material->SetTexture("normalMap", tnormal);
+	floorMesh->Material->SetTexture("metallicMap", tmetallic);
+	floorMesh->Material->SetTexture("roughnessMap", troughness);
+	floorMesh->Material->SetTexture("aoMap", tao);
+	floorMesh->Material->SetTexture("shadowMap", &shadowTarget->Textures[0]);
 
 	lightPositions[0] = iw::vector3( 0, 5, 0);
 	lightPositions[1] = iw::vector3( 5, 2, 5);
@@ -152,12 +150,12 @@ int GameLayer3D::Initialize()
 	Space->SetComponentData<IW::ModelComponent>(enemy, mesh, 1U);
 	Space->SetComponentData<Enemy>             (enemy, SPIN, 0.2617993f, .12f, 0.0f);
 
-	Space->SetComponentData<IW::Transform>     (floor, iw::vector3(0, -1, 0));
-	Space->SetComponentData<IW::ModelComponent>(floor, floorMesh->Meshes, floorMesh->MeshCount);
+	Space->SetComponentData<IW::Transform>     (floor, iw::vector3(0, -1, 0), iw::vector3(15, 1, 15));
+	Space->SetComponentData<IW::ModelComponent>(floor, floorMesh, 1U);
 
 	//IW::Entity debug = Space->CreateEntity<IW::Transform, IW::DebugVector>();
 
-	lightDirection = iw::vector3(0, 1, 0);
+	lightDirection = iw::vector3(1, 1, 0);
 
 	PushSystem<EnemySystem>(mesh);
 	PushSystem<BulletSystem>();
@@ -244,21 +242,23 @@ void GameLayer3D::PostUpdate() {
 
 		// Draw shadow texture
 
+		// 
+
 		IW::OrthographicCamera lightCam = IW::OrthographicCamera(80, 80, -20, 80);
 		lightCam.Position = lightDirection;
 		lightCam.Rotation = iw::quaternion::from_look_at(lightDirection);
 
 		Renderer->BeginScene(shadowTarget);
 
-		Renderer->Device->SetPipeline(shadowPipeline->Handle.get());
+		Renderer->Device->SetPipeline(shadowPipeline->Program.get());
 
-		shadowPipeline->Handle->GetParam("viewProjection")
+		shadowPipeline->Program->GetParam("viewProjection")
 			->SetAsMat4(lightCam.GetView() * lightCam.GetProjection());
 
 		for (auto tree : Space->Query<IW::Transform, IW::ModelComponent>()) {
 			auto [transform, model] = tree.Components.Tie<ModelComponents>();
 
-			shadowPipeline->Handle->GetParam("model")
+			shadowPipeline->Program->GetParam("model")
 				->SetAsMat4(transform->Transformation());
 
 			for (size_t i = 0; i < model->MeshCount; i++) {
@@ -273,21 +273,21 @@ void GameLayer3D::PostUpdate() {
 		float blurw = 1.0f / (shadowTarget->Width  * blurAmount);
 		float blurh = 1.0f / (shadowTarget->Height * blurAmount);
 
-		blurFilter->Handle->GetParam("blurScale")->SetAsFloats(&iw::vector3(blurw, 0, 0), 3);
-		Renderer->ApplyFilter(blurFilter->Handle, shadowTarget, shadowTargetBlur);
+		blurFilter->Program->GetParam("blurScale")->SetAsFloats(&iw::vector3(blurw, 0, 0), 3);
+		Renderer->ApplyFilter(blurFilter->Program, shadowTarget, shadowTargetBlur);
 
-		blurFilter->Handle->GetParam("blurScale")->SetAsFloats(&iw::vector3(0, blurh, 0), 3);
-		Renderer->ApplyFilter(blurFilter->Handle, shadowTargetBlur, shadowTarget);
+		blurFilter->Program->GetParam("blurScale")->SetAsFloats(&iw::vector3(0, blurh, 0), 3);
+		Renderer->ApplyFilter(blurFilter->Program, shadowTargetBlur, shadowTarget);
 		
 		// Draw actual scene
 
 		Renderer->BeginScene();
 
-		Renderer->Device->SetPipeline(pbrPipeline->Handle.get());
-		pbrPipeline->Handle->GetParam("lightPositions")->SetAsFloats(&lightPositions, 4, 3); // need better way to pass scene data
-		pbrPipeline->Handle->GetParam("lightColors")->SetAsFloats(&lightColors, 4, 3);
-		pbrPipeline->Handle->GetParam("camPos")->SetAsFloats(&controller->Camera->Position, 3);
-		pbrPipeline->Handle->GetParam("lightSpace")->SetAsMat4(lightCam.GetViewProjection());
+		Renderer->Device->SetPipeline(pbrPipeline->Program.get());
+		pbrPipeline->Program->GetParam("lightPositions")->SetAsFloats(&lightPositions, 4, 3); // need better way to pass scene data
+		pbrPipeline->Program->GetParam("lightColors")->SetAsFloats(&lightColors, 4, 3);
+		pbrPipeline->Program->GetParam("camPos")->SetAsFloats(&controller->Camera->Position, 3);
+		pbrPipeline->Program->GetParam("lightSpace")->SetAsMat4(lightCam.GetViewProjection());
 		//pbrPipeline->GetParam("sunDirection")->SetAsFloats(&lightPositions, 3);
 
 		for (auto tree : Space->Query<IW::Transform, IW::ModelComponent>()) {

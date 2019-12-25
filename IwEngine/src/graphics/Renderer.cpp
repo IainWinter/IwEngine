@@ -35,6 +35,13 @@ namespace IW {
 		delete m_filterMesh;
 	}
 
+	void Renderer::RegisterShader(
+		std::string name,
+		iw::ref<Shader> shader)
+	{
+		m_shaders[name] = shader;
+	}
+
 	void Renderer::Initialize() {
 		m_filterMesh->Initialize(Device);
 	}
@@ -45,6 +52,29 @@ namespace IW {
 
 	void Renderer::End() {
 
+	}
+
+	void Renderer::SetShader(
+		std::string name)
+	{
+		auto itr = m_shaders.find(name);
+		if (itr != m_shaders.end()) {
+			SetShader(itr->second);
+		}
+
+		else {
+			LOG_WARNING << "No shader " << name << " registered!";
+		}
+	}
+
+	void Renderer::SetShader(
+		iw::ref<Shader>& shader)
+	{
+		if (!shader->Program) {
+			shader->Initialize(Device);
+		}
+
+		Device->SetPipeline(shader->Program.get());
 	}
 
 	void Renderer::BeginScene(
@@ -77,7 +107,7 @@ namespace IW {
 			return;
 		}
 
-		IPipeline* pipeline = mesh->Material->Shader->Program;
+		IPipeline* pipeline = mesh->Material->Shader->Program.get();
 
 		mesh->Material->Use(Device);
 
@@ -88,7 +118,7 @@ namespace IW {
 	}
 
 	void Renderer::ApplyFilter(
-		iw::ref<IPipeline>& pipeline,
+		iw::ref<Shader>& shader,
 		RenderTarget* source,
 		RenderTarget* dest)
 	{
@@ -96,9 +126,9 @@ namespace IW {
 		
 		BeginScene(dest);
 
-		Device->SetPipeline(pipeline.get());
+		SetShader(shader);
 
-		pipeline->GetParam("filterTexture")->SetAsTexture(
+		shader->Program->GetParam("filterTexture")->SetAsTexture(
 			source->Textures[0].Handle);
 
 		m_filterMesh->Draw(Device);

@@ -231,7 +231,7 @@ namespace IW {
 	void Material::Use(
 		const iw::ref<IDevice>& device) const
 	{
-		device->SetPipeline(Shader->Program);
+		device->SetPipeline(Shader->Program.get());
 
 		for (const MaterialProperty& prop : m_properties) {
 			IPipelineParam* param = Shader->Program->GetParam(prop.Name);
