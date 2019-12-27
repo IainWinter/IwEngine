@@ -1,6 +1,25 @@
 #include "iw/graphics/RenderTarget.h"
+#include <assert.h>
 
 namespace IW {
+	RenderTarget::RenderTarget(
+		std::initializer_list<Texture> textures)
+		: Frame(nullptr)
+	{
+		TextureCount = textures.size();
+		Textures = new Texture[TextureCount];
+
+		auto titr = textures.begin();
+		
+		Width  = titr->Width;
+		Height = titr->Height;
+		
+		for (size_t i = 0; i < TextureCount; i++, titr++) {
+			assert(Width == titr->Width && Height == titr->Height);
+			Textures[i] = *titr;
+		}
+	}
+
 	RenderTarget::RenderTarget(
 		int width, 
 		int height,
@@ -10,7 +29,7 @@ namespace IW {
 		, Height(height)
 		, Frame(nullptr)
 	{
-		if (formats.size() != types.size()) return;
+		assert(formats.size() != types.size());
 
 		TextureCount = formats.size();
 		Textures = new Texture[TextureCount];

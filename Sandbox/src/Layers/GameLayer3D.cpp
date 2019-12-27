@@ -8,12 +8,15 @@
 #include "imgui/imgui.h"
 #include "iw/graphics/MeshFactory.h"
 #include "iw/graphics/Shader.h"
+#include "iw/graphics/DirectionalLight.h"
 
 #include "iw/util/io/File.h"
 
 #include "Systems/BulletSystem.h"
 #include "Systems/PlayerSystem.h"
 #include "Systems/EnemySystem.h"
+
+#include "iw/graphics/TextureAtlas.h"
 
 GameLayer3D::GameLayer3D()
 	: Layer("Game")
@@ -44,19 +47,30 @@ iw::vector3 p;
 
 iw::matrix4 camBuf[2];
 
+IW::DirectionalLight light;
+
 int GameLayer3D::Initialize()
 {
 	// Loading shaders and filters
 
 	pbrPipeline    = Asset->Load<IW::Shader>("shaders/pbr.shader");
-	shadowPipeline = Asset->Load<IW::Shader>("shaders/shadows/directional.shader");
-	nullFilter     = Asset->Load<IW::Shader>("shaders/filters/null.shader");
-	blurFilter     = Asset->Load<IW::Shader>("shaders/filters/gaussian.shader");
 
-	pbrPipeline->Initialize(Renderer->Device);
-	shadowPipeline->Initialize(Renderer->Device);
-	nullFilter->Initialize(Renderer->Device);
-	blurFilter->Initialize(Renderer->Device);
+	light = IW::DirectionalLight(IW::OrthographicCamera(80, 80, -20, 80));
+	light.SetLightShader(Asset->Load<IW::Shader>("shaders/shadows/directional.shader"));
+	light.SetPostFilter (Asset->Load<IW::Shader>("shaders/filters/gaussian.shader"));
+	light.SetNullFilter (Asset->Load<IW::Shader>("shaders/filters/null.shader"));
+
+	IW::TextureAtlas lightsA(2048, 2048, IW::RG,    IW::FLOAT);
+	IW::TextureAtlas lightsB(2048, 2048, IW::DEPTH, IW::FLOAT);
+	IW::TextureAtlas posts  (2048, 2048, IW::ALPHA, IW::FLOAT);
+
+	IW::RenderTarget shadowTarget { lightsA.GetSubTexture(0), lightsB.GetSubTexture(0) };
+	IW::RenderTarget blurTarget { posts.GetSubTexture(0) };
+
+
+
+	light.SetShadowTarget(std::make_shared<IW::RenderTarget>(shadowTarget));
+	light.SetPostTarget(std::make_shared<IW::RenderTarget>(blurTarget));
 
 	// Create uniform buffer for the camera and set it for the pipelines that need it
 
@@ -64,11 +78,6 @@ int GameLayer3D::Initialize()
 	pbrPipeline->Program->SetBuffer("Camera", cameraBuffer);
 
 	// Setup render targets for shadow map and blur filter
-
-	shadowTarget     = new IW::RenderTarget(1048, 1048, { IW::RG, IW::DEPTH }, { IW::FLOAT, IW::FLOAT });
-	shadowTargetBlur = new IW::RenderTarget(1048, 1048, { IW::ALPHA }, { IW::FLOAT });
-	shadowTarget->Initialize(Renderer->Device);
-	shadowTargetBlur->Initialize(Renderer->Device);
 
 	IW::Mesh* floorMesh = IW::MakePlane(10, 10);
 	floorMesh->GenTangents();
@@ -93,7 +102,7 @@ int GameLayer3D::Initialize()
 	normal   ->Initialize(Renderer->Device);
 	metallic ->Initialize(Renderer->Device);
 	roughness->Initialize(Renderer->Device);
-	ao       ->Initialize(Renderer->Device);
+	ao       ->Initialize(Renderer->Device);	
 
 	iw::ref<IW::Texture> talbedo    = Asset->Load<IW::Texture>("textures/tile/albedo.png");
 	iw::ref<IW::Texture> tnormal    = Asset->Load<IW::Texture>("textures/tile/normal.png");
@@ -111,14 +120,14 @@ int GameLayer3D::Initialize()
 	mesh->Material->SetTexture("metallicMap",  metallic);
 	mesh->Material->SetTexture("roughnessMap", roughness);
 	mesh->Material->SetTexture("aoMap",        ao);
-	mesh->Material->SetTexture("shadowMap",    &shadowTarget->Textures[0]);
+	mesh->Material->SetTexture("shadowMap",    &shadowTarget.Textures[0]);
 
-	floorMesh->Material->SetTexture("albedoMap", talbedo);
-	floorMesh->Material->SetTexture("normalMap", tnormal);
-	floorMesh->Material->SetTexture("metallicMap", tmetallic);
+	floorMesh->Material->SetTexture("albedoMap",    talbedo);
+	floorMesh->Material->SetTexture("normalMap",    tnormal);
+	floorMesh->Material->SetTexture("metallicMap",  tmetallic);
 	floorMesh->Material->SetTexture("roughnessMap", troughness);
-	floorMesh->Material->SetTexture("aoMap", tao);
-	floorMesh->Material->SetTexture("shadowMap", &shadowTarget->Textures[0]);
+	floorMesh->Material->SetTexture("aoMap",        tao);
+	floorMesh->Material->SetTexture("shadowMap",    &shadowTarget.Textures[0]);
 
 	lightPositions[0] = iw::vector3( 0, 5, 0);
 	lightPositions[1] = iw::vector3( 5, 2, 5);
@@ -238,35 +247,26 @@ void GameLayer3D::PostUpdate() {
 
 		//Renderer->End -- unbind stuff?
 
-
+		light.SetPosition(lightDirection);
+		light.SetRotation(iw::quaternion::from_look_at(lightDirection));
 
 		// Draw shadow texture
 
-		// 
-
-		IW::OrthographicCamera lightCam = IW::OrthographicCamera(80, 80, -20, 80);
-		lightCam.Position = lightDirection;
-		lightCam.Rotation = iw::quaternion::from_look_at(lightDirection);
-
-		Renderer->BeginScene(shadowTarget);
-
-		Renderer->Device->SetPipeline(shadowPipeline->Program.get());
-
-		shadowPipeline->Program->GetParam("viewProjection")
-			->SetAsMat4(lightCam.GetView() * lightCam.GetProjection());
+		Renderer->BeginLight(&light);
 
 		for (auto tree : Space->Query<IW::Transform, IW::ModelComponent>()) {
 			auto [transform, model] = tree.Components.Tie<ModelComponents>();
 
-			shadowPipeline->Program->GetParam("model")
-				->SetAsMat4(transform->Transformation());
-
 			for (size_t i = 0; i < model->MeshCount; i++) {
-				model->Meshes[i].Draw(Renderer->Device);
+				Renderer->CastMesh(&light, transform, &model->Meshes[i]);
 			}
 		}
 
-		Renderer->EndScene();
+		Renderer->LightPostProcess(&light);
+
+		light.PostProcess();
+
+		Renderer->EndLight(&light);
 
 		// Blur shadow texture
 

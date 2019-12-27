@@ -3,6 +3,7 @@
 #include "IwGraphics.h"
 #include "Mesh.h"
 #include "RenderTarget.h"
+#include "Light.h"
 #include "iw/renderer/Device.h"
 #include "iw/common/Components/Transform.h"
 #include "iw/util/memory/smart_pointers.h"
@@ -13,13 +14,30 @@ namespace IW {
 namespace Graphics {
 	class Renderer {
 	public:
+		class SceneDataBuilder {
+			
+		};
+
+		struct SceneData {
+			iw::matrix4 World;
+			iw::ref<Camera> Camera;
+			std::vector<Light> Lights;
+			RenderTarget FinalTarget;
+			//RenderTarget FinalPostProcessTarget;
+		};
+
 		int Width;
 		int Height;
 
 		iw::ref<IDevice> Device;
 	private:
 		Mesh* m_filterMesh;
-		
+
+#ifdef IW_DEBUG
+		int lightBeginEndCount = 0;
+		int sceneBeginEndCount = 0;
+#endif
+
 	public:
 		IWGRAPHICS_API
 		Renderer(
@@ -39,14 +57,7 @@ namespace Graphics {
 
 		IWGRAPHICS_API
 		void SetShader(
-			std::string name);
-
-		IWGRAPHICS_API
-		void SetShader(
 			iw::ref<Shader>& shader);
-
-		IWGRAPHICS_API
-		void RenderLight();
 
 		IWGRAPHICS_API
 		void BeginScene(
@@ -57,6 +68,20 @@ namespace Graphics {
 
 		IWGRAPHICS_API
 		void DrawMesh(
+			const Transform* transform,
+			const Mesh* mesh);
+
+		IWGRAPHICS_API
+		void BeginLight(
+			Light* light);
+
+		IWGRAPHICS_API
+		void EndLight(
+			const Light* light);
+
+		IWGRAPHICS_API
+		void CastMesh(
+			const Light* light,
 			const Transform* transform,
 			const Mesh* mesh);
 

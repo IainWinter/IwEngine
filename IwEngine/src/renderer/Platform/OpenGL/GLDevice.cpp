@@ -269,6 +269,18 @@ namespace IW {
 		return new GLTexture(width, height, format, type, data);
 	}
 
+	ITexture* GLDevice::CreateSubTexture(
+		ITexture* texture,
+		int xOffset,
+		int yOffset,
+		int width,
+		int height,
+		int minmap = 0)
+	{
+		return static_cast<GLTexture*>(texture)
+			->CreateSubTexture(xOffset, yOffset, width, height, minmap);
+	}
+
 	void GLDevice::DestroyTexture(
 		ITexture* texture)
 	{

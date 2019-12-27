@@ -8,7 +8,7 @@
 
 namespace IW {
 namespace Graphics {
-	struct IWGRAPHICS_API Texture {
+	struct Texture {
 		unsigned char* Colors;
 
 		int Width;
@@ -19,8 +19,10 @@ namespace Graphics {
 
 		ITexture* Handle;
 
+		IWGRAPHICS_API
 		Texture();
 
+		IWGRAPHICS_API
 		Texture(
 			int width,
 			int height,
@@ -28,8 +30,22 @@ namespace Graphics {
 			TextureFormatType type,
 			unsigned char* colors);
 
+		GEN_5(IWGRAPHICS_API, Texture)
+
+		IWGRAPHICS_API
 		void Initialize(
 			const iw::ref<IDevice>& device);
+
+		IWGRAPHICS_API
+		Texture GetSubTexture(
+			const iw::ref<IDevice>& device,
+			int xOffset,
+			int yOffset,
+			int width,
+			int height);
+
+		IWGRAPHICS_API
+		iw::vector2 Dimensions() const;
 	};
 }
 

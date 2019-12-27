@@ -1,5 +1,6 @@
 #include "iw/graphics/Renderer.h"
 #include "iw/util/io/File.h"
+#include <assert.h>
 
 namespace IW {
 	Renderer::Renderer(
@@ -35,13 +36,6 @@ namespace IW {
 		delete m_filterMesh;
 	}
 
-	void Renderer::RegisterShader(
-		std::string name,
-		iw::ref<Shader> shader)
-	{
-		m_shaders[name] = shader;
-	}
-
 	void Renderer::Initialize() {
 		m_filterMesh->Initialize(Device);
 	}
@@ -52,19 +46,6 @@ namespace IW {
 
 	void Renderer::End() {
 
-	}
-
-	void Renderer::SetShader(
-		std::string name)
-	{
-		auto itr = m_shaders.find(name);
-		if (itr != m_shaders.end()) {
-			SetShader(itr->second);
-		}
-
-		else {
-			LOG_WARNING << "No shader " << name << " registered!";
-		}
 	}
 
 	void Renderer::SetShader(
@@ -80,6 +61,11 @@ namespace IW {
 	void Renderer::BeginScene(
 		RenderTarget* target)
 	{
+#ifdef IW_DEBUG
+		assert(lightBeginEndCount == 0 && sceneBeginEndCount == 0);
+		++sceneBeginEndCount;
+#endif
+
 		if (target == nullptr) {
 			Device->SetViewport(Width, Height);
 			Device->SetFrameBuffer(nullptr);
@@ -93,13 +79,20 @@ namespace IW {
 	}
 
 	void Renderer::EndScene() {
-
+#ifdef IW_DEBUG
+		assert(lightBeginEndCount == 0 && sceneBeginEndCount == 1);
+		--sceneBeginEndCount;
+#endif
 	}
 
 	void Renderer::DrawMesh(
 		const Transform* transform, 
 		const Mesh* mesh)
 	{
+#ifdef IW_DEBUG
+		assert(lightBeginEndCount == 0 && sceneBeginEndCount == 1);
+#endif
+
 		const auto& material = mesh->Material;
 		
 		if(!material) {
@@ -115,6 +108,47 @@ namespace IW {
 			->SetAsMat4(transform->Transformation());
 
 		mesh->Draw(Device);
+	}
+
+	void Renderer::BeginLight(
+		Light* light)
+	{
+#ifdef IW_DEBUG
+		assert(lightBeginEndCount == 0 && sceneBeginEndCount == 1);
+		++lightBeginEndCount;
+#endif
+
+		BeginScene(light->ShadowTarget().get());
+
+		light->LightShader()->Program->GetParam("viewProjection")
+			->SetAsMat4(light->Cam().GetView() * light->Cam().GetProjection());
+
+	}
+
+	void Renderer::EndLight(
+		const Light* light)
+	{
+#ifdef IW_DEBUG
+		assert(lightBeginEndCount == 1 && sceneBeginEndCount == 1);
+		--lightBeginEndCount;
+#endif
+
+		EndScene();
+	}
+
+	void Renderer::CastMesh(
+		const Light* light, 
+		const Transform* transform, 
+		const Mesh* mesh)
+	{
+#ifdef IW_DEBUG
+		assert(lightBeginEndCount == 1 && sceneBeginEndCount == 1);
+#endif
+
+		light->LightShader()->Program->GetParam("model")
+			->SetAsMat4(transform->Transformation());
+
+		DrawMesh(transform, mesh);
 	}
 
 	void Renderer::ApplyFilter(

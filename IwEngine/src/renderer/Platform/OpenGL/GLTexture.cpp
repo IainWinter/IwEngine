@@ -13,6 +13,7 @@ namespace IW {
 		, m_width(width)
 		, m_height(height)
 		, m_format(format)
+		, m_type(type)
 	{
 		GLenum gltype = -1;
 		GLint glformat = -1;
@@ -83,6 +84,9 @@ namespace IW {
 			return;
 		}
 
+		m_glformat = glformat;
+		m_gltype = gltype;
+
 		glGenTextures(1, &m_renderId);
 		Bind();
 
@@ -110,11 +114,44 @@ namespace IW {
 		glDeleteTextures(1, &m_renderId);
 	}
 
+	GLTexture* GLTexture::CreateSubTexture(
+		int xOffset, 
+		int yOffset, 
+		int width, 
+		int height,
+		int minmap) const
+	{
+		GLTexture* sub = new GLTexture(width, height, m_format, m_type, nullptr);
+		glTextureSubImage2D(sub->m_renderId, minmap, xOffset, yOffset, width, height, m_glformat, m_gltype, m_data);
+
+		return sub;
+	}
+
 	void GLTexture::Bind() const {
 		glBindTexture(GL_TEXTURE_2D, m_renderId);
 	}
 
 	void GLTexture::Unbind() const {
 		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
+	unsigned int GLTexture::Id() const {
+		return m_renderId;
+	}
+
+	int GLTexture::Width() const {
+		return m_width;
+	}
+
+	int GLTexture::Height() const {
+		return m_height;
+	}
+
+	TextureFormat GLTexture::Format() const {
+		return m_format;
+	}
+	
+	TextureFormatType GLTexture::Type() const {
+		return m_type;
 	}
 }

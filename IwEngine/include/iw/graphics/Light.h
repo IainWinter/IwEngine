@@ -2,6 +2,7 @@
 
 #include "Shader.h"
 #include "Camera.h"
+#include "RenderTarget.h"
 
 namespace IW {
 namespace Graphics {
@@ -9,30 +10,62 @@ namespace Graphics {
 	private:
 		iw::ref<Shader> m_light;
 		iw::ref<Shader> m_null;
-		iw::ref<Shader> m_blur;
-		IW::Camera* m_camera;
+		iw::ref<IW::RenderTarget> m_shadowTarget;
+		iw::ref<Shader> m_post;
+		iw::ref<IW::RenderTarget> m_postTarget;
 
 	public:
 		IWGRAPHICS_API
-		Light(
-			iw::ref<Shader> m_null,
-			iw::ref<Shader> m_blur,
-			iw::ref<Shader> m_light);
+		virtual void PostProcess();
 
 		IWGRAPHICS_API
-		~Light();
+		virtual const Camera& Cam() const = 0;
 
 		IWGRAPHICS_API
-		void SetCamera(
-			Camera& camera);
+		virtual Camera& Cam() = 0;
 
 		IWGRAPHICS_API
-		void SetPosition(
-			const iw::vector3& position);
+		virtual void SetPosition(
+			const iw::vector3& position) = 0;
 
 		IWGRAPHICS_API
-		void SetRotation(
-			const iw::quaternion& rotation);
+		virtual void SetRotation(
+			const iw::quaternion& rotation) = 0;
+
+		IWGRAPHICS_API
+		const iw::ref<Shader>& LightShader() const;
+
+		IWGRAPHICS_API
+		const iw::ref<Shader>& NullFilter() const;
+
+		IWGRAPHICS_API
+		const iw::ref<RenderTarget>& ShadowTarget() const;
+
+		IWGRAPHICS_API
+		const iw::ref<Shader>& PostFilter() const;
+
+		IWGRAPHICS_API
+		const iw::ref<RenderTarget>& PostTarget() const;
+
+		IWGRAPHICS_API
+		void SetLightShader(
+			iw::ref<Shader>& lightShader);
+
+		IWGRAPHICS_API
+		void SetNullFilter(
+			iw::ref<Shader>& nullFilter);
+
+		IWGRAPHICS_API
+		void SetShadowTarget(
+			iw::ref<RenderTarget>& shadowTarget);
+
+		IWGRAPHICS_API
+		void SetPostFilter(
+			iw::ref<Shader>& postFilter);
+
+		IWGRAPHICS_API
+		void SetPostTarget(
+			iw::ref<RenderTarget>& postTarget);
 	};
 }
 

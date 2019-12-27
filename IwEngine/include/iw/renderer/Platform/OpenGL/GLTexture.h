@@ -5,7 +5,7 @@
 
 namespace IW {
 namespace RenderAPI {
-	class IWRENDERER_API GLTexture
+	class GLTexture
 		: public ITexture
 	{
 	private:
@@ -15,8 +15,12 @@ namespace RenderAPI {
 		int m_width;
 		int m_height;
 		TextureFormat m_format;
+		TextureFormatType m_type;
+		int m_glformat;
+		int m_gltype;
 
 	public:
+		IWRENDERER_API
 		GLTexture(
 			int width,
 			int height,
@@ -24,26 +28,37 @@ namespace RenderAPI {
 			TextureFormatType type,
 			const void* data);
 
+		IWRENDERER_API
 		~GLTexture();
 
-		inline unsigned int Id() const {
-			return m_renderId;
-		}
+		IWRENDERER_API
+		GLTexture* CreateSubTexture(
+			int xOffset,
+			int yOffset,
+			int width,
+			int height,
+			int minmap = 0) const;
 
-		inline int Width() const {
-			return m_width;
-		}
-
-		inline int Height() const {
-			return m_height;
-		}
-
-		inline TextureFormat Format() const {
-			return m_format;
-		}
-
+		IWRENDERER_API
 		void Bind() const;
+
+		IWRENDERER_API
 		void Unbind() const;
+
+		IWRENDERER_API
+		unsigned int Id() const;
+
+		IWRENDERER_API
+		int Width() const;
+
+		IWRENDERER_API
+		int Height() const;
+
+		IWRENDERER_API
+		TextureFormat Format() const;
+
+		IWRENDERER_API
+		TextureFormatType Type() const;
 	};
 }
 

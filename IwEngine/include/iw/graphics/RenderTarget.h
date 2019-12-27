@@ -18,6 +18,9 @@ namespace Graphics {
 		IFrameBuffer* Frame;
 
 		RenderTarget(
+			std::initializer_list<Texture> textures);
+
+		RenderTarget(
 			int width,
 			int height,
 			std::initializer_list<TextureFormat> formats,

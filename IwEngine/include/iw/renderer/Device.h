@@ -162,6 +162,14 @@ namespace RenderAPI {
 			TextureFormatType type,
 			const void* data = nullptr) = 0;
 
+		virtual ITexture* CreateSubTexture(
+			ITexture* texture,
+			int xOffset,
+			int yOffset,
+			int width,
+			int height,
+			int minmap = 0) = 0;
+
 		virtual void DestroyTexture(
 			ITexture* texture) = 0;
 

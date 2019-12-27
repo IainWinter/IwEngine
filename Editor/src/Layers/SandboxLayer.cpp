@@ -2,21 +2,15 @@
 #include "iw/graphics/Model.h"
 #include "iw/engine/Components/CameraController.h"
 #include "iw/engine/Time.h"
-
 #include "iw/physics/Collision/SphereCollider.h"
-
 #include "Events/ActionEvents.h"
-
 #include "imgui/imgui.h"
-
 #include "iw/physics/Dynamics/ManifoldSolver.h"
-
 #include "iw/physics/Collision/PlaneCollider.h"
 #include "iw/physics/Dynamics/Rigidbody.h"
-
 #include "iw/graphics/MeshFactory.h"
-
 #include "iw/input/Devices/Mouse.h"
+#include "iw/graphics/TextureAtlas.h"
 
 namespace IW {
 	struct ModelComponents {
@@ -45,7 +39,11 @@ namespace IW {
 
 		iw::ref<IW::Material> mat = std::make_shared<IW::Material>(directional);
 
+		IW::TextureAtlas atlas = IW::TextureAtlas(2048, 2048, IW::DEPTH, IW::FLOAT);
+		atlas.GenTexBounds(2, 2);
 
+		iw::vector2 coords(.1, .8);
+		coords = atlas.MapCoords(1, coords);
 
 		space.SetGravity(iw::vector3(0, -9.8f, 0));
 		space.AddSolver(new ManifoldSolver());
@@ -54,7 +52,6 @@ namespace IW {
 
 		iw::ref<Model> plane = Asset->Load<Model>("Plane");
 		
-
 		Space->SetComponentData<Model>(ent, *plane);
 
 		Transform*     t = Space->SetComponentData<Transform>(ent, iw::vector3(0, 0, 0), iw::vector3(150, 1, 150));
@@ -72,7 +69,28 @@ namespace IW {
 	}
 
 	void SandboxLayer::PostUpdate() {
+		//Renderer->BuildSceneData("Main")
+		//	.SetWorldOrigin(iw::matrix4::identity)
+		//	.SetCamera(camera)
+		//	.AddLight(light)
+		//	.Build();
+
+		//Renderer->BuildSceneData()
+		//	.SetCamera()
+		//	.SetTarget();
+
+		//Renderer->BeginLight();
+
+		//Renderer->CastMesh();
+
+		//Renderer->EndLight(); 
+
+
 		Renderer->BeginScene();
+
+		//Renderer->DrawMesh();
+
+		//Renderer->EndScene();
 
 		for (auto c_e : Space->Query<Transform, CameraController>()) {
 			auto [c_t, c_c] = c_e.Components.Tie<CameraComponents>();
