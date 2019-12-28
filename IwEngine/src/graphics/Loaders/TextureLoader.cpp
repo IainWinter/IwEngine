@@ -60,6 +60,6 @@ namespace IW {
 	void TextureLoader::FreeAsset(
 		Texture* texture)
 	{
-		free(texture->Colors);
+		free(texture->Colors());
 	}
 }

@@ -9,16 +9,21 @@
 namespace IW {
 namespace Graphics {
 	struct Texture {
-		unsigned char* Colors;
+	protected:
+		int m_width;
+		int m_height;
+		int m_channels;
+		TextureFormat m_format;
+		TextureFormatType m_formatType;
 
-		int Width;
-		int Height;
-		int Channels;
-		TextureFormat Format;
-		TextureFormatType FormatType;
+		const Texture* m_parent;
+		int m_xOffset;
+		int m_yOffset;
 
-		ITexture* Handle;
+		unsigned char* m_colors;
+		ITexture* m_handle;
 
+	public:
 		IWGRAPHICS_API
 		Texture();
 
@@ -30,6 +35,15 @@ namespace Graphics {
 			TextureFormatType type,
 			unsigned char* colors);
 
+		IWGRAPHICS_API
+		Texture(
+			const Texture* parent,
+			int xOffset,
+			int yOffset,
+			int width,
+			int height,
+			unsigned char* colors = nullptr);
+
 		GEN_5(IWGRAPHICS_API, Texture)
 
 		IWGRAPHICS_API
@@ -37,12 +51,45 @@ namespace Graphics {
 			const iw::ref<IDevice>& device);
 
 		IWGRAPHICS_API
-		Texture GetSubTexture(
-			const iw::ref<IDevice>& device,
+		Texture CreateSubTexture(
 			int xOffset,
 			int yOffset,
 			int width,
-			int height);
+			int height/*,
+			int minmap = 0*/) const;
+
+		IWGRAPHICS_API
+		int Width() const;
+
+		IWGRAPHICS_API
+		int Height() const;
+
+		IWGRAPHICS_API
+		int Channels() const;
+
+		IWGRAPHICS_API
+		TextureFormat Format() const;
+
+		IWGRAPHICS_API
+		TextureFormatType FormatType() const;
+
+		IWGRAPHICS_API
+		const Texture* Parent() const;
+
+		IWGRAPHICS_API
+		int XOffset() const;
+
+		IWGRAPHICS_API
+		int YOffset() const;
+
+		IWGRAPHICS_API
+		unsigned char* Colors() const;
+
+		IWGRAPHICS_API
+		ITexture* Handle() const;
+
+		IWGRAPHICS_API
+		bool IsSubTexture() const;
 
 		IWGRAPHICS_API
 		iw::vector2 Dimensions() const;

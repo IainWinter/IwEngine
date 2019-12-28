@@ -10,9 +10,14 @@ namespace Physics {
 	{
 	private:
 		std::vector<Rigidbody*> m_rigidbodies;
-		std::vector<RigidbodySolver*> m_rigidbodySolvers;
+		std::vector<DynamicSolver*> m_dynamicSolvers;
 		iw::vector3 m_gravity;
-		
+
+	protected:
+		IWPHYSICS_API
+		void SolveManifolds(
+			std::vector<Manifold>& manifolds,
+			scalar dt = 0) override;
 	public:
 		IWPHYSICS_API
 		virtual void AddRigidbody(
@@ -23,12 +28,12 @@ namespace Physics {
 			Rigidbody* rigidbody);
 
 		IWPHYSICS_API
-		void AddSolver(
-			RigidbodySolver* solver);
+		void AddDSolver(
+			DynamicSolver* solver);
 
 		IWPHYSICS_API
-		void RemoveSolver(
-			RigidbodySolver* solver);
+		void RemoveDSolver(
+			DynamicSolver* solver);
 
 		IWPHYSICS_API
 		virtual void Step(

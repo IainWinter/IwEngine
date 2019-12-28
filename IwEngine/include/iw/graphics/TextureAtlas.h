@@ -7,14 +7,14 @@
 namespace IW {
 namespace Graphics {
 	struct TexBounds {
-		iw::vector2 Min;
-		iw::vector2 Max;
+		iw::vector2 Offset;
+		iw::vector2 Dimensions;
 
 		TexBounds(
-			iw::vector2 min,
-			iw::vector2 max)
-			: Min(min)
-			, Max(max)
+			iw::vector2 offset,
+			iw::vector2 dimensions)
+			: Offset(offset)
+			, Dimensions(dimensions)
 		{}
 	};
 
@@ -22,7 +22,8 @@ namespace Graphics {
 		: Texture
 	{
 	private:
-		std::vector<TexBounds> m_textures;
+		std::vector<TexBounds> m_bounds;
+		std::vector<iw::ref<Texture>> m_textures;
 
 	public:
 		IWGRAPHICS_API
@@ -51,33 +52,34 @@ namespace Graphics {
 			int tile,
 			iw::vector2 coords) const;
 
-		Texture GetSubTexture(
-			int tile) const;
+		IWGRAPHICS_API
+		iw::ref<Texture> GetSubTexture(
+			int tile);
 
 		IWGRAPHICS_API
 		TexBounds GetTexBounds(
 			int tile) const;
 
-		// Generate bounds based on largest areas without the 'backgroundColor' surrounding
-		IWGRAPHICS_API
-		void GenTexBounds(
-			iw::vector4 backgroundColor);
+		//// Generate bounds based on largest areas without the 'backgroundColor' surrounding
+		//IWGRAPHICS_API
+		//void GenTexBounds(
+		//	iw::vector4 backgroundColor);
 
-		// Split texture into equal squares
+		// Split texture into equal rectangles
 		IWGRAPHICS_API
 		void GenTexBounds(
 			int cols,
 			int rows);
 
-		// Split a tile into subtiles
-		IWGRAPHICS_API
-		void GenSubTexBounds(
-			int tile,
-			int cols,
-			int rows);
+		//// Split a tile into subtiles
+		//IWGRAPHICS_API
+		//void GenSubTexBounds(
+		//	int tile,
+		//	int cols,
+		//	int rows);
 
-		IWGRAPHICS_API
-		const std::vector<TexBounds>& Textures() const;
+		//IWGRAPHICS_API
+		//const std::vector<TexBounds>& TextureBounds() const;
 
 		IWGRAPHICS_API
 		int TileCount() const;

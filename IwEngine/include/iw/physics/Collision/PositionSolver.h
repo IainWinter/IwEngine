@@ -1,16 +1,16 @@
 #pragma once
 
-#include "RigidbodySolver.h"
+#include "Solver.h"
 
 namespace IW {
 namespace Physics {
-	class ManifoldSolver
-		: public DynamicSolver
+	class PositionSolver
+		: public Solver
 	{
 	public:
 		IWPHYSICS_API
 		void Solve(
-			std::vector<Rigidbody*>& bodies,
+			std::vector<CollisionObject*>& objects,
 			std::vector<Manifold>& manifolds,
 			scalar dt) override;
 	};

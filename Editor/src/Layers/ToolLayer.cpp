@@ -30,21 +30,29 @@ namespace IW {
 		iw::ref<Shader> shader = Asset->Load<Shader>("shaders/default.shader");
 		shader->Initialize(Renderer->Device);
 
-		iw::ref<Material> mat = std::make_shared<Material>();
-		mat->SetShader(shader);
+		iw::ref<Material> smat = std::make_shared<Material>();
+		smat->SetShader(shader);
+		smat->SetFloats("color", &iw::vector3(1), 3);
+
+		iw::ref<Material> pmat = std::make_shared<Material>();
+		pmat->SetShader(shader);
+		pmat->SetFloats("color", &iw::vector3(.5f, .1f, .6), 3);
 
 		Mesh* smesh = MakeUvSphere(25, 30);
 		smesh->GenNormals();
-		smesh->SetMaterial(mat);
+		smesh->SetMaterial(smat);
 		smesh->Initialize(Renderer->Device);
+		
+		//Mesh* pmesh = MakePlane(1, 1);
+		//pmesh->SetMaterial(pmat);
+		//pmesh->Initialize(Renderer->Device);
 
-		Mesh* pmesh = MakePlane(1, 1);
-		pmesh->SetMaterial(mat);
-		pmesh->Initialize(Renderer->Device);
+		iw::ref<Model> plane = Asset->Load<Model>("models/box.obj");
 
-		Model pm { pmesh, 1 };
-
-		Asset->Give<Model>("Plane", &pm);
+		for (size_t i = 0; i < plane->MeshCount; i++) {
+			plane->Meshes[i].SetMaterial(pmat);
+			plane->Meshes[i].Initialize(Renderer->Device);
+		}
 
 		Model sm { smesh, 1 };
 

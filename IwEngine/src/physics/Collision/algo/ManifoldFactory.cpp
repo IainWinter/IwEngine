@@ -85,7 +85,7 @@ namespace detail {
 		if (d > a->Radius) {
 			return { 0, 0, 0, true };
 		}
-
+		
 		return {
 			A - N * a->Radius,
 			A - N * d,

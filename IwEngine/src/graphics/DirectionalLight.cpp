@@ -2,23 +2,12 @@
 
 namespace IW {
 	DirectionalLight::DirectionalLight(
+		iw::ref<Shader> shader,
+		iw::ref<IW::RenderTarget> target,
 		OrthographicCamera camera)
-		: m_camera(camera)
+		: Light(shader, target)
+		, m_camera(camera)
 	{}
-
-	const Camera& DirectionalLight::Cam() const {
-		return m_camera;
-	}
-
-	Camera& Graphics::DirectionalLight::Cam() {
-		return m_camera;
-	}
-
-	void DirectionalLight::SetCam(
-		const OrthographicCamera& camera)
-	{
-		m_camera = camera;
-	}
 
 	void DirectionalLight::SetPosition(
 		const iw::vector3& position)
@@ -30,5 +19,9 @@ namespace IW {
 		const iw::quaternion& rotation)
 	{
 		m_camera.Rotation = rotation;
+	}
+
+	iw::matrix4 DirectionalLight::ViewProj() {
+		return m_camera.GetViewProjection();
 	}
 }

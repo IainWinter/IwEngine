@@ -2,17 +2,17 @@
 
 #include "Rigidbody.h"
 #include "iw/physics/Collision/Solver.h"
-#include <vector>
 
 namespace IW {
 namespace Physics {
-	class RigidbodySolver
+	class DynamicSolver
 		: public Solver
 {
 	public:
 		IWPHYSICS_API
 		virtual void Solve(
 			std::vector<Rigidbody*>& bodies,
+			std::vector<Manifold>& manifolds,
 			scalar dt) = 0;
 	};
 }

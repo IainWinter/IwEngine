@@ -38,6 +38,7 @@ namespace IW {
 
 	void Renderer::Initialize() {
 		m_filterMesh->Initialize(Device);
+		m_lightBuf = Device->CreateUniformBuffer(sizeof(LightData), &m_lightData);
 	}
 
 	void Renderer::Begin() {
@@ -49,23 +50,14 @@ namespace IW {
 	}
 
 	void Renderer::SetShader(
-		iw::ref<Shader>& shader)
+		const iw::ref<Shader>& shader)
 	{
-		if (!shader->Program) {
-			shader->Initialize(Device);
-		}
-
 		Device->SetPipeline(shader->Program.get());
 	}
 
 	void Renderer::BeginScene(
 		RenderTarget* target)
 	{
-#ifdef IW_DEBUG
-		assert(lightBeginEndCount == 0 && sceneBeginEndCount == 0);
-		++sceneBeginEndCount;
-#endif
-
 		if (target == nullptr) {
 			Device->SetViewport(Width, Height);
 			Device->SetFrameBuffer(nullptr);
@@ -79,20 +71,13 @@ namespace IW {
 	}
 
 	void Renderer::EndScene() {
-#ifdef IW_DEBUG
-		assert(lightBeginEndCount == 0 && sceneBeginEndCount == 1);
-		--sceneBeginEndCount;
-#endif
+
 	}
 
 	void Renderer::DrawMesh(
 		const Transform* transform, 
 		const Mesh* mesh)
 	{
-#ifdef IW_DEBUG
-		assert(lightBeginEndCount == 0 && sceneBeginEndCount == 1);
-#endif
-
 		const auto& material = mesh->Material;
 		
 		if(!material) {
@@ -110,28 +95,27 @@ namespace IW {
 		mesh->Draw(Device);
 	}
 
+	bool first = 1;
+
 	void Renderer::BeginLight(
 		Light* light)
 	{
-#ifdef IW_DEBUG
-		assert(lightBeginEndCount == 0 && sceneBeginEndCount == 1);
-		++lightBeginEndCount;
-#endif
+		BeginScene(light->LightTarget().get());
+		SetShader (light->LightShader());
 
-		BeginScene(light->ShadowTarget().get());
+		m_lightData.ViewProj = light->ViewProj();
+		Device->UpdateUniformBufferData(m_lightBuf, &m_lightData);
 
-		light->LightShader()->Program->GetParam("viewProjection")
-			->SetAsMat4(light->Cam().GetView() * light->Cam().GetProjection());
-
+		if (first) {
+			light->LightShader()->Program->SetBuffer("viewProjection", m_lightBuf);
+			first = 0;
+		}
 	}
 
 	void Renderer::EndLight(
 		const Light* light)
 	{
-#ifdef IW_DEBUG
-		assert(lightBeginEndCount == 1 && sceneBeginEndCount == 1);
-		--lightBeginEndCount;
-#endif
+		// post process
 
 		EndScene();
 	}
@@ -141,14 +125,10 @@ namespace IW {
 		const Transform* transform, 
 		const Mesh* mesh)
 	{
-#ifdef IW_DEBUG
-		assert(lightBeginEndCount == 1 && sceneBeginEndCount == 1);
-#endif
-
 		light->LightShader()->Program->GetParam("model")
 			->SetAsMat4(transform->Transformation());
 
-		DrawMesh(transform, mesh);
+		mesh->Draw(Device);
 	}
 
 	void Renderer::ApplyFilter(
@@ -162,8 +142,8 @@ namespace IW {
 
 		SetShader(shader);
 
-		shader->Program->GetParam("filterTexture")->SetAsTexture(
-			source->Textures[0].Handle);
+		//shader->Program->GetParam("filterTexture")->SetAsTexture(
+		//	source->Textures[0]->Handle());
 
 		m_filterMesh->Draw(Device);
 

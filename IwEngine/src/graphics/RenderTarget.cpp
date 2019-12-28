@@ -3,65 +3,46 @@
 
 namespace IW {
 	RenderTarget::RenderTarget(
-		std::initializer_list<Texture> textures)
-		: Frame(nullptr)
+		int width,
+		int height)
+		: m_width(width)
+		, m_height(height)
+		, m_handle(nullptr)
+	{}
+
+	void RenderTarget::AddTexture(
+		iw::ref<Texture> texture)
 	{
-		TextureCount = textures.size();
-		Textures = new Texture[TextureCount];
-
-		auto titr = textures.begin();
-		
-		Width  = titr->Width;
-		Height = titr->Height;
-		
-		for (size_t i = 0; i < TextureCount; i++, titr++) {
-			assert(Width == titr->Width && Height == titr->Height);
-			Textures[i] = *titr;
-		}
-	}
-
-	RenderTarget::RenderTarget(
-		int width, 
-		int height,
-		std::initializer_list<TextureFormat> formats,
-		std::initializer_list<TextureFormatType> types)
-		: Width(width)
-		, Height(height)
-		, Frame(nullptr)
-	{
-		assert(formats.size() != types.size());
-
-		TextureCount = formats.size();
-		Textures = new Texture[TextureCount];
-
-		auto fitr = formats.begin();
-		auto titr = types  .begin();
-		for (size_t i = 0; i < TextureCount; i++, fitr++, titr++) {
-			Textures[i] = {
-				Width,
-				Height,
-				*fitr,
-				*titr,
-				nullptr
-			};
-		}
+		m_textures.push_back(texture);
 	}
 
 	void RenderTarget::Initialize(
 		const iw::ref<IDevice>& device)
 	{
-		Frame = device->CreateFrameBuffer();
-		
-		for (size_t i = 0; i < TextureCount; i++) {
-			Textures[i].Initialize(device);
-			device->AttachTextureToFrameBuffer(Frame, Textures[i].Handle);
+		m_handle = device->CreateFrameBuffer();
+
+		for (iw::ref<Texture>& texture : m_textures) {
+			texture->Initialize(device);
+			device->AttachTextureToFrameBuffer(m_handle, texture->Handle());
 		}
 	}
 
 	void RenderTarget::Use(
 		const iw::ref<IDevice>& device)
 	{
-		device->SetFrameBuffer(Frame);
-		device->SetViewport(Width, Height);
+		device->SetFrameBuffer(m_handle);
+		device->SetViewport(m_width, m_height);
+	}
+
+	int RenderTarget::Width() const {
+		return m_width;
+	}
+
+	int RenderTarget::Height() const {
+		return m_height;
+	}
+
+	IFrameBuffer* RenderTarget::Handle() const {
+		return m_handle;
 	}
 }

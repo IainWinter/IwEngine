@@ -13,8 +13,13 @@ namespace Physics {
 	class CollisionSpace {
 	private:
 		std::vector<CollisionObject*> m_objects;
-		std::vector<Solver> m_solvers;
+		std::vector<Solver*> m_solvers;
 
+	protected:
+		IWPHYSICS_API
+		virtual void SolveManifolds(
+			std::vector<Manifold>& manifolds,
+			scalar dt = 0);
 	public:
 		IWPHYSICS_API
 		virtual void AddCollisionObject(
@@ -25,6 +30,17 @@ namespace Physics {
 			CollisionObject* object);
 
 		IWPHYSICS_API
+		void AddSolver(
+			Solver* solver);
+
+		IWPHYSICS_API
+		void RemoveSolver(
+			Solver* solver);
+
+		//IWPHYSICS_API
+		//virtual void SolveConstrains();
+
+		IWPHYSICS_API
 		bool TestObject(
 			CollisionObject* object);
 
@@ -32,8 +48,6 @@ namespace Physics {
 		bool TestObjects(
 			CollisionObject* object,
 			CollisionObject* other);
-
-		// Collision calls
 	};
 }
 

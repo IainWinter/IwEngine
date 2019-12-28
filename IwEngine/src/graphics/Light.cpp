@@ -1,7 +1,22 @@
 #include "iw/graphics/Light.h"
 
 namespace IW {
-	void Light::PostProcess() {}
+	Light::Light(
+		iw::ref<Shader> shader,
+		iw::ref<IW::RenderTarget> target)
+		: m_lightShader(shader)
+		, m_lightTarget(target)
+	{}
+
+	const iw::ref<Shader>& Light::LightShader() const {
+		return m_lightShader;
+	}
+
+	const iw::ref<RenderTarget>& Light::LightTarget() const {
+		return m_lightTarget;
+	}
+
+	/*void Light::PostProcess() {}
 
 	const iw::ref<Shader>& Light::LightShader() const {
 		return m_light;
@@ -51,5 +66,5 @@ namespace IW {
 		iw::ref<RenderTarget>& postTarget)
 	{
 		m_postTarget = postTarget;
-	}
+	}*/
 }

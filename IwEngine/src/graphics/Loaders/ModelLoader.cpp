@@ -62,7 +62,9 @@ namespace IW {
 					texturePath.Set(std::string(texturePath.C_Str()));
 
 					iw::ref<Texture> texture = m_asset.Load<Texture>(texturePath.C_Str());
-					material.SetTexture("albedoMap", texture);
+					if (texture) {
+						material.SetTexture("albedoMap", texture);
+					}
 				}
 
 				size_t size = strlen(ainame) + 1;
@@ -118,10 +120,6 @@ namespace IW {
 					}
 				}
 			}
-
-			//Mesh* mesh = root;
-
-			//scene->mMeshes[0]->
 
 			mesh.VertexCount = aimesh->mNumVertices;
 			if (aimesh->HasPositions()) {

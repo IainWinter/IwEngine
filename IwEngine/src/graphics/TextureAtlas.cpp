@@ -29,52 +29,64 @@ namespace Graphics {
 		int tile,
 		iw::vector2 coords) const
 	{
-		const TexBounds& bounds = m_textures.at(tile);
-		return bounds.Min / bounds.Max + coords * (bounds.Max - bounds.Min) / Dimensions();
+		const TexBounds& bounds = m_bounds.at(tile);
+		return bounds.Offset + bounds.Dimensions - bounds.Offset * coords;
 	}
 
-	Texture TextureAtlas::GetSubTexture(
-		int tile) const
+	iw::ref<Texture> TextureAtlas::GetSubTexture(
+		int tile)
 	{
-		return ;
+		// check if algreay gotten
+
+		TexBounds bounds = m_bounds.at(tile);
+		Texture tex = CreateSubTexture(
+			bounds.Offset.x,     bounds.Offset.y, 
+			bounds.Dimensions.x, bounds.Dimensions.y);
+
+		iw::ref<Texture> tref = std::make_shared<Texture>(std::forward<Texture>(tex));
+
+		return m_textures.emplace_back(tref);
 	}
 
 	TexBounds TextureAtlas::GetTexBounds(
 		int tile) const
 	{
-		return m_textures.at(tile);
+		return m_bounds.at(tile);
 	}
 
-	void TextureAtlas::GenTexBounds(
-		iw::vector4 backgroundColor)
-	{
-		// algo for finding texture bounds
-	}
+	//void TextureAtlas::GenTexBounds(
+	//	iw::vector4 backgroundColor)
+	//{
+	//	// algo for finding texture bounds
+	//}
 
 	void TextureAtlas::GenTexBounds(
 		int cols,
 		int rows)
 	{
-		m_textures.clear();
+		m_bounds.clear();
 
-		float xstep = Width / cols;
-		float ystep = Height / rows;
+		float xstep = m_width / cols;
+		float ystep = m_height / rows;
 		for (int r = 0; r < rows; r++) {
 			for (int c = 0; c < cols; c++) {
-				m_textures.emplace_back(
-					iw::vector2(c * xstep, r * ystep), 
-					iw::vector2((c + 1) * xstep, (r + 1) * ystep)
+				iw::vector2 min( c      * xstep,  r      * ystep);
+				iw::vector2 max((c + 1) * xstep, (r + 1) * ystep);
+
+				m_bounds.emplace_back(
+					min, 
+					max - min
 				);
 			}
 		}
 	}
 
-	const std::vector<TexBounds>& TextureAtlas::Textures() const {
-		return m_textures;
-	}
+	//const std::vector<TexBounds>& TextureAtlas::Textures() const {
+	//	return m_textures;
+	//}
 
 	int TextureAtlas::TileCount() const {
-		return m_textures.size();
+		return m_bounds.size();
 	}
 }
 }

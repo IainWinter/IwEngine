@@ -8,29 +8,40 @@
 
 namespace IW {
 namespace Graphics {
-	struct IWGRAPHICS_API RenderTarget {
-		int Width;
-		int Height;
+	struct RenderTarget {
+	private:
+		int m_width;
+		int m_height;
+		std::vector<iw::ref<Texture>> m_textures;
 
-		Texture* Textures;
-		size_t TextureCount;
+		IFrameBuffer* m_handle;
 
-		IFrameBuffer* Frame;
-
-		RenderTarget(
-			std::initializer_list<Texture> textures);
-
+	public:
+		IWGRAPHICS_API
 		RenderTarget(
 			int width,
-			int height,
-			std::initializer_list<TextureFormat> formats,
-			std::initializer_list<TextureFormatType> types);
+			int height);
 
+		IWGRAPHICS_API
+		void AddTexture(
+			iw::ref<Texture> texture);
+
+		IWGRAPHICS_API
 		void Initialize(
 			const iw::ref<IDevice>& device);
 
+		IWGRAPHICS_API
 		void Use(
 			const iw::ref<IDevice>& device);
+
+		IWGRAPHICS_API
+		int Width() const;
+
+		IWGRAPHICS_API
+		int Height() const;
+
+		IWGRAPHICS_API
+		IFrameBuffer* Handle() const;
 	};
 }
 

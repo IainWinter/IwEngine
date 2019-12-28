@@ -5,6 +5,17 @@
 #include <vector>
 
 namespace IW {
+	void DynamicsSpace::SolveManifolds(
+		std::vector<Manifold>& manifolds,
+		scalar dt)
+	{
+		CollisionSpace::SolveManifolds(manifolds, dt); // not sure the order here both ways fuck it up
+
+		for (DynamicSolver* solver : m_dynamicSolvers) {
+			solver->Solve(m_rigidbodies, manifolds, dt);
+		}
+	}
+
 	void DynamicsSpace::AddRigidbody(
 		Rigidbody* rigidbody)
 	{
@@ -30,21 +41,21 @@ namespace IW {
 		RemoveCollisionObject(rigidbody);
 	}
 
-	void DynamicsSpace::AddSolver(
-		RigidbodySolver* solver)
+	void DynamicsSpace::AddDSolver(
+		DynamicSolver* solver)
 	{
 		assert(solver);
-		m_rigidbodySolvers.push_back(solver);
+		m_dynamicSolvers.push_back(solver);
 	}
 
-	void DynamicsSpace::RemoveSolver(
-		RigidbodySolver* solver)
+	void DynamicsSpace::RemoveDSolver(
+		DynamicSolver* solver)
 	{
 		assert(solver);
-		auto itr = std::find(m_rigidbodySolvers.begin(), m_rigidbodySolvers.end(), solver);
+		auto itr = std::find(m_dynamicSolvers.begin(), m_dynamicSolvers.end(), solver);
 
-		assert(itr != m_rigidbodySolvers.end());
-		m_rigidbodySolvers.erase(itr);
+		assert(itr != m_dynamicSolvers.end());
+		m_dynamicSolvers.erase(itr);
 	}
 
 	void DynamicsSpace::Step(
@@ -62,16 +73,26 @@ namespace IW {
 		
 		//ResolveTransforms();
 
-		for (RigidbodySolver* solver : m_rigidbodySolvers) {
-			solver->Solve(m_rigidbodies, dt);
+		std::vector<Manifold> manifolds;
+		for (Rigidbody* a : m_rigidbodies) {
+			for (Rigidbody* b : m_rigidbodies) {
+				if (a == b) break;
+
+				Manifold m = algo::MakeManifold(a, b);
+				if (m.HasCollision) {
+					manifolds.push_back(m);
+				}
+			}
 		}
+
+		SolveManifolds(manifolds, dt);
 
 		for (Rigidbody* rigidbody : m_rigidbodies) {
 			if (rigidbody->IsKinematic()) {
 				rigidbody->SetVelocity(dt * rigidbody->Force() * rigidbody->Mass() + rigidbody->Velocity());
 				rigidbody->Trans()->Position += rigidbody->Velocity();
 
-				rigidbody->SetVelocity(rigidbody->Velocity() * .98f);
+				rigidbody->SetVelocity(rigidbody->Velocity() * .98f); // scuffed friction
 			}
 		}
 

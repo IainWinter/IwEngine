@@ -6,11 +6,13 @@
 #include "Events/ActionEvents.h"
 #include "imgui/imgui.h"
 #include "iw/physics/Dynamics/ManifoldSolver.h"
+#include "iw/physics/Collision/PositionSolver.h"
 #include "iw/physics/Collision/PlaneCollider.h"
 #include "iw/physics/Dynamics/Rigidbody.h"
 #include "iw/graphics/MeshFactory.h"
 #include "iw/input/Devices/Mouse.h"
 #include "iw/graphics/TextureAtlas.h"
+#include "iw/graphics/DirectionalLight.h"
 
 namespace IW {
 	struct ModelComponents {
@@ -32,31 +34,59 @@ namespace IW {
 		: Layer("Sandbox")
 	{}
 
+	DirectionalLight light;
+
 	int SandboxLayer::Initialize() {
-		auto& directional = Asset->Load<IW::Shader>("shaders/shadows/directional.shader");
-		auto&  nullFilter = Asset->Load<IW::Shader>("shaders/shadows/directional.shader");
-		auto&  blurfilter = Asset->Load<IW::Shader>("shaders/shadows/directional.shader");
+		// Shader
+		iw::ref<Shader> directional = Asset->Load<Shader>("shaders/lights/directional.shader");
+		directional->Initialize(Renderer->Device);
 
-		iw::ref<IW::Material> mat = std::make_shared<IW::Material>(directional);
+		// Textures
+		TextureAtlas atlasD = TextureAtlas(2048, 2048, IW::DEPTH, IW::FLOAT);
+		atlasD.Initialize(Renderer->Device);
+		atlasD.GenTexBounds(2, 2);
 
-		IW::TextureAtlas atlas = IW::TextureAtlas(2048, 2048, IW::DEPTH, IW::FLOAT);
-		atlas.GenTexBounds(2, 2);
+		TextureAtlas atlasRG = TextureAtlas(2048, 2048, IW::RG, IW::FLOAT);
+		atlasRG.Initialize(Renderer->Device);
+		atlasRG.GenTexBounds(2, 2);
 
-		iw::vector2 coords(.1, .8);
-		coords = atlas.MapCoords(1, coords);
+		iw::ref<Texture> subD  = atlasD .GetSubTexture(0);
+		iw::ref<Texture> subRG = atlasRG.GetSubTexture(0);
+
+		subD->Initialize(Renderer->Device);
+		subRG->Initialize(Renderer->Device);
+
+		// Target
+		//iw::ref<RenderTarget> target = Renderer->BuildRenderTarget()
+		//	.SetWidth(1024)
+		//	.SetHeight(1024)
+		//	.AddTexture(sub)
+		//	.Initialize();
+
+		iw::ref<RenderTarget> target = std::make_shared<RenderTarget>(1024, 1024);
+		target->AddTexture(subRG);
+		target->AddTexture(subD);
+		target->Initialize(Renderer->Device);
+		
+		// Light
+		light = DirectionalLight(directional, target, OrthographicCamera(100, 50, -50, 50));
+		light.SetPosition(10);
+		light.SetRotation(iw::quaternion::from_look_at(iw::vector3(1, 2, 1)));
 
 		space.SetGravity(iw::vector3(0, -9.8f, 0));
-		space.AddSolver(new ManifoldSolver());
+		space.AddDSolver(new ManifoldSolver());
+		space.AddSolver (new PositionSolver());
 
-		Entity ent = Space->CreateEntity<Transform, Model, PlaneCollider, Rigidbody>();
+		iw::ref<Model> plane = Asset->Load<Model>("models/box.obj");
+		plane->Meshes[0].Material->SetTexture("shadowMap", subRG);
 
-		iw::ref<Model> plane = Asset->Load<Model>("Plane");
-		
-		Space->SetComponentData<Model>(ent, *plane);
+		// floor
+		Entity floor = Space->CreateEntity<Transform, Model, PlaneCollider, Rigidbody>();
+		Space->SetComponentData<Model>(floor, *plane);
 
-		Transform*     t = Space->SetComponentData<Transform>(ent, iw::vector3(0, 0, 0), iw::vector3(150, 1, 150));
-		PlaneCollider* s = Space->SetComponentData<PlaneCollider>(ent, iw::vector3::unit_y, 0.0f);
-		Rigidbody*     r = Space->SetComponentData<Rigidbody>(ent);
+		Transform*     t = Space->SetComponentData<Transform>(floor, iw::vector3(0, 0, 0), iw::vector3(15, 15, 15));
+		PlaneCollider* s = Space->SetComponentData<PlaneCollider>(floor, iw::vector3::unit_y, 0.0f);
+		Rigidbody*     r = Space->SetComponentData<Rigidbody>(floor);
 
 		r->SetIsKinematic(false);
 		r->SetMass(1);
@@ -64,6 +94,36 @@ namespace IW {
 		r->SetTrans(t);
 
 		space.AddRigidbody(r);
+
+		Transform* tl = new Transform();
+		Transform* tr = new Transform();
+		Transform* tt = new Transform();
+		Transform* tb = new Transform();
+
+		PlaneCollider* planel = new PlaneCollider(iw::vector3( 1.6f, 1,  0), -19);
+		PlaneCollider* planer = new PlaneCollider(iw::vector3(-1.6f, 1,  0), -19);
+		PlaneCollider* planet = new PlaneCollider(iw::vector3( 0,    1,  1.6f), -10);
+		PlaneCollider* planeb = new PlaneCollider(iw::vector3( 0,    1, -1.6f), -10);
+
+		Rigidbody* rl = new Rigidbody(false);
+		Rigidbody* rr = new Rigidbody(false);
+		Rigidbody* rt = new Rigidbody(false);
+		Rigidbody* rb = new Rigidbody(false);
+		
+		rl->SetCol(planel);
+		rr->SetCol(planer);
+		rt->SetCol(planet);
+		rb->SetCol(planeb);
+
+		rl->SetTrans(tl);
+		rr->SetTrans(tr);
+		rt->SetTrans(tt);
+		rb->SetTrans(tb);
+
+		space.AddRigidbody(rl);
+		space.AddRigidbody(rr);
+		space.AddRigidbody(rt);
+		space.AddRigidbody(rb);
 
 		return 0;
 	}
@@ -85,12 +145,19 @@ namespace IW {
 
 		//Renderer->EndLight(); 
 
+		Renderer->BeginLight(&light);
+
+		for (auto m_e : Space->Query<Transform, Model>()) {
+			auto [m_t, m_m] = m_e.Components.Tie<ModelComponents>();
+
+			for (size_t i = 0; i < m_m->MeshCount; i++) {
+				Renderer->CastMesh(&light, m_t, &m_m->Meshes[i]);
+			}
+		}
+
+		Renderer->EndLight(&light);
 
 		Renderer->BeginScene();
-
-		//Renderer->DrawMesh();
-
-		//Renderer->EndScene();
 
 		for (auto c_e : Space->Query<Transform, CameraController>()) {
 			auto [c_t, c_c] = c_e.Components.Tie<CameraComponents>();
@@ -101,16 +168,20 @@ namespace IW {
 				for (size_t i = 0; i < m_m->MeshCount; i++) {
 					Mesh& mesh = m_m->Meshes[i];
 
-					mesh.Material->Shader->Program->GetParam("view")
-						->SetAsMat4(c_c->Camera->GetView());
+					Renderer->SetShader(mesh.Material->Shader);
 
-					mesh.Material->Shader->Program->GetParam("proj")
-						->SetAsMat4(c_c->Camera->GetProjection());
+					mesh.Material->Shader->Program->GetParam("lightSpace")
+						->SetAsMat4(light.ViewProj());
+
+					mesh.Material->Shader->Program->GetParam("viewProj")
+						->SetAsMat4(c_c->Camera->GetViewProjection());
 
 					Renderer->DrawMesh(m_t, &mesh);
 				}
 			}
 		}
+
+		Renderer->EndScene();
 
 		for (auto p_e : Space->Query<Transform, PlaneCollider>()) {
 			auto [p_t, p_p] = p_e.Components.Tie<PlaneComponents>();
@@ -123,8 +194,6 @@ namespace IW {
 				p_t->Rotation *= iw::quaternion::from_axis_angle(iw::vector3::unit_x, -iw::PI * Time::DeltaTime());
 			}
 		}
-
-		Renderer->EndScene();
 	}
 
 	float ts = 0.1f;
@@ -157,13 +226,13 @@ namespace IW {
 
 			Space->SetComponentData<Model>(ent, *sphere);
 
-			Transform*      t = Space->SetComponentData<Transform>     (ent, iw::vector3(cos(x) * 5, 5, sin(x) * 5));
+			Transform*      t = Space->SetComponentData<Transform>     (ent, iw::vector3(15, 15, sin(x) * 15));
 			SphereCollider* s = Space->SetComponentData<SphereCollider>(ent, iw::vector3::zero, 1.0f);
 			Rigidbody*      r = Space->SetComponentData<Rigidbody>     (ent);
 
 			r->SetMass(2);
 			//r->ApplyForce(iw::vector3(cos(x += .1f) * 50, 500, sin(x / .1f) * 50));
-			r->ApplyForce(iw::vector3(cos(x) * 30, 100, sin(x += 2 * iw::PI / sc) * 30));
+			r->SetVelocity(iw::vector3(fabs(cos(x)), 1, sin(x += 2 * iw::PI / sc)));
 			r->SetCol(s);
 			r->SetTrans(t);
 

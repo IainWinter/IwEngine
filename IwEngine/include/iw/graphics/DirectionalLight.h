@@ -12,18 +12,13 @@ namespace Graphics {
 
 	public:
 		IWGRAPHICS_API
+		DirectionalLight() = default;
+
+		IWGRAPHICS_API
 		DirectionalLight(
+			iw::ref<Shader> shader,
+			iw::ref<IW::RenderTarget> target,
 			OrthographicCamera camera);
-
-		IWGRAPHICS_API
-		const Camera& Cam() const override;
-
-		IWGRAPHICS_API
-		Camera& Cam() override;
-
-		IWGRAPHICS_API
-		void SetCam(
-			const OrthographicCamera& camera);
 
 		IWGRAPHICS_API
 		void SetPosition(
@@ -32,6 +27,9 @@ namespace Graphics {
 		IWGRAPHICS_API
 		void SetRotation(
 			const iw::quaternion& rotation) override;
+
+		IWGRAPHICS_API
+		iw::matrix4 ViewProj() override;
 	};
 }
 

@@ -275,7 +275,7 @@ namespace IW {
 		int yOffset,
 		int width,
 		int height,
-		int minmap = 0)
+		int minmap)
 	{
 		return static_cast<GLTexture*>(texture)
 			->CreateSubTexture(xOffset, yOffset, width, height, minmap);

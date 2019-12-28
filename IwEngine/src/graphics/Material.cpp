@@ -243,7 +243,7 @@ namespace IW {
 
 			if (prop.IsSample) {
 				Texture* texture = (Texture*)prop.Data;
-				param->SetAsTexture(texture->Handle);
+				param->SetAsTexture(texture->Handle());
 			}
 
 			else {

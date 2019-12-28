@@ -19,6 +19,32 @@ namespace IW {
 		m_objects.erase(itr);
 	}
 
+	void CollisionSpace::AddSolver(
+		Solver* solver)
+	{
+		assert(solver);
+		m_solvers.push_back(solver);
+	}
+
+	void CollisionSpace::RemoveSolver(
+		Solver* solver)
+	{
+		assert(solver);
+		auto itr = std::find(m_solvers.begin(), m_solvers.end(), solver);
+
+		assert(itr != m_solvers.end());
+		m_solvers.erase(itr);
+	}
+
+	void CollisionSpace::SolveManifolds(
+		std::vector<Manifold>& manifolds,
+		scalar dt)
+	{
+		for (Solver* solver : m_solvers) {
+			solver->Solve(m_objects, manifolds, dt);
+		}
+	}
+
 	// going to need some sort of result to be returned. I like the idea of a lil iwcallback
 
 	bool CollisionSpace::TestObject(
