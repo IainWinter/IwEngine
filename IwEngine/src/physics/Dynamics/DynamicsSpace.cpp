@@ -89,7 +89,7 @@ namespace IW {
 
 		for (Rigidbody* rigidbody : m_rigidbodies) {
 			if (rigidbody->IsKinematic()) {
-				if (rigidbody->Velocity().length_squared() > INFINITY) {
+				if (rigidbody->Velocity().length_squared() == INFINITY) {
 					rigidbody->SetVelocity(0);
 				}
 
