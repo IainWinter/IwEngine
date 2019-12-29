@@ -5,7 +5,7 @@
 
 namespace IW {
 namespace Physics {
-	class DynamicSolver
+	class DynamicsSolver
 		: public Solver
 {
 	public:

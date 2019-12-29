@@ -5,7 +5,7 @@
 #include "iw/physics/Collision/SphereCollider.h"
 #include "Events/ActionEvents.h"
 #include "imgui/imgui.h"
-#include "iw/physics/Dynamics/ManifoldSolver.h"
+#include "iw/physics/Dynamics/ImpulseSolver.h"
 #include "iw/physics/Collision/PositionSolver.h"
 #include "iw/physics/Collision/PlaneCollider.h"
 #include "iw/physics/Dynamics/Rigidbody.h"
@@ -94,7 +94,7 @@ namespace IW {
 		light.SetRotation(iw::quaternion::from_look_at(iw::vector3(1, 2, 1)));
 
 		space.SetGravity(iw::vector3(0, -9.8f, 0));
-		space.AddDSolver(new ManifoldSolver());
+		space.AddDSolver(new ImpulseSolver());
 		space.AddSolver (new PositionSolver());
 
 		iw::ref<Model> plane = Asset->Load<Model>("models/box.obj");

@@ -11,7 +11,7 @@ namespace IW {
 	{
 		CollisionSpace::SolveManifolds(manifolds, dt); // not sure the order here both ways fuck it up
 
-		for (DynamicSolver* solver : m_dynamicSolvers) {
+		for (DynamicsSolver* solver : m_dynamicSolvers) {
 			solver->Solve(m_rigidbodies, manifolds, dt);
 		}
 	}
@@ -42,14 +42,14 @@ namespace IW {
 	}
 
 	void DynamicsSpace::AddDSolver(
-		DynamicSolver* solver)
+		DynamicsSolver* solver)
 	{
 		assert(solver);
 		m_dynamicSolvers.push_back(solver);
 	}
 
 	void DynamicsSpace::RemoveDSolver(
-		DynamicSolver* solver)
+		DynamicsSolver* solver)
 	{
 		assert(solver);
 		auto itr = std::find(m_dynamicSolvers.begin(), m_dynamicSolvers.end(), solver);
@@ -89,6 +89,10 @@ namespace IW {
 
 		for (Rigidbody* rigidbody : m_rigidbodies) {
 			if (rigidbody->IsKinematic()) {
+				if (rigidbody->Velocity().length_squared() > INFINITY) {
+					rigidbody->SetVelocity(0);
+				}
+
 				rigidbody->SetVelocity(dt * rigidbody->Force() * rigidbody->Mass() + rigidbody->Velocity());
 				rigidbody->Trans()->Position += rigidbody->Velocity();
 

@@ -1,11 +1,11 @@
 #pragma once
 
-#include "RigidbodySolver.h"
+#include "DynamicsSolver.h"
 
 namespace IW {
 namespace Physics {
-	class ManifoldSolver
-		: public DynamicSolver
+	class ImpulseSolver
+		: public DynamicsSolver
 	{
 	public:
 		IWPHYSICS_API

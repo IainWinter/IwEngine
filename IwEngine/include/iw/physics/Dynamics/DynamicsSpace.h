@@ -1,7 +1,7 @@
 #pragma once
 
 #include "iw/physics/Collision/CollisionSpace.h"
-#include "RigidbodySolver.h"
+#include "DynamicsSolver.h"
 
 namespace IW {
 namespace Physics {
@@ -10,7 +10,7 @@ namespace Physics {
 	{
 	private:
 		std::vector<Rigidbody*> m_rigidbodies;
-		std::vector<DynamicSolver*> m_dynamicSolvers;
+		std::vector<DynamicsSolver*> m_dynamicSolvers;
 		iw::vector3 m_gravity;
 
 	protected:
@@ -29,11 +29,11 @@ namespace Physics {
 
 		IWPHYSICS_API
 		void AddDSolver(
-			DynamicSolver* solver);
+			DynamicsSolver* solver);
 
 		IWPHYSICS_API
 		void RemoveDSolver(
-			DynamicSolver* solver);
+			DynamicsSolver* solver);
 
 		IWPHYSICS_API
 		virtual void Step(
