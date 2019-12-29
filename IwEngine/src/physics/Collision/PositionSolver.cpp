@@ -16,13 +16,12 @@ namespace IW {
 			//	resolution = 0.1f; // if objects are exactly ontop of eachother nudge them a little
 			//}
 
-			// from old iwengine not sure where this is actualy from
-
-			// wtf is this magic LOL this fixed everything and now i understand what i need to do!!! Let's go!
-
 			const float percent = 0.8f;
 			const float slop = 0.1f;
-			iw::vector3 correction = manifold.Normal * percent * fmax(resolution.length() - slop, .0001f) / (aBody->InvMass() + bBody->InvMass());
+
+			iw::vector3 correction = manifold.Normal * percent
+				* fmax(resolution.length() - slop, .0001f)
+				/ (aBody->InvMass() + bBody->InvMass());
 		
 			if (aBody->IsKinematic()) {
 				aBody->Trans()->Position -= aBody->InvMass() * correction;

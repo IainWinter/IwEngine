@@ -40,7 +40,7 @@ namespace Graphics {
 
 		TexBounds bounds = m_bounds.at(tile);
 		Texture tex = CreateSubTexture(
-			bounds.Offset.x,     bounds.Offset.y, 
+			bounds.Offset.x,     bounds.Offset.y,
 			bounds.Dimensions.x, bounds.Dimensions.y);
 
 		iw::ref<Texture> tref = std::make_shared<Texture>(std::forward<Texture>(tex));

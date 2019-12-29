@@ -12,20 +12,25 @@ namespace IW {
 
 			iw::vector3 aVel = aBody->Velocity(); // aBody->NextTrans().Position - aBody->Trans()->Position;
 			iw::vector3 bVel = bBody->Velocity(); //bBody->NextTrans().Position - bBody->Trans()->Position;
-			scalar      rVel = (bVel - aVel).dot(manifold.Normal);
+			iw::vector3 rVel = bVel - aVel;   
+			scalar      nVel = rVel.dot(manifold.Normal);
 
-			if (rVel > 0)
-				continue;
+			//if (nVel > 0)
+			//	continue;
 
 			scalar e = 1.0f;
-			scalar j = -(1.0f + e) * rVel / (aBody->InvMass() + bBody->InvMass());
+			scalar u = 0.1f;
+
+			scalar j = -(1.0f + e) * nVel / (aBody->InvMass() + bBody->InvMass());
 
 			iw::vector3 impluse = j * manifold.Normal;
 			iw::vector3 aImp = -impluse * aBody->InvMass();
 			iw::vector3 bImp =  impluse * bBody->InvMass();
 
+			iw::vector3 friction = u * j * rVel.normalized();
+
 			if (aBody->IsKinematic()) {
-				aBody->SetVelocity(aBody->Velocity() + aImp);
+				aBody->SetVelocity(aBody->Velocity() + aImp + friction * aBody->Mass() * dt);
 			}
 
 			if (bBody->IsKinematic()) {

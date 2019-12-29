@@ -35,11 +35,21 @@ namespace IW {
 	{}
 
 	DirectionalLight light;
+	iw::ref<RenderTarget> target;
+	iw::ref<RenderTarget> targetBlur;
+	iw::ref<Shader> gaussian;
+	iw::ref<Shader> nul;
+	float blurAmount = 0.0f;
 
 	int SandboxLayer::Initialize() {
 		// Shader
 		iw::ref<Shader> directional = Asset->Load<Shader>("shaders/lights/directional.shader");
+		gaussian = Asset->Load<Shader>("shaders/filters/gaussian.shader");
+		nul = Asset->Load<Shader>("shaders/filters/null.shader");
+		
 		directional->Initialize(Renderer->Device);
+		gaussian   ->Initialize(Renderer->Device);
+		nul        ->Initialize(Renderer->Device);
 
 		// Textures
 		TextureAtlas atlasD = TextureAtlas(2048, 2048, IW::DEPTH, IW::FLOAT);
@@ -50,11 +60,17 @@ namespace IW {
 		atlasRG.Initialize(Renderer->Device);
 		atlasRG.GenTexBounds(2, 2);
 
-		iw::ref<Texture> subD  = atlasD .GetSubTexture(0);
-		iw::ref<Texture> subRG = atlasRG.GetSubTexture(0);
+		TextureAtlas atlasBlur = TextureAtlas(2048, 2048, IW::ALPHA, IW::FLOAT);
+		atlasBlur.Initialize(Renderer->Device);
+		atlasBlur.GenTexBounds(2, 2);
 
-		subD->Initialize(Renderer->Device);
-		subRG->Initialize(Renderer->Device);
+		iw::ref<Texture> subD    = atlasD .GetSubTexture(0);
+		iw::ref<Texture> subRG   = atlasRG.GetSubTexture(0);
+		iw::ref<Texture> subBlur = atlasBlur.GetSubTexture(0);
+
+		subD   ->Initialize(Renderer->Device);
+		subRG  ->Initialize(Renderer->Device);
+		subBlur->Initialize(Renderer->Device);
 
 		// Target
 		//iw::ref<RenderTarget> target = Renderer->BuildRenderTarget()
@@ -63,14 +79,18 @@ namespace IW {
 		//	.AddTexture(sub)
 		//	.Initialize();
 
-		iw::ref<RenderTarget> target = std::make_shared<RenderTarget>(1024, 1024);
+		target = std::make_shared<RenderTarget>(1024, 1024);
 		target->AddTexture(subRG);
 		target->AddTexture(subD);
 		target->Initialize(Renderer->Device);
 		
+		targetBlur = std::make_shared<RenderTarget>(1024, 1024);
+		targetBlur->AddTexture(subBlur);
+		targetBlur->Initialize(Renderer->Device);
+
 		// Light
-		light = DirectionalLight(directional, target, OrthographicCamera(100, 50, -50, 50));
-		light.SetPosition(10);
+		light = DirectionalLight(directional, target, OrthographicCamera(50, 50, -50, 100));
+		light.SetPosition(1);
 		light.SetRotation(iw::quaternion::from_look_at(iw::vector3(1, 2, 1)));
 
 		space.SetGravity(iw::vector3(0, -9.8f, 0));
@@ -157,6 +177,17 @@ namespace IW {
 
 		Renderer->EndLight(&light);
 
+		float blurw = 1.0f / (target->Width()  * blurAmount);
+		float blurh = 1.0f / (target->Height() * blurAmount);
+
+		Renderer->SetShader(gaussian);
+
+		gaussian->Program->GetParam("blurScale")->SetAsFloats(&iw::vector3(blurw, 0, 0), 3);
+		Renderer->ApplyFilter(gaussian, target.get(), targetBlur.get());
+
+		gaussian->Program->GetParam("blurScale")->SetAsFloats(&iw::vector3(0, blurh, 0), 3);
+		Renderer->ApplyFilter(gaussian, targetBlur.get(), target.get());
+
 		Renderer->BeginScene();
 
 		for (auto c_e : Space->Query<Transform, CameraController>()) {
@@ -206,6 +237,7 @@ namespace IW {
 		ImGui::Begin("Sandbox");
 
 		ImGui::SliderFloat("Time scale", &ts, 0.001f, 1);
+		ImGui::SliderFloat("Shadow map blur", &blurAmount, 0, 5);
 
 		ImGui::End();
 	}

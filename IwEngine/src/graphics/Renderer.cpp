@@ -15,10 +15,10 @@ namespace IW {
 		};
 
 		iw::vector2 uvs[4] = {
-			iw::vector2(1, 0),
-			iw::vector2(1, 1),
 			iw::vector2(0, 1),
-			iw::vector2(0, 0)
+			iw::vector2(0, 0),
+			iw::vector2(1, 0),
+			iw::vector2(1, 1)
 		};
 
 		unsigned int tris[6] = {
