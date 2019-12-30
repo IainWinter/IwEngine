@@ -7,11 +7,13 @@ uniform mat4 model;
 
 layout(location = 0) in vec3 vert;
 layout(location = 1) in vec3 norm;
+layout(location = 2) in vec2 uv;
 
 out vec4 LightPos;
 out vec2 UV;
 
 void main() {
+	UV = uv;
 	vec4 worldpos = model * vec4(vert, 1);
 	LightPos  = lightSpace * worldpos;
 	gl_Position = viewProj * worldpos;
@@ -24,6 +26,7 @@ uniform vec3 color;
 uniform sampler2D shadowMap;
 
 in vec4 LightPos;
+in vec2 UV;
 
 float linstep(float l, float h, float v) {
 	return clamp((v - l) / (h - l), 0.0, 1.0);

@@ -41,6 +41,10 @@ namespace Graphics {
 		int Height() const;
 
 		IWGRAPHICS_API
+		const iw::ref<Texture>& Tex(
+			int index) const;
+
+		IWGRAPHICS_API
 		IFrameBuffer* Handle() const;
 	};
 }

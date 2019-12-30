@@ -10,20 +10,20 @@ namespace IW {
 		iw::vector3 pos[4] = {
 			iw::vector3(-1,  1, 0),
 			iw::vector3(-1, -1, 0),
-			iw::vector3( 1, -1, 0),
 			iw::vector3( 1,  1, 0),
+			iw::vector3( 1, -1, 0),
 		};
 
 		iw::vector2 uvs[4] = {
 			iw::vector2(0, 1),
 			iw::vector2(0, 0),
-			iw::vector2(1, 0),
-			iw::vector2(1, 1)
+			iw::vector2(1, 1),
+			iw::vector2(1, 0)
 		};
 
 		unsigned int tris[6] = {
 			0, 1, 2,
-			0, 2, 3
+			1, 3, 2
 		};
 
 		m_filterMesh = new Mesh();
@@ -142,8 +142,8 @@ namespace IW {
 
 		SetShader(shader);
 
-		//shader->Program->GetParam("filterTexture")->SetAsTexture(
-		//	source->Textures[0]->Handle());
+		shader->Program->GetParam("filterTexture")->SetAsTexture(
+			source->Tex(0)->Handle());
 
 		m_filterMesh->Draw(Device);
 

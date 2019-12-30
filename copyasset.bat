@@ -1,0 +1,1 @@
+@xcopy C:\dev\IwEngine\Editor\assets C:\dev\IwEngine\Editor\build\assets\ /e /y /f /i

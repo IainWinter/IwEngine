@@ -66,7 +66,7 @@ namespace Graphics {
 	{
 		m_bounds.clear();
 
-		int xstep = m_width / cols;
+		int xstep = m_width  / cols;
 		int ystep = m_height / rows;
 		for (int r = 0; r < rows; r++) {
 			for (int c = 0; c < cols; c++) {

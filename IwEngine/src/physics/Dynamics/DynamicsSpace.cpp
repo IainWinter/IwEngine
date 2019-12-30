@@ -89,8 +89,16 @@ namespace IW {
 
 		for (Rigidbody* rigidbody : m_rigidbodies) {
 			if (rigidbody->IsKinematic()) {
-				if (rigidbody->Velocity().length_squared() == INFINITY) {
+				if (   isnan(rigidbody->Velocity().length_squared())
+					|| isinf(rigidbody->Velocity().length_squared()))
+				{
 					rigidbody->SetVelocity(0);
+				}
+
+				if (   isnan(rigidbody->Trans()->Position.length_squared())
+					|| isinf(rigidbody->Trans()->Position.length_squared()))
+				{
+					rigidbody->Trans()->Position = 0;
 				}
 
 				rigidbody->SetVelocity(dt * rigidbody->Force() * rigidbody->Mass() + rigidbody->Velocity());

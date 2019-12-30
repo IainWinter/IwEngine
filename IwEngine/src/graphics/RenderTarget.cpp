@@ -42,6 +42,12 @@ namespace IW {
 		return m_height;
 	}
 
+	const iw::ref<Texture>& RenderTarget::Tex(
+		int index) const
+	{
+		return m_textures.at(index);
+	}
+
 	IFrameBuffer* RenderTarget::Handle() const {
 		return m_handle;
 	}
