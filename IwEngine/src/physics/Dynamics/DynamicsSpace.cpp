@@ -94,7 +94,7 @@ namespace IW {
 				}
 
 				rigidbody->SetVelocity(dt * rigidbody->Force() * rigidbody->Mass() + rigidbody->Velocity());
-				rigidbody->Trans()->Position += rigidbody->Velocity();
+				rigidbody->Trans()->Position += dt * rigidbody->Velocity();
 
 				//rigidbody->SetVelocity(rigidbody->Velocity() * .98f); // scuffed friction
 			}

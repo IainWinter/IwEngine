@@ -243,7 +243,7 @@ namespace IW {
 	}
 
 	float x = 0;
-	int sc = 5;
+	int sc = 15;
 
 	bool SandboxLayer::On(
 		ActionEvent& e)
@@ -258,13 +258,13 @@ namespace IW {
 
 			Space->SetComponentData<Model>(ent, *sphere);
 
-			Transform*      t = Space->SetComponentData<Transform>     (ent, iw::vector3(15, 15, sin(x) * 15));
+			Transform*      t = Space->SetComponentData<Transform>     (ent, iw::vector3(cos(x) * 15, 15, sin(x) * 15));
 			SphereCollider* s = Space->SetComponentData<SphereCollider>(ent, iw::vector3::zero, 1.0f);
 			Rigidbody*      r = Space->SetComponentData<Rigidbody>     (ent);
 
 			r->SetMass(2);
 			//r->ApplyForce(iw::vector3(cos(x += .1f) * 50, 500, sin(x / .1f) * 50));
-			r->SetVelocity(iw::vector3(fabs(cos(x)), 1, sin(x += 2 * iw::PI / sc)));
+			r->SetVelocity(iw::vector3(cos(x) * 20, 20, 20 * sin(x += 2 * iw::PI / sc)));
 			r->SetCol(s);
 			r->SetTrans(t);
 

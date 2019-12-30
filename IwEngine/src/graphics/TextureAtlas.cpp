@@ -66,8 +66,8 @@ namespace Graphics {
 	{
 		m_bounds.clear();
 
-		float xstep = m_width / cols;
-		float ystep = m_height / rows;
+		int xstep = m_width / cols;
+		int ystep = m_height / rows;
 		for (int r = 0; r < rows; r++) {
 			for (int c = 0; c < cols; c++) {
 				iw::vector2 min( c      * xstep,  r      * ystep);
