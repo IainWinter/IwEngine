@@ -26,6 +26,8 @@ namespace IW {
 
 		Console = std::make_shared<IW::Console>(iw::make_getback(&Application::HandleCommand, this));
 
+		Physics = std::make_shared<DynamicsSpace>();
+
 		PushOverlay<ImGuiLayer>();
 		PushOverlay<DebugLayer>();
 	}
@@ -50,8 +52,12 @@ namespace IW {
 
 		// Events
 
-		Bus->subscribe(iw::make_callback(&Application ::HandleEvent, this));
+		Bus->subscribe(iw::make_callback(&Application::HandleEvent, this));
 		Bus->subscribe(iw::make_callback(&InputManager::HandleEvent, Input.get()));
+		
+		// Physics
+
+		Physics->SetCollisionCallback(iw::make_callback(&Application::HandleCollision, this));
 
 		// Asset Loader
 
@@ -62,7 +68,6 @@ namespace IW {
 
 		// Window
 
-		LOG_DEBUG << "Setting window event bus...";
 		m_window->SetEventbus(Bus);
 
 		int status;
@@ -257,5 +262,12 @@ namespace IW {
 		LOG_INFO << command.Original;
 
 		return false;
+	}
+
+	void Application::HandleCollision(
+		Manifold& manifold,
+		scalar dt)
+	{
+		LOG_INFO << manifold.PenetrationDepth;
 	}
 }

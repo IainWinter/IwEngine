@@ -1,7 +1,7 @@
 #pragma once
 
 #include "iw/util/iwutil.h"
-#include "iw/util/memory/smart_pointers.h"
+#include "iw/util/memory/ref.h"
 #include <cstddef>
 #include <malloc.h>
 #include <list>

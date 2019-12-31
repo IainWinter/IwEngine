@@ -6,7 +6,7 @@
 #include "iw/renderer/VertexArray.h"
 #include "iw/renderer/IndexBuffer.h"
 #include "iw/renderer/Device.h"
-#include "iw/util/memory/smart_pointers.h"
+#include "iw/util/memory/ref.h"
 
 namespace IW {
 namespace Graphics {

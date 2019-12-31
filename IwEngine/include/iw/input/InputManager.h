@@ -5,7 +5,7 @@
 #include "Devices/Device.h"
 #include "Devices/Mouse.h"
 #include "Devices/Keyboard.h"
-#include "iw/util/memory/smart_pointers.h"
+#include "iw/util/memory/ref.h"
 #include "iw/events/eventbus.h"
 #include <vector>
 

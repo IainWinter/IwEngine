@@ -103,8 +103,6 @@ namespace IW {
 
 				rigidbody->SetVelocity(dt * rigidbody->Force() * rigidbody->Mass() + rigidbody->Velocity());
 				rigidbody->Trans()->Position += dt * rigidbody->Velocity();
-
-				//rigidbody->SetVelocity(rigidbody->Velocity() * .98f); // scuffed friction
 			}
 		}
 
@@ -117,7 +115,11 @@ namespace IW {
 		// if not then go to the broadphase pair cache and see what other bodies it could be colliding with
 
 		// At the end the forces should be cleared
- 
+
+		// send collision callbacks
+
+		SendCollisionCallbacks(manifolds, dt);
+
 		ClearForces();
 	}
 

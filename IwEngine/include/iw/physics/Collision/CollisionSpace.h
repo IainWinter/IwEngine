@@ -1,8 +1,8 @@
 #pragma once
 
-#include "iw/physics/Collision/CollisionObject.h"
 #include "Solver.h"
-#include <vector>
+#include "iw/events/callback.h"
+#include "iw/util/memory/ref.h"
 
 // https://www.youtube.com/watch?v=1RphLzpQiJY  Debugging like this could be really cool
 // https://www.youtube.com/watch?v=SHinxAhv1ZE  I now understand the goal of this is to have basically a bunch of these constraint rules be applied on contact points
@@ -11,15 +11,14 @@
 namespace IW {
 namespace Physics {
 	class CollisionSpace {
+	public:
+		using CollisionCallback = iw::callback<Manifold&, scalar>;
+	protected:
+		CollisionCallback m_collisionCallback;
 	private:
 		std::vector<CollisionObject*> m_objects;
 		std::vector<Solver*> m_solvers;
 
-	protected:
-		IWPHYSICS_API
-		virtual void SolveManifolds(
-			std::vector<Manifold>& manifolds,
-			scalar dt = 0);
 	public:
 		IWPHYSICS_API
 		virtual void AddCollisionObject(
@@ -48,6 +47,20 @@ namespace Physics {
 		bool TestObjects(
 			CollisionObject* object,
 			CollisionObject* other);
+
+		IWPHYSICS_API
+		void SetCollisionCallback(
+			const CollisionCallback& callback);
+	protected:
+		IWPHYSICS_API
+		virtual void SolveManifolds(
+			std::vector<Manifold>& manifolds,
+			scalar dt = 0);
+
+		IWPHYSICS_API
+		virtual void SendCollisionCallbacks(
+			std::vector<Manifold>& manifolds,
+			scalar dt = 0);
 	};
 }
 

@@ -87,11 +87,13 @@ namespace IW {
 		iw::ref<IW::Space> space,
 		iw::ref<IW::Renderer> renderer,
 		iw::ref<AssetManager> asset,
+		iw::ref<DynamicsSpace> physics,
 		iw::ref<iw::eventbus> bus)
 	{
 		Space    = space;
 		Renderer = renderer;
 		Asset    = asset;
+		Physics  = physics;
 		Bus      = bus;
 	}
 }

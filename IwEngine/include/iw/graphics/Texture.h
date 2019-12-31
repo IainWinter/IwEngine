@@ -4,7 +4,7 @@
 #include "Color.h"
 #include "iw/renderer/Device.h"
 #include "iw/renderer/Texture.h"
-#include "iw/util/memory/smart_pointers.h"
+#include "iw/util/memory/ref.h"
 
 namespace IW {
 namespace Graphics {

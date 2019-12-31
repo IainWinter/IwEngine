@@ -5,7 +5,7 @@
 #include "Devices/Device.h"
 #include "iw/events/event.h"
 #include "iw/events/callback.h"
-#include "iw/util/memory/smart_pointers.h"
+#include "iw/util/memory/ref.h"
 #include <string>
 
 namespace IW {

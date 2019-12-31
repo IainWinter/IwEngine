@@ -3,7 +3,7 @@
 #include "iw/events/eventbus.h"
 #include "WindowOptions.h"
 #include "iw/input/InputManager.h"
-#include "iw/util/memory/smart_pointers.h"
+#include "iw/util/memory/ref.h"
 
 namespace IW {
 namespace Engine {

@@ -13,11 +13,6 @@ namespace Physics {
 		std::vector<DynamicsSolver*> m_dynamicSolvers;
 		iw::vector3 m_gravity;
 
-	protected:
-		IWPHYSICS_API
-		void SolveManifolds(
-			std::vector<Manifold>& manifolds,
-			scalar dt = 0) override;
 	public:
 		IWPHYSICS_API
 		virtual void AddRigidbody(
@@ -45,7 +40,10 @@ namespace Physics {
 		void SetGravity(
 			const iw::vector3& gravity);
 	protected:
-		
+		IWPHYSICS_API
+		void SolveManifolds(
+			std::vector<Manifold>& manifolds,
+			scalar dt = 0) override;
 	private:
 		void TrySetGravity();
 		void TryApplyGravity();

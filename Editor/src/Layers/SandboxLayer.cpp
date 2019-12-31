@@ -39,7 +39,7 @@ namespace IW {
 	iw::ref<RenderTarget> targetBlur;
 	iw::ref<Shader> gaussian;
 	iw::ref<Shader> nul;
-	float blurAmount = 0.0f;
+	float blurAmount = 0.4f;
 
 	int SandboxLayer::Initialize() {
 		// Shader
@@ -93,10 +93,6 @@ namespace IW {
 		light.SetPosition(1);
 		light.SetRotation(iw::quaternion::from_look_at(iw::vector3(1, 2, 1)));
 
-		space.SetGravity(iw::vector3(0, -9.8f, 0));
-		space.AddDSolver(new ImpulseSolver());
-		space.AddSolver (new PositionSolver());
-
 		iw::ref<Model> plane = Asset->Load<Model>("models/box.obj");
 		plane->Meshes[0].Material->SetTexture("shadowMap", subRG);
 
@@ -113,7 +109,7 @@ namespace IW {
 		r->SetCol(s);
 		r->SetTrans(t);
 
-		space.AddRigidbody(r);
+		Physics->AddRigidbody(r);
 
 		Transform* tl = new Transform();
 		Transform* tr = new Transform();
@@ -140,10 +136,14 @@ namespace IW {
 		rt->SetTrans(tt);
 		rb->SetTrans(tb);
 
-		space.AddRigidbody(rl);
-		space.AddRigidbody(rr);
-		space.AddRigidbody(rt);
-		space.AddRigidbody(rb);
+		Physics->AddRigidbody(rl);
+		Physics->AddRigidbody(rr);
+		Physics->AddRigidbody(rt);
+		Physics->AddRigidbody(rb);
+
+		Physics->SetGravity(iw::vector3(0, -9.8f, 0));
+		Physics->AddDSolver(new ImpulseSolver());
+		Physics->AddSolver(new PositionSolver());
 
 		return 0;
 	}
@@ -230,7 +230,7 @@ namespace IW {
 	float ts = 0.1f;
 	
 	void SandboxLayer::FixedUpdate() {
-		space.Step(Time::FixedTime() * ts);
+		Physics->Step(Time::FixedTime() * ts);
 	}
 
 	void SandboxLayer::ImGui() {
@@ -268,8 +268,9 @@ namespace IW {
 			r->SetCol(s);
 			r->SetTrans(t);
 
-			space.AddRigidbody(r);
+			Physics->AddRigidbody(r);
 		}
+
 		return true;
 	}
 }

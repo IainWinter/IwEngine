@@ -1,18 +1,19 @@
 #pragma once
 
 #include "Core.h"
-#include "Window.h"
-#include "EventStack.h"
 #include "Task.h"
+#include "Window.h"
 #include "Console.h"
-#include "iw/events/eventbus.h"
+#include "EventStack.h"
 #include "InitOptions.h"
 #include "Layers/ImGuiLayer.h"
-#include "iw/asset/AssetManager.h"
-#include "iw/input/InputManager.h"
 #include "iw/entity/Space.h"
+#include "iw/events/eventbus.h"
+#include "iw/asset/AssetManager.h"
 #include "iw/graphics/Renderer.h"
+#include "iw/input/InputManager.h"
 #include "iw/util/queue/blocking_queue.h"
+#include "iw/physics/Dynamics/DynamicsSpace.h"
 #include <vector>
 #include <thread>
 
@@ -30,12 +31,13 @@ namespace Engine {
 		bool m_running;
 
 	protected:
-		iw::ref<Space>        Space;
-		iw::ref<Renderer>     Renderer;
-		iw::ref<AssetManager> Asset;
-		iw::ref<InputManager> Input;
-		iw::ref<Console>      Console;
-		iw::ref<iw::eventbus> Bus;
+		iw::ref<Space>         Space;
+		iw::ref<Renderer>      Renderer;
+		iw::ref<AssetManager>  Asset;
+		iw::ref<InputManager>  Input;
+		iw::ref<Console>       Console;
+		iw::ref<iw::eventbus>  Bus;
+		iw::ref<DynamicsSpace> Physics;
 
 	public:
 		IWENGINE_API
@@ -70,6 +72,11 @@ namespace Engine {
 			const Command& command);
 
 		IWENGINE_API
+		virtual void HandleCollision(
+			Manifold& manifold,
+			scalar dt);
+
+		IWENGINE_API
 		inline IWindow& GetWindow() {
 			return *m_window;
 		}
@@ -89,7 +96,7 @@ namespace Engine {
 			Args&&... args)
 		{
 			L* layer = new L(std::forward<Args>(args)...);
-			layer->SetApplicationVars(Space, Renderer, Asset, Bus);
+			layer->SetApplicationVars(Space, Renderer, Asset, Physics, Bus);
 
 			m_layers.PushBack(layer);
 			return layer;
@@ -102,7 +109,7 @@ namespace Engine {
 			Args&& ... args)
 		{
 			L* layer = new L(std::forward<Args>(args)...);
-			layer->SetApplicationVars(Space, Renderer, Asset, Bus);
+			layer->SetApplicationVars(Space, Renderer, Asset, Physics, Bus);
 
 			m_layers.PushFront(layer);
 			return layer;

@@ -9,6 +9,7 @@
 #include "iw/graphics/Renderer.h"
 #include "iw/events/eventbus.h"
 #include "iw/entity/Space.h"
+#include "iw/physics/Dynamics/DynamicsSpace.h"
 
 namespace IW {
 namespace Engine {
@@ -19,10 +20,11 @@ namespace Engine {
 		const char* m_name;
 		EventStack<ISystem*> m_systems; // layer doesnt own systems but prolly should
 	protected:
-		iw::ref<Space>        Space;
-		iw::ref<Renderer>     Renderer;
-		iw::ref<AssetManager> Asset;
-		iw::ref<iw::eventbus>     Bus;
+		iw::ref<Space>         Space;
+		iw::ref<Renderer>      Renderer;
+		iw::ref<AssetManager>  Asset;
+		iw::ref<DynamicsSpace> Physics;
+		iw::ref<iw::eventbus>  Bus;
 
 	public:
 		IWENGINE_API
@@ -138,6 +140,7 @@ namespace Engine {
 			iw::ref<IW::Space> space,
 			iw::ref<IW::Renderer> renderer,
 			iw::ref<AssetManager> asset,
+			iw::ref<DynamicsSpace> physics,
 			iw::ref<iw::eventbus> bus);
 	};
 }

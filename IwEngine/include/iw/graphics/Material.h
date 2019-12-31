@@ -6,7 +6,7 @@
 #include "Shader.h"
 #include "iw/renderer/Pipeline.h"
 #include "iw/renderer/Device.h"
-#include "iw/util/memory/smart_pointers.h"
+#include "iw/util/memory/ref.h"
 #include "iw/util/tuple/foreach.h"
 #include "iw/math/vector2.h"
 #include "iw/math/vector3.h"

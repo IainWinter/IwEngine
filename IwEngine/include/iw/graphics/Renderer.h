@@ -6,7 +6,7 @@
 #include "Light.h"
 #include "iw/renderer/Device.h"
 #include "iw/common/Components/Transform.h"
-#include "iw/util/memory/smart_pointers.h"
+#include "iw/util/memory/ref.h"
 #include <unordered_map>
 #include <vector>
 

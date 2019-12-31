@@ -3,7 +3,7 @@
 #include "IwAsset.h"
 #include "IAssetLoader.h"
 #include "AssetManager.h"
-#include "iw/util/memory/smart_pointers.h"
+#include "iw/util/memory/ref.h"
 #include "iw/log/logger.h"
 #include <unordered_map>
 #include <assert.h>

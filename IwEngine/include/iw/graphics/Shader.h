@@ -3,7 +3,7 @@
 #include "IwGraphics.h"
 #include "iw/renderer/Pipeline.h"
 #include "iw/renderer/Device.h"
-#include "iw/util/memory/smart_pointers.h"
+#include "iw/util/memory/ref.h"
 #include <vector>
 
 namespace IW {

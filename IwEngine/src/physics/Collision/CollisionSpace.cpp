@@ -45,6 +45,15 @@ namespace IW {
 		}
 	}
 
+	void CollisionSpace::SendCollisionCallbacks(
+		std::vector<Manifold>& manifolds,
+		scalar dt)
+	{
+		for (Manifold& manifold : manifolds) {
+			m_collisionCallback(manifold, dt);
+		}
+	}
+
 	// going to need some sort of result to be returned. I like the idea of a lil iwcallback
 
 	bool CollisionSpace::TestObject(
@@ -71,5 +80,11 @@ namespace IW {
 		assert(object && other);
 
 		return object->Bounds().Intersects(other->Bounds());
+	}
+
+	void CollisionSpace::SetCollisionCallback(
+		const CollisionCallback& callback)
+	{
+		m_collisionCallback = callback;
 	}
 }
