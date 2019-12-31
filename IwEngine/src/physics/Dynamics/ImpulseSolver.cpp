@@ -21,7 +21,7 @@ namespace IW {
 				continue;
 
 			// This goes in rigidbody
-			scalar e = 0.5f;
+			scalar e = aBody->Restitution() * bBody->Restitution();
 
 			scalar j = -(1.0f + e) * nVel / (aBody->InvMass() + bBody->InvMass());
 
@@ -44,10 +44,10 @@ namespace IW {
 			scalar      fVel = rVel.dot(tangent);
 
 			// These go in rigidbody
-			scalar aSF = 0.1f;
-			scalar bSF = 0.1f;
-			scalar aDF = .02f;
-			scalar bDF = .02f;
+			scalar aSF = aBody->StaticFriction();
+			scalar bSF = bBody->StaticFriction();
+			scalar aDF = aBody->DynamicFriction();
+			scalar bDF = bBody->DynamicFriction();
 
 			scalar mu = iw::vector2(aSF, bSF).length();
 

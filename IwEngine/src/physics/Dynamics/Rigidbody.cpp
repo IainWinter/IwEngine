@@ -57,6 +57,18 @@ namespace IW {
 		return m_isKinematic;
 	}
 
+	float Rigidbody::StaticFriction() const {
+		return m_staticFriction;
+	}
+
+	float Rigidbody::DynamicFriction() const {
+		return m_dynamicFriction;
+	}
+
+	float Rigidbody::Restitution() const {
+		return m_restitution;
+	}
+
 	const Transform& Rigidbody::NextTrans() const {
 		return m_nextTrans;
 	}
@@ -101,6 +113,24 @@ namespace IW {
 		bool isKinematic)
 	{
 		m_isKinematic = isKinematic;
+	}
+
+	void Rigidbody::SetStaticFriction(
+		float staticFriction)
+	{
+		m_staticFriction = staticFriction;
+	}
+
+	void Rigidbody::SetDynamicFriction(
+		float dynamicFriction)
+	{
+		m_dynamicFriction = dynamicFriction;
+	}
+
+	void Rigidbody::SetRestitution(
+		float restitution)
+	{
+		m_restitution = restitution;
 	}
 	
 	void Rigidbody::SetNextTrans(
