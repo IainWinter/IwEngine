@@ -3,7 +3,8 @@
 namespace IW {
 	Rigidbody::Rigidbody(
 		bool isKinematic)
-		: m_takesGravity(true)
+		: m_invMass(1)
+		, m_takesGravity(true)
 		, m_simGravity(true)
 		, m_isKinematic(isKinematic)
 	{}

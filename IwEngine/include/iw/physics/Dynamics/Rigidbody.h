@@ -36,14 +36,31 @@ namespace Physics {
 		void TransCenterOfMass(
 			const Transform& to);
 
+		IWPHYSICS_API
 		const iw::vector3& Gravity() const;
+
+		IWPHYSICS_API
 		const iw::vector3& Force() const;
+
+		IWPHYSICS_API
 		const iw::vector3& Velocity() const;
+
+		IWPHYSICS_API
 		scalar Mass() const;
+
+		IWPHYSICS_API
 		scalar InvMass() const;
+
+		IWPHYSICS_API
 		bool TakesGravity() const;
+
+		IWPHYSICS_API
 		bool SimGravity() const;
+
+		IWPHYSICS_API
 		bool IsKinematic() const;
+
+		IWPHYSICS_API
 		const Transform& NextTrans() const;
 
 		IWPHYSICS_API

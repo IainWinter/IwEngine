@@ -13,6 +13,7 @@
 #include "iw/input/Devices/Mouse.h"
 #include "iw/graphics/TextureAtlas.h"
 #include "iw/graphics/DirectionalLight.h"
+#include "Systems/PlayerSystem.h"
 
 namespace IW {
 	struct ModelComponents {
@@ -144,6 +145,26 @@ namespace IW {
 		Physics->SetGravity(iw::vector3(0, -9.8f, 0));
 		Physics->AddDSolver(new ImpulseSolver());
 		Physics->AddSolver(new PositionSolver());
+
+		// Player
+
+		iw::ref<Model> sphere = Asset->Load<Model>("Sphere");
+
+		Entity player = Space->CreateEntity<Transform, Model, SphereCollider, Rigidbody, Player>();
+		Space->SetComponentData<Model>(player, *sphere);
+		Space->SetComponentData<Player>(player, -10.0f, .18f, .08f);
+
+		Transform* tp      = Space->SetComponentData<Transform>     (player, iw::vector3(0, 15, 0));
+		SphereCollider* sp = Space->SetComponentData<SphereCollider>(player, iw::vector3::zero, 1.0f);
+		Rigidbody* rp      = Space->SetComponentData<Rigidbody>     (player);
+
+		rp->SetMass(1);
+		rp->SetCol(sp);
+		rp->SetTrans(tp);
+
+		Physics->AddRigidbody(rp);
+
+		PushSystem<PlayerSystem>();
 
 		return 0;
 	}

@@ -15,8 +15,6 @@ namespace IW {
 	Application::Application()
 		: m_running(false)
 		, m_window(IWindow::Create())
-		, Space(std::make_shared<IW::Space>())
-		, Asset(std::make_shared<AssetManager>())
 	{
 		m_device = iw::ref<IDevice>(IDevice::Create());
 		Renderer = std::make_shared<IW::Renderer>(m_device);
@@ -27,6 +25,8 @@ namespace IW {
 		Console = std::make_shared<IW::Console>(iw::make_getback(&Application::HandleCommand, this));
 
 		Physics = std::make_shared<DynamicsSpace>();
+		Space = std::make_shared<IW::Space>();
+		Asset = std::make_shared<AssetManager>();
 
 		PushOverlay<ImGuiLayer>();
 		PushOverlay<DebugLayer>();
@@ -268,6 +268,5 @@ namespace IW {
 		Manifold& manifold,
 		scalar dt)
 	{
-		LOG_INFO << manifold.PenetrationDepth;
 	}
 }

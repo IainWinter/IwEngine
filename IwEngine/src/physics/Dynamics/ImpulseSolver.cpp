@@ -44,10 +44,10 @@ namespace IW {
 			scalar      fVel = rVel.dot(tangent);
 
 			// These go in rigidbody
-			scalar aSF = 1.1f;
-			scalar bSF = 1.1f;
-			scalar aDF = .15f;
-			scalar bDF = .15f;
+			scalar aSF = 0.1f;
+			scalar bSF = 0.1f;
+			scalar aDF = .02f;
+			scalar bDF = .02f;
 
 			scalar mu = iw::vector2(aSF, bSF).length();
 
