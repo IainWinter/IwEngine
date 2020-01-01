@@ -25,14 +25,13 @@ namespace IW {
 			}
 
 			if (movement != 0) {
-				movement.normalize();
+				iw::vector3 m = movement.normalized() * player->Speed * Time::DeltaTime();
+
 				if (player->Timer > 0) {
-					transform->Position += movement * player->Speed * 10 * (player->Timer / player->DashTime) * Time::DeltaTime();
+					m *= 10 * player->Timer / player->DashTime;
 				}
 
-				else {
-					transform->Position += movement * player->Speed * Time::DeltaTime();
-				}
+				rigidbody->MovePosition(m);
 			}
 		}
 	}

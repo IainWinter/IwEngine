@@ -109,6 +109,8 @@ namespace IW {
 		r->SetMass(1);
 		r->SetCol(s);
 		r->SetTrans(t);
+		r->SetStaticFriction(.1f);
+		r->SetDynamicFriction(.01f);
 
 		Physics->AddRigidbody(r);
 
@@ -288,6 +290,8 @@ namespace IW {
 			r->SetVelocity(iw::vector3(cos(x) * 20, 20, 20 * sin(x += 2 * iw::PI / sc)));
 			r->SetCol(s);
 			r->SetTrans(t);
+			r->SetStaticFriction(.1f);
+			r->SetDynamicFriction(.01f);
 
 			Physics->AddRigidbody(r);
 		}

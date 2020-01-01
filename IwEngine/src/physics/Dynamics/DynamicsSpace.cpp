@@ -157,8 +157,23 @@ namespace IW {
 			if (rigidbody->IsKinematic()) {
 				Transform t = *rigidbody->Trans();
 
-				t.Position += rigidbody->Velocity() + dt * rigidbody->Force() / rigidbody->Mass();
+				t.Position += 
+					  rigidbody->Velocity() * dt
+					+ rigidbody->Force() * rigidbody->InvMass() * dt * dt;
+
 				rigidbody->SetNextTrans(t);
+
+				//Transform& t = *rigidbody->Trans();
+				//Transform nt = rigidbody->NextTrans();
+
+				//iw::vector3 v = nt.Position - t.Position + dt * rigidbody->Force() * rigidbody->InvMass();
+
+				//nt.Position = t.Position + v * dt;
+
+				////LOG_INFO << v << " " << rigidbody->Velocity();
+
+				//rigidbody->SetNextTrans(t);
+				//rigidbody->SetVelocity(v);
 			}
 		}
 	}

@@ -48,8 +48,7 @@ namespace IW {
 			scalar bSF = bBody->StaticFriction();
 			scalar aDF = aBody->DynamicFriction();
 			scalar bDF = bBody->DynamicFriction();
-
-			scalar mu = iw::vector2(aSF, bSF).length();
+			scalar mu  = iw::vector2(aSF, bSF).length();
 
 			scalar f  = -fVel / (aBody->InvMass() + bBody->InvMass());
 

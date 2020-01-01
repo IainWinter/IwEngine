@@ -120,6 +120,10 @@ namespace Physics {
 		IWPHYSICS_API
 		void SetNextTrans(
 			const Transform& nextTrans);
+
+		IWPHYSICS_API
+		void MovePosition(
+			const iw::vector3& position);
 	};
 }
 

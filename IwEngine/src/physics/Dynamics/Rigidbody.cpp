@@ -7,6 +7,9 @@ namespace IW {
 		, m_takesGravity(true)
 		, m_simGravity(true)
 		, m_isKinematic(isKinematic)
+		, m_staticFriction(.5)
+		, m_dynamicFriction(.5)
+		, m_restitution(.5)
 	{}
 
 	void Rigidbody::ApplyForce(
@@ -137,5 +140,12 @@ namespace IW {
 		const Transform& nextTrans)
 	{
 		m_nextTrans = nextTrans;
+	}
+
+	void Rigidbody::MovePosition(
+		const iw::vector3& position)
+	{
+		SetVelocity(Velocity() + position);
+		m_transform->Position += position;
 	}
 }
