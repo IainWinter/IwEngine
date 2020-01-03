@@ -11,7 +11,10 @@ namespace Physics {
 		Collider*  m_collider;      // Shape of the collision object (only 3d right now)
 
 	public:
+		IWPHYSICS_API
 		Transform* Trans() const;
+
+		IWPHYSICS_API
 		Collider* Col() const; // should be const probly also these are not needed if they are pointers but Ill try the get set thigs for now as a lil test because ive always dismissed it for the most part
 
 		IWPHYSICS_API

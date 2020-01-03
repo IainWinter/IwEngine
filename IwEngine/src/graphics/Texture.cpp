@@ -154,7 +154,7 @@ namespace Graphics {
 		int yOffset, 
 		int width, 
 		int height/*,
-		int minmap = 0*/) const
+		int mipmap = 0*/) const
 	{
 		return Texture(this, xOffset, yOffset, width, height/*, minmap*/);
 	}

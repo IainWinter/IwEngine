@@ -37,7 +37,7 @@ namespace RenderAPI {
 			int yOffset,
 			int width,
 			int height,
-			int minmap = 0) const;
+			int mipmap = 0) const;
 
 		IWRENDERER_API
 		void Bind() const;

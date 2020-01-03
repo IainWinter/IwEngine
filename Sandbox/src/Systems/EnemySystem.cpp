@@ -7,11 +7,6 @@
 
 #include "IW/physics/AABB.h";
 
-struct Components {
-	IW::Transform* Transform;
-	Enemy*         Enemy;
-};
-
 EnemySystem::EnemySystem(
 	IW::Mesh* circle)
 	: IW::System<IW::Transform, Enemy>("Enemy")

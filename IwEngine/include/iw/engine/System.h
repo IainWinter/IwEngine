@@ -2,6 +2,9 @@
 
 #include "iw/entity/Space.h"
 #include "iw/graphics/Renderer.h"
+#include "iw/asset/AssetManager.h"
+#include "iw/physics/Dynamics/DynamicsSpace.h"
+#include "iw/events/eventbus.h"
 #include "Events/Events.h"
 #include <queue>
 //#include <thread>
@@ -31,6 +34,10 @@ namespace Engine {
 
 		virtual bool On(WindowResizedEvent& e) = 0;
 
+		// Physics events
+
+		virtual bool On(CollisionEvent& e) = 0;
+
 		virtual const char* Name() const = 0;
 	};
 
@@ -45,8 +52,11 @@ namespace Engine {
 		std::queue<size_t> m_delete; // Probly make it so space can queue component creation at the ComponentArray level because of templated bs
 
 	protected:
-		iw::ref<Space>    Space;
-		iw::ref<Renderer> Renderer;
+		iw::ref<Space>         Space;
+		iw::ref<Renderer>      Renderer;
+		iw::ref<AssetManager>  Asset;
+		iw::ref<DynamicsSpace> Physics;
+		iw::ref<iw::eventbus>  Bus;
 
 		virtual void Update(
 			EntityComponentArray& view)
@@ -123,18 +133,28 @@ namespace Engine {
 
 		virtual bool On(WindowResizedEvent& e) override { return false; }
 
-		inline const char* Name() const override {
+		// Physics events
+
+		virtual bool On(CollisionEvent& e) override { return false; }
+
+		const char* Name() const override {
 			return m_name;
 		}
 	private:
 		friend class Layer;
 
-		inline void SetLayerVars(
-			iw::ref<IW::Space>& space,
-			iw::ref<IW::Renderer>& renderer)
+		void SetLayerVars(
+			iw::ref<IW::Space> space,
+			iw::ref<IW::Renderer> renderer,
+			iw::ref<AssetManager> asset,
+			iw::ref<DynamicsSpace> physics,
+			iw::ref<iw::eventbus> bus)
 		{
 			Space = space;
 			Renderer = renderer;
+			Asset = asset;
+			Physics = physics;
+			Bus = bus;
 		}
 	};	
 }

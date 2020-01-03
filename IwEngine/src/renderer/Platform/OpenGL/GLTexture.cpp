@@ -119,10 +119,10 @@ namespace IW {
 		int yOffset, 
 		int width, 
 		int height,
-		int minmap) const
+		int mipmap) const
 	{
 		GLTexture* sub = new GLTexture(width, height, m_format, m_type, nullptr);
-		glTextureSubImage2D(sub->m_renderId, minmap, xOffset, yOffset, width, height, m_glformat, m_gltype, m_data);
+		glTextureSubImage2D(sub->m_renderId, mipmap, xOffset, yOffset, width, height, m_glformat, m_gltype, m_data);
 
 		return sub;
 	}

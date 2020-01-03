@@ -71,6 +71,12 @@ namespace IW {
 		return m_systems.On(e);
 	}
 
+	bool Layer::On(
+		CollisionEvent& e)
+	{
+		return m_systems.On(e);
+	}
+
 	void Layer::UpdateSystems() {
 		for (ISystem* system : m_systems) {
 			system->Update();

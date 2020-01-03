@@ -17,12 +17,11 @@ namespace Physics {
 		bool m_simGravity;      // If the rigidbody will simulate gravity
 		bool m_isKinematic;     // If the rigidbody gets simulated. Still participates with collisions, but is unefected.
 
-		float m_staticFriction;   // Static friction coeffeicent
-		float m_dynamicFriction;  // Dynamic friction coeffeicent
-		float m_restitution;      // Elasticity of collisions
+		float m_staticFriction;  // Static friction coeffeicent
+		float m_dynamicFriction; // Dynamic friction coeffeicent
+		float m_restitution;     // Elasticity of collisions
 
-		Transform   m_nextTrans;     // Where the rigidbody will be next step if there is no interference
-		iw::vector3 m_interVelocity; // Velocity from positional change
+		Transform m_nextTrans; // Where the rigidbody will be next step if there is no interference
 
 	public:
 		IWPHYSICS_API
@@ -35,11 +34,6 @@ namespace Physics {
 
 		IWPHYSICS_API
 		void ApplyGravity();
-
-		// Transforms the rigidbody by its center of mass (no torque)
-		IWPHYSICS_API
-		void TransCenterOfMass(
-			const Transform& to);
 
 		IWPHYSICS_API
 		const iw::vector3& Gravity() const;
@@ -120,10 +114,6 @@ namespace Physics {
 		IWPHYSICS_API
 		void SetNextTrans(
 			const Transform& nextTrans);
-
-		IWPHYSICS_API
-		void MovePosition(
-			const iw::vector3& position);
 	};
 }
 

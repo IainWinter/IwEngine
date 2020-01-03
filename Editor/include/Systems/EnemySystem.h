@@ -3,7 +3,7 @@
 #include "Components/Enemy.h"
 #include "iw/engine/System.h"
 #include "iw/common/Components/Transform.h"
-#include "iw/graphics/Mesh.h"
+#include "iw/engine/Components/Model.h"
 
 class EnemySystem
 	: public IW::System<IW::Transform, Enemy>
@@ -14,14 +14,12 @@ public:
 		Enemy* Enemy;
 	};
 private:
-	IW::Mesh* CircleMesh;
+	iw::ref<IW::Model> BulletModel;
 
 public:
 	EnemySystem(
-		IW::Mesh* circle);
+		iw::ref<IW::Model> bulletModel);
 
 	void Update(
 		IW::EntityComponentArray& view) override;
-
-	void Destroy() override;
 };

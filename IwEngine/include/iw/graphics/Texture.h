@@ -56,7 +56,7 @@ namespace Graphics {
 			int yOffset,
 			int width,
 			int height/*,
-			int minmap = 0*/) const;
+			int mipmap = 0*/) const;
 
 		IWGRAPHICS_API
 		int Width() const;

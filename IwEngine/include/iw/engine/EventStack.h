@@ -96,6 +96,13 @@ namespace Engine {
 				}
 			}
 
+			else if (e.Group == iw::val(EventGroup::PHYSICS)) {
+				switch (e.Type) {
+					case PhysicsEventType::Collision: e.Handled = On((CollisionEvent&)e); break;
+					default: error = true;
+				}
+			}
+
 			if (error) {
 				LOG_WARNING << "Layer Stack mishandled event " + e.Type << "!";
 			}

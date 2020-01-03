@@ -5,11 +5,11 @@
 #include "System.h"
 #include "InitOptions.h"
 #include "Events/Events.h"
-#include "iw/asset/AssetManager.h"
-#include "iw/graphics/Renderer.h"
-#include "iw/events/eventbus.h"
 #include "iw/entity/Space.h"
+#include "iw/graphics/Renderer.h"
+#include "iw/asset/AssetManager.h"
 #include "iw/physics/Dynamics/DynamicsSpace.h"
+#include "iw/events/eventbus.h"
 
 namespace IW {
 namespace Engine {
@@ -91,6 +91,12 @@ namespace Engine {
 		virtual bool On(
 			WindowResizedEvent& e);
 
+		// Physics events
+
+		IWENGINE_API
+		virtual bool On(
+			CollisionEvent& e);
+
 		// System updates
 
 		IWENGINE_API
@@ -110,7 +116,7 @@ namespace Engine {
 			Args&&... args)
 		{
 			S* layer = new S(std::forward<Args>(args)...);
-			layer->SetLayerVars(Space, Renderer);
+			layer->SetLayerVars(Space, Renderer, Asset, Physics, Bus);
 
 			m_systems.PushBack(layer);
 			return layer;

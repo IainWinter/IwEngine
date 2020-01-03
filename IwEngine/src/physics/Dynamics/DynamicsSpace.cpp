@@ -157,7 +157,7 @@ namespace IW {
 			if (rigidbody->IsKinematic()) {
 				Transform t = *rigidbody->Trans();
 
-				t.Position += 
+				t.Position +=
 					  rigidbody->Velocity() * dt
 					+ rigidbody->Force() * rigidbody->InvMass() * dt * dt;
 

@@ -22,12 +22,6 @@ namespace IW {
 		ApplyForce(m_gravity * Mass());
 	}
 
-	void Rigidbody::TransCenterOfMass(
-		const Transform& to)
-	{
-		//SetTrans(to); // not just this, calc velocity ?
-	}
-
 	const iw::vector3& Rigidbody::Gravity() const {
 		return m_gravity;
 	}
@@ -140,12 +134,5 @@ namespace IW {
 		const Transform& nextTrans)
 	{
 		m_nextTrans = nextTrans;
-	}
-
-	void Rigidbody::MovePosition(
-		const iw::vector3& position)
-	{
-		SetVelocity(Velocity() + position);
-		m_transform->Position += position;
 	}
 }

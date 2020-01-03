@@ -156,7 +156,7 @@ namespace RenderAPI {
 			int yOffset,
 			int width,
 			int height,
-			int minmap = 0) override;
+			int mipmap = 0) override;
 
 		virtual void DestroyTexture(
 			ITexture* texture)  override;

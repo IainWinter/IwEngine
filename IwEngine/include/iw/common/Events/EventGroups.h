@@ -11,6 +11,7 @@ namespace Engine {
 		WINDOW,
 		INPUT,
 		ACTION,
+		PHYSICS,
 		NOT_HANDLED
 	};
 }

@@ -7,12 +7,12 @@ namespace IW {
 		scalar dt)
 	{
 		for (Manifold& manifold : manifolds) {
-			Rigidbody* aBody = manifold.BodyA;
-			Rigidbody* bBody = manifold.BodyB;
+			Rigidbody* aBody = (Rigidbody*)manifold.BodyA;
+			Rigidbody* bBody = (Rigidbody*)manifold.BodyB;
 
 			iw::vector3 aVel = aBody->Velocity();
 			iw::vector3 bVel = bBody->Velocity();
-			iw::vector3 rVel = bVel - aVel;   
+			iw::vector3 rVel = bVel - aVel;
 			scalar      nVel = rVel.dot(manifold.Normal);
 
 			// Impluse
@@ -20,7 +20,6 @@ namespace IW {
 			if (nVel > 0)
 				continue;
 
-			// This goes in rigidbody
 			scalar e = aBody->Restitution() * bBody->Restitution();
 
 			scalar j = -(1.0f + e) * nVel / (aBody->InvMass() + bBody->InvMass());
@@ -43,7 +42,6 @@ namespace IW {
 			iw::vector3 tangent = (rVel - nVel * manifold.Normal).normalized();
 			scalar      fVel = rVel.dot(tangent);
 
-			// These go in rigidbody
 			scalar aSF = aBody->StaticFriction();
 			scalar bSF = bBody->StaticFriction();
 			scalar aDF = aBody->DynamicFriction();

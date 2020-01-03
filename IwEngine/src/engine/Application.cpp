@@ -9,6 +9,7 @@
 #include "iw/graphics/Loaders/MaterialLoader.h"
 #include "iw/graphics/Loaders/TextureLoader.h"
 #include "iw/graphics/Loaders/ShaderLoader.h"
+//#include "iw/physics/Events/CollisionEvents.h"
 #include <atomic>
 
 namespace IW {
@@ -269,5 +270,10 @@ namespace IW {
 		Manifold& manifold,
 		scalar dt)
 	{
+		Bus->push<CollisionEvent>(
+			manifold.BodyA, 
+			manifold.BodyB, 
+			manifold.PenetrationDepth, 
+			dt);
 	}
 }

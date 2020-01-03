@@ -56,9 +56,7 @@ namespace detail {
 		iw::vector3 AtoB = B - A;
 		iw::vector3 BtoA = A - B;
 
-		if (   AtoB.length() > 2 * a->Radius /** ta->Scale*/
-			|| BtoA.length() > 2 * b->Radius /** ta->Scale*/) // cant compare spheres that are scaled non uniformly should be v > rad * scale
-		{
+		if (AtoB.length() - b->Radius > a->Radius) {
 			return { 0, 0, 0, true };
 		}
 
@@ -81,7 +79,6 @@ namespace detail {
 		iw::vector3 P = N * b->Plane.D;
 
 		float d = (A - P).dot(N);
-
 		if (d > a->Radius) {
 			return { 0, 0, 0, true };
 		}

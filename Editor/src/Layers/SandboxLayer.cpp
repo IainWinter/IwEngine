@@ -14,6 +14,8 @@
 #include "iw/graphics/TextureAtlas.h"
 #include "iw/graphics/DirectionalLight.h"
 #include "Systems/PlayerSystem.h"
+#include "Systems/EnemySystem.h"
+#include "Systems/BulletSystem.h"
 
 namespace IW {
 	struct ModelComponents {
@@ -40,7 +42,7 @@ namespace IW {
 	iw::ref<RenderTarget> targetBlur;
 	iw::ref<Shader> gaussian;
 	iw::ref<Shader> nul;
-	float blurAmount = 0.4f;
+	float blurAmount = 1.2f;
 
 	int SandboxLayer::Initialize() {
 		// Shader
@@ -156,17 +158,35 @@ namespace IW {
 		Space->SetComponentData<Model>(player, *sphere);
 		Space->SetComponentData<Player>(player, -10.0f, .18f, .08f);
 
-		Transform* tp      = Space->SetComponentData<Transform>     (player, iw::vector3(0, 15, 0));
+		Transform* tp      = Space->SetComponentData<Transform>     (player, iw::vector3(0, 10, 0));
 		SphereCollider* sp = Space->SetComponentData<SphereCollider>(player, iw::vector3::zero, 1.0f);
 		Rigidbody* rp      = Space->SetComponentData<Rigidbody>     (player);
 
 		rp->SetMass(1);
 		rp->SetCol(sp);
 		rp->SetTrans(tp);
+		rp->SetStaticFriction(.1f);
+		rp->SetDynamicFriction(.02f);
 
 		Physics->AddRigidbody(rp);
 
+		Entity enemy = Space->CreateEntity<Transform, Model, SphereCollider, Rigidbody, Enemy>();
+		Space->SetComponentData<Model>(enemy, *sphere);
+		Space->SetComponentData<Enemy>(enemy, SPIN, 0.2617993f, .12f, 0.0f);
+
+		Transform* te      = Space->SetComponentData<Transform>     (enemy, iw::vector3(0, 1, 0));
+		SphereCollider* se = Space->SetComponentData<SphereCollider>(enemy, iw::vector3::zero, 1.0f);
+		Rigidbody* re      = Space->SetComponentData<Rigidbody>     (enemy);
+
+		re->SetMass(1);
+		re->SetCol(se);
+		re->SetTrans(te);
+
+		Physics->AddRigidbody(re);
+
 		PushSystem<PlayerSystem>();
+		PushSystem<EnemySystem>(sphere);
+		PushSystem<BulletSystem>();
 
 		return 0;
 	}
@@ -266,7 +286,7 @@ namespace IW {
 	}
 
 	float x = 0;
-	int sc = 15;
+	int sc = 5;
 
 	bool SandboxLayer::On(
 		ActionEvent& e)
@@ -277,23 +297,38 @@ namespace IW {
 		iw::ref<Model> sphere = Asset->Load<Model>("Sphere");
 
 		for (size_t i = 0; i < sc; i++) {
-			Entity ent = Space->CreateEntity<Transform, Model, SphereCollider, Rigidbody>();
+			Entity enemy = Space->CreateEntity<Transform, Model, SphereCollider, Rigidbody, Enemy>();
+			Space->SetComponentData<Model>(enemy, *sphere);
+			Space->SetComponentData<Enemy>(enemy, SPIN, 0.2617993f, .12f, 0.0f);
 
-			Space->SetComponentData<Model>(ent, *sphere);
+			Transform* te = Space->SetComponentData<Transform>(enemy, iw::vector3(cos(x) * 10, 15, sin(x) * 10));
+			SphereCollider* se = Space->SetComponentData<SphereCollider>(enemy, iw::vector3::zero, 1.0f);
+			Rigidbody* re = Space->SetComponentData<Rigidbody>(enemy);
 
-			Transform*      t = Space->SetComponentData<Transform>     (ent, iw::vector3(cos(x) * 15, 15, sin(x) * 15));
-			SphereCollider* s = Space->SetComponentData<SphereCollider>(ent, iw::vector3::zero, 1.0f);
-			Rigidbody*      r = Space->SetComponentData<Rigidbody>     (ent);
+			re->SetMass(1);
+			re->SetCol(se);
+			re->SetTrans(te);
+			re->SetVelocity(iw::vector3(cos(x) * 0, 20, 0 * sin(x += 2 * iw::PI / sc)));
 
-			r->SetMass(2);
-			//r->ApplyForce(iw::vector3(cos(x += .1f) * 50, 500, sin(x / .1f) * 50));
-			r->SetVelocity(iw::vector3(cos(x) * 20, 20, 20 * sin(x += 2 * iw::PI / sc)));
-			r->SetCol(s);
-			r->SetTrans(t);
-			r->SetStaticFriction(.1f);
-			r->SetDynamicFriction(.01f);
+			Physics->AddRigidbody(re);
 
-			Physics->AddRigidbody(r);
+			//Entity ent = Space->CreateEntity<Transform, Model, SphereCollider, Rigidbody>();
+
+			//Space->SetComponentData<Model>(ent, *sphere);
+
+			//Transform*      t = Space->SetComponentData<Transform>     (ent, iw::vector3(cos(x) * 0, 15, sin(x) * 0));
+			//SphereCollider* s = Space->SetComponentData<SphereCollider>(ent, iw::vector3::zero, 1.0f);
+			//Rigidbody*      r = Space->SetComponentData<Rigidbody>     (ent);
+
+			//r->SetMass(1);
+			////r->ApplyForce(iw::vector3(cos(x += .1f) * 50, 500, sin(x / .1f) * 50));
+			//r->SetVelocity(iw::vector3(cos(x) * 0, 20, 0 * sin(x += 2 * iw::PI / sc)));
+			//r->SetCol(s);
+			//r->SetTrans(t);
+			//r->SetStaticFriction(.1f);
+			//r->SetDynamicFriction(.02f);
+
+			//Physics->AddRigidbody(r);
 		}
 
 		return true;

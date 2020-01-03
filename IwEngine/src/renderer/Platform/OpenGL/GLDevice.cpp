@@ -275,10 +275,10 @@ namespace IW {
 		int yOffset,
 		int width,
 		int height,
-		int minmap)
+		int mipmap)
 	{
 		return static_cast<GLTexture*>(texture)
-			->CreateSubTexture(xOffset, yOffset, width, height, minmap);
+			->CreateSubTexture(xOffset, yOffset, width, height, mipmap);
 	}
 
 	void GLDevice::DestroyTexture(
