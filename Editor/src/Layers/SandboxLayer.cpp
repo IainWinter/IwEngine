@@ -170,8 +170,10 @@ namespace IW {
 
 		Physics->AddRigidbody(rp);
 
+		iw::ref<Model> tetrahedron = Asset->Load<Model>("Tetrahedron");
+
 		Entity enemy = Space->CreateEntity<Transform, Model, SphereCollider, Rigidbody, Enemy>();
-		Space->SetComponentData<Model>(enemy, *sphere);
+		Space->SetComponentData<Model>(enemy, *tetrahedron);
 		Space->SetComponentData<Enemy>(enemy, SPIN, 0.2617993f, .12f, 0.0f);
 
 		Transform* te      = Space->SetComponentData<Transform>     (enemy, iw::vector3(0, 1, 0));
@@ -301,7 +303,7 @@ namespace IW {
 			Space->SetComponentData<Model>(enemy, *sphere);
 			Space->SetComponentData<Enemy>(enemy, SPIN, 0.2617993f, .12f, 0.0f);
 
-			Transform* te = Space->SetComponentData<Transform>(enemy, iw::vector3(cos(x) * 10, 15, sin(x) * 10));
+			Transform* te = Space->SetComponentData<Transform>(enemy, iw::vector3(cos(x) * 1, 15, sin(x) * 1));
 			SphereCollider* se = Space->SetComponentData<SphereCollider>(enemy, iw::vector3::zero, 1.0f);
 			Rigidbody* re = Space->SetComponentData<Rigidbody>(enemy);
 

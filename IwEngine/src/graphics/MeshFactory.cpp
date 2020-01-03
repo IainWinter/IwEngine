@@ -5,25 +5,25 @@
 
 namespace IW {
 namespace Graphics {
-	const unsigned IcoVertCount  = 12;
-	const unsigned IcoIndexCount = 60;
+	static const unsigned IcoVertCount  = 12;
+	static const unsigned IcoIndexCount = 60;
 
-	static const iw::vector3 IcoVertData[] = {
-		iw::vector3(-ICO_X,  0,	    ICO_Z),
-		iw::vector3(ICO_X,  0,	    ICO_Z),
+	static const iw::vector3 IcoVerts[] = {
+		iw::vector3(-ICO_X,  0,	     ICO_Z),
+		iw::vector3( ICO_X,  0,	     ICO_Z),
 		iw::vector3(-ICO_X,  0,     -ICO_Z),
-		iw::vector3(ICO_X,  0,     -ICO_Z),
+		iw::vector3( ICO_X,  0,     -ICO_Z),
 		iw::vector3(0,		 ICO_Z,  ICO_X),
 		iw::vector3(0,		 ICO_Z, -ICO_X),
-		iw::vector3(0,     -ICO_Z,  ICO_X),
+		iw::vector3(0,      -ICO_Z,  ICO_X),
 		iw::vector3(0,	    -ICO_Z, -ICO_X),
-		iw::vector3(ICO_Z,  ICO_X,  0),
+		iw::vector3( ICO_Z,  ICO_X,  0),
 		iw::vector3(-ICO_Z,  ICO_X,  0),
-		iw::vector3(ICO_Z, -ICO_X,  0),
+		iw::vector3( ICO_Z, -ICO_X,  0),
 		iw::vector3(-ICO_Z, -ICO_X,  0)
 	};
 
-	static const unsigned IcoIndexData[] = {
+	static const unsigned IcoIndex[] = {
 		 1,  4,  0,
 		 4,  9,	 0,
 		 4,  5,	 9,
@@ -46,32 +46,23 @@ namespace Graphics {
 		11,  2,	 7
 	};
 
-	// clock wise
-	//static const unsigned ico_index_data[] = {
-	//	0,  4,  1,
-	//	0,  9,  4,
-	//	9,  5,  4,
-	//	4,  5,  8,
-	//	4,  8,  1,
-	//	8, 10,  1,
-	//	8,  3, 10,
-	//	5,  3,  8,
-	//	5,  2,  3,
-	//	2,  7,  3,
-	//	7, 10,  3,
-	//	7,  6, 10,
-	//	7, 11,  6,
-	//	11,  0,  6,
-	//	0,  1,  6,
-	//	6,  1, 10,
-	//	9,  0, 11,
-	//	9, 11,  2,
-	//	9,  2,  5,
-	//	7,  2, 11
-	//};
+	static const unsigned TriVertCount = 4;
+	static const unsigned TriIndexCount = 12;
 
-	const iw::vector3* IcoVerts = IcoVertData;
-	const unsigned*    IcoIndex = IcoIndexData;
+	static const iw::vector3 TriVerts[] = {
+		iw::vector3(cos(iw::PI2 * 0 / 3), -1, sin(iw::PI2 * 0 / 3)) * 2,
+		iw::vector3(cos(iw::PI2 * 1 / 3), -1, sin(iw::PI2 * 1 / 3)) * 2,
+		iw::vector3(cos(iw::PI2 * 2 / 3), -1, sin(iw::PI2 * 2 / 3)) * 2,
+		iw::vector3(0, 1, 0),
+	};
+
+	static const unsigned TriIndex[] = {
+		1, 0, 3,
+		1, 0, 3,
+		2, 1, 3,
+		0, 2, 3
+	};
+
 
 	Mesh* MakeIcosphere(
 		unsigned resolution)
@@ -94,6 +85,10 @@ namespace Graphics {
 		unsigned vertCount  = IcoVertCount;
 		for (unsigned i = 0; i < resolution; i++) {
 			detail::SubDevide(mesh->Vertices, mesh->Indices, indexCount, vertCount);
+		}
+
+		for (unsigned i = 0; i < mesh->VertexCount; i++) {
+			mesh->Vertices[i].normalize();
 		}
 
 		// Normals
@@ -166,6 +161,36 @@ namespace Graphics {
 			mesh->Indices[index++] = v + lonCount + 1;
 			mesh->Indices[index++] = v + 1;
 		}
+
+		return mesh;
+	}
+
+	Mesh* MakeTetrahedron(
+		unsigned int resolution)
+	{
+		unsigned res = (unsigned)pow(4, resolution);
+
+		Mesh* mesh = new Mesh();
+		mesh->VertexCount = 4 + (6 * res);
+		mesh->IndexCount  = 12 * res;
+		mesh->Vertices = new iw::vector3[mesh->VertexCount];
+		mesh->Normals  = new iw::vector3[mesh->VertexCount];
+		mesh->Indices  = new unsigned   [mesh->IndexCount];
+
+		memcpy(mesh->Vertices, TriVerts, TriVertCount * sizeof(iw::vector3));
+		memcpy(mesh->Indices, TriIndex, TriIndexCount * sizeof(unsigned));
+
+		// Verts & Index
+
+		unsigned indexCount = TriIndexCount;
+		unsigned vertCount  = TriVertCount;
+		for (unsigned i = 0; i < resolution; i++) {
+			detail::SubDevide(mesh->Vertices, mesh->Indices, indexCount, vertCount);
+		}
+
+		// Normals
+
+		mesh->GenNormals();
 
 		return mesh;
 	}
@@ -264,7 +289,7 @@ namespace detail {
 		if (inserted.second) {
 			auto& edge0 = verts[first];
 			auto& edge1 = verts[second];
-			auto point = (edge0 + edge1).normalized_fast();
+			auto point = (edge0 + edge1) / 2;
 			verts[currentVertCount++] = point;
 		}
 

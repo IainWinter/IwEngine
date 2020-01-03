@@ -39,10 +39,13 @@ namespace IW {
 		pmat->SetFloats("color", &iw::vector3(.5f, .1f, .6), 3);
 
 		Mesh* smesh = MakeUvSphere(25, 30);
-		smesh->GenNormals();
 		smesh->SetMaterial(smat);
 		smesh->Initialize(Renderer->Device);
 		
+		Mesh* tmesh = MakeTetrahedron(5);
+		tmesh->SetMaterial(smat);
+		tmesh->Initialize(Renderer->Device);
+
 		//Mesh* pmesh = MakePlane(1, 1);
 		//pmesh->SetMaterial(pmat);
 		//pmesh->Initialize(Renderer->Device);
@@ -55,8 +58,10 @@ namespace IW {
 		}
 
 		Model sm { smesh, 1 };
+		Model tm { tmesh, 1 };
 
 		Asset->Give<Model>("Sphere", &sm);
+		Asset->Give<Model>("Tetrahedron", &tm);
 
 		PerspectiveCamera* perspective = new PerspectiveCamera(1.17f, 1.778f, .01f, 2000.0f);
 

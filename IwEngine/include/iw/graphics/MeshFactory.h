@@ -17,6 +17,12 @@ namespace Graphics {
 		unsigned latCount,
 		unsigned lonCount);
 
+	//Tris
+
+	IWGRAPHICS_API
+	Mesh* MakeTetrahedron(
+		unsigned int resolution);
+
 	// Plane
 
 	IWGRAPHICS_API
@@ -29,10 +35,18 @@ namespace detail {
 	using IndexLookup = std::unordered_map<IndexPair, unsigned, iw::pair_hash>;
 	using VertList    = std::vector<iw::vector3>;
 
+	// Icosphere
+
 	static const unsigned IcoVertCount;
 	static const unsigned IcoIndexCount;
-	static const unsigned*    IcoIndex;
 	static const iw::vector3* IcoVerts;
+	static const unsigned*    IcoIndex;
+
+	// Icosphere
+	static const unsigned TriVertCount;
+	static const unsigned TriIndexCount;
+	static const iw::vector3* TriVerts;
+	static const unsigned*    TriIndex;
 
 	void SubDevide(
 		iw::vector3* verts,
