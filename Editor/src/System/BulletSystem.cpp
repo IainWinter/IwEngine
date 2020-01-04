@@ -29,7 +29,6 @@ void BulletSystem::Update(
 bool BulletSystem::On(
 	IW::CollisionEvent& e)
 {
-	LOG_INFO << e.PenetrationDepth;
 
 	return false;
 }

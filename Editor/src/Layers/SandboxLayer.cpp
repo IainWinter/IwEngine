@@ -92,18 +92,18 @@ namespace IW {
 		targetBlur->Initialize(Renderer->Device);
 
 		// Light
-		light = DirectionalLight(directional, target, OrthographicCamera(50, 50, -50, 100));
-		light.SetPosition(1);
+		light = DirectionalLight(directional, target, OrthographicCamera(40, 40, -50, 50));
+		light.SetPosition(10);
 		light.SetRotation(iw::quaternion::from_look_at(iw::vector3(1, 2, 1)));
 
-		iw::ref<Model> plane = Asset->Load<Model>("models/box.obj");
+		iw::ref<Model> plane = Asset->Load<Model>("models/level1.obj");
 		plane->Meshes[0].Material->SetTexture("shadowMap", subRG);
 
 		// floor
 		Entity floor = Space->CreateEntity<Transform, Model, PlaneCollider, Rigidbody>();
 		Space->SetComponentData<Model>(floor, *plane);
 
-		Transform*     t = Space->SetComponentData<Transform>(floor, iw::vector3(0, 0, 0), iw::vector3(15, 15, 15));
+		Transform*     t = Space->SetComponentData<Transform>(floor, iw::vector3(0, 0, 0));
 		PlaneCollider* s = Space->SetComponentData<PlaneCollider>(floor, iw::vector3::unit_y, 0.0f);
 		Rigidbody*     r = Space->SetComponentData<Rigidbody>(floor);
 
@@ -120,31 +120,37 @@ namespace IW {
 		Transform* tr = new Transform();
 		Transform* tt = new Transform();
 		Transform* tb = new Transform();
+		Transform* to = new Transform();
 
-		PlaneCollider* planel = new PlaneCollider(iw::vector3( 1.6f, 1,  0), -19);
-		PlaneCollider* planer = new PlaneCollider(iw::vector3(-1.6f, 1,  0), -19);
-		PlaneCollider* planet = new PlaneCollider(iw::vector3( 0,    1,  1.6f), -10);
-		PlaneCollider* planeb = new PlaneCollider(iw::vector3( 0,    1, -1.6f), -10);
+		PlaneCollider* planel = new PlaneCollider(iw::vector3( 1, 0,  0), -10);
+		PlaneCollider* planer = new PlaneCollider(iw::vector3(-1, 0,  0), -10);
+		PlaneCollider* planet = new PlaneCollider(iw::vector3( 0, 0,  1), -10);
+		PlaneCollider* planeb = new PlaneCollider(iw::vector3( 0, 0, -1), -10);
+		PlaneCollider* planeo = new PlaneCollider(iw::vector3( 0, -1, 0), -2);
 
 		Rigidbody* rl = new Rigidbody(false);
 		Rigidbody* rr = new Rigidbody(false);
 		Rigidbody* rt = new Rigidbody(false);
 		Rigidbody* rb = new Rigidbody(false);
+		Rigidbody* ro = new Rigidbody(false);
 		
 		rl->SetCol(planel);
 		rr->SetCol(planer);
 		rt->SetCol(planet);
 		rb->SetCol(planeb);
+		ro->SetCol(planeo);
 
 		rl->SetTrans(tl);
 		rr->SetTrans(tr);
 		rt->SetTrans(tt);
 		rb->SetTrans(tb);
+		ro->SetTrans(to);
 
 		Physics->AddRigidbody(rl);
 		Physics->AddRigidbody(rr);
 		Physics->AddRigidbody(rt);
 		Physics->AddRigidbody(rb);
+		Physics->AddRigidbody(ro);
 
 		Physics->SetGravity(iw::vector3(0, -9.8f, 0));
 		Physics->AddDSolver(new ImpulseSolver());

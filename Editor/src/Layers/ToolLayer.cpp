@@ -50,7 +50,7 @@ namespace IW {
 		//pmesh->SetMaterial(pmat);
 		//pmesh->Initialize(Renderer->Device);
 
-		iw::ref<Model> plane = Asset->Load<Model>("models/box.obj");
+		iw::ref<Model> plane = Asset->Load<Model>("models/level1.obj");
 
 		for (size_t i = 0; i < plane->MeshCount; i++) {
 			plane->Meshes[i].SetMaterial(pmat);

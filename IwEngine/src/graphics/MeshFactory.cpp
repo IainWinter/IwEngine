@@ -5,6 +5,8 @@
 
 namespace IW {
 namespace Graphics {
+	// Icosphere
+
 	static const unsigned IcoVertCount  = 12;
 	static const unsigned IcoIndexCount = 60;
 
@@ -46,13 +48,15 @@ namespace Graphics {
 		11,  2,	 7
 	};
 
+	// Triangle
+
 	static const unsigned TriVertCount = 4;
 	static const unsigned TriIndexCount = 12;
 
 	static const iw::vector3 TriVerts[] = {
-		iw::vector3(cos(iw::PI2 * 0 / 3), -1, sin(iw::PI2 * 0 / 3)) * 2,
-		iw::vector3(cos(iw::PI2 * 1 / 3), -1, sin(iw::PI2 * 1 / 3)) * 2,
-		iw::vector3(cos(iw::PI2 * 2 / 3), -1, sin(iw::PI2 * 2 / 3)) * 2,
+		iw::vector3(cos(iw::PI2 * 0 / 3), -1, sin(iw::PI2 * 0 / 3)),
+		iw::vector3(cos(iw::PI2 * 1 / 3), -1, sin(iw::PI2 * 1 / 3)),
+		iw::vector3(cos(iw::PI2 * 2 / 3), -1, sin(iw::PI2 * 2 / 3)),
 		iw::vector3(0, 1, 0),
 	};
 
@@ -62,7 +66,6 @@ namespace Graphics {
 		2, 1, 3,
 		0, 2, 3
 	};
-
 
 	Mesh* MakeIcosphere(
 		unsigned resolution)
