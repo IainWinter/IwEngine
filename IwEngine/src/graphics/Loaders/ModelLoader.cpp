@@ -9,6 +9,13 @@
 #include <vector>
 
 namespace IW {
+	void LoadTexture(
+		AssetManager& asset,
+		Material& material,
+		aiMaterial* aimaterial,
+		aiTextureType type,
+		const char* name);
+
 	MeshLoader::MeshLoader(
 		AssetManager& asset)
 		: AssetLoader(asset)
@@ -36,42 +43,48 @@ namespace IW {
 				aiMaterial* aimaterial = scene->mMaterials[i];
 				const char* ainame     = aimaterial->GetName().C_Str();
 
-				Color albedo;
+				Color diffuse;
+				Color ambient;
 				//Color emissiveColor;
-				float metallic;
-				float roughness = 0.2f;
+				//float metallic;
+				//float roughness = 0.2f;
 				//float ambientOcclusion;
-
-				aiGetMaterialColor(aimaterial, AI_MATKEY_COLOR_DIFFUSE,  (aiColor4D*)&albedo);
+				
+				aiGetMaterialColor(aimaterial, AI_MATKEY_COLOR_DIFFUSE, (aiColor4D*)&diffuse);
+				aiGetMaterialColor(aimaterial, AI_MATKEY_COLOR_AMBIENT, (aiColor4D*)&ambient);
 			//	aiGetMaterialColor(aimaterial, AI_MATKEY_COLOR_EMISSIVE, (aiColor4D*)&emissiveColor);
 
-				aiGetMaterialFloat(aimaterial, AI_MATKEY_SHININESS, &metallic);
+				//aiGetMaterialFloat(aimaterial, AI_MATKEY_SHININESS, &metallic);
 
-				metallic /= 4 * 128; // obj files scale this by 4? and then opengl by 128???
+				//metallic /= 4 * 128; // obj files scale this by 4? and then opengl by 128???
 
 				Material material;
-				//material.SetFloats("albedo", &albedo, 3);
+				material.SetFloats("diffuse", &diffuse, 3);
+				material.SetFloats("ambient", &ambient, 3);
 				//material.SetFloats("emissiveColor", &emissiveColor, 4);
 				//material.SetFloat("metallic", metallic);
 				//material.SetFloat("roughness", roughness);
 
-				aiString texturePath;
-				if (   aimaterial->GetTextureCount(aiTextureType_DIFFUSE) > 0
-					&& aimaterial->GetTexture(aiTextureType_DIFFUSE, 0, &texturePath) == AI_SUCCESS)
-				{
-					texturePath.Set(std::string(texturePath.C_Str()));
-
-					iw::ref<Texture> texture = m_asset.Load<Texture>(texturePath.C_Str());
-					if (texture) {
-						material.SetTexture("albedoMap", texture);
-					}
+				if (aimaterial->GetTextureCount(aiTextureType_UNKNOWN) > 0) {
+					LOG_WARNING << "Unknown textures in material " << path;
 				}
 
-				size_t size = strlen(ainame) + 1;
-				char*  name = new char[size];
-				memcpy(name, ainame, size);
+				LoadTexture(m_asset, material, aimaterial, aiTextureType_DIFFUSE,      "diffuseMap");
+				LoadTexture(m_asset, material, aimaterial, aiTextureType_SPECULAR,     "specularMap");
+				LoadTexture(m_asset, material, aimaterial, aiTextureType_AMBIENT,      "ambientMap");
+				LoadTexture(m_asset, material, aimaterial, aiTextureType_EMISSIVE,     "emissiveMap");
+				LoadTexture(m_asset, material, aimaterial, aiTextureType_NORMALS,      "normalMap");
+				LoadTexture(m_asset, material, aimaterial, aiTextureType_SHININESS,    "shininessMap");
+				LoadTexture(m_asset, material, aimaterial, aiTextureType_OPACITY,      "opacityMap");
+				LoadTexture(m_asset, material, aimaterial, aiTextureType_DISPLACEMENT, "displacementMap");
+				LoadTexture(m_asset, material, aimaterial, aiTextureType_LIGHTMAP,     "lightmapMap");
+				LoadTexture(m_asset, material, aimaterial, aiTextureType_REFLECTION,   "reflectionMap");
 
-				materials.push_back(m_asset.Give<Material>(name, &material));
+				//size_t size = strlen(ainame) + 1;
+				//char*  name = new char[size];
+				//memcpy(name, ainame, size);
+
+				materials.push_back(m_asset.Give<Material>(ainame, &material));
 			}
 		}
 
@@ -141,7 +154,11 @@ namespace IW {
 			}
 
 			if (aimesh->HasTextureCoords(0)) {
-				mesh.SetUVs(mesh.VertexCount, (iw::vector2*)aimesh->mTextureCoords[0]);
+				mesh.SetUVs(mesh.VertexCount, nullptr);
+				for (size_t i = 0; i < mesh.VertexCount; i++) { // ai tex coords are vec3
+					mesh.Uvs[i].x = aimesh->mTextureCoords[0][i].x;
+					mesh.Uvs[i].y = aimesh->mTextureCoords[0][i].y;
+				}
 			}
 
 			if (aimesh->HasBones()) {
@@ -182,5 +199,29 @@ namespace IW {
 		//quad->Compile(Renderer.Device);
 
 		return model;
+	}
+
+	void LoadTexture(
+		AssetManager& asset,
+		Material& material,
+		aiMaterial* aimaterial,
+		aiTextureType type,
+		const char* name)
+	{
+		aiString texturePath;
+		unsigned count = aimaterial->GetTextureCount(type);
+		for (size_t i = 0; i < count; i++) {
+			if (aimaterial->GetTexture(type, i, &texturePath) == AI_SUCCESS) {
+				std::stringstream ss(name);
+				if (i > 0) {
+					ss << i;
+				}
+
+				iw::ref<Texture> texture = asset.Load<Texture>(texturePath.C_Str());
+				if (texture) {
+					material.SetTexture(ss.str().c_str(), texture);
+				}
+			}
+		}
 	}
 }

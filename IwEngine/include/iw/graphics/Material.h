@@ -80,6 +80,10 @@ namespace Graphics {
 		}
 
 		IWGRAPHICS_API
+		void Use(
+			const iw::ref<IDevice>& device) const;
+
+		IWGRAPHICS_API
 		void SetBool(
 			const char* name,
 			bool value);
@@ -194,10 +198,6 @@ namespace Graphics {
 		IWGRAPHICS_API
 		Texture* GetTexture(
 			const char* name);
-
-		IWGRAPHICS_API
-		void Use(
-			const iw::ref<IDevice>& device) const;
 	private:
 		std::tuple<void*, size_t> GetData(
 			const char* name);

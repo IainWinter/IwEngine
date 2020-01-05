@@ -290,7 +290,13 @@ namespace IW {
 	void GLDevice::SetTexture(
 		ITexture* texture)
 	{
-		static_cast<GLTexture*>(texture)->Bind();
+		if (texture) {
+			static_cast<GLTexture*>(texture)->Bind();
+		}
+
+		else {
+			glBindTexture(GL_TEXTURE_2D, 0); // this is prob the way to do it cus you cant call unbind a nullptr
+		}
 	}
 
 	IFrameBuffer* GLDevice::CreateFrameBuffer() {
@@ -306,12 +312,12 @@ namespace IW {
 	void GLDevice::SetFrameBuffer(
 		IFrameBuffer* frameBuffer)
 	{
-		if (!frameBuffer) {
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		if (frameBuffer) {
+			static_cast<GLFrameBuffer*>(frameBuffer)->Bind();
 		}
 
 		else {
-			static_cast<GLFrameBuffer*>(frameBuffer)->Bind();
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);  // this is prob the way to do it cus you cant call unbind a nullptr
 		}
 	}
 

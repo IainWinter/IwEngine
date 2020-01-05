@@ -185,7 +185,14 @@ namespace IW {
 		glUniform1i(m_location, m_textureCount);
 
 		glActiveTexture(GL_TEXTURE0 + m_textureCount);
-		static_cast<const GLTexture*>(texture)->Bind();
+
+		if (texture) {
+			static_cast<const GLTexture*>(texture)->Bind();
+		}
+
+		else {
+			glBindTexture(GL_TEXTURE_2D, 0); // this is prob the way to do it cus you cant call unbind a nullptr
+		}
 
 		++m_textureCount;
 	}

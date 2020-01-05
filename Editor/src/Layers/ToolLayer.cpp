@@ -32,11 +32,7 @@ namespace IW {
 
 		iw::ref<Material> smat = std::make_shared<Material>();
 		smat->SetShader(shader);
-		smat->SetFloats("color", &iw::vector3(1), 3);
-
-		iw::ref<Material> pmat = std::make_shared<Material>();
-		pmat->SetShader(shader);
-		pmat->SetFloats("color", &iw::vector3(.5f, .1f, .6), 3);
+		smat->SetFloats("diffuse", &iw::vector3(1), 3);
 
 		Mesh* smesh = MakeUvSphere(25, 30);
 		smesh->SetMaterial(smat);
@@ -50,10 +46,19 @@ namespace IW {
 		//pmesh->SetMaterial(pmat);
 		//pmesh->Initialize(Renderer->Device);
 
-		iw::ref<Model> plane = Asset->Load<Model>("models/level1.obj");
+		iw::ref<Model> plane = Asset->Load<Model>("models/grass.obj");
 
 		for (size_t i = 0; i < plane->MeshCount; i++) {
-			plane->Meshes[i].SetMaterial(pmat);
+			iw::ref<Material>& mat = plane->Meshes[i].Material;
+			
+			mat->SetShader(shader);
+			mat->GetTexture("diffuseMap")->Initialize(Renderer->Device);
+			mat->GetTexture("ambientMap")->Initialize(Renderer->Device);
+			//mat->GetTexture("normalMap") ->Initialize(Renderer->Device);
+
+			plane->Meshes[i].SetTangents(0, nullptr);
+			plane->Meshes[i].SetBiTangents(0, nullptr);
+
 			plane->Meshes[i].Initialize(Renderer->Device);
 		}
 

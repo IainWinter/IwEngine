@@ -96,14 +96,14 @@ namespace IW {
 		light.SetPosition(10);
 		light.SetRotation(iw::quaternion::from_look_at(iw::vector3(1, 2, 1)));
 
-		iw::ref<Model> plane = Asset->Load<Model>("models/level1.obj");
+		iw::ref<Model> plane = Asset->Load<Model>("models/grass.obj");
 		plane->Meshes[0].Material->SetTexture("shadowMap", subRG);
 
 		// floor
 		Entity floor = Space->CreateEntity<Transform, Model, PlaneCollider, Rigidbody>();
 		Space->SetComponentData<Model>(floor, *plane);
 
-		Transform*     t = Space->SetComponentData<Transform>(floor, iw::vector3(0, 0, 0));
+		Transform*     t = Space->SetComponentData<Transform>(floor, iw::vector3(0, 0, 0), iw::vector3(15));
 		PlaneCollider* s = Space->SetComponentData<PlaneCollider>(floor, iw::vector3::unit_y, 0.0f);
 		Rigidbody*     r = Space->SetComponentData<Rigidbody>(floor);
 

@@ -58,7 +58,9 @@ namespace IW {
 
 		if (count > 0) {
 			Vertices = new iw::vector3[count];
-			memcpy(Vertices, vertices, count * sizeof(iw::vector3));
+			if (vertices) {
+				memcpy(Vertices, vertices, count * sizeof(iw::vector3));
+			}
 		}
 
 		VertexCount = count;
@@ -74,7 +76,9 @@ namespace IW {
 
 		if (count > 0) {
 			Normals = new iw::vector3[count];
-			memcpy(Normals, normals, count * sizeof(iw::vector3));
+			if (normals) {
+				memcpy(Normals, normals, count * sizeof(iw::vector3));
+			}
 		}
 
 		Outdated = true;
@@ -89,7 +93,9 @@ namespace IW {
 
 		if (count > 0) {
 			Tangents = new iw::vector3[count];
-			memcpy(Tangents, tangents, count * sizeof(iw::vector3));
+			if (tangents) {
+				memcpy(Tangents, tangents, count * sizeof(iw::vector3));
+			}
 		}
 
 		Outdated = true;
@@ -104,7 +110,9 @@ namespace IW {
 
 		if (count > 0) {
 			BiTangents = new iw::vector3[count];
-			memcpy(BiTangents, bitangents, count * sizeof(iw::vector3));
+			if (bitangents) {
+				memcpy(BiTangents, bitangents, count * sizeof(iw::vector3));
+			}
 		}
 
 		Outdated = true;
@@ -119,7 +127,9 @@ namespace IW {
 
 		if (count > 0) {
 			Colors = new iw::vector4[count];
-			memcpy(Colors, colors, count * sizeof(iw::vector4));
+			if (colors) {
+				memcpy(Colors, colors, count * sizeof(iw::vector4));
+			}
 		}
 
 		Outdated = true;
@@ -134,7 +144,9 @@ namespace IW {
 
 		if (count > 0) {
 			Uvs = new iw::vector2[count];
-			memcpy(Uvs, uvs, count * sizeof(iw::vector2));
+			if (uvs) {
+				memcpy(Uvs, uvs, count * sizeof(iw::vector2));
+			}
 		}
 
 		Outdated = true;
@@ -149,7 +161,9 @@ namespace IW {
 
 		if (count > 0) {
 			Indices = new unsigned[count];
-			memcpy(Indices, indices, count * sizeof(unsigned));
+			if (indices) {
+				memcpy(Indices, indices, count * sizeof(unsigned));
+			}
 		}
 
 		IndexCount = count;

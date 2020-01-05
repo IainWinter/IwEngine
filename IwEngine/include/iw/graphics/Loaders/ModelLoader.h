@@ -10,10 +10,12 @@ namespace Graphics {
 		: public AssetLoader<Model>
 	{
 	public:
-		IWGRAPHICS_API MeshLoader(
+		IWGRAPHICS_API
+		MeshLoader(
 			AssetManager& asset);
 	private:
-		IWGRAPHICS_API Model* LoadAsset(
+		IWGRAPHICS_API
+		Model* LoadAsset(
 			std::string filepath) override;
 	};
 }

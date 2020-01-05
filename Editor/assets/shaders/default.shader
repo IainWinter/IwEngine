@@ -22,7 +22,10 @@ void main() {
 #shader Fragment
 #version 440 core
 
-uniform vec3 color;
+uniform vec3 diffuse;
+uniform vec3 ambient;
+uniform sampler2D diffuseMap;
+uniform sampler2D ambientMap;
 uniform sampler2D shadowMap;
 
 in vec4 LightPos;
@@ -33,7 +36,7 @@ float linstep(float l, float h, float v) {
 }
 
 float chebyshevUpperBound(vec2 coords, float distance) {
-	vec2 moments = texture2D(shadowMap, coords).rg;
+	vec2 moments = texture(shadowMap, coords).rg;
 
 	if (distance <= moments.x)
 		return 1.0;
@@ -47,21 +50,20 @@ float chebyshevUpperBound(vec2 coords, float distance) {
 	return p_max;
 }
 
-float linShadow(vec2 coords, float distance) {
-	float lightDepth1 = texture2D(shadowMap, coords).r;
-	float lightDepth2 = clamp(distance / 40.0, 0.0, 1.0);
-	float bias = 0.001;
-	return step(lightDepth2, lightDepth1 + bias);
-}
-
 void main() {
+	float ambiance = 0.05f;
+
+	vec3 color = diffuse * texture(diffuseMap, UV).rgb;
+	vec3 ao    = ambient * texture(ambientMap, UV).r;
+
 	vec3 coords = (LightPos.xyz / LightPos.w) * 0.5 + 0.5;
 	float shadow = chebyshevUpperBound(coords.xy, coords.z);
 
-	vec3 c = vec3(.1) + color * shadow;
+	vec3 c = ao * color * (ambiance + shadow);
 
-	//c = c / (c + vec3(1.0));
-	//c = pow(c, vec3(1.0 / 2.2));
+	gl_FragColor = vec4(c, 1);
 
-	gl_FragColor = vec4(c, 1.0);
+	if (c == 0.05345) {
+		gl_FragColor = vec4(c * ambient, 1);
+	}
 }

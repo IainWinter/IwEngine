@@ -63,6 +63,41 @@ namespace IW {
 		return *this;
 	}
 
+	void Material::Use(
+		const iw::ref<IDevice>& device) const
+	{
+		device->SetPipeline(Shader->Program.get());
+
+		for (const MaterialProperty& prop : m_properties) {
+			IPipelineParam* param = Shader->Program->GetParam(prop.Name);
+
+			if (!param) {
+				LOG_WARNING << "Invalid property in material: " << prop.Name;
+				continue;
+			}
+
+			if (prop.IsSample) {
+				Texture* texture = (Texture*)prop.Data;
+				if (!texture->Handle()) {
+					LOG_WARNING << "Texture not initialized: " << prop.Name;
+				}
+
+				param->SetAsTexture(texture->Handle());
+			}
+
+			else {
+				switch (prop.Type) {
+					case BOOL:   param->SetAsBools  (prop.Data, prop.Count, prop.Stride);  break;
+					case INT:    param->SetAsInts   (prop.Data, prop.Count, prop.Stride);  break;
+					case UINT:   param->SetAsUInts  (prop.Data, prop.Count, prop.Stride);  break;
+					case FLOAT:  param->SetAsFloats (prop.Data, prop.Count, prop.Stride);  break;
+					case DOUBLE: param->SetAsDoubles(prop.Data, prop.Count, prop.Stride);  break;
+					default: LOG_WARNING << "Invalid property in material: " << prop.Name; break;
+				}
+			}
+		}
+	}
+
 	void Material::SetBool(
 		const char* name,
 		bool value)
@@ -226,37 +261,6 @@ namespace IW {
 		const char* name)
 	{
 		return (Texture*)std::get<0>(GetData(name));
-	}
-
-	void Material::Use(
-		const iw::ref<IDevice>& device) const
-	{
-		device->SetPipeline(Shader->Program.get());
-
-		for (const MaterialProperty& prop : m_properties) {
-			IPipelineParam* param = Shader->Program->GetParam(prop.Name);
-
-			if (!param) {
-				LOG_WARNING << "Invalid property in material: " << prop.Name;
-				continue;
-			}
-
-			if (prop.IsSample) {
-				Texture* texture = (Texture*)prop.Data;
-				param->SetAsTexture(texture->Handle());
-			}
-
-			else {
-				switch (prop.Type) {
-					case BOOL:   param->SetAsBools  (prop.Data, prop.Count, prop.Stride); break;
-					case INT:    param->SetAsInts   (prop.Data, prop.Count, prop.Stride); break;
-					case UINT:   param->SetAsUInts  (prop.Data, prop.Count, prop.Stride); break;
-					case FLOAT:  param->SetAsFloats (prop.Data, prop.Count, prop.Stride); break;
-					case DOUBLE: param->SetAsDoubles(prop.Data, prop.Count, prop.Stride); break;
-					default: LOG_WARNING << "Invalid property in material: " << prop.Name; break;
-				}
-			}
-		}
 	}
 
 	std::tuple<void*, size_t> Material::GetData(
