@@ -28,11 +28,23 @@ namespace IW {
 
 	int ToolLayer::Initialize() {
 		iw::ref<Shader> shader = Asset->Load<Shader>("shaders/default.shader");
-		shader->Initialize(Renderer->Device);
+		Renderer->InitShader(shader, ALL);
 
 		iw::ref<Material> smat = std::make_shared<Material>();
 		smat->SetShader(shader);
-		smat->SetFloats("diffuse", &iw::vector3(1), 3);
+		smat->SetFloats("albedo", &iw::vector3(1, .92f, 1), 3);
+		smat->SetTexture("albedoMap", nullptr);
+		smat->SetTexture("ambientMap", nullptr);
+		smat->SetTexture("displacementMap", nullptr);
+		smat->SetTexture("normalMap", nullptr);
+
+		iw::ref<Material> pmat = std::make_shared<Material>();
+		pmat->SetShader(shader);
+		pmat->SetFloats("albedo", &iw::vector3(1), 3);
+		pmat->SetTexture("albedoMap", Asset->Load<Texture>("textures/moss/albedo.jpg"));
+		pmat->SetTexture("ambientMap", Asset->Load<Texture>("textures/moss/ao.jpg"));
+		pmat->SetTexture("displacementMap", Asset->Load<Texture>("textures/moss/displacement.jpg"));
+		pmat->SetTexture("normalMap", Asset->Load<Texture>("textures/moss/normal.jpg"));
 
 		Mesh* smesh = MakeUvSphere(25, 30);
 		smesh->SetMaterial(smat);
@@ -42,22 +54,27 @@ namespace IW {
 		tmesh->SetMaterial(smat);
 		tmesh->Initialize(Renderer->Device);
 
-		//Mesh* pmesh = MakePlane(1, 1);
-		//pmesh->SetMaterial(pmat);
-		//pmesh->Initialize(Renderer->Device);
+		Mesh* pmesh = MakePlane(50, 50);
+		pmesh->SetMaterial(pmat);
+		pmesh->Initialize(Renderer->Device);
 
-		iw::ref<Model> plane = Asset->Load<Model>("models/grass.obj");
+		Model pm { pmesh, 1 };
+
+		iw::ref<Model> plane = Asset->Give<Model>("Floor", &pm);
+
+		/*Asset->Load<Model>("models/grass.obj");*/
 
 		for (size_t i = 0; i < plane->MeshCount; i++) {
 			iw::ref<Material>& mat = plane->Meshes[i].Material;
 			
 			mat->SetShader(shader);
-			mat->GetTexture("diffuseMap")->Initialize(Renderer->Device);
+			mat->GetTexture("albedoMap")->Initialize(Renderer->Device);
 			mat->GetTexture("ambientMap")->Initialize(Renderer->Device);
-			//mat->GetTexture("normalMap") ->Initialize(Renderer->Device);
+			mat->GetTexture("displacementMap")->Initialize(Renderer->Device);
+			mat->GetTexture("normalMap") ->Initialize(Renderer->Device);
 
-			plane->Meshes[i].SetTangents(0, nullptr);
-			plane->Meshes[i].SetBiTangents(0, nullptr);
+			//plane->Meshes[i].SetTangents(0, nullptr);
+			//plane->Meshes[i].SetBiTangents(0, nullptr);
 
 			plane->Meshes[i].Initialize(Renderer->Device);
 		}

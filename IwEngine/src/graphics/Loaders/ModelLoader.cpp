@@ -8,6 +8,7 @@
 #include "assimp/pbrmaterial.h"
 #include <vector>
 
+#include "assimp/pbrmaterial.h"
 namespace IW {
 	void LoadTexture(
 		AssetManager& asset,
@@ -43,14 +44,14 @@ namespace IW {
 				aiMaterial* aimaterial = scene->mMaterials[i];
 				const char* ainame     = aimaterial->GetName().C_Str();
 
-				Color diffuse;
+				Color albedo;
 				Color ambient;
 				//Color emissiveColor;
 				//float metallic;
 				//float roughness = 0.2f;
 				//float ambientOcclusion;
 				
-				aiGetMaterialColor(aimaterial, AI_MATKEY_COLOR_DIFFUSE, (aiColor4D*)&diffuse);
+				aiGetMaterialColor(aimaterial, AI_MATKEY_COLOR_DIFFUSE, (aiColor4D*)&albedo);
 				aiGetMaterialColor(aimaterial, AI_MATKEY_COLOR_AMBIENT, (aiColor4D*)&ambient);
 			//	aiGetMaterialColor(aimaterial, AI_MATKEY_COLOR_EMISSIVE, (aiColor4D*)&emissiveColor);
 
@@ -59,8 +60,8 @@ namespace IW {
 				//metallic /= 4 * 128; // obj files scale this by 4? and then opengl by 128???
 
 				Material material;
-				material.SetFloats("diffuse", &diffuse, 3);
-				material.SetFloats("ambient", &ambient, 3);
+				material.SetFloats("albedo", &albedo, 4);
+				material.SetFloats("ambient", &ambient, 4);
 				//material.SetFloats("emissiveColor", &emissiveColor, 4);
 				//material.SetFloat("metallic", metallic);
 				//material.SetFloat("roughness", roughness);
@@ -69,7 +70,7 @@ namespace IW {
 					LOG_WARNING << "Unknown textures in material " << path;
 				}
 
-				LoadTexture(m_asset, material, aimaterial, aiTextureType_DIFFUSE,      "diffuseMap");
+				LoadTexture(m_asset, material, aimaterial, aiTextureType_DIFFUSE,      "albedoMap");
 				LoadTexture(m_asset, material, aimaterial, aiTextureType_SPECULAR,     "specularMap");
 				LoadTexture(m_asset, material, aimaterial, aiTextureType_AMBIENT,      "ambientMap");
 				LoadTexture(m_asset, material, aimaterial, aiTextureType_EMISSIVE,     "emissiveMap");

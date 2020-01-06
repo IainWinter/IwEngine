@@ -1,8 +1,8 @@
 #shader Vertex
 #version 430 core
 
-layout(std140, column_major) uniform Light {
-	mat4 viewProjection;
+layout(std140, column_major) uniform Camera {
+	mat4 viewProj;
 };
 
 uniform mat4 model;
@@ -10,7 +10,7 @@ uniform mat4 model;
 in vec3 vert;
 
 void main() {
-	gl_Position = viewProjection * model * vec4(vert, 1);
+	gl_Position = viewProj * model * vec4(vert, 1);
 }
 
 #shader Fragment

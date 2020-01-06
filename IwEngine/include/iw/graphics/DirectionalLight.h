@@ -29,7 +29,7 @@ namespace Graphics {
 			const iw::quaternion& rotation) override;
 
 		IWGRAPHICS_API
-		iw::matrix4 ViewProj() override;
+		Camera& Cam() override;
 	};
 }
 

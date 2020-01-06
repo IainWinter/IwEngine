@@ -73,15 +73,17 @@ namespace Graphics {
 		Material& operator=(
 			const Material& copy);
 
-		inline void SetShader(
-			iw::ref<IW::Shader>& shader)
-		{
-			Shader = shader;
-		}
-
 		IWGRAPHICS_API
 		void Use(
 			const iw::ref<IDevice>& device) const;
+
+		IWGRAPHICS_API
+		bool HasProperty(
+			const char* name) /*const*/;
+
+		IWGRAPHICS_API
+		void SetShader(
+			iw::ref<IW::Shader>& shader);
 
 		IWGRAPHICS_API
 		void SetBool(

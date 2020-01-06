@@ -48,8 +48,8 @@ namespace IW {
 
 		LOG_SINK(iw::async_stdout_sink, iw::INFO);
 		LOG_SINK(iw::async_stderr_sink, iw::ERR);
-		LOG_SINK(iw::file_sink,         iw::INFO,  "logs/sandbox_info.log");
-		LOG_SINK(iw::file_sink,         iw::DEBUG, "logs/sandbox_debug.log");
+		LOG_SINK(iw::file_sink,         iw::INFO,  "/logs/sandbox_info.log");
+		LOG_SINK(iw::file_sink,         iw::DEBUG, "/logs/sandbox_debug.log");
 
 		// Events
 
@@ -260,8 +260,6 @@ namespace IW {
 				(int)command.Tokens[0].Int,
 				(int)command.Tokens[1].Int);
 		}
-
-		LOG_INFO << command.Original;
 
 		return false;
 	}

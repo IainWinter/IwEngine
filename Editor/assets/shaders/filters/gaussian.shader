@@ -1,9 +1,8 @@
 #shader Vertex
 #version 430 core
 
-layout(std140, column_major) uniform Camera{
-	mat4 proj;
-	mat4 view;
+layout(std140, column_major) uniform Camera {
+	mat4 viewProj;
 };
 
 in vec3 vert;

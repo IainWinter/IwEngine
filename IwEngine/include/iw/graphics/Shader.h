@@ -8,7 +8,7 @@
 
 namespace IW {
 namespace Graphics {
-	enum ShaderType {
+	enum class ShaderType {
 		VERTEX,
 		GEOMETRY,
 		FRAGMENT

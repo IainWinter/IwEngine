@@ -21,7 +21,7 @@ namespace IW {
 		m_camera.Rotation = rotation;
 	}
 
-	iw::matrix4 DirectionalLight::ViewProj() {
-		return m_camera.GetViewProjection();
+	Camera& DirectionalLight::Cam() {
+		return m_camera;
 	}
 }

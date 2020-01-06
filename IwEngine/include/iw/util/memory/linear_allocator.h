@@ -34,7 +34,8 @@ namespace util {
 		void resize(
 			size_t size);
 
-		void reset();
+		void reset(
+			bool aggressive = false);
 
 		inline size_t peak() {
 			return m_peak;

@@ -78,11 +78,17 @@ namespace IW {
 
 			if (prop.IsSample) {
 				Texture* texture = (Texture*)prop.Data;
-				if (!texture->Handle()) {
+				if (!texture) {
+					param->SetAsTexture(nullptr);
+				}
+				
+				else if (!texture->Handle()) {
 					LOG_WARNING << "Texture not initialized: " << prop.Name;
 				}
 
-				param->SetAsTexture(texture->Handle());
+				else {
+					param->SetAsTexture(texture->Handle());
+				}
 			}
 
 			else {
@@ -96,6 +102,18 @@ namespace IW {
 				}
 			}
 		}
+	}
+
+	bool Material::HasProperty(
+		const char* name) /*const*/
+	{
+		return FindProperty(name) != nullptr;
+	}
+
+	void Material::SetShader(
+		iw::ref<IW::Shader>& shader)
+	{
+		Shader = shader;
 	}
 
 	void Material::SetBool(
@@ -271,12 +289,12 @@ namespace IW {
 	}
 
 	Material::MaterialProperty* Material::FindProperty(
-		const char* name) 
+		const char* name)
 	{
 		MaterialProperty* prop = nullptr;
-		for (MaterialProperty& prop : m_properties) {
-			if (strcmp(prop.Name, name) == 0) {
-				return &prop;
+		for (MaterialProperty& p : m_properties) {
+			if (strcmp(p.Name, name) == 0) {
+				prop = &p;
 			}
 		}
 

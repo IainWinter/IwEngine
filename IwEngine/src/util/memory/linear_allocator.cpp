@@ -52,7 +52,7 @@ namespace iw {
 	void linear_allocator::resize(
 		size_t size)
 	{
-		size_t sizeToCopy = size < m_cursor   ? size : m_cursor;
+		size_t sizeToCopy = size < m_cursor ? size : m_cursor;
 
 		void* memory = malloc(size);
 		memcpy(memory, m_memory, sizeToCopy);
@@ -63,7 +63,19 @@ namespace iw {
 		m_capacity = size;
 	}
 
-	void linear_allocator::reset() {
+	void linear_allocator::reset(
+		bool aggressive)
+	{
 		m_cursor = 0;
+
+		if (aggressive) {
+			size_t size = 128;
+			while (m_peak > 2 * size) {
+				size *= 2;
+			}
+
+			resize(size);
+			m_peak = 0;
+		}
 	}
 }

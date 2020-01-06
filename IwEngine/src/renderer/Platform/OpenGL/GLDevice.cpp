@@ -123,7 +123,8 @@ namespace IW {
 	}
 
 	void GLDevice::UpdateUniformBufferData(
-		IUniformBuffer* uniformBuffer, const void* data)
+		IUniformBuffer* uniformBuffer,
+		const void* data)
 	{
 		static_cast<GLUniformBuffer*>(uniformBuffer)->UpdateData(data);
 	}

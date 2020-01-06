@@ -32,7 +32,7 @@ namespace Graphics {
 		const iw::ref<RenderTarget>& LightTarget() const;
 
 		IWGRAPHICS_API
-		virtual iw::matrix4 ViewProj() = 0;
+		virtual Camera& Cam() = 0;
 
 		IWGRAPHICS_API
 		virtual void SetPosition(

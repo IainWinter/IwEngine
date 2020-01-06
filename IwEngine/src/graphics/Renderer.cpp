@@ -38,7 +38,8 @@ namespace IW {
 
 	void Renderer::Initialize() {
 		m_filterMesh->Initialize(Device);
-		m_lightBuf = Device->CreateUniformBuffer(sizeof(LightData), &m_lightData);
+		m_cameraUBO   = Device->CreateUniformBuffer(sizeof(CameraData),   &m_cameraData);
+		m_materialUBO = Device->CreateUniformBuffer(sizeof(MaterialData), &m_materialData);
 	}
 
 	void Renderer::Begin() {
@@ -49,6 +50,21 @@ namespace IW {
 
 	}
 
+	void Renderer::InitShader(
+		iw::ref<Shader>& shader,
+		UBOBinding bindings)
+	{
+		shader->Initialize(Device);
+		
+		if (bindings & CAMERA) {
+			shader->Program->SetBuffer("Camera", m_cameraUBO);
+		}
+
+		if (bindings & MATERIAL) {
+			shader->Program->SetBuffer("Material", m_materialUBO);
+		}
+	}
+
 	void Renderer::SetShader(
 		const iw::ref<Shader>& shader)
 	{
@@ -56,6 +72,7 @@ namespace IW {
 	}
 
 	void Renderer::BeginScene(
+		Camera* camera,
 		RenderTarget* target)
 	{
 		if (target == nullptr) {
@@ -65,6 +82,16 @@ namespace IW {
 
 		else {
 			target->Use(Device);
+		}
+
+		iw::matrix4 vp = iw::matrix4::identity;
+		if (camera != nullptr) {
+			vp = camera->GetViewProjection();
+		}
+
+		if (vp != m_cameraData.ViewProj) {
+			m_cameraData.ViewProj = vp;
+			Device->UpdateUniformBufferData(m_cameraUBO, &m_cameraData);
 		}
 
 		Device->Clear();
@@ -78,38 +105,50 @@ namespace IW {
 		const Transform* transform, 
 		const Mesh* mesh)
 	{
-		const auto& material = mesh->Material;
+		const iw::ref<Material>&  material = mesh->Material;
+		const iw::ref<IPipeline>& pipeline = material->Shader->Program;
 		
 		if(!material) {
 			// draw with default material
 			return;
 		}
 
-		IPipeline* pipeline = mesh->Material->Shader->Program.get();
+		SetShader(material->Shader);
 
-		mesh->Material->Use(Device);
+		//material->Use(Device);
 
-		pipeline->GetParam("model")
-			->SetAsMat4(transform->Transformation());
+		float* albedo      = std::get<0>(material->GetFloats("albedo"));
+		Texture* albedoMap = material->GetTexture("albedoMap");
+
+		if (albedo) {
+			m_materialData.Albedo = *(iw::vector4*)albedo;
+		}
+
+		else {
+			m_materialData.Albedo = iw::vector4::one;
+		}
+
+		m_materialData.HasAlbedoMap = !!albedoMap;
+		if (albedoMap) {
+			pipeline->GetParam("albedoMap")->SetAsTexture(albedoMap->Handle());
+		}
+
+		else {
+			pipeline->GetParam("albedoMap")->SetAsTexture(nullptr);
+		}
+
+		Device->UpdateUniformBufferData(m_materialUBO, &m_materialData);
+
+		pipeline->GetParam("model")->SetAsMat4(transform->Transformation());
 
 		mesh->Draw(Device);
 	}
 
-	bool first = 1;
-
 	void Renderer::BeginLight(
 		Light* light)
 	{
-		BeginScene(light->LightTarget().get());
+		BeginScene(&light->Cam(), light->LightTarget().get());
 		SetShader (light->LightShader());
-
-		m_lightData.ViewProj = light->ViewProj();
-		Device->UpdateUniformBufferData(m_lightBuf, &m_lightData);
-
-		if (first) {
-			light->LightShader()->Program->SetBuffer("viewProjection", m_lightBuf);
-			first = 0;
-		}
 	}
 
 	void Renderer::EndLight(
@@ -125,7 +164,7 @@ namespace IW {
 		const Transform* transform, 
 		const Mesh* mesh)
 	{
-		light->LightShader()->Program->GetParam("model")
+		mesh->Material->Shader->Program->GetParam("model")
 			->SetAsMat4(transform->Transformation());
 
 		mesh->Draw(Device);
@@ -138,7 +177,7 @@ namespace IW {
 	{
 		if (source == dest) return;
 		
-		BeginScene(dest);
+		BeginScene(nullptr, dest);
 
 		SetShader(shader);
 

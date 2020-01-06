@@ -10,6 +10,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Ka textures/GroundForest003_AO_3K.jpg
-map_Kn textures/GroundForest003_NRM_3K.jpg
-map_Kd textures/GroundForest003_COL_VAR1_3K.jpg
+map_Kd textures/moss/albedo.jpg
+map_Ka textures/moss/ao.jpg
+map_Kn textures/moss/normal.jpg
+map textures/moss/roughness.jpg
+disp textures/moss/displacement.jpg

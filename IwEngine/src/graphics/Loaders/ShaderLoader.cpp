@@ -26,11 +26,11 @@ namespace IW {
 
 			ShaderType type;
 			if (name == "Vertex") {
-				type = VERTEX;
+				type = ShaderType::VERTEX;
 			}
 
 			else if (name == "Fragment") {
-				type = FRAGMENT;
+				type = ShaderType::FRAGMENT;
 			}
 
 			else {

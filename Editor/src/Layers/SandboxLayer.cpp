@@ -18,6 +18,12 @@
 #include "Systems/BulletSystem.h"
 
 namespace IW {
+	struct ModelUBO {
+		iw::matrix4 model;
+		iw::vector3 albedo;
+	};
+
+
 	struct ModelComponents {
 		Transform* Transform;
 		Model* Model;
@@ -50,11 +56,12 @@ namespace IW {
 		gaussian = Asset->Load<Shader>("shaders/filters/gaussian.shader");
 		nul = Asset->Load<Shader>("shaders/filters/null.shader");
 		
-		directional->Initialize(Renderer->Device);
-		gaussian   ->Initialize(Renderer->Device);
-		nul        ->Initialize(Renderer->Device);
+		Renderer->InitShader(directional, CAMERA);
+		Renderer->InitShader(gaussian, CAMERA);
+		Renderer->InitShader(nul, CAMERA);
 
 		// Textures
+		
 		TextureAtlas atlasD = TextureAtlas(2048, 2048, IW::DEPTH, IW::FLOAT);
 		atlasD.Initialize(Renderer->Device);
 		atlasD.GenTexBounds(2, 2);
@@ -96,14 +103,14 @@ namespace IW {
 		light.SetPosition(10);
 		light.SetRotation(iw::quaternion::from_look_at(iw::vector3(1, 2, 1)));
 
-		iw::ref<Model> plane = Asset->Load<Model>("models/grass.obj");
+		iw::ref<Model> plane = Asset->Load<Model>("Floor");
 		plane->Meshes[0].Material->SetTexture("shadowMap", subRG);
 
 		// floor
 		Entity floor = Space->CreateEntity<Transform, Model, PlaneCollider, Rigidbody>();
 		Space->SetComponentData<Model>(floor, *plane);
 
-		Transform*     t = Space->SetComponentData<Transform>(floor, iw::vector3(0, 0, 0), iw::vector3(15));
+		Transform*     t = Space->SetComponentData<Transform>(floor, iw::vector3(0, 0, 0), iw::vector3(15, 1, 15));
 		PlaneCollider* s = Space->SetComponentData<PlaneCollider>(floor, iw::vector3::unit_y, 0.0f);
 		Rigidbody*     r = Space->SetComponentData<Rigidbody>(floor);
 
@@ -239,10 +246,10 @@ namespace IW {
 		gaussian->Program->GetParam("blurScale")->SetAsFloats(&iw::vector3(0, blurh, 0), 3);
 		Renderer->ApplyFilter(gaussian, targetBlur.get(), target.get());
 
-		Renderer->BeginScene();
-
 		for (auto c_e : Space->Query<Transform, CameraController>()) {
 			auto [c_t, c_c] = c_e.Components.Tie<CameraComponents>();
+
+			Renderer->BeginScene(c_c->Camera);
 
 			for (auto m_e : Space->Query<Transform, Model>()) {
 				auto [m_t, m_m] = m_e.Components.Tie<ModelComponents>();
@@ -253,17 +260,14 @@ namespace IW {
 					Renderer->SetShader(mesh.Material->Shader);
 
 					mesh.Material->Shader->Program->GetParam("lightSpace")
-						->SetAsMat4(light.ViewProj());
-
-					mesh.Material->Shader->Program->GetParam("viewProj")
-						->SetAsMat4(c_c->Camera->GetViewProjection());
+						->SetAsMat4(light.Cam().GetViewProjection());
 
 					Renderer->DrawMesh(m_t, &mesh);
 				}
 			}
-		}
 
-		Renderer->EndScene();
+			Renderer->EndScene();
+		}
 
 		for (auto p_e : Space->Query<Transform, PlaneCollider>()) {
 			auto [p_t, p_p] = p_e.Components.Tie<PlaneComponents>();

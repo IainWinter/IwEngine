@@ -63,6 +63,10 @@ namespace util {
 		bool empty() {
 			return m_queue.empty(); // not sure if this is thread safe?
 		}
+
+		size_t size() {
+			return m_queue.size();
+		}
 	};
 }
 

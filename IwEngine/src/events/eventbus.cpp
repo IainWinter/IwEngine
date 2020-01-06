@@ -26,7 +26,8 @@ namespace iw {
 			publish_event(m_events.pop());
 		}
 
-		m_alloc.reset();
+		m_alloc.reset(false); // true
+		m_count = 0;
 	}
 
 	void eventbus::publish_event(

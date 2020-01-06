@@ -22,10 +22,13 @@ namespace IW {
 	void GLUniformBuffer::UpdateData(
 		const void* data) const
 	{
-		Bind();
-		void* buffer = glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
-		memcpy(buffer, data, m_size);
-		glUnmapBuffer(GL_UNIFORM_BUFFER);
+		glNamedBufferSubData(m_renderId, 0, m_size, data);
+
+
+		//Bind();
+		//void* buffer = glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);  // need way to only copy a lil bit
+		//memcpy(buffer, data, m_size);
+		//glUnmapBuffer(GL_UNIFORM_BUFFER);
 	}
 
 	void GLUniformBuffer::BindBase(

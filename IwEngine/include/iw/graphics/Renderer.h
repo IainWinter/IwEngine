@@ -57,8 +57,19 @@ namespace Graphics {
 	//	}
 	//};
 
-	struct LightData {
+	struct CameraData {
 		iw::matrix4 ViewProj;
+	};
+
+	struct MaterialData {
+		iw::vector4 Albedo;
+		bool HasAlbedoMap;
+	};
+
+	enum UBOBinding {
+		CAMERA   = 0x01,
+		MATERIAL = 0x10,
+		ALL      = 0x11
 	};
 
 	class Renderer {
@@ -78,8 +89,11 @@ namespace Graphics {
 	private:
 		Mesh* m_filterMesh;
 
-		IUniformBuffer* m_lightBuf;
-		LightData m_lightData;
+		IUniformBuffer* m_cameraUBO;
+		CameraData m_cameraData;
+
+		IUniformBuffer* m_materialUBO;
+		MaterialData m_materialData;
 
 	public:
 		IWGRAPHICS_API
@@ -99,11 +113,17 @@ namespace Graphics {
 		void End();
 
 		IWGRAPHICS_API
+		void InitShader(
+			iw::ref<Shader>& shader,
+			UBOBinding bindings);
+
+		IWGRAPHICS_API
 		void SetShader(
 			const iw::ref<Shader>& shader);
 
 		IWGRAPHICS_API
 		void BeginScene(
+			Camera* camera = nullptr,
 			RenderTarget* target = nullptr);
 
 		IWGRAPHICS_API
