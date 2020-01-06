@@ -16,12 +16,11 @@ namespace events {
 		std::vector<callback<event&>> m_callbacks;
 		linear_allocator m_alloc;
 		blocking_queue<event*> m_events;
-		size_t m_limit = 2000;
-		size_t m_count = 0;
+		bool m_blocked;
 
 	public:
 		IWEVENTS_API
-		eventbus();
+			eventbus();
 
 		IWEVENTS_API
 		void subscribe(
@@ -34,19 +33,23 @@ namespace events {
 		IWEVENTS_API
 		void publish();
 
+		IWEVENTS_API
+		void pause();
+
+		IWEVENTS_API
+		void resume();
+
 		template<
 			typename _e,
 			typename... _args>
 		void push(
 			_args&&... args)
 		{
-			if (m_limit > m_events.size()) {
-				_e* e = alloc_event<_e>();
-				*e = _e{ std::forward<_args>(args)... };
-				m_events.push(e);
-			}
+			std::unique_lock<std::mutex> lock(m_mutex);
+			_e* e = alloc_event<_e>();
+			*e = _e{ std::forward<_args>(args)... };
+			m_events.push(e);
 
-			m_count++;
 		}
 
 		template<
@@ -55,13 +58,12 @@ namespace events {
 		void send(
 			_args&&... args)
 		{
-			if (m_limit > m_count) {
+			std::unique_lock<std::mutex> lock(m_mutex);
+			if (!m_blocked) {
 				_e* e = alloc_event<_e>();
 				*e = _e{ std::forward<_args>(args)... };
 				publish_event(e);
 			}
-
-			m_count++;
 		}
 	private:
 		IWEVENTS_API
