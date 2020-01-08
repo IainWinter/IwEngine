@@ -16,11 +16,10 @@ namespace events {
 		std::vector<callback<event&>> m_callbacks;
 		linear_allocator m_alloc;
 		blocking_queue<event*> m_events;
-		bool m_blocked;
 
 	public:
 		IWEVENTS_API
-			eventbus();
+		eventbus();
 
 		IWEVENTS_API
 		void subscribe(
@@ -33,23 +32,15 @@ namespace events {
 		IWEVENTS_API
 		void publish();
 
-		IWEVENTS_API
-		void pause();
-
-		IWEVENTS_API
-		void resume();
-
 		template<
 			typename _e,
 			typename... _args>
 		void push(
 			_args&&... args)
 		{
-			std::unique_lock<std::mutex> lock(m_mutex);
 			_e* e = alloc_event<_e>();
 			*e = _e{ std::forward<_args>(args)... };
 			m_events.push(e);
-
 		}
 
 		template<
@@ -58,12 +49,8 @@ namespace events {
 		void send(
 			_args&&... args)
 		{
-			std::unique_lock<std::mutex> lock(m_mutex);
-			if (!m_blocked) {
-				_e* e = alloc_event<_e>();
-				*e = _e{ std::forward<_args>(args)... };
-				publish_event(e);
-			}
+			_e e(std::forward<_args>(args)...);
+			publish_event(&e);
 		}
 	private:
 		IWEVENTS_API
@@ -75,10 +62,17 @@ namespace events {
 		_e* alloc_event() {
 			event* e = m_alloc.alloc<_e>();
 			if (e == nullptr) {
+				char* before = m_alloc.memory();
 				m_alloc.resize(m_alloc.capacity() * 2);
-				e = m_alloc.alloc<_e>();
+				char* after = m_alloc.memory();
 
-				LOG_INFO << "Resized event allocator to " << m_alloc.capacity();
+				int offset = after - before;
+				for (event*& eptr : m_events) { // this is such monkey shit but might be the only way cus the types are unknown
+					char*& ptr = (char*&)eptr;
+					ptr += offset;
+				}
+
+				e = m_alloc.alloc<_e>();
 			}
 
 			return (_e*)e;

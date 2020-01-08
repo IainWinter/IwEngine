@@ -4,7 +4,7 @@
 
 namespace IW {
 	GLUniformBuffer::GLUniformBuffer(
-		unsigned int size, 
+		size_t size, 
 		const void* data)
 		: m_size(size)
 		, m_data(data)

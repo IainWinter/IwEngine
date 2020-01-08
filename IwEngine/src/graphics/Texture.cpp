@@ -8,6 +8,7 @@ namespace Graphics {
 		, m_channels(0)
 		, m_format(ALPHA)
 		, m_formatType(UBYTE)
+		, m_wrap(REPEAT)
 		, m_parent(nullptr)
 		, m_xOffset(0)
 		, m_yOffset(0)
@@ -20,11 +21,13 @@ namespace Graphics {
 		int height,
 		TextureFormat format,
 		TextureFormatType type,
+		TextureWrap wrap,
 		unsigned char* colors)
 		: m_width(width)
 		, m_height(height)
 		, m_format(format)
 		, m_formatType(type)
+		, m_wrap(wrap)
 		, m_parent(nullptr)
 		, m_xOffset(0)
 		, m_yOffset(0)
@@ -42,6 +45,7 @@ namespace Graphics {
 
 		if (!m_colors) {
 			m_colors = new unsigned char[m_width * m_height];
+			memset(m_colors, 0, m_width * m_height);
 		}
 	}
 
@@ -57,6 +61,7 @@ namespace Graphics {
 		, m_channels(parent->m_channels)
 		, m_format(parent->m_format)
 		, m_formatType(parent->m_formatType)
+		, m_wrap(parent->m_wrap)
 		, m_parent(parent)
 		, m_xOffset(xOffset)
 		, m_yOffset(yOffset)
@@ -71,6 +76,7 @@ namespace Graphics {
 		, m_channels(other.m_channels)
 		, m_format(other.m_format)
 		, m_formatType(other.m_formatType)
+		, m_wrap(other.m_wrap)
 		, m_parent(other.m_parent)
 		, m_xOffset(other.m_xOffset)
 		, m_yOffset(other.m_yOffset)
@@ -89,6 +95,7 @@ namespace Graphics {
 		, m_channels(other.m_channels)
 		, m_format(other.m_format)
 		, m_formatType(other.m_formatType)
+		, m_wrap(other.m_wrap)
 		, m_parent(other.m_parent)
 		, m_xOffset(other.m_xOffset)
 		, m_yOffset(other.m_yOffset)
@@ -110,8 +117,14 @@ namespace Graphics {
 		m_width      = other.m_width;
 		m_height     = other.m_height;
 		m_format     = other.m_format;
+		m_formatType = other.m_formatType;
 		m_channels   = other.m_channels;
-		m_handle = nullptr;
+		m_wrap       = other.m_wrap;
+		m_parent     = other.m_parent;
+		m_xOffset    = other.m_yOffset;
+		m_yOffset    = other.m_yOffset;
+		m_colors     = other.m_colors;
+		m_handle     = nullptr;
 
 		m_colors = new unsigned char[m_width * m_height];
 		if (other.m_colors) {
@@ -124,12 +137,17 @@ namespace Graphics {
 	Texture& Texture::operator=(
 		Texture&& other) noexcept
 	{
-		m_width    = other.m_width;
-		m_height   = other.m_height;
-		m_format   = other.m_format;
-		m_channels = other.m_channels;
-		m_colors   = other.m_colors;
-		m_handle   = other.m_handle;
+		m_width      = other.m_width;
+		m_height     = other.m_height;
+		m_format     = other.m_format;
+		m_formatType = other.m_formatType;
+		m_channels   = other.m_channels;
+		m_wrap       = other.m_wrap;
+		m_parent     = other.m_parent;
+		m_xOffset    = other.m_yOffset;
+		m_yOffset    = other.m_yOffset;
+		m_colors     = other.m_colors;
+		m_handle     = other.m_handle;
 
 		other.m_colors = nullptr;
 		other.m_handle = nullptr;
@@ -145,7 +163,7 @@ namespace Graphics {
 		}
 
 		else {
-			m_handle = device->CreateTexture(m_width, m_height, m_format, m_formatType, m_colors);
+			m_handle = device->CreateTexture(m_width, m_height, m_format, m_formatType, m_wrap, m_colors);
 		}
 	}
 

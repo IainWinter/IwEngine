@@ -8,15 +8,13 @@ namespace RenderAPI {
 		: public IUniformBuffer
 	{
 	private:
-		unsigned int m_renderId;
-		const void* m_buffer;
-
-		unsigned int m_size;
+		unsigned m_renderId;
+		size_t m_size;
 		const void* m_data;
 
 	public:
 		GLUniformBuffer(
-			unsigned int size,
+			size_t size,
 			const void* data);
 
 		~GLUniformBuffer();
@@ -25,7 +23,7 @@ namespace RenderAPI {
 			const void* data) const;
 
 		void BindBase(
-			unsigned int index) const;
+			unsigned index) const;
 
 		void Bind() const;
 		void Unbind() const;

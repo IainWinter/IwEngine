@@ -60,7 +60,7 @@ namespace IW {
 				//metallic /= 4 * 128; // obj files scale this by 4? and then opengl by 128???
 
 				Material material;
-				material.SetFloats("albedo", &albedo, 4);
+				material.SetFloats("albedo",  &albedo, 4);
 				material.SetFloats("ambient", &ambient, 4);
 				//material.SetFloats("emissiveColor", &emissiveColor, 4);
 				//material.SetFloat("metallic", metallic);

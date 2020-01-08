@@ -33,7 +33,8 @@ void main() {
 
 layout(std140, column_major) uniform Material {
 	vec4 albedo;
-	bool hasAlbedoMap;
+	float hasAlbedoMap;
+	float hasShadowMap;
 };
 
 //uniform vec3 ambient;
@@ -70,7 +71,7 @@ void main() {
 	/*normal = texture(normalMap, UV).xyz;*/
 
 	vec3 diffuse = albedo.xyz;
-	if (hasAlbedoMap) {
+	if (hasAlbedoMap == 1) {
 		diffuse *= texture(albedoMap, UV).rgb;
 	}
 
@@ -79,14 +80,17 @@ void main() {
 
 	float ambiance = 0.05;
 
-	vec3  coords = (LightPos.xyz / LightPos.w) * 0.5 + 0.5;
-	float shadow = chebyshevUpperBound(coords.xy, coords.z);
+	float shadow = 0;
+	if (hasShadowMap == 1) {
+		vec3 coords = (LightPos.xyz / LightPos.w) * 0.5 + 0.5;
+		shadow = chebyshevUpperBound(coords.xy, coords.z);
+	}
 
-	vec3 color = ambiance /** ambient*/ * ao + diffuse * (ambiance + shadow);
+	vec3 color = ambiance /* ambient*/ * ao + diffuse * (ambiance + shadow);
 
-	gl_FragColor = vec4(diffuse, 1);
+	gl_FragColor = vec4(color, 1);
 
-	if (color == 0.05345) {
+	if (color.x == 0.05345) {
 		gl_FragColor = vec4(color /** ambient*/ * normal, 1);
 	}
 }

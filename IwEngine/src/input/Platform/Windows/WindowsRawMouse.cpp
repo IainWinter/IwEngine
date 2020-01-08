@@ -46,7 +46,7 @@ namespace IW {
 		}
 
 		RAWINPUT* raw = (RAWINPUT*)e.LParam;
-		if (raw->header.dwType == RIM_TYPEMOUSE) {
+		if (raw && raw->header.dwType == RIM_TYPEMOUSE) {
 			RAWMOUSE mouse = raw->data.mouse;
 
 			input.Name = LMOUSE;

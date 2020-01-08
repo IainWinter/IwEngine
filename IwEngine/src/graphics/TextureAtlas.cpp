@@ -11,8 +11,9 @@ namespace Graphics {
 		int height,
 		TextureFormat format,
 		TextureFormatType type,
+		TextureWrap wrap,
 		unsigned char* colors)
-		: Texture(width, height, format, type, colors)
+		: Texture(width, height, format, type, wrap, colors)
 	{}
 
 	TextureAtlas::TextureAtlas(
@@ -30,7 +31,11 @@ namespace Graphics {
 		iw::vector2 coords) const
 	{
 		const TexBounds& bounds = m_bounds.at(tile);
-		return bounds.Offset + bounds.Dimensions - bounds.Offset * coords;
+
+		int x = bounds.X + bounds.Width  - bounds.X;
+		int y = bounds.Y + bounds.Height - bounds.Y;
+
+		return iw::vector2(x, y) * coords;
 	}
 
 	iw::ref<Texture> TextureAtlas::GetSubTexture(
@@ -40,8 +45,8 @@ namespace Graphics {
 
 		TexBounds bounds = m_bounds.at(tile);
 		Texture tex = CreateSubTexture(
-			bounds.Offset.x,     bounds.Offset.y,
-			bounds.Dimensions.x, bounds.Dimensions.y);
+			bounds.X,     bounds.Y,
+			bounds.Width, bounds.Height);
 
 		iw::ref<Texture> tref = std::make_shared<Texture>(std::forward<Texture>(tex));
 
@@ -70,12 +75,13 @@ namespace Graphics {
 		int ystep = m_height / rows;
 		for (int r = 0; r < rows; r++) {
 			for (int c = 0; c < cols; c++) {
-				iw::vector2 min( c      * xstep,  r      * ystep);
-				iw::vector2 max((c + 1) * xstep, (r + 1) * ystep);
+				int x = c * xstep;
+				int y = r * xstep;
 
 				m_bounds.emplace_back(
-					min, 
-					max - min
+					x, y,
+					(c + 1) * xstep - x, 
+					(r + 1) * ystep - y
 				);
 			}
 		}

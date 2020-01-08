@@ -148,6 +148,7 @@ namespace RenderAPI {
 			int height,
 			TextureFormat format,
 			TextureFormatType type,
+			TextureWrap wrap,
 			const void* data = nullptr) override;
 
 		virtual ITexture* CreateSubTexture(

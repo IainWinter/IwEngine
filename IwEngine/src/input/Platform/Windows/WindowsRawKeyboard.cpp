@@ -31,7 +31,7 @@ namespace IW {
 		}
 
 		RAWINPUT* raw = (RAWINPUT*)e.LParam;
-		if (raw->header.dwType == RIM_TYPEKEYBOARD) {
+		if (raw && raw->header.dwType == RIM_TYPEKEYBOARD) {
 			RAWKEYBOARD keyboard = raw->data.keyboard;
 
 			if (keyboard.VKey == 255) {

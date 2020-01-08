@@ -63,7 +63,8 @@ namespace Graphics {
 
 	struct MaterialData {
 		iw::vector4 Albedo;
-		bool HasAlbedoMap;
+		float HasAlbedoMap;
+		float HasShadowMap;
 	};
 
 	enum UBOBinding {

@@ -32,7 +32,7 @@ namespace IW {
 
 		iw::ref<Material> smat = std::make_shared<Material>();
 		smat->SetShader(shader);
-		smat->SetFloats("albedo", &iw::vector3(1, .92f, 1), 3);
+		smat->SetFloats("albedo", &iw::vector4(1, .92f, 1, 1), 4);
 		smat->SetTexture("albedoMap", nullptr);
 		smat->SetTexture("ambientMap", nullptr);
 		smat->SetTexture("displacementMap", nullptr);
@@ -40,7 +40,7 @@ namespace IW {
 
 		iw::ref<Material> pmat = std::make_shared<Material>();
 		pmat->SetShader(shader);
-		pmat->SetFloats("albedo", &iw::vector3(1), 3);
+		pmat->SetFloats("albedo", &iw::vector4(1), 4);
 		pmat->SetTexture("albedoMap", Asset->Load<Texture>("textures/moss/albedo.jpg"));
 		pmat->SetTexture("ambientMap", Asset->Load<Texture>("textures/moss/ao.jpg"));
 		pmat->SetTexture("displacementMap", Asset->Load<Texture>("textures/moss/displacement.jpg"));

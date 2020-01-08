@@ -9,19 +9,19 @@ namespace RenderAPI {
 		: public IVertexBuffer
 	{
 	private:
-		unsigned int m_renderId;
-		unsigned int m_size;
+		unsigned m_renderId;
+		size_t m_size;
 		const void* m_data;
 
 	public:
 		GLVertexBuffer(
-			unsigned int size,
+			size_t size,
 			const void* data);
 
 		~GLVertexBuffer();
 
 		void UpdateData(
-			unsigned int size,
+			size_t size,
 			const void* data) const;
 
 		void Bind() const;

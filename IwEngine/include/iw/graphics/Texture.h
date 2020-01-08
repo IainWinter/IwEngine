@@ -15,6 +15,7 @@ namespace Graphics {
 		int m_channels;
 		TextureFormat m_format;
 		TextureFormatType m_formatType;
+		TextureWrap m_wrap;
 
 		const Texture* m_parent;
 		int m_xOffset;
@@ -33,7 +34,8 @@ namespace Graphics {
 			int height,
 			TextureFormat format,
 			TextureFormatType type,
-			unsigned char* colors);
+			TextureWrap wrap,
+			unsigned char* colors = nullptr);
 
 		IWGRAPHICS_API
 		Texture(
@@ -72,6 +74,9 @@ namespace Graphics {
 
 		IWGRAPHICS_API
 		TextureFormatType FormatType() const;
+
+		IWGRAPHICS_API
+		TextureWrap Wrap() const;
 
 		IWGRAPHICS_API
 		const Texture* Parent() const;

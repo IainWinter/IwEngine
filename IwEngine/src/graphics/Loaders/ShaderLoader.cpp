@@ -46,8 +46,6 @@ namespace IW {
 			}
 
 			shader->AddShader(type, code.c_str());
-
-			LOG_INFO << code;
 		}
 
 		return shader;

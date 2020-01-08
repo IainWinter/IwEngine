@@ -47,35 +47,35 @@ namespace IW {
 	iw::ref<RenderTarget> target;
 	iw::ref<RenderTarget> targetBlur;
 	iw::ref<Shader> gaussian;
-	iw::ref<Shader> nul;
 	float blurAmount = 1.2f;
+	TextureAtlas atlasD;
+	TextureAtlas atlasRG;
+	TextureAtlas atlasBlur;
 
 	int SandboxLayer::Initialize() {
 		// Shader
 		iw::ref<Shader> directional = Asset->Load<Shader>("shaders/lights/directional.shader");
 		gaussian = Asset->Load<Shader>("shaders/filters/gaussian.shader");
-		nul = Asset->Load<Shader>("shaders/filters/null.shader");
 		
 		Renderer->InitShader(directional, CAMERA);
-		Renderer->InitShader(gaussian, CAMERA);
-		Renderer->InitShader(nul, CAMERA);
+		Renderer->InitShader(gaussian,    CAMERA);
 
 		// Textures
 		
-		TextureAtlas atlasD = TextureAtlas(2048, 2048, IW::DEPTH, IW::FLOAT);
-		atlasD.Initialize(Renderer->Device);
-		atlasD.GenTexBounds(2, 2);
+		atlasD    = TextureAtlas(2048, 2048, IW::DEPTH, IW::FLOAT, IW::BORDER);
+		atlasRG   = TextureAtlas(2048, 2048, IW::RG,    IW::FLOAT, IW::BORDER);
+		atlasBlur = TextureAtlas(2048, 2048, IW::ALPHA, IW::FLOAT, IW::BORDER);
 
-		TextureAtlas atlasRG = TextureAtlas(2048, 2048, IW::RG, IW::FLOAT);
-		atlasRG.Initialize(Renderer->Device);
-		atlasRG.GenTexBounds(2, 2);
-
-		TextureAtlas atlasBlur = TextureAtlas(2048, 2048, IW::ALPHA, IW::FLOAT);
+		atlasD   .Initialize(Renderer->Device);
+		atlasRG  .Initialize(Renderer->Device);
 		atlasBlur.Initialize(Renderer->Device);
+
+		atlasD   .GenTexBounds(2, 2);
+		atlasRG  .GenTexBounds(2, 2);
 		atlasBlur.GenTexBounds(2, 2);
 
-		iw::ref<Texture> subD    = atlasD .GetSubTexture(0);
-		iw::ref<Texture> subRG   = atlasRG.GetSubTexture(0);
+		iw::ref<Texture> subD    = atlasD   .GetSubTexture(0);
+		iw::ref<Texture> subRG   = atlasRG  .GetSubTexture(0);
 		iw::ref<Texture> subBlur = atlasBlur.GetSubTexture(0);
 
 		subD   ->Initialize(Renderer->Device);
@@ -99,9 +99,9 @@ namespace IW {
 		targetBlur->Initialize(Renderer->Device);
 
 		// Light
-		light = DirectionalLight(directional, target, OrthographicCamera(40, 40, -50, 50));
-		light.SetPosition(10);
-		light.SetRotation(iw::quaternion::from_look_at(iw::vector3(1, 2, 1)));
+		light = DirectionalLight(directional, target, OrthographicCamera(30, 30, -5, 50));
+		light.SetPosition(2);
+		light.SetRotation(iw::quaternion::from_look_at(iw::vector3(1)));
 
 		iw::ref<Model> plane = Asset->Load<Model>("Floor");
 		plane->Meshes[0].Material->SetTexture("shadowMap", subRG);
@@ -110,9 +110,9 @@ namespace IW {
 		Entity floor = Space->CreateEntity<Transform, Model, PlaneCollider, Rigidbody>();
 		Space->SetComponentData<Model>(floor, *plane);
 
-		Transform*     t = Space->SetComponentData<Transform>(floor, iw::vector3(0, 0, 0), iw::vector3(15, 1, 15));
+		Transform*     t = Space->SetComponentData<Transform>    (floor, iw::vector3(0, 0, 0), iw::vector3(15, 1, 15));
 		PlaneCollider* s = Space->SetComponentData<PlaneCollider>(floor, iw::vector3::unit_y, 0.0f);
-		Rigidbody*     r = Space->SetComponentData<Rigidbody>(floor);
+		Rigidbody*     r = Space->SetComponentData<Rigidbody>    (floor);
 
 		r->SetIsKinematic(false);
 		r->SetMass(1);
@@ -166,9 +166,10 @@ namespace IW {
 		// Player
 
 		iw::ref<Model> sphere = Asset->Load<Model>("Sphere");
+		sphere->Meshes[0].Material->SetTexture("shadowMap", subRG);
 
 		Entity player = Space->CreateEntity<Transform, Model, SphereCollider, Rigidbody, Player>();
-		Space->SetComponentData<Model>(player, *sphere);
+		Space->SetComponentData<Model> (player, *sphere);
 		Space->SetComponentData<Player>(player, -10.0f, .18f, .08f);
 
 		Transform* tp      = Space->SetComponentData<Transform>     (player, iw::vector3(0, 10, 0));
@@ -292,7 +293,7 @@ namespace IW {
 		ImGui::Begin("Sandbox");
 
 		ImGui::SliderFloat("Time scale", &ts, 0.001f, 1);
-		ImGui::SliderFloat("Shadow map blur", &blurAmount, 0, 5);
+		ImGui::SliderFloat("Shadow map blur", &blurAmount, 0.001f, 5);
 
 		ImGui::End();
 	}

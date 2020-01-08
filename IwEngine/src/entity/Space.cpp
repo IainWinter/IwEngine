@@ -52,8 +52,7 @@ namespace IW {
 		bool componentsExist = false;
 		if (entityData->Archetype && entityData->Archetype->Hash == archetype->Hash) {
 			componentsExist = m_componentManager.ReinstateEntityComponents(entityData);
-
-			LOG_DEBUG << "Recycling  components " << entityData->ChunkIndex << " for " << entityData->Entity.Index;
+			//LOG_DEBUG << "Recycling  components " << entityData->ChunkIndex << " for " << entityData->Entity.Index;
 		}
 
 		else {
@@ -62,8 +61,7 @@ namespace IW {
 
 		if (!componentsExist) {
 			entityData->ChunkIndex = m_componentManager.ReserveEntityComponents(entityData);
-
-			LOG_DEBUG << "Creating   components " << entityData->ChunkIndex << " for " << entityData->Entity.Index;
+			//LOG_DEBUG << "Creating   components " << entityData->ChunkIndex << " for " << entityData->Entity.Index;
 		}
 
 		return entityData->Entity;
@@ -78,7 +76,7 @@ namespace IW {
 			return false;
 		}
 
-		LOG_DEBUG << "Destroying components " << entityData->ChunkIndex << " for " << entityData->Entity.Index;
+		//LOG_DEBUG << "Destroying components " << entityData->ChunkIndex << " for " << entityData->Entity.Index;
 
 		return m_entityManager.DestroyEntity(index)
 			&& m_componentManager.DestroyEntityComponents(entityData);

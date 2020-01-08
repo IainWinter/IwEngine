@@ -17,6 +17,9 @@ namespace util {
 	template<
 		typename _t>
 	class blocking_queue {
+	public:
+		using iterator       = typename std::deque<_t>::iterator;
+		using const_iterator = typename std::deque<_t>::const_iterator;
 	private:
 		std::mutex              m_mutex;
 		std::condition_variable m_condition;
@@ -55,7 +58,7 @@ namespace util {
 		void clear() {
 			std::unique_lock<std::mutex> lock(m_mutex);
 			m_queue.clear();
-
+			
 			//lock.unlock();
 			m_condition.notify_one();
 		}
@@ -66,6 +69,22 @@ namespace util {
 
 		size_t size() {
 			return m_queue.size();
+		}
+
+		iterator begin() {
+			return m_queue.begin();
+		}
+
+		iterator end() {
+			return m_queue.end();
+		}
+
+		const_iterator begin() const {
+			return m_queue.begin();
+		}
+
+		const_iterator end() const {
+			return m_queue.end();
 		}
 	};
 }

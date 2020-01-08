@@ -54,7 +54,7 @@ namespace IW {
 
 		stbi_image_free(image);
 
-		return new Texture(width, height, (TextureFormat)channels, UBYTE, colors);
+		return new Texture(width, height, (TextureFormat)channels, UBYTE, REPEAT, colors);
 	}
 
 	void TextureLoader::FreeAsset(

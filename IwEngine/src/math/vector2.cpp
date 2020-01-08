@@ -85,14 +85,6 @@ namespace iw {
 		y /= scale;
 	}
 
-	float& iw::vector2::operator[](
-		size_t index)
-	{
-		if (index == 0) return x;
-		else if (index == 1) return y;
-		throw std::out_of_range("Index out of bounds");
-	}
-
 	vector2 vector2::operator+(
 		const vector2& other) const
 	{
@@ -135,7 +127,8 @@ namespace iw {
 		return *this = (*this) * other;
 	}
 
-	vector2 vector2::operator/=(const vector2& other)
+	vector2 vector2::operator/=(
+		const vector2& other)
 	{
 		return *this = (*this) / other;
 	}
@@ -190,6 +183,14 @@ namespace iw {
 
 	vector2 vector2::operator-() const {
 		return vector2(-x, -y);
+	}
+
+	float& iw::vector2::operator[](
+		size_t index)
+	{
+		if (index == 0) return x;
+		else if (index == 1) return y;
+		throw std::out_of_range("Index out of bounds");
 	}
 
 	bool vector2::operator==(

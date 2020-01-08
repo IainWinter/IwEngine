@@ -261,13 +261,14 @@ namespace IW {
 	}
 
 	ITexture* GLDevice::CreateTexture(
-		int width, 
-		int height, 
-		TextureFormat format, 
+		int width,
+		int height,
+		TextureFormat format,
 		TextureFormatType type,
+		TextureWrap wrap,
 		const void* data)
 	{
-		return new GLTexture(width, height, format, type, data);
+		return new GLTexture(width, height, format, type, wrap, data);
 	}
 
 	ITexture* GLDevice::CreateSubTexture(

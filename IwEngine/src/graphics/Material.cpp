@@ -126,8 +126,8 @@ namespace IW {
 	void Material::SetBools(
 		const char* name,
 		void* values,
-		size_t count,
-		size_t stride)
+		unsigned count,
+		unsigned stride)
 	{
 		CreateProperty(name, values, count, stride, false, BOOL, sizeof(bool));
 	}
@@ -142,8 +142,8 @@ namespace IW {
 	void Material::SetInts(
 		const char* name,
 		void* values,
-		size_t count,
-		size_t stride)
+		unsigned count,
+		unsigned stride)
 	{
 		CreateProperty(name, values, count, stride, false, INT, sizeof(int));
 	}
@@ -158,8 +158,8 @@ namespace IW {
 	void Material::SetUInts(
 		const char* name,
 		void* values,
-		size_t count,
-		size_t stride)
+		unsigned count,
+		unsigned stride)
 	{
 		CreateProperty(name, values, count, stride, false, UINT, sizeof(unsigned int));
 	}
@@ -174,8 +174,8 @@ namespace IW {
 	void Material::SetFloats(
 		const char* name,
 		void* values,
-		size_t count,
-		size_t stride)
+		unsigned count,
+		unsigned stride)
 	{
 		CreateProperty(name, values, count, stride, false, FLOAT, sizeof(float));
 	}
@@ -190,8 +190,8 @@ namespace IW {
 	void Material::SetDoubles(
 		const char* name,
 		void* values,
-		size_t count,
-		size_t stride)
+		unsigned count,
+		unsigned stride)
 	{
 		CreateProperty(name, values, count, stride, false, DOUBLE, sizeof(double));
 	}
@@ -304,8 +304,8 @@ namespace IW {
 	void Material::CreateProperty(
 		const char* name,
 		void* values,
-		size_t count,
-		size_t stride,
+		unsigned count,
+		unsigned stride,
 		bool isSample,
 		MaterialPropertyType type,
 		size_t typeSize)

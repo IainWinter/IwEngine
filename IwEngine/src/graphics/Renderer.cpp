@@ -117,8 +117,11 @@ namespace IW {
 
 		//material->Use(Device);
 
-		float* albedo      = std::get<0>(material->GetFloats("albedo"));
+		float* albedo  = std::get<0>(material->GetFloats("albedo"));
+		float* ambient = std::get<0>(material->GetFloats("ambient"));
+
 		Texture* albedoMap = material->GetTexture("albedoMap");
+		Texture* shadowMap = material->GetTexture("shadowMap");
 
 		if (albedo) {
 			m_materialData.Albedo = *(iw::vector4*)albedo;
@@ -128,13 +131,23 @@ namespace IW {
 			m_materialData.Albedo = iw::vector4::one;
 		}
 
-		m_materialData.HasAlbedoMap = !!albedoMap;
+		m_materialData.HasAlbedoMap = (float)!!albedoMap;
+		m_materialData.HasShadowMap = (float)!!shadowMap;
+
 		if (albedoMap) {
 			pipeline->GetParam("albedoMap")->SetAsTexture(albedoMap->Handle());
 		}
 
 		else {
 			pipeline->GetParam("albedoMap")->SetAsTexture(nullptr);
+		}
+
+		if (shadowMap) {
+			pipeline->GetParam("shadowMap")->SetAsTexture(shadowMap->Handle());
+		}
+
+		else {
+			pipeline->GetParam("shadowMap")->SetAsTexture(nullptr);
 		}
 
 		Device->UpdateUniformBufferData(m_materialUBO, &m_materialData);
@@ -164,7 +177,7 @@ namespace IW {
 		const Transform* transform, 
 		const Mesh* mesh)
 	{
-		mesh->Material->Shader->Program->GetParam("model")
+		light->LightShader()->Program->GetParam("model")
 			->SetAsMat4(transform->Transformation());
 
 		mesh->Draw(Device);

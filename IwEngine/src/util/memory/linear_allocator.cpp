@@ -2,18 +2,22 @@
 #include "iw/log/logger.h"
 #include "memory_util.h"
 #include <stdlib.h>
+#include <assert.h>
 
 namespace iw {
 	linear_allocator::linear_allocator(
-		size_t size)
+		size_t size,
+		size_t resetsToRealloc)
 		: m_memory(malloc(size))
 		, m_capacity(size)
+		, m_minCapacity(size)
 		, m_peak(0)
 		, m_cursor(0)
+		, m_resets(0)
+		, m_resetsToRealloc(resetsToRealloc)
 	{
-		if (m_memory != nullptr) {
-			memset(m_memory, 0, m_capacity);
-		}
+		assert(m_memory);
+		memset(m_memory, 0, m_capacity);
 	}
 
 	linear_allocator::~linear_allocator() {
@@ -31,12 +35,12 @@ namespace iw {
 			padding = calc_padding(caddress, alignment);
 		}
 
-		if (m_cursor + padding + size > m_capacity) {
+		size_t padsize = padding + size;
+		if (m_cursor + padsize > m_capacity) {
 			return nullptr;
 		}
 
-		m_cursor += padding;
-		m_cursor += size;
+		m_cursor += padsize;
 
 		//LOG_DEBUG << "Allocating " << size << " bytes at " << (void*)caddress << " with " << padding << " bytes padding"
 
@@ -44,7 +48,7 @@ namespace iw {
 			m_peak = m_cursor;
 		}
 
-		memset((void*)caddress, 0, size + padding); //reset memory of alloc not nessesary but nice. TODO: lookout for preformance hit
+		//memset((void*)caddress, 0, padsize); //reset memory of alloc not nessesary but nice. TODO: lookout for preformance hit
 
 		return (void*)(caddress + padding);
 	}
@@ -52,30 +56,48 @@ namespace iw {
 	void linear_allocator::resize(
 		size_t size)
 	{
-		size_t sizeToCopy = size < m_cursor ? size : m_cursor;
+		void* memory = realloc(m_memory, size);
+		if (!memory) {
+			memory = malloc(size);
+			assert(memory);
 
-		void* memory = malloc(size);
-		memcpy(memory, m_memory, sizeToCopy);
+			memcpy(memory, m_memory, size < m_cursor ? size : m_cursor);
+			free(m_memory);
+		}
 
-		free(m_memory);
 		m_memory = memory;
-
 		m_capacity = size;
+
+		LOG_INFO << "Resized event allocator to " << m_capacity;
 	}
 
 	void linear_allocator::reset(
-		bool aggressive)
+		bool clean)
 	{
-		m_cursor = 0;
-
-		if (aggressive) {
-			size_t size = 128;
-			while (m_peak > 2 * size) {
-				size *= 2;
+		if (   clean 
+			&& m_memory 
+			&& m_resets > m_resetsToRealloc)
+		{
+			size_t halfCap = m_capacity / 2;
+			if (   m_cursor      <  halfCap
+				&& m_minCapacity <= halfCap)
+			{
+				resize(halfCap);
 			}
 
-			resize(size);
-			m_peak = 0;
+			m_resets = 0;
+		}
+
+		else {
+			++m_resets;
+		}
+
+		if (   m_memory
+			&& m_cursor >  0
+			&& m_cursor <= m_capacity)
+		{
+			memset(m_memory, 0, m_cursor);
+			m_cursor = 0;
 		}
 	}
 }

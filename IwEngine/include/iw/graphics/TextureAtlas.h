@@ -7,14 +7,20 @@
 namespace IW {
 namespace Graphics {
 	struct TexBounds {
-		iw::vector2 Offset;
-		iw::vector2 Dimensions;
+		int X;
+		int Y;
+		int Width;
+		int Height;
 
 		TexBounds(
-			iw::vector2 offset,
-			iw::vector2 dimensions)
-			: Offset(offset)
-			, Dimensions(dimensions)
+			int x,
+			int y,
+			int width,
+			int height)
+			: X(x)
+			, Y(y)
+			, Width(width)
+			, Height(height)
 		{}
 	};
 
@@ -35,6 +41,7 @@ namespace Graphics {
 			int height,
 			TextureFormat format,
 			TextureFormatType type,
+			TextureWrap wrap,
 			unsigned char* colors = nullptr);
 
 		IWGRAPHICS_API

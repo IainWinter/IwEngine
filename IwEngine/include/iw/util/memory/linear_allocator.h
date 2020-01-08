@@ -9,12 +9,16 @@ namespace util {
 	private:
 		void*  m_memory;
 		size_t m_capacity;
+		size_t m_minCapacity;
 		size_t m_peak;
 		size_t m_cursor;
+		size_t m_resets;
+		size_t m_resetsToRealloc;
 
 	public:
 		linear_allocator(
-			size_t size);
+			size_t size,
+			size_t resetsToRealloc = 0);
 
 		~linear_allocator();
 
@@ -35,7 +39,15 @@ namespace util {
 			size_t size);
 
 		void reset(
-			bool aggressive = false);
+			bool clean = false);
+
+		inline char* memory() {
+			return (char*)m_memory;
+		}
+
+		inline size_t capacity() {
+			return m_capacity;
+		}
 
 		inline size_t peak() {
 			return m_peak;
@@ -43,10 +55,6 @@ namespace util {
 
 		inline size_t size() {
 			return m_cursor;
-		}
-
-		inline size_t capacity() {
-			return m_capacity;
 		}
 	};
 }

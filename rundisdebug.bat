@@ -10,7 +10,7 @@ for /f "skip=1 tokens=3" %%s in ('query user %USERNAME%') do (
 
 :: run program with the console's contexts 'n such
 
-cd C:\dev\IwEngine\Sandbox\bin\Debug.windows.x86_64\
-Sandbox.exe
+cd C:\dev\IwEngine\Editor\bin\Release.windows.x86_64\
+Editor.exe
 
 :: then reconnect to the remote session

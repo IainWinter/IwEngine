@@ -30,9 +30,9 @@ namespace Graphics {
 		struct MaterialProperty {
 			char* Name;
 
-			size_t Size;
-			size_t Count;
-			size_t Stride;
+			size_t   Size;
+			unsigned Count;
+			unsigned Stride;
 
 			bool IsSample;
 			MaterialPropertyType Type;
@@ -96,8 +96,8 @@ namespace Graphics {
 		void SetBools(
 			const char* name,
 			void* values,
-			size_t count,
-			size_t stride = 0);
+			unsigned count,
+			unsigned stride = 0);
 
 		IWGRAPHICS_API
 		void SetInt(
@@ -108,8 +108,8 @@ namespace Graphics {
 		void SetInts(
 			const char* name,
 			void* values,
-			size_t count,
-			size_t stride = 0);
+			unsigned count,
+			unsigned stride = 0);
 
 		IWGRAPHICS_API
 		void SetUInt(
@@ -120,8 +120,8 @@ namespace Graphics {
 		void SetUInts(
 			const char* name,
 			void* values,
-			size_t count,
-			size_t stride = 0);
+			unsigned count,
+			unsigned stride = 0);
 
 		IWGRAPHICS_API
 		void SetFloat(
@@ -132,8 +132,8 @@ namespace Graphics {
 		void SetFloats(
 			const char* name,
 			void* values,
-			size_t count,
-			size_t stride = 0);
+			unsigned count,
+			unsigned stride = 0);
 
 		IWGRAPHICS_API
 		void SetDouble(
@@ -144,8 +144,8 @@ namespace Graphics {
 		void SetDoubles(
 			const char* name,
 			void* values,
-			size_t count,
-			size_t stride = 0);
+			unsigned count,
+			unsigned stride = 0);
 
 		IWGRAPHICS_API
 		void SetTexture(
@@ -210,8 +210,8 @@ namespace Graphics {
 		void CreateProperty(
 			const char* name,
 			void* values,
-			size_t count,
-			size_t stride,
+			unsigned count,
+			unsigned stride,
 			bool isSample,
 			MaterialPropertyType type,
 			size_t typeSize);

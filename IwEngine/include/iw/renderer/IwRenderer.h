@@ -12,9 +12,9 @@ namespace IW {
 namespace RenderAPI {
 	enum MeshTopology {
 		POINTS = 1,
-		LINES = 2,
-		TRIANGLES = 3,
-		QUADS = 4
+		LINES,
+		TRIANGLES,
+		QUADS
 	};
 
 	enum TextureFormatType {
@@ -30,6 +30,14 @@ namespace RenderAPI {
 		RGBA,
 		DEPTH,
 		STENCIL
+	};
+
+	enum TextureWrap {
+		EDGE,
+		BORDER,
+		MIRROR,
+		REPEAT,
+		MIRROR_EDGE
 	};
 }
 
