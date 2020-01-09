@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IwRenderer.h"
+#include "iw/renderer/PipelineParamType.h"
 
 namespace IW {
 namespace RenderAPI {
@@ -19,6 +20,9 @@ namespace RenderAPI {
 
 		virtual _i Translate(
 			TextureWrap textureWrap) = 0;
+
+		virtual _i Translate(
+			_e glenum) = 0;
 
 		IWRENDERER_API
 		static Translator& Instance();

@@ -18,6 +18,9 @@ namespace RenderAPI {
 
 		GLint Translate(
 			TextureWrap textureWrap) override;
+
+		GLint Translate(
+			GLenum glenum) override;
 	};
 }
 

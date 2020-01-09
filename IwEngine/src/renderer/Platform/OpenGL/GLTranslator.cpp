@@ -1,4 +1,5 @@
 #include "iw/renderer/Platform/OpenGL/GLTranslator.h"
+#include "iw/util/enum/val.h"
 
 namespace IW {
 namespace RenderAPI {
@@ -77,7 +78,22 @@ namespace RenderAPI {
 			case MIRROR_EDGE: return GL_MIRROR_CLAMP_TO_EDGE;
 		}
 
-		return GLU_INVALID_VALUE;
+		return GL_INVALID_VALUE;
+	}
+
+	GLint GLTranslator::Translate(
+		GLenum glenum)
+	{
+		switch (glenum) {
+			case GL_BOOL:         return iw::val(UniformType::BOOL);
+			case GL_INT:          return iw::val(UniformType::INT);
+			case GL_UNSIGNED_INT: return iw::val(UniformType::UINT);
+			case GL_FLOAT:        return iw::val(UniformType::FLOAT);
+			case GL_DOUBLE:       return iw::val(UniformType::DOUBLE);
+			case GL_SAMPLER_2D:   return iw::val(UniformType::SAMPLE2);
+		}
+
+		return GL_INVALID_VALUE;
 	}
 }
 }

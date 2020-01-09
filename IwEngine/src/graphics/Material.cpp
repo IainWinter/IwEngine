@@ -63,6 +63,36 @@ namespace IW {
 		return *this;
 	}
 
+	void Material::Initialize(
+		const iw::ref<IDevice>& device)
+	{
+		if (Shader) {
+			LOG_WARNING << "Tried to initialize material without a shader!";
+			return;
+		}
+		
+		if (!Shader->Program) {
+			Shader->Initialize(device);
+		}
+
+		int count = Shader->Program->UniformCount();
+		for (int i = 0; i < count; i++) {
+			IPipelineParam* uniform = Shader->Program->GetParam(i);
+			if (uniform->Name().substr(0, 4) == "mat_") {
+				const char* name = uniform->Name().substr(4).c_str();
+				unsigned    c    = uniform->Size() / uniform->TypeSize();
+				switch (uniform->Type()) {
+					case UniformType::BOOL:    SetBools  (name, nullptr, c, uniform->Size()); break;
+					case UniformType::INT:     SetInts   (name, nullptr, c, uniform->Size()); break;
+					case UniformType::UINT:    SetUInts  (name, nullptr, c, uniform->Size()); break;
+					case UniformType::FLOAT:   SetFloats (name, nullptr, c, uniform->Size()); break;
+					case UniformType::DOUBLE:  SetDoubles(name, nullptr, c, uniform->Size()); break;
+					case UniformType::SAMPLE2: SetTexture(name, nullptr); break;
+				}
+			}
+		}
+	}
+
 	void Material::Use(
 		const iw::ref<IDevice>& device) const
 	{
@@ -93,11 +123,11 @@ namespace IW {
 
 			else {
 				switch (prop.Type) {
-					case BOOL:   param->SetAsBools  (prop.Data, prop.Count, prop.Stride);  break;
-					case INT:    param->SetAsInts   (prop.Data, prop.Count, prop.Stride);  break;
-					case UINT:   param->SetAsUInts  (prop.Data, prop.Count, prop.Stride);  break;
-					case FLOAT:  param->SetAsFloats (prop.Data, prop.Count, prop.Stride);  break;
-					case DOUBLE: param->SetAsDoubles(prop.Data, prop.Count, prop.Stride);  break;
+					case UniformType::BOOL:   param->SetAsBools  (prop.Data, prop.Count, prop.Stride);  break;
+					case UniformType::INT:    param->SetAsInts   (prop.Data, prop.Count, prop.Stride);  break;
+					case UniformType::UINT:   param->SetAsUInts  (prop.Data, prop.Count, prop.Stride);  break;
+					case UniformType::FLOAT:  param->SetAsFloats (prop.Data, prop.Count, prop.Stride);  break;
+					case UniformType::DOUBLE: param->SetAsDoubles(prop.Data, prop.Count, prop.Stride);  break;
 					default: LOG_WARNING << "Invalid property in material: " << prop.Name; break;
 				}
 			}
@@ -120,7 +150,7 @@ namespace IW {
 		const char* name,
 		bool value)
 	{
-		CreateProperty(name, &value, 1, 0, false, BOOL, sizeof(bool));
+		CreateProperty(name, &value, 1, 0, false, UniformType::BOOL, sizeof(bool));
 	}
 
 	void Material::SetBools(
@@ -129,14 +159,14 @@ namespace IW {
 		unsigned count,
 		unsigned stride)
 	{
-		CreateProperty(name, values, count, stride, false, BOOL, sizeof(bool));
+		CreateProperty(name, values, count, stride, false, UniformType::BOOL, sizeof(bool));
 	}
 
 	void Material::SetInt(
 		const char* name,
 		int value)
 	{
-		CreateProperty(name, &value, 1, 0, false, INT, sizeof(int));
+		CreateProperty(name, &value, 1, 0, false, UniformType::INT, sizeof(int));
 	}
 
 	void Material::SetInts(
@@ -145,14 +175,14 @@ namespace IW {
 		unsigned count,
 		unsigned stride)
 	{
-		CreateProperty(name, values, count, stride, false, INT, sizeof(int));
+		CreateProperty(name, values, count, stride, false, UniformType::INT, sizeof(int));
 	}
 
 	void Material::SetUInt(
 		const char* name,
 		unsigned int value)
 	{
-		CreateProperty(name, &value, 1, 0, false, UINT, sizeof(unsigned int));
+		CreateProperty(name, &value, 1, 0, false, UniformType::UINT, sizeof(unsigned int));
 	}
 
 	void Material::SetUInts(
@@ -161,14 +191,14 @@ namespace IW {
 		unsigned count,
 		unsigned stride)
 	{
-		CreateProperty(name, values, count, stride, false, UINT, sizeof(unsigned int));
+		CreateProperty(name, values, count, stride, false, UniformType::UINT, sizeof(unsigned int));
 	}
 
 	void Material::SetFloat(
 		const char* name,
 		float value)
 	{
-		CreateProperty(name, &value, 1, 0, false, FLOAT, sizeof(float));
+		CreateProperty(name, &value, 1, 0, false, UniformType::FLOAT, sizeof(float));
 	}
 
 	void Material::SetFloats(
@@ -177,14 +207,14 @@ namespace IW {
 		unsigned count,
 		unsigned stride)
 	{
-		CreateProperty(name, values, count, stride, false, FLOAT, sizeof(float));
+		CreateProperty(name, values, count, stride, false, UniformType::FLOAT, sizeof(float));
 	}
 
 	void Material::SetDouble(
 		const char* name,
 		double value)
 	{
-		CreateProperty(name, &value, 1, 0, false, DOUBLE, sizeof(double));
+		CreateProperty(name, &value, 1, 0, false, UniformType::DOUBLE, sizeof(double));
 	}
 
 	void Material::SetDoubles(
@@ -193,14 +223,14 @@ namespace IW {
 		unsigned count,
 		unsigned stride)
 	{
-		CreateProperty(name, values, count, stride, false, DOUBLE, sizeof(double));
+		CreateProperty(name, values, count, stride, false, UniformType::DOUBLE, sizeof(double));
 	}
 
 	void Material::SetTexture(
 		const char* name, 
 		Texture* texture)
 	{
-		CreateProperty(name, texture, 0, 0, true, SAMPLE, 0);
+		CreateProperty(name, texture, 0, 0, true, UniformType::SAMPLE2, 0);
 	}
 
 	void Material::SetTexture(
@@ -307,7 +337,7 @@ namespace IW {
 		unsigned count,
 		unsigned stride,
 		bool isSample,
-		MaterialPropertyType type,
+		UniformType type,
 		size_t typeSize)
 	{
 		MaterialProperty* prop = FindProperty(name);

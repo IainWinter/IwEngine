@@ -1,6 +1,7 @@
 #pragma once
 
 #include "iw/renderer/PipelineParam.h"
+#include <string>
 
 namespace IW {
 namespace RenderAPI {
@@ -8,15 +9,29 @@ namespace RenderAPI {
 		: public IPipelineParam
 	{
 	private:
-		unsigned int m_location;
-		unsigned int& m_textureCount;
+		unsigned  m_location;
+		unsigned& m_textureCount;
+
+		UniformType m_type;
+		unsigned  m_typeSize;
+		unsigned  m_size;
+		std::string m_name;
 
 	public:
 		GLPipelineParam(
 			int location,
-			unsigned int& textureCount);
+			unsigned& textureCount,
+			UniformType type,
+			int typeSize,
+			int size,
+			std::string name);
 
 		// Stride is 0 if there is only a single element
+
+		UniformType Type()     const override;
+		unsigned    TypeSize() const override;
+		unsigned    Size()     const override;
+		const std::string& Name() const override;
 
 		void SetAsBool(
 			bool value) override;

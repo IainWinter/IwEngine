@@ -211,7 +211,7 @@ namespace IW {
 	{
 		aiString texturePath;
 		unsigned count = aimaterial->GetTextureCount(type);
-		for (size_t i = 0; i < count; i++) {
+		for (unsigned i = 0; i < count; i++) {
 			if (aimaterial->GetTexture(type, i, &texturePath) == AI_SUCCESS) {
 				std::stringstream ss(name);
 				if (i > 0) {

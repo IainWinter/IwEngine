@@ -8,6 +8,8 @@
 #	endif
 #endif
 
+#define TRANSLATE GLTranslator::Instance().Translate
+
 namespace IW {
 namespace RenderAPI {
 	enum MeshTopology {

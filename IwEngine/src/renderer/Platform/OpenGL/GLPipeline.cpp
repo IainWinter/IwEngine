@@ -1,6 +1,7 @@
 #include "iw/renderer/Platform/OpenGL/GLPipeline.h"
 #include "iw/renderer/Platform/OpenGL/GLPipelineParam.h"
 #include "iw/renderer/Platform/OpenGL/GLUniformBuffer.h"
+#include "iw/renderer/Platform/OpenGL/GLTranslator.h"
 #include "gl/glew.h"
 
 namespace IW {
@@ -47,14 +48,39 @@ namespace IW {
 
 		else {
 			int location = glGetUniformLocation(m_programId, name);
-			
+
 			if (location != -1) {
-				param = new GLPipelineParam(location, m_textureCount);
+				param = (GLPipelineParam*)GetParam(location);
 				m_params.emplace(name, param);
 			}
 		}
 
 		return param;
+	}
+
+	IPipelineParam* GLPipeline::GetParam(
+		int index)
+	{
+		int nameSize = 128;
+		int nameSizeActual;
+		int      size;
+		unsigned gltype;
+		char     name[128];
+
+		glGetActiveUniform(m_programId, index, nameSize, &nameSizeActual, &size, &gltype, name);
+
+		UniformType type = (UniformType)TRANSLATE(gltype);
+		unsigned typeSize = 0;
+		switch (type) {
+			case UniformType::BOOL:    typeSize = sizeof(bool);     break;
+			case UniformType::INT:     typeSize = sizeof(int);      break;
+			case UniformType::UINT:    typeSize = sizeof(unsigned); break;
+			case UniformType::FLOAT:   typeSize = sizeof(float);    break;
+			case UniformType::DOUBLE:  typeSize = sizeof(double);   break;
+			case UniformType::SAMPLE2: typeSize = 0;                break;
+		}
+
+		return new GLPipelineParam(index, m_textureCount, type, typeSize, size, name);
 	}
 
 	void GLPipeline::SetBuffer(
@@ -67,6 +93,12 @@ namespace IW {
 
 		int uniformIndex = glGetUniformBlockIndex(m_programId, name);
 		glUniformBlockBinding(m_programId, uniformIndex, index);
+	}
+
+	int GLPipeline::UniformCount() {
+		int count;
+		glGetProgramiv(m_programId, GL_ACTIVE_ATTRIBUTES, &count);
+		return count;
 	}
 
 	void GLPipeline::Use() {

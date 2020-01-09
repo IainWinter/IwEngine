@@ -18,15 +18,6 @@ namespace IW {
 namespace Graphics {
 	struct Material {
 	private:
-		enum MaterialPropertyType {
-			BOOL,
-			INT,
-			UINT,
-			FLOAT,
-			DOUBLE,
-			SAMPLE
-		};
-
 		struct MaterialProperty {
 			char* Name;
 
@@ -35,7 +26,7 @@ namespace Graphics {
 			unsigned Stride;
 
 			bool IsSample;
-			MaterialPropertyType Type;
+			UniformType Type;
 
 			void* Data;
 		};
@@ -72,6 +63,10 @@ namespace Graphics {
 		IWGRAPHICS_API
 		Material& operator=(
 			const Material& copy);
+
+		IWGRAPHICS_API
+		void Initialize(
+			const iw::ref<IDevice>& device);
 
 		IWGRAPHICS_API
 		void Use(
@@ -213,7 +208,7 @@ namespace Graphics {
 			unsigned count,
 			unsigned stride,
 			bool isSample,
-			MaterialPropertyType type,
+			UniformType type,
 			size_t typeSize);
 	};
 }

@@ -2,6 +2,7 @@
 
 #include "IwRenderer.h"
 #include "Texture.h"
+#include "PipelineParamType.h"
 #include "iw/math/matrix2.h"
 #include "iw/math/matrix3.h"
 #include "iw/math/matrix4.h"
@@ -9,13 +10,14 @@
 
 namespace IW {
 namespace RenderAPI {
-	//leak that state
-
-	// if stride is 0 then count is used inplace
-
 	class IWRENDERER_API IPipelineParam {
 	public:
 		virtual ~IPipelineParam() {}
+
+		virtual UniformType Type()        const = 0;
+		virtual unsigned    TypeSize()    const = 0;
+		virtual unsigned    Size()        const = 0;
+		virtual const std::string& Name() const = 0;
 
 		virtual void SetAsBool(
 			bool value) = 0;
