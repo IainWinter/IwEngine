@@ -35,11 +35,11 @@ namespace IW {
 				}
 
 				else {
-					SetProperty(name, nullptr, 
-						uniform->Type(), 
-						uniform->TypeSize(), 
-						uniform->Stride(), 
-						uniform->Count()); 			
+					SetProperty(name, nullptr,
+						uniform->Type(),
+						uniform->TypeSize(),
+						uniform->Stride(),
+						uniform->Count());
 				}
 			}
 		}
@@ -146,13 +146,16 @@ namespace IW {
 		else {
 			auto itr = m_index.emplace(name, m_textures.size());
 
-			TextureProperty prop{
+			TextureProperty prop {
 				itr.first->first,
 				texture
 			};
 
 			m_textures.push_back(prop);
 		}
+
+		name[0] = toupper(name[0]);
+		Set("has" + name, (float)(texture != nullptr));
 	}
 
 	iw::ref<Texture> Material::GetTexture(
@@ -210,7 +213,13 @@ namespace IW {
 
 			// may want to allow smaller counts and strides but lets see 
 
-			memcpy(prop.Data, data, typeSize * stride * count);
+			if (!data) {
+				memset(prop.Data, 0, typeSize * stride * count);
+			}
+
+			else {
+				memcpy(prop.Data, data, typeSize * stride * count);
+			}
 		}
 
 		else {
