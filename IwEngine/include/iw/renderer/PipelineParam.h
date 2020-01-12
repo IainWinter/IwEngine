@@ -16,7 +16,8 @@ namespace RenderAPI {
 
 		virtual UniformType Type()        const = 0;
 		virtual unsigned    TypeSize()    const = 0;
-		virtual unsigned    Size()        const = 0;
+		virtual unsigned    Stride()      const = 0;
+		virtual unsigned    Count()       const = 0;
 		virtual const std::string& Name() const = 0;
 
 		virtual void SetAsBool(

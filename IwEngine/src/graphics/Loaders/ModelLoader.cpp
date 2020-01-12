@@ -60,8 +60,14 @@ namespace IW {
 				//metallic /= 4 * 128; // obj files scale this by 4? and then opengl by 128???
 
 				Material material;
-				material.SetFloats("albedo",  &albedo, 4);
-				material.SetFloats("ambient", &ambient, 4);
+
+				// Loaded  value
+				// Scanned description
+				// User value
+				
+				material.Set("albedo",  albedo);
+				material.Set("ambient", ambient);
+
 				//material.SetFloats("emissiveColor", &emissiveColor, 4);
 				//material.SetFloat("metallic", metallic);
 				//material.SetFloat("roughness", roughness);
@@ -220,7 +226,7 @@ namespace IW {
 
 				iw::ref<Texture> texture = asset.Load<Texture>(texturePath.C_Str());
 				if (texture) {
-					material.SetTexture(ss.str().c_str(), texture);
+					material.SetTexture(ss.str(), texture);
 				}
 			}
 		}

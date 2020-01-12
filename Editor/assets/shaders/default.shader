@@ -7,7 +7,7 @@ layout(std140, column_major) uniform Camera {
 
 uniform mat4 model;
 uniform mat4 lightSpace;
-//uniform sampler2D displacementMap;
+//uniform sampler2D mat_displacementMap;
 
 layout(location = 0) in vec3 vert;
 layout(location = 1) in vec3 norm;
@@ -18,7 +18,7 @@ out vec3 Normal;
 out vec4 LightPos;
 
 void main() {
-	/*vec3 disp = norm * texture(displacementMap, uv).r;*/
+	/*vec3 disp = norm * texture(mat_displacementMap, uv).r;*/
 	vec4 worldpos = model * vec4(vert /*+ disp*/, 1);
 
 	UV = uv;
@@ -31,17 +31,15 @@ void main() {
 #shader Fragment
 #version 440 core
 
-layout(std140, column_major) uniform Material {
-	vec4 albedo;
-	float hasAlbedoMap;
-	float hasShadowMap;
-};
+uniform vec4  mat_albedo;
+uniform float mat_hasAlbedoMap;
+uniform float mat_hasShadowMap;
 
 //uniform vec3 ambient;
-uniform sampler2D albedoMap;
+uniform sampler2D mat_albedoMap;
 //uniform sampler2D ambientMap;
 //uniform sampler2D normalMap;
-uniform sampler2D shadowMap;
+uniform sampler2D mat_shadowMap;
 
 in vec2 UV;
 in vec3 Normal;
@@ -52,7 +50,7 @@ float linstep(float l, float h, float v) {
 }
 
 float chebyshevUpperBound(vec2 coords, float distance) {
-	vec2 moments = texture(shadowMap, coords).rg;
+	vec2 moments = texture(mat_shadowMap, coords).rg;
 
 	if (distance <= moments.x)
 		return 1.0;
@@ -70,9 +68,9 @@ void main() {
 	vec3 normal = Normal;
 	/*normal = texture(normalMap, UV).xyz;*/
 
-	vec3 diffuse = albedo.xyz;
-	if (hasAlbedoMap == 1) {
-		diffuse *= texture(albedoMap, UV).rgb;
+	vec3 diffuse = mat_albedo.xyz;
+	if (mat_hasAlbedoMap == 1) {
+		diffuse *= texture(mat_albedoMap, UV).rgb;
 	}
 
 	float ao = 0;
@@ -81,7 +79,7 @@ void main() {
 	float ambiance = 0.05;
 
 	float shadow = 0;
-	if (hasShadowMap == 1) {
+	if (mat_hasShadowMap == 1) {
 		vec3 coords = (LightPos.xyz / LightPos.w) * 0.5 + 0.5;
 		shadow = chebyshevUpperBound(coords.xy, coords.z);
 	}

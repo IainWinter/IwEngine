@@ -37,7 +37,7 @@ namespace IW {
 	}
 
 	IPipelineParam* GLPipeline::GetParam(
-		const char* name)
+		std::string name)
 	{
 		GLPipelineParam* param = nullptr;
 
@@ -47,7 +47,7 @@ namespace IW {
 		}
 
 		else {
-			int location = glGetUniformLocation(m_programId, name);
+			int location = glGetUniformLocation(m_programId, name.c_str());
 
 			if (location != -1) {
 				param = (GLPipelineParam*)GetParam(location);
@@ -61,43 +61,53 @@ namespace IW {
 	IPipelineParam* GLPipeline::GetParam(
 		int index)
 	{
-		int nameSize = 128;
-		int nameSizeActual;
-		int      size;
+		int      nameSize;
+		int      count;
 		unsigned gltype;
 		char     name[128];
 
-		glGetActiveUniform(m_programId, index, nameSize, &nameSizeActual, &size, &gltype, name);
+		memset(name, '\0', 128);
+		glGetActiveUniform(m_programId, index, 128, &nameSize, &count, &gltype, name);
 
-		UniformType type = (UniformType)TRANSLATE(gltype);
-		unsigned typeSize = 0;
-		switch (type) {
-			case UniformType::BOOL:    typeSize = sizeof(bool);     break;
-			case UniformType::INT:     typeSize = sizeof(int);      break;
-			case UniformType::UINT:    typeSize = sizeof(unsigned); break;
-			case UniformType::FLOAT:   typeSize = sizeof(float);    break;
-			case UniformType::DOUBLE:  typeSize = sizeof(double);   break;
-			case UniformType::SAMPLE2: typeSize = 0;                break;
+		auto itr = m_params.find(name);
+		if (itr == m_params.end()) {
+			unsigned typeSize = 0;
+			unsigned stride = 0;
+			UniformType type = (UniformType)TRANSLATE(gltype, stride);
+			switch (type) {
+				case UniformType::BOOL:    typeSize = sizeof(bool);     break;
+				case UniformType::INT:     typeSize = sizeof(int);      break;
+				case UniformType::UINT:    typeSize = sizeof(unsigned); break;
+				case UniformType::FLOAT:   typeSize = sizeof(float);    break;
+				case UniformType::DOUBLE:  typeSize = sizeof(double);   break;
+			}
+
+			std::string s(name);
+			GLPipelineParam* p = new GLPipelineParam(index, m_textureCount, type, typeSize, stride, count, s);
+
+			return m_params.emplace(s, p).first->second;
 		}
 
-		return new GLPipelineParam(index, m_textureCount, type, typeSize, size, name);
+		// todo: sus maybe mem leak this is a bad hack solve ^ should combine with function above
+
+		return itr->second;
 	}
 
 	void GLPipeline::SetBuffer(
-		const char* name,
+		std::string name,
 		IUniformBuffer* buffer)
 	{
 		int index = m_bufferCount++; // cant be bigger than GL_MAN_UNIFORM_BUFFER_COUNT
 		
 		((GLUniformBuffer*)buffer)->BindBase(index);
 
-		int uniformIndex = glGetUniformBlockIndex(m_programId, name);
+		int uniformIndex = glGetUniformBlockIndex(m_programId, name.c_str());
 		glUniformBlockBinding(m_programId, uniformIndex, index);
 	}
 
 	int GLPipeline::UniformCount() {
 		int count;
-		glGetProgramiv(m_programId, GL_ACTIVE_ATTRIBUTES, &count);
+		glGetProgramiv(m_programId, GL_ACTIVE_UNIFORMS, &count);
 		return count;
 	}
 

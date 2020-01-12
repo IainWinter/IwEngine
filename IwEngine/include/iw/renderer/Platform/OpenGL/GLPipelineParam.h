@@ -14,23 +14,26 @@ namespace RenderAPI {
 
 		UniformType m_type;
 		unsigned  m_typeSize;
-		unsigned  m_size;
+		unsigned  m_stride;
+		unsigned  m_count;
 		std::string m_name;
 
 	public:
 		GLPipelineParam(
-			int location,
+			unsigned location,
 			unsigned& textureCount,
 			UniformType type,
-			int typeSize,
-			int size,
+			unsigned typeSize,
+			unsigned stride,
+			unsigned count,
 			std::string name);
 
 		// Stride is 0 if there is only a single element
 
 		UniformType Type()     const override;
 		unsigned    TypeSize() const override;
-		unsigned    Size()     const override;
+		unsigned    Stride()   const override;
+		unsigned    Count()    const override;
 		const std::string& Name() const override;
 
 		void SetAsBool(

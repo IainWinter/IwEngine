@@ -38,8 +38,7 @@ namespace IW {
 
 	void Renderer::Initialize() {
 		m_filterMesh->Initialize(Device);
-		m_cameraUBO   = Device->CreateUniformBuffer(sizeof(CameraData),   &m_cameraData);
-		m_materialUBO = Device->CreateUniformBuffer(sizeof(MaterialData), &m_materialData);
+		m_cameraUBO = Device->CreateUniformBuffer(sizeof(CameraData),   &m_cameraData);
 	}
 
 	void Renderer::Begin() {
@@ -60,9 +59,9 @@ namespace IW {
 			shader->Program->SetBuffer("Camera", m_cameraUBO);
 		}
 
-		if (bindings & MATERIAL) {
-			shader->Program->SetBuffer("Material", m_materialUBO);
-		}
+		//if (bindings & MATERIAL) {
+		//	shader->Program->SetBuffer("Material", m_materialUBO);
+		//}
 	}
 
 	void Renderer::SetShader(
@@ -106,7 +105,6 @@ namespace IW {
 		const Mesh* mesh)
 	{
 		const iw::ref<Material>&  material = mesh->Material;
-		const iw::ref<IPipeline>& pipeline = material->Shader->Program;
 		
 		if(!material) {
 			// draw with default material
@@ -115,44 +113,9 @@ namespace IW {
 
 		SetShader(material->Shader);
 
-		//material->Use(Device);
+		material->Use(Device);
 
-		float* albedo  = std::get<0>(material->GetFloats("albedo"));
-		float* ambient = std::get<0>(material->GetFloats("ambient"));
-
-		Texture* albedoMap = material->GetTexture("albedoMap");
-		Texture* shadowMap = material->GetTexture("shadowMap");
-
-		if (albedo) {
-			m_materialData.Albedo = *(iw::vector4*)albedo;
-		}
-
-		else {
-			m_materialData.Albedo = iw::vector4::one;
-		}
-
-		m_materialData.HasAlbedoMap = (float)!!albedoMap;
-		m_materialData.HasShadowMap = (float)!!shadowMap;
-
-		if (albedoMap) {
-			pipeline->GetParam("albedoMap")->SetAsTexture(albedoMap->Handle());
-		}
-
-		else {
-			pipeline->GetParam("albedoMap")->SetAsTexture(nullptr);
-		}
-
-		if (shadowMap) {
-			pipeline->GetParam("shadowMap")->SetAsTexture(shadowMap->Handle());
-		}
-
-		else {
-			pipeline->GetParam("shadowMap")->SetAsTexture(nullptr);
-		}
-
-		Device->UpdateUniformBufferData(m_materialUBO, &m_materialData);
-
-		pipeline->GetParam("model")->SetAsMat4(transform->Transformation());
+		material->Shader->Program->GetParam("model")->SetAsMat4(transform->Transformation());
 
 		mesh->Draw(Device);
 	}

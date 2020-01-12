@@ -1,72 +1,21 @@
 #include "iw/graphics/Material.h"
+#include "iw/log/logger.h"
 
 namespace IW {
+	Material::Material()
+		: m_alloc(128)
+	{}
+	
 	Material::Material(
 		iw::ref<IW::Shader>& shader)
 		: Shader(shader)
+		, m_alloc(128)
 	{}
-
-	Material::Material(
-		const Material& copy)
-		: Shader(copy.Shader)
-	{
-		for (const MaterialProperty& prop : copy.m_properties) {
-			size_t nameSize = strlen(prop.Name) + 1;
-
-			MaterialProperty& newProp = m_properties.emplace_back(
-				MaterialProperty{
-					(char*)malloc(nameSize),
-					prop.Size,
-					prop.Count,
-					prop.Stride,
-					prop.IsSample,
-					prop.Type,
-					malloc(prop.Size)
-				}
-			);
-
-			memcpy(newProp.Name, prop.Name, nameSize);
-			memcpy(newProp.Data, prop.Data, prop.Size);
-		}
-	}
-
-	Material::~Material() {
-		for (MaterialProperty& prop : m_properties) {
-			delete[] prop.Name;
-			free(prop.Data);
-		}
-	}
-
-	Material& Material::operator=(
-		const Material& copy)
-	{
-		Shader = copy.Shader;
-		for (const MaterialProperty& prop : copy.m_properties) {
-			size_t nameSize = strlen(prop.Name) + 1;
-
-			MaterialProperty& newProp = m_properties.emplace_back(
-				MaterialProperty{
-					(char*)malloc(nameSize),
-					prop.Size,
-					prop.Count,
-					prop.Stride,
-					prop.IsSample,
-					prop.Type,
-					malloc(prop.Size)
-				}
-			);
-
-			memcpy(newProp.Name, prop.Name, nameSize);
-			memcpy(newProp.Data, prop.Data, prop.Size);
-		}
-
-		return *this;
-	}
 
 	void Material::Initialize(
 		const iw::ref<IDevice>& device)
 	{
-		if (Shader) {
+		if (!Shader) {
 			LOG_WARNING << "Tried to initialize material without a shader!";
 			return;
 		}
@@ -79,15 +28,18 @@ namespace IW {
 		for (int i = 0; i < count; i++) {
 			IPipelineParam* uniform = Shader->Program->GetParam(i);
 			if (uniform->Name().substr(0, 4) == "mat_") {
-				const char* name = uniform->Name().substr(4).c_str();
-				unsigned    c    = uniform->Size() / uniform->TypeSize();
-				switch (uniform->Type()) {
-					case UniformType::BOOL:    SetBools  (name, nullptr, c, uniform->Size()); break;
-					case UniformType::INT:     SetInts   (name, nullptr, c, uniform->Size()); break;
-					case UniformType::UINT:    SetUInts  (name, nullptr, c, uniform->Size()); break;
-					case UniformType::FLOAT:   SetFloats (name, nullptr, c, uniform->Size()); break;
-					case UniformType::DOUBLE:  SetDoubles(name, nullptr, c, uniform->Size()); break;
-					case UniformType::SAMPLE2: SetTexture(name, nullptr); break;
+				std::string name = uniform->Name().substr(4);
+
+				if (uniform->Type() == UniformType::SAMPLE2) {
+					SetTexture(name, nullptr);
+				}
+
+				else {
+					SetProperty(name, nullptr, 
+						uniform->Type(), 
+						uniform->TypeSize(), 
+						uniform->Stride(), 
+						uniform->Count()); 			
 				}
 			}
 		}
@@ -99,45 +51,39 @@ namespace IW {
 		device->SetPipeline(Shader->Program.get());
 
 		for (const MaterialProperty& prop : m_properties) {
-			IPipelineParam* param = Shader->Program->GetParam(prop.Name);
+			IPipelineParam* param = Shader->Program->GetParam("mat_" + prop.Name);
 
 			if (!param) {
 				LOG_WARNING << "Invalid property in material: " << prop.Name;
 				continue;
 			}
 
-			if (prop.IsSample) {
-				Texture* texture = (Texture*)prop.Data;
-				if (!texture) {
-					param->SetAsTexture(nullptr);
-				}
-				
-				else if (!texture->Handle()) {
-					LOG_WARNING << "Texture not initialized: " << prop.Name;
-				}
+			switch (prop.Type) {
+				case UniformType::BOOL:   param->SetAsBools  (prop.Data, prop.Count, prop.Stride);  break;
+				case UniformType::INT:    param->SetAsInts   (prop.Data, prop.Count, prop.Stride);  break;
+				case UniformType::UINT:   param->SetAsUInts  (prop.Data, prop.Count, prop.Stride);  break;
+				case UniformType::FLOAT:  param->SetAsFloats (prop.Data, prop.Count, prop.Stride);  break;
+				case UniformType::DOUBLE: param->SetAsDoubles(prop.Data, prop.Count, prop.Stride);  break;
+				default: LOG_WARNING << "Invalid property in material: " << prop.Name; break;
+			}
+		}
 
-				else {
-					param->SetAsTexture(texture->Handle());
-				}
+		for (const TextureProperty& prop : m_textures) {
+			IPipelineParam* param = Shader->Program->GetParam("mat_" + prop.Name);
+
+			if (!param) {
+				LOG_WARNING << "Invalid texture in material: " << prop.Name;
+				continue;
+			}
+
+			if (prop.Texture) {
+				param->SetAsTexture(prop.Texture->Handle());
 			}
 
 			else {
-				switch (prop.Type) {
-					case UniformType::BOOL:   param->SetAsBools  (prop.Data, prop.Count, prop.Stride);  break;
-					case UniformType::INT:    param->SetAsInts   (prop.Data, prop.Count, prop.Stride);  break;
-					case UniformType::UINT:   param->SetAsUInts  (prop.Data, prop.Count, prop.Stride);  break;
-					case UniformType::FLOAT:  param->SetAsFloats (prop.Data, prop.Count, prop.Stride);  break;
-					case UniformType::DOUBLE: param->SetAsDoubles(prop.Data, prop.Count, prop.Stride);  break;
-					default: LOG_WARNING << "Invalid property in material: " << prop.Name; break;
-				}
+				param->SetAsTexture(nullptr);
 			}
 		}
-	}
-
-	bool Material::HasProperty(
-		const char* name) /*const*/
-	{
-		return FindProperty(name) != nullptr;
 	}
 
 	void Material::SetShader(
@@ -146,244 +92,142 @@ namespace IW {
 		Shader = shader;
 	}
 
-	void Material::SetBool(
-		const char* name,
-		bool value)
-	{
-		CreateProperty(name, &value, 1, 0, false, UniformType::BOOL, sizeof(bool));
-	}
+#define MAT_SETS(d, ut)                                    \
+		void Material::Set(                                \
+			std::string name,                              \
+			d data)                                        \
+		{                                                  \
+			SetProperty(name, &data, ut, sizeof(d), 1, 1); \
+		}                                                  \
 
-	void Material::SetBools(
-		const char* name,
-		void* values,
-		unsigned count,
-		unsigned stride)
-	{
-		CreateProperty(name, values, count, stride, false, UniformType::BOOL, sizeof(bool));
-	}
+	MAT_SETS(bool,     UniformType::BOOL)
+	MAT_SETS(int,      UniformType::INT)
+	MAT_SETS(unsigned, UniformType::UINT)
+	MAT_SETS(float,    UniformType::FLOAT)
+	MAT_SETS(double,   UniformType::DOUBLE)
 
-	void Material::SetInt(
-		const char* name,
-		int value)
-	{
-		CreateProperty(name, &value, 1, 0, false, UniformType::INT, sizeof(int));
-	}
+#undef MAT_SETS
 
-	void Material::SetInts(
-		const char* name,
-		void* values,
-		unsigned count,
-		unsigned stride)
-	{
-		CreateProperty(name, values, count, stride, false, UniformType::INT, sizeof(int));
-	}
+#define MAT_SET(d, ut, ts, mp)                                  \
+		void Material::Set(                                     \
+			std::string name,                                   \
+			d data,                                             \
+			unsigned stride,                                    \
+			unsigned count)                                     \
+		{                                                       \
+			SetProperty(name, mp(data), ut, ts, stride, count); \
+		}                                                       \
 
-	void Material::SetUInt(
-		const char* name,
-		unsigned int value)
-	{
-		CreateProperty(name, &value, 1, 0, false, UniformType::UINT, sizeof(unsigned int));
-	}
+		MAT_SET(bool*,       UniformType::BOOL,   sizeof(bool))
+		MAT_SET(int*,        UniformType::INT,    sizeof(int))
+		MAT_SET(unsigned*,   UniformType::UINT,   sizeof(unsigned))
+		MAT_SET(float*,      UniformType::FLOAT,  sizeof(float))
+		MAT_SET(double*,     UniformType::DOUBLE, sizeof(double))
+		MAT_SET(iw::vector2, UniformType::FLOAT,  sizeof(float), &)
+		MAT_SET(iw::vector3, UniformType::FLOAT,  sizeof(float), &)
+		MAT_SET(iw::vector4, UniformType::FLOAT,  sizeof(float), &)
+		MAT_SET(Color,       UniformType::FLOAT,  sizeof(float), &)
 
-	void Material::SetUInts(
-		const char* name,
-		void* values,
-		unsigned count,
-		unsigned stride)
-	{
-		CreateProperty(name, values, count, stride, false, UniformType::UINT, sizeof(unsigned int));
-	}
-
-	void Material::SetFloat(
-		const char* name,
-		float value)
-	{
-		CreateProperty(name, &value, 1, 0, false, UniformType::FLOAT, sizeof(float));
-	}
-
-	void Material::SetFloats(
-		const char* name,
-		void* values,
-		unsigned count,
-		unsigned stride)
-	{
-		CreateProperty(name, values, count, stride, false, UniformType::FLOAT, sizeof(float));
-	}
-
-	void Material::SetDouble(
-		const char* name,
-		double value)
-	{
-		CreateProperty(name, &value, 1, 0, false, UniformType::DOUBLE, sizeof(double));
-	}
-
-	void Material::SetDoubles(
-		const char* name,
-		void* values,
-		unsigned count,
-		unsigned stride)
-	{
-		CreateProperty(name, values, count, stride, false, UniformType::DOUBLE, sizeof(double));
-	}
+#undef MAT_SET
 
 	void Material::SetTexture(
-		const char* name, 
-		Texture* texture)
+		std::string name,
+		iw::ref<Texture> texture)
 	{
-		CreateProperty(name, texture, 0, 0, true, UniformType::SAMPLE2, 0);
-	}
-
-	void Material::SetTexture(
-		const char* name,
-		const iw::ref<Texture>& texture)
-	{
-		SetTexture(name, texture.get());
-	}
-
-	bool* Material::GetBool(
-		const char* name)
-	{
-		return (bool*)std::get<0>(GetData(name));
-	}
-
-	std::tuple<bool*, size_t> Material::GetBools(
-		const char* name)
-	{
-		auto data = GetData(name);
-		return { (bool*)std::get<0>(data), std::get<1>(data) };
-	}
-
-	int* Material::GetInt(
-		const char* name)
-	{
-		return (int*)std::get<0>(GetData(name));
-	}
-
-	std::tuple<int*, size_t> Material::GetInts(
-		const char* name)
-	{
-		auto data = GetData(name);
-		return { (int*)std::get<0>(data), std::get<1>(data) };
-	}
-
-	unsigned int* Material::GetUInt(
-		const char* name)
-	{
-		return (unsigned int*)std::get<0>(GetData(name));
-	}
-
-	std::tuple<unsigned int*, size_t> Material::GetUInts(
-		const char* name)
-	{
-		auto data = GetData(name);
-		return { (unsigned int*)std::get<0>(data), std::get<1>(data) };
-	}
-
-	float* Material::GetFloat(
-		const char* name)
-	{
-		return (float*)std::get<0>(GetData(name));
-	}
-
-	std::tuple<float*, size_t> Material::GetFloats(
-		const char* name)
-	{
-		auto data = GetData(name);
-		return { (float*)std::get<0>(data), std::get<1>(data) };
-	}
-
-	double* Material::GetDouble(
-		const char* name)
-	{
-		return (double*)std::get<0>(GetData(name));
-	}
-
-	std::tuple<double*, size_t> Material::GetDoubles(
-		const char* name)
-	{
-		auto data = GetData(name);
-		return { (double*)std::get<0>(data), std::get<1>(data) };
-	}
-
-	Texture* Material::GetTexture(
-		const char* name)
-	{
-		return (Texture*)std::get<0>(GetData(name));
-	}
-
-	std::tuple<void*, size_t> Material::GetData(
-		const char* name)
-	{
-		MaterialProperty* prop = FindProperty(name);
-		return { prop ? (bool*)prop->Data : nullptr, prop ? prop->Count : 0 };
-	}
-
-	Material::MaterialProperty* Material::FindProperty(
-		const char* name)
-	{
-		MaterialProperty* prop = nullptr;
-		for (MaterialProperty& p : m_properties) {
-			if (strcmp(p.Name, name) == 0) {
-				prop = &p;
-			}
-		}
-
-		return prop;
-	}
-
-	void Material::CreateProperty(
-		const char* name,
-		void* values,
-		unsigned count,
-		unsigned stride,
-		bool isSample,
-		UniformType type,
-		size_t typeSize)
-	{
-		MaterialProperty* prop = FindProperty(name);
-		size_t size = count * typeSize;
-
-		if (prop) {
-			if (prop->IsSample) {
-				free(prop->Data);
-			}
-
-			prop->Size = size;
-			prop->Count = count;
-			prop->Stride = stride;
-			prop->IsSample = isSample;
-			prop->Type = type;
-
-			if (isSample) {
-				prop->Data = values;
-			}
-
-			else {
-				prop->Data = malloc(size);
-				memcpy(prop->Data, values, size);
-			}
+		if (Has(name)) {
+			TextureProperty& prop = m_textures.at(m_index.at(name));
+			prop.Texture = texture;
 		}
 
 		else {
-			size_t nameSize = strlen(name) + 1;
+			auto itr = m_index.emplace(name, m_textures.size());
 
-			prop = &m_properties.emplace_back(
-				MaterialProperty{
-					(char*)malloc(nameSize),
-					size,
-					count,
-					stride,
-					isSample,
-					type,
-					isSample ? values : malloc(size)
-				}
-			);
+			TextureProperty prop{
+				itr.first->first,
+				texture
+			};
 
-			if (!isSample) {
-				memcpy(prop->Data, values, size);
+			m_textures.push_back(prop);
+		}
+	}
+
+	iw::ref<Texture> Material::GetTexture(
+		std::string name)
+	{
+		if (!Has(name)) {
+			LOG_WARNING << "Tried to get texture that doesnt exist: " << name;
+			return nullptr;
+		}
+
+		return m_textures.at(m_index.at(name)).Texture;
+	}
+
+	bool Material::Has(
+		std::string name) const
+	{
+		return m_index.find(name) != m_index.end();
+	}
+
+	void Material::SetProperty(
+		const std::string& name,
+		const void* data,
+		UniformType type,
+		unsigned typeSize,
+		unsigned stride,
+		unsigned count)
+
+	{
+		if (type == UniformType::UNKNOWN) {
+			LOG_WARNING << "Attempted to set uniform with an invalid type: " << name << "!";
+			return;
+		}
+
+		if (Has(name)) {
+			MaterialProperty& prop = m_properties.at(m_index.at(name));
+			if (prop.Type != type) {
+				LOG_WARNING << "Attempted to set uniform with duplicate name but different type: " << name << "!";
+				return;
+			}
+			
+			if (prop.TypeSize != typeSize) {
+				LOG_WARNING << "Attempted to set uniform with duplicate name but different type size: " << name << "!";
+				return;
 			}
 
-			memcpy(prop->Name, name, nameSize);
+			if (prop.Stride != stride) {
+				LOG_WARNING << "Attempted to set uniform with duplicate name but different stride: " << name << "!";
+				return;
+			}
+
+			if (prop.Count != count) {
+				LOG_WARNING << "Attempted to set uniform with duplicate name but different count: " << name << "!";
+				return;
+			}
+
+			// may want to allow smaller counts and strides but lets see 
+
+			memcpy(prop.Data, data, typeSize * stride * count);
 		}
+
+		else {
+			auto itr = m_index.emplace(name, m_properties.size());
+
+			MaterialProperty prop {
+				itr.first->first,
+				m_alloc.alloc(typeSize * stride * count),
+				type,
+				typeSize,
+				stride,
+				count
+			};
+
+			m_properties.push_back(prop);
+		}
+	}
+
+	Material::MaterialProperty& Material::GetProperty(
+		const std::string& name)
+	{
+		return m_properties.at(m_index.at(name));
 	}
 }

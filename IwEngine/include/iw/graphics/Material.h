@@ -8,61 +8,48 @@
 #include "iw/renderer/Device.h"
 #include "iw/util/memory/ref.h"
 #include "iw/util/tuple/foreach.h"
+#include "iw/util/memory/linear_allocator.h"
 #include "iw/math/vector2.h"
 #include "iw/math/vector3.h"
 #include "iw/math/vector4.h"
 #include <vector>
+#include <unordered_map>
 #include <tuple>
 
 namespace IW {
 namespace Graphics {
 	struct Material {
-	private:
-		struct MaterialProperty {
-			char* Name;
-
-			size_t   Size;
-			unsigned Count;
-			unsigned Stride;
-
-			bool IsSample;
-			UniformType Type;
-
-			void* Data;
-		};
-
 	public:
 		iw::ref<Shader> Shader;
 
 	private:
+		struct MaterialProperty {
+			const std::string& Name;
+			void* Data;
+			UniformType Type;
+			unsigned TypeSize;
+			unsigned Stride;
+			unsigned Count;
+		};
+
+		struct TextureProperty {
+			const std::string& Name;
+			iw::ref<Texture> Texture;
+		};
+
+		iw::linear_allocator m_alloc;
 		std::vector<MaterialProperty> m_properties;
+		std::vector<TextureProperty>  m_textures;
+
+		std::unordered_map<std::string, unsigned> m_index; // also done in pipeline seems bad
 
 	public:
 		IWGRAPHICS_API
-		Material() = default;
+		Material();
 
 		IWGRAPHICS_API
 		Material(
 			iw::ref<IW::Shader>& shader);
-
-		IWGRAPHICS_API
-		Material(
-			Material&&) noexcept = default;
-
-		IWGRAPHICS_API
-		Material(
-			const Material& copy);
-
-		IWGRAPHICS_API
-		~Material();
-
-		IWGRAPHICS_API
-		Material& operator=(
-			Material&&) noexcept = default;
-
-		IWGRAPHICS_API
-		Material& operator=(
-			const Material& copy);
 
 		IWGRAPHICS_API
 		void Initialize(
@@ -73,143 +60,81 @@ namespace Graphics {
 			const iw::ref<IDevice>& device) const;
 
 		IWGRAPHICS_API
-		bool HasProperty(
-			const char* name) /*const*/;
-
-		IWGRAPHICS_API
 		void SetShader(
 			iw::ref<IW::Shader>& shader);
 
-		IWGRAPHICS_API
-		void SetBool(
-			const char* name,
-			bool value);
+#define MAT_SETS(d)              \
+		IWGRAPHICS_API         \
+		void Set(              \
+			std::string name, \
+			d  data);         \
 
-		// Stride is 0 if there is only a single element
+		MAT_SETS(bool)
+		MAT_SETS(int)
+		MAT_SETS(unsigned)
+		MAT_SETS(float)
+		MAT_SETS(double)
 
-		IWGRAPHICS_API
-		void SetBools(
-			const char* name,
-			void* values,
-			unsigned count,
-			unsigned stride = 0);
+#undef MAT_SETS
 
-		IWGRAPHICS_API
-		void SetInt(
-			const char* name,
-			int value);
+#define MAT_SET(d, s, c)            \
+		IWGRAPHICS_API            \
+		void Set(                 \
+			std::string name,    \
+			d data,              \
+			unsigned stride = s, \
+			unsigned count = c); \
 
-		IWGRAPHICS_API
-		void SetInts(
-			const char* name,
-			void* values,
-			unsigned count,
-			unsigned stride = 0);
+		MAT_SET(bool*,       1, 1)
+		MAT_SET(int*,        1, 1)
+		MAT_SET(unsigned*,   1, 1)
+		MAT_SET(float*,      1, 1)
+		MAT_SET(double*,     1, 1)
+		MAT_SET(iw::vector2, 2, 1)
+		MAT_SET(iw::vector3, 3, 1)
+		MAT_SET(iw::vector4, 4, 1)
+		MAT_SET(Color,       4, 1)
 
-		IWGRAPHICS_API
-		void SetUInt(
-			const char* name,
-			unsigned int value);
+#undef MAT_SET
 
-		IWGRAPHICS_API
-		void SetUInts(
-			const char* name,
-			void* values,
-			unsigned count,
-			unsigned stride = 0);
+		template<
+			typename _t>
+		_t* Get(
+			std::string name)
+		{
+			if (!Has(name)) {
+				LOG_WARNING << "Tried to get property that doesnt exist: " << name;
+				return nullptr;
+			}
 
-		IWGRAPHICS_API
-		void SetFloat(
-			const char* name,
-			float value);
-
-		IWGRAPHICS_API
-		void SetFloats(
-			const char* name,
-			void* values,
-			unsigned count,
-			unsigned stride = 0);
-
-		IWGRAPHICS_API
-		void SetDouble(
-			const char* name,
-			double value);
-
-		IWGRAPHICS_API
-		void SetDoubles(
-			const char* name,
-			void* values,
-			unsigned count,
-			unsigned stride = 0);
+			return (_t*)GetProperty(name).Data;
+		}
 
 		IWGRAPHICS_API
 		void SetTexture(
-			const char* name,
-			Texture* texture);
+			std::string name,
+			iw::ref<Texture> texture);
 
 		IWGRAPHICS_API
-		void SetTexture(
-			const char* name,
-			const iw::ref<Texture>& texture);
+		iw::ref<Texture> GetTexture(
+			std::string name);
 
 		IWGRAPHICS_API
-		bool* GetBool(
-			const char* name);
-
-		IWGRAPHICS_API
-		std::tuple<bool*, size_t> GetBools(
-			const char* name);
-
-		IWGRAPHICS_API
-		int* GetInt(
-			const char* name);
-
-		IWGRAPHICS_API
-		std::tuple<int*, size_t> GetInts(
-			const char* name);
-
-		IWGRAPHICS_API
-		unsigned int* GetUInt(
-			const char* name);
-
-		IWGRAPHICS_API
-		std::tuple<unsigned int*, size_t> GetUInts(
-			const char* name);
-
-		IWGRAPHICS_API
-		float* GetFloat(
-			const char* name);
-
-		IWGRAPHICS_API
-		std::tuple<float*, size_t> GetFloats(
-			const char* name);
-
-		IWGRAPHICS_API
-		double* GetDouble(
-			const char* name);
-
-		IWGRAPHICS_API
-		std::tuple<double*, size_t> GetDoubles(
-			const char* name);
-
-		IWGRAPHICS_API
-		Texture* GetTexture(
-			const char* name);
+		bool Has(
+			std::string name) const;
 	private:
-		std::tuple<void*, size_t> GetData(
-			const char* name);
-
-		MaterialProperty* FindProperty(
-			const char* name);
-
-		void CreateProperty(
-			const char* name,
-			void* values,
-			unsigned count,
-			unsigned stride,
-			bool isSample,
+		IWGRAPHICS_API
+		void SetProperty(
+			const std::string& name,
+			const void* data,
 			UniformType type,
-			size_t typeSize);
+			unsigned typeSize,
+			unsigned stride,
+			unsigned count);
+
+		IWGRAPHICS_API
+		MaterialProperty& GetProperty(
+			const std::string& name);
 	};
 }
 

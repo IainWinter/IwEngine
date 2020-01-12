@@ -20,7 +20,8 @@ namespace RenderAPI {
 			TextureWrap textureWrap) override;
 
 		GLint Translate(
-			GLenum glenum) override;
+			GLenum glenum,
+			unsigned& count) override;
 	};
 }
 

@@ -11,6 +11,7 @@ namespace log {
 	private:
 		std::vector<sink*> m_sinks;
 		std::string preamble = "[Pream] Start of log...";
+		bool m_tabbed;
 
 	public:
 		template<
@@ -35,7 +36,17 @@ namespace log {
 			std::stringstream string;
 			string << obj;
 
-			sink_msg(level, string.str());
+			std::string str = string.str();
+			if (    str.length() > 1
+				&& std::count(str.begin(), str.end(), '\n') > 1)
+			{
+				size_t i = 0;
+				while ((i = str.find_first_of('\n', i + 1)) != std::string::npos) {
+					str.insert(i + 1, "        ", 0, 8);
+				}
+			}
+
+			sink_msg(level, str);
 		}
 
 		IWLOG_API
@@ -51,7 +62,7 @@ namespace log {
 		IWLOG_API
 		void sink_msg(
 			loglevel level,
-			std::string string);
+			std::string& string);
 	};
 
 	class log_view {

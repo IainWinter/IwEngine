@@ -61,15 +61,9 @@ namespace Graphics {
 		iw::matrix4 ViewProj;
 	};
 
-	struct MaterialData {
-		iw::vector4 Albedo;
-		float HasAlbedoMap;
-		float HasShadowMap;
-	};
-
 	enum UBOBinding {
 		CAMERA   = 0x01,
-		MATERIAL = 0x10,
+		//MATERIAL = 0x10,
 		ALL      = 0x11
 	};
 
@@ -92,9 +86,6 @@ namespace Graphics {
 
 		IUniformBuffer* m_cameraUBO;
 		CameraData m_cameraData;
-
-		IUniformBuffer* m_materialUBO;
-		MaterialData m_materialData;
 
 	public:
 		IWGRAPHICS_API

@@ -82,15 +82,91 @@ namespace RenderAPI {
 	}
 
 	GLint GLTranslator::Translate(
-		GLenum glenum)
+		GLenum glenum,
+		unsigned& count)
 	{
 		switch (glenum) {
-			case GL_BOOL:         return iw::val(UniformType::BOOL);
-			case GL_INT:          return iw::val(UniformType::INT);
-			case GL_UNSIGNED_INT: return iw::val(UniformType::UINT);
-			case GL_FLOAT:        return iw::val(UniformType::FLOAT);
-			case GL_DOUBLE:       return iw::val(UniformType::DOUBLE);
-			case GL_SAMPLER_2D:   return iw::val(UniformType::SAMPLE2);
+			case GL_BOOL:              count = 1;  break;
+			case GL_INT:               count = 1;  break;
+			case GL_UNSIGNED_INT:      count = 1;  break;
+			case GL_FLOAT:             count = 1;  break;
+			case GL_DOUBLE:            count = 1;  break;
+			case GL_BOOL_VEC2:		   count = 2;  break;
+			case GL_INT_VEC2:		   count = 2;  break;
+			case GL_UNSIGNED_INT_VEC2: count = 2;  break;
+			case GL_DOUBLE_VEC2:	   count = 2;  break;
+			case GL_FLOAT_VEC2:		   count = 2;  break;
+			case GL_BOOL_VEC3:		   count = 3;  break;
+			case GL_INT_VEC3:		   count = 3;  break;
+			case GL_UNSIGNED_INT_VEC3: count = 3;  break;
+			case GL_FLOAT_VEC3:		   count = 3;  break;
+			case GL_DOUBLE_VEC3:	   count = 3;  break;
+			case GL_BOOL_VEC4:		   count = 4;  break;
+			case GL_INT_VEC4:		   count = 4;  break;
+			case GL_UNSIGNED_INT_VEC4: count = 4;  break;
+			case GL_FLOAT_VEC4:		   count = 4;  break;
+			case GL_DOUBLE_VEC4:	   count = 4;  break;
+			case GL_FLOAT_MAT2:        count = 4;  break;
+			case GL_FLOAT_MAT2x3:      count = 6;  break;
+			case GL_FLOAT_MAT2x4:      count = 8;  break;
+			case GL_FLOAT_MAT3:        count = 9;  break;
+			case GL_FLOAT_MAT3x2:      count = 6;  break;
+			case GL_FLOAT_MAT3x4:      count = 12; break;
+			case GL_FLOAT_MAT4:        count = 16; break;
+			case GL_FLOAT_MAT4x2:      count = 8;  break;
+			case GL_FLOAT_MAT4x3:      count = 12; break;
+			case GL_DOUBLE_MAT2:       count = 4;  break;
+			case GL_DOUBLE_MAT2x3:     count = 6;  break;
+			case GL_DOUBLE_MAT2x4:     count = 8;  break;
+			case GL_DOUBLE_MAT3:       count = 9;  break;
+			case GL_DOUBLE_MAT3x2:     count = 6;  break;
+			case GL_DOUBLE_MAT3x4:     count = 12; break;
+			case GL_DOUBLE_MAT4:       count = 16; break;
+			case GL_DOUBLE_MAT4x2:     count = 8;  break;
+			case GL_DOUBLE_MAT4x3:     count = 12; break;
+			case GL_SAMPLER_2D:        count = 0;  break;
+		}
+
+		switch (glenum) {
+			case GL_BOOL_VEC2:
+			case GL_BOOL_VEC3:
+			case GL_BOOL_VEC4:
+			case GL_BOOL:              return iw::val(UniformType::BOOL);
+			case GL_INT_VEC2:
+			case GL_INT_VEC3:
+			case GL_INT_VEC4:
+			case GL_INT:               return iw::val(UniformType::INT);
+			case GL_UNSIGNED_INT_VEC2:
+			case GL_UNSIGNED_INT_VEC3:
+			case GL_UNSIGNED_INT_VEC4:
+			case GL_UNSIGNED_INT:      return iw::val(UniformType::UINT);
+			case GL_FLOAT_MAT2:
+			case GL_FLOAT_MAT2x3:
+			case GL_FLOAT_MAT2x4:
+			case GL_FLOAT_MAT3:
+			case GL_FLOAT_MAT3x2:
+			case GL_FLOAT_MAT3x4:
+			case GL_FLOAT_MAT4:
+			case GL_FLOAT_MAT4x2:
+			case GL_FLOAT_MAT4x3:
+			case GL_FLOAT_VEC2:
+			case GL_FLOAT_VEC3:
+			case GL_FLOAT_VEC4:
+			case GL_FLOAT:             return iw::val(UniformType::FLOAT);
+			case GL_DOUBLE_MAT2:
+			case GL_DOUBLE_MAT2x3:
+			case GL_DOUBLE_MAT2x4:
+			case GL_DOUBLE_MAT3:
+			case GL_DOUBLE_MAT3x2:
+			case GL_DOUBLE_MAT3x4:
+			case GL_DOUBLE_MAT4:
+			case GL_DOUBLE_MAT4x2:
+			case GL_DOUBLE_MAT4x3:
+			case GL_DOUBLE_VEC2:
+			case GL_DOUBLE_VEC3:
+			case GL_DOUBLE_VEC4:
+			case GL_DOUBLE:            return iw::val(UniformType::DOUBLE);
+			case GL_SAMPLER_2D:        return iw::val(UniformType::SAMPLE2);
 		}
 
 		return GL_INVALID_VALUE;

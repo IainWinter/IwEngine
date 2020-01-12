@@ -6,6 +6,7 @@
 #include "GlPipelineParam.h"
 #include "iw/renderer/Pipeline.h"
 #include <unordered_map>
+#include <string>
 
 namespace IW {
 namespace RenderAPI {
@@ -13,7 +14,7 @@ namespace RenderAPI {
 		: public IPipeline
 	{
 	private:
-		std::unordered_map<const char*, GLPipelineParam*> m_params;
+		std::unordered_map<std::string, GLPipelineParam*> m_params;
 
 		unsigned int m_bufferCount;
 		unsigned int m_textureCount;
@@ -31,7 +32,7 @@ namespace RenderAPI {
 
 		IWRENDERER_API
 		IPipelineParam* GetParam(
-			const char* name) override;
+			std::string name) override;
 
 		IWRENDERER_API
 		IPipelineParam* GetParam(
@@ -39,7 +40,7 @@ namespace RenderAPI {
 
 		IWRENDERER_API
 		void SetBuffer(
-			const char* name,
+			std::string name,
 			IUniformBuffer* buffer) override;
 
 		IWRENDERER_API

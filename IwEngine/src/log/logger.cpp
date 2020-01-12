@@ -16,7 +16,7 @@ namespace iw {
 
 	void logger::sink_msg(
 		loglevel level,
-		std::string string)
+		std::string& string)
 	{
 		for (sink* sink : m_sinks) {
 			if (sink->should_log(level)) {

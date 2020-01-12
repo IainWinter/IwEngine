@@ -22,7 +22,8 @@ namespace RenderAPI {
 			TextureWrap textureWrap) = 0;
 
 		virtual _i Translate(
-			_e glenum) = 0;
+			_e glenum,
+			unsigned& count) = 0;
 
 		IWRENDERER_API
 		static Translator& Instance();
