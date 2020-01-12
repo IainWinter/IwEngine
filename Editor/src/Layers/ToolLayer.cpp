@@ -38,7 +38,8 @@ namespace IW {
 		smat->Set("albedo", iw::vector4(1, .92f, 1, 1));
 		smat->Set("hasAlbedoMap", (float)false);
 		smat->Set("hasShadowMap", (float)true);
-		smat->Set("hasAoMap",     (float)false);
+		smat->Set("hasAoMap", (float)false);
+		smat->Set("hasDisplacementMap", (float)false);
 
 		iw::ref<Material> pmat = std::make_shared<Material>();
 		pmat->SetShader(shader);
@@ -46,11 +47,13 @@ namespace IW {
 		pmat->Initialize(Renderer->Device);
 
 		pmat->Set       ("albedo", iw::vector4(1));
+		pmat->SetTexture("displacementMap", Asset->Load<Texture>("textures/moss/displacement.jpg"));
 		pmat->SetTexture("albedoMap", Asset->Load<Texture>("textures/moss/albedo.jpg"));
 		pmat->SetTexture("aoMap", Asset->Load<Texture>("textures/moss/ao.jpg"));
+		pmat->Set("hasDisplacementMap", (float)true);
 		pmat->Set("hasAlbedoMap", (float)true);
+		pmat->Set("hasAoMap", (float)true);
 		pmat->Set("hasShadowMap", (float)true);
-		smat->Set("hasAoMap",     (float)true);
 
 		//pmat->SetTexture("ambientMap",      Asset->Load<Texture>("textures/moss/ao.jpg"));
 		//pmat->SetTexture("displacementMap", Asset->Load<Texture>("textures/moss/displacement.jpg"));
@@ -78,9 +81,10 @@ namespace IW {
 			iw::ref<Material>& mat = plane->Meshes[i].Material;
 			
 			mat->SetShader(shader);
+			mat->GetTexture("displacementMap")->Initialize(Renderer->Device);
 			mat->GetTexture("albedoMap")->Initialize(Renderer->Device);
+			mat->GetTexture("aoMap")->Initialize(Renderer->Device);
 			//mat->GetTexture("ambientMap")->Initialize(Renderer->Device);
-			//mat->GetTexture("displacementMap")->Initialize(Renderer->Device);
 			//mat->GetTexture("normalMap") ->Initialize(Renderer->Device);
 
 			//plane->Meshes[i].SetTangents(0, nullptr);

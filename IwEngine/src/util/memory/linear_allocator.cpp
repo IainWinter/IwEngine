@@ -76,7 +76,7 @@ namespace iw {
 	{
 		if (   clean 
 			&& m_memory 
-			&& m_resets > m_resetsToRealloc)
+			&& m_resets >= m_resetsToRealloc)
 		{
 			size_t halfCap = m_capacity / 2;
 			if (   m_cursor      <  halfCap

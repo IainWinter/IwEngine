@@ -77,6 +77,10 @@ namespace IW {
 			}
 
 			if (prop.Texture) {
+				if (!prop.Texture->Handle()) {
+					LOG_WARNING << "Uninitialized texture in material: " << prop.Name;
+				}
+
 				param->SetAsTexture(prop.Texture->Handle());
 			}
 

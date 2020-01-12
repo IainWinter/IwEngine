@@ -7,7 +7,8 @@ layout(std140, column_major) uniform Camera {
 
 uniform mat4 model;
 uniform mat4 lightSpace;
-//uniform sampler2D mat_displacementMap;
+uniform float mat_hasDisplacementMap;
+uniform sampler2D mat_displacementMap;
 
 layout(location = 0) in vec3 vert;
 layout(location = 1) in vec3 norm;
@@ -18,8 +19,12 @@ out vec3 Normal;
 out vec4 LightPos;
 
 void main() {
-	/*vec3 disp = norm * texture(mat_displacementMap, uv).r;*/
-	vec4 worldpos = model * vec4(vert /*+ disp*/, 1);
+	vec3 disp = vec3(0);
+	if (mat_hasDisplacementMap == 1) {
+		disp = norm * texture(mat_displacementMap, uv).r;
+	}
+
+	vec4 worldpos = model * vec4(vert + disp, 1);
 
 	UV = uv;
 	Normal = norm;

@@ -74,8 +74,6 @@ namespace IW {
 			speed = e.State ? 50 : 10;
 		}
 
-		LOG_INFO << speed;
-
 		return false;
 	}
 }
