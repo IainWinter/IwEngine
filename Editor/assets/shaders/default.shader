@@ -32,12 +32,14 @@ void main() {
 #version 440 core
 
 uniform vec4  mat_albedo;
+uniform float mat_ao;
 uniform float mat_hasAlbedoMap;
+uniform float mat_hasAoMap;
 uniform float mat_hasShadowMap;
 
 //uniform vec3 ambient;
 uniform sampler2D mat_albedoMap;
-//uniform sampler2D ambientMap;
+uniform sampler2D mat_aoMap;
 //uniform sampler2D normalMap;
 uniform sampler2D mat_shadowMap;
 
@@ -73,8 +75,10 @@ void main() {
 		diffuse *= texture(mat_albedoMap, UV).rgb;
 	}
 
-	float ao = 0;
-	/*ao = texture(ambientMap, UV).r;*/
+	float ao = mat_ao;
+	if (mat_hasAoMap == 1) {
+		ao *= texture(mat_aoMap, UV).r;
+	}
 
 	float ambiance = 0.05;
 

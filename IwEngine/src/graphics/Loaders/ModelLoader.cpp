@@ -45,14 +45,14 @@ namespace IW {
 				const char* ainame     = aimaterial->GetName().C_Str();
 
 				Color albedo;
-				Color ambient;
+				Color ao;
 				//Color emissiveColor;
 				//float metallic;
 				//float roughness = 0.2f;
 				//float ambientOcclusion;
 				
 				aiGetMaterialColor(aimaterial, AI_MATKEY_COLOR_DIFFUSE, (aiColor4D*)&albedo);
-				aiGetMaterialColor(aimaterial, AI_MATKEY_COLOR_AMBIENT, (aiColor4D*)&ambient);
+				aiGetMaterialColor(aimaterial, AI_MATKEY_COLOR_AMBIENT, (aiColor4D*)&ao);
 			//	aiGetMaterialColor(aimaterial, AI_MATKEY_COLOR_EMISSIVE, (aiColor4D*)&emissiveColor);
 
 				//aiGetMaterialFloat(aimaterial, AI_MATKEY_SHININESS, &metallic);
@@ -66,7 +66,7 @@ namespace IW {
 				// User value
 				
 				material.Set("albedo",  albedo);
-				material.Set("ambient", ambient);
+				material.Set("ao", ao);
 
 				//material.SetFloats("emissiveColor", &emissiveColor, 4);
 				//material.SetFloat("metallic", metallic);
@@ -78,7 +78,7 @@ namespace IW {
 
 				LoadTexture(m_asset, material, aimaterial, aiTextureType_DIFFUSE,      "albedoMap");
 				LoadTexture(m_asset, material, aimaterial, aiTextureType_SPECULAR,     "specularMap");
-				LoadTexture(m_asset, material, aimaterial, aiTextureType_AMBIENT,      "ambientMap");
+				LoadTexture(m_asset, material, aimaterial, aiTextureType_AMBIENT,      "aoMap");
 				LoadTexture(m_asset, material, aimaterial, aiTextureType_EMISSIVE,     "emissiveMap");
 				LoadTexture(m_asset, material, aimaterial, aiTextureType_NORMALS,      "normalMap");
 				LoadTexture(m_asset, material, aimaterial, aiTextureType_SHININESS,    "shininessMap");
