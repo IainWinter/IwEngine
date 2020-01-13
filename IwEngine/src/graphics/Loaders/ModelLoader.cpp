@@ -65,7 +65,7 @@ namespace IW {
 				// Scanned description
 				// User value
 				
-				material.Set("albedo",  albedo);
+				material.Set("albedo", albedo);
 				material.Set("ao", ao);
 
 				//material.SetFloats("emissiveColor", &emissiveColor, 4);

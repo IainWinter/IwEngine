@@ -104,7 +104,7 @@ namespace IW {
 		const Transform* transform, 
 		const Mesh* mesh)
 	{
-		const iw::ref<Material>&  material = mesh->Material;
+		iw::ref<Material> material = mesh->Material;
 		
 		if(!material) {
 			// draw with default material

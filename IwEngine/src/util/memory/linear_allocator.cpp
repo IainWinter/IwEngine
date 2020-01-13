@@ -20,8 +20,81 @@ namespace iw {
 		memset(m_memory, 0, m_capacity);
 	}
 
+	linear_allocator::linear_allocator(
+		const linear_allocator& copy)
+		: m_memory(malloc(copy.m_capacity))
+		, m_capacity(copy.m_capacity)
+		, m_minCapacity(copy.m_minCapacity)
+		, m_peak(copy.m_peak)
+		, m_cursor(copy.m_cursor)
+		, m_resets(copy.m_resets)
+		, m_resetsToRealloc(copy.m_resetsToRealloc)
+	{
+		assert(m_memory);
+		memcpy(m_memory, copy.m_memory, m_capacity);
+	}
+
+	linear_allocator::linear_allocator(
+		linear_allocator&& copy) noexcept
+		: m_memory(copy.m_memory)
+		, m_capacity(copy.m_capacity)
+		, m_minCapacity(copy.m_minCapacity)
+		, m_peak(copy.m_peak)
+		, m_cursor(copy.m_cursor)
+		, m_resets(copy.m_resets)
+		, m_resetsToRealloc(copy.m_resetsToRealloc)
+	{
+		copy.m_memory = nullptr;
+		copy.m_capacity = 0;
+		copy.m_minCapacity = 0;
+		copy.m_peak = 0;
+		copy.m_cursor = 0;
+		copy.m_resets = 0;
+		copy.m_resetsToRealloc = 0;
+	}
+
 	linear_allocator::~linear_allocator() {
 		free(m_memory);
+	}
+
+	linear_allocator& linear_allocator::operator=(
+		const linear_allocator& copy)
+	{
+		m_memory = copy.m_memory;
+		m_capacity = copy.m_capacity;
+		m_minCapacity = copy.m_minCapacity;
+		m_peak = copy.m_peak;
+		m_cursor = copy.m_cursor;
+		m_resets = copy.m_resets;
+		m_resetsToRealloc = copy.m_resetsToRealloc;
+
+		m_memory = malloc(m_capacity);
+		assert(m_memory);
+		memcpy(m_memory, copy.m_memory, m_capacity);
+
+		return *this;
+	}
+
+	linear_allocator& linear_allocator::operator=(
+		linear_allocator&& copy) noexcept
+	{
+		m_memory          = copy.m_memory;
+		m_capacity        = copy.m_capacity;
+		m_minCapacity     = copy.m_minCapacity;
+		m_peak            = copy.m_peak;
+		m_cursor          = copy.m_cursor;
+		m_resets          = copy.m_resets;
+		m_resetsToRealloc = copy.m_resetsToRealloc;
+
+		copy.m_memory          = nullptr;
+		copy.m_capacity        = 0;
+		copy.m_minCapacity     = 0;
+		copy.m_peak            = 0;
+		copy.m_cursor          = 0;
+		copy.m_resets          = 0;
+		copy.m_resetsToRealloc = 0;
+
+		return *this;
 	}
 
 	void* linear_allocator::alloc(
@@ -79,7 +152,7 @@ namespace iw {
 			&& m_resets >= m_resetsToRealloc)
 		{
 			size_t halfCap = m_capacity / 2;
-			if (   m_cursor      <  halfCap
+			if (   m_cursor      <  halfCap / 2
 				&& m_minCapacity <= halfCap)
 			{
 				resize(halfCap);

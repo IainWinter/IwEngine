@@ -41,15 +41,15 @@ namespace IW {
 		//smat->Set("hasAoMap", (float)false);
 		//smat->Set("hasDisplacementMap", (float)false);
 
-		iw::ref<Material> pmat = std::make_shared<Material>();
-		pmat->SetShader(shader);
+		//iw::ref<Material> pmat = std::make_shared<Material>();
+		//pmat->SetShader(shader);
 
-		pmat->Initialize(Renderer->Device);
+		//pmat->Initialize(Renderer->Device);
 
-		pmat->Set       ("albedo", iw::vector4(1));
-		pmat->SetTexture("displacementMap", Asset->Load<Texture>("textures/moss/displacement.jpg"));
-		pmat->SetTexture("albedoMap", Asset->Load<Texture>("textures/moss/albedo.jpg"));
-		pmat->SetTexture("aoMap", Asset->Load<Texture>("textures/moss/ao.jpg"));
+		//pmat->Set       ("albedo", iw::vector4(1));
+		//pmat->SetTexture("displacementMap", Asset->Load<Texture>("textures/moss/displacement.jpg"));
+		//pmat->SetTexture("albedoMap", Asset->Load<Texture>("textures/moss/albedo.jpg"));
+		//pmat->SetTexture("aoMap", Asset->Load<Texture>("textures/moss/ao.jpg"));
 		//pmat->Set("hasDisplacementMap", (float)false);
 		//pmat->Set("hasAlbedoMap", (float)true);
 		//pmat->Set("hasAoMap", (float)true);
@@ -67,30 +67,26 @@ namespace IW {
 		tmesh->SetMaterial(smat);
 		tmesh->Initialize(Renderer->Device);
 
-		Mesh* pmesh = MakePlane(50, 50);
-		pmesh->SetMaterial(pmat);
-		pmesh->Initialize(Renderer->Device);
-
-		Model pm { pmesh, 1 };
-
-		iw::ref<Model> plane = Asset->Give<Model>("Floor", &pm);
+		iw::ref<Model> level = Asset->Load<Model>("models/grass/grass.obj");
 
 		/*Asset->Load<Model>("models/grass.obj");*/
 
-		for (size_t i = 0; i < plane->MeshCount; i++) {
-			iw::ref<Material>& mat = plane->Meshes[i].Material;
+		for (size_t i = 0; i < level->MeshCount; i++) {
+			iw::ref<Material>& mat = level->Meshes[i].Material;
 			
 			mat->SetShader(shader);
-			mat->GetTexture("displacementMap")->Initialize(Renderer->Device);
-			mat->GetTexture("albedoMap")->Initialize(Renderer->Device);
-			mat->GetTexture("aoMap")->Initialize(Renderer->Device);
+			mat->Initialize(Renderer->Device);
+
+			//mat->GetTexture("displacementMap")->Initialize(Renderer->Device);
+			//mat->GetTexture("albedoMap")->Initialize(Renderer->Device);
+			//mat->GetTexture("aoMap")->Initialize(Renderer->Device);
 			//mat->GetTexture("ambientMap")->Initialize(Renderer->Device);
 			//mat->GetTexture("normalMap") ->Initialize(Renderer->Device);
 
-			//plane->Meshes[i].SetTangents(0, nullptr);
-			//plane->Meshes[i].SetBiTangents(0, nullptr);
+			level->Meshes[i].SetTangents(0, nullptr);
+			level->Meshes[i].SetBiTangents(0, nullptr);
 
-			plane->Meshes[i].Initialize(Renderer->Device);
+			level->Meshes[i].Initialize(Renderer->Device);
 		}
 
 		Model sm { smesh, 1 };

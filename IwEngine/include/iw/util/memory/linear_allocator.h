@@ -5,7 +5,7 @@
 
 namespace iw {
 namespace util {
-	class IWUTIL_API linear_allocator {
+	class linear_allocator {
 	private:
 		void*  m_memory;
 		size_t m_capacity;
@@ -16,11 +16,12 @@ namespace util {
 		size_t m_resetsToRealloc;
 
 	public:
+		IWUTIL_API
 		linear_allocator(
 			size_t size,
 			size_t resetsToRealloc = 0);
 
-		~linear_allocator();
+		GEN_5(IWUTIL_API, linear_allocator);
 
 		template<
 			typename _t>
@@ -31,13 +32,16 @@ namespace util {
 			return (_t*)alloc(sizeof(_t) * count, alignment);
 		}
 
+		IWUTIL_API
 		void* alloc(
 			size_t size,
 			size_t alignment = 0);
 
+		IWUTIL_API
 		void resize(
 			size_t size);
 
+		IWUTIL_API
 		void reset(
 			bool clean = false);
 

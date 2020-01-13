@@ -103,14 +103,16 @@ namespace IW {
 		light.SetPosition(2);
 		light.SetRotation(iw::quaternion::from_look_at(iw::vector3(1)));
 
-		iw::ref<Model> plane = Asset->Load<Model>("Floor");
-		plane->Meshes[0].Material->SetTexture("shadowMap", subRG);
+		iw::ref<Model> level = Asset->Load<Model>("models/grass/grass.obj");
+		for (size_t i = 0; i < level->MeshCount; i++) {
+			level->Meshes[i].Material->SetTexture("shadowMap", subRG);
+		}
 
 		// floor
 		Entity floor = Space->CreateEntity<Transform, Model, PlaneCollider, Rigidbody>();
-		Space->SetComponentData<Model>(floor, *plane);
+		Space->SetComponentData<Model>(floor, *level);
 
-		Transform*     t = Space->SetComponentData<Transform>    (floor, iw::vector3(0, 0, 0), iw::vector3(15, 1, 15));
+		Transform*     t = Space->SetComponentData<Transform>    (floor, iw::vector3(0, 0, 0), iw::vector3(5));
 		PlaneCollider* s = Space->SetComponentData<PlaneCollider>(floor, iw::vector3::unit_y, 0.0f);
 		Rigidbody*     r = Space->SetComponentData<Rigidbody>    (floor);
 
@@ -185,6 +187,7 @@ namespace IW {
 		Physics->AddRigidbody(rp);
 
 		iw::ref<Model> tetrahedron = Asset->Load<Model>("Tetrahedron");
+		tetrahedron->Meshes[0].Material->SetTexture("shadowMap", subRG);
 
 		Entity enemy = Space->CreateEntity<Transform, Model, SphereCollider, Rigidbody, Enemy>();
 		Space->SetComponentData<Model>(enemy, *tetrahedron);

@@ -20,7 +20,7 @@ void EnemySystem::Update(
 	for (auto entity : view) {
 		auto [transform, enemy] = entity.Components.Tie<Components>();
 
-		transform->Rotation *= iw::quaternion::from_euler_angles(0, IW::Time::DeltaTime(), 0);
+		transform->Rotation *= iw::quaternion::from_euler_angles(0, -IW::Time::DeltaTime(), 0);
 
 		if (  !enemy->HasShot
 			&& enemy->Timer <= 0)

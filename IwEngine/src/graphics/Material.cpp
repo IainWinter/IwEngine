@@ -24,37 +24,50 @@ namespace IW {
 			Shader->Initialize(device);
 		}
 
+		for (TextureProperty& prop : m_textures) {
+			if (prop.Texture && !prop.Texture->Handle()) {
+				prop.Texture->Initialize(device);
+			}
+		}
+
 		int count = Shader->Program->UniformCount();
 		for (int i = 0; i < count; i++) {
 			IPipelineParam* uniform = Shader->Program->GetParam(i);
 			if (uniform->Name().substr(0, 4) == "mat_") {
 				std::string name = uniform->Name().substr(4);
 
-				if (uniform->Type() == UniformType::SAMPLE2) {
-					SetTexture(name, nullptr);
-				}
+				if (!Has(name)) {
+					if (uniform->Type() == UniformType::SAMPLE2) {
+						SetTexture(name, nullptr);
+					}
 
-				else {
-					SetProperty(name, nullptr,
-						uniform->Type(),
-						uniform->TypeSize(),
-						uniform->Stride(),
-						uniform->Count());
+					else {
+						SetProperty(name, nullptr,
+							uniform->Type(),
+							uniform->TypeSize(),
+							uniform->Stride(),
+							uniform->Count());
+					}
 				}
 			}
 		}
 	}
 
 	void Material::Use(
-		const iw::ref<IDevice>& device) const
+		const iw::ref<IDevice>& device)
 	{
 		device->SetPipeline(Shader->Program.get());
 
-		for (const MaterialProperty& prop : m_properties) {
+		for (MaterialProperty& prop : m_properties) {
+			if (!prop.Active) {
+				continue;
+			}
+
 			IPipelineParam* param = Shader->Program->GetParam("mat_" + prop.Name);
 
 			if (!param) {
 				LOG_WARNING << "Invalid property in material: " << prop.Name;
+				prop.Active = false;
 				continue;
 			}
 
@@ -68,11 +81,16 @@ namespace IW {
 			}
 		}
 
-		for (const TextureProperty& prop : m_textures) {
+		for (TextureProperty& prop : m_textures) {
+			if (!prop.Active) {
+				continue;
+			}
+
 			IPipelineParam* param = Shader->Program->GetParam("mat_" + prop.Name);
 
 			if (!param) {
 				LOG_WARNING << "Invalid texture in material: " << prop.Name;
+				prop.Active = false;
 				continue;
 			}
 
@@ -141,6 +159,7 @@ namespace IW {
 		if (Has(name)) {
 			TextureProperty& prop = m_textures.at(m_index.at(name));
 			prop.Texture = texture;
+			prop.Active = true;
 		}
 
 		else {
@@ -148,11 +167,14 @@ namespace IW {
 
 			TextureProperty prop {
 				itr.first->first,
-				texture
+				texture,
+				true
 			};
 
 			m_textures.push_back(prop);
 		}
+
+		std::string n(name);
 
 		name[0] = toupper(name[0]);
 		Set("has" + name, (float)(texture != nullptr));
@@ -176,7 +198,7 @@ namespace IW {
 	}
 
 	void Material::SetProperty(
-		const std::string& name,
+		std::string name,
 		const void* data,
 		UniformType type,
 		unsigned typeSize,
@@ -189,57 +211,67 @@ namespace IW {
 			return;
 		}
 
+		unsigned size = typeSize * stride * count;
+
+		MaterialProperty* prop;
 		if (Has(name)) {
-			MaterialProperty& prop = m_properties.at(m_index.at(name));
-			if (prop.Type != type) {
+			prop = &m_properties.at(m_index.at(name));
+			if (prop->Type != type) {
 				LOG_WARNING << "Attempted to set uniform with duplicate name but different type: " << name << "!";
 				return;
 			}
 			
-			if (prop.TypeSize != typeSize) {
+			if (prop->TypeSize != typeSize) {
 				LOG_WARNING << "Attempted to set uniform with duplicate name but different type size: " << name << "!";
 				return;
 			}
 
-			if (prop.Stride != stride) {
+			// may want to allow smaller counts and strides but lets see 
+			if (prop->Stride != stride) {
 				LOG_WARNING << "Attempted to set uniform with duplicate name but different stride: " << name << "!";
 				return;
 			}
 
-			if (prop.Count != count) {
+			if (prop->Count != count) {
 				LOG_WARNING << "Attempted to set uniform with duplicate name but different count: " << name << "!";
 				return;
 			}
 
-			// may want to allow smaller counts and strides but lets see 
-
-			if (!data) {
-				memset(prop.Data, 0, typeSize * stride * count);
-			}
-
-			else {
-				memcpy(prop.Data, data, typeSize * stride * count);
-			}
+			prop->Active = true;
 		}
 
 		else {
 			auto itr = m_index.emplace(name, m_properties.size());
 
-			MaterialProperty prop {
-				itr.first->first,
-				m_alloc.alloc(typeSize * stride * count),
-				type,
-				typeSize,
-				stride,
-				count
-			};
+			prop = &m_properties.emplace_back(
+				MaterialProperty {
+					itr.first->first,
+					m_alloc.alloc(size),
+					type,
+					typeSize,
+					stride,
+					count,
+					true
+				}
+			);
 
-			m_properties.push_back(prop);
+			if (!prop->Data) {
+				m_alloc.resize(m_alloc.capacity() + size);
+				prop->Data = m_alloc.alloc(size);
+			}
+		}
+
+		if (!data) {
+			memset(prop->Data, 0, size);
+		}
+
+		else {
+			memcpy(prop->Data, data, size);
 		}
 	}
 
 	Material::MaterialProperty& Material::GetProperty(
-		const std::string& name)
+		std::string name)
 	{
 		return m_properties.at(m_index.at(name));
 	}

@@ -24,17 +24,19 @@ namespace Graphics {
 
 	private:
 		struct MaterialProperty {
-			const std::string& Name;
+			std::string Name;
 			void* Data;
 			UniformType Type;
 			unsigned TypeSize;
 			unsigned Stride;
 			unsigned Count;
+			bool Active;
 		};
 
 		struct TextureProperty {
-			const std::string& Name;
+			std::string Name;
 			iw::ref<Texture> Texture;
+			bool Active;
 		};
 
 		iw::linear_allocator m_alloc;
@@ -57,7 +59,7 @@ namespace Graphics {
 
 		IWGRAPHICS_API
 		void Use(
-			const iw::ref<IDevice>& device) const;
+			const iw::ref<IDevice>& device);
 
 		IWGRAPHICS_API
 		void SetShader(
@@ -125,7 +127,7 @@ namespace Graphics {
 	private:
 		IWGRAPHICS_API
 		void SetProperty(
-			const std::string& name,
+			std::string name,
 			const void* data,
 			UniformType type,
 			unsigned typeSize,
@@ -134,7 +136,7 @@ namespace Graphics {
 
 		IWGRAPHICS_API
 		MaterialProperty& GetProperty(
-			const std::string& name);
+			std::string name);
 	};
 }
 
