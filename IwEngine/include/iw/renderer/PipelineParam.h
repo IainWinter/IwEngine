@@ -70,7 +70,8 @@ namespace RenderAPI {
 			const iw::matrix4& matrix) = 0;
 
 		virtual void SetAsTexture(
-			const ITexture* texture) = 0;
+			const ITexture* texture,
+			int index = -1) = 0;
 	};
 }
 	using namespace RenderAPI;

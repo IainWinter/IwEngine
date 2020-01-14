@@ -1,29 +1,30 @@
-# Blender MTL File: 'grass.blend'
-# Material Count: 2
+# Blender MTL File: 'None'
+# Material Count: 3
 
-newmtl Foliage01_col
+newmtl Foliage
 Ns 506.250000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
-Ke 0.0 0.0 0.0
+Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Bump textures/grass/Foliage01_nrm.jpg
-map_Kd textures/grass/Foliage01_col.jpg
-map_Ns textures/grass/Foliage01_rgh.jpg
-map_Disp textures/grass/Foliage01_disp.jpg
+map_Kd textures/foliage/albedo.jpg
+map_Ns textures/foliage/roughness.jpg
+map_Bump textures/foliage/normal.jpg
+map_Disp textures/foliage/displacement.jpg
 
-newmtl Material.002
+newmtl Ground
 Ns 225.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
-Ks 0.053333 0.053333 0.053333
-Ke 0.0 0.0 0.0
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Bump textures/grass/dirt_ground_normal.png
-map_Kd textures/grass/dirt_ground_basecolor.png
-map_Ns textures/grass/dirt_ground_roughness.png
+map_Kd textures/grass/albedo.jpg
+map_Bump textures/grass/normal.jpg
+-map_Ns textures/grass/roughness.jpg
+

@@ -233,6 +233,16 @@ namespace IW {
 			auto [m_t, m_m] = m_e.Components.Tie<ModelComponents>();
 
 			for (size_t i = 0; i < m_m->MeshCount; i++) {
+				//iw::ref<Texture> t = m_m->Meshes[i].Material->GetTexture("alphaMaskMap");
+
+				//ITexture* it = nullptr;
+				//if (t) {
+				//	it = t->Handle();
+				//}				
+				//
+				//light.LightShader()->Program->GetParam("alphaMask")->SetAsTexture(it, 0);
+				//light.LightShader()->Program->GetParam("alphaThreshold")->SetAsFloat(0.5f);
+
 				Renderer->CastMesh(&light, m_t, &m_m->Meshes[i]);
 			}
 		}

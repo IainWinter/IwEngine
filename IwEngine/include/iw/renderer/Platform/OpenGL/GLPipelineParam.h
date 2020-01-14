@@ -86,7 +86,8 @@ namespace RenderAPI {
 			const iw::matrix4& matrix) override;
 
 		void SetAsTexture(
-			const ITexture* texture) override;
+			const ITexture* texture,
+			int index) override;
 	};
 }
 

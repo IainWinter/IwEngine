@@ -51,7 +51,7 @@ namespace IW {
 				//float roughness = 0.2f;
 				//float ambientOcclusion;
 				
-				aiGetMaterialColor(aimaterial, AI_MATKEY_COLOR_DIFFUSE, (aiColor4D*)&albedo);
+				aiGetMaterialColor(aimaterial, AI_MATKEY_COLOR_DIFFUSE, (aiColor4D*)&albedo); 
 				aiGetMaterialColor(aimaterial, AI_MATKEY_COLOR_AMBIENT, (aiColor4D*)&ao);
 			//	aiGetMaterialColor(aimaterial, AI_MATKEY_COLOR_EMISSIVE, (aiColor4D*)&emissiveColor);
 

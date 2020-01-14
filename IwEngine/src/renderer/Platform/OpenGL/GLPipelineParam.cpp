@@ -205,16 +205,20 @@ namespace IW {
 	}
 
 	void GLPipelineParam::SetAsTexture(
-		const ITexture* texture)
+		const ITexture* texture,
+		int index)
 	{
-		if (m_textureCount > 32) {
-			LOG_WARNING << "Already bound 32 textures";
+		if (index < 0) {
+			index = m_textureCount++;
+		}
+
+		if (index > 32) {
+			LOG_WARNING << "Cannot bind more than 32 textures";
 			return;
 		}
 
-		glUniform1i(m_location, m_textureCount);
-
-		glActiveTexture(GL_TEXTURE0 + m_textureCount);
+		glUniform1i(m_location, index);
+		glActiveTexture(GL_TEXTURE0 + index);
 
 		if (texture) {
 			static_cast<const GLTexture*>(texture)->Bind();
@@ -223,7 +227,5 @@ namespace IW {
 		else {
 			glBindTexture(GL_TEXTURE_2D, 0); // this is prob the way to do it cus you cant call unbind a nullptr
 		}
-
-		++m_textureCount;
 	}
 }

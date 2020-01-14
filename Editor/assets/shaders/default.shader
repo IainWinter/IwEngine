@@ -39,11 +39,13 @@ void main() {
 uniform vec4  mat_albedo;
 uniform float mat_ao;
 uniform float mat_hasAlbedoMap;
+uniform float mat_hasAlphaMaskMap;
 uniform float mat_hasAoMap;
 uniform float mat_hasShadowMap;
 
 //uniform vec3 ambient;
 uniform sampler2D mat_albedoMap;
+uniform sampler2D mat_alphaMaskMap;
 uniform sampler2D mat_aoMap;
 //uniform sampler2D normalMap;
 uniform sampler2D mat_shadowMap;
@@ -75,9 +77,16 @@ void main() {
 	vec3 normal = Normal;
 	/*normal = texture(normalMap, UV).xyz;*/
 
-	vec3 diffuse = mat_albedo.xyz;
+	vec4 diffuse = mat_albedo;
 	if (mat_hasAlbedoMap == 1) {
-		diffuse *= texture(mat_albedoMap, UV).rgb;
+		diffuse *= texture(mat_albedoMap, UV);
+	}
+
+	if (mat_hasAlphaMaskMap == 1) {
+		if (0.5 > texture(mat_alphaMaskMap, UV).r) {
+			discard;
+		}
+		//diffuse.a = texture(mat_alphaMaskMap, UV).r;
 	}
 
 	float ao = mat_ao;
@@ -93,7 +102,7 @@ void main() {
 		shadow = chebyshevUpperBound(coords.xy, coords.z);
 	}
 
-	vec3 color = ambiance /* ambient*/ * ao + diffuse * (ambiance + shadow);
+	vec3 color = ambiance /* ambient*/ * ao + diffuse.xyz * (ambiance + shadow);
 
 	gl_FragColor = vec4(color, 1);
 

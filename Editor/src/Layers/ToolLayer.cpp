@@ -76,7 +76,6 @@ namespace IW {
 			
 			mat->SetShader(shader);
 			mat->Initialize(Renderer->Device);
-
 			//mat->GetTexture("displacementMap")->Initialize(Renderer->Device);
 			//mat->GetTexture("albedoMap")->Initialize(Renderer->Device);
 			//mat->GetTexture("aoMap")->Initialize(Renderer->Device);
@@ -88,6 +87,12 @@ namespace IW {
 
 			level->Meshes[i].Initialize(Renderer->Device);
 		}
+
+		auto a = Asset->Load<Texture>("textures/foliage/alpha_mask.jpg");
+		a->Initialize(Renderer->Device);
+
+		level->Meshes[1].Material->SetTexture("alphaMaskMap", a);
+		level->Meshes[2].Material->SetTexture("alphaMaskMap", a);
 
 		Model sm { smesh, 1 };
 		Model tm { tmesh, 1 };
