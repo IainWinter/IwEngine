@@ -1,10 +1,12 @@
 #include "Layers/SandboxLayer.h"
+#include "Systems/PlayerSystem.h"
+#include "Systems/EnemySystem.h"
+#include "Systems/BulletSystem.h"
+#include "Events/ActionEvents.h"
 #include "iw/graphics/Model.h"
 #include "iw/engine/Components/CameraController.h"
 #include "iw/engine/Time.h"
 #include "iw/physics/Collision/SphereCollider.h"
-#include "Events/ActionEvents.h"
-#include "imgui/imgui.h"
 #include "iw/physics/Dynamics/ImpulseSolver.h"
 #include "iw/physics/Collision/PositionSolver.h"
 #include "iw/physics/Collision/PlaneCollider.h"
@@ -13,9 +15,8 @@
 #include "iw/input/Devices/Mouse.h"
 #include "iw/graphics/TextureAtlas.h"
 #include "iw/graphics/DirectionalLight.h"
-#include "Systems/PlayerSystem.h"
-#include "Systems/EnemySystem.h"
-#include "Systems/BulletSystem.h"
+#include "iw/util/jobs/pipeline.h"
+#include "imgui/imgui.h"
 
 namespace IW {
 	struct ModelUBO {
@@ -39,10 +40,6 @@ namespace IW {
 		PlaneCollider* Collider;
 	};
 
-	SandboxLayer::SandboxLayer()
-		: Layer("Sandbox")
-	{}
-
 	DirectionalLight light;
 	iw::ref<RenderTarget> target;
 	iw::ref<RenderTarget> targetBlur;
@@ -51,6 +48,128 @@ namespace IW {
 	TextureAtlas atlasD;
 	TextureAtlas atlasRG;
 	TextureAtlas atlasBlur;
+
+	iw::pipeline pipeline;
+
+	struct GenerateShadowMap
+		: iw::node
+	{
+		iw::ref<Renderer> renderer;
+		iw::ref<Space>    space;
+
+		GenerateShadowMap(
+			iw::ref<Renderer> r,
+			iw::ref<Space> s)
+			: iw::node(2, 1)
+			, renderer(r)
+			, space(s)
+		{}
+
+		void execute() override {
+			Light* light = in<Light*>(0);
+			float& threshold = in<float>(1);
+
+			renderer->BeginLight(light);
+
+			for (auto m_e : space->Query<Transform, Model>()) {
+				auto [m_t, m_m] = m_e.Components.Tie<ModelComponents>();
+
+				for (size_t i = 0; i < m_m->MeshCount; i++) {
+					//iw::ref<Texture> t = m_m->Meshes[i].Material->GetTexture("alphaMaskMap");
+
+					//ITexture* it = nullptr;
+					//if (t) {
+					//	it = t->Handle();
+					//}
+
+					//light->LightShader()->Program->GetParam("alphaMask")->SetAsTexture(it, 0);
+					//light->LightShader()->Program->GetParam("alphaThreshold")->SetAsFloat(threshold);
+
+					renderer->CastMesh(light, m_t, &m_m->Meshes[i]);
+				}
+			}
+
+			renderer->EndLight(light);
+
+			out<iw::ref<RenderTarget>>(0, light->LightTarget());
+		}
+	};
+
+	struct PostProcessShadowMap
+		: iw::node
+	{
+		iw::ref<Renderer> renderer;
+
+		PostProcessShadowMap(
+			iw::ref<Renderer> r)
+			: iw::node(4, 1)
+			, renderer(r)
+		{}
+
+		void execute() override {
+			iw::ref<RenderTarget>& target = in<iw::ref<RenderTarget>>(0);
+			iw::ref<RenderTarget>& intermediate = in<iw::ref<RenderTarget>>(1);
+			iw::ref<Shader>& shader = in<iw::ref<Shader>>(2);
+			iw::vector2& blur = in<iw::vector2>(3);
+
+			renderer->SetShader(gaussian);
+
+			shader->Program->GetParam("blurScale")->SetAsFloats(&iw::vector3(blur.x, 0, 0), 3);
+			renderer->ApplyFilter(shader, target.get(), intermediate.get());
+
+			shader->Program->GetParam("blurScale")->SetAsFloats(&iw::vector3(0, blur.y, 0), 3);
+			renderer->ApplyFilter(shader, intermediate.get(), target.get());
+
+			out<iw::ref<Texture>>(0, target->Tex(0));
+		}
+	};
+
+	struct MainRender
+		: iw::node
+	{
+		iw::ref<Renderer> renderer;
+		iw::ref<Space>    space;
+
+		MainRender(
+			iw::ref<Renderer> r,
+			iw::ref<Space> s)
+			: iw::node(2, 0)
+			, renderer(r)
+			, space(s)
+		{}
+
+		void execute() override {
+			iw::ref<Texture>& shadowMap = in<iw::ref<Texture>>(0);
+			Light* light = in<Light*>(1);
+
+			for (auto c_e : space->Query<Transform, CameraController>()) {
+				auto [c_t, c_c] = c_e.Components.Tie<CameraComponents>();
+
+				renderer->BeginScene(c_c->Camera);
+
+				for (auto m_e : space->Query<Transform, Model>()) {
+					auto [m_t, m_m] = m_e.Components.Tie<ModelComponents>();
+
+					for (size_t i = 0; i < m_m->MeshCount; i++) {
+						Mesh& mesh = m_m->Meshes[i];
+
+						renderer->SetShader(mesh.Material->Shader);
+
+						mesh.Material->Shader->Program->GetParam("lightSpace")
+							->SetAsMat4(light->Cam().GetViewProjection());
+
+						renderer->DrawMesh(m_t, &mesh);
+					}
+				}
+
+				renderer->EndScene();
+			}
+		}
+	};
+
+	SandboxLayer::SandboxLayer()
+		: Layer("Sandbox")
+	{}
 
 	int SandboxLayer::Initialize() {
 		// Shader
@@ -207,81 +326,28 @@ namespace IW {
 		PushSystem<EnemySystem>(sphere);
 		PushSystem<BulletSystem>();
 
+		pipeline.first<GenerateShadowMap>(Renderer, Space)
+			.then<PostProcessShadowMap>  (0, 0, Renderer)
+			.then<MainRender>            (0, 0, Renderer, Space);
+
+		// get rid of first index at least
+
+		pipeline.init()
+			.set(0, 0, &light)
+			.set(1, 1, targetBlur)
+			.set(1, 2, gaussian)
+			.set(2, 1, &light);
+
 		return 0;
 	}
 
 	void SandboxLayer::PostUpdate() {
-		//Renderer->BuildSceneData("Main")
-		//	.SetWorldOrigin(iw::matrix4::identity)
-		//	.SetCamera(camera)
-		//	.AddLight(light)
-		//	.Build();
-
-		//Renderer->BuildSceneData()
-		//	.SetCamera()
-		//	.SetTarget();
-
-		//Renderer->BeginLight();
-
-		//Renderer->CastMesh();
-
-		//Renderer->EndLight(); 
-
-		Renderer->BeginLight(&light);
-
-		for (auto m_e : Space->Query<Transform, Model>()) {
-			auto [m_t, m_m] = m_e.Components.Tie<ModelComponents>();
-
-			for (size_t i = 0; i < m_m->MeshCount; i++) {
-				//iw::ref<Texture> t = m_m->Meshes[i].Material->GetTexture("alphaMaskMap");
-
-				//ITexture* it = nullptr;
-				//if (t) {
-				//	it = t->Handle();
-				//}				
-				//
-				//light.LightShader()->Program->GetParam("alphaMask")->SetAsTexture(it, 0);
-				//light.LightShader()->Program->GetParam("alphaThreshold")->SetAsFloat(0.5f);
-
-				Renderer->CastMesh(&light, m_t, &m_m->Meshes[i]);
-			}
-		}
-
-		Renderer->EndLight(&light);
-
-		float blurw = 1.0f / (target->Width()  * blurAmount);
+		float blurw = 1.0f / (target->Width() * blurAmount);
 		float blurh = 1.0f / (target->Height() * blurAmount);
 
-		Renderer->SetShader(gaussian);
+		pipeline.set(1, 3, iw::vector2(blurw, blurh));
 
-		gaussian->Program->GetParam("blurScale")->SetAsFloats(&iw::vector3(blurw, 0, 0), 3);
-		Renderer->ApplyFilter(gaussian, target.get(), targetBlur.get());
-
-		gaussian->Program->GetParam("blurScale")->SetAsFloats(&iw::vector3(0, blurh, 0), 3);
-		Renderer->ApplyFilter(gaussian, targetBlur.get(), target.get());
-
-		for (auto c_e : Space->Query<Transform, CameraController>()) {
-			auto [c_t, c_c] = c_e.Components.Tie<CameraComponents>();
-
-			Renderer->BeginScene(c_c->Camera);
-
-			for (auto m_e : Space->Query<Transform, Model>()) {
-				auto [m_t, m_m] = m_e.Components.Tie<ModelComponents>();
-
-				for (size_t i = 0; i < m_m->MeshCount; i++) {
-					Mesh& mesh = m_m->Meshes[i];
-
-					Renderer->SetShader(mesh.Material->Shader);
-
-					mesh.Material->Shader->Program->GetParam("lightSpace")
-						->SetAsMat4(light.Cam().GetViewProjection());
-
-					Renderer->DrawMesh(m_t, &mesh);
-				}
-			}
-
-			Renderer->EndScene();
-		}
+		pipeline.execute();
 
 		for (auto p_e : Space->Query<Transform, PlaneCollider>()) {
 			auto [p_t, p_p] = p_e.Components.Tie<PlaneComponents>();
