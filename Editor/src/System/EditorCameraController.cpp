@@ -25,7 +25,11 @@ namespace IW {
 				}
 
 				if (movement.z != 0) {
-					t->Position += -t->Forward() * movement.z * speed * Time::DeltaTime();
+					iw::vector3 forward = t->Forward();
+					forward.y = 0;
+					forward.normalize();
+
+					t->Position += -forward * movement.z * speed * Time::DeltaTime();
 				}
 
 				c->Camera->Position = t->Position;

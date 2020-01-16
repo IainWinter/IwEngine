@@ -6,7 +6,7 @@
 
 namespace IW {
 namespace ECS {
-	struct IWENTITY_API Chunk {
+	struct Chunk {
 		Chunk* Next;
 		Chunk* Previous;
 
@@ -17,38 +17,34 @@ namespace ECS {
 
 		char Buffer[];
 
-		inline size_t ReserveComponents() {
-			++Count;
-			return CurrentIndex++ + IndexOffset;
-		}
+		IWENTITY_API
+		size_t ReserveComponents();
 
-		inline void ReinstateComponents() {
-			++Count;
-		}
+		IWENTITY_API
+		void ReinstateComponents();
 
-		inline void FreeComponents() {
-			--Count;
-		}
+		IWENTITY_API
+		void FreeComponents();
 
-		inline bool ContainsIndex(
-			size_t index) const
-		{
-			return  IndexOffset <= index
-				&& IndexOffset + CurrentIndex > index;
-		}
-	
-		inline size_t EndIndex() const {
-			return CurrentIndex + IndexOffset;
-		}
+		IWENTITY_API
+		bool ContainsIndex(
+			size_t index) const;
 
+		IWENTITY_API
+		size_t EndIndex() const;
+
+		IWENTITY_API
 		size_t BeginIndex();
 
+		IWENTITY_API
 		Entity* GetEntity(
 			size_t index);
 
+		IWENTITY_API
 		char* GetComponentStream(
 			const ArchetypeLayout& layout);
 
+		IWENTITY_API
 		char* GetComponentData(
 			const ArchetypeLayout& layout,
 			size_t index);

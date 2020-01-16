@@ -197,6 +197,35 @@ namespace IW {
 		return nullptr;
 	}
 
+	Entity* ChunkList::GetEntity(
+		size_t index)
+	{
+		Chunk* chunk = FindChunk(index);
+		if (chunk) {
+			return chunk->GetEntity(index);
+		}
+
+		return nullptr;
+	}
+
+	int ChunkList::IndexOf(
+		const iw::ref<Component>& component,
+		void* instance)
+	{
+		Chunk* chunk = m_root;
+		if (chunk) {
+			size_t offset = (char*)instance - (char*)(chunk->Buffer);
+			if (offset < m_chunkSize) {
+				ArchetypeLayout layout = m_archetype->GetLayout(component);
+				return (offset - layout.Offset * m_chunkCapacity) / layout.Component->Size;
+			}
+
+			chunk = chunk->Next;
+		}
+
+		return -1;
+	}
+
 	iterator ChunkList::Begin(
 		const iw::ref<ComponentQuery>& query)
 	{

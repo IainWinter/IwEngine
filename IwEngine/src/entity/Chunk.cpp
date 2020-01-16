@@ -2,6 +2,30 @@
 #include <iw\log\logger.h>
 
 namespace IW {
+	size_t Chunk::ReserveComponents() {
+		++Count;
+		return CurrentIndex++ + IndexOffset;
+	}
+
+	void Chunk::ReinstateComponents() {
+		++Count;
+	}
+
+	void Chunk::FreeComponents() {
+		--Count;
+	}
+
+	bool Chunk::ContainsIndex(
+		size_t index) const
+	{
+		return  IndexOffset <= index
+			&& IndexOffset + CurrentIndex > index;
+	}
+
+	size_t Chunk::EndIndex() const {
+		return CurrentIndex + IndexOffset;
+	}
+
 	size_t Chunk::BeginIndex() {
 		size_t i = IndexOffset;
 		while (i != EndIndex() && !GetEntity(i)->Alive) {

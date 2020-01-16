@@ -22,4 +22,7 @@ public:
 
 	void Update(
 		IW::EntityComponentArray& view) override;
+
+	bool On(
+		IW::CollisionEvent& e) override;
 };

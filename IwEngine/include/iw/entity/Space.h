@@ -114,6 +114,19 @@ namespace ECS {
 			return nullptr;
 		}
 
+		template<
+			typename _c>
+		Entity FindEntityFromComponent(
+			_c* instance)
+		{
+			return FindEntityFromComponent(m_componentManager.GetComponent(typeid(_c)), instance);
+		}
+
+		IWENTITY_API
+		Entity FindEntityFromComponent(
+			iw::ref<Component> component,
+			void* instance);
+
 		// Querying
 
 		template<

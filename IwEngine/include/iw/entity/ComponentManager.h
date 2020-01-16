@@ -51,6 +51,12 @@ namespace ECS {
 			const iw::ref<EntityData>& entityData,
 			const iw::ref<Component>& component);
 
+		IWENTITY_API
+		Entity FindEntityFromComponent(
+			iw::ref<ArchetypeQuery>& query,
+			const iw::ref<Component>& component,
+			void* instance);
+
 		EntityComponentArray Query(
 			const iw::ref<ComponentQuery>& components,
 			const iw::ref<ArchetypeQuery>& query);

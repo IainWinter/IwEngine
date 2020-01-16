@@ -22,14 +22,7 @@ public:
 	pipeline& first(
 		_args... args)
 	{
-		delete m_root;
-		m_root = new _t(std::forward<_args>(args)...);
-		m_current = m_root;
-
-		m_index.clear();
-		m_index.push_back(m_current);
-
-		return *this;
+		return first<_t>(new _t(std::forward<_args>(args)...));
 	}
 
 	template<
@@ -40,10 +33,34 @@ public:
 		unsigned b,
 		_args... args)
 	{
+		return then<_t>(new _t(std::forward<_args>(args)...));
+	}
+
+	template<
+		typename _t>
+	pipeline& first(
+		_t* node)
+	{
+		delete m_root;
+		m_root = node;
+		m_current = m_root;
+
+		m_index.clear();
+		m_index.push_back(m_current);
+
+		return *this;
+	}
+
+	template<
+		typename _t>
+	pipeline& then(
+		unsigned a,
+		unsigned b,
+		_t* node)
+	{
 		if (m_current) {
-			node* n = new _t(std::forward<_args>(args)...);
-			m_current->link(n, a, b);
-			m_current = n;
+			m_current->link(node, a, b);
+			m_current = node;
 
 			m_index.push_back(m_current);
 		}

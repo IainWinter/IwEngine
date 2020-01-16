@@ -76,6 +76,20 @@ namespace IW {
 		return nullptr;
 	}
 
+	Entity ComponentManager::FindEntityFromComponent(
+		iw::ref<ArchetypeQuery>& query,
+		const iw::ref<Component>& component, 
+		void* instance)
+	{
+		for (size_t i = 0; i < query->Count; i++) {
+			ChunkList& list = m_componentData.find(query->Hashes[i])->second;
+			int index = list.IndexOf(component, instance);
+			if (index != -1) {
+				return *list.GetEntity(index);
+			}
+		}
+	}
+
 	EntityComponentArray ComponentManager::Query(
 		const iw::ref<ComponentQuery>& components,
 		const iw::ref<ArchetypeQuery>& query)

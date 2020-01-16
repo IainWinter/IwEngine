@@ -82,6 +82,17 @@ namespace IW {
 			&& m_componentManager.DestroyEntityComponents(entityData);
 	}
 
+
+	Entity Space::FindEntityFromComponent(
+		iw::ref<Component> component,
+		void* instance)
+	{
+		return m_componentManager.FindEntityFromComponent(
+			m_archetypeManager.MakeQuery(MakeQuery({ component })),
+			component,
+			instance);
+	}
+
 	EntityComponentArray Space::Query(
 		const iw::ref<ComponentQuery>& query)
 	{

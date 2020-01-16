@@ -83,6 +83,15 @@ namespace ECS {
 			size_t index);
 
 		IWENTITY_API
+		Entity* GetEntity(
+			size_t index);
+
+		IWENTITY_API
+		int IndexOf(
+			const iw::ref<Component>& component,
+			void* instance);
+
+		IWENTITY_API
 		iterator Begin(
 			const iw::ref<ComponentQuery>& query);
 

@@ -17,6 +17,16 @@ namespace ECS {
 		size_t Size;
 		size_t Count;
 		ArchetypeLayout Layout[];
+
+		ArchetypeLayout GetLayout(
+			const iw::ref<Component>& component)
+		{
+			for (size_t i = 0; i < Count; i++) {
+				if (component->Type == Layout[i].Component->Type) {
+					return Layout[i];
+				}
+			}
+		}
 	};
 
 	struct ArchetypeQuery {

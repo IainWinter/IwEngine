@@ -155,6 +155,7 @@ namespace iw {
 			if (   m_cursor      <  halfCap / 2
 				&& m_minCapacity <= halfCap)
 			{
+				LOG_INFO << m_cursor;
 				resize(halfCap);
 			}
 

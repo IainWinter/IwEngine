@@ -49,7 +49,10 @@ namespace IW {
 	TextureAtlas atlasRG;
 	TextureAtlas atlasBlur;
 
+	struct PostProcessShadowMap;
+
 	iw::pipeline pipeline;
+	PostProcessShadowMap* postProcessShadowMap;
 
 	struct GenerateShadowMap
 		: iw::node
@@ -293,7 +296,7 @@ namespace IW {
 		Space->SetComponentData<Model> (player, *sphere);
 		Space->SetComponentData<Player>(player, -10.0f, .18f, .08f);
 
-		Transform* tp      = Space->SetComponentData<Transform>     (player, iw::vector3(0, 10, 0));
+		Transform* tp      = Space->SetComponentData<Transform>     (player, iw::vector3(5, 1, 0));
 		SphereCollider* sp = Space->SetComponentData<SphereCollider>(player, iw::vector3::zero, 1.0f);
 		Rigidbody* rp      = Space->SetComponentData<Rigidbody>     (player);
 
@@ -302,6 +305,7 @@ namespace IW {
 		rp->SetTrans(tp);
 		rp->SetStaticFriction(.1f);
 		rp->SetDynamicFriction(.02f);
+		rp->SetId(player.Index);
 
 		Physics->AddRigidbody(rp);
 
@@ -319,6 +323,7 @@ namespace IW {
 		re->SetMass(1);
 		re->SetCol(se);
 		re->SetTrans(te);
+		re->SetId(enemy.Index);
 
 		Physics->AddRigidbody(re);
 
@@ -326,17 +331,34 @@ namespace IW {
 		PushSystem<EnemySystem>(sphere);
 		PushSystem<BulletSystem>();
 
-		pipeline.first<GenerateShadowMap>(Renderer, Space)
-			.then<PostProcessShadowMap>  (0, 0, Renderer)
-			.then<MainRender>            (0, 0, Renderer, Space);
+		GenerateShadowMap*     generateShadowMap    = new GenerateShadowMap(Renderer, Space);
+		                       postProcessShadowMap = new PostProcessShadowMap(Renderer);
+		MainRender*            mainRender           = new MainRender(Renderer, Space);
 
-		// get rid of first index at least
+		pipeline.first(generateShadowMap)
+			.then(0, 0, postProcessShadowMap)
+			.then(0, 0, mainRender);
 
-		pipeline.init()
-			.set(0, 0, &light)
-			.set(1, 1, targetBlur)
-			.set(1, 2, gaussian)
-			.set(2, 1, &light);
+		generateShadowMap->link(postProcessShadowMap, 0, 0);
+
+		generateShadowMap->set(0, &light);
+
+		postProcessShadowMap->set(1, targetBlur);
+		postProcessShadowMap->set(2, gaussian);
+
+		mainRender->set(1, &light);
+
+		//pipeline.first<GenerateShadowMap>(Renderer, Space)
+		//	.then<PostProcessShadowMap>  (0, 0, Renderer)
+		//	.then<MainRender>            (0, 0, Renderer, Space);
+
+		//// get rid of first index at least
+
+		//pipeline.init()
+		//	.set(0, 0, &light)
+		//	.set(1, 1, targetBlur)
+		//	.set(1, 2, gaussian)
+		//	.set(2, 1, &light);
 
 		return 0;
 	}
@@ -345,7 +367,7 @@ namespace IW {
 		float blurw = 1.0f / (target->Width() * blurAmount);
 		float blurh = 1.0f / (target->Height() * blurAmount);
 
-		pipeline.set(1, 3, iw::vector2(blurw, blurh));
+		postProcessShadowMap->set(3, iw::vector2(blurw, blurh));
 
 		pipeline.execute();
 
@@ -393,14 +415,15 @@ namespace IW {
 			Space->SetComponentData<Model>(enemy, *sphere);
 			Space->SetComponentData<Enemy>(enemy, SPIN, 0.2617993f, .12f, 0.0f);
 
-			Transform* te = Space->SetComponentData<Transform>(enemy, iw::vector3(cos(x) * 1, 15, sin(x) * 1));
+			Transform* te      = Space->SetComponentData<Transform>(enemy, iw::vector3(cos(x) * 1, 15, sin(x) * 1));
 			SphereCollider* se = Space->SetComponentData<SphereCollider>(enemy, iw::vector3::zero, 1.0f);
-			Rigidbody* re = Space->SetComponentData<Rigidbody>(enemy);
+			Rigidbody* re      = Space->SetComponentData<Rigidbody>(enemy);
 
 			re->SetMass(1);
 			re->SetCol(se);
 			re->SetTrans(te);
 			re->SetVelocity(iw::vector3(cos(x) * 0, 20, 0 * sin(x += 2 * iw::PI / sc)));
+			re->SetId(enemy.Index);
 
 			Physics->AddRigidbody(re);
 
