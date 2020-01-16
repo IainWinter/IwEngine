@@ -44,8 +44,23 @@ namespace Engine {
 			const char* name)
 		{
 			auto itr = m_items.begin();
-			for (; itr != m_items.end(); itr++;) {
+			for (; itr != m_items.end(); itr++) {
 				if (strcmp((*itr)->Name(), name) == 0) {
+					break;
+				}
+			}
+
+			if (itr != m_items.end()) {
+				m_items.erase(itr);
+			}
+		}
+
+		void Pop(
+			const T& layer)
+		{
+			auto itr = m_items.begin();
+			for (; itr != m_items.end(); itr++) {
+				if (*itr == layer) {
 					break;
 				}
 			}

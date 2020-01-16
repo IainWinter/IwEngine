@@ -26,7 +26,8 @@ namespace IW {
 		context->AddDevice(rm);
 		context->AddDevice(k);
 
-		PushLayer<ToolLayer>();
+		active = true;
+		toolbox = PushLayer<ToolLayer>();
 		PushLayer<SandboxLayer>();
 	}
 
@@ -55,6 +56,18 @@ namespace IW {
 
 		else if (command.Verb == "forward") {
 			Bus->push<ForwardEvent>(command.Active);
+		}
+
+		else if (command.Verb == "/") {
+			if (active) {
+				PopLayer(toolbox);
+			}
+
+			else {
+				PushLayer(toolbox);
+			}
+
+			active = !active;
 		}
 
 		return Application::HandleCommand(command);

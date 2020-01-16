@@ -218,6 +218,14 @@ namespace IW {
 					e.Handled = true;
 					break;
 				}
+				case iw::val(InputEventType::KeyTyped): {
+					KeyTypedEvent& kte = e.as<KeyTypedEvent>();
+					if (kte.Character == '/') {
+						Console->QueueCommand(std::string(1, kte.Character));
+						e.Handled = true;
+						break;
+					}
+				}
 			}
 		}
 

@@ -98,7 +98,7 @@ namespace Engine {
 			L* layer = new L(std::forward<Args>(args)...);
 			layer->SetApplicationVars(Space, Renderer, Asset, Physics, Bus);
 
-			m_layers.PushBack(layer);
+			PushLayer(layer);
 			return layer;
 		}
 
@@ -111,8 +111,26 @@ namespace Engine {
 			L* layer = new L(std::forward<Args>(args)...);
 			layer->SetApplicationVars(Space, Renderer, Asset, Physics, Bus);
 
-			m_layers.PushFront(layer);
+			PushOverlay(layer);
 			return layer;
+		}
+
+		template<
+			typename L>
+		void PushLayer(
+			L* layer)
+		{
+			LOG_INFO << "Pushed " << layer->Name() << " layer";
+			m_layers.PushBack(layer);
+		}
+
+		template<
+			typename L>
+		void PushOverlay(
+			L* layer)
+		{
+			LOG_INFO << "Pushed " << layer->Name() << " overlay";
+			m_layers.PushFront(layer);
 		}
 
 		template<
@@ -120,9 +138,9 @@ namespace Engine {
 		void PopLayer(
 			L* layer)
 		{
+			LOG_INFO << "Popped " << layer->Name() << " layer";
 			m_layers.Pop(layer);
 		}
-
 	};
 }
 

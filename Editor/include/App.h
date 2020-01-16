@@ -1,6 +1,7 @@
 #pragma once 
 
 #include "iw/engine/EntryPoint.h"
+#include "Layers/ToolLayer.h"
 
 namespace IW {
 inline namespace Editor {
@@ -9,6 +10,8 @@ inline namespace Editor {
 	{
 	public:
 	private:
+		ToolLayer* toolbox;
+		bool active;
 
 	public:
 		App();
