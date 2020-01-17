@@ -10,6 +10,8 @@ BulletSystem::~BulletSystem() {}
 void BulletSystem::Update(
 	IW::EntityComponentArray& view)
 {
+	size_t count = 0;
+	size_t first = 0;
 	for (auto entity : view) {
 		auto [transform, rigidbody, bullet] = entity.Components.Tie<Components>();
 
@@ -17,12 +19,22 @@ void BulletSystem::Update(
 			//rigidbody->MovePosition(transform->Position + iw::vector3(1, 0, 0) * transform->Rotation * bullet->Speed * IW::Time::FixedTime());
 		}
 
-		if (bullet->Time > 5.f) {
+		/*if (bullet->Time > 5.f) {
 			QueueDestroyEntity(entity.Index);
 			Physics->RemoveRigidbody(rigidbody);
-		}
+		}*/
 
 		bullet->Time += IW::Time::DeltaTime();
+
+		if (count == 0) {
+			first = entity.Index;
+		}
+
+		count++;
+	}
+
+	if (count > 1200) {
+		QueueDestroyEntity(first);
 	}
 }
 

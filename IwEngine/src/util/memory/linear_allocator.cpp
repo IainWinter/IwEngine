@@ -147,31 +147,33 @@ namespace iw {
 	void linear_allocator::reset(
 		bool clean)
 	{
-		if (   clean 
-			&& m_memory 
-			&& m_resets >= m_resetsToRealloc)
-		{
-			size_t halfCap = m_capacity / 2;
-			if (   m_cursor      <  halfCap / 2
-				&& m_minCapacity <= halfCap)
-			{
-				LOG_INFO << m_cursor;
-				resize(halfCap);
-			}
+		memset(m_memory, 0, m_cursor);
+		m_cursor = 0;
 
-			m_resets = 0;
-		}
+		//if (   clean 
+		//	&& m_memory 
+		//	&& m_resets >= m_resetsToRealloc)
+		//{
+		//	size_t halfCap = m_capacity / 2;
+		//	if (   m_cursor      <  halfCap / 2
+		//		&& m_minCapacity <= halfCap)
+		//	{
+		//		LOG_INFO << m_cursor;
+		//		resize(halfCap);
+		//	}
 
-		else {
-			++m_resets;
-		}
+		//	m_resets = 0;
+		//}
 
-		if (   m_memory
-			&& m_cursor >  0
-			&& m_cursor <= m_capacity)
-		{
-			memset(m_memory, 0, m_cursor);
-			m_cursor = 0;
-		}
+		//else {
+		//	++m_resets;
+		//}
+
+		//if (   m_memory
+		//	&& m_cursor >  0
+		//	&& m_cursor <= m_capacity)
+		//{
+
+		//}
 	}
 }

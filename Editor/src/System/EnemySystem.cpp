@@ -69,8 +69,9 @@ bool EnemySystem::On(
 	if (   e.BodyA->Id() != IW::NOID
 		&& e.BodyB->Id() != IW::NOID)
 	{
-		QueueDestroyEntity(e.BodyA->Id());
-		Physics->RemoveRigidbody(e.BodyA);
+		//LOG_INFO << e.BodyA->Id() << "Col";
+		//QueueDestroyEntity(e.BodyA->Id());
+		//Physics->RemoveRigidbody(e.BodyA);
 	}
 
 	return false;
