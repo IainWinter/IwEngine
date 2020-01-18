@@ -42,20 +42,31 @@ namespace util {
 	};
 
 	struct node;
+	struct node_link;
 
 	struct node_out
 		: node_in
 	{
-		node* next;
-		int index;
-
-		IWUTIL_API
-		node_out();
+		std::vector<node_link> links;
 
 		IWUTIL_API
 		void link(
 			node* node,
+			int index);
+
+		IWUTIL_API
+		void unlink(
+			node* node,
 			int i);
+	};
+
+	struct node_link {
+		node* next;
+		int index;
+
+		node_link(
+			node* next = nullptr,
+			int index = -1);
 	};
 
 	struct node {
@@ -109,13 +120,14 @@ namespace util {
 			unsigned i,
 			_t v)
 		{
-			node_out& o = m_out.at(i);
-
-			if (o.next) {
-				o.next->set<_t>(o.index, v);
+			node_out& node = m_out.at(i);
+			if (node.links.size() != 0) {
+				for (node_link& link : node.links) {
+					link.next->set<_t>(link.index, v);
+				}
 			}
 
-			o.set<_t>(v);
+			node.set<_t>(v);
 		}
 	};
 }

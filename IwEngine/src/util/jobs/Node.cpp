@@ -9,19 +9,33 @@ namespace iw {
 		free(value);
 	}
 
-	node_out::node_out()
-		: node_in()
-		, next(nullptr)
-		, index(-1)
-	{}
-
 	void node_out::link(
+		node* node,
+		int index)
+	{
+		links.emplace_back(node, index);
+	}
+
+	void node_out::unlink(
 		node* node,
 		int i)
 	{
-		next  = node;
-		index = i;
+		auto itr = links.begin();
+		for (; itr != links.end(); itr++) {
+			if (itr->next == node) {
+				break;
+			}
+		}
+
+		links.erase(itr);
 	}
+
+	node_link::node_link(
+		node* next,
+		int index)
+		: next(next)
+		, index(index)
+	{}
 
 	node::node(
 		unsigned in,

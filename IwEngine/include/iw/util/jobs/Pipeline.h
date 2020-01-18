@@ -17,26 +17,6 @@ public:
 	~pipeline();
 
 	template<
-		typename _t,
-		typename... _args>
-	pipeline& first(
-		_args... args)
-	{
-		return first<_t>(new _t(std::forward<_args>(args)...));
-	}
-
-	template<
-		typename _t,
-		typename... _args>
-	pipeline& then(
-		unsigned a,
-		unsigned b,
-		_args... args)
-	{
-		return then<_t>(new _t(std::forward<_args>(args)...));
-	}
-
-	template<
 		typename _t>
 	pipeline& first(
 		_t* node)
@@ -54,9 +34,9 @@ public:
 	template<
 		typename _t>
 	pipeline& then(
-		unsigned a,
-		unsigned b,
-		_t* node)
+		_t* node,
+		unsigned a = 0,
+		unsigned b = 0)
 	{
 		if (m_current) {
 			m_current->link(node, a, b);
@@ -70,17 +50,6 @@ public:
 
 	IWUTIL_API
 	pipeline& init(/*multithread options*/);
-
-	template<
-		typename _t>
-	pipeline& set(
-		unsigned nodeIndex,
-		unsigned index,
-		_t value)
-	{
-		m_index.at(nodeIndex)->set<_t>(index, value);
-		return *this;
-	}
 
 	IWUTIL_API
 	void execute();
