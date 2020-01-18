@@ -39,8 +39,10 @@ namespace events {
 			_args&&... args)
 		{
 			_e* e = alloc_event<_e>();
-			*e = _e{ std::forward<_args>(args)... };
-			m_events.push(e);
+			if (e != nullptr) {
+				*e = _e{ std::forward<_args>(args)... };
+				m_events.push(e);
+			}
 		}
 
 		template<
@@ -61,7 +63,9 @@ namespace events {
 			typename _e>
 		_e* alloc_event() {
 			event* e = m_alloc.alloc<_e>();
-			if (e == nullptr) {
+			if (    e == nullptr
+				&& m_alloc.capacity() < 1024 * 1024 * 8)
+			{
 				char* before = m_alloc.memory();
 				m_alloc.resize(m_alloc.capacity() * 2);
 				char* after = m_alloc.memory();
