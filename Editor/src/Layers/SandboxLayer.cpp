@@ -41,7 +41,7 @@ namespace IW {
 	};
 
 	DirectionalLight light;
-	iw::vector3 lightPos;
+	iw::vector3 lightPos = iw::vector3(2, 5, .5f);
 	iw::ref<RenderTarget> target;
 	iw::ref<RenderTarget> targetBlur;
 	iw::ref<Shader> gaussian;
@@ -249,9 +249,12 @@ namespace IW {
 
 	int SandboxLayer::Initialize() {
 		// Shader
+
+		iw::ref<Shader> shader = Asset->Load<Shader>("shaders/default.shader");
 		iw::ref<Shader> directional = Asset->Load<Shader>("shaders/lights/directional_transparent.shader");
 		gaussian = Asset->Load<Shader>("shaders/filters/gaussian.shader");
 		
+		Renderer->InitShader(shader, ALL);
 		Renderer->InitShader(directional, CAMERA);
 		Renderer->InitShader(gaussian,    CAMERA);
 
@@ -286,21 +289,75 @@ namespace IW {
 		targetBlur->AddTexture(subBlur);
 		targetBlur->Initialize(Renderer->Device);
 
-		// Light
+		// Lights
+
 		light = DirectionalLight(directional, target, OrthographicCamera(60, 60, -50, 50));
 
+		// Materials
+
+		iw::ref<Material> smat = std::make_shared<Material>();
+		iw::ref<Material> tmat = std::make_shared<Material>();
+
+		smat->SetShader(shader);
+		tmat->SetShader(shader);
+
+		smat->Set("albedo", iw::vector4(1, .95f, 1, 1));
+		tmat->Set("albedo", iw::vector4(.95f, 1, 1, 1));
+
+		smat->SetTexture("shadowMap", subRG);
+		tmat->SetTexture("shadowMap", subRG);
+
+		smat->Initialize(Renderer->Device);
+		tmat->Initialize(Renderer->Device);
+
+		// Models
+
 		iw::ref<Model> level = Asset->Load<Model>("models/grass/grass.obj");
+
 		for (size_t i = 0; i < level->MeshCount; i++) {
-			level->Meshes[i].Material->SetTexture("shadowMap", subRG);
+			iw::ref<Material>& mat = level->Meshes[i].Material;
+
+			mat->SetShader(shader);
+
+			mat->SetTexture("shadowMap", subRG);
+
+			mat->Initialize(Renderer->Device);
+
+			level->Meshes[i].SetTangents(0, nullptr);
+			level->Meshes[i].SetBiTangents(0, nullptr);
+
+			level->Meshes[i].Initialize(Renderer->Device);
 		}
 
-		// floor
+		auto a = Asset->Load<Texture>("textures/foliage/alpha_mask.jpg");
+		a->Initialize(Renderer->Device);
+
+		level->Meshes[1].Material->SetTexture("alphaMaskMap", a);
+		level->Meshes[2].Material->SetTexture("alphaMaskMap", a);
+
+		Mesh* smesh = MakeUvSphere(25, 30);
+		Mesh* tmesh = MakeTetrahedron(5);
+
+		smesh->SetMaterial(smat);
+		tmesh->SetMaterial(smat);
+
+		smesh->Initialize(Renderer->Device);
+		tmesh->Initialize(Renderer->Device);
+
+		Model sm { smesh, 1 };
+		Model tm { tmesh, 1 };
+
+		iw::ref<Model> sphere = Asset->Give<Model>("Sphere", &sm);
+		iw::ref<Model> tetrahedron = Asset->Give<Model>("Tetrahedron", &tm);
+
+		// Floor
+
 		Entity floor = Space->CreateEntity<Transform, Model, PlaneCollider, Rigidbody>();
 		Space->SetComponentData<Model>(floor, *level);
 
-		Transform*     t = Space->SetComponentData<Transform>    (floor, iw::vector3(0, 0, 0), iw::vector3(5, 1, 5));
+		Transform* t = Space->SetComponentData<Transform>(floor, iw::vector3(0, 0, 0), iw::vector3(5, 3, 5));
 		PlaneCollider* s = Space->SetComponentData<PlaneCollider>(floor, iw::vector3::unit_y, 0.0f);
-		Rigidbody*     r = Space->SetComponentData<Rigidbody>    (floor);
+		Rigidbody* r = Space->SetComponentData<Rigidbody>(floor);
 
 		r->SetIsKinematic(false);
 		r->SetMass(1);
@@ -317,18 +374,18 @@ namespace IW {
 		Transform* tb = new Transform();
 		Transform* to = new Transform();
 
-		PlaneCollider* planel = new PlaneCollider(iw::vector3( 1, 0,  0), -10);
-		PlaneCollider* planer = new PlaneCollider(iw::vector3(-1, 0,  0), -10);
-		PlaneCollider* planet = new PlaneCollider(iw::vector3( 0, 0,  1), -10);
-		PlaneCollider* planeb = new PlaneCollider(iw::vector3( 0, 0, -1), -10);
-		PlaneCollider* planeo = new PlaneCollider(iw::vector3( 0, -1, 0), -2);
+		PlaneCollider* planel = new PlaneCollider(iw::vector3(1, 0, 0), -16);
+		PlaneCollider* planer = new PlaneCollider(iw::vector3(-1, 0, 0), -16);
+		PlaneCollider* planet = new PlaneCollider(iw::vector3(0, 0, 1), -9);
+		PlaneCollider* planeb = new PlaneCollider(iw::vector3(0, 0, -1), -9);
+		PlaneCollider* planeo = new PlaneCollider(iw::vector3(0, -1, 0), -2);
 
 		Rigidbody* rl = new Rigidbody(false);
 		Rigidbody* rr = new Rigidbody(false);
 		Rigidbody* rt = new Rigidbody(false);
 		Rigidbody* rb = new Rigidbody(false);
 		Rigidbody* ro = new Rigidbody(false);
-		
+
 		rl->SetCol(planel);
 		rr->SetCol(planer);
 		rt->SetCol(planet);
@@ -341,6 +398,12 @@ namespace IW {
 		rb->SetTrans(tb);
 		ro->SetTrans(to);
 
+		rl->SetRestitution(1);
+		rr->SetRestitution(1);
+		rt->SetRestitution(1);
+		rb->SetRestitution(1);
+		ro->SetRestitution(1);
+
 		Physics->AddRigidbody(rl);
 		Physics->AddRigidbody(rr);
 		Physics->AddRigidbody(rt);
@@ -351,10 +414,7 @@ namespace IW {
 		Physics->AddDSolver(new ImpulseSolver());
 		Physics->AddSolver(new PositionSolver());
 
-		// Player
-
-		iw::ref<Model> sphere = Asset->Load<Model>("Sphere");
-		sphere->Meshes[0].Material->SetTexture("shadowMap", subRG);
+		// Player		
 
 		Entity player = Space->CreateEntity<Transform, Model, SphereCollider, Rigidbody, Player>();
 		Space->SetComponentData<Model> (player, *sphere);
@@ -372,9 +432,6 @@ namespace IW {
 
 		Physics->AddRigidbody(rp);
 
-		iw::ref<Model> tetrahedron = Asset->Load<Model>("Tetrahedron");
-		tetrahedron->Meshes[0].Material->SetTexture("shadowMap", subRG);
-
 		Entity enemy = Space->CreateEntity<Transform, Model, SphereCollider, Rigidbody, Enemy>();
 		Space->SetComponentData<Model>(enemy, *tetrahedron);
 		Space->SetComponentData<Enemy>(enemy, SPIN, 0.2617993f, .12f, 0.0f);
@@ -389,9 +446,7 @@ namespace IW {
 
 		Physics->AddRigidbody(re);
 
-		PushSystem<PlayerSystem>();
-		PushSystem<EnemySystem>(sphere);
-		PushSystem<BulletSystem>();
+		// Rendering pipeline
 
 		                       generateShadowMap    = new GenerateShadowMap(Renderer, Space);
 		                       postProcessShadowMap = new PostProcessShadowMap(Renderer);
@@ -408,17 +463,11 @@ namespace IW {
 
 		mainRender->SetLight(light);
 
-		//pipeline.first<GenerateShadowMap>(Renderer, Space)
-		//	.then<PostProcessShadowMap>  (0, 0, Renderer)
-		//	.then<MainRender>            (0, 0, Renderer, Space);
+		// Systems
 
-		//// get rid of first index at least
-
-		//pipeline.init()
-		//	.set(0, 0, &light)
-		//	.set(1, 1, targetBlur)
-		//	.set(1, 2, gaussian)
-		//	.set(2, 1, &light);
+		PushSystem<PlayerSystem>();
+		PushSystem<EnemySystem>(sphere);
+		PushSystem<BulletSystem>();
 
 		return 0;
 	}

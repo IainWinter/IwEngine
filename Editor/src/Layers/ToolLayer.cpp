@@ -27,83 +27,10 @@ namespace IW {
 	{}
 
 	int ToolLayer::Initialize() {
-		iw::ref<Shader> shader = Asset->Load<Shader>("shaders/default.shader");
-		Renderer->InitShader(shader, ALL);
-
-		iw::ref<Material> smat = std::make_shared<Material>();
-		smat->SetShader(shader);
-
-		smat->Initialize(Renderer->Device);
-
-		smat->Set("albedo", iw::vector4(1, .92f, 1, 1));
-		//smat->Set("hasAlbedoMap", (float)false);
-		//smat->Set("hasShadowMap", (float)true);
-		//smat->Set("hasAoMap", (float)false);
-		//smat->Set("hasDisplacementMap", (float)false);
-
-		//iw::ref<Material> pmat = std::make_shared<Material>();
-		//pmat->SetShader(shader);
-
-		//pmat->Initialize(Renderer->Device);
-
-		//pmat->Set       ("albedo", iw::vector4(1));
-		//pmat->SetTexture("displacementMap", Asset->Load<Texture>("textures/moss/displacement.jpg"));
-		//pmat->SetTexture("albedoMap", Asset->Load<Texture>("textures/moss/albedo.jpg"));
-		//pmat->SetTexture("aoMap", Asset->Load<Texture>("textures/moss/ao.jpg"));
-		//pmat->Set("hasDisplacementMap", (float)false);
-		//pmat->Set("hasAlbedoMap", (float)true);
-		//pmat->Set("hasAoMap", (float)true);
-		//pmat->Set("hasShadowMap", (float)true);
-
-		//pmat->SetTexture("ambientMap",      Asset->Load<Texture>("textures/moss/ao.jpg"));
-		//pmat->SetTexture("displacementMap", Asset->Load<Texture>("textures/moss/displacement.jpg"));
-		//pmat->SetTexture("normalMap",       Asset->Load<Texture>("textures/moss/normal.jpg"));
-
-		Mesh* smesh = MakeUvSphere(25, 30);
-		smesh->SetMaterial(smat);
-		smesh->Initialize(Renderer->Device);
-		
-		Mesh* tmesh = MakeTetrahedron(5);
-		tmesh->SetMaterial(smat);
-		tmesh->Initialize(Renderer->Device);
-
-		iw::ref<Model> level = Asset->Load<Model>("models/grass/grass.obj");
-
-		/*Asset->Load<Model>("models/grass.obj");*/
-
-		for (size_t i = 0; i < level->MeshCount; i++) {
-			iw::ref<Material>& mat = level->Meshes[i].Material;
-			
-			mat->SetShader(shader);
-			mat->Initialize(Renderer->Device);
-			//mat->GetTexture("displacementMap")->Initialize(Renderer->Device);
-			//mat->GetTexture("albedoMap")->Initialize(Renderer->Device);
-			//mat->GetTexture("aoMap")->Initialize(Renderer->Device);
-			//mat->GetTexture("ambientMap")->Initialize(Renderer->Device);
-			//mat->GetTexture("normalMap") ->Initialize(Renderer->Device);
-
-			level->Meshes[i].SetTangents(0, nullptr);
-			level->Meshes[i].SetBiTangents(0, nullptr);
-
-			level->Meshes[i].Initialize(Renderer->Device);
-		}
-
-		auto a = Asset->Load<Texture>("textures/foliage/alpha_mask.jpg");
-		a->Initialize(Renderer->Device);
-
-		level->Meshes[1].Material->SetTexture("alphaMaskMap", a);
-		level->Meshes[2].Material->SetTexture("alphaMaskMap", a);
-
-		Model sm { smesh, 1 };
-		Model tm { tmesh, 1 };
-
-		Asset->Give<Model>("Sphere", &sm);
-		Asset->Give<Model>("Tetrahedron", &tm);
-
 		PerspectiveCamera* perspective = new PerspectiveCamera(1.17f, 1.778f, .01f, 2000.0f);
 
 		IW::Entity camera = Space->CreateEntity<Transform, CameraController>();
-		Space->SetComponentData<Transform>(camera, iw::vector3(0, 0, -5));
+		Space->SetComponentData<Transform>(camera, iw::vector3(0, 25, 0), iw::vector3::one, iw::quaternion::from_axis_angle(iw::vector3::unit_x, -iw::PI/2));
 		Space->SetComponentData<CameraController>(camera, perspective);
 
 		PushSystem<EditorCameraController>();

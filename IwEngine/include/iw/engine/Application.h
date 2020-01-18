@@ -121,6 +121,7 @@ namespace Engine {
 			L* layer)
 		{
 			LOG_INFO << "Pushed " << layer->Name() << " layer";
+			layer->SetApplicationVars(Space, Renderer, Asset, Physics, Bus);
 			m_layers.PushBack(layer);
 		}
 
@@ -130,6 +131,7 @@ namespace Engine {
 			L* layer)
 		{
 			LOG_INFO << "Pushed " << layer->Name() << " overlay";
+			layer->SetApplicationVars(Space, Renderer, Asset, Physics, Bus);
 			m_layers.PushFront(layer);
 		}
 

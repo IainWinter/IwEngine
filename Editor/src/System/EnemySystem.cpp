@@ -47,6 +47,7 @@ void EnemySystem::Update(
 			r->SetTrans(t);
 			r->SetVelocity(v);
 			r->SetSimGravity(false);
+			r->SetRestitution(1);
 
 			Physics->AddRigidbody(r);
 		}

@@ -32,19 +32,18 @@ namespace IW {
 					t->Position += -forward * movement.z * speed * Time::DeltaTime();
 				}
 
-				c->Camera->Position = t->Position;
 			}
-
+			
 			if (rotation != 0) {
 				iw::quaternion deltaP = iw::quaternion::from_axis_angle(-t->Right(), rotation.x);
 				iw::quaternion deltaY = iw::quaternion::from_axis_angle(iw::vector3::unit_y, rotation.y);
 
 				t->Rotation *= deltaP * deltaY;
-
-				c->Camera->Rotation = t->Rotation;
-
-				rotation = 0;
 			}
+			
+			c->Camera->Position = t->Position;
+			c->Camera->Rotation = t->Rotation;
+			rotation = 0;
 		}
 	}
 

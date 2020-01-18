@@ -21,10 +21,8 @@ inline namespace Editor {
 	public:
 		EditorCameraController();
 
-
-
 		void Update(
-			EntityComponentArray& eca);
+			EntityComponentArray& eca) override;
 
 		bool On(ActionEvent& e) override;
 		bool On(MouseMovedEvent& e) override;

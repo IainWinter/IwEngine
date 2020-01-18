@@ -26,7 +26,7 @@ namespace IW {
 		context->AddDevice(rm);
 		context->AddDevice(k);
 
-		active = true;
+		active = false;
 		toolbox = PushLayer<ToolLayer>();
 		PushLayer<SandboxLayer>();
 	}
@@ -39,6 +39,8 @@ namespace IW {
 		if (!err) {
 			GetLayer<ImGuiLayer>("ImGui")->BindContext();
 		}
+
+		PopLayer(toolbox);
 
 		return err;
 	}
