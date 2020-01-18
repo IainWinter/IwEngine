@@ -26,19 +26,12 @@ namespace Physics {
 		Collider* Col() const; // should be const probly also these are not needed if they are pointers but Ill try the get set thigs for now as a lil test because ive always dismissed it for the most part
 
 		IWPHYSICS_API
-		size_t Id() const;
-
-		IWPHYSICS_API
 		void SetTrans(
 			Transform* transform);
 
 		IWPHYSICS_API
 		void SetCol(
 			Collider* collider);
-
-		IWPHYSICS_API
-		void SetId(
-			size_t id);
 	};
 }
 

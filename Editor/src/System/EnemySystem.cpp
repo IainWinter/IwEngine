@@ -47,7 +47,6 @@ void EnemySystem::Update(
 			r->SetTrans(t);
 			r->SetVelocity(v);
 			r->SetSimGravity(false);
-			r->SetId(ent.Index);
 
 			Physics->AddRigidbody(r);
 		}
@@ -66,13 +65,13 @@ void EnemySystem::Update(
 bool EnemySystem::On(
 	IW::CollisionEvent& e)
 {
-	if (   e.BodyA->Id() != IW::NOID
-		&& e.BodyB->Id() != IW::NOID)
-	{
-		//LOG_INFO << e.BodyA->Id() << "Col";
-		//QueueDestroyEntity(e.BodyA->Id());
-		//Physics->RemoveRigidbody(e.BodyA);
-	}
+	//if (   e.BodyA->Id() != IW::NOID
+	//	&& e.BodyB->Id() != IW::NOID)
+	//{
+	//	//LOG_INFO << e.BodyA->Id() << "Col";
+	//	//QueueDestroyEntity(e.BodyA->Id());
+	//	//Physics->RemoveRigidbody(e.BodyA);
+	//}
 
 	return false;
 }

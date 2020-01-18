@@ -246,7 +246,7 @@ namespace iw {
 			return identity;
 		}
 
-		float a = angle / 2;
+		float a = angle * 0.5f;
 		return quaternion(axis * sin(a), cos(a));
 	}
 
@@ -298,19 +298,21 @@ namespace iw {
 		vector3 target,
 		vector3 up)
 	{
-		vector3 forward = (target - eye).normalized();
-		float dot = forward.dot(vector3::unit_z);
+		vector3 z = -vector3::unit_z;
 
-		if (iw::almost_equal(dot, -1.0f, 6)) {
+		vector3 forward = (target - eye).normalized();
+		float dot = z.dot(forward);
+
+		if (abs(dot + 1.0f) < 0.00001f) {
 			return quaternion(up, PI);
 		}
 
-		else if (iw::almost_equal(dot, 1.0f, 6)) {
-			return identity;
+		if (abs(dot - 1.0f) < 0.00001f) {
+			return quaternion::identity;
 		}
 
-		float angle = acos(dot);
-		vector3 axis = forward.cross(vector3::unit_z).normalized();
+		float angle  = acos(dot);
+		vector3 axis = z.cross(forward).normalized();
 
 		return from_axis_angle(axis, angle);
 	}

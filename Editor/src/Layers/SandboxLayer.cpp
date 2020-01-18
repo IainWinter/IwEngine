@@ -41,6 +41,7 @@ namespace IW {
 	};
 
 	DirectionalLight light;
+	iw::vector3 lightPos;
 	iw::ref<RenderTarget> target;
 	iw::ref<RenderTarget> targetBlur;
 	iw::ref<Shader> gaussian;
@@ -49,9 +50,11 @@ namespace IW {
 	TextureAtlas atlasRG;
 	TextureAtlas atlasBlur;
 
+	struct GenerateShadowMap;
 	struct PostProcessShadowMap;
 
 	iw::pipeline pipeline;
+	GenerateShadowMap* generateShadowMap;
 	PostProcessShadowMap* postProcessShadowMap;
 
 	struct GenerateShadowMap
@@ -68,9 +71,29 @@ namespace IW {
 			, space(s)
 		{}
 
+		void SetLight(
+			DirectionalLight& light)
+		{
+			set<DirectionalLight*>(0, &light);
+		}
+
+		void SetThreshold(
+			float threshold)
+		{
+			set<float>(1, threshold);
+		}
+
+		Light* GetLight() {
+			return in<Light*>(0);
+		}
+
+		float& GetThreshold() {
+			return in<float>(1);
+		}
+
 		void execute() override {
-			Light* light = in<Light*>(0);
-			float& threshold = in<float>(1);
+			Light* light = GetLight();
+			float& threshold = GetThreshold();
 
 			renderer->BeginLight(light);
 
@@ -78,15 +101,17 @@ namespace IW {
 				auto [m_t, m_m] = m_e.Components.Tie<ModelComponents>();
 
 				for (size_t i = 0; i < m_m->MeshCount; i++) {
-					//iw::ref<Texture> t = m_m->Meshes[i].Material->GetTexture("alphaMaskMap");
+					iw::ref<Texture> t = m_m->Meshes[i].Material->GetTexture("alphaMaskMap");
 
-					//ITexture* it = nullptr;
-					//if (t) {
-					//	it = t->Handle();
-					//}
+					ITexture* it = nullptr;
+					if (t) {
+						it = t->Handle();
+					}
 
-					//light->LightShader()->Program->GetParam("alphaMask")->SetAsTexture(it, 0);
-					//light->LightShader()->Program->GetParam("alphaThreshold")->SetAsFloat(threshold);
+					light->LightShader()->Program->GetParam("hasAlphaMask")  ->SetAsFloat(it != nullptr);
+
+					light->LightShader()->Program->GetParam("alphaMask")     ->SetAsTexture(it, 0);
+					light->LightShader()->Program->GetParam("alphaThreshold")->SetAsFloat(threshold);
 
 					renderer->CastMesh(light, m_t, &m_m->Meshes[i]);
 				}
@@ -109,11 +134,45 @@ namespace IW {
 			, renderer(r)
 		{}
 
+		void SetIntermediate(
+			iw::ref<RenderTarget>& target)
+		{
+			set<iw::ref<RenderTarget>>(1, target);
+		}
+		
+		void SetShader(
+			iw::ref<Shader>& shader)
+		{
+			set<iw::ref<Shader>>(2, shader);
+		}
+
+		void SetBlur(
+			iw::vector2& blur)
+		{
+			set<iw::vector2>(3, blur);
+		}
+
+		iw::ref<RenderTarget>& GetTarget() {
+			return in<iw::ref<RenderTarget>>(0);
+		}
+
+		iw::ref<RenderTarget>& GetIntermediate() {
+			return in<iw::ref<RenderTarget>>(1);
+		}
+
+		iw::ref<Shader>& GetShader() {
+			return in<iw::ref<Shader>>(2);
+		}
+
+		iw::vector2& GetBlur() {
+			return in<iw::vector2>(3);
+		}
+
 		void execute() override {
-			iw::ref<RenderTarget>& target = in<iw::ref<RenderTarget>>(0);
-			iw::ref<RenderTarget>& intermediate = in<iw::ref<RenderTarget>>(1);
-			iw::ref<Shader>& shader = in<iw::ref<Shader>>(2);
-			iw::vector2& blur = in<iw::vector2>(3);
+			iw::ref<RenderTarget>& target = GetTarget();
+			iw::ref<RenderTarget>& intermediate = GetIntermediate();
+			iw::ref<Shader>& shader = GetShader();
+			iw::vector2& blur = GetBlur();
 
 			renderer->SetShader(gaussian);
 
@@ -141,9 +200,23 @@ namespace IW {
 			, space(s)
 		{}
 
+		void SetLight(
+			DirectionalLight& light)
+		{
+			set<DirectionalLight*>(1, &light);
+		}
+
+		iw::ref<Texture>& GetTexture() {
+			return in<iw::ref<Texture>>(0);
+		}
+
+		Light* GetLight() {
+			return in<Light*>(1);
+		}
+
 		void execute() override {
-			iw::ref<Texture>& shadowMap = in<iw::ref<Texture>>(0);
-			Light* light = in<Light*>(1);
+			iw::ref<Texture>& shadowMap = GetTexture();
+			Light* light = GetLight();
 
 			for (auto c_e : space->Query<Transform, CameraController>()) {
 				auto [c_t, c_c] = c_e.Components.Tie<CameraComponents>();
@@ -176,7 +249,7 @@ namespace IW {
 
 	int SandboxLayer::Initialize() {
 		// Shader
-		iw::ref<Shader> directional = Asset->Load<Shader>("shaders/lights/directional.shader");
+		iw::ref<Shader> directional = Asset->Load<Shader>("shaders/lights/directional_transparent.shader");
 		gaussian = Asset->Load<Shader>("shaders/filters/gaussian.shader");
 		
 		Renderer->InitShader(directional, CAMERA);
@@ -204,13 +277,6 @@ namespace IW {
 		subRG  ->Initialize(Renderer->Device);
 		subBlur->Initialize(Renderer->Device);
 
-		// Target
-		//iw::ref<RenderTarget> target = Renderer->BuildRenderTarget()
-		//	.SetWidth(1024)
-		//	.SetHeight(1024)
-		//	.AddTexture(sub)
-		//	.Initialize();
-
 		target = std::make_shared<RenderTarget>(1024, 1024);
 		target->AddTexture(subRG);
 		target->AddTexture(subD);
@@ -221,9 +287,7 @@ namespace IW {
 		targetBlur->Initialize(Renderer->Device);
 
 		// Light
-		light = DirectionalLight(directional, target, OrthographicCamera(30, 30, -5, 50));
-		light.SetPosition(2);
-		light.SetRotation(iw::quaternion::from_look_at(iw::vector3(1)));
+		light = DirectionalLight(directional, target, OrthographicCamera(60, 60, -50, 50));
 
 		iw::ref<Model> level = Asset->Load<Model>("models/grass/grass.obj");
 		for (size_t i = 0; i < level->MeshCount; i++) {
@@ -234,7 +298,7 @@ namespace IW {
 		Entity floor = Space->CreateEntity<Transform, Model, PlaneCollider, Rigidbody>();
 		Space->SetComponentData<Model>(floor, *level);
 
-		Transform*     t = Space->SetComponentData<Transform>    (floor, iw::vector3(0, 0, 0), iw::vector3(5));
+		Transform*     t = Space->SetComponentData<Transform>    (floor, iw::vector3(0, 0, 0), iw::vector3(5, 1, 5));
 		PlaneCollider* s = Space->SetComponentData<PlaneCollider>(floor, iw::vector3::unit_y, 0.0f);
 		Rigidbody*     r = Space->SetComponentData<Rigidbody>    (floor);
 
@@ -305,7 +369,6 @@ namespace IW {
 		rp->SetTrans(tp);
 		rp->SetStaticFriction(.1f);
 		rp->SetDynamicFriction(.02f);
-		rp->SetId(player.Index);
 
 		Physics->AddRigidbody(rp);
 
@@ -323,7 +386,6 @@ namespace IW {
 		re->SetMass(1);
 		re->SetCol(se);
 		re->SetTrans(te);
-		re->SetId(enemy.Index);
 
 		Physics->AddRigidbody(re);
 
@@ -331,22 +393,20 @@ namespace IW {
 		PushSystem<EnemySystem>(sphere);
 		PushSystem<BulletSystem>();
 
-		GenerateShadowMap*     generateShadowMap    = new GenerateShadowMap(Renderer, Space);
+		                       generateShadowMap    = new GenerateShadowMap(Renderer, Space);
 		                       postProcessShadowMap = new PostProcessShadowMap(Renderer);
 		MainRender*            mainRender           = new MainRender(Renderer, Space);
 
 		pipeline.first(generateShadowMap)
-			.then(0, 0, postProcessShadowMap)
-			.then(0, 0, mainRender);
+			.then(postProcessShadowMap)
+			.then(mainRender);
 
-		generateShadowMap->link(postProcessShadowMap, 0, 0);
+		generateShadowMap->SetLight(light);
 
-		generateShadowMap->set(0, &light);
+		postProcessShadowMap->SetIntermediate(targetBlur);
+		postProcessShadowMap->SetShader(gaussian);
 
-		postProcessShadowMap->set(1, targetBlur);
-		postProcessShadowMap->set(2, gaussian);
-
-		mainRender->set(1, &light);
+		mainRender->SetLight(light);
 
 		//pipeline.first<GenerateShadowMap>(Renderer, Space)
 		//	.then<PostProcessShadowMap>  (0, 0, Renderer)
@@ -363,11 +423,17 @@ namespace IW {
 		return 0;
 	}
 
+	float threshold = 0;
+
 	void SandboxLayer::PostUpdate() {
+		light.SetPosition(lightPos);
+		light.SetRotation(iw::quaternion::from_look_at(lightPos));
+
 		float blurw = 1.0f / (target->Width() * blurAmount);
 		float blurh = 1.0f / (target->Height() * blurAmount);
 
-		postProcessShadowMap->set(3, iw::vector2(blurw, blurh));
+		generateShadowMap->SetThreshold(threshold);
+		postProcessShadowMap->SetBlur(iw::vector2(blurw, blurh));
 
 		pipeline.execute();
 
@@ -395,6 +461,8 @@ namespace IW {
 
 		ImGui::SliderFloat("Time scale", &ts, 0.001f, 1);
 		ImGui::SliderFloat("Shadow map blur", &blurAmount, 0.001f, 5);
+		ImGui::SliderFloat("Shadow map threshold", &threshold, 0, 1);
+		ImGui::SliderFloat3("Light pos", (float*)&lightPos, -5, 5);
 
 		ImGui::End();
 	}
@@ -423,7 +491,6 @@ namespace IW {
 			re->SetCol(se);
 			re->SetTrans(te);
 			re->SetVelocity(iw::vector3(cos(x) * 0, 20, 0 * sin(x += 2 * iw::PI / sc)));
-			re->SetId(enemy.Index);
 
 			Physics->AddRigidbody(re);
 

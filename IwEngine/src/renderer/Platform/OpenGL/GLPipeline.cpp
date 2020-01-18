@@ -53,6 +53,10 @@ namespace IW {
 				param = (GLPipelineParam*)GetParam(location);
 				m_params.emplace(name, param);
 			}
+
+			else {
+				LOG_WARNING << "Couldn't find uniform " << name;
+			}
 		}
 
 		return param;

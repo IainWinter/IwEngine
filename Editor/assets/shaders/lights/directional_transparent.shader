@@ -21,12 +21,13 @@ void main() {
 #version 430 core
 
 uniform sampler2D alphaMask;
+uniform float hasAlphaMask;
 uniform float alphaThreshold;
 
 in vec2 UV;
 
 void main() {
-	if (alphaThreshold > texture(alphaMask, UV).r) {
+	if (hasAlphaMask == 1 && alphaThreshold >= texture(alphaMask, UV).r) {
 		discard;
 	}
 

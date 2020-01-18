@@ -12,6 +12,7 @@ void BulletSystem::Update(
 {
 	size_t count = 0;
 	size_t first = 0;
+	IW::Rigidbody* body = nullptr;
 	for (auto entity : view) {
 		auto [transform, rigidbody, bullet] = entity.Components.Tie<Components>();
 
@@ -25,16 +26,19 @@ void BulletSystem::Update(
 		}*/
 
 		bullet->Time += IW::Time::DeltaTime();
+		transform->Position.y = 1;
 
-		if (count == 0) {
+		if (count >= 400) {
 			first = entity.Index;
+			body = rigidbody;
 		}
 
 		count++;
 	}
 
-	if (count > 1200) {
+	if (count > 400) {
 		QueueDestroyEntity(first);
+		Physics->RemoveRigidbody(body);
 	}
 }
 
