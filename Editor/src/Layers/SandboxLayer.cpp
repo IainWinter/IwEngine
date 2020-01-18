@@ -45,7 +45,7 @@ namespace IW {
 	iw::ref<RenderTarget> target;
 	iw::ref<RenderTarget> targetBlur;
 	iw::ref<Shader> gaussian;
-	float blurAmount = 1.2f;
+	float blurAmount = .5f;
 	TextureAtlas atlasD;
 	TextureAtlas atlasRG;
 	TextureAtlas atlasBlur;
@@ -478,8 +478,8 @@ namespace IW {
 		light.SetPosition(lightPos);
 		light.SetRotation(iw::quaternion::from_look_at(lightPos));
 
-		float blurw = 1.0f / (target->Width() * blurAmount);
-		float blurh = 1.0f / (target->Height() * blurAmount);
+		float blurw = 1.0f / target->Width() * blurAmount;
+		float blurh = 1.0f / target->Height() * blurAmount;
 
 		generateShadowMap->SetThreshold(threshold);
 		postProcessShadowMap->SetBlur(iw::vector2(blurw, blurh));
@@ -509,7 +509,7 @@ namespace IW {
 		ImGui::Begin("Sandbox");
 
 		ImGui::SliderFloat("Time scale", &ts, 0.001f, 1);
-		ImGui::SliderFloat("Shadow map blur", &blurAmount, 0.001f, 5);
+		ImGui::SliderFloat("Shadow map blur", &blurAmount, 0, 5);
 		ImGui::SliderFloat("Shadow map threshold", &threshold, 0, 1);
 		ImGui::SliderFloat3("Light pos", (float*)&lightPos, -5, 5);
 
