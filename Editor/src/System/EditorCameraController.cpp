@@ -40,9 +40,7 @@ namespace IW {
 
 				t->Rotation *= deltaP * deltaY;
 			}
-			
-			c->Camera->Position = t->Position;
-			c->Camera->Rotation = t->Rotation;
+
 			rotation = 0;
 		}
 	}

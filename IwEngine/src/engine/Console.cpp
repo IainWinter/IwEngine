@@ -57,7 +57,7 @@ namespace IW {
 			tokens.push_back(token);
 		}
 
-		char* original = m_strbuf.alloc<char>(tokens[0].size() + 1);
+		char* original = m_strbuf.alloc<char>(tokens[0].size() + 1); // needs to resize sometimes
 		strcpy(original, tokens[0].c_str());
 			 
 		bool active = true;

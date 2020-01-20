@@ -19,7 +19,7 @@ namespace IW {
 
 		iw::ref<EntityData> entityData = m_pool.alloc_ref_t<EntityData>();
 
-		entityData->Entity = Entity {
+		entityData->Entity = EntityHandle {
 			m_entities.size(),
 			0,
 			true

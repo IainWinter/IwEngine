@@ -37,11 +37,11 @@ namespace IW {
 
 	EntityComponentData iterator::operator*() {
 		for (size_t i = 0; i < m_indices->Count; i++) {
-			m_data->Components[i] = m_chunk->GetComponentData(
+			m_data->Components[i] = m_chunk->GetComponentPtr(
 				m_archetype->Layout[m_indices->Indices[i]], m_index);
 		}
 
-		Entity* entity = m_chunk->GetEntity(m_index);
+		EntityHandle* entity = m_chunk->GetEntity(m_index);
 
 		//if (   m_chunk 
 		//	&& m_index == m_chunk->EndIndex())
@@ -61,7 +61,7 @@ namespace IW {
 		size_t index,
 		const iw::ref<Archetype>& archetype,
 		const iw::ref<ComponentQuery>& query,
-		iw::pool_allocator& pool)
+		iw::pool_allocator& componentPool)
 		: m_chunk(chunk)
 		, m_index(index)
 		, m_archetype(archetype)
@@ -70,13 +70,13 @@ namespace IW {
 			+ sizeof(size_t)
 			* query->Count;
 
-		m_data = pool.alloc_ref_t<ComponentData>(cdSize);
+		m_data = componentPool.alloc_ref_t<ComponentData>(cdSize);
 		
 		size_t cdisSize = sizeof(ComponentDataIndices)
 			+ sizeof(size_t)
 			* query->Count;
 
-		m_indices = pool.alloc_ref_t<ComponentDataIndices>(cdisSize);
+		m_indices = componentPool.alloc_ref_t<ComponentDataIndices>(cdisSize);
 	
 		m_indices->Count = query->Count;
 		for (size_t i = 0; i < query->Count; i++) {
@@ -92,25 +92,25 @@ namespace IW {
 	ChunkList::ChunkList(
 		const iw::ref<Archetype>& archetype,
 		size_t chunkSize,
-		iw::pool_allocator& itrPool,
-		iw::pool_allocator& componentPool)
+		iw::pool_allocator& componentPool,
+		iw::pool_allocator& chunkPool)
 		: m_root(nullptr)
 		, m_count(0)
 		, m_chunkCount(0)
 		, m_archetype(archetype)
 		, m_chunkSize(chunkSize)
 		, m_chunkCapacity(GetChunkCapacity(archetype))
-		, m_itrPool(itrPool)
 		, m_componentPool(componentPool)
+		, m_chunkPool(chunkPool)
 	{}
 
 	size_t ChunkList::ReserveComponents(
-		const Entity& entity)
+		const EntityHandle& entity)
 	{
 		Chunk& chunk = FindOrCreateChunk();
 		size_t index = chunk.ReserveComponents();
 
-		Entity* entityComponent = chunk.GetEntity(index);
+		EntityHandle* entityComponent = chunk.GetEntity(index);
 		*entityComponent = entity;
 
 		++m_count;
@@ -125,7 +125,7 @@ namespace IW {
 		if (chunk) {
 			chunk->ReinstateComponents();
 
-			Entity* entityComponent = chunk->GetEntity(entityData->ChunkIndex);
+			EntityHandle* entityComponent = chunk->GetEntity(entityData->ChunkIndex);
 			*entityComponent = entityData->Entity;
 
 			++m_count;
@@ -143,7 +143,7 @@ namespace IW {
 		if (chunk) {
 			chunk->FreeComponents();
 
-			Entity* entityComponent = chunk->GetEntity(index);
+			EntityHandle* entityComponent = chunk->GetEntity(index);
 			entityComponent->Alive = false;
 
 			--m_count;
@@ -174,7 +174,33 @@ namespace IW {
 		return false;
 	}
 
-	void* ChunkList::GetComponentData(
+	bool ChunkList::MoveComponents(
+		ChunkList& to,
+		size_t index,
+		size_t newIndex)
+	{
+		Chunk* chunk = FindChunk(index);
+		if (chunk) {
+			for (size_t i = 0; i < m_archetype->Count; i++) {
+				ArchetypeLayout& layout = m_archetype->Layout[i];
+				iw::ref<Component> component = layout.Component;
+
+				void* ptr  = to.GetComponentPtr(component, newIndex);
+				if (!ptr) continue;
+
+				void* from = chunk->GetComponentPtr(layout, index);
+				if (!from) continue; // not sure if this can ever trip
+
+				memmove(ptr, from, component->Size); // could put this in Chunk.h if it sounds better
+			}
+
+			return true;
+		}
+
+		return false;
+	}
+
+	void* ChunkList::GetComponentPtr(
 		const iw::ref<Component>& component,
 		size_t index)
 	{
@@ -191,13 +217,13 @@ namespace IW {
 				return nullptr;
 			}
 
-			return chunk->GetComponentData(m_archetype->Layout[i], index);
+			return chunk->GetComponentPtr(m_archetype->Layout[i], index);
 		}
 
 		return nullptr;
 	}
 
-	Entity* ChunkList::GetEntity(
+	EntityHandle* ChunkList::GetEntity(
 		size_t index)
 	{
 		Chunk* chunk = FindChunk(index);
@@ -212,18 +238,20 @@ namespace IW {
 		const iw::ref<Component>& component,
 		void* instance)
 	{
+		int index = -1;
 		Chunk* chunk = m_root;
-		if (chunk) {
-			size_t offset = (char*)instance - (char*)(chunk->Buffer);
-			if (offset < m_chunkSize) {
-				ArchetypeLayout layout = m_archetype->GetLayout(component);
-				return (offset - layout.Offset * m_chunkCapacity) / layout.Component->Size;
+		while (chunk) {
+			index = chunk->IndexOf(m_archetype->GetLayout(component), instance);
+			if (index == -1) {
+				chunk = chunk->Next;
 			}
 
-			chunk = chunk->Next;
+			else {
+				break;
+			}
 		}
 
-		return -1;
+		return index;
 	}
 
 	iterator ChunkList::Begin(
@@ -239,7 +267,7 @@ namespace IW {
 			index = chunk->BeginIndex();
 		}
 
-		return iterator(m_root, index, m_archetype, query, m_itrPool);
+		return iterator(m_root, index, m_archetype, query, m_componentPool);
 	}
 
 	iterator ChunkList::End(
@@ -255,7 +283,7 @@ namespace IW {
 			index = chunk->EndIndex();
 		}
 
-		return iterator(nullptr, index, m_archetype, query, m_itrPool);
+		return iterator(nullptr, index, m_archetype, query, m_componentPool);
 	}
 
 	Chunk* ChunkList::FindChunk(
@@ -270,7 +298,7 @@ namespace IW {
 	}
 
 	Chunk* ChunkList::CreateChunk() {
-		Chunk* chunk = m_componentPool.alloc_t<Chunk>(m_chunkSize);
+		Chunk* chunk = m_chunkPool.alloc_t<Chunk>(m_chunkSize);
 
 		chunk->IndexOffset = m_chunkCapacity * m_chunkCount;
 		chunk->Capacity    = m_chunkCapacity;
@@ -303,8 +331,8 @@ namespace IW {
 	size_t ChunkList::GetChunkCapacity(
 		const iw::ref<Archetype>& archetype)
 	{
-		size_t archetypeSize = archetype->Size + sizeof(Entity);
-		size_t bufSize       = m_chunkSize - sizeof(Chunk);
+		size_t archetypeSize = archetype->Size + sizeof(EntityHandle);
+		size_t bufSize       = m_chunkSize     - sizeof(Chunk);
 		size_t padSize       = bufSize % archetypeSize;
 
 		return (bufSize - padSize) / archetypeSize;

@@ -1,7 +1,7 @@
 #include "Layers/GameLayer3D.h"
 #include "iw/graphics/Loaders/ModelLoader.h"
 #include "iw/engine/Components/CameraController.h"
-#include "iw/engine/Components/Model.h"
+#include "iw/graphics/Model.h"
 #include "iw/input/Devices/Keyboard.h"
 #include "iw/input/Devices/Mouse.h"
 #include "iw/engine/Time.h"
@@ -149,18 +149,18 @@ int GameLayer3D::Initialize()
 	IW::Entity enemy  = Space->CreateEntity<IW::Transform, IW::ModelComponent, Enemy>();
 	IW::Entity floor  = Space->CreateEntity<IW::Transform, IW::ModelComponent>();
 	
-	Space->SetComponentData<IW::CameraController>(camera, perspective);
+	Space->SetComponent<IW::CameraController>(camera, perspective);
 
-	Space->SetComponentData<IW::Transform>     (player, iw::vector3(3, -0.25f, 0), iw::vector3(0.75f));
-	Space->SetComponentData<IW::ModelComponent>(player, mesh, 1U);
-	Space->SetComponentData<Player>            (player, 4.0f, .18f, .08f);
+	Space->SetComponent<IW::Transform>     (player, iw::vector3(3, -0.25f, 0), iw::vector3(0.75f));
+	Space->SetComponent<IW::ModelComponent>(player, mesh, 1U);
+	Space->SetComponent<Player>            (player, 4.0f, .18f, .08f);
 
-	Space->SetComponentData<IW::Transform>     (enemy, iw::vector3(0, -0.25f, 0), iw::vector3(0.75f));
-	Space->SetComponentData<IW::ModelComponent>(enemy, mesh, 1U);
-	Space->SetComponentData<Enemy>             (enemy, SPIN, 0.2617993f, .12f, 0.0f);
+	Space->SetComponent<IW::Transform>     (enemy, iw::vector3(0, -0.25f, 0), iw::vector3(0.75f));
+	Space->SetComponent<IW::ModelComponent>(enemy, mesh, 1U);
+	Space->SetComponent<Enemy>             (enemy, SPIN, 0.2617993f, .12f, 0.0f);
 
-	Space->SetComponentData<IW::Transform>     (floor, iw::vector3(0, -1, 0), iw::vector3(15, 1, 15));
-	Space->SetComponentData<IW::ModelComponent>(floor, floorMesh, 1U);
+	Space->SetComponent<IW::Transform>     (floor, iw::vector3(0, -1, 0), iw::vector3(15, 1, 15));
+	Space->SetComponent<IW::ModelComponent>(floor, floorMesh, 1U);
 
 	//IW::Entity debug = Space->CreateEntity<IW::Transform, IW::DebugVector>();
 

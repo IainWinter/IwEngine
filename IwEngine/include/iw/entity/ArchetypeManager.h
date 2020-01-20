@@ -16,11 +16,27 @@ namespace ECS {
 		iw::pool_allocator m_pool;
 		
 	public:
+		IWENTITY_API
 		ArchetypeManager();
 
+		IWENTITY_API
 		iw::ref<Archetype>& CreateArchetype(
 			std::initializer_list<iw::ref<Component>> components);
 
+		IWENTITY_API
+		iw::ref<Archetype>& CreateArchetype(
+			const iw::ref<Component>* begin,
+			const iw::ref<Component>* end);
+
+		IWENTITY_API
+		iw::ref<Archetype>& AddComponent(
+			iw::ref<Archetype> archetype, iw::ref<Component> component);
+
+		IWENTITY_API
+		iw::ref<Archetype>& RemoveComponent(
+			iw::ref<Archetype> archetype, iw::ref<Component> component);
+
+		IWENTITY_API
 		iw::ref<ArchetypeQuery> MakeQuery(
 			const iw::ref<ComponentQuery>& query);
 	};

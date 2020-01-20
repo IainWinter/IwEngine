@@ -16,6 +16,20 @@ namespace ECS {
 
 		static size_t Hash(
 			std::initializer_list<iw::ref<Component>> components);
+
+		template<
+			typename _itr>
+		static size_t Hash(
+			_itr begin,
+			_itr end)
+		{
+			size_t seed = std::distance(begin, end);
+			for (_itr component = begin; component != end; component++) {
+				seed ^= (*component)->Type + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+			}
+
+			return seed;
+		}
 	};
 
 	struct ComponentQuery {

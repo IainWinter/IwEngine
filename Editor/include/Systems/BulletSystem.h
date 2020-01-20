@@ -18,13 +18,22 @@ public:
 public:
 	BulletSystem();
 
-	~BulletSystem();
+	void Update(
+		IW::EntityComponentArray& view) override;
+};
 
-	//void Sync();
+class BulletCollisionSystem
+	: public IW::System<Bullet, IW::CollisionEvent>
+{
+public:
+	struct Components {
+		Bullet* Bullet;
+		IW::CollisionEvent Collision;
+	};
+
+public:
+	BulletCollisionSystem();
 
 	void Update(
 		IW::EntityComponentArray& view) override;
-
-	bool On(
-		IW::CollisionEvent& e) override;
 };

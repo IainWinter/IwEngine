@@ -4,7 +4,7 @@
 #include "iw/engine/System.h"
 #include "iw/common/Components/Transform.h"
 #include "iw/physics/AABB.h"
-#include "iw/engine/Components/Model.h"
+#include "iw/graphics/Model.h"
 
 namespace IW {
 namespace Engine {

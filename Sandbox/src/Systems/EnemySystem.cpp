@@ -1,7 +1,7 @@
 #include "Systems/EnemySystem.h"
 #include "Components/Bullet.h"
 #include "iw/engine/Time.h"
-#include "iw/engine/Components/Model.h"
+#include "iw/graphics/Model.h"
 #include "iw/input/Devices/Keyboard.h"
 #include "iw/physics/AABB.h"
 
@@ -31,12 +31,12 @@ void EnemySystem::Update(
 			enemy->Rotation = fmod(enemy->Rotation + enemy->Speed, iw::PI2);
 			iw::quaternion rot = iw::quaternion::from_euler_angles(0, enemy->Rotation, 0);
 
-			IW::Entity spawned = Space->CreateEntity<IW::Transform, IW::ModelComponent, Bullet, IW::AABB2>();
+			IW::Entity spawned = Space->CreateEntity<IW::Transform, IW::Model, Bullet, IW::AABB2>();
 			
-			Space->SetComponentData<IW::Transform>     (spawned, transform->Position + iw::vector3(sqrt(2), 0, 0) * rot, iw::vector3(.25f), rot);
-			Space->SetComponentData<IW::ModelComponent>(spawned, CircleMesh, 1U);
-			Space->SetComponentData<Bullet>            (spawned, LINE, 5.0f);
-			Space->SetComponentData<IW::AABB2> (spawned, iw::vector2(-0.25f), iw::vector2(0.25f));
+			Space->SetComponent<IW::Transform>(spawned, transform->Position + iw::vector3(sqrt(2), 0, 0) * rot, iw::vector3(.25f), rot);
+			Space->SetComponent<IW::Model>    (spawned, CircleMesh, 1U);
+			Space->SetComponent<Bullet>       (spawned, LINE, 5.0f);
+			Space->SetComponent<IW::AABB2>    (spawned, iw::vector2(-0.25f), iw::vector2(0.25f));
 		}
 
 		if (enemy->Timer <= -enemy->CooldownTime) {

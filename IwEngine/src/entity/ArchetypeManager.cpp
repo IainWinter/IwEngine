@@ -10,31 +10,38 @@ namespace IW {
 	iw::ref<Archetype>& ArchetypeManager::CreateArchetype(
 		std::initializer_list<iw::ref<Component>> components)
 	{
-		size_t hash = Component::Hash(components);
+		return CreateArchetype(components.begin(), components.end());
+	}
+
+	iw::ref<Archetype>& ArchetypeManager::CreateArchetype(
+		const iw::ref<Component>* begin,
+		const iw::ref<Component>* end)
+	{
+		size_t hash = Component::Hash(begin, end);
 		iw::ref<Archetype>& archetype = m_hashed[hash];
 		if (!archetype) {
 			size_t bufSize = sizeof(Archetype)
 				+ sizeof(ArchetypeLayout)
-				* components.size();
+				* std::distance(begin, end);
 
 			archetype = m_pool.alloc_ref_t<Archetype>(bufSize);
 
 			size_t totalSize = 0;
-			for (auto& component : components) {
-				totalSize += component->Size;
+			for (auto itr = begin; itr != end; itr++) {
+				totalSize += (*itr)->Size;
 			}
 
-			archetype->Hash = hash;
-			archetype->Count = components.size();
-			archetype->Size = totalSize;
+			archetype->Hash  = hash;
+			archetype->Count = std::distance(begin, end);
+			archetype->Size  = totalSize;
 
-			size_t i    = 0;
+			size_t i = 0;
 			size_t size = 0;
-			for (auto& component : components) {
-				archetype->Layout[i].Component = component;
-				archetype->Layout[i].Offset = size;
+			for (auto itr = begin; itr != end; itr++) {
+				archetype->Layout[i].Component = *itr;
+				archetype->Layout[i].Offset    = size;
 
-				size += component->Size;
+				size += (*itr)->Size;
 
 				archetype->Layout[i].Onset = totalSize - size;
 
@@ -45,6 +52,43 @@ namespace IW {
 		}
 
 		return archetype;
+	}
+
+	iw::ref<Archetype>& ArchetypeManager::AddComponent(
+		iw::ref<Archetype> archetype,
+		iw::ref<Component> component)
+	{
+		size_t bufSize = sizeof(Archetype)
+			+ sizeof(ArchetypeLayout)
+			* archetype->Count + 1;
+
+		std::vector<iw::ref<Component>> components;
+		for (size_t i = 0; i < archetype->Count; i++) {
+			components.push_back(archetype->Layout[i].Component);
+		}
+
+		components.push_back(component);
+
+		return CreateArchetype(components.begin()._Ptr, components.end()._Ptr);
+	}
+
+	iw::ref<Archetype>& ArchetypeManager::RemoveComponent(
+		iw::ref<Archetype> archetype,
+		iw::ref<Component> component)
+	{
+		size_t bufSize = sizeof(Archetype)
+			+ sizeof(ArchetypeLayout)
+			* archetype->Count - 1;
+
+		std::vector<iw::ref<Component>> components;
+		for (size_t i = 0; i < archetype->Count; i++) {
+			iw::ref<Component> c = archetype->Layout[i].Component;
+			if(c != component) {
+				components.push_back(c);	
+			}
+		}
+
+		return CreateArchetype(components.begin()._Ptr, components.end()._Ptr);
 	}
 
 	iw::ref<ArchetypeQuery> ArchetypeManager::MakeQuery(

@@ -1,7 +1,7 @@
 #include "Systems/EnemySystem.h"
 #include "Components/Bullet.h"
 #include "iw/engine/Time.h"
-#include "iw/engine/Components/Model.h"
+#include "iw/graphics/Model.h"
 #include "iw/input/Devices/Keyboard.h"
 #include "iw/physics/AABB.h"
 
@@ -34,13 +34,13 @@ void EnemySystem::Update(
 			v.normalize();
 			v *= 5;
 
-			IW::Entity ent = Space->CreateEntity<IW::Transform, IW::Model, IW::SphereCollider, IW::Rigidbody, Bullet>();
-			Space->SetComponentData<IW::Model>(ent, *BulletModel);
-			Space->SetComponentData<Bullet>   (ent, LINE, 5.0f);
+			IW::Entity bullet = Space->CreateEntity<IW::Transform, IW::Model, IW::SphereCollider, IW::Rigidbody, Bullet>();
+			bullet.SetComponent<IW::Model>(*BulletModel);
+			bullet.SetComponent<Bullet>   (LINE, 5.0f);
 
-			IW::Transform* t      = Space->SetComponentData<IW::Transform>     (ent, transform->Position + iw::vector3(sqrt(2), 0, 0) * rot, iw::vector3(.25f));
-			IW::SphereCollider* s = Space->SetComponentData<IW::SphereCollider>(ent, iw::vector3::zero, .25f);
-			IW::Rigidbody* r      = Space->SetComponentData<IW::Rigidbody>     (ent);
+			IW::Transform* t      = bullet.SetComponent<IW::Transform>     (transform->Position + iw::vector3(sqrt(2), 0, 0) * rot, iw::vector3(.25f));
+			IW::SphereCollider* s = bullet.SetComponent<IW::SphereCollider>(iw::vector3::zero, .25f);
+			IW::Rigidbody* r      = bullet.SetComponent<IW::Rigidbody>     ();
 
 			r->SetMass(1);
 			r->SetCol(s);

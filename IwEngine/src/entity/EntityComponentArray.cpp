@@ -3,6 +3,8 @@
 namespace IW {
 	using iterator = EntityComponentArray::iterator;
 
+	// I wouldnt be shocked if there wasnt some subtle logic bug somewhere in here
+
 	iterator& iterator::operator++() {
 		++m_itrs[m_index];
 
@@ -61,7 +63,7 @@ namespace IW {
 		ChunkListVec&& begins,
 		ChunkListVec&& ends)
 		: m_begins(std::forward<ChunkListVec>(begins))
-		, m_ends(std::forward<ChunkListVec>(ends))
+		, m_ends  (std::forward<ChunkListVec>(ends))
 	{}
 
 	iterator EntityComponentArray::begin() {

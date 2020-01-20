@@ -27,12 +27,6 @@ namespace IW {
 	{}
 
 	int ToolLayer::Initialize() {
-		PerspectiveCamera* perspective = new PerspectiveCamera(1.17f, 1.778f, .01f, 2000.0f);
-
-		IW::Entity camera = Space->CreateEntity<Transform, CameraController>();
-		Space->SetComponentData<Transform>(camera, iw::vector3(0, 25, 0), iw::vector3::one, iw::quaternion::from_axis_angle(iw::vector3::unit_x, -iw::PI/2));
-		Space->SetComponentData<CameraController>(camera, perspective);
-
 		PushSystem<EditorCameraController>();
 
 		return 0;

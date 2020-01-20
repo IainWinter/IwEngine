@@ -2,7 +2,7 @@
 
 #include "IwEntity.h"
 #include "Archetype.h"
-#include "Entity.h"
+#include "EntityHandle.h"
 
 namespace IW {
 namespace ECS {
@@ -37,15 +37,28 @@ namespace ECS {
 		size_t BeginIndex();
 
 		IWENTITY_API
-		Entity* GetEntity(
+		int IndexOf(
+			const ArchetypeLayout& layout,
+			void* instance) const;
+
+		IWENTITY_API
+		EntityHandle* GetEntity(
 			size_t index);
+
+		IWENTITY_API
+		const EntityHandle* GetEntity(
+			size_t index) const;
 
 		IWENTITY_API
 		char* GetComponentStream(
 			const ArchetypeLayout& layout);
 
 		IWENTITY_API
-		char* GetComponentData(
+		const char* GetComponentStream(
+			const ArchetypeLayout& layout) const;
+
+		IWENTITY_API
+		char* GetComponentPtr(
 			const ArchetypeLayout& layout,
 			size_t index);
 	};

@@ -67,12 +67,12 @@ namespace util {
 			_functor&& functor,
 			_tuple tuple,
 			std::index_sequence<_i...>,
-			_tuple_args tuple_args,
+			_tuple_args tuple_arg,
 			_fixed_args... fixed_args)
 		{
 			(functor(
 				std::get<_i>(tuple),
-				std::get<_i>(tuple_args),
+				std::get<_i>(tuple_arg),
 				fixed_args...), ...);
 		}
 #pragma endregion
@@ -269,8 +269,8 @@ namespace util {
 #pragma region no_return_no_args
 	template<
 		typename _functor,
-		typename _tuple,
-		size_t _size>
+		size_t _size,
+		typename _tuple>
 	void foreach(
 		_tuple tuple)
 	{
@@ -288,9 +288,9 @@ namespace util {
 #pragma region no_return_tuple_args
 	template<
 		typename _functor,
+		size_t _size,
 		typename _tuple,
-		typename _tuple_args,
-		size_t _size>
+		typename _tuple_args>
 	void foreach(
 		_tuple tuple,
 		_tuple_args tuple_args)
@@ -311,8 +311,8 @@ namespace util {
 #pragma region no_return_fixed_args
 	template<
 		typename _functor,
-		typename _tuple,
 		size_t _size,
+		typename _tuple,
 		typename... _fixed_args>
 	void foreach(
 		_tuple tuple,
@@ -334,8 +334,8 @@ namespace util {
 #pragma region no_return_tuple_args_and_fixed_args
 	template<
 		typename _functor,
-		typename _tuple,
 		size_t _size,
+		typename _tuple,
 		typename _tuple_args,
 		typename... _fixed_args>
 	void foreach(
@@ -361,8 +361,8 @@ namespace util {
 #pragma region no_return_tuple_args_and_single_fixed_arg
 	template<
 		typename _functor,
-		typename _tuple,
 		size_t _size,
+		typename _tuple,
 		typename _fixed_arg,
 		typename... _tuple_args>
 	void formatrix(
@@ -434,9 +434,9 @@ namespace util {
 #pragma region return_fixed_args
 	template<
 		typename _functor,
+		size_t _size,
 		typename _tuple,
 		typename _tuple_return,
-		size_t _size,
 		typename... _fixed_args>
 	_tuple_return geteach(
 		_tuple tuple,
@@ -459,9 +459,9 @@ namespace util {
 #pragma region return_tuple_args_and_fixed_args
 	template<
 		typename _functor,
+		size_t _size,
 		typename _tuple,
 		typename _tuple_return,
-		size_t _size,
 		typename _tuple_args,
 		typename... _fixed_args>
 	_tuple_return geteach(
@@ -488,9 +488,9 @@ namespace util {
 #pragma region no_return_tuple_args_and_single_fixed_arg
 	template<
 		typename _functor,
+		size_t _size,
 		typename _tuple,
 		typename _tuple_return,
-		size_t _size,
 		typename _fixed_arg,
 		typename... _tuple_args>
 	_tuple_return getmatrix(

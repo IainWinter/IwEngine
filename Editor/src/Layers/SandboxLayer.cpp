@@ -18,6 +18,10 @@
 #include "iw/util/jobs/pipeline.h"
 #include "imgui/imgui.h"
 
+#include "Pipeline/GenerateShadowMap.h"
+#include "Pipeline/FilterTarget.h"
+#include "Pipeline/Render.h"
+
 namespace IW {
 	struct ModelUBO {
 		iw::matrix4 model;
@@ -50,198 +54,9 @@ namespace IW {
 	TextureAtlas atlasRG;
 	TextureAtlas atlasBlur;
 
-	struct GenerateShadowMap;
-	struct PostProcessShadowMap;
-
 	iw::pipeline pipeline;
 	GenerateShadowMap* generateShadowMap;
-	PostProcessShadowMap* postProcessShadowMap;
-
-	struct GenerateShadowMap
-		: iw::node
-	{
-		iw::ref<Renderer> renderer;
-		iw::ref<Space>    space;
-
-		GenerateShadowMap(
-			iw::ref<Renderer> r,
-			iw::ref<Space> s)
-			: iw::node(2, 1)
-			, renderer(r)
-			, space(s)
-		{}
-
-		void SetLight(
-			DirectionalLight& light)
-		{
-			set<DirectionalLight*>(0, &light);
-		}
-
-		void SetThreshold(
-			float threshold)
-		{
-			set<float>(1, threshold);
-		}
-
-		Light* GetLight() {
-			return in<Light*>(0);
-		}
-
-		float& GetThreshold() {
-			return in<float>(1);
-		}
-
-		void execute() override {
-			Light* light = GetLight();
-			float& threshold = GetThreshold();
-
-			renderer->BeginLight(light);
-
-			for (auto m_e : space->Query<Transform, Model>()) {
-				auto [m_t, m_m] = m_e.Components.Tie<ModelComponents>();
-
-				for (size_t i = 0; i < m_m->MeshCount; i++) {
-					iw::ref<Texture> t = m_m->Meshes[i].Material->GetTexture("alphaMaskMap");
-
-					ITexture* it = nullptr;
-					if (t) {
-						it = t->Handle();
-					}
-
-					light->LightShader()->Program->GetParam("hasAlphaMask")  ->SetAsFloat(it != nullptr);
-
-					light->LightShader()->Program->GetParam("alphaMask")     ->SetAsTexture(it, 0);
-					light->LightShader()->Program->GetParam("alphaThreshold")->SetAsFloat(threshold);
-
-					renderer->CastMesh(light, m_t, &m_m->Meshes[i]);
-				}
-			}
-
-			renderer->EndLight(light);
-
-			out<iw::ref<RenderTarget>>(0, light->LightTarget());
-		}
-	};
-
-	struct PostProcessShadowMap
-		: iw::node
-	{
-		iw::ref<Renderer> renderer;
-
-		PostProcessShadowMap(
-			iw::ref<Renderer> r)
-			: iw::node(4, 1)
-			, renderer(r)
-		{}
-
-		void SetIntermediate(
-			iw::ref<RenderTarget>& target)
-		{
-			set<iw::ref<RenderTarget>>(1, target);
-		}
-		
-		void SetShader(
-			iw::ref<Shader>& shader)
-		{
-			set<iw::ref<Shader>>(2, shader);
-		}
-
-		void SetBlur(
-			iw::vector2& blur)
-		{
-			set<iw::vector2>(3, blur);
-		}
-
-		iw::ref<RenderTarget>& GetTarget() {
-			return in<iw::ref<RenderTarget>>(0);
-		}
-
-		iw::ref<RenderTarget>& GetIntermediate() {
-			return in<iw::ref<RenderTarget>>(1);
-		}
-
-		iw::ref<Shader>& GetShader() {
-			return in<iw::ref<Shader>>(2);
-		}
-
-		iw::vector2& GetBlur() {
-			return in<iw::vector2>(3);
-		}
-
-		void execute() override {
-			iw::ref<RenderTarget>& target = GetTarget();
-			iw::ref<RenderTarget>& intermediate = GetIntermediate();
-			iw::ref<Shader>& shader = GetShader();
-			iw::vector2& blur = GetBlur();
-
-			renderer->SetShader(gaussian);
-
-			shader->Program->GetParam("blurScale")->SetAsFloats(&iw::vector3(blur.x, 0, 0), 3);
-			renderer->ApplyFilter(shader, target.get(), intermediate.get());
-
-			shader->Program->GetParam("blurScale")->SetAsFloats(&iw::vector3(0, blur.y, 0), 3);
-			renderer->ApplyFilter(shader, intermediate.get(), target.get());
-
-			out<iw::ref<Texture>>(0, target->Tex(0));
-		}
-	};
-
-	struct MainRender
-		: iw::node
-	{
-		iw::ref<Renderer> renderer;
-		iw::ref<Space>    space;
-
-		MainRender(
-			iw::ref<Renderer> r,
-			iw::ref<Space> s)
-			: iw::node(2, 0)
-			, renderer(r)
-			, space(s)
-		{}
-
-		void SetLight(
-			DirectionalLight& light)
-		{
-			set<DirectionalLight*>(1, &light);
-		}
-
-		iw::ref<Texture>& GetTexture() {
-			return in<iw::ref<Texture>>(0);
-		}
-
-		Light* GetLight() {
-			return in<Light*>(1);
-		}
-
-		void execute() override {
-			iw::ref<Texture>& shadowMap = GetTexture();
-			Light* light = GetLight();
-
-			for (auto c_e : space->Query<Transform, CameraController>()) {
-				auto [c_t, c_c] = c_e.Components.Tie<CameraComponents>();
-
-				renderer->BeginScene(c_c->Camera);
-
-				for (auto m_e : space->Query<Transform, Model>()) {
-					auto [m_t, m_m] = m_e.Components.Tie<ModelComponents>();
-
-					for (size_t i = 0; i < m_m->MeshCount; i++) {
-						Mesh& mesh = m_m->Meshes[i];
-
-						renderer->SetShader(mesh.Material->Shader);
-
-						mesh.Material->Shader->Program->GetParam("lightSpace")
-							->SetAsMat4(light->Cam().GetViewProjection());
-
-						renderer->DrawMesh(m_t, &mesh);
-					}
-				}
-
-				renderer->EndScene();
-			}
-		}
-	};
+	FilterTarget* postProcessShadowMap;
 
 	SandboxLayer::SandboxLayer()
 		: Layer("Sandbox")
@@ -353,11 +168,11 @@ namespace IW {
 		// Floor
 
 		Entity floor = Space->CreateEntity<Transform, Model, PlaneCollider, Rigidbody>();
-		Space->SetComponentData<Model>(floor, *level);
+		floor.SetComponent<Model>(*level);
 
-		Transform* t = Space->SetComponentData<Transform>(floor, iw::vector3(0, 0, 0), iw::vector3(5, 3, 5));
-		PlaneCollider* s = Space->SetComponentData<PlaneCollider>(floor, iw::vector3::unit_y, 0.0f);
-		Rigidbody* r = Space->SetComponentData<Rigidbody>(floor);
+		Transform* t     = floor.SetComponent<Transform>    (iw::vector3(0, 0, 0), iw::vector3(5, 3, 5));
+		PlaneCollider* s = floor.SetComponent<PlaneCollider>(iw::vector3::unit_y, 0.0f);
+		Rigidbody* r     = floor.SetComponent<Rigidbody>();
 
 		r->SetIsKinematic(false);
 		r->SetMass(1);
@@ -417,12 +232,12 @@ namespace IW {
 		// Player		
 
 		Entity player = Space->CreateEntity<Transform, Model, SphereCollider, Rigidbody, Player>();
-		Space->SetComponentData<Model> (player, *sphere);
-		Space->SetComponentData<Player>(player, -10.0f, .18f, .08f);
+		player.SetComponent<Model> (*sphere);
+		player.SetComponent<Player>(-10.0f, .18f, .08f);
 
-		Transform* tp      = Space->SetComponentData<Transform>     (player, iw::vector3(5, 1, 0));
-		SphereCollider* sp = Space->SetComponentData<SphereCollider>(player, iw::vector3::zero, 1.0f);
-		Rigidbody* rp      = Space->SetComponentData<Rigidbody>     (player);
+		Transform* tp      = player.SetComponent<Transform>     (iw::vector3(5, 1, 0));
+		SphereCollider* sp = player.SetComponent<SphereCollider>(iw::vector3::zero, 1.0f);
+		Rigidbody* rp      = player.SetComponent<Rigidbody>     ();
 
 		rp->SetMass(1);
 		rp->SetCol(sp);
@@ -433,12 +248,12 @@ namespace IW {
 		Physics->AddRigidbody(rp);
 
 		Entity enemy = Space->CreateEntity<Transform, Model, SphereCollider, Rigidbody, Enemy>();
-		Space->SetComponentData<Model>(enemy, *tetrahedron);
-		Space->SetComponentData<Enemy>(enemy, SPIN, 0.2617993f, .12f, 0.0f);
+		enemy.SetComponent<Model>(*tetrahedron);
+		enemy.SetComponent<Enemy>(SPIN, 0.2617993f, .12f, 0.0f);
 
-		Transform* te      = Space->SetComponentData<Transform>     (enemy, iw::vector3(0, 1, 0));
-		SphereCollider* se = Space->SetComponentData<SphereCollider>(enemy, iw::vector3::zero, 1.0f);
-		Rigidbody* re      = Space->SetComponentData<Rigidbody>     (enemy);
+		Transform* te      = enemy.SetComponent<Transform>     (iw::vector3(0, 1, 0));
+		SphereCollider* se = enemy.SetComponent<SphereCollider>(iw::vector3::zero, 1.0f);
+		Rigidbody* re      = enemy.SetComponent<Rigidbody>     ();
 
 		re->SetMass(1);
 		re->SetCol(se);
@@ -446,11 +261,19 @@ namespace IW {
 
 		Physics->AddRigidbody(re);
 
+		// Camera
+
+		PerspectiveCamera* perspective = new PerspectiveCamera(1.17f, 1.778f, .01f, 2000.0f);
+
+		Entity camera = Space->CreateEntity<Transform, CameraController>();
+		camera.SetComponent<Transform>       (iw::vector3(0, 25, 0), iw::vector3::one, iw::quaternion::from_axis_angle(iw::vector3::unit_x, -iw::PI / 2));
+		camera.SetComponent<CameraController>(perspective);
+
 		// Rendering pipeline
 
-		                       generateShadowMap    = new GenerateShadowMap(Renderer, Space);
-		                       postProcessShadowMap = new PostProcessShadowMap(Renderer);
-		MainRender*            mainRender           = new MainRender(Renderer, Space);
+		        generateShadowMap    = new GenerateShadowMap(Renderer, Space);
+		        postProcessShadowMap = new FilterTarget(Renderer);
+		Render* mainRender           = new Render(Renderer, Space);
 
 		pipeline.first(generateShadowMap)
 			.then(postProcessShadowMap)
@@ -468,6 +291,7 @@ namespace IW {
 		PushSystem<PlayerSystem>();
 		PushSystem<EnemySystem>(sphere);
 		PushSystem<BulletSystem>();
+		PushSystem<BulletCollisionSystem>();
 
 		return 0;
 	}
@@ -485,21 +309,9 @@ namespace IW {
 		postProcessShadowMap->SetBlur(iw::vector2(blurw, blurh));
 
 		pipeline.execute();
-
-		for (auto p_e : Space->Query<Transform, PlaneCollider>()) {
-			auto [p_t, p_p] = p_e.Components.Tie<PlaneComponents>();
-
-			if (IW::Mouse::ButtonDown(IW::XMOUSE1)) {
-				p_t->Rotation *= iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::PI * Time::DeltaTime());
-			}
-
-			if (IW::Mouse::ButtonDown(IW::XMOUSE2)) {
-				p_t->Rotation *= iw::quaternion::from_axis_angle(iw::vector3::unit_x, -iw::PI * Time::DeltaTime());
-			}
-		}
 	}
 
-	float ts = 0.1f;
+	float ts = 1.0f;
 	
 	void SandboxLayer::FixedUpdate() {
 		Physics->Step(Time::FixedTime() * ts);
@@ -529,12 +341,12 @@ namespace IW {
 
 		for (size_t i = 0; i < sc; i++) {
 			Entity enemy = Space->CreateEntity<Transform, Model, SphereCollider, Rigidbody, Enemy>();
-			Space->SetComponentData<Model>(enemy, *sphere);
-			Space->SetComponentData<Enemy>(enemy, SPIN, 0.2617993f, .12f, 0.0f);
+			enemy.SetComponent<Model>(*sphere);
+			enemy.SetComponent<Enemy>(SPIN, 0.2617993f, .12f, 0.0f);
 
-			Transform* te      = Space->SetComponentData<Transform>(enemy, iw::vector3(cos(x) * 1, 15, sin(x) * 1));
-			SphereCollider* se = Space->SetComponentData<SphereCollider>(enemy, iw::vector3::zero, 1.0f);
-			Rigidbody* re      = Space->SetComponentData<Rigidbody>(enemy);
+			Transform* te      = enemy.SetComponent<Transform>     (iw::vector3(cos(x) * 1, 15, sin(x) * 1));
+			SphereCollider* se = enemy.SetComponent<SphereCollider>(iw::vector3::zero, 1.0f);
+			Rigidbody* re      = enemy.SetComponent<Rigidbody>();
 
 			re->SetMass(1);
 			re->SetCol(se);
@@ -542,24 +354,6 @@ namespace IW {
 			re->SetVelocity(iw::vector3(cos(x) * 0, 20, 0 * sin(x += 2 * iw::PI / sc)));
 
 			Physics->AddRigidbody(re);
-
-			//Entity ent = Space->CreateEntity<Transform, Model, SphereCollider, Rigidbody>();
-
-			//Space->SetComponentData<Model>(ent, *sphere);
-
-			//Transform*      t = Space->SetComponentData<Transform>     (ent, iw::vector3(cos(x) * 0, 15, sin(x) * 0));
-			//SphereCollider* s = Space->SetComponentData<SphereCollider>(ent, iw::vector3::zero, 1.0f);
-			//Rigidbody*      r = Space->SetComponentData<Rigidbody>     (ent);
-
-			//r->SetMass(1);
-			////r->ApplyForce(iw::vector3(cos(x += .1f) * 50, 500, sin(x / .1f) * 50));
-			//r->SetVelocity(iw::vector3(cos(x) * 0, 20, 0 * sin(x += 2 * iw::PI / sc)));
-			//r->SetCol(s);
-			//r->SetTrans(t);
-			//r->SetStaticFriction(.1f);
-			//r->SetDynamicFriction(.02f);
-
-			//Physics->AddRigidbody(r);
 		}
 
 		return true;

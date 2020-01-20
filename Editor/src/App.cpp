@@ -5,6 +5,7 @@
 #include "Events/ActionEvents.h"
 #include "iw/physics/Plane.h"
 #include "iw/physics/Collision/PlaneCollider.h"
+#include "iw/physics/Collision/SphereCollider.h"
 
 namespace IW {
 	App::App() {
@@ -73,6 +74,50 @@ namespace IW {
 		}
 
 		return Application::HandleCommand(command);
+	}
+
+	void App::HandleCollision(
+		Manifold& manifold,
+		scalar dt)
+	{
+		Entity a = Space->FindEntity(manifold.BodyA);
+		Entity b = Space->FindEntity(manifold.BodyB);
+
+		if (a.Handle.Index != EntityHandle::Empty.Index) {
+			Rigidbody* r = a.FindComponent<Rigidbody>();
+
+			Physics->RemoveRigidbody(r);
+
+			a.AddComponent<CollisionEvent>(manifold.BodyA, manifold.BodyB, manifold.PenetrationDepth, dt);
+
+			r = a.FindComponent<Rigidbody>();
+			r->SetTrans(a.FindComponent<Transform>());
+			r->SetCol(a.FindComponent<SphereCollider>());
+
+			Physics->AddRigidbody(r);
+		}
+
+		if (b.Handle.Index != EntityHandle::Empty.Index) {
+			//Rigidbody* r = b.FindComponent<Rigidbody>();
+
+			//Physics->RemoveRigidbody(r);
+
+			//b.AddComponent<CollisionEvent>(manifold.BodyB, manifold.BodyA, -manifold.PenetrationDepth, dt);
+
+			//r = b.FindComponent<Rigidbody>();
+			//r->SetTrans(b.FindComponent<Transform>());
+
+			//Collider* c = b.FindComponent<SphereCollider>();
+			//if (!c) {
+			//	c = b.FindComponent<PlaneCollider>();
+			//}
+
+			//r->SetCol(c);
+
+			//Physics->AddRigidbody(r);
+		}
+
+		Application::HandleCollision(manifold, dt);
 	}
 }
 

@@ -125,21 +125,21 @@
 //	ortho->Rotation = iw::quaternion::from_euler_angles(0, iw::PI, 0);
 //
 //	IW::Entity camera = Space->CreateEntity<IW::CameraController>();
-//	Space->SetComponentData<IW::CameraController>(camera, ortho);
+//	Space->SetComponent<IW::CameraController>(camera, ortho);
 //
 //	IW::Entity player = Space->CreateEntity<IW::Transform, IW::Model, Player, IwPhysics::AABB2D>();
-//	Space->SetComponentData<IW::Transform>    (player, iw::vector3(10, 0, 0), iw::vector3::one, iw::quaternion::from_euler_angles(0, 0, 0));
-//	Space->SetComponentData<IW::Model>  (player, &qmodel->Meshes[0], 1U);
-//	Space->SetComponentData<Player>           (player, 10.0f, 100.0f, 0.1666f, 0.1f);
-//	Space->SetComponentData<IwPhysics::AABB2D>(player, iw::vector2(-1), iw::vector2(1));
+//	Space->SetComponent<IW::Transform>    (player, iw::vector3(10, 0, 0), iw::vector3::one, iw::quaternion::from_euler_angles(0, 0, 0));
+//	Space->SetComponent<IW::Model>  (player, &qmodel->Meshes[0], 1U);
+//	Space->SetComponent<Player>           (player, 10.0f, 100.0f, 0.1666f, 0.1f);
+//	Space->SetComponent<IwPhysics::AABB2D>(player, iw::vector2(-1), iw::vector2(1));
 //
 //	for (float x = 4; x < 7; x++) {
 //		for (float y = 5; y < 6; y++) {
 //			IW::Entity enemy = Space->CreateEntity<IW::Transform, IW::Model, Enemy, IwPhysics::AABB2D>();
-//			Space->SetComponentData<IW::Transform>    (enemy, iw::vector3(x * 3 - 15, y * 3 - 15, 0));
-//			Space->SetComponentData<IW::Model>  (enemy, &qmodel->Meshes[0], 1U);
-//			Space->SetComponentData<Enemy>            (enemy, SPIN, 3.0f, 0.05f, 0.025f, 0.025f);
-//			Space->SetComponentData<IwPhysics::AABB2D>(enemy, iw::vector2(-1), iw::vector2(1));
+//			Space->SetComponent<IW::Transform>    (enemy, iw::vector3(x * 3 - 15, y * 3 - 15, 0));
+//			Space->SetComponent<IW::Model>  (enemy, &qmodel->Meshes[0], 1U);
+//			Space->SetComponent<Enemy>            (enemy, SPIN, 3.0f, 0.05f, 0.025f, 0.025f);
+//			Space->SetComponent<IwPhysics::AABB2D>(enemy, iw::vector2(-1), iw::vector2(1));
 //		}
 //	}
 //

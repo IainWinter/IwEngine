@@ -1,7 +1,7 @@
 #pragma once
 
 #include "iw/entity/Space.h"
-//#include "iw/log/logger.h"
+#include "iw/entity/Entity.h"
 #include <assert.h>
 
 namespace IW {
@@ -18,27 +18,6 @@ namespace IW {
 		return m_componentManager.GetComponent(type);
 	}
 
-	iw::ref<ComponentQuery> Space::MakeQuery(
-		std::initializer_list<iw::ref<Component>> components)
-	{
-		size_t bufSize = sizeof(ComponentQuery)
-			+ sizeof(iw::ref<Component>)
-			* components.size();
-
-		ComponentQuery* buf = (ComponentQuery*)malloc(bufSize);
-		assert(buf);
-		memset(buf, 0, bufSize);
-
-		buf->Count = components.size();
-
-		size_t i = 0;
-		for (iw::ref<Component> component : components) {
-			buf->Components[i++] = component;
-		}
-
-		return iw::ref<ComponentQuery>(buf, free);
-	}
-
 	iw::ref<Archetype>& Space::CreateArchetype(
 		std::initializer_list<iw::ref<Component>> components)
 	{
@@ -49,10 +28,12 @@ namespace IW {
 		const iw::ref<Archetype>& archetype)
 	{
 		iw::ref<EntityData>& entityData = m_entityManager.CreateEntity();
+
 		bool componentsExist = false;
-		if (entityData->Archetype && entityData->Archetype->Hash == archetype->Hash) {
-			componentsExist = m_componentManager.ReinstateEntityComponents(entityData);
-			//LOG_DEBUG << "Recycling  components " << entityData->ChunkIndex << " for " << entityData->Entity.Index;
+		if (   entityData->Archetype
+			&& entityData->Archetype->Hash == archetype->Hash)
+		{
+			componentsExist = m_componentManager.ReinstateComponentData(entityData); // combine this logic into cmgr.CreateComponentData
 		}
 
 		else {
@@ -60,42 +41,97 @@ namespace IW {
 		}
 
 		if (!componentsExist) {
-			entityData->ChunkIndex = m_componentManager.ReserveEntityComponents(entityData);
-			//LOG_DEBUG << "Creating   components " << entityData->ChunkIndex << " for " << entityData->Entity.Index;
+			entityData->ChunkIndex = m_componentManager.CreateComponentsData(entityData);
 		}
 
-		return entityData->Entity;
+		return Entity { entityData->Entity, *this };
 	}
 
 	bool Space::DestroyEntity(
 		size_t index)
 	{
-		iw::ref<EntityData>& entityData = m_entityManager.GetEntityData(index);
-		if (!entityData->Entity.Alive) {
-			LOG_WARNING << "Tried to delete dead entity!";
-			return false;
-		}
-
-		//LOG_DEBUG << "Destroying components " << entityData->ChunkIndex << " for " << entityData->Entity.Index;
-
-		return m_entityManager.DestroyEntity(index)
-			&& m_componentManager.DestroyEntityComponents(entityData);
+		return m_entityManager   .DestroyEntity(index)
+			&& m_componentManager.DestroyComponentsData(m_entityManager.GetEntityData(index));
 	}
 
-
-	Entity Space::FindEntityFromComponent(
-		iw::ref<Component> component,
-		void* instance)
+	void Space::AddComponent(
+		const EntityHandle& entity,
+		const iw::ref<Component>& component)
 	{
-		return m_componentManager.FindEntityFromComponent(
-			m_archetypeManager.MakeQuery(MakeQuery({ component })),
-			component,
-			instance);
+		iw::ref<EntityData>& entityData = m_entityManager   .GetEntityData(entity.Index);
+		iw::ref<Archetype>   archetype  = m_archetypeManager.AddComponent (entityData->Archetype, component);
+
+		MoveComponents(entityData, archetype);
+	}
+
+	void Space::RemoveComponent(
+		const EntityHandle& entity,
+		const iw::ref<Component>& component)
+	{
+		iw::ref<EntityData>& entityData = m_entityManager   .GetEntityData  (entity.Index);
+		iw::ref<Archetype>   archetype  = m_archetypeManager.RemoveComponent(entityData->Archetype, component);
+
+		MoveComponents(entityData, archetype);
+	}
+
+	void* Space::SetComponent(
+		const EntityHandle& entity,
+		const iw::ref<Component>& component,
+		void* data)
+	{
+		if (component) {
+			iw::ref<EntityData>& entityData = m_entityManager.GetEntityData(entity.Index);
+			void* ptr = m_componentManager.GetComponentPtr(entityData, component);
+			if (ptr) {
+				memcpy(ptr, data, component->Size); // should pass this all the way down to Chunk.h but ugh
+				return ptr;
+			}
+		}
+
+		return nullptr;
+	}
+
+	void* Space::FindComponent(
+		const EntityHandle& entity,
+		const iw::ref<Component>& component)
+	{
+		if (component) {
+			iw::ref<EntityData>& entityData = m_entityManager.GetEntityData(entity.Index);
+			return m_componentManager.GetComponentPtr(entityData, component);
+		}
+
+		return nullptr;
+	}
+
+	iw::ref<ComponentQuery> Space::MakeQuery(
+		std::initializer_list<iw::ref<Component>> components)
+	{
+		return m_componentManager.MakeQuery(components);
 	}
 
 	EntityComponentArray Space::Query(
 		const iw::ref<ComponentQuery>& query)
 	{
 		return m_componentManager.Query(query, m_archetypeManager.MakeQuery(query));
+	}
+
+	Entity Space::FindEntity(
+		iw::ref<Component> component,
+		void* instance)
+	{
+		EntityHandle entity = m_componentManager.FindEntity(
+			m_archetypeManager.MakeQuery(MakeQuery({ component })),
+			component,
+			instance);
+
+		return { entity , *this };
+	}
+
+	void Space::MoveComponents(
+		iw::ref<EntityData>& entityData,
+		const iw::ref<Archetype>& archetype)
+	{
+		entityData->ChunkIndex = m_componentManager.MoveComponentData(entityData, archetype);
+		entityData->Archetype = archetype;
 	}
 }

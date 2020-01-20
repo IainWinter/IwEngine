@@ -5,8 +5,6 @@ BulletSystem::BulletSystem()
 	: IW::System<IW::Transform, IW::Rigidbody, Bullet>("Bullet")
 {}
 
-BulletSystem::~BulletSystem() {}
-
 void BulletSystem::Update(
 	IW::EntityComponentArray& view)
 {
@@ -42,9 +40,20 @@ void BulletSystem::Update(
 	}
 }
 
-bool BulletSystem::On(
-	IW::CollisionEvent& e)
-{
+BulletCollisionSystem::BulletCollisionSystem()
+	: IW::System<Bullet, IW::CollisionEvent>("Bullet Collision")
+{}
 
-	return false;
+void BulletCollisionSystem::Update(
+	IW::EntityComponentArray& view)
+{
+	for (auto entity : view) {
+		auto [bullet, collision] = entity.Components.Tie<Components>();
+
+		LOG_INFO << "Collision " << entity.Index;
+
+		//QueueDestroyEntity(entity.Index);
+		//Physics->RemoveRigidbody(collision.BodyA);
+	}
+
 }

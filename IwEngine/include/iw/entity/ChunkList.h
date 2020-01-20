@@ -21,19 +21,22 @@ namespace ECS {
 			size_t m_index;
 			iw::ref<Archetype> m_archetype;
 			iw::ref<ComponentDataIndices> m_indices;
-
 			iw::ref<ComponentData> m_data;
 
 		public:
-			IWENTITY_API iterator& operator++();
+			IWENTITY_API
+			iterator& operator++();
 
-			IWENTITY_API bool operator==(
+			IWENTITY_API
+			bool operator==(
 				const iterator& itr) const;
 
-			IWENTITY_API bool operator!=(
+			IWENTITY_API
+			bool operator!=(
 				const iterator& itr) const;
 
-			IWENTITY_API EntityComponentData operator*();
+			IWENTITY_API
+			EntityComponentData operator*();
 		private:
 			friend class ChunkList;
 
@@ -42,7 +45,7 @@ namespace ECS {
 				size_t index,
 				const iw::ref<Archetype>& archetype,
 				const iw::ref<ComponentQuery>& query,
-				iw::pool_allocator& pool);
+				iw::pool_allocator& componentPool);
 		};
 	private:
 		Chunk* m_root;
@@ -54,20 +57,20 @@ namespace ECS {
 		const size_t m_chunkSize;
 		const size_t m_chunkCapacity;
 
-		iw::pool_allocator& m_itrPool;
 		iw::pool_allocator& m_componentPool;
+		iw::pool_allocator& m_chunkPool;
 
 	public:
 		IWENTITY_API
 		ChunkList(
 			const iw::ref<Archetype>& archetype,
 			size_t chunkSize,
-			iw::pool_allocator& itrPool,
-			iw::pool_allocator& componentPool);
+			iw::pool_allocator& componentPool,
+			iw::pool_allocator& chunkPool);
 
-		IWENTITY_API size_t
-		ReserveComponents(
-			const Entity& entity);
+		IWENTITY_API
+		size_t ReserveComponents(
+			const EntityHandle& entity);
 
 		IWENTITY_API
 		bool ReinstateComponents(
@@ -78,12 +81,18 @@ namespace ECS {
 			size_t index);
 
 		IWENTITY_API
-		void* GetComponentData(
+		bool MoveComponents(
+			ChunkList& to,
+			size_t index,
+			size_t newIndex);
+
+		IWENTITY_API
+		void* GetComponentPtr(
 			const iw::ref<Component>& component,
 			size_t index);
 
 		IWENTITY_API
-		Entity* GetEntity(
+		EntityHandle* GetEntity(
 			size_t index);
 
 		IWENTITY_API

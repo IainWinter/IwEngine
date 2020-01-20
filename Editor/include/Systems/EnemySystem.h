@@ -3,7 +3,7 @@
 #include "Components/Enemy.h"
 #include "iw/engine/System.h"
 #include "iw/common/Components/Transform.h"
-#include "iw/engine/Components/Model.h"
+#include "iw/graphics/Model.h"
 
 class EnemySystem
 	: public IW::System<IW::Transform, Enemy>
