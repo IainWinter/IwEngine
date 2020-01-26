@@ -43,16 +43,6 @@ namespace IW {
 
 		EntityHandle* entity = m_chunk->GetEntity(m_index);
 
-		//if (   m_chunk 
-		//	&& m_index == m_chunk->EndIndex())
-		//{
-		//	LOG_INFO << "dddd";
-		//}
-
-		//if (entity->Index > 98734259873) {
-		//	LOG_INFO << "dddd";
-		//}
-
 		return EntityComponentData { entity->Index, entity->Version, *m_data };
 	}
 
@@ -241,7 +231,7 @@ namespace IW {
 		int index = -1;
 		Chunk* chunk = m_root;
 		while (chunk) {
-			index = chunk->IndexOf(m_archetype->GetLayout(component), instance);
+			index = chunk->IndexOf(*m_archetype->GetLayout(component), instance);
 			if (index == -1) {
 				chunk = chunk->Next;
 			}

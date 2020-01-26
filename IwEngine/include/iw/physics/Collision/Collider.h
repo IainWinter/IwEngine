@@ -1,35 +1,52 @@
 #pragma once
 
+#include "iw/physics/IwPhysics.h"
 #include "iw/physics/AABB.h"
-#include "iw/physics/Ray.h"
+#include "iw/physics/Collision/ManifoldPoints.h"
+#include "iw/common/Components/Transform.h"
 
 namespace IW  {
 namespace Physics {
-	enum class ColliderShape {
-		CIRCLE, SPHERE,
-		BOX, CUBE,
-		PLANE,
-		MESH
-	};
-
 namespace impl {
+	template<typename V>
+	struct SphereCollider;
+
+	template<typename V>
+	struct PlaneCollider;
+
 	template<
 		typename V>
 	struct Collider {
-	public:
-		ColliderShape Shape;
-
 	protected:
 		AABB<V> m_bounds;
 		bool m_outdated;
 
 	public:
-		Collider(
-			ColliderShape shape)
-			: Shape(shape)
-			, m_outdated(true)
+		Collider()
+			: m_outdated(true)
 		{}
 
+		// dont like that you need to pass transforms
+
+		IWPHYSICS_API
+		virtual ManifoldPoints TestCollision(
+			const Transform* transform,
+			const impl::Collider<V>* collider,
+			const Transform* colliderTransform) const = 0;
+
+		IWPHYSICS_API
+		virtual ManifoldPoints TestCollision(
+			const Transform* transform,
+			const impl::SphereCollider<V>* sphere,
+			const Transform* sphereTransform) const = 0;
+
+		IWPHYSICS_API
+		virtual ManifoldPoints TestCollision(
+			const Transform* transform,
+			const impl::PlaneCollider<V>* plane,
+			const Transform* planeTransform) const = 0;
+
+		IWPHYSICS_API
 		virtual const AABB<V>& Bounds() = 0;
 	};
 }

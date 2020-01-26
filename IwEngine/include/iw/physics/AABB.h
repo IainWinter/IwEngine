@@ -1,7 +1,6 @@
 #pragma once
 
 #include "IwPhysics.h"
-#include "iw/log/logger.h"
 
 namespace IW {
 namespace Physics {

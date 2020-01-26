@@ -10,30 +10,19 @@ namespace IW {
 namespace Physics {
 namespace algo {
 	IWPHYSICS_API
-	Manifold MakeManifold(
-		Rigidbody* a,
-		Rigidbody* b);
-
-namespace detail {
-	struct ManifoldPoints {
-		iw::vector3 A;
-		iw::vector3 B;
-		iw::vector3 Normal;
-		bool NoContact;
-	};
-
-	ManifoldPoints FindManifoldPoints(
-		CollisionObject* a,
-		CollisionObject* b);
-
 	ManifoldPoints FindSphereSphereMaifoldPoints(
-		SphereCollider* a, Transform* ta,
-		SphereCollider* b, Transform* tb);
+		const SphereCollider* a, const Transform* ta,
+		const SphereCollider* b, const Transform* tb);
 
+	IWPHYSICS_API
 	ManifoldPoints FindSpherePlaneMaifoldPoints(
-		SphereCollider* a, Transform* ta,
-		PlaneCollider* b, Transform* tb);
-}
+		const SphereCollider* a, const Transform* ta,
+		const PlaneCollider*  b, const Transform* tb);
+
+	IWPHYSICS_API
+	ManifoldPoints FindPlaneSphereMaifoldPoints(
+		const PlaneCollider*  a, const Transform* ta,
+		const SphereCollider* b, const Transform* tb);
 }
 }
 

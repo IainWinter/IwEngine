@@ -5,13 +5,10 @@
 
 namespace IW {
 namespace Physics {
-	constexpr size_t NOID = -1;
-
 	class CollisionObject {
 	protected:
 		Transform* m_transform;     // Position, rotation, and scale
 		Collider*  m_collider;      // Shape of the collision object (only 3d right now)
-		size_t    m_id;             // Custom id for identifying colliders outside of the physics simulation
 
 	public:
 		CollisionObject();

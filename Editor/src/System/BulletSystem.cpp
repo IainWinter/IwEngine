@@ -8,9 +8,6 @@ BulletSystem::BulletSystem()
 void BulletSystem::Update(
 	IW::EntityComponentArray& view)
 {
-	size_t count = 0;
-	size_t first = 0;
-	IW::Rigidbody* body = nullptr;
 	for (auto entity : view) {
 		auto [transform, rigidbody, bullet] = entity.Components.Tie<Components>();
 
@@ -18,42 +15,38 @@ void BulletSystem::Update(
 			//rigidbody->MovePosition(transform->Position + iw::vector3(1, 0, 0) * transform->Rotation * bullet->Speed * IW::Time::FixedTime());
 		}
 
+		transform->Position.y = 1;
+
 		/*if (bullet->Time > 5.f) {
 			QueueDestroyEntity(entity.Index);
 			Physics->RemoveRigidbody(rigidbody);
 		}*/
 
 		bullet->Time += IW::Time::DeltaTime();
-		transform->Position.y = 1;
-
-		if (count >= 400) {
-			first = entity.Index;
-			body = rigidbody;
-		}
-
-		count++;
-	}
-
-	if (count > 400) {
-		QueueDestroyEntity(first);
-		Physics->RemoveRigidbody(body);
 	}
 }
 
-BulletCollisionSystem::BulletCollisionSystem()
-	: IW::System<Bullet, IW::CollisionEvent>("Bullet Collision")
-{}
-
-void BulletCollisionSystem::Update(
-	IW::EntityComponentArray& view)
+bool BulletSystem::On(
+	IW::CollisionEvent& event)
 {
-	for (auto entity : view) {
-		auto [bullet, collision] = entity.Components.Tie<Components>();
+	IW::Entity a = Space->FindEntity(event.BodyA);
+	IW::Entity b = Space->FindEntity(event.BodyB);
 
-		LOG_INFO << "Collision " << entity.Index;
-
-		//QueueDestroyEntity(entity.Index);
-		//Physics->RemoveRigidbody(collision.BodyA);
+	if (   a.Index() != IW::EntityHandle::Empty.Index 
+		&& a.HasComponent<Bullet>() 
+		&& a.HasComponent<IW::Rigidbody>())
+	{
+		Physics->RemoveRigidbody(a.FindComponent<IW::Rigidbody>());
+		QueueDestroyEntity(a.Index());
 	}
 
+	if (   b.Index() != IW::EntityHandle::Empty.Index 
+		&& b.HasComponent<Bullet>() 
+		&& b.HasComponent<IW::Rigidbody>())
+	{
+		Physics->RemoveRigidbody(b.FindComponent<IW::Rigidbody>());
+		QueueDestroyEntity(b.Index());
+	}
+
+	return false;
 }

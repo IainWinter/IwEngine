@@ -18,11 +18,11 @@ namespace iw {
 
 	void node_out::unlink(
 		node* node,
-		int i)
+		int index)
 	{
 		auto itr = links.begin();
 		for (; itr != links.end(); itr++) {
-			if (itr->next == node) {
+			if (itr->next == node && itr->index == index) {
 				break;
 			}
 		}
@@ -51,5 +51,13 @@ namespace iw {
 		unsigned b)
 	{
 		m_out.at(a).link(node, b);
+	}
+
+	void node::unlink(
+		node* node,
+		unsigned a,
+		unsigned b)
+	{
+		m_out.at(a).unlink(node, b);
 	}
 }

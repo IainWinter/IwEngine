@@ -189,11 +189,11 @@ namespace IW {
 		Transform* tb = new Transform();
 		Transform* to = new Transform();
 
-		PlaneCollider* planel = new PlaneCollider(iw::vector3(1, 0, 0), -16);
-		PlaneCollider* planer = new PlaneCollider(iw::vector3(-1, 0, 0), -16);
-		PlaneCollider* planet = new PlaneCollider(iw::vector3(0, 0, 1), -9);
-		PlaneCollider* planeb = new PlaneCollider(iw::vector3(0, 0, -1), -9);
-		PlaneCollider* planeo = new PlaneCollider(iw::vector3(0, -1, 0), -2);
+		PlaneCollider* planel = new PlaneCollider(iw::vector3( 1,  0,  0), -16);
+		PlaneCollider* planer = new PlaneCollider(iw::vector3(-1,  0,  0), -16);
+		PlaneCollider* planet = new PlaneCollider(iw::vector3( 0,  0,  1), -9);
+		PlaneCollider* planeb = new PlaneCollider(iw::vector3( 0,  0, -1), -9);
+		PlaneCollider* planeo = new PlaneCollider(iw::vector3( 0, -1,  0), -2);
 
 		Rigidbody* rl = new Rigidbody(false);
 		Rigidbody* rr = new Rigidbody(false);
@@ -275,23 +275,20 @@ namespace IW {
 		        postProcessShadowMap = new FilterTarget(Renderer);
 		Render* mainRender           = new Render(Renderer, Space);
 
+		generateShadowMap   ->SetLight(light);
+		postProcessShadowMap->SetIntermediate(targetBlur);
+		postProcessShadowMap->SetShader(gaussian);
+		mainRender          ->SetLight(light);
+
 		pipeline.first(generateShadowMap)
 			.then(postProcessShadowMap)
 			.then(mainRender);
-
-		generateShadowMap->SetLight(light);
-
-		postProcessShadowMap->SetIntermediate(targetBlur);
-		postProcessShadowMap->SetShader(gaussian);
-
-		mainRender->SetLight(light);
 
 		// Systems
 
 		PushSystem<PlayerSystem>();
 		PushSystem<EnemySystem>(sphere);
 		PushSystem<BulletSystem>();
-		PushSystem<BulletCollisionSystem>();
 
 		return 0;
 	}

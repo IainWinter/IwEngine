@@ -16,15 +16,35 @@ namespace impl {
 		PlaneCollider(
 			V p,
 			float d)
-			: Collider<V>(ColliderShape::PLANE)
+			: Collider<V>()
 			, Plane(p, d)
 		{}
 
 		PlaneCollider(
 			impl::Plane<V> plane)
-			: Collider<V>(ColliderShape::PLANE)
+			: Collider<V>()
 			, Plane(plane)
 		{}
+
+		ManifoldPoints TestCollision(
+			const Transform* transform,
+			const impl::Collider<V>* collider,
+			const Transform* colliderTransform) const override
+		{
+			return collider->TestCollision(colliderTransform, this, transform);
+		}
+
+		IWPHYSICS_API
+		ManifoldPoints TestCollision(
+			const Transform* transform,
+			const impl::SphereCollider<V>* sphere,
+			const Transform* sphereTransform) const override;
+
+		IWPHYSICS_API
+		ManifoldPoints TestCollision(
+			const Transform* transform,
+			const impl::PlaneCollider<V>* plane,
+			const Transform* planeTransform) const override;
 
 		const AABB<V>& Bounds() override {
 			//if (m_outdated) {
@@ -37,8 +57,8 @@ namespace impl {
 	};
 }
 
-	using PlaneCollider2  = impl::PlaneCollider<iw::vector2>;
-	using PlaneCollider   = impl::PlaneCollider<iw::vector3>;
+	using PlaneCollider2 = impl::PlaneCollider<iw::vector2>;
+	using PlaneCollider  = impl::PlaneCollider<iw::vector3>;
 	using PlaneCollider4 = impl::PlaneCollider<iw::vector4>;
 }
 

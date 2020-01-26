@@ -103,6 +103,18 @@ namespace IW {
 		return nullptr;
 	}
 
+	bool Space::HasComponent(
+		const EntityHandle& entity,
+		const iw::ref<Component>& component)
+	{
+		if (component) {
+			iw::ref<EntityData>& entityData = m_entityManager.GetEntityData(entity.Index);
+			return entityData->Archetype->HasComponent(component);
+		}
+
+		return false;
+	}
+
 	iw::ref<ComponentQuery> Space::MakeQuery(
 		std::initializer_list<iw::ref<Component>> components)
 	{
@@ -116,7 +128,7 @@ namespace IW {
 	}
 
 	Entity Space::FindEntity(
-		iw::ref<Component> component,
+		const iw::ref<Component>& component,
 		void* instance)
 	{
 		EntityHandle entity = m_componentManager.FindEntity(

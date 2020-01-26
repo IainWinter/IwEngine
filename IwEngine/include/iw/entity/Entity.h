@@ -53,6 +53,12 @@ namespace ECS {
 		_c* FindComponent() {
 			return Space.FindComponent<_c>(Handle);
 		}
+
+		template<
+			typename _c>
+		bool HasComponent() {
+			return Space.HasComponent<_c>(Handle);
+		}
 	};
 }
 

@@ -6,8 +6,7 @@ namespace iw {
 		, m_current(nullptr)
 	{}
 
-	util::pipeline::~pipeline()
-	{
+	pipeline::~pipeline() {
 		for (node* n : m_index) {
 			delete n;
 		}
@@ -17,9 +16,5 @@ namespace iw {
 		for (node* node : m_index) {
 			node->execute();
 		}
-	}
-
-	pipeline& pipeline::init() {
-		return *this;
 	}
 }

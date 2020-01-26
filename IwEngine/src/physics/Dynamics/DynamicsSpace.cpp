@@ -35,8 +35,9 @@ namespace IW {
 		assert(rigidbody);
 		auto itr = std::find(m_rigidbodies.begin(), m_rigidbodies.end(), rigidbody);
 
-		assert(itr != m_rigidbodies.end());
-		m_rigidbodies.erase(itr);
+		if (itr != m_rigidbodies.end()) {
+			m_rigidbodies.erase(itr);
+		}
 
 		RemoveCollisionObject(rigidbody);
 	}
@@ -78,9 +79,9 @@ namespace IW {
 			for (Rigidbody* b : m_rigidbodies) {
 				if (a == b) break;
 
-				Manifold m = algo::MakeManifold(a, b);
-				if (m.HasCollision) {
-					manifolds.push_back(m);
+				ManifoldPoints points = a->Col()->TestCollision(a->Trans(), b->Col(), b->Trans());
+				if (points.HasCollision) {
+					manifolds.emplace_back(a, b, points);
 				}
 			}
 		}
@@ -114,11 +115,11 @@ namespace IW {
 
 		// if not then go to the broadphase pair cache and see what other bodies it could be colliding with
 
-		// At the end the forces should be cleared
-
 		// send collision callbacks
 
 		SendCollisionCallbacks(manifolds, dt);
+
+		// At the end the forces should be cleared
 
 		ClearForces();
 	}

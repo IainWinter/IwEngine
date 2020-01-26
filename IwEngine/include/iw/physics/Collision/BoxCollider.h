@@ -21,6 +21,7 @@ namespace impl {
 		BoxCollider(
 			V center,
 			float scale)
+			: Collider<V>()
 		{
 			for (int i = 0; i < PointCount; i++) {
 				Points[i] = center + (iw::vector4(1)[i] * scale);

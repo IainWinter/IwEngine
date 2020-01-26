@@ -68,6 +68,12 @@ namespace ECS {
 			const EntityHandle& entity,
 			const iw::ref<Component>& component);
 
+		// Returns true if the entities archetype contains the component
+		IWENTITY_API
+		bool HasComponent(
+			const EntityHandle& entity,
+			const iw::ref<Component>& component);
+
 		// Makes a component query from a list of registered components
 		IWENTITY_API
 		iw::ref<ComponentQuery> MakeQuery(
@@ -81,7 +87,7 @@ namespace ECS {
 		// Finds an entity from one of its components
 		IWENTITY_API
 		Entity FindEntity(
-			iw::ref<Component> component,
+			const iw::ref<Component>& component,
 			void* instance);
 
 		// Registers a component type with the component manager allowing it to be used in archetypes
@@ -169,6 +175,15 @@ namespace ECS {
 			const EntityHandle& entity)
 		{
 			return (_c*)FindComponent(entity, GetComponent<_c>());
+		}
+
+		// Returns true if the entities archetype contains the component
+		template<
+			typename _c>
+		bool HasComponent(
+			const EntityHandle& entity)
+		{
+			return HasComponent(entity, GetComponent<_c>());
 		}
 
 		// Makes a component query from a list of registered components

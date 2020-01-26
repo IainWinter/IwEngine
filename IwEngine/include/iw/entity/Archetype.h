@@ -18,14 +18,22 @@ namespace ECS {
 		size_t Count;
 		ArchetypeLayout Layout[];
 
-		ArchetypeLayout GetLayout(
+		ArchetypeLayout* GetLayout(
 			const iw::ref<Component>& component)
 		{
 			for (size_t i = 0; i < Count; i++) {
 				if (component->Type == Layout[i].Component->Type) {
-					return Layout[i];
+					return &Layout[i];
 				}
 			}
+
+			return nullptr;
+		}
+
+		bool HasComponent(
+			const iw::ref<Component>& component)
+		{
+			return GetLayout(component) != nullptr;
 		}
 	};
 

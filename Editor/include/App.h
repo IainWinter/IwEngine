@@ -22,9 +22,9 @@ inline namespace Editor {
 		bool HandleCommand(
 			const Command& command) override;
 
-		void HandleCollision(
-			Manifold& manifold,
-			scalar dt) override;
+		//void HandleCollision(
+		//	Manifold& manifold,
+		//	scalar dt) override;
 	};
 }
 }

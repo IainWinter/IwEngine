@@ -15,8 +15,9 @@ namespace IW {
 		assert(object);
 		auto itr = std::find(m_objects.begin(), m_objects.end(), object);
 		
-		assert(itr != m_objects.end());
-		m_objects.erase(itr);
+		if (itr != m_objects.end()) {
+			m_objects.erase(itr);
+		}
 	}
 
 	void CollisionSpace::AddSolver(

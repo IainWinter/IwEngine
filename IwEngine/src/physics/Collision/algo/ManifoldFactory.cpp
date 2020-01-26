@@ -3,52 +3,9 @@
 namespace IW {
 namespace Physics {
 namespace algo {
-	Manifold MakeManifold(
-		Rigidbody* a,
-		Rigidbody* b)
-	{
-		detail::ManifoldPoints points = detail::FindManifoldPoints(a, b);
-
-		if (points.NoContact) {
-			return { 0, 0, 0, 0, 0, false };
-		}
-
-		return {
-			a, b,
-			points.A, points.B,
-			points.Normal,
-			(points.B - points.A).length(),
-			true
-		};
-	}
-
-namespace detail {
-	ManifoldPoints FindManifoldPoints(
-		CollisionObject* a,
-		CollisionObject* b)
-	{
-		if (   a->Col()->Shape == ColliderShape::SPHERE
-			&& b->Col()->Shape == ColliderShape::SPHERE)
-		{
-			return detail::FindSphereSphereMaifoldPoints(
-				(SphereCollider*)a->Col(), a->Trans(),
-				(SphereCollider*)b->Col(), b->Trans());
-		}
-
-		else if (a->Col()->Shape == ColliderShape::SPHERE
-			  && b->Col()->Shape == ColliderShape::PLANE)
-		{
-			return detail::FindSpherePlaneMaifoldPoints(
-				(SphereCollider*)a->Col(), a->Trans(),
-				(PlaneCollider*)b->Col(), b->Trans());
-		}
-
-		return { 0, 0, 0, true };
-	}
-
 	ManifoldPoints FindSphereSphereMaifoldPoints(
-		SphereCollider* a, Transform* ta,
-		SphereCollider* b, Transform* tb)
+		const SphereCollider* a, const Transform* ta,
+		const SphereCollider* b, const Transform* tb)
 	{
 		iw::vector3 A = a->Center + ta->Position;
 		iw::vector3 B = b->Center + tb->Position;
@@ -57,22 +14,28 @@ namespace detail {
 		iw::vector3 BtoA = A - B;
 
 		if (AtoB.length() - b->Radius > a->Radius) {
-			return { 0, 0, 0, true };
+			return { 
+				0, 0, 
+				0, 
+				0,
+				false
+			};
 		}
 
+		A += AtoB.normalized() * a->Radius;
+		B += BtoA.normalized() * b->Radius;
+
 		return {
-			A + AtoB.normalized() * a->Radius,
-			B + BtoA.normalized() * b->Radius,
-			AtoB.normalized(),
-			false
+			A, B,
+			BtoA.normalized(),
+			(B - A).length(),
+			true
 		};
 	}
 
 	ManifoldPoints FindSpherePlaneMaifoldPoints(
-		SphereCollider* a,
-		Transform* ta,
-		PlaneCollider* b,
-		Transform* tb)
+		const SphereCollider* a, const Transform* ta,
+		const PlaneCollider*  b, const Transform* tb)
 	{
 		iw::vector3 A = a->Center + ta->Position;
 		iw::vector3 N = b->Plane.P.normalized() * tb->Rotation + tb->Position;
@@ -80,17 +43,38 @@ namespace detail {
 
 		float d = (A - P).dot(N);
 		if (d > a->Radius) {
-			return { 0, 0, 0, true };
+			return {
+				0, 0,
+				0,
+				0,
+				false
+			};
 		}
 		
+		iw::vector3 B = A - N * d;
+		A = A - N * a->Radius;
+
 		return {
-			A - N * a->Radius,
-			A - N * d,
-			-N.normalized(),
-			false
+			A, B,
+			N.normalized(),
+			(B - A).length(),
+			true
 		};
 	}
-}
+
+	ManifoldPoints FindPlaneSphereMaifoldPoints(
+		const PlaneCollider*  a, const Transform* ta,
+		const SphereCollider* b, const Transform* tb)
+	{
+		ManifoldPoints points = FindSpherePlaneMaifoldPoints(b, tb, a, ta);
+
+		iw::vector3 v = points.A;
+		points.A = points.B;
+		points.B = v;
+		points.Normal = -points.Normal;
+
+		return points;
+	}
 }
 }
 }

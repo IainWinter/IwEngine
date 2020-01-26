@@ -6,8 +6,10 @@
 namespace iw {
 namespace util {
 	struct node_in {
+	private:
 		void* value;
 
+	public:
 		IWUTIL_API
 		node_in();
 
@@ -29,8 +31,7 @@ namespace util {
 			}
 
 			if (value) {
-				memset(value, 0, sizeof(_t));
-				*(_t*)value = std::forward<_t>(v);
+				new (value) _t(v);
 			}
 		}
 
@@ -57,13 +58,14 @@ namespace util {
 		IWUTIL_API
 		void unlink(
 			node* node,
-			int i);
+			int index);
 	};
 
 	struct node_link {
 		node* next;
 		int index;
 
+		IWUTIL_API
 		node_link(
 			node* next = nullptr,
 			int index = -1);
@@ -89,45 +91,51 @@ namespace util {
 			unsigned a,
 			unsigned b);
 
+		IWUTIL_API
+		void unlink(
+			node* node,
+			unsigned a,
+			unsigned b);
+
 		template<
 			typename _t>
 		void set(
-			unsigned i,
-			_t v)
+			unsigned index,
+			_t value)
 		{
-			m_in.at(i).set<_t>(v);
+			m_in.at(index).set<_t>(value);
 		}
 
 		template<
 			typename _t>
 		_t& get(
-			unsigned i)
+			unsigned index)
 		{
-			return m_out.at(i).Get<_t>();
+			return m_out.at(index).get<_t>();
 		}
 	protected:
 		template<
 			typename _t>
 		_t& in(
-			unsigned i)
+			unsigned index)
 		{
-			return m_in.at(i).get<_t>();
+			return m_in.at(index).get<_t>();
 		}
 
 		template<
 			typename _t>
 		void out(
-			unsigned i,
-			_t v)
+			unsigned index,
+			_t value)
 		{
-			node_out& node = m_out.at(i);
+			node_out& node = m_out.at(index);
 			if (node.links.size() != 0) {
 				for (node_link& link : node.links) {
-					link.next->set<_t>(link.index, v);
+					link.next->set<_t>(link.index, value);
 				}
 			}
 
-			node.set<_t>(v);
+			node.set<_t>(value);
 		}
 	};
 }
