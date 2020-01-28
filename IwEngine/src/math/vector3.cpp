@@ -194,25 +194,25 @@ namespace iw {
 	vector3 vector3::operator+=(
 		float other)
 	{
-		return *this = (*this) + other;
+		return *this = *this + other;
 	}
 
 	vector3 vector3::operator-=(
 		float other)
 	{
-		return *this = (*this) - other;
+		return *this = *this - other;
 	}
 
 	vector3 vector3::operator*=(
 		float other)
 	{
-		return *this = (*this) * other;
+		return *this = *this * other;
 	}
 
 	vector3 vector3::operator/=(
 		float other)
 	{
-		return *this = (*this) / other;
+		return *this = *this / other;
 	}
 
 	vector3 vector3::operator*(
@@ -227,23 +227,20 @@ namespace iw {
 	vector3& vector3::operator*=(
 		const matrix3& mat)
 	{
-		return *this = iw::vector3(
-			x * mat(0, 0) + y * mat(0, 1) + z * mat(0, 2),
-			x * mat(1, 0) + y * mat(1, 1) + z * mat(1, 2),
-			x * mat(2, 0) + y * mat(2, 1) + z * mat(2, 2));
+		return *this = *this * mat;
 	}
 
-	vector3 vector3::operator*(
-		const matrix4& mat) const
-	{
-		return (vector4(*this, 1) * mat).xyz();
-	}
+	//vector3 vector3::operator*(
+	//	const matrix4& mat) const
+	//{
+	//	return *this = *this * mat; (vector4(*this, 1) * mat).xyz();
+	//}
 
-	vector3& vector3::operator*=(
-		const matrix4& mat)
-	{
-		return *this = (vector4(*this, 1) * mat).xyz();
-	}
+	//vector3& vector3::operator*=(
+	//	const matrix4& mat)
+	//{
+	//	return *this = (vector4(*this, 1) * mat).xyz();
+	//}
 
 	vector3 vector3::operator*(
 		const quaternion& quat) const
@@ -253,23 +250,15 @@ namespace iw {
 
 		const vector3& v = *this;
 
-		return 2.0f * u * v.dot(u)
-			 + 2.0f * s * v.cross(u) 
-			 + v * (s*s - u.dot(u));
+		return 2.0f * u.dot(v)  * u
+			+ (s*s  - u.dot(u)) * v
+			+  2.0f * s * u.cross(v);
 	}
 
 	vector3& vector3::operator*=(
 		const quaternion& quat)
 	{
-		vector3 u = vector3(quat.x, quat.y, quat.z);
-		float s = quat.w;
-
-		const vector3& v = *this;
-
-		return *this 
-			= 2.0f * u * v.dot(u)
-			+ 2.0f * s * v.cross(u)
-			+ v * (s*s - u.dot(u));
+		return *this = *this * quat;
 	}
 
 	vector3 vector3::operator-() const {

@@ -73,7 +73,7 @@ namespace IW {
 		// Font
 
 		font = Asset->Load<Font>("fonts/arial.fnt");
-		textMesh = font->GenerateMesh("Test", 0.03f, Renderer->Width / Renderer->Height);
+		textMesh = font->GenerateMesh("This is a test", 0.03f, 1);
 		
 		textMesh->Initialize(Renderer->Device);
 		font->Initialize(Renderer->Device);
@@ -284,8 +284,11 @@ namespace IW {
 
 		PerspectiveCamera* perspective = new PerspectiveCamera(1.17f, 1.778f, .01f, 2000.0f);
 
+		iw::quaternion camrot = iw::quaternion::from_axis_angle(iw::vector3::unit_y, iw::PI)
+			* iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::PI / 2);
+
 		camera = Space->CreateEntity<Transform, CameraController>();
-		camera.SetComponent<Transform>       (iw::vector3(0, 25, 0), iw::vector3::one, iw::quaternion::from_axis_angle(iw::vector3::unit_x, -iw::PI / 2));
+		camera.SetComponent<Transform>       (iw::vector3(0, 25, 0), iw::vector3::one, camrot);
 		camera.SetComponent<CameraController>(perspective);
 
 		// Rendering pipeline
@@ -354,6 +357,8 @@ namespace IW {
 		ImGui::SliderFloat("Shadow map blur", &blurAmount, 0, 5);
 		ImGui::SliderFloat("Shadow map threshold", &threshold, 0, 1);
 		ImGui::SliderFloat3("Light pos", (float*)&lightPos, -5, 5);
+
+		ImGui::SliderFloat3("Cam pos", (float*)&camera.FindComponent<Transform>()->Position, -10, 10);
 
 		ImGui::End();
 	}

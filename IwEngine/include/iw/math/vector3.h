@@ -171,11 +171,11 @@ namespace math {
 		vector3& operator*=(
 			const matrix3& mat);
 
-		vector3 operator*(
-			const matrix4& mat) const;
+		//vector3 operator*(
+		//	const matrix4& mat) const;
 
-		vector3& operator*=(
-			const matrix4& mat);
+		//vector3& operator*=(
+		//	const matrix4& mat);
 
 		vector3 operator*(
 			const quaternion& quat) const;

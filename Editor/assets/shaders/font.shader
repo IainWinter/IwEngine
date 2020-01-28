@@ -7,8 +7,8 @@ layout(std140, column_major) uniform Camera {
 
 uniform mat4 model;
 
-layout(location = 0) in vec3 vert;
-layout(location = 1) in vec2 uv;
+in vec3 vert;
+in vec2 uv;
 
 out vec2 UV;
 
@@ -26,5 +26,5 @@ uniform sampler2D fontMap;
 in vec2 UV;
 
 void main() {
-	gl_FragColor = vec4(color, texture2D(fontMap, UV));
+	gl_FragColor = vec4(color, texture2D(fontMap, UV).a);
 }

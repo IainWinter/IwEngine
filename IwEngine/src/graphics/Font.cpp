@@ -62,11 +62,11 @@ namespace Graphics {
 		int padWidth  = m_padding.Left + m_padding.Right;
 		int padHeight = m_padding.Top  + m_padding.Bottom;
 
-		int charHeightPixels = m_lightHeight - padHeight;
+		int lineHeightPixels = m_lightHeight - padHeight;
 
 		iw::vector2 charDim = iw::vector2(
-			lineHeight / charHeightPixels,
-			lineHeight / charHeightPixels / ratio
+			lineHeight / lineHeightPixels,
+			lineHeight / lineHeightPixels / ratio
 		);
 
 		Mesh* mesh = new Mesh();
@@ -107,29 +107,24 @@ namespace Graphics {
 				float maxX = x + (quadWidth  * m_size);
 				float maxY = y + (quadHeight * m_size);
 
-				// 0 2
-				// 1 3
 				mesh->Vertices[vert + 0] = iw::vector3(x,    y,    0);
 				mesh->Vertices[vert + 1] = iw::vector3(x,    maxY, 0);
 				mesh->Vertices[vert + 2] = iw::vector3(maxX, y,    0);
 				mesh->Vertices[vert + 3] = iw::vector3(maxX, maxY, 0);
 
-				mesh->Uvs[vert + 0] = iw::vector2(xTex,            yTex);
-				mesh->Uvs[vert + 1] = iw::vector2(xTex,            yTex + yTexSize);
-				mesh->Uvs[vert + 2] = iw::vector2(xTex + xTexSize, yTex);
-				mesh->Uvs[vert + 3] = iw::vector2(xTex + xTexSize, yTex + yTexSize);
+				mesh->Uvs[vert + 0] = iw::vector2(xTex + xTexSize, yTex + yTexSize);
+				mesh->Uvs[vert + 1] = iw::vector2(xTex + xTexSize, yTex);
+				mesh->Uvs[vert + 2] = iw::vector2(xTex,            yTex + yTexSize);
+				mesh->Uvs[vert + 3] = iw::vector2(xTex,            yTex);
 
-				vert += 4;
+				mesh->Indices[index + 0] = vert;
+				mesh->Indices[index + 1] = vert + 1;
+				mesh->Indices[index + 2] = vert + 2;
+				mesh->Indices[index + 3] = vert + 1;
+				mesh->Indices[index + 4] = vert + 3;
+				mesh->Indices[index + 5] = vert + 2;
 
-				// 0 1 2
-				// 1 3 2
-				mesh->Indices[index + 0] = index;
-				mesh->Indices[index + 1] = index + 1;
-				mesh->Indices[index + 2] = index + 2;
-				mesh->Indices[index + 3] = index + 1;
-				mesh->Indices[index + 4] = index + 3;
-				mesh->Indices[index + 5] = index + 2;
-
+				vert  += 4;
 				index += 6;
 
 				cursor.x += xAdvance * m_size;

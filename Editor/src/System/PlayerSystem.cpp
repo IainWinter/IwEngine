@@ -50,10 +50,10 @@ bool PlayerSystem::On(
 	IW::KeyEvent& event)
 {
 	switch (event.Button) {
-		case IW::UP:    movement.z -= event.State == 0 ? -1 : 1; break;
-		case IW::DOWN:  movement.z += event.State == 0 ? -1 : 1; break;
-		case IW::LEFT:  movement.x -= event.State == 0 ? -1 : 1; break;
-		case IW::RIGHT: movement.x += event.State == 0 ? -1 : 1; break;
+		case IW::UP:    movement.z -= event.State == 0 ? 1 : -1; break;
+		case IW::DOWN:  movement.z += event.State == 0 ? 1 : -1; break;
+		case IW::LEFT:  movement.x -= event.State == 0 ? 1 : -1; break;
+		case IW::RIGHT: movement.x += event.State == 0 ? 1 : -1; break;
 		case IW::X:     dash = event.State; break;
 	}
 

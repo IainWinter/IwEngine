@@ -298,10 +298,8 @@ namespace iw {
 		vector3 target,
 		vector3 up)
 	{
-		vector3 z = -vector3::unit_z;
-
 		vector3 forward = (target - eye).normalized();
-		float dot = z.dot(forward);
+		float dot = vector3::unit_z.dot(forward);
 
 		if (abs(dot + 1.0f) < 0.00001f) {
 			return quaternion(up, PI);
@@ -312,7 +310,7 @@ namespace iw {
 		}
 
 		float angle  = acos(dot);
-		vector3 axis = z.cross(forward).normalized();
+		vector3 axis = vector3::unit_z.cross(forward).normalized();
 
 		return from_axis_angle(axis, angle);
 	}

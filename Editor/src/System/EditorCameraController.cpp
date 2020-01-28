@@ -17,7 +17,8 @@ namespace IW {
 
 			if (movement != 0) {
 				if (movement.x != 0) {
-					t->Position += -t->Right() * movement.x * speed * Time::DeltaTime();
+					iw::vector3 rot = t->Right();
+					t->Position += rot * movement.x * speed * Time::DeltaTime();
 				}
 
 				if (movement.y != 0) {
@@ -29,16 +30,16 @@ namespace IW {
 					forward.y = 0;
 					forward.normalize();
 
-					t->Position += -forward * movement.z * speed * Time::DeltaTime();
+					t->Position += forward * movement.z * speed * Time::DeltaTime();
 				}
-
 			}
 			
 			if (rotation != 0) {
-				iw::quaternion deltaP = iw::quaternion::from_axis_angle(-t->Right(), rotation.x);
-				iw::quaternion deltaY = iw::quaternion::from_axis_angle(iw::vector3::unit_y, rotation.y);
+				iw::quaternion deltaP = iw::quaternion::from_axis_angle(t->Right(), rotation.x);
+				iw::quaternion deltaY = iw::quaternion::from_axis_angle(-iw::vector3::unit_y, rotation.y);
 
-				t->Rotation *= deltaP * deltaY;
+				t->Rotation = deltaP * t->Rotation;
+				t->Rotation = deltaY * t->Rotation;
 			}
 
 			rotation = 0;
@@ -49,9 +50,9 @@ namespace IW {
 		ActionEvent& e)
 	{
 		switch (e.Action) {
-			case iw::val(Actions::JUMP):    movement.y += e.as<ToggleEvent>().Active ?  1 : -1; break;
-			case iw::val(Actions::RIGHT):   movement.x += e.as<ToggleEvent>().Active ?  1 : -1; break;
-			case iw::val(Actions::FORWARD): movement.z += e.as<ToggleEvent>().Active ? -1 :  1; break;
+			case iw::val(Actions::JUMP):    movement.y += e.as<ToggleEvent>().Active ? 1 : -1; break;
+			case iw::val(Actions::RIGHT):   movement.x += e.as<ToggleEvent>().Active ? 1 : -1; break;
+			case iw::val(Actions::FORWARD): movement.z += e.as<ToggleEvent>().Active ? 1 : -1; break;
 		}
 
 		return false;
