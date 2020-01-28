@@ -53,6 +53,28 @@ namespace Graphics {
 		~Mesh();
 
 		IWGRAPHICS_API
+		void Initialize(
+			const iw::ref<IDevice>& device);
+
+		IWGRAPHICS_API
+		void Update(
+			const iw::ref<IDevice>& device);
+
+		IWGRAPHICS_API
+		void Destroy(
+			const iw::ref<IDevice>& device);
+
+		IWGRAPHICS_API
+		void Draw(
+			const iw::ref<IDevice>& device) const;
+
+		IWGRAPHICS_API
+		void GenNormals();
+
+		IWGRAPHICS_API
+		void GenTangents();
+
+		IWGRAPHICS_API
 		void SetVertices(
 			unsigned count,
 			iw::vector3* vertices);
@@ -88,33 +110,11 @@ namespace Graphics {
 			unsigned* indices);
 
 		IWGRAPHICS_API
-		void GenNormals();
-
-		IWGRAPHICS_API
-		void GenTangents(); 
-
-		IWGRAPHICS_API
 		void SetMaterial(
 			iw::ref<IW::Material>& material);
 
 		IWGRAPHICS_API
 		size_t GetElementCount();
-
-		IWGRAPHICS_API
-		void Initialize(
-			const iw::ref<IDevice>& device);
-
-		IWGRAPHICS_API
-		void Update(
-			const iw::ref<IDevice>& device);
-
-		IWGRAPHICS_API
-		void Destroy(
-			const iw::ref<IDevice>& device);
-
-		IWGRAPHICS_API
-		void Draw(
-			const iw::ref<IDevice>& device) const;
 	};
 }
 

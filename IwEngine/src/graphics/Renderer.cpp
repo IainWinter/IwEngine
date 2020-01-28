@@ -108,14 +108,15 @@ namespace IW {
 		
 		if(!material) {
 			// draw with default material
-			return;
 		}
 
-		SetShader(material->Shader);
+		else {
+			SetShader(material->Shader);
 
-		material->Use(Device);
+			material->Use(Device);
 
-		material->Shader->Program->GetParam("model")->SetAsMat4(transform->Transformation());
+			material->Shader->Program->GetParam("model")->SetAsMat4(transform->Transformation());
+		}
 
 		mesh->Draw(Device);
 	}

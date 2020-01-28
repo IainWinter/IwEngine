@@ -9,6 +9,7 @@
 #include "iw/graphics/Loaders/MaterialLoader.h"
 #include "iw/graphics/Loaders/TextureLoader.h"
 #include "iw/graphics/Loaders/ShaderLoader.h"
+#include "iw/graphics/Loaders/FontLoader.h"
 //#include "iw/physics/Events/CollisionEvents.h"
 #include <atomic>
 
@@ -66,6 +67,7 @@ namespace IW {
 		Asset->SetLoader<MaterialLoader>();
 		Asset->SetLoader<TextureLoader>();
 		Asset->SetLoader<ShaderLoader>();
+		Asset->SetLoader<FontLoader>();
 
 		// Window
 

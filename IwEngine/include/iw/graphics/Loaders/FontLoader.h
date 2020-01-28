@@ -2,20 +2,20 @@
 
 #include "iw/graphics/IwGraphics.h"
 #include "iw/asset/AssetLoader.h"
-#include "iw/graphics/Material.h"
+#include "iw/graphics/Font.h"
 
 namespace IW {
 namespace Graphics {
-	class MaterialLoader
-		: public AssetLoader<Material>
+	class FontLoader
+		: public AssetLoader<Font>
 	{
 	public:
 		IWGRAPHICS_API
-		MaterialLoader(
+		FontLoader(
 			AssetManager& asset);
 	private:
 		IWGRAPHICS_API
-		Material* LoadAsset(
+		Font* LoadAsset(
 			std::string filepath) override;
 	};
 }

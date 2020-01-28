@@ -111,7 +111,7 @@ namespace IW {
 		//	aiTexture* texture = scene->mTextures[0];
 		//}
 
-		Model* model = new Model{
+		Model* model = new Model {
 			new Mesh[scene->mNumMeshes],
 			scene->mNumMeshes
 		};

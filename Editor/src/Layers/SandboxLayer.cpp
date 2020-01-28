@@ -22,6 +22,8 @@
 #include "Pipeline/FilterTarget.h"
 #include "Pipeline/Render.h"
 
+#include "iw/graphics/Font.h"
+
 namespace IW {
 	struct ModelUBO {
 		iw::matrix4 model;
@@ -58,11 +60,28 @@ namespace IW {
 	GenerateShadowMap* generateShadowMap;
 	FilterTarget* postProcessShadowMap;
 
+	Entity camera;
+	Mesh* textMesh;
+	iw::ref<Shader> fontShader;
+	iw::ref<Font> font;
+
 	SandboxLayer::SandboxLayer()
 		: Layer("Sandbox")
 	{}
 
 	int SandboxLayer::Initialize() {
+		// Font
+
+		font = Asset->Load<Font>("fonts/arial.fnt");
+		textMesh = font->GenerateMesh("Test", 0.03f, Renderer->Width / Renderer->Height);
+		
+		textMesh->Initialize(Renderer->Device);
+		font->Initialize(Renderer->Device);
+
+		fontShader = Asset->Load<Shader>("shaders/font.shader");
+
+		Renderer->InitShader(fontShader, CAMERA);
+
 		// Shader
 
 		iw::ref<Shader> shader = Asset->Load<Shader>("shaders/default.shader");
@@ -265,7 +284,7 @@ namespace IW {
 
 		PerspectiveCamera* perspective = new PerspectiveCamera(1.17f, 1.778f, .01f, 2000.0f);
 
-		Entity camera = Space->CreateEntity<Transform, CameraController>();
+		camera = Space->CreateEntity<Transform, CameraController>();
 		camera.SetComponent<Transform>       (iw::vector3(0, 25, 0), iw::vector3::one, iw::quaternion::from_axis_angle(iw::vector3::unit_x, -iw::PI / 2));
 		camera.SetComponent<CameraController>(perspective);
 
@@ -306,6 +325,20 @@ namespace IW {
 		postProcessShadowMap->SetBlur(iw::vector2(blurw, blurh));
 
 		pipeline.execute();
+
+		//Renderer->BeginScene();
+
+		Renderer->SetShader(fontShader);
+
+		fontShader->Program->GetParam("color")->SetAsFloats(&iw::vector3::one, 1, 3);
+		fontShader->Program->GetParam("fontMap")->SetAsTexture(font->GetTexture(0)->Handle());
+
+		Transform t{ iw::vector3(0, 0, -1), iw::vector3::one, iw::quaternion::identity };
+		fontShader->Program->GetParam("model")->SetAsMat4(t.Transformation());
+
+		Renderer->DrawMesh(&t, textMesh);
+
+		//Renderer->EndScene();
 	}
 
 	float ts = 1.0f;
