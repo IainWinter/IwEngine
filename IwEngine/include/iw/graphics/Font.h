@@ -20,13 +20,13 @@ namespace Graphics {
 	};
 
 	struct Character {
-		unsigned X;
-		unsigned Y;
-		unsigned Width;
-		unsigned Height;
+		int X;
+		int Y;
+		int Width;
+		int Height;
 		int Xoffset;
 		int Yoffset;
-		unsigned Xadvance;
+		int Xadvance;
 		unsigned Page;
 		unsigned Chnl;
 	};

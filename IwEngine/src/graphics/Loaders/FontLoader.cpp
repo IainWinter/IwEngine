@@ -436,35 +436,35 @@ namespace IW {
 				case State::CHAR: {
 					switch (token.type) {
 						case Type::ID: {
-							id = (unsigned)std::stoi(token.value);
+							id = std::stoi(token.value);
 							break;
 						}
 						case Type::X: {
-							character.X = (unsigned)std::stoi(token.value);
+							character.X = std::stoi(token.value);
 							break;
 						}
 						case Type::Y: {
-							character.Y = (unsigned)std::stoi(token.value);
+							character.Y = std::stoi(token.value);
 							break;
 						}
 						case Type::WIDTH: {
-							character.Width = (unsigned)std::stoi(token.value);
+							character.Width = std::stoi(token.value);
 							break;
 						}
 						case Type::HEIGHT: {
-							character.Height = (unsigned)std::stoi(token.value);
+							character.Height = std::stoi(token.value);
 							break;
 						}
 						case Type::XOFFSET: {
-							character.Xoffset = (int)std::stoi(token.value);
+							character.Xoffset = std::stoi(token.value);
 							break;
 						}
 						case Type::YOFFSET: {
-							character.Yoffset = (int)std::stoi(token.value);
+							character.Yoffset = std::stoi(token.value);
 							break;
 						}
 						case Type::XADVANCE: {
-							character.Xadvance = (int)std::stoi(token.value);
+							character.Xadvance = std::stoi(token.value);
 							break;
 						}
 						case Type::PAGE: {
