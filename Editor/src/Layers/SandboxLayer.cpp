@@ -73,7 +73,9 @@ namespace IW {
 		// Font
 
 		font = Asset->Load<Font>("fonts/arial.fnt");
-		textMesh = font->GenerateMesh("This is a test", 0.03f, 1);
+		textMesh = font->GenerateMesh("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque venenatis orci in ipsum auctor pulvinar. \n"
+			"Aenean tristique mauris et mauris accumsan, et pretium diam dignissim. Nullam pharetra nisi nec urna mattis, molestie ullamcorper ex tempus. \n"
+			"In quis mauris at magna dictum finibus.", .01f, 1);
 		
 		textMesh->Initialize(Renderer->Device);
 		font->Initialize(Renderer->Device);
@@ -336,7 +338,7 @@ namespace IW {
 		fontShader->Program->GetParam("color")->SetAsFloats(&iw::vector3::one, 1, 3);
 		fontShader->Program->GetParam("fontMap")->SetAsTexture(font->GetTexture(0)->Handle());
 
-		Transform t{ iw::vector3(0, 0, -1), iw::vector3::one, iw::quaternion::identity };
+		Transform t{ iw::vector3(0, 5, 0), iw::vector3::one, iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::PI / 2) };
 		fontShader->Program->GetParam("model")->SetAsMat4(t.Transformation());
 
 		Renderer->DrawMesh(&t, textMesh);

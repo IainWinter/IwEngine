@@ -46,7 +46,7 @@ namespace Graphics {
 
 	Mesh* Font::GenerateMesh(
 		std::string string,
-		float lineHeight,
+		float size,
 		float ratio) const
 	{
 		std::vector<std::string> lines;
@@ -64,9 +64,9 @@ namespace Graphics {
 
 		int lineHeightPixels = m_lightHeight - padHeight;
 
-		iw::vector2 charDim = iw::vector2(
-			lineHeight / lineHeightPixels,
-			lineHeight / lineHeightPixels / ratio
+		iw::vector2 scale = iw::vector2(
+			size / lineHeightPixels * m_size * ratio,
+			size / lineHeightPixels * m_size
 		);
 
 		Mesh* mesh = new Mesh();
@@ -85,37 +85,28 @@ namespace Graphics {
 			for (unsigned character : line) {
 				const Character& c = GetCharacter(character);
 				
-				float xTex = float(c.X + m_padding.Left) / GetTexture(c.Page)->Width();
-				float yTex = float(c.Y + m_padding.Top)  / GetTexture(c.Page)->Height();
+				iw::vector2 dim(c.Width - padWidth, c.Height - padHeight);
+				iw::vector2 tex(GetTexture(c.Page)->Width(), GetTexture(c.Page)->Height());
 
-				int width  = c.Width  - padWidth;
-				int height = c.Height - padHeight;
+				float u = (c.X + m_padding.Left) / tex.x;
+				float v = (c.Y + m_padding.Top)  / tex.y;
+				float maxU = u + dim.x / tex.x;
+				float maxV = v + dim.y / tex.y;
 
-				float quadWidth =  width  * charDim.x;
-				float quadHeight = height * charDim.y;
-
-				float xTexSize = (float)width  / GetTexture(c.Page)->Width();
-				float yTexSize = (float)height / GetTexture(c.Page)->Height();
-
-				float xOff = (c.Xoffset + m_padding.Left) * charDim.x;
-				float yOff = (c.Yoffset + m_padding.Top)  * charDim.y;
-
-				float xAdvance = (c.Xadvance - padWidth) * charDim.x;
-
-				float x = cursor.x + (xOff * m_size);
-				float y = cursor.y + (yOff * m_size);
-				float maxX = x + (quadWidth  * m_size);
-				float maxY = y + (quadHeight * m_size);
+				float x = cursor.x + (c.Xoffset + m_padding.Left) * scale.x;
+				float y = cursor.y - (c.Yoffset + m_padding.Top)  * scale.y;
+				float maxX = x + dim.x * scale.x;
+				float minY = y - dim.y * scale.y;
 
 				mesh->Vertices[vert + 0] = iw::vector3(x,    y,    0);
-				mesh->Vertices[vert + 1] = iw::vector3(x,    maxY, 0);
+				mesh->Vertices[vert + 1] = iw::vector3(x,    minY, 0);
 				mesh->Vertices[vert + 2] = iw::vector3(maxX, y,    0);
-				mesh->Vertices[vert + 3] = iw::vector3(maxX, maxY, 0);
+				mesh->Vertices[vert + 3] = iw::vector3(maxX, minY, 0);
 
-				mesh->Uvs[vert + 0] = iw::vector2(xTex + xTexSize, yTex + yTexSize);
-				mesh->Uvs[vert + 1] = iw::vector2(xTex + xTexSize, yTex);
-				mesh->Uvs[vert + 2] = iw::vector2(xTex,            yTex + yTexSize);
-				mesh->Uvs[vert + 3] = iw::vector2(xTex,            yTex);
+				mesh->Uvs[vert + 0] = iw::vector2(u,    v);
+				mesh->Uvs[vert + 1] = iw::vector2(u,    maxV);
+				mesh->Uvs[vert + 2] = iw::vector2(maxU, v);
+				mesh->Uvs[vert + 3] = iw::vector2(maxU, maxV);
 
 				mesh->Indices[index + 0] = vert;
 				mesh->Indices[index + 1] = vert + 1;
@@ -127,10 +118,11 @@ namespace Graphics {
 				vert  += 4;
 				index += 6;
 
-				cursor.x += xAdvance * m_size;
+				cursor.x += c.Xadvance * scale.x;
 			}
 
-			cursor.y += lineHeight * m_size;
+			cursor.x = 0;
+			cursor.y -= size * m_size;
 		}
 
 		return mesh;

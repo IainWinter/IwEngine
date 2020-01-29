@@ -92,7 +92,7 @@ namespace Graphics {
 		IWGRAPHICS_API
 		Mesh* GenerateMesh(
 			std::string string,
-			float lineHeight,
+			float size,
 			float ratio) const;
 
 		IWGRAPHICS_API

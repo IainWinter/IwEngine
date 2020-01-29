@@ -17,7 +17,7 @@ namespace IW {
 
 			if (movement != 0) {
 				if (movement.x != 0) {
-					iw::vector3 rot = t->Right();
+					iw::vector3 rot = -t->Right();
 					t->Position += rot * movement.x * speed * Time::DeltaTime();
 				}
 
