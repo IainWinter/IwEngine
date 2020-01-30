@@ -4,10 +4,12 @@
 
 namespace IW {
 namespace RenderAPI {
-	class IWRENDERER_API IComputePipeline {
+	class IComputePipeline {
 	public:
-		virtual ~IComputePipeline() {}
+		IWRENDERER_API
+		virtual ~IComputePipeline() = default;
 
+		IWRENDERER_API
 		virtual void DispatchComputeShader(
 			int x,
 			int y,

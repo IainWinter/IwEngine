@@ -5,12 +5,12 @@ namespace IW {
 	GLFrameBuffer::GLFrameBuffer() 
 		: m_textureCount(0)
 	{
-		glGenFramebuffers(1, &m_renderId);
+		glGenFramebuffers(1, &gl_id);
 		Bind();
 	}
 
 	GLFrameBuffer::~GLFrameBuffer() {
-		glDeleteFramebuffers(1, &m_renderId);
+		glDeleteFramebuffers(1, &gl_id);
 	}
 
 	void GLFrameBuffer::AttachTexture(
@@ -32,7 +32,7 @@ namespace IW {
 	}
 
 	void GLFrameBuffer::Bind() const {
-		glBindFramebuffer(GL_FRAMEBUFFER, m_renderId);
+		glBindFramebuffer(GL_FRAMEBUFFER, gl_id);
 	}
 
 	void GLFrameBuffer::Unbind() const {

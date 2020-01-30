@@ -45,7 +45,20 @@ namespace Graphics {
 	}
 
 	Mesh* Font::GenerateMesh(
-		std::string string,
+		const std::string& string,
+		float size,
+		float ratio) const
+	{
+		Mesh* mesh = new Mesh();
+
+		UpdateMesh(mesh, string, size, ratio);
+
+		return mesh;
+	}
+
+	void Font::UpdateMesh(
+		Mesh* mesh,
+		const std::string& string,
 		float size,
 		float ratio) const
 	{
@@ -59,8 +72,8 @@ namespace Graphics {
 			count += line.length();
 		}
 
-		int padWidth  = m_padding.Left + m_padding.Right;
-		int padHeight = m_padding.Top  + m_padding.Bottom;
+		int padWidth = m_padding.Left + m_padding.Right;
+		int padHeight = m_padding.Top + m_padding.Bottom;
 
 		int lineHeightPixels = m_lightHeight - padHeight;
 
@@ -69,7 +82,8 @@ namespace Graphics {
 			size / lineHeightPixels * m_size
 		);
 
-		Mesh* mesh = new Mesh();
+		delete[] mesh->Vertices;
+		delete[] mesh->Indices;
 
 		mesh->VertexCount = count * 4;
 		mesh->IndexCount  = count * 6;
@@ -79,32 +93,34 @@ namespace Graphics {
 		mesh->Indices  = new unsigned   [mesh->IndexCount];
 
 		iw::vector2 cursor;
-		unsigned vert  = 0;
+		unsigned vert = 0;
 		unsigned index = 0;
+		unsigned lastChar = 0;
 		for (std::string line : lines) {
 			for (unsigned character : line) {
 				const Character& c = GetCharacter(character);
-				
+				int kerning = GetKerning(lastChar, character);
+
 				iw::vector2 dim(c.Width - padWidth, c.Height - padHeight);
 				iw::vector2 tex(GetTexture(c.Page)->Width(), GetTexture(c.Page)->Height());
 
 				float u = (c.X + m_padding.Left) / tex.x;
-				float v = (c.Y + m_padding.Top)  / tex.y;
+				float v = (c.Y + m_padding.Top) / tex.y;
 				float maxU = u + dim.x / tex.x;
 				float maxV = v + dim.y / tex.y;
 
 				float x = cursor.x + (c.Xoffset + m_padding.Left) * scale.x;
-				float y = cursor.y - (c.Yoffset + m_padding.Top)  * scale.y;
+				float y = cursor.y - (c.Yoffset + m_padding.Top) * scale.y;
 				float maxX = x + dim.x * scale.x;
 				float minY = y - dim.y * scale.y;
 
-				mesh->Vertices[vert + 0] = iw::vector3(x,    y,    0);
-				mesh->Vertices[vert + 1] = iw::vector3(x,    minY, 0);
-				mesh->Vertices[vert + 2] = iw::vector3(maxX, y,    0);
+				mesh->Vertices[vert + 0] = iw::vector3(x, y, 0);
+				mesh->Vertices[vert + 1] = iw::vector3(x, minY, 0);
+				mesh->Vertices[vert + 2] = iw::vector3(maxX, y, 0);
 				mesh->Vertices[vert + 3] = iw::vector3(maxX, minY, 0);
 
-				mesh->Uvs[vert + 0] = iw::vector2(u,    v);
-				mesh->Uvs[vert + 1] = iw::vector2(u,    maxV);
+				mesh->Uvs[vert + 0] = iw::vector2(u, v);
+				mesh->Uvs[vert + 1] = iw::vector2(u, maxV);
 				mesh->Uvs[vert + 2] = iw::vector2(maxU, v);
 				mesh->Uvs[vert + 3] = iw::vector2(maxU, maxV);
 
@@ -115,17 +131,17 @@ namespace Graphics {
 				mesh->Indices[index + 4] = vert + 3;
 				mesh->Indices[index + 5] = vert + 2;
 
-				vert  += 4;
+				vert += 4;
 				index += 6;
 
-				cursor.x += c.Xadvance * scale.x;
+				cursor.x += (c.Xadvance + kerning) * scale.x;
+
+				lastChar = character;
 			}
 
 			cursor.x = 0;
 			cursor.y -= size * m_size;
 		}
-
-		return mesh;
 	}
 
 	iw::ref<Texture>& Font::GetTexture(
@@ -154,9 +170,14 @@ namespace Graphics {
 
 	int Font::GetKerning(
 		unsigned characterA,
-		unsigned characterB)
+		unsigned characterB) const
 	{
-		return m_kernings.at(std::make_pair(characterA, characterB));
+		auto itr = m_kernings.find(std::make_pair(characterA, characterB));
+		if (itr == m_kernings.end()) {
+			return 0;
+		}
+
+		return itr->second;
 	}
 
 	void Font::SetCharacter(

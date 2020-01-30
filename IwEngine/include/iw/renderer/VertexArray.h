@@ -6,12 +6,12 @@
 
 namespace IW {
 namespace RenderAPI {
-	class IWRENDERER_API IVertexArray {
+	class IVertexArray {
 	public:
-		virtual ~IVertexArray() {}
-
+		IWRENDERER_API
+		virtual ~IVertexArray() = default;
 	protected:
-		IVertexArray() {}
+		IVertexArray() = default;
 	};
 }
 

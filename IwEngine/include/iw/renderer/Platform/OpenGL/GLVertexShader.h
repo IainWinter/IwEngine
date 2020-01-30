@@ -4,21 +4,22 @@
 
 namespace IW {
 namespace RenderAPI {
-	class IWRENDERER_API GLVertexShader
+	class GLVertexShader
 		: public IVertexShader
 	{
 	private:
-		unsigned int m_vertexShader;
+		unsigned gl_id;
 
 	public:
+		IWRENDERER_API
 		GLVertexShader(
 			const char* source);
 
-		~GLVertexShader();
+		IWRENDERER_API
+		~GLVertexShader() = default;
 
-		inline unsigned int VertexShader() const {
-			return m_vertexShader;
-		}
+		IWRENDERER_API
+		unsigned VertexShader() const;
 	};
 }
 

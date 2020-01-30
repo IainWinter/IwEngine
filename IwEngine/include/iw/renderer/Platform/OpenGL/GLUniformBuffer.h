@@ -1,32 +1,23 @@
 #pragma once
 
 #include "iw/renderer/UniformBuffer.h"
+#include "GLBuffer.h"
 
 namespace IW {
 namespace RenderAPI {
-	class IWRENDERER_API GLUniformBuffer
+	class GLUniformBuffer
 		: public IUniformBuffer
+		, public GLBuffer
 	{
-	private:
-		unsigned m_renderId;
-		size_t m_size;
-		const void* m_data;
-
 	public:
+		IWRENDERER_API
 		GLUniformBuffer(
+			const void* data,
 			size_t size,
-			const void* data);
+			BufferIOType io = DYNAMIC);
 
-		~GLUniformBuffer();
-
-		void UpdateData(
-			const void* data) const;
-
-		void BindBase(
-			unsigned index) const;
-
-		void Bind() const;
-		void Unbind() const;
+		IWRENDERER_API
+		~GLUniformBuffer() = default;
 	};
 }
 

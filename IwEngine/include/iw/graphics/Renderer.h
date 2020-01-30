@@ -114,6 +114,10 @@ namespace Graphics {
 			const iw::ref<Shader>& shader);
 
 		IWGRAPHICS_API
+		void SetCamera(
+			Camera* camera);
+
+		IWGRAPHICS_API
 		void BeginScene(
 			Camera* camera = nullptr,
 			RenderTarget* target = nullptr);

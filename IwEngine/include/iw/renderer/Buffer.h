@@ -4,12 +4,13 @@
 
 namespace IW {
 namespace RenderAPI {
-	class IGeometryShader {
+	class IBuffer {
 	public:
 		IWRENDERER_API
-		virtual ~IGeometryShader() = default;
+		virtual ~IBuffer() = default;
+
 	protected:
-		IGeometryShader() = default;
+		IBuffer() = default;
 	};
 }
 

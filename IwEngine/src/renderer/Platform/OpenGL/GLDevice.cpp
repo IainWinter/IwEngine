@@ -51,82 +51,85 @@ namespace IW {
 		glViewport(0, 0, x, y);
 	}
 
-	IIndexBuffer* GLDevice::CreateIndexBuffer(
-		size_t size,
-		const void* data)
+	void GLDevice::DestroyBuffer(
+		IBuffer* buffer)
 	{
-		return new GLIndexBuffer(size, data);
+		delete buffer;
 	}
 
-	void GLDevice::DestroyIndexBuffer(
-		IIndexBuffer* indexBuffer)
+	void SetBuffer(
+		IBuffer* buffer)
 	{
-		delete indexBuffer;
+		dynamic_cast<GLBuffer*>(buffer)->Bind();
+	}
+
+	void GLDevice::UpdateBuffer(
+		IBuffer* buffer, 
+		const void* data, 
+		size_t size, 
+		size_t offset)
+	{
+		dynamic_cast<GLBuffer*>(buffer)->UpdateData(data, size, offset);
+	}
+
+	IIndexBuffer* GLDevice::CreateIndexBuffer(
+		const void* data,
+		size_t count,
+		BufferIOType io)
+	{
+		return new GLIndexBuffer(data, count, io);
 	}
 
 	void GLDevice::SetIndexBuffer(
 		IIndexBuffer* indexBuffer)
 	{
 		if (indexBuffer) {
-			static_cast<GLIndexBuffer*>(indexBuffer)->Bind();
+			SetBuffer(indexBuffer);
 		}
 
 		else {
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // dont like that this is here. Things are prob backwards tbh
 		}
 	}
 
 	IVertexBuffer* GLDevice::CreateVertexBuffer(
+		const void* data,
 		size_t size,
-		const void* data)
+		BufferIOType io)
 	{
-		return new GLVertexBuffer(size, data);
-	}
-
-	void GLDevice::DestroyVertexBuffer(
-		IVertexBuffer* vertexBuffer)
-	{
-		delete vertexBuffer;
+		return new GLVertexBuffer(data, size, io);
 	}
 
 	void GLDevice::SetVertexBuffer(
 		IVertexBuffer* vertexBuffer)
 	{
-		static_cast<GLVertexBuffer*>(vertexBuffer)->Bind();
-	}
+		if (vertexBuffer) {
+			SetBuffer(vertexBuffer);
+		}
 
-	void GLDevice::UpdateVertexBufferData(
-		IVertexBuffer* vertexBuffer,
-		const void* data,
-		size_t size)
-	{
-		static_cast<GLVertexBuffer*>(vertexBuffer)->UpdateData(size, data);
+		else {
+			glBindBuffer(GL_ARRAY_BUFFER, 0); // dont like that this is here. Things are prob backwards tbh
+		}
 	}
 
 	IUniformBuffer* GLDevice::CreateUniformBuffer(
-		size_t size, 
-		const void* data)
+		const void* data,
+		size_t size,
+		BufferIOType io)
 	{
-		return new GLUniformBuffer(size, data);
-	}
-
-	void GLDevice::DestroyUniformBuffer(
-		IUniformBuffer* uniformBuffer)
-	{
-		delete uniformBuffer;
+		return new GLUniformBuffer(data, size, io);
 	}
 
 	void GLDevice::SetUniformBuffer(
 		IUniformBuffer* uniformBuffer)
 	{
-		static_cast<GLUniformBuffer*>(uniformBuffer)->Bind();
-	}
+		if (uniformBuffer) {
+			SetBuffer(uniformBuffer);
+		}
 
-	void GLDevice::UpdateUniformBufferData(
-		IUniformBuffer* uniformBuffer,
-		const void* data)
-	{
-		static_cast<GLUniformBuffer*>(uniformBuffer)->UpdateData(data);
+		else {
+			glBindBuffer(GL_UNIFORM_BUFFER, 0); // dont like that this is here. Things are prob backwards tbh
+		}
 	}
 
 	IVertexArray* GLDevice::CreateVertexArray() {
@@ -164,10 +167,11 @@ namespace IW {
 		IVertexArray* vertexArray, 
 		size_t bufferIndex, 
 		const void* data,
-		size_t size)
+		size_t size,
+		size_t offset)
 	{
 		static_cast<GLVertexArray*>(vertexArray)
-			->UpdateBuffer(bufferIndex, size, data);
+			->UpdateBuffer(bufferIndex, data, size, offset);
 	}
 
 	IVertexShader* GLDevice::CreateVertexShader(
@@ -297,7 +301,7 @@ namespace IW {
 		}
 
 		else {
-			glBindTexture(GL_TEXTURE_2D, 0); // this is prob the way to do it cus you cant call unbind a nullptr
+			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 	}
 
@@ -319,7 +323,7 @@ namespace IW {
 		}
 
 		else {
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);  // this is prob the way to do it cus you cant call unbind a nullptr
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		}
 	}
 

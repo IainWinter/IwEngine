@@ -10,20 +10,33 @@ namespace RenderAPI {
 		//typename _l,
 		typename _e>
 	class Translator {
-	public:	
+	public:
+		IWRENDERER_API
 		virtual _e Translate(
 			TextureFormatType textureFormatType) = 0;
 
+		IWRENDERER_API
 		virtual _i Translate(
 			TextureFormat textureFormat,
 			TextureFormatType textureFormatType) = 0;
 
+		IWRENDERER_API
 		virtual _i Translate(
 			TextureWrap textureWrap) = 0;
 
+		// Uniform type conversion
+		IWRENDERER_API
 		virtual _i Translate(
 			_e glenum,
 			unsigned& count) = 0;
+
+		IWRENDERER_API
+		virtual _i Translate(
+			BufferType bufferType) = 0;
+
+		IWRENDERER_API
+		virtual _i Translate(
+			BufferIOType bufferIOType) = 0;
 
 		IWRENDERER_API
 		static Translator& Instance();

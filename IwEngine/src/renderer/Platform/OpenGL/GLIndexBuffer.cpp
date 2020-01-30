@@ -3,26 +3,15 @@
 
 namespace IW {
 	GLIndexBuffer::GLIndexBuffer(
-		unsigned int count, 
-		const void* data)
-		: m_data(data) 
+		const void* data,
+		unsigned count, 
+		BufferIOType io)
+		: GLBuffer(INDEX, io, data, count * sizeof(unsigned))
 		, m_count(count)
-	{
-		glGenBuffers(1, &m_renderId);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_renderId);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, 
-			count * sizeof(unsigned int), data, GL_STATIC_DRAW);
-	}
+	{}
 
-	GLIndexBuffer::~GLIndexBuffer() {
-		glDeleteBuffers(1, &m_renderId);
-	}
-
-	void GLIndexBuffer::Bind() const {
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_renderId);
-	}
-
-	void GLIndexBuffer::Unbind() const {
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	unsigned GLIndexBuffer::Count() const {
+		return m_count;
 	}
 }
+

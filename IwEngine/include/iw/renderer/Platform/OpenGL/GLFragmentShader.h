@@ -4,21 +4,22 @@
 
 namespace IW {
 namespace RenderAPI {
-	class IWRENDERER_API GLFragmentShader
+	class GLFragmentShader
 		: public IFragmentShader
 	{
 	private:
-		unsigned int m_fragmentShader;
+		unsigned gl_id;
 
 	public:
+		IWRENDERER_API
 		GLFragmentShader(
 			const char* source);
 
-		~GLFragmentShader();
+		IWRENDERER_API
+		~GLFragmentShader() = default;
 
-		inline unsigned int FragmentShader() const {
-			return m_fragmentShader;
-		}
+		IWRENDERER_API
+		unsigned FragmentShader() const;
 	};
 }
 

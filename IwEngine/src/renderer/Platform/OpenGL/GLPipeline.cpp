@@ -12,15 +12,15 @@ namespace IW {
 		: m_bufferCount(0)
 		, m_textureCount(0)
 	{
-		m_programId = glCreateProgram();
-		glAttachShader(m_programId, vertexShader->VertexShader());
-		glAttachShader(m_programId, fragmentShader->FragmentShader());
+		gl_id = glCreateProgram();
+		glAttachShader(gl_id, vertexShader->VertexShader());
+		glAttachShader(gl_id, fragmentShader->FragmentShader());
 		if (geometryShader) {
-			glAttachShader(m_programId, geometryShader->GeometryShader());
+			glAttachShader(gl_id, geometryShader->GeometryShader());
 		}
 
-		glLinkProgram(m_programId);
-		glValidateProgram(m_programId);
+		glLinkProgram(gl_id);
+		glValidateProgram(gl_id);
 
 		glDeleteShader(vertexShader->VertexShader());
 		glDeleteShader(fragmentShader->FragmentShader());
@@ -30,7 +30,7 @@ namespace IW {
 	}
 	
 	GLPipeline::~GLPipeline() {
-		glDeleteProgram(m_programId);
+		glDeleteProgram(gl_id);
 		for (auto p : m_params) {
 			delete p.second;
 		}
@@ -47,7 +47,7 @@ namespace IW {
 		}
 
 		else {
-			int location = glGetUniformLocation(m_programId, name.c_str());
+			int location = glGetUniformLocation(gl_id, name.c_str());
 
 			if (location != -1) {
 				param = (GLPipelineParam*)GetParam(location);
@@ -71,7 +71,7 @@ namespace IW {
 		char     name[128];
 
 		memset(name, '\0', 128);
-		glGetActiveUniform(m_programId, index, 128, &nameSize, &count, &gltype, name);
+		glGetActiveUniform(gl_id, index, 128, &nameSize, &count, &gltype, name);
 
 		auto itr = m_params.find(name);
 		if (itr == m_params.end()) {
@@ -87,7 +87,7 @@ namespace IW {
 			}
 
 			std::string s(name);
-			GLPipelineParam* p = new GLPipelineParam(index, m_textureCount, type, typeSize, stride, count, s);
+			GLPipelineParam* p = new GLPipelineParam(index, m_textureCount, s, type, typeSize, stride, count);
 
 			return m_params.emplace(s, p).first->second;
 		}
@@ -103,20 +103,20 @@ namespace IW {
 	{
 		int index = m_bufferCount++; // cant be bigger than GL_MAN_UNIFORM_BUFFER_COUNT
 		
-		((GLUniformBuffer*)buffer)->BindBase(index);
+		dynamic_cast<GLBuffer*>(buffer)->BindBase(index);
 
-		int uniformIndex = glGetUniformBlockIndex(m_programId, name.c_str());
-		glUniformBlockBinding(m_programId, uniformIndex, index);
+		int uniformIndex = glGetUniformBlockIndex(gl_id, name.c_str());
+		glUniformBlockBinding(gl_id, uniformIndex, index);
 	}
 
 	int GLPipeline::UniformCount() {
 		int count;
-		glGetProgramiv(m_programId, GL_ACTIVE_UNIFORMS, &count);
+		glGetProgramiv(gl_id, GL_ACTIVE_UNIFORMS, &count);
 		return count;
 	}
 
 	void GLPipeline::Use() {
 		m_textureCount = 0;
-		glUseProgram(m_programId);
+		glUseProgram(gl_id);
 	}
 }

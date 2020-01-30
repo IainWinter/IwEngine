@@ -8,25 +8,27 @@ namespace IW {
 	{
 		LOG_INFO << "Loaded fragment shader...\n" << source;
 
-		m_computeShader = glCreateShader(GL_COMPUTE_SHADER);
-		glShaderSource(m_computeShader, 1, &source, nullptr);
-		glCompileShader(m_computeShader);
+		gl_id = glCreateShader(GL_COMPUTE_SHADER);
+		glShaderSource(gl_id, 1, &source, nullptr);
+		glCompileShader(gl_id);
 
 		int result;
-		glGetShaderiv(m_computeShader, GL_COMPILE_STATUS, &result);
+		glGetShaderiv(gl_id, GL_COMPILE_STATUS, &result);
 		if (!result) {
 			int length;
-			glGetShaderiv(m_computeShader, GL_INFO_LOG_LENGTH, &length);
+			glGetShaderiv(gl_id, GL_INFO_LOG_LENGTH, &length);
 
 			char* message = new char[length];
-			glGetShaderInfoLog(m_computeShader, length, &length, message);
+			glGetShaderInfoLog(gl_id, length, &length, message);
 
 			LOG_ERROR << "Error compiling compute shader " << message;
 
 			delete[] message;
-			glDeleteShader(m_computeShader);
+			glDeleteShader(gl_id);
 		}
 	}
 
-	GLComputeShader::~GLComputeShader() {}
+	unsigned GLComputeShader::ComputeShader() const {
+		return gl_id;
+	}
 }

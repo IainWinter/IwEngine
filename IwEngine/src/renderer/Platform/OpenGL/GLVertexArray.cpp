@@ -3,18 +3,19 @@
 
 namespace IW {
 	GLVertexArray::GLVertexArray() {
-		glGenVertexArrays(1, &m_renderId);
-		glBindVertexArray(m_renderId);
+		glGenVertexArrays(1, &gl_id);
+		glBindVertexArray(gl_id);
 	}
 
 	GLVertexArray::~GLVertexArray() {
-		glDeleteVertexArrays(1, &m_renderId);
-		for (auto it = m_buffers.begin(); it != m_buffers.end(); ++it) {
-			delete (*it);
+		glDeleteVertexArrays(1, &gl_id);
+		
+		for (GLVertexBuffer* buffer : m_buffers) {
+			delete buffer;
 		}
 
-		m_buffers.clear();
-		m_layouts.clear();
+		//m_buffers.clear();
+		//m_layouts.clear();
 	}
 
 	void GLVertexArray::AddBuffer(
@@ -26,10 +27,15 @@ namespace IW {
 		
 		unsigned offset = 0;
 		unsigned index  = (unsigned)m_buffers.size();
-		for (auto& element : layout.GetElements()) {
+		for (const VertexBufferLayoutElement& element : layout.GetElements()) {
 			glEnableVertexAttribArray(index);
-			glVertexAttribPointer(index, element.Count, element.Type,
-				element.Normalized, layout.GetStride(), (const void*)offset);
+			glVertexAttribPointer(
+				index, 
+				element.Count, 
+				element.Type,
+				element.Normalized, 
+				layout.GetStride(), 
+				(const void*)offset);
 
 			offset += element.Count * GetSizeOfType(element.Type);
 			++index;
@@ -41,14 +47,15 @@ namespace IW {
 
 	void GLVertexArray::UpdateBuffer(
 		size_t index, 
-		unsigned size, 
-		const void* data)
+		const void* data,
+		size_t size,
+		size_t offset)
 	{
-		m_buffers[index]->UpdateData(size, data);
+		m_buffers[index]->UpdateData(data, size, offset);
 	}
 
 	void GLVertexArray::Bind() const {
-		glBindVertexArray(m_renderId);
+		glBindVertexArray(gl_id);
 	}
 
 	void GLVertexArray::Unbind() const {

@@ -1,31 +1,23 @@
 #pragma once
 
-#include "iw/renderer/IwRenderer.h"
 #include "iw/renderer/VertexBuffer.h"
+#include "GLBuffer.h"
 
 namespace IW {
 namespace RenderAPI {
-	class IWRENDERER_API GLVertexBuffer
+	class GLVertexBuffer
 		: public IVertexBuffer
+		, public GLBuffer
 	{
-	private:
-		unsigned m_renderId;
-		size_t m_size;
-		const void* m_data;
-
 	public:
+		IWRENDERER_API
 		GLVertexBuffer(
+			const void* data,
 			size_t size,
-			const void* data);
+			BufferIOType io = STATIC);
 
-		~GLVertexBuffer();
-
-		void UpdateData(
-			size_t size,
-			const void* data) const;
-
-		void Bind() const;
-		void Unbind() const;
+		IWRENDERER_API
+		~GLVertexBuffer() = default;
 	};
 }
 

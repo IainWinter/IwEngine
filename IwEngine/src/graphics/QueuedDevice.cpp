@@ -54,13 +54,13 @@ namespace IW {
 			switch (op.Operation) {
 				case CREATE_INDEX_BUFFER: {
 					CIB* args = (CIB*)op.Args;
-					args->Buffer.initialize(Device.CreateIndexBuffer(args->Size, args->Data));
+					args->Buffer.initialize(Device.CreateIndexBuffer(args->Data, args->Size));
 					args->Buffer.release();
 					break;
 				}
 				case CREATE_VERTEX_BUFFER: {
 					CVB* args = (CVB*)op.Args;
-					args->Buffer.initialize(Device.CreateVertexBuffer(args->Size, args->Data));
+					args->Buffer.initialize(Device.CreateVertexBuffer(args->Data, args->Size));
 					args->Buffer.release();
 					break;
 				}
@@ -82,12 +82,12 @@ namespace IW {
 				}
 				case DESTROY_INDEX_BUFFER: {
 					DIB* args = (DIB*)op.Args;
-					Device.DestroyIndexBuffer(args->Buffer.consume()); //could be uninitalized
+					Device.DestroyBuffer(args->Buffer.consume()); //could be uninitalized
 					break;
 				}
 				case DESTROY_VERTEX_BUFFER: {
 					CVB* args = (CVB*)op.Args;
-					Device.DestroyVertexBuffer(args->Buffer.consume()); //could be uninitalized
+					Device.DestroyBuffer(args->Buffer.consume()); //could be uninitalized
 					break;
 				}
 				case DESTROY_VERTEX_ARRAY: {

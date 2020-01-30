@@ -91,7 +91,14 @@ namespace Graphics {
 
 		IWGRAPHICS_API
 		Mesh* GenerateMesh(
-			std::string string,
+			const std::string& string,
+			float size,
+			float ratio) const;
+
+		IWGRAPHICS_API
+		void UpdateMesh(
+			Mesh* mesh,
+			const std::string& string,
 			float size,
 			float ratio) const;
 
@@ -114,7 +121,7 @@ namespace Graphics {
 		IWGRAPHICS_API
 		int GetKerning(
 			unsigned characterA,
-			unsigned characterB);
+			unsigned characterB)  const;
 
 		IWGRAPHICS_API
 		void SetTexture(

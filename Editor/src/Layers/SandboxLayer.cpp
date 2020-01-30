@@ -62,6 +62,7 @@ namespace IW {
 
 	Entity camera;
 	Mesh* textMesh;
+	OrthographicCamera* textCam;
 	iw::ref<Shader> fontShader;
 	iw::ref<Font> font;
 
@@ -74,9 +75,9 @@ namespace IW {
 
 		font = Asset->Load<Font>("fonts/arial.fnt");
 		textMesh = font->GenerateMesh("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque venenatis orci in ipsum auctor pulvinar. \n"
-			"Aenean tristique mauris et mauris accumsan, et pretium diam dignissim. Nullam pharetra nisi nec urna mattis, molestie ullamcorper ex tempus. \n"
-			"In quis mauris at magna dictum finibus.", .01f, 1);
-		
+			"Aenean tristique mauris et mauris accumsan, et pretium diam dignissim. Nullam pharetra nisi nec urna mattis,\n"
+			"molestie ullamcorper ex tempus. In quis mauris at magna dictum finibus.", .0035f, 1);
+
 		textMesh->Initialize(Renderer->Device);
 		font->Initialize(Renderer->Device);
 
@@ -293,6 +294,8 @@ namespace IW {
 		camera.SetComponent<Transform>       (iw::vector3(0, 25, 0), iw::vector3::one, camrot);
 		camera.SetComponent<CameraController>(perspective);
 
+		textCam = new OrthographicCamera(iw::vector3::zero, camrot, 16, 9, -10, 10);
+
 		// Rendering pipeline
 
 		        generateShadowMap    = new GenerateShadowMap(Renderer, Space);
@@ -319,7 +322,12 @@ namespace IW {
 
 	float threshold = 0;
 
+	int i = 0;
+
 	void SandboxLayer::PostUpdate() {
+		//font->UpdateMesh(textMesh, std::to_string(i++), 1.f, 1);
+	//	textMesh->Update(Renderer->Device);
+
 		light.SetPosition(lightPos);
 		light.SetRotation(iw::quaternion::from_look_at(lightPos));
 
@@ -332,6 +340,8 @@ namespace IW {
 		pipeline.execute();
 
 		//Renderer->BeginScene();
+
+		//Renderer->SetCamera(textCam);
 
 		Renderer->SetShader(fontShader);
 

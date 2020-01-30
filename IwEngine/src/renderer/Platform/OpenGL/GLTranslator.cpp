@@ -171,5 +171,28 @@ namespace RenderAPI {
 
 		return GL_INVALID_VALUE;
 	}
+
+	GLint GLTranslator::Translate(
+		BufferType bufferType)
+	{
+		switch (bufferType) {
+			case VERTEX:  return GL_ARRAY_BUFFER;
+			case INDEX:   return GL_ELEMENT_ARRAY_BUFFER;
+			case UNIFORM: return GL_UNIFORM_BUFFER;
+		}
+
+		return GL_INVALID_VALUE;
+	}
+
+	GLint GLTranslator::Translate(
+		BufferIOType bufferIOType)
+	{
+		switch (bufferIOType) {
+			case STATIC:  return GL_STATIC_DRAW;
+			case DYNAMIC: return GL_DYNAMIC_DRAW;
+		}
+
+		return GL_INVALID_VALUE;
+	}
 }
 }

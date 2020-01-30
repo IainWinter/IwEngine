@@ -135,7 +135,7 @@ namespace IW {
 						size_t q2 = token.find_last_of('"');
 						std::string value = token.substr(q1 + 1, q2 - q1 - 1);
 
-						token = token.substr(0, q1 - 1); // 2?
+						token = token.substr(0, q1 - 1);
 						ToLower(token);
 
 						if (token == "face") {

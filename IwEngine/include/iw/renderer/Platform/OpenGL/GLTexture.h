@@ -9,8 +9,13 @@ namespace RenderAPI {
 		: public ITexture
 	{
 	private:
-		unsigned int m_renderId;
-		const void*  m_data;
+		unsigned int gl_id;
+		int gl_format;
+		int gl_type;
+		int gl_wrapX;
+		int gl_wrapY;
+
+		const void* m_data;
 
 		int m_width;
 		int m_height;
@@ -18,14 +23,9 @@ namespace RenderAPI {
 
 		TextureFormatType m_type;
 		TextureFormat     m_format;
-		int m_glformat;
-		int m_gltype;
-
 		TextureWrap       m_wrapX;
 		TextureWrap       m_wrapY;
 		//TextureWrap       m_wrapZ;
-		int m_glwrapX;
-		int m_glwrapY;
 		//int m_glwrapZ;
 
 	public:

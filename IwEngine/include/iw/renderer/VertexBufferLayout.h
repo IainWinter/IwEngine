@@ -7,18 +7,19 @@
 namespace IW {
 namespace RenderAPI {
 	struct VertexBufferLayoutElement {
-		unsigned int  Type;
-		unsigned int  Count;
+		unsigned      Type;
+		unsigned      Count;
 		unsigned char Normalized;
 	};
 
 	class VertexBufferLayout {
 	private:
 		std::vector<VertexBufferLayoutElement> m_elements;
-		unsigned int m_stride;
+		unsigned m_stride;
 
 	public:
-		IWRENDERER_API VertexBufferLayout();
+		IWRENDERER_API
+			VertexBufferLayout();
 
 		template<
 			typename _t>
@@ -26,37 +27,36 @@ namespace RenderAPI {
 			unsigned int count)
 		{
 			LOG_ERROR << "Cannot push invalid buffer type!";
-			static_assert(false);
+			static_assert(false, "Cannot push invalid buffer type!");
 		}
 
 		template<>
-		IWRENDERER_API void Push<float>(
+		IWRENDERER_API
+		void Push<float>(
 			unsigned int count);
 
 		template<>
-		IWRENDERER_API void Push<unsigned int>(
+		IWRENDERER_API
+		void Push<unsigned int>(
 			unsigned int count);
 
 		template<>
-		IWRENDERER_API void Push<unsigned char>(
+		IWRENDERER_API
+		void Push<unsigned char>(
 			unsigned int count);
 
-		inline const
-		std::vector<VertexBufferLayoutElement>& GetElements() const {
-			return m_elements;
-		}
+		IWRENDERER_API
+		void Clear();
 
-		inline unsigned int GetStride() const {
-			return m_stride;
-		}
+		IWRENDERER_API
+		const std::vector<VertexBufferLayoutElement>& GetElements() const;
 
-		void Clear() {
-			m_elements.clear();
-			m_elements.shrink_to_fit();
-		}
+		IWRENDERER_API
+		unsigned GetStride() const;
 	};
 
-	IWRENDERER_API unsigned int GetSizeOfType(
+	IWRENDERER_API
+	unsigned int GetSizeOfType(
 		unsigned int glType);
 }
 

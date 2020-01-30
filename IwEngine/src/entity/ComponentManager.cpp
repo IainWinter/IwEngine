@@ -126,7 +126,12 @@ namespace IW {
 			ChunkList& list = m_componentData.find(query->Hashes[i])->second;
 			int index = list.IndexOf(component, instance);
 			if (index != -1) {
-				return *list.GetEntity(index);
+				EntityHandle* handle = list.GetEntity(index);
+				if (handle) {
+					return *handle;
+				}
+
+				break;
 			}
 		}
 

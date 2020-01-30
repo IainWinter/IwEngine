@@ -6,25 +6,27 @@ namespace IW {
 	GLVertexShader::GLVertexShader(
 		const char* source)
 	{
-		m_vertexShader = glCreateShader(GL_VERTEX_SHADER);
-		glShaderSource(m_vertexShader, 1, &source, nullptr);
-		glCompileShader(m_vertexShader);
+		gl_id = glCreateShader(GL_VERTEX_SHADER);
+		glShaderSource(gl_id, 1, &source, nullptr);
+		glCompileShader(gl_id);
 
 		int result;
-		glGetShaderiv(m_vertexShader, GL_COMPILE_STATUS, &result);
+		glGetShaderiv(gl_id, GL_COMPILE_STATUS, &result);
 		if (!result) {
 			int length;
-			glGetShaderiv(m_vertexShader, GL_INFO_LOG_LENGTH, &length);
+			glGetShaderiv(gl_id, GL_INFO_LOG_LENGTH, &length);
 
 			char* message = new char[length];
-			glGetShaderInfoLog(m_vertexShader, length, &length, message);
+			glGetShaderInfoLog(gl_id, length, &length, message);
 
 			LOG_ERROR << "Error compiling vertex shader " << message;
 
 			delete[] message;
-			glDeleteShader(m_vertexShader);
+			glDeleteShader(gl_id);
 		}
 	}
 
-	GLVertexShader::~GLVertexShader() {}
+	unsigned GLVertexShader::VertexShader() const {
+		return gl_id;
+	}
 }

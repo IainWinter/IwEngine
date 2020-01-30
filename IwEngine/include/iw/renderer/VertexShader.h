@@ -4,11 +4,12 @@
 
 namespace IW {
 namespace RenderAPI {
-	class IWRENDERER_API IVertexShader {
+	class IVertexShader {
 	public:
-		virtual ~IVertexShader() {}
+		IWRENDERER_API
+		virtual ~IVertexShader() = default;
 	protected:
-		IVertexShader() {}
+		IVertexShader() = default;
 	};
 }
 

@@ -4,12 +4,12 @@
 
 namespace IW {
 namespace RenderAPI {
-	class IWRENDERER_API ITexture {
+	class ITexture {
 	public:
-		virtual ~ITexture() {}
-
+		IWRENDERER_API
+		virtual ~ITexture() = default;
 	protected:
-		ITexture() {}
+		ITexture() = default;
 	};
 }
 

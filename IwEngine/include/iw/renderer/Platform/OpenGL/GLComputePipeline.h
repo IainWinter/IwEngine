@@ -9,23 +9,27 @@
 
 namespace IW {
 namespace RenderAPI {
-	class IWRENDERER_API GLComputePipeline
+	class GLComputePipeline
 		: public IComputePipeline
 	{
 	private:
-		unsigned int m_program;
+		unsigned gl_id;
 
 	public:
+		IWRENDERER_API
 		GLComputePipeline(
 			GLComputeShader* computeShader);
 
+		IWRENDERER_API
 		~GLComputePipeline();
 
+		IWRENDERER_API
 		void DispatchComputeShader(
 			int x,
 			int y,
 			int z) override;
 
+		IWRENDERER_API
 		void Use() const;
 	};
 }

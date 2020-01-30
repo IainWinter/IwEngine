@@ -17,144 +17,172 @@
 
 namespace IW {
 namespace RenderAPI {
-	class IWRENDERER_API IDevice {
+	class IDevice {
 	public:
+		IWRENDERER_API
 		virtual void DrawElements(
 			MeshTopology topology,
 			unsigned count,
 			ptrdiff_t offset) = 0;
 
+		IWRENDERER_API
 		virtual void Clear() = 0;
 
 		// should be in frame buffer?
+		IWRENDERER_API
 		virtual void SetViewport(
 			int x,
 			int y) = 0;
 
+		// Buffers
+
+		IWRENDERER_API
+		virtual void DestroyBuffer(
+			IBuffer* buffer) = 0;
+
+		IWRENDERER_API
+		virtual void UpdateBuffer(
+			IBuffer* buffer,
+			const void* data,
+			size_t size = 0,
+			size_t offset = 0) = 0;
+
 		// Index buffers
 
+		IWRENDERER_API
 		virtual IIndexBuffer* CreateIndexBuffer(
-			size_t size,
-			const void* data = nullptr) = 0;
+			const void* data,
+			size_t count,
+			BufferIOType io = STATIC) = 0;
 
-		virtual void DestroyIndexBuffer(
-			IIndexBuffer* indexBuffer) = 0;
-
+		IWRENDERER_API
 		virtual void SetIndexBuffer(
 			IIndexBuffer* indexBuffer) = 0;
 
 		// Vertex buffers
 
+		IWRENDERER_API
 		virtual IVertexBuffer* CreateVertexBuffer(
+			const void* data,
 			size_t size,
-			const void* data = nullptr) = 0;
+			BufferIOType io = STATIC) = 0;
 
-		virtual void DestroyVertexBuffer(
-			IVertexBuffer* vertexBuffer) = 0;
-
+		IWRENDERER_API
 		virtual void SetVertexBuffer(
 			IVertexBuffer* vertexBuffer) = 0;
 
-		virtual void UpdateVertexBufferData(
-			IVertexBuffer* vertexBuffer,
-			const void* data,
-			size_t size = 0) = 0;
-
 		// Uniform buffers
 
+		IWRENDERER_API
 		virtual IUniformBuffer* CreateUniformBuffer(
+			const void* data,
 			size_t size,
-			const void* data = nullptr) = 0;
+			BufferIOType io = DYNAMIC) = 0;
 
-		virtual void DestroyUniformBuffer(
-			IUniformBuffer* uniformBuffer) = 0;
-
+		IWRENDERER_API
 		virtual void SetUniformBuffer(
 			IUniformBuffer* uniformBuffer) = 0;
 
-		virtual void UpdateUniformBufferData(
-			IUniformBuffer* uniformBuffer,
-			const void* data) = 0;
-
 		// Vertex arrays
 
+		IWRENDERER_API
 		virtual IVertexArray* CreateVertexArray() = 0;
 
+		IWRENDERER_API
 		virtual void DestroyVertexArray(
 			IVertexArray* vertexArray) = 0;
 
+		IWRENDERER_API
 		virtual void SetVertexArray(
 			IVertexArray* vertexArray) = 0;
 
+		IWRENDERER_API
 		virtual void AddBufferToVertexArray(
 			IVertexArray* vertexArray,
 			IVertexBuffer* buffer,
 			const VertexBufferLayout& layout) = 0;
 
+		IWRENDERER_API
 		virtual void UpdateVertexArrayData(
 			IVertexArray* vertexArray,
 			size_t bufferIndex,
 			const void* data,
-			size_t size = 0) = 0;
+			size_t size,
+			size_t offset = 0) = 0;
 
 		// Vertex shader
 
+		IWRENDERER_API
 		virtual IVertexShader* CreateVertexShader(
 			const char* source) = 0;
 
+		IWRENDERER_API
 		virtual void DestroyVertexArray(
 			IVertexShader* vertexShader) = 0;
 
 		// Fragment shader
 
+		IWRENDERER_API
 		virtual IFragmentShader* CreateFragmentShader(
 			const char* source) = 0;
 
+		IWRENDERER_API
 		virtual void DestroyFragmentShader(
 			IFragmentShader* fragmentShader) = 0;
 
 		// Geometry shader
 
+		IWRENDERER_API
 		virtual IGeometryShader* CreateGeometryShader(
 			const char* source) = 0;
 
+		IWRENDERER_API
 		virtual void DestroyGeometryShader(
 			IGeometryShader* geometryShader) = 0;
 
 		// Compute shader
 
+		IWRENDERER_API
 		virtual IComputeShader* CreateComputeShader(
 			const char* source) = 0;
 
+		IWRENDERER_API
 		virtual void DestroyComputeShader(
 			IComputeShader* computeShader) = 0;
 
 		// Shader pipeline
 
+		IWRENDERER_API
 		virtual IPipeline* CreatePipeline(
 			IVertexShader* vertexShader,
 			IFragmentShader* fragmentShader,
 			IGeometryShader* geometryShader = nullptr) = 0;
 
+		IWRENDERER_API
 		virtual void DestroyPipeline(
 			IPipeline* pipeline) = 0;
 
+		IWRENDERER_API
 		virtual void SetPipeline(
 			IPipeline* pipeline) = 0;
 
 		// Compute shader pipeline // prob doesnt do anyhting yet
 
+		IWRENDERER_API
 		virtual IComputePipeline* CreateComputePipeline(
 			IComputeShader* computeShader) = 0;
 
+		IWRENDERER_API
 		virtual void DestroyComputePipeline(
 			IComputePipeline* computePipeline) = 0;
 
+		IWRENDERER_API
 		virtual void SetComputePipeline(
 			IComputePipeline* computePipeline) = 0;
 
 		// Textures
 
+		IWRENDERER_API
 		virtual ITexture* CreateTexture(
 			int width,
 			int height,
@@ -163,6 +191,7 @@ namespace RenderAPI {
 			TextureWrap wrap,
 			const void* data = nullptr) = 0;
 
+		IWRENDERER_API
 		virtual ITexture* CreateSubTexture(
 			ITexture* texture,
 			int xOffset,
@@ -171,26 +200,33 @@ namespace RenderAPI {
 			int height,
 			int mipmap = 0) = 0;
 
+		IWRENDERER_API
 		virtual void DestroyTexture(
 			ITexture* texture) = 0;
 
+		IWRENDERER_API
 		virtual void SetTexture(
 			ITexture* texture) = 0;
 
 		// Frame buffers
 
+		IWRENDERER_API
 		virtual IFrameBuffer* CreateFrameBuffer() = 0;
 
+		IWRENDERER_API
 		virtual void DestroyFrameBuffer(
 			IFrameBuffer* frameBuffer) = 0;
 
+		IWRENDERER_API
 		virtual void SetFrameBuffer(
 			IFrameBuffer* frameBuffer) = 0;
 
+		IWRENDERER_API
 		virtual void AttachTextureToFrameBuffer(
 			IFrameBuffer* frameBuffer,
 			ITexture* texture) = 0;
 
+		IWRENDERER_API
 		static IDevice* Create();
 	};
 }

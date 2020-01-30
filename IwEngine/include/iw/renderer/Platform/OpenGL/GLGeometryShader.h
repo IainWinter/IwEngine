@@ -4,21 +4,22 @@
 
 namespace IW {
 namespace RenderAPI {
-	class IWRENDERER_API GLGeometryShader
+	class GLGeometryShader
 		: public IGeometryShader
 	{
 	private:
-		unsigned int m_geometryShader;
+		unsigned gl_id;
 
 	public:
+		IWRENDERER_API
 		GLGeometryShader(
 			const char* source);
 
-		~GLGeometryShader();
+		IWRENDERER_API
+		~GLGeometryShader() = default;
 
-		inline unsigned int GeometryShader() const {
-			return m_geometryShader;
-		}
+		IWRENDERER_API
+		unsigned GeometryShader() const;
 	};
 }
 

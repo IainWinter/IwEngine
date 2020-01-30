@@ -4,9 +4,10 @@
 
 namespace IW {
 namespace RenderAPI {
-	class IWRENDERER_API IFrameBuffer {
+	class IFrameBuffer {
 	public:
-		virtual ~IFrameBuffer() {}
+		IWRENDERER_API
+		virtual ~IFrameBuffer() = default;
 	protected:
 		IFrameBuffer() {}
 	};

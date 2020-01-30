@@ -19,17 +19,17 @@ namespace IW {
 		, m_wrapX(wrap)
 		, m_wrapY(wrap)
 	{
-		m_gltype = GLTranslator::Instance().Translate(type);
-		m_glformat = GLTranslator::Instance().Translate(format, type);
-		m_glwrapX = m_glwrapY = GLTranslator::Instance().Translate(wrap);
+		gl_type = GLTranslator::Instance().Translate(type);
+		gl_format = GLTranslator::Instance().Translate(format, type);
+		gl_wrapX = gl_wrapY = GLTranslator::Instance().Translate(wrap);
 
 		bool errout = false;
-		if (m_gltype == GL_INVALID_VALUE) {
+		if (gl_type == GL_INVALID_VALUE) {
 			LOG_ERROR << "Invalid texture format type " << type;
 			errout = true;
 		}
 
-		if (m_glformat == GL_INVALID_VALUE) {
+		if (gl_format == GL_INVALID_VALUE) {
 			LOG_ERROR << "Invalid texture pixel format " << format << " channels";
 			errout = true;
 		}
@@ -38,15 +38,15 @@ namespace IW {
 			return;
 		}
 
-		glGenTextures(1, &m_renderId);
+		glGenTextures(1, &gl_id);
 		Bind();
 
 		if (data == nullptr) {
-			glTexStorage2D(GL_TEXTURE_2D, 1, m_glformat, m_width, m_height);
+			glTexStorage2D(GL_TEXTURE_2D, 1, gl_format, m_width, m_height);
 		}
 
 		else {
-			glTexImage2D(GL_TEXTURE_2D, 0, m_glformat, m_width, m_height, 0, m_glformat, m_gltype, m_data);
+			glTexImage2D(GL_TEXTURE_2D, 0, gl_format, m_width, m_height, 0, gl_format, gl_type, m_data);
 		}
 
 		glGenerateMipmap(GL_TEXTURE_2D);
@@ -54,15 +54,15 @@ namespace IW {
 		// Need to pass options for these
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, m_glwrapX);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, m_glwrapY);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, gl_wrapX);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, gl_wrapY);
 
 		float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 	}
 
 	GLTexture::~GLTexture() {
-		glDeleteTextures(1, &m_renderId);
+		glDeleteTextures(1, &gl_id);
 	}
 
 	GLTexture* GLTexture::CreateSubTexture(
@@ -73,22 +73,22 @@ namespace IW {
 		int mipmap) const
 	{
 		GLTexture* sub = new GLTexture(width, height, m_format, m_type, m_wrapX/*, m_wrapY*/);
-		glTextureSubImage2D(sub->m_renderId, mipmap, xOffset, yOffset, width, height, m_glformat, m_gltype, m_data);
+		glTextureSubImage2D(sub->gl_id, mipmap, xOffset, yOffset, width, height, gl_format, gl_type, m_data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 
 		return sub;
 	}
 
 	void GLTexture::Bind() const {
-		glBindTexture(GL_TEXTURE_2D, m_renderId);
+		glBindTexture(GL_TEXTURE_2D, gl_id);
 	}
 
 	void GLTexture::Unbind() const {
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
-	unsigned int GLTexture::Id() const {
-		return m_renderId;
+	unsigned GLTexture::Id() const {
+		return gl_id;
 	}
 
 	int GLTexture::Width() const {

@@ -16,9 +16,9 @@ namespace RenderAPI {
 	private:
 		std::unordered_map<std::string, GLPipelineParam*> m_params;
 
-		unsigned int m_bufferCount;
-		unsigned int m_textureCount;
-		unsigned int m_programId;
+		unsigned gl_id;
+		unsigned m_bufferCount;
+		unsigned m_textureCount;
 
 	public:
 		IWRENDERER_API

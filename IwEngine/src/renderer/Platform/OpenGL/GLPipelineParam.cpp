@@ -6,19 +6,23 @@ namespace IW {
 	GLPipelineParam::GLPipelineParam(
 		unsigned location,
 		unsigned& textureCount,
+		std::string name,
 		UniformType type,
 		unsigned typeSize,
 		unsigned stride,
-		unsigned count,
-		std::string name)
+		unsigned count)
 		: m_location(location)
 		, m_textureCount(textureCount)
+		, m_name(name)
 		, m_type(type)
 		, m_typeSize(typeSize)
 		, m_stride(stride)
 		, m_count(count)
-		, m_name(name)
 	{}
+
+	const std::string& GLPipelineParam::Name() const {
+		return m_name;
+	}
 
 	UniformType GLPipelineParam::Type() const {
 		return m_type;
@@ -34,10 +38,6 @@ namespace IW {
 
 	unsigned GLPipelineParam::Count() const {
 		return m_count;
-	}
-
-	const std::string& GLPipelineParam::Name() const {
-		return m_name;
 	}
 
 	void GLPipelineParam::SetAsBool(

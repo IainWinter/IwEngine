@@ -1,30 +1,26 @@
 #pragma once
 
 #include "iw/renderer/IndexBuffer.h"
+#include "GLBuffer.h"
 
 namespace IW {
 namespace RenderAPI {
-	class IWRENDERER_API GLIndexBuffer
+	class GLIndexBuffer
 		: public IIndexBuffer
+		, public GLBuffer
 	{
 	private:
-		unsigned int m_renderId;
-		unsigned int m_count;
-		const void* m_data;
+		unsigned m_count;
 
 	public:
+		IWRENDERER_API
 		GLIndexBuffer(
+			const void* data,
 			unsigned int count,
-			const void* data);
+			BufferIOType io = STATIC);
 
-		~GLIndexBuffer();
-
-		void Bind()   const;
-		void Unbind() const;
-
-		inline unsigned int GetCount() const {
-			return m_count;
-		}
+		IWRENDERER_API
+		unsigned Count() const;
 	};
 }
 

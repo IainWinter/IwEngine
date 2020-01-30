@@ -8,6 +8,7 @@
 #	endif
 #endif
 
+// canmt be gl here
 #define TRANSLATE GLTranslator::Instance().Translate
 
 namespace IW {
@@ -40,6 +41,17 @@ namespace RenderAPI {
 		MIRROR,
 		REPEAT,
 		MIRROR_EDGE
+	};
+
+	enum BufferType {
+		VERTEX,
+		INDEX,
+		UNIFORM
+	};
+
+	enum BufferIOType {
+		STATIC,
+		DYNAMIC
 	};
 }
 

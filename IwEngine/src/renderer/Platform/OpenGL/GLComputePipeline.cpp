@@ -6,14 +6,14 @@ namespace IW {
 	GLComputePipeline::GLComputePipeline(
 		GLComputeShader* computeShader)
 	{
-		m_program = glCreateProgram();
-		glAttachShader(m_program, computeShader->ComputeShader());
-		glLinkProgram(m_program);
-		glValidateProgram(m_program);
+		gl_id = glCreateProgram();
+		glAttachShader(gl_id, computeShader->ComputeShader());
+		glLinkProgram(gl_id);
+		glValidateProgram(gl_id);
 	}
 
 	GLComputePipeline::~GLComputePipeline() {
-		glDeleteProgram(m_program);
+		glDeleteProgram(gl_id);
 	}
 
 	void GLComputePipeline::DispatchComputeShader(
@@ -25,6 +25,6 @@ namespace IW {
 	}
 
 	void GLComputePipeline::Use() const {
-		glUseProgram(m_program);
+		glUseProgram(gl_id);
 	}
 }

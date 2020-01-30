@@ -2,7 +2,6 @@
 
 #include "PipelineParam.h"
 #include "UniformBuffer.h"
-#include "iw/math/matrix4.h"
 #include <string>
 
 namespace IW {
@@ -10,7 +9,10 @@ namespace RenderAPI {
 	class IPipeline {
 	public:
 		IWRENDERER_API
-		virtual ~IPipeline() {}
+			virtual ~IPipeline() = default;
+
+		IWRENDERER_API
+		virtual int UniformCount() = 0;
 
 		IWRENDERER_API
 		virtual IPipelineParam* GetParam(
@@ -24,9 +26,6 @@ namespace RenderAPI {
 		virtual void SetBuffer(
 			std::string name,
 			IUniformBuffer* buffer) = 0;
-
-		IWRENDERER_API
-		virtual int UniformCount() = 0;
 	};
 }
 

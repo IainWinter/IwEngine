@@ -38,7 +38,7 @@ namespace IW {
 
 	void Renderer::Initialize() {
 		m_filterMesh->Initialize(Device);
-		m_cameraUBO = Device->CreateUniformBuffer(sizeof(CameraData),   &m_cameraData);
+		m_cameraUBO = Device->CreateUniformBuffer(&m_cameraData, sizeof(CameraData));
 	}
 
 	void Renderer::Begin() {
@@ -70,6 +70,20 @@ namespace IW {
 		Device->SetPipeline(shader->Program.get());
 	}
 
+	void Renderer::SetCamera(
+		Camera* camera)
+	{
+		iw::matrix4 vp = iw::matrix4::identity;
+		if (camera != nullptr) {
+			vp = camera->GetViewProjection();
+		}
+
+		if (vp != m_cameraData.ViewProj) {
+			m_cameraData.ViewProj = vp;
+			Device->UpdateBuffer(m_cameraUBO, &m_cameraData);
+		}
+	}
+
 	void Renderer::BeginScene(
 		Camera* camera,
 		RenderTarget* target)
@@ -83,15 +97,7 @@ namespace IW {
 			target->Use(Device);
 		}
 
-		iw::matrix4 vp = iw::matrix4::identity;
-		if (camera != nullptr) {
-			vp = camera->GetViewProjection();
-		}
-
-		if (vp != m_cameraData.ViewProj) {
-			m_cameraData.ViewProj = vp;
-			Device->UpdateUniformBufferData(m_cameraUBO, &m_cameraData);
-		}
+		SetCamera(camera);
 
 		Device->Clear();
 	}

@@ -6,25 +6,27 @@ namespace IW {
 	GLFragmentShader::GLFragmentShader(
 		const char* source)
 	{
-		m_fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-		glShaderSource(m_fragmentShader, 1, &source, nullptr);
-		glCompileShader(m_fragmentShader);
+		gl_id = glCreateShader(GL_FRAGMENT_SHADER);
+		glShaderSource(gl_id, 1, &source, nullptr);
+		glCompileShader(gl_id);
 
 		int result;
-		glGetShaderiv(m_fragmentShader, GL_COMPILE_STATUS, &result);
+		glGetShaderiv(gl_id, GL_COMPILE_STATUS, &result);
 		if (!result) {
 			int length;
-			glGetShaderiv(m_fragmentShader, GL_INFO_LOG_LENGTH, &length);
+			glGetShaderiv(gl_id, GL_INFO_LOG_LENGTH, &length);
 
 			char* message = new char[length];
-			glGetShaderInfoLog(m_fragmentShader, length, &length, message);
+			glGetShaderInfoLog(gl_id, length, &length, message);
 
 			LOG_ERROR << "Error compiling fragment shader " << message;
 
 			delete[] message;
-			glDeleteShader(m_fragmentShader);
+			glDeleteShader(gl_id);
 		}
 	}
 
-	GLFragmentShader::~GLFragmentShader() {}
+	unsigned GLFragmentShader::FragmentShader() const {
+		return gl_id;
+	}
 }

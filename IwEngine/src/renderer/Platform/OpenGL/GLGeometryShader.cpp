@@ -6,25 +6,27 @@ namespace IW {
 	GLGeometryShader::GLGeometryShader(
 		const char* source)
 	{
-		m_geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
-		glShaderSource(m_geometryShader, 1, &source, nullptr);
-		glCompileShader(m_geometryShader);
+		gl_id = glCreateShader(GL_GEOMETRY_SHADER);
+		glShaderSource(gl_id, 1, &source, nullptr);
+		glCompileShader(gl_id);
 
 		int result;
-		glGetShaderiv(m_geometryShader, GL_COMPILE_STATUS, &result);
+		glGetShaderiv(gl_id, GL_COMPILE_STATUS, &result);
 		if (!result) {
 			int length;
-			glGetShaderiv(m_geometryShader, GL_INFO_LOG_LENGTH, &length);
+			glGetShaderiv(gl_id, GL_INFO_LOG_LENGTH, &length);
 
 			char* message = new char[length];
-			glGetShaderInfoLog(m_geometryShader, length, &length, message);
+			glGetShaderInfoLog(gl_id, length, &length, message);
 
 			LOG_ERROR << "Error compiling geometry shader " << message;
 
 			delete[] message;
-			glDeleteShader(m_geometryShader);
+			glDeleteShader(gl_id);
 		}
 	}
 
-	GLGeometryShader::~GLGeometryShader() {}
+	unsigned GLGeometryShader::GeometryShader() const {
+		return gl_id;
+	}
 }

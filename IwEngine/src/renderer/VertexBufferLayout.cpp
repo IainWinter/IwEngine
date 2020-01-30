@@ -30,6 +30,19 @@ namespace IW {
 		m_stride += count * GetSizeOfType(GL_UNSIGNED_BYTE);
 	}
 
+	void VertexBufferLayout::Clear() {
+		m_elements.clear();
+		m_elements.shrink_to_fit();
+	}
+
+	const std::vector<VertexBufferLayoutElement>& VertexBufferLayout::GetElements() const {
+		return m_elements;
+	}
+
+	unsigned VertexBufferLayout::GetStride() const {
+		return m_stride;
+	}
+
 	unsigned int RenderAPI::GetSizeOfType(
 		unsigned int glType)
 	{

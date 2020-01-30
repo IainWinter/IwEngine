@@ -1,14 +1,18 @@
 #pragma once
 
 #include "IwRenderer.h"
+#include "Buffer.h"
 
 namespace IW {
 namespace RenderAPI {
-	class IWRENDERER_API IUniformBuffer {
+	class IUniformBuffer
+		: public virtual IBuffer
+	{
 	public:
-		virtual ~IUniformBuffer() {}
+		IWRENDERER_API
+		virtual ~IUniformBuffer() = default;
 	protected:
-		IUniformBuffer() {}
+		IUniformBuffer() = default;
 	};
 }
 

@@ -4,11 +4,12 @@
 
 namespace IW {
 namespace RenderAPI {
-	class IWRENDERER_API IComputeShader {
+	class IComputeShader {
 	public:
-		virtual ~IComputeShader() {}
+		IWRENDERER_API
+		virtual ~IComputeShader() = default;
 	protected:
-		IComputeShader() {}
+		IComputeShader() = default;
 	};
 }
 

@@ -52,27 +52,8 @@ namespace IW {
 	void Mesh::Initialize(
 		const iw::ref<IDevice>& device)
 	{
-		if (VertexArray && Outdated) { // reset data not sub data
-			//int index = 0;
-			//if (Vertices) {
-			//	device->UpdateVertexArrayData(VertexArray, index, VertexCount * sizeof(iw::vector3), Vertices);
-			//	index++;
-			//}
-
-			//if (Normals) {
-			//	device->UpdateVertexArrayData(VertexArray, index, NormalCount * sizeof(iw::vector3), Normals);
-			//	index++;
-			//}
-
-			//if (Colors) {
-			//	device->UpdateVertexArrayData(VertexArray, index, ColorCount * sizeof(iw::vector3), Colors);
-			//	index++;
-			//}
-
-			//if (Uvs) {
-			//	device->UpdateVertexArrayData(VertexArray, index, UvCount * sizeof(iw::vector2), Uvs);
-			//	index++;
-			//}
+		if (VertexArray && Outdated) {
+			Update(device);
 		}
 
 		else {
@@ -86,35 +67,35 @@ namespace IW {
 			layout2f.Push<float>(2);
 
 			VertexArray = device->CreateVertexArray();
-			IndexBuffer = device->CreateIndexBuffer(IndexCount, Indices);
+			IndexBuffer = device->CreateIndexBuffer(Indices, IndexCount);
 
 			if (Vertices) {
-				IVertexBuffer* buffer = device->CreateVertexBuffer(VertexCount * sizeof(iw::vector3), Vertices);
+				IVertexBuffer* buffer = device->CreateVertexBuffer(Vertices, VertexCount * sizeof(iw::vector3));
 				device->AddBufferToVertexArray(VertexArray, buffer, layout3f);
 			}
 
 			if (Normals) {
-				IVertexBuffer* buffer = device->CreateVertexBuffer(VertexCount * sizeof(iw::vector3), Normals);
+				IVertexBuffer* buffer = device->CreateVertexBuffer(Normals, VertexCount * sizeof(iw::vector3));
 				device->AddBufferToVertexArray(VertexArray, buffer, layout3f);
 			}
 
 			if (Tangents) {
-				IVertexBuffer* buffer = device->CreateVertexBuffer(VertexCount * sizeof(iw::vector3), Tangents);
+				IVertexBuffer* buffer = device->CreateVertexBuffer(Tangents, VertexCount * sizeof(iw::vector3));
 				device->AddBufferToVertexArray(VertexArray, buffer, layout3f);
 			}
 
 			if (BiTangents) {
-				IVertexBuffer* buffer = device->CreateVertexBuffer(VertexCount * sizeof(iw::vector3), BiTangents);
+				IVertexBuffer* buffer = device->CreateVertexBuffer(BiTangents, VertexCount * sizeof(iw::vector3));
 				device->AddBufferToVertexArray(VertexArray, buffer, layout3f);
 			}
 
 			if (Colors) {
-				IVertexBuffer* buffer = device->CreateVertexBuffer(VertexCount * sizeof(iw::vector4), Colors);
+				IVertexBuffer* buffer = device->CreateVertexBuffer(Colors, VertexCount * sizeof(iw::vector4));
 				device->AddBufferToVertexArray(VertexArray, buffer, layout4f);
 			}
 
 			if (Uvs) {
-				IVertexBuffer* buffer = device->CreateVertexBuffer(VertexCount * sizeof(iw::vector2), Uvs);
+				IVertexBuffer* buffer = device->CreateVertexBuffer(Uvs, VertexCount * sizeof(iw::vector2));
 				device->AddBufferToVertexArray(VertexArray, buffer, layout2f);
 			}
 		}
@@ -145,13 +126,17 @@ namespace IW {
 			device->UpdateVertexArrayData(VertexArray, index, Uvs, VertexCount * sizeof(iw::vector2));
 			index++;
 		}
+
+		if (IndexBuffer) {
+			device->UpdateBuffer(IndexBuffer, Indices, IndexCount * sizeof(iw::vector2));
+		}
 	}
 
 	void Mesh::Destroy(
 		const iw::ref<IDevice>& device)
 	{
 		device->DestroyVertexArray(VertexArray);
-		device->DestroyIndexBuffer(IndexBuffer);
+		device->DestroyBuffer(IndexBuffer);
 	}
 
 	void Mesh::Draw(

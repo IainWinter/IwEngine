@@ -4,9 +4,10 @@
 
 namespace IW {
 namespace RenderAPI {
-	class IWRENDERER_API IFragmentShader {
+	class IFragmentShader {
 	public:
-		virtual ~IFragmentShader() {}
+		IWRENDERER_API
+		virtual ~IFragmentShader() = default;
 	protected:
 		IFragmentShader() {}
 	};
