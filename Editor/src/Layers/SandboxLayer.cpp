@@ -73,10 +73,8 @@ namespace IW {
 	int SandboxLayer::Initialize() {
 		// Font
 
-		font = Asset->Load<Font>("fonts/arial.fnt");
-		textMesh = font->GenerateMesh("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque venenatis orci in ipsum auctor pulvinar. \n"
-			"Aenean tristique mauris et mauris accumsan, et pretium diam dignissim. Nullam pharetra nisi nec urna mattis,\n"
-			"molestie ullamcorper ex tempus. In quis mauris at magna dictum finibus.", .0035f, 1);
+		font = Asset->Load<Font>("fonts/twcentmt.fnt");
+		textMesh = font->GenerateMesh("Winter.dev", .01f, 1);
 
 		textMesh->Initialize(Renderer->Device);
 		font->Initialize(Renderer->Device);
@@ -325,8 +323,8 @@ namespace IW {
 	int i = 0;
 
 	void SandboxLayer::PostUpdate() {
-		//font->UpdateMesh(textMesh, std::to_string(i++), 1.f, 1);
-	//	textMesh->Update(Renderer->Device);
+		//font->UpdateMesh(textMesh, std::to_string(i++), .01f, 1);
+		//textMesh->Update(Renderer->Device);
 
 		light.SetPosition(lightPos);
 		light.SetRotation(iw::quaternion::from_look_at(lightPos));
@@ -341,14 +339,14 @@ namespace IW {
 
 		//Renderer->BeginScene();
 
-		//Renderer->SetCamera(textCam);
+		Renderer->SetCamera(textCam);
 
 		Renderer->SetShader(fontShader);
 
 		fontShader->Program->GetParam("color")->SetAsFloats(&iw::vector3::one, 1, 3);
 		fontShader->Program->GetParam("fontMap")->SetAsTexture(font->GetTexture(0)->Handle());
 
-		Transform t{ iw::vector3(0, 5, 0), iw::vector3::one, iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::PI / 2) };
+		Transform t{ iw::vector3(-7.5, 0, 3), iw::vector3::one, iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::PI / 2) };
 		fontShader->Program->GetParam("model")->SetAsMat4(t.Transformation());
 
 		Renderer->DrawMesh(&t, textMesh);
