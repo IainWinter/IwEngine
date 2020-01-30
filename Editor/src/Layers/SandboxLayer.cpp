@@ -344,7 +344,7 @@ namespace IW {
 		fontShader->Program->GetParam("color")->SetAsFloats(&iw::vector3::one, 1, 3);
 		fontShader->Program->GetParam("fontMap")->SetAsTexture(font->GetTexture(0)->Handle());
 
-		Transform t{ iw::vector3(-7.5, 0, 3), iw::vector3::one, iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::PI / 2) };
+		Transform t{ iw::vector3(-7.5, 0, 2.5f), iw::vector3::one, iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::PI / 2) };
 		fontShader->Program->GetParam("model")->SetAsMat4(t.Transformation());
 
 		Renderer->DrawMesh(&t, textMesh);
@@ -374,9 +374,9 @@ namespace IW {
 	bool SandboxLayer::On(
 		MouseMovedEvent& e)
 	{
-		font->UpdateMesh(textMesh, std::to_string(e.X) + " " + std::to_string(e.Y), .01f, 1);
+		font->UpdateMesh(textMesh, std::to_string(e.X) + '\n' + std::to_string(e.Y), .01f, 1);
 
-		return true;
+		return false;
 	}
 
 	float x = 0;
