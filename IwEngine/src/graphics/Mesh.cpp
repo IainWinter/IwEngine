@@ -128,7 +128,7 @@ namespace IW {
 		}
 
 		if (IndexBuffer) {
-			device->UpdateBuffer(IndexBuffer, Indices, IndexCount * sizeof(iw::vector2));
+			device->UpdateBuffer(IndexBuffer, Indices, IndexCount * sizeof(unsigned));
 		}
 	}
 

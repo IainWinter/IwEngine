@@ -13,11 +13,11 @@ namespace IW {
 		, gl_io(TRANSLATE(io))
 		, m_type(type)
 		, m_io(io)
-		, m_size(size)
+		, m_size(size) // Set in UpdateData
 		, m_data(data)
 	{
 		glGenBuffers(1, &gl_id);
-		glBindBuffer(gl_type, gl_id);
+		Bind();
 		glBufferData(gl_type, size, data, gl_io);
 	}
 
@@ -28,13 +28,20 @@ namespace IW {
 	void GLBuffer::UpdateData(
 		const void* data,
 		size_t size,
-		size_t offset) const
+		size_t offset)
 	{
-		if (size == 0) {
-			size = m_size;
+		if (size > m_size) {
+			m_size = size;
+			glNamedBufferData(gl_id, size, data, gl_io);
 		}
 
-		glNamedBufferSubData(gl_id, offset, size, data);
+		else {
+			if (size == 0) {
+				size = m_size;
+			}
+
+			glNamedBufferSubData(gl_id, offset, size, data);
+		}
 	}
 
 	void GLBuffer::Bind() const {

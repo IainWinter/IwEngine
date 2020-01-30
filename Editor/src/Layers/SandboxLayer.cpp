@@ -320,11 +320,9 @@ namespace IW {
 
 	float threshold = 0;
 
-	int i = 0;
-
 	void SandboxLayer::PostUpdate() {
-		//font->UpdateMesh(textMesh, std::to_string(i++), .01f, 1);
-		//textMesh->Update(Renderer->Device);
+		
+		textMesh->Update(Renderer->Device);
 
 		light.SetPosition(lightPos);
 		light.SetRotation(iw::quaternion::from_look_at(lightPos));
@@ -371,6 +369,14 @@ namespace IW {
 		ImGui::SliderFloat3("Cam pos", (float*)&camera.FindComponent<Transform>()->Position, -10, 10);
 
 		ImGui::End();
+	}
+
+	bool SandboxLayer::On(
+		MouseMovedEvent& e)
+	{
+		font->UpdateMesh(textMesh, std::to_string(e.X) + " " + std::to_string(e.Y), .01f, 1);
+
+		return true;
 	}
 
 	float x = 0;

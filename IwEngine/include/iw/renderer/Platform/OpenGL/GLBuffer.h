@@ -24,7 +24,7 @@ namespace RenderAPI {
 		void UpdateData(
 			const void* data,
 			size_t size,
-			size_t offset = 0) const;
+			size_t offset = 0);
 
 		IWRENDERER_API
 		void Bind() const;
