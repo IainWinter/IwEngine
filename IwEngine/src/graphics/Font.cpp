@@ -83,8 +83,10 @@ namespace Graphics {
 		);
 
 		delete[] mesh->Vertices;
+		delete[] mesh->Uvs;
 		delete[] mesh->Indices;
 
+		mesh->Outdated    = true;
 		mesh->VertexCount = count * 4;
 		mesh->IndexCount  = count * 6;
 
@@ -95,11 +97,13 @@ namespace Graphics {
 		iw::vector2 cursor;
 		unsigned vert = 0;
 		unsigned index = 0;
-		unsigned lastChar = 0;
 		for (std::string line : lines) {
-			for (unsigned character : line) {
-				const Character& c = GetCharacter(character);
-				int kerning = GetKerning(lastChar, character);
+			for (size_t i = 1; i <= line.length(); i++) {
+				unsigned char1 = line[i - 1];
+				unsigned char2 = line[i];
+
+				const Character& c = GetCharacter(char1);
+				int kerning = GetKerning(char1, char2);
 
 				iw::vector2 dim(c.Width - padWidth, c.Height - padHeight);
 				iw::vector2 tex(GetTexture(c.Page)->Width(), GetTexture(c.Page)->Height());
@@ -135,8 +139,6 @@ namespace Graphics {
 				index += 6;
 
 				cursor.x += (c.Xadvance + kerning) * scale.x;
-
-				lastChar = character;
 			}
 
 			cursor.x = 0;

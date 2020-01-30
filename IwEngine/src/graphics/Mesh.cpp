@@ -52,7 +52,7 @@ namespace IW {
 	void Mesh::Initialize(
 		const iw::ref<IDevice>& device)
 	{
-		if (VertexArray && Outdated) {
+		if (VertexArray) {
 			Update(device);
 		}
 
@@ -106,29 +106,33 @@ namespace IW {
 	void Mesh::Update(
 		const iw::ref<IDevice>& device)
 	{
-		int index = 0;
-		if (Vertices) {
-			device->UpdateVertexArrayData(VertexArray, index, Vertices, VertexCount * sizeof(iw::vector3));
-			index++;
-		}
+		if (Outdated) {
+			int index = 0;
+			if (Vertices) {
+				device->UpdateVertexArrayData(VertexArray, index, Vertices, VertexCount * sizeof(iw::vector3));
+				index++;
+			}
 
-		if (Normals) {
-			device->UpdateVertexArrayData(VertexArray, index, Normals, VertexCount * sizeof(iw::vector3));
-			index++;
-		}
+			if (Normals) {
+				device->UpdateVertexArrayData(VertexArray, index, Normals, VertexCount * sizeof(iw::vector3));
+				index++;
+			}
 
-		if (Colors) {
-			device->UpdateVertexArrayData(VertexArray, index, Colors, VertexCount * sizeof(iw::vector4));
-			index++;
-		}
+			if (Colors) {
+				device->UpdateVertexArrayData(VertexArray, index, Colors, VertexCount * sizeof(iw::vector4));
+				index++;
+			}
 
-		if (Uvs) {
-			device->UpdateVertexArrayData(VertexArray, index, Uvs, VertexCount * sizeof(iw::vector2));
-			index++;
-		}
+			if (Uvs) {
+				device->UpdateVertexArrayData(VertexArray, index, Uvs, VertexCount * sizeof(iw::vector2));
+				index++;
+			}
 
-		if (IndexBuffer) {
-			device->UpdateBuffer(IndexBuffer, Indices, IndexCount * sizeof(unsigned));
+			if (IndexBuffer) {
+				device->UpdateBuffer(IndexBuffer, Indices, IndexCount * sizeof(unsigned));
+			}
+
+			Outdated = false;
 		}
 	}
 

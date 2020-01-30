@@ -73,7 +73,7 @@ namespace IW {
 	int SandboxLayer::Initialize() {
 		// Font
 
-		font = Asset->Load<Font>("fonts/twcentmt.fnt");
+		font = Asset->Load<Font>("fonts/arial.fnt");
 		textMesh = font->GenerateMesh("Winter.dev", .01f, 1);
 
 		textMesh->Initialize(Renderer->Device);
@@ -321,7 +321,6 @@ namespace IW {
 	float threshold = 0;
 
 	void SandboxLayer::PostUpdate() {
-		
 		textMesh->Update(Renderer->Device);
 
 		light.SetPosition(lightPos);
@@ -374,7 +373,7 @@ namespace IW {
 	bool SandboxLayer::On(
 		MouseMovedEvent& e)
 	{
-		font->UpdateMesh(textMesh, std::to_string(e.X) + '\n' + std::to_string(e.Y), .01f, 1);
+		font->UpdateMesh(textMesh, std::to_string((int)e.X) + '\n' + std::to_string((int)e.Y), .01f, 1);
 
 		return false;
 	}
