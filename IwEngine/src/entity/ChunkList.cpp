@@ -118,6 +118,13 @@ namespace IW {
 			EntityHandle* entityComponent = chunk->GetEntity(entityData->ChunkIndex);
 			*entityComponent = entityData->Entity;
 
+			for (size_t i = 0; i < m_archetype->Count; i++) {
+				ArchetypeLayout& layout = m_archetype->Layout[i];
+
+				void* old = chunk->GetComponentPtr(layout, entityData->ChunkIndex);
+				memset(old, 0, layout.Component->Size); // could put this in Chunk.h if it sounds better
+			}
+
 			++m_count;
 
 			return true;

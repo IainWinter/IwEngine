@@ -8,6 +8,30 @@ namespace ECS {
 		EntityHandle Handle;
 		Space* Space;
 
+		Entity()
+			: Handle(EntityHandle::Empty)
+			, Space(nullptr)
+		{}
+
+		Entity(
+			EntityHandle handle,
+			ECS::Space* space)
+			: Handle(handle)
+			, Space(space)
+		{}
+
+		bool operator==(
+			const EntityHandle& other)
+		{
+			return Handle == other;
+		}
+
+		bool operator!=(
+			const EntityHandle& other)
+		{
+			return !operator==(other);
+		}
+
 		size_t Index() {
 			return Handle.Index;
 		}

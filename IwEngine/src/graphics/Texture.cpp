@@ -43,10 +43,10 @@ namespace Graphics {
 			case STENCIL: m_channels = 1; break;
 		}
 
-		if (!m_colors) {
-			m_colors = new unsigned char[m_width * m_height];
-			memset(m_colors, 0, m_width * m_height);
-		}
+		//if (!m_colors) {
+		//	m_colors = new unsigned char[m_width * m_height];
+		//	memset(m_colors, 0, m_width * m_height);
+		//}
 	}
 
 	Texture::Texture(

@@ -52,9 +52,6 @@ namespace IW {
 	iw::ref<RenderTarget> targetBlur;
 	iw::ref<Shader> gaussian;
 	float blurAmount = .5f;
-	TextureAtlas atlasD;
-	TextureAtlas atlasRG;
-	TextureAtlas atlasBlur;
 
 	iw::pipeline pipeline;
 	GenerateShadowMap* generateShadowMap;
@@ -62,6 +59,7 @@ namespace IW {
 
 	Entity camera;
 	Mesh* textMesh;
+	Transform textTransform;
 	OrthographicCamera* textCam;
 	iw::ref<Shader> fontShader;
 	iw::ref<Font> font;
@@ -74,14 +72,22 @@ namespace IW {
 		// Font
 
 		font = Asset->Load<Font>("fonts/arial.fnt");
-		textMesh = font->GenerateMesh("Winter.dev", .01f, 1);
-
-		textMesh->Initialize(Renderer->Device);
 		font->Initialize(Renderer->Device);
 
-		fontShader = Asset->Load<Shader>("shaders/font.shader");
+		textMesh = font->GenerateMesh("Winter.dev", .01f, 1);
 
+		fontShader = Asset->Load<Shader>("shaders/font.shader");
 		Renderer->InitShader(fontShader, CAMERA);
+
+		iw::ref<Material> textMat = REF<Material>(fontShader);
+
+		textMat->Set("color", iw::vector3(1, .25f, 1));
+		textMat->SetTexture("fontMap", font->GetTexture(0));
+
+		textMesh->SetMaterial(textMat);
+		textMesh->Initialize(Renderer->Device);
+
+		textTransform = { iw::vector3(-7.5, 1, 2.5f), iw::vector3::one, iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::PI / 2) };
 
 		// Shader
 
@@ -95,33 +101,21 @@ namespace IW {
 
 		// Textures
 		
-		atlasD    = TextureAtlas(2048, 2048, IW::DEPTH, IW::FLOAT, IW::BORDER);
-		atlasRG   = TextureAtlas(2048, 2048, IW::RG,    IW::FLOAT, IW::BORDER);
-		atlasBlur = TextureAtlas(2048, 2048, IW::ALPHA, IW::FLOAT, IW::BORDER);
+		iw::ref<Texture> texDepth  = REF<Texture>(1024, 1024, IW::DEPTH, IW::FLOAT, IW::BORDER);
+		iw::ref<Texture> texShadow = REF<Texture>(1024, 1024, IW::RG,    IW::FLOAT, IW::BORDER);
+		iw::ref<Texture> texBlur   = REF<Texture>(1024, 1024, IW::ALPHA, IW::FLOAT, IW::BORDER);
 
-		atlasD   .Initialize(Renderer->Device);
-		atlasRG  .Initialize(Renderer->Device);
-		atlasBlur.Initialize(Renderer->Device);
-
-		atlasD   .GenTexBounds(2, 2);
-		atlasRG  .GenTexBounds(2, 2);
-		atlasBlur.GenTexBounds(2, 2);
-
-		iw::ref<Texture> subD    = atlasD   .GetSubTexture(0);
-		iw::ref<Texture> subRG   = atlasRG  .GetSubTexture(0);
-		iw::ref<Texture> subBlur = atlasBlur.GetSubTexture(0);
-
-		subD   ->Initialize(Renderer->Device);
-		subRG  ->Initialize(Renderer->Device);
-		subBlur->Initialize(Renderer->Device);
+		texDepth->Initialize(Renderer->Device);
+		texShadow->Initialize(Renderer->Device);
+		texBlur->Initialize(Renderer->Device);
 
 		target = std::make_shared<RenderTarget>(1024, 1024);
-		target->AddTexture(subRG);
-		target->AddTexture(subD);
+		target->AddTexture(texShadow);
+		target->AddTexture(texDepth);
 		target->Initialize(Renderer->Device);
 		
 		targetBlur = std::make_shared<RenderTarget>(1024, 1024);
-		targetBlur->AddTexture(subBlur);
+		targetBlur->AddTexture(texBlur);
 		targetBlur->Initialize(Renderer->Device);
 
 		// Lights
@@ -130,8 +124,8 @@ namespace IW {
 
 		// Materials
 
-		iw::ref<Material> smat = std::make_shared<Material>();
-		iw::ref<Material> tmat = std::make_shared<Material>();
+		iw::ref<Material> smat = REF<Material>();
+		iw::ref<Material> tmat = REF<Material>();
 
 		smat->SetShader(shader);
 		tmat->SetShader(shader);
@@ -139,8 +133,8 @@ namespace IW {
 		smat->Set("albedo", iw::vector4(1, .95f, 1, 1));
 		tmat->Set("albedo", iw::vector4(.95f, 1, 1, 1));
 
-		smat->SetTexture("shadowMap", subRG);
-		tmat->SetTexture("shadowMap", subRG);
+		smat->SetTexture("shadowMap", texShadow);
+		tmat->SetTexture("shadowMap", texShadow);
 
 		smat->Initialize(Renderer->Device);
 		tmat->Initialize(Renderer->Device);
@@ -154,7 +148,7 @@ namespace IW {
 
 			mat->SetShader(shader);
 
-			mat->SetTexture("shadowMap", subRG);
+			mat->SetTexture("shadowMap", texShadow);
 
 			mat->Initialize(Renderer->Device);
 
@@ -253,7 +247,7 @@ namespace IW {
 
 		Entity player = Space->CreateEntity<Transform, Model, SphereCollider, Rigidbody, Player>();
 		player.SetComponent<Model> (*sphere);
-		player.SetComponent<Player>(-10.0f, .18f, .08f);
+		player.SetComponent<Player>(-10.0f, .18f, .08f, 10);
 
 		Transform* tp      = player.SetComponent<Transform>     (iw::vector3(5, 1, 0));
 		SphereCollider* sp = player.SetComponent<SphereCollider>(iw::vector3::zero, 1.0f);
@@ -321,8 +315,6 @@ namespace IW {
 	float threshold = 0;
 
 	void SandboxLayer::PostUpdate() {
-		textMesh->Update(Renderer->Device);
-
 		light.SetPosition(lightPos);
 		light.SetRotation(iw::quaternion::from_look_at(lightPos));
 
@@ -334,21 +326,23 @@ namespace IW {
 
 		pipeline.execute();
 
-		//Renderer->BeginScene();
+		//Renderer->SetCamera(textCam);
 
-		Renderer->SetCamera(textCam);
+		for (auto m_e : Space->Query<Transform, Model>()) {
+			auto [m_t, m_m] = m_e.Components.Tie<ModelComponents>();
 
-		Renderer->SetShader(fontShader);
+			font->UpdateMesh(textMesh, std::to_string(m_e.Index), .1f, 1);
+			textMesh->Update(Renderer->Device);
 
-		fontShader->Program->GetParam("color")->SetAsFloats(&iw::vector3::one, 1, 3);
-		fontShader->Program->GetParam("fontMap")->SetAsTexture(font->GetTexture(0)->Handle());
+			Transform t = *m_t;
+			t.Position.y += 1;
+			t.Scale = 0.1f;
+			t.Rotation = iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::PI / 2);
 
-		Transform t{ iw::vector3(-7.5, 0, 2.5f), iw::vector3::one, iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::PI / 2) };
-		fontShader->Program->GetParam("model")->SetAsMat4(t.Transformation());
+			//t.Rotation = iw::quaternion::from_look_at(t.Position, camera.FindComponent<Transform>()->Position);
 
-		Renderer->DrawMesh(&t, textMesh);
-
-		//Renderer->EndScene();
+			Renderer->DrawMesh(&t, textMesh);	
+		}
 	}
 
 	float ts = 1.0f;
@@ -367,12 +361,19 @@ namespace IW {
 
 		ImGui::SliderFloat3("Cam pos", (float*)&camera.FindComponent<Transform>()->Position, -10, 10);
 
+		ImGui::SliderFloat3("Text pos",   (float*)&textTransform.Position, -8, 8);
+		ImGui::SliderFloat3("Text scale", (float*)&textTransform.Scale, 0, 10);
+		ImGui::SliderFloat4("Text rot",   (float*)&textTransform.Rotation, 0, 1);
+
 		ImGui::End();
 	}
+
+	std::stringstream ss;
 
 	bool SandboxLayer::On(
 		MouseMovedEvent& e)
 	{
+		ss.str(std::string());
 		font->UpdateMesh(textMesh, std::to_string((int)e.X) + '\n' + std::to_string((int)e.Y), .01f, 1);
 
 		return false;
@@ -380,6 +381,15 @@ namespace IW {
 
 	float x = 0;
 	int sc = 5;
+
+	bool SandboxLayer::On(
+		KeyTypedEvent& e)
+	{
+		ss << e.Character;
+		font->UpdateMesh(textMesh, ss.str(), .01f, 1);
+
+		return false;
+	}
 
 	bool SandboxLayer::On(
 		ActionEvent& e)

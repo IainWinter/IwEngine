@@ -117,10 +117,7 @@ namespace IW {
 		}
 
 		else {
-			SetShader(material->Shader);
-
 			material->Use(Device);
-
 			material->Shader->Program->GetParam("model")->SetAsMat4(transform->Transformation());
 		}
 

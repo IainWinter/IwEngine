@@ -7,6 +7,7 @@
 
 #include "IW/physics/Collision/SphereCollider.h";
 #include "IW/physics/Dynamics/Rigidbody.h";
+#include <Components\Player.h>
 
 EnemySystem::EnemySystem(
 	iw::ref<IW::Model> bulletModel)
@@ -48,6 +49,7 @@ void EnemySystem::Update(
 			r->SetVelocity(v);
 			r->SetSimGravity(false);
 			r->SetRestitution(1);
+			r->SetIsTrigger(true);
 
 			Physics->AddRigidbody(r);
 		}
@@ -64,15 +66,42 @@ void EnemySystem::Update(
 }
 
 bool EnemySystem::On(
-	IW::CollisionEvent& e)
+	IW::CollisionEvent& event)
 {
-	//if (   e.BodyA->Id() != IW::NOID
-	//	&& e.BodyB->Id() != IW::NOID)
-	//{
-	//	//LOG_INFO << e.BodyA->Id() << "Col";
-	//	//QueueDestroyEntity(e.BodyA->Id());
-	//	//Physics->RemoveRigidbody(e.BodyA);
-	//}
+	IW::Entity a = Space->FindEntity(event.BodyA);
+	IW::Entity b = Space->FindEntity(event.BodyB);
+
+	if (   a.Index() == IW::EntityHandle::Empty.Index
+		|| b.Index() == IW::EntityHandle::Empty.Index)
+	{
+		return false;
+	}
+
+	IW::Entity player;
+	IW::Entity enemy;
+	if (a.HasComponent<Player>() && b.HasComponent<Enemy>()) {
+		player = a;
+		enemy  = b;
+	}
+
+	else if (b.HasComponent<Player>() && a.HasComponent<Enemy>()) {
+		player = b;
+		enemy  = a;
+	}
+
+	if (   player.Index() != IW::EntityHandle::Empty.Index
+		|| enemy .Index() != IW::EntityHandle::Empty.Index)
+	{
+		Player* playerComponent = player.FindComponent<Player>();
+		if (playerComponent->Timer > 0) {
+			QueueDestroyEntity(enemy.Index());
+			Physics->RemoveRigidbody(enemy.FindComponent<IW::Rigidbody>());
+		}
+
+		else {
+			playerComponent->Health -= 1;
+		}
+	}
 
 	return false;
 }

@@ -16,6 +16,8 @@ namespace util {
 	template<
 		typename _t>
 	using weak = std::weak_ptr<_t>;
+
+	#define REF std::make_shared
 }
 
 	using namespace util;

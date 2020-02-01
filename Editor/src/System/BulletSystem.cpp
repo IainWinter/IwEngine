@@ -1,5 +1,6 @@
 #include "Systems/BulletSystem.h"
 #include "iw/engine/Time.h"
+#include <Components\Enemy.h>
 
 BulletSystem::BulletSystem()
 	: IW::System<IW::Transform, IW::Rigidbody, Bullet>("Bullet")
@@ -32,20 +33,32 @@ bool BulletSystem::On(
 	IW::Entity a = Space->FindEntity(event.BodyA);
 	IW::Entity b = Space->FindEntity(event.BodyB);
 
-	if (   a.Index() != IW::EntityHandle::Empty.Index 
-		&& a.HasComponent<Bullet>() 
-		&& a.HasComponent<IW::Rigidbody>())
+	IW::Entity bullet;
+	IW::Entity other;
+	if (   a != IW::EntityHandle::Empty 
+		&& a.HasComponent<Bullet>()) 
 	{
-		Physics->RemoveRigidbody(a.FindComponent<IW::Rigidbody>());
-		QueueDestroyEntity(a.Index());
+		bullet = a;
+		other  = b;
 	}
 
-	if (   b.Index() != IW::EntityHandle::Empty.Index 
-		&& b.HasComponent<Bullet>() 
-		&& b.HasComponent<IW::Rigidbody>())
+	else if (b != IW::EntityHandle::Empty
+		  && b.HasComponent<Bullet>())
 	{
-		Physics->RemoveRigidbody(b.FindComponent<IW::Rigidbody>());
-		QueueDestroyEntity(b.Index());
+		bullet = b;
+		other  = a;
+	}
+
+	if (    other != IW::EntityHandle::Empty
+		&& (other.HasComponent<Enemy>() || other.HasComponent<Bullet>()))
+	{
+		return false;
+	}
+
+	if (bullet != IW::EntityHandle::Empty) {
+		LOG_INFO << bullet.Index();
+		Physics->RemoveRigidbody(bullet.FindComponent<IW::Rigidbody>());
+		QueueDestroyEntity(bullet.Index());
 	}
 
 	return false;

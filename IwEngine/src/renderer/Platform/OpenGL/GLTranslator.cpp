@@ -26,28 +26,28 @@ namespace RenderAPI {
 		switch (textureFormat) {
 			case ALPHA: {
 				switch (textureFormatType) {
-					case UBYTE: return GL_RED;
+					case UBYTE: return GL_R8;
 					case FLOAT: return GL_R32F;
 				}
 			}
 
 			case RG: {
 				switch (textureFormatType) {
-					case UBYTE: return GL_RG;
+					case UBYTE: return GL_RG8;
 					case FLOAT: return GL_RG32F;
 				}
 			}
 
 			case RGB: {
 				switch (textureFormatType) {
-					case UBYTE: return GL_RGB;
+					case UBYTE: return GL_RGB8;
 					case FLOAT: return GL_RGB32F;
 				}
 			}
 
 			case RGBA: {
 				switch (textureFormatType) {
-					case UBYTE: return GL_RGBA;
+					case UBYTE: return GL_RGBA8;
 					case FLOAT: return GL_RGBA32F;
 				}
 			}
@@ -55,13 +55,28 @@ namespace RenderAPI {
 			case DEPTH: {
 				switch (textureFormatType) {
 					case UBYTE: return GL_DEPTH_COMPONENT;
-					case FLOAT: return GL_DEPTH_COMPONENT32F;
+					case FLOAT: return GL_DEPTH_COMPONENT24;
 				}
 			}
 
 			case STENCIL: {
 				return GL_STENCIL_COMPONENTS;
 			}
+		}
+
+		return GL_INVALID_VALUE;
+	}
+
+	GLint GLTranslator::Translate(
+		TextureFormat textureFormat)
+	{
+		switch (textureFormat) {
+			case ALPHA:   return GL_RED;
+			case RG:      return GL_RG;
+			case RGB:     return GL_RGB;
+			case RGBA:    return GL_RGBA;
+			case DEPTH:   return GL_DEPTH_COMPONENT;
+			case STENCIL: return GL_STENCIL_COMPONENTS;
 		}
 
 		return GL_INVALID_VALUE;

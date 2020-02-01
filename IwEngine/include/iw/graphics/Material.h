@@ -45,6 +45,8 @@ namespace Graphics {
 
 		std::unordered_map<std::string, unsigned> m_index; // also done in pipeline seems bad
 
+		bool m_initialized;
+
 	public:
 		IWGRAPHICS_API
 		Material();

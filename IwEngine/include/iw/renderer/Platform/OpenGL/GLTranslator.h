@@ -20,6 +20,10 @@ namespace RenderAPI {
 
 		IWRENDERER_API
 		GLint Translate(
+			TextureFormat textureFormat) override;
+
+		IWRENDERER_API
+		GLint Translate(
 			TextureWrap textureWrap) override;
 
 		// Uniform type conversion

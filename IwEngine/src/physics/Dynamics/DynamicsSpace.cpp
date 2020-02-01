@@ -75,13 +75,20 @@ namespace IW {
 		//ResolveTransforms();
 
 		std::vector<Manifold> manifolds;
+		std::vector<Manifold> triggers;
 		for (Rigidbody* a : m_rigidbodies) {
 			for (Rigidbody* b : m_rigidbodies) {
 				if (a == b) break;
 
 				ManifoldPoints points = a->Col()->TestCollision(a->Trans(), b->Col(), b->Trans());
 				if (points.HasCollision) {
-					manifolds.emplace_back(a, b, points);
+					if (a->IsTrigger() || b->IsTrigger()) {
+						triggers.emplace_back(a, b, points);
+					}
+
+					else {
+						manifolds.emplace_back(a, b, points);
+					}
 				}
 			}
 		}
@@ -118,6 +125,7 @@ namespace IW {
 		// send collision callbacks
 
 		SendCollisionCallbacks(manifolds, dt);
+		SendCollisionCallbacks(triggers,  dt);
 
 		// At the end the forces should be cleared
 

@@ -44,7 +44,7 @@ namespace IW {
 			entityData->ChunkIndex = m_componentManager.CreateComponentsData(entityData);
 		}
 
-		return Entity { entityData->Entity, this };
+		return Entity(entityData->Entity, this);
 	}
 
 	bool Space::DestroyEntity(
@@ -136,7 +136,7 @@ namespace IW {
 			component,
 			instance);
 
-		return { entity , this };
+		return Entity(entity , this);
 	}
 
 	void Space::MoveComponents(

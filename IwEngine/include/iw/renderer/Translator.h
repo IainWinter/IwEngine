@@ -22,6 +22,10 @@ namespace RenderAPI {
 
 		IWRENDERER_API
 		virtual _i Translate(
+			TextureFormat textureFormat) = 0;
+
+		IWRENDERER_API
+		virtual _i Translate(
 			TextureWrap textureWrap) = 0;
 
 		// Uniform type conversion

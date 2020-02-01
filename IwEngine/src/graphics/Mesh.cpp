@@ -52,6 +52,10 @@ namespace IW {
 	void Mesh::Initialize(
 		const iw::ref<IDevice>& device)
 	{
+		if (Material) {
+			Material->Initialize(device);
+		}
+
 		if (VertexArray) {
 			Update(device);
 		}

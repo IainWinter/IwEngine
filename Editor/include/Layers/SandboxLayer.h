@@ -19,7 +19,7 @@ namespace IW {
 		void ImGui() override;
 
 		bool On(MouseMovedEvent& e) override;
-
+		bool On(KeyTypedEvent& e) override;
 		bool On(ActionEvent& e) override;
 	};
 }

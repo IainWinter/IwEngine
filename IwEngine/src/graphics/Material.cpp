@@ -4,49 +4,55 @@
 namespace IW {
 	Material::Material()
 		: m_alloc(128)
+		, m_initialized(false)
 	{}
 	
 	Material::Material(
 		iw::ref<IW::Shader>& shader)
 		: Shader(shader)
 		, m_alloc(128)
+		, m_initialized(false)
 	{}
 
 	void Material::Initialize(
 		const iw::ref<IDevice>& device)
 	{
-		if (!Shader) {
-			LOG_WARNING << "Tried to initialize material without a shader!";
-			return;
-		}
-		
-		if (!Shader->Program) {
-			Shader->Initialize(device);
-		}
+		if(!m_initialized) {
+			m_initialized = true;
 
-		for (TextureProperty& prop : m_textures) {
-			if (prop.Texture && !prop.Texture->Handle()) {
-				prop.Texture->Initialize(device);
+			if (!Shader) {
+				LOG_WARNING << "Tried to initialize material without a shader!";
+				return;
 			}
-		}
+		
+			if (!Shader->Program) {
+				Shader->Initialize(device);
+			}
 
-		int count = Shader->Program->UniformCount();
-		for (int i = 0; i < count; i++) {
-			IPipelineParam* uniform = Shader->Program->GetParam(i);
-			if (uniform->Name().substr(0, 4) == "mat_") {
-				std::string name = uniform->Name().substr(4);
+			for (TextureProperty& prop : m_textures) {
+				if (prop.Texture && !prop.Texture->Handle()) {
+					prop.Texture->Initialize(device);
+				}
+			}
 
-				if (!Has(name)) {
-					if (uniform->Type() == UniformType::SAMPLE2) {
-						SetTexture(name, nullptr);
-					}
+			int count = Shader->Program->UniformCount();
+			for (int i = 0; i < count; i++) {
+				IPipelineParam* uniform = Shader->Program->GetParam(i);
+				if (uniform->Name().substr(0, 4) == "mat_") {
+					std::string name = uniform->Name().substr(4);
 
-					else {
-						SetProperty(name, nullptr,
-							uniform->Type(),
-							uniform->TypeSize(),
-							uniform->Stride(),
-							uniform->Count());
+					if (!Has(name)) {
+						if (uniform->Type() == UniformType::SAMPLE2) {
+							SetTexture(name, nullptr);
+						}
+
+						else {
+							SetProperty(name, nullptr,
+								uniform->Type(),
+								uniform->TypeSize(),
+								uniform->Stride(),
+								uniform->Count());
+						}
 					}
 				}
 			}

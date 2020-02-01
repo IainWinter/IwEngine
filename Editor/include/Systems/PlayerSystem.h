@@ -27,6 +27,6 @@ public:
 	void FixedUpdate(
 		IW::EntityComponentArray& view) override;
 
-	bool On(
-		IW::KeyEvent& event);
+	bool On(IW::KeyEvent& event);
+	bool On(IW::CollisionEvent& event);
 };

@@ -4,6 +4,7 @@ namespace IW {
 	CollisionObject::CollisionObject()
 		: m_transform(nullptr)
 		, m_collider(nullptr)
+		, m_isTrigger(false)
 	{}
 
 	AABB CollisionObject::Bounds() const {
@@ -22,6 +23,10 @@ namespace IW {
 		return m_collider;
 	}
 
+	bool CollisionObject::IsTrigger() const {
+		return m_isTrigger;
+	}
+
 	void CollisionObject::SetTrans(
 		Transform* transform)
 	{
@@ -32,5 +37,11 @@ namespace IW {
 		Collider* collider)
 	{
 		m_collider = collider;
+	}
+	
+	void CollisionObject::SetIsTrigger(
+		bool isTrigger)
+	{
+		m_isTrigger = isTrigger;
 	}
 }

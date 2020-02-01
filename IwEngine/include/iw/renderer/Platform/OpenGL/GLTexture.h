@@ -9,7 +9,7 @@ namespace RenderAPI {
 		: public ITexture
 	{
 	private:
-		unsigned int gl_id;
+		unsigned gl_id;
 		int gl_format;
 		int gl_type;
 		int gl_wrapX;

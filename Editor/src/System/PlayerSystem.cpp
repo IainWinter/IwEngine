@@ -1,6 +1,7 @@
 #include "Systems/PLayerSystem.h"
 #include "iw/engine/Time.h"
 #include "iw/input/Devices/Keyboard.h"
+#include <Components\Bullet.h>
 
 PlayerSystem::PlayerSystem()
 	: System<IW::Transform, IW::Rigidbody, Player>("Player")
@@ -21,6 +22,11 @@ void PlayerSystem::Update(
 
 		else if (player->Timer >= -player->CooldownTime) {
 			player->Timer -= IW::Time::DeltaTime();
+		}
+
+		if (player->Health == 0) {
+			Physics->RemoveRigidbody(rigidbody);
+			QueueDestroyEntity(entity.Index);
 		}
 	}
 }
@@ -58,4 +64,32 @@ bool PlayerSystem::On(
 	}
 
 	return true;
+}
+
+bool PlayerSystem::On(
+	IW::CollisionEvent& event)
+{
+	IW::Entity a = Space->FindEntity(event.BodyA);
+	IW::Entity b = Space->FindEntity(event.BodyB);
+
+	if (   a.Index() == IW::EntityHandle::Empty.Index
+		|| b.Index() == IW::EntityHandle::Empty.Index)
+	{
+		return false;
+	}
+
+	IW::Entity player;
+	if (a.HasComponent<Player>() && b.HasComponent<Bullet>()) {
+		player = a;
+	}
+
+	else if (b.HasComponent<Player>() && a.HasComponent<Bullet>()) {
+		player = b;
+	}
+
+	if (player.Index() != IW::EntityHandle::Empty.Index) {
+		player.FindComponent<Player>()->Health -= 1;
+	}
+
+	return false;
 }

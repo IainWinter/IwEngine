@@ -1,5 +1,5 @@
 #shader Vertex
-#version 430 core
+#version 440 core
 
 layout(std140, column_major) uniform Camera {
 	mat4 viewProj;
@@ -20,11 +20,18 @@ void main() {
 #shader Fragment
 #version 440 core
 
-uniform vec3 color;
-uniform sampler2D fontMap;
+uniform vec3 mat_color;
+uniform float  mat_hasFontMap;
+uniform sampler2D mat_fontMap;
 
 in vec2 UV;
 
 void main() {
-	gl_FragColor = vec4(color, texture2D(fontMap, UV).a);
+	vec4 color = vec4(mat_color, 1);
+
+	if (mat_hasFontMap == 1.0) {
+		color.a = texture2D(mat_fontMap, UV).a;
+	}
+
+	gl_FragColor = color;
 }
