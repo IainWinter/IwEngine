@@ -41,9 +41,9 @@ namespace IW {
 	{
 		const char* stream = GetComponentStream(layout);
 		if (   stream <= instance
-			&& stream + layout.Component->Size * Count > instance)
+			&& stream + layout.Component->Size * CurrentIndex > instance)
 		{
-			size_t index = ((char*)instance - stream) / layout.Component->Size;
+			size_t index = ((char*)instance - stream) / layout.Component->Size + IndexOffset;
 			if (GetEntity(index)->Alive) {
 				return (int)index;
 			}

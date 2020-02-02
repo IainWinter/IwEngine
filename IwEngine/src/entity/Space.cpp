@@ -136,7 +136,7 @@ namespace IW {
 			component,
 			instance);
 
-		return Entity(entity , this);
+		return Entity(entity, this);
 	}
 
 	void Space::MoveComponents(

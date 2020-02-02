@@ -38,7 +38,9 @@ namespace IW {
 	EntityComponentData iterator::operator*() {
 		for (size_t i = 0; i < m_indices->Count; i++) {
 			m_data->Components[i] = m_chunk->GetComponentPtr(
-				m_archetype->Layout[m_indices->Indices[i]], m_index);
+				m_archetype->Layout[m_indices->Indices[i]], 
+				m_index
+			);
 		}
 
 		EntityHandle* entity = m_chunk->GetEntity(m_index);
@@ -237,8 +239,9 @@ namespace IW {
 	{
 		int index = -1;
 		Chunk* chunk = m_root;
+		ArchetypeLayout& layout = *m_archetype->GetLayout(component);
 		while (chunk) {
-			index = chunk->IndexOf(*m_archetype->GetLayout(component), instance);
+			index = chunk->IndexOf(layout, instance);
 			if (index == -1) {
 				chunk = chunk->Next;
 			}
