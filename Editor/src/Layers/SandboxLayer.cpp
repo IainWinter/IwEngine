@@ -3,26 +3,19 @@
 #include "Systems/EnemySystem.h"
 #include "Systems/BulletSystem.h"
 #include "Events/ActionEvents.h"
-#include "iw/graphics/Model.h"
 #include "iw/engine/Components/CameraController.h"
 #include "iw/engine/Time.h"
 #include "iw/physics/Collision/SphereCollider.h"
-#include "iw/physics/Dynamics/ImpulseSolver.h"
 #include "iw/physics/Collision/PositionSolver.h"
 #include "iw/physics/Collision/PlaneCollider.h"
+#include "iw/physics/Dynamics/ImpulseSolver.h"
 #include "iw/physics/Dynamics/Rigidbody.h"
 #include "iw/graphics/MeshFactory.h"
-#include "iw/input/Devices/Mouse.h"
-#include "iw/graphics/TextureAtlas.h"
-#include "iw/graphics/DirectionalLight.h"
-#include "iw/util/jobs/pipeline.h"
-#include "imgui/imgui.h"
-
-#include "Pipeline/GenerateShadowMap.h"
-#include "Pipeline/FilterTarget.h"
-#include "Pipeline/Render.h"
-
 #include "iw/graphics/Font.h"
+#include "iw/graphics/Model.h"
+#include "iw/graphics/TextureAtlas.h"
+#include "iw/input/Devices/Mouse.h"
+#include "imgui/imgui.h"
 
 namespace IW {
 	struct ModelUBO {
@@ -46,24 +39,6 @@ namespace IW {
 		PlaneCollider* Collider;
 	};
 
-	DirectionalLight light;
-	iw::vector3 lightPos = iw::vector3(2, 5, .5f);
-	iw::ref<RenderTarget> target;
-	iw::ref<RenderTarget> targetBlur;
-	iw::ref<Shader> gaussian;
-	float blurAmount = .5f;
-
-	iw::pipeline pipeline;
-	GenerateShadowMap* generateShadowMap;
-	FilterTarget* postProcessShadowMap;
-
-	Entity camera;
-	Mesh* textMesh;
-	Transform textTransform;
-	OrthographicCamera* textCam;
-	iw::ref<Shader> fontShader;
-	iw::ref<Font> font;
-
 	SandboxLayer::SandboxLayer()
 		: Layer("Sandbox")
 	{}
@@ -81,7 +56,7 @@ namespace IW {
 
 		iw::ref<Material> textMat = REF<Material>(fontShader);
 
-		textMat->Set("color", iw::vector3(1, .25f, 1));
+		textMat->Set("color", iw::vector3::one);
 		textMat->SetTexture("fontMap", font->GetTexture(0));
 
 		textMesh->SetMaterial(textMat);
@@ -95,7 +70,7 @@ namespace IW {
 		iw::ref<Shader> directional = Asset->Load<Shader>("shaders/lights/directional_transparent.shader");
 		gaussian = Asset->Load<Shader>("shaders/filters/gaussian.shader");
 		
-		Renderer->InitShader(shader, ALL);
+		Renderer->InitShader(shader,      ALL);
 		Renderer->InitShader(directional, CAMERA);
 		Renderer->InitShader(gaussian,    CAMERA);
 
@@ -312,9 +287,10 @@ namespace IW {
 		return 0;
 	}
 
-	float threshold = 0;
 
 	void SandboxLayer::PostUpdate() {
+		textMesh->Update(Renderer->Device);
+
 		light.SetPosition(lightPos);
 		light.SetRotation(iw::quaternion::from_look_at(lightPos));
 
@@ -326,26 +302,10 @@ namespace IW {
 
 		pipeline.execute();
 
-		//Renderer->SetCamera(textCam);
-
-		for (auto m_e : Space->Query<Transform, Model>()) {
-			auto [m_t, m_m] = m_e.Components.Tie<ModelComponents>();
-
-			font->UpdateMesh(textMesh, std::to_string(m_e.Index), .1f, 1);
-			textMesh->Update(Renderer->Device);
-
-			Transform t = *m_t;
-			t.Position.y += 1;
-			t.Scale = 0.1f;
-			t.Rotation = iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::PI / 2);
-
-			//t.Rotation = iw::quaternion::from_look_at(t.Position, camera.FindComponent<Transform>()->Position);
-
-			Renderer->DrawMesh(&t, textMesh);	
-		}
+		Renderer->SetCamera(textCam);
+		Renderer->DrawMesh(&textTransform, textMesh);
 	}
 
-	float ts = 1.0f;
 	
 	void SandboxLayer::FixedUpdate() {
 		Physics->Step(Time::FixedTime() * ts);
@@ -368,25 +328,23 @@ namespace IW {
 		ImGui::End();
 	}
 
-	std::stringstream ss;
+
 
 	bool SandboxLayer::On(
 		MouseMovedEvent& e)
 	{
-		ss.str(std::string());
+		str.clear();
 		font->UpdateMesh(textMesh, std::to_string((int)e.X) + '\n' + std::to_string((int)e.Y), .01f, 1);
 
 		return false;
 	}
 
-	float x = 0;
-	int sc = 5;
 
 	bool SandboxLayer::On(
 		KeyTypedEvent& e)
 	{
-		ss << e.Character;
-		font->UpdateMesh(textMesh, ss.str(), .01f, 1);
+		str += e.Character;
+		font->UpdateMesh(textMesh, str, .01f, 1);
 
 		return false;
 	}

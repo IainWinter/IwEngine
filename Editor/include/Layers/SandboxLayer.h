@@ -2,13 +2,45 @@
 
 #include "iw/engine/Layer.h"
 #include "iw/physics/Dynamics/DynamicsSpace.h"
+#include "iw/graphics/DirectionalLight.h"
+#include "iw/graphics/Font.h"
+#include "iw/util/jobs/pipeline.h"
+#include "iw/util/memory/ref.h"
+
+#include "Pipeline/GenerateShadowMap.h"
+#include "Pipeline/FilterTarget.h"
+#include "Pipeline/Render.h"
 
 namespace IW {
 	class SandboxLayer
 		: public Layer
 	{
 	private:
-		iw::vector3 movement; // this is going to be editing the toolbox camera in the future so wont be here
+		DirectionalLight light;
+		iw::vector3 lightPos = iw::vector3(2, 5, .5f);
+		iw::ref<RenderTarget> target;
+		iw::ref<RenderTarget> targetBlur;
+		iw::ref<Shader> gaussian;
+		float blurAmount = .5f;
+
+		iw::pipeline pipeline;
+		GenerateShadowMap* generateShadowMap;
+		FilterTarget* postProcessShadowMap;
+
+		Entity camera;
+
+		Mesh* textMesh;
+		Transform textTransform;
+		OrthographicCamera* textCam;
+		iw::ref<Shader> fontShader;
+		iw::ref<Font> font;
+
+		float x = 0;
+		int sc = 5;
+		std::string str;
+		float ts = 1.0f;
+		float threshold = 0.25f;
+
 	public:
 		SandboxLayer();
 
