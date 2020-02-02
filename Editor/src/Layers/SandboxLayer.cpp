@@ -43,6 +43,8 @@ namespace IW {
 		: Layer("Sandbox")
 	{}
 
+	iw::ref<Model> tetrahedron;
+
 	int SandboxLayer::Initialize() {
 		// Font
 
@@ -152,7 +154,7 @@ namespace IW {
 		Model tm { tmesh, 1 };
 
 		iw::ref<Model> sphere = Asset->Give<Model>("Sphere", &sm);
-		iw::ref<Model> tetrahedron = Asset->Give<Model>("Tetrahedron", &tm);
+		tetrahedron = Asset->Give<Model>("Tetrahedron", &tm);
 
 		// Floor
 
@@ -359,7 +361,7 @@ namespace IW {
 
 		for (size_t i = 0; i < sc; i++) {
 			Entity enemy = Space->CreateEntity<Transform, Model, SphereCollider, Rigidbody, Enemy>();
-			enemy.SetComponent<Model>(*sphere);
+			enemy.SetComponent<Model>(*tetrahedron);
 			enemy.SetComponent<Enemy>(SPIN, 0.2617993f, .12f, 0.0f);
 
 			Transform* te      = enemy.SetComponent<Transform>     (iw::vector3(cos(x) * 1, 15, sin(x) * 1));
