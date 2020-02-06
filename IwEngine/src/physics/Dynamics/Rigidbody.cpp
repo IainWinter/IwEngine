@@ -34,6 +34,14 @@ namespace IW {
 		return m_velocity;
 	}
 
+	const iw::vector3& Rigidbody::Lock() const {
+		return m_lock;
+	}
+
+	const iw::vector3& Rigidbody::IsLocked() const {
+		return m_isLocked;
+	}
+
 	scalar Rigidbody::Mass() const {
 		return 1.0f / m_invMass;
 	}
@@ -86,6 +94,18 @@ namespace IW {
 		const iw::vector3& velocity)
 	{
 		m_velocity = velocity;
+	}
+
+	void Rigidbody::SetLock(
+		const iw::vector3& lock)
+	{
+		m_lock = lock;
+	}
+
+	void Rigidbody::SetIsLocked(
+		const iw::vector3& isLocked)
+	{
+		m_isLocked = isLocked;
 	}
 
 	void Rigidbody::SetMass(

@@ -30,6 +30,10 @@ namespace IW {
 					forward.y = 0;
 					forward.normalize();
 
+					if (forward.length_squared() == 0) {
+						forward = t->Right().cross(iw::vector3::unit_y);
+					}
+
 					t->Position += forward * movement.z * speed * Time::DeltaTime();
 				}
 			}
@@ -54,6 +58,8 @@ namespace IW {
 			case iw::val(Actions::RIGHT):   movement.x += e.as<ToggleEvent>().Active ? 1 : -1; break;
 			case iw::val(Actions::FORWARD): movement.z += e.as<ToggleEvent>().Active ? 1 : -1; break;
 		}
+
+		LOG_INFO << movement;
 
 		return false;
 	}

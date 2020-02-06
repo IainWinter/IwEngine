@@ -118,14 +118,14 @@ namespace Graphics {
 				float maxX = x + dim.x * scale.x;
 				float minY = y - dim.y * scale.y;
 
-				mesh->Vertices[vert + 0] = iw::vector3(x, y, 0);
-				mesh->Vertices[vert + 1] = iw::vector3(x, minY, 0);
-				mesh->Vertices[vert + 2] = iw::vector3(maxX, y, 0);
+				mesh->Vertices[vert + 0] = iw::vector3(   x,    y, 0);
+				mesh->Vertices[vert + 1] = iw::vector3(   x, minY, 0);
+				mesh->Vertices[vert + 2] = iw::vector3(maxX,    y, 0);
 				mesh->Vertices[vert + 3] = iw::vector3(maxX, minY, 0);
 
-				mesh->Uvs[vert + 0] = iw::vector2(u, v);
-				mesh->Uvs[vert + 1] = iw::vector2(u, maxV);
-				mesh->Uvs[vert + 2] = iw::vector2(maxU, v);
+				mesh->Uvs[vert + 0] = iw::vector2(   u,    v);
+				mesh->Uvs[vert + 1] = iw::vector2(   u, maxV);
+				mesh->Uvs[vert + 2] = iw::vector2(maxU,    v);
 				mesh->Uvs[vert + 3] = iw::vector2(maxU, maxV);
 
 				mesh->Indices[index + 0] = vert;

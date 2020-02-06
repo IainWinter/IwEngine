@@ -111,6 +111,18 @@ namespace IW {
 
 				rigidbody->SetVelocity(dt * rigidbody->Force() * rigidbody->Mass() + rigidbody->Velocity());
 				rigidbody->Trans()->Position += dt * rigidbody->Velocity();
+
+				if (rigidbody->IsLocked().x) {
+					rigidbody->Trans()->Position.x = rigidbody->Lock().x;
+				}
+
+				if (rigidbody->IsLocked().y) {
+					rigidbody->Trans()->Position.y = rigidbody->Lock().y;
+				}
+
+				if (rigidbody->IsLocked().z) {
+					rigidbody->Trans()->Position.z = rigidbody->Lock().z;
+				}
 			}
 		}
 

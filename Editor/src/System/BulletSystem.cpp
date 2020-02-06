@@ -16,8 +16,6 @@ void BulletSystem::Update(
 			//rigidbody->MovePosition(transform->Position + iw::vector3(1, 0, 0) * transform->Rotation * bullet->Speed * IW::Time::FixedTime());
 		}
 
-		transform->Position.y = 1;
-
 		/*if (bullet->Time > 5.f) {
 			QueueDestroyEntity(entity.Index);
 			Physics->RemoveRigidbody(rigidbody);

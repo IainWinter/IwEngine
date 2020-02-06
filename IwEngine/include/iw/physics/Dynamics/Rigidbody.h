@@ -12,6 +12,8 @@ namespace Physics {
 		iw::vector3 m_gravity;  // Gravitational force on the rigidbody
 		iw::vector3 m_force;    // Net force on the rigidbody
 		iw::vector3 m_velocity; // Velocity of rigidbody
+		iw::vector3 m_lock;     // Lock to axis
+		iw::vector3 m_isLocked; // If its locked to the axis
 		scalar m_invMass;       // 1 / Mass of rigidbody
 		bool m_takesGravity;    // If the rigidbody will use its own gravity or take it from the space
 		bool m_simGravity;      // If the rigidbody will simulate gravity
@@ -43,6 +45,12 @@ namespace Physics {
 
 		IWPHYSICS_API
 		const iw::vector3& Velocity() const;
+
+		IWPHYSICS_API
+		const iw::vector3& Lock() const;
+
+		IWPHYSICS_API
+		const iw::vector3& IsLocked() const;
 
 		IWPHYSICS_API
 		scalar Mass() const;
@@ -82,6 +90,14 @@ namespace Physics {
 		IWPHYSICS_API
 		void SetVelocity(
 			const iw::vector3& velocity);
+
+		IWPHYSICS_API
+		void SetLock(
+			const iw::vector3& lock);
+
+		IWPHYSICS_API
+		void SetIsLocked(
+			const iw::vector3& isLocked);
 
 		IWPHYSICS_API
 		void SetMass(

@@ -51,6 +51,9 @@ void EnemySystem::Update(
 			r->SetRestitution(1);
 			r->SetIsTrigger(true);
 
+			r->SetIsLocked(iw::vector3(0, 1, 0));
+			r->SetLock(iw::vector3(0, 1, 0));
+
 			Physics->AddRigidbody(r);
 		}
 
