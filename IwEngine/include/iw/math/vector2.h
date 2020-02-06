@@ -11,7 +11,7 @@ namespace math {
 	/**
 	* Represents a vector or point in 2D.
 	*/
-	struct IWMATH_API vector2 {
+	struct REFLECT IWMATH_API vector2 {
 		/**
 		* A vector with components: 0, 0.
 		*/
@@ -32,7 +32,8 @@ namespace math {
 		*/
 		static const vector2 unit_y;
 
-		float x, y;
+		REFLECT float x;
+		REFLECT float y;
 
 		vector2();
 

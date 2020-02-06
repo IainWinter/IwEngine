@@ -17,6 +17,9 @@
 #include "iw/input/Devices/Mouse.h"
 #include "imgui/imgui.h"
 
+#include "iw/math/vector2.reflect.h"
+#include "iw/math/vector3.reflect.h"
+
 namespace IW {
 	struct ModelUBO {
 		iw::matrix4 model;
@@ -46,6 +49,34 @@ namespace IW {
 	iw::ref<Model> tetrahedron;
 
 	int SandboxLayer::Initialize() {
+		std::stringstream ss;
+		
+		iw::vector2 v(1.1f, 2.2f);
+	
+		const iw::Class* vec2 = iw::GetClass<iw::vector2>();
+		
+		ss << "{";
+
+		char buf[5];
+		buf[4] = '\0';
+
+		for (int i = 0; i < vec2->fieldCount; i++) {
+			memcpy(buf, (char*)&v + vec2->fields[i].offset, vec2->fields[i].type->size);
+			ss << "\"" << vec2->fields[i].name << "\": " << buf;
+
+			if (i != vec2->fieldCount - 1) {
+				ss << ", ";
+			}
+		}
+
+		ss << "}";
+
+		float deserialize = *(float*)buf;
+
+		LOG_INFO << ss.str();
+
+		//LOG_INFO << iw::SerializeType<float>(v.x) << iw::SerializeType<float>(v.y);
+
 		// Font
 
 		font = Asset->Load<Font>("fonts/arial.fnt");
@@ -64,7 +95,7 @@ namespace IW {
 		textMesh->SetMaterial(textMat);
 		textMesh->Initialize(Renderer->Device);
 
-		textTransform = { iw::vector3(-7.5, 1, 2.5f), iw::vector3::one, iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::PI / 2) };
+		textTransform = { iw::vector3(-7.5, 1, 2.5f), iw::vector3::one, iw::quaternion::identity};
 
 		// Shader
 
@@ -224,10 +255,10 @@ namespace IW {
 
 		Entity player = Space->CreateEntity<Transform, Model, SphereCollider, Rigidbody, Player>();
 		player.SetComponent<Model> (*sphere);
-		player.SetComponent<Player>(-10.0f, .18f, .08f, 10);
+		player.SetComponent<Player>(8.0f, .18f, .08f, 10);
 
-		Transform* tp      = player.SetComponent<Transform>     (iw::vector3(5, 1, 0));
-		SphereCollider* sp = player.SetComponent<SphereCollider>(iw::vector3::zero, 1.0f);
+		Transform* tp      = player.SetComponent<Transform>     (iw::vector3(5, 1, 0), iw::vector3(.75f));
+		SphereCollider* sp = player.SetComponent<SphereCollider>(iw::vector3::zero, .75f);
 		Rigidbody* rp      = player.SetComponent<Rigidbody>     ();
 
 		rp->SetMass(1);
@@ -235,6 +266,9 @@ namespace IW {
 		rp->SetTrans(tp);
 		rp->SetStaticFriction(.1f);
 		rp->SetDynamicFriction(.02f);
+
+		rp->SetIsLocked(iw::vector3(0, 1, 0));
+		rp->SetLock(iw::vector3(0, 1, 0));
 
 		Physics->AddRigidbody(rp);
 
@@ -256,14 +290,14 @@ namespace IW {
 
 		PerspectiveCamera* perspective = new PerspectiveCamera(1.17f, 1.778f, .01f, 2000.0f);
 
-		iw::quaternion camrot = iw::quaternion::from_axis_angle(iw::vector3::unit_y, iw::PI)
-			* iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::PI / 2);
+		iw::quaternion camrot = iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::PI / 2)
+			                  * iw::quaternion::from_axis_angle(iw::vector3::unit_z, iw::PI);
 
 		camera = Space->CreateEntity<Transform, CameraController>();
 		camera.SetComponent<Transform>       (iw::vector3(0, 25, 0), iw::vector3::one, camrot);
 		camera.SetComponent<CameraController>(perspective);
 
-		textCam = new OrthographicCamera(iw::vector3::zero, camrot, 16, 9, -10, 10);
+		textCam = new OrthographicCamera(iw::vector3::one, iw::quaternion::from_axis_angle(iw::vector3::unit_y, iw::PI), 16, 9, -10, 10);
 
 		// Rendering pipeline
 
@@ -329,8 +363,6 @@ namespace IW {
 
 		ImGui::End();
 	}
-
-
 
 	bool SandboxLayer::On(
 		MouseMovedEvent& e)

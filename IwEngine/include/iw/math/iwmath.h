@@ -1,11 +1,15 @@
 #pragma once
 
+#include "iw\reflection\Reflect.h"
+
 #ifdef IW_PLATFORM_WINDOWS
 #	ifdef IW_BUILD_DLL
 #		define IWMATH_API __declspec(dllexport)
-#else
+#	else
 #		define IWMATH_API __declspec(dllimport)
 #	endif
+#else
+#	define IWMATH_API 
 #endif
 
 namespace iw {
@@ -36,7 +40,8 @@ namespace math {
 	*
 	* @param value Value to inverse square root.
 	*/
-	IWMATH_API float fast_inv_sqrt(
+	IWMATH_API
+	float fast_inv_sqrt(
 		float value);
 
 	/**
@@ -45,7 +50,8 @@ namespace math {
 	* @param a The base
 	* @param b The exponent
 	*/
-	IWMATH_API float fast_pow(
+	IWMATH_API
+	float fast_pow(
 		float base, float exponent);
 
 	/**
@@ -55,7 +61,8 @@ namespace math {
 	* @param b A floating point number.
 	* @param accuracy Number of decimals to compare.
 	*/
-	IWMATH_API bool almost_equal(
+	IWMATH_API
+	bool almost_equal(
 		float a, 
 		float b, 
 		unsigned int accuracy);

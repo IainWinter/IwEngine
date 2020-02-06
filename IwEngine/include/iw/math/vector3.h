@@ -14,7 +14,7 @@ namespace math {
 	/**
 	* Represents a vector or point in 3D.
 	*/
-	struct IWMATH_API vector3 {
+	struct REFLECT IWMATH_API vector3 {
 		/**
 		* A vector with components: 0, 0, 0.
 		*/
@@ -40,7 +40,9 @@ namespace math {
 		*/
 		static const vector3 unit_z;
 
-		float x, y, z;
+		REFLECT float x;
+		REFLECT float y;
+		REFLECT float z;
 
 		vector3();
 

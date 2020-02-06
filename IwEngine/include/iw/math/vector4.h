@@ -12,7 +12,7 @@ namespace math {
 	/**
 	* Represents a vector with 4 dimensions.
 	*/
-	struct IWMATH_API vector4 {
+	struct REFLECT IWMATH_API vector4 {
 		/**
 		* A vector with components: 0, 0, 0, 0.
 		*/
@@ -43,7 +43,10 @@ namespace math {
 		*/
 		static const vector4 unit_w;
 
-		float x, y, z, w;
+		REFLECT float x;
+		REFLECT float y;
+		REFLECT float z;
+		REFLECT float w;
 
 		vector4();
 
