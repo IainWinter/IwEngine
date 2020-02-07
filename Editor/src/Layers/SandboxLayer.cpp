@@ -20,12 +20,14 @@
 #include "iw/math/vector2.reflect.h"
 #include "iw/math/vector3.reflect.h"
 
+#include <fstream>
+#include <string>
+
 namespace IW {
 	struct ModelUBO {
 		iw::matrix4 model;
 		iw::vector3 albedo;
 	};
-
 
 	struct ModelComponents {
 		Transform* Transform;
@@ -42,27 +44,77 @@ namespace IW {
 		PlaneCollider* Collider;
 	};
 
+	class bytestream
+		: std::stringstream
+	{
+	public:
+		template<
+			typename _t>
+		bytestream& operator<<(
+			_t& value)
+		{
+			for (int b = 0; b < iw::GetType<_t>()->size; b++) {
+				char* byte = (char*)&value + b;
+				std::stringstream::operator<<(*byte);
+			}
+
+			return *this;
+		}
+
+		std::string str() {
+			return std::stringstream::str();
+		}
+	};
+
 	SandboxLayer::SandboxLayer()
 		: Layer("Sandbox")
-	{}
+	{
+		// Byte stream
+
+		//for (int i = 0; i < vec2->fieldCount; i++) {
+		//	for (int b = 0; b < vec2->fields[i].type->size; b++) {
+		//		char* byte = (char*)&v + vec2->fields[i].offset + b;
+		//		ss << *byte;
+		//	}
+		//}
+
+		//LOG_INFO << ss.str();
+
+		//char buf[sizeof(float) + 1];
+		//buf[sizeof(float)] = '\0';
+		//memcpy(buf, &v, sizeof(float));
+
+		//const char* b = iw::SerializeType(5.5f);
+		//ss << 
+
+		//ss.str();
+
+		//LOG_INFO << iw::SerializeType<float>(v.x) << iw::SerializeType<float>(v.y);
+	}
 
 	iw::ref<Model> tetrahedron;
 
 	int SandboxLayer::Initialize() {
 		std::stringstream ss;
-		
+
+		bytestream bs;
+
 		iw::vector2 v(1.1f, 2.2f);
-	
+
 		const iw::Class* vec2 = iw::GetClass<iw::vector2>();
-		
+
+		//std::string s = ss.str();
+
+		// Json
+
 		ss << "{";
 
-		char buf[5];
-		buf[4] = '\0';
-
 		for (int i = 0; i < vec2->fieldCount; i++) {
-			memcpy(buf, (char*)&v + vec2->fields[i].offset, vec2->fields[i].type->size);
-			ss << "\"" << vec2->fields[i].name << "\": " << buf;
+			iw::Field& field = vec2->fields[i];
+			ss << "\"" << field.name << "\": ";
+
+			field.type->Serialize(ss, (char*)&v + field.offset);
+			field.type->Serialize(bs, (char*)&v + field.offset);
 
 			if (i != vec2->fieldCount - 1) {
 				ss << ", ";
@@ -71,11 +123,8 @@ namespace IW {
 
 		ss << "}";
 
-		float deserialize = *(float*)buf;
-
-		LOG_INFO << ss.str();
-
-		//LOG_INFO << iw::SerializeType<float>(v.x) << iw::SerializeType<float>(v.y);
+		LOG_INFO << "JSON        " << ss.str();
+		LOG_INFO << "Byte stream " << bs.str();
 
 		// Font
 
