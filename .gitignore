@@ -2,3 +2,5 @@ build/
 bin/
 lib/
 .vs/
+
+*.reflect.h

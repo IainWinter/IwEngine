@@ -19,9 +19,26 @@
 
 #include "iw/math/vector2.reflect.h"
 #include "iw/math/vector3.reflect.h"
+#include "iw/math/matrix2.reflect.h"
 
-#include <fstream>
-#include <string>
+#include "iw/util/io/bytestream.h"
+
+struct test {
+	iw::vector2 Pos2;
+	iw::vector3 Pos3;
+};
+
+namespace iw {
+	namespace detail {
+		template<>
+		const Class* GetClass(ClassTag<test>) {
+			static Class c = Class("test", 20, 2);
+			c.fields[0] = { "Pos2", iw::GetClass<iw::vector2>(), 0 };
+			c.fields[1] = { "Pos3", iw::GetClass<iw::vector3>(), 8 };
+			return &c;
+		}
+	}
+}
 
 namespace IW {
 	struct ModelUBO {
@@ -44,87 +61,32 @@ namespace IW {
 		PlaneCollider* Collider;
 	};
 
-	class bytestream
-		: std::stringstream
-	{
-	public:
-		template<
-			typename _t>
-		bytestream& operator<<(
-			_t& value)
-		{
-			for (int b = 0; b < iw::GetType<_t>()->size; b++) {
-				char* byte = (char*)&value + b;
-				std::stringstream::operator<<(*byte);
-			}
-
-			return *this;
-		}
-
-		std::string str() {
-			return std::stringstream::str();
-		}
-	};
-
 	SandboxLayer::SandboxLayer()
 		: Layer("Sandbox")
-	{
-		// Byte stream
-
-		//for (int i = 0; i < vec2->fieldCount; i++) {
-		//	for (int b = 0; b < vec2->fields[i].type->size; b++) {
-		//		char* byte = (char*)&v + vec2->fields[i].offset + b;
-		//		ss << *byte;
-		//	}
-		//}
-
-		//LOG_INFO << ss.str();
-
-		//char buf[sizeof(float) + 1];
-		//buf[sizeof(float)] = '\0';
-		//memcpy(buf, &v, sizeof(float));
-
-		//const char* b = iw::SerializeType(5.5f);
-		//ss << 
-
-		//ss.str();
-
-		//LOG_INFO << iw::SerializeType<float>(v.x) << iw::SerializeType<float>(v.y);
-	}
+	{}
 
 	iw::ref<Model> tetrahedron;
 
 	int SandboxLayer::Initialize() {
-		std::stringstream ss;
+		iw::bytestream bs;
+		
+		//iw::GetType<int[3]>();
 
-		bytestream bs;
+		iw::matrix2 min = iw::matrix2::create_scale(1, 2);
+		iw::Serialize(bs, min);
 
-		iw::vector2 v(1.1f, 2.2f);
+		iw::matrix2 mout;
+		iw::Deserialize(bs, mout);
 
-		const iw::Class* vec2 = iw::GetClass<iw::vector2>();
+		test out {
+			iw::vector2(1.1f, 2.2f),
+			iw::vector3(1.1f, 2.2f, 3.3f)
+		};
 
-		//std::string s = ss.str();
-
-		// Json
-
-		ss << "{";
-
-		for (int i = 0; i < vec2->fieldCount; i++) {
-			iw::Field& field = vec2->fields[i];
-			ss << "\"" << field.name << "\": ";
-
-			field.type->Serialize(ss, (char*)&v + field.offset);
-			field.type->Serialize(bs, (char*)&v + field.offset);
-
-			if (i != vec2->fieldCount - 1) {
-				ss << ", ";
-			}
-		}
-
-		ss << "}";
-
-		LOG_INFO << "JSON        " << ss.str();
-		LOG_INFO << "Byte stream " << bs.str();
+		iw::Serialize(bs, out);
+		
+		test in;
+		iw::Deserialize(bs, in);
 
 		// Font
 

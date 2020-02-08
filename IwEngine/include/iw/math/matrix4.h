@@ -12,14 +12,14 @@ namespace math {
 	/**
 	* Represents a 4x4 matrix.
 	*/
-	struct IWMATH_API matrix4 {
+	struct REFLECT IWMATH_API matrix4 {
 		/**
 		* 4x4 Identity matrix
 		*/
 		static const matrix4 identity;
 
 		union {
-			float elements[4 * 4];
+			REFLECT float elements[4 * 4];
 			vector4 rows[4];
 		};
 

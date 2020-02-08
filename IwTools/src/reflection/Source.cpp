@@ -67,8 +67,17 @@ public:
     void Print(
         raw_ostream& out)
     {
-        if (m_field->getType()->isFundamentalType()) {
-            OUT << "{\"" << Name() << "\", GetType<" << TypeName() << ">(), " << Offset() << "};\n";
+        bool integral;
+        if (m_field->getType()->isArrayType()) {
+            integral = m_field->getType()->getArrayElementTypeNoTypeQual()->isFundamentalType();
+        }
+
+        else {
+            integral = m_field->getType()->isFundamentalType();
+        }
+
+        if (integral) {
+            OUT << "{\"" << Name() << "\", GetType(TypeTag<"   << TypeName() << ">()), " << Offset() << "};\n";
         }
 
         else {
@@ -361,7 +370,13 @@ class ClassFinder
     void FoundField(
         const FieldDecl* field)
     {
-        if (field->getParent() != m_working.top()->Record()) {
+        if (field->isAnonymousStructOrUnion()) {
+            return;
+        }
+
+        if (   field->getParent() != m_working.top()->Record()
+            && !field->getParent()->isAnonymousStructOrUnion())
+        {
             m_working.pop();
         }
 

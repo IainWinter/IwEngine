@@ -9,14 +9,14 @@ namespace math {
 	/**
 	* Represents a 2x2 matrix.
 	*/
-	struct IWMATH_API matrix2 {
+	struct REFLECT IWMATH_API matrix2 {
 		/**
 		* 2x2 Identity matrix
 		*/
 		static const matrix2 identity;
 
-		union {
-			float elements[2 * 2];
+		REFLECT union {
+			REFLECT float elements[2 * 2];
 			vector2 rows[2];
 		};
 

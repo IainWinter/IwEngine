@@ -7,10 +7,10 @@ namespace detail {
 	template<>
 	const Class* GetClass(ClassTag<iw::math::vector4>) {
 		static Class c = Class("iw::math::vector4", 16, 4);
-		c.fields[0] = {"x", GetType<float>(), 0};
-		c.fields[1] = {"y", GetType<float>(), 4};
-		c.fields[2] = {"z", GetType<float>(), 8};
-		c.fields[3] = {"w", GetType<float>(), 12};
+		c.fields[0] = {"x", GetType(TypeTag<float>()), 0};
+		c.fields[1] = {"y", GetType(TypeTag<float>()), 4};
+		c.fields[2] = {"z", GetType(TypeTag<float>()), 8};
+		c.fields[3] = {"w", GetType(TypeTag<float>()), 12};
 		return &c;
 	}
 }

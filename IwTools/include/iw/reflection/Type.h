@@ -1,5 +1,10 @@
 #pragma once
 
+// Supports all integral types (int, float, char...) and their respected fixed arrays
+// Supports all classes generated from IwReflection.exe
+// Doesn't support arrays of classes
+// Doesn't support pointers
+
 namespace iw {
 	struct Type;
 	struct Class;
@@ -24,24 +29,30 @@ namespace iw {
 	};
 
 	struct Type {
-		const char* name;
-		const size_t size;
-		const IntegralType type;
-		const bool isClass;
+		const char* name;        // Literal type name 
+		const size_t size;       // Size in bytes of type
+		const IntegralType type; // Integral type (NOT_INTEGRAL) for classes
+		const bool isClass;      // If AsClass() is valid
+		const bool isArray;      // If type is an array
+		const size_t count;      // Count of elements in supposed array
 
 		Type(
 			const char* name,
 			size_t size,
 			IntegralType type,
-			bool isClass = false)
+			bool isClass = false,
+			bool isArray = false,
+			size_t count = 0)
 			: name(name)
 			, size(size)
 			, type(type)
 			, isClass(isClass)
+			, isArray(isArray)
+			, count(count)
 		{}
 
 		const Class* AsClass() const {
-			return (const Class*)this;
+			return isClass ? (const Class*)this : nullptr;
 		}
 
 		template<
@@ -66,6 +77,41 @@ namespace iw {
 				case UNSIGNED_LONG:      stream << *(unsigned long*)     value; break;
 				case UNSIGNED_LONG_LONG: stream << *(unsigned long long*)value; break;
 			}
+		}
+
+		template<
+			typename _s>
+		void Deserialize(
+			_s& stream,
+			void* value) const
+		{
+			switch (type) {
+				case BOOL:               stream >> *(bool*)              value; break;
+				case CHAR:               stream >> *(char*)              value; break;
+				case SHORT:              stream >> *(short*)             value; break;
+				case INT:                stream >> *(int*)               value; break;
+				case LONG:               stream >> *(long*)              value; break;
+				case FLOAT:              stream >> *(float*)             value; break;
+				case DOUBLE:             stream >> *(double*)            value; break;
+				case LONG_LONG:          stream >> *(long long*)         value; break;
+				case LONG_DOUBLE:        stream >> *(long double*)       value; break;
+				case UNSIGNED_CHAR:      stream >> *(unsigned char*)     value; break;
+				case UNSIGNED_SHORT:     stream >> *(unsigned short*)    value; break;
+				case UNSIGNED_INT:       stream >> *(unsigned int*)      value; break;
+				case UNSIGNED_LONG:      stream >> *(unsigned long*)     value; break;
+				case UNSIGNED_LONG_LONG: stream >> *(unsigned long long*)value; break;
+			}
+		}
+
+		template<
+			typename _t,
+			typename _s>
+		_t Deserialize(
+			_s& stream) const
+		{
+			_t value;
+			Deserialize(stream, &value);
+			return value;
 		}
 	};
 
@@ -109,6 +155,73 @@ namespace iw {
 			, fields(new Field[fieldCount])
 			, fieldCount(fieldCount)
 		{}
+
+		template<
+			typename _s>
+		void Serialize(
+			_s& stream,
+			const void* value) const
+		{
+			for (int i = 0; i < fieldCount; i++) {
+				iw::Field& field = fields[i];
+				char* ptr = (char*)value + field.offset;
+
+				if (field.type->isClass) {
+					field.type->AsClass()->Serialize(stream, ptr);
+				}
+
+				else {
+					if (field.type->isArray) {
+						for (int e = 0; e < field.type->count; e++) {
+							field.type->Serialize(stream, ptr + e * field.type->size);
+						}
+					}
+
+					else {
+						field.type->Serialize(stream, ptr);
+					}
+				}
+			}
+		}
+
+		template<
+			typename _s>
+		void Deserialize(
+			_s& stream,
+			void* value) const
+		{
+			for (int i = 0; i < fieldCount; i++) {
+				iw::Field& field = fields[i];
+				char* ptr = (char*)value + field.offset;
+
+				if (field.type->isClass) {
+					field.type->AsClass()->Deserialize(stream, ptr);
+				}
+
+				else {
+					if (field.type->isArray) {
+						for (int e = 0; e < field.type->count; e++) {
+							field.type->Deserialize(stream, ptr + e * field.type->size);
+						}
+					}
+
+					else {
+						field.type->Deserialize(stream, ptr);
+					}
+				}
+			}
+		}
+
+		template<
+			typename _t,
+			typename _s>
+		_t Deserialize(
+			_s& stream) const
+		{
+			_t value;
+			Deserialize(stream, &value);
+			return value;
+		}
 	};
 
 namespace detail {
@@ -118,10 +231,33 @@ namespace detail {
 
 	template<
 		typename _t>
+	struct TypeTag {};
+
+	template<
+		typename _t,
+		size_t _s>
+	struct TypeTag<_t[_s]> {};
+
+	template<
+		typename _t>
 	const Class* GetClass(
 		ClassTag<_t>)
 	{
 		static_assert("No reflection information for class");
+		throw nullptr;
+	}
+
+	template<
+		typename _t>
+	const Class* GetType(
+		TypeTag<_t>)
+	{
+		if constexpr (!std::is_integral_v<_t>) {
+			return GetClass(ClassTag<_t>());
+		}
+
+		static_assert("No reflection information for type");
+		throw nullptr;
 	}
 }
 
@@ -134,15 +270,24 @@ namespace detail {
 	template<
 		typename _t>
 	const Type* GetType() {
-		static_assert("No reflection information for type");
+		return iw::detail::GetType(iw::detail::template TypeTag<_t>());
 	}
 
-#define INTEGRAL(t, it, n, s)              \
-	template<>                            \
-	inline const Type* GetType<t>() {     \
-		static Type type = { n, s, it }; \
-		return &type;                    \
-	}                                     \
+#define INTEGRAL(t, it, n, s)                                         \
+	template<>                                                       \
+	inline const Type* GetType<t>() {                                \
+		static Type type = { n, s, it };                            \
+		return &type;                                               \
+	}                                                                \
+	namespace detail {                                               \
+		template<size_t _s>                                         \
+		inline const Type* GetType(                                 \
+			TypeTag<t[_s]>)                                        \
+		{                                                           \
+			static Type type = { n, s, it, false, true, _s }; \
+			return &type;                                          \
+		}                                                           \
+	}                                                                \
 
 	INTEGRAL(bool,               BOOL,               "bool",               sizeof(bool))
 	INTEGRAL(char,               CHAR,               "char",               sizeof(char))
@@ -161,56 +306,50 @@ namespace detail {
 
 #undef INTEGRAL
 
-//#define PRIMITIVE(t, s)                           \
-//	template<>                                   \
-//	inline void SerializeType<t>(t v) {   \
-//		static char* buf = new char[s + 1];     \
-//		buf[s] = '\0';                          \
-//		memcpy(buf, &v, s);                     \
-//		return;                                 \
-//	}                                            \
-//
-//	PRIMITIVE(bool,               sizeof(bool))
-//	PRIMITIVE(char,               sizeof(char))
-//	PRIMITIVE(short,              sizeof(short))
-//	PRIMITIVE(int,                sizeof(int))
-//	PRIMITIVE(long,               sizeof(long))
-//	PRIMITIVE(long long,          sizeof(long long))
-//	//PRIMITIVE(float,              sizeof(float))
-//	PRIMITIVE(double,             sizeof(double))
-//	PRIMITIVE(long double,        sizeof(long double))
-//	PRIMITIVE(unsigned char,      sizeof(unsigned char))
-//	PRIMITIVE(unsigned short,     sizeof(unsigned short))
-//	PRIMITIVE(unsigned int,       sizeof(unsigned int))
-//	PRIMITIVE(unsigned long,      sizeof(unsigned long))
-//	PRIMITIVE(unsigned long long, sizeof(unsigned long long))
-//
-//#undef PRIMITIVE
+	template<
+		typename _t,
+		typename _s>
+	void Serialize(
+		_s& stream,
+		const _t& value)
+	{
+		const iw::Type* type = GetType<_t>();
+		if (type->isClass) {
+			type->AsClass()->Serialize(stream, &value);
+		}
 
-//#define PRIMITIVE(t, n, s)                                      \
-//	template<>                                                   \
-//	inline char* SerializeType<t>() {                            \
-//		char* buf = 					                     \
-//		static Type type = { n, s };                            \
-//		return &type;                                           \
-//	}                                                            \
-//
-//	PRIMITIVE(bool, "bool", sizeof(bool))
-//	PRIMITIVE(char, "char", sizeof(char))
-//	PRIMITIVE(short, "short", sizeof(short))
-//	PRIMITIVE(int, "int", sizeof(int))
-//	PRIMITIVE(long, "long", sizeof(long))
-//	PRIMITIVE(long long, "long long", sizeof(long long))
-//	PRIMITIVE(float, "float", sizeof(float))
-//	PRIMITIVE(double, "double", sizeof(double))
-//	PRIMITIVE(long double, "long double", sizeof(long double))
-//	PRIMITIVE(unsigned char, "unsigned char", sizeof(unsigned char))
-//	PRIMITIVE(unsigned short, "unsigned short", sizeof(unsigned short))
-//	PRIMITIVE(unsigned int, "unsigned int", sizeof(unsigned int))
-//	PRIMITIVE(unsigned long, "unsigned long", sizeof(unsigned long))
-//	PRIMITIVE(unsigned long long, "unsigned long long", sizeof(unsigned long long))
-//
-//#undef PRIMITIVE
+		else {
+			type->Serialize(stream, &value);
+		}
+	}
+
+	template<
+		typename _t,
+		typename _s>
+	void Deserialize(
+		_s& stream,
+		_t& value)
+	{
+		const iw::Type* type = GetType<_t>();
+		if (type->isClass) {
+			type->AsClass()->Deserialize(stream, &value);
+		}
+
+		else {
+			type->Deserialize(stream, &value);
+		}
+	}
+
+	template<
+		typename _t,
+		typename _s>
+	_t Deserialize(
+		_s& stream)
+	{
+		_t value;
+		Deserialize(stream, value);
+		return value;
+	}
 
 namespace detail {
 	//template<

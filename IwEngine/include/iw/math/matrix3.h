@@ -10,14 +10,14 @@ namespace math {
 	/**
 	* Represents a 3x3 matrix.
 	*/
-	struct IWMATH_API matrix3 {
+	struct REFLECT IWMATH_API matrix3 {
 		/**
 		* 3x3 Identity matrix
 		*/
 		static const matrix3 identity;
 
 		union {
-			float elements[3 * 3];
+			REFLECT float elements[3 * 3];
 			vector3 rows[3];
 		};
 

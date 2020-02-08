@@ -10,10 +10,13 @@ namespace math {
 	/**
 	* Represents a rotation in 3D.
 	*/
-	struct IWMATH_API quaternion {
+	struct REFLECT IWMATH_API quaternion {
 		static const quaternion identity;
 
-		float x, y, z, w;
+		REFLECT float x;
+		REFLECT float y;
+		REFLECT float z;
+		REFLECT float w;
 
 		quaternion();
 
