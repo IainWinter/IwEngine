@@ -239,24 +239,24 @@ namespace detail {
 	struct TypeTag<_t[_s]> {};
 
 	template<
-		typename _t>
+		typename _c>
 	const Class* GetClass(
-		ClassTag<_t>)
+		ClassTag<_c>)
 	{
-		static_assert("No reflection information for class");
+		assert("No reflection information for type", typeid(_c).name());
 		throw nullptr;
 	}
 
 	template<
 		typename _t>
-	const Class* GetType(
+	const Type* GetType(
 		TypeTag<_t>)
 	{
-		if constexpr (!std::is_integral_v<_t>) {
+		if constexpr (!std::is_arithmetic_v<_t>) {
 			return GetClass(ClassTag<_t>());
 		}
 
-		static_assert("No reflection information for type");
+		assert("No reflection information for type", typeid(_t).name());
 		throw nullptr;
 	}
 }
@@ -273,21 +273,24 @@ namespace detail {
 		return iw::detail::GetType(iw::detail::template TypeTag<_t>());
 	}
 
-#define INTEGRAL(t, it, n, s)                                         \
-	template<>                                                       \
-	inline const Type* GetType<t>() {                                \
-		static Type type = { n, s, it };                            \
-		return &type;                                               \
-	}                                                                \
-	namespace detail {                                               \
-		template<size_t _s>                                         \
-		inline const Type* GetType(                                 \
-			TypeTag<t[_s]>)                                        \
-		{                                                           \
+#define INTEGRAL(t, it, n, s)                                    \
+	namespace detail {                                          \
+		template<>                                             \
+		inline const Type* GetType(                            \
+			TypeTag<t>)                                       \
+		{                                                      \
+			static Type type = { n, s, it };                  \
+			return &type;                                     \
+		}                                                      \
+                                                                 \
+		template<size_t _s>                                    \
+		inline const Type* GetType(                            \
+			TypeTag<t[_s]>)                                   \
+		{                                                      \
 			static Type type = { n, s, it, false, true, _s }; \
-			return &type;                                          \
-		}                                                           \
-	}                                                                \
+			return &type;                                     \
+		}                                                      \
+	}                                                           \
 
 	INTEGRAL(bool,               BOOL,               "bool",               sizeof(bool))
 	INTEGRAL(char,               CHAR,               "char",               sizeof(char))
@@ -351,15 +354,67 @@ namespace detail {
 		return value;
 	}
 
+	template<
+		typename _t,
+		typename _s>
+	void Serialize(
+		_s& stream,
+		const std::vector<_t>& vector)
+	{
+		const iw::Type* type = GetType<_t>();
+
+		Serialize<size_t>(stream, vector.size());
+
+		if (type->isClass) {
+			for (const _t& item : vector) {
+				type->AsClass()->Serialize(stream, &item);
+			}
+		}
+
+		else {
+			for (const _t& item : vector) {
+				type->Serialize(stream, &item);
+			}
+		}
+	}
+
+	template<
+		typename _t,
+		typename _s>
+	void Deserialize(
+		_s& stream,
+		std::vector<_t>& vector)
+	{
+		const iw::Type* type = GetType<_t>();
+
+		size_t size;
+		Deserialize<size_t>(stream, size);
+
+		vector.resize(size);
+
+		if (type->isClass) {
+			for (_t& item : vector) {
+				type->AsClass()->Deserialize(stream, &item);
+			}
+		}
+
+		else {
+			for (_t& item : vector) {
+				type->Deserialize(stream, &item);
+			}
+		}
+	}
+
 namespace detail {
-	//template<
-	//	typename _t>
-	//const Class* GetClass(
-	//	ClassTag<std::vector<_t>>)
-	//{
-	//	static Class c;
-	//	return &c;
-	//}
+	template<
+		typename _t>
+	const Class* GetClass(
+		ClassTag<std::vector<_t>>)
+	{
+		static Class c = Class("std::vector2", 8, 2);
+		c.fields[0] = { "iteams", GetType(TypeTag<_t[0]>()), 0 }; // idk if this is the best way to do this
+		return &c;
+	}
 
 	//template<
 	//	typename _k,

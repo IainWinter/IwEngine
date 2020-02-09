@@ -17,11 +17,14 @@
 #include "iw/input/Devices/Mouse.h"
 #include "imgui/imgui.h"
 
-#include "iw/math/vector2.reflect.h"
-#include "iw/math/vector3.reflect.h"
-#include "iw/math/matrix2.reflect.h"
+
+#include "iw/reflect/math/vector2.h"
+#include "iw/reflect/math/vector3.h"
+#include "iw/reflect/math/matrix2.h"
 
 #include "iw/util/io/bytestream.h"
+
+#include <vector>
 
 struct test {
 	iw::vector2 Pos2;
@@ -70,7 +73,19 @@ namespace IW {
 	int SandboxLayer::Initialize() {
 		iw::bytestream bs;
 		
-		//iw::GetType<int[3]>();
+		std::vector<int> intsout;
+
+		intsout.push_back(1);
+		intsout.push_back(2);
+		intsout.push_back(3);
+		intsout.push_back(4);
+		intsout.push_back(5);
+
+		iw::Serialize(bs, intsout);
+
+		std::vector<int> intsin;
+		iw::Deserialize(bs, intsin);
+
 
 		iw::matrix2 min = iw::matrix2::create_scale(1, 2);
 		iw::Serialize(bs, min);
