@@ -21,6 +21,7 @@ using namespace llvm;
 
 
 #include "iw/reflection/Type.h"
+#include <filesystem>
 #include <iostream>
 #include <vector>
 #include <stack>
@@ -240,6 +241,15 @@ class ClassFinder
     std::vector<ReflectedClass*> m_classes;
     std::stack <ReflectedClass*> m_working;
 
+    std::string m_outFolder;
+
+public:
+    ClassFinder(
+        std::string outFolder)
+        : m_outFolder(outFolder)
+    {}
+
+private:
     virtual void run(
         const MatchFinder::MatchResult& result)
     {
@@ -303,7 +313,7 @@ class ClassFinder
             raw_fd_ostream out(c->OutPath(), error, flag);
 
             if (error) {
-                std::cout << "ERROR GENERATING " << c->OutPath();
+                std::cout << "ERROR GENERATING " << error;
                 continue;
             }
 
@@ -349,8 +359,18 @@ class ClassFinder
         std::string filename = source->getFilename(record->getLocation()).str();
         std::string outpath  = filename;
 
+        std::filesystem::path file = filename;
+        std::filesystem::path base = m_outFolder;
+
+        std::error_code ec;
+        outpath = std::filesystem::relative(file, base, ec).string();
+
+        outpath.erase(0, outpath.find_first_of('\\') + 1);
+
         outpath.erase(outpath.find_last_of('.'));
-        outpath.append(".reflect.h");
+        outpath.append(".h");
+        
+        outpath = m_outFolder + outpath;
 
         ReflectedClass* c = new ReflectedClass(
             record, 
@@ -407,10 +427,10 @@ class ClassFinder
 static llvm::cl::OptionCategory gToolCategory("iwreflection options");
 
 int main(int argc, const char** argv) {
-    CommonOptionsParser op(argc, argv, gToolCategory);
+    CommonOptionsParser op(--argc, argv + 1, gToolCategory);
     ClangTool tool(op.getCompilations(), op.getSourcePathList());
 
-    ClassFinder classFinder;
+    ClassFinder classFinder(argv[1]);
     MatchFinder finder;
 
     DeclarationMatcher classMatcher = cxxRecordDecl(decl().bind("id"), hasAttr(attr::Annotate));
