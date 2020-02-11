@@ -1,14 +1,20 @@
 #pragma once
 
 #include "IwEntity.h"
-#include "PrefabComponent.h"
+#include "Archetype.h"
 
 namespace IW {
 namespace ECS {
 	struct Prefab {
 	private:
-		size_t ComponentCount;
-		PrefabComponent Component[];
+		iw::ref<Archetype> m_archetype;
+		void* m_componentData;
+		size_t m_componentCount;
+
+	public:
+		Prefab() {
+
+		}
 	};
 
 }

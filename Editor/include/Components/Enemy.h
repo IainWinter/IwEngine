@@ -1,14 +1,16 @@
 #pragma once
 
-enum EnemyType {
+#include "iw/reflection/Reflect.h"
+
+enum REFLECT EnemyType {
 	SPIN
 };
 
-struct Enemy {
-	EnemyType Type;
-	float Speed;
-	float FireTime;
-	float CooldownTime;
+struct REFLECT Enemy {
+	REFLECT EnemyType Type;
+	REFLECT float Speed;
+	REFLECT float FireTime;
+	REFLECT float CooldownTime;
 	float Timer;
 	float Rotation;
 	bool  HasShot;

@@ -1,12 +1,13 @@
 #pragma once
 
 #include "Enemy.h"
-#include "iw/math/vector3.h"
-#include "iw/graphics/Model.h"
+#include "iw/math/vector2.h"
+//#include "iw/graphics/Model.h"
 #include <vector>
 
-struct Level {
-	std::vector<Enemy> Enemies;
-	std::vector<iw::vector3> Positions;
-	IW::Model level;
+struct REFLECT Level {
+	REFLECT std::vector<Enemy>       Enemies;
+	REFLECT std::vector<iw::vector2> Positions;
+	REFLECT std::string StageName;
+	//IW::Model Stage;
 };

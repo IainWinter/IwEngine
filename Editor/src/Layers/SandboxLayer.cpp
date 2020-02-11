@@ -17,31 +17,13 @@
 #include "iw/input/Devices/Mouse.h"
 #include "imgui/imgui.h"
 
-
+#include "iw/reflection/reflect/std/string.h"
+#include "iw/reflection/reflect/std/vector.h"
 #include "iw/reflect/math/vector2.h"
-#include "iw/reflect/math/vector3.h"
-#include "iw/reflect/math/matrix2.h"
+#include "iw/reflect/Components/Enemy.h"
+#include "iw/reflect/Components/Level.h"
 
-#include "iw/util/io/bytestream.h"
-
-#include <vector>
-
-struct test {
-	iw::vector2 Pos2;
-	iw::vector3 Pos3;
-};
-
-namespace iw {
-	namespace detail {
-		template<>
-		const Class* GetClass(ClassTag<test>) {
-			static Class c = Class("test", 20, 2);
-			c.fields[0] = { "Pos2", iw::GetClass<iw::vector2>(), 0 };
-			c.fields[1] = { "Pos3", iw::GetClass<iw::vector3>(), 8 };
-			return &c;
-		}
-	}
-}
+#include "iw/util/serialization/JsonSerializer.h"
 
 namespace IW {
 	struct ModelUBO {
@@ -71,39 +53,17 @@ namespace IW {
 	iw::ref<Model> tetrahedron;
 
 	int SandboxLayer::Initialize() {
-		iw::bytestream bs;
-		
-		std::vector<int> intsout;
+		Level level;
+		//level.Enemies.push_back(Enemy { SPIN, 1.02f, .15f, 1.0f });
+		//level.Enemies.push_back(Enemy { SPIN, 0.2617993f, .12f, 0.0f });
+		//level.Positions.push_back(0);
+		//level.Positions.push_back(1);
+		//level.StageName = "models/grass/grass.obj";
 
-		intsout.push_back(1);
-		intsout.push_back(2);
-		intsout.push_back(3);
-		intsout.push_back(4);
-		intsout.push_back(5);
-
-		iw::Serialize(bs, intsout);
-
-		std::vector<int> intsin;
-		iw::Deserialize(bs, intsin);
-
-
-		iw::matrix2 min = iw::matrix2::create_scale(1, 2);
-		iw::Serialize(bs, min);
-
-		iw::matrix2 mout;
-		iw::Deserialize(bs, mout);
-
-		test out {
-			iw::vector2(1.1f, 2.2f),
-			iw::vector3(1.1f, 2.2f, 3.3f)
-		};
-
-		iw::Serialize(bs, out);
-		
-		test in;
-		iw::Deserialize(bs, in);
-
-		// Font
+		{
+			iw::Serializer byte("test.bin");
+			byte.Read(level);
+		}
 
 		font = Asset->Load<Font>("fonts/arial.fnt");
 		font->Initialize(Renderer->Device);
@@ -175,10 +135,10 @@ namespace IW {
 
 		// Models
 
-		iw::ref<Model> level = Asset->Load<Model>("models/grass/grass.obj");
+		iw::ref<Model> stage = Asset->Load<Model>(level.StageName);
 
-		for (size_t i = 0; i < level->MeshCount; i++) {
-			iw::ref<Material>& mat = level->Meshes[i].Material;
+		for (size_t i = 0; i < stage->MeshCount; i++) {
+			iw::ref<Material>& mat = stage->Meshes[i].Material;
 
 			mat->SetShader(shader);
 
@@ -186,17 +146,17 @@ namespace IW {
 
 			mat->Initialize(Renderer->Device);
 
-			level->Meshes[i].SetTangents(0, nullptr);
-			level->Meshes[i].SetBiTangents(0, nullptr);
+			stage->Meshes[i].SetTangents(0, nullptr);
+			stage->Meshes[i].SetBiTangents(0, nullptr);
 
-			level->Meshes[i].Initialize(Renderer->Device);
+			stage->Meshes[i].Initialize(Renderer->Device);
 		}
 
 		auto a = Asset->Load<Texture>("textures/foliage/alpha_mask.jpg");
 		a->Initialize(Renderer->Device);
 
-		level->Meshes[1].Material->SetTexture("alphaMaskMap", a);
-		level->Meshes[2].Material->SetTexture("alphaMaskMap", a);
+		stage->Meshes[1].Material->SetTexture("alphaMaskMap", a);
+		stage->Meshes[2].Material->SetTexture("alphaMaskMap", a);
 
 		Mesh* smesh = MakeUvSphere(25, 30);
 		Mesh* tmesh = MakeTetrahedron(5);
@@ -216,7 +176,7 @@ namespace IW {
 		// Floor
 
 		Entity floor = Space->CreateEntity<Transform, Model, PlaneCollider, Rigidbody>();
-		floor.SetComponent<Model>(*level);
+		floor.SetComponent<Model>(*stage);
 
 		Transform* t     = floor.SetComponent<Transform>    (iw::vector3(0, 0, 0), iw::vector3(5, 3, 5));
 		PlaneCollider* s = floor.SetComponent<PlaneCollider>(iw::vector3::unit_y, 0.0f);
@@ -281,7 +241,7 @@ namespace IW {
 
 		Entity player = Space->CreateEntity<Transform, Model, SphereCollider, Rigidbody, Player>();
 		player.SetComponent<Model> (*sphere);
-		player.SetComponent<Player>(8.0f, .18f, .08f, 10);
+		player.SetComponent<Player>(6.0f, .18f, .08f, 10);
 
 		Transform* tp      = player.SetComponent<Transform>     (iw::vector3(5, 1, 0), iw::vector3(.75f));
 		SphereCollider* sp = player.SetComponent<SphereCollider>(iw::vector3::zero, .75f);
@@ -298,19 +258,21 @@ namespace IW {
 
 		Physics->AddRigidbody(rp);
 
-		Entity enemy = Space->CreateEntity<Transform, Model, SphereCollider, Rigidbody, Enemy>();
-		enemy.SetComponent<Model>(*tetrahedron);
-		enemy.SetComponent<Enemy>(SPIN, 0.2617993f, .12f, 0.0f);
+		for (size_t i = 0; i < level.Enemies.size(); i++) {
+			Entity enemy = Space->CreateEntity<Transform, Model, SphereCollider, Rigidbody, Enemy>();
+			enemy.SetComponent<Model>(*tetrahedron);
+			enemy.SetComponent<Enemy>(level.Enemies[i]);
 
-		Transform* te      = enemy.SetComponent<Transform>     (iw::vector3(0, 1, 0));
-		SphereCollider* se = enemy.SetComponent<SphereCollider>(iw::vector3::zero, 1.0f);
-		Rigidbody* re      = enemy.SetComponent<Rigidbody>     ();
+			Transform* te = enemy.SetComponent<Transform>(iw::vector3(level.Positions[i].x, 0, level.Positions[i].y));
+			SphereCollider* se = enemy.SetComponent<SphereCollider>(iw::vector3::zero, 1.0f);
+			Rigidbody* re = enemy.SetComponent<Rigidbody>();
 
-		re->SetMass(1);
-		re->SetCol(se);
-		re->SetTrans(te);
+			re->SetMass(1);
+			re->SetCol(se);
+			re->SetTrans(te);
 
-		Physics->AddRigidbody(re);
+			Physics->AddRigidbody(re);
+		}
 
 		// Camera
 
@@ -386,6 +348,21 @@ namespace IW {
 		ImGui::SliderFloat3("Text pos",   (float*)&textTransform.Position, -8, 8);
 		ImGui::SliderFloat3("Text scale", (float*)&textTransform.Scale, 0, 10);
 		ImGui::SliderFloat4("Text rot",   (float*)&textTransform.Rotation, 0, 1);
+
+		if (ImGui::Button("Save level")) {
+			iw::Serializer out("test.bin", true);
+			
+			Level level;
+			for (auto entity : Space->Query<Transform, Enemy>()) {
+				auto [transform, enemy] = entity.Components.Tie<EnemySystem::Components>();
+				level.Positions.push_back({ transform->Position.x, transform->Position.z });
+				level.Enemies.push_back(*enemy);
+			}
+
+			level.StageName = "models/grass/grass.obj";
+			
+			out.Write(level);
+		}
 
 		ImGui::End();
 	}
