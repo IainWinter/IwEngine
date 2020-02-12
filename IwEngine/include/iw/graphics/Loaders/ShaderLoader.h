@@ -4,7 +4,7 @@
 #include "iw/graphics/Shader.h"
 #include "iw/asset/AssetLoader.h"
 
-namespace IW {
+namespace iw {
 namespace Graphics {
 	class ShaderLoader
 		: public AssetLoader<Shader>

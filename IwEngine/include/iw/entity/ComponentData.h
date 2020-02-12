@@ -2,7 +2,7 @@
 
 #include "IwEntity.h"
 
-namespace IW {
+namespace iw {
 namespace ECS {
 	struct ComponentData {
 		void* Components[];

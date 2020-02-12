@@ -2,11 +2,13 @@
 #include "gl/glew.h"
 #include <cstring>
 
-namespace IW {
+namespace iw {
+namespace RenderAPI {
 	GLUniformBuffer::GLUniformBuffer(
 		const void* data,
 		size_t size,
 		BufferIOType io)
 		: GLBuffer(UNIFORM, io, data, size)
 	{}
+}
 }

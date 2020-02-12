@@ -2,7 +2,8 @@
 #include "iw/renderer/Platform/OpenGL/GLTexture.h"
 #include "gl/glew.h"
 
-namespace IW {
+namespace iw {
+namespace RenderAPI {
 	GLPipelineParam::GLPipelineParam(
 		unsigned location,
 		unsigned& textureCount,
@@ -228,4 +229,5 @@ namespace IW {
 			glBindTexture(GL_TEXTURE_2D, 0); // this is prob the way to do it cus you cant call unbind a nullptr
 		}
 	}
+}
 }

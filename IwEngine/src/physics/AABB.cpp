@@ -1,6 +1,6 @@
 #include "iw/physics/AABB.h"
 
-namespace IW {
+namespace iw {
 namespace Physics {
 	template<>
 	inline bool AABB2::Intersects(

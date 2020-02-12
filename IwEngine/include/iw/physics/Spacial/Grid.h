@@ -4,7 +4,7 @@
 #include <vector>
 #include <unordered_map>
 
-namespace IW {
+namespace iw {
 namespace Physics {
 	template<
 		typename T,

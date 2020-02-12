@@ -6,7 +6,7 @@
 #include "iw/util/async/potential.h"
 #include <queue>
 
-namespace IW {
+namespace iw {
 namespace Graphics {
 	using PIB = iw::potential<IIndexBuffer*>;
 	using PVB = iw::potential<IVertexBuffer*>;

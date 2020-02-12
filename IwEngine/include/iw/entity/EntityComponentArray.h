@@ -4,7 +4,7 @@
 #include "ChunkList.h"
 #include <vector>
 
-namespace IW {
+namespace iw {
 namespace ECS {
 	class EntityComponentArray {
 	public:

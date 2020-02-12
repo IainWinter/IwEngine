@@ -1,6 +1,7 @@
 #include "iw/input/Context.h"
 
-namespace IW {
+namespace iw {
+namespace Input {
 	Context::Context(
 		std::string name, 
 		float width, 
@@ -31,4 +32,5 @@ namespace IW {
 	{
 		m_commands[input] = command;
 	}
+}
 }

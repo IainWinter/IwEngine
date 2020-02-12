@@ -3,7 +3,7 @@
 #include "iw/engine/Layer.h"
 #include "imgui/imgui.h"
 
-namespace IW {
+namespace iw {
 namespace Engine {
 	class ImGuiLayer
 		: public Layer

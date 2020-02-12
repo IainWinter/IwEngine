@@ -10,7 +10,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace IW {
+namespace iw {
 namespace Graphics {
 	//class RenderTargetBuilder {
 	//private:

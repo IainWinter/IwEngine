@@ -2,7 +2,7 @@
 
 #include "iw/renderer/ComputeShader.h"
 
-namespace IW {
+namespace iw {
 namespace RenderAPI {
 	class GLComputeShader
 		: public IComputeShader

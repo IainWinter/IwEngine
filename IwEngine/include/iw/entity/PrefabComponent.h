@@ -3,7 +3,7 @@
 #include "IwEntity.h"
 #include "Component.h"
 
-namespace IW {
+namespace iw {
 namespace ECS {
 	struct PrefabComponent {
 	private:

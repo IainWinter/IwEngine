@@ -3,6 +3,7 @@
 #include "Serializer.h"
 
 namespace iw {
+namespace Reflect {
 	// WIP
 	class JsonSerializer
 		: public Serializer
@@ -63,7 +64,7 @@ namespace iw {
 			const void* value,
 			size_t count) override
 		{
-			if (type->type == CHAR) {
+			if (type->type == IntegralType::CHAR) {
 				m_stream->put('"');
 				Write((char*)value, count);
 				m_stream->put('"');
@@ -91,24 +92,27 @@ namespace iw {
 		{
 			std::string str;
 			switch (type->type) {
-				case BOOL:               str = std::to_string(*(bool*)              value); break;
-				case CHAR:               str = std::to_string(*(char*)              value); break;
-				case SHORT:              str = std::to_string(*(short*)             value); break;
-				case INT:                str = std::to_string(*(int*)               value); break;
-				case LONG:               str = std::to_string(*(long*)              value); break;
-				case FLOAT:              str = std::to_string(*(float*)             value); break;
-				case DOUBLE:             str = std::to_string(*(double*)            value); break;
-				case LONG_LONG:          str = std::to_string(*(long long*)         value); break;
-				case LONG_DOUBLE:        str = std::to_string(*(long double*)       value); break;
-				case UNSIGNED_CHAR:      str = std::to_string(*(unsigned char*)     value); break;
-				case UNSIGNED_SHORT:     str = std::to_string(*(unsigned short*)    value); break;
-				case UNSIGNED_INT:       str = std::to_string(*(unsigned int*)      value); break;
-				case UNSIGNED_LONG:      str = std::to_string(*(unsigned long*)     value); break;
-				case UNSIGNED_LONG_LONG: str = std::to_string(*(unsigned long long*)value); break;
+				case IntegralType::BOOL:               str = std::to_string(*(bool*)              value); break;
+				case IntegralType::CHAR:               str = std::to_string(*(char*)              value); break;
+				case IntegralType::SHORT:              str = std::to_string(*(short*)             value); break;
+				case IntegralType::INT:                str = std::to_string(*(int*)               value); break;
+				case IntegralType::LONG:               str = std::to_string(*(long*)              value); break;
+				case IntegralType::FLOAT:              str = std::to_string(*(float*)             value); break;
+				case IntegralType::DOUBLE:             str = std::to_string(*(double*)            value); break;
+				case IntegralType::LONG_LONG:          str = std::to_string(*(long long*)         value); break;
+				case IntegralType::LONG_DOUBLE:        str = std::to_string(*(long double*)       value); break;
+				case IntegralType::UNSIGNED_CHAR:      str = std::to_string(*(unsigned char*)     value); break;
+				case IntegralType::UNSIGNED_SHORT:     str = std::to_string(*(unsigned short*)    value); break;
+				case IntegralType::UNSIGNED_INT:       str = std::to_string(*(unsigned int*)      value); break;
+				case IntegralType::UNSIGNED_LONG:      str = std::to_string(*(unsigned long*)     value); break;
+				case IntegralType::UNSIGNED_LONG_LONG: str = std::to_string(*(unsigned long long*)value); break;
 			}
 
 			Write(str.c_str(), str.length());
 		}
 		
 	};
+}
+
+	using namespace Reflect;
 }

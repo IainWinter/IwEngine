@@ -1,6 +1,7 @@
 #include "iw/engine/Layer.h"
 
-namespace IW {
+namespace iw {
+namespace Engine {
 	Layer::Layer(
 		const char* name)
 		: m_name(name)
@@ -90,8 +91,8 @@ namespace IW {
 	}
 
 	void Layer::SetApplicationVars(
-		iw::ref<IW::Space> space,
-		iw::ref<IW::Renderer> renderer,
+		iw::ref<iw::Space> space,
+		iw::ref<iw::Renderer> renderer,
 		iw::ref<AssetManager> asset,
 		iw::ref<DynamicsSpace> physics,
 		iw::ref<iw::eventbus> bus)
@@ -102,4 +103,5 @@ namespace IW {
 		Physics  = physics;
 		Bus      = bus;
 	}
+}
 }

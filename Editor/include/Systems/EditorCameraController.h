@@ -3,7 +3,7 @@
 #include "iw/engine/System.h"
 #include "iw/engine/Components/CameraController.h"
 
-namespace IW {
+namespace iw {
 inline namespace Editor {
 	class EditorCameraController
 		: public System<Transform, CameraController>

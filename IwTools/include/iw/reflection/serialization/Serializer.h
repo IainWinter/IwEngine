@@ -6,6 +6,7 @@
 #include <fstream>
 
 namespace iw {
+namespace Reflect {
 	class Serializer {
 	protected:
 		std::iostream* m_stream;
@@ -137,7 +138,7 @@ namespace iw {
 			const void* value,
 			size_t count)
 		{
-			if (type->type == CHAR) {
+			if (type->type == IntegralType::CHAR) {
 				Write((char*)value, count);
 				m_stream->put('\0');
 			}
@@ -215,7 +216,7 @@ namespace iw {
 			void* value,
 			size_t count)
 		{
-			if (type->type == CHAR) {
+			if (type->type == IntegralType::CHAR) {
 				Read((char*)value, count);
 				m_stream->get(); // remove null char
 			}
@@ -257,17 +258,5 @@ namespace iw {
 	};
 }
 
-// {
-// "pos": {
-//   "x" 1,
-//   "y": 2
-// }
-// "arr": [1, 2, 3, 4]
-//
-//
-//
-//
-// }
-//
-//
-
+	using namespace Reflect;
+}

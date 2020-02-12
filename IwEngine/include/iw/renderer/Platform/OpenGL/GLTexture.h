@@ -3,7 +3,7 @@
 #include "GLVertexBuffer.h"
 #include "iw/renderer/Texture.h"
 
-namespace IW {
+namespace iw {
 namespace RenderAPI {
 	class GLTexture
 		: public ITexture

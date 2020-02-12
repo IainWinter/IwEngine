@@ -4,7 +4,8 @@
 #include <Windows.h>
 #endif
 
-namespace IW {
+namespace iw {
+namespace Input {
 	Translation KeyboardBase::translation = CreateTranslation();
 
 	InputName KeyboardBase::Translate(
@@ -213,4 +214,5 @@ namespace IW {
 		return translation;
 	}
 
+}
 }

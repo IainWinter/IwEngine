@@ -6,7 +6,7 @@
 #include "iw/util/memory/ref.h"
 #include <vector>
 
-namespace IW {
+namespace iw {
 namespace Graphics {
 	enum class ShaderType {
 		VERTEX,

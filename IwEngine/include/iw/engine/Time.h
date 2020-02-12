@@ -3,7 +3,7 @@
 #include "Core.h"
 #include <chrono>
 
-namespace IW {
+namespace iw {
 namespace Time {
 	using TimePoint = std::chrono::time_point<std::chrono::steady_clock>;
 	using Duration  = std::chrono::high_resolution_clock::duration;

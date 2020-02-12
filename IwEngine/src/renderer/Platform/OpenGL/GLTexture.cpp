@@ -40,7 +40,8 @@ bool MessageCallback(
 	#define GL(stmt) stmt
 #endif
 
-namespace IW {
+namespace iw {
+namespace RenderAPI {
 	GLTexture::GLTexture(
 		int width,
 		int height,
@@ -145,4 +146,5 @@ namespace IW {
 	TextureFormatType GLTexture::Type() const {
 		return m_type;
 	}
+}
 }

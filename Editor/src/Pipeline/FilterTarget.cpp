@@ -1,6 +1,6 @@
 #include "Pipeline/FilterTarget.h"
 
-namespace IW {
+namespace iw {
 	FilterTarget::FilterTarget(
 		iw::ref<Renderer> r)
 		: iw::node(4, 1)

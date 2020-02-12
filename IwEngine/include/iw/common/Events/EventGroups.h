@@ -2,7 +2,7 @@
 
 #include "iw/util/enum/val.h"
 
-namespace IW {
+namespace iw {
 namespace Engine {
 	enum class EventGroup
 		: short

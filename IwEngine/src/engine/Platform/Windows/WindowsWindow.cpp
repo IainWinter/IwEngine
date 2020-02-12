@@ -34,7 +34,8 @@ void GLAPIENTRY MessageCallback(
 	}
 }
 
-namespace IW {
+namespace iw {
+namespace Engine {
 	IWindow* IWindow::Create() {
 		return new WindowsWindow();
 	}
@@ -295,12 +296,13 @@ namespace IW {
 				Bus->push<WindowEvent>(Destroyed, Id());
 				break;
 			default:
-				//Bus->push(iw::event(IW::NOT_HANDLED, 0));
+				//Bus->push(iw::event(iw::NOT_HANDLED, 0));
 				return DefWindowProc(hwnd, msg, wParam, lParam);
 		}
 
 		return 0;
 	}
+}
 }
 
 ATOM RegClass(

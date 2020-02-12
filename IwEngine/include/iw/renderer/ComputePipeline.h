@@ -2,7 +2,7 @@
 
 #include "Pipeline.h"
 
-namespace IW {
+namespace iw {
 namespace RenderAPI {
 	class IComputePipeline {
 	public:

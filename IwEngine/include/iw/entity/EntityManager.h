@@ -6,7 +6,7 @@
 #include <vector>
 #include <queue>
 
-namespace IW {
+namespace iw {
 namespace ECS {
 	class EntityManager {
 	private:

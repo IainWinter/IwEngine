@@ -2,7 +2,7 @@
 
 #include "iw/math/vector3.h"
 
-namespace IW {
+namespace iw {
 namespace Graphics {
 	struct Vertex {
 		iw::vector3 Vertex;

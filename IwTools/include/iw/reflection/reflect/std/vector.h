@@ -4,6 +4,7 @@
 #include <vector>
 
 namespace iw {
+namespace Reflect {
 namespace detail {
 	template<
 		typename _t>
@@ -31,5 +32,6 @@ namespace detail {
 		};
 		return &c;
 	}
+}
 }
 }

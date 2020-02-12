@@ -4,7 +4,7 @@
 #include "iw/input/InputState.h"
 #include "iw/events/event.h"
 
-namespace IW {
+namespace iw {
 namespace Engine {
 	enum class InputEventType
 		: short

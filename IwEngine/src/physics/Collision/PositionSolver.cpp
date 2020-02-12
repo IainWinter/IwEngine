@@ -1,6 +1,7 @@
 #include "iw/physics/Collision/PositionSolver.h"
 
-namespace IW {
+namespace iw {
+namespace Physics {
 	void PositionSolver::Solve(
 		std::vector<CollisionObject*>& bodies,
 		std::vector<Manifold>& manifolds,
@@ -28,4 +29,5 @@ namespace IW {
 			}
 		}
 	}
+}
 }

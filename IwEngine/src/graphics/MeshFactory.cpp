@@ -3,7 +3,7 @@
 #define ICO_X .525731112119133606f
 #define ICO_Z .850650808352039932f
 
-namespace IW {
+namespace iw {
 namespace Graphics {
 	// Icosphere
 
@@ -54,9 +54,9 @@ namespace Graphics {
 	static const unsigned TriIndexCount = 12;
 
 	static const iw::vector3 TriVerts[] = {
-		iw::vector3(cos(iw::PI2 * 0 / 3), -1, sin(iw::PI2 * 0 / 3)),
-		iw::vector3(cos(iw::PI2 * 1 / 3), -1, sin(iw::PI2 * 1 / 3)),
-		iw::vector3(cos(iw::PI2 * 2 / 3), -1, sin(iw::PI2 * 2 / 3)),
+		iw::vector3(cos(iw::Pi2 * 0 / 3), -1, sin(iw::Pi2 * 0 / 3)),
+		iw::vector3(cos(iw::Pi2 * 1 / 3), -1, sin(iw::Pi2 * 1 / 3)),
+		iw::vector3(cos(iw::Pi2 * 2 / 3), -1, sin(iw::Pi2 * 2 / 3)),
 		iw::vector3(0, 1, 0),
 	};
 
@@ -115,13 +115,13 @@ namespace Graphics {
 
 		// Verts
 
-		float lonStep = iw::PI2 / lonCount;
-		float latStep = iw::PI  / latCount;
+		float lonStep = iw::Pi2 / lonCount;
+		float latStep = iw::Pi  / latCount;
 
 		size_t vert = 0;
 		for (unsigned lat = 0; lat <= latCount; lat++) {
 			for (unsigned lon = 0; lon <= lonCount; lon++) {
-				float y = sin(-iw::PI / 2 + lat * latStep);
+				float y = sin(-iw::Pi / 2 + lat * latStep);
 				float x = cos(lon * lonStep) * sin(lat * latStep);
 				float z = sin(lon * lonStep) * sin(lat * latStep);
 

@@ -7,7 +7,8 @@
 #include <assert.h>
 #include <memory>
 
-namespace IW {
+namespace iw {
+namespace ECS {
 	ComponentManager::ComponentManager()
 		: m_chunkPool(m_chunkSize)
 		, m_componentPool(512)
@@ -210,4 +211,5 @@ namespace IW {
 
 		return itr->second;
 	}
+}
 }

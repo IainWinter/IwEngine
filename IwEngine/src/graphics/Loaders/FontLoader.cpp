@@ -3,7 +3,8 @@
 
 #undef UNICODE
 
-namespace IW {
+namespace iw {
+namespace Graphics {
 	FontLoader::FontLoader(
 		AssetManager& asset)
 		: AssetLoader(asset)
@@ -577,4 +578,5 @@ namespace IW {
 
 		return builder.Build();
 	}
+}
 }

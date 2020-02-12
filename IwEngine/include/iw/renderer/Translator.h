@@ -3,7 +3,7 @@
 #include "IwRenderer.h"
 #include "iw/renderer/PipelineParamType.h"
 
-namespace IW {
+namespace iw {
 namespace RenderAPI {
 	template<
 		typename _i,

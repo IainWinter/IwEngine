@@ -4,7 +4,8 @@
 #include "iw/entity/Entity.h"
 #include <assert.h>
 
-namespace IW {
+namespace iw {
+namespace ECS {
 	iw::ref<Component>& Space::RegisterComponent(
 		ComponentType type,
 		size_t size)
@@ -146,4 +147,5 @@ namespace IW {
 		entityData->ChunkIndex = m_componentManager.MoveComponentData(entityData, archetype);
 		entityData->Archetype = archetype;
 	}
+}
 }

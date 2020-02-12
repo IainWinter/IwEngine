@@ -9,7 +9,8 @@
 #include <vector>
 
 #include "assimp/pbrmaterial.h"
-namespace IW {
+namespace iw {
+namespace Graphics {
 	void LoadTexture(
 		AssetManager& asset,
 		Material& material,
@@ -231,4 +232,5 @@ namespace IW {
 			}
 		}
 	}
+}
 }

@@ -1,7 +1,8 @@
 #include "iw/graphics/Loaders/ShaderLoader.h"
 #include "iw/util/io/File.h"
 
-namespace IW {
+namespace iw {
+namespace Graphics {
 	ShaderLoader::ShaderLoader(
 		AssetManager& asset)
 		: AssetLoader(asset)
@@ -50,4 +51,5 @@ namespace IW {
 
 		return shader;
 	}
+}
 }

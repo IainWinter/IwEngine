@@ -4,7 +4,7 @@
 #include "Camera.h"
 #include "RenderTarget.h"
 
-namespace IW {
+namespace iw {
 namespace Graphics {
 	struct Light {
 	private:
@@ -14,7 +14,7 @@ namespace Graphics {
 		// Filter
 		//iw::ref<Shader> m_null;
 		//iw::ref<Shader> m_post;
-		//iw::ref<IW::RenderTarget> m_postTarget;
+		//iw::ref<iw::RenderTarget> m_postTarget;
 
 	public:
 		IWGRAPHICS_API

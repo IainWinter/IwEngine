@@ -4,7 +4,7 @@
 #include "Texture.h"
 #include <vector>
 
-namespace IW {
+namespace iw {
 namespace Graphics {
 	struct TexBounds {
 		int X;

@@ -2,7 +2,7 @@
 
 #include "iw/engine/Events/ActionEvents.h"
 
-namespace IW {
+namespace iw {
 	enum class Actions
 		: int
 	{

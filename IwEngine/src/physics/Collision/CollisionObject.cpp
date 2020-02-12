@@ -1,6 +1,7 @@
 #include "iw/physics/Collision/CollisionObject.h"
 
-namespace IW {
+namespace iw {
+namespace Physics {
 	CollisionObject::CollisionObject()
 		: m_transform(nullptr)
 		, m_collider(nullptr)
@@ -44,4 +45,5 @@ namespace IW {
 	{
 		m_isTrigger = isTrigger;
 	}
+}
 }

@@ -1,7 +1,7 @@
 #include "iw/renderer/Platform/OpenGL/GLTranslator.h"
 #include "iw/util/enum/val.h"
 
-namespace IW {
+namespace iw {
 namespace RenderAPI {
 	Translator<GLint, GLenum>& Translator<GLint, GLenum>::Instance() {
 		static GLTranslator translator;

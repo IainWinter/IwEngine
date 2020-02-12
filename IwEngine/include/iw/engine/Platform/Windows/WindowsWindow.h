@@ -4,7 +4,7 @@
 #include "iw/input/InputState.h"
 #include <Windows.h>
 
-namespace IW {
+namespace iw {
 namespace Engine {
 	class WindowsWindow
 		: public Window

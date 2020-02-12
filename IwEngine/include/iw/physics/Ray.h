@@ -3,7 +3,7 @@
 #include "IwPhysics.h"
 #include "ITransformable.h"
 
-namespace IW {
+namespace iw {
 namespace Physics {
 namespace impl {
 	template<
@@ -25,7 +25,7 @@ namespace impl {
 		{}
 
 		void Transform(
-			const IW::Transform& transform) override;
+			const iw::Transform& transform) override;
 
 		//inline float Angle() const {
 		//	return A.dot(B) / (A.length() * B.length());

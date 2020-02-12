@@ -4,7 +4,7 @@
 #include "EntityHandle.h"
 #include "Archetype.h"
 
-namespace IW {
+namespace iw {
 namespace ECS {
 	struct EntityData {
 		EntityHandle Entity;

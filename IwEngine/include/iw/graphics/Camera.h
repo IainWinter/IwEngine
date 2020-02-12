@@ -3,7 +3,7 @@
 #include "IwGraphics.h"
 #include "iw/math/matrix4.h"
 
-namespace IW {
+namespace iw {
 namespace Graphics {
 	class IWGRAPHICS_API Camera {
 	public:

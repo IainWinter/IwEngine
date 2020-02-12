@@ -1,7 +1,8 @@
 #include "iw/engine/Console.h"
 #include <sstream>
 
-namespace IW {
+namespace iw {
+namespace Engine {
 	Console::Console(
 		const HandlerFunc& handler)
 		: m_handler(handler)
@@ -142,4 +143,5 @@ namespace IW {
 	{
 		return Token();
 	}
+}
 }

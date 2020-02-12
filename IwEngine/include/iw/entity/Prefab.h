@@ -3,7 +3,7 @@
 #include "IwEntity.h"
 #include "Archetype.h"
 
-namespace IW {
+namespace iw {
 namespace ECS {
 	struct Prefab {
 		iw::ref<Archetype> m_archetype;

@@ -4,7 +4,7 @@
 #include "Component.h"
 #include <memory>
 
-namespace IW {
+namespace iw {
 namespace ECS {
 	struct ArchetypeLayout {
 		iw::ref<Component> Component;

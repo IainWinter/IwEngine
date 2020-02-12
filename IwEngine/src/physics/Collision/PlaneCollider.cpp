@@ -2,7 +2,8 @@
 #include "iw/physics/Collision/SphereCollider.h"
 #include "iw/physics/Collision/algo/ManifoldFactory.h"
 
-namespace IW {
+namespace iw {
+namespace Physics {
 	template<>
 	ManifoldPoints PlaneCollider::TestCollision(
 		const Transform* transform,
@@ -22,4 +23,5 @@ namespace IW {
 		return {}; /*algo::FindPlanePlaneMaifoldPoints(
 			this, transform, plane, planeTransform);*/
 	}
+}
 }

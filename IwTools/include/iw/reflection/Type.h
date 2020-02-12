@@ -6,12 +6,13 @@
 // Doesn't support pointers
 
 namespace iw {
+namespace Reflect {
 	struct Type;
 	struct Class;
 	struct Field;
 	class Serializer;
 
-	enum IntegralType {
+	enum class IntegralType {
 		NOT_INTEGRAL,
 		BOOL,
 		CHAR,
@@ -75,7 +76,7 @@ namespace iw {
 			const char* name,
 			size_t size,
 			size_t fieldCount)
-			: Type(name, size, NOT_INTEGRAL, true)
+			: Type(name, size, IntegralType::NOT_INTEGRAL, true)
 			, fields(new Field[fieldCount])
 			, fieldCount(fieldCount)
 			, serialize  (nullptr)
@@ -87,7 +88,7 @@ namespace iw {
 			size_t size,
 			size_t fieldCount,
 			size_t arrayCount)
-			: Type(name, size, NOT_INTEGRAL, true, true, arrayCount)
+			: Type(name, size, IntegralType::NOT_INTEGRAL, true, true, arrayCount)
 			, fields(new Field[fieldCount])
 			, fieldCount(fieldCount)
 			, serialize  (nullptr)
@@ -95,4 +96,7 @@ namespace iw {
 		{}
 
 	};
+}
+
+	using namespace Reflect;
 }

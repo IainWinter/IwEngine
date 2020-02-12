@@ -3,7 +3,7 @@
 #include "iw/renderer/IndexBuffer.h"
 #include "GLBuffer.h"
 
-namespace IW {
+namespace iw {
 namespace RenderAPI {
 	class GLIndexBuffer
 		: public IIndexBuffer

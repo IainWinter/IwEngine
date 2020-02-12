@@ -1,7 +1,8 @@
 #include "iw/entity/EntityManager.h"
 #include <assert.h>
 
-namespace IW {
+namespace iw {
+namespace ECS {
 	EntityManager::EntityManager()
 		: m_pool(1024)
 	{}
@@ -73,4 +74,5 @@ namespace IW {
 		while (!m_dead.empty()) m_dead.pop(); // clear pq
 		m_pool.reset();
 	}
+}
 }

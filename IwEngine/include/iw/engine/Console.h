@@ -8,7 +8,7 @@
 #include <string>
 #include <functional>
 
-namespace IW {
+namespace iw {
 namespace Engine {
 	struct Token {
 		size_t Count;

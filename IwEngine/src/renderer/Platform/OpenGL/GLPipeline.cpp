@@ -4,7 +4,8 @@
 #include "iw/renderer/Platform/OpenGL/GLTranslator.h"
 #include "gl/glew.h"
 
-namespace IW {
+namespace iw {
+namespace RenderAPI {
 	GLPipeline::GLPipeline(
 		GLVertexShader* vertexShader,
 		GLFragmentShader* fragmentShader,
@@ -119,4 +120,5 @@ namespace IW {
 		m_textureCount = 0;
 		glUseProgram(gl_id);
 	}
+}
 }

@@ -5,7 +5,8 @@
 #include "iw/common/Events/OSEvents.h"
 #include "iw/common/Platform.h"
 
-namespace IW {
+namespace iw {
+namespace Input {
 	void SetRawInputEventLParam(
 		OsEvent& e);
 
@@ -237,4 +238,5 @@ namespace IW {
 		e.LParam = (LPARAM)lpb;
 	}
 #endif
+}
 }

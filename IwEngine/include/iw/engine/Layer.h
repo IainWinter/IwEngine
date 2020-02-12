@@ -11,7 +11,7 @@
 #include "iw/physics/Dynamics/DynamicsSpace.h"
 #include "iw/events/eventbus.h"
 
-namespace IW {
+namespace iw {
 namespace Engine {
 	class Application;
 
@@ -143,8 +143,8 @@ namespace Engine {
 
 		IWENTITY_API
 		void SetApplicationVars(
-			iw::ref<IW::Space> space,
-			iw::ref<IW::Renderer> renderer,
+			iw::ref<iw::Space> space,
+			iw::ref<iw::Renderer> renderer,
 			iw::ref<AssetManager> asset,
 			iw::ref<DynamicsSpace> physics,
 			iw::ref<iw::eventbus> bus);

@@ -6,7 +6,7 @@
 #include "EntityManager.h"
 #include "iw/log/logger.h"
 
-namespace IW {
+namespace iw {
 namespace ECS {
 	struct Entity;
 

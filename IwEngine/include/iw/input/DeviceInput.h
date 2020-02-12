@@ -3,7 +3,7 @@
 #include "iwinput.h"
 #include <string>
 
-namespace IW {
+namespace iw {
 namespace Input {
 	struct DeviceInput {
 		DeviceType Device;

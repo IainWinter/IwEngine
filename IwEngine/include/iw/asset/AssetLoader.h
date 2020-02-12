@@ -8,7 +8,7 @@
 #include <unordered_map>
 #include <assert.h>
 
-namespace IW {
+namespace iw {
 namespace Asset {
 	template<
 		typename _a>

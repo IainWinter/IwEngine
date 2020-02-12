@@ -2,7 +2,7 @@
 
 #include "iw/physics/IwPhysics.h"
 
-namespace IW {
+namespace iw {
 namespace Physics {
 	struct ManifoldPoints {
 		iw::vector3 A;

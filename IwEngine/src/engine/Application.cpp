@@ -13,21 +13,22 @@
 //#include "iw/physics/Events/CollisionEvents.h"
 #include <atomic>
 
-namespace IW {
+namespace iw {
+namespace Engine {
 	Application::Application()
 		: m_running(false)
 		, m_window(IWindow::Create())
 	{
 		m_device = iw::ref<IDevice>(IDevice::Create());
-		Renderer = std::make_shared<IW::Renderer>(m_device);
+		Renderer = std::make_shared<iw::Renderer>(m_device);
 
 		Bus   = std::make_shared<iw::eventbus>();
 		Input = std::make_shared<InputManager>(Bus);
 
-		Console = std::make_shared<IW::Console>(iw::make_getback(&Application::HandleCommand, this));
+		Console = std::make_shared<iw::Console>(iw::make_getback(&Application::HandleCommand, this));
 
 		Physics = std::make_shared<DynamicsSpace>();
-		Space = std::make_shared<IW::Space>();
+		Space = std::make_shared<iw::Space>();
 		Asset = std::make_shared<AssetManager>();
 
 		PushOverlay<ImGuiLayer>();
@@ -284,4 +285,5 @@ namespace IW {
 			manifold.PenetrationDepth, 
 			dt);
 	}
+}
 }

@@ -4,7 +4,7 @@
 #include "EntityHandle.h"
 #include "ComponentData.h"
 
-namespace IW {
+namespace iw {
 namespace ECS {
 	struct EntityComponentData {
 		size_t& Index;

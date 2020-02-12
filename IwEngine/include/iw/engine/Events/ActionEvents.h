@@ -3,7 +3,7 @@
 #include "iw/events/event.h"
 #include "iw/common/Events/EventGroups.h"
 
-namespace IW {
+namespace iw {
 namespace Engine {
 	enum class ActionEventType
 		: short

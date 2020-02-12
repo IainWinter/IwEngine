@@ -8,7 +8,7 @@
 #define IW_PLATFORM_MIN 1
 #include "iw/common/Platform.h"
 
-namespace IW {
+namespace iw {
 namespace Engine {
 	enum class OsEventType
 		: short

@@ -276,6 +276,7 @@ void ClassFinder::onEndOfTranslationUnit() {
             OUT <<
                 "#include \"" << c->FilePath() << "\""        "\n\n"
                 "namespace iw {"                              "\n"
+                "namespace Reflect {"                              "\n"
                 "namespace detail {"                          "\n";
         }
 
@@ -296,7 +297,7 @@ void ClassFinder::onEndOfTranslationUnit() {
         }
 
         if (!c->IsSubClass()) {
-            OUT << "}\n}\n";
+            OUT << "}\n}\n}\n";
         }
 
         delete c;

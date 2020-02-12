@@ -5,7 +5,8 @@
 #include "imgui/imgui.h"
 #include <gl\glew.h>
 
-namespace IW {
+namespace iw {
+namespace Engine {
 	DebugLayer::DebugLayer()
 		: Layer("Debug")
 	{}
@@ -97,4 +98,5 @@ namespace IW {
 		logs.push_back(log.str());
 		return false;
 	}
+}
 }

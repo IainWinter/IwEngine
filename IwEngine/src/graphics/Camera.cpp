@@ -1,6 +1,7 @@
 #include "iw/graphics/Camera.h"
 
-namespace IW {
+namespace iw {
+namespace Graphics {
 	Camera::Camera()
 		: Position(iw::vector3::zero)
 		, Rotation(iw::quaternion::identity) 
@@ -104,4 +105,5 @@ namespace IW {
 	{
 		m_projection = iw::matrix4::create_perspective_field_of_view(fov, aspect, zNear, zFar);
 	}
+}
 }

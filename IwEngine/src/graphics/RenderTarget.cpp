@@ -1,7 +1,8 @@
 #include "iw/graphics/RenderTarget.h"
 #include <assert.h>
 
-namespace IW {
+namespace iw {
+namespace Graphics {
 	RenderTarget::RenderTarget(
 		int width,
 		int height)
@@ -51,4 +52,5 @@ namespace IW {
 	IFrameBuffer* RenderTarget::Handle() const {
 		return m_handle;
 	}
+}
 }

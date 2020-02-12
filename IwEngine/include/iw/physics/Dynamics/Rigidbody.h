@@ -3,7 +3,7 @@
 #include "iw/physics/Collision/CollisionObject.h"
 #include "iw/common/Components/Transform.h"
 
-namespace IW {
+namespace iw {
 namespace Physics {
 	class Rigidbody
 		: public CollisionObject

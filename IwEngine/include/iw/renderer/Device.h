@@ -15,7 +15,7 @@
 #include "Texture.h"
 #include "FrameBuffer.h"
 
-namespace IW {
+namespace iw {
 namespace RenderAPI {
 	class IDevice {
 	public:

@@ -1,6 +1,7 @@
 #include "iw/common/Components/Transform.h"
 
-namespace IW {
+namespace iw {
+namespace Engine {
 	iw::matrix4 Transform::Transformation() const {
 		return iw::matrix4::create_from_quaternion(Rotation)
 			* iw::matrix4::create_scale(Scale)
@@ -18,4 +19,5 @@ namespace IW {
 	iw::vector3 Transform::Up() const {
 		return iw::vector3::unit_y * Rotation;
 	}
+}
 }

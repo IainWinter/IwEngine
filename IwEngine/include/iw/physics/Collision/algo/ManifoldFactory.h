@@ -6,7 +6,7 @@
 #include "iw/physics/Collision/PlaneCollider.h"
 #include "iw/physics/Collision/Manifold.h"
 
-namespace IW {
+namespace iw {
 namespace Physics {
 namespace algo {
 	IWPHYSICS_API

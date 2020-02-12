@@ -3,7 +3,7 @@
 #include "iw/events/event.h"
 #include <vector>
 
-namespace IW {
+namespace iw {
 namespace Engine {
 	// T needs to have a 'const char* Name()' function
 	// and bool 'On(Event&)' functions for every event

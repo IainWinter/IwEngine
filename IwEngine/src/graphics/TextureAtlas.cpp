@@ -1,6 +1,6 @@
 #include "iw/graphics/TextureAtlas.h"
 
-namespace IW {
+namespace iw {
 namespace Graphics {
 	TextureAtlas::TextureAtlas()
 		: Texture()

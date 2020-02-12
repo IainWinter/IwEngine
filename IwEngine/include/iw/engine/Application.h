@@ -17,7 +17,7 @@
 #include <vector>
 #include <thread>
 
-namespace IW {
+namespace iw {
 namespace Engine {
 	class Application {
 	private:
@@ -149,5 +149,5 @@ namespace Engine {
 	using namespace Engine;
 }
 
-IW::Application* CreateApplication(
-	IW::InitOptions& options);
+iw::Application* CreateApplication(
+	iw::InitOptions& options);

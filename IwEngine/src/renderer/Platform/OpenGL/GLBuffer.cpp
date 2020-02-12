@@ -2,7 +2,8 @@
 #include "iw/renderer/Platform/OpenGL/GLTranslator.h"
 #include "gl/glew.h"
 
-namespace IW {
+namespace iw {
+namespace RenderAPI {
 	GLBuffer::GLBuffer(
 		BufferType type,
 		BufferIOType io,
@@ -61,4 +62,5 @@ namespace IW {
 	unsigned GLBuffer::Id() const {
 		return gl_id;
 	}
+}
 }

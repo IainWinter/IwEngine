@@ -3,7 +3,7 @@
 #include "GLTexture.h"
 #include "iw/renderer/FrameBuffer.h"
 
-namespace IW {
+namespace iw {
 namespace RenderAPI {
 	class GLFrameBuffer
 		: public IFrameBuffer

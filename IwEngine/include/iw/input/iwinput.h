@@ -11,7 +11,7 @@
 #define NO_WIDTH  -1.0f
 #define NO_HEIGHT -1.0f
 
-namespace IW {
+namespace iw {
 namespace Input {
 	enum class DeviceType
 		: int

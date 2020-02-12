@@ -2,7 +2,8 @@
 #include <assert.h>
 #include "iw/log/logger.h"
 
-namespace IW {
+namespace iw {
+namespace ECS {
 	using iterator = ChunkList::iterator;
 
 	// replace with free list like thing but for valid entities 
@@ -337,4 +338,5 @@ namespace IW {
 
 		return (bufSize - padSize) / archetypeSize;
 	}
+}
 }

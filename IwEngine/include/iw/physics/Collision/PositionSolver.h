@@ -2,7 +2,7 @@
 
 #include "Solver.h"
 
-namespace IW {
+namespace iw {
 namespace Physics {
 	class PositionSolver
 		: public Solver

@@ -1,7 +1,8 @@
 #include "iw/renderer/Platform/OpenGL/GLVertexArray.h"
 #include "gl/glew.h"
 
-namespace IW {
+namespace iw {
+namespace RenderAPI {
 	GLVertexArray::GLVertexArray() {
 		glGenVertexArrays(1, &gl_id);
 		glBindVertexArray(gl_id);
@@ -61,4 +62,5 @@ namespace IW {
 	void GLVertexArray::Unbind() const {
 		glBindVertexArray(0);
 	}
+}
 }

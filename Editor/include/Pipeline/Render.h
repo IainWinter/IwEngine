@@ -8,7 +8,7 @@
 #include "iw/graphics/Model.h"
 #include "iw/engine/Components/CameraController.h"
 
-namespace IW {
+namespace iw {
 	struct Render
 		: iw::node
 	{

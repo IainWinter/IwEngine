@@ -1,6 +1,6 @@
 #include "iw/graphics/Texture.h"
 
-namespace IW {
+namespace iw {
 namespace Graphics {
 	Texture::Texture()
 		: m_width(0)

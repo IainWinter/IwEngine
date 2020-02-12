@@ -2,7 +2,7 @@
 
 #include "WindowOptions.h"
 
-namespace IW {
+namespace iw {
 namespace Engine {
 	struct InitOptions {
 		WindowOptions WindowOptions;

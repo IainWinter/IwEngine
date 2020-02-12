@@ -4,6 +4,7 @@
 #include <string>
 
 namespace iw {
+namespace Reflect {
 namespace detail {
 	template<>
 	inline const Class* GetClass(
@@ -30,5 +31,6 @@ namespace detail {
 		};
 		return &c;
 	}
+}
 }
 }

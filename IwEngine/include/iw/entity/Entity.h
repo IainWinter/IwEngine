@@ -2,7 +2,7 @@
 
 #include "Space.h"
 
-namespace IW {
+namespace iw {
 namespace ECS {
 	struct Entity {
 		EntityHandle Handle;

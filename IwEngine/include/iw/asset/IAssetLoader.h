@@ -3,7 +3,7 @@
 #include "iw/util/memory/ref.h"
 #include <string>
 
-namespace IW {
+namespace iw {
 namespace Asset {
 	class IAssetLoader {
 	public:

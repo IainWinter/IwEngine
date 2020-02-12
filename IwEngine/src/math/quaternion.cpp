@@ -302,7 +302,7 @@ namespace iw {
 		float dot = vector3::unit_z.dot(forward);
 
 		if (abs(dot + 1.0f) < 0.00001f) {
-			return quaternion(up, PI);
+			return quaternion(up, Pi);
 		}
 
 		if (abs(dot - 1.0f) < 0.00001f) {

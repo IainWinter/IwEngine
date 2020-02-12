@@ -2,7 +2,7 @@
 
 #include "Light.h"
 
-namespace IW {
+namespace iw {
 namespace Graphics {
 	struct DirectionalLight
 		: Light
@@ -17,7 +17,7 @@ namespace Graphics {
 		IWGRAPHICS_API
 		DirectionalLight(
 			iw::ref<Shader> shader,
-			iw::ref<IW::RenderTarget> target,
+			iw::ref<iw::RenderTarget> target,
 			OrthographicCamera camera);
 
 		IWGRAPHICS_API

@@ -4,7 +4,8 @@
 
 #include "iw/log/logger.h"
 
-namespace IW {
+namespace iw {
+namespace Input {
 	Mouse* Mouse::Create() {
 		return new WindowsMouse();
 	}
@@ -90,3 +91,4 @@ namespace IW {
 	}
 }
 #endif
+}

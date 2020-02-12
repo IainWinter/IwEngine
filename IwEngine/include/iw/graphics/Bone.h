@@ -4,7 +4,7 @@
 #include "iw/math/matrix4.h"
 #include "iw/common/Components/Transform.h"
 
-namespace IW {
+namespace iw {
 namespace Graphics {
 	struct VertexWeight {
 		unsigned int Index;

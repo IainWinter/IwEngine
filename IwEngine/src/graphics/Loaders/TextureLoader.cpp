@@ -4,7 +4,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/std_image.h"
 
-namespace IW {
+namespace iw {
+namespace Graphics {
 	TextureLoader::TextureLoader(
 		AssetManager& asset)
 		: AssetLoader(asset)
@@ -62,4 +63,5 @@ namespace IW {
 	{
 		free(texture->Colors());
 	}
+}
 }

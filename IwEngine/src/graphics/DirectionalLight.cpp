@@ -1,9 +1,10 @@
 #include "iw/graphics/DirectionalLight.h"
 
-namespace IW {
+namespace iw {
+namespace Graphics {
 	DirectionalLight::DirectionalLight(
 		iw::ref<Shader> shader,
-		iw::ref<IW::RenderTarget> target,
+		iw::ref<iw::RenderTarget> target,
 		OrthographicCamera camera)
 		: Light(shader, target)
 		, m_camera(camera)
@@ -24,4 +25,5 @@ namespace IW {
 	Camera& DirectionalLight::Cam() {
 		return m_camera;
 	}
+}
 }

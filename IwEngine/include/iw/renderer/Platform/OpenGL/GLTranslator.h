@@ -3,7 +3,7 @@
 #include "iw/renderer/Translator.h"
 #include "gl/glew.h"
 
-namespace IW {
+namespace iw {
 namespace RenderAPI {
 	class GLTranslator
 		: public Translator<GLint, GLenum>

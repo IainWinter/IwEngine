@@ -5,7 +5,7 @@
 #include "iw/renderer/VertexBufferLayout.h"
 #include <vector>
 
-namespace IW {
+namespace iw {
 namespace RenderAPI {
 	class GLVertexArray
 		: public IVertexArray

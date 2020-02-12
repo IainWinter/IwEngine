@@ -5,7 +5,7 @@
 #include "iw/math/vector3.h"
 #include "iw/math/matrix4.h"
 
-namespace IW {
+namespace iw {
 namespace Engine {
 	struct IWCOMMON_API Transform {
 		iw::vector3    Position = iw::vector3::zero;

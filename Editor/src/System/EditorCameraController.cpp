@@ -3,7 +3,7 @@
 #include "iw/engine/Time.h"
 #include <imgui/imgui.h>
 
-namespace IW {
+namespace iw {
 	EditorCameraController::EditorCameraController()
 		: System("Editor Camera Controller")
 		, speed(10)

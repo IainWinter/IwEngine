@@ -4,7 +4,7 @@
 #include "UniformBuffer.h"
 #include <string>
 
-namespace IW {
+namespace iw {
 namespace RenderAPI {
 	class IPipeline {
 	public:

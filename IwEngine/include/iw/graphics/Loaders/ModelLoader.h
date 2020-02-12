@@ -4,7 +4,7 @@
 #include "iw/graphics/Model.h"
 #include "iw/asset/AssetLoader.h"
 
-namespace IW {
+namespace iw {
 namespace Graphics {
 	class MeshLoader
 		: public AssetLoader<Model>

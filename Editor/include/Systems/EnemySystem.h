@@ -6,23 +6,23 @@
 #include "iw/graphics/Model.h"
 
 class EnemySystem
-	: public IW::System<IW::Transform, Enemy>
+	: public iw::System<iw::Transform, Enemy>
 {
 public:
 	struct Components {
-		IW::Transform* Transform;
+		iw::Transform* Transform;
 		Enemy* Enemy;
 	};
 private:
-	iw::ref<IW::Model> BulletModel;
+	iw::ref<iw::Model> BulletModel;
 
 public:
 	EnemySystem(
-		iw::ref<IW::Model> bulletModel);
+		iw::ref<iw::Model> bulletModel);
 
 	void Update(
-		IW::EntityComponentArray& view) override;
+		iw::EntityComponentArray& view) override;
 
 	bool On(
-		IW::CollisionEvent& e) override;
+		iw::CollisionEvent& e) override;
 };

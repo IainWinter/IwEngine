@@ -2,7 +2,7 @@
 
 #include "IwRenderer.h"
 
-namespace IW {
+namespace iw {
 namespace RenderAPI {
 	class IFrameBuffer {
 	public:

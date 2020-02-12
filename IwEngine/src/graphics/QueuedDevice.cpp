@@ -3,7 +3,8 @@
 // < Operation > 
 
 
-namespace IW {
+namespace iw {
+namespace Graphics {
 	struct CIB {
 		PIB         Buffer;
 		size_t      Size;
@@ -261,4 +262,5 @@ namespace IW {
 	{
 
 	}
+}
 }

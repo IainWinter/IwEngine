@@ -6,7 +6,7 @@
 #include "iw/util/jobs/node.h"
 #include "iw/graphics/Model.h"
 
-namespace IW {
+namespace iw {
 	struct FilterTarget
 		: iw::node
 	{

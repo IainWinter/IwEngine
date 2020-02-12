@@ -3,7 +3,7 @@
 #include "IwRenderer.h"
 #include "Buffer.h"
 
-namespace IW {
+namespace iw {
 namespace RenderAPI {
 	class IVertexBuffer
 		: public virtual IBuffer

@@ -6,12 +6,12 @@
 #include "iw/physics/Dynamics/Rigidbody.h"
 
 class PlayerSystem
-	: public IW::System<IW::Transform, IW::Rigidbody, Player>
+	: public iw::System<iw::Transform, iw::Rigidbody, Player>
 {
 public:
 	struct Components {
-		IW::Transform* Transform;
-		IW::Rigidbody* Rigidbody;
+		iw::Transform* Transform;
+		iw::Rigidbody* Rigidbody;
 		Player*    Player;
 	};
 private:
@@ -22,11 +22,11 @@ public:
 	PlayerSystem();
 
 	void Update(
-		IW::EntityComponentArray& view) override;
+		iw::EntityComponentArray& view) override;
 
 	void FixedUpdate(
-		IW::EntityComponentArray& view) override;
+		iw::EntityComponentArray& view) override;
 
-	bool On(IW::KeyEvent& event);
-	bool On(IW::CollisionEvent& event);
+	bool On(iw::KeyEvent& event);
+	bool On(iw::CollisionEvent& event);
 };

@@ -3,7 +3,7 @@
 #include "iw/common/Components/Transform.h"
 #include "iw/physics/Collision/Collider.h"
 
-namespace IW {
+namespace iw {
 namespace Physics {
 	class CollisionObject {
 	protected:

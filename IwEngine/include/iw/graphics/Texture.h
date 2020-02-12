@@ -6,7 +6,7 @@
 #include "iw/renderer/Texture.h"
 #include "iw/util/memory/ref.h"
 
-namespace IW {
+namespace iw {
 namespace Graphics {
 	struct Texture {
 	protected:

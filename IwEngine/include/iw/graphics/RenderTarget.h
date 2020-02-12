@@ -6,7 +6,7 @@
 #include "iw/util/memory/ref.h"
 #include "Texture.h"
 
-namespace IW {
+namespace iw {
 namespace Graphics {
 	struct RenderTarget {
 	private:

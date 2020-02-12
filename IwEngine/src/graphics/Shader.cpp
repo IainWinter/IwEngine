@@ -1,7 +1,8 @@
 #include "iw/graphics/Shader.h"
 #include "iw/util/enum/val.h"
 
-namespace IW {
+namespace iw {
+namespace Graphics {
 	Shader::Shader()
 		: Program(nullptr)
 	{}
@@ -43,4 +44,4 @@ namespace IW {
 		Program = iw::ref<IPipeline>(device->CreatePipeline(vertex, fragment, geometry));
 	}
 }
-
+}

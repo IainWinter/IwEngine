@@ -9,7 +9,7 @@
 #include <queue>
 //#include <thread>
 
-namespace IW {
+namespace iw {
 namespace Engine {
 	class ISystem {
 	public:
@@ -144,8 +144,8 @@ namespace Engine {
 		friend class Layer;
 
 		void SetLayerVars(
-			iw::ref<IW::Space> space,
-			iw::ref<IW::Renderer> renderer,
+			iw::ref<iw::Space> space,
+			iw::ref<iw::Renderer> renderer,
 			iw::ref<AssetManager> asset,
 			iw::ref<DynamicsSpace> physics,
 			iw::ref<iw::eventbus> bus)

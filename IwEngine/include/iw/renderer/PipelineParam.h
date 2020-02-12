@@ -8,7 +8,7 @@
 #include "iw/math/matrix4.h"
 #include "iw/log/logger.h"
 
-namespace IW {
+namespace iw {
 namespace RenderAPI {
 	class IPipelineParam {
 	public:

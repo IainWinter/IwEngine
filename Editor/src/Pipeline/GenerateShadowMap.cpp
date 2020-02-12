@@ -1,6 +1,6 @@
 #include "Pipeline/GenerateShadowMap.h"
 
-namespace IW {
+namespace iw {
 	GenerateShadowMap::GenerateShadowMap(
 		iw::ref<Renderer> r,
 		iw::ref<Space> s)

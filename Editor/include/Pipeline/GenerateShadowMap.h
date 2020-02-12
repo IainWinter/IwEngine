@@ -7,7 +7,7 @@
 #include "iw/graphics/DirectionalLight.h"
 #include "iw/graphics/Model.h"
 
-namespace IW {
+namespace iw {
 	struct GenerateShadowMap
 		: iw::node
 	{

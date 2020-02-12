@@ -1,9 +1,10 @@
 #include "iw/graphics/Light.h"
 
-namespace IW {
+namespace iw {
+namespace Graphics {
 	Light::Light(
 		iw::ref<Shader> shader,
-		iw::ref<IW::RenderTarget> target)
+		iw::ref<iw::RenderTarget> target)
 		: m_lightShader(shader)
 		, m_lightTarget(target)
 	{}
@@ -67,4 +68,5 @@ namespace IW {
 	{
 		m_postTarget = postTarget;
 	}*/
+}
 }

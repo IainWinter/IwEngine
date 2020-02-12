@@ -8,7 +8,7 @@
 #include "iw/renderer/Device.h"
 #include "iw/util/memory/ref.h"
 
-namespace IW {
+namespace iw {
 namespace Graphics {
 	// Honestly have no clue on the best way to seperate this data...
 	// Seems like the worst case is to seperate the data into different VBOS which is whats going on here
@@ -111,7 +111,7 @@ namespace Graphics {
 
 		IWGRAPHICS_API
 		void SetMaterial(
-			iw::ref<IW::Material>& material);
+			iw::ref<iw::Material>& material);
 
 		IWGRAPHICS_API
 		size_t GetElementCount();

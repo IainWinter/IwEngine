@@ -3,7 +3,7 @@
 #include "Collider.h"
 #include "iw/physics/Plane.h"
 
-namespace IW {
+namespace iw {
 namespace Physics {
 namespace impl {
 	template<

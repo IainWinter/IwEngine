@@ -8,7 +8,7 @@
 // https://www.youtube.com/watch?v=SHinxAhv1ZE  I now understand the goal of this is to have basically a bunch of these constraint rules be applied on contact points
 // https://www.youtube.com/watch?v=7_nKOET6zwI  Continuous Collisions      49:00 for the $
 
-namespace IW {
+namespace iw {
 namespace Physics {
 	class CollisionSpace {
 	public:

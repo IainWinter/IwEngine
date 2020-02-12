@@ -2,7 +2,8 @@
 #include "iw/log/logger.h"
 #include "gl/glew.h"
 
-namespace IW {
+namespace iw {
+namespace RenderAPI {
 	GLComputeShader::GLComputeShader(
 		const char* source)
 	{
@@ -31,4 +32,5 @@ namespace IW {
 	unsigned GLComputeShader::ComputeShader() const {
 		return gl_id;
 	}
+}
 }

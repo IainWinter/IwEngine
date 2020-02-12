@@ -4,7 +4,7 @@
 #include <functional>
 #include <atomic>
 
-namespace IW {
+namespace iw {
 namespace Engine {
 	template<
 		typename _f>

@@ -4,7 +4,7 @@
 #include "iw/math/vector3.h"
 #include "iw/math/vector4.h"
 
-namespace IW {
+namespace iw {
 namespace Physics {
 namespace impl {
 	template<

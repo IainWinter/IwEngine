@@ -6,7 +6,8 @@
 /// RenderQueue - Async stuff
 //
 
-namespace IW {
+namespace iw {
+namespace Graphics {
 	RenderQueue::RenderQueue(
 		IDevice& device)
 		: QueuedDevice(device)
@@ -31,4 +32,5 @@ namespace IW {
 
 		m_scratch.reset();
 	}
+}
 }

@@ -4,7 +4,8 @@
 #include <assert.h>
 #include <vector>
 
-namespace IW {
+namespace iw {
+namespace Physics {
 	void DynamicsSpace::SolveManifolds(
 		std::vector<Manifold>& manifolds,
 		scalar dt)
@@ -212,4 +213,5 @@ namespace IW {
 			}
 		}
 	}
+}
 }

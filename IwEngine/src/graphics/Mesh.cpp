@@ -2,7 +2,8 @@
 
 #include "iw/graphics/Mesh.h"
 
-namespace IW {
+namespace iw {
+namespace Graphics {
 	Mesh::Mesh()
 		: Vertices(nullptr)
 		, Normals(nullptr)
@@ -347,7 +348,7 @@ namespace IW {
 	}
 
 	void Mesh::SetMaterial(
-		iw::ref<IW::Material>& material)
+		iw::ref<iw::Material>& material)
 	{
 			Material = material;
 	}
@@ -355,4 +356,5 @@ namespace IW {
 	size_t Mesh::GetElementCount() {
 			return IndexCount / Topology;
 	}
+}
 }

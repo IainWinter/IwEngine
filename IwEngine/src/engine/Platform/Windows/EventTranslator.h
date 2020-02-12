@@ -4,7 +4,8 @@
 #include "iw/log/logger.h"
 #include "iw/common/Platform.h"
 
-namespace IW {
+namespace iw {
+namespace Engine {
 	template<
 		typename _event_t>
 	_event_t Translate(
@@ -28,4 +29,5 @@ namespace IW {
 	{
 		return WindowResizedEvent(windowId, LOWORD(lParam), HIWORD(lParam));
 	}
+}
 }

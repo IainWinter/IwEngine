@@ -4,7 +4,7 @@
 #include "iw/graphics/Texture.h"
 #include "iw/asset/AssetLoader.h"
 
-namespace IW {
+namespace iw {
 namespace Graphics {
 	class TextureLoader
 		: public AssetLoader<Texture>

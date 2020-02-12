@@ -1,6 +1,7 @@
 #include "iw/entity/EntityComponentArray.h"
 
-namespace IW {
+namespace iw {
+namespace ECS {
 	using iterator = EntityComponentArray::iterator;
 
 	// I wouldnt be shocked if there wasnt some subtle logic bug somewhere in here
@@ -73,4 +74,5 @@ namespace IW {
 	iterator EntityComponentArray::end() {
 		return iterator(m_ends, m_ends, m_begins.size());
 	}
+}
 }

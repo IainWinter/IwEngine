@@ -1,6 +1,6 @@
 #pragma once
 
-namespace IW {
+namespace iw {
 	enum class DisplayState {
 		NORMAL,
 		HIDDEN,

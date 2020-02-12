@@ -4,7 +4,7 @@
 #include "iw/util/algorithm/pair_hash.h"
 #include <unordered_map>
 
-namespace IW {
+namespace iw {
 namespace Graphics {
 	//Spheres
 

@@ -3,7 +3,7 @@
 #include "iw/renderer/UniformBuffer.h"
 #include "GLBuffer.h"
 
-namespace IW {
+namespace iw {
 namespace RenderAPI {
 	class GLUniformBuffer
 		: public IUniformBuffer

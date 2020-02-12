@@ -2,7 +2,8 @@
 #include "iw/physics/Spacial/Grid.h"
 #include "iw/engine/Time.h"
 
-namespace IW {
+namespace iw {
+namespace Engine {
 	PhysicsSystem::PhysicsSystem()
 		: System<Transform, AABB>("Physics")
 	{}
@@ -38,4 +39,5 @@ namespace IW {
 		//	}
 		//}
 	}
+}
 }

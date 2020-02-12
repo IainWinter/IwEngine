@@ -1,7 +1,8 @@
 #include "iw/physics/Collision/CollisionSpace.h"
 #include <assert.h>
 
-namespace IW {
+namespace iw {
+namespace Physics {
 	void CollisionSpace::AddCollisionObject(
 		CollisionObject* object)
 	{
@@ -88,4 +89,5 @@ namespace IW {
 	{
 		m_collisionCallback = callback;
 	}
+}
 }

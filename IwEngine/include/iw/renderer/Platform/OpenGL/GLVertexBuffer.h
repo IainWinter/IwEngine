@@ -3,7 +3,7 @@
 #include "iw/renderer/VertexBuffer.h"
 #include "GLBuffer.h"
 
-namespace IW {
+namespace iw {
 namespace RenderAPI {
 	class GLVertexBuffer
 		: public IVertexBuffer

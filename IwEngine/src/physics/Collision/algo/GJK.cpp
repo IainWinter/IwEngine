@@ -1,7 +1,7 @@
 #include "iw/physics/Collision/algo/GJK.h"
 #include <vector>
 
-namespace IW {
+namespace iw {
 namespace Physics {
 namespace algo {
 	bool GJK(

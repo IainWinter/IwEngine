@@ -3,7 +3,7 @@
 #include "iw/physics/Collision/CollisionSpace.h"
 #include "DynamicsSolver.h"
 
-namespace IW {
+namespace iw {
 namespace Physics {
 	class DynamicsSpace
 		: public CollisionSpace

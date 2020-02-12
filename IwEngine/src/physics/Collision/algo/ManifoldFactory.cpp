@@ -1,6 +1,6 @@
 #include "iw/physics/Collision/algo/ManifoldFactory.h"
 
-namespace IW {
+namespace iw {
 namespace Physics {
 namespace algo {
 	ManifoldPoints FindSphereSphereMaifoldPoints(

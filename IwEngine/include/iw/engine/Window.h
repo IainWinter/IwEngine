@@ -5,7 +5,7 @@
 #include "iw/input/InputManager.h"
 #include "iw/util/memory/ref.h"
 
-namespace IW {
+namespace iw {
 namespace Engine {
 	class IWindow {
 	public:

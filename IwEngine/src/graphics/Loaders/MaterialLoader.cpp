@@ -1,7 +1,8 @@
 #include "iw/graphics/Loaders/MaterialLoader.h"
 #include "iw/util/io/File.h"
 
-namespace IW {
+namespace iw {
+namespace Graphics {
 	MaterialLoader::MaterialLoader(
 		AssetManager& asset)
 		: AssetLoader(asset)
@@ -17,4 +18,5 @@ namespace IW {
 
 		return nullptr;
 	}
+}
 }

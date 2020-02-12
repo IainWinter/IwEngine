@@ -3,7 +3,7 @@
 #include "IwInput.h"
 #include <cstring>
 
-namespace IW {
+namespace iw {
 namespace Input {
 	class InputState {
 	private:

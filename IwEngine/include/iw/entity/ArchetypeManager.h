@@ -7,7 +7,7 @@
 #include <unordered_map>
 #include <memory>
 
-namespace IW {
+namespace iw {
 namespace ECS {
 	class ArchetypeManager {
 	private:

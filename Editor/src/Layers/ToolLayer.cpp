@@ -9,7 +9,7 @@
 #include "iw/physics/Collision/PlaneCollider.h"
 #include "imgui/imgui.h"
 
-namespace IW {
+namespace iw {
 	struct ModelComponents {
 		Transform* Transform;
 		Model* Model;
@@ -61,7 +61,7 @@ namespace IW {
 				Transform t = *entTransform;
 				t.Position.y += 1;
 				t.Scale = 0.1f;
-				t.Rotation = iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::PI / 2);
+				t.Rotation = iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2);
 
 				//t.Rotation = iw::quaternion::from_look_at(t.Position, camera.FindComponent<Transform>()->Position);
 

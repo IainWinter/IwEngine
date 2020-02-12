@@ -4,7 +4,7 @@
 #include "Archetype.h"
 #include "EntityHandle.h"
 
-namespace IW {
+namespace iw {
 namespace ECS {
 	struct Chunk {
 		Chunk* Next;

@@ -1,6 +1,6 @@
 #include "Pipeline/Render.h"
 
-namespace IW {
+namespace iw {
 	Render::Render(
 		iw::ref<Renderer> r,
 		iw::ref<Space> s)

@@ -14,7 +14,7 @@
 #include "iw/renderer/Device.h"
 #include <queue>
 
-namespace IW {
+namespace iw {
 namespace Graphics {
 	class IWGRAPHICS_API RenderQueue {
 	private:

@@ -2,7 +2,7 @@
 
 #include "iw/renderer/VertexShader.h"
 
-namespace IW {
+namespace iw {
 namespace RenderAPI {
 	class GLVertexShader
 		: public IVertexShader

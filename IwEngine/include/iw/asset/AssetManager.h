@@ -8,7 +8,7 @@
 #include <memory>
 #include <thread>
 
-namespace IW {
+namespace iw {
 // Have the asset manager store laoding things, just give ref to loaders to load data into them
 // 
 

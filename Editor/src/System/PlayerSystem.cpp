@@ -4,12 +4,12 @@
 #include <Components\Bullet.h>
 
 PlayerSystem::PlayerSystem()
-	: System<IW::Transform, IW::Rigidbody, Player>("Player")
+	: System<iw::Transform, iw::Rigidbody, Player>("Player")
 	, dash(false)
 {}
 
 void PlayerSystem::Update(
-	IW::EntityComponentArray& view)
+	iw::EntityComponentArray& view)
 {
 	for (auto entity : view) {
 		auto [ transform, rigidbody, player ] = entity.Components.Tie<Components>();
@@ -21,7 +21,7 @@ void PlayerSystem::Update(
 		}
 
 		else if (player->Timer >= -player->CooldownTime) {
-			player->Timer -= IW::Time::DeltaTime();
+			player->Timer -= iw::Time::DeltaTime();
 		}
 
 		if (player->Health <= 0) {
@@ -38,7 +38,7 @@ void PlayerSystem::Update(
 }
 
 void PlayerSystem::FixedUpdate(
-	IW::EntityComponentArray& view)
+	iw::EntityComponentArray& view)
 {
 	for (auto entity : view) {
 		auto [transform, rigidbody, player] = entity.Components.Tie<Components>();
@@ -59,32 +59,32 @@ void PlayerSystem::FixedUpdate(
 }
 
 bool PlayerSystem::On(
-	IW::KeyEvent& event)
+	iw::KeyEvent& event)
 {
 	switch (event.Button) {
-		case IW::UP:    movement.z -= event.State ? 1 : -1; break;
-		case IW::DOWN:  movement.z += event.State ? 1 : -1; break;
-		case IW::LEFT:  movement.x -= event.State ? 1 : -1; break;
-		case IW::RIGHT: movement.x += event.State ? 1 : -1; break;
-		case IW::X:     dash = event.State; break;
+		case iw::UP:    movement.z -= event.State ? 1 : -1; break;
+		case iw::DOWN:  movement.z += event.State ? 1 : -1; break;
+		case iw::LEFT:  movement.x -= event.State ? 1 : -1; break;
+		case iw::RIGHT: movement.x += event.State ? 1 : -1; break;
+		case iw::X:     dash = event.State; break;
 	}
 
 	return true;
 }
 
 bool PlayerSystem::On(
-	IW::CollisionEvent& event)
+	iw::CollisionEvent& event)
 {
-	IW::Entity a = Space->FindEntity(event.BodyA);
-	IW::Entity b = Space->FindEntity(event.BodyB);
+	iw::Entity a = Space->FindEntity(event.BodyA);
+	iw::Entity b = Space->FindEntity(event.BodyB);
 
-	if (   a.Index() == IW::EntityHandle::Empty.Index
-		|| b.Index() == IW::EntityHandle::Empty.Index)
+	if (   a.Index() == iw::EntityHandle::Empty.Index
+		|| b.Index() == iw::EntityHandle::Empty.Index)
 	{
 		return false;
 	}
 
-	IW::Entity player;
+	iw::Entity player;
 	if (a.HasComponent<Player>() && b.HasComponent<Bullet>()) {
 		player = a;
 	}
@@ -93,7 +93,7 @@ bool PlayerSystem::On(
 		player = b;
 	}
 
-	if (player.Index() != IW::EntityHandle::Empty.Index) {
+	if (player.Index() != iw::EntityHandle::Empty.Index) {
 		Player* p = player.FindComponent<Player>();
 		if (!p->Damaged) {
 			p->Damaged = true;

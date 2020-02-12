@@ -11,7 +11,7 @@
 #include "Pipeline/FilterTarget.h"
 #include "Pipeline/Render.h"
 
-namespace IW {
+namespace iw {
 	class SandboxLayer
 		: public Layer
 	{

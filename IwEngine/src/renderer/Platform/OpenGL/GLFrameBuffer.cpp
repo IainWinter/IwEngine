@@ -1,7 +1,8 @@
 #include "iw/renderer/Platform/OpenGL/GLFrameBuffer.h"
 #include "gl/glew.h"
 
-namespace IW {
+namespace iw {
+namespace RenderAPI {
 	GLFrameBuffer::GLFrameBuffer() 
 		: m_textureCount(0)
 	{
@@ -38,4 +39,5 @@ namespace IW {
 	void GLFrameBuffer::Unbind() const {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
+}
 }

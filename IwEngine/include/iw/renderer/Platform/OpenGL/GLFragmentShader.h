@@ -2,7 +2,7 @@
 
 #include "iw/renderer/FragmentShader.h"
 
-namespace IW {
+namespace iw {
 namespace RenderAPI {
 	class GLFragmentShader
 		: public IFragmentShader

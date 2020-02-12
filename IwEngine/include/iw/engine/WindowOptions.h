@@ -2,7 +2,7 @@
 
 #include "DisplayState.h"
 
-namespace IW {
+namespace iw {
 namespace Engine {
 	struct WindowOptions {
 		unsigned int Width;

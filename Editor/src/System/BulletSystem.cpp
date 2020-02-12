@@ -3,17 +3,17 @@
 #include <Components\Enemy.h>
 
 BulletSystem::BulletSystem()
-	: IW::System<IW::Transform, IW::Rigidbody, Bullet>("Bullet")
+	: iw::System<iw::Transform, iw::Rigidbody, Bullet>("Bullet")
 {}
 
 void BulletSystem::Update(
-	IW::EntityComponentArray& view)
+	iw::EntityComponentArray& view)
 {
 	for (auto entity : view) {
 		auto [transform, rigidbody, bullet] = entity.Components.Tie<Components>();
 
 		if (bullet->Type == LINE) {
-			//rigidbody->MovePosition(transform->Position + iw::vector3(1, 0, 0) * transform->Rotation * bullet->Speed * IW::Time::FixedTime());
+			//rigidbody->MovePosition(transform->Position + iw::vector3(1, 0, 0) * transform->Rotation * bullet->Speed * iw::Time::FixedTime());
 		}
 
 		/*if (bullet->Time > 5.f) {
@@ -21,40 +21,40 @@ void BulletSystem::Update(
 			Physics->RemoveRigidbody(rigidbody);
 		}*/
 
-		bullet->Time += IW::Time::DeltaTime();
+		bullet->Time += iw::Time::DeltaTime();
 	}
 }
 
 bool BulletSystem::On(
-	IW::CollisionEvent& event)
+	iw::CollisionEvent& event)
 {
-	IW::Entity a = Space->FindEntity(event.BodyA);
-	IW::Entity b = Space->FindEntity(event.BodyB);
+	iw::Entity a = Space->FindEntity(event.BodyA);
+	iw::Entity b = Space->FindEntity(event.BodyB);
 
-	IW::Entity bullet;
-	IW::Entity other;
-	if (   a != IW::EntityHandle::Empty 
+	iw::Entity bullet;
+	iw::Entity other;
+	if (   a != iw::EntityHandle::Empty 
 		&& a.HasComponent<Bullet>()) 
 	{
 		bullet = a;
 		other  = b;
 	}
 
-	else if (b != IW::EntityHandle::Empty
+	else if (b != iw::EntityHandle::Empty
 		  && b.HasComponent<Bullet>())
 	{
 		bullet = b;
 		other  = a;
 	}
 
-	if (    other != IW::EntityHandle::Empty
+	if (    other != iw::EntityHandle::Empty
 		&& (other.HasComponent<Enemy>() || other.HasComponent<Bullet>()))
 	{
 		return false;
 	}
 
-	if (bullet != IW::EntityHandle::Empty) {
-		Physics->RemoveRigidbody(bullet.FindComponent<IW::Rigidbody>());
+	if (bullet != iw::EntityHandle::Empty) {
+		Physics->RemoveRigidbody(bullet.FindComponent<iw::Rigidbody>());
 		QueueDestroyEntity(bullet.Index());
 	}
 

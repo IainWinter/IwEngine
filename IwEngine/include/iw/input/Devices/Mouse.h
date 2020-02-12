@@ -2,7 +2,7 @@
 
 #include "Device.h"
 
-namespace IW {
+namespace iw {
 namespace Input {
 	class IWINPUT_API MouseBase
 		: public Device

@@ -9,7 +9,7 @@
 #include "iw/events/eventbus.h"
 #include <vector>
 
-namespace IW {
+namespace iw {
 namespace Input {
 	class InputManager {
 	private:

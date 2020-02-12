@@ -4,7 +4,7 @@
 #include "iw/log/logger.h"
 #include <vector>
 
-namespace IW {
+namespace iw {
 namespace RenderAPI {
 	struct VertexBufferLayoutElement {
 		unsigned      Type;

@@ -1,7 +1,7 @@
 #include "iw/graphics/Font.h"
 #include <istream>
 
-namespace IW {
+namespace iw {
 namespace Graphics {
 	Font::Font(
 		std::string name, 

@@ -2,7 +2,8 @@
 #include "iw/renderer/Platform/OpenGL/GLPipelineParam.h"
 #include "gl/glew.h"
 
-namespace IW {
+namespace iw {
+namespace RenderAPI {
 	GLComputePipeline::GLComputePipeline(
 		GLComputeShader* computeShader)
 	{
@@ -27,4 +28,5 @@ namespace IW {
 	void GLComputePipeline::Use() const {
 		glUseProgram(gl_id);
 	}
+}
 }

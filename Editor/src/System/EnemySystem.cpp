@@ -10,38 +10,38 @@
 #include <Components\Player.h>
 
 EnemySystem::EnemySystem(
-	iw::ref<IW::Model> bulletModel)
-	: IW::System<IW::Transform, Enemy>("Enemy")
+	iw::ref<iw::Model> bulletModel)
+	: iw::System<iw::Transform, Enemy>("Enemy")
 	, BulletModel(bulletModel)
 {}
 
 void EnemySystem::Update(
-	IW::EntityComponentArray& view)
+	iw::EntityComponentArray& view)
 {
 	for (auto entity : view) {
 		auto [transform, enemy] = entity.Components.Tie<Components>();
 
-		transform->Rotation *= iw::quaternion::from_euler_angles(0, -IW::Time::DeltaTime(), 0);
+		transform->Rotation *= iw::quaternion::from_euler_angles(0, -iw::Time::DeltaTime(), 0);
 
 		if (  !enemy->HasShot
 			&& enemy->Timer <= 0)
 		{
 			enemy->HasShot = true;
 
-			enemy->Rotation = fmod(enemy->Rotation + enemy->Speed, iw::PI2);
+			enemy->Rotation = fmod(enemy->Rotation + enemy->Speed, iw::Pi2);
 			iw::quaternion rot = iw::quaternion::from_euler_angles(0, enemy->Rotation, 0);
 
 			iw::vector3 v = iw::vector3::unit_x * rot;
 			v.normalize();
 			v *= 5;
 
-			IW::Entity bullet = Space->CreateEntity<IW::Transform, IW::Model, IW::SphereCollider, IW::Rigidbody, Bullet>();
-			bullet.SetComponent<IW::Model>(*BulletModel);
+			iw::Entity bullet = Space->CreateEntity<iw::Transform, iw::Model, iw::SphereCollider, iw::Rigidbody, Bullet>();
+			bullet.SetComponent<iw::Model>(*BulletModel);
 			bullet.SetComponent<Bullet>   (LINE, 5.0f);
 
-			IW::Transform* t      = bullet.SetComponent<IW::Transform>     (transform->Position + iw::vector3(sqrt(2), 0, 0) * rot, iw::vector3(.25f));
-			IW::SphereCollider* s = bullet.SetComponent<IW::SphereCollider>(iw::vector3::zero, .25f);
-			IW::Rigidbody* r      = bullet.SetComponent<IW::Rigidbody>     ();
+			iw::Transform* t      = bullet.SetComponent<iw::Transform>     (transform->Position + iw::vector3(sqrt(2), 0, 0) * rot, iw::vector3(.25f));
+			iw::SphereCollider* s = bullet.SetComponent<iw::SphereCollider>(iw::vector3::zero, .25f);
+			iw::Rigidbody* r      = bullet.SetComponent<iw::Rigidbody>     ();
 
 			r->SetMass(1);
 			r->SetCol(s);
@@ -63,25 +63,25 @@ void EnemySystem::Update(
 		}
 
 		if (enemy->Timer >= -enemy->CooldownTime) {
-			enemy->Timer -= IW::Time::DeltaTime();
+			enemy->Timer -= iw::Time::DeltaTime();
 		}
 	}
 }
 
 bool EnemySystem::On(
-	IW::CollisionEvent& event)
+	iw::CollisionEvent& event)
 {
-	IW::Entity a = Space->FindEntity(event.BodyA);
-	IW::Entity b = Space->FindEntity(event.BodyB);
+	iw::Entity a = Space->FindEntity(event.BodyA);
+	iw::Entity b = Space->FindEntity(event.BodyB);
 
-	if (   a.Index() == IW::EntityHandle::Empty.Index
-		|| b.Index() == IW::EntityHandle::Empty.Index)
+	if (   a.Index() == iw::EntityHandle::Empty.Index
+		|| b.Index() == iw::EntityHandle::Empty.Index)
 	{
 		return false;
 	}
 
-	IW::Entity player;
-	IW::Entity enemy;
+	iw::Entity player;
+	iw::Entity enemy;
 	if (a.HasComponent<Player>() && b.HasComponent<Enemy>()) {
 		player = a;
 		enemy  = b;
@@ -92,13 +92,13 @@ bool EnemySystem::On(
 		enemy  = a;
 	}
 
-	if (   player.Index() != IW::EntityHandle::Empty.Index
-		|| enemy .Index() != IW::EntityHandle::Empty.Index)
+	if (   player.Index() != iw::EntityHandle::Empty.Index
+		|| enemy .Index() != iw::EntityHandle::Empty.Index)
 	{
 		Player* playerComponent = player.FindComponent<Player>();
 		if (playerComponent->Timer > 0) {
 			QueueDestroyEntity(enemy.Index());
-			Physics->RemoveRigidbody(enemy.FindComponent<IW::Rigidbody>());
+			Physics->RemoveRigidbody(enemy.FindComponent<iw::Rigidbody>());
 		}
 
 		else {

@@ -4,7 +4,8 @@
 #include <Windows.h>
 #endif
 
-namespace IW {
+namespace iw {
+namespace Input {
 	Translation MouseBase::translation = CreateTranslation();
 
 	InputName MouseBase::Translate(
@@ -33,4 +34,5 @@ namespace IW {
 		return translation;
 	}
 
+}
 }

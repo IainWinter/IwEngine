@@ -3,7 +3,7 @@
 #include "iw/renderer/PipelineParam.h"
 #include <string>
 
-namespace IW {
+namespace iw {
 namespace RenderAPI {
 	class GLPipelineParam
 		: public IPipelineParam

@@ -13,7 +13,8 @@
 #include "iw/renderer/Platform/OpenGL/GLFrameBuffer.h"
 #include "gl/glew.h"
 
-namespace IW {
+namespace iw {
+namespace RenderAPI {
 	IDevice* IDevice::Create() {
 		return new GLDevice();
 	}
@@ -335,5 +336,5 @@ namespace IW {
 			->AttachTexture(static_cast<GLTexture*>(texture));
 	}
 }
-
+}
 //http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-16-shadow-mapping/

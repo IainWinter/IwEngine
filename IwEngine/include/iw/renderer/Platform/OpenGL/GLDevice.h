@@ -2,7 +2,7 @@
 
 #include "iw/renderer/Device.h"
 
-namespace IW {
+namespace iw {
 namespace RenderAPI {
 	class GLDevice
 		: public IDevice

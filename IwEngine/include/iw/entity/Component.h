@@ -5,7 +5,7 @@
 #include <typeindex>
 #include <vector>
 
-namespace IW {
+namespace iw {
 namespace ECS {
 	struct IWENTITY_API Component {
 #ifdef IW_USE_REFLECTION

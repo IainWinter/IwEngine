@@ -1,6 +1,7 @@
 #include "iw/physics/Dynamics/Rigidbody.h"
 
-namespace IW {
+namespace iw {
+namespace Physics {
 	Rigidbody::Rigidbody(
 		bool isKinematic)
 		: m_invMass(1)
@@ -155,4 +156,5 @@ namespace IW {
 	{
 		m_nextTrans = nextTrans;
 	}
+}
 }

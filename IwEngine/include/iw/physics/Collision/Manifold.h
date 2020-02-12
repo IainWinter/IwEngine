@@ -3,7 +3,7 @@
 #include "iw/physics/Collision/ManifoldPoints.h"
 #include "iw/physics/Dynamics/Rigidbody.h"
 
-namespace IW {
+namespace iw {
 namespace Physics {
 	struct Manifold {
 		Rigidbody* BodyA;

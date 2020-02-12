@@ -2,7 +2,8 @@
 #include "iw/events/callback.h"
 #include <assert.h>
 
-namespace IW {
+namespace iw {
+namespace ECS {
 	ArchetypeManager::ArchetypeManager()
 		: m_pool(1024)
 	{}
@@ -170,4 +171,5 @@ namespace IW {
 		m_archetypes.clear();
 		m_pool.reset();
 	}
+}
 }

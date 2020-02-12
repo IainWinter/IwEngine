@@ -16,6 +16,7 @@
 
 
 namespace iw {
+namespace Reflect {
 namespace detail {
 	template<
 		typename _c>
@@ -61,13 +62,13 @@ namespace detail {
 	template<
 		typename _c>
 	const Class* GetClass() {
-		return iw::detail::GetClass(iw::detail::template ClassTag<_c>());
+		return detail::GetClass(detail::template ClassTag<_c>());
 	}
 
 	template<
 		typename _t>
 	const Type* GetType() {
-		return iw::detail::GetType(iw::detail::template TypeTag<_t>());
+		return detail::GetType(detail::template TypeTag<_t>());
 	}
 
 #define INTEGRAL(t, it, n, s)                                        \
@@ -89,20 +90,23 @@ namespace detail {
 		}                                                          \
 	}                                                               \
 
-	INTEGRAL(bool,               BOOL,               "bool",               sizeof(bool))
-	INTEGRAL(char,               CHAR,               "char",               sizeof(char))
-	INTEGRAL(short,              SHORT,              "short",              sizeof(short))
-	INTEGRAL(int,                INT,                "int",                sizeof(int))
-	INTEGRAL(long,               LONG,               "long",               sizeof(long))
-	INTEGRAL(float,              FLOAT,              "float",              sizeof(float))
-	INTEGRAL(double,             DOUBLE,             "double",             sizeof(double))
-	INTEGRAL(long long,          LONG_LONG,          "long long",          sizeof(long long))
-	INTEGRAL(long double,        LONG_DOUBLE,        "long double",        sizeof(long double))
-	INTEGRAL(unsigned char,      UNSIGNED_CHAR,      "unsigned char",      sizeof(unsigned char))
-	INTEGRAL(unsigned short,     UNSIGNED_SHORT,     "unsigned short",     sizeof(unsigned short))
-	INTEGRAL(unsigned int,       UNSIGNED_INT,       "unsigned int",       sizeof(unsigned int))
-	INTEGRAL(unsigned long,      UNSIGNED_LONG,      "unsigned long",      sizeof(unsigned long))
-	INTEGRAL(unsigned long long, UNSIGNED_LONG_LONG, "unsigned long long", sizeof(unsigned long long))
+	INTEGRAL(bool,               IntegralType::BOOL,               "bool",               sizeof(bool))
+	INTEGRAL(char,               IntegralType::CHAR,               "char",               sizeof(char))
+	INTEGRAL(short,              IntegralType::SHORT,              "short",              sizeof(short))
+	INTEGRAL(int,                IntegralType::INT,                "int",                sizeof(int))
+	INTEGRAL(long,               IntegralType::LONG,               "long",               sizeof(long))
+	INTEGRAL(float,              IntegralType::FLOAT,              "float",              sizeof(float))
+	INTEGRAL(double,             IntegralType::DOUBLE,             "double",             sizeof(double))
+	INTEGRAL(long long,          IntegralType::LONG_LONG,          "long long",          sizeof(long long))
+	INTEGRAL(long double,        IntegralType::LONG_DOUBLE,        "long double",        sizeof(long double))
+	INTEGRAL(unsigned char,      IntegralType::UNSIGNED_CHAR,      "unsigned char",      sizeof(unsigned char))
+	INTEGRAL(unsigned short,     IntegralType::UNSIGNED_SHORT,     "unsigned short",     sizeof(unsigned short))
+	INTEGRAL(unsigned int,       IntegralType::UNSIGNED_INT,       "unsigned int",       sizeof(unsigned int))
+	INTEGRAL(unsigned long,      IntegralType::UNSIGNED_LONG,      "unsigned long",      sizeof(unsigned long))
+	INTEGRAL(unsigned long long, IntegralType::UNSIGNED_LONG_LONG, "unsigned long long", sizeof(unsigned long long))
 
 #undef INTEGRAL
+}
+
+	using namespace Reflect;
 }

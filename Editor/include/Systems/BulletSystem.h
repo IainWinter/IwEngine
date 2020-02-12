@@ -6,12 +6,12 @@
 #include "iw/common/Components/Transform.h"
 
 class BulletSystem
-	: public IW::System<IW::Transform, IW::Rigidbody, Bullet>
+	: public iw::System<iw::Transform, iw::Rigidbody, Bullet>
 {
 public:
 	struct Components {
-		IW::Transform* Transform;
-		IW::Rigidbody* Rigidbody;
+		iw::Transform* Transform;
+		iw::Rigidbody* Rigidbody;
 		Bullet* Bullet;
 	};
 
@@ -19,8 +19,8 @@ public:
 	BulletSystem();
 
 	void Update(
-		IW::EntityComponentArray& view) override;
+		iw::EntityComponentArray& view) override;
 
 	bool On(
-		IW::CollisionEvent& event) override;
+		iw::CollisionEvent& event) override;
 };

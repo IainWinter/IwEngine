@@ -2,7 +2,7 @@
 
 #include <type_traits>
 
-namespace IW {
+namespace iw {
 namespace RenderAPI {
 	enum class UniformType {
 		BOOL,

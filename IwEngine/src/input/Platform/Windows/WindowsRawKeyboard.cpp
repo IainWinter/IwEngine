@@ -4,7 +4,8 @@
 #ifdef IW_PLATFORM_WINDOWS
 #include <Windows.h>
 
-namespace IW {
+namespace iw {
+namespace Input {
 	RawKeyboard* RawKeyboard::Create() {
 		return new WindowsRawKeyboard();
 	}
@@ -51,3 +52,4 @@ namespace IW {
 	}
 }
 #endif
+}

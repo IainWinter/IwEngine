@@ -2,7 +2,7 @@
 
 #include "IwPhysics.h"
 
-namespace IW {
+namespace iw {
 namespace Physics {
 namespace impl {
 	template<

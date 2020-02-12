@@ -1,7 +1,8 @@
 #include "iw/renderer/VertexBufferLayout.h"
 #include "gl/glew.h"
 
-namespace IW {
+namespace iw {
+namespace RenderAPI {
 	VertexBufferLayout::VertexBufferLayout()
 		: m_stride(0)
 	{}
@@ -55,4 +56,4 @@ namespace IW {
 		return 0;
 	}
 }
-
+}

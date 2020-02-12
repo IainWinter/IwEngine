@@ -2,7 +2,8 @@
 #include "iw/util/io/File.h"
 #include <assert.h>
 
-namespace IW {
+namespace iw {
+namespace Graphics {
 	Renderer::Renderer(
 		const iw::ref<IDevice>& device)
 		: Device(device)
@@ -168,4 +169,5 @@ namespace IW {
 
 		EndScene();
 	}
+}
 }

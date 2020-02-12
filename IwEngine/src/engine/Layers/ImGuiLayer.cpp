@@ -5,7 +5,8 @@
 #include "iw/engine/Time.h"
 
 
-namespace IW {
+namespace iw {
+namespace Engine {
 	ImGuiLayer::ImGuiLayer()
 		: Layer("ImGui")
 		, m_context(nullptr)
@@ -96,4 +97,5 @@ namespace IW {
 
 		return false;
 	}
+}
 }

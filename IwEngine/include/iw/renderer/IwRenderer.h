@@ -11,7 +11,7 @@
 // canmt be gl here
 #define TRANSLATE GLTranslator::Instance().Translate
 
-namespace IW {
+namespace iw {
 namespace RenderAPI {
 	enum MeshTopology {
 		POINTS = 1,

@@ -1,6 +1,7 @@
 #include "iw/physics/Dynamics/ImpulseSolver.h"
 
-namespace IW {
+namespace iw {
+namespace Physics {
 	void ImpulseSolver::Solve(
 		std::vector<Rigidbody*>& bodies,
 		std::vector<Manifold>& manifolds,
@@ -69,4 +70,5 @@ namespace IW {
 			}
 		}
 	}
+}
 }

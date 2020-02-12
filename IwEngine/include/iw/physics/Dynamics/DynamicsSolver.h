@@ -3,7 +3,7 @@
 #include "Rigidbody.h"
 #include "iw/physics/Collision/Solver.h"
 
-namespace IW {
+namespace iw {
 namespace Physics {
 	class DynamicsSolver
 		: public Solver

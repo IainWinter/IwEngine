@@ -9,5 +9,5 @@ struct REFLECT Level {
 	REFLECT std::vector<Enemy>       Enemies;
 	REFLECT std::vector<iw::vector2> Positions;
 	REFLECT std::string StageName;
-	//IW::Model Stage;
+	//iw::Model Stage;
 };

@@ -5,7 +5,7 @@
 #include "iw/common/Events/EventGroups.h"
 #include "iw/events/event.h"
 
-namespace IW {
+namespace iw {
 namespace Engine {
 	enum class PhysicsEventType
 		: short

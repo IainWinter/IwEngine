@@ -3,7 +3,7 @@
 #ifdef IW_PLATFORM_WINDOWS
 #include "iw/input/Devices/Keyboard.h"
 
-namespace IW {
+namespace iw {
 namespace Input {
 	class IWINPUT_API WindowsKeyboard
 		: public Keyboard

@@ -3,7 +3,7 @@
 #include "IwRenderer.h"
 #include "Buffer.h"
 
-namespace IW {
+namespace iw {
 namespace RenderAPI {
 	class IUniformBuffer
 		: public virtual IBuffer

@@ -2,7 +2,7 @@
 
 #include "DynamicsSolver.h"
 
-namespace IW {
+namespace iw {
 namespace Physics {
 	class ImpulseSolver
 		: public DynamicsSolver

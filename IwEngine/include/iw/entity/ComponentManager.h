@@ -10,7 +10,7 @@
 #include <unordered_map>
 #include <memory>
 
-namespace IW {
+namespace iw {
 namespace ECS {
 	class ComponentManager {
 	private:

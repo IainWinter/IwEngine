@@ -4,7 +4,7 @@
 #include "Manifold.h"
 #include <vector>
 
-namespace IW {
+namespace iw {
 namespace Physics {
 	class Solver {
 	public:

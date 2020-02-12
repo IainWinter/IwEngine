@@ -11,7 +11,7 @@
 #include <vector>
 #include <assert.h>
 
-namespace IW {
+namespace iw {
 namespace ECS {
 	class ChunkList {
 	public:

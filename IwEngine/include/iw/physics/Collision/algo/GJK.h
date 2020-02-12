@@ -3,7 +3,7 @@
 #include "iw/physics/IwPhysics.h" 
 #include "iw/physics/Collision/CollisionObject.h"
 
-namespace IW {
+namespace iw {
 namespace Physics {
 namespace algo {
 	bool GJK(

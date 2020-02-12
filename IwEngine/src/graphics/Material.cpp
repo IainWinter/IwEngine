@@ -1,14 +1,15 @@
 #include "iw/graphics/Material.h"
 #include "iw/log/logger.h"
 
-namespace IW {
+namespace iw {
+namespace Graphics {
 	Material::Material()
 		: m_alloc(128)
 		, m_initialized(false)
 	{}
 	
 	Material::Material(
-		iw::ref<IW::Shader>& shader)
+		iw::ref<iw::Shader>& shader)
 		: Shader(shader)
 		, m_alloc(128)
 		, m_initialized(false)
@@ -115,7 +116,7 @@ namespace IW {
 	}
 
 	void Material::SetShader(
-		iw::ref<IW::Shader>& shader)
+		iw::ref<iw::Shader>& shader)
 	{
 		Shader = shader;
 	}
@@ -281,4 +282,5 @@ namespace IW {
 	{
 		return m_properties.at(m_index.at(name));
 	}
+}
 }

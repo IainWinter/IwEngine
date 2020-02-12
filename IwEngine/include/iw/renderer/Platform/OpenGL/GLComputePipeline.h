@@ -7,7 +7,7 @@
 #include "GlPipelineParam.h"
 #include "iw/renderer/ComputePipeline.h"
 
-namespace IW {
+namespace iw {
 namespace RenderAPI {
 	class GLComputePipeline
 		: public IComputePipeline

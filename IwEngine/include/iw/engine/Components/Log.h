@@ -4,7 +4,7 @@
 
 #undef ERROR
 
-namespace IW {
+namespace iw {
 	enum LogType {
 		INFO,
 		DEBUG,

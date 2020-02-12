@@ -4,7 +4,7 @@
 #include "iw/math/vector3.h"
 #include <type_traits>
 
-namespace IW {
+namespace iw {
 namespace Physics {
 namespace impl {
 	template<

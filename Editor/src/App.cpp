@@ -7,17 +7,17 @@
 #include "iw/physics/Collision/PlaneCollider.h"
 #include "iw/physics/Collision/SphereCollider.h"
 
-namespace IW {
+namespace iw {
 	App::App() {
-		iw::ref<Context> context = Input->CreateContext("Sandbox");
+		iw::ref<Context> context = Input->CreateContext("Editor");
 		
-		context->MapButton(IW::SPACE, "+jump");
-		context->MapButton(IW::SHIFT, "-jump");
-		context->MapButton(IW::D    , "+right");
-		context->MapButton(IW::A    , "-right");
-		context->MapButton(IW::W    , "+forward");
-		context->MapButton(IW::S    , "-forward");
-		context->MapButton(IW::E    , "use");
+		context->MapButton(iw::SPACE, "+jump");
+		context->MapButton(iw::SHIFT, "-jump");
+		context->MapButton(iw::D    , "+right");
+		context->MapButton(iw::A    , "-right");
+		context->MapButton(iw::W    , "+forward");
+		context->MapButton(iw::S    , "-forward");
+		context->MapButton(iw::E    , "use");
 
 		iw::ref<Device> m  = Input->CreateDevice<Mouse>();
 		iw::ref<Device> rm = Input->CreateDevice<RawMouse>();
@@ -33,7 +33,7 @@ namespace IW {
 	}
 
 	int App::Initialize(
-		IW::InitOptions& options)
+		iw::InitOptions& options)
 	{
 		int err = Application::Initialize(options);
 
@@ -77,15 +77,15 @@ namespace IW {
 	}
 }
 
-IW::Application* CreateApplication(
-	IW::InitOptions& options)
+iw::Application* CreateApplication(
+	iw::InitOptions& options)
 {
-	options.WindowOptions = IW::WindowOptions {
+	options.WindowOptions = iw::WindowOptions {
 		1280,
 		720,
 		true,
-		IW::DisplayState::NORMAL
+		iw::DisplayState::NORMAL
 	};
 
-	return new IW::App();
+	return new iw::App();
 }

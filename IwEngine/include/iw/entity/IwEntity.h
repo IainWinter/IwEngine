@@ -16,7 +16,7 @@
 #	include <typeindex>
 #endif
 
-namespace IW {
+namespace iw {
 namespace ECS {
 #ifdef IW_USE_REFLECTION
 	using ComponentType = const iw::Type*;

@@ -3,7 +3,7 @@
 #include "IwGraphics.h"
 #include "iw/math/vector4.h"
 
-namespace IW {
+namespace iw {
 namespace Graphics {
 	struct Color {
 		float r, g, b, a;

@@ -2,7 +2,7 @@
 
 #include "iw/engine/Layer.h"
 
-namespace IW {
+namespace iw {
 namespace Engine {
 	class DebugLayer
 		: public Layer

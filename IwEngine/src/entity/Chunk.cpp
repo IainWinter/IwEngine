@@ -1,7 +1,8 @@
 #include "iw/entity/Chunk.h"
 #include <iw\log\logger.h>
 
-namespace IW {
+namespace iw {
+namespace ECS {
 	size_t Chunk::ReserveComponents() {
 		++Count;
 		return CurrentIndex++ + IndexOffset;
@@ -84,4 +85,5 @@ namespace IW {
 			+ layout.Component->Size
 			* (index - IndexOffset);
 	}
+}
 }

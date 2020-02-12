@@ -3,10 +3,10 @@
 #include "iw/engine/EntryPoint.h"
 #include "Layers/ToolLayer.h"
 
-namespace IW {
+namespace iw {
 inline namespace Editor {
 	class App
-		: public IW::Application
+		: public iw::Application
 	{
 	public:
 	private:
@@ -17,7 +17,7 @@ inline namespace Editor {
 		App();
 
 		int Initialize(
-			IW::InitOptions& options) override;
+			iw::InitOptions& options) override;
 
 		bool HandleCommand(
 			const Command& command) override;

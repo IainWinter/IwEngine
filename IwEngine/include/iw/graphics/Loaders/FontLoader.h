@@ -4,7 +4,7 @@
 #include "iw/asset/AssetLoader.h"
 #include "iw/graphics/Font.h"
 
-namespace IW {
+namespace iw {
 namespace Graphics {
 	class FontLoader
 		: public AssetLoader<Font>

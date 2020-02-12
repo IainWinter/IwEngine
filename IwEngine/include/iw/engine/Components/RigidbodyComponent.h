@@ -2,7 +2,7 @@
 
 #include "iw/physics/Dynamics/Rigidbody.h"
 
-namespace IW {
+namespace iw {
 	struct RigidbodyComponent {
 		Rigidbody* Rigidbody;
 	};

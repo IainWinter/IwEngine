@@ -6,10 +6,10 @@
 #include "iw/physics/AABB.h"
 #include "iw/graphics/Model.h"
 
-namespace IW {
+namespace iw {
 namespace Engine {
 	class PhysicsSystem
-		: public System<Transform, IW::Physics::AABB>
+		: public System<Transform, iw::Physics::AABB>
 	{
 	public:
 		IWENGINE_API

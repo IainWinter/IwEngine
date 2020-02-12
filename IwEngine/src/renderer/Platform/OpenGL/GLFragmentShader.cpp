@@ -2,7 +2,8 @@
 #include "iw/log/logger.h"
 #include "gl/glew.h"
 
-namespace IW {
+namespace iw {
+namespace RenderAPI {
 	GLFragmentShader::GLFragmentShader(
 		const char* source)
 	{
@@ -29,4 +30,5 @@ namespace IW {
 	unsigned GLFragmentShader::FragmentShader() const {
 		return gl_id;
 	}
+}
 }

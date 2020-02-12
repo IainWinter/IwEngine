@@ -5,7 +5,7 @@
 #include "iw/physics/Collision/ManifoldPoints.h"
 #include "iw/common/Components/Transform.h"
 
-namespace IW  {
+namespace iw  {
 namespace Physics {
 namespace impl {
 	template<typename V>
@@ -67,7 +67,7 @@ namespace impl {
 //#include "iw/physics/AABB.h"
 //#include "iw/physics/Ray.h"
 //
-//namespace IW {
+//namespace iw {
 //	namespace Physics {
 //		namespace impl {
 //			template<
@@ -78,47 +78,47 @@ namespace impl {
 //
 //				//IWPHYSICS_API
 //				//virtual bool TestCollision(
-//				//	IW::BoxCollider2 other,
+//				//	iw::BoxCollider2 other,
 //				//	V* resolve = nullptr) const = 0;
 //
 //				IWPHYSICS_API
 //					virtual bool TestCollision(
-//						IW::BoxCollider<V> other,
+//						iw::BoxCollider<V> other,
 //						V* resolve = nullptr) const = 0;
 //
 //				//IWPHYSICS_API
 //				//virtual bool TestCollision(
-//				//	IW::BoxCollider4 other,
+//				//	iw::BoxCollider4 other,
 //				//	V* resolve = nullptr) const = 0;
 //
 //				//IWPHYSICS_API
 //				//virtual bool TestCollision(
-//				//	IW::SphereCollider2 other,
+//				//	iw::SphereCollider2 other,
 //				//	V* resolve = nullptr) const = 0;
 //
 //				IWPHYSICS_API
 //					virtual bool TestCollision(
-//						IW::SphereCollider other,
+//						iw::SphereCollider other,
 //						V* resolve = nullptr) const = 0;
 //
 //				//IWPHYSICS_API
 //				//virtual bool TestCollision(
-//				//	IW::SphereCollider4 other,
+//				//	iw::SphereCollider4 other,
 //				//	V* resolve = nullptr) const = 0;
 //
 //				//IWPHYSICS_API
 //				//virtual bool TestRay(
-//				//	IW::Ray2 ray,
+//				//	iw::Ray2 ray,
 //				//	V* poi = nullptr) const = 0;
 //
 //				IWPHYSICS_API
 //					virtual bool TestRay(
-//						IW::Ray ray,
+//						iw::Ray ray,
 //						V* poi = nullptr) const = 0;
 //
 //				//IWPHYSICS_API
 //				//virtual bool TestRay(
-//				//	IW::Ray4 ray,
+//				//	iw::Ray4 ray,
 //				//	V* poi = nullptr) const = 0;
 //
 //				//IWPHYSICS_API

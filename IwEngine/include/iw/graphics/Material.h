@@ -16,7 +16,7 @@
 #include <unordered_map>
 #include <tuple>
 
-namespace IW {
+namespace iw {
 namespace Graphics {
 	struct Material {
 	public:
@@ -53,7 +53,7 @@ namespace Graphics {
 
 		IWGRAPHICS_API
 		Material(
-			iw::ref<IW::Shader>& shader);
+			iw::ref<iw::Shader>& shader);
 
 		IWGRAPHICS_API
 		void Initialize(
@@ -65,7 +65,7 @@ namespace Graphics {
 
 		IWGRAPHICS_API
 		void SetShader(
-			iw::ref<IW::Shader>& shader);
+			iw::ref<iw::Shader>& shader);
 
 #define MAT_SETS(d)              \
 		IWGRAPHICS_API         \

@@ -2,7 +2,7 @@
 
 #include "Mesh.h"
 
-namespace IW {
+namespace iw {
 namespace Graphics {
 	struct Model {
 		Mesh*  Meshes;
