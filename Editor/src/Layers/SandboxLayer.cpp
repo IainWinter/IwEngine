@@ -25,7 +25,7 @@
 #include "iw/reflect/Components/Enemy.h"
 #include "iw/reflect/Components/Level.h"
 
-namespace IW {
+namespace iw {
 	struct ModelUBO {
 		iw::matrix4 model;
 		iw::vector3 albedo;
@@ -84,11 +84,11 @@ namespace IW {
 
 		// Textures
 		
-		Texture shadow = Texture(1024, 1024, IW::RG,    IW::FLOAT, IW::BORDER);
+		Texture shadow = Texture(1024, 1024, iw::RG,    iw::FLOAT, iw::BORDER);
 		iw::ref<Texture> texShadow = Asset->Give("ShadowMap", &shadow);
 		
-		iw::ref<Texture> texDepth  = REF<Texture>(1024, 1024, IW::DEPTH, IW::FLOAT, IW::BORDER);
-		iw::ref<Texture> texBlur   = REF<Texture>(1024, 1024, IW::ALPHA, IW::FLOAT, IW::BORDER);
+		iw::ref<Texture> texDepth  = REF<Texture>(1024, 1024, iw::DEPTH, iw::FLOAT, iw::BORDER);
+		iw::ref<Texture> texBlur   = REF<Texture>(1024, 1024, iw::ALPHA, iw::FLOAT, iw::BORDER);
 
 		texDepth->Initialize(Renderer->Device);
 		texShadow->Initialize(Renderer->Device);
@@ -193,7 +193,7 @@ namespace IW {
 		Physics->AddDSolver(new ImpulseSolver());
 		Physics->AddSolver(new PositionSolver());
 
-		textCam = new OrthographicCamera(iw::vector3::one, iw::quaternion::from_axis_angle(iw::vector3::unit_y, iw::PI), 16, 9, -10, 10);
+		textCam = new OrthographicCamera(iw::vector3::one, iw::quaternion::from_axis_angle(iw::vector3::unit_y, iw::Pi), 16, 9, -10, 10);
 
 		// Rendering pipeline
 
@@ -222,24 +222,24 @@ namespace IW {
 	void SandboxLayer::LoadLevel(
 		std::string name)
 	{
-		Space->Clear();
+		//Space->Clear();
 
 		Level level;
 		
-		iw::Serializer byte("test.bin");
+		//iw::Serializer byte("test.bin");
 		
-		bool reset = false;
+		bool reset = true;
 		if (reset) {
 			level.Enemies.push_back(Enemy{ SPIN, 1.02f, .15f, 1.0f });
 			level.Enemies.push_back(Enemy{ SPIN, 0.2617993f, .12f, 0.0f });
 			level.Positions.push_back(0);
 			level.Positions.push_back(1);
 			level.StageName = "models/grass/grass.obj";
-			byte.Write(level);
+			//byte.Write(level);
 		}
 
 		else {
-			byte.Read(level);
+			//byte.Read(level);
 		}
 
 		iw::ref<Model> stage = Asset->Load<Model>(level.StageName);
@@ -283,7 +283,7 @@ namespace IW {
 			enemy.SetComponent<Model>(*Asset->Load<Model>("Tetrahedron"));
 			enemy.SetComponent<Enemy>(level.Enemies[i]);
 
-			Transform*      te = enemy.SetComponent<Transform>(iw::vector3(level.Positions[i].x, 0, level.Positions[i].y));
+			Transform*      te = enemy.SetComponent<Transform>(iw::vector3(level.Positions[i].x, 1, level.Positions[i].y));
 			SphereCollider* se = enemy.SetComponent<SphereCollider>(iw::vector3::zero, 1.0f);
 			Rigidbody*      re = enemy.FindComponent<Rigidbody>();
 
@@ -300,9 +300,9 @@ namespace IW {
 		player.SetComponent<Model>(*Asset->Load<Model>("Sphere"));
 		player.SetComponent<Player>(6.0f, .18f, .08f, 10);
 
-		Transform* tp = player.SetComponent<Transform>(iw::vector3(5, 1, 0), iw::vector3(.75f));
+		Transform*      tp = player.SetComponent<Transform>(iw::vector3(5, 1, 0), iw::vector3(.75f));
 		SphereCollider* sp = player.SetComponent<SphereCollider>(iw::vector3::zero, .75f);
-		Rigidbody* rp = player.SetComponent<Rigidbody>();
+		Rigidbody*      rp = player.SetComponent<Rigidbody>();
 
 		rp->SetMass(1);
 		rp->SetCol(sp);
@@ -319,8 +319,8 @@ namespace IW {
 
 		PerspectiveCamera* perspective = new PerspectiveCamera(1.17f, 1.778f, .01f, 2000.0f);
 
-		iw::quaternion camrot = iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::PI / 2)
-			* iw::quaternion::from_axis_angle(iw::vector3::unit_z, iw::PI);
+		iw::quaternion camrot = iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
+			* iw::quaternion::from_axis_angle(iw::vector3::unit_z, iw::Pi);
 
 		Entity camera = Space->CreateEntity<Transform, CameraController>();
 		camera.SetComponent<Transform>(iw::vector3(0, 25, 0), iw::vector3::one, camrot);
@@ -420,7 +420,7 @@ namespace IW {
 			re->SetMass(1);
 			re->SetCol(se);
 			re->SetTrans(te);
-			re->SetVelocity(iw::vector3(cos(x) * 0, 20, 0 * sin(x += 2 * iw::PI / sc)));
+			re->SetVelocity(iw::vector3(cos(x) * 0, 20, 0 * sin(x += 2 * iw::Pi / sc)));
 
 			Physics->AddRigidbody(re);
 		}
