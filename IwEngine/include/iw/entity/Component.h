@@ -7,10 +7,12 @@
 
 namespace IW {
 namespace ECS {
-	using ComponentType = std::type_index;
-
 	struct IWENTITY_API Component {
+#ifdef IW_USE_REFLECTION
+		const iw::Type* Type;
+#else
 		size_t Type;
+#endif
 		size_t Size;
 		const char* Name;
 
@@ -25,7 +27,7 @@ namespace ECS {
 		{
 			size_t seed = std::distance(begin, end);
 			for (_itr component = begin; component != end; component++) {
-				seed ^= (*component)->Type + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+				seed ^= (size_t)(*component)->Name + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 			}
 
 			return seed;

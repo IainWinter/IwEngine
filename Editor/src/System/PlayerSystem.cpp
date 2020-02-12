@@ -24,10 +24,16 @@ void PlayerSystem::Update(
 			player->Timer -= IW::Time::DeltaTime();
 		}
 
-		if (player->Health == 0) {
+		if (player->Health <= 0) {
 			Physics->RemoveRigidbody(rigidbody);
 			QueueDestroyEntity(entity.Index);
 		}
+
+		if (player->Damaged) {
+			LOG_INFO << player->Health;
+		}
+
+		player->Damaged = false;
 	}
 }
 
@@ -88,7 +94,11 @@ bool PlayerSystem::On(
 	}
 
 	if (player.Index() != IW::EntityHandle::Empty.Index) {
-		player.FindComponent<Player>()->Health -= 1;
+		Player* p = player.FindComponent<Player>();
+		if (!p->Damaged) {
+			p->Damaged = true;
+			p->Health -= 1;
+		}
 	}
 
 	return false;

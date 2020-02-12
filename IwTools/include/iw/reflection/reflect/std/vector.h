@@ -10,61 +10,26 @@ namespace detail {
 	inline const Class* GetClass(
 		ClassTag<std::vector<_t>>)
 	{
-		static Class c = Class("std::vector", sizeof(size_t) + sizeof(void*), 2);
-		c.fields[0] = { "size",   GetType(TypeTag<size_t>()),        0 };
-		c.fields[1] = { "iteams", GetType(TypeTag<_t[1]>()), sizeof(size_t) }; // use ptr
+		static Class c = Class("std::vector", sizeof(size_t) + sizeof(_t*), 2);
+		c.fields[0] = { "size",  GetType(TypeTag<size_t>()), 0 };
+		c.fields[1] = { "items", GetType(TypeTag<_t[1] >()), sizeof(size_t) }; // use ptr
+		c.serialize = [](Serializer& serializer, const void* data) {
+			const  std::vector<_t>& vector = *(std::vector<_t>*)data;
+
+			size_t size = vector.size();
+			serializer.SerializeField     (c.fields[0], &size);
+			serializer.SerializeFieldArray(c.fields[1], iw::GetType<_t>(), vector.data(), size);
+		};
+		c.deserialize = [](Serializer& serializer, void* data) {
+			std::vector<_t>& vector = *(std::vector<_t>*)data;
+
+			size_t size;
+			serializer.DeserializeField(c.fields[0], &size);
+
+			vector.resize(size);
+			serializer.DeserializeFieldArray(c.fields[1], iw::GetType<_t>(), vector.data(), size);
+		};
 		return &c;
-	}
-
-	template<
-		typename _t,
-		typename _s>
-	void Serialize(
-		_s& stream,
-		const std::vector<_t>& vector)
-	{
-		const iw::Type* type = GetType<_t>();
-
-		Serialize<size_t>(stream, vector.size());
-
-		if (type->isClass) {
-			for (const _t& item : vector) {
-				type->AsClass()->Serialize(stream, &item);
-			}
-		}
-
-		else {
-			for (const _t& item : vector) {
-				type->Serialize(stream, &item);
-			}
-		}
-	}
-
-	template<
-		typename _t,
-		typename _s>
-	void Deserialize(
-		_s& stream,
-		std::vector<_t>& vector)
-	{
-		const iw::Type* type = GetType<_t>();
-
-		size_t size;
-		Deserialize<size_t>(stream, size);
-
-		vector.resize(size);
-
-		if (type->isClass) {
-			for (_t& item : vector) {
-				type->AsClass()->Deserialize(stream, &item);
-			}
-		}
-
-		else {
-			for (_t& item : vector) {
-				type->Deserialize(stream, &item);
-			}
-		}
 	}
 }
 }

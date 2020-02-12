@@ -94,14 +94,26 @@ namespace ECS {
 		template<
 			typename _c>
 		iw::ref<Component>& RegisterComponent() {
-			return RegisterComponent(typeid(_c), sizeof(_c));
+			return RegisterComponent(
+#ifdef IW_USE_REFLECTION
+				iw::GetType<_c>(), iw::GetType<_c>()->size
+#else
+				typeid(_c), sizeof(_c)
+#endif
+			);
 		}
 
 		// Gets a registed component from the component manager if one exists
 		template<
 			typename _c>
 		iw::ref<Component> GetComponent() {
-			return GetComponent(typeid(_c));
+			return GetComponent(
+#ifdef IW_USE_REFLECTION
+				iw::GetType<_c>()
+#else
+				typeid(_c)
+#endif
+			);
 		}
 
 		// Creates an archetype from a list of registed components
@@ -147,8 +159,8 @@ namespace ECS {
 			const EntityHandle& entity,
 			_args&&... args)
 		{
-			iw::ref<EntityData>& entityData = m_entityManager   .GetEntityData(entity.Index);
-			iw::ref<Component>   component  = m_componentManager.GetComponent (typeid(_c));
+			iw::ref<EntityData>& entityData = m_entityManager.GetEntityData(entity.Index);
+			iw::ref<Component>   component  = GetComponent<_c>();
 
 			if (component) {
 				_c* ptr = (_c*)m_componentManager.GetComponentPtr(entityData, component);

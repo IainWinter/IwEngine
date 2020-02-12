@@ -9,6 +9,7 @@ namespace iw {
 	struct Type;
 	struct Class;
 	struct Field;
+	class Serializer;
 
 	enum IntegralType {
 		NOT_INTEGRAL,
@@ -34,7 +35,7 @@ namespace iw {
 		const IntegralType type; // Integral type (NOT_INTEGRAL) for classes
 		const bool isClass;      // If AsClass() is valid
 		const bool isArray;      // If type is an array
-		const size_t count;      // Count of elements in supposed array
+		size_t count;      // Count of elements in supposed array
 
 		Type(
 			const char* name,
@@ -67,6 +68,8 @@ namespace iw {
 	{
 		Field* fields;
 		size_t fieldCount;
+		void(* serialize)  (Serializer& serializer, const void* data);
+		void(* deserialize)(Serializer& serializer,       void* data);
 
 		Class(
 			const char* name,
@@ -75,6 +78,8 @@ namespace iw {
 			: Type(name, size, NOT_INTEGRAL, true)
 			, fields(new Field[fieldCount])
 			, fieldCount(fieldCount)
+			, serialize  (nullptr)
+			, deserialize(nullptr)
 		{}
 
 		Class(
@@ -85,6 +90,9 @@ namespace iw {
 			: Type(name, size, NOT_INTEGRAL, true, true, arrayCount)
 			, fields(new Field[fieldCount])
 			, fieldCount(fieldCount)
+			, serialize  (nullptr)
+			, deserialize(nullptr)
 		{}
+
 	};
 }

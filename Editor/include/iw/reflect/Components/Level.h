@@ -6,7 +6,7 @@
 namespace iw {
 namespace detail {
 	template<>
-	const Class* GetClass(ClassTag<Level>) {
+	inline const Class* GetClass(ClassTag<Level>) {
 		static Class c = Class("Level", sizeof(Level), 3);
 		c.fields[0] = {"Enemies", GetClass(ClassTag<std::vector<Enemy>>()), offsetof(Level, Enemies)};
 		c.fields[1] = {"Positions", GetClass(ClassTag<std::vector<iw::vector2>>()), offsetof(Level, Positions)};
@@ -14,7 +14,7 @@ namespace detail {
 		return &c;
 	}
 	template<size_t _s>
-	const Class* GetClass(ClassTag<Level[_s]>) {
+	inline const Class* GetClass(ClassTag<Level[_s]>) {
 		static Class c = Class("Level""[]", sizeof(Level), 3, _s);
 		c.fields[0] = {"Enemies", GetClass(ClassTag<std::vector<Enemy>>()), offsetof(Level, Enemies)};
 		c.fields[1] = {"Positions", GetClass(ClassTag<std::vector<iw::vector2>>()), offsetof(Level, Positions)};

@@ -170,8 +170,10 @@ namespace IW {
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 
+#ifdef IW_DEBUG
 		//glEnable(GL_DEBUG_OUTPUT);
 		//glDebugMessageCallback(MessageCallback, 0);
+#endif
 
 		SetCursor(options.Cursor);
 		SetState(options.State);

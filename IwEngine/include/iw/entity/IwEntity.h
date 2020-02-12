@@ -9,11 +9,20 @@
 #endif
 
 #include "iw/util/memory/ref.h"
-#include <typeindex>
+
+#ifdef IW_USE_REFLECTION
+#	include "iw/reflection/Reflect.h"
+#else
+#	include <typeindex>
+#endif
 
 namespace IW {
 namespace ECS {
+#ifdef IW_USE_REFLECTION
+	using ComponentType = const iw::Type*;
+#else
 	using ComponentType = std::type_index;
+#endif
 }
 
 	using namespace ECS;

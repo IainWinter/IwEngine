@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Type.h"
+#include <assert.h>
+#include <cstddef>
 
 #if !defined(__clang__) && !defined(__GNUC__)
 	#ifdef __attribute__ 
@@ -11,6 +13,7 @@
 #endif
 
 #define REFLECT __attribute__((annotate("reflect")))
+
 
 namespace iw {
 namespace detail {
@@ -37,7 +40,7 @@ namespace detail {
 	const Class* GetClass(
 		ClassTag<_c>)
 	{
-		assert("No reflection information for type", typeid(_c).name());
+		assert("No reflection information for class");
 		throw nullptr;
 	}
 
@@ -50,7 +53,7 @@ namespace detail {
 			return GetClass(ClassTag<_t>());
 		}
 
-		assert("No reflection information for type", typeid(_t).name());
+		assert("No reflection information for type");
 		throw nullptr;
 	}
 }

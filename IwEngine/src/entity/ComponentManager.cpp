@@ -20,9 +20,16 @@ namespace IW {
 		iw::ref<Component>& component = m_components[type];
 		if (!component) {
 			component = m_componentPool.alloc_ref_t<Component>();
+
+#ifdef IW_USE_REFLECTION
+			component->Type = type;
+			component->Name = type->name;
+			component->Size = type->size;
+#else
 			component->Type = type.hash_code();
 			component->Name = type.name();
 			component->Size = size;
+#endif
 		}
 
 		return component;

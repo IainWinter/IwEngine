@@ -6,7 +6,7 @@
 namespace iw {
 namespace detail {
 	template<>
-	const Class* GetClass(ClassTag<Enemy>) {
+	inline const Class* GetClass(ClassTag<Enemy>) {
 		static Class c = Class("Enemy", sizeof(Enemy), 4);
 		c.fields[0] = {"Type", GetType(TypeTag<int>()), offsetof(Enemy, Type)};
 		c.fields[1] = {"Speed", GetType(TypeTag<float>()), offsetof(Enemy, Speed)};
@@ -15,7 +15,7 @@ namespace detail {
 		return &c;
 	}
 	template<size_t _s>
-	const Class* GetClass(ClassTag<Enemy[_s]>) {
+	inline const Class* GetClass(ClassTag<Enemy[_s]>) {
 		static Class c = Class("Enemy""[]", sizeof(Enemy), 4, _s);
 		c.fields[0] = {"Type", GetType(TypeTag<int>()), offsetof(Enemy, Type)};
 		c.fields[1] = {"Speed", GetType(TypeTag<float>()), offsetof(Enemy, Speed)};

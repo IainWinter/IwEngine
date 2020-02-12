@@ -7,4 +7,5 @@ struct Player {
 	int Health;
 
 	float Timer;
+	bool Damaged;
 };

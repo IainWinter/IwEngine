@@ -17,13 +17,13 @@
 #include "iw/input/Devices/Mouse.h"
 #include "imgui/imgui.h"
 
+#include "iw/reflection/serialization/JsonSerializer.h"
+
 #include "iw/reflection/reflect/std/string.h"
 #include "iw/reflection/reflect/std/vector.h"
 #include "iw/reflect/math/vector2.h"
 #include "iw/reflect/Components/Enemy.h"
 #include "iw/reflect/Components/Level.h"
-
-#include "iw/util/serialization/JsonSerializer.h"
 
 namespace IW {
 	struct ModelUBO {
@@ -54,16 +54,25 @@ namespace IW {
 
 	int SandboxLayer::Initialize() {
 		Level level;
-		//level.Enemies.push_back(Enemy { SPIN, 1.02f, .15f, 1.0f });
-		//level.Enemies.push_back(Enemy { SPIN, 0.2617993f, .12f, 0.0f });
-		//level.Positions.push_back(0);
-		//level.Positions.push_back(1);
-		//level.StageName = "models/grass/grass.obj";
 
 		{
+			bool reset = false;
 			iw::Serializer byte("test.bin");
-			byte.Read(level);
+			if (reset) {
+				level.Enemies.push_back(Enemy { SPIN, 1.02f, .15f, 1.0f });
+				level.Enemies.push_back(Enemy { SPIN, 0.2617993f, .12f, 0.0f });
+				level.Positions.push_back(0);
+				level.Positions.push_back(1);
+				level.StageName = "models/grass/grass.obj";
+
+				byte.Write(level);
+			}
+
+			else {
+				byte.Read(level);
+			}
 		}
+		// Fonts
 
 		font = Asset->Load<Font>("fonts/arial.fnt");
 		font->Initialize(Renderer->Device);
@@ -311,7 +320,6 @@ namespace IW {
 		return 0;
 	}
 
-
 	void SandboxLayer::PostUpdate() {
 		textMesh->Update(Renderer->Device);
 
@@ -351,6 +359,7 @@ namespace IW {
 
 		if (ImGui::Button("Save level")) {
 			iw::Serializer out("test.bin", true);
+			iw::JsonSerializer jout("test.json", true);
 			
 			Level level;
 			for (auto entity : Space->Query<Transform, Enemy>()) {
@@ -362,6 +371,7 @@ namespace IW {
 			level.StageName = "models/grass/grass.obj";
 			
 			out.Write(level);
+			jout.Write(level);
 		}
 
 		ImGui::End();
