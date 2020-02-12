@@ -15,16 +15,22 @@ namespace ECS {
 		iw::pool_allocator m_pool;
 
 	public:
+		IWENTITY_API
 		EntityManager();
 
+		IWENTITY_API
 		iw::ref<EntityData>& CreateEntity();
 
+		IWENTITY_API
 		bool DestroyEntity(
 			size_t index);
 
 		IWENTITY_API
 		iw::ref<EntityData>& GetEntityData(
 			size_t index);
+
+		IWENTITY_API
+		void Clear();
 	};
 }
 

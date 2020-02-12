@@ -212,7 +212,6 @@ namespace ECS {
 			return Query(MakeQuery<_cs...>());
 		}
 
-
 		// Finds an entity from one of its components
 		template<
 			typename _c>
@@ -220,6 +219,13 @@ namespace ECS {
 			_c* instance) 		// returns invalid entity sometimes
 		{
 			return FindEntity(GetComponent<_c>(), instance);
+		}
+
+		// Clears space of entities and all component data
+		void Clear() {
+			m_entityManager.Clear();
+			m_componentManager.Clear();
+			m_archetypeManager.Clear();
 		}
 	private:
 		// Moves components from one chunk list to another

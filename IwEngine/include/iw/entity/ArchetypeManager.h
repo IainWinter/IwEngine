@@ -39,6 +39,9 @@ namespace ECS {
 		IWENTITY_API
 		iw::ref<ArchetypeQuery> MakeQuery(
 			const iw::ref<ComponentQuery>& query);
+
+		IWENTITY_API
+		void Clear();
 	};
 }
 

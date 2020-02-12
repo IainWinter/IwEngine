@@ -109,6 +109,10 @@ namespace util {
 			return free(addr, size);
 		}
 
+		void reset() {
+			delete m_root; // should only delete next pages but keep 1
+		}
+
 		size_t page_size() const {
 			return m_pageSize;
 		}

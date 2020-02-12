@@ -164,6 +164,13 @@ namespace IW {
 		return query;
 	}
 
+	void ComponentManager::Clear() {
+		m_components.clear();
+		m_componentData.clear();
+		m_chunkPool.reset();
+		m_componentPool.reset();
+	}
+
 	EntityComponentArray ComponentManager::Query(
 		const iw::ref<ComponentQuery>& components,
 		const iw::ref<ArchetypeQuery>& query)

@@ -74,6 +74,9 @@ namespace ECS {
 			iw::ref<ArchetypeQuery>& query,
 			const iw::ref<Component>& component,
 			void* instance);
+
+		IWENTITY_API
+		void Clear();
 	private:
 		ChunkList* FindChunkList(
 			const iw::ref<Archetype>& archetype);

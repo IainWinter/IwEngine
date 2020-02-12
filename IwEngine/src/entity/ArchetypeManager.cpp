@@ -164,4 +164,10 @@ namespace IW {
 
 		return q;
 	}
+
+	void ArchetypeManager::Clear() {
+		m_hashed.clear();
+		m_archetypes.clear();
+		m_pool.reset();
+	}
 }

@@ -67,4 +67,10 @@ namespace IW {
 	{
 		return m_entities.at(index);
 	}
+
+	void EntityManager::Clear() {
+		m_entities.clear();
+		while (!m_dead.empty()) m_dead.pop(); // clear pq
+		m_pool.reset();
+	}
 }
