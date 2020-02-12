@@ -27,8 +27,6 @@ namespace IW {
 		GenerateShadowMap* generateShadowMap;
 		FilterTarget* postProcessShadowMap;
 
-		Entity camera;
-
 		Mesh* textMesh;
 		Transform textTransform;
 		OrthographicCamera* textCam;
@@ -45,6 +43,10 @@ namespace IW {
 		SandboxLayer();
 
 		int Initialize() override;
+
+		void LoadLevel(
+			std::string name); //temp
+
 		void PostUpdate() override;
 		void FixedUpdate() override;
 
