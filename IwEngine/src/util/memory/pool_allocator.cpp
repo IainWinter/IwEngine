@@ -1,11 +1,10 @@
 #include "iw/util/memory/pool_allocator.h"
 #include <functional>
 
-#include "iw/log/logger.h"
-
 using namespace std::placeholders;
 
 namespace iw {
+namespace util {
 	pool_allocator::pool_allocator(
 		size_t pageSize)
 		: m_root(new page(pageSize))
@@ -56,6 +55,14 @@ namespace iw {
 		return m_root->free(addr, size);
 	}
 
+	void pool_allocator::reset() {
+		m_root->reset();
+	}
+
+	size_t pool_allocator::page_size() const {
+		return m_pageSize;
+	}
+
 	// Page 
 
 	pool_allocator::page::page(
@@ -74,7 +81,7 @@ namespace iw {
 	}
 
 	pool_allocator::page::~page() {
-		delete[] m_memory;
+		free(m_memory, m_size);
 		delete m_next;
 	}
 
@@ -148,4 +155,22 @@ namespace iw {
 
 		return false;
 	}
+
+	void pool_allocator::page::reset() {
+		m_freelist.clear();
+		if (m_memory) {
+			m_freelist.emplace_back(m_memory, m_size);
+
+#ifdef IW_DEBUG
+			memset(m_memory, 0xcd, m_size);
+#endif
+
+			delete m_next;
+		}
+	}
+
+	char* pool_allocator::page::memory() const {
+		return m_memory;
+	}
+}
 }

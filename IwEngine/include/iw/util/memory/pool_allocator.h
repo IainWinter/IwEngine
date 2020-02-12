@@ -42,9 +42,9 @@ namespace util {
 				void* addr,
 				size_t size);
 
-			char* memory() const {
-				return m_memory;
-			}
+			void reset();
+
+			char* memory() const;
 
 			//page(
 			//	const page&) = delete;
@@ -109,13 +109,9 @@ namespace util {
 			return free(addr, size);
 		}
 
-		void reset() {
-			delete m_root; // should only delete next pages but keep 1
-		}
+		void reset();
 
-		size_t page_size() const {
-			return m_pageSize;
-		}
+		size_t page_size() const;
 
 		//size_t item_size() const {
 		//	return m_itemSize;
