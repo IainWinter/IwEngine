@@ -56,6 +56,8 @@ bool BulletSystem::On(
 	if (bullet != iw::EntityHandle::Empty) {
 		Physics->RemoveRigidbody(bullet.FindComponent<iw::Rigidbody>());
 		QueueDestroyEntity(bullet.Index());
+
+		return true;
 	}
 
 	return false;

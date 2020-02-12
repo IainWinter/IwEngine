@@ -226,7 +226,7 @@ namespace iw {
 
 		Level level;
 		
-		//iw::Serializer byte("test.bin");
+		iw::Serializer byte("test.bin");
 		
 		bool reset = true;
 		if (reset) {
@@ -235,11 +235,11 @@ namespace iw {
 			level.Positions.push_back(0);
 			level.Positions.push_back(1);
 			level.StageName = "models/grass/grass.obj";
-			//byte.Write(level);
+			byte.Write(level);
 		}
 
 		else {
-			//byte.Read(level);
+			byte.Read(level);
 		}
 
 		iw::ref<Model> stage = Asset->Load<Model>(level.StageName);
@@ -267,7 +267,7 @@ namespace iw {
 
 		Transform*     t = floor.SetComponent<Transform>(iw::vector3(0, 0, 0), iw::vector3(5, 3, 5));
 		PlaneCollider* s = floor.SetComponent<PlaneCollider>(iw::vector3::unit_y, 0.0f);
-		Rigidbody*     r = floor.FindComponent<Rigidbody>();
+		Rigidbody*     r = floor.SetComponent<Rigidbody>();
 
 		r->SetIsKinematic(false);
 		r->SetMass(1);
@@ -285,11 +285,12 @@ namespace iw {
 
 			Transform*      te = enemy.SetComponent<Transform>(iw::vector3(level.Positions[i].x, 1, level.Positions[i].y));
 			SphereCollider* se = enemy.SetComponent<SphereCollider>(iw::vector3::zero, 1.0f);
-			Rigidbody*      re = enemy.FindComponent<Rigidbody>();
+			Rigidbody*      re = enemy.SetComponent<Rigidbody>();
 
 			re->SetMass(1);
 			re->SetCol(se);
 			re->SetTrans(te);
+			re->SetVelocity(-1);
 
 			Physics->AddRigidbody(re);
 		}
@@ -413,14 +414,13 @@ namespace iw {
 			enemy.SetComponent<Model>(*Asset->Load<Model>("Tetrahedron"));
 			enemy.SetComponent<Enemy>(SPIN, 0.2617993f, .12f, 0.0f);
 
-			Transform* te      = enemy.SetComponent<Transform>     (iw::vector3(cos(x) * 1, 15, sin(x) * 1));
+			Transform*      te = enemy.SetComponent<Transform>     (iw::vector3(cos(x) * 1, 15, sin(x) * 1));
 			SphereCollider* se = enemy.SetComponent<SphereCollider>(iw::vector3::zero, 1.0f);
-			Rigidbody* re      = enemy.SetComponent<Rigidbody>();
+			Rigidbody*      re = enemy.SetComponent<Rigidbody>();
 
 			re->SetMass(1);
 			re->SetCol(se);
 			re->SetTrans(te);
-			re->SetVelocity(iw::vector3(cos(x) * 0, 20, 0 * sin(x += 2 * iw::Pi / sc)));
 
 			Physics->AddRigidbody(re);
 		}
