@@ -295,7 +295,7 @@ namespace iw {
 			Physics->AddRigidbody(re);
 		}
 
-		// Player		
+		// Player
 
 		Entity player = Space->CreateEntity<Transform, Model, SphereCollider, Rigidbody, Player>();
 		player.SetComponent<Model>(*Asset->Load<Model>("Sphere"));

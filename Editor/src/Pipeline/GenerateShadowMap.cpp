@@ -44,7 +44,7 @@ namespace iw {
 			auto [m_t, m_m] = m_e.Components.Tie<Components>();
 
 			for (size_t i = 0; i < m_m->MeshCount; i++) {
-				iw::ref<Texture> t = m_m->Meshes[i].Material->GetTexture("alphaMaskMap");
+				iw::ref<Texture> t = m_m->Meshes[i].Material->GetTexture("alphaMaskMap"); // bad mem from Query!
 
 				ITexture* it = nullptr;
 				if (t) {

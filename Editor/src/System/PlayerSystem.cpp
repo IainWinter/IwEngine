@@ -99,8 +99,6 @@ bool PlayerSystem::On(
 			p->Damaged = true;
 			p->Health -= 1;
 		}
-
-		return true;
 	}
 
 	return false;
