@@ -12,6 +12,7 @@ namespace Engine {
 		INPUT,
 		ACTION,
 		PHYSICS,
+		ENTITY,
 		NOT_HANDLED
 	};
 }

@@ -2,14 +2,12 @@
 
 #include "iw/engine/Core.h"
 #include "iw/engine/System.h"
-#include "iw/common/Components/Transform.h"
-#include "iw/physics/AABB.h"
-#include "iw/graphics/Model.h"
+#include "iw/physics/Dynamics/Rigidbody.h"
 
 namespace iw {
 namespace Engine {
 	class PhysicsSystem
-		: public System<Transform, iw::Physics::AABB>
+		: public System<Rigidbody>
 	{
 	public:
 		IWENGINE_API
@@ -18,6 +16,10 @@ namespace Engine {
 		IWENGINE_API
 		void Update(
 			EntityComponentArray& view);
+
+		IWENGINE_API
+		bool On(
+			EntityDestroyedEvent& e) override;
 	};
 }
 

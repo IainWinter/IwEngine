@@ -97,6 +97,12 @@ namespace Engine {
 		virtual bool On(
 			CollisionEvent& e);
 
+		// Entity events
+
+		IWENGINE_API
+		virtual bool On(
+			EntityDestroyedEvent& e);
+
 		// System updates
 
 		IWENGINE_API

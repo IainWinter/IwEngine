@@ -74,5 +74,9 @@ namespace ECS {
 		while (!m_dead.empty()) m_dead.pop(); // clear pq
 		m_pool.reset();
 	}
+
+	const std::vector<iw::ref<EntityData>>& EntityManager::Entities() const {
+		return m_entities;
+	}
 }
 }

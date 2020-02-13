@@ -5,7 +5,7 @@
 #include "iw/events/event.h"
 
 namespace iw {
-namespace Engine {
+namespace Input {
 	enum class InputEventType
 		: short
 	{
@@ -129,5 +129,5 @@ namespace Engine {
 	};
 }
 
-	using namespace Engine;
+	using namespace Input;
 }

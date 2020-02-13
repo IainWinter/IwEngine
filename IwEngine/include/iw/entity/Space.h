@@ -6,6 +6,10 @@
 #include "EntityManager.h"
 #include "iw/log/logger.h"
 
+#ifdef IW_USE_EVENTS
+#	include "iw/events/eventbus.h"
+#endif
+
 namespace iw {
 namespace ECS {
 	struct Entity;
@@ -16,27 +20,31 @@ namespace ECS {
 		ArchetypeManager m_archetypeManager;
 		EntityManager    m_entityManager;
 
+#ifdef IW_USE_EVENTS
+		ref<eventbus> m_bus;
+#endif
+
 	public:
 		// Registers a component type with the component manager allowing it to be used in archetypes
 		IWENTITY_API
-		iw::ref<Component>& RegisterComponent(
+		ref<Component>& RegisterComponent(
 			ComponentType type,
 			size_t size);
 
 		// Gets a registed component from the component manager if one exists
 		IWENTITY_API
-		iw::ref<Component> GetComponent(
+		ref<Component> GetComponent(
 			ComponentType type);
 
 		// Creates an archetype from a list of registed components
 		IWENTITY_API
-		iw::ref<Archetype>& CreateArchetype(
-			std::initializer_list<iw::ref<Component>> components);
+		ref<Archetype>& CreateArchetype(
+			std::initializer_list<ref<Component>> components);
 
 		// Recycles or creates a new entity with components of the specified archetype
 		IWENTITY_API
 		Entity CreateEntity(
-			const iw::ref<Archetype>& archetype);
+			const ref<Archetype>& archetype);
 
 		// Destroys an entity and its components
 		IWENTITY_API
@@ -47,56 +55,56 @@ namespace ECS {
 		IWENTITY_API
 		void AddComponent(
 			const EntityHandle& entity,
-			const iw::ref<Component>& component);
+			const ref<Component>& component);
 
 		// Removes a component from an entity
 		IWENTITY_API
 		void RemoveComponent(
 			const EntityHandle& entity,
-			const iw::ref<Component>& component);
+			const ref<Component>& component);
 
 		// Sets component data with a copy
 		IWENTITY_API
 		void* SetComponent(
 			const EntityHandle& entity,
-			const iw::ref<Component>& component,
+			const ref<Component>& component,
 			void* data);
 
 		// Finds a pointer to the component data of an entity
 		IWENTITY_API
 		void* FindComponent(
 			const EntityHandle& entity,
-			const iw::ref<Component>& component);
+			const ref<Component>& component);
 
 		// Returns true if the entities archetype contains the component
 		IWENTITY_API
 		bool HasComponent(
 			const EntityHandle& entity,
-			const iw::ref<Component>& component);
+			const ref<Component>& component);
 
 		// Makes a component query from a list of registered components
 		IWENTITY_API
-		iw::ref<ComponentQuery> MakeQuery(
-			std::initializer_list<iw::ref<Component>> components);
+		ref<ComponentQuery> MakeQuery(
+			std::initializer_list<ref<Component>> components);
 
 		// Query for entities with the specified components
 		IWENTITY_API
 		EntityComponentArray Query(
-			const iw::ref<ComponentQuery>& query);
+			const ref<ComponentQuery>& query);
 
 		// Finds an entity from one of its components
 		IWENTITY_API
 		Entity FindEntity(
-			const iw::ref<Component>& component,
+			const ref<Component>& component,
 			void* instance);
 
 		// Registers a component type with the component manager allowing it to be used in archetypes
 		template<
 			typename _c>
-		iw::ref<Component>& RegisterComponent() {
+		ref<Component>& RegisterComponent() {
 			return RegisterComponent(
 #ifdef IW_USE_REFLECTION
-				iw::GetType<_c>(), iw::GetType<_c>()->size
+				GetType<_c>(), GetType<_c>()->size
 #else
 				typeid(_c), sizeof(_c)
 #endif
@@ -106,10 +114,10 @@ namespace ECS {
 		// Gets a registed component from the component manager if one exists
 		template<
 			typename _c>
-		iw::ref<Component> GetComponent() {
+		ref<Component> GetComponent() {
 			return GetComponent(
 #ifdef IW_USE_REFLECTION
-				iw::GetType<_c>()
+				GetType<_c>()
 #else
 				typeid(_c)
 #endif
@@ -119,7 +127,7 @@ namespace ECS {
 		// Creates an archetype from a list of registed components
 		template<
 			typename... _cs>
-		iw::ref<Archetype>& CreateArchetype() {
+		ref<Archetype>& CreateArchetype() {
 			return CreateArchetype({ RegisterComponent<_cs>()... });
 		}
 
@@ -159,8 +167,8 @@ namespace ECS {
 			const EntityHandle& entity,
 			_args&&... args)
 		{
-			iw::ref<EntityData>& entityData = m_entityManager.GetEntityData(entity.Index);
-			iw::ref<Component>   component  = GetComponent<_c>();
+			ref<EntityData>& entityData = m_entityManager.GetEntityData(entity.Index);
+			ref<Component>   component  = GetComponent<_c>();
 
 			if (component) {
 				_c* ptr = (_c*)m_componentManager.GetComponentPtr(entityData, component);
@@ -201,7 +209,7 @@ namespace ECS {
 		// Makes a component query from a list of registered components
 		template<
 			typename... _cs>
-		iw::ref<ComponentQuery> MakeQuery() {
+		ref<ComponentQuery> MakeQuery() {
 			return MakeQuery({ RegisterComponent<_cs>()... });
 		}
 
@@ -222,16 +230,21 @@ namespace ECS {
 		}
 
 		// Clears space of entities and all component data
-		void Clear() {
-			m_entityManager.Clear();
-			m_componentManager.Clear();
-			m_archetypeManager.Clear();
+		IWENTITY_API
+		void Clear();
+
+#ifdef IW_USE_EVENTS
+		void SetEventBus(
+			ref<eventbus> bus)
+		{
+			m_bus = bus;
 		}
+#endif
 	private:
 		// Moves components from one chunk list to another
 		void MoveComponents(
-			iw::ref<EntityData>& entityData,
-			const iw::ref<Archetype>& archetype);
+			ref<EntityData>& entityData,
+			const ref<Archetype>& archetype);
 	};
 }
 

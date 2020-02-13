@@ -93,7 +93,7 @@ namespace Engine {
 
 			else if (e.Group == iw::val(EventGroup::INPUT)) {
 				switch (e.Type) {
-					case InputEventType::MouseWheel:  e.Handled = On((MouseWheelEvent&)e); break;
+					case InputEventType::MouseWheel:  e.Handled = On((MouseWheelEvent&) e); break;
 					case InputEventType::MouseMoved:  e.Handled = On((MouseMovedEvent&) e); break;
 					case InputEventType::MouseButton: e.Handled = On((MouseButtonEvent&)e); break;
 					case InputEventType::Key:    	    e.Handled = On((KeyEvent&)        e); break;
@@ -114,6 +114,13 @@ namespace Engine {
 			else if (e.Group == iw::val(EventGroup::PHYSICS)) {
 				switch (e.Type) {
 					case PhysicsEventType::Collision: e.Handled = On((CollisionEvent&)e); break;
+					default: error = true;
+				}
+			}
+
+			else if (e.Group == iw::val(EventGroup::ENTITY)) {
+				switch (e.Type) {
+					case EntityEventType::Destroyed: e.Handled = On((EntityDestroyedEvent&)e); break;
 					default: error = true;
 				}
 			}

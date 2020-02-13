@@ -78,6 +78,12 @@ namespace Engine {
 		return m_systems.On(e);
 	}
 
+	bool Layer::On(
+		EntityDestroyedEvent& e)
+	{
+		return m_systems.On(e);
+	}
+
 	void Layer::UpdateSystems() {
 		for (ISystem* system : m_systems) {
 			system->Update();

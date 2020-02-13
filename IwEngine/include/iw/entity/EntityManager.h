@@ -31,6 +31,9 @@ namespace ECS {
 
 		IWENTITY_API
 		void Clear();
+
+		IWENTITY_API
+		const std::vector<iw::ref<EntityData>>& Entities() const;
 	};
 }
 

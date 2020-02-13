@@ -9,11 +9,11 @@
 #include "Layers/ImGuiLayer.h"
 #include "iw/entity/Space.h"
 #include "iw/events/eventbus.h"
-#include "iw/asset/AssetManager.h"
 #include "iw/graphics/Renderer.h"
+#include "iw/asset/AssetManager.h"
 #include "iw/input/InputManager.h"
-#include "iw/util/queue/blocking_queue.h"
 #include "iw/physics/Dynamics/DynamicsSpace.h"
+#include "iw/util/queue/blocking_queue.h"
 #include <vector>
 #include <thread>
 
@@ -22,7 +22,7 @@ namespace Engine {
 	class Application {
 	private:
 		IWindow* m_window;
-		iw::ref<IDevice> m_device;
+		ref<IDevice> m_device;
 
 		ImGuiLayer* m_imguiLayer;
 		EventStack<Layer*> m_layers;
@@ -31,13 +31,13 @@ namespace Engine {
 		bool m_running;
 
 	protected:
-		iw::ref<Space>         Space;
-		iw::ref<Renderer>      Renderer;
-		iw::ref<AssetManager>  Asset;
-		iw::ref<InputManager>  Input;
-		iw::ref<Console>       Console;
-		iw::ref<iw::eventbus>  Bus;
-		iw::ref<DynamicsSpace> Physics;
+		ref<Space>         Space;
+		ref<Renderer>      Renderer;
+		ref<AssetManager>  Asset;
+		ref<InputManager>  Input;
+		ref<Console>       Console;
+		ref<DynamicsSpace> Physics;
+		ref<eventbus>      Bus;
 
 	public:
 		IWENGINE_API

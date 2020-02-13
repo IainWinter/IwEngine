@@ -166,6 +166,7 @@ namespace util {
 #endif
 
 			delete m_next;
+			m_next = nullptr;
 		}
 	}
 

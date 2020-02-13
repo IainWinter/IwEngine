@@ -25,6 +25,8 @@
 #include "iw/reflect/Components/Enemy.h"
 #include "iw/reflect/Components/Level.h"
 
+#include "iw/engine/Systems/PhysicsSystem.h"
+
 namespace iw {
 	struct ModelUBO {
 		iw::matrix4 model;
@@ -212,6 +214,7 @@ namespace iw {
 
 		// Systems
 
+		PushSystem<PhysicsSystem>();
 		PushSystem<PlayerSystem>();
 		PushSystem<EnemySystem>(sphere);
 		PushSystem<BulletSystem>();
@@ -222,13 +225,13 @@ namespace iw {
 	void SandboxLayer::LoadLevel(
 		std::string name)
 	{
-		//Space->Clear();
+		Space->Clear();
 
 		Level level;
 		
 		iw::Serializer byte("test.bin");
 		
-		bool reset = true;
+		bool reset = false;
 		if (reset) {
 			level.Enemies.push_back(Enemy{ SPIN, 1.02f, .15f, 1.0f });
 			level.Enemies.push_back(Enemy{ SPIN, 0.2617993f, .12f, 0.0f });
@@ -377,6 +380,10 @@ namespace iw {
 			
 			out.Write(level);
 			jout.Write(level);
+		}
+
+		if (ImGui::Button("Load level")) {
+			LoadLevel("test.bin");
 		}
 
 		ImGui::End();

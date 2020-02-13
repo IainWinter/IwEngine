@@ -4,31 +4,35 @@
 #include "iw/entity/Entity.h"
 #include <assert.h>
 
+#ifdef IW_USE_EVENTS
+#	include "iw/entity/Events/EntityEvents.h"
+#endif
+
 namespace iw {
 namespace ECS {
-	iw::ref<Component>& Space::RegisterComponent(
+	ref<Component>& Space::RegisterComponent(
 		ComponentType type,
 		size_t size)
 	{
 		return m_componentManager.RegisterComponent(type, size);
 	}
 
-	iw::ref<Component> Space::GetComponent(
+	ref<Component> Space::GetComponent(
 		ComponentType type)
 	{
 		return m_componentManager.GetComponent(type);
 	}
 
-	iw::ref<Archetype>& Space::CreateArchetype(
-		std::initializer_list<iw::ref<Component>> components)
+	ref<Archetype>& Space::CreateArchetype(
+		std::initializer_list<ref<Component>> components)
 	{
 		return m_archetypeManager.CreateArchetype(components);
 	}
 
 	Entity Space::CreateEntity(
-		const iw::ref<Archetype>& archetype)
+		const ref<Archetype>& archetype)
 	{
-		iw::ref<EntityData>& entityData = m_entityManager.CreateEntity();
+		ref<EntityData>& entityData = m_entityManager.CreateEntity();
 
 		bool componentsExist = false;
 		if (   entityData->Archetype
@@ -51,37 +55,45 @@ namespace ECS {
 	bool Space::DestroyEntity(
 		size_t index)
 	{
+		ref<EntityData>& entityData = m_entityManager.GetEntityData(index);
+
+#ifdef IW_USE_EVENTS
+		if (m_bus) {
+			m_bus->send<EntityDestroyedEvent>(Entity(entityData->Entity, this));
+		}
+#endif
+
 		return m_entityManager   .DestroyEntity(index)
-			&& m_componentManager.DestroyComponentsData(m_entityManager.GetEntityData(index));
+			&& m_componentManager.DestroyComponentsData(entityData);
 	}
 
 	void Space::AddComponent(
 		const EntityHandle& entity,
-		const iw::ref<Component>& component)
+		const ref<Component>& component)
 	{
-		iw::ref<EntityData>& entityData = m_entityManager   .GetEntityData(entity.Index);
-		iw::ref<Archetype>   archetype  = m_archetypeManager.AddComponent (entityData->Archetype, component);
+		ref<EntityData>& entityData = m_entityManager   .GetEntityData(entity.Index);
+		ref<Archetype>   archetype  = m_archetypeManager.AddComponent (entityData->Archetype, component);
 
 		MoveComponents(entityData, archetype);
 	}
 
 	void Space::RemoveComponent(
 		const EntityHandle& entity,
-		const iw::ref<Component>& component)
+		const ref<Component>& component)
 	{
-		iw::ref<EntityData>& entityData = m_entityManager   .GetEntityData  (entity.Index);
-		iw::ref<Archetype>   archetype  = m_archetypeManager.RemoveComponent(entityData->Archetype, component);
+		ref<EntityData>& entityData = m_entityManager   .GetEntityData  (entity.Index);
+		ref<Archetype>   archetype  = m_archetypeManager.RemoveComponent(entityData->Archetype, component);
 
 		MoveComponents(entityData, archetype);
 	}
 
 	void* Space::SetComponent(
 		const EntityHandle& entity,
-		const iw::ref<Component>& component,
+		const ref<Component>& component,
 		void* data)
 	{
 		if (component) {
-			iw::ref<EntityData>& entityData = m_entityManager.GetEntityData(entity.Index);
+			ref<EntityData>& entityData = m_entityManager.GetEntityData(entity.Index);
 			void* ptr = m_componentManager.GetComponentPtr(entityData, component);
 			if (ptr) {
 				memcpy(ptr, data, component->Size); // should pass this all the way down to Chunk.h but ugh
@@ -94,10 +106,10 @@ namespace ECS {
 
 	void* Space::FindComponent(
 		const EntityHandle& entity,
-		const iw::ref<Component>& component)
+		const ref<Component>& component)
 	{
 		if (component) {
-			iw::ref<EntityData>& entityData = m_entityManager.GetEntityData(entity.Index);
+			ref<EntityData>& entityData = m_entityManager.GetEntityData(entity.Index);
 			return m_componentManager.GetComponentPtr(entityData, component);
 		}
 
@@ -106,30 +118,30 @@ namespace ECS {
 
 	bool Space::HasComponent(
 		const EntityHandle& entity,
-		const iw::ref<Component>& component)
+		const ref<Component>& component)
 	{
 		if (component) {
-			iw::ref<EntityData>& entityData = m_entityManager.GetEntityData(entity.Index);
+			ref<EntityData>& entityData = m_entityManager.GetEntityData(entity.Index);
 			return entityData->Archetype->HasComponent(component);
 		}
 
 		return false;
 	}
 
-	iw::ref<ComponentQuery> Space::MakeQuery(
-		std::initializer_list<iw::ref<Component>> components)
+	ref<ComponentQuery> Space::MakeQuery(
+		std::initializer_list<ref<Component>> components)
 	{
 		return m_componentManager.MakeQuery(components);
 	}
 
 	EntityComponentArray Space::Query(
-		const iw::ref<ComponentQuery>& query)
+		const ref<ComponentQuery>& query)
 	{
 		return m_componentManager.Query(query, m_archetypeManager.MakeQuery(query));
 	}
 
 	Entity Space::FindEntity(
-		const iw::ref<Component>& component,
+		const ref<Component>& component,
 		void* instance)
 	{
 		EntityHandle entity = m_componentManager.FindEntity(
@@ -140,9 +152,25 @@ namespace ECS {
 		return Entity(entity, this);
 	}
 
+	void Space::Clear() {
+#ifdef IW_USE_EVENTS
+		if (m_bus) {
+			for (const ref<EntityData>& data : m_entityManager.Entities()) {
+				if (data->Entity.Alive) {
+					m_bus->send<EntityDestroyedEvent>(Entity(data->Entity, this));
+				}
+			}
+		}
+#endif
+
+		m_entityManager.Clear();
+		m_componentManager.Clear();
+		m_archetypeManager.Clear();
+	}
+
 	void Space::MoveComponents(
-		iw::ref<EntityData>& entityData,
-		const iw::ref<Archetype>& archetype)
+		ref<EntityData>& entityData,
+		const ref<Archetype>& archetype)
 	{
 		entityData->ChunkIndex = m_componentManager.MoveComponentData(entityData, archetype);
 		entityData->Archetype = archetype;

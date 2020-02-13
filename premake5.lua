@@ -80,7 +80,8 @@ project "IwEngine"
 
 	defines {
 		"IMGUI_IMPL_OPENGL_LOADER_GLEW",
-		"IW_USE_REFLECTION"
+		--"IW_USE_REFLECTION",
+		"IW_USE_EVENTS"
 	}
 
 	filter "system:windows"
@@ -281,7 +282,10 @@ project "Editor"
 		"xcopy /e /y /f /i \"" .. edtordir  .. resdir .. "\" \""           .. edtordir .. bindir .. resdir .. "\""
 	}
 
-	defines "IW_USE_REFLECTION"
+	defines {
+		--"IW_USE_REFLECTION",
+		"IW_USE_EVENTS"
+	}
 
 	filter "system:windows"
 		cppdialect "C++17"

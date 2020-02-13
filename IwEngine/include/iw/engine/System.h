@@ -38,6 +38,10 @@ namespace Engine {
 
 		virtual bool On(CollisionEvent& e) = 0;
 
+		// Entity events
+
+		virtual bool On(EntityDestroyedEvent& e) = 0;
+
 		virtual const char* Name() const = 0;
 	};
 
@@ -136,6 +140,10 @@ namespace Engine {
 		// Physics events
 
 		virtual bool On(CollisionEvent& e) override { return false; }
+
+		// Entity events
+
+		virtual bool On(EntityDestroyedEvent& e) override { return false; }
 
 		const char* Name() const override {
 			return m_name;

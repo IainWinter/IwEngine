@@ -1,17 +1,10 @@
 #include "iw/engine/Systems/PhysicsSystem.h"
-#include "iw/physics/Spacial/Grid.h"
-#include "iw/engine/Time.h"
 
 namespace iw {
 namespace Engine {
 	PhysicsSystem::PhysicsSystem()
-		: System<Transform, AABB>("Physics")
+		: System<Rigidbody>("Physics")
 	{}
-
-	struct Components {
-		Transform* Transform;
-		AABB* AABB;
-	};
 
 	void PhysicsSystem::Update(
 		EntityComponentArray& eca)
@@ -38,6 +31,17 @@ namespace Engine {
 		//		}
 		//	}
 		//}
+	}
+
+	bool PhysicsSystem::On(
+		EntityDestroyedEvent& e)
+	{
+		if (e.Entity.HasComponent<Rigidbody>()) {
+			Rigidbody* body = e.Entity.FindComponent<Rigidbody>();
+			Physics->RemoveRigidbody(body);
+		}
+
+		return false;
 	}
 }
 }

@@ -98,7 +98,6 @@ bool EnemySystem::On(
 		Player* playerComponent = player.FindComponent<Player>();
 		if (playerComponent->Timer > 0) {
 			QueueDestroyEntity(enemy.Index());
-			Physics->RemoveRigidbody(enemy.FindComponent<iw::Rigidbody>());
 		}
 
 		else {

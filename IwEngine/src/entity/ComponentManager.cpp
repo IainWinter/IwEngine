@@ -10,7 +10,7 @@
 namespace iw {
 namespace ECS {
 	ComponentManager::ComponentManager()
-		: m_chunkPool(m_chunkSize)
+		: m_chunkPool(m_chunkSize + sizeof(Chunk))
 		, m_componentPool(512)
 	{}
 
