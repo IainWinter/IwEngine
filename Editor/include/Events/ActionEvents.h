@@ -6,7 +6,9 @@ namespace iw {
 	enum class Actions
 		: int
 	{
-		JUMP, RIGHT, FORWARD, USE, SPAWN_CIRCLE_TEMP
+		JUMP, RIGHT, FORWARD, USE,
+		SPAWN_CIRCLE_TEMP,
+		RESET_LEVEL
 	};
 
 	struct JumpEvent
@@ -41,6 +43,14 @@ namespace iw {
 	{
 		UseEvent()
 			: SingleEvent(iw::val(Actions::USE))
+		{}
+	};
+
+	struct ResetLevelEvent
+		: SingleEvent
+	{
+		ResetLevelEvent()
+			: SingleEvent(iw::val(Actions::RESET_LEVEL))
 		{}
 	};
 }

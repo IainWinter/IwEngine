@@ -302,7 +302,7 @@ namespace iw {
 
 		Entity player = Space->CreateEntity<Transform, Model, SphereCollider, Rigidbody, Player>();
 		player.SetComponent<Model>(*Asset->Load<Model>("Sphere"));
-		player.SetComponent<Player>(6.0f, .18f, .08f, 10);
+		player.SetComponent<Player>(4.0f, 8 / 60.0f, .08f, 10);
 
 		Transform*      tp = player.SetComponent<Transform>(iw::vector3(5, 1, 0), iw::vector3(.75f));
 		SphereCollider* sp = player.SetComponent<SphereCollider>(iw::vector3::zero, .75f);
@@ -411,28 +411,34 @@ namespace iw {
 	bool SandboxLayer::On(
 		ActionEvent& e)
 	{
-		if (e.Action != iw::val(Actions::SPAWN_CIRCLE_TEMP))
-			return false;
+		switch (e.Action) {
+			case val(Actions::SPAWN_CIRCLE_TEMP): {
+				iw::ref<Model> sphere = Asset->Load<Model>("Sphere");
 
-		iw::ref<Model> sphere = Asset->Load<Model>("Sphere");
+				for (size_t i = 0; i < 1; i++) {
+					Entity enemy = Space->CreateEntity<Transform, Model, SphereCollider, Rigidbody, Enemy>();
+					enemy.SetComponent<Model>(*Asset->Load<Model>("Tetrahedron"));
+					enemy.SetComponent<Enemy>(SPIN, 0.2617993f, .12f, 0.0f);
 
-		for (size_t i = 0; i < sc; i++) {
-			Entity enemy = Space->CreateEntity<Transform, Model, SphereCollider, Rigidbody, Enemy>();
-			enemy.SetComponent<Model>(*Asset->Load<Model>("Tetrahedron"));
-			enemy.SetComponent<Enemy>(SPIN, 0.2617993f, .12f, 0.0f);
+					Transform* te = enemy.SetComponent<Transform>(iw::vector3(cos(x) * 1, 15, sin(x) * 1));
+					SphereCollider* se = enemy.SetComponent<SphereCollider>(iw::vector3::zero, 1.0f);
+					Rigidbody* re = enemy.SetComponent<Rigidbody>();
 
-			Transform*      te = enemy.SetComponent<Transform>     (iw::vector3(cos(x) * 1, 15, sin(x) * 1));
-			SphereCollider* se = enemy.SetComponent<SphereCollider>(iw::vector3::zero, 1.0f);
-			Rigidbody*      re = enemy.SetComponent<Rigidbody>();
+					re->SetMass(1);
+					re->SetCol(se);
+					re->SetTrans(te);
 
-			re->SetMass(1);
-			re->SetCol(se);
-			re->SetTrans(te);
-
-			Physics->AddRigidbody(re);
+					Physics->AddRigidbody(re);
+				}
+				break;
+			}
+			case val(Actions::RESET_LEVEL): {
+				LoadLevel("test.bin");
+				break;
+			}
 		}
 
-		return true;
+		return false;
 	}
 }
 
