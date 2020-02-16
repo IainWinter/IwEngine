@@ -1,5 +1,4 @@
 #include "App.h"
-
 #include "Layers/ToolLayer.h"
 #include "Layers/SandboxLayer.h"
 #include "Events/ActionEvents.h"
@@ -27,8 +26,9 @@ namespace iw {
 		context->AddDevice(rm);
 		context->AddDevice(k);
 
-		active = false;
 		toolbox = PushLayer<ToolLayer>();
+		imgui   = PushLayer<ImGuiLayer>();
+
 		PushLayer<SandboxLayer>();
 	}
 
@@ -38,10 +38,14 @@ namespace iw {
 		int err = Application::Initialize(options);
 
 		if (!err) {
-			GetLayer<ImGuiLayer>("ImGui")->BindContext();
+			ImGuiLayer* imgui = GetLayer<ImGuiLayer>("ImGui");
+			if (imgui) {
+				imgui->BindContext();
+			}
 		}
 
 		PopLayer(toolbox);
+		PopLayer(imgui);
 
 		return err;
 	}
@@ -62,15 +66,21 @@ namespace iw {
 		}
 
 		else if (command.Verb == "/") {
-			if (active) {
-				PopLayer(toolbox);
-			}
-
-			else {
+			if (GetLayer("Toolbox") == nullptr) {
 				PushLayer(toolbox);
 			}
 
-			active = !active;
+			else {
+				PopLayer(toolbox);
+			}
+
+			if (GetLayer("ImGui") == nullptr) {
+				PushLayer(imgui);
+			}
+
+			else {
+				PopLayer(imgui);
+			}
 		}
 
 		return Application::HandleCommand(command);

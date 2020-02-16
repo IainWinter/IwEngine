@@ -2,6 +2,7 @@
 
 #include "iw/engine/EntryPoint.h"
 #include "Layers/ToolLayer.h"
+#include "iw/engine/Layers/ImGuiLayer.h"
 
 namespace iw {
 inline namespace Editor {
@@ -10,8 +11,8 @@ inline namespace Editor {
 	{
 	public:
 	private:
-		ToolLayer* toolbox;
-		bool active;
+		ToolLayer*  toolbox;
+		ImGuiLayer* imgui;
 
 	public:
 		App();

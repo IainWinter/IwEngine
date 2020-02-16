@@ -30,7 +30,6 @@ namespace Engine {
 		Space = std::make_shared<iw::Space>();
 		Asset = std::make_shared<AssetManager>();
 
-		PushOverlay<ImGuiLayer>();
 		PushOverlay<DebugLayer>();
 	}
 
@@ -96,8 +95,6 @@ namespace Engine {
 
 		//Need to set after so window doesn't send events before imgui gets initialized
 		m_window->SetState(options.WindowOptions.State);
-
-		m_imguiLayer = GetLayer<ImGuiLayer>("ImGui");
 
 		// Time again!
 
@@ -179,13 +176,15 @@ namespace Engine {
 			layer->PostUpdate();
 		}
 
+		ImGuiLayer* imgui = GetLayer<ImGuiLayer>("ImGui");
+
 		// ImGui render (Sync)
-		if (m_imguiLayer) {
-			m_imguiLayer->Begin();
+		if (imgui) {
+			imgui->Begin();
 			for (Layer* layer : m_layers) {
 				layer->ImGui();
 			}
-			m_imguiLayer->End();
+			imgui->End();
 		}
 
 		// Run through render queue! (Sync)

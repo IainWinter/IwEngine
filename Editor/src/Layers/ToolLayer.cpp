@@ -21,7 +21,7 @@ namespace iw {
 	};
 
 	ToolLayer::ToolLayer()
-		 : Layer("Tool")
+		 : Layer("Toolbox")
 	{}
 
 	int ToolLayer::Initialize() {

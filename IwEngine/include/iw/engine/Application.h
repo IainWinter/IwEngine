@@ -24,7 +24,6 @@ namespace Engine {
 		IWindow* m_window;
 		ref<IDevice> m_device;
 
-		ImGuiLayer* m_imguiLayer;
 		EventStack<Layer*> m_layers;
 
 		std::thread m_renderThread;

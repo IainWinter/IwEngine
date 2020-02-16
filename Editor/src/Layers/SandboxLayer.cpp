@@ -72,7 +72,7 @@ namespace iw {
 		textMesh->SetMaterial(textMat);
 		textMesh->Initialize(Renderer->Device);
 
-		textTransform = { iw::vector3(-7.5, 1, 2.5f), iw::vector3::one, iw::quaternion::identity};
+		textTransform = { iw::vector3(-6.8, -1.8, 0), iw::vector3::one, iw::quaternion::identity};
 
 		// Shader
 
@@ -154,42 +154,42 @@ namespace iw {
 		Transform* tt = new Transform();
 		Transform* tb = new Transform();
 		Transform* to = new Transform();
+		Transform* tu = new Transform();
 
 		PlaneCollider* planel = new PlaneCollider(iw::vector3( 1,  0,  0), -16);
 		PlaneCollider* planer = new PlaneCollider(iw::vector3(-1,  0,  0), -16);
 		PlaneCollider* planet = new PlaneCollider(iw::vector3( 0,  0,  1), -9);
 		PlaneCollider* planeb = new PlaneCollider(iw::vector3( 0,  0, -1), -9);
 		PlaneCollider* planeo = new PlaneCollider(iw::vector3( 0, -1,  0), -2);
+		PlaneCollider* planeu = new PlaneCollider(iw::vector3( 0,  1,  0),  0);
 
 		Rigidbody* rl = new Rigidbody(false);
 		Rigidbody* rr = new Rigidbody(false);
 		Rigidbody* rt = new Rigidbody(false);
 		Rigidbody* rb = new Rigidbody(false);
 		Rigidbody* ro = new Rigidbody(false);
+		Rigidbody* ru = new Rigidbody(false);
 
 		rl->SetCol(planel);
 		rr->SetCol(planer);
 		rt->SetCol(planet);
 		rb->SetCol(planeb);
 		ro->SetCol(planeo);
+		ru->SetCol(planeu);
 
 		rl->SetTrans(tl);
 		rr->SetTrans(tr);
 		rt->SetTrans(tt);
 		rb->SetTrans(tb);
 		ro->SetTrans(to);
-
-		rl->SetRestitution(1);
-		rr->SetRestitution(1);
-		rt->SetRestitution(1);
-		rb->SetRestitution(1);
-		ro->SetRestitution(1);
+		ru->SetTrans(tu);
 
 		Physics->AddRigidbody(rl);
 		Physics->AddRigidbody(rr);
 		Physics->AddRigidbody(rt);
 		Physics->AddRigidbody(rb);
 		Physics->AddRigidbody(ro);
+		Physics->AddRigidbody(ru);
 
 		Physics->SetGravity(iw::vector3(0, -9.8f, 0));
 		Physics->AddDSolver(new ImpulseSolver());
@@ -245,41 +245,80 @@ namespace iw {
 			byte.Read(level);
 		}
 
-		iw::ref<Model> stage = Asset->Load<Model>(level.StageName);
+		// Stage
 
-		for (size_t i = 0; i < stage->MeshCount; i++) {
-			iw::ref<Material>& mat = stage->Meshes[i].Material;
+		float scaleOut = 1.4f;
 
-			mat->SetShader (Asset->Load<Shader>("shaders/default.shader"));
-			mat->SetTexture("shadowMap", Asset->Load<Texture>("ShadowMap")); // shouldnt be part of material
-			mat->Initialize(Renderer->Device);
+		int x = 16 * scaleOut;
+		int y = 9 * scaleOut;
 
-			stage->Meshes[i].SetTangents(0, nullptr);
-			stage->Meshes[i].SetBiTangents(0, nullptr);
-			stage->Meshes[i].Initialize(Renderer->Device);
+		for (int i = -x; i < x; i += 4) {
+			LoadTree("models/forest/tree.dae", Transform {
+				iw::vector3(i, 0, y),
+				iw::vector3::one, 
+				iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
+				* iw::quaternion::from_axis_angle(iw::vector3::unit_y, rand() / (float)RAND_MAX * iw::Pi2)
+			});
 		}
 
-		iw::ref<Texture> a = Asset->Load<Texture>("textures/foliage/alpha_mask.jpg");
-		a->Initialize(Renderer->Device);
+		for (int i = -x; i < x; i += 4) {
+			LoadTree("models/forest/tree.dae", Transform {
+				iw::vector3(i, 0, -y),
+				iw::vector3::one,
+				iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
+				* iw::quaternion::from_axis_angle(iw::vector3::unit_y, rand() / (float)RAND_MAX * iw::Pi2)
+			});
+		}
 
-		stage->Meshes[1].Material->SetTexture("alphaMaskMap", a);
-		stage->Meshes[2].Material->SetTexture("alphaMaskMap", a);
+		for (int i = -y; i <= y; i += 3) {
+			LoadTree("models/forest/tree.dae", Transform {
+				iw::vector3(x, 0, i),
+				iw::vector3::one,
+				iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
+				* iw::quaternion::from_axis_angle(iw::vector3::unit_y, rand() / (float)RAND_MAX * iw::Pi2)
+			});
+		}
 
-		Entity floor = Space->CreateEntity<Transform, Model, PlaneCollider, Rigidbody>();
-		floor.SetComponent<Model>(*stage);
+		for (int i = -y + 3; i < y; i += 3) {
+			LoadTree("models/forest/tree.dae", Transform {
+				iw::vector3(-x, 0, i),
+				iw::vector3::one,
+				iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
+				* iw::quaternion::from_axis_angle(iw::vector3::unit_y, rand() / (float)RAND_MAX * iw::Pi2)
+			});
+		}
 
-		Transform*     t = floor.SetComponent<Transform>(iw::vector3(0, 0, 0), iw::vector3(5, 3, 5));
-		PlaneCollider* s = floor.SetComponent<PlaneCollider>(iw::vector3::unit_y, 0.0f);
-		Rigidbody*     r = floor.SetComponent<Rigidbody>();
+		LoadFloor("models/forest/floor.dae", Transform{
+			iw::vector3(0, 0, 0),
+			iw::vector3(32),
+			iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
+		});
 
-		r->SetIsKinematic(false);
-		r->SetMass(1);
-		r->SetCol(s);
-		r->SetTrans(t);
-		r->SetStaticFriction(.1f);
-		r->SetDynamicFriction(.01f);
+		//iw::ref<Model> stage = Asset->Load<Model>(level.StageName);
 
-		Physics->AddRigidbody(r);
+		//for (size_t i = 0; i < stage->MeshCount; i++) {
+		//	iw::ref<Material>& mat = stage->Meshes[i].Material;
+
+		//	mat->SetShader (Asset->Load<Shader>("shaders/default.shader"));
+		//	mat->SetTexture("shadowMap", Asset->Load<Texture>("ShadowMap")); // shouldnt be part of material
+		//	mat->Initialize(Renderer->Device);
+
+		//	stage->Meshes[i].SetTangents(0, nullptr);
+		//	stage->Meshes[i].SetBiTangents(0, nullptr);
+		//	stage->Meshes[i].Initialize(Renderer->Device);
+		//}
+
+		//iw::ref<Texture> a = Asset->Load<Texture>("textures/foliage/alpha_mask.jpg");
+		//a->Initialize(Renderer->Device);
+
+		//stage->Meshes[1].Material->SetTexture("alphaMaskMap", a);
+		//stage->Meshes[2].Material->SetTexture("alphaMaskMap", a);
+
+		//Entity floor = Space->CreateEntity<Transform, Model>();
+		//floor.SetComponent<Transform>(iw::vector3(0, 0, 0), iw::vector3(5, 3, 5));
+		//floor.SetComponent<Model>    (*stage);
+
+		// Enemies
 
 		for (size_t i = 0; i < level.Enemies.size(); i++) {
 			Entity enemy = Space->CreateEntity<Transform, Model, SphereCollider, Rigidbody, Enemy>();
@@ -329,32 +368,56 @@ namespace iw {
 		Entity camera = Space->CreateEntity<Transform, CameraController>();
 		camera.SetComponent<Transform>(iw::vector3(0, 25, 0), iw::vector3::one, camrot);
 		camera.SetComponent<CameraController>(perspective);
+	}
 
-		// Rock
+	void SandboxLayer::LoadTree(
+		std::string name,
+		Transform transform)
+	{
+		iw::ref<Model> tree = Asset->Load<Model>(name);
 
-		iw::ref<Model> rock = Asset->Load<Model>("models/tree/tree.dae");
-
-		for (size_t i = 0; i < rock->MeshCount; i++) {
-			iw::ref<Material>& mat = rock->Meshes[i].Material;
+		for (size_t i = 0; i < tree->MeshCount; i++) {
+			iw::ref<Material>& mat = tree->Meshes[i].Material;
 
 			mat->SetShader(Asset->Load<Shader>("shaders/default.shader"));
 			mat->SetTexture("shadowMap", Asset->Load<Texture>("ShadowMap")); // shouldnt be part of material
 			mat->Initialize(Renderer->Device);
 
-			rock->Meshes[i].SetTangents(0, nullptr);
-			rock->Meshes[i].SetBiTangents(0, nullptr);
-			rock->Meshes[i].Initialize(Renderer->Device);
+			tree->Meshes[i].SetTangents(0, nullptr);
+			tree->Meshes[i].SetBiTangents(0, nullptr);
+			tree->Meshes[i].Initialize(Renderer->Device);
 		}
 
 		ref<Texture> leavesAlpha = Asset->Load<Texture>("textures/tree/leaves/alpha.jpg");
-
+		tree->Meshes[1].Material->SetTexture("alphaMaskMap", leavesAlpha);
 		leavesAlpha->Initialize(Renderer->Device);
 
-		rock->Meshes[1].Material->SetTexture("alphaMaskMap", leavesAlpha);
+		Entity ent = Space->CreateEntity<Transform, Model>();
+		ent.SetComponent<Transform>(transform);
+		ent.SetComponent<Model>(*tree);
+	}
 
-		Entity rocke = Space->CreateEntity<Transform, Model>();
-		rocke.SetComponent<Transform>(iw::vector3(5, 2, -3), iw::vector3::one, iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2));
-		rocke.SetComponent<Model>(*rock);
+	void SandboxLayer::LoadFloor(
+		std::string name,
+		Transform transform)
+	{
+		iw::ref<Model> floor = Asset->Load<Model>(name);
+
+		for (size_t i = 0; i < floor->MeshCount; i++) {
+			iw::ref<Material>& mat = floor->Meshes[i].Material;
+
+			mat->SetShader(Asset->Load<Shader>("shaders/default.shader"));
+			mat->SetTexture("shadowMap", Asset->Load<Texture>("ShadowMap")); // shouldnt be part of material
+			mat->Initialize(Renderer->Device);
+
+			floor->Meshes[i].SetTangents(0, nullptr);
+			floor->Meshes[i].SetBiTangents(0, nullptr);
+			floor->Meshes[i].Initialize(Renderer->Device);
+		}
+
+		Entity ent = Space->CreateEntity<Transform, Model>();
+		ent.SetComponent<Transform>(transform);
+		ent.SetComponent<Model>(*floor);
 	}
 
 	void SandboxLayer::PostUpdate() {
