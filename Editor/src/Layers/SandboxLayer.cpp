@@ -353,7 +353,6 @@ namespace iw {
 		rock->Meshes[1].Material->SetTexture("alphaMaskMap", leavesAlpha);
 
 		Entity rocke = Space->CreateEntity<Transform, Model>();
-
 		rocke.SetComponent<Transform>(iw::vector3(5, 2, -3), iw::vector3::one, iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2));
 		rocke.SetComponent<Model>(*rock);
 	}

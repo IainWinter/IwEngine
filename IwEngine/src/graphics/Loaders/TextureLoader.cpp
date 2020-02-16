@@ -27,7 +27,8 @@ namespace Graphics {
 		}
 
 		else if (channels == 3) {
-			image = stbi_load(filepath.c_str(), &width, &height, &channels, STBI_rgb);
+			image = stbi_load(filepath.c_str(), &width, &height, &channels, STBI_rgb_alpha);
+			channels = 4;
 		}
 
 		else if (channels == 4) {

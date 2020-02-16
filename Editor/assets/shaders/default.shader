@@ -79,7 +79,7 @@ void main() {
 
 	vec4 diffuse = mat_albedo;
 	if (mat_hasAlbedoMap == 1) {
-		diffuse *= texture(mat_albedoMap, UV);
+		diffuse *= vec4(texture(mat_albedoMap, UV).rgb, 1);
 	}
 
 	if (mat_hasAlphaMaskMap == 1) {
@@ -102,11 +102,11 @@ void main() {
 		shadow = chebyshevUpperBound(coords.xy, coords.z);
 	}
 
-	vec4 color = ambiance /* ambient*/ * ao + diffuse * vec4(vec3(ambiance + shadow), 1);
+	vec4 color = ambiance * ao +  diffuse * vec4(vec3(ambiance + shadow), 1);
 
 	gl_FragColor = color;
 
 	if (color.x == 0.05345) {
-		gl_FragColor = vec4(normal, 1);
+		gl_FragColor = ambiance /* ambient*/ * ao + diffuse * vec4(vec3(ambiance + shadow), 1) * vec4(normal, 1);
 	}
 }
