@@ -329,6 +329,33 @@ namespace iw {
 		Entity camera = Space->CreateEntity<Transform, CameraController>();
 		camera.SetComponent<Transform>(iw::vector3(0, 25, 0), iw::vector3::one, camrot);
 		camera.SetComponent<CameraController>(perspective);
+
+		// Rock
+
+		iw::ref<Model> rock = Asset->Load<Model>("models/tree/tree.dae");
+
+		for (size_t i = 0; i < rock->MeshCount; i++) {
+			iw::ref<Material>& mat = rock->Meshes[i].Material;
+
+			mat->SetShader(Asset->Load<Shader>("shaders/default.shader"));
+			mat->SetTexture("shadowMap", Asset->Load<Texture>("ShadowMap")); // shouldnt be part of material
+			mat->Initialize(Renderer->Device);
+
+			rock->Meshes[i].SetTangents(0, nullptr);
+			rock->Meshes[i].SetBiTangents(0, nullptr);
+			rock->Meshes[i].Initialize(Renderer->Device);
+		}
+
+		ref<Texture> leavesAlpha = Asset->Load<Texture>("textures/tree/leaves/alpha.jpg");
+
+		leavesAlpha->Initialize(Renderer->Device);
+
+		rock->Meshes[1].Material->SetTexture("alphaMaskMap", leavesAlpha);
+
+		Entity rocke = Space->CreateEntity<Transform, Model>();
+
+		rocke.SetComponent<Transform>(iw::vector3(5, 2, -3), iw::vector3::one, iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2));
+		rocke.SetComponent<Model>(*rock);
 	}
 
 	void SandboxLayer::PostUpdate() {

@@ -63,13 +63,13 @@ namespace ECS {
 			+ sizeof(size_t)
 			* query->Count;
 
-		m_data = componentPool.alloc_ref_t<ComponentData>(cdSize);
+		m_data = componentPool.alloc_ref<ComponentData>(cdSize);
 		
 		size_t cdisSize = sizeof(ComponentDataIndices)
 			+ sizeof(size_t)
 			* query->Count;
 
-		m_indices = componentPool.alloc_ref_t<ComponentDataIndices>(cdisSize);
+		m_indices = componentPool.alloc_ref<ComponentDataIndices>(cdisSize);
 	
 		m_indices->Count = query->Count;
 		for (size_t i = 0; i < query->Count; i++) {
@@ -165,7 +165,7 @@ namespace ECS {
 				LOG_DEBUG << "Deleting Chunk " << chunk->IndexOffset / chunk->Capacity;
 
 				--m_chunkCount;
-				free(chunk);
+				m_chunkPool.free(chunk, m_chunkSize);
 			}
 
 			return true;
@@ -299,7 +299,7 @@ namespace ECS {
 	}
 
 	Chunk* ChunkList::CreateChunk() {
-		Chunk* chunk = m_chunkPool.alloc_t<Chunk>(m_chunkSize);
+		Chunk* chunk = m_chunkPool.alloc<Chunk>(m_chunkSize);
 
 		chunk->IndexOffset = m_chunkCapacity * m_chunkCount;
 		chunk->Capacity    = m_chunkCapacity;

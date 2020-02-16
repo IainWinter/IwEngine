@@ -18,7 +18,7 @@ namespace ECS {
 			return dead;
 		}
 
-		iw::ref<EntityData> entityData = m_pool.alloc_ref_t<EntityData>();
+		iw::ref<EntityData> entityData = m_pool.alloc_ref<EntityData>();
 
 		entityData->Entity = EntityHandle {
 			m_entities.size(),
@@ -77,6 +77,12 @@ namespace ECS {
 
 	const std::vector<iw::ref<EntityData>>& EntityManager::Entities() const {
 		return m_entities;
+	}
+
+	bool EntityManager::IsValidEntityIndex(
+		size_t index) const
+	{
+		return index < m_entities.size();
 	}
 }
 }

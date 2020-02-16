@@ -7,7 +7,7 @@
 
 namespace iw {
 namespace Input {
-	void SetRawInputEventLParam(
+	LPARAM SetRawInputEventLParam(
 		OsEvent& e);
 
 	InputManager::InputManager(
@@ -25,8 +25,9 @@ namespace Input {
 		OsEvent& osevent = (OsEvent&)e;
 		Context& context = *m_active.get();
 
+		LPARAM oldRawLParam = 0;
 		if (e.Type == iw::val(OsEventType::INPUT)) {
-			SetRawInputEventLParam(osevent);
+			oldRawLParam = SetRawInputEventLParam(osevent);
 		}
 		
 		if (osevent.LParam == 0) {
@@ -145,6 +146,11 @@ namespace Input {
 				}
 			}
 		}
+
+		if (oldRawLParam) {
+			delete[] (LPBYTE)osevent.LParam;
+			osevent.LParam = oldRawLParam;
+		}
 	}
 
 	iw::ref<Context> InputManager::CreateContext(
@@ -210,13 +216,14 @@ namespace Input {
 	//	return !!ret;
 	//}
 
-
 #ifdef IW_PLATFORM_WINDOWS
-	void SetRawInputEventLParam(
+	LPARAM SetRawInputEventLParam(
 		OsEvent& e)
 	{
 		const size_t rihSize = sizeof(RAWINPUTHEADER);
 		const HRAWINPUT rptr = (HRAWINPUT)e.LParam;
+
+		LPARAM old = e.LParam;
 
 		UINT dwSize = 0;
 		GetRawInputData(rptr, RID_INPUT, NULL, &dwSize, rihSize);
@@ -224,18 +231,20 @@ namespace Input {
 		if (dwSize == 0) {
 			LOG_WARNING << "Invalid raw input device! HRAWINPUT " << e.LParam;
 			e.LParam = 0;
-			return;
+			return old;
 		}
 
 		LPBYTE lpb = new BYTE[dwSize];
 
 		if (GetRawInputData(rptr, RID_INPUT, lpb, &dwSize, rihSize) != dwSize) {
+			delete[] lpb;
+			lpb = nullptr;
 			LOG_WARNING << "GetRawInputData does not return correct size!";
-			e.LParam = 0;
-			return;
 		}
 
 		e.LParam = (LPARAM)lpb;
+
+		return old;
 	}
 #endif
 }

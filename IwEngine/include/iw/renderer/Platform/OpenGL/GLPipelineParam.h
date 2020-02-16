@@ -46,55 +46,24 @@ namespace RenderAPI {
 		IWRENDERER_API
 		unsigned Count() const override;
 
-		IWRENDERER_API
-		void SetAsBool(
-			bool value) override;
+#define SET_AS(t, n)                    \
+	IWRENDERER_API                     \
+	void SetAs##n(                     \
+		t value) override;            \
+                                        \
+	IWRENDERER_API                     \
+	void SetAs##n##s(                  \
+		const void* values,	          \
+		unsigned stride,              \
+		unsigned count = 1) override; \
 
-		IWRENDERER_API
-		void SetAsBools(
-			const void* values,
-			unsigned count,
-			unsigned stride) override;
+	SET_AS(bool,     Bool)
+	SET_AS(int,      Int)
+	SET_AS(unsigned, UInt)
+	SET_AS(float,    Float)
+	SET_AS(double,   Double)
 
-		IWRENDERER_API
-		void SetAsInt(
-			int value) override;
-
-		IWRENDERER_API
-		void SetAsInts(
-			const void* values,
-			unsigned count,
-			unsigned stride) override;
-
-		IWRENDERER_API
-		void SetAsUInt(
-			unsigned int value) override;
-
-		IWRENDERER_API
-		void SetAsUInts(
-			const void* values,
-			unsigned count,
-			unsigned stride) override;
-
-		IWRENDERER_API
-		void SetAsFloat(
-			float value) override;
-
-		IWRENDERER_API
-		void SetAsFloats(
-			const void* values,
-			unsigned count,
-			unsigned stride) override;
-
-		IWRENDERER_API
-		void SetAsDouble(
-			double value) override;
-
-		IWRENDERER_API
-		void SetAsDoubles(
-			const void* values,
-			unsigned count,
-			unsigned stride) override;
+#undef SET_AS
 
 		IWRENDERER_API
 		void SetAsMat2(

@@ -35,7 +35,6 @@ namespace util {
 			const _t& item)
 		{
 			std::unique_lock<std::mutex> lock(m_mutex);
-
 			m_queue.push_back(item);
 
 			//lock.unlock();

@@ -78,12 +78,13 @@ namespace Graphics {
 				continue;
 			}
 
+			
 			switch (prop.Type) {
-				case UniformType::BOOL:   param->SetAsBools  (prop.Data, prop.Count, prop.Stride);  break;
-				case UniformType::INT:    param->SetAsInts   (prop.Data, prop.Count, prop.Stride);  break;
-				case UniformType::UINT:   param->SetAsUInts  (prop.Data, prop.Count, prop.Stride);  break;
-				case UniformType::FLOAT:  param->SetAsFloats (prop.Data, prop.Count, prop.Stride);  break;
-				case UniformType::DOUBLE: param->SetAsDoubles(prop.Data, prop.Count, prop.Stride);  break;
+				case UniformType::BOOL:   param->SetAsBools  (prop.Data, prop.Stride, prop.Count); break;
+				case UniformType::INT:    param->SetAsInts   (prop.Data, prop.Stride, prop.Count); break;
+				case UniformType::UINT:   param->SetAsUInts  (prop.Data, prop.Stride, prop.Count); break;
+				case UniformType::FLOAT:  param->SetAsFloats (prop.Data, prop.Stride, prop.Count); break;
+				case UniformType::DOUBLE: param->SetAsDoubles(prop.Data, prop.Stride, prop.Count); break;
 				default: LOG_WARNING << "Invalid property in material: " << prop.Name; break;
 			}
 		}
@@ -121,15 +122,15 @@ namespace Graphics {
 		Shader = shader;
 	}
 
-#define MAT_SETS(d, ut)                                    \
-		void Material::Set(                                \
-			std::string name,                              \
-			d data)                                        \
-		{                                                  \
-			SetProperty(name, &data, ut, sizeof(d), 1, 1); \
-		}                                                  \
+#define MAT_SETS(d, ut)                                \
+	void Material::Set(                                \
+		std::string name,                              \
+		d data)                                        \
+	{                                                  \
+		SetProperty(name, &data, ut, sizeof(d), 1, 1); \
+	}                                                  \
 
-	MAT_SETS(bool,     UniformType::BOOL)
+	MAT_SETS(bool,     UniformType::BOOL) // bools are just ints so they need to be resized!!
 	MAT_SETS(int,      UniformType::INT)
 	MAT_SETS(unsigned, UniformType::UINT)
 	MAT_SETS(float,    UniformType::FLOAT)
@@ -147,7 +148,7 @@ namespace Graphics {
 			SetProperty(name, mp(data), ut, ts, stride, count); \
 		}                                                       \
 
-		MAT_SET(bool*,       UniformType::BOOL,   sizeof(bool))
+		MAT_SET(bool*,       UniformType::BOOL,   sizeof(int)) // bools are just ints so they need to be resized!!
 		MAT_SET(int*,        UniformType::INT,    sizeof(int))
 		MAT_SET(unsigned*,   UniformType::UINT,   sizeof(unsigned))
 		MAT_SET(float*,      UniformType::FLOAT,  sizeof(float))

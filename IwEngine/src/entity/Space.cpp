@@ -55,6 +55,13 @@ namespace ECS {
 	bool Space::DestroyEntity(
 		size_t index)
 	{
+#ifdef IW_DEBUG
+		if (!m_entityManager.IsValidEntityIndex(index)) {
+			LOG_WARNING << "Tried to delete entity with an invalid index " << index;
+			return false;
+		}
+#endif 
+
 		ref<EntityData>& entityData = m_entityManager.GetEntityData(index);
 
 #ifdef IW_USE_EVENTS
@@ -71,6 +78,21 @@ namespace ECS {
 		const EntityHandle& entity,
 		const ref<Component>& component)
 	{
+#ifdef IW_DEBUG
+		if (!m_entityManager.IsValidEntityIndex(entity.Index)) {
+			LOG_WARNING << "Tried to add a " << component->Name
+				        << " component to an entity with an invalid index " << entity.Index;
+			return;
+		}
+#endif 
+
+#ifdef IW_DEBUG
+		if (!component) {
+			LOG_WARNING << "Tried to add empty component from entity " << entity.Index;
+			return;
+		}
+#endif 
+
 		ref<EntityData>& entityData = m_entityManager   .GetEntityData(entity.Index);
 		ref<Archetype>   archetype  = m_archetypeManager.AddComponent (entityData->Archetype, component);
 
@@ -81,6 +103,21 @@ namespace ECS {
 		const EntityHandle& entity,
 		const ref<Component>& component)
 	{
+#ifdef IW_DEBUG
+		if (!m_entityManager.IsValidEntityIndex(entity.Index)) {
+			LOG_WARNING << "Tried to remove a " << component->Name
+				        << " component from an entity with an invalid index " << entity.Index;
+			return;
+		}
+#endif
+
+#ifdef IW_DEBUG
+		if (!component) {
+			LOG_WARNING << "Tried to remove empty component from entity " << entity.Index;
+			return;
+		}
+#endif 
+
 		ref<EntityData>& entityData = m_entityManager   .GetEntityData  (entity.Index);
 		ref<Archetype>   archetype  = m_archetypeManager.RemoveComponent(entityData->Archetype, component);
 
@@ -92,40 +129,65 @@ namespace ECS {
 		const ref<Component>& component,
 		void* data)
 	{
-		if (component) {
-			ref<EntityData>& entityData = m_entityManager.GetEntityData(entity.Index);
-			void* ptr = m_componentManager.GetComponentPtr(entityData, component);
-			if (ptr) {
-				memcpy(ptr, data, component->Size); // should pass this all the way down to Chunk.h but ugh
-				return ptr;
-			}
+#ifdef IW_DEBUG
+		if (!m_entityManager.IsValidEntityIndex(entity.Index)) {
+			LOG_WARNING << "Tried to set a " << component->Name
+				        << " component's data on an entity with an invalid index " << entity.Index;
+			return nullptr;
 		}
+#endif
 
-		return nullptr;
+#ifdef IW_DEBUG
+		if (!component) {
+			LOG_WARNING << "Tried to set empty component on entity " << entity.Index;
+			return nullptr;
+		}
+#endif 
+
+		ref<EntityData>& entityData = m_entityManager.GetEntityData(entity.Index);
+		void* ptr = m_componentManager.GetComponentPtr(entityData, component);
+		if (ptr) {
+			memcpy(ptr, data, component->Size); // should pass this all the way down to Chunk.h but ugh
+			return ptr;
+		}
 	}
 
 	void* Space::FindComponent(
 		const EntityHandle& entity,
 		const ref<Component>& component)
 	{
-		if (component) {
-			ref<EntityData>& entityData = m_entityManager.GetEntityData(entity.Index);
-			return m_componentManager.GetComponentPtr(entityData, component);
+#ifdef IW_DEBUG
+		if (!m_entityManager.IsValidEntityIndex(entity.Index)) {
+			LOG_WARNING << "Tried to find a " << component->Name
+				        << " component on an entity with an invalid index " << entity.Index;
+			return nullptr;
 		}
+#endif
 
-		return nullptr;
+#ifdef IW_DEBUG
+		if (!component) {
+			LOG_WARNING << "Tried to find empty component on entity " << entity.Index;
+			return nullptr;
+		}
+#endif 
+
+		ref<EntityData>& entityData = m_entityManager.GetEntityData(entity.Index);
+		return m_componentManager.GetComponentPtr(entityData, component);
 	}
 
 	bool Space::HasComponent(
 		const EntityHandle& entity,
 		const ref<Component>& component)
 	{
-		if (component) {
-			ref<EntityData>& entityData = m_entityManager.GetEntityData(entity.Index);
-			return entityData->Archetype->HasComponent(component);
+#ifdef IW_DEBUG
+		if (!component) {
+			LOG_WARNING << "Tried to find empty component on entity " << entity.Index;
+			return false;
 		}
+#endif 
 
-		return false;
+		ref<EntityData>& entityData = m_entityManager.GetEntityData(entity.Index);
+		return entityData->Archetype->HasComponent(component);
 	}
 
 	ref<ComponentQuery> Space::MakeQuery(
@@ -144,6 +206,13 @@ namespace ECS {
 		const ref<Component>& component,
 		void* instance)
 	{
+#ifdef IW_DEBUG
+		if (!component) {
+			LOG_WARNING << "Tried to find entity with an empty component";
+			return Entity();
+		}
+#endif 
+
 		EntityHandle entity = m_componentManager.FindEntity(
 			m_archetypeManager.MakeQuery(MakeQuery({ component })),
 			component,

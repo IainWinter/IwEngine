@@ -20,7 +20,12 @@ namespace Physics {
 	void DynamicsSpace::AddRigidbody(
 		Rigidbody* rigidbody)
 	{
-		assert(rigidbody);
+#ifdef IW_DEBUG
+		if (rigidbody == nullptr) {
+			LOG_WARNING << "Tried to add null rigidbody to dynamics space";
+		}
+#endif
+
 		m_rigidbodies.push_back(rigidbody);
 
 		if (rigidbody->TakesGravity()) {
@@ -33,7 +38,12 @@ namespace Physics {
 	void DynamicsSpace::RemoveRigidbody(
 		Rigidbody* rigidbody)
 	{
-		assert(rigidbody);
+#ifdef IW_DEBUG
+		if (rigidbody == nullptr) {
+			LOG_WARNING << "Tried to remove null rigidbody to dynamics space";
+		}
+#endif
+
 		auto itr = std::find(m_rigidbodies.begin(), m_rigidbodies.end(), rigidbody);
 
 		if (itr != m_rigidbodies.end()) {
@@ -46,17 +56,32 @@ namespace Physics {
 	void DynamicsSpace::AddDSolver(
 		DynamicsSolver* solver)
 	{
-		assert(solver);
+#ifdef IW_DEBUG
+		if (solver== nullptr) {
+			LOG_WARNING << "Tried to add null solver to dynamics space";
+		}
+#endif
+
 		m_dynamicSolvers.push_back(solver);
 	}
 
 	void DynamicsSpace::RemoveDSolver(
 		DynamicsSolver* solver)
 	{
-		assert(solver);
+#ifdef IW_DEBUG
+		if (solver == nullptr) {
+			LOG_WARNING << "Tried to remove null solver to dynamics space";
+		}
+#endif
+
 		auto itr = std::find(m_dynamicSolvers.begin(), m_dynamicSolvers.end(), solver);
 
-		assert(itr != m_dynamicSolvers.end());
+#ifdef IW_DEBUG
+		if (itr != m_dynamicSolvers.end()) {
+			LOG_WARNING << "Tried to remove solver that doesn't exist in the dynamics space";
+		}
+#endif
+
 		m_dynamicSolvers.erase(itr);
 	}
 

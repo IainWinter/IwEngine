@@ -1,5 +1,6 @@
 #include "iw/renderer/Platform/OpenGL/GLPipelineParam.h"
 #include "iw/renderer/Platform/OpenGL/GLTexture.h"
+#include "iw/renderer/Platform/OpenGL/GLErrorCatch.h"
 #include "gl/glew.h"
 
 namespace iw {
@@ -41,6 +42,47 @@ namespace RenderAPI {
 		return m_count;
 	}
 
+#define SET_AS(t, gt, n, sn)                                                               \
+	void GLPipelineParam::SetAs##n(                                                        \
+		t value)                                                                           \
+	{                                                                                      \
+		SetAs##n##s(&value, 1, 1);                                                         \
+	}                                                                                      \
+		                                                                                   \
+	void GLPipelineParam::SetAs##n##s(                                                     \
+		const void* values,                                                                \
+		unsigned stride,                                                                   \
+		unsigned count)                                                                    \
+	{                                                                                      \
+		const gt* v = (const gt*)values;                                                   \
+		if (count == 1) {                                                                  \
+			switch (stride) {                                                              \
+				case 1: GL(glUniform1##sn(m_location, v[0]));                   break;     \
+				case 2: GL(glUniform2##sn(m_location, v[0], v[1]));             break;     \
+				case 3: GL(glUniform3##sn(m_location, v[0], v[1], v[2]));       break;     \
+				case 4: GL(glUniform4##sn(m_location, v[0], v[1], v[2], v[3])); break;     \
+				default: LOG_WARNING << "Stride is too large (" << (stride) << ")"; break; \
+			}                                                                              \
+		}                                                                                  \
+		                                                                                   \
+		else {                                                                             \
+			switch (stride) {                                                              \
+				case 1: GL(glUniform1##sn##v(m_location, count, v)); break;                \
+				case 2: GL(glUniform2##sn##v(m_location, count, v)); break;                \
+				case 3: GL(glUniform3##sn##v(m_location, count, v)); break;                \
+				case 4: GL(glUniform4##sn##v(m_location, count, v)); break;                \
+				default: LOG_WARNING << "Stride is too large (" << (stride) << ")"; break; \
+			}                                                                              \
+		}                                                                                  \
+	}                                                                                      \
+
+	SET_AS(int,      GLint,    Int,    i)
+	SET_AS(unsigned, GLuint,   UInt,  ui)
+	SET_AS(float,    GLfloat,  Float,  f)
+	SET_AS(double,   GLdouble, Double, d)
+
+#undef SET_AS
+
 	void GLPipelineParam::SetAsBool(
 		bool value)
 	{
@@ -55,18 +97,19 @@ namespace RenderAPI {
 		SetAsInts(values, count, stride);
 	}
 
-	void GLPipelineParam::SetAsInt(
+	/*void GLPipelineParam::SetAsInt(
 		int value)
 	{
+		SetAsInts(&value, 1, 1);
 		glUniform1i(m_location, value);
 	}
 
 	void GLPipelineParam::SetAsInts(
 		const void* values,
-		unsigned count,
-		unsigned stride)
+		unsigned stride,
+		unsigned count)
 	{
-		if (stride) {
+		if (count != 1) {
 			switch (stride) {
 				case 1: glUniform1iv(m_location, count, (const GLint*)values); break;
 				case 2: glUniform2iv(m_location, count, (const GLint*)values); break;
@@ -78,7 +121,7 @@ namespace RenderAPI {
 
 		else {
 			const GLint* v = (const GLint*)values;
-			switch (count) {
+			switch (stride) {
 				case 1: glUniform1i(m_location, v[0]); break;
 				case 2: glUniform2i(m_location, v[0], v[1]); break;
 				case 3: glUniform3i(m_location, v[0], v[1], v[2]); break;
@@ -185,7 +228,7 @@ namespace RenderAPI {
 				default: LOG_WARNING << "Stride is too large (" << (stride) << ")"; break;
 			}
 		}
-	}
+	}*/
 
 	void GLPipelineParam::SetAsMat2(
 		const iw::matrix2& matrix)
@@ -213,7 +256,7 @@ namespace RenderAPI {
 			index = m_textureCount++;
 		}
 
-		if (index > 32) {
+		if (index > 32) { // depends on driver
 			LOG_WARNING << "Cannot bind more than 32 textures";
 			return;
 		}

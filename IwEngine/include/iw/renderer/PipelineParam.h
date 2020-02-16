@@ -29,55 +29,27 @@ namespace RenderAPI {
 		IWRENDERER_API
 		virtual const std::string& Name() const = 0;
 
-		IWRENDERER_API
-		virtual void SetAsBool(
-			bool value) = 0;
+#define SET_AS(t, n)               \
+	IWRENDERER_API                \
+	virtual void SetAs##n(        \
+		t value) = 0;            \
+                                   \
+	IWRENDERER_API                \
+	virtual void SetAs##n##s(     \
+		const void* values,	     \
+		unsigned stride,         \
+		unsigned count = 1) = 0; \
 
-		IWRENDERER_API
-		virtual void SetAsBools(
-			const void* values,
-			unsigned count,
-			unsigned stride = 0) = 0;
 
-		IWRENDERER_API
-		virtual void SetAsInt(
-			int value) = 0;
+	SET_AS(bool,     Bool)
+	SET_AS(int,      Int)
+	SET_AS(unsigned, UInt)
+	SET_AS(float,    Float)
+	SET_AS(double,   Double)
 
-		IWRENDERER_API
-		virtual void SetAsInts(
-			const void* values,
-			unsigned count,
-			unsigned stride = 0) = 0;
+#undef SET_AS
 
-		IWRENDERER_API
-		virtual void SetAsUInt(
-			unsigned int value) = 0;
-
-		IWRENDERER_API
-		virtual void SetAsUInts(
-			const void* values,
-			unsigned count,
-			unsigned stride = 0) = 0;
-
-		IWRENDERER_API
-		virtual void SetAsFloat(
-			float value) = 0;
-
-		IWRENDERER_API
-		virtual void SetAsFloats(
-			const void* values,
-			unsigned count,
-			unsigned stride = 0) = 0;
-
-		IWRENDERER_API
-		virtual void SetAsDouble(
-			double value) = 0;
-
-		IWRENDERER_API
-		virtual void SetAsDoubles(
-			const void* values,
-			unsigned count,
-			unsigned stride = 0) = 0;
+		// does set as floats work for this? if so can make them just call that from here
 
 		IWRENDERER_API
 		virtual void SetAsMat2(

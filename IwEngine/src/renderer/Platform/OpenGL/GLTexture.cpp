@@ -34,6 +34,8 @@ bool MessageCallback(
 	return hasError;
 }
 
+// the message callback apparently works
+
 #ifdef IW_DEBUG
 	#define GL(stmt) stmt; while(MessageCallback(#stmt, __FILE__, __LINE__)) {}
 #else

@@ -4,7 +4,7 @@
 #include "event.h"
 #include "callback.h"
 #include "iw/util/queue/blocking_queue.h"
-#include "iw/util/memory/linear_allocator.h"
+#include "iw/util/memory/pool_allocator.h"
 #include "iw/log/logger.h"
 #include <mutex>
 
@@ -14,8 +14,8 @@ namespace events {
 	private:
 		std::mutex m_mutex;
 		std::vector<callback<event&>> m_callbacks;
-		linear_allocator m_alloc;
 		blocking_queue<event*> m_events;
+		pool_allocator m_alloc;
 
 	public:
 		IWEVENTS_API
@@ -38,9 +38,15 @@ namespace events {
 		void push(
 			_args&&... args)
 		{
-			_e* e = alloc_event<_e>();
+			if (m_events.size() > 10000) {
+				return;
+			}
+
+			_e* e = m_alloc.alloc<_e>();
 			if (e != nullptr) {
-				*e = _e{ std::forward<_args>(args)... };
+				*e = _e(std::forward<_args>(args)...);
+				e->Size = sizeof(_e);
+
 				m_events.push(e);
 			}
 		}
@@ -52,35 +58,14 @@ namespace events {
 			_args&&... args)
 		{
 			_e e(std::forward<_args>(args)...);
+			e.Size = sizeof(_e);
+
 			publish_event(&e);
 		}
 	private:
 		IWEVENTS_API
 		void publish_event(
 			event* e);
-
-		template<
-			typename _e>
-		_e* alloc_event() {
-			event* e = m_alloc.alloc<_e>();
-			if (    e == nullptr
-				&& m_alloc.capacity() < 1024 * 1024 * 8)
-			{
-				char* before = m_alloc.memory();
-				m_alloc.resize(m_alloc.capacity() * 2);
-				char* after = m_alloc.memory();
-
-				int offset = after - before;
-				for (event*& eptr : m_events) { // this is such monkey shit but might be the only way cus the types are unknown
-					char*& ptr = (char*&)eptr;
-					ptr += offset;
-				}
-
-				e = m_alloc.alloc<_e>();
-			}
-
-			return (_e*)e;
-		}
 	};
 }
 

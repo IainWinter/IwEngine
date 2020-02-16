@@ -67,27 +67,27 @@ namespace Graphics {
 		void SetShader(
 			iw::ref<iw::Shader>& shader);
 
-#define MAT_SETS(d)              \
+#define MAT_SET(d)               \
 		IWGRAPHICS_API         \
 		void Set(              \
 			std::string name, \
-			d  data);         \
+			d data);          \
 
-		MAT_SETS(bool)
-		MAT_SETS(int)
-		MAT_SETS(unsigned)
-		MAT_SETS(float)
-		MAT_SETS(double)
+		MAT_SET(bool)
+		MAT_SET(int)
+		MAT_SET(unsigned)
+		MAT_SET(float)
+		MAT_SET(double)
 
-#undef MAT_SETS
+#undef MAT_SET
 
-#define MAT_SET(d, s, c)            \
-		IWGRAPHICS_API            \
-		void Set(                 \
-			std::string name,    \
-			d data,              \
-			unsigned stride = s, \
-			unsigned count = c); \
+#define MAT_SET(d, s, c)             \
+		IWGRAPHICS_API             \
+		void Set(                  \
+			std::string name,     \
+			d data,               \
+			unsigned stride = s,  \
+			unsigned count  = c); \
 
 		MAT_SET(bool*,       1, 1)
 		MAT_SET(int*,        1, 1)

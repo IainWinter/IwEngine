@@ -25,7 +25,7 @@ namespace ECS {
 				+ sizeof(ArchetypeLayout)
 				* std::distance(begin, end);
 
-			archetype = m_pool.alloc_ref_t<Archetype>(bufSize);
+			archetype = m_pool.alloc_ref<Archetype>(bufSize);
 
 			size_t totalSize = 0;
 			for (auto itr = begin; itr != end; itr++) {
@@ -156,7 +156,7 @@ namespace ECS {
 			+ sizeof(size_t)
 			* matches.size();
 
-		iw::ref<ArchetypeQuery> q = m_pool.alloc_ref_t<ArchetypeQuery>(bufSize);
+		iw::ref<ArchetypeQuery> q = m_pool.alloc_ref<ArchetypeQuery>(bufSize);
 
 		q->Count = matches.size();
 		for (size_t i = 0; i < q->Count; i++) {

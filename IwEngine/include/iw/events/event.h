@@ -6,11 +6,13 @@ namespace events {
 		short Group;
 		short Type;
 		bool Handled;
+		int Size; // might get removed
 
 		event()
 			: Group(0)
 			, Type(0)
 			, Handled(false)
+			, Size(0)
 		{}
 
 		event(
@@ -19,6 +21,7 @@ namespace events {
 			: Group(category)
 			, Type(type)
 			, Handled(false)
+			, Size(0)
 		{}
 
 		template<

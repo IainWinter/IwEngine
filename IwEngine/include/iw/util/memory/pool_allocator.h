@@ -5,6 +5,9 @@
 #include <cstddef>
 #include <malloc.h>
 #include <list>
+#include <mutex>
+
+#include "iw/log/logger.h"
 
 namespace iw {
 namespace util {
@@ -26,11 +29,13 @@ namespace util {
 
 			char* m_memory;
 			size_t m_size;
-			page* m_next;
 			std::list<freemem> m_freelist;
+			page* m_previous;
+			page* m_next;
 
 		public:
 			page(
+				page* previous,
 				size_t size);
 
 			~page();
@@ -45,6 +50,12 @@ namespace util {
 			void reset();
 
 			char* memory() const;
+			const std::list<freemem>& freelist() const;
+			page* next();
+
+		private:
+			void* alloc_to_next(
+				size_t size);
 
 			//page(
 			//	const page&) = delete;
@@ -55,6 +66,7 @@ namespace util {
 	private:
 		page*  m_root;
 		size_t m_pageSize;
+		std::mutex m_mutex;
 
 	public:
 		pool_allocator(
@@ -74,44 +86,68 @@ namespace util {
 		pool_allocator& operator=(
 			const pool_allocator&) = delete;
 
-		void* alloc(
-			size_t size);
+		template<
+			typename _t>
+		_t* alloc(
+			size_t size = sizeof(_t))
+		{
+			return (_t*)alloc<void>(size);
+		}
 
-		ref<void> alloc_ref(
-			size_t size);
+		template<
+			typename _t>
+		ref<_t> alloc_ref(
+			size_t size = sizeof(_t))
+		{
+			return std::static_pointer_cast<_t, void>(alloc_ref<void>(size));
+		}
 
+		template<
+			typename _t>
 		bool free(
-			void* addr,
-			size_t size);
-
-		template<
-			typename _t>
-		_t* alloc_t(
-			size_t size = sizeof(_t))
-		{
-			return (_t*)alloc(size);
-		}
-
-		template<
-			typename _t>
-		ref<_t> alloc_ref_t(
-			size_t size = sizeof(_t))
-		{
-			return std::static_pointer_cast<_t, void>(alloc_ref(size));
-		}
-
-		template<
-			typename _t>
-		bool free_t(
 			_t* addr,
 			size_t size = sizeof(_t))
 		{
-			return free(addr, size);
+			return free<void>(addr, size);
 		}
+
+		template<>
+		void* alloc<void>(
+			size_t size);
+
+		template<>
+		ref<void> alloc_ref<void>(
+			size_t size);
+
+		template<>
+		bool free<void>(
+			void* addr,
+			size_t size);
 
 		void reset();
 
 		size_t page_size() const;
+
+		void log() const {
+			page* page = m_root;
+
+			char* mem = page->memory();
+			auto list = page->freelist();
+
+			int i = 1;
+
+			LOG_INFO << "Pool allocator";
+			while (page) {
+				LOG_INFO << "Page " << i;
+				for (auto f : list) {
+					LOG_INFO << " - " << f.size << " " << (void*)f.mem;
+				}
+
+				page = page->next();
+				i++;
+			}
+			
+		}
 
 		//size_t item_size() const {
 		//	return m_itemSize;

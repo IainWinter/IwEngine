@@ -10,8 +10,8 @@
 namespace iw {
 namespace ECS {
 	ComponentManager::ComponentManager()
-		: m_chunkPool(m_chunkSize + sizeof(Chunk))
-		, m_componentPool(512)
+		: m_chunkPool(m_chunkSize)
+		, m_componentPool(1024)
 	{}
 
 	iw::ref<Component>& ComponentManager::RegisterComponent(
@@ -20,7 +20,7 @@ namespace ECS {
 	{
 		iw::ref<Component>& component = m_components[type];
 		if (!component) {
-			component = m_componentPool.alloc_ref_t<Component>();
+			component = m_componentPool.alloc_ref<Component>();
 
 #ifdef IW_USE_REFLECTION
 			component->Type = type;
@@ -112,7 +112,7 @@ namespace ECS {
 				+ sizeof(size_t)
 				* entityData->Archetype->Count;
 
-			iw::ref<ComponentData> data = m_componentPool.alloc_ref_t<ComponentData>(cdSize);
+			iw::ref<ComponentData> data = m_componentPool.alloc_ref<ComponentData>(cdSize);
 
 			for (size_t i = 0; i < entityData->Archetype->Count; i++) {
 				data->Components[i] = list->GetComponentPtr(
@@ -153,7 +153,7 @@ namespace ECS {
 			+ sizeof(iw::ref<Component>)
 			* components.size();
 
-		iw::ref<ComponentQuery> query = m_componentPool.alloc_ref_t<ComponentQuery>(bufSize);
+		iw::ref<ComponentQuery> query = m_componentPool.alloc_ref<ComponentQuery>(bufSize);
 
 		query->Count = components.size();
 

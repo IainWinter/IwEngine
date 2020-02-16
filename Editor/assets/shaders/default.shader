@@ -36,8 +36,8 @@ void main() {
 #shader Fragment
 #version 440 core
 
-uniform vec4  mat_albedo;
-uniform float mat_ao;
+uniform vec4 mat_albedo;
+uniform vec4 mat_ao;
 uniform float mat_hasAlbedoMap;
 uniform float mat_hasAlphaMaskMap;
 uniform float mat_hasAoMap;
@@ -89,12 +89,12 @@ void main() {
 		//diffuse.a = texture(mat_alphaMaskMap, UV).r;
 	}
 
-	float ao = mat_ao;
+	vec4 ao = mat_ao;
 	if (mat_hasAoMap == 1) {
-		ao *= texture(mat_aoMap, UV).r;
+		ao.a *= texture(mat_aoMap, UV).r;
 	}
 
-	float ambiance = 0.05;
+	float ambiance = 0.01;
 
 	float shadow = 0;
 	if (mat_hasShadowMap == 1) {
@@ -102,11 +102,11 @@ void main() {
 		shadow = chebyshevUpperBound(coords.xy, coords.z);
 	}
 
-	vec3 color = ambiance /* ambient*/ * ao + diffuse.xyz * (ambiance + shadow);
+	vec4 color = ambiance /* ambient*/ * ao + diffuse * vec4(vec3(ambiance + shadow), 1);
 
-	gl_FragColor = vec4(color, 1);
+	gl_FragColor = color;
 
 	if (color.x == 0.05345) {
-		gl_FragColor = vec4(color /** ambient*/ * normal, 1);
+		gl_FragColor = vec4(normal, 1);
 	}
 }

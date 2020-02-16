@@ -6,15 +6,12 @@
 
 namespace iw {
 	linear_allocator::linear_allocator(
-		size_t size,
-		size_t resetsToRealloc)
+		size_t size)
 		: m_memory(malloc(size))
 		, m_capacity(size)
 		, m_minCapacity(size)
 		, m_peak(0)
 		, m_cursor(0)
-		, m_resets(0)
-		, m_resetsToRealloc(resetsToRealloc)
 	{
 		assert(m_memory);
 		memset(m_memory, 0, m_capacity);
@@ -27,8 +24,6 @@ namespace iw {
 		, m_minCapacity(copy.m_minCapacity)
 		, m_peak(copy.m_peak)
 		, m_cursor(copy.m_cursor)
-		, m_resets(copy.m_resets)
-		, m_resetsToRealloc(copy.m_resetsToRealloc)
 	{
 		assert(m_memory);
 		memcpy(m_memory, copy.m_memory, m_capacity);
@@ -41,16 +36,12 @@ namespace iw {
 		, m_minCapacity(copy.m_minCapacity)
 		, m_peak(copy.m_peak)
 		, m_cursor(copy.m_cursor)
-		, m_resets(copy.m_resets)
-		, m_resetsToRealloc(copy.m_resetsToRealloc)
 	{
 		copy.m_memory = nullptr;
 		copy.m_capacity = 0;
 		copy.m_minCapacity = 0;
 		copy.m_peak = 0;
 		copy.m_cursor = 0;
-		copy.m_resets = 0;
-		copy.m_resetsToRealloc = 0;
 	}
 
 	linear_allocator::~linear_allocator() {
@@ -65,8 +56,6 @@ namespace iw {
 		m_minCapacity = copy.m_minCapacity;
 		m_peak = copy.m_peak;
 		m_cursor = copy.m_cursor;
-		m_resets = copy.m_resets;
-		m_resetsToRealloc = copy.m_resetsToRealloc;
 
 		m_memory = malloc(m_capacity);
 		assert(m_memory);
@@ -83,16 +72,12 @@ namespace iw {
 		m_minCapacity     = copy.m_minCapacity;
 		m_peak            = copy.m_peak;
 		m_cursor          = copy.m_cursor;
-		m_resets          = copy.m_resets;
-		m_resetsToRealloc = copy.m_resetsToRealloc;
 
 		copy.m_memory          = nullptr;
 		copy.m_capacity        = 0;
 		copy.m_minCapacity     = 0;
 		copy.m_peak            = 0;
 		copy.m_cursor          = 0;
-		copy.m_resets          = 0;
-		copy.m_resetsToRealloc = 0;
 
 		return *this;
 	}
@@ -141,39 +126,13 @@ namespace iw {
 		m_memory = memory;
 		m_capacity = size;
 
-		LOG_INFO << "Resized event allocator to " << m_capacity;
+#ifdef IW_DEBUG
+		LOG_INFO << "Resized linear allocator to " << m_capacity;
+#endif
 	}
 
-	void linear_allocator::reset(
-		bool clean)
-	{
+	void linear_allocator::reset() {
 		memset(m_memory, 0, m_cursor);
 		m_cursor = 0;
-
-		//if (   clean 
-		//	&& m_memory 
-		//	&& m_resets >= m_resetsToRealloc)
-		//{
-		//	size_t halfCap = m_capacity / 2;
-		//	if (   m_cursor      <  halfCap / 2
-		//		&& m_minCapacity <= halfCap)
-		//	{
-		//		LOG_INFO << m_cursor;
-		//		resize(halfCap);
-		//	}
-
-		//	m_resets = 0;
-		//}
-
-		//else {
-		//	++m_resets;
-		//}
-
-		//if (   m_memory
-		//	&& m_cursor >  0
-		//	&& m_cursor <= m_capacity)
-		//{
-
-		//}
 	}
 }

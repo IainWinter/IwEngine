@@ -34,6 +34,10 @@ namespace ECS {
 
 		IWENTITY_API
 		const std::vector<iw::ref<EntityData>>& Entities() const;
+
+		IWENTITY_API
+		bool IsValidEntityIndex(
+			size_t index) const;
 	};
 }
 

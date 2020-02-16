@@ -12,14 +12,11 @@ namespace util {
 		size_t m_minCapacity;
 		size_t m_peak;
 		size_t m_cursor;
-		size_t m_resets;
-		size_t m_resetsToRealloc;
 
 	public:
 		IWUTIL_API
 		linear_allocator(
-			size_t size,
-			size_t resetsToRealloc = 0);
+			size_t size);
 
 		GEN_5(IWUTIL_API, linear_allocator);
 
@@ -42,8 +39,7 @@ namespace util {
 			size_t size);
 
 		IWUTIL_API
-		void reset(
-			bool clean = false);
+		void reset();
 
 		inline char* memory() {
 			return (char*)m_memory;

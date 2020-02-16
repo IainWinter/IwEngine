@@ -2,7 +2,7 @@
 
 namespace iw {
 	eventbus::eventbus()
-		: m_alloc(1024, 1)
+		: m_alloc(1024)
 	{}
 
 	void eventbus::subscribe(
@@ -21,11 +21,22 @@ namespace iw {
 
 	void eventbus::publish() {
 		std::unique_lock<std::mutex> lock(m_mutex);
-		while (!m_events.empty()) {
-			publish_event(m_events.pop());
-		}
 
-		m_alloc.reset(true);
+		int count = 0;
+		while (!m_events.empty()) {
+			event* e = m_events.pop();
+			publish_event(e);
+			if (e->Group == -1) {
+				LOG_INFO << "Mysterious -1 event";
+				continue;
+			}
+
+			m_alloc.free(e, e->Size);
+
+			if (count++ > 10000) {
+				break;
+			}
+		}
 	}
 
 	void eventbus::publish_event(
