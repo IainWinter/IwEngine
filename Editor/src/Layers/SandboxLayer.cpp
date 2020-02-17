@@ -431,6 +431,13 @@ namespace iw {
 		ent.SetComponent<Model>(*floor);
 	}
 
+	void SandboxLayer::PreUpdate() {
+		if (loadLevel != "") {
+			LoadLevel(loadLevel);
+			loadLevel = "";
+		}
+	}
+
 	void SandboxLayer::PostUpdate() {
 		textMesh->Update(Renderer->Device);
 
@@ -483,7 +490,7 @@ namespace iw {
 		}
 
 		if (ImGui::Button("Load level")) {
-			LoadLevel("test.bin");
+			loadLevel = "test.bin";
 		}
 
 		ImGui::End();
@@ -532,11 +539,11 @@ namespace iw {
 				break;
 			}
 			case val(Actions::RESET_LEVEL): {
-				LoadLevel("test.bin");
+				loadLevel = "test.bin";
 				break;
 			}
 			case val(Actions::NEXT_LEVEL): {
-				LoadLevel("test2.bin");
+				loadLevel = "test2.bin";
 				break;
 			}
 		}

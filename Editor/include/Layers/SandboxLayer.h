@@ -41,6 +41,8 @@ namespace iw {
 		float ts = 1.0f;
 		float threshold = 0.25f;
 
+		std::string loadLevel;
+
 	public:
 		SandboxLayer();
 
@@ -61,6 +63,7 @@ namespace iw {
 			std::string name,
 			Transform transform); //temp
 
+		void PreUpdate() override;
 		void PostUpdate() override;
 		void FixedUpdate() override;
 
