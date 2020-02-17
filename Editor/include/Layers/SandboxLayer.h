@@ -16,6 +16,8 @@ namespace iw {
 		: public Layer
 	{
 	private:
+		PerspectiveCamera* mainCam;
+
 		DirectionalLight light;
 		iw::vector3 lightPos = iw::vector3(2, 5, .5f);
 		iw::ref<RenderTarget> target;

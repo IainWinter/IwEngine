@@ -17,8 +17,8 @@ namespace iw {
 		context->MapButton(iw::W    , "+forward");
 		context->MapButton(iw::S    , "-forward");
 		context->MapButton(iw::E    , "use");
-		context->MapButton(iw::T    , "/");
-		context->MapButton(iw::I    , ".");
+		context->MapButton(iw::T    , "toolbox");
+		context->MapButton(iw::I    , "imgui");
 
 		iw::ref<Device> m  = Input->CreateDevice<Mouse>();
 		iw::ref<Device> rm = Input->CreateDevice<RawMouse>();
@@ -67,7 +67,7 @@ namespace iw {
 			Bus->push<ForwardEvent>(command.Active);
 		}
 
-		else if (command.Verb == "/") {
+		else if (command.Verb == "toolbox") {
 			if (GetLayer("Toolbox") == nullptr) {
 				PushLayer(toolbox);
 			}
@@ -77,7 +77,7 @@ namespace iw {
 			}
 		}
 
-		else if (command.Verb == ".") {
+		else if (command.Verb == "imgui") {
 			if (GetLayer("ImGui") == nullptr) {
 				PushLayer(imgui);
 				Bus->push<WindowResizedEvent>(Window().Id(), Renderer->Width, Renderer->Height);

@@ -14,7 +14,9 @@ public:
 		Enemy* Enemy;
 	};
 private:
-	iw::ref<iw::Model> BulletModel;
+	iw::ref<iw::Model> m_bulletModel;
+	int m_enemyCount;
+	float m_levelResetTimer;
 
 public:
 	EnemySystem(

@@ -9,17 +9,25 @@
 #include "IW/physics/Dynamics/Rigidbody.h";
 #include <Components\Player.h>
 
+#include "Events/ActionEvents.h"
+
 EnemySystem::EnemySystem(
 	iw::ref<iw::Model> bulletModel)
 	: iw::System<iw::Transform, Enemy>("Enemy")
-	, BulletModel(bulletModel)
+	, m_bulletModel(bulletModel)
+	, m_enemyCount(0)
+	, m_levelResetTimer(0)
 {}
 
 void EnemySystem::Update(
 	iw::EntityComponentArray& view)
 {
+	m_enemyCount = 0;
+
 	for (auto entity : view) {
 		auto [transform, enemy] = entity.Components.Tie<Components>();
+
+		m_enemyCount++;
 
 		transform->Rotation *= iw::quaternion::from_euler_angles(0, -iw::Time::DeltaTime(), 0);
 
@@ -36,7 +44,7 @@ void EnemySystem::Update(
 			v *= 5;
 
 			iw::Entity bullet = Space->CreateEntity<iw::Transform, iw::Model, iw::SphereCollider, iw::Rigidbody, Bullet>();
-			bullet.SetComponent<iw::Model>(*BulletModel);
+			bullet.SetComponent<iw::Model>(*m_bulletModel);
 			bullet.SetComponent<Bullet>   (LINE, 5.0f);
 
 			iw::Transform* t      = bullet.SetComponent<iw::Transform>     (transform->Position + iw::vector3(sqrt(2), 0, 0) * rot, iw::vector3(.25f));
@@ -66,6 +74,14 @@ void EnemySystem::Update(
 			enemy->Timer -= iw::Time::DeltaTime();
 		}
 	}
+
+	if (m_enemyCount == 0) {
+		m_levelResetTimer += iw::Time::DeltaTime();
+		if (m_levelResetTimer > 1.0f) {
+			m_levelResetTimer = 0;
+			Bus->push<iw::NextLevelEvent>();
+		}
+	}
 }
 
 bool EnemySystem::On(
@@ -93,7 +109,7 @@ bool EnemySystem::On(
 	}
 
 	if (   player.Index() != iw::EntityHandle::Empty.Index
-		|| enemy .Index() != iw::EntityHandle::Empty.Index)
+		&& enemy .Index() != iw::EntityHandle::Empty.Index)
 	{
 		Player* playerComponent = player.FindComponent<Player>();
 		if (playerComponent->Timer > 0) {

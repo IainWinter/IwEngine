@@ -158,12 +158,17 @@ namespace Graphics {
 	void Texture::Initialize(
 		const iw::ref<IDevice>& device)
 	{
-		if (IsSubTexture()) {
-			m_handle = device->CreateSubTexture(m_parent->Handle(), m_xOffset, m_yOffset, m_width, m_height);
+		if (m_handle) {
+			// Update
 		}
-
 		else {
-			m_handle = device->CreateTexture(m_width, m_height, m_format, m_formatType, m_wrap, m_colors);
+			if (IsSubTexture()) {
+				m_handle = device->CreateSubTexture(m_parent->Handle(), m_xOffset, m_yOffset, m_width, m_height);
+			}
+
+			else {
+				m_handle = device->CreateTexture(m_width, m_height, m_format, m_formatType, m_wrap, m_colors);
+			}
 		}
 	}
 

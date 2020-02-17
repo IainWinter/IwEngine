@@ -1,5 +1,7 @@
 #include "iw/engine/Systems/PhysicsSystem.h"
 
+#include "iw/graphics/Model.h"
+
 namespace iw {
 namespace Engine {
 	PhysicsSystem::PhysicsSystem()

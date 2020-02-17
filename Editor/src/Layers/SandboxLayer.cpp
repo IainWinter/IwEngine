@@ -29,8 +29,8 @@
 
 namespace iw {
 	struct ModelUBO {
-		iw::matrix4 model;
-		iw::vector3 albedo;
+		matrix4 model;
+		vector3 albedo;
 	};
 
 	struct ModelComponents {
@@ -64,20 +64,20 @@ namespace iw {
 		fontShader = Asset->Load<Shader>("shaders/font.shader");
 		Renderer->InitShader(fontShader, CAMERA);
 
-		iw::ref<Material> textMat = REF<Material>(fontShader);
+		ref<Material> textMat = REF<Material>(fontShader);
 
-		textMat->Set("color", iw::vector3::one);
+		textMat->Set("color", vector3::one);
 		textMat->SetTexture("fontMap", font->GetTexture(0));
 
 		textMesh->SetMaterial(textMat);
 		textMesh->Initialize(Renderer->Device);
 
-		textTransform = { iw::vector3(-6.8, -1.8, 0), iw::vector3::one, iw::quaternion::identity};
+		textTransform = { vector3(-6.8, -1.8, 0), vector3::one, quaternion::identity};
 
 		// Shader
 
-		iw::ref<Shader> shader = Asset->Load<Shader>("shaders/default.shader");
-		iw::ref<Shader> directional = Asset->Load<Shader>("shaders/lights/directional_transparent.shader");
+		ref<Shader> shader = Asset->Load<Shader>("shaders/default.shader");
+		ref<Shader> directional = Asset->Load<Shader>("shaders/lights/directional_transparent.shader");
 		gaussian = Asset->Load<Shader>("shaders/filters/gaussian.shader");
 		
 		Renderer->InitShader(shader,      ALL);
@@ -86,11 +86,11 @@ namespace iw {
 
 		// Textures
 		
-		Texture shadow = Texture(1024, 1024, iw::RG,    iw::FLOAT, iw::BORDER);
-		iw::ref<Texture> texShadow = Asset->Give("ShadowMap", &shadow);
+		Texture shadow = Texture(1024, 1024, RG,    FLOAT, BORDER);
+		ref<Texture> texShadow = Asset->Give("ShadowMap", &shadow);
 		
-		iw::ref<Texture> texDepth  = REF<Texture>(1024, 1024, iw::DEPTH, iw::FLOAT, iw::BORDER);
-		iw::ref<Texture> texBlur   = REF<Texture>(1024, 1024, iw::ALPHA, iw::FLOAT, iw::BORDER);
+		ref<Texture> texDepth  = REF<Texture>(1024, 1024, DEPTH, FLOAT, BORDER);
+		ref<Texture> texBlur   = REF<Texture>(1024, 1024, ALPHA, FLOAT, BORDER);
 
 		texDepth->Initialize(Renderer->Device);
 		texShadow->Initialize(Renderer->Device);
@@ -111,14 +111,14 @@ namespace iw {
 
 		// Materials
 
-		iw::ref<Material> smat = REF<Material>();
-		iw::ref<Material> tmat = REF<Material>();
+		ref<Material> smat = REF<Material>();
+		ref<Material> tmat = REF<Material>();
 
 		smat->SetShader(shader);
 		tmat->SetShader(shader);
 
-		smat->Set("albedo", iw::vector4(1, .95f, 1, 1));
-		tmat->Set("albedo", iw::vector4(.95f, 1, 1, 1));
+		smat->Set("albedo", vector4(1, .95f, 1, 1));
+		tmat->Set("albedo", vector4(.95f, 1, 1, 1));
 
 		smat->SetTexture("shadowMap", texShadow);
 		tmat->SetTexture("shadowMap", texShadow); // shouldnt be part of material
@@ -140,8 +140,13 @@ namespace iw {
 		Model sm { smesh, 1 };
 		Model tm { tmesh, 1 };
 
-		iw::ref<Model> sphere = Asset->Give<Model>("Sphere", &sm);
+		ref<Model> sphere = Asset->Give<Model>("Sphere", &sm);
 		Asset->Give<Model>("Tetrahedron", &tm);
+
+		// Cameras
+
+		mainCam = new PerspectiveCamera(1.17f, 1.778f, .01f, 2000.0f);
+		textCam = new OrthographicCamera(vector3::one, quaternion::from_axis_angle(vector3::unit_y, Pi), 16, 9, -10, 10);
 
 		// Loading level
 
@@ -156,12 +161,12 @@ namespace iw {
 		Transform* to = new Transform();
 		Transform* tu = new Transform();
 
-		PlaneCollider* planel = new PlaneCollider(iw::vector3( 1,  0,  0), -16);
-		PlaneCollider* planer = new PlaneCollider(iw::vector3(-1,  0,  0), -16);
-		PlaneCollider* planet = new PlaneCollider(iw::vector3( 0,  0,  1), -9);
-		PlaneCollider* planeb = new PlaneCollider(iw::vector3( 0,  0, -1), -9);
-		PlaneCollider* planeo = new PlaneCollider(iw::vector3( 0, -1,  0), -2);
-		PlaneCollider* planeu = new PlaneCollider(iw::vector3( 0,  1,  0),  0);
+		PlaneCollider* planel = new PlaneCollider(vector3( 1,  0,  0), -16);
+		PlaneCollider* planer = new PlaneCollider(vector3(-1,  0,  0), -16);
+		PlaneCollider* planet = new PlaneCollider(vector3( 0,  0,  1), -9);
+		PlaneCollider* planeb = new PlaneCollider(vector3( 0,  0, -1), -9);
+		PlaneCollider* planeo = new PlaneCollider(vector3( 0, -1,  0), -2);
+		PlaneCollider* planeu = new PlaneCollider(vector3( 0,  1,  0),  0);
 
 		Rigidbody* rl = new Rigidbody(false);
 		Rigidbody* rr = new Rigidbody(false);
@@ -191,11 +196,9 @@ namespace iw {
 		Physics->AddRigidbody(ro);
 		Physics->AddRigidbody(ru);
 
-		Physics->SetGravity(iw::vector3(0, -9.8f, 0));
+		Physics->SetGravity(vector3(0, -9.8f, 0));
 		Physics->AddDSolver(new ImpulseSolver());
 		Physics->AddSolver(new PositionSolver());
-
-		textCam = new OrthographicCamera(iw::vector3::one, iw::quaternion::from_axis_angle(iw::vector3::unit_y, iw::Pi), 16, 9, -10, 10);
 
 		// Rendering pipeline
 
@@ -229,7 +232,7 @@ namespace iw {
 
 		Level level;
 		
-		iw::Serializer byte("test.bin");
+		Serializer byte(name);
 		
 		bool reset = false;
 		if (reset) {
@@ -247,100 +250,67 @@ namespace iw {
 
 		// Stage
 
-		float scaleOutX = 1.3f;
-		float scaleOutY = 1.4f;
+		float scale = 2.0f;
+		float scaleOutX = 1.6f;
+		float scaleOutY = 1.8f;
 
 		int x = 16 * scaleOutX;
 		int y = 9  * scaleOutY;
 
-		for (int i = -x; i < x; i += 4) {
-			LoadTree("models/forest/tree.dae", Transform {
-				iw::vector3(i, 0, y),
-				iw::vector3::one, 
-				iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
-				* iw::quaternion::from_axis_angle(iw::vector3::unit_y, rand() / (float)RAND_MAX * iw::Pi2)
-			});
-		}
-
-		for (int i = -x; i < x; i += 4) {
-			LoadTree("models/forest/tree.dae", Transform {
-				iw::vector3(i, 0, -y),
-				iw::vector3::one,
-				iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
-				* iw::quaternion::from_axis_angle(iw::vector3::unit_y, rand() / (float)RAND_MAX * iw::Pi2)
-			});
-		}
-
-		for (int i = -y; i <= y; i += 3) {
-			LoadTree("models/forest/tree.dae", Transform {
-				iw::vector3(x, 0, i),
-				iw::vector3::one,
-				iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
-				* iw::quaternion::from_axis_angle(iw::vector3::unit_y, rand() / (float)RAND_MAX * iw::Pi2)
-			});
-		}
-
-		for (int i = -y + 3; i < y; i += 3) {
-			LoadTree("models/forest/tree.dae", Transform {
-				iw::vector3(-x, 0, i),
-				iw::vector3::one,
-				iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
-				* iw::quaternion::from_axis_angle(iw::vector3::unit_y, rand() / (float)RAND_MAX * iw::Pi2)
-			});
-		}
-
-		scaleOutX = 1.6f;
-		scaleOutY = 1.8f;
-
-		x = 16 * scaleOutX;
-		y = 9 * scaleOutY;
-
-		for (int i = -x; i < x; i += 4) {
-			LoadTree("models/forest/tree.dae", Transform{
-				iw::vector3(i, 0, y),
-				iw::vector3::one,
-				iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
-				* iw::quaternion::from_axis_angle(iw::vector3::unit_y, rand() / (float)RAND_MAX * iw::Pi2)
+		for (int l = 0; l < 1; l++) {
+			for (int i = -x; i < x; i += 4) {
+				LoadTree("models/forest/tree.dae", Transform {
+					vector3(i, 0, y),
+					scale,
+					quaternion::from_axis_angle(vector3::unit_x, Pi / 2)
+					* quaternion::from_axis_angle(vector3::unit_y, rand() / (float)RAND_MAX * Pi2)
 				});
-		}
+			}
 
-		for (int i = -x; i < x; i += 4) {
-			LoadTree("models/forest/tree.dae", Transform{
-				iw::vector3(i, 0, -y),
-				iw::vector3::one,
-				iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
-				* iw::quaternion::from_axis_angle(iw::vector3::unit_y, rand() / (float)RAND_MAX * iw::Pi2)
+			for (int i = -x; i < x; i += 4) {
+				LoadTree("models/forest/tree.dae", Transform {
+					vector3(i, 0, -y),
+					scale,
+					quaternion::from_axis_angle(vector3::unit_x, Pi / 2)
+					* quaternion::from_axis_angle(vector3::unit_y, rand() / (float)RAND_MAX * Pi2)
 				});
-		}
+			}
 
-		for (int i = -y; i <= y; i += 3) {
-			LoadTree("models/forest/tree.dae", Transform{
-				iw::vector3(x, 0, i),
-				iw::vector3::one,
-				iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
-				* iw::quaternion::from_axis_angle(iw::vector3::unit_y, rand() / (float)RAND_MAX * iw::Pi2)
+			for (int i = -y; i <= y; i += 3) {
+				LoadTree("models/forest/tree.dae", Transform {
+					vector3(x, 0, i),
+					scale,
+					quaternion::from_axis_angle(vector3::unit_x, Pi / 2)
+					* quaternion::from_axis_angle(vector3::unit_y, rand() / (float)RAND_MAX * Pi2)
 				});
-		}
+			}
 
-		for (int i = -y + 3; i < y; i += 3) {
-			LoadTree("models/forest/tree.dae", Transform{
-				iw::vector3(-x, 0, i),
-				iw::vector3::one,
-				iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
-				* iw::quaternion::from_axis_angle(iw::vector3::unit_y, rand() / (float)RAND_MAX * iw::Pi2)
+			for (int i = -y + 3; i < y; i += 3) {
+				LoadTree("models/forest/tree.dae", Transform {
+					vector3(-x, 0, i),
+					scale,
+					quaternion::from_axis_angle(vector3::unit_x, Pi / 2)
+					* quaternion::from_axis_angle(vector3::unit_y, rand() / (float)RAND_MAX * Pi2)
 				});
+			}
+
+			scaleOutX = 1.6f;
+			scaleOutY = 1.8f;
+
+			x = 16 * scaleOutX;
+			y = 9  * scaleOutY;
 		}
 
 		LoadFloor("models/forest/floor.dae", Transform{
-			iw::vector3(0, 0, 0),
-			iw::vector3(32),
-			iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
+			vector3(0, 0, 0),
+			vector3(32),
+			quaternion::from_axis_angle(vector3::unit_x, Pi / 2)
 		});
 
-		//iw::ref<Model> stage = Asset->Load<Model>(level.StageName);
+		//ref<Model> stage = Asset->Load<Model>(level.StageName);
 
 		//for (size_t i = 0; i < stage->MeshCount; i++) {
-		//	iw::ref<Material>& mat = stage->Meshes[i].Material;
+		//	ref<Material>& mat = stage->Meshes[i].Material;
 
 		//	mat->SetShader (Asset->Load<Shader>("shaders/default.shader"));
 		//	mat->SetTexture("shadowMap", Asset->Load<Texture>("ShadowMap")); // shouldnt be part of material
@@ -351,14 +321,14 @@ namespace iw {
 		//	stage->Meshes[i].Initialize(Renderer->Device);
 		//}
 
-		//iw::ref<Texture> a = Asset->Load<Texture>("textures/foliage/alpha_mask.jpg");
+		//ref<Texture> a = Asset->Load<Texture>("textures/foliage/alpha_mask.jpg");
 		//a->Initialize(Renderer->Device);
 
 		//stage->Meshes[1].Material->SetTexture("alphaMaskMap", a);
 		//stage->Meshes[2].Material->SetTexture("alphaMaskMap", a);
 
 		//Entity floor = Space->CreateEntity<Transform, Model>();
-		//floor.SetComponent<Transform>(iw::vector3(0, 0, 0), iw::vector3(5, 3, 5));
+		//floor.SetComponent<Transform>(vector3(0, 0, 0), vector3(5, 3, 5));
 		//floor.SetComponent<Model>    (*stage);
 
 		// Enemies
@@ -368,8 +338,8 @@ namespace iw {
 			enemy.SetComponent<Model>(*Asset->Load<Model>("Tetrahedron"));
 			enemy.SetComponent<Enemy>(level.Enemies[i]);
 
-			Transform*      te = enemy.SetComponent<Transform>(iw::vector3(level.Positions[i].x, 1, level.Positions[i].y));
-			SphereCollider* se = enemy.SetComponent<SphereCollider>(iw::vector3::zero, 1.0f);
+			Transform*      te = enemy.SetComponent<Transform>(vector3(level.Positions[i].x, 1, level.Positions[i].y));
+			SphereCollider* se = enemy.SetComponent<SphereCollider>(vector3::zero, 1.0f);
 			Rigidbody*      re = enemy.SetComponent<Rigidbody>();
 
 			re->SetMass(1);
@@ -386,8 +356,8 @@ namespace iw {
 		player.SetComponent<Model>(*Asset->Load<Model>("Sphere"));
 		player.SetComponent<Player>(4.0f, 8 / 60.0f, .08f, 10);
 
-		Transform*      tp = player.SetComponent<Transform>(iw::vector3(5, 1, 0), iw::vector3(.75f));
-		SphereCollider* sp = player.SetComponent<SphereCollider>(iw::vector3::zero, .75f);
+		Transform*      tp = player.SetComponent<Transform>(vector3(5, 1, 0), vector3(.75f));
+		SphereCollider* sp = player.SetComponent<SphereCollider>(vector3::zero, .75f);
 		Rigidbody*      rp = player.SetComponent<Rigidbody>();
 
 		rp->SetMass(1);
@@ -396,31 +366,29 @@ namespace iw {
 		rp->SetStaticFriction(.1f);
 		rp->SetDynamicFriction(.02f);
 
-		rp->SetIsLocked(iw::vector3(0, 1, 0));
-		rp->SetLock(iw::vector3(0, 1, 0));
+		rp->SetIsLocked(vector3(0, 1, 0));
+		rp->SetLock(vector3(0, 1, 0));
 
 		Physics->AddRigidbody(rp);
 
 		// Camera
 
-		PerspectiveCamera* perspective = new PerspectiveCamera(1.17f, 1.778f, .01f, 2000.0f);
-
-		iw::quaternion camrot = iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
-			* iw::quaternion::from_axis_angle(iw::vector3::unit_z, iw::Pi);
+		quaternion camrot = quaternion::from_axis_angle(vector3::unit_x, Pi / 2)
+			* quaternion::from_axis_angle(vector3::unit_z, Pi);
 
 		Entity camera = Space->CreateEntity<Transform, CameraController>();
-		camera.SetComponent<Transform>(iw::vector3(0, 25, 0), iw::vector3::one, camrot);
-		camera.SetComponent<CameraController>(perspective);
+		camera.SetComponent<Transform>(vector3(0, 25, 0), vector3::one, camrot);
+		camera.SetComponent<CameraController>(mainCam);
 	}
 
 	void SandboxLayer::LoadTree(
 		std::string name,
 		Transform transform)
 	{
-		iw::ref<Model> tree = Asset->Load<Model>(name);
+		ref<Model> tree = Asset->Load<Model>(name);
 
 		for (size_t i = 0; i < tree->MeshCount; i++) {
-			iw::ref<Material>& mat = tree->Meshes[i].Material;
+			ref<Material>& mat = tree->Meshes[i].Material;
 
 			mat->SetShader(Asset->Load<Shader>("shaders/default.shader"));
 			mat->SetTexture("shadowMap", Asset->Load<Texture>("ShadowMap")); // shouldnt be part of material
@@ -444,10 +412,10 @@ namespace iw {
 		std::string name,
 		Transform transform)
 	{
-		iw::ref<Model> floor = Asset->Load<Model>(name);
+		ref<Model> floor = Asset->Load<Model>(name);
 
 		for (size_t i = 0; i < floor->MeshCount; i++) {
-			iw::ref<Material>& mat = floor->Meshes[i].Material;
+			ref<Material>& mat = floor->Meshes[i].Material;
 
 			mat->SetShader(Asset->Load<Shader>("shaders/default.shader"));
 			mat->SetTexture("shadowMap", Asset->Load<Texture>("ShadowMap")); // shouldnt be part of material
@@ -464,18 +432,16 @@ namespace iw {
 	}
 
 	void SandboxLayer::PostUpdate() {
-		font->UpdateMesh(textMesh, std::to_string(1.0f / Time::DeltaTime()), .01f, 1);
-
 		textMesh->Update(Renderer->Device);
 
 		light.SetPosition(lightPos);
-		light.SetRotation(iw::quaternion::from_look_at(lightPos));
+		light.SetRotation(quaternion::from_look_at(lightPos));
 
 		float blurw = 1.0f / target->Width() * blurAmount;
 		float blurh = 1.0f / target->Height() * blurAmount;
 
 		generateShadowMap->SetThreshold(threshold);
-		postProcessShadowMap->SetBlur(iw::vector2(blurw, blurh));
+		postProcessShadowMap->SetBlur(vector2(blurw, blurh));
 
 		pipeline.execute();
 
@@ -500,8 +466,8 @@ namespace iw {
 		ImGui::SliderFloat4("Text rot",   (float*)&textTransform.Rotation, 0, 1);
 
 		if (ImGui::Button("Save level")) {
-			iw::Serializer out("test.bin", true);
-			iw::JsonSerializer jout("test.json", true);
+			Serializer out("test.bin", true);
+			JsonSerializer jout("test.json", true);
 			
 			Level level;
 			for (auto entity : Space->Query<Transform, Enemy>()) {
@@ -546,15 +512,15 @@ namespace iw {
 	{
 		switch (e.Action) {
 			case val(Actions::SPAWN_CIRCLE_TEMP): {
-				iw::ref<Model> sphere = Asset->Load<Model>("Sphere");
+				ref<Model> sphere = Asset->Load<Model>("Sphere");
 
 				for (size_t i = 0; i < 1; i++) {
 					Entity enemy = Space->CreateEntity<Transform, Model, SphereCollider, Rigidbody, Enemy>();
 					enemy.SetComponent<Model>(*Asset->Load<Model>("Tetrahedron"));
 					enemy.SetComponent<Enemy>(SPIN, 0.2617993f, .12f, 0.0f);
 
-					Transform* te = enemy.SetComponent<Transform>(iw::vector3(cos(x) * 1, 15, sin(x) * 1));
-					SphereCollider* se = enemy.SetComponent<SphereCollider>(iw::vector3::zero, 1.0f);
+					Transform* te = enemy.SetComponent<Transform>(vector3(cos(x) * 1, 15, sin(x) * 1));
+					SphereCollider* se = enemy.SetComponent<SphereCollider>(vector3::zero, 1.0f);
 					Rigidbody* re = enemy.SetComponent<Rigidbody>();
 
 					re->SetMass(1);
@@ -567,6 +533,10 @@ namespace iw {
 			}
 			case val(Actions::RESET_LEVEL): {
 				LoadLevel("test.bin");
+				break;
+			}
+			case val(Actions::NEXT_LEVEL): {
+				LoadLevel("test2.bin");
 				break;
 			}
 		}

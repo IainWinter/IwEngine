@@ -8,7 +8,7 @@ namespace iw {
 	{
 		JUMP, RIGHT, FORWARD, USE,
 		SPAWN_CIRCLE_TEMP,
-		RESET_LEVEL
+		RESET_LEVEL, NEXT_LEVEL
 	};
 
 	struct JumpEvent
@@ -51,6 +51,14 @@ namespace iw {
 	{
 		ResetLevelEvent()
 			: SingleEvent(iw::val(Actions::RESET_LEVEL))
+		{}
+	};
+
+	struct NextLevelEvent
+		: SingleEvent
+	{
+		NextLevelEvent()
+			: SingleEvent(iw::val(Actions::NEXT_LEVEL))
 		{}
 	};
 }
