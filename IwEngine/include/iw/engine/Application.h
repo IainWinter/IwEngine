@@ -76,7 +76,7 @@ namespace Engine {
 			scalar dt);
 
 		IWENGINE_API
-		inline IWindow& GetWindow() {
+		inline IWindow& Window() {
 			return *m_window;
 		}
 

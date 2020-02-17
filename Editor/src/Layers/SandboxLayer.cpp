@@ -247,10 +247,11 @@ namespace iw {
 
 		// Stage
 
-		float scaleOut = 1.4f;
+		float scaleOutX = 1.3f;
+		float scaleOutY = 1.4f;
 
-		int x = 16 * scaleOut;
-		int y = 9 * scaleOut;
+		int x = 16 * scaleOutX;
+		int y = 9  * scaleOutY;
 
 		for (int i = -x; i < x; i += 4) {
 			LoadTree("models/forest/tree.dae", Transform {
@@ -286,6 +287,48 @@ namespace iw {
 				iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
 				* iw::quaternion::from_axis_angle(iw::vector3::unit_y, rand() / (float)RAND_MAX * iw::Pi2)
 			});
+		}
+
+		scaleOutX = 1.6f;
+		scaleOutY = 1.8f;
+
+		x = 16 * scaleOutX;
+		y = 9 * scaleOutY;
+
+		for (int i = -x; i < x; i += 4) {
+			LoadTree("models/forest/tree.dae", Transform{
+				iw::vector3(i, 0, y),
+				iw::vector3::one,
+				iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
+				* iw::quaternion::from_axis_angle(iw::vector3::unit_y, rand() / (float)RAND_MAX * iw::Pi2)
+				});
+		}
+
+		for (int i = -x; i < x; i += 4) {
+			LoadTree("models/forest/tree.dae", Transform{
+				iw::vector3(i, 0, -y),
+				iw::vector3::one,
+				iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
+				* iw::quaternion::from_axis_angle(iw::vector3::unit_y, rand() / (float)RAND_MAX * iw::Pi2)
+				});
+		}
+
+		for (int i = -y; i <= y; i += 3) {
+			LoadTree("models/forest/tree.dae", Transform{
+				iw::vector3(x, 0, i),
+				iw::vector3::one,
+				iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
+				* iw::quaternion::from_axis_angle(iw::vector3::unit_y, rand() / (float)RAND_MAX * iw::Pi2)
+				});
+		}
+
+		for (int i = -y + 3; i < y; i += 3) {
+			LoadTree("models/forest/tree.dae", Transform{
+				iw::vector3(-x, 0, i),
+				iw::vector3::one,
+				iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
+				* iw::quaternion::from_axis_angle(iw::vector3::unit_y, rand() / (float)RAND_MAX * iw::Pi2)
+				});
 		}
 
 		LoadFloor("models/forest/floor.dae", Transform{
@@ -421,6 +464,8 @@ namespace iw {
 	}
 
 	void SandboxLayer::PostUpdate() {
+		font->UpdateMesh(textMesh, std::to_string(1.0f / Time::DeltaTime()), .01f, 1);
+
 		textMesh->Update(Renderer->Device);
 
 		light.SetPosition(lightPos);
@@ -486,7 +531,6 @@ namespace iw {
 
 		return false;
 	}
-
 
 	bool SandboxLayer::On(
 		KeyTypedEvent& e)
