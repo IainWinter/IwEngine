@@ -20,5 +20,8 @@ namespace iw {
 		void PostUpdate() override;
 
 		void ImGui() override;
+
+		bool On(
+			MouseButtonEvent& e) override;
 	};
 }

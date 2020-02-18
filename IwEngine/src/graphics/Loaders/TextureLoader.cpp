@@ -18,25 +18,15 @@ namespace Graphics {
 		stbi_info(filepath.c_str(), &width, &height, &channels);
 
 		unsigned char* image = nullptr;
-		if (channels == 1) {
-			image = stbi_load(filepath.c_str(), &width, &height, &channels, STBI_grey);
-		}
-
-		else if (channels == 2) {
-			image = stbi_load(filepath.c_str(), &width, &height, &channels, STBI_grey_alpha);
-		}
-
-		else if (channels == 3) {
-			image = stbi_load(filepath.c_str(), &width, &height, &channels, STBI_rgb_alpha);
-			channels = 4;
-		}
-
-		else if (channels == 4) {
-			image = stbi_load(filepath.c_str(), &width, &height, &channels, STBI_rgb_alpha);
-		}
-
-		else {
-			LOG_ERROR << channels << " channels is not supported!";
+		switch (channels) {
+			case 1: image = stbi_load(filepath.c_str(), &width, &height, &channels, STBI_grey);       break;
+			case 2: image = stbi_load(filepath.c_str(), &width, &height, &channels, STBI_grey_alpha); break;
+			case 3: {
+				image = stbi_load(filepath.c_str(), &width, &height, &channels, STBI_rgb_alpha);
+				channels = 4; // hack to fix trees this is def not the way
+				break;
+			}
+			case 4: image = stbi_load(filepath.c_str(), &width, &height, &channels, STBI_rgb_alpha);  break;
 		}
 
 		if (stbi_failure_reason()) {

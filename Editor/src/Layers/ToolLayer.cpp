@@ -101,5 +101,28 @@ namespace iw {
 
 		ImGui::End();
 	}
+
+	bool ToolLayer::On(
+		MouseButtonEvent& e)
+	{
+		if (   e.State
+			&& e.Button == iw::LMOUSE)
+		{
+			matrix4 viewproj = (*Space->Query<Transform, CameraController>().begin()).Components.Tie<CameraComponents>().Controller->Camera->GetViewProjection(); // yak on em
+
+			float x = (e.InputStates->GetState(MOUSEX) / Renderer->Width  - 0.5f) * 2;
+			float y = (e.InputStates->GetState(MOUSEY) / Renderer->Height - 0.5f) * 2;
+
+			vector4 begin(x, y, -1, 1);
+			vector4 end  (x, y,  0, 1);
+
+			vector4 wStart = begin * viewproj; wStart /= wStart.w;
+			vector4 wEnd   = end   * viewproj; wEnd   /= wEnd  .w;
+
+			LOG_INFO << (wEnd - wStart).normalized();
+		}
+
+		return false;
+	}
 }
 

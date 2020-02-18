@@ -31,6 +31,9 @@ namespace RenderAPI {
 		~GLPipeline();
 
 		IWRENDERER_API
+		unsigned Handle() const override;
+
+		IWRENDERER_API
 		IPipelineParam* GetParam(
 			std::string name) override;
 

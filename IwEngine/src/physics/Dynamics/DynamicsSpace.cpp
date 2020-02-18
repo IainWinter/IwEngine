@@ -23,6 +23,7 @@ namespace Physics {
 #ifdef IW_DEBUG
 		if (rigidbody == nullptr) {
 			LOG_WARNING << "Tried to add null rigidbody to dynamics space";
+			return;
 		}
 #endif
 
@@ -41,6 +42,7 @@ namespace Physics {
 #ifdef IW_DEBUG
 		if (rigidbody == nullptr) {
 			LOG_WARNING << "Tried to remove null rigidbody to dynamics space";
+			return;
 		}
 #endif
 
@@ -59,6 +61,7 @@ namespace Physics {
 #ifdef IW_DEBUG
 		if (solver== nullptr) {
 			LOG_WARNING << "Tried to add null solver to dynamics space";
+			return;
 		}
 #endif
 
@@ -71,6 +74,7 @@ namespace Physics {
 #ifdef IW_DEBUG
 		if (solver == nullptr) {
 			LOG_WARNING << "Tried to remove null solver to dynamics space";
+			return;
 		}
 #endif
 
@@ -79,6 +83,7 @@ namespace Physics {
 #ifdef IW_DEBUG
 		if (itr != m_dynamicSolvers.end()) {
 			LOG_WARNING << "Tried to remove solver that doesn't exist in the dynamics space";
+			return;
 		}
 #endif
 

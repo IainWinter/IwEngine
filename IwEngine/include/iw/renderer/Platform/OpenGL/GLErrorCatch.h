@@ -41,7 +41,8 @@ namespace RenderAPI {
 }
 
 #ifdef IW_DEBUG
-#	define GL(stmt) stmt; while(iw::MessageCallback(#stmt, __FILE__, __LINE__)) {}
+#	define GL (stmt) stmt; while(iw::MessageCallback(#stmt, __FILE__, __LINE__)) {}
+#	define GLe(stmt) stmt; while(iw::MessageCallback(#stmt, __FILE__, __LINE__)) { err = true; }
 #else
 #	define GL(stmt) stmt
 #endif

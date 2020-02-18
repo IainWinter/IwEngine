@@ -28,6 +28,12 @@ namespace RenderAPI {
 		if(geometryShader) {
 			glDeleteShader(geometryShader->GeometryShader());
 		}
+
+		LOG_INFO << "Shader #" << gl_id << " compiled with uniforms:";
+		for (int i = 0; i < UniformCount(); i++) {
+			auto uniform = GetParam(i);
+			LOG_INFO << "\t Location: " << uniform->Location() << " Name: " << uniform->Name();
+		}
 	}
 	
 	GLPipeline::~GLPipeline() {
@@ -35,6 +41,10 @@ namespace RenderAPI {
 		for (auto p : m_params) {
 			delete p.second;
 		}
+	}
+
+	unsigned GLPipeline::Handle() const {
+		return gl_id;
 	}
 
 	IPipelineParam* GLPipeline::GetParam(
@@ -48,16 +58,7 @@ namespace RenderAPI {
 		}
 
 		else {
-			int location = glGetUniformLocation(gl_id, name.c_str());
-
-			if (location != -1) {
-				param = (GLPipelineParam*)GetParam(location);
-				m_params.emplace(name, param);
-			}
-
-			else {
-				LOG_WARNING << "Couldn't find uniform " << name;
-			}
+			LOG_WARNING << "Couldn't find uniform " << name;
 		}
 
 		return param;
@@ -92,8 +93,6 @@ namespace RenderAPI {
 
 			return m_params.emplace(s, p).first->second;
 		}
-
-		// todo: sus maybe mem leak this is a bad hack solve ^ should combine with function above
 
 		return itr->second;
 	}

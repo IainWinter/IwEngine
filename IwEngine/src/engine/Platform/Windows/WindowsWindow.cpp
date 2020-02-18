@@ -172,8 +172,8 @@ namespace Engine {
 		glCullFace(GL_BACK);
 
 #ifdef IW_DEBUG
-		//glEnable(GL_DEBUG_OUTPUT);
-		//glDebugMessageCallback(MessageCallback, 0);
+		glEnable(GL_DEBUG_OUTPUT);
+		glDebugMessageCallback(MessageCallback, 0);
 #endif
 
 		SetCursor(options.Cursor);

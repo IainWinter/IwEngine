@@ -9,10 +9,13 @@ namespace RenderAPI {
 	class IPipeline {
 	public:
 		IWRENDERER_API
-			virtual ~IPipeline() = default;
+		virtual ~IPipeline() = default;
 
 		IWRENDERER_API
 		virtual int UniformCount() = 0;
+
+		IWRENDERER_API
+		virtual unsigned Handle() const = 0;
 
 		IWRENDERER_API
 		virtual IPipelineParam* GetParam(

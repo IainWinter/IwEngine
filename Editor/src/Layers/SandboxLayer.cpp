@@ -399,7 +399,7 @@ namespace iw {
 			tree->Meshes[i].Initialize(Renderer->Device);
 		}
 
-		ref<Texture> leavesAlpha = Asset->Load<Texture>("textures/tree/leaves/alpha.jpg");
+		ref<Texture> leavesAlpha = Asset->Load<Texture>("textures/forest/tree/leaves/alpha.jpg");
 		tree->Meshes[1].Material->SetTexture("alphaMaskMap", leavesAlpha);
 		leavesAlpha->Initialize(Renderer->Device);
 

@@ -1,4 +1,5 @@
 #include "iw/physics/Collision/CollisionSpace.h"
+#include "iw/log/logger.h"
 #include <assert.h>
 
 namespace iw {
@@ -6,14 +7,26 @@ namespace Physics {
 	void CollisionSpace::AddCollisionObject(
 		CollisionObject* object)
 	{
-		assert(object);
+#ifdef IW_DEBUG
+		if (object == nullptr) {
+			LOG_WARNING << "Tried to add null object to collision space";
+			return;
+		}
+#endif
+
 		m_objects.push_back(object);
 	}
 
 	void CollisionSpace::RemoveCollisionObject(
 		CollisionObject* object)
 	{
-		assert(object);
+#ifdef IW_DEBUG
+		if (object == nullptr) {
+			LOG_WARNING << "Tried to remove null object to collision space";
+			return;
+		}
+#endif
+
 		auto itr = std::find(m_objects.begin(), m_objects.end(), object);
 		
 		if (itr != m_objects.end()) {
@@ -24,17 +37,35 @@ namespace Physics {
 	void CollisionSpace::AddSolver(
 		Solver* solver)
 	{
-		assert(solver);
+#ifdef IW_DEBUG
+		if (solver == nullptr) {
+			LOG_WARNING << "Tried to add null solver to collision space";
+			return;
+		}
+#endif
+
 		m_solvers.push_back(solver);
 	}
 
 	void CollisionSpace::RemoveSolver(
 		Solver* solver)
 	{
-		assert(solver);
+#ifdef IW_DEBUG
+		if (solver == nullptr) {
+			LOG_WARNING << "Tried to remove null solver to dynamics space";
+			return;
+		}
+#endif
+
 		auto itr = std::find(m_solvers.begin(), m_solvers.end(), solver);
 
-		assert(itr != m_solvers.end());
+#ifdef IW_DEBUG
+		if (itr != m_solvers.end()) {
+			LOG_WARNING << "Tried to remove solver that doesn't exist in the collision space";
+			return;
+		}
+#endif
+
 		m_solvers.erase(itr);
 	}
 
@@ -61,7 +92,12 @@ namespace Physics {
 	bool CollisionSpace::TestObject(
 		CollisionObject* object)
 	{
-		assert(object);
+#ifdef IW_DEBUG
+		if (object == nullptr) {
+			LOG_WARNING << "Tried to test null object against collision space";
+			return false;
+		}
+#endif
 
 		bool col = false;
 		for (CollisionObject* other : m_objects) {
@@ -79,10 +115,30 @@ namespace Physics {
 		CollisionObject* object, 
 		CollisionObject* other)
 	{
-		assert(object && other);
+#ifdef IW_DEBUG
+		if (   object == nullptr
+			|| other  == nullptr)
+		{
+			LOG_WARNING << "Tried to test null objects against each other";
+			return false;
+		}
+#endif
 
 		return object->Bounds().Intersects(other->Bounds());
 	}
+
+	//bool CollisionSpace::TestRay(
+	//	Ray* ray)
+	//{
+	//	return false;
+	//}
+
+	//bool CollisionSpace::TestRay(
+	//	Ray* ray,
+	//	CollisionObject* other)
+	//{
+	//	return false;
+	//}
 
 	void CollisionSpace::SetCollisionCallback(
 		const CollisionCallback& callback)

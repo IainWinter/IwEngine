@@ -15,6 +15,12 @@ namespace RenderAPI {
 		virtual ~IPipelineParam() = default;
 
 		IWRENDERER_API
+		virtual const std::string& Name() const = 0;
+
+		IWRENDERER_API
+		virtual unsigned Location() const = 0;
+
+		IWRENDERER_API
 		virtual UniformType Type() const = 0;
 
 		IWRENDERER_API
@@ -25,9 +31,6 @@ namespace RenderAPI {
 
 		IWRENDERER_API
 		virtual unsigned Count() const = 0;
-
-		IWRENDERER_API
-		virtual const std::string& Name() const = 0;
 
 #define SET_AS(t, n)               \
 	IWRENDERER_API                \

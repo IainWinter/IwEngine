@@ -35,6 +35,9 @@ namespace RenderAPI {
 		const std::string& Name() const override;
 
 		IWRENDERER_API
+		unsigned Location() const override;
+
+		IWRENDERER_API
 		UniformType Type() const override;
 
 		IWRENDERER_API

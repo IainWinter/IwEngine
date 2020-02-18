@@ -78,7 +78,7 @@ namespace RenderAPI {
 		void Unbind() const;
 
 		IWRENDERER_API
-		unsigned int Id() const;
+		unsigned Id() const;
 
 		IWRENDERER_API
 		int Width() const;

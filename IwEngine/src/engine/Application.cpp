@@ -219,12 +219,9 @@ namespace Engine {
 			switch (e.Type) {
 				case iw::val(InputEventType::Command): {
 					InputCommandEvent& ice = e.as<InputCommandEvent>();
-					Console->ExecuteCommand(ice.Command);
+					Console->QueueCommand(ice.Command);
 					e.Handled = true;
 					break;
-				}
-				case iw::val(InputEventType::KeyTyped): {
-					KeyTypedEvent& kte = e.as<KeyTypedEvent>();
 				}
 			}
 		}

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Solver.h"
+#include "iw/physics/Ray.h"
 #include "iw/events/callback.h"
 #include "iw/util/memory/ref.h"
 
@@ -47,6 +48,16 @@ namespace Physics {
 		bool TestObjects(
 			CollisionObject* object,
 			CollisionObject* other);
+
+		//IWPHYSICS_API
+		//bool TestRay(
+		//	Ray* ray,
+		//	RayTestResults* out = nullptr);
+
+		//IWPHYSICS_API
+		//bool TestRay(
+		//	Ray* ray,
+		//	CollisionObject* other);
 
 		IWPHYSICS_API
 		void SetCollisionCallback(

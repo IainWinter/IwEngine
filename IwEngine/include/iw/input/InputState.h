@@ -21,9 +21,15 @@ namespace Input {
 		}
 
 		inline float& operator[](
-			int index)
+			int input)
 		{
-			return states[index];
+			return GetState(input);
+		}
+
+		inline float& GetState(
+			int input)
+		{
+			return states[input];
 		}
 
 		inline bool& GetLock(

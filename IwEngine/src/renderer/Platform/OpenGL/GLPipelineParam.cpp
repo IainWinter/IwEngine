@@ -26,6 +26,10 @@ namespace RenderAPI {
 		return m_name;
 	}
 
+	unsigned GLPipelineParam::Location() const {
+		return m_location;
+	}
+
 	UniformType GLPipelineParam::Type() const {
 		return m_type;
 	}
@@ -57,20 +61,20 @@ namespace RenderAPI {
 		const gt* v = (const gt*)values;                                                   \
 		if (count == 1) {                                                                  \
 			switch (stride) {                                                              \
-				case 1: GL(glUniform1##sn(m_location, v[0]));                   break;     \
-				case 2: GL(glUniform2##sn(m_location, v[0], v[1]));             break;     \
-				case 3: GL(glUniform3##sn(m_location, v[0], v[1], v[2]));       break;     \
-				case 4: GL(glUniform4##sn(m_location, v[0], v[1], v[2], v[3])); break;     \
+				case 1: glUniform1##sn(m_location, v[0]);                   break;         \
+				case 2: glUniform2##sn(m_location, v[0], v[1]);             break;         \
+				case 3: glUniform3##sn(m_location, v[0], v[1], v[2]);       break;         \
+				case 4: glUniform4##sn(m_location, v[0], v[1], v[2], v[3]); break;         \
 				default: LOG_WARNING << "Stride is too large (" << (stride) << ")"; break; \
 			}                                                                              \
 		}                                                                                  \
 		                                                                                   \
 		else {                                                                             \
 			switch (stride) {                                                              \
-				case 1: GL(glUniform1##sn##v(m_location, count, v)); break;                \
-				case 2: GL(glUniform2##sn##v(m_location, count, v)); break;                \
-				case 3: GL(glUniform3##sn##v(m_location, count, v)); break;                \
-				case 4: GL(glUniform4##sn##v(m_location, count, v)); break;                \
+				case 1: glUniform1##sn##v(m_location, count, v); break;                    \
+				case 2: glUniform2##sn##v(m_location, count, v); break;                    \
+				case 3: glUniform3##sn##v(m_location, count, v); break;                    \
+				case 4: glUniform4##sn##v(m_location, count, v); break;                    \
 				default: LOG_WARNING << "Stride is too large (" << (stride) << ")"; break; \
 			}                                                                              \
 		}                                                                                  \

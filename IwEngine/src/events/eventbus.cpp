@@ -33,7 +33,7 @@ namespace iw {
 
 			m_alloc.free(e, e->Size);
 
-			if (count++ > 10000) {
+			if (count++ > 1000) { // should be based on time
 				break;
 			}
 		}
