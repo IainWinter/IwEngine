@@ -27,7 +27,7 @@ void PlayerSystem::Update(
 
 		if (player->Health <= 0) {
 			if (player->DeathTimer == 0) {
-				player->DeathTimer = 2.0;
+				player->DeathTimer = 1.5;
 			}
 		}
 
@@ -37,10 +37,6 @@ void PlayerSystem::Update(
 
 		if (player->DeathTimer > 0) {
 			player->DeathTimer -= iw::Time::DeltaTime();
-
-			iw::vector3 pos = rigidbody->Lock();
-			pos.y -= 1.75 * iw::Time::DeltaTime();
-			rigidbody->SetLock(pos);
 
 			if (player->DeathTimer <= 0) {
 				player->DeathTimer = 0;
@@ -59,18 +55,25 @@ void PlayerSystem::FixedUpdate(
 	for (auto entity : view) {
 		auto [transform, rigidbody, player] = entity.Components.Tie<Components>();
 
-		iw::vector3 m = movement.normalized() * player->Speed;
-		if (movement != 0) {
-			if (player->Timer > 0) {
-				m *= 10 * player->Timer / player->DashTime;
-			}
+		if (player->DeathTimer > 0) {
+			rigidbody->SetVelocity(0);
+			transform->Scale -= .75f / 1.5f * iw::Time::FixedTime();
 		}
 
-		iw::vector3 v = rigidbody->Velocity();
-		v.x = m.x;
-		v.z = m.z;
+		else {
+			iw::vector3 m = movement.normalized() * player->Speed;
+			if (movement != 0) {
+				if (player->Timer > 0) {
+					m *= 10 * player->Timer / player->DashTime;
+				}
+			}
 
-		rigidbody->SetVelocity(v);
+			iw::vector3 v = rigidbody->Velocity();
+			v.x = m.x;
+			v.z = m.z;
+
+			rigidbody->SetVelocity(v);
+		}
 	}
 }
 

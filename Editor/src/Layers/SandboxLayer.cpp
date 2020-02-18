@@ -354,7 +354,7 @@ namespace iw {
 
 		Entity player = Space->CreateEntity<Transform, Model, SphereCollider, Rigidbody, Player>();
 		player.SetComponent<Model>(*Asset->Load<Model>("Sphere"));
-		player.SetComponent<Player>(4.0f, 8 / 60.0f, .08f, 10);
+		player.SetComponent<Player>(4.0f, 8 / 60.0f, .08f, 5);
 
 		Transform*      tp = player.SetComponent<Transform>(vector3(5, 1, 0), vector3(.75f));
 		SphereCollider* sp = player.SetComponent<SphereCollider>(vector3::zero, .75f);
