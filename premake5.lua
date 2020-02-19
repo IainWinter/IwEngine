@@ -7,6 +7,7 @@ imguidir  = iwengdir .. "/extern/imgui"
 assimpdir = iwengdir .. "/extern/assimp"
 stbdir    = iwengdir .. "/extern/stb"
 llvmdir   = iwengdir .. "/extern/llvm"
+jsondir   = iwengdir .. "/extern/json"
 
 cfgname = "%{cfg.buildcfg}.%{cfg.system}.%{cfg.architecture}"
 achname = "%{cfg.architecture}"
@@ -58,7 +59,8 @@ project "IwEngine"
 		imguidir  .. incdir,
 		assimpdir .. incdir,
 		assimpdir .. blddir .. incdir,
-		stbdir .. incdir
+		stbdir .. incdir,
+		jsondir
 	}
 
 	libdirs {
@@ -82,6 +84,10 @@ project "IwEngine"
 		"IMGUI_IMPL_OPENGL_LOADER_GLEW",
 		--"IW_USE_REFLECTION",
 		"IW_USE_EVENTS"
+	}
+
+	postbuildcommands {
+		"xcopy /y /f \"" .. iwengdir  .. bindir .. "/IwEngine.dll\" \"" .. edtordir .. bindir .. "\"",
 	}
 
 	filter "system:windows"
@@ -265,7 +271,8 @@ project "Editor"
 		edtordir .. incdir,
 		iwengdir .. incdir,
 		iwtoldir .. incdir,
-		imguidir .. incdir
+		imguidir .. incdir,
+		jsondir
 	}
 
 	links {

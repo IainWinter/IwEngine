@@ -31,7 +31,11 @@ namespace RenderAPI {
 
 		LOG_INFO << "Shader #" << gl_id << " compiled with uniforms:";
 		for (int i = 0; i < UniformCount(); i++) {
-			auto uniform = GetParam(i);
+			IPipelineParam* uniform = GetParam(i);
+			if (!uniform) {
+				continue; // Check for null
+			}
+			
 			LOG_INFO << "\t Location: " << uniform->Location() << " Name: " << uniform->Name();
 		}
 	}
@@ -70,31 +74,36 @@ namespace RenderAPI {
 		int      nameSize;
 		int      count;
 		unsigned gltype;
-		char     name[128];
-
+		char     name[128]; 
 		memset(name, '\0', 128);
+
 		glGetActiveUniform(gl_id, index, 128, &nameSize, &count, &gltype, name);
+		int location = glGetUniformLocation(gl_id, name);
 
-		auto itr = m_params.find(name);
-		if (itr == m_params.end()) {
-			unsigned typeSize = 0;
-			unsigned stride = 0;
-			UniformType type = (UniformType)TRANSLATE(gltype, stride);
-			switch (type) {
-				case UniformType::BOOL:    typeSize = sizeof(bool);     break;
-				case UniformType::INT:     typeSize = sizeof(int);      break;
-				case UniformType::UINT:    typeSize = sizeof(unsigned); break;
-				case UniformType::FLOAT:   typeSize = sizeof(float);    break;
-				case UniformType::DOUBLE:  typeSize = sizeof(double);   break;
-			}
-
-			std::string s(name);
-			GLPipelineParam* p = new GLPipelineParam(index, m_textureCount, s, type, typeSize, stride, count);
-
-			return m_params.emplace(s, p).first->second;
+		if (location == -1) {
+			return nullptr;
 		}
 
-		return itr->second;
+		auto itr = m_params.find(name);
+		if (itr != m_params.end()) {
+			return itr->second;
+		}
+
+		unsigned typeSize = 0;
+		unsigned stride = 0;
+		UniformType type = (UniformType)TRANSLATE(gltype, stride);
+		switch (type) {
+			case UniformType::BOOL:    typeSize = sizeof(bool);     break;
+			case UniformType::INT:     typeSize = sizeof(int);      break;
+			case UniformType::UINT:    typeSize = sizeof(unsigned); break;
+			case UniformType::FLOAT:   typeSize = sizeof(float);    break;
+			case UniformType::DOUBLE:  typeSize = sizeof(double);   break;
+		}
+
+		std::string s(name);
+		GLPipelineParam* p = new GLPipelineParam(location, m_textureCount, s, type, typeSize, stride, count);
+
+		return m_params.emplace(s, p).first->second;
 	}
 
 	void GLPipeline::SetBuffer(

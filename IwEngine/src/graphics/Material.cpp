@@ -39,21 +39,26 @@ namespace Graphics {
 			int count = Shader->Program->UniformCount();
 			for (int i = 0; i < count; i++) {
 				IPipelineParam* uniform = Shader->Program->GetParam(i);
-				if (uniform->Name().substr(0, 4) == "mat_") {
-					std::string name = uniform->Name().substr(4);
+				if (!uniform) {
+					continue; // Check for null
+				}
 
-					if (!Has(name)) {
-						if (uniform->Type() == UniformType::SAMPLE2) {
-							SetTexture(name, nullptr);
-						}
+				if(uniform->Name().substr(0, 4) != "mat_") {
+					continue; // Check for 'mat_' prefix
+				}
+				
+				std::string name = uniform->Name().substr(4);
+				if (!Has(name)) {
+					if (uniform->Type() == UniformType::SAMPLE2) {
+						SetTexture(name, nullptr);
+					}
 
-						else {
-							SetProperty(name, nullptr,
-								uniform->Type(),
-								uniform->TypeSize(),
-								uniform->Stride(),
-								uniform->Count());
-						}
+					else {
+						SetProperty(name, nullptr,
+							uniform->Type(),
+							uniform->TypeSize(),
+							uniform->Stride(),
+							uniform->Count());
 					}
 				}
 			}

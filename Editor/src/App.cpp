@@ -6,6 +6,8 @@
 #include "iw/physics/Collision/PlaneCollider.h"
 #include "iw/physics/Collision/SphereCollider.h"
 
+#include "iw/util/io/parsers/json.h"
+
 namespace iw {
 	App::App() {
 		iw::ref<Context> context = Input->CreateContext("Editor");
@@ -37,6 +39,10 @@ namespace iw {
 	int App::Initialize(
 		iw::InitOptions& options)
 	{
+		json j;
+
+		j.parse_file("test.json");
+
 		int err = Application::Initialize(options);
 
 		if (!err) {
