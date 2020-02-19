@@ -10,3 +10,6 @@
 	path = IwEngine/extern/llvm
 	url = https://github.com/llvm/llvm-project.git
 	ignore = dirty
+[submodule "IwEngine/extern/json"]
+	path = IwEngine/extern/json
+	url = https://github.com/sheredom/json.h
