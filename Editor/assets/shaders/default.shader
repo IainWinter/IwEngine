@@ -94,7 +94,7 @@ void main() {
 		ao.a *= texture(mat_aoMap, UV).r;
 	}
 
-	float ambiance = 0.01;
+	float ambiance = 0.05;
 
 	float shadow = 0;
 	if (mat_hasShadowMap == 1) {

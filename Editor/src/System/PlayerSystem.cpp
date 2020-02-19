@@ -27,7 +27,7 @@ void PlayerSystem::Update(
 
 		if (player->Health <= 0) {
 			if (player->DeathTimer == 0) {
-				player->DeathTimer = 1.5;
+				player->DeathTimer = 1.0f;
 			}
 		}
 
@@ -57,7 +57,7 @@ void PlayerSystem::FixedUpdate(
 
 		if (player->DeathTimer > 0) {
 			rigidbody->SetVelocity(0);
-			transform->Scale -= .75f / 1.5f * iw::Time::FixedTime();
+			transform->Scale -= .75f / 1.0f * iw::Time::FixedTime();
 		}
 
 		else {

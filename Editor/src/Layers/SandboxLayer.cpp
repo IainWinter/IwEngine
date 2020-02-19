@@ -145,7 +145,7 @@ namespace iw {
 
 		// Cameras
 
-		mainCam = new PerspectiveCamera(1.17f, 1.778f, .01f, 2000.0f);
+		mainCam = new PerspectiveCamera (1.17f, 1.778f, .01f, 2000.0f);
 		textCam = new OrthographicCamera(vector3::one, quaternion::from_axis_angle(vector3::unit_y, Pi), 16, 9, -10, 10);
 
 		// Loading level
