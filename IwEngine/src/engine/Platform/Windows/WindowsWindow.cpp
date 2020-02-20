@@ -138,7 +138,7 @@ namespace Engine {
 		DescribePixelFormat(m_device, pfid, sizeof(pfd), &pfd);
 		SetPixelFormat(m_device, pfid, &pfd);
 
-		CONST INT major = 4, minor = 4;
+		CONST INT major = 3, minor = 3;
 		INT contextAttribs[] = {
 			WGL_CONTEXT_MAJOR_VERSION_ARB, major,
 			WGL_CONTEXT_MINOR_VERSION_ARB, minor,

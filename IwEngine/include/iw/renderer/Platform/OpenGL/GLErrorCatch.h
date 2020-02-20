@@ -44,5 +44,6 @@ namespace RenderAPI {
 #	define GL (stmt) stmt; while(iw::MessageCallback(#stmt, __FILE__, __LINE__)) {}
 #	define GLe(stmt) stmt; while(iw::MessageCallback(#stmt, __FILE__, __LINE__)) { err = true; }
 #else
-#	define GL(stmt) stmt
+#	define GL(stmt)  stmt
+#	define GLe(stmt) stmt
 #endif

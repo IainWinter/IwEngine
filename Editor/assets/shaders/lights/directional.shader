@@ -1,5 +1,5 @@
 #shader Vertex
-#version 440 core
+#version 330
 
 layout(std140, column_major) uniform Camera {
 	mat4 viewProj;
@@ -14,7 +14,7 @@ void main() {
 }
 
 #shader Fragment
-#version 440 core
+#version 330
 
 void main() {
 	float depth = gl_FragCoord.z;

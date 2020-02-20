@@ -76,13 +76,28 @@ namespace iw {
 
 		// Shader
 
-		ref<Shader> shader = Asset->Load<Shader>("shaders/default.shader");
+		ref<Shader> shader = Asset->Load<Shader>("shaders/pbr.shader");
 		ref<Shader> directional = Asset->Load<Shader>("shaders/lights/directional_transparent.shader");
 		gaussian = Asset->Load<Shader>("shaders/filters/gaussian.shader");
 		
 		Renderer->InitShader(shader,      ALL);
 		Renderer->InitShader(directional, CAMERA);
 		Renderer->InitShader(gaussian,    CAMERA);
+
+		Renderer->SetShader(shader);
+
+		vector3* positions = new vector3[2];
+		vector3* colors    = new vector3[2];
+
+		positions[0] = vector3(3, 3, 0);
+		positions[1] = vector3(-3, 3, 0);
+
+		colors[0] = vector3(0, 0, 1);
+		colors[1] = vector3(1, 0, 0);
+
+		shader->Program->GetParam("lightPositions[0]")->SetAsFloats(positions, 3, 2);
+		shader->Program->GetParam("lightColors[0]")   ->SetAsFloats(colors, 3, 2);
+		shader->Program->GetParam("ambiance")->SetAsFloat(0.05f);
 
 		// Textures
 		
@@ -120,6 +135,12 @@ namespace iw {
 		smat->Set("albedo", vector4(1, .95f, 1, 1));
 		tmat->Set("albedo", vector4(.95f, 1, 1, 1));
 
+		smat->Set("roughness", 0.5f);
+		tmat->Set("roughness", 0.5f);
+		
+		smat->Set("matallic", 0.5f);
+		tmat->Set("matallic", 0.5f);
+
 		smat->SetTexture("shadowMap", texShadow);
 		tmat->SetTexture("shadowMap", texShadow); // shouldnt be part of material
 
@@ -133,6 +154,9 @@ namespace iw {
 
 		smesh->SetMaterial(smat);
 		tmesh->SetMaterial(smat);
+
+		smesh->GenTangents();
+		tmesh->GenTangents();
 
 		smesh->Initialize(Renderer->Device);
 		tmesh->Initialize(Renderer->Device);
@@ -231,7 +255,7 @@ namespace iw {
 		Space->Clear();
 
 		Level level;
-		
+
 		Serializer byte(name);
 		
 		bool reset = false;
@@ -240,7 +264,7 @@ namespace iw {
 			level.Enemies.push_back(Enemy{ SPIN, 0.2617993f, .12f, 0.0f });
 			level.Positions.push_back(0);
 			level.Positions.push_back(1);
-			level.StageName = "models/grass/grass.obj";
+			level.StageName = "";
 			byte.Write(level);
 		}
 
@@ -307,30 +331,6 @@ namespace iw {
 			quaternion::from_axis_angle(vector3::unit_x, Pi / 2)
 		});
 
-		//ref<Model> stage = Asset->Load<Model>(level.StageName);
-
-		//for (size_t i = 0; i < stage->MeshCount; i++) {
-		//	ref<Material>& mat = stage->Meshes[i].Material;
-
-		//	mat->SetShader (Asset->Load<Shader>("shaders/default.shader"));
-		//	mat->SetTexture("shadowMap", Asset->Load<Texture>("ShadowMap")); // shouldnt be part of material
-		//	mat->Initialize(Renderer->Device);
-
-		//	stage->Meshes[i].SetTangents(0, nullptr);
-		//	stage->Meshes[i].SetBiTangents(0, nullptr);
-		//	stage->Meshes[i].Initialize(Renderer->Device);
-		//}
-
-		//ref<Texture> a = Asset->Load<Texture>("textures/foliage/alpha_mask.jpg");
-		//a->Initialize(Renderer->Device);
-
-		//stage->Meshes[1].Material->SetTexture("alphaMaskMap", a);
-		//stage->Meshes[2].Material->SetTexture("alphaMaskMap", a);
-
-		//Entity floor = Space->CreateEntity<Transform, Model>();
-		//floor.SetComponent<Transform>(vector3(0, 0, 0), vector3(5, 3, 5));
-		//floor.SetComponent<Model>    (*stage);
-
 		// Enemies
 
 		for (size_t i = 0; i < level.Enemies.size(); i++) {
@@ -390,12 +390,13 @@ namespace iw {
 		for (size_t i = 0; i < tree->MeshCount; i++) {
 			ref<Material>& mat = tree->Meshes[i].Material;
 
-			mat->SetShader(Asset->Load<Shader>("shaders/default.shader"));
+			mat->SetShader(Asset->Load<Shader>("shaders/pbr.shader"));
 			mat->SetTexture("shadowMap", Asset->Load<Texture>("ShadowMap")); // shouldnt be part of material
 			mat->Initialize(Renderer->Device);
 
-			tree->Meshes[i].SetTangents(0, nullptr);
-			tree->Meshes[i].SetBiTangents(0, nullptr);
+			mat->Set("roughness", 0.5f);
+			mat->Set("matallic", 0.5f);
+
 			tree->Meshes[i].Initialize(Renderer->Device);
 		}
 
@@ -417,12 +418,13 @@ namespace iw {
 		for (size_t i = 0; i < floor->MeshCount; i++) {
 			ref<Material>& mat = floor->Meshes[i].Material;
 
-			mat->SetShader(Asset->Load<Shader>("shaders/default.shader"));
+			mat->SetShader(Asset->Load<Shader>("shaders/pbr.shader"));
 			mat->SetTexture("shadowMap", Asset->Load<Texture>("ShadowMap")); // shouldnt be part of material
 			mat->Initialize(Renderer->Device);
 
-			floor->Meshes[i].SetTangents(0, nullptr);
-			floor->Meshes[i].SetBiTangents(0, nullptr);
+			mat->Set("roughness", 0.5f);
+			mat->Set("matallic", 0.5f);
+
 			floor->Meshes[i].Initialize(Renderer->Device);
 		}
 

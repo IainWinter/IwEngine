@@ -126,7 +126,8 @@ project "IwReflection"
 		llvmdir  .. blddir .. "/tools/clang" .. incdir,
 		llvmdir  .. blddir .. incdir,
 		llvmdir  .. "/llvm"  .. incdir,
-		llvmdir  .. "/clang" .. incdir
+		llvmdir  .. "/clang" .. incdir,
+		jsondir
 	}
 
 	libdirs {

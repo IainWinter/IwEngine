@@ -74,13 +74,26 @@ namespace Graphics {
 	void Renderer::SetCamera(
 		Camera* camera)
 	{
-		iw::matrix4 vp = iw::matrix4::identity;
+		matrix4 vp  = iw::matrix4::identity;
+		vector4 pos = vector4::zero;
+		
 		if (camera != nullptr) {
-			vp = camera->GetViewProjection();
+			vp  = camera->GetViewProjection();
+			pos = camera->Position;
 		}
 
+		bool update = false;
 		if (vp != m_cameraData.ViewProj) {
 			m_cameraData.ViewProj = vp;
+			update = true;
+		}
+
+		if (pos != m_cameraData.CameraPos) {
+			m_cameraData.CameraPos = pos;
+			update = true;
+		}
+
+		if (update) {
 			Device->UpdateBuffer(m_cameraUBO, &m_cameraData);
 		}
 	}

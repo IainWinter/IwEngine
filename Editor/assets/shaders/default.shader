@@ -1,5 +1,5 @@
 #shader Vertex
-#version 440 core
+#version 330
 
 layout(std140, column_major) uniform Camera {
 	mat4 viewProj;
@@ -34,7 +34,7 @@ void main() {
 }
 
 #shader Fragment
-#version 440 core
+#version 330
 
 uniform vec4 mat_albedo;
 uniform vec4 mat_ao;
@@ -86,7 +86,6 @@ void main() {
 		if (0.5 > texture(mat_alphaMaskMap, UV).r) {
 			discard;
 		}
-		//diffuse.a = texture(mat_alphaMaskMap, UV).r;
 	}
 
 	vec4 ao = mat_ao;

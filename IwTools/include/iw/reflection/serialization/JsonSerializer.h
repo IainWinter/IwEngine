@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Serializer.h"
+#include "json.h"
+#include <streambuf>
 
 namespace iw {
 namespace Reflect {
@@ -8,16 +10,34 @@ namespace Reflect {
 	class JsonSerializer
 		: public Serializer
 	{
+	private:
+		json_value_s* m_json;
+		json_value_s* m_current;
+
 	public:
 		JsonSerializer()
 			: Serializer()
+			, m_json(nullptr)
 		{}
 
 		JsonSerializer(
 			std::string filePath,
 			bool overwrite = false)
 			: Serializer(filePath, overwrite)
-		{}
+			, m_json(nullptr)
+		{
+			std::string source = (std::stringstream() << m_stream->rdbuf()).str();
+			m_current = m_json = json_parse(source.c_str(), source.size());
+		}
+
+		~JsonSerializer() {
+			free(m_json);
+		}
+
+		void ResetCursor() override {
+			m_current = m_json;
+			Serializer::ResetCursor();
+		}
 
 		void SerializeClass(
 			const iw::Class* class_,
@@ -44,7 +64,7 @@ namespace Reflect {
 			m_stream->put(',');
 		}
 
-		virtual void SerializeFieldArray(
+		void SerializeFieldArray(
 			const iw::Field& field,
 			const iw::Type* elemType,
 			const void* value,
@@ -110,7 +130,107 @@ namespace Reflect {
 
 			Write(str.c_str(), str.length());
 		}
-		
+
+		void DeserializeClass(
+			const iw::Class* class_,
+			void* value)
+		{
+			if (class_->deserialize) {
+				class_->deserialize(*this, value);
+			}
+
+			else {
+				for (int i = 0; i < class_->fieldCount; i++) {
+					const iw::Field& f = class_->fields[i];
+					DeserializeField(f, (char*)value + f.offset);
+				}
+			}
+		}
+
+		void DeserializeField(
+			const iw::Field& field,
+			void* value)
+		{
+			DeserializeType(field.type, value);
+		}
+
+		void DeserializeFieldArray(
+			const iw::Field& field,
+			const iw::Type* elemType,
+			void* value,
+			size_t size)
+		{
+			DeserializeArray(elemType, value, size);
+		}
+
+		void DeserializeType(
+			const iw::Type* type,
+			void* value)
+		{
+			if (type->isArray) {
+				DeserializeArray(type, value, type->count);
+			}
+
+			else {
+				void* ptr = (char*)value;
+				if (type->isClass) {
+					const iw::Class* class_ = type->AsClass();
+					DeserializeClass(class_, ptr);
+				}
+
+				else {
+					DeserializeValue(type, ptr);
+				}
+			}
+		}
+
+		void DeserializeArray(
+			const iw::Type* type,
+			void* value,
+			size_t count)
+		{
+			if (type->type == IntegralType::CHAR) {
+				Read((char*)value, count);
+				m_stream->get(); // remove null char
+			}
+
+			else {
+				for (int i = 0; i < count; i++) {
+					void* ptr = (char*)value + i * type->size;
+					DeserializeType(type, ptr);
+				}
+			}
+		}
+
+		void DeserializeValue(
+			const iw::Type* type,
+			void* value)
+		{
+			Read((char*)value, type->size);
+		}
+
+		void DeserializeValue(
+			const iw::Type* type,
+			const void* value)
+		{
+			std::string str((char*)value);
+			switch (type->type) {
+				case IntegralType::BOOL:               *(bool*)              value = str != "false" && str[0] != '0'; break;
+				case IntegralType::CHAR:               *(char*)              value = str[0];                          break;
+				case IntegralType::SHORT:              *(short*)             value = std::stol(str);                  break;
+				case IntegralType::INT:                *(int*)               value = std::stoi(str);                  break;
+				case IntegralType::LONG:               *(long*)              value = std::stol(str);                  break;
+				case IntegralType::FLOAT:              *(float*)             value = std::stof(str);                  break;
+				case IntegralType::DOUBLE:             *(double*)            value = std::stod(str);                  break;
+				case IntegralType::LONG_LONG:          *(long long*)         value = std::stoll(str);                 break;
+				case IntegralType::LONG_DOUBLE:        *(long double*)       value = std::stold(str);                 break;
+				case IntegralType::UNSIGNED_CHAR:      *(unsigned char*)     value = (unsigned char)str[0];           break;
+				case IntegralType::UNSIGNED_SHORT:     *(unsigned short*)    value = std::stoul(str);                 break;
+				case IntegralType::UNSIGNED_INT:       *(unsigned int*)      value = std::stoul(str);                 break;
+				case IntegralType::UNSIGNED_LONG:      *(unsigned long*)     value = std::stoul(str);                 break;
+				case IntegralType::UNSIGNED_LONG_LONG: *(unsigned long long*)value = std::stoull(str);                break;
+			}
+		}
 	};
 }
 

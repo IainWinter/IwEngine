@@ -190,7 +190,7 @@ namespace Graphics {
 		std::string n(name);
 
 		name[0] = toupper(name[0]);
-		Set("has" + name, (float)(texture != nullptr));
+		Set("has" + name, texture != nullptr ? 1.0f : 0.0f);
 	}
 
 	iw::ref<Texture> Material::GetTexture(

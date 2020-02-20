@@ -58,25 +58,30 @@ namespace RenderAPI {
 		unsigned stride,                                                                   \
 		unsigned count)                                                                    \
 	{                                                                                      \
+		bool err = 0;                                                                      \
 		const gt* v = (const gt*)values;                                                   \
-		if (count == 1) {                                                                  \
+		/*if (count == 1) {                                                                \
 			switch (stride) {                                                              \
-				case 1: glUniform1##sn(m_location, v[0]);                   break;         \
-				case 2: glUniform2##sn(m_location, v[0], v[1]);             break;         \
-				case 3: glUniform3##sn(m_location, v[0], v[1], v[2]);       break;         \
-				case 4: glUniform4##sn(m_location, v[0], v[1], v[2], v[3]); break;         \
+				case 1: GLe(glUniform1##sn(m_location, v[0]));                   break;    \
+				case 2: GLe(glUniform2##sn(m_location, v[0], v[1]));             break;    \
+				case 3: GLe(glUniform3##sn(m_location, v[0], v[1], v[2]));       break;    \
+				case 4: GLe(glUniform4##sn(m_location, v[0], v[1], v[2], v[3])); break;    \
 				default: LOG_WARNING << "Stride is too large (" << (stride) << ")"; break; \
 			}                                                                              \
-		}                                                                                  \
+		}*/                                                                                \
 		                                                                                   \
-		else {                                                                             \
+		/*else {*/                                                                         \
 			switch (stride) {                                                              \
-				case 1: glUniform1##sn##v(m_location, count, v); break;                    \
-				case 2: glUniform2##sn##v(m_location, count, v); break;                    \
-				case 3: glUniform3##sn##v(m_location, count, v); break;                    \
-				case 4: glUniform4##sn##v(m_location, count, v); break;                    \
+				case 1: GLe(glUniform1##sn##v(m_location, count, v)); break;               \
+				case 2: GLe(glUniform2##sn##v(m_location, count, v)); break;               \
+				case 3: GLe(glUniform3##sn##v(m_location, count, v)); break;               \
+				case 4: GLe(glUniform4##sn##v(m_location, count, v)); break;               \
 				default: LOG_WARNING << "Stride is too large (" << (stride) << ")"; break; \
 			}                                                                              \
+		/*}*/                                                                              \
+                                                                                           \
+        if(err) {                                                                          \
+			LOG_WARNING << "Problem setting uniform " << m_name;                           \
 		}                                                                                  \
 	}                                                                                      \
 

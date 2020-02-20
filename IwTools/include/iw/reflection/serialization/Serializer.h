@@ -44,7 +44,7 @@ namespace Reflect {
 				std::istreambuf_iterator<char>());
 		}
 
-		void ResetCursor() {
+		virtual void ResetCursor() {
 			m_stream->seekg(0);
 		}
 
@@ -235,26 +235,6 @@ namespace Reflect {
 		{
 			Read((char*)value, type->size);
 		}
-
-		/*IWUTIL_API
-		void SerializeVector(
-			const iw::Class* class_,
-			const void* value);
-
-		IWUTIL_API
-		void SerializeString(
-			const iw::Class* class_,
-			const void* value);
-
-		IWUTIL_API
-		void DeserializeVector(
-			const iw::Class* class_,
-			void* value);
-
-		IWUTIL_API
-		void DeserializeString(
-			const iw::Class* class_,
-			void* value);*/
 	};
 }
 

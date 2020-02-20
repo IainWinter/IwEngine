@@ -59,6 +59,7 @@ namespace Graphics {
 
 	struct CameraData {
 		iw::matrix4 ViewProj;
+		iw::vector4 CameraPos;
 	};
 
 	enum UBOBinding {
