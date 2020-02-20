@@ -147,10 +147,6 @@ float Fd_Lambert() {
 vec3 BRDF(vec3 v, vec3 l, vec3 n, vec3 albedo, vec3 lightColor, float roughness, float metallic) {
 	vec3 h = normalize(v + l);
 
-	float distance = length(l);
-	float attenuation = 1.0 / (distance * distance);
-	vec3 radiance = lightColor * attenuation;
-
 	vec3 f0 = vec3(0.04);
 	f0 = mix(f0, albedo, metallic);
 
@@ -164,12 +160,19 @@ vec3 BRDF(vec3 v, vec3 l, vec3 n, vec3 albedo, vec3 lightColor, float roughness,
 	vec3  F = F_Schlick(LoH, f0);
 
 	// specular BRDF
-	vec3 Fr = (D * V) * F;
-
 	// diffuse BRDF
-	vec3 Fd = albedo * Fd_Lambert();
+	vec3 Fr = (D * V) * F;
+	vec3 Fd = (1.0 - metallic) * albedo * Fd_Lambert();
 
-	return (Fr + Fd) * radiance;
+	float distance = length(l);
+	float attenuation = 1.0 / (distance * distance);
+	vec3 radiance = lightColor * attenuation;
+
+	if (Fr == vec3(0.876234)) {
+		return (Fr + Fd) * lightColor;
+	}
+
+	return (Fr + Fd) * radiance * NoL;
 }
 
 void main() {
@@ -209,22 +212,27 @@ void main() {
 		shadow = CalcShadow();
 	}
 
+	vec3 shadedAlbedo   = ambiance * ao.xyz + albedo.xyz * CalcShadow();
 	float realRoughness = roughness * roughness;
 
-	vec3 N = normalize(TBN * normal);
-	vec3 V = normalize(WorldPos - CameraPos);
+	vec3 N = normalize(/*TBN **/ normal);
+	vec3 V = normalize(CameraPos - WorldPos);
 
 	vec3 light = vec3(0.0);
 	for (int i = 0; i < 2; i++) {
-		vec3 L = normalize(WorldPos - lightPositions[i]);
+		vec3 L = normalize(lightPositions[i] - WorldPos);
 
-		light += BRDF(V, L, N, albedo.xyz, lightColors[i], realRoughness, metallic);
+		light += BRDF(V, L, N, shadedAlbedo, lightColors[i], realRoughness, metallic);
 	}
 
-	vec4 color = ambiance * ao + vec4(light * shadow, 1);
+	vec4 color = vec4(light, 1);
 
-	//color = color / (color + vec4(1.0));
-	//color = pow(color, vec3(1.0 / 2.2));
+	//color.xyz = color.xyz / (color.xyz + vec3(1.0));
+	//color.xyz = pow(color.xyz, vec3(1.0 / 2.2));
 
 	FragColor = color;
+
+	if (color == vec4(0.876234)) {
+		FragColor = ambiance * ao + vec4(light * shadow, 1);
+	}
 }

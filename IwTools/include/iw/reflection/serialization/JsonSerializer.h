@@ -2,7 +2,8 @@
 
 #include "Serializer.h"
 #include "json.h"
-#include <streambuf>
+#include <stack>
+#include <assert.h>
 
 namespace iw {
 namespace Reflect {
@@ -12,7 +13,7 @@ namespace Reflect {
 	{
 	private:
 		json_value_s* m_json;
-		json_value_s* m_current;
+		std::stack<json_value_s*> m_current;
 
 	public:
 		JsonSerializer()
@@ -27,7 +28,27 @@ namespace Reflect {
 			, m_json(nullptr)
 		{
 			std::string source = (std::stringstream() << m_stream->rdbuf()).str();
-			m_current = m_json = json_parse(source.c_str(), source.size());
+			m_json = json_parse(source.c_str(), source.size());
+			m_current.push(m_json);
+
+			json_object_element_s* field = json_value_as_object(m_json)->start;
+
+			while (field) {
+				m_current.push(field->value);
+				m_current.push((json_value_s*)field->name);
+
+				field = field->next;
+			}
+
+			// object
+			//    name | object
+			//              string | number
+			//              name | array
+			//                        object
+			//                           name | number
+			//                               ...
+			//                        ...
+			//    name | object
 		}
 
 		~JsonSerializer() {
@@ -35,7 +56,8 @@ namespace Reflect {
 		}
 
 		void ResetCursor() override {
-			m_current = m_json;
+			m_current = std::stack<json_value_s*>();
+			m_current.push(m_json);
 			Serializer::ResetCursor();
 		}
 
@@ -108,7 +130,7 @@ namespace Reflect {
 
 		void SerializeValue(
 			const iw::Type* type,
-			const void* value)
+			const void* value) override
 		{
 			std::string str;
 			switch (type->type) {
@@ -131,10 +153,20 @@ namespace Reflect {
 			Write(str.c_str(), str.length());
 		}
 
+
 		void DeserializeClass(
 			const iw::Class* class_,
-			void* value)
+			void* value) override
 		{
+			assert(m_current.top()->type == json_type_object);// need to return bool as failure for proper debug
+
+			json_object_element_s* field = json_value_as_object(m_json)->start;
+			while (field) {
+				m_current.push(field->value);
+				m_current.push((json_value_s*)field->name);
+				field = field->next;
+			}
+
 			if (class_->deserialize) {
 				class_->deserialize(*this, value);
 			}
@@ -149,7 +181,7 @@ namespace Reflect {
 
 		void DeserializeField(
 			const iw::Field& field,
-			void* value)
+			void* value) override
 		{
 			DeserializeType(field.type, value);
 		}
@@ -158,14 +190,14 @@ namespace Reflect {
 			const iw::Field& field,
 			const iw::Type* elemType,
 			void* value,
-			size_t size)
+			size_t size) override
 		{
 			DeserializeArray(elemType, value, size);
 		}
 
 		void DeserializeType(
 			const iw::Type* type,
-			void* value)
+			void* value) override
 		{
 			if (type->isArray) {
 				DeserializeArray(type, value, type->count);
@@ -187,7 +219,7 @@ namespace Reflect {
 		void DeserializeArray(
 			const iw::Type* type,
 			void* value,
-			size_t count)
+			size_t count) override
 		{
 			if (type->type == IntegralType::CHAR) {
 				Read((char*)value, count);
@@ -204,14 +236,7 @@ namespace Reflect {
 
 		void DeserializeValue(
 			const iw::Type* type,
-			void* value)
-		{
-			Read((char*)value, type->size);
-		}
-
-		void DeserializeValue(
-			const iw::Type* type,
-			const void* value)
+			void* value) override
 		{
 			std::string str((char*)value);
 			switch (type->type) {

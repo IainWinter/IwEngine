@@ -50,7 +50,12 @@ namespace iw {
 
 	SandboxLayer::SandboxLayer()
 		: Layer("Sandbox")
-	{}
+	{
+		//JsonSerializer json("test.json");
+
+		//Level level;
+		//json.Read(level);
+	}
 
 	int SandboxLayer::Initialize() {
 
@@ -92,12 +97,11 @@ namespace iw {
 		positions[0] = vector3(3, 3, 0);
 		positions[1] = vector3(-3, 3, 0);
 
-		colors[0] = vector3(0, 0, 1);
-		colors[1] = vector3(1, 0, 0);
+		colors[0] = vector3(1);
+		colors[1] = vector3(1);
 
 		shader->Program->GetParam("lightPositions[0]")->SetAsFloats(positions, 3, 2);
 		shader->Program->GetParam("lightColors[0]")   ->SetAsFloats(colors, 3, 2);
-		shader->Program->GetParam("ambiance")->SetAsFloat(0.05f);
 
 		// Textures
 		
@@ -135,11 +139,11 @@ namespace iw {
 		smat->Set("albedo", vector4(1, .95f, 1, 1));
 		tmat->Set("albedo", vector4(.95f, 1, 1, 1));
 
-		smat->Set("roughness", 0.5f);
-		tmat->Set("roughness", 0.5f);
+		smat->Set("roughness", 0.8f);
+		tmat->Set("roughness", 0.8f);
 		
-		smat->Set("matallic", 0.5f);
-		tmat->Set("matallic", 0.5f);
+		smat->Set("metallic", 0.2f);
+		tmat->Set("metallic", 0.2f);
 
 		smat->SetTexture("shadowMap", texShadow);
 		tmat->SetTexture("shadowMap", texShadow); // shouldnt be part of material
@@ -226,14 +230,15 @@ namespace iw {
 
 		// Rendering pipeline
 
-		        generateShadowMap    = new GenerateShadowMap(Renderer, Space);
-		        postProcessShadowMap = new FilterTarget(Renderer);
-		Render* mainRender           = new Render(Renderer, Space);
+		generateShadowMap    = new GenerateShadowMap(Renderer, Space);
+		postProcessShadowMap = new FilterTarget(Renderer);
+		mainRender           = new Render(Renderer, Space);
 
 		generateShadowMap   ->SetLight(light);
 		postProcessShadowMap->SetIntermediate(targetBlur);
 		postProcessShadowMap->SetShader(gaussian);
 		mainRender          ->SetLight(light);
+		mainRender          ->SetAmbiance(0.1f);
 
 		pipeline.first(generateShadowMap)
 			.then(postProcessShadowMap)
@@ -394,8 +399,8 @@ namespace iw {
 			mat->SetTexture("shadowMap", Asset->Load<Texture>("ShadowMap")); // shouldnt be part of material
 			mat->Initialize(Renderer->Device);
 
-			mat->Set("roughness", 0.5f);
-			mat->Set("matallic", 0.5f);
+			mat->Set("roughness", 0.7f);
+			mat->Set("metallic", 0.0f);
 
 			tree->Meshes[i].Initialize(Renderer->Device);
 		}
@@ -422,8 +427,8 @@ namespace iw {
 			mat->SetTexture("shadowMap", Asset->Load<Texture>("ShadowMap")); // shouldnt be part of material
 			mat->Initialize(Renderer->Device);
 
-			mat->Set("roughness", 0.5f);
-			mat->Set("matallic", 0.5f);
+			mat->Set("roughness", 0.9f);
+			mat->Set("metallic", 0.1f);
 
 			floor->Meshes[i].Initialize(Renderer->Device);
 		}
@@ -466,6 +471,8 @@ namespace iw {
 		ImGui::Begin("Sandbox");
 
 		ImGui::SliderFloat("Time scale", &ts, 0.001f, 1);
+
+		ImGui::SliderFloat("Ambiance", (float*)&mainRender->GetAmbiance(), 0, 1);
 		ImGui::SliderFloat("Shadow map blur", &blurAmount, 0, 5);
 		ImGui::SliderFloat("Shadow map threshold", &threshold, 0, 1);
 		ImGui::SliderFloat3("Light pos", (float*)&lightPos, -5, 5);

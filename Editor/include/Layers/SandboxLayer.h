@@ -28,6 +28,7 @@ namespace iw {
 		iw::pipeline pipeline;
 		GenerateShadowMap* generateShadowMap;
 		FilterTarget* postProcessShadowMap;
+		Render* mainRender;
 
 		Mesh* textMesh;
 		Transform textTransform;

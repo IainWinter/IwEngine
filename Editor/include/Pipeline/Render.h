@@ -22,8 +22,12 @@ namespace iw {
 		void SetLight(
 			DirectionalLight& light);
 
+		void SetAmbiance(
+			float ambiance);
+
 		iw::ref<Texture>& GetTexture();
 		Light* GetLight();
+		float& GetAmbiance();
 
 		void execute() override;
 	};

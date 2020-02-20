@@ -4,7 +4,7 @@ namespace iw {
 	Render::Render(
 		iw::ref<Renderer> r,
 		iw::ref<Space> s)
-		: iw::node(2, 0)
+		: iw::node(3, 0)
 		, renderer(r)
 		, space(s)
 	{}
@@ -15,12 +15,22 @@ namespace iw {
 		set<DirectionalLight*>(1, &light);
 	}
 
+	void Render::SetAmbiance(
+		float ambiance)
+	{
+		set<float>(2, ambiance);
+	}
+
 	iw::ref<Texture>& Render::GetTexture() {
 		return in<iw::ref<Texture>>(0);
 	}
 
 	Light* Render::GetLight() {
 		return in<Light*>(1);
+	}
+
+	float& Render::GetAmbiance() {
+		return in<float>(2);
 	}
 	
 	struct CameraComponents {
@@ -36,6 +46,7 @@ namespace iw {
 	void Render::execute() {
 		iw::ref<Texture>& shadowMap = GetTexture();
 		Light* light = GetLight();
+		float ambiance = GetAmbiance();
 
 		for (auto c_e : space->Query<Transform, CameraController>()) {
 			auto [c_t, c_c] = c_e.Components.Tie<CameraComponents>();
@@ -55,6 +66,9 @@ namespace iw {
 
 					mesh.Material->Shader->Program->GetParam("lightSpace")
 						->SetAsMat4(light->Cam().GetViewProjection());
+
+					mesh.Material->Shader->Program->GetParam("ambiance")
+						->SetAsFloat(ambiance);
 
 					renderer->DrawMesh(m_t, &mesh);
 				}
