@@ -392,17 +392,20 @@ namespace iw {
 	{
 		ref<Model> tree = Asset->Load<Model>(name);
 
-		for (size_t i = 0; i < tree->MeshCount; i++) {
-			ref<Material>& mat = tree->Meshes[i].Material;
+		if (tree->Meshes[0].VertexArray == nullptr) {
+			for (size_t i = 0; i < tree->MeshCount; i++) {
+				ref<Material>& mat = tree->Meshes[i].Material;
 
-			mat->SetShader(Asset->Load<Shader>("shaders/pbr.shader"));
-			mat->SetTexture("shadowMap", Asset->Load<Texture>("ShadowMap")); // shouldnt be part of material
-			mat->Initialize(Renderer->Device);
+				mat->SetShader(Asset->Load<Shader>("shaders/pbr.shader"));
+				mat->SetTexture("shadowMap", Asset->Load<Texture>("ShadowMap")); // shouldnt be part of material
+				mat->Initialize(Renderer->Device);
 
-			mat->Set("roughness", 0.7f);
-			mat->Set("metallic", 0.0f);
+				mat->Set("roughness", 0.7f);
+				mat->Set("metallic", 0.0f);
 
-			tree->Meshes[i].Initialize(Renderer->Device);
+				tree->Meshes[i].GenTangents();
+				tree->Meshes[i].Initialize(Renderer->Device);
+			}
 		}
 
 		ref<Texture> leavesAlpha = Asset->Load<Texture>("textures/forest/tree/leaves/alpha.jpg");
@@ -420,17 +423,20 @@ namespace iw {
 	{
 		ref<Model> floor = Asset->Load<Model>(name);
 
-		for (size_t i = 0; i < floor->MeshCount; i++) {
-			ref<Material>& mat = floor->Meshes[i].Material;
+		if (floor->Meshes[0].VertexArray == nullptr) {
+			for (size_t i = 0; i < floor->MeshCount; i++) {
+				ref<Material>& mat = floor->Meshes[i].Material;
 
-			mat->SetShader(Asset->Load<Shader>("shaders/pbr.shader"));
-			mat->SetTexture("shadowMap", Asset->Load<Texture>("ShadowMap")); // shouldnt be part of material
-			mat->Initialize(Renderer->Device);
+				mat->SetShader(Asset->Load<Shader>("shaders/pbr.shader"));
+				mat->SetTexture("shadowMap", Asset->Load<Texture>("ShadowMap")); // shouldnt be part of material
+				mat->Initialize(Renderer->Device);
 
-			mat->Set("roughness", 0.9f);
-			mat->Set("metallic", 0.1f);
+				mat->Set("roughness", 0.9f);
+				mat->Set("metallic", 0.1f);
 
-			floor->Meshes[i].Initialize(Renderer->Device);
+				floor->Meshes[i].GenTangents();
+				floor->Meshes[i].Initialize(Renderer->Device);
+			}
 		}
 
 		Entity ent = Space->CreateEntity<Transform, Model>();

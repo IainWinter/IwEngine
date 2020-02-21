@@ -157,7 +157,9 @@ namespace Graphics {
 	}
 
 	// Generate vertex normals by averaging the face normals of the surrounding faces
-	void Mesh::GenNormals() {
+	void Mesh::GenNormals(
+		bool smooth)
+	{
 		if (!Vertices) return;
 
 		Normals = new iw::vector3[VertexCount];
@@ -169,41 +171,51 @@ namespace Graphics {
 
 			iw::vector3 face = (v2 - v1).cross(v3 - v1).normalized();
 
-			Normals[Indices[i + 0]] = (Normals[Indices[i + 0]] + face).normalized();
-			Normals[Indices[i + 1]] = (Normals[Indices[i + 1]] + face).normalized();
-			Normals[Indices[i + 2]] = (Normals[Indices[i + 2]] + face).normalized();
+			if (smooth) {
+				Normals[Indices[i + 0]] = (Normals[Indices[i + 0]] + face).normalized();
+				Normals[Indices[i + 1]] = (Normals[Indices[i + 1]] + face).normalized();
+				Normals[Indices[i + 2]] = (Normals[Indices[i + 2]] + face).normalized();
+			}
+
+			else {
+				Normals[Indices[i + 0]] = face;
+				Normals[Indices[i + 1]] = face;
+				Normals[Indices[i + 2]] = face;
+			}
 		}
 	}
 
 	// Generate tangents and bitangents from vertex normals and uv corrds
 	// If there are no normals, they are generated along with the tangents
-	void Mesh::GenTangents() {
+	void Mesh::GenTangents(
+		bool smooth)
+	{
 		if (!Uvs || !Vertices) return;
 
 		if (!Normals) {
-			GenNormals();
+			GenNormals(smooth);
 		}
 
 		delete[] Tangents;
 		delete[] BiTangents;
 
-		Tangents = new iw::vector3[VertexCount];
+		Tangents   = new iw::vector3[VertexCount];
 		BiTangents = new iw::vector3[VertexCount];
 
 		unsigned v = 0;
 		for (unsigned i = 0; i < IndexCount; i += 3) {
-			iw::vector3& norm = Normals[Indices[i + 0]]; // can use any normal
+			iw::vector3& norm = Normals [Indices[i + 0]]; // can use any normal
 			iw::vector3& pos1 = Vertices[Indices[i + 0]];
 			iw::vector3& pos2 = Vertices[Indices[i + 1]];
 			iw::vector3& pos3 = Vertices[Indices[i + 2]];
-			iw::vector2& uv1 = Uvs[Indices[i + 0]];
-			iw::vector2& uv2 = Uvs[Indices[i + 1]];
-			iw::vector2& uv3 = Uvs[Indices[i + 2]];
+			iw::vector2& uv1  = Uvs     [Indices[i + 0]];
+			iw::vector2& uv2  = Uvs     [Indices[i + 1]];
+			iw::vector2& uv3  = Uvs     [Indices[i + 2]];
 
 			iw::vector3 edge1 = pos2 - pos1;
 			iw::vector3 edge2 = pos3 - pos1;
-			iw::vector2 duv1 = uv2 - uv1;
-			iw::vector2 duv2 = uv3 - uv1;
+			iw::vector2 duv1  = uv2  - uv1;
+			iw::vector2 duv2  = uv3  - uv1;
 
 			float f = 1.0f / duv1.cross_length(duv2);
 

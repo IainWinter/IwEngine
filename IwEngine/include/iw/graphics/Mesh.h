@@ -69,10 +69,12 @@ namespace Graphics {
 			const iw::ref<IDevice>& device) const;
 
 		IWGRAPHICS_API
-		void GenNormals();
+		void GenNormals(
+			bool smooth = true);
 
 		IWGRAPHICS_API
-		void GenTangents();
+		void GenTangents(
+			bool smooth = true);
 
 		IWGRAPHICS_API
 		void SetVertices(

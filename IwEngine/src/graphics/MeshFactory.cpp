@@ -50,7 +50,8 @@ namespace Graphics {
 
 	// Triangle
 
-	static const unsigned TriVertCount = 4;
+	static const unsigned TriVertCount  = 4;
+	static const unsigned TriUvCount    = 4;
 	static const unsigned TriIndexCount = 12;
 
 	static const iw::vector3 TriVerts[] = {
@@ -58,6 +59,13 @@ namespace Graphics {
 		iw::vector3(cos(iw::Pi2 * 1 / 3), -1, sin(iw::Pi2 * 1 / 3)),
 		iw::vector3(cos(iw::Pi2 * 2 / 3), -1, sin(iw::Pi2 * 2 / 3)),
 		iw::vector3(0, 1, 0),
+	};
+
+	static const iw::vector2 TriUvs[] = {
+		iw::vector2(0,    0),
+		iw::vector2(1,    0),
+		iw::vector2(0.5f, 1),
+		iw::vector2(1,    1),
 	};
 
 	static const unsigned TriIndex[] = {
@@ -76,7 +84,6 @@ namespace Graphics {
 		mesh->VertexCount = 12 + (30 * res);
 		mesh->IndexCount  = 60 * res;
 		mesh->Vertices = new iw::vector3[mesh->VertexCount];
-		mesh->Normals  = new iw::vector3[mesh->VertexCount];
 		mesh->Indices  = new unsigned[mesh->IndexCount];
 
 		memcpy(mesh->Vertices, IcoVerts, IcoVertCount * sizeof(iw::vector3));
@@ -87,7 +94,7 @@ namespace Graphics {
 		unsigned indexCount = IcoIndexCount;
 		unsigned vertCount  = IcoVertCount;
 		for (unsigned i = 0; i < resolution; i++) {
-			detail::SubDevide(mesh->Vertices, mesh->Indices, indexCount, vertCount);
+			detail::SubDevideVerts(mesh->Vertices, mesh->Indices, indexCount, vertCount);
 		}
 
 		for (unsigned i = 0; i < mesh->VertexCount; i++) {
@@ -177,23 +184,26 @@ namespace Graphics {
 		mesh->VertexCount = 4 + (6 * res);
 		mesh->IndexCount  = 12 * res;
 		mesh->Vertices = new iw::vector3[mesh->VertexCount];
-		mesh->Normals  = new iw::vector3[mesh->VertexCount];
+		mesh->Uvs      = new iw::vector2[mesh->VertexCount];
 		mesh->Indices  = new unsigned   [mesh->IndexCount];
 
-		memcpy(mesh->Vertices, TriVerts, TriVertCount * sizeof(iw::vector3));
-		memcpy(mesh->Indices, TriIndex, TriIndexCount * sizeof(unsigned));
+		memcpy(mesh->Vertices, TriVerts, TriVertCount  * sizeof(iw::vector3));
+		memcpy(mesh->Uvs,      TriUvs,   TriUvCount    * sizeof(iw::vector2));
+		memcpy(mesh->Indices,  TriIndex, TriIndexCount * sizeof(unsigned));
 
 		// Verts & Index
 
 		unsigned indexCount = TriIndexCount;
 		unsigned vertCount  = TriVertCount;
+		unsigned uvCount    = TriUvCount;
 		for (unsigned i = 0; i < resolution; i++) {
-			detail::SubDevide(mesh->Vertices, mesh->Indices, indexCount, vertCount);
+			detail::SubDevideUvs  (mesh->Uvs,      mesh->Indices, indexCount, uvCount);
+			detail::SubDevideVerts(mesh->Vertices, mesh->Indices, indexCount, vertCount);
 		}
 
 		// Normals
 
-		mesh->GenNormals();
+		mesh->GenNormals(false);
 
 		return mesh;
 	}
@@ -224,8 +234,8 @@ namespace Graphics {
 				unsigned i = z + x * (zCount + 1);
 
 				mesh->Vertices[i] = offset + iw::vector3(x * stepX, 0, z * stepZ);
-				mesh->Normals[i]  = iw::vector3::unit_y;
-				mesh->Uvs[i]      = iw::vector2(x * stepU, z * stepV);
+				mesh->Normals [i] = iw::vector3::unit_y;
+				mesh->Uvs     [i] = iw::vector2(x * stepU, z * stepV);
 			}
 		}
 
@@ -251,7 +261,7 @@ namespace Graphics {
 	}
 
 namespace detail {
-	void SubDevide(
+	void SubDevideVerts(
 		iw::vector3* verts,
 		unsigned* index,
 		unsigned& currentIndexCount,
@@ -279,6 +289,28 @@ namespace detail {
 		delete[] next_index;
 	}
 
+
+	/*
+	    0, 1, 2,
+		1, 0, 3,
+		2, 1, 3,
+		0, 2, 3
+	*/
+
+	void SubDevideUvs(
+		iw::vector2* uvs,
+		const unsigned* index,
+		unsigned indexCount,
+		unsigned& currentUvCount)
+	{
+		IndexLookup lookup;
+		for (unsigned i = 0; i < indexCount; i += 3) {
+			CreateUvsForEdge(lookup, uvs, index[i],     index[i + ((i + 1) % 3)], currentUvCount);
+			CreateUvsForEdge(lookup, uvs, index[i + 1], index[i + ((i + 2) % 3)], currentUvCount);
+			CreateUvsForEdge(lookup, uvs, index[i + 2], index[i + ((i + 3) % 3)], currentUvCount);
+		}
+	}
+
 	unsigned CreateVertexForEdge(
 		IndexLookup& lookup,
 		iw::vector3* verts,
@@ -294,6 +326,26 @@ namespace detail {
 			auto& edge1 = verts[second];
 			auto point = (edge0 + edge1) / 2;
 			verts[currentVertCount++] = point;
+		}
+
+		return inserted.first->second;
+	}
+
+	unsigned CreateUvsForEdge(
+		IndexLookup& lookup,
+		iw::vector2* uvs,
+		unsigned first,
+		unsigned second,
+		unsigned& currentUvCount)
+	{
+		IndexPair key = first < second ? IndexPair(first, second) : IndexPair(second, first);
+
+		auto inserted = lookup.insert({ key, currentUvCount });
+		if (inserted.second) {
+			auto& edge0 = uvs[first];
+			auto& edge1 = uvs[second];
+			auto point = (edge0 + edge1) / 2;
+			uvs[currentUvCount++] = point;
 		}
 
 		return inserted.first->second;

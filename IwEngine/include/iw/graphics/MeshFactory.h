@@ -36,23 +36,30 @@ namespace detail {
 	using VertList    = std::vector<iw::vector3>;
 
 	// Icosphere
-
 	static const unsigned IcoVertCount;
 	static const unsigned IcoIndexCount;
 	static const iw::vector3* IcoVerts;
 	static const unsigned*    IcoIndex;
 
-	// Icosphere
+	// Tetrahedron
 	static const unsigned TriVertCount;
+	static const unsigned TriUvCount;
 	static const unsigned TriIndexCount;
 	static const iw::vector3* TriVerts;
+	static const iw::vector2* TriUvs;
 	static const unsigned*    TriIndex;
 
-	void SubDevide(
+	void SubDevideVerts(
 		iw::vector3* verts,
 		unsigned* index,
 		unsigned& currentIndexCount,
 		unsigned& currentVertCount);
+
+	void SubDevideUvs(
+		iw::vector2* uvs,
+		const unsigned* index,
+		unsigned indexCount,
+		unsigned& currentUvCount);
 
 	unsigned CreateVertexForEdge(
 		IndexLookup& lookup,
@@ -60,6 +67,13 @@ namespace detail {
 		unsigned first,
 		unsigned second,
 		unsigned& currentVertCount);
+
+	unsigned CreateUvsForEdge(
+		IndexLookup& lookup,
+		iw::vector2* uvs,
+		unsigned first,
+		unsigned second,
+		unsigned& currentUvCount);
 }
 }
 

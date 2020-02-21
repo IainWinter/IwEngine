@@ -25,6 +25,8 @@ out vec4 LightPos;
 out vec3 CameraPos;
 out vec2 TexCoords;
 out vec3 Normal;
+out vec3 NT;
+out vec3 BT;
 out mat3 TBN;
 
 void main() {
@@ -47,7 +49,10 @@ void main() {
 	vec3 N = normalize(modelVector * normal);
 	
 	TBN    = mat3(T, B, N);
-	Normal = normalize(modelVector * normal);
+	Normal = normal;
+
+	NT = tangent;
+	BT = bitangent;
 
 	gl_Position = viewProj * worldPos;
 }
@@ -60,6 +65,8 @@ in vec4 LightPos;
 in vec3 CameraPos;
 in vec2 TexCoords;
 in vec3 Normal;
+in vec3 NT;
+in vec3 BT;
 in mat3 TBN;
 
 out vec4 FragColor;
@@ -194,7 +201,7 @@ void main() {
 
 	vec3 normal = Normal;
 	if (mat_hasNormalMap == 1) {
-		normal = texture(mat_normalMap, TexCoords).xyz * 2.0 - 1.0;
+		normal = texture(mat_normalMap, TexCoords).xyz * 2 - 1;
 	}
 
 	float metallic = mat_metallic;
@@ -215,7 +222,7 @@ void main() {
 	vec3 shadedAlbedo   = ambiance * ao.xyz + albedo.xyz * CalcShadow();
 	float realRoughness = roughness * roughness;
 
-	vec3 N = normalize(/*TBN **/ normal);
+	vec3 N = normalize(/*TBN * */normal);
 	vec3 V = normalize(CameraPos - WorldPos);
 
 	vec3 light = vec3(0.0);
@@ -233,6 +240,6 @@ void main() {
 	FragColor = color;
 
 	if (color == vec4(0.876234)) {
-		FragColor = ambiance * ao + vec4(light * shadow, 1);
+		FragColor = vec4(light, 1);
 	}
 }
