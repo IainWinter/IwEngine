@@ -40,14 +40,12 @@ void main() {
 	CameraPos = camPos.xyz;
 	TexCoords = uv;
 
-	mat3 modelVector = transpose(inverse(mat3(model)));
-
-	vec3 T = normalize(modelVector * tangent);
-	vec3 B = normalize(modelVector * bitangent);
-	vec3 N = normalize(modelVector * normal);
-
-	TBN = mat3(T, B, N);
-	Normal = normalize(modelVector * normal);
+	vec3 T = (model * normalize(vec4(tangent,   1))).xyz;
+	vec3 B = (model * normalize(vec4(bitangent, 1))).xyz;
+	vec3 N = (model * normalize(vec4(normal,    1))).xyz;
+	
+	TBN    = mat3(T, B, N);
+	Normal = /*transpose(TBN) **/ normal;
 
 	gl_Position = viewProj * worldPos;
 }
@@ -65,10 +63,6 @@ in mat3 TBN;
 out vec4 FragColor;
 
 // global props
-
-uniform vec3 sunPos;
-
-uniform float gamma;
 
 uniform float ambiance;
 uniform vec3 lightPositions[2];
@@ -91,7 +85,7 @@ uniform sampler2D mat_roughnessMap;
 uniform sampler2D mat_aoMap;
 
 uniform vec4 mat_albedo;
-uniform float mat_ao;
+uniform vec4 mat_ao;
 uniform float mat_metallic;
 uniform float mat_roughness;
 
@@ -124,40 +118,56 @@ float CalcShadow() {
 	return min(max(p, pMax), 1.0);
 }
 
-float DistributionGGX(vec3 N, vec3 H, float roughness) {
-	float a = roughness * roughness;
-	float a2 = a * a;
-	float NdotH = max(dot(N, H), 0.0);
-	float NdotH2 = NdotH * NdotH;
+// google version
 
-	float num = a2;
-	float denom = (NdotH2 * (a2 - 1.0) + 1.0);
-	denom = PI * denom * denom;
-
-	return num / denom;
+float D_GGX(float NoH, float roughness) {
+	float a = NoH * roughness;
+	float k = roughness / (1.0 - NoH * NoH + a * a);
+	return k * k * (1.0 / PI);
 }
 
-float GeometrySchlickGGX(float NdotV, float roughness) {
-	float r = (roughness + 1.0);
-	float k = (r * r) / 8.0;
-
-	float num = NdotV;
-	float denom = NdotV * (1.0 - k) + k;
-
-	return num / denom;
+float V_SmithGGXCorrelated(float NoV, float NoL, float roughness) {
+	float a2 = roughness * roughness;
+	float GGXV = NoL * sqrt(NoV * NoV * (1.0 - a2) + a2);
+	float GGXL = NoV * sqrt(NoL * NoL * (1.0 - a2) + a2);
+	return 0.5 / (GGXV + GGXL);
 }
 
-float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness) {
-	float NdotV = max(dot(N, V), 0.0);
-	float NdotL = max(dot(N, L), 0.0);
-	float ggx2 = GeometrySchlickGGX(NdotV, roughness);
-	float ggx1 = GeometrySchlickGGX(NdotL, roughness);
-
-	return ggx1 * ggx2;
+vec3 F_Schlick(float VoH, vec3 f0) {
+	float f = pow(1.0 - VoH, 5.0);
+	return f + f0 * (1.0 - f);
 }
 
-vec3 fresnelSchlick(float cosTheta, vec3 F0) {
-	return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
+float Fd_Lambert() {
+	return 1.0 / PI;
+}
+
+vec3 BRDF(vec3 v, vec3 l, vec3 n, vec3 albedo, vec3 lightColor, float roughness, float metallic) {
+	vec3 nl = normalize(l);
+	vec3 h  = normalize(v + nl);
+
+	vec3 f0 = vec3(0.04);
+	f0 = mix(f0, albedo, metallic);
+
+	float NoV = abs(dot(n, v)) + 1e-5;
+	float NoL = clamp(dot(n, nl), 0.0, 1.0);
+	float NoH = clamp(dot(n, h), 0.0, 1.0);
+	float LoH = clamp(dot(nl, h), 0.0, 1.0);
+
+	float D = D_GGX(NoH, roughness);
+	float V = V_SmithGGXCorrelated(NoV, NoL, roughness);
+	vec3  F = F_Schlick(LoH, f0);
+
+	// specular BRDF
+	// diffuse BRDF
+	vec3 Fr = (D * V) * F;
+	vec3 Fd = (1.0 - metallic) * albedo * Fd_Lambert();
+
+	float distance    = length(l);
+	float attenuation = 1.0 / (distance * distance);
+	vec3 radiance     = lightColor * attenuation;
+
+	return (Fr + Fd) * radiance * NoL;
 }
 
 void main() {
@@ -172,9 +182,9 @@ void main() {
 		albedo = texture(mat_albedoMap, TexCoords);
 	}
 
-	float ao = mat_ao;
+	vec4 ao = mat_ao;
 	if (mat_hasAoMap == 1) {
-		ao = texture(mat_aoMap, TexCoords).r;
+		ao = texture(mat_aoMap, TexCoords);
 	}
 
 	vec3 normal = Normal;
@@ -197,72 +207,41 @@ void main() {
 		shadow = CalcShadow();
 	}
 
-	vec3 shadedAlbedo = albedo.xyz;
+	vec3 shadedAlbedo   = ambiance * ao.xyz + albedo.xyz * CalcShadow();
+	float realRoughness = roughness * roughness;
 
 	vec3 N = normalize(normal);
 	vec3 V = normalize(CameraPos - WorldPos);
 
-	vec3 F0 = vec3(0.04);
-	F0 = mix(F0, shadedAlbedo, metallic);
-
-	// reflectance equation
-	vec3 Lo = vec3(0.0);
-	for (int i = 0; i < 2; ++i) {
-		// calculate per-light radiance
-		vec3 L = normalize(lightPositions[i] - WorldPos);
-		vec3 H = normalize(V + L);
-		float distance = length(lightPositions[i] - WorldPos);
-		float attenuation = 1.0 / (distance /** distance*/); // not with gamma correction
-		vec3 radiance = lightColors[i] * attenuation;
-
-		// cook-torrance brdf
-		float NDF = DistributionGGX(N, H, roughness);
-		float G = GeometrySmith(N, V, L, roughness);
-		vec3 F = fresnelSchlick(max(dot(H, V), 0.0), F0);
-
-		vec3 kS = F;
-		vec3 kD = vec3(1.0) - kS;
-		kD *= 1.0 - metallic;
-
-		vec3 numerator = NDF * G * F;
-		float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0);
-		vec3 specular = numerator / max(denominator, 0.001);
-
-		// add to outgoing radiance Lo
-		float NdotL = max(dot(N, L), 0.0);
-		Lo += (kD * shadedAlbedo / PI + specular) * radiance * NdotL;
+	vec3 light = vec3(0.0);
+	for (int i = 0; i < 2; i++) {
+		vec3 L = lightPositions[i] - WorldPos;
+		light += BRDF(V, L, N, shadedAlbedo, lightColors[i], realRoughness, metallic);
 	}
 
-	// Sun
-
-	{
-		// calculate per-light radiance
-		vec3 L = normalize(sunPos);
-		vec3 H = normalize(V + L);
-
-		// cook-torrance brdf
-		float NDF = DistributionGGX(N, H, roughness);
-		float G = GeometrySmith(N, V, L, roughness);
-		vec3 F = fresnelSchlick(max(dot(H, V), 0.0), F0);
-
-		vec3 kS = F;
-		vec3 kD = vec3(1.0) - kS;
-		kD *= 1.0 - metallic;
-
-		vec3 numerator = NDF * G * F;
-		float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0);
-		vec3 specular = numerator / max(denominator, 0.001);
-
-		// add to outgoing radiance Lo
-		float NdotL = max(dot(N, L), 0.0);
-		Lo += (kD * shadedAlbedo / PI + specular) * CalcShadow();
+	vec4 color = vec4(0);
+	if (ambiance < .3f) {
+		color = vec4(TBN[0], 1);
 	}
 
-	vec3 ambient = ambiance * shadedAlbedo * ao;
-	vec3 color = ambient + Lo;
+	else if (ambiance > .6f) {
+		color = vec4(TBN[2], 1);
+	}
 
-	color = color / (color + vec3(1.0));
-	color = pow(color, vec3(1.0 / gamma));
+	else {
+		color = vec4(TBN[1], 1);
+	}
 
-	FragColor = vec4(color, 1.0);
+	if (ambiance == 1) {
+		color = vec4(N, 1);
+	}
+
+	if (ambiance == 0) {
+		color = vec4(light, 1);
+	}
+
+	//color.xyz = color.xyz / (color.xyz + vec3(1.0));
+	//color.xyz = pow(color.xyz, vec3(1.0 / 2.2));
+
+	FragColor = color;
 }

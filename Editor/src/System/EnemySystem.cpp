@@ -29,7 +29,7 @@ void EnemySystem::Update(
 
 		m_enemyCount++;
 
-		//transform->Rotation *= iw::quaternion::from_euler_angles(0, -iw::Time::DeltaTime(), 0);
+		transform->Rotation *= iw::quaternion::from_euler_angles(0, -iw::Time::DeltaTime(), 0);
 
 		if (  !enemy->HasShot
 			&& enemy->Timer <= 0)

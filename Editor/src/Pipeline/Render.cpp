@@ -4,7 +4,7 @@ namespace iw {
 	Render::Render(
 		iw::ref<Renderer> r,
 		iw::ref<Space> s)
-		: iw::node(3, 0)
+		: iw::node(4, 0)
 		, renderer(r)
 		, space(s)
 	{}
@@ -21,6 +21,12 @@ namespace iw {
 		set<float>(2, ambiance);
 	}
 
+	void Render::SetGamma(
+		float gamma)
+	{
+		set<float>(3, gamma);
+	}
+
 	iw::ref<Texture>& Render::GetTexture() {
 		return in<iw::ref<Texture>>(0);
 	}
@@ -33,6 +39,10 @@ namespace iw {
 		return in<float>(2);
 	}
 	
+	float& Render::GetGamma() {
+		return in<float>(3);
+	}
+
 	struct CameraComponents {
 		Transform* Transform;
 		CameraController* Camera;
@@ -47,6 +57,7 @@ namespace iw {
 		iw::ref<Texture>& shadowMap = GetTexture();
 		Light* light = GetLight();
 		float ambiance = GetAmbiance();
+		float gamma = GetGamma();
 
 		for (auto c_e : space->Query<Transform, CameraController>()) {
 			auto [c_t, c_c] = c_e.Components.Tie<CameraComponents>();
@@ -69,6 +80,12 @@ namespace iw {
 
 					mesh.Material->Shader->Program->GetParam("ambiance")
 						->SetAsFloat(ambiance);
+
+					mesh.Material->Shader->Program->GetParam("gamma")
+						->SetAsFloat(gamma);
+
+					mesh.Material->Shader->Program->GetParam("sunPos")
+						->SetAsFloats(&light->Cam().Position, 3);
 
 					renderer->DrawMesh(m_t, &mesh);
 				}

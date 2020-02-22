@@ -25,9 +25,13 @@ namespace iw {
 		void SetAmbiance(
 			float ambiance);
 
+		void SetGamma(
+			float gamma);
+
 		iw::ref<Texture>& GetTexture();
 		Light* GetLight();
 		float& GetAmbiance();
+		float& GetGamma();
 
 		void execute() override;
 	};

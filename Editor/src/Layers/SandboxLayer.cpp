@@ -136,8 +136,8 @@ namespace iw {
 		smat->SetShader(shader);
 		tmat->SetShader(shader);
 
-		smat->Set("albedo", vector4(1, .95f, 1, 1));
-		tmat->Set("albedo", vector4(.95f, 1, 1, 1));
+		smat->Set("albedo", vector4(1, 1, 1, 1));
+		tmat->Set("albedo", vector4(1, 1, 1, 1));
 
 		smat->Set("roughness", 0.8f);
 		tmat->Set("roughness", 0.8f);
@@ -239,6 +239,7 @@ namespace iw {
 		postProcessShadowMap->SetShader(gaussian);
 		mainRender          ->SetLight(light);
 		mainRender          ->SetAmbiance(0.1f);
+		mainRender          ->SetGamma(2.2f);
 
 		pipeline.first(generateShadowMap)
 			.then(postProcessShadowMap)
@@ -479,6 +480,8 @@ namespace iw {
 		ImGui::SliderFloat("Time scale", &ts, 0.001f, 1);
 
 		ImGui::SliderFloat("Ambiance", (float*)&mainRender->GetAmbiance(), 0, 1);
+		ImGui::SliderFloat("Gamma", (float*)&mainRender->GetGamma(), 0, 5);
+
 		ImGui::SliderFloat("Shadow map blur", &blurAmount, 0, 5);
 		ImGui::SliderFloat("Shadow map threshold", &threshold, 0, 1);
 		ImGui::SliderFloat3("Light pos", (float*)&lightPos, -5, 5);

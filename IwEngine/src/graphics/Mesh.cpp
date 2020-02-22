@@ -204,7 +204,6 @@ namespace Graphics {
 
 		unsigned v = 0;
 		for (unsigned i = 0; i < IndexCount; i += 3) {
-			iw::vector3& norm = Normals [Indices[i + 0]]; // can use any normal
 			iw::vector3& pos1 = Vertices[Indices[i + 0]];
 			iw::vector3& pos2 = Vertices[Indices[i + 1]];
 			iw::vector3& pos3 = Vertices[Indices[i + 2]];
@@ -219,22 +218,19 @@ namespace Graphics {
 
 			float f = 1.0f / duv1.cross_length(duv2);
 
-			iw::vector3 tanget;
-			tanget.x = f * (duv2.y * edge1.x - duv1.y * edge2.x);
-			tanget.y = f * (duv2.y * edge1.y - duv1.y * edge2.y);
-			tanget.z = f * (duv2.y * edge1.z - duv1.y * edge2.z);
-			tanget.normalize();
+			iw::vector3 tangent   = f * (edge1 * duv2.y - edge2 * duv1.y);
+			iw::vector3 bitangent = f * (edge2 * duv1.x - edge1 * duv2.x);
+			
+			tangent.normalize();
+			bitangent.normalize();
 
-			iw::vector3 bitanget = norm.cross(tanget);
-			bitanget.normalize();
+			Tangents[Indices[i + 0]] = tangent;
+			Tangents[Indices[i + 1]] = tangent;
+			Tangents[Indices[i + 2]] = tangent;
 
-			Tangents[Indices[i + 0]] = tanget;
-			Tangents[Indices[i + 1]] = tanget;
-			Tangents[Indices[i + 2]] = tanget;
-
-			BiTangents[Indices[i + 0]] = bitanget;
-			BiTangents[Indices[i + 1]] = bitanget;
-			BiTangents[Indices[i + 2]] = bitanget;
+			BiTangents[Indices[i + 0]] = bitangent;
+			BiTangents[Indices[i + 1]] = bitangent;
+			BiTangents[Indices[i + 2]] = bitangent;
 		}
 	}
 
