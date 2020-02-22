@@ -51,7 +51,7 @@ namespace iw {
 	SandboxLayer::SandboxLayer()
 		: Layer("Sandbox")
 	{
-		//JsonSerializer json("test.json");
+		//JsonSerializer json("assets/levels/test.json");
 
 		//Level level;
 		//json.Read(level);
@@ -178,7 +178,7 @@ namespace iw {
 
 		// Loading level
 
-		LoadLevel("test.bin");
+		LoadLevel("assets/levels/test.bin");
 
 		// Floor colliders
 
@@ -491,8 +491,8 @@ namespace iw {
 		ImGui::SliderFloat4("Text rot",   (float*)&textTransform.Rotation, 0, 1);
 
 		if (ImGui::Button("Save level")) {
-			Serializer out("test.bin", true);
-			JsonSerializer jout("test.json", true);
+			Serializer out("assets/levels/test.bin", true);
+			JsonSerializer jout("assets/levels/test.json", true);
 			
 			Level level;
 			for (auto entity : Space->Query<Transform, Enemy>()) {
@@ -508,7 +508,7 @@ namespace iw {
 		}
 
 		if (ImGui::Button("Load level")) {
-			loadLevel = "test.bin";
+			loadLevel = "assets/levels/test.bin";
 		}
 
 		ImGui::End();
@@ -557,11 +557,11 @@ namespace iw {
 				break;
 			}
 			case val(Actions::RESET_LEVEL): {
-				loadLevel = "test.bin";
+				loadLevel = "assets/levels/test.bin";
 				break;
 			}
 			case val(Actions::NEXT_LEVEL): {
-				loadLevel = "test2.bin";
+				loadLevel = "assets/levels/test2.bin";
 				break;
 			}
 		}

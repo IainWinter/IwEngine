@@ -234,7 +234,6 @@ void main() {
 	}
 
 	// Sun
-
 	{
 		// calculate per-light radiance
 		vec3 L = normalize(sunPos);
@@ -259,10 +258,12 @@ void main() {
 	}
 
 	vec3 ambient = ambiance * shadedAlbedo * ao;
-	vec3 color = ambient + Lo;
+	vec3 color = ambient + Lo * 2;
 
-	color = color / (color + vec3(1.0));
-	color = pow(color, vec3(1.0 / gamma));
+	if (gamma != 0) {
+		color = color / (color + vec3(1.0));
+		color = pow(color, vec3(1.0 / gamma));
+	}
 
 	FragColor = vec4(color, 1.0);
 }
