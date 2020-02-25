@@ -4,6 +4,7 @@
 #include "iw/graphics/Renderer.h"
 #include "iw/asset/AssetManager.h"
 #include "iw/physics/Dynamics/DynamicsSpace.h"
+#include "iw/audio/AudioSpace.h"
 #include "iw/events/eventbus.h"
 #include "Events/Events.h"
 #include <queue>
@@ -60,6 +61,7 @@ namespace Engine {
 		iw::ref<Renderer>      Renderer;
 		iw::ref<AssetManager>  Asset;
 		iw::ref<DynamicsSpace> Physics;
+		iw::ref<AudioSpace>    Audio;
 		iw::ref<iw::eventbus>  Bus;
 
 		virtual void Update(
@@ -156,13 +158,15 @@ namespace Engine {
 			iw::ref<iw::Renderer> renderer,
 			iw::ref<AssetManager> asset,
 			iw::ref<DynamicsSpace> physics,
+			iw::ref<AudioSpace> audio,
 			iw::ref<iw::eventbus> bus)
 		{
-			Space = space;
+			Space    = space;
 			Renderer = renderer;
-			Asset = asset;
-			Physics = physics;
-			Bus = bus;
+			Asset    = asset;
+			Physics  = physics;
+			Audio    = audio;
+			Bus      = bus;
 		}
 	};	
 }

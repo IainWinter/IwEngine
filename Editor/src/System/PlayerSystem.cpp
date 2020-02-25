@@ -4,6 +4,8 @@
 #include "iw/input/Devices/Keyboard.h"
 #include <Components\Bullet.h>
 
+#undef PlaySound
+
 PlayerSystem::PlayerSystem()
 	: System<iw::Transform, iw::Rigidbody, Player>("Player")
 	, dash(false)
@@ -28,6 +30,8 @@ void PlayerSystem::Update(
 		if (player->Health <= 0) {
 			if (player->DeathTimer == 0) {
 				player->DeathTimer = 1.0f;
+
+				Audio->PlaySound("Death.wav");
 			}
 		}
 
@@ -117,6 +121,8 @@ bool PlayerSystem::On(
 		if (!p->Damaged) {
 			p->Damaged = true;
 			p->Health -= 1;
+
+			Audio->PlaySound("Fire.wav");
 		}
 	}
 

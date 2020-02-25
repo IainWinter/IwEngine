@@ -18,17 +18,15 @@ namespace Engine {
 		: m_running(false)
 		, m_window(IWindow::Create())
 	{
-		m_device = iw::ref<IDevice>(IDevice::Create());
-		Renderer = std::make_shared<iw::Renderer>(m_device);
-
-		Bus   = std::make_shared<iw::eventbus>();
-		Input = std::make_shared<InputManager>(Bus);
-
-		Console = std::make_shared<iw::Console>(iw::make_getback(&Application::HandleCommand, this));
-
-		Physics = std::make_shared<DynamicsSpace>();
-		Space = std::make_shared<iw::Space>();
-		Asset = std::make_shared<AssetManager>();
+		m_device = ref<IDevice>(IDevice::Create());
+		Bus      = REF<eventbus>();
+		Space    = REF<iw::Space>();
+		Renderer = REF<iw::Renderer>(m_device);
+		Asset    = REF<AssetManager>();
+		Input    = REF<InputManager>(Bus);
+		Console  = REF<iw::Console>(iw::make_getback(&Application::HandleCommand, this));
+		Physics  = REF<DynamicsSpace>();
+		Audio    = REF<AudioSpace>(32, "assets/sounds/");
 
 		PushOverlay<DebugLayer>();
 	}
@@ -46,8 +44,8 @@ namespace Engine {
 
 		// Logging
 
-		LOG_SINK(iw::stdout_sink, iw::INFO);
-		LOG_SINK(iw::stderr_sink, iw::ERR);
+		LOG_SINK(iw::/*async_*/stdout_sink, iw::INFO);
+		LOG_SINK(iw::/*async_*/stderr_sink, iw::ERR);
 		LOG_SINK(iw::file_sink,         iw::INFO,  "/logs/sandbox_info.log");
 		LOG_SINK(iw::file_sink,         iw::DEBUG, "/logs/sandbox_debug.log");
 
@@ -80,6 +78,13 @@ namespace Engine {
 		LOG_DEBUG << "Initializing window...";
 		if (status = m_window->Initialize(options.WindowOptions)) {
 			LOG_ERROR << "Window failed to initialize with error code " << status;
+			return status;
+		}
+
+		// Audio
+
+		if (status = Audio->Initialize()) {
+			LOG_ERROR << "Audio space failed to initialize with error code " << status;
 			return status;
 		}
 

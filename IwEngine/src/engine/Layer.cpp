@@ -101,12 +101,14 @@ namespace Engine {
 		iw::ref<iw::Renderer> renderer,
 		iw::ref<AssetManager> asset,
 		iw::ref<DynamicsSpace> physics,
+		iw::ref<AudioSpace> audio,
 		iw::ref<iw::eventbus> bus)
 	{
 		Space    = space;
 		Renderer = renderer;
 		Asset    = asset;
 		Physics  = physics;
+		Audio  = audio;
 		Bus      = bus;
 	}
 }

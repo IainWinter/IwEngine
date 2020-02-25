@@ -9,7 +9,10 @@
 #include "iw/graphics/Renderer.h"
 #include "iw/asset/AssetManager.h"
 #include "iw/physics/Dynamics/DynamicsSpace.h"
+#include "iw/audio/AudioSpace.h"
 #include "iw/events/eventbus.h"
+
+#undef PlaySound
 
 namespace iw {
 namespace Engine {
@@ -24,6 +27,7 @@ namespace Engine {
 		iw::ref<Renderer>      Renderer;
 		iw::ref<AssetManager>  Asset;
 		iw::ref<DynamicsSpace> Physics;
+		iw::ref<AudioSpace>    Audio;
 		iw::ref<iw::eventbus>  Bus;
 
 	public:
@@ -122,7 +126,7 @@ namespace Engine {
 			Args&&... args)
 		{
 			S* layer = new S(std::forward<Args>(args)...);
-			layer->SetLayerVars(Space, Renderer, Asset, Physics, Bus);
+			layer->SetLayerVars(Space, Renderer, Asset, Physics, Audio, Bus);
 
 			m_systems.PushBack(layer);
 			return layer;
@@ -153,6 +157,7 @@ namespace Engine {
 			iw::ref<iw::Renderer> renderer,
 			iw::ref<AssetManager> asset,
 			iw::ref<DynamicsSpace> physics,
+			iw::ref<AudioSpace> audio,
 			iw::ref<iw::eventbus> bus);
 	};
 }

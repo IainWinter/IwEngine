@@ -8,11 +8,12 @@
 #include "InitOptions.h"
 #include "Layers/ImGuiLayer.h"
 #include "iw/entity/Space.h"
+#include "iw/audio/AudioSpace.h"
+#include "iw/physics/Dynamics/DynamicsSpace.h"
 #include "iw/events/eventbus.h"
 #include "iw/graphics/Renderer.h"
 #include "iw/asset/AssetManager.h"
 #include "iw/input/InputManager.h"
-#include "iw/physics/Dynamics/DynamicsSpace.h"
 #include "iw/util/queue/blocking_queue.h"
 #include <vector>
 #include <thread>
@@ -36,6 +37,7 @@ namespace Engine {
 		ref<InputManager>  Input;
 		ref<Console>       Console;
 		ref<DynamicsSpace> Physics;
+		ref<AudioSpace>    Audio;
 		ref<eventbus>      Bus;
 
 	public:
@@ -95,7 +97,7 @@ namespace Engine {
 			Args&&... args)
 		{
 			L* layer = new L(std::forward<Args>(args)...);
-			layer->SetApplicationVars(Space, Renderer, Asset, Physics, Bus);
+			layer->SetApplicationVars(Space, Renderer, Asset, Physics, Audio, Bus);
 
 			PushLayer(layer);
 			return layer;
@@ -108,7 +110,7 @@ namespace Engine {
 			Args&& ... args)
 		{
 			L* layer = new L(std::forward<Args>(args)...);
-			layer->SetApplicationVars(Space, Renderer, Asset, Physics, Bus);
+			layer->SetApplicationVars(Space, Renderer, Asset, Physics, Audio, Bus);
 
 			PushOverlay(layer);
 			return layer;
@@ -120,7 +122,7 @@ namespace Engine {
 			L* layer)
 		{
 			LOG_INFO << "Pushed " << layer->Name() << " layer";
-			layer->SetApplicationVars(Space, Renderer, Asset, Physics, Bus);
+			layer->SetApplicationVars(Space, Renderer, Asset, Physics, Audio, Bus);
 			m_layers.PushBack(layer);
 		}
 
@@ -130,7 +132,7 @@ namespace Engine {
 			L* layer)
 		{
 			LOG_INFO << "Pushed " << layer->Name() << " overlay";
-			layer->SetApplicationVars(Space, Renderer, Asset, Physics, Bus);
+			layer->SetApplicationVars(Space, Renderer, Asset, Physics, Audio, Bus);
 			m_layers.PushFront(layer);
 		}
 

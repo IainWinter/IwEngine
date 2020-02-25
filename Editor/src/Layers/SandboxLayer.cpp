@@ -58,6 +58,8 @@ namespace iw {
 	}
 
 	int SandboxLayer::Initialize() {
+		Audio->CreateSound("Fire.wav");
+		Audio->CreateSound("Death.wav");
 
 		// Fonts
 
@@ -238,7 +240,7 @@ namespace iw {
 		postProcessShadowMap->SetIntermediate(targetBlur);
 		postProcessShadowMap->SetShader(gaussian);
 		mainRender          ->SetLight(light);
-		mainRender          ->SetAmbiance(0.1f);
+		mainRender          ->SetAmbiance(0.03f);
 		mainRender          ->SetGamma(2.2f);
 
 		pipeline.first(generateShadowMap)
@@ -489,6 +491,8 @@ namespace iw {
 		ImGui::SliderFloat3("Text pos",   (float*)&textTransform.Position, -8, 8);
 		ImGui::SliderFloat3("Text scale", (float*)&textTransform.Scale, 0, 10);
 		ImGui::SliderFloat4("Text rot",   (float*)&textTransform.Rotation, 0, 1);
+
+		ImGui::SliderFloat("Volume", &Audio->GetVolume(), 0, 1);
 
 		if (ImGui::Button("Save level")) {
 			Serializer out("assets/levels/test.bin", true);

@@ -8,9 +8,9 @@ assimpdir = iwengdir .. "/extern/assimp"
 stbdir    = iwengdir .. "/extern/stb"
 llvmdir   = iwengdir .. "/extern/llvm"
 jsondir   = iwengdir .. "/extern/json"
+fmoddir   = iwengdir .. "/extern/fmod"
 
 cfgname = "%{cfg.buildcfg}.%{cfg.system}.%{cfg.architecture}"
-achname = "%{cfg.architecture}"
 bindir  = "/bin/" .. cfgname
 libdir  = "/lib/" .. cfgname
 resdir  = "/assets"
@@ -60,18 +60,21 @@ project "IwEngine"
 		assimpdir .. incdir,
 		assimpdir .. blddir .. incdir,
 		stbdir .. incdir,
-		jsondir
+		jsondir,
+		fmoddir .. incdir
 	}
 
 	libdirs {
-		assimpdir .. blddir .. "/code/%{cfg.buildcfg}"
+		assimpdir .. blddir .. "/code/%{cfg.buildcfg}",
+		fmoddir .. "/lib/%{cfg.platform}",
 	}
 
 	links {
 		"GLEW",
 		"ImGui",
 		"assimp-vc140-mt",
-		"opengl32.lib"
+		"opengl32.lib",
+		"fmod"
 	}
 
 	disablewarnings { 
@@ -273,7 +276,8 @@ project "Editor"
 		iwengdir .. incdir,
 		iwtoldir .. incdir,
 		imguidir .. incdir,
-		jsondir
+		jsondir,
+		fmoddir .. incdir
 	}
 
 	links {
@@ -283,11 +287,12 @@ project "Editor"
 	}
 
 	prebuildcommands  {
-		"xcopy /y /f \""    .. assimpdir .. blddir .. "/code/%{cfg.buildcfg}/assimp-vc140-mt.dll\" \"" .. edtordir .. bindir .. "\"",
-		"xcopy /y /f \""    .. iwengdir  .. bindir .. "/IwEngine.dll\" \"" .. edtordir .. bindir .. "\"",
-		"xcopy /y /f \""    .. glewdir   .. bindir .. "/GLEW.dll\" \""     .. edtordir .. bindir .. "\"",
-		"xcopy /e /y /f /i \"" .. edtordir  .. resdir .. "\" \""           .. edtordir .. blddir .. resdir .. "\"",
-		"xcopy /e /y /f /i \"" .. edtordir  .. resdir .. "\" \""           .. edtordir .. bindir .. resdir .. "\""
+		"xcopy /y /f \"" .. assimpdir .. blddir .. "/code/%{cfg.buildcfg}/assimp-vc140-mt.dll\" \"" .. edtordir .. bindir .. "\"",
+		"xcopy /y /f \"" .. fmoddir   ..           "/bin/%{cfg.platform}/fmod.dll\" \""         .. edtordir .. bindir .. "\"",
+		"xcopy /y /f \"" .. glewdir   .. bindir .. "/GLEW.dll\" \""                                 .. edtordir .. bindir .. "\"",
+		"xcopy /y /f \"" .. iwengdir  .. bindir .. "/IwEngine.dll\" \""                             .. edtordir .. bindir .. "\"",
+		"xcopy /e /y /f /i \"" .. edtordir  .. resdir .. "\" \"" .. edtordir .. blddir .. resdir .. "\"",
+		"xcopy /e /y /f /i \"" .. edtordir  .. resdir .. "\" \"" .. edtordir .. bindir .. resdir .. "\""
 	}
 
 	defines {

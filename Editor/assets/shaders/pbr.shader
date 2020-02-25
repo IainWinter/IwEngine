@@ -68,7 +68,7 @@ out vec4 FragColor;
 
 uniform vec3 sunPos;
 
-uniform float gamma;
+uniform float gamma; // probly not implmented correctly but I tried :c
 
 uniform float ambiance;
 uniform vec3 lightPositions[2];
@@ -170,6 +170,7 @@ void main() {
 	vec4 albedo = mat_albedo;
 	if (mat_hasAlbedoMap == 1) {
 		albedo = texture(mat_albedoMap, TexCoords);
+		albedo.xyz = pow(albedo.xyz, vec3(gamma));
 	}
 
 	float ao = mat_ao;
@@ -197,13 +198,11 @@ void main() {
 		shadow = CalcShadow();
 	}
 
-	vec3 shadedAlbedo = albedo.xyz;
-
 	vec3 N = normalize(normal);
 	vec3 V = normalize(CameraPos - WorldPos);
 
 	vec3 F0 = vec3(0.04);
-	F0 = mix(F0, shadedAlbedo, metallic);
+	F0 = mix(F0, albedo.xyz, metallic);
 
 	// reflectance equation
 	vec3 Lo = vec3(0.0);
@@ -230,7 +229,7 @@ void main() {
 
 		// add to outgoing radiance Lo
 		float NdotL = max(dot(N, L), 0.0);
-		Lo += (kD * shadedAlbedo / PI + specular) * radiance * NdotL;
+		Lo += (kD * albedo.xyz / PI + specular) * radiance * NdotL;
 	}
 
 	// Sun
@@ -254,16 +253,14 @@ void main() {
 
 		// add to outgoing radiance Lo
 		float NdotL = max(dot(N, L), 0.0);
-		Lo += (kD * shadedAlbedo / PI + specular) * CalcShadow();
+		Lo += (kD * albedo.xyz / PI + specular) * CalcShadow();
 	}
 
-	vec3 ambient = ambiance * shadedAlbedo * ao;
-	vec3 color = ambient + Lo * 2;
+	vec3 ambient = max(ambiance - ao, 0) * albedo.xyz;
+	vec3 color = ambient + Lo;
 
-	if (gamma != 0) {
-		color = color / (color + vec3(1.0));
-		color = pow(color, vec3(1.0 / gamma));
-	}
+	color = color / (color + vec3(1.0));
+	color = pow(color, vec3(1.0 / gamma));
 
-	FragColor = vec4(color, 1.0);
+	FragColor = vec4(color, albedo.w);
 }
