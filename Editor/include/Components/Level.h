@@ -4,10 +4,12 @@
 #include "iw/math/vector2.h"
 //#include "iw/graphics/Model.h"
 #include <vector>
+#include "Player.h"
 
 struct REFLECT Level {
 	REFLECT std::vector<Enemy>       Enemies;
 	REFLECT std::vector<iw::vector2> Positions;
-	REFLECT std::string StageName;
+	REFLECT std::string StageName = "";
+	REFLECT Player Player = {};
 	//iw::Model Stage;
 };

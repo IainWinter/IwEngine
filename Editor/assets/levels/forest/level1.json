@@ -1,0 +1,32 @@
+{
+  "Enemies": {
+    "size": 1,
+    "items": [
+      {
+        "Type": 0,
+        "Speed": 0.250000,
+        "FireTime": 0.150000,
+        "CooldownTime": 0.000000
+      }
+    ]
+  },
+  "Positions": {
+    "size": 1,
+    "items": [
+      {
+        "x": -3.000000,
+        "y": 0.000000
+      }
+    ]
+  },
+  "StageName": {
+    "size": 0,
+    "string": ""
+  },
+  "Player": {
+    "Speed": 4.000000,
+    "DashTime": 0.133333,
+    "CooldownTime": 0.080000,
+    "Health": 5
+  }
+}

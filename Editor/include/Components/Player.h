@@ -1,12 +1,14 @@
 #pragma once
 
-struct Player {
-	float Speed;
-	float DashTime;
-	float CooldownTime;
-	int Health;
+#include "iw/reflection/Reflect.h"
+
+struct REFLECT Player {
+	REFLECT float Speed;
+	REFLECT float DashTime;
+	REFLECT float CooldownTime;
+	REFLECT int   Health;
 
 	float Timer;
 	float DeathTimer;
-	bool Damaged;
+	bool  Damaged;
 };

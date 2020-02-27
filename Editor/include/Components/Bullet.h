@@ -1,11 +1,13 @@
 #pragma once
 
+#include "iw/reflection/Reflect.h"
+
 enum BulletType {
 	LINE
 };
 
-struct Bullet {
-	BulletType Type;
-	float      Speed;
-	float      Time;
+struct REFLECT Bullet {
+	REFLECT BulletType Type;
+	REFLECT float      Speed;
+	REFLECT float      Time;
 };

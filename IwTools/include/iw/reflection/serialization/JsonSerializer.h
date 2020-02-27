@@ -3,6 +3,7 @@
 #include "Serializer.h"
 #include "json.h"
 #include <stack>
+#include <vector>
 #include <assert.h>
 
 namespace iw {
@@ -28,27 +29,22 @@ namespace Reflect {
 			, m_json(nullptr)
 		{
 			std::string source = (std::stringstream() << m_stream->rdbuf()).str();
+			if (source == "") {
+				return; // No json to parse
+			}
+
 			m_json = json_parse(source.c_str(), source.size());
 			m_current.push(m_json);
 
-			json_object_element_s* field = json_value_as_object(m_json)->start;
-
-			while (field) {
-				m_current.push(field->value);
-				m_current.push((json_value_s*)field->name);
-
-				field = field->next;
-			}
-
 			// object
-			//    name | object
-			//              string | number
-			//              name | array
-			//                        object
-			//                           name | number
-			//                               ...
-			//                        ...
-			//    name | object
+			//  name | object
+			//   string | number
+			//   name | array
+			//    object
+			//     name | number
+			//      ...
+			//      ...
+			//   name | object
 		}
 
 		~JsonSerializer() {
@@ -56,7 +52,7 @@ namespace Reflect {
 		}
 
 		void ResetCursor() override {
-			m_current = std::stack<json_value_s*>();
+			m_current = {};
 			m_current.push(m_json);
 			Serializer::ResetCursor();
 		}
@@ -158,13 +154,20 @@ namespace Reflect {
 			const iw::Class* class_,
 			void* value) override
 		{
-			assert(m_current.top()->type == json_type_object);// need to return bool as failure for proper debug
+			assert(m_current.top()->type == json_type_object);
 
-			json_object_element_s* field = json_value_as_object(m_json)->start;
+			json_object_element_s* field = json_value_as_object(m_current.top())->start;
+			m_current.pop();
+
+			// push in reverse order
+			std::vector<json_value_s*> fields;
 			while (field) {
-				m_current.push(field->value);
-				m_current.push((json_value_s*)field->name);
+				fields.push_back(field->value);
 				field = field->next;
+			}
+
+			for (int i = 0; i < fields.size(); i++) {
+				m_current.push(fields[fields.size() - i - 1]);
 			}
 
 			if (class_->deserialize) {
@@ -179,54 +182,33 @@ namespace Reflect {
 			}
 		}
 
-		void DeserializeField(
-			const iw::Field& field,
-			void* value) override
-		{
-			DeserializeType(field.type, value);
-		}
-
-		void DeserializeFieldArray(
-			const iw::Field& field,
-			const iw::Type* elemType,
-			void* value,
-			size_t size) override
-		{
-			DeserializeArray(elemType, value, size);
-		}
-
-		void DeserializeType(
-			const iw::Type* type,
-			void* value) override
-		{
-			if (type->isArray) {
-				DeserializeArray(type, value, type->count);
-			}
-
-			else {
-				void* ptr = (char*)value;
-				if (type->isClass) {
-					const iw::Class* class_ = type->AsClass();
-					DeserializeClass(class_, ptr);
-				}
-
-				else {
-					DeserializeValue(type, ptr);
-				}
-			}
-		}
-
 		void DeserializeArray(
 			const iw::Type* type,
 			void* value,
 			size_t count) override
 		{
 			if (type->type == IntegralType::CHAR) {
-				Read((char*)value, count);
-				m_stream->get(); // remove null char
+				assert(m_current.top()->type == json_type_string);
+				DeserializeValue(type, value); // array of chars is a string
 			}
 
 			else {
+				assert(m_current.top()->type == json_type_array);
+
+				json_array_element_s* element = json_value_as_array(m_current.top())->start;
+				m_current.pop();
+
+				// push in reverse order
+				std::vector<json_value_s*> elements;
+				while (element) {
+					elements.push_back(element->value);
+					element = element->next;
+				}
+
+				for (int i = 0; i < elements.size(); i++) {
+					m_current.push(elements[elements.size() - i - 1]);
+				}
+
 				for (int i = 0; i < count; i++) {
 					void* ptr = (char*)value + i * type->size;
 					DeserializeType(type, ptr);
@@ -238,23 +220,52 @@ namespace Reflect {
 			const iw::Type* type,
 			void* value) override
 		{
-			std::string str((char*)value);
-			switch (type->type) {
-				case IntegralType::BOOL:               *(bool*)              value = str != "false" && str[0] != '0'; break;
-				case IntegralType::CHAR:               *(char*)              value = str[0];                          break;
-				case IntegralType::SHORT:              *(short*)             value = std::stol(str);                  break;
-				case IntegralType::INT:                *(int*)               value = std::stoi(str);                  break;
-				case IntegralType::LONG:               *(long*)              value = std::stol(str);                  break;
-				case IntegralType::FLOAT:              *(float*)             value = std::stof(str);                  break;
-				case IntegralType::DOUBLE:             *(double*)            value = std::stod(str);                  break;
-				case IntegralType::LONG_LONG:          *(long long*)         value = std::stoll(str);                 break;
-				case IntegralType::LONG_DOUBLE:        *(long double*)       value = std::stold(str);                 break;
-				case IntegralType::UNSIGNED_CHAR:      *(unsigned char*)     value = (unsigned char)str[0];           break;
-				case IntegralType::UNSIGNED_SHORT:     *(unsigned short*)    value = std::stoul(str);                 break;
-				case IntegralType::UNSIGNED_INT:       *(unsigned int*)      value = std::stoul(str);                 break;
-				case IntegralType::UNSIGNED_LONG:      *(unsigned long*)     value = std::stoul(str);                 break;
-				case IntegralType::UNSIGNED_LONG_LONG: *(unsigned long long*)value = std::stoull(str);                break;
+			int i = m_current.top()->type;
+			switch (m_current.top()->type) {
+				case json_type_number: {
+					json_number_s* number = json_value_as_number(m_current.top());
+
+					std::string str(number->number);
+					switch (type->type) {
+						case IntegralType::CHAR:               *(char*)              value = str[0];                break;
+						case IntegralType::SHORT:              *(short*)             value = std::stol(str);        break;
+						case IntegralType::INT:                *(int*)               value = std::stoi(str);        break;
+						case IntegralType::LONG:               *(long*)              value = std::stol(str);        break;
+						case IntegralType::FLOAT:              *(float*)             value = std::stof(str);        break;
+						case IntegralType::DOUBLE:             *(double*)            value = std::stod(str);        break;
+						case IntegralType::LONG_LONG:          *(long long*)         value = std::stoll(str);       break;
+						case IntegralType::LONG_DOUBLE:        *(long double*)       value = std::stold(str);       break;
+						case IntegralType::UNSIGNED_CHAR:      *(unsigned char*)     value = (unsigned char)str[0]; break;
+						case IntegralType::UNSIGNED_SHORT:     *(unsigned short*)    value = std::stoul(str);       break;
+						case IntegralType::UNSIGNED_INT:       *(unsigned int*)      value = std::stoul(str);       break;
+						case IntegralType::UNSIGNED_LONG:      *(unsigned long*)     value = std::stoul(str);       break;
+						case IntegralType::UNSIGNED_LONG_LONG: *(unsigned long long*)value = std::stoull(str);      break;
+					}
+					break;
+				}
+				case json_type_string: {
+					json_string_s* string = json_value_as_string(m_current.top());
+					memcpy(value, string->string, string->string_size);
+					break;
+				}
+				case json_type_true: {
+					*(bool*)value = true;
+					break;
+				}
+				case json_type_false: {
+					*(bool*)value = false;
+					break;
+				}
+				case json_type_null: {
+					*(size_t*)value = (size_t)nullptr;
+					break;
+				}
+				default: {
+					assert("Invalid value in json");
+				}
 			}
+
+			m_current.pop();
 		}
 	};
 }

@@ -23,6 +23,7 @@
 #include "iw/reflection/reflect/std/vector.h"
 #include "iw/reflect/math/vector2.h"
 #include "iw/reflect/Components/Enemy.h"
+#include "iw/reflect/Components/Player.h"
 #include "iw/reflect/Components/Level.h"
 
 #include "iw/engine/Systems/PhysicsSystem.h"
@@ -50,12 +51,7 @@ namespace iw {
 
 	SandboxLayer::SandboxLayer()
 		: Layer("Sandbox")
-	{
-		//JsonSerializer json("assets/levels/test.json");
-
-		//Level level;
-		//json.Read(level);
-	}
+	{}
 
 	int SandboxLayer::Initialize() {
 		Audio->CreateSound("Fire.wav");
@@ -180,7 +176,8 @@ namespace iw {
 
 		// Loading level
 
-		LoadLevel("assets/levels/test.bin");
+		Bus->push<iw::ResetLevelEvent>();
+		//LoadLevel("assets/levels/test.bin");
 
 		// Floor colliders
 
@@ -264,20 +261,21 @@ namespace iw {
 
 		Level level;
 
-		Serializer byte(name);
-		
+		JsonSerializer json(name);
+
 		bool reset = false;
 		if (reset) {
-			level.Enemies.push_back(Enemy{ SPIN, 1.02f, .15f, 1.0f });
-			level.Enemies.push_back(Enemy{ SPIN, 0.2617993f, .12f, 0.0f });
+			level.Enemies.push_back(Enemy { SPIN, 0.25f, .15f, 0.0f });
+			level.Enemies.push_back(Enemy { SPIN, 0.25f, .12f, 0.0f });
 			level.Positions.push_back(0);
 			level.Positions.push_back(1);
+			level.Player = Player { 4.0f, 8 / 60.0f, .08f, 5 };
 			level.StageName = "";
-			byte.Write(level);
+			json.Write(level);
 		}
 
 		else {
-			byte.Read(level);
+			json.Read(level);
 		}
 
 		// Stage
@@ -362,7 +360,7 @@ namespace iw {
 
 		Entity player = Space->CreateEntity<Transform, Model, SphereCollider, Rigidbody, Player>();
 		player.SetComponent<Model>(*Asset->Load<Model>("Sphere"));
-		player.SetComponent<Player>(4.0f, 8 / 60.0f, .08f, 5);
+		player.SetComponent<Player>(level.Player);
 
 		Transform*      tp = player.SetComponent<Transform>(vector3(5, 1, 0), vector3(.75f));
 		SphereCollider* sp = player.SetComponent<SphereCollider>(vector3::zero, .75f);
@@ -495,8 +493,7 @@ namespace iw {
 		ImGui::SliderFloat("Volume", &Audio->GetVolume(), 0, 1);
 
 		if (ImGui::Button("Save level")) {
-			Serializer out("assets/levels/test.bin", true);
-			JsonSerializer jout("assets/levels/test.json", true);
+			JsonSerializer jout("assets/levels/working.json", true);
 			
 			Level level;
 			for (auto entity : Space->Query<Transform, Enemy>()) {
@@ -507,12 +504,11 @@ namespace iw {
 
 			level.StageName = "models/grass/grass.obj";
 			
-			out.Write(level);
 			jout.Write(level);
 		}
 
 		if (ImGui::Button("Load level")) {
-			loadLevel = "assets/levels/test.bin";
+			loadLevel = "assets/levels/forest/level1.bin";
 		}
 
 		ImGui::End();
@@ -561,11 +557,11 @@ namespace iw {
 				break;
 			}
 			case val(Actions::RESET_LEVEL): {
-				loadLevel = "assets/levels/test.bin";
+				loadLevel = "assets/levels/forest/level1.json";
 				break;
 			}
 			case val(Actions::NEXT_LEVEL): {
-				loadLevel = "assets/levels/test2.bin";
+				loadLevel = "assets/levels/forest/level2.json";
 				break;
 			}
 		}
