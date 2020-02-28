@@ -51,7 +51,15 @@ namespace iw {
 
 	SandboxLayer::SandboxLayer()
 		: Layer("Sandbox")
-	{}
+	{
+		levels = {
+			"assets/levels/forest/level1.json",
+			"assets/levels/forest/level2.json",
+			"assets/levels/forest/level3.json",
+		};
+
+		currentLevel = 0;
+	}
 
 	int SandboxLayer::Initialize() {
 		Audio->CreateSound("Fire.wav");
@@ -174,11 +182,6 @@ namespace iw {
 		mainCam = new PerspectiveCamera (1.17f, 1.778f, .01f, 2000.0f);
 		textCam = new OrthographicCamera(vector3::one, quaternion::from_axis_angle(vector3::unit_y, Pi), 16, 9, -10, 10);
 
-		// Loading level
-
-		Bus->push<iw::ResetLevelEvent>();
-		//LoadLevel("assets/levels/test.bin");
-
 		// Floor colliders
 
 		Transform* tl = new Transform();
@@ -251,6 +254,8 @@ namespace iw {
 		PushSystem<EnemySystem>(sphere);
 		PushSystem<BulletSystem>();
 
+		Bus->push<ResetLevelEvent>();
+
 		return 0;
 	}
 
@@ -265,8 +270,8 @@ namespace iw {
 
 		bool reset = false;
 		if (reset) {
-			level.Enemies.push_back(Enemy { SPIN, 0.25f, .15f, 0.0f });
-			level.Enemies.push_back(Enemy { SPIN, 0.25f, .12f, 0.0f });
+			level.Enemies.push_back(Enemy { EnemyType::SPIN, 0.25f, .15f, 0.0f });
+			level.Enemies.push_back(Enemy { EnemyType::SPIN, 0.25f, .12f, 0.0f });
 			level.Positions.push_back(0);
 			level.Positions.push_back(1);
 			level.Player = Player { 4.0f, 8 / 60.0f, .08f, 5 };
@@ -542,7 +547,7 @@ namespace iw {
 				for (size_t i = 0; i < 1; i++) {
 					Entity enemy = Space->CreateEntity<Transform, Model, SphereCollider, Rigidbody, Enemy>();
 					enemy.SetComponent<Model>(*Asset->Load<Model>("Tetrahedron"));
-					enemy.SetComponent<Enemy>(SPIN, 0.2617993f, .12f, 0.0f);
+					enemy.SetComponent<Enemy>(EnemyType::SPIN, 0.2617993f, .12f, 0.0f);
 
 					Transform* te = enemy.SetComponent<Transform>(vector3(cos(x) * 1, 15, sin(x) * 1));
 					SphereCollider* se = enemy.SetComponent<SphereCollider>(vector3::zero, 1.0f);
@@ -556,12 +561,12 @@ namespace iw {
 				}
 				break;
 			}
-			case val(Actions::RESET_LEVEL): {
-				loadLevel = "assets/levels/forest/level1.json";
-				break;
-			}
 			case val(Actions::NEXT_LEVEL): {
-				loadLevel = "assets/levels/forest/level2.json";
+				currentLevel = (currentLevel + 1) % (int)levels.size();
+				// no break
+			}
+			case val(Actions::RESET_LEVEL): {
+				loadLevel = levels.at(currentLevel);
 				break;
 			}
 		}

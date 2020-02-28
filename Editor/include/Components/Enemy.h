@@ -2,8 +2,9 @@
 
 #include "iw/reflection/Reflect.h"
 
-enum REFLECT EnemyType {
-	SPIN
+enum class REFLECT EnemyType {
+	SPIN,
+	CIRCLE
 };
 
 struct REFLECT Enemy {

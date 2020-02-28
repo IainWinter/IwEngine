@@ -4,8 +4,8 @@
     "items": [
       {
         "Type": 0,
-        "Speed": 0.250000,
-        "FireTime": 0.150000,
+        "Speed": 0.2617994,
+        "FireTime": 0.120000,
         "CooldownTime": 0.000000
       }
     ]

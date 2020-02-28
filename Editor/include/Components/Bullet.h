@@ -3,7 +3,8 @@
 #include "iw/reflection/Reflect.h"
 
 enum BulletType {
-	LINE
+	LINE,
+	CIRCLE
 };
 
 struct REFLECT Bullet {

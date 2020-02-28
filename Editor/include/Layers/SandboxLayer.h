@@ -44,6 +44,9 @@ namespace iw {
 
 		std::string loadLevel;
 
+		std::vector<std::string> levels;
+		int currentLevel;
+
 	public:
 		SandboxLayer();
 
