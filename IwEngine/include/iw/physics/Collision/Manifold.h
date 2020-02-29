@@ -1,13 +1,15 @@
 #pragma once
 
 #include "iw/physics/Collision/ManifoldPoints.h"
-#include "iw/physics/Dynamics/Rigidbody.h"
+#include "CollisionObject.h"
 
 namespace iw {
 namespace Physics {
+	struct Rigidbody;
+
 	struct Manifold {
-		Rigidbody* BodyA;
-		Rigidbody* BodyB;
+		CollisionObject* ObjA;
+		CollisionObject* ObjB;
 		iw::vector3 A;
 		iw::vector3 B;
 		iw::vector3 Normal;
@@ -15,11 +17,11 @@ namespace Physics {
 		bool HasCollision;
 
 		Manifold(
-			Rigidbody* a,
-			Rigidbody* b,
+			CollisionObject* a,
+			CollisionObject* b,
 			const ManifoldPoints& points)
-			: BodyA(a)
-			, BodyB(b)
+			: ObjA(a)
+			, ObjB(b)
 			, A(points.A)
 			, B(points.B)
 			, Normal(points.Normal)

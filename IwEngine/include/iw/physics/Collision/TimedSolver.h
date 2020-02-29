@@ -1,17 +1,18 @@
 #pragma once
 
-#include "iw/physics/Collision/Solver.h"
+#include "Solver.h"
 
 namespace iw {
 namespace Physics {
-	class ImpulseSolver
+	class TimedSolver
 		: public Solver
-	{
+{
 	public:
 		IWPHYSICS_API
-		void Solve(
+		virtual void Solve(
 			std::vector<CollisionObject*>& objects,
-			std::vector<Manifold>& manifolds) override;
+			std::vector<Manifold>& manifolds,
+			scalar dt) = 0;
 	};
 }
 

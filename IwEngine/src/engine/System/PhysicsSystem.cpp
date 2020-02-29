@@ -38,9 +38,13 @@ namespace Engine {
 	bool PhysicsSystem::On(
 		EntityDestroyedEvent& e)
 	{
-		if (e.Entity.HasComponent<Rigidbody>()) {
-			Rigidbody* body = e.Entity.FindComponent<Rigidbody>();
-			Physics->RemoveRigidbody(body);
+		CollisionObject* object = e.Entity.FindComponent<CollisionObject>();
+		if (!object) {
+			object = e.Entity.FindComponent<Rigidbody>();
+		}
+
+		if (object) {
+			Physics->RemoveCollisionObject(object);
 		}
 
 		return false;

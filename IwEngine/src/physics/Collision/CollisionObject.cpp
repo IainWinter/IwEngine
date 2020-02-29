@@ -6,6 +6,7 @@ namespace Physics {
 		: m_transform(nullptr)
 		, m_collider(nullptr)
 		, m_isTrigger(false)
+		, m_isDynamic(false)
 	{}
 
 	AABB CollisionObject::Bounds() const {
@@ -22,6 +23,10 @@ namespace Physics {
 
 	Collider* CollisionObject::Col() const {
 		return m_collider;
+	}
+
+	bool CollisionObject::IsDynamic() const {
+		return m_isDynamic;
 	}
 
 	bool CollisionObject::IsTrigger() const {

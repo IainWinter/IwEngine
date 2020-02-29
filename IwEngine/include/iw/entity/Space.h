@@ -220,11 +220,20 @@ namespace ECS {
 			return Query(MakeQuery<_cs...>());
 		}
 
+		// Finds an entity from one of its components. Allows for instance to be inherited
+		template<
+			typename _c>
+		Entity FindEntity(
+			void* instance)
+		{
+			return FindEntity(GetComponent<_c>(), instance);
+		}
+
 		// Finds an entity from one of its components
 		template<
 			typename _c>
 		Entity FindEntity(
-			_c* instance) 		// returns invalid entity sometimes
+			_c* instance)
 		{
 			return FindEntity(GetComponent<_c>(), instance);
 		}

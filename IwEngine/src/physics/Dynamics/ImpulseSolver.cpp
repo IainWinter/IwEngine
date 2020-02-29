@@ -1,38 +1,44 @@
 #include "iw/physics/Dynamics/ImpulseSolver.h"
+#include "iw/physics/Dynamics/Rigidbody.h"
 
 namespace iw {
 namespace Physics {
 	void ImpulseSolver::Solve(
-		std::vector<Rigidbody*>& bodies,
-		std::vector<Manifold>& manifolds,
-		scalar dt)
+		std::vector<CollisionObject*>& objects,
+		std::vector<Manifold>& manifolds)
 	{
 		for (Manifold& manifold : manifolds) {
-			Rigidbody* aBody = (Rigidbody*)manifold.BodyA;
-			Rigidbody* bBody = (Rigidbody*)manifold.BodyB;
+			// Test for is each objects is dynamic or not
 
-			iw::vector3 aVel = aBody->Velocity();
-			iw::vector3 bVel = bBody->Velocity();
+			Rigidbody* aBody = manifold.ObjA->IsDynamic() ? (Rigidbody*)manifold.ObjA : nullptr;
+			Rigidbody* bBody = manifold.ObjB->IsDynamic() ? (Rigidbody*)manifold.ObjB : nullptr;
+
+			iw::vector3 aVel = aBody ? aBody->Velocity() : 0.0f;
+			iw::vector3 bVel = bBody ? bBody->Velocity() : 0.0f;
 			iw::vector3 rVel = bVel - aVel;
 			scalar      nVel = rVel.dot(manifold.Normal);
+
+			scalar aInvMass = aBody ? aBody->InvMass() : 1.0f;
+			scalar bInvMass = bBody ? bBody->InvMass() : 1.0f;
 
 			// Impluse
 
 			if (nVel > 0)
 				continue;
 
-			scalar e = aBody->Restitution() * bBody->Restitution();
+			scalar e = (aBody ? aBody->Restitution() : 1.0f)
+				     * (bBody ? bBody->Restitution() : 0.5f);
 
-			scalar j = -(1.0f + e) * nVel / (aBody->InvMass() + bBody->InvMass());
+			scalar j = -(1.0f + e) * nVel / (aInvMass + bInvMass);
 
 			iw::vector3 impluse = j * manifold.Normal;
 
-			if (aBody->IsKinematic()) {
-				aVel -= impluse * aBody->InvMass();
+			if (aBody ? aBody->IsKinematic() : false) {
+				aVel -= impluse * aInvMass;
 			}
 
-			if (bBody->IsKinematic()) {
-				bVel += impluse * bBody->InvMass();
+			if (bBody ? bBody->IsKinematic() : false) {
+				bVel += impluse * bInvMass;
 			}
 
 			// Friction
@@ -43,13 +49,13 @@ namespace Physics {
 			iw::vector3 tangent = (rVel - nVel * manifold.Normal).normalized();
 			scalar      fVel = rVel.dot(tangent);
 
-			scalar aSF = aBody->StaticFriction();
-			scalar bSF = bBody->StaticFriction();
-			scalar aDF = aBody->DynamicFriction();
-			scalar bDF = bBody->DynamicFriction();
+			scalar aSF = aBody ? aBody->StaticFriction()  : 0.5f;
+			scalar bSF = bBody ? bBody->StaticFriction()  : 0.5f;
+			scalar aDF = aBody ? aBody->DynamicFriction() : 0.5f;
+			scalar bDF = bBody ? bBody->DynamicFriction() : 0.5f;
 			scalar mu  = iw::vector2(aSF, bSF).length();
 
-			scalar f  = -fVel / (aBody->InvMass() + bBody->InvMass());
+			scalar f  = -fVel / (aInvMass + bInvMass);
 
 			iw::vector3 friction;
 			if (abs(f) < j * mu) {
@@ -61,12 +67,12 @@ namespace Physics {
 				friction = -j * tangent * mu;
 			}
 
-			if (aBody->IsKinematic()) {
-				aBody->SetVelocity(aVel - friction * aBody->InvMass());
+			if (aBody ? aBody->IsKinematic() : false) {
+				aBody->SetVelocity(aVel - friction * aInvMass);
 			}
 
-			if (bBody->IsKinematic()) {
-				bBody->SetVelocity(bVel + friction * bBody->InvMass());
+			if (bBody ? bBody->IsKinematic() : false) {
+				bBody->SetVelocity(bVel + friction * bInvMass);
 			}
 		}
 	}

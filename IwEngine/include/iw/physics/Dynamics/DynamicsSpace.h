@@ -1,7 +1,8 @@
 #pragma once
 
 #include "iw/physics/Collision/CollisionSpace.h"
-#include "DynamicsSolver.h"
+#include "Rigidbody.h"
+//#include "iw/physics/Collision/TimedSolver.h"
 
 namespace iw {
 namespace Physics {
@@ -9,8 +10,8 @@ namespace Physics {
 		: public CollisionSpace
 	{
 	private:
-		std::vector<Rigidbody*> m_rigidbodies;
-		std::vector<DynamicsSolver*> m_dynamicSolvers;
+		//std::vector<Rigidbody*> m_rigidbodies;
+		//std::vector<TimedSolver*> m_timedSolvers;
 		iw::vector3 m_gravity;
 
 	public:
@@ -18,17 +19,9 @@ namespace Physics {
 		virtual void AddRigidbody(
 			Rigidbody* rigidbody);
 
-		IWPHYSICS_API
-		virtual void RemoveRigidbody(
-			Rigidbody* rigidbody);
-
-		IWPHYSICS_API
-		void AddDSolver(
-			DynamicsSolver* solver);
-
-		IWPHYSICS_API
-		void RemoveDSolver(
-			DynamicsSolver* solver);
+		//IWPHYSICS_API
+		//virtual void RemoveRigidbody(
+		//	Rigidbody* rigidbody);
 
 		IWPHYSICS_API
 		virtual void Step(
@@ -39,11 +32,6 @@ namespace Physics {
 		IWPHYSICS_API
 		void SetGravity(
 			const iw::vector3& gravity);
-	protected:
-		IWPHYSICS_API
-		void SolveManifolds(
-			std::vector<Manifold>& manifolds,
-			scalar dt = 0) override;
 	private:
 		void TrySetGravity();
 		void TryApplyGravity();

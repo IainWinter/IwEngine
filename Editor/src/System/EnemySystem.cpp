@@ -122,29 +122,40 @@ void EnemySystem::Update(
 bool EnemySystem::On(
 	iw::CollisionEvent& event)
 {
-	iw::Entity a = Space->FindEntity(event.BodyA);
-	iw::Entity b = Space->FindEntity(event.BodyB);
+	iw::Entity a = Space->FindEntity(event.ObjA);
+	if (a == iw::EntityHandle::Empty) {
+		a = Space->FindEntity<iw::Rigidbody>(event.ObjA);
+	}
 
-	if (   a.Index() == iw::EntityHandle::Empty.Index
-		|| b.Index() == iw::EntityHandle::Empty.Index)
+	iw::Entity b = Space->FindEntity(event.ObjB);
+	if (b == iw::EntityHandle::Empty) {
+		b = Space->FindEntity<iw::Rigidbody>(event.ObjB);
+	}
+
+	if (   a == iw::EntityHandle::Empty
+		|| b == iw::EntityHandle::Empty)
 	{
 		return false;
 	}
 
 	iw::Entity player;
 	iw::Entity enemy;
-	if (a.HasComponent<Player>() && b.HasComponent<Enemy>()) {
+	if (   a.HasComponent<Player>()
+		&& b.HasComponent<Enemy>())
+	{
 		player = a;
 		enemy  = b;
 	}
 
-	else if (b.HasComponent<Player>() && a.HasComponent<Enemy>()) {
+	else if (b.HasComponent<Player>()
+		&&   a.HasComponent<Enemy>())
+	{
 		player = b;
 		enemy  = a;
 	}
 
-	if (   player.Index() != iw::EntityHandle::Empty.Index
-		&& enemy .Index() != iw::EntityHandle::Empty.Index)
+	if (   player != iw::EntityHandle::Empty
+		&& enemy  != iw::EntityHandle::Empty)
 	{
 		Player* playerComponent = player.FindComponent<Player>();
 		if (playerComponent->Timer > 0) {

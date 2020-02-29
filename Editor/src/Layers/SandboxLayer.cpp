@@ -6,8 +6,8 @@
 #include "iw/engine/Components/CameraController.h"
 #include "iw/engine/Time.h"
 #include "iw/physics/Collision/SphereCollider.h"
-#include "iw/physics/Collision/PositionSolver.h"
 #include "iw/physics/Collision/PlaneCollider.h"
+#include "iw/physics/Dynamics/SmoothPositionSolver.h"
 #include "iw/physics/Dynamics/ImpulseSolver.h"
 #include "iw/physics/Dynamics/Rigidbody.h"
 #include "iw/graphics/MeshFactory.h"
@@ -198,12 +198,12 @@ namespace iw {
 		PlaneCollider* planeo = new PlaneCollider(vector3( 0, -1,  0), -2);
 		PlaneCollider* planeu = new PlaneCollider(vector3( 0,  1,  0),  0);
 
-		Rigidbody* rl = new Rigidbody(false);
-		Rigidbody* rr = new Rigidbody(false);
-		Rigidbody* rt = new Rigidbody(false);
-		Rigidbody* rb = new Rigidbody(false);
-		Rigidbody* ro = new Rigidbody(false);
-		Rigidbody* ru = new Rigidbody(false);
+		CollisionObject* rl = new CollisionObject();
+		CollisionObject* rr = new CollisionObject();
+		CollisionObject* rt = new CollisionObject();
+		CollisionObject* rb = new CollisionObject();
+		CollisionObject* ro = new CollisionObject();
+		CollisionObject* ru = new CollisionObject();
 
 		rl->SetCol(planel);
 		rr->SetCol(planer);
@@ -219,16 +219,16 @@ namespace iw {
 		ro->SetTrans(to);
 		ru->SetTrans(tu);
 
-		Physics->AddRigidbody(rl);
-		Physics->AddRigidbody(rr);
-		Physics->AddRigidbody(rt);
-		Physics->AddRigidbody(rb);
-		Physics->AddRigidbody(ro);
-		Physics->AddRigidbody(ru);
+		Physics->AddCollisionObject(rl);
+		Physics->AddCollisionObject(rr);
+		Physics->AddCollisionObject(rt);
+		Physics->AddCollisionObject(rb);
+		Physics->AddCollisionObject(ro);
+		Physics->AddCollisionObject(ru);
 
 		Physics->SetGravity(vector3(0, -9.8f, 0));
-		Physics->AddDSolver(new ImpulseSolver());
-		Physics->AddSolver(new PositionSolver());
+		Physics->AddSolver(new ImpulseSolver());
+		Physics->AddSolver(new SmoothPositionSolver());
 
 		// Rendering pipeline
 
@@ -336,7 +336,7 @@ namespace iw {
 			y = 9  * scaleOutY;
 		}
 
-		LoadFloor("models/forest/floor.dae", Transform{
+		LoadFloor("models/forest/floor.dae", Transform {
 			vector3(0, 0, 0),
 			vector3(32),
 			quaternion::from_axis_angle(vector3::unit_x, Pi / 2)
@@ -345,20 +345,18 @@ namespace iw {
 		// Enemies
 
 		for (size_t i = 0; i < level.Enemies.size(); i++) {
-			Entity enemy = Space->CreateEntity<Transform, Model, SphereCollider, Rigidbody, Enemy>();
+			Entity enemy = Space->CreateEntity<Transform, Model, SphereCollider, CollisionObject, Enemy>();
 			enemy.SetComponent<Model>(*Asset->Load<Model>("Tetrahedron"));
 			enemy.SetComponent<Enemy>(level.Enemies[i]);
 
-			Transform*      te = enemy.SetComponent<Transform>(vector3(level.Positions[i].x, 1, level.Positions[i].y));
-			SphereCollider* se = enemy.SetComponent<SphereCollider>(vector3::zero, 1.0f);
-			Rigidbody*      re = enemy.SetComponent<Rigidbody>();
+			Transform*       te = enemy.SetComponent<Transform>(vector3(level.Positions[i].x, 1, level.Positions[i].y));
+			SphereCollider*  se = enemy.SetComponent<SphereCollider>(vector3::zero, 1.0f);
+			CollisionObject* re = enemy.SetComponent<CollisionObject>();
 
-			re->SetMass(1);
 			re->SetCol(se);
 			re->SetTrans(te);
-			re->SetVelocity(-1);
 
-			Physics->AddRigidbody(re);
+			Physics->AddCollisionObject(re);
 		}
 
 		// Player

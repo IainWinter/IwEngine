@@ -6,18 +6,7 @@
 
 namespace iw {
 namespace Physics {
-	void DynamicsSpace::SolveManifolds(
-		std::vector<Manifold>& manifolds,
-		scalar dt)
-	{
-		CollisionSpace::SolveManifolds(manifolds, dt); // not sure the order here both ways fuck it up
-
-		for (DynamicsSolver* solver : m_dynamicSolvers) {
-			solver->Solve(m_rigidbodies, manifolds, dt);
-		}
-	}
-
-	void DynamicsSpace::AddRigidbody(
+ 	void DynamicsSpace::AddRigidbody(
 		Rigidbody* rigidbody)
 	{
 #ifdef IW_DEBUG
@@ -27,7 +16,7 @@ namespace Physics {
 		}
 #endif
 
-		m_rigidbodies.push_back(rigidbody);
+		//m_rigidbodies.push_back(rigidbody);
 
 		if (rigidbody->TakesGravity()) {
 			rigidbody->SetGravity(m_gravity);
@@ -36,59 +25,59 @@ namespace Physics {
 		AddCollisionObject(rigidbody);
 	}
 
-	void DynamicsSpace::RemoveRigidbody(
-		Rigidbody* rigidbody)
-	{
-#ifdef IW_DEBUG
-		if (rigidbody == nullptr) {
-			LOG_WARNING << "Tried to remove null rigidbody to dynamics space";
-			return;
-		}
-#endif
+//	void DynamicsSpace::RemoveRigidbody(
+//		Rigidbody* rigidbody)
+//	{
+//#ifdef IW_DEBUG
+//		if (rigidbody == nullptr) {
+//			LOG_WARNING << "Tried to remove null rigidbody from dynamics space";
+//			return;
+//		}
+//#endif
+//
+//		//auto itr = std::find(m_rigidbodies.begin(), m_rigidbodies.end(), rigidbody);
+//
+//		//if (itr != m_rigidbodies.end()) {
+//		//	m_rigidbodies.erase(itr);
+//		//}
+//
+//		RemoveCollisionObject(rigidbody);
+//	}
 
-		auto itr = std::find(m_rigidbodies.begin(), m_rigidbodies.end(), rigidbody);
-
-		if (itr != m_rigidbodies.end()) {
-			m_rigidbodies.erase(itr);
-		}
-
-		RemoveCollisionObject(rigidbody);
-	}
-
-	void DynamicsSpace::AddDSolver(
-		DynamicsSolver* solver)
-	{
-#ifdef IW_DEBUG
-		if (solver== nullptr) {
-			LOG_WARNING << "Tried to add null solver to dynamics space";
-			return;
-		}
-#endif
-
-		m_dynamicSolvers.push_back(solver);
-	}
-
-	void DynamicsSpace::RemoveDSolver(
-		DynamicsSolver* solver)
-	{
-#ifdef IW_DEBUG
-		if (solver == nullptr) {
-			LOG_WARNING << "Tried to remove null solver to dynamics space";
-			return;
-		}
-#endif
-
-		auto itr = std::find(m_dynamicSolvers.begin(), m_dynamicSolvers.end(), solver);
-
-#ifdef IW_DEBUG
-		if (itr != m_dynamicSolvers.end()) {
-			LOG_WARNING << "Tried to remove solver that doesn't exist in the dynamics space";
-			return;
-		}
-#endif
-
-		m_dynamicSolvers.erase(itr);
-	}
+//	void DynamicsSpace::AddDSolver(
+//		DynamicsSolver* solver)
+//	{
+//#ifdef IW_DEBUG
+//		if (solver== nullptr) {
+//			LOG_WARNING << "Tried to add null solver to dynamics space";
+//			return;
+//		}
+//#endif
+//
+//		m_dynamicSolvers.push_back(solver);
+//	}
+//
+//	void DynamicsSpace::RemoveDSolver(
+//		DynamicsSolver* solver)
+//	{
+//#ifdef IW_DEBUG
+//		if (solver == nullptr) {
+//			LOG_WARNING << "Tried to remove null solver to dynamics space";
+//			return;
+//		}
+//#endif
+//
+//		auto itr = std::find(m_dynamicSolvers.begin(), m_dynamicSolvers.end(), solver);
+//
+//#ifdef IW_DEBUG
+//		if (itr != m_dynamicSolvers.end()) {
+//			LOG_WARNING << "Tried to remove solver that doesn't exist in the dynamics space";
+//			return;
+//		}
+//#endif
+//
+//		m_dynamicSolvers.erase(itr);
+//	}
 
 	void DynamicsSpace::Step(
 		scalar dt)
@@ -101,32 +90,12 @@ namespace Physics {
 
 		//SweepCastBodies(); //CheckCollisions();
 
-		//StepTransforms();
-		
-		//ResolveTransforms();
+		ResolveConstrains(dt); // might go after step
 
-		std::vector<Manifold> manifolds;
-		std::vector<Manifold> triggers;
-		for (Rigidbody* a : m_rigidbodies) {
-			for (Rigidbody* b : m_rigidbodies) {
-				if (a == b) break;
+		for (CollisionObject* object : m_objects) {
+			if (!object->IsDynamic()) continue;
 
-				ManifoldPoints points = a->Col()->TestCollision(a->Trans(), b->Col(), b->Trans());
-				if (points.HasCollision) {
-					if (a->IsTrigger() || b->IsTrigger()) {
-						triggers.emplace_back(a, b, points);
-					}
-
-					else {
-						manifolds.emplace_back(a, b, points);
-					}
-				}
-			}
-		}
-
-		SolveManifolds(manifolds, dt);
-
-		for (Rigidbody* rigidbody : m_rigidbodies) {
+			Rigidbody* rigidbody = (Rigidbody*)object;
 			if (rigidbody->IsKinematic()) {
 				if (   isnan(rigidbody->Velocity().length_squared())
 					|| isinf(rigidbody->Velocity().length_squared()))
@@ -167,9 +136,6 @@ namespace Physics {
 
 		// send collision callbacks
 
-		SendCollisionCallbacks(manifolds, dt);
-		SendCollisionCallbacks(triggers,  dt);
-
 		// At the end the forces should be cleared
 
 		ClearForces();
@@ -187,7 +153,10 @@ namespace Physics {
 	}
 
 	void DynamicsSpace::TrySetGravity() {
-		for (Rigidbody* rigidbody : m_rigidbodies) {
+		for (CollisionObject* object : m_objects) {
+			if (!object->IsDynamic()) continue;
+
+			Rigidbody* rigidbody = (Rigidbody*)object;
 			if (rigidbody->TakesGravity() && rigidbody->IsKinematic()) {
 				rigidbody->SetGravity(m_gravity);
 			}
@@ -195,7 +164,10 @@ namespace Physics {
 	}
 
 	void DynamicsSpace::TryApplyGravity() {
-		for (Rigidbody* rigidbody : m_rigidbodies) {
+		for (CollisionObject* object : m_objects) {
+			if (!object->IsDynamic()) continue;
+
+			Rigidbody* rigidbody = (Rigidbody*)object;
 			if (rigidbody->SimGravity() && rigidbody->IsKinematic()) {
 				rigidbody->ApplyGravity();
 			}
@@ -205,13 +177,15 @@ namespace Physics {
 	void DynamicsSpace::PredictTransforms(
 		scalar dt)
 	{
-		for (Rigidbody* rigidbody : m_rigidbodies) {
+		for (CollisionObject* object : m_objects) {
+			if (!object->IsDynamic()) continue;
+
+			Rigidbody* rigidbody = (Rigidbody*)object;
 			if (rigidbody->IsKinematic()) {
 				Transform t = *rigidbody->Trans();
 
-				t.Position +=
-					  rigidbody->Velocity() * dt
-					+ rigidbody->Force() * rigidbody->InvMass() * dt * dt;
+				t.Position += rigidbody->Velocity() * dt
+					        + rigidbody->Force() * rigidbody->InvMass() * dt*dt;
 
 				rigidbody->SetNextTrans(t);
 
@@ -231,13 +205,19 @@ namespace Physics {
 	}
 
 	void DynamicsSpace::SweepCastBodies() {
-		for (Rigidbody* rigidbody : m_rigidbodies) {
+		for (CollisionObject* object : m_objects) {
+			if (!object->IsDynamic()) continue;
+			Rigidbody* rigidbody = (Rigidbody*)object;
+
 			//ShapeCast(rigidbody, *rigidbody->Trans(), rigidbody->NextTrans());
 		}
 	}
 
 	void DynamicsSpace::ClearForces() {
-		for (Rigidbody* rigidbody : m_rigidbodies) {
+		for (CollisionObject* object : m_objects) {
+			if (!object->IsDynamic()) continue;
+			Rigidbody* rigidbody = (Rigidbody*)object;
+
 			if (rigidbody->IsKinematic()) {
 				rigidbody->SetForce(0.0f);
 			}

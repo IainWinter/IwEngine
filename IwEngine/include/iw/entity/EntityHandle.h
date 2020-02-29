@@ -15,7 +15,7 @@ namespace ECS {
 		bool operator==(
 			const EntityHandle& other)
 		{
-			return  Index == other.Index
+			return  Index   == other.Index
 				&& Version == other.Version;
 		}
 

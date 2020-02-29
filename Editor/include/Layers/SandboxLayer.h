@@ -59,9 +59,9 @@ namespace iw {
 			std::string name,
 			Transform transform); //temp
 
-		void LoadRock(
-			std::string name,
-			Transform transform); //temp
+		//void LoadRock(
+		//	std::string name,
+		//	Transform transform); //temp
 
 		void LoadFloor(
 			std::string name,

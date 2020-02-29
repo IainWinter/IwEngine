@@ -29,18 +29,18 @@ namespace Engine {
 	struct CollisionEvent
 		: PhysicsEvent
 	{
-		Rigidbody* BodyA;
-		Rigidbody* BodyB;
+		CollisionObject* ObjA;
+		CollisionObject* ObjB;
 		scalar PenetrationDepth;
 
 		CollisionEvent(
-			Rigidbody* bodyA,
-			Rigidbody* bodyB,
+			CollisionObject* objA,
+			CollisionObject* objB,
 			scalar pen,
 			scalar dt)
 			: PhysicsEvent(PhysicsEventType::Collision, dt)
-			, BodyA(bodyA)
-			, BodyB(bodyB)
+			, ObjA(objA)
+			, ObjB(objB)
 			, PenetrationDepth(pen)
 		{}
 	};

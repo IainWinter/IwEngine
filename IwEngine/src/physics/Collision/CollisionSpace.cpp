@@ -69,13 +69,45 @@ namespace Physics {
 		m_solvers.erase(itr);
 	}
 
+	void CollisionSpace::ResolveConstrains(
+		scalar dt)
+	{
+		std::vector<Manifold> manifolds;
+		std::vector<Manifold> triggers;
+		for (CollisionObject* a : m_objects) {
+			for (CollisionObject* b : m_objects) {
+				if (a == b) break;
+
+				ManifoldPoints points = a->Col()->TestCollision(a->Trans(), b->Col(), b->Trans());
+				if (points.HasCollision) {
+					if (a->IsTrigger() || b->IsTrigger()) {
+						triggers.emplace_back(a, b, points);
+					}
+
+					else {
+						manifolds.emplace_back(a, b, points);
+					}
+				}
+			}
+		}
+
+		SolveManifolds(manifolds, dt);
+
+		SendCollisionCallbacks(manifolds, dt);
+		SendCollisionCallbacks(triggers, dt);
+	}
+
 	void CollisionSpace::SolveManifolds(
 		std::vector<Manifold>& manifolds,
 		scalar dt)
 	{
 		for (Solver* solver : m_solvers) {
-			solver->Solve(m_objects, manifolds, dt);
+			solver->Solve(m_objects, manifolds);
 		}
+
+		/*for (TimedSolver* solver : m_timedSolvers) {
+			solver->Solve(m_objects, manifolds, dt);
+		}*/
 	}
 
 	void CollisionSpace::SendCollisionCallbacks(

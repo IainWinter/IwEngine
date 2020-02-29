@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Solver.h"
-#include "iw/physics/Ray.h"
+//#include "iw/physics/Ray.h"
 #include "iw/events/callback.h"
 #include "iw/util/memory/ref.h"
 
@@ -16,8 +16,8 @@ namespace Physics {
 		using CollisionCallback = iw::callback<Manifold&, scalar>;
 	protected:
 		CollisionCallback m_collisionCallback;
-	private:
 		std::vector<CollisionObject*> m_objects;
+	private:
 		std::vector<Solver*> m_solvers;
 
 	public:
@@ -37,8 +37,9 @@ namespace Physics {
 		void RemoveSolver(
 			Solver* solver);
 
-		//IWPHYSICS_API
-		//virtual void SolveConstrains();
+		IWPHYSICS_API
+		void ResolveConstrains(
+			scalar dt = 0);
 
 		IWPHYSICS_API
 		bool TestObject(

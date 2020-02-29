@@ -98,8 +98,15 @@ bool PlayerSystem::On(
 bool PlayerSystem::On(
 	iw::CollisionEvent& event)
 {
-	iw::Entity a = Space->FindEntity(event.BodyA);
-	iw::Entity b = Space->FindEntity(event.BodyB);
+	iw::Entity a = Space->FindEntity(event.ObjA);
+	if (a == iw::EntityHandle::Empty) {
+		a = Space->FindEntity<iw::Rigidbody>(event.ObjA);
+	}
+
+	iw::Entity b = Space->FindEntity(event.ObjB);
+	if (b == iw::EntityHandle::Empty) {
+		b = Space->FindEntity<iw::Rigidbody>(event.ObjB);
+	}
 
 	if (   a.Index() == iw::EntityHandle::Empty.Index
 		|| b.Index() == iw::EntityHandle::Empty.Index)
@@ -108,11 +115,15 @@ bool PlayerSystem::On(
 	}
 
 	iw::Entity player;
-	if (a.HasComponent<Player>() && b.HasComponent<Bullet>()) {
+	if (   a.HasComponent<Player>()
+		&& b.HasComponent<Bullet>())
+	{
 		player = a;
 	}
 
-	else if (b.HasComponent<Player>() && a.HasComponent<Bullet>()) {
+	else if (b.HasComponent<Player>()
+		&&   a.HasComponent<Bullet>())
+	{
 		player = b;
 	}
 

@@ -28,8 +28,15 @@ void BulletSystem::Update(
 bool BulletSystem::On(
 	iw::CollisionEvent& event)
 {
-	iw::Entity a = Space->FindEntity(event.BodyA);
-	iw::Entity b = Space->FindEntity(event.BodyB);
+	iw::Entity a = Space->FindEntity(event.ObjA);
+	if (a == iw::EntityHandle::Empty) {
+		a = Space->FindEntity<iw::Rigidbody>(event.ObjA);
+	}
+
+	iw::Entity b = Space->FindEntity(event.ObjB);
+	if (b == iw::EntityHandle::Empty) {
+		b = Space->FindEntity<iw::Rigidbody>(event.ObjB);
+	}
 
 	iw::Entity bullet;
 	iw::Entity other;

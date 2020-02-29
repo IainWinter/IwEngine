@@ -11,7 +11,9 @@ namespace Physics {
 		, m_staticFriction(.5)
 		, m_dynamicFriction(.5)
 		, m_restitution(.5)
-	{}
+	{
+		m_isDynamic = true;
+	}
 
 	void Rigidbody::ApplyForce(
 		const iw::vector3& force)

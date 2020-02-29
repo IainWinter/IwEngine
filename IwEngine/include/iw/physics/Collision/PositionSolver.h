@@ -11,8 +11,7 @@ namespace Physics {
 		IWPHYSICS_API
 		void Solve(
 			std::vector<CollisionObject*>& objects,
-			std::vector<Manifold>& manifolds,
-			scalar dt) override;
+			std::vector<Manifold>& manifolds) override;
 	};
 }
 
