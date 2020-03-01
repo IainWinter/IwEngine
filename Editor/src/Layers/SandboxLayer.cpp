@@ -28,6 +28,8 @@
 
 #include "iw/engine/Systems/PhysicsSystem.h"
 
+#include "iw/audio/AudioSpaceStudio.h"
+
 namespace iw {
 	struct ModelUBO {
 		matrix4 model;
@@ -61,9 +63,18 @@ namespace iw {
 		currentLevel = 0;
 	}
 
+	int forestInstance = 0;
+
 	int SandboxLayer::Initialize() {
-		Audio->CreateSound("Fire.wav");
-		Audio->CreateSound("Death.wav");
+		AudioSpaceStudio* studio = (AudioSpaceStudio*)Audio->AsStudio();
+
+		studio->LoadMasterBank("Master.bank");
+		studio->LoadMasterBank("Master.strings.bank");
+		studio->CreateEvent("swordAttack");
+		studio->CreateEvent("forestAmbiance");
+		studio->CreateEvent("playerDamaged");
+
+		forestInstance = studio->CreateInstance("forestAmbiance", false);
 
 		// Fonts
 
@@ -495,6 +506,14 @@ namespace iw {
 
 		ImGui::SliderFloat("Volume", &Audio->GetVolume(), 0, 1);
 
+		if (ImGui::Button("Start ambiance")) {
+			Audio->AsStudio()->StartInstance(forestInstance);
+		}
+
+		if (ImGui::Button("Stop ambiance")) {
+			Audio->AsStudio()->StopInstance(forestInstance);
+		}
+
 		if (ImGui::Button("Save level")) {
 			JsonSerializer jout("assets/levels/working.json", true);
 			
@@ -531,6 +550,10 @@ namespace iw {
 	{
 		str += e.Character;
 		font->UpdateMesh(textMesh, str, .01f, 1);
+
+		if (e.Button == X) {
+			Audio->AsStudio()->CreateInstance("swordAttack");
+		}
 
 		return false;
 	}

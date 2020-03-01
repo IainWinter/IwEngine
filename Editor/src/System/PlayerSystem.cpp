@@ -2,6 +2,7 @@
 #include "Events/ActionEvents.h"
 #include "iw/engine/Time.h"
 #include "iw/input/Devices/Keyboard.h"
+#include "iw/audio/AudioSpaceStudio.h"
 #include <Components\Bullet.h>
 
 #undef PlaySound
@@ -31,7 +32,7 @@ void PlayerSystem::Update(
 			if (player->DeathTimer == 0) {
 				player->DeathTimer = 1.0f;
 
-				Audio->PlaySound("Death.wav");
+				//Audio->PlaySound("Death.wav");
 			}
 		}
 
@@ -133,7 +134,7 @@ bool PlayerSystem::On(
 			p->Damaged = true;
 			p->Health -= 1;
 
-			Audio->PlaySound("Fire.wav");
+			Audio->AsStudio()->CreateInstance("playerDamaged");
 		}
 	}
 

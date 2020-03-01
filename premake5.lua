@@ -74,7 +74,8 @@ project "IwEngine"
 		"ImGui",
 		"assimp-vc140-mt",
 		"opengl32.lib",
-		"fmod"
+		"fmod",
+		"fmodstudio"
 	}
 
 	disablewarnings { 
@@ -288,7 +289,8 @@ project "Editor"
 
 	prebuildcommands  {
 		"xcopy /y /f \"" .. assimpdir .. blddir .. "/code/%{cfg.buildcfg}/assimp-vc140-mt.dll\" \"" .. edtordir .. bindir .. "\"",
-		"xcopy /y /f \"" .. fmoddir   ..           "/bin/%{cfg.platform}/fmod.dll\" \""         .. edtordir .. bindir .. "\"",
+		"xcopy /y /f \"" .. fmoddir   ..           "/bin/%{cfg.platform}/fmod.dll\" \""             .. edtordir .. bindir .. "\"",
+		"xcopy /y /f \"" .. fmoddir   ..           "/bin/%{cfg.platform}/fmodstudio.dll\" \""       .. edtordir .. bindir .. "\"",
 		"xcopy /y /f \"" .. glewdir   .. bindir .. "/GLEW.dll\" \""                                 .. edtordir .. bindir .. "\"",
 		"xcopy /y /f \"" .. iwengdir  .. bindir .. "/IwEngine.dll\" \""                             .. edtordir .. bindir .. "\"",
 		"xcopy /e /y /f /i \"" .. edtordir  .. resdir .. "\" \"" .. edtordir .. blddir .. resdir .. "\"",

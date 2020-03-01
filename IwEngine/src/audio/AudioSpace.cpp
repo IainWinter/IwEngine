@@ -1,33 +1,48 @@
 #include "iw/audio/AudioSpace.h"
 #include "iw/log/logger.h"
-
-#define CHECK_ERROR(err, msg, n) if(CheckError(err, msg)) return n;
+#include "fmod/fmod.h"
 
 namespace iw {
 namespace Audio {
 	AudioSpace::AudioSpace(
-		int channels,
 		std::string rootDir,
+		int channels,
 		float volume)
-		: m_system(nullptr)
-		, m_channel(nullptr)
+		: m_rootDir(rootDir)
 		, m_channels(channels)
 		, m_volume(volume)
-		, m_rootDir(rootDir)
-	{
-		FMOD_RESULT error;
+	{}
 
-		error = FMOD::System_Create(&m_system);
-		CHECK_ERROR(error, "Audio space did not get created!");
+	AudioSpaceRaw* AudioSpace::AsRaw() {
+		return (AudioSpaceRaw*)this;
 	}
 
-	int AudioSpace::Initialize() {
-		FMOD_RESULT error;
+	AudioSpaceStudio* AudioSpace::AsStudio() {
+		return (AudioSpaceStudio*)this;
+	}
 
-		error = m_system->init(m_channels, FMOD_INIT_NORMAL, nullptr);
-		CHECK_ERROR(error, "Audio space did not get initliaze!", 1);
+	std::string& AudioSpace::GetRootDir() {
+		return m_rootDir;
+	}
 
-		return 0;
+	int AudioSpace::GetChannels() {
+		return m_channels;
+	}
+
+	float& AudioSpace::GetVolume() {
+		return m_volume;
+	}
+
+	void AudioSpace::SetRootDir(
+		std::string& rootDir)
+	{
+		m_rootDir = rootDir;
+	}
+
+	void AudioSpace::SetChannels(
+		int channels)
+	{
+		m_channels = channels;
 	}
 
 	void AudioSpace::SetVolume(
@@ -36,45 +51,8 @@ namespace Audio {
 		m_volume = volume;
 	}
 
-	float& AudioSpace::GetVolume() {
-		return m_volume;
-	}
-
-	void AudioSpace::CreateSound(
-		std::string name)
-	{
-		std::string path = m_rootDir + name;
-
-		auto itr = m_sounds.find(path);
-		if (itr != m_sounds.end()) {
-			itr->second->release();
-		}
-
-		FMOD_RESULT error;
-		error = m_system->createSound(path.c_str(), FMOD_DEFAULT, 0, &m_sounds[path]);
-		CHECK_ERROR(error, "Sound did not get created!");
-	}
-
-	void AudioSpace::PlaySound(
-		std::string name)
-	{
-		std::string path = m_rootDir + name;
-
-		auto itr = m_sounds.find(path);
-		if (itr == m_sounds.end()) {
-			LOG_INFO << "Could not find sound!";
-			return;
-		}
-
-
-		FMOD_RESULT error;
-		error = m_system->playSound(itr->second, 0, false, &m_channel);
-		CHECK_ERROR(error, "Sound did not get played!");
-		m_channel->setVolume(m_volume);
-	}
-
 	bool AudioSpace::CheckError(
-		FMOD_RESULT result,
+		int result,
 		const char* message)
 	{
 		if (result != FMOD_OK) {

@@ -10,6 +10,7 @@
 #include "iw/graphics/Loaders/TextureLoader.h"
 #include "iw/graphics/Loaders/ShaderLoader.h"
 #include "iw/graphics/Loaders/FontLoader.h"
+#include "iw/audio/AudioSpaceRaw.h"
 #include <atomic>
 
 namespace iw {
@@ -26,7 +27,7 @@ namespace Engine {
 		Input    = REF<InputManager>(Bus);
 		Console  = REF<iw::Console>(iw::make_getback(&Application::HandleCommand, this));
 		Physics  = REF<DynamicsSpace>();
-		Audio    = REF<AudioSpace>(32, "assets/sounds/");
+		Audio    = REF<AudioSpaceRaw>("assets/sounds/");
 
 		PushOverlay<DebugLayer>();
 	}
@@ -195,6 +196,8 @@ namespace Engine {
 		// Run through render queue! (Sync)
 
 		Renderer->End();
+
+		Audio->Update();
 
 		// Swap buffers (Sync)
 		m_window->SwapBuffers();

@@ -1,50 +1,60 @@
 #pragma once
 
 #include "IwAudio.h"
-#include "fmod/fmod.hpp"
-#include <unordered_map>
 #include <string>
+
+#undef PlaySound
 
 namespace iw {
 namespace Audio {
+	class AudioSpaceRaw;
+	class AudioSpaceStudio;
+
 	class AudioSpace {
 	private:
-		FMOD::System* m_system;
-
-		FMOD::Channel* m_channel;
+		std::string m_rootDir;
 		int m_channels;
 		float m_volume;
-
-		std::unordered_map<std::string, FMOD::Sound*> m_sounds;
-		std::string m_rootDir;
 
 	public:
 		IWAUDIO_API
 		AudioSpace(
+			std::string rootDir,
 			int channels,
-			std::string rootDir = "",
-			float volume = 1.0f);
-
-		IWAUDIO_API
-		int Initialize();
-
-		IWAUDIO_API
-		void SetVolume(
 			float volume);
 
-		IWAUDIO_API
-		float& GetVolume();
+		virtual int Initialize() = 0;
+		virtual void Update() = 0;
 
 		IWAUDIO_API
-		void CreateSound(
-			std::string name);
+		AudioSpaceRaw* AsRaw();
 
 		IWAUDIO_API
-		void PlaySound(
-			std::string name);
-	private:
+		AudioSpaceStudio* AsStudio();
+
+		IWAUDIO_API
+		virtual std::string& GetRootDir();
+
+		IWAUDIO_API
+		virtual int GetChannels();
+
+		IWAUDIO_API
+		virtual float& GetVolume();
+
+		IWAUDIO_API
+		virtual void SetRootDir(
+			std::string& rootDir);
+
+		IWAUDIO_API
+		virtual void SetChannels(
+			int channels);
+
+		IWAUDIO_API
+		virtual void SetVolume(
+			float volume);
+	protected:
 		bool CheckError(
-			FMOD_RESULT result,
+			int result,
 			const char* message);
 	};
 }

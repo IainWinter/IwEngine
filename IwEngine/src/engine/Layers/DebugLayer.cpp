@@ -21,7 +21,7 @@ namespace Engine {
 		//	auto [transform, log] = entity.Components.Tie<Components>();
 		//}
 
-		while (logs.size() > 20) {
+		while (logs.size() > 5) {
 			logs.erase(logs.begin());
 		}
 	}

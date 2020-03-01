@@ -5,9 +5,12 @@
 #include "iw/physics/Plane.h"
 #include "iw/physics/Collision/PlaneCollider.h"
 #include "iw/physics/Collision/SphereCollider.h"
+#include "iw/audio/AudioSpaceStudio.h"
 
 namespace iw {
 	App::App() {
+		Audio = REF<AudioSpaceStudio>("assets/sounds/");
+
 		iw::ref<Context> context = Input->CreateContext("Editor");
 		
 		context->MapButton(iw::SPACE, "+jump");
