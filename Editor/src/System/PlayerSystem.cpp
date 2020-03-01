@@ -21,6 +21,7 @@ void PlayerSystem::Update(
 		if (player->Timer <= -player->CooldownTime) {
 			if (dash) {
 				player->Timer = player->DashTime;
+				Audio->AsStudio()->CreateInstance("swordAttack");
 			}
 		}
 

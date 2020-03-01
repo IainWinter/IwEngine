@@ -73,6 +73,7 @@ namespace iw {
 		studio->CreateEvent("swordAttack");
 		studio->CreateEvent("forestAmbiance");
 		studio->CreateEvent("playerDamaged");
+		studio->CreateEvent("enemyDeath");
 
 		forestInstance = studio->CreateInstance("forestAmbiance", false);
 
@@ -550,10 +551,6 @@ namespace iw {
 	{
 		str += e.Character;
 		font->UpdateMesh(textMesh, str, .01f, 1);
-
-		if (e.Button == X) {
-			Audio->AsStudio()->CreateInstance("swordAttack");
-		}
 
 		return false;
 	}

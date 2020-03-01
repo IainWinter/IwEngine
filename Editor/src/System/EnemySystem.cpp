@@ -10,6 +10,7 @@
 #include <Components\Player.h>
 
 #include "Events/ActionEvents.h"
+#include "iw/audio/AudioSpaceStudio.h"
 
 EnemySystem::EnemySystem(
 	iw::ref<iw::Model> bulletModel)
@@ -160,6 +161,7 @@ bool EnemySystem::On(
 		Player* playerComponent = player.FindComponent<Player>();
 		if (playerComponent->Timer > 0) {
 			QueueDestroyEntity(enemy.Index());
+			Audio->AsStudio()->CreateInstance("enemyDeath");
 		}
 
 		else {
