@@ -28,7 +28,7 @@ namespace Time {
 	}
 
 	float TotalTime() {
-		return time * 1000;
+		return time;
 	}
 
 	float DeltaTime() {

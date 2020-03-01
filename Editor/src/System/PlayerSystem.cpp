@@ -18,29 +18,6 @@ void PlayerSystem::Update(
 	for (auto entity : view) {
 		auto [ transform, rigidbody, player ] = entity.Components.Tie<Components>();
 
-		if (player->Timer <= -player->CooldownTime) {
-			if (dash) {
-				player->Timer = player->DashTime;
-				Audio->AsStudio()->CreateInstance("swordAttack");
-			}
-		}
-
-		else if (player->Timer >= -player->CooldownTime) {
-			player->Timer -= iw::Time::DeltaTime();
-		}
-
-		if (player->Health <= 0) {
-			if (player->DeathTimer == 0) {
-				player->DeathTimer = 1.0f;
-
-				//Audio->PlaySound("Death.wav");
-			}
-		}
-
-		if (player->Damaged) {
-			LOG_INFO << player->Health;
-		}
-
 		if (player->DeathTimer > 0) {
 			player->DeathTimer -= iw::Time::DeltaTime();
 
@@ -51,7 +28,32 @@ void PlayerSystem::Update(
 			}
 		}
 
-		player->Damaged = false;
+		else {
+			if (player->Timer <= -player->CooldownTime) {
+				if (dash) {
+					player->Timer = player->DashTime;
+					Audio->AsStudio()->CreateInstance("swordAttack");
+				}
+			}
+
+			else if (player->Timer >= -player->CooldownTime) {
+				player->Timer -= iw::Time::DeltaTime();
+			}
+
+			if (player->Health <= 0) {
+				if (player->DeathTimer == 0) {
+					player->DeathTimer = 1.0f;
+
+					//Audio->PlaySound("Death.wav");
+				}
+			}
+
+			if (player->Damaged) {
+				LOG_INFO << player->Health;
+			}
+
+			player->Damaged = false;
+		}
 	}
 }
 

@@ -17,6 +17,8 @@
 #include "iw/input/Devices/Mouse.h"
 #include "imgui/imgui.h"
 
+#include "Components/Tree.h"
+
 #include "iw/reflection/serialization/JsonSerializer.h"
 
 #include "iw/reflection/reflect/std/string.h"
@@ -49,6 +51,11 @@ namespace iw {
 	struct PlaneComponents {
 		Transform* Transform;
 		PlaneCollider* Collider;
+	};
+
+	struct TreeComponents {
+		Model* Model;
+		Tree* Tree;
 	};
 
 	SandboxLayer::SandboxLayer()
@@ -99,11 +106,13 @@ namespace iw {
 
 		// Shader
 
-		ref<Shader> shader = Asset->Load<Shader>("shaders/pbr.shader");
+		ref<Shader> shader      = Asset->Load<Shader>("shaders/pbr.shader");
+		ref<Shader> treeShader  = Asset->Load<Shader>("shaders/tree.shader");
 		ref<Shader> directional = Asset->Load<Shader>("shaders/lights/directional_transparent.shader");
-		gaussian = Asset->Load<Shader>("shaders/filters/gaussian.shader");
+		            gaussian    = Asset->Load<Shader>("shaders/filters/gaussian.shader");
 		
 		Renderer->InitShader(shader,      ALL);
+		Renderer->InitShader(treeShader,  ALL);
 		Renderer->InitShader(directional, CAMERA);
 		Renderer->InitShader(gaussian,    CAMERA);
 
@@ -425,10 +434,12 @@ namespace iw {
 		}
 
 		ref<Texture> leavesAlpha = Asset->Load<Texture>("textures/forest/tree/leaves/alpha.jpg");
-		tree->Meshes[1].Material->SetTexture("alphaMaskMap", leavesAlpha);
 		leavesAlpha->Initialize(Renderer->Device);
 
-		Entity ent = Space->CreateEntity<Transform, Model>();
+		tree->Meshes[1].Material->SetShader(Asset->Load<Shader>("shaders/tree.shader"));
+		tree->Meshes[1].Material->SetTexture("alphaMaskMap", leavesAlpha);
+
+		Entity ent = Space->CreateEntity<Transform, Model, Tree>();
 		ent.SetComponent<Transform>(transform);
 		ent.SetComponent<Model>(*tree);
 	}
@@ -469,6 +480,18 @@ namespace iw {
 
 	void SandboxLayer::PostUpdate() {
 		textMesh->Update(Renderer->Device);
+
+		// for tree wind
+		//for (EntityComponentData tree : Space->Query<Model, Tree>()) {
+		//	auto [m, t] = tree.Components.Tie<TreeComponents>();
+
+		//	Renderer->SetShader(m->Meshes[1].Material->Shader);
+
+		//	m->Meshes[1].Material->Shader->Program->GetParam("time")
+		//		->SetAsFloat(Time::TotalTime());
+		//}
+
+		// Main render
 
 		light.SetPosition(lightPos);
 		light.SetRotation(quaternion::from_look_at(lightPos));

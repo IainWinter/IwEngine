@@ -11,7 +11,6 @@ namespace Graphics {
 	Material* MaterialLoader::LoadAsset(
 		std::string filepath)
 	{
-		LOG_INFO << "Loading " << filepath;
 		for (std::string line : iw::ReadFileLines(filepath.c_str())) {
 			LOG_INFO << line;
 		}

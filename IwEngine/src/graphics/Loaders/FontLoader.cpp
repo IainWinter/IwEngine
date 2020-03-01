@@ -568,7 +568,7 @@ namespace Graphics {
 						break;
 					}
 					default: {
-						LOG_WARNING << "Invalid token in font file " << filepath;
+						LOG_WARNING << "\tInvalid token in font file " << filepath;
 						return nullptr;
 					}
 				}

@@ -29,14 +29,14 @@ namespace RenderAPI {
 			glDeleteShader(geometryShader->GeometryShader());
 		}
 
-		LOG_INFO << "Shader #" << gl_id << " compiled with uniforms:";
+		LOG_DEBUG << "Shader #" << gl_id << " compiled with uniforms:";
 		for (int i = 0; i < UniformCount(); i++) {
 			IPipelineParam* uniform = GetParam(i);
 			if (!uniform) {
 				continue; // Check for null
 			}
 			
-			LOG_INFO << "\t Location: " << uniform->Location() << " Name: " << uniform->Name();
+			LOG_DEBUG << "\tLocation: " << uniform->Location() << " Name: " << uniform->Name();
 		}
 	}
 	
