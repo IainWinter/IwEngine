@@ -27,4 +27,9 @@ public:
 
 	bool On(
 		iw::CollisionEvent& e) override;
+private:
+	void SpawnBullet(
+		Bullet prefab,
+		iw::vector3 position,
+		iw::quaternion rot);
 };

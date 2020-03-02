@@ -2,26 +2,55 @@
 #include "iw/engine/Time.h"
 #include <Components\Enemy.h>
 
+#include "Components/Player.h"
+
+struct PlayerComponents {
+	iw::Transform* Transform;
+	Player* Player;
+};
+
 BulletSystem::BulletSystem()
 	: iw::System<iw::Transform, iw::Rigidbody, Bullet>("Bullet")
 {}
 
-void BulletSystem::Update(
+void BulletSystem::FixedUpdate(
 	iw::EntityComponentArray& view)
 {
 	for (auto entity : view) {
 		auto [transform, rigidbody, bullet] = entity.Components.Tie<Components>();
 
-		if (bullet->Type == LINE) {
-			//rigidbody->MovePosition(transform->Position + iw::vector3(1, 0, 0) * transform->Rotation * bullet->Speed * iw::Time::FixedTime());
+		switch (bullet->Type) {
+			case SINE: {
+				rigidbody->SetVelocity(bullet->initialVelocity * (1 + sin(bullet->Time * 5) * 0.5f));
+				break;
+			}
+			case SEEK: {
+				iw::vector3 target;
+				float maxDistance = -1;
+				for (auto entity : Space->Query<iw::Transform, Player>()) {
+					auto [pt, p] = entity.Components.Tie<PlayerComponents>();
+
+					float distance = (pt->Position - transform->Position).length();
+					if (distance > maxDistance) {
+						target = pt->Position;
+						maxDistance = distance;
+					}
+				}
+
+				if (maxDistance != -1) {
+					rigidbody->ApplyForce(target - transform->Position);
+				}
+
+				break;
+			}
 		}
+
+		bullet->Time += iw::Time::DeltaTime();
 
 		/*if (bullet->Time > 5.f) {
 			QueueDestroyEntity(entity.Index);
 			Physics->RemoveRigidbody(rigidbody);
 		}*/
-
-		bullet->Time += iw::Time::DeltaTime();
 	}
 }
 

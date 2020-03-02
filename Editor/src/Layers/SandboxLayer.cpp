@@ -24,6 +24,7 @@
 #include "iw/reflection/reflect/std/string.h"
 #include "iw/reflection/reflect/std/vector.h"
 #include "iw/reflect/math/vector2.h"
+#include "iw/reflect/Components/Bullet.h"
 #include "iw/reflect/Components/Enemy.h"
 #include "iw/reflect/Components/Player.h"
 #include "iw/reflect/Components/Level.h"
@@ -68,6 +69,14 @@ namespace iw {
 		};
 
 		currentLevel = 0;
+
+		//Level level;
+		//level.Enemies.push_back(Enemy{ EnemyType::SPIN, Bullet { LINE, 5 }, iw::Pi2 / 24.0f, 0.12f });
+		//level.Positions.push_back(0);
+		//level.Player = Player { 4.0f, 8 / 60.0f, .2f, 5 };
+		//level.StageName = "";
+
+		//JsonSerializer("assets/levels/working.json").Write(level);
 	}
 
 	int forestInstance = 0;
@@ -286,23 +295,7 @@ namespace iw {
 		Space->Clear();
 
 		Level level;
-
-		JsonSerializer json(name);
-
-		bool reset = false;
-		if (reset) {
-			level.Enemies.push_back(Enemy { EnemyType::SPIN, 0.25f, .15f, 0.0f });
-			level.Enemies.push_back(Enemy { EnemyType::SPIN, 0.25f, .12f, 0.0f });
-			level.Positions.push_back(0);
-			level.Positions.push_back(1);
-			level.Player = Player { 4.0f, 8 / 60.0f, .08f, 5 };
-			level.StageName = "";
-			json.Write(level);
-		}
-
-		else {
-			json.Read(level);
-		}
+		JsonSerializer(name).Read(level);
 
 		// Stage
 
@@ -588,7 +581,7 @@ namespace iw {
 				for (size_t i = 0; i < 1; i++) {
 					Entity enemy = Space->CreateEntity<Transform, Model, SphereCollider, Rigidbody, Enemy>();
 					enemy.SetComponent<Model>(*Asset->Load<Model>("Tetrahedron"));
-					enemy.SetComponent<Enemy>(EnemyType::SPIN, 0.2617993f, .12f, 0.0f);
+					enemy.SetComponent<Enemy>(EnemyType::SPIN, Bullet{ LINE, 5 }, 0.2617993f, .12f, 0.0f);
 
 					Transform* te = enemy.SetComponent<Transform>(vector3(cos(x) * 1, 15, sin(x) * 1));
 					SphereCollider* se = enemy.SetComponent<SphereCollider>(vector3::zero, 1.0f);

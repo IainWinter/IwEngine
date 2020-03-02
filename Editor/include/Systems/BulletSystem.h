@@ -18,7 +18,7 @@ public:
 public:
 	BulletSystem();
 
-	void Update(
+	void FixedUpdate(
 		iw::EntityComponentArray& view) override;
 
 	bool On(

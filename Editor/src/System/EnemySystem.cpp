@@ -38,67 +38,29 @@ void EnemySystem::Update(
 			enemy->HasShot = true;
 
 			switch (enemy->Type) {
-			case EnemyType::SPIN: {
+				case EnemyType::SPIN: {
 					enemy->Rotation = fmod(enemy->Rotation + enemy->Speed, iw::Pi2);
-					iw::quaternion rot = iw::quaternion::from_euler_angles(0, enemy->Rotation, 0);
 
-					iw::vector3 v = iw::vector3::unit_x * rot;
-					v.normalize();
-
-					iw::Entity bullet = Space->CreateEntity<iw::Transform, iw::Model, iw::SphereCollider, iw::Rigidbody, Bullet>();
-					bullet.SetComponent<iw::Model>(*m_bulletModel);
-					bullet.SetComponent<Bullet>   (BulletType::LINE, 5.0f);
-
-					iw::Transform*      t = bullet.SetComponent<iw::Transform>     (transform->Position + iw::vector3(sqrt(2), 0, 0) * rot, iw::vector3(.25f));
-					iw::SphereCollider* s = bullet.SetComponent<iw::SphereCollider>(iw::vector3::zero, .25f);
-					iw::Rigidbody*      r = bullet.SetComponent<iw::Rigidbody>     ();
-
-					r->SetMass(1);
-					r->SetCol(s);
-					r->SetTrans(t);
-					r->SetVelocity(v * 5);
-					r->SetSimGravity(false);
-					r->SetRestitution(1);
-					r->SetIsTrigger(true);
-					r->SetIsLocked(iw::vector3(0, 1, 0));
-					r->SetLock(iw::vector3(0, 1, 0));
-
-					Physics->AddRigidbody(r);
+					SpawnBullet(
+						enemy->Bullet,
+						transform->Position,
+						iw::quaternion::from_euler_angles(0, enemy->Rotation, 0)
+					);
 
 					break;
 				}
 				case EnemyType::CIRCLE: {
 					for (float i = 1; i < iw::Pi2 / enemy->Speed; i++) {
-						iw::quaternion rot = iw::quaternion::from_euler_angles(0, enemy->Rotation + enemy->Speed * i, 0);
-
-						iw::vector3 v = iw::vector3::unit_x * rot;
-						v.normalize();
-
-						iw::Entity bullet = Space->CreateEntity<iw::Transform, iw::Model, iw::SphereCollider, iw::Rigidbody, Bullet>();
-						bullet.SetComponent<iw::Model>(*m_bulletModel);
-						bullet.SetComponent<Bullet>(BulletType::LINE, 5.0f);
-
-						iw::Transform* t = bullet.SetComponent<iw::Transform>(transform->Position + iw::vector3(sqrt(2), 0, 0) * rot, iw::vector3(.25f));
-						iw::SphereCollider* s = bullet.SetComponent<iw::SphereCollider>(iw::vector3::zero, .25f);
-						iw::Rigidbody* r = bullet.SetComponent<iw::Rigidbody>();
-
-						r->SetMass(1);
-						r->SetCol(s);
-						r->SetTrans(t);
-						r->SetVelocity(v * 5);
-						r->SetSimGravity(false);
-						r->SetRestitution(1);
-						r->SetIsTrigger(true);
-						r->SetIsLocked(iw::vector3(0, 1, 0));
-						r->SetLock(iw::vector3(0, 1, 0));
-
-						Physics->AddRigidbody(r);
+						SpawnBullet(
+							enemy->Bullet,
+							transform->Position,
+							iw::quaternion::from_euler_angles(0, enemy->Rotation + enemy->Speed * i, 0)
+						);
 					}
 
 					break;
 				}
 			}
-
 		}
 
 		if (enemy->Timer <= -enemy->CooldownTime) {
@@ -170,4 +132,32 @@ bool EnemySystem::On(
 	}
 
 	return false;
+}
+
+void EnemySystem::SpawnBullet(
+	Bullet prefab,
+	iw::vector3 position,
+	iw::quaternion rot)
+{
+	iw::Entity bullet = Space->CreateEntity<iw::Transform, iw::Model, iw::SphereCollider, iw::Rigidbody, Bullet>();
+	
+	                        bullet.SetComponent<iw::Model>         (*m_bulletModel);
+	Bullet*             b = bullet.SetComponent<Bullet>            (prefab);
+	iw::Transform*      t = bullet.SetComponent<iw::Transform>     (position + iw::vector3(sqrt(2), 0, 0) * rot, iw::vector3(.25f));
+	iw::SphereCollider* s = bullet.SetComponent<iw::SphereCollider>(iw::vector3::zero, .25f);
+	iw::Rigidbody*      r = bullet.SetComponent<iw::Rigidbody>     ();
+
+	b->initialVelocity = iw::vector3::unit_x * rot * prefab.Speed;
+
+	r->SetMass(1);
+	r->SetCol(s);
+	r->SetTrans(t);
+	r->SetVelocity(b->initialVelocity);
+	r->SetSimGravity(false);
+	r->SetRestitution(1);
+	r->SetIsTrigger(true);
+	r->SetIsLocked(iw::vector3(0, 1, 0));
+	r->SetLock(iw::vector3(0, 1, 0));
+
+	Physics->AddRigidbody(r);
 }

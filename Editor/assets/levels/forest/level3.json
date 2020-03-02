@@ -4,12 +4,20 @@
     "items": [
       {
         "Type": 1,
+        "Bullet": {
+          "Type": 1,
+          "Speed": 5.000000
+        },
         "Speed": 0.6283185,
         "FireTime": 1.50000,
         "CooldownTime": 0.000000
       },
       {
         "Type": 1,
+        "Bullet": {
+          "Type": 0,
+          "Speed": 5.000000
+        },
         "Speed": 0.6283185,
         "FireTime": 1.50000,
         "CooldownTime": 0.000000

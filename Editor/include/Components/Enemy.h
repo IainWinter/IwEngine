@@ -1,6 +1,6 @@
 #pragma once
 
-#include "iw/reflection/Reflect.h"
+#include "Bullet.h"
 
 enum class REFLECT EnemyType {
 	SPIN,
@@ -9,6 +9,7 @@ enum class REFLECT EnemyType {
 
 struct REFLECT Enemy {
 	REFLECT EnemyType Type;
+	REFLECT Bullet Bullet;
 	REFLECT float Speed;
 	REFLECT float FireTime;
 	REFLECT float CooldownTime;
