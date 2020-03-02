@@ -41,19 +41,19 @@ namespace util {
 		IWUTIL_API
 		void reset();
 
-		inline char* memory() {
+		inline char* memory() const { // make these not inline
 			return (char*)m_memory;
 		}
 
-		inline size_t capacity() {
+		inline size_t capacity() const {
 			return m_capacity;
 		}
 
-		inline size_t peak() {
+		inline size_t peak() const {
 			return m_peak;
 		}
 
-		inline size_t size() {
+		inline size_t size() const {
 			return m_cursor;
 		}
 	};

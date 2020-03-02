@@ -12,13 +12,18 @@
 #include "Events/ActionEvents.h"
 #include "iw/audio/AudioSpaceStudio.h"
 
-EnemySystem::EnemySystem(
-	iw::ref<iw::Model> bulletModel)
+EnemySystem::EnemySystem()
 	: iw::System<iw::Transform, Enemy>("Enemy")
-	, m_bulletModel(bulletModel)
+	, m_bulletModel(nullptr)
 	, m_enemyCount(0)
 	, m_levelResetTimer(0)
 {}
+
+int EnemySystem::Initialize() {
+	m_bulletModel = Asset->Load<iw::Model>("Sphere");
+	
+	return 0;
+}
 
 void EnemySystem::Update(
 	iw::EntityComponentArray& view)

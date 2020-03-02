@@ -41,17 +41,17 @@ namespace Graphics {
 		, Outdated(false)
 	{}
 
-	Mesh::~Mesh() {
-		delete[] Vertices;
-		delete[] Normals;
-		delete[] Colors;
-		delete[] Uvs;
-		delete[] Indices;
-		delete[] Bones;
-	}
+	//Mesh::~Mesh() {
+	//	delete[] Vertices;
+	//	delete[] Normals;
+	//	delete[] Colors;
+	//	delete[] Uvs;
+	//	delete[] Indices;
+	//	delete[] Bones;
+	//}
 
 	void Mesh::Initialize(
-		const iw::ref<IDevice>& device)
+		const ref<IDevice>& device)
 	{
 		if (Material) {
 			Material->Initialize(device);
@@ -72,35 +72,35 @@ namespace Graphics {
 			layout2f.Push<float>(2);
 
 			VertexArray = device->CreateVertexArray();
-			IndexBuffer = device->CreateIndexBuffer(Indices, IndexCount);
+			IndexBuffer = device->CreateIndexBuffer(Indices.get(), IndexCount);
 
 			if (Vertices) {
-				IVertexBuffer* buffer = device->CreateVertexBuffer(Vertices, VertexCount * sizeof(iw::vector3));
+				IVertexBuffer* buffer = device->CreateVertexBuffer(Vertices.get(), VertexCount * sizeof(vector3));
 				device->AddBufferToVertexArray(VertexArray, buffer, layout3f);
 			}
 
 			if (Normals) {
-				IVertexBuffer* buffer = device->CreateVertexBuffer(Normals, VertexCount * sizeof(iw::vector3));
+				IVertexBuffer* buffer = device->CreateVertexBuffer(Normals.get(), VertexCount * sizeof(vector3));
 				device->AddBufferToVertexArray(VertexArray, buffer, layout3f);
 			}
 
 			if (Tangents) {
-				IVertexBuffer* buffer = device->CreateVertexBuffer(Tangents, VertexCount * sizeof(iw::vector3));
+				IVertexBuffer* buffer = device->CreateVertexBuffer(Tangents.get(), VertexCount * sizeof(vector3));
 				device->AddBufferToVertexArray(VertexArray, buffer, layout3f);
 			}
 
 			if (BiTangents) {
-				IVertexBuffer* buffer = device->CreateVertexBuffer(BiTangents, VertexCount * sizeof(iw::vector3));
+				IVertexBuffer* buffer = device->CreateVertexBuffer(BiTangents.get(), VertexCount * sizeof(vector3));
 				device->AddBufferToVertexArray(VertexArray, buffer, layout3f);
 			}
 
 			if (Colors) {
-				IVertexBuffer* buffer = device->CreateVertexBuffer(Colors, VertexCount * sizeof(iw::vector4));
+				IVertexBuffer* buffer = device->CreateVertexBuffer(Colors.get(), VertexCount * sizeof(vector4));
 				device->AddBufferToVertexArray(VertexArray, buffer, layout4f);
 			}
 
 			if (Uvs) {
-				IVertexBuffer* buffer = device->CreateVertexBuffer(Uvs, VertexCount * sizeof(iw::vector2));
+				IVertexBuffer* buffer = device->CreateVertexBuffer(Uvs.get(), VertexCount * sizeof(vector2));
 				device->AddBufferToVertexArray(VertexArray, buffer, layout2f);
 			}
 		}
@@ -109,32 +109,32 @@ namespace Graphics {
 	}
 
 	void Mesh::Update(
-		const iw::ref<IDevice>& device)
+		const ref<IDevice>& device)
 	{
 		if (Outdated) {
 			int index = 0;
 			if (Vertices) {
-				device->UpdateVertexArrayData(VertexArray, index, Vertices, VertexCount * sizeof(iw::vector3));
+				device->UpdateVertexArrayData(VertexArray, index, Vertices.get(), VertexCount * sizeof(vector3));
 				index++;
 			}
 
 			if (Normals) {
-				device->UpdateVertexArrayData(VertexArray, index, Normals, VertexCount * sizeof(iw::vector3));
+				device->UpdateVertexArrayData(VertexArray, index, Normals.get(), VertexCount * sizeof(vector3));
 				index++;
 			}
 
 			if (Colors) {
-				device->UpdateVertexArrayData(VertexArray, index, Colors, VertexCount * sizeof(iw::vector4));
+				device->UpdateVertexArrayData(VertexArray, index, Colors.get(), VertexCount * sizeof(vector4));
 				index++;
 			}
 
 			if (Uvs) {
-				device->UpdateVertexArrayData(VertexArray, index, Uvs, VertexCount * sizeof(iw::vector2));
+				device->UpdateVertexArrayData(VertexArray, index, Uvs.get(), VertexCount * sizeof(vector2));
 				index++;
 			}
 
 			if (IndexBuffer) {
-				device->UpdateBuffer(IndexBuffer, Indices, IndexCount * sizeof(unsigned));
+				device->UpdateBuffer(IndexBuffer, Indices.get(), IndexCount * sizeof(unsigned));
 			}
 
 			Outdated = false;
@@ -142,18 +142,24 @@ namespace Graphics {
 	}
 
 	void Mesh::Destroy(
-		const iw::ref<IDevice>& device)
+		const ref<IDevice>& device)
 	{
 		device->DestroyVertexArray(VertexArray);
 		device->DestroyBuffer(IndexBuffer);
 	}
 
 	void Mesh::Draw(
-		const iw::ref<IDevice>& device) const
+		const ref<IDevice>& device) const
 	{
 		device->SetVertexArray(VertexArray);
 		device->SetIndexBuffer(IndexBuffer);
 		device->DrawElements(Topology, IndexCount, 0);
+	}
+
+	Mesh* Mesh::Instance() const {
+		Mesh* mesh = new Mesh();
+		*mesh = *this;
+		return mesh;
 	}
 
 	// Generate vertex normals by averaging the face normals of the surrounding faces
@@ -162,14 +168,14 @@ namespace Graphics {
 	{
 		if (!Vertices) return;
 
-		Normals = new iw::vector3[VertexCount];
+		Normals = ref<vector3[]>(new vector3[VertexCount]);
 
 		for (unsigned i = 0; i < IndexCount; i += 3) {
-			iw::vector3& v1 = Vertices[Indices[i + 0]];
-			iw::vector3& v2 = Vertices[Indices[i + 1]];
-			iw::vector3& v3 = Vertices[Indices[i + 2]];
+			vector3& v1 = Vertices[Indices[i + 0]];
+			vector3& v2 = Vertices[Indices[i + 1]];
+			vector3& v3 = Vertices[Indices[i + 2]];
 
-			iw::vector3 face = (v2 - v1).cross(v3 - v1).normalized();
+			vector3 face = (v2 - v1).cross(v3 - v1).normalized();
 
 			if (smooth) {
 				Normals[Indices[i + 0]] = (Normals[Indices[i + 0]] + face).normalized();
@@ -196,30 +202,27 @@ namespace Graphics {
 			GenNormals(smooth);
 		}
 
-		delete[] Tangents;
-		delete[] BiTangents;
-
-		Tangents   = new iw::vector3[VertexCount];
-		BiTangents = new iw::vector3[VertexCount];
+		Tangents   = ref<vector3[]>(new vector3[VertexCount]);
+		BiTangents = ref<vector3[]>(new vector3[VertexCount]);
 
 		unsigned v = 0;
 		for (unsigned i = 0; i < IndexCount; i += 3) {
-			iw::vector3& pos1 = Vertices[Indices[i + 0]];
-			iw::vector3& pos2 = Vertices[Indices[i + 1]];
-			iw::vector3& pos3 = Vertices[Indices[i + 2]];
-			iw::vector2& uv1  = Uvs     [Indices[i + 0]];
-			iw::vector2& uv2  = Uvs     [Indices[i + 1]];
-			iw::vector2& uv3  = Uvs     [Indices[i + 2]];
+			vector3& pos1 = Vertices[Indices[i + 0]];
+			vector3& pos2 = Vertices[Indices[i + 1]];
+			vector3& pos3 = Vertices[Indices[i + 2]];
+			vector2& uv1  = Uvs     [Indices[i + 0]];
+			vector2& uv2  = Uvs     [Indices[i + 1]];
+			vector2& uv3  = Uvs     [Indices[i + 2]];
 
-			iw::vector3 edge1 = pos2 - pos1;
-			iw::vector3 edge2 = pos3 - pos1;
-			iw::vector2 duv1  = uv2  - uv1;
-			iw::vector2 duv2  = uv3  - uv1;
+			vector3 edge1 = pos2 - pos1;
+			vector3 edge2 = pos3 - pos1;
+			vector2 duv1  = uv2  - uv1;
+			vector2 duv2  = uv3  - uv1;
 
 			float f = 1.0f / duv1.cross_length(duv2);
 
-			iw::vector3 tangent   = f * (edge1 * duv2.y - edge2 * duv1.y);
-			iw::vector3 bitangent = f * (edge2 * duv1.x - edge1 * duv2.x);
+			vector3 tangent   = f * (edge1 * duv2.y - edge2 * duv1.y);
+			vector3 bitangent = f * (edge2 * duv1.x - edge1 * duv2.x);
 			
 			tangent.normalize();
 			bitangent.normalize();
@@ -236,15 +239,12 @@ namespace Graphics {
 
 	void Mesh::SetVertices(
 		unsigned count,
-		iw::vector3* vertices)
+		vector3* vertices)
 	{
-		delete[] Vertices;
-		Vertices = nullptr;
-
 		if (count > 0) {
-			Vertices = new iw::vector3[count];
+			Vertices = ref<vector3[]>(new vector3[count]);
 			if (vertices) {
-				memcpy(Vertices, vertices, count * sizeof(iw::vector3));
+				memcpy(Vertices.get(), vertices, count * sizeof(vector3));
 			}
 		}
 
@@ -254,15 +254,12 @@ namespace Graphics {
 
 	void Mesh::SetNormals(
 		unsigned count,
-		iw::vector3* normals)
+		vector3* normals)
 	{
-		delete[] Normals;
-		Normals = nullptr;
-
 		if (count > 0) {
-			Normals = new iw::vector3[count];
+			Normals = ref<vector3[]>(new vector3[count]);
 			if (normals) {
-				memcpy(Normals, normals, count * sizeof(iw::vector3));
+				memcpy(Normals.get(), normals, count * sizeof(vector3));
 			}
 		}
 
@@ -271,15 +268,12 @@ namespace Graphics {
 
 	void Mesh::SetTangents(
 		unsigned count,
-		iw::vector3* tangents)
+		vector3* tangents)
 	{
-		delete[] Tangents;
-		Tangents = nullptr;
-
 		if (count > 0) {
-			Tangents = new iw::vector3[count];
+			Tangents = ref<vector3[]>(new vector3[count]);
 			if (tangents) {
-				memcpy(Tangents, tangents, count * sizeof(iw::vector3));
+				memcpy(Tangents.get(), tangents, count * sizeof(vector3));
 			}
 		}
 
@@ -288,15 +282,12 @@ namespace Graphics {
 
 	void Mesh::SetBiTangents(
 		unsigned count,
-		iw::vector3* bitangents)
+		vector3* bitangents)
 	{
-		delete[] BiTangents;
-		BiTangents = nullptr;
-
 		if (count > 0) {
-			BiTangents = new iw::vector3[count];
+			BiTangents = ref<vector3[]>(new vector3[count]);
 			if (bitangents) {
-				memcpy(BiTangents, bitangents, count * sizeof(iw::vector3));
+				memcpy(BiTangents.get(), bitangents, count * sizeof(vector3));
 			}
 		}
 
@@ -305,15 +296,12 @@ namespace Graphics {
 
 	void Mesh::SetColors(
 		unsigned count,
-		iw::vector4* colors)
+		vector4* colors)
 	{
-		delete[] Colors;
-		Colors = nullptr;
-
 		if (count > 0) {
-			Colors = new iw::vector4[count];
+			Colors = ref<vector4[]>(new vector4[count]);
 			if (colors) {
-				memcpy(Colors, colors, count * sizeof(iw::vector4));
+				memcpy(Colors.get(), colors, count * sizeof(vector4));
 			}
 		}
 
@@ -322,15 +310,12 @@ namespace Graphics {
 
 	void Mesh::SetUVs(
 		unsigned count,
-		iw::vector2* uvs)
+		vector2* uvs)
 	{
-		delete[] Uvs;
-		Uvs = nullptr;
-
 		if (count > 0) {
-			Uvs = new iw::vector2[count];
+			Uvs = ref<vector2[]>(new vector2[count]);
 			if (uvs) {
-				memcpy(Uvs, uvs, count * sizeof(iw::vector2));
+				memcpy(Uvs.get(), uvs, count * sizeof(vector2));
 			}
 		}
 
@@ -341,13 +326,10 @@ namespace Graphics {
 		unsigned count,
 		unsigned* indices)
 	{
-		delete[] Indices;
-		Indices = nullptr;
-
 		if (count > 0) {
-			Indices = new unsigned[count];
+			Indices = ref<unsigned[]>(new unsigned[count]);
 			if (indices) {
-				memcpy(Indices, indices, count * sizeof(unsigned));
+				memcpy(Indices.get(), indices, count * sizeof(unsigned));
 			}
 		}
 
@@ -356,13 +338,13 @@ namespace Graphics {
 	}
 
 	void Mesh::SetMaterial(
-		iw::ref<iw::Material>& material)
+		ref<iw::Material>& material)
 	{
-			Material = material;
+		Material = material;
 	}
 
 	size_t Mesh::GetElementCount() {
-			return IndexCount / Topology;
+		return IndexCount / Topology;
 	}
 }
 }

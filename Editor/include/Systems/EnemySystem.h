@@ -19,8 +19,9 @@ private:
 	float m_levelResetTimer;
 
 public:
-	EnemySystem(
-		iw::ref<iw::Model> bulletModel);
+	EnemySystem();
+
+	int Initialize() override;
 
 	void Update(
 		iw::EntityComponentArray& view) override;

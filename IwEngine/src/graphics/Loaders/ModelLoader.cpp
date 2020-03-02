@@ -120,49 +120,49 @@ namespace Graphics {
 		for (size_t i = 0; i < scene->mNumMeshes; i++) {
 			const aiMesh* aimesh = scene->mMeshes[i];
 
-			size_t indexBufferSize = 0;
+			Mesh& mesh = model->Meshes[i];
+			mesh.SetMaterial(materials.at(aimesh->mMaterialIndex));
+			
+			size_t indexCount = 0;
 			for (size_t t = 0; t < aimesh->mNumFaces; t++) {
-				indexBufferSize += aimesh->mFaces[t].mNumIndices; // could a face have diffrent incices?
+				indexCount += aimesh->mFaces[t].mNumIndices; // could a face have diffrent incices?
 			}
 
-			Mesh& mesh = model->Meshes[i];
-
-			mesh.SetMaterial(materials.at(aimesh->mMaterialIndex));
-
-			mesh.IndexCount = 0;
-			mesh.Indices = new unsigned int[indexBufferSize];
-
-			if (mesh.Indices) {
-				for (size_t t = 0; t < aimesh->mNumFaces; t++) {
-					const aiFace& face = aimesh->mFaces[t];
-					for (size_t f = 0; f < face.mNumIndices; f++) {
-						mesh.Indices[mesh.IndexCount] = face.mIndices[f];
-						mesh.IndexCount++;
+			unsigned* indices = new unsigned int[indexCount];
+			
+			{
+				unsigned i = 0;
+				for (size_t f = 0; f < aimesh->mNumFaces; f++) {
+					const aiFace& face = aimesh->mFaces[f];
+					for (size_t v = 0; v < face.mNumIndices; v++) {
+						indices[i++] = face.mIndices[v];
 					}
 				}
 			}
 
-			mesh.VertexCount = aimesh->mNumVertices;
+			mesh.SetIndices(indexCount, indices);
+			delete[] indices;
+
 			if (aimesh->HasPositions()) {
-				mesh.SetVertices(mesh.VertexCount, (iw::vector3*)aimesh->mVertices);
+				mesh.SetVertices(aimesh->mNumVertices, (iw::vector3*)aimesh->mVertices);
 			}
 
 			if (aimesh->HasNormals()) {
-				mesh.SetNormals(mesh.VertexCount, (iw::vector3*)aimesh->mNormals);
+				mesh.SetNormals(aimesh->mNumVertices, (iw::vector3*)aimesh->mNormals);
 			}
 
 			if (aimesh->HasTangentsAndBitangents()) {
-				mesh.SetTangents  (mesh.VertexCount, (iw::vector3*)aimesh->mTangents);
-				mesh.SetBiTangents(mesh.VertexCount, (iw::vector3*)aimesh->mBitangents);
+				mesh.SetTangents  (aimesh->mNumVertices, (iw::vector3*)aimesh->mTangents);
+				mesh.SetBiTangents(aimesh->mNumVertices, (iw::vector3*)aimesh->mBitangents);
 			}
 
 			// Need to check for multiple channels i guess
 			if (aimesh->HasVertexColors(0)) {
-				mesh.SetColors(mesh.VertexCount, (iw::vector4*)aimesh->mColors[0]);
+				mesh.SetColors(aimesh->mNumVertices, (iw::vector4*)aimesh->mColors[0]);
 			}
 
 			if (aimesh->HasTextureCoords(0)) {
-				mesh.SetUVs(mesh.VertexCount, nullptr);
+				mesh.SetUVs(aimesh->mNumVertices, nullptr);
 				for (size_t i = 0; i < mesh.VertexCount; i++) { // ai tex coords are vec3
 					mesh.Uvs[i].x = aimesh->mTextureCoords[0][i].x;
 					mesh.Uvs[i].y = aimesh->mTextureCoords[0][i].y;

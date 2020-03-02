@@ -15,22 +15,22 @@ namespace Graphics {
 	//    , but idk how bad that actually is cus I like the idea more...
 
 	struct Mesh {
-		iw::vector3* Vertices; // should combine
-		iw::vector3* Normals;
-		iw::vector3* Tangents;
-		iw::vector3* BiTangents;
-		iw::vector4* Colors;
-		iw::vector2* Uvs;
+		ref<vector3[]> Vertices;
+		ref<vector3[]> Normals;
+		ref<vector3[]> Tangents;
+		ref<vector3[]> BiTangents;
+		ref<vector4[]> Colors;
+		ref<vector2[]> Uvs;
 
-		unsigned* Indices;
+		ref<unsigned[]> Indices;
 
-		Bone* Bones;
+		ref<Bone[]> Bones;
 
 		unsigned VertexCount;
 		unsigned IndexCount;
 		unsigned BoneCount;
 
-		iw::ref<Material> Material;
+		ref<Material> Material;
 
 		MeshTopology Topology;
 
@@ -50,23 +50,27 @@ namespace Graphics {
 			MeshTopology topology);
 
 		IWGRAPHICS_API
-		~Mesh();
+		~Mesh() = default;
 
 		IWGRAPHICS_API
 		void Initialize(
-			const iw::ref<IDevice>& device);
+			const ref<IDevice>& device);
 
 		IWGRAPHICS_API
 		void Update(
-			const iw::ref<IDevice>& device);
+			const ref<IDevice>& device);
 
 		IWGRAPHICS_API
 		void Destroy(
-			const iw::ref<IDevice>& device);
+			const ref<IDevice>& device);
 
 		IWGRAPHICS_API
 		void Draw(
-			const iw::ref<IDevice>& device) const;
+			const ref<IDevice>& device) const;
+
+		IWGRAPHICS_API
+		Mesh* Instance() const; // makes a copy but references the same data
+		//Mesh Clone() const; // will clone the meshs data
 
 		IWGRAPHICS_API
 		void GenNormals(
@@ -79,32 +83,32 @@ namespace Graphics {
 		IWGRAPHICS_API
 		void SetVertices(
 			unsigned count,
-			iw::vector3* vertices);
+			vector3* vertices);
 
 		IWGRAPHICS_API
 		void SetNormals(
 			unsigned count,
-			iw::vector3* normals);
+			vector3* normals);
 
 		IWGRAPHICS_API
 		void SetTangents(
 			unsigned count,
-			iw::vector3* tangents);
+			vector3* tangents);
 
 		IWGRAPHICS_API
 		void SetBiTangents(
 			unsigned count,
-			iw::vector3* bitangents);
+			vector3* bitangents);
 
 		IWGRAPHICS_API
 		void SetColors(
 			unsigned count,
-			iw::vector4* colors);
+			vector4* colors);
 
 		IWGRAPHICS_API
 		void SetUVs(
 			unsigned count,
-			iw::vector2* uvs);
+			vector2* uvs);
 
 		IWGRAPHICS_API
 		void SetIndices(
@@ -113,7 +117,7 @@ namespace Graphics {
 
 		IWGRAPHICS_API
 		void SetMaterial(
-			iw::ref<iw::Material>& material);
+			ref<iw::Material>& material);
 
 		IWGRAPHICS_API
 		size_t GetElementCount();

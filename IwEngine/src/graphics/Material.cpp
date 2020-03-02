@@ -15,6 +15,68 @@ namespace Graphics {
 		, m_initialized(false)
 	{}
 
+	Material::Material(
+		const Material& other)
+		: Shader       (other.Shader)
+		, m_alloc      (other.m_alloc.capacity())
+		, m_properties (other.m_properties)
+		, m_textures   (other.m_textures)
+		, m_index      (other.m_index)
+		, m_initialized(other.m_initialized)
+	{
+		for (auto& prop : m_properties) {
+			unsigned size = prop.TypeSize * prop.Stride * prop.Count;
+			void* ptr = m_alloc.alloc(size);
+			memcpy(ptr, prop.Data, size);
+			prop.Data = ptr;
+		}
+	}
+
+	Material::Material(
+		Material&& other) noexcept
+		: Shader       (std::move(other.Shader))
+		, m_alloc      (std::move(other.m_alloc))
+		, m_properties (std::move(other.m_properties))
+		, m_textures   (std::move(other.m_textures))
+		, m_index      (std::move(other.m_index))
+		, m_initialized(std::move(other.m_initialized))
+	{}
+
+	Material::~Material() {}
+
+	Material& Material::operator=(
+		const Material& other)
+	{
+		Shader        = other.Shader;
+		m_alloc       = iw::linear_allocator(other.m_alloc.capacity());
+		m_properties  = other.m_properties;
+		m_textures    = other.m_textures;
+		m_index       = other.m_index;
+		m_initialized = other.m_initialized;
+
+		for (auto& prop : m_properties) {
+			unsigned size = prop.TypeSize * prop.Stride * prop.Count;
+			void* ptr = m_alloc.alloc(size);
+			memcpy(ptr, prop.Data, size);
+			prop.Data = ptr;
+		}
+
+		return *this;
+	}
+
+	Material& Material::operator=(
+		Material&& other) noexcept
+	{
+		Shader        = std::move(other.Shader);
+		m_alloc       = std::move(other.m_alloc);
+		m_properties  = std::move(other.m_properties);
+		m_textures    = std::move(other.m_textures);
+		m_index       = std::move(other.m_index);
+		m_initialized = std::move(other.m_initialized);
+
+		return *this;
+	}
+
 	void Material::Initialize(
 		const iw::ref<IDevice>& device)
 	{
@@ -63,6 +125,10 @@ namespace Graphics {
 				}
 			}
 		}
+	}
+
+	Material Material::Instance() {
+		return *this;
 	}
 
 	void Material::Use(

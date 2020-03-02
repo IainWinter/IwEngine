@@ -43,7 +43,7 @@ namespace iw {
 
 		PushSystem<EditorCameraController>();
 
-		return 0;
+		return Layer::Initialize();
 	}
 
 	void ToolLayer::PostUpdate() {

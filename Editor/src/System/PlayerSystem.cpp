@@ -9,8 +9,15 @@
 
 PlayerSystem::PlayerSystem()
 	: System<iw::Transform, iw::Rigidbody, Player>("Player")
+	, m_playerModel(nullptr)
+	, movement(0)
 	, dash(false)
 {}
+
+int PlayerSystem::Initialize() {
+	m_playerModel = Asset->Load<iw::Model>("Player");
+	return 0;
+}
 
 void PlayerSystem::Update(
 	iw::EntityComponentArray& view)
@@ -137,8 +144,21 @@ bool PlayerSystem::On(
 			p->Damaged = true;
 			p->Health -= 1;
 
+			float color = p->Health / 5.0f;
+			m_playerModel->Meshes[0].Material->Set("albedo", iw::Color(1, color, color, 1));
+
 			Audio->AsStudio()->CreateInstance("playerDamaged");
 		}
+	}
+
+	return false;
+}
+
+bool PlayerSystem::On(
+	iw::ActionEvent& event)
+{
+	if (event.Action == iw::val(iw::Actions::RESET_LEVEL)) {
+		m_playerModel->Meshes[0].Material->Set("albedo", iw::Color(1));
 	}
 
 	return false;

@@ -82,17 +82,12 @@ namespace Graphics {
 			size / lineHeightPixels * m_size
 		);
 
-		delete[] mesh->Vertices;
-		delete[] mesh->Uvs;
-		delete[] mesh->Indices;
+		unsigned vertCount  = count * 4;
+		unsigned indexCount = count * 6;
 
-		mesh->Outdated    = true;
-		mesh->VertexCount = count * 4;
-		mesh->IndexCount  = count * 6;
-
-		mesh->Vertices = new iw::vector3[mesh->VertexCount];
-		mesh->Uvs      = new iw::vector2[mesh->VertexCount];
-		mesh->Indices  = new unsigned   [mesh->IndexCount];
+		iw::vector3* verts   = new iw::vector3[vertCount];
+		iw::vector2* uvs     = new iw::vector2[vertCount];
+		unsigned*    indices = new unsigned   [indexCount];
 
 		iw::vector2 cursor;
 		unsigned vert = 0;
@@ -118,22 +113,22 @@ namespace Graphics {
 				float maxX = x + dim.x * scale.x;
 				float minY = y - dim.y * scale.y;
 
-				mesh->Vertices[vert + 0] = iw::vector3(   x,    y, 0);
-				mesh->Vertices[vert + 1] = iw::vector3(   x, minY, 0);
-				mesh->Vertices[vert + 2] = iw::vector3(maxX,    y, 0);
-				mesh->Vertices[vert + 3] = iw::vector3(maxX, minY, 0);
+				verts[vert + 0] = iw::vector3(   x,    y, 0);
+				verts[vert + 1] = iw::vector3(   x, minY, 0);
+				verts[vert + 2] = iw::vector3(maxX,    y, 0);
+				verts[vert + 3] = iw::vector3(maxX, minY, 0);
 
-				mesh->Uvs[vert + 0] = iw::vector2(   u,    v);
-				mesh->Uvs[vert + 1] = iw::vector2(   u, maxV);
-				mesh->Uvs[vert + 2] = iw::vector2(maxU,    v);
-				mesh->Uvs[vert + 3] = iw::vector2(maxU, maxV);
+				uvs[vert + 0] = iw::vector2(   u,    v);
+				uvs[vert + 1] = iw::vector2(   u, maxV);
+				uvs[vert + 2] = iw::vector2(maxU,    v);
+				uvs[vert + 3] = iw::vector2(maxU, maxV);
 
-				mesh->Indices[index + 0] = vert;
-				mesh->Indices[index + 1] = vert + 1;
-				mesh->Indices[index + 2] = vert + 2;
-				mesh->Indices[index + 3] = vert + 1;
-				mesh->Indices[index + 4] = vert + 3;
-				mesh->Indices[index + 5] = vert + 2;
+				indices[index + 0] = vert;
+				indices[index + 1] = vert + 1;
+				indices[index + 2] = vert + 2;
+				indices[index + 3] = vert + 1;
+				indices[index + 4] = vert + 3;
+				indices[index + 5] = vert + 2;
 
 				vert += 4;
 				index += 6;
@@ -144,6 +139,14 @@ namespace Graphics {
 			cursor.x = 0;
 			cursor.y -= size * m_size;
 		}
+	
+		mesh->SetVertices(vertCount,  verts);
+		mesh->SetUVs     (vertCount,  uvs);
+		mesh->SetIndices (indexCount, indices);
+
+		delete[] verts;
+		delete[] uvs;
+		delete[] indices;
 	}
 
 	iw::ref<Texture>& Font::GetTexture(

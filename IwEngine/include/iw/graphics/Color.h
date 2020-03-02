@@ -16,6 +16,14 @@ namespace Graphics {
 		{}
 
 		Color(
+			float rgba)
+			: r(rgba)
+			, g(rgba)
+			, b(rgba)
+			, a(rgba)
+		{}
+
+		Color(
 			float r,
 			float g,
 			float b)

@@ -77,7 +77,7 @@ namespace Audio {
 		);
 
 		CHECK_ERROR(
-			m_channel->setVolume(GetVolume());
+			m_channel->setVolume(GetVolume()),
 			"Volume could not be set!"
 		);
 	}

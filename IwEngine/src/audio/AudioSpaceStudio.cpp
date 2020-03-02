@@ -114,7 +114,7 @@ namespace Audio {
 	{
 #ifdef IW_DEBUG
 		if (0 > index || index >= m_instances.size()) {
-			LOG_WARNING << "Cannot start instance " + index + "; index out of range!";
+			LOG_WARNING << "Cannot start instance " << index << "; index out of range!";
 			return;
 		}
 #endif
@@ -126,7 +126,7 @@ namespace Audio {
 	{
 #ifdef IW_DEBUG
 		if (0 > index || index >= m_instances.size()) {
-			LOG_WARNING << "Cannot stop instance " + index + "; index out of range!";
+			LOG_WARNING << "Cannot stop instance " << index << "; index out of range!";
 			return;
 		}
 #endif
@@ -138,7 +138,7 @@ namespace Audio {
 	{
 #ifdef IW_DEBUG
 		if (0 > index || index >= m_instances.size()) {
-			LOG_WARNING << "Cannot remove instance " + index + "; index out of range!";
+			LOG_WARNING << "Cannot remove instance " << index << "; index out of range!";
 			return;
 		}
 #endif
@@ -152,7 +152,7 @@ namespace Audio {
 		auto itr = std::find(m_instances.begin(), m_instances.end(), instance);
 #ifdef IW_DEBUG
 		if (itr == m_instances.end()) {
-			LOG_WARNING << "Cannot remove instance " + instance + "; cannot find instance!";
+			LOG_WARNING << "Cannot remove instance " << instance << "; cannot find instance!";
 			return;
 		}
 #endif

@@ -58,7 +58,7 @@ namespace Audio {
 	protected:
 		bool CheckError(
 			int result,
-			const char* message);
+			std::string message);
 	};
 }
 

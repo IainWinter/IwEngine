@@ -55,9 +55,14 @@ namespace Graphics {
 		Material(
 			iw::ref<iw::Shader>& shader);
 
+		GEN_5(IWGRAPHICS_API, Material);
+
 		IWGRAPHICS_API
 		void Initialize(
 			const iw::ref<IDevice>& device);
+
+		IWGRAPHICS_API
+		Material Instance();
 
 		IWGRAPHICS_API
 		void Use(

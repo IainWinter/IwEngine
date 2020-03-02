@@ -21,7 +21,7 @@ void BulletSystem::FixedUpdate(
 
 		switch (bullet->Type) {
 			case SINE: {
-				rigidbody->SetVelocity(bullet->initialVelocity * (1 + sin(bullet->Time * 5) * 0.5f));
+				rigidbody->SetVelocity(bullet->initialVelocity * (1 + sin(bullet->Time * 5)) * 0.5f);
 				break;
 			}
 			case SEEK: {
@@ -38,7 +38,7 @@ void BulletSystem::FixedUpdate(
 				}
 
 				if (maxDistance != -1) {
-					rigidbody->ApplyForce(target - transform->Position);
+					rigidbody->ApplyForce((target - transform->Position) * 0.25f);
 				}
 
 				break;

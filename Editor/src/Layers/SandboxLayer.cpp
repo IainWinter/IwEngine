@@ -206,8 +206,16 @@ namespace iw {
 		Model sm { smesh, 1 };
 		Model tm { tmesh, 1 };
 
-		ref<Model> sphere = Asset->Give<Model>("Sphere", &sm);
+		Asset->Give<Model>("Sphere", &sm);
 		Asset->Give<Model>("Tetrahedron", &tm);
+
+		//	Player
+
+		Mesh* pmesh = smesh->Instance();
+		pmesh->Material = REF<Material>(smat->Instance());
+
+		Model pm { pmesh, 1 };
+		Asset->Give<Model>("Player", &pm);
 
 		// Cameras
 
@@ -283,12 +291,12 @@ namespace iw {
 
 		PushSystem<PhysicsSystem>();
 		PushSystem<PlayerSystem>();
-		PushSystem<EnemySystem>(sphere);
+		PushSystem<EnemySystem>();
 		PushSystem<BulletSystem>();
 
 		Bus->push<ResetLevelEvent>();
 
-		return 0;
+		return Layer::Initialize();
 	}
 
 	void SandboxLayer::LoadLevel(
@@ -378,7 +386,7 @@ namespace iw {
 		// Player
 
 		Entity player = Space->CreateEntity<Transform, Model, SphereCollider, Rigidbody, Player>();
-		player.SetComponent<Model>(*Asset->Load<Model>("Sphere"));
+		player.SetComponent<Model>(*Asset->Load<Model>("Player"));
 		player.SetComponent<Player>(level.Player);
 
 		Transform*      tp = player.SetComponent<Transform>(vector3(5, 1, 0), vector3(.75f));
@@ -607,7 +615,7 @@ namespace iw {
 			}
 		}
 
-		return false;
+		return Layer::On(e);
 	}
 }
 

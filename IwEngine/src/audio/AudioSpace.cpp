@@ -53,7 +53,7 @@ namespace Audio {
 
 	bool AudioSpace::CheckError(
 		int result,
-		const char* message)
+		std::string message)
 	{
 		if (result != FMOD_OK) {
 			LOG_ERROR << message;

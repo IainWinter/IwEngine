@@ -80,30 +80,34 @@ namespace Graphics {
 	{
 		unsigned res = (unsigned)pow(4, resolution);
 
-		Mesh* mesh = new Mesh();
-		mesh->VertexCount = 12 + (30 * res);
-		mesh->IndexCount  = 60 * res;
-		mesh->Vertices = new iw::vector3[mesh->VertexCount];
-		mesh->Indices  = new unsigned[mesh->IndexCount];
+		unsigned vertCount  = 12 + (30 * res);
+		unsigned indexCount = 60 * res;
 
-		memcpy(mesh->Vertices, IcoVerts, IcoVertCount * sizeof(iw::vector3));
-		memcpy(mesh->Indices, IcoIndex, IcoIndexCount * sizeof(unsigned));
+		iw::vector3* verts   = new iw::vector3[vertCount];
+		unsigned*    indices = new unsigned   [indexCount];
+
+		memcpy(verts,   IcoVerts, IcoVertCount  * sizeof(iw::vector3));
+		memcpy(indices, IcoIndex, IcoIndexCount * sizeof(unsigned));
 
 		// Verts & Index
 
-		unsigned indexCount = IcoIndexCount;
-		unsigned vertCount  = IcoVertCount;
+		unsigned currentIndexCount = IcoIndexCount;
+		unsigned currentVertCount  = IcoVertCount;
 		for (unsigned i = 0; i < resolution; i++) {
-			detail::SubDevideVerts(mesh->Vertices, mesh->Indices, indexCount, vertCount);
+			detail::SubDevideVerts(verts, indices, currentIndexCount, currentVertCount);
 		}
 
-		for (unsigned i = 0; i < mesh->VertexCount; i++) {
-			mesh->Vertices[i].normalize();
+		for (unsigned i = 0; i < vertCount; i++) {
+			verts[i].normalize();
 		}
 
-		// Normals
-
+		Mesh* mesh = new Mesh();
+		mesh->SetVertices(vertCount,  verts);
+		mesh->SetIndices (indexCount, indices);
 		mesh->GenNormals();
+
+		delete[] verts;
+		delete[] indices;
 
 		return mesh;
 	}
@@ -112,13 +116,13 @@ namespace Graphics {
 		unsigned latCount,
 		unsigned lonCount)
 	{
-		Mesh* mesh = new Mesh();
-		mesh->VertexCount = (latCount + 1) * (lonCount + 1);
-		mesh->IndexCount  = 6 * (lonCount + (latCount - 2) * lonCount);
-		mesh->Vertices = new iw::vector3[mesh->VertexCount];
-		mesh->Normals  = new iw::vector3[mesh->VertexCount];
-		mesh->Uvs      = new iw::vector2[mesh->VertexCount];
-		mesh->Indices  = new unsigned   [mesh->IndexCount];
+		unsigned vertCount  = (latCount + 1) * (lonCount + 1);
+		unsigned indexCount = 6 * (lonCount + (latCount - 2) * lonCount);
+
+		iw::vector3* verts   = new iw::vector3[vertCount];
+		iw::vector3* norms   = new iw::vector3[vertCount];
+		iw::vector2* uvs     = new iw::vector2[vertCount];
+		unsigned*    indices = new unsigned   [indexCount];
 
 		// Verts
 
@@ -135,9 +139,9 @@ namespace Graphics {
 				float u = (float)lon / lonCount;
 				float v = (float)lat / latCount;
 
-				mesh->Vertices[vert] = iw::vector3(x, y, z);
-				mesh->Normals [vert] = iw::vector3(x, y, z);
-				mesh->Uvs     [vert] = iw::vector2(u, v);
+				verts[vert] = iw::vector3(x, y, z);
+				norms[vert] = iw::vector3(x, y, z);
+				uvs  [vert] = iw::vector2(u, v);
 
 				vert++;
 			}
@@ -148,29 +152,40 @@ namespace Graphics {
 		size_t index = 0;
 		unsigned v = lonCount + 1;
 		for (unsigned lon = 0; lon < lonCount; ++lon, v++) {
-			mesh->Indices[index++] = lon;
-			mesh->Indices[index++] = v;
-			mesh->Indices[index++] = v + 1;
+			indices[index++] = lon;
+			indices[index++] = v;
+			indices[index++] = v + 1;
 		}
 
 		for (unsigned lat = 1; lat < latCount - 1; lat++) {
 			v = lat * (lonCount + 1);
 			for (unsigned lon = 0; lon < lonCount; lon++, v++) {
-				mesh->Indices[index++] = v;
-				mesh->Indices[index++] = v + lonCount + 1;
-				mesh->Indices[index++] = v + 1;
-				mesh->Indices[index++] = v + 1;
-				mesh->Indices[index++] = v + lonCount + 1;
-				mesh->Indices[index++] = v + lonCount + 2;
+				indices[index++] = v;
+				indices[index++] = v + lonCount + 1;
+				indices[index++] = v + 1;
+				indices[index++] = v + 1;
+				indices[index++] = v + lonCount + 1;
+				indices[index++] = v + lonCount + 2;
 			}
 		}
 
 		v = (latCount - 1) * (lonCount + 1);
 		for (unsigned lon = 0; lon < lonCount; lon++, v++) {
-			mesh->Indices[index++] = v;
-			mesh->Indices[index++] = v + lonCount + 1;
-			mesh->Indices[index++] = v + 1;
+			indices[index++] = v;
+			indices[index++] = v + lonCount + 1;
+			indices[index++] = v + 1;
 		}
+
+		Mesh* mesh = new Mesh();
+		mesh->SetVertices(vertCount,  verts);
+		mesh->SetNormals (vertCount,  norms);
+		mesh->SetUVs     (vertCount,  uvs);
+		mesh->SetIndices (indexCount, indices);
+
+		delete[] verts;
+		delete[] norms;
+		delete[] uvs;
+		delete[] indices;
 
 		return mesh;
 	}
@@ -180,30 +195,36 @@ namespace Graphics {
 	{
 		unsigned res = (unsigned)pow(4, resolution);
 
-		Mesh* mesh = new Mesh();
-		mesh->VertexCount = 4 + (6 * res);
-		mesh->IndexCount  = 12 * res;
-		mesh->Vertices = new iw::vector3[mesh->VertexCount];
-		mesh->Uvs      = new iw::vector2[mesh->VertexCount];
-		mesh->Indices  = new unsigned   [mesh->IndexCount];
+		unsigned vertCount  = 4 + (6 * res);
+		unsigned indexCount = 12 * res;
 
-		memcpy(mesh->Vertices, TriVerts, TriVertCount  * sizeof(iw::vector3));
-		memcpy(mesh->Uvs,      TriUvs,   TriUvCount    * sizeof(iw::vector2));
-		memcpy(mesh->Indices,  TriIndex, TriIndexCount * sizeof(unsigned));
+		iw::vector3* verts   = new iw::vector3[vertCount];
+		iw::vector2* uvs     = new iw::vector2[vertCount];
+		unsigned*    indices = new unsigned   [indexCount];
+
+		memcpy(verts,   TriVerts, TriVertCount  * sizeof(iw::vector3));
+		memcpy(uvs,     TriUvs,   TriUvCount    * sizeof(iw::vector2));
+		memcpy(indices, TriIndex, TriIndexCount * sizeof(unsigned));
 
 		// Verts & Index
 
-		unsigned indexCount = TriIndexCount;
-		unsigned vertCount  = TriVertCount;
-		unsigned uvCount    = TriUvCount;
+		unsigned currentIndexCount = TriIndexCount;
+		unsigned currentUvCount    = TriUvCount;
+		unsigned currentVertCount  = TriVertCount;
 		for (unsigned i = 0; i < resolution; i++) {
-			detail::SubDevideUvs  (mesh->Uvs,      mesh->Indices, indexCount, uvCount);
-			detail::SubDevideVerts(mesh->Vertices, mesh->Indices, indexCount, vertCount);
+			detail::SubDevideUvs  (uvs,   indices, currentIndexCount, currentUvCount);
+			detail::SubDevideVerts(verts, indices, currentIndexCount, currentVertCount);
 		}
 
-		// Normals
+		Mesh* mesh = new Mesh();
+		mesh->SetVertices(vertCount,  verts);
+		mesh->SetUVs     (vertCount,  uvs);
+		mesh->SetIndices (indexCount, indices);
+		mesh->GenNormals (false);
 
-		mesh->GenNormals(false);
+		delete[] verts;
+		delete[] uvs;
+		delete[] indices;
 
 		return mesh;
 	}
@@ -213,13 +234,13 @@ namespace Graphics {
 		unsigned xCount,
 		unsigned zCount)
 	{
-		Mesh* mesh = new Mesh();
-		mesh->VertexCount = (xCount + 1) * (zCount + 1);
-		mesh->IndexCount  = 6 * xCount * zCount;
-		mesh->Vertices = new iw::vector3[mesh->VertexCount];
-		mesh->Normals  = new iw::vector3[mesh->VertexCount];
-		mesh->Uvs      = new iw::vector2[mesh->VertexCount];
-		mesh->Indices  = new unsigned   [mesh->IndexCount];
+		unsigned vertCount  = (xCount + 1) * (zCount + 1);
+		unsigned indexCount = 6 * xCount * zCount;
+
+		iw::vector3* verts   = new iw::vector3[vertCount];
+		iw::vector3* norms   = new iw::vector3[vertCount];
+		iw::vector2* uvs     = new iw::vector2[vertCount];
+		unsigned*    indices = new unsigned   [indexCount];
 
 		float stepX = 1.0f / xCount;
 		float stepZ = 1.0f / zCount;
@@ -233,21 +254,21 @@ namespace Graphics {
 			for (unsigned z = 0; z <= zCount; z++) {
 				unsigned i = z + x * (zCount + 1);
 
-				mesh->Vertices[i] = offset + iw::vector3(x * stepX, 0, z * stepZ);
-				mesh->Normals [i] = iw::vector3::unit_y;
-				mesh->Uvs     [i] = iw::vector2(x * stepU, z * stepV);
+				verts[i] = offset + iw::vector3(x * stepX, 0, z * stepZ);
+				norms[i] = iw::vector3::unit_y;
+				uvs[i]   = iw::vector2(x * stepU, z * stepV);
 			}
 		}
 
 		unsigned i = 0, v = 0;
-		while(v <= mesh->VertexCount - (zCount + 3)) {
-			mesh->Indices[i++] = v;
-			mesh->Indices[i++] = v + 1;
-			mesh->Indices[i++] = v + zCount + 1;
+		while(v <= vertCount - (zCount + 3)) {
+			indices[i++] = v;
+			indices[i++] = v + 1;
+			indices[i++] = v + zCount + 1;
 
-			mesh->Indices[i++] = v + 1;
-			mesh->Indices[i++] = v + zCount + 2;
-			mesh->Indices[i++] = v + zCount + 1;
+			indices[i++] = v + 1;
+			indices[i++] = v + zCount + 2;
+			indices[i++] = v + zCount + 1;
 
 			v++;
 			if (   v != 0
@@ -256,6 +277,17 @@ namespace Graphics {
 				v++;
 			}
 		}
+
+		Mesh* mesh = new Mesh();
+		mesh->SetVertices(vertCount,  verts);
+		mesh->SetVertices(vertCount,  norms);
+		mesh->SetUVs     (vertCount,  uvs);
+		mesh->SetIndices (indexCount, indices);
+
+		delete[] verts;
+		delete[] norms;
+		delete[] uvs;
+		delete[] indices;
 
 		return mesh;
 	}
