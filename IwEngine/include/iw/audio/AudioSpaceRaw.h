@@ -25,6 +25,9 @@ namespace Audio {
 			float volume = 1.0f);
 
 		IWAUDIO_API
+		~AudioSpaceRaw();
+
+		IWAUDIO_API
 		int Initialize() override;
 
 		IWAUDIO_API

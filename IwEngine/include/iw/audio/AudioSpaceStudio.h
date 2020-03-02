@@ -38,6 +38,9 @@ namespace Audio {
 			float volume = 1.0f);
 
 		IWAUDIO_API
+		~AudioSpaceStudio();
+
+		IWAUDIO_API
 		int Initialize() override;
 
 		IWAUDIO_API

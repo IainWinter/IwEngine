@@ -23,6 +23,9 @@ namespace Audio {
 			int channels,
 			float volume);
 
+		IWAUDIO_API
+		virtual ~AudioSpace() = default;
+
 		virtual int Initialize() = 0;
 		virtual void Update() = 0;
 

@@ -12,20 +12,37 @@ namespace Audio {
 		, m_system(nullptr)
 	{}
 
+	AudioSpaceStudio::~AudioSpaceStudio() {
+		for (auto itr : m_banks) {
+			itr.second->unload();
+		}
+
+		for (auto itr : m_events) {
+			itr.second->releaseAllInstances();
+		}
+
+		m_system->release();
+	}
+
 	int AudioSpaceStudio::Initialize() {
-		FMOD_RESULT error;
+		CHECK_ERROR(
+			FMOD::Studio::System::create(&m_system),
+			"Audio space did not get created!", 1
+		);
 
-		error = FMOD::Studio::System::create(&m_system);
-		CHECK_ERROR(error, "Audio space did not get created!", 1);
-
-		error = m_system->initialize(GetChannels(), FMOD_STUDIO_INIT_NORMAL, FMOD_INIT_NORMAL, nullptr);
-		CHECK_ERROR(error, "Audio space did not get initliaze!", 2);
+		CHECK_ERROR(
+			m_system->initialize(GetChannels(), FMOD_STUDIO_INIT_NORMAL, FMOD_INIT_NORMAL, nullptr),
+			"Audio space did not get initliaze!", 2
+		);
 
 		return 0;
 	}
 
 	void AudioSpaceStudio::Update() {
-		m_system->update();
+		CHECK_ERROR(
+			m_system->update(),
+			"Audio space could failed to update!"
+		);
 	}
 
 	void AudioSpaceStudio::LoadMasterBank(
@@ -36,13 +53,12 @@ namespace Audio {
 		auto itr = m_banks.find(name);
 		if (itr != m_banks.end()) {
 			itr->second->unload();
-			delete itr->second; // ?
-			itr->second = nullptr;
 		}
 
-		FMOD_RESULT error;
-		error = m_system->loadBankFile(path.c_str(), FMOD_STUDIO_LOAD_BANK_NORMAL, &m_banks[name]);
-		CHECK_ERROR(error, "Master bank did not get loaded!");
+		CHECK_ERROR(
+			m_system->loadBankFile(path.c_str(), FMOD_STUDIO_LOAD_BANK_NORMAL, &m_banks[name]),
+			"Master bank did not get loaded!"
+		);
 	}
 
 	void AudioSpaceStudio::CreateEvent(
@@ -51,14 +67,16 @@ namespace Audio {
 		std::string path = "event:/" + name;
 
 		auto itr = m_events.find(name);
+#ifdef IW_DEBUG
 		if (itr != m_events.end()) {
-			LOG_INFO << "Event already created!";
+			LOG_WARNING << "Event " << name << " already created!";
 			return;
 		}
-
-		FMOD_RESULT error;
-		error = m_system->getEvent(path.c_str(), &m_events[name]);
-		CHECK_ERROR(error, "Event could not be found!");
+#endif
+		CHECK_ERROR(
+			m_system->getEvent(path.c_str(), &m_events[name]),
+			"Event " + name + " could not be found!"
+		);
 	}
 
 	int AudioSpaceStudio::CreateInstance(
@@ -68,16 +86,18 @@ namespace Audio {
 		std::string path = "event:/" + name;
 
 		auto itr = m_events.find(name);
+#ifdef IW_DEBUG
 		if (itr == m_events.end()) {
-			LOG_INFO << "Cannot find event!";
+			LOG_WARNING << "Cannot find event " << name << "!";
 			return -1;
 		}
-
+#endif
 		FMOD::Studio::EventInstance*& instance = m_instances.emplace_back(nullptr);
 
-		FMOD_RESULT error;
-		error = itr->second->createInstance(&instance);
-		CHECK_ERROR(error, "Event could not be instanced!", -1);
+		CHECK_ERROR(
+			itr->second->createInstance(&instance),
+			"Event " + name + " could not be instanced!", -1
+		);
 
 		instance->start();
 
@@ -86,24 +106,42 @@ namespace Audio {
 			instance->setCallback(__dontlookatme__RemoveInstanceFromList, FMOD_STUDIO_EVENT_CALLBACK_STOPPED);
 		}
 
-		return m_instances.size();
+		return m_instances.size() - 1;
 	}
 
 	void AudioSpaceStudio::StartInstance(
 		int index)
 	{
-		m_instances.at(index - 1)->start();
+#ifdef IW_DEBUG
+		if (0 > index || index >= m_instances.size()) {
+			LOG_WARNING << "Cannot start instance " + index + "; index out of range!";
+			return;
+		}
+#endif
+		m_instances.at(index)->start();
 	}
 
 	void AudioSpaceStudio::StopInstance(
 		int index)
 	{
-		m_instances.at(index - 1)->stop(FMOD_STUDIO_STOP_IMMEDIATE);
+#ifdef IW_DEBUG
+		if (0 > index || index >= m_instances.size()) {
+			LOG_WARNING << "Cannot stop instance " + index + "; index out of range!";
+			return;
+		}
+#endif
+		m_instances.at(index)->stop(FMOD_STUDIO_STOP_IMMEDIATE);
 	}
 
 	void AudioSpaceStudio::RemoveInstance(
 		int index)
 	{
+#ifdef IW_DEBUG
+		if (0 > index || index >= m_instances.size()) {
+			LOG_WARNING << "Cannot remove instance " + index + "; index out of range!";
+			return;
+		}
+#endif
 		m_instances.at(index)->release();
 		m_instances.erase(m_instances.begin() + index);
 	}
@@ -112,11 +150,12 @@ namespace Audio {
 		FMOD::Studio::EventInstance* instance)
 	{
 		auto itr = std::find(m_instances.begin(), m_instances.end(), instance);
+#ifdef IW_DEBUG
 		if (itr == m_instances.end()) {
-			LOG_WARNING << "Cannot find instance!";
+			LOG_WARNING << "Cannot remove instance " + instance + "; cannot find instance!";
 			return;
 		}
-
+#endif
 		instance->release();
 		m_instances.erase(itr);
 	}
