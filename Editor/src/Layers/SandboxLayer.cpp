@@ -66,6 +66,8 @@ namespace iw {
 			"assets/levels/forest/level1.json",
 			"assets/levels/forest/level2.json",
 			"assets/levels/forest/level3.json",
+			"assets/levels/forest/level4.json",
+			"assets/levels/forest/level5.json",
 		};
 
 		currentLevel = 0;

@@ -5,7 +5,7 @@
       {
         "Type": 1,
         "Bullet": {
-          "Type": 0,
+          "Type": 2,
           "Speed": 5.000000
         },
         "Speed": 0.6283185,
@@ -15,7 +15,7 @@
       {
         "Type": 1,
         "Bullet": {
-          "Type": 0,
+          "Type": 2,
           "Speed": 5.000000
         },
         "Speed": 0.6283185,
