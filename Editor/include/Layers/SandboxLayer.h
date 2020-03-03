@@ -42,30 +42,10 @@ namespace iw {
 		float ts = 1.0f;
 		float threshold = 0.25f;
 
-		std::string loadLevel;
-
-		std::vector<std::string> levels;
-		int currentLevel;
-
 	public:
 		SandboxLayer();
 
 		int Initialize() override;
-
-		void LoadLevel(
-			std::string name); //temp
-
-		void LoadTree(
-			std::string name,
-			Transform transform); //temp
-
-		//void LoadRock(
-		//	std::string name,
-		//	Transform transform); //temp
-
-		void LoadFloor(
-			std::string name,
-			Transform transform); //temp
 
 		void PreUpdate() override;
 		void PostUpdate() override;
