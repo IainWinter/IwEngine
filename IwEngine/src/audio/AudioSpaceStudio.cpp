@@ -103,7 +103,7 @@ namespace Audio {
 
 		if (realeaseAtEnd) {
 			instance->setUserData(this);
-			instance->setCallback(__dontlookatme__RemoveInstanceFromList, FMOD_STUDIO_EVENT_CALLBACK_STOPPED);
+			instance->setCallback((FMOD_STUDIO_EVENT_CALLBACK)__dontlookatme__RemoveInstanceFromList, FMOD_STUDIO_EVENT_CALLBACK_STOPPED);
 		}
 
 		return m_instances.size() - 1;
