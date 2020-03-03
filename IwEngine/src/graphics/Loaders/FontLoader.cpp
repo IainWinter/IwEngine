@@ -290,8 +290,8 @@ namespace Graphics {
 		State state = State::NONE;
 		unsigned id = 0;
 		std::string file = "";
-		Character character;
-		Kerning kerning;
+		Character character = {};
+		Kerning kerning = {};
 
 		for (size_t i = 0; i < tokens.size(); i++) {
 			Token token = tokens[i];

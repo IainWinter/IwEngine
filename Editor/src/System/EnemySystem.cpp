@@ -44,8 +44,6 @@ void EnemySystem::Update(
 
 			switch (enemy->Type) {
 				case EnemyType::SPIN: {
-					enemy->Rotation = fmod(enemy->Rotation + enemy->Speed, iw::Pi2);
-
 					SpawnBullet(
 						enemy->Bullet,
 						transform->Position,
@@ -66,6 +64,8 @@ void EnemySystem::Update(
 					break;
 				}
 			}
+
+			enemy->Rotation = fmod(enemy->Rotation + enemy->Speed, iw::Pi2);
 		}
 
 		if (enemy->Timer <= -enemy->CooldownTime) {
@@ -129,10 +129,6 @@ bool EnemySystem::On(
 		if (playerComponent->Timer > 0) {
 			QueueDestroyEntity(enemy.Index());
 			Audio->AsStudio()->CreateInstance("enemyDeath");
-		}
-
-		else {
-			playerComponent->Health -= 1;
 		}
 	}
 

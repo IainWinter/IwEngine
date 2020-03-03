@@ -482,6 +482,7 @@ namespace iw {
 	}
 
 	void SandboxLayer::PostUpdate() {
+		font->UpdateMesh(textMesh, std::to_string(1.0f / Time::DeltaTime()), 0.01f, 1);
 		textMesh->Update(Renderer->Device);
 
 		// for tree wind

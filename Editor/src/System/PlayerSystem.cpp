@@ -140,7 +140,9 @@ bool PlayerSystem::On(
 
 	if (player.Index() != iw::EntityHandle::Empty.Index) {
 		Player* p = player.FindComponent<Player>();
-		if (!p->Damaged) {
+		if (  !p->Damaged
+			&& p->Health > 0)
+		{
 			p->Damaged = true;
 			p->Health -= 1;
 
@@ -157,8 +159,9 @@ bool PlayerSystem::On(
 bool PlayerSystem::On(
 	iw::ActionEvent& event)
 {
-	if (event.Action == iw::val(iw::Actions::RESET_LEVEL)) {
-		m_playerModel->Meshes[0].Material->Set("albedo", iw::Color(1));
+	switch (event.Action) {
+		case iw::val(iw::Actions::NEXT_LEVEL ):
+		case iw::val(iw::Actions::RESET_LEVEL): m_playerModel->Meshes[0].Material->Set("albedo", iw::Color(1)); break;
 	}
 
 	return false;

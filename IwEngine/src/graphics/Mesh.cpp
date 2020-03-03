@@ -53,6 +53,8 @@ namespace Graphics {
 	void Mesh::Initialize(
 		const ref<IDevice>& device)
 	{
+		Outdated = false;
+
 		if (Material) {
 			Material->Initialize(device);
 		}
@@ -62,6 +64,16 @@ namespace Graphics {
 		}
 
 		else {
+			if (   !Vertices
+				&& !Normals
+				&& !Tangents
+				&& !BiTangents
+				&& !Colors
+				&& !Uvs)
+			{
+				return; // exit if there are no buffers
+			}
+
 			VertexBufferLayout layout4f;
 			layout4f.Push<float>(4);
 
@@ -104,13 +116,15 @@ namespace Graphics {
 				device->AddBufferToVertexArray(VertexArray, buffer, layout2f);
 			}
 		}
-
-		Outdated = false;
 	}
 
 	void Mesh::Update(
 		const ref<IDevice>& device)
 	{
+		if (!VertexArray) {
+			Initialize(device);
+		}
+
 		if (Outdated) {
 			int index = 0;
 			if (Vertices) {
