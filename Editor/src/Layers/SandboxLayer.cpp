@@ -117,7 +117,7 @@ namespace iw {
 
 		// Shader
 
-		ref<Shader> shader      = Asset->Load<Shader>("shaders/pbr.shader");
+		ref<Shader> shader      = Asset->Load<Shader>("shaders/default.shader");
 		ref<Shader> treeShader  = Asset->Load<Shader>("shaders/tree.shader");
 		ref<Shader> directional = Asset->Load<Shader>("shaders/lights/directional_transparent.shader");
 		            gaussian    = Asset->Load<Shader>("shaders/filters/gaussian.shader");
@@ -138,8 +138,8 @@ namespace iw {
 		colors[0] = vector3(1);
 		colors[1] = vector3(1);
 
-		shader->Program->GetParam("lightPositions[0]")->SetAsFloats(positions, 3, 2);
-		shader->Program->GetParam("lightColors[0]")   ->SetAsFloats(colors, 3, 2);
+		//shader->Program->GetParam("lightPositions[0]")->SetAsFloats(positions, 3, 2);
+		//shader->Program->GetParam("lightColors[0]")   ->SetAsFloats(colors, 3, 2);
 
 		// Textures
 		
@@ -315,7 +315,7 @@ namespace iw {
 
 		int x = 16 * scaleOutX;
 		int y = 9  * scaleOutY;
-
+		/*
 		for (int l = 0; l < 1; l++) {
 			for (int i = -x; i < x; i += 4) {
 				LoadTree("models/forest/tree.dae", Transform {
@@ -359,7 +359,7 @@ namespace iw {
 			x = 16 * scaleOutX;
 			y = 9  * scaleOutY;
 		}
-
+		*/
 		LoadFloor("models/forest/floor.dae", Transform {
 			vector3(0, 0, 0),
 			vector3(32),

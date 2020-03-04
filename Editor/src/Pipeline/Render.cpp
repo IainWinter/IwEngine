@@ -75,17 +75,17 @@ namespace iw {
 
 					renderer->SetShader(mesh.Material->Shader);
 
-					mesh.Material->Shader->Program->GetParam("lightSpace")
-						->SetAsMat4(light->Cam().GetViewProjection());
+					//mesh.Material->Shader->Program->GetParam("lightSpace")
+					//	->SetAsMat4(light->Cam().GetViewProjection());
 
-					mesh.Material->Shader->Program->GetParam("ambiance")
-						->SetAsFloat(ambiance);
+					//mesh.Material->Shader->Program->GetParam("ambiance")
+					//	->SetAsFloat(ambiance);
 
-					mesh.Material->Shader->Program->GetParam("gamma")
-						->SetAsFloat(gamma);
+					//mesh.Material->Shader->Program->GetParam("gamma")
+					//	->SetAsFloat(gamma);
 
-					mesh.Material->Shader->Program->GetParam("sunPos")
-						->SetAsFloats(&light->Cam().Position, 3);
+					//mesh.Material->Shader->Program->GetParam("sunPos")
+					//	->SetAsFloats(&light->Cam().Position, 3);
 
 					renderer->DrawMesh(m_t, &mesh);
 				}

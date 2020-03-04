@@ -1,6 +1,7 @@
 #include "App.h"
 #include "Layers/ToolLayer.h"
 #include "Layers/SandboxLayer.h"
+#include "Layers/TestLayer.h"
 #include "Events/ActionEvents.h"
 #include "iw/physics/Plane.h"
 #include "iw/physics/Collision/PlaneCollider.h"
@@ -34,7 +35,7 @@ namespace iw {
 		toolbox = PushLayer<ToolLayer>();
 		imgui   = PushLayer<ImGuiLayer>();
 
-		PushLayer<SandboxLayer>();
+		PushLayer<TestLayer>();
 	}
 
 	int App::Initialize(
