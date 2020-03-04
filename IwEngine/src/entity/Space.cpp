@@ -60,7 +60,7 @@ namespace ECS {
 			LOG_WARNING << "Tried to delete entity with an invalid index " << index;
 			return false;
 		}
-#endif 
+#endif
 
 		ref<EntityData>& entityData = m_entityManager.GetEntityData(index);
 

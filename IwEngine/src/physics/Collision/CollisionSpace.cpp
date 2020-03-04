@@ -80,6 +80,9 @@ namespace Physics {
 
 				ManifoldPoints points = a->Col()->TestCollision(a->Trans(), b->Col(), b->Trans());
 				if (points.HasCollision) {
+					// establish more formal rules for what can collide with what
+					if (a->IsTrigger() && b->IsTrigger()) continue;
+
 					if (a->IsTrigger() || b->IsTrigger()) {
 						triggers.emplace_back(a, b, points);
 					}

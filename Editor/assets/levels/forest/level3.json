@@ -28,11 +28,11 @@
     "size": 2,
     "items": [
       {
-        "x": -6.000000,
+        "x": 6.000000,
         "y": 4.000000
       },
       {
-        "x": -6.000000,
+        "x": 6.000000,
         "y": -4.000000
       }
     ]
@@ -44,7 +44,18 @@
   "Player": {
     "Speed": 4.000000,
     "DashTime": 0.133333,
-    "CooldownTime": 0.080000,
+    "CooldownTime": 0.20000,
     "Health": 5
+  },
+  "Door": {
+    "State": 1,
+    "NextLevelPosition": {
+      "x": -14.000000,
+      "y": 0.000000
+    },
+    "NextLevel": {
+      "size": 25,
+      "string": "levels/forest/level4.json"
+    }
   }
 }

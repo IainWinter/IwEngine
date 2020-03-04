@@ -38,7 +38,7 @@ void BulletSystem::FixedUpdate(
 				}
 
 				if (maxDistance != -1) {
-					rigidbody->ApplyForce((target - transform->Position) /** 0.25f*/);
+					rigidbody->ApplyForce((target - transform->Position) * 0.5f);
 				}
 
 				break;

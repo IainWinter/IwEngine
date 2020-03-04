@@ -19,7 +19,7 @@
           "Speed": 5.000000
         },
         "Speed": 0.2617994,
-        "FireTime": 0.120000,
+        "FireTime": 0.060000,
         "CooldownTime": 0.000000
       }
     ]
@@ -28,12 +28,12 @@
     "size": 2,
     "items": [
       {
-        "x": -3.000000,
-        "y": 3.200000
+        "x": 6.000000,
+        "y": 3.000000
       },
       {
-        "x": -3.000000,
-        "y": -3.200000
+        "x": 2.000000,
+        "y": -3.000000
       }
     ]
   },
@@ -44,7 +44,18 @@
   "Player": {
     "Speed": 4.000000,
     "DashTime": 0.133333,
-    "CooldownTime": 0.080000,
+    "CooldownTime": 0.20000,
     "Health": 5
+  },
+  "Door": {
+    "State": 1,
+    "NextLevelPosition": {
+      "x": -14.000000,
+      "y": 0.000000
+    },
+    "NextLevel": {
+      "size": 25,
+      "string": "levels/forest/level3.json"
+    }
   }
 }

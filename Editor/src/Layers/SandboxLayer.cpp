@@ -2,7 +2,9 @@
 #include "Systems/PlayerSystem.h"
 #include "Systems/EnemySystem.h"
 #include "Systems/BulletSystem.h"
+#include "Systems/LevelSystem.h"
 #include "Events/ActionEvents.h"
+#include "iw/engine/Systems/PhysicsSystem.h"
 #include "iw/engine/Components/CameraController.h"
 #include "iw/engine/Time.h"
 #include "iw/physics/Collision/SphereCollider.h"
@@ -15,23 +17,8 @@
 #include "iw/graphics/Model.h"
 #include "iw/graphics/TextureAtlas.h"
 #include "iw/input/Devices/Mouse.h"
-#include "imgui/imgui.h"
-
-#include "Components/Tree.h"
-
-#include "iw/reflection/serialization/JsonSerializer.h"
-
-#include "iw/reflection/reflect/std/string.h"
-#include "iw/reflection/reflect/std/vector.h"
-#include "iw/reflect/math/vector2.h"
-#include "iw/reflect/Components/Bullet.h"
-#include "iw/reflect/Components/Enemy.h"
-#include "iw/reflect/Components/Player.h"
-#include "iw/reflect/Components/Level.h"
-
-#include "iw/engine/Systems/PhysicsSystem.h"
-
 #include "iw/audio/AudioSpaceStudio.h"
+#include "imgui/imgui.h"
 
 namespace iw {
 	struct ModelUBO {
@@ -54,32 +41,9 @@ namespace iw {
 		PlaneCollider* Collider;
 	};
 
-	struct TreeComponents {
-		Model* Model;
-		Tree* Tree;
-	};
-
 	SandboxLayer::SandboxLayer()
 		: Layer("Sandbox")
-	{
-		levels = {
-			"assets/levels/forest/level1.json",
-			"assets/levels/forest/level2.json",
-			"assets/levels/forest/level3.json",
-			"assets/levels/forest/level4.json",
-			"assets/levels/forest/level5.json",
-		};
-
-		currentLevel = 0;
-
-		//Level level;
-		//level.Enemies.push_back(Enemy{ EnemyType::SPIN, Bullet { LINE, 5 }, iw::Pi2 / 24.0f, 0.12f });
-		//level.Positions.push_back(0);
-		//level.Player = Player { 4.0f, 8 / 60.0f, .2f, 5 };
-		//level.StageName = "";
-
-		//JsonSerializer("assets/levels/working.json").Write(level);
-	}
+	{}
 
 	int forestInstance = 0;
 
@@ -118,12 +82,10 @@ namespace iw {
 		// Shader
 
 		ref<Shader> shader      = Asset->Load<Shader>("shaders/pbr.shader");
-		ref<Shader> treeShader  = Asset->Load<Shader>("shaders/tree.shader");
 		ref<Shader> directional = Asset->Load<Shader>("shaders/lights/directional_transparent.shader");
 		            gaussian    = Asset->Load<Shader>("shaders/filters/gaussian.shader");
 		
 		Renderer->InitShader(shader,      ALL);
-		Renderer->InitShader(treeShader,  ALL);
 		Renderer->InitShader(directional, CAMERA);
 		Renderer->InitShader(gaussian,    CAMERA);
 
@@ -293,207 +255,21 @@ namespace iw {
 		PushSystem<PlayerSystem>();
 		PushSystem<EnemySystem>();
 		PushSystem<BulletSystem>();
-
-		Bus->push<ResetLevelEvent>();
+		PushSystem<LevelSystem>();
 
 		return Layer::Initialize();
 	}
 
-	void SandboxLayer::LoadLevel(
-		std::string name)
-	{
-		Space->Clear();
-
-		Level level;
-		JsonSerializer(name).Read(level);
-
-		// Stage
-
-		float scale = 2.0f;
-		float scaleOutX = 1.6f;
-		float scaleOutY = 1.8f;
-
-		int x = 16 * scaleOutX;
-		int y = 9  * scaleOutY;
-
-		for (int l = 0; l < 1; l++) {
-			for (int i = -x; i < x; i += 4) {
-				LoadTree("models/forest/tree.dae", Transform {
-					vector3(i, 0, y),
-					scale,
-					quaternion::from_axis_angle(vector3::unit_x, Pi / 2)
-					* quaternion::from_axis_angle(vector3::unit_y, rand() / (float)RAND_MAX * Pi2)
-				});
-			}
-
-			for (int i = -x; i < x; i += 4) {
-				LoadTree("models/forest/tree.dae", Transform {
-					vector3(i, 0, -y),
-					scale,
-					quaternion::from_axis_angle(vector3::unit_x, Pi / 2)
-					* quaternion::from_axis_angle(vector3::unit_y, rand() / (float)RAND_MAX * Pi2)
-				});
-			}
-
-			for (int i = -y; i <= y; i += 3) {
-				LoadTree("models/forest/tree.dae", Transform {
-					vector3(x, 0, i),
-					scale,
-					quaternion::from_axis_angle(vector3::unit_x, Pi / 2)
-					* quaternion::from_axis_angle(vector3::unit_y, rand() / (float)RAND_MAX * Pi2)
-				});
-			}
-
-			for (int i = -y + 3; i < y; i += 3) {
-				LoadTree("models/forest/tree.dae", Transform {
-					vector3(-x, 0, i),
-					scale,
-					quaternion::from_axis_angle(vector3::unit_x, Pi / 2)
-					* quaternion::from_axis_angle(vector3::unit_y, rand() / (float)RAND_MAX * Pi2)
-				});
-			}
-
-			scaleOutX = 1.6f;
-			scaleOutY = 1.8f;
-
-			x = 16 * scaleOutX;
-			y = 9  * scaleOutY;
-		}
-
-		LoadFloor("models/forest/floor.dae", Transform {
-			vector3(0, 0, 0),
-			vector3(32),
-			quaternion::from_axis_angle(vector3::unit_x, Pi / 2)
-		});
-
-		// Enemies
-
-		for (size_t i = 0; i < level.Enemies.size(); i++) {
-			Entity enemy = Space->CreateEntity<Transform, Model, SphereCollider, CollisionObject, Enemy>();
-			enemy.SetComponent<Model>(*Asset->Load<Model>("Tetrahedron"));
-			enemy.SetComponent<Enemy>(level.Enemies[i]);
-
-			Transform*       te = enemy.SetComponent<Transform>(vector3(level.Positions[i].x, 1, level.Positions[i].y));
-			SphereCollider*  se = enemy.SetComponent<SphereCollider>(vector3::zero, 1.0f);
-			CollisionObject* re = enemy.SetComponent<CollisionObject>();
-
-			re->SetCol(se);
-			re->SetTrans(te);
-
-			Physics->AddCollisionObject(re);
-		}
-
-		// Player
-
-		Entity player = Space->CreateEntity<Transform, Model, SphereCollider, Rigidbody, Player>();
-		player.SetComponent<Model>(*Asset->Load<Model>("Player"));
-		player.SetComponent<Player>(level.Player);
-
-		Transform*      tp = player.SetComponent<Transform>(vector3(5, 1, 0), vector3(.75f));
-		SphereCollider* sp = player.SetComponent<SphereCollider>(vector3::zero, .75f);
-		Rigidbody*      rp = player.SetComponent<Rigidbody>();
-
-		rp->SetMass(1);
-		rp->SetCol(sp);
-		rp->SetTrans(tp);
-		rp->SetStaticFriction(.1f);
-		rp->SetDynamicFriction(.02f);
-
-		rp->SetIsLocked(vector3(0, 1, 0));
-		rp->SetLock(vector3(0, 1, 0));
-
-		Physics->AddRigidbody(rp);
-
-		// Camera
-
-		quaternion camrot = quaternion::from_axis_angle(vector3::unit_x, Pi / 2)
-			* quaternion::from_axis_angle(vector3::unit_z, Pi);
-
-		Entity camera = Space->CreateEntity<Transform, CameraController>();
-		camera.SetComponent<Transform>(vector3(0, 25, 0), vector3::one, camrot);
-		camera.SetComponent<CameraController>(mainCam);
-	}
-
-	void SandboxLayer::LoadTree(
-		std::string name,
-		Transform transform)
-	{
-		ref<Model> tree = Asset->Load<Model>(name);
-
-		if (tree->Meshes[0].VertexArray == nullptr) {
-			for (size_t i = 0; i < tree->MeshCount; i++) {
-				ref<Material>& mat = tree->Meshes[i].Material;
-
-				mat->SetShader(Asset->Load<Shader>("shaders/pbr.shader"));
-				mat->SetTexture("shadowMap", Asset->Load<Texture>("ShadowMap")); // shouldnt be part of material
-				mat->Initialize(Renderer->Device);
-
-				mat->Set("roughness", 0.7f);
-				mat->Set("metallic", 0.0f);
-
-				tree->Meshes[i].GenTangents();
-				tree->Meshes[i].Initialize(Renderer->Device);
-			}
-		}
-
-		ref<Texture> leavesAlpha = Asset->Load<Texture>("textures/forest/tree/leaves/alpha.jpg");
-		leavesAlpha->Initialize(Renderer->Device);
-
-		tree->Meshes[1].Material->SetShader(Asset->Load<Shader>("shaders/tree.shader"));
-		tree->Meshes[1].Material->SetTexture("alphaMaskMap", leavesAlpha);
-
-		Entity ent = Space->CreateEntity<Transform, Model, Tree>();
-		ent.SetComponent<Transform>(transform);
-		ent.SetComponent<Model>(*tree);
-	}
-
-	void SandboxLayer::LoadFloor(
-		std::string name,
-		Transform transform)
-	{
-		ref<Model> floor = Asset->Load<Model>(name);
-
-		if (floor->Meshes[0].VertexArray == nullptr) {
-			for (size_t i = 0; i < floor->MeshCount; i++) {
-				ref<Material>& mat = floor->Meshes[i].Material;
-
-				mat->SetShader(Asset->Load<Shader>("shaders/pbr.shader"));
-				mat->SetTexture("shadowMap", Asset->Load<Texture>("ShadowMap")); // shouldnt be part of material
-				mat->Initialize(Renderer->Device);
-
-				mat->Set("roughness", 0.9f);
-				mat->Set("metallic", 0.1f);
-
-				floor->Meshes[i].GenTangents();
-				floor->Meshes[i].Initialize(Renderer->Device);
-			}
-		}
-
-		Entity ent = Space->CreateEntity<Transform, Model>();
-		ent.SetComponent<Transform>(transform);
-		ent.SetComponent<Model>(*floor);
-	}
-
 	void SandboxLayer::PreUpdate() {
-		if (loadLevel != "") {
-			LoadLevel(loadLevel);
-			loadLevel = "";
-		}
+		//if (loadLevel != "") {
+		//	LoadLevel(loadLevel);
+		//	loadLevel = "";
+		//}
 	}
 
 	void SandboxLayer::PostUpdate() {
 		font->UpdateMesh(textMesh, std::to_string(1.0f / Time::DeltaTime()), 0.01f, 1);
 		textMesh->Update(Renderer->Device);
-
-		// for tree wind
-		//for (EntityComponentData tree : Space->Query<Model, Tree>()) {
-		//	auto [m, t] = tree.Components.Tie<TreeComponents>();
-
-		//	Renderer->SetShader(m->Meshes[1].Material->Shader);
-
-		//	m->Meshes[1].Material->Shader->Program->GetParam("time")
-		//		->SetAsFloat(Time::TotalTime());
-		//}
 
 		// Main render
 
@@ -542,24 +318,24 @@ namespace iw {
 			Audio->AsStudio()->StopInstance(forestInstance);
 		}
 
-		if (ImGui::Button("Save level")) {
-			JsonSerializer jout("assets/levels/working.json", true);
-			
-			Level level;
-			for (auto entity : Space->Query<Transform, Enemy>()) {
-				auto [transform, enemy] = entity.Components.Tie<EnemySystem::Components>();
-				level.Positions.push_back({ transform->Position.x, transform->Position.z });
-				level.Enemies.push_back(*enemy);
-			}
+		//if (ImGui::Button("Save level")) {
+		//	JsonSerializer jout("assets/levels/working.json", true);
+		//	
+		//	Level level;
+		//	for (auto entity : Space->Query<Transform, Enemy>()) {
+		//		auto [transform, enemy] = entity.Components.Tie<EnemySystem::Components>();
+		//		level.Positions.push_back({ transform->Position.x, transform->Position.z });
+		//		level.Enemies.push_back(*enemy);
+		//	}
 
-			level.StageName = "models/grass/grass.obj";
-			
-			jout.Write(level);
-		}
+		//	level.StageName = "models/grass/grass.obj";
+		//	
+		//	jout.Write(level);
+		//}
 
-		if (ImGui::Button("Load level")) {
-			loadLevel = "assets/levels/forest/level1.bin";
-		}
+		//if (ImGui::Button("Load level")) {
+		//	loadLevel = "assets/levels/forest/level1.bin";
+		//}
 
 		ImGui::End();
 	}
@@ -606,12 +382,15 @@ namespace iw {
 				}
 				break;
 			}
-			case val(Actions::NEXT_LEVEL): {
-				currentLevel = (currentLevel + 1) % (int)levels.size();
-				// no break
-			}
-			case val(Actions::RESET_LEVEL): {
-				loadLevel = levels.at(currentLevel);
+			case val(Actions::LOADED_LEVEL): { // hack for needing to reset space, should all be in level prefabs but thatl come later
+				// Main Camera
+
+				iw::quaternion camrot = iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
+					* iw::quaternion::from_axis_angle(iw::vector3::unit_z, iw::Pi);
+
+				iw::Entity camera = Space->CreateEntity<iw::Transform, iw::CameraController>();
+				camera.SetComponent<iw::Transform>(vector3(0, 25, 0), iw::vector3::one, camrot);
+				camera.SetComponent<iw::CameraController>(mainCam);
 				break;
 			}
 		}

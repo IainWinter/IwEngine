@@ -82,7 +82,7 @@ void EnemySystem::Update(
 		m_levelResetTimer += iw::Time::DeltaTime();
 		if (m_levelResetTimer > 1.0f) {
 			m_levelResetTimer = 0;
-			Bus->push<iw::NextLevelEvent>();
+			Bus->push<OpenNextLevelEvent>();
 		}
 	}
 }

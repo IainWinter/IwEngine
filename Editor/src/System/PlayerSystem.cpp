@@ -1,11 +1,9 @@
-#include "Systems/PLayerSystem.h"
+#include "Systems/PlayerSystem.h"
 #include "Events/ActionEvents.h"
+#include "Components/Bullet.h"
 #include "iw/engine/Time.h"
-#include "iw/input/Devices/Keyboard.h"
 #include "iw/audio/AudioSpaceStudio.h"
-#include <Components\Bullet.h>
-
-#undef PlaySound
+#include "iw/input/Devices/Keyboard.h"
 
 PlayerSystem::PlayerSystem()
 	: System<iw::Transform, iw::Rigidbody, Player>("Player")
@@ -31,7 +29,7 @@ void PlayerSystem::Update(
 			if (player->DeathTimer <= 0) {
 				player->DeathTimer = 0;
 				QueueDestroyEntity(entity.Index);
-				Bus->push<iw::ResetLevelEvent>();
+				Bus->push<ResetLevelEvent>();
 			}
 		}
 
@@ -160,8 +158,8 @@ bool PlayerSystem::On(
 	iw::ActionEvent& event)
 {
 	switch (event.Action) {
-		case iw::val(iw::Actions::NEXT_LEVEL ):
-		case iw::val(iw::Actions::RESET_LEVEL): m_playerModel->Meshes[0].Material->Set("albedo", iw::Color(1)); break;
+		case iw::val(Actions::NEXT_LEVEL ):
+		case iw::val(Actions::RESET_LEVEL): m_playerModel->Meshes[0].Material->Set("albedo", iw::Color(1)); break;
 	}
 
 	return false;
