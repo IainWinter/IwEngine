@@ -252,7 +252,7 @@ namespace iw {
 		postProcessShadowMap->SetIntermediate(targetBlur);
 		postProcessShadowMap->SetShader(gaussian);
 		mainRender          ->SetLight(light);
-		mainRender          ->SetAmbiance(0.03f);
+		mainRender          ->SetAmbiance(0.008f);
 		mainRender          ->SetGamma(2.2f);
 
 		pipeline.first(generateShadowMap)
@@ -278,7 +278,7 @@ namespace iw {
 	}
 
 	void SandboxLayer::PostUpdate() {
-		font->UpdateMesh(textMesh, std::to_string(1.0f / Time::DeltaTime()), 0.01f, 1);
+		//font->UpdateMesh(textMesh, std::to_string(1.0f / Time::DeltaTime()), 0.01f, 1);
 		textMesh->Update(Renderer->Device);
 
 		// Main render

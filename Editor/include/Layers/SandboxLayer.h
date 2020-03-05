@@ -19,7 +19,7 @@ namespace iw {
 		PerspectiveCamera* mainCam;
 
 		DirectionalLight light;
-		iw::vector3 lightPos = iw::vector3(2, 5, .5f);
+		iw::vector3 lightPos = iw::vector3(-1.25, 5, -1.75f);
 		iw::ref<RenderTarget> target;
 		iw::ref<RenderTarget> targetBlur;
 		iw::ref<Shader> gaussian;
