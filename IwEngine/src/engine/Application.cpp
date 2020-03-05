@@ -2,7 +2,7 @@
 #include "iw/engine/Layers/DebugLayer.h"
 #include "iw/engine/Time.h"
 #include "iw/log/logger.h"
-#include "iw/log/sink/std_sink.h"
+#include "iw/log/sink/async_std_sink.h"
 #include "iw/log/sink/file_sink.h"
 #include "iw/events/callback.h"
 #include "iw/graphics/Loaders/ModelLoader.h"
@@ -45,8 +45,8 @@ namespace Engine {
 
 		// Logging
 
-		LOG_SINK(iw::/*async_*/stdout_sink, iw::INFO);
-		LOG_SINK(iw::/*async_*/stderr_sink, iw::ERR);
+		LOG_SINK(iw::async_stdout_sink, iw::INFO);
+		LOG_SINK(iw::async_stderr_sink, iw::ERR);
 		LOG_SINK(iw::file_sink,         iw::INFO,  "/logs/sandbox_info.log");
 		LOG_SINK(iw::file_sink,         iw::DEBUG, "/logs/sandbox_debug.log");
 

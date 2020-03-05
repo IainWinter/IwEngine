@@ -36,7 +36,7 @@
   "Door": {
     "State": 1,
     "NextLevelPosition": {
-      "x": -14.000000,
+      "x": -32.000000,
       "y": 0.000000
     },
     "NextLevel": {

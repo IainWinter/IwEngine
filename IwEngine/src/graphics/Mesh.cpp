@@ -165,6 +165,12 @@ namespace Graphics {
 	void Mesh::Draw(
 		const ref<IDevice>& device) const
 	{
+#ifdef IW_DEBUG
+		if (!VertexArray) {
+			LOG_WARNING << "Mesh needs to be initialized!";
+		}
+#endif 
+
 		device->SetVertexArray(VertexArray);
 		device->SetIndexBuffer(IndexBuffer);
 		device->DrawElements(Topology, IndexCount, 0);

@@ -179,6 +179,16 @@ namespace iw {
 		Model pm { pmesh, 1 };
 		Asset->Give<Model>("Player", &pm);
 
+		//	Door
+
+		Mesh* dmesh = MakeIcosphere(0);
+		dmesh->Material = REF<Material>(smat->Instance());
+
+		dmesh->Initialize(Renderer->Device);
+
+		Model dm { dmesh, 1 };
+		Asset->Give<Model>("Door", &dm);
+
 		// Cameras
 
 		mainCam = new PerspectiveCamera (1.17f, 1.778f, .01f, 2000.0f);

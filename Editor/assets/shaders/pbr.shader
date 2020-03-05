@@ -52,4 +52,4 @@ void main() {
 	gl_Position = viewProj * worldPos;
 }
 
-#shader Fragment shaders/pbr.fs
+#shader Fragment shaders/pbr.frag

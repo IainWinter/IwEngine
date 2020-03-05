@@ -26,27 +26,37 @@ namespace Graphics {
 		Color(
 			float r,
 			float g,
-			float b)
-			: r(r)
-			, g(g)
-			, b(b)
-			, a(1.0f)
-		{}
-
-		Color(
-			float r,
-			float g,
 			float b,
-			float a)
+			float a = 1.0f)
 			: r(r)
 			, g(g)
 			, b(b)
 			, a(a)
 		{}
 
+		operator iw::vector4() {
+			return iw::vector4(r, g, b, a);
+		}
+
 		operator iw::vector4() const {
 			return iw::vector4(r, g, b, a);
 		}
+
+		static Color From255(
+			int r,
+			int g,
+			int b,
+			int a = 255) {
+			return Color(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f);
+		}
+
+		//static Color Blend(
+		//	const Color& a,
+		//	const Color& b,
+		//	float amount) // with mode
+		//{
+		//	return lerp(a, b, amount);
+		//}
 	};
 }
 
