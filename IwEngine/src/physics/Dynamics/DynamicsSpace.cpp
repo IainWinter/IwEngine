@@ -96,6 +96,9 @@ namespace Physics {
 			if (!object->IsDynamic()) continue;
 
 			Rigidbody* rigidbody = (Rigidbody*)object;
+
+			rigidbody->SetLastTrans(*rigidbody->Trans());
+
 			if (rigidbody->IsKinematic()) {
 				if (   isnan(rigidbody->Velocity().length_squared())
 					|| isinf(rigidbody->Velocity().length_squared()))
@@ -184,8 +187,20 @@ namespace Physics {
 			if (rigidbody->IsKinematic()) {
 				Transform t = *rigidbody->Trans();
 
-				t.Position += rigidbody->Velocity() * dt
-					        + rigidbody->Force() * rigidbody->InvMass() * dt*dt;
+				t.Position += dt    * rigidbody->Velocity()
+					        + dt*dt * rigidbody->Force() * rigidbody->InvMass();
+
+				if (rigidbody->IsLocked().x) {
+					t.Position.x = rigidbody->Lock().x;
+				}
+
+				if (rigidbody->IsLocked().y) {
+					t.Position.y = rigidbody->Lock().y;
+				}
+
+				if (rigidbody->IsLocked().z) {
+					t.Position.z = rigidbody->Lock().z;
+				}
 
 				rigidbody->SetNextTrans(t);
 

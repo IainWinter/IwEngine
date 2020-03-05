@@ -77,6 +77,10 @@ namespace Physics {
 		return m_restitution;
 	}
 
+	const Transform& Rigidbody::LastTrans() const {
+		return m_lastTrans;
+	}
+
 	const Transform& Rigidbody::NextTrans() const {
 		return m_nextTrans;
 	}
@@ -151,6 +155,20 @@ namespace Physics {
 		float restitution)
 	{
 		m_restitution = restitution;
+	}
+
+	void Rigidbody::SetTrans(
+		Transform* transform)
+	{
+		m_nextTrans = *transform;
+		m_lastTrans = *transform;
+		CollisionObject::SetTrans(transform);
+	}
+
+	void Rigidbody::SetLastTrans(
+		const Transform& lastTrans)
+	{
+		m_lastTrans = lastTrans;
 	}
 	
 	void Rigidbody::SetNextTrans(

@@ -3,7 +3,7 @@
 namespace iw {
 namespace Physics {
 	CollisionObject::CollisionObject()
-		: m_transform(nullptr)
+		: m_transform()
 		, m_collider(nullptr)
 		, m_isTrigger(false)
 		, m_isDynamic(false)
@@ -17,8 +17,12 @@ namespace Physics {
 		return bounds;
 	}
 
-	Transform* CollisionObject::Trans() const {
-		return m_transform;
+	Transform* CollisionObject::Trans() {
+		return &m_transform;
+	}
+
+	const Transform* CollisionObject::Trans() const {
+		return &m_transform;
 	}
 
 	Collider* CollisionObject::Col() const {
@@ -36,7 +40,7 @@ namespace Physics {
 	void CollisionObject::SetTrans(
 		Transform* transform)
 	{
-		m_transform = transform;
+		m_transform = *transform;
 	}
 
 	void CollisionObject::SetCol(

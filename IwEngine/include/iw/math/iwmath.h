@@ -66,6 +66,24 @@ namespace math {
 		float a, 
 		float b, 
 		unsigned int accuracy);
+
+	/**
+	* Returns the linear interpolation from a to b by w.
+	*
+	* @param a Value of origin.
+	* @param b Value of destination.
+	* @param w Percent through distance between points.
+	* @tparam _t Any type that supports +_t, -_t, and *float operators.
+	*/
+	template<
+		typename _t>
+	_t lerp(
+		const _t& a,
+		const _t& b,
+		float w)
+	{
+		return a + w * (b - a);
+	}
 }
 
 	using namespace math;
