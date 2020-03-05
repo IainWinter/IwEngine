@@ -13,7 +13,7 @@ out vec4 FragColor;
 
 uniform vec3 sunPos;
 
-uniform float gamma; // probly not implmented correctly but I tried :c
+uniform float gamma;
 
 uniform float ambiance;
 uniform vec3 lightPositions[2];

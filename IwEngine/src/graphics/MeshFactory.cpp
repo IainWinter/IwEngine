@@ -119,6 +119,11 @@ namespace Graphics {
 		unsigned vertCount  = (latCount + 1) * (lonCount + 1);
 		unsigned indexCount = 6 * (lonCount + (latCount - 2) * lonCount);
 
+		// invalid counts
+		if (indexCount == 0) {
+			return nullptr;
+		}
+
 		iw::vector3* verts   = new iw::vector3[vertCount];
 		iw::vector3* norms   = new iw::vector3[vertCount];
 		iw::vector2* uvs     = new iw::vector2[vertCount];
@@ -263,12 +268,12 @@ namespace Graphics {
 		unsigned i = 0, v = 0;
 		while(v <= vertCount - (zCount + 3)) {
 			indices[i++] = v;
-			indices[i++] = v + 1;
 			indices[i++] = v + zCount + 1;
+			indices[i++] = v + 1;
 
 			indices[i++] = v + 1;
-			indices[i++] = v + zCount + 2;
 			indices[i++] = v + zCount + 1;
+			indices[i++] = v + zCount + 2;
 
 			v++;
 			if (   v != 0

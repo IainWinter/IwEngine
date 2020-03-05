@@ -5,6 +5,7 @@
 #include "iw/graphics/Shader.h"
 #include "iw/graphics/Camera.h"
 #include "imgui/imgui.h"
+#include "iw/engine/Time.h"
 
 namespace iw {
 	struct ModelComponents {
@@ -20,10 +21,12 @@ namespace iw {
 		ref<Shader> shader = Asset->Load<Shader>("shaders/test.shader");
 		Renderer->InitShader(shader, CAMERA);
 
-		sphere = &Asset->Load<Model>("models/forest/tree.dae")->Meshes[0];
+		sphere = MakePlane(1, 1);
 		sphere->Material = REF<Material>(shader);
 		sphere->Material->Set("albedo", Color(1));
-		sphere->Uvs = nullptr;
+		//sphere->Material->SetTexture("albedoMap", Asset->Load<Texture>("textures/forest/floor/albedo.jpg"));
+
+		sphere->Normals = nullptr;
 
 		sphere->Initialize(Renderer->Device);
 
@@ -36,6 +39,8 @@ namespace iw {
 	}
 
 	void TestLayer::PostUpdate() {
+		transform->Rotation *= iw::quaternion::from_euler_angles(iw::Time::DeltaTime());
+
 		Renderer->BeginScene();
 		Renderer->SetCamera(camera);
 		Renderer->DrawMesh(transform, sphere);
