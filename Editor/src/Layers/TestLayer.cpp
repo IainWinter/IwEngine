@@ -23,10 +23,10 @@ namespace iw {
 		ref<Shader> shader = Asset->Load<Shader>("shaders/test.shader");
 		Renderer->InitShader(shader, CAMERA);
 
-		sphere = MakeIcosphere(1);
+		sphere = MakeUvSphere(30, 30);
 		sphere->Material = REF<Material>(shader);
 		sphere->Material->Set("albedo", Color(1));
-		//sphere->Material->SetTexture("albedoMap", Asset->Load<Texture>("textures/forest/floor/albedo.jpg"));
+		sphere->Material->SetTexture("albedoMap", Asset->Load<Texture>("textures/forest/floor/albedo.jpg"));
 
 		sphere->Normals = nullptr;
 
@@ -41,10 +41,9 @@ namespace iw {
 	}
 
 	void TestLayer::PostUpdate() {
-		transform->Rotation *= iw::quaternion::from_euler_angles(iw::Time::DeltaTime());
+		transform->Rotation *= quaternion::from_euler_angles(iw::Time::DeltaTime());
 
-		Renderer->BeginScene();
-		Renderer->SetCamera(camera);
+		Renderer->BeginScene(camera);
 		Renderer->DrawMesh(transform, sphere);
 		Renderer->EndScene();
 	}
