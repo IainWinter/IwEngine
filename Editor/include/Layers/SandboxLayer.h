@@ -18,6 +18,9 @@ namespace iw {
 	private:
 		PerspectiveCamera* mainCam;
 
+		OrthographicCamera* tranCam;
+		iw::Mesh* tranMesh;
+
 		DirectionalLight light;
 		iw::vector3 lightPos = iw::vector3(-1.25, 5, -1.75f);
 		iw::ref<RenderTarget> target;

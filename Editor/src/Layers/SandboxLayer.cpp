@@ -189,10 +189,18 @@ namespace iw {
 		Model dm { dmesh, 1 };
 		Asset->Give<Model>("Door", &dm);
 
+		// Transition mesh
+		
+		tranMesh = MakePlane(1, 1);
+		tranMesh->Material = REF<Material>(smat->Instance());
+
+		tranMesh->Initialize(Renderer->Device);
+
 		// Cameras
 
 		mainCam = new PerspectiveCamera (1.17f, 1.778f, .01f, 2000.0f);
 		textCam = new OrthographicCamera(vector3::one, quaternion::from_axis_angle(vector3::unit_y, Pi), 16, 9, -10, 10);
+		tranCam = new OrthographicCamera(16, 9, 0, 1);
 
 		// Floor colliders
 

@@ -118,6 +118,8 @@ bool LevelSystem::On(
 	switch (event.Action) {
 		case iw::val(Actions::NEXT_LEVEL): {
 			currentLevelName = currentLevel.Door.NextLevel;
+			//Task.Queue(iw::bind(LoadLevel, currentLevelName)), 5.0f);
+
 			// no break
 		}
 		case iw::val(Actions::RESET_LEVEL): {
