@@ -130,49 +130,49 @@ void LevelSystem::LoadLevel(
 	int x = 16 * scaleOutX;
 	int y = 9 * scaleOutY;
 
-	for (int l = 0; l < 1; l++) {
-		for (int i = -x; i < x; i += 4) {
-			LoadTree("models/forest/tree.dae", iw::Transform {
-				iw::vector3(i, 0, y),
-				scale,
-				iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
-					* iw::quaternion::from_axis_angle(iw::vector3::unit_y, rand() / (float)RAND_MAX * iw::Pi2)
-			});
-		}
+	//for (int l = 0; l < 1; l++) {
+	//	for (int i = -x; i < x; i += 4) {
+	//		LoadTree("models/forest/tree.dae", iw::Transform {
+	//			iw::vector3(i, 0, y),
+	//			scale,
+	//			iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
+	//				* iw::quaternion::from_axis_angle(iw::vector3::unit_y, rand() / (float)RAND_MAX * iw::Pi2)
+	//		});
+	//	}
 
-		for (int i = -x; i < x; i += 4) {
-			LoadTree("models/forest/tree.dae", iw::Transform{
-				iw::vector3(i, 0, -y),
-				scale,
-				iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
-					* iw::quaternion::from_axis_angle(iw::vector3::unit_y, rand() / (float)RAND_MAX * iw::Pi2)
-			});
-		}
+	//	for (int i = -x; i < x; i += 4) {
+	//		LoadTree("models/forest/tree.dae", iw::Transform{
+	//			iw::vector3(i, 0, -y),
+	//			scale,
+	//			iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
+	//				* iw::quaternion::from_axis_angle(iw::vector3::unit_y, rand() / (float)RAND_MAX * iw::Pi2)
+	//		});
+	//	}
 
-		for (int i = -y; i <= y; i += 3) {
-			LoadTree("models/forest/tree.dae", iw::Transform{
-				iw::vector3(x, 0, i),
-				scale,
-				iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
-					* iw::quaternion::from_axis_angle(iw::vector3::unit_y, rand() / (float)RAND_MAX * iw::Pi2)
-			});
-		}
+	//	for (int i = -y; i <= y; i += 3) {
+	//		LoadTree("models/forest/tree.dae", iw::Transform{
+	//			iw::vector3(x, 0, i),
+	//			scale,
+	//			iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
+	//				* iw::quaternion::from_axis_angle(iw::vector3::unit_y, rand() / (float)RAND_MAX * iw::Pi2)
+	//		});
+	//	}
 
-		for (int i = -y + 3; i < y; i += 3) {
-			LoadTree("models/forest/tree.dae", iw::Transform{
-				iw::vector3(-x, 0, i),
-				scale,
-				iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
-					* iw::quaternion::from_axis_angle(iw::vector3::unit_y, rand() / (float)RAND_MAX * iw::Pi2)
-			});
-		}
+	//	for (int i = -y + 3; i < y; i += 3) {
+	//		LoadTree("models/forest/tree.dae", iw::Transform{
+	//			iw::vector3(-x, 0, i),
+	//			scale,
+	//			iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
+	//				* iw::quaternion::from_axis_angle(iw::vector3::unit_y, rand() / (float)RAND_MAX * iw::Pi2)
+	//		});
+	//	}
+	//
+	//	scaleOutX = 1.6f;
+	//	scaleOutY = 1.8f;
 
-		scaleOutX = 1.6f;
-		scaleOutY = 1.8f;
-
-		x = 16 * scaleOutX;
-		y = 9 * scaleOutY;
-	}
+	//	x = 16 * scaleOutX;
+	//	y = 9 * scaleOutY;
+	//}
 
 	LoadFloor("models/forest/floor.dae", iw::Transform {
 		iw::vector3(0, 0, 0),

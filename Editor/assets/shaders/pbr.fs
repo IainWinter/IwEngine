@@ -1,11 +1,11 @@
 #version 330
 
-in vec3 WorldPos;
-in vec4 LightPos;
-in vec3 CameraPos;
-in vec2 TexCoords;
-in vec3 Normal;
-in mat3 TBN;
+layout (location = 0) in vec3 WorldPos;
+layout (location = 1) in vec4 LightPos;
+layout (location = 2) in vec3 CameraPos;
+layout (location = 3) in vec2 TexCoords;
+layout (location = 4) in vec3 Normal;
+layout (location = 5) in mat3 TBN;
 
 out vec4 FragColor;
 
