@@ -69,7 +69,7 @@ namespace Graphics {
 			const ref<IDevice>& device) const;
 
 		IWGRAPHICS_API
-		Mesh* Instance() const; // makes a copy but references the same data
+		Mesh Instance() const; // makes a copy but references the same data
 		//Mesh Clone() const; // will clone the meshs data
 
 		IWGRAPHICS_API

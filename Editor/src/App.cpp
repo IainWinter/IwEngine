@@ -7,6 +7,8 @@
 #include "iw/physics/Collision/SphereCollider.h"
 #include "iw/audio/AudioSpaceStudio.h"
 
+#include "Layers/TestLayer.h"
+
 namespace iw {
 	App::App() {
 		Audio = REF<AudioSpaceStudio>("assets/sounds/");

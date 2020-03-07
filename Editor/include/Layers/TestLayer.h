@@ -9,9 +9,9 @@ namespace iw {
 		: public Layer
 	{
 	private:
-		Mesh* sphere;
 		Camera* camera;
-		Transform* transform;
+		iw::vector3 lightPos;
+		ref<Shader> shader;
 
 	public:
 		TestLayer();

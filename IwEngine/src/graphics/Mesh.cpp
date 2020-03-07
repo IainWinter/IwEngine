@@ -176,10 +176,8 @@ namespace Graphics {
 		device->DrawElements(Topology, IndexCount, 0);
 	}
 
-	Mesh* Mesh::Instance() const {
-		Mesh* mesh = new Mesh();
-		*mesh = *this;
-		return mesh;
+	Mesh Mesh::Instance() const {
+		return *this;
 	}
 
 	// Generate vertex normals by averaging the face normals of the surrounding faces

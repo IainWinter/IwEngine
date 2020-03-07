@@ -47,6 +47,10 @@ namespace iw {
 
 	int forestInstance = 0;
 
+	iw::matrix4 persp = iw::matrix4::create_perspective_field_of_view(1.17f, 1.778f, .01f, 2000.0f);
+	iw::matrix4 ortho = iw::matrix4::create_orthographic(16 * 3.5f, 9 * 3.5f, -100, 100);
+	float blend;
+
 	int SandboxLayer::Initialize() {
 		AudioSpaceStudio* studio = (AudioSpaceStudio*)Audio->AsStudio();
 
@@ -173,10 +177,10 @@ namespace iw {
 
 		//	Player
 
-		Mesh* pmesh = smesh->Instance();
-		pmesh->Material = REF<Material>(smat->Instance());
+		Model pm { new Mesh[1], 1 };
+		pm.Meshes[0] = smesh->Instance();
+		pm.Meshes[0].Material = REF<Material>(smat->Instance());
 
-		Model pm { pmesh, 1 };
 		Asset->Give<Model>("Player", &pm);
 
 		//	Door
@@ -198,7 +202,7 @@ namespace iw {
 
 		// Cameras
 
-		mainCam = new PerspectiveCamera (1.17f, 1.778f, .01f, 2000.0f);
+		mainCam = new PerspectiveCamera ();
 		textCam = new OrthographicCamera(vector3::one, quaternion::from_axis_angle(vector3::unit_y, Pi), 16, 9, -10, 10);
 		tranCam = new OrthographicCamera(16, 9, 0, 1);
 
@@ -291,6 +295,8 @@ namespace iw {
 
 		// Main render
 
+		mainCam->SetProjection(iw::lerp(persp, ortho, blend));
+
 		light.SetPosition(lightPos);
 		light.SetRotation(quaternion::from_look_at(lightPos));
 
@@ -317,6 +323,8 @@ namespace iw {
 
 		ImGui::SliderFloat("Ambiance", (float*)&mainRender->GetAmbiance(), 0, 1);
 		ImGui::SliderFloat("Gamma", (float*)&mainRender->GetGamma(), 0, 5);
+		ImGui::SliderFloat("Camera blend", &blend, 0, 1);
+
 
 		ImGui::SliderFloat("Shadow map blur", &blurAmount, 0, 5);
 		ImGui::SliderFloat("Shadow map threshold", &threshold, 0, 1);

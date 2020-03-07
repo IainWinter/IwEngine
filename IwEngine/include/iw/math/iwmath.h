@@ -82,7 +82,7 @@ namespace math {
 		const _t& b,
 		float w)
 	{
-		return a + w * (b - a);
+		return a + (b - a) * w;
 	}
 }
 

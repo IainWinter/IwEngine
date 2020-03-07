@@ -8,9 +8,9 @@
 #include "iw/engine/Time.h"
 
 namespace iw {
-	struct ModelComponents {
+	struct MeshComponents {
 		Transform* Transform;
-		Model* Model;
+		Mesh* Model;
 	};
 
 	TestLayer::TestLayer()
@@ -18,39 +18,75 @@ namespace iw {
 	{}
 
 	int TestLayer::Initialize() {
-		ref<Shader> shader = Asset->Load<Shader>("shaders/test.shader");
+		shader = Asset->Load<Shader>("shaders/test_pbr.shader");
 		Renderer->InitShader(shader, CAMERA);
 
-		sphere = MakePlane(1, 1);
-		sphere->Material = REF<Material>(shader);
-		sphere->Material->Set("albedo", Color(1));
-		//sphere->Material->SetTexture("albedoMap", Asset->Load<Texture>("textures/forest/floor/albedo.jpg"));
+		Mesh* mesh = MakeIcosphere(5);
 
-		sphere->Normals = nullptr;
+		for (int x = -4; x < 5; x++) {
+			Entity entity = Space->CreateEntity<Transform, Mesh>();
 
-		sphere->Initialize(Renderer->Device);
+			Transform* transform  = entity.SetComponent<Transform>(iw::vector3(x * 2.5f, 0, 7.5f));
+			Mesh*      sphere     = entity.SetComponent<Mesh>();
+
+			*sphere = mesh->Instance();
+
+			sphere->Material = REF<Material>(shader);
+			sphere->Material->Set("albedo", iw::vector3(
+				rand() / (float)RAND_MAX, 
+				rand() / (float)RAND_MAX, 
+				rand() / (float)RAND_MAX)
+			);
+
+			sphere->Initialize(Renderer->Device);
+		}
 
 		camera = new PerspectiveCamera(1.17f, 1.77f, .01f, 100.0f);
-		transform = new Transform();
-
 		camera->Position.z = -5;
+
+		lightPos = iw::vector3(0, 4, 5);
+
+		delete mesh;
 
 		return Layer::Initialize();
 	}
 
 	void TestLayer::PostUpdate() {
-		transform->Rotation *= iw::quaternion::from_euler_angles(iw::Time::DeltaTime());
+		Renderer->BeginScene(camera);
+		
+		shader->Program->GetParam("lightPos")->SetAsFloats(&lightPos, 3);
 
-		Renderer->BeginScene();
-		Renderer->SetCamera(camera);
-		Renderer->DrawMesh(transform, sphere);
+		for (auto entity : Space->Query<Transform, Mesh>()) {
+			auto [transform, sphere] = entity.Components.Tie<MeshComponents>();
+			Renderer->DrawMesh(transform, sphere);
+		}
+
 		Renderer->EndScene();
 	}
 
 	void TestLayer::ImGui() {
 		ImGui::Begin("Test");
 
-		ImGui::SliderFloat3("pos", (float*)&transform->Position, -10, 10);
+		ImGui::SliderFloat3("Light pos", (float*)&lightPos, -10, 10);
+
+		for (auto entity : Space->Query<Transform, Mesh>()) {
+			auto [transform, sphere] = entity.Components.Tie<MeshComponents>();
+
+			std::stringstream ss;
+			ss << "Reflectance " << entity.Index;
+
+			ImGui::SliderFloat(ss.str().c_str(), sphere->Material->Get<float>("reflectance"), 0, 1);
+			
+			ss = std::stringstream();
+			ss << "Smoothness " << entity.Index;
+			
+			ImGui::SliderFloat(ss.str().c_str(), sphere->Material->Get<float>("smoothness"), 0, 1);
+
+			ss = std::stringstream();
+			ss << "Metallic " << entity.Index;
+
+			ImGui::SliderFloat(ss.str().c_str(), sphere->Material->Get<float>("metallic"), 0, 1);
+		}
 
 		ImGui::End();
 	}

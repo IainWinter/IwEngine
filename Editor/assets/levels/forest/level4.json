@@ -45,7 +45,7 @@
     "Speed": 4.000000,
     "DashTime": 0.133333,
     "CooldownTime": 0.20000,
-    "Health": 5
+    "Health": 3
   },
   "Door": {
     "State": 1,
