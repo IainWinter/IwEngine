@@ -59,8 +59,6 @@ namespace iw {
 			case iw::val(Actions::FORWARD): movement.z += e.as<ToggleEvent>().Active ? 1 : -1; break;
 		}
 
-		LOG_INFO << movement;
-
 		return false;
 	}
 
@@ -68,8 +66,8 @@ namespace iw {
 		MouseMovedEvent& e)
 	{
 		if (e.Device == DeviceType::RAW_MOUSE) {
-			rotation.x = e.DeltaY * Time::DeltaTime() * .4f;
-			rotation.y = e.DeltaX * Time::DeltaTime() * .4f;
+			rotation.x = e.DeltaY * .001f;
+			rotation.y = e.DeltaX * .001f;
 		}
 
 		return false;
@@ -79,7 +77,7 @@ namespace iw {
 		MouseButtonEvent& e)
 	{
 		if (e.Device == DeviceType::RAW_MOUSE && e.Button == RMOUSE) {
-			speed = e.State ? 50 : 10;
+			speed = e.State ? 100 : 10;
 		}
 
 		return false;

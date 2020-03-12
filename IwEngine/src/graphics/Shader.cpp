@@ -4,7 +4,7 @@
 namespace iw {
 namespace Graphics {
 	Shader::Shader()
-		: Program(nullptr)
+		: m_handle(nullptr)
 	{}
 
 	void Shader::AddShader(
@@ -25,6 +25,10 @@ namespace Graphics {
 		m_source.push_back(shader);
 	}
 
+	IPipeline* Shader::Handle() const {
+		return m_handle;
+	}
+
 	void Shader::Initialize(
 		const iw::ref<IDevice>& device)
 	{
@@ -41,7 +45,13 @@ namespace Graphics {
 			}
 		}
 
-		Program = iw::ref<IPipeline>(device->CreatePipeline(vertex, fragment, geometry));
+		m_handle = device->CreatePipeline(vertex, fragment, geometry);
+	}
+
+	void Shader::Use(
+		const iw::ref<IDevice>& device)
+	{
+		device->SetPipeline(m_handle);
 	}
 }
 }

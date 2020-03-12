@@ -47,6 +47,10 @@ namespace iw {
 
 	int forestInstance = 0;
 
+	iw::matrix4 persp = iw::matrix4::create_perspective_field_of_view(1.17f, 1.778f, .01f, 2000.0f);
+	iw::matrix4 ortho = iw::matrix4::create_orthographic(16 * 3.5f, 9 * 3.5f, -100, 100);
+	float blend;
+
 	int SandboxLayer::Initialize() {
 		AudioSpaceStudio* studio = (AudioSpaceStudio*)Audio->AsStudio();
 
@@ -89,7 +93,7 @@ namespace iw {
 		Renderer->InitShader(directional, CAMERA);
 		Renderer->InitShader(gaussian,    CAMERA);
 
-		Renderer->SetShader(shader);
+		//Renderer->SetShader(shader);
 
 		vector3* positions = new vector3[2];
 		vector3* colors    = new vector3[2];
@@ -100,20 +104,16 @@ namespace iw {
 		colors[0] = vector3(1);
 		colors[1] = vector3(1);
 
-		shader->Program->GetParam("lightPositions[0]")->SetAsFloats(positions, 3, 2);
-		shader->Program->GetParam("lightColors[0]")   ->SetAsFloats(colors, 3, 2);
+		shader->Handle()->GetParam("lightPositions[0]")->SetAsFloats(positions, 3, 2);
+		shader->Handle()->GetParam("lightColors[0]")   ->SetAsFloats(colors, 3, 2);
 
 		// Textures
 		
-		Texture shadow = Texture(1024, 1024, RG,    FLOAT, BORDER);
+		Texture shadow = Texture(1024, 1024, RG, FLOAT, BORDER);
+
 		ref<Texture> texShadow = Asset->Give("ShadowMap", &shadow);
-		
 		ref<Texture> texDepth  = REF<Texture>(1024, 1024, DEPTH, FLOAT, BORDER);
 		ref<Texture> texBlur   = REF<Texture>(1024, 1024, ALPHA, FLOAT, BORDER);
-
-		texDepth->Initialize(Renderer->Device);
-		texShadow->Initialize(Renderer->Device);
-		texBlur->Initialize(Renderer->Device);
 
 		target = std::make_shared<RenderTarget>(1024, 1024);
 		target->AddTexture(texShadow);
@@ -126,7 +126,7 @@ namespace iw {
 
 		// Lights
 
-		light = DirectionalLight(directional, target, OrthographicCamera(60, 60, -50, 50));
+		light = DirectionalLight(100.0f, OrthographicCamera(60, 60, -50, 50), directional, target);
 
 		// Materials
 
@@ -173,16 +173,34 @@ namespace iw {
 
 		//	Player
 
-		Mesh* pmesh = smesh->Instance();
-		pmesh->Material = REF<Material>(smat->Instance());
+		Model pm { new Mesh[1], 1 };
+		pm.Meshes[0] = smesh->Instance();
+		pm.Meshes[0].Material = REF<Material>(smat->Instance());
 
-		Model pm { pmesh, 1 };
 		Asset->Give<Model>("Player", &pm);
+
+		//	Door
+
+		Mesh* dmesh = MakeIcosphere(0);
+		dmesh->Material = REF<Material>(smat->Instance());
+
+		dmesh->Initialize(Renderer->Device);
+
+		Model dm { dmesh, 1 };
+		Asset->Give<Model>("Door", &dm);
+
+		// Transition mesh
+		
+		tranMesh = MakePlane(1, 1);
+		tranMesh->Material = REF<Material>(smat->Instance());
+
+		tranMesh->Initialize(Renderer->Device);
 
 		// Cameras
 
-		mainCam = new PerspectiveCamera (1.17f, 1.778f, .01f, 2000.0f);
+		mainCam = new PerspectiveCamera ();
 		textCam = new OrthographicCamera(vector3::one, quaternion::from_axis_angle(vector3::unit_y, Pi), 16, 9, -10, 10);
+		tranCam = new OrthographicCamera(16, 9, 0, 1);
 
 		// Floor colliders
 
@@ -242,7 +260,7 @@ namespace iw {
 		postProcessShadowMap->SetIntermediate(targetBlur);
 		postProcessShadowMap->SetShader(gaussian);
 		mainRender          ->SetLight(light);
-		mainRender          ->SetAmbiance(0.03f);
+		mainRender          ->SetAmbiance(0.008f);
 		mainRender          ->SetGamma(2.2f);
 
 		pipeline.first(generateShadowMap)
@@ -268,10 +286,12 @@ namespace iw {
 	}
 
 	void SandboxLayer::PostUpdate() {
-		font->UpdateMesh(textMesh, std::to_string(1.0f / Time::DeltaTime()), 0.01f, 1);
+		//font->UpdateMesh(textMesh, std::to_string(1.0f / Time::DeltaTime()), 0.01f, 1);
 		textMesh->Update(Renderer->Device);
 
 		// Main render
+
+		mainCam->SetProjection(iw::lerp(persp, ortho, blend));
 
 		light.SetPosition(lightPos);
 		light.SetRotation(quaternion::from_look_at(lightPos));
@@ -284,8 +304,9 @@ namespace iw {
 
 		pipeline.execute();
 
-		Renderer->SetCamera(textCam);
+		Renderer->BeginScene(textCam);
 		Renderer->DrawMesh(&textTransform, textMesh);
+		Renderer->EndScene();
 	}
 	
 	void SandboxLayer::FixedUpdate() {
@@ -299,6 +320,8 @@ namespace iw {
 
 		ImGui::SliderFloat("Ambiance", (float*)&mainRender->GetAmbiance(), 0, 1);
 		ImGui::SliderFloat("Gamma", (float*)&mainRender->GetGamma(), 0, 5);
+		ImGui::SliderFloat("Camera blend", &blend, 0, 1);
+
 
 		ImGui::SliderFloat("Shadow map blur", &blurAmount, 0, 5);
 		ImGui::SliderFloat("Shadow map threshold", &threshold, 0, 1);
@@ -362,26 +385,6 @@ namespace iw {
 		ActionEvent& e)
 	{
 		switch (e.Action) {
-			case val(Actions::SPAWN_CIRCLE_TEMP): {
-				ref<Model> sphere = Asset->Load<Model>("Sphere");
-
-				for (size_t i = 0; i < 1; i++) {
-					Entity enemy = Space->CreateEntity<Transform, Model, SphereCollider, Rigidbody, Enemy>();
-					enemy.SetComponent<Model>(*Asset->Load<Model>("Tetrahedron"));
-					enemy.SetComponent<Enemy>(EnemyType::SPIN, Bullet{ LINE, 5 }, 0.2617993f, .12f, 0.0f);
-
-					Transform* te = enemy.SetComponent<Transform>(vector3(cos(x) * 1, 15, sin(x) * 1));
-					SphereCollider* se = enemy.SetComponent<SphereCollider>(vector3::zero, 1.0f);
-					Rigidbody* re = enemy.SetComponent<Rigidbody>();
-
-					re->SetMass(1);
-					re->SetCol(se);
-					re->SetTrans(te);
-
-					Physics->AddRigidbody(re);
-				}
-				break;
-			}
 			case val(Actions::LOADED_LEVEL): { // hack for needing to reset space, should all be in level prefabs but thatl come later
 				// Main Camera
 
@@ -389,8 +392,11 @@ namespace iw {
 					* iw::quaternion::from_axis_angle(iw::vector3::unit_z, iw::Pi);
 
 				iw::Entity camera = Space->CreateEntity<iw::Transform, iw::CameraController>();
-				camera.SetComponent<iw::Transform>(vector3(0, 25, 0), iw::vector3::one, camrot);
-				camera.SetComponent<iw::CameraController>(mainCam);
+
+				iw::Transform* transform = camera.SetComponent<iw::Transform>(vector3(0, 25, 0), iw::vector3::one, camrot);
+				                           camera.SetComponent<iw::CameraController>(mainCam);
+
+				mainCam->SetTrans(transform);
 				break;
 			}
 		}

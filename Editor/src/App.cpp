@@ -7,6 +7,8 @@
 #include "iw/physics/Collision/SphereCollider.h"
 #include "iw/audio/AudioSpaceStudio.h"
 
+#include "Layers/TestLayer.h"
+
 namespace iw {
 	App::App() {
 		Audio = REF<AudioSpaceStudio>("assets/sounds/");
@@ -34,7 +36,7 @@ namespace iw {
 		toolbox = PushLayer<ToolLayer>();
 		imgui   = PushLayer<ImGuiLayer>();
 
-		PushLayer<SandboxLayer>();
+		PushLayer<TestLayer>();
 	}
 
 	int App::Initialize(
@@ -83,7 +85,7 @@ namespace iw {
 		else if (command.Verb == "imgui") {
 			if (GetLayer("ImGui") == nullptr) {
 				PushLayer(imgui);
-				Bus->push<WindowResizedEvent>(Window().Id(), Renderer->Width, Renderer->Height);
+				Bus->push<WindowResizedEvent>(Window().Id(), Renderer->Width(), Renderer->Height());
 			}
 
 			else {

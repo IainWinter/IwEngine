@@ -165,15 +165,19 @@ namespace Graphics {
 	void Mesh::Draw(
 		const ref<IDevice>& device) const
 	{
+#ifdef IW_DEBUG
+		if (!VertexArray) {
+			LOG_WARNING << "Mesh needs to be initialized!";
+		}
+#endif 
+
 		device->SetVertexArray(VertexArray);
 		device->SetIndexBuffer(IndexBuffer);
 		device->DrawElements(Topology, IndexCount, 0);
 	}
 
-	Mesh* Mesh::Instance() const {
-		Mesh* mesh = new Mesh();
-		*mesh = *this;
-		return mesh;
+	Mesh Mesh::Instance() const {
+		return *this;
 	}
 
 	// Generate vertex normals by averaging the face normals of the surrounding faces

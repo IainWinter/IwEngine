@@ -78,10 +78,11 @@ void EnemySystem::Update(
 		}
 	}
 
-	if (m_enemyCount == 0) {
+	if (   m_enemyCount == 0
+		&& m_levelResetTimer < 0.2f)
+	{
 		m_levelResetTimer += iw::Time::DeltaTime();
-		if (m_levelResetTimer > 1.0f) {
-			m_levelResetTimer = 0;
+		if (m_levelResetTimer > 0.2f) {
 			Bus->push<OpenNextLevelEvent>();
 		}
 	}
@@ -130,6 +131,16 @@ bool EnemySystem::On(
 			QueueDestroyEntity(enemy.Index());
 			Audio->AsStudio()->CreateInstance("enemyDeath");
 		}
+	}
+
+	return false;
+}
+
+bool EnemySystem::On(
+	iw::ActionEvent& e)
+{
+	if (e.Action == iw::val(Actions::LOADED_LEVEL)) {
+		m_levelResetTimer = 0;
 	}
 
 	return false;

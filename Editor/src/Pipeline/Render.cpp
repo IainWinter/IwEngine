@@ -62,10 +62,11 @@ namespace iw {
 		for (auto c_e : space->Query<Transform, CameraController>()) {
 			auto [c_t, c_c] = c_e.Components.Tie<CameraComponents>();
 
-			c_c->Camera->Position = c_t->Position;
-			c_c->Camera->Rotation = c_t->Rotation;
-
 			renderer->BeginScene(c_c->Camera);
+
+			// Alpha pass
+			std::vector<Transform*> transs;
+			std::vector<Mesh*>      meshes;
 
 			for (auto m_e : space->Query<Transform, Model>()) {
 				auto [m_t, m_m] = m_e.Components.Tie<ModelComponents>();
@@ -73,22 +74,51 @@ namespace iw {
 				for (size_t i = 0; i < m_m->MeshCount; i++) {
 					Mesh& mesh = m_m->Meshes[i];
 
-					renderer->SetShader(mesh.Material->Shader);
+					if (mesh.Material->Get<Color>("albedo")->a != 1) {
+						transs.push_back(m_t);
+						meshes.push_back(&mesh);
+						continue;
+					}
 
-					mesh.Material->Shader->Program->GetParam("lightSpace")
-						->SetAsMat4(light->Cam().GetViewProjection());
+					renderer->Device->SetPipeline(mesh.Material->Shader->Handle());
 
-					mesh.Material->Shader->Program->GetParam("ambiance")
+					//mesh.Material->Shader->Program->GetParam("lightSpace")
+					//	->SetAsMat4(light->Cam().ViewProjection());
+
+					mesh.Material->Shader->Handle()->GetParam("ambiance")
 						->SetAsFloat(ambiance);
 
-					mesh.Material->Shader->Program->GetParam("gamma")
+					mesh.Material->Shader->Handle()->GetParam("gamma")
 						->SetAsFloat(gamma);
 
-					mesh.Material->Shader->Program->GetParam("sunPos")
-						->SetAsFloats(&light->Cam().Position, 3);
+					//mesh.Material->Shader->Program->GetParam("sunPos")
+					//	->SetAsFloats(&light->Cam().Position(), 3);
 
 					renderer->DrawMesh(m_t, &mesh);
 				}
+			}
+
+			// scuffed alpha pass
+
+			for (size_t i = 0; i < transs.size(); i++) {
+				Transform* m_t = transs[i];
+				Mesh&     mesh = *meshes[i];
+
+				renderer->Device->SetPipeline(mesh.Material->Shader->Handle());
+
+				//mesh.Material->Shader->Program->GetParam("lightSpace")
+				//	->SetAsMat4(light->Cam().ViewProjection());
+
+				mesh.Material->Shader->Handle()->GetParam("ambiance")
+					->SetAsFloat(ambiance);
+
+				mesh.Material->Shader->Handle()->GetParam("gamma")
+					->SetAsFloat(gamma);
+
+				//mesh.Material->Shader->Program->GetParam("sunPos")
+				//	->SetAsFloats(&light->Cam().Position(), 3);
+
+				renderer->DrawMesh(m_t, &mesh);
 			}
 
 			renderer->EndScene();

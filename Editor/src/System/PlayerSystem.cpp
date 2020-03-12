@@ -159,7 +159,10 @@ bool PlayerSystem::On(
 {
 	switch (event.Action) {
 		case iw::val(Actions::NEXT_LEVEL ):
-		case iw::val(Actions::RESET_LEVEL): m_playerModel->Meshes[0].Material->Set("albedo", iw::Color(1)); break;
+		case iw::val(Actions::RESET_LEVEL): {
+			m_playerModel->Meshes[0].Material->Set("albedo", iw::Color(1));
+			break;
+		}
 	}
 
 	return false;

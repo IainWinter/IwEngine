@@ -28,6 +28,9 @@ public:
 
 	bool On(
 		iw::CollisionEvent& e) override;
+
+	bool On(
+		iw::ActionEvent& e) override;
 private:
 	void SpawnBullet(
 		Bullet prefab,

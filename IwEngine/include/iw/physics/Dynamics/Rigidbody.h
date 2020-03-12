@@ -23,6 +23,7 @@ namespace Physics {
 		float m_dynamicFriction; // Dynamic friction coeffeicent
 		float m_restitution;     // Elasticity of collisions
 
+		Transform m_lastTrans; // Where the rigidbody was last step
 		Transform m_nextTrans; // Where the rigidbody will be next step if there is no interference
 
 	public:
@@ -77,6 +78,9 @@ namespace Physics {
 		float Restitution() const;
 
 		IWPHYSICS_API
+		const Transform& LastTrans() const;
+
+		IWPHYSICS_API
 		const Transform& NextTrans() const;
 
 		IWPHYSICS_API
@@ -126,6 +130,14 @@ namespace Physics {
 		IWPHYSICS_API
 		void SetRestitution(
 			float restitution);
+
+		IWPHYSICS_API
+		void SetTrans(
+			Transform* transform) override;
+
+		IWPHYSICS_API
+		void SetLastTrans(
+			const Transform& lastTrans);
 
 		IWPHYSICS_API
 		void SetNextTrans(

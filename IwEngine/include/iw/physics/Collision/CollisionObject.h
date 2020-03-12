@@ -7,7 +7,7 @@ namespace iw {
 namespace Physics {
 	class CollisionObject {
 	protected:
-		Transform* m_transform;     // Position, rotation, and scale
+		Transform m_transform;     // Position, rotation, and scale.
 		Collider*  m_collider;      // Shape of the collision object (only 3d right now)
 		bool m_isTrigger;
 		bool m_isDynamic;
@@ -20,7 +20,10 @@ namespace Physics {
 		AABB Bounds() const;
 
 		IWPHYSICS_API
-		Transform* Trans() const;
+		Transform* Trans();
+
+		IWPHYSICS_API
+		const Transform* Trans() const;
 
 		IWPHYSICS_API
 		Collider* Col() const; // should be const probly also these are not needed if they are pointers but Ill try the get set thigs for now as a lil test because ive always dismissed it for the most part
@@ -32,7 +35,7 @@ namespace Physics {
 		bool IsTrigger() const;
 
 		IWPHYSICS_API
-		void SetTrans(
+		virtual void SetTrans(
 			Transform* transform);
 
 		IWPHYSICS_API

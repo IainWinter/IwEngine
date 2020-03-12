@@ -115,8 +115,9 @@ void main() {
 	vec4 albedo = mat_albedo;
 	if (mat_hasAlbedoMap == 1) {
 		albedo = texture(mat_albedoMap, TexCoords);
-		albedo.xyz = pow(albedo.xyz, vec3(gamma));
 	}
+
+	albedo.xyz = pow(albedo.xyz, vec3(gamma));
 
 	float ao = mat_ao;
 	if (mat_hasAoMap == 1) {

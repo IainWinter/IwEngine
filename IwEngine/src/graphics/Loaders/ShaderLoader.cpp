@@ -55,7 +55,6 @@ namespace Graphics {
 				code = source.substr(start, end - start);
 			}
 
-			
 			// Only make this when we need to
 			if (shader == nullptr) {
 				shader = new Shader();

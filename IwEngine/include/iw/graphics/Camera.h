@@ -1,28 +1,33 @@
 #pragma once
 
 #include "IwGraphics.h"
-#include "iw/math/matrix4.h"
+#include "iw/common/Components/Transform.h"
 
 namespace iw {
 namespace Graphics {
 	class IWGRAPHICS_API Camera {
-	public:
-		iw::vector3    Position;
-		iw::quaternion Rotation;
 	protected:
 		iw::matrix4 m_view;
 	private:
+		Transform*     m_transform;
 		iw::vector3    m_position;
 		iw::quaternion m_rotation;
+		bool m_outdated;
 
 	public:
 		Camera();
 
 		Camera(
-			const iw::vector3& position,
-			const iw::quaternion& rotation);
+			Transform* transform);
+
+		Camera(
+			const vector3& position,
+			const quaternion& rotation);
 
 		virtual ~Camera() {}
+
+		void SetTrans(
+			Transform* transform);
 
 		void SetView(
 			const iw::matrix4& view);
@@ -30,10 +35,22 @@ namespace Graphics {
 		virtual void SetProjection(
 			const iw::matrix4& projection) = 0;
 
-		iw::matrix4 GetView();
-		iw::matrix4 GetViewProjection();
+		const vector3& Position() const;
+		const quaternion& Rotation() const;
 
-		virtual iw::matrix4 GetProjection() const = 0;
+		vector3& Position();
+		quaternion& Rotation();
+
+		void SetPosition(
+			const vector3& rotation);
+
+		void SetRotation(
+			const quaternion& rotation);
+
+		matrix4 View();
+		matrix4 ViewProjection();
+
+		virtual iw::matrix4 Projection() const = 0;
 	private:
 		void RecalculateView();
 	};
@@ -56,8 +73,15 @@ namespace Graphics {
 			float zFar);
 
 		OrthographicCamera(
-			const iw::vector3& position,
-			const iw::quaternion& rotation,
+			Transform* transform,
+			float width,
+			float height,
+			float zNear,
+			float zFar);
+
+		OrthographicCamera(
+			const vector3& position,
+			const quaternion& rotation,
 			float width,
 			float height,
 			float zNear,
@@ -75,7 +99,7 @@ namespace Graphics {
 			m_projection = projection;
 		}
 
-		inline iw::matrix4 GetProjection() const override {
+		inline iw::matrix4 Projection() const override {
 			return m_projection;
 		}
 	};
@@ -102,8 +126,15 @@ namespace Graphics {
 			float zFar);
 
 		PerspectiveCamera(
-			const iw::vector3& position,
-			const iw::quaternion& rotation,
+			Transform* transform,
+			float fov,
+			float aspect,
+			float zNear,
+			float zFar);
+
+		PerspectiveCamera(
+			const vector3& position,
+			const quaternion& rotation,
 			float fov,
 			float aspect,
 			float zNear,
@@ -121,7 +152,7 @@ namespace Graphics {
 			m_projection = projection;
 		}
 
-		inline iw::matrix4 GetProjection() const override {
+		inline iw::matrix4 Projection() const override {
 			return m_projection;
 		}
 	};
