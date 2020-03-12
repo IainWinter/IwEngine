@@ -68,6 +68,9 @@ namespace iw {
 		light2 = new iw::PointLight(30.f, 1.0f);
 		dirLight = new iw::DirectionalLight();
 
+		light ->SetPosition( 5);
+		light2->SetPosition(-5);
+
 		scene = new Scene();
 
 		scene->Camera = camera;

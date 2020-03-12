@@ -100,8 +100,6 @@ namespace Graphics {
 		SetTarget(target);
 
 		m_state = RenderState::SCENE;
-		
-		//Device->Clear();
 	}
 
 	void Renderer::BeginScene(
@@ -110,10 +108,8 @@ namespace Graphics {
 	{
 		BeginScene(scene->Camera, target);
 
-		SetPointLights(scene->PointLights);
+		SetPointLights      (scene->PointLights);
 		SetDirectionalLights(scene->DirectionalLights);
-
-		//Device->Clear();
 	}
 
 	void Renderer::EndScene() {

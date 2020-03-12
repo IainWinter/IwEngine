@@ -169,7 +169,7 @@ void LevelSystem::LoadLevel(
 		}
 
 		for (int i = -x; i < x; i += 4) {
-			LoadTree("models/forest/tree.dae", iw::Transform{
+			LoadTree("models/forest/tree.dae", iw::Transform {
 				iw::vector3(i, 0, -y),
 				scale,
 				iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
@@ -178,7 +178,7 @@ void LevelSystem::LoadLevel(
 		}
 
 		for (int i = -y; i <= y; i += 3) {
-			LoadTree("models/forest/tree.dae", iw::Transform{
+			LoadTree("models/forest/tree.dae", iw::Transform {
 				iw::vector3(x, 0, i),
 				scale,
 				iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
@@ -187,7 +187,7 @@ void LevelSystem::LoadLevel(
 		}
 
 		for (int i = -y + 3; i < y; i += 3) {
-			LoadTree("models/forest/tree.dae", iw::Transform{
+			LoadTree("models/forest/tree.dae", iw::Transform {
 				iw::vector3(-x, 0, i),
 				scale,
 				iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)

@@ -1,4 +1,4 @@
-#include "PointLight.h"
+#include "iw/graphics/PointLight.h"
 #include "iw/graphics/Renderer.h"
 
 namespace iw {
