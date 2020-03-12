@@ -23,10 +23,9 @@ namespace Graphics {
 			ShaderType Type;
 		};
 
-	public:
-		iw::ref<IPipeline> Program; // not really sure of the name for Shader Program. Every engine just calls it Shader but thats wrong kinda?
 	private:
 		std::vector<ShaderSource> m_source;
+		IPipeline* m_handle;
 
 	public:
 		IWGRAPHICS_API
@@ -38,7 +37,14 @@ namespace Graphics {
 			const char* source);
 
 		IWGRAPHICS_API
+		IPipeline* Handle() const;
+
+		IWGRAPHICS_API
 		void Initialize(
+			const iw::ref<IDevice>& device);
+
+		IWGRAPHICS_API
+		void Use(
 			const iw::ref<IDevice>& device);
 	};
 }

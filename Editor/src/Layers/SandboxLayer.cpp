@@ -93,7 +93,7 @@ namespace iw {
 		Renderer->InitShader(directional, CAMERA);
 		Renderer->InitShader(gaussian,    CAMERA);
 
-		Renderer->SetShader(shader);
+		//Renderer->SetShader(shader);
 
 		vector3* positions = new vector3[2];
 		vector3* colors    = new vector3[2];
@@ -104,20 +104,16 @@ namespace iw {
 		colors[0] = vector3(1);
 		colors[1] = vector3(1);
 
-		shader->Program->GetParam("lightPositions[0]")->SetAsFloats(positions, 3, 2);
-		shader->Program->GetParam("lightColors[0]")   ->SetAsFloats(colors, 3, 2);
+		shader->Handle()->GetParam("lightPositions[0]")->SetAsFloats(positions, 3, 2);
+		shader->Handle()->GetParam("lightColors[0]")   ->SetAsFloats(colors, 3, 2);
 
 		// Textures
 		
-		Texture shadow = Texture(1024, 1024, RG,    FLOAT, BORDER);
+		Texture shadow = Texture(1024, 1024, RG, FLOAT, BORDER);
+
 		ref<Texture> texShadow = Asset->Give("ShadowMap", &shadow);
-		
 		ref<Texture> texDepth  = REF<Texture>(1024, 1024, DEPTH, FLOAT, BORDER);
 		ref<Texture> texBlur   = REF<Texture>(1024, 1024, ALPHA, FLOAT, BORDER);
-
-		texDepth->Initialize(Renderer->Device);
-		texShadow->Initialize(Renderer->Device);
-		texBlur->Initialize(Renderer->Device);
 
 		target = std::make_shared<RenderTarget>(1024, 1024);
 		target->AddTexture(texShadow);
@@ -130,7 +126,7 @@ namespace iw {
 
 		// Lights
 
-		light = DirectionalLight(directional, target, OrthographicCamera(60, 60, -50, 50));
+		light = DirectionalLight(100.0f, OrthographicCamera(60, 60, -50, 50), directional, target);
 
 		// Materials
 
@@ -308,8 +304,9 @@ namespace iw {
 
 		pipeline.execute();
 
-		Renderer->SetCamera(textCam);
+		Renderer->BeginScene(textCam);
 		Renderer->DrawMesh(&textTransform, textMesh);
+		Renderer->EndScene();
 	}
 	
 	void SandboxLayer::FixedUpdate() {
@@ -388,26 +385,6 @@ namespace iw {
 		ActionEvent& e)
 	{
 		switch (e.Action) {
-			case val(Actions::SPAWN_CIRCLE_TEMP): {
-				ref<Model> sphere = Asset->Load<Model>("Sphere");
-
-				for (size_t i = 0; i < 1; i++) {
-					Entity enemy = Space->CreateEntity<Transform, Model, SphereCollider, Rigidbody, Enemy>();
-					enemy.SetComponent<Model>(*Asset->Load<Model>("Tetrahedron"));
-					enemy.SetComponent<Enemy>(EnemyType::SPIN, Bullet{ LINE, 5 }, 0.2617993f, .12f, 0.0f);
-
-					Transform* te = enemy.SetComponent<Transform>(vector3(cos(x) * 1, 15, sin(x) * 1));
-					SphereCollider* se = enemy.SetComponent<SphereCollider>(vector3::zero, 1.0f);
-					Rigidbody* re = enemy.SetComponent<Rigidbody>();
-
-					re->SetMass(1);
-					re->SetCol(se);
-					re->SetTrans(te);
-
-					Physics->AddRigidbody(re);
-				}
-				break;
-			}
 			case val(Actions::LOADED_LEVEL): { // hack for needing to reset space, should all be in level prefabs but thatl come later
 				// Main Camera
 
@@ -415,8 +392,11 @@ namespace iw {
 					* iw::quaternion::from_axis_angle(iw::vector3::unit_z, iw::Pi);
 
 				iw::Entity camera = Space->CreateEntity<iw::Transform, iw::CameraController>();
-				camera.SetComponent<iw::Transform>(vector3(0, 25, 0), iw::vector3::one, camrot);
-				camera.SetComponent<iw::CameraController>(mainCam);
+
+				iw::Transform* transform = camera.SetComponent<iw::Transform>(vector3(0, 25, 0), iw::vector3::one, camrot);
+				                           camera.SetComponent<iw::CameraController>(mainCam);
+
+				mainCam->SetTrans(transform);
 				break;
 			}
 		}

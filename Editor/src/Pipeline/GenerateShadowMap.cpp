@@ -38,7 +38,7 @@ namespace iw {
 		Light* light = GetLight();
 		float& threshold = GetThreshold();
 
-		renderer->BeginLight(light);
+		renderer->BeginShadowCast(light);
 
 		for (auto m_e : space->Query<Transform, Model>()) {
 			auto [m_t, m_m] = m_e.Components.Tie<Components>();
@@ -51,16 +51,16 @@ namespace iw {
 					it = t->Handle();
 				}
 
-				light->LightShader()->Program->GetParam("hasAlphaMask")  ->SetAsFloat(it != nullptr);
-				light->LightShader()->Program->GetParam("alphaMask")     ->SetAsTexture(it, 0);
-				light->LightShader()->Program->GetParam("alphaThreshold")->SetAsFloat(threshold);
+				light->ShadowShader()->Handle()->GetParam("hasAlphaMask")  ->SetAsFloat(it != nullptr);
+				light->ShadowShader()->Handle()->GetParam("alphaMask")     ->SetAsTexture(it, 0);
+				light->ShadowShader()->Handle()->GetParam("alphaThreshold")->SetAsFloat(threshold);
 
-				renderer->CastMesh(light, m_t, &m_m->Meshes[i]);
+				renderer->DrawMesh(m_t, &m_m->Meshes[i]);
 			}
 		}
 
-		renderer->EndLight(light);
+		renderer->EndShadowCast(light);
 
-		out(0, light->LightTarget());
+		out(0, light->ShadowTarget());
 	}
 }

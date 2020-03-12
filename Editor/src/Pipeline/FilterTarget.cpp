@@ -47,13 +47,13 @@ namespace iw {
 		iw::ref<Shader>& shader = GetShader();
 		iw::vector2& blur = GetBlur();
 
-		renderer->SetShader(shader);
+		//renderer->SetShader(shader);
 
-		shader->Program->GetParam("blurScale")->SetAsFloats(&iw::vector3(blur.x, 0, 0), 3);
-		renderer->ApplyFilter(shader, target.get(), intermediate.get());
+		//shader->Handle()->GetParam("blurScale")->SetAsFloats(&iw::vector3(blur.x, 0, 0), 3);
+		//renderer->ApplyFilter(shader, target.get(), intermediate.get());
 
-		shader->Program->GetParam("blurScale")->SetAsFloats(&iw::vector3(0, blur.y, 0), 3);
-		renderer->ApplyFilter(shader, intermediate.get(), target.get());
+		//shader->Handle()->GetParam("blurScale")->SetAsFloats(&iw::vector3(0, blur.y, 0), 3);
+		//renderer->ApplyFilter(shader, intermediate.get(), target.get());
 
 		out(0, target->Tex(0));
 	}

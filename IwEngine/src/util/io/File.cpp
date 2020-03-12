@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <cerrno>
 #include <string>
+#include <algorithm>
 
 #define MAX_LINE_LENGTH 1000
 
@@ -32,7 +33,7 @@ namespace util {
 	{
 		std::string contents;
 		FILE* file;
-		errno_t errorCode = fopen_s(&file, filePath.c_str(), "rt");
+		errno_t errorCode = fopen_s(&file, filePath.c_str(), "rb");
 		if (file) {
 			fseek(file, 0, SEEK_END);
 			contents.resize(ftell(file));
@@ -44,6 +45,10 @@ namespace util {
 		else {
 			ReportError(errorCode, filePath);
 		}
+
+		// kinda sucks
+
+		contents.erase(std::remove(contents.begin(), contents.end(), '\r'), contents.end());
 
 		return contents;
 	}

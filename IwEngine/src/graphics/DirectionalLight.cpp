@@ -1,29 +1,36 @@
 #include "iw/graphics/DirectionalLight.h"
+#include "iw/graphics/Renderer.h"
 
 namespace iw {
 namespace Graphics {
 	DirectionalLight::DirectionalLight(
-		iw::ref<Shader> shader,
-		iw::ref<iw::RenderTarget> target,
-		OrthographicCamera camera)
-		: Light(shader, target)
-		, m_camera(camera)
-	{}
-
-	void DirectionalLight::SetPosition(
-		const iw::vector3& position)
+		float intensity,
+		OrthographicCamera shadowCamera,
+		ref<Shader> shadowShader,
+		ref<RenderTarget> shadowTarget)
+		: Light(intensity, nullptr, shadowShader, shadowTarget)
 	{
-		m_camera.Position = position;
+		m_shadowCamera = new OrthographicCamera(shadowCamera);
+	}
+
+	void DirectionalLight::SetupShadowCast(
+		Renderer* renderer)
+	{
+		renderer->SetCamera(m_shadowCamera);
+	}
+
+	const quaternion& DirectionalLight::Rotation() const {
+		return m_shadowCamera->Rotation();
+	}
+
+	quaternion& DirectionalLight::Rotation() {
+		return m_shadowCamera->Rotation();
 	}
 
 	void DirectionalLight::SetRotation(
 		const iw::quaternion& rotation)
 	{
-		m_camera.Rotation = rotation;
-	}
-
-	Camera& DirectionalLight::Cam() {
-		return m_camera;
+		m_shadowCamera->SetRotation(rotation);
 	}
 }
 }

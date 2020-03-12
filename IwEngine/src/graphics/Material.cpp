@@ -88,7 +88,7 @@ namespace Graphics {
 				return;
 			}
 		
-			if (!Shader->Program) {
+			if (!Shader->Handle()) {
 				Shader->Initialize(device);
 			}
 
@@ -98,9 +98,9 @@ namespace Graphics {
 				}
 			}
 
-			int count = Shader->Program->UniformCount();
+			int count = Shader->Handle()->UniformCount();
 			for (int i = 0; i < count; i++) {
-				IPipelineParam* uniform = Shader->Program->GetParam(i);
+				IPipelineParam* uniform = Shader->Handle()->GetParam(i);
 				if (!uniform) {
 					continue; // Check for null
 				}
@@ -134,14 +134,14 @@ namespace Graphics {
 	void Material::Use(
 		const iw::ref<IDevice>& device)
 	{
-		device->SetPipeline(Shader->Program.get());
+		//device->SetPipeline(Shader->Handle());
 
 		for (MaterialProperty& prop : m_properties) {
 			if (!prop.Active) {
 				continue;
 			}
 
-			IPipelineParam* param = Shader->Program->GetParam("mat_" + prop.Name);
+			IPipelineParam* param = Shader->Handle()->GetParam("mat_" + prop.Name);
 
 			if (!param) {
 				LOG_WARNING << "Invalid property in material: " << prop.Name;
@@ -165,7 +165,7 @@ namespace Graphics {
 				continue;
 			}
 
-			IPipelineParam* param = Shader->Program->GetParam("mat_" + prop.Name);
+			IPipelineParam* param = Shader->Handle()->GetParam("mat_" + prop.Name);
 
 			if (!param) {
 				LOG_WARNING << "Invalid texture in material: " << prop.Name;

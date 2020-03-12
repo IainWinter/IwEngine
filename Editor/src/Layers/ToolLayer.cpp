@@ -10,9 +10,8 @@
 #include "imgui/imgui.h"
 
 namespace iw {
-	struct ModelComponents {
+	struct ObjectComponents {
 		Transform* Transform;
-		Model* Model;
 	};
 
 	struct CameraComponents {
@@ -50,10 +49,10 @@ namespace iw {
 		for (auto camera : Space->Query<Transform, CameraController>()) {
 			auto [camTransform, camController] = camera.Components.Tie<CameraComponents>();
 
-			Renderer->SetCamera(camController->Camera);
+			Renderer->BeginScene(camController->Camera);
 
-			for (auto entity : Space->Query<Transform, Model>()) {
-				auto [entTransform, entModel] = entity.Components.Tie<ModelComponents>();
+			for (auto entity : Space->Query<Transform, Mesh>()) {
+				auto [entTransform] = entity.Components.Tie<ObjectComponents>();
 
 				font->UpdateMesh(textMesh, std::to_string(entity.Index), .1f, 1);
 				textMesh->Update(Renderer->Device);
@@ -67,37 +66,20 @@ namespace iw {
 
 				Renderer->DrawMesh(&t, textMesh);
 			}
+
+			Renderer->EndScene();
 		}
 	}
 
 	void ToolLayer::ImGui() {
 		ImGui::Begin("Toolbox");
 
-		if (ImGui::Button("Create Sphere")) {
-			Bus->push<SingleEvent>(iw::val(Actions::SPAWN_CIRCLE_TEMP));
-		}
-
 		int draws = 0;
 		for (auto entity : Space->Query<Transform, Model>()) {
-			auto [t, m] = entity.Components.Tie<ModelComponents>();
-
 			draws++;
-
-			//std::stringstream s;
-			//s << "Position ";
-			//s << entity.Index;
-
-			//ImGui::Value("Entity Index", (int)entity.Index);
-			//ImGui::SliderFloat3(s.str().c_str(), (float*)&t->Position, -10, 10);
 		}
 
 		ImGui::Value("Number of object", draws);
-
-		//for (auto entity : Space->Query<Transform, CameraController>()) {
-		//	auto [t, m] = entity.Components.Tie<EditorCameraController::Components>();
-
-		//	ImGui::SliderFloat3("Pos", (float*)&t->Position, -10, 10);
-		//}
 
 		ImGui::End();
 	}
@@ -105,24 +87,24 @@ namespace iw {
 	bool ToolLayer::On(
 		MouseButtonEvent& e)
 	{
-		if (   e.State
-			&& e.Button == iw::LMOUSE)
-		{
-			matrix4 viewproj = (*Space->Query<Transform, CameraController>().begin()).Components.Tie<CameraComponents>().Controller->Camera->GetViewProjection(); // yak on em
+		//if (   e.State
+		//	&& e.Button == iw::LMOUSE)
+		//{
+		//	matrix4 viewproj = (*Space->Query<Transform, CameraController>().begin()).Components.Tie<CameraComponents>().Controller->Camera->GetViewProjection(); // yak on em
 
-			float x = (e.InputStates->GetState(MOUSEX) / Renderer->Width  - 0.5f) * 2;
-			float y = (e.InputStates->GetState(MOUSEY) / Renderer->Height - 0.5f) * 2;
+		//	float x = (e.InputStates->GetState(MOUSEX) / Renderer->Width  - 0.5f) * 2;
+		//	float y = (e.InputStates->GetState(MOUSEY) / Renderer->Height - 0.5f) * 2;
 
-			vector4 begin(x, y, -1, 1);
-			vector4 end  (x, y,  0, 1);
+		//	vector4 begin(x, y, -1, 1);
+		//	vector4 end  (x, y,  0, 1);
 
-			vector4 wStart = begin * viewproj; wStart /= wStart.w;
-			vector4 wEnd   = end   * viewproj; wEnd   /= wEnd  .w;
+		//	vector4 wStart = begin * viewproj; wStart /= wStart.w;
+		//	vector4 wEnd   = end   * viewproj; wEnd   /= wEnd  .w;
 
-			LOG_INFO << (wEnd - wStart).normalized();
-		}
+		//	LOG_INFO << (wEnd - wStart).normalized();
+		//}
 
-		return false;
+		return Layer::On(e);;
 	}
 }
 

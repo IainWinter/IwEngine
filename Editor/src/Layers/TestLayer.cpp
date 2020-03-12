@@ -6,11 +6,18 @@
 #include "iw/graphics/Camera.h"
 #include "imgui/imgui.h"
 #include "iw/engine/Time.h"
+#include "iw/engine/Components/CameraController.h"
+#include "iw/graphics/PointLight.h"
 
 namespace iw {
 	struct MeshComponents {
 		Transform* Transform;
 		Mesh* Model;
+	};
+
+	struct CameraControllerComponents {
+		Transform* Transform;
+		CameraController* Model;
 	};
 
 	TestLayer::TestLayer()
@@ -19,14 +26,16 @@ namespace iw {
 
 	int TestLayer::Initialize() {
 		shader = Asset->Load<Shader>("shaders/test_pbr.shader");
-		Renderer->InitShader(shader, CAMERA);
+		Renderer->InitShader(shader, CAMERA | LIGHTS);
 
 		Mesh* mesh = MakeIcosphere(5);
+
+		srand(time(nullptr));
 
 		for (int x = -4; x < 5; x++) {
 			Entity entity = Space->CreateEntity<Transform, Mesh>();
 
-			Transform* transform  = entity.SetComponent<Transform>(iw::vector3(x * 2.5f, 0, 7.5f));
+			Transform* transform  = entity.SetComponent<Transform>(iw::vector3(x * 2.5f, 0, 10));
 			Mesh*      sphere     = entity.SetComponent<Mesh>();
 
 			*sphere = mesh->Instance();
@@ -38,13 +47,32 @@ namespace iw {
 				rand() / (float)RAND_MAX)
 			);
 
+			sphere->Material->Set("reflectance", rand() / (float)RAND_MAX);
+			sphere->Material->Set("roughness",   rand() / (float)RAND_MAX);
+			sphere->Material->Set("metallic",    rand() / (float)RAND_MAX);
+
 			sphere->Initialize(Renderer->Device);
 		}
 
 		camera = new PerspectiveCamera(1.17f, 1.77f, .01f, 100.0f);
-		camera->Position.z = -5;
 
-		lightPos = iw::vector3(0, 4, 5);
+		Entity rig = Space->CreateEntity<Transform, CameraController>();
+		
+		Transform* transform = rig.SetComponent<Transform>();
+		                       rig.SetComponent<CameraController>(camera);
+
+
+		camera->SetTrans(transform);
+
+		light  = new iw::PointLight(30.f, 1.0f);
+		light2 = new iw::PointLight(30.f, 1.0f);
+		dirLight = new iw::DirectionalLight();
+
+		scene = new Scene();
+
+		scene->Camera = camera;
+		scene->PointLights.push_back(light);
+		scene->PointLights.push_back(light2);
 
 		delete mesh;
 
@@ -52,9 +80,7 @@ namespace iw {
 	}
 
 	void TestLayer::PostUpdate() {
-		Renderer->BeginScene(camera);
-		
-		shader->Program->GetParam("lightPos")->SetAsFloats(&lightPos, 3);
+		Renderer->BeginScene(scene);
 
 		for (auto entity : Space->Query<Transform, Mesh>()) {
 			auto [transform, sphere] = entity.Components.Tie<MeshComponents>();
@@ -67,7 +93,11 @@ namespace iw {
 	void TestLayer::ImGui() {
 		ImGui::Begin("Test");
 
-		ImGui::SliderFloat3("Light pos", (float*)&lightPos, -10, 10);
+		ImGui::SliderFloat3("Light pos", (float*)&light->Position(), -10, 10);
+		ImGui::SliderFloat("Light rad", &light->Radius(), 0, 100);
+
+		ImGui::SliderFloat3("Light 2 pos", (float*)&light2->Position(), -10, 10);
+		ImGui::SliderFloat("Light 2 rad", &light2->Radius(), 0, 100);
 
 		for (auto entity : Space->Query<Transform, Mesh>()) {
 			auto [transform, sphere] = entity.Components.Tie<MeshComponents>();
@@ -78,9 +108,9 @@ namespace iw {
 			ImGui::SliderFloat(ss.str().c_str(), sphere->Material->Get<float>("reflectance"), 0, 1);
 			
 			ss = std::stringstream();
-			ss << "Smoothness " << entity.Index;
+			ss << "Roughness " << entity.Index;
 			
-			ImGui::SliderFloat(ss.str().c_str(), sphere->Material->Get<float>("smoothness"), 0, 1);
+			ImGui::SliderFloat(ss.str().c_str(), sphere->Material->Get<float>("roughness"), 0, 1);
 
 			ss = std::stringstream();
 			ss << "Metallic " << entity.Index;

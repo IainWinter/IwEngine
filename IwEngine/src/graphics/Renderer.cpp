@@ -27,10 +27,14 @@ namespace Graphics {
 			1, 3, 2
 		};
 
-		m_filterMesh = new Mesh();
-		m_filterMesh->SetVertices(4, pos);
-		m_filterMesh->SetUVs(4, uvs);
-		m_filterMesh->SetIndices(6, tris);
+		Mesh* filterMesh = new Mesh();
+		filterMesh->SetVertices(4, pos);
+		filterMesh->SetUVs(4, uvs);
+		filterMesh->SetIndices(6, tris);
+
+		// needs to be initialized
+
+		m_filterMesh = filterMesh;
 	}
 
 	Renderer::~Renderer() {
@@ -38,26 +42,49 @@ namespace Graphics {
 	}
 
 	void Renderer::Initialize() {
-		m_filterMesh->Initialize(Device);
 		m_cameraUBO = Device->CreateUniformBuffer(&m_cameraData, sizeof(CameraData));
+		m_lightUBO  = Device->CreateUniformBuffer(&m_lightData, sizeof(LightData));
+	}
+
+	int Renderer::Width() const {
+		return m_width;
+	}
+
+	int Renderer::Height() const {
+		return m_height;
+	}
+
+	void Renderer::Resize(
+		int width,
+		int height)
+	{
+		m_width = width;
+		m_height = height;
+		Device->SetViewport(m_width, m_height);
 	}
 
 	void Renderer::Begin() {
-		//Device->Clear();
+		Device->Clear();
+
+		// clear queues
 	}
 
 	void Renderer::End() {
-
+		// execute queues
 	}
 
 	void Renderer::InitShader(
 		iw::ref<Shader>& shader,
-		UBOBinding bindings)
+		int bindings)
 	{
 		shader->Initialize(Device);
 		
 		if (bindings & CAMERA) {
-			shader->Program->SetBuffer("Camera", m_cameraUBO);
+			shader->Handle()->SetBuffer("Camera", m_cameraUBO);
+		}
+
+		if (bindings & LIGHTS) {
+			shader->Handle()->SetBuffer("Lights", m_lightUBO);
 		}
 
 		//if (bindings & MATERIAL) {
@@ -65,122 +92,173 @@ namespace Graphics {
 		//}
 	}
 
-	void Renderer::SetShader(
-		const iw::ref<Shader>& shader)
+	void Renderer::BeginScene(
+		Camera* camera,
+		const ref<RenderTarget>& target)
 	{
-		Device->SetPipeline(shader->Program.get());
-	}
+		SetCamera(camera);
+		SetTarget(target);
 
-	void Renderer::SetCamera(
-		Camera* camera)
-	{
-		matrix4 vp  = iw::matrix4::identity;
-		vector4 pos = vector4::zero;
+		m_state = RenderState::SCENE;
 		
-		if (camera != nullptr) {
-			vp  = camera->GetViewProjection();
-			pos = camera->Position;
-		}
-
-		bool update = false;
-		if (vp != m_cameraData.ViewProj) {
-			m_cameraData.ViewProj = vp;
-			update = true;
-		}
-
-		if (pos != m_cameraData.CameraPos) {
-			m_cameraData.CameraPos = pos;
-			update = true;
-		}
-
-		if (update) {
-			Device->UpdateBuffer(m_cameraUBO, &m_cameraData);
-		}
+		//Device->Clear();
 	}
 
 	void Renderer::BeginScene(
-		Camera* camera,
-		RenderTarget* target)
+		Scene* scene,
+		const ref<RenderTarget>& target)
 	{
-		if (target == nullptr) {
-			Device->SetViewport(Width, Height);
-			Device->SetFrameBuffer(nullptr);
-		}
+		BeginScene(scene->Camera, target);
 
-		else {
-			target->Use(Device);
-		}
+		SetPointLights(scene->PointLights);
+		SetDirectionalLights(scene->DirectionalLights);
 
-		SetCamera(camera);
-
-		Device->Clear();
+		//Device->Clear();
 	}
 
 	void Renderer::EndScene() {
-
+		m_state = RenderState::INVALID;
 	}
 
-	void Renderer::DrawMesh(
-		const Transform* transform, 
-		const Mesh* mesh)
-	{
-		iw::ref<Material> material = mesh->Material;
-		
-		if(!material) {
-			// draw with default material
-		}
-
-		else {
-			material->Use(Device);
-			material->Shader->Program->GetParam("model")->SetAsMat4(transform->Transformation());
-		}
-
-		mesh->Draw(Device);
-	}
-
-	void Renderer::BeginLight(
+	void Renderer::BeginShadowCast(
 		Light* light)
 	{
-		BeginScene(&light->Cam(), light->LightTarget().get());
-		SetShader (light->LightShader());
+		SetShader(light->ShadowShader());
+		SetTarget(light->ShadowTarget());
+
+		light->SetupShadowCast(this);
+
+		m_state = RenderState::SHADOW_MAP;
 	}
 
-	void Renderer::EndLight(
+	void Renderer::EndShadowCast(
 		const Light* light)
 	{
-		// post process
-
 		EndScene();
 	}
 
-	void Renderer::CastMesh(
-		const Light* light, 
-		const Transform* transform, 
+	void Renderer::DrawMesh(
+		const Transform* transform,
 		const Mesh* mesh)
 	{
-		light->LightShader()->Program->GetParam("model")
-			->SetAsMat4(transform->Transformation());
+#ifdef IW_DEBUG
+		if (m_state == RenderState::INVALID) {
+			LOG_WARNING << "Tried to submit mesh to renderer while in invalid state!";
+		}
+#endif
+		if (m_state == RenderState::SCENE) {
+			if (mesh->Material) {
+				SetMaterial(mesh->Material);
+			}
+		}
+
+		m_shader->Handle()->GetParam("model")->SetAsMat4(
+			transform->Transformation()
+		);
 
 		mesh->Draw(Device);
 	}
 
 	void Renderer::ApplyFilter(
 		iw::ref<Shader>& shader,
-		RenderTarget* source,
-		RenderTarget* dest)
+		const ref<RenderTarget>& source,
+		const ref<RenderTarget>& destination)
 	{
-		if (source == dest) return;
-		
-		BeginScene(nullptr, dest);
+		if (source == destination) return;
 
+		SetCamera(nullptr);
 		SetShader(shader);
+		SetTarget(destination);
 
-		shader->Program->GetParam("filterTexture")->SetAsTexture(
-			source->Tex(0)->Handle());
+		shader->Handle()->GetParam("filterTexture")->SetAsTexture(
+			source->Tex(0)->Handle()
+		);
 
 		m_filterMesh->Draw(Device);
 
 		EndScene();
+	}
+
+	void Renderer::SetTarget(
+		const ref<RenderTarget>& target)
+	{
+		if (m_target != target) {
+			if (target) {
+				Device->SetViewport(target->Width(), target->Height());
+			}
+
+			else {
+				Device->SetViewport(m_width, m_height);
+			}
+
+			Device->SetFrameBuffer(target->Handle());
+		}
+
+		m_target = target;
+	}
+
+	void Renderer::SetCamera(
+		Camera* camera)
+	{
+		matrix4 vp  = matrix4::identity;
+		vector3 pos = vector3::zero;
+
+		if (camera) {
+			vp  = camera->ViewProjection();
+			pos = camera->Position();
+		}
+
+		if (   m_cameraData.CameraPos != pos	
+			|| m_cameraData.ViewProj  != vp)
+		{
+			m_cameraData.CameraPos = pos;
+			m_cameraData.ViewProj  = vp;
+			Device->UpdateBuffer(m_cameraUBO, &m_cameraData);
+		}
+	}
+
+	void Renderer::SetShader(
+		const iw::ref<Shader>& shader)
+	{
+		if (m_shader != shader) {
+			m_shader = shader;
+			m_shader->Use(Device);
+		}
+	}
+
+	void Renderer::SetMaterial(
+		const ref<Material>& material)
+	{
+		SetShader(material->Shader);
+		
+		if (m_material != material) {
+			m_material = material;
+			m_material->Use(Device);
+		}
+	}
+
+	void Renderer::SetPointLights(
+		const std::vector<PointLight*>& lights)
+	{
+		m_lightData.PointLightCount = lights.size();
+		for (size_t i = 0; i < lights.size(); i++) {
+			m_lightData.PointLights[i].Position = lights[i]->Position();
+			m_lightData.PointLights[i].Radius = lights[i]->Radius();
+		}
+
+		Device->UpdateBuffer(m_lightUBO, &m_lightData);
+	}
+
+	void Renderer::SetDirectionalLights(
+		const std::vector<DirectionalLight*>& lights)
+	{
+		m_lightData.DirectionalLightCount = lights.size();
+		for (size_t i = 0; i < lights.size(); i++) {
+			m_lightData.DirectionalLights[i].Position = lights[i]->Position();
+			m_lightData.DirectionalLights[i].Direction = lights[i]->Rotation().euler_angles();
+		}
+
+		Device->UpdateBuffer(m_lightUBO, &m_lightData);
 	}
 }
 }

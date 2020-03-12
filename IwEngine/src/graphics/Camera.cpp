@@ -3,27 +3,44 @@
 namespace iw {
 namespace Graphics {
 	Camera::Camera()
-		: Position(iw::vector3::zero)
-		, Rotation(iw::quaternion::identity) 
+		: m_transform(nullptr)
 	{
 		RecalculateView();
 	}
 
 	Camera::Camera(
-		const iw::vector3& position,
-		const iw::quaternion& rotation) 
-		: Position(position)
-		, Rotation(rotation)
+		Transform* transform)
+		: m_transform(transform)
 	{
 		RecalculateView();
 	}
 
-	iw::matrix4 Camera::GetView() {
-		if (Position != m_position || Rotation != m_rotation) {
+	Camera::Camera(
+		const vector3& position,
+		const quaternion& rotation)
+		: m_transform(nullptr)
+		, m_position(position)
+		, m_rotation(rotation)
+	{
+		RecalculateView();
+	}
+
+	iw::matrix4 Camera::View() {
+		if (   m_outdated 
+			|| Position() != m_position 
+			|| Rotation() != m_rotation)
+		{
 			RecalculateView();
 		}
 
 		return m_view;
+	}
+
+	void Camera::SetTrans(
+		Transform* transform)
+	{
+		m_transform = transform;
+		m_outdated = true;
 	}
 
 	void Camera::SetView(
@@ -32,18 +49,62 @@ namespace Graphics {
 		m_view = view;
 	}
 
-	iw::matrix4 Camera::GetViewProjection() {
-		return GetView() * GetProjection();
+	const vector3& Camera::Position() const {
+		return m_transform ? m_transform->Position : m_position;
+	}
+
+	const quaternion& Camera::Rotation() const {
+		return m_transform ? m_transform->Rotation : m_rotation;
+	}
+
+	vector3& Camera::Position() {
+		return m_transform ? m_transform->Position : m_position;
+	}
+
+	quaternion& Camera::Rotation() {
+		return m_transform ? m_transform->Rotation : m_rotation;
+	}
+
+	void Camera::SetPosition(
+		const vector3& position)
+	{
+		if (m_transform) {
+			m_transform->Position = position;
+		}
+		
+		else {
+			m_position= position;
+		}
+
+		m_outdated = true;
+	}
+
+	void Camera::SetRotation(
+		const quaternion& rotation)
+	{
+		if (m_transform) {
+			m_transform->Rotation = rotation;
+		}
+
+		else {
+			m_rotation = rotation;
+		}
+
+		m_outdated = true;
+	}
+
+	iw::matrix4 Camera::ViewProjection() {
+		return View() * Projection();
 	}
 
 	void Camera::RecalculateView() {
 		m_view = iw::matrix4::create_look_at(
-			Position,
-			Position + iw::vector3::unit_z * Rotation,
-			iw::vector3::unit_y * Rotation);
+			Position(),
+			Position() + iw::vector3::unit_z * Rotation(),
+			iw::vector3::unit_y * Rotation());
 
-		m_position = Position;
-		m_rotation = Rotation;
+		m_position = Position();
+		m_rotation = Rotation();
 	}
 
 	OrthographicCamera::OrthographicCamera(
@@ -56,11 +117,22 @@ namespace Graphics {
 	}
 
 	OrthographicCamera::OrthographicCamera(
-		const iw::vector3& position, 
-		const iw::quaternion& rotation, 
+		Transform* transform,
 		float width, 
 		float height, 
 		float zNear, 
+		float zFar)
+		: Camera(transform)
+	{
+		SetProjection(width, height, zNear, zFar);
+	}
+
+	OrthographicCamera::OrthographicCamera(
+		const vector3& position,
+		const quaternion& rotation,
+		float width,
+		float height,
+		float zNear,
 		float zFar)
 		: Camera(position, rotation)
 	{
@@ -86,8 +158,19 @@ namespace Graphics {
 	}
 
 	PerspectiveCamera::PerspectiveCamera(
-		const iw::vector3& position,
-		const iw::quaternion& rotation,
+		Transform* transform,
+		float fov,
+		float aspect,
+		float zNear,
+		float zFar)
+		: Camera(transform)
+	{
+		SetProjection(fov, aspect, zNear, zFar);
+	}
+
+	PerspectiveCamera::PerspectiveCamera(
+		const vector3& position,
+		const quaternion& rotation,
 		float fov,
 		float aspect,
 		float zNear,

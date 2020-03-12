@@ -11,12 +11,6 @@ namespace Graphics {
 		, m_handle(nullptr)
 	{}
 
-	void RenderTarget::AddTexture(
-		iw::ref<Texture> texture)
-	{
-		m_textures.push_back(texture);
-	}
-
 	void RenderTarget::Initialize(
 		const iw::ref<IDevice>& device)
 	{
@@ -33,6 +27,12 @@ namespace Graphics {
 	{
 		device->SetFrameBuffer(m_handle);
 		device->SetViewport(m_width, m_height);
+	}
+
+	void RenderTarget::AddTexture(
+		iw::ref<Texture> texture)
+	{
+		m_textures.push_back(texture);
 	}
 
 	int RenderTarget::Width() const {

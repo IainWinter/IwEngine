@@ -2,6 +2,7 @@
 
 #include "iw/engine/Layer.h"
 #include "iw/graphics/Font.h"
+#include "iw/graphics/PointLight.h"
 
 namespace iw {
 	// Test for intel graphics
@@ -9,9 +10,13 @@ namespace iw {
 		: public Layer
 	{
 	private:
-		Camera* camera;
-		iw::vector3 lightPos;
+		Scene* scene;
 		ref<Shader> shader;
+
+		Camera* camera;
+		PointLight* light;
+		PointLight* light2;
+		DirectionalLight* dirLight;
 
 	public:
 		TestLayer();

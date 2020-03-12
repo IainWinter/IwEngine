@@ -62,9 +62,6 @@ namespace iw {
 		for (auto c_e : space->Query<Transform, CameraController>()) {
 			auto [c_t, c_c] = c_e.Components.Tie<CameraComponents>();
 
-			c_c->Camera->Position = c_t->Position;
-			c_c->Camera->Rotation = c_t->Rotation;
-
 			renderer->BeginScene(c_c->Camera);
 
 			// Alpha pass
@@ -83,19 +80,19 @@ namespace iw {
 						continue;
 					}
 
-					renderer->SetShader(mesh.Material->Shader);
+					renderer->Device->SetPipeline(mesh.Material->Shader->Handle());
 
-					mesh.Material->Shader->Program->GetParam("lightSpace")
-						->SetAsMat4(light->Cam().GetViewProjection());
+					//mesh.Material->Shader->Program->GetParam("lightSpace")
+					//	->SetAsMat4(light->Cam().ViewProjection());
 
-					mesh.Material->Shader->Program->GetParam("ambiance")
+					mesh.Material->Shader->Handle()->GetParam("ambiance")
 						->SetAsFloat(ambiance);
 
-					mesh.Material->Shader->Program->GetParam("gamma")
+					mesh.Material->Shader->Handle()->GetParam("gamma")
 						->SetAsFloat(gamma);
 
-					mesh.Material->Shader->Program->GetParam("sunPos")
-						->SetAsFloats(&light->Cam().Position, 3);
+					//mesh.Material->Shader->Program->GetParam("sunPos")
+					//	->SetAsFloats(&light->Cam().Position(), 3);
 
 					renderer->DrawMesh(m_t, &mesh);
 				}
@@ -107,19 +104,19 @@ namespace iw {
 				Transform* m_t = transs[i];
 				Mesh&     mesh = *meshes[i];
 
-				renderer->SetShader(mesh.Material->Shader);
+				renderer->Device->SetPipeline(mesh.Material->Shader->Handle());
 
-				mesh.Material->Shader->Program->GetParam("lightSpace")
-					->SetAsMat4(light->Cam().GetViewProjection());
+				//mesh.Material->Shader->Program->GetParam("lightSpace")
+				//	->SetAsMat4(light->Cam().ViewProjection());
 
-				mesh.Material->Shader->Program->GetParam("ambiance")
+				mesh.Material->Shader->Handle()->GetParam("ambiance")
 					->SetAsFloat(ambiance);
 
-				mesh.Material->Shader->Program->GetParam("gamma")
+				mesh.Material->Shader->Handle()->GetParam("gamma")
 					->SetAsFloat(gamma);
 
-				mesh.Material->Shader->Program->GetParam("sunPos")
-					->SetAsFloats(&light->Cam().Position, 3);
+				//mesh.Material->Shader->Program->GetParam("sunPos")
+				//	->SetAsFloats(&light->Cam().Position(), 3);
 
 				renderer->DrawMesh(m_t, &mesh);
 			}

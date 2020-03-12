@@ -10,88 +10,81 @@
 #include <unordered_map>
 #include <vector>
 
+#include "iw/graphics/PointLight.h"
+#include "iw/graphics/DirectionalLight.h"
+
+#define MAX_POINT_LIGHTS 16
+#define MAX_DIRECTIONAL_LIGHTS 4
+
 namespace iw {
 namespace Graphics {
-	//class RenderTargetBuilder {
-	//private:
-	//	int m_width;
-	//	int m_height;
-	//	std::vector<iw::ref<Texture>> m_textures;
-	//	iw::ref<IDevice> m_device;
-
-	//public:
-	//	RenderTargetBuilder(
-	//		iw::ref<IDevice> device)
-	//		: m_device(m_device)
-	//	{}
-
-	//	RenderTargetBuilder& SetWidth(
-	//		int width)
-	//	{
-	//		m_width = width;
-	//	}
-
-	//	RenderTargetBuilder& SetHeight(
-	//		int height)
-	//	{
-	//		m_height = height;
-	//	}
-
-	//	RenderTargetBuilder& AddTexture(
-	//		iw::ref<Texture> texture)
-	//	{
-	//		m_textures.push_back(texture);
-	//	}
-
-	//	iw::ref<RenderTarget> Initialize() {
-	//		auto freee = iw::make_callback(&IDevice::DestroyFrameBuffer, m_device.get());
-
-	//		iw::ref<RenderTarget> rt = iw::ref<RenderTarget>(new RenderTarget(m_width, m_height), freee);
-	//		for (iw::ref<Texture>& tex : m_textures) {
-	//			rt->AddTexture(tex);
-	//		}
-
-	//		rt->Initialize(m_device);
-
-	//		return rt;
-	//	}
-	//};
+	struct Scene {
+		Camera* Camera;
+		std::vector<PointLight*> PointLights;
+		std::vector<DirectionalLight*> DirectionalLights;
+	};
 
 	struct CameraData {
-		iw::matrix4 ViewProj;
-		iw::vector4 CameraPos;
+		matrix4 ViewProj;
+		vector4 CameraPos;
+	};
+
+	struct LightData {
+		vector2 PAD;
+		float PointLightCount;
+		float DirectionalLightCount;
+
+		struct PointLightDescription {
+			vector3 Position;
+			float Radius;
+		} PointLights[MAX_POINT_LIGHTS];
+
+		struct DirectionalLightDescription {
+			vector3 Position;
+			vector3 Direction;
+		} DirectionalLights[MAX_POINT_LIGHTS];
 	};
 
 	enum UBOBinding {
-		CAMERA   = 0x01,
-		//MATERIAL = 0x10,
-		ALL      = 0x11
+		CAMERA   = 0x001,
+		LIGHTS   = 0x010,
+	   //MATERIAL = 0x100,
+		ALL      = 0x111
 	};
 
 	class Renderer {
 	public:
-		//struct SceneData {
-		//	iw::matrix4 World;
-		//	iw::ref<Camera> Camera;
-		//	std::vector<Light> Lights;
-		//	RenderTarget FinalTarget;
-		//	//RenderTarget FinalPostProcessTarget;
-		//};
-
-		int Width;
-		int Height;
-
-		iw::ref<IDevice> Device;
+		ref<IDevice> Device;
 	private:
-		Mesh* m_filterMesh;
+		enum class RenderState {
+			SCENE,
+			SHADOW_MAP,
+			INVALID
+		};
+
+		const Mesh* m_filterMesh;
+
+		int m_width;
+		int m_height;
+
+		// Current State of Renderer
 
 		IUniformBuffer* m_cameraUBO;
+		IUniformBuffer* m_lightUBO;
+
 		CameraData m_cameraData;
+		LightData  m_lightData;
+
+		ref<Shader>   m_shader;
+		ref<Material> m_material;
+		ref<RenderTarget> m_target;
+
+		RenderState m_state;
 
 	public:
 		IWGRAPHICS_API
 		Renderer(
-			const iw::ref<IDevice>& device);
+			const ref<IDevice>& device);
 
 		IWGRAPHICS_API
 		~Renderer();
@@ -100,63 +93,103 @@ namespace Graphics {
 		void Initialize();
 
 		IWGRAPHICS_API
+		int Width() const;
+
+		IWGRAPHICS_API
+		int Height() const;
+
+		IWGRAPHICS_API
+		void Resize(
+			int width,
+			int height);
+
+		// Clears screen buffer
+		IWGRAPHICS_API
 		void Begin();
 
+		// executes queue
 		IWGRAPHICS_API
 		void End();
 
+		// binds buffers to shader and initializes it. TO BE PRIVATED
 		IWGRAPHICS_API
 		void InitShader(
-			iw::ref<Shader>& shader,
-			UBOBinding bindings);
+			ref<Shader>& shader,
+			int bindings);
 
+		// set optional camera, identity if null
+		// set optional target, screen if null
 		IWGRAPHICS_API
-		void SetShader(
-			const iw::ref<Shader>& shader);
+		void BeginScene(
+			Camera* camera = nullptr,
+			const ref<RenderTarget>& target = nullptr);
+
+		// calls begin scene
+		// set scene lights if provided, no action if null
+		IWGRAPHICS_API
+		void BeginScene(
+			Scene* scene = nullptr,
+			const ref<RenderTarget>& target = nullptr);
+
+		// marks end of scene, subsequent calls to SubmitMesh will be invalid
+		IWGRAPHICS_API
+		void EndScene();
+
+		// set light camera
+		// set light shader
+		// set light target
+		IWGRAPHICS_API
+		void BeginShadowCast(
+			Light* light);
+
+		// marks end of shadow cast, subsequent calls to SubmitMesh will be invalid
+		IWGRAPHICS_API
+		void EndShadowCast(
+			const Light* light);
+
+		// if rendering a scene
+		//	set mesh shader
+		//	set mesh material
+		// if rendering a shadow map
+		//	use light shader
+		// set transform model matrix
+		// set mesh verts and indices
+		IWGRAPHICS_API
+		void DrawMesh(
+			const Transform* transform,
+			const Mesh* mesh);
+
+		// tbd
+		IWGRAPHICS_API
+		void ApplyFilter(
+			ref<Shader>& filter,
+			const ref<RenderTarget>& source,
+			const ref<RenderTarget>& destination = nullptr);
+
+	//private:
+		IWGRAPHICS_API
+		void SetTarget(
+			const ref<RenderTarget>& target);
 
 		IWGRAPHICS_API
 		void SetCamera(
 			Camera* camera);
 
 		IWGRAPHICS_API
-		void BeginScene(
-			Camera* camera = nullptr,
-			RenderTarget* target = nullptr);
+		void SetShader(
+			const ref<Shader>& shader);
 
 		IWGRAPHICS_API
-		void EndScene();
+		void SetMaterial(
+			const ref<Material>& material);
 
 		IWGRAPHICS_API
-		void DrawMesh(
-			const Transform* transform,
-			const Mesh* mesh);
+		void SetPointLights(
+			const std::vector<PointLight*>& lights);
 
 		IWGRAPHICS_API
-		void BeginLight(
-			Light* light);
-
-		IWGRAPHICS_API
-		void EndLight(
-			const Light* light);
-
-		IWGRAPHICS_API
-		void CastMesh(
-			const Light* light,
-			const Transform* transform,
-			const Mesh* mesh);
-
-		IWGRAPHICS_API
-		void ApplyFilter(
-			iw::ref<Shader>& filter,
-			RenderTarget* source,
-			RenderTarget* dest = nullptr);
-
-		// I kinda like this idea
-
-		//IWGRAPHICS_API
-		//RenderTargetBuilder BuildRenderTarget() {
-		//	return RenderTargetBuilder(Device);
-		//}
+		void SetDirectionalLights(
+			const std::vector<DirectionalLight*>& lights);
 	};
 }
 

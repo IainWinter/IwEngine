@@ -1,7 +1,7 @@
 #shader Vertex
 #version 330
 
-layout(std140, column_major) uniform Camera{
+layout(std140, column_major) uniform Camera {
 	mat4 viewProj;
 	vec4 camPos;
 };

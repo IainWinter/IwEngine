@@ -23,16 +23,16 @@ namespace Graphics {
 			int height);
 
 		IWGRAPHICS_API
-		void AddTexture(
-			iw::ref<Texture> texture);
-
-		IWGRAPHICS_API
 		void Initialize(
 			const iw::ref<IDevice>& device);
 
 		IWGRAPHICS_API
 		void Use(
 			const iw::ref<IDevice>& device);
+
+		IWGRAPHICS_API
+		void AddTexture(
+			iw::ref<Texture> texture);
 
 		IWGRAPHICS_API
 		int Width() const;

@@ -243,8 +243,7 @@ namespace Engine {
 				}
 				case Resized: {
 					WindowResizedEvent& wre = e.as<WindowResizedEvent>();
-					Renderer->Width  = wre.Width;
-					Renderer->Height = wre.Height;
+					Renderer->Resize(wre.Width, wre.Height);
 					e.Handled = true;
 					break;
 				}
