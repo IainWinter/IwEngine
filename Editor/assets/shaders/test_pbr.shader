@@ -161,32 +161,20 @@ float DirectionalLightShadow(
 }
 
 float PointLightShadow(
-	vec3 P,
+	vec3 NegL,
 	float R)
 {
 	if (mat_hasShadowMap2 == 0) {
 		return 1.0f;
 	}
 
-	// get vector between fragment position and light position
-	vec3 fragToLight = WorldPos - P;
+	float closestDepth = texture(mat_shadowMap2, NegL).r;
+	float currentDepth = length(NegL);
 
-	// use the light to fragment vector to sample from the depth map    
-	float closestDepth = texture(mat_shadowMap2, fragToLight).r;
-
-	// it is currently in linear range between [0,1]. Re-transform back to original value
-	closestDepth *= R;
-
-	// now get current linear depth as the length between the fragment and light position
-	float currentDepth = length(fragToLight);
-
-	// now test for shadows
 	float bias = 0.05;
-	float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
+	float shadow = currentDepth + bias > R * closestDepth ? 0.0 : 1.0;
 
-	FragColor = vec4(vec3(closestDepth / R), 1.0);
-
-	return shadow;
+	return closestDepth;
 }
 
 // For PBR BFDR
@@ -284,7 +272,7 @@ void main() {
 		// Light powa
 		float attenuation = getDistanceAtt(L, 1 / pow(R, 2));
 
-		color += (albedo * Fd + Fr) * NdotL * attenuation * PointLightShadow(P, R);
+		color += (albedo * Fd + Fr) * NdotL * attenuation * PointLightShadow(-L, R);
 	}
 
 	for (int i = 0; i < directionalLightCount; i++) {
@@ -311,7 +299,5 @@ void main() {
 		color += (albedo * Fd + Fr) * NdotL * DirectionalLightShadow(DirectionalLightPos[i]);
 	}
 
-	if (color.x == 0.234) {
-		FragColor = vec4(linearToSRGB(color), 1.0f);
-	}
+	FragColor = vec4(linearToSRGB(color), 1.0f);
 }

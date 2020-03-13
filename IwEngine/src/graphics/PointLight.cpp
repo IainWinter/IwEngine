@@ -11,18 +11,7 @@ namespace Graphics {
 		: Light(power, nullptr, shadowShader, shadowTarget)
 		, m_radius(radius)
 	{
-		if (CanCastShadows()) {
-			m_shadowCamera = new PerspectiveCamera(
-				Pi / 2,
-				shadowTarget->Width() / shadowTarget->Height(),
-				0.01f,
-				radius
-			);
-		}
-
-		else {
-			m_shadowCamera = new PerspectiveCamera();
-		}
+		UpdateCamera();
 	}
 
 	void PointLight::SetupShadowCast(
@@ -36,12 +25,12 @@ namespace Graphics {
 		}
 
 		matrix4 cube[6];
-		cube[0] = matrix4::create_look_at(Position(), Position() + vector3( 1.0,  0.0,  0.0), vector3(0.0, 1.0,  0.0)) * m_shadowCamera->Projection(); 
-		cube[1] = matrix4::create_look_at(Position(), Position() + vector3(-1.0,  0.0,  0.0), vector3(0.0, 1.0,  0.0)) * m_shadowCamera->Projection();
-		cube[2] = matrix4::create_look_at(Position(), Position() + vector3( 0.0,  1.0,  0.0), vector3(0.0,  0.0, -1.0)) * m_shadowCamera->Projection();
-		cube[3] = matrix4::create_look_at(Position(), Position() + vector3( 0.0, -1.0,  0.0), vector3(0.0,  0.0, 1.0)) * m_shadowCamera->Projection(); 
-		cube[4] = matrix4::create_look_at(Position(), Position() + vector3( 0.0,  0.0,  1.0), vector3(0.0, 1.0,  0.0)) * m_shadowCamera->Projection();
-		cube[5] = matrix4::create_look_at(Position(), Position() + vector3( 0.0,  0.0, -1.0), vector3(0.0, 1.0,  0.0)) * m_shadowCamera->Projection(); 
+		cube[0] = matrix4::create_look_at(Position(), Position() + vector3::unit_x, -vector3::unit_y) * m_shadowCamera->Projection();
+		cube[1] = matrix4::create_look_at(Position(), Position() - vector3::unit_x, -vector3::unit_y) * m_shadowCamera->Projection();
+		cube[2] = matrix4::create_look_at(Position(), Position() + vector3::unit_y, vector3::unit_z) * m_shadowCamera->Projection();
+		cube[3] = matrix4::create_look_at(Position(), Position() - vector3::unit_y, -vector3::unit_z) * m_shadowCamera->Projection();
+		cube[4] = matrix4::create_look_at(Position(), Position() + vector3::unit_z, -vector3::unit_y) * m_shadowCamera->Projection();
+		cube[5] = matrix4::create_look_at(Position(), Position() - vector3::unit_z, -vector3::unit_y) * m_shadowCamera->Projection();
 
 		m_shadowShader->Handle()->GetParam("light_mats[0]") ->SetAsMat4s(cube, 6);
 		m_shadowShader->Handle()->GetParam("light_pos")     ->SetAsFloats(&Position(), 3);
@@ -52,31 +41,46 @@ namespace Graphics {
 		return m_radius;
 	}
 
-	float& PointLight::Radius() {
-		return m_radius;
-	}
-
 	void PointLight::SetRadius(
 		float radius)
 	{
-		m_radius = radius;
+		if (m_radius != radius) {
+			m_radius = radius;
+			UpdateCamera();
+		}
 	}
 
 	void PointLight::SetShadowTarget(
 		ref<RenderTarget>& shadowTarget)
 	{
-		PerspectiveCamera* camera = new PerspectiveCamera(
-			Position(), quaternion::identity,
-			Pi / 2,
-			shadowTarget->Width() / shadowTarget->Height(),
-			0.01f,
-			Radius()
-		);
+		if (m_shadowTarget != shadowTarget) {
+			Light::SetShadowTarget(shadowTarget);
+			UpdateCamera();
+		}
+	}
 
-		delete m_shadowCamera;
-		m_shadowCamera = camera;
+	void PointLight::UpdateCamera() {
+		if (CanCastShadows()) {
+#ifdef IW_DEBUG
+			if (m_shadowTarget->Width() != m_shadowTarget->Height()) {
+				LOG_WARNING << "Shadow maps need to have textures with equal width and height";
+			}
+#endif 
+			PerspectiveCamera* camera = new PerspectiveCamera(
+				Position(), quaternion::identity,
+				Pi / 2,
+				m_shadowTarget->Width() / m_shadowTarget->Height(),
+				0.01f,
+				Radius()
+			);
+			
+			delete m_shadowCamera;
+			m_shadowCamera = camera;
+		}
 
-		Light::SetShadowTarget(shadowTarget);
+		else {
+			m_shadowCamera = new PerspectiveCamera();
+		}
 	}
 }
 }

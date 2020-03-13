@@ -28,14 +28,17 @@ namespace Graphics {
 			Renderer* renderer);
 
 		IWGRAPHICS_API float  Radius() const;
-		IWGRAPHICS_API float& Radius();
 
 		IWGRAPHICS_API
 		void SetRadius(
 			float radius);
 
+		IWGRAPHICS_API
 		void SetShadowTarget(
 			ref<RenderTarget>& shadowTarget) override;
+
+	private:
+		void UpdateCamera();
 	};
 }
 

@@ -165,7 +165,7 @@ namespace math {
 		void look_at(
 			const vector3& eye,
 			const vector3& target,
-			const vector3& up);
+			const vector3& up = vector3::unit_y);
 
 		matrix4 operator+ (
 			const matrix4& other) const;
@@ -434,7 +434,7 @@ namespace math {
 		static matrix4 create_look_at(
 			const vector3& eye,
 			const vector3& target,
-			const vector3& up);
+			const vector3& up = vector3::unit_y);
 
 		IWMATH_API
 		friend std::ostream& operator<<(

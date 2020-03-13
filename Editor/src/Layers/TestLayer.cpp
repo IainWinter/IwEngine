@@ -143,7 +143,7 @@ namespace iw {
 		scene = new Scene();
 		scene->Camera = camera;
 		scene->PointLights.push_back(light);
-		scene->PointLights.push_back(light2);
+		//scene->PointLights.push_back(light2);
 		scene->DirectionalLights.push_back(dirLight);
 
 		delete sphere;
@@ -183,11 +183,15 @@ namespace iw {
 	void TestLayer::ImGui() {
 		ImGui::Begin("Test");
 
-		ImGui::SliderFloat3("Light pos", (float*)&light->Position(), -10, 10);
-		ImGui::SliderFloat("Light rad", &light->Radius(), 0, 100);
+		float r = light->Radius();
 
-		ImGui::SliderFloat3("Light 2 pos", (float*)&light2->Position(), -10, 10);
-		ImGui::SliderFloat("Light 2 rad", &light2->Radius(), 0, 100);
+		ImGui::SliderFloat3("Light pos", (float*)&light->Position(), -20, 20);
+		ImGui::SliderFloat("Light rad", &r, 0, 100);
+
+		light->SetRadius(r);
+
+		//ImGui::SliderFloat3("Light 2 pos", (float*)&light2->Position(), -10, 10);
+		//ImGui::SliderFloat("Light 2 rad", &light2->Radius(), 0, 100);
 
 		quaternion rot = dirLight->Rotation();
 
@@ -213,24 +217,24 @@ namespace iw {
 			}
 		}
 
-		for (auto entity : Space->Query<Transform, Mesh>()) {
-			auto [transform, mesh] = entity.Components.Tie<MeshComponents>();
+		//for (auto entity : Space->Query<Transform, Mesh>()) {
+		//	auto [transform, mesh] = entity.Components.Tie<MeshComponents>();
 
-			std::stringstream ss;
-			ss << "Reflectance " << entity.Index;
+		//	std::stringstream ss;
+		//	ss << "Reflectance " << entity.Index;
 
-			ImGui::SliderFloat(ss.str().c_str(), mesh->Material->Get<float>("reflectance"), 0, 1);
-			
-			ss = std::stringstream();
-			ss << "Roughness " << entity.Index;
-			
-			ImGui::SliderFloat(ss.str().c_str(), mesh->Material->Get<float>("roughness"), 0, 1);
+		//	ImGui::SliderFloat(ss.str().c_str(), mesh->Material->Get<float>("reflectance"), 0, 1);
+		//	
+		//	ss = std::stringstream();
+		//	ss << "Roughness " << entity.Index;
+		//	
+		//	ImGui::SliderFloat(ss.str().c_str(), mesh->Material->Get<float>("roughness"), 0, 1);
 
-			ss = std::stringstream();
-			ss << "Metallic " << entity.Index;
+		//	ss = std::stringstream();
+		//	ss << "Metallic " << entity.Index;
 
-			ImGui::SliderFloat(ss.str().c_str(), mesh->Material->Get<float>("metallic"), 0, 1);
-		}
+		//	ImGui::SliderFloat(ss.str().c_str(), mesh->Material->Get<float>("metallic"), 0, 1);
+		//}
 
 		ImGui::End();
 	}
