@@ -1,8 +1,9 @@
 #shader Vertex
-#version 330
+#version 420
 
 layout(std140, column_major) uniform Camera {
 	mat4 viewProj;
+	vec4 camPos;
 };
 
 uniform mat4 model;
@@ -18,7 +19,7 @@ void main() {
 }
 
 #shader Fragment
-#version 330
+#version 420
 
 uniform sampler2D alphaMask;
 uniform float hasAlphaMask;

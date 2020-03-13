@@ -29,14 +29,30 @@ namespace RenderAPI {
 			glDeleteShader(geometryShader->GeometryShader());
 		}
 
-		LOG_DEBUG << "Shader #" << gl_id << " compiled with uniforms:";
-		for (int i = 0; i < UniformCount(); i++) {
+		int ucount = UniformCount();
+		int bcount = BufferCount();
+
+		const char* u = ucount == 1 ? " uniform" : " uniforms";
+		const char* b = bcount == 1 ? " block"   : " blocks";
+
+		LOG_DEBUG << "Shader #" << gl_id << " compiled with " << ucount << u << " & " << bcount << b << ":";
+
+		for (int i = 0; i < ucount; i++) {
 			IPipelineParam* uniform = GetParam(i);
 			if (!uniform) {
 				continue; // Check for null
 			}
 			
-			LOG_DEBUG << "\tLocation: " << uniform->Location() << " Name: " << uniform->Name();
+			LOG_DEBUG << "\tUniform Location: " << uniform->Location() << " Name: " << uniform->Name();
+		}
+
+ 		for (int i = 0; i < bcount; i++) {
+			//IPipelineParam* uniform = GetParam(i);
+			//if (!uniform) {
+			//	continue; // Check for null
+			//}
+
+			//LOG_DEBUG << "\tBuffer Location: " << uniform->Location() << " Name: " << uniform->Name();
 		}
 	}
 	
@@ -49,6 +65,18 @@ namespace RenderAPI {
 
 	unsigned GLPipeline::Handle() const {
 		return gl_id;
+	}
+
+	int GLPipeline::UniformCount() const {
+		int count;
+		glGetProgramiv(gl_id, GL_ACTIVE_UNIFORMS, &count);
+		return count;
+	}
+
+	int GLPipeline::BufferCount() const {
+		int count;
+		glGetProgramiv(gl_id, GL_ACTIVE_UNIFORM_BLOCKS, &count);
+		return count;
 	}
 
 	IPipelineParam* GLPipeline::GetParam(
@@ -115,13 +143,13 @@ namespace RenderAPI {
 		dynamic_cast<GLBuffer*>(buffer)->BindBase(index);
 
 		int uniformIndex = glGetUniformBlockIndex(gl_id, name.c_str());
-		glUniformBlockBinding(gl_id, uniformIndex, index);
-	}
+#ifdef IW_DEBUG
+		if (uniformIndex == -1) {
+			LOG_WARNING << "Cannot find uniform buffer named " << name;
+		}
+#endif
 
-	int GLPipeline::UniformCount() {
-		int count;
-		glGetProgramiv(gl_id, GL_ACTIVE_UNIFORMS, &count);
-		return count;
+		glUniformBlockBinding(gl_id, uniformIndex, index);
 	}
 
 	void GLPipeline::Use() {

@@ -29,10 +29,20 @@ namespace Graphics {
 		vector4 CameraPos;
 	};
 
+	struct ShadowData {
+		int __pad1, __pad2, __pad3;
+
+		int DirectionalLightCount;
+
+		matrix4 LightViewProj[MAX_DIRECTIONAL_LIGHTS];
+	};
+
+	// might needs pad
 	struct LightData {
-		vector2 PAD;
-		float PointLightCount;
-		float DirectionalLightCount;
+		int __pad1, __pad2;
+
+		int PointLightCount;
+		int DirectionalLightCount;
 
 		struct PointLightDescription {
 			vector3 Position;
@@ -40,16 +50,16 @@ namespace Graphics {
 		} PointLights[MAX_POINT_LIGHTS];
 
 		struct DirectionalLightDescription {
-			vector3 Position;
-			vector3 Direction;
-		} DirectionalLights[MAX_POINT_LIGHTS];
+			vector3 InvDirection;
+		} DirectionalLights[MAX_DIRECTIONAL_LIGHTS];
 	};
 
 	enum UBOBinding {
-		CAMERA   = 0x001,
-		LIGHTS   = 0x010,
-	   //MATERIAL = 0x100,
-		ALL      = 0x111
+		CAMERA   = 0x00000001,
+		SHADOWS  = 0x00000010,
+		LIGHTS   = 0x00000100,
+	   //MATERIAL = 0x00001000,
+		ALL      = 0x11111111
 	};
 
 	class Renderer {
@@ -70,9 +80,11 @@ namespace Graphics {
 		// Current State of Renderer
 
 		IUniformBuffer* m_cameraUBO;
+		IUniformBuffer* m_shadowUBO;
 		IUniformBuffer* m_lightUBO;
 
 		CameraData m_cameraData;
+		ShadowData m_shadowData;
 		LightData  m_lightData;
 
 		ref<Shader>   m_shader;
@@ -115,7 +127,7 @@ namespace Graphics {
 		IWGRAPHICS_API
 		void InitShader(
 			ref<Shader>& shader,
-			int bindings);
+			int bindings = 0);
 
 		// set optional camera, identity if null
 		// set optional target, screen if null
@@ -131,10 +143,6 @@ namespace Graphics {
 			Scene* scene = nullptr,
 			const ref<RenderTarget>& target = nullptr);
 
-		// marks end of scene, subsequent calls to SubmitMesh will be invalid
-		IWGRAPHICS_API
-		void EndScene();
-
 		// set light camera
 		// set light shader
 		// set light target
@@ -142,10 +150,13 @@ namespace Graphics {
 		void BeginShadowCast(
 			Light* light);
 
+		// marks end of scene, subsequent calls to SubmitMesh will be invalid
+		IWGRAPHICS_API
+		void EndScene();
+
 		// marks end of shadow cast, subsequent calls to SubmitMesh will be invalid
 		IWGRAPHICS_API
-		void EndShadowCast(
-			const Light* light);
+		void EndShadowCast();
 
 		// if rendering a scene
 		//	set mesh shader

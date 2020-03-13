@@ -9,12 +9,14 @@ namespace RenderAPI {
 		: public IFrameBuffer
 	{
 	private:
-		unsigned int gl_id;
-		unsigned int m_textureCount;
+		unsigned gl_id;
+		unsigned m_textureCount;
+		bool m_noColor;
 
 	public:
 		IWRENDERER_API
-		GLFrameBuffer();
+		GLFrameBuffer(
+			bool noColor);
 
 		IWRENDERER_API
 		~GLFrameBuffer();
@@ -28,6 +30,9 @@ namespace RenderAPI {
 
 		IWRENDERER_API
 		void Unbind() const;
+
+		IWRENDERER_API
+		bool NoColor() const;
 	};
 }
 

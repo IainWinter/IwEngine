@@ -3,11 +3,18 @@
 
 namespace iw {
 namespace RenderAPI {
-	GLFrameBuffer::GLFrameBuffer() 
+	GLFrameBuffer::GLFrameBuffer(
+		bool noColor)
 		: m_textureCount(0)
+		, m_noColor(noColor)
 	{
 		glGenFramebuffers(1, &gl_id);
 		Bind();
+
+		if (noColor) {
+			glDrawBuffer(GL_NONE);
+			glReadBuffer(GL_NONE);
+		}
 	}
 
 	GLFrameBuffer::~GLFrameBuffer() {
@@ -27,9 +34,13 @@ namespace RenderAPI {
 		Bind();
 		texture->Bind();
 
-		glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, texture->Id(), 0);
-		//glDrawBuffer(GL_NONE);
-		//glReadBuffer(GL_NONE);
+		if (texture->Type() == TEX_2D) {
+			glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, texture->Id(), 0);
+		}
+
+		else if (texture->Type() == TEX_CUBE) {
+			glFramebufferTexture(GL_FRAMEBUFFER, attachment, texture->Id(), 0);
+		}
 	}
 
 	void GLFrameBuffer::Bind() const {
@@ -38,6 +49,10 @@ namespace RenderAPI {
 
 	void GLFrameBuffer::Unbind() const {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+
+	bool GLFrameBuffer::NoColor() const {
+		return m_noColor;
 	}
 }
 }

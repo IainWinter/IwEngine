@@ -1,4 +1,4 @@
-#version 330
+#version 420
 
 layout (location = 0) in vec3 WorldPos;
 layout (location = 1) in vec4 LightPos;

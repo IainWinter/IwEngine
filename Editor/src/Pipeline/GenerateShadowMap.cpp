@@ -59,7 +59,7 @@ namespace iw {
 			}
 		}
 
-		renderer->EndShadowCast(light);
+		renderer->EndShadowCast();
 
 		out(0, light->ShadowTarget());
 	}

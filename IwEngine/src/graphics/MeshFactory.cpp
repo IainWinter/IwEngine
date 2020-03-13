@@ -247,13 +247,13 @@ namespace Graphics {
 		iw::vector2* uvs     = new iw::vector2[vertCount];
 		unsigned*    indices = new unsigned   [indexCount];
 
-		float stepX = 1.0f / xCount;
-		float stepZ = 1.0f / zCount;
+		float stepX = 2.0f / xCount;
+		float stepZ = 2.0f / zCount;
 
-		float stepU = 1.0f / xCount;
-		float stepV = 1.0f / zCount;
+		float stepU = 2.0f / xCount;
+		float stepV = 2.0f / zCount;
 
-		iw::vector3 offset = (-iw::vector3::unit_x - iw::vector3::unit_z) / 2;
+		iw::vector3 offset = -(iw::vector3::unit_x + iw::vector3::unit_z);
 
 		for (unsigned x = 0; x <= xCount; x++) {
 			for (unsigned z = 0; z <= zCount; z++) {
@@ -261,19 +261,19 @@ namespace Graphics {
 
 				verts[i] = offset + iw::vector3(x * stepX, 0, z * stepZ);
 				norms[i] = iw::vector3::unit_y;
-				uvs[i]   = iw::vector2(x * stepU, z * stepV);
+				uvs  [i] = iw::vector2(x * stepU, z * stepV);
 			}
 		}
 
 		unsigned i = 0, v = 0;
 		while(v <= vertCount - (zCount + 3)) {
 			indices[i++] = v;
+			indices[i++] = v + 1; 
 			indices[i++] = v + zCount + 1;
-			indices[i++] = v + 1;
 
 			indices[i++] = v + 1;
+			indices[i++] = v + zCount + 2; 
 			indices[i++] = v + zCount + 1;
-			indices[i++] = v + zCount + 2;
 
 			v++;
 			if (   v != 0
@@ -285,7 +285,7 @@ namespace Graphics {
 
 		Mesh* mesh = new Mesh();
 		mesh->SetVertices(vertCount,  verts);
-		mesh->SetVertices(vertCount,  norms);
+		mesh->SetNormals (vertCount,  norms);
 		mesh->SetUVs     (vertCount,  uvs);
 		mesh->SetIndices (indexCount, indices);
 

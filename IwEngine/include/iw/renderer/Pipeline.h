@@ -12,7 +12,10 @@ namespace RenderAPI {
 		virtual ~IPipeline() = default;
 
 		IWRENDERER_API
-		virtual int UniformCount() = 0;
+		virtual int UniformCount() const = 0;
+
+		IWRENDERER_API
+		virtual int BufferCount() const = 0;
 
 		IWRENDERER_API
 		virtual unsigned Handle() const = 0;

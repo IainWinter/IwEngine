@@ -135,17 +135,25 @@ namespace iw {
 			q.normalize();
 		}
 
-		float vz = atan2f(
-			-2 * (q.x * q.y - q.w * q.z), 
-			q.w * q.w + q.x * q.x - q.y * q.y - q.z * q.z);
+		vector3 euler;
+		euler.x = atan2f(
+			2 * (q.w * q.x + q.y * q.z), 
+			1 - 2 * (q.x * q.x + q.y * q.y));
 
-		float vy = asinf(2 * (q.x * q.z + q.w * q.y));
+		float sinp = 2 * (q.w * q.y - q.z * q.x);
+		if (fabs(sinp) >= 1.0f) {
+			euler.y = copysignf(Pi * 0.5f, sinp); // use 90 degrees if out of range
+		}
 
-		float vx = atan2f(
-			-2 * (q.y * q.z - q.w * q.x),
-			q.w * q.w - q.x * q.x - q.y * q.y + q.z * q.z);
+		else {
+			euler.y = asinf(sinp);
+		}
 
-		return vector3(vx, vy, vz);
+		euler.z = std::atan2f(
+			2 * (q.w * q.z + q.x * q.y),
+			1 - 2 * (q.y * q.y + q.z * q.z));
+
+		return euler;
 	}
 
 	quaternion quaternion::operator+(
@@ -273,24 +281,6 @@ namespace iw {
 			sy * cp * sr + cy * sp * cr,
 			sy * cp * cr - cy * sp * sr,
 			cy * cp * cr + sy * sp * sr);
-
-		//x /= 2;
-		//y /= 2;
-		//z /= 2;
-
-		//float cx = cosf(x);
-		//float sx = sinf(x);
-		//float cy = cosf(y);
-		//float sy = sinf(y);
-		//float cz = cosf(z);
-		//float sz = sinf(z);
-
-		//return quaternion(
-		//	cx * cy * cz + sx * sy * sz,
-		//	sx * cy * cz - cx * sy * sz,
-		//	cx * sy * cz + sx * cy * sz,
-		//	cx * cy * sz - sx * sy * cz
-		//);
 	}
 
 	quaternion quaternion::from_look_at(

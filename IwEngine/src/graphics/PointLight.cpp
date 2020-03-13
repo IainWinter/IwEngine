@@ -36,14 +36,16 @@ namespace Graphics {
 		}
 
 		matrix4 cube[6];
-		cube[0] = m_shadowCamera->ViewProjection();                                       // forward
-		cube[1] = m_shadowCamera->ViewProjection() * matrix4::create_rotation_y( Pi / 2); // left
-		cube[2] = m_shadowCamera->ViewProjection() * matrix4::create_rotation_y( Pi);     // back
-		cube[3] = m_shadowCamera->ViewProjection() * matrix4::create_rotation_y(-Pi);     // right
-		cube[4] = m_shadowCamera->ViewProjection() * matrix4::create_rotation_x( Pi);     // top
-		cube[5] = m_shadowCamera->ViewProjection() * matrix4::create_rotation_x(-Pi);     // bottom
+		cube[0] = matrix4::create_look_at(Position(), Position() + vector3( 1.0,  0.0,  0.0), vector3(0.0, 1.0,  0.0)) * m_shadowCamera->Projection(); 
+		cube[1] = matrix4::create_look_at(Position(), Position() + vector3(-1.0,  0.0,  0.0), vector3(0.0, 1.0,  0.0)) * m_shadowCamera->Projection();
+		cube[2] = matrix4::create_look_at(Position(), Position() + vector3( 0.0,  1.0,  0.0), vector3(0.0,  0.0, -1.0)) * m_shadowCamera->Projection();
+		cube[3] = matrix4::create_look_at(Position(), Position() + vector3( 0.0, -1.0,  0.0), vector3(0.0,  0.0, 1.0)) * m_shadowCamera->Projection(); 
+		cube[4] = matrix4::create_look_at(Position(), Position() + vector3( 0.0,  0.0,  1.0), vector3(0.0, 1.0,  0.0)) * m_shadowCamera->Projection();
+		cube[5] = matrix4::create_look_at(Position(), Position() + vector3( 0.0,  0.0, -1.0), vector3(0.0, 1.0,  0.0)) * m_shadowCamera->Projection(); 
 
-		m_shadowShader->Handle()->GetParam("light_cubemats")->SetAsFloats(cube, 16, 16 * 6);
+		m_shadowShader->Handle()->GetParam("light_mats[0]") ->SetAsMat4s(cube, 6);
+		m_shadowShader->Handle()->GetParam("light_pos")     ->SetAsFloats(&Position(), 3);
+		m_shadowShader->Handle()->GetParam("light_farPlane")->SetAsFloat(Radius());
 	}
 
 	float PointLight::Radius() const {
@@ -58,6 +60,23 @@ namespace Graphics {
 		float radius)
 	{
 		m_radius = radius;
+	}
+
+	void PointLight::SetShadowTarget(
+		ref<RenderTarget>& shadowTarget)
+	{
+		PerspectiveCamera* camera = new PerspectiveCamera(
+			Position(), quaternion::identity,
+			Pi / 2,
+			shadowTarget->Width() / shadowTarget->Height(),
+			0.01f,
+			Radius()
+		);
+
+		delete m_shadowCamera;
+		m_shadowCamera = camera;
+
+		Light::SetShadowTarget(shadowTarget);
 	}
 }
 }

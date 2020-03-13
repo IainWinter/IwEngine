@@ -174,8 +174,9 @@ namespace RenderAPI {
 		virtual ITexture* CreateTexture(
 			int width,
 			int height,
+			TextureType type,
 			TextureFormat format,
-			TextureFormatType type,
+			TextureFormatType formatType,
 			TextureWrap wrap,
 			const void* data = nullptr) override;
 
@@ -199,7 +200,8 @@ namespace RenderAPI {
 		// Frame buffers
 
 		IWRENDERER_API
-		IFrameBuffer* CreateFrameBuffer() override;
+		IFrameBuffer* CreateFrameBuffer(
+			bool noColor) override;
 
 		IWRENDERER_API
 		void DestroyFrameBuffer(

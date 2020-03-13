@@ -13,7 +13,7 @@ namespace Graphics {
 		TextureFormatType type,
 		TextureWrap wrap,
 		unsigned char* colors)
-		: Texture(width, height, format, type, wrap, colors)
+		: Texture(width, height, TEX_2D, format, type, wrap, colors)
 	{}
 
 	TextureAtlas::TextureAtlas(

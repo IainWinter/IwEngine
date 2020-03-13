@@ -1,9 +1,19 @@
 #shader Vertex
-#version 330
+#version 420
+
+#define MAX_DIRECTIONAL_LIGHTS 4
 
 layout(std140, column_major) uniform Camera {
 	mat4 viewProj;
 	vec4 camPos;
+};
+
+layout(std140, column_major) uniform Shadows {
+	int shadows_pad1, shadows_pad2, shadows_pad3;
+
+	int directionalLightSpaceCount;
+
+	mat4 directionalLightSpaces[MAX_DIRECTIONAL_LIGHTS];
 };
 
 uniform mat4 model;
@@ -16,6 +26,7 @@ out vec2 TexCoords;
 out vec3 Normal;
 out vec3 CameraPos;
 out vec3 WorldPos;
+out vec4 DirectionalLightPos[MAX_DIRECTIONAL_LIGHTS];
 
 void main() {
 	vec4 worldPos = model * vec4(vert, 1);
@@ -25,11 +36,15 @@ void main() {
 	CameraPos = camPos.xyz;
 	WorldPos  = worldPos.xyz;
 
+	for (int i = 0; i < directionalLightSpaceCount; i++) {
+		DirectionalLightPos[i] = directionalLightSpaces[i] * worldPos;
+	}
+
 	gl_Position = viewProj * worldPos;
 }
 
 #shader Fragment
-#version 330
+#version 420
 
 #define MAX_POINT_LIGHTS 16
 #define MAX_DIRECTIONAL_LIGHTS 4
@@ -40,14 +55,16 @@ struct PointLight {
 };
 
 struct DirectionalLight {
-	vec3 Position;
-	vec3 Direction;
+	vec3 InvDirection;
 };
 
-layout(std140) uniform Lights {
-	vec2 PAD;
-	float pointLightCount;
-	float directionalLightCount;
+// might needs pad
+layout(std140) uniform Lights{
+	int lights_pad1, lights_pad2;
+
+	int pointLightCount;
+	int directionalLightCount;
+
 	PointLight       pointLights      [MAX_POINT_LIGHTS];
 	DirectionalLight directionalLights[MAX_DIRECTIONAL_LIGHTS];
 };
@@ -56,23 +73,30 @@ in vec2 TexCoords;
 in vec3 Normal;
 in vec3 CameraPos;
 in vec3 WorldPos;
+in vec4 DirectionalLightPos[MAX_DIRECTIONAL_LIGHTS];
 
 out vec4 FragColor;
-//
-//// World properties
-//
-//uniform vec3 lightPos;
-//uniform float lightRadius;
-//uniform float lightPower;
 
 // Material model
 
-uniform vec3 mat_albedo;
+uniform vec3  mat_albedo;
 uniform float mat_metallic;
 uniform float mat_roughness;
 uniform float mat_reflectance;
 
+// Shadow maps
+
+uniform float     mat_hasShadowMap;
+uniform sampler2D mat_shadowMap;
+
+uniform float     mat_hasShadowMap2;
+uniform samplerCube mat_shadowMap2;
+
+// Math Constants
+
 const float PI = 3.14159265359f;
+
+// Math functions
 
 float lerp(
 	float a, 
@@ -80,6 +104,14 @@ float lerp(
 	float w)
 {
 	return a + w * (b - a);
+}
+
+float linstep(
+	float l, 
+	float h, 
+	float v)
+{
+	return clamp((v - l) / (h - l), 0.0, 1.0);
 }
 
 // For gamma correction
@@ -100,6 +132,61 @@ vec3 linearToSRGB(
 	vec3 sRGBHi = (pow(abs(linearCol), vec3(1.0f / 2.4f)) * 1.055f) - 0.055f;
 	vec3 sRGB   = (length(linearCol) <= 0.0031308f) ? sRGBLo : sRGBHi;
 	return sRGB;
+}
+
+// Shadows
+
+float DirectionalLightShadow(
+	vec4 C)
+{
+	if (mat_hasShadowMap == 0) {
+		return 1.0f;
+	}
+
+	vec3 coords = (C.xyz / C.w) * 0.5 + 0.5;
+	vec2 moments = texture(mat_shadowMap, coords.xy).rg;
+	float compare = coords.z;
+
+	if (compare > 1.0) {
+		return 1.0;
+	}
+
+	float p = step(compare, moments.x);
+	float v = max(moments.y - moments.x * moments.x, 0.00002);
+
+	float d = compare - moments.x;
+	float pMax = linstep(0.2, 1.0, v / (v + d * d));
+
+	return min(max(p, pMax), 1.0);
+}
+
+float PointLightShadow(
+	vec3 P,
+	float R)
+{
+	if (mat_hasShadowMap2 == 0) {
+		return 1.0f;
+	}
+
+	// get vector between fragment position and light position
+	vec3 fragToLight = WorldPos - P;
+
+	// use the light to fragment vector to sample from the depth map    
+	float closestDepth = texture(mat_shadowMap2, fragToLight).r;
+
+	// it is currently in linear range between [0,1]. Re-transform back to original value
+	closestDepth *= R;
+
+	// now get current linear depth as the length between the fragment and light position
+	float currentDepth = length(fragToLight);
+
+	// now test for shadows
+	float bias = 0.05;
+	float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
+
+	FragColor = vec4(vec3(closestDepth / R), 1.0);
+
+	return shadow;
 }
 
 // For PBR BFDR
@@ -171,7 +258,37 @@ void main() {
 	vec3 color = vec3(0);
 
 	for (int i = 0; i < pointLightCount; i++) {
-		vec3 L  = pointLights[i].Position - WorldPos;
+		vec3  P = pointLights[i].Position;
+		float R = pointLights[i].Radius;
+
+		vec3 L  = P - WorldPos;
+		vec3 nL = normalize(L);
+
+		float NdotV = abs(dot(N, V));
+		vec3  H     = normalize(V + nL);
+		float LdotH = clamp(dot(nL, H), 0.0f, 1.0f);
+		float NdotH = clamp(dot(N, H),  0.0f, 1.0f);
+		float NdotL = clamp(dot(N, nL), 0.0f, 1.0f);
+
+		vec3  F   = F_Schlick(f0, f90, LdotH);
+		float Vis = V_SmithGGXCorrelated(NdotV, NdotL, roughness);
+		float D   = D_GGX(NdotH, roughness);
+
+		// Specular BRDF
+		vec3 Fr = D * F * Vis / PI;
+
+		// Diffuse BRDF 
+		float Fd = Fr_DisneyDiffuse(NdotV, NdotL, LdotH, mat_roughness) / PI;
+		Fd *= 1.0f - mat_metallic;
+
+		// Light powa
+		float attenuation = getDistanceAtt(L, 1 / pow(R, 2));
+
+		color += (albedo * Fd + Fr) * NdotL * attenuation * PointLightShadow(P, R);
+	}
+
+	for (int i = 0; i < directionalLightCount; i++) {
+		vec3 L = directionalLights[i].InvDirection;
 		vec3 nL = normalize(L);
 
 		float NdotV = abs(dot(N, V));
@@ -191,38 +308,10 @@ void main() {
 		float Fd = Fr_DisneyDiffuse(NdotV, NdotL, LdotH, mat_roughness) / PI;
 		Fd *= 1.0f - mat_metallic;
 
-		// Light powa
-		float attenuation = getDistanceAtt(L, 1 / pow(pointLights[i].Radius, 2));
-
-		color += (albedo * Fd + Fr) * NdotL * attenuation;
+		color += (albedo * Fd + Fr) * NdotL * DirectionalLightShadow(DirectionalLightPos[i]);
 	}
 
-	//for (int i = 0; i < directionalLightCount; i++) {
-	//	vec3 L = directionalLights[i].Position - WorldPos;
-	//	vec3 nL = normalize(L);
-
-	//	float NdotV = abs(dot(N, V));
-	//	vec3  H = normalize(V + nL);
-	//	float LdotH = clamp(dot(nL, H), 0.0f, 1.0f);
-	//	float NdotH = clamp(dot(N, H), 0.0f, 1.0f);
-	//	float NdotL = clamp(dot(N, nL), 0.0f, 1.0f);
-
-	//	vec3  F = F_Schlick(f0, f90, LdotH);
-	//	float Vis = V_SmithGGXCorrelated(NdotV, NdotL, roughness);
-	//	float D = D_GGX(NdotH, roughness);
-
-	//	// Specular BRDF
-	//	vec3 Fr = D * F * Vis / PI;
-
-	//	// Diffuse BRDF 
-	//	float Fd = Fr_DisneyDiffuse(NdotV, NdotL, LdotH, mat_roughness) / PI;
-	//	Fd *= 1.0f - mat_metallic;
-
-	//	// Light powa
-	//	float attenuation = getDistanceAtt(L, 1 / pow(pointLights[i].Radius, 2));
-
-	//	color += (albedo * Fd + Fr) * NdotL * attenuation;
-	//}
-
-	FragColor = vec4(linearToSRGB(color), 1.0f);
+	if (color.x == 0.234) {
+		FragColor = vec4(linearToSRGB(color), 1.0f);
+	}
 }

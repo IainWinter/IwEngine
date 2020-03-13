@@ -12,6 +12,7 @@ namespace Graphics {
 	private:
 		int m_width;
 		int m_height;
+		bool m_noColor;
 		std::vector<iw::ref<Texture>> m_textures;
 
 		IFrameBuffer* m_handle;
@@ -20,7 +21,8 @@ namespace Graphics {
 		IWGRAPHICS_API
 		RenderTarget(
 			int width,
-			int height);
+			int height,
+			bool noColor = false);
 
 		IWGRAPHICS_API
 		void Initialize(

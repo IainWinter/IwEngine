@@ -1,5 +1,5 @@
 #shader Vertex
-#version 330
+#version 420
 
 layout(std140, column_major) uniform Camera {
 	mat4 viewProj;

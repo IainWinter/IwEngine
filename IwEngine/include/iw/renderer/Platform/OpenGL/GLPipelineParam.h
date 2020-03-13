@@ -69,6 +69,21 @@ namespace RenderAPI {
 #undef SET_AS
 
 		IWRENDERER_API
+		void SetAsMat2s(
+			const void* matrix,
+			int count = 1) override;
+
+		IWRENDERER_API
+		void SetAsMat3s(
+			const void* matrix,
+			int count = 1) override;
+
+		IWRENDERER_API
+		void SetAsMat4s(
+			const void* matrix,
+			int count = 1) override;
+
+		IWRENDERER_API
 		void SetAsMat2(
 			const iw::matrix2& matrix) override;
 

@@ -5,16 +5,18 @@ namespace iw {
 namespace Graphics {
 	RenderTarget::RenderTarget(
 		int width,
-		int height)
+		int height,
+		bool noColor)
 		: m_width(width)
 		, m_height(height)
+		, m_noColor(noColor)
 		, m_handle(nullptr)
 	{}
 
 	void RenderTarget::Initialize(
 		const iw::ref<IDevice>& device)
 	{
-		m_handle = device->CreateFrameBuffer();
+		m_handle = device->CreateFrameBuffer(m_noColor);
 
 		for (iw::ref<Texture>& texture : m_textures) {
 			texture->Initialize(device);

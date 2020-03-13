@@ -55,6 +55,21 @@ namespace RenderAPI {
 		// does set as floats work for this? if so can make them just call that from here
 
 		IWRENDERER_API
+		virtual void SetAsMat2s(
+			const void* matrix,
+			int count = 1) = 0;
+
+		IWRENDERER_API
+		virtual void SetAsMat3s(
+			const void* matrix,
+			int count = 1) = 0;
+
+		IWRENDERER_API
+		virtual void SetAsMat4s(
+			const void* matrix,
+			int count = 1) = 0;
+
+		IWRENDERER_API
 		virtual void SetAsMat2(
 			const iw::matrix2& matrix) = 0;
 

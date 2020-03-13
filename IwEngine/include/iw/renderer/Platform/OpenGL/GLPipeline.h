@@ -31,6 +31,13 @@ namespace RenderAPI {
 		~GLPipeline();
 
 		IWRENDERER_API
+		int UniformCount() const override;
+
+		IWRENDERER_API
+		int BufferCount() const override;
+
+
+		IWRENDERER_API
 		unsigned Handle() const override;
 
 		IWRENDERER_API
@@ -45,9 +52,6 @@ namespace RenderAPI {
 		void SetBuffer(
 			std::string name,
 			IUniformBuffer* buffer) override;
-
-		IWRENDERER_API
-		int UniformCount() override;
 
 		IWRENDERER_API
 		void Use();

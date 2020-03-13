@@ -19,6 +19,10 @@ namespace Graphics {
 		renderer->SetCamera(m_shadowCamera);
 	}
 
+	matrix4 DirectionalLight::ViewProjection() const {
+		return m_shadowCamera->ViewProjection();
+	}
+
 	const quaternion& DirectionalLight::Rotation() const {
 		return m_shadowCamera->Rotation();
 	}

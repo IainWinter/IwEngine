@@ -87,7 +87,8 @@ project "IwEngine"
 	defines {
 		"IMGUI_IMPL_OPENGL_LOADER_GLEW",
 		--"IW_USE_REFLECTION",
-		"IW_USE_EVENTS"
+		"IW_USE_EVENTS",
+		"IW_LAZY_INIT"
 	}
 
 	postbuildcommands {
@@ -299,7 +300,8 @@ project "Editor"
 
 	defines {
 		--"IW_USE_REFLECTION",
-		"IW_USE_EVENTS"
+		"IW_USE_EVENTS",
+		"IW_LAZY_INIT"
 	}
 
 	filter "system:windows"

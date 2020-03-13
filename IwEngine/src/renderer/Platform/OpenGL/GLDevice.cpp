@@ -268,12 +268,13 @@ namespace RenderAPI {
 	ITexture* GLDevice::CreateTexture(
 		int width,
 		int height,
+		TextureType type,
 		TextureFormat format,
-		TextureFormatType type,
+		TextureFormatType formatType,
 		TextureWrap wrap,
 		const void* data)
 	{
-		return new GLTexture(width, height, format, type, wrap, data);
+		return new GLTexture(width, height, type, format, formatType, wrap, data);
 	}
 
 	ITexture* GLDevice::CreateSubTexture(
@@ -306,8 +307,10 @@ namespace RenderAPI {
 		}
 	}
 
-	IFrameBuffer* GLDevice::CreateFrameBuffer() {
-		return new GLFrameBuffer();
+	IFrameBuffer* GLDevice::CreateFrameBuffer(
+		bool noColor)
+	{
+		return new GLFrameBuffer(noColor);
 	}
 
 	void GLDevice::DestroyFrameBuffer(

@@ -33,6 +33,9 @@ namespace Graphics {
 		IWGRAPHICS_API
 		void SetRadius(
 			float radius);
+
+		void SetShadowTarget(
+			ref<RenderTarget>& shadowTarget) override;
 	};
 }
 

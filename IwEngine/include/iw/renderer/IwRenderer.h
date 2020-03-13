@@ -20,6 +20,11 @@ namespace RenderAPI {
 		QUADS
 	};
 
+	enum TextureType {
+		TEX_2D,
+		TEX_CUBE
+	};
+
 	enum TextureFormatType {
 		UBYTE,
 		FLOAT

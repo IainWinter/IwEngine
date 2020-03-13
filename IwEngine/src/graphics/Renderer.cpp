@@ -43,7 +43,8 @@ namespace Graphics {
 
 	void Renderer::Initialize() {
 		m_cameraUBO = Device->CreateUniformBuffer(&m_cameraData, sizeof(CameraData));
-		m_lightUBO  = Device->CreateUniformBuffer(&m_lightData, sizeof(LightData));
+		m_shadowUBO = Device->CreateUniformBuffer(&m_shadowData, sizeof(ShadowData));
+		m_lightUBO  = Device->CreateUniformBuffer(&m_lightData,  sizeof(LightData));
 	}
 
 	int Renderer::Width() const {
@@ -83,6 +84,10 @@ namespace Graphics {
 			shader->Handle()->SetBuffer("Camera", m_cameraUBO);
 		}
 
+		if (bindings & SHADOWS) {
+			shader->Handle()->SetBuffer("Shadows", m_shadowUBO);
+		}
+
 		if (bindings & LIGHTS) {
 			shader->Handle()->SetBuffer("Lights", m_lightUBO);
 		}
@@ -112,24 +117,29 @@ namespace Graphics {
 		SetDirectionalLights(scene->DirectionalLights);
 	}
 
-	void Renderer::EndScene() {
-		m_state = RenderState::INVALID;
-	}
-
 	void Renderer::BeginShadowCast(
 		Light* light)
 	{
+#ifdef IW_DEBUG
+		if (!light->CanCastShadows()) {
+			LOG_WARNING << "Tried to begin shadow cast with light that cannot cast shadows!";
+		}
+#endif
 		SetShader(light->ShadowShader());
 		SetTarget(light->ShadowTarget());
 
 		light->SetupShadowCast(this);
 
+		Device->Clear();
+
 		m_state = RenderState::SHADOW_MAP;
 	}
 
-	void Renderer::EndShadowCast(
-		const Light* light)
-	{
+	void Renderer::EndScene() {
+		m_state = RenderState::INVALID;
+	}
+
+	void Renderer::EndShadowCast() {
 		EndScene();
 	}
 
@@ -181,13 +191,13 @@ namespace Graphics {
 		if (m_target != target) {
 			if (target) {
 				Device->SetViewport(target->Width(), target->Height());
+				Device->SetFrameBuffer(target->Handle());
 			}
 
 			else {
 				Device->SetViewport(m_width, m_height);
+				Device->SetFrameBuffer(nullptr);
 			}
-
-			Device->SetFrameBuffer(target->Handle());
 		}
 
 		m_target = target;
@@ -239,7 +249,7 @@ namespace Graphics {
 		m_lightData.PointLightCount = lights.size();
 		for (size_t i = 0; i < lights.size(); i++) {
 			m_lightData.PointLights[i].Position = lights[i]->Position();
-			m_lightData.PointLights[i].Radius = lights[i]->Radius();
+			m_lightData.PointLights[i].Radius   = lights[i]->Radius();
 		}
 
 		Device->UpdateBuffer(m_lightUBO, &m_lightData);
@@ -250,11 +260,16 @@ namespace Graphics {
 	{
 		m_lightData.DirectionalLightCount = lights.size();
 		for (size_t i = 0; i < lights.size(); i++) {
-			m_lightData.DirectionalLights[i].Position = lights[i]->Position();
-			m_lightData.DirectionalLights[i].Direction = lights[i]->Rotation().euler_angles();
+			m_lightData.DirectionalLights[i].InvDirection = -lights[i]->Rotation().euler_angles();
 		}
 
-		Device->UpdateBuffer(m_lightUBO, &m_lightData);
+		m_shadowData.DirectionalLightCount = lights.size();
+		for (size_t i = 0; i < lights.size(); i++) {
+			m_shadowData.LightViewProj[i] = lights[i]->ViewProjection();
+		}
+
+		Device->UpdateBuffer(m_lightUBO,  &m_lightData);
+		Device->UpdateBuffer(m_shadowUBO, &m_shadowData);
 	}
 }
 }

@@ -10,31 +10,35 @@ namespace RenderAPI {
 	{
 	private:
 		unsigned gl_id;
-		int gl_format;
 		int gl_type;
+		int gl_format;
+		int gl_formatType;
 		int gl_wrapX;
 		int gl_wrapY;
 
-		const void* m_data;
-
 		int m_width;
 		int m_height;
+		int m_channels;
 		//int m_depth;
 
-		TextureFormatType m_type;
+		TextureType       m_type;
 		TextureFormat     m_format;
+		TextureFormatType m_formatType;
 		TextureWrap       m_wrapX;
 		TextureWrap       m_wrapY;
 		//TextureWrap       m_wrapZ;
 		//int m_glwrapZ;
+
+		const void* m_data;
 
 	public:
 		IWRENDERER_API
 		GLTexture(
 			int width,
 			int height,
+			TextureType type,
 			TextureFormat format,
-			TextureFormatType type,
+			TextureFormatType formatType,
 			TextureWrap wrap,
 			const void* data = nullptr);
 
@@ -87,10 +91,19 @@ namespace RenderAPI {
 		int Height() const;
 
 		IWRENDERER_API
+		TextureType Type() const;
+
+		IWRENDERER_API
 		TextureFormat Format() const;
 
 		IWRENDERER_API
-		TextureFormatType Type() const;
+		TextureFormatType FormatType() const;
+
+		IWRENDERER_API
+		TextureWrap WrapX() const;
+
+		IWRENDERER_API
+		TextureWrap WrapY() const;
 	};
 }
 

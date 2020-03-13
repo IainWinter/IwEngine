@@ -8,6 +8,17 @@ namespace RenderAPI {
 		return translator;
 	}
 
+	GLint GLTranslator::Translate(
+		TextureType textureType)
+	{
+		switch (textureType) {
+			case TEX_2D:   return GL_TEXTURE_2D;
+			case TEX_CUBE: return GL_TEXTURE_CUBE_MAP;
+		}
+
+		return GL_INVALID_VALUE;
+	}
+
 	GLenum GLTranslator::Translate(
 		TextureFormatType textureFormatType)
 	{

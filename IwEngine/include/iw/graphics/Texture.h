@@ -13,9 +13,11 @@ namespace Graphics {
 		int m_width;
 		int m_height;
 		int m_channels;
-		TextureFormat m_format;
+
+		TextureType       m_type;
+		TextureFormat     m_format;
 		TextureFormatType m_formatType;
-		TextureWrap m_wrap;
+		TextureWrap       m_wrap;
 
 		const Texture* m_parent;
 		int m_xOffset;
@@ -32,8 +34,9 @@ namespace Graphics {
 		Texture(
 			int width,
 			int height,
+			TextureType type,
 			TextureFormat format,
-			TextureFormatType type,
+			TextureFormatType formatType,
 			TextureWrap wrap,
 			unsigned char* colors = nullptr);
 

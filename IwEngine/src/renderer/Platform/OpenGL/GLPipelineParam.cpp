@@ -58,7 +58,7 @@ namespace RenderAPI {
 		unsigned stride,                                                                   \
 		unsigned count)                                                                    \
 	{                                                                                      \
-		bool err = 0;                                                                      \
+		bool err = false;                                                                  \
 		const gt* v = (const gt*)values;                                                   \
 		/*if (count == 1) {                                                                \
 			switch (stride) {                                                              \
@@ -239,22 +239,61 @@ namespace RenderAPI {
 		}
 	}*/
 
+	void GLPipelineParam::SetAsMat2s(
+		const void* matrix,
+		int count)
+	{
+		bool err = false;
+
+		GLe(glUniformMatrix2fv(m_location, count, GL_FALSE, (float*)matrix));
+
+		if (err) {
+			LOG_WARNING << "Problem setting uniform " << m_name;
+		}
+	}
+
+	void GLPipelineParam::SetAsMat3s(
+		const void* matrix,
+		int count)
+	{
+		bool err = false;
+
+		GLe(glUniformMatrix3fv(m_location, count, GL_FALSE, (float*)matrix));
+
+		if (err) {
+			LOG_WARNING << "Problem setting uniform " << m_name;
+		}
+	}
+
+	void GLPipelineParam::SetAsMat4s(
+		const void* matrix,
+		int count)
+	{
+		bool err = false;
+
+		GLe(glUniformMatrix4fv(m_location, count, GL_FALSE, (float*)matrix));
+
+		if (err) {
+			LOG_WARNING << "Problem setting uniform " << m_name;
+		}
+	}
+
 	void GLPipelineParam::SetAsMat2(
 		const iw::matrix2& matrix)
 	{
-		glUniformMatrix2fv(m_location, 1, GL_FALSE, matrix.elements);
+		SetAsMat2s(&matrix);
 	}
 
 	void GLPipelineParam::SetAsMat3(
 		const iw::matrix3& matrix)
 	{
-		glUniformMatrix3fv(m_location, 1, GL_FALSE, matrix.elements);
+		SetAsMat3s(&matrix);
 	}
 
 	void GLPipelineParam::SetAsMat4(
 		const iw::matrix4& matrix)
 	{
-		glUniformMatrix4fv(m_location, 1, GL_FALSE, matrix.elements);
+		SetAsMat4s(&matrix);
 	}
 
 	void GLPipelineParam::SetAsTexture(

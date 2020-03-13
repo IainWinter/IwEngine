@@ -22,6 +22,9 @@ namespace Graphics {
 		void SetupShadowCast(
 			Renderer* renderer) override;
 
+		IWGRAPHICS_API
+		matrix4 ViewProjection() const;
+
 		IWGRAPHICS_API const quaternion& Rotation() const;
 		IWGRAPHICS_API       quaternion& Rotation();
 

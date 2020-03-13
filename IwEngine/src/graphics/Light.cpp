@@ -73,17 +73,17 @@ namespace Graphics {
 		m_shadowCamera->SetPosition(position);
 	}
 
-	//void Light::SetLightShader(
-	//	ref<Shader>& shadowShader)
-	//{
-	//	m_shadowShader = shadowShader;
-	//}
+	void Light::SetShadowShader(
+		ref<Shader>& shadowShader)
+	{
+		m_shadowShader = shadowShader;
+	}
 
-	//void Light::SetShadowTarget(
-	//	ref<RenderTarget>& shadowTarget)
-	//{
-	//	m_shadowTarget = shadowTarget;
-	//}
+	void Light::SetShadowTarget(
+		ref<RenderTarget>& shadowTarget)
+	{
+		m_shadowTarget = shadowTarget;
+	}
 
 	/*void Light::PostProcess() {}
 

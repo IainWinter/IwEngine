@@ -6,6 +6,7 @@ namespace Graphics {
 		: m_width(0)
 		, m_height(0)
 		, m_channels(0)
+		, m_type(TEX_2D)
 		, m_format(ALPHA)
 		, m_formatType(UBYTE)
 		, m_wrap(REPEAT)
@@ -19,14 +20,16 @@ namespace Graphics {
 	Texture::Texture(
 		int width,
 		int height,
+		TextureType type,
 		TextureFormat format,
-		TextureFormatType type,
+		TextureFormatType formatType,
 		TextureWrap wrap,
 		unsigned char* colors)
 		: m_width(width)
 		, m_height(height)
+		, m_type(type)
 		, m_format(format)
-		, m_formatType(type)
+		, m_formatType(formatType)
 		, m_wrap(wrap)
 		, m_parent(nullptr)
 		, m_xOffset(0)
@@ -34,7 +37,7 @@ namespace Graphics {
 		, m_colors(colors)
 		, m_handle(nullptr)
 	{
-		switch (format) {
+		switch (formatType) {
 			case ALPHA:   m_channels = 1; break;
 			case RG:      m_channels = 2; break;
 			case RGB:     m_channels = 3; break;
@@ -59,6 +62,7 @@ namespace Graphics {
 		: m_width(width)
 		, m_height(height)
 		, m_channels(parent->m_channels)
+		, m_type(parent->m_type)
 		, m_format(parent->m_format)
 		, m_formatType(parent->m_formatType)
 		, m_wrap(parent->m_wrap)
@@ -74,6 +78,7 @@ namespace Graphics {
 		: m_width(other.m_width)
 		, m_height(other.m_height)
 		, m_channels(other.m_channels)
+		, m_type(other.m_type)
 		, m_format(other.m_format)
 		, m_formatType(other.m_formatType)
 		, m_wrap(other.m_wrap)
@@ -82,9 +87,11 @@ namespace Graphics {
 		, m_yOffset(other.m_yOffset)
 		, m_handle(nullptr)
 	{
-		m_colors = new unsigned char[m_width * m_height];
-		if (other.m_colors) {
-			memcpy(m_colors, other.m_colors, m_width * m_height);
+		if (m_colors) {
+			m_colors = new unsigned char[m_width * m_height];
+			if (other.m_colors) {
+				memcpy(m_colors, other.m_colors, m_width * m_height);
+			}
 		}
 	}
 
@@ -93,6 +100,7 @@ namespace Graphics {
 		: m_width(other.m_width)
 		, m_height(other.m_height)
 		, m_channels(other.m_channels)
+		, m_type(other.m_type)
 		, m_format(other.m_format)
 		, m_formatType(other.m_formatType)
 		, m_wrap(other.m_wrap)
@@ -116,9 +124,10 @@ namespace Graphics {
 	{
 		m_width      = other.m_width;
 		m_height     = other.m_height;
+		m_channels   = other.m_channels;
+		m_type       = other.m_type;
 		m_format     = other.m_format;
 		m_formatType = other.m_formatType;
-		m_channels   = other.m_channels;
 		m_wrap       = other.m_wrap;
 		m_parent     = other.m_parent;
 		m_xOffset    = other.m_yOffset;
@@ -126,9 +135,11 @@ namespace Graphics {
 		m_colors     = other.m_colors;
 		m_handle     = nullptr;
 
-		m_colors = new unsigned char[m_width * m_height];
-		if (other.m_colors) {
-			memcpy(m_colors, other.m_colors, m_width * m_height);
+		if (m_colors) {
+			m_colors = new unsigned char[m_width * m_height];
+			if (other.m_colors) {
+				memcpy(m_colors, other.m_colors, m_width * m_height);
+			}
 		}
 
 		return *this;
@@ -139,9 +150,10 @@ namespace Graphics {
 	{
 		m_width      = other.m_width;
 		m_height     = other.m_height;
+		m_channels   = other.m_channels;
+		m_type       = other.m_type;
 		m_format     = other.m_format;
 		m_formatType = other.m_formatType;
-		m_channels   = other.m_channels;
 		m_wrap       = other.m_wrap;
 		m_parent     = other.m_parent;
 		m_xOffset    = other.m_yOffset;
@@ -167,7 +179,7 @@ namespace Graphics {
 			}
 
 			else {
-				m_handle = device->CreateTexture(m_width, m_height, m_format, m_formatType, m_wrap, m_colors);
+				m_handle = device->CreateTexture(m_width, m_height, m_type, m_format, m_formatType, m_wrap, m_colors);
 			}
 		}
 	}
@@ -200,6 +212,10 @@ namespace Graphics {
 
 	TextureFormatType Texture::FormatType() const {
 		return m_formatType;
+	}
+
+	TextureWrap Texture::Wrap() const {
+		return m_wrap;
 	}
 
 	const Texture* Texture::Parent() const {

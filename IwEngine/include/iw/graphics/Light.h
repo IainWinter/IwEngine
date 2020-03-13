@@ -57,13 +57,13 @@ namespace Graphics {
 		void SetPosition(
 			const vector3& position);
 
-		//IWGRAPHICS_API
-		//void SetLightShader(
-		//	ref<Shader>& shadowShader);
+		IWGRAPHICS_API
+		virtual void SetShadowShader(
+			ref<Shader>& shadowShader);
 
-		//IWGRAPHICS_API
-		//void SetShadowTarget(
-		//	ref<RenderTarget>& shadowTarget);
+		IWGRAPHICS_API
+		virtual void SetShadowTarget(
+			ref<RenderTarget>& shadowTarget);
 
 
 		//IWGRAPHICS_API

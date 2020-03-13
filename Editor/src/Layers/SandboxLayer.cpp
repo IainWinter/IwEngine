@@ -109,11 +109,11 @@ namespace iw {
 
 		// Textures
 		
-		Texture shadow = Texture(1024, 1024, RG, FLOAT, BORDER);
+		Texture shadow = Texture(1024, 1024, TEX_2D, RG, FLOAT, BORDER);
 
 		ref<Texture> texShadow = Asset->Give("ShadowMap", &shadow);
-		ref<Texture> texDepth  = REF<Texture>(1024, 1024, DEPTH, FLOAT, BORDER);
-		ref<Texture> texBlur   = REF<Texture>(1024, 1024, ALPHA, FLOAT, BORDER);
+		ref<Texture> texDepth  = REF<Texture>(1024, 1024, TEX_2D, DEPTH, FLOAT, BORDER);
+		ref<Texture> texBlur   = REF<Texture>(1024, 1024, TEX_2D, ALPHA, FLOAT, BORDER);
 
 		target = std::make_shared<RenderTarget>(1024, 1024);
 		target->AddTexture(texShadow);
