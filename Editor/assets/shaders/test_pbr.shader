@@ -172,9 +172,9 @@ float PointLightShadow(
 	float currentDepth = length(NegL);
 
 	float bias = 0.05;
-	float shadow = currentDepth + bias > R * closestDepth ? 0.0 : 1.0;
+	float shadow = R * closestDepth > currentDepth - bias ? 1.0 : 0.0;
 
-	return closestDepth;
+	return shadow;
 }
 
 // For PBR BFDR
@@ -274,7 +274,7 @@ void main() {
 
 		color += (albedo * Fd + Fr) * NdotL * attenuation * PointLightShadow(-L, R);
 	}
-
+	
 	for (int i = 0; i < directionalLightCount; i++) {
 		vec3 L = directionalLights[i].InvDirection;
 		vec3 nL = normalize(L);

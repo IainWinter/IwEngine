@@ -27,7 +27,8 @@ namespace Graphics {
 		virtual void SetupShadowCast(
 			Renderer* renderer);
 
-		IWGRAPHICS_API float  Radius() const;
+		IWGRAPHICS_API
+		float Radius() const;
 
 		IWGRAPHICS_API
 		void SetRadius(

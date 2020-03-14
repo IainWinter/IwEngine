@@ -152,6 +152,26 @@ namespace RenderAPI {
 		glUniformBlockBinding(gl_id, uniformIndex, index);
 	}
 
+//	bool GLPipeline::IsTextureActive(
+//		IPipelineParam* param) const
+//	{
+//#ifdef IW_DEBUG
+//		if (param->Type() != UniformType::SAMPLER) {
+//			LOG_WARNING << "Checking for active texture but param is not a texture!";
+//		}
+//#endif 
+//		GLint* texture = new GLint[4]; 
+//		glGetIntegerv(GL_ACTIVE_TEXTURE, texture);
+//
+//		unsigned g = param->SetAsTexture();
+//
+//		//if (texture == param->Location()) {
+//
+//		//}
+//
+//		return false;
+//	}
+
 	void GLPipeline::Use() {
 		m_textureCount = 0;
 		glUseProgram(gl_id);

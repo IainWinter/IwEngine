@@ -53,6 +53,10 @@ namespace RenderAPI {
 			std::string name,
 			IUniformBuffer* buffer) override;
 
+		//IWRENDERER_API
+		//bool IsTextureActive(
+		//	IPipelineParam* param) const override;
+
 		IWRENDERER_API
 		void Use();
 	};

@@ -192,7 +192,7 @@ namespace RenderAPI {
 			case GL_DOUBLE_VEC3:
 			case GL_DOUBLE_VEC4:
 			case GL_DOUBLE:            return iw::val(UniformType::DOUBLE);
-			case GL_SAMPLER_2D:        return iw::val(UniformType::SAMPLE2);
+			case GL_SAMPLER_2D:        return iw::val(UniformType::SAMPLER);
 		}
 
 		return GL_INVALID_VALUE;

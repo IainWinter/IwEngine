@@ -18,6 +18,8 @@
 
 namespace iw {
 namespace Graphics {
+	// Instances need to not bind each texture if its the same
+
 	struct Material {
 	public:
 		iw::ref<Shader> Shader;

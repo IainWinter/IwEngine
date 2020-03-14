@@ -32,6 +32,14 @@ namespace RenderAPI {
 		virtual void SetBuffer(
 			std::string name,
 			IUniformBuffer* buffer) = 0;
+
+		//IWRENDERER_API
+		//virtual bool IsTextureActive(
+		//	IPipelineParam* param) const = 0;
+
+		//IWRENDERER_API
+		//virtual bool IsActive(
+		//	IUniformBuffer* buffer) const = 0;
 	};
 }
 

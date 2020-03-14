@@ -10,7 +10,7 @@ namespace RenderAPI {
 		UINT,
 		FLOAT,
 		DOUBLE,
-		SAMPLE2,
+		SAMPLER,
 		UNKNOWN
 	};
 

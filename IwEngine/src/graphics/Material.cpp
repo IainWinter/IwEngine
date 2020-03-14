@@ -111,7 +111,7 @@ namespace Graphics {
 				
 				std::string name = uniform->Name().substr(4);
 				if (!Has(name)) {
-					if (uniform->Type() == UniformType::SAMPLE2) {
+					if (uniform->Type() == UniformType::SAMPLER) {
 						SetTexture(name, nullptr);
 					}
 
@@ -178,7 +178,9 @@ namespace Graphics {
 					LOG_WARNING << "Uninitialized texture in material: " << prop.Name;
 				}
 
-				param->SetAsTexture(prop.Texture->Handle());
+				//if (!Shader->Handle()->IsTextureActive(param)) {
+					param->SetAsTexture(prop.Texture->Handle());
+				//}
 			}
 
 			else {
