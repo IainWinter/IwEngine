@@ -24,7 +24,7 @@ namespace Graphics {
 	}
 
 	bool Light::CanCastShadows() const {
-		return m_shadowCamera && m_shadowTarget;
+		return m_shadowShader && m_shadowTarget;
 	}
 
 	bool Light::Outdated() const {

@@ -8,7 +8,7 @@ namespace Graphics {
 		float power,
 		ref<Shader> shadowShader,
 		ref<RenderTarget> shadowTarget)
-		: Light(power, nullptr, shadowShader, shadowTarget)
+		: Light(power, new PerspectiveCamera(), shadowShader, shadowTarget)
 		, m_radius(radius)
 		, m_outdated(true)
 	{
@@ -17,7 +17,7 @@ namespace Graphics {
 
 	PointLight::PointLight(
 		const PointLight& copy)
-		: Light(m_intensity, nullptr, copy.m_shadowShader, copy.m_shadowTarget)
+		: Light(m_intensity, new PerspectiveCamera(), copy.m_shadowShader, copy.m_shadowTarget)
 		, m_radius(copy.m_radius)
 		, m_outdated(true)
 	{
