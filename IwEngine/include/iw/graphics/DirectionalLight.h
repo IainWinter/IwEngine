@@ -26,7 +26,7 @@ namespace Graphics {
 		matrix4 ViewProjection() const;
 
 		IWGRAPHICS_API const quaternion& Rotation() const;
-		IWGRAPHICS_API       quaternion& Rotation();
+		//IWGRAPHICS_API       quaternion& Rotation();
 
 		IWGRAPHICS_API
 		void SetRotation(

@@ -37,17 +37,20 @@ namespace Graphics {
 		IWGRAPHICS_API
 		bool CanCastShadows() const;
 
+		IWGRAPHICS_API
+		virtual bool Outdated() const;
+
 		IWGRAPHICS_API       float              Intensity()    const;
-		IWGRAPHICS_API       float&             Intensity();
+		//IWGRAPHICS_API       float&             Intensity();
 
 		IWGRAPHICS_API const vector3&           Position()     const;
-		IWGRAPHICS_API       vector3&           Position();
+		//IWGRAPHICS_API       vector3&           Position();
 
 		IWGRAPHICS_API const ref<Shader>&       ShadowShader() const;
-		IWGRAPHICS_API       ref<Shader>&       ShadowShader();
+		//IWGRAPHICS_API       ref<Shader>&       ShadowShader();
 
 		IWGRAPHICS_API const ref<RenderTarget>& ShadowTarget() const;
-		IWGRAPHICS_API       ref<RenderTarget>& ShadowTarget();
+		//IWGRAPHICS_API       ref<RenderTarget>& ShadowTarget();
 
 		IWGRAPHICS_API
 		void SetIntensity(

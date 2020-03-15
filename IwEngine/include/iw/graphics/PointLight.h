@@ -10,6 +10,8 @@ namespace Graphics {
 	{
 	protected:
 		float m_radius;
+		float m_fov;
+		bool m_outdated;
 
 	public:
 		// Takes ownership of camera ptr
@@ -24,8 +26,11 @@ namespace Graphics {
 		~PointLight() override = default;
 
 		IWGRAPHICS_API
-		virtual void SetupShadowCast(
-			Renderer* renderer);
+		void SetupShadowCast(
+			Renderer* renderer) override;
+
+		IWGRAPHICS_API
+		bool Outdated() const override;
 
 		IWGRAPHICS_API
 		float Radius() const;
@@ -37,7 +42,6 @@ namespace Graphics {
 		IWGRAPHICS_API
 		void SetShadowTarget(
 			ref<RenderTarget>& shadowTarget) override;
-
 	private:
 		void UpdateCamera();
 	};

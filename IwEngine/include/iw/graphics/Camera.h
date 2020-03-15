@@ -26,20 +26,24 @@ namespace Graphics {
 
 		virtual ~Camera() {}
 
+		bool Outdated() const;
+
+		const vector3& Position() const;
+		//      vector3& Position();
+
+		const quaternion& Rotation() const;
+		//      quaternion& Rotation();
+
+		matrix4 View();
+		matrix4 ViewProjection();
+
+		virtual iw::matrix4 Projection() const = 0;
+
 		void SetTrans(
 			Transform* transform);
 
 		void SetView(
 			const iw::matrix4& view);
-
-		virtual void SetProjection(
-			const iw::matrix4& projection) = 0;
-
-		const vector3& Position() const;
-		const quaternion& Rotation() const;
-
-		vector3& Position();
-		quaternion& Rotation();
 
 		void SetPosition(
 			const vector3& rotation);
@@ -47,10 +51,8 @@ namespace Graphics {
 		void SetRotation(
 			const quaternion& rotation);
 
-		matrix4 View();
-		matrix4 ViewProjection();
-
-		virtual iw::matrix4 Projection() const = 0;
+		virtual void SetProjection(
+			const iw::matrix4& projection) = 0;
 	private:
 		void RecalculateView();
 	};

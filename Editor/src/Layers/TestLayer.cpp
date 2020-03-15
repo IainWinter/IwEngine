@@ -50,7 +50,7 @@ namespace iw {
 
 		// Point light shadow map textures & target
 
-		ref<Texture> pointShadowDepth = ref<Texture>(new Texture(1024, 1024, TEX_CUBE, DEPTH, FLOAT, BORDER));
+		ref<Texture> pointShadowDepth = ref<Texture>(new Texture(1024, 1024, TEX_CUBE, DEPTH, FLOAT, EDGE));
 
 		ref<RenderTarget> pointShadowTarget = REF<RenderTarget>(1024, 1024, true);
 		pointShadowTarget->AddTexture(pointShadowDepth);
@@ -152,23 +152,28 @@ namespace iw {
 	}
 
 	void TestLayer::PostUpdate() {
-		Renderer->BeginShadowCast(dirLight);
+		if (dirLight->Outdated()) {
+			Renderer->BeginShadowCast(dirLight);
 
-		for (auto entity : Space->Query<Transform, Mesh>()) {
-			auto [transform, mesh] = entity.Components.Tie<MeshComponents>();
-			Renderer->DrawMesh(transform, mesh);
+			for (auto entity : Space->Query<Transform, Mesh>()) {
+				auto [transform, mesh] = entity.Components.Tie<MeshComponents>();
+				Renderer->DrawMesh(transform, mesh);
+			}
+
+			Renderer->EndShadowCast();
 		}
 
-		Renderer->EndShadowCast();
+		if (light->Outdated()) {
+			Renderer->BeginShadowCast(light);
 
-		Renderer->BeginShadowCast(light);
+			for (auto entity : Space->Query<Transform, Mesh>()) {
+				auto [transform, mesh] = entity.Components.Tie<MeshComponents>();
+				Renderer->DrawMesh(transform, mesh);
+			}
 
-		for (auto entity : Space->Query<Transform, Mesh>()) {
-			auto [transform, mesh] = entity.Components.Tie<MeshComponents>();
-			Renderer->DrawMesh(transform, mesh);
+			Renderer->EndShadowCast();
 		}
 
-		Renderer->EndShadowCast();
 
 		Renderer->BeginScene(scene);
 
@@ -184,18 +189,20 @@ namespace iw {
 		ImGui::Begin("Test");
 
 		float r = light->Radius();
+		vector3 pos = light->Position();
 
-		ImGui::SliderFloat3("Light pos", (float*)&light->Position(), -20, 20);
+		ImGui::SliderFloat3("Light pos", (float*)&pos, -20, 20);
 		ImGui::SliderFloat("Light rad", &r, 0, 100);
 
 		light->SetRadius(r);
+		light->SetPosition(pos);
 
 		//ImGui::SliderFloat3("Light 2 pos", (float*)&light2->Position(), -10, 10);
 		//ImGui::SliderFloat("Light 2 rad", &light2->Radius(), 0, 100);
 
 		quaternion rot = dirLight->Rotation();
 
-		ImGui::SliderFloat4("Dir rad", (float*)&rot, 0, 1);
+		ImGui::SliderFloat4("Dir rot", (float*)&rot, 0, 1);
 
 		rot.normalize();
 

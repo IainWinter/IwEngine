@@ -9,6 +9,8 @@ namespace RenderAPI {
 		: public IPipelineParam
 	{
 	private:
+		unsigned MAX_TEXTURES;
+
 		unsigned  m_location;
 		unsigned& m_textureCount;
 

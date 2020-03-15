@@ -8,6 +8,9 @@ namespace RenderAPI {
 	public:
 		IWRENDERER_API
 		virtual ~ITexture() = default;
+
+		IWRENDERER_API
+		virtual void GenerateMipMaps() const = 0;
 	protected:
 		ITexture() = default;
 	};

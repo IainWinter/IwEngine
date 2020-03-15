@@ -75,7 +75,7 @@ namespace iw {
 		ImGui::Begin("Toolbox");
 
 		int draws = 0;
-		for (auto entity : Space->Query<Transform, Model>()) {
+		for (auto entity : Space->Query<Transform, Mesh>()) {
 			draws++;
 		}
 

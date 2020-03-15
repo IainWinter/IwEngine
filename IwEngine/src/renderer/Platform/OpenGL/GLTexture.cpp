@@ -50,6 +50,7 @@ namespace RenderAPI {
 		, m_type(type)
 		, m_wrapX(wrap)
 		, m_wrapY(wrap)
+		, m_wrapZ(wrap)
 		, m_data(data)
 	{
 		switch (formatType) {
@@ -64,7 +65,7 @@ namespace RenderAPI {
 		gl_type = TRANSLATE(type);
 		gl_format = TRANSLATE(format, formatType);
 		gl_formatType = TRANSLATE(formatType);
-		gl_wrapX = gl_wrapY = TRANSLATE(wrap);
+		gl_wrapX = gl_wrapY = gl_wrapZ = TRANSLATE(wrap);
 
 		bool errout = false;
 		if (gl_formatType == GL_INVALID_VALUE) {
@@ -110,7 +111,8 @@ namespace RenderAPI {
 				}
 				case TEX_CUBE: {
 					for (unsigned i = 0; i < 6; i++) {
-						glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, gl_format, m_width, m_height, 0, TRANSLATE(format), gl_formatType, m_data);
+						GLenum gl_face = GL_TEXTURE_CUBE_MAP_POSITIVE_X + i;
+						glTexImage2D(gl_face, 0, gl_format, m_width, m_height, 0, TRANSLATE(format), gl_formatType, m_data);
 					}
 
 					break;
@@ -118,16 +120,19 @@ namespace RenderAPI {
 			}
 		//}
 
-		glGenerateMipmap(gl_type);
-
 		// Need to pass options for these
 		glTexParameteri(gl_type, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glTexParameteri(gl_type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(gl_type, GL_TEXTURE_WRAP_S, gl_wrapX);
 		glTexParameteri(gl_type, GL_TEXTURE_WRAP_T, gl_wrapY);
+		glTexParameteri(gl_type, GL_TEXTURE_WRAP_R, gl_wrapZ);
+
+		glGenerateMipmap(gl_type);
 
 		float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 		glTexParameterfv(gl_type, GL_TEXTURE_BORDER_COLOR, borderColor);
+
+		Unbind();
 	}
 
 	GLTexture::~GLTexture() {
@@ -148,19 +153,29 @@ namespace RenderAPI {
 
 		GLTexture* sub = new GLTexture(width, height, m_type, m_format, m_formatType, m_wrapX/*, m_wrapY*/);
 		if (m_data) {
+			sub->Bind();
+			
 			glTextureSubImage2D(sub->Id(), mipmap, xOffset, yOffset, width, height, TRANSLATE(m_format), gl_formatType, m_data);
 			glGenerateMipmap(GL_TEXTURE_2D);
+			
+			sub->Unbind();
 		}
 
 		return sub;
 	}
 
 	void GLTexture::Bind() const {
-		/**/glBindTexture(gl_type, gl_id)/*)*/;
+		glBindTexture(gl_type, gl_id);
 	}
 
 	void GLTexture::Unbind() const {
 		glBindTexture(gl_type, 0);
+	}
+
+	void GLTexture::GenerateMipMaps() const {
+		Bind();
+		glGenerateMipmap(gl_type);
+		Unbind();
 	}
 
 	unsigned GLTexture::Id() const {

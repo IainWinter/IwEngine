@@ -27,9 +27,9 @@ namespace Graphics {
 		return m_shadowCamera->Rotation();
 	}
 
-	quaternion& DirectionalLight::Rotation() {
-		return m_shadowCamera->Rotation();
-	}
+	//quaternion& DirectionalLight::Rotation() {
+	//	return m_shadowCamera->Rotation();
+	//}
 
 	void DirectionalLight::SetRotation(
 		const iw::quaternion& rotation)

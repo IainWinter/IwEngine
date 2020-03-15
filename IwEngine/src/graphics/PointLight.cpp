@@ -27,14 +27,20 @@ namespace Graphics {
 		matrix4 cube[6];
 		cube[0] = matrix4::create_look_at(Position(), Position() + vector3::unit_x, -vector3::unit_y) * m_shadowCamera->Projection();
 		cube[1] = matrix4::create_look_at(Position(), Position() - vector3::unit_x, -vector3::unit_y) * m_shadowCamera->Projection();
-		cube[2] = matrix4::create_look_at(Position(), Position() + vector3::unit_y, vector3::unit_z) * m_shadowCamera->Projection();
+		cube[2] = matrix4::create_look_at(Position(), Position() + vector3::unit_y,  vector3::unit_z) * m_shadowCamera->Projection();
 		cube[3] = matrix4::create_look_at(Position(), Position() - vector3::unit_y, -vector3::unit_z) * m_shadowCamera->Projection();
-		cube[4] = matrix4::create_look_at(Position(), Position() + vector3::unit_z, -vector3::unit_y) * m_shadowCamera->Projection();
+		cube[4] = m_shadowCamera->ViewProjection();
 		cube[5] = matrix4::create_look_at(Position(), Position() - vector3::unit_z, -vector3::unit_y) * m_shadowCamera->Projection();
 
 		m_shadowShader->Handle()->GetParam("light_mats[0]") ->SetAsMat4s(cube, 6);
 		m_shadowShader->Handle()->GetParam("light_pos")     ->SetAsFloats(&Position(), 3);
 		m_shadowShader->Handle()->GetParam("light_farPlane")->SetAsFloat(Radius());
+
+		m_outdated = false;
+	}
+
+	bool PointLight::Outdated() const {
+		return m_outdated || Light::Outdated();
 	}
 
 	float PointLight::Radius() const {
@@ -46,6 +52,10 @@ namespace Graphics {
 	{
 		if (m_radius != radius) {
 			m_radius = radius;
+			if (m_radius < 0.02f) {
+				m_radius = 0.02f;
+			}
+
 			UpdateCamera();
 		}
 	}
@@ -74,6 +84,8 @@ namespace Graphics {
 				Radius()
 			);
 			
+			camera->SetRotation(quaternion::from_axis_angle(vector3::unit_z, Pi));
+
 			delete m_shadowCamera;
 			m_shadowCamera = camera;
 		}
@@ -81,6 +93,8 @@ namespace Graphics {
 		else {
 			m_shadowCamera = new PerspectiveCamera();
 		}
+
+		m_outdated = true;
 	}
 }
 }

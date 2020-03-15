@@ -26,10 +26,7 @@ namespace Graphics {
 	}
 
 	iw::matrix4 Camera::View() {
-		if (   m_outdated 
-			|| Position() != m_position 
-			|| Rotation() != m_rotation)
-		{
+		if (Outdated()) {
 			RecalculateView();
 		}
 
@@ -47,6 +44,17 @@ namespace Graphics {
 		const iw::matrix4& view)
 	{
 		m_view = view;
+
+		SetPosition(m_view.translation());
+		SetRotation(m_view.rotation());
+
+		m_outdated = false;
+	}
+
+	bool Camera::Outdated() const {
+		return m_outdated
+			|| Position() != m_position
+			|| Rotation() != m_rotation;
 	}
 
 	const vector3& Camera::Position() const {
@@ -57,40 +65,44 @@ namespace Graphics {
 		return m_transform ? m_transform->Rotation : m_rotation;
 	}
 
-	vector3& Camera::Position() {
-		return m_transform ? m_transform->Position : m_position;
-	}
+	//vector3& Camera::Position() {
+	//	return m_transform ? m_transform->Position : m_position;
+	//}
 
-	quaternion& Camera::Rotation() {
-		return m_transform ? m_transform->Rotation : m_rotation;
-	}
+	//quaternion& Camera::Rotation() {
+	//	return m_transform ? m_transform->Rotation : m_rotation;
+	//}
 
 	void Camera::SetPosition(
 		const vector3& position)
 	{
-		if (m_transform) {
-			m_transform->Position = position;
-		}
+		if (Position() != position) {
+			if (m_transform) {
+				m_transform->Position = position;
+			}
 		
-		else {
-			m_position= position;
-		}
+			else {
+				m_position= position;
+			}
 
-		m_outdated = true;
+			m_outdated = true;
+		}
 	}
 
 	void Camera::SetRotation(
 		const quaternion& rotation)
 	{
-		if (m_transform) {
-			m_transform->Rotation = rotation;
-		}
+		if (Rotation() != rotation) {
+			if (m_transform) {
+				m_transform->Rotation = rotation;
+			}
 
-		else {
-			m_rotation = rotation;
+			else {
+				m_rotation = rotation;
+			}
+	
+			m_outdated = true;
 		}
-
-		m_outdated = true;
 	}
 
 	iw::matrix4 Camera::ViewProjection() {
@@ -105,6 +117,8 @@ namespace Graphics {
 
 		m_position = Position();
 		m_rotation = Rotation();
+
+		m_outdated = false;
 	}
 
 	OrthographicCamera::OrthographicCamera(

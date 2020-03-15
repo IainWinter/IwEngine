@@ -140,6 +140,7 @@ namespace Graphics {
 	}
 
 	void Renderer::EndShadowCast() {
+		m_target->Tex(0)->Handle()->GenerateMipMaps();
 		EndScene();
 	}
 
@@ -226,10 +227,10 @@ namespace Graphics {
 	void Renderer::SetShader(
 		const iw::ref<Shader>& shader)
 	{
-		if (m_shader != shader) {
+		//if (m_shader != shader) { // newed to reset tex unit count somehow before this is valid
 			m_shader = shader;
 			m_shader->Use(Device);
-		}
+		//}
 	}
 
 	void Renderer::SetMaterial(

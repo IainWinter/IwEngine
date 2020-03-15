@@ -20,7 +20,9 @@ namespace RenderAPI {
 		, m_typeSize(typeSize)
 		, m_stride(stride)
 		, m_count(count)
-	{}
+	{
+		glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, (GLint*)&MAX_TEXTURES);
+	}
 
 	const std::string& GLPipelineParam::Name() const {
 		return m_name;
@@ -304,20 +306,17 @@ namespace RenderAPI {
 			index = m_textureCount++;
 		}
 
-		if (index > 32) { // depends on driver
-			LOG_WARNING << "Cannot bind more than 32 textures";
-			return;
+#ifdef IW_DEBUG
+		if (index > MAX_TEXTURES) {
+			LOG_WARNING << "Cannot bind more than " << MAX_TEXTURES << " textures!";
 		}
+#endif
 
 		glUniform1i(m_location, index);
 		glActiveTexture(GL_TEXTURE0 + index);
 
 		if (texture) {
-			static_cast<const GLTexture*>(texture)->Bind();
-		}
-
-		else {
-			glBindTexture(GL_TEXTURE_2D, 0); // this is prob the way to do it cus you cant call unbind a nullptr
+			static_cast<const GLTexture*>(texture)->Bind(); 
 		}
 	}
 }

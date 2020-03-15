@@ -89,7 +89,7 @@ uniform float mat_reflectance;
 uniform float     mat_hasShadowMap;
 uniform sampler2D mat_shadowMap;
 
-uniform float     mat_hasShadowMap2;
+uniform float       mat_hasShadowMap2;
 uniform samplerCube mat_shadowMap2;
 
 // Math Constants
@@ -282,7 +282,7 @@ void main() {
 		float NdotV = abs(dot(N, V));
 		vec3  H = normalize(V + nL);
 		float LdotH = clamp(dot(nL, H), 0.0f, 1.0f);
-		float NdotH = clamp(dot(N, H), 0.0f, 1.0f);
+		float NdotH = clamp(dot(N, H),  0.0f, 1.0f);
 		float NdotL = clamp(dot(N, nL), 0.0f, 1.0f);
 
 		vec3  F = F_Schlick(f0, f90, LdotH);
@@ -298,6 +298,6 @@ void main() {
 
 		color += (albedo * Fd + Fr) * NdotL * DirectionalLightShadow(DirectionalLightPos[i]);
 	}
-
+	
 	FragColor = vec4(linearToSRGB(color), 1.0f);
 }

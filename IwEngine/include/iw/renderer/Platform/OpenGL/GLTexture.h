@@ -15,6 +15,7 @@ namespace RenderAPI {
 		int gl_formatType;
 		int gl_wrapX;
 		int gl_wrapY;
+		int gl_wrapZ;
 
 		int m_width;
 		int m_height;
@@ -26,8 +27,7 @@ namespace RenderAPI {
 		TextureFormatType m_formatType;
 		TextureWrap       m_wrapX;
 		TextureWrap       m_wrapY;
-		//TextureWrap       m_wrapZ;
-		//int m_glwrapZ;
+		TextureWrap       m_wrapZ;
 
 		const void* m_data;
 
@@ -80,6 +80,9 @@ namespace RenderAPI {
 
 		IWRENDERER_API
 		void Unbind() const;
+
+		IWRENDERER_API
+		void GenerateMipMaps() const override;
 
 		IWRENDERER_API
 		unsigned Id() const;
