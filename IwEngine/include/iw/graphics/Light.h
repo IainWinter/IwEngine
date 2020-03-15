@@ -8,7 +8,7 @@ namespace iw {
 namespace Graphics {
 	class Renderer;
 
-	struct Light {
+	struct Light { // need copy constructor
 	protected:
 		float m_intensity;
 

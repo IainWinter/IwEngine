@@ -15,6 +15,9 @@ namespace Graphics {
 			ref<Shader>        shadowShader = nullptr,
 			ref<RenderTarget>  shadowTarget = nullptr);
 
+		GEN_copy(IWGRAPHICS_API, DirectionalLight)
+		GEN_move(IWGRAPHICS_API, DirectionalLight)
+
 		IWGRAPHICS_API
 		~DirectionalLight() override = default;
 

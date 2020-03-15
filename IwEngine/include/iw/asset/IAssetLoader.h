@@ -15,6 +15,10 @@ namespace Asset {
 		virtual iw::ref<void> Give(
 			std::string filename,
 			void* asset) = 0;
+
+		virtual iw::ref<void> Give(
+			std::string name,
+			const ref<void>& asset) = 0;
 	};
 }
 

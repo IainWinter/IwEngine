@@ -32,7 +32,7 @@ namespace Graphics {
 	struct ShadowData {
 		int __pad1, __pad2, __pad3;
 
-		int DirectionalLightCount;
+		int DirectionalLightCount = 0;
 
 		matrix4 LightViewProj[MAX_DIRECTIONAL_LIGHTS];
 	};
@@ -41,8 +41,8 @@ namespace Graphics {
 	struct LightData {
 		int __pad1, __pad2;
 
-		int PointLightCount;
-		int DirectionalLightCount;
+		int PointLightCount = 0;
+		int DirectionalLightCount = 0;
 
 		struct PointLightDescription {
 			vector3 Position;

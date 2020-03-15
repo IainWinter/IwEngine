@@ -29,7 +29,7 @@ namespace iw {
 			float gamma);
 
 		iw::ref<Texture>& GetTexture();
-		Light* GetLight();
+		DirectionalLight* GetLight();
 		float& GetAmbiance();
 		float& GetGamma();
 

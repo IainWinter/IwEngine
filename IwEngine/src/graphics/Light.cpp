@@ -13,9 +13,7 @@ namespace Graphics {
 		, m_shadowTarget(shadowTarget)
 	{
 #ifdef IW_DEBUG
-		if (   (!shadowShader && !shadowTarget)
-			|| ( shadowShader &&  shadowTarget))
-		{
+		if (!!shadowShader != !!shadowTarget) {
 			LOG_WARNING << "A light needs both a shader and a target or neither.";
 		}
 #endif

@@ -13,6 +13,48 @@ namespace Graphics {
 		m_shadowCamera = new OrthographicCamera(shadowCamera);
 	}
 
+	DirectionalLight::DirectionalLight(
+		const DirectionalLight& copy)
+		: Light(m_intensity, nullptr, copy.m_shadowShader, copy.m_shadowTarget)
+	{
+		m_shadowCamera = new OrthographicCamera(*(OrthographicCamera*)copy.m_shadowCamera);
+	}
+
+	DirectionalLight::DirectionalLight(
+		DirectionalLight&& copy) noexcept
+		: Light(m_intensity, copy.m_shadowCamera, copy.m_shadowShader, copy.m_shadowTarget)
+	{
+		copy.m_shadowCamera = nullptr;
+		copy.m_shadowShader = nullptr;
+		copy.m_shadowTarget = nullptr;
+	}
+
+	DirectionalLight& DirectionalLight::operator=(
+		const DirectionalLight& copy)
+	{
+		m_intensity    = copy.m_intensity;
+		m_shadowCamera = new OrthographicCamera(*(OrthographicCamera*)copy.m_shadowCamera);
+		m_shadowShader = copy.m_shadowShader;
+		m_shadowTarget = copy.m_shadowTarget;
+
+		return *this;
+	}
+
+	DirectionalLight& DirectionalLight::operator=(
+		DirectionalLight&& copy) noexcept
+	{
+		m_intensity    = copy.m_intensity;
+		m_shadowCamera = copy.m_shadowCamera;
+		m_shadowShader = copy.m_shadowShader;
+		m_shadowTarget = copy.m_shadowTarget;
+
+		copy.m_shadowCamera = nullptr;
+		copy.m_shadowShader = nullptr;
+		copy.m_shadowTarget = nullptr;
+
+		return *this;
+	}
+
 	void DirectionalLight::SetupShadowCast(
 		Renderer* renderer)
 	{

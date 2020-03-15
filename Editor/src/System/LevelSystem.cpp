@@ -282,7 +282,8 @@ void LevelSystem::LoadTree(
 			iw::ref<iw::Material>& mat = tree->Meshes[i].Material;
 
 			mat->SetShader(Asset->Load<iw::Shader>("shaders/pbr.shader"));
-			mat->SetTexture("shadowMap", Asset->Load<iw::Texture>("ShadowMap")); // shouldnt be part of material
+			mat->SetTexture("shadowMap",  Asset->Load<iw::Texture>("SunShadowMap"));   // shouldnt be part of material
+			mat->SetTexture("shadowMap2", Asset->Load<iw::Texture>("LightShadowMap")); // shouldnt be part of material
 			mat->Initialize(Renderer->Device);
 
 			mat->Set("roughness", 0.7f);
@@ -314,7 +315,8 @@ void LevelSystem::LoadFloor(
 			iw::ref<iw::Material>& mat = floor->Meshes[i].Material;
 
 			mat->SetShader(Asset->Load<iw::Shader>("shaders/pbr.shader"));
-			mat->SetTexture("shadowMap", Asset->Load<iw::Texture>("ShadowMap")); // shouldnt be part of material
+			mat->SetTexture("shadowMap",  Asset->Load<iw::Texture>("SunShadowMap"));   // shouldnt be part of material
+			mat->SetTexture("shadowMap2", Asset->Load<iw::Texture>("LightShadowMap")); // shouldnt be part of material
 			mat->Initialize(Renderer->Device);
 
 			mat->Set("roughness", 0.9f);

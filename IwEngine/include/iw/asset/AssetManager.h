@@ -82,6 +82,20 @@ namespace Asset {
 
 			return nullptr;
 		}
+
+		template<
+			typename _a>
+		iw::ref<_a> Give(
+			std::string name,
+			const ref<_a>& asset)
+		{
+			auto itr = m_loaders.find(typeid(_a).hash_code());
+			if (itr != m_loaders.end()) {
+				return  std::static_pointer_cast<_a, void>(itr->second->Give("assets/" + name, asset));
+			}
+
+			return nullptr;
+		}
 	};
 }
 

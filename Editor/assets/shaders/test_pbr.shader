@@ -12,7 +12,6 @@ layout(std140, column_major) uniform Shadows {
 	int shadows_pad1, shadows_pad2, shadows_pad3;
 
 	int directionalLightSpaceCount;
-
 	mat4 directionalLightSpaces[MAX_DIRECTIONAL_LIGHTS];
 };
 
@@ -58,13 +57,11 @@ struct DirectionalLight {
 	vec3 InvDirection;
 };
 
-// might needs pad
 layout(std140) uniform Lights{
 	int lights_pad1, lights_pad2;
 
 	int pointLightCount;
 	int directionalLightCount;
-
 	PointLight       pointLights      [MAX_POINT_LIGHTS];
 	DirectionalLight directionalLights[MAX_DIRECTIONAL_LIGHTS];
 };

@@ -10,7 +10,6 @@ namespace Graphics {
 	{
 	protected:
 		float m_radius;
-		float m_fov;
 		bool m_outdated;
 
 	public:
@@ -21,6 +20,9 @@ namespace Graphics {
 			float             intensity    = 10.0f,
 			ref<Shader>       shadowShader = nullptr,
 			ref<RenderTarget> shadowTarget = nullptr);
+
+		GEN_copy(IWGRAPHICS_API, PointLight)
+		GEN_move(IWGRAPHICS_API, PointLight)
 
 		IWGRAPHICS_API
 		~PointLight() override = default;

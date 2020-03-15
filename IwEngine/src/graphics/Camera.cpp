@@ -25,6 +25,58 @@ namespace Graphics {
 		RecalculateView();
 	}
 
+	/*Camera::Camera(
+		const Camera& copy)
+		: m_transform(copy.m_transform), nullptr, copy.m_shadowShader, copy.m_shadowTarget)
+		, m_radius(copy.m_radius)
+		, m_outdated(true)
+	{
+		UpdateCamera();
+	}
+
+	Camera::Camera(
+		Camera&& copy) noexcept
+		: Light(m_intensity, copy.m_shadowCamera, copy.m_shadowShader, copy.m_shadowTarget)
+		, m_radius(copy.m_radius)
+		, m_outdated(true)
+	{
+		copy.m_shadowCamera = nullptr;
+		copy.m_shadowShader = nullptr;
+		copy.m_shadowTarget = nullptr;
+	}
+
+	Camera& Camera::operator=(
+		const Camera& copy)
+	{
+		m_intensity = copy.m_intensity;
+		m_shadowCamera = nullptr;
+		m_shadowShader = copy.m_shadowShader;
+		m_shadowTarget = copy.m_shadowTarget;
+		m_radius = copy.m_radius;
+		m_outdated = true;
+
+		UpdateCamera();
+
+		return *this;
+	}
+
+	Camera& Camera::operator=(
+		Camera&& copy) noexcept
+	{
+		m_intensity = copy.m_intensity;
+		m_shadowCamera = copy.m_shadowCamera;
+		m_shadowShader = copy.m_shadowShader;
+		m_shadowTarget = copy.m_shadowTarget;
+		m_radius = copy.m_radius;
+		m_outdated = true;
+
+		copy.m_shadowCamera = nullptr;
+		copy.m_shadowShader = nullptr;
+		copy.m_shadowTarget = nullptr;
+
+		return *this;
+	}*/
+
 	iw::matrix4 Camera::View() {
 		if (Outdated()) {
 			RecalculateView();
@@ -82,7 +134,7 @@ namespace Graphics {
 			}
 		
 			else {
-				m_position= position;
+				m_position = position;
 			}
 
 			m_outdated = true;

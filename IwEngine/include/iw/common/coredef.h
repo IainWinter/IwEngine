@@ -12,7 +12,7 @@
 						  api clas& operator=(const clas& other) = default;     \
 						  api clas& operator=(clas&& other) noexcept = default; \
 
-#define GEN_copy(api, clas)     api clas(const clas& other)             \
+#define GEN_copy(api, clas)     api clas(const clas& other);            \
 						  api clas& operator=(const clas& other); \
 
 #define GEN_move(api, clas)     api clas(clas&& other) noexcept;            \

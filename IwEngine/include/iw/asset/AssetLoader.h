@@ -72,7 +72,14 @@ namespace Asset {
 			m_loaded[name] = iw::ref<_a>(buf);
 
 			return m_loaded.at(name);
+		}
 
+		iw::ref<void> Give(
+			std::string name,
+			const ref<void>& asset)
+		{
+			m_loaded[name] = std::static_pointer_cast<_a, void>(asset);
+			return m_loaded.at(name);
 		}
 
 		virtual void Release(

@@ -1,58 +1,121 @@
 #version 420
 
-layout (location = 0) in vec3 WorldPos;
-layout (location = 1) in vec4 LightPos;
-layout (location = 2) in vec3 CameraPos;
-layout (location = 3) in vec2 TexCoords;
-layout (location = 4) in vec3 Normal;
-layout (location = 5) in mat3 TBN;
+#define MAX_POINT_LIGHTS 16
+#define MAX_DIRECTIONAL_LIGHTS 4
+
+struct PointLight {
+	vec3 Position;
+	float Radius;
+};
+
+struct DirectionalLight {
+	vec3 InvDirection;
+};
+
+layout(std140) uniform Lights{
+	int lights_pad1, lights_pad2;
+
+	int pointLightCount;
+	int directionalLightCount;
+	PointLight       pointLights      [MAX_POINT_LIGHTS];
+	DirectionalLight directionalLights[MAX_DIRECTIONAL_LIGHTS];
+};
+
+in vec3 WorldPos;
+in vec4 LightPos;
+in vec3 CameraPos;
+in vec2 TexCoords;
+in vec3 Normal;
+in mat3 TBN;
+in vec4 DirectionalLightPos[MAX_DIRECTIONAL_LIGHTS];
 
 out vec4 FragColor;
 
 // global props
 
-uniform vec3 sunPos;
-
-uniform float gamma;
-
 uniform float ambiance;
-uniform vec3 lightPositions[2];
-uniform vec3 lightColors[2];
 
 // material parameters
 
-uniform float mat_hasAlbedoMap; // guess these have to be floats???? invalid op when using ints idk why
-uniform float mat_hasAlphaMaskMap;
+uniform vec4  mat_albedo;
+uniform float mat_metallic;
+uniform float mat_roughness;
+uniform float mat_reflectance;
+uniform float mat_ao;
+
+uniform float mat_hasAlbedoMap;
 uniform float mat_hasNormalMap;
 uniform float mat_hasMetallicMap;
 uniform float mat_hasRoughnessMap;
+uniform float mat_hasReflectanceMap;
 uniform float mat_hasAoMap;
 
 uniform sampler2D mat_albedoMap;
-uniform sampler2D mat_alphaMaskMap;
 uniform sampler2D mat_normalMap;
 uniform sampler2D mat_metallicMap;
 uniform sampler2D mat_roughnessMap;
+uniform sampler2D mat_reflectanceMap;
 uniform sampler2D mat_aoMap;
 
-uniform vec4 mat_albedo;
-uniform float mat_ao;
-uniform float mat_metallic;
-uniform float mat_roughness;
+uniform sampler2D mat_alphaMaskMap;
+uniform float mat_hasAlphaMaskMap;
 
-// take out of material at some point, also could be multiple
+uniform float     mat_hasShadowMap;       // take out of material at some point
+uniform sampler2D mat_shadowMap;          // take out of material at some point
 
-uniform float mat_hasShadowMap;
-uniform sampler2D mat_shadowMap;
+uniform float       mat_hasShadowMap2;    // take out of material at some point
+uniform samplerCube mat_shadowMap2;       // take out of material at some point
 
 const float PI = 3.14159265359f;
 
-float linstep(float l, float h, float v) {
+// Math functions
+
+float lerp(
+	float a, 
+	float b, 
+	float w)
+{
+	return a + w * (b - a);
+}
+
+float linstep(
+	float l, 
+	float h, 
+	float v)
+{
 	return clamp((v - l) / (h - l), 0.0, 1.0);
 }
 
-float CalcShadow() {
-	vec3 coords = (LightPos.xyz / LightPos.w) * 0.5 + 0.5;
+// Gamma correction
+
+vec3 sRGBToLinear(
+	vec3 sRGBCol)
+{
+	vec3 linearRGBLo = sRGBCol / 12.92f;
+	vec3 linearRGBHi = pow((sRGBCol + 0.055f) / 1.055f, vec3(2.4f));
+	vec3 linearRGB   = (length(sRGBCol) <= 0.04045f) ? linearRGBLo : linearRGBHi;
+	return linearRGB;
+}
+
+vec3 linearToSRGB(
+	vec3 linearCol)
+{
+	vec3 sRGBLo = linearCol * 12.92f;
+	vec3 sRGBHi = (pow(abs(linearCol), vec3(1.0f / 2.4f)) * 1.055f) - 0.055f;
+	vec3 sRGB   = (length(linearCol) <= 0.0031308f) ? sRGBLo : sRGBHi;
+	return sRGB;
+}
+
+// Shadows
+
+float DirectionalLightShadow(
+	vec4 coords4)
+{
+	if (mat_hasShadowMap == 0) {
+		return 1.0f;
+	}
+
+	vec3 coords = (coords4.xyz / coords4.w) * 0.5 + 0.5;
 	vec2 moments = texture(mat_shadowMap, coords.xy).rg;
 	float compare = coords.z;
 
@@ -69,144 +132,194 @@ float CalcShadow() {
 	return min(max(p, pMax), 1.0);
 }
 
-float DistributionGGX(vec3 N, vec3 H, float roughness) {
-	float a = roughness * roughness;
-	float a2 = a * a;
-	float NdotH = max(dot(N, H), 0.0);
-	float NdotH2 = NdotH * NdotH;
+float PointLightShadow(
+	vec3 NegL,
+	float R)
+{
+	if (mat_hasShadowMap2 == 0) {
+		return 1.0f;
+	}
 
-	float num = a2;
-	float denom = (NdotH2 * (a2 - 1.0) + 1.0);
-	denom = PI * denom * denom;
+	float closestDepth = texture(mat_shadowMap2, NegL).r;
+	float currentDepth = length(NegL);
 
-	return num / denom;
+	float bias = 0.05;
+	float shadow = R * closestDepth > currentDepth - bias ? 1.0 : 0.0;
+
+	return shadow;
 }
 
-float GeometrySchlickGGX(float NdotV, float roughness) {
-	float r = (roughness + 1.0);
-	float k = (r * r) / 8.0;
+// PBR BRDF
 
-	float num = NdotV;
-	float denom = NdotV * (1.0 - k) + k;
+vec3 F_Schlick(
+	vec3 f0, 
+	float f90, 
+	float u)
+{ 
+	return f0 + (f90 - f0) * pow(1.f - u, 5.f);
+} 
 
-	return num / denom;
+float V_SmithGGXCorrelated(
+	float NdotL, 
+	float NdotV, 
+	float roughness)
+{ 
+	float alphaG2 = roughness * roughness;
+	float Lambda_GGXV = NdotL * sqrt((-NdotV * alphaG2 + NdotV) * NdotV + alphaG2);
+	float Lambda_GGXL = NdotV * sqrt((-NdotL * alphaG2 + NdotL) * NdotL + alphaG2);
+	
+	return 0.5f / (Lambda_GGXV + Lambda_GGXL);
+} 
+
+float D_GGX(
+	float NdotH, 
+	float roughness) 
+{ 
+	float m2 = roughness * roughness;
+	float f = (NdotH * m2 - NdotH) * NdotH + 1;
+	return m2 / (f * f);
+} 
+
+float Fr_DisneyDiffuse(
+	float NdotV, 
+	float NdotL, 
+	float LdotH, 
+	float roughness) 
+{ 
+	float energyBias   = lerp(0,   0.5,        roughness);
+	float energyFactor = lerp(1.0, 1.0 / 1.51, roughness);
+	vec3 f0            = vec3(1.0f, 1.0f, 1.0f);
+	float fd90         = energyBias + 2.0 * LdotH * LdotH * roughness;
+	float lightScatter = F_Schlick(f0, fd90, NdotL).r;
+	float viewScatter  = F_Schlick(f0, fd90, NdotV).r;
+	
+	return lightScatter * viewScatter * energyFactor;
 }
 
-float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness) {
-	float NdotV = max(dot(N, V), 0.0);
-	float NdotL = max(dot(N, L), 0.0);
-	float ggx2 = GeometrySchlickGGX(NdotV, roughness);
-	float ggx1 = GeometrySchlickGGX(NdotL, roughness);
+// attenuation
 
-	return ggx1 * ggx2;
+float getDistanceAtt(
+	vec3 unormalizedLightVector,
+	float invSqrRadius)
+{
+	float dist2 = dot(unormalizedLightVector, unormalizedLightVector);
+	return clamp(1.0 - dist2 * invSqrRadius, 0.0, 1.0);
 }
 
-vec3 fresnelSchlick(float cosTheta, vec3 F0) {
-	return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
+vec3 BRDF(
+	vec3 N, 
+	vec3 V, 
+	vec3 L, 
+	vec3 albedo, 
+	vec3 f0, 
+	float f90,
+	float roughness,
+	float metallic)
+{
+	vec3 nL = normalize(L);
+	vec3  H = normalize(V + nL);
+
+	float NdotV = abs  (dot(N,  V));
+	float LdotH = clamp(dot(nL, H),  0.0f, 1.0f);
+	float NdotH = clamp(dot(N,  H),  0.0f, 1.0f);
+	float NdotL = clamp(dot(N,  nL), 0.0f, 1.0f);
+
+	vec3  F   = F_Schlick(f0, f90, LdotH);
+	float Vis = V_SmithGGXCorrelated(NdotV, NdotL, roughness);
+	float D   = D_GGX(NdotH, roughness);
+
+	// Specular BRDF
+	vec3 Fr = D * F * Vis / PI;
+
+	// Diffuse BRDF
+	float Fd = Fr_DisneyDiffuse(NdotV, NdotL, LdotH, roughness) / PI * (1.0 - metallic);
+
+	return (albedo * Fd + Fr) * NdotL;
 }
 
 void main() {
+	// Discard is in alpha mask
+
 	if (mat_hasAlphaMaskMap == 1) {
 		if (0.5 > texture(mat_alphaMaskMap, TexCoords).r) {
 			discard;
 		}
 	}
 
+	// Color
+
 	vec4 albedo = mat_albedo;
 	if (mat_hasAlbedoMap == 1) {
 		albedo = texture(mat_albedoMap, TexCoords);
 	}
 
-	albedo.xyz = pow(albedo.xyz, vec3(gamma));
+	albedo.rgb = sRGBToLinear(albedo.rgb);
 
-	float ao = mat_ao;
-	if (mat_hasAoMap == 1) {
-		ao = texture(mat_aoMap, TexCoords).r;
-	}
+	// Normal
 
 	vec3 normal = Normal;
 	if (mat_hasNormalMap == 1) {
 		normal = TBN * (texture(mat_normalMap, TexCoords).xyz * 2 - 1);
 	}
 
+	// Metallic
+
 	float metallic = mat_metallic;
 	if (mat_hasMetallicMap == 1) {
 		metallic = texture(mat_metallicMap, TexCoords).r;
 	}
+
+	// Roughness
 
 	float roughness = mat_roughness;
 	if (mat_hasRoughnessMap == 1) {
 		roughness = texture(mat_roughnessMap, TexCoords).r;
 	}
 
-	float shadow = 1.0f;
-	if (mat_hasShadowMap == 1) {
-		shadow = CalcShadow();
+	roughness = roughness*roughness;
+
+	// Reflectance
+
+	float reflectance = mat_reflectance;
+	if (mat_hasReflectanceMap == 1) {
+		reflectance = texture(mat_reflectanceMap, TexCoords).r;
 	}
 
-	vec3 N = normalize(normal);
+	// Ambient occlusion
+
+	float ao = mat_ao;
+	if (mat_hasAoMap == 1) {
+		ao = texture(mat_aoMap, TexCoords).r;
+	}
+
+	vec3  f0  = mix(vec3(0.16f * reflectance * reflectance), albedo.xyz, metallic);
+	float f90 = clamp(50.0f * dot(f0, vec3(0.33f)), 0.0f, 1.0f);
+
+	vec3 N = normalize(Normal);
 	vec3 V = normalize(CameraPos - WorldPos);
 
-	vec3 F0 = vec3(0.04);
-	F0 = mix(F0, albedo.xyz, metallic);
+	vec3 color = vec3(0);
 
-	// reflectance equation
-	vec3 Lo = vec3(0.0);
-	for (int i = 0; i < 2; ++i) {
-		// calculate per-light radiance
-		vec3 L = normalize(lightPositions[i] - WorldPos);
-		vec3 H = normalize(V + L);
-		float distance = length(lightPositions[i] - WorldPos);
-		float attenuation = 1.0 / (distance /** distance*/); // not with gamma correction
-		vec3 radiance = lightColors[i] * attenuation;
+	for (int i = 0; i < pointLightCount; i++) {
+		vec3 P = pointLights[i].Position;
+		vec3 L = P - WorldPos;
 
-		// cook-torrance brdf
-		float NDF = DistributionGGX(N, H, roughness);
-		float G = GeometrySmith(N, V, L, roughness);
-		vec3 F = fresnelSchlick(max(dot(H, V), 0.0), F0);
+		float R = pointLights[i].Radius;
 
-		vec3 kS = F;
-		vec3 kD = vec3(1.0) - kS;
-		kD *= 1.0 - metallic;
+		color += BRDF(N, V, L, albedo.xyz, f0, f90, roughness, metallic) 
+		       * getDistanceAtt(L, 1 / pow(R, 2))
+			   * PointLightShadow(-L, R);
+	}
+	
+	for (int i = 0; i < directionalLightCount; i++) {
+		vec3 L = directionalLights[i].InvDirection;
 
-		vec3 numerator = NDF * G * F;
-		float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0);
-		vec3 specular = numerator / max(denominator, 0.001);
-
-		// add to outgoing radiance Lo
-		float NdotL = max(dot(N, L), 0.0);
-		Lo += (kD * albedo.xyz / PI + specular) * radiance * NdotL;
+		color += BRDF(N, V, L, albedo.xyz, f0, f90, roughness, metallic)
+		       * DirectionalLightShadow(DirectionalLightPos[i]);
 	}
 
-	// Sun
-	{
-		// calculate per-light radiance
-		vec3 L = normalize(sunPos);
-		vec3 H = normalize(V + L);
+	vec3 ambient = max(ambiance - ao, 0) * albedo.rgb;
+	color += ambient;
 
-		// cook-torrance brdf
-		float NDF = DistributionGGX(N, H, roughness);
-		float G = GeometrySmith(N, V, L, roughness);
-		vec3 F = fresnelSchlick(max(dot(H, V), 0.0), F0);
-
-		vec3 kS = F;
-		vec3 kD = vec3(1.0) - kS;
-		kD *= 1.0 - metallic;
-
-		vec3 numerator = NDF * G * F;
-		float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0);
-		vec3 specular = numerator / max(denominator, 0.001);
-
-		// add to outgoing radiance Lo
-		float NdotL = max(dot(N, L), 0.0);
-		Lo += (kD * albedo.xyz / PI + specular) * CalcShadow();
-	}
-
-	vec3 ambient = max(ambiance - ao, 0) * albedo.xyz;
-	vec3 color = ambient + Lo;
-
-	color = color / (color + vec3(1.0));
-	color = pow(color, vec3(1.0 / gamma));
-
-	FragColor = vec4(color, albedo.w);
+	FragColor = vec4(linearToSRGB(color), albedo.a);
 }

@@ -16,22 +16,29 @@ namespace iw {
 		: public Layer
 	{
 	private:
-		PerspectiveCamera* mainCam;
+		// Main cameras
 
-		OrthographicCamera* tranCam;
-		iw::Mesh* tranMesh;
+		float ambiance;
 
-		DirectionalLight light;
-		iw::vector3 lightPos = iw::vector3(-1.25, 5, -1.75f);
-		iw::ref<RenderTarget> target;
-		iw::ref<RenderTarget> targetBlur;
-		iw::ref<Shader> gaussian;
-		float blurAmount = .5f;
+		Scene* scene;
 
-		iw::pipeline pipeline;
-		GenerateShadowMap* generateShadowMap;
-		FilterTarget* postProcessShadowMap;
-		Render* mainRender;
+		// Lights
+
+		DirectionalLight* sun;
+		PointLight* light;
+
+		// Light post process
+
+		//float blurAmount = .5f;
+
+		// Pipeline would be nice needs to redesign for multiple shadow maps
+
+		//iw::pipeline pipeline;
+		//GenerateShadowMap* generateShadowMap;
+		//FilterTarget* postProcessShadowMap;
+		//Render* mainRender;
+
+		// Little bit of text
 
 		Mesh* textMesh;
 		Transform textTransform;

@@ -318,6 +318,10 @@ namespace RenderAPI {
 		if (texture) {
 			static_cast<const GLTexture*>(texture)->Bind(); 
 		}
+
+		else {
+			glBindTexture(GL_TEXTURE_2D, 0); // this is garbo
+		}
 	}
 }
 }

@@ -31,8 +31,8 @@ namespace iw {
 		return in<iw::ref<Texture>>(0);
 	}
 
-	Light* Render::GetLight() {
-		return in<Light*>(1);
+	DirectionalLight* Render::GetLight() {
+		return in<DirectionalLight*>(1);
 	}
 
 	float& Render::GetAmbiance() {
@@ -55,7 +55,7 @@ namespace iw {
 
 	void Render::execute() {
 		iw::ref<Texture>& shadowMap = GetTexture();
-		Light* light = GetLight();
+		DirectionalLight* light = GetLight();
 		float ambiance = GetAmbiance();
 		float gamma = GetGamma();
 
@@ -82,17 +82,8 @@ namespace iw {
 
 					renderer->Device->SetPipeline(mesh.Material->Shader->Handle());
 
-					//mesh.Material->Shader->Program->GetParam("lightSpace")
-					//	->SetAsMat4(light->Cam().ViewProjection());
-
 					mesh.Material->Shader->Handle()->GetParam("ambiance")
 						->SetAsFloat(ambiance);
-
-					mesh.Material->Shader->Handle()->GetParam("gamma")
-						->SetAsFloat(gamma);
-
-					//mesh.Material->Shader->Program->GetParam("sunPos")
-					//	->SetAsFloats(&light->Cam().Position(), 3);
 
 					renderer->DrawMesh(m_t, &mesh);
 				}
@@ -106,17 +97,8 @@ namespace iw {
 
 				renderer->Device->SetPipeline(mesh.Material->Shader->Handle());
 
-				//mesh.Material->Shader->Program->GetParam("lightSpace")
-				//	->SetAsMat4(light->Cam().ViewProjection());
-
 				mesh.Material->Shader->Handle()->GetParam("ambiance")
 					->SetAsFloat(ambiance);
-
-				mesh.Material->Shader->Handle()->GetParam("gamma")
-					->SetAsFloat(gamma);
-
-				//mesh.Material->Shader->Program->GetParam("sunPos")
-				//	->SetAsFloats(&light->Cam().Position(), 3);
 
 				renderer->DrawMesh(m_t, &mesh);
 			}

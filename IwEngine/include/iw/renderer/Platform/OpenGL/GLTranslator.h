@@ -10,7 +10,7 @@ namespace RenderAPI {
 	{
 	public:
 		IWRENDERER_API
-		virtual GLint Translate(
+		GLint Translate(
 			TextureType textureType) override;
 
 		IWRENDERER_API

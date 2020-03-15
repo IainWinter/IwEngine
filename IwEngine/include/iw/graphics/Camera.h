@@ -24,6 +24,9 @@ namespace Graphics {
 			const vector3& position,
 			const quaternion& rotation);
 
+		//GEN_copy(, Camera)
+		//GEN_move(, Camera)
+
 		virtual ~Camera() {}
 
 		bool Outdated() const;

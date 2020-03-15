@@ -10,8 +10,61 @@ namespace Graphics {
 		ref<RenderTarget> shadowTarget)
 		: Light(power, nullptr, shadowShader, shadowTarget)
 		, m_radius(radius)
+		, m_outdated(true)
 	{
 		UpdateCamera();
+	}
+
+	PointLight::PointLight(
+		const PointLight& copy)
+		: Light(m_intensity, nullptr, copy.m_shadowShader, copy.m_shadowTarget)
+		, m_radius(copy.m_radius)
+		, m_outdated(true)
+	{
+		UpdateCamera();
+	}
+
+	PointLight::PointLight(
+		PointLight&& copy) noexcept
+		: Light(m_intensity, copy.m_shadowCamera, copy.m_shadowShader, copy.m_shadowTarget)
+		, m_radius(copy.m_radius)
+		, m_outdated(true)
+	{
+		copy.m_shadowCamera = nullptr;
+		copy.m_shadowShader = nullptr;
+		copy.m_shadowTarget = nullptr;
+	}
+
+	PointLight& PointLight::operator=(
+		const PointLight& copy)
+	{
+		m_intensity    = copy.m_intensity;
+		m_shadowCamera = nullptr;
+		m_shadowShader = copy.m_shadowShader;
+		m_shadowTarget = copy.m_shadowTarget;
+		m_radius       = copy.m_radius;
+		m_outdated     = true;
+
+		UpdateCamera();
+
+		return *this;
+	}
+
+	PointLight& PointLight::operator=(
+		PointLight&& copy) noexcept
+	{
+		m_intensity    = copy.m_intensity;
+		m_shadowCamera = copy.m_shadowCamera;
+		m_shadowShader = copy.m_shadowShader;
+		m_shadowTarget = copy.m_shadowTarget;
+		m_radius       = copy.m_radius;
+		m_outdated     = true;
+
+		copy.m_shadowCamera = nullptr;
+		copy.m_shadowShader = nullptr;
+		copy.m_shadowTarget = nullptr;
+
+		return *this;
 	}
 
 	void PointLight::SetupShadowCast(

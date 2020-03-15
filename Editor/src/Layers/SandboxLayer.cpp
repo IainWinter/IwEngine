@@ -43,6 +43,11 @@ namespace iw {
 
 	SandboxLayer::SandboxLayer()
 		: Layer("Sandbox")
+		, ambiance(.03f)
+		, light(nullptr)
+		, sun(nullptr)
+		, textCam(nullptr)
+		, textMesh(nullptr)
 	{}
 
 	int forestInstance = 0;
@@ -85,48 +90,64 @@ namespace iw {
 
 		// Shader
 
-		ref<Shader> shader      = Asset->Load<Shader>("shaders/pbr.shader");
-		ref<Shader> directional = Asset->Load<Shader>("shaders/lights/directional_transparent.shader");
-		            gaussian    = Asset->Load<Shader>("shaders/filters/gaussian.shader");
+		ref<Shader> shader   = Asset->Load<Shader>("shaders/pbr.shader");
+		ref<Shader> gaussian = Asset->Load<Shader>("shaders/filters/gaussian.shader");
+		ref<Shader> dirShadowShader   = Asset->Load<Shader>("shaders/lights/directional.shader");
+		ref<Shader> pointShadowShader = Asset->Load<Shader>("shaders/lights/point.shader");
 		
-		Renderer->InitShader(shader,      ALL);
-		Renderer->InitShader(directional, CAMERA);
-		Renderer->InitShader(gaussian,    CAMERA);
+		Renderer->InitShader(shader,   CAMERA | SHADOWS | LIGHTS);
+		Renderer->InitShader(gaussian, CAMERA);
+		Renderer->InitShader(dirShadowShader, CAMERA);
+		Renderer->InitShader(pointShadowShader);
 
-		//Renderer->SetShader(shader);
+		// Directional light shadow map textures & target
 
-		vector3* positions = new vector3[2];
-		vector3* colors    = new vector3[2];
+		ref<Texture> dirShadowColor = ref<Texture>(new Texture(1024, 1024, TEX_2D, RG, FLOAT, BORDER));
+		ref<Texture> dirShadowDepth = ref<Texture>(new Texture(1024, 1024, TEX_2D, DEPTH, FLOAT, BORDER));
 
-		positions[0] = vector3(3, 3, 0);
-		positions[1] = vector3(-3, 3, 0);
+		ref<RenderTarget> dirShadowTarget = REF<RenderTarget>(1024, 1024);
+		dirShadowTarget->AddTexture(dirShadowColor);
+		dirShadowTarget->AddTexture(dirShadowDepth);
 
-		colors[0] = vector3(1);
-		colors[1] = vector3(1);
+		dirShadowTarget->Initialize(Renderer->Device);
 
-		shader->Handle()->GetParam("lightPositions[0]")->SetAsFloats(positions, 3, 2);
-		shader->Handle()->GetParam("lightColors[0]")   ->SetAsFloats(colors, 3, 2);
+		//ref<Texture> texBlur = REF<Texture>(1024, 1024, TEX_2D, ALPHA, FLOAT, BORDER);
 
-		// Textures
+		//ref<RenderTarget> targetBlur = REF<RenderTarget>(1024, 1024);
+		//targetBlur->AddTexture(texBlur);
+		//targetBlur->Initialize(Renderer->Device);
+
+		// Point light shadow map textures & target
+
+		ref<Texture> pointShadowDepth = ref<Texture>(new Texture(1024, 1024, TEX_CUBE, DEPTH, FLOAT, EDGE));
+
+		ref<RenderTarget> pointShadowTarget = REF<RenderTarget>(1024, 1024, true);
+		pointShadowTarget->AddTexture(pointShadowDepth);
+
+		pointShadowTarget->Initialize(Renderer->Device);
+
+		Asset->Give<iw::Texture>("SunShadowMap",   dirShadowTarget->Tex(0));
+		Asset->Give<iw::Texture>("LightShadowMap", pointShadowTarget->Tex(0));
+
+		// Scene 
+
+		scene = new Scene();
 		
-		Texture shadow = Texture(1024, 1024, TEX_2D, RG, FLOAT, BORDER);
+		//	Lights
 
-		ref<Texture> texShadow = Asset->Give("ShadowMap", &shadow);
-		ref<Texture> texDepth  = REF<Texture>(1024, 1024, TEX_2D, DEPTH, FLOAT, BORDER);
-		ref<Texture> texBlur   = REF<Texture>(1024, 1024, TEX_2D, ALPHA, FLOAT, BORDER);
+		sun   = new DirectionalLight(100, OrthographicCamera(60, 32, -100, 100), dirShadowShader, dirShadowTarget);
+		light = new PointLight(30, 30, pointShadowShader, pointShadowTarget);
 
-		target = std::make_shared<RenderTarget>(1024, 1024);
-		target->AddTexture(texShadow);
-		target->AddTexture(texDepth);
-		target->Initialize(Renderer->Device);
-		
-		targetBlur = std::make_shared<RenderTarget>(1024, 1024);
-		targetBlur->AddTexture(texBlur);
-		targetBlur->Initialize(Renderer->Device);
+		sun->SetRotation(quaternion(0.872f, 0.0f, 0.303f, 0.384f));
+		light->SetPosition(vector3(0, 10, 0));
 
-		// Lights
+		scene->DirectionalLights.push_back(sun);
+		scene->PointLights      .push_back(light);
 
-		light = DirectionalLight(100.0f, OrthographicCamera(60, 60, -50, 50), directional, target);
+		//	Cameras
+
+		scene->Camera = new PerspectiveCamera();
+		textCam = new OrthographicCamera(vector3::one, quaternion::from_axis_angle(vector3::unit_y, Pi), 16, 9, -10, 10);
 
 		// Materials
 
@@ -145,8 +166,11 @@ namespace iw {
 		smat->Set("metallic", 0.2f);
 		tmat->Set("metallic", 0.2f);
 
-		smat->SetTexture("shadowMap", texShadow);
-		tmat->SetTexture("shadowMap", texShadow); // shouldnt be part of material
+		smat->SetTexture("shadowMap",  dirShadowTarget->Tex(0));    // shouldnt really be part of material
+		tmat->SetTexture("shadowMap",  dirShadowTarget->Tex(0));
+
+		smat->SetTexture("shadowMap2", pointShadowTarget->Tex(0));
+		tmat->SetTexture("shadowMap2", pointShadowTarget->Tex(0));
 
 		smat->Initialize(Renderer->Device);
 		tmat->Initialize(Renderer->Device);
@@ -188,19 +212,6 @@ namespace iw {
 
 		Model dm { dmesh, 1 };
 		Asset->Give<Model>("Door", &dm);
-
-		// Transition mesh
-		
-		tranMesh = MakePlane(1, 1);
-		tranMesh->Material = REF<Material>(smat->Instance());
-
-		tranMesh->Initialize(Renderer->Device);
-
-		// Cameras
-
-		mainCam = new PerspectiveCamera ();
-		textCam = new OrthographicCamera(vector3::one, quaternion::from_axis_angle(vector3::unit_y, Pi), 16, 9, -10, 10);
-		tranCam = new OrthographicCamera(16, 9, 0, 1);
 
 		// Floor colliders
 
@@ -252,20 +263,20 @@ namespace iw {
 
 		// Rendering pipeline
 
-		generateShadowMap    = new GenerateShadowMap(Renderer, Space);
-		postProcessShadowMap = new FilterTarget(Renderer);
-		mainRender           = new Render(Renderer, Space);
+		//generateShadowMap    = new GenerateShadowMap(Renderer, Space);
+		//postProcessShadowMap = new FilterTarget(Renderer);
+		//mainRender           = new Render(Renderer, Space);
 
-		generateShadowMap   ->SetLight(light);
-		postProcessShadowMap->SetIntermediate(targetBlur);
-		postProcessShadowMap->SetShader(gaussian);
-		mainRender          ->SetLight(light);
-		mainRender          ->SetAmbiance(0.008f);
-		mainRender          ->SetGamma(2.2f);
+		//generateShadowMap   ->SetLight(light);
+		//postProcessShadowMap->SetIntermediate(targetBlur);
+		//postProcessShadowMap->SetShader(gaussian);
+		//mainRender          ->SetLight(light);
+		//mainRender          ->SetAmbiance(0.008f);
+		//mainRender          ->SetGamma(2.2f);
 
-		pipeline.first(generateShadowMap)
-			.then(postProcessShadowMap)
-			.then(mainRender);
+		//pipeline.first(generateShadowMap)
+		//	.then(postProcessShadowMap)
+		//	.then(mainRender);
 
 		// Systems
 
@@ -286,27 +297,116 @@ namespace iw {
 	}
 
 	void SandboxLayer::PostUpdate() {
-		//font->UpdateMesh(textMesh, std::to_string(1.0f / Time::DeltaTime()), 0.01f, 1);
+		//font->UpdateMesh(textMesh, std::to_string(1.0f / Time::DeltaTime()), 0.01f, 1); //fps
 		textMesh->Update(Renderer->Device);
+		scene->Camera->SetProjection(iw::lerp(persp, ortho, blend));
+		
+		// Shadow maps
+
+		for(DirectionalLight* light : scene->DirectionalLights) {
+			if (!light->CanCastShadows()) {
+				continue;
+			}
+
+			Renderer->BeginShadowCast(light);
+
+			for (auto m_e : Space->Query<Transform, Model>()) {
+				auto [m_t, m_m] = m_e.Components.Tie<ModelComponents>();
+
+				for (size_t i = 0; i < m_m->MeshCount; i++) {
+					//iw::ref<Texture> t = m_m->Meshes[i].Material->GetTexture("alphaMaskMap");
+
+					//ITexture* it = nullptr;
+					//if (t) {
+					//	it = t->Handle();
+					//}
+
+					//light->ShadowShader()->Handle()->GetParam("hasAlphaMask")->SetAsFloat(it != nullptr);
+					//light->ShadowShader()->Handle()->GetParam("alphaMask")->SetAsTexture(it, 0);
+					//light->ShadowShader()->Handle()->GetParam("alphaThreshold")->SetAsFloat(threshold);
+
+					Renderer->DrawMesh(m_t, &m_m->Meshes[i]);
+				}
+			}
+
+			Renderer->EndShadowCast();
+		}
+
+		for (PointLight* light : scene->PointLights) {
+			if (!light->CanCastShadows()) {
+				continue;
+			}
+			
+			Renderer->BeginShadowCast(light);
+
+			for (auto entity : Space->Query<Transform, Model>()) {
+				auto [transform, model] = entity.Components.Tie<ModelComponents>();
+				for (size_t i = 0; i < model->MeshCount; i++) {
+					Renderer->DrawMesh(transform, &model->Meshes[i]);
+				}
+			}
+
+			Renderer->EndShadowCast();
+		}
 
 		// Main render
 
-		mainCam->SetProjection(iw::lerp(persp, ortho, blend));
+		Renderer->BeginScene(scene);
 
-		light.SetPosition(lightPos);
-		light.SetRotation(quaternion::from_look_at(lightPos));
+		// Alpha pass
+		std::vector<Transform*> transs;
+		std::vector<Mesh*>      meshes;
 
-		float blurw = 1.0f / target->Width() * blurAmount;
-		float blurh = 1.0f / target->Height() * blurAmount;
+		for (auto m_e : Space->Query<Transform, Model>()) {
+			auto [m_t, m_m] = m_e.Components.Tie<ModelComponents>();
 
-		generateShadowMap->SetThreshold(threshold);
-		postProcessShadowMap->SetBlur(vector2(blurw, blurh));
+			for (size_t i = 0; i < m_m->MeshCount; i++) {
+				Mesh& mesh = m_m->Meshes[i];
 
-		pipeline.execute();
+				if (mesh.Material->Get<Color>("albedo")->a != 1) {
+					transs.push_back(m_t);
+					meshes.push_back(&mesh);
+					continue;
+				}
+
+				Renderer->Device->SetPipeline(mesh.Material->Shader->Handle());
+
+				mesh.Material->Shader->Handle()->GetParam("ambiance")
+					->SetAsFloat(ambiance);
+
+				Renderer->DrawMesh(m_t, &mesh);
+			}
+		}
+
+		// scuffed alpha pass
+
+		for (size_t i = 0; i < transs.size(); i++) {
+			Transform* m_t = transs[i];
+			Mesh& mesh = *meshes[i];
+
+			Renderer->Device->SetPipeline(mesh.Material->Shader->Handle());
+
+			mesh.Material->Shader->Handle()->GetParam("ambiance")
+				->SetAsFloat(ambiance);
+
+			Renderer->DrawMesh(m_t, &mesh);
+		}
+
+		Renderer->EndScene();
 
 		Renderer->BeginScene(textCam);
+		
 		Renderer->DrawMesh(&textTransform, textMesh);
+		
 		Renderer->EndScene();
+
+		//float blurw = 1.0f / target->Width() * blurAmount;
+		//float blurh = 1.0f / target->Height() * blurAmount;
+
+		//generateShadowMap->SetThreshold(threshold);
+		//postProcessShadowMap->SetBlur(vector2(blurw, blurh));
+
+		//pipeline.execute();
 	}
 	
 	void SandboxLayer::FixedUpdate() {
@@ -318,14 +418,25 @@ namespace iw {
 
 		ImGui::SliderFloat("Time scale", &ts, 0.001f, 1);
 
-		ImGui::SliderFloat("Ambiance", (float*)&mainRender->GetAmbiance(), 0, 1);
-		ImGui::SliderFloat("Gamma", (float*)&mainRender->GetGamma(), 0, 5);
+		ImGui::SliderFloat("Ambiance", (float*)&ambiance, 0, 1);
+		//ImGui::SliderFloat("Gamma", (float*)&mainRender->GetGamma(), 0, 5);
 		ImGui::SliderFloat("Camera blend", &blend, 0, 1);
 
 
-		ImGui::SliderFloat("Shadow map blur", &blurAmount, 0, 5);
+		//ImGui::SliderFloat("Shadow map blur", &blurAmount, 0, 5);
 		ImGui::SliderFloat("Shadow map threshold", &threshold, 0, 1);
-		ImGui::SliderFloat3("Light pos", (float*)&lightPos, -5, 5);
+		
+		quaternion rot = sun->Rotation();
+		ImGui::SliderFloat4("Sun rot", (float*)&rot, 0, 1);
+		sun->SetRotation(rot);
+
+		vector3 pos = light->Position();
+		ImGui::SliderFloat3("Light pos", (float*)&pos, -25, 25);
+		light->SetPosition(pos);
+
+		float rad = light->Radius();
+		ImGui::SliderFloat("Light rad", (float*)&rad, 0, 100);
+		light->SetRadius(rad);
 
 		ImGui::SliderFloat3("Text pos",   (float*)&textTransform.Position, -8, 8);
 		ImGui::SliderFloat3("Text scale", (float*)&textTransform.Scale, 0, 10);
@@ -394,9 +505,9 @@ namespace iw {
 				iw::Entity camera = Space->CreateEntity<iw::Transform, iw::CameraController>();
 
 				iw::Transform* transform = camera.SetComponent<iw::Transform>(vector3(0, 25, 0), iw::vector3::one, camrot);
-				                           camera.SetComponent<iw::CameraController>(mainCam);
+				                           camera.SetComponent<iw::CameraController>(scene->Camera);
 
-				mainCam->SetTrans(transform);
+				scene->Camera->SetTrans(transform);
 				break;
 			}
 		}
