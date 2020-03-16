@@ -98,7 +98,7 @@ namespace Engine {
 
 	void Layer::SetApplicationVars(
 		iw::ref<iw::Space> space,
-		iw::ref<iw::Renderer> renderer,
+		iw::ref<iw::QueuedRenderer> renderer,
 		iw::ref<AssetManager> asset,
 		iw::ref<DynamicsSpace> physics,
 		iw::ref<AudioSpace> audio,

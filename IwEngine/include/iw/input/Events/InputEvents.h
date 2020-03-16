@@ -3,6 +3,7 @@
 #include "iw/common/Events/EventGroups.h"
 #include "iw/input/InputState.h"
 #include "iw/events/event.h"
+#include <string>
 
 namespace iw {
 namespace Input {

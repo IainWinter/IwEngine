@@ -59,6 +59,8 @@ namespace iw {
 	int SandboxLayer::Initialize() {
 		AudioSpaceStudio* studio = (AudioSpaceStudio*)Audio->AsStudio();
 
+		studio->SetVolume(0.25f);
+
 		studio->LoadMasterBank("Master.bank");
 		studio->LoadMasterBank("Master.strings.bank");
 		studio->CreateEvent("swordAttack");

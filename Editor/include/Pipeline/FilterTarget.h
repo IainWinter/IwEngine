@@ -1,7 +1,7 @@
 #pragma once
 
 #include "iw/entity/Space.h"
-#include "iw/graphics/Renderer.h"
+#include "iw/graphics/QueuedRenderer.h"
 #include "iw/util/memory/ref.h"
 #include "iw/util/jobs/node.h"
 #include "iw/graphics/Model.h"

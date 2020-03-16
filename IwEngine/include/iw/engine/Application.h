@@ -11,7 +11,7 @@
 #include "iw/audio/AudioSpace.h"
 #include "iw/physics/Dynamics/DynamicsSpace.h"
 #include "iw/events/eventbus.h"
-#include "iw/graphics/Renderer.h"
+#include "iw/graphics/QueuedRenderer.h"
 #include "iw/asset/AssetManager.h"
 #include "iw/input/InputManager.h"
 #include "iw/util/queue/blocking_queue.h"
@@ -31,14 +31,14 @@ namespace Engine {
 		bool m_running;
 
 	protected:
-		ref<Space>         Space;
-		ref<Renderer>      Renderer;
-		ref<AssetManager>  Asset;
-		ref<InputManager>  Input;
-		ref<Console>       Console;
-		ref<DynamicsSpace> Physics;
-		ref<AudioSpace>    Audio;
-		ref<eventbus>      Bus;
+		ref<Space>          Space;
+		ref<iw::QueuedRenderer> Renderer;
+		ref<AssetManager>   Asset;
+		ref<InputManager>   Input;
+		ref<Console>        Console;
+		ref<DynamicsSpace>  Physics;
+		ref<AudioSpace>     Audio;
+		ref<eventbus>       Bus;
 
 	public:
 		IWENGINE_API

@@ -6,7 +6,7 @@
 #include "InitOptions.h"
 #include "Events/Events.h"
 #include "iw/entity/Space.h"
-#include "iw/graphics/Renderer.h"
+#include "iw/graphics/QueuedRenderer.h"
 #include "iw/asset/AssetManager.h"
 #include "iw/physics/Dynamics/DynamicsSpace.h"
 #include "iw/audio/AudioSpace.h"
@@ -23,12 +23,12 @@ namespace Engine {
 		const char* m_name;
 		EventStack<ISystem*> m_systems; // layer doesnt own systems but prolly should
 	protected:
-		iw::ref<Space>         Space;
-		iw::ref<Renderer>      Renderer;
-		iw::ref<AssetManager>  Asset;
-		iw::ref<DynamicsSpace> Physics;
-		iw::ref<AudioSpace>    Audio;
-		iw::ref<iw::eventbus>  Bus;
+		iw::ref<Space>          Space;
+		iw::ref<iw::QueuedRenderer> Renderer;
+		iw::ref<AssetManager>   Asset;
+		iw::ref<DynamicsSpace>  Physics;
+		iw::ref<AudioSpace>     Audio;
+		iw::ref<iw::eventbus>   Bus;
 
 	public:
 		IWENGINE_API
@@ -154,7 +154,7 @@ namespace Engine {
 		IWENTITY_API
 		void SetApplicationVars(
 			iw::ref<iw::Space> space,
-			iw::ref<iw::Renderer> renderer,
+			iw::ref<iw::QueuedRenderer> renderer,
 			iw::ref<AssetManager> asset,
 			iw::ref<DynamicsSpace> physics,
 			iw::ref<AudioSpace> audio,

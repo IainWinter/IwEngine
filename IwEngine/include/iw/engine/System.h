@@ -1,12 +1,12 @@
 #pragma once
 
+#include "Events/Events.h"
 #include "iw/entity/Space.h"
-#include "iw/graphics/Renderer.h"
+#include "iw/graphics/QueuedRenderer.h"
 #include "iw/asset/AssetManager.h"
 #include "iw/physics/Dynamics/DynamicsSpace.h"
 #include "iw/audio/AudioSpace.h"
 #include "iw/events/eventbus.h"
-#include "Events/Events.h"
 #include <queue>
 //#include <thread>
 
@@ -57,12 +57,12 @@ namespace Engine {
 		std::queue<size_t> m_delete; // Probly make it so space can queue component creation at the ComponentArray level because of templated bs
 
 	protected:
-		iw::ref<Space>         Space;
-		iw::ref<Renderer>      Renderer;
-		iw::ref<AssetManager>  Asset;
-		iw::ref<DynamicsSpace> Physics;
-		iw::ref<AudioSpace>    Audio;
-		iw::ref<iw::eventbus>  Bus;
+		iw::ref<Space>          Space;
+		iw::ref<iw::QueuedRenderer> Renderer;
+		iw::ref<AssetManager>   Asset;
+		iw::ref<DynamicsSpace>  Physics;
+		iw::ref<AudioSpace>     Audio;
+		iw::ref<iw::eventbus>   Bus;
 
 		virtual void Update(
 			EntityComponentArray& view)
@@ -155,7 +155,7 @@ namespace Engine {
 
 		void SetLayerVars(
 			iw::ref<iw::Space> space,
-			iw::ref<iw::Renderer> renderer,
+			iw::ref<iw::QueuedRenderer> renderer,
 			iw::ref<AssetManager> asset,
 			iw::ref<DynamicsSpace> physics,
 			iw::ref<AudioSpace> audio,

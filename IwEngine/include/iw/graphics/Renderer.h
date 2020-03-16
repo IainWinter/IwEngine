@@ -1,16 +1,17 @@
 #pragma once
 
 #include "IwGraphics.h"
-#include "Mesh.h"
 #include "RenderTarget.h"
 #include "Light.h"
-#include "iw/renderer/Device.h"
+#include "Mesh.h"
+#include "Camera.h"
 #include "iw/common/Components/Transform.h"
+#include "iw/renderer/Device.h"
 #include "iw/util/memory/ref.h"
 #include <unordered_map>
 #include <vector>
 
-#include "iw/graphics/PointLight.h"
+#include "iw/graphics/PointLight.h" // wish these didnt have to be
 #include "iw/graphics/DirectionalLight.h"
 
 #define MAX_POINT_LIGHTS 16
@@ -99,7 +100,7 @@ namespace Graphics {
 			const ref<IDevice>& device);
 
 		IWGRAPHICS_API
-		~Renderer();
+		virtual ~Renderer();
 
 		IWGRAPHICS_API
 		void Initialize();
@@ -115,31 +116,31 @@ namespace Graphics {
 			int width,
 			int height);
 
-		// Clears screen buffer
-		IWGRAPHICS_API
-		void Begin();
-
-		// executes queue
-		IWGRAPHICS_API
-		void End();
-
 		// binds buffers to shader and initializes it. TO BE PRIVATED
 		IWGRAPHICS_API
 		void InitShader(
 			ref<Shader>& shader,
 			int bindings = 0);
 
+		// Clears screen buffer
+		IWGRAPHICS_API
+		virtual void Begin();
+
+		// nothing
+		IWGRAPHICS_API
+		virtual void End();
+
 		// set optional camera, identity if null
 		// set optional target, screen if null
 		IWGRAPHICS_API
-		void BeginScene(
+		virtual void BeginScene(
 			Camera* camera = nullptr,
 			const ref<RenderTarget>& target = nullptr);
 
 		// calls begin scene
 		// set scene lights if provided, no action if null
 		IWGRAPHICS_API
-		void BeginScene(
+		virtual void BeginScene(
 			Scene* scene = nullptr,
 			const ref<RenderTarget>& target = nullptr);
 
@@ -147,16 +148,16 @@ namespace Graphics {
 		// set light shader
 		// set light target
 		IWGRAPHICS_API
-		void BeginShadowCast(
+		virtual void BeginShadowCast(
 			Light* light);
 
 		// marks end of scene, subsequent calls to SubmitMesh will be invalid
 		IWGRAPHICS_API
-		void EndScene();
+		virtual void EndScene();
 
 		// marks end of shadow cast, subsequent calls to SubmitMesh will be invalid
 		IWGRAPHICS_API
-		void EndShadowCast();
+		virtual void EndShadowCast();
 
 		// if rendering a scene
 		//	set mesh shader
@@ -166,7 +167,7 @@ namespace Graphics {
 		// set transform model matrix
 		// set mesh verts and indices
 		IWGRAPHICS_API
-		void DrawMesh(
+		virtual void DrawMesh(
 			const Transform* transform,
 			const Mesh* mesh);
 

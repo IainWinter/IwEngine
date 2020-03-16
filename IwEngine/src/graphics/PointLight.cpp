@@ -1,5 +1,5 @@
 #include "iw/graphics/PointLight.h"
-#include "iw/graphics/Renderer.h"
+#include "iw/graphics/QueuedRenderer.h"
 
 namespace iw {
 namespace Graphics {

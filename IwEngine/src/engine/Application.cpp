@@ -22,7 +22,7 @@ namespace Engine {
 		m_device = ref<IDevice>(IDevice::Create());
 		Bus      = REF<eventbus>();
 		Space    = REF<iw::Space>();
-		Renderer = REF<iw::Renderer>(m_device);
+		Renderer = REF<iw::QueuedRenderer>(m_device);
 		Asset    = REF<AssetManager>();
 		Input    = REF<InputManager>(Bus);
 		Console  = REF<iw::Console>(iw::make_getback(&Application::HandleCommand, this));

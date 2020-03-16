@@ -1,4 +1,4 @@
-#include "iw/graphics/Renderer.h"
+#include "iw/graphics/QueuedRenderer.h"
 #include "iw/util/io/File.h"
 #include <assert.h>
 
@@ -71,7 +71,7 @@ namespace Graphics {
 	}
 
 	void Renderer::End() {
-		// execute queues
+		// nothing
 	}
 
 	void Renderer::InitShader(
@@ -111,7 +111,7 @@ namespace Graphics {
 		Scene* scene,
 		const ref<RenderTarget>& target)
 	{
-		BeginScene(scene->Camera, target);
+		Renderer::BeginScene(scene->Camera, target);
 
 		SetPointLights      (scene->PointLights);
 		SetDirectionalLights(scene->DirectionalLights);
