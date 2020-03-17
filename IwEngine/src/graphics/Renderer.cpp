@@ -8,7 +8,7 @@ namespace Graphics {
 		const iw::ref<IDevice>& device)
 		: Device(device)
 		, m_camera(nullptr)
-		, m_light(nullptr)
+		, m_mesh(nullptr)
 	{
 		iw::vector3 pos[4] = {
 			iw::vector3(-1,  1, 0),
@@ -29,21 +29,18 @@ namespace Graphics {
 			1, 3, 2
 		};
 
-		Mesh* filterMesh = new Mesh();
-		filterMesh->SetVertices(4, pos);
-		filterMesh->SetUVs(4, uvs);
-		filterMesh->SetIndices(6, tris);
-
-		// needs to be initialized
-
-		m_filterMesh = filterMesh;
+		m_quad = new Mesh();
+		m_quad->SetVertices(4, pos);
+		m_quad->SetUVs(4, uvs);
+		m_quad->SetIndices(6, tris);
 	}
 
 	Renderer::~Renderer() {
-		delete m_filterMesh;
+		delete m_quad;
 	}
 
 	void Renderer::Initialize() {
+		m_quad->Initialize(Device);
 		m_cameraUBO = Device->CreateUniformBuffer(&m_cameraData, sizeof(CameraData));
 		m_shadowUBO = Device->CreateUniformBuffer(&m_shadowData, sizeof(ShadowData));
 		m_lightUBO  = Device->CreateUniformBuffer(&m_lightData,  sizeof(LightData));
@@ -134,7 +131,6 @@ namespace Graphics {
 
 		Device->Clear();
 
-		m_light = light;
 		m_state = RenderState::SHADOW_MAP;
 	}
 
@@ -149,7 +145,7 @@ namespace Graphics {
 
 	void Renderer::DrawMesh(
 		const Transform* transform,
-		const Mesh* mesh)
+		Mesh* mesh)
 	{
 #ifdef IW_DEBUG
 		if (m_state == RenderState::INVALID) {
@@ -166,7 +162,8 @@ namespace Graphics {
 			transform->Transformation()
 		);
 
-		mesh->Draw(Device);
+		SetMesh(mesh);
+		m_mesh->Draw(Device);
 	}
 
 	void Renderer::ApplyFilter(
@@ -184,7 +181,8 @@ namespace Graphics {
 			source->Tex(0)->Handle()
 		);
 
-		m_filterMesh->Draw(Device);
+		SetMesh(m_quad);
+		m_quad->Draw(Device);
 
 		EndScene();
 	}
@@ -229,6 +227,22 @@ namespace Graphics {
 		m_camera = camera;
 	}
 
+	void Renderer::SetMesh(
+		Mesh* mesh)
+	{
+		if (m_mesh != mesh) {
+			if (m_mesh) {
+				m_mesh->Unbind(Device);
+			}
+
+			m_mesh = mesh;
+
+			if (m_mesh) {
+				m_mesh->Bind(Device);
+			}
+		}
+	}
+
 	void Renderer::SetShader(
 		const iw::ref<Shader>& shader)
 	{
@@ -240,10 +254,10 @@ namespace Graphics {
 
 	void Renderer::SetMaterial(
 		const ref<Material>& material)
-	{
-		SetShader(material->Shader);
-		
+	{		
 		if (m_material != material) {
+			SetShader(material->Shader);
+
 			m_material = material;
 			m_material->Use(Device);
 		}

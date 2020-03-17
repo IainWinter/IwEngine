@@ -45,7 +45,7 @@ void BulletSystem::FixedUpdate(
 			}
 		}
 
-		bullet->Time += iw::Time::DeltaTime();
+		bullet->Time += iw::Time::FixedTime();
 
 		/*if (bullet->Time > 5.f) {
 			QueueDestroyEntity(entity.Index);

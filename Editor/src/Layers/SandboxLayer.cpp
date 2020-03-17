@@ -210,6 +210,8 @@ namespace iw {
 		Mesh* dmesh = MakeIcosphere(0);
 		dmesh->Material = REF<Material>(smat->Instance());
 
+		dmesh->Material->SetTransparency(Transparency::ADD);
+
 		dmesh->Initialize(Renderer->Device);
 
 		Model dm { dmesh, 1 };

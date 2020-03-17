@@ -12,7 +12,12 @@
 namespace iw {
 	struct MeshComponents {
 		Transform* Transform;
-		Mesh* Model;
+		Mesh* Mesh;
+	};
+
+	struct ModelComponents {
+		Transform* Transform;
+		Model* Model;
 	};
 
 	struct CameraControllerComponents {
@@ -59,8 +64,8 @@ namespace iw {
 
 		// Meshes
 
-		Mesh* sphere = MakeIcosphere(5);
-		Mesh* plane  = MakePlane(5, 5);
+		Mesh*      sphere = MakeIcosphere(5);
+		ref<Model> plane  = Asset->Load<Model>("models/block/level1.dae");
 
 		for (int x = -4; x < 5; x++) {
 			Entity entity = Space->CreateEntity<Transform, Mesh>();
@@ -91,24 +96,29 @@ namespace iw {
 		// Floor
 
 		{
-			Entity entity = Space->CreateEntity<Transform, Mesh>();
+			Entity entity = Space->CreateEntity<Transform, Model>();
 
-			Transform* transform = entity.SetComponent<Transform>(iw::vector3(0, -2, 10), iw::vector3(10));
-			Mesh*      mesh      = entity.SetComponent<Mesh>();
+			Transform* transform = entity.SetComponent<Transform>(iw::vector3(0, -2, 10));
+			Model*      model      = entity.SetComponent<Model>(*plane);
 
-			*mesh = plane->Instance();
+			for (size_t i = 0; i < model->MeshCount; i++) {
+				Mesh& mesh = model->Meshes[i];
 
-			mesh->Material = REF<Material>(shader);
-			mesh->Material->Set("albedo", iw::vector4(1));
+				mesh.Material->SetShader(shader);
 
-			mesh->Material->Set("reflectance", 0.0f);
-			mesh->Material->Set("roughness",   1.0f);
-			mesh->Material->Set("metallic",    0.0f);
+				//mesh.Material = REF<Material>(shader);
+				mesh.Material->Set("albedo", iw::vector4(1));
+					
+				mesh.Material->Set("reflectance", 0.0f);
+				mesh.Material->Set("roughness", 1.0f);
+				mesh.Material->Set("metallic", 0.0f);
+					
+				mesh.Material->SetTexture("shadowMap", dirShadowTarget->Tex(0));
+				mesh.Material->SetTexture("shadowMap2", pointShadowTarget->Tex(0));
+					
+				mesh.Initialize(Renderer->Device);
+			}
 
-			mesh->Material->SetTexture("shadowMap",  dirShadowTarget  ->Tex(0));
-			mesh->Material->SetTexture("shadowMap2", pointShadowTarget->Tex(0));
-
-			mesh->Initialize(Renderer->Device);
 		}
 
 		// Camera controller
@@ -161,6 +171,14 @@ namespace iw {
 				Renderer->DrawMesh(transform, mesh);
 			}
 
+			for (auto entity : Space->Query<Transform, Model>()) {
+				auto [transform, model] = entity.Components.Tie<ModelComponents>();
+				for (size_t i = 0; i < model->MeshCount; i++) {
+					Mesh& mesh = model->Meshes[i];
+					Renderer->DrawMesh(transform, &mesh);
+				}
+			}
+
 			Renderer->EndShadowCast();
 		}
 
@@ -172,6 +190,14 @@ namespace iw {
 				Renderer->DrawMesh(transform, mesh);
 			}
 
+			for (auto entity : Space->Query<Transform, Model>()) {
+				auto [transform, model] = entity.Components.Tie<ModelComponents>();
+				for (size_t i = 0; i < model->MeshCount; i++) {
+					Mesh& mesh = model->Meshes[i];
+					Renderer->DrawMesh(transform, &mesh);
+				}
+			}
+
 			Renderer->EndShadowCast();
 		}
 
@@ -180,6 +206,14 @@ namespace iw {
 		for (auto entity : Space->Query<Transform, Mesh>()) {
 			auto [transform, mesh] = entity.Components.Tie<MeshComponents>();
 			Renderer->DrawMesh(transform, mesh);
+		}
+
+		for (auto entity : Space->Query<Transform, Model>()) {
+			auto [transform, model] = entity.Components.Tie<ModelComponents>();
+			for (size_t i = 0; i < model->MeshCount; i++) {
+				Mesh& mesh = model->Meshes[i];
+				Renderer->DrawMesh(transform, &mesh);
+			}
 		}
 
 		Renderer->EndScene();

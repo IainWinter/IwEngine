@@ -145,8 +145,10 @@ namespace Graphics {
 		bool Has(
 			std::string name) const;
 
+		IWGRAPHICS_API
 		Transparency GetTransparency() const;
 
+		IWGRAPHICS_API
 		void SetTransparency(
 			Transparency transparency);
 

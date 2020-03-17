@@ -224,7 +224,7 @@ namespace Graphics {
 
 	void QueuedRenderer::DrawMesh(
 		const Transform* transform,
-		const Mesh* mesh)
+		Mesh* mesh)
 	{
 		m_block        = 2;
 		m_transparency = val(mesh->Material->GetTransparency());

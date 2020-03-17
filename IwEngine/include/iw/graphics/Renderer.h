@@ -73,7 +73,7 @@ namespace Graphics {
 			INVALID
 		};
 
-		const Mesh* m_filterMesh;
+		Mesh* m_quad;
 
 		int m_width;
 		int m_height;
@@ -92,7 +92,7 @@ namespace Graphics {
 
 		// state cache
 		Camera*           m_camera;
-		Light*            m_light;
+		Mesh*             m_mesh;
 		ref<Shader>       m_shader;
 		ref<Material>     m_material;
 		ref<RenderTarget> m_target;
@@ -172,7 +172,7 @@ namespace Graphics {
 		IWGRAPHICS_API
 		virtual void DrawMesh(
 			const Transform* transform,
-			const Mesh* mesh);
+			Mesh* mesh);
 
 		// tbd
 		IWGRAPHICS_API
@@ -189,6 +189,10 @@ namespace Graphics {
 		IWGRAPHICS_API
 		void SetCamera(
 			Camera* camera);
+
+		IWGRAPHICS_API
+		void SetMesh(
+			Mesh* mesh);
 
 		IWGRAPHICS_API
 		void SetShader(

@@ -151,61 +151,61 @@ void LevelSystem::LoadLevel(
 
 	// Stage
 
-	float scale = 2.0f;
-	float scaleOutX = 1.6f;
-	float scaleOutY = 1.8f;
+	//float scale = 2.0f;
+	//float scaleOutX = 1.6f;
+	//float scaleOutY = 1.8f;
 
-	int x = 16 * scaleOutX;
-	int y = 9 * scaleOutY;
+	//int x = 16 * scaleOutX;
+	//int y = 9 * scaleOutY;
 
-	for (int l = 0; l < 1; l++) {
-		for (int i = -x; i < x; i += 4) {
-			LoadTree("models/forest/tree.dae", iw::Transform {
-				iw::vector3(i, 0, y),
-				scale,
-				iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
-					* iw::quaternion::from_axis_angle(iw::vector3::unit_y, rand() / (float)RAND_MAX * iw::Pi2)
-			});
-		}
+	//for (int l = 0; l < 1; l++) {
+	//	for (int i = -x; i < x; i += 4) {
+	//		LoadTree("models/forest/tree.dae", iw::Transform {
+	//			iw::vector3(i, 0, y),
+	//			scale,
+	//			iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
+	//				* iw::quaternion::from_axis_angle(iw::vector3::unit_y, rand() / (float)RAND_MAX * iw::Pi2)
+	//		});
+	//	}
 
-		for (int i = -x; i < x; i += 4) {
-			LoadTree("models/forest/tree.dae", iw::Transform {
-				iw::vector3(i, 0, -y),
-				scale,
-				iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
-					* iw::quaternion::from_axis_angle(iw::vector3::unit_y, rand() / (float)RAND_MAX * iw::Pi2)
-			});
-		}
+	//	for (int i = -x; i < x; i += 4) {
+	//		LoadTree("models/forest/tree.dae", iw::Transform {
+	//			iw::vector3(i, 0, -y),
+	//			scale,
+	//			iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
+	//				* iw::quaternion::from_axis_angle(iw::vector3::unit_y, rand() / (float)RAND_MAX * iw::Pi2)
+	//		});
+	//	}
 
-		for (int i = -y; i <= y; i += 3) {
-			LoadTree("models/forest/tree.dae", iw::Transform {
-				iw::vector3(x, 0, i),
-				scale,
-				iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
-					* iw::quaternion::from_axis_angle(iw::vector3::unit_y, rand() / (float)RAND_MAX * iw::Pi2)
-			});
-		}
+	//	for (int i = -y; i <= y; i += 3) {
+	//		LoadTree("models/forest/tree.dae", iw::Transform {
+	//			iw::vector3(x, 0, i),
+	//			scale,
+	//			iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
+	//				* iw::quaternion::from_axis_angle(iw::vector3::unit_y, rand() / (float)RAND_MAX * iw::Pi2)
+	//		});
+	//	}
 
-		for (int i = -y + 3; i < y; i += 3) {
-			LoadTree("models/forest/tree.dae", iw::Transform {
-				iw::vector3(-x, 0, i),
-				scale,
-				iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
-					* iw::quaternion::from_axis_angle(iw::vector3::unit_y, rand() / (float)RAND_MAX * iw::Pi2)
-			});
-		}
-	
-		scaleOutX = 1.6f;
-		scaleOutY = 1.8f;
+	//	for (int i = -y + 3; i < y; i += 3) {
+	//		LoadTree("models/forest/tree.dae", iw::Transform {
+	//			iw::vector3(-x, 0, i),
+	//			scale,
+	//			iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
+	//				* iw::quaternion::from_axis_angle(iw::vector3::unit_y, rand() / (float)RAND_MAX * iw::Pi2)
+	//		});
+	//	}
+	//
+	//	scaleOutX = 1.6f;
+	//	scaleOutY = 1.8f;
 
-		x = 16 * scaleOutX;
-		y = 9 * scaleOutY;
-	}
+	//	x = 16 * scaleOutX;
+	//	y = 9 * scaleOutY;
+	//}
 
-	LoadFloor("models/forest/floor.dae", iw::Transform {
+	LoadFloor("models/block/level1.dae", iw::Transform {
 		iw::vector3(0, 0, 0),
-		iw::vector3(32),
-		iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
+		iw::vector3(2),
+		iw::quaternion::identity
 	});
 
 	// Enemies
@@ -289,7 +289,9 @@ void LevelSystem::LoadTree(
 			mat->Set("roughness", 0.7f);
 			mat->Set("metallic", 0.0f);
 
+
 			tree->Meshes[i].GenTangents();
+			tree->Meshes[i].SetIsStatic(true);
 			tree->Meshes[i].Initialize(Renderer->Device);
 		}
 	}
@@ -323,6 +325,7 @@ void LevelSystem::LoadFloor(
 			mat->Set("metallic", 0.1f);
 
 			floor->Meshes[i].GenTangents();
+			//floor->Meshes[i].SetIsStatic(true);
 			floor->Meshes[i].Initialize(Renderer->Device);
 		}
 	}

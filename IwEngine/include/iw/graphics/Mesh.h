@@ -15,6 +15,8 @@ namespace Graphics {
 	//    , but idk how bad that actually is cus I like the idea more...
 
 	struct Mesh {
+		// these should all be private
+
 		ref<vector3[]> Vertices;
 		ref<vector3[]> Normals;
 		ref<vector3[]> Tangents;
@@ -38,7 +40,12 @@ namespace Graphics {
 		IIndexBuffer* IndexBuffer;
 
 		bool Outdated;
-
+		bool IsStatic;
+	private:
+#ifdef IW_DEBUG
+		bool m_used;
+#endif
+	public:
 		//Mesh* Next;
 		//Mesh* Child;
 
@@ -52,21 +59,35 @@ namespace Graphics {
 		IWGRAPHICS_API
 		~Mesh() = default;
 
+		// Sends the mesh to video memory
 		IWGRAPHICS_API
 		void Initialize(
 			const ref<IDevice>& device);
 
+		// Updates the video memory copy of the mesh
 		IWGRAPHICS_API
 		void Update(
 			const ref<IDevice>& device);
 
+		// Destroys the video memory copy of the mesh
 		IWGRAPHICS_API
 		void Destroy(
 			const ref<IDevice>& device);
 
+		// Draws the mesh once used
 		IWGRAPHICS_API
 		void Draw(
 			const ref<IDevice>& device) const;
+
+		// Binds the mesh for use
+		IWGRAPHICS_API
+		void Bind(
+			const ref<IDevice>& device);
+
+		// Marks mesh as unbound (doesn't change renderer state [for now])
+		IWGRAPHICS_API
+		void Unbind(
+			const ref<IDevice>& device);
 
 		IWGRAPHICS_API
 		Mesh Instance() const; // makes a copy but references the same data
@@ -118,6 +139,10 @@ namespace Graphics {
 		IWGRAPHICS_API
 		void SetMaterial(
 			ref<iw::Material>& material);
+
+		IWGRAPHICS_API
+		void SetIsStatic(
+			bool isStatic);
 
 		IWGRAPHICS_API
 		size_t GetElementCount();

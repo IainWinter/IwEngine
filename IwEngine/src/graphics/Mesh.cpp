@@ -20,7 +20,11 @@ namespace Graphics {
 		, VertexArray(nullptr)
 		, IndexBuffer(nullptr)
 		, Outdated(false)
-	{}
+	{
+#ifdef IW_DEBUG
+		m_used = false;
+#endif
+	}
 
 	Mesh::Mesh(
 		MeshTopology topology)
@@ -39,7 +43,11 @@ namespace Graphics {
 		, VertexArray(nullptr)
 		, IndexBuffer(nullptr)
 		, Outdated(false)
-	{}
+	{
+#ifdef IW_DEBUG
+		m_used = false;
+#endif
+	}
 
 	//Mesh::~Mesh() {
 	//	delete[] Vertices;
@@ -166,14 +174,32 @@ namespace Graphics {
 		const ref<IDevice>& device) const
 	{
 #ifdef IW_DEBUG
+		if (!m_used) {
+			LOG_WARNING << "Mesh needs to be used before drawing";
+		}
+
 		if (!VertexArray) {
 			LOG_WARNING << "Mesh needs to be initialized!";
 		}
 #endif 
+		device->DrawElements(Topology, IndexCount, 0);
+	}
 
+	void Mesh::Bind(
+		const ref<IDevice>& device)
+	{
+#ifdef IW_DEBUG
+		m_used = true;
+#endif
 		device->SetVertexArray(VertexArray);
 		device->SetIndexBuffer(IndexBuffer);
-		device->DrawElements(Topology, IndexCount, 0);
+	}
+
+	void Mesh::Unbind(
+		const ref<IDevice>& device) {
+#ifdef IW_DEBUG
+		m_used = false;
+#endif
 	}
 
 	Mesh Mesh::Instance() const {
@@ -359,6 +385,12 @@ namespace Graphics {
 		ref<iw::Material>& material)
 	{
 		Material = material;
+	}
+
+	void Mesh::SetIsStatic(
+		bool isStatic)
+	{
+		IsStatic = isStatic;
 	}
 
 	size_t Mesh::GetElementCount() {

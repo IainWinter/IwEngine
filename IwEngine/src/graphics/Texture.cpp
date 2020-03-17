@@ -37,7 +37,7 @@ namespace Graphics {
 		, m_colors(colors)
 		, m_handle(nullptr)
 	{
-		switch (formatType) {
+		switch (format) {
 			case ALPHA:   m_channels = 1; break;
 			case RG:      m_channels = 2; break;
 			case RGB:     m_channels = 3; break;
