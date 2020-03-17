@@ -8,14 +8,27 @@ namespace Graphics {
 		const ref<IDevice>& device)
 		: Renderer(device)
 		, m_pool(500 * (sizeof(BeginSceneOP) + sizeof(BeginShadowOP) + sizeof(DrawMeshOP)))
+		, m_layer(0)
+		, m_shadow(0)
+		, m_camera(0)
+		, m_block(0)
+		, m_material(0)
+		, m_transparency(0)
 	{}
+
+	void QueuedRenderer::SetLayer(
+		int layer)
+	{
+		m_layer = layer;
+	}
 
 	void QueuedRenderer::Begin() {
 		m_queue.emplace_back(0, RenderOP::BEGIN, nullptr);
 	}
 
 	void QueuedRenderer::End(){
-		m_queue.emplace_back(0, RenderOP::END, nullptr);
+		m_camera = 0;
+		m_queue.emplace_back(-1, RenderOP::END, nullptr);
 		
 #ifdef IW_DEBUG
 		// validate
@@ -38,18 +51,18 @@ namespace Graphics {
 				}
 				case RenderOP::BEGIN_SCENE: {
 					switch (item.OP) {
-						case RenderOP::END_SCENE:    block = RenderOP::BEGIN_SCENE;  break;
-						case RenderOP::DRAW_MESH:                                    break;
-						default:                     invalid = true;                 break;
+						case RenderOP::END_SCENE:    block = RenderOP::BEGIN;  break;
+						case RenderOP::DRAW_MESH:                              break;
+						default:                     invalid = true;           break;
 					}
 
 					break;
 				}
 				case RenderOP::BEGIN_SHADOW: {
 					switch (item.OP) {
-						case RenderOP::END_SHADOW:   block = RenderOP::BEGIN_SCENE;  break;
-						case RenderOP::DRAW_MESH:                                    break;
-						default:                     invalid = true;                 break;
+						case RenderOP::END_SHADOW:   block = RenderOP::BEGIN;  break;
+						case RenderOP::DRAW_MESH:                              break;
+						default:                     invalid = true;           break;
 					}
 
 					break;
@@ -77,9 +90,19 @@ namespace Graphics {
 
 		// sort
 
-		//std::sort(m_queue.begin(), m_queue.end(), [&](RenderItem& a, RenderItem& b) {
-		//	return Sort(a, b);
-		//});
+		std::vector<RenderItem> items;
+		for (RenderItem& i : m_queue) {
+			items.push_back(i);
+		}
+
+		std::sort(m_queue.begin(), m_queue.end(), [&](RenderItem& a, RenderItem& b) {
+			return a.Order < b.Order;
+		});
+
+		std::vector<RenderItem> items2;
+		for (RenderItem& i : m_queue) {
+			items2.push_back(i);
+		}
 
 		// execute
 
@@ -139,97 +162,120 @@ namespace Graphics {
 		Camera* camera,
 		const ref<RenderTarget>& target)
 	{
+		m_shadow  = 1;
+		m_block   = 1;
+		m_camera += 1;
+		m_position = camera->Position();
+
 		BeginSceneOP* op = m_pool.alloc<BeginSceneOP>();
 		op->Scene  = nullptr;
 		op->Camera = camera;
 		op->Target = target;
 
-		m_queue.emplace_back(0, RenderOP::BEGIN_SCENE, op);
+		m_queue.emplace_back(GenOrder(), RenderOP::BEGIN_SCENE, op);
 	}
 
 	void QueuedRenderer::BeginScene(
 		Scene* scene,
 		const ref<RenderTarget>& target)
 	{
+		m_shadow  = 1;
+		m_block   = 1;
+		m_camera += 1;
+		m_position = scene->Camera->Position();
+
 		BeginSceneOP* op = m_pool.alloc<BeginSceneOP>();
 		op->Scene  = scene;
 		op->Camera = nullptr;
 		op->Target = target;
 
-		m_queue.emplace_back(0, RenderOP::BEGIN_SCENE, op);
+		m_queue.emplace_back(GenOrder(), RenderOP::BEGIN_SCENE, op);
 	}
 
 	void QueuedRenderer::BeginShadowCast(
 		Light* light)
 	{
+		m_shadow  = 0;
+		m_block   = 1;
+		m_camera += 1;
+		m_position = light->ShadowCamera()->Position();
+
 		BeginShadowOP* op = m_pool.alloc<BeginShadowOP>();
 		op->Light = light;
 
-		m_queue.emplace_back(0, RenderOP::BEGIN_SHADOW, op);
+		m_queue.emplace_back(GenOrder(), RenderOP::BEGIN_SHADOW, op);
 	}
 
 	void QueuedRenderer::EndScene() {
-		m_queue.emplace_back(0, RenderOP::END_SCENE, nullptr);
+		m_block        = 3;
+		m_material     = 0;
+		m_transparency = 0;
+		
+		m_queue.emplace_back(GenOrder(), RenderOP::END_SCENE, nullptr);
 	}
 
 	void QueuedRenderer::EndShadowCast() {
-		m_queue.emplace_back(0, RenderOP::END_SHADOW, nullptr);
+		m_block        = 3;
+		m_transparency = 0;
+		m_material     = 0;
+		
+		m_queue.emplace_back(GenOrder(), RenderOP::END_SHADOW, nullptr);
 	}
 
 	void QueuedRenderer::DrawMesh(
 		const Transform* transform,
 		const Mesh* mesh)
 	{
+		m_block        = 2;
+		m_transparency = val(mesh->Material->GetTransparency());
+		m_material     = mesh->Material->__GetOrder();
+
 		DrawMeshOP* op = m_pool.alloc<DrawMeshOP>();
 		op->Transform = transform;
 		op->Mesh = mesh;
 
-		m_queue.emplace_back(0, RenderOP::DRAW_MESH, op);
+		m_queue.emplace_back(GenOrder(transform, mesh), RenderOP::DRAW_MESH, op);
 	}
 
-	bool QueuedRenderer::Sort(
-		RenderItem& a, 
-		RenderItem& b)
+	QueuedRenderer::key QueuedRenderer::GenOrder(
+		const Transform* transform,
+		const Mesh* mesh) const
 	{
-		int alayer    = GetOrder(a.Order, Bits::LAYER);
-		int acamera   = GetOrder(a.Order, Bits::CAMERA);
-		int atransp   = GetOrder(a.Order, Bits::TRANSPARENCY);
-		int adeoth    = GetOrder(a.Order, Bits::DEPTH);
-		int amaterial = GetOrder(a.Order, Bits::MATERIAL);
-
-		int blayer    = GetOrder(a.Order, Bits::LAYER);
-		int bcamera   = GetOrder(a.Order, Bits::CAMERA);
-		int btransp   = GetOrder(a.Order, Bits::TRANSPARENCY);
-		int bdeoth    = GetOrder(a.Order, Bits::DEPTH);
-		int bmaterial = GetOrder(a.Order, Bits::MATERIAL);
-
-		return alayer     < blayer
-			|| acamera   < bcamera
-			|| atransp   < btransp
-			|| adeoth    < bdeoth
-			|| amaterial < bmaterial;
-	}
-
-	int QueuedRenderer::GetBits(
-		int64_t order,
-		int k,
-		int p)
-	{
-		return (((1 << k) - 1) & (order >> (p - 1)));
-	}
-
-	int QueuedRenderer::GetOrder(
-		int64_t order,
-		Bits bits)
-	{
-		switch (bits) {
-		case Bits::LAYER:        return GetBits(order, val(Bits::CAMERA), val(Bits::LAYER));
-		case Bits::CAMERA:       return GetBits(order, val(Bits::TRANSPARENCY), val(Bits::CAMERA));
-		case Bits::TRANSPARENCY: return GetBits(order, val(Bits::DEPTH), val(Bits::TRANSPARENCY));
-		case Bits::DEPTH:        return GetBits(order, val(Bits::MATERIAL), val(Bits::DEPTH));
-		case Bits::MATERIAL:     return GetBits(order, sizeof(int64_t), val(Bits::MATERIAL));
-		default:                 return -1;
+		key layer        = m_layer;
+		key shadow       = m_shadow;
+		key camera       = m_camera;
+		key block        = m_block;
+		key transparency = m_transparency;
+		key material     = m_material;
+		key depth        = 0;
+		
+		if (m_camera) {
+			if (transform && mesh) {
+				depth = 10000 * (m_position - transform->Position).length_fast(); // best value can def be found. Prob some equation of last scenes difference in depth or min value
+			}
 		}
+
+		if (transparency == val(Transparency::NONE)) {
+			layer        <<= val(Bits::LAYER);
+			shadow       <<= val(Bits::SHADOW);
+			camera       <<= val(Bits::CAMERA);
+			block        <<= val(Bits::BLOCK);
+			transparency <<= val(Bits::TRANSPARENCY);
+			material     <<= val(Bits::MATERIAL);
+			depth        <<= val(Bits::DEPTH);
+		}
+
+		else {
+			layer        <<= val(TransparencyBits::LAYER);
+			shadow       <<= val(TransparencyBits::SHADOW);
+			camera       <<= val(TransparencyBits::CAMERA);
+			block        <<= val(TransparencyBits::BLOCK);
+			transparency <<= val(TransparencyBits::TRANSPARENCY);
+			depth        <<= val(TransparencyBits::DEPTH);
+			material     <<= val(TransparencyBits::MATERIAL);
+		}
+
+		return layer | shadow | camera | block | transparency | material | depth;
 	}
 }
 }

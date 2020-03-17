@@ -6,6 +6,8 @@ namespace Graphics {
 	Material::Material()
 		: m_alloc(128)
 		, m_initialized(false)
+		, m_transparency(Transparency::NONE)
+		, m_order(0)
 	{}
 	
 	Material::Material(
@@ -13,6 +15,8 @@ namespace Graphics {
 		: Shader(shader)
 		, m_alloc(128)
 		, m_initialized(false)
+		, m_transparency(Transparency::NONE)
+		, m_order(0)
 	{}
 
 	Material::Material(
@@ -23,6 +27,8 @@ namespace Graphics {
 		, m_textures   (other.m_textures)
 		, m_index      (other.m_index)
 		, m_initialized(other.m_initialized)
+		, m_transparency(other.m_transparency)
+		, m_order(0)
 	{
 		for (auto& prop : m_properties) {
 			unsigned size = prop.TypeSize * prop.Stride * prop.Count;
@@ -34,12 +40,14 @@ namespace Graphics {
 
 	Material::Material(
 		Material&& other) noexcept
-		: Shader       (std::move(other.Shader))
-		, m_alloc      (std::move(other.m_alloc))
-		, m_properties (std::move(other.m_properties))
-		, m_textures   (std::move(other.m_textures))
-		, m_index      (std::move(other.m_index))
-		, m_initialized(std::move(other.m_initialized))
+		: Shader        (std::move(other.Shader))
+		, m_alloc       (std::move(other.m_alloc))
+		, m_properties  (std::move(other.m_properties))
+		, m_textures    (std::move(other.m_textures))
+		, m_index       (std::move(other.m_index))
+		, m_initialized (std::move(other.m_initialized))
+		, m_transparency(std::move(other.m_transparency))
+		, m_order       (other.m_order)
 	{}
 
 	Material::~Material() {}
@@ -47,12 +55,14 @@ namespace Graphics {
 	Material& Material::operator=(
 		const Material& other)
 	{
-		Shader        = other.Shader;
-		m_alloc       = iw::linear_allocator(other.m_alloc.capacity());
-		m_properties  = other.m_properties;
-		m_textures    = other.m_textures;
-		m_index       = other.m_index;
-		m_initialized = other.m_initialized;
+		Shader         = other.Shader;
+		m_alloc        = iw::linear_allocator(other.m_alloc.capacity());
+		m_properties   = other.m_properties;
+		m_textures     = other.m_textures;
+		m_index        = other.m_index;
+		m_initialized  = other.m_initialized;
+		m_transparency = other.m_transparency;
+		m_order        = 0;
 
 		for (auto& prop : m_properties) {
 			unsigned size = prop.TypeSize * prop.Stride * prop.Count;
@@ -67,12 +77,14 @@ namespace Graphics {
 	Material& Material::operator=(
 		Material&& other) noexcept
 	{
-		Shader        = std::move(other.Shader);
-		m_alloc       = std::move(other.m_alloc);
-		m_properties  = std::move(other.m_properties);
-		m_textures    = std::move(other.m_textures);
-		m_index       = std::move(other.m_index);
-		m_initialized = std::move(other.m_initialized);
+		Shader         = std::move(other.Shader);
+		m_alloc        = std::move(other.m_alloc);
+		m_properties   = std::move(other.m_properties);
+		m_textures     = std::move(other.m_textures);
+		m_index        = std::move(other.m_index);
+		m_initialized  = std::move(other.m_initialized);
+		m_transparency = std::move(other.m_transparency);
+		m_order        = 0;
 
 		return *this;
 	}
@@ -80,8 +92,11 @@ namespace Graphics {
 	void Material::Initialize(
 		const iw::ref<IDevice>& device)
 	{
+		static int s_counter = 0;
+
 		if(!m_initialized) {
 			m_initialized = true;
+			m_order = ++s_counter;
 
 			if (!Shader) {
 				LOG_WARNING << "Tried to initialize material without a shader!";
@@ -276,6 +291,16 @@ namespace Graphics {
 		std::string name) const
 	{
 		return m_index.find(name) != m_index.end();
+	}
+
+	Transparency Material::GetTransparency() const {
+		return m_transparency;
+	}
+
+	void Material::SetTransparency(
+		Transparency transparency)
+	{
+		m_transparency = transparency;
 	}
 
 	void Material::SetProperty(

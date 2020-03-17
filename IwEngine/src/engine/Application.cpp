@@ -2,7 +2,6 @@
 #include "iw/engine/Layers/DebugLayer.h"
 #include "iw/engine/Time.h"
 #include "iw/log/logger.h"
-#include "iw/log/sink/std_sink.h"
 #include "iw/log/sink/file_sink.h"
 #include "iw/events/callback.h"
 #include "iw/graphics/Loaders/ModelLoader.h"
@@ -12,6 +11,14 @@
 #include "iw/graphics/Loaders/FontLoader.h"
 #include "iw/audio/AudioSpaceRaw.h"
 #include <atomic>
+
+#ifdef IW_DEBUG
+	#include "iw/log/sink/std_sink.h"
+#else
+	#include "iw/log/sink/async_std_sink.h"
+#endif
+
+
 
 namespace iw {
 namespace Engine {
@@ -45,8 +52,13 @@ namespace Engine {
 
 		// Logging
 
+#ifdef IW_DEBUG
 		LOG_SINK(iw::stdout_sink, iw::INFO);
 		LOG_SINK(iw::stderr_sink, iw::ERR);
+#else
+		LOG_SINK(iw::async_stdout_sink, iw::INFO);
+		LOG_SINK(iw::async_stderr_sink, iw::ERR);
+#endif
 		LOG_SINK(iw::file_sink,         iw::INFO,  "/logs/sandbox_info.log");
 		LOG_SINK(iw::file_sink,         iw::DEBUG, "/logs/sandbox_debug.log");
 
@@ -161,7 +173,11 @@ namespace Engine {
 		//m_workQueue.clear();
 
 		// Pre Update (Sync)
+		 
+		int layerNumber = 0;
+
 		for (Layer* layer : m_layers) {
+			Renderer->SetLayer(layerNumber);
 			layer->PreUpdate();
 		}
 
@@ -169,7 +185,11 @@ namespace Engine {
 		//m_updateTask.Run();
 
 		// Update layers (ASync)
+
+		layerNumber = 0;
+
 		for (Layer* layer : m_layers) {
+			Renderer->SetLayer(layerNumber);
 			layer->UpdateSystems();
 			layer->Update();
 		}
@@ -178,13 +198,21 @@ namespace Engine {
 		//m_updateTask.Wait();
 
 		// Post Update (Sync)
+
+		layerNumber = 0;
+
 		for (Layer* layer : m_layers) {
+			Renderer->SetLayer(layerNumber);
 			layer->PostUpdate();
 		}
 
-		ImGuiLayer* imgui = GetLayer<ImGuiLayer>("ImGui");
+		// Run through render queue! (Sync)
+
+		Renderer->End();
 
 		// ImGui render (Sync)
+
+		ImGuiLayer* imgui = GetLayer<ImGuiLayer>("ImGui");
 		if (imgui) {
 			imgui->Begin();
 			for (Layer* layer : m_layers) {
@@ -192,10 +220,6 @@ namespace Engine {
 			}
 			imgui->End();
 		}
-
-		// Run through render queue! (Sync)
-
-		Renderer->End();
 
 		Audio->Update();
 

@@ -49,7 +49,7 @@ namespace Graphics {
 	}
 
 	void Shader::Use(
-		const iw::ref<IDevice>& device)
+		const iw::ref<IDevice>& device) const
 	{
 		device->SetPipeline(m_handle);
 	}

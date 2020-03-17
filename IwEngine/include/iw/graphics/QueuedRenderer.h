@@ -11,20 +11,26 @@ namespace Graphics {
 		: public Renderer
 	{
 	private:
+		using key = uint64_t;
+
 		enum class Bits {
-			LAYER        = 0,
-			CAMERA       = 3,
-			TRANSPARENCY = 6,
-			DEPTH        = 8,
-			MATERIAL     = 32,
+			DEPTH        = 8 * sizeof(key) - 64, // 0000000000000000000000000000000000000000xxxxxxxxxxxxxxxxxxxxxxxx
+			MATERIAL     = 8 * sizeof(key) - 40, // 000000000000000000000000xxxxxxxxxxxxxxxx000000000000000000000000
+			TRANSPARENCY = 8 * sizeof(key) - 24, // 0000000000000000000000xx0000000000000000000000000000000000000000
+			BLOCK        = 8 * sizeof(key) - 22, // 00000000000000000000xx000000000000000000000000000000000000000000
+			CAMERA       = 8 * sizeof(key) - 20, // 00000000xxxxxxxxxxxx00000000000000000000000000000000000000000000
+			SHADOW       = 8 * sizeof(key) - 8,  // 0000000x00000000000000000000000000000000000000000000000000000000
+			LAYER        = 8 * sizeof(key) - 7,  // xxxxxxx000000000000000000000000000000000000000000000000000000000
 		};
 
 		enum class TransparencyBits {
-			LAYER = 0,
-			CAMERA = 3,
-			TRANSPARENCY = 6,
-			MATERIAL = 8,
-			DEPTH = 32
+			MATERIAL     = 8 * sizeof(key) - 64, // 000000000000000000000000000000000000000000000000xxxxxxxxxxxxxxxx
+			DEPTH        = 8 * sizeof(key) - 48, // 000000000000000000000000xxxxxxxxxxxxxxxxxxxxxxxx0000000000000000
+			TRANSPARENCY = 8 * sizeof(key) - 24, // 0000000000000000000000xx0000000000000000000000000000000000000000
+			BLOCK        = 8 * sizeof(key) - 22, // 00000000000000000000xx000000000000000000000000000000000000000000
+			CAMERA       = 8 * sizeof(key) - 20, // 00000000xxxxxxxxxxxx00000000000000000000000000000000000000000000
+			SHADOW       = 8 * sizeof(key) - 8,  // 0000000x00000000000000000000000000000000000000000000000000000000
+			LAYER        = 8 * sizeof(key) - 7,  // xxxxxxx000000000000000000000000000000000000000000000000000000000
 		};
 
 		enum class RenderOP {
@@ -51,7 +57,7 @@ namespace Graphics {
 		};
 
 		struct RenderItem {
-			int64_t  Order;
+			uint64_t  Order;
 			RenderOP OP;
 			void*    Data;
 
@@ -62,7 +68,7 @@ namespace Graphics {
 			{}
 
 			RenderItem(
-				int64_t order,
+				uint64_t order,
 				RenderOP op,
 				void* data)
 				: Order(order)
@@ -74,10 +80,23 @@ namespace Graphics {
 		std::deque<RenderItem> m_queue;
 		pool_allocator m_pool;
 
+		int m_layer;
+		int m_shadow;
+		int m_camera;
+		int m_block;
+		int m_material;
+		int m_transparency;
+		vector3 m_position;
+
 	public:
 		IWGRAPHICS_API
 		QueuedRenderer(
 		const ref<IDevice>& device);
+
+		// sets current layer for ordering
+		IWGRAPHICS_API
+		void SetLayer(
+			int layer);
 
 		// Clears screen buffer
 		IWGRAPHICS_API
@@ -127,18 +146,10 @@ namespace Graphics {
 		void DrawMesh(
 			const Transform* transform,
 			const Mesh* mesh) override;
-		private:
-			bool Sort(
-				RenderItem& a,
-				RenderItem& b);
-
-			int GetBits(
-				int64_t order,
-				int k, int p);
-
-			int GetOrder(
-				int64_t order,
-				Bits bits);
+	private:
+		key GenOrder(
+			const Transform* transform = nullptr,
+			const Mesh* mesh = nullptr) const;
 	};
 }
 

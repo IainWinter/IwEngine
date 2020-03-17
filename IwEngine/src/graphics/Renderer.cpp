@@ -7,6 +7,8 @@ namespace Graphics {
 	Renderer::Renderer(
 		const iw::ref<IDevice>& device)
 		: Device(device)
+		, m_camera(nullptr)
+		, m_light(nullptr)
 	{
 		iw::vector3 pos[4] = {
 			iw::vector3(-1,  1, 0),
@@ -132,6 +134,7 @@ namespace Graphics {
 
 		Device->Clear();
 
+		m_light = light;
 		m_state = RenderState::SHADOW_MAP;
 	}
 
@@ -199,9 +202,9 @@ namespace Graphics {
 				Device->SetViewport(m_width, m_height);
 				Device->SetFrameBuffer(nullptr);
 			}
-		}
 
-		m_target = target;
+			m_target = target;
+		}
 	}
 
 	void Renderer::SetCamera(
@@ -222,6 +225,8 @@ namespace Graphics {
 			m_cameraData.ViewProj  = vp;
 			Device->UpdateBuffer(m_cameraUBO, &m_cameraData);
 		}
+
+		m_camera = camera;
 	}
 
 	void Renderer::SetShader(

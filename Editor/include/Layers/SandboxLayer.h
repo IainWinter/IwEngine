@@ -57,7 +57,6 @@ namespace iw {
 
 		int Initialize() override;
 
-		void PreUpdate() override;
 		void PostUpdate() override;
 		void FixedUpdate() override;
 

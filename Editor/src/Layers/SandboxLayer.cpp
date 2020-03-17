@@ -291,13 +291,6 @@ namespace iw {
 		return Layer::Initialize();
 	}
 
-	void SandboxLayer::PreUpdate() {
-		//if (loadLevel != "") {
-		//	LoadLevel(loadLevel);
-		//	loadLevel = "";
-		//}
-	}
-
 	void SandboxLayer::PostUpdate() {
 		//font->UpdateMesh(textMesh, std::to_string(1.0f / Time::DeltaTime()), 0.01f, 1); //fps
 		textMesh->Update(Renderer->Device);

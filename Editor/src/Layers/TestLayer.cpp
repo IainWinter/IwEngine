@@ -29,7 +29,7 @@ namespace iw {
 	int TestLayer::Initialize() {
 		// Shaders
 
-		                    shader    = Asset->Load<Shader>("shaders/test_pbr.shader");
+		                    shader    = Asset->Load<Shader>("shaders/pbr.shader");
 		ref<Shader> dirShadowShader   = Asset->Load<Shader>("shaders/lights/directional.shader");
 		ref<Shader> pointShadowShader = Asset->Load<Shader>("shaders/lights/point.shader");
 
@@ -71,10 +71,11 @@ namespace iw {
 			*mesh = sphere->Instance();
 
 			mesh->Material = REF<Material>(shader);
-			mesh->Material->Set("albedo", iw::vector3(
+			mesh->Material->Set("albedo", iw::vector4(
 				rand() / (float)RAND_MAX,
 				rand() / (float)RAND_MAX,
-				rand() / (float)RAND_MAX)
+				rand() / (float)RAND_MAX,
+				1.0f)
 			);
 
 			mesh->Material->Set("reflectance", rand() / (float)RAND_MAX);
@@ -98,7 +99,7 @@ namespace iw {
 			*mesh = plane->Instance();
 
 			mesh->Material = REF<Material>(shader);
-			mesh->Material->Set("albedo", iw::vector3(1));
+			mesh->Material->Set("albedo", iw::vector4(1));
 
 			mesh->Material->Set("reflectance", 0.0f);
 			mesh->Material->Set("roughness",   1.0f);
@@ -174,7 +175,6 @@ namespace iw {
 			Renderer->EndShadowCast();
 		}
 
-
 		Renderer->BeginScene(scene);
 
 		for (auto entity : Space->Query<Transform, Mesh>()) {
@@ -212,10 +212,11 @@ namespace iw {
 			for (auto entity : Space->Query<Transform, Mesh>()) {
 				auto [transform, mesh] = entity.Components.Tie<MeshComponents>();
 
-				mesh->Material->Set("albedo", iw::vector3(
+				mesh->Material->Set("albedo", iw::vector4(
 					rand() / (float)RAND_MAX,
 					rand() / (float)RAND_MAX,
-					rand() / (float)RAND_MAX)
+					rand() / (float)RAND_MAX,
+					1.0f)
 				);
 
 				mesh->Material->Set("reflectance", rand() / (float)RAND_MAX);

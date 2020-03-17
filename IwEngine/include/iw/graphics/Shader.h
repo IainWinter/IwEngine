@@ -45,7 +45,7 @@ namespace Graphics {
 
 		IWGRAPHICS_API
 		void Use(
-			const iw::ref<IDevice>& device);
+			const iw::ref<IDevice>& device) const;
 	};
 }
 

@@ -88,11 +88,14 @@ namespace Graphics {
 		ShadowData m_shadowData;
 		LightData  m_lightData;
 
-		ref<Shader>   m_shader;
-		ref<Material> m_material;
-		ref<RenderTarget> m_target;
-
 		RenderState m_state;
+
+		// state cache
+		Camera*           m_camera;
+		Light*            m_light;
+		ref<Shader>       m_shader;
+		ref<Material>     m_material;
+		ref<RenderTarget> m_target;
 
 	public:
 		IWGRAPHICS_API

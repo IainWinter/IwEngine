@@ -41,16 +41,10 @@ namespace Graphics {
 		virtual bool Outdated() const;
 
 		IWGRAPHICS_API       float              Intensity()    const;
-		//IWGRAPHICS_API       float&             Intensity();
-
 		IWGRAPHICS_API const vector3&           Position()     const;
-		//IWGRAPHICS_API       vector3&           Position();
-
 		IWGRAPHICS_API const ref<Shader>&       ShadowShader() const;
-		//IWGRAPHICS_API       ref<Shader>&       ShadowShader();
-
 		IWGRAPHICS_API const ref<RenderTarget>& ShadowTarget() const;
-		//IWGRAPHICS_API       ref<RenderTarget>& ShadowTarget();
+		IWGRAPHICS_API const Camera*            ShadowCamera() const;
 
 		IWGRAPHICS_API
 		void SetIntensity(

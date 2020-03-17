@@ -20,6 +20,13 @@ namespace iw {
 namespace Graphics {
 	// Instances need to not bind each texture if its the same
 
+	enum class Transparency {
+		NONE = 0,
+		ADD,
+		SUB,
+		MULT
+	};
+
 	struct Material {
 	public:
 		iw::ref<Shader> Shader;
@@ -48,6 +55,10 @@ namespace Graphics {
 		std::unordered_map<std::string, unsigned> m_index; // also done in pipeline seems bad
 
 		bool m_initialized;
+
+		Transparency m_transparency;
+
+		int m_order;
 
 	public:
 		IWGRAPHICS_API
@@ -133,6 +144,15 @@ namespace Graphics {
 		IWGRAPHICS_API
 		bool Has(
 			std::string name) const;
+
+		Transparency GetTransparency() const;
+
+		void SetTransparency(
+			Transparency transparency);
+
+		int __GetOrder() const {
+			return m_order;
+		}
 	private:
 		IWGRAPHICS_API
 		void SetProperty(

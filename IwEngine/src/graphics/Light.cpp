@@ -35,33 +35,21 @@ namespace Graphics {
 		return m_intensity;
 	}
 
-	//float& Light::Intensity() {
-	//	return m_intensity;
-	//}
-
 	const vector3& Light::Position() const {
 		return m_shadowCamera->Position();
 	}
-
-	//vector3& Light::Position() {
-	//	return m_shadowCamera->Position();
-	//}
 
 	const iw::ref<Shader>& Light::ShadowShader() const {
 		return m_shadowShader;
 	}
 
-	//iw::ref<Shader>& Light::ShadowShader() {
-	//	return m_shadowShader;
-	//}
-
 	const iw::ref<RenderTarget>& Light::ShadowTarget() const {
 		return m_shadowTarget;
 	}
 
-	//iw::ref<RenderTarget>& Light::ShadowTarget() {
-	//	return m_shadowTarget;
-	//}
+	const Camera* Light::ShadowCamera() const {
+		return m_shadowCamera;
+	}
 
 	void Light::SetIntensity(
 		float intensity)
