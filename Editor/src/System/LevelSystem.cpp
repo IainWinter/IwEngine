@@ -202,9 +202,9 @@ void LevelSystem::LoadLevel(
 	//	y = 9 * scaleOutY;
 	//}
 
-	LoadFloor("models/block/level1.dae", iw::Transform {
+	LoadFloor("models/block/a.dae", iw::Transform {
 		iw::vector3(0, 0, 0),
-		iw::vector3(2),
+		iw::vector3(1),
 		iw::quaternion::identity
 	});
 
