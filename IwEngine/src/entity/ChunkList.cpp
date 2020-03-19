@@ -98,13 +98,13 @@ namespace ECS {
 	{}
 
 	size_t ChunkList::ReserveComponents(
-		const EntityHandle& entity)
+		const iw::ref<EntityData>& entityData)
 	{
 		Chunk& chunk = FindOrCreateChunk();
 		size_t index = chunk.ReserveComponents();
 
 		EntityHandle* entityComponent = chunk.GetEntity(index);
-		*entityComponent = entity;
+		*entityComponent = entityData->Entity;
 
 		++m_count;
 
@@ -137,14 +137,21 @@ namespace ECS {
 	}
 
 	bool ChunkList::FreeComponents(
-		size_t index)
+		const iw::ref<EntityData>& entityData)
 	{
-		Chunk* chunk = FindChunk(index);
+		Chunk* chunk = FindChunk(entityData->ChunkIndex);
 		if (chunk) {
 			chunk->FreeComponents();
 
-			EntityHandle* entityComponent = chunk->GetEntity(index);
+			EntityHandle* entityComponent = chunk->GetEntity(entityData->ChunkIndex);
 			entityComponent->Alive = false;
+
+			for (size_t i = 0; i < m_archetype->Count; i++) { // recently added not sure if needed but prob for the best
+				ArchetypeLayout& layout = m_archetype->Layout[i];
+
+				void* component = chunk->GetComponentPtr(layout, entityData->ChunkIndex);
+				memset(component, 0, layout.Component->Size); // could put this in Chunk.h if it sounds better
+			}
 
 			--m_count;
 

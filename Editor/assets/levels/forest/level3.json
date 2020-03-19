@@ -38,8 +38,8 @@
     ]
   },
   "StageName": {
-    "size": 0,
-    "string": ""
+    "size": 23,
+    "string": "models/block/level2.dae"
   },
   "Player": {
     "Speed": 4.000000,

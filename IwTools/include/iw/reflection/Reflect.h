@@ -1,5 +1,9 @@
 #pragma once
 
+// Supports all integral types (int, float, char...) and their respected fixed arrays
+// Supports all classes generated from IwReflection.exe and their respected fixed arrays
+// Doesn't support pointers
+
 #include "Type.h"
 #include <assert.h>
 #include <cstddef>

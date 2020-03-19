@@ -18,6 +18,11 @@ public:
 private:
 	std::string currentLevelName;
 	Level currentLevel;
+
+	iw::Entity levelEntity;
+	iw::Entity nextLevelEntity;
+	bool transition;
+
 	iw::Entity currentDoor;
 	iw::Color openColor;
 	iw::Color closedColor;
@@ -36,14 +41,17 @@ public:
 	bool On(
 		iw::ActionEvent& event);
 
-	void LoadLevel(
+	iw::Entity LoadLevel(
 		std::string name);
 
 	void LoadTree(
 		std::string name,
 		iw::Transform transform);
 
-	void LoadFloor(
+	iw::Entity LoadFloor(
 		std::string name,
 		iw::Transform transform);
+private:
+	void DestroyAllChildren(
+		iw::Transform* transform);
 };

@@ -1,10 +1,5 @@
 #pragma once
 
-// Supports all integral types (int, float, char...) and their respected fixed arrays
-// Supports all classes generated from IwReflection.exe
-// Doesn't support arrays of classes
-// Doesn't support pointers
-
 namespace iw {
 namespace Reflect {
 	struct Type;

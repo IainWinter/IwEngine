@@ -6,7 +6,7 @@ enum class Actions
 	: int
 {
 	JUMP, RIGHT, FORWARD, USE,
-	RESET_LEVEL, NEXT_LEVEL, OPEN_NEXT_LEVEL, LOADED_LEVEL
+	RESET_LEVEL, OPEN_NEXT_LEVEL, NEXT_LEVEL, START_NEXT_LEVEL
 };
 
 struct JumpEvent
@@ -52,6 +52,15 @@ struct ResetLevelEvent
 	{}
 };
 
+struct OpenNextLevelEvent
+	: iw::SingleEvent
+{
+	OpenNextLevelEvent()
+		: iw::SingleEvent(iw::val(Actions::OPEN_NEXT_LEVEL))
+	{}
+};
+
+
 struct NextLevelEvent
 	: iw::SingleEvent
 {
@@ -60,18 +69,10 @@ struct NextLevelEvent
 	{}
 };
 
-struct LoadedLevelEvent
+struct StartNextLevelEvent
 	: iw::SingleEvent
 {
-	LoadedLevelEvent()
-		: iw::SingleEvent(iw::val(Actions::LOADED_LEVEL))
-	{}
-};
-
-struct OpenNextLevelEvent
-	: iw::SingleEvent
-{
-	OpenNextLevelEvent()
-		: iw::SingleEvent(iw::val(Actions::OPEN_NEXT_LEVEL))
+	StartNextLevelEvent()
+		: iw::SingleEvent(iw::val(Actions::START_NEXT_LEVEL))
 	{}
 };

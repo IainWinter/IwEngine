@@ -28,7 +28,6 @@ void PlayerSystem::Update(
 
 			if (player->DeathTimer <= 0) {
 				player->DeathTimer = 0;
-				QueueDestroyEntity(entity.Index);
 				Bus->push<ResetLevelEvent>();
 			}
 		}
@@ -94,11 +93,42 @@ bool PlayerSystem::On(
 	iw::KeyEvent& event)
 {
 	switch (event.Button) {
-		case iw::UP:    movement.z -= event.State ? 1 : -1; break;
-		case iw::DOWN:  movement.z += event.State ? 1 : -1; break;
-		case iw::LEFT:  movement.x -= event.State ? 1 : -1; break;
-		case iw::RIGHT: movement.x += event.State ? 1 : -1; break;
-		case iw::X:     dash = event.State; break;
+		case iw::UP: {
+			if (movement.z == 1) {
+				movement.z = 0;
+			}
+
+			movement.z -= event.State ? 1 : -1;
+			break;
+		}
+		case iw::DOWN: {
+			if (movement.z == -1) {
+				movement.z = 0;
+			}
+
+			movement.z += event.State ? 1 : -1;
+			break; 
+		}
+		case iw::LEFT: {
+			if (movement.x == 1) {
+				movement.x = 0;
+			}
+
+			movement.x -= event.State ? 1 : -1;
+			break; 
+		}
+		case iw::RIGHT: {
+			if (movement.x == -1) {
+				movement.x = 0;
+			}
+
+			movement.x += event.State ? 1 : -1;
+			break; 
+		}
+		case iw::X: {
+			dash = event.State;
+			break;
+		}
 	}
 
 	return true;
@@ -158,7 +188,10 @@ bool PlayerSystem::On(
 	iw::ActionEvent& event)
 {
 	switch (event.Action) {
-		case iw::val(Actions::NEXT_LEVEL ):
+		case iw::val(Actions::START_NEXT_LEVEL): {
+			movement = 0;
+			dash = 0;
+		}
 		case iw::val(Actions::RESET_LEVEL): {
 			m_playerModel->Meshes[0].Material->Set("albedo", iw::Color(1));
 			break;

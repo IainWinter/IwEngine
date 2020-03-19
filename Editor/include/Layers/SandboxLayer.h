@@ -1,5 +1,6 @@
-#pragma once 
+#pragma once
 
+#include "Systems/PlayerSystem.h"
 #include "iw/engine/Layer.h"
 #include "iw/physics/Dynamics/DynamicsSpace.h"
 #include "iw/graphics/DirectionalLight.h"
@@ -16,6 +17,8 @@ namespace iw {
 		: public Layer
 	{
 	private:
+		PlayerSystem* playerSystem;
+
 		// Main cameras
 
 		float ambiance;

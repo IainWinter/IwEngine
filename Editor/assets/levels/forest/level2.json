@@ -19,7 +19,7 @@
           "Speed": 5.000000
         },
         "Speed": 0.2617994,
-        "FireTime": 0.060000,
+        "FireTime": 0.120000,
         "CooldownTime": 0.000000
       }
     ]
@@ -38,8 +38,8 @@
     ]
   },
   "StageName": {
-    "size": 0,
-    "string": ""
+    "size": 23,
+    "string": "models/block/level2.dae"
   },
   "Player": {
     "Speed": 4.000000,

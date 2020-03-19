@@ -1,8 +1,8 @@
 #include "Systems/BulletSystem.h"
+#include "Events/ActionEvents.h"
+#include "Components/Player.h"
 #include "iw/engine/Time.h"
 #include <Components\Enemy.h>
-
-#include "Components/Player.h"
 
 struct PlayerComponents {
 	iw::Transform* Transform;
@@ -90,6 +90,7 @@ bool BulletSystem::On(
 	}
 
 	if (bullet != iw::EntityHandle::Empty) {
+		bullet.FindComponent<iw::Transform>()->SetParent(nullptr);
 		QueueDestroyEntity(bullet.Index());
 	}
 

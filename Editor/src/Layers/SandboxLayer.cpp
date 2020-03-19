@@ -1,5 +1,4 @@
 #include "Layers/SandboxLayer.h"
-#include "Systems/PlayerSystem.h"
 #include "Systems/EnemySystem.h"
 #include "Systems/BulletSystem.h"
 #include "Systems/LevelSystem.h"
@@ -44,6 +43,7 @@ namespace iw {
 	SandboxLayer::SandboxLayer()
 		: Layer("Sandbox")
 		, ambiance(.03f)
+		, playerSystem(nullptr)
 		, light(nullptr)
 		, sun(nullptr)
 		, textCam(nullptr)
@@ -88,7 +88,7 @@ namespace iw {
 		textMesh->SetMaterial(textMat);
 		textMesh->Initialize(Renderer->Device);
 
-		textTransform = { vector3(-6.8, -1.8, 0), vector3::one, quaternion::identity};
+		textTransform = Transform(vector3(-6.8, -1.8, 0), vector3::one, quaternion::identity);
 
 		// Shader
 
@@ -150,6 +150,17 @@ namespace iw {
 
 		scene->Camera = new PerspectiveCamera();
 		textCam = new OrthographicCamera(vector3::one, quaternion::from_axis_angle(vector3::unit_y, Pi), 16, 9, -10, 10);
+
+		iw::quaternion camrot = 
+			  iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
+			* iw::quaternion::from_axis_angle(iw::vector3::unit_z, iw::Pi);
+
+		iw::Entity camera = Space->CreateEntity<iw::Transform, iw::CameraController>();
+
+		iw::Transform* transform = camera.SetComponent<iw::Transform>(vector3(0, 25, 0), iw::vector3::one, camrot);
+		camera.SetComponent<iw::CameraController>(scene->Camera);
+
+		scene->Camera->SetTrans(transform);
 
 		// Materials
 
@@ -284,8 +295,8 @@ namespace iw {
 
 		// Systems
 
+		playerSystem = PushSystem<PlayerSystem>();
 		PushSystem<PhysicsSystem>();
-		PushSystem<PlayerSystem>();
 		PushSystem<EnemySystem>();
 		PushSystem<BulletSystem>();
 		PushSystem<LevelSystem>();
@@ -493,18 +504,12 @@ namespace iw {
 		ActionEvent& e)
 	{
 		switch (e.Action) {
-			case val(Actions::LOADED_LEVEL): { // hack for needing to reset space, should all be in level prefabs but thatl come later
-				// Main Camera
-
-				iw::quaternion camrot = iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
-					* iw::quaternion::from_axis_angle(iw::vector3::unit_z, iw::Pi);
-
-				iw::Entity camera = Space->CreateEntity<iw::Transform, iw::CameraController>();
-
-				iw::Transform* transform = camera.SetComponent<iw::Transform>(vector3(0, 25, 0), iw::vector3::one, camrot);
-				                           camera.SetComponent<iw::CameraController>(scene->Camera);
-
-				scene->Camera->SetTrans(transform);
+			case iw::val(Actions::NEXT_LEVEL): {
+				PopSystem(playerSystem);
+				break;
+			}
+			case iw::val(Actions::START_NEXT_LEVEL): {
+				PushSystem(playerSystem);
 				break;
 			}
 		}

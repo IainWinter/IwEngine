@@ -51,7 +51,7 @@ namespace ECS {
 		const iw::ref<EntityData>& entityData)
 	{
 		ChunkList& list = FindOrCreateChunkList(entityData->Archetype);
-		return list.ReserveComponents(entityData->Entity);
+		return list.ReserveComponents(entityData);
 	}
 
 	bool ComponentManager::ReinstateComponentData(
@@ -66,7 +66,7 @@ namespace ECS {
 	{
 		ChunkList* list = FindChunkList(entityData->Archetype);
 		if (list) {
-			return list->FreeComponents(entityData->ChunkIndex);
+			return list->FreeComponents(entityData);
 		}
 
 		return false;
@@ -80,10 +80,10 @@ namespace ECS {
 		if (from) {
 			ChunkList& to = FindOrCreateChunkList(archetype);
 			
-			size_t chunkIndex = to.ReserveComponents(entityData->Entity); // check for reinstate??
+			size_t chunkIndex = to.ReserveComponents(entityData); // check for reinstate??
 
 			from->MoveComponents(to, entityData->ChunkIndex, chunkIndex);
-			from->FreeComponents(entityData->ChunkIndex);
+			from->FreeComponents(entityData);
 
 			return chunkIndex;
 		}

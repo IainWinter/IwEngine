@@ -70,7 +70,7 @@ namespace ECS {
 
 		IWENTITY_API
 		size_t ReserveComponents(
-			const EntityHandle& entity);
+			const iw::ref<EntityData>& entityData);
 
 		IWENTITY_API
 		bool ReinstateComponents(
@@ -78,7 +78,7 @@ namespace ECS {
 
 		IWENTITY_API
 		bool FreeComponents(
-			size_t index);
+			const iw::ref<EntityData>& entityData);
 
 		IWENTITY_API
 		bool MoveComponents(

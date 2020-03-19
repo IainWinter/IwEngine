@@ -20,6 +20,7 @@ private:
 	iw::ref<iw::Model> m_playerModel;
 	iw::vector3 movement;
 	bool dash;
+	bool enabled;
 
 public:
 	PlayerSystem();

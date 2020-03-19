@@ -120,33 +120,43 @@ namespace Engine {
 		}
 
 		template<
+			typename S>
+		S* GetSystem(
+			const char* name)
+		{
+			return (S*)m_systems.Get(name);
+		}
+
+		template<
 			typename S,
 			typename... Args>
 		S* PushSystem(
 			Args&&... args)
 		{
-			S* layer = new S(std::forward<Args>(args)...);
-			layer->SetLayerVars(Space, Renderer, Asset, Physics, Audio, Bus);
+			S* system = new S(std::forward<Args>(args)...);
+			system->SetLayerVars(Space, Renderer, Asset, Physics, Audio, Bus);
 
-			m_systems.PushBack(layer);
-			return layer;
+			PushSystem(system);
+			return system;
+		}
+
+		template<
+			typename S>
+		void PushSystem(
+			S* system)
+		{
+			LOG_INFO << "Pushed " << system->Name() << " system into " << Name() << " layer";
+			system->SetLayerVars(Space, Renderer, Asset, Physics, Audio, Bus);
+			m_systems.PushBack(system);
 		}
 
 		template<
 			typename S>
 		void PopSystem(
-			const char* name)
+			S* system)
 		{
-			auto itr = m_systems.begin();
-			for (; itr != m_systems.end(); itr++;) {
-				if (strcmp((*itr)->Name(), name)) {
-					break;
-				}
-			}
-
-			if (itr != m_systems.end()) {
-				m_systems.erase(itr);
-			}
+			LOG_INFO << "Pushed " << system->Name() << " system from " << Name() << " layer";
+			m_systems.Pop(system);
 		}
 	private:
 		friend class Application;

@@ -35,6 +35,8 @@ LevelSystem::LevelSystem()
 	openColor   = iw::Color::From255(66, 201, 66, 127);
 	closedColor = iw::Color::From255(201, 66, 66, 127);
 
+	transition = false;
+
 	//Level level;
 	//level.Enemies.push_back(Enemy{ EnemyType::SPIN, Bullet { LINE, 5 }, iw::Pi2 / 24.0f, 0.12f });
 	//level.Positions.push_back(0);
@@ -68,19 +70,41 @@ void LevelSystem::Update(
 			model->Meshes[0].Material->Set("albedo", iw::lerp<iw::vector4>(closedColor, openColor, 4 * (0.25f - door->ColorTimer)));
 		}
 	}
+
+	if (transition) {
+		iw::Transform* current  = levelEntity.FindComponent<iw::Transform>();
+		iw::Transform* next = nextLevelEntity.FindComponent<iw::Transform>();
+
+		current->Position.x -= iw::Time::DeltaTime() * 30;
+		next->Position.x    -= iw::Time::DeltaTime() * 30;
+
+		if (next->Position.x < 0) {
+			next->Position.x = 0;
+			transition = false;
+
+			DestroyAllChildren(current);
+
+			Bus->push<StartNextLevelEvent>();
+
+			levelEntity = nextLevelEntity;
+			nextLevelEntity = iw::Entity();
+		}
+	}
+
+	//levelEntity.FindComponent<iw::Transform>()->Rotation *= iw::quaternion::from_euler_angles(0, iw::Time::DeltaTime() * 0.1f, 0);
 }
 
 bool LevelSystem::On(
-	iw::CollisionEvent& event)
+	iw::CollisionEvent& e)
 {
-	iw::Entity a = Space->FindEntity(event.ObjA);
+	iw::Entity a = Space->FindEntity(e.ObjA);
 	if (a == iw::EntityHandle::Empty) {
-		a = Space->FindEntity<iw::Rigidbody>(event.ObjA);
+		a = Space->FindEntity<iw::Rigidbody>(e.ObjA);
 	}
 
-	iw::Entity b = Space->FindEntity(event.ObjB);
+	iw::Entity b = Space->FindEntity(e.ObjB);
 	if (b == iw::EntityHandle::Empty) {
-		b = Space->FindEntity<iw::Rigidbody>(event.ObjB);
+		b = Space->FindEntity<iw::Rigidbody>(e.ObjB);
 	}
 
 	if (   a.Index() == iw::EntityHandle::Empty.Index
@@ -113,22 +137,15 @@ bool LevelSystem::On(
 }
 
 bool LevelSystem::On(
-	iw::ActionEvent& event)
+	iw::ActionEvent& e)
 {
-	switch (event.Action) {
-		case iw::val(Actions::NEXT_LEVEL): {
-			currentLevelName = currentLevel.Door.NextLevel;
-			//Task.Queue(iw::bind(LoadLevel, currentLevelName)), 5.0f);
-
-			// no break
-		}
+	switch (e.Action) {
 		case iw::val(Actions::RESET_LEVEL): {
-			LoadLevel(currentLevelName);
-			break;
-		}
-		case iw::val(Actions::LOADED_LEVEL): {
-			iw::Model* modelComp = currentDoor.FindComponent<iw::Model>();
-			modelComp->Meshes[0].Material->Set("albedo", iw::Color::From255(201, 66, 66, 127));
+			if (levelEntity != iw::EntityHandle::Empty) {
+				DestroyAllChildren(levelEntity.FindComponent<iw::Transform>());
+			}
+
+			levelEntity = LoadLevel(currentLevelName);
 			break;
 		}
 		case iw::val(Actions::OPEN_NEXT_LEVEL): {
@@ -137,15 +154,31 @@ bool LevelSystem::On(
 			doorComp->ColorTimer = 0.25f;
 			break;
 		}
+		case iw::val(Actions::NEXT_LEVEL): {
+			currentDoor.FindComponent<LevelDoor>()->State = LevelDoorState::LOCKED;
+			
+			transition       = true;
+			currentLevelName = currentLevel.Door.NextLevel;
+
+			nextLevelEntity = LoadLevel(currentLevelName);
+			nextLevelEntity.FindComponent<iw::Transform>()->Position.x = 64;
+
+			break;
+		}
+		//case iw::val(Actions::START_NEXT_LEVEL): {
+		//	iw::Model* modelComp = currentDoor.FindComponent<iw::Model>();
+		//	modelComp->Meshes[0].Material->Set("albedo", iw::Color::From255(201, 66, 66, 127));
+		//	break;
+		//}
 	}
 
 	return false;
 }
 
-void LevelSystem::LoadLevel(
+iw::Entity LevelSystem::LoadLevel(
 	std::string name)
 {
-	Space->Clear();
+	//Space->Clear();
 
 	iw::JsonSerializer("assets/" + name).Read(currentLevel);
 
@@ -154,10 +187,10 @@ void LevelSystem::LoadLevel(
 	//float scale = 2.0f;
 	//float scaleOutX = 1.6f;
 	//float scaleOutY = 1.8f;
-
+	//
 	//int x = 16 * scaleOutX;
 	//int y = 9 * scaleOutY;
-
+	//
 	//for (int l = 0; l < 1; l++) {
 	//	for (int i = -x; i < x; i += 4) {
 	//		LoadTree("models/forest/tree.dae", iw::Transform {
@@ -167,7 +200,7 @@ void LevelSystem::LoadLevel(
 	//				* iw::quaternion::from_axis_angle(iw::vector3::unit_y, rand() / (float)RAND_MAX * iw::Pi2)
 	//		});
 	//	}
-
+	//
 	//	for (int i = -x; i < x; i += 4) {
 	//		LoadTree("models/forest/tree.dae", iw::Transform {
 	//			iw::vector3(i, 0, -y),
@@ -176,7 +209,7 @@ void LevelSystem::LoadLevel(
 	//				* iw::quaternion::from_axis_angle(iw::vector3::unit_y, rand() / (float)RAND_MAX * iw::Pi2)
 	//		});
 	//	}
-
+	//
 	//	for (int i = -y; i <= y; i += 3) {
 	//		LoadTree("models/forest/tree.dae", iw::Transform {
 	//			iw::vector3(x, 0, i),
@@ -185,7 +218,7 @@ void LevelSystem::LoadLevel(
 	//				* iw::quaternion::from_axis_angle(iw::vector3::unit_y, rand() / (float)RAND_MAX * iw::Pi2)
 	//		});
 	//	}
-
+	//
 	//	for (int i = -y + 3; i < y; i += 3) {
 	//		LoadTree("models/forest/tree.dae", iw::Transform {
 	//			iw::vector3(-x, 0, i),
@@ -197,16 +230,22 @@ void LevelSystem::LoadLevel(
 	//
 	//	scaleOutX = 1.6f;
 	//	scaleOutY = 1.8f;
-
+	//
 	//	x = 16 * scaleOutX;
 	//	y = 9 * scaleOutY;
 	//}
 
-	LoadFloor("models/block/a.dae", iw::Transform {
+	iw::Entity level = LoadFloor(currentLevel.StageName, iw::Transform {
 		iw::vector3(0, 0, 0),
 		iw::vector3(1),
 		iw::quaternion::identity
 	});
+
+	iw::Transform* levelTransform = level.FindComponent<iw::Transform>();
+
+	if (levelTransform == nullptr) {
+		LOG_INFO << "heh";
+	}
 
 	// Enemies
 
@@ -218,6 +257,8 @@ void LevelSystem::LoadLevel(
 		iw::Transform*       te = enemy.SetComponent<iw::Transform>(iw::vector3(currentLevel.Positions[i].x, 1, currentLevel.Positions[i].y));
 		iw::SphereCollider*  se = enemy.SetComponent<iw::SphereCollider>(iw::vector3::zero, 1.0f);
 		iw::CollisionObject* re = enemy.SetComponent<iw::CollisionObject>();
+
+		levelTransform->AddChild(te);
 
 		re->SetCol(se);
 		re->SetTrans(te);
@@ -239,6 +280,8 @@ void LevelSystem::LoadLevel(
 	iw::SphereCollider* sp = player.SetComponent<iw::SphereCollider>(iw::vector3::zero, .75f);
 	iw::Rigidbody*      rp = player.SetComponent<iw::Rigidbody>();
 
+	levelTransform->AddChild(tp);
+
 	rp->SetMass(1);
 	rp->SetCol(sp);
 	rp->SetTrans(tp);
@@ -253,12 +296,16 @@ void LevelSystem::LoadLevel(
 	// Door
 
 	currentDoor = Space->CreateEntity<iw::Transform, iw::Model, iw::SphereCollider, iw::CollisionObject, LevelDoor>();
-	currentDoor.SetComponent<LevelDoor>(currentLevel.Door);
-
+	
+	                          currentDoor.SetComponent<LevelDoor>(currentLevel.Door);
 	iw::Model*           md = currentDoor.SetComponent<iw::Model>(*Asset->Load<iw::Model>("Door"));
 	iw::Transform*       td = currentDoor.SetComponent<iw::Transform>(iw::vector3(20, 1, 0), 5.0f);
 	iw::SphereCollider*  sd = currentDoor.SetComponent<iw::SphereCollider>(iw::vector3::zero, 5.0f);
 	iw::CollisionObject* cd = currentDoor.SetComponent<iw::CollisionObject>();
+
+	md->Meshes[0].Material->Set("albedo", iw::Color::From255(201, 66, 66, 127));
+
+	levelTransform->AddChild(td);
 
 	cd->SetCol(sd);
 	cd->SetTrans(td);
@@ -268,7 +315,7 @@ void LevelSystem::LoadLevel(
 
 	// Camera recreated in layer from \/
 
-	Bus->push<LoadedLevelEvent>();
+	return level;
 }
 
 void LevelSystem::LoadTree(
@@ -289,7 +336,6 @@ void LevelSystem::LoadTree(
 			mat->Set("roughness", 0.7f);
 			mat->Set("metallic", 0.0f);
 
-
 			tree->Meshes[i].GenTangents();
 			tree->Meshes[i].SetIsStatic(true);
 			tree->Meshes[i].Initialize(Renderer->Device);
@@ -306,7 +352,7 @@ void LevelSystem::LoadTree(
 	ent.SetComponent<iw::Model>(*tree);
 }
 
-void LevelSystem::LoadFloor(
+iw::Entity LevelSystem::LoadFloor(
 	std::string name,
 	iw::Transform transform)
 {
@@ -330,7 +376,21 @@ void LevelSystem::LoadFloor(
 		}
 	}
 
-	iw::Entity ent = Space->CreateEntity<iw::Transform, iw::Model>();
-	ent.SetComponent<iw::Transform>(transform);
-	ent.SetComponent<iw::Model>(*floor);
+	iw::Entity entity = Space->CreateEntity<iw::Transform, iw::Model>();
+	entity.SetComponent<iw::Transform>(transform);
+	entity.SetComponent<iw::Model>(*floor);
+
+	return entity;
+}
+
+void LevelSystem::DestroyAllChildren(
+	iw::Transform* transform)
+{
+	if (transform) {
+		for (iw::Transform* child : transform->Children()) {
+			DestroyAllChildren(child);
+		}
+
+		Space->DestroyEntity(Space->FindEntity(transform).Index());
+	}
 }

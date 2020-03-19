@@ -32,7 +32,7 @@ public:
 	bool On(
 		iw::ActionEvent& e) override;
 private:
-	void SpawnBullet(
+	iw::Transform* SpawnBullet(
 		Bullet prefab,
 		iw::vector3 position,
 		iw::quaternion rot);

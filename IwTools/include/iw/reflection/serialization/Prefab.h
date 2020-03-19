@@ -1,11 +1,11 @@
 #pragma once
 
-#include "IwEntity.h"
-#include "Archetype.h"
+#include "Type.h"
 
 namespace iw {
-namespace ECS {
+namespace Reflect {
 	struct Prefab {
+		std::vector<>
 		iw::ref<Archetype> m_archetype;
 		void* m_componentData;
 		size_t m_componentCount;

@@ -128,7 +128,7 @@ namespace iw {
 	vector3 vector3::operator-(
 		const vector3& other) const
 	{
-		return vector3(x - other.x, y - other.y, z - other.z);
+ 		return vector3(x - other.x, y - other.y, z - other.z);
 	}
 
 	vector3 vector3::operator*(

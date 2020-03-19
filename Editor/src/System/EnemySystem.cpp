@@ -44,21 +44,25 @@ void EnemySystem::Update(
 
 			switch (enemy->Type) {
 				case EnemyType::SPIN: {
-					SpawnBullet(
+					iw::Transform* bullet = SpawnBullet(
 						enemy->Bullet,
 						transform->Position,
 						iw::quaternion::from_euler_angles(0, enemy->Rotation, 0)
 					);
 
+					transform->Parent()->AddChild(bullet);
+
 					break;
 				}
 				case EnemyType::CIRCLE: {
 					for (float i = 1; i < iw::Pi2 / enemy->Speed; i++) {
-						SpawnBullet(
+						iw::Transform* bullet = SpawnBullet(
 							enemy->Bullet,
 							transform->Position,
 							iw::quaternion::from_euler_angles(0, enemy->Rotation + enemy->Speed * i, 0)
 						);
+
+						transform->Parent()->AddChild(bullet);
 					}
 
 					break;
@@ -89,16 +93,16 @@ void EnemySystem::Update(
 }
 
 bool EnemySystem::On(
-	iw::CollisionEvent& event)
+	iw::CollisionEvent& e)
 {
-	iw::Entity a = Space->FindEntity(event.ObjA);
+	iw::Entity a = Space->FindEntity(e.ObjA);
 	if (a == iw::EntityHandle::Empty) {
-		a = Space->FindEntity<iw::Rigidbody>(event.ObjA);
+		a = Space->FindEntity<iw::Rigidbody>(e.ObjA);
 	}
 
-	iw::Entity b = Space->FindEntity(event.ObjB);
+	iw::Entity b = Space->FindEntity(e.ObjB);
 	if (b == iw::EntityHandle::Empty) {
-		b = Space->FindEntity<iw::Rigidbody>(event.ObjB);
+		b = Space->FindEntity<iw::Rigidbody>(e.ObjB);
 	}
 
 	if (   a == iw::EntityHandle::Empty
@@ -128,8 +132,10 @@ bool EnemySystem::On(
 	{
 		Player* playerComponent = player.FindComponent<Player>();
 		if (playerComponent->Timer > 0) {
-			QueueDestroyEntity(enemy.Index());
 			Audio->AsStudio()->CreateInstance("enemyDeath");
+
+			enemy.FindComponent<iw::Transform>()->SetParent(nullptr);
+			QueueDestroyEntity(enemy.Index());
 		}
 	}
 
@@ -139,14 +145,18 @@ bool EnemySystem::On(
 bool EnemySystem::On(
 	iw::ActionEvent& e)
 {
-	if (e.Action == iw::val(Actions::LOADED_LEVEL)) {
-		m_levelResetTimer = 0;
+	switch (e.Action) {
+		case iw::val(Actions::NEXT_LEVEL):
+		case iw::val(Actions::RESET_LEVEL): {
+			m_levelResetTimer = 0;
+			break;
+		}
 	}
 
 	return false;
 }
 
-void EnemySystem::SpawnBullet(
+iw::Transform* EnemySystem::SpawnBullet(
 	Bullet prefab,
 	iw::vector3 position,
 	iw::quaternion rot)
@@ -172,4 +182,6 @@ void EnemySystem::SpawnBullet(
 	r->SetLock(iw::vector3(0, 1, 0));
 
 	Physics->AddRigidbody(r);
+
+	return t;
 }

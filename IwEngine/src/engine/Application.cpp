@@ -117,7 +117,7 @@ namespace Engine {
 		// Time again!
 
 		Time::UpdateTime();
-		Time::SetFixedTime(1 / 60.0f);
+		Time::SetFixedTime(1 / 50.0f);
 
 		return 0;
 	}
@@ -223,10 +223,12 @@ namespace Engine {
 
 		Audio->Update();
 
-		// Swap buffers (Sync)
-		m_window->SwapBuffers();
 		Console->ExecuteQueue(); 
 		Bus->publish();
+
+		// Swap buffers (Sync)
+		
+		m_window->SwapBuffers();
 	}
 
 	void Application::FixedUpdate() {
