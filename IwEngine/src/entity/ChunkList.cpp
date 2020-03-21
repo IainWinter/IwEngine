@@ -115,70 +115,77 @@ namespace ECS {
 		const iw::ref<EntityData>& entityData)
 	{
 		Chunk* chunk = FindChunk(entityData->ChunkIndex);
-		if (chunk) {
-			chunk->ReinstateComponents();
-
-			EntityHandle* entityComponent = chunk->GetEntity(entityData->ChunkIndex);
-			*entityComponent = entityData->Entity;
-
-			for (size_t i = 0; i < m_archetype->Count; i++) {
-				ArchetypeLayout& layout = m_archetype->Layout[i];
-
-				void* old = chunk->GetComponentPtr(layout, entityData->ChunkIndex);
-				memset(old, 0, layout.Component->Size); // could put this in Chunk.h if it sounds better
-			}
-
-			++m_count;
-
-			return true;
+		if (!chunk) {
+			return false;
 		}
 
-		return false;
+		EntityHandle* entityComponent = chunk->GetEntity(entityData->ChunkIndex);
+		if (entityComponent->Index != entityData->Entity.Index) {
+			return false;
+		}
+
+		chunk->ReinstateComponents();
+
+		*entityComponent = entityData->Entity;
+
+		for (size_t i = 0; i < m_archetype->Count; i++) {
+			ArchetypeLayout& layout = m_archetype->Layout[i];
+
+			void* old = chunk->GetComponentPtr(layout, entityData->ChunkIndex);
+			memset(old, 0, layout.Component->Size); // could put this in Chunk.h if it sounds better
+		}
+
+		++m_count;
+
+		return true;
 	}
 
 	bool ChunkList::FreeComponents(
 		const iw::ref<EntityData>& entityData)
 	{
 		Chunk* chunk = FindChunk(entityData->ChunkIndex);
-		if (chunk) {
-			chunk->FreeComponents();
-
-			EntityHandle* entityComponent = chunk->GetEntity(entityData->ChunkIndex);
-			entityComponent->Alive = false;
-
-			for (size_t i = 0; i < m_archetype->Count; i++) { // recently added not sure if needed but prob for the best
-				ArchetypeLayout& layout = m_archetype->Layout[i];
-
-				void* component = chunk->GetComponentPtr(layout, entityData->ChunkIndex);
-				memset(component, 0, layout.Component->Size); // could put this in Chunk.h if it sounds better
-			}
-
-			--m_count;
-
-			// If chunk is empty free it
-			if (chunk->Count == 0) {			
-				if (chunk->Previous) {
-					chunk->Previous->Next = chunk->Next;
-				}
-
-				if (chunk->Next) {
-					chunk->Next->Previous = chunk->Previous;
-				}
-
-				if (chunk == m_root) {
-					m_root = m_root->Next;
-				}
-
-				LOG_DEBUG << "Deleting Chunk " << chunk->IndexOffset / chunk->Capacity;
-
-				--m_chunkCount;
-				m_chunkPool.free(chunk, m_chunkSize);
-			}
-
-			return true;
+		if (!chunk) {
+			return false;
 		}
 
-		return false;
+		chunk->FreeComponents();
+
+		EntityHandle* entityComponent = chunk->GetEntity(entityData->ChunkIndex);
+		entityComponent->Alive = false;
+
+		for (size_t i = 0; i < m_archetype->Count; i++) { // recently added not sure if needed but prob for the best
+			ArchetypeLayout& layout = m_archetype->Layout[i];
+
+			void* component = chunk->GetComponentPtr(layout, entityData->ChunkIndex);
+			memset(component, 0, layout.Component->Size); // could put this in Chunk.h if it sounds better
+		}
+
+		--m_count;
+
+		// If chunk is empty free it
+		if (chunk->Count == 0) {	
+			if (chunk->Previous) {
+				chunk->Previous->Next = chunk->Next;
+			}
+
+			if (chunk->Next) {
+				chunk->Next->Previous = chunk->Previous;
+			}
+
+			if (chunk == m_root) {
+				m_root = m_root->Next;
+			}
+
+			LOG_DEBUG << "Deleting Chunk " << chunk->IndexOffset / chunk->Capacity;
+
+			if (!chunk->Next) {
+				--m_chunkCount;
+			}
+
+			m_chunkPool.free(chunk, m_chunkSize);
+		}
+
+		return true;
 	}
 
 	bool ChunkList::MoveComponents(
@@ -187,24 +194,24 @@ namespace ECS {
 		size_t newIndex)
 	{
 		Chunk* chunk = FindChunk(index);
-		if (chunk) {
-			for (size_t i = 0; i < m_archetype->Count; i++) {
-				ArchetypeLayout& layout = m_archetype->Layout[i];
-				iw::ref<Component> component = layout.Component;
-
-				void* ptr  = to.GetComponentPtr(component, newIndex);
-				if (!ptr) continue;
-
-				void* from = chunk->GetComponentPtr(layout, index);
-				if (!from) continue; // not sure if this can ever trip
-
-				memmove(ptr, from, component->Size); // could put this in Chunk.h if it sounds better
-			}
-
-			return true;
+		if (!chunk) {
+			return false;
 		}
 
-		return false;
+		for (size_t i = 0; i < m_archetype->Count; i++) {
+			ArchetypeLayout& layout = m_archetype->Layout[i];
+			iw::ref<Component> component = layout.Component;
+
+			void* ptr  = to.GetComponentPtr(component, newIndex);
+			if (!ptr) continue;
+
+			void* from = chunk->GetComponentPtr(layout, index);
+			if (!from) continue; // not sure if this can ever trip
+
+			memmove(ptr, from, component->Size); // could put this in Chunk.h if it sounds better
+		}
+
+		return true;
 	}
 
 	void* ChunkList::GetComponentPtr(
@@ -212,33 +219,33 @@ namespace ECS {
 		size_t index)
 	{
 		Chunk* chunk = FindChunk(index);
-		if (chunk) {
-			size_t i = 0;
-			for (; i < m_archetype->Count; i++) {
-				if (component->Type == m_archetype->Layout[i].Component->Type) {
-					break;
-				}
-			}
-
-			if (i == m_archetype->Count) {
-				return nullptr;
-			}
-
-			return chunk->GetComponentPtr(m_archetype->Layout[i], index);
+		if (!chunk) {
+			return false;
 		}
 
-		return nullptr;
+		size_t i = 0;
+		for (; i < m_archetype->Count; i++) {
+			if (component->Type == m_archetype->Layout[i].Component->Type) {
+				break;
+			}
+		}
+
+		if (i == m_archetype->Count) {
+			return nullptr;
+		}
+
+		return chunk->GetComponentPtr(m_archetype->Layout[i], index);
 	}
 
 	EntityHandle* ChunkList::GetEntity(
 		size_t index)
 	{
 		Chunk* chunk = FindChunk(index);
-		if (chunk) {
-			return chunk->GetEntity(index);
+		if (!chunk) {
+			return nullptr;
 		}
 
-		return nullptr;
+		return chunk->GetEntity(index);
 	}
 
 	int ChunkList::IndexOf(

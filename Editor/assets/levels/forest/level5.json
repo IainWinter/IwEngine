@@ -1,4 +1,8 @@
 {
+  "StageName": {
+    "size": 23,
+    "string": "models/block/level5.dae"
+  },
   "Enemies": {
     "size": 3,
     "items": [
@@ -51,22 +55,20 @@
       }
     ]
   },
-  "StageName": {
-    "size": 23,
-    "string": "models/block/level2.dae"
+  "InPosition": {
+    "x": -22.000000,
+    "y": 0.000000
   },
-  "Player": {
-    "Speed": 4.000000,
-    "DashTime": 0.133333,
-    "CooldownTime": 0.20000,
-    "Health": 3
+  "OutPosition": {
+    "x": 18.000000,
+    "y": 0.000000
+  },
+  "LevelLocation": {
+    "x": 0.000000,
+    "y": -36.000000
   },
   "Door": {
     "State": 1,
-    "NextLevelPosition": {
-      "x": -22.000000,
-      "y": 0.000000
-    },
     "NextLevel": {
       "size": 25,
       "string": "levels/forest/level1.json"

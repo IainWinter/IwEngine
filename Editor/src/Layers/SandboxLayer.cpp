@@ -460,6 +460,10 @@ namespace iw {
 			Audio->AsStudio()->StopInstance(forestInstance);
 		}
 
+		if (ImGui::Button("Next level")) {
+			Bus->push<NextLevelEvent>();
+		}
+
 		//if (ImGui::Button("Save level")) {
 		//	JsonSerializer jout("assets/levels/working.json", true);
 		//	
@@ -509,7 +513,7 @@ namespace iw {
 				break;
 			}
 			case iw::val(Actions::START_NEXT_LEVEL): {
-				PushSystem(playerSystem);
+				PushSystemFront(playerSystem);
 				break;
 			}
 		}

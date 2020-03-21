@@ -8,10 +8,16 @@
 #include <vector>
 
 struct REFLECT Level {
+	REFLECT std::string StageName = "";
+
 	REFLECT std::vector<Enemy>       Enemies;
 	REFLECT std::vector<iw::vector2> Positions;
-	REFLECT std::string StageName = "";
-	REFLECT Player Player = {};
+
+	REFLECT iw::vector2 InPosition;
+	REFLECT iw::vector2 OutPosition;
+	REFLECT iw::vector2 LevelPosition;
+
 	REFLECT LevelDoor Door = {};
+
 	//iw::Model Stage;
 };

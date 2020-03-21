@@ -2,11 +2,13 @@
 
 #include "iw/engine/Events/ActionEvents.h"
 
+#include "iw/math/vector3.h"
+
 enum class Actions
 	: int
 {
 	JUMP, RIGHT, FORWARD, USE,
-	RESET_LEVEL, OPEN_NEXT_LEVEL, NEXT_LEVEL, START_NEXT_LEVEL
+	RESET_LEVEL, OPEN_NEXT_LEVEL, NEXT_LEVEL, START_NEXT_LEVEL, START_LEVEL
 };
 
 struct JumpEvent
@@ -60,7 +62,6 @@ struct OpenNextLevelEvent
 	{}
 };
 
-
 struct NextLevelEvent
 	: iw::SingleEvent
 {
@@ -74,5 +75,18 @@ struct StartNextLevelEvent
 {
 	StartNextLevelEvent()
 		: iw::SingleEvent(iw::val(Actions::START_NEXT_LEVEL))
+	{}
+};
+
+
+struct StartLevelEvent
+	: iw::SingleEvent
+{
+	iw::vector3 PlayerPos;
+
+	StartLevelEvent(
+		iw::vector3 playerPos)
+		: iw::SingleEvent(iw::val(Actions::START_LEVEL))
+		, PlayerPos(playerPos)
 	{}
 };

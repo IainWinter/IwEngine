@@ -33,6 +33,10 @@ void EnemySystem::Update(
 	for (auto entity : view) {
 		auto [transform, enemy] = entity.Components.Tie<Components>();
 
+		if (transform->Parent() == nullptr) {
+			LOG_INFO << "herh";
+		}
+
 		m_enemyCount++;
 
 		transform->Rotation *= iw::quaternion::from_euler_angles(0, -iw::Time::DeltaTime(), 0);
@@ -135,7 +139,7 @@ bool EnemySystem::On(
 			Audio->AsStudio()->CreateInstance("enemyDeath");
 
 			enemy.FindComponent<iw::Transform>()->SetParent(nullptr);
-			QueueDestroyEntity(enemy.Index());
+			Space->DestroyEntity(enemy.Index());
 		}
 	}
 

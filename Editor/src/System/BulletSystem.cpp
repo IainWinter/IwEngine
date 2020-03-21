@@ -91,7 +91,7 @@ bool BulletSystem::On(
 
 	if (bullet != iw::EntityHandle::Empty) {
 		bullet.FindComponent<iw::Transform>()->SetParent(nullptr);
-		QueueDestroyEntity(bullet.Index());
+		Space->DestroyEntity(bullet.Index());
 	}
 
 	return false;

@@ -91,7 +91,7 @@ void ReflectedClass::Generate(
 {
     OUT <<
         "\t"  "template<>"                                               "\n"
-        "\t"      "const Class* GetClass(ClassTag<" << Name() << ">) {"  "\n"
+        "\t"      "inline const Class* GetClass(ClassTag<" << Name() << ">) {"  "\n"
         "\t\t"        "static Class c = ";                     Print(out);
                 
         for (size_t i = 0; i < m_fields.size(); i++) {
@@ -110,7 +110,7 @@ void ReflectedClass::Generate(
 
     OUT <<
         "\t"  "template<size_t _s>"                                          "\n"
-        "\t"      "const Class* GetClass(ClassTag<" << Name() << "[_s]>) {"  "\n"
+        "\t"      "inline const Class* GetClass(ClassTag<" << Name() << "[_s]>) {"  "\n"
         "\t\t"        "static Class c = ";                     PrintArray(out);
 
         for (size_t i = 0; i < m_fields.size(); i++) {

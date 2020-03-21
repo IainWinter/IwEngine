@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Components/Player.h"
-#include "iw/engine/System.h"
-#include "iw/common/Components/Transform.h"
-#include "iw/physics/Dynamics/Rigidbody.h"
 #include "Events/ActionEvents.h"
+#include "iw/engine/System.h"
 #include "iw/graphics/Model.h"
+#include "iw/reflect/Components/Player.h"
+#include "iw/physics/Dynamics/Rigidbody.h"
+#include "iw/common/Components/Transform.h"
 
 class PlayerSystem
 	: public iw::System<iw::Transform, iw::Rigidbody, Player>
@@ -17,10 +17,14 @@ public:
 		Player*    Player;
 	};
 private:
+	// prefab info
+	Player playerPrefab;
 	iw::ref<iw::Model> m_playerModel;
+
+	iw::Entity player;
+
 	iw::vector3 movement;
 	bool dash;
-	bool enabled;
 
 public:
 	PlayerSystem();

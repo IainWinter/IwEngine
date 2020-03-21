@@ -52,6 +52,6 @@ public:
 		std::string name,
 		iw::Transform transform);
 private:
-	void DestroyAllChildren(
+	void DestroyAll(
 		iw::Transform* transform);
 };

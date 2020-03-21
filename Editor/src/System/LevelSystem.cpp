@@ -40,7 +40,6 @@ LevelSystem::LevelSystem()
 	//Level level;
 	//level.Enemies.push_back(Enemy{ EnemyType::SPIN, Bullet { LINE, 5 }, iw::Pi2 / 24.0f, 0.12f });
 	//level.Positions.push_back(0);
-	//level.Player = Player { 4.0f, 8 / 60.0f, .2f, 5 };
 	//level.StageName = "";
 	//level.Door = LevelDoor{
 	//	LevelDoorState::LOCKED,
@@ -75,19 +74,23 @@ void LevelSystem::Update(
 		iw::Transform* current  = levelEntity.FindComponent<iw::Transform>();
 		iw::Transform* next = nextLevelEntity.FindComponent<iw::Transform>();
 
-		current->Position.x -= iw::Time::DeltaTime() * 30;
-		next->Position.x    -= iw::Time::DeltaTime() * 30;
+		iw::vector2 delta = currentLevel.LevelPosition / 2 * iw::Time::DeltaTime();
 
-		if (next->Position.x < 0) {
+		current->Position.x -= delta.x;
+		current->Position.z -= delta.y;
+
+		next->Position.x -= delta.x;
+		next->Position.z -= delta.y;
+
+		if (   delta.x > 0 ? next->Position.x <= 0 : next->Position.x >= 0
+			&& delta.y > 0 ? next->Position.z <= 0 : next->Position.z >= 0)
+		{
 			next->Position.x = 0;
+			next->Position.z = 0;
 			transition = false;
 
-			DestroyAllChildren(current);
-
 			Bus->push<StartNextLevelEvent>();
-
-			levelEntity = nextLevelEntity;
-			nextLevelEntity = iw::Entity();
+			Bus->push<StartLevelEvent>(currentLevel.InPosition);
 		}
 	}
 
@@ -142,10 +145,13 @@ bool LevelSystem::On(
 	switch (e.Action) {
 		case iw::val(Actions::RESET_LEVEL): {
 			if (levelEntity != iw::EntityHandle::Empty) {
-				DestroyAllChildren(levelEntity.FindComponent<iw::Transform>());
+				DestroyAll(levelEntity.FindComponent<iw::Transform>());
 			}
 
 			levelEntity = LoadLevel(currentLevelName);
+
+			Bus->send<StartLevelEvent>(currentLevel.InPosition);
+
 			break;
 		}
 		case iw::val(Actions::OPEN_NEXT_LEVEL): {
@@ -161,15 +167,25 @@ bool LevelSystem::On(
 			currentLevelName = currentLevel.Door.NextLevel;
 
 			nextLevelEntity = LoadLevel(currentLevelName);
-			nextLevelEntity.FindComponent<iw::Transform>()->Position.x = 64;
+
+			iw::Transform* transform = nextLevelEntity.FindComponent<iw::Transform>();
+			transform->Position.x = currentLevel.LevelPosition.x;
+			transform->Position.z = currentLevel.LevelPosition.y;
 
 			break;
 		}
-		//case iw::val(Actions::START_NEXT_LEVEL): {
-		//	iw::Model* modelComp = currentDoor.FindComponent<iw::Model>();
-		//	modelComp->Meshes[0].Material->Set("albedo", iw::Color::From255(201, 66, 66, 127));
-		//	break;
-		//}
+		case iw::val(Actions::START_LEVEL): {
+			if (nextLevelEntity != iw::EntityHandle::Empty) {
+				DestroyAll(levelEntity.FindComponent<iw::Transform>());
+
+				levelEntity = nextLevelEntity;
+				nextLevelEntity = iw::Entity();
+
+				//iw::Model* modelComp = currentDoor.FindComponent<iw::Model>();
+				//modelComp->Meshes[0].Material->Set("albedo", iw::Color::From255(201, 66, 66, 127));
+			}
+			break;
+		}
 	}
 
 	return false;
@@ -243,10 +259,6 @@ iw::Entity LevelSystem::LoadLevel(
 
 	iw::Transform* levelTransform = level.FindComponent<iw::Transform>();
 
-	if (levelTransform == nullptr) {
-		LOG_INFO << "heh";
-	}
-
 	// Enemies
 
 	for (size_t i = 0; i < currentLevel.Enemies.size(); i++) {
@@ -254,9 +266,13 @@ iw::Entity LevelSystem::LoadLevel(
 		
 		                          enemy.SetComponent<iw::Model>(*Asset->Load<iw::Model>("Tetrahedron"));
 		                          enemy.SetComponent<Enemy>(currentLevel.Enemies[i]);
-		iw::Transform*       te = enemy.SetComponent<iw::Transform>(iw::vector3(currentLevel.Positions[i].x, 1, currentLevel.Positions[i].y));
+		iw::Transform*       te = enemy.SetComponent<iw::Transform>();
 		iw::SphereCollider*  se = enemy.SetComponent<iw::SphereCollider>(iw::vector3::zero, 1.0f);
 		iw::CollisionObject* re = enemy.SetComponent<iw::CollisionObject>();
+
+		te->Position.x = currentLevel.Positions[i].x;
+		te->Position.z = currentLevel.Positions[i].y;
+		te->Position.y = 1;
 
 		levelTransform->AddChild(te);
 
@@ -268,30 +284,30 @@ iw::Entity LevelSystem::LoadLevel(
 
 	// Player
 
-	iw::vector3 playerPos = currentLevel.Door.NextLevelPosition;
-	playerPos.z = playerPos.y;
-	playerPos.y = 1.0f;
+	//iw::vector3 playerPos = currentLevel.Door.NextLevelPosition;
+	//playerPos.z = playerPos.y;
+	//playerPos.y = 1.0f;
 
-	iw::Entity player = Space->CreateEntity<iw::Transform, iw::Model, iw::SphereCollider, iw::Rigidbody, Player>();
-	
-	                         player.SetComponent<iw::Model>(*Asset->Load<iw::Model>("Player"));
-	                         player.SetComponent<Player>(currentLevel.Player);
-	iw::Transform*      tp = player.SetComponent<iw::Transform>(playerPos, iw::vector3(.75f));
-	iw::SphereCollider* sp = player.SetComponent<iw::SphereCollider>(iw::vector3::zero, .75f);
-	iw::Rigidbody*      rp = player.SetComponent<iw::Rigidbody>();
+	//iw::Entity player = Space->CreateEntity<iw::Transform, iw::Model, iw::SphereCollider, iw::Rigidbody, Player>();
+	//
+	//                         player.SetComponent<iw::Model>(*Asset->Load<iw::Model>("Player"));
+	//                         player.SetComponent<Player>(currentLevel.Player);
+	//iw::Transform*      tp = player.SetComponent<iw::Transform>(playerPos, iw::vector3(.75f));
+	//iw::SphereCollider* sp = player.SetComponent<iw::SphereCollider>(iw::vector3::zero, .75f);
+	//iw::Rigidbody*      rp = player.SetComponent<iw::Rigidbody>();
 
-	levelTransform->AddChild(tp);
+	//levelTransform->AddChild(tp);
 
-	rp->SetMass(1);
-	rp->SetCol(sp);
-	rp->SetTrans(tp);
-	rp->SetStaticFriction(.1f);
-	rp->SetDynamicFriction(.02f);
+	//rp->SetMass(1);
+	//rp->SetCol(sp);
+	//rp->SetTrans(tp);
+	//rp->SetStaticFriction(.1f);
+	//rp->SetDynamicFriction(.02f);
 
-	rp->SetIsLocked(iw::vector3(0, 1, 0));
-	rp->SetLock    (iw::vector3(0, 1, 0));
+	//rp->SetIsLocked(iw::vector3(0, 1, 0));
+	//rp->SetLock    (iw::vector3(0, 1, 0));
 
-	Physics->AddRigidbody(rp);
+	//Physics->AddRigidbody(rp);
 
 	// Door
 
@@ -299,7 +315,7 @@ iw::Entity LevelSystem::LoadLevel(
 	
 	                          currentDoor.SetComponent<LevelDoor>(currentLevel.Door);
 	iw::Model*           md = currentDoor.SetComponent<iw::Model>(*Asset->Load<iw::Model>("Door"));
-	iw::Transform*       td = currentDoor.SetComponent<iw::Transform>(iw::vector3(20, 1, 0), 5.0f);
+	iw::Transform*       td = currentDoor.SetComponent<iw::Transform>(iw::vector3(currentLevel.OutPosition.x, 1, currentLevel.OutPosition.y), 5.0f);
 	iw::SphereCollider*  sd = currentDoor.SetComponent<iw::SphereCollider>(iw::vector3::zero, 5.0f);
 	iw::CollisionObject* cd = currentDoor.SetComponent<iw::CollisionObject>();
 
@@ -383,12 +399,12 @@ iw::Entity LevelSystem::LoadFloor(
 	return entity;
 }
 
-void LevelSystem::DestroyAllChildren(
+void LevelSystem::DestroyAll(
 	iw::Transform* transform)
 {
 	if (transform) {
 		for (iw::Transform* child : transform->Children()) {
-			DestroyAllChildren(child);
+			DestroyAll(child);
 		}
 
 		Space->DestroyEntity(Space->FindEntity(transform).Index());
