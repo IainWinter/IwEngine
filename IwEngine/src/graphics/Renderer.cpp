@@ -54,6 +54,18 @@ namespace Graphics {
 		return m_height;
 	}
 
+	void Renderer::SetWidth(
+		int width)
+	{
+		m_width = width;
+	}
+
+	void Renderer::SetHeight(
+		int height)
+	{
+		m_height = height;
+	}
+
 	void Renderer::Resize(
 		int width,
 		int height)

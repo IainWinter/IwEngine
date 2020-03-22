@@ -30,7 +30,7 @@ LevelSystem::LevelSystem()
 
 	//currentLevel = 0;
 
-	currentLevelName = "levels/forest/level1.json";
+	currentLevelName = "levels/forest/forest1.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 127);
 	closedColor = iw::Color::From255(201, 66, 66, 127);
@@ -74,7 +74,7 @@ void LevelSystem::Update(
 		iw::Transform* current  = levelEntity.FindComponent<iw::Transform>();
 		iw::Transform* next = nextLevelEntity.FindComponent<iw::Transform>();
 
-		iw::vector2 delta = currentLevel.LevelPosition / 2 * iw::Time::DeltaTime();
+		iw::vector2 delta = currentLevel.LevelPosition * iw::Time::DeltaTime();
 
 		current->Position.x -= delta.x;
 		current->Position.z -= delta.y;
@@ -89,8 +89,12 @@ void LevelSystem::Update(
 			next->Position.z = 0;
 			transition = false;
 
-			Bus->push<StartNextLevelEvent>();
-			Bus->push<StartLevelEvent>(currentLevel.InPosition);
+			iw::vector3 position;
+			position.x = currentLevel.InPosition.x;
+			position.z = currentLevel.InPosition.y;
+
+			Bus->push<StartNextLevelEvent>(currentLevel.CameraFollow);
+			Bus->push<StartLevelEvent>(position);
 		}
 	}
 
@@ -150,7 +154,11 @@ bool LevelSystem::On(
 
 			levelEntity = LoadLevel(currentLevelName);
 
-			Bus->send<StartLevelEvent>(currentLevel.InPosition);
+			iw::vector3 position;
+			position.x = currentLevel.InPosition.x;
+			position.z = currentLevel.InPosition.y;
+
+			Bus->push<StartLevelEvent>(position);
 
 			break;
 		}

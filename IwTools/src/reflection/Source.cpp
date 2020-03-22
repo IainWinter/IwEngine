@@ -51,7 +51,13 @@ std::string ReflectedField::TypeName() const {
         return "int"; //get underlying type at somepoint
     }
 
-    return m_field->getType().getAsString();
+    std::string name = m_field->getType().getAsString();
+
+    if (name == "_Bool") {
+        name = "bool";
+    }
+
+    return name;
 }
 
 std::string ReflectedField::TypeNameTIfTemplate() const {

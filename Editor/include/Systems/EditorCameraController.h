@@ -4,7 +4,7 @@
 #include "iw/engine/Components/CameraController.h"
 
 namespace iw {
-inline namespace Editor {
+namespace Editor {
 	class EditorCameraController
 		: public System<Transform, CameraController>
 	{
@@ -21,6 +21,8 @@ inline namespace Editor {
 	public:
 		EditorCameraController();
 
+		//int Initialize() override;
+
 		void Update(
 			EntityComponentArray& eca) override;
 
@@ -29,4 +31,6 @@ inline namespace Editor {
 		bool On(MouseButtonEvent& e) override;
 	};
 }
+
+	using namespace Editor;
 }

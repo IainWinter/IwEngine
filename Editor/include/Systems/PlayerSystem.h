@@ -6,6 +6,7 @@
 #include "iw/reflect/Components/Player.h"
 #include "iw/physics/Dynamics/Rigidbody.h"
 #include "iw/common/Components/Transform.h"
+#include "iw/graphics/Camera.h"
 
 class PlayerSystem
 	: public iw::System<iw::Transform, iw::Rigidbody, Player>
@@ -28,6 +29,10 @@ private:
 
 public:
 	PlayerSystem();
+
+	iw::Entity& GetPlayer() {
+		return player;
+	}
 
 	int Initialize() override;
 

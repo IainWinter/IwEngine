@@ -28,6 +28,8 @@ namespace detail {
 
 			string.resize(size);
 			serializer.DeserializeFieldArray(c.fields[1], iw::GetType<char>(), string.data(), size);
+
+			string[size] = '\0';
 		};
 		return &c;
 	}

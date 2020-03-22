@@ -2,6 +2,7 @@
 #include "Systems/EnemySystem.h"
 #include "Systems/BulletSystem.h"
 #include "Systems/LevelSystem.h"
+#include "Systems/GameCameraController.h"
 #include "Events/ActionEvents.h"
 #include "iw/engine/Systems/PhysicsSystem.h"
 #include "iw/engine/Components/CameraController.h"
@@ -52,8 +53,8 @@ namespace iw {
 
 	int forestInstance = 0;
 
-	iw::matrix4 persp = iw::matrix4::create_perspective_field_of_view(1.17f, 1.778f, .01f, 2000.0f);
-	iw::matrix4 ortho = iw::matrix4::create_orthographic(16 * 3.5f, 9 * 3.5f, -100, 100);
+	iw::matrix4 persp = iw::matrix4::create_perspective_field_of_view(1.17f, 1.778f, 1.0f, 50.0f);
+	iw::matrix4 ortho = iw::matrix4::create_orthographic(16 * 4, 9 * 4, -100, 100);
 	float blend;
 
 	int SandboxLayer::Initialize() {
@@ -148,7 +149,7 @@ namespace iw {
 
 		//	Cameras
 
-		scene->Camera = new PerspectiveCamera();
+		scene->Camera = new PerspectiveCamera(); // projection from up top
 		textCam = new OrthographicCamera(vector3::one, quaternion::from_axis_angle(vector3::unit_y, Pi), 16, 9, -10, 10);
 
 		iw::quaternion camrot = 
@@ -157,7 +158,7 @@ namespace iw {
 
 		iw::Entity camera = Space->CreateEntity<iw::Transform, iw::CameraController>();
 
-		iw::Transform* transform = camera.SetComponent<iw::Transform>(vector3(0, 25, 0), iw::vector3::one, camrot);
+		iw::Transform* transform = camera.SetComponent<iw::Transform>(vector3(0, 27.18f, 0), iw::vector3::one, camrot);
 		camera.SetComponent<iw::CameraController>(scene->Camera);
 
 		scene->Camera->SetTrans(transform);
@@ -265,12 +266,12 @@ namespace iw {
 		ro->SetTrans(to);
 		ru->SetTrans(tu);
 
-		Physics->AddCollisionObject(rl);
-		Physics->AddCollisionObject(rr);
-		Physics->AddCollisionObject(rt);
-		Physics->AddCollisionObject(rb);
-		Physics->AddCollisionObject(ro);
-		Physics->AddCollisionObject(ru);
+		//Physics->AddCollisionObject(rl);
+		//Physics->AddCollisionObject(rr);
+		//Physics->AddCollisionObject(rt);
+		//Physics->AddCollisionObject(rb);
+		//Physics->AddCollisionObject(ro);
+		//Physics->AddCollisionObject(ru);
 
 		Physics->SetGravity(vector3(0, -9.8f, 0));
 		Physics->AddSolver(new ImpulseSolver());
@@ -300,6 +301,7 @@ namespace iw {
 		PushSystem<EnemySystem>();
 		PushSystem<BulletSystem>();
 		PushSystem<LevelSystem>();
+		PushSystem<GameCameraController>(playerSystem->GetPlayer());
 
 		return Layer::Initialize();
 	}

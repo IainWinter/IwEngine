@@ -101,6 +101,9 @@ namespace Engine {
 			return status;
 		}
 
+
+		Renderer->SetWidth (options.WindowOptions.Width);
+		Renderer->SetHeight(options.WindowOptions.Height);
 		Renderer->Initialize();
 
 		for (Layer* layer : m_layers) {

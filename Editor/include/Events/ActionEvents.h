@@ -73,11 +73,14 @@ struct NextLevelEvent
 struct StartNextLevelEvent
 	: iw::SingleEvent
 {
-	StartNextLevelEvent()
+	bool CameraFollow;
+
+	StartNextLevelEvent(
+		bool cameraFollow)
 		: iw::SingleEvent(iw::val(Actions::START_NEXT_LEVEL))
+		, CameraFollow(cameraFollow)
 	{}
 };
-
 
 struct StartLevelEvent
 	: iw::SingleEvent

@@ -115,6 +115,14 @@ namespace Graphics {
 		int Height() const;
 
 		IWGRAPHICS_API
+		void SetWidth(
+			int width);
+
+		IWGRAPHICS_API
+		void SetHeight(
+			int height);
+
+		IWGRAPHICS_API
 		void Resize(
 			int width,
 			int height);
@@ -180,7 +188,6 @@ namespace Graphics {
 			ref<Shader>& filter,
 			const ref<RenderTarget>& source,
 			const ref<RenderTarget>& destination = nullptr);
-
 	//private:
 		IWGRAPHICS_API
 		void SetTarget(
