@@ -3,23 +3,63 @@
 #include "iw/engine/Time.h"
 #include <imgui/imgui.h>
 
-GameCameraController::GameCameraController(iw::Entity& player)
+GameCameraController::GameCameraController(
+	iw::Entity& player)
 	: System("Game Camera Controller")
 	, player(player)
+	, locked(false)
 	, follow(true)
+	, transitionToCenter(false)
+	, speed(2.0)
 {}
 
 void GameCameraController::Update(
 	iw::EntityComponentArray& eca)
 {
+	if (locked) {
+		return;
+	}
+
 	for (auto entity : eca) {
 		auto [t, c] = entity.Components.Tie<Components>();
 
+		iw::vector3 target;
 		if (follow) {
-			iw::vector3 target = player.FindComponent<iw::Transform>()->Position;
-			t->Position.x = iw::lerp(t->Position.x, target.x, iw::Time::DeltaTime() * 2.0f);
-			t->Position.z = iw::lerp(t->Position.z, target.z, iw::Time::DeltaTime() * 2.0f);
+			target = player.FindComponent<iw::Transform>()->Position;
 		}
+
+		else {
+			target = center;
+		}
+
+		target.y = 27.15f;
+
+		if (transitionToCenter) {
+			speed += 0.01f;
+
+			if (   iw::almost_equal(t->Position.x, target.x, 2)
+				&& iw::almost_equal(t->Position.z, target.z, 2))
+			{
+				Bus->push<AtNextLevelEvent>();
+
+				t->Position.x -= target.x;
+				t->Position.z -= target.z;
+				
+				center = 0;
+				target = 0;
+
+				transitionToCenter = false;
+				speed = 2;
+			}
+		}
+
+
+		iw::quaternion camrot =
+			  iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
+			* iw::quaternion::from_axis_angle(iw::vector3::unit_z, iw::Pi);
+
+		t->Position = iw::lerp(t->Position, target, iw::Time::DeltaTime() * speed);
+		t->Rotation = iw::lerp(t->Rotation, camrot, iw::Time::DeltaTime() * speed);
 	}
 }
 
@@ -27,24 +67,30 @@ bool GameCameraController::On(
 	iw::ActionEvent& e)
 {
 	switch (e.Action) {
-		case iw::val(Actions::START_NEXT_LEVEL): {
-			follow = e.as<StartNextLevelEvent>().CameraFollow;
+		case iw::val(Actions::GOTO_NEXT_LEVEL): {
+			follow = false;
+			transitionToCenter = true;
 
-			for (auto entity : Space->Query<iw::Transform, iw::CameraController>()) {
-				auto [t, c] = entity.Components.Tie<Components>();
+			GoToNextLevelEvent& event = e.as<GoToNextLevelEvent>();
 
-				if (follow) {
-					iw::vector3 target = player.FindComponent<iw::Transform>()->Position;
-					t->Position.x = target.x;
-					t->Position.z = target.y;
-				}
+			center.x = event.CenterPosition.x;
+			center.z = event.CenterPosition.y;
 
-				else {
-					t->Position = iw::vector3(0, 27.15f, 0);
-				}
+			if (event.CameraFollow) {
+				center.x += event.PlayerPosition.x;
+				center.z += event.PlayerPosition.y;
 			}
 
 			break;
+		}
+		case iw::val(Actions::START_LEVEL): {
+			follow = e.as<StartLevelEvent>().CameraFollow;
+			//transitionToCenter = !follow;
+
+			break;
+		}
+		case iw::val(Actions::DEV_CONSOLE): {
+			locked = !e.as<iw::ToggleEvent>().Active;
 		}
 	}
 

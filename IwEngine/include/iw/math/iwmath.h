@@ -82,7 +82,10 @@ namespace math {
 		const _t& b,
 		float w)
 	{
-		return a + (b - a) * w;
+		if      (w < 0) w = 0;
+		else if (w > 1) w = 1;
+
+		return a * (1 - w) + b * w;
 	}
 }
 

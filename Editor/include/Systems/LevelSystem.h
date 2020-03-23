@@ -19,6 +19,8 @@ private:
 	std::string currentLevelName;
 	Level currentLevel;
 
+	iw::Entity& playerEntity;
+
 	iw::Entity levelEntity;
 	iw::Entity nextLevelEntity;
 	bool transition;
@@ -28,7 +30,8 @@ private:
 	iw::Color closedColor;
 
 public:
-	LevelSystem();
+	LevelSystem(
+		iw::Entity& player);
 
 	int Initialize() override;
 

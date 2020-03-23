@@ -12,8 +12,10 @@ namespace Engine {
 	{
 		for (auto entity : eca) {
 			auto [transform, rigidbody] = entity.Components.Tie<Components>();
-
-			transform->Position = iw::lerp(rigidbody->LastTrans().Position, rigidbody->Trans()->Position, accumulator / iw::FixedTime());
+			
+			if (rigidbody->IsKinematic()) {
+				transform->Position = iw::lerp(rigidbody->LastTrans().Position, rigidbody->Trans()->Position, accumulator / iw::FixedTime());
+			}
 		}
 
 		accumulator += Time::DeltaTime();

@@ -22,6 +22,12 @@ EnemySystem::EnemySystem()
 int EnemySystem::Initialize() {
 	m_bulletModel = Asset->Load<iw::Model>("Sphere");
 	
+	iw::ref<iw::Material> blue = REF<iw::Material>(m_bulletModel->Meshes[0].Material->Instance());
+
+	blue->Set("albedo", iw::Color::From255(0, 213, 255, 128));
+
+	m_bulletModel->Meshes[0].Material = blue;
+
 	return 0;
 }
 
@@ -91,7 +97,7 @@ void EnemySystem::Update(
 	{
 		m_levelResetTimer += iw::Time::DeltaTime();
 		if (m_levelResetTimer > 0.2f) {
-			Bus->push<OpenNextLevelEvent>();
+			Bus->push<UnlockLevelDoorEvent>();
 		}
 	}
 }
@@ -150,7 +156,7 @@ bool EnemySystem::On(
 	iw::ActionEvent& e)
 {
 	switch (e.Action) {
-		case iw::val(Actions::NEXT_LEVEL):
+		case iw::val(Actions::START_LEVEL):
 		case iw::val(Actions::RESET_LEVEL): {
 			m_levelResetTimer = 0;
 			break;

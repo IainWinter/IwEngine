@@ -43,7 +43,7 @@
   "Door": {
     "State": 1,
     "NextLevel": {
-      "size": 26,
+      "size": 27,
       "string": "levels/forest/forest12.json"
     }
   }

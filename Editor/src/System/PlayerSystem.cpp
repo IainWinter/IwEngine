@@ -57,8 +57,6 @@ int PlayerSystem::Initialize() {
 	iw::SphereCollider* sp = player.SetComponent<iw::SphereCollider>(iw::vector3::zero, .75f);
 	iw::Rigidbody*      rp = player.SetComponent<iw::Rigidbody>();
 
-	//levelTransform->AddChild(tp);
-
 	rp->SetMass(1);
 	rp->SetCol(sp);
 	rp->SetTrans(tp);
@@ -77,7 +75,7 @@ void PlayerSystem::Update(
 	iw::EntityComponentArray& view)
 {
 	for (auto entity : view) {
-		auto [ transform, rigidbody, player ] = entity.Components.Tie<Components>();
+		auto [transform, rigidbody, player] = entity.Components.Tie<Components>();
 
 		if (player->DeathTimer > 0) {
 			player->DeathTimer -= iw::Time::DeltaTime();
@@ -248,21 +246,32 @@ bool PlayerSystem::On(
 	iw::ActionEvent& event)
 {
 	switch (event.Action) {
+		case iw::val(Actions::GOTO_NEXT_LEVEL): {
+			iw::Transform* t = player.FindComponent<iw::Transform>();
+			iw::Rigidbody* r = player.FindComponent<iw::Rigidbody>();
+
+			r->SetVelocity(0);
+			r->SetIsKinematic(false);
+
+			t->Scale = 0;
+
+			movement = 0;
+			dash = 0;
+			break;
+		}
 		case iw::val(Actions::START_LEVEL): {
 			iw::Transform* t = player.FindComponent<iw::Transform>();
 			iw::Rigidbody* r = player.FindComponent<iw::Rigidbody>();
 			Player*        p = player.FindComponent<Player>();
 
-			t->Position.x = event.as<StartLevelEvent>().PlayerPos.x;
-			t->Position.z = event.as<StartLevelEvent>().PlayerPos.y;
+			t->Position.x = event.as<StartLevelEvent>().PlayerPosition.x;
+			t->Position.z = event.as<StartLevelEvent>().PlayerPosition.y;
 			t->Scale = 0.75f;
 			
 			r->SetTrans(t);
-			
-			*p = playerPrefab;
+			r->SetIsKinematic(true);
 
-			movement = 0;
-			dash = 0;
+			*p = playerPrefab;
 
 			// no break
 		}

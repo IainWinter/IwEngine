@@ -171,7 +171,7 @@ namespace Graphics {
 		}
 
 		m_shader->Handle()->GetParam("model")->SetAsMat4(
-			transform->Transformation()
+			transform->WorldTransformation()
 		);
 
 		SetMesh(mesh);

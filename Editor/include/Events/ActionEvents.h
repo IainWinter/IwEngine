@@ -2,13 +2,23 @@
 
 #include "iw/engine/Events/ActionEvents.h"
 
-#include "iw/math/vector3.h"
+#include "iw/math/vector2.h"
 
 enum class Actions
 	: int
 {
+	DEV_CONSOLE,
 	JUMP, RIGHT, FORWARD, USE,
-	RESET_LEVEL, OPEN_NEXT_LEVEL, NEXT_LEVEL, START_NEXT_LEVEL, START_LEVEL
+	RESET_LEVEL, START_LEVEL, UNLOCK_LEVEL_DOOR, LOAD_NEXT_LEVEL, GOTO_NEXT_LEVEL, AT_NEXT_LEVEL
+};
+
+struct DevConsoleEvent
+	: iw::ToggleEvent
+{
+	DevConsoleEvent(
+		bool active)
+		: ToggleEvent(iw::val(Actions::DEV_CONSOLE), active)
+	{}
 };
 
 struct JumpEvent
@@ -54,42 +64,60 @@ struct ResetLevelEvent
 	{}
 };
 
-struct OpenNextLevelEvent
-	: iw::SingleEvent
-{
-	OpenNextLevelEvent()
-		: iw::SingleEvent(iw::val(Actions::OPEN_NEXT_LEVEL))
-	{}
-};
-
-struct NextLevelEvent
-	: iw::SingleEvent
-{
-	NextLevelEvent()
-		: iw::SingleEvent(iw::val(Actions::NEXT_LEVEL))
-	{}
-};
-
-struct StartNextLevelEvent
-	: iw::SingleEvent
-{
-	bool CameraFollow;
-
-	StartNextLevelEvent(
-		bool cameraFollow)
-		: iw::SingleEvent(iw::val(Actions::START_NEXT_LEVEL))
-		, CameraFollow(cameraFollow)
-	{}
-};
-
 struct StartLevelEvent
 	: iw::SingleEvent
 {
-	iw::vector3 PlayerPos;
+	bool CameraFollow;
+	iw::vector2 PlayerPosition;
 
 	StartLevelEvent(
-		iw::vector3 playerPos)
+		bool cameraFollow,
+		iw::vector2 playerPosition)
 		: iw::SingleEvent(iw::val(Actions::START_LEVEL))
-		, PlayerPos(playerPos)
+		, CameraFollow(cameraFollow)
+		, PlayerPosition(playerPosition)
+	{}
+};
+
+
+struct UnlockLevelDoorEvent
+	: iw::SingleEvent
+{
+	UnlockLevelDoorEvent()
+		: iw::SingleEvent(iw::val(Actions::UNLOCK_LEVEL_DOOR))
+	{}
+};
+
+struct LoadNextLevelEvent
+	: iw::SingleEvent
+{
+	LoadNextLevelEvent()
+		: iw::SingleEvent(iw::val(Actions::LOAD_NEXT_LEVEL))
+	{}
+};
+
+struct GoToNextLevelEvent
+	: iw::SingleEvent
+{
+	bool CameraFollow;
+	iw::vector2 PlayerPosition;
+	iw::vector2 CenterPosition;
+
+	GoToNextLevelEvent(
+		bool cameraFollow,
+		iw::vector2 playerPosition,
+		iw::vector2 centerPosition)
+		: iw::SingleEvent(iw::val(Actions::GOTO_NEXT_LEVEL))
+		, CameraFollow(cameraFollow)
+		, PlayerPosition(playerPosition)
+		, CenterPosition(centerPosition)
+	{}
+};
+
+struct AtNextLevelEvent
+	: iw::SingleEvent
+{
+	AtNextLevelEvent()
+		: iw::SingleEvent(iw::val(Actions::AT_NEXT_LEVEL))
 	{}
 };

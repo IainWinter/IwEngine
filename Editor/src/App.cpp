@@ -73,13 +73,16 @@ namespace iw {
 		}
 
 		else if (command.Verb == "toolbox") {
-			if (GetLayer("Toolbox") == nullptr) {
-				PushLayer(toolbox);
+			bool dev = GetLayer("Toolbox") != nullptr;
+			if (dev) {
+				PopLayer(toolbox);
 			}
 
 			else {
-				PopLayer(toolbox);
+				PushLayer(toolbox);
 			}
+
+			Bus->send<DevConsoleEvent>(dev);
 		}
 
 		else if (command.Verb == "imgui") {

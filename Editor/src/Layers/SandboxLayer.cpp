@@ -49,11 +49,12 @@ namespace iw {
 		, sun(nullptr)
 		, textCam(nullptr)
 		, textMesh(nullptr)
+		, scene(nullptr)
 	{}
 
 	int forestInstance = 0;
 
-	iw::matrix4 persp = iw::matrix4::create_perspective_field_of_view(1.17f, 1.778f, 1.0f, 50.0f);
+	iw::matrix4 persp = iw::matrix4::create_perspective_field_of_view(1.17f, 1.778f, 1.0f, 500.0f);
 	iw::matrix4 ortho = iw::matrix4::create_orthographic(16 * 4, 9 * 4, -100, 100);
 	float blend;
 
@@ -229,50 +230,6 @@ namespace iw {
 		Model dm { dmesh, 1 };
 		Asset->Give<Model>("Door", &dm);
 
-		// Floor colliders
-
-		Transform* tl = new Transform();
-		Transform* tr = new Transform();
-		Transform* tt = new Transform();
-		Transform* tb = new Transform();
-		Transform* to = new Transform();
-		Transform* tu = new Transform();
-
-		PlaneCollider* planel = new PlaneCollider(vector3( 1,  0,  0), -16);
-		PlaneCollider* planer = new PlaneCollider(vector3(-1,  0,  0), -16);
-		PlaneCollider* planet = new PlaneCollider(vector3( 0,  0,  1), -9);
-		PlaneCollider* planeb = new PlaneCollider(vector3( 0,  0, -1), -9);
-		PlaneCollider* planeo = new PlaneCollider(vector3( 0, -1,  0), -2);
-		PlaneCollider* planeu = new PlaneCollider(vector3( 0,  1,  0),  0);
-
-		CollisionObject* rl = new CollisionObject();
-		CollisionObject* rr = new CollisionObject();
-		CollisionObject* rt = new CollisionObject();
-		CollisionObject* rb = new CollisionObject();
-		CollisionObject* ro = new CollisionObject();
-		CollisionObject* ru = new CollisionObject();
-
-		rl->SetCol(planel);
-		rr->SetCol(planer);
-		rt->SetCol(planet);
-		rb->SetCol(planeb);
-		ro->SetCol(planeo);
-		ru->SetCol(planeu);
-
-		rl->SetTrans(tl);
-		rr->SetTrans(tr);
-		rt->SetTrans(tt);
-		rb->SetTrans(tb);
-		ro->SetTrans(to);
-		ru->SetTrans(tu);
-
-		//Physics->AddCollisionObject(rl);
-		//Physics->AddCollisionObject(rr);
-		//Physics->AddCollisionObject(rt);
-		//Physics->AddCollisionObject(rb);
-		//Physics->AddCollisionObject(ro);
-		//Physics->AddCollisionObject(ru);
-
 		Physics->SetGravity(vector3(0, -9.8f, 0));
 		Physics->AddSolver(new ImpulseSolver());
 		Physics->AddSolver(new SmoothPositionSolver());
@@ -300,7 +257,7 @@ namespace iw {
 		PushSystem<PhysicsSystem>();
 		PushSystem<EnemySystem>();
 		PushSystem<BulletSystem>();
-		PushSystem<LevelSystem>();
+		PushSystem<LevelSystem>(playerSystem->GetPlayer());
 		PushSystem<GameCameraController>(playerSystem->GetPlayer());
 
 		return Layer::Initialize();
@@ -463,7 +420,7 @@ namespace iw {
 		}
 
 		if (ImGui::Button("Next level")) {
-			Bus->push<NextLevelEvent>();
+			Bus->push<LoadNextLevelEvent>();
 		}
 
 		//if (ImGui::Button("Save level")) {
@@ -510,11 +467,12 @@ namespace iw {
 		ActionEvent& e)
 	{
 		switch (e.Action) {
-			case iw::val(Actions::NEXT_LEVEL): {
+			case iw::val(Actions::GOTO_NEXT_LEVEL): {
+				playerSystem->On(e);
 				PopSystem(playerSystem);
 				break;
 			}
-			case iw::val(Actions::START_NEXT_LEVEL): {
+			case iw::val(Actions::AT_NEXT_LEVEL): {
 				PushSystemFront(playerSystem);
 				break;
 			}

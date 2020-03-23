@@ -17,8 +17,10 @@
 #include "iw/reflect/Components/LevelDoor.h"
 #include "iw/reflect/Components/Level.h"
 
-LevelSystem::LevelSystem()
+LevelSystem::LevelSystem(
+	iw::Entity& player)
 	: iw::System<iw::Transform, iw::Model, LevelDoor>("Level")
+	, playerEntity(player)
 {
 	//levels = {
 	//	"assets/levels/forest/level1.json",
@@ -30,7 +32,7 @@ LevelSystem::LevelSystem()
 
 	//currentLevel = 0;
 
-	currentLevelName = "levels/forest/forest1.json";
+	currentLevelName = "levels/forest/forest10.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 127);
 	closedColor = iw::Color::From255(201, 66, 66, 127);
@@ -70,33 +72,33 @@ void LevelSystem::Update(
 		}
 	}
 
-	if (transition) {
-		iw::Transform* current  = levelEntity.FindComponent<iw::Transform>();
-		iw::Transform* next = nextLevelEntity.FindComponent<iw::Transform>();
+	//if (transition) {
+	//	iw::Transform* current = levelEntity    .FindComponent<iw::Transform>();
+	//	iw::Transform* next    = nextLevelEntity.FindComponent<iw::Transform>();
 
-		iw::vector2 delta = currentLevel.LevelPosition * iw::Time::DeltaTime();
+	//	iw::vector2 delta = currentLevel.LevelPosition * iw::Time::DeltaTime() * 0.5f;
+	//	
+	//	current->Position.x -= delta.x;
+	//	current->Position.z -= delta.y;
 
-		current->Position.x -= delta.x;
-		current->Position.z -= delta.y;
+	//	next->Position.x -= delta.x;
+	//	next->Position.z -= delta.y;
 
-		next->Position.x -= delta.x;
-		next->Position.z -= delta.y;
+	//	if (   delta.x > 0 ? next->Position.x <= 0 : next->Position.x >= 0
+	//		&& delta.y > 0 ? next->Position.z <= 0 : next->Position.z >= 0)
+	//	{
+	//		next->Position.x = 0;
+	//		next->Position.z = 0;
+	//		transition = false;
 
-		if (   delta.x > 0 ? next->Position.x <= 0 : next->Position.x >= 0
-			&& delta.y > 0 ? next->Position.z <= 0 : next->Position.z >= 0)
-		{
-			next->Position.x = 0;
-			next->Position.z = 0;
-			transition = false;
+	//		iw::vector3 position;
+	//		position.x = currentLevel.InPosition.x;
+	//		position.z = currentLevel.InPosition.y;
 
-			iw::vector3 position;
-			position.x = currentLevel.InPosition.x;
-			position.z = currentLevel.InPosition.y;
-
-			Bus->push<StartNextLevelEvent>(currentLevel.CameraFollow);
-			Bus->push<StartLevelEvent>(position);
-		}
-	}
+	//		Bus->push<StartNextLevelEvent>(currentLevel.CameraFollow);
+	//		Bus->push<StartLevelEvent>(position);
+	//	}
+	//}
 
 	//levelEntity.FindComponent<iw::Transform>()->Rotation *= iw::quaternion::from_euler_angles(0, iw::Time::DeltaTime() * 0.1f, 0);
 }
@@ -136,7 +138,7 @@ bool LevelSystem::On(
 	if (doorEnt.Index() != iw::EntityHandle::Empty.Index) {
 		LevelDoor* door = doorEnt.FindComponent<LevelDoor>();
 		if (door->State == LevelDoorState::OPEN) {
-			Bus->push<NextLevelEvent>();
+			Bus->push<LoadNextLevelEvent>();
 		}
 	}
 
@@ -154,44 +156,45 @@ bool LevelSystem::On(
 
 			levelEntity = LoadLevel(currentLevelName);
 
-			iw::vector3 position;
-			position.x = currentLevel.InPosition.x;
-			position.z = currentLevel.InPosition.y;
-
-			Bus->push<StartLevelEvent>(position);
+			Bus->push<StartLevelEvent>(currentLevel.CameraFollow, currentLevel.InPosition);
 
 			break;
 		}
-		case iw::val(Actions::OPEN_NEXT_LEVEL): {
+		case iw::val(Actions::UNLOCK_LEVEL_DOOR): {
 			LevelDoor* doorComp = currentDoor.FindComponent<LevelDoor>();
 			doorComp->State = LevelDoorState::OPEN;
 			doorComp->ColorTimer = 0.25f;
+
 			break;
 		}
-		case iw::val(Actions::NEXT_LEVEL): {
+		case iw::val(Actions::LOAD_NEXT_LEVEL): {
 			currentDoor.FindComponent<LevelDoor>()->State = LevelDoorState::LOCKED;
 			
-			transition       = true;
+			//transition       = true;
 			currentLevelName = currentLevel.Door.NextLevel;
-
-			nextLevelEntity = LoadLevel(currentLevelName);
+			nextLevelEntity  = LoadLevel(currentLevelName);
 
 			iw::Transform* transform = nextLevelEntity.FindComponent<iw::Transform>();
 			transform->Position.x = currentLevel.LevelPosition.x;
 			transform->Position.z = currentLevel.LevelPosition.y;
 
+			Bus->push<GoToNextLevelEvent>(currentLevel.CameraFollow, currentLevel.InPosition, currentLevel.LevelPosition);
+
 			break;
 		}
-		case iw::val(Actions::START_LEVEL): {
+		case iw::val(Actions::AT_NEXT_LEVEL): {
 			if (nextLevelEntity != iw::EntityHandle::Empty) {
 				DestroyAll(levelEntity.FindComponent<iw::Transform>());
 
 				levelEntity = nextLevelEntity;
 				nextLevelEntity = iw::Entity();
 
-				//iw::Model* modelComp = currentDoor.FindComponent<iw::Model>();
-				//modelComp->Meshes[0].Material->Set("albedo", iw::Color::From255(201, 66, 66, 127));
+				iw::Transform* current = levelEntity.FindComponent<iw::Transform>();
+				current->Position = 0;
 			}
+
+			Bus->push<StartLevelEvent>(currentLevel.CameraFollow, currentLevel.InPosition);
+
 			break;
 		}
 	}

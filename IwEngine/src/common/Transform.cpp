@@ -21,16 +21,9 @@ namespace Engine {
 	{}
 
 	matrix4 Transform::Transformation() const {
-		matrix4 parent = matrix4::identity;
-
-		if (m_parent) {
-			parent = m_parent->Transformation();
-		}
-
 		return matrix4::create_from_quaternion(Rotation)
 			 * matrix4::create_scale(Scale)
-			 * matrix4::create_translation(Position)
-			 * parent;
+			 * matrix4::create_translation(Position);
 	}
 
 	vector3 Transform::Forward() const {
@@ -43,6 +36,76 @@ namespace Engine {
 
 	vector3 Transform::Up() const {
 		return vector3::unit_y * Rotation;
+	}
+
+	matrix4 Transform::WorldTransformation() const {
+		matrix4 parent = matrix4::identity;
+
+		if (m_parent) {
+			parent = m_parent->WorldTransformation();
+		}
+
+		return Transformation() * parent;
+	}
+
+	vector3 Transform::WorldForward() const {
+		quaternion parent = quaternion::identity;
+
+		if (m_parent) {
+			parent = m_parent->WorldRotation();
+		}
+
+		return Forward() * parent;
+	}
+
+	vector3 Transform::WorldRight() const {
+		quaternion parent = quaternion::identity;
+
+		if (m_parent) {
+			parent = m_parent->WorldRotation();
+		}
+
+		return Right() * parent;
+	}
+
+	vector3 Transform::WorldUp() const {
+		quaternion parent = quaternion::identity;
+
+		if (m_parent) {
+			parent = m_parent->WorldRotation();
+		}
+
+		return Up() * parent;
+	}
+
+	vector3 Transform::WorldPosition() const {
+		vector3 parent = vector3::zero;
+
+		if (m_parent) {
+			parent = m_parent->WorldPosition();
+		}
+
+		return Position + parent;
+	}
+
+	vector3 Transform::WorldScale() const {
+		vector3 parent = vector3::zero;
+
+		if (m_parent) {
+			parent = m_parent->WorldScale();
+		}
+
+		return Scale + parent;
+	}
+
+	quaternion Transform::WorldRotation() const {
+		quaternion parent = quaternion::identity;
+
+		if (m_parent) {
+			parent = m_parent->WorldRotation();
+		}
+
+		return Rotation * parent;
 	}
 
 	size_t Transform::ChildCount() const {
@@ -109,6 +172,10 @@ namespace Engine {
 	void Transform::SetParent(
 		Transform* transform)
 	{
+		if (m_parent == transform) {
+			return;
+		}
+
 		if (m_parent) {
 			m_parent->RemoveChild(this);
 		}

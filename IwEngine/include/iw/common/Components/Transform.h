@@ -26,17 +26,18 @@ namespace Engine {
 			vector3    scale    = vector3::one,
 			quaternion rotation = quaternion::identity);
 
-		IWCOMMON_API
-		matrix4 Transformation() const;
+		IWCOMMON_API matrix4 Transformation() const;
+		IWCOMMON_API vector3 Forward()        const;
+		IWCOMMON_API vector3 Right()          const;
+		IWCOMMON_API vector3 Up()             const;
 
-		IWCOMMON_API
-		vector3 Forward() const;
-
-		IWCOMMON_API
-		vector3 Right() const;
-
-		IWCOMMON_API
-		vector3 Up() const;
+		IWCOMMON_API matrix4    WorldTransformation() const;
+		IWCOMMON_API vector3    WorldForward()        const;
+		IWCOMMON_API vector3    WorldRight()          const;
+		IWCOMMON_API vector3    WorldUp()             const;
+		IWCOMMON_API vector3    WorldPosition()       const;
+		IWCOMMON_API vector3    WorldScale()          const;
+		IWCOMMON_API quaternion WorldRotation()       const;
 
 		IWCOMMON_API
 		size_t ChildCount() const;
