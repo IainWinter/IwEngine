@@ -122,10 +122,10 @@ namespace Graphics {
 		Scene* scene,
 		const ref<RenderTarget>& target)
 	{
-		Renderer::BeginScene(scene->Camera, target);
+		Renderer::BeginScene(scene->MainCamera(), target);
 
-		SetPointLights      (scene->PointLights);
-		SetDirectionalLights(scene->DirectionalLights);
+		SetPointLights      (scene->PointLights());
+		SetDirectionalLights(scene->DirectionalLights());
 	}
 
 	void Renderer::BeginShadowCast(

@@ -16,7 +16,7 @@ GameCameraController::GameCameraController(
 void GameCameraController::Update(
 	iw::EntityComponentArray& eca)
 {
-	if (locked) {
+	if (locked == true) {
 		return;
 	}
 
@@ -52,7 +52,6 @@ void GameCameraController::Update(
 				speed = 2;
 			}
 		}
-
 
 		iw::quaternion camrot =
 			  iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)

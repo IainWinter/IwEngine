@@ -2,29 +2,19 @@
 
 #include "IwGraphics.h"
 #include "RenderTarget.h"
-#include "Light.h"
+#include "Scene.h"
 #include "Mesh.h"
-#include "Camera.h"
 #include "iw/common/Components/Transform.h"
 #include "iw/renderer/Device.h"
 #include "iw/util/memory/ref.h"
 #include <unordered_map>
 #include <vector>
 
-#include "iw/graphics/PointLight.h" // wish these didnt have to be
-#include "iw/graphics/DirectionalLight.h"
-
 #define MAX_POINT_LIGHTS 16
 #define MAX_DIRECTIONAL_LIGHTS 4
 
 namespace iw {
 namespace Graphics {
-	struct Scene {
-		Camera* Camera;
-		std::vector<PointLight*> PointLights;
-		std::vector<DirectionalLight*> DirectionalLights;
-	};
-
 	struct CameraData {
 		matrix4 ViewProj;
 		vector4 CameraPos;
@@ -34,7 +24,6 @@ namespace Graphics {
 		int __pad1, __pad2, __pad3;
 
 		int DirectionalLightCount = 0;
-
 		matrix4 LightViewProj[MAX_DIRECTIONAL_LIGHTS];
 	};
 

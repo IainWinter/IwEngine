@@ -152,10 +152,10 @@ namespace iw {
 		// scene
 
 		scene = new Scene();
-		scene->Camera = camera;
-		scene->PointLights.push_back(light);
+		scene->SetMainCamera(camera);
+		scene->AddLight(light);
 		//scene->PointLights.push_back(light2);
-		scene->DirectionalLights.push_back(dirLight);
+		scene->AddLight(dirLight);
 
 		delete sphere;
 

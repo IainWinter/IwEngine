@@ -43,7 +43,6 @@ namespace iw {
 
 	SandboxLayer::SandboxLayer()
 		: Layer("Sandbox")
-		, ambiance(.03f)
 		, playerSystem(nullptr)
 		, light(nullptr)
 		, sun(nullptr)
@@ -145,12 +144,12 @@ namespace iw {
 		sun->SetRotation(quaternion(0.872f, 0.0f, 0.303f, 0.384f));
 		light->SetPosition(vector3(0, 10, 0));
 
-		scene->DirectionalLights.push_back(sun);
-		scene->PointLights      .push_back(light);
+		scene->AddLight(sun);
+		scene->AddLight(light);
 
 		//	Cameras
 
-		scene->Camera = new PerspectiveCamera(); // projection from up top
+		scene->SetMainCamera(new PerspectiveCamera()); // projection from up top
 		textCam = new OrthographicCamera(vector3::one, quaternion::from_axis_angle(vector3::unit_y, Pi), 16, 9, -10, 10);
 
 		iw::quaternion camrot = 
@@ -160,9 +159,9 @@ namespace iw {
 		iw::Entity camera = Space->CreateEntity<iw::Transform, iw::CameraController>();
 
 		iw::Transform* transform = camera.SetComponent<iw::Transform>(vector3(0, 27.18f, 0), iw::vector3::one, camrot);
-		camera.SetComponent<iw::CameraController>(scene->Camera);
+		camera.SetComponent<iw::CameraController>(scene->MainCamera());
 
-		scene->Camera->SetTrans(transform);
+		scene->MainCamera()->SetTrans(transform);
 
 		// Materials
 
@@ -266,11 +265,11 @@ namespace iw {
 	void SandboxLayer::PostUpdate() {
 		//font->UpdateMesh(textMesh, std::to_string(1.0f / Time::DeltaTime()), 0.01f, 1); //fps
 		textMesh->Update(Renderer->Device);
-		scene->Camera->SetProjection(iw::lerp(persp, ortho, blend));
+		scene->MainCamera()->SetProjection(iw::lerp(persp, ortho, blend));
 		
 		// Shadow maps
 
-		for(DirectionalLight* light : scene->DirectionalLights) {
+		for(Light* light : scene->DirectionalLights()) {
 			if (!light->CanCastShadows()) {
 				continue;
 			}
@@ -299,19 +298,19 @@ namespace iw {
 			Renderer->EndShadowCast();
 		}
 
-		for (PointLight* light : scene->PointLights) {
+		for (Light* light : scene->PointLights()) {
 			if (!light->CanCastShadows()) {
 				continue;
 			}
 			
 			Renderer->BeginShadowCast(light);
 
-			for (auto entity : Space->Query<Transform, Model>()) {
-				auto [transform, model] = entity.Components.Tie<ModelComponents>();
-				for (size_t i = 0; i < model->MeshCount; i++) {
-					Renderer->DrawMesh(transform, &model->Meshes[i]);
+				for (auto entity : Space->Query<Transform, Model>()) {
+					auto [transform, model] = entity.Components.Tie<ModelComponents>();
+					for (size_t i = 0; i < model->MeshCount; i++) {
+						Renderer->DrawMesh(transform, &model->Meshes[i]);
+					}
 				}
-			}
 
 			Renderer->EndShadowCast();
 		}
@@ -320,51 +319,17 @@ namespace iw {
 
 		Renderer->BeginScene(scene);
 
-		// Alpha pass
-		std::vector<Transform*> transs;
-		std::vector<Mesh*>      meshes;
-
-		for (auto m_e : Space->Query<Transform, Model>()) {
-			auto [m_t, m_m] = m_e.Components.Tie<ModelComponents>();
-
-			for (size_t i = 0; i < m_m->MeshCount; i++) {
-				Mesh& mesh = m_m->Meshes[i];
-
-				if (mesh.Material->Get<Color>("albedo")->a != 1) {
-					transs.push_back(m_t);
-					meshes.push_back(&mesh);
-					continue;
+			for (auto entity : Space->Query<Transform, Model>()) {
+				auto [transform, model] = entity.Components.Tie<ModelComponents>();
+				for (size_t i = 0; i < model->MeshCount; i++) {
+					Renderer->DrawMesh(transform, &model->Meshes[i]);
 				}
-
-				Renderer->Device->SetPipeline(mesh.Material->Shader->Handle());
-
-				mesh.Material->Shader->Handle()->GetParam("ambiance")
-					->SetAsFloat(ambiance);
-
-				Renderer->DrawMesh(m_t, &mesh);
 			}
-		}
-
-		// scuffed alpha pass
-
-		for (size_t i = 0; i < transs.size(); i++) {
-			Transform* m_t = transs[i];
-			Mesh& mesh = *meshes[i];
-
-			Renderer->Device->SetPipeline(mesh.Material->Shader->Handle());
-
-			mesh.Material->Shader->Handle()->GetParam("ambiance")
-				->SetAsFloat(ambiance);
-
-			Renderer->DrawMesh(m_t, &mesh);
-		}
 
 		Renderer->EndScene();
 
 		Renderer->BeginScene(textCam);
-		
-		Renderer->DrawMesh(&textTransform, textMesh);
-		
+			Renderer->DrawMesh(&textTransform, textMesh);
 		Renderer->EndScene();
 
 		//float blurw = 1.0f / target->Width() * blurAmount;
@@ -385,7 +350,7 @@ namespace iw {
 
 		ImGui::SliderFloat("Time scale", &ts, 0.001f, 1);
 
-		ImGui::SliderFloat("Ambiance", (float*)&ambiance, 0, 1);
+		ImGui::SliderFloat("Ambiance", (float*)&scene->Ambiance(), 0, 1);
 		//ImGui::SliderFloat("Gamma", (float*)&mainRender->GetGamma(), 0, 5);
 		ImGui::SliderFloat("Camera blend", &blend, 0, 1);
 

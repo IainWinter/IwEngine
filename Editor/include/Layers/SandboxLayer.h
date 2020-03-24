@@ -19,10 +19,6 @@ namespace iw {
 	private:
 		PlayerSystem* playerSystem;
 
-		// Main cameras
-
-		float ambiance;
-
 		Scene* scene;
 
 		// Lights
