@@ -26,3 +26,10 @@ namespace Physics {
 
 	using namespace Physics;
 }
+
+#include "iw/reflection/Reflect.h"
+
+#ifdef REFLECTING
+#	undef  IWPHYSICS_API
+#	define IWPHYSICS_API
+#endif

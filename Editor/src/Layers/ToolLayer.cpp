@@ -52,19 +52,19 @@ namespace iw {
 			Renderer->BeginScene(camController->Camera);
 
 			for (auto entity : Space->Query<Transform, Mesh>()) {
-				auto [entTransform] = entity.Components.Tie<ObjectComponents>();
+				auto [transform] = entity.Components.Tie<ObjectComponents>();
 
 				font->UpdateMesh(textMesh, std::to_string(entity.Index), .1f, 1);
 				textMesh->Update(Renderer->Device);
 
-				Transform t = *entTransform;
-				t.Position.y += 1;
-				t.Scale = 0.1f;
-				t.Rotation = iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2);
+				Transform world;
+				world.Position = transform->WorldPosition();
+				world.Scale    = transform->WorldScale();
+				world.Rotation = transform->WorldRotation();
 
 				//t.Rotation = iw::quaternion::from_look_at(t.Position, camera.FindComponent<Transform>()->Position);
 
-				Renderer->DrawMesh(&t, textMesh);
+				Renderer->DrawMesh(world, textMesh);
 			}
 
 			Renderer->EndScene();

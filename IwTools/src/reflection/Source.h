@@ -131,6 +131,7 @@ public:
 	//	const FunctionDecl* function);
 
 	std::string Name() const;
+	std::string QualName() const;
 
 	size_t Size() const;
 
@@ -143,6 +144,8 @@ public:
 	std::string OutPath() const;
 
 	bool IsSubClass() const;
+
+	bool IsTemplateSpecialization() const;
 
 	bool HasBody() const;
 
@@ -179,3 +182,7 @@ private:
 	void FoundFunction(
 		const FunctionDecl* function);
 };
+
+
+void removePrefix(
+	std::string& name);

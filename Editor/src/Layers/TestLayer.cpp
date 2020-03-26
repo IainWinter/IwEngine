@@ -8,6 +8,13 @@
 #include "iw/engine/Time.h"
 #include "iw/engine/Components/CameraController.h"
 #include "iw/graphics/PointLight.h"
+#include <iw\physics\Collision\SphereCollider.h>
+#include <iw\physics\Collision\PlaneCollider.h>
+#include <iw\physics\Dynamics\SmoothPositionSolver.h>
+#include <iw\physics\Dynamics\ImpulseSolver.h>
+#include <iw\engine\Systems\PhysicsSystem.h>
+#include "iw/input/Devices/Keyboard.h"
+#include "iw/physics/Collision/PositionSolver.h"
 
 namespace iw {
 	struct MeshComponents {
@@ -31,7 +38,15 @@ namespace iw {
 		srand(time(nullptr));
 	}
 
+	Mesh* sphere;
+	Mesh* plane;
+
+	ref<RenderTarget> dirShadowTarget;
+	ref<RenderTarget> pointShadowTarget;
+
 	int TestLayer::Initialize() {
+		PushSystem<PhysicsSystem>();
+
 		// Shaders
 
 		                    shader    = Asset->Load<Shader>("shaders/pbr.shader");
@@ -44,10 +59,13 @@ namespace iw {
 
 		// Directional light shadow map textures & target
 
+		sphere = MakeIcosphere(5);
+		plane = MakePlane(1, 1);
+
 		ref<Texture> dirShadowColor = ref<Texture>(new Texture(1024, 1024, TEX_2D, RG,    FLOAT, BORDER));
 		ref<Texture> dirShadowDepth = ref<Texture>(new Texture(1024, 1024, TEX_2D, DEPTH, FLOAT, BORDER));
 
-		ref<RenderTarget> dirShadowTarget = REF<RenderTarget>(1024, 1024);
+		dirShadowTarget = REF<RenderTarget>(1024, 1024);
 		dirShadowTarget->AddTexture(dirShadowColor);
 		dirShadowTarget->AddTexture(dirShadowDepth);
 
@@ -56,32 +74,25 @@ namespace iw {
 		// Point light shadow map textures & target
 
 		ref<Texture> pointShadowDepth = ref<Texture>(new Texture(1024, 1024, TEX_CUBE, DEPTH, FLOAT, EDGE));
-
-		ref<RenderTarget> pointShadowTarget = REF<RenderTarget>(1024, 1024, true);
+		
+		pointShadowTarget = REF<RenderTarget>(1024, 1024, true);
 		pointShadowTarget->AddTexture(pointShadowDepth);
 
 		pointShadowTarget->Initialize(Renderer->Device);
 
-		// Meshes
+		// Floor
 
-		Mesh*      sphere = MakeIcosphere(5);
-		ref<Model> plane  = Asset->Load<Model>("models/block/level1.dae");
+		{
+			Entity entity = Space->CreateEntity<Transform, Mesh, PlaneCollider, CollisionObject>();
 
-		for (int x = -4; x < 5; x++) {
-			Entity entity = Space->CreateEntity<Transform, Mesh>();
-
-			Transform* transform = entity.SetComponent<Transform>(iw::vector3(x * 2.5f, 0, 10));
-			Mesh*      mesh      = entity.SetComponent<Mesh>();
-
-			*mesh = sphere->Instance();
+			Transform* transform = entity.SetComponent<Transform>(iw::vector3(0, 0, 0), 15);
+			Mesh*      mesh      = entity.SetComponent<Mesh>(plane->Instance());
+			PlaneCollider*   col = entity.SetComponent<PlaneCollider>(vector3::unit_y, 0);
+			CollisionObject* obj = entity.SetComponent<CollisionObject>();
 
 			mesh->Material = REF<Material>(shader);
-			mesh->Material->Set("albedo", iw::vector4(
-				rand() / (float)RAND_MAX,
-				rand() / (float)RAND_MAX,
-				rand() / (float)RAND_MAX,
-				1.0f)
-			);
+
+			mesh->Material->Set("albedo", iw::vector4(1.0f));
 
 			mesh->Material->Set("reflectance", rand() / (float)RAND_MAX);
 			mesh->Material->Set("roughness",   rand() / (float)RAND_MAX);
@@ -91,34 +102,11 @@ namespace iw {
 			mesh->Material->SetTexture("shadowMap2", pointShadowTarget->Tex(0));
 
 			mesh->Initialize(Renderer->Device);
-		}
 
-		// Floor
+			obj->SetTrans(transform);
+			obj->SetCol(col);
 
-		{
-			Entity entity = Space->CreateEntity<Transform, Model>();
-
-			Transform* transform = entity.SetComponent<Transform>(iw::vector3(0, -2, 10));
-			Model*      model      = entity.SetComponent<Model>(*plane);
-
-			for (size_t i = 0; i < model->MeshCount; i++) {
-				Mesh& mesh = model->Meshes[i];
-
-				mesh.Material->SetShader(shader);
-
-				//mesh.Material = REF<Material>(shader);
-				mesh.Material->Set("albedo", iw::vector4(1));
-					
-				mesh.Material->Set("reflectance", 0.0f);
-				mesh.Material->Set("roughness", 1.0f);
-				mesh.Material->Set("metallic", 0.0f);
-					
-				mesh.Material->SetTexture("shadowMap", dirShadowTarget->Tex(0));
-				mesh.Material->SetTexture("shadowMap2", pointShadowTarget->Tex(0));
-					
-				mesh.Initialize(Renderer->Device);
-			}
-
+			Physics->AddCollisionObject(obj);
 		}
 
 		// Camera controller
@@ -128,7 +116,7 @@ namespace iw {
 
 			Entity entity = Space->CreateEntity<Transform, CameraController>();
 
-			Transform* transform = entity.SetComponent<Transform>();
+			Transform* transform = entity.SetComponent<Transform>(vector3(0, 6, -5));
 			                       entity.SetComponent<CameraController>(camera);
 
 			camera->SetTrans(transform);
@@ -157,13 +145,17 @@ namespace iw {
 		//scene->PointLights.push_back(light2);
 		scene->AddLight(dirLight);
 
-		delete sphere;
+		//delete sphere;
+
+		Physics->SetGravity(vector3(0, -9.8f, 0));
+		Physics->AddSolver(new ImpulseSolver());
+		Physics->AddSolver(new SmoothPositionSolver());
 
 		return Layer::Initialize();
 	}
 
 	void TestLayer::PostUpdate() {
-		if (dirLight->Outdated()) {
+		//if (dirLight->Outdated()) {
 			Renderer->BeginShadowCast(dirLight);
 
 			for (auto entity : Space->Query<Transform, Mesh>()) {
@@ -171,35 +163,19 @@ namespace iw {
 				Renderer->DrawMesh(transform, mesh);
 			}
 
-			for (auto entity : Space->Query<Transform, Model>()) {
-				auto [transform, model] = entity.Components.Tie<ModelComponents>();
-				for (size_t i = 0; i < model->MeshCount; i++) {
-					Mesh& mesh = model->Meshes[i];
-					Renderer->DrawMesh(transform, &mesh);
-				}
-			}
-
 			Renderer->EndShadowCast();
-		}
+		//}
 
-		if (light->Outdated()) {
-			Renderer->BeginShadowCast(light);
+		//if (light->Outdated()) {
+			//Renderer->BeginShadowCast(light);
 
-			for (auto entity : Space->Query<Transform, Mesh>()) {
-				auto [transform, mesh] = entity.Components.Tie<MeshComponents>();
-				Renderer->DrawMesh(transform, mesh);
-			}
+			//for (auto entity : Space->Query<Transform, Mesh>()) {
+			//	auto [transform, mesh] = entity.Components.Tie<MeshComponents>();
+			//	Renderer->DrawMesh(transform, mesh);
+			//}
 
-			for (auto entity : Space->Query<Transform, Model>()) {
-				auto [transform, model] = entity.Components.Tie<ModelComponents>();
-				for (size_t i = 0; i < model->MeshCount; i++) {
-					Mesh& mesh = model->Meshes[i];
-					Renderer->DrawMesh(transform, &mesh);
-				}
-			}
-
-			Renderer->EndShadowCast();
-		}
+			//Renderer->EndShadowCast();
+		//}
 
 		Renderer->BeginScene(scene);
 
@@ -208,15 +184,50 @@ namespace iw {
 			Renderer->DrawMesh(transform, mesh);
 		}
 
-		for (auto entity : Space->Query<Transform, Model>()) {
-			auto [transform, model] = entity.Components.Tie<ModelComponents>();
-			for (size_t i = 0; i < model->MeshCount; i++) {
-				Mesh& mesh = model->Meshes[i];
-				Renderer->DrawMesh(transform, &mesh);
-			}
-		}
-
 		Renderer->EndScene();
+
+		if (Keyboard::KeyDown(E)) {
+			Entity entity = Space->CreateEntity<Transform, Mesh, SphereCollider, Rigidbody>();
+
+			Transform* transform = entity.SetComponent<Transform>(iw::vector3(0, 5, 0));
+			Mesh* mesh = entity.SetComponent<Mesh>(sphere->Instance());
+			SphereCollider* col = entity.SetComponent<SphereCollider>(vector3::zero, 1);
+			Rigidbody* body = entity.SetComponent<Rigidbody>();
+
+			mesh->Material = REF<Material>(shader);
+
+			mesh->Material->Set("albedo", iw::vector4(
+				rand() / (float)RAND_MAX,
+				rand() / (float)RAND_MAX,
+				rand() / (float)RAND_MAX,
+				1.0f)
+			);
+
+			mesh->Material->Set("reflectance", rand() / (float)RAND_MAX);
+			mesh->Material->Set("roughness", rand() / (float)RAND_MAX);
+			mesh->Material->Set("metallic", rand() / (float)RAND_MAX);
+
+			mesh->Material->SetTexture("shadowMap",  dirShadowTarget->Tex(0));
+			mesh->Material->SetTexture("shadowMap2", pointShadowTarget->Tex(0));
+
+			mesh->Initialize(Renderer->Device);
+
+			body->SetMass(1);
+			body->SetTrans(transform);
+			body->SetCol(col);
+			body->SetVelocity(iw::vector3(
+				5 * rand() / (float)RAND_MAX * 2 - 1,
+				15 * rand() / (float)RAND_MAX,
+				5 * rand() / (float)RAND_MAX * 2 - 1));
+
+			body->SetDynamicFriction(0.1f);
+
+			Physics->AddRigidbody(body);
+		}
+	}
+
+	void TestLayer::FixedUpdate() {
+		Physics->Step(Time::FixedTime());
 	}
 
 	void TestLayer::ImGui() {

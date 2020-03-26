@@ -36,7 +36,7 @@ namespace iw {
 		toolbox = PushLayer<ToolLayer>();
 		imgui   = PushLayer<ImGuiLayer>();
 
-		PushLayer<SandboxLayer>();
+		PushLayer<TestLayer>();
 	}
 
 	int App::Initialize(

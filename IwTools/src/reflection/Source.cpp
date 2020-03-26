@@ -1,4 +1,5 @@
 #include "Source.h"
+#include <sstream>
 
 #define OUT out
 
@@ -34,11 +35,11 @@ void ReflectedField::Print(
     }
 
     if (IsEnum() || integral) {
-        OUT << "{\"" << Name() << "\", GetType(TypeTag<"   << TypeName() << ">()), offsetof(" << Parent()->Name() << ", " << Name() << ")};\n";
+        OUT << "{\"" << Name() << "\", GetType(TypeTag<"   << TypeName() << ">()), offsetof(" << Parent()->QualName() << ", " << Name() << ")};\n";
     }
 
     else {
-        OUT << "{\"" << Name() << "\", GetClass(ClassTag<" << TypeName() << ">()), offsetof(" << Parent()->Name() << ", " << Name() << ")};\n";
+        OUT << "{\"" << Name() << "\", GetClass(ClassTag<" << TypeName() << ">()), offsetof(" << Parent()->QualName() << ", " << Name() << ")};\n";
     }
 }
 
@@ -57,12 +58,16 @@ std::string ReflectedField::TypeName() const {
         name = "bool";
     }
 
+    removePrefix(name);
+
     return name;
 }
 
 std::string ReflectedField::TypeNameTIfTemplate() const {
     if (m_field->getType()->isTemplateTypeParmType()) {
-        return m_field->getTemplateParameterList(0)->getParam(0)->getName().str();
+        if (m_field->getNumTemplateParameterLists() > 0) {
+            return m_field->getTemplateParameterList(0)->getParam(0)->getName().str();
+        }
     }
 
     return TypeName();
@@ -97,7 +102,7 @@ void ReflectedClass::Generate(
 {
     OUT <<
         "\t"  "template<>"                                               "\n"
-        "\t"      "inline const Class* GetClass(ClassTag<" << Name() << ">) {"  "\n"
+        "\t"      "inline const Class* GetClass(ClassTag<" << QualName() << ">) {"  "\n"
         "\t\t"        "static Class c = ";                     Print(out);
                 
         for (size_t i = 0; i < m_fields.size(); i++) {
@@ -116,7 +121,7 @@ void ReflectedClass::Generate(
 
     OUT <<
         "\t"  "template<size_t _s>"                                          "\n"
-        "\t"      "inline const Class* GetClass(ClassTag<" << Name() << "[_s]>) {"  "\n"
+        "\t"      "inline const Class* GetClass(ClassTag<" << QualName() << "[_s]>) {"  "\n"
         "\t\t"        "static Class c = ";                     PrintArray(out);
 
         for (size_t i = 0; i < m_fields.size(); i++) {
@@ -139,13 +144,13 @@ void ReflectedClass::Generate(
 void ReflectedClass::Print(
     raw_ostream& out) const
 {
-    OUT << "Class(\"" << Name() << "\", sizeof(" << Name() << "), " << m_fields.size() << ");\n";
+    OUT << "Class(\"" << QualName() << "\", sizeof(" << QualName() << "), " << m_fields.size() << ");\n";
 }
 
 void ReflectedClass::PrintArray(
     raw_ostream& out) const
 {
-    OUT << "Class(\"" << Name() << "\"\"[]\", sizeof(" << Name() << "), " << m_fields.size() << ", _s);\n";
+    OUT << "Class(\"" << QualName() << "\"\"[]\", sizeof(" << QualName() << "), " << m_fields.size() << ", _s);\n";
 }
 
 void ReflectedClass::AddField(
@@ -156,6 +161,30 @@ void ReflectedClass::AddField(
 
 std::string ReflectedClass::Name() const {
     return m_record->getQualifiedNameAsString();
+}
+
+std::string ReflectedClass::QualName() const {
+    std::stringstream name;
+
+    name << m_record->getQualifiedNameAsString();
+
+    if (IsTemplateSpecialization()) {
+        const TemplateArgumentList& list = ((ClassTemplateSpecializationDecl*)m_record)->getTemplateArgs();
+
+        name << "<";
+
+        for (int i = 0; i < list.size(); i++) {
+            const TemplateArgument& arg = list[i];
+            std::string type = arg.getAsType().getAsString();
+
+            removePrefix(type);
+            name << type;
+        }
+
+        name << ">";
+    }
+
+    return name.str();
 }
 
 size_t ReflectedClass::Size() const {
@@ -186,6 +215,10 @@ bool ReflectedClass::IsSubClass() const {
 
 bool ReflectedClass::HasBody() const {
     return m_hasBody;
+}
+
+bool ReflectedClass::IsTemplateSpecialization() const {
+    return Record()->getDeclKind() == Decl::Kind::ClassTemplateSpecialization;
 }
 
 bool ReflectedClass::HasWrittenToDisk() const {
@@ -238,8 +271,20 @@ void ClassFinder::onEndOfTranslationUnit() {
             ReflectedClass* b = toWrite[j];
 
             if (a->Name() == b->Name()) {
-                delete a;
-                toWrite.erase(toWrite.begin() + i);
+                if (    a->IsTemplateSpecialization()
+                    && !b->IsTemplateSpecialization())
+                {
+                    delete b;
+                    toWrite.erase(toWrite.begin() + j);
+                    j = 0;
+                }
+
+                else if(!a->IsTemplateSpecialization()
+                    &&   b->IsTemplateSpecialization())
+                {
+                    delete a;
+                    toWrite.erase(toWrite.begin() + i);
+                }
             }
         }
     }
@@ -393,4 +438,18 @@ int main(int argc, const char** argv) {
     //finder.addMatcher(funcMatcher,  &classFinder);
 
     return tool.run(newFrontendActionFactory(&finder).get());
+}
+
+void removePrefix(
+    std::string& name)
+{
+    int index = name.find(' ');
+    if (index) {
+        std::string prefix = name.substr(0, index);
+        if (prefix == "struct"
+            || prefix == "class")
+        {
+            name = name.substr(index + 1);
+        }
+    }
 }

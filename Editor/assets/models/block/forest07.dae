@@ -44,7 +44,7 @@
   </library_effects>
   <library_images>
     <image id="texturesscaleboy_png" name="texturesscaleboy_png">
-      <init_from>texturesscaleboy.png</init_from>
+      <init_from>textures/scaleboy.png</init_from>
     </image>
   </library_images>
   <library_materials>

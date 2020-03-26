@@ -52,7 +52,7 @@ namespace Graphics {
 		};
 
 		struct DrawMeshOP {
-			const Transform* Transform;
+			Transform Transform;
 			Mesh* Mesh;
 		};
 
@@ -146,9 +146,14 @@ namespace Graphics {
 		void DrawMesh(
 			const Transform* transform,
 			Mesh* mesh) override;
+
+		IWGRAPHICS_API
+		void DrawMesh(
+			const Transform& transform,
+			Mesh* mesh);
 	private:
 		key GenOrder(
-			const Transform* transform = nullptr,
+			const Transform& transform = Transform(),
 			const Mesh* mesh = nullptr) const;
 	};
 }

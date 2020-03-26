@@ -9,10 +9,10 @@ namespace Physics {
 namespace impl {
 	template<
 		typename V>
-	struct Plane
+	struct REFLECT Plane
 	{
-		V P;
-		float D;
+		REFLECT V P;
+		REFLECT float D;
 
 		Plane(
 			V points,

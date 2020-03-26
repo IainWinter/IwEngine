@@ -2,7 +2,8 @@
 
 #include "Enemy.h"
 #include "iw/math/vector2.h"
-//#include "iw/graphics/Model.h"
+//#include "iw/physics/Collision/SphereCollider.h"
+#include "iw/physics/Collision/PlaneCollider.h"
 #include "Player.h"
 #include "LevelDoor.h"
 #include <vector>
@@ -20,6 +21,9 @@ struct REFLECT Level {
 	REFLECT iw::vector2 LevelPosition;
 
 	REFLECT LevelDoor Door = {};
+
+	//REFLECT std::vector<iw::SphereCollider> Spheres;
+	REFLECT std::vector<iw::PlaneCollider>  Planes;
 
 	//iw::Model Stage;
 };

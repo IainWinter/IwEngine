@@ -1,17 +1,18 @@
 #pragma once
 
 #include "iw/common/iwcommon.h"
-#include "iw/math/quaternion.h"
 #include "iw/math/vector3.h"
 #include "iw/math/matrix4.h"
+#include "iw/math/quaternion.h"
+#include "iw/reflection/Reflect.h"
 #include <vector>
 
 namespace iw {
 namespace Engine {
-	struct Transform {
-		vector3 Position;
-		vector3 Scale;
-		quaternion Rotation;
+	struct REFLECT Transform {
+		REFLECT vector3 Position;
+		REFLECT vector3 Scale;
+		REFLECT quaternion Rotation;
 	private:
 		std::vector<Transform*> m_children;
 		Transform* m_parent;
@@ -42,7 +43,7 @@ namespace Engine {
 		IWCOMMON_API
 		size_t ChildCount() const;
 
-		IWCOMMON_API std::vector<Transform*>&       Children();
+		IWCOMMON_API       std::vector<Transform*>& Children();
 		IWCOMMON_API const std::vector<Transform*>& Children() const;
 
 		IWCOMMON_API

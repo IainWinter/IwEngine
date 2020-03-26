@@ -8,11 +8,11 @@ namespace Physics {
 namespace impl {
 	template<
 		typename V>
-	struct SphereCollider
+	struct REFLECT SphereCollider
 		: Collider<V>
 	{
-		V Center;
-		float Radius;
+		REFLECT V Center;
+		REFLECT float Radius;
 
 		SphereCollider(
 			V center,

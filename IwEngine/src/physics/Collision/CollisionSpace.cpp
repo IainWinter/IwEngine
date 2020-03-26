@@ -106,10 +106,11 @@ namespace Physics {
 		std::vector<Manifold>& manifolds,
 		scalar dt)
 	{
-		for (Solver* solver : m_solvers) {
-			solver->Solve(m_objects, manifolds);
-		}
-
+		//for (int i = 0; i < 5; i++) {
+			for (Solver* solver : m_solvers) {
+				solver->Solve(m_objects, manifolds);
+			}
+		//}
 		/*for (TimedSolver* solver : m_timedSolvers) {
 			solver->Solve(m_objects, manifolds, dt);
 		}*/

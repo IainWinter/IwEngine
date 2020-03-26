@@ -24,6 +24,7 @@ namespace iw {
 		int Initialize() override;
 
 		void PostUpdate() override;
+		void FixedUpdate() override;
 
 		void ImGui() override;
 	};

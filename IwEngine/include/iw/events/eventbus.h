@@ -38,7 +38,7 @@ namespace events {
 		void push(
 			_args&&... args)
 		{
-			if (m_events.size() > 10000) {
+			if (m_events.size() > 1000) {
 				return;
 			}
 

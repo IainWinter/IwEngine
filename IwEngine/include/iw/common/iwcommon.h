@@ -7,3 +7,10 @@
 #		define IWCOMMON_API __declspec(dllimport)
 #	endif
 #endif
+
+#include "iw/reflection/Reflect.h"
+
+#ifdef REFLECTING
+#	undef  IWCOMMON_API
+#	define IWCOMMON_API
+#endif

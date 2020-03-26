@@ -21,6 +21,8 @@ namespace impl {
 		AABB<V> m_bounds;
 		bool m_outdated;
 
+		//M m_tensor;
+
 	public:
 		Collider()
 			: m_outdated(true)

@@ -11,11 +11,15 @@
 #include "iw/reflection/reflect/std/string.h"
 #include "iw/reflection/reflect/std/vector.h"
 #include "iw/reflect/math/vector2.h"
+#include "iw/reflect/math/vector3.h"
 #include "iw/reflect/Components/Bullet.h"
 #include "iw/reflect/Components/Enemy.h"
 #include "iw/reflect/Components/Player.h"
 #include "iw/reflect/Components/LevelDoor.h"
+#include "iw/reflect/Physics/Plane.h"
+#include "iw/reflect/Physics/Collision/PlaneCollider.h"
 #include "iw/reflect/Components/Level.h"
+//#include "iw/reflect/Physics/Collision/SphereCollider.h"
 
 LevelSystem::LevelSystem(
 	iw::Entity& player)
@@ -39,17 +43,21 @@ LevelSystem::LevelSystem(
 
 	transition = false;
 
-	//Level level;
-	//level.Enemies.push_back(Enemy{ EnemyType::SPIN, Bullet { LINE, 5 }, iw::Pi2 / 24.0f, 0.12f });
-	//level.Positions.push_back(0);
-	//level.StageName = "";
-	//level.Door = LevelDoor{
-	//	LevelDoorState::LOCKED,
-	//	iw::vector2(-5, 0),
-	//	"next.json"
-	//};
+	Level level;
+	level.Enemies.push_back(Enemy{ EnemyType::SPIN, Bullet { LINE, 5 }, iw::Pi2 / 24.0f, 0.12f });
+	level.Positions.push_back(0);
+	level.StageName = "";
+	level.Door = LevelDoor {
+		LevelDoorState::LOCKED,
+		"next.json"
+	};
 
-	//iw::JsonSerializer("assets/levels/working.json").Write(level);
+	level.Planes.push_back(iw::PlaneCollider( iw::vector3::unit_x, 16));
+	level.Planes.push_back(iw::PlaneCollider(-iw::vector3::unit_x, 16));
+	level.Planes.push_back(iw::PlaneCollider(-iw::vector3::unit_z,  9));
+	level.Planes.push_back(iw::PlaneCollider( iw::vector3::unit_z,  9));
+
+	iw::JsonSerializer("assets/levels/working.json").Write(level);
 }
 
 int LevelSystem::Initialize() {

@@ -11,16 +11,16 @@ namespace Physics {
 			Rigidbody* aBody = manifold.ObjA->IsDynamic() ? (Rigidbody*)manifold.ObjA : nullptr;
 			Rigidbody* bBody = manifold.ObjB->IsDynamic() ? (Rigidbody*)manifold.ObjB : nullptr;
 
-			scalar aInvMass = aBody ? aBody->InvMass() : 1.0f;
-			scalar bInvMass = bBody ? bBody->InvMass() : 1.0f;
+			scalar aInvMass = aBody ? aBody->InvMass() : 0.0f;
+			scalar bInvMass = bBody ? bBody->InvMass() : 0.0f;
 
 			iw::vector3 resolution = manifold.B - manifold.A;
 
 			const float percent = 0.8f;
-			const float slop = 0.1f;
+			const float slop = 0.01f;
 
 			iw::vector3 correction = manifold.Normal * percent
-				* fmax(resolution.length() - slop, .0001f)
+				* fmax(resolution.length() - slop, 0.0f)
 				/ (aInvMass + bInvMass);
 		
 			if (aBody ? aBody->IsKinematic() : false) {

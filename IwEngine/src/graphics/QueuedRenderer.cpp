@@ -148,7 +148,7 @@ namespace Graphics {
 				case RenderOP::DRAW_MESH: {
 					DrawMeshOP* draw = (DrawMeshOP*)item.Data;
 
-					Renderer::DrawMesh(draw->Transform, draw->Mesh);
+					Renderer::DrawMesh(&draw->Transform, draw->Mesh);
 					break;
 				}
 			}
@@ -226,9 +226,16 @@ namespace Graphics {
 		const Transform* transform,
 		Mesh* mesh)
 	{
-		m_block        = 2;
+		DrawMesh(*transform, mesh);
+	}
+
+	void QueuedRenderer::DrawMesh(
+		const Transform& transform,
+		Mesh* mesh)
+	{
+		m_block = 2;
 		m_transparency = val(mesh->Material->GetTransparency());
-		m_material     = mesh->Material->__GetOrder();
+		m_material = mesh->Material->__GetOrder();
 
 		DrawMeshOP* op = m_pool.alloc<DrawMeshOP>();
 		op->Transform = transform;
@@ -238,7 +245,7 @@ namespace Graphics {
 	}
 
 	QueuedRenderer::key QueuedRenderer::GenOrder(
-		const Transform* transform,
+		const Transform& transform,
 		const Mesh* mesh) const
 	{
 		key layer        = m_layer;
@@ -250,8 +257,8 @@ namespace Graphics {
 		key depth        = 0;
 		
 		if (m_camera) {
-			if (transform && mesh) {
-				depth = 10000 * (m_position - transform->Position).length_fast(); // best value can def be found. Prob some equation of last scenes difference in depth or min value
+			if (mesh) {
+				depth = 10000 * (m_position - transform.Position).length_fast(); // best value can def be found. Prob some equation of last scenes difference in depth or min value
 			}
 		}
 

@@ -7,9 +7,9 @@ namespace Physics {
 namespace impl {
 	template<
 		typename V>
-	struct AABB {
-		V Min;
-		V Max;
+	struct REFLECT AABB {
+		REFLECT V Min;
+		REFLECT V Max;
 
 		AABB() = default;
 

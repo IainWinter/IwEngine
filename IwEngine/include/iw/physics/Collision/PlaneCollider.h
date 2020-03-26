@@ -8,10 +8,10 @@ namespace Physics {
 namespace impl {
 	template<
 		typename V>
-	struct PlaneCollider
+	struct REFLECT PlaneCollider
 		: Collider<V>
 	{
-		impl::Plane<V> Plane;
+		REFLECT impl::Plane<V> Plane;
 
 		PlaneCollider(
 			V p,
