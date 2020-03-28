@@ -7,28 +7,36 @@ namespace Physics {
 namespace impl {
 	template<
 		typename V>
-	struct REFLECT SphereCollider
+	struct REFLECT CapsuleCollider
 		: Collider<V>
 	{
-		REFLECT V Center;
+		REFLECT V Position;
+		REFLECT V Offset;
 		REFLECT float Radius;
 
-		SphereCollider()
-			: Center(0.0f)
+		CapsuleCollider()
+			: Position(0.0f)
+			, Offset(0.0f, 1.0f, 0.0f)
 			, Radius(1.0f)
 		{}
 
-		SphereCollider(
-			V center,
+		CapsuleCollider(
+			V position,
+			V offset,
 			float radius)
 			: Collider<V>()
-			, Center(center)
+			, Position(position)
+			, Offset(offset)
 			, Radius(radius)
 		{}
 
 		const AABB<V>& Bounds() override {
 			if (m_outdated) {
-				m_bounds = AABB<V>(Center, Radius);
+				m_bounds = AABB<V>(
+					Position + Position.normalized() * Radius,
+					Position + Offset + Offset.normalized() * Radius
+				);
+
 				m_outdated = false;
 			}
 
@@ -63,9 +71,9 @@ namespace impl {
 	};
 }
 
-	using SphereCollider2 = impl::SphereCollider<iw::vector2>;
-	using SphereCollider  = impl::SphereCollider<iw::vector3>;
-	using SphereCollider4 = impl::SphereCollider<iw::vector4>;
+	using CapsuleCollider2 = impl::CapsuleCollider<iw::vector2>;
+	using CapsuleCollider  = impl::CapsuleCollider<iw::vector3>;
+	using CapsuleCollider4 = impl::CapsuleCollider<iw::vector4>;
 }
 
 	using namespace Physics;

@@ -23,11 +23,11 @@ namespace Physics {
 
 			// Impluse
 
-			if (nVel > 0)
+			if (nVel >= 0)
 				continue;
 
-			scalar e = (aBody ? aBody->Restitution() : 0.5f)
-				     * (bBody ? bBody->Restitution() : 0.5f);
+			scalar e = (aBody ? aBody->Restitution() : 0.0f)
+				     * (bBody ? bBody->Restitution() : 0.0f);
 
 			scalar j = -(1.0f + e) * nVel / (aInvMass + bInvMass);
 
@@ -49,10 +49,10 @@ namespace Physics {
 			iw::vector3 tangent = (rVel - nVel * manifold.Normal).normalized();
 			scalar      fVel = rVel.dot(tangent);
 
-			scalar aSF = aBody ? aBody->StaticFriction()  : 0.5f;
-			scalar bSF = bBody ? bBody->StaticFriction()  : 0.5f;
-			scalar aDF = aBody ? aBody->DynamicFriction() : 0.5f;
-			scalar bDF = bBody ? bBody->DynamicFriction() : 0.5f;
+			scalar aSF = aBody ? aBody->StaticFriction()  : 0.0f;
+			scalar bSF = bBody ? bBody->StaticFriction()  : 0.0f;
+			scalar aDF = aBody ? aBody->DynamicFriction() : 0.0f;
+			scalar bDF = bBody ? bBody->DynamicFriction() : 0.0f;
 			scalar mu  = iw::vector2(aSF, bSF).length();
 
 			scalar f  = -fVel / (aInvMass + bInvMass);

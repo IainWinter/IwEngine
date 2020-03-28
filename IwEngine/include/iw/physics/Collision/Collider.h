@@ -9,10 +9,14 @@ namespace iw  {
 namespace Physics {
 namespace impl {
 	template<typename V>
-	struct SphereCollider;
+	struct REFLECT SphereCollider;
 
 	template<typename V>
-	struct PlaneCollider;
+	struct REFLECT CapsuleCollider;
+
+	template<typename V>
+	struct REFLECT PlaneCollider;
+
 
 	template<
 		typename V>
@@ -31,6 +35,9 @@ namespace impl {
 		// dont like that you need to pass transforms
 
 		IWPHYSICS_API
+		virtual const AABB<V>& Bounds() = 0;
+
+		IWPHYSICS_API
 		virtual ManifoldPoints TestCollision(
 			const Transform* transform,
 			const impl::Collider<V>* collider,
@@ -45,11 +52,14 @@ namespace impl {
 		IWPHYSICS_API
 		virtual ManifoldPoints TestCollision(
 			const Transform* transform,
-			const impl::PlaneCollider<V>* plane,
-			const Transform* planeTransform) const = 0;
+			const impl::CapsuleCollider<V>* capsule,
+			const Transform* capsuleTransform) const = 0;
 
 		IWPHYSICS_API
-		virtual const AABB<V>& Bounds() = 0;
+		virtual ManifoldPoints TestCollision(
+			const Transform* transform,
+			const impl::PlaneCollider<V>* plane,
+			const Transform* planeTransform) const = 0;
 	};
 }
 

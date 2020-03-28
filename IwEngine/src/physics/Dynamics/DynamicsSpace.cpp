@@ -186,22 +186,26 @@ namespace Physics {
 			Rigidbody* rigidbody = (Rigidbody*)object;
 			if (rigidbody->IsKinematic()) {
 				Transform t = *rigidbody->Trans();
-
-				t.Position += dt    * rigidbody->Velocity()
-					        + dt*dt * rigidbody->Force() * rigidbody->InvMass();
+				vector3   v = rigidbody->Velocity();
 
 				if (rigidbody->IsLocked().x) {
 					t.Position.x = rigidbody->Lock().x;
+					v.x = 0;
 				}
 
 				if (rigidbody->IsLocked().y) {
 					t.Position.y = rigidbody->Lock().y;
+					v.y = 0;
 				}
 
 				if (rigidbody->IsLocked().z) {
 					t.Position.z = rigidbody->Lock().z;
+					v.z = 0;
 				}
 
+				t.Position += dt * v + dt * dt * rigidbody->Force() * rigidbody->InvMass();
+
+				rigidbody->SetVelocity(v);
 				rigidbody->SetNextTrans(t);
 
 				//Transform& t = *rigidbody->Trans();

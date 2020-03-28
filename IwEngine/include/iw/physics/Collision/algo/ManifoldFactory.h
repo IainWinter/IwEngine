@@ -3,6 +3,7 @@
 #include "iw/physics/IwPhysics.h"
 #include "iw/physics/Collision/CollisionObject.h"
 #include "iw/physics/Collision/SphereCollider.h"
+#include "iw/physics/Collision/CapsuleCollider.h"
 #include "iw/physics/Collision/PlaneCollider.h"
 #include "iw/physics/Collision/Manifold.h"
 
@@ -20,9 +21,9 @@ namespace algo {
 		const PlaneCollider*  b, const Transform* tb);
 
 	IWPHYSICS_API
-	ManifoldPoints FindPlaneSphereMaifoldPoints(
-		const PlaneCollider*  a, const Transform* ta,
-		const SphereCollider* b, const Transform* tb);
+	ManifoldPoints FindSphereCapsuleMaifoldPoints(
+		const SphereCollider*  a, const Transform* ta,
+		const CapsuleCollider* b, const Transform* tb);
 }
 }
 

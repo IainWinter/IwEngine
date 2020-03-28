@@ -13,6 +13,10 @@ namespace impl {
 	{
 		REFLECT impl::Plane<V> Plane;
 
+		PlaneCollider()
+			: Plane(0.0f, 0.0f)
+		{}
+
 		PlaneCollider(
 			V p,
 			float d)
@@ -26,6 +30,15 @@ namespace impl {
 			, Plane(plane)
 		{}
 
+		const AABB<V>& Bounds() override {
+			//if (m_outdated) {
+			//	m_bounds = AABB<V>(XYZ, D);
+			//	m_outdated = false;
+			//}
+
+			return m_bounds;
+		}
+
 		ManifoldPoints TestCollision(
 			const Transform* transform,
 			const impl::Collider<V>* collider,
@@ -37,23 +50,20 @@ namespace impl {
 		IWPHYSICS_API
 		ManifoldPoints TestCollision(
 			const Transform* transform,
-			const impl::SphereCollider<V>* sphere,
+			const SphereCollider<V>* sphere,
 			const Transform* sphereTransform) const override;
 
 		IWPHYSICS_API
 		ManifoldPoints TestCollision(
 			const Transform* transform,
-			const impl::PlaneCollider<V>* plane,
+			const CapsuleCollider<V>* capsule,
+			const Transform* capsuleTransform) const override;
+
+		IWPHYSICS_API
+		ManifoldPoints TestCollision(
+			const Transform* transform,
+			const PlaneCollider<V>* plane,
 			const Transform* planeTransform) const override;
-
-		const AABB<V>& Bounds() override {
-			//if (m_outdated) {
-			//	m_bounds = AABB<V>(XYZ, D);
-			//	m_outdated = false;
-			//}
-
-			return m_bounds;
-		}
 	};
 }
 

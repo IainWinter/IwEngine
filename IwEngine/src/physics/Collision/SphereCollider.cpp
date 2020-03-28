@@ -1,4 +1,5 @@
 #include "iw/physics/Collision/SphereCollider.h"
+#include "iw/physics/Collision/CapsuleCollider.h"
 #include "iw/physics/Collision/PlaneCollider.h"
 #include "iw/physics/Collision/algo/ManifoldFactory.h"
 
@@ -12,6 +13,16 @@ namespace Physics {
 	{
 		return algo::FindSphereSphereMaifoldPoints(
 			this, transform, sphere, sphereTransform);
+	}
+
+	template<>
+	ManifoldPoints SphereCollider::TestCollision(
+		const Transform* transform,
+		const Physics::CapsuleCollider* capsule,
+		const Transform* capsuleTransform) const
+	{
+		return algo::FindSphereCapsuleMaifoldPoints(
+			this, transform, capsule, capsuleTransform);
 	}
 
 	template<>

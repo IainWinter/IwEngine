@@ -1,4 +1,5 @@
 #include "iw/physics/Collision/algo/ManifoldFactory.h"
+#include <iw\log\logger.h>
 
 namespace iw {
 namespace Physics {
@@ -7,13 +8,16 @@ namespace algo {
 		const SphereCollider* a, const Transform* ta,
 		const SphereCollider* b, const Transform* tb)
 	{
-		iw::vector3 A = a->Center + ta->Position;
-		iw::vector3 B = b->Center + tb->Position;
+		vector3 A = a->Center + ta->Position;
+		vector3 B = b->Center + tb->Position;
 
-		iw::vector3 AtoB = B - A;
-		iw::vector3 BtoA = A - B;
+		float Ar = a->Radius * ta->Scale.x;
+		float Br = b->Radius * tb->Scale.x;
 
-		if (AtoB.length() - b->Radius > a->Radius) {
+		vector3 AtoB = B - A;
+		vector3 BtoA = A - B;
+
+		if (AtoB.length() > Ar + Br) {
 			return { 
 				0, 0, 
 				0, 
@@ -22,27 +26,34 @@ namespace algo {
 			};
 		}
 
-		A += AtoB.normalized() * a->Radius;
-		B += BtoA.normalized() * b->Radius;
+		A += AtoB.normalized() * Ar;
+		B += BtoA.normalized() * Br;
+
+		AtoB = B - A;
 
 		return {
 			A, B,
-			BtoA.normalized(),
-			(B - A).length(),
+			AtoB.normalized(),
+			AtoB.length(),
 			true
 		};
 	}
+
+	// Transforms dont work for plane
 
 	ManifoldPoints FindSpherePlaneMaifoldPoints(
 		const SphereCollider* a, const Transform* ta,
 		const PlaneCollider*  b, const Transform* tb)
 	{
-		iw::vector3 A = a->Center + ta->Position;
-		iw::vector3 N = b->Plane.P.normalized() * tb->Rotation + tb->Position;
-		iw::vector3 P = N * b->Plane.D;
+		vector3 A = a->Center + ta->Position;
+		vector3 N = b->Plane.P.normalized() * tb->Rotation + tb->Position;
+		vector3 P = N * b->Plane.D;
+
+		float Ar = a->Radius * ta->Scale.x;
 
 		float d = (A - P).dot(N);
-		if (d > a->Radius) {
+
+		if (d > Ar) {
 			return {
 				0, 0,
 				0,
@@ -51,8 +62,8 @@ namespace algo {
 			};
 		}
 		
-		iw::vector3 B = A - N * d;
-		A = A - N * a->Radius;
+		vector3 B = A - N * d;
+		A = A - N * Ar;
 
 		return {
 			A, B,
@@ -62,18 +73,46 @@ namespace algo {
 		};
 	}
 
-	ManifoldPoints FindPlaneSphereMaifoldPoints(
-		const PlaneCollider*  a, const Transform* ta,
-		const SphereCollider* b, const Transform* tb)
+	ManifoldPoints FindSphereCapsuleMaifoldPoints(
+		const SphereCollider*  a, const Transform* ta,
+		const CapsuleCollider* b, const Transform* tb)
 	{
-		ManifoldPoints points = FindSpherePlaneMaifoldPoints(b, tb, a, ta);
+		vector3 A = a->Center   + ta->Position;
+		vector3 B = b->Position + tb->Position;
+		vector3 C = B + b->Offset;
+		
+		float Ar = a->Radius * ta->Scale.x;
+		float Br = b->Radius * tb->Scale.x;
 
-		iw::vector3 v = points.A;
-		points.A = points.B;
-		points.B = v;
-		points.Normal = -points.Normal;
+		vector3 BtoA = A - B;
+		vector3 BtoC = C - B;
 
-		return points;
+		float   d = iw::clamp(BtoC.normalized().dot(BtoA), 0.0f, BtoC.length());
+		vector3 D = B + BtoC.normalized() * d;
+
+		vector3 AtoD = D - A;
+		vector3 DtoA = A - D;
+
+		if (AtoD.length() > Ar + Br) {
+			return {
+				0, 0,
+				0,
+				0,
+				false
+			};
+		}
+
+		A += AtoD.normalized() * Ar;
+		D += DtoA.normalized() * Br;
+
+		AtoD = D - A;
+
+		return {
+			A, D,
+			AtoD.normalized(),
+			AtoD.length(),
+			true
+		};
 	}
 }
 }
