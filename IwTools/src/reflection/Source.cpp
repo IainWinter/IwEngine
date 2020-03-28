@@ -63,7 +63,7 @@ std::string ReflectedField::TypeName() const {
     return name;
 }
 
-std::string ReflectedField::TypeNameTIfTemplate() const {
+std::string ReflectedField::TypeNameIfTemplate() const {
     if (m_field->getType()->isTemplateTypeParmType()) {
         if (m_field->getNumTemplateParameterLists() > 0) {
             return m_field->getTemplateParameterList(0)->getParam(0)->getName().str();
@@ -318,7 +318,7 @@ void ClassFinder::onEndOfTranslationUnit() {
                 for (ReflectedClass* other : toWrite) {
                     if (c == other) continue;
                         
-                    if (other->Name() == field.TypeNameTIfTemplate()) {
+                    if (other->Name() == field.TypeNameIfTemplate()) {
             OUT << "#include \"" << other->OutPath() << "\""  "\n";
                     }
                 }

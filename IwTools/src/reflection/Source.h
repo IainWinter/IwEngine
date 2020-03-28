@@ -68,7 +68,7 @@ public:
 
 	std::string TypeName() const;
 
-	std::string TypeNameTIfTemplate() const;
+	std::string TypeNameIfTemplate() const;
 
 	bool IsEnum() const;
 
