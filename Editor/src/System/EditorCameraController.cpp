@@ -66,8 +66,8 @@ namespace iw {
 		MouseMovedEvent& e)
 	{
 		if (e.Device == DeviceType::RAW_MOUSE) {
-			rotation.x = e.DeltaY * .001f;
-			rotation.y = e.DeltaX * .001f;
+			rotation.x = e.DeltaY * Time::DeltaTime();
+			rotation.y = e.DeltaX * Time::DeltaTime();
 		}
 
 		return false;

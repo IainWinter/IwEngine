@@ -250,6 +250,7 @@ namespace Graphics {
 			m_mesh = mesh;
 
 			if (m_mesh) {
+				m_mesh->Update(Device);
 				m_mesh->Bind(Device);
 			}
 		}
@@ -268,10 +269,17 @@ namespace Graphics {
 		const ref<Material>& material)
 	{		
 		if (m_material != material) {
-			SetShader(material->Shader);
+			if (material) {
+				SetShader(material->Shader);
+				material->Use(Device);
+			}
+
+			else {
+				//SetShader(Material::Default.Shader);
+				//Material::Default.Use(Device);
+			}
 
 			m_material = material;
-			m_material->Use(Device);
 		}
 	}
 

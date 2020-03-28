@@ -18,8 +18,9 @@
 #include "iw/reflect/Components/LevelDoor.h"
 #include "iw/reflect/Physics/Plane.h"
 #include "iw/reflect/Physics/Collision/PlaneCollider.h"
+#include "iw/reflect/Physics/Collision/SphereCollider.h"
+#include "iw/reflect/Physics/Collision/CapsuleCollider.h"
 #include "iw/reflect/Components/Level.h"
-//#include "iw/reflect/Physics/Collision/SphereCollider.h"
 
 LevelSystem::LevelSystem(
 	iw::Entity& player)
@@ -43,21 +44,21 @@ LevelSystem::LevelSystem(
 
 	transition = false;
 
-	Level level;
-	level.Enemies.push_back(Enemy{ EnemyType::SPIN, Bullet { LINE, 5 }, iw::Pi2 / 24.0f, 0.12f });
-	level.Positions.push_back(0);
-	level.StageName = "";
-	level.Door = LevelDoor {
-		LevelDoorState::LOCKED,
-		"next.json"
-	};
+	//Level level;
+	//level.Enemies.push_back(Enemy{ EnemyType::SPIN, Bullet { LINE, 5 }, iw::Pi2 / 24.0f, 0.12f });
+	//level.Positions.push_back(0);
+	//level.StageName = "";
+	//level.Door = LevelDoor {
+	//	LevelDoorState::LOCKED,
+	//	"next.json"
+	//};
 
-	level.Planes.push_back(iw::PlaneCollider( iw::vector3::unit_x, 16));
-	level.Planes.push_back(iw::PlaneCollider(-iw::vector3::unit_x, 16));
-	level.Planes.push_back(iw::PlaneCollider(-iw::vector3::unit_z,  9));
-	level.Planes.push_back(iw::PlaneCollider( iw::vector3::unit_z,  9));
+	//level.Planes.push_back(iw::PlaneCollider( iw::vector3::unit_x, 16));
+	//level.Planes.push_back(iw::PlaneCollider(-iw::vector3::unit_x, 16));
+	//level.Planes.push_back(iw::PlaneCollider(-iw::vector3::unit_z,  9));
+	//level.Planes.push_back(iw::PlaneCollider( iw::vector3::unit_z,  9));
 
-	iw::JsonSerializer("assets/levels/working.json").Write(level);
+	//iw::JsonSerializer("assets/levels/working.json").Write(level);
 }
 
 int LevelSystem::Initialize() {
@@ -283,22 +284,69 @@ iw::Entity LevelSystem::LoadLevel(
 	for (size_t i = 0; i < currentLevel.Enemies.size(); i++) {
 		iw::Entity enemy = Space->CreateEntity<iw::Transform, iw::Model, iw::SphereCollider, iw::CollisionObject, Enemy>();
 		
-		                          enemy.SetComponent<iw::Model>(*Asset->Load<iw::Model>("Tetrahedron"));
-		                          enemy.SetComponent<Enemy>(currentLevel.Enemies[i]);
-		iw::Transform*       te = enemy.SetComponent<iw::Transform>();
-		iw::SphereCollider*  se = enemy.SetComponent<iw::SphereCollider>(iw::vector3::zero, 1.0f);
-		iw::CollisionObject* re = enemy.SetComponent<iw::CollisionObject>();
+		                         enemy.SetComponent<iw::Model>(*Asset->Load<iw::Model>("Tetrahedron"));
+		                         enemy.SetComponent<Enemy>(currentLevel.Enemies[i]);
+		iw::Transform*       t = enemy.SetComponent<iw::Transform>();
+		iw::SphereCollider*  s = enemy.SetComponent<iw::SphereCollider>(iw::vector3::zero, 1.0f);
+		iw::CollisionObject* r = enemy.SetComponent<iw::CollisionObject>();
 
-		te->Position.x = currentLevel.Positions[i].x;
-		te->Position.z = currentLevel.Positions[i].y;
-		te->Position.y = 1;
+		t->Position.x = currentLevel.Positions[i].x;
+		t->Position.z = currentLevel.Positions[i].y;
+		t->Position.y = 1;
 
-		levelTransform->AddChild(te);
+		levelTransform->AddChild(t);
 
-		re->SetCol(se);
-		re->SetTrans(te);
+		r->SetCol(s);
+		r->SetTrans(t);
 
-		Physics->AddCollisionObject(re);
+		Physics->AddCollisionObject(r);
+	}
+
+	// Colliders
+
+	for (iw::PlaneCollider& prefab : currentLevel.Planes) {
+		iw::Entity enemy = Space->CreateEntity<iw::Transform, iw::PlaneCollider, iw::CollisionObject>();
+		
+		iw::Transform*       transform = enemy.SetComponent<iw::Transform>();
+		iw::PlaneCollider*   collider  = enemy.SetComponent<iw::PlaneCollider>(prefab);
+		iw::CollisionObject* object    = enemy.SetComponent<iw::CollisionObject>();
+
+		levelTransform->AddChild(transform);
+
+		object->SetCol(collider);
+		object->SetTrans(transform);
+
+		Physics->AddCollisionObject(object);
+	}
+
+	for (iw::CapsuleCollider& prefab : currentLevel.Capsules) {
+		iw::Entity enemy = Space->CreateEntity<iw::Transform, iw::CapsuleCollider, iw::CollisionObject>();
+
+		iw::Transform*       transform = enemy.SetComponent<iw::Transform>(iw::vector3::unit_y);
+		iw::CapsuleCollider* collider  = enemy.SetComponent<iw::CapsuleCollider>(prefab);
+		iw::CollisionObject* object    = enemy.SetComponent<iw::CollisionObject>();
+
+		levelTransform->AddChild(transform);
+
+		object->SetCol(collider);
+		object->SetTrans(transform);
+
+		Physics->AddCollisionObject(object);
+	}
+
+	for (iw::SphereCollider& prefab : currentLevel.Spheres) {
+		iw::Entity enemy = Space->CreateEntity<iw::Transform, iw::SphereCollider, iw::CollisionObject>();
+
+		iw::Transform*       transform = enemy.SetComponent<iw::Transform>(iw::vector3::unit_y);
+		iw::SphereCollider*  collider  = enemy.SetComponent<iw::SphereCollider>(prefab);
+		iw::CollisionObject* object    = enemy.SetComponent<iw::CollisionObject>();
+
+		levelTransform->AddChild(transform);
+
+		object->SetCol(collider);
+		object->SetTrans(transform);
+
+		Physics->AddCollisionObject(object);
 	}
 
 	// Player
@@ -306,7 +354,7 @@ iw::Entity LevelSystem::LoadLevel(
 	//iw::vector3 playerPos = currentLevel.Door.NextLevelPosition;
 	//playerPos.z = playerPos.y;
 	//playerPos.y = 1.0f;
-
+	//
 	//iw::Entity player = Space->CreateEntity<iw::Transform, iw::Model, iw::SphereCollider, iw::Rigidbody, Player>();
 	//
 	//                         player.SetComponent<iw::Model>(*Asset->Load<iw::Model>("Player"));
@@ -314,18 +362,18 @@ iw::Entity LevelSystem::LoadLevel(
 	//iw::Transform*      tp = player.SetComponent<iw::Transform>(playerPos, iw::vector3(.75f));
 	//iw::SphereCollider* sp = player.SetComponent<iw::SphereCollider>(iw::vector3::zero, .75f);
 	//iw::Rigidbody*      rp = player.SetComponent<iw::Rigidbody>();
-
+	//
 	//levelTransform->AddChild(tp);
-
+	//
 	//rp->SetMass(1);
 	//rp->SetCol(sp);
 	//rp->SetTrans(tp);
 	//rp->SetStaticFriction(.1f);
 	//rp->SetDynamicFriction(.02f);
-
+	//
 	//rp->SetIsLocked(iw::vector3(0, 1, 0));
 	//rp->SetLock    (iw::vector3(0, 1, 0));
-
+	//
 	//Physics->AddRigidbody(rp);
 
 	// Door
@@ -335,7 +383,7 @@ iw::Entity LevelSystem::LoadLevel(
 	                          currentDoor.SetComponent<LevelDoor>(currentLevel.Door);
 	iw::Model*           md = currentDoor.SetComponent<iw::Model>(*Asset->Load<iw::Model>("Door"));
 	iw::Transform*       td = currentDoor.SetComponent<iw::Transform>(iw::vector3(currentLevel.OutPosition.x, 1, currentLevel.OutPosition.y), 5.0f);
-	iw::SphereCollider*  sd = currentDoor.SetComponent<iw::SphereCollider>(iw::vector3::zero, 5.0f);
+	iw::SphereCollider*  sd = currentDoor.SetComponent<iw::SphereCollider>(iw::vector3::zero, 1.0f);
 	iw::CollisionObject* cd = currentDoor.SetComponent<iw::CollisionObject>();
 
 	md->Meshes[0].Material->Set("albedo", iw::Color::From255(201, 66, 66, 127));

@@ -61,68 +61,66 @@ namespace Graphics {
 	void Mesh::Initialize(
 		const ref<IDevice>& device)
 	{
-		Outdated = false;
-
 		if (Material) {
 			Material->Initialize(device);
 		}
 
 		if (VertexArray) {
-			Update(device);
+			return;
 		}
 
-		else {
-			if (   !Vertices
-				&& !Normals
-				&& !Tangents
-				&& !BiTangents
-				&& !Colors
-				&& !Uvs)
-			{
-				return; // exit if there are no buffers
-			}
+		if (   !Vertices
+			&& !Normals
+			&& !Tangents
+			&& !BiTangents
+			&& !Colors
+			&& !Uvs)
+		{
+			return; // exit if there are no buffers
+		}
 
-			VertexBufferLayout layout4f;
-			layout4f.Push<float>(4);
+		Outdated = false;
 
-			VertexBufferLayout layout3f;
-			layout3f.Push<float>(3);
+		VertexBufferLayout layout4f;
+		layout4f.Push<float>(4);
 
-			VertexBufferLayout layout2f;
-			layout2f.Push<float>(2);
+		VertexBufferLayout layout3f;
+		layout3f.Push<float>(3);
 
-			VertexArray = device->CreateVertexArray();
-			IndexBuffer = device->CreateIndexBuffer(Indices.get(), IndexCount);
+		VertexBufferLayout layout2f;
+		layout2f.Push<float>(2);
 
-			if (Vertices) {
-				IVertexBuffer* buffer = device->CreateVertexBuffer(Vertices.get(), VertexCount * sizeof(vector3));
-				device->AddBufferToVertexArray(VertexArray, buffer, layout3f);
-			}
+		VertexArray = device->CreateVertexArray();
+		IndexBuffer = device->CreateIndexBuffer(Indices.get(), IndexCount);
 
-			if (Normals) {
-				IVertexBuffer* buffer = device->CreateVertexBuffer(Normals.get(), VertexCount * sizeof(vector3));
-				device->AddBufferToVertexArray(VertexArray, buffer, layout3f);
-			}
+		if (Vertices) {
+			IVertexBuffer* buffer = device->CreateVertexBuffer(Vertices.get(), VertexCount * sizeof(vector3));
+			device->AddBufferToVertexArray(VertexArray, buffer, layout3f);
+		}
 
-			if (Tangents) {
-				IVertexBuffer* buffer = device->CreateVertexBuffer(Tangents.get(), VertexCount * sizeof(vector3));
-				device->AddBufferToVertexArray(VertexArray, buffer, layout3f);
-			}
+		if (Normals) {
+			IVertexBuffer* buffer = device->CreateVertexBuffer(Normals.get(), VertexCount * sizeof(vector3));
+			device->AddBufferToVertexArray(VertexArray, buffer, layout3f);
+		}
 
-			if (BiTangents) {
-				IVertexBuffer* buffer = device->CreateVertexBuffer(BiTangents.get(), VertexCount * sizeof(vector3));
-				device->AddBufferToVertexArray(VertexArray, buffer, layout3f);
-			}
+		if (Tangents) {
+			IVertexBuffer* buffer = device->CreateVertexBuffer(Tangents.get(), VertexCount * sizeof(vector3));
+			device->AddBufferToVertexArray(VertexArray, buffer, layout3f);
+		}
 
-			if (Colors) {
-				IVertexBuffer* buffer = device->CreateVertexBuffer(Colors.get(), VertexCount * sizeof(vector4));
-				device->AddBufferToVertexArray(VertexArray, buffer, layout4f);
-			}
+		if (BiTangents) {
+			IVertexBuffer* buffer = device->CreateVertexBuffer(BiTangents.get(), VertexCount * sizeof(vector3));
+			device->AddBufferToVertexArray(VertexArray, buffer, layout3f);
+		}
 
-			if (Uvs) {
-				IVertexBuffer* buffer = device->CreateVertexBuffer(Uvs.get(), VertexCount * sizeof(vector2));
-				device->AddBufferToVertexArray(VertexArray, buffer, layout2f);
-			}
+		if (Colors) {
+			IVertexBuffer* buffer = device->CreateVertexBuffer(Colors.get(), VertexCount * sizeof(vector4));
+			device->AddBufferToVertexArray(VertexArray, buffer, layout4f);
+		}
+
+		if (Uvs) {
+			IVertexBuffer* buffer = device->CreateVertexBuffer(Uvs.get(), VertexCount * sizeof(vector2));
+			device->AddBufferToVertexArray(VertexArray, buffer, layout2f);
 		}
 	}
 
@@ -133,33 +131,35 @@ namespace Graphics {
 			Initialize(device);
 		}
 
-		if (Outdated) {
-			int index = 0;
-			if (Vertices) {
-				device->UpdateVertexArrayData(VertexArray, index, Vertices.get(), VertexCount * sizeof(vector3));
-				index++;
-			}
+		if (!Outdated) {
+			return;
+		}
 
-			if (Normals) {
-				device->UpdateVertexArrayData(VertexArray, index, Normals.get(), VertexCount * sizeof(vector3));
-				index++;
-			}
+		Outdated = false;
 
-			if (Colors) {
-				device->UpdateVertexArrayData(VertexArray, index, Colors.get(), VertexCount * sizeof(vector4));
-				index++;
-			}
+		int index = 0;
+		if (Vertices) {
+			device->UpdateVertexArrayData(VertexArray, index, Vertices.get(), VertexCount * sizeof(vector3));
+			index++;
+		}
 
-			if (Uvs) {
-				device->UpdateVertexArrayData(VertexArray, index, Uvs.get(), VertexCount * sizeof(vector2));
-				index++;
-			}
+		if (Normals) {
+			device->UpdateVertexArrayData(VertexArray, index, Normals.get(), VertexCount * sizeof(vector3));
+			index++;
+		}
 
-			if (IndexBuffer) {
-				device->UpdateBuffer(IndexBuffer, Indices.get(), IndexCount * sizeof(unsigned));
-			}
+		if (Colors) {
+			device->UpdateVertexArrayData(VertexArray, index, Colors.get(), VertexCount * sizeof(vector4));
+			index++;
+		}
 
-			Outdated = false;
+		if (Uvs) {
+			device->UpdateVertexArrayData(VertexArray, index, Uvs.get(), VertexCount * sizeof(vector2));
+			index++;
+		}
+
+		if (IndexBuffer) {
+			device->UpdateBuffer(IndexBuffer, Indices.get(), IndexCount * sizeof(unsigned));
 		}
 	}
 

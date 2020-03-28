@@ -155,6 +155,8 @@ namespace Graphics {
 
 		} while (!m_queue.empty());
 
+		//m_pool.log();
+
 		m_pool.reset();
 	}
 
@@ -234,8 +236,8 @@ namespace Graphics {
 		Mesh* mesh)
 	{
 		m_block = 2;
-		m_transparency = val(mesh->Material->GetTransparency());
-		m_material = mesh->Material->__GetOrder();
+		m_transparency = val(mesh->Material ? mesh->Material->GetTransparency() : Transparency::NONE);
+		m_material     =     mesh->Material ? mesh->Material->__GetOrder()      : 0;
 
 		DrawMeshOP* op = m_pool.alloc<DrawMeshOP>();
 		op->Transform = transform;
@@ -248,7 +250,7 @@ namespace Graphics {
 		const Transform& transform,
 		const Mesh* mesh) const
 	{
-		key layer        = m_layer;
+		key layer        = m_layer; 
 		key shadow       = m_shadow;
 		key camera       = m_camera;
 		key block        = m_block;

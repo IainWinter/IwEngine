@@ -221,8 +221,12 @@ namespace util {
 			memset(m_memory, 0xee, m_size);
 #endif
 
-			delete m_next;
-			m_next = nullptr;
+			//delete m_next;
+			//m_next = nullptr;
+		}
+
+		if (m_next){
+			m_next->reset();
 		}
 	}
 

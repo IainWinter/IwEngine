@@ -87,6 +87,36 @@ namespace math {
 
 		return a * (1 - w) + b * w;
 	}
+
+	/**
+	* Returns tje the value clamped inbetween min and max.
+	*
+	* @param a Value to be clamped.
+	* @param min Min value of range.
+	* @param max Max value of range.
+	* @tparam _t Any type that is specialized.
+	*/
+	template<
+		typename _t>
+	_t clamp(
+		const _t& x,
+		const _t& min,
+		const _t& max)
+	{
+		static_assert("no impl for clamp of type t");
+	}
+
+	template<>
+	inline float clamp(
+		const float& x,
+		const float& min,
+		const float& max)
+	{
+		if (min > x) return min;
+		if (max < x) return max;
+
+		return x;
+	}
 }
 
 	using namespace math;

@@ -257,7 +257,7 @@ namespace iw {
 		PushSystem<EnemySystem>();
 		PushSystem<BulletSystem>();
 		PushSystem<LevelSystem>(playerSystem->GetPlayer());
-		PushSystem<GameCameraController>(playerSystem->GetPlayer());
+		PushSystem<GameCameraController>(playerSystem->GetPlayer(), scene);
 
 		return Layer::Initialize();
 	}

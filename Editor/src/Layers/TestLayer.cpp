@@ -16,6 +16,8 @@
 #include "iw/input/Devices/Keyboard.h"
 #include "iw/physics/Collision/PositionSolver.h"
 
+#include "iw/engine/Systems/Voxel/ChunkRendererSystem.h"
+
 namespace iw {
 	struct MeshComponents {
 		Transform* Transform;
@@ -45,7 +47,7 @@ namespace iw {
 	ref<RenderTarget> pointShadowTarget;
 
 	int TestLayer::Initialize() {
-		PushSystem<PhysicsSystem>();
+		PushSystem<ChunkRendererSystem>();
 
 		// Shaders
 
@@ -181,6 +183,17 @@ namespace iw {
 
 		for (auto entity : Space->Query<Transform, Mesh>()) {
 			auto [transform, mesh] = entity.Components.Tie<MeshComponents>();
+			Renderer->DrawMesh(transform, mesh);
+		}
+
+		Renderer->EndScene();
+
+		Renderer->BeginScene(scene);
+
+		for (auto entity : Space->Query<Transform, iw::Engine::Chunk, Mesh>()) {
+			auto [transform, chunk, mesh] = entity.Components.Tie<ChunkRendererSystem::Components>();
+
+			mesh->Update(Renderer->Device);
 			Renderer->DrawMesh(transform, mesh);
 		}
 

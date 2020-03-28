@@ -2,6 +2,7 @@
 
 #include "iw/engine/System.h"
 #include "iw/engine/Components/CameraController.h"
+#include "iw/graphics/Scene.h"
 
 class GameCameraController
 	: public iw::System<iw::Transform, iw::CameraController>
@@ -15,14 +16,17 @@ private:
 	bool locked;
 	bool follow;
 	bool transitionToCenter;
-	iw::Entity& player;
 
 	iw::vector3 center;
 	float speed;
 
+	iw::Entity& player;
+	iw::Scene* scene;
+
 public:
 	GameCameraController(
-		iw::Entity& player);
+		iw::Entity& player,
+		iw::Scene* scene);
 
 	void SetLocked(
 		bool locked)

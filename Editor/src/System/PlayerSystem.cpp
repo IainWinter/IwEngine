@@ -54,14 +54,14 @@ int PlayerSystem::Initialize() {
 	                         player.SetComponent<iw::Model>(*Asset->Load<iw::Model>("Player"));
 	                         player.SetComponent<Player>(playerPrefab);
 	iw::Transform*      tp = player.SetComponent<iw::Transform>(iw::vector3::zero, iw::vector3(.75f));
-	iw::SphereCollider* sp = player.SetComponent<iw::SphereCollider>(iw::vector3::zero, .75f);
+	iw::SphereCollider* sp = player.SetComponent<iw::SphereCollider>(iw::vector3::zero, 1);
 	iw::Rigidbody*      rp = player.SetComponent<iw::Rigidbody>();
 
 	rp->SetMass(1);
 	rp->SetCol(sp);
 	rp->SetTrans(tp);
-	rp->SetStaticFriction(.1f);
-	rp->SetDynamicFriction(.02f);
+	rp->SetStaticFriction (0.0f);
+	rp->SetDynamicFriction(0.0f);
 
 	rp->SetIsLocked(iw::vector3(0, 1, 0));
 	rp->SetLock    (iw::vector3(0, 1, 0));
