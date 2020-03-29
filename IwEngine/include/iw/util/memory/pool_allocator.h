@@ -28,8 +28,11 @@ namespace util {
 			};
 
 			char* m_memory;
-			size_t m_size;
 			std::list<freemem> m_freelist;
+
+			size_t m_capacity;
+			size_t m_size;
+
 			page* m_previous;
 			page* m_next;
 
@@ -50,6 +53,7 @@ namespace util {
 			void reset();
 
 			char* memory() const;
+			size_t size() const;
 			const std::list<freemem>& freelist() const;
 			page* next();
 
@@ -108,6 +112,7 @@ namespace util {
 			_t* addr,
 			size_t size = sizeof(_t))
 		{
+			addr->~_t();
 			return free<void>(addr, size);
 		}
 
@@ -127,6 +132,7 @@ namespace util {
 		void reset();
 
 		size_t page_size() const;
+		size_t acitive_size() const;
 
 		void log() const {
 			page* page = m_root;
@@ -136,7 +142,7 @@ namespace util {
 
 			int i = 1;
 
-			LOG_INFO << "Pool allocator";
+			LOG_INFO << "Pool allocator - " << acitive_size();
 			while (page) {
 				LOG_INFO << "Page " << i;
 				for (auto f : list) {

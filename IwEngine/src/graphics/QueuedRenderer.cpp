@@ -149,13 +149,13 @@ namespace Graphics {
 					DrawMeshOP* draw = (DrawMeshOP*)item.Data;
 
 					Renderer::DrawMesh(&draw->Transform, draw->Mesh);
-					break;
-				}
+
+					m_pool.free<DrawMeshOP>(draw); // need to free to call dest for vector in transform
+					break;                         // only because it copies instead of using a ptr bc of the text
+				}                                  // but that doesnt even work cus the mesh uses a ptr and gets updated so they are all the same :c
 			}
 
 		} while (!m_queue.empty());
-
-		//m_pool.log();
 
 		m_pool.reset();
 	}

@@ -70,19 +70,24 @@ namespace util {
 		return m_pageSize;
 	}
 
+	size_t pool_allocator::acitive_size() const {
+		return m_root->size();
+	}
+
 	// Page 
 
 	pool_allocator::page::page(
 		page* previous,
 		size_t size)
 		: m_memory((char*)malloc(size))
-		, m_size(size)
+		, m_capacity(size)
+		, m_size(0)
 		, m_previous(previous)
 		, m_next(nullptr)
 	{
 		reset();
 
-		LOG_INFO << "Appended " << m_size << " byte page to   pool allocator";
+		LOG_INFO << "Appended " << m_capacity << " byte page to   pool allocator";
 	}
 
 	pool_allocator::page::~page() {
@@ -95,7 +100,7 @@ namespace util {
 		m_previous = nullptr;
 		m_freelist.clear();
 
-		LOG_INFO << "Removed  " << m_size << " byte page from pool allocator";
+		LOG_INFO << "Removed  " << m_capacity << " byte page from pool allocator";
 	}
 
 	void* pool_allocator::page::alloc(
@@ -130,6 +135,8 @@ namespace util {
 
 		memset(ptr, 0, size);
 
+		m_size += size;
+
 		return ptr;
 	}
 
@@ -137,13 +144,8 @@ namespace util {
 		void* addr,
 		size_t size)
 	{
-		if (size > 17000) {
-			LOG_INFO << "Bad memory size";
-			return false;
-		}
-
 		if (   addr >= m_memory
-			&& addr <= m_memory + m_size - size)
+			&& addr <= m_memory + m_capacity - size)
 		{
 			freemem& new_mem = *m_freelist.emplace(m_freelist.begin(), (char*)addr, size);
 
@@ -184,7 +186,7 @@ namespace util {
 			{
 				const freemem& free = m_freelist.front();
 				if (   free.mem  == m_memory
-					&& free.size == m_size)
+					&& free.size == m_capacity)
 				{
 					m_previous->m_next = m_next;
 					if (m_next) {
@@ -196,14 +198,12 @@ namespace util {
 				}
 			}
 
+			m_size -= size;
+
 			return true;
 		}
 
 		else {
-			if (m_next == (page*)0xdddddddddddddddd) {
-				LOG_INFO << "d";
-			}
-
 			if (m_next) {
 				return m_next->free(addr, size);
 			}
@@ -215,10 +215,11 @@ namespace util {
 	void pool_allocator::page::reset() {
 		m_freelist.clear();
 		if (m_memory) {
-			m_freelist.emplace_back(m_memory, m_size);
+			m_freelist.emplace_back(m_memory, m_capacity);
+			m_size = 0;
 
 #ifdef IW_DEBUG
-			memset(m_memory, 0xee, m_size);
+			memset(m_memory, 0xee, m_capacity);
 #endif
 
 			//delete m_next;
@@ -234,6 +235,10 @@ namespace util {
 		return m_memory;
 	}
 
+	size_t pool_allocator::page::size() const {
+		return m_size + (m_next ? m_next->size() : 0);
+	}
+
 	const std::list<pool_allocator::page::freemem>& pool_allocator::page::freelist() const {
 		return m_freelist;
 	}
@@ -246,7 +251,7 @@ namespace util {
 		size_t size)
 	{
 		if (m_next == nullptr) {
-			m_next = new page(this, m_size);
+			m_next = new page(this, m_capacity);
 		}
 
 		return m_next->alloc(size);
