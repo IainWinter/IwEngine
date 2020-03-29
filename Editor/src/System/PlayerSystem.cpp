@@ -195,6 +195,13 @@ bool PlayerSystem::On(
 bool PlayerSystem::On(
 	iw::CollisionEvent& event)
 {
+	// i frames
+	//Player* p = player.FindComponent<Player>();
+
+	//if (p->Timer >= p->DashTime - 0.05f) {
+	//	return false;
+	//}
+
 	iw::Entity a = Space->FindEntity(event.ObjA);
 	if (a == iw::EntityHandle::Empty) {
 		a = Space->FindEntity<iw::Rigidbody>(event.ObjA);

@@ -15,6 +15,11 @@ public:
 		Bullet* Bullet;
 	};
 private:
+	struct BulletComponents {
+		iw::Transform* Transform;
+		Bullet* Bullet;
+	};
+
 	iw::Entity& player;
 
 public:
@@ -24,5 +29,6 @@ public:
 	void FixedUpdate(
 		iw::EntityComponentArray& view) override;
 
-	bool On(iw::CollisionEvent& event) override;
+	bool On(iw::CollisionEvent& e) override;
+	bool On(iw::EntityDestroyedEvent& e) override;
 };
