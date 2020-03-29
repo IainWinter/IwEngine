@@ -5,40 +5,54 @@
   },
   "CameraFollow": 0,
   "Enemies": {
-    "size": 2,
+    "size": 3,
     "items": [
       {
         "Type": 1,
         "Bullet": {
-          "Type": 1,
+          "Type": 0,
           "Speed": 5.000000
         },
         "Speed": 0.6283185,
-        "FireTime": 1.50000,
+        "FireTime": 2.00000,
         "CooldownTime": 0.000000
       },
       {
-        "Type": 1,
+        "Type": 0,
         "Bullet": {
-          "Type": 1,
+          "Type": 0,
           "Speed": 5.000000
         },
-        "Speed": 0.6283185,
-        "FireTime": 1.50000,
+        "Speed": 0.2617994,
+        "FireTime": 0.120000,
+        "CooldownTime": 0.000000
+      },
+      {
+        "Type": 0,
+        "Bullet": {
+          "Type": 0,
+          "Speed": 5.000000
+        },
+        "Speed": -0.2617994,
+        "FireTime": 0.120000,
         "CooldownTime": 0.000000
       }
     ]
   },
   "Positions": {
-    "size": 2,
+    "size": 3,
     "items": [
       {
-        "x": 6.000000,
-        "y": 4.000000
+        "x": 12.000000,
+        "y": 0.000000
       },
       {
         "x": 0.000000,
-        "y": -4.000000
+        "y": 5.000000
+      },
+      {
+        "x":  0.000000,
+        "y": -5.000000
       }
     ]
   },

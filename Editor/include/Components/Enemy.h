@@ -4,7 +4,8 @@
 
 enum class REFLECT EnemyType {
 	SPIN,
-	CIRCLE
+	CIRCLE,
+	SEEK
 };
 
 struct REFLECT Enemy {

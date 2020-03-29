@@ -14,9 +14,12 @@ public:
 		iw::Rigidbody* Rigidbody;
 		Bullet* Bullet;
 	};
+private:
+	iw::Entity& player;
 
 public:
-	BulletSystem();
+	BulletSystem(
+		iw::Entity& player);
 
 	void FixedUpdate(
 		iw::EntityComponentArray& view) override;

@@ -42,8 +42,8 @@ namespace Graphics {
 		};
 
 		struct BeginSceneOP {
-			Scene* Scene;
-			Camera* Camera; // if nullptr use camera
+			Scene*  Scene; // if nullptr use camera
+			Camera* Camera;
 			ref<RenderTarget> Target;
 		};
 
@@ -52,14 +52,14 @@ namespace Graphics {
 		};
 
 		struct DrawMeshOP {
-			Transform Transform;
+			Transform Transform; // see End function
 			Mesh* Mesh;
 		};
 
 		struct RenderItem {
-			uint64_t  Order;
+			uint64_t Order;
 			RenderOP OP;
-			void*    Data;
+			void* Data;
 
 			RenderItem()
 				: Order(0)

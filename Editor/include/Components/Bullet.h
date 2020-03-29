@@ -6,6 +6,7 @@
 enum BulletType {
 	LINE,
 	SINE,
+	ORBIT,
 	SEEK
 };
 
@@ -15,4 +16,5 @@ struct REFLECT Bullet {
 
 	float Time;
 	iw::vector3 initialVelocity;
+	int enemyIndex;
 };

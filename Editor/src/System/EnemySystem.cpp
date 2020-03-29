@@ -12,11 +12,13 @@
 #include "Events/ActionEvents.h"
 #include "iw/audio/AudioSpaceStudio.h"
 
-EnemySystem::EnemySystem()
+EnemySystem::EnemySystem(
+	iw::Entity& player)
 	: iw::System<iw::Transform, Enemy>("Enemy")
 	, m_bulletModel(nullptr)
 	, m_enemyCount(0)
 	, m_levelResetTimer(0)
+	, player(player)
 {}
 
 int EnemySystem::Initialize() {
@@ -57,7 +59,8 @@ void EnemySystem::Update(
 					iw::Transform* bullet = SpawnBullet(
 						enemy->Bullet,
 						transform->Position,
-						iw::quaternion::from_euler_angles(0, enemy->Rotation, 0)
+						iw::quaternion::from_euler_angles(0, enemy->Rotation, 0),
+						entity.Index
 					);
 
 					transform->Parent()->AddChild(bullet);
@@ -65,15 +68,30 @@ void EnemySystem::Update(
 					break;
 				}
 				case EnemyType::CIRCLE: {
-					for (float i = 1; i < iw::Pi2 / enemy->Speed; i++) {
+					int count = roundf(iw::Pi2 / enemy->Speed);
+					for (float i = 0; i < count; i++) {
 						iw::Transform* bullet = SpawnBullet(
 							enemy->Bullet,
 							transform->Position,
-							iw::quaternion::from_euler_angles(0, enemy->Rotation + enemy->Speed * i, 0)
+							iw::quaternion::from_euler_angles(0, enemy->Rotation + enemy->Speed * i, 0),
+							entity.Index
 						);
 
 						transform->Parent()->AddChild(bullet);
 					}
+
+					break;
+				}
+				case EnemyType::SEEK: {
+					iw::Transform* bullet = SpawnBullet(
+						enemy->Bullet,
+						transform->Position,
+						iw::quaternion::from_look_at(transform->Position, player.FindComponent<iw::Transform>()->Position)
+						* iw::quaternion::from_euler_angles(0, -iw::Pi / 2, 0),
+						entity.Index
+					);
+
+					transform->Parent()->AddChild(bullet);
 
 					break;
 				}
@@ -82,12 +100,12 @@ void EnemySystem::Update(
 			enemy->Rotation = fmod(enemy->Rotation + enemy->Speed, iw::Pi2);
 		}
 
-		if (enemy->Timer <= -enemy->CooldownTime) {
+		else if (enemy->Timer < -enemy->CooldownTime) {
 			enemy->HasShot = false;
 			enemy->Timer = enemy->FireTime;
 		}
 
-		if (enemy->Timer >= -enemy->CooldownTime) {
+		else /*if (enemy->Timer >= -enemy->CooldownTime) */{
 			enemy->Timer -= iw::Time::DeltaTime();
 		}
 	}
@@ -169,7 +187,8 @@ bool EnemySystem::On(
 iw::Transform* EnemySystem::SpawnBullet(
 	Bullet prefab,
 	iw::vector3 position,
-	iw::quaternion rot)
+	iw::quaternion rot,
+	int index)
 {
 	iw::Entity bullet = Space->CreateEntity<iw::Transform, iw::Model, iw::SphereCollider, iw::Rigidbody, Bullet>();
 	
@@ -180,6 +199,8 @@ iw::Transform* EnemySystem::SpawnBullet(
 	iw::Rigidbody*      r = bullet.SetComponent<iw::Rigidbody>     ();
 
 	b->initialVelocity = iw::vector3::unit_x * rot * prefab.Speed;
+
+	b->enemyIndex = index;
 
 	r->SetMass(1);
 	r->SetCol(s);

@@ -9,8 +9,10 @@ struct PlayerComponents {
 	Player* Player;
 };
 
-BulletSystem::BulletSystem()
+BulletSystem::BulletSystem(
+	iw::Entity& player)
 	: iw::System<iw::Transform, iw::Rigidbody, Bullet>("Bullet")
+	, player(player)
 {}
 
 void BulletSystem::FixedUpdate(
@@ -21,25 +23,20 @@ void BulletSystem::FixedUpdate(
 
 		switch (bullet->Type) {
 			case SINE: {
-				rigidbody->SetVelocity(bullet->initialVelocity * (1 + sin(bullet->Time * 5)) * 0.5f);
+				float speed = (sin(bullet->Time * 5) + 1) * 0.5f;
+				rigidbody->SetVelocity(bullet->initialVelocity * speed);
+
+				break;
+			}
+			case ORBIT: {
+				iw::vector3 target = player.FindComponent<iw::Transform>()->Position;
+				rigidbody->ApplyForce((target - transform->Position) * 0.5f);
+
 				break;
 			}
 			case SEEK: {
-				iw::vector3 target;
-				float maxDistance = -1;
-				for (auto entity : Space->Query<iw::Transform, Player>()) {
-					auto [pt, p] = entity.Components.Tie<PlayerComponents>();
-
-					float distance = (pt->Position - transform->Position).length();
-					if (distance > maxDistance) {
-						target = pt->Position;
-						maxDistance = distance;
-					}
-				}
-
-				if (maxDistance != -1) {
-					rigidbody->ApplyForce((target - transform->Position) * 0.5f);
-				}
+				iw::vector3 target = player.FindComponent<iw::Transform>()->Position;
+				rigidbody->SetVelocity((target - transform->Position).normalized() * bullet->Speed);
 
 				break;
 			}
@@ -83,8 +80,9 @@ bool BulletSystem::On(
 		other  = a;
 	}
 
-	if (    other != iw::EntityHandle::Empty
-		&& (other.HasComponent<Enemy>() || other.HasComponent<Bullet>()))
+	if (   other != iw::EntityHandle::Empty
+		&& (   other.HasComponent<Bullet>() 
+			|| other.Index() == bullet.FindComponent<Bullet>()->enemyIndex))
 	{
 		return false;
 	}

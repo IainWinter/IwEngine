@@ -84,10 +84,10 @@ bool GameCameraController::On(
 			center.x = event.CenterPosition.x;
 			center.z = event.CenterPosition.y;
 
-			if (event.CameraFollow) {
-				center.x += event.PlayerPosition.x;
-				center.z += event.PlayerPosition.y;
-			}
+			//if (event.CameraFollow) {
+			//	center.x += event.PlayerPosition.x;
+			//	center.z += event.PlayerPosition.y;
+			//}
 
 			break;
 		}

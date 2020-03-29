@@ -18,8 +18,11 @@ private:
 	int m_enemyCount;
 	float m_levelResetTimer;
 
+	iw::Entity& player;
+
 public:
-	EnemySystem();
+	EnemySystem(
+		iw::Entity& player);
 
 	int Initialize() override;
 
@@ -35,5 +38,6 @@ private:
 	iw::Transform* SpawnBullet(
 		Bullet prefab,
 		iw::vector3 position,
-		iw::quaternion rot);
+		iw::quaternion rot,
+		int index);
 };

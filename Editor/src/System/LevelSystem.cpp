@@ -37,7 +37,7 @@ LevelSystem::LevelSystem(
 
 	//currentLevel = 0;
 
-	currentLevelName = "levels/forest/forest1.json";
+	currentLevelName = "levels/forest/forest10.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 127);
 	closedColor = iw::Color::From255(201, 66, 66, 127);

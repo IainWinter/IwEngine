@@ -5,18 +5,8 @@
   },
   "CameraFollow": false,
   "Enemies": {
-    "size": 2,
+    "size": 1,
     "items": [
-      {
-        "Type": 0,
-        "Bullet": {
-          "Type": 0,
-          "Speed": 5.000000
-        },
-        "Speed": 0.2617994,
-        "FireTime": 0.120000,
-        "CooldownTime": 0.000000
-      },
       {
         "Type": 0,
         "Bullet": {
@@ -30,15 +20,11 @@
     ]
   },
   "Positions": {
-    "size": 2,
+    "size": 1,
     "items": [
       {
         "x": 6.000000,
         "y": 3.000000
-      },
-      {
-        "x": 2.000000,
-        "y": -3.000000
       }
     ]
   },

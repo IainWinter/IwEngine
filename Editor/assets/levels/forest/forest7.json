@@ -10,8 +10,8 @@
       {
         "Type": 0,
         "Bullet": {
-          "Type": 0,
-          "Speed": 5.000000
+          "Type": 2,
+          "Speed": 7.000000
         },
         "Speed": 0.2617994,
         "FireTime": 0.120000,

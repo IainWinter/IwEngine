@@ -254,8 +254,8 @@ namespace iw {
 
 		playerSystem = PushSystem<PlayerSystem>();
 		PushSystem<PhysicsSystem>();
-		PushSystem<EnemySystem>();
-		PushSystem<BulletSystem>();
+		PushSystem<EnemySystem>(playerSystem->GetPlayer());
+		PushSystem<BulletSystem>(playerSystem->GetPlayer());
 		PushSystem<LevelSystem>(playerSystem->GetPlayer());
 		PushSystem<GameCameraController>(playerSystem->GetPlayer(), scene);
 
@@ -419,14 +419,14 @@ namespace iw {
 		return false;
 	}
 
-	bool SandboxLayer::On(
-		KeyTypedEvent& e)
-	{
-		str += e.Character;
-		font->UpdateMesh(textMesh, str, .01f, 1);
+	//bool SandboxLayer::On(
+	//	KeyTypedEvent& e)
+	//{
+	//	str += e.Character;
+	//	font->UpdateMesh(textMesh, str, .01f, 1);
 
-		return false;
-	}
+	//	return false;
+	//}
 
 	bool SandboxLayer::On(
 		ActionEvent& e)
