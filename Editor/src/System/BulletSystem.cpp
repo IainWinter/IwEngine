@@ -94,22 +94,3 @@ bool BulletSystem::On(
 
 	return false;
 }
-
-bool BulletSystem::On(
-	iw::EntityDestroyedEvent& e)
-{
-	if (e.Entity.HasComponent<Enemy>()) {
-		iw::vector3 position = e.Entity.FindComponent<iw::Transform>()->Position;
-
-		for (auto entity : Space->Query<iw::Transform, Bullet>()) {
-			auto [transform, bullet] = entity.Components.Tie<BulletComponents>();
-
-			float distance = (transform->Position - position).length();
-			if (distance < 4) {
-				Space->DestroyEntity(entity.Index);
-			}
-		}
-	}
-
-	return false;
-}

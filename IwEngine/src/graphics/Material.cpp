@@ -7,6 +7,7 @@ namespace Graphics {
 		: m_alloc(128)
 		, m_initialized(false)
 		, m_transparency(Transparency::NONE)
+		, m_castShadows(true)
 		, m_order(0)
 	{}
 	
@@ -16,18 +17,20 @@ namespace Graphics {
 		, m_alloc(128)
 		, m_initialized(false)
 		, m_transparency(Transparency::NONE)
+		, m_castShadows(true)
 		, m_order(0)
 	{}
 
 	Material::Material(
 		const Material& other)
-		: Shader       (other.Shader)
-		, m_alloc      (other.m_alloc.capacity())
-		, m_properties (other.m_properties)
-		, m_textures   (other.m_textures)
-		, m_index      (other.m_index)
-		, m_initialized(other.m_initialized)
+		: Shader        (other.Shader)
+		, m_alloc       (other.m_alloc.capacity())
+		, m_properties  (other.m_properties)
+		, m_textures    (other.m_textures)
+		, m_index       (other.m_index)
 		, m_transparency(other.m_transparency)
+		, m_castShadows (other.m_castShadows)
+		, m_initialized (other.m_initialized)
 		, m_order(0)
 	{
 		for (auto& prop : m_properties) {
@@ -45,8 +48,9 @@ namespace Graphics {
 		, m_properties  (std::move(other.m_properties))
 		, m_textures    (std::move(other.m_textures))
 		, m_index       (std::move(other.m_index))
-		, m_initialized (std::move(other.m_initialized))
-		, m_transparency(std::move(other.m_transparency))
+		, m_transparency(other.m_transparency)
+		, m_castShadows (other.m_castShadows)
+		, m_initialized (other.m_initialized)
 		, m_order       (other.m_order)
 	{}
 
@@ -60,8 +64,9 @@ namespace Graphics {
 		m_properties   = other.m_properties;
 		m_textures     = other.m_textures;
 		m_index        = other.m_index;
-		m_initialized  = other.m_initialized;
 		m_transparency = other.m_transparency;
+		m_castShadows  = other.m_castShadows;
+		m_initialized  = other.m_initialized;
 		m_order        = 0;
 
 		for (auto& prop : m_properties) {
@@ -82,8 +87,9 @@ namespace Graphics {
 		m_properties   = std::move(other.m_properties);
 		m_textures     = std::move(other.m_textures);
 		m_index        = std::move(other.m_index);
-		m_initialized  = std::move(other.m_initialized);
-		m_transparency = std::move(other.m_transparency);
+		m_transparency = other.m_transparency;
+		m_castShadows  = other.m_castShadows;
+		m_initialized  = other.m_initialized;
 		m_order        = 0;
 
 		return *this;
@@ -297,10 +303,20 @@ namespace Graphics {
 		return m_transparency;
 	}
 
+	bool Material::CastShadows() const {
+		return m_castShadows;
+	}
+
 	void Material::SetTransparency(
 		Transparency transparency)
 	{
 		m_transparency = transparency;
+	}
+
+	void Material::SetCastShadows(
+		bool castShadows)
+	{
+		m_castShadows = castShadows;
 	}
 
 	void Material::SetProperty(

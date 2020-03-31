@@ -2,6 +2,7 @@
 #include "Systems/EnemySystem.h"
 #include "Systems/BulletSystem.h"
 #include "Systems/LevelSystem.h"
+#include "Systems/EnemyDeathCircleSystem.h"
 #include "Systems/GameCameraController.h"
 #include "Events/ActionEvents.h"
 #include "iw/engine/Systems/PhysicsSystem.h"
@@ -211,8 +212,7 @@ namespace iw {
 
 		//	Player
 
-		Model pm { new Mesh[1], 1 };
-		pm.Meshes[0] = smesh->Instance();
+		Model pm { smesh, 1 };
 		pm.Meshes[0].Material = REF<Material>(smat->Instance());
 
 		Asset->Give<Model>("Player", &pm);
@@ -258,6 +258,7 @@ namespace iw {
 		PushSystem<BulletSystem>(playerSystem->GetPlayer());
 		PushSystem<LevelSystem>(playerSystem->GetPlayer());
 		PushSystem<GameCameraController>(playerSystem->GetPlayer(), scene);
+		PushSystem<EnemyDeathCircleSystem>();
 
 		return Layer::Initialize();
 	}
@@ -269,36 +270,36 @@ namespace iw {
 		
 		// Shadow maps
 
-		for(Light* light : scene->DirectionalLights()) {
-			if (!light->CanCastShadows()) {
-				continue;
-			}
+		//for(Light* light : scene->DirectionalLights()) {
+		//	if (!light->CanCastShadows()) {
+		//		continue;
+		//	}
+		//
+		//	Renderer->BeginShadowCast(light);
+		//
+		//	for (auto m_e : Space->Query<Transform, Model>()) {
+		//		auto [m_t, m_m] = m_e.Components.Tie<ModelComponents>();
+		//
+		//		for (size_t i = 0; i < m_m->MeshCount; i++) {
+		//			//iw::ref<Texture> t = m_m->Meshes[i].Material->GetTexture("alphaMaskMap");
+		//
+		//			//ITexture* it = nullptr;
+		//			//if (t) {
+		//			//	it = t->Handle();
+		//			//}
+		//
+		//			//light->ShadowShader()->Handle()->GetParam("hasAlphaMask")->SetAsFloat(it != nullptr);
+		//			//light->ShadowShader()->Handle()->GetParam("alphaMask")->SetAsTexture(it, 0);
+		//			//light->ShadowShader()->Handle()->GetParam("alphaThreshold")->SetAsFloat(threshold);
+		//
+		//			Renderer->DrawMesh(m_t, &m_m->Meshes[i]);
+		//		}
+		//	}
+		//
+		//	Renderer->EndShadowCast();
+		//}
 
-			Renderer->BeginShadowCast(light);
-
-			for (auto m_e : Space->Query<Transform, Model>()) {
-				auto [m_t, m_m] = m_e.Components.Tie<ModelComponents>();
-
-				for (size_t i = 0; i < m_m->MeshCount; i++) {
-					//iw::ref<Texture> t = m_m->Meshes[i].Material->GetTexture("alphaMaskMap");
-
-					//ITexture* it = nullptr;
-					//if (t) {
-					//	it = t->Handle();
-					//}
-
-					//light->ShadowShader()->Handle()->GetParam("hasAlphaMask")->SetAsFloat(it != nullptr);
-					//light->ShadowShader()->Handle()->GetParam("alphaMask")->SetAsTexture(it, 0);
-					//light->ShadowShader()->Handle()->GetParam("alphaThreshold")->SetAsFloat(threshold);
-
-					Renderer->DrawMesh(m_t, &m_m->Meshes[i]);
-				}
-			}
-
-			Renderer->EndShadowCast();
-		}
-
-		for (Light* light : scene->PointLights()) {
+		for (Light* light : scene->Lights()) {
 			if (!light->CanCastShadows()) {
 				continue;
 			}
@@ -308,7 +309,9 @@ namespace iw {
 				for (auto entity : Space->Query<Transform, Model>()) {
 					auto [transform, model] = entity.Components.Tie<ModelComponents>();
 					for (size_t i = 0; i < model->MeshCount; i++) {
-						Renderer->DrawMesh(transform, &model->Meshes[i]);
+						if (model->Meshes[i].Material->CastShadows()) {
+							Renderer->DrawMesh(transform, &model->Meshes[i]);
+						}
 					}
 				}
 

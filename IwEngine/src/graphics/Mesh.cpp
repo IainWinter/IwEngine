@@ -202,8 +202,9 @@ namespace Graphics {
 #endif
 	}
 
-	Mesh Mesh::Instance() const {
-		return *this;
+	Mesh* Mesh::Instance() const {
+		Mesh* mesh = new Mesh(*this);
+		return mesh;
 	}
 
 	// Generate vertex normals by averaging the face normals of the surrounding faces

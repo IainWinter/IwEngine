@@ -22,11 +22,16 @@ namespace Asset {
 
 	private:
 		virtual _a* LoadAsset(
-			std::string filepath) = 0;
+			std::string filepath)
+		{
+			return nullptr;
+		}
 
 		virtual void FreeAsset(
 			_a* asset)
-		{}
+		{
+			// find and remove from m_loaded
+		}
 	public:
 		AssetLoader(
 			AssetManager& asset)

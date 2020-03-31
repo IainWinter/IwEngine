@@ -56,8 +56,7 @@ namespace Graphics {
 		Mesh(
 			MeshTopology topology);
 
-		IWGRAPHICS_API
-		~Mesh() = default;
+		GEN_default5(IWGRAPHICS_API, Mesh)
 
 		// Sends the mesh to video memory
 		IWGRAPHICS_API
@@ -90,7 +89,7 @@ namespace Graphics {
 			const ref<IDevice>& device);
 
 		IWGRAPHICS_API
-		Mesh Instance() const; // makes a copy but references the same data
+		Mesh* Instance() const; // makes a copy but references the same data
 		//Mesh Clone() const; // will clone the meshs data
 
 		IWGRAPHICS_API

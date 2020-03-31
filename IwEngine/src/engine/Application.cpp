@@ -79,6 +79,8 @@ namespace Engine {
 		Asset->SetLoader<ShaderLoader>();
 		Asset->SetLoader<FontLoader>();
 
+		Asset->SetLoader<AssetLoader<Mesh>>(); // make asset store that asset loader extends loading abilities to
+
 		// Space
 
 		Space->SetEventBus(Bus);

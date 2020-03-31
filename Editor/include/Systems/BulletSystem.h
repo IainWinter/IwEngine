@@ -30,5 +30,4 @@ public:
 		iw::EntityComponentArray& view) override;
 
 	bool On(iw::CollisionEvent& e) override;
-	bool On(iw::EntityDestroyedEvent& e) override;
 };

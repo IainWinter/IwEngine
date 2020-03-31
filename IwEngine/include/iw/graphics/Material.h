@@ -54,10 +54,11 @@ namespace Graphics {
 
 		std::unordered_map<std::string, unsigned> m_index; // also done in pipeline seems bad
 
-		bool m_initialized;
-
 		Transparency m_transparency;
+		bool m_castShadows;
 
+
+		bool m_initialized;
 		int m_order;
 
 	public:
@@ -149,8 +150,15 @@ namespace Graphics {
 		Transparency GetTransparency() const;
 
 		IWGRAPHICS_API
+		bool CastShadows() const;
+
+		IWGRAPHICS_API
 		void SetTransparency(
 			Transparency transparency);
+
+		IWGRAPHICS_API
+		void SetCastShadows(
+			bool castShadows);
 
 		int __GetOrder() const {
 			return m_order;

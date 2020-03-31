@@ -3,13 +3,15 @@
 #include "iw/engine/Events/ActionEvents.h"
 
 #include "iw/math/vector2.h"
+#include "iw/math/vector3.h"
 
 enum class Actions
 	: int
 {
 	DEV_CONSOLE,
 	JUMP, RIGHT, FORWARD, USE,
-	RESET_LEVEL, START_LEVEL, UNLOCK_LEVEL_DOOR, LOAD_NEXT_LEVEL, GOTO_NEXT_LEVEL, AT_NEXT_LEVEL
+	RESET_LEVEL, START_LEVEL, UNLOCK_LEVEL_DOOR, LOAD_NEXT_LEVEL, GOTO_NEXT_LEVEL, AT_NEXT_LEVEL,
+	SPAWN_ENEMY_DEATH
 };
 
 struct DevConsoleEvent
@@ -119,5 +121,17 @@ struct AtNextLevelEvent
 {
 	AtNextLevelEvent()
 		: iw::SingleEvent(iw::val(Actions::AT_NEXT_LEVEL))
+	{}
+};
+
+struct SpawnEnemyDeath
+	: iw::SingleEvent
+{
+	iw::vector3 Position;
+
+	SpawnEnemyDeath(
+		iw::vector3 position)
+		: iw::SingleEvent(iw::val(Actions::SPAWN_ENEMY_DEATH))
+		, Position(position)
 	{}
 };

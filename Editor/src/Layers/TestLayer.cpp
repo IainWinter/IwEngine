@@ -88,7 +88,7 @@ namespace iw {
 			Entity entity = Space->CreateEntity<Transform, Mesh, PlaneCollider, CollisionObject>();
 
 			Transform* transform = entity.SetComponent<Transform>(iw::vector3(0, 0, 0), 15);
-			Mesh*      mesh      = entity.SetComponent<Mesh>(plane->Instance());
+			Mesh*      mesh      = entity.SetComponent<Mesh>(*plane);
 			PlaneCollider*   col = entity.SetComponent<PlaneCollider>(vector3::unit_y, 0);
 			CollisionObject* obj = entity.SetComponent<CollisionObject>();
 
@@ -203,9 +203,9 @@ namespace iw {
 			Entity entity = Space->CreateEntity<Transform, Mesh, SphereCollider, Rigidbody>();
 
 			Transform* transform = entity.SetComponent<Transform>(iw::vector3(0, 5, 0));
-			Mesh* mesh = entity.SetComponent<Mesh>(sphere->Instance());
-			SphereCollider* col = entity.SetComponent<SphereCollider>(vector3::zero, 1);
-			Rigidbody* body = entity.SetComponent<Rigidbody>();
+			Mesh* mesh           = entity.SetComponent<Mesh>(*sphere->Instance());
+			SphereCollider* col  = entity.SetComponent<SphereCollider>(vector3::zero, 1);
+			Rigidbody* body      = entity.SetComponent<Rigidbody>();
 
 			mesh->Material = REF<Material>(shader);
 

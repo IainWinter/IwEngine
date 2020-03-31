@@ -22,13 +22,18 @@ EnemySystem::EnemySystem(
 {}
 
 int EnemySystem::Initialize() {
-	m_bulletModel = Asset->Load<iw::Model>("Sphere");
-	
-	iw::ref<iw::Material> blue = REF<iw::Material>(m_bulletModel->Meshes[0].Material->Instance());
+	iw::Mesh*    mesh = Asset->Load<iw::Model>("Sphere")->Meshes[0].Instance();
+	iw::Material mat  = mesh->Material->Instance();
 
-	blue->Set("albedo", iw::Color::From255(0, 213, 255, 128));
+	iw::Model bullet = { mesh, 1 };
 
-	m_bulletModel->Meshes[0].Material = blue;
+	m_bulletModel = Asset->Give<iw::Model>("Bullet", &bullet);
+
+	mat.Set("albedo", iw::Color::From255(0, 213, 255, 128));
+	mat.SetTransparency(iw::Transparency::ADD);
+	//mat.SetCastShadows(false);
+
+	m_bulletModel->Meshes[0].Material = REF<iw::Material>(mat);
 
 	return 0;
 }
@@ -162,7 +167,9 @@ bool EnemySystem::On(
 		if (playerComponent->Timer > 0) {
 			Audio->AsStudio()->CreateInstance("enemyDeath");
 
-			enemy.FindComponent<iw::Transform>()->SetParent(nullptr);
+			Bus->push<SpawnEnemyDeath>(enemy.FindComponent<iw::Transform>()->Position);
+
+			enemy.FindComponent<iw::Transform>()->SetParent(nullptr); // got moved to enemtdeathcirclesystem but should be in seperate system that cleans up destroied entities (remove from physics / transform tree)
 			Space->DestroyEntity(enemy.Index());
 		}
 	}
