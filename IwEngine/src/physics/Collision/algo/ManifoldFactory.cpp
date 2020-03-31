@@ -8,11 +8,11 @@ namespace algo {
 		const SphereCollider* a, const Transform* ta,
 		const SphereCollider* b, const Transform* tb)
 	{
-		vector3 A = a->Center + ta->Position;
-		vector3 B = b->Center + tb->Position;
+		vector3 A = a->Center + ta->WorldPosition();
+		vector3 B = b->Center + tb->WorldPosition();
 
-		float Ar = a->Radius * ta->Scale.x;
-		float Br = b->Radius * tb->Scale.x;
+		float Ar = a->Radius * ta->WorldScale().x;
+		float Br = b->Radius * tb->WorldScale().x;
 
 		vector3 AtoB = B - A;
 		vector3 BtoA = A - B;
@@ -45,11 +45,13 @@ namespace algo {
 		const SphereCollider* a, const Transform* ta,
 		const PlaneCollider*  b, const Transform* tb)
 	{
-		vector3 A = a->Center + ta->Position;
-		vector3 N = b->Plane.P.normalized() * tb->Rotation + tb->Position;
+		vector3 A = a->Center  + ta->WorldPosition();
+		vector3 N = b->Plane.P * tb->WorldRotation() + tb->WorldPosition();
+		N.normalize();
+		
 		vector3 P = N * b->Plane.D;
 
-		float Ar = a->Radius * ta->Scale.x;
+		float Ar = a->Radius * ta->WorldScale().x;
 
 		float d = (A - P).dot(N);
 
@@ -77,12 +79,12 @@ namespace algo {
 		const SphereCollider*  a, const Transform* ta,
 		const CapsuleCollider* b, const Transform* tb)
 	{
-		vector3 A = a->Center   + ta->Position;
-		vector3 B = b->Position + tb->Position;
-		vector3 C = B + b->Offset;
+		vector3 A = a->Center   + ta->WorldPosition();
+		vector3 B = b->Position + tb->WorldPosition();
+		vector3 C = B + b->Offset * tb->WorldRotation() * tb->WorldScale(); // might not be correct
 		
-		float Ar = a->Radius * ta->Scale.x;
-		float Br = b->Radius * tb->Scale.x;
+		float Ar = a->Radius * ta->WorldScale().x;
+		float Br = b->Radius * tb->WorldScale().x;
 
 		vector3 BtoA = A - B;
 		vector3 BtoC = C - B;

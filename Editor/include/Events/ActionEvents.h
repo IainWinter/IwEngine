@@ -4,6 +4,7 @@
 
 #include "iw/math/vector2.h"
 #include "iw/math/vector3.h"
+#include "iw/common/Components/Transform.h"
 
 enum class Actions
 	: int
@@ -101,15 +102,18 @@ struct LoadNextLevelEvent
 struct GoToNextLevelEvent
 	: iw::SingleEvent
 {
+	std::string LevelName;
 	bool CameraFollow;
 	iw::vector2 PlayerPosition;
 	iw::vector2 CenterPosition;
 
 	GoToNextLevelEvent(
+		std::string levelName,
 		bool cameraFollow,
 		iw::vector2 playerPosition,
 		iw::vector2 centerPosition)
 		: iw::SingleEvent(iw::val(Actions::GOTO_NEXT_LEVEL))
+		, LevelName(levelName)
 		, CameraFollow(cameraFollow)
 		, PlayerPosition(playerPosition)
 		, CenterPosition(centerPosition)
@@ -128,10 +132,13 @@ struct SpawnEnemyDeath
 	: iw::SingleEvent
 {
 	iw::vector3 Position;
+	iw::Transform* Level;
 
 	SpawnEnemyDeath(
-		iw::vector3 position)
+		iw::vector3 position,
+		iw::Transform* level)
 		: iw::SingleEvent(iw::val(Actions::SPAWN_ENEMY_DEATH))
 		, Position(position)
+		, Level(level)
 	{}
 };

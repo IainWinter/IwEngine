@@ -212,7 +212,7 @@ namespace util {
 		return false;
 	}
 
-	void pool_allocator::page::reset() {
+	void pool_allocator::page::reset() {	
 		m_freelist.clear();
 		if (m_memory) {
 			m_freelist.emplace_back(m_memory, m_capacity);

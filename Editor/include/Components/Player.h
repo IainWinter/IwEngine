@@ -5,7 +5,7 @@
 struct REFLECT Player {
 	REFLECT float Speed;
 	REFLECT float DashTime;
-	REFLECT float CooldownTime;
+	REFLECT float ChargeTime;
 	REFLECT int   Health;
 
 	float Timer;

@@ -13,7 +13,7 @@ struct REFLECT Enemy {
 	REFLECT Bullet Bullet;
 	REFLECT float Speed;
 	REFLECT float FireTime;
-	REFLECT float CooldownTime;
+	REFLECT float ChargeTime;
 
 	float Timer;
 	float Rotation;

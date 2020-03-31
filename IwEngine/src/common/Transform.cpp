@@ -89,13 +89,13 @@ namespace Engine {
 	}
 
 	vector3 Transform::WorldScale() const {
-		vector3 parent = vector3::zero;
+		vector3 parent = vector3::one;
 
 		if (m_parent) {
 			parent = m_parent->WorldScale();
 		}
 
-		return Scale + parent;
+		return Scale * parent;
 	}
 
 	quaternion Transform::WorldRotation() const {

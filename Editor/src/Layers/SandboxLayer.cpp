@@ -1,5 +1,4 @@
 #include "Layers/SandboxLayer.h"
-#include "Systems/EnemySystem.h"
 #include "Systems/BulletSystem.h"
 #include "Systems/LevelSystem.h"
 #include "Systems/EnemyDeathCircleSystem.h"
@@ -77,7 +76,7 @@ namespace iw {
 		font = Asset->Load<Font>("fonts/arial.fnt");
 		font->Initialize(Renderer->Device);
 
-		textMesh = font->GenerateMesh("Winter.dev", .01f, 1);
+		textMesh = font->GenerateMesh("Use arrow keys to move and x to attack.\ni: debug menu\nt: freecam", .005f, 1);
 
 		fontShader = Asset->Load<Shader>("shaders/font.shader");
 		Renderer->InitShader(fontShader, CAMERA);
@@ -253,12 +252,13 @@ namespace iw {
 		// Systems
 
 		playerSystem = PushSystem<PlayerSystem>();
+		enemySystem  = PushSystem<EnemySystem>(playerSystem->GetPlayer());
 		PushSystem<PhysicsSystem>();
-		PushSystem<EnemySystem>(playerSystem->GetPlayer());
 		PushSystem<BulletSystem>(playerSystem->GetPlayer());
-		PushSystem<LevelSystem>(playerSystem->GetPlayer());
 		PushSystem<GameCameraController>(playerSystem->GetPlayer(), scene);
 		PushSystem<EnemyDeathCircleSystem>();
+
+		PushSystem<LevelSystem>(playerSystem->GetPlayer());
 
 		return Layer::Initialize();
 	}
@@ -413,11 +413,19 @@ namespace iw {
 		ImGui::End();
 	}
 
+	bool settexttocursor = false;
+
 	bool SandboxLayer::On(
 		MouseMovedEvent& e)
 	{
-		str.clear();
-		font->UpdateMesh(textMesh, std::to_string((int)e.X) + '\n' + std::to_string((int)e.Y), .01f, 1);
+		if (settexttocursor) {
+			str.clear();
+			font->UpdateMesh(textMesh, std::to_string((int)e.X) + '\n' + std::to_string((int)e.Y), .01f, 1);
+		}
+
+		if (e.X < -1000) {
+			settexttocursor = true;
+		}
 
 		return false;
 	}
@@ -437,11 +445,18 @@ namespace iw {
 		switch (e.Action) {
 			case iw::val(Actions::GOTO_NEXT_LEVEL): {
 				playerSystem->On(e);
+				enemySystem ->On(e);
 				PopSystem(playerSystem);
+				PopSystem(enemySystem);
+
+				font->UpdateMesh(textMesh, "", .01f, 1);
+				settexttocursor = false;
+
 				break;
 			}
 			case iw::val(Actions::AT_NEXT_LEVEL): {
 				PushSystemFront(playerSystem);
+				PushSystemFront(enemySystem);
 				break;
 			}
 		}

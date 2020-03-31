@@ -102,7 +102,7 @@ namespace Engine {
 
 			// Execute queues space operations
 			while (!m_delete.empty()) {
-				size_t index = m_delete.front() ;
+				size_t index = m_delete.front();
 				Space->DestroyEntity(index);
 				m_delete.pop();
 			}

@@ -82,7 +82,7 @@ bool BulletSystem::On(
 
 	if (   other != iw::EntityHandle::Empty
 		&& (   other.HasComponent<Bullet>() 
-			|| other.Index() == bullet.FindComponent<Bullet>()->enemyIndex))
+			|| other.HasComponent<Enemy>()/*.Index() == bullet.FindComponent<Bullet>()->enemyIndex*/))
 	{
 		return false;
 	}

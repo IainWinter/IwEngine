@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Systems/PlayerSystem.h"
+#include "Systems/EnemySystem.h"
 #include "iw/engine/Layer.h"
 #include "iw/physics/Dynamics/DynamicsSpace.h"
 #include "iw/graphics/DirectionalLight.h"
@@ -18,6 +19,7 @@ namespace iw {
 	{
 	private:
 		PlayerSystem* playerSystem;
+		EnemySystem*  enemySystem;
 
 		Scene* scene;
 

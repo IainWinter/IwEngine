@@ -14,7 +14,7 @@ EnemyDeathCircleSystem::EnemyDeathCircleSystem()
 	, m_deathCircleModel(nullptr)
 {
 	m_prefab.Radius   = 4.0f;
-	m_prefab.FadeTime = 2.0f;
+	m_prefab.FadeTime = 0.4f;
 	m_prefab.Timer    = 0.0f;
 }
 
@@ -41,18 +41,25 @@ void EnemyDeathCircleSystem::Update(
 	for (auto entity : view) {
 		auto [transform, model, object, circle] = entity.Components.Tie<Components>();
 
+		float rate = circle->Radius / circle->FadeTime * iw::Time::DeltaTime();
+
 		if (circle->Timer > 2 * circle->FadeTime) {
+			transform->SetParent(nullptr);
 			QueueDestroyEntity(entity.Index);
 		}
 
 		else if (circle->Timer < circle->FadeTime) {
-			transform->Scale = iw::lerp(transform->Scale, iw::vector3(circle->Radius), circle->Radius / circle->FadeTime * iw::Time::DeltaTime());
+			transform->Scale = iw::lerp(transform->Scale, iw::vector3(circle->Radius), rate);
 			object->SetTrans(transform);
 		}
 
 		else {
 			iw::Color* color = model->Meshes[0].Material->Get<iw::Color>("albedo");
-			color->a = iw::lerp(color->a, 0.0f, circle->Radius / circle->FadeTime * iw::Time::DeltaTime());
+			color->a = iw::lerp(color->a, 0.0f, rate);
+
+			if (object->Col()) {
+				object->SetCol(nullptr);
+			}
 		}
 
 		circle->Timer += iw::Time::DeltaTime();
@@ -60,55 +67,12 @@ void EnemyDeathCircleSystem::Update(
 }
 
 bool EnemyDeathCircleSystem::On(
-	iw::CollisionEvent& e)
-{
-	iw::Entity a = Space->FindEntity(e.ObjA);
-	if (a == iw::EntityHandle::Empty) {
-		a = Space->FindEntity<iw::Rigidbody>(e.ObjA);
-	}
-
-	iw::Entity b = Space->FindEntity(e.ObjB);
-	if (b == iw::EntityHandle::Empty) {
-		b = Space->FindEntity<iw::Rigidbody>(e.ObjB);
-	}
-
-	if (   a == iw::EntityHandle::Empty
-		|| b == iw::EntityHandle::Empty)
-	{
-		return false;
-	}
-
-	iw::Entity circle;
-	iw::Entity bullet;
-	if (   a.HasComponent<EnemyDeathCircle>()
-		&& b.HasComponent<Bullet>())
-	{
-		circle = a;
-		bullet = b;
-	}
-
-	else if (b.HasComponent<EnemyDeathCircle>()
-		&&   a.HasComponent<Bullet>())
-	{
-		circle = b;
-		bullet = a;
-	}
-
-	if (   circle != iw::EntityHandle::Empty
-		&& bullet != iw::EntityHandle::Empty)
-	{
-		Space->DestroyEntity(bullet.Index());
-	}
-
-	return false;
-}
-
-bool EnemyDeathCircleSystem::On(
 	iw::ActionEvent& e)
 {
 	if (e.Action == iw::val(Actions::SPAWN_ENEMY_DEATH)) {
 		SpawnEnemyDeath& event = e.as<SpawnEnemyDeath>();
-		SpawnDeathCircle(m_prefab, event.Position);
+		iw::Transform* circle = SpawnDeathCircle(m_prefab, event.Position);
+		circle->SetParent(event.Level);
 	}
 
 	return false;

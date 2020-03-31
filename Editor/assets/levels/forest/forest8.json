@@ -15,7 +15,7 @@
         },
         "Speed": 0.2617994,
         "FireTime": 2.00000,
-        "CooldownTime": 0.000000
+        "ChargeTime": 0.000000
       },
       {
         "Type": 1,
@@ -25,7 +25,7 @@
         },
         "Speed": 0.2617994,
         "FireTime": 2.50000,
-        "CooldownTime": 0.000000
+        "ChargeTime": 0.000000
       },
       {
         "Type": 2,
@@ -35,7 +35,7 @@
         },
         "Speed": 0.0,
         "FireTime": 2.000000,
-        "CooldownTime": 0.000000
+        "ChargeTime": 0.000000
       }
     ]
   },

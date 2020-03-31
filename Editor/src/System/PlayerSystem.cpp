@@ -35,7 +35,7 @@ PlayerSystem::PlayerSystem()
 		// Default values
 		playerPrefab.Speed        = 4.0f;
 		playerPrefab.DashTime     = 8 / 60.0f;
-		playerPrefab.CooldownTime = 0.2f;
+		playerPrefab.ChargeTime = 0.2f;
 		playerPrefab.Health       = 3;
 
 #ifdef IW_DEBUG
@@ -87,14 +87,14 @@ void PlayerSystem::Update(
 		}
 
 		else {
-			if (player->Timer <= -player->CooldownTime) {
+			if (player->Timer <= -player->ChargeTime) {
 				if (dash) {
 					player->Timer = player->DashTime;
 					Audio->AsStudio()->CreateInstance("swordAttack");
 				}
 			}
 
-			else if (player->Timer >= -player->CooldownTime) {
+			else if (player->Timer >= -player->ChargeTime) {
 				player->Timer -= iw::Time::DeltaTime();
 			}
 
@@ -249,6 +249,8 @@ bool PlayerSystem::On(
 	return false;
 }
 
+std::string level = "";
+
 bool PlayerSystem::On(
 	iw::ActionEvent& event)
 {
@@ -264,6 +266,9 @@ bool PlayerSystem::On(
 
 			movement = 0;
 			dash = 0;
+
+			level = event.as<GoToNextLevelEvent>().LevelName;
+
 			break;
 		}
 		case iw::val(Actions::START_LEVEL): {
@@ -279,6 +284,11 @@ bool PlayerSystem::On(
 			r->SetIsKinematic(true);
 
 			*p = playerPrefab;
+
+			if (level == "models/block/forest12.dae") {
+				p->Health = 1000000;
+			}
+
 
 			// no break
 		}

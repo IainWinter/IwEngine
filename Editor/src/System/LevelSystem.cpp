@@ -187,7 +187,7 @@ bool LevelSystem::On(
 			transform->Position.x = currentLevel.LevelPosition.x;
 			transform->Position.z = currentLevel.LevelPosition.y;
 
-			Bus->push<GoToNextLevelEvent>(currentLevel.CameraFollow, currentLevel.InPosition, currentLevel.LevelPosition);
+			Bus->push<GoToNextLevelEvent>(currentLevel.StageName, currentLevel.CameraFollow, currentLevel.InPosition, currentLevel.LevelPosition);
 
 			break;
 		}

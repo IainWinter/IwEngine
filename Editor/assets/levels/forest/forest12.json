@@ -5,17 +5,17 @@
   },
   "CameraFollow": true,
   "Enemies": {
-    "size": 5,
+    "size": 4,
     "items": [
       {
-        "Type": 0,
+        "Type": 1,
         "Bullet": {
-          "Type": 1,
+          "Type": 0,
           "Speed": 5.000000
         },
         "Speed": 0.2617994,
-        "FireTime": 0.100000,
-        "CooldownTime": 0.000000
+        "FireTime": 5.000000,
+        "ChargeTime": 0.000000
       },
       {
         "Type": 1,
@@ -24,8 +24,8 @@
           "Speed": 5.000000
         },
         "Speed": 0.2617994,
-        "FireTime": 1.500000,
-        "CooldownTime": 0.000000
+        "FireTime": 5.000000,
+        "ChargeTime": 0.000000
       },
       {
         "Type": 1,
@@ -34,53 +34,39 @@
           "Speed": 5.000000
         },
         "Speed": 0.2617994,
-        "FireTime": 1.500000,
-        "CooldownTime": 0.000000
+        "FireTime": 5.000000,
+        "ChargeTime": 0.000000
       },
       {
         "Type": 1,
         "Bullet": {
-          "Type": 0,
+          "Type": 2,
           "Speed": 5.000000
         },
         "Speed": 0.2617994,
-        "FireTime": 1.500000,
-        "CooldownTime": 0.000000
-      },
-      {
-        "Type": 1,
-        "Bullet": {
-          "Type": 0,
-          "Speed": 5.000000
-        },
-        "Speed": 0.2617994,
-        "FireTime": 1.500000,
-        "CooldownTime": 0.000000
+        "FireTime": 5.000000,
+        "ChargeTime": 0.000000
       }
     ]
   },
   "Positions": {
-    "size": 5,
+    "size": 4,
     "items": [
       {
-        "x": 0.000000,
-        "y": 0.000000
+        "x": 6.000000,
+        "y": 6.000000
       },
       {
-        "x": 20.000000,
-        "y": 20.000000
+        "x": 6.000000,
+        "y": -6.000000
       },
       {
-        "x":  20.000000,
-        "y": -20.000000
+        "x": -6.000000,
+        "y": 6.000000
       },
       {
-        "x": -20.000000,
-        "y":  20.000000
-      },
-      {
-        "x": -20.000000,
-        "y": -20.000000
+        "x": -6.000000,
+        "y": -6.000000
       }
     ]
   },

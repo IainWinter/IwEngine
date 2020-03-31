@@ -55,7 +55,7 @@ void EnemySystem::Update(
 		transform->Rotation *= iw::quaternion::from_euler_angles(0, -iw::Time::DeltaTime(), 0);
 
 		if (  !enemy->HasShot
-			&& enemy->Timer <= 0)
+			&& enemy->Timer > enemy->ChargeTime)
 		{
 			enemy->HasShot = true;
 
@@ -92,7 +92,7 @@ void EnemySystem::Update(
 						enemy->Bullet,
 						transform->Position,
 						iw::quaternion::from_look_at(transform->Position, player.FindComponent<iw::Transform>()->Position)
-						* iw::quaternion::from_euler_angles(0, -iw::Pi / 2, 0),
+							* iw::quaternion::from_euler_angles(0, -iw::Pi / 2, 0),
 						entity.Index
 					);
 
@@ -105,13 +105,13 @@ void EnemySystem::Update(
 			enemy->Rotation = fmod(enemy->Rotation + enemy->Speed, iw::Pi2);
 		}
 
-		else if (enemy->Timer < -enemy->CooldownTime) {
+		else if (enemy->Timer >= enemy->FireTime) {
 			enemy->HasShot = false;
-			enemy->Timer = enemy->FireTime;
+			enemy->Timer   = 0;
 		}
 
-		else /*if (enemy->Timer >= -enemy->CooldownTime) */{
-			enemy->Timer -= iw::Time::DeltaTime();
+		else {
+			enemy->Timer += iw::Time::DeltaTime();
 		}
 	}
 
@@ -167,9 +167,11 @@ bool EnemySystem::On(
 		if (playerComponent->Timer > 0) {
 			Audio->AsStudio()->CreateInstance("enemyDeath");
 
-			Bus->push<SpawnEnemyDeath>(enemy.FindComponent<iw::Transform>()->Position);
+			iw::Transform* transform = enemy.FindComponent<iw::Transform>();
 
-			enemy.FindComponent<iw::Transform>()->SetParent(nullptr); // got moved to enemtdeathcirclesystem but should be in seperate system that cleans up destroied entities (remove from physics / transform tree)
+			Bus->push<SpawnEnemyDeath>(enemy.FindComponent<iw::Transform>()->Position, transform->Parent());
+
+			transform->SetParent(nullptr); // got moved to enemtdeathcirclesystem but should be in seperate system that cleans up destroied entities (remove from physics / transform tree)
 			Space->DestroyEntity(enemy.Index());
 		}
 	}
@@ -177,10 +179,21 @@ bool EnemySystem::On(
 	return false;
 }
 
+bool trigger = true;
+
 bool EnemySystem::On(
 	iw::ActionEvent& e)
 {
 	switch (e.Action) {
+		case iw::val(Actions::GOTO_NEXT_LEVEL): {
+			if (e.as<GoToNextLevelEvent>().LevelName == "models/block/forest12.dae") {
+				trigger = false;
+			}
+
+			else {
+				trigger = true;
+			}
+		}
 		case iw::val(Actions::START_LEVEL):
 		case iw::val(Actions::RESET_LEVEL): {
 			m_levelResetTimer = 0;
@@ -214,8 +227,8 @@ iw::Transform* EnemySystem::SpawnBullet(
 	r->SetTrans(t);
 	r->SetVelocity(b->initialVelocity);
 	r->SetSimGravity(false);
-	r->SetRestitution(1);
-	r->SetIsTrigger(true);
+	r->SetRestitution(0.1f);
+	r->SetIsTrigger(trigger);
 	r->SetIsLocked(iw::vector3(0, 1, 0));
 	r->SetLock(iw::vector3(0, 1, 0));
 

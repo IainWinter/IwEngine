@@ -5,27 +5,17 @@
   },
   "CameraFollow": 0,
   "Enemies": {
-    "size": 4,
+    "size": 6,
     "items": [
       {
         "Type": 1,
         "Bullet": {
-          "Type": 1,
+          "Type": 0,
           "Speed": 5.000000
         },
         "Speed": 0.6283185,
-        "FireTime": 1.40000,
-        "CooldownTime": 0.400000
-      },
-      {
-        "Type": 1,
-        "Bullet": {
-          "Type": 1,
-          "Speed": 5.000000
-        },
-        "Speed": 0.6283185,
-        "FireTime": 1.40000,
-        "CooldownTime": 0.400000
+        "FireTime": 2.40000,
+        "ChargeTime": 0.000000
       },
       {
         "Type": 1,
@@ -34,8 +24,8 @@
           "Speed": 5.000000
         },
         "Speed": 0.6283185,
-        "FireTime": 1.50000,
-        "CooldownTime": 0.000000
+        "FireTime": 2.40000,
+        "ChargeTime": 0.200000
       },
       {
         "Type": 1,
@@ -44,29 +34,67 @@
           "Speed": 5.000000
         },
         "Speed": 0.6283185,
-        "FireTime": 1.50000,
-        "CooldownTime": 0.000000
+        "FireTime": 2.40000,
+        "ChargeTime": 0.400000
+      },
+      {
+        "Type": 1,
+        "Bullet": {
+          "Type": 0,
+          "Speed": 5.000000
+        },
+        "Speed": 0.6283185,
+        "FireTime": 2.40000,
+        "ChargeTime": 0.600000
+      },
+      {
+        "Type": 1,
+        "Bullet": {
+          "Type": 0,
+          "Speed": 5.000000
+        },
+        "Speed": 0.6283185,
+        "FireTime": 2.40000,
+        "ChargeTime": 0.800000
+      },
+      {
+        "Type": 1,
+        "Bullet": {
+          "Type": 0,
+          "Speed": 5.000000
+        },
+        "Speed": 0.6283185,
+        "FireTime": 2.40000,
+        "ChargeTime": 1.000000
       }
     ]
   },
   "Positions": {
-    "size": 4,
+    "size": 6,
     "items": [
       {
-        "x": 2.000000,
-        "y": 5.000000
+        "x": 10.000000,
+        "y": 11.000000
       },
       {
-        "x": -2.000000,
-        "y":  5.000000
+        "x": 10.000000,
+        "y": 4.000000
       },
       {
-        "x": 12.000000,
-        "y": -3.000000
+        "x": 10.000000,
+        "y": -4.000000
       },
       {
-        "x": -12.000000,
-        "y": -3.000000
+        "x": -10.00000,
+        "y": 9.000000
+      },
+      {
+        "x": -10.000000,
+        "y": 1.000000
+      },
+      {
+        "x": -10.000000,
+        "y": -6.000000
       }
     ]
   },
