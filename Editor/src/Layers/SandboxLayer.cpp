@@ -387,7 +387,7 @@ namespace iw {
 			Audio->AsStudio()->StopInstance(forestInstance);
 		}
 
-		if (ImGui::Button("Next level")) {
+		if (ImGui::Button("Next level (don't spam)")) {
 			Bus->push<LoadNextLevelEvent>();
 		}
 
@@ -449,8 +449,14 @@ namespace iw {
 				PopSystem(playerSystem);
 				PopSystem(enemySystem);
 
-				font->UpdateMesh(textMesh, "", .01f, 1);
-				settexttocursor = false;
+				if (e.as<GoToNextLevelEvent>().LevelName == "models/block/forest12.dae") {
+					font->UpdateMesh(textMesh, "ayy you've gotten to the boss congrats!\nsadly he's out today so\nhave some fun with the physics instead...\nmember you can press i/t", .004f, 1);
+				}
+
+				else {
+					font->UpdateMesh(textMesh, "", .01f, 1);
+					settexttocursor = false;
+				}
 
 				break;
 			}

@@ -260,7 +260,7 @@ namespace Graphics {
 		
 		if (m_camera) {
 			if (mesh) {
-				depth = 10000 * (m_position - transform.Position).length_fast(); // best value can def be found. Prob some equation of last scenes difference in depth or min value
+				depth = 10000.0f * (m_position - transform.Position).length_fast(); // best value can def be found. Prob some equation of last scenes difference in depth or min value
 			}
 		}
 
@@ -271,7 +271,8 @@ namespace Graphics {
 			block        <<= val(Bits::BLOCK);
 			transparency <<= val(Bits::TRANSPARENCY);
 			material     <<= val(Bits::MATERIAL);
-			depth        <<= val(Bits::DEPTH);
+
+			depth          = ((1 << val(Bits::MATERIAL)) - 1) & ((key)-1 - depth);
 		}
 
 		else {
@@ -280,8 +281,10 @@ namespace Graphics {
 			camera       <<= val(TransparencyBits::CAMERA);
 			block        <<= val(TransparencyBits::BLOCK);
 			transparency <<= val(TransparencyBits::TRANSPARENCY);
-			depth        <<= val(TransparencyBits::DEPTH);
 			material     <<= val(TransparencyBits::MATERIAL);
+
+			depth         = ((1 << val(TransparencyBits::DEPTH)) - 1) & ((key)-1 - depth);
+
 		}
 
 		return layer | shadow | camera | block | transparency | material | depth;
