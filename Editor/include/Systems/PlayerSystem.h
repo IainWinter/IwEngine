@@ -24,8 +24,7 @@ private:
 
 	iw::Entity player;
 
-	iw::vector3 movement;
-	bool dash;
+	bool left, right, up, down, dash;
 
 public:
 	PlayerSystem();

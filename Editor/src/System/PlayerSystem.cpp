@@ -12,7 +12,10 @@ PlayerSystem::PlayerSystem()
 	: System<iw::Transform, iw::Rigidbody, Player>("Player")
 	, playerPrefab()
 	, m_playerModel(nullptr)
-	, movement(0)
+	, up(false)
+	, down(false)
+	, left(false)
+	, right(false)
 	, dash(false)
 {
 #ifdef IW_DEBUG
@@ -123,18 +126,24 @@ void PlayerSystem::FixedUpdate(
 		}
 
 		else {
-			iw::vector3 m = movement.normalized() * player->Speed;
-			if (movement != 0) {
-				if (player->Timer > 0) {
-					m *= 10 * player->Timer / player->DashTime;
-				}
+			iw::vector3 movement;
+			if (left)  movement.x -= 1;
+			if (right) movement.x += 1;
+			if (up)    movement.z -= 1;
+			if (down)  movement.z += 1;
+
+			movement.normalize();
+			movement *= player->Speed;
+			
+			//if (movement != 0) {
+
+			//}
+
+			if (player->Timer > 0) {
+				movement *= 10 * player->Timer / player->DashTime;
 			}
 
-			iw::vector3 v = rigidbody->Velocity();
-			v.x = m.x;
-			v.z = m.z;
-
-			rigidbody->SetVelocity(v);
+			rigidbody->SetVelocity(movement);
 		}
 	}
 }
@@ -144,43 +153,73 @@ bool PlayerSystem::On(
 {
 	switch (event.Button) {
 		case iw::UP: {
-			if (    event.State && movement.z == -1
-				|| !event.State && movement.z ==  1)
-			{
-				movement.z = 0;
-			}
+			up = event.State;
 
-			movement.z -= event.State ? 1 : -1;
+			//if (event.State && up) {
+			//	up = 0;
+			//}
+
+
+
+			//if (    event.State && movement.z == -1
+			//	|| !event.State && movement.z ==  1)
+			//{
+			//	movement.z = 0;
+			//}
+
+			////else if (!event.State && movement.z == 0) {
+			////	movement.z = -1;
+			////}
+
+			//movement.z -= event.State ? 1 : -1;
 			break;
 		}
 		case iw::DOWN: {
-			if (    event.State && movement.z ==  1
-				|| !event.State && movement.z == -1)
-			{
-				movement.z = 0;
-			}
+			down = event.State;
 
-			movement.z += event.State ? 1 : -1;
+			//if (    event.State && movement.z ==  1
+			//	|| !event.State && movement.z == -1)
+			//{
+			//	movement.z = 0;
+			//}
+
+			////else if (!event.State && movement.z == 0) {
+			////	movement.z = 1;
+			////}
+
+			//movement.z += event.State ? 1 : -1;
 			break; 
 		}
 		case iw::LEFT: {
-			if (    event.State && movement.x == -1
-				|| !event.State && movement.x ==  1)
-			{
-				movement.x = 0;
-			}
+			left = event.State;
 
-			movement.x -= event.State ? 1 : -1;
+			//if (    event.State && movement.x == -1
+			//	|| !event.State && movement.x ==  1)
+			//{
+			//	movement.x = 0;
+			//}
+
+			////else if (!event.State && movement.x == 0) {
+			////	movement.x = -1;
+			////}
+
+			//movement.x -= event.State ? 1 : -1;
 			break; 
 		}
 		case iw::RIGHT: {
-			if (    event.State && movement.x ==  1
-				|| !event.State && movement.x == -1)
-			{
-				movement.x = 0;
-			}
+			right = event.State;
 
-			movement.x += event.State ? 1 : -1;
+			//if (    event.State && movement.x ==  1
+			//	|| !event.State && movement.x == -1)
+			//{
+			//	movement.x = 0;
+			//}
+
+			////else if (!event.State && movement.x == 0) {
+			////	movement.x = 1;
+			////}
+
+			//movement.x += event.State ? 1 : -1;
 			break; 
 		}
 		case iw::X: {
@@ -264,8 +303,7 @@ bool PlayerSystem::On(
 
 			t->Scale = 0;
 
-			movement = 0;
-			dash = 0;
+			up = down = left = right = dash = false;
 
 			level = event.as<GoToNextLevelEvent>().LevelName;
 

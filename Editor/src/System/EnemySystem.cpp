@@ -29,8 +29,8 @@ int EnemySystem::Initialize() {
 
 	m_bulletModel = Asset->Give<iw::Model>("Bullet", &bullet);
 
-	mat.Set("albedo", iw::Color::From255(0, 213, 255, 128));
-	mat.SetTransparency(iw::Transparency::ADD);
+	mat.Set("albedo", iw::Color::From255(0, 213, 255, 191));
+	//mat.SetTransparency(iw::Transparency::ADD);
 	//mat.SetCastShadows(false);
 
 	m_bulletModel->Meshes[0].Material = REF<iw::Material>(mat);

@@ -386,7 +386,8 @@ iw::Entity LevelSystem::LoadLevel(
 	iw::SphereCollider*  sd = currentDoor.SetComponent<iw::SphereCollider>(iw::vector3::zero, 1.0f);
 	iw::CollisionObject* cd = currentDoor.SetComponent<iw::CollisionObject>();
 
-	md->Meshes[0].Material->Set("albedo", iw::Color::From255(201, 66, 66, 127));
+	md->Meshes[0].Material->Set("albedo", closedColor);
+	md->Meshes[0].Material->SetCastShadows(false);
 
 	levelTransform->AddChild(td);
 

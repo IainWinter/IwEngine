@@ -272,7 +272,7 @@ namespace Graphics {
 			transparency <<= val(Bits::TRANSPARENCY);
 			material     <<= val(Bits::MATERIAL);
 
-			depth          = ((1 << val(Bits::MATERIAL)) - 1) & ((key)-1 - depth);
+			depth          = (((key)1 << val(Bits::MATERIAL)) - 1) & ((key)-1 - depth);
 		}
 
 		else {
@@ -283,7 +283,7 @@ namespace Graphics {
 			transparency <<= val(TransparencyBits::TRANSPARENCY);
 			material     <<= val(TransparencyBits::MATERIAL);
 
-			depth         = ((1 << val(TransparencyBits::DEPTH)) - 1) & ((key)-1 - depth);
+			depth         = (((key)1 << val(TransparencyBits::DEPTH)) - 1) & ((key)-1 - depth);
 
 		}
 
