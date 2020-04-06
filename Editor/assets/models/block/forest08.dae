@@ -5,22 +5,22 @@
       <author>Blender User</author>
       <authoring_tool>Blender 2.82.7 commit date:2020-03-12, commit time:05:06, hash:375c7dc4caf4</authoring_tool>
     </contributor>
-    <created>2020-03-23T15:33:11</created>
-    <modified>2020-03-23T15:33:11</modified>
+    <created>2020-04-05T18:46:05</created>
+    <modified>2020-04-05T18:46:05</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
   <library_effects>
     <effect id="scale-effect">
       <profile_COMMON>
-        <newparam sid="texturesscaleboy_png-surface">
+        <newparam sid="textures_scaleboy_png-surface">
           <surface type="2D">
-            <init_from>texturesscaleboy_png</init_from>
+            <init_from>textures_scaleboy_png</init_from>
           </surface>
         </newparam>
-        <newparam sid="texturesscaleboy_png-sampler">
+        <newparam sid="textures_scaleboy_png-sampler">
           <sampler2D>
-            <source>texturesscaleboy_png-surface</source>
+            <source>textures_scaleboy_png-surface</source>
           </sampler2D>
         </newparam>
         <technique sid="common">
@@ -29,7 +29,7 @@
               <color sid="emission">0 0 0 1</color>
             </emission>
             <diffuse>
-              <texture texture="texturesscaleboy_png-sampler" texcoord="Plane_004-mesh-map-0"/>
+              <texture texture="textures_scaleboy_png-sampler" texcoord="Plane_004-mesh-map-0"/>
             </diffuse>
             <reflectivity>
               <float sid="specular">0.5</float>
@@ -43,7 +43,7 @@
     </effect>
   </library_effects>
   <library_images>
-    <image id="texturesscaleboy_png" name="texturesscaleboy_png">
+    <image id="textures_scaleboy_png" name="textures_scaleboy_png">
       <init_from>textures/scaleboy.png</init_from>
     </image>
   </library_images>
@@ -53,6 +53,48 @@
     </material>
   </library_materials>
   <library_geometries>
+    <geometry id="Icosphere_008-mesh" name="Icosphere.008">
+      <mesh>
+        <source id="Icosphere_008-mesh-positions">
+          <float_array id="Icosphere_008-mesh-positions-array" count="33">2.765593 0 1.228458 -0.3764439 0 2.249386 -2.318378 0 -0.423398 -0.3764439 0 -3.096181 2.765593 0 -2.075254 1.153406 1.789873 1.612289 -1.239683 1.789873 0.8347159 -1.239683 1.789873 -1.681512 1.153406 1.789873 -2.459085 2.632452 1.789873 -0.423398 0.4919815 3.07218 -0.423398</float_array>
+          <technique_common>
+            <accessor source="#Icosphere_008-mesh-positions-array" count="11" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Icosphere_008-mesh-normals">
+          <float_array id="Icosphere_008-mesh-normals-array" count="45">0.9972448 0.07418048 0 0.3081703 0.0741893 0.948434 -0.806781 0.07419377 0.5861738 -0.8067809 0.07419365 -0.586174 0.30817 0.07418912 -0.9484342 0.6929105 0.5161622 0.5034399 -0.2646734 0.5161647 0.8145687 -0.8564841 0.5161735 0 -0.2646735 0.5161643 -0.8145689 0.6929105 0.5161622 -0.5034399 0.4814469 0.8036475 0.3497993 -0.1839008 0.8036463 0.5659798 -0.5951054 0.8036478 0 -0.1839007 0.8036463 -0.5659798 0.4814469 0.8036475 -0.3497993</float_array>
+          <technique_common>
+            <accessor source="#Icosphere_008-mesh-normals-array" count="15" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Icosphere_008-mesh-map-0">
+          <float_array id="Icosphere_008-mesh-map-0-array" count="90">0.727272 0.157461 0.545454 0.157461 0.636363 0.314921 0.90909 0.157461 0.727272 0.157461 0.818181 0.314921 0.181818 0.157461 0 0.157461 0.090909 0.314921 0.363636 0.157461 0.181818 0.157461 0.272727 0.314921 0.545454 0.157461 0.363636 0.157461 0.454545 0.314921 0.727272 0.157461 0.636363 0.314921 0.818181 0.314921 0.90909 0.157461 0.818181 0.314921 1 0.314921 0.181818 0.157461 0.090909 0.314921 0.272727 0.314921 0.363636 0.157461 0.272727 0.314921 0.454545 0.314921 0.545454 0.157461 0.454545 0.314921 0.636363 0.314921 0.818181 0.314921 0.636363 0.314921 0.727272 0.472382 1 0.314921 0.818181 0.314921 0.90909 0.472382 0.272727 0.314921 0.090909 0.314921 0.181818 0.472382 0.454545 0.314921 0.272727 0.314921 0.363636 0.472382 0.636363 0.314921 0.454545 0.314921 0.545454 0.472382</float_array>
+          <technique_common>
+            <accessor source="#Icosphere_008-mesh-map-0-array" count="45" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="Icosphere_008-mesh-vertices">
+          <input semantic="POSITION" source="#Icosphere_008-mesh-positions"/>
+        </vertices>
+        <triangles count="15">
+          <input semantic="VERTEX" source="#Icosphere_008-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#Icosphere_008-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#Icosphere_008-mesh-map-0" offset="2" set="0"/>
+          <p>0 0 0 4 0 1 9 0 2 1 1 3 0 1 4 5 1 5 2 2 6 1 2 7 6 2 8 3 3 9 2 3 10 7 3 11 4 4 12 3 4 13 8 4 14 0 5 15 9 5 16 5 5 17 1 6 18 5 6 19 6 6 20 2 7 21 6 7 22 7 7 23 3 8 24 7 8 25 8 8 26 4 9 27 8 9 28 9 9 29 5 10 30 9 10 31 10 10 32 6 11 33 5 11 34 10 11 35 7 12 36 6 12 37 10 12 38 8 13 39 7 13 40 10 13 41 9 14 42 8 14 43 10 14 44</p>
+        </triangles>
+      </mesh>
+    </geometry>
     <geometry id="Cylinder_001-mesh" name="Cylinder.001">
       <mesh>
         <source id="Cylinder_001-mesh-positions">
@@ -2408,6 +2450,10 @@
   </library_geometries>
   <library_visual_scenes>
     <visual_scene id="_8" name="08">
+      <node id="Icosphere_040" name="Icosphere.040" type="NODE">
+        <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
+        <instance_geometry url="#Icosphere_008-mesh" name="Icosphere.040"/>
+      </node>
       <node id="Cylinder_001" name="Cylinder.001" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Cylinder_001-mesh" name="Cylinder.001"/>

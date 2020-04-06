@@ -24,7 +24,7 @@ private:
 
 	iw::Entity player;
 
-	bool left, right, up, down, dash;
+	bool left, right, up, down, dash, sprint;
 
 public:
 	PlayerSystem();

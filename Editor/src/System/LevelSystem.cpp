@@ -37,7 +37,7 @@ LevelSystem::LevelSystem(
 
 	//currentLevel = 0;
 
-	currentLevelName = "levels/forest/forest1.json";
+	currentLevelName = "levels/forest/forest10.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 127);
 	closedColor = iw::Color::From255(201, 66, 66, 127);
@@ -285,10 +285,12 @@ iw::Entity LevelSystem::LoadLevel(
 		iw::Entity enemy = Space->CreateEntity<iw::Transform, iw::Model, iw::SphereCollider, iw::CollisionObject, Enemy>();
 		
 		                         enemy.SetComponent<iw::Model>(*Asset->Load<iw::Model>("Tetrahedron"));
-		                         enemy.SetComponent<Enemy>(currentLevel.Enemies[i]);
+		Enemy*               e = enemy.SetComponent<Enemy>(currentLevel.Enemies[i]);
 		iw::Transform*       t = enemy.SetComponent<iw::Transform>();
 		iw::SphereCollider*  s = enemy.SetComponent<iw::SphereCollider>(iw::vector3::zero, 1.0f);
 		iw::CollisionObject* r = enemy.SetComponent<iw::CollisionObject>();
+
+		//e->Timer = e->ChargeTime;
 
 		t->Position.x = currentLevel.Positions[i].x;
 		t->Position.z = currentLevel.Positions[i].y;

@@ -46,7 +46,8 @@ bool PlayerSystem::On(
 		case IW::DOWN:  movement.z += event.State == 0 ? -1 : 1; break;
 		case IW::LEFT:  movement.x -= event.State == 0 ? -1 : 1; break;
 		case IW::RIGHT: movement.x += event.State == 0 ? -1 : 1; break;
-		case IW::X:     dash = event.State; break;
+		case IW::X:     dash   = event.State; break;
+		case iw::C:     sprint = event.State; break;
 	}
 
 	return true;

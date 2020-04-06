@@ -18,4 +18,7 @@ struct REFLECT Enemy {
 	float Timer;
 	float Rotation;
 	bool  HasShot;
+
+	// only for circle might get removed
+	float RotSpeed;
 };

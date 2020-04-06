@@ -300,7 +300,7 @@ namespace iw {
 		}
 
 		float angle  = acos(dot);
-		vector3 axis = vector3::unit_z.cross(forward).normalized();
+		vector3 axis = forward.cross(vector3::unit_z).normalized();
 
 		return from_axis_angle(axis, angle);
 	}

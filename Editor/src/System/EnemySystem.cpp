@@ -46,13 +46,46 @@ void EnemySystem::Update(
 	for (auto entity : view) {
 		auto [transform, enemy] = entity.Components.Tie<Components>();
 
-		if (transform->Parent() == nullptr) {
-			LOG_INFO << "herh";
-		}
-
 		m_enemyCount++;
 
-		transform->Rotation *= iw::quaternion::from_euler_angles(0, -iw::Time::DeltaTime(), 0);
+
+		switch (enemy->Type) {
+			case EnemyType::SPIN: {
+				transform->Rotation *= iw::quaternion::from_euler_angles(0, -iw::Time::DeltaTime(), 0);
+				break;
+			}
+			case EnemyType::CIRCLE: {
+				if (enemy->Timer < enemy->ChargeTime) {
+					float speed = 1.0f / (enemy->ChargeTime - enemy->Timer);
+
+					if (speed > 30.0f) {
+						speed = 30.0f;
+					}
+
+					enemy->RotSpeed += 5 * speed * iw::Time::DeltaTime();
+				}
+
+				else {
+					enemy->RotSpeed *= 1 - 20 * iw::Time::DeltaTime();
+				}
+
+				transform->Rotation *= iw::quaternion::from_euler_angles(0, enemy->RotSpeed * iw::Time::DeltaTime(), 0);
+				break;
+			}
+			case EnemyType::SEEK: {
+				iw::vector3 target = player.FindComponent<iw::Transform>()->Position;
+				float       dir    = atan2(target.z - transform->Position.z, target.x - transform->Position.x) /*+ iw::Pi*/;
+
+				transform->Rotation = //iw::lerp(transform->Rotation,
+					  iw::quaternion::from_euler_angles(0, dir, 0) 
+					//* iw::quaternion::from_euler_angles(0, iw::Pi, 0), iw::Time::DeltaTime()
+				/*).normalized()*/;
+				
+				// need to slerp
+
+				break;
+			}
+		}
 
 		if (  !enemy->HasShot
 			&& enemy->Timer > enemy->ChargeTime)
@@ -91,8 +124,7 @@ void EnemySystem::Update(
 					iw::Transform* bullet = SpawnBullet(
 						enemy->Bullet,
 						transform->Position,
-						iw::quaternion::from_look_at(transform->Position, player.FindComponent<iw::Transform>()->Position)
-							* iw::quaternion::from_euler_angles(0, -iw::Pi / 2, 0),
+						transform->Rotation.inverted(),
 						entity.Index
 					);
 
