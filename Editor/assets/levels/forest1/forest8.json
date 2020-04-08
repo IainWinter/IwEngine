@@ -1,46 +1,58 @@
 {
   "StageName": {
     "size": 25,
-    "string": "models/block/forest03.dae"
+    "string": "models/block/forest08.dae"
   },
-  "CameraFollow": false,
+  "CameraFollow": 0,
   "Enemies": {
-    "size": 2,
+    "size": 3,
     "items": [
       {
-        "Type": 0,
-        "Bullet": {
-          "Type": 0,
-          "Speed": 5.000000
-        },
-        "Speed": -0.2617994,
-        "FireTime": 0.120000,
-        "ChargeTime": 0.000000,
-        "Rotation": 0.000000
-      },
-      {
-        "Type": 0,
+        "Type": 1,
         "Bullet": {
           "Type": 0,
           "Speed": 5.000000
         },
         "Speed": 0.2617994,
-        "FireTime": 0.120000,
-        "ChargeTime": 0.000000,
-        "Rotation": 0.000000
+        "FireTime": 2.00000,
+        "ChargeTime": 1.700000
+      },
+      {
+        "Type": 1,
+        "Bullet": {
+          "Type": 0,
+          "Speed": 7.000000
+        },
+        "Speed": 0.2617994,
+        "FireTime": 2.50000,
+        "ChargeTime": 2.000000
+      },
+      {
+        "Type": 2,
+        "Bullet": {
+          "Type": 3,
+          "Speed": 4.100000
+        },
+        "Speed": 0.0,
+        "FireTime": 2.000000,
+        "ChargeTime": 0.000000
       }
     ]
   },
   "Positions": {
-    "size": 2,
+    "size": 3,
     "items": [
       {
-        "x":  0.000000,
-        "y": -6.000000
+        "x": -3.000000,
+        "y": -7.000000
       },
       {
-        "x": 0.000000,
-        "y": 6.000000
+        "x": 18.000000,
+        "y": 7.500000
+      },
+      {
+        "x": 14.000000,
+        "y": 0.000000
       }
     ]
   },
@@ -49,7 +61,7 @@
     "y": 0.000000
   },
   "OutPosition": {
-    "x": 28.000000,
+    "x": 24.000000,
     "y": 0.000000
   },
   "LevelLocation": {
@@ -60,28 +72,58 @@
     "State": 1,
     "NextLevel": {
       "size": 26,
-      "string": "levels/forest/forest4.json"
+      "string": "levels/forest/forest9.json"
     }
   },
   "Spheres": {
-    "size": 0,
-    "items": []
+    "size": 2,
+    "items": [
+      {
+        "Center": {
+          "x": -17.000000,
+          "y": 0.000000,
+          "z": -13.000000
+        },
+        "Radius": 2.500000
+      },
+      {
+        "Center": {
+          "x":  0.500000,
+          "y":  0.000000,
+          "z": -0.500000
+        },
+        "Radius": 2.500000
+      }
+    ]
   },
   "Capsules": {
-    "size": 1,
+    "size": 2,
     "items": [
       {
         "Position": {
-          "x": -3.000000,
+          "x": -9.00000,
           "y":  0.000000,
-          "z":  0.000000
+          "z": -3.250000
         },
         "Offset": {
-          "x": 6.000000,
-          "y": 0.000000,
-          "z": 0.000000
+          "x": -1.000000,
+          "y":  0.000000,
+          "z": -16.000000
         },
-        "Radius": 3.000000
+        "Radius": 1.500000
+      },
+      {
+        "Position": {
+          "x": 9.750000,
+          "y": 0.000000,
+          "z": 4.250000
+        },
+        "Offset": {
+          "x": -7.000000,
+          "y": 0.000000,
+          "z": 12.000000
+        },
+        "Radius": 1.500000
       }
     ]
   },
@@ -115,7 +157,7 @@
             "y": 0.000000,
             "z": -1.000000
           },
-          "D": -11.000000
+          "D": -13.000000
         }
       },
       {

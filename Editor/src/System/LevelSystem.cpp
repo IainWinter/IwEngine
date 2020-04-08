@@ -177,7 +177,7 @@ bool LevelSystem::On(
 			break;
 		}
 		case iw::val(Actions::LOAD_NEXT_LEVEL): {
-			currentDoor.FindComponent<LevelDoor>()->State = LevelDoorState::LOCKED;
+			currentDoor.FindComponent<LevelDoor>()->State = LevelDoorState::LOCKED; // stops events from being spammed
 			
 			//transition       = true;
 			currentLevelName = currentLevel.Door.NextLevel;
@@ -382,22 +382,26 @@ iw::Entity LevelSystem::LoadLevel(
 
 	currentDoor = Space->CreateEntity<iw::Transform, iw::Model, iw::SphereCollider, iw::CollisionObject, LevelDoor>();
 	
-	                          currentDoor.SetComponent<LevelDoor>(currentLevel.Door);
-	iw::Model*           md = currentDoor.SetComponent<iw::Model>(*Asset->Load<iw::Model>("Door"));
-	iw::Transform*       td = currentDoor.SetComponent<iw::Transform>(iw::vector3(currentLevel.OutPosition.x, 1, currentLevel.OutPosition.y), 5.0f);
-	iw::SphereCollider*  sd = currentDoor.SetComponent<iw::SphereCollider>(iw::vector3::zero, 1.0f);
-	iw::CollisionObject* cd = currentDoor.SetComponent<iw::CollisionObject>();
+	LevelDoor*           door      = currentDoor.SetComponent<LevelDoor>(currentLevel.Door);
+	iw::Model*           model     = currentDoor.SetComponent<iw::Model>(*Asset->Load<iw::Model>("Door"));
+	iw::Transform*       transform = currentDoor.SetComponent<iw::Transform>(iw::vector3(currentLevel.OutPosition.x, 1, currentLevel.OutPosition.y), 5.0f);
+	iw::SphereCollider*  collider  = currentDoor.SetComponent<iw::SphereCollider>(iw::vector3::zero, 1.0f);
+	iw::CollisionObject* object    = currentDoor.SetComponent<iw::CollisionObject>();
 
-	md->Meshes[0].Material->Set("albedo", closedColor);
-	md->Meshes[0].Material->SetCastShadows(false);
+	if (door->State == LevelDoorState::OPEN) {
+		door->ColorTimer = 0.25f;
+	}
 
-	levelTransform->AddChild(td);
+	model->Meshes[0].Material->Set("albedo", closedColor);
+	model->Meshes[0].Material->SetCastShadows(false);
 
-	cd->SetCol(sd);
-	cd->SetTrans(td);
-	cd->SetIsTrigger(true);
+	levelTransform->AddChild(transform);
 
-	Physics->AddCollisionObject(cd);
+	object->SetCol(collider);
+	object->SetTrans(transform);
+	object->SetIsTrigger(true);
+
+	Physics->AddCollisionObject(object);
 
 	// Camera recreated in layer from \/
 

@@ -5,15 +5,26 @@
   },
   "CameraFollow": false,
   "Enemies": {
-    "size": 2,
+    "size": 3,
     "items": [
+      {
+        "Type": 1,
+        "Bullet": {
+          "Type": 0,
+          "Speed": 5.000000
+        },
+        "Speed": 0.261799,
+        "FireTime": 3.00000,
+        "ChargeTime": 2.500000,
+        "Rotation": 0.000000
+      },
       {
         "Type": 0,
         "Bullet": {
           "Type": 0,
           "Speed": 5.000000
         },
-        "Speed": -0.2617994,
+        "Speed": 0.261799,
         "FireTime": 0.120000,
         "ChargeTime": 0.000000,
         "Rotation": 0.000000
@@ -24,7 +35,7 @@
           "Type": 0,
           "Speed": 5.000000
         },
-        "Speed": 0.2617994,
+        "Speed": 0.261799,
         "FireTime": 0.120000,
         "ChargeTime": 0.000000,
         "Rotation": 0.000000
@@ -32,35 +43,39 @@
     ]
   },
   "Positions": {
-    "size": 2,
+    "size": 3,
     "items": [
       {
-        "x": -1.000000,
-        "y": -4.000000
+        "x": 16.000000,
+        "y": -5.000000
       },
       {
-        "x": -1.000000,
-        "y":  4.000000
+        "x": 13.000000,
+        "y": 5.000000
+      },
+      {
+        "x": -6.000000,
+        "y": 1.000000
       }
     ]
   },
   "InPosition": {
-    "x": -22.000000,
-    "y":   0.000000
+    "x":   0.000000,
+    "y": -10.000000
   },
   "OutPosition": {
     "x": 28.000000,
     "y":  0.000000
   },
   "LevelLocation": {
-    "x": 64.000000,
-    "y":  0.000000
+    "x": 0.000000,
+    "y": 32.000000
   },
   "Door": {
-    "State": 1,
+    "State": 0,
     "NextLevel": {
       "size": 27,
-      "string": "levels/forest/forest10.json"
+      "string": "levels/forest/forest18.json"
     }
   },
   "Spheres": {
@@ -68,8 +83,22 @@
     "items": []
   },
   "Capsules": {
-    "size": 0,
-    "items": []
+    "size": 1,
+    "items": [
+      {
+        "Position": {
+          "x": 13.000000,
+          "y": 0.000000,
+          "z": -13.000000
+        },
+        "Offset": {
+          "x": -3.000000,
+          "y": 0.000000,
+          "z": 13.000000
+        },
+        "Radius": 1.500000
+      }
+    ]
   },
   "Planes": {
     "size": 4,

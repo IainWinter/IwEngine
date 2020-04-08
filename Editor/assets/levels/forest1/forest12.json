@@ -1,55 +1,51 @@
 {
   "StageName": {
     "size": 25,
-    "string": "models/block/forest03.dae"
+    "string": "models/block/forest12.dae"
   },
-  "CameraFollow": false,
+  "CameraFollow": true,
   "Enemies": {
     "size": 4,
     "items": [
       {
-        "Type": 0,
+        "Type": 1,
         "Bullet": {
           "Type": 0,
           "Speed": 5.000000
         },
-        "Speed": -0.2617994,
-        "FireTime": 0.120000,
-        "ChargeTime": 0.000000,
-        "Rotation": 0.000000
+        "Speed": 0.2617994,
+        "FireTime": 5.000000,
+        "ChargeTime": 0.000000
       },
       {
-        "Type": 0,
+        "Type": 1,
         "Bullet": {
           "Type": 0,
           "Speed": 5.000000
         },
-        "Speed": -0.2617994,
-        "FireTime": 0.120000,
-        "ChargeTime": 0.000000,
-        "Rotation": 0.000000
+        "Speed": 0.2617994,
+        "FireTime": 5.000000,
+        "ChargeTime": 0.000000
       },
       {
-        "Type": 0,
+        "Type": 1,
         "Bullet": {
           "Type": 0,
           "Speed": 5.000000
         },
-        "Speed": -0.2617994,
-        "FireTime": 0.120000,
-        "ChargeTime": 0.000000,
-        "Rotation": 0.000000
+        "Speed": 0.2617994,
+        "FireTime": 5.000000,
+        "ChargeTime": 0.000000
       },
       {
-        "Type": 0,
+        "Type": 1,
         "Bullet": {
-          "Type": 0,
+          "Type": 2,
           "Speed": 5.000000
         },
-        "Speed": -0.2617994,
-        "FireTime": 0.120000,
-        "ChargeTime": 0.000000,
-        "Rotation": 0.000000
+        "Speed": 0.2617994,
+        "FireTime": 5.000000,
+        "ChargeTime": 0.000000
       }
     ]
   },
@@ -57,45 +53,46 @@
     "size": 4,
     "items": [
       {
-        "x": 5.000000,
-        "y": 0.000000
+        "x": 6.000000,
+        "y": 6.000000
       },
       {
-        "x": -5.000000,
-        "y": 0.000000
+        "x": 6.000000,
+        "y": -6.000000
       },
       {
-        "x": 0.000000,
-        "y": 5.000000
+        "x": -6.000000,
+        "y": 6.000000
       },
       {
-        "x": 0.000000,
-        "y": -5.000000
+        "x": -6.000000,
+        "y": -6.000000
       }
     ]
   },
   "InPosition": {
-    "x":   0.000000,
-    "y": -10.000000
+    "x": 0.000000,
+    "y": -45.000000
   },
   "OutPosition": {
-    "x": 28.000000,
-    "y": 0.000000
+    "x":  0.000000,
+    "y": 45.000000
   },
   "LevelLocation": {
     "x": 0.000000,
-    "y": 32.000000
+    "y": 96.000000
   },
   "Door": {
     "State": 1,
     "NextLevel": {
-      "size": 27,
-      "string": "levels/forest/forest12.json"
+      "size": 26,
+      "string": "levels/forest/forest1.json"
     }
   },
   "Spheres": {
     "size": 0,
-    "items": []
+    "items": [
+    ]
   },
   "Capsules": {
     "size": 0,
@@ -111,27 +108,27 @@
             "y": 0.000000,
             "z": 0.000000
           },
-          "D": -28.000000
+          "D": -55.000000
         }
       },
       {
         "Plane": {
           "P": {
             "x": -1.000000,
-            "y": 0.000000,
-            "z": 0.000000
+            "y": -0.000000,
+            "z": -0.000000
           },
-          "D": -28.000000
+          "D": -55.000000
         }
       },
       {
         "Plane": {
           "P": {
-            "x": 0.000000,
-            "y": 0.000000,
+            "x": -0.000000,
+            "y": -0.000000,
             "z": -1.000000
           },
-          "D": -11.000000
+          "D": -45.000000
         }
       },
       {
@@ -141,7 +138,7 @@
             "y": 0.000000,
             "z": 1.000000
           },
-          "D": -12.000000
+          "D": -45.000000
         }
       }
     ]

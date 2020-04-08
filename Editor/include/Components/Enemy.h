@@ -14,9 +14,9 @@ struct REFLECT Enemy {
 	REFLECT float Speed;
 	REFLECT float FireTime;
 	REFLECT float ChargeTime;
+	REFLECT float Rotation;
 
 	float Timer;
-	float Rotation;
 	bool  HasShot;
 
 	// only for circle might get removed

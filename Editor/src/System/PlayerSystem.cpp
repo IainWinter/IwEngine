@@ -17,6 +17,7 @@ PlayerSystem::PlayerSystem()
 	, left(false)
 	, right(false)
 	, dash(false)
+	, sprint(false)
 {
 #ifdef IW_DEBUG
 	const char* file = "assets/prefabs/player.json";
@@ -145,7 +146,7 @@ void PlayerSystem::FixedUpdate(
 			if (   !dash
 				&& sprint)
 			{
-				//movement *= 2.5f;
+				movement *= 2.0f;
 			}
 
 			rigidbody->SetVelocity(movement);
@@ -233,6 +234,13 @@ bool PlayerSystem::On(
 		}
 		case iw::C: {
 			sprint = event.State;
+			break;
+		}
+		case iw::R: {
+			if (event.State) {
+				Bus->send<ResetLevelEvent>();
+			}
+
 			break;
 		}
 	}

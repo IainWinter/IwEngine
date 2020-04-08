@@ -8,25 +8,25 @@
     "size": 2,
     "items": [
       {
-        "Type": 0,
+        "Type": 1,
         "Bullet": {
           "Type": 0,
           "Speed": 5.000000
         },
-        "Speed": -0.2617994,
-        "FireTime": 0.120000,
-        "ChargeTime": 0.000000,
+        "Speed": 0.174533,
+        "FireTime": 3.00000,
+        "ChargeTime": 1.500000,
         "Rotation": 0.000000
       },
       {
-        "Type": 0,
+        "Type": 1,
         "Bullet": {
           "Type": 0,
           "Speed": 5.000000
         },
-        "Speed": 0.2617994,
-        "FireTime": 0.120000,
-        "ChargeTime": 0.000000,
+        "Speed": 0.261799,
+        "FireTime": 5.00000,
+        "ChargeTime": 1.500000,
         "Rotation": 0.000000
       }
     ]
@@ -35,17 +35,17 @@
     "size": 2,
     "items": [
       {
-        "x": -1.000000,
-        "y": -4.000000
+        "x":  0.000000,
+        "y": -5.000000
       },
       {
-        "x": -1.000000,
-        "y":  4.000000
+        "x": 0.000000,
+        "y": 5.000000
       }
     ]
   },
   "InPosition": {
-    "x": -22.000000,
+    "x": -24.000000,
     "y":   0.000000
   },
   "OutPosition": {
@@ -60,7 +60,7 @@
     "State": 1,
     "NextLevel": {
       "size": 27,
-      "string": "levels/forest/forest10.json"
+      "string": "levels/forest/forest14.json"
     }
   },
   "Spheres": {
