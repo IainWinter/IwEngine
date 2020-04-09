@@ -16,7 +16,7 @@
         "Speed": 0.2617994,
         "FireTime": 0.120000,
         "ChargeTime": 0.000000,
-        "Rotation": 0.000000
+        "Rotation": 0.1309
       },
       {
         "Type": 0,
@@ -27,7 +27,7 @@
         "Speed": 0.2617994,
         "FireTime": 0.120000,
         "ChargeTime": 0.000000,
-        "Rotation": 0.000000
+        "Rotation": 0.1309
       },
       {
         "Type": 0,
@@ -38,7 +38,7 @@
         "Speed": 0.2617994,
         "FireTime": 0.120000,
         "ChargeTime": 0.000000,
-        "Rotation": 0.000000
+        "Rotation": 0.1309
       },
       {
         "Type": 0,
@@ -49,7 +49,7 @@
         "Speed": 0.2617994,
         "FireTime": 0.120000,
         "ChargeTime": 0.000000,
-        "Rotation": 0.000000
+        "Rotation": 0.1309
       }
     ]
   },

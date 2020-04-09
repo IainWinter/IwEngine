@@ -5,18 +5,18 @@
   },
   "CameraFollow": false,
   "Enemies": {
-    "size": 4,
+    "size": 3,
     "items": [
       {
-        "Type": 0,
+        "Type": 1,
         "Bullet": {
           "Type": 0,
           "Speed": 5.000000
         },
-        "Speed": -0.2617994,
-        "FireTime": 0.120000,
-        "ChargeTime": 0.000000,
-        "Rotation": 0.000000
+        "Speed": 0.261799,
+        "FireTime": 3.00000,
+        "ChargeTime": 2.500000,
+        "Rotation": 0.1309
       },
       {
         "Type": 0,
@@ -24,10 +24,10 @@
           "Type": 0,
           "Speed": 5.000000
         },
-        "Speed": -0.2617994,
+        "Speed": 0.2617994,
         "FireTime": 0.120000,
         "ChargeTime": 0.000000,
-        "Rotation": 0.000000
+        "Rotation": 3.141593
       },
       {
         "Type": 0,
@@ -39,38 +39,23 @@
         "FireTime": 0.120000,
         "ChargeTime": 0.000000,
         "Rotation": 0.000000
-      },
-      {
-        "Type": 0,
-        "Bullet": {
-          "Type": 0,
-          "Speed": 5.000000
-        },
-        "Speed": -0.2617994,
-        "FireTime": 0.120000,
-        "ChargeTime": 0.000000,
-        "Rotation": 0.000000
       }
     ]
   },
   "Positions": {
-    "size": 4,
+    "size": 3,
     "items": [
-      {
-        "x": 12.000000,
-        "y": -6.000000
-      },
-      {
-        "x": 12.000000,
-        "y": 0.000000
-      },
-      {
-        "x": 12.000000,
-        "y": 6.000000
-      },
       {
         "x": 0.000000,
         "y": 0.000000
+      },
+      {
+        "x": 5.000000,
+        "y": -5.000000
+      },
+      {
+        "x": -5.000000,
+        "y": 5.000000
       }
     ]
   },
@@ -94,26 +79,29 @@
     }
   },
   "Spheres": {
-    "size": 0,
-    "items": []
-  },
-  "Capsules": {
-    "size": 1,
+    "size": 2,
     "items": [
       {
-        "Position": {
+        "Center": {
+          "x": -5.000000,
+          "y":  0.000000,
+          "z": -5.000000
+        },
+        "Radius": 2.500000
+      },
+      {
+        "Center": {
           "x": 5.000000,
           "y": 0.000000,
-          "z": -6.000000
+          "z": 5.000000
         },
-        "Offset": {
-          "x": 0.000000,
-          "y": 0.000000,
-          "z": 4.000000
-        },
-        "Radius": 0.500000
+        "Radius": 2.500000
       }
     ]
+  },
+  "Capsules": {
+    "size": 0,
+    "items": []
   },
   "Planes": {
     "size": 4,

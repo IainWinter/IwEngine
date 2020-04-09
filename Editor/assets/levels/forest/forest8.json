@@ -5,55 +5,40 @@
   },
   "CameraFollow": false,
   "Enemies": {
-    "size": 2,
+    "size": 1,
     "items": [
       {
-        "Type": 0,
+        "Type": 10,
         "Bullet": {
           "Type": 0,
-          "Speed": 5.000000
+          "Speed": 8.000000
         },
-        "Speed": 0.2617994,
-        "FireTime": 0.120000,
-        "ChargeTime": 0.000000,
-        "Rotation": 3.141592
-      },
-      {
-        "Type": 0,
-        "Bullet": {
-          "Type": 0,
-          "Speed": 5.000000
-        },
-        "Speed": 0.2617994,
-        "FireTime": 0.120000,
-        "ChargeTime": 0.000000,
-        "Rotation": 0
+        "Speed": 0.261799,
+        "FireTime": 3.00000,
+        "ChargeTime": 2.500000,
+        "Rotation": 0.000000
       }
     ]
   },
   "Positions": {
-    "size": 2,
+    "size": 1,
     "items": [
       {
-        "x": -6.000000,
-        "y": -3.000000
-      },
-      {
-        "x":  6.000000,
-        "y": -3.000000
+        "x": 0.000000,
+        "y": 0.000000
       }
     ]
   },
   "InPosition": {
-    "x":  0.000000,
+    "x": 0.000000,
     "y": 10.000000
   },
   "OutPosition": {
     "x": 28.000000,
-    "y":  0.000000
+    "y": 0.000000
   },
   "LevelLocation": {
-    "x":   0.000000,
+    "x": 0.000000,
     "y": -32.000000
   },
   "Door": {
@@ -64,17 +49,8 @@
     }
   },
   "Spheres": {
-    "size": 1,
-    "items": [
-      {
-        "Center": {
-          "x": 0.000000,
-          "y": 0.000000,
-          "z": 2.000000
-        },
-        "Radius": 2.500000
-      }
-    ]
+    "size": 0,
+    "items": []
   },
   "Capsules": {
     "size": 0,
