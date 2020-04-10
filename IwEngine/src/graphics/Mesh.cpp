@@ -181,7 +181,7 @@ namespace Graphics {
 		if (!VertexArray) {
 			LOG_WARNING << "Mesh needs to be initialized!";
 		}
-#endif 
+#endif
 		device->DrawElements(Topology, IndexCount, 0);
 	}
 
@@ -281,6 +281,8 @@ namespace Graphics {
 			BiTangents[Indices[i + 2]] = bitangent;
 		}
 	}
+
+	// need to be able to delete verts n such
 
 	void Mesh::SetVertices(
 		unsigned count,

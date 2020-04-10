@@ -63,6 +63,9 @@ namespace Physics {
 		IWPHYSICS_API
 		void SetCollisionCallback(
 			const CollisionCallback& callback);
+
+		IWPHYSICS_API
+		const std::vector<CollisionObject*>& CollisionObjects() const;
 	protected:
 		IWPHYSICS_API
 		virtual void SolveManifolds(

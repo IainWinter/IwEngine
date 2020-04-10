@@ -193,5 +193,9 @@ namespace Physics {
 	{
 		m_collisionCallback = callback;
 	}
+
+	const std::vector<CollisionObject*>& CollisionSpace::CollisionObjects() const {
+		return m_objects;
+	}
 }
 }

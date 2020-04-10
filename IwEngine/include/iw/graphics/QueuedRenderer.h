@@ -38,7 +38,8 @@ namespace Graphics {
 			BEGIN,        END,
 			BEGIN_SCENE,  END_SCENE,
 			BEGIN_SHADOW, END_SHADOW,
-			DRAW_MESH
+			DRAW_MESH,
+			APPLY_FILTER
 		};
 
 		struct BeginSceneOP {
@@ -54,6 +55,12 @@ namespace Graphics {
 		struct DrawMeshOP {
 			Transform Transform; // see End function
 			Mesh* Mesh;
+		};
+
+		struct FilterOP {
+			ref<Shader> Filter;
+			ref<RenderTarget> Source;
+			ref<RenderTarget> Target;
 		};
 
 		struct RenderItem {
@@ -147,10 +154,17 @@ namespace Graphics {
 			const Transform* transform,
 			Mesh* mesh) override;
 
+		// Copies transform to be able to use stack allocated ones. DrawMesh(*, *) calls to this. TODO: could make 2 differnt draw calls one for instances and one for ptrs
 		IWGRAPHICS_API
 		void DrawMesh(
 			const Transform& transform,
 			Mesh* mesh);
+
+		IWGRAPHICS_API
+		void ApplyFilter(
+			ref<Shader>& filter,
+			const ref<RenderTarget>& source,
+			const ref<RenderTarget>& target = nullptr) override;
 	private:
 		key GenOrder(
 			const Transform& transform = Transform(),

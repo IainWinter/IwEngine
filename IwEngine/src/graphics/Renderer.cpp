@@ -112,8 +112,8 @@ namespace Graphics {
 		Camera* camera,
 		const ref<RenderTarget>& target)
 	{
-		SetCamera(camera);
-		SetTarget(target);
+		Renderer::SetCamera(camera);
+		Renderer::SetTarget(target);
 
 		m_state = RenderState::SCENE;
 	}
@@ -124,8 +124,8 @@ namespace Graphics {
 	{
 		Renderer::BeginScene(scene->MainCamera(), target);
 
-		SetPointLights      (scene->PointLights());
-		SetDirectionalLights(scene->DirectionalLights());
+		Renderer::SetPointLights      (scene->PointLights());
+		Renderer::SetDirectionalLights(scene->DirectionalLights());
 	}
 
 	void Renderer::BeginShadowCast(
@@ -136,8 +136,8 @@ namespace Graphics {
 			LOG_WARNING << "Tried to begin shadow cast with light that cannot cast shadows!";
 		}
 #endif
-		SetShader(light->ShadowShader());
-		SetTarget(light->ShadowTarget());
+		Renderer::SetShader(light->ShadowShader());
+		Renderer::SetTarget(light->ShadowTarget());
 
 		light->SetupShadowCast(this);
 
@@ -152,7 +152,7 @@ namespace Graphics {
 
 	void Renderer::EndShadowCast() {
 		m_target->Tex(0)->Handle()->GenerateMipMaps();
-		EndScene();
+		Renderer::EndScene();
 	}
 
 	void Renderer::DrawMesh(
@@ -174,29 +174,31 @@ namespace Graphics {
 			transform->WorldTransformation()
 		);
 
-		SetMesh(mesh);
+		Renderer::SetMesh(mesh);
 		m_mesh->Draw(Device);
 	}
 
 	void Renderer::ApplyFilter(
 		iw::ref<Shader>& shader,
 		const ref<RenderTarget>& source,
-		const ref<RenderTarget>& destination)
+		const ref<RenderTarget>& target)
 	{
-		if (source == destination) return;
+		//if (source == destination) return; // this prob has to be here
 
-		SetCamera(nullptr);
-		SetShader(shader);
-		SetTarget(destination);
+		Renderer::BeginScene((Camera*)nullptr, target);
+		
+		Renderer::SetShader(shader);
 
-		shader->Handle()->GetParam("filterTexture")->SetAsTexture(
-			source->Tex(0)->Handle()
-		);
+		if (source) {
+			shader->Handle()->GetParam("filterTexture")->SetAsTexture(
+				source->Tex(0)->Handle()
+			);
+		}
 
-		SetMesh(m_quad);
+		Renderer::SetMesh(m_quad);
 		m_quad->Draw(Device);
 
-		EndScene();
+		Renderer::EndScene();
 	}
 
 	void Renderer::SetTarget(
@@ -270,7 +272,7 @@ namespace Graphics {
 	{		
 		if (m_material != material) {
 			if (material) {
-				SetShader(material->Shader);
+				Renderer::SetShader(material->Shader);
 				material->Use(Device);
 			}
 

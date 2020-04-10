@@ -288,21 +288,101 @@ namespace iw {
 		vector3 target,
 		vector3 up)
 	{
-		vector3 forward = (target - eye).normalized();
-		float dot = vector3::unit_z.dot(forward);
+		vector3 local_forward = (target - eye).normalized();
+		vector3 local_right   = up.cross(local_forward).normalized();
+		vector3 local_up      = local_forward.cross(local_right);
 
-		if (abs(dot + 1.0f) < 0.00001f) {
-			return quaternion(up, Pi);
+		float m00 = local_right.x;
+		float m01 = local_right.y;
+		float m02 = local_right.z;
+		float m10 = local_up.x;
+		float m11 = local_up.y;
+		float m12 = local_up.z;
+		float m20 = local_forward.x;
+		float m21 = local_forward.y;
+		float m22 = local_forward.z;
+
+		quaternion q;
+		
+		float num8 = (m00 + m11) + m22;
+		if (num8 > 0.0f) {
+			float num = sqrt(num8 + 1.0f);
+
+			q.w = num * 0.5f;
+			num = 0.5f / num;
+			q.x = (m12 - m21) * num;
+			q.y = (m20 - m02) * num;
+			q.z = (m01 - m10) * num;
+
+			return q;
 		}
 
-		if (abs(dot - 1.0f) < 0.00001f) {
-			return quaternion::identity;
+		if (   (m00 >= m11) 
+			&& (m00 >= m22))
+		{
+			float num7 = sqrt(((1.0f + m00) - m11) - m22);
+			float num4 = 0.5f / num7;
+
+			q.x = 0.5f * num7;
+			q.y = (m01 + m10) * num4;
+			q.z = (m02 + m20) * num4;
+			q.w = (m12 - m21) * num4;
+
+			return q;
 		}
 
-		float angle  = acos(dot);
-		vector3 axis = forward.cross(vector3::unit_z).normalized();
+		if (m11 > m22) {
+			float num6 = sqrt(((1.0f + m11) - m00) - m22);
+			float num3 = 0.5f / num6;
 
-		return from_axis_angle(axis, angle);
+			q.x = (m10 + m01) * num3;
+			q.y = 0.5f * num6;
+			q.z = (m21 + m12) * num3;
+			q.w = (m20 - m02) * num3;
+
+			return q;
+		}
+
+		float num5 = sqrt(((1.0f + m22) - m00) - m11);
+		float num2 = 0.5f / num5;
+		q.x = (m20 + m02) * num2;
+		q.y = (m21 + m12) * num2;
+		q.z = 0.5f * num5;
+		q.w = (m01 - m10) * num2;
+
+		return q;
+
+
+		//float dot = up.dot(target - eye);
+
+		//if (abs(dot + 1.0f) < 0.00001f) {
+		//	return quaternion(up, Pi);
+		//}
+
+		//if (abs(dot - 1.0f) < 0.00001f) {
+		//	return quaternion::identity;
+		//}
+
+		//float angle = acos(dot);
+		//vector3 axis = up.cross(target - eye).normalized();
+
+		//return from_axis_angle(axis, angle);
+
+		//vector3 forward = (target - eye).normalized();
+		//float dot = vector3::unit_z.dot(forward);
+
+		//if (abs(dot + 1.0f) < 0.00001f) {
+		//	return quaternion(up, Pi);
+		//}
+
+		//if (abs(dot - 1.0f) < 0.00001f) {
+		//	return quaternion::identity;
+		//}
+
+		//float angle  = acos(dot);
+		//vector3 axis = vector3::unit_z.cross(forward).normalized();
+
+		//return from_axis_angle(axis, angle);
 	}
 
 	std::ostream& math::operator<<(

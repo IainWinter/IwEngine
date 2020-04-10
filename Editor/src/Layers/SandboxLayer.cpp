@@ -20,6 +20,9 @@
 #include "iw/audio/AudioSpaceStudio.h"
 #include "imgui/imgui.h"
 
+#include "iw/engine/Systems/Debug/DrawCollidersSystem.h"
+
+
 namespace iw {
 	struct ModelUBO {
 		matrix4 model;
@@ -259,6 +262,8 @@ namespace iw {
 		PushSystem<EnemyDeathCircleSystem>();
 
 		PushSystem<LevelSystem>(playerSystem->GetPlayer());
+
+		PushSystem<iw::DrawCollidersSystem>(scene->MainCamera());
 
 		return Layer::Initialize();
 	}

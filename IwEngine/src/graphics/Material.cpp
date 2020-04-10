@@ -5,9 +5,10 @@ namespace iw {
 namespace Graphics {
 	Material::Material()
 		: m_alloc(128)
-		, m_initialized(false)
 		, m_transparency(Transparency::NONE)
 		, m_castShadows(true)
+		, m_wireframe(false)
+		, m_initialized(false)
 		, m_order(0)
 	{}
 	
@@ -15,9 +16,10 @@ namespace Graphics {
 		iw::ref<iw::Shader>& shader)
 		: Shader(shader)
 		, m_alloc(128)
-		, m_initialized(false)
 		, m_transparency(Transparency::NONE)
 		, m_castShadows(true)
+		, m_wireframe(false)
+		, m_initialized(false)
 		, m_order(0)
 	{}
 
@@ -30,6 +32,7 @@ namespace Graphics {
 		, m_index       (other.m_index)
 		, m_transparency(other.m_transparency)
 		, m_castShadows (other.m_castShadows)
+		, m_wireframe   (other.m_wireframe)
 		, m_initialized (other.m_initialized)
 		, m_order(0)
 	{
@@ -50,6 +53,7 @@ namespace Graphics {
 		, m_index       (std::move(other.m_index))
 		, m_transparency(other.m_transparency)
 		, m_castShadows (other.m_castShadows)
+		, m_wireframe   (other.m_wireframe)
 		, m_initialized (other.m_initialized)
 		, m_order       (other.m_order)
 	{}
@@ -66,6 +70,7 @@ namespace Graphics {
 		m_index        = other.m_index;
 		m_transparency = other.m_transparency;
 		m_castShadows  = other.m_castShadows;
+		m_wireframe    = other.m_wireframe;
 		m_initialized  = other.m_initialized;
 		m_order        = 0;
 
@@ -89,6 +94,7 @@ namespace Graphics {
 		m_index        = std::move(other.m_index);
 		m_transparency = other.m_transparency;
 		m_castShadows  = other.m_castShadows;
+		m_wireframe    = other.m_wireframe;
 		m_initialized  = other.m_initialized;
 		m_order        = 0;
 
@@ -156,6 +162,8 @@ namespace Graphics {
 		const iw::ref<IDevice>& device)
 	{
 		//device->SetPipeline(Shader->Handle());
+
+		device->SetWireframe(Wireframe());
 
 		for (MaterialProperty& prop : m_properties) {
 			if (!prop.Active) {
@@ -299,7 +307,7 @@ namespace Graphics {
 		return m_index.find(name) != m_index.end();
 	}
 
-	Transparency Material::GetTransparency() const {
+	iw::Transparency Material::Transparency() const {
 		return m_transparency;
 	}
 
@@ -307,8 +315,12 @@ namespace Graphics {
 		return m_castShadows;
 	}
 
+	bool Material::Wireframe() const {
+		return m_wireframe;
+	}
+
 	void Material::SetTransparency(
-		Transparency transparency)
+		iw::Transparency transparency)
 	{
 		m_transparency = transparency;
 	}
@@ -317,6 +329,12 @@ namespace Graphics {
 		bool castShadows)
 	{
 		m_castShadows = castShadows;
+	}
+
+	void Material::SetWireframe(
+		bool wireframe)
+	{
+		m_wireframe = wireframe;
 	}
 
 	void Material::SetProperty(

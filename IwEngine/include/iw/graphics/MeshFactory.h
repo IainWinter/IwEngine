@@ -17,6 +17,11 @@ namespace Graphics {
 		unsigned latCount,
 		unsigned lonCount);
 
+	// Capsule
+
+	Mesh* MakeCapsule(
+		unsigned resolution);
+
 	//Tris
 
 	IWGRAPHICS_API

@@ -153,6 +153,14 @@ namespace Graphics {
 					m_pool.free<DrawMeshOP>(draw); // need to free to call dest for vector in transform
 					break;                         // only because it copies instead of using a ptr bc of the text
 				}                                  // but that doesnt even work cus the mesh uses a ptr and gets updated so they are all the same :c
+				case RenderOP::APPLY_FILTER: {
+					FilterOP* filter = (FilterOP*)item.Data;
+
+					Renderer::ApplyFilter(filter->Filter, filter->Source, filter->Target);
+
+					m_pool.free<FilterOP>(filter);
+					break;
+				}
 			}
 
 		} while (!m_queue.empty());
@@ -167,7 +175,7 @@ namespace Graphics {
 		m_shadow  = 1;
 		m_block   = 1;
 		m_camera += 1;
-		m_position = camera->Position();
+		m_position = camera ? camera->Position() : vector3::zero;
 
 		BeginSceneOP* op = m_pool.alloc<BeginSceneOP>();
 		op->Scene  = nullptr;
@@ -218,8 +226,8 @@ namespace Graphics {
 
 	void QueuedRenderer::EndShadowCast() {
 		m_block        = 3;
-		m_transparency = 0;
 		m_material     = 0;
+		m_transparency = 0;
 		
 		m_queue.emplace_back(GenOrder(), RenderOP::END_SHADOW, nullptr);
 	}
@@ -236,14 +244,32 @@ namespace Graphics {
 		Mesh* mesh)
 	{
 		m_block = 2;
-		m_transparency = val(mesh->Material ? mesh->Material->GetTransparency() : Transparency::NONE);
 		m_material     =     mesh->Material ? mesh->Material->__GetOrder()      : 0;
+		m_transparency = val(mesh->Material ? mesh->Material->Transparency() : Transparency::NONE);
 
 		DrawMeshOP* op = m_pool.alloc<DrawMeshOP>();
 		op->Transform = transform;
 		op->Mesh = mesh;
 
 		m_queue.emplace_back(GenOrder(transform, mesh), RenderOP::DRAW_MESH, op);
+	}
+
+	void QueuedRenderer::ApplyFilter(
+		ref<Shader>& filter,
+		const ref<RenderTarget>& source,
+		const ref<RenderTarget>& target)
+	{
+		m_block        = 0;
+		m_material     = 0;
+		m_transparency = 0;
+		m_camera = 0; // find which camera was used to render to the source target and put after that
+
+		FilterOP* op = m_pool.alloc<FilterOP>();
+		op->Filter = filter;
+		op->Source = source;
+		op->Target = target;
+
+		m_queue.emplace_back(GenOrder(), RenderOP::APPLY_FILTER, op);
 	}
 
 	QueuedRenderer::key QueuedRenderer::GenOrder(

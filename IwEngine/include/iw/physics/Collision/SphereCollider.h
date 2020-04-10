@@ -14,14 +14,15 @@ namespace impl {
 		REFLECT float Radius;
 
 		SphereCollider()
-			: Center(0.0f)
+			: Collider<V>(ColliderType::SPHERE)
+			, Center(0.0f)
 			, Radius(1.0f)
 		{}
 
 		SphereCollider(
 			V center,
 			float radius)
-			: Collider<V>()
+			: Collider<V>(ColliderType::SPHERE)
 			, Center(center)
 			, Radius(radius)
 		{}
@@ -33,6 +34,14 @@ namespace impl {
 			}
 
 			return m_bounds;
+		}
+
+		Transform Trans() const override {
+			Transform transform;
+			transform.Position = Center;
+			transform.Scale    = Radius;
+
+			return transform;
 		}
 
 		ManifoldPoints TestCollision(

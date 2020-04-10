@@ -52,6 +52,20 @@ namespace RenderAPI {
 		glViewport(0, 0, x, y);
 	}
 
+	void GLDevice::SetWireframe(
+		bool wireframe)
+	{
+		if (wireframe) {
+			//glDisable(GL_DEPTH_TEST);
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		}
+
+		else {
+			//glEnable(GL_DEPTH_TEST);
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		}
+	}
+
 	void GLDevice::DestroyBuffer(
 		IBuffer* buffer)
 	{

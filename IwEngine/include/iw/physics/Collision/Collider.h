@@ -7,6 +7,14 @@
 
 namespace iw  {
 namespace Physics {
+
+	enum class ColliderType {
+		SPHERE,
+		CAPSULE,
+		PLANE,
+		//BOX
+	};
+
 namespace impl {
 	template<typename V>
 	struct REFLECT SphereCollider;
@@ -22,20 +30,31 @@ namespace impl {
 		typename V>
 	struct Collider {
 	protected:
+		ColliderType m_type;
 		AABB<V> m_bounds;
 		bool m_outdated;
 
 		//M m_tensor;
 
 	public:
-		Collider()
-			: m_outdated(true)
+		Collider(
+			ColliderType type)
+			: m_type(type)
+			, m_outdated(true)
 		{}
 
-		// dont like that you need to pass transforms
+		IWPHYSICS_API
+		ColliderType Type() const {
+			return m_type;
+		}
 
 		IWPHYSICS_API
 		virtual const AABB<V>& Bounds() = 0;
+
+		IWPHYSICS_API
+		virtual Transform Trans() const = 0;
+
+		// dont like that you need to pass transforms
 
 		IWPHYSICS_API
 		virtual ManifoldPoints TestCollision(

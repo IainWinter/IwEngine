@@ -1,12 +1,12 @@
 #include "Layers/ToolLayer.h"
-#include "Systems/EditorCameraController.h"
 #include "Events/ActionEvents.h"
-#include "iw/graphics/Model.h"
+#include "Systems/EditorCameraController.h"
+#include "iw/engine/Components/CameraController.h"
+#include "iw/physics/Collision/PlaneCollider.h"
 #include "iw/graphics/MeshFactory.h"
 #include "iw/graphics/Shader.h"
 #include "iw/graphics/Camera.h"
-#include "iw/engine/Components/CameraController.h"
-#include "iw/physics/Collision/PlaneCollider.h"
+#include "iw/graphics/Model.h"
 #include "imgui/imgui.h"
 
 namespace iw {

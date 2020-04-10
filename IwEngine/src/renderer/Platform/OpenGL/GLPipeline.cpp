@@ -14,8 +14,15 @@ namespace RenderAPI {
 		, m_textureCount(0)
 	{
 		gl_id = glCreateProgram();
-		glAttachShader(gl_id, vertexShader->VertexShader());
-		glAttachShader(gl_id, fragmentShader->FragmentShader());
+
+		if (vertexShader) {
+			glAttachShader(gl_id, vertexShader->VertexShader());
+		}
+
+		if (fragmentShader) {
+			glAttachShader(gl_id, fragmentShader->FragmentShader());
+		}
+
 		if (geometryShader) {
 			glAttachShader(gl_id, geometryShader->GeometryShader());
 		}
@@ -23,8 +30,14 @@ namespace RenderAPI {
 		glLinkProgram(gl_id);
 		glValidateProgram(gl_id);
 
-		glDeleteShader(vertexShader->VertexShader());
-		glDeleteShader(fragmentShader->FragmentShader());
+		if (vertexShader) {
+			glDeleteShader(vertexShader->VertexShader());
+		}
+
+		if (fragmentShader) {
+			glDeleteShader(fragmentShader->FragmentShader());
+		}
+		
 		if(geometryShader) {
 			glDeleteShader(geometryShader->GeometryShader());
 		}

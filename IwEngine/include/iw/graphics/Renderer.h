@@ -171,12 +171,12 @@ namespace Graphics {
 			const Transform* transform,
 			Mesh* mesh);
 
-		// tbd
+		// Runs a shader on a fullscreen quad with verts and uvs
 		IWGRAPHICS_API
-		void ApplyFilter(
+		virtual void ApplyFilter(
 			ref<Shader>& filter,
 			const ref<RenderTarget>& source,
-			const ref<RenderTarget>& destination = nullptr);
+			const ref<RenderTarget>& target = nullptr);
 	//private:
 		IWGRAPHICS_API
 		void SetTarget(

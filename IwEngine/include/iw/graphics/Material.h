@@ -56,7 +56,7 @@ namespace Graphics {
 
 		Transparency m_transparency;
 		bool m_castShadows;
-
+		bool m_wireframe;
 
 		bool m_initialized;
 		int m_order;
@@ -147,18 +147,25 @@ namespace Graphics {
 			std::string name) const;
 
 		IWGRAPHICS_API
-		Transparency GetTransparency() const;
+		iw::Transparency Transparency() const;
 
 		IWGRAPHICS_API
 		bool CastShadows() const;
 
 		IWGRAPHICS_API
+		bool Wireframe() const;
+
+		IWGRAPHICS_API
 		void SetTransparency(
-			Transparency transparency);
+			iw::Transparency transparency);
 
 		IWGRAPHICS_API
 		void SetCastShadows(
 			bool castShadows);
+
+		IWGRAPHICS_API
+		void SetWireframe(
+			bool wireframe);
 
 		int __GetOrder() const {
 			return m_order;

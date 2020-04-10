@@ -14,19 +14,20 @@ namespace impl {
 		REFLECT impl::Plane<V> Plane;
 
 		PlaneCollider()
-			: Plane(0.0f, 0.0f)
+			: Collider<V>(ColliderType::PLANE)
+			, Plane(0.0f, 0.0f)
 		{}
 
 		PlaneCollider(
 			V p,
 			float d)
-			: Collider<V>()
+			: Collider<V>(ColliderType::PLANE)
 			, Plane(p, d)
 		{}
 
 		PlaneCollider(
 			impl::Plane<V> plane)
-			: Collider<V>()
+			: Collider<V>(ColliderType::PLANE)
 			, Plane(plane)
 		{}
 
@@ -37,6 +38,17 @@ namespace impl {
 			//}
 
 			return m_bounds;
+		}
+
+		Transform Trans() const override {
+			Transform transform;
+			transform.Position = Plane.P.normalized() * Plane.D;
+			transform.Scale    = 10.0f; // should be width, height when made non infinite
+
+			transform.Rotation =  quaternion::from_look_at(-Plane.P);
+			transform.Rotation *= quaternion::from_axis_angle(transform.Right(), -Pi / 2);
+
+			return transform;
 		}
 
 		ManifoldPoints TestCollision(

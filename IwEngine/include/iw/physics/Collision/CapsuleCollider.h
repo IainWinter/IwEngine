@@ -2,6 +2,8 @@
 
 #include "Collider.h"
 
+#include "iw/engine/Time.h"
+
 namespace iw {
 namespace Physics {
 namespace impl {
@@ -15,7 +17,8 @@ namespace impl {
 		REFLECT float Radius;
 
 		CapsuleCollider()
-			: Position(0.0f)
+			: Collider<V>(ColliderType::CAPSULE)
+			, Position(0.0f)
 			, Offset(0.0f, 1.0f, 0.0f)
 			, Radius(1.0f)
 		{}
@@ -24,7 +27,7 @@ namespace impl {
 			V position,
 			V offset,
 			float radius)
-			: Collider<V>()
+			: Collider<V>(ColliderType::CAPSULE)
 			, Position(position)
 			, Offset(offset)
 			, Radius(radius)
@@ -41,6 +44,16 @@ namespace impl {
 			}
 
 			return m_bounds;
+		}
+
+		Transform Trans() const override {
+			Transform transform;
+			transform.Position = (Position + Offset) / 2;
+			transform.Scale    = vector3(Radius, Offset.length(), Radius);
+			transform.Rotation = quaternion::from_look_at(Position, Position + Offset);
+			transform.Rotation *= quaternion::from_axis_angle(transform.Right(), Pi / 2);
+
+			return transform;
 		}
 
 		ManifoldPoints TestCollision(

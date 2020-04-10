@@ -25,6 +25,17 @@ namespace Physics {
 		return &m_transform;
 	}
 
+	Transform CollisionObject::ColTrans() const {
+		const Transform* tran = Trans();
+		      Transform  coll = m_collider->Trans();
+
+		coll.Position += tran->Position;
+		coll.Scale    *= tran->Scale;
+		coll.Rotation *= tran->Rotation;
+
+		return coll;
+	}
+
 	Collider* CollisionObject::Col() const {
 		return m_collider;
 	}

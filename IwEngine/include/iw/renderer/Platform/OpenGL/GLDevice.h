@@ -22,6 +22,12 @@ namespace RenderAPI {
 			int x,
 			int y) override;
 
+		// State changes
+
+		IWRENDERER_API
+		virtual void SetWireframe(
+			bool wireframe) override;
+
 		// Buffers
 
 		IWRENDERER_API

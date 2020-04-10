@@ -154,31 +154,31 @@ namespace Graphics {
 
 		// Index
 
-		size_t index = 0;
+		unsigned i = 0;
 		unsigned v = lonCount + 1;
 		for (unsigned lon = 0; lon < lonCount; ++lon, v++) {
-			indices[index++] = lon;
-			indices[index++] = v;
-			indices[index++] = v + 1;
+			indices[i++] = lon;
+			indices[i++] = v;
+			indices[i++] = v + 1;
 		}
 
 		for (unsigned lat = 1; lat < latCount - 1; lat++) {
 			v = lat * (lonCount + 1);
 			for (unsigned lon = 0; lon < lonCount; lon++, v++) {
-				indices[index++] = v;
-				indices[index++] = v + lonCount + 1;
-				indices[index++] = v + 1;
-				indices[index++] = v + 1;
-				indices[index++] = v + lonCount + 1;
-				indices[index++] = v + lonCount + 2;
+				indices[i++] = v;
+				indices[i++] = v + lonCount + 1;
+				indices[i++] = v + 1;
+				indices[i++] = v + 1;
+				indices[i++] = v + lonCount + 1;
+				indices[i++] = v + lonCount + 2;
 			}
 		}
 
 		v = (latCount - 1) * (lonCount + 1);
 		for (unsigned lon = 0; lon < lonCount; lon++, v++) {
-			indices[index++] = v;
-			indices[index++] = v + lonCount + 1;
-			indices[index++] = v + 1;
+			indices[i++] = v;
+			indices[i++] = v + lonCount + 1;
+			indices[i++] = v + 1;
 		}
 
 		Mesh* mesh = new Mesh();
@@ -189,6 +189,128 @@ namespace Graphics {
 
 		delete[] verts;
 		delete[] norms;
+		delete[] uvs;
+		delete[] indices;
+
+		return mesh;
+	}
+
+	Mesh* MakeCapsule(
+		unsigned resolution)
+	{
+		const float height = 4.0f;
+		const float radius = 1.0f;
+
+		// make segments an even number
+		if (resolution % 2 != 0)
+			resolution++;
+
+		// extra vertex on the seam
+		int points = resolution + 1;
+
+		unsigned vertCount  = points * (points + 1);
+		unsigned indexCount = (resolution * (resolution + 1) * 2 * 3);
+
+		vector3*  vertices = new vector3 [vertCount];
+		vector2*  uvs      = new vector2 [vertCount];
+		unsigned* indices  = new unsigned[indexCount];
+
+
+		// calculate points around a circle
+		float* pX = new float[points];
+		float* pZ = new float[points];
+		float* pY = new float[points];
+		float* pR = new float[points];
+
+		float calcH = 0.0f;
+		float calcV = 0.0f;
+
+		for (int i = 0; i < points; i++) {
+			pX[i] = sin(calcH);
+			pZ[i] = cos(calcH);
+			pY[i] = cos(calcV);
+			pR[i] = sin(calcV);
+
+			calcH += 2 * Pi / resolution;
+			calcV +=     Pi / resolution;
+		}
+		
+		float yOff = (height - radius * 2.0f) * 0.5f;
+		if (yOff < 0) {
+			yOff = 0;
+		}
+
+		float stepX = 1.0f / (points - 1);
+		int   top   = ceil (points * 0.5f);
+		int   btm   = floor(points * 0.5f);
+
+		int v = 0;
+
+		// Top Hemisphere
+
+		for (int y = 0; y < top; y++) {
+			for (int x = 0; x < points; x++) {
+				vertices[v] = vector3(
+					pX[x] * pR[y], 
+					pY[y] + yOff, 
+					pZ[x] * pR[y]
+				);
+
+				uvs[v] = vector2(
+					1.0f - stepX * x, 
+					(vertices[v].y + (height * 0.5f)) / height
+				);
+
+				v++;
+			}
+		}
+
+		// Bottom Hemisphere
+
+		for (int y = btm; y < points; y++) {
+			for (int x = 0; x < points; x++) {
+				vertices[v] = vector3(
+					pX[x] * pR[y], 
+					pY[y] - yOff, 
+					pZ[x] * pR[y]) * radius;
+
+				uvs[v] = vector2(
+					1.0f - stepX * x, 
+					(vertices[v].y + (height * 0.5f)) / height
+				);
+
+				v++;
+			}
+		}
+
+		// Index
+
+		unsigned i = 0;
+		for (int y = 0; y < resolution + 1; y++) {
+			for (int x = 0; x < resolution; x++) {
+				indices[i++] = (y + 0) * points + x + 0;
+				indices[i++] = (y + 1) * points + x + 0;
+				indices[i++] = (y + 1) * points + x + 1;
+
+				indices[i++] = (y + 0) * points + x + 1;
+				indices[i++] = (y + 0) * points + x + 0;
+				indices[i++] = (y + 1) * points + x + 1;
+			}
+		}
+
+		Mesh* mesh = new Mesh();
+
+		mesh->SetVertices(vertCount, vertices);
+		mesh->SetUVs     (vertCount, uvs);
+		mesh->SetIndices (indexCount, indices);
+
+		mesh->GenNormals();
+
+		delete[] pX;
+		delete[] pZ;
+		delete[] pY;
+		delete[] pR;
+		delete[] vertices;
 		delete[] uvs;
 		delete[] indices;
 

@@ -34,6 +34,12 @@ namespace RenderAPI {
 			int x,
 			int y) = 0;
 
+		// State changes
+
+		IWRENDERER_API
+		virtual void SetWireframe(
+			bool wireframe) = 0;
+
 		// Buffers
 
 		IWRENDERER_API
