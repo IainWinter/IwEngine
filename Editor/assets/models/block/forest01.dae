@@ -5,22 +5,22 @@
       <author>Blender User</author>
       <authoring_tool>Blender 2.82.7 commit date:2020-03-12, commit time:05:06, hash:375c7dc4caf4</authoring_tool>
     </contributor>
-    <created>2020-03-23T15:31:36</created>
-    <modified>2020-03-23T15:31:36</modified>
+    <created>2020-04-10T17:49:54</created>
+    <modified>2020-04-10T17:49:54</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
   <library_effects>
     <effect id="scale-effect">
       <profile_COMMON>
-        <newparam sid="texturesscaleboy_png-surface">
+        <newparam sid="textures_scaleboy_png-surface">
           <surface type="2D">
-            <init_from>texturesscaleboy_png</init_from>
+            <init_from>textures_scaleboy_png</init_from>
           </surface>
         </newparam>
-        <newparam sid="texturesscaleboy_png-sampler">
+        <newparam sid="textures_scaleboy_png-sampler">
           <sampler2D>
-            <source>texturesscaleboy_png-surface</source>
+            <source>textures_scaleboy_png-surface</source>
           </sampler2D>
         </newparam>
         <technique sid="common">
@@ -29,7 +29,7 @@
               <color sid="emission">0 0 0 1</color>
             </emission>
             <diffuse>
-              <texture texture="texturesscaleboy_png-sampler" texcoord="Plane_004-mesh-map-0"/>
+              <texture texture="textures_scaleboy_png-sampler" texcoord="Plane_004-mesh-map-0"/>
             </diffuse>
             <reflectivity>
               <float sid="specular">0.5</float>
@@ -42,11 +42,7 @@
       </profile_COMMON>
     </effect>
   </library_effects>
-  <library_images>
-    <image id="texturesscaleboy_png" name="texturesscaleboy_png">
-      <init_from>textures/scaleboy.png</init_from>
-    </image>
-  </library_images>
+  <library_images/>
   <library_materials>
     <material id="scale-material" name="scale">
       <instance_effect url="#scale-effect"/>

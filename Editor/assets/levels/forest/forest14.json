@@ -1,7 +1,7 @@
 {
   "StageName": {
     "size": 25,
-    "string": "models/block/forest03.dae"
+    "string": "models/block/forest14.dae"
   },
   "CameraFollow": false,
   "Enemies": {
@@ -101,16 +101,17 @@
     "size": 1,
     "items": [
       {
-        "Position": {
+        "Center": {
           "x": 5.000000,
           "y": 0.000000,
-          "z": -6.000000
+          "z": -4.000000
         },
-        "Offset": {
+        "Direction": {
           "x": 0.000000,
           "y": 0.000000,
-          "z": 4.000000
+          "z": 1.000000
         },
+        "Height": 6.000000,
         "Radius": 0.500000
       }
     ]
