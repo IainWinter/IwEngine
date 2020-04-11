@@ -21,8 +21,8 @@ namespace Engine {
 	{}
 
 	matrix4 Transform::Transformation() const {
-		return matrix4::create_from_quaternion(Rotation)
-			 * matrix4::create_scale(Scale)
+		return matrix4::create_scale(Scale)
+			* matrix4::create_from_quaternion(Rotation)
 			 * matrix4::create_translation(Position);
 	}
 

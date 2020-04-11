@@ -75,6 +75,8 @@ namespace Graphics {
 		0, 2, 3
 	};
 
+	// default rad should be .5 not 1
+
 	Mesh* MakeIcosphere(
 		unsigned resolution)
 	{
@@ -196,11 +198,10 @@ namespace Graphics {
 	}
 
 	Mesh* MakeCapsule(
-		unsigned resolution)
+		unsigned resolution,
+		float height,
+		float radius)
 	{
-		const float height = 4.0f;
-		const float radius = 1.0f;
-
 		// make segments an even number
 		if (resolution % 2 != 0)
 			resolution++;
@@ -214,7 +215,6 @@ namespace Graphics {
 		vector3*  vertices = new vector3 [vertCount];
 		vector2*  uvs      = new vector2 [vertCount];
 		unsigned* indices  = new unsigned[indexCount];
-
 
 		// calculate points around a circle
 		float* pX = new float[points];
@@ -252,9 +252,11 @@ namespace Graphics {
 			for (int x = 0; x < points; x++) {
 				vertices[v] = vector3(
 					pX[x] * pR[y], 
-					pY[y] + yOff, 
+					pY[y], 
 					pZ[x] * pR[y]
-				);
+				) * radius;
+
+				vertices[v].y += yOff;
 
 				uvs[v] = vector2(
 					1.0f - stepX * x, 
@@ -271,8 +273,10 @@ namespace Graphics {
 			for (int x = 0; x < points; x++) {
 				vertices[v] = vector3(
 					pX[x] * pR[y], 
-					pY[y] - yOff, 
+					pY[y], 
 					pZ[x] * pR[y]) * radius;
+
+				vertices[v].y -= yOff;
 
 				uvs[v] = vector2(
 					1.0f - stepX * x, 

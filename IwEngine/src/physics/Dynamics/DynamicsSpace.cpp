@@ -97,7 +97,7 @@ namespace Physics {
 
 			Rigidbody* rigidbody = (Rigidbody*)object;
 
-			rigidbody->SetLastTrans(*rigidbody->Trans());
+			rigidbody->SetLastTrans(rigidbody->Trans());
 
 			if (rigidbody->IsKinematic()) {
 				if (   isnan(rigidbody->Velocity().length_squared())
@@ -106,25 +106,25 @@ namespace Physics {
 					rigidbody->SetVelocity(0);
 				}
 
-				if (   isnan(rigidbody->Trans()->Position.length_squared())
-					|| isinf(rigidbody->Trans()->Position.length_squared()))
+				if (   isnan(rigidbody->Trans().Position.length_squared())
+					|| isinf(rigidbody->Trans().Position.length_squared()))
 				{
-					rigidbody->Trans()->Position = 0;
+					rigidbody->Trans().Position = 0;
 				}
 
 				rigidbody->SetVelocity(dt * rigidbody->Force() * rigidbody->Mass() + rigidbody->Velocity());
-				rigidbody->Trans()->Position += dt * rigidbody->Velocity();
+				rigidbody->Trans().Position += dt * rigidbody->Velocity();
 
 				if (rigidbody->IsLocked().x) {
-					rigidbody->Trans()->Position.x = rigidbody->Lock().x;
+					rigidbody->Trans().Position.x = rigidbody->Lock().x;
 				}
 
 				if (rigidbody->IsLocked().y) {
-					rigidbody->Trans()->Position.y = rigidbody->Lock().y;
+					rigidbody->Trans().Position.y = rigidbody->Lock().y;
 				}
 
 				if (rigidbody->IsLocked().z) {
-					rigidbody->Trans()->Position.z = rigidbody->Lock().z;
+					rigidbody->Trans().Position.z = rigidbody->Lock().z;
 				}
 			}
 		}
@@ -185,7 +185,7 @@ namespace Physics {
 
 			Rigidbody* rigidbody = (Rigidbody*)object;
 			if (rigidbody->IsKinematic()) {
-				Transform t = *rigidbody->Trans();
+				Transform t = rigidbody->Trans();
 				vector3   v = rigidbody->Velocity();
 
 				if (rigidbody->IsLocked().x) {

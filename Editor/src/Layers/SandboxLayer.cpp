@@ -263,8 +263,6 @@ namespace iw {
 
 		PushSystem<LevelSystem>(playerSystem->GetPlayer());
 
-		PushSystem<iw::DrawCollidersSystem>(scene->MainCamera());
-
 		return Layer::Initialize();
 	}
 
@@ -365,18 +363,6 @@ namespace iw {
 
 		//ImGui::SliderFloat("Shadow map blur", &blurAmount, 0, 5);
 		ImGui::SliderFloat("Shadow map threshold", &threshold, 0, 1);
-		
-		quaternion rot = sun->Rotation();
-		ImGui::SliderFloat4("Sun rot", (float*)&rot, 0, 1);
-		sun->SetRotation(rot);
-
-		vector3 pos = light->Position();
-		ImGui::SliderFloat3("Light pos", (float*)&pos, -25, 25);
-		light->SetPosition(pos);
-
-		float rad = light->Radius();
-		ImGui::SliderFloat("Light rad", (float*)&rad, 0, 100);
-		light->SetRadius(rad);
 
 		ImGui::SliderFloat3("Text pos",   (float*)&textTransform.Position, -8, 8);
 		ImGui::SliderFloat3("Text scale", (float*)&textTransform.Scale, 0, 10);
@@ -454,7 +440,7 @@ namespace iw {
 				PopSystem(playerSystem);
 				PopSystem(enemySystem);
 
-				if (e.as<GoToNextLevelEvent>().LevelName == "models/block/forest12.dae") {
+				if (e.as<GoToNextLevelEvent>().LevelName == "models/block/forest100.dae") {
 					font->UpdateMesh(textMesh, "ayy you've gotten to the boss congrats!\nsadly he's out today so\nhave some fun with the physics instead...\nmember you can press i/t", .004f, 1);
 				}
 

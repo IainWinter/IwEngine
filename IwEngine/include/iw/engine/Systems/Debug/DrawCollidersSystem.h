@@ -12,7 +12,7 @@ namespace Engine {
 		Camera* m_camera;
 
 		ref<Material> material;
-		Mesh* capsule;
+		ref<Mesh> capsule;
 		Mesh* sphere;
 		Mesh* plane;
 

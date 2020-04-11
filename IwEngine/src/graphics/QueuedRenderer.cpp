@@ -150,9 +150,25 @@ namespace Graphics {
 
 					Renderer::DrawMesh(&draw->Transform, draw->Mesh);
 
-					m_pool.free<DrawMeshOP>(draw); // need to free to call dest for vector in transform
-					break;                         // only because it copies instead of using a ptr bc of the text
-				}                                  // but that doesnt even work cus the mesh uses a ptr and gets updated so they are all the same :c
+					m_pool.free<DrawMeshOP>(draw);
+					break;
+				}
+				case RenderOP::DRAW_MESH_INST: {
+					DrawMeshInstanceOP* draw = (DrawMeshInstanceOP*)item.Data;
+
+					Renderer::DrawMesh(draw->Transform, draw->Mesh);
+
+					m_pool.free<DrawMeshInstanceOP>(draw);
+					break;
+				}
+				case RenderOP::DRAW_MESH_ONCE: {
+					DrawMeshOnceOP* draw = (DrawMeshOnceOP*)item.Data;
+
+					Renderer::DrawMesh(&draw->Transform, draw->Mesh.get());
+
+					m_pool.free<DrawMeshOnceOP>(draw);
+					break;
+				}
 				case RenderOP::APPLY_FILTER: {
 					FilterOP* filter = (FilterOP*)item.Data;
 
@@ -236,22 +252,45 @@ namespace Graphics {
 		const Transform* transform,
 		Mesh* mesh)
 	{
-		DrawMesh(*transform, mesh);
+		m_block        = 2;
+		m_material     =     mesh->Material ? mesh->Material->__GetOrder()   : 0;
+		m_transparency = val(mesh->Material ? mesh->Material->Transparency() : Transparency::NONE);
+
+		DrawMeshInstanceOP* op = m_pool.alloc<DrawMeshInstanceOP>();
+		op->Transform = transform;
+		op->Mesh      = mesh;
+
+		m_queue.emplace_back(GenOrder(*transform, mesh), RenderOP::DRAW_MESH_INST, op);
 	}
 
 	void QueuedRenderer::DrawMesh(
 		const Transform& transform,
 		Mesh* mesh)
 	{
-		m_block = 2;
-		m_material     =     mesh->Material ? mesh->Material->__GetOrder()      : 0;
+		m_block        = 2;
+		m_material     =     mesh->Material ? mesh->Material->__GetOrder()   : 0;
 		m_transparency = val(mesh->Material ? mesh->Material->Transparency() : Transparency::NONE);
 
 		DrawMeshOP* op = m_pool.alloc<DrawMeshOP>();
 		op->Transform = transform;
-		op->Mesh = mesh;
+		op->Mesh      = mesh;
 
 		m_queue.emplace_back(GenOrder(transform, mesh), RenderOP::DRAW_MESH, op);
+	}
+
+	void QueuedRenderer::DrawMesh(
+		const Transform& transform,
+		ref<Mesh> mesh)
+	{
+		m_block        = 2;
+		m_material     =     mesh->Material ? mesh->Material->__GetOrder()   : 0;
+		m_transparency = val(mesh->Material ? mesh->Material->Transparency() : Transparency::NONE);
+
+		DrawMeshOnceOP* op = m_pool.alloc<DrawMeshOnceOP>();
+		op->Transform = transform;
+		op->Mesh      = mesh;
+
+		m_queue.emplace_back(GenOrder(transform, mesh.get()), RenderOP::DRAW_MESH_ONCE, op);
 	}
 
 	void QueuedRenderer::ApplyFilter(
@@ -262,7 +301,7 @@ namespace Graphics {
 		m_block        = 0;
 		m_material     = 0;
 		m_transparency = 0;
-		m_camera = 0; // find which camera was used to render to the source target and put after that
+		m_camera       = 0; // find which camera was used to render to the source target and put after that
 
 		FilterOP* op = m_pool.alloc<FilterOP>();
 		op->Filter = filter;

@@ -12,32 +12,35 @@ namespace impl {
 	struct REFLECT CapsuleCollider
 		: Collider<V>
 	{
-		REFLECT V Position;
-		REFLECT V Offset;
+		REFLECT V Center;
+		REFLECT V Direction;
+		REFLECT float Height;
 		REFLECT float Radius;
 
 		CapsuleCollider()
 			: Collider<V>(ColliderType::CAPSULE)
-			, Position(0.0f)
-			, Offset(0.0f, 1.0f, 0.0f)
-			, Radius(1.0f)
+			, Center(0.0f)
+			, Direction(V::unit_y)
+			, Height(2.0f)
+			, Radius(0.5f)
 		{}
 
 		CapsuleCollider(
-			V position,
-			V offset,
+			V center,
+			float height,
 			float radius)
 			: Collider<V>(ColliderType::CAPSULE)
-			, Position(position)
-			, Offset(offset)
+			, Center(position)
+			, Direction(V::unit_y)
+			, Height(height)
 			, Radius(radius)
 		{}
 
 		const AABB<V>& Bounds() override {
 			if (m_outdated) {
 				m_bounds = AABB<V>(
-					Position + Position.normalized() * Radius,
-					Position + Offset + Offset.normalized() * Radius
+					/*Position + Position.normalized() * Radius,
+					Position + Offset + Offset.normalized() * Radius*/
 				);
 
 				m_outdated = false;
@@ -48,10 +51,20 @@ namespace impl {
 
 		Transform Trans() const override {
 			Transform transform;
-			transform.Position = (Position + Offset) / 2;
-			transform.Scale    = vector3(Radius, Offset.length(), Radius);
-			transform.Rotation = quaternion::from_look_at(Position, Position + Offset);
-			transform.Rotation *= quaternion::from_axis_angle(transform.Right(), Pi / 2);
+			transform.Position = Center;
+			//transform.Scale    = vector3(Radius, Height / 2, Radius);
+
+			if      (Direction == V::unit_x) {
+				transform.Rotation = quaternion::from_axis_angle(V::unit_z, Pi / 2);
+			}
+
+			else if (Direction == V::unit_y) {
+				transform.Rotation = quaternion::identity;
+			}
+
+			else if (Direction == V::unit_z) {
+				transform.Rotation = quaternion::from_axis_angle(V::unit_x, Pi / 2);
+			}
 
 			return transform;
 		}

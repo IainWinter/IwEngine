@@ -24,11 +24,11 @@ namespace Physics {
 				/ (aInvMass + bInvMass);
 		
 			if (aBody ? aBody->IsKinematic() : false) {
-				aBody->Trans()->Position -= aInvMass * correction;
+				aBody->Trans().Position -= aInvMass * correction;
 			}
 
 			if (bBody ? bBody->IsKinematic() : false) {
-				bBody->Trans()->Position += bInvMass * correction;
+				bBody->Trans().Position += bInvMass * correction;
 			}
 		}
 	}

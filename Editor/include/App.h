@@ -1,11 +1,12 @@
 #pragma once 
 
 #include "iw/engine/EntryPoint.h"
-#include "Layers/ToolLayer.h"
 #include "iw/engine/Layers/ImGuiLayer.h"
+#include "Layers/ToolLayer.h"
+#include "Layers/SandboxLayer.h"
 
 namespace iw {
-inline namespace Editor {
+namespace Editor {
 	class App
 		: public iw::Application
 	{
@@ -13,12 +14,15 @@ inline namespace Editor {
 	private:
 		ToolLayer*  toolbox;
 		ImGuiLayer* imgui;
+		SandboxLayer* sandbox;
 
 	public:
 		App();
 
 		int Initialize(
 			iw::InitOptions& options) override;
+
+		void Update() override;
 
 		bool HandleCommand(
 			const Command& command) override;

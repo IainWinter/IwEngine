@@ -19,6 +19,9 @@ namespace Engine {
 		virtual void Update() = 0;
 		virtual void FixedUpdate() = 0;
 
+		virtual void OnPush() = 0;
+		virtual void OnPop() = 0;
+
 		// Action events
 
 		virtual bool On(ActionEvent& e) = 0;
@@ -122,6 +125,9 @@ namespace Engine {
 				m_delete.pop();
 			}
 		}
+
+		virtual void OnPush() override {}
+		virtual void OnPop() override {}
 
 		// Action Events
 

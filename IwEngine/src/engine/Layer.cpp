@@ -30,6 +30,9 @@ namespace Engine {
 	void Layer::FixedUpdate() {}
 	void Layer::ImGui() {}
 
+	void Layer::OnPush() {}
+	void Layer::OnPop() {}
+
 	bool Layer::On(
 		ActionEvent& e)
 	{

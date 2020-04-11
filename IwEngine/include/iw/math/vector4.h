@@ -140,6 +140,16 @@ namespace math {
 			float y,
 			float z);
 
+		/**
+		* Returns the most influential components
+		*/
+		float major() const;
+
+		/**
+		* Returns the lest influential components
+		*/
+		float minor() const;
+
 		vector4 operator+(
 			const vector4& other) const;
 

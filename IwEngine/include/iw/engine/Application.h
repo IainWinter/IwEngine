@@ -124,6 +124,8 @@ namespace Engine {
 			LOG_INFO << "Pushed " << layer->Name() << " layer";
 			layer->SetApplicationVars(Space, Renderer, Asset, Physics, Audio, Bus);
 			m_layers.PushBack(layer);
+
+			layer->OnPush();
 		}
 
 		template<
@@ -134,6 +136,8 @@ namespace Engine {
 			LOG_INFO << "Pushed " << layer->Name() << " overlay";
 			layer->SetApplicationVars(Space, Renderer, Asset, Physics, Audio, Bus);
 			m_layers.PushFront(layer);
+
+			layer->OnPush();
 		}
 
 		template<
@@ -143,6 +147,8 @@ namespace Engine {
 		{
 			LOG_INFO << "Popped " << layer->Name() << " layer";
 			m_layers.Pop(layer);
+
+			layer->OnPop();
 		}
 	};
 }

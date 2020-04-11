@@ -14,7 +14,7 @@ namespace Engine {
 			auto [transform, rigidbody] = entity.Components.Tie<Components>();
 			
 			if (rigidbody->IsKinematic()) {
-				transform->Position = iw::lerp(rigidbody->LastTrans().Position, rigidbody->Trans()->Position, accumulator / iw::FixedTime());
+				transform->Position = iw::lerp(rigidbody->LastTrans().Position, rigidbody->Trans().Position, accumulator / iw::FixedTime());
 			}
 		}
 

@@ -110,13 +110,20 @@ namespace iw {
 		z /= scale;
 	}
 
-	float& vector3::operator[](
-		size_t index)
-	{
-		if (index == 0) return x;
-		else if (index == 1) return y;
-		else if (index == 2) return z;
-		throw std::out_of_range("Index out of bounds");
+	float vector3::major() const {
+		float major = x;
+		if (y > major) major = y;
+		if (z > major) major = z;
+
+		return major;
+	}
+
+	float vector3::minor() const {
+		float minor = x;
+		if (y < minor) minor = y;
+		if (z < minor) minor = z;
+
+		return minor;
 	}
 
 	vector3 vector3::operator+(
@@ -263,6 +270,15 @@ namespace iw {
 
 	vector3 vector3::operator-() const {
 		return vector3(-x, -y, -z);
+	}
+
+	float& vector3::operator[](
+		size_t index)
+	{
+		if (index == 0) return x;
+		else if (index == 1) return y;
+		else if (index == 2) return z;
+		throw std::out_of_range("Index out of bounds");
 	}
 
 	bool vector3::operator==(

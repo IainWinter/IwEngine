@@ -107,6 +107,16 @@ namespace math {
 		*/
 		void normalize_fast();
 
+		/**
+		* Returns the most influential components
+		*/
+		float major() const;
+
+		/**
+		* Returns the lest influential components
+		*/
+		float minor() const;
+
 		vector2 operator+ (
 			const vector2& other) const;
 

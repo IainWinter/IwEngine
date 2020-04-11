@@ -20,7 +20,9 @@ namespace Graphics {
 	// Capsule
 
 	Mesh* MakeCapsule(
-		unsigned resolution);
+		unsigned resolution,
+		float height = 2.0f,
+		float radius = 0.5f);
 
 	//Tris
 

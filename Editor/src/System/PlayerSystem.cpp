@@ -340,11 +340,6 @@ bool PlayerSystem::On(
 
 			*p = playerPrefab;
 
-			if (level == "models/block/forest12.dae") {
-				p->Health = 1000000;
-			}
-
-
 			// no break
 		}
 		case iw::val(Actions::RESET_LEVEL): {

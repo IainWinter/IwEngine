@@ -1,6 +1,5 @@
 #include "Layers/RayMarchingLayer.h"
 #include "iw/engine/Components/CameraController.h"
-#include "Systems/EditorCameraController.h"
 
 namespace iw {
 	RayMarchingLayer::RayMarchingLayer()

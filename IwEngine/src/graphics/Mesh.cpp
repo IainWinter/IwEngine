@@ -166,8 +166,10 @@ namespace Graphics {
 	void Mesh::Destroy(
 		const ref<IDevice>& device)
 	{
-		device->DestroyVertexArray(VertexArray);
-		device->DestroyBuffer(IndexBuffer);
+		if (VertexArray && IndexBuffer) {
+			device->DestroyVertexArray(VertexArray);
+			device->DestroyBuffer(IndexBuffer);
+		}
 	}
 
 	void Mesh::Draw(

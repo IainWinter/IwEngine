@@ -61,6 +61,12 @@ namespace Engine {
 		IWENGINE_API
 		virtual void FixedUpdate();
 
+		IWENGINE_API
+		virtual void OnPush();
+
+		IWENGINE_API
+		virtual void OnPop();
+
 		// Action events
 
 		IWENGINE_API
@@ -148,6 +154,8 @@ namespace Engine {
 			LOG_INFO << "Pushed " << system->Name() << " system onto " << Name() << " layer";
 			system->SetLayerVars(Space, Renderer, Asset, Physics, Audio, Bus);
 			m_systems.PushBack(system);
+
+			system->OnPush();
 		}
 
 		template<
@@ -171,6 +179,8 @@ namespace Engine {
 			LOG_INFO << "Pushed " << system->Name() << " system onto " << Name() << " layer";
 			system->SetLayerVars(Space, Renderer, Asset, Physics, Audio, Bus);
 			m_systems.PushFront(system);
+
+			system->OnPush();
 		}
 
 		template<
@@ -178,8 +188,10 @@ namespace Engine {
 		void PopSystem(
 			S* system)
 		{
-			LOG_INFO << "Pushed " << system->Name() << " system onto " << Name() << " layer";
+			LOG_INFO << "Popped " << system->Name() << " system from " << Name() << " layer";
 			m_systems.Pop(system);
+
+			system->OnPop();
 		}
 	private:
 		friend class Application;

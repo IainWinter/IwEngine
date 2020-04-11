@@ -12,8 +12,8 @@ namespace Physics {
 
 			iw::vector3 resolution = (manifold.B - manifold.A) * 0.5f;
 		
-			aBody->Trans()->Position -= resolution;
-			bBody->Trans()->Position += resolution;
+			aBody->Trans().Position -= resolution;
+			bBody->Trans().Position += resolution;
 		}
 	}
 }

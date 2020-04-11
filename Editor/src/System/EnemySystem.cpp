@@ -211,21 +211,10 @@ bool EnemySystem::On(
 	return false;
 }
 
-bool trigger = true;
-
 bool EnemySystem::On(
 	iw::ActionEvent& e)
 {
 	switch (e.Action) {
-		case iw::val(Actions::GOTO_NEXT_LEVEL): {
-			if (e.as<GoToNextLevelEvent>().LevelName == "models/block/forest12.dae") {
-				trigger = false;
-			}
-
-			else {
-				trigger = true;
-			}
-		}
 		case iw::val(Actions::START_LEVEL):
 		case iw::val(Actions::RESET_LEVEL): {
 			m_levelResetTimer = 0;
@@ -260,7 +249,7 @@ iw::Transform* EnemySystem::SpawnBullet(
 	r->SetVelocity(b->initialVelocity);
 	r->SetSimGravity(false);
 	r->SetRestitution(0.1f);
-	r->SetIsTrigger(trigger);
+	r->SetIsTrigger(true);
 	r->SetIsLocked(iw::vector3(0, 1, 0));
 	r->SetLock(iw::vector3(0, 1, 0));
 

@@ -41,6 +41,9 @@ namespace Graphics {
 
 		bool Outdated;
 		bool IsStatic;
+
+		//std::vector<Mesh> m_children; // make all this private
+
 	private:
 #ifdef IW_DEBUG
 		bool m_used;

@@ -1,6 +1,4 @@
 #include "App.h"
-#include "Layers/ToolLayer.h"
-#include "Layers/SandboxLayer.h"
 #include "Events/ActionEvents.h"
 #include "iw/physics/Plane.h"
 #include "iw/physics/Collision/PlaneCollider.h"
@@ -34,10 +32,8 @@ namespace iw {
 		context->AddDevice(rm);
 		context->AddDevice(k);
 
-		toolbox = PushLayer<ToolLayer>();
+		sandbox = PushLayer<SandboxLayer>();
 		imgui   = PushLayer<ImGuiLayer>();
-
-		PushLayer<SandboxLayer>();
 	}
 
 	int App::Initialize(
@@ -52,10 +48,21 @@ namespace iw {
 			}
 		}
 
+		toolbox = PushLayer<ToolLayer>(sandbox->GetScene());
+		err = toolbox->Initialize();
+
 		PopLayer(toolbox);
 		PopLayer(imgui);
 
 		return err;
+	}
+
+	void App::Update() {
+		if (GetLayer("Toolbox") != nullptr) {
+			sandbox->Update();
+		}
+
+		Application::Update();
 	}
 
 	bool App::HandleCommand(
@@ -77,10 +84,12 @@ namespace iw {
 			bool dev = GetLayer("Toolbox") != nullptr;
 			if (dev) {
 				PopLayer(toolbox);
+				PushLayer(sandbox);
 			}
 
 			else {
 				PushLayer(toolbox);
+				PopLayer(sandbox);
 			}
 
 			Bus->send<DevConsoleEvent>(dev);

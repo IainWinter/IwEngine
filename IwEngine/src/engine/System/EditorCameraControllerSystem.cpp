@@ -1,15 +1,16 @@
-#include "Systems/EditorCameraController.h"
-#include "Events/ActionEvents.h"
+#include "iw/engine/Systems/EditorCameraControllerSystem.h"
+#include "iw/input/Devices/Keyboard.h"
 #include "iw/engine/Time.h"
 #include <imgui/imgui.h>
 
+
 namespace iw {
-	EditorCameraController::EditorCameraController()
+	EditorCameraControllerSystem::EditorCameraControllerSystem()
 		: System("Editor Camera Controller")
 		, speed(10)
 	{}
 
-	void EditorCameraController::Update(
+	void EditorCameraControllerSystem::Update(
 		EntityComponentArray& eca)
 	{
 		for (auto entity : eca) {
@@ -50,19 +51,39 @@ namespace iw {
 		}
 	}
 
-	bool EditorCameraController::On(
-		ActionEvent& e)
+	void EditorCameraControllerSystem::OnPush() {
+		movement.y += Keyboard::KeyDown(SHIFT) ? -1 : 0;
+		movement.y += Keyboard::KeyDown(SPACE) ?  1 : 0;
+		
+		movement.x += Keyboard::KeyDown(A) ? -1 : 0;
+		movement.x += Keyboard::KeyDown(D) ?  1 : 0;
+		
+		movement.z += Keyboard::KeyDown(W) ?  1 : 0;
+		movement.z += Keyboard::KeyDown(S) ? -1 : 0;
+	}
+
+	void EditorCameraControllerSystem::OnPop() {
+		movement = 0;
+	}
+
+	bool EditorCameraControllerSystem::On(
+		KeyEvent& e)
 	{
-		switch (e.Action) {
-			case iw::val(Actions::JUMP):    movement.y += e.as<ToggleEvent>().Active ? 1 : -1; break;
-			case iw::val(Actions::RIGHT):   movement.x += e.as<ToggleEvent>().Active ? 1 : -1; break;
-			case iw::val(Actions::FORWARD): movement.z += e.as<ToggleEvent>().Active ? 1 : -1; break;
+		switch (e.Button) {
+			case iw::val(SHIFT): movement.y -= e.State ? 1 : -1; break;
+			case iw::val(SPACE): movement.y += e.State ? 1 : -1; break;
+
+			case iw::val(A):     movement.x -= e.State ? 1 : -1; break;
+			case iw::val(D):     movement.x += e.State ? 1 : -1; break;
+
+			case iw::val(W):     movement.z += e.State ? 1 : -1; break;
+			case iw::val(S):     movement.z -= e.State ? 1 : -1; break;
 		}
 
 		return false;
 	}
 
-	bool EditorCameraController::On(
+	bool EditorCameraControllerSystem::On(
 		MouseMovedEvent& e)
 	{
 		if (e.Device == DeviceType::RAW_MOUSE) {
@@ -73,7 +94,7 @@ namespace iw {
 		return false;
 	}
 
-	bool EditorCameraController::On(
+	bool EditorCameraControllerSystem::On(
 		MouseButtonEvent& e)
 	{
 		if (e.Device == DeviceType::RAW_MOUSE && e.Button == RMOUSE) {

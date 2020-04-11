@@ -11,27 +11,27 @@ namespace Physics {
 
 	AABB CollisionObject::Bounds() const {
 		AABB bounds = Col()->Bounds();
-		bounds.Min += Trans()->Position;
-		bounds.Max += Trans()->Position;
+		bounds.Min += Trans().Position;
+		bounds.Max += Trans().Position;
 
 		return bounds;
 	}
 
-	Transform* CollisionObject::Trans() {
-		return &m_transform;
+	Transform& CollisionObject::Trans() {
+		return m_transform;
 	}
 
-	const Transform* CollisionObject::Trans() const {
-		return &m_transform;
+	const Transform& CollisionObject::Trans() const {
+		return m_transform;
 	}
 
 	Transform CollisionObject::ColTrans() const {
-		const Transform* tran = Trans();
+		const Transform& tran = Trans();
 		      Transform  coll = m_collider->Trans();
 
-		coll.Position += tran->Position;
-		coll.Scale    *= tran->Scale;
-		coll.Rotation *= tran->Rotation;
+		coll.Position += tran.Position;
+		coll.Scale    *= tran.Scale;
+		coll.Rotation *= tran.Rotation;
 
 		return coll;
 	}

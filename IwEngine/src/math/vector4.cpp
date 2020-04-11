@@ -135,14 +135,22 @@ namespace iw {
 		this->z = z;
 	}
 
-	float& iw::vector4::operator[](
-		size_t index)
-	{
-		if (index == 0) return x;
-		else if (index == 1) return y;
-		else if (index == 2) return z;
-		else if (index == 3) return w;
-		throw std::out_of_range("Index out of bounds");
+	float vector4::major() const {
+		float major = x;
+		if (y > major) major = y;
+		if (z > major) major = z;
+		if (w > major) major = w;
+
+		return major;
+	}
+
+	float vector4::minor() const {
+		float minor = x;
+		if (y < minor) minor = y;
+		if (z < minor) minor = z;
+		if (w < minor) minor = w;
+
+		return minor;
 	}
 
 	vector4 vector4::operator+(
@@ -263,6 +271,16 @@ namespace iw {
 
 	vector4 vector4::operator-() const {
 		return vector4(-x, -y, -z, -w);
+	}
+
+	float& iw::vector4::operator[](
+		size_t index)
+	{
+		if (index == 0) return x;
+		else if (index == 1) return y;
+		else if (index == 2) return z;
+		else if (index == 3) return w;
+		throw std::out_of_range("Index out of bounds");
 	}
 
 	bool vector4::operator==(

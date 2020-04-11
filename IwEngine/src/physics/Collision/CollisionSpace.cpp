@@ -90,7 +90,7 @@ namespace Physics {
 					continue;
 				}
 
-				ManifoldPoints points = a->Col()->TestCollision(a->Trans(), b->Col(), b->Trans());
+				ManifoldPoints points = a->Col()->TestCollision(&a->Trans(), b->Col(), &b->Trans());
 				if (points.HasCollision) {
 					// establish more formal rules for what can collide with what
 					if (   a->IsTrigger()

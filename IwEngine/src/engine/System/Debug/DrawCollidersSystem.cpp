@@ -1,6 +1,8 @@
 #include "iw/engine/Systems/Debug/DrawCollidersSystem.h"
 #include "iw/graphics/MeshFactory.h"
 
+#include "iw/physics/Collision/CapsuleCollider.h"
+
 namespace iw {
 namespace Engine {
 	DrawCollidersSystem::DrawCollidersSystem(
@@ -12,15 +14,13 @@ namespace Engine {
 	int DrawCollidersSystem::Initialize() {
 		ref<Shader> shader = Asset->Load<Shader>("shaders/debug/wireframe.shader");
 
-		Renderer->InitShader(shader, CAMERA);
-
 		material = REF<Material>();
 		
 		material->Set("color", iw::Color(0, 1, 0, 1));
 		material->SetWireframe(true);
 		material->SetShader(shader);
 
-		sphere = MakeIcosphere(3);
+		sphere = MakeIcosphere(2);
 
 		sphere->SetNormals(0, nullptr);
 		sphere->SetMaterial(material);
@@ -33,12 +33,12 @@ namespace Engine {
 		plane->SetMaterial(material);
 		plane->Initialize(Renderer->Device);
 
-		capsule = MakeCapsule(5);
+		//capsule = ref<Mesh>(MakeCapsule(5));
 
-		capsule->SetNormals(0, nullptr);
-		capsule->SetUVs    (0, nullptr);
-		capsule->SetMaterial(material);
-		capsule->Initialize(Renderer->Device);
+		//capsule->SetNormals(0, nullptr);
+		//capsule->SetUVs    (0, nullptr);
+		//capsule->SetMaterial(material);
+		//capsule->Initialize(Renderer->Device);
 
 		return 0;
 	}
@@ -51,7 +51,23 @@ namespace Engine {
 			
 			switch (object->Col()->Type()) {
 				case ColliderType::SPHERE:  Renderer->DrawMesh(object->ColTrans(), sphere);  break;
-				case ColliderType::CAPSULE: Renderer->DrawMesh(object->ColTrans(), capsule); break;
+				case ColliderType::CAPSULE: {
+					CapsuleCollider* col = (CapsuleCollider*)object->Col();
+
+					capsule = ref<Mesh>(
+						MakeCapsule(5, col->Height, col->Radius),
+						std::bind(&Mesh::Destroy, capsule, Renderer->Device)
+					);
+
+					capsule->SetNormals(0, nullptr);
+					capsule->SetUVs(0, nullptr);
+					capsule->SetMaterial(material);
+					capsule->Initialize(Renderer->Device);
+
+					Renderer->DrawMesh(object->ColTrans(), capsule);
+
+					break;
+				}
 				case ColliderType::PLANE:   Renderer->DrawMesh(object->ColTrans(), plane);   break;
 			}
 		}

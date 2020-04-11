@@ -20,13 +20,13 @@ namespace Physics {
 		AABB Bounds() const;
 
 		IWPHYSICS_API
-		Transform* Trans();
+		Transform& Trans();
 
 		IWPHYSICS_API
-		const Transform* Trans() const;
+		const Transform& Trans() const;
 
 		IWPHYSICS_API
-		Transform ColTrans() const;
+		Transform ColTrans() const; // not sure about this
 
 		IWPHYSICS_API
 		Collider* Col() const; // should be const probly also these are not needed if they are pointers but Ill try the get set thigs for now as a lil test because ive always dismissed it for the most part
