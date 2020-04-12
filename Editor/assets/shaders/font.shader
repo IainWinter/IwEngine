@@ -8,8 +8,8 @@ layout(std140, column_major) uniform Camera {
 
 uniform mat4 model;
 
-in vec3 vert;
-in vec2 uv;
+layout(location = 0) in vec3 vert;
+layout(location = 1) in vec2 uv;
 
 out vec2 UV;
 
