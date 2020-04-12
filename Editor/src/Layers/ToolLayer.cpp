@@ -9,6 +9,8 @@
 #include "iw/graphics/Model.h"
 #include "imgui/imgui.h"
 
+#include "iw/input/Devices/Mouse.h"
+
 namespace iw {
 	struct ObjectComponents {
 		Transform* Transform;
@@ -104,6 +106,8 @@ namespace iw {
 		scene->SetMainCamera(oldcamera);
 	}
 
+	vector3 p;
+
 	void ToolLayer::PostUpdate() {
 		//for (auto camera : Space->Query<Transform, CameraController>()) {
 		//	auto [camTransform, camController] = camera.Components.Tie<CameraComponents>();
@@ -184,6 +188,15 @@ namespace iw {
 
 		Renderer->EndScene();
 
+		Renderer->BeginScene(camera);
+
+		Transform t;
+		t.Position = p;
+		Renderer->DrawMesh(t, plightMesh);
+
+		Renderer->EndScene();
+
+
 		//Renderer->BeginScene(scene->MainCamera());
 		//	Renderer->DrawMesh(&textTransform, textMesh);
 		//Renderer->EndScene();
@@ -221,22 +234,26 @@ namespace iw {
 	bool ToolLayer::On(
 		MouseButtonEvent& e)
 	{
-		//if (   e.State
-		//	&& e.Button == iw::LMOUSE)
-		//{
-		//	matrix4 viewproj = (*Space->Query<Transform, CameraController>().begin()).Components.Tie<CameraComponents>().Controller->Camera->GetViewProjection(); // yak on em
+		if (   e.State
+			&& e.Button == iw::LMOUSE)
+		{
+			matrix4 invview = camera->View()      .inverted();
+			matrix4 invproj = camera->Projection().inverted();
 
-		//	float x = (e.InputStates->GetState(MOUSEX) / Renderer->Width  - 0.5f) * 2;
-		//	float y = (e.InputStates->GetState(MOUSEY) / Renderer->Height - 0.5f) * 2;
+			float x =  (e.InputStates[MOUSEX] / Renderer->Width()  - 0.5f) * 2;
+			float y = -(e.InputStates[MOUSEY] / Renderer->Height() - 0.5f) * 2;
 
-		//	vector4 begin(x, y, -1, 1);
-		//	vector4 end  (x, y,  0, 1);
+			vector4 clip = vector4(     x,      y, -1, 1) * invproj;
+			vector4 eye  = vector4(clip.x, clip.y, -1, 0) * invview;
 
-		//	vector4 wStart = begin * viewproj; wStart /= wStart.w;
-		//	vector4 wEnd   = end   * viewproj; wEnd   /= wEnd  .w;
+			vector3 ray = eye.xyz().normalized();
 
-		//	LOG_INFO << (wEnd - wStart).normalized();
-		//}
+			p = camera->Position() + ray * 5;
+
+			LOG_INFO << invview  << "\n" << invproj;
+
+			LOG_INFO << vector2(x, y) << "\n" << ray;
+		}
 
 		if (e.Button == XMOUSE1) {
 			if (e.State) {

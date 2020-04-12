@@ -44,7 +44,7 @@ namespace events {
 
 			_e* e = m_alloc.alloc<_e>();
 			if (e != nullptr) {
-				*e = _e(std::forward<_args>(args)...);
+				new(e) _e(std::forward<_args>(args)...);
 				e->Size = sizeof(_e);
 
 				m_events.push(e);

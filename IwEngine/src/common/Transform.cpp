@@ -23,7 +23,7 @@ namespace Engine {
 	matrix4 Transform::Transformation() const {
 		return matrix4::create_scale(Scale)
 			* matrix4::create_from_quaternion(Rotation)
-			 * matrix4::create_translation(Position);
+			* matrix4::create_translation(Position);
 	}
 
 	vector3 Transform::Forward() const {

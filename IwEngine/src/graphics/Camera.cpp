@@ -77,7 +77,7 @@ namespace Graphics {
 		return *this;
 	}*/
 
-	iw::matrix4 Camera::View() {
+	matrix4 Camera::View() {
 		if (Outdated()) {
 			RecalculateView();
 		}
@@ -93,7 +93,7 @@ namespace Graphics {
 	}
 
 	void Camera::SetView(
-		const iw::matrix4& view)
+		const matrix4& view)
 	{
 		m_view = view;
 
@@ -157,15 +157,16 @@ namespace Graphics {
 		}
 	}
 
-	iw::matrix4 Camera::ViewProjection() {
+	matrix4 Camera::ViewProjection() {
 		return View() * Projection();
 	}
 
 	void Camera::RecalculateView() {
-		m_view = iw::matrix4::create_look_at(
+		m_view = matrix4::create_look_at(
 			Position(),
-			Position() + iw::vector3::unit_z * Rotation(),
-			iw::vector3::unit_y * Rotation());
+			Position() + vector3::unit_z * Rotation(),
+			vector3::unit_y * Rotation());
+
 
 		m_position = Position();
 		m_rotation = Rotation();
@@ -211,7 +212,7 @@ namespace Graphics {
 		float zNear, 
 		float zFar)
 	{
-		m_projection = iw::matrix4::create_orthographic(width, height, zNear, zFar);
+		m_projection = matrix4::create_orthographic(width, height, zNear, zFar);
 	}
 	
 	PerspectiveCamera::PerspectiveCamera(
@@ -252,7 +253,7 @@ namespace Graphics {
 		float zNear, 
 		float zFar)
 	{
-		m_projection = iw::matrix4::create_perspective_field_of_view(fov, aspect, zNear, zFar);
+		m_projection = matrix4::create_perspective_field_of_view(fov, aspect, zNear, zFar);
 	}
 }
 }

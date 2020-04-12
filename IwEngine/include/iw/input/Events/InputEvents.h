@@ -17,12 +17,12 @@ namespace Input {
 		: iw::event
 	{
 		DeviceType Device;
-		InputState* InputStates; // this cant be a pointer or needs a function for getting states instead of operator
+		InputState& InputStates; // this cant be a pointer or needs a function for getting states instead of operator
 
 		InputEvent(
 			InputEventType type,
 			DeviceType device,
-			InputState* inputState)
+			InputState& inputState)
 			: iw::event(iw::val(EventGroup::INPUT), iw::val(type))
 			, Device(device)
 			, InputStates(inputState)
@@ -48,7 +48,7 @@ namespace Input {
 
 		MouseWheelEvent(
 			DeviceType device,
-			InputState* inputState,
+			InputState& inputState,
 			float delta)
 			: InputEvent(InputEventType::MouseWheel, device, inputState)
 			, Delta(delta)
@@ -65,7 +65,7 @@ namespace Input {
 
 		MouseMovedEvent(
 			DeviceType device,
-			InputState* inputState,
+			InputState& inputState,
 			float x,
 			float y,
 			float deltaX,
@@ -86,7 +86,7 @@ namespace Input {
 
 		MouseButtonEvent(
 			DeviceType device,
-			InputState* inputState,
+			InputState& inputState,
 			InputName button,
 			bool state)
 			: InputEvent(InputEventType::MouseButton, device, inputState)
@@ -103,7 +103,7 @@ namespace Input {
 
 		KeyEvent(
 			DeviceType device,
-			InputState* inputState,
+			InputState& inputState,
 			InputName button,
 			bool state)
 			: InputEvent(InputEventType::Key, device, inputState)
@@ -120,7 +120,7 @@ namespace Input {
 
 		KeyTypedEvent(
 			DeviceType device,
-			InputState* inputState,
+			InputState& inputState,
 			InputName button,
 			char character)
 			: InputEvent(InputEventType::KeyTyped, device, inputState)

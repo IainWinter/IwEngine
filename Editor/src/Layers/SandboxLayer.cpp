@@ -162,7 +162,7 @@ namespace iw {
 		iw::Entity camera = Space->CreateEntity<iw::Transform, iw::CameraController>();
 
 		iw::Transform* transform = camera.SetComponent<iw::Transform>(vector3(0, 27.18f, 0), iw::vector3::one, camrot);
-		camera.SetComponent<iw::CameraController>(scene->MainCamera());
+		                           camera.SetComponent<iw::CameraController>(scene->MainCamera());
 
 		scene->MainCamera()->SetTrans(transform);
 

@@ -2,6 +2,8 @@
 
 #include "Device.h"
 
+#include "iw/math/vector2.h"
+
 namespace iw {
 namespace Input {
 	class IWINPUT_API MouseBase
@@ -42,6 +44,8 @@ namespace Input {
 
 		static bool ButtonUp(
 			InputName button);
+
+		static vector2 ScreenPos();
 
 		static Mouse* Create();
 	};

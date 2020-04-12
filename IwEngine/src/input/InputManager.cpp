@@ -116,12 +116,12 @@ namespace Input {
 
 					char character = GetCharacter(input.Name, shifted, caps);
 					if (character != '\0') {
-						m_bus->push<KeyTypedEvent>(input.Device, &context.State, input.Name, character);
+						m_bus->push<KeyTypedEvent>(input.Device, context.State, input.Name, character);
 					}
 				}
 
 				if (input.State != lastState) {
-					m_bus->push<KeyEvent>(input.Device, &context.State, input.Name, active);
+					m_bus->push<KeyEvent>(input.Device, context.State, input.Name, active);
 				}
 			}
 
@@ -129,20 +129,20 @@ namespace Input {
 				  || input.Device == DeviceType::RAW_MOUSE)
 			{
 				if (input.Name == WHEEL) {
-					m_bus->push<MouseWheelEvent>(input.Device, &context.State, input.State);
+					m_bus->push<MouseWheelEvent>(input.Device, context.State, input.State);
 				}
 
 				else if (input.Name == MOUSEdX || input.Name == MOUSEdY
 					  || input.Name == MOUSEX  || input.Name == MOUSEY)
 				{
 					m_bus->push<MouseMovedEvent>(
-						input.Device, &context.State,
+						input.Device, context.State,
 						context.State[MOUSEX],  context.State[MOUSEY],
 						context.State[MOUSEdX], context.State[MOUSEdY]);
 				}
 
 				else {
-					m_bus->push<MouseButtonEvent>(input.Device, &context.State, input.Name, active);
+					m_bus->push<MouseButtonEvent>(input.Device, context.State, input.Name, active);
 				}
 			}
 		}

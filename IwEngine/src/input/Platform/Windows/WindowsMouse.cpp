@@ -26,6 +26,11 @@ namespace Input {
 		return !ButtonDown(button);
 	}
 
+	vector2 Mouse::ScreenPos() {
+		POINT p; GetCursorPos(&p);
+		return vector2(p.x, p.y);
+	}
+
 	DeviceInput WindowsMouse::TranslateOsEvent(
 		const OsEvent& e)
 	{

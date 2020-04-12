@@ -237,7 +237,7 @@ namespace Engine {
 	}
 
 	void Application::FixedUpdate() {
-		for (Layer* layer : m_layers) { //Need fixed update for systems too
+		for (Layer* layer : m_layers) {
 			layer->FixedUpdateSystems();
 			layer->FixedUpdate();
 		}
