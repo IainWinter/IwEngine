@@ -174,14 +174,6 @@ namespace iw {
 	}
 
 	void matrix4::invert() {
-		float det = determinant();
-		if (det == 0) {
-			throw std::invalid_argument("Determinant is zero, "
-				"therefore inverse matrix doesn't exist.");
-		}
-
-		float invDet = 1 / det;
-
 		float m00 = elements[0];
 		float m01 = elements[1];
 		float m02 = elements[2];
@@ -199,40 +191,58 @@ namespace iw {
 		float m32 = elements[14];
 		float m33 = elements[15];
 
-		*this = matrix4(
-			invDet *  (m11 * (m22 * m33 - m23 * m32) - m12
-				* (m21 * m33 - m23 * m31) + m13 * (m21 * m32 - m22 * m31)),
-			invDet * -(m01 * (m22 * m33 - m23 * m32) - m02
-				* (m21 * m33 - m23 * m31) + m03 * (m21 * m32 - m22 * m31)),
-			invDet *  (m01 * (m12 * m33 - m13 * m32) - m02
-				* (m11 * m33 - m13 * m31) + m03 * (m11 * m32 - m12 * m31)),
-			invDet * -(m01 * (m12 * m23 - m13 * m22) - m02
-				* (m11 * m23 - m13 * m21) + m03 * (m11 * m22 - m12 * m21)),
-			invDet * -(m10 * (m22 * m33 - m23 * m32) - m12
-				* (m20 * m33 - m23 * m30) + m13 * (m20 * m32 - m22 * m30)),
-			invDet *  (m00 * (m22 * m33 - m23 * m32) - m02
-				* (m20 * m33 - m23 * m30) + m03 * (m20 * m32 - m22 * m30)),
-			invDet * -(m00 * (m12 * m33 - m13 * m32) - m02
-				* (m10 * m33 - m13 * m30) + m03 * (m10 * m32 - m12 * m30)),
-			invDet *  (m00 * (m12 * m23 - m13 * m22) - m02
-				* (m10 * m23 - m13 * m20) + m03 * (m10 * m22 - m12 * m20)),
-			invDet *  (m10 * (m21 * m33 - m23 * m31) - m11
-				* (m20 * m33 - m23 * m30) + m13 * (m20 * m31 - m21 * m30)),
-			invDet * -(m00 * (m21 * m33 - m23 * m31) - m01
-				* (m20 * m33 - m23 * m30) + m03 * (m20 * m31 - m21 * m30)),
-			invDet *  (m00 * (m11 * m33 - m13 * m31) - m01
-				* (m10 * m33 - m13 * m30) + m03 * (m10 * m31 - m11 * m30)),
-			invDet * -(m00 * (m11 * m23 - m13 * m21) - m01
-				* (m10 * m23 - m13 * m20) + m03 * (m10 * m21 - m11 * m20)),
-			invDet * -(m10 * (m21 * m32 - m22 * m31) - m11
-				* (m20 * m32 - m22 * m30) + m12 * (m20 * m31 - m21 * m30)),
-			invDet *  (m00 * (m21 * m32 - m22 * m31) - m01
-				* (m20 * m32 - m22 * m30) + m02 * (m20 * m31 - m21 * m30)),
-			invDet * -(m00 * (m11 * m32 - m12 * m31) - m01
-				* (m10 * m32 - m12 * m30) + m02 * (m10 * m31 - m11 * m30)),
-			invDet *  (m00 * (m11 * m22 - m12 * m21) - m01
-				* (m10 * m22 - m12 * m20) + m02 * (m10 * m21 - m11 * m20))
+		matrix4 inv = matrix4(
+			 m11 * m22 * m33 - m11 * m23 * m32 - m21 * m12 * m33 + m21 * m13 * m32 + m31 * m12 * m23 - m31 * m13 * m22,
+			-m10 * m22 * m33 + m10 * m23 * m32 + m20 * m12 * m33 - m20 * m13 * m32 - m30 * m12 * m23 + m30 * m13 * m22,
+			 m10 * m21 * m33 - m10 * m23 * m31 - m20 * m11 * m33 + m20 * m13 * m31 + m30 * m11 * m23 - m30 * m13 * m21,
+			-m10 * m21 * m32 + m10 * m22 * m31 + m20 * m11 * m32 - m20 * m12 * m31 - m30 * m11 * m22 + m30 * m12 * m21,
+			-m01 * m22 * m33 + m01 * m23 * m32 + m21 * m02 * m33 - m21 * m03 * m32 - m31 * m02 * m23 + m31 * m03 * m22,
+			 m00 * m22 * m33 - m00 * m23 * m32 - m20 * m02 * m33 + m20 * m03 * m32 + m30 * m02 * m23 - m30 * m03 * m22,
+			-m00 * m21 * m33 + m00 * m23 * m31 + m20 * m01 * m33 - m20 * m03 * m31 - m30 * m01 * m23 + m30 * m03 * m21,
+			 m00 * m21 * m32 - m00 * m22 * m31 - m20 * m01 * m32 + m20 * m02 * m31 + m30 * m01 * m22 - m30 * m02 * m21,
+			 m01 * m12 * m33 - m01 * m13 * m32 - m11 * m02 * m33 + m11 * m03 * m32 + m31 * m02 * m13 - m31 * m03 * m12,
+			-m00 * m12 * m33 + m00 * m13 * m32 + m10 * m02 * m33 - m10 * m03 * m32 - m30 * m02 * m13 + m30 * m03 * m12,
+			 m00 * m11 * m33 - m00 * m13 * m31 - m10 * m01 * m33 + m10 * m03 * m31 + m30 * m01 * m13 - m30 * m03 * m11,
+			-m00 * m11 * m32 + m00 * m12 * m31 + m10 * m01 * m32 - m10 * m02 * m31 - m30 * m01 * m12 + m30 * m02 * m11,
+			-m01 * m12 * m23 + m01 * m13 * m22 + m11 * m02 * m23 - m11 * m03 * m22 - m21 * m02 * m13 + m21 * m03 * m12,
+			 m00 * m12 * m23 - m00 * m13 * m22 - m10 * m02 * m23 + m10 * m03 * m22 + m20 * m02 * m13 - m20 * m03 * m12,
+			-m00 * m11 * m23 + m00 * m13 * m21 + m10 * m01 * m23 - m10 * m03 * m21 - m20 * m01 * m13 + m20 * m03 * m11,
+			 m00 * m11 * m22 - m00 * m12 * m21 - m10 * m01 * m22 + m10 * m02 * m21 + m20 * m01 * m12 - m20 * m02 * m11
 		);
+
+		//matrix4 inv = matrix4(
+		//	 (m11 * (m22 * m33 - m23 * m32) - m12 * (m21 * m33 - m23 * m31) + m13 * (m21 * m32 - m22 * m31)),
+		//	-(m01 * (m22 * m33 - m23 * m32) - m02 * (m21 * m33 - m23 * m31) + m03 * (m21 * m32 - m22 * m31)),
+		//	 (m01 * (m12 * m33 - m13 * m32) - m02 * (m11 * m33 - m13 * m31) + m03 * (m11 * m32 - m12 * m31)),
+		//	-(m01 * (m12 * m23 - m13 * m22) - m02 * (m11 * m23 - m13 * m21) + m03 * (m11 * m22 - m12 * m21)),
+		//	-(m10 * (m22 * m33 - m23 * m32) - m12 * (m20 * m33 - m23 * m30) + m13 * (m20 * m32 - m22 * m30)),
+		//	 (m00 * (m22 * m33 - m23 * m32) - m02 * (m20 * m33 - m23 * m30) + m03 * (m20 * m32 - m22 * m30)),
+		//	-(m00 * (m12 * m33 - m13 * m32) - m02 * (m10 * m33 - m13 * m30) + m03 * (m10 * m32 - m12 * m30)),
+		//	 (m00 * (m12 * m23 - m13 * m22) - m02 * (m10 * m23 - m13 * m20) + m03 * (m10 * m22 - m12 * m20)),
+		//	 (m10 * (m21 * m33 - m23 * m31) - m11 * (m20 * m33 - m23 * m30) + m13 * (m20 * m31 - m21 * m30)),
+		//	-(m00 * (m21 * m33 - m23 * m31) - m01 * (m20 * m33 - m23 * m30) + m03 * (m20 * m31 - m21 * m30)),
+		//	 (m00 * (m11 * m33 - m13 * m31) - m01 * (m10 * m33 - m13 * m30) + m03 * (m10 * m31 - m11 * m30)),
+		//	-(m00 * (m11 * m23 - m13 * m21) - m01 * (m10 * m23 - m13 * m20) + m03 * (m10 * m21 - m11 * m20)),
+		//	-(m10 * (m21 * m32 - m22 * m31) - m11 * (m20 * m32 - m22 * m30) + m12 * (m20 * m31 - m21 * m30)),
+		//	 (m00 * (m21 * m32 - m22 * m31) - m01 * (m20 * m32 - m22 * m30) + m02 * (m20 * m31 - m21 * m30)),
+		//	-(m00 * (m11 * m32 - m12 * m31) - m01 * (m10 * m32 - m12 * m30) + m02 * (m10 * m31 - m11 * m30)),
+		//	 (m00 * (m11 * m22 - m12 * m21) - m01 * (m10 * m22 - m12 * m20) + m02 * (m10 * m21 - m11 * m20))
+		//);
+
+		float det = m00 * inv[0] + m01 * inv[4] + m02 * inv[8] + m03 * inv[12];
+
+		if (det == 0.0f) {
+			throw std::invalid_argument("Determinant is zero, "
+				"therefore inverse matrix doesn't exist.");
+		}
+
+		float invDet = 1.0f / det;
+
+		for (int i = 0; i < 16; i++) {
+			inv[i] *= invDet;
+		}
+
+		*this = inv;
 	}
 
 	void matrix4::normalize() {
