@@ -26,7 +26,7 @@ int EnemyDeathCircleSystem::Initialize() {
 
 	m_deathCircleModel = Asset->Give<iw::Model>("Death Circle", &circle);
 
-	mat.Set("albedo", iw::Color::From255(255, 0, 0, 64));
+	mat.Set("albedo", iw::Color::From255(0, 195, 255, 64));
 	mat.SetTransparency(iw::Transparency::ADD);
 	mat.SetCastShadows(false);
 
@@ -90,7 +90,7 @@ iw::Transform* EnemyDeathCircleSystem::SpawnDeathCircle(
 	iw::SphereCollider*  s = circle.SetComponent<iw::SphereCollider> (iw::vector3::zero, 1);
 	iw::CollisionObject* c = circle.SetComponent<iw::CollisionObject>();
 
-	m->Meshes[0].Material->Set("albedo", iw::Color::From255(255, 0, 0, 64));
+	m->Meshes[0].Material->Set("albedo", iw::Color::From255(0, 195, 255, 64));
 
 	c->SetCol(s);
 	c->SetTrans(t);
