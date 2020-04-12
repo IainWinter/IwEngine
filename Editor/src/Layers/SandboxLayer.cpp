@@ -444,6 +444,10 @@ namespace iw {
 					font->UpdateMesh(textMesh, "ayy you've gotten to the boss congrats!\nsadly he's out today so\nhave some fun with the physics instead...\nmember you can press i/t", .004f, 1);
 				}
 
+				else if (e.as<GoToNextLevelEvent>().LevelName == "models/block/forest08.dae") {
+					font->UpdateMesh(textMesh, "So this would be a lil mini boss but that seems\nlike it should be annoying to program xd", .004f, 1);
+				}
+
 				else {
 					font->UpdateMesh(textMesh, "", .01f, 1);
 					settexttocursor = false;

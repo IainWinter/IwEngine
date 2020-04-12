@@ -5,22 +5,22 @@
       <author>Blender User</author>
       <authoring_tool>Blender 2.82.7 commit date:2020-03-12, commit time:05:06, hash:375c7dc4caf4</authoring_tool>
     </contributor>
-    <created>2020-04-11T22:04:56</created>
-    <modified>2020-04-11T22:04:56</modified>
+    <created>2020-04-12T15:24:12</created>
+    <modified>2020-04-12T15:24:12</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
   <library_effects>
-    <effect id="scale_005-effect">
+    <effect id="scale-effect">
       <profile_COMMON>
-        <newparam sid="texturesscaleboy_png_002-surface">
+        <newparam sid="textures_scaleboy_png-surface">
           <surface type="2D">
-            <init_from>texturesscaleboy_png_002</init_from>
+            <init_from>textures_scaleboy_png</init_from>
           </surface>
         </newparam>
-        <newparam sid="texturesscaleboy_png_002-sampler">
+        <newparam sid="textures_scaleboy_png-sampler">
           <sampler2D>
-            <source>texturesscaleboy_png_002-surface</source>
+            <source>textures_scaleboy_png-surface</source>
           </sampler2D>
         </newparam>
         <technique sid="common">
@@ -29,7 +29,7 @@
               <color sid="emission">0 0 0 1</color>
             </emission>
             <diffuse>
-              <texture texture="texturesscaleboy_png_002-sampler" texcoord="Plane_004-mesh-map-0"/>
+              <texture texture="textures_scaleboy_png-sampler" texcoord="Plane_004-mesh-map-0"/>
             </diffuse>
             <reflectivity>
               <float sid="specular">0.5</float>
@@ -43,55 +43,55 @@
     </effect>
   </library_effects>
   <library_images>
-    <image id="texturesscaleboy_png_002" name="texturesscaleboy_png_002">
-      <init_from>texturesscaleboy.png.002.png</init_from>
+    <image id="textures_scaleboy_png" name="textures_scaleboy_png">
+      <init_from>textures/scaleboy.png</init_from>
     </image>
   </library_images>
   <library_materials>
-    <material id="scale_005-material" name="scale.005">
-      <instance_effect url="#scale_005-effect"/>
+    <material id="scale-material" name="scale">
+      <instance_effect url="#scale-effect"/>
     </material>
   </library_materials>
   <library_geometries>
-    <geometry id="Plane_039-mesh" name="Plane.039">
+    <geometry id="Plane_053-mesh" name="Plane.053">
       <mesh>
-        <source id="Plane_039-mesh-positions">
-          <float_array id="Plane_039-mesh-positions-array" count="12">-32 0 18.06433 -32.00001 0 -17.93568 32.00001 0 18.0643 32 0 -17.9357</float_array>
+        <source id="Plane_053-mesh-positions">
+          <float_array id="Plane_053-mesh-positions-array" count="12">-32 0 18 -32 0 -18 32 0 18 32 0 -18</float_array>
           <technique_common>
-            <accessor source="#Plane_039-mesh-positions-array" count="4" stride="3">
+            <accessor source="#Plane_053-mesh-positions-array" count="4" stride="3">
               <param name="X" type="float"/>
               <param name="Y" type="float"/>
               <param name="Z" type="float"/>
             </accessor>
           </technique_common>
         </source>
-        <source id="Plane_039-mesh-normals">
-          <float_array id="Plane_039-mesh-normals-array" count="3">0 1 0</float_array>
+        <source id="Plane_053-mesh-normals">
+          <float_array id="Plane_053-mesh-normals-array" count="3">0 1 0</float_array>
           <technique_common>
-            <accessor source="#Plane_039-mesh-normals-array" count="1" stride="3">
+            <accessor source="#Plane_053-mesh-normals-array" count="1" stride="3">
               <param name="X" type="float"/>
               <param name="Y" type="float"/>
               <param name="Z" type="float"/>
             </accessor>
           </technique_common>
         </source>
-        <source id="Plane_039-mesh-map-0">
-          <float_array id="Plane_039-mesh-map-0-array" count="12">31.98599 7.49888e-5 7.49888e-5 17.98249 7.49888e-5 7.50484e-5 31.98599 7.49888e-5 31.98599 17.98249 7.49888e-5 17.98249</float_array>
+        <source id="Plane_053-mesh-map-0">
+          <float_array id="Plane_053-mesh-map-0-array" count="12">15.98178 8.986481 0.002538681 0.004336833 15.98178 0.004336833 15.98178 8.986481 0.002538681 8.986481 0.002538681 0.004336833</float_array>
           <technique_common>
-            <accessor source="#Plane_039-mesh-map-0-array" count="6" stride="2">
+            <accessor source="#Plane_053-mesh-map-0-array" count="6" stride="2">
               <param name="S" type="float"/>
               <param name="T" type="float"/>
             </accessor>
           </technique_common>
         </source>
-        <vertices id="Plane_039-mesh-vertices">
-          <input semantic="POSITION" source="#Plane_039-mesh-positions"/>
+        <vertices id="Plane_053-mesh-vertices">
+          <input semantic="POSITION" source="#Plane_053-mesh-positions"/>
         </vertices>
-        <triangles material="scale_005-material" count="2">
-          <input semantic="VERTEX" source="#Plane_039-mesh-vertices" offset="0"/>
-          <input semantic="NORMAL" source="#Plane_039-mesh-normals" offset="1"/>
-          <input semantic="TEXCOORD" source="#Plane_039-mesh-map-0" offset="2" set="0"/>
-          <p>1 0 0 2 0 1 3 0 2 1 0 3 0 0 4 2 0 5</p>
+        <triangles material="scale-material" count="2">
+          <input semantic="VERTEX" source="#Plane_053-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#Plane_053-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#Plane_053-mesh-map-0" offset="2" set="0"/>
+          <p>0 0 0 3 0 1 1 0 2 0 0 3 2 0 4 3 0 5</p>
         </triangles>
       </mesh>
     </geometry>
@@ -2074,10 +2074,10 @@
     <visual_scene id="_7" name="07">
       <node id="Plane_039" name="Plane.039" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
-        <instance_geometry url="#Plane_039-mesh" name="Plane.039">
+        <instance_geometry url="#Plane_053-mesh" name="Plane.039">
           <bind_material>
             <technique_common>
-              <instance_material symbol="scale_005-material" target="#scale_005-material">
+              <instance_material symbol="scale-material" target="#scale-material">
                 <bind_vertex_input semantic="Plane_004-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
               </instance_material>
             </technique_common>

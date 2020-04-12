@@ -5,29 +5,12 @@
       <author>Blender User</author>
       <authoring_tool>Blender 2.82.7 commit date:2020-03-12, commit time:05:06, hash:375c7dc4caf4</authoring_tool>
     </contributor>
-    <created>2020-04-11T22:13:05</created>
-    <modified>2020-04-11T22:13:05</modified>
+    <created>2020-04-12T15:26:48</created>
+    <modified>2020-04-12T15:26:48</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
   <library_effects>
-    <effect id="Material-effect">
-      <profile_COMMON>
-        <technique sid="common">
-          <lambert>
-            <emission>
-              <color sid="emission">0 0 0 1</color>
-            </emission>
-            <diffuse>
-              <color sid="diffuse">0.8 0.8 0.8 1</color>
-            </diffuse>
-            <index_of_refraction>
-              <float sid="ior">1.45</float>
-            </index_of_refraction>
-          </lambert>
-        </technique>
-      </profile_COMMON>
-    </effect>
     <effect id="scale-effect">
       <profile_COMMON>
         <newparam sid="textures_scaleboy_png-surface">
@@ -59,16 +42,269 @@
       </profile_COMMON>
     </effect>
   </library_effects>
-  <library_images/>
+  <library_images>
+    <image id="textures_scaleboy_png" name="textures_scaleboy_png">
+      <init_from>textures/scaleboy.png</init_from>
+    </image>
+  </library_images>
   <library_materials>
-    <material id="Material-material" name="Material">
-      <instance_effect url="#Material-effect"/>
-    </material>
     <material id="scale-material" name="scale">
       <instance_effect url="#scale-effect"/>
     </material>
   </library_materials>
   <library_geometries>
+    <geometry id="Plane_011-mesh" name="Plane.011">
+      <mesh>
+        <source id="Plane_011-mesh-positions">
+          <float_array id="Plane_011-mesh-positions-array" count="12">0 0 -18 0 0 -54 64 0 -18 64 0 -54</float_array>
+          <technique_common>
+            <accessor source="#Plane_011-mesh-positions-array" count="4" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Plane_011-mesh-normals">
+          <float_array id="Plane_011-mesh-normals-array" count="3">0 1 0</float_array>
+          <technique_common>
+            <accessor source="#Plane_011-mesh-normals-array" count="1" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Plane_011-mesh-map-0">
+          <float_array id="Plane_011-mesh-map-0-array" count="12">15.98178 8.986481 0.002538681 0.004336833 15.98178 0.004336833 15.98178 8.986481 0.002538681 8.986481 0.002538681 0.004336833</float_array>
+          <technique_common>
+            <accessor source="#Plane_011-mesh-map-0-array" count="6" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="Plane_011-mesh-vertices">
+          <input semantic="POSITION" source="#Plane_011-mesh-positions"/>
+        </vertices>
+        <triangles material="scale-material" count="2">
+          <input semantic="VERTEX" source="#Plane_011-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#Plane_011-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#Plane_011-mesh-map-0" offset="2" set="0"/>
+          <p>0 0 0 3 0 1 1 0 2 0 0 3 2 0 4 3 0 5</p>
+        </triangles>
+      </mesh>
+    </geometry>
+    <geometry id="Plane_010-mesh" name="Plane.010">
+      <mesh>
+        <source id="Plane_010-mesh-positions">
+          <float_array id="Plane_010-mesh-positions-array" count="12">-64 0 -18 -64 0 -54 0 0 -18 0 0 -54</float_array>
+          <technique_common>
+            <accessor source="#Plane_010-mesh-positions-array" count="4" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Plane_010-mesh-normals">
+          <float_array id="Plane_010-mesh-normals-array" count="3">0 1 0</float_array>
+          <technique_common>
+            <accessor source="#Plane_010-mesh-normals-array" count="1" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Plane_010-mesh-map-0">
+          <float_array id="Plane_010-mesh-map-0-array" count="12">15.98178 8.986481 0.002538681 0.004336833 15.98178 0.004336833 15.98178 8.986481 0.002538681 8.986481 0.002538681 0.004336833</float_array>
+          <technique_common>
+            <accessor source="#Plane_010-mesh-map-0-array" count="6" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="Plane_010-mesh-vertices">
+          <input semantic="POSITION" source="#Plane_010-mesh-positions"/>
+        </vertices>
+        <triangles material="scale-material" count="2">
+          <input semantic="VERTEX" source="#Plane_010-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#Plane_010-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#Plane_010-mesh-map-0" offset="2" set="0"/>
+          <p>0 0 0 3 0 1 1 0 2 0 0 3 2 0 4 3 0 5</p>
+        </triangles>
+      </mesh>
+    </geometry>
+    <geometry id="Plane_009-mesh" name="Plane.009">
+      <mesh>
+        <source id="Plane_009-mesh-positions">
+          <float_array id="Plane_009-mesh-positions-array" count="12">0 0 54 0 0 18 64 0 54 64 0 18</float_array>
+          <technique_common>
+            <accessor source="#Plane_009-mesh-positions-array" count="4" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Plane_009-mesh-normals">
+          <float_array id="Plane_009-mesh-normals-array" count="3">0 1 0</float_array>
+          <technique_common>
+            <accessor source="#Plane_009-mesh-normals-array" count="1" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Plane_009-mesh-map-0">
+          <float_array id="Plane_009-mesh-map-0-array" count="12">15.98178 8.986481 0.002538681 0.004336833 15.98178 0.004336833 15.98178 8.986481 0.002538681 8.986481 0.002538681 0.004336833</float_array>
+          <technique_common>
+            <accessor source="#Plane_009-mesh-map-0-array" count="6" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="Plane_009-mesh-vertices">
+          <input semantic="POSITION" source="#Plane_009-mesh-positions"/>
+        </vertices>
+        <triangles material="scale-material" count="2">
+          <input semantic="VERTEX" source="#Plane_009-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#Plane_009-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#Plane_009-mesh-map-0" offset="2" set="0"/>
+          <p>0 0 0 3 0 1 1 0 2 0 0 3 2 0 4 3 0 5</p>
+        </triangles>
+      </mesh>
+    </geometry>
+    <geometry id="Plane_008-mesh" name="Plane.008">
+      <mesh>
+        <source id="Plane_008-mesh-positions">
+          <float_array id="Plane_008-mesh-positions-array" count="12">-64 0 54 -64 0 18 0 0 54 0 0 18</float_array>
+          <technique_common>
+            <accessor source="#Plane_008-mesh-positions-array" count="4" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Plane_008-mesh-normals">
+          <float_array id="Plane_008-mesh-normals-array" count="3">0 1 0</float_array>
+          <technique_common>
+            <accessor source="#Plane_008-mesh-normals-array" count="1" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Plane_008-mesh-map-0">
+          <float_array id="Plane_008-mesh-map-0-array" count="12">15.98178 8.986481 0.002538681 0.004336833 15.98178 0.004336833 15.98178 8.986481 0.002538681 8.986481 0.002538681 0.004336833</float_array>
+          <technique_common>
+            <accessor source="#Plane_008-mesh-map-0-array" count="6" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="Plane_008-mesh-vertices">
+          <input semantic="POSITION" source="#Plane_008-mesh-positions"/>
+        </vertices>
+        <triangles material="scale-material" count="2">
+          <input semantic="VERTEX" source="#Plane_008-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#Plane_008-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#Plane_008-mesh-map-0" offset="2" set="0"/>
+          <p>0 0 0 3 0 1 1 0 2 0 0 3 2 0 4 3 0 5</p>
+        </triangles>
+      </mesh>
+    </geometry>
+    <geometry id="Plane_007-mesh" name="Plane.007">
+      <mesh>
+        <source id="Plane_007-mesh-positions">
+          <float_array id="Plane_007-mesh-positions-array" count="12">0 0 18 0 0 -18 64 0 18 64 0 -18</float_array>
+          <technique_common>
+            <accessor source="#Plane_007-mesh-positions-array" count="4" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Plane_007-mesh-normals">
+          <float_array id="Plane_007-mesh-normals-array" count="3">0 1 0</float_array>
+          <technique_common>
+            <accessor source="#Plane_007-mesh-normals-array" count="1" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Plane_007-mesh-map-0">
+          <float_array id="Plane_007-mesh-map-0-array" count="12">15.98178 8.986481 0.002538681 0.004336833 15.98178 0.004336833 15.98178 8.986481 0.002538681 8.986481 0.002538681 0.004336833</float_array>
+          <technique_common>
+            <accessor source="#Plane_007-mesh-map-0-array" count="6" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="Plane_007-mesh-vertices">
+          <input semantic="POSITION" source="#Plane_007-mesh-positions"/>
+        </vertices>
+        <triangles material="scale-material" count="2">
+          <input semantic="VERTEX" source="#Plane_007-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#Plane_007-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#Plane_007-mesh-map-0" offset="2" set="0"/>
+          <p>0 0 0 3 0 1 1 0 2 0 0 3 2 0 4 3 0 5</p>
+        </triangles>
+      </mesh>
+    </geometry>
+    <geometry id="Plane_006-mesh" name="Plane.006">
+      <mesh>
+        <source id="Plane_006-mesh-positions">
+          <float_array id="Plane_006-mesh-positions-array" count="12">-64 0 18 -64 0 -18 0 0 18 0 0 -18</float_array>
+          <technique_common>
+            <accessor source="#Plane_006-mesh-positions-array" count="4" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Plane_006-mesh-normals">
+          <float_array id="Plane_006-mesh-normals-array" count="3">0 1 0</float_array>
+          <technique_common>
+            <accessor source="#Plane_006-mesh-normals-array" count="1" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Plane_006-mesh-map-0">
+          <float_array id="Plane_006-mesh-map-0-array" count="12">15.98178 8.986481 0.002538681 0.004336833 15.98178 0.004336833 15.98178 8.986481 0.002538681 8.986481 0.002538681 0.004336833</float_array>
+          <technique_common>
+            <accessor source="#Plane_006-mesh-map-0-array" count="6" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="Plane_006-mesh-vertices">
+          <input semantic="POSITION" source="#Plane_006-mesh-positions"/>
+        </vertices>
+        <triangles material="scale-material" count="2">
+          <input semantic="VERTEX" source="#Plane_006-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#Plane_006-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#Plane_006-mesh-map-0" offset="2" set="0"/>
+          <p>0 0 0 3 0 1 1 0 2 0 0 3 2 0 4 3 0 5</p>
+        </triangles>
+      </mesh>
+    </geometry>
     <geometry id="Cone_1922-mesh" name="Cone.1922">
       <mesh>
         <source id="Cone_1922-mesh-positions">
@@ -271,7 +507,7 @@
         <vertices id="Cone_1918-mesh-vertices">
           <input semantic="POSITION" source="#Cone_1918-mesh-positions"/>
         </vertices>
-        <triangles material="Material-material" count="190">
+        <triangles count="190">
           <input semantic="VERTEX" source="#Cone_1918-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Cone_1918-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Cone_1918-mesh-map-0" offset="2" set="0"/>
@@ -523,7 +759,7 @@
         <vertices id="Cone_1912-mesh-vertices">
           <input semantic="POSITION" source="#Cone_1912-mesh-positions"/>
         </vertices>
-        <triangles material="Material-material" count="190">
+        <triangles count="190">
           <input semantic="VERTEX" source="#Cone_1912-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Cone_1912-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Cone_1912-mesh-map-0" offset="2" set="0"/>
@@ -565,7 +801,7 @@
         <vertices id="Cone_1911-mesh-vertices">
           <input semantic="POSITION" source="#Cone_1911-mesh-positions"/>
         </vertices>
-        <triangles material="Material-material" count="62">
+        <triangles count="62">
           <input semantic="VERTEX" source="#Cone_1911-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Cone_1911-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Cone_1911-mesh-map-0" offset="2" set="0"/>
@@ -607,7 +843,7 @@
         <vertices id="Cone_1910-mesh-vertices">
           <input semantic="POSITION" source="#Cone_1910-mesh-positions"/>
         </vertices>
-        <triangles material="Material-material" count="190">
+        <triangles count="190">
           <input semantic="VERTEX" source="#Cone_1910-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Cone_1910-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Cone_1910-mesh-map-0" offset="2" set="0"/>
@@ -691,7 +927,7 @@
         <vertices id="Cone_1908-mesh-vertices">
           <input semantic="POSITION" source="#Cone_1908-mesh-positions"/>
         </vertices>
-        <triangles material="Material-material" count="62">
+        <triangles count="62">
           <input semantic="VERTEX" source="#Cone_1908-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Cone_1908-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Cone_1908-mesh-map-0" offset="2" set="0"/>
@@ -733,7 +969,7 @@
         <vertices id="Cone_1907-mesh-vertices">
           <input semantic="POSITION" source="#Cone_1907-mesh-positions"/>
         </vertices>
-        <triangles material="Material-material" count="190">
+        <triangles count="190">
           <input semantic="VERTEX" source="#Cone_1907-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Cone_1907-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Cone_1907-mesh-map-0" offset="2" set="0"/>
@@ -775,7 +1011,7 @@
         <vertices id="Cone_1906-mesh-vertices">
           <input semantic="POSITION" source="#Cone_1906-mesh-positions"/>
         </vertices>
-        <triangles material="Material-material" count="190">
+        <triangles count="190">
           <input semantic="VERTEX" source="#Cone_1906-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Cone_1906-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Cone_1906-mesh-map-0" offset="2" set="0"/>
@@ -859,7 +1095,7 @@
         <vertices id="Icosphere_053-mesh-vertices">
           <input semantic="POSITION" source="#Icosphere_053-mesh-positions"/>
         </vertices>
-        <triangles material="Material-material" count="15">
+        <triangles count="15">
           <input semantic="VERTEX" source="#Icosphere_053-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Icosphere_053-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Icosphere_053-mesh-map-0" offset="2" set="0"/>
@@ -943,7 +1179,7 @@
         <vertices id="Cone_1903-mesh-vertices">
           <input semantic="POSITION" source="#Cone_1903-mesh-positions"/>
         </vertices>
-        <triangles material="Material-material" count="190">
+        <triangles count="190">
           <input semantic="VERTEX" source="#Cone_1903-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Cone_1903-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Cone_1903-mesh-map-0" offset="2" set="0"/>
@@ -1993,7 +2229,7 @@
         <vertices id="Cone_1878-mesh-vertices">
           <input semantic="POSITION" source="#Cone_1878-mesh-positions"/>
         </vertices>
-        <triangles material="Material-material" count="190">
+        <triangles count="190">
           <input semantic="VERTEX" source="#Cone_1878-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Cone_1878-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Cone_1878-mesh-map-0" offset="2" set="0"/>
@@ -2329,7 +2565,7 @@
         <vertices id="Cone_1871-mesh-vertices">
           <input semantic="POSITION" source="#Cone_1871-mesh-positions"/>
         </vertices>
-        <triangles material="Material-material" count="62">
+        <triangles count="62">
           <input semantic="VERTEX" source="#Cone_1871-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Cone_1871-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Cone_1871-mesh-map-0" offset="2" set="0"/>
@@ -2371,7 +2607,7 @@
         <vertices id="Cone_1870-mesh-vertices">
           <input semantic="POSITION" source="#Cone_1870-mesh-positions"/>
         </vertices>
-        <triangles material="Material-material" count="190">
+        <triangles count="190">
           <input semantic="VERTEX" source="#Cone_1870-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Cone_1870-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Cone_1870-mesh-map-0" offset="2" set="0"/>
@@ -3169,7 +3405,7 @@
         <vertices id="Cone_1851-mesh-vertices">
           <input semantic="POSITION" source="#Cone_1851-mesh-positions"/>
         </vertices>
-        <triangles material="Material-material" count="62">
+        <triangles count="62">
           <input semantic="VERTEX" source="#Cone_1851-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Cone_1851-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Cone_1851-mesh-map-0" offset="2" set="0"/>
@@ -3631,7 +3867,7 @@
         <vertices id="Cone_1840-mesh-vertices">
           <input semantic="POSITION" source="#Cone_1840-mesh-positions"/>
         </vertices>
-        <triangles material="Material-material" count="190">
+        <triangles count="190">
           <input semantic="VERTEX" source="#Cone_1840-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Cone_1840-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Cone_1840-mesh-map-0" offset="2" set="0"/>
@@ -4185,48 +4421,6 @@
         </triangles>
       </mesh>
     </geometry>
-    <geometry id="Plane_022-mesh" name="Plane.022">
-      <mesh>
-        <source id="Plane_022-mesh-positions">
-          <float_array id="Plane_022-mesh-positions-array" count="12">0 0 -18.00001 3.8147e-6 0 18 -64 0 -17.99999 -64 0 18.00001</float_array>
-          <technique_common>
-            <accessor source="#Plane_022-mesh-positions-array" count="4" stride="3">
-              <param name="X" type="float"/>
-              <param name="Y" type="float"/>
-              <param name="Z" type="float"/>
-            </accessor>
-          </technique_common>
-        </source>
-        <source id="Plane_022-mesh-normals">
-          <float_array id="Plane_022-mesh-normals-array" count="3">0 1 0</float_array>
-          <technique_common>
-            <accessor source="#Plane_022-mesh-normals-array" count="1" stride="3">
-              <param name="X" type="float"/>
-              <param name="Y" type="float"/>
-              <param name="Z" type="float"/>
-            </accessor>
-          </technique_common>
-        </source>
-        <source id="Plane_022-mesh-map-0">
-          <float_array id="Plane_022-mesh-map-0-array" count="12">31.98599 7.49888e-5 7.49888e-5 17.98249 7.49888e-5 7.50484e-5 31.98599 7.49888e-5 31.98599 17.98249 7.49888e-5 17.98249</float_array>
-          <technique_common>
-            <accessor source="#Plane_022-mesh-map-0-array" count="6" stride="2">
-              <param name="S" type="float"/>
-              <param name="T" type="float"/>
-            </accessor>
-          </technique_common>
-        </source>
-        <vertices id="Plane_022-mesh-vertices">
-          <input semantic="POSITION" source="#Plane_022-mesh-positions"/>
-        </vertices>
-        <triangles material="scale-material" count="2">
-          <input semantic="VERTEX" source="#Plane_022-mesh-vertices" offset="0"/>
-          <input semantic="NORMAL" source="#Plane_022-mesh-normals" offset="1"/>
-          <input semantic="TEXCOORD" source="#Plane_022-mesh-map-0" offset="2" set="0"/>
-          <p>1 0 0 2 0 1 3 0 2 1 0 3 0 0 4 2 0 5</p>
-        </triangles>
-      </mesh>
-    </geometry>
     <geometry id="Cone_1195-mesh" name="Cone.1195">
       <mesh>
         <source id="Cone_1195-mesh-positions">
@@ -4303,7 +4497,7 @@
         <vertices id="Cone_1194-mesh-vertices">
           <input semantic="POSITION" source="#Cone_1194-mesh-positions"/>
         </vertices>
-        <triangles material="Material-material" count="190">
+        <triangles count="190">
           <input semantic="VERTEX" source="#Cone_1194-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Cone_1194-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Cone_1194-mesh-map-0" offset="2" set="0"/>
@@ -4345,7 +4539,7 @@
         <vertices id="Cone_1193-mesh-vertices">
           <input semantic="POSITION" source="#Cone_1193-mesh-positions"/>
         </vertices>
-        <triangles material="Material-material" count="62">
+        <triangles count="62">
           <input semantic="VERTEX" source="#Cone_1193-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Cone_1193-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Cone_1193-mesh-map-0" offset="2" set="0"/>
@@ -4387,7 +4581,7 @@
         <vertices id="Cone_1192-mesh-vertices">
           <input semantic="POSITION" source="#Cone_1192-mesh-positions"/>
         </vertices>
-        <triangles material="Material-material" count="190">
+        <triangles count="190">
           <input semantic="VERTEX" source="#Cone_1192-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Cone_1192-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Cone_1192-mesh-map-0" offset="2" set="0"/>
@@ -4471,7 +4665,7 @@
         <vertices id="Cone_1190-mesh-vertices">
           <input semantic="POSITION" source="#Cone_1190-mesh-positions"/>
         </vertices>
-        <triangles material="Material-material" count="62">
+        <triangles count="62">
           <input semantic="VERTEX" source="#Cone_1190-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Cone_1190-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Cone_1190-mesh-map-0" offset="2" set="0"/>
@@ -4513,7 +4707,7 @@
         <vertices id="Cone_1189-mesh-vertices">
           <input semantic="POSITION" source="#Cone_1189-mesh-positions"/>
         </vertices>
-        <triangles material="Material-material" count="190">
+        <triangles count="190">
           <input semantic="VERTEX" source="#Cone_1189-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Cone_1189-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Cone_1189-mesh-map-0" offset="2" set="0"/>
@@ -4555,7 +4749,7 @@
         <vertices id="Cone_1188-mesh-vertices">
           <input semantic="POSITION" source="#Cone_1188-mesh-positions"/>
         </vertices>
-        <triangles material="Material-material" count="190">
+        <triangles count="190">
           <input semantic="VERTEX" source="#Cone_1188-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Cone_1188-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Cone_1188-mesh-map-0" offset="2" set="0"/>
@@ -4605,90 +4799,6 @@
         </triangles>
       </mesh>
     </geometry>
-    <geometry id="Plane_021-mesh" name="Plane.021">
-      <mesh>
-        <source id="Plane_021-mesh-positions">
-          <float_array id="Plane_021-mesh-positions-array" count="12">64 0 -18.00001 64 0 18 -3.8147e-6 0 -17.99999 1.90735e-6 0 18.00001</float_array>
-          <technique_common>
-            <accessor source="#Plane_021-mesh-positions-array" count="4" stride="3">
-              <param name="X" type="float"/>
-              <param name="Y" type="float"/>
-              <param name="Z" type="float"/>
-            </accessor>
-          </technique_common>
-        </source>
-        <source id="Plane_021-mesh-normals">
-          <float_array id="Plane_021-mesh-normals-array" count="3">0 1 0</float_array>
-          <technique_common>
-            <accessor source="#Plane_021-mesh-normals-array" count="1" stride="3">
-              <param name="X" type="float"/>
-              <param name="Y" type="float"/>
-              <param name="Z" type="float"/>
-            </accessor>
-          </technique_common>
-        </source>
-        <source id="Plane_021-mesh-map-0">
-          <float_array id="Plane_021-mesh-map-0-array" count="12">31.98599 7.49888e-5 7.49888e-5 17.98249 7.49888e-5 7.50484e-5 31.98599 7.49888e-5 31.98599 17.98249 7.49888e-5 17.98249</float_array>
-          <technique_common>
-            <accessor source="#Plane_021-mesh-map-0-array" count="6" stride="2">
-              <param name="S" type="float"/>
-              <param name="T" type="float"/>
-            </accessor>
-          </technique_common>
-        </source>
-        <vertices id="Plane_021-mesh-vertices">
-          <input semantic="POSITION" source="#Plane_021-mesh-positions"/>
-        </vertices>
-        <triangles material="scale-material" count="2">
-          <input semantic="VERTEX" source="#Plane_021-mesh-vertices" offset="0"/>
-          <input semantic="NORMAL" source="#Plane_021-mesh-normals" offset="1"/>
-          <input semantic="TEXCOORD" source="#Plane_021-mesh-map-0" offset="2" set="0"/>
-          <p>1 0 0 2 0 1 3 0 2 1 0 3 0 0 4 2 0 5</p>
-        </triangles>
-      </mesh>
-    </geometry>
-    <geometry id="Plane_020-mesh" name="Plane.020">
-      <mesh>
-        <source id="Plane_020-mesh-positions">
-          <float_array id="Plane_020-mesh-positions-array" count="12">0 0 -54.00001 3.8147e-6 0 -18.00001 -64 0 -53.99999 -64 0 -17.99999</float_array>
-          <technique_common>
-            <accessor source="#Plane_020-mesh-positions-array" count="4" stride="3">
-              <param name="X" type="float"/>
-              <param name="Y" type="float"/>
-              <param name="Z" type="float"/>
-            </accessor>
-          </technique_common>
-        </source>
-        <source id="Plane_020-mesh-normals">
-          <float_array id="Plane_020-mesh-normals-array" count="3">0 1 0</float_array>
-          <technique_common>
-            <accessor source="#Plane_020-mesh-normals-array" count="1" stride="3">
-              <param name="X" type="float"/>
-              <param name="Y" type="float"/>
-              <param name="Z" type="float"/>
-            </accessor>
-          </technique_common>
-        </source>
-        <source id="Plane_020-mesh-map-0">
-          <float_array id="Plane_020-mesh-map-0-array" count="12">31.98599 7.49888e-5 7.49888e-5 17.98249 7.49888e-5 7.50484e-5 31.98599 7.49888e-5 31.98599 17.98249 7.49888e-5 17.98249</float_array>
-          <technique_common>
-            <accessor source="#Plane_020-mesh-map-0-array" count="6" stride="2">
-              <param name="S" type="float"/>
-              <param name="T" type="float"/>
-            </accessor>
-          </technique_common>
-        </source>
-        <vertices id="Plane_020-mesh-vertices">
-          <input semantic="POSITION" source="#Plane_020-mesh-positions"/>
-        </vertices>
-        <triangles material="scale-material" count="2">
-          <input semantic="VERTEX" source="#Plane_020-mesh-vertices" offset="0"/>
-          <input semantic="NORMAL" source="#Plane_020-mesh-normals" offset="1"/>
-          <input semantic="TEXCOORD" source="#Plane_020-mesh-map-0" offset="2" set="0"/>
-          <p>1 0 0 2 0 1 3 0 2 1 0 3 0 0 4 2 0 5</p>
-        </triangles>
-      </mesh>
-    </geometry>
     <geometry id="Icosphere_034-mesh" name="Icosphere.034">
       <mesh>
         <source id="Icosphere_034-mesh-positions">
@@ -4723,7 +4833,7 @@
         <vertices id="Icosphere_034-mesh-vertices">
           <input semantic="POSITION" source="#Icosphere_034-mesh-positions"/>
         </vertices>
-        <triangles material="Material-material" count="15">
+        <triangles count="15">
           <input semantic="VERTEX" source="#Icosphere_034-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Icosphere_034-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Icosphere_034-mesh-map-0" offset="2" set="0"/>
@@ -4807,7 +4917,7 @@
         <vertices id="Cone_1157-mesh-vertices">
           <input semantic="POSITION" source="#Cone_1157-mesh-positions"/>
         </vertices>
-        <triangles material="Material-material" count="190">
+        <triangles count="190">
           <input semantic="VERTEX" source="#Cone_1157-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Cone_1157-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Cone_1157-mesh-map-0" offset="2" set="0"/>
@@ -5857,7 +5967,7 @@
         <vertices id="Cone_1132-mesh-vertices">
           <input semantic="POSITION" source="#Cone_1132-mesh-positions"/>
         </vertices>
-        <triangles material="Material-material" count="190">
+        <triangles count="190">
           <input semantic="VERTEX" source="#Cone_1132-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Cone_1132-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Cone_1132-mesh-map-0" offset="2" set="0"/>
@@ -6117,132 +6227,6 @@
         </triangles>
       </mesh>
     </geometry>
-    <geometry id="Plane_019-mesh" name="Plane.019">
-      <mesh>
-        <source id="Plane_019-mesh-positions">
-          <float_array id="Plane_019-mesh-positions-array" count="12">0 0 18 3.8147e-6 0 53.99999 -64 0 18.00001 -64 0 54.00001</float_array>
-          <technique_common>
-            <accessor source="#Plane_019-mesh-positions-array" count="4" stride="3">
-              <param name="X" type="float"/>
-              <param name="Y" type="float"/>
-              <param name="Z" type="float"/>
-            </accessor>
-          </technique_common>
-        </source>
-        <source id="Plane_019-mesh-normals">
-          <float_array id="Plane_019-mesh-normals-array" count="3">0 1 0</float_array>
-          <technique_common>
-            <accessor source="#Plane_019-mesh-normals-array" count="1" stride="3">
-              <param name="X" type="float"/>
-              <param name="Y" type="float"/>
-              <param name="Z" type="float"/>
-            </accessor>
-          </technique_common>
-        </source>
-        <source id="Plane_019-mesh-map-0">
-          <float_array id="Plane_019-mesh-map-0-array" count="12">31.98599 7.49888e-5 7.49888e-5 17.98249 7.49888e-5 7.50484e-5 31.98599 7.49888e-5 31.98599 17.98249 7.49888e-5 17.98249</float_array>
-          <technique_common>
-            <accessor source="#Plane_019-mesh-map-0-array" count="6" stride="2">
-              <param name="S" type="float"/>
-              <param name="T" type="float"/>
-            </accessor>
-          </technique_common>
-        </source>
-        <vertices id="Plane_019-mesh-vertices">
-          <input semantic="POSITION" source="#Plane_019-mesh-positions"/>
-        </vertices>
-        <triangles material="scale-material" count="2">
-          <input semantic="VERTEX" source="#Plane_019-mesh-vertices" offset="0"/>
-          <input semantic="NORMAL" source="#Plane_019-mesh-normals" offset="1"/>
-          <input semantic="TEXCOORD" source="#Plane_019-mesh-map-0" offset="2" set="0"/>
-          <p>1 0 0 2 0 1 3 0 2 1 0 3 0 0 4 2 0 5</p>
-        </triangles>
-      </mesh>
-    </geometry>
-    <geometry id="Plane_018-mesh" name="Plane.018">
-      <mesh>
-        <source id="Plane_018-mesh-positions">
-          <float_array id="Plane_018-mesh-positions-array" count="12">64 0 -54.00001 64 0 -18.00001 -3.8147e-6 0 -53.99999 1.90735e-6 0 -17.99999</float_array>
-          <technique_common>
-            <accessor source="#Plane_018-mesh-positions-array" count="4" stride="3">
-              <param name="X" type="float"/>
-              <param name="Y" type="float"/>
-              <param name="Z" type="float"/>
-            </accessor>
-          </technique_common>
-        </source>
-        <source id="Plane_018-mesh-normals">
-          <float_array id="Plane_018-mesh-normals-array" count="3">0 1 0</float_array>
-          <technique_common>
-            <accessor source="#Plane_018-mesh-normals-array" count="1" stride="3">
-              <param name="X" type="float"/>
-              <param name="Y" type="float"/>
-              <param name="Z" type="float"/>
-            </accessor>
-          </technique_common>
-        </source>
-        <source id="Plane_018-mesh-map-0">
-          <float_array id="Plane_018-mesh-map-0-array" count="12">31.98599 7.49888e-5 7.49888e-5 17.98249 7.49888e-5 7.50484e-5 31.98599 7.49888e-5 31.98599 17.98249 7.49888e-5 17.98249</float_array>
-          <technique_common>
-            <accessor source="#Plane_018-mesh-map-0-array" count="6" stride="2">
-              <param name="S" type="float"/>
-              <param name="T" type="float"/>
-            </accessor>
-          </technique_common>
-        </source>
-        <vertices id="Plane_018-mesh-vertices">
-          <input semantic="POSITION" source="#Plane_018-mesh-positions"/>
-        </vertices>
-        <triangles material="scale-material" count="2">
-          <input semantic="VERTEX" source="#Plane_018-mesh-vertices" offset="0"/>
-          <input semantic="NORMAL" source="#Plane_018-mesh-normals" offset="1"/>
-          <input semantic="TEXCOORD" source="#Plane_018-mesh-map-0" offset="2" set="0"/>
-          <p>1 0 0 2 0 1 3 0 2 1 0 3 0 0 4 2 0 5</p>
-        </triangles>
-      </mesh>
-    </geometry>
-    <geometry id="Plane_017-mesh" name="Plane.017">
-      <mesh>
-        <source id="Plane_017-mesh-positions">
-          <float_array id="Plane_017-mesh-positions-array" count="12">64 0 18 64 0 53.99999 -3.8147e-6 0 18.00001 1.90735e-6 0 54.00001</float_array>
-          <technique_common>
-            <accessor source="#Plane_017-mesh-positions-array" count="4" stride="3">
-              <param name="X" type="float"/>
-              <param name="Y" type="float"/>
-              <param name="Z" type="float"/>
-            </accessor>
-          </technique_common>
-        </source>
-        <source id="Plane_017-mesh-normals">
-          <float_array id="Plane_017-mesh-normals-array" count="3">0 1 0</float_array>
-          <technique_common>
-            <accessor source="#Plane_017-mesh-normals-array" count="1" stride="3">
-              <param name="X" type="float"/>
-              <param name="Y" type="float"/>
-              <param name="Z" type="float"/>
-            </accessor>
-          </technique_common>
-        </source>
-        <source id="Plane_017-mesh-map-0">
-          <float_array id="Plane_017-mesh-map-0-array" count="12">31.98599 7.49888e-5 7.49888e-5 17.98249 7.49888e-5 7.50484e-5 31.98599 7.49888e-5 31.98599 17.98249 7.49888e-5 17.98249</float_array>
-          <technique_common>
-            <accessor source="#Plane_017-mesh-map-0-array" count="6" stride="2">
-              <param name="S" type="float"/>
-              <param name="T" type="float"/>
-            </accessor>
-          </technique_common>
-        </source>
-        <vertices id="Plane_017-mesh-vertices">
-          <input semantic="POSITION" source="#Plane_017-mesh-positions"/>
-        </vertices>
-        <triangles material="scale-material" count="2">
-          <input semantic="VERTEX" source="#Plane_017-mesh-vertices" offset="0"/>
-          <input semantic="NORMAL" source="#Plane_017-mesh-normals" offset="1"/>
-          <input semantic="TEXCOORD" source="#Plane_017-mesh-map-0" offset="2" set="0"/>
-          <p>1 0 0 2 0 1 3 0 2 1 0 3 0 0 4 2 0 5</p>
-        </triangles>
-      </mesh>
-    </geometry>
     <geometry id="Icosphere_030-mesh" name="Icosphere.030">
       <mesh>
         <source id="Icosphere_030-mesh-positions">
@@ -6319,7 +6303,7 @@
         <vertices id="Cone_993-mesh-vertices">
           <input semantic="POSITION" source="#Cone_993-mesh-positions"/>
         </vertices>
-        <triangles material="Material-material" count="62">
+        <triangles count="62">
           <input semantic="VERTEX" source="#Cone_993-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Cone_993-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Cone_993-mesh-map-0" offset="2" set="0"/>
@@ -6361,7 +6345,7 @@
         <vertices id="Cone_994-mesh-vertices">
           <input semantic="POSITION" source="#Cone_994-mesh-positions"/>
         </vertices>
-        <triangles material="Material-material" count="190">
+        <triangles count="190">
           <input semantic="VERTEX" source="#Cone_994-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Cone_994-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Cone_994-mesh-map-0" offset="2" set="0"/>
@@ -7159,7 +7143,7 @@
         <vertices id="Cone_1014-mesh-vertices">
           <input semantic="POSITION" source="#Cone_1014-mesh-positions"/>
         </vertices>
-        <triangles material="Material-material" count="62">
+        <triangles count="62">
           <input semantic="VERTEX" source="#Cone_1014-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Cone_1014-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Cone_1014-mesh-map-0" offset="2" set="0"/>
@@ -7621,7 +7605,7 @@
         <vertices id="Cone_1025-mesh-vertices">
           <input semantic="POSITION" source="#Cone_1025-mesh-positions"/>
         </vertices>
-        <triangles material="Material-material" count="190">
+        <triangles count="190">
           <input semantic="VERTEX" source="#Cone_1025-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Cone_1025-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Cone_1025-mesh-map-0" offset="2" set="0"/>
@@ -8136,6 +8120,78 @@
   </library_geometries>
   <library_visual_scenes>
     <visual_scene id="_3" name="23">
+      <node id="Plane_011" name="Plane.011" type="NODE">
+        <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
+        <instance_geometry url="#Plane_011-mesh" name="Plane.011">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="scale-material" target="#scale-material">
+                <bind_vertex_input semantic="Plane_004-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Plane_010" name="Plane.010" type="NODE">
+        <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
+        <instance_geometry url="#Plane_010-mesh" name="Plane.010">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="scale-material" target="#scale-material">
+                <bind_vertex_input semantic="Plane_004-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Plane_009" name="Plane.009" type="NODE">
+        <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
+        <instance_geometry url="#Plane_009-mesh" name="Plane.009">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="scale-material" target="#scale-material">
+                <bind_vertex_input semantic="Plane_004-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Plane_008" name="Plane.008" type="NODE">
+        <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
+        <instance_geometry url="#Plane_008-mesh" name="Plane.008">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="scale-material" target="#scale-material">
+                <bind_vertex_input semantic="Plane_004-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Plane_007" name="Plane.007" type="NODE">
+        <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
+        <instance_geometry url="#Plane_007-mesh" name="Plane.007">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="scale-material" target="#scale-material">
+                <bind_vertex_input semantic="Plane_004-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Plane_006" name="Plane.006" type="NODE">
+        <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
+        <instance_geometry url="#Plane_006-mesh" name="Plane.006">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="scale-material" target="#scale-material">
+                <bind_vertex_input semantic="Plane_004-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
       <node id="Cone_1810" name="Cone.1810" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Cone_1922-mesh" name="Cone.1810"/>
@@ -8154,15 +8210,7 @@
       </node>
       <node id="Cone_1806" name="Cone.1806" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
-        <instance_geometry url="#Cone_1918-mesh" name="Cone.1806">
-          <bind_material>
-            <technique_common>
-              <instance_material symbol="Material-material" target="#Material-material">
-                <bind_vertex_input semantic="Cone_023-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
-              </instance_material>
-            </technique_common>
-          </bind_material>
-        </instance_geometry>
+        <instance_geometry url="#Cone_1918-mesh" name="Cone.1806"/>
       </node>
       <node id="Cone_1805" name="Cone.1805" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
@@ -8186,39 +8234,15 @@
       </node>
       <node id="Cone_1800" name="Cone.1800" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
-        <instance_geometry url="#Cone_1912-mesh" name="Cone.1800">
-          <bind_material>
-            <technique_common>
-              <instance_material symbol="Material-material" target="#Material-material">
-                <bind_vertex_input semantic="Cone_022-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
-              </instance_material>
-            </technique_common>
-          </bind_material>
-        </instance_geometry>
+        <instance_geometry url="#Cone_1912-mesh" name="Cone.1800"/>
       </node>
       <node id="Cone_1799" name="Cone.1799" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
-        <instance_geometry url="#Cone_1911-mesh" name="Cone.1799">
-          <bind_material>
-            <technique_common>
-              <instance_material symbol="Material-material" target="#Material-material">
-                <bind_vertex_input semantic="Cone_025-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
-              </instance_material>
-            </technique_common>
-          </bind_material>
-        </instance_geometry>
+        <instance_geometry url="#Cone_1911-mesh" name="Cone.1799"/>
       </node>
       <node id="Cone_1798" name="Cone.1798" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
-        <instance_geometry url="#Cone_1910-mesh" name="Cone.1798">
-          <bind_material>
-            <technique_common>
-              <instance_material symbol="Material-material" target="#Material-material">
-                <bind_vertex_input semantic="Cone_026-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
-              </instance_material>
-            </technique_common>
-          </bind_material>
-        </instance_geometry>
+        <instance_geometry url="#Cone_1910-mesh" name="Cone.1798"/>
       </node>
       <node id="Cone_1797" name="Cone.1797" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
@@ -8226,39 +8250,15 @@
       </node>
       <node id="Cone_1796" name="Cone.1796" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
-        <instance_geometry url="#Cone_1908-mesh" name="Cone.1796">
-          <bind_material>
-            <technique_common>
-              <instance_material symbol="Material-material" target="#Material-material">
-                <bind_vertex_input semantic="Cone_019-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
-              </instance_material>
-            </technique_common>
-          </bind_material>
-        </instance_geometry>
+        <instance_geometry url="#Cone_1908-mesh" name="Cone.1796"/>
       </node>
       <node id="Cone_1795" name="Cone.1795" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
-        <instance_geometry url="#Cone_1907-mesh" name="Cone.1795">
-          <bind_material>
-            <technique_common>
-              <instance_material symbol="Material-material" target="#Material-material">
-                <bind_vertex_input semantic="Cone_017-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
-              </instance_material>
-            </technique_common>
-          </bind_material>
-        </instance_geometry>
+        <instance_geometry url="#Cone_1907-mesh" name="Cone.1795"/>
       </node>
       <node id="Cone_1794" name="Cone.1794" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
-        <instance_geometry url="#Cone_1906-mesh" name="Cone.1794">
-          <bind_material>
-            <technique_common>
-              <instance_material symbol="Material-material" target="#Material-material">
-                <bind_vertex_input semantic="Cone_015-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
-              </instance_material>
-            </technique_common>
-          </bind_material>
-        </instance_geometry>
+        <instance_geometry url="#Cone_1906-mesh" name="Cone.1794"/>
       </node>
       <node id="Cone_1793" name="Cone.1793" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
@@ -8266,15 +8266,7 @@
       </node>
       <node id="Icosphere_030" name="Icosphere.030" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
-        <instance_geometry url="#Icosphere_053-mesh" name="Icosphere.030">
-          <bind_material>
-            <technique_common>
-              <instance_material symbol="Material-material" target="#Material-material">
-                <bind_vertex_input semantic="UVMap" input_semantic="TEXCOORD" input_set="0"/>
-              </instance_material>
-            </technique_common>
-          </bind_material>
-        </instance_geometry>
+        <instance_geometry url="#Icosphere_053-mesh" name="Icosphere.030"/>
       </node>
       <node id="Cone_1792" name="Cone.1792" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
@@ -8282,15 +8274,7 @@
       </node>
       <node id="Cone_1791" name="Cone.1791" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
-        <instance_geometry url="#Cone_1903-mesh" name="Cone.1791">
-          <bind_material>
-            <technique_common>
-              <instance_material symbol="Material-material" target="#Material-material">
-                <bind_vertex_input semantic="Cone_023-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
-              </instance_material>
-            </technique_common>
-          </bind_material>
-        </instance_geometry>
+        <instance_geometry url="#Cone_1903-mesh" name="Cone.1791"/>
       </node>
       <node id="Cone_1790" name="Cone.1790" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
@@ -8390,15 +8374,7 @@
       </node>
       <node id="Cone_1766" name="Cone.1766" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
-        <instance_geometry url="#Cone_1878-mesh" name="Cone.1766">
-          <bind_material>
-            <technique_common>
-              <instance_material symbol="Material-material" target="#Material-material">
-                <bind_vertex_input semantic="Cone_021-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
-              </instance_material>
-            </technique_common>
-          </bind_material>
-        </instance_geometry>
+        <instance_geometry url="#Cone_1878-mesh" name="Cone.1766"/>
       </node>
       <node id="Cone_1765" name="Cone.1765" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
@@ -8430,27 +8406,11 @@
       </node>
       <node id="Cone_1759" name="Cone.1759" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
-        <instance_geometry url="#Cone_1871-mesh" name="Cone.1759">
-          <bind_material>
-            <technique_common>
-              <instance_material symbol="Material-material" target="#Material-material">
-                <bind_vertex_input semantic="Cone_016-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
-              </instance_material>
-            </technique_common>
-          </bind_material>
-        </instance_geometry>
+        <instance_geometry url="#Cone_1871-mesh" name="Cone.1759"/>
       </node>
       <node id="Cone_1758" name="Cone.1758" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
-        <instance_geometry url="#Cone_1870-mesh" name="Cone.1758">
-          <bind_material>
-            <technique_common>
-              <instance_material symbol="Material-material" target="#Material-material">
-                <bind_vertex_input semantic="Cone_023-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
-              </instance_material>
-            </technique_common>
-          </bind_material>
-        </instance_geometry>
+        <instance_geometry url="#Cone_1870-mesh" name="Cone.1758"/>
       </node>
       <node id="Cone_1757" name="Cone.1757" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
@@ -8526,15 +8486,7 @@
       </node>
       <node id="Cone_1739" name="Cone.1739" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
-        <instance_geometry url="#Cone_1851-mesh" name="Cone.1739">
-          <bind_material>
-            <technique_common>
-              <instance_material symbol="Material-material" target="#Material-material">
-                <bind_vertex_input semantic="Cone_012-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
-              </instance_material>
-            </technique_common>
-          </bind_material>
-        </instance_geometry>
+        <instance_geometry url="#Cone_1851-mesh" name="Cone.1739"/>
       </node>
       <node id="Cone_1738" name="Cone.1738" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
@@ -8578,15 +8530,7 @@
       </node>
       <node id="Cone_1017" name="Cone.1017" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
-        <instance_geometry url="#Cone_1840-mesh" name="Cone.1017">
-          <bind_material>
-            <technique_common>
-              <instance_material symbol="Material-material" target="#Material-material">
-                <bind_vertex_input semantic="Cone_031-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
-              </instance_material>
-            </technique_common>
-          </bind_material>
-        </instance_geometry>
+        <instance_geometry url="#Cone_1840-mesh" name="Cone.1017"/>
       </node>
       <node id="Cone_1016" name="Cone.1016" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
@@ -8640,57 +8584,21 @@
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Cone_1196-mesh" name="Cone.1163"/>
       </node>
-      <node id="Plane_022" name="Plane.022" type="NODE">
-        <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
-        <instance_geometry url="#Plane_022-mesh" name="Plane.022">
-          <bind_material>
-            <technique_common>
-              <instance_material symbol="scale-material" target="#scale-material">
-                <bind_vertex_input semantic="Plane_004-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
-              </instance_material>
-            </technique_common>
-          </bind_material>
-        </instance_geometry>
-      </node>
       <node id="Cone_1162" name="Cone.1162" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Cone_1195-mesh" name="Cone.1162"/>
       </node>
       <node id="Cone_1161" name="Cone.1161" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
-        <instance_geometry url="#Cone_1194-mesh" name="Cone.1161">
-          <bind_material>
-            <technique_common>
-              <instance_material symbol="Material-material" target="#Material-material">
-                <bind_vertex_input semantic="Cone_022-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
-              </instance_material>
-            </technique_common>
-          </bind_material>
-        </instance_geometry>
+        <instance_geometry url="#Cone_1194-mesh" name="Cone.1161"/>
       </node>
       <node id="Cone_1160" name="Cone.1160" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
-        <instance_geometry url="#Cone_1193-mesh" name="Cone.1160">
-          <bind_material>
-            <technique_common>
-              <instance_material symbol="Material-material" target="#Material-material">
-                <bind_vertex_input semantic="Cone_025-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
-              </instance_material>
-            </technique_common>
-          </bind_material>
-        </instance_geometry>
+        <instance_geometry url="#Cone_1193-mesh" name="Cone.1160"/>
       </node>
       <node id="Cone_1159" name="Cone.1159" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
-        <instance_geometry url="#Cone_1192-mesh" name="Cone.1159">
-          <bind_material>
-            <technique_common>
-              <instance_material symbol="Material-material" target="#Material-material">
-                <bind_vertex_input semantic="Cone_026-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
-              </instance_material>
-            </technique_common>
-          </bind_material>
-        </instance_geometry>
+        <instance_geometry url="#Cone_1192-mesh" name="Cone.1159"/>
       </node>
       <node id="Cone_1158" name="Cone.1158" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
@@ -8698,79 +8606,23 @@
       </node>
       <node id="Cone_1157" name="Cone.1157" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
-        <instance_geometry url="#Cone_1190-mesh" name="Cone.1157">
-          <bind_material>
-            <technique_common>
-              <instance_material symbol="Material-material" target="#Material-material">
-                <bind_vertex_input semantic="Cone_019-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
-              </instance_material>
-            </technique_common>
-          </bind_material>
-        </instance_geometry>
+        <instance_geometry url="#Cone_1190-mesh" name="Cone.1157"/>
       </node>
       <node id="Cone_1156" name="Cone.1156" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
-        <instance_geometry url="#Cone_1189-mesh" name="Cone.1156">
-          <bind_material>
-            <technique_common>
-              <instance_material symbol="Material-material" target="#Material-material">
-                <bind_vertex_input semantic="Cone_017-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
-              </instance_material>
-            </technique_common>
-          </bind_material>
-        </instance_geometry>
+        <instance_geometry url="#Cone_1189-mesh" name="Cone.1156"/>
       </node>
       <node id="Cone_1155" name="Cone.1155" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
-        <instance_geometry url="#Cone_1188-mesh" name="Cone.1155">
-          <bind_material>
-            <technique_common>
-              <instance_material symbol="Material-material" target="#Material-material">
-                <bind_vertex_input semantic="Cone_015-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
-              </instance_material>
-            </technique_common>
-          </bind_material>
-        </instance_geometry>
+        <instance_geometry url="#Cone_1188-mesh" name="Cone.1155"/>
       </node>
       <node id="Cone_1154" name="Cone.1154" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Cone_1187-mesh" name="Cone.1154"/>
       </node>
-      <node id="Plane_021" name="Plane.021" type="NODE">
-        <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
-        <instance_geometry url="#Plane_021-mesh" name="Plane.021">
-          <bind_material>
-            <technique_common>
-              <instance_material symbol="scale-material" target="#scale-material">
-                <bind_vertex_input semantic="Plane_004-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
-              </instance_material>
-            </technique_common>
-          </bind_material>
-        </instance_geometry>
-      </node>
-      <node id="Plane_020" name="Plane.020" type="NODE">
-        <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
-        <instance_geometry url="#Plane_020-mesh" name="Plane.020">
-          <bind_material>
-            <technique_common>
-              <instance_material symbol="scale-material" target="#scale-material">
-                <bind_vertex_input semantic="Plane_004-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
-              </instance_material>
-            </technique_common>
-          </bind_material>
-        </instance_geometry>
-      </node>
       <node id="Icosphere_031" name="Icosphere.031" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
-        <instance_geometry url="#Icosphere_034-mesh" name="Icosphere.031">
-          <bind_material>
-            <technique_common>
-              <instance_material symbol="Material-material" target="#Material-material">
-                <bind_vertex_input semantic="UVMap" input_semantic="TEXCOORD" input_set="0"/>
-              </instance_material>
-            </technique_common>
-          </bind_material>
-        </instance_geometry>
+        <instance_geometry url="#Icosphere_034-mesh" name="Icosphere.031"/>
       </node>
       <node id="Cone_1127" name="Cone.1127" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
@@ -8778,15 +8630,7 @@
       </node>
       <node id="Cone_1124" name="Cone.1124" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
-        <instance_geometry url="#Cone_1157-mesh" name="Cone.1124">
-          <bind_material>
-            <technique_common>
-              <instance_material symbol="Material-material" target="#Material-material">
-                <bind_vertex_input semantic="Cone_023-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
-              </instance_material>
-            </technique_common>
-          </bind_material>
-        </instance_geometry>
+        <instance_geometry url="#Cone_1157-mesh" name="Cone.1124"/>
       </node>
       <node id="Cone_1123" name="Cone.1123" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
@@ -8886,15 +8730,7 @@
       </node>
       <node id="Cone_1099" name="Cone.1099" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
-        <instance_geometry url="#Cone_1132-mesh" name="Cone.1099">
-          <bind_material>
-            <technique_common>
-              <instance_material symbol="Material-material" target="#Material-material">
-                <bind_vertex_input semantic="Cone_021-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
-              </instance_material>
-            </technique_common>
-          </bind_material>
-        </instance_geometry>
+        <instance_geometry url="#Cone_1132-mesh" name="Cone.1099"/>
       </node>
       <node id="Cone_1098" name="Cone.1098" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
@@ -8920,69 +8756,17 @@
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Cone_1126-mesh" name="Cone.1093"/>
       </node>
-      <node id="Plane_019" name="Plane.019" type="NODE">
-        <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
-        <instance_geometry url="#Plane_019-mesh" name="Plane.019">
-          <bind_material>
-            <technique_common>
-              <instance_material symbol="scale-material" target="#scale-material">
-                <bind_vertex_input semantic="Plane_004-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
-              </instance_material>
-            </technique_common>
-          </bind_material>
-        </instance_geometry>
-      </node>
-      <node id="Plane_018" name="Plane.018" type="NODE">
-        <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
-        <instance_geometry url="#Plane_018-mesh" name="Plane.018">
-          <bind_material>
-            <technique_common>
-              <instance_material symbol="scale-material" target="#scale-material">
-                <bind_vertex_input semantic="Plane_004-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
-              </instance_material>
-            </technique_common>
-          </bind_material>
-        </instance_geometry>
-      </node>
-      <node id="Plane_017" name="Plane.017" type="NODE">
-        <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
-        <instance_geometry url="#Plane_017-mesh" name="Plane.017">
-          <bind_material>
-            <technique_common>
-              <instance_material symbol="scale-material" target="#scale-material">
-                <bind_vertex_input semantic="Plane_004-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
-              </instance_material>
-            </technique_common>
-          </bind_material>
-        </instance_geometry>
-      </node>
       <node id="Icosphere_028" name="Icosphere.028" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Icosphere_030-mesh" name="Icosphere.028"/>
       </node>
       <node id="Cone_962" name="Cone.962" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
-        <instance_geometry url="#Cone_993-mesh" name="Cone.962">
-          <bind_material>
-            <technique_common>
-              <instance_material symbol="Material-material" target="#Material-material">
-                <bind_vertex_input semantic="Cone_016-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
-              </instance_material>
-            </technique_common>
-          </bind_material>
-        </instance_geometry>
+        <instance_geometry url="#Cone_993-mesh" name="Cone.962"/>
       </node>
       <node id="Cone_963" name="Cone.963" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
-        <instance_geometry url="#Cone_994-mesh" name="Cone.963">
-          <bind_material>
-            <technique_common>
-              <instance_material symbol="Material-material" target="#Material-material">
-                <bind_vertex_input semantic="Cone_023-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
-              </instance_material>
-            </technique_common>
-          </bind_material>
-        </instance_geometry>
+        <instance_geometry url="#Cone_994-mesh" name="Cone.963"/>
       </node>
       <node id="Cone_964" name="Cone.964" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
@@ -9058,15 +8842,7 @@
       </node>
       <node id="Cone_983" name="Cone.983" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
-        <instance_geometry url="#Cone_1014-mesh" name="Cone.983">
-          <bind_material>
-            <technique_common>
-              <instance_material symbol="Material-material" target="#Material-material">
-                <bind_vertex_input semantic="Cone_012-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
-              </instance_material>
-            </technique_common>
-          </bind_material>
-        </instance_geometry>
+        <instance_geometry url="#Cone_1014-mesh" name="Cone.983"/>
       </node>
       <node id="Cone_984" name="Cone.984" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
@@ -9110,15 +8886,7 @@
       </node>
       <node id="Cone_994" name="Cone.994" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
-        <instance_geometry url="#Cone_1025-mesh" name="Cone.994">
-          <bind_material>
-            <technique_common>
-              <instance_material symbol="Material-material" target="#Material-material">
-                <bind_vertex_input semantic="Cone_031-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
-              </instance_material>
-            </technique_common>
-          </bind_material>
-        </instance_geometry>
+        <instance_geometry url="#Cone_1025-mesh" name="Cone.994"/>
       </node>
       <node id="Cone_995" name="Cone.995" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
