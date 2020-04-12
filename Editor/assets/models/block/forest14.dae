@@ -5,8 +5,8 @@
       <author>Blender User</author>
       <authoring_tool>Blender 2.82.7 commit date:2020-03-12, commit time:05:06, hash:375c7dc4caf4</authoring_tool>
     </contributor>
-    <created>2020-04-10T22:21:10</created>
-    <modified>2020-04-10T22:21:10</modified>
+    <created>2020-04-12T15:25:26</created>
+    <modified>2020-04-12T15:25:26</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
@@ -42,51 +42,55 @@
       </profile_COMMON>
     </effect>
   </library_effects>
-  <library_images/>
+  <library_images>
+    <image id="textures_scaleboy_png" name="textures_scaleboy_png">
+      <init_from>textures/scaleboy.png</init_from>
+    </image>
+  </library_images>
   <library_materials>
     <material id="scale-material" name="scale">
       <instance_effect url="#scale-effect"/>
     </material>
   </library_materials>
   <library_geometries>
-    <geometry id="Plane_032-mesh" name="Plane.032">
+    <geometry id="Plane_026-mesh" name="Plane.026">
       <mesh>
-        <source id="Plane_032-mesh-positions">
-          <float_array id="Plane_032-mesh-positions-array" count="12">-32 0 18 -32 0 -18 32 0 18 32 0 -18</float_array>
+        <source id="Plane_026-mesh-positions">
+          <float_array id="Plane_026-mesh-positions-array" count="12">-32 0 18 -32 0 -18 32 0 18 32 0 -18</float_array>
           <technique_common>
-            <accessor source="#Plane_032-mesh-positions-array" count="4" stride="3">
+            <accessor source="#Plane_026-mesh-positions-array" count="4" stride="3">
               <param name="X" type="float"/>
               <param name="Y" type="float"/>
               <param name="Z" type="float"/>
             </accessor>
           </technique_common>
         </source>
-        <source id="Plane_032-mesh-normals">
-          <float_array id="Plane_032-mesh-normals-array" count="3">0 1 0</float_array>
+        <source id="Plane_026-mesh-normals">
+          <float_array id="Plane_026-mesh-normals-array" count="3">0 1 0</float_array>
           <technique_common>
-            <accessor source="#Plane_032-mesh-normals-array" count="1" stride="3">
+            <accessor source="#Plane_026-mesh-normals-array" count="1" stride="3">
               <param name="X" type="float"/>
               <param name="Y" type="float"/>
               <param name="Z" type="float"/>
             </accessor>
           </technique_common>
         </source>
-        <source id="Plane_032-mesh-map-0">
-          <float_array id="Plane_032-mesh-map-0-array" count="12">31.98599 17.98249 7.49888e-5 7.50484e-5 31.98599 7.49888e-5 31.98599 17.98249 7.49888e-5 17.98249 7.49888e-5 7.50484e-5</float_array>
+        <source id="Plane_026-mesh-map-0">
+          <float_array id="Plane_026-mesh-map-0-array" count="12">15.98178 8.986481 0.002538681 0.004336833 15.98178 0.004336833 15.98178 8.986481 0.002538681 8.986481 0.002538681 0.004336833</float_array>
           <technique_common>
-            <accessor source="#Plane_032-mesh-map-0-array" count="6" stride="2">
+            <accessor source="#Plane_026-mesh-map-0-array" count="6" stride="2">
               <param name="S" type="float"/>
               <param name="T" type="float"/>
             </accessor>
           </technique_common>
         </source>
-        <vertices id="Plane_032-mesh-vertices">
-          <input semantic="POSITION" source="#Plane_032-mesh-positions"/>
+        <vertices id="Plane_026-mesh-vertices">
+          <input semantic="POSITION" source="#Plane_026-mesh-positions"/>
         </vertices>
         <triangles material="scale-material" count="2">
-          <input semantic="VERTEX" source="#Plane_032-mesh-vertices" offset="0"/>
-          <input semantic="NORMAL" source="#Plane_032-mesh-normals" offset="1"/>
-          <input semantic="TEXCOORD" source="#Plane_032-mesh-map-0" offset="2" set="0"/>
+          <input semantic="VERTEX" source="#Plane_026-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#Plane_026-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#Plane_026-mesh-map-0" offset="2" set="0"/>
           <p>0 0 0 3 0 1 1 0 2 0 0 3 2 0 4 3 0 5</p>
         </triangles>
       </mesh>
@@ -136,7 +140,7 @@
     <geometry id="Cylinder_007-mesh" name="Cylinder.007">
       <mesh>
         <source id="Cylinder_007-mesh-positions">
-          <float_array id="Cylinder_007-mesh-positions-array" count="24">5.5 -5.88448e-7 -0.9999998 5.5 5.88448e-7 -7 5.25 2.999998 -0.9999998 5.25 2.999999 -7 4.75 2.999998 -0.9999998 4.75 2.999999 -7 4.5 -8.91289e-7 -0.9999998 4.5 2.85606e-7 -7</float_array>
+          <float_array id="Cylinder_007-mesh-positions-array" count="24">5.5 -5.88448e-7 -0.9999998 5.5 5.88448e-7 -7 5.25 1.499999 -0.9999998 5.25 1.500001 -7 4.75 1.499999 -0.9999998 4.75 1.5 -7 4.5 -8.91289e-7 -0.9999998 4.5 2.85606e-7 -7</float_array>
           <technique_common>
             <accessor source="#Cylinder_007-mesh-positions-array" count="8" stride="3">
               <param name="X" type="float"/>
@@ -146,7 +150,7 @@
           </technique_common>
         </source>
         <source id="Cylinder_007-mesh-normals">
-          <float_array id="Cylinder_007-mesh-normals-array" count="27">0.9965458 0.08304554 0 0 1 2.38419e-7 -0.9965458 0.08304554 0 0 0 -1 0 0 1 0.9965458 0.08304548 0 -1.27157e-6 1 1.98682e-7 -0.9965458 0.08304548 0 0 0 1</float_array>
+          <float_array id="Cylinder_007-mesh-normals-array" count="27">0.9863939 0.164399 2.09044e-7 0 1 2.38419e-7 -0.9863939 0.164399 0 0 0 -1 0 0 1 0.9863939 0.1643989 0 -6.35783e-7 1 1.98682e-7 -0.9863939 0.1643989 0 0 0 1</float_array>
           <technique_common>
             <accessor source="#Cylinder_007-mesh-normals-array" count="9" stride="3">
               <param name="X" type="float"/>
@@ -2700,7 +2704,7 @@
     <visual_scene id="_4" name="14">
       <node id="Plane_032" name="Plane.032" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
-        <instance_geometry url="#Plane_032-mesh" name="Plane.032">
+        <instance_geometry url="#Plane_026-mesh" name="Plane.032">
           <bind_material>
             <technique_common>
               <instance_material symbol="scale-material" target="#scale-material">
