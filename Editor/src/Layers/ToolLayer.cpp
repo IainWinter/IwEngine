@@ -33,6 +33,13 @@ namespace iw {
 	{}
 
 	int ToolLayer::Initialize() {
+		//// Selection buffer
+
+		//ref<Texture> selectionTexture = ref<Texture>(new Texture(1024, 1024, TEX_2D, RGBA, UBYTE, EDGE));
+		//selectionBuffer = ref<RenderTarget>(new RenderTarget(1024, 1024));
+		//selectionBuffer->AddTexture(selectionTexture);
+		//selectionBuffer->Initialize(Renderer->Device);
+
 		// Fonts
 
 		font = Asset->Load<Font>("fonts/arial.fnt");
@@ -250,9 +257,14 @@ namespace iw {
 
 			p = camera->Position() + ray * 5;
 
-			LOG_INFO << invview  << "\n" << invproj;
+			//for (auto entity : Space->Query<Transform>()) {
+			//	Transform* transform = entity.Components.Tie<Transform*>();
 
-			LOG_INFO << vector2(x, y) << "\n" << ray;
+
+			//	
+
+			//}
+
 		}
 
 		if (e.Button == XMOUSE1) {

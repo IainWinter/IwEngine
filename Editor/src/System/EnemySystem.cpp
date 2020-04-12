@@ -236,7 +236,7 @@ iw::Transform* EnemySystem::SpawnBullet(
 	                        bullet.SetComponent<iw::Model>         (*m_bulletModel);
 	Bullet*             b = bullet.SetComponent<Bullet>            (prefab);
 	iw::Transform*      t = bullet.SetComponent<iw::Transform>     (position + iw::vector3(sqrt(2), 0, 0) * rot, iw::vector3(.25f));
-	iw::SphereCollider* s = bullet.SetComponent<iw::SphereCollider>(iw::vector3::zero, 1);
+	iw::SphereCollider* s = bullet.SetComponent<iw::SphereCollider>(iw::vector3::zero, 0.5f);
 	iw::Rigidbody*      r = bullet.SetComponent<iw::Rigidbody>     ();
 
 	b->initialVelocity = iw::vector3::unit_x * rot * prefab.Speed;
