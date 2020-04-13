@@ -264,7 +264,7 @@ namespace iw {
 
 		PushSystem<LevelSystem>(playerSystem->GetPlayer());
 
-		PushSystem<ScoreSystem>(scene->MainCamera(), textCam);
+		PushSystem<ScoreSystem>(playerSystem->GetPlayer(), scene->MainCamera(), textCam);
 
 		return Layer::Initialize();
 	}
@@ -449,6 +449,10 @@ namespace iw {
 
 				else if (e.as<GoToNextLevelEvent>().LevelName == "models/block/forest08.dae") {
 					font->UpdateMesh(textMesh, "So this would be a lil mini boss but that seems\nlike it would be annoying to program xd", .004f, 1);
+				}
+
+				else if (e.as<GoToNextLevelEvent>().LevelName == "models/block/forest01.dae") {
+					font->UpdateMesh(textMesh, "Lets go! You've finished the play test\nIf you got the time, post some feedback at\nhttps://winter.dev/demo", .004f, 1);
 				}
 
 				else {

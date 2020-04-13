@@ -7,10 +7,13 @@
 #include "Components/EnemyDeathCircle.h"
 
 ScoreSystem::ScoreSystem(
+	iw::Entity& player,
 	iw::Camera* camera,
 	iw::Camera* uiCam)
 	: iw::System<iw::Transform, Score>("Score")
+	, player(player)
 	, totalScore(0.0f)
+	, potentiaScore(0.0f)
 	, camera(camera)
 	, uiCam(uiCam)
 {}
@@ -24,16 +27,27 @@ int ScoreSystem::Initialize() {
 	iw::ref<iw::Shader> fontShader = Asset->Load<iw::Shader>("shaders/font.shader");
 	Renderer->InitShader(fontShader, iw::CAMERA);
 
-	textMat = REF<iw::Material>(fontShader);
+	textMatBad   = REF<iw::Material>(fontShader);
+	textMat      = REF<iw::Material>(fontShader);
 
-	textMat->Set("color", iw::vector3(1));
-	textMat->SetTexture("fontMap", font->GetTexture(0));
-	textMat->SetTransparency(iw::Transparency::ADD);
+	textMatBad->Set  ("color", iw::vector3(1, 0.1f, 0.1f));
+	textMat->Set     ("color", iw::vector3(1));
+
+	textMatBad->SetTexture  ("fontMap", font->GetTexture(0));
+	textMat->SetTexture     ("fontMap", font->GetTexture(0));
+
+	textMatBad->SetTransparency  (iw::Transparency::ADD);
+	textMat->SetTransparency     (iw::Transparency::ADD);
 
 	totalScoreMesh = font->GenerateMesh(std::to_string(totalScore), .02f, 1);
 
 	totalScoreMesh->SetMaterial(textMat);
 	totalScoreMesh->Initialize(Renderer->Device);
+
+	potentialScoreMesh = font->GenerateMesh(std::to_string(potentiaScore), .02f, 1);
+
+	potentialScoreMesh->SetMaterial(textMat);
+	potentialScoreMesh->Initialize(Renderer->Device);
 
 	return  0;
 }
@@ -48,9 +62,16 @@ void ScoreSystem::Update(
 
 		auto itr = scores.find(score->Score);
 		if (itr == scores.end()) {
-			itr = scores.emplace(score->Score, font->GenerateMesh(std::to_string(score->Score), .01f, 1)).first;
+			itr = scores.emplace(score->Score, font->GenerateMesh(std::to_string(score->Score), .011f, 1)).first;
 
-			itr->second->SetMaterial(textMat);
+			if (score->Score < 0) {
+				itr->second->SetMaterial(textMatBad);
+			}
+
+			else if (score->Score >= 0) {
+				itr->second->SetMaterial(textMat);
+			}
+
 			itr->second->Initialize(Renderer->Device);
 		}
 
@@ -73,16 +94,37 @@ void ScoreSystem::Update(
 
 	Renderer->EndScene();
 
-
 	font->UpdateMesh(totalScoreMesh, std::to_string(totalScore), .01f, 1);
 	totalScoreMesh->Update(Renderer->Device);
+
+	font->UpdateMesh(potentialScoreMesh, std::to_string(potentiaScore), .01f, 1);
+	potentialScoreMesh->Update(Renderer->Device);
 
 	Renderer->BeginScene(uiCam);
 
 	iw::Transform t;
+	iw::Transform tp;
 	t.Position = iw::vector3(-6.75, 5.5, 0);
+	tp.Position = iw::vector3(-6.75, 4.75, 0);
 
-	Renderer->DrawMesh(t, totalScoreMesh);
+	if (totalScore < 0) {
+		totalScoreMesh->SetMaterial(textMatBad);
+	}
+
+	else if (totalScore >= 0) {
+		totalScoreMesh->SetMaterial(textMat);
+	}
+
+	if (potentiaScore < 0) {
+		potentialScoreMesh->SetMaterial(textMatBad);
+	}
+
+	else if (potentiaScore >= 0) {
+		potentialScoreMesh->SetMaterial(textMat);
+	}
+
+	Renderer->DrawMesh(t,  totalScoreMesh);
+	Renderer->DrawMesh(tp, potentialScoreMesh);
 
 	Renderer->EndScene();
 }
@@ -123,10 +165,38 @@ bool ScoreSystem::On(
 	}
 
  	if (other.HasComponent<EnemyDeathCircle>()) {
-		iw::vector3 pos = bullet.FindComponent<iw::Rigidbody>()->Trans().Position;
-		iw::vector3 des = other.FindComponent<iw::CollisionObject>()->Trans().Position;
+		iw::vector3 pos = bullet.FindComponent<iw::Rigidbody>()      ->Trans().Position;
+		iw::vector3 des = other .FindComponent<iw::CollisionObject>()->Trans().Position;
 
-		SpawnScore((pos-des).length() * 10, bullet.FindComponent<iw::Rigidbody>()->Trans().Position);
+		SpawnScore((pos-des).length() * 10, pos);
+	}
+
+	if (other.HasComponent<Player>()) {
+		iw::vector3 pos = bullet.FindComponent<iw::Rigidbody>()->Trans().Position;
+
+		SpawnScore(-potentiaScore * 0.5, pos);
+	}
+
+	return false;
+}
+
+bool ScoreSystem::On(
+	iw::ActionEvent& e)
+{
+	if (e.Action == iw::val(Actions::GOTO_NEXT_LEVEL)) {
+		totalScore += potentiaScore;
+		potentiaScore = 0;
+	}
+
+	else if (e.Action == iw::val(Actions::RESET_LEVEL)) {
+		potentiaScore = 0;
+	}
+
+	else if (e.Action == iw::val(Actions::SPAWN_ENEMY_DEATH)) {
+		iw::vector3 pos = e.as<SpawnEnemyDeath>().Position;
+		float       score = 1.0f - player.FindComponent<Player>()->Timer / player.FindComponent<Player>()->DashTime;
+
+		SpawnScore(score * 1000, pos);
 	}
 
 	return false;
@@ -141,5 +211,5 @@ void ScoreSystem::SpawnScore(
 	entity.SetComponent<iw::Transform>(position);
 	entity.SetComponent<Score>(score, 1.0f);
 
-	totalScore += score;
+	potentiaScore += score;
 }

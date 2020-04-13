@@ -18,18 +18,25 @@ public:
 		Score* Score;
 	};
 
+	iw::Entity& player;
+
 	iw::Camera* camera;
 	iw::Camera* uiCam;
 
 	iw::Mesh* totalScoreMesh;
 	int totalScore;
 
+	iw::Mesh* potentialScoreMesh;
+	int potentiaScore;
+
 	iw::ref<iw::Font> font;
+	iw::ref<iw::Material> textMatBad;
 	iw::ref<iw::Material> textMat;
 	std::unordered_map<int, iw::ref<iw::Mesh>> scores;
 
 public:
 	ScoreSystem(
+		iw::Entity& player,
 		iw::Camera* camera,
 		iw::Camera* uiCam);
 
@@ -39,6 +46,7 @@ public:
 		iw::EntityComponentArray& view) override;
 
 	bool On(iw::CollisionEvent& e) override;
+	bool On(iw::ActionEvent& e) override;
 
 private:
 	void SpawnScore(
