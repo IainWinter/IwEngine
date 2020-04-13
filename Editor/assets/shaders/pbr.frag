@@ -234,7 +234,7 @@ vec3 BRDF(
 	// Diffuse BRDF
 	float Fd = Fr_DisneyDiffuse(NdotV, NdotL, LdotH, roughness) / PI * (1.0 - metallic);
 
-	return (albedo * Fd + Fr) * NdotL;
+	return (albedo * Fd + Fr) * 5.0f * NdotL;
 }
 
 void main() {

@@ -92,13 +92,21 @@ void PlayerSystem::Update(
 
 		else {
 			if (player->Timer <= -player->ChargeTime) {
-				if (    dash 
+				if (    dash
 					&& (up || down || left || right))
 				{
 					player->Timer = player->DashTime;
 					Audio->AsStudio()->CreateInstance("swordAttack");
 				}
 			}
+
+			//if (player->Timer <= 0.0f) {
+			//	if (dash
+			//		|| !sprint)
+			//	{
+			//		sprint = dash;
+			//	}
+			//}
 
 			else if (player->Timer >= -player->ChargeTime) {
 				player->Timer -= iw::Time::DeltaTime();
@@ -137,15 +145,12 @@ void PlayerSystem::FixedUpdate(
 
 			movement.normalize();
 			movement *= player->Speed;
-			
 
 			if (player->Timer > 0) {
 				movement *= 10 * player->Timer / player->DashTime;
 			}
 
-			if (   !dash
-				&& sprint)
-			{
+			if (sprint) {
 				movement *= 2.0f;
 			}
 
@@ -230,10 +235,6 @@ bool PlayerSystem::On(
 		}
 		case iw::X: {
 			dash = event.State;
-			break;
-		}
-		case iw::C: {
-			sprint = event.State;
 			break;
 		}
 		case iw::R: {

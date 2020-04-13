@@ -21,6 +21,7 @@
 #include "iw/reflect/Physics/Collision/SphereCollider.h"
 #include "iw/reflect/Physics/Collision/CapsuleCollider.h"
 #include "iw/reflect/Components/Level.h"
+#include <Components\DontDeleteBullets.h>
 
 LevelSystem::LevelSystem(
 	iw::Entity& player)
@@ -322,7 +323,19 @@ iw::Entity LevelSystem::LoadLevel(
 	}
 
 	for (iw::CapsuleCollider& prefab : currentLevel.Capsules) {
-		iw::Entity enemy = Space->CreateEntity<iw::Transform, iw::CapsuleCollider, iw::CollisionObject>();
+		iw::Entity enemy;
+		
+		if (   currentLevel.StageName == "models/block/forest15.dae"
+			|| currentLevel.StageName == "models/block/forest16.dae"
+			|| currentLevel.StageName == "models/block/forest17.dae")
+		{
+			enemy = Space->CreateEntity<iw::Transform, iw::CapsuleCollider, iw::CollisionObject, DontDeleteBullets>();
+		}
+
+		else {
+			enemy = Space->CreateEntity<iw::Transform, iw::CapsuleCollider, iw::CollisionObject>();
+		}
+
 
 		iw::Transform*       transform = enemy.SetComponent<iw::Transform>(iw::vector3::unit_y);
 		iw::CapsuleCollider* collider  = enemy.SetComponent<iw::CapsuleCollider>(prefab);

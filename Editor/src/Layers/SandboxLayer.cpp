@@ -445,7 +445,7 @@ namespace iw {
 				}
 
 				else if (e.as<GoToNextLevelEvent>().LevelName == "models/block/forest08.dae") {
-					font->UpdateMesh(textMesh, "So this would be a lil mini boss but that seems\nlike it should be annoying to program xd", .004f, 1);
+					font->UpdateMesh(textMesh, "So this would be a lil mini boss but that seems\nlike it would be annoying to program xd", .004f, 1);
 				}
 
 				else {

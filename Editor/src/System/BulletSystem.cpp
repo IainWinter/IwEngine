@@ -4,6 +4,7 @@
 #include "Components/Player.h"
 #include "Components/Enemy.h"
 #include "iw/engine/Time.h"
+#include <Components\DontDeleteBullets.h>
 
 struct PlayerComponents {
 	iw::Transform* Transform;
@@ -84,6 +85,7 @@ bool BulletSystem::On(
 	if (   other != iw::EntityHandle::Empty
 		&& (   other.HasComponent<Bullet>() 
 			|| other.HasComponent<Enemy>()/*.Index() == bullet.FindComponent<Bullet>()->enemyIndex*/
+			|| other.HasComponent<DontDeleteBullets>()
 			|| other.FindComponent<LevelDoor>()))
 	{
 		return false;

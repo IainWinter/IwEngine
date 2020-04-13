@@ -24,7 +24,7 @@
           "Type": 0,
           "Speed": 5.000000
         },
-        "Speed": -0.2617994,
+        "Speed": 0.2617994,
         "FireTime": 0.120000,
         "ChargeTime": 0.000000,
         "Rotation": 0.000000
@@ -35,7 +35,7 @@
           "Type": 0,
           "Speed": 5.000000
         },
-        "Speed": 0.2617994,
+        "Speed": -0.2617994,
         "FireTime": 0.120000,
         "ChargeTime": 0.000000,
         "Rotation": 0.000000
@@ -90,7 +90,7 @@
     "State": 1,
     "NextLevel": {
       "size": 27,
-      "string": "levels/forest/forest15.json"
+      "string": "levels/forest/forest21.json"
     }
   },
   "Spheres": {

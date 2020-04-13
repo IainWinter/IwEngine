@@ -53,6 +53,8 @@ namespace Graphics {
 					switch (item.OP) {
 						case RenderOP::END_SCENE:    block = RenderOP::BEGIN;  break;
 						case RenderOP::DRAW_MESH:                              break;
+						case RenderOP::DRAW_MESH_INST:                         break;
+						case RenderOP::DRAW_MESH_ONCE:                         break;
 						default:                     invalid = true;           break;
 					}
 
@@ -62,6 +64,8 @@ namespace Graphics {
 					switch (item.OP) {
 						case RenderOP::END_SHADOW:   block = RenderOP::BEGIN;  break;
 						case RenderOP::DRAW_MESH:                              break;
+						case RenderOP::DRAW_MESH_INST:                         break;
+						case RenderOP::DRAW_MESH_ONCE:                         break;
 						default:                     invalid = true;           break;
 					}
 
