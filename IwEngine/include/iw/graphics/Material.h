@@ -24,7 +24,8 @@ namespace Graphics {
 		NONE = 0,
 		ADD,
 		SUB,
-		MULT
+		MULT,
+		TEXT
 	};
 
 	struct Material {

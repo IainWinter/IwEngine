@@ -4,40 +4,87 @@
 #include "Components/Player.h"
 #include "Components/Enemy.h"
 #include "iw/engine/Time.h"
+#include "Components/EnemyDeathCircle.h"
 
-ScoreSystem::ScoreSystem()
-	: iw::System<iw::Transform, iw::Font, Score>("Score")
+ScoreSystem::ScoreSystem(
+	iw::Camera* camera,
+	iw::Camera* uiCam)
+	: iw::System<iw::Transform, Score>("Score")
+	, totalScore(0.0f)
+	, camera(camera)
+	, uiCam(uiCam)
 {}
 
 int ScoreSystem::Initialize() {
 	// Fonts
 
-	iw::ref<iw::Font> font = Asset->Load<iw::Font>("fonts/arial.fnt");
-	font->Initialize(Renderer->Device);
-
-	iw::Mesh* textMesh = font->GenerateMesh("", .01f, 1);
+	font = Asset->Load<iw::Font>("fonts/arial.fnt");
+	//font->Initialize(Renderer->Device);
 
 	iw::ref<iw::Shader> fontShader = Asset->Load<iw::Shader>("shaders/font.shader");
 	Renderer->InitShader(fontShader, iw::CAMERA);
 
-	iw::ref<iw::Material> textMat = REF<iw::Material>(fontShader);
+	textMat = REF<iw::Material>(fontShader);
 
-	textMat->Set("color", iw::vector3(1, .25f, 1));
+	textMat->Set("color", iw::vector3(1));
 	textMat->SetTexture("fontMap", font->GetTexture(0));
+	textMat->SetTransparency(iw::Transparency::ADD);
 
-	textMesh->SetMaterial(textMat);
-	textMesh->Initialize(Renderer->Device);
+	totalScoreMesh = font->GenerateMesh(std::to_string(totalScore), .02f, 1);
+
+	totalScoreMesh->SetMaterial(textMat);
+	totalScoreMesh->Initialize(Renderer->Device);
 
 	return  0;
 }
 
-void ScoreSystem::FixedUpdate(
+void ScoreSystem::Update(
 	iw::EntityComponentArray& view)
 {
-	for (auto entity : view) {
-		auto [transform, text, score] = entity.Components.Tie<Components>();
+	Renderer->BeginScene(camera);
 
+	for (auto entity : view) {
+		auto [transform, score] = entity.Components.Tie<Components>();
+
+		auto itr = scores.find(score->Score);
+		if (itr == scores.end()) {
+			itr = scores.emplace(score->Score, font->GenerateMesh(std::to_string(score->Score), .01f, 1)).first;
+
+			itr->second->SetMaterial(textMat);
+			itr->second->Initialize(Renderer->Device);
+		}
+
+		iw::Transform trans = *transform;
+		trans.Position.y +=  0.1f * (score->Timer / score->Lifetime);
+		trans.Position.z += -2    * (score->Timer / score->Lifetime);
+
+		trans.Rotation = iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2);
+
+		trans.Scale = 1.0f;
+
+		if (score->Timer >= score->Lifetime) {
+			QueueDestroyEntity(entity.Index);
+		}
+
+		score->Timer += iw::Time::DeltaTime();
+
+		Renderer->DrawMesh(trans, itr->second);
 	}
+
+	Renderer->EndScene();
+
+
+	font->UpdateMesh(totalScoreMesh, std::to_string(totalScore), .01f, 1);
+	totalScoreMesh->Update(Renderer->Device);
+
+	Renderer->BeginScene(uiCam);
+
+	iw::Transform t;
+	t.Position = iw::vector3(-6.75, 5.5, 0);
+
+	Renderer->DrawMesh(t, totalScoreMesh);
+
+	Renderer->EndScene();
 }
 
 bool ScoreSystem::On(
@@ -69,18 +116,30 @@ bool ScoreSystem::On(
 		other  = a;
 	}
 
-	if (   other != iw::EntityHandle::Empty
-		&& (   other.HasComponent<Bullet>() 
-			|| other.HasComponent<Enemy>()/*.Index() == bullet.FindComponent<Bullet>()->enemyIndex*/
-			|| other.FindComponent<LevelDoor>()))
+	if (   other  == iw::EntityHandle::Empty
+		|| bullet == iw::EntityHandle::Empty)
 	{
 		return false;
 	}
 
-	if (bullet != iw::EntityHandle::Empty) {
-		bullet.FindComponent<iw::Transform>()->SetParent(nullptr);
-		Space->DestroyEntity(bullet.Index());
+ 	if (other.HasComponent<EnemyDeathCircle>()) {
+		iw::vector3 pos = bullet.FindComponent<iw::Rigidbody>()->Trans().Position;
+		iw::vector3 des = other.FindComponent<iw::CollisionObject>()->Trans().Position;
+
+		SpawnScore((pos-des).length() * 10, bullet.FindComponent<iw::Rigidbody>()->Trans().Position);
 	}
 
 	return false;
+}
+
+void ScoreSystem::SpawnScore(
+	int score, 
+	iw::vector3 position)
+{
+	iw::Entity entity = Space->CreateEntity<iw::Transform, Score>();
+
+	entity.SetComponent<iw::Transform>(position);
+	entity.SetComponent<Score>(score, 1.0f);
+
+	totalScore += score;
 }

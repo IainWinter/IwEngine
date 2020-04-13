@@ -31,7 +31,10 @@ void main() {
 	vec4 color = vec4(mat_color, 1);
 
 	if (mat_hasFontMap == 1) {
-		color.a = texture2D(mat_fontMap, UV).a;
+		color.w = texture2D(mat_fontMap, UV).a;
+		if (color.w < 0.5f) {
+			discard;
+		}
 	}
 
 	gl_FragColor = color;

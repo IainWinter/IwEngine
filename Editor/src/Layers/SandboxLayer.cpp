@@ -3,6 +3,7 @@
 #include "Systems/LevelSystem.h"
 #include "Systems/EnemyDeathCircleSystem.h"
 #include "Systems/GameCameraController.h"
+#include "Systems/ScoreSystem.h"
 #include "Events/ActionEvents.h"
 #include "iw/engine/Systems/PhysicsSystem.h"
 #include "iw/engine/Components/CameraController.h"
@@ -262,6 +263,8 @@ namespace iw {
 		PushSystem<EnemyDeathCircleSystem>();
 
 		PushSystem<LevelSystem>(playerSystem->GetPlayer());
+
+		PushSystem<ScoreSystem>(scene->MainCamera(), textCam);
 
 		return Layer::Initialize();
 	}

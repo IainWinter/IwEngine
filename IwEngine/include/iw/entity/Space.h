@@ -115,13 +115,14 @@ namespace ECS {
 		template<
 			typename _c>
 		ref<Component> GetComponent() {
-			return GetComponent(
-#ifdef IW_USE_REFLECTION
-				GetType<_c>()
-#else
-				typeid(_c)
-#endif
-			);
+			return RegisterComponent<_c>();
+//			return GetComponent(
+//#ifdef IW_USE_REFLECTION
+//				GetType<_c>()
+//#else
+//				typeid(_c)
+//#endif
+//			);
 		}
 
 		// Creates an archetype from a list of registed components

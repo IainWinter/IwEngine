@@ -267,7 +267,7 @@ namespace iw {
 
 		}
 
-		if (e.Button == XMOUSE1) {
+		if (e.Button == LMOUSE) {
 			if (e.State) {
 				PushSystem(cameraSystem);
 			}
