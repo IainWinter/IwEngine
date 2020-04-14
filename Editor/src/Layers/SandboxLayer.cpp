@@ -62,6 +62,20 @@ namespace iw {
 	float blend;
 
 	int SandboxLayer::Initialize() {
+
+		MeshDescription description;
+		
+		description.DescribeMesh(
+			iw::vdata<float, 3>(),
+			iw::vdata<float, 2>()
+		);
+
+		MeshData data(description);
+
+
+
+
+
 		AudioSpaceStudio* studio = (AudioSpaceStudio*)Audio->AsStudio();
 
 		studio->SetVolume(0.25f);

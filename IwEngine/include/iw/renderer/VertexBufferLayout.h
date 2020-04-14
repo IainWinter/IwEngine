@@ -7,7 +7,7 @@
 namespace iw {
 namespace RenderAPI {
 	struct VertexBufferLayoutElement {
-		unsigned      Type;
+		unsigned      Type; // should be UniformType
 		unsigned      Count;
 		unsigned char Normalized;
 	};
@@ -16,10 +16,12 @@ namespace RenderAPI {
 	private:
 		std::vector<VertexBufferLayoutElement> m_elements;
 		unsigned m_stride;
+		unsigned m_instanceStride;
 
 	public:
 		IWRENDERER_API
-			VertexBufferLayout();
+		VertexBufferLayout(
+			unsigned instanceStride = 0);
 
 		template<
 			typename _t>
@@ -33,17 +35,17 @@ namespace RenderAPI {
 		template<>
 		IWRENDERER_API
 		void Push<float>(
-			unsigned int count);
+			unsigned count);
 
 		template<>
 		IWRENDERER_API
-		void Push<unsigned int>(
-			unsigned int count);
+		void Push<unsigned>(
+			unsigned count);
 
 		template<>
 		IWRENDERER_API
 		void Push<unsigned char>(
-			unsigned int count);
+			unsigned count);
 
 		IWRENDERER_API
 		void Clear();

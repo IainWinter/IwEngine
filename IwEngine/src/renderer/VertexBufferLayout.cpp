@@ -3,21 +3,23 @@
 
 namespace iw {
 namespace RenderAPI {
-	VertexBufferLayout::VertexBufferLayout()
+	VertexBufferLayout::VertexBufferLayout(
+		unsigned instanceStride)
 		: m_stride(0)
+		, m_instanceStride(instanceStride)
 	{}
 
 	template<>
 	void VertexBufferLayout::Push<float>(
-		unsigned int count)
+		unsigned count)
 	{
 		m_elements.push_back({ GL_FLOAT, count, GL_FALSE });
 		m_stride += count * GetSizeOfType(GL_FLOAT);
 	}
 
 	template<>
-	void VertexBufferLayout::Push<unsigned int>(
-		unsigned int count)
+	void VertexBufferLayout::Push<unsigned>(
+		unsigned count)
 	{
 		m_elements.push_back({ GL_UNSIGNED_INT, count, GL_FALSE });
 		m_stride += count * GetSizeOfType(GL_UNSIGNED_INT);
@@ -25,7 +27,7 @@ namespace RenderAPI {
 
 	template<>
 	void VertexBufferLayout::Push<unsigned char>(
-		unsigned int count)
+		unsigned count)
 	{
 		m_elements.push_back({ GL_UNSIGNED_BYTE, count, GL_TRUE });
 		m_stride += count * GetSizeOfType(GL_UNSIGNED_BYTE);

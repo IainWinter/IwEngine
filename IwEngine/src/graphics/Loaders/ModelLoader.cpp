@@ -1,4 +1,5 @@
 #include "iw/graphics/Loaders/ModelLoader.h"
+#include "iw/graphics/Bone.h"
 #include "iw/graphics/Mesh.h"
 #include "iw/graphics/Texture.h"
 #include "iw/log/logger.h"
@@ -169,30 +170,30 @@ namespace Graphics {
 				}
 			}
 
-			if (aimesh->HasBones()) {
-				aiBone* aibone = aimesh->mBones[i];
-				
-				aiVector3D pos;
-				aiVector3D rot;
-				aiVector3D scale;
+			//if (aimesh->HasBones()) {
+			//	aiBone* aibone = aimesh->mBones[i];
+			//	
+			//	aiVector3D pos;
+			//	aiVector3D rot;
+			//	aiVector3D scale;
 
-				aibone->mOffsetMatrix.Decompose(scale, rot, pos);
+			//	aibone->mOffsetMatrix.Decompose(scale, rot, pos);
 
-				Bone bone;
-				bone.Offset.Position = iw::vector3(pos.x,     pos.y,   pos.z);
-				bone.Offset.Scale    = iw::vector3(scale.x, scale.y, scale.z);
-				bone.Offset.Rotation = iw::quaternion::from_euler_angles(rot.x, rot.y, rot.z);
+			//	Bone bone;
+			//	bone.Offset.Position = iw::vector3(pos.x,     pos.y,   pos.z);
+			//	bone.Offset.Scale    = iw::vector3(scale.x, scale.y, scale.z);
+			//	bone.Offset.Rotation = iw::quaternion::from_euler_angles(rot.x, rot.y, rot.z);
 
-				bone.WeightCount = aibone->mNumWeights;
-				bone.Weights     = new VertexWeight[bone.WeightCount];
+			//	bone.WeightCount = aibone->mNumWeights;
+			//	bone.Weights     = new VertexWeight[bone.WeightCount];
 
-				for (size_t i = 0; i < bone.WeightCount; i++) {
-					aiVertexWeight aiweight = aibone->mWeights[i];
+			//	for (size_t i = 0; i < bone.WeightCount; i++) {
+			//		aiVertexWeight aiweight = aibone->mWeights[i];
 
-					bone.Weights[i].Index  = aiweight.mVertexId;
-					bone.Weights[i].Weight = aiweight.mWeight;
-				}
-			}
+			//		bone.Weights[i].Index  = aiweight.mVertexId;
+			//		bone.Weights[i].Weight = aiweight.mWeight;
+			//	}
+			//}
 		}
 
 		importer.FreeScene();

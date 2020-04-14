@@ -5,7 +5,7 @@ namespace iw {
 namespace RenderAPI {
 	GLVertexArray::GLVertexArray() {
 		glGenVertexArrays(1, &gl_id);
-		glBindVertexArray(gl_id);
+		glBindVertexArray(gl_id); // prob not
 	}
 
 	GLVertexArray::~GLVertexArray() {
@@ -31,7 +31,7 @@ namespace RenderAPI {
 		for (const VertexBufferLayoutElement& element : layout.GetElements()) {
 			glEnableVertexAttribArray(index);
 			glVertexAttribPointer(
-				index, 
+				index,
 				element.Count, 
 				element.Type,
 				element.Normalized, 
@@ -41,6 +41,9 @@ namespace RenderAPI {
 			offset += element.Count * GetSizeOfType(element.Type);
 			++index;
 		}
+
+		Unbind();
+		vb->Unbind();
 
 		m_buffers.push_back(vb);
 		m_layouts.push_back(layout);
