@@ -62,9 +62,8 @@ namespace iw {
 	float blend;
 
 	int SandboxLayer::Initialize() {
-
 		MeshDescription description;
-		
+
 		description.DescribeMesh(
 			iw::vdata<float, 3>(),
 			iw::vdata<float, 2>()
@@ -95,8 +94,9 @@ namespace iw {
 		data.SetBufferData(1, 4, uvs);
 		data.SetIndexData(6, indices);
 
-		data.Set
+		data.SetTopology(MeshTopology::TRIANGLES);
 
+		Mesh mesh = data.GetInstance();
 
 		AudioSpaceStudio* studio = (AudioSpaceStudio*)Audio->AsStudio();
 

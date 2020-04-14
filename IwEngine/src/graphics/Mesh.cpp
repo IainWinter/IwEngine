@@ -4,213 +4,82 @@
 
 namespace iw {
 namespace Graphics {
-	Mesh::Mesh()
-		: Vertices(nullptr)
-		, Normals(nullptr)
-		, Tangents(nullptr)
-		, BiTangents(nullptr)
-		, Colors(nullptr)
-		, Uvs(nullptr)
-		, Indices(nullptr)
-		, Bones(nullptr)
-		, BoneCount(0)
-		, VertexCount(0)
-		, IndexCount(0)
-		, Topology(TRIANGLES)
-		, VertexArray(nullptr)
-		, IndexBuffer(nullptr)
-		, Outdated(false)
+	MeshData::MeshData(
+		const MeshDescription& description)
+		: m_description(description)
 	{
-#ifdef IW_DEBUG
-		m_used = false;
-#endif
+		m_buffers.resize((size_t)1 + description.GetBufferCount());
 	}
 
-	Mesh::Mesh(
+	Mesh MeshData::GetInstance() {
+		Mesh mesh(ref<MeshData>(this));
+	}
+
+	MeshData::BufferData MeshData::GetBuffer(
+		unsigned index)
+	{
+		return m_buffers[index];
+	}
+
+	MeshData::IndexData MeshData::GetIndexBuffer() {
+		return *(IndexData*)&m_buffers.back();
+	}
+
+	MeshTopology MeshData::Topology() const { 
+		return m_topology; 
+	}
+
+	const MeshDescription& MeshData::Description() const { 
+		return m_description; 
+	}
+
+	void MeshData::SetBufferData(
+		unsigned index,
+		unsigned count,
+		void* data)
+	{
+		if (index >= m_buffers.size()) {
+			return;
+		}
+
+		unsigned size = m_description
+			.GetBufferDescription(index)
+			.GetStride() * count;
+
+		BufferData& buffer = m_buffers[index];
+
+		buffer.Count = count;
+		buffer.Data = ref<char[]>(new char[(size_t)size]);
+
+		memcpy(buffer.Data.get(), data, size);
+
+		m_outdated = true;
+	}
+
+	void MeshData::SetIndexData(
+		unsigned count,
+		unsigned* data)
+	{
+		unsigned size = sizeof(unsigned) * count;
+
+		BufferData& buffer = m_buffers.back();
+
+		buffer.Count = count;
+		buffer.Data = ref<char[]>(new char[(size_t)size]);
+
+		memcpy(buffer.Data.get(), data, size);
+
+		m_outdated = true;
+	}
+
+	void MeshData::SetTopology(
 		MeshTopology topology)
-		: Vertices(nullptr)
-		, Normals(nullptr)
-		, Tangents(nullptr)
-		, BiTangents(nullptr)
-		, Colors(nullptr)
-		, Uvs(nullptr)
-		, Indices(nullptr)
-		, Bones(nullptr)
-		, BoneCount(0)
-		, VertexCount(0)
-		, IndexCount(0)
-		, Topology(topology)
-		, VertexArray(nullptr)
-		, IndexBuffer(nullptr)
-		, Outdated(false)
 	{
-#ifdef IW_DEBUG
-		m_used = false;
-#endif
-	}
-
-	//Mesh::~Mesh() {
-	//	delete[] Vertices;
-	//	delete[] Normals;
-	//	delete[] Colors;
-	//	delete[] Uvs;
-	//	delete[] Indices;
-	//	delete[] Bones;
-	//}
-
-	void Mesh::Initialize(
-		const ref<IDevice>& device)
-	{
-		if (Material) {
-			Material->Initialize(device);
-		}
-
-		if (VertexArray) {
-			return;
-		}
-
-		if (   !Vertices
-			&& !Normals
-			&& !Tangents
-			&& !BiTangents
-			&& !Colors
-			&& !Uvs)
-		{
-			return; // exit if there are no buffers
-		}
-
-		Outdated = false;
-
-		VertexBufferLayout layout4f;
-		layout4f.Push<float>(4);
-
-		VertexBufferLayout layout3f;
-		layout3f.Push<float>(3);
-
-		VertexBufferLayout layout2f;
-		layout2f.Push<float>(2);
-
-		VertexArray = device->CreateVertexArray();
-		IndexBuffer = device->CreateIndexBuffer(Indices.get(), IndexCount);
-
-		if (Vertices) {
-			IVertexBuffer* buffer = device->CreateVertexBuffer(Vertices.get(), VertexCount * sizeof(vector3));
-			device->AddBufferToVertexArray(VertexArray, buffer, layout3f);
-		}
-
-		if (Normals) {
-			IVertexBuffer* buffer = device->CreateVertexBuffer(Normals.get(), VertexCount * sizeof(vector3));
-			device->AddBufferToVertexArray(VertexArray, buffer, layout3f);
-		}
-
-		if (Tangents) {
-			IVertexBuffer* buffer = device->CreateVertexBuffer(Tangents.get(), VertexCount * sizeof(vector3));
-			device->AddBufferToVertexArray(VertexArray, buffer, layout3f);
-		}
-
-		if (BiTangents) {
-			IVertexBuffer* buffer = device->CreateVertexBuffer(BiTangents.get(), VertexCount * sizeof(vector3));
-			device->AddBufferToVertexArray(VertexArray, buffer, layout3f);
-		}
-
-		if (Colors) {
-			IVertexBuffer* buffer = device->CreateVertexBuffer(Colors.get(), VertexCount * sizeof(vector4));
-			device->AddBufferToVertexArray(VertexArray, buffer, layout4f);
-		}
-
-		if (Uvs) {
-			IVertexBuffer* buffer = device->CreateVertexBuffer(Uvs.get(), VertexCount * sizeof(vector2));
-			device->AddBufferToVertexArray(VertexArray, buffer, layout2f);
-		}
-	}
-
-	void Mesh::Update(
-		const ref<IDevice>& device)
-	{
-		if (!VertexArray) {
-			Initialize(device);
-		}
-
-		if (!Outdated) {
-			return;
-		}
-
-		Outdated = false;
-
-		int index = 0;
-		if (Vertices) {
-			device->UpdateVertexArrayData(VertexArray, index, Vertices.get(), VertexCount * sizeof(vector3));
-			index++;
-		}
-
-		if (Normals) {
-			device->UpdateVertexArrayData(VertexArray, index, Normals.get(), VertexCount * sizeof(vector3));
-			index++;
-		}
-
-		if (Colors) {
-			device->UpdateVertexArrayData(VertexArray, index, Colors.get(), VertexCount * sizeof(vector4));
-			index++;
-		}
-
-		if (Uvs) {
-			device->UpdateVertexArrayData(VertexArray, index, Uvs.get(), VertexCount * sizeof(vector2));
-			index++;
-		}
-
-		if (IndexBuffer) {
-			device->UpdateBuffer(IndexBuffer, Indices.get(), IndexCount * sizeof(unsigned));
-		}
-	}
-
-	void Mesh::Destroy(
-		const ref<IDevice>& device)
-	{
-		if (VertexArray && IndexBuffer) {
-			device->DestroyVertexArray(VertexArray);
-			device->DestroyBuffer(IndexBuffer);
-		}
-	}
-
-	void Mesh::Draw(
-		const ref<IDevice>& device) const
-	{
-#ifdef IW_DEBUG
-		if (!m_used) {
-			LOG_WARNING << "Mesh needs to be used before drawing";
-		}
-
-		if (!VertexArray) {
-			LOG_WARNING << "Mesh needs to be initialized!";
-		}
-#endif
-		device->DrawElements(Topology, IndexCount, 0);
-	}
-
-	void Mesh::Bind(
-		const ref<IDevice>& device)
-	{
-#ifdef IW_DEBUG
-		m_used = true;
-#endif
-		device->SetVertexArray(VertexArray);
-		device->SetIndexBuffer(IndexBuffer);
-	}
-
-	void Mesh::Unbind(
-		const ref<IDevice>& device) {
-#ifdef IW_DEBUG
-		m_used = false;
-#endif
-	}
-
-	Mesh* Mesh::Instance() const {
-		Mesh* mesh = new Mesh(*this);
-		return mesh;
+		m_topology = topology;
 	}
 
 	// Generate vertex normals by averaging the face normals of the surrounding faces
-	void Mesh::GenNormals(
+	void MeshData::GenNormals(
 		bool smooth)
 	{
 		if (!Vertices) return;
@@ -240,7 +109,7 @@ namespace Graphics {
 
 	// Generate tangents and bitangents from vertex normals and uv corrds
 	// If there are no normals, they are generated along with the tangents
-	void Mesh::GenTangents(
+	void MeshData::GenTangents(
 		bool smooth)
 	{
 		if (!Uvs || !Vertices) return;
@@ -249,7 +118,7 @@ namespace Graphics {
 			GenNormals(smooth);
 		}
 
-		Tangents   = ref<vector3[]>(new vector3[VertexCount]);
+		Tangents = ref<vector3[]>(new vector3[VertexCount]);
 		BiTangents = ref<vector3[]>(new vector3[VertexCount]);
 
 		unsigned v = 0;
@@ -257,20 +126,20 @@ namespace Graphics {
 			vector3& pos1 = Vertices[Indices[i + 0]];
 			vector3& pos2 = Vertices[Indices[i + 1]];
 			vector3& pos3 = Vertices[Indices[i + 2]];
-			vector2& uv1  = Uvs     [Indices[i + 0]];
-			vector2& uv2  = Uvs     [Indices[i + 1]];
-			vector2& uv3  = Uvs     [Indices[i + 2]];
+			vector2& uv1 = Uvs[Indices[i + 0]];
+			vector2& uv2 = Uvs[Indices[i + 1]];
+			vector2& uv3 = Uvs[Indices[i + 2]];
 
 			vector3 edge1 = pos2 - pos1;
 			vector3 edge2 = pos3 - pos1;
-			vector2 duv1  = uv2  - uv1;
-			vector2 duv2  = uv3  - uv1;
+			vector2 duv1 = uv2 - uv1;
+			vector2 duv2 = uv3 - uv1;
 
 			float f = 1.0f / duv1.cross_length(duv2);
 
-			vector3 tangent   = f * (edge1 * duv2.y - edge2 * duv1.y);
+			vector3 tangent = f * (edge1 * duv2.y - edge2 * duv1.y);
 			vector3 bitangent = f * (edge2 * duv1.x - edge1 * duv2.x);
-			
+
 			tangent.normalize();
 			bitangent.normalize();
 
@@ -284,122 +153,110 @@ namespace Graphics {
 		}
 	}
 
-	// need to be able to delete verts n such
-
-	void Mesh::SetVertices(
-		unsigned count,
-		vector3* vertices)
+	void MeshData::Initialize(
+		const ref<IDevice>& device)
 	{
-		if (count > 0) {
-			Vertices = ref<vector3[]>(new vector3[count]);
-			if (vertices) {
-				memcpy(Vertices.get(), vertices, count * sizeof(vector3));
-			}
+		if (m_vertexArray) {
+			LOG_WARNING << "Mesh data was already initialized!";
+			return;
 		}
 
-		VertexCount = count;
-		Outdated = true;
+		m_outdated = false;
+
+		m_vertexArray = device->CreateVertexArray();
+		m_indexBuffer = device->CreateIndexBuffer(GetIndexBuffer().Ptr(), GetIndexBuffer().Count);
+
+		for (int i = 0; i < m_buffers.size() - 1; i++) {
+			BufferData& data = GetBuffer(i);
+			VertexBufferLayout& layout = m_description.GetBufferDescription(i);
+
+			IVertexBuffer* buffer = device->CreateVertexBuffer(data.Ptr(), data.Count * layout.GetStride());
+			device->AddBufferToVertexArray(m_vertexArray, buffer, layout);
+		}
 	}
 
-	void Mesh::SetNormals(
-		unsigned count,
-		vector3* normals)
+	void MeshData::Update(
+		const ref<IDevice>& device)
 	{
-		if (count > 0) {
-			Normals = ref<vector3[]>(new vector3[count]);
-			if (normals) {
-				memcpy(Normals.get(), normals, count * sizeof(vector3));
-			}
+		if (!m_vertexArray) {
+			LOG_WARNING << "Mesh data was not initialized!";
+			Initialize(device);
 		}
 
-		Outdated = true;
-	}
-
-	void Mesh::SetTangents(
-		unsigned count,
-		vector3* tangents)
-	{
-		if (count > 0) {
-			Tangents = ref<vector3[]>(new vector3[count]);
-			if (tangents) {
-				memcpy(Tangents.get(), tangents, count * sizeof(vector3));
-			}
+		if (!m_outdated) {
+			return;
 		}
 
-		Outdated = true;
+		m_outdated = false;
+
+		for (int i = 0; i < m_buffers.size() - 1; i++) {
+			BufferData& data = GetBuffer(i);
+			VertexBufferLayout& layout = m_description.GetBufferDescription(i);
+
+			device->UpdateVertexArrayData(m_vertexArray, i, data.Ptr(), data.Count * layout.GetStride());
+		}
 	}
 
-	void Mesh::SetBiTangents(
-		unsigned count,
-		vector3* bitangents)
+	void MeshData::Destroy(
+		const ref<IDevice>& device)
 	{
-		if (count > 0) {
-			BiTangents = ref<vector3[]>(new vector3[count]);
-			if (bitangents) {
-				memcpy(BiTangents.get(), bitangents, count * sizeof(vector3));
-			}
+		if (m_vertexArray && m_indexBuffer) {
+			device->DestroyVertexArray(m_vertexArray);
+			device->DestroyBuffer(m_indexBuffer);
+		}
+	}
+
+	void MeshData::Draw(
+		const ref<IDevice>& device) const
+	{
+#ifdef IW_DEBUG
+		if (!m_used) {
+			LOG_WARNING << "Mesh needs to be used before drawing";
 		}
 
-		Outdated = true;
-	}
-
-	void Mesh::SetColors(
-		unsigned count,
-		vector4* colors)
-	{
-		if (count > 0) {
-			Colors = ref<vector4[]>(new vector4[count]);
-			if (colors) {
-				memcpy(Colors.get(), colors, count * sizeof(vector4));
-			}
+		if (!VertexArray) {
+			LOG_WARNING << "Mesh needs to be initialized!";
 		}
-
-		Outdated = true;
+#endif
+		device->DrawElements(m_topology, GetIndexBuffer().Count, 0);
 	}
 
-	void Mesh::SetUVs(
-		unsigned count,
-		vector2* uvs)
+	void MeshData::Bind(
+		const ref<IDevice>& device)
 	{
-		if (count > 0) {
-			Uvs = ref<vector2[]>(new vector2[count]);
-			if (uvs) {
-				memcpy(Uvs.get(), uvs, count * sizeof(vector2));
-			}
-		}
-
-		Outdated = true;
+#ifdef IW_DEBUG
+		m_used = true;
+#endif
+		device->SetVertexArray(m_vertexArray);
+		device->SetIndexBuffer(m_indexBuffer);
 	}
 
-	void Mesh::SetIndices(
-		unsigned count,
-		unsigned* indices)
+	void MeshData::Unbind(
+		const ref<IDevice>& device)
 	{
-		if (count > 0) {
-			Indices = ref<unsigned[]>(new unsigned[count]);
-			if (indices) {
-				memcpy(Indices.get(), indices, count * sizeof(unsigned));
-			}
-		}
-
-		IndexCount = count;
-		Outdated = true;
+#ifdef IW_DEBUG
+		m_used = false;
+#endif
 	}
+
+	// Mesh
+
+	Mesh::Mesh(
+		ref<MeshData> data)
+		: m_data(data)
+	{}
 
 	void Mesh::SetMaterial(
 		ref<iw::Material>& material)
 	{
-		Material = material;
+		m_material = material;
 	}
 
-	void Mesh::SetIsStatic(
-		bool isStatic)
-	{
-		IsStatic = isStatic;
+	const ref<iw::Material> Mesh::Material() const {
+		return m_material;
 	}
 
-	size_t Mesh::GetElementCount() {
-		return IndexCount / Topology;
+	ref<iw::Material> Mesh::Material() {
+		return m_material;
 	}
-}
 }
