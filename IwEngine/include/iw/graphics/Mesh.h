@@ -10,6 +10,8 @@
 
 #include <initializer_list>
 
+#include <functional>
+
 namespace iw {
 namespace Graphics {
 	template<
@@ -28,7 +30,7 @@ namespace Graphics {
 		void DescribeMesh(
 			vdata<_t, _s>... buffers)
 		{
-			(DescribeBuf(buffers), ...);
+			(DescribeBuffer(buffers), ...);
 		}
 
 		template<
@@ -63,10 +65,6 @@ namespace Graphics {
 		VertexBufferLayout GetBufferDescription(
 			unsigned index) const
 		{
-			if (index >= m_layouts.size()) {
-				return;
-			}
-
 			return m_layouts[index];
 		}
 	};
@@ -74,21 +72,31 @@ namespace Graphics {
 	struct MeshData {
 	private:
 		struct BufferData {
-			ref<void> Data;
+			ref<char[]> Data;
 			unsigned Count;
 		};
 
+		MeshDescription m_description;
+		MeshTopology m_topology;
+
 		std::vector<BufferData> m_buffers;
 
-		MeshDescription m_description;
+		IVertexArray* m_vertexArray;
+		IIndexBuffer* m_indexBuffer;
+
 
 	public:
 		MeshData(
 			const MeshDescription& description)
 			: m_description(description)
 		{
-			m_buffers.resize(description.GetBufferCount());
+			m_buffers.resize((size_t)1 + description.GetBufferCount());
 		}
+
+		void          SetTopology(MeshTopology topology) { m_topology = topology; }
+		MeshTopology  GetTopology()                const { return m_topology; }
+
+
 
 		void SetBufferData(
 			unsigned index,
@@ -99,12 +107,32 @@ namespace Graphics {
 				return;
 			}
 
-			m_description.Get
+			unsigned size = m_description
+				.GetBufferDescription(index)
+				.GetStride() * count;
 
-			m_buffers[index].Data = ref<void>();
+			BufferData& buffer = m_buffers[index];
+
+			buffer.Count = count;
+			buffer.Data  = ref<char[]>(new char[(size_t)size]);
+
+			memcpy(buffer.Data.get(), data, size);
+		}
+
+		void SetIndexData(
+			unsigned count,
+			unsigned* data)
+		{
+			unsigned size = sizeof(unsigned) * count;
+
+			BufferData& buffer = m_buffers.back();
+
+			buffer.Count = count;
+			buffer.Data = ref<char[]>(new char[(size_t)size]);
+
+			memcpy(buffer.Data.get(), data, size);
 		}
 	};
-
 
 	// Honestly have no clue on the best way to seperate this data...
 	// Seems like the worst case is to seperate the data into different VBOS which is whats going on here

@@ -72,8 +72,30 @@ namespace iw {
 
 		MeshData data(description);
 
+		vector3 verts[] = {
+			vector3(0, 0, 0),
+			vector3(1, 0, 0),
+			vector3(0, 1, 0),
+			vector3(1, 1, 0)
+		};
 
+		vector2 uvs[] = {
+			vector2(0, 0),
+			vector2(1, 0),
+			vector2(0, 1),
+			vector2(1, 1)
+		};
 
+		unsigned indices[] = {
+			0, 1, 2,
+			1, 3, 2
+		};
+
+		data.SetBufferData(0, 4, verts);
+		data.SetBufferData(1, 4, uvs);
+		data.SetIndexData(6, indices);
+
+		data.Set
 
 
 		AudioSpaceStudio* studio = (AudioSpaceStudio*)Audio->AsStudio();
