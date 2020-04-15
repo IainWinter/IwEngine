@@ -4,6 +4,7 @@
 #include "RenderTarget.h"
 #include "Scene.h"
 #include "Mesh.h"
+#include "MeshFactory.h"
 #include "iw/common/Components/Transform.h"
 #include "iw/renderer/Device.h"
 #include "iw/util/memory/ref.h"
@@ -62,7 +63,7 @@ namespace Graphics {
 			INVALID
 		};
 
-		Mesh* m_quad;
+		Mesh m_quad;
 
 		int m_width;
 		int m_height;

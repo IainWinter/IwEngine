@@ -4,46 +4,121 @@
 
 namespace iw {
 namespace Graphics {
+	// Mesh Description
+
+	void MeshDescription::DescribeBuffer(
+		bName name,
+		VertexBufferLayout& layout)
+	{
+		m_map.emplace(name, m_layouts.size());
+		m_layouts.push_back(layout);
+	}
+
+	bool MeshDescription::HasBuffer(
+		bName name) const
+	{
+		return m_map.find(name) != m_map.end();
+	}
+
+	unsigned MeshDescription::GetBufferCount() const {
+		return m_layouts.size();
+	}
+
+	unsigned MeshDescription::GetBufferIndex(
+		bName name) const
+	{
+		return m_map.at(name);
+	}
+
+	VertexBufferLayout MeshDescription::GetBufferLayout(
+		bName name) const
+	{
+		return GetBufferLayout(GetBufferIndex(name));
+	}
+
+	VertexBufferLayout MeshDescription::GetBufferLayout(
+		unsigned index) const
+	{
+		return m_layouts.at(index);
+	}
+
+	// Mesh Data
+
+	MeshData::MeshData()
+		: m_topology(MeshTopology::TRIANGLES)
+		, m_vertexArray(nullptr)
+		, m_indexBuffer(nullptr)
+		, m_outdated(false)
+		, m_bound(false)
+	{}
+
 	MeshData::MeshData(
 		const MeshDescription& description)
 		: m_description(description)
+		, m_topology(MeshTopology::TRIANGLES)
+		, m_vertexArray(nullptr)
+		, m_indexBuffer(nullptr)
+		, m_outdated(false)
+		, m_bound(false)
 	{
 		m_buffers.resize((size_t)1 + description.GetBufferCount());
 	}
 
-	Mesh MeshData::GetInstance() {
+	Mesh MeshData::MakeInstance() {
 		Mesh mesh(ref<MeshData>(this));
 	}
 
-	MeshData::BufferData MeshData::GetBuffer(
-		unsigned index)
+	MeshTopology MeshData::Topology() const {
+		return m_topology;
+	}
+
+	const MeshDescription& MeshData::Description() const {
+		return m_description;
+	}
+
+	void* MeshData::Get(
+		bName name)
 	{
-		return m_buffers[index];
+		return GetBuffer(m_description.GetBufferIndex(name)).Ptr();
 	}
 
-	MeshData::IndexData MeshData::GetIndexBuffer() {
-		return *(IndexData*)&m_buffers.back();
+	const void* MeshData::Get(
+		bName name) const
+	{
+		return GetBuffer(m_description.GetBufferIndex(name)).Ptr();
 	}
 
-	MeshTopology MeshData::Topology() const { 
-		return m_topology; 
+	unsigned MeshData::GetCount(
+		bName name) const
+	{
+		return GetBuffer(m_description.GetBufferIndex(name)).Count;
 	}
 
-	const MeshDescription& MeshData::Description() const { 
-		return m_description; 
+	unsigned* MeshData::GetIndex() {
+		return GetIndexBuffer().Ptr();
+	}
+
+	const unsigned* MeshData::GetIndex() const {
+		return GetIndexBuffer().Ptr();
+	}
+
+	unsigned MeshData::GetIndexCount() const {
+		return GetIndexBuffer().Count;
 	}
 
 	void MeshData::SetBufferData(
-		unsigned index,
+		bName name,
 		unsigned count,
 		void* data)
 	{
-		if (index >= m_buffers.size()) {
+		unsigned index = m_description.GetBufferIndex(name);
+
+		if (index >= m_buffers.size() - 1) {
 			return;
 		}
 
 		unsigned size = m_description
-			.GetBufferDescription(index)
+			.GetBufferLayout(index)
 			.GetStride() * count;
 
 		BufferData& buffer = m_buffers[index];
@@ -82,29 +157,36 @@ namespace Graphics {
 	void MeshData::GenNormals(
 		bool smooth)
 	{
-		if (!Vertices) return;
+		if (!m_description.HasBuffer(bName::POSITION)) return;
 
-		Normals = ref<vector3[]>(new vector3[VertexCount]);
+		// check if mesh description has normals
 
-		for (unsigned i = 0; i < IndexCount; i += 3) {
-			vector3& v1 = Vertices[Indices[i + 0]];
-			vector3& v2 = Vertices[Indices[i + 1]];
-			vector3& v3 = Vertices[Indices[i + 2]];
+		vector3*  positions = (vector3*)Get(bName::POSITION);
+		unsigned* index     = GetIndex();
+		
+		vector3* normals = new vector3[GetCount(bName::POSITION)];
+
+		for (unsigned i = 0; i < GetIndexCount(); i += 3) {
+			vector3& v1 = positions[index[i + 0]];
+			vector3& v2 = positions[index[i + 1]];
+			vector3& v3 = positions[index[i + 2]];
 
 			vector3 face = (v2 - v1).cross(v3 - v1).normalized();
 
 			if (smooth) {
-				Normals[Indices[i + 0]] = (Normals[Indices[i + 0]] + face).normalized();
-				Normals[Indices[i + 1]] = (Normals[Indices[i + 1]] + face).normalized();
-				Normals[Indices[i + 2]] = (Normals[Indices[i + 2]] + face).normalized();
+				normals[index[i + 0]] = (normals[index[i + 0]] + face).normalized();
+				normals[index[i + 1]] = (normals[index[i + 1]] + face).normalized();
+				normals[index[i + 2]] = (normals[index[i + 2]] + face).normalized();
 			}
 
 			else {
-				Normals[Indices[i + 0]] = face;
-				Normals[Indices[i + 1]] = face;
-				Normals[Indices[i + 2]] = face;
+				normals[index[i + 0]] = face;
+				normals[index[i + 1]] = face;
+				normals[index[i + 2]] = face;
 			}
 		}
+
+		SetBufferData(bName::NORMAL, GetCount(bName::POSITION), normals);
 	}
 
 	// Generate tangents and bitangents from vertex normals and uv corrds
@@ -112,23 +194,33 @@ namespace Graphics {
 	void MeshData::GenTangents(
 		bool smooth)
 	{
-		if (!Uvs || !Vertices) return;
+		if (   !m_description.HasBuffer(bName::UV)
+			|| !m_description.HasBuffer(bName::POSITION))
+		{
+			return;
+		}
 
-		if (!Normals) {
+		if (!m_description.HasBuffer(bName::NORMAL)) {
 			GenNormals(smooth);
 		}
 
-		Tangents = ref<vector3[]>(new vector3[VertexCount]);
-		BiTangents = ref<vector3[]>(new vector3[VertexCount]);
+		vector3*  positions = (vector3*)Get(bName::POSITION);
+		vector2*  uvs       = (vector2*)Get(bName::UV);
+		unsigned* index     = GetIndex();
+
+		// check if mesh description has tangents and bi tangents
+
+		vector3* tangents   = new vector3[GetCount(bName::NORMAL)];
+		vector3* btangents = new vector3[GetCount(bName::NORMAL)];
 
 		unsigned v = 0;
-		for (unsigned i = 0; i < IndexCount; i += 3) {
-			vector3& pos1 = Vertices[Indices[i + 0]];
-			vector3& pos2 = Vertices[Indices[i + 1]];
-			vector3& pos3 = Vertices[Indices[i + 2]];
-			vector2& uv1 = Uvs[Indices[i + 0]];
-			vector2& uv2 = Uvs[Indices[i + 1]];
-			vector2& uv3 = Uvs[Indices[i + 2]];
+		for (unsigned i = 0; i < GetIndexCount(); i += 3) {
+			vector3& pos1 = positions[index[i + 0]];
+			vector3& pos2 = positions[index[i + 1]];
+			vector3& pos3 = positions[index[i + 2]];
+			vector2& uv1 = uvs[index[i + 0]];
+			vector2& uv2 = uvs[index[i + 1]];
+			vector2& uv3 = uvs[index[i + 2]];
 
 			vector3 edge1 = pos2 - pos1;
 			vector3 edge2 = pos3 - pos1;
@@ -143,20 +235,45 @@ namespace Graphics {
 			tangent.normalize();
 			bitangent.normalize();
 
-			Tangents[Indices[i + 0]] = tangent;
-			Tangents[Indices[i + 1]] = tangent;
-			Tangents[Indices[i + 2]] = tangent;
+			tangents[index[i + 0]] = tangent;
+			tangents[index[i + 1]] = tangent;
+			tangents[index[i + 2]] = tangent;
 
-			BiTangents[Indices[i + 0]] = bitangent;
-			BiTangents[Indices[i + 1]] = bitangent;
-			BiTangents[Indices[i + 2]] = bitangent;
+			btangents[index[i + 0]] = bitangent;
+			btangents[index[i + 1]] = bitangent;
+			btangents[index[i + 2]] = bitangent;
 		}
+
+		SetBufferData(bName::TANGENT,   GetCount(bName::NORMAL),  tangents);
+		SetBufferData(bName::BITANGENT, GetCount(bName::NORMAL), btangents);
+	}
+
+	const MeshData::BufferData& MeshData::GetBuffer(
+		unsigned index) const
+	{
+		return m_buffers[index];
+	}
+
+	MeshData::BufferData& MeshData::GetBuffer(
+		unsigned index)
+	{
+		return m_buffers[index];
+	}
+
+	const MeshData::IndexData& MeshData::GetIndexBuffer() const {
+		return *(IndexData*)&m_buffers.back();
+	}
+
+	MeshData::IndexData& MeshData::GetIndexBuffer(){
+		return *(IndexData*)&m_buffers.back();
 	}
 
 	void MeshData::Initialize(
 		const ref<IDevice>& device)
 	{
-		if (m_vertexArray) {
+		if (   m_vertexArray 
+			|| m_indexBuffer)
+		{
 			LOG_WARNING << "Mesh data was already initialized!";
 			return;
 		}
@@ -168,7 +285,7 @@ namespace Graphics {
 
 		for (int i = 0; i < m_buffers.size() - 1; i++) {
 			BufferData& data = GetBuffer(i);
-			VertexBufferLayout& layout = m_description.GetBufferDescription(i);
+			VertexBufferLayout& layout = m_description.GetBufferLayout(i);
 
 			IVertexBuffer* buffer = device->CreateVertexBuffer(data.Ptr(), data.Count * layout.GetStride());
 			device->AddBufferToVertexArray(m_vertexArray, buffer, layout);
@@ -180,10 +297,11 @@ namespace Graphics {
 	{
 		if (!m_vertexArray) {
 			LOG_WARNING << "Mesh data was not initialized!";
-			Initialize(device);
+			return;
 		}
 
 		if (!m_outdated) {
+			LOG_WARNING << "Mesh data is not out of date!";
 			return;
 		}
 
@@ -191,7 +309,7 @@ namespace Graphics {
 
 		for (int i = 0; i < m_buffers.size() - 1; i++) {
 			BufferData& data = GetBuffer(i);
-			VertexBufferLayout& layout = m_description.GetBufferDescription(i);
+			VertexBufferLayout& layout = m_description.GetBufferLayout(i);
 
 			device->UpdateVertexArrayData(m_vertexArray, i, data.Ptr(), data.Count * layout.GetStride());
 		}
@@ -210,12 +328,16 @@ namespace Graphics {
 		const ref<IDevice>& device) const
 	{
 #ifdef IW_DEBUG
-		if (!m_used) {
-			LOG_WARNING << "Mesh needs to be used before drawing";
+		if (!m_vertexArray) {
+			LOG_WARNING << "Mesh needs to be initialized before drawing!";
 		}
 
-		if (!VertexArray) {
-			LOG_WARNING << "Mesh needs to be initialized!";
+		if (!m_bound) {
+			LOG_WARNING << "Mesh needs to be bound before drawing!";
+		}
+
+		if (!m_outdated) {
+			LOG_WARNING << "Mesh is begin drawn out of date!";
 		}
 #endif
 		device->DrawElements(m_topology, GetIndexBuffer().Count, 0);
@@ -224,9 +346,7 @@ namespace Graphics {
 	void MeshData::Bind(
 		const ref<IDevice>& device)
 	{
-#ifdef IW_DEBUG
-		m_used = true;
-#endif
+		m_bound = true;
 		device->SetVertexArray(m_vertexArray);
 		device->SetIndexBuffer(m_indexBuffer);
 	}
@@ -234,9 +354,7 @@ namespace Graphics {
 	void MeshData::Unbind(
 		const ref<IDevice>& device)
 	{
-#ifdef IW_DEBUG
-		m_used = false;
-#endif
+		m_bound = false;
 	}
 
 	// Mesh
@@ -258,5 +376,23 @@ namespace Graphics {
 
 	ref<iw::Material> Mesh::Material() {
 		return m_material;
+	}
+
+	void Mesh::Draw(
+		const ref<IDevice>& device) const
+	{
+		m_data->Draw(device);
+	}
+
+	void Mesh::Bind(
+		const ref<IDevice>& device)
+	{
+		m_data->Bind(device);
+	}
+
+	void Mesh::Unbind(
+		const ref<IDevice>& device)
+	{
+		m_data->Unbind(device);
 	}
 }

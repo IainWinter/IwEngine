@@ -14,31 +14,25 @@ namespace Engine {
 	int DrawCollidersSystem::Initialize() {
 		ref<Shader> shader = Asset->Load<Shader>("shaders/debug/wireframe.shader");
 
+		description.DescribeBuffer(bName::POSITION, MakeLayout<float>(3));
+
 		material = REF<Material>();
 		
 		material->Set("color", iw::Color(0, 1, 0, 1));
 		material->SetWireframe(true);
 		material->SetShader(shader);
 
-		sphere = MakeIcosphere(2);
+		sphere  = MakeIcosphere(description, 5);
+		plane   = MakePlane    (description, 5, 5);
 
-		sphere->SetNormals(0, nullptr);
-		sphere->SetMaterial(material);
-		sphere->Initialize(Renderer->Device);
+		sphere .Initialize(Renderer->Device); // this should happen automatically when trying to render an uninitialized mesh
+		plane  .Initialize(Renderer->Device);
 
-		plane = MakePlane(5, 5);
+		sphereInstance = sphere.MakeInstance();
+		sphereInstance.SetMaterial(material);
 
-		plane->SetNormals(0, nullptr);
-		plane->SetUVs    (0, nullptr);
-		plane->SetMaterial(material);
-		plane->Initialize(Renderer->Device);
-
-		//capsule = ref<Mesh>(MakeCapsule(5));
-
-		//capsule->SetNormals(0, nullptr);
-		//capsule->SetUVs    (0, nullptr);
-		//capsule->SetMaterial(material);
-		//capsule->Initialize(Renderer->Device);
+		planeInstance = plane.MakeInstance();
+		planeInstance.SetMaterial(material);
 
 		return 0;
 	}
@@ -50,25 +44,31 @@ namespace Engine {
 			if (!object->Col()) continue;
 			
 			switch (object->Col()->Type()) {
-				case ColliderType::SPHERE:  Renderer->DrawMesh(object->ColTrans(), sphere);  break;
+				case ColliderType::SPHERE: {
+					Renderer->DrawMesh(object->ColTrans(), sphereInstance);
+					break;
+				}
 				case ColliderType::CAPSULE: {
 					CapsuleCollider* col = (CapsuleCollider*)object->Col();
 
-					capsule = ref<Mesh>(
-						MakeCapsule(5, col->Height, col->Radius),
-						std::bind(&Mesh::Destroy, capsule, Renderer->Device)
-					);
+					auto key = std::make_pair(col->Height, col->Radius);
+					auto itr = capsules.find(key);
+					if (itr == capsules.end()) {
+						itr = capsules.emplace(key, MakeCapsule(description, 5, col->Height, col->Radius)).first;
+						itr->second.Initialize(Renderer->Device);
+					}
 
-					capsule->SetNormals(0, nullptr);
-					capsule->SetUVs(0, nullptr);
-					capsule->SetMaterial(material);
-					capsule->Initialize(Renderer->Device);
+					Mesh instance = itr->second.MakeInstance();
+					instance.SetMaterial(material);
 
-					Renderer->DrawMesh(object->ColTrans(), capsule);
+					Renderer->DrawMesh(object->ColTrans(), instance);
 
 					break;
 				}
-				case ColliderType::PLANE:   Renderer->DrawMesh(object->ColTrans(), plane);   break;
+				case ColliderType::PLANE: {
+					Renderer->DrawMesh(object->ColTrans(), plane);
+					break; 
+				}
 			}
 		}
 

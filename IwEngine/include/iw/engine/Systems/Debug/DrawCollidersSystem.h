@@ -11,10 +11,17 @@ namespace Engine {
 	private:
 		Camera* m_camera;
 
+		MeshDescription description;
+
+		MeshData sphere;
+		MeshData plane;
+
+		Mesh sphereInstance;
+		Mesh planeInstance;
+
 		ref<Material> material;
-		ref<Mesh> capsule;
-		Mesh* sphere;
-		Mesh* plane;
+
+		std::unordered_map<std::pair<float, float>, MeshData> capsules;
 
 	public:
 		IWENGINE_API

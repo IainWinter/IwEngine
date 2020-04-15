@@ -10,29 +10,14 @@ namespace Graphics {
 		, m_camera(nullptr)
 		, m_mesh(nullptr)
 	{
-		iw::vector3 pos[4] = {
-			iw::vector3(-1,  1, 0),
-			iw::vector3(-1, -1, 0),
-			iw::vector3( 1,  1, 0),
-			iw::vector3( 1, -1, 0),
-		};
 
-		iw::vector2 uvs[4] = {
-			iw::vector2(0, 1),
-			iw::vector2(0, 0),
-			iw::vector2(1, 1),
-			iw::vector2(1, 0)
-		};
+		MeshDescription description;
+		description.DescribeBuffer(bName::POSITION, MakeLayout<float>(3));
+		description.DescribeBuffer(bName::UV,       MakeLayout<float>(2));
 
-		unsigned int tris[6] = {
-			0, 1, 2,
-			1, 3, 2
-		};
+		MeshData data = MakePlane(description, 1, 1);
 
-		m_quad = new Mesh();
-		m_quad->SetVertices(4, pos);
-		m_quad->SetUVs(4, uvs);
-		m_quad->SetIndices(6, tris);
+		m_quad = data.MakeInstance();
 	}
 
 	Renderer::~Renderer() {

@@ -10,19 +10,19 @@ namespace Graphics {
 	static const unsigned IcoVertCount  = 12;
 	static const unsigned IcoIndexCount = 60;
 
-	static const iw::vector3 IcoVerts[] = {
-		iw::vector3(-ICO_X,  0,	     ICO_Z),
-		iw::vector3( ICO_X,  0,	     ICO_Z),
-		iw::vector3(-ICO_X,  0,     -ICO_Z),
-		iw::vector3( ICO_X,  0,     -ICO_Z),
-		iw::vector3(0,		 ICO_Z,  ICO_X),
-		iw::vector3(0,		 ICO_Z, -ICO_X),
-		iw::vector3(0,      -ICO_Z,  ICO_X),
-		iw::vector3(0,	    -ICO_Z, -ICO_X),
-		iw::vector3( ICO_Z,  ICO_X,  0),
-		iw::vector3(-ICO_Z,  ICO_X,  0),
-		iw::vector3( ICO_Z, -ICO_X,  0),
-		iw::vector3(-ICO_Z, -ICO_X,  0)
+	static const vector3 IcoVerts[] = {
+		vector3(-ICO_X,  0,	     ICO_Z),
+		vector3( ICO_X,  0,	     ICO_Z),
+		vector3(-ICO_X,  0,     -ICO_Z),
+		vector3( ICO_X,  0,     -ICO_Z),
+		vector3(0,		 ICO_Z,  ICO_X),
+		vector3(0,		 ICO_Z, -ICO_X),
+		vector3(0,      -ICO_Z,  ICO_X),
+		vector3(0,	    -ICO_Z, -ICO_X),
+		vector3( ICO_Z,  ICO_X,  0),
+		vector3(-ICO_Z,  ICO_X,  0),
+		vector3( ICO_Z, -ICO_X,  0),
+		vector3(-ICO_Z, -ICO_X,  0)
 	};
 
 	static const unsigned IcoIndex[] = {
@@ -48,24 +48,24 @@ namespace Graphics {
 		11,  2,	 7
 	};
 
-	// Triangle
+	// Tetrahedron
 
 	static const unsigned TriVertCount  = 4;
 	static const unsigned TriUvCount    = 4;
 	static const unsigned TriIndexCount = 12;
 
-	static const iw::vector3 TriVerts[] = {
-		iw::vector3(cos(iw::Pi2 * 0 / 3), -1, sin(iw::Pi2 * 0 / 3)),
-		iw::vector3(cos(iw::Pi2 * 1 / 3), -1, sin(iw::Pi2 * 1 / 3)),
-		iw::vector3(cos(iw::Pi2 * 2 / 3), -1, sin(iw::Pi2 * 2 / 3)),
-		iw::vector3(0, 1, 0),
+	static const vector3 TriVerts[] = {
+		vector3(cos(Pi2 * 0 / 3), -1, sin(Pi2 * 0 / 3)),
+		vector3(cos(Pi2 * 1 / 3), -1, sin(Pi2 * 1 / 3)),
+		vector3(cos(Pi2 * 2 / 3), -1, sin(Pi2 * 2 / 3)),
+		vector3(0, 1, 0),
 	};
 
-	static const iw::vector2 TriUvs[] = {
-		iw::vector2(0,    0),
-		iw::vector2(1,    0),
-		iw::vector2(0.5f, 1),
-		iw::vector2(1,    1),
+	static const vector2 TriUvs[] = {
+		vector2(0,    0),
+		vector2(1,    0),
+		vector2(0.5f, 1),
+		vector2(1,    1),
 	};
 
 	static const unsigned TriIndex[] = {
@@ -77,19 +77,25 @@ namespace Graphics {
 
 	// default rad should be .5 not 1
 
-	Mesh* MakeIcosphere(
+	MeshData MakeIcosphere(
+		const MeshDescription& description,
 		unsigned resolution)
 	{
+		if (!description.HasBuffer(bName::POSITION)) {
+			LOG_WARNING << "Cannot generate an IcoSphere for a mesh description that does not contain at least a POSITION buffer!";
+			return MeshData(description);
+		}
+
 		unsigned res = (unsigned)pow(4, resolution);
 
-		unsigned vertCount  = 12 + (30 * res);
 		unsigned indexCount = 60 * res;
+		unsigned vertCount  = 12 + (30 * res);
 
-		iw::vector3* verts   = new iw::vector3[vertCount];
-		unsigned*    indices = new unsigned   [indexCount];
+		unsigned* indices = new unsigned[indexCount];
+		vector3*  verts   = new vector3 [vertCount];
 
-		memcpy(verts,   IcoVerts, IcoVertCount  * sizeof(iw::vector3));
 		memcpy(indices, IcoIndex, IcoIndexCount * sizeof(unsigned));
+		memcpy(verts,   IcoVerts, IcoVertCount  * sizeof(vector3));
 
 		// Verts & Index
 
@@ -99,56 +105,73 @@ namespace Graphics {
 			detail::SubDevideVerts(verts, indices, currentIndexCount, currentVertCount);
 		}
 
+		// Makes it a sphere
+
 		for (unsigned i = 0; i < vertCount; i++) {
 			verts[i].normalize();
 		}
 
-		Mesh* mesh = new Mesh();
-		mesh->SetVertices(vertCount,  verts);
-		mesh->SetIndices (indexCount, indices);
-		mesh->GenNormals();
+		MeshData data(description);
+
+		data.SetIndexData(indexCount, indices);
+		data.SetBufferData(bName::POSITION, vertCount, verts);
+
+		if (description.HasBuffer(bName::NORMAL)) {
+			data.GenNormals();
+		}
 
 		delete[] verts;
 		delete[] indices;
 
-		return mesh;
+		return data;
 	}
 
-	Mesh* MakeUvSphere(
+	MeshData MakeUvSphere(
+		const MeshDescription& description,
 		unsigned latCount,
 		unsigned lonCount)
 	{
-		unsigned vertCount  = (latCount + 1) * (lonCount + 1);
-		unsigned indexCount = 6 * (lonCount + (latCount - 2) * lonCount);
-
-		// invalid counts
-		if (indexCount == 0) {
-			return nullptr;
+		if (!description.HasBuffer(bName::POSITION)) {
+			LOG_WARNING << "Cannot generate a UvSphere for a mesh description that does not contain at least a POSITION buffer!";
+			return MeshData(description);
 		}
 
-		iw::vector3* verts   = new iw::vector3[vertCount];
-		iw::vector3* norms   = new iw::vector3[vertCount];
-		iw::vector2* uvs     = new iw::vector2[vertCount];
-		unsigned*    indices = new unsigned   [indexCount];
+		unsigned indexCount = 6 * (lonCount + (latCount - 2) * lonCount);
+		unsigned vertCount  = (latCount + 1) * (lonCount + 1);
+
+		if (indexCount == 0) {
+			LOG_WARNING << "Cannot generate UvSphere with lat: " << latCount << " and lon: " << lonCount << " counts!";
+			return MeshData(description);
+		}
+
+		unsigned* indices = new unsigned[indexCount];
+		vector3*  verts   = new vector3 [vertCount];
+		vector2*  uvs     = nullptr;
+		
+		if (description.HasBuffer(bName::UV)) {
+			uvs = new vector2[vertCount];
+		}
 
 		// Verts
 
-		float lonStep = iw::Pi2 / lonCount;
-		float latStep = iw::Pi  / latCount;
+		float lonStep = Pi2 / lonCount;
+		float latStep = Pi  / latCount;
 
 		size_t vert = 0;
 		for (unsigned lat = 0; lat <= latCount; lat++) {
 			for (unsigned lon = 0; lon <= lonCount; lon++) {
-				float y = sin(-iw::Pi / 2 + lat * latStep);
+				float y = sin(-Pi / 2 + lat * latStep);
 				float x = cos(lon * lonStep) * sin(lat * latStep);
 				float z = sin(lon * lonStep) * sin(lat * latStep);
 
 				float u = (float)lon / lonCount;
 				float v = (float)lat / latCount;
 
-				verts[vert] = iw::vector3(x, y, z);
-				norms[vert] = iw::vector3(x, y, z);
-				uvs  [vert] = iw::vector2(u, v);
+				verts[vert] = vector3(x, y, z);
+				
+				if (uvs) {
+					uvs[vert] = vector2(u, v);
+				}
 
 				vert++;
 			}
@@ -183,25 +206,37 @@ namespace Graphics {
 			indices[i++] = v + 1;
 		}
 
-		Mesh* mesh = new Mesh();
-		mesh->SetVertices(vertCount,  verts);
-		mesh->SetNormals (vertCount,  norms);
-		mesh->SetUVs     (vertCount,  uvs);
-		mesh->SetIndices (indexCount, indices);
+		MeshData data(description);
+
+		data.SetIndexData(indexCount, indices);
+		data.SetBufferData(bName::POSITION, vertCount, verts);
+
+		if (uvs) {
+			data.SetBufferData(bName::UV, vertCount, uvs);
+		}
+
+		if (description.HasBuffer(bName::NORMAL)) {
+			data.GenNormals();
+		}
 
 		delete[] verts;
-		delete[] norms;
 		delete[] uvs;
 		delete[] indices;
 
-		return mesh;
+		return data;
 	}
 
-	Mesh* MakeCapsule(
+	MeshData MakeCapsule(
+		const MeshDescription& description,
 		unsigned resolution,
 		float height,
 		float radius)
 	{
+		if (!description.HasBuffer(bName::POSITION)) {
+			LOG_WARNING << "Cannot generate a Capsule for a mesh description that does not contain at least a POSITION buffer!";
+			return MeshData(description);
+		}
+
 		// make segments an even number
 		if (resolution % 2 != 0)
 			resolution++;
@@ -209,12 +244,16 @@ namespace Graphics {
 		// extra vertex on the seam
 		int points = resolution + 1;
 
-		unsigned vertCount  = points * (points + 1);
 		unsigned indexCount = (resolution * (resolution + 1) * 2 * 3);
+		unsigned vertCount  = points * (points + 1);
 
-		vector3*  vertices = new vector3 [vertCount];
-		vector2*  uvs      = new vector2 [vertCount];
-		unsigned* indices  = new unsigned[indexCount];
+		unsigned* indices = new unsigned[indexCount];
+		vector3*  verts   = new vector3 [vertCount];
+		vector2*  uvs     = nullptr;
+
+		if (description.HasBuffer(bName::UV)) {
+			uvs = new vector2[vertCount];
+		}
 
 		// calculate points around a circle
 		float* pX = new float[points];
@@ -250,18 +289,20 @@ namespace Graphics {
 
 		for (int y = 0; y < top; y++) {
 			for (int x = 0; x < points; x++) {
-				vertices[v] = vector3(
-					pX[x] * pR[y], 
-					pY[y], 
+				verts[v] = vector3(
+					pX[x] * pR[y],
+					pY[y],
 					pZ[x] * pR[y]
 				) * radius;
 
-				vertices[v].y += yOff;
+				verts[v].y += yOff;
 
-				uvs[v] = vector2(
-					1.0f - stepX * x, 
-					(vertices[v].y + (height * 0.5f)) / height
-				);
+				if (uvs) {
+					uvs[v] = vector2(
+						1.0f - stepX * x,
+						(verts[v].y + (height * 0.5f)) / height
+					);
+				}
 
 				v++;
 			}
@@ -271,17 +312,19 @@ namespace Graphics {
 
 		for (int y = btm; y < points; y++) {
 			for (int x = 0; x < points; x++) {
-				vertices[v] = vector3(
+				verts[v] = vector3(
 					pX[x] * pR[y], 
 					pY[y], 
 					pZ[x] * pR[y]) * radius;
 
-				vertices[v].y -= yOff;
+				verts[v].y -= yOff;
 
-				uvs[v] = vector2(
-					1.0f - stepX * x, 
-					(vertices[v].y + (height * 0.5f)) / height
-				);
+				if(uvs) {
+					uvs[v] = vector2(
+						1.0f - stepX * x, 
+						(verts[v].y + (height * 0.5f)) / height
+					);
+				}
 
 				v++;
 			}
@@ -302,40 +345,58 @@ namespace Graphics {
 			}
 		}
 
-		Mesh* mesh = new Mesh();
+		MeshData data(description);
 
-		mesh->SetVertices(vertCount, vertices);
-		mesh->SetUVs     (vertCount, uvs);
-		mesh->SetIndices (indexCount, indices);
+		data.SetIndexData(indexCount, indices);
+		data.SetBufferData(bName::POSITION, vertCount, verts);
 
-		mesh->GenNormals();
+		if (uvs) {
+			data.SetBufferData(bName::UV, vertCount, uvs);
+		}
 
+		if (description.HasBuffer(bName::NORMAL)) {
+			data.GenNormals();
+		}
+
+		delete[] verts;
+		delete[] uvs;
+		delete[] indices;
 		delete[] pX;
 		delete[] pZ;
 		delete[] pY;
 		delete[] pR;
-		delete[] vertices;
-		delete[] uvs;
-		delete[] indices;
 
-		return mesh;
+		return data;
 	}
 
-	Mesh* MakeTetrahedron(
+	MeshData MakeTetrahedron(
+		const MeshDescription& description,
 		unsigned int resolution)
 	{
+		if (!description.HasBuffer(bName::POSITION)) {
+			LOG_WARNING << "Cannot generate an Tetrahedron for a mesh description that does not contain at least a POSITION buffer!";
+			return MeshData(description);
+		}
+
 		unsigned res = (unsigned)pow(4, resolution);
 
-		unsigned vertCount  = 4 + (6 * res);
 		unsigned indexCount = 12 * res;
+		unsigned vertCount  = 4 + (6 * res);
 
-		iw::vector3* verts   = new iw::vector3[vertCount];
-		iw::vector2* uvs     = new iw::vector2[vertCount];
-		unsigned*    indices = new unsigned   [indexCount];
+		unsigned* indices = new unsigned[indexCount];
+		vector3*  verts   = new vector3 [vertCount];
+		vector2*  uvs     = nullptr;
 
-		memcpy(verts,   TriVerts, TriVertCount  * sizeof(iw::vector3));
-		memcpy(uvs,     TriUvs,   TriUvCount    * sizeof(iw::vector2));
+		if (description.HasBuffer(bName::UV)) {
+			uvs = new vector2[vertCount];
+		}
+
 		memcpy(indices, TriIndex, TriIndexCount * sizeof(unsigned));
+		memcpy(verts,   TriVerts, TriVertCount  * sizeof(vector3));
+
+		if (uvs) {
+			memcpy(uvs, TriUvs, TriUvCount * sizeof(vector2));
+		}
 
 		// Verts & Index
 
@@ -347,31 +408,46 @@ namespace Graphics {
 			detail::SubDevideVerts(verts, indices, currentIndexCount, currentVertCount);
 		}
 
-		Mesh* mesh = new Mesh();
-		mesh->SetVertices(vertCount,  verts);
-		mesh->SetUVs     (vertCount,  uvs);
-		mesh->SetIndices (indexCount, indices);
-		mesh->GenNormals (false);
+		MeshData data(description);
+
+		data.SetIndexData(indexCount, indices);
+		data.SetBufferData(bName::POSITION, vertCount, verts);
+
+		if (uvs) {
+			data.SetBufferData(bName::UV, vertCount, uvs);
+		}
+
+		if (description.HasBuffer(bName::NORMAL)) {
+			data.GenNormals();
+		}
 
 		delete[] verts;
 		delete[] uvs;
 		delete[] indices;
 
-		return mesh;
+		return data;
 	}
 
-	IWGRAPHICS_API
-	Mesh* MakePlane(
+	MeshData MakePlane(
+		const MeshDescription& description,
 		unsigned xCount,
 		unsigned zCount)
 	{
-		unsigned vertCount  = (xCount + 1) * (zCount + 1);
-		unsigned indexCount = 6 * xCount * zCount;
+		if (!description.HasBuffer(bName::POSITION)) {
+			LOG_WARNING << "Cannot generate an Plane for a mesh description that does not contain at least a POSITION buffer!";
+			return MeshData(description);
+		}
 
-		iw::vector3* verts   = new iw::vector3[vertCount];
-		iw::vector3* norms   = new iw::vector3[vertCount];
-		iw::vector2* uvs     = new iw::vector2[vertCount];
-		unsigned*    indices = new unsigned   [indexCount];
+		unsigned indexCount = 6 * xCount * zCount;
+		unsigned vertCount  = (xCount + 1) * (zCount + 1);
+
+		unsigned* indices = new unsigned[indexCount];
+		vector3*  verts   = new vector3 [vertCount];
+		vector2*  uvs     = nullptr;
+
+		if (description.HasBuffer(bName::UV)) {
+			uvs = new vector2[vertCount];
+		}
 
 		float stepX = 2.0f / xCount;
 		float stepZ = 2.0f / zCount;
@@ -379,15 +455,17 @@ namespace Graphics {
 		float stepU = 2.0f / xCount;
 		float stepV = 2.0f / zCount;
 
-		iw::vector3 offset = -(iw::vector3::unit_x + iw::vector3::unit_z);
+		vector3 offset = -(vector3::unit_x + vector3::unit_z);
 
 		for (unsigned x = 0; x <= xCount; x++) {
 			for (unsigned z = 0; z <= zCount; z++) {
 				unsigned i = z + x * (zCount + 1);
 
-				verts[i] = offset + iw::vector3(x * stepX, 0, z * stepZ);
-				norms[i] = iw::vector3::unit_y;
-				uvs  [i] = iw::vector2(x * stepU, z * stepV);
+				verts[i] = offset + vector3(x * stepX, 0, z * stepZ);
+				
+				if (uvs) {
+					uvs[i] = vector2(x * stepU, z * stepV);
+				}
 			}
 		}
 
@@ -409,23 +487,29 @@ namespace Graphics {
 			}
 		}
 
-		Mesh* mesh = new Mesh();
-		mesh->SetVertices(vertCount,  verts);
-		mesh->SetNormals (vertCount,  norms);
-		mesh->SetUVs     (vertCount,  uvs);
-		mesh->SetIndices (indexCount, indices);
+		MeshData data(description);
+
+		data.SetIndexData(indexCount, indices);
+		data.SetBufferData(bName::POSITION, vertCount, verts);
+
+		if (uvs) {
+			data.SetBufferData(bName::UV, vertCount, uvs);
+		}
+
+		if (description.HasBuffer(bName::NORMAL)) {
+			data.GenNormals();
+		}
 
 		delete[] verts;
-		delete[] norms;
 		delete[] uvs;
 		delete[] indices;
 
-		return mesh;
+		return data;
 	}
 
 namespace detail {
 	void SubDevideVerts(
-		iw::vector3* verts,
+		vector3* verts,
 		unsigned* index,
 		unsigned& currentIndexCount,
 		unsigned& currentVertCount)
@@ -461,7 +545,7 @@ namespace detail {
 	*/
 
 	void SubDevideUvs(
-		iw::vector2* uvs,
+		vector2* uvs,
 		const unsigned* index,
 		unsigned indexCount,
 		unsigned& currentUvCount)
@@ -476,7 +560,7 @@ namespace detail {
 
 	unsigned CreateVertexForEdge(
 		IndexLookup& lookup,
-		iw::vector3* verts,
+		vector3* verts,
 		unsigned first,
 		unsigned second,
 		unsigned& currentVertCount)
@@ -496,7 +580,7 @@ namespace detail {
 
 	unsigned CreateUvsForEdge(
 		IndexLookup& lookup,
-		iw::vector2* uvs,
+		vector2* uvs,
 		unsigned first,
 		unsigned second,
 		unsigned& currentUvCount)

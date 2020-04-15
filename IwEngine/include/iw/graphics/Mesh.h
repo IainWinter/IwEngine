@@ -18,59 +18,46 @@ namespace Graphics {
 	struct MeshData;
 	struct Mesh;
 
-	template<
-		typename _t,
-		unsigned _s>
-	struct vdata {};
+	enum class bName {
+		POSITION,
+		NORMAL,
+		TANGENT,
+		BITANGENT,
+		COLOR,
+		UV,
+		UV1, UV2, UV3, UV4, UV5,
+		UV6, UV7, UV8, UV9, UV10,
+	};
 
 	struct MeshDescription {
 	private:
 		std::vector<VertexBufferLayout> m_layouts;
+		std::unordered_map<bName, unsigned> m_map;
 
 	public:
-		template<
-			typename... _t,
-			unsigned... _s>
-		void DescribeMesh(
-			vdata<_t, _s>... buffers)
-		{
-			(DescribeBuffer(buffers), ...);
-		}
-
-		template<
-			typename... _t,
-			unsigned... _s>
+		IWGRAPHICS_API
 		void DescribeBuffer(
-			vdata<_t, _s>... verts)
-		{
-			VertexBufferLayout layout;
-			(layout.Push<_t>(_s), ...);
+			bName name,
+			VertexBufferLayout& layout);
 
-			m_layouts.emplace_back(layout);
-		}
+		IWGRAPHICS_API
+		bool HasBuffer(
+			bName name) const;
 
-		template<
-			typename... _t,
-			unsigned... _s>
-		void DescribeInstanceBuffer(
-			unsigned stride,
-			vdata<_t, _s>... verts)
-		{
-			VertexBufferLayout layout(stride);
-			(layout.Push<_t>(_s), ...);
+		IWGRAPHICS_API
+		unsigned GetBufferCount() const;
 
-			m_layouts.emplace_back(layout);
-		}
+		IWGRAPHICS_API
+		unsigned GetBufferIndex(
+			bName name) const;
 
-		unsigned GetBufferCount() const {
-			return m_layouts.size();
-		}
+		IWGRAPHICS_API
+		VertexBufferLayout GetBufferLayout(
+			bName name) const;
 
-		VertexBufferLayout GetBufferDescription(
-			unsigned index) const
-		{
-			return m_layouts[index];
-		}
+		IWGRAPHICS_API
+		VertexBufferLayout GetBufferLayout(
+			unsigned index) const;
 	};
 
 	struct MeshData {
@@ -79,18 +66,16 @@ namespace Graphics {
 			ref<char[]> Data;
 			unsigned Count;
 
-			void* Ptr() {
-				return Data.get();
-			}
+			void*       Ptr()       { return Data.get(); }
+			const void* Ptr() const { return Data.get(); }
 		};
 
 		struct IndexData {
 			ref<unsigned[]> Index;
 			unsigned Count;
 
-			unsigned* Ptr() {
-				return Index.get();
-			}
+			unsigned*       Ptr()       { return Index.get(); }
+			const unsigned* Ptr() const { return Index.get(); }
 		};
 
 		MeshDescription m_description;
@@ -102,30 +87,47 @@ namespace Graphics {
 		IIndexBuffer* m_indexBuffer;
 
 		bool m_outdated;
+		bool m_bound;
 
 	public:
+		IWGRAPHICS_API
+		MeshData();
+
+		IWGRAPHICS_API
 		MeshData(
 			const MeshDescription& description);
 
-		Mesh GetInstance();
+		IWGRAPHICS_API
+		Mesh MakeInstance();
 
-		BufferData GetBuffer(unsigned index);
-		IndexData  GetIndexBuffer();
-
-		MeshTopology           Topology()    const;
+		IWGRAPHICS_API
 		const MeshDescription& Description() const;
 
+		IWGRAPHICS_API
+		MeshTopology Topology() const;
+
+		IWGRAPHICS_API void*       Get     (bName name);
+		IWGRAPHICS_API const void* Get     (bName name) const;
+		IWGRAPHICS_API unsigned    GetCount(bName name) const;
+
+		IWGRAPHICS_API unsigned*       GetIndex();
+		IWGRAPHICS_API const unsigned* GetIndex()      const;
+		IWGRAPHICS_API unsigned        GetIndexCount() const;
+
+		IWGRAPHICS_API
+		void SetTopology(
+			MeshTopology topology);
+
+		IWGRAPHICS_API
 		void SetBufferData(
-			unsigned index,
+			bName name,
 			unsigned count,
 			void* data);
 
+		IWGRAPHICS_API
 		void SetIndexData(
 			unsigned count,
 			unsigned* data);
-
-		void SetTopology(
-			MeshTopology topology);
 
 		IWGRAPHICS_API
 		void GenNormals(
@@ -138,9 +140,18 @@ namespace Graphics {
 		IWGRAPHICS_API void Initialize(const ref<IDevice>& device);		 // Send the mesh data to video memory
 		IWGRAPHICS_API void Update    (const ref<IDevice>& device);		 // Updates the video memory copy of the mesh
 		IWGRAPHICS_API void Destroy   (const ref<IDevice>& device);		 // Destroys the video memory copy of the mesh
-		IWGRAPHICS_API void Draw      (const ref<IDevice>& device) const; // Draws the mesh once used
-		IWGRAPHICS_API void Bind      (const ref<IDevice>& device);		 // Binds the mesh for use
-		IWGRAPHICS_API void Unbind    (const ref<IDevice>& device);		 // Marks mesh as unbound (doesn't change renderer state [for now])
+	private:
+		const BufferData& GetBuffer(unsigned index) const;
+		      BufferData& GetBuffer(unsigned index);
+
+		const IndexData& GetIndexBuffer() const;
+		      IndexData& GetIndexBuffer();
+
+		friend struct Mesh;
+
+		IWGRAPHICS_API void Draw  (const ref<IDevice>& device) const; // Draws the mesh once used
+		IWGRAPHICS_API void Bind  (const ref<IDevice>& device);	  // Binds the mesh for use
+		IWGRAPHICS_API void Unbind(const ref<IDevice>& device);	  // Marks mesh as unbound (doesn't change renderer state [for now])
 	};
 
 	struct Mesh {
@@ -156,12 +167,16 @@ namespace Graphics {
 		Mesh(
 			ref<MeshData> data);
 
-		IWGRAPHICS_API
-		void SetMaterial(
-			ref<Material>& material);
-
 		IWGRAPHICS_API const ref<iw::Material> Material() const;
 		IWGRAPHICS_API       ref<iw::Material> Material();
+
+		IWGRAPHICS_API
+		void SetMaterial(
+			ref<iw::Material>& material);
+
+		IWGRAPHICS_API void Draw  (const ref<IDevice>& device) const; // Draws the mesh once used
+		IWGRAPHICS_API void Bind  (const ref<IDevice>& device);       // Binds the mesh for use
+		IWGRAPHICS_API void Unbind(const ref<IDevice>& device);       // Marks mesh as unbound (doesn't change renderer state [for now])
 
 		//IWGRAPHICS_API const ref<MeshData> Data() const;
 		//IWGRAPHICS_API       ref<MeshData> Data();

@@ -12,6 +12,15 @@ namespace RenderAPI {
 		unsigned char Normalized;
 	};
 
+	class VertexBufferLayout;
+
+	template<
+		typename _t>
+	VertexBufferLayout MakeLayout(unsigned count, unsigned instanceStride = 0) {
+		VertexBufferLayout layout(instanceStride);
+		layout.Push<_t>(count);
+	}
+
 	class VertexBufferLayout {
 	private:
 		std::vector<VertexBufferLayoutElement> m_elements;
