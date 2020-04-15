@@ -336,7 +336,7 @@ namespace Graphics {
 			LOG_WARNING << "Mesh needs to be bound before drawing!";
 		}
 
-		if (!m_outdated) {
+		if (m_outdated) {
 			LOG_WARNING << "Mesh is begin drawn out of date!";
 		}
 #endif
@@ -376,6 +376,14 @@ namespace Graphics {
 
 	ref<iw::Material> Mesh::Material() {
 		return m_material;
+	}
+
+	const ref<iw::MeshData> Mesh::Data() const {
+		return m_data;
+	}
+
+	ref<iw::MeshData> Mesh::Data() {
+		return m_data;
 	}
 
 	void Mesh::Draw(

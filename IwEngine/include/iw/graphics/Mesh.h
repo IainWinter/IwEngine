@@ -170,6 +170,9 @@ namespace Graphics {
 		IWGRAPHICS_API const ref<iw::Material> Material() const;
 		IWGRAPHICS_API       ref<iw::Material> Material();
 
+		IWGRAPHICS_API const ref<iw::MeshData> Data() const;
+		IWGRAPHICS_API       ref<iw::MeshData> Data();
+
 		IWGRAPHICS_API
 		void SetMaterial(
 			ref<iw::Material>& material);

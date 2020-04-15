@@ -62,44 +62,6 @@ namespace iw {
 	float blend;
 
 	int SandboxLayer::Initialize() {
-		vector3 verts[] = {
-			vector3(0, 0, 0),
-			vector3(1, 0, 0),
-			vector3(0, 1, 0),
-			vector3(1, 1, 0)
-		};
-
-		vector2 uvs[] = {
-			vector2(0, 0),
-			vector2(1, 0),
-			vector2(0, 1),
-			vector2(1, 1)
-		};
-
-		unsigned indices[] = {
-			0, 1, 2,
-			1, 3, 2
-		};
-		
-		VertexBufferLayout f3;
-		f3.Push<float>(3);
-
-		VertexBufferLayout f2;
-		f2.Push<float>(2);
-
-		MeshDescription description;
-		description.DescribeBuffer(bName::POSITION, f3);
-		description.DescribeBuffer(bName::UV,       f2);
-
-		MeshData data(description);
-
-		data.SetBufferData(0, 4, verts);
-		data.SetBufferData(1, 4, uvs);
-		data.SetIndexData(6, indices);
-		data.SetTopology(MeshTopology::TRIANGLES);
-
-		Mesh mesh = data.MakeInstance();
-
 		AudioSpaceStudio* studio = (AudioSpaceStudio*)Audio->AsStudio();
 
 		studio->SetVolume(0.25f);

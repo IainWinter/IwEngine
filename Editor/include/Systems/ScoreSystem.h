@@ -23,10 +23,10 @@ public:
 	iw::Camera* camera;
 	iw::Camera* uiCam;
 
-	iw::Mesh* totalScoreMesh;
+	iw::Mesh totalScoreMesh;
 	int totalScore;
 
-	iw::Mesh* potentialScoreMesh;
+	iw::Mesh potentialScoreMesh;
 	int potentiaScore;
 
 	iw::ref<iw::Font> font;

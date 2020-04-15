@@ -62,9 +62,9 @@ namespace Graphics {
 		friend class FontBuilder;
 
 	private:
-		std::unordered_map<unsigned, iw::ref<Texture>> m_textures;
+		std::unordered_map<unsigned, ref<Texture>> m_textures;
 		std::unordered_map<unsigned, Character> m_characters;
-		std::unordered_map<std::pair<unsigned, unsigned>, int, iw::pair_hash> m_kernings;
+		std::unordered_map<std::pair<unsigned, unsigned>, int, pair_hash> m_kernings;
 
 	public:
 		IWGRAPHICS_API
@@ -87,27 +87,34 @@ namespace Graphics {
 
 		IWGRAPHICS_API
 		void Initialize(
-			const iw::ref<IDevice>& device);
+			const ref<IDevice>& device);
 
 		IWGRAPHICS_API
-		Mesh* GenerateMesh(
+		Mesh GenerateMesh(
+			const std::string& string,
+			float size,
+			float ratio) const;
+
+		IWGRAPHICS_API
+		Mesh GenerateMesh(
+			const MeshDescription& description,
 			const std::string& string,
 			float size,
 			float ratio) const;
 
 		IWGRAPHICS_API
 		void UpdateMesh(
-			Mesh* mesh,
+			Mesh& meshData,
 			const std::string& string,
 			float size,
 			float ratio) const;
 
 		IWGRAPHICS_API
-		iw::ref<Texture>& GetTexture(
+		ref<Texture>& GetTexture(
 			unsigned id);
 
 		IWGRAPHICS_API
-		const iw::ref<Texture>& GetTexture(
+		const ref<Texture>& GetTexture(
 			unsigned id) const;
 
 		IWGRAPHICS_API
@@ -126,7 +133,7 @@ namespace Graphics {
 		IWGRAPHICS_API
 		void SetTexture(
 			unsigned id,
-			iw::ref<Texture> texture);
+			ref<Texture> texture);
 
 		IWGRAPHICS_API
 		void SetCharacter(
@@ -221,7 +228,7 @@ namespace Graphics {
 		IWGRAPHICS_API
 		void SetTexture(
 			unsigned id,
-			iw::ref<Texture> texture);
+			ref<Texture> texture);
 
 		IWGRAPHICS_API
 		void SetCharacter(

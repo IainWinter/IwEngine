@@ -82,7 +82,7 @@ namespace Graphics {
 
 		// state cache
 		Camera*           m_camera;
-		Mesh*             m_mesh;
+		ref<MeshData>     m_meshData;
 		ref<Shader>       m_shader;
 		ref<Material>     m_material;
 		ref<RenderTarget> m_target;
@@ -171,6 +171,12 @@ namespace Graphics {
 		virtual void DrawMesh(
 			const Transform* transform,
 			Mesh* mesh);
+
+		// Same as DrawMesh
+		IWGRAPHICS_API
+		virtual void DrawMesh(
+			const Transform* transform,
+			Mesh& mesh);
 
 		// Runs a shader on a fullscreen quad with verts and uvs
 		IWGRAPHICS_API

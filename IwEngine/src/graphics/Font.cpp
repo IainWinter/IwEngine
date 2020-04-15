@@ -44,12 +44,26 @@ namespace Graphics {
 		}
 	}
 
-	Mesh* Font::GenerateMesh(
+	Mesh Font::GenerateMesh(
 		const std::string& string,
 		float size,
 		float ratio) const
 	{
-		Mesh* mesh = new Mesh();
+		iw::MeshDescription description;
+		description.DescribeBuffer(iw::bName::POSITION, iw::MakeLayout<float>(3));
+		description.DescribeBuffer(iw::bName::UV, iw::MakeLayout<float>(2));
+
+		return GenerateMesh(description, string, size, ratio);
+	}
+
+	Mesh Font::GenerateMesh(
+		const MeshDescription& description,
+		const std::string& string,
+		float size,
+		float ratio) const
+	{
+		MeshData* data = new MeshData(description);
+		Mesh mesh = data->MakeInstance();
 
 		UpdateMesh(mesh, string, size, ratio);
 
@@ -57,11 +71,18 @@ namespace Graphics {
 	}
 
 	void Font::UpdateMesh(
-		Mesh* mesh,
+		Mesh& mesh,
 		const std::string& string,
 		float size,
 		float ratio) const
 	{
+		if (   !mesh.Data()->Description().HasBuffer(bName::POSITION)
+			|| !mesh.Data()->Description().HasBuffer(bName::UV))
+		{
+			LOG_WARNING << "Cannot update a mesh data with description that does not contain at least a POSITION and UV buffer!";
+			return;
+		}
+
 		std::vector<std::string> lines;
 		size_t count = 0;
 
@@ -72,7 +93,7 @@ namespace Graphics {
 			count += line.length();
 		}
 
-		int padWidth = m_padding.Left + m_padding.Right;
+		int padWidth  = m_padding.Left + m_padding.Right;
 		int padHeight = m_padding.Top + m_padding.Bottom;
 
 		int lineHeightPixels = m_lightHeight - padHeight;
@@ -82,12 +103,12 @@ namespace Graphics {
 			size / lineHeightPixels * m_size
 		);
 
-		unsigned vertCount  = count * 4;
 		unsigned indexCount = count * 6;
+		unsigned vertCount  = count * 4;
 
+		unsigned*    indices = new unsigned   [indexCount];
 		iw::vector3* verts   = new iw::vector3[vertCount];
 		iw::vector2* uvs     = new iw::vector2[vertCount];
-		unsigned*    indices = new unsigned   [indexCount];
 
 		iw::vector2 cursor;
 		unsigned vert = 0;
@@ -140,9 +161,9 @@ namespace Graphics {
 			cursor.y -= size * m_size;
 		}
 	
-		mesh->SetVertices(vertCount,  verts);
-		mesh->SetUVs     (vertCount,  uvs);
-		mesh->SetIndices (indexCount, indices);
+		mesh.Data()->SetIndexData(indexCount, indices);
+		mesh.Data()->SetBufferData(bName::POSITION, vertCount, verts);
+		mesh.Data()->SetBufferData(bName::UV,       vertCount, uvs);
 
 		delete[] verts;
 		delete[] uvs;

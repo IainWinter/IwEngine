@@ -8,9 +8,8 @@ namespace Graphics {
 		const iw::ref<IDevice>& device)
 		: Device(device)
 		, m_camera(nullptr)
-		, m_mesh(nullptr)
+		, m_meshData(nullptr)
 	{
-
 		MeshDescription description;
 		description.DescribeBuffer(bName::POSITION, MakeLayout<float>(3));
 		description.DescribeBuffer(bName::UV,       MakeLayout<float>(2));
@@ -20,12 +19,7 @@ namespace Graphics {
 		m_quad = data.MakeInstance();
 	}
 
-	Renderer::~Renderer() {
-		delete m_quad;
-	}
-
 	void Renderer::Initialize() {
-		m_quad->Initialize(Device);
 		m_cameraUBO = Device->CreateUniformBuffer(&m_cameraData, sizeof(CameraData));
 		m_shadowUBO = Device->CreateUniformBuffer(&m_shadowData, sizeof(ShadowData));
 		m_lightUBO  = Device->CreateUniformBuffer(&m_lightData,  sizeof(LightData));
@@ -150,8 +144,8 @@ namespace Graphics {
 		}
 #endif
 		if (m_state == RenderState::SCENE) {
-			if (mesh->Material) {
-				SetMaterial(mesh->Material);
+			if (mesh->Material()) {
+				Renderer::SetMaterial(mesh->Material());
 			}
 		}
 
@@ -160,7 +154,15 @@ namespace Graphics {
 		);
 
 		Renderer::SetMesh(mesh);
-		m_mesh->Draw(Device);
+
+		mesh->Draw(Device);
+	}
+
+	void Renderer::DrawMesh(
+		const Transform* transform,
+		Mesh& mesh)
+	{
+		DrawMesh(transform, &mesh);
 	}
 
 	void Renderer::ApplyFilter(
@@ -180,8 +182,8 @@ namespace Graphics {
 			);
 		}
 
-		Renderer::SetMesh(m_quad);
-		m_quad->Draw(Device);
+		Renderer::SetMesh(&m_quad);
+		m_quad.Draw(Device);
 
 		Renderer::EndScene();
 	}
@@ -229,16 +231,16 @@ namespace Graphics {
 	void Renderer::SetMesh(
 		Mesh* mesh)
 	{
-		if (m_mesh != mesh) {
-			if (m_mesh) {
-				m_mesh->Unbind(Device);
-			}
+		if (!mesh) {
+			m_meshData = nullptr;
+		}
 
-			m_mesh = mesh;
+		else if (m_meshData != mesh->Data()) {
+			m_meshData = mesh->Data();
 
-			if (m_mesh) {
-				m_mesh->Update(Device);
-				m_mesh->Bind(Device);
+			if (m_meshData) {
+				m_meshData->Update(Device);
+				mesh->Bind(Device);
 			}
 		}
 	}

@@ -27,27 +27,24 @@ int ScoreSystem::Initialize() {
 	iw::ref<iw::Shader> fontShader = Asset->Load<iw::Shader>("shaders/font.shader");
 	Renderer->InitShader(fontShader, iw::CAMERA);
 
-	textMatBad   = REF<iw::Material>(fontShader);
-	textMat      = REF<iw::Material>(fontShader);
+	textMatBad = REF<iw::Material>(fontShader);
+	textMat    = REF<iw::Material>(fontShader);
 
-	textMatBad->Set  ("color", iw::vector3(1, 0.1f, 0.1f));
-	textMat->Set     ("color", iw::vector3(1));
+	textMatBad->Set("color", iw::vector3(1, 0.1f, 0.1f));
+	textMatBad->SetTexture("fontMap", font->GetTexture(0));
+	textMatBad->SetTransparency(iw::Transparency::ADD);
 
-	textMatBad->SetTexture  ("fontMap", font->GetTexture(0));
-	textMat->SetTexture     ("fontMap", font->GetTexture(0));
-
-	textMatBad->SetTransparency  (iw::Transparency::ADD);
-	textMat->SetTransparency     (iw::Transparency::ADD);
+	textMat   ->Set("color", iw::vector3(1));
+	textMat   ->SetTexture("fontMap", font->GetTexture(0));
+	textMat   ->SetTransparency(iw::Transparency::ADD);
 
 	totalScoreMesh = font->GenerateMesh(std::to_string(totalScore), .02f, 1);
-
-	totalScoreMesh->SetMaterial(textMat);
-	totalScoreMesh->Initialize(Renderer->Device);
+	totalScoreMesh.SetMaterial(textMat);
+	totalScoreMesh.Data()->Initialize(Renderer->Device);
 
 	potentialScoreMesh = font->GenerateMesh(std::to_string(potentiaScore), .02f, 1);
-
-	potentialScoreMesh->SetMaterial(textMat);
-	potentialScoreMesh->Initialize(Renderer->Device);
+	potentialScoreMesh.SetMaterial(textMat);
+	potentialScoreMesh.Data()->Initialize(Renderer->Device);
 
 	return  0;
 }
@@ -72,7 +69,7 @@ void ScoreSystem::Update(
 				itr->second->SetMaterial(textMat);
 			}
 
-			itr->second->Initialize(Renderer->Device);
+			itr->second->Data()->Update(Renderer->Device);
 		}
 
 		iw::Transform trans = *transform;
@@ -95,10 +92,10 @@ void ScoreSystem::Update(
 	Renderer->EndScene();
 
 	font->UpdateMesh(totalScoreMesh, std::to_string(totalScore), .01f, 1);
-	totalScoreMesh->Update(Renderer->Device);
+	totalScoreMesh.Data()->Update(Renderer->Device);
 
 	font->UpdateMesh(potentialScoreMesh, std::to_string(potentiaScore), .01f, 1);
-	potentialScoreMesh->Update(Renderer->Device);
+	potentialScoreMesh.Data()->Update(Renderer->Device);
 
 	Renderer->BeginScene(uiCam);
 
@@ -108,19 +105,19 @@ void ScoreSystem::Update(
 	tp.Position = iw::vector3(-6.75, 4.75, 0);
 
 	if (totalScore < 0) {
-		totalScoreMesh->SetMaterial(textMatBad);
+		totalScoreMesh.SetMaterial(textMatBad);
 	}
 
 	else if (totalScore >= 0) {
-		totalScoreMesh->SetMaterial(textMat);
+		totalScoreMesh.SetMaterial(textMat);
 	}
 
 	if (potentiaScore < 0) {
-		potentialScoreMesh->SetMaterial(textMatBad);
+		potentialScoreMesh.SetMaterial(textMatBad);
 	}
 
 	else if (potentiaScore >= 0) {
-		potentialScoreMesh->SetMaterial(textMat);
+		potentialScoreMesh.SetMaterial(textMat);
 	}
 
 	Renderer->DrawMesh(t,  totalScoreMesh);
