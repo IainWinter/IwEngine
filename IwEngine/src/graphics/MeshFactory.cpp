@@ -77,13 +77,13 @@ namespace Graphics {
 
 	// default rad should be .5 not 1
 
-	MeshData MakeIcosphere(
+	MeshData* MakeIcosphere(
 		const MeshDescription& description,
 		unsigned resolution)
 	{
 		if (!description.HasBuffer(bName::POSITION)) {
 			LOG_WARNING << "Cannot generate an IcoSphere for a mesh description that does not contain at least a POSITION buffer!";
-			return MeshData(description);
+			return nullptr;
 		}
 
 		unsigned res = (unsigned)pow(4, resolution);
@@ -111,13 +111,13 @@ namespace Graphics {
 			verts[i].normalize();
 		}
 
-		MeshData data(description);
+		MeshData* data = new MeshData(description);
 
-		data.SetIndexData(indexCount, indices);
-		data.SetBufferData(bName::POSITION, vertCount, verts);
+		data->SetIndexData(indexCount, indices);
+		data->SetBufferData(bName::POSITION, vertCount, verts);
 
 		if (description.HasBuffer(bName::NORMAL)) {
-			data.GenNormals();
+			data->GenNormals();
 		}
 
 		delete[] verts;
@@ -126,14 +126,14 @@ namespace Graphics {
 		return data;
 	}
 
-	MeshData MakeUvSphere(
+	MeshData* MakeUvSphere(
 		const MeshDescription& description,
 		unsigned latCount,
 		unsigned lonCount)
 	{
 		if (!description.HasBuffer(bName::POSITION)) {
 			LOG_WARNING << "Cannot generate a UvSphere for a mesh description that does not contain at least a POSITION buffer!";
-			return MeshData(description);
+			return nullptr;
 		}
 
 		unsigned indexCount = 6 * (lonCount + (latCount - 2) * lonCount);
@@ -141,7 +141,7 @@ namespace Graphics {
 
 		if (indexCount == 0) {
 			LOG_WARNING << "Cannot generate UvSphere with lat: " << latCount << " and lon: " << lonCount << " counts!";
-			return MeshData(description);
+			return nullptr;
 		}
 
 		unsigned* indices = new unsigned[indexCount];
@@ -206,17 +206,17 @@ namespace Graphics {
 			indices[i++] = v + 1;
 		}
 
-		MeshData data(description);
+		MeshData* data = new MeshData(description);
 
-		data.SetIndexData(indexCount, indices);
-		data.SetBufferData(bName::POSITION, vertCount, verts);
+		data->SetIndexData(indexCount, indices);
+		data->SetBufferData(bName::POSITION, vertCount, verts);
 
 		if (uvs) {
-			data.SetBufferData(bName::UV, vertCount, uvs);
+			data->SetBufferData(bName::UV, vertCount, uvs);
 		}
 
 		if (description.HasBuffer(bName::NORMAL)) {
-			data.GenNormals();
+			data->GenNormals();
 		}
 
 		delete[] verts;
@@ -226,7 +226,7 @@ namespace Graphics {
 		return data;
 	}
 
-	MeshData MakeCapsule(
+	MeshData* MakeCapsule(
 		const MeshDescription& description,
 		unsigned resolution,
 		float height,
@@ -234,7 +234,7 @@ namespace Graphics {
 	{
 		if (!description.HasBuffer(bName::POSITION)) {
 			LOG_WARNING << "Cannot generate a Capsule for a mesh description that does not contain at least a POSITION buffer!";
-			return MeshData(description);
+			return nullptr;
 		}
 
 		// make segments an even number
@@ -345,17 +345,17 @@ namespace Graphics {
 			}
 		}
 
-		MeshData data(description);
+		MeshData* data = new MeshData(description);
 
-		data.SetIndexData(indexCount, indices);
-		data.SetBufferData(bName::POSITION, vertCount, verts);
+		data->SetIndexData(indexCount, indices);
+		data->SetBufferData(bName::POSITION, vertCount, verts);
 
 		if (uvs) {
-			data.SetBufferData(bName::UV, vertCount, uvs);
+			data->SetBufferData(bName::UV, vertCount, uvs);
 		}
 
 		if (description.HasBuffer(bName::NORMAL)) {
-			data.GenNormals();
+			data->GenNormals();
 		}
 
 		delete[] verts;
@@ -369,13 +369,13 @@ namespace Graphics {
 		return data;
 	}
 
-	MeshData MakeTetrahedron(
+	MeshData* MakeTetrahedron(
 		const MeshDescription& description,
 		unsigned int resolution)
 	{
 		if (!description.HasBuffer(bName::POSITION)) {
 			LOG_WARNING << "Cannot generate an Tetrahedron for a mesh description that does not contain at least a POSITION buffer!";
-			return MeshData(description);
+			return nullptr;
 		}
 
 		unsigned res = (unsigned)pow(4, resolution);
@@ -408,17 +408,17 @@ namespace Graphics {
 			detail::SubDevideVerts(verts, indices, currentIndexCount, currentVertCount);
 		}
 
-		MeshData data(description);
+		MeshData* data = new MeshData(description);
 
-		data.SetIndexData(indexCount, indices);
-		data.SetBufferData(bName::POSITION, vertCount, verts);
+		data->SetIndexData(indexCount, indices);
+		data->SetBufferData(bName::POSITION, vertCount, verts);
 
 		if (uvs) {
-			data.SetBufferData(bName::UV, vertCount, uvs);
+			data->SetBufferData(bName::UV, vertCount, uvs);
 		}
 
 		if (description.HasBuffer(bName::NORMAL)) {
-			data.GenNormals();
+			data->GenNormals();
 		}
 
 		delete[] verts;
@@ -428,14 +428,14 @@ namespace Graphics {
 		return data;
 	}
 
-	MeshData MakePlane(
+	MeshData* MakePlane(
 		const MeshDescription& description,
 		unsigned xCount,
 		unsigned zCount)
 	{
 		if (!description.HasBuffer(bName::POSITION)) {
 			LOG_WARNING << "Cannot generate an Plane for a mesh description that does not contain at least a POSITION buffer!";
-			return MeshData(description);
+			return nullptr;
 		}
 
 		unsigned indexCount = 6 * xCount * zCount;
@@ -487,17 +487,17 @@ namespace Graphics {
 			}
 		}
 
-		MeshData data(description);
+		MeshData* data = new MeshData(description);
 
-		data.SetIndexData(indexCount, indices);
-		data.SetBufferData(bName::POSITION, vertCount, verts);
+		data->SetIndexData(indexCount, indices);
+		data->SetBufferData(bName::POSITION, vertCount, verts);
 
 		if (uvs) {
-			data.SetBufferData(bName::UV, vertCount, uvs);
+			data->SetBufferData(bName::UV, vertCount, uvs);
 		}
 
 		if (description.HasBuffer(bName::NORMAL)) {
-			data.GenNormals();
+			data->GenNormals();
 		}
 
 		delete[] verts;

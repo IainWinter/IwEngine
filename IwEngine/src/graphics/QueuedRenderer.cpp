@@ -165,14 +165,6 @@ namespace Graphics {
 					m_pool.free<DrawMeshInstanceOP>(draw);
 					break;
 				}
-				case RenderOP::DRAW_MESH_ONCE: {
-					DrawMeshOnceOP* draw = (DrawMeshOnceOP*)item.Data;
-
-					Renderer::DrawMesh(&draw->Transform, draw->Mesh.get());
-
-					m_pool.free<DrawMeshOnceOP>(draw);
-					break;
-				}
 				case RenderOP::APPLY_FILTER: {
 					FilterOP* filter = (FilterOP*)item.Data;
 
@@ -257,44 +249,29 @@ namespace Graphics {
 		Mesh* mesh)
 	{
 		m_block        = 2;
-		m_material     =     mesh->Material ? mesh->Material->__GetOrder()   : 0;
-		m_transparency = val(mesh->Material ? mesh->Material->Transparency() : Transparency::NONE);
+		m_material     =     mesh->Material() ? mesh->Material()->__GetOrder()   : 0;
+		m_transparency = val(mesh->Material() ? mesh->Material()->Transparency() : Transparency::NONE);
 
 		DrawMeshInstanceOP* op = m_pool.alloc<DrawMeshInstanceOP>();
 		op->Transform = transform;
 		op->Mesh      = mesh;
 
-		m_queue.emplace_back(GenOrder(*transform, mesh), RenderOP::DRAW_MESH_INST, op);
+		m_queue.emplace_back(GenOrder(transform, mesh), RenderOP::DRAW_MESH_INST, op);
 	}
 
 	void QueuedRenderer::DrawMesh(
 		const Transform& transform,
-		Mesh* mesh)
+		Mesh& mesh)
 	{
 		m_block        = 2;
-		m_material     =     mesh->Material ? mesh->Material->__GetOrder()   : 0;
-		m_transparency = val(mesh->Material ? mesh->Material->Transparency() : Transparency::NONE);
+		m_material     =     mesh.Material() ? mesh.Material()->__GetOrder()   : 0;
+		m_transparency = val(mesh.Material() ? mesh.Material()->Transparency() : Transparency::NONE);
 
 		DrawMeshOP* op = m_pool.alloc<DrawMeshOP>();
 		op->Transform = transform;
 		op->Mesh      = mesh;
 
-		m_queue.emplace_back(GenOrder(transform, mesh), RenderOP::DRAW_MESH, op);
-	}
-
-	void QueuedRenderer::DrawMesh(
-		const Transform& transform,
-		ref<Mesh> mesh)
-	{
-		m_block        = 2;
-		m_material     =     mesh->Material ? mesh->Material->__GetOrder()   : 0;
-		m_transparency = val(mesh->Material ? mesh->Material->Transparency() : Transparency::NONE);
-
-		DrawMeshOnceOP* op = m_pool.alloc<DrawMeshOnceOP>();
-		op->Transform = transform;
-		op->Mesh      = mesh;
-
-		m_queue.emplace_back(GenOrder(transform, mesh.get()), RenderOP::DRAW_MESH_ONCE, op);
+		m_queue.emplace_back(GenOrder(&transform, &mesh), RenderOP::DRAW_MESH, op);
 	}
 
 	void QueuedRenderer::ApplyFilter(
@@ -316,7 +293,7 @@ namespace Graphics {
 	}
 
 	QueuedRenderer::key QueuedRenderer::GenOrder(
-		const Transform& transform,
+		const Transform* transform,
 		const Mesh* mesh) const
 	{
 		key layer        = m_layer; 
@@ -329,7 +306,7 @@ namespace Graphics {
 		
 		if (m_camera) {
 			if (mesh) {
-				depth = 10000.0f * (m_position - transform.Position).length_fast(); // best value can def be found. Prob some equation of last scenes difference in depth or min value
+				depth = 10000.0f * (m_position - (transform ? transform->Position : 0)).length_fast();
 			}
 		}
 

@@ -9,19 +9,20 @@ namespace Graphics {
 	//Spheres
 
 	IWGRAPHICS_API
-	MeshData MakeIcosphere(
+	MeshData* MakeIcosphere(
 		const MeshDescription& description,
 		unsigned resolution);
 
 	IWGRAPHICS_API
-	MeshData MakeUvSphere(
+	MeshData* MakeUvSphere(
 		const MeshDescription& description,
 		unsigned latCount,
 		unsigned lonCount);
 
 	// Capsule
 
-	MeshData MakeCapsule(
+	IWGRAPHICS_API
+	MeshData* MakeCapsule(
 		const MeshDescription& description,
 		unsigned resolution,
 		float height = 2.0f,
@@ -30,14 +31,14 @@ namespace Graphics {
 	//Tris
 
 	IWGRAPHICS_API
-	MeshData MakeTetrahedron(
+	MeshData* MakeTetrahedron(
 		const MeshDescription& description,
 		unsigned int resolution);
 
 	// Plane
 
 	IWGRAPHICS_API
-	MeshData MakePlane(
+	MeshData* MakePlane(
 		const MeshDescription& description,
 		unsigned xCount,
 		unsigned zCount);

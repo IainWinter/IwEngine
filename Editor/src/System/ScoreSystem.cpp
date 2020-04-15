@@ -62,14 +62,14 @@ void ScoreSystem::Update(
 			itr = scores.emplace(score->Score, font->GenerateMesh(std::to_string(score->Score), .011f, 1)).first;
 
 			if (score->Score < 0) {
-				itr->second->SetMaterial(textMatBad);
+				itr->second.SetMaterial(textMatBad);
 			}
 
 			else if (score->Score >= 0) {
-				itr->second->SetMaterial(textMat);
+				itr->second.SetMaterial(textMat);
 			}
 
-			itr->second->Data()->Update(Renderer->Device);
+			itr->second.Data()->Update(Renderer->Device);
 		}
 
 		iw::Transform trans = *transform;

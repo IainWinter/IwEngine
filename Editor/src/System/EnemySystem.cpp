@@ -33,7 +33,7 @@ int EnemySystem::Initialize() {
 	//mat.SetTransparency(iw::Transparency::ADD);
 	//mat.SetCastShadows(false);
 
-	m_bulletModel->Meshes[0].Material = REF<iw::Material>(mat);
+	m_bulletModel->Meshes[0].SetMaterial(REF<iw::Material>(mat));
 
 	return 0;
 }

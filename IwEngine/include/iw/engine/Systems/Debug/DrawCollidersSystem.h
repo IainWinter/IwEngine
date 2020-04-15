@@ -13,15 +13,12 @@ namespace Engine {
 
 		MeshDescription description;
 
-		MeshData sphere;
-		MeshData plane;
-
 		Mesh sphereInstance;
 		Mesh planeInstance;
 
 		ref<Material> material;
 
-		std::unordered_map<std::pair<float, float>, MeshData> capsules;
+		std::unordered_map<std::pair<float, float>, Mesh> capsules;
 
 	public:
 		IWENGINE_API

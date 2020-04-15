@@ -297,7 +297,7 @@ bool PlayerSystem::On(
 			p->Health -= 1;
 
 			float color = p->Health / 3.0f;
-			m_playerModel->Meshes[0].Material->Set("albedo", iw::Color(1, color, color, 1));
+			m_playerModel->Meshes[0].Material()->Set("albedo", iw::Color(1, color, color, 1));
 
 			Audio->AsStudio()->CreateInstance("playerDamaged");
 		}

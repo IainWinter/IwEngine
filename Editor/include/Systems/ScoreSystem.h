@@ -32,7 +32,7 @@ public:
 	iw::ref<iw::Font> font;
 	iw::ref<iw::Material> textMatBad;
 	iw::ref<iw::Material> textMat;
-	std::unordered_map<int, iw::ref<iw::Mesh>> scores;
+	std::unordered_map<int, iw::Mesh> scores;
 
 public:
 	ScoreSystem(

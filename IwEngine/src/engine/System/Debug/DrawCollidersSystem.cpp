@@ -22,16 +22,16 @@ namespace Engine {
 		material->SetWireframe(true);
 		material->SetShader(shader);
 
-		sphere  = MakeIcosphere(description, 5);
-		plane   = MakePlane    (description, 5, 5);
+		MeshData* sphere  = MakeIcosphere(description, 5);
+		MeshData* plane   = MakePlane    (description, 5, 5);
 
-		sphere .Initialize(Renderer->Device); // this should happen automatically when trying to render an uninitialized mesh
-		plane  .Initialize(Renderer->Device);
+		sphere ->Initialize(Renderer->Device); // this should happen automatically when trying to render an uninitialized mesh
+		plane  ->Initialize(Renderer->Device);
 
-		sphereInstance = sphere.MakeInstance();
+		sphereInstance = sphere->MakeInstance();
 		sphereInstance.SetMaterial(material);
 
-		planeInstance = plane.MakeInstance();
+		planeInstance = plane->MakeInstance();
 		planeInstance.SetMaterial(material);
 
 		return 0;
@@ -54,19 +54,19 @@ namespace Engine {
 					auto key = std::make_pair(col->Height, col->Radius);
 					auto itr = capsules.find(key);
 					if (itr == capsules.end()) {
-						itr = capsules.emplace(key, MakeCapsule(description, 5, col->Height, col->Radius)).first;
-						itr->second.Initialize(Renderer->Device);
-					}
+						iw::Mesh mesh = MakeCapsule(description, 5, col->Height, col->Radius)->MakeInstance();
 
-					Mesh instance = itr->second.MakeInstance();
-					instance.SetMaterial(material);
+						itr = capsules.emplace(key, ).first;
+						itr->second.Data()->Initialize(Renderer->Device);
+						itr->second.SetMaterial(material);
+					}		
 
-					Renderer->DrawMesh(object->ColTrans(), instance);
+					Renderer->DrawMesh(object->ColTrans(), itr->second);
 
 					break;
 				}
 				case ColliderType::PLANE: {
-					Renderer->DrawMesh(object->ColTrans(), plane);
+					Renderer->DrawMesh(object->ColTrans(), planeInstance);
 					break; 
 				}
 			}

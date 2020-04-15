@@ -38,7 +38,7 @@ namespace Graphics {
 			BEGIN,        END,
 			BEGIN_SCENE,  END_SCENE,
 			BEGIN_SHADOW, END_SHADOW,
-			DRAW_MESH, DRAW_MESH_INST, DRAW_MESH_ONCE,
+			DRAW_MESH, DRAW_MESH_INST,
 			APPLY_FILTER
 		};
 
@@ -54,17 +54,12 @@ namespace Graphics {
 
 		struct DrawMeshOP {
 			Transform Transform;
-			Mesh* Mesh;
+			Mesh      Mesh;
 		};
 
 		struct DrawMeshInstanceOP {
 			const Transform* Transform;
 			Mesh* Mesh;
-		};
-
-		struct DrawMeshOnceOP {
-			Transform Transform;
-			ref<Mesh> Mesh;
 		};
 
 		struct FilterOP {
@@ -167,12 +162,7 @@ namespace Graphics {
 		IWGRAPHICS_API
 		void DrawMesh(
 			const Transform& transform,
-			Mesh* mesh);
-
-		IWGRAPHICS_API
-		void DrawMesh(
-			const Transform& transform,
-			ref<Mesh> mesh);
+			Mesh& mesh);
 
 		IWGRAPHICS_API
 		void ApplyFilter(
@@ -181,7 +171,7 @@ namespace Graphics {
 			const ref<RenderTarget>& target = nullptr) override;
 	private:
 		key GenOrder(
-			const Transform& transform = Transform(),
+			const Transform* transform = nullptr,
 			const Mesh* mesh = nullptr) const;
 	};
 }
