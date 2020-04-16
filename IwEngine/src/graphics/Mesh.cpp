@@ -396,7 +396,6 @@ void MeshDescription::DescribeBuffer(
 		else {
 			device->DrawElements(m_topology, GetIndexBuffer().Count, 0);
 		}
-
 	}
 
 	// Mesh
