@@ -103,7 +103,7 @@ namespace RenderAPI {
 		}
 
 		else {
-			LOG_WARNING << "Couldn't find uniform " << name;
+			//LOG_WARNING << "Couldn't find uniform " << name; // make has param function and uncomment this
 		}
 
 		return param;

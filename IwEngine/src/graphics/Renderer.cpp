@@ -151,9 +151,11 @@ namespace Graphics {
 			}
 		}
 
-		m_shader->Handle()->GetParam("model")->SetAsMat4(
-			transform->WorldTransformation()
-		);
+		IPipelineParam* model = m_shader->Handle()->GetParam("model");
+
+		if (model) {
+			model->SetAsMat4(transform->WorldTransformation());
+		}
 
 		Renderer::SetMesh(mesh);
 

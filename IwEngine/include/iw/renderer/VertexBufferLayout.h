@@ -69,6 +69,9 @@ namespace RenderAPI {
 
 		IWRENDERER_API
 		unsigned GetStride() const;
+
+		IWRENDERER_API
+		unsigned GetInstanceStride() const;
 	};
 
 	IWRENDERER_API

@@ -31,6 +31,7 @@ namespace RenderAPI {
 		unsigned i = index > 0 ? index : (unsigned)m_buffers.size();
 		for (const VertexBufferLayoutElement& element : layout.GetElements()) {
 			glEnableVertexAttribArray(i);
+			glVertexAttribDivisor(i, layout.GetInstanceStride());
 			glVertexAttribPointer(
 				i,
 				element.Count, 

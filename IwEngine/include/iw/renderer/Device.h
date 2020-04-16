@@ -26,6 +26,13 @@ namespace RenderAPI {
 			ptrdiff_t offset) = 0;
 
 		IWRENDERER_API
+		virtual void DrawElementsInstanced(
+			MeshTopology topology,
+			unsigned count,
+			ptrdiff_t offset,
+			unsigned instanceCount) = 0;
+
+		IWRENDERER_API
 		virtual void Clear() = 0;
 
 		// should be in frame buffer?

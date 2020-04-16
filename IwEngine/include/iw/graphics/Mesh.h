@@ -37,8 +37,12 @@ namespace detail {
 	private:
 		std::vector<VertexBufferLayout> m_layouts;
 		std::unordered_map<bName, unsigned> m_map;
+		bool m_hasInstancedBuffer;
 
 	public:
+		IWGRAPHICS_API
+		MeshDescription();
+
 		IWGRAPHICS_API
 		void DescribeBuffer(
 			bName name,
@@ -62,6 +66,9 @@ namespace detail {
 		IWGRAPHICS_API
 		VertexBufferLayout GetBufferLayout(
 			unsigned index) const;
+
+		IWGRAPHICS_API
+		bool HasInstancedBuffer() const;
 	};
 
 	struct MeshData {
@@ -150,9 +157,9 @@ namespace detail {
 		void GenTangents(
 			bool smooth = true);
 
-		IWGRAPHICS_API void Initialize(const ref<IDevice>& device);		 // Send the mesh data to video memory
-		IWGRAPHICS_API void Update    (const ref<IDevice>& device);		 // Updates the video memory copy of the mesh
-		IWGRAPHICS_API void Destroy   (const ref<IDevice>& device);		 // Destroys the video memory copy of the mesh
+		IWGRAPHICS_API void Initialize(const ref<IDevice>& device); // Send the mesh data to video memory
+		IWGRAPHICS_API void Update    (const ref<IDevice>& device); // Updates the video memory copy of the mesh
+		IWGRAPHICS_API void Destroy   (const ref<IDevice>& device); // Destroys the video memory copy of the mesh
 	private:
 		~MeshData() = default; // force dynamic allocation
 

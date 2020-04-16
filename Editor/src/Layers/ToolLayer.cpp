@@ -32,6 +32,8 @@ namespace iw {
 		, scene(scene)
 	{}
 
+	Mesh particles;
+
 	int ToolLayer::Initialize() {
 		//// Selection buffer
 
@@ -101,6 +103,45 @@ namespace iw {
 
 		cameraSystem = new EditorCameraControllerSystem();
 		PushSystem<DrawCollidersSystem>(camera);
+
+
+
+		// Particle test
+
+		ref<Shader> particleShader = Asset->Load<Shader>("shaders/particle/simple.shader");
+		Renderer->InitShader(particleShader, CAMERA);
+
+		MeshDescription particleDec;
+
+		particleDec.DescribeBuffer(bName::POSITION, MakeLayout<float>(3));
+		//description.DescribeBuffer(bName::UV,       MakeLayout<float>(2));
+
+		VertexBufferLayout instanceLayout(1);
+		instanceLayout.Push<float>(4);
+		instanceLayout.Push<float>(4);
+		instanceLayout.Push<float>(4);
+		instanceLayout.Push<float>(4);
+
+		particleDec.DescribeBuffer(bName::UV1, instanceLayout);
+
+		MeshData* meshdata = MakePlane(particleDec, 1, 1);
+
+		matrix4 mats[4] = {
+			matrix4::create_translation(0, 2, 0),
+			matrix4::create_translation(2, 0, 0),
+			matrix4::create_translation(-2, 0, 0),
+			matrix4::create_translation(0, 2, 0),
+		};
+
+		meshdata->SetBufferData(bName::UV1, 4, mats);
+		meshdata->Initialize(Renderer->Device);
+
+		iw::Material particleMaterial(particleShader);
+		particleMaterial.Set("color", Color::From255(180, 0, 20));
+		particleMaterial.Initialize(Renderer->Device);
+
+		particles = meshdata->MakeInstance();
+		particles.SetMaterial(particleMaterial.MakeInstance());
 
 		return Layer::Initialize();
 	}
@@ -193,6 +234,8 @@ namespace iw {
 					Renderer->DrawMesh(*transform, mesh);
 				}
 			}
+
+			Renderer->DrawMesh(Transform(vector3(0, 5, 0)), particles);
 
 		Renderer->EndScene();
 

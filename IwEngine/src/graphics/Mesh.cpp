@@ -14,12 +14,21 @@ namespace detail {
 
 	// Mesh Description
 
-	void MeshDescription::DescribeBuffer(
+MeshDescription::MeshDescription()
+	: m_hasInstancedBuffer(false)
+{
+}
+
+void MeshDescription::DescribeBuffer(
 		bName name,
 		VertexBufferLayout& layout)
 	{
 		m_map.emplace(name, m_layouts.size());
 		m_layouts.push_back(layout);
+
+		if (layout.GetInstanceStride() > 0) {
+			m_hasInstancedBuffer = true;
+		}
 	}
 
 	bool MeshDescription::HasBuffer(
@@ -48,6 +57,10 @@ namespace detail {
 		unsigned index) const
 	{
 		return m_layouts.at(index);
+	}
+
+	bool MeshDescription::HasInstancedBuffer() const {
+		return m_hasInstancedBuffer;
 	}
 
 	// Mesh Data
@@ -375,7 +388,15 @@ namespace detail {
 			LOG_WARNING << "Mesh is begin drawn out of date!";
 		}
 #endif
-		device->DrawElements(m_topology, GetIndexBuffer().Count, 0);
+
+		if (m_description.HasInstancedBuffer()) {
+			device->DrawElementsInstanced(m_topology, GetIndexBuffer().Count, 0, GetCount(bName::UV1));
+		}
+
+		else {
+			device->DrawElements(m_topology, GetIndexBuffer().Count, 0);
+		}
+
 	}
 
 	// Mesh

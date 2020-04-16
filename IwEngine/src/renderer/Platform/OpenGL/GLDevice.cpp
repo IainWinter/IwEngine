@@ -41,6 +41,30 @@ namespace RenderAPI {
 		}
 	}
 
+	void GLDevice::DrawElementsInstanced(
+		MeshTopology topology,
+		unsigned count,
+		ptrdiff_t offset,
+		unsigned instanceCount)
+	{
+		GLenum glTopology = 0;
+		switch (topology) {
+			case POINTS:    glTopology = GL_POINTS;	   break;
+			case LINES:     glTopology = GL_LINES;     break;
+			case TRIANGLES: glTopology = GL_TRIANGLES; break;
+			case QUADS:     glTopology = GL_QUADS;	   break;
+		}
+
+		if (glTopology) {
+			glDrawElementsInstanced(
+				glTopology,
+				(int)count,
+				GL_UNSIGNED_INT,
+				(const void*)offset,
+				instanceCount);
+		}
+	}
+	
 	void GLDevice::Clear() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}

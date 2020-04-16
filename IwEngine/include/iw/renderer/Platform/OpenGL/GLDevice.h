@@ -15,6 +15,13 @@ namespace RenderAPI {
 			ptrdiff_t offset) override;
 
 		IWRENDERER_API
+		void DrawElementsInstanced(
+			MeshTopology topology,
+			unsigned count,
+			ptrdiff_t offset,
+			unsigned instanceCount) override;
+
+		IWRENDERER_API
 		void Clear() override;
 
 		IWRENDERER_API

@@ -46,6 +46,10 @@ namespace RenderAPI {
 		return m_stride;
 	}
 
+	unsigned VertexBufferLayout::GetInstanceStride() const {
+		return m_instanceStride;
+	}
+	
 	unsigned int RenderAPI::GetSizeOfType(
 		unsigned int glType)
 	{
