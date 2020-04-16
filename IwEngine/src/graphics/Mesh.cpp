@@ -4,6 +4,14 @@
 
 namespace iw {
 namespace Graphics {
+namespace detail {
+	void DestroyMeshData(
+		MeshData* diekiddo)
+	{
+		delete diekiddo;
+	}
+}
+
 	// Mesh Description
 
 	void MeshDescription::DescribeBuffer(
@@ -50,7 +58,9 @@ namespace Graphics {
 		, m_indexBuffer(nullptr)
 		, m_outdated(false)
 		, m_bound(false)
-	{}
+	{
+		m_this = ref<MeshData>(this, detail::DestroyMeshData);
+	}
 
 	MeshData::MeshData(
 		const MeshDescription& description)
@@ -61,15 +71,25 @@ namespace Graphics {
 		, m_outdated(false)
 		, m_bound(false)
 	{
-		m_buffers.resize((size_t)1 + description.GetBufferCount());
+		m_this = ref<MeshData>(this, detail::DestroyMeshData);
+
+		m_buffers.resize(description.GetBufferCount());
 	}
 
 	Mesh MeshData::MakeInstance() {
-		Mesh mesh(ref<MeshData>(this));
+		return Mesh(m_this);
+	}
+
+	bool MeshData::IsInitialized() const {
+		return !!m_vertexArray || !!m_indexBuffer;
 	}
 
 	MeshTopology MeshData::Topology() const {
 		return m_topology;
+	}
+
+	bool MeshData::IsOutdated() const {
+		return m_outdated;
 	}
 
 	const MeshDescription& MeshData::Description() const {
@@ -111,22 +131,19 @@ namespace Graphics {
 		unsigned count,
 		void* data)
 	{
-		unsigned index = m_description.GetBufferIndex(name);
-
-		if (index >= m_buffers.size() - 1) {
+		if (!m_description.HasBuffer(name)) {
 			return;
 		}
 
-		unsigned size = m_description
-			.GetBufferLayout(index)
-			.GetStride() * count;
+		unsigned index = m_description.GetBufferIndex(name);
+		unsigned size  = count * m_description.GetBufferLayout(index).GetStride();
 
 		BufferData& buffer = m_buffers[index];
 
 		buffer.Count = count;
-		buffer.Data = ref<char[]>(new char[(size_t)size]);
+		buffer.Data = ref<char[]>(new char[size]);
 
-		memcpy(buffer.Data.get(), data, size);
+		memcpy(buffer.Ptr(), data, size);
 
 		m_outdated = true;
 	}
@@ -135,14 +152,10 @@ namespace Graphics {
 		unsigned count,
 		unsigned* data)
 	{
-		unsigned size = sizeof(unsigned) * count;
+		m_index.Count = count;
+		m_index.Index = ref<unsigned[]>(new unsigned[count]);
 
-		BufferData& buffer = m_buffers.back();
-
-		buffer.Count = count;
-		buffer.Data = ref<char[]>(new char[(size_t)size]);
-
-		memcpy(buffer.Data.get(), data, size);
+		memcpy(m_index.Ptr(), data, count * sizeof(unsigned));
 
 		m_outdated = true;
 	}
@@ -195,12 +208,16 @@ namespace Graphics {
 		bool smooth)
 	{
 		if (   !m_description.HasBuffer(bName::UV)
-			|| !m_description.HasBuffer(bName::POSITION))
+			|| !m_description.HasBuffer(bName::POSITION)
+			|| GetCount(bName::UV) == 0
+			|| GetCount(bName::POSITION) == 0)
 		{
 			return;
 		}
 
-		if (!m_description.HasBuffer(bName::NORMAL)) {
+		if (   m_description.HasBuffer(bName::NORMAL)
+			&& GetCount(bName::NORMAL) == 0)
+		{
 			GenNormals(smooth);
 		}
 
@@ -210,7 +227,7 @@ namespace Graphics {
 
 		// check if mesh description has tangents and bi tangents
 
-		vector3* tangents   = new vector3[GetCount(bName::NORMAL)];
+		vector3* tangents  = new vector3[GetCount(bName::NORMAL)];
 		vector3* btangents = new vector3[GetCount(bName::NORMAL)];
 
 		unsigned v = 0;
@@ -229,10 +246,10 @@ namespace Graphics {
 
 			float f = 1.0f / duv1.cross_length(duv2);
 
-			vector3 tangent = f * (edge1 * duv2.y - edge2 * duv1.y);
+			vector3 tangent   = f * (edge1 * duv2.y - edge2 * duv1.y);
 			vector3 bitangent = f * (edge2 * duv1.x - edge1 * duv2.x);
 
-			tangent.normalize();
+			tangent  .normalize();
 			bitangent.normalize();
 
 			tangents[index[i + 0]] = tangent;
@@ -248,24 +265,24 @@ namespace Graphics {
 		SetBufferData(bName::BITANGENT, GetCount(bName::NORMAL), btangents);
 	}
 
-	const MeshData::BufferData& MeshData::GetBuffer(
-		unsigned index) const
-	{
-		return m_buffers[index];
-	}
-
 	MeshData::BufferData& MeshData::GetBuffer(
 		unsigned index)
 	{
 		return m_buffers[index];
 	}
 
-	const MeshData::IndexData& MeshData::GetIndexBuffer() const {
-		return *(IndexData*)&m_buffers.back();
+	const MeshData::BufferData& MeshData::GetBuffer(
+		unsigned index) const
+	{
+		return m_buffers[index];
 	}
 
-	MeshData::IndexData& MeshData::GetIndexBuffer(){
-		return *(IndexData*)&m_buffers.back();
+	MeshData::IndexData& MeshData::GetIndexBuffer() {
+		return m_index;
+	}
+
+	const MeshData::IndexData& MeshData::GetIndexBuffer() const {
+		return m_index;
 	}
 
 	void MeshData::Initialize(
@@ -283,12 +300,14 @@ namespace Graphics {
 		m_vertexArray = device->CreateVertexArray();
 		m_indexBuffer = device->CreateIndexBuffer(GetIndexBuffer().Ptr(), GetIndexBuffer().Count);
 
-		for (int i = 0; i < m_buffers.size() - 1; i++) {
+		for (int i = 0; i < m_buffers.size(); i++) {
 			BufferData& data = GetBuffer(i);
 			VertexBufferLayout& layout = m_description.GetBufferLayout(i);
 
-			IVertexBuffer* buffer = device->CreateVertexBuffer(data.Ptr(), data.Count * layout.GetStride());
-			device->AddBufferToVertexArray(m_vertexArray, buffer, layout);
+			if (data.Ptr() != nullptr) {
+				IVertexBuffer* buffer = device->CreateVertexBuffer(data.Ptr(), data.Count * layout.GetStride());
+				device->AddBufferToVertexArray(m_vertexArray, buffer, layout, i);
+			}
 		}
 	}
 
@@ -307,9 +326,11 @@ namespace Graphics {
 
 		m_outdated = false;
 
-		for (int i = 0; i < m_buffers.size() - 1; i++) {
+		for (int i = 0; i < m_buffers.size(); i++) {
 			BufferData& data = GetBuffer(i);
 			VertexBufferLayout& layout = m_description.GetBufferLayout(i);
+
+			// check for null data?
 
 			device->UpdateVertexArrayData(m_vertexArray, i, data.Ptr(), data.Count * layout.GetStride());
 		}
@@ -322,6 +343,20 @@ namespace Graphics {
 			device->DestroyVertexArray(m_vertexArray);
 			device->DestroyBuffer(m_indexBuffer);
 		}
+	}
+
+	void MeshData::Bind(
+		const ref<IDevice>& device)
+	{
+		m_bound = true;
+		device->SetVertexArray(m_vertexArray);
+		device->SetIndexBuffer(m_indexBuffer);
+	}
+
+	void MeshData::Unbind(
+		const ref<IDevice>& device)
+	{
+		m_bound = false;
 	}
 
 	void MeshData::Draw(
@@ -343,20 +378,6 @@ namespace Graphics {
 		device->DrawElements(m_topology, GetIndexBuffer().Count, 0);
 	}
 
-	void MeshData::Bind(
-		const ref<IDevice>& device)
-	{
-		m_bound = true;
-		device->SetVertexArray(m_vertexArray);
-		device->SetIndexBuffer(m_indexBuffer);
-	}
-
-	void MeshData::Unbind(
-		const ref<IDevice>& device)
-	{
-		m_bound = false;
-	}
-
 	// Mesh
 
 	Mesh::Mesh(
@@ -370,26 +391,33 @@ namespace Graphics {
 		m_material = material;
 	}
 
-	const ref<iw::Material> Mesh::Material() const {
-		return m_material;
+	Mesh Mesh::MakeInstance() const {
+		Mesh mesh = *this;
+		mesh.SetMaterial(mesh.Material()->MakeInstance());
+		
+		return mesh;
 	}
 
 	ref<iw::Material> Mesh::Material() {
 		return m_material;
 	}
 
-	const ref<iw::MeshData> Mesh::Data() const {
-		return m_data;
+	const ref<iw::Material> Mesh::Material() const {
+		return m_material;
 	}
 
 	ref<iw::MeshData> Mesh::Data() {
 		return m_data;
 	}
 
-	void Mesh::Draw(
-		const ref<IDevice>& device) const
+	const ref<iw::MeshData> Mesh::Data() const {
+		return m_data;
+	}
+
+	void Mesh::SetData(
+		ref<MeshData>& data)
 	{
-		m_data->Draw(device);
+		m_data = data;
 	}
 
 	void Mesh::Bind(
@@ -403,4 +431,11 @@ namespace Graphics {
 	{
 		m_data->Unbind(device);
 	}
+
+	void Mesh::Draw(
+		const ref<IDevice>& device) const
+	{
+		m_data->Draw(device);
+	}
+}
 }

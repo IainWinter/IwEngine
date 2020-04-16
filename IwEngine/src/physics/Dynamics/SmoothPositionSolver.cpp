@@ -23,6 +23,8 @@ namespace Physics {
 				* fmax(resolution.length() - slop, 0.0f)
 				/ (aInvMass + bInvMass);
 		
+			//float neg = aBody ? 1.0f : -1.0f;
+
 			if (aBody ? aBody->IsKinematic() : false) {
 				aBody->Trans().Position -= aInvMass * correction;
 			}

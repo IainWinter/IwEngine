@@ -93,7 +93,7 @@ namespace Graphics {
 			const ref<IDevice>& device);
 
 		IWGRAPHICS_API
-		virtual ~Renderer();
+		virtual ~Renderer() = default;
 
 		IWGRAPHICS_API
 		void Initialize();
@@ -175,7 +175,7 @@ namespace Graphics {
 		// Same as DrawMesh
 		IWGRAPHICS_API
 		virtual void DrawMesh(
-			const Transform* transform,
+			const Transform& transform,
 			Mesh& mesh);
 
 		// Runs a shader on a fullscreen quad with verts and uvs

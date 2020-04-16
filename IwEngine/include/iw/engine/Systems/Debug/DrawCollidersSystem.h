@@ -18,7 +18,7 @@ namespace Engine {
 
 		ref<Material> material;
 
-		std::unordered_map<std::pair<float, float>, Mesh> capsules;
+		std::unordered_map<std::pair<float, float>, Mesh, pair_hash> capsules;
 
 	public:
 		IWENGINE_API

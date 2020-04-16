@@ -25,7 +25,6 @@ int ScoreSystem::Initialize() {
 	//font->Initialize(Renderer->Device);
 
 	iw::ref<iw::Shader> fontShader = Asset->Load<iw::Shader>("shaders/font.shader");
-	Renderer->InitShader(fontShader, iw::CAMERA);
 
 	textMatBad = REF<iw::Material>(fontShader);
 	textMat    = REF<iw::Material>(fontShader);
@@ -38,13 +37,17 @@ int ScoreSystem::Initialize() {
 	textMat   ->SetTexture("fontMap", font->GetTexture(0));
 	textMat   ->SetTransparency(iw::Transparency::ADD);
 
-	totalScoreMesh = font->GenerateMesh(std::to_string(totalScore), .02f, 1);
-	totalScoreMesh.SetMaterial(textMat);
-	totalScoreMesh.Data()->Initialize(Renderer->Device);
+	textMatBad->Initialize(Renderer->Device);
+	textMat   ->Initialize(Renderer->Device);
 
+	totalScoreMesh     = font->GenerateMesh(std::to_string(totalScore), .02f, 1);
 	potentialScoreMesh = font->GenerateMesh(std::to_string(potentiaScore), .02f, 1);
-	potentialScoreMesh.SetMaterial(textMat);
+
+	totalScoreMesh    .Data()->Initialize(Renderer->Device);
 	potentialScoreMesh.Data()->Initialize(Renderer->Device);
+	
+	potentialScoreMesh.SetMaterial(textMat);
+	totalScoreMesh    .SetMaterial(textMat);
 
 	return  0;
 }
@@ -54,40 +57,40 @@ void ScoreSystem::Update(
 {
 	Renderer->BeginScene(camera);
 
-	for (auto entity : view) {
-		auto [transform, score] = entity.Components.Tie<Components>();
+		for (auto entity : view) {
+			auto [transform, score] = entity.Components.Tie<Components>();
 
-		auto itr = scores.find(score->Score);
-		if (itr == scores.end()) {
-			itr = scores.emplace(score->Score, font->GenerateMesh(std::to_string(score->Score), .011f, 1)).first;
+			auto itr = scores.find(score->Score);
+			if (itr == scores.end()) {
+				itr = scores.emplace(score->Score, font->GenerateMesh(std::to_string(score->Score), .011f, 1)).first;
 
-			if (score->Score < 0) {
-				itr->second.SetMaterial(textMatBad);
+				if (score->Score < 0) {
+					itr->second.SetMaterial(textMatBad);
+				}
+
+				else if (score->Score >= 0) {
+					itr->second.SetMaterial(textMat);
+				}
+
+				itr->second.Data()->Initialize(Renderer->Device);
 			}
 
-			else if (score->Score >= 0) {
-				itr->second.SetMaterial(textMat);
+			iw::Transform trans = *transform;
+			trans.Position.y +=  0.1f * (score->Timer / score->Lifetime);
+			trans.Position.z += -2    * (score->Timer / score->Lifetime);
+
+			trans.Rotation = iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2);
+
+			trans.Scale = 1.0f;
+
+			if (score->Timer >= score->Lifetime) {
+				QueueDestroyEntity(entity.Index);
 			}
 
-			itr->second.Data()->Update(Renderer->Device);
+			score->Timer += iw::Time::DeltaTime();
+
+			Renderer->DrawMesh(trans, itr->second);
 		}
-
-		iw::Transform trans = *transform;
-		trans.Position.y +=  0.1f * (score->Timer / score->Lifetime);
-		trans.Position.z += -2    * (score->Timer / score->Lifetime);
-
-		trans.Rotation = iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2);
-
-		trans.Scale = 1.0f;
-
-		if (score->Timer >= score->Lifetime) {
-			QueueDestroyEntity(entity.Index);
-		}
-
-		score->Timer += iw::Time::DeltaTime();
-
-		Renderer->DrawMesh(trans, itr->second);
-	}
 
 	Renderer->EndScene();
 
@@ -96,8 +99,6 @@ void ScoreSystem::Update(
 
 	font->UpdateMesh(potentialScoreMesh, std::to_string(potentiaScore), .01f, 1);
 	potentialScoreMesh.Data()->Update(Renderer->Device);
-
-	Renderer->BeginScene(uiCam);
 
 	iw::Transform t;
 	iw::Transform tp;
@@ -120,8 +121,10 @@ void ScoreSystem::Update(
 		potentialScoreMesh.SetMaterial(textMat);
 	}
 
-	Renderer->DrawMesh(t,  totalScoreMesh);
-	Renderer->DrawMesh(tp, potentialScoreMesh);
+	Renderer->BeginScene(uiCam);
+
+		Renderer->DrawMesh(t,  totalScoreMesh);
+		Renderer->DrawMesh(tp, potentialScoreMesh);
 
 	Renderer->EndScene();
 }

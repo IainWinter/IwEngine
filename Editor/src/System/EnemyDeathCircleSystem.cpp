@@ -11,7 +11,6 @@
 
 EnemyDeathCircleSystem::EnemyDeathCircleSystem()
 	: iw::System<iw::Transform, iw::Model, iw::CollisionObject, EnemyDeathCircle>("Enemy Death Circle")
-	, m_deathCircleModel(nullptr)
 {
 	m_prefab.Radius   = 4.0f;
 	m_prefab.FadeTime = 0.4f;
@@ -19,18 +18,13 @@ EnemyDeathCircleSystem::EnemyDeathCircleSystem()
 }
 
 int EnemyDeathCircleSystem::Initialize() {
-	iw::Mesh* mesh = Asset->Load<iw::Model>("Sphere")->Meshes[0].Instance();
-	iw::Material mat = mesh->Material->Instance();
+	iw::Mesh sphere = Asset->Load<iw::Model>("Sphere")->GetMesh(0).MakeInstance();
 
-	iw::Model circle = { mesh, 1 };
+	sphere.Material()->Set("albedo", iw::Color::From255(0, 195, 255, 64));
+	sphere.Material()->SetTransparency(iw::Transparency::ADD);
+	sphere.Material()->SetCastShadows(false);
 
-	m_deathCircleModel = Asset->Give<iw::Model>("Death Circle", &circle);
-
-	mat.Set("albedo", iw::Color::From255(0, 195, 255, 64));
-	mat.SetTransparency(iw::Transparency::ADD);
-	mat.SetCastShadows(false);
-
-	m_deathCircleModel->Meshes[0].Material = REF<iw::Material>(mat);
+	m_deathCircleModel.AddMesh(sphere);
 
 	return 0;
 }
@@ -54,7 +48,7 @@ void EnemyDeathCircleSystem::Update(
 		}
 
 		else {
-			iw::Color* color = model->Meshes[0].Material->Get<iw::Color>("albedo");
+			iw::Color* color = model->GetMesh(0).Material()->Get<iw::Color>("albedo");
 			color->a = iw::lerp(color->a, 0.0f, rate);
 
 			if (object->Col()) {
@@ -85,12 +79,12 @@ iw::Transform* EnemyDeathCircleSystem::SpawnDeathCircle(
 	iw::Entity circle = Space->CreateEntity<iw::Transform, iw::Model, iw::SphereCollider, iw::CollisionObject, EnemyDeathCircle>();
 	
 	                         circle.SetComponent<EnemyDeathCircle>   (prefab);
-	iw::Model*           m = circle.SetComponent<iw::Model>          (*m_deathCircleModel);
+	iw::Model*           m = circle.SetComponent<iw::Model>          (m_deathCircleModel);
 	iw::Transform*       t = circle.SetComponent<iw::Transform>      (position, 0.0f);
 	iw::SphereCollider*  s = circle.SetComponent<iw::SphereCollider> (iw::vector3::zero, 1);
 	iw::CollisionObject* c = circle.SetComponent<iw::CollisionObject>();
 
-	m->Meshes[0].Material->Set("albedo", iw::Color::From255(0, 195, 255, 64));
+	m->GetMesh(0).Material()->Set("albedo", iw::Color::From255(0, 195, 255, 64));
 
 	c->SetCol(s);
 	c->SetTrans(t);

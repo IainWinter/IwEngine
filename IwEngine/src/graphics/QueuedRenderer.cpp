@@ -54,7 +54,6 @@ namespace Graphics {
 						case RenderOP::END_SCENE:    block = RenderOP::BEGIN;  break;
 						case RenderOP::DRAW_MESH:                              break;
 						case RenderOP::DRAW_MESH_INST:                         break;
-						case RenderOP::DRAW_MESH_ONCE:                         break;
 						default:                     invalid = true;           break;
 					}
 
@@ -65,7 +64,6 @@ namespace Graphics {
 						case RenderOP::END_SHADOW:   block = RenderOP::BEGIN;  break;
 						case RenderOP::DRAW_MESH:                              break;
 						case RenderOP::DRAW_MESH_INST:                         break;
-						case RenderOP::DRAW_MESH_ONCE:                         break;
 						default:                     invalid = true;           break;
 					}
 
@@ -94,19 +92,9 @@ namespace Graphics {
 
 		// sort
 
-		std::vector<RenderItem> items;
-		for (RenderItem& i : m_queue) {
-			items.push_back(i);
-		}
-
 		std::sort(m_queue.begin(), m_queue.end(), [&](RenderItem& a, RenderItem& b) {
 			return a.Order < b.Order;
 		});
-
-		std::vector<RenderItem> items2;
-		for (RenderItem& i : m_queue) {
-			items2.push_back(i);
-		}
 
 		// execute
 
@@ -152,7 +140,7 @@ namespace Graphics {
 				case RenderOP::DRAW_MESH: {
 					DrawMeshOP* draw = (DrawMeshOP*)item.Data;
 
-					Renderer::DrawMesh(&draw->Transform, draw->Mesh);
+					Renderer::DrawMesh(draw->Transform, draw->Mesh);
 
 					m_pool.free<DrawMeshOP>(draw);
 					break;

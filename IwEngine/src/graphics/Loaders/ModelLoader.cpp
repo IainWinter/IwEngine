@@ -113,83 +113,138 @@ namespace Graphics {
 		//	aiTexture* texture = scene->mTextures[0];
 		//}
 
-		Model* model = new Model {
-			new Mesh[scene->mNumMeshes],
-			scene->mNumMeshes
-		};
+		Model* model = new Model();
 
 		for (size_t i = 0; i < scene->mNumMeshes; i++) {
 			const aiMesh* aimesh = scene->mMeshes[i];
 
-			Mesh& mesh = model->Meshes[i];
-			mesh.SetMaterial(materials.at(aimesh->mMaterialIndex));
-			
-			size_t indexCount = 0;
-			for (size_t t = 0; t < aimesh->mNumFaces; t++) {
-				indexCount += aimesh->mFaces[t].mNumIndices; // could a face have diffrent incices?
-			}
-
-			unsigned* indices = new unsigned int[indexCount];
-			
-			{
-				unsigned i = 0;
-				for (size_t f = 0; f < aimesh->mNumFaces; f++) {
-					const aiFace& face = aimesh->mFaces[f];
-					for (size_t v = 0; v < face.mNumIndices; v++) {
-						indices[i++] = face.mIndices[v];
-					}
-				}
-			}
-
-			mesh.SetIndices(indexCount, indices);
-			delete[] indices;
+			MeshDescription description;
 
 			if (aimesh->HasPositions()) {
-				mesh.SetVertices(aimesh->mNumVertices, (iw::vector3*)aimesh->mVertices);
+				description.DescribeBuffer(bName::POSITION, MakeLayout<float>(3));
 			}
 
 			if (aimesh->HasNormals()) {
-				mesh.SetNormals(aimesh->mNumVertices, (iw::vector3*)aimesh->mNormals);
+				description.DescribeBuffer(bName::NORMAL, MakeLayout<float>(3));
 			}
 
 			if (aimesh->HasTangentsAndBitangents()) {
-				mesh.SetTangents  (aimesh->mNumVertices, (iw::vector3*)aimesh->mTangents);
-				mesh.SetBiTangents(aimesh->mNumVertices, (iw::vector3*)aimesh->mBitangents);
+				description.DescribeBuffer(bName::TANGENT, MakeLayout<float>(3));
+				description.DescribeBuffer(bName::BITANGENT, MakeLayout<float>(3));
 			}
 
-			// Need to check for multiple channels i guess
-			if (aimesh->HasVertexColors(0)) {
-				mesh.SetColors(aimesh->mNumVertices, (iw::vector4*)aimesh->mColors[0]);
+			// max of 8
+			for (int i = 0; i < aimesh->GetNumColorChannels(); i++) {
+				bName channel = (bName)((int)bName::COLOR + i);
+				description.DescribeBuffer(channel, MakeLayout<float>(4));
 			}
 
-			if (aimesh->HasTextureCoords(0)) {
-				mesh.SetUVs(aimesh->mNumVertices, nullptr);
-				for (size_t i = 0; i < mesh.VertexCount; i++) { // ai tex coords are vec3
-					mesh.Uvs[i].x = aimesh->mTextureCoords[0][i].x;
-					mesh.Uvs[i].y = aimesh->mTextureCoords[0][i].y;
+			// max of 8
+			for (int i = 0; i < aimesh->GetNumUVChannels(); i++) {
+				bName channel = (bName)((int)bName::UV + i);
+				description.DescribeBuffer(channel, MakeLayout<float>(aimesh->mNumUVComponents[i]));
+			}
+
+			MeshData* data = new MeshData(description);
+
+			if (description.HasBuffer(bName::POSITION)) {
+				data->SetBufferData(bName::POSITION, aimesh->mNumVertices, aimesh->mVertices);
+			}
+
+			if (description.HasBuffer(bName::NORMAL)) {
+				data->SetBufferData(bName::NORMAL, aimesh->mNumVertices, aimesh->mNormals);
+			}
+
+			if (   description.HasBuffer(bName::TANGENT)
+				&& description.HasBuffer(bName::BITANGENT))
+			{
+				data->SetBufferData(bName::TANGENT, aimesh->mNumVertices, aimesh->mTangents);
+				data->SetBufferData(bName::BITANGENT, aimesh->mNumVertices, aimesh->mBitangents);
+			}
+
+			for (int c = 0; c < aimesh->GetNumColorChannels(); c++) {
+				bName channel = (bName)((int)bName::COLOR + c);
+				if (description.HasBuffer(channel)) {
+					data->SetBufferData(channel, aimesh->mNumVertices, aimesh->mColors[c]);
 				}
 			}
 
+			for (int c = 0; c < aimesh->GetNumUVChannels(); c++) {
+				bName channel = (bName)((int)bName::UV + c);
+				if (description.HasBuffer(channel)) {
+					unsigned uvComponents = aimesh->mNumUVComponents[c];
+					unsigned count        = aimesh->mNumVertices * uvComponents;
+
+					float* buffer = new float[count];
+
+					for (int i = 0, j = 0; j < count; i++) {
+						switch (uvComponents) {
+							case 1: {
+								buffer[j++] = aimesh->mTextureCoords[c][i].x;
+								break;
+							}
+							case 2: {
+								buffer[j++] = aimesh->mTextureCoords[c][i].x;
+								buffer[j++] = aimesh->mTextureCoords[c][i].y;
+								break;
+							}
+							case 3: {
+								buffer[j++] = aimesh->mTextureCoords[c][i].x;
+								buffer[j++] = aimesh->mTextureCoords[c][i].y;
+								buffer[j++] = aimesh->mTextureCoords[c][i].z;
+								break;
+							}
+						}
+					}
+
+					data->SetBufferData(channel, aimesh->mNumVertices, buffer);
+					
+					delete[] buffer;
+				}
+			}
+
+			size_t indexCount = 0;
+			for (size_t t = 0; t < aimesh->mNumFaces; t++) {
+				indexCount += aimesh->mFaces[t].mNumIndices; // could a face have a diffrent # of incices???
+			}
+
+			unsigned* indices = new unsigned int[indexCount];
+
+			for (size_t f = 0, i = 0; f < aimesh->mNumFaces; f++) {
+				const aiFace& face = aimesh->mFaces[f];
+				for (size_t v = 0; v < face.mNumIndices; v++) {
+					indices[i++] = face.mIndices[v];
+				}
+			}
+
+			data->SetIndexData(indexCount, indices);
+			delete[] indices;
+
+			Mesh mesh = data->MakeInstance();
+			mesh.SetMaterial(materials.at(aimesh->mMaterialIndex));
+
+			model->AddMesh(mesh);
+						
 			//if (aimesh->HasBones()) {
 			//	aiBone* aibone = aimesh->mBones[i];
 			//	
 			//	aiVector3D pos;
 			//	aiVector3D rot;
 			//	aiVector3D scale;
-
+			//
 			//	aibone->mOffsetMatrix.Decompose(scale, rot, pos);
-
+			//
 			//	Bone bone;
 			//	bone.Offset.Position = iw::vector3(pos.x,     pos.y,   pos.z);
 			//	bone.Offset.Scale    = iw::vector3(scale.x, scale.y, scale.z);
 			//	bone.Offset.Rotation = iw::quaternion::from_euler_angles(rot.x, rot.y, rot.z);
-
+			//
 			//	bone.WeightCount = aibone->mNumWeights;
 			//	bone.Weights     = new VertexWeight[bone.WeightCount];
-
+			//
 			//	for (size_t i = 0; i < bone.WeightCount; i++) {
 			//		aiVertexWeight aiweight = aibone->mWeights[i];
-
+			//
 			//		bone.Weights[i].Index  = aiweight.mVertexId;
 			//		bone.Weights[i].Weight = aiweight.mWeight;
 			//	}
@@ -197,15 +252,6 @@ namespace Graphics {
 		}
 
 		importer.FreeScene();
-
-		//Mesh* mesh = new Mesh[];
-
-		//Mesh* quad = new Mesh();
-		//quad->SetMaterial(quadMaterial);
-		//quad->SetVertices(model.VertexCount, qdata.Vertices);
-		//quad->SetNormals(qdata.VertexCount, qdata.Normals);
-		//quad->SetIndices(qdata.FaceCount, qdata.Faces);
-		//quad->Compile(Renderer.Device);
 
 		return model;
 	}

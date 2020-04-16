@@ -5,9 +5,6 @@
 #include "iw/physics/Collision/SphereCollider.h"
 #include "iw/audio/AudioSpaceStudio.h"
 
-//#include "Layers/TestLayer.h"
-//#include "Layers/RayMarchingLayer.h"
-
 namespace iw {
 	App::App() {
 		Audio = REF<AudioSpaceStudio>("assets/sounds/");
@@ -61,6 +58,7 @@ namespace iw {
 		if (GetLayer("Toolbox") != nullptr) {
 			//sandbox->Update();
 			sandbox->UpdateSystems();
+			sandbox->FixedUpdateSystems();
 		}
 
 		Application::Update();

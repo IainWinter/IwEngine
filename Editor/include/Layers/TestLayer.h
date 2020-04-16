@@ -13,10 +13,11 @@ namespace iw {
 		Scene* scene;
 		ref<Shader> shader;
 
-		Camera* camera;
-		PointLight* light;
-		PointLight* light2;
-		DirectionalLight* dirLight;
+		ref<RenderTarget> dirShadowTarget;
+		ref<RenderTarget> pointShadowTarget;
+
+		MeshData* sphere;
+		MeshData* plane;
 
 	public:
 		TestLayer();
@@ -27,5 +28,9 @@ namespace iw {
 		void FixedUpdate() override;
 
 		void ImGui() override;
+
+		Scene* GetScene() {
+			return scene;
+		}
 	};
 }

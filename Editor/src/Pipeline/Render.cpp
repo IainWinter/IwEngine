@@ -71,18 +71,16 @@ namespace iw {
 			for (auto m_e : space->Query<Transform, Model>()) {
 				auto [m_t, m_m] = m_e.Components.Tie<ModelComponents>();
 
-				for (size_t i = 0; i < m_m->MeshCount; i++) {
-					Mesh& mesh = m_m->Meshes[i];
-
-					if (mesh.Material->Get<Color>("albedo")->a != 1) {
+				for (Mesh& mesh : *m_m) {
+					if (mesh.Material()->Get<Color>("albedo")->a != 1) {
 						transs.push_back(m_t);
 						meshes.push_back(&mesh);
 						continue;
 					}
 
-					renderer->Device->SetPipeline(mesh.Material->Shader->Handle());
+					renderer->Device->SetPipeline(mesh.Material()->Shader->Handle());
 
-					mesh.Material->Shader->Handle()->GetParam("ambiance")
+					mesh.Material()->Shader->Handle()->GetParam("ambiance")
 						->SetAsFloat(ambiance);
 
 					renderer->DrawMesh(m_t, &mesh);
@@ -95,9 +93,9 @@ namespace iw {
 				Transform* m_t = transs[i];
 				Mesh&     mesh = *meshes[i];
 
-				renderer->Device->SetPipeline(mesh.Material->Shader->Handle());
+				renderer->Device->SetPipeline(mesh.Material()->Shader->Handle());
 
-				mesh.Material->Shader->Handle()->GetParam("ambiance")
+				mesh.Material()->Shader->Handle()->GetParam("ambiance")
 					->SetAsFloat(ambiance);
 
 				renderer->DrawMesh(m_t, &mesh);

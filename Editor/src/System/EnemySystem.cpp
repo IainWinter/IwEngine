@@ -15,25 +15,17 @@
 EnemySystem::EnemySystem(
 	iw::Entity& player)
 	: iw::System<iw::Transform, Enemy>("Enemy")
-	, m_bulletModel(nullptr)
 	, m_enemyCount(0)
 	, m_levelResetTimer(0)
 	, player(player)
 {}
 
 int EnemySystem::Initialize() {
-	iw::Mesh*    mesh = Asset->Load<iw::Model>("Sphere")->Meshes[0].Instance();
-	iw::Material mat  = mesh->Material->Instance();
+	iw::Mesh sphere = Asset->Load<iw::Model>("Sphere")->GetMesh(0).MakeInstance();
 
-	iw::Model bullet = { mesh, 1 };
+	sphere.Material()->Set("albedo", iw::Color::From255(0, 213, 255, 191));
 
-	m_bulletModel = Asset->Give<iw::Model>("Bullet", &bullet);
-
-	mat.Set("albedo", iw::Color::From255(0, 213, 255, 191));
-	//mat.SetTransparency(iw::Transparency::ADD);
-	//mat.SetCastShadows(false);
-
-	m_bulletModel->Meshes[0].SetMaterial(REF<iw::Material>(mat));
+	m_bulletModel.AddMesh(sphere);
 
 	return 0;
 }
@@ -233,7 +225,7 @@ iw::Transform* EnemySystem::SpawnBullet(
 {
 	iw::Entity bullet = Space->CreateEntity<iw::Transform, iw::Model, iw::SphereCollider, iw::Rigidbody, Bullet>();
 	
-	                        bullet.SetComponent<iw::Model>         (*m_bulletModel);
+	                        bullet.SetComponent<iw::Model>         (m_bulletModel);
 	Bullet*             b = bullet.SetComponent<Bullet>            (prefab);
 	iw::Transform*      t = bullet.SetComponent<iw::Transform>     (position + iw::vector3(sqrt(2), 0, 0) * rot, iw::vector3(.25f));
 	iw::SphereCollider* s = bullet.SetComponent<iw::SphereCollider>(iw::vector3::zero, 0.5f);

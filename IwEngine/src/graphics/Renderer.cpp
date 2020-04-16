@@ -14,9 +14,9 @@ namespace Graphics {
 		description.DescribeBuffer(bName::POSITION, MakeLayout<float>(3));
 		description.DescribeBuffer(bName::UV,       MakeLayout<float>(2));
 
-		MeshData data = MakePlane(description, 1, 1);
+		MeshData* data = MakePlane(description, 1, 1);
 
-		m_quad = data.MakeInstance();
+		m_quad = data->MakeInstance();
 	}
 
 	void Renderer::Initialize() {
@@ -68,23 +68,25 @@ namespace Graphics {
 		iw::ref<Shader>& shader,
 		int bindings)
 	{
-		shader->Initialize(Device);
-		
-		if (bindings & CAMERA) {
-			shader->Handle()->SetBuffer("Camera", m_cameraUBO);
-		}
+		if (!shader->IsInitialized()) {
+			shader->Initialize(Device);
 
-		if (bindings & SHADOWS) {
-			shader->Handle()->SetBuffer("Shadows", m_shadowUBO);
-		}
+			if (bindings & CAMERA) {
+				shader->Handle()->SetBuffer("Camera", m_cameraUBO);
+			}
 
-		if (bindings & LIGHTS) {
-			shader->Handle()->SetBuffer("Lights", m_lightUBO);
-		}
+			if (bindings & SHADOWS) {
+				shader->Handle()->SetBuffer("Shadows", m_shadowUBO);
+			}
 
-		//if (bindings & MATERIAL) {
-		//	shader->Program->SetBuffer("Material", m_materialUBO);
-		//}
+			if (bindings & LIGHTS) {
+				shader->Handle()->SetBuffer("Lights", m_lightUBO);
+			}
+
+			//if (bindings & MATERIAL) {
+			//	shader->Program->SetBuffer("Material", m_materialUBO);
+			//}
+		}
 	}
 
 	void Renderer::BeginScene(
@@ -159,10 +161,10 @@ namespace Graphics {
 	}
 
 	void Renderer::DrawMesh(
-		const Transform* transform,
+		const Transform& transform,
 		Mesh& mesh)
 	{
-		DrawMesh(transform, &mesh);
+		Renderer::DrawMesh(&transform, &mesh);
 	}
 
 	void Renderer::ApplyFilter(
@@ -239,7 +241,6 @@ namespace Graphics {
 			m_meshData = mesh->Data();
 
 			if (m_meshData) {
-				m_meshData->Update(Device);
 				mesh->Bind(Device);
 			}
 		}
@@ -257,9 +258,12 @@ namespace Graphics {
 	void Renderer::SetMaterial(
 		const ref<Material>& material)
 	{		
+		if (material) {
+			Renderer::SetShader(material->Shader);
+		}
+
 		if (m_material != material) {
 			if (material) {
-				Renderer::SetShader(material->Shader);
 				material->Use(Device);
 			}
 
@@ -267,9 +271,9 @@ namespace Graphics {
 				//SetShader(Material::Default.Shader);
 				//Material::Default.Use(Device);
 			}
-
-			m_material = material;
 		}
+
+		m_material = material;
 	}
 
 	void Renderer::SetPointLights(

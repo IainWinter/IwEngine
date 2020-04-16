@@ -26,7 +26,8 @@ namespace RenderAPI {
 		IWRENDERER_API
 		void AddBuffer(
 			GLVertexBuffer* vb,
-			const VertexBufferLayout& layout);
+			const VertexBufferLayout& layout,
+			int index = -1); // if index is negitive the next slot gets used
 
 		IWRENDERER_API
 		void UpdateBuffer(

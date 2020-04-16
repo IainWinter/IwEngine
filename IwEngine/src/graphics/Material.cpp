@@ -154,13 +154,18 @@ namespace Graphics {
 		}
 	}
 
-	Material Material::Instance() {
-		return *this;
+	ref<Material> Material::MakeInstance() const {
+		return REF<Material>(*this);
 	}
 
 	void Material::Use(
 		const iw::ref<IDevice>& device)
 	{
+		if (!m_initialized) {
+			LOG_WARNING << "Cannot use material that has not been initialized!";
+			return;
+		}
+
 		//device->SetPipeline(Shader->Handle());
 
 		device->SetWireframe(Wireframe());
@@ -178,7 +183,6 @@ namespace Graphics {
 				continue;
 			}
 
-			
 			switch (prop.Type) {
 				case UniformType::BOOL:   param->SetAsBools  (prop.Data, prop.Stride, prop.Count); break;
 				case UniformType::INT:    param->SetAsInts   (prop.Data, prop.Stride, prop.Count); break;

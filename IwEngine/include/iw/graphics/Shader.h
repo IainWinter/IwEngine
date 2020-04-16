@@ -40,12 +40,10 @@ namespace Graphics {
 		IPipeline* Handle() const;
 
 		IWGRAPHICS_API
-		void Initialize(
-			const iw::ref<IDevice>& device);
+		bool IsInitialized() const;
 
-		IWGRAPHICS_API
-		void Use(
-			const iw::ref<IDevice>& device) const;
+		IWGRAPHICS_API void Initialize(const iw::ref<IDevice>& device);
+		IWGRAPHICS_API void Use       (const iw::ref<IDevice>& device) const;
 	};
 }
 

@@ -41,7 +41,7 @@ namespace iw {
 
 		// Little bit of text
 
-		Mesh* textMesh;
+		Mesh textMesh;
 		Transform textTransform;
 		OrthographicCamera* textCam;
 		iw::ref<Shader> fontShader;

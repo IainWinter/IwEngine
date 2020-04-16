@@ -55,7 +55,7 @@ int PlayerSystem::Initialize() {
 	
 	player = Space->CreateEntity<iw::Transform, iw::Model, iw::SphereCollider, iw::Rigidbody, Player>();
 	
-	                         player.SetComponent<iw::Model>(*Asset->Load<iw::Model>("Player"));
+	                         player.SetComponent<iw::Model>(*m_playerModel);
 	                         player.SetComponent<Player>(playerPrefab);
 	iw::Transform*      tp = player.SetComponent<iw::Transform>(iw::vector3::zero, iw::vector3(.75f));
 	iw::SphereCollider* sp = player.SetComponent<iw::SphereCollider>(iw::vector3::zero, 1);
@@ -297,7 +297,7 @@ bool PlayerSystem::On(
 			p->Health -= 1;
 
 			float color = p->Health / 3.0f;
-			m_playerModel->Meshes[0].Material()->Set("albedo", iw::Color(1, color, color, 1));
+			m_playerModel->GetMesh(0).Material()->Set("albedo", iw::Color(1, color, color, 1));
 
 			Audio->AsStudio()->CreateInstance("playerDamaged");
 		}
@@ -344,7 +344,7 @@ bool PlayerSystem::On(
 			// no break
 		}
 		case iw::val(Actions::RESET_LEVEL): {
-			m_playerModel->Meshes[0].Material->Set("albedo", iw::Color(1));
+			m_playerModel->GetMesh(0).Material()->Set("albedo", iw::Color(1));
 			break;
 		}
 	}

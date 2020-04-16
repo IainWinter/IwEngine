@@ -16,7 +16,7 @@ public:
 		EnemyDeathCircle* DeathCircle;
 	};
 private:
-	iw::ref<iw::Model> m_deathCircleModel;
+	iw::Model m_deathCircleModel;
 	EnemyDeathCircle m_prefab;
 
 public:

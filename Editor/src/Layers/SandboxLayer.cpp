@@ -48,6 +48,7 @@ namespace iw {
 	SandboxLayer::SandboxLayer()
 		: Layer("Sandbox")
 		, playerSystem(nullptr)
+		, enemySystem(nullptr)
 		, light(nullptr)
 		, sun(nullptr)
 		, textCam(nullptr)
@@ -62,7 +63,10 @@ namespace iw {
 	float blend;
 
 	int SandboxLayer::Initialize() {
-		AudioSpaceStudio* studio = (AudioSpaceStudio*)Audio->AsStudio();
+
+		// Audio
+
+		AudioSpaceStudio* studio = Audio->AsStudio();
 
 		studio->SetVolume(0.25f);
 
@@ -90,12 +94,14 @@ namespace iw {
 		textMat->Set("color", vector3::one);
 		textMat->SetTexture("fontMap", font->GetTexture(0));
 
-		textMesh->SetMaterial(textMat);
-		textMesh->Initialize(Renderer->Device);
+		textMat->Initialize(Renderer->Device);
+
+		textMesh.SetMaterial(textMat);
+		textMesh.Data()->Initialize(Renderer->Device);
 
 		textTransform = Transform(vector3(-6.8, -1.8, 0), vector3::one, quaternion::identity);
 
-		// Shader
+		// Shaders
 
 		ref<Shader> shader   = Asset->Load<Shader>("shaders/pbr.shader");
 		ref<Shader> gaussian = Asset->Load<Shader>("shaders/filters/gaussian.shader");
@@ -109,7 +115,7 @@ namespace iw {
 
 		// Directional light shadow map textures & target
 
-		ref<Texture> dirShadowColor = ref<Texture>(new Texture(1024, 1024, TEX_2D, RG, FLOAT, BORDER));
+		ref<Texture> dirShadowColor = ref<Texture>(new Texture(1024, 1024, TEX_2D, RG,    FLOAT, BORDER));
 		ref<Texture> dirShadowDepth = ref<Texture>(new Texture(1024, 1024, TEX_2D, DEPTH, FLOAT, BORDER));
 
 		ref<RenderTarget> dirShadowTarget = REF<RenderTarget>(1024, 1024);
@@ -169,109 +175,113 @@ namespace iw {
 
 		// Materials
 
-		ref<Material> smat = REF<Material>();
-		ref<Material> tmat = REF<Material>();
-
-		smat->SetShader(shader);
-		tmat->SetShader(shader);
-
-		smat->Set("albedo", vector4(1, 1, 1, 1));
-		tmat->Set("albedo", vector4(1, 1, 1, 1));
-
-		smat->Set("roughness", 0.8f);
-		tmat->Set("roughness", 0.8f);
-		
-		smat->Set("metallic", 0.2f);
-		tmat->Set("metallic", 0.2f);
-
-		smat->SetTexture("shadowMap",  dirShadowTarget->Tex(0));    // shouldnt really be part of material
-		tmat->SetTexture("shadowMap",  dirShadowTarget->Tex(0));
-
-		smat->SetTexture("shadowMap2", pointShadowTarget->Tex(0));
-		tmat->SetTexture("shadowMap2", pointShadowTarget->Tex(0));
-
-		smat->Initialize(Renderer->Device);
-		tmat->Initialize(Renderer->Device);
+		Material* mat = new Material(shader);
+		mat->Set("albedo", vector4(1, 1, 1, 1));
+		mat->Set("roughness", 0.8f);
+		mat->Set("metallic", 0.2f);
+		mat->SetTexture("shadowMap",  dirShadowTarget->Tex(0));    // shouldnt really be part of material
+		mat->SetTexture("shadowMap2", pointShadowTarget->Tex(0));
+		mat->Initialize(Renderer->Device);
 
 		// Models
 
-		Mesh* smesh = MakeUvSphere(25, 30);
-		Mesh* tmesh = MakeTetrahedron(5);
+		MeshDescription description;
 
-		smesh->SetMaterial(smat);
-		tmesh->SetMaterial(smat);
+		description.DescribeBuffer(bName::POSITION,  MakeLayout<float>(3));
+		description.DescribeBuffer(bName::NORMAL,    MakeLayout<float>(3));
+		description.DescribeBuffer(bName::TANGENT,   MakeLayout<float>(3));
+		description.DescribeBuffer(bName::BITANGENT, MakeLayout<float>(3));
+		description.DescribeBuffer(bName::UV,        MakeLayout<float>(2));
 
-		smesh->GenTangents();
-		tmesh->GenTangents();
+		Mesh smesh = MakeUvSphere(description, 25, 30)->MakeInstance();
+		Mesh tmesh = MakeTetrahedron(description, 5)->MakeInstance();
 
-		smesh->Initialize(Renderer->Device);
-		tmesh->Initialize(Renderer->Device);
+		smesh.Data()->GenTangents();
+		tmesh.Data()->GenTangents();
 
-		Model sm { smesh, 1 };
-		Model tm { tmesh, 1 };
+		smesh.Data()->Initialize(Renderer->Device);
+		tmesh.Data()->Initialize(Renderer->Device);
 
-		Asset->Give<Model>("Sphere", &sm);
-		Asset->Give<Model>("Tetrahedron", &tm);
+		smesh.SetMaterial(mat->MakeInstance());
+		tmesh.SetMaterial(mat->MakeInstance());
+
+		Model smodel;
+		smodel.AddMesh(smesh);
+		
+		Model tmodel;
+		tmodel.AddMesh(tmesh);
+
+		Asset->Give<Model>("Sphere",      &smodel);
+		Asset->Give<Model>("Tetrahedron", &tmodel);
 
 		//	Player
 
-		Model pm { smesh, 1 };
-		pm.Meshes[0].Material = REF<Material>(smat->Instance());
+		Mesh pmesh = smesh.Data()->MakeInstance();
+		pmesh.SetMaterial(mat->MakeInstance());
 
-		Asset->Give<Model>("Player", &pm);
+		Model pmodel;
+		pmodel.AddMesh(pmesh);
+
+		Asset->Give<Model>("Player", &pmodel);
 
 		//	Door
 
-		Mesh* dmesh = MakeIcosphere(0);
-		dmesh->Material = REF<Material>(smat->Instance());
+		Mesh dmesh = MakeIcosphere(description, 0)->MakeInstance();
+		dmesh.Data()->Initialize(Renderer->Device);
+	
+		dmesh.SetMaterial(mat->MakeInstance());
+		dmesh.Material()->SetTransparency(Transparency::ADD);
 
-		dmesh->Material->SetTransparency(Transparency::ADD);
+		Model dmodel;
+		dmodel.AddMesh(dmesh);
 
-		dmesh->Initialize(Renderer->Device);
+		Asset->Give<Model>("Door", &dmodel);
 
-		Model dm { dmesh, 1 };
-		Asset->Give<Model>("Door", &dm);
+		// Physics
 
 		Physics->SetGravity(vector3(0, -9.8f, 0));
 		Physics->AddSolver(new ImpulseSolver());
 		Physics->AddSolver(new SmoothPositionSolver());
 
 		// Rendering pipeline
-
+		//
 		//generateShadowMap    = new GenerateShadowMap(Renderer, Space);
 		//postProcessShadowMap = new FilterTarget(Renderer);
 		//mainRender           = new Render(Renderer, Space);
-
+		//
 		//generateShadowMap   ->SetLight(light);
 		//postProcessShadowMap->SetIntermediate(targetBlur);
 		//postProcessShadowMap->SetShader(gaussian);
 		//mainRender          ->SetLight(light);
 		//mainRender          ->SetAmbiance(0.008f);
 		//mainRender          ->SetGamma(2.2f);
-
+		//
 		//pipeline.first(generateShadowMap)
 		//	.then(postProcessShadowMap)
 		//	.then(mainRender);
+		//
+		// Systems
 
 		// Systems
 
 		playerSystem = PushSystem<PlayerSystem>();
 		enemySystem  = PushSystem<EnemySystem>(playerSystem->GetPlayer());
-		PushSystem<PhysicsSystem>();
-		PushSystem<BulletSystem>(playerSystem->GetPlayer());
 		PushSystem<GameCameraController>(playerSystem->GetPlayer(), scene);
-		PushSystem<EnemyDeathCircleSystem>();
-
+		PushSystem<BulletSystem>(playerSystem->GetPlayer());
 		PushSystem<LevelSystem>(playerSystem->GetPlayer());
-
 		PushSystem<ScoreSystem>(playerSystem->GetPlayer(), scene->MainCamera(), textCam);
+		PushSystem<EnemyDeathCircleSystem>();
+		PushSystem<PhysicsSystem>();
 
 		return Layer::Initialize();
 	}
 
 	void SandboxLayer::PostUpdate() {
 		//font->UpdateMesh(textMesh, std::to_string(1.0f / Time::DeltaTime()), 0.01f, 1); //fps
-		textMesh->Update(Renderer->Device);
+		if (textMesh.Data()->IsOutdated()) {
+			textMesh.Data()->Update(Renderer->Device);
+		}
+
 		scene->MainCamera()->SetProjection(iw::lerp(persp, ortho, blend));
 		
 		// Shadow maps
@@ -314,9 +324,10 @@ namespace iw {
 
 				for (auto entity : Space->Query<Transform, Model>()) {
 					auto [transform, model] = entity.Components.Tie<ModelComponents>();
-					for (size_t i = 0; i < model->MeshCount; i++) {
-						if (model->Meshes[i].Material->CastShadows()) {
-							Renderer->DrawMesh(transform, &model->Meshes[i]);
+
+					for (Mesh& mesh : *model) {
+						if (mesh.Material()->CastShadows()) {
+							Renderer->DrawMesh(*transform, mesh);
 						}
 					}
 				}
@@ -330,15 +341,16 @@ namespace iw {
 
 			for (auto entity : Space->Query<Transform, Model>()) {
 				auto [transform, model] = entity.Components.Tie<ModelComponents>();
-				for (size_t i = 0; i < model->MeshCount; i++) {
-					Renderer->DrawMesh(transform, &model->Meshes[i]);
+
+				for (Mesh& mesh : *model) {
+					Renderer->DrawMesh(*transform, mesh);
 				}
 			}
 
 		Renderer->EndScene();
 
 		Renderer->BeginScene(textCam);
-			Renderer->DrawMesh(&textTransform, textMesh);
+			Renderer->DrawMesh(textTransform, textMesh);
 		Renderer->EndScene();
 
 		//float blurw = 1.0f / target->Width() * blurAmount;

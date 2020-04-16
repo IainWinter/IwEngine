@@ -16,13 +16,15 @@ namespace Engine {
 
 		description.DescribeBuffer(bName::POSITION, MakeLayout<float>(3));
 
-		material = REF<Material>();
+		material = REF<Material>(shader);
 		
 		material->Set("color", iw::Color(0, 1, 0, 1));
 		material->SetWireframe(true);
-		material->SetShader(shader);
+		material->SetCastShadows(false);
 
-		MeshData* sphere  = MakeIcosphere(description, 5);
+		material->Initialize(Renderer->Device);
+
+		MeshData* sphere  = MakeIcosphere(description, 2);
 		MeshData* plane   = MakePlane    (description, 5, 5);
 
 		sphere ->Initialize(Renderer->Device); // this should happen automatically when trying to render an uninitialized mesh
@@ -55,11 +57,11 @@ namespace Engine {
 					auto itr = capsules.find(key);
 					if (itr == capsules.end()) {
 						iw::Mesh mesh = MakeCapsule(description, 5, col->Height, col->Radius)->MakeInstance();
+						mesh.Data()->Initialize(Renderer->Device);
+						mesh.SetMaterial(material);
 
-						itr = capsules.emplace(key, ).first;
-						itr->second.Data()->Initialize(Renderer->Device);
-						itr->second.SetMaterial(material);
-					}		
+						itr = capsules.emplace(key, mesh).first;
+					}
 
 					Renderer->DrawMesh(object->ColTrans(), itr->second);
 

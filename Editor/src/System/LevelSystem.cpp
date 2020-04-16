@@ -78,7 +78,7 @@ void LevelSystem::Update(
 
 		if (door->ColorTimer > 0) {
 			door->ColorTimer -= iw::Time::DeltaTime();
-			model->Meshes[0].Material->Set("albedo", iw::lerp<iw::vector4>(closedColor, openColor, 4 * (0.25f - door->ColorTimer)));
+			model->GetMesh(0).Material()->Set("albedo", iw::lerp<iw::vector4>(closedColor, openColor, 4 * (0.25f - door->ColorTimer)));
 		}
 	}
 
@@ -405,8 +405,8 @@ iw::Entity LevelSystem::LoadLevel(
 		door->ColorTimer = 0.25f;
 	}
 
-	model->Meshes[0].Material->Set("albedo", closedColor);
-	model->Meshes[0].Material->SetCastShadows(false);
+	model->GetMesh(0).Material()->Set("albedo", closedColor);
+	model->GetMesh(0).Material()->SetCastShadows(false);
 
 	levelTransform->AddChild(transform);
 
@@ -425,34 +425,34 @@ void LevelSystem::LoadTree(
 	std::string name,
 	iw::Transform transform)
 {
-	iw::ref<iw::Model> tree = Asset->Load<iw::Model>(name);
+	//iw::ref<iw::Model> tree = Asset->Load<iw::Model>(name);
 
-	if (tree->Meshes[0].VertexArray == nullptr) {
-		for (size_t i = 0; i < tree->MeshCount; i++) {
-			iw::ref<iw::Material>& mat = tree->Meshes[i].Material;
+	//if (tree->Meshes[0].VertexArray == nullptr) {
+	//	for (size_t i = 0; i < tree->MeshCount; i++) {
+	//		iw::ref<iw::Material>& mat = tree->Meshes[i].Material;
 
-			mat->SetShader(Asset->Load<iw::Shader>("shaders/pbr.shader"));
-			mat->SetTexture("shadowMap",  Asset->Load<iw::Texture>("SunShadowMap"));   // shouldnt be part of material
-			mat->SetTexture("shadowMap2", Asset->Load<iw::Texture>("LightShadowMap")); // shouldnt be part of material
-			mat->Initialize(Renderer->Device);
+	//		mat->SetShader(Asset->Load<iw::Shader>("shaders/pbr.shader"));
+	//		mat->SetTexture("shadowMap",  Asset->Load<iw::Texture>("SunShadowMap"));   // shouldnt be part of material
+	//		mat->SetTexture("shadowMap2", Asset->Load<iw::Texture>("LightShadowMap")); // shouldnt be part of material
+	//		mat->Initialize(Renderer->Device);
 
-			mat->Set("roughness", 0.7f);
-			mat->Set("metallic", 0.0f);
+	//		mat->Set("roughness", 0.7f);
+	//		mat->Set("metallic", 0.0f);
 
-			tree->Meshes[i].GenTangents();
-			tree->Meshes[i].SetIsStatic(true);
-			tree->Meshes[i].Initialize(Renderer->Device);
-		}
-	}
+	//		tree->Meshes[i].GenTangents();
+	//		tree->Meshes[i].SetIsStatic(true);
+	//		tree->Meshes[i].Initialize(Renderer->Device);
+	//	}
+	//}
 
-	iw::ref<iw::Texture> leavesAlpha = Asset->Load<iw::Texture>("textures/forest/tree/leaves/alpha.jpg");
-	leavesAlpha->Initialize(Renderer->Device);
+	//iw::ref<iw::Texture> leavesAlpha = Asset->Load<iw::Texture>("textures/forest/tree/leaves/alpha.jpg");
+	//leavesAlpha->Initialize(Renderer->Device);
 
-	tree->Meshes[1].Material->SetTexture("alphaMaskMap", leavesAlpha);
+	//tree->Meshes[1].Material->SetTexture("alphaMaskMap", leavesAlpha);
 
-	iw::Entity ent = Space->CreateEntity<iw::Transform, iw::Model>();
-	ent.SetComponent<iw::Transform>(transform);
-	ent.SetComponent<iw::Model>(*tree);
+	//iw::Entity ent = Space->CreateEntity<iw::Transform, iw::Model>();
+	//ent.SetComponent<iw::Transform>(transform);
+	//ent.SetComponent<iw::Model>(*tree);
 }
 
 iw::Entity LevelSystem::LoadFloor(
@@ -461,22 +461,24 @@ iw::Entity LevelSystem::LoadFloor(
 {
 	iw::ref<iw::Model> floor = Asset->Load<iw::Model>(name);
 
-	if (floor->Meshes[0].VertexArray == nullptr) {
-		for (size_t i = 0; i < floor->MeshCount; i++) {
-			iw::ref<iw::Material>& mat = floor->Meshes[i].Material;
-
-			mat->SetShader(Asset->Load<iw::Shader>("shaders/pbr.shader"));
-			mat->SetTexture("shadowMap",  Asset->Load<iw::Texture>("SunShadowMap"));   // shouldnt be part of material
-			mat->SetTexture("shadowMap2", Asset->Load<iw::Texture>("LightShadowMap")); // shouldnt be part of material
-			mat->Initialize(Renderer->Device);
-
-			mat->Set("roughness", 0.9f);
-			mat->Set("metallic", 0.1f);
-
-			floor->Meshes[i].GenTangents();
-			//floor->Meshes[i].SetIsStatic(true);
-			floor->Meshes[i].Initialize(Renderer->Device);
+	for (iw::Mesh& mesh : *floor) {
+		if (mesh.Data()->IsInitialized()) {
+			continue;
 		}
+
+		mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/pbr.shader"));
+		mesh.Material()->SetTexture("shadowMap",  Asset->Load<iw::Texture>("SunShadowMap"));   // shouldnt be part of material
+		mesh.Material()->SetTexture("shadowMap2", Asset->Load<iw::Texture>("LightShadowMap")); // shouldnt be part of material
+		mesh.Material()->Initialize(Renderer->Device);
+
+		mesh.Material()->Set("roughness", 0.9f);
+		mesh.Material()->Set("metallic", 0.1f);
+
+		mesh.Material()->Initialize(Renderer->Device);
+
+		//floor->Meshes[i].SetIsStatic(true);
+		//mesh.Data()->GenTangents();
+		mesh.Data()->Initialize(Renderer->Device);
 	}
 
 	iw::Entity entity = Space->CreateEntity<iw::Transform, iw::Model>();

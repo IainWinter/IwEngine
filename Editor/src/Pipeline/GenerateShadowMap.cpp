@@ -43,8 +43,8 @@ namespace iw {
 		for (auto m_e : space->Query<Transform, Model>()) {
 			auto [m_t, m_m] = m_e.Components.Tie<Components>();
 
-			for (size_t i = 0; i < m_m->MeshCount; i++) {
-				iw::ref<Texture> t = m_m->Meshes[i].Material->GetTexture("alphaMaskMap");
+			for (Mesh& mesh : *m_m) {
+				iw::ref<Texture> t = mesh.Material()->GetTexture("alphaMaskMap");
 
 				ITexture* it = nullptr;
 				if (t) {
@@ -55,7 +55,7 @@ namespace iw {
 				light->ShadowShader()->Handle()->GetParam("alphaMask")     ->SetAsTexture(it, 0);
 				light->ShadowShader()->Handle()->GetParam("alphaThreshold")->SetAsFloat(threshold);
 
-				renderer->DrawMesh(m_t, &m_m->Meshes[i]);
+				renderer->DrawMesh(*m_t, mesh);
 			}
 		}
 

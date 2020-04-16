@@ -11,13 +11,13 @@ namespace iw {
 		: public Layer
 	{
 	private:
-		Mesh* plightMesh;
-		Mesh* dlightMesh;
-		Mesh* cameraMesh;
+		Mesh plightMesh;
+		Mesh dlightMesh;
+		Mesh cameraMesh;
 
 		ref<RenderTarget> selectionBuffer;
 
-		Mesh* textMesh;
+		Mesh textMesh;
 		iw::ref<Shader> fontShader;
 		iw::ref<Font> font;
 

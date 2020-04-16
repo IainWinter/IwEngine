@@ -172,10 +172,11 @@ namespace RenderAPI {
 	void GLDevice::AddBufferToVertexArray(
 		IVertexArray* vertexArray,
 		IVertexBuffer* buffer,
-		const VertexBufferLayout& layout)
+		const VertexBufferLayout& layout,
+		int index)
 	{
 		static_cast<GLVertexArray*>(vertexArray)
-			->AddBuffer(static_cast<GLVertexBuffer*>(buffer), layout);
+			->AddBuffer(static_cast<GLVertexBuffer*>(buffer), layout, index);
 	}
 
 	void GLDevice::UpdateVertexArrayData(

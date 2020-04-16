@@ -16,9 +16,14 @@ namespace RenderAPI {
 
 	template<
 		typename _t>
-	VertexBufferLayout MakeLayout(unsigned count, unsigned instanceStride = 0) {
+	VertexBufferLayout MakeLayout(
+		unsigned count,
+		unsigned instanceStride = 0)
+	{
 		VertexBufferLayout layout(instanceStride);
 		layout.Push<_t>(count);
+
+		return layout;
 	}
 
 	class VertexBufferLayout {

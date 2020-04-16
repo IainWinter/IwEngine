@@ -404,7 +404,10 @@ namespace Graphics {
 		unsigned currentUvCount    = TriUvCount;
 		unsigned currentVertCount  = TriVertCount;
 		for (unsigned i = 0; i < resolution; i++) {
-			detail::SubDevideUvs  (uvs,   indices, currentIndexCount, currentUvCount);
+			if (uvs) {
+				detail::SubDevideUvs(uvs, indices, currentIndexCount, currentUvCount);
+			}
+
 			detail::SubDevideVerts(verts, indices, currentIndexCount, currentVertCount);
 		}
 
@@ -452,9 +455,6 @@ namespace Graphics {
 		float stepX = 2.0f / xCount;
 		float stepZ = 2.0f / zCount;
 
-		float stepU = 2.0f / xCount;
-		float stepV = 2.0f / zCount;
-
 		vector3 offset = -(vector3::unit_x + vector3::unit_z);
 
 		for (unsigned x = 0; x <= xCount; x++) {
@@ -464,7 +464,7 @@ namespace Graphics {
 				verts[i] = offset + vector3(x * stepX, 0, z * stepZ);
 				
 				if (uvs) {
-					uvs[i] = vector2(x * stepU, z * stepV);
+					uvs[i] = vector2(x * stepX, z * stepZ);
 				}
 			}
 		}

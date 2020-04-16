@@ -103,7 +103,7 @@ namespace Graphics {
 	public:
 		IWGRAPHICS_API
 		QueuedRenderer(
-		const ref<IDevice>& device);
+			const ref<IDevice>& device);
 
 		// sets current layer for ordering
 		IWGRAPHICS_API

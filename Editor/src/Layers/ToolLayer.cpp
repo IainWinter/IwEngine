@@ -48,15 +48,14 @@ namespace iw {
 		textMesh = font->GenerateMesh("", .01f, 1);
 
 		fontShader = Asset->Load<Shader>("shaders/font.shader");
-		Renderer->InitShader(fontShader, CAMERA);
 
 		iw::ref<Material> textMat = REF<Material>(fontShader);
 
 		textMat->Set("color", iw::vector3(1, .25f, 1));
 		textMat->SetTexture("fontMap", font->GetTexture(0));
 
-		textMesh->SetMaterial(textMat);
-		textMesh->Initialize(Renderer->Device);
+		textMesh.SetMaterial(textMat);
+		textMesh.Data()->Initialize(Renderer->Device);
 
 		// Meshes
 
@@ -64,30 +63,32 @@ namespace iw {
 
 		Renderer->InitShader(shader, CAMERA);
 
-		ref<Material> lightMaterial = REF<Material>();
+		ref<Material> lightMaterial = REF<Material>(shader);
 		lightMaterial->Set("color", iw::Color(1, 1, 0, 1));
 		lightMaterial->SetWireframe(true);
-		lightMaterial->SetShader(shader);
 
-		plightMesh = MakeIcosphere(2);
-		plightMesh->SetNormals(0, nullptr);
-		plightMesh->SetMaterial(lightMaterial);
-		plightMesh->Initialize(Renderer->Device);
+		lightMaterial->Initialize(Renderer->Device);
 
-		dlightMesh = MakeTetrahedron(2);
-		dlightMesh->SetNormals(0, nullptr);
-		dlightMesh->SetMaterial(lightMaterial);
-		dlightMesh->Initialize(Renderer->Device);
-
-		ref<Material> cameraMaterial = REF<Material>();
+		ref<Material> cameraMaterial = REF<Material>(shader);
 		cameraMaterial->Set("color", iw::Color(0.1f, 0, 1, 1));
 		cameraMaterial->SetWireframe(true);
-		cameraMaterial->SetShader(shader);
 
-		cameraMesh = MakeTetrahedron(1);
-		cameraMesh->SetNormals(0, nullptr);
-		cameraMesh->SetMaterial(cameraMaterial);
-		cameraMesh->Initialize(Renderer->Device);
+		cameraMaterial->Initialize(Renderer->Device);
+
+		MeshDescription description;
+		description.DescribeBuffer(bName::POSITION, MakeLayout<float>(3));
+
+		plightMesh = MakeIcosphere(description, 2)->MakeInstance();
+		dlightMesh = MakeTetrahedron(description, 2)->MakeInstance();
+		cameraMesh = MakeTetrahedron(description, 1)->MakeInstance();
+
+		plightMesh.Data()->Initialize(Renderer->Device);
+		dlightMesh.Data()->Initialize(Renderer->Device);
+		cameraMesh.Data()->Initialize(Renderer->Device);
+		
+		plightMesh.SetMaterial(lightMaterial);
+		dlightMesh.SetMaterial(lightMaterial);
+		cameraMesh.SetMaterial(cameraMaterial);
 
 		camera = new PerspectiveCamera(1.7f, 1.777f, 0.01f, 1000.0f);
 
@@ -174,10 +175,9 @@ namespace iw {
 
 				for (auto entity : Space->Query<Transform, Model>()) {
 					auto [transform, model] = entity.Components.Tie<ModelComponents>();
-					for (size_t i = 0; i < model->MeshCount; i++) {
-						if (model->Meshes[i].Material->CastShadows()) {
-							Renderer->DrawMesh(transform, &model->Meshes[i]);
-						}
+
+					for (Mesh& mesh : *model) {
+						Renderer->DrawMesh(*transform, mesh);
 					}
 				}
 
@@ -188,8 +188,9 @@ namespace iw {
 
 			for (auto entity : Space->Query<Transform, Model>()) {
 				auto [transform, model] = entity.Components.Tie<ModelComponents>();
-				for (size_t i = 0; i < model->MeshCount; i++) {
-					Renderer->DrawMesh(transform, &model->Meshes[i]);
+				
+				for (Mesh& mesh : *model) {
+					Renderer->DrawMesh(*transform, mesh);
 				}
 			}
 
@@ -197,9 +198,7 @@ namespace iw {
 
 		Renderer->BeginScene(camera);
 
-		Transform t;
-		t.Position = p;
-		Renderer->DrawMesh(t, plightMesh);
+			Renderer->DrawMesh(p, plightMesh);
 
 		Renderer->EndScene();
 

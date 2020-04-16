@@ -94,7 +94,8 @@ namespace RenderAPI {
 		void AddBufferToVertexArray(
 			IVertexArray* vertexArray,
 			IVertexBuffer* buffer,
-			const VertexBufferLayout& layout) override;
+			const VertexBufferLayout& layout,
+			int index = -1) override; // if index is negitive the next slot gets used
 
 		IWRENDERER_API
 		void UpdateVertexArrayData(

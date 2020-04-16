@@ -173,6 +173,7 @@ namespace Graphics {
 		if (m_handle) {
 			// Update
 		}
+
 		else {
 			if (IsSubTexture()) {
 				m_handle = device->CreateSubTexture(m_parent->Handle(), m_xOffset, m_yOffset, m_width, m_height);

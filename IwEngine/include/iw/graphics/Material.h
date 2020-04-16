@@ -77,7 +77,7 @@ namespace Graphics {
 			const iw::ref<IDevice>& device);
 
 		IWGRAPHICS_API
-		Material Instance();
+		ref<Material> MakeInstance() const;
 
 		IWGRAPHICS_API
 		void Use(

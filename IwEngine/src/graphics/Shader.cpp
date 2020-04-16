@@ -29,9 +29,18 @@ namespace Graphics {
 		return m_handle;
 	}
 
+	bool Shader::IsInitialized() const {
+		return !!m_handle;
+	}
+
 	void Shader::Initialize(
 		const iw::ref<IDevice>& device)
 	{
+		if (IsInitialized()) {
+			LOG_WARNING << "Tried to initialize a shader twice!";
+			return;
+		}
+
 		IVertexShader* vertex = nullptr;
 		IGeometryShader* geometry = nullptr;
 		IFragmentShader* fragment = nullptr;
@@ -51,6 +60,11 @@ namespace Graphics {
 	void Shader::Use(
 		const iw::ref<IDevice>& device) const
 	{
+		if (!IsInitialized()) {
+			LOG_WARNING << "Tried to use a shader before it was initialized!";
+			return;
+		}
+
 		device->SetPipeline(m_handle);
 	}
 }
