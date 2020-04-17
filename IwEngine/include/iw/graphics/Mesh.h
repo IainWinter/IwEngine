@@ -179,7 +179,7 @@ namespace detail {
 
 		friend void detail::DestroyMeshData(MeshData*); // might want to make a make function instead
 
-		void AddBufferToVertexArray(
+		void TryAddBufferToVertexArray(
 			const ref<IDevice>& device,
 			VertexBufferLayout& layout,
 			BufferData& data,

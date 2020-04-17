@@ -13,7 +13,7 @@ ScoreSystem::ScoreSystem(
 	: iw::System<iw::Transform, Score>("Score")
 	, player(player)
 	, totalScore(0.0f)
-	, potentiaScore(0.0f)
+	, potentialScore(0.0f)
 	, camera(camera)
 	, uiCam(uiCam)
 {}
@@ -41,10 +41,7 @@ int ScoreSystem::Initialize() {
 	textMat   ->Initialize(Renderer->Device);
 
 	totalScoreMesh     = font->GenerateMesh(std::to_string(totalScore), .02f, 1);
-	potentialScoreMesh = font->GenerateMesh(std::to_string(potentiaScore), .02f, 1);
-
-	totalScoreMesh    .Data()->Initialize(Renderer->Device);
-	potentialScoreMesh.Data()->Initialize(Renderer->Device);
+	potentialScoreMesh = font->GenerateMesh(std::to_string(potentialScore), .02f, 1);
 	
 	potentialScoreMesh.SetMaterial(textMat);
 	totalScoreMesh    .SetMaterial(textMat);
@@ -95,10 +92,10 @@ void ScoreSystem::Update(
 	Renderer->EndScene();
 
 	font->UpdateMesh(totalScoreMesh, std::to_string(totalScore), .01f, 1);
-	totalScoreMesh.Data()->Update(Renderer->Device);
+	//totalScoreMesh.Data()->Update(Renderer->Device);
 
-	font->UpdateMesh(potentialScoreMesh, std::to_string(potentiaScore), .01f, 1);
-	potentialScoreMesh.Data()->Update(Renderer->Device);
+	font->UpdateMesh(potentialScoreMesh, std::to_string(potentialScore), .01f, 1);
+	//potentialScoreMesh.Data()->Update(Renderer->Device);
 
 	iw::Transform t;
 	iw::Transform tp;
@@ -113,11 +110,11 @@ void ScoreSystem::Update(
 		totalScoreMesh.SetMaterial(textMat);
 	}
 
-	if (potentiaScore < 0) {
+	if (potentialScore < 0) {
 		potentialScoreMesh.SetMaterial(textMatBad);
 	}
 
-	else if (potentiaScore >= 0) {
+	else if (potentialScore >= 0) {
 		potentialScoreMesh.SetMaterial(textMat);
 	}
 
@@ -174,7 +171,7 @@ bool ScoreSystem::On(
 	if (other.HasComponent<Player>()) {
 		iw::vector3 pos = bullet.FindComponent<iw::Rigidbody>()->Trans().Position;
 
-		SpawnScore(-potentiaScore * 0.5, pos);
+		SpawnScore(-potentialScore * 0.5, pos);
 	}
 
 	return false;
@@ -184,12 +181,12 @@ bool ScoreSystem::On(
 	iw::ActionEvent& e)
 {
 	if (e.Action == iw::val(Actions::GOTO_NEXT_LEVEL)) {
-		totalScore += potentiaScore;
-		potentiaScore = 0;
+		totalScore += potentialScore;
+		potentialScore = 0;
 	}
 
 	else if (e.Action == iw::val(Actions::RESET_LEVEL)) {
-		potentiaScore = 0;
+		potentialScore = 0;
 	}
 
 	else if (e.Action == iw::val(Actions::SPAWN_ENEMY_DEATH)) {
@@ -211,5 +208,5 @@ void ScoreSystem::SpawnScore(
 	entity.SetComponent<iw::Transform>(position);
 	entity.SetComponent<Score>(score, 1.0f);
 
-	potentiaScore += score;
+	potentialScore += score;
 }

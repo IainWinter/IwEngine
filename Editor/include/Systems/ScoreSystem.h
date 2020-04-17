@@ -27,7 +27,7 @@ public:
 	int totalScore;
 
 	iw::Mesh potentialScoreMesh;
-	int potentiaScore;
+	int potentialScore;
 
 	iw::ref<iw::Font> font;
 	iw::ref<iw::Material> textMatBad;

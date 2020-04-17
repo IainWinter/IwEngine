@@ -339,10 +339,7 @@ void MeshDescription::DescribeBuffer(
 		for (int i = 0; i < m_buffers.size(); i++) {
 			BufferData& data = GetBuffer(i);
 			VertexBufferLayout& layout = m_description.GetBufferLayout(i);
-
-			if (data.Ptr() != nullptr) {
-				AddBufferToVertexArray(device, layout, data, i);
-			}
+			TryAddBufferToVertexArray(device, layout, data, i);
 		}
 	}
 
@@ -370,10 +367,13 @@ void MeshDescription::DescribeBuffer(
 			}
 
 			else {
-				if (data.Ptr() != nullptr) {
-					AddBufferToVertexArray(device, layout, data, i);
-				}
+				TryAddBufferToVertexArray(device, layout, data, i);
 			}
+		}
+
+		IndexData& index = GetIndexBuffer();
+		if (index.Ptr()) {
+			device->UpdateBuffer(m_indexBuffer, index.Ptr(), index.Count * sizeof(unsigned));
 		}
 	}
 
@@ -426,12 +426,16 @@ void MeshDescription::DescribeBuffer(
 		}
 	}
 
-	void MeshData::AddBufferToVertexArray(
+	void MeshData::TryAddBufferToVertexArray(
 		const ref<IDevice>& device,
 		VertexBufferLayout& layout,
 		BufferData& data,
 		unsigned index)
 	{
+		if (!data.Ptr()) {
+			return;
+		}
+
 		IVertexBuffer* buffer = device->CreateVertexBuffer(data.Ptr(), data.Count * layout.GetStride());
 		device->AddBufferToVertexArray(m_vertexArray, buffer, layout, index);
 		data.Initialized = true;
