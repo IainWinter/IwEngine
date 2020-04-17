@@ -1,31 +1,42 @@
 #include "Layers/SandboxLayer.h"
+
+#include "Events/ActionEvents.h"
+
 #include "Systems/BulletSystem.h"
 #include "Systems/LevelSystem.h"
 #include "Systems/EnemyDeathCircleSystem.h"
 #include "Systems/GameCameraController.h"
 #include "Systems/ScoreSystem.h"
-#include "Events/ActionEvents.h"
 #include "iw/engine/Systems/PhysicsSystem.h"
-#include "iw/engine/Systems/MeshRenderSystem.h"
-#include "iw/engine/Systems/ModelRenderSystem.h"
-#include "iw/engine/Systems/LightRenderSystem.h"
+#include "iw/engine/Systems/ParticleUpdateSystem.h"
+#include "iw/engine/Systems/ParticleUpdateSystem.h"
+#include "iw/engine/Systems/Render/MeshRenderSystem.h"
+#include "iw/engine/Systems/Render/ModelRenderSystem.h"
+#include "iw/engine/Systems/Render/ParticleRenderSystem.h"
+#include "iw/engine/Systems/Render/MeshShadowRenderSystem.h"
+#include "iw/engine/Systems/Render/ModelShadowRenderSystem.h"
+#include "iw/engine/Systems/Render/ParticleShadowRenderSystem.h"
+
 #include "iw/engine/Components/CameraController.h"
 #include "iw/engine/Time.h"
+
 #include "iw/physics/Collision/SphereCollider.h"
 #include "iw/physics/Collision/PlaneCollider.h"
 #include "iw/physics/Dynamics/SmoothPositionSolver.h"
 #include "iw/physics/Dynamics/ImpulseSolver.h"
 #include "iw/physics/Dynamics/Rigidbody.h"
+
 #include "iw/graphics/MeshFactory.h"
 #include "iw/graphics/Font.h"
 #include "iw/graphics/Model.h"
 #include "iw/graphics/TextureAtlas.h"
+
 #include "iw/input/Devices/Mouse.h"
 #include "iw/input/Devices/Keyboard.h"
-#include "iw/audio/AudioSpaceStudio.h"
-#include "imgui/imgui.h"
 
-#include "iw/engine/Systems/Debug/DrawCollidersSystem.h"
+#include "iw/audio/AudioSpaceStudio.h"
+
+#include "imgui/imgui.h"
 
 float randf() {
 	return ((float)rand() / RAND_MAX - 0.5f) * 2.0f;
@@ -113,13 +124,15 @@ namespace iw {
 		ref<Shader> gaussian = Asset->Load<Shader>("shaders/filters/gaussian.shader");
 		ref<Shader> dirShadowShader   = Asset->Load<Shader>("shaders/lights/directional.shader");
 		ref<Shader> pointShadowShader = Asset->Load<Shader>("shaders/lights/point.shader");
-		ref<Shader> dirIShadowShader = Asset->Load<Shader>("shaders/lights/directional_instanced.shader");
+		ref<Shader> dirIShadowShader   = Asset->Load<Shader>("shaders/lights/directional_instanced.shader");
+		ref<Shader> pointIShadowShader = Asset->Load<Shader>("shaders/lights/point_instanced.shader");
 		
 		Renderer->InitShader(shader,   CAMERA | SHADOWS | LIGHTS);
 		Renderer->InitShader(gaussian, CAMERA);
 		Renderer->InitShader(dirShadowShader,  CAMERA);
 		Renderer->InitShader(pointShadowShader);
 		Renderer->InitShader(dirIShadowShader, CAMERA);
+		Renderer->InitShader(pointIShadowShader);
 
 		// Directional light shadow map textures & target
 
@@ -154,8 +167,8 @@ namespace iw {
 
 		//	Lights
 
-		sun   = new DirectionalLight(100, OrthographicCamera(60, 32, -100, 100), dirShadowShader, dirShadowTarget);
-		light = new PointLight(30, 30, pointShadowShader, pointShadowTarget);
+		sun   = new DirectionalLight(100, OrthographicCamera(60, 32, -100, 100), dirShadowTarget, dirShadowShader, dirIShadowShader);
+		light = new PointLight(30, 30, pointShadowTarget, pointShadowShader, pointIShadowShader);
 
 		sun  ->SetRotation(quaternion(0.872f, 0.0f, 0.303f, 0.384f));
 		light->SetPosition(vector3(0, 10, 0));
@@ -279,9 +292,15 @@ namespace iw {
 		PushSystem<EnemyDeathCircleSystem>();
 		PushSystem<PhysicsSystem>();
 
-		PushSystem<iw::MeshRenderSystem>(MainScene);
-		PushSystem<iw::ModelRenderSystem>(MainScene);
-		PushSystem<iw::LightRenderSystem>(MainScene);
+
+		PushSystem<iw::ParticleUpdateSystem>();
+
+		PushSystem<iw::    MeshShadowRenderSystem>(MainScene);
+		PushSystem<iw::   ModelShadowRenderSystem>(MainScene);
+		PushSystem<iw::ParticleShadowRenderSystem>(MainScene);
+		PushSystem<iw::          MeshRenderSystem>(MainScene);
+		PushSystem<iw::         ModelRenderSystem>(MainScene);
+		PushSystem<iw::      ParticleRenderSystem>(MainScene);
 
 		// Particle test
 
@@ -295,9 +314,10 @@ namespace iw {
 		Mesh particle = Asset->Load<Model>("models/forest/tuft.dae")->GetMesh(0);
 		particle.SetMaterial(particleMaterial.MakeInstance());
 
-		system.SetParticleMesh(particle);
+		ParticleSystem<StaticParticle> system;
 
-		system.SetUpdate([&](Particle<StaticParticle>* p, unsigned c) {
+		system.SetParticleMesh(particle);
+		system.SetUpdate([](auto s, auto p, auto c) {
 			if (Keyboard::KeyDown(G)) {
 				for (int i = 0; i < 10; i++) {
 					float x = randf() * 32.0f;
@@ -317,7 +337,7 @@ namespace iw {
 
 						trans.Rotation = quaternion::from_euler_angles(0, randf() * 2 * Pi, 0);
 
-						system.SpawnParticle(trans);
+						s->SpawnParticle(trans);
 					}
 				}
 
@@ -327,14 +347,16 @@ namespace iw {
 			return false;
 		});
 
+		iw::Entity particleEntity = Space->CreateEntity<iw::Transform, iw::ParticleSystem<StaticParticle>>();
+
+		particleEntity.SetComponent<iw::Transform>();
+		particleEntity.SetComponent<iw::ParticleSystem<StaticParticle>>(system);
+
 		return Layer::Initialize();
 	}
 
 	void SandboxLayer::PostUpdate() {
 		// Update particle system
-
-		system.UpdateParticles();
-		system.Update();
 
 		//font->UpdateMesh(textMesh, std::to_string(1.0f / Time::DeltaTime()), 0.01f, 1); //fps
 		if (textMesh.Data()->IsOutdated()) {
@@ -374,12 +396,6 @@ namespace iw {
 		//	Renderer->EndShadowCast();
 		//}
 
-		// Main render
-
-		Renderer->BeginScene(MainScene);
-			Renderer->DrawMesh(Transform(), system.GetParticleMesh());
-		Renderer->EndScene();
-
 		Renderer->BeginScene(textCam);
 			Renderer->DrawMesh(textTransform, textMesh);
 		Renderer->EndScene();
@@ -392,15 +408,9 @@ namespace iw {
 
 		//pipeline.execute();
 	}
-	
-	void SandboxLayer::FixedUpdate() {
-		Physics->Step(Time::FixedTime() * ts);
-	}
 
 	void SandboxLayer::ImGui() {
 		ImGui::Begin("Sandbox");
-
-		ImGui::SliderFloat("Time scale", &ts, 0.001f, 1);
 
 		ImGui::SliderFloat("Ambiance", (float*)&MainScene->Ambiance(), 0, 1);
 		//ImGui::SliderFloat("Gamma", (float*)&mainRender->GetGamma(), 0, 5);

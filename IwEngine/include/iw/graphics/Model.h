@@ -20,12 +20,8 @@ namespace Graphics {
 			m_meshes,era(mesh);
 		}*/
 
-		std::vector<Mesh>::iterator begin(){
-			return m_meshes.begin();
-		}
-
-		std::vector<Mesh>::iterator end() {
-			return m_meshes.end();
+		std::vector<Mesh>& GetMeshes() {
+			return m_meshes;
 		}
 
 		Mesh& GetMesh(

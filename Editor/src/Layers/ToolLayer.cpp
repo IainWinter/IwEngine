@@ -166,35 +166,35 @@ namespace iw {
 
 		Renderer->EndScene();
 
-		for (Light* light : m_mainScene->Lights()) {
-			if (!light->CanCastShadows()) {
-				continue;
-			}
+		//for (Light* light : m_mainScene->Lights()) {
+		//	if (!light->CanCastShadows()) {
+		//		continue;
+		//	}
 
-			Renderer->BeginShadowCast(light);
+		//	Renderer->BeginShadowCast(light);
 
-				for (auto entity : Space->Query<Transform, Model>()) {
-					auto [transform, model] = entity.Components.Tie<ModelComponents>();
+		//		for (auto entity : Space->Query<Transform, Model>()) {
+		//			auto [transform, model] = entity.Components.Tie<ModelComponents>();
 
-					for (Mesh& mesh : *model) {
-						Renderer->DrawMesh(*transform, mesh);
-					}
-				}
+		//			for (Mesh& mesh : *model) {
+		//				Renderer->DrawMesh(*transform, mesh);
+		//			}
+		//		}
 
-			Renderer->EndShadowCast();
-		}
+		//	Renderer->EndShadowCast();
+		//}
 
-		Renderer->BeginScene(m_mainScene);
+		//Renderer->BeginScene(m_mainScene);
 
-			for (auto entity : Space->Query<Transform, Model>()) {
-				auto [transform, model] = entity.Components.Tie<ModelComponents>();
-				
-				for (Mesh& mesh : *model) {
-					Renderer->DrawMesh(*transform, mesh);
-				}
-			}
+		//	for (auto entity : Space->Query<Transform, Model>()) {
+		//		auto [transform, model] = entity.Components.Tie<ModelComponents>();
+		//		
+		//		for (Mesh& mesh : *model) {
+		//			Renderer->DrawMesh(*transform, mesh);
+		//		}
+		//	}
 
-		Renderer->EndScene();
+		//Renderer->EndScene();
 
 		Renderer->BeginScene(camera);
 

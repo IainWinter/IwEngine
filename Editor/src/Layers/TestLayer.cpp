@@ -196,7 +196,7 @@ namespace iw {
 			for (auto entity : Space->Query<Transform, Model>()) {
 				auto [transform, model] = entity.Components.Tie<ModelComponents>();
 
-				for (Mesh& mesh : *model) {
+				for (Mesh& mesh : model->GetMeshes()) {
 					if (mesh.Material()->CastShadows()) {
 						Renderer->DrawMesh(*transform, mesh);
 					}

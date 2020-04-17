@@ -91,38 +91,48 @@ namespace Graphics {
 
 	void Renderer::BeginScene(
 		Camera* camera,
-		const ref<RenderTarget>& target)
+		const ref<RenderTarget>& target,
+		bool clear)
 	{
 		Renderer::SetCamera(camera);
 		Renderer::SetTarget(target);
+
+		if (clear) {
+			Device->Clear();
+		}
 
 		m_state = RenderState::SCENE;
 	}
 
 	void Renderer::BeginScene(
 		Scene* scene,
-		const ref<RenderTarget>& target)
+		const ref<RenderTarget>& target,
+		bool clear)
 	{
-		Renderer::BeginScene(scene->MainCamera(), target);
+		Renderer::BeginScene(scene->MainCamera(), target, clear);
 
 		Renderer::SetPointLights      (scene->PointLights());
 		Renderer::SetDirectionalLights(scene->DirectionalLights());
 	}
 
 	void Renderer::BeginShadowCast(
-		Light* light)
+		Light* light,
+		bool useParticleShader,
+		bool clear)
 	{
 #ifdef IW_DEBUG
 		if (!light->CanCastShadows()) {
 			LOG_WARNING << "Tried to begin shadow cast with light that cannot cast shadows!";
 		}
 #endif
-		Renderer::SetShader(light->ShadowShader());
+		Renderer::SetShader(useParticleShader ? light->ParticleShadowShader() : light->ShadowShader());
 		Renderer::SetTarget(light->ShadowTarget());
 
 		light->SetupShadowCast(this);
 
-		Device->Clear();
+		if (clear) {
+			Device->Clear();
+		}
 
 		m_state = RenderState::SHADOW_MAP;
 	}

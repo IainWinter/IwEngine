@@ -461,7 +461,7 @@ iw::Entity LevelSystem::LoadFloor(
 {
 	iw::ref<iw::Model> floor = Asset->Load<iw::Model>(name);
 
-	for (iw::Mesh& mesh : *floor) {
+	for (iw::Mesh& mesh : floor->GetMeshes()) {
 		if (mesh.Data()->IsInitialized()) {
 			continue;
 		}

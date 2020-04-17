@@ -1,10 +1,10 @@
-#include "iw/engine/Systems/ModelRenderSystem.h"
+#include "iw/engine/Systems/Render/ModelRenderSystem.h"
 
 namespace iw {
 namespace Engine {
 	ModelRenderSystem::ModelRenderSystem(
 		Scene* scene)
-		: System<Transform, Model>("Model Render")
+		: System("Model Render")
 		, m_scene(scene)
 	{}
 
@@ -15,7 +15,7 @@ namespace Engine {
 		
 		for (auto entity : eca) {
 			auto [transform, model] = entity.Components.Tie<Components>();
-			for (iw::Mesh& mesh : *model) {
+			for (iw::Mesh& mesh : model->GetMeshes()) {
 				Renderer->DrawMesh(transform, &mesh);
 			}
 		}

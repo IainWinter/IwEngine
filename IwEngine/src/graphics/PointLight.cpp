@@ -5,10 +5,14 @@ namespace iw {
 namespace Graphics {
 	PointLight::PointLight(
 		float radius,
-		float power,
-		ref<Shader> shadowShader,
-		ref<RenderTarget> shadowTarget)
-		: Light(power, new PerspectiveCamera(), shadowShader, shadowTarget)
+		float intensity,
+		ref<RenderTarget>  shadowTarget,
+		ref<Shader>        shadowShader,
+		ref<Shader>        particleShadowShader)
+		: Light(intensity, new PerspectiveCamera(), 
+			shadowTarget,
+			shadowShader,
+			particleShadowShader)
 		, m_radius(radius)
 		, m_outdated(true)
 	{
@@ -17,7 +21,10 @@ namespace Graphics {
 
 	PointLight::PointLight(
 		const PointLight& copy)
-		: Light(m_intensity, new PerspectiveCamera(), copy.m_shadowShader, copy.m_shadowTarget)
+		: Light(m_intensity, new PerspectiveCamera(*(PerspectiveCamera*)copy.m_shadowCamera),
+			copy.m_shadowTarget,
+			copy.m_shadowShader,
+			copy.m_particleShadowShader)
 		, m_radius(copy.m_radius)
 		, m_outdated(true)
 	{
@@ -26,25 +33,30 @@ namespace Graphics {
 
 	PointLight::PointLight(
 		PointLight&& copy) noexcept
-		: Light(m_intensity, copy.m_shadowCamera, copy.m_shadowShader, copy.m_shadowTarget)
+		: Light(m_intensity, copy.m_shadowCamera,
+			copy.m_shadowTarget,
+			copy.m_shadowShader,
+			copy.m_particleShadowShader)
 		, m_radius(copy.m_radius)
 		, m_outdated(true)
 	{
 		copy.m_shadowCamera = nullptr;
-		copy.m_shadowShader = nullptr;
 		copy.m_shadowTarget = nullptr;
+		copy.m_shadowShader = nullptr;
+		copy.m_particleShadowShader = nullptr;
 	}
 
 	PointLight& PointLight::operator=(
 		const PointLight& copy)
 	{
 		m_intensity    = copy.m_intensity;
-		m_shadowCamera = nullptr;
-		m_shadowShader = copy.m_shadowShader;
-		m_shadowTarget = copy.m_shadowTarget;
 		m_radius       = copy.m_radius;
 		m_outdated     = true;
+		m_shadowTarget = copy.m_shadowTarget;
+		m_shadowShader = copy.m_shadowShader;
+		m_particleShadowShader = copy.m_particleShadowShader;
 
+		*m_shadowCamera = *copy.m_shadowCamera;
 		UpdateCamera();
 
 		return *this;
@@ -54,15 +66,17 @@ namespace Graphics {
 		PointLight&& copy) noexcept
 	{
 		m_intensity    = copy.m_intensity;
-		m_shadowCamera = copy.m_shadowCamera;
-		m_shadowShader = copy.m_shadowShader;
-		m_shadowTarget = copy.m_shadowTarget;
 		m_radius       = copy.m_radius;
 		m_outdated     = true;
+		m_shadowCamera = copy.m_shadowCamera;
+		m_shadowTarget = copy.m_shadowTarget;
+		m_shadowShader = copy.m_shadowShader;
+		m_particleShadowShader = copy.m_particleShadowShader;
 
 		copy.m_shadowCamera = nullptr;
-		copy.m_shadowShader = nullptr;
 		copy.m_shadowTarget = nullptr;
+		copy.m_shadowShader = nullptr;
+		copy.m_particleShadowShader = nullptr;
 
 		return *this;
 	}

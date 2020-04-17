@@ -1,14 +1,14 @@
-#include "iw/engine/Systems/LightRenderSystem.h"
+#include "iw/engine/Systems/Render/ModelShadowRenderSystem.h"
 
 namespace iw {
 namespace Engine {
-	LightRenderSystem::LightRenderSystem(
+	ModelShadowRenderSystem::ModelShadowRenderSystem(
 		Scene* scene)
-		: System<Transform, Model>("Light Render")
+		: System("Model Shadow Render")
 		, m_scene(scene)
 	{}
 
-	void LightRenderSystem::Update(
+	void ModelShadowRenderSystem::Update(
 		EntityComponentArray& eca)
 	{
 		for (iw::Light* light : m_scene->Lights()) {
@@ -18,9 +18,9 @@ namespace Engine {
 
 			Renderer->BeginShadowCast(light);
 
-			for (auto entity : Space->Query<iw::Transform, iw::Model>()) {
+			for (auto entity : eca) {
 				auto [transform, model] = entity.Components.Tie<Components>();
-				for (iw::Mesh& mesh : *model) {
+				for (iw::Mesh& mesh : model->GetMeshes()) {
 					if (mesh.Material()->CastShadows()) {
 						Renderer->DrawMesh(*transform, mesh);
 					}

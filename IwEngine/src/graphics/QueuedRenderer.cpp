@@ -114,11 +114,11 @@ namespace Graphics {
 					BeginSceneOP* scene = (BeginSceneOP*)item.Data;
 
 					if (scene->Scene) {
-						Renderer::BeginScene(scene->Scene, scene->Target);
+						Renderer::BeginScene(scene->Scene, scene->Target, scene->Clear);
 					}
 
 					else {
-						Renderer::BeginScene(scene->Camera, scene->Target);
+						Renderer::BeginScene(scene->Camera, scene->Target, scene->Clear);
 					}
 				
 					break;
@@ -130,7 +130,7 @@ namespace Graphics {
 				case RenderOP::BEGIN_SHADOW: {
 					BeginShadowOP* shadow = (BeginShadowOP*)item.Data;
 
-					Renderer::BeginShadowCast(shadow->Light);
+					Renderer::BeginShadowCast(shadow->Light, shadow->UseParticleShader, shadow->Clear);
 					break;					 
 				}							 
 				case RenderOP::END_SHADOW: {
@@ -170,7 +170,8 @@ namespace Graphics {
 
 	void QueuedRenderer::BeginScene(
 		Camera* camera,
-		const ref<RenderTarget>& target)
+		const ref<RenderTarget>& target,
+		bool clear)
 	{
 		m_shadow  = 1;
 		m_block   = 1;
@@ -181,13 +182,15 @@ namespace Graphics {
 		op->Scene  = nullptr;
 		op->Camera = camera;
 		op->Target = target;
+		op->Clear  = clear;
 
 		m_queue.emplace_back(GenOrder(), RenderOP::BEGIN_SCENE, op);
 	}
 
 	void QueuedRenderer::BeginScene(
 		Scene* scene,
-		const ref<RenderTarget>& target)
+		const ref<RenderTarget>& target,
+		bool clear)
 	{
 		m_shadow  = 1;
 		m_block   = 1;
@@ -198,12 +201,15 @@ namespace Graphics {
 		op->Scene  = scene;
 		op->Camera = nullptr;
 		op->Target = target;
+		op->Clear  = clear;
 
 		m_queue.emplace_back(GenOrder(), RenderOP::BEGIN_SCENE, op);
 	}
 
 	void QueuedRenderer::BeginShadowCast(
-		Light* light)
+		Light* light,
+		bool useParticleShader,
+		bool clear)
 	{
 		m_shadow  = 0;
 		m_block   = 1;
@@ -212,6 +218,8 @@ namespace Graphics {
 
 		BeginShadowOP* op = m_pool.alloc<BeginShadowOP>();
 		op->Light = light;
+		op->UseParticleShader = useParticleShader;
+		op->Clear = clear;
 
 		m_queue.emplace_back(GenOrder(), RenderOP::BEGIN_SHADOW, op);
 	}

@@ -5,12 +5,14 @@ namespace Graphics {
 	Light::Light(
 		float power,
 		iw::Camera* camera,
+		iw::ref<RenderTarget> shadowTarget,
 		iw::ref<Shader> shadowShader,
-		iw::ref<RenderTarget> shadowTarget)
+		iw::ref<Shader> particleShadowShader)
 		: m_intensity(power)
 		, m_shadowCamera(camera)
-		, m_shadowShader(shadowShader)
 		, m_shadowTarget(shadowTarget)
+		, m_shadowShader(shadowShader)
+		, m_particleShadowShader(particleShadowShader)
 	{
 #ifdef IW_DEBUG
 		if (!!shadowShader != !!shadowTarget) {
@@ -39,12 +41,16 @@ namespace Graphics {
 		return m_shadowCamera->Position();
 	}
 
+	const iw::ref<RenderTarget>& Light::ShadowTarget() const {
+		return m_shadowTarget;
+	}
+
 	const iw::ref<Shader>& Light::ShadowShader() const {
 		return m_shadowShader;
 	}
 
-	const iw::ref<RenderTarget>& Light::ShadowTarget() const {
-		return m_shadowTarget;
+	const ref<Shader>& Light::ParticleShadowShader() const {
+		return m_particleShadowShader;
 	}
 
 	const Camera* Light::ShadowCamera() const {
@@ -63,16 +69,22 @@ namespace Graphics {
 		m_shadowCamera->SetPosition(position);
 	}
 
+	void Light::SetShadowTarget(
+		ref<RenderTarget>& shadowTarget)
+	{
+		m_shadowTarget = shadowTarget;
+	}
+
 	void Light::SetShadowShader(
 		ref<Shader>& shadowShader)
 	{
 		m_shadowShader = shadowShader;
 	}
 
-	void Light::SetShadowTarget(
-		ref<RenderTarget>& shadowTarget)
+	void Light::SetParticleShadowShader(
+		ref<Shader>& particleShadowShader)
 	{
-		m_shadowTarget = shadowTarget;
+		m_particleShadowShader = particleShadowShader;
 	}
 
 	/*void Light::PostProcess() {}

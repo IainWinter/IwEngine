@@ -136,21 +136,25 @@ namespace Graphics {
 		IWGRAPHICS_API
 		virtual void BeginScene(
 			Camera* camera = nullptr,
-			const ref<RenderTarget>& target = nullptr);
+			const ref<RenderTarget>& target = nullptr,
+			bool clear = false);
 
 		// calls begin scene
 		// set scene lights if provided, no action if null
 		IWGRAPHICS_API
 		virtual void BeginScene(
 			Scene* scene = nullptr,
-			const ref<RenderTarget>& target = nullptr);
+			const ref<RenderTarget>& target = nullptr,
+			bool clear = false);
 
 		// set light camera
 		// set light shader
 		// set light target
 		IWGRAPHICS_API
 		virtual void BeginShadowCast(
-			Light* light);
+			Light* light,
+			bool useParticleShader = false,
+			bool clear = true);
 
 		// marks end of scene, subsequent calls to SubmitMesh will be invalid
 		IWGRAPHICS_API

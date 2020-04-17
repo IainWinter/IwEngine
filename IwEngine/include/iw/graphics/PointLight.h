@@ -18,8 +18,9 @@ namespace Graphics {
 		PointLight(
 			float             radius       = 30.0f,
 			float             intensity    = 10.0f,
+			ref<RenderTarget> shadowTarget = nullptr,
 			ref<Shader>       shadowShader = nullptr,
-			ref<RenderTarget> shadowTarget = nullptr);
+			ref<Shader>       particleShadowShader = nullptr);
 
 		GEN_copy(IWGRAPHICS_API, PointLight)
 		GEN_move(IWGRAPHICS_API, PointLight)

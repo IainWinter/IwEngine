@@ -12,8 +12,9 @@ namespace Graphics {
 		DirectionalLight(
 			float              intensity    = 10.0f,
 			OrthographicCamera shadowCamera = OrthographicCamera(32, 32, -100, 100),
+			ref<RenderTarget>  shadowTarget = nullptr,
 			ref<Shader>        shadowShader = nullptr,
-			ref<RenderTarget>  shadowTarget = nullptr);
+			ref<Shader>        particleShadowShader = nullptr);
 
 		GEN_copy(IWGRAPHICS_API, DirectionalLight)
 		GEN_move(IWGRAPHICS_API, DirectionalLight)

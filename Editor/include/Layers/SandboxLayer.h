@@ -1,19 +1,13 @@
 #pragma once
 
+#include "iw/engine/Layer.h"
 #include "Systems/PlayerSystem.h"
 #include "Systems/EnemySystem.h"
-#include "iw/engine/Layer.h"
-#include "iw/physics/Dynamics/DynamicsSpace.h"
+
 #include "iw/graphics/DirectionalLight.h"
 #include "iw/graphics/Font.h"
-#include "iw/util/jobs/pipeline.h"
+
 #include "iw/util/memory/ref.h"
-
-#include "Pipeline/GenerateShadowMap.h"
-#include "Pipeline/FilterTarget.h"
-#include "Pipeline/Render.h"
-
-#include "iw/graphics/ParticleSystem.h"
 
 namespace iw {
 	class SandboxLayer
@@ -32,13 +26,6 @@ namespace iw {
 
 		//float blurAmount = .5f;
 
-		// Pipeline would be nice needs to redesign for multiple shadow maps
-
-		//iw::pipeline pipeline;
-		//GenerateShadowMap* generateShadowMap;
-		//FilterTarget* postProcessShadowMap;
-		//Render* mainRender;
-
 		// Little bit of text
 
 		Mesh textMesh;
@@ -50,10 +37,7 @@ namespace iw {
 		float x = 0;
 		int sc = 5;
 		std::string str;
-		float ts = 1.0f;
 		float threshold = 0.25f;
-
-		ParticleSystem<StaticParticle> system;
 
 	public:
 		SandboxLayer();
@@ -61,7 +45,6 @@ namespace iw {
 		int Initialize() override;
 
 		void PostUpdate() override;
-		void FixedUpdate() override;
 
 		void ImGui() override;
 

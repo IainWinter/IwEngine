@@ -5,11 +5,7 @@
 #include "iw/physics/Collision/SphereCollider.h"
 #include "iw/audio/AudioSpaceStudio.h"
 
-#include "Layers/RacingLol.h"
-
 namespace iw {
-	RecingLayer* racing;
-
 	App::App() {
 		Audio = REF<AudioSpaceStudio>("assets/sounds/");
 
@@ -33,7 +29,7 @@ namespace iw {
 		context->AddDevice(rm);
 		context->AddDevice(k);
 
-		racing = PushLayer<RecingLayer>();
+		sandbox = PushLayer<SandboxLayer>();
 		imgui   = PushLayer<ImGuiLayer>();
 	}
 
@@ -49,7 +45,7 @@ namespace iw {
 			}
 		}
 
-		toolbox = PushLayer<ToolLayer>(racing->GetMainScene());
+		toolbox = PushLayer<ToolLayer>(sandbox->GetMainScene());
 		err = toolbox->Initialize();
 
 		PopLayer(toolbox);
@@ -60,9 +56,9 @@ namespace iw {
 
 	void App::Update() {
 		if (GetLayer("Toolbox") != nullptr) {
-			racing->Update();
-			racing->UpdateSystems();
-			racing->FixedUpdateSystems();
+			sandbox->Update();
+			sandbox->FixedUpdate();
+			sandbox->UpdateSystems();
 		}
 
 		Application::Update();
@@ -87,12 +83,12 @@ namespace iw {
 			bool dev = GetLayer("Toolbox") != nullptr;
 			if (dev) {
 				PopLayer(toolbox);
-				PushLayer(racing);
+				PushLayer(sandbox);
 			}
 
 			else {
 				PushLayer(toolbox);
-				PopLayer(racing);
+				PopLayer(sandbox);
 			}
 
 			Bus->send<DevConsoleEvent>(dev);

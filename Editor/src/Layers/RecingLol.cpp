@@ -1,17 +1,19 @@
 #include "Layers/RacingLol.h"
+
 #include "Systems/CarControllerSystem.h"
 #include "Systems/GameCameraController.h"
-
 #include "Systems/CarControllerSystem.h"
 #include "iw/engine/Systems/LerpCameraControllerSystem.h"
-#include "iw/engine/Systems/MeshRenderSystem.h"
-#include "iw/engine/Systems/ModelRenderSystem.h"
-#include "iw/engine/Systems/LightRenderSystem.h"
+#include "iw/engine/Systems/Render/MeshRenderSystem.h"
+#include "iw/engine/Systems/Render/ModelRenderSystem.h"
+#include "iw/engine/Systems/Render/MeshShadowRenderSystem.h"
+#include "iw/engine/Systems/Render/ModelShadowRenderSystem.h"
+#include "iw/engine/Systems/PhysicsSystem.h"
+
+#include "iw/engine/Time.h"
 
 #include "iw/graphics/MeshFactory.h"
-#include "iw/engine/Time.h"
 #include "iw/physics/Collision/CapsuleCollider.h"
-#include "iw/engine/Systems/PhysicsSystem.h"
 
 RecingLayer::RecingLayer()
 	: Layer("Ray Marching")
@@ -41,14 +43,14 @@ int RecingLayer::Initialize() {
 
 	//	Lights
 
-	iw::DirectionalLight* sun = new iw::DirectionalLight(100, iw::OrthographicCamera(60, 32, -100, 100), dirShadowShader, dirShadowTarget);
+	iw::DirectionalLight* sun = new iw::DirectionalLight(100, iw::OrthographicCamera(60, 32, -100, 100), dirShadowTarget, dirShadowShader);
 	sun->SetRotation(iw::quaternion(0.872f, 0.0f, 0.303f, 0.384f));
 
 	MainScene->AddLight(sun);
 	MainScene->SetMainCamera(new iw::PerspectiveCamera(1.17f, 1.778f, 1.0f, 500.0f));
 
 	iw::ref<iw::Model> model = Asset->Load<iw::Model>("models/block/forest04.dae");
-	for (iw::Mesh& mesh : *model) {
+	for (iw::Mesh& mesh : model->GetMeshes()) {
 		mesh.Material()->SetTexture("shadowMap", dirShadowColor); // shouldnt be part of material
 		mesh.Material()->Set("roughness", 0.9f);
 		mesh.Material()->Set("metallic", 0.1f);
@@ -86,7 +88,8 @@ int RecingLayer::Initialize() {
 
 	PushSystem<iw::MeshRenderSystem>(MainScene);
 	PushSystem<iw::ModelRenderSystem>(MainScene);
-	PushSystem<iw::LightRenderSystem>(MainScene);
+	PushSystem<iw::ModelShadowRenderSystem>(MainScene);
+	PushSystem<iw::ModelShadowRenderSystem>(MainScene);
 	PushSystem<iw::LerpCameraControllerSystem>(player);
 	PushSystem<CarControllerSystem>();
 	PushSystem<iw::PhysicsSystem>();

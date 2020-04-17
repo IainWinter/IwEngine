@@ -6,27 +6,34 @@ namespace Graphics {
 	DirectionalLight::DirectionalLight(
 		float intensity,
 		OrthographicCamera shadowCamera,
-		ref<Shader> shadowShader,
-		ref<RenderTarget> shadowTarget)
-		: Light(intensity, nullptr, shadowShader, shadowTarget)
-	{
-		m_shadowCamera = new OrthographicCamera(shadowCamera);
-	}
+		ref<RenderTarget>  shadowTarget,
+		ref<Shader>        shadowShader,
+		ref<Shader>        particleShadowShader)
+		: Light(intensity, new OrthographicCamera(shadowCamera), 
+			shadowTarget, 
+			shadowShader, 
+			particleShadowShader)
+	{}
 
 	DirectionalLight::DirectionalLight(
 		const DirectionalLight& copy)
-		: Light(m_intensity, nullptr, copy.m_shadowShader, copy.m_shadowTarget)
-	{
-		m_shadowCamera = new OrthographicCamera(*(OrthographicCamera*)copy.m_shadowCamera);
-	}
+		: Light(m_intensity, new OrthographicCamera(*(OrthographicCamera*)copy.m_shadowCamera),
+			copy.m_shadowTarget, 
+			copy.m_shadowShader, 
+			copy.m_particleShadowShader)
+	{}
 
 	DirectionalLight::DirectionalLight(
 		DirectionalLight&& copy) noexcept
-		: Light(m_intensity, copy.m_shadowCamera, copy.m_shadowShader, copy.m_shadowTarget)
+		: Light(m_intensity, copy.m_shadowCamera,
+			copy.m_shadowTarget,
+			copy.m_shadowShader,
+			copy.m_particleShadowShader)
 	{
 		copy.m_shadowCamera = nullptr;
-		copy.m_shadowShader = nullptr;
 		copy.m_shadowTarget = nullptr;
+		copy.m_shadowShader = nullptr;
+		copy.m_particleShadowShader = nullptr;
 	}
 
 	DirectionalLight& DirectionalLight::operator=(
@@ -34,8 +41,9 @@ namespace Graphics {
 	{
 		m_intensity    = copy.m_intensity;
 		m_shadowCamera = new OrthographicCamera(*(OrthographicCamera*)copy.m_shadowCamera);
-		m_shadowShader = copy.m_shadowShader;
 		m_shadowTarget = copy.m_shadowTarget;
+		m_shadowShader = copy.m_shadowShader;
+		m_particleShadowShader = copy.m_particleShadowShader;
 
 		return *this;
 	}
@@ -45,12 +53,14 @@ namespace Graphics {
 	{
 		m_intensity    = copy.m_intensity;
 		m_shadowCamera = copy.m_shadowCamera;
-		m_shadowShader = copy.m_shadowShader;
 		m_shadowTarget = copy.m_shadowTarget;
+		m_shadowShader = copy.m_shadowShader;
+		m_particleShadowShader = copy.m_particleShadowShader;
 
 		copy.m_shadowCamera = nullptr;
-		copy.m_shadowShader = nullptr;
 		copy.m_shadowTarget = nullptr;
+		copy.m_shadowShader = nullptr;
+		copy.m_particleShadowShader = nullptr;
 
 		return *this;
 	}

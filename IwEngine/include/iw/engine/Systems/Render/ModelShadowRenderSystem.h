@@ -6,7 +6,7 @@
 
 namespace iw {
 namespace Engine {
-	class LightRenderSystem
+	class ModelShadowRenderSystem
 		: public System<Transform, Model>
 	{
 	public:
@@ -19,7 +19,7 @@ namespace Engine {
 
 	public:
 		IWENGINE_API
-		LightRenderSystem(
+		ModelShadowRenderSystem(
 			Scene* scene);
 
 		IWENGINE_API

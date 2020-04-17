@@ -241,6 +241,8 @@ namespace Engine {
 			layer->FixedUpdateSystems();
 			layer->FixedUpdate();
 		}
+
+		Physics->Step(iw::Time::FixedTime()); // no timescale tho :c
 	}
 
 	void Application::Destroy() {

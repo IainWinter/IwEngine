@@ -1,5 +1,4 @@
 #include "iw/engine/Layers/DebugLayer.h"
-#include "iw/engine/Components/Log.h"
 #include "iw/common/Components/Transform.h"
 #include "iw/engine/Time.h"
 #include "imgui/imgui.h"
@@ -11,16 +10,7 @@ namespace Engine {
 		: Layer("Debug")
 	{}
 
-	struct Components {
-		Transform* Transform;
-		VectorLog* Log;
-	};
-
 	void DebugLayer::PostUpdate() {
-		//for (auto entity : Space.Query<Transform, VectorLog>()) {
-		//	auto [transform, log] = entity.Components.Tie<Components>();
-		//}
-
 		while (logs.size() > 5) {
 			logs.erase(logs.begin());
 		}

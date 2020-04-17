@@ -46,15 +46,18 @@ namespace Graphics {
 			Scene*  Scene; // if nullptr use camera
 			Camera* Camera;
 			ref<RenderTarget> Target;
+			bool Clear;
 		};
 
 		struct BeginShadowOP {
 			Light* Light;
+			bool UseParticleShader;
+			bool Clear;
 		};
 
 		struct DrawMeshOP {
 			Transform Transform;
-			Mesh      Mesh;
+			Mesh Mesh;
 		};
 
 		struct DrawMeshInstanceOP {
@@ -123,21 +126,25 @@ namespace Graphics {
 		IWGRAPHICS_API
 		void BeginScene(
 			Camera* camera = nullptr,
-			const ref<RenderTarget>& target = nullptr) override;
+			const ref<RenderTarget>& target = nullptr,
+			bool clear = false) override;
 
 		// calls begin scene
 		// set scene lights if provided, no action if null
 		IWGRAPHICS_API
 		void BeginScene(
 			Scene* scene = nullptr,
-			const ref<RenderTarget>& target = nullptr) override;
+			const ref<RenderTarget>& target = nullptr,
+			bool clear = false) override;
 
 		// set light camera
 		// set light shader
 		// set light target
 		IWGRAPHICS_API
 		void BeginShadowCast(
-			Light* light) override;
+			Light* light,
+			bool useParticleShader = false,
+			bool clear = true) override;
 
 		// marks end of scene, subsequent calls to SubmitMesh will be invalid
 		IWGRAPHICS_API

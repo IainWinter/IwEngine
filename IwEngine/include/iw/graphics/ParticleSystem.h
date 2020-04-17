@@ -30,36 +30,51 @@ namespace Graphics {
 	};
 
 	template<
-		typename _p>
+		typename _p = StaticParticle>
 	struct ParticleSystem {
 	public:
 		using particle_t = Particle<_p>;
-		using func_update = std::function<bool(particle_t*, unsigned)>;
+		using func_update = std::function<bool(ParticleSystem<StaticParticle>*, particle_t*, unsigned)>;
 
 	private:
-		func_update m_update; // might want to just make 2 types of particle systems one that is more of a sim and a static one 
 		std::vector<particle_t> m_particles; // but the template works for now
-		Mesh m_mesh;
-		bool m_needsToUpdateBuffer;
-
 		std::vector<particle_t> m_spawn;
 		std::vector<unsigned>   m_delete;
 
+		Mesh m_mesh;
+		bool m_needsToUpdateBuffer;
+
+		func_update m_update;
 		_p m_prefab;
+
+		Transform* m_transform;
 
 	public:
 		ParticleSystem() {
 			m_needsToUpdateBuffer = false;
 
-			m_update = [](particle_t*, unsigned) {
+			m_update = [](ParticleSystem<StaticParticle>* s, particle_t*, unsigned) {
 				return false;
 			};
+
+			m_transform = nullptr;
 
 			srand(6783542);
 		}
 
 		Mesh& GetParticleMesh() {
 			return m_mesh;
+		}
+
+		void SetTransform(
+			Transform* transform)
+		{
+			m_transform = transform;
+		}
+
+		Transform* GetTransform()
+		{
+			return m_transform;
 		}
 
 		void SetParticleMesh(
@@ -93,7 +108,7 @@ namespace Graphics {
 			m_update = update;
 		}
 
-		void Update() {
+		void UpdateParticleMesh() {
 			if (m_needsToUpdateBuffer) {
 				for (unsigned i : m_delete) {
 					m_particles.erase(m_particles.begin() + i);
@@ -101,6 +116,7 @@ namespace Graphics {
 
 				for (const particle_t& p : m_spawn) {
 					m_particles.push_back(p);
+					m_particles.back().Transform.SetParent(m_transform);
 				}
 
 				m_delete.clear();
@@ -111,7 +127,7 @@ namespace Graphics {
 				matrix4* models = new matrix4[count];
 
 				for (unsigned i = 0; i < count; i++) {
-					models[i] = m_particles[i].Transform.Transformation();
+					models[i] = m_particles[i].Transform.WorldTransformation();
 				}
 
 				m_mesh.Data()->SetBufferData(bName::UV1, count, models);
@@ -143,8 +159,8 @@ namespace Graphics {
 			m_needsToUpdateBuffer = true;
 		}
 
-		void UpdateParticles() {
-			m_needsToUpdateBuffer |= m_update(m_particles.data(), m_particles.size());
+		void Update() {
+			m_needsToUpdateBuffer |= m_update(this, m_particles.data(), m_particles.size());
 		}
 	};
 }
