@@ -87,7 +87,7 @@ namespace util {
 	{
 		reset();
 
-		LOG_INFO << "Appended " << m_capacity << " byte page to   pool allocator";
+		//LOG_INFO << "Appended " << m_capacity << " byte page to   pool allocator";
 	}
 
 	pool_allocator::page::~page() {
@@ -100,7 +100,7 @@ namespace util {
 		m_previous = nullptr;
 		m_freelist.clear();
 
-		LOG_INFO << "Removed  " << m_capacity << " byte page from pool allocator";
+		//LOG_INFO << "Removed  " << m_capacity << " byte page from pool allocator";
 	}
 
 	void* pool_allocator::page::alloc(

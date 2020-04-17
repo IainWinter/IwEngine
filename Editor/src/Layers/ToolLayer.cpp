@@ -29,7 +29,7 @@ namespace iw {
 	ToolLayer::ToolLayer(
 		Scene* scene)
 		 : Layer("Toolbox")
-		, scene(scene)
+		, m_mainScene(scene)
 	{}
 
 	int ToolLayer::Initialize() {
@@ -106,12 +106,12 @@ namespace iw {
 	}
 
 	void ToolLayer::OnPush() {
-		oldcamera = scene->MainCamera();
-		scene->SetMainCamera(camera);
+		oldcamera = m_mainScene->MainCamera();
+		m_mainScene->SetMainCamera(camera);
 	}
 
 	void ToolLayer::OnPop() {
-		scene->SetMainCamera(oldcamera);
+		m_mainScene->SetMainCamera(oldcamera);
 	}
 
 	vector3 p;
@@ -149,14 +149,14 @@ namespace iw {
 
 			Renderer->DrawMesh(transform, cameraMesh);
 
-			for (PointLight* light : scene->PointLights()) {
+			for (PointLight* light : m_mainScene->PointLights()) {
 				transform.Position = light->Position();
 				transform.Scale    = 0.1f;
 
 				Renderer->DrawMesh(transform, plightMesh);
 			}
 
-			for (DirectionalLight* light : scene->DirectionalLights()) {
+			for (DirectionalLight* light : m_mainScene->DirectionalLights()) {
 				transform.Position = light->Position();
 				transform.Rotation = light->Rotation();
 				transform.Scale = 0.1f;
@@ -166,7 +166,7 @@ namespace iw {
 
 		Renderer->EndScene();
 
-		for (Light* light : scene->Lights()) {
+		for (Light* light : m_mainScene->Lights()) {
 			if (!light->CanCastShadows()) {
 				continue;
 			}
@@ -184,7 +184,7 @@ namespace iw {
 			Renderer->EndShadowCast();
 		}
 
-		Renderer->BeginScene(scene);
+		Renderer->BeginScene(m_mainScene);
 
 			for (auto entity : Space->Query<Transform, Model>()) {
 				auto [transform, model] = entity.Components.Tie<ModelComponents>();
@@ -203,7 +203,7 @@ namespace iw {
 		Renderer->EndScene();
 
 
-		//Renderer->BeginScene(scene->MainCamera());
+		//Renderer->BeginScene(m_mainScene->MainCamera());
 		//	Renderer->DrawMesh(&textTransform, textMesh);
 		//Renderer->EndScene();
 	}
@@ -218,7 +218,7 @@ namespace iw {
 
 		ImGui::Value("Number of object", draws);
 
-		for (PointLight* light : scene->PointLights()) {
+		for (PointLight* light : m_mainScene->PointLights()) {
 			vector3 pos = light->Position();
 			ImGui::SliderFloat3("Light pos", (float*)&pos, -25, 25);
 			light->SetPosition(pos);
@@ -228,7 +228,7 @@ namespace iw {
 			light->SetRadius(rad);
 		}
 
-		for (DirectionalLight* light : scene->DirectionalLights()) {
+		for (DirectionalLight* light : m_mainScene->DirectionalLights()) {
 			quaternion rot = light->Rotation();
 			ImGui::SliderFloat4("Light rot", (float*)&rot, 0, 1);
 			light->SetRotation(rot);

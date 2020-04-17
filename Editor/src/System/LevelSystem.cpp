@@ -469,7 +469,6 @@ iw::Entity LevelSystem::LoadFloor(
 		mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/pbr.shader"));
 		mesh.Material()->SetTexture("shadowMap",  Asset->Load<iw::Texture>("SunShadowMap"));   // shouldnt be part of material
 		mesh.Material()->SetTexture("shadowMap2", Asset->Load<iw::Texture>("LightShadowMap")); // shouldnt be part of material
-		mesh.Material()->Initialize(Renderer->Device);
 
 		mesh.Material()->Set("roughness", 0.9f);
 		mesh.Material()->Set("metallic", 0.1f);

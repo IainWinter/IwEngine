@@ -120,7 +120,9 @@ namespace Graphics {
 			}
 
 			for (TextureProperty& prop : m_textures) {
-				if (prop.Texture && !prop.Texture->Handle()) {
+				if (    prop.Texture
+					&& !prop.Texture->Handle())
+				{
 					prop.Texture->Initialize(device);
 				}
 			}
@@ -321,6 +323,10 @@ namespace Graphics {
 
 	bool Material::Wireframe() const {
 		return m_wireframe;
+	}
+
+	bool Material::IsInitialized() const {
+		return m_initialized;
 	}
 
 	void Material::SetTransparency(

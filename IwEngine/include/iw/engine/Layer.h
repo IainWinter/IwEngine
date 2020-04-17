@@ -6,6 +6,7 @@
 #include "InitOptions.h"
 #include "Events/Events.h"
 #include "iw/entity/Space.h"
+#include "iw/graphics/Scene.h"
 #include "iw/graphics/QueuedRenderer.h"
 #include "iw/asset/AssetManager.h"
 #include "iw/physics/Dynamics/DynamicsSpace.h"
@@ -29,6 +30,8 @@ namespace Engine {
 		iw::ref<DynamicsSpace>  Physics;
 		iw::ref<AudioSpace>     Audio;
 		iw::ref<iw::eventbus>   Bus;
+
+		Scene* MainScene;
 
 	public:
 		IWENGINE_API
@@ -192,6 +195,10 @@ namespace Engine {
 			m_systems.Pop(system);
 
 			system->OnPop();
+		}
+
+		iw::Scene* GetMainScene() {
+			return MainScene;
 		}
 	private:
 		friend class Application;

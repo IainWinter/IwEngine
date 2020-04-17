@@ -5,6 +5,7 @@
 #include "iw/engine/Systems/EditorCameraControllerSystem.h"
 
 #include "iw/graphics/RenderTarget.h"
+#include "iw/graphics/Scene.h"
 
 namespace iw {
 	class ToolLayer
@@ -18,10 +19,10 @@ namespace iw {
 		ref<RenderTarget> selectionBuffer;
 
 		Mesh textMesh;
-		iw::ref<Shader> fontShader;
-		iw::ref<Font> font;
+		ref<Shader> fontShader;
+		ref<Font> font;
 
-		Scene* scene;
+		Scene* m_mainScene;
 
 		Camera* camera;
 		Camera* oldcamera;

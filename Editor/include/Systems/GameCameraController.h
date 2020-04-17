@@ -20,12 +20,12 @@ private:
 	iw::vector3 center;
 	float speed;
 
-	iw::Entity& player;
+	iw::Entity& m_target;
 	iw::Scene* scene;
 
 public:
 	GameCameraController(
-		iw::Entity& player,
+		iw::Entity& target,
 		iw::Scene* scene);
 
 	void SetLocked(

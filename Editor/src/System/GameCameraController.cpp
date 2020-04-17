@@ -4,10 +4,10 @@
 #include <imgui/imgui.h>
 
 GameCameraController::GameCameraController(
-	iw::Entity& player,
+	iw::Entity& target,
 	iw::Scene* scene)
 	: System("Game Camera Controller")
-	, player(player)
+	, m_target(target)
 	, scene(scene)
 	, locked(false)
 	, follow(true)
@@ -27,7 +27,7 @@ void GameCameraController::Update(
 
 		iw::vector3 target;
 		if (follow) {
-			target = player.FindComponent<iw::Transform>()->Position;
+			target = m_target.FindComponent<iw::Transform>()->Position;
 		}
 
 		else {

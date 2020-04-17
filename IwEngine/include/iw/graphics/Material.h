@@ -157,6 +157,9 @@ namespace Graphics {
 		bool Wireframe() const;
 
 		IWGRAPHICS_API
+		bool IsInitialized() const;
+
+		IWGRAPHICS_API
 		void SetTransparency(
 			iw::Transparency transparency);
 

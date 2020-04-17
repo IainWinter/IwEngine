@@ -2,22 +2,25 @@
 
 #include "iw/engine/Core.h"
 #include "iw/engine/System.h"
-#include "iw/physics/Dynamics/Rigidbody.h"
+#include "iw/graphics/Model.h"
 
 namespace iw {
 namespace Engine {
-	class LightShadowRenderSystem
-		: public System<Transform, Light>
+	class LightRenderSystem
+		: public System<Transform, Model>
 	{
 	public:
 		struct Components {
 			Transform* Transform;
-			Light* Light;
+			Model* Model;
 		};
+
+		Scene* m_scene;
 
 	public:
 		IWENGINE_API
-		LightShadowRenderSystem();
+		LightRenderSystem(
+			Scene* scene);
 
 		IWENGINE_API
 		void Update(

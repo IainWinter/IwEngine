@@ -23,8 +23,6 @@ namespace iw {
 		PlayerSystem* playerSystem;
 		EnemySystem*  enemySystem;
 
-		Scene* scene;
-
 		// Lights
 
 		DirectionalLight* sun;
@@ -70,9 +68,5 @@ namespace iw {
 		bool On(MouseMovedEvent& e) override;
 		//bool On(KeyTypedEvent& e) override;
 		bool On(ActionEvent& e) override;
-
-		Scene* GetScene() {
-			return scene;
-		}
 	};
 }

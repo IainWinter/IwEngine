@@ -5,6 +5,7 @@ namespace Engine {
 	Layer::Layer(
 		const char* name)
 		: m_name(name)
+		, MainScene(new Scene())
 	{}
 
 	Layer::~Layer() {}

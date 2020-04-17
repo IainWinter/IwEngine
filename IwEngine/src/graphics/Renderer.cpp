@@ -147,6 +147,10 @@ namespace Graphics {
 #endif
 		if (m_state == RenderState::SCENE) {
 			if (mesh->Material()) {
+				if (!mesh->Material()->IsInitialized()) {
+					mesh->Material()->Initialize(Device);
+				}
+
 				Renderer::SetMaterial(mesh->Material());
 			}
 		}

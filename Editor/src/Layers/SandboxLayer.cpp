@@ -6,6 +6,9 @@
 #include "Systems/ScoreSystem.h"
 #include "Events/ActionEvents.h"
 #include "iw/engine/Systems/PhysicsSystem.h"
+#include "iw/engine/Systems/MeshRenderSystem.h"
+#include "iw/engine/Systems/ModelRenderSystem.h"
+#include "iw/engine/Systems/LightRenderSystem.h"
 #include "iw/engine/Components/CameraController.h"
 #include "iw/engine/Time.h"
 #include "iw/physics/Collision/SphereCollider.h"
@@ -57,7 +60,6 @@ namespace iw {
 		, sun(nullptr)
 		, textCam(nullptr)
 		, textMesh(nullptr)
-		, scene(nullptr)
 	{}
 
 	int forestInstance = 0;
@@ -150,8 +152,6 @@ namespace iw {
 
 		// Scene 
 
-		scene = new Scene();
-		
 		//	Lights
 
 		sun   = new DirectionalLight(100, OrthographicCamera(60, 32, -100, 100), dirShadowShader, dirShadowTarget);
@@ -160,12 +160,12 @@ namespace iw {
 		sun  ->SetRotation(quaternion(0.872f, 0.0f, 0.303f, 0.384f));
 		light->SetPosition(vector3(0, 10, 0));
 
-		scene->AddLight(sun);
-		scene->AddLight(light);
+		MainScene->AddLight(sun);
+		MainScene->AddLight(light);
 
 		//	Cameras
 
-		scene->SetMainCamera(new PerspectiveCamera()); // projection from up top
+		MainScene->SetMainCamera(new PerspectiveCamera()); // projection from up top
 		textCam = new OrthographicCamera(vector3::one, quaternion::from_axis_angle(vector3::unit_y, Pi), 16, 9, -10, 10);
 
 		iw::quaternion camrot = 
@@ -175,9 +175,9 @@ namespace iw {
 		iw::Entity camera = Space->CreateEntity<iw::Transform, iw::CameraController>();
 
 		iw::Transform* transform = camera.SetComponent<iw::Transform>(vector3(0, 27.18f, 0), iw::vector3::one, camrot);
-		                           camera.SetComponent<iw::CameraController>(scene->MainCamera());
+		                           camera.SetComponent<iw::CameraController>(MainScene->MainCamera());
 
-		scene->MainCamera()->SetTrans(transform);
+								   MainScene->MainCamera()->SetTrans(transform);
 
 		// Materials
 
@@ -272,12 +272,16 @@ namespace iw {
 
 		playerSystem = PushSystem<PlayerSystem>();
 		enemySystem  = PushSystem<EnemySystem>(playerSystem->GetPlayer());
-		PushSystem<GameCameraController>(playerSystem->GetPlayer(), scene);
+		PushSystem<GameCameraController>(playerSystem->GetPlayer(), MainScene);
 		PushSystem<BulletSystem>(playerSystem->GetPlayer());
 		PushSystem<LevelSystem>(playerSystem->GetPlayer());
-		PushSystem<ScoreSystem>(playerSystem->GetPlayer(), scene->MainCamera(), textCam);
+		PushSystem<ScoreSystem>(playerSystem->GetPlayer(), MainScene->MainCamera(), textCam);
 		PushSystem<EnemyDeathCircleSystem>();
 		PushSystem<PhysicsSystem>();
+
+		PushSystem<iw::MeshRenderSystem>(MainScene);
+		PushSystem<iw::ModelRenderSystem>(MainScene);
+		PushSystem<iw::LightRenderSystem>(MainScene);
 
 		// Particle test
 
@@ -337,7 +341,7 @@ namespace iw {
 			textMesh.Data()->Update(Renderer->Device);
 		}
 
-		scene->MainCamera()->SetProjection(iw::lerp(persp, ortho, blend));
+		MainScene->MainCamera()->SetProjection(iw::lerp(persp, ortho, blend));
 		
 		// Shadow maps
 
@@ -370,40 +374,10 @@ namespace iw {
 		//	Renderer->EndShadowCast();
 		//}
 
-		for (Light* light : scene->Lights()) {
-			if (!light->CanCastShadows()) {
-				continue;
-			}
-			
-			Renderer->BeginShadowCast(light);
-
-				for (auto entity : Space->Query<Transform, Model>()) {
-					auto [transform, model] = entity.Components.Tie<ModelComponents>();
-
-					for (Mesh& mesh : *model) {
-						if (mesh.Material()->CastShadows()) {
-							Renderer->DrawMesh(*transform, mesh);
-						}
-					}
-				}
-
-			Renderer->EndShadowCast();
-		}
-
 		// Main render
 
-		Renderer->BeginScene(scene);
-
-			for (auto entity : Space->Query<Transform, Model>()) {
-				auto [transform, model] = entity.Components.Tie<ModelComponents>();
-
-				for (Mesh& mesh : *model) {
-					Renderer->DrawMesh(*transform, mesh);
-				}
-			}
-
+		Renderer->BeginScene(MainScene);
 			Renderer->DrawMesh(Transform(), system.GetParticleMesh());
-
 		Renderer->EndScene();
 
 		Renderer->BeginScene(textCam);
@@ -428,7 +402,7 @@ namespace iw {
 
 		ImGui::SliderFloat("Time scale", &ts, 0.001f, 1);
 
-		ImGui::SliderFloat("Ambiance", (float*)&scene->Ambiance(), 0, 1);
+		ImGui::SliderFloat("Ambiance", (float*)&MainScene->Ambiance(), 0, 1);
 		//ImGui::SliderFloat("Gamma", (float*)&mainRender->GetGamma(), 0, 5);
 		ImGui::SliderFloat("Camera blend", &blend, 0, 1);
 

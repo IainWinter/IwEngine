@@ -123,7 +123,6 @@ namespace Graphics {
 	public:
 		PerspectiveCamera() = default;
 
-
 		PerspectiveCamera(
 			float fov,
 			float aspect,
