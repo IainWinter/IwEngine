@@ -24,8 +24,8 @@ namespace RenderAPI {
 		const VertexBufferLayout& layout,
 		int index)
 	{
-		Bind();
 		vb->Bind();
+		Bind();
 		
 		unsigned offset = 0;
 		unsigned i = index > 0 ? index : (unsigned)m_buffers.size();
@@ -34,9 +34,9 @@ namespace RenderAPI {
 			glVertexAttribDivisor(i, layout.GetInstanceStride());
 			glVertexAttribPointer(
 				i,
-				element.Count, 
+				element.Count,
 				element.Type,
-				element.Normalized, 
+				element.Normalized,
 				layout.GetStride(), 
 				(const void*)offset);
 
@@ -44,8 +44,8 @@ namespace RenderAPI {
 			++i;
 		}
 
-		Unbind();
 		vb->Unbind();
+		Unbind();
 
 		m_buffers.push_back(vb);
 		m_layouts.push_back(layout);

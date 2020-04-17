@@ -60,6 +60,9 @@ namespace detail {
 			bName name) const;
 
 		IWGRAPHICS_API
+		std::vector<bName> GetBufferNames() const;
+
+		IWGRAPHICS_API
 		VertexBufferLayout GetBufferLayout(
 			bName name) const;
 
@@ -76,6 +79,7 @@ namespace detail {
 		struct BufferData {
 			ref<char[]> Data;
 			unsigned Count;
+			bool Initialized;
 
 			void*       Ptr()       { return Data.get(); }
 			const void* Ptr() const { return Data.get(); }
@@ -121,10 +125,10 @@ namespace detail {
 		bool IsOutdated() const;
 
 		IWGRAPHICS_API
-		const MeshDescription& Description() const;
-
-		IWGRAPHICS_API
 		MeshTopology Topology() const;
+
+		//IWGRAPHICS_API       MeshDescription& Description();
+		IWGRAPHICS_API const MeshDescription& Description() const;
 
 		IWGRAPHICS_API void*       Get     (bName name);
 		IWGRAPHICS_API const void* Get     (bName name) const;
@@ -157,25 +161,35 @@ namespace detail {
 		void GenTangents(
 			bool smooth = true);
 
+		IWGRAPHICS_API
+		void ConformMeshData(
+			const MeshDescription& description);
+
 		IWGRAPHICS_API void Initialize(const ref<IDevice>& device); // Send the mesh data to video memory
 		IWGRAPHICS_API void Update    (const ref<IDevice>& device); // Updates the video memory copy of the mesh
 		IWGRAPHICS_API void Destroy   (const ref<IDevice>& device); // Destroys the video memory copy of the mesh
 	private:
+		friend struct Mesh;
+
+		IWGRAPHICS_API void Bind  (const ref<IDevice>& device);	  // Binds the mesh for use
+		IWGRAPHICS_API void Unbind(const ref<IDevice>& device);	  // Marks mesh as unbound (doesn't change renderer state [for now])
+		IWGRAPHICS_API void Draw  (const ref<IDevice>& device) const; // Draws the mesh once used
+
 		~MeshData() = default; // force dynamic allocation
 
-		friend void detail::DestroyMeshData(MeshData*);
+		friend void detail::DestroyMeshData(MeshData*); // might want to make a make function instead
+
+		void AddBufferToVertexArray(
+			const ref<IDevice>& device,
+			VertexBufferLayout& layout,
+			BufferData& data,
+			unsigned index);
 
 		IWGRAPHICS_API       BufferData& GetBuffer(unsigned index);
 		IWGRAPHICS_API const BufferData& GetBuffer(unsigned index) const;
 
 		IWGRAPHICS_API       IndexData& GetIndexBuffer();
 		IWGRAPHICS_API const IndexData& GetIndexBuffer() const;
-
-		friend struct Mesh;
-
-		IWGRAPHICS_API void Bind  (const ref<IDevice>& device);	  // Binds the mesh for use
-		IWGRAPHICS_API void Unbind(const ref<IDevice>& device);	  // Marks mesh as unbound (doesn't change renderer state [for now])
-		IWGRAPHICS_API void Draw  (const ref<IDevice>& device) const; // Draws the mesh once used
 	};
 
 	struct Mesh {

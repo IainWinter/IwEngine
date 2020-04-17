@@ -1,6 +1,7 @@
 #pragma once
 
 #include "iw/graphics/Mesh.h"
+#include <algorithm>
 
 namespace iw {
 namespace Graphics {
@@ -45,6 +46,17 @@ void MeshDescription::DescribeBuffer(
 		bName name) const
 	{
 		return m_map.at(name);
+	}
+
+	std::vector<bName> MeshDescription::GetBufferNames() const {
+		std::vector<bName> names;
+		names.reserve(m_map.size());
+
+		for (auto pair : m_map) {
+			names.push_back(pair.first);
+		}
+
+		return names;
 	}
 
 	VertexBufferLayout MeshDescription::GetBufferLayout(
@@ -97,13 +109,17 @@ void MeshDescription::DescribeBuffer(
 		return !!m_vertexArray || !!m_indexBuffer;
 	}
 
+	bool MeshData::IsOutdated() const {
+		return m_outdated;
+	}
+
 	MeshTopology MeshData::Topology() const {
 		return m_topology;
 	}
 
-	bool MeshData::IsOutdated() const {
-		return m_outdated;
-	}
+	//MeshDescription& MeshData::Description() {
+	//	return m_description;
+	//}
 
 	const MeshDescription& MeshData::Description() const {
 		return m_description;
@@ -278,24 +294,31 @@ void MeshDescription::DescribeBuffer(
 		SetBufferData(bName::BITANGENT, GetCount(bName::NORMAL), btangents);
 	}
 
-	MeshData::BufferData& MeshData::GetBuffer(
-		unsigned index)
+	void MeshData::ConformMeshData(
+		const MeshDescription& description)
 	{
-		return m_buffers[index];
-	}
+		if (IsInitialized()) {
+			LOG_WARNING << "Cannot conform mesh data after it has been initialized!";
+			return;
+		}
 
-	const MeshData::BufferData& MeshData::GetBuffer(
-		unsigned index) const
-	{
-		return m_buffers[index];
-	}
+		std::vector<unsigned> diff;
 
-	MeshData::IndexData& MeshData::GetIndexBuffer() {
-		return m_index;
-	}
+		for (bName name : m_description.GetBufferNames()) {
+			if (!description.HasBuffer(name)) {
+				diff.push_back(m_description.GetBufferIndex(name));
+			}
+		}
 
-	const MeshData::IndexData& MeshData::GetIndexBuffer() const {
-		return m_index;
+		std::sort(diff.begin(), diff.end(), std::greater<unsigned>());
+
+		for (unsigned i : diff) {
+			m_buffers.erase(m_buffers.begin() + i);
+		}
+
+		m_buffers.resize(description.GetBufferCount());
+
+		m_description = description;
 	}
 
 	void MeshData::Initialize(
@@ -318,8 +341,7 @@ void MeshDescription::DescribeBuffer(
 			VertexBufferLayout& layout = m_description.GetBufferLayout(i);
 
 			if (data.Ptr() != nullptr) {
-				IVertexBuffer* buffer = device->CreateVertexBuffer(data.Ptr(), data.Count * layout.GetStride());
-				device->AddBufferToVertexArray(m_vertexArray, buffer, layout, i);
+				AddBufferToVertexArray(device, layout, data, i);
 			}
 		}
 	}
@@ -343,9 +365,15 @@ void MeshDescription::DescribeBuffer(
 			BufferData& data = GetBuffer(i);
 			VertexBufferLayout& layout = m_description.GetBufferLayout(i);
 
-			// check for null data?
+			if (data.Initialized) {
+				device->UpdateVertexArrayData(m_vertexArray, i, data.Ptr(), data.Count * layout.GetStride());
+			}
 
-			device->UpdateVertexArrayData(m_vertexArray, i, data.Ptr(), data.Count * layout.GetStride());
+			else {
+				if (data.Ptr() != nullptr) {
+					AddBufferToVertexArray(device, layout, data, i);
+				}
+			}
 		}
 	}
 
@@ -396,7 +424,37 @@ void MeshDescription::DescribeBuffer(
 		else {
 			device->DrawElements(m_topology, GetIndexBuffer().Count, 0);
 		}
+	}
 
+	void MeshData::AddBufferToVertexArray(
+		const ref<IDevice>& device,
+		VertexBufferLayout& layout,
+		BufferData& data,
+		unsigned index)
+	{
+		IVertexBuffer* buffer = device->CreateVertexBuffer(data.Ptr(), data.Count * layout.GetStride());
+		device->AddBufferToVertexArray(m_vertexArray, buffer, layout, index);
+		data.Initialized = true;
+	}
+
+	MeshData::BufferData& MeshData::GetBuffer(
+		unsigned index)
+	{
+		return m_buffers[index];
+	}
+
+	const MeshData::BufferData& MeshData::GetBuffer(
+		unsigned index) const
+	{
+		return m_buffers[index];
+	}
+
+	MeshData::IndexData& MeshData::GetIndexBuffer() {
+		return m_index;
+	}
+
+	const MeshData::IndexData& MeshData::GetIndexBuffer() const {
+		return m_index;
 	}
 
 	// Mesh

@@ -23,6 +23,9 @@
 
 #include "iw/engine/Systems/Debug/DrawCollidersSystem.h"
 
+float randf() {
+	return ((float)rand() / RAND_MAX - 0.5f) * 2.0f;
+}
 
 namespace iw {
 	struct ModelUBO {
@@ -107,11 +110,13 @@ namespace iw {
 		ref<Shader> gaussian = Asset->Load<Shader>("shaders/filters/gaussian.shader");
 		ref<Shader> dirShadowShader   = Asset->Load<Shader>("shaders/lights/directional.shader");
 		ref<Shader> pointShadowShader = Asset->Load<Shader>("shaders/lights/point.shader");
+		ref<Shader> dirIShadowShader = Asset->Load<Shader>("shaders/lights/directional_instanced.shader");
 		
 		Renderer->InitShader(shader,   CAMERA | SHADOWS | LIGHTS);
 		Renderer->InitShader(gaussian, CAMERA);
-		Renderer->InitShader(dirShadowShader, CAMERA);
+		Renderer->InitShader(dirShadowShader,  CAMERA);
 		Renderer->InitShader(pointShadowShader);
+		Renderer->InitShader(dirIShadowShader, CAMERA);
 
 		// Directional light shadow map textures & target
 
@@ -151,7 +156,7 @@ namespace iw {
 		sun   = new DirectionalLight(100, OrthographicCamera(60, 32, -100, 100), dirShadowShader, dirShadowTarget);
 		light = new PointLight(30, 30, pointShadowShader, pointShadowTarget);
 
-		sun->SetRotation(quaternion(0.872f, 0.0f, 0.303f, 0.384f));
+		sun  ->SetRotation(quaternion(0.872f, 0.0f, 0.303f, 0.384f));
 		light->SetPosition(vector3(0, 10, 0));
 
 		scene->AddLight(sun);
@@ -273,10 +278,59 @@ namespace iw {
 		PushSystem<EnemyDeathCircleSystem>();
 		PushSystem<PhysicsSystem>();
 
+		// Particle test
+
+		ref<Shader> particleShader = Asset->Load<Shader>("shaders/particle/simple.shader");
+		Renderer->InitShader(particleShader, CAMERA);
+
+		iw::Material particleMaterial(particleShader);
+		particleMaterial.Set("color", Color::From255(0, 60, 10));
+		particleMaterial.Initialize(Renderer->Device);
+
+		Mesh particle = Asset->Load<Model>("models/forest/tuft.dae")->GetMesh(0);
+		particle.SetMaterial(particleMaterial.MakeInstance());
+
+		system.SetParticleMesh(particle);
+
+		system.SetUpdate([&](Particle<StaticParticle>* p, unsigned c) {
+			if (Mouse::ButtonDown(XMOUSE1)) {
+				for (int i = 0; i < 10; i++) {
+					float x = randf() * 32.0f;
+					float z = randf() * 18.0f;
+
+					if (   abs(x) > 28 + randf() * 2
+						|| abs(z) > 12 + randf() * 2)
+					{
+						Transform trans;
+						trans.Position.x = x;
+						trans.Position.z = z;
+						trans.Position.y = randf() * 0.5f + 0.25f;
+
+						trans.Scale.x = (randf() + 1.2f) * 0.2;
+						trans.Scale.z = (randf() + 1.2f) * 0.2;
+						trans.Scale.y = (randf() + 1.5f) * 0.5; 
+
+						trans.Rotation = quaternion::from_euler_angles(0, randf() * 2 * Pi, 0);
+
+						system.SpawnParticle(trans);
+					}
+				}
+
+				return true;
+			}
+
+			return false;
+		});
+
 		return Layer::Initialize();
 	}
 
 	void SandboxLayer::PostUpdate() {
+		// Update particle system
+
+		system.UpdateParticles();
+		system.Update();
+
 		//font->UpdateMesh(textMesh, std::to_string(1.0f / Time::DeltaTime()), 0.01f, 1); //fps
 		if (textMesh.Data()->IsOutdated()) {
 			textMesh.Data()->Update(Renderer->Device);
@@ -346,6 +400,8 @@ namespace iw {
 					Renderer->DrawMesh(*transform, mesh);
 				}
 			}
+
+			Renderer->DrawMesh(Transform(), system.GetParticleMesh());
 
 		Renderer->EndScene();
 

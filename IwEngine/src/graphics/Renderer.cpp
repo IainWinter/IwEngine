@@ -151,6 +151,10 @@ namespace Graphics {
 			}
 		}
 
+		else {
+			Device->SetWireframe(false);
+		}
+
 		IPipelineParam* model = m_shader->Handle()->GetParam("model");
 
 		if (model) {
@@ -158,6 +162,14 @@ namespace Graphics {
 		}
 
 		Renderer::SetMesh(mesh);
+
+		if (!m_meshData->IsInitialized()) {
+			m_meshData->Initialize(Device);
+		}
+
+		if (m_meshData->IsOutdated()) {
+			m_meshData->Update(Device);
+		}
 
 		mesh->Draw(Device);
 	}

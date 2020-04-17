@@ -13,6 +13,8 @@
 #include "Pipeline/FilterTarget.h"
 #include "Pipeline/Render.h"
 
+#include "iw/graphics/ParticleSystem.h"
+
 namespace iw {
 	class SandboxLayer
 		: public Layer
@@ -52,6 +54,8 @@ namespace iw {
 		std::string str;
 		float ts = 1.0f;
 		float threshold = 0.25f;
+
+		ParticleSystem<StaticParticle> system;
 
 	public:
 		SandboxLayer();
