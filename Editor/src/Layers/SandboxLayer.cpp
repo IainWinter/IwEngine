@@ -18,6 +18,7 @@
 #include "iw/graphics/Model.h"
 #include "iw/graphics/TextureAtlas.h"
 #include "iw/input/Devices/Mouse.h"
+#include "iw/input/Devices/Keyboard.h"
 #include "iw/audio/AudioSpaceStudio.h"
 #include "imgui/imgui.h"
 
@@ -293,7 +294,7 @@ namespace iw {
 		system.SetParticleMesh(particle);
 
 		system.SetUpdate([&](Particle<StaticParticle>* p, unsigned c) {
-			if (Mouse::ButtonDown(XMOUSE1)) {
+			if (Keyboard::KeyDown(G)) {
 				for (int i = 0; i < 10; i++) {
 					float x = randf() * 32.0f;
 					float z = randf() * 18.0f;
