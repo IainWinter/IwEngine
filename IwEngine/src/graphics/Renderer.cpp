@@ -156,7 +156,6 @@ namespace Graphics {
 		}
 
 		IPipelineParam* model = m_shader->Handle()->GetParam("model");
-
 		if (model) {
 			model->SetAsMat4(transform->WorldTransformation());
 		}
