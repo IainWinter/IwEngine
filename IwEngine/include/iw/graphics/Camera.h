@@ -38,7 +38,9 @@ namespace Graphics {
 		//      quaternion& Rotation();
 
 		matrix4 View();
+		matrix4 View() const;
 		matrix4 ViewProjection();
+		matrix4 ViewProjection() const;
 
 		virtual iw::matrix4 Projection() const = 0;
 

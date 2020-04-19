@@ -131,7 +131,7 @@ namespace iw {
 		Renderer->InitShader(gaussian, CAMERA);
 		Renderer->InitShader(dirShadowShader,  CAMERA);
 		Renderer->InitShader(pointShadowShader);
-		Renderer->InitShader(dirIShadowShader, CAMERA);
+		Renderer->InitShader(dirIShadowShader);
 		Renderer->InitShader(pointIShadowShader);
 
 		// Directional light shadow map textures & target

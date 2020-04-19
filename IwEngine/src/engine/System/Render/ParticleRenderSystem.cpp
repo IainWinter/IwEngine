@@ -15,7 +15,10 @@ namespace Engine {
 		
 		for (auto entity : eca) {
 			auto [transform, system] = entity.Components.Tie<Components>();
+
+			system->SetCamera(m_scene->MainCamera());
 			system->UpdateParticleMesh();
+
 			Renderer->DrawMesh(transform, &system->GetParticleMesh());
 		}
 			

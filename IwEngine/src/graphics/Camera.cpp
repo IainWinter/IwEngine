@@ -85,6 +85,10 @@ namespace Graphics {
 		return m_view;
 	}
 
+	matrix4 Camera::View() const {
+		return m_view;
+	}
+
 	void Camera::SetTrans(
 		Transform* transform)
 	{
@@ -158,6 +162,10 @@ namespace Graphics {
 	}
 
 	matrix4 Camera::ViewProjection() {
+		return View() * Projection();
+	}
+
+	matrix4 Camera::ViewProjection() const {
 		return View() * Projection();
 	}
 

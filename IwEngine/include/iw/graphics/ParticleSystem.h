@@ -48,7 +48,7 @@ namespace Graphics {
 		_p m_prefab;
 
 		Transform* m_transform;
-		Camera* m_camera; // for optimization
+		const Camera* m_camera; // for optimization
 
 	public:
 		ParticleSystem() {
@@ -79,7 +79,7 @@ namespace Graphics {
 		}
 
 		void SetCamera(
-			Camera* camera) // for optimization
+			const Camera* camera) // for optimization
 		{
 			m_camera = camera;
 			m_needsToUpdateBuffer = true;

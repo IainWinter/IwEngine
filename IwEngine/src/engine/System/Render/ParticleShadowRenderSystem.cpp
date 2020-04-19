@@ -20,9 +20,10 @@ namespace Engine {
 
 			for (auto entity : eca) {
 				auto [transform, system] = entity.Components.Tie<Components>();
-				//system->SetCamera(light->ShadowCamera());
-
 				if (system->GetParticleMesh().Material()->CastShadows()) {
+					system->SetCamera(light->ShadowCamera());
+					system->UpdateParticleMesh();
+
 					Renderer->DrawMesh(*transform, system->GetParticleMesh());
 				}
 			}
