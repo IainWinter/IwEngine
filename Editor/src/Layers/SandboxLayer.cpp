@@ -167,18 +167,14 @@ namespace iw {
 
 		//	Lights
 
-		sun   = new DirectionalLight(100, OrthographicCamera(60, 32, -100, 100), dirShadowTarget, dirShadowShader, dirIShadowShader);
-		//light = new PointLight(30, 30, pointShadowTarget, pointShadowShader, pointIShadowShader);
+		sun   = new DirectionalLight(100, OrthographicCamera(60, 60, -100, 100), dirShadowTarget, dirShadowShader, dirIShadowShader);
+		light = new PointLight(30, 30, pointShadowTarget, pointShadowShader, pointIShadowShader);
 
-		quaternion q = quaternion(0.872f, 0.0f, 0.303f, 0.384f);
-
-		LOG_INFO << q.euler_angles(); // holy moly euler angles are wrong maths
-
-		sun->SetRotation(q);
-		//light->SetPosition(vector3(0, 10, 0));
+		sun->SetRotation(quaternion(0.872f, 0.0f, 0.303f, 0.384f));
+		light->SetPosition(vector3(0, 10, 0));
 
 		MainScene->AddLight(sun);
-		//MainScene->AddLight(light);
+		MainScene->AddLight(light);
 
 		//	Cameras
 
@@ -194,7 +190,7 @@ namespace iw {
 		iw::Transform* transform = camera.SetComponent<iw::Transform>(vector3(0, 27.18f, 0), iw::vector3::one, camrot);
 		                           camera.SetComponent<iw::CameraController>(MainScene->MainCamera());
 
-								   MainScene->MainCamera()->SetTrans(transform);
+		MainScene->MainCamera()->SetTrans(transform);
 
 		// Materials
 

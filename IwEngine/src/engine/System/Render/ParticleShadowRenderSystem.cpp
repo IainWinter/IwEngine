@@ -11,7 +11,7 @@ namespace Engine {
 	void ParticleShadowRenderSystem::Update(
 		EntityComponentArray& eca)
 	{
-		for (iw::Light* light : m_scene->Lights()) {
+		for (iw::DirectionalLight* light : m_scene->DirectionalLights()) {
 			if (!light->CanCastShadows()) {
 				continue;
 			}
@@ -20,9 +20,37 @@ namespace Engine {
 
 			for (auto entity : eca) {
 				auto [transform, system] = entity.Components.Tie<Components>();
+				auto psystem = system; // not sure why it lamdas cant use the struct binding :c
+
 				if (system->GetParticleMesh().Material()->CastShadows()) {
-					system->SetCamera(light->ShadowCamera());
-					system->UpdateParticleMesh();
+					Renderer->BeforeDraw([=]() {
+						psystem->SetCamera(light->ShadowCamera());
+						psystem->UpdateParticleMesh();
+					});
+
+					Renderer->DrawMesh(*transform, system->GetParticleMesh());
+				}
+			}
+
+			Renderer->EndShadowCast();
+		}
+
+		for (iw::PointLight* light : m_scene->PointLights()) {
+			if (!light->CanCastShadows()) {
+				continue;
+			}
+
+			Renderer->BeginShadowCast(light, true, false);
+
+			for (auto entity : eca) {
+				auto [transform, system] = entity.Components.Tie<Components>();
+				auto psystem = system; // not sure why it lamdas cant use the struct binding :c
+
+				if (system->GetParticleMesh().Material()->CastShadows()) {
+					Renderer->BeforeDraw([=]() {
+						psystem->SetCamera(nullptr);
+						psystem->UpdateParticleMesh();
+					});
 
 					Renderer->DrawMesh(*transform, system->GetParticleMesh());
 				}

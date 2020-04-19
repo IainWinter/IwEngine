@@ -3,6 +3,7 @@
 #include "Renderer.h"
 #include "iw/util/memory/pool_allocator.h"
 #include "iw/util/enum/val.h"
+#include <functional>
 #include <deque>
 
 namespace iw {
@@ -12,6 +13,7 @@ namespace Graphics {
 	{
 	private:
 		using key = uint64_t;
+		using setup_draw_func = std::function<void()>;
 
 		enum class Bits {
 			DEPTH        = 8 * sizeof(key) - 64, // 0000000000000000000000000000000000000000xxxxxxxxxxxxxxxxxxxxxxxx
@@ -58,11 +60,15 @@ namespace Graphics {
 		struct DrawMeshOP {
 			Transform Transform;
 			Mesh Mesh;
+
+			setup_draw_func SetupDraw;
 		};
 
 		struct DrawMeshInstanceOP {
 			const Transform* Transform;
 			Mesh* Mesh;
+
+			setup_draw_func SetupDraw;
 		};
 
 		struct FilterOP {
@@ -102,6 +108,8 @@ namespace Graphics {
 		int m_material;
 		int m_transparency;
 		vector3 m_position;
+
+		setup_draw_func m_setupDrawFunc; // gets set by 'BeforeDraw' and then consumed by 'DrawMesh'
 
 	public:
 		IWGRAPHICS_API
@@ -153,6 +161,12 @@ namespace Graphics {
 		// marks end of shadow cast, subsequent calls to SubmitMesh will be invalid
 		IWGRAPHICS_API
 		void EndShadowCast() override;
+
+		// Set a function to run before a mesh gets drawn,
+		//	this is useful when a mesh needs to be updated in different ways for seperate draw calls
+		IWGRAPHICS_API
+		void BeforeDraw(
+			const setup_draw_func& func);
 
 		// if rendering a scene
 		//	set mesh shader

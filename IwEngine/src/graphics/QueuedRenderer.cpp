@@ -140,6 +140,10 @@ namespace Graphics {
 				case RenderOP::DRAW_MESH: {
 					DrawMeshOP* draw = (DrawMeshOP*)item.Data;
 
+					if (draw->SetupDraw) {
+						draw->SetupDraw();
+					}
+
 					Renderer::DrawMesh(draw->Transform, draw->Mesh);
 
 					m_pool.free<DrawMeshOP>(draw);
@@ -147,6 +151,10 @@ namespace Graphics {
 				}
 				case RenderOP::DRAW_MESH_INST: {
 					DrawMeshInstanceOP* draw = (DrawMeshInstanceOP*)item.Data;
+
+					if (draw->SetupDraw) {
+						draw->SetupDraw();
+					}
 
 					Renderer::DrawMesh(draw->Transform, draw->Mesh);
 
@@ -240,6 +248,12 @@ namespace Graphics {
 		m_queue.emplace_back(GenOrder(), RenderOP::END_SHADOW, nullptr);
 	}
 
+	void QueuedRenderer::BeforeDraw(
+		const setup_draw_func& func)
+	{
+		m_setupDrawFunc = func;
+	}
+
 	void QueuedRenderer::DrawMesh(
 		const Transform* transform,
 		Mesh* mesh)
@@ -251,6 +265,9 @@ namespace Graphics {
 		DrawMeshInstanceOP* op = m_pool.alloc<DrawMeshInstanceOP>();
 		op->Transform = transform;
 		op->Mesh      = mesh;
+		op->SetupDraw = m_setupDrawFunc;
+
+		m_setupDrawFunc = nullptr; // reset for next call
 
 		m_queue.emplace_back(GenOrder(transform, mesh), RenderOP::DRAW_MESH_INST, op);
 	}
@@ -266,6 +283,9 @@ namespace Graphics {
 		DrawMeshOP* op = m_pool.alloc<DrawMeshOP>();
 		op->Transform = transform;
 		op->Mesh      = mesh;
+		op->SetupDraw = m_setupDrawFunc;
+
+		m_setupDrawFunc = nullptr; // reset for next call
 
 		m_queue.emplace_back(GenOrder(&transform, &mesh), RenderOP::DRAW_MESH, op);
 	}

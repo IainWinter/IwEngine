@@ -320,7 +320,7 @@ namespace Graphics {
 	{
 		m_lightData.DirectionalLightCount = lights.size();
 		for (size_t i = 0; i < lights.size(); i++) {
-			m_lightData.DirectionalLights[i].InvDirection = -lights[i]->Rotation().euler_angles();
+			m_lightData.DirectionalLights[i].InvDirection = -vector3::unit_z * lights[i]->Rotation();
 		}
 
 		m_shadowData.DirectionalLightCount = lights.size();

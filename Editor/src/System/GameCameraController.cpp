@@ -62,12 +62,12 @@ void GameCameraController::Update(
 		t->Position = iw::lerp(t->Position, target, iw::Time::DeltaTime() * speed);
 		t->Rotation = iw::lerp(t->Rotation, camrot, iw::Time::DeltaTime() * speed);
 
-		iw::DirectionalLight* sun = scene->DirectionalLights()[0];
+		//iw::DirectionalLight* sun = scene->DirectionalLights()[0];
 
-		iw::vector3 subpos = target;
-		subpos.y = 0;
+		//iw::vector3 subpos = target;
+		//subpos.y = 0;
 
-		sun->SetPosition(subpos);
+		//sun->SetPosition(subpos);
 	}
 }
 

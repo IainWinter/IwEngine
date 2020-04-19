@@ -218,20 +218,38 @@ namespace iw {
 
 		ImGui::Value("Number of object", draws);
 
+		char name = 'A';
+
 		for (PointLight* light : m_mainScene->PointLights()) {
+			std::stringstream ss;
+			ss << name << " Light pos";
+
 			vector3 pos = light->Position();
-			ImGui::SliderFloat3("Light pos", (float*)&pos, -25, 25);
+			ImGui::SliderFloat3(ss.str().c_str(), (float*)&pos, -25, 25);
 			light->SetPosition(pos);
 
+			ss = std::stringstream();
+			ss << name++ << " Light rad";
+
 			float rad = light->Radius();
-			ImGui::SliderFloat("Light rad", (float*)&rad, 0, 100);
+			ImGui::SliderFloat(ss.str().c_str(), (float*)&rad, 0, 100);
 			light->SetRadius(rad);
 		}
 
 		for (DirectionalLight* light : m_mainScene->DirectionalLights()) {
-			quaternion rot = light->Rotation();
-			ImGui::SliderFloat4("Light rot", (float*)&rot, -1, 1);
-			light->SetRotation(rot.normalized());
+			std::stringstream ss;
+			ss << name << " Light pos";
+
+			vector3 pos = light->Position();
+			ImGui::SliderFloat3(ss.str().c_str(), (float*)&pos, -25, 25);
+			light->SetPosition(pos);
+
+			ss = std::stringstream();
+			ss << name++ << " Light rot";
+
+			vector3 rot = light->Rotation().euler_angles();
+			ImGui::SliderFloat3(ss.str().c_str(), (float*)&rot, -Pi, Pi);
+			light->SetRotation(quaternion::from_euler_angles(rot));
 		}
 
 		ImGui::End();
