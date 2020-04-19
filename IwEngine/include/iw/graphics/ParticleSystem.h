@@ -48,6 +48,7 @@ namespace Graphics {
 		_p m_prefab;
 
 		Transform* m_transform;
+		Camera* m_camera; // for optimization
 
 	public:
 		ParticleSystem() {
@@ -58,6 +59,7 @@ namespace Graphics {
 			};
 
 			m_transform = nullptr;
+			m_camera = nullptr;
 
 			srand(6783542);
 		}
@@ -66,15 +68,21 @@ namespace Graphics {
 			return m_mesh;
 		}
 
+		Transform* GetTransform() {
+			return m_transform;
+		}
+
 		void SetTransform(
 			Transform* transform)
 		{
 			m_transform = transform;
 		}
 
-		Transform* GetTransform()
+		void SetCamera(
+			Camera* camera) // for optimization
 		{
-			return m_transform;
+			m_camera = camera;
+			m_needsToUpdateBuffer = true;
 		}
 
 		void SetParticleMesh(
@@ -128,6 +136,10 @@ namespace Graphics {
 
 				for (unsigned i = 0; i < count; i++) {
 					models[i] = m_particles[i].Transform.WorldTransformation();
+
+					if (m_camera) {
+						models[i] *= m_camera->ViewProjection();
+					}
 				}
 
 				m_mesh.Data()->SetBufferData(bName::UV1, count, models);

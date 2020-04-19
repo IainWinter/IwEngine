@@ -230,8 +230,8 @@ namespace iw {
 
 		for (DirectionalLight* light : m_mainScene->DirectionalLights()) {
 			quaternion rot = light->Rotation();
-			ImGui::SliderFloat4("Light rot", (float*)&rot, 0, 1);
-			light->SetRotation(rot);
+			ImGui::SliderFloat4("Light rot", (float*)&rot, -1, 1);
+			light->SetRotation(rot.normalized());
 		}
 
 		ImGui::End();

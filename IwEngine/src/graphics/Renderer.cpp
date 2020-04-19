@@ -155,6 +155,16 @@ namespace Graphics {
 			LOG_WARNING << "Tried to submit mesh to renderer while in invalid state!";
 		}
 #endif
+		Renderer::SetMesh(mesh);
+
+		if (!m_meshData->IsInitialized()) {
+			m_meshData->Initialize(Device);
+		}
+
+		if (m_meshData->IsOutdated()) {
+			m_meshData->Update(Device);
+		}
+
 		if (m_state == RenderState::SCENE) {
 			if (mesh->Material()) {
 				if (!mesh->Material()->IsInitialized()) {
@@ -166,22 +176,12 @@ namespace Graphics {
 		}
 
 		else {
-			Device->SetWireframe(false);
+			Device->SetWireframe(false);  // set some shadow material or whatever
 		}
 
 		IPipelineParam* model = m_shader->Handle()->GetParam("model");
 		if (model) {
 			model->SetAsMat4(transform->WorldTransformation());
-		}
-
-		Renderer::SetMesh(mesh);
-
-		if (!m_meshData->IsInitialized()) {
-			m_meshData->Initialize(Device);
-		}
-
-		if (m_meshData->IsOutdated()) {
-			m_meshData->Update(Device);
 		}
 
 		mesh->Draw(Device);

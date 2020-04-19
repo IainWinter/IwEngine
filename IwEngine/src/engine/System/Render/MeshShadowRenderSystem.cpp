@@ -12,7 +12,7 @@ namespace Engine {
 		EntityComponentArray& eca)
 	{
 		for (iw::Light* light : m_scene->Lights()) {
-			if (!light->CanCastShadows()) {
+			if (!light->CanCastShadows() || !light->Outdated()) {
 				continue;
 			}
 

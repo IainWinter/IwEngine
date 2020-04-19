@@ -168,13 +168,17 @@ namespace iw {
 		//	Lights
 
 		sun   = new DirectionalLight(100, OrthographicCamera(60, 32, -100, 100), dirShadowTarget, dirShadowShader, dirIShadowShader);
-		light = new PointLight(30, 30, pointShadowTarget, pointShadowShader, pointIShadowShader);
+		//light = new PointLight(30, 30, pointShadowTarget, pointShadowShader, pointIShadowShader);
 
-		sun  ->SetRotation(quaternion(0.872f, 0.0f, 0.303f, 0.384f));
-		light->SetPosition(vector3(0, 10, 0));
+		quaternion q = quaternion(0.872f, 0.0f, 0.303f, 0.384f);
+
+		LOG_INFO << q.euler_angles(); // holy moly euler angles are wrong maths
+
+		sun->SetRotation(q);
+		//light->SetPosition(vector3(0, 10, 0));
 
 		MainScene->AddLight(sun);
-		MainScene->AddLight(light);
+		//MainScene->AddLight(light);
 
 		//	Cameras
 
@@ -305,21 +309,27 @@ namespace iw {
 		// Particle test
 
 		ref<Shader> particleShader = Asset->Load<Shader>("shaders/particle/simple.shader");
-		Renderer->InitShader(particleShader, CAMERA);
+		Renderer->InitShader(particleShader);
 
 		iw::Material particleMaterial(particleShader);
 		particleMaterial.Set("color", Color::From255(0, 60, 10));
 		particleMaterial.Initialize(Renderer->Device);
 
-		Mesh particle = Asset->Load<Model>("models/forest/tuft.dae")->GetMesh(0);
+		Mesh particle = Asset->Load<Model>("models/forest/tuft_simple.dae")->GetMesh(0);
 		particle.SetMaterial(particleMaterial.MakeInstance());
 
-		ParticleSystem<StaticParticle> system;
+		iw::Entity particleEntity = Space->CreateEntity<iw::Transform, iw::ParticleSystem<StaticParticle>>();
 
-		system.SetParticleMesh(particle);
-		system.SetUpdate([](auto s, auto p, auto c) {
-			if (Keyboard::KeyDown(G)) {
-				for (int i = 0; i < 10; i++) {
+		iw::Transform*                      t = particleEntity.SetComponent<iw::Transform>();
+		iw::ParticleSystem<StaticParticle>* s = particleEntity.SetComponent<iw::ParticleSystem<StaticParticle>>();
+
+		s->SetTransform(t);
+		s->SetParticleMesh(particle);
+		s->SetCamera(MainScene->MainCamera());
+
+		s->SetUpdate([](auto s, auto p, auto c) {
+			if (c < 3000 &&  Keyboard::KeyDown(G)) {
+				for (int i = 0; i < 3000; i++) {
 					float x = randf() * 32.0f;
 					float z = randf() * 18.0f;
 
@@ -333,7 +343,7 @@ namespace iw {
 
 						trans.Scale.x = (randf() + 1.2f) * 0.2;
 						trans.Scale.z = (randf() + 1.2f) * 0.2;
-						trans.Scale.y = (randf() + 1.5f) * 0.5; 
+						trans.Scale.y = (randf() + 1.5f) * 0.5;
 
 						trans.Rotation = quaternion::from_euler_angles(0, randf() * 2 * Pi, 0);
 
@@ -346,11 +356,6 @@ namespace iw {
 
 			return false;
 		});
-
-		iw::Entity particleEntity = Space->CreateEntity<iw::Transform, iw::ParticleSystem<StaticParticle>>();
-
-		particleEntity.SetComponent<iw::Transform>();
-		particleEntity.SetComponent<iw::ParticleSystem<StaticParticle>>(system);
 
 		return Layer::Initialize();
 	}
@@ -422,7 +427,7 @@ namespace iw {
 
 		ImGui::SliderFloat3("Text pos",   (float*)&textTransform.Position, -8, 8);
 		ImGui::SliderFloat3("Text scale", (float*)&textTransform.Scale, 0, 10);
-		ImGui::SliderFloat4("Text rot",   (float*)&textTransform.Rotation, 0, 1);
+		ImGui::SliderFloat4("Text rot",   (float*)&textTransform.Rotation, -1, 1);
 
 		ImGui::SliderFloat("Volume", &Audio->GetVolume(), 0, 1);
 
