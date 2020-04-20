@@ -133,6 +133,7 @@ void PlayerSystem::FixedUpdate(
 
 		if (player->DeathTimer > 0) {
 			rigidbody->SetVelocity(0);
+
 			transform->Scale -= .75f / 1.0f * iw::Time::FixedTime();
 		}
 
