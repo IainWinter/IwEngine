@@ -42,7 +42,7 @@ void GameCameraController::Update(
 			if (   iw::almost_equal(t->Position.x, target.x, 2)
 				&& iw::almost_equal(t->Position.z, target.z, 2))
 			{
-				Bus->push<AtNextLevelEvent>();
+				Bus->push<AtNextLevelEvent>(); // should be timed
 
 				t->Position.x -= target.x;
 				t->Position.z -= target.z;
