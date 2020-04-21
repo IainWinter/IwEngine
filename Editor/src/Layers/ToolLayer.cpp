@@ -9,7 +9,17 @@
 #include "iw/graphics/Model.h"
 #include "imgui/imgui.h"
 
+#include "iw/engine/Systems/ParticleUpdateSystem.h"
+#include "iw/engine/Systems/ParticleUpdateSystem.h"
+#include "iw/engine/Systems/Render/MeshRenderSystem.h"
+#include "iw/engine/Systems/Render/ModelRenderSystem.h"
+#include "iw/engine/Systems/Render/ParticleRenderSystem.h"
+#include "iw/engine/Systems/Render/MeshShadowRenderSystem.h"
+#include "iw/engine/Systems/Render/ModelShadowRenderSystem.h"
+#include "iw/engine/Systems/Render/ParticleShadowRenderSystem.h"
+
 #include "iw/input/Devices/Mouse.h"
+#include <iw\engine\Systems\PhysicsSystem.h>
 
 namespace iw {
 	struct ObjectComponents {
@@ -101,6 +111,14 @@ namespace iw {
 
 		cameraSystem = new EditorCameraControllerSystem();
 		PushSystem<DrawCollidersSystem>(camera);
+		PushSystem<PhysicsSystem>();
+
+		PushSystem<iw::    MeshShadowRenderSystem>(m_mainScene);
+		PushSystem<iw::   ModelShadowRenderSystem>(m_mainScene);
+		PushSystem<iw::ParticleShadowRenderSystem>(m_mainScene);
+		PushSystem<iw::          MeshRenderSystem>(m_mainScene);
+		PushSystem<iw::         ModelRenderSystem>(m_mainScene);
+		PushSystem<iw::      ParticleRenderSystem>(m_mainScene);
 
 		return Layer::Initialize();
 	}

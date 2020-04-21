@@ -58,10 +58,16 @@ namespace iw {
 		if (GetLayer("Toolbox") != nullptr) {
 			//sandbox->Update();
 			//sandbox->FixedUpdate();
-			sandbox->UpdateSystems();
+			//sandbox->UpdateSystems();
 		}
 
 		Application::Update();
+	}
+
+	void Editor::App::FixedUpdate() {
+		if (GetLayer("Toolbox") == nullptr) {
+			Application::FixedUpdate();
+		}
 	}
 
 	bool App::HandleCommand(

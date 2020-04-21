@@ -353,6 +353,15 @@ namespace iw {
 			return false;
 		});
 
+		//iw::ref<iw::Model> rock = Asset->Load<iw::Model>("models/forest/ground.dae");
+
+		//rock->GetMesh(0).Material()->SetShader(shader);
+
+		//iw::Entity e = Space->CreateEntity<iw::Transform, iw::Model>();
+
+		//e.SetComponent<iw::Transform>();
+		//e.SetComponent<iw::Model>(*rock);
+
 		return Layer::Initialize();
 	}
 

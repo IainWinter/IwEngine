@@ -23,6 +23,7 @@ namespace Editor {
 			iw::InitOptions& options) override;
 
 		void Update() override;
+		void FixedUpdate() override;
 
 		bool HandleCommand(
 			const Command& command) override;
