@@ -75,6 +75,9 @@ int PlayerSystem::Initialize() {
 	return 0;
 }
 
+float distance;
+iw::vector3 start;
+
 void PlayerSystem::Update(
 	iw::EntityComponentArray& view)
 {
@@ -92,9 +95,17 @@ void PlayerSystem::Update(
 
 		else {
 			if (player->Timer <= -player->ChargeTime) {
+				if (distance == 0) {
+					distance = (start - transform->Position).length();
+					LOG_INFO << distance;
+				}
+
 				if (    dash
 					&& (up || down || left || right))
 				{
+					start = transform->Position;
+					distance = 0;
+
 					player->Timer = player->DashTime;
 					Audio->AsStudio()->CreateInstance("swordAttack");
 				}
@@ -126,7 +137,7 @@ void PlayerSystem::Update(
 }
 
 void PlayerSystem::FixedUpdate(
-	iw::EntityComponentArray& view)
+	iw::EntityComponentArray& view) // player goes a differnt distance depending on framerate :c
 {
 	for (auto entity : view) {
 		auto [transform, rigidbody, player] = entity.Components.Tie<Components>();
