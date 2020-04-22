@@ -7,11 +7,10 @@
 #include "iw/physics/Collision/CapsuleCollider.h"
 #include "Player.h"
 #include "LevelDoor.h"
+#include "ModelPrefab.h"
 #include <vector>
 
 struct REFLECT Level {
-	REFLECT std::string StageName = "";
-
 	REFLECT bool CameraFollow = false;
 
 	REFLECT std::vector<Enemy>       Enemies;
@@ -26,6 +25,8 @@ struct REFLECT Level {
 	REFLECT std::vector<iw::SphereCollider>  Spheres;
 	REFLECT std::vector<iw::CapsuleCollider> Capsules;
 	REFLECT std::vector<iw::PlaneCollider>   Planes;
+
+	REFLECT std::vector<ModelPrefab> Models;
 
 	//iw::Model Stage;
 };

@@ -12,6 +12,7 @@
 #include "iw/reflection/reflect/std/vector.h"
 #include "iw/reflect/math/vector2.h"
 #include "iw/reflect/math/vector3.h"
+#include "iw/reflect/common/Components/Transform.h"
 #include "iw/reflect/Components/Bullet.h"
 #include "iw/reflect/Components/Enemy.h"
 #include "iw/reflect/Components/Player.h"
@@ -21,6 +22,7 @@
 #include "iw/reflect/Physics/Collision/SphereCollider.h"
 #include "iw/reflect/Physics/Collision/CapsuleCollider.h"
 #include "iw/reflect/Components/Level.h"
+#include "iw/reflect/Components/ModelPrefab.h"
 #include <Components\DontDeleteBullets.h>
 
 LevelSystem::LevelSystem(
@@ -188,7 +190,7 @@ bool LevelSystem::On(
 			transform->Position.x = currentLevel.LevelPosition.x;
 			transform->Position.z = currentLevel.LevelPosition.y;
 
-			Bus->push<GoToNextLevelEvent>(currentLevel.StageName, currentLevel.CameraFollow, currentLevel.InPosition, currentLevel.LevelPosition);
+			Bus->push<GoToNextLevelEvent>(currentLevelName, currentLevel.CameraFollow, currentLevel.InPosition, currentLevel.LevelPosition);
 
 			break;
 		}
@@ -272,13 +274,44 @@ iw::Entity LevelSystem::LoadLevel(
 	//	y = 9 * scaleOutY;
 	//}
 
-	iw::Entity level = LoadFloor(currentLevel.StageName, iw::Transform {
-		iw::vector3(0, 0, 0),
-		iw::vector3(1),
-		iw::quaternion::identity
-	});
+	iw::Transform* levelTransform = nullptr;
+	iw::Entity level;
 
-	iw::Transform* levelTransform = level.FindComponent<iw::Transform>();
+	for (ModelPrefab& prefab : currentLevel.Models) {
+		iw::ref<iw::Model> model = Asset->Load<iw::Model>(prefab.ModelName);
+
+		for (iw::Mesh& mesh : model->GetMeshes()) {
+			if (mesh.Data()->IsInitialized()) {
+				continue;
+			}
+
+			mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/pbr.shader"));
+			mesh.Material()->SetTexture("shadowMap", Asset->Load<iw::Texture>("SunShadowMap"));   // shouldnt be part of material
+			mesh.Material()->SetTexture("shadowMap2", Asset->Load<iw::Texture>("LightShadowMap")); // shouldnt be part of material
+
+			mesh.Material()->Set("roughness", 0.9f);
+			mesh.Material()->Set("metallic", 0.1f);
+
+			mesh.Material()->Initialize(Renderer->Device);
+
+			//floor->Meshes[i].SetIsStatic(true);
+			//mesh.Data()->GenTangents();
+			mesh.Data()->Initialize(Renderer->Device);
+		}
+
+		iw::Entity entity = Space->CreateEntity<iw::Transform, iw::Model>();
+		iw::Transform* t = entity.SetComponent<iw::Transform>(prefab.Transform);
+		                   entity.SetComponent<iw::Model>(*model);
+
+		if(levelTransform) {
+			levelTransform->AddChild(t);
+		}
+
+		else {
+			levelTransform = t;
+			level = entity;
+		}
+	}
 
 	// Enemies
 
@@ -325,9 +358,9 @@ iw::Entity LevelSystem::LoadLevel(
 	for (iw::CapsuleCollider& prefab : currentLevel.Capsules) {
 		iw::Entity enemy;
 		
-		if (   currentLevel.StageName == "models/block/forest15.dae"
-			|| currentLevel.StageName == "models/block/forest16.dae"
-			|| currentLevel.StageName == "models/block/forest17.dae")
+		if (   currentLevelName == "levels/forest/forest15.json"
+			|| currentLevelName == "levels/forest/forest16.json"
+			|| currentLevelName == "levels/forest/forest17.json")
 		{
 			enemy = Space->CreateEntity<iw::Transform, iw::CapsuleCollider, iw::CollisionObject, DontDeleteBullets>();
 		}
@@ -363,33 +396,6 @@ iw::Entity LevelSystem::LoadLevel(
 
 		Physics->AddCollisionObject(object);
 	}
-
-	// Player
-
-	//iw::vector3 playerPos = currentLevel.Door.NextLevelPosition;
-	//playerPos.z = playerPos.y;
-	//playerPos.y = 1.0f;
-	//
-	//iw::Entity player = Space->CreateEntity<iw::Transform, iw::Model, iw::SphereCollider, iw::Rigidbody, Player>();
-	//
-	//                         player.SetComponent<iw::Model>(*Asset->Load<iw::Model>("Player"));
-	//                         player.SetComponent<Player>(currentLevel.Player);
-	//iw::Transform*      tp = player.SetComponent<iw::Transform>(playerPos, iw::vector3(.75f));
-	//iw::SphereCollider* sp = player.SetComponent<iw::SphereCollider>(iw::vector3::zero, .75f);
-	//iw::Rigidbody*      rp = player.SetComponent<iw::Rigidbody>();
-	//
-	//levelTransform->AddChild(tp);
-	//
-	//rp->SetMass(1);
-	//rp->SetCol(sp);
-	//rp->SetTrans(tp);
-	//rp->SetStaticFriction(.1f);
-	//rp->SetDynamicFriction(.02f);
-	//
-	//rp->SetIsLocked(iw::vector3(0, 1, 0));
-	//rp->SetLock    (iw::vector3(0, 1, 0));
-	//
-	//Physics->AddRigidbody(rp);
 
 	// Door
 

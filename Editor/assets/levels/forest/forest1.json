@@ -1,8 +1,4 @@
 {
-  "StageName": {
-    "size": 25,
-    "string": "models/block/forest01.dae"
-  },
   "CameraFollow": true,
   "Enemies": {
     "size": 0,
@@ -28,7 +24,7 @@
     "State": 1,
     "NextLevel": {
       "size": 26,
-      "string": "levels/forest/forest2.json"
+      "string": "levels/forest/forest3.json"
     }
   },
   "Spheres": {
@@ -101,6 +97,35 @@
             "z": -1.000000
           },
           "D": -16.000000
+        }
+      }
+    ]
+  },
+  "Models": {
+    "size": 1,
+    "items": [
+      {
+        "ModelName": {
+          "size": 25,
+          "string": "models/block/forest01.dae"
+        },
+        "Transform": {
+          "Position": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "Scale": {
+            "x": 1,
+            "y": 1,
+            "z": 1
+          },
+          "Rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          }
         }
       }
     ]

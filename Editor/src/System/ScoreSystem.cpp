@@ -165,13 +165,13 @@ bool ScoreSystem::On(
 		iw::vector3 pos = bullet.FindComponent<iw::Rigidbody>()      ->Trans().Position;
 		iw::vector3 des = other .FindComponent<iw::CollisionObject>()->Trans().Position;
 
-		SpawnScore((pos-des).length() * 10, pos);
+		SpawnScore(ceil((pos-des).length() * 10), pos);
 	}
 
 	if (other.HasComponent<Player>()) {
 		iw::vector3 pos = bullet.FindComponent<iw::Rigidbody>()->Trans().Position;
 
-		SpawnScore(-potentialScore * 0.5, pos);
+		SpawnScore(-potentialScore / 2, pos);
 	}
 
 	return false;
@@ -191,9 +191,9 @@ bool ScoreSystem::On(
 
 	else if (e.Action == iw::val(Actions::SPAWN_ENEMY_DEATH)) {
 		iw::vector3 pos = e.as<SpawnEnemyDeath>().Position;
-		float       score = 1.0f - player.FindComponent<Player>()->Timer / player.FindComponent<Player>()->DashTime;
+		float       score = 1000 * (1.0f - player.FindComponent<Player>()->Timer / player.FindComponent<Player>()->DashTime);
 
-		SpawnScore(score * 1000, pos);
+		SpawnScore(ceil(score / 100) * 100, pos);
 	}
 
 	return false;

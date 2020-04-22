@@ -1,10 +1,10 @@
 #pragma once
 
 #include "iw/common/iwcommon.h"
+#include "iw/reflection/Reflect.h"
 #include "iw/math/vector3.h"
 #include "iw/math/matrix4.h"
 #include "iw/math/quaternion.h"
-#include "iw/reflection/Reflect.h"
 #include <vector>
 
 namespace iw {

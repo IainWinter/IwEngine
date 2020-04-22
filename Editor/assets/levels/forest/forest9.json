@@ -13,10 +13,10 @@
           "Type": 0,
           "Speed": 5.000000
         },
-        "Speed": 0.261799,
-        "FireTime": 3.00000,
+        "Speed": 0.314159,
+        "FireTime": 3.50000,
         "ChargeTime": 2.500000,
-        "Rotation": 0.1309
+        "Rotation": 0.15708
       },
       {
         "Type": 1,
@@ -24,10 +24,10 @@
           "Type": 0,
           "Speed": 5.000000
         },
-        "Speed": 0.261799,
-        "FireTime": 3.00000,
+        "Speed": 0.314159,
+        "FireTime": 3.50000,
         "ChargeTime": 2.500000,
-        "Rotation": 0.1309
+        "Rotation": 0.15708
       },
       {
         "Type": 1,
@@ -35,10 +35,10 @@
           "Type": 0,
           "Speed": 5.000000
         },
-        "Speed": 0.261799,
-        "FireTime": 3.00000,
+        "Speed": 0.314159,
+        "FireTime": 3.50000,
         "ChargeTime": 2.500000,
-        "Rotation": 0.1309
+        "Rotation": 0.15708
       },
       {
         "Type": 1,
@@ -46,10 +46,10 @@
           "Type": 0,
           "Speed": 5.000000
         },
-        "Speed": 0.261799,
-        "FireTime": 3.00000,
+        "Speed": 0.314159,
+        "FireTime": 3.50000,
         "ChargeTime": 2.500000,
-        "Rotation": 0.1309
+        "Rotation": 0.15708
       }
     ]
   },

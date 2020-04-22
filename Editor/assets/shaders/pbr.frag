@@ -44,6 +44,9 @@ uniform float mat_reflectance;
 uniform float mat_ao;
 
 uniform float mat_hasAlbedoMap;
+uniform float mat_hasAlbedoMap2;
+uniform float mat_hasBlendMap;
+
 uniform float mat_hasNormalMap;
 uniform float mat_hasMetallicMap;
 uniform float mat_hasRoughnessMap;
@@ -51,6 +54,9 @@ uniform float mat_hasReflectanceMap;
 uniform float mat_hasAoMap;
 
 uniform sampler2D mat_albedoMap;
+uniform sampler2D mat_albedoMap2;
+uniform sampler2D mat_blendMap;
+
 uniform sampler2D mat_normalMap;
 uniform sampler2D mat_metallicMap;
 uniform sampler2D mat_roughnessMap;
@@ -249,7 +255,12 @@ void main() {
 	// Color
 
 	vec4 albedo = mat_albedo;
-	if (mat_hasAlbedoMap == 1) {
+	if(mat_hasBlendMap == 1 && mat_hasAlbedoMap2 == 1) {
+		float blend = texture(mat_blendMap, TexCoords).r;
+		albedo = texture(mat_albedoMap, TexCoords) * vec4(1.0f, 1.0f, 1.0f, blend) + texture(mat_albedoMap2, TexCoords) * vec4(1.0f, 1.0f, 1.0f, 1.0f - blend);
+	}
+
+	else if (mat_hasAlbedoMap == 1) {
 		albedo = texture(mat_albedoMap, TexCoords);
 	}
 
