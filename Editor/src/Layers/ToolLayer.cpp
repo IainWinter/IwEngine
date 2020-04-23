@@ -229,12 +229,10 @@ namespace iw {
 	void ToolLayer::ImGui() {
 		ImGui::Begin("Toolbox");
 
-		int draws = 0;
-		for (auto entity : Space->Query<Transform, Mesh>()) {
-			draws++;
-		}
+		float amb = m_mainScene->Ambiance();
+		ImGui::SliderFloat("Ambiance", &amb, 0, 1);
+		m_mainScene->SetAmbiance(amb);
 
-		ImGui::Value("Number of object", draws);
 
 		char name = 'A';
 
@@ -250,7 +248,7 @@ namespace iw {
 			ss << name++ << " Light rad";
 
 			float rad = light->Radius();
-			ImGui::SliderFloat(ss.str().c_str(), (float*)&rad, 0, 100);
+			ImGui::SliderFloat(ss.str().c_str(), &rad, 0, 100);
 			light->SetRadius(rad);
 		}
 
@@ -280,18 +278,20 @@ namespace iw {
 			&& e.Button == iw::LMOUSE
 			&& e.Device == DeviceType::MOUSE)
 		{
-			matrix4 invview = camera->View()      .inverted();
-			matrix4 invproj = camera->Projection().inverted();
+			// this works ezpz but not if yor looking in thr direction of the x axis :/
 
-			float x =  (e.InputStates[MOUSEX] / Renderer->Width()  - 0.5f) * 2;
-			float y = -(e.InputStates[MOUSEY] / Renderer->Height() - 0.5f) * 2;
+			//matrix4 invview = camera->View()      .inverted();
+			//matrix4 invproj = camera->Projection().inverted();
 
-			vector4 clip = vector4(     x,      y, -1, 1) * invproj;
-			vector4 eye  = vector4(clip.x, clip.y, -1, 0) * invview;
+			//float x =  (e.InputStates[MOUSEX] / Renderer->Width()  - 0.5f) * 2;
+			//float y = -(e.InputStates[MOUSEY] / Renderer->Height() - 0.5f) * 2;
 
-			vector3 ray = eye.xyz().normalized();
+			//vector4 clip = vector4(     x,      y, -1, 1) * invproj;
+			//vector4 eye  = vector4(clip.x, clip.y, -1, 0) * invview;
 
-			p = camera->Position() + ray * 5;
+			//vector3 ray = eye.xyz().normalized();
+
+			//p = camera->Position() + ray * 5;
 
 			//for (auto entity : Space->Query<Transform>()) {
 			//	Transform* transform = entity.Components.Tie<Transform*>();

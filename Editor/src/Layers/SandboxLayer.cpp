@@ -170,7 +170,7 @@ namespace iw {
 		sun   = new DirectionalLight(100, OrthographicCamera(60, 60, -100, 100), dirShadowTarget, dirShadowShader, dirIShadowShader);
 		light = new PointLight(30, 30, pointShadowTarget, pointShadowShader, pointIShadowShader);
 
-		sun->SetRotation(quaternion::from_euler_angles(Pi / 2, 0, -Pi / 2));
+		sun->SetRotation(quaternion::from_euler_angles(1.433f, 0.0f, -0.525f));
 		light->SetPosition(vector3(0, 10, 0));
 
 		MainScene->AddLight(sun);

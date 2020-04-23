@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "assimp/pbrmaterial.h"
+
 namespace iw {
 namespace Graphics {
 	void LoadTexture(
@@ -18,6 +19,11 @@ namespace Graphics {
 		aiMaterial* aimaterial,
 		aiTextureType type,
 		const char* name);
+
+	void LoadWeirdTextures(
+		AssetManager& asset,
+		Material& material,
+		aiMaterial* aimaterial);
 
 	MeshLoader::MeshLoader(
 		AssetManager& asset)
@@ -75,7 +81,7 @@ namespace Graphics {
 				//material.SetFloat("roughness", roughness);
 
 				if (aimaterial->GetTextureCount(aiTextureType_UNKNOWN) > 0) {
-					LOG_WARNING << "Unknown textures in material " << path;
+					LoadWeirdTextures(m_asset, material, aimaterial);
 				}
 
 				LoadTexture(m_asset, material, aimaterial, aiTextureType_DIFFUSE,      "albedoMap");
@@ -265,9 +271,21 @@ namespace Graphics {
 	{
 		aiString texturePath;
 		unsigned count = aimaterial->GetTextureCount(type);
+
+		std::vector<aiString> names;
+
 		for (unsigned i = 0; i < count; i++) {
 			if (aimaterial->GetTexture(type, i, &texturePath) == AI_SUCCESS) {
-				std::stringstream ss(name);
+				if (std::find(names.begin(), names.end(), texturePath) != names.end()) {
+					continue;
+				}
+
+				names.push_back(texturePath);
+				
+				std::stringstream ss;
+				
+				ss << name;
+				
 				if (i > 0) {
 					ss << i;
 				}
@@ -278,6 +296,21 @@ namespace Graphics {
 				}
 			}
 		}
+	}
+
+	void LoadWeirdTextures(
+		AssetManager& asset,
+		Material& material, 
+		aiMaterial* aimaterial)
+	{
+		aiString texturePath;
+		if (aimaterial->GetTexture(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE, &texturePath) == AI_SUCCESS) {
+			iw::ref<Texture> texture = asset.Load<Texture>(texturePath.C_Str());
+			if (texture) {
+				material.SetTexture("roughness", texture);
+			}
+		}
+
 	}
 }
 }

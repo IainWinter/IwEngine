@@ -86,6 +86,7 @@ namespace Graphics {
 		ref<Shader>       m_shader;
 		ref<Material>     m_material;
 		ref<RenderTarget> m_target;
+		float m_ambiance;
 
 	public:
 		IWGRAPHICS_API

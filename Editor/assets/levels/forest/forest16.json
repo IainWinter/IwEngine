@@ -1,9 +1,13 @@
 {
-  "StageName": {
-    "size": 25,
-    "string": "models/block/forest16.dae"
-  },
   "CameraFollow": false,
+  "InPosition": {
+    "x": 20.000000,
+    "y": -10.000000
+  },
+  "LevelLocation": {
+    "x": 0.000000,
+    "y": 36.000000
+  },
   "Enemies": {
     "size": 0,
     "items": []
@@ -12,24 +16,26 @@
     "size": 0,
     "items": []
   },
-  "InPosition": {
-    "x": 20.000000,
-    "y": -10.000000
+  "Doors": {
+    "size": 1,
+    "items": [
+      {
+        "State": 1,
+        "NextLevel": {
+          "size": 27,
+          "string": "levels/forest/forest17.json"
+        }
+      }
+    ]
   },
-  "OutPosition": {
-    "x": 20.000000,
-    "y": 14.000000
-  },
-  "LevelLocation": {
-    "x": 0.000000,
-    "y": 36.000000
-  },
-  "Door": {
-    "State": 0,
-    "NextLevel": {
-      "size": 27,
-      "string": "levels/forest/forest17.json"
-    }
+  "DoorPositions": {
+    "size": 1,
+    "items": [
+      {
+        "x": 20.000000,
+        "y": 14.000000
+      }
+    ]
   },
   "Spheres": {
     "size": 0,
@@ -80,6 +86,35 @@
             "z": 1.000000
           },
           "D": -12.000000
+        }
+      }
+    ]
+  },
+  "Models": {
+    "size": 1,
+    "items": [
+      {
+        "ModelName": {
+          "size": 25,
+          "string": "models/block/forest16.dae"
+        },
+        "Transform": {
+          "Position": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "Scale": {
+            "x": 1,
+            "y": 1,
+            "z": 1
+          },
+          "Rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          }
         }
       }
     ]

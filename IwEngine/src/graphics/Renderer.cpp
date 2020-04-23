@@ -101,6 +101,8 @@ namespace Graphics {
 			Device->Clear();
 		}
 
+		m_ambiance = 0.0f;
+
 		m_state = RenderState::SCENE;
 	}
 
@@ -113,6 +115,8 @@ namespace Graphics {
 
 		Renderer::SetPointLights      (scene->PointLights());
 		Renderer::SetDirectionalLights(scene->DirectionalLights());
+
+		m_ambiance = scene->Ambiance();
 	}
 
 	void Renderer::BeginShadowCast(
@@ -182,6 +186,11 @@ namespace Graphics {
 		IPipelineParam* model = m_shader->Handle()->GetParam("model");
 		if (model) {
 			model->SetAsMat4(transform->WorldTransformation());
+		}
+
+		IPipelineParam* ambiance = m_shader->Handle()->GetParam("ambiance");
+		if (ambiance) {
+			ambiance->SetAsFloat(m_ambiance);
 		}
 
 		mesh->Draw(Device);

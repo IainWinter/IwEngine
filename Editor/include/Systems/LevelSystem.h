@@ -25,7 +25,7 @@ private:
 	iw::Entity nextLevelEntity;
 	bool transition;
 
-	iw::Entity currentDoor;
+	iw::Entity levelDoor;
 	iw::Color openColor;
 	iw::Color closedColor;
 

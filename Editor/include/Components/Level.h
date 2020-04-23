@@ -12,15 +12,14 @@
 
 struct REFLECT Level {
 	REFLECT bool CameraFollow = false;
+	REFLECT iw::vector2 InPosition;
+	REFLECT iw::vector2 LevelPosition;
 
 	REFLECT std::vector<Enemy>       Enemies;
 	REFLECT std::vector<iw::vector2> Positions;
 
-	REFLECT iw::vector2 InPosition;
-	REFLECT iw::vector2 OutPosition;
-	REFLECT iw::vector2 LevelPosition;
-
-	REFLECT LevelDoor Door = {};
+	REFLECT std::vector<LevelDoor> Doors;
+	REFLECT std::vector<iw::vector2> DoorPositions;
 
 	REFLECT std::vector<iw::SphereCollider>  Spheres;
 	REFLECT std::vector<iw::CapsuleCollider> Capsules;

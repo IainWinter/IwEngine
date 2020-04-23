@@ -1,0 +1,138 @@
+{
+    "asset" : {
+        "generator" : "Khronos glTF Blender I/O v1.0.5",
+        "version" : "2.0"
+    },
+    "scene" : 0,
+    "scenes" : [
+        {
+            "name" : "Scene",
+            "nodes" : [
+                0
+            ]
+        }
+    ],
+    "nodes" : [
+        {
+            "mesh" : 0,
+            "name" : "ForestGround"
+        }
+    ],
+    "materials" : [
+        {
+            "doubleSided" : true,
+            "name" : "ForestGround",
+            "normalTexture" : {
+                "index" : 0,
+                "texCoord" : 0
+            },
+            "pbrMetallicRoughness" : {
+                "baseColorTexture" : {
+                    "index" : 1,
+                    "texCoord" : 0
+                },
+                "metallicFactor" : 0,
+                "metallicRoughnessTexture" : {
+                    "index" : 2,
+                    "texCoord" : 0
+                }
+            }
+        }
+    ],
+    "meshes" : [
+        {
+            "name" : "Plane",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 0,
+                        "TEXCOORD_0" : 1
+                    },
+                    "indices" : 2,
+                    "material" : 0
+                }
+            ]
+        }
+    ],
+    "textures" : [
+        {
+            "source" : 0
+        },
+        {
+            "source" : 1
+        },
+        {
+            "source" : 2
+        }
+    ],
+    "images" : [
+        {
+            "mimeType" : "image/jpeg",
+            "name" : "groundblended norm",
+            "uri" : "textures/forest_path/normal.jpg"
+        },
+        {
+            "mimeType" : "image/jpeg",
+            "name" : "groundblended",
+            "uri" : "textures/forest_path/albedo.jpg"
+        },
+        {
+            "mimeType" : "image/jpeg",
+            "name" : "groundblended rough",
+            "uri" : "textures/forest_path/roughness.jpg"
+        }
+    ],
+    "accessors" : [
+        {
+            "bufferView" : 0,
+            "componentType" : 5126,
+            "count" : 52798,
+            "max" : [
+                32,
+                1.4467617273330688,
+                18
+            ],
+            "min" : [
+                -32,
+                -2.259144906702204e-07,
+                -18
+            ],
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 1,
+            "componentType" : 5126,
+            "count" : 52798,
+            "type" : "VEC2"
+        },
+        {
+            "bufferView" : 2,
+            "componentType" : 5123,
+            "count" : 61206,
+            "type" : "SCALAR"
+        }
+    ],
+    "bufferViews" : [
+        {
+            "buffer" : 0,
+            "byteLength" : 633576,
+            "byteOffset" : 0
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 422384,
+            "byteOffset" : 633576
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 122412,
+            "byteOffset" : 1055960
+        }
+    ],
+    "buffers" : [
+        {
+            "byteLength" : 1178372,
+            "uri" : "forest_path.bin"
+        }
+    ]
+}
