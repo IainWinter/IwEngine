@@ -64,23 +64,36 @@
     ]
   },
   "Doors": {
-    "size": 1,
+    "size": 2,
     "items": [
       {
+        "GoBack": 0,
         "State": 1,
         "NextLevel": {
           "size": 27,
-          "string": "levels/forest/forest06.json"
+          "string": "levels/forest/forest05.json"
+        }
+      },
+      {
+        "GoBack": 0,
+        "State": 0,
+        "NextLevel": {
+          "size": 29,
+          "string": "levels/forest/forest05.a.json"
         }
       }
     ]
   },
   "DoorPositions": {
-    "size": 1,
+    "size": 2,
     "items": [
       {
         "x": 22.000000,
         "y": 0.000000
+      },
+      {
+        "x": 0.000000,
+        "y": 16.000000
       }
     ]
   },
@@ -151,7 +164,7 @@
             "y": 0.000000,
             "z": -1.000000
           },
-          "D": -11.000000
+          "D": -12.000000
         }
       },
       {

@@ -176,5 +176,12 @@ namespace Physics {
 	{
 		m_nextTrans = nextTrans;
 	}
+
+	void Rigidbody::Move(
+		const iw::vector3 delta)
+	{		
+		m_transform.Position += delta;
+		m_velocity = delta;
+	}
 }
 }

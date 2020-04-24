@@ -9,7 +9,7 @@
 #include "iw/util/io/File.h"
 
 PlayerSystem::PlayerSystem()
-	: System<iw::Transform, iw::Rigidbody, Player>("Player")
+	: System("Player")
 	, playerPrefab()
 	, m_playerModel(nullptr)
 	, up(false)
@@ -18,6 +18,8 @@ PlayerSystem::PlayerSystem()
 	, right(false)
 	, dash(false)
 	, sprint(false)
+	, transition(false)
+	, begin(0)
 {
 #ifdef IW_DEBUG
 	const char* file = "assets/prefabs/player.json";
@@ -53,120 +55,114 @@ PlayerSystem::PlayerSystem()
 int PlayerSystem::Initialize() {
 	m_playerModel = Asset->Load<iw::Model>("Player");
 	
-	player = Space->CreateEntity<iw::Transform, iw::Model, iw::SphereCollider, iw::Rigidbody, Player>();
+	player = Space->CreateEntity<iw::Transform, iw::Model, iw::SphereCollider, iw::CollisionObject, Player>();
 	
 	                         player.SetComponent<iw::Model>(*m_playerModel);
 	                         player.SetComponent<Player>(playerPrefab);
-	iw::Transform*      tp = player.SetComponent<iw::Transform>(iw::vector3::zero, iw::vector3(.75f));
-	iw::SphereCollider* sp = player.SetComponent<iw::SphereCollider>(iw::vector3::zero, 1);
-	iw::Rigidbody*      rp = player.SetComponent<iw::Rigidbody>();
+	iw::Transform*       t = player.SetComponent<iw::Transform>(iw::vector3(0, 1, 0), iw::vector3(.75f));
+	iw::SphereCollider*  s = player.SetComponent<iw::SphereCollider>(iw::vector3::zero, 1);
+	iw::CollisionObject* c = player.SetComponent<iw::CollisionObject>();
 
-	rp->SetMass(1);
-	rp->SetCol(sp);
-	rp->SetTrans(tp);
-	rp->SetStaticFriction (0.0f);
-	rp->SetDynamicFriction(0.0f);
+	//c->SetMass(1);
+	c->SetCol(s);
+	c->SetTrans(t);
+	//c->SetStaticFriction (0.0f);
+	//c->SetDynamicFriction(0.0f);
 
-	rp->SetIsLocked(iw::vector3(0, 1, 0));
-	rp->SetLock    (iw::vector3(0, 1, 0));
+	//c->SetIsLocked(iw::vector3(0, 1, 0));
+	//c->SetLock    (iw::vector3(0, 1, 0));
 
-	Physics->AddRigidbody(rp);
+	Physics->AddCollisionObject(c);
 
 	return 0;
 }
 
-float distance;
+float distance; //tmp debug
 iw::vector3 start;
 
 void PlayerSystem::Update(
 	iw::EntityComponentArray& view)
 {
 	for (auto entity : view) {
-		auto [transform, rigidbody, player] = entity.Components.Tie<Components>();
+		auto [transform, object, player] = entity.Components.Tie<Components>();
 
-		if (player->DeathTimer > 0) {
-			player->DeathTimer -= iw::Time::DeltaTime();
-
-			if (player->DeathTimer <= 0) {
-				player->DeathTimer = 0;
-				Bus->push<ResetLevelEvent>();
-			}
+		if (transition) {
+			transform->Position = iw::lerp(transitionStartPosition, transitionTargetPosition, iw::Time::TotalTime() - begin);
 		}
 
 		else {
-			if (player->Timer <= -player->ChargeTime) {
-				if (distance == 0) {
-					distance = (start - transform->Position).length();
-					LOG_INFO << distance;
-				}
+			if (player->DeathTimer > 0) {
+				player->DeathTimer -= iw::Time::DeltaTime();
 
-				if (    dash
-					&& (up || down || left || right))
-				{
-					start = transform->Position;
-					distance = 0;
+				transform->Scale -= .75f / 1.0f * iw::Time::DeltaTime();
 
-					player->Timer = player->DashTime;
-					Audio->AsStudio()->CreateInstance("swordAttack");
+				if (player->DeathTimer <= 0) {
+					player->DeathTimer = 0;
+					Bus->push<ResetLevelEvent>();
 				}
 			}
 
-			//if (player->Timer <= 0.0f) {
-			//	if (dash
-			//		|| !sprint)
-			//	{
-			//		sprint = dash;
-			//	}
-			//}
+			else {
+				iw::vector3 movement;
+				if (left)  movement.x -= 1;
+				if (right) movement.x += 1;
+				if (up)    movement.z -= 1;
+				if (down)  movement.z += 1;
 
-			else if (player->Timer >= -player->ChargeTime) {
-				player->Timer -= iw::Time::DeltaTime();
-			}
+				movement.normalize();
+				movement *= player->Speed;
 
-			if (player->Health <= 0) {
-				if (player->DeathTimer == 0) {
-					player->DeathTimer = 1.0f;
-
-					//Audio->PlaySound("Death.wav");
+				if (player->Timer > 0) {
+					movement *= 10 * player->Timer / player->DashTime;
 				}
+
+				if (sprint) {
+					movement *= 2.0f;
+				}
+
+				transform->Position += movement * iw::Time::DeltaTime();
+				object->SetTrans(transform);
+
+				if (player->Timer <= -player->ChargeTime) {
+					if (distance == 0) {
+						distance = (start - transform->Position).length();
+						LOG_INFO << distance;
+					}
+
+					if (dash
+						&& (up || down || left || right))
+					{
+						start = transform->Position;
+						distance = 0;
+
+						player->Timer = player->DashTime;
+						Audio->AsStudio()->CreateInstance("swordAttack");
+					}
+				}
+
+				// sprinting after holding x?
+				//if (player->Timer <= 0.0f) {
+				//	if (dash
+				//		|| !sprint)
+				//	{
+				//		sprint = dash;
+				//	}
+				//}
+
+				else if (player->Timer >= -player->ChargeTime) {
+					player->Timer -= iw::Time::DeltaTime();
+				}
+
+				if (player->Health <= 0) {
+					if (player->DeathTimer == 0) {
+						player->DeathTimer = 1.0f;
+
+						//Audio->PlaySound("Death.wav");
+					}
+				}
+
+				player->Damaged = false;
 			}
-
-			player->Damaged = false;
-		}
-	}
-}
-
-void PlayerSystem::FixedUpdate(
-	iw::EntityComponentArray& view) // player goes a differnt distance depending on framerate :c
-{
-	for (auto entity : view) {
-		auto [transform, rigidbody, player] = entity.Components.Tie<Components>();
-
-		if (player->DeathTimer > 0) {
-			rigidbody->SetVelocity(0);
-
-			transform->Scale -= .75f / 1.0f * iw::Time::FixedTime();
-		}
-
-		else {
-			iw::vector3 movement;
-			if (left)  movement.x -= 1;
-			if (right) movement.x += 1;
-			if (up)    movement.z -= 1;
-			if (down)  movement.z += 1;
-
-			movement.normalize();
-			movement *= player->Speed;
-
-			if (player->Timer > 0) {
-				movement *= 10 * player->Timer / player->DashTime;
-			}
-
-			if (sprint) {
-				movement *= 2.0f;
-			}
-
-			rigidbody->SetVelocity(movement);
 		}
 	}
 }
@@ -181,8 +177,6 @@ bool PlayerSystem::On(
 			//if (event.State && up) {
 			//	up = 0;
 			//}
-
-
 
 			//if (    event.State && movement.z == -1
 			//	|| !event.State && movement.z ==  1)
@@ -318,40 +312,40 @@ bool PlayerSystem::On(
 	return false;
 }
 
-std::string level = "";
-
 bool PlayerSystem::On(
-	iw::ActionEvent& event)
+	iw::ActionEvent& e)
 {
-	switch (event.Action) {
+	switch (e.Action) {
 		case iw::val(Actions::GOTO_NEXT_LEVEL): {
+			GoToNextLevelEvent& event = e.as<GoToNextLevelEvent>();
+
 			iw::Transform* t = player.FindComponent<iw::Transform>();
-			iw::Rigidbody* r = player.FindComponent<iw::Rigidbody>();
 
-			r->SetVelocity(0);
-			r->SetIsKinematic(false);
+			transition = true;
+			transitionStartPosition  = iw::vector3(t->Position.x, 1, t->Position.z);
+			transitionTargetPosition = iw::vector3(event.CenterPosition.x + event.PlayerPosition.x, 1, event.CenterPosition.y + event.PlayerPosition.y);
+			begin = iw::Time::TotalTime();
 
-			t->Scale = 0;
+			//t->Scale = 0;
 
 			up = down = left = right = dash = sprint = false;
-
-			level = event.as<GoToNextLevelEvent>().LevelName;
 
 			break;
 		}
 		case iw::val(Actions::START_LEVEL): {
-			iw::Transform* t = player.FindComponent<iw::Transform>();
-			iw::Rigidbody* r = player.FindComponent<iw::Rigidbody>();
-			Player*        p = player.FindComponent<Player>();
+			iw::Transform*       t = player.FindComponent<iw::Transform>();
+			iw::CollisionObject* c = player.FindComponent<iw::CollisionObject>();
+			Player*              p = player.FindComponent<Player>();
 
-			t->Position.x = event.as<StartLevelEvent>().PlayerPosition.x;
-			t->Position.z = event.as<StartLevelEvent>().PlayerPosition.y;
+			t->Position.x = e.as<StartLevelEvent>().PlayerPosition.x;
+			t->Position.z = e.as<StartLevelEvent>().PlayerPosition.y;
 			t->Scale = 0.75f;
 			
-			r->SetTrans(t);
-			r->SetIsKinematic(true);
+			c->SetTrans(t);
 
 			*p = playerPrefab;
+
+			transition = false;
 
 			// no break
 		}

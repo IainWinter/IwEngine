@@ -94,8 +94,22 @@ struct UnlockLevelDoorEvent
 struct LoadNextLevelEvent
 	: iw::SingleEvent
 {
+	std::string LevelName;
+	iw::vector2 Position;
+	bool GoBack;
+
 	LoadNextLevelEvent()
 		: iw::SingleEvent(iw::val(Actions::LOAD_NEXT_LEVEL))
+	{}
+
+	LoadNextLevelEvent(
+		std::string levelName,
+		iw::vector2 position,
+		bool goback)
+		: iw::SingleEvent(iw::val(Actions::LOAD_NEXT_LEVEL))
+		, LevelName(levelName)
+		, Position(position)
+		, GoBack(goback)
 	{}
 };
 

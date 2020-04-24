@@ -7,6 +7,11 @@ namespace Engine {
 		: System<Transform, Rigidbody>("Physics")
 	{}
 
+	struct OtherComponents {
+		Transform* Transform;
+		CollisionObject* Object;
+	};
+
 	void PhysicsSystem::Update(
 		EntityComponentArray& eca)
 	{
@@ -17,6 +22,12 @@ namespace Engine {
 				transform->Position = iw::lerp(rigidbody->LastTrans().Position, rigidbody->Trans().Position, accumulator / iw::FixedTime());
 			}
 		}
+
+		//for (auto entity : Space->Query<Transform, CollisionObject>()) {
+		//	auto [transform, object] = entity.Components.Tie<OtherComponents>();
+
+		//	transform->Position = iw::lerp(transform->Positionobject->Trans().Position, rigidbody->Trans().Position, accumulator / iw::FixedTime());
+		//}
 
 		accumulator += Time::DeltaTime();
 	}

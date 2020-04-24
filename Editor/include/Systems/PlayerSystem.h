@@ -4,18 +4,18 @@
 #include "iw/engine/System.h"
 #include "iw/graphics/Model.h"
 #include "iw/reflect/Components/Player.h"
-#include "iw/physics/Dynamics/Rigidbody.h"
+#include "iw/physics/Collision/CollisionObject.h"
 #include "iw/common/Components/Transform.h"
 #include "iw/graphics/Camera.h"
 
 class PlayerSystem
-	: public iw::System<iw::Transform, iw::Rigidbody, Player>
+	: public iw::System<iw::Transform, iw::CollisionObject, Player>
 {
 public:
 	struct Components {
 		iw::Transform* Transform;
-		iw::Rigidbody* Rigidbody;
-		Player*    Player;
+		iw::CollisionObject* Object;
+		Player* Player;
 	};
 private:
 	// prefab info
@@ -24,7 +24,10 @@ private:
 
 	iw::Entity player;
 
-	bool left, right, up, down, dash, sprint;
+	bool left, right, up, down, dash, sprint, transition;
+	iw::vector3 transitionStartPosition;
+	iw::vector3 transitionTargetPosition;
+	float begin;
 
 public:
 	PlayerSystem();
@@ -36,9 +39,6 @@ public:
 	int Initialize() override;
 
 	void Update(
-		iw::EntityComponentArray& view) override;
-
-	void FixedUpdate(
 		iw::EntityComponentArray& view) override;
 
 	bool On(iw::KeyEvent& event);

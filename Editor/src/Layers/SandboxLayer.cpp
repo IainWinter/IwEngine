@@ -501,9 +501,9 @@ namespace iw {
 	{
 		switch (e.Action) {
 			case iw::val(Actions::GOTO_NEXT_LEVEL): {
-				playerSystem->On(e);
+				//playerSystem->On(e);
 				enemySystem ->On(e);
-				PopSystem(playerSystem);
+				//PopSystem(playerSystem);
 				PopSystem(enemySystem);
 
 				if (e.as<GoToNextLevelEvent>().LevelName == "models/block/forest100.dae") {
@@ -526,7 +526,7 @@ namespace iw {
 				break;
 			}
 			case iw::val(Actions::AT_NEXT_LEVEL): {
-				PushSystemFront(playerSystem);
+				//PushSystemFront(playerSystem);
 				PushSystemFront(enemySystem);
 				break;
 			}

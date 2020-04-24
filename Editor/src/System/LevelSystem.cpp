@@ -40,7 +40,7 @@ LevelSystem::LevelSystem(
 
 	//currentLevel = 0;
 
-	currentLevelName = "levels/forest/forest01.json";
+	currentLevelName = "levels/forest/forest05.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 127);
 	closedColor = iw::Color::From255(201, 66, 66, 127);
@@ -148,9 +148,11 @@ bool LevelSystem::On(
 	}
 
 	if (doorEnt.Index() != iw::EntityHandle::Empty.Index) {
-		LevelDoor* door = doorEnt.FindComponent<LevelDoor>();
+		LevelDoor*     door = doorEnt.FindComponent<LevelDoor>();
+		iw::Transform* tran = doorEnt.FindComponent<iw::Transform>();
 		if (door->State == LevelDoorState::OPEN) {
-			Bus->push<LoadNextLevelEvent>();
+			door->State = LevelDoorState::LOCKED; // stops events from being spammed
+			Bus->push<LoadNextLevelEvent>(door->NextLevel, iw::vector2(tran->Position.x, tran->Position.z), door->GoBack);
 		}
 	}
 
@@ -180,19 +182,26 @@ bool LevelSystem::On(
 			break;
 		}
 		case iw::val(Actions::LOAD_NEXT_LEVEL): {
-			LevelDoor* door = levelDoor.FindComponent<LevelDoor>();
+			LoadNextLevelEvent& event = e.as<LoadNextLevelEvent>();
 
-			door->State = LevelDoorState::LOCKED; // stops events from being spammed
-			
-			//transition       = true;
-			currentLevelName = door->NextLevel;
-			nextLevelEntity  = LoadLevel(currentLevelName);
+			iw::vector2 lvpos = -currentLevel.LevelPosition;
+
+			currentLevelName = event.LevelName.length() > 0 ? event.LevelName : levelDoor.FindComponent<LevelDoor>()->NextLevel;
+			nextLevelEntity  = LoadLevel(event.LevelName); // changes current level
+
+			if (event.GoBack) {
+				currentLevel.InPosition = -event.Position + event.Position.normalized() * 6;
+			}
+
+			else {
+				lvpos = currentLevel.LevelPosition;
+			}
 
 			iw::Transform* transform = nextLevelEntity.FindComponent<iw::Transform>();
-			transform->Position.x = currentLevel.LevelPosition.x;
-			transform->Position.z = currentLevel.LevelPosition.y;
+			transform->Position.x = lvpos.x;
+			transform->Position.z = lvpos.y;
 
-			Bus->push<GoToNextLevelEvent>(currentLevelName, currentLevel.CameraFollow, currentLevel.InPosition, currentLevel.LevelPosition);
+			Bus->push<GoToNextLevelEvent>(currentLevelName, currentLevel.CameraFollow, currentLevel.InPosition, lvpos);
 
 			break;
 		}

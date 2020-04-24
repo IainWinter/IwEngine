@@ -10,6 +10,7 @@ enum class REFLECT LevelDoorState {
 };
 
 struct REFLECT LevelDoor {
+	REFLECT bool GoBack;
 	REFLECT LevelDoorState State;
 	REFLECT std::string NextLevel;
 
