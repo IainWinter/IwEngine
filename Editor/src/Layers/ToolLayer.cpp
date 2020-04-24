@@ -10,7 +10,6 @@
 #include "imgui/imgui.h"
 
 #include "iw/engine/Systems/ParticleUpdateSystem.h"
-#include "iw/engine/Systems/ParticleUpdateSystem.h"
 #include "iw/engine/Systems/Render/MeshRenderSystem.h"
 #include "iw/engine/Systems/Render/ModelRenderSystem.h"
 #include "iw/engine/Systems/Render/ParticleRenderSystem.h"

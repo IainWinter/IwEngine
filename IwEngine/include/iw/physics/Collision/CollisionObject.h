@@ -8,8 +8,9 @@ namespace Physics {
 	class CollisionObject {
 	protected:
 		Transform m_transform;     // Position, rotation, and scale.
-		Collider*  m_collider;      // Shape of the collision object (only 3d right now)
+		Collider* m_collider;      // Shape of the collision object (only 3d right now)
 		bool m_isTrigger;
+		bool m_isStatic;
 		bool m_isDynamic;
 
 	public:
@@ -32,10 +33,13 @@ namespace Physics {
 		Collider* Col() const; // should be const probly also these are not needed if they are pointers but Ill try the get set thigs for now as a lil test because ive always dismissed it for the most part
 
 		IWPHYSICS_API
-		bool IsDynamic() const; // if the collision object is a rigidbody
+		bool IsTrigger() const;
 
 		IWPHYSICS_API
-		bool IsTrigger() const;
+		bool IsStatic() const;
+
+		IWPHYSICS_API
+		bool IsDynamic() const; // if the collision object is a rigidbody
 
 		IWPHYSICS_API
 		virtual void SetTrans(
@@ -48,6 +52,10 @@ namespace Physics {
 		IWPHYSICS_API
 		void SetIsTrigger(
 			bool isTrigger);
+
+		IWPHYSICS_API
+		void SetIsStatic(
+			bool isStatic);
 	};
 }
 

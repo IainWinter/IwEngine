@@ -23,11 +23,11 @@ namespace Engine {
 			}
 		}
 
-		//for (auto entity : Space->Query<Transform, CollisionObject>()) {
-		//	auto [transform, object] = entity.Components.Tie<OtherComponents>();
+		for (auto entity : Space->Query<Transform, CollisionObject>()) {
+			auto [transform, object] = entity.Components.Tie<OtherComponents>();
 
-		//	transform->Position = iw::lerp(transform->Positionobject->Trans().Position, rigidbody->Trans().Position, accumulator / iw::FixedTime());
-		//}
+			transform->Position = iw::lerp(transform->Position, object->Trans().Position, accumulator / iw::FixedTime());
+		}
 
 		accumulator += Time::DeltaTime();
 	}

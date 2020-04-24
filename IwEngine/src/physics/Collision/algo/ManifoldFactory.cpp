@@ -46,10 +46,10 @@ namespace algo {
 		const PlaneCollider*  b, const Transform* tb)
 	{
 		vector3 A = a->Center  + ta->WorldPosition();
-		vector3 N = b->Plane.P * tb->WorldRotation() + tb->WorldPosition();
+		vector3 N = b->Plane.P * tb->WorldRotation();
 		N.normalize();
 		
-		vector3 P = N * b->Plane.D;
+		vector3 P = N * b->Plane.D + tb->WorldPosition();
 
 		float Ar = a->Radius * ta->WorldScale().x;
 

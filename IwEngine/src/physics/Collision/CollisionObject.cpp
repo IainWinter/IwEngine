@@ -6,6 +6,7 @@ namespace Physics {
 		: m_transform()
 		, m_collider(nullptr)
 		, m_isTrigger(false)
+		, m_isStatic(true)
 		, m_isDynamic(false)
 	{}
 
@@ -40,12 +41,16 @@ namespace Physics {
 		return m_collider;
 	}
 
-	bool CollisionObject::IsDynamic() const {
-		return m_isDynamic;
-	}
-
 	bool CollisionObject::IsTrigger() const {
 		return m_isTrigger;
+	}
+
+	bool CollisionObject::IsStatic() const {
+		return m_isStatic;
+	}
+
+	bool CollisionObject::IsDynamic() const {
+		return m_isDynamic;
 	}
 
 	void CollisionObject::SetTrans(
@@ -64,6 +69,12 @@ namespace Physics {
 		bool isTrigger)
 	{
 		m_isTrigger = isTrigger;
+	}
+
+	void CollisionObject::SetIsStatic(
+		bool isStatic)
+	{
+		m_isStatic = isStatic;
 	}
 }
 }

@@ -10,10 +10,10 @@ namespace Physics {
 			CollisionObject* aBody = manifold.ObjA;
 			CollisionObject* bBody = manifold.ObjB;
 
-			iw::vector3 resolution = (manifold.B - manifold.A) * 0.5f;
-		
-			aBody->Trans().Position -= resolution;
-			bBody->Trans().Position += resolution;
+			iw::vector3 resolution = (manifold.B - manifold.A);
+
+			aBody->Trans().Position -= resolution * (1 - (int)aBody->IsStatic());
+			bBody->Trans().Position += resolution * (1 - (int)bBody->IsStatic());
 		}
 	}
 }

@@ -66,6 +66,7 @@ int PlayerSystem::Initialize() {
 	//c->SetMass(1);
 	c->SetCol(s);
 	c->SetTrans(t);
+	c->SetIsStatic(false);
 	//c->SetStaticFriction (0.0f);
 	//c->SetDynamicFriction(0.0f);
 
@@ -87,7 +88,7 @@ void PlayerSystem::Update(
 		auto [transform, object, player] = entity.Components.Tie<Components>();
 
 		if (transition) {
-			transform->Position = iw::lerp(transitionStartPosition, transitionTargetPosition, iw::Time::TotalTime() - begin);
+			object->Trans().Position = iw::lerp(transitionStartPosition, transitionTargetPosition, iw::Time::TotalTime() - begin);
 		}
 
 		else {
@@ -120,8 +121,7 @@ void PlayerSystem::Update(
 					movement *= 2.0f;
 				}
 
-				transform->Position += movement * iw::Time::DeltaTime();
-				object->SetTrans(transform);
+				object->Trans().Position += movement * iw::Time::DeltaTime();
 
 				if (player->Timer <= -player->ChargeTime) {
 					if (distance == 0) {
@@ -173,70 +173,18 @@ bool PlayerSystem::On(
 	switch (event.Button) {
 		case iw::UP: {
 			up = event.State;
-
-			//if (event.State && up) {
-			//	up = 0;
-			//}
-
-			//if (    event.State && movement.z == -1
-			//	|| !event.State && movement.z ==  1)
-			//{
-			//	movement.z = 0;
-			//}
-
-			////else if (!event.State && movement.z == 0) {
-			////	movement.z = -1;
-			////}
-
-			//movement.z -= event.State ? 1 : -1;
 			break;
 		}
 		case iw::DOWN: {
 			down = event.State;
-
-			//if (    event.State && movement.z ==  1
-			//	|| !event.State && movement.z == -1)
-			//{
-			//	movement.z = 0;
-			//}
-
-			////else if (!event.State && movement.z == 0) {
-			////	movement.z = 1;
-			////}
-
-			//movement.z += event.State ? 1 : -1;
 			break; 
 		}
 		case iw::LEFT: {
 			left = event.State;
-
-			//if (    event.State && movement.x == -1
-			//	|| !event.State && movement.x ==  1)
-			//{
-			//	movement.x = 0;
-			//}
-
-			////else if (!event.State && movement.x == 0) {
-			////	movement.x = -1;
-			////}
-
-			//movement.x -= event.State ? 1 : -1;
 			break; 
 		}
 		case iw::RIGHT: {
 			right = event.State;
-
-			//if (    event.State && movement.x ==  1
-			//	|| !event.State && movement.x == -1)
-			//{
-			//	movement.x = 0;
-			//}
-
-			////else if (!event.State && movement.x == 0) {
-			////	movement.x = 1;
-			////}
-
-			//movement.x += event.State ? 1 : -1;
 			break; 
 		}
 		case iw::X: {
@@ -319,10 +267,12 @@ bool PlayerSystem::On(
 		case iw::val(Actions::GOTO_NEXT_LEVEL): {
 			GoToNextLevelEvent& event = e.as<GoToNextLevelEvent>();
 
-			iw::Transform* t = player.FindComponent<iw::Transform>();
+			iw::CollisionObject* c = player.FindComponent<iw::CollisionObject>();
+
+			c->SetCol(nullptr);
 
 			transition = true;
-			transitionStartPosition  = iw::vector3(t->Position.x, 1, t->Position.z);
+			transitionStartPosition  = iw::vector3(c->Trans().Position.x, 1, c->Trans().Position.z);
 			transitionTargetPosition = iw::vector3(event.CenterPosition.x + event.PlayerPosition.x, 1, event.CenterPosition.y + event.PlayerPosition.y);
 			begin = iw::Time::TotalTime();
 
@@ -335,12 +285,14 @@ bool PlayerSystem::On(
 		case iw::val(Actions::START_LEVEL): {
 			iw::Transform*       t = player.FindComponent<iw::Transform>();
 			iw::CollisionObject* c = player.FindComponent<iw::CollisionObject>();
+			iw::SphereCollider*  s = player.FindComponent<iw::SphereCollider>();
 			Player*              p = player.FindComponent<Player>();
 
 			t->Position.x = e.as<StartLevelEvent>().PlayerPosition.x;
 			t->Position.z = e.as<StartLevelEvent>().PlayerPosition.y;
 			t->Scale = 0.75f;
 			
+			c->SetCol(s);
 			c->SetTrans(t);
 
 			*p = playerPrefab;

@@ -16,12 +16,14 @@
 #include "iw/engine/Systems/Render/MeshShadowRenderSystem.h"
 #include "iw/engine/Systems/Render/ModelShadowRenderSystem.h"
 #include "iw/engine/Systems/Render/ParticleShadowRenderSystem.h"
+#include "iw/engine/Systems/Debug/DrawCollidersSystem.h"
 
 #include "iw/engine/Components/CameraController.h"
 #include "iw/engine/Time.h"
 
 #include "iw/physics/Collision/SphereCollider.h"
 #include "iw/physics/Collision/PlaneCollider.h"
+#include "iw/physics/Collision/PositionSolver.h"
 #include "iw/physics/Dynamics/SmoothPositionSolver.h"
 #include "iw/physics/Dynamics/ImpulseSolver.h"
 #include "iw/physics/Dynamics/Rigidbody.h"
@@ -260,7 +262,7 @@ namespace iw {
 
 		Physics->SetGravity(vector3(0, -9.8f, 0));
 		Physics->AddSolver(new ImpulseSolver());
-		Physics->AddSolver(new SmoothPositionSolver());
+		Physics->AddSolver(new PositionSolver());
 
 		// Rendering pipeline
 		//
@@ -301,6 +303,8 @@ namespace iw {
 		PushSystem<iw::          MeshRenderSystem>(MainScene);
 		PushSystem<iw::         ModelRenderSystem>(MainScene);
 		PushSystem<iw::      ParticleRenderSystem>(MainScene);
+
+		//PushSystem<iw::DrawCollidersSystem>(MainScene->MainCamera());
 
 		// Particle test
 
@@ -506,15 +510,15 @@ namespace iw {
 				//PopSystem(playerSystem);
 				PopSystem(enemySystem);
 
-				if (e.as<GoToNextLevelEvent>().LevelName == "models/block/forest100.dae") {
+				if (e.as<GoToNextLevelEvent>().LevelName == "models/block/forest100.json") {
 					font->UpdateMesh(textMesh, "ayy you've gotten to the boss congrats!\nsadly he's out today so\nhave some fun with the physics instead...\nmember you can press i/t", .004f, 1);
 				}
 
-				else if (e.as<GoToNextLevelEvent>().LevelName == "models/block/forest08.dae") {
+				else if (e.as<GoToNextLevelEvent>().LevelName == "models/block/forest08.json") {
 					font->UpdateMesh(textMesh, "So this would be a lil mini boss but that seems\nlike it would be annoying to program xd", .004f, 1);
 				}
 
-				else if (e.as<GoToNextLevelEvent>().LevelName == "models/block/forest01.dae") {
+				else if (e.as<GoToNextLevelEvent>().LevelName == "models/block/forest01.json") {
 					font->UpdateMesh(textMesh, "Lets go! You've finished the play test\nIf you got the time, post some feedback at\nhttps://winter.dev/demo", .004f, 1);
 				}
 
