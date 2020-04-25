@@ -40,10 +40,10 @@ LevelSystem::LevelSystem(
 
 	//currentLevel = 0;
 
-	currentLevelName = "levels/forest/forest05.json";
+	currentLevelName = "levels/forest/forest01.json";
 
-	openColor   = iw::Color::From255(66, 201, 66, 127);
-	closedColor = iw::Color::From255(201, 66, 66, 127);
+	openColor   = iw::Color::From255(66, 201, 66, 31);
+	closedColor = iw::Color::From255(201, 66, 66, 31);
 
 	transition = false;
 
@@ -187,7 +187,7 @@ bool LevelSystem::On(
 			iw::vector2 lvpos = -currentLevel.LevelPosition;
 
 			currentLevelName = event.LevelName.length() > 0 ? event.LevelName : levelDoor.FindComponent<LevelDoor>()->NextLevel;
-			nextLevelEntity  = LoadLevel(event.LevelName); // changes current level
+			nextLevelEntity  = LoadLevel(currentLevelName); // changes current level
 
 			if (event.GoBack) {
 				currentLevel.InPosition = -event.Position + event.Position.normalized() * 6;

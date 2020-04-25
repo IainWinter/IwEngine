@@ -82,7 +82,7 @@
     "size": 1,
     "items": [
       {
-        "GoBack": 0,
+        "GoBack": false,
         "State": 1,
         "NextLevel": {
           "size": 27,
@@ -95,7 +95,7 @@
     "size": 1,
     "items": [
       {
-        "x": 22.000000,
+        "x": 28.000000,
         "y": 0.000000
       }
     ]

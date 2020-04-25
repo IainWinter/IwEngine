@@ -67,7 +67,7 @@
     "size": 1,
     "items": [
       {
-        "GoBack": 0,
+        "GoBack": false,
         "State": 1,
         "NextLevel": {
           "size": 27,

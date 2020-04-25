@@ -88,7 +88,7 @@ void PlayerSystem::Update(
 		auto [transform, object, player] = entity.Components.Tie<Components>();
 
 		if (transition) {
-			object->Trans().Position = iw::lerp(transitionStartPosition, transitionTargetPosition, iw::Time::TotalTime() - begin);
+			object->Trans().Position = iw::lerp(transitionStartPosition, transitionTargetPosition, 0.75f * (iw::Time::TotalTime() - begin));
 		}
 
 		else {

@@ -67,15 +67,15 @@
     "size": 2,
     "items": [
       {
-        "GoBack": 0,
+        "GoBack": false,
         "State": 1,
         "NextLevel": {
           "size": 27,
-          "string": "levels/forest/forest05.json"
+          "string": "levels/forest/forest06.json"
         }
       },
       {
-        "GoBack": 0,
+        "GoBack": false,
         "State": 0,
         "NextLevel": {
           "size": 29,
@@ -88,7 +88,7 @@
     "size": 2,
     "items": [
       {
-        "x": 22.000000,
+        "x": 28.000000,
         "y": 0.000000
       },
       {
