@@ -331,8 +331,6 @@ void MeshDescription::DescribeBuffer(
 			return;
 		}
 
-		m_outdated = false;
-
 		m_vertexArray = device->CreateVertexArray();
 		m_indexBuffer = device->CreateIndexBuffer(GetIndexBuffer().Ptr(), GetIndexBuffer().Count);
 
@@ -341,6 +339,8 @@ void MeshDescription::DescribeBuffer(
 			VertexBufferLayout& layout = m_description.GetBufferLayout(i);
 			TryAddBufferToVertexArray(device, layout, data, i);
 		}
+
+		m_outdated = false;
 	}
 
 	void MeshData::Update(
@@ -355,8 +355,6 @@ void MeshDescription::DescribeBuffer(
 			LOG_WARNING << "Mesh data is not out of date!";
 			return;
 		}
-
-		m_outdated = false;
 
 		for (int i = 0; i < m_buffers.size(); i++) {
 			BufferData& data = GetBuffer(i);
@@ -375,6 +373,8 @@ void MeshDescription::DescribeBuffer(
 		if (index.Ptr()) {
 			device->UpdateBuffer(m_indexBuffer, index.Ptr(), index.Count * sizeof(unsigned));
 		}
+
+		m_outdated = false;
 	}
 
 	void MeshData::Destroy(

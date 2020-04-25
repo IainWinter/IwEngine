@@ -278,7 +278,7 @@ bool PlayerSystem::On(
 
 			//t->Scale = 0;
 
-			up = down = left = right = dash = sprint = false;
+			//up = down = left = right = dash = sprint = false;
 
 			break;
 		}

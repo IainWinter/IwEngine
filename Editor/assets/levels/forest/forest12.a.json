@@ -1,84 +1,40 @@
 {
   "CameraFollow": false,
   "InPosition": {
-    "x": -24.000000,
-    "y": 0.000000
+    "x": 0.000000,
+    "y": -10.000000
   },
   "LevelLocation": {
-    "x": 64.000000,
-    "y": 0.000000
+    "x": 0.000000,
+    "y": 36.000000
   },
   "Enemies": {
-    "size": 2,
-    "items": [
-      {
-        "Type": 1,
-        "Bullet": {
-          "Type": 0,
-          "Speed": 5.000000
-        },
-        "Speed": 0.043633,
-        "FireTime": 2.000000,
-        "ChargeTime": 1.500000,
-        "Rotation": 0.1309
-      },
-      {
-        "Type": 1,
-        "Bullet": {
-          "Type": 0,
-          "Speed": 5.000000
-        },
-        "Speed": 1.04719755119,
-        "FireTime": 5.00000,
-        "ChargeTime": 1.500000,
-        "Rotation": 0.52359877
-      }
-    ]
+    "size": 0,
+    "items": []
   },
   "Positions": {
-    "size": 2,
-    "items": [
-      {
-        "x": 0.000000,
-        "y": -5.000000
-      },
-      {
-        "x": 0.000000,
-        "y": 5.000000
-      }
-    ]
+    "size": 0,
+    "items": []
   },
   "Doors": {
-    "size": 2,
+    "size": 1,
     "items": [
       {
-        "GoBack": false,
-        "State": 1,
-        "NextLevel": {
-          "size": 27,
-          "string": "levels/forest/forest13.json"
-        }
-      },
-      {
-        "GoBack": false,
+        "GoBack": true,
         "State": 0,
         "NextLevel": {
-          "size": 29,
-          "string": "levels/forest/forest12.a.json"
+          "size": 27,
+          "string": "levels/forest/forest12.json"
         }
       }
     ]
   },
   "DoorPositions": {
-    "size": 2,
+    "size": 1,
     "items": [
       {
-        "x": 28.000000,
-        "y": 0.000000
-      },
-      {
         "x": 0.000000,
-        "y": 16.000000
+        "y": -16.000000
       }
     ]
   },
@@ -87,23 +43,8 @@
     "items": []
   },
   "Capsules": {
-    "size": 1,
-    "items": [
-      {
-        "Center": {
-          "x": -5.000000,
-          "y": 0.000000,
-          "z": 3.000000
-        },
-        "Direction": {
-          "x": 1.000000,
-          "y": 0.000000,
-          "z": 0.000000
-        },
-        "Height": 7.000000,
-        "Radius": 0.500000
-      }
-    ]
+    "size": 0,
+    "items": []
   },
   "Planes": {
     "size": 4,
@@ -135,7 +76,7 @@
             "y": 0.000000,
             "z": -1.000000
           },
-          "D": -12.000000
+          "D": -11.000000
         }
       },
       {
