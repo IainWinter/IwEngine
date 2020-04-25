@@ -33,9 +33,11 @@ namespace Engine {
 	}
 
 	void PhysicsSystem::FixedUpdate(
-		EntityComponentArray& view)
+		EntityComponentArray& view) //eubex
 	{
-		accumulator = 0;
+		if (accumulator < iw::Time::FixedTime()) {
+			accumulator = 0;
+		}
 	}
 
 	bool PhysicsSystem::On(

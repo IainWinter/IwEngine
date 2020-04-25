@@ -165,7 +165,7 @@ bool ScoreSystem::On(
 		iw::vector3 pos = bullet.FindComponent<iw::Rigidbody>()      ->Trans().Position;
 		iw::vector3 des = other .FindComponent<iw::CollisionObject>()->Trans().Position;
 
-		SpawnScore(ceil((pos-des).length() * 10), pos);
+		SpawnScore(ceil((pos-des).length()) * 10, pos);
 	}
 
 	if (other.HasComponent<Player>()) {
