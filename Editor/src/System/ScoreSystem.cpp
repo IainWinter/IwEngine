@@ -171,7 +171,10 @@ bool ScoreSystem::On(
 	if (other.HasComponent<Player>()) {
 		iw::vector3 pos = bullet.FindComponent<iw::Rigidbody>()->Trans().Position;
 
-		SpawnScore(-potentialScore / 2, pos);
+		int score = potentialScore / 2;
+		score = score - (score % 50);
+
+		SpawnScore(-score, pos);
 	}
 
 	return false;
