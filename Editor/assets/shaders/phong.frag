@@ -12,7 +12,7 @@ struct DirectionalLight {
 	vec3 InvDirection;
 };
 
-layout(std140) uniform Lights{
+layout(std140) uniform Lights {
 	int lights_pad1, lights_pad2;
 
 	int pointLightCount;
@@ -22,7 +22,6 @@ layout(std140) uniform Lights{
 };
 
 in vec3 WorldPos;
-in vec4 LightPos;
 in vec3 CameraPos;
 in vec2 TexCoords;
 in vec3 Normal;
@@ -33,16 +32,25 @@ out vec4 FragColor;
 // global props
 
 uniform float ambiance;
+uniform float blinn;
 
 // material parameters
 
 uniform vec4 mat_baseColor;
+uniform vec4 mat_reflectance;
+uniform vec4 mat_ao;
 
-uniform float mat_hasDifuseMap;
+uniform float mat_hasDiffuseMap;
 uniform sampler2D mat_diffuseMap;
 
 uniform float mat_hasNormalMap;
 uniform sampler2D mat_normalMap;
+
+uniform float mat_hasReflectanceMap;
+uniform sampler2D mat_reflectanceMap;
+
+uniform float mat_hasAoMap;
+uniform sampler2D mat_aoMap;
 
 uniform float mat_hasAlphaMaskMap;
 uniform sampler2D mat_alphaMaskMap;
@@ -136,6 +144,18 @@ float PointLightShadow(
 	return shadow;
 }
 
+// attenuation
+
+float getDistanceAtt(
+	vec3 unormalizedLightVector,
+	float invSqrRadius)
+{
+	float dist2 = dot(unormalizedLightVector, unormalizedLightVector);
+	return clamp(1.0 - dist2 * invSqrRadius, 0.0, 1.0);
+}
+
+// BRDF
+
 vec3 BRDF(
 	vec3 N, 
 	vec3 V, 
@@ -153,7 +173,7 @@ vec3 BRDF(
     vec3 reflectDir = reflect(-L, N);
     float spec = 0.0;
     
-	if(blinn) {
+	if(blinn == 1.0) {
         vec3 halfwayDir = normalize(L + V);  
         spec = pow(max(dot(N, halfwayDir), 0.0), 32.0);
     }
@@ -217,7 +237,7 @@ void main() {
 
 		float R = pointLights[i].Radius;
 
-		color += BRDF(N, V, L, albedo.xyz) 
+		color += BRDF(N, V, L, baseColor.xyz) 
 		       * getDistanceAtt(L, 1 / pow(R, 2))
 			   * PointLightShadow(-L, R);
 	}
@@ -225,12 +245,12 @@ void main() {
 	for (int i = 0; i < directionalLightCount; i++) {
 		vec3 L = directionalLights[i].InvDirection;
 
-		color += BRDF(N, V, L, albedo.xyz)
+		color += BRDF(N, V, L, baseColor.xyz)
 		       * DirectionalLightShadow(DirectionalLightPos[i]);
 	}
 
-	vec3 ambient = max(ambiance - ao, 0) * albedo.rgb;
+	vec3 ambient = max(ambiance - ao, 0) * baseColor.rgb;
 	color += ambient;
 
-	FragColor = vec4(linearToSRGB(color), albedo.a);
+	FragColor = vec4(linearToSRGB(color), baseColor.a);
 }

@@ -123,7 +123,7 @@ namespace iw {
 
 		// Shaders
 
-		ref<Shader> shader   = Asset->Load<Shader>("shaders/pbr.shader");
+		ref<Shader> shader   = Asset->Load<Shader>("shaders/phong.shader");
 		ref<Shader> gaussian = Asset->Load<Shader>("shaders/filters/gaussian.shader");
 		ref<Shader> dirShadowShader    = Asset->Load<Shader>("shaders/lights/directional.shader");
 		ref<Shader> pointShadowShader  = Asset->Load<Shader>("shaders/lights/point.shader");

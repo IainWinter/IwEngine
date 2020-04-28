@@ -296,7 +296,7 @@ iw::Entity LevelSystem::LoadLevel(
 				continue;
 			}
 
-			mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/pbr.shader"));
+			mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/phong.shader"));
 			mesh.Material()->SetTexture("shadowMap", Asset->Load<iw::Texture>("SunShadowMap"));   // shouldnt be part of material
 			mesh.Material()->SetTexture("shadowMap2", Asset->Load<iw::Texture>("LightShadowMap")); // shouldnt be part of material
 
@@ -498,7 +498,7 @@ iw::Entity LevelSystem::LoadFloor(
 			continue;
 		}
 
-		mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/pbr.shader"));
+		mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/phong.shader"));
 		mesh.Material()->SetTexture("shadowMap",  Asset->Load<iw::Texture>("SunShadowMap"));   // shouldnt be part of material
 		mesh.Material()->SetTexture("shadowMap2", Asset->Load<iw::Texture>("LightShadowMap")); // shouldnt be part of material
 

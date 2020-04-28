@@ -52,14 +52,14 @@ namespace Graphics {
 				aiMaterial* aimaterial = scene->mMaterials[i];
 				const char* ainame     = aimaterial->GetName().C_Str();
 
-				Color albedo;
+				Color diffuse;
 				//float ao;
 				//Color emissiveColor;
 				//float metallic;
 				//float roughness = 0.2f;
 				//float ambientOcclusion;
 				
-				aiGetMaterialColor(aimaterial, AI_MATKEY_COLOR_DIFFUSE, (aiColor4D*)&albedo); 
+				aiGetMaterialColor(aimaterial, AI_MATKEY_COLOR_DIFFUSE, (aiColor4D*)&diffuse); 
 				//aiGetMaterialColor(aimaterial, AI_MATKEY_COLOR_AMBIENT, (aiColor4D*)&ao);
 			//	aiGetMaterialColor(aimaterial, AI_MATKEY_COLOR_EMISSIVE, (aiColor4D*)&emissiveColor);
 
@@ -73,7 +73,6 @@ namespace Graphics {
 				// Scanned description
 				// User value
 				
-				material.Set("albedo", albedo);
 				material.Set("ao", 0.0f);
 
 				//material.SetFloats("emissiveColor", &emissiveColor, 4);
@@ -81,10 +80,17 @@ namespace Graphics {
 				//material.SetFloat("roughness", roughness);
 
 				if (aimaterial->GetTextureCount(aiTextureType_UNKNOWN) > 0) {
+					// this means be are pbr
+
+					material.Set("albedo", diffuse);
 					LoadWeirdTextures(m_asset, material, aimaterial);
 				}
 
-				LoadTexture(m_asset, material, aimaterial, aiTextureType_DIFFUSE,      "albedoMap");
+				else {
+					material.Set("diffuse", diffuse);
+					LoadTexture(m_asset, material, aimaterial, aiTextureType_DIFFUSE, "diffuseMap");
+				}
+
 				LoadTexture(m_asset, material, aimaterial, aiTextureType_SPECULAR,     "specularMap");
 				LoadTexture(m_asset, material, aimaterial, aiTextureType_AMBIENT,      "aoMap");
 				LoadTexture(m_asset, material, aimaterial, aiTextureType_EMISSIVE,     "emissiveMap");
