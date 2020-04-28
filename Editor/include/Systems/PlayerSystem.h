@@ -41,6 +41,8 @@ public:
 	void Update(
 		iw::EntityComponentArray& view) override;
 
+	void OnPush() override;
+
 	bool On(iw::KeyEvent& event);
 	bool On(iw::CollisionEvent& event);
 	bool On(iw::ActionEvent& event);

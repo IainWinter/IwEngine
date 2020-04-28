@@ -24,7 +24,7 @@ namespace log {
 			_sink_t* sink = new _sink_t(level, std::forward<_Args_T>(args)...);
 			m_sinks.push_back(sink);
 
-			sink->log(preamble);
+			sink->log(INFO, preamble);
 		}
 
 		template<

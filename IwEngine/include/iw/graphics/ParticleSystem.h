@@ -172,7 +172,7 @@ namespace Graphics {
 		}
 
 		void Update() {
-			m_needsToUpdateBuffer |= m_update(this, m_particles.data(), m_particles.size());
+			m_needsToUpdateBuffer |= m_update(this, m_particles.data(), (unsigned)m_particles.size());
 		}
 	};
 }

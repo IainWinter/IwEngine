@@ -9,10 +9,10 @@
 enum class Actions
 	: int
 {
-	DEV_CONSOLE,
+	GAME_STATE, DEV_CONSOLE,
 	JUMP, RIGHT, FORWARD, USE,
 	RESET_LEVEL, START_LEVEL, UNLOCK_LEVEL_DOOR, LOAD_NEXT_LEVEL, GOTO_NEXT_LEVEL, AT_NEXT_LEVEL,
-	SPAWN_ENEMY_DEATH
+	SPAWN_ENEMY_DEATH, SPAWN_ITEM, SPAWN_NOTE
 };
 
 struct DevConsoleEvent
@@ -24,12 +24,29 @@ struct DevConsoleEvent
 	{}
 };
 
+enum GameState {
+	PAUSED,
+	RUNNING
+};
+
+struct GameStateEvent
+	: iw::SingleEvent
+{
+	GameState State;
+
+	GameStateEvent(
+		GameState state)
+		: iw::SingleEvent(iw::val(Actions::GAME_STATE))
+		, State(state)
+	{}
+};
+
 struct JumpEvent
 	: iw::ToggleEvent
 {
 	JumpEvent(
 		bool active)
-		: ToggleEvent(iw::val(Actions::JUMP), active)
+		: iw::ToggleEvent(iw::val(Actions::JUMP), active)
 	{}
 };
 
@@ -154,5 +171,32 @@ struct SpawnEnemyDeath
 		: iw::SingleEvent(iw::val(Actions::SPAWN_ENEMY_DEATH))
 		, Position(position)
 		, Level(level)
+	{}
+};
+
+struct SpawnItemEvent
+	: iw::SingleEvent
+{
+	iw::vector3 Position;
+	iw::Transform* Level;
+
+	SpawnItemEvent(
+		iw::vector3 position,
+		iw::Transform* level)
+		: iw::SingleEvent(iw::val(Actions::SPAWN_ITEM))
+		, Position(position)
+		, Level(level)
+	{}
+};
+
+struct SpawnNoteEvent
+	: iw::SingleEvent
+{
+	int Index;
+
+	SpawnNoteEvent(
+		int index)
+		: iw::SingleEvent(iw::val(Actions::SPAWN_NOTE))
+		, Index(index)
 	{}
 };

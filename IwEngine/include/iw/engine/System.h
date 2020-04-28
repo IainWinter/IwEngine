@@ -49,6 +49,8 @@ namespace Engine {
 		virtual const char* Name() const = 0;
 	};
 
+	// have an event only system
+
 	template<
 		typename... _cs>
 	class System

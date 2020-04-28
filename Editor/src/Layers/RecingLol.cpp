@@ -60,14 +60,14 @@ int RecingLayer::Initialize() {
 	for (int i = 0; i < 50; i++) {
 		iw::Entity entity = Space->CreateEntity<iw::Transform, iw::Model>();
 
-		entity.SetComponent<iw::Transform>(iw::vector3(64 * i, 0, 0));
-		entity.SetComponent<iw::Model>(*model);
+		entity.Set<iw::Transform>(iw::vector3(64 * i, 0, 0));
+		entity.Set<iw::Model>(*model);
 	}
 
 	iw::Entity camera = Space->CreateEntity<iw::Transform, iw::CameraController>();
 
-	iw::Transform* t = camera.SetComponent<iw::Transform>(iw::vector3(0, 5, 0));
-	camera.SetComponent<iw::CameraController>(MainScene->MainCamera());
+	iw::Transform* t = camera.Set<iw::Transform>(iw::vector3(0, 5, 0));
+	camera.Set<iw::CameraController>(MainScene->MainCamera());
 
 	MainScene->MainCamera()->SetTrans(t);
 
@@ -81,10 +81,10 @@ int RecingLayer::Initialize() {
 
 	iw::Entity player = Space->CreateEntity<iw::Transform, iw::Mesh, iw::CapsuleCollider, iw::Rigidbody, Car>();
 
-	                          player.SetComponent<iw::Mesh>(box);
-	iw::Transform* tt =       player.SetComponent<iw::Transform>(iw::vector3(0, 5, 0), 1, iw::quaternion::from_axis_angle(iw::vector3::unit_z, iw::Pi / 2));
-	iw::Rigidbody* r =        player.SetComponent<iw::Rigidbody>();
-	iw::CapsuleCollider* c  = player.SetComponent<iw::CapsuleCollider>();
+	                          player.Set<iw::Mesh>(box);
+	iw::Transform* tt =       player.Set<iw::Transform>(iw::vector3(0, 5, 0), 1, iw::quaternion::from_axis_angle(iw::vector3::unit_z, iw::Pi / 2));
+	iw::Rigidbody* r =        player.Set<iw::Rigidbody>();
+	iw::CapsuleCollider* c  = player.Set<iw::CapsuleCollider>();
 
 	PushSystem<iw::MeshRenderSystem>(MainScene);
 	PushSystem<iw::ModelRenderSystem>(MainScene);

@@ -20,7 +20,7 @@ namespace iw {
 	{
 		for (sink* sink : m_sinks) {
 			if (sink->should_log(level)) {
-				sink->log(string);
+				sink->log(level, string);
 			}
 		}
 	}

@@ -9,6 +9,7 @@ namespace iw {
 	{}
 
 	void file_sink::log(
+		loglevel level,
 		std::string& msg)
 	{
 		file << msg;

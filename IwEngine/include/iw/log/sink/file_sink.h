@@ -5,22 +5,24 @@
 
 namespace iw {
 namespace log {
-	class IWLOG_API file_sink final
+	class file_sink
 		: public sink
 	{
 	private:
-		struct {
-			std::ofstream file;
-		};
+		std::ofstream file;
 
 	public:
+		IWLOG_API
 		file_sink(
 			loglevel level,
 			const char* file);
 
+		IWLOG_API
 		void log(
+			loglevel level,
 			std::string& msg);
 
+		IWLOG_API
 		void flush();
 	};
 }

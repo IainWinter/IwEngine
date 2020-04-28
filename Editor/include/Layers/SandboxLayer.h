@@ -3,6 +3,7 @@
 #include "iw/engine/Layer.h"
 #include "Systems/PlayerSystem.h"
 #include "Systems/EnemySystem.h"
+#include "Systems/BulletSystem.h"
 
 #include "iw/graphics/DirectionalLight.h"
 #include "iw/graphics/Font.h"
@@ -16,6 +17,7 @@ namespace iw {
 	private:
 		PlayerSystem* playerSystem;
 		EnemySystem*  enemySystem;
+		BulletSystem* bulletSystem;
 
 		// Lights
 
@@ -28,11 +30,9 @@ namespace iw {
 
 		// Little bit of text
 
-		Mesh textMesh;
-		Transform textTransform;
-		OrthographicCamera* textCam;
-		iw::ref<Shader> fontShader;
-		iw::ref<Font> font;
+		OrthographicCamera* m_textCam;
+		Mesh* m_textMesh;
+		ref<Font> m_font;
 
 		float x = 0;
 		int sc = 5;

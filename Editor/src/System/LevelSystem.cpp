@@ -135,14 +135,14 @@ bool LevelSystem::On(
 	}
 
 	iw::Entity doorEnt;
-	if (   a.HasComponent<Player>()
-		&& b.HasComponent<LevelDoor>())
+	if (   a.Has<Player>()
+		&& b.Has<LevelDoor>())
 	{
 		doorEnt = b;
 	}
 
-	else if (b.HasComponent<Player>()
-		&&   a.HasComponent<LevelDoor>())
+	else if (b.Has<Player>()
+		&&   a.Has<LevelDoor>())
 	{
 		doorEnt = a;
 	}
@@ -311,8 +311,8 @@ iw::Entity LevelSystem::LoadLevel(
 		}
 
 		iw::Entity entity = Space->CreateEntity<iw::Transform, iw::Model>();
-		iw::Transform* t = entity.SetComponent<iw::Transform>(prefab.Transform);
-		                   entity.SetComponent<iw::Model>(*model);
+		iw::Transform* t = entity.Set<iw::Transform>(prefab.Transform);
+		                   entity.Set<iw::Model>(*model);
 
 		if(levelTransform) {
 			levelTransform->AddChild(t);
@@ -329,11 +329,11 @@ iw::Entity LevelSystem::LoadLevel(
 	for (size_t i = 0; i < currentLevel.Enemies.size(); i++) {
 		iw::Entity ent = Space->CreateEntity<iw::Transform, iw::Model, iw::SphereCollider, iw::CollisionObject, Enemy>();
 		
-		                         ent.SetComponent<iw::Model>(*Asset->Load<iw::Model>("Tetrahedron"));
-		Enemy*               e = ent.SetComponent<Enemy>(currentLevel.Enemies[i]);
-		iw::Transform*       t = ent.SetComponent<iw::Transform>();
-		iw::SphereCollider*  s = ent.SetComponent<iw::SphereCollider>(iw::vector3::zero, 1.0f);
-		iw::CollisionObject* r = ent.SetComponent<iw::CollisionObject>();
+		                         ent.Set<iw::Model>(*Asset->Load<iw::Model>("Tetrahedron"));
+		Enemy*               e = ent.Set<Enemy>(currentLevel.Enemies[i]);
+		iw::Transform*       t = ent.Set<iw::Transform>();
+		iw::SphereCollider*  s = ent.Set<iw::SphereCollider>(iw::vector3::zero, 1.0f);
+		iw::CollisionObject* r = ent.Set<iw::CollisionObject>();
 
 		//e->Timer = e->ChargeTime;
 
@@ -354,9 +354,9 @@ iw::Entity LevelSystem::LoadLevel(
 	for (iw::PlaneCollider& prefab : currentLevel.Planes) {
 		iw::Entity ent = Space->CreateEntity<iw::Transform, iw::PlaneCollider, iw::CollisionObject>();
 		
-		iw::Transform*       transform = ent.SetComponent<iw::Transform>();
-		iw::PlaneCollider*   collider  = ent.SetComponent<iw::PlaneCollider>(prefab);
-		iw::CollisionObject* object    = ent.SetComponent<iw::CollisionObject>();
+		iw::Transform*       transform = ent.Set<iw::Transform>();
+		iw::PlaneCollider*   collider  = ent.Set<iw::PlaneCollider>(prefab);
+		iw::CollisionObject* object    = ent.Set<iw::CollisionObject>();
 
 		levelTransform->AddChild(transform);
 
@@ -381,9 +381,9 @@ iw::Entity LevelSystem::LoadLevel(
 		}
 
 
-		iw::Transform*       transform = ent.SetComponent<iw::Transform>(iw::vector3::unit_y);
-		iw::CapsuleCollider* collider  = ent.SetComponent<iw::CapsuleCollider>(prefab);
-		iw::CollisionObject* object    = ent.SetComponent<iw::CollisionObject>();
+		iw::Transform*       transform = ent.Set<iw::Transform>(iw::vector3::unit_y);
+		iw::CapsuleCollider* collider  = ent.Set<iw::CapsuleCollider>(prefab);
+		iw::CollisionObject* object    = ent.Set<iw::CollisionObject>();
 
 		levelTransform->AddChild(transform);
 
@@ -396,9 +396,9 @@ iw::Entity LevelSystem::LoadLevel(
 	for (iw::SphereCollider& prefab : currentLevel.Spheres) {
 		iw::Entity ent = Space->CreateEntity<iw::Transform, iw::SphereCollider, iw::CollisionObject>();
 
-		iw::Transform*       transform = ent.SetComponent<iw::Transform>(iw::vector3::unit_y);
-		iw::SphereCollider*  collider  = ent.SetComponent<iw::SphereCollider>(prefab);
-		iw::CollisionObject* object    = ent.SetComponent<iw::CollisionObject>();
+		iw::Transform*       transform = ent.Set<iw::Transform>(iw::vector3::unit_y);
+		iw::SphereCollider*  collider  = ent.Set<iw::SphereCollider>(prefab);
+		iw::CollisionObject* object    = ent.Set<iw::CollisionObject>();
 
 		levelTransform->AddChild(transform);
 
@@ -417,11 +417,11 @@ iw::Entity LevelSystem::LoadLevel(
 			levelDoor = ent;
 		}
 
-		LevelDoor*           door      = ent.SetComponent<LevelDoor>(currentLevel.Doors[i]);
-		iw::Model*           model     = ent.SetComponent<iw::Model>(*Asset->Load<iw::Model>("Door"));
-		iw::Transform*       transform = ent.SetComponent<iw::Transform>(iw::vector3(currentLevel.DoorPositions[i].x, 1, currentLevel.DoorPositions[i].y), 5.0f);
-		iw::SphereCollider*  collider  = ent.SetComponent<iw::SphereCollider>(iw::vector3::zero, 1.0f);
-		iw::CollisionObject* object    = ent.SetComponent<iw::CollisionObject>();
+		LevelDoor*           door      = ent.Set<LevelDoor>(currentLevel.Doors[i]);
+		iw::Model*           model     = ent.Set<iw::Model>(*Asset->Load<iw::Model>("Door"));
+		iw::Transform*       transform = ent.Set<iw::Transform>(iw::vector3(currentLevel.DoorPositions[i].x, 1, currentLevel.DoorPositions[i].y), 5.0f);
+		iw::SphereCollider*  collider  = ent.Set<iw::SphereCollider>(iw::vector3::zero, 1.0f);
+		iw::CollisionObject* object    = ent.Set<iw::CollisionObject>();
 
 		iw::ref<iw::Material> material = model->GetMesh(0).Material()->MakeInstance();
 
@@ -447,6 +447,8 @@ iw::Entity LevelSystem::LoadLevel(
 	}
 
 	// Camera recreated in layer from \/
+
+	Bus->push<SpawnItemEvent>(iw::vector3(-8, 1, 8), levelTransform);
 
 	return level;
 }
@@ -481,8 +483,8 @@ void LevelSystem::LoadTree(
 	//tree->Meshes[1].Material->SetTexture("alphaMaskMap", leavesAlpha);
 
 	//iw::Entity ent = Space->CreateEntity<iw::Transform, iw::Model>();
-	//ent.SetComponent<iw::Transform>(transform);
-	//ent.SetComponent<iw::Model>(*tree);
+	//ent.Set<iw::Transform>(transform);
+	//ent.Set<iw::Model>(*tree);
 }
 
 iw::Entity LevelSystem::LoadFloor(
@@ -511,8 +513,8 @@ iw::Entity LevelSystem::LoadFloor(
 	}
 
 	iw::Entity entity = Space->CreateEntity<iw::Transform, iw::Model>();
-	entity.SetComponent<iw::Transform>(transform);
-	entity.SetComponent<iw::Model>(*floor);
+	entity.Set<iw::Transform>(transform);
+	entity.Set<iw::Model>(*floor);
 
 	return entity;
 }

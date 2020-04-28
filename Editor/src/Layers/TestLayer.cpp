@@ -91,10 +91,10 @@ namespace iw {
 		{
 			Entity entity = Space->CreateEntity<Transform, Mesh, PlaneCollider, CollisionObject>();
 
-			Transform*       trans = entity.SetComponent<Transform>(iw::vector3(0, 0, 0), 15);
-			Mesh*            mesh  = entity.SetComponent<Mesh>(plane->MakeInstance());
-			PlaneCollider*   col   = entity.SetComponent<PlaneCollider>(vector3::unit_y, 0);
-			CollisionObject* obj   = entity.SetComponent<CollisionObject>();
+			Transform*       trans = entity.Set<Transform>(iw::vector3(0, 0, 0), 15);
+			Mesh*            mesh  = entity.Set<Mesh>(plane->MakeInstance());
+			PlaneCollider*   col   = entity.Set<PlaneCollider>(vector3::unit_y, 0);
+			CollisionObject* obj   = entity.Set<CollisionObject>();
 
 			mesh->SetMaterial(REF<Material>(shader));
 
@@ -145,8 +145,8 @@ namespace iw {
 		{
 			Entity entity = Space->CreateEntity<Transform, EditorCameraController>();
 
-			Transform* transform = entity.SetComponent<Transform>(vector3(0, 6, -5));
-			                       entity.SetComponent<EditorCameraController>(camera);
+			Transform* transform = entity.Set<Transform>(vector3(0, 6, -5));
+			                       entity.Set<EditorCameraController>(camera);
 
 			camera->SetTrans(transform);
 		}
@@ -218,10 +218,10 @@ namespace iw {
 		if (Keyboard::KeyDown(E)) {
 			Entity entity = Space->CreateEntity<Transform, Mesh, SphereCollider, Rigidbody>();
 
-			Transform*      trans = entity.SetComponent<Transform>(iw::vector3(0, 5, 0));
-			Mesh*           mesh  = entity.SetComponent<Mesh>(sphere->MakeInstance());
-			SphereCollider* col   = entity.SetComponent<SphereCollider>(vector3::zero, 1);
-			Rigidbody*      body  = entity.SetComponent<Rigidbody>();
+			Transform*      trans = entity.Set<Transform>(iw::vector3(0, 5, 0));
+			Mesh*           mesh  = entity.Set<Mesh>(sphere->MakeInstance());
+			SphereCollider* col   = entity.Set<SphereCollider>(vector3::zero, 1);
+			Rigidbody*      body  = entity.Set<Rigidbody>();
 
 			mesh->SetMaterial(REF<Material>(shader));
 

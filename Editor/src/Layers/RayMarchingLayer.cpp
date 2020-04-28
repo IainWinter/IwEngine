@@ -21,8 +21,8 @@ namespace iw {
 
 		//Entity entity = Space->CreateEntity<Transform, CameraController>();
 
-		//Transform* transform = entity.SetComponent<Transform>(vector3(0, 6, -5));
-		//	                   entity.SetComponent<CameraController>(camera);
+		//Transform* transform = entity.Set<Transform>(vector3(0, 6, -5));
+		//	                   entity.Set<CameraController>(camera);
 
 		//camera->SetTrans(transform);
 

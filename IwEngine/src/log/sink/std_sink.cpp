@@ -8,8 +8,10 @@ namespace iw {
 	{}
 
 	void stdout_sink::log(
+		loglevel level,
 		std::string& msg)
 	{
+		set_color(level);
 		std::cout << msg;
 	}
 
@@ -23,8 +25,10 @@ namespace iw {
 	{}
 
 	void stderr_sink::log(
+		loglevel level,
 		std::string& msg)
 	{
+		set_color(level);
 		std::cerr << msg;
 	}
 

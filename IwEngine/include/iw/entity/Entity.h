@@ -78,7 +78,7 @@ namespace ECS {
 		template<
 			typename _c,
 			typename... _args>
-		_c* SetComponent(
+		_c* Set(
 			_args&&... args)
 		{
 #ifdef IW_DEBUG
@@ -104,7 +104,7 @@ namespace ECS {
 
 		template<
 			typename _c>
-		bool HasComponent() {
+		bool Has() {
 #ifdef IW_DEBUG
 		if (!Space) {
 			LOG_ERROR << "Entity has no space!";
