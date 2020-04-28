@@ -140,14 +140,14 @@ namespace Graphics {
 			}
 
 			// max of 8
-			for (int i = 0; i < aimesh->GetNumColorChannels(); i++) {
-				bName channel = (bName)((int)bName::COLOR + i);
+			for (unsigned i = 0; i < aimesh->GetNumColorChannels(); i++) {
+				bName channel = (bName)((unsigned)bName::COLOR + i);
 				description.DescribeBuffer(channel, MakeLayout<float>(4));
 			}
 
 			// max of 8
-			for (int i = 0; i < aimesh->GetNumUVChannels(); i++) {
-				bName channel = (bName)((int)bName::UV + i);
+			for (unsigned i = 0; i < aimesh->GetNumUVChannels(); i++) {
+				bName channel = (bName)((unsigned)bName::UV + i);
 				description.DescribeBuffer(channel, MakeLayout<float>(aimesh->mNumUVComponents[i]));
 			}
 
@@ -175,8 +175,8 @@ namespace Graphics {
 				}
 			}
 
-			for (int c = 0; c < aimesh->GetNumUVChannels(); c++) {
-				bName channel = (bName)((int)bName::UV + c);
+			for (unsigned c = 0; c < aimesh->GetNumUVChannels(); c++) {
+				bName channel = (bName)((unsigned)bName::UV + c);
 				if (description.HasBuffer(channel)) {
 					unsigned uvComponents = aimesh->mNumUVComponents[c];
 					unsigned count        = aimesh->mNumVertices * uvComponents;
@@ -209,14 +209,14 @@ namespace Graphics {
 				}
 			}
 
-			size_t indexCount = 0;
-			for (size_t t = 0; t < aimesh->mNumFaces; t++) {
+			unsigned indexCount = 0;
+			for (unsigned t = 0; t < aimesh->mNumFaces; t++) {
 				indexCount += aimesh->mFaces[t].mNumIndices; // could a face have a diffrent # of incices???
 			}
 
 			unsigned* indices = new unsigned int[indexCount];
 
-			for (size_t f = 0, i = 0; f < aimesh->mNumFaces; f++) {
+			for (unsigned f = 0, i = 0; f < aimesh->mNumFaces; f++) {
 				const aiFace& face = aimesh->mFaces[f];
 				for (size_t v = 0; v < face.mNumIndices; v++) {
 					indices[i++] = face.mIndices[v];

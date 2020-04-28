@@ -78,11 +78,11 @@ iw::Transform* EnemyDeathCircleSystem::SpawnDeathCircle(
 {
 	iw::Entity circle = Space->CreateEntity<iw::Transform, iw::Model, iw::SphereCollider, iw::CollisionObject, EnemyDeathCircle>();
 	
-	                         circle.SetComponent<EnemyDeathCircle>   (prefab);
-	iw::Model*           m = circle.SetComponent<iw::Model>          (m_deathCircleModel);
-	iw::Transform*       t = circle.SetComponent<iw::Transform>      (position, 0.0f);
-	iw::SphereCollider*  s = circle.SetComponent<iw::SphereCollider> (iw::vector3::zero, 1);
-	iw::CollisionObject* c = circle.SetComponent<iw::CollisionObject>();
+	                         circle.Set<EnemyDeathCircle>   (prefab);
+	iw::Model*           m = circle.Set<iw::Model>          (m_deathCircleModel);
+	iw::Transform*       t = circle.Set<iw::Transform>      (position, 0.0f);
+	iw::SphereCollider*  s = circle.Set<iw::SphereCollider> (iw::vector3::zero, 1);
+	iw::CollisionObject* c = circle.Set<iw::CollisionObject>();
 
 	m->GetMesh(0).Material()->Set("albedo", iw::Color::From255(0, 195, 255, 64));
 

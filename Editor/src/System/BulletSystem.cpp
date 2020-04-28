@@ -69,23 +69,23 @@ bool BulletSystem::On(
 	iw::Entity bullet;
 	iw::Entity other;
 	if (   a != iw::EntityHandle::Empty 
-		&& a.HasComponent<Bullet>()) 
+		&& a.Has<Bullet>()) 
 	{
 		bullet = a;
 		other  = b;
 	}
 
 	else if (b != iw::EntityHandle::Empty
-		  && b.HasComponent<Bullet>())
+		  && b.Has<Bullet>())
 	{
 		bullet = b;
 		other  = a;
 	}
 
 	if (   other != iw::EntityHandle::Empty
-		&& (   other.HasComponent<Bullet>() 
-			|| other.HasComponent<Enemy>()/*.Index() == bullet.FindComponent<Bullet>()->enemyIndex*/
-			|| other.HasComponent<DontDeleteBullets>()
+		&& (   other.Has<Bullet>() 
+			|| other.Has<Enemy>()/*.Index() == bullet.FindComponent<Bullet>()->enemyIndex*/
+			|| other.Has<DontDeleteBullets>()
 			|| other.FindComponent<LevelDoor>()))
 	{
 		return false;

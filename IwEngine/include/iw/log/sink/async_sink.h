@@ -7,35 +7,46 @@
 
 namespace iw {
 namespace log {
-	class IWLOG_API async_sink
+	class async_sink
 		: public sink
 	{
 	private:
-		struct {
-			iw::blocking_queue<std::string> m_messages;
-			std::thread                      m_thread;
+		struct logbit {
+			loglevel level;
+			std::string text;
 		};
+
+		iw::blocking_queue<logbit> m_messages;
+		std::thread m_thread;
 	private:
+		IWLOG_API
 		void async_logger() {
 			while (true) {
-				async_log(m_messages.pop());
+				logbit log = m_messages.pop();
+				async_log(log.level, log.text);
 			}
 		}
 	public:
+		IWLOG_API
 		async_sink(
 			loglevel level)
 			: sink(level)
 			, m_thread([this] { async_logger(); })
 		{}
 
+		IWLOG_API
 		virtual ~async_sink() {
 			m_thread.join();
 		}
 
+		IWLOG_API
 		void log(
+			loglevel level,
 			std::string& msg);
 
+		IWLOG_API
 		virtual void async_log(
+			loglevel level,
 			std::string& msg) = 0;
 	};
 }

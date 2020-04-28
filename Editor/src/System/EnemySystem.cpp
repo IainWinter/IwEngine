@@ -170,15 +170,15 @@ bool EnemySystem::On(
 
 	iw::Entity player;
 	iw::Entity enemy;
-	if (   a.HasComponent<Player>()
-		&& b.HasComponent<Enemy>())
+	if (   a.Has<Player>()
+		&& b.Has<Enemy>())
 	{
 		player = a;
 		enemy  = b;
 	}
 
-	else if (b.HasComponent<Player>()
-		&&   a.HasComponent<Enemy>())
+	else if (b.Has<Player>()
+		&&   a.Has<Enemy>())
 	{
 		player = b;
 		enemy  = a;
@@ -225,11 +225,11 @@ iw::Transform* EnemySystem::SpawnBullet(
 {
 	iw::Entity bullet = Space->CreateEntity<iw::Transform, iw::Model, iw::SphereCollider, iw::Rigidbody, Bullet>();
 	
-	                        bullet.SetComponent<iw::Model>         (m_bulletModel);
-	Bullet*             b = bullet.SetComponent<Bullet>            (prefab);
-	iw::Transform*      t = bullet.SetComponent<iw::Transform>     (position + iw::vector3(sqrt(2), 0, 0) * rot, iw::vector3(.25f));
-	iw::SphereCollider* s = bullet.SetComponent<iw::SphereCollider>(iw::vector3::zero, 0.5f);
-	iw::Rigidbody*      r = bullet.SetComponent<iw::Rigidbody>     ();
+	                        bullet.Set<iw::Model>         (m_bulletModel);
+	Bullet*             b = bullet.Set<Bullet>            (prefab);
+	iw::Transform*      t = bullet.Set<iw::Transform>     (position + iw::vector3(sqrt(2), 0, 0) * rot, iw::vector3(.25f));
+	iw::SphereCollider* s = bullet.Set<iw::SphereCollider>(iw::vector3::zero, 0.5f);
+	iw::Rigidbody*      r = bullet.Set<iw::Rigidbody>     ();
 
 	b->initialVelocity = iw::vector3::unit_x * rot * prefab.Speed;
 

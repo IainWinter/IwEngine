@@ -8,8 +8,10 @@ namespace iw {
 	{}
 
 	void async_stdout_sink::async_log(
+		loglevel level,
 		std::string& msg)
 	{
+		set_color(level);
 		std::cout << msg;
 	}
 
@@ -23,8 +25,10 @@ namespace iw {
 	{}
 
 	void async_stderr_sink::async_log(
+		loglevel level,
 		std::string& msg)
 	{
+		set_color(level);
 		std::cerr << msg;
 	}
 

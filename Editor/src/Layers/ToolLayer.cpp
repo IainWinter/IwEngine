@@ -103,8 +103,8 @@ namespace iw {
 
 		Entity cameraEntity = Space->CreateEntity<Transform, EditorCameraController>();
 
-		Transform* transform = cameraEntity.SetComponent<Transform>(5);
-		                       cameraEntity.SetComponent<EditorCameraController>(camera);
+		Transform* transform = cameraEntity.Set<Transform>(5);
+		                       cameraEntity.Set<EditorCameraController>(camera);
 
 		camera->SetTrans(transform);
 

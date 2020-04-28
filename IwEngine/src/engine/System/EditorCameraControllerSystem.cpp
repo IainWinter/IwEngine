@@ -98,7 +98,7 @@ namespace iw {
 		MouseButtonEvent& e)
 	{
 		if (e.Device == DeviceType::RAW_MOUSE && e.Button == RMOUSE) {
-			speed = e.State ? 100 : 10;
+			speed = e.State ? 100.0f : 10.0f;
 		}
 
 		return false;

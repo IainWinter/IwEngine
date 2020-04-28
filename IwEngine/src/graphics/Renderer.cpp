@@ -156,9 +156,14 @@ namespace Graphics {
 	{
 #ifdef IW_DEBUG
 		if (m_state == RenderState::INVALID) {
-			LOG_WARNING << "Tried to submit mesh to renderer while in invalid state!";
+			LOG_WARNING << "Tried to submit mesh to renderer while in an invalid state!";
 		}
 #endif
+		if (!mesh->Data()) {
+			LOG_WARNING << "Tried to submit mesh without data to renderer!";
+			return;
+		}
+
 		Renderer::SetMesh(mesh);
 
 		if (!m_meshData->IsInitialized()) {

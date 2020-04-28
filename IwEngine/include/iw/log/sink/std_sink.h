@@ -12,6 +12,7 @@ namespace log {
 			loglevel level);
 
 		void log(
+			loglevel level,
 			std::string& msg);
 
 		void flush();
@@ -25,6 +26,7 @@ namespace log {
 			loglevel level);
 
 		void log(
+			loglevel level,
 			std::string& msg);
 
 		void flush();

@@ -57,11 +57,11 @@ int PlayerSystem::Initialize() {
 	
 	player = Space->CreateEntity<iw::Transform, iw::Model, iw::SphereCollider, iw::CollisionObject, Player>();
 	
-	                         player.SetComponent<iw::Model>(*m_playerModel);
-	                         player.SetComponent<Player>(playerPrefab);
-	iw::Transform*       t = player.SetComponent<iw::Transform>(iw::vector3(0, 1, 0), iw::vector3(.75f));
-	iw::SphereCollider*  s = player.SetComponent<iw::SphereCollider>(iw::vector3::zero, 1);
-	iw::CollisionObject* c = player.SetComponent<iw::CollisionObject>();
+	                         player.Set<iw::Model>(*m_playerModel);
+	                         player.Set<Player>(playerPrefab);
+	iw::Transform*       t = player.Set<iw::Transform>(iw::vector3(0, 1, 0), iw::vector3(.75f));
+	iw::SphereCollider*  s = player.Set<iw::SphereCollider>(iw::vector3::zero, 1);
+	iw::CollisionObject* c = player.Set<iw::CollisionObject>();
 
 	//c->SetMass(1);
 	c->SetCol(s);
@@ -167,6 +167,10 @@ void PlayerSystem::Update(
 	}
 }
 
+void PlayerSystem::OnPush() {
+	left = right = up = down = dash = sprint = transition = false;
+}
+
 bool PlayerSystem::On(
 	iw::KeyEvent& event)
 {
@@ -230,14 +234,14 @@ bool PlayerSystem::On(
 	}
 
 	iw::Entity player;
-	if (   a.HasComponent<Player>()
-		&& b.HasComponent<Bullet>())
+	if (   a.Has<Player>()
+		&& b.Has<Bullet>())
 	{
 		player = a;
 	}
 
-	else if (b.HasComponent<Player>()
-		&&   a.HasComponent<Bullet>())
+	else if (b.Has<Player>()
+		&&   a.Has<Bullet>())
 	{
 		player = b;
 	}

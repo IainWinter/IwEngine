@@ -7,15 +7,18 @@
 #include "Systems/EnemyDeathCircleSystem.h"
 #include "Systems/GameCameraController.h"
 #include "Systems/ScoreSystem.h"
+#include "Systems/ItemSystem.h"
+#include "Systems/NoteSystem.h"
 #include "iw/engine/Systems/PhysicsSystem.h"
 #include "iw/engine/Systems/ParticleUpdateSystem.h"
-#include "iw/engine/Systems/ParticleUpdateSystem.h"
+#include "iw/engine/Systems/EntityCleanupSystem.h"
 #include "iw/engine/Systems/Render/MeshRenderSystem.h"
 #include "iw/engine/Systems/Render/ModelRenderSystem.h"
 #include "iw/engine/Systems/Render/ParticleRenderSystem.h"
 #include "iw/engine/Systems/Render/MeshShadowRenderSystem.h"
 #include "iw/engine/Systems/Render/ModelShadowRenderSystem.h"
 #include "iw/engine/Systems/Render/ParticleShadowRenderSystem.h"
+#include "iw/engine/Systems/Render/UiRenderSystem.h"
 #include "iw/engine/Systems/Debug/DrawCollidersSystem.h"
 
 #include "iw/engine/Components/CameraController.h"
@@ -71,8 +74,8 @@ namespace iw {
 		, enemySystem(nullptr)
 		, light(nullptr)
 		, sun(nullptr)
-		, textCam(nullptr)
-		, textMesh(nullptr)
+		, m_textCam(nullptr)
+		, m_textMesh(nullptr)
 	{}
 
 	int forestInstance = 0;
@@ -100,32 +103,30 @@ namespace iw {
 
 		// Fonts
 
-		font = Asset->Load<Font>("fonts/arial.fnt");
-		font->Initialize(Renderer->Device);
+		m_font = Asset->Load<Font>("fonts/arial.fnt");
+		m_font->Initialize(Renderer->Device);
 
-		textMesh = font->GenerateMesh("Use arrow keys to move and x to attack.\ni: debug menu\nt: freecam", .005f, 1);
-
-		fontShader = Asset->Load<Shader>("shaders/font.shader");
+		ref<Shader> fontShader = Asset->Load<Shader>("shaders/font.shader");
 		Renderer->InitShader(fontShader, CAMERA);
 
 		ref<Material> textMat = REF<Material>(fontShader);
+		textMat->Set("color", vector3(1));
+		textMat->SetTexture("fontMap", m_font->GetTexture(0));
 
-		textMat->Set("color", vector3::one);
-		textMat->SetTexture("fontMap", font->GetTexture(0));
-
-		textMat->Initialize(Renderer->Device);
-
+		Mesh textMesh = m_font->GenerateMesh("Use arrow keys to move and x to attack.\ni: debug menu\nt: freecam", .005f, 1);
 		textMesh.SetMaterial(textMat);
-		textMesh.Data()->Initialize(Renderer->Device);
 
-		textTransform = Transform(vector3(-6.8, -1.8, 0), vector3::one, quaternion::identity);
+		iw::Entity textEnt = Space->CreateEntity<iw::Transform, iw::Mesh, iw::UiElement>();
+
+		             textEnt.Set<iw::Transform>(vector3(-6.8, -1.8, 0), vector3(1), quaternion::identity);
+		m_textMesh = textEnt.Set<iw::Mesh>(textMesh);
 
 		// Shaders
 
 		ref<Shader> shader   = Asset->Load<Shader>("shaders/pbr.shader");
 		ref<Shader> gaussian = Asset->Load<Shader>("shaders/filters/gaussian.shader");
-		ref<Shader> dirShadowShader   = Asset->Load<Shader>("shaders/lights/directional.shader");
-		ref<Shader> pointShadowShader = Asset->Load<Shader>("shaders/lights/point.shader");
+		ref<Shader> dirShadowShader    = Asset->Load<Shader>("shaders/lights/directional.shader");
+		ref<Shader> pointShadowShader  = Asset->Load<Shader>("shaders/lights/point.shader");
 		ref<Shader> dirIShadowShader   = Asset->Load<Shader>("shaders/lights/directional_instanced.shader");
 		ref<Shader> pointIShadowShader = Asset->Load<Shader>("shaders/lights/point_instanced.shader");
 		
@@ -181,7 +182,7 @@ namespace iw {
 		//	Cameras
 
 		MainScene->SetMainCamera(new PerspectiveCamera()); // projection from up top
-		textCam = new OrthographicCamera(vector3::one, quaternion::from_axis_angle(vector3::unit_y, Pi), 16, 9, -10, 10);
+		m_textCam = new OrthographicCamera(vector3::one, quaternion::from_axis_angle(vector3::unit_y, Pi), 16, 9, -10, 10);
 
 		iw::quaternion camrot = 
 			  iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
@@ -189,8 +190,8 @@ namespace iw {
 
 		iw::Entity camera = Space->CreateEntity<iw::Transform, iw::CameraController>();
 
-		iw::Transform* transform = camera.SetComponent<iw::Transform>(vector3(0, 27.18f, 0), iw::vector3::one, camrot);
-		                           camera.SetComponent<iw::CameraController>(MainScene->MainCamera());
+		iw::Transform* transform = camera.Set<iw::Transform>(vector3(0, 27.18f, 0), iw::vector3::one, camrot);
+		                           camera.Set<iw::CameraController>(MainScene->MainCamera());
 
 		MainScene->MainCamera()->SetTrans(transform);
 
@@ -287,15 +288,13 @@ namespace iw {
 
 		playerSystem = PushSystem<PlayerSystem>();
 		enemySystem  = PushSystem<EnemySystem>(playerSystem->GetPlayer());
+		bulletSystem = PushSystem<BulletSystem>(playerSystem->GetPlayer());
+
 		PushSystem<GameCameraController>(playerSystem->GetPlayer(), MainScene);
-		PushSystem<BulletSystem>(playerSystem->GetPlayer());
 		PushSystem<LevelSystem>(playerSystem->GetPlayer());
-		PushSystem<ScoreSystem>(playerSystem->GetPlayer(), MainScene->MainCamera(), textCam);
+		PushSystem<ScoreSystem>(playerSystem->GetPlayer(), MainScene->MainCamera(), m_textCam);
 		PushSystem<EnemyDeathCircleSystem>();
 		PushSystem<PhysicsSystem>();
-
-
-		PushSystem<iw::ParticleUpdateSystem>();
 
 		PushSystem<iw::    MeshShadowRenderSystem>(MainScene);
 		PushSystem<iw::   ModelShadowRenderSystem>(MainScene);
@@ -303,6 +302,14 @@ namespace iw {
 		PushSystem<iw::          MeshRenderSystem>(MainScene);
 		PushSystem<iw::         ModelRenderSystem>(MainScene);
 		PushSystem<iw::      ParticleRenderSystem>(MainScene);
+
+		PushSystem<iw::UiRenderSystem>(m_textCam);
+
+		PushSystem<ItemSystem>();
+		PushSystem<NoteSystem>();
+
+		PushSystem<iw::ParticleUpdateSystem>();
+		PushSystem<iw::EntityCleanupSystem>();
 
 		//PushSystem<iw::DrawCollidersSystem>(MainScene->MainCamera());
 
@@ -320,8 +327,8 @@ namespace iw {
 
 		iw::Entity particleEntity = Space->CreateEntity<iw::Transform, iw::ParticleSystem<StaticParticle>>();
 
-		iw::Transform*                      t = particleEntity.SetComponent<iw::Transform>();
-		iw::ParticleSystem<StaticParticle>* s = particleEntity.SetComponent<iw::ParticleSystem<StaticParticle>>();
+		iw::Transform*                      t = particleEntity.Set<iw::Transform>();
+		iw::ParticleSystem<StaticParticle>* s = particleEntity.Set<iw::ParticleSystem<StaticParticle>>();
 
 		s->SetTransform(t);
 		s->SetParticleMesh(particle);
@@ -333,19 +340,19 @@ namespace iw {
 					float x = randf() * 32.0f;
 					float z = randf() * 18.0f;
 
-					if (   abs(x) > 28 + randf() * 2
-						|| abs(z) > 12 + randf() * 2)
+					if (   abs(x) > 28.0f + randf() * 2.0f
+						|| abs(z) > 12.0f + randf() * 2.0f)
 					{
 						Transform trans;
 						trans.Position.x = x;
 						trans.Position.z = z;
 						trans.Position.y = randf() * 0.5f + 0.25f;
 
-						trans.Scale.x = (randf() + 1.2f) * 0.2;
-						trans.Scale.z = (randf() + 1.2f) * 0.2;
-						trans.Scale.y = (randf() + 1.5f) * 0.5;
+						trans.Scale.x = (randf() + 1.2f) * 0.2f;
+						trans.Scale.z = (randf() + 1.2f) * 0.2f;
+						trans.Scale.y = (randf() + 1.5f) * 0.5f;
 
-						trans.Rotation = quaternion::from_euler_angles(0, randf() * 2 * Pi, 0);
+						trans.Rotation = quaternion::from_euler_angles(0, randf() * 2.0f * Pi, 0.0f);
 
 						s->SpawnParticle(trans);
 					}
@@ -363,8 +370,8 @@ namespace iw {
 
 		//iw::Entity e = Space->CreateEntity<iw::Transform, iw::Model>();
 
-		//e.SetComponent<iw::Transform>();
-		//e.SetComponent<iw::Model>(*rock);
+		//e.Set<iw::Transform>();
+		//e.Set<iw::Model>(*rock);
 
 		return Layer::Initialize();
 	}
@@ -373,9 +380,6 @@ namespace iw {
 		// Update particle system
 
 		//font->UpdateMesh(textMesh, std::to_string(1.0f / Time::DeltaTime()), 0.01f, 1); //fps
-		if (textMesh.Data()->IsOutdated()) {
-			textMesh.Data()->Update(Renderer->Device);
-		}
 
 		MainScene->MainCamera()->SetProjection(iw::lerp(persp, ortho, blend));
 		
@@ -410,10 +414,6 @@ namespace iw {
 		//	Renderer->EndShadowCast();
 		//}
 
-		Renderer->BeginScene(textCam);
-			Renderer->DrawMesh(textTransform, textMesh);
-		Renderer->EndScene();
-
 		//float blurw = 1.0f / target->Width() * blurAmount;
 		//float blurh = 1.0f / target->Height() * blurAmount;
 
@@ -433,10 +433,6 @@ namespace iw {
 
 		//ImGui::SliderFloat("Shadow map blur", &blurAmount, 0, 5);
 		ImGui::SliderFloat("Shadow map threshold", &threshold, 0, 1);
-
-		ImGui::SliderFloat3("Text pos",   (float*)&textTransform.Position, -8, 8);
-		ImGui::SliderFloat3("Text scale", (float*)&textTransform.Scale, 0, 10);
-		ImGui::SliderFloat4("Text rot",   (float*)&textTransform.Rotation, -1, 1);
 
 		ImGui::SliderFloat("Volume", &Audio->GetVolume(), 0, 1);
 
@@ -481,7 +477,7 @@ namespace iw {
 	{
 		if (settexttocursor) {
 			str.clear();
-			font->UpdateMesh(textMesh, std::to_string((int)e.X) + '\n' + std::to_string((int)e.Y), .01f, 1);
+			m_font->UpdateMesh(*m_textMesh, std::to_string((int)e.X) + '\n' + std::to_string((int)e.Y), .01f, 1);
 		}
 
 		if (e.X < -1000) {
@@ -511,19 +507,19 @@ namespace iw {
 				PopSystem(enemySystem);
 
 				if (e.as<GoToNextLevelEvent>().LevelName == "models/block/forest100.json") {
-					font->UpdateMesh(textMesh, "ayy you've gotten to the boss congrats!\nsadly he's out today so\nhave some fun with the physics instead...\nmember you can press i/t", .004f, 1);
+					m_font->UpdateMesh(*m_textMesh, "ayy you've gotten to the boss congrats!\nsadly he's out today so\nhave some fun with the physics instead...\nmember you can press i/t", .004f, 1);
 				}
 
 				else if (e.as<GoToNextLevelEvent>().LevelName == "models/block/forest08.json") {
-					font->UpdateMesh(textMesh, "So this would be a lil mini boss but that seems\nlike it would be annoying to program xd", .004f, 1);
+					m_font->UpdateMesh(*m_textMesh, "So this would be a lil mini boss but that seems\nlike it would be annoying to program xd", .004f, 1);
 				}
 
 				else if (e.as<GoToNextLevelEvent>().LevelName == "models/block/forest01.json") {
-					font->UpdateMesh(textMesh, "Lets go! You've finished the play test\nIf you got the time, post some feedback at\nhttps://winter.dev/demo", .004f, 1);
+					m_font->UpdateMesh(*m_textMesh, "Lets go! You've finished the play test\nIf you got the time, post some feedback at\nhttps://winter.dev/demo", .004f, 1);
 				}
 
 				else {
-					font->UpdateMesh(textMesh, "", .01f, 1);
+					m_font->UpdateMesh(*m_textMesh, "", .01f, 1);
 					settexttocursor = false;
 				}
 
@@ -532,6 +528,23 @@ namespace iw {
 			case iw::val(Actions::AT_NEXT_LEVEL): {
 				//PushSystemFront(playerSystem);
 				PushSystemFront(enemySystem);
+				break;
+			}
+			case iw::val(Actions::GAME_STATE): {
+				GameStateEvent& event = e.as<GameStateEvent>();
+
+				if (event.State == RUNNING) {
+					PushSystemFront(playerSystem);
+					PushSystemFront(enemySystem);
+					PushSystemFront(bulletSystem);
+				}
+
+				else {
+					PopSystem(playerSystem);
+					PopSystem(enemySystem);
+					PopSystem(bulletSystem);
+				}
+
 				break;
 			}
 		}

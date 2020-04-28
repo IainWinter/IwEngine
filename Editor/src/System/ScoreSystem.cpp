@@ -52,7 +52,7 @@ int ScoreSystem::Initialize() {
 void ScoreSystem::Update(
 	iw::EntityComponentArray& view)
 {
-	Renderer->BeginScene(camera);
+	Renderer->BeginScene(camera); // use ui element
 
 		for (auto entity : view) {
 			auto [transform, score] = entity.Components.Tie<Components>();
@@ -142,14 +142,14 @@ bool ScoreSystem::On(
 	iw::Entity bullet;
 	iw::Entity other;
 	if (   a != iw::EntityHandle::Empty 
-		&& a.HasComponent<Bullet>()) 
+		&& a.Has<Bullet>()) 
 	{
 		bullet = a;
 		other  = b;
 	}
 
 	else if (b != iw::EntityHandle::Empty
-		  && b.HasComponent<Bullet>())
+		  && b.Has<Bullet>())
 	{
 		bullet = b;
 		other  = a;
@@ -161,14 +161,14 @@ bool ScoreSystem::On(
 		return false;
 	}
 
- 	if (other.HasComponent<EnemyDeathCircle>()) {
+ 	if (other.Has<EnemyDeathCircle>()) {
 		iw::vector3 pos = bullet.FindComponent<iw::Rigidbody>()      ->Trans().Position;
 		iw::vector3 des = other .FindComponent<iw::CollisionObject>()->Trans().Position;
 
 		SpawnScore(ceil((pos-des).length()) * 10, pos);
 	}
 
-	if (other.HasComponent<Player>()) {
+	if (other.Has<Player>()) {
 		iw::vector3 pos = bullet.FindComponent<iw::Rigidbody>()->Trans().Position;
 
 		int score = potentialScore / 2;
@@ -208,8 +208,8 @@ void ScoreSystem::SpawnScore(
 {
 	iw::Entity entity = Space->CreateEntity<iw::Transform, Score>();
 
-	entity.SetComponent<iw::Transform>(position);
-	entity.SetComponent<Score>(score, 1.0f);
+	entity.Set<iw::Transform>(position);
+	entity.Set<Score>(score, 1.0f);
 
 	potentialScore += score;
 }
