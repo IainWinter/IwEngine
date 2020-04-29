@@ -80,7 +80,7 @@ void LevelSystem::Update(
 
 		if (door->ColorTimer > 0) {
 			door->ColorTimer -= iw::Time::DeltaTime();
-			model->GetMesh(0).Material()->Set("albedo", iw::lerp<iw::vector4>(closedColor, openColor, 4 * (0.25f - door->ColorTimer)));
+			model->GetMesh(0).Material()->Set("baseColor", iw::lerp<iw::vector4>(closedColor, openColor, 4 * (0.25f - door->ColorTimer)));
 		}
 	}
 
@@ -302,6 +302,7 @@ iw::Entity LevelSystem::LoadLevel(
 
 			mesh.Material()->Set("roughness", 0.9f);
 			mesh.Material()->Set("metallic", 0.1f);
+			mesh.Material()->Set("reflectance", 0.1f);
 
 			mesh.Material()->Initialize(Renderer->Device);
 
@@ -428,11 +429,11 @@ iw::Entity LevelSystem::LoadLevel(
 		material->SetCastShadows(false);
 
 		if (door->State == LevelDoorState::OPEN) {
-			material->Set("albedo", openColor);
+			material->Set("baseColor", openColor);
 		}
 
 		else {
-			material->Set("albedo", closedColor);
+			material->Set("baseColor", closedColor);
 		}
 
 		model->GetMesh(0).SetMaterial(material);
@@ -447,8 +448,9 @@ iw::Entity LevelSystem::LoadLevel(
 	}
 
 	// Camera recreated in layer from \/
-
-	Bus->push<SpawnItemEvent>(iw::vector3(-8, 1, 8), levelTransform);
+	if (currentLevelName == "models/forest/level05.a.json") {
+		Bus->push<SpawnItemEvent>(iw::vector3(-8, 1, 8), levelTransform);
+	}
 
 	return level;
 }

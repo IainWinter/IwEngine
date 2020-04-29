@@ -72,7 +72,7 @@ int RecingLayer::Initialize() {
 	MainScene->MainCamera()->SetTrans(t);
 
 	iw::ref<iw::Material> mat = model->GetMesh(0).Material()->MakeInstance();
-	mat->Set("albedo", iw::Color::From255(1, 1, 1, 1));
+	mat->Set("baseColor", iw::Color::From255(1, 1, 1, 1));
 	mat->Set("roughness", 0.2f);
 	mat->Set("metallic", 1.0f);
 

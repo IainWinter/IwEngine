@@ -37,8 +37,8 @@ uniform float blinn;
 // material parameters
 
 uniform vec4 mat_baseColor;
-uniform vec4 mat_reflectance;
-uniform vec4 mat_ao;
+uniform float mat_reflectance;
+uniform float mat_ao;
 
 uniform float mat_hasDiffuseMap;
 uniform sampler2D mat_diffuseMap;
@@ -160,11 +160,9 @@ vec3 BRDF(
 	vec3 N, 
 	vec3 V, 
 	vec3 L, 
-	vec3 baseColor)
-{  
-	// ambient
-    vec3 ambient = 0.05 * baseColor;
-    
+	vec3 baseColor,
+	float reflectance)
+{     
 	// diffuse
     float diff = max(dot(L, N), 0.0);
     vec3 diffuse = diff * baseColor;
@@ -173,18 +171,18 @@ vec3 BRDF(
     vec3 reflectDir = reflect(-L, N);
     float spec = 0.0;
     
-	if(blinn == 1.0) {
-        vec3 halfwayDir = normalize(L + V);  
-        spec = pow(max(dot(N, halfwayDir), 0.0), 32.0);
-    }
+	//if(blinn == 1.0) {
+		vec3 halfwayDir = normalize(L + V);  
+		spec = pow(max(dot(N, halfwayDir), 0.0), reflectance * 256);
+ //   }
 
-    else {
-        vec3 reflectDir = reflect(-L, N);
-        spec = pow(max(dot(V, reflectDir), 0.0), 8.0);
-    }
+    //else {
+        //vec3 reflectDir = reflect(-L, N);
+        //spec = pow(max(dot(V, reflectDir), 0.0), 8.0);
+    //}
 
     vec3 specular = vec3(0.3) * spec; // assuming bright white light color
-    return ambient + diffuse + specular;
+    return diffuse + specular;
 }
 
 void main() {
@@ -200,7 +198,7 @@ void main() {
 
 	vec4 baseColor = mat_baseColor;
 	if (mat_hasDiffuseMap == 1) {
-		baseColor = texture(mat_hasDiffuseMap , TexCoords);
+		baseColor = texture(mat_diffuseMap, TexCoords);
 	}
 
 	baseColor.rgb = sRGBToLinear(baseColor.rgb);
@@ -237,7 +235,7 @@ void main() {
 
 		float R = pointLights[i].Radius;
 
-		color += BRDF(N, V, L, baseColor.xyz) 
+		color += BRDF(N, V, L, baseColor.xyz, reflectance)
 		       * getDistanceAtt(L, 1 / pow(R, 2))
 			   * PointLightShadow(-L, R);
 	}
@@ -245,7 +243,7 @@ void main() {
 	for (int i = 0; i < directionalLightCount; i++) {
 		vec3 L = directionalLights[i].InvDirection;
 
-		color += BRDF(N, V, L, baseColor.xyz)
+		color += BRDF(N, V, L, baseColor.xyz, reflectance)
 		       * DirectionalLightShadow(DirectionalLightPos[i]);
 	}
 

@@ -21,7 +21,7 @@ int ItemSystem::Initialize() {
 
 	iw::Mesh note = iw::MakePlane(description, 1, 1)->MakeInstance();
 
-	material->Set("albedo", iw::Color::From255(209, 195, 167));
+	material->Set("baseColor", iw::Color::From255(209, 195, 167));
 	material->SetCastShadows(false);
 	note.SetMaterial(material);
 

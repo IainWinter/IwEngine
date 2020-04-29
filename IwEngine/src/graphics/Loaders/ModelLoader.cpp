@@ -73,6 +73,7 @@ namespace Graphics {
 				// Scanned description
 				// User value
 				
+				material.Set("baseColor", diffuse);
 				material.Set("ao", 0.0f);
 
 				//material.SetFloats("emissiveColor", &emissiveColor, 4);
@@ -80,14 +81,11 @@ namespace Graphics {
 				//material.SetFloat("roughness", roughness);
 
 				if (aimaterial->GetTextureCount(aiTextureType_UNKNOWN) > 0) {
-					// this means be are pbr
-
-					material.Set("albedo", diffuse);
+					// this means we are pbr kinda
 					LoadWeirdTextures(m_asset, material, aimaterial);
 				}
 
 				else {
-					material.Set("diffuse", diffuse);
 					LoadTexture(m_asset, material, aimaterial, aiTextureType_DIFFUSE, "diffuseMap");
 				}
 
@@ -313,10 +311,16 @@ namespace Graphics {
 		if (aimaterial->GetTexture(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE, &texturePath) == AI_SUCCESS) {
 			iw::ref<Texture> texture = asset.Load<Texture>(texturePath.C_Str());
 			if (texture) {
-				material.SetTexture("roughness", texture);
+				material.SetTexture("roughnessMap", texture);
 			}
 		}
 
+		if (aimaterial->GetTexture(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_TEXTURE, &texturePath) == AI_SUCCESS) {
+			iw::ref<Texture> texture = asset.Load<Texture>(texturePath.C_Str());
+			if (texture) {
+				material.SetTexture("albedoMap", texture);
+			}
+		}
 	}
 }
 }

@@ -23,7 +23,7 @@ EnemySystem::EnemySystem(
 int EnemySystem::Initialize() {
 	iw::Mesh sphere = Asset->Load<iw::Model>("Sphere")->GetMesh(0).MakeInstance();
 
-	sphere.Material()->Set("albedo", iw::Color::From255(0, 213, 255, 191));
+	sphere.Material()->Set("baseColor", iw::Color::From255(0, 213, 255, 191));
 
 	m_bulletModel.AddMesh(sphere);
 

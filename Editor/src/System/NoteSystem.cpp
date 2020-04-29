@@ -23,7 +23,7 @@ int NoteSystem::Initialize() {
 	m_material->Set("color", iw::vector3(1));
 	m_material->SetTexture("fontMap", m_font->GetTexture(0));
 
-	m_prefabs.push_back(Note { "hmm maybe timing is the key????", 2.0f, 0.0f });
+	m_prefabs.push_back(Note { "The greatest lore of all time. People will be\nmaking 4 hours long videos decrypting\nthe secrets that these notes\nare bouta hold. You've never een anything \ncleaner than this", 2.0f, 0.0f });
 
 	return 0;
 }

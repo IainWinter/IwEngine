@@ -255,7 +255,7 @@ bool PlayerSystem::On(
 			p->Health -= 1;
 
 			float color = p->Health / 3.0f;
-			m_playerModel->GetMesh(0).Material()->Set("albedo", iw::Color(1, color, color, 1));
+			m_playerModel->GetMesh(0).Material()->Set("baseColor", iw::Color(1, color, color, 1));
 
 			Audio->AsStudio()->CreateInstance("playerDamaged");
 		}
@@ -306,7 +306,7 @@ bool PlayerSystem::On(
 			// no break
 		}
 		case iw::val(Actions::RESET_LEVEL): {
-			m_playerModel->GetMesh(0).Material()->Set("albedo", iw::Color(1));
+			m_playerModel->GetMesh(0).Material()->Set("baseColor", iw::Color(1));
 			break;
 		}
 	}

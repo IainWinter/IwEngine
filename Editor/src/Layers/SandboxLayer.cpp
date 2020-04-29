@@ -50,7 +50,7 @@ float randf() {
 namespace iw {
 	struct ModelUBO {
 		matrix4 model;
-		vector3 albedo;
+		vector3 diffuse;
 	};
 
 	struct ModelComponents {
@@ -198,9 +198,10 @@ namespace iw {
 		// Materials
 
 		Material* mat = new Material(shader);
-		mat->Set("albedo", vector4(1, 1, 1, 1));
+		mat->Set("baseColor", vector4(1, 1, 1, 1));
 		mat->Set("roughness", 0.8f);
 		mat->Set("metallic", 0.2f);
+		mat->Set("reflectance", 0.2f);
 		mat->SetTexture("shadowMap",  dirShadowTarget->Tex(0));    // shouldnt really be part of material
 		mat->SetTexture("shadowMap2", pointShadowTarget->Tex(0));
 		mat->Initialize(Renderer->Device);

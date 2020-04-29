@@ -98,7 +98,7 @@ namespace iw {
 
 			mesh->SetMaterial(REF<Material>(shader));
 
-			mesh->Material()->Set("albedo", iw::vector4(1.0f));
+			mesh->Material()->Set("baseColor", iw::vector4(1.0f));
 
 			mesh->Material()->Set("reflectance", rand() / (float)RAND_MAX);
 			mesh->Material()->Set("roughness",   rand() / (float)RAND_MAX);

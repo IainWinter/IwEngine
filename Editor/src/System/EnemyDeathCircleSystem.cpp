@@ -20,7 +20,7 @@ EnemyDeathCircleSystem::EnemyDeathCircleSystem()
 int EnemyDeathCircleSystem::Initialize() {
 	iw::Mesh sphere = Asset->Load<iw::Model>("Sphere")->GetMesh(0).MakeInstance();
 
-	sphere.Material()->Set("albedo", iw::Color::From255(0, 195, 255, 64));
+	sphere.Material()->Set("baseColor", iw::Color::From255(0, 195, 255, 64));
 	sphere.Material()->SetTransparency(iw::Transparency::ADD);
 	sphere.Material()->SetCastShadows(false);
 
@@ -48,7 +48,7 @@ void EnemyDeathCircleSystem::Update(
 		}
 
 		else {
-			iw::Color* color = model->GetMesh(0).Material()->Get<iw::Color>("albedo");
+			iw::Color* color = model->GetMesh(0).Material()->Get<iw::Color>("diffuse");
 			color->a = iw::lerp(color->a, 0.0f, rate);
 
 			if (object->Col()) {
@@ -84,7 +84,7 @@ iw::Transform* EnemyDeathCircleSystem::SpawnDeathCircle(
 	iw::SphereCollider*  s = circle.Set<iw::SphereCollider> (iw::vector3::zero, 1);
 	iw::CollisionObject* c = circle.Set<iw::CollisionObject>();
 
-	m->GetMesh(0).Material()->Set("albedo", iw::Color::From255(0, 195, 255, 64));
+	m->GetMesh(0).Material()->Set("baseColor", iw::Color::From255(0, 195, 255, 64));
 
 	c->SetCol(s);
 	c->SetTrans(t);
