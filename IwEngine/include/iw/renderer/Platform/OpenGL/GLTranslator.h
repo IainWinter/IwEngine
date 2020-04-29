@@ -10,6 +10,10 @@ namespace RenderAPI {
 	{
 	public:
 		IWRENDERER_API
+		GLenum Translate(
+			CullFace cull) override; 
+
+		IWRENDERER_API
 		GLint Translate(
 			TextureType textureType) override;
 

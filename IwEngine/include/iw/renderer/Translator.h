@@ -12,6 +12,10 @@ namespace RenderAPI {
 	class Translator {
 	public:
 		IWRENDERER_API
+		virtual _e Translate(
+			CullFace cull) = 0;
+
+		IWRENDERER_API
 		virtual _i Translate(
 			TextureType textureType) = 0;
 

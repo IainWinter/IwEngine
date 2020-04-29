@@ -8,6 +8,18 @@ namespace RenderAPI {
 		return translator;
 	}
 
+	GLenum GLTranslator::Translate(
+		CullFace cull)
+	{
+		switch (cull) {
+			case CullFace::FRONT: return GL_FRONT;
+			case CullFace::BACK:  return GL_BACK;
+			case CullFace::BOTH:  return GL_FRONT_AND_BACK;
+		}
+
+		return GL_INVALID_VALUE;
+	}
+
 	GLint GLTranslator::Translate(
 		TextureType textureType)
 	{

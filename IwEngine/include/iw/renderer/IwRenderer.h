@@ -30,6 +30,12 @@ namespace RenderAPI {
 		FLOAT
 	};
 
+	enum CullFace {
+		FRONT,
+		BACK,
+		BOTH
+	};
+
 	// GL has types for every type of value in diffrent bit depths :c but they also dont work so...
 	enum TextureFormat {
 		ALPHA = 1,

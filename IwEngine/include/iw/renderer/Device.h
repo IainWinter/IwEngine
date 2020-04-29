@@ -47,6 +47,10 @@ namespace RenderAPI {
 		virtual void SetWireframe(
 			bool wireframe) = 0;
 
+		IWRENDERER_API
+		virtual void SetCullFace(
+			CullFace cull) = 0;
+
 		// Buffers
 
 		IWRENDERER_API

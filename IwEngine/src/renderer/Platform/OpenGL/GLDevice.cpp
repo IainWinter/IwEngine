@@ -11,6 +11,7 @@
 #include "iw/renderer/Platform/OpenGL/GLComputePipeline.h"
 #include "iw/renderer/Platform/OpenGL/GLTexture.h"
 #include "iw/renderer/Platform/OpenGL/GLFrameBuffer.h"
+#include "iw/renderer/Platform/OpenGL/GLTranslator.h"
 #include "gl/glew.h"
 
 namespace iw {
@@ -74,6 +75,12 @@ namespace RenderAPI {
 		int y)
 	{
 		glViewport(0, 0, x, y);
+	}
+
+	void GLDevice::SetCullFace(
+		CullFace cull)
+	{
+		glCullFace(TRANSLATE(cull));
 	}
 
 	void GLDevice::SetWireframe(

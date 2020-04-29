@@ -29,6 +29,10 @@ namespace RenderAPI {
 			int x,
 			int y) override;
 
+		IWRENDERER_API
+		void SetCullFace(
+			CullFace cull) override;
+
 		// State changes
 
 		IWRENDERER_API

@@ -188,6 +188,8 @@ namespace Graphics {
 			Device->SetWireframe(false);  // set some shadow material or whatever
 		}
 
+		Device->SetCullFace(BACK);
+
 		IPipelineParam* model = m_shader->Handle()->GetParam("model");
 		if (model) {
 			model->SetAsMat4(transform->WorldTransformation());

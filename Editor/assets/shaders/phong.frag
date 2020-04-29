@@ -168,20 +168,19 @@ vec3 BRDF(
     vec3 diffuse = diff * baseColor;
     
 	// specular
-    vec3 reflectDir = reflect(-L, N);
     float spec = 0.0;
     
 	//if(blinn == 1.0) {
-		vec3 halfwayDir = normalize(L + V);  
-		spec = pow(max(dot(N, halfwayDir), 0.0), reflectance * 256);
+		//vec3 halfwayDir = normalize(L + V);  
+		//spec = pow(max(dot(N, halfwayDir), 0.0), reflectance * 256);
  //   }
 
     //else {
-        //vec3 reflectDir = reflect(-L, N);
-        //spec = pow(max(dot(V, reflectDir), 0.0), 8.0);
+        vec3 reflectDir = reflect(-L, N);
+        spec = pow(max(dot(V, reflectDir), 0.0), reflectance * 8.0);
     //}
 
-    vec3 specular = vec3(0.3) * spec; // assuming bright white light color
+    vec3 specular = vec3(0.15) * spec; // assuming bright white light color
     return diffuse + specular;
 }
 
