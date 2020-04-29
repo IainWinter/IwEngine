@@ -48,7 +48,7 @@ void EnemyDeathCircleSystem::Update(
 		}
 
 		else {
-			iw::Color* color = model->GetMesh(0).Material()->Get<iw::Color>("diffuse");
+			iw::Color* color = model->GetMesh(0).Material()->Get<iw::Color>("baseColor");
 			color->a = iw::lerp(color->a, 0.0f, rate);
 
 			if (object->Col()) {

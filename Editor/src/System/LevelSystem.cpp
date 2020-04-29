@@ -40,7 +40,7 @@ LevelSystem::LevelSystem(
 
 	//currentLevel = 0;
 
-	currentLevelName = "levels/forest/forest01.json";
+	currentLevelName = "levels/forest/forest05.a.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 63);
 	closedColor = iw::Color::From255(201, 66, 66, 63);
@@ -448,7 +448,7 @@ iw::Entity LevelSystem::LoadLevel(
 	}
 
 	// Camera recreated in layer from \/
-	if (currentLevelName == "models/forest/level05.a.json") {
+	if (currentLevelName == "levels/forest/forest05.a.json") {
 		Bus->push<SpawnItemEvent>(iw::vector3(-8, 1, 8), levelTransform);
 	}
 
@@ -506,6 +506,7 @@ iw::Entity LevelSystem::LoadFloor(
 
 		mesh.Material()->Set("roughness", 0.9f);
 		mesh.Material()->Set("metallic", 0.1f);
+		mesh.Material()->Set("reflectance", 0.1f);
 
 		mesh.Material()->Initialize(Renderer->Device);
 

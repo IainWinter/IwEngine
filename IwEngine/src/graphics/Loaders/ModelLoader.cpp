@@ -80,14 +80,14 @@ namespace Graphics {
 				//material.SetFloat("metallic", metallic);
 				//material.SetFloat("roughness", roughness);
 
-				if (aimaterial->GetTextureCount(aiTextureType_UNKNOWN) > 0) {
+				//if (aimaterial->GetTextureCount(aiTextureType_UNKNOWN) > 0) {
 					// this means we are pbr kinda
-					LoadWeirdTextures(m_asset, material, aimaterial);
-				}
+				//	LoadWeirdTextures(m_asset, material, aimaterial);
+				//}
 
-				else {
+				//else {
 					LoadTexture(m_asset, material, aimaterial, aiTextureType_DIFFUSE, "diffuseMap");
-				}
+				//}
 
 				LoadTexture(m_asset, material, aimaterial, aiTextureType_SPECULAR,     "specularMap");
 				LoadTexture(m_asset, material, aimaterial, aiTextureType_AMBIENT,      "aoMap");
