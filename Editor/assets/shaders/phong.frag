@@ -3,6 +3,8 @@
 #define MAX_POINT_LIGHTS 16
 #define MAX_DIRECTIONAL_LIGHTS 4
 
+#include shaders/vertex_texture_blend.shader
+
 struct PointLight {
 	vec3 Position;
 	float Radius;

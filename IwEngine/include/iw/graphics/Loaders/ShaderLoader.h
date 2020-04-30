@@ -10,10 +10,12 @@ namespace Graphics {
 		: public AssetLoader<Shader>
 	{
 	public:
-		IWGRAPHICS_API ShaderLoader(
+		IWGRAPHICS_API
+		ShaderLoader(
 			AssetManager& asset);
 	private:
-		IWGRAPHICS_API Shader* LoadAsset(
+		IWGRAPHICS_API
+		Shader* LoadAsset(
 			std::string filepath) override;
 	};
 }

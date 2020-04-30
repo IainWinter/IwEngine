@@ -18,19 +18,19 @@ namespace Graphics {
 
 		Shader* shader = nullptr;
 
-		size_t index = source.find("#shader");
-		while (index < source.size()) {
-			size_t start = source.find('\n', index) + 1;
-			if (index != 0 && start == 0) {
-				start = source.find('\0', index) + 1;
+		size_t i = source.find("#shader");
+		while (i < source.size()) {
+			size_t start = source.find('\n', i) + 1;
+			if (i != 0 && start == 0) {
+				start = source.find('\0', i) + 1;
 			}
 
 			size_t end = source.find("#shader", start);
 
-			size_t offset = index + 8;
+			size_t offset = i + 8;
 			std::string name = source.substr(offset, start - offset - 1);
 			
-			index = end;
+			i = end;
 
 			ShaderType type = TypeFromName(name);
 
@@ -42,17 +42,39 @@ namespace Graphics {
 
 				type = TypeFromName(name);
 
-				LOG_INFO << "\tGetting " << name << " shader source from " << include;
-				code = iw::ReadFile("assets/" + include);
-
 				if (type == ShaderType::INVALID) {
 					LOG_WARNING << "\tInvalid shader type " << name << " from " << filepath << "@c" << offset;
+					
+					delete shader;
 					return nullptr;
 				}
+
+				LOG_INFO << "\tGetting " << name << " shader source from " << include;
+				code = iw::ReadFile("assets/" + include);
 			}
 
 			else {
 				code = source.substr(start, end - start);
+			}
+
+			size_t j = code.find("#include");
+			while (j < code.size()) {
+				size_t start = code.find('\n', j) + 1;
+				if (j != 0 && start == 0) {
+					start = code.find('\0', j) + 1;
+				}
+
+				size_t end = code.find("#include", start);
+
+				size_t offset = j + 9;
+				std::string incldue = code.substr(offset, start - offset - 1);
+
+				j = end;
+
+				std::string source = name.substr(name.find_first_of(' ') + 1, name.find_first_of('\0') - name.find_first_of(' ') - 1);
+
+				LOG_INFO << "\tGetting shader source from " << incldue;
+				code += iw::ReadFile("assets/" + incldue);
 			}
 
 			// Only make this when we need to
