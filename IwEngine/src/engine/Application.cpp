@@ -141,15 +141,15 @@ namespace Engine {
 			while (m_running) {
 				Update();
 
-				if (Time::FixedTime() == 0)
+				if (Time::RawFixedTime() == 0)
 					continue;
 
 				accumulatedTime += Time::DeltaTime();
 				while (m_running 
-					&& accumulatedTime >= Time::FixedTime())
+					&& accumulatedTime >= Time::RawFixedTime())
 				{
 					FixedUpdate();
-					accumulatedTime -= Time::FixedTime();
+					accumulatedTime -= Time::RawFixedTime();
 				}
 			}
 		});

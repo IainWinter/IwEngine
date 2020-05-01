@@ -7,8 +7,10 @@
 namespace iw {
 namespace ECS {
 	struct EntityComponentData {
-		size_t& Index;
-		short&  Version;
+		EntityHandle Handle;
+
+		size_t Index; // dep
+		short Version;
 
 		ComponentData& Components;
 	};

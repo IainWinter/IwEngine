@@ -1,7 +1,9 @@
 #pragma once
 
 enum ItemType {
-	NOTE,
+	NOTE,        // Show a note
+	CONSUMABLE,  // Give an item
+	ACTION       // Give an ability
 };
 
 struct Item {

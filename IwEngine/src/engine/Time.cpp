@@ -8,12 +8,20 @@ namespace Time {
 	static size_t    ticks     = 0;
 	static float     time      = 0.0f;
 	static float     fixedTime = 0.2f;
+	static float     timeScale = 1.0f;
 
 	void SetFixedTime(
 		float duration) 
 	{
 		fixedTime = duration;
 		LOG_DEBUG << "Set fixed timeset to " << duration << " seconds";
+	}
+
+	void SetTimeScale(
+		float duration)
+	{
+		timeScale = duration;
+		LOG_DEBUG << "Set time scale to " << duration << " seconds";
 	}
 
 	void UpdateTime() {
@@ -40,8 +48,16 @@ namespace Time {
 		return (std::chrono::high_resolution_clock::now() - now).count() / 1000000000.0f;
 	}
 
-	float FixedTime() {
+	float RawFixedTime() {
 		return fixedTime;
+	}
+
+	float FixedTime() {
+		return fixedTime * timeScale;
+	}
+
+	float TimeScale() {
+		return timeScale;
 	}
 }
 }

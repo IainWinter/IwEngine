@@ -49,26 +49,94 @@ namespace Engine {
 		virtual const char* Name() const = 0;
 	};
 
+	class SystemBase
+		: public ISystem
+	{
+	private:
+		const char* m_name;
+
+	protected:
+		ref<Space>               Space;
+		ref<QueuedRenderer>      Renderer;
+		ref<AssetManager>        Asset;
+		ref<DynamicsSpace>       Physics;
+		ref<AudioSpace>          Audio;
+		ref<eventbus>            Bus;
+
+	public:
+		SystemBase(
+			const char* name)
+			: m_name(name)
+		{}
+
+		virtual int  Initialize() { return 0;  }
+		virtual void Destroy() {}
+		virtual void Update() {}
+		virtual void FixedUpdate() {}
+
+		virtual void OnPush() override {}
+		virtual void OnPop() override {}
+
+		// Action Events
+
+		virtual bool On(ActionEvent& e) override { return false; }
+
+		// Input events
+
+		virtual bool On(MouseWheelEvent& e) override { return false; }
+		virtual bool On(MouseMovedEvent& e) override { return false; }
+		virtual bool On(MouseButtonEvent& e) override { return false; }
+		virtual bool On(KeyEvent& e) override { return false; }
+		virtual bool On(KeyTypedEvent& e) override { return false; }
+
+		// Window events
+
+		virtual bool On(WindowResizedEvent& e) override { return false; }
+
+		// Physics events
+
+		virtual bool On(CollisionEvent& e) override { return false; }
+
+		// Entity events
+
+		virtual bool On(EntityDestroyedEvent& e) override { return false; }
+
+		const char* Name() const override {
+			return m_name;
+		}
+	private:
+		friend class Layer;
+
+		void SetLayerVars(
+			iw::ref<iw::Space> space,
+			iw::ref<iw::QueuedRenderer> renderer,
+			iw::ref<AssetManager> asset,
+			iw::ref<DynamicsSpace> physics,
+			iw::ref<AudioSpace> audio,
+			iw::ref<iw::eventbus> bus)
+		{
+			Space = space;
+			Renderer = renderer;
+			Asset = asset;
+			Physics = physics;
+			Audio = audio;
+			Bus = bus;
+		}
+	};
+
 	// have an event only system
 
 	template<
 		typename... _cs>
 	class System
-		: public ISystem
+		: public SystemBase
 	{
 	private:
-		const char* m_name;
+
 		//std::queue<std::thread>      m_threads;
 		std::queue<size_t> m_delete; // Probly make it so space can queue component creation at the ComponentArray level because of templated bs
 
 	protected:
-		iw::ref<Space>          Space;
-		iw::ref<iw::QueuedRenderer> Renderer;
-		iw::ref<AssetManager>   Asset;
-		iw::ref<DynamicsSpace>  Physics;
-		iw::ref<AudioSpace>     Audio;
-		iw::ref<iw::eventbus>   Bus;
-
 		virtual void Update(
 			EntityComponentArray& view)
 		{}
@@ -85,16 +153,12 @@ namespace Engine {
 	public:
 		System(
 			const char* name)
-			: m_name(name)
+			: SystemBase(name)
 		{}
-
-		virtual ~System() {}
 
 		virtual int Initialize() {
 			return 0;
 		}
-
-		virtual void Destroy() {}
 
 		// These wont have to be copies this is just temp
 
@@ -126,55 +190,6 @@ namespace Engine {
 				Space->DestroyEntity(index);
 				m_delete.pop();
 			}
-		}
-
-		virtual void OnPush() override {}
-		virtual void OnPop() override {}
-
-		// Action Events
-
-		virtual bool On(ActionEvent& e) override { return false; }
-
-		// Input events
-
-		virtual bool On(MouseWheelEvent&  e) override { return false; }
-		virtual bool On(MouseMovedEvent&  e) override { return false; }
-		virtual bool On(MouseButtonEvent& e) override { return false; }
-		virtual bool On(KeyEvent&         e) override { return false; }
-		virtual bool On(KeyTypedEvent&    e) override { return false; }
-
-		// Window events
-
-		virtual bool On(WindowResizedEvent& e) override { return false; }
-
-		// Physics events
-
-		virtual bool On(CollisionEvent& e) override { return false; }
-
-		// Entity events
-
-		virtual bool On(EntityDestroyedEvent& e) override { return false; }
-
-		const char* Name() const override {
-			return m_name;
-		}
-	private:
-		friend class Layer;
-
-		void SetLayerVars(
-			iw::ref<iw::Space> space,
-			iw::ref<iw::QueuedRenderer> renderer,
-			iw::ref<AssetManager> asset,
-			iw::ref<DynamicsSpace> physics,
-			iw::ref<AudioSpace> audio,
-			iw::ref<iw::eventbus> bus)
-		{
-			Space    = space;
-			Renderer = renderer;
-			Asset    = asset;
-			Physics  = physics;
-			Audio    = audio;
-			Bus      = bus;
 		}
 	};	
 }

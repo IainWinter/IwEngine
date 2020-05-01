@@ -28,7 +28,7 @@ void GLAPIENTRY MessageCallback(
 	}
 
 	else {
-		LOG_DEBUG << "GL DEBUG: " << message
+		LOG_INFO << "GL DEBUG: " << message
 			<< " TYPE 0x" << type
 			<< " SEVERITY 0x" << severity;
 	}

@@ -46,7 +46,7 @@ namespace ECS {
 
 		EntityHandle* entity = m_chunk->GetEntity(m_index);
 
-		return EntityComponentData { entity->Index, entity->Version, *m_data };
+		return EntityComponentData { *entity, entity->Index, entity->Version, *m_data };
 	}
 
 	iterator::iterator(

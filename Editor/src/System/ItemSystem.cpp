@@ -1,13 +1,16 @@
 #include "Systems/ItemSystem.h"
-#include "Components/Enemy.h"
-#include "Components/Player.h"
 #include "Events/ActionEvents.h"
+
+#include "Components/Player.h"
+#include "Components/Note.h"
+#include "Components/Slowmo.h"
 
 #include "iw/engine/Time.h"
 #include "iw/physics/Collision/SphereCollider.h";
 #include "iw/physics/Collision/CollisionObject.h";
 #include "iw/audio/AudioSpaceStudio.h"
 #include "iw/graphics/Model.h"
+
 
 ItemSystem::ItemSystem()
 	: iw::System<iw::Transform, iw::CollisionObject, Item>("Item")
@@ -34,18 +37,64 @@ void ItemSystem::Update(
 	iw::EntityComponentArray& view)
 {
 	for (auto entity : view) {
-		auto [transform, object, circle] = entity.Components.Tie<Components>();
+		auto [transform, object, item] = entity.Components.Tie<Components>();
 
+		if (   item->Type == NOTE
+			|| Space->HasComponent<Note>(entity.Handle))
+		{
+			Note* note = Space->FindComponent<Note>(entity.Handle);
+
+
+		}
+
+	 if (   item->Type == CONSUMABLE
+		 || Space->HasComponent<Slowmo>(entity.Handle))
+	 {
+			Slowmo* item = Space->FindComponent<Slowmo>(entity.Handle);
+
+			if (item->Timer <= 0) {
+				iw::SetTimeScale(1.0f);
+			}
+
+			if (item->Timer > 0) {
+				item->Timer -= iw::Time::DeltaTime();
+				iw::Time::SetTimeScale(0.1f);
+			}
+
+			else if (iw::Keyboard::KeyDown(iw::X)) {
+				if (item->IsActive) {
+					item->Timer = item->Time;
+				}
+
+				if (item->IsPickedup) {
+					item->IsActive = true;
+				}
+			}
+		}
 	}
 }
 
 bool ItemSystem::On(
 	iw::ActionEvent& e)
 {
+	switch (e.Action) {
+		case iw::val(Actions::SPAWN_ITEM): {
+
+		}
+	}
+
 	if (e.Action == iw::val(Actions::SPAWN_ITEM)) {
 		SpawnItemEvent& event = e.as<SpawnItemEvent>();
 		iw::Transform* note = SpawnItem(m_prefab, event.Position);
 		note->SetParent(event.Level);
+	}
+
+	else if (e.Action == iw::val(Actions::SPAWN_NOTE)) {
+		SpawnNoteEvent& event = e.as<SpawnNoteEvent>();
+		iw::Transform* note = SpawnNote(m_prefabs.at(event.Index));
+		note->SetParent(m_root);
+
+		Bus->push<GameStateEvent>(PAUSED);
 	}
 
 	return false;
@@ -110,5 +159,19 @@ iw::Transform* ItemSystem::SpawnItem(
 
 	Physics->AddCollisionObject(c);
 
+	return t;
+}
+
+iw::Transform* ItemSystem::SpawnNote(
+	Note prefab)
+{
+	iw::Mesh mesh = m_font->GenerateMesh(prefab.Text, 0.005f, 1.0f);
+	mesh.SetMaterial(m_material);
+
+	iw::Entity note = Space->CreateEntity<iw::Transform, iw::Mesh, iw::UiElement, Note>();
+
+	iw::Transform* t = note.Set<iw::Transform>(iw::vector3(-5, 3, 0));
+	note.Set<iw::Mesh>(mesh);
+	note.Set<Note>(prefab);
 	return t;
 }

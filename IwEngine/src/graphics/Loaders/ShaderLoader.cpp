@@ -69,6 +69,7 @@ namespace Graphics {
 				size_t offset = j + 9;
 				std::string incldue = code.substr(offset, start - offset - 1);
 
+				code = code.erase(j - 1, start - j);
 				j = end;
 
 				std::string source = name.substr(name.find_first_of(' ') + 1, name.find_first_of('\0') - name.find_first_of(' ') - 1);

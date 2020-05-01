@@ -302,7 +302,7 @@ iw::Entity LevelSystem::LoadLevel(
 
 			mesh.Material()->Set("roughness", 0.9f);
 			mesh.Material()->Set("metallic", 0.1f);
-			mesh.Material()->Set("reflectance", 0.1f);
+			mesh.Material()->Set("reflectance", 10.0f);
 
 			mesh.Material()->Initialize(Renderer->Device);
 
