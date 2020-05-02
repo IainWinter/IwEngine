@@ -11,6 +11,7 @@
 #include "iw/audio/AudioSpaceStudio.h"
 #include "iw/graphics/Model.h"
 
+#include "iw/input/Devices/Keyboard.h"
 
 ItemSystem::ItemSystem()
 	: iw::System<iw::Transform, iw::CollisionObject, Item>("Item")
@@ -44,7 +45,20 @@ void ItemSystem::Update(
 		{
 			Note* note = Space->FindComponent<Note>(entity.Handle);
 
+			// open a note and pause the game, wait for x to resume
 
+			if (note->Timer == 0.0f) {
+				Bus->push<GameStateEvent>(PAUSED);
+			}
+
+			note->Timer += iw::Time::DeltaTime();
+
+			if (note->Timer > note->Time) {
+				if (iw::Keyboard::KeyDown(iw::X)) {
+					QueueDestroyEntity(entity.Index);
+					Bus->push<GameStateEvent>(RUNNING);
+				}
+			}
 		}
 
 	 if (   item->Type == CONSUMABLE
@@ -61,7 +75,7 @@ void ItemSystem::Update(
 				iw::Time::SetTimeScale(0.1f);
 			}
 
-			else if (iw::Keyboard::KeyDown(iw::X)) {
+			else if (iw::Keyboard::KeyDown(iw::C)) {
 				if (item->IsActive) {
 					item->Timer = item->Time;
 				}
@@ -79,22 +93,21 @@ bool ItemSystem::On(
 {
 	switch (e.Action) {
 		case iw::val(Actions::SPAWN_ITEM): {
-
+			SpawnItemEvent& event = e.as<SpawnItemEvent>();
+			
+			iw::Transform* note = SpawnItem(m_prefab, event.Position);
+			note->SetParent(event.Level);
+			
+			break;
 		}
-	}
+		case iw::val(Actions::SPAWN_NOTE): {
+			SpawnNoteEvent& event = e.as<SpawnNoteEvent>();
 
-	if (e.Action == iw::val(Actions::SPAWN_ITEM)) {
-		SpawnItemEvent& event = e.as<SpawnItemEvent>();
-		iw::Transform* note = SpawnItem(m_prefab, event.Position);
-		note->SetParent(event.Level);
-	}
-
-	else if (e.Action == iw::val(Actions::SPAWN_NOTE)) {
-		SpawnNoteEvent& event = e.as<SpawnNoteEvent>();
-		iw::Transform* note = SpawnNote(m_prefabs.at(event.Index));
-		note->SetParent(m_root);
-
-		Bus->push<GameStateEvent>(PAUSED);
+			iw::Transform* note = SpawnNote(m_prefabs.at(event.Index));
+			note->SetParent(m_root);
+		
+			break;
+		}
 	}
 
 	return false;
@@ -147,11 +160,11 @@ iw::Transform* ItemSystem::SpawnItem(
 {
 	iw::Entity note = Space->CreateEntity<iw::Transform, iw::Mesh, iw::SphereCollider, iw::CollisionObject, Item>();
 
-	                         note.Set<Item>(prefab);
-	iw::Mesh*            m = note.Set<iw::Mesh>(m_noteMesh);
 	iw::Transform*       t = note.Set<iw::Transform>(position, iw::vector3(0.65f, 0.9f, 0.9f), iw::quaternion::from_euler_angles(0, iw::Pi * 2 * rand() / RAND_MAX, 0));
+	iw::Mesh*            m = note.Set<iw::Mesh>(m_noteMesh);
 	iw::SphereCollider*  s = note.Set<iw::SphereCollider>(iw::vector3::zero, 1);
 	iw::CollisionObject* c = note.Set<iw::CollisionObject>();
+	                         note.Set<Item>(prefab);
 
 	c->SetCol(s);
 	c->SetTrans(t);
@@ -173,5 +186,6 @@ iw::Transform* ItemSystem::SpawnNote(
 	iw::Transform* t = note.Set<iw::Transform>(iw::vector3(-5, 3, 0));
 	note.Set<iw::Mesh>(mesh);
 	note.Set<Note>(prefab);
+
 	return t;
 }

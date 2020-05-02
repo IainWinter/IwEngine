@@ -1,17 +1,19 @@
 #pragma once
 
 #include "Components/Item.h"
+
 #include "iw/engine/System.h"
 #include "iw/common/Components/Transform.h"
 #include "iw/graphics/Mesh.h"
+#include "iw/graphics/Font.h"
+
 
 class ItemSystem
-	: public iw::System<iw::Transform, iw::CollisionObject, Item>
+	: public iw::System<iw::Transform, Item>
 {
 public:
 	struct Components {
 		iw::Transform* Transform;
-		iw::CollisionObject* Object;
 		Item* Item;
 	};
 private:
@@ -32,4 +34,7 @@ private:
 	iw::Transform* SpawnItem(
 		Item prefab,
 		iw::vector3 position);
+
+	iw::Transform* SpawnNote(
+		Note prefab);
 };
