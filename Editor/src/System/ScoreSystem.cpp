@@ -162,14 +162,14 @@ bool ScoreSystem::On(
 	}
 
  	if (other.Has<EnemyDeathCircle>()) {
-		iw::vector3 pos = bullet.FindComponent<iw::Rigidbody>()      ->Trans().Position;
-		iw::vector3 des = other .FindComponent<iw::CollisionObject>()->Trans().Position;
+		iw::vector3 pos = bullet.Find<iw::Rigidbody>()      ->Trans().Position;
+		iw::vector3 des = other .Find<iw::CollisionObject>()->Trans().Position;
 
 		SpawnScore(ceil((pos-des).length()) * 10, pos);
 	}
 
 	if (other.Has<Player>()) {
-		iw::vector3 pos = bullet.FindComponent<iw::Rigidbody>()->Trans().Position;
+		iw::vector3 pos = bullet.Find<iw::Rigidbody>()->Trans().Position;
 
 		int score = potentialScore / 2;
 		score = score - (score % 50);
@@ -194,7 +194,7 @@ bool ScoreSystem::On(
 
 	else if (e.Action == iw::val(Actions::SPAWN_ENEMY_DEATH)) {
 		iw::vector3 pos = e.as<SpawnEnemyDeath>().Position;
-		float       score = 1000 * (1.0f - player.FindComponent<Player>()->Timer / player.FindComponent<Player>()->DashTime);
+		float       score = 1000 * (1.0f - player.Find<Player>()->Timer / player.Find<Player>()->DashTime);
 
 		SpawnScore(ceil(score / 100) * 100, pos);
 	}

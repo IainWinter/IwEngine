@@ -85,8 +85,8 @@ void LevelSystem::Update(
 	}
 
 	//if (transition) {
-	//	iw::Transform* current = levelEntity    .FindComponent<iw::Transform>();
-	//	iw::Transform* next    = nextLevelEntity.FindComponent<iw::Transform>();
+	//	iw::Transform* current = levelEntity    .Find<iw::Transform>();
+	//	iw::Transform* next    = nextLevelEntity.Find<iw::Transform>();
 
 	//	iw::vector2 delta = currentLevel.LevelPosition * iw::Time::DeltaTime() * 0.5f;
 	//	
@@ -112,7 +112,7 @@ void LevelSystem::Update(
 	//	}
 	//}
 
-	//levelEntity.FindComponent<iw::Transform>()->Rotation *= iw::quaternion::from_euler_angles(0, iw::Time::DeltaTime() * 0.1f, 0);
+	//levelEntity.Find<iw::Transform>()->Rotation *= iw::quaternion::from_euler_angles(0, iw::Time::DeltaTime() * 0.1f, 0);
 }
 
 bool LevelSystem::On(
@@ -148,8 +148,8 @@ bool LevelSystem::On(
 	}
 
 	if (doorEnt.Index() != iw::EntityHandle::Empty.Index) {
-		LevelDoor*     door = doorEnt.FindComponent<LevelDoor>();
-		iw::Transform* tran = doorEnt.FindComponent<iw::Transform>();
+		LevelDoor*     door = doorEnt.Find<LevelDoor>();
+		iw::Transform* tran = doorEnt.Find<iw::Transform>();
 		if (door->State == LevelDoorState::OPEN) {
 			door->State = LevelDoorState::LOCKED; // stops events from being spammed
 			Bus->push<LoadNextLevelEvent>(door->NextLevel, iw::vector2(tran->Position.x, tran->Position.z), door->GoBack);
@@ -165,7 +165,7 @@ bool LevelSystem::On(
 	switch (e.Action) {
 		case iw::val(Actions::RESET_LEVEL): {
 			if (levelEntity != iw::EntityHandle::Empty) {
-				DestroyAll(levelEntity.FindComponent<iw::Transform>());
+				DestroyAll(levelEntity.Find<iw::Transform>());
 			}
 
 			levelEntity = LoadLevel(currentLevelName);
@@ -175,7 +175,7 @@ bool LevelSystem::On(
 			break;
 		}
 		case iw::val(Actions::UNLOCK_LEVEL_DOOR): {
-			LevelDoor* door = levelDoor.FindComponent<LevelDoor>();
+			LevelDoor* door = levelDoor.Find<LevelDoor>();
 			door->State = LevelDoorState::OPEN;
 			door->ColorTimer = 0.25f;
 
@@ -186,7 +186,7 @@ bool LevelSystem::On(
 
 			iw::vector2 lvpos = -currentLevel.LevelPosition;
 
-			currentLevelName = event.LevelName.length() > 0 ? event.LevelName : levelDoor.FindComponent<LevelDoor>()->NextLevel;
+			currentLevelName = event.LevelName.length() > 0 ? event.LevelName : levelDoor.Find<LevelDoor>()->NextLevel;
 			nextLevelEntity  = LoadLevel(currentLevelName); // changes current level
 
 			if (event.GoBack) {
@@ -197,7 +197,7 @@ bool LevelSystem::On(
 				lvpos = currentLevel.LevelPosition;
 			}
 
-			iw::Transform* transform = nextLevelEntity.FindComponent<iw::Transform>();
+			iw::Transform* transform = nextLevelEntity.Find<iw::Transform>();
 			transform->Position.x = lvpos.x;
 			transform->Position.z = lvpos.y;
 
@@ -207,12 +207,12 @@ bool LevelSystem::On(
 		}
 		case iw::val(Actions::AT_NEXT_LEVEL): {
 			if (nextLevelEntity != iw::EntityHandle::Empty) {
-				DestroyAll(levelEntity.FindComponent<iw::Transform>());
+				DestroyAll(levelEntity.Find<iw::Transform>());
 
 				levelEntity = nextLevelEntity;
 				nextLevelEntity = iw::Entity();
 
-				iw::Transform* current = levelEntity.FindComponent<iw::Transform>();
+				iw::Transform* current = levelEntity.Find<iw::Transform>();
 				current->Position = 0;
 			}
 

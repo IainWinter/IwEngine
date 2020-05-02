@@ -27,7 +27,7 @@ void GameCameraController::Update(
 
 		iw::vector3 target;
 		if (follow) {
-			target = m_target.FindComponent<iw::Transform>()->Position;
+			target = m_target.Find<iw::Transform>()->Position;
 		}
 
 		else {
@@ -64,7 +64,7 @@ void GameCameraController::Update(
 
 		//iw::PointLight* lamp = scene->PointLights()[0];
 
-		//iw::vector3 subpos = m_target.FindComponent<iw::Transform>()->Position;
+		//iw::vector3 subpos = m_target.Find<iw::Transform>()->Position;
 		//subpos.y = 1;
 
 		//lamp->SetPosition(subpos);

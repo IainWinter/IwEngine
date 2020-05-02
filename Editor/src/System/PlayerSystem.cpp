@@ -211,7 +211,7 @@ bool PlayerSystem::On(
 	iw::CollisionEvent& event)
 {
 	// i frames
-	//Player* p = player.FindComponent<Player>();
+	//Player* p = player.Find<Player>();
 
 	//if (p->Timer >= p->DashTime - 0.05f) {
 	//	return false;
@@ -247,7 +247,7 @@ bool PlayerSystem::On(
 	}
 
 	if (player.Index() != iw::EntityHandle::Empty.Index) {
-		Player* p = player.FindComponent<Player>();
+		Player* p = player.Find<Player>();
 		if (  !p->Damaged
 			&& p->Health > 0)
 		{
@@ -271,7 +271,7 @@ bool PlayerSystem::On(
 		case iw::val(Actions::GOTO_NEXT_LEVEL): {
 			GoToNextLevelEvent& event = e.as<GoToNextLevelEvent>();
 
-			iw::CollisionObject* c = player.FindComponent<iw::CollisionObject>();
+			iw::CollisionObject* c = player.Find<iw::CollisionObject>();
 
 			c->SetCol(nullptr);
 
@@ -287,10 +287,10 @@ bool PlayerSystem::On(
 			break;
 		}
 		case iw::val(Actions::START_LEVEL): {
-			iw::Transform*       t = player.FindComponent<iw::Transform>();
-			iw::CollisionObject* c = player.FindComponent<iw::CollisionObject>();
-			iw::SphereCollider*  s = player.FindComponent<iw::SphereCollider>();
-			Player*              p = player.FindComponent<Player>();
+			iw::Transform*       t = player.Find<iw::Transform>();
+			iw::CollisionObject* c = player.Find<iw::CollisionObject>();
+			iw::SphereCollider*  s = player.Find<iw::SphereCollider>();
+			Player*              p = player.Find<Player>();
 
 			t->Position.x = e.as<StartLevelEvent>().PlayerPosition.x;
 			t->Position.z = e.as<StartLevelEvent>().PlayerPosition.y;

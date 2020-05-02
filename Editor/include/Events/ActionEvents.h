@@ -12,7 +12,7 @@ enum class Actions
 	GAME_STATE, DEV_CONSOLE,
 	JUMP, RIGHT, FORWARD, USE,
 	RESET_LEVEL, START_LEVEL, UNLOCK_LEVEL_DOOR, LOAD_NEXT_LEVEL, GOTO_NEXT_LEVEL, AT_NEXT_LEVEL,
-	SPAWN_ENEMY_DEATH, SPAWN_ITEM, SPAWN_NOTE
+	SPAWN_ENEMY_DEATH, SPAWN_ITEM, SPAWN_NOTE, SPAWN_CONSUMABLE
 };
 
 struct DevConsoleEvent
@@ -197,6 +197,18 @@ struct SpawnNoteEvent
 	SpawnNoteEvent(
 		int index)
 		: iw::SingleEvent(iw::val(Actions::SPAWN_NOTE))
+		, Index(index)
+	{}
+};
+
+struct SpawnConsumableEvent
+	: iw::SingleEvent
+{
+	int Index;
+
+	SpawnConsumableEvent(
+		int index)
+		: iw::SingleEvent(iw::val(Actions::SPAWN_CONSUMABLE))
 		, Index(index)
 	{}
 };

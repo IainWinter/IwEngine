@@ -67,8 +67,9 @@ iw::Transform* NoteSystem::SpawnNote(
 
 	iw::Entity note = Space->CreateEntity<iw::Transform, iw::Mesh, iw::UiElement, Note>();
 
-	iw::Transform*       t = note.Set<iw::Transform>(iw::vector3(-5, 3, 0));
-							 note.Set<iw::Mesh>(mesh);
-	                         note.Set<Note>(prefab);
+	iw::Transform* t = note.Set<iw::Transform>(iw::vector3(-5, 3, 0));
+					   note.Set<iw::Mesh>(mesh);
+	                   note.Set<Note>(prefab);
+
 	return t;
 }

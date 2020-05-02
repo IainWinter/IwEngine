@@ -31,13 +31,13 @@ void BulletSystem::FixedUpdate(
 				break;
 			}
 			case ORBIT: {
-				iw::vector3 target = player.FindComponent<iw::Transform>()->Position;
+				iw::vector3 target = player.Find<iw::Transform>()->Position;
 				rigidbody->ApplyForce((target - transform->Position) * 0.5f);
 
 				break;
 			}
 			case SEEK: {
-				iw::vector3 target = player.FindComponent<iw::Transform>()->Position;
+				iw::vector3 target = player.Find<iw::Transform>()->Position;
 				rigidbody->SetVelocity((target - transform->Position).normalized() * bullet->Speed);
 
 				break;
@@ -84,15 +84,15 @@ bool BulletSystem::On(
 
 	if (   other != iw::EntityHandle::Empty
 		&& (   other.Has<Bullet>() 
-			|| other.Has<Enemy>()/*.Index() == bullet.FindComponent<Bullet>()->enemyIndex*/
+			|| other.Has<Enemy>()/*.Index() == bullet.Find<Bullet>()->enemyIndex*/
 			|| other.Has<DontDeleteBullets>()
-			|| other.FindComponent<LevelDoor>()))
+			|| other.Find<LevelDoor>()))
 	{
 		return false;
 	}
 
 	if (bullet != iw::EntityHandle::Empty) {
-		bullet.FindComponent<iw::Transform>()->SetParent(nullptr);
+		bullet.Find<iw::Transform>()->SetParent(nullptr);
 		QueueDestroyEntity(bullet.Index());
 	}
 

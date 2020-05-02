@@ -92,7 +92,7 @@ namespace ECS {
 
 		template<
 			typename _c>
-		_c* FindComponent() {
+		_c* Find() {
 #ifdef IW_DEBUG
 		if (!Space) {
 			LOG_ERROR << "Entity has no space!";

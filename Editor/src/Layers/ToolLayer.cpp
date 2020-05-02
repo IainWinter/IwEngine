@@ -150,7 +150,7 @@ namespace iw {
 		//		world.Scale    = transform->WorldScale();
 		//		world.Rotation = transform->WorldRotation();
 		//
-		//		//t.Rotation = iw::quaternion::from_look_at(t.Position, camera.FindComponent<Transform>()->Position);
+		//		//t.Rotation = iw::quaternion::from_look_at(t.Position, camera.Find<Transform>()->Position);
 		//
 		//		Renderer->DrawMesh(world, textMesh);
 		//	}

@@ -65,7 +65,7 @@ void EnemySystem::Update(
 				break;
 			}
 			case EnemyType::SEEK: {
-				iw::vector3 target = player.FindComponent<iw::Transform>()->Position;
+				iw::vector3 target = player.Find<iw::Transform>()->Position;
 				float       dir    = atan2(target.z - transform->Position.z, target.x - transform->Position.x) /*+ iw::Pi*/;
 
 				transform->Rotation = //iw::lerp(transform->Rotation,
@@ -187,13 +187,13 @@ bool EnemySystem::On(
 	if (   player != iw::EntityHandle::Empty
 		&& enemy  != iw::EntityHandle::Empty)
 	{
-		Player* playerComponent = player.FindComponent<Player>();
+		Player* playerComponent = player.Find<Player>();
 		if (playerComponent->Timer > 0) {
 			Audio->AsStudio()->CreateInstance("enemyDeath");
 
-			iw::Transform* transform = enemy.FindComponent<iw::Transform>();
+			iw::Transform* transform = enemy.Find<iw::Transform>();
 
-			Bus->push<SpawnEnemyDeath>(enemy.FindComponent<iw::Transform>()->Position, transform->Parent());
+			Bus->push<SpawnEnemyDeath>(enemy.Find<iw::Transform>()->Position, transform->Parent());
 
 			transform->SetParent(nullptr); // got moved to enemtdeathcirclesystem but should be in seperate system that cleans up destroied entities (remove from physics / transform tree)
 			Space->DestroyEntity(enemy.Index());
