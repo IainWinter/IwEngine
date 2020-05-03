@@ -40,7 +40,7 @@ LevelSystem::LevelSystem(
 
 	//currentLevel = 0;
 
-	currentLevelName = "levels/forest/forest03.json";
+	currentLevelName = "levels/forest/forest05.a.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 63);
 	closedColor = iw::Color::From255(201, 66, 66, 63);
@@ -449,7 +449,8 @@ iw::Entity LevelSystem::LoadLevel(
 
 	// Camera recreated in layer from \/
 	if (currentLevelName == "levels/forest/forest05.a.json") {
-		Bus->push<SpawnItemEvent>(iw::vector3(-8, 1, 8), levelTransform);
+		Bus->push<SpawnItemEvent>(Item{ NOTE, 0 },       iw::vector3(0, 0.1f, 5), levelTransform);
+		Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 0 }, iw::vector3(0, 0.1f, 8), levelTransform);
 	}
 
 	return level;

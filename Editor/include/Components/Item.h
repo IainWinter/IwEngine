@@ -8,4 +8,5 @@ enum ItemType {
 
 struct Item {
 	ItemType Type;
+	unsigned Id;
 };

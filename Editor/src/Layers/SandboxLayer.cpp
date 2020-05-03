@@ -9,6 +9,7 @@
 #include "Systems/ScoreSystem.h"
 #include "Systems/ItemSystem.h"
 #include "Systems/NoteSystem.h"
+#include "Systems/ConsumableSystem.h"
 #include "iw/engine/Systems/PhysicsSystem.h"
 #include "iw/engine/Systems/ParticleUpdateSystem.h"
 #include "iw/engine/Systems/EntityCleanupSystem.h"
@@ -297,6 +298,13 @@ namespace iw {
 		PushSystem<EnemyDeathCircleSystem>();
 		PushSystem<PhysicsSystem>();
 
+		PushSystem<ItemSystem>();
+		PushSystem<NoteSystem>();
+		PushSystem<ConsumableSystem>();
+
+		PushSystem<iw::ParticleUpdateSystem>();
+		PushSystem<iw::EntityCleanupSystem>();
+
 		PushSystem<iw::    MeshShadowRenderSystem>(MainScene);
 		PushSystem<iw::   ModelShadowRenderSystem>(MainScene);
 		PushSystem<iw::ParticleShadowRenderSystem>(MainScene);
@@ -305,12 +313,6 @@ namespace iw {
 		PushSystem<iw::      ParticleRenderSystem>(MainScene);
 
 		PushSystem<iw::UiRenderSystem>(m_textCam);
-
-		PushSystem<ItemSystem>();
-		PushSystem<NoteSystem>();
-
-		PushSystem<iw::ParticleUpdateSystem>();
-		PushSystem<iw::EntityCleanupSystem>();
 
 		//PushSystem<iw::DrawCollidersSystem>(MainScene->MainCamera());
 
@@ -447,6 +449,10 @@ namespace iw {
 
 		if (ImGui::Button("Next level (don't spam)")) {
 			Bus->push<LoadNextLevelEvent>();
+		}
+
+		if (ImGui::Button("Spawn slowmo")) {
+			Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 0 }, iw::vector3(0, 0.1f, 8), nullptr);
 		}
 
 		//if (ImGui::Button("Save level")) {

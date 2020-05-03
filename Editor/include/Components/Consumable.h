@@ -6,4 +6,5 @@ enum ConsumableType {
 
 struct Consumable {
 	ConsumableType Type;
+	bool IsActive;
 };

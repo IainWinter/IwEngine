@@ -43,7 +43,7 @@ void EnemySystem::Update(
 
 		switch (enemy->Type) {
 			case EnemyType::SPIN: {
-				transform->Rotation *= iw::quaternion::from_euler_angles(0, -iw::Time::DeltaTime(), 0);
+				transform->Rotation *= iw::quaternion::from_euler_angles(0, -iw::Time::DeltaTimeScaled(), 0);
 				break;
 			}
 			case EnemyType::CIRCLE: {
@@ -54,14 +54,14 @@ void EnemySystem::Update(
 						speed = 30.0f;
 					}
 
-					enemy->RotSpeed += 5 * speed * iw::Time::DeltaTime();
+					enemy->RotSpeed += 5 * speed * iw::Time::DeltaTimeScaled();
 				}
 
 				else {
-					enemy->RotSpeed *= 1 - 20 * iw::Time::DeltaTime();
+					enemy->RotSpeed *= 1 - 20 * iw::Time::DeltaTimeScaled();
 				}
 
-				transform->Rotation *= iw::quaternion::from_euler_angles(0, enemy->RotSpeed * iw::Time::DeltaTime(), 0);
+				transform->Rotation *= iw::quaternion::from_euler_angles(0, enemy->RotSpeed * iw::Time::DeltaTimeScaled(), 0);
 				break;
 			}
 			case EnemyType::SEEK: {
@@ -135,7 +135,7 @@ void EnemySystem::Update(
 		}
 
 		else {
-			enemy->Timer += iw::Time::DeltaTime();
+			enemy->Timer += iw::Time::DeltaTimeScaled();
 		}
 	}
 

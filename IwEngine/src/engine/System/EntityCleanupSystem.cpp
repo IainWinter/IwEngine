@@ -12,12 +12,12 @@ namespace Engine {
 	bool EntityCleanupSystem::On(
 		EntityDestroyedEvent& e)
 	{
-		Transform* transform = e.Entity.FindComponent<Transform>();
+		Transform* transform = e.Entity.Find<Transform>();
 		if (transform) {
 			//transform->SetParent(nullptr); //causes problems for some reason
 		}
 
-		Mesh* mesh = e.Entity.FindComponent<Mesh>();
+		Mesh* mesh = e.Entity.Find<Mesh>();
 		if (mesh) {
 			mesh->Data()    .reset();
 			mesh->Material().reset();

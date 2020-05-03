@@ -5,6 +5,7 @@
 #include "iw/math/vector2.h"
 #include "iw/math/vector3.h"
 #include "iw/common/Components/Transform.h"
+#include "Components/Item.h"
 
 enum class Actions
 	: int
@@ -177,13 +178,16 @@ struct SpawnEnemyDeath
 struct SpawnItemEvent
 	: iw::SingleEvent
 {
+	Item Item;
 	iw::vector3 Position;
 	iw::Transform* Level;
 
 	SpawnItemEvent(
+		::Item item,
 		iw::vector3 position,
 		iw::Transform* level)
 		: iw::SingleEvent(iw::val(Actions::SPAWN_ITEM))
+		, Item(item)
 		, Position(position)
 		, Level(level)
 	{}
@@ -192,10 +196,10 @@ struct SpawnItemEvent
 struct SpawnNoteEvent
 	: iw::SingleEvent
 {
-	int Index;
+	unsigned Index;
 
 	SpawnNoteEvent(
-		int index)
+		unsigned index)
 		: iw::SingleEvent(iw::val(Actions::SPAWN_NOTE))
 		, Index(index)
 	{}
@@ -204,10 +208,10 @@ struct SpawnNoteEvent
 struct SpawnConsumableEvent
 	: iw::SingleEvent
 {
-	int Index;
+	unsigned Index;
 
 	SpawnConsumableEvent(
-		int index)
+		unsigned index)
 		: iw::SingleEvent(iw::val(Actions::SPAWN_CONSUMABLE))
 		, Index(index)
 	{}

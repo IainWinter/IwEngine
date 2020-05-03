@@ -29,6 +29,8 @@ private:
 	iw::vector3 transitionTargetPosition;
 	float begin;
 
+	unsigned m_activeConsumable;
+
 public:
 	PlayerSystem();
 

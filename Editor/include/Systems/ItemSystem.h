@@ -10,7 +10,6 @@ class ItemSystem
 {
 private:
 	iw::Mesh m_noteMesh;
-	Item m_prefab;
 
 public:
 	ItemSystem();

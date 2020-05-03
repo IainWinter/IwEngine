@@ -4,7 +4,7 @@
 
 #include "iw/engine/System.h"
 #include "iw/common/Components/Transform.h"
-
+#include "iw/graphics/Font.h"
 
 #include <vector>
 
@@ -17,8 +17,6 @@ public:
 		Note* Item;
 	};
 private:
-	iw::Transform* m_root;
-
 	iw::ref<iw::Font>     m_font;
 	iw::ref<iw::Material> m_material;
 

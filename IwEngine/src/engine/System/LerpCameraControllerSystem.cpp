@@ -24,7 +24,7 @@ namespace iw {
 
 			iw::vector3 target;
 			if (m_target != iw::EntityHandle::Empty && follow) {
-				target = m_target.FindComponent<iw::Transform>()->Position;
+				target = m_target.Find<iw::Transform>()->Position;
 			}
 
 			target.y += 2;

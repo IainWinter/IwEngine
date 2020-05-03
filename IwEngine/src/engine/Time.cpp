@@ -43,6 +43,10 @@ namespace Time {
 		return deltaTime.count() / 1000000000.0f;
 	}
 
+	float DeltaTimeScaled() {
+		return DeltaTime() * TimeScale();
+	}
+
 	// Idk why this is like 1000 times slower
 	float DeltaTimeNow() {
 		return (std::chrono::high_resolution_clock::now() - now).count() / 1000000000.0f;
@@ -53,7 +57,7 @@ namespace Time {
 	}
 
 	float FixedTime() {
-		return fixedTime * timeScale;
+		return RawFixedTime() * TimeScale();
 	}
 
 	float TimeScale() {

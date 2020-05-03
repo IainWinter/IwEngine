@@ -2,10 +2,8 @@
 #include "Events/ActionEvents.h"
 
 #include "iw/engine/Time.h"
-#include "iw/audio/AudioSpaceStudio.h"
-
 #include "iw/engine/Components/UiElement_temp.h"
-
+#include "iw/audio/AudioSpaceStudio.h"
 #include "iw/input/Devices/Keyboard.h"
 
 NoteSystem::NoteSystem()
@@ -14,8 +12,6 @@ NoteSystem::NoteSystem()
 }
 
 int NoteSystem::Initialize() {
-	m_root = new iw::Transform();
-
 	m_font = Asset->Load<iw::Font>("fonts/arial.fnt");
 
 	m_material = REF<iw::Material>(Asset->Load<iw::Shader>("shaders/font.shader"));
@@ -23,7 +19,7 @@ int NoteSystem::Initialize() {
 	m_material->Set("color", iw::vector3(1));
 	m_material->SetTexture("fontMap", m_font->GetTexture(0));
 
-	m_prefabs.push_back(Note { "The greatest lore of all time. People will be\nmaking 4 hours long videos decrypting\nthe secrets that these notes\nare bouta hold. You've never een anything \ncleaner than this", 2.0f, 0.0f });
+	m_prefabs.push_back(Note { "A scroll with the words 'slow mo is bound to c.\nsave ths for a hard level idiot' written on it.\nWhat could it be??", 1.5f, 0.0f });
 
 	return 0;
 }
@@ -51,7 +47,6 @@ bool NoteSystem::On(
 	if (e.Action == iw::val(Actions::SPAWN_NOTE)) {
 		SpawnNoteEvent& event = e.as<SpawnNoteEvent>();
 		iw::Transform* note = SpawnNote(m_prefabs.at(event.Index));
-		note->SetParent(m_root);
 
 		Bus->push<GameStateEvent>(PAUSED);
 	}
@@ -67,7 +62,7 @@ iw::Transform* NoteSystem::SpawnNote(
 
 	iw::Entity note = Space->CreateEntity<iw::Transform, iw::Mesh, iw::UiElement, Note>();
 
-	iw::Transform* t = note.Set<iw::Transform>(iw::vector3(-5, 3, 0));
+	iw::Transform* t = note.Set<iw::Transform>(iw::vector3(-2, 5, 0));
 					   note.Set<iw::Mesh>(mesh);
 	                   note.Set<Note>(prefab);
 

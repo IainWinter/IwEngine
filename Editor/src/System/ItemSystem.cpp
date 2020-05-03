@@ -14,9 +14,7 @@
 
 ItemSystem::ItemSystem()
 	: iw::SystemBase("Item")
-{
-	m_prefab.Type = NOTE;
-}
+{}
 
 int ItemSystem::Initialize() {
 	iw::MeshDescription   description = Asset->Load<iw::Model>("Sphere")->GetMesh(0).Data()->Description();
@@ -38,7 +36,7 @@ bool ItemSystem::On(
 {
 	if (e.Action == iw::val(Actions::SPAWN_ITEM)) {
 		SpawnItemEvent& event = e.as<SpawnItemEvent>();
-		iw::Transform* note = SpawnItem(m_prefab, event.Position);
+		iw::Transform* note = SpawnItem(event.Item, event.Position);
 		note->SetParent(event.Level);
 	}
 
@@ -80,17 +78,18 @@ bool ItemSystem::On(
 		Item* item = entity.Find<Item>();
 
 		switch (item->Type) {
-		case NOTE: {
-			Bus->push<SpawnNoteEvent>(0);
-			break;
-		}
-		case CONSUMABLE: {
-			Bus->push<SpawnConsumableEvent>(0);
-			break;
-		}
-		default:
-			LOG_WARNING << "Tried to spawn item with an invalid type";
-			break;
+			case NOTE: {
+				Bus->push<SpawnNoteEvent>(item->Id);
+				break;
+			}
+			case CONSUMABLE: {
+				Bus->push<SpawnConsumableEvent>(item->Id);
+				break;
+			}
+			default: {
+				LOG_WARNING << "Tried to spawn item with an invalid type";
+				break;
+			}
 		}
 
 		entity.Find<iw::Transform>()->SetParent(nullptr);

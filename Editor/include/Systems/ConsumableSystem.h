@@ -11,10 +11,18 @@
 class ConsumableSystem
 	: public iw::System<iw::Transform, Consumable>
 {
+private:
+	int m_activeConsumable;
+	bool m_used;
+
+	std::vector<Consumable> m_prefabs;
+	iw::ref<iw::Material> m_material;
+	iw::ref<iw::Font> m_font;
+
 public:
 	struct Components {
 		iw::Transform* Transform;
-		Consumable* Item;
+		Consumable* Consumable;
 	};
 
 public:
