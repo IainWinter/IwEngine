@@ -164,9 +164,13 @@ vec3 BRDF(
 	vec3 L, 
 	vec3 baseColor,
 	float reflectance)
-{     
+{
+	vec3 nL = normalize(L);
+
+	float NdotL = clamp(dot(N,  nL), 0.0f, 1.0f);
+
 	// diffuse
-    float diff = max(dot(L, N), 0.0);
+    float diff = max(NdotL, 0.0);
     vec3 diffuse = diff * baseColor;
     
 	// specular

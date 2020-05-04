@@ -81,7 +81,6 @@ bool ConsumableSystem::On(
 
 			break;
 		}
-
 		case iw::val(Actions::GOTO_NEXT_LEVEL): {
 			if (m_used) {
 				m_activeConsumable = -1;

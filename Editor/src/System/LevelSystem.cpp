@@ -40,7 +40,7 @@ LevelSystem::LevelSystem(
 
 	//currentLevel = 0;
 
-	currentLevelName = "levels/forest/forest05.a.json";
+	currentLevelName = "levels/forest/forest03.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 63);
 	closedColor = iw::Color::From255(201, 66, 66, 63);
@@ -302,7 +302,7 @@ iw::Entity LevelSystem::LoadLevel(
 
 			mesh.Material()->Set("roughness", 0.9f);
 			mesh.Material()->Set("metallic", 0.1f);
-			mesh.Material()->Set("reflectance", 10.0f);
+			mesh.Material()->Set("reflectance", 0.1f);
 
 			mesh.Material()->Initialize(Renderer->Device);
 
