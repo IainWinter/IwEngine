@@ -33,11 +33,11 @@ namespace Engine {
 	}
 
 	void PhysicsSystem::FixedUpdate(
-		EntityComponentArray& view) //eubex
+		EntityComponentArray& view)
 	{
-		if (accumulator < iw::Time::FixedTime()) {
+		//if (accumulator < iw::Time::FixedTime()) { // this if statement was here but it works better if its not there idk what the reason was lmao
 			accumulator = 0;
-		}
+		//}
 	}
 
 	bool PhysicsSystem::On(

@@ -196,7 +196,7 @@ bool ScoreSystem::On(
 		iw::vector3 pos = e.as<SpawnEnemyDeath>().Position;
 		float       score = 1000 * (1.0f - player.Find<Player>()->Timer / player.Find<Player>()->DashTime);
 
-		SpawnScore(ceil(score / 100) * 100, pos);
+		SpawnScore(floor(score / 200) * 200 + 200, pos);
 	}
 
 	return false;

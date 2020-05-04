@@ -23,6 +23,8 @@ namespace Graphics {
 		, m_order(0)
 	{}
 
+	// get me outta here
+
 	Material::Material(
 		const Material& other)
 		: Shader        (other.Shader)

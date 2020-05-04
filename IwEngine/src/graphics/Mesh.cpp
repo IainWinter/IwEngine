@@ -15,12 +15,12 @@ namespace detail {
 
 	// Mesh Description
 
-MeshDescription::MeshDescription()
-	: m_hasInstancedBuffer(false)
-{
-}
+	MeshDescription::MeshDescription()
+		: m_hasInstancedBuffer(false)
+	{
+	}
 
-void MeshDescription::DescribeBuffer(
+	void MeshDescription::DescribeBuffer(
 		bName name,
 		VertexBufferLayout& layout)
 	{
@@ -476,8 +476,10 @@ void MeshDescription::DescribeBuffer(
 
 	Mesh Mesh::MakeInstance() const {
 		Mesh mesh = *this;
-		mesh.SetMaterial(mesh.Material()->MakeInstance());
-		
+		if (Material()) {
+			mesh.SetMaterial(Material()->MakeInstance());
+		}
+
 		return mesh;
 	}
 

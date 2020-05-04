@@ -16,8 +16,9 @@ private:
 	bool m_used;
 
 	std::vector<Consumable> m_prefabs;
-	iw::ref<iw::Material> m_material;
-	iw::ref<iw::Font> m_font;
+	iw::Mesh m_slowmo;
+
+	iw::Entity& m_target;
 
 public:
 	struct Components {
@@ -26,7 +27,8 @@ public:
 	};
 
 public:
-	ConsumableSystem();
+	ConsumableSystem(
+		iw::Entity& target);
 
 	int Initialize() override;
 

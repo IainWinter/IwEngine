@@ -198,14 +198,16 @@ namespace iw {
 
 		// Materials
 
-		Material* mat = new Material(shader);
-		mat->Set("baseColor", vector4(1, 1, 1, 1));
-		mat->Set("roughness", 0.8f);
-		mat->Set("metallic", 0.2f);
-		mat->Set("reflectance", 0.2f);
-		mat->SetTexture("shadowMap",  dirShadowTarget->Tex(0));    // shouldnt really be part of material
-		mat->SetTexture("shadowMap2", pointShadowTarget->Tex(0));
-		mat->Initialize(Renderer->Device);
+		Material* def = new Material(shader);
+		def->Set("baseColor", vector4(1, 1, 1, 1));
+		def->Set("roughness", 0.8f);
+		def->Set("metallic", 0.2f);
+		def->Set("reflectance", 0.2f);
+		def->SetTexture("shadowMap",  dirShadowTarget->Tex(0));    // shouldnt really be part of material
+		def->SetTexture("shadowMap2", pointShadowTarget->Tex(0));
+		def->Initialize(Renderer->Device);
+
+		ref<Material> mat = Asset->Give<iw::Material>("materials/Default", def);
 
 		// Models
 
@@ -222,9 +224,6 @@ namespace iw {
 
 		smesh.Data()->GenTangents();
 		tmesh.Data()->GenTangents();
-
-		smesh.Data()->Initialize(Renderer->Device);
-		tmesh.Data()->Initialize(Renderer->Device);
 
 		smesh.SetMaterial(mat->MakeInstance());
 		tmesh.SetMaterial(mat->MakeInstance());
@@ -251,7 +250,6 @@ namespace iw {
 		//	Door
 
 		Mesh dmesh = MakeIcosphere(description, 0)->MakeInstance();
-		dmesh.Data()->Initialize(Renderer->Device);
 	
 		dmesh.SetMaterial(mat->MakeInstance());
 		dmesh.Material()->SetTransparency(Transparency::ADD);
@@ -300,7 +298,7 @@ namespace iw {
 
 		PushSystem<ItemSystem>();
 		PushSystem<NoteSystem>();
-		PushSystem<ConsumableSystem>();
+		PushSystem<ConsumableSystem>(playerSystem->GetPlayer());
 
 		PushSystem<iw::ParticleUpdateSystem>();
 		PushSystem<iw::EntityCleanupSystem>();

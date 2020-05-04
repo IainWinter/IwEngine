@@ -8,8 +8,10 @@
 
 #include "iw/input/Devices/Keyboard.h"
 
-ConsumableSystem::ConsumableSystem()
+ConsumableSystem::ConsumableSystem(
+	iw::Entity& target)
 	: iw::System<iw::Transform, Consumable>("Consumables")
+	, m_target(target)
 	, m_activeConsumable(-1)
 	, m_used(false)
 {}
@@ -17,12 +19,15 @@ ConsumableSystem::ConsumableSystem()
 int ConsumableSystem::Initialize() {
 	m_prefabs.push_back(Consumable{ SLOWMO, true });
 
-	m_font = Asset->Load<iw::Font>("fonts/arial.fnt");
+	iw::MeshDescription description;
+	description.DescribeBuffer(iw::bName::POSITION, iw::MakeLayout<float>(3));
+	description.DescribeBuffer(iw::bName::NORMAL,   iw::MakeLayout<float>(3));
+	description.DescribeBuffer(iw::bName::UV,       iw::MakeLayout<float>(2));
 
-	m_material = REF<iw::Material>(Asset->Load<iw::Shader>("shaders/font.shader"));
+	m_slowmo = iw::MakeIcosphere(description, 0)->MakeInstance();
+	m_slowmo.SetMaterial(Asset->Load<iw::Material>("materials/Default")->MakeInstance());
 
-	m_material->Set("color", iw::vector3(1));
-	m_material->SetTexture("fontMap", m_font->GetTexture(0));
+	m_slowmo.Material()->Set("baseColor", iw::Color::From255(0, 0, 255));
 
 	return 0;
 }
@@ -30,8 +35,13 @@ int ConsumableSystem::Initialize() {
 void ConsumableSystem::Update(
 	iw::EntityComponentArray& view)
 {
+	iw::vector3 target = m_target.Find<iw::Transform>()->Position;
+	target += iw::vector3(-0.75f, 1.0f, 0.75f);
+
 	for (auto entity : view) {
 		auto [transform, consumable] = entity.Components.Tie<Components>();
+
+		transform->Position = iw::lerp(transform->Position, target, iw::Time::DeltaTimeScaled() * 5);
 
 		if (Space->HasComponent<Slowmo>(entity.Handle)) {
 			Slowmo* item = Space->FindComponent<Slowmo>(entity.Handle);
@@ -96,10 +106,7 @@ bool ConsumableSystem::On(
 iw::Transform* ConsumableSystem::SpawnConsumable(
 	Consumable prefab)
 {
-	iw::Mesh mesh = m_font->GenerateMesh("Slow mo", 0.005f, 1.0f);
-	mesh.SetMaterial(m_material);
-
-	iw::Entity consumable = Space->CreateEntity<iw::Transform, iw::Mesh, iw::UiElement, Consumable>();
+	iw::Entity consumable = Space->CreateEntity<iw::Transform, iw::Mesh, Consumable>();
 
 	switch (prefab.Type) {
 		case SLOWMO: {
@@ -107,10 +114,9 @@ iw::Transform* ConsumableSystem::SpawnConsumable(
 		}
 	}
 
-	iw::Transform* t = consumable.Set<iw::Transform>(iw::vector3(6.5f, -3, 0));
-					   consumable.Set<iw::Mesh>(mesh);
+	iw::Transform* t = consumable.Set<iw::Transform>(iw::vector3(6.5f, -3, 0), 0.25f);
+					   consumable.Set<iw::Mesh>(m_slowmo.MakeInstance());
 	                   consumable.Set<Consumable>(prefab);
-
 
 	return t;
 }

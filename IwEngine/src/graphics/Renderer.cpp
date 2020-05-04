@@ -164,6 +164,15 @@ namespace Graphics {
 			return;
 		}
 
+		if (!mesh->Material()) {
+			LOG_WARNING << "Tried to submit mesh without a material to renderer!";
+		}
+
+		else if (!mesh->Material()->Shader) {
+			LOG_WARNING << "Tried to submit mesh with a material that has no shader to renderer!";
+			return;
+		}
+
 		Renderer::SetMesh(mesh);
 
 		if (!m_meshData->IsInitialized()) {
