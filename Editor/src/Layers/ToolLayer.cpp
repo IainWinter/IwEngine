@@ -232,7 +232,6 @@ namespace iw {
 		ImGui::SliderFloat("Ambiance", &amb, 0, 1);
 		m_mainScene->SetAmbiance(amb);
 
-
 		char name = 'A';
 
 		for (PointLight* light : m_mainScene->PointLights()) {
@@ -302,7 +301,7 @@ namespace iw {
 
 		}
 
-		if (   e.Button == MMOUSE
+		if (   e.Button == LMOUSE
 			&& e.Device == DeviceType::MOUSE)
 		{
 			if (e.State) {

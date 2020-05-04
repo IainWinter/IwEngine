@@ -153,7 +153,7 @@ float getDistanceAtt(
 	float invSqrRadius)
 {
 	float dist2 = dot(unormalizedLightVector, unormalizedLightVector);
-	return clamp(1.0 - dist2 * invSqrRadius, 0.0, 1.0);
+	return clamp(1.0 - dist2 * invSqrRadius, 0.0, 1.0) * 0.1f;
 }
 
 // BRDF
@@ -170,8 +170,7 @@ vec3 BRDF(
 	float NdotL = clamp(dot(N,  nL), 0.0f, 1.0f);
 
 	// diffuse
-    float diff = max(NdotL, 0.0);
-    vec3 diffuse = diff * baseColor;
+    float diffuse = max(NdotL, 0.0);
     
 	// specular
     float spec = 0.0;
@@ -186,8 +185,8 @@ vec3 BRDF(
         spec = pow(max(dot(V, reflectDir), 0.0), reflectance * 8.0);
     //}
 
-    vec3 specular = vec3(0.15) * spec; // assuming bright white light color
-    return diffuse + specular;
+    vec3 specular = vec3(1.0) * spec; // assuming bright white light color
+    return baseColor * diffuse;
 }
 
 void main() {
