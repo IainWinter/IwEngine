@@ -71,7 +71,7 @@ void ConsumableSystem::Update(
 				rot += 10;
 
 				if (item->Timer + item->Time * 0.8f > item->Time) {
-					transform->Scale = iw::lerp(transform->Scale, iw::vector3(iw::randf() * 0.15f + 0.25f), iw::Time::DeltaTime() * 8);
+					transform->Scale = iw::lerp(transform->Scale, iw::vector3(iw::randf() * 0.25f + 0.25f), iw::Time::DeltaTime() * 8);
 				}
 
 				else {
