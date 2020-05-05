@@ -14,6 +14,7 @@ ConsumableSystem::ConsumableSystem(
 	, m_target(target)
 	, m_activeConsumable(-1)
 	, m_used(false)
+	, m_usingItem(false)
 {}
 
 int ConsumableSystem::Initialize() {
@@ -35,13 +36,22 @@ int ConsumableSystem::Initialize() {
 void ConsumableSystem::Update(
 	iw::EntityComponentArray& view)
 {
-	iw::vector3 target = m_target.Find<iw::Transform>()->Position;
-	target += iw::vector3(-0.75f, 1.0f, 0.75f);
+	iw::vector3 target = m_target.Find<iw::Transform>()->Position
+		               + iw::vector3(-1.0f, 1.0f, 0.75f);
+	float offset = 0.0f;
+	float totalOffset = 0.0f;
+	
+	for (auto entity : view) {
+		totalOffset += iw::Time::DeltaTimeScaled();
+	}
 
 	for (auto entity : view) {
 		auto [transform, consumable] = entity.Components.Tie<Components>();
 
-		transform->Position = iw::lerp(transform->Position, target, iw::Time::DeltaTimeScaled() * 5);
+		float time = offset + iw::TotalTime();
+
+		iw::vector3 adj = target;
+		float rot = 1.0f;
 
 		if (Space->HasComponent<Slowmo>(entity.Handle)) {
 			Slowmo* item = Space->FindComponent<Slowmo>(entity.Handle);
@@ -49,10 +59,25 @@ void ConsumableSystem::Update(
 			if (item->Timer < 0) {
 				iw::SetTimeScale(1.0f);
 				QueueDestroyEntity(entity.Index);
+				m_usingItem = false;
 			}
 
 			if (item->Timer > 0) {
 				item->Timer -= iw::Time::DeltaTime();
+
+				adj.y += iw::randf() * sin(time);
+				adj.z += iw::randf() * sin(time);
+
+				rot += 10;
+
+				if (item->Timer + item->Time * 0.8f > item->Time) {
+					transform->Scale = iw::lerp(transform->Scale, iw::vector3(iw::randf() * 0.15f + 0.25f), iw::Time::DeltaTime() * 8);
+				}
+
+				else {
+					transform->Scale = iw::lerp(transform->Scale, iw::vector3(0), iw::Time::DeltaTime() * 5);
+				}
+
 				if (m_used) {
 					iw::Time::SetTimeScale(0.3f);
 				}
@@ -62,13 +87,31 @@ void ConsumableSystem::Update(
 				}
 			}
 
-			else if (iw::Keyboard::KeyDown(iw::C)) {
+			else if (!m_usingItem && iw::Keyboard::KeyDown(iw::C)) {
 				if (consumable->IsActive) {
 					item->Timer = item->Time;
 					m_used = true;
+					m_usingItem = true;
 				}
 			}
 		}
+	
+		transform->Position = iw::lerp(
+			transform->Position, 
+			adj + iw::vector3(0, 0.2f * sin(time), 0),
+			((totalOffset - offset) * (totalOffset - offset) * 5 + iw::Time::DeltaTime()) * 5
+		);
+
+		transform->Rotation *= iw::quaternion::from_euler_angles(0, rot * iw::Time::DeltaTime(), 0);
+
+		if (   m_usingItem
+			&& offset == 0)
+		{
+			target.x -= 0.25f;
+		}
+
+		target.x -= 0.5f;
+		offset += iw::Time::DeltaTimeScaled();
 	}
 }
 
@@ -84,7 +127,7 @@ bool ConsumableSystem::On(
 			break;
 		}
 		case iw::val(Actions::RESET_LEVEL): {
-			if (m_activeConsumable > -1) {
+			if (m_used && !m_usingItem && m_activeConsumable > -1) {
 				iw::Transform* consumable = SpawnConsumable(m_prefabs.at(m_activeConsumable));
 				m_used = false;
 			}
@@ -114,7 +157,7 @@ iw::Transform* ConsumableSystem::SpawnConsumable(
 		}
 	}
 
-	iw::Transform* t = consumable.Set<iw::Transform>(iw::vector3(6.5f, -3, 0), 0.25f);
+	iw::Transform* t = consumable.Set<iw::Transform>(iw::vector3(m_target.Find<iw::Transform>()->Position), 0.25f);
 					   consumable.Set<iw::Mesh>(m_slowmo.MakeInstance());
 	                   consumable.Set<Consumable>(prefab);
 

@@ -44,10 +44,6 @@
 
 #include "imgui/imgui.h"
 
-float randf() {
-	return ((float)rand() / RAND_MAX - 0.5f) * 2.0f;
-}
-
 namespace iw {
 	struct ModelUBO {
 		matrix4 model;
@@ -338,8 +334,8 @@ namespace iw {
 		s->SetUpdate([](auto s, auto p, auto c) {
 			if (c < 3000 &&  Keyboard::KeyDown(G)) {
 				for (int i = 0; i < 3000; i++) {
-					float x = randf() * 32.0f;
-					float z = randf() * 18.0f;
+					float x = iw::randf() * 32.0f;
+					float z = iw::randf() * 18.0f;
 
 					if (   abs(x) > 28.0f + randf() * 2.0f
 						|| abs(z) > 12.0f + randf() * 2.0f)

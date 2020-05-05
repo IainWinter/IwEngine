@@ -35,6 +35,12 @@ namespace math {
 	constexpr float Phi = 1.61803398875f;
 
 	/**
+	* Returns a random float 0 - 1
+	*/
+	IWMATH_API
+	float randf();
+
+	/**
 	* Returns an approximation of the inverse
 	*  square root of the specified value.
 	*

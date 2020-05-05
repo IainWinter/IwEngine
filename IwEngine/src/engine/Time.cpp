@@ -14,14 +14,14 @@ namespace Time {
 		float duration) 
 	{
 		fixedTime = duration;
-		LOG_DEBUG << "Set fixed timeset to " << duration << " seconds";
+		//LOG_DEBUG << "Set fixed timeset to " << duration << " seconds";
 	}
 
 	void SetTimeScale(
 		float duration)
 	{
 		timeScale = duration;
-		LOG_DEBUG << "Set time scale to " << duration << " seconds";
+		//LOG_DEBUG << "Set time scale to " << duration << " seconds";
 	}
 
 	void UpdateTime() {

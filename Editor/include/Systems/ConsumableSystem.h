@@ -14,6 +14,7 @@ class ConsumableSystem
 private:
 	int m_activeConsumable;
 	bool m_used;
+	bool m_usingItem;
 
 	std::vector<Consumable> m_prefabs;
 	iw::Mesh m_slowmo;

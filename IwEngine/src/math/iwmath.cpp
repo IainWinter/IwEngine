@@ -1,8 +1,13 @@
 #include "iw/math/iwmath.h"
+#include <random>
 #include <cmath>
 
 namespace iw {
 namespace math {
+	float randf() {
+		return ((float)rand() / RAND_MAX - 0.5f) * 2.0f;
+	}
+
 	float fast_inv_sqrt(
 		float x)
 	{
