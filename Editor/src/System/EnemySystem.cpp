@@ -40,12 +40,13 @@ void EnemySystem::Update(
 
 		m_enemyCount++;
 
-
 		switch (enemy->Type) {
+			// spin to win ez
 			case EnemyType::SPIN: {
 				transform->Rotation *= iw::quaternion::from_euler_angles(0, -iw::Time::DeltaTimeScaled(), 0);
 				break;
 			}
+			// charge over time and then shoot a circle
 			case EnemyType::CIRCLE: {
 				if (enemy->Timer < enemy->ChargeTime) {
 					float speed = 1.0f / (enemy->ChargeTime - enemy->Timer);
@@ -64,16 +65,25 @@ void EnemySystem::Update(
 				transform->Rotation *= iw::quaternion::from_euler_angles(0, enemy->RotSpeed * iw::Time::DeltaTimeScaled(), 0);
 				break;
 			}
+			// lmao this one breaks the story
+			// 
 			case EnemyType::SEEK: {
 				iw::vector3 target = player.Find<iw::Transform>()->Position;
-				float       dir    = atan2(target.z - transform->Position.z, target.x - transform->Position.x) /*+ iw::Pi*/;
+				float       dir    = atan2(target.z - transform->Position.z, target.x - transform->Position.x);
 
-				transform->Rotation = //iw::lerp(transform->Rotation,
-					  iw::quaternion::from_euler_angles(0, dir, 0) 
-					//* iw::quaternion::from_euler_angles(0, iw::Pi, 0), iw::Time::DeltaTime()
-				/*).normalized()*/;
+				transform->Rotation = iw::quaternion::from_euler_angles(0, dir, 0);
 				
 				// need to slerp
+
+				break;
+			}
+			// this one secretly breaks the story xd
+			// spins to player quickly and does 1 / 2 firing moves
+			case EnemyType::MINI_BOSS_BOX_SPIN: {
+				iw::vector3 target = player.Find<iw::Transform>()->Position;
+				float       dir    = atan2(target.z - transform->Position.z, target.x - transform->Position.x);
+
+				transform->Rotation = iw::quaternion::from_euler_angles(0, dir, 0);
 
 				break;
 			}
@@ -124,6 +134,55 @@ void EnemySystem::Update(
 
 					break;
 				}
+				case EnemyType::MINI_BOSS_BOX_SPIN: {
+					float time = enemy->FireTime - enemy->ChargeTime;
+
+					if      (enemy->Timer >= enemy->ChargeTime + time / 2.0f)
+					{
+						if (enemy->Timer2 == 0.0f) {
+							float rot = iw::hPi + iw::Pi / 8 * sin(iw::Time::TotalTime() * 5);
+
+							for (int i = 0; i <= enemy->Speed; i++) {
+								iw::quaternion offset = iw::quaternion::from_euler_angles(0, -rot + iw::Pi / enemy->Speed * i, 0);
+
+								iw::Transform* bullet = SpawnBullet(
+									enemy->Bullet,
+									transform->Position,
+									transform->Rotation.inverted() * offset,
+									entity.Index
+								);
+							}
+						}
+
+						enemy->Timer2 += iw::Time::DeltaTimeScaled();
+
+						if (enemy->Timer2 > 0.15f) {
+							enemy->Timer2 = 0.0f;
+						}
+
+						if (enemy->Timer <= enemy->ChargeTime + time / 4 * 3) {
+							enemy->HasShot = false;
+						}
+					}
+
+					else if (enemy->Timer >= enemy->ChargeTime + time / 4)
+					{
+						LOG_DEBUG << enemy->Timer;
+					}
+
+					else
+					{
+						//if (iw::randf() >= 0.5f) {
+							enemy->Timer = enemy->ChargeTime + time / 2;
+						//}
+
+						//else {
+						//	enemy->Timer = enemy->ChargeTime + time / 4;
+						//}
+
+						enemy->HasShot = false;
+					}
+				}
 			}
 
 			enemy->Rotation = fmod(enemy->Rotation + enemy->Speed, iw::Pi2);
@@ -132,11 +191,11 @@ void EnemySystem::Update(
 		else if (enemy->Timer >= enemy->FireTime) {
 			enemy->HasShot = false;
 			enemy->Timer   = 0;
+			enemy->Timer2  = 0;
 		}
 
-		else {
-			enemy->Timer += iw::Time::DeltaTimeScaled();
-		}
+		enemy->Timer  += iw::Time::DeltaTimeScaled();
+
 	}
 
 	if (   m_enemyCount == 0

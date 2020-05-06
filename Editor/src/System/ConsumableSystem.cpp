@@ -29,6 +29,7 @@ int ConsumableSystem::Initialize() {
 	m_slowmo.SetMaterial(Asset->Load<iw::Material>("materials/Default")->MakeInstance());
 
 	m_slowmo.Material()->Set("baseColor", iw::Color::From255(0, 0, 255));
+	m_slowmo.Material()->Set("reflectance", 1.0f);
 
 	return 0;
 }
@@ -36,13 +37,20 @@ int ConsumableSystem::Initialize() {
 void ConsumableSystem::Update(
 	iw::EntityComponentArray& view)
 {
+	// this could be made much better
+
 	iw::vector3 target = m_target.Find<iw::Transform>()->Position
 		               + iw::vector3(-1.0f, 1.0f, 0.75f);
+	
 	float offset = 0.0f;
 	float totalOffset = 0.0f;
 	
+	int index = 0;
+	int count = 0;
+
 	for (auto entity : view) {
 		totalOffset += iw::Time::DeltaTimeScaled();
+		count++;
 	}
 
 	for (auto entity : view) {
@@ -51,7 +59,7 @@ void ConsumableSystem::Update(
 		float time = offset + iw::TotalTime();
 
 		iw::vector3 adj = target;
-		float rot = 1.0f;
+		float rot = (count - index + 1.0f) / count + 1.0f;
 
 		if (Space->HasComponent<Slowmo>(entity.Handle)) {
 			Slowmo* item = Space->FindComponent<Slowmo>(entity.Handle);
@@ -68,10 +76,10 @@ void ConsumableSystem::Update(
 				adj.y += iw::randf() * sin(time);
 				adj.z += iw::randf() * sin(time);
 
-				rot += 10;
+				rot += 5;
 
 				if (item->Timer + item->Time * 0.8f > item->Time) {
-					transform->Scale = iw::lerp(transform->Scale, iw::vector3(iw::randf() * 0.25f + 0.25f), iw::Time::DeltaTime() * 8);
+					transform->Scale = iw::lerp(transform->Scale, iw::vector3(iw::randf() + 0.25f), iw::Time::DeltaTime() * 8);
 				}
 
 				else {
@@ -99,19 +107,21 @@ void ConsumableSystem::Update(
 		transform->Position = iw::lerp(
 			transform->Position, 
 			adj + iw::vector3(0, 0.2f * sin(time), 0),
-			((totalOffset - offset) * (totalOffset - offset) * 5 + iw::Time::DeltaTime()) * 5
+			((totalOffset - offset) * (totalOffset - offset) + iw::Time::DeltaTime()) * 5
 		);
 
-		transform->Rotation *= iw::quaternion::from_euler_angles(0, rot * iw::Time::DeltaTime(), 0);
+		transform->Rotation *= iw::quaternion::from_euler_angles(rot * iw::Time::DeltaTime());
 
 		if (   m_usingItem
-			&& offset == 0)
+			&& index == 0)
 		{
 			target.x -= 0.25f;
 		}
 
 		target.x -= 0.5f;
 		offset += iw::Time::DeltaTimeScaled();
+
+		index++;
 	}
 }
 
@@ -138,6 +148,8 @@ bool ConsumableSystem::On(
 			if (m_used) {
 				m_activeConsumable = -1;
 			}
+
+			// should tp items back to start
 
 			break;
 		}

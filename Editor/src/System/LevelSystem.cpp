@@ -40,7 +40,7 @@ LevelSystem::LevelSystem(
 
 	//currentLevel = 0;
 
-	currentLevelName = "levels/forest/forest21.json";
+	currentLevelName = "levels/forest/forest08.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 63);
 	closedColor = iw::Color::From255(201, 66, 66, 63);
@@ -325,12 +325,24 @@ iw::Entity LevelSystem::LoadLevel(
 		}
 	}
 
+	// These should all be spawn x events
+
 	// Enemies
 
 	for (size_t i = 0; i < currentLevel.Enemies.size(); i++) {
 		iw::Entity ent = Space->CreateEntity<iw::Transform, iw::Model, iw::SphereCollider, iw::CollisionObject, Enemy>();
 		
-		                         ent.Set<iw::Model>(*Asset->Load<iw::Model>("Tetrahedron"));
+		switch (currentLevel.Enemies[i].Type) {
+			case EnemyType::MINI_BOSS_BOX_SPIN: {
+				ent.Set<iw::Model>(*Asset->Load<iw::Model>("Tetrahedron")); // should be box
+				break;
+			}
+			default: {
+				ent.Set<iw::Model>(*Asset->Load<iw::Model>("Tetrahedron"));
+				break;
+			}
+		}
+
 		Enemy*               e = ent.Set<Enemy>(currentLevel.Enemies[i]);
 		iw::Transform*       t = ent.Set<iw::Transform>();
 		iw::SphereCollider*  s = ent.Set<iw::SphereCollider>(iw::vector3::zero, 1.0f);

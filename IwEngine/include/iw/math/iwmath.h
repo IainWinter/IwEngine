@@ -20,9 +20,14 @@ namespace math {
 	constexpr float Pi = 3.14159265359f;
 
 	/**
-	* Pi ~ 6.28
+	* 2 * Pi ~ 6.28
 	*/
 	constexpr float Pi2 = Pi * 2;
+
+	/**
+	* Pi / 2 ~ 1.57
+	*/
+	constexpr float hPi = Pi * 0.5f;
 
 	/**
 	* e ~ 2.71

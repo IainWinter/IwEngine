@@ -3,9 +3,10 @@
 #include "Bullet.h"
 
 enum class REFLECT EnemyType {
-	SPIN,
-	CIRCLE,
-	SEEK
+	SPIN = 0x00,
+	CIRCLE = 0x1,
+	SEEK,
+	MINI_BOSS_BOX_SPIN = 0x10
 };
 
 struct REFLECT Enemy {
@@ -18,6 +19,9 @@ struct REFLECT Enemy {
 
 	float Timer;
 	bool  HasShot;
+
+	// only for boss
+	float Timer2;
 
 	// only for circle might get removed
 	float RotSpeed;

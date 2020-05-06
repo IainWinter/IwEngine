@@ -78,11 +78,11 @@ namespace Physics {
 			for (CollisionObject* b : m_objects) {
 				if (a == b) break;
 
-				//if (   a->IsTrigger()
-				//	&& b->IsTrigger())
-				//{
-				//	continue;
-				//}
+				if (   a->IsTrigger()
+					&& b->IsTrigger())
+				{
+					continue;
+				}
 
 				if (   !a->Col()
 					|| !b->Col())
