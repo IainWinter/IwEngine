@@ -342,48 +342,11 @@ iw::Entity LevelSystem::LoadLevel(
 		switch (currentLevel.Enemies[i].Type) {
 			case EnemyType::MINI_BOSS_BOX_SPIN: {
 				e->Health = 3;
-
 				ent.Set<iw::Model>(*Asset->Load<iw::Model>("Tetrahedron")); // should be box
-
-				c->SetOnCollision([&](iw::Manifold& man, float dt) {
-					iw::Entity enemy  = Space->FindEntity<iw::CollisionObject>(man.ObjA);
-					iw::Entity player = Space->FindEntity<iw::Rigidbody>(man.ObjB);
-
-					if (!enemy || !player) {
-						return;
-					}
-
-					Enemy*  enemyComponent  = enemy .Find<Enemy>();
-					Player* playerComponent = player.Find<Player>();
-
-					if (!enemyComponent || !playerComponent) {
-						return;
-					}
-
-					if (playerComponent->Timer <= 0.0f) {
-						return;
-					}
-
-					enemyComponent->Health -= 1;
-
-					if (enemyComponent->Health > 0) {
-						return;
-					}
-					
-					iw::Transform* transform = enemy.Find<iw::Transform>();
-						
-					Audio->AsStudio()->CreateInstance("enemyDeath");
-					Bus->push<SpawnEnemyDeath>(enemy.Find<iw::Transform>()->Position, transform->Parent());
-
-					transform->SetParent(nullptr);
-					Space->DestroyEntity(enemy.Index());
-				});
-				
 				break;
 			}
 			default: {
 				e->Health = 1;
-
 				ent.Set<iw::Model>(*Asset->Load<iw::Model>("Tetrahedron"));
 				break;
 			}
@@ -399,7 +362,41 @@ iw::Entity LevelSystem::LoadLevel(
 
 		c->SetCol(s);
 		c->SetTrans(t);
-		c->SetIsTrigger(true); // temp should make collision layers
+		//c->SetIsTrigger(true); // temp should make collision layers
+
+		c->SetOnCollision([&](iw::Manifold& man, float dt) {
+			iw::Entity enemy = Space->FindEntity<iw::CollisionObject>(man.ObjA);
+			iw::Entity player = Space->FindEntity<iw::Rigidbody>(man.ObjB);
+
+			if (!enemy || !player) {
+				return;
+			}
+
+			Enemy* enemyComponent = enemy.Find<Enemy>();
+			Player* playerComponent = player.Find<Player>();
+
+			if (!enemyComponent || !playerComponent) {
+				return;
+			}
+
+			if (playerComponent->Timer <= 0.0f) {
+				return;
+			}
+
+			enemyComponent->Health -= 1;
+
+			if (enemyComponent->Health > 0) {
+				return;
+			}
+
+			iw::Transform* transform = enemy.Find<iw::Transform>();
+
+			Audio->AsStudio()->CreateInstance("enemyDeath");
+			Bus->push<SpawnEnemyDeath>(enemy.Find<iw::Transform>()->Position, transform->Parent());
+
+			transform->SetParent(nullptr);
+			Space->DestroyEntity(enemy.Index());
+		});
 
 		Physics->AddCollisionObject(c);
 	}

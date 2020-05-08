@@ -156,7 +156,7 @@ void EnemySystem::Update(
 					if (enemy->Timer >= fire2)
 					{
 						if (enemy->Timer2 == 0.0f) {
-							float rot = iw::Pi + iw::hPi * 0.5f * sin(enemy->Timer);
+							float rot = iw::Pi + iw::hPi * 0.5f * cos(enemy->Timer);
 
 							for (int i = 0; i <= count; i++) {
 								if (   i != dontShoot
@@ -303,6 +303,11 @@ iw::Transform* EnemySystem::SpawnBullet( // this should be in bullet system i gu
 		iw::Entity bullet = Space->FindEntity<iw::Rigidbody>(man.ObjA);
 		iw::Entity other  = Space->FindEntity(man.ObjB);
 
+		if (!bullet) {
+			bullet = Space->FindEntity<iw::Rigidbody>(man.ObjB);
+			other = Space->FindEntity(man.ObjA);
+		}
+
 		if (!other) {
 			other = Space->FindEntity<iw::Rigidbody>(man.ObjB);
 		}
@@ -320,6 +325,7 @@ iw::Transform* EnemySystem::SpawnBullet( // this should be in bullet system i gu
 		}
 
 		bullet.Find<iw::Transform>()->SetParent(nullptr);
+		//Space->DestroyEntity(bullet.Index());
 		Bus->push<iw::EntityDestroyEvent>(bullet);
 	});
 

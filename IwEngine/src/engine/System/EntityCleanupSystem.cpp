@@ -13,7 +13,7 @@ namespace Engine {
 		EntityDestroyEvent& e)
 	{
 		Space->DestroyEntity(e.Entity.Index());
-		return false;
+		return true;
 	}
 	
 	bool EntityCleanupSystem::On(
