@@ -53,6 +53,10 @@ namespace Physics {
 		return m_isDynamic;
 	}
 
+	func_CollisionCallback& CollisionObject::OnCollision() {
+		return m_onCollision;
+	}
+
 	void CollisionObject::SetTrans(
 		Transform* transform)
 	{
@@ -75,6 +79,12 @@ namespace Physics {
 		bool isStatic)
 	{
 		m_isStatic = isStatic;
+	}
+
+	void CollisionObject::SetOnCollision(
+		func_CollisionCallback callback)
+	{
+		m_onCollision = callback;
 	}
 }
 }

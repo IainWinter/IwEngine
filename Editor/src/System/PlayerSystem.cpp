@@ -8,6 +8,8 @@
 #include "iw/reflection/serialization/JsonSerializer.h"
 #include "iw/util/io/File.h"
 
+#include "Components/Enemy.h"
+
 PlayerSystem::PlayerSystem()
 	: System("Player")
 	, playerPrefab()
@@ -55,25 +57,54 @@ PlayerSystem::PlayerSystem()
 int PlayerSystem::Initialize() {
 	m_playerModel = Asset->Load<iw::Model>("Player");
 	
-	player = Space->CreateEntity<iw::Transform, iw::Model, iw::SphereCollider, iw::CollisionObject, Player>();
+	player = Space->CreateEntity<iw::Transform, iw::Model, iw::SphereCollider, iw::Rigidbody, Player>();
 	
 	                         player.Set<iw::Model>(*m_playerModel);
 	                         player.Set<Player>(playerPrefab);
 	iw::Transform*       t = player.Set<iw::Transform>(iw::vector3(0, 1, 0), iw::vector3(.75f));
 	iw::SphereCollider*  s = player.Set<iw::SphereCollider>(iw::vector3::zero, 1);
-	iw::CollisionObject* c = player.Set<iw::CollisionObject>();
+	iw::Rigidbody*       r = player.Set<iw::Rigidbody>();
 
 	//c->SetMass(1);
-	c->SetCol(s);
-	c->SetTrans(t);
-	c->SetIsStatic(false);
+	r->SetCol(s);
+	r->SetTrans(t);
+	r->SetIsStatic(false);
+
+	r->SetOnCollision([&](iw::Manifold& man, float dt) {
+		iw::Entity enemy  = Space->FindEntity<iw::CollisionObject>(man.ObjA);
+		iw::Entity player = Space->FindEntity<iw::Rigidbody>(man.ObjB);
+
+		if (!enemy || !player) {
+			return;
+		}
+
+		Player* playerComponent = player.Find<Player>();
+		Enemy*  enemyComponent  = enemy .Find<Enemy>();
+
+		if (playerComponent->Timer <= 0) {
+			return;
+		}
+
+		if (enemyComponent->Type >= EnemyType::MINI_BOSS_BOX_SPIN) {
+			Player*        playerComp  = player.Find<Player>();
+			iw::Transform* playerTrans = player.Find<iw::Transform>();
+			iw::Rigidbody* playerBody  = player.Find<iw::Rigidbody>();
+
+			iw::vector3 dir = playerTrans->Position - enemy.Find<iw::Transform>()->Position;
+			dir.normalize();
+
+			//playerBody->Move(playerComp->Movement * 10 * dt);
+			playerBody->ApplyForce(movement * 500);
+		}
+	});
+
 	//c->SetStaticFriction (0.0f);
 	//c->SetDynamicFriction(0.0f);
 
 	//c->SetIsLocked(iw::vector3(0, 1, 0));
 	//c->SetLock    (iw::vector3(0, 1, 0));
 
-	Physics->AddCollisionObject(c);
+	Physics->AddRigidbody(r);
 
 	return 0;
 }
@@ -85,18 +116,18 @@ void PlayerSystem::Update(
 	iw::EntityComponentArray& view)
 {
 	for (auto entity : view) {
-		auto [transform, object, player] = entity.Components.Tie<Components>();
+		auto [transform, body, player] = entity.Components.Tie<Components>();
 
 		if (transition) {
-			object->Trans().Position = iw::lerp(transitionStartPosition, transitionTargetPosition, 0.75f * (iw::Time::TotalTime() - begin));
+			body->Trans().Position = iw::lerp(transitionStartPosition, transitionTargetPosition, 0.75f * (iw::Time::TotalTime() - begin));
 		}
 
 		else {
 			if (player->DeathTimer > 0) {
-				player->DeathTimer -= iw::Time::DeltaTime();
-
 				transform->Scale -= .75f / 1.0f * iw::Time::DeltaTime();
+				body->SetVelocity(0.0f);
 
+				player->DeathTimer -= iw::Time::DeltaTime();
 				if (player->DeathTimer <= 0) {
 					player->DeathTimer = 0;
 					Bus->push<ResetLevelEvent>();
@@ -104,7 +135,7 @@ void PlayerSystem::Update(
 			}
 
 			else {
-				iw::vector3 movement;
+				movement = 0;
 				if (left)  movement.x -= 1;
 				if (right) movement.x += 1;
 				if (up)    movement.z -= 1;
@@ -121,7 +152,9 @@ void PlayerSystem::Update(
 					movement *= 2.0f;
 				}
 
-				object->Trans().Position += movement * iw::Time::DeltaTime();
+				//body->Trans().Position += movement * iw::Time::DeltaTime();
+
+				body->SetVelocity(movement / iw::TimeScale());
 
 				if (player->Timer <= -player->ChargeTime) {
 					if (distance == 0) {
@@ -271,12 +304,13 @@ bool PlayerSystem::On(
 		case iw::val(Actions::GOTO_NEXT_LEVEL): {
 			GoToNextLevelEvent& event = e.as<GoToNextLevelEvent>();
 
-			iw::CollisionObject* c = player.Find<iw::CollisionObject>();
+			Player*        p = player.Find<Player>();
+			iw::Rigidbody* r = player.Find<iw::Rigidbody>();
 
-			c->SetCol(nullptr);
+			r->SetCol(nullptr);
 
 			transition = true;
-			transitionStartPosition  = iw::vector3(c->Trans().Position.x, 1, c->Trans().Position.z);
+			transitionStartPosition  = iw::vector3(r->Trans().Position.x, 1, r->Trans().Position.z);
 			transitionTargetPosition = iw::vector3(event.CenterPosition.x + event.PlayerPosition.x, 1, event.CenterPosition.y + event.PlayerPosition.y);
 			begin = iw::Time::TotalTime();
 
@@ -287,21 +321,23 @@ bool PlayerSystem::On(
 			break;
 		}
 		case iw::val(Actions::START_LEVEL): {
-			iw::Transform*       t = player.Find<iw::Transform>();
-			iw::CollisionObject* c = player.Find<iw::CollisionObject>();
-			iw::SphereCollider*  s = player.Find<iw::SphereCollider>();
 			Player*              p = player.Find<Player>();
-
-			t->Position.x = e.as<StartLevelEvent>().PlayerPosition.x;
-			t->Position.z = e.as<StartLevelEvent>().PlayerPosition.y;
-			t->Scale = 0.75f;
-			
-			c->SetCol(s);
-			c->SetTrans(t);
+			iw::Transform*       t = player.Find<iw::Transform>();
+			iw::Rigidbody*       r = player.Find<iw::Rigidbody>();
+			iw::SphereCollider*  s = player.Find<iw::SphereCollider>();
 
 			*p = playerPrefab;
 
-			transition = false;
+			t->Position.x = e.as<StartLevelEvent>().PlayerPosition.x;
+			t->Position.z = e.as<StartLevelEvent>().PlayerPosition.y;
+			t->Position.y = 1.0f;
+			t->Scale = 0.75f;
+			
+			r->SetCol(s);
+			r->SetTrans(t);
+			r->SetSimGravity(false);
+
+			transition = false; // put in player
 
 			// no break
 		}

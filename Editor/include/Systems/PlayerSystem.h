@@ -9,12 +9,12 @@
 #include "iw/graphics/Camera.h"
 
 class PlayerSystem
-	: public iw::System<iw::Transform, iw::CollisionObject, Player>
+	: public iw::System<iw::Transform, iw::Rigidbody, Player>
 {
 public:
 	struct Components {
 		iw::Transform* Transform;
-		iw::CollisionObject* Object;
+		iw::Rigidbody* Object;
 		Player* Player;
 	};
 private:
@@ -23,6 +23,8 @@ private:
 	iw::ref<iw::Model> m_playerModel;
 
 	iw::Entity player;
+
+	iw::vector3 movement;
 
 	bool left, right, up, down, dash, sprint, transition;
 	iw::vector3 transitionStartPosition;

@@ -1,6 +1,9 @@
 #include "Systems/LevelSystem.h"
 #include "Events/ActionEvents.h"
 #include "Components/Player.h"
+#include "Components/DontDeleteBullets.h"
+
+#include "iw/audio/AudioSpaceStudio.h"
 #include "iw/reflection/serialization/JsonSerializer.h"
 #include "iw/graphics/Model.h"
 #include "iw/physics/Dynamics/Rigidbody.h"
@@ -23,7 +26,6 @@
 #include "iw/reflect/Physics/Collision/CapsuleCollider.h"
 #include "iw/reflect/Components/Level.h"
 #include "iw/reflect/Components/ModelPrefab.h"
-#include <Components\DontDeleteBullets.h>
 
 LevelSystem::LevelSystem(
 	iw::Entity& player)
@@ -332,9 +334,42 @@ iw::Entity LevelSystem::LoadLevel(
 	for (size_t i = 0; i < currentLevel.Enemies.size(); i++) {
 		iw::Entity ent = Space->CreateEntity<iw::Transform, iw::Model, iw::SphereCollider, iw::CollisionObject, Enemy>();
 		
+		Enemy*               e = ent.Set<Enemy>(currentLevel.Enemies[i]);
+		iw::Transform*       t = ent.Set<iw::Transform>();
+		iw::SphereCollider*  s = ent.Set<iw::SphereCollider>(iw::vector3::zero, 1.0f);
+		iw::CollisionObject* c = ent.Set<iw::CollisionObject>();
+
 		switch (currentLevel.Enemies[i].Type) {
 			case EnemyType::MINI_BOSS_BOX_SPIN: {
 				ent.Set<iw::Model>(*Asset->Load<iw::Model>("Tetrahedron")); // should be box
+
+				c->SetOnCollision([&](iw::Manifold& man, float dt) {
+					iw::Entity enemy  = Space->FindEntity<iw::CollisionObject>(man.ObjA);
+					iw::Entity player = Space->FindEntity<iw::Rigidbody>(man.ObjB);
+
+					if (!enemy || !player) {
+						return;
+					}
+
+					Player* playerComponent = player.Find<Player>();
+					Enemy*  enemyComponent  = enemy .Find<Enemy>();
+
+
+					if (playerComponent->Timer <= 0 || enemyComponent->Type == EnemyType::MINI_BOSS_BOX_SPIN) {
+						return;
+					}
+
+					else {
+						iw::Transform* transform = enemy.Find<iw::Transform>();
+						
+						Audio->AsStudio()->CreateInstance("enemyDeath");
+						Bus->push<SpawnEnemyDeath>(enemy.Find<iw::Transform>()->Position, transform->Parent());
+
+						transform->SetParent(nullptr);
+						Space->DestroyEntity(enemy.Index());
+					}
+				});
+				
 				break;
 			}
 			default: {
@@ -342,11 +377,6 @@ iw::Entity LevelSystem::LoadLevel(
 				break;
 			}
 		}
-
-		Enemy*               e = ent.Set<Enemy>(currentLevel.Enemies[i]);
-		iw::Transform*       t = ent.Set<iw::Transform>();
-		iw::SphereCollider*  s = ent.Set<iw::SphereCollider>(iw::vector3::zero, 1.0f);
-		iw::CollisionObject* r = ent.Set<iw::CollisionObject>();
 
 		//e->Timer = e->ChargeTime;
 
@@ -356,10 +386,11 @@ iw::Entity LevelSystem::LoadLevel(
 
 		levelTransform->AddChild(t);
 
-		r->SetCol(s);
-		r->SetTrans(t);
+		c->SetCol(s);
+		c->SetTrans(t);
+		c->SetIsTrigger(true); // temp should make collision layers
 
-		Physics->AddCollisionObject(r);
+		Physics->AddCollisionObject(c);
 	}
 
 	// Colliders

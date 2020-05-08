@@ -1,16 +1,21 @@
 #include "Systems/EnemySystem.h"
-#include "Components/Bullet.h"
+
 #include "iw/engine/Time.h"
 #include "iw/graphics/Model.h"
 #include "iw/input/Devices/Keyboard.h"
+
+#include "iw/physics/Collision/SphereCollider.h";
+#include "iw/physics/Dynamics/Rigidbody.h";
 #include "iw/physics/AABB.h"
 
-#include "IW/physics/Collision/SphereCollider.h";
-#include "IW/physics/Dynamics/Rigidbody.h";
-#include <Components\Player.h>
+#include "iw/audio/AudioSpaceStudio.h"
+
+#include "Components/Bullet.h"
+#include "Components/Player.h"
+#include "Components/LevelDoor.h"
+#include "Components/DontDeleteBullets.h"
 
 #include "Events/ActionEvents.h"
-#include "iw/audio/AudioSpaceStudio.h"
 
 EnemySystem::EnemySystem(
 	iw::Entity& player)
@@ -80,10 +85,12 @@ void EnemySystem::Update(
 			// this one secretly breaks the story xd
 			// spins to player quickly and does 1 / 2 firing moves
 			case EnemyType::MINI_BOSS_BOX_SPIN: {
-				iw::vector3 target = player.Find<iw::Transform>()->Position;
-				float       dir    = atan2(target.z - transform->Position.z, target.x - transform->Position.x);
+				if (enemy->Timer < enemy->ChargeTime) {
+					iw::vector3 target = player.Find<iw::Transform>()->Position;
+					float       dir    = atan2(target.z - transform->Position.z, target.x - transform->Position.x);
 
-				transform->Rotation = iw::quaternion::from_euler_angles(0, dir, 0);
+					transform->Rotation = iw::quaternion::from_euler_angles(0, dir, 0);
+				}
 
 				break;
 			}
@@ -135,50 +142,90 @@ void EnemySystem::Update(
 					break;
 				}
 				case EnemyType::MINI_BOSS_BOX_SPIN: {
-					float time = enemy->FireTime - enemy->ChargeTime;
+					const float time = enemy->FireTime - enemy->ChargeTime;
 
-					if      (enemy->Timer >= enemy->ChargeTime + time / 2.0f)
+					const float fire1 = enemy->ChargeTime + time * 1.0f / 3.0f;
+					const float fire2 = enemy->ChargeTime + time * 2.0f / 3.0f;
+
+					const float fire12 = (fire2 - fire1) * 0.5f;
+
+					int dontShoot = enemy->Speed * 0.5f;
+
+					if (enemy->Timer >= fire2)
 					{
 						if (enemy->Timer2 == 0.0f) {
-							float rot = iw::hPi + iw::Pi / 8 * sin(iw::Time::TotalTime() * 5);
+							float rot = iw::hPi + sin(enemy->Timer * 3) * iw::hPi * 0.25f;
 
 							for (int i = 0; i <= enemy->Speed; i++) {
-								iw::quaternion offset = iw::quaternion::from_euler_angles(0, -rot + iw::Pi / enemy->Speed * i, 0);
+								if (   i != dontShoot
+									&& i != dontShoot - 1
+									&& i != dontShoot + 1)
+								{
+									iw::quaternion offset = iw::quaternion::from_euler_angles(0, -rot + iw::Pi / enemy->Speed * i, 0);
 
-								iw::Transform* bullet = SpawnBullet(
-									enemy->Bullet,
-									transform->Position,
-									transform->Rotation.inverted() * offset,
-									entity.Index
-								);
+									iw::Transform* bullet = SpawnBullet(
+										enemy->Bullet,
+										transform->Position,
+										transform->Rotation.inverted() * offset,
+										entity.Index
+									);
+
+									transform->Parent()->AddChild(bullet);
+								}
 							}
 						}
 
 						enemy->Timer2 += iw::Time::DeltaTimeScaled();
 
-						if (enemy->Timer2 > 0.15f) {
+						if (enemy->Timer2 > 0.2f) {
 							enemy->Timer2 = 0.0f;
 						}
 
-						if (enemy->Timer <= enemy->ChargeTime + time / 4 * 3) {
-							enemy->HasShot = false;
+						if (enemy->Timer <= fire2 + fire12) {
+							enemy->HasShot = false; // resets hasShot if not finished kinda scuff
 						}
 					}
 
-					else if (enemy->Timer >= enemy->ChargeTime + time / 4)
+					else if (enemy->Timer >= fire1)
 					{
-						LOG_DEBUG << enemy->Timer;
+						if (enemy->Timer2 == 0.0f) {
+							float rot = enemy->Timer * iw::Pi2 * 2;
+							iw::quaternion offset = iw::quaternion::from_euler_angles(0, rot, 0);
+
+							iw::Transform* bullet = SpawnBullet(
+								enemy->Bullet,
+								transform->Position,
+								transform->Rotation.inverted() * offset,
+								entity.Index
+							);
+
+							transform->Parent()->AddChild(bullet);
+						}
+
+						enemy->Timer2 += iw::Time::DeltaTimeScaled();
+
+						if (enemy->Timer2 > 0.02f) {
+							enemy->Timer2 = 0.0f;
+						}
+
+						if (enemy->Timer <= fire1 + fire12) {
+							enemy->HasShot = false;  // resets hasShot if not finished kinda scuff
+						}
+
+						else {
+							enemy->Timer = fire2 + fire12;
+						}
 					}
 
 					else
 					{
-						//if (iw::randf() >= 0.5f) {
-							enemy->Timer = enemy->ChargeTime + time / 2;
-						//}
+						if (iw::randf() >= 0.0f) {
+							enemy->Timer = fire1;
+						}
 
-						//else {
-						//	enemy->Timer = enemy->ChargeTime + time / 4;
-						//}
+						else {
+							enemy->Timer = fire2;
+						}
 
 						enemy->HasShot = false;
 					}
@@ -209,60 +256,6 @@ void EnemySystem::Update(
 }
 
 bool EnemySystem::On(
-	iw::CollisionEvent& e)
-{
-	iw::Entity a = Space->FindEntity(e.ObjA);
-	if (a == iw::EntityHandle::Empty) {
-		a = Space->FindEntity<iw::Rigidbody>(e.ObjA);
-	}
-
-	iw::Entity b = Space->FindEntity(e.ObjB);
-	if (b == iw::EntityHandle::Empty) {
-		b = Space->FindEntity<iw::Rigidbody>(e.ObjB);
-	}
-
-	if (   a == iw::EntityHandle::Empty
-		|| b == iw::EntityHandle::Empty)
-	{
-		return false;
-	}
-
-	iw::Entity player;
-	iw::Entity enemy;
-	if (   a.Has<Player>()
-		&& b.Has<Enemy>())
-	{
-		player = a;
-		enemy  = b;
-	}
-
-	else if (b.Has<Player>()
-		&&   a.Has<Enemy>())
-	{
-		player = b;
-		enemy  = a;
-	}
-
-	if (   player != iw::EntityHandle::Empty
-		&& enemy  != iw::EntityHandle::Empty)
-	{
-		Player* playerComponent = player.Find<Player>();
-		if (playerComponent->Timer > 0) {
-			Audio->AsStudio()->CreateInstance("enemyDeath");
-
-			iw::Transform* transform = enemy.Find<iw::Transform>();
-
-			Bus->push<SpawnEnemyDeath>(enemy.Find<iw::Transform>()->Position, transform->Parent());
-
-			transform->SetParent(nullptr); // got moved to enemtdeathcirclesystem but should be in seperate system that cleans up destroied entities (remove from physics / transform tree)
-			Space->DestroyEntity(enemy.Index());
-		}
-	}
-
-	return false;
-}
-
-bool EnemySystem::On(
 	iw::ActionEvent& e)
 {
 	switch (e.Action) {
@@ -276,7 +269,7 @@ bool EnemySystem::On(
 	return false;
 }
 
-iw::Transform* EnemySystem::SpawnBullet(
+iw::Transform* EnemySystem::SpawnBullet( // this should be in bullet system i guess
 	Bullet prefab,
 	iw::vector3 position,
 	iw::quaternion rot,
@@ -303,6 +296,30 @@ iw::Transform* EnemySystem::SpawnBullet(
 	r->SetIsTrigger(true);
 	r->SetIsLocked(iw::vector3(0, 1, 0));
 	r->SetLock(iw::vector3(0, 1, 0));
+
+	r->SetOnCollision([&](iw::Manifold& man, float dt) {
+		iw::Entity bullet = Space->FindEntity<iw::Rigidbody>(man.ObjA);
+		iw::Entity other  = Space->FindEntity(man.ObjB);
+
+		if (!other) {
+			other = Space->FindEntity<iw::Rigidbody>(man.ObjB);
+		}
+
+		if (!bullet || !other) {
+			return;
+		}
+
+		if (   other.Has<Bullet>()
+			|| other.Has<Enemy>()/*.Index() == bullet.Find<Bullet>()->enemyIndex*/
+			|| other.Has<DontDeleteBullets>()
+			|| other.Has<LevelDoor>())
+		{
+			return;
+		}
+
+		bullet.Find<iw::Transform>()->SetParent(nullptr);
+		Bus->push<iw::EntityDestroyEvent>(bullet);
+	});
 
 	Physics->AddRigidbody(r);
 

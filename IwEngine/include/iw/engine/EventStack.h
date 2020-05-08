@@ -120,6 +120,7 @@ namespace Engine {
 
 			else if (e.Group == iw::val(EventGroup::ENTITY)) {
 				switch (e.Type) {
+					case EntityEventType::Destroy:   e.Handled = On((EntityDestroyEvent&)  e); break;
 					case EntityEventType::Destroyed: e.Handled = On((EntityDestroyedEvent&)e); break;
 					default: error = true;
 				}

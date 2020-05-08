@@ -132,6 +132,17 @@ namespace Physics {
 	{
 		for (Manifold& manifold : manifolds) {
 			m_collisionCallback(manifold, dt);
+
+			func_CollisionCallback& a = manifold.ObjA->OnCollision();
+			func_CollisionCallback& b = manifold.ObjB->OnCollision();
+
+			if (a) {
+				a(manifold, dt);
+			}
+
+			if (b) {
+				b(manifold, dt);
+			}
 		}
 	}
 
@@ -189,7 +200,7 @@ namespace Physics {
 	//}
 
 	void CollisionSpace::SetCollisionCallback(
-		const CollisionCallback& callback)
+		const func_CollisionCallback& callback)
 	{
 		m_collisionCallback = callback;
 	}

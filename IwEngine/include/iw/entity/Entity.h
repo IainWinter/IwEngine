@@ -32,6 +32,10 @@ namespace ECS {
 			return !operator==(other);
 		}
 
+		operator bool() {
+			return *this != EntityHandle::Empty;
+		}
+
 		size_t Index() {
 			return Handle.Index;
 		}

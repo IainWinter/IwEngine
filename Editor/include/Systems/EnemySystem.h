@@ -29,7 +29,6 @@ public:
 	void Update(
 		iw::EntityComponentArray& view) override;
 
-	bool On(iw::CollisionEvent& e) override;
 	bool On(iw::ActionEvent&    e) override;
 private:
 	iw::Transform* SpawnBullet(

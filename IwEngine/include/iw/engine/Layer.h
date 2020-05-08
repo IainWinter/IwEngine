@@ -72,49 +72,28 @@ namespace Engine {
 
 		// Action events
 
-		IWENGINE_API
-		virtual bool On(
-			ActionEvent& e);
+		IWENGINE_API virtual bool On(ActionEvent& e);
 
 		// Input events
 
-		IWENGINE_API
-		virtual bool On(
-			MouseWheelEvent& e);
-
-		IWENGINE_API
-		virtual bool On(
-			MouseMovedEvent& e);
-
-		IWENGINE_API
-		virtual bool On(
-			MouseButtonEvent& e);
-
-		IWENGINE_API
-		virtual bool On(
-			KeyEvent& e);
-
-		IWENGINE_API
-		virtual bool On(
-			KeyTypedEvent& e);
+		IWENGINE_API virtual bool On(MouseWheelEvent& e);
+		IWENGINE_API virtual bool On(MouseMovedEvent& e);
+		IWENGINE_API virtual bool On(MouseButtonEvent& e);
+		IWENGINE_API virtual bool On(KeyEvent& e);
+		IWENGINE_API virtual bool On(KeyTypedEvent& e);
 
 		// Window events
 
-		IWENGINE_API
-		virtual bool On(
-			WindowResizedEvent& e);
+		IWENGINE_API virtual bool On(WindowResizedEvent& e);
 
 		// Physics events
 
-		IWENGINE_API
-		virtual bool On(
-			CollisionEvent& e);
+		IWENGINE_API virtual bool On(CollisionEvent& e);
 
 		// Entity events
 
-		IWENGINE_API
-		virtual bool On(
-			EntityDestroyedEvent& e);
+		IWENGINE_API virtual bool On(EntityDestroyEvent& e);
+		IWENGINE_API virtual bool On(EntityDestroyedEvent& e);
 
 		// System updates
 

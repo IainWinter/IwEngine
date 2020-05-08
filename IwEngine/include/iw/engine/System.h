@@ -44,6 +44,7 @@ namespace Engine {
 
 		// Entity events
 
+		virtual bool On(EntityDestroyEvent& e) = 0;
 		virtual bool On(EntityDestroyedEvent& e) = 0;
 
 		virtual const char* Name() const = 0;
@@ -99,6 +100,7 @@ namespace Engine {
 
 		// Entity events
 
+		virtual bool On(EntityDestroyEvent& e) override { return false; }
 		virtual bool On(EntityDestroyedEvent& e) override { return false; }
 
 		const char* Name() const override {

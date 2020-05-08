@@ -2,9 +2,14 @@
 
 #include "iw/common/Components/Transform.h"
 #include "iw/physics/Collision/Collider.h"
+#include "iw/events/callback.h"
 
 namespace iw {
 namespace Physics {
+	struct Manifold;
+
+	using func_CollisionCallback = std::function<void(Manifold&, scalar)>;
+
 	class CollisionObject {
 	protected:
 		Transform m_transform;     // Position, rotation, and scale.
@@ -12,6 +17,8 @@ namespace Physics {
 		bool m_isTrigger;
 		bool m_isStatic;
 		bool m_isDynamic;
+
+		func_CollisionCallback m_onCollision;
 
 	public:
 		IWPHYSICS_API
@@ -42,6 +49,9 @@ namespace Physics {
 		bool IsDynamic() const; // if the collision object is a rigidbody
 
 		IWPHYSICS_API
+		func_CollisionCallback& OnCollision();
+
+		IWPHYSICS_API
 		virtual void SetTrans(
 			Transform* transform);
 
@@ -56,6 +66,10 @@ namespace Physics {
 		IWPHYSICS_API
 		void SetIsStatic(
 			bool isStatic);
+
+		IWPHYSICS_API
+		void SetOnCollision(
+			iw::func_CollisionCallback callback);
 	};
 }
 

@@ -2,7 +2,6 @@
 
 #include "Solver.h"
 //#include "iw/physics/Ray.h"
-#include "iw/events/callback.h"
 #include "iw/util/memory/ref.h"
 
 // https://www.youtube.com/watch?v=1RphLzpQiJY  Debugging like this could be really cool
@@ -12,10 +11,8 @@
 namespace iw {
 namespace Physics {
 	class CollisionSpace {
-	public:
-		using CollisionCallback = iw::callback<Manifold&, scalar>;
 	protected:
-		CollisionCallback m_collisionCallback;
+		func_CollisionCallback m_collisionCallback;
 		std::vector<CollisionObject*> m_objects;
 	private:
 		std::vector<Solver*> m_solvers;
@@ -62,7 +59,7 @@ namespace Physics {
 
 		IWPHYSICS_API
 		void SetCollisionCallback(
-			const CollisionCallback& callback);
+			const func_CollisionCallback& callback);
 
 		IWPHYSICS_API
 		const std::vector<CollisionObject*>& CollisionObjects() const;

@@ -8,6 +8,13 @@ namespace Engine {
 	EntityCleanupSystem::EntityCleanupSystem()
 		: System<>("Entity Cleanup")
 	{}
+
+	bool EntityCleanupSystem::On(
+		EntityDestroyEvent& e)
+	{
+		Space->DestroyEntity(e.Entity.Index());
+		return false;
+	}
 	
 	bool EntityCleanupSystem::On(
 		EntityDestroyedEvent& e)

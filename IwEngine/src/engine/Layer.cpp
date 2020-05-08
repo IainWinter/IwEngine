@@ -83,6 +83,12 @@ namespace Engine {
 	}
 
 	bool Layer::On(
+		EntityDestroyEvent& e)
+	{
+		return m_systems.On(e);
+	}
+
+	bool Layer::On(
 		EntityDestroyedEvent& e)
 	{
 		return m_systems.On(e);

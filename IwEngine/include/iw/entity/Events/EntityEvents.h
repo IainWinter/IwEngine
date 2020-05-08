@@ -8,6 +8,7 @@ namespace ECS {
 	enum class EntityEventType
 		: short
 	{
+		Destroy,
 		Destroyed
 	};
 
@@ -21,6 +22,15 @@ namespace ECS {
 			iw::Entity entity)
 			: event(val(EventGroup::ENTITY), val(type))
 			, Entity(entity)
+		{}
+	};
+
+	struct EntityDestroyEvent
+		: EntityEvent
+	{
+		EntityDestroyEvent(
+			iw::Entity entity)
+			: EntityEvent(EntityEventType::Destroy, entity)
 		{}
 	};
 

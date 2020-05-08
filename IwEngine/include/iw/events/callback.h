@@ -33,6 +33,10 @@ namespace events {
 				return m_getback(arg...);
 			}
 		}
+
+		operator bool() {
+			return m_getback.operator bool();
+		}
 	};
 
 	template<

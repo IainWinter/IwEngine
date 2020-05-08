@@ -30,8 +30,7 @@ namespace Engine {
 			EntityComponentArray& view);
 
 		IWENGINE_API
-		bool On(
-			EntityDestroyedEvent& e) override;
+		bool On(EntityDestroyedEvent& e) override;
 	};
 }
 
