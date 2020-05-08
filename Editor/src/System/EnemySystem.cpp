@@ -149,19 +149,21 @@ void EnemySystem::Update(
 
 					const float fire12 = (fire2 - fire1) * 0.5f;
 
-					int dontShoot = enemy->Speed * 0.5f;
+					int count = roundf(iw::Pi2 / enemy->Speed);
+
+					int dontShoot = count * 0.5f;
 
 					if (enemy->Timer >= fire2)
 					{
 						if (enemy->Timer2 == 0.0f) {
-							float rot = iw::hPi + sin(enemy->Timer * 3) * iw::hPi * 0.25f;
+							float rot = iw::Pi + iw::hPi * 0.5f * sin(enemy->Timer);
 
-							for (int i = 0; i <= enemy->Speed; i++) {
+							for (int i = 0; i <= count; i++) {
 								if (   i != dontShoot
 									&& i != dontShoot - 1
 									&& i != dontShoot + 1)
 								{
-									iw::quaternion offset = iw::quaternion::from_euler_angles(0, -rot + iw::Pi / enemy->Speed * i, 0);
+									iw::quaternion offset = iw::quaternion::from_euler_angles(0, -rot + enemy->Speed * i, 0);
 
 									iw::Transform* bullet = SpawnBullet(
 										enemy->Bullet,
@@ -177,7 +179,7 @@ void EnemySystem::Update(
 
 						enemy->Timer2 += iw::Time::DeltaTimeScaled();
 
-						if (enemy->Timer2 > 0.2f) {
+						if (enemy->Timer2 > 0.1f) {
 							enemy->Timer2 = 0.0f;
 						}
 

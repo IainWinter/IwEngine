@@ -25,4 +25,7 @@ struct REFLECT Enemy {
 
 	// only for circle might get removed
 	float RotSpeed;
+
+	// only really for bosses
+	int Health;
 };

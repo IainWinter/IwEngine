@@ -78,23 +78,30 @@ int PlayerSystem::Initialize() {
 			return;
 		}
 
-		Player* playerComponent = player.Find<Player>();
 		Enemy*  enemyComponent  = enemy .Find<Enemy>();
+		Player* playerComponent = player.Find<Player>();
+
+		if (!enemyComponent || !playerComponent) {
+			return;
+		}
 
 		if (playerComponent->Timer <= 0) {
 			return;
 		}
 
 		if (enemyComponent->Type >= EnemyType::MINI_BOSS_BOX_SPIN) {
+			if (transition) return;
+
 			Player*        playerComp  = player.Find<Player>();
 			iw::Transform* playerTrans = player.Find<iw::Transform>();
 			iw::Rigidbody* playerBody  = player.Find<iw::Rigidbody>();
 
-			iw::vector3 dir = playerTrans->Position - enemy.Find<iw::Transform>()->Position;
-			dir.normalize();
+			playerComp->Timer = 0.0f;
 
-			//playerBody->Move(playerComp->Movement * 10 * dt);
-			playerBody->ApplyForce(movement * 500);
+			transition = true;
+			transitionStartPosition  = playerTrans->Position;
+			transitionTargetPosition = playerTrans->Position + movement.normalized() * 12;
+			begin = iw::Time::TotalTime();
 		}
 	});
 
@@ -120,6 +127,13 @@ void PlayerSystem::Update(
 
 		if (transition) {
 			body->Trans().Position = iw::lerp(transitionStartPosition, transitionTargetPosition, 0.75f * (iw::Time::TotalTime() - begin));
+
+			if (   iw::almost_equal(body->Trans().Position.x, transitionTargetPosition.x, 2)
+				&& iw::almost_equal(body->Trans().Position.z, transitionTargetPosition.z, 2))
+			{
+				transition = false;
+				body->Trans().Position = transitionTargetPosition;
+			}
 		}
 
 		else {
