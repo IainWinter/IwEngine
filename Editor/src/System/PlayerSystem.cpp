@@ -44,7 +44,7 @@ PlayerSystem::PlayerSystem()
 		playerPrefab.Speed        = 4.0f;
 		playerPrefab.DashTime     = 8 / 60.0f;
 		playerPrefab.ChargeTime = 0.2f;
-		playerPrefab.Health       = 3;
+		playerPrefab.Health       = 300000;
 
 #ifdef IW_DEBUG
 		iw::JsonSerializer(file).Write(playerPrefab);

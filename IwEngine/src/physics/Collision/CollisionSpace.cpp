@@ -79,7 +79,8 @@ namespace Physics {
 				if (a == b) break;
 
 				if (   a->IsTrigger()
-					&& b->IsTrigger())
+					&& b->IsTrigger()
+					&& a->IsDynamic())
 				{
 					continue;
 				}

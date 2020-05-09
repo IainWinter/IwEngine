@@ -97,14 +97,14 @@ namespace Engine {
 		return m_systems.On(e);
 	}
 
-	void Layer::UpdateSystems(std::unordered_map<const char*, float>& temp_debug) {
+	void Layer::UpdateSystems(std::unordered_map<const char*, float>& temp_debug, float smooth) {
 		for (ISystem* system : m_systems) {
 			float start = iw::Time::DeltaTimeNow();
 
 			system->Update();
 
 			float end = iw::Time::DeltaTimeNow();
-			temp_debug[system->Name()] += end - start;
+			temp_debug[system->Name()] = iw::lerp(temp_debug[system->Name()], end - start, smooth);
 		}
 	}
 

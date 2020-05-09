@@ -98,7 +98,7 @@ namespace Engine {
 		// System updates
 
 		IWENGINE_API
-		void UpdateSystems(std::unordered_map<const char*, float>& debugpoop);
+		void UpdateSystems(std::unordered_map<const char*, float>& debugpoop, float smooth);
 
 		IWENGINE_API
 		void FixedUpdateSystems();

@@ -171,7 +171,9 @@ namespace Engine {
 	std::unordered_map<const char*, std::unordered_map<const char*, float>> system_update_times;
 	float renderTime;
 	float eventTime;
+	float physicsTime;
 	size_t ticks;
+	float smooth = 0.004f;
 
 	void Application::Update() {
 		// Update time (Sync)
@@ -206,11 +208,11 @@ namespace Engine {
 			float start = iw::Time::DeltaTimeNow();
 
 			Renderer->SetLayer(layerNumber);
-			layer->UpdateSystems(system_update_times[layer->Name()]);
+			layer->UpdateSystems(system_update_times[layer->Name()], smooth);
 			layer->Update();
 
 			float end = iw::Time::DeltaTimeNow();
-			update_times[layer->Name()] += end - start;
+			update_times[layer->Name()] = iw::lerp(update_times[layer->Name()], end - start, smooth);
 		}
 
 		// Pause until work is finished (ASync)
@@ -227,7 +229,7 @@ namespace Engine {
 			layer->PostUpdate();
 
 			float end = iw::Time::DeltaTimeNow();
-			post_update_times[layer->Name()] += end - start;
+			post_update_times[layer->Name()] = iw::lerp(post_update_times[layer->Name()], end - start, smooth);
 		}
 
 		// Run through render queue! (Sync)
@@ -237,7 +239,7 @@ namespace Engine {
 		Renderer->End();
 
 		float renderEnd = iw::Time::DeltaTimeNow();
-		renderTime += renderEnd - renderStart;
+		renderTime = iw::lerp(renderTime, renderEnd - renderStart, smooth);
 
 		// ImGui render (Sync)
 
@@ -249,16 +251,19 @@ namespace Engine {
 			}
 
 			ImGui::Begin("Times");
+			ImGui::SliderFloat("Smooth", &smooth, 0, 1);
+
 			ImGui::Text("Tick %i", iw::Time::Ticks());
-			ImGui::Text("Renderer took %4.4f ns", renderTime * 1000000 / (iw::Time::Ticks() - ticks));
-			ImGui::Text("Eventbus took %4.4f ns", eventTime  * 1000000 / (iw::Time::Ticks() - ticks));
+			ImGui::Text("Renderer took %4.4f ns", renderTime  * 1000000 /*/ (iw::Time::Ticks() - ticks)*/);
+			ImGui::Text("Physics  took %4.4f ns", physicsTime * 1000000 /*/ (iw::Time::Ticks() - ticks)*/);
+			ImGui::Text("Eventbus took %4.4f ns", eventTime * 1000000 /*/ (iw::Time::Ticks() - ticks)*/);
 
 			for (Layer* layer : m_layers) {
-				ImGui::Text("%4.4f ns - %s layer",   post_update_times[layer->Name()] * 1000000 / (iw::Time::Ticks() - ticks), layer->Name());
-				ImGui::Text("%4.4f ns - %s systems", update_times     [layer->Name()] * 1000000 / (iw::Time::Ticks() - ticks), layer->Name());
+				ImGui::Text("%4.4f ns - %s layer",   post_update_times[layer->Name()] * 1000000 /*/ (iw::Time::Ticks() - ticks)*/, layer->Name());
+				ImGui::Text("%4.4f ns - %s systems", update_times     [layer->Name()] * 1000000 /*/ (iw::Time::Ticks() - ticks)*/, layer->Name());
 
 				for (ISystem* system : layer->temp_GetSystems()) {
-					ImGui::Text("\t%4.4f ns - %s system", system_update_times[layer->Name()][system->Name()] * 1000000 / (iw::Time::Ticks() - ticks), system->Name());
+					ImGui::Text("\t%4.4f ns - %s system", system_update_times[layer->Name()][system->Name()] * 1000000 /*/ (iw::Time::Ticks() - ticks)*/, system->Name());
 				}
 			}
 			ImGui::End();
@@ -291,8 +296,8 @@ namespace Engine {
 		Bus->publish();
 
 		float eventEnd = iw::Time::DeltaTimeNow();
-		eventTime += eventEnd - eventStart;
-
+		eventTime = iw::lerp(eventTime, eventEnd - eventStart, smooth);
+		
 		// Swap buffers (Sync)
 		
 		m_window->SwapBuffers();
@@ -304,7 +309,12 @@ namespace Engine {
 			layer->FixedUpdate();
 		}
 
-		Physics->Step(iw::Time::FixedTime()); // no timescale tho :c
+		float physicsStart = iw::Time::DeltaTimeNow();
+		
+		Physics->Step(iw::Time::FixedTime());
+		
+		float physicsEnd = iw::Time::DeltaTimeNow();
+		physicsTime = iw::lerp(physicsTime, physicsEnd - physicsStart, smooth);
 	}
 
 	void Application::Destroy() {
