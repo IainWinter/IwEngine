@@ -61,8 +61,8 @@ int PlayerSystem::Initialize() {
 	
 	                         player.Set<iw::Model>(*m_playerModel);
 	                         player.Set<Player>(playerPrefab);
-	iw::Transform*       t = player.Set<iw::Transform>(iw::vector3(0, 1, 0), iw::vector3(.75f));
-	iw::SphereCollider*  s = player.Set<iw::SphereCollider>(iw::vector3::zero, 1);
+	iw::Transform*       t = player.Set<iw::Transform>(iw::vector3(0, 1, 0), iw::vector3(1));
+	iw::SphereCollider*  s = player.Set<iw::SphereCollider>(iw::vector3::zero, 0.75f);
 	iw::Rigidbody*       r = player.Set<iw::Rigidbody>();
 
 	//c->SetMass(1);
@@ -97,6 +97,7 @@ int PlayerSystem::Initialize() {
 			iw::Rigidbody* playerBody  = player.Find<iw::Rigidbody>();
 
 			playerComp->Timer = 0.0f;
+			playerBody->SetIsTrigger(true);
 
 			transition = true;
 			transitionStartPosition  = playerTrans->Position;
@@ -126,13 +127,14 @@ void PlayerSystem::Update(
 		auto [transform, body, player] = entity.Components.Tie<Components>();
 
 		if (transition) {
-			body->Trans().Position = iw::lerp(transitionStartPosition, transitionTargetPosition, 0.75f * (iw::Time::TotalTime() - begin));
+			body->Trans().Position = iw::lerp(transitionStartPosition, transitionTargetPosition, (iw::Time::TotalTime() - begin));
 
 			if (   iw::almost_equal(body->Trans().Position.x, transitionTargetPosition.x, 2)
 				&& iw::almost_equal(body->Trans().Position.z, transitionTargetPosition.z, 2))
 			{
 				transition = false;
 				body->Trans().Position = transitionTargetPosition;
+				body->SetIsTrigger(false);
 			}
 		}
 

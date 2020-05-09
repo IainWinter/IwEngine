@@ -98,13 +98,17 @@ namespace Engine {
 		// System updates
 
 		IWENGINE_API
-		void UpdateSystems();
+		void UpdateSystems(std::unordered_map<const char*, float>& debugpoop);
 
 		IWENGINE_API
 		void FixedUpdateSystems();
 
 		inline const char* Name() {
 			return m_name;
+		}
+
+		EventStack<ISystem*> temp_GetSystems() {
+			return m_systems;
 		}
 
 		template<

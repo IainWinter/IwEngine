@@ -166,6 +166,13 @@ namespace Engine {
 		Destroy();
 	}
 
+	std::unordered_map<const char*, float> update_times;
+	std::unordered_map<const char*, float> post_update_times;
+	std::unordered_map<const char*, std::unordered_map<const char*, float>> system_update_times;
+	float renderTime;
+	float eventTime;
+	size_t ticks;
+
 	void Application::Update() {
 		// Update time (Sync)
 		Time::UpdateTime();
@@ -182,6 +189,8 @@ namespace Engine {
 		int layerNumber = 0;
 
 		for (Layer* layer : m_layers) {
+			float start = iw::DeltaTimeNow();
+
 			Renderer->SetLayer(layerNumber);
 			layer->PreUpdate();
 		}
@@ -194,9 +203,14 @@ namespace Engine {
 		layerNumber = 0;
 
 		for (Layer* layer : m_layers) {
+			float start = iw::Time::DeltaTimeNow();
+
 			Renderer->SetLayer(layerNumber);
-			layer->UpdateSystems();
+			layer->UpdateSystems(system_update_times[layer->Name()]);
 			layer->Update();
+
+			float end = iw::Time::DeltaTimeNow();
+			update_times[layer->Name()] += end - start;
 		}
 
 		// Pause until work is finished (ASync)
@@ -207,13 +221,23 @@ namespace Engine {
 		layerNumber = 0;
 
 		for (Layer* layer : m_layers) {
+			float start = iw::Time::DeltaTimeNow();
+
 			Renderer->SetLayer(layerNumber);
 			layer->PostUpdate();
+
+			float end = iw::Time::DeltaTimeNow();
+			post_update_times[layer->Name()] += end - start;
 		}
 
 		// Run through render queue! (Sync)
 
+		float renderStart = iw::Time::DeltaTimeNow();
+
 		Renderer->End();
+
+		float renderEnd = iw::Time::DeltaTimeNow();
+		renderTime += renderEnd - renderStart;
 
 		// ImGui render (Sync)
 
@@ -223,13 +247,51 @@ namespace Engine {
 			for (Layer* layer : m_layers) {
 				layer->ImGui();
 			}
+
+			ImGui::Begin("Times");
+			ImGui::Text("Tick %i", iw::Time::Ticks());
+			ImGui::Text("Renderer took %4.4f ns", renderTime * 1000000 / (iw::Time::Ticks() - ticks));
+			ImGui::Text("Eventbus took %4.4f ns", eventTime  * 1000000 / (iw::Time::Ticks() - ticks));
+
+			for (Layer* layer : m_layers) {
+				ImGui::Text("%4.4f ns - %s layer",   post_update_times[layer->Name()] * 1000000 / (iw::Time::Ticks() - ticks), layer->Name());
+				ImGui::Text("%4.4f ns - %s systems", update_times     [layer->Name()] * 1000000 / (iw::Time::Ticks() - ticks), layer->Name());
+
+				for (ISystem* system : layer->temp_GetSystems()) {
+					ImGui::Text("\t%4.4f ns - %s system", system_update_times[layer->Name()][system->Name()] * 1000000 / (iw::Time::Ticks() - ticks), system->Name());
+				}
+			}
+			ImGui::End();
+
 			imgui->End();
 		}
 
+		/*if (iw::Time::Ticks() % 100 == 0) {
+			ticks = iw::Time::Ticks() - 1;
+			for (auto p : update_times) {
+				p.second /= 100;
+			}
+
+			for (auto p : post_update_times) {
+				p.second /= 100;
+			}
+
+			for (auto p : system_update_times) {
+				for (auto q : p.second) {
+					q.second /= 100;
+				}
+			}
+		}*/
+
 		Audio->Update();
 
-		Console->ExecuteQueue(); 
+		float eventStart = iw::Time::DeltaTimeNow();
+
+		Console->ExecuteQueue();
 		Bus->publish();
+
+		float eventEnd = iw::Time::DeltaTimeNow();
+		eventTime += eventEnd - eventStart;
 
 		// Swap buffers (Sync)
 		

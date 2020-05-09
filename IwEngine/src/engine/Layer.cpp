@@ -1,5 +1,8 @@
 #include "iw/engine/Layer.h"
 
+#include "iw/engine/Time.h"
+#include <unordered_map>
+
 namespace iw {
 namespace Engine {
 	Layer::Layer(
@@ -94,9 +97,14 @@ namespace Engine {
 		return m_systems.On(e);
 	}
 
-	void Layer::UpdateSystems() {
+	void Layer::UpdateSystems(std::unordered_map<const char*, float>& temp_debug) {
 		for (ISystem* system : m_systems) {
+			float start = iw::Time::DeltaTimeNow();
+
 			system->Update();
+
+			float end = iw::Time::DeltaTimeNow();
+			temp_debug[system->Name()] += end - start;
 		}
 	}
 

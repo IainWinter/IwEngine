@@ -147,6 +147,10 @@ namespace Engine {
 			return false;
 		}
 
+		size_t size() const {
+			return m_items.size();
+		}
+
 		iterator begin() {
 			return m_items.begin();
 		}
