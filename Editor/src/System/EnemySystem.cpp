@@ -14,6 +14,7 @@
 #include "Components/Player.h"
 #include "Components/LevelDoor.h"
 #include "Components/DontDeleteBullets.h"
+#include "Components/EnemyDeathCircle.h"
 
 #include "Events/ActionEvents.h"
 
@@ -89,7 +90,7 @@ void EnemySystem::Update(
 					iw::vector3 target = player.Find<iw::Transform>()->Position;
 					float       dir    = atan2(target.z - transform->Position.z, target.x - transform->Position.x);
 
-					transform->Rotation = iw::quaternion::from_euler_angles(0, dir, 0);
+					transform->Rotation = iw::lerp(transform->Rotation, iw::quaternion::from_euler_angles(0, dir, 0), iw::Time::DeltaTime() * 4);
 				}
 
 				break;
@@ -324,7 +325,20 @@ iw::Transform* EnemySystem::SpawnBullet( // this should be in bullet system i gu
 			return;
 		}
 
-		bullet.Find<iw::Transform>()->SetParent(nullptr);
+		iw::Transform* bulletTransform = bullet.Find<iw::Transform>();
+
+		if (other.Has<Player>()) {
+			Bus->push<GiveScoreEvent>(bulletTransform->Position, 0, true);
+		}
+
+		else if (other.Has<EnemyDeathCircle>()) {
+			iw::Transform* otherTransform  = other .Find<iw::Transform>();
+
+			float score = ceil((bulletTransform->Position - otherTransform->Position).length()) * 10;
+			Bus->push<GiveScoreEvent>(bulletTransform->Position, score, false);
+		}
+
+		bulletTransform->SetParent(nullptr);
 		//Space->DestroyEntity(bullet.Index());
 		Bus->push<iw::EntityDestroyEvent>(bullet);
 	});

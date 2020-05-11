@@ -13,7 +13,8 @@ enum class Actions
 	GAME_STATE, DEV_CONSOLE,
 	JUMP, RIGHT, FORWARD, USE,
 	RESET_LEVEL, START_LEVEL, UNLOCK_LEVEL_DOOR, LOAD_NEXT_LEVEL, GOTO_NEXT_LEVEL, AT_NEXT_LEVEL,
-	SPAWN_ENEMY_DEATH, SPAWN_ITEM, SPAWN_NOTE, SPAWN_CONSUMABLE
+	SPAWN_ENEMY_DEATH, SPAWN_ITEM, SPAWN_NOTE, SPAWN_CONSUMABLE,
+	GIVE_SCORE
 };
 
 struct DevConsoleEvent
@@ -214,5 +215,23 @@ struct SpawnConsumableEvent
 		unsigned index)
 		: iw::SingleEvent(iw::val(Actions::SPAWN_CONSUMABLE))
 		, Index(index)
+	{}
+};
+
+struct GiveScoreEvent
+	: iw::SingleEvent
+{
+	iw::vector3 Position;
+	int Score;
+	bool HalfScore; // dont use score half potential score
+
+	GiveScoreEvent(
+		iw::vector3 position,
+		int score,
+		bool halfScore = false)
+		: iw::SingleEvent(iw::val(Actions::GIVE_SCORE))
+		, Position(position)
+		, Score(score)
+		, HalfScore(halfScore)
 	{}
 };

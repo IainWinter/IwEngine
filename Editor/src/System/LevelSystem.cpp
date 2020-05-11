@@ -342,11 +342,15 @@ iw::Entity LevelSystem::LoadLevel(
 		switch (currentLevel.Enemies[i].Type) {
 			case EnemyType::MINI_BOSS_BOX_SPIN: {
 				e->Health = 3;
-				ent.Set<iw::Model>(*Asset->Load<iw::Model>("Tetrahedron")); // should be box
+				e->ScoreMultiple = 10;
+				t->Scale = 0.75f;
+				ent.Set<iw::Model>(*Asset->Load<iw::Model>("Box"));
+
 				break;
 			}
 			default: {
 				e->Health = 1;
+				e->ScoreMultiple = 1;
 				ent.Set<iw::Model>(*Asset->Load<iw::Model>("Tetrahedron"));
 				break;
 			}
@@ -365,14 +369,14 @@ iw::Entity LevelSystem::LoadLevel(
 		//c->SetIsTrigger(true); // temp should make collision layers
 
 		c->SetOnCollision([&](iw::Manifold& man, float dt) {
-			iw::Entity enemy = Space->FindEntity<iw::CollisionObject>(man.ObjA);
+			iw::Entity enemy  = Space->FindEntity<iw::CollisionObject>(man.ObjA);
 			iw::Entity player = Space->FindEntity<iw::Rigidbody>(man.ObjB);
 
 			if (!enemy || !player) {
 				return;
 			}
 
-			Enemy* enemyComponent = enemy.Find<Enemy>();
+			Enemy*  enemyComponent  = enemy.Find<Enemy>();
 			Player* playerComponent = player.Find<Player>();
 
 			if (!enemyComponent || !playerComponent) {
@@ -389,12 +393,16 @@ iw::Entity LevelSystem::LoadLevel(
 				return;
 			}
 
-			iw::Transform* transform = enemy.Find<iw::Transform>();
+			iw::Transform* enemyTransform  = enemy.Find<iw::Transform>();
+			iw::Transform* playerTransform = player.Find<iw::Transform>();
+
+			float score = floor((playerTransform->Position - enemyTransform->Position).length() / 200) * 200 + 200;
 
 			Audio->AsStudio()->CreateInstance("enemyDeath");
-			Bus->push<SpawnEnemyDeath>(enemy.Find<iw::Transform>()->Position, transform->Parent());
+			Bus->push<SpawnEnemyDeath>(enemy.Find<iw::Transform>()->Position, enemyTransform->Parent());
+			Bus->push<GiveScoreEvent>(enemyTransform->Position, score * enemyComponent->ScoreMultiple);
 
-			transform->SetParent(nullptr);
+			enemyTransform->SetParent(nullptr);
 			Space->DestroyEntity(enemy.Index());
 		});
 

@@ -75,6 +75,48 @@ namespace Graphics {
 		0, 2, 3
 	};
 
+	// Cube
+
+	static const unsigned CubeVertCount  = 8;
+	static const unsigned CubeIndexCount = 36;
+
+	static vector3 CubeVerts[] = {
+		vector3(-1, -1, -1),
+		vector3( 1, -1, -1),
+		vector3( 1,  1, -1),
+		vector3(-1,  1, -1),
+		vector3(-1,  1,  1),
+		vector3( 1,  1,  1),
+		vector3( 1, -1,  1),
+		vector3(-1, -1,  1),
+	};
+
+	static vector2 CubeUvs[] = {
+		vector2(0, 0),
+		vector2(1, 0),
+		vector2(1, 1),
+		vector2(0, 1),
+		vector2(0, 1),
+		vector2(1, 1),
+		vector2(1, 0),
+		vector2(0, 0),
+	};
+
+	static const unsigned CubeIndex[] = {
+		0, 2, 1, // front
+		0, 3, 2,
+		2, 3, 4, // top
+		2, 4, 5,
+		1, 2, 5, // right
+		1, 5, 6,
+		0, 7, 4, // left
+		0, 4, 3,
+		5, 4, 7, // back
+		5, 7, 6,
+		0, 6, 7, // bottom
+		0, 1, 6
+	};
+
 	// default rad should be .5 not 1
 
 	MeshData* MakeIcosphere(
@@ -486,6 +528,107 @@ namespace Graphics {
 				v++;
 			}
 		}
+
+		MeshData* data = new MeshData(description);
+
+		data->SetIndexData(indexCount, indices);
+		data->SetBufferData(bName::POSITION, vertCount, verts);
+
+		if (uvs) {
+			data->SetBufferData(bName::UV, vertCount, uvs);
+		}
+
+		if (description.HasBuffer(bName::NORMAL)) {
+			data->GenNormals();
+		}
+
+		delete[] verts;
+		delete[] uvs;
+		delete[] indices;
+
+		return data;
+	}
+
+	MeshData* MakeCube(
+		const MeshDescription& description,
+		unsigned resolution)
+	{
+		if (!description.HasBuffer(bName::POSITION)) {
+			LOG_WARNING << "Cannot generate a UvSphere for a mesh description that does not contain at least a POSITION buffer!";
+			return nullptr;
+		}
+
+		unsigned indexCount = 36 /*+ resolution*/;
+		unsigned vertCount  = 8  /*+ resolution*/;
+
+		unsigned* indices = new unsigned[indexCount];
+		vector3* verts    = new vector3[vertCount];
+		vector2* uvs      = nullptr;
+
+		if (description.HasBuffer(bName::UV)) {
+			uvs = new vector2[vertCount];
+		}
+
+		memcpy(indices, CubeIndex, CubeIndexCount * sizeof(unsigned));
+		memcpy(verts,   CubeVerts, CubeVertCount * sizeof(vector3));
+
+		if (uvs) {
+			memcpy(uvs, CubeUvs, CubeVertCount * sizeof(vector2));
+		}
+
+		//// Verts
+
+		//float lonStep = Pi2 / lonCount;
+		//float latStep = Pi / latCount;
+
+		//size_t vert = 0;
+		//for (unsigned lat = 0; lat <= latCount; lat++) {
+		//	for (unsigned lon = 0; lon <= lonCount; lon++) {
+		//		float y = sin(-Pi / 2 + lat * latStep);
+		//		float x = cos(lon * lonStep) * sin(lat * latStep);
+		//		float z = sin(lon * lonStep) * sin(lat * latStep);
+
+		//		float u = (float)lon / lonCount;
+		//		float v = (float)lat / latCount;
+
+		//		verts[vert] = vector3(x, y, z);
+
+		//		if (uvs) {
+		//			uvs[vert] = vector2(u, v);
+		//		}
+
+		//		vert++;
+		//	}
+		//}
+
+		//// Index
+
+		//unsigned i = 0;
+		//unsigned v = lonCount + 1;
+		//for (unsigned lon = 0; lon < lonCount; ++lon, v++) {
+		//	indices[i++] = lon;
+		//	indices[i++] = v;
+		//	indices[i++] = v + 1;
+		//}
+
+		//for (unsigned lat = 1; lat < latCount - 1; lat++) {
+		//	v = lat * (lonCount + 1);
+		//	for (unsigned lon = 0; lon < lonCount; lon++, v++) {
+		//		indices[i++] = v;
+		//		indices[i++] = v + lonCount + 1;
+		//		indices[i++] = v + 1;
+		//		indices[i++] = v + 1;
+		//		indices[i++] = v + lonCount + 1;
+		//		indices[i++] = v + lonCount + 2;
+		//	}
+		//}
+
+		//v = (latCount - 1) * (lonCount + 1);
+		//for (unsigned lon = 0; lon < lonCount; lon++, v++) {
+		//	indices[i++] = v;
+		//	indices[i++] = v + lonCount + 1;
+		//	indices[i++] = v + 1;
+		//}
 
 		MeshData* data = new MeshData(description);
 

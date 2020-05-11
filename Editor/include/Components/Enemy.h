@@ -28,4 +28,5 @@ struct REFLECT Enemy {
 
 	// only really for bosses
 	int Health;
+	int ScoreMultiple;
 };

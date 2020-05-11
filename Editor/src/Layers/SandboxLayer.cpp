@@ -217,12 +217,15 @@ namespace iw {
 
 		Mesh smesh = MakeUvSphere(description, 25, 30)->MakeInstance();
 		Mesh tmesh = MakeTetrahedron(description, 5)->MakeInstance();
+		Mesh bmesh = MakeCube(description)->MakeInstance();
 
 		smesh.Data()->GenTangents();
 		tmesh.Data()->GenTangents();
+		bmesh.Data()->GenTangents();
 
 		smesh.SetMaterial(mat->MakeInstance());
 		tmesh.SetMaterial(mat->MakeInstance());
+		bmesh.SetMaterial(mat->MakeInstance());
 
 		Model smodel;
 		smodel.AddMesh(smesh);
@@ -230,8 +233,12 @@ namespace iw {
 		Model tmodel;
 		tmodel.AddMesh(tmesh);
 
-		Asset->Give<Model>("Sphere",      &smodel);
+		Model bmodel;
+		bmodel.AddMesh(bmesh);
+
+		Asset->Give<Model>("Sphere", &smodel);
 		Asset->Give<Model>("Tetrahedron", &tmodel);
+		Asset->Give<Model>("Box", &bmodel);
 
 		//	Player
 

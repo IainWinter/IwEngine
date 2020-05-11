@@ -11,7 +11,7 @@ namespace Graphics {
 	IWGRAPHICS_API
 	MeshData* MakeIcosphere(
 		const MeshDescription& description,
-		unsigned resolution);
+		unsigned resolution = 0);
 
 	IWGRAPHICS_API
 	MeshData* MakeUvSphere(
@@ -43,6 +43,13 @@ namespace Graphics {
 		unsigned xCount,
 		unsigned zCount);
 
+	// Cube
+
+	IWGRAPHICS_API
+	MeshData* MakeCube(
+		const MeshDescription& description, // can only return a default cube
+		unsigned resolution = 0); // resolution doesnt do anything rn
+
 namespace detail {
 	using IndexPair   = std::pair<unsigned, unsigned>;
 	using IndexLookup = std::unordered_map<IndexPair, unsigned, pair_hash>;
@@ -61,6 +68,14 @@ namespace detail {
 	static const vector3*  TriVerts;
 	static const vector2*  TriUvs;
 	static const unsigned* TriIndex;
+
+	// Cube
+
+	static const unsigned CubeVertCount;
+	static const unsigned CubeIndexCount;
+	static vector3*  CubeVerts;
+	static vector2*  CubeUvs;
+	static unsigned* CubeIndex;
 
 	void SubDevideVerts(
 		vector3* verts,

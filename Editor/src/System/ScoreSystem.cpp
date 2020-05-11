@@ -127,76 +127,30 @@ void ScoreSystem::Update(
 }
 
 bool ScoreSystem::On(
-	iw::CollisionEvent& event)
-{
-	iw::Entity a = Space->FindEntity(event.ObjA);
-	if (a == iw::EntityHandle::Empty) {
-		a = Space->FindEntity<iw::Rigidbody>(event.ObjA);
-	}
-
-	iw::Entity b = Space->FindEntity(event.ObjB);
-	if (b == iw::EntityHandle::Empty) {
-		b = Space->FindEntity<iw::Rigidbody>(event.ObjB);
-	}
-
-	iw::Entity bullet;
-	iw::Entity other;
-	if (   a != iw::EntityHandle::Empty 
-		&& a.Has<Bullet>()) 
-	{
-		bullet = a;
-		other  = b;
-	}
-
-	else if (b != iw::EntityHandle::Empty
-		  && b.Has<Bullet>())
-	{
-		bullet = b;
-		other  = a;
-	}
-
-	if (   other  == iw::EntityHandle::Empty
-		|| bullet == iw::EntityHandle::Empty)
-	{
-		return false;
-	}
-
- 	if (other.Has<EnemyDeathCircle>()) {
-		iw::vector3 pos = bullet.Find<iw::Rigidbody>()      ->Trans().Position;
-		iw::vector3 des = other .Find<iw::CollisionObject>()->Trans().Position;
-
-		SpawnScore(ceil((pos-des).length()) * 10, pos);
-	}
-
-	if (other.Has<Player>()) {
-		iw::vector3 pos = bullet.Find<iw::Rigidbody>()->Trans().Position;
-
-		int score = potentialScore / 2;
-		score = score - (score % 50);
-
-		SpawnScore(-score, pos);
-	}
-
-	return false;
-}
-
-bool ScoreSystem::On(
 	iw::ActionEvent& e)
 {
-	if (e.Action == iw::val(Actions::GOTO_NEXT_LEVEL)) {
+	if (e.Action == iw::val(Actions::GIVE_SCORE)) {
+		GiveScoreEvent& event = e.as<GiveScoreEvent>();
+		
+		if (event.HalfScore) {
+			int score = potentialScore / 2;
+			score = score - (score % 50);
+
+			SpawnScore(-score, event.Position);
+		}
+
+		else {
+			SpawnScore(event.Score, event.Position);
+		}
+	}
+
+	else if (e.Action == iw::val(Actions::GOTO_NEXT_LEVEL)) {
 		totalScore += potentialScore;
 		potentialScore = 0;
 	}
 
 	else if (e.Action == iw::val(Actions::RESET_LEVEL)) {
 		potentialScore = 0;
-	}
-
-	else if (e.Action == iw::val(Actions::SPAWN_ENEMY_DEATH)) {
-		iw::vector3 pos = e.as<SpawnEnemyDeath>().Position;
-		float       score = 1000 * (1.0f - player.Find<Player>()->Timer / player.Find<Player>()->DashTime);
-
-		SpawnScore(floor(score / 200) * 200 + 200, pos);
 	}
 
 	return false;

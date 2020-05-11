@@ -81,8 +81,8 @@ namespace Graphics {
 		void SetCamera(
 			const Camera* camera) // for optimization
 		{
+			m_needsToUpdateBuffer = m_camera != camera;
 			m_camera = camera;
-			m_needsToUpdateBuffer = true;
 		}
 
 		void SetParticleMesh(
