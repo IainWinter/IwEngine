@@ -266,7 +266,7 @@ namespace iw {
 
 		Physics->SetGravity(vector3(0, -9.8f, 0));
 		Physics->AddSolver(new ImpulseSolver());
-		Physics->AddSolver(new PositionSolver());
+		Physics->AddSolver(new SmoothPositionSolver());
 
 		// Rendering pipeline
 		//

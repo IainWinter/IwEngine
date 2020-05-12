@@ -1,15 +1,6 @@
 #include "Systems/BulletSystem.h"
 #include "Events/ActionEvents.h"
-#include "Components/LevelDoor.h"
-#include "Components/Player.h"
-#include "Components/Enemy.h"
 #include "iw/engine/Time.h"
-#include <Components\DontDeleteBullets.h>
-
-struct PlayerComponents {
-	iw::Transform* Transform;
-	Player* Player;
-};
 
 BulletSystem::BulletSystem(
 	iw::Entity& player)

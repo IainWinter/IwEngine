@@ -42,7 +42,7 @@ LevelSystem::LevelSystem(
 
 	//currentLevel = 0;
 
-	currentLevelName = "levels/forest/forest05.json";
+	currentLevelName = "levels/forest/forest01.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 63);
 	closedColor = iw::Color::From255(201, 66, 66, 63);
@@ -376,7 +376,7 @@ iw::Entity LevelSystem::LoadLevel(
 				return;
 			}
 
-			Enemy*  enemyComponent  = enemy.Find<Enemy>();
+			Enemy*  enemyComponent  = enemy .Find<Enemy>();
 			Player* playerComponent = player.Find<Player>();
 
 			if (!enemyComponent || !playerComponent) {
@@ -393,16 +393,16 @@ iw::Entity LevelSystem::LoadLevel(
 				return;
 			}
 
-			iw::Transform* enemyTransform  = enemy.Find<iw::Transform>();
-			iw::Transform* playerTransform = player.Find<iw::Transform>();
+			iw::Transform* transform  = enemy.Find<iw::Transform>();
 
-			float score = floor((playerTransform->Position - enemyTransform->Position).length() / 200) * 200 + 200;
+			float score = floor(5 * (1.0f - playerComponent->Timer / playerComponent->DashTime)) * 200 + 200;
 
 			Audio->AsStudio()->CreateInstance("enemyDeath");
-			Bus->push<SpawnEnemyDeath>(enemy.Find<iw::Transform>()->Position, enemyTransform->Parent());
-			Bus->push<GiveScoreEvent>(enemyTransform->Position, score * enemyComponent->ScoreMultiple);
 
-			enemyTransform->SetParent(nullptr);
+			Bus->push<SpawnEnemyDeath>(transform->Position, transform->Parent());
+			Bus->push<GiveScoreEvent>(transform->Position, score * enemyComponent->ScoreMultiple);
+
+			transform->SetParent(nullptr);
 			Space->DestroyEntity(enemy.Index());
 		});
 
