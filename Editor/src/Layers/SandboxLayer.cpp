@@ -44,6 +44,9 @@
 
 #include "imgui/imgui.h"
 
+#include "iw/engine/Events/Seq/MoveToTarget.h"
+#include "iw/engine/Events/Seq/DestroyEntity.h"
+
 namespace iw {
 	struct ModelUBO {
 		matrix4 model;
@@ -80,6 +83,8 @@ namespace iw {
 	iw::matrix4 persp = iw::matrix4::create_perspective_field_of_view(1.17f, 1.778f, 1.0f, 500.0f);
 	iw::matrix4 ortho = iw::matrix4::create_orthographic(16 * 4, 9 * 4, -100, 100);
 	float blend;
+
+	iw::event_seq seq;
 
 	int SandboxLayer::Initialize() {
 
@@ -377,6 +382,14 @@ namespace iw {
 		//e.Set<iw::Transform>();
 		//e.Set<iw::Model>(*rock);
 
+
+		iw::MoveToTarget* move = new iw::MoveToTarget(playerSystem->GetPlayer(), iw::vector3(20, 1, 0));
+		seq.add(move);
+		seq.stop();
+
+		iw::DestroyEntity* des = new iw::DestroyEntity(playerSystem->GetPlayer());
+		seq.add(des);
+	
 		return Layer::Initialize();
 	}
 
@@ -384,6 +397,7 @@ namespace iw {
 		// Update particle system
 
 		//font->UpdateMesh(textMesh, std::to_string(1.0f / Time::DeltaTime()), 0.01f, 1); //fps
+		seq.update();
 
 		MainScene->MainCamera()->SetProjection(iw::lerp(persp, ortho, blend));
 		
@@ -454,6 +468,10 @@ namespace iw {
 
 		if (ImGui::Button("Spawn slowmo")) {
 			Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 0 }, iw::vector3(0, 0.1f, 8), nullptr);
+		}
+
+		if (ImGui::Button("Start seq")) {
+			seq.start();
 		}
 
 		//if (ImGui::Button("Save level")) {
