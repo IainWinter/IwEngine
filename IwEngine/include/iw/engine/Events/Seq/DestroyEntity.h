@@ -20,7 +20,7 @@ namespace Engine {
 
 		bool update() override {
 			entity.Find<Transform>()->SetParent(nullptr);
-			entity.Space->DestroyEntity(entity.Index()); // this should set alive to false but doesnt
+			entity.Space->DestroyEntity(entity.Index()); // this should set alive to false but doesnt. I think this is why its crashing
 			return true;
 		}
 	};

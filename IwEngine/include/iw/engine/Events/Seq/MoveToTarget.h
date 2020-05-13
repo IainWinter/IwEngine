@@ -11,7 +11,7 @@ namespace Engine {
 		: event_task
 	{
 	private:
-		Entity& entity;
+		Entity& entity; // in future it would be awesome if there is a verison that doesnt need a reference
 		vector3 target;
 		vector3 origin;
 		// add speed here
