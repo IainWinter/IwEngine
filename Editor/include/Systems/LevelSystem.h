@@ -33,6 +33,7 @@ private:
 
 	iw::event_seq* sequence; // For cut scenes, prob shouldnt be here
 	iw::Entity firstEnemy;
+	iw::Entity otherGuy;
 
 public:
 	LevelSystem(

@@ -538,7 +538,8 @@ iw::Entity LevelSystem::LoadLevel(
 	// to destory the enemy, just use the firstEnemy variable from line 346
 	// if it keeps crashing just make it move underground and I'll figure it out later (i.e. set 'y' to like -5)
 
-	iw::Entity otherGuy = Space->CreateEntity<iw::Transform, iw::Mesh>();
+	Space->DestroyEntity(otherGuy.Index());
+	otherGuy = Space->CreateEntity<iw::Transform, iw::Mesh>();
 
 	otherGuy.Set<iw::Transform>(
 		iw::vector3(-5, 1, -16 /*starting location */ /*z axis is reversed xd (- is going twoards the top of the screen)*/), 
