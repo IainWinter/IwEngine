@@ -538,17 +538,17 @@ iw::Entity LevelSystem::LoadLevel(
 	// to destory the enemy, just use the firstEnemy variable from line 346
 	// if it keeps crashing just make it move underground and I'll figure it out later (i.e. set 'y' to like -5)
 
-	Space->DestroyEntity(otherGuy.Index());
-	otherGuy = Space->CreateEntity<iw::Transform, iw::Mesh>();
-
-	otherGuy.Set<iw::Transform>(
-		iw::vector3(-5, 1, -16 /*starting location */ /*z axis is reversed xd (- is going twoards the top of the screen)*/), 
-		0.75f /*scale*/
-	);
-
-	otherGuy.Set<iw::Mesh>(Asset->Load<iw::Model>("Sphere")->GetMesh(0).MakeInstance()); // "Sphere" gets created at line 246 of SandboxLayer.cpp
-
 	if (currentLevelName == "levels/forest/forest02.json") {
+		Space->DestroyEntity(otherGuy.Index());
+		otherGuy = Space->CreateEntity<iw::Transform, iw::Mesh>();
+
+		otherGuy.Set<iw::Transform>(
+			iw::vector3(-5, 1, -16 /*starting location */ /*z axis is reversed xd (- is going twoards the top of the screen)*/),
+			0.75f /*scale*/
+		);
+
+		otherGuy.Set<iw::Mesh>(Asset->Load<iw::Model>("Sphere")->GetMesh(0).MakeInstance()); // "Sphere" gets created at line 246 of SandboxLayer.cpp
+
 		delete sequence;
 		sequence = new iw::event_seq();
 		sequence->add(new iw::MoveToTarget(otherGuy, iw::vector3(-5, 1, -5))); // sample of what to kinda do
