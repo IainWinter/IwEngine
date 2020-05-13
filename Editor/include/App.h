@@ -2,8 +2,7 @@
 
 #include "iw/engine/EntryPoint.h"
 #include "iw/engine/Layers/ImGuiLayer.h"
-#include "Layers/ToolLayer.h"
-#include "Layers/SandboxLayer.h"
+#include "iw/engine/Layer.h"
 
 namespace iw {
 namespace Editor {
@@ -12,9 +11,10 @@ namespace Editor {
 	{
 	public:
 	private:
-		ToolLayer*  toolbox;
 		ImGuiLayer* imgui;
-		SandboxLayer* sandbox;
+
+		Layer* toolbox;
+		Layer* sandbox;
 
 	public:
 		App();

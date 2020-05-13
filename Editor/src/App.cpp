@@ -5,6 +5,11 @@
 #include "iw/physics/Collision/SphereCollider.h"
 #include "iw/audio/AudioSpaceStudio.h"
 
+#include "Layers/SandboxLayer.h"
+#include "Layers/ToolLayer.h"
+
+//#include "Layers/AimTrainer.h"
+
 namespace iw {
 	App::App() {
 		Audio = REF<AudioSpaceStudio>("assets/sounds/");
@@ -29,7 +34,7 @@ namespace iw {
 		context->AddDevice(rm);
 		context->AddDevice(k);
 
-		sandbox = PushLayer<SandboxLayer>();
+		sandbox = PushLayer<SandboxLayer>(); //PushLayer<AimTrainerLayer>();
 		imgui   = PushLayer<ImGuiLayer>();
 	}
 

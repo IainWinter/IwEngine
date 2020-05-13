@@ -15,13 +15,13 @@
 #include "iw/graphics/MeshFactory.h"
 #include "iw/physics/Collision/CapsuleCollider.h"
 
-RecingLayer::RecingLayer()
+RacingLayer::RacingLayer()
 	: Layer("Ray Marching")
 {
 	srand(time(nullptr));
 }
 
-int RecingLayer::Initialize() {
+int RacingLayer::Initialize() {
 	// Shaders
 
 	shader = Asset->Load<iw::Shader>("shaders/pbr.shader");
@@ -103,15 +103,15 @@ int RecingLayer::Initialize() {
 	return Layer::Initialize();
 }
 
-void RecingLayer::PostUpdate() {
+void RacingLayer::PostUpdate() {
 
 }
 
-void RecingLayer::FixedUpdate() {
+void RacingLayer::FixedUpdate() {
 	Physics->Step(iw::Time::FixedTime());
 }
 
-void RecingLayer::ImGui() {
+void RacingLayer::ImGui() {
 	//ImGui::Begin("Test");
 
 	//ImGui::End();

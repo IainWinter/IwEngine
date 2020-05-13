@@ -44,6 +44,8 @@
 
 #include "imgui/imgui.h"
 
+#include "iw/events/seq/event_seq.h"
+
 #include "iw/engine/Events/Seq/MoveToTarget.h"
 #include "iw/engine/Events/Seq/DestroyEntity.h"
 
@@ -382,13 +384,11 @@ namespace iw {
 		//e.Set<iw::Transform>();
 		//e.Set<iw::Model>(*rock);
 
-
-		iw::MoveToTarget* move = new iw::MoveToTarget(playerSystem->GetPlayer(), iw::vector3(20, 1, 0));
+		iw::MoveToTarget* move = new iw::MoveToTarget(playerSystem->GetPlayer(), iw::vector3(-10, 1, 0));
 		seq.add(move);
-		seq.stop();
 
-		iw::DestroyEntity* des = new iw::DestroyEntity(playerSystem->GetPlayer());
-		seq.add(des);
+		//iw::DestroyEntity* des = new iw::DestroyEntity(playerSystem->GetPlayer());
+		//seq.add(des);
 	
 		return Layer::Initialize();
 	}
@@ -471,7 +471,7 @@ namespace iw {
 		}
 
 		if (ImGui::Button("Start seq")) {
-			seq.start();
+			seq.restart();
 		}
 
 		//if (ImGui::Button("Save level")) {

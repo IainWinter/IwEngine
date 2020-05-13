@@ -1,13 +1,18 @@
 #pragma once
-#include "iw/events/seq/event_seq.h"
-#include "iw/entity/Entity.h"
+
+#include "iw/events/seq/event_task.h"
 #include "iw/common/Components/Transform.h"
+#include "iw/entity/Entity.h"
 
 namespace iw {
 namespace Engine {
-	struct DestroyEntity:event_seq_item {
+	struct DestroyEntity
+		: event_task
+	{
+	private:
 		Entity& entity;
 
+	public:
 		DestroyEntity(
 			Entity& entity)
 			: entity(entity)
@@ -15,7 +20,7 @@ namespace Engine {
 
 		bool update() override {
 			entity.Find<Transform>()->SetParent(nullptr);
-			entity.Space->DestroyEntity(entity.Index());
+			entity.Space->DestroyEntity(entity.Index()); // this should set alive to false but doesnt
 			return true;
 		}
 	};

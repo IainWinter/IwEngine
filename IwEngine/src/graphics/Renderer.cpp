@@ -124,11 +124,16 @@ namespace Graphics {
 		bool useParticleShader,
 		bool clear)
 	{
-#ifdef IW_DEBUG
 		if (!light->CanCastShadows()) {
 			LOG_WARNING << "Tried to begin shadow cast with light that cannot cast shadows!";
+			return;
 		}
-#endif
+
+		if (useParticleShader && !light->ParticleShadowShader()) {
+			LOG_WARNING << "Tried to begin particle shadow cast with light that has no particle shader!";
+			return;
+		}
+
 		Renderer::SetShader(useParticleShader ? light->ParticleShadowShader() : light->ShadowShader());
 		Renderer::SetTarget(light->ShadowTarget());
 
@@ -154,11 +159,11 @@ namespace Graphics {
 		const Transform* transform,
 		Mesh* mesh)
 	{
-#ifdef IW_DEBUG
 		if (m_state == RenderState::INVALID) {
 			LOG_WARNING << "Tried to submit mesh to renderer while in an invalid state!";
+			return;
 		}
-#endif
+
 		if (!mesh->Data()) {
 			LOG_WARNING << "Tried to submit mesh without data to renderer!";
 			return;
@@ -166,6 +171,7 @@ namespace Graphics {
 
 		if (!mesh->Material()) {
 			LOG_WARNING << "Tried to submit mesh without a material to renderer!";
+			//return; this is not critical
 		}
 
 		else if (!mesh->Material()->Shader) {
