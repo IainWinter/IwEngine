@@ -15,7 +15,7 @@ namespace events {
 	}
 
 	void event_seq::add(
-		event_task* task)
+		event_task* task) // peep argument(s) on new line(s)
 	{
 		m_tasks.push_back(task);
 	}

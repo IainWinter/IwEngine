@@ -27,10 +27,13 @@
 #include "iw/reflect/Components/Level.h"
 #include "iw/reflect/Components/ModelPrefab.h"
 
+#include "iw/engine/Events/Seq/MoveToTarget.h"
+
 LevelSystem::LevelSystem(
 	iw::Entity& player)
 	: iw::System<iw::Transform, iw::Model, LevelDoor>("Level")
 	, playerEntity(player)
+	, sequence(nullptr)
 {
 	//levels = {
 	//	"assets/levels/forest/level1.json",
@@ -84,6 +87,10 @@ void LevelSystem::Update(
 			door->ColorTimer -= iw::Time::DeltaTime();
 			model->GetMesh(0).Material()->Set("baseColor", iw::lerp<iw::vector4>(closedColor, openColor, 4 * (0.25f - door->ColorTimer)));
 		}
+	}
+
+	if (sequence) {
+		sequence->update();
 	}
 
 	//if (transition) {
@@ -220,6 +227,10 @@ bool LevelSystem::On(
 
 			Bus->push<StartLevelEvent>(currentLevel.CameraFollow, currentLevel.InPosition);
 
+			if (sequence) {
+				sequence->restart();
+			}
+
 			break;
 		}
 	}
@@ -328,8 +339,11 @@ iw::Entity LevelSystem::LoadLevel(
 	}
 
 	// These should all be spawn x events
+	// Not really sure what the best way to sort loading levels is. Im sure it will become apparent in time
 
 	// Enemies
+
+	firstEnemy = iw::Entity();
 
 	for (size_t i = 0; i < currentLevel.Enemies.size(); i++) {
 		iw::Entity ent = Space->CreateEntity<iw::Transform, iw::Model, iw::SphereCollider, iw::CollisionObject, Enemy>();
@@ -338,6 +352,10 @@ iw::Entity LevelSystem::LoadLevel(
 		iw::Transform*       t = ent.Set<iw::Transform>();
 		iw::SphereCollider*  s = ent.Set<iw::SphereCollider>(iw::vector3::zero, 1.0f);
 		iw::CollisionObject* c = ent.Set<iw::CollisionObject>();
+
+		if (!firstEnemy) {
+			firstEnemy = ent;
+		}
 
 		switch (currentLevel.Enemies[i].Type) {
 			case EnemyType::MINI_BOSS_BOX_SPIN: {
@@ -506,10 +524,37 @@ iw::Entity LevelSystem::LoadLevel(
 		Physics->AddCollisionObject(object);
 	}
 
-	// Camera recreated in layer from \/
+	// Spawning items
+	
 	if (currentLevelName == "levels/forest/forest05.a.json") {
 		Bus->push<SpawnItemEvent>(Item{ NOTE, 0 },       iw::vector3(0, 0.1f, 5), levelTransform);
 		Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 0 }, iw::vector3(0, 0.1f, 8), levelTransform);
+	}
+
+	// run a cut scene
+
+	// Lucas - edit this for now \/
+	// You can edit line 48 to make it start on level 2
+	// to destory the enemy, just use the firstEnemy variable from line 346
+	// if it keeps crashing just make it move underground and I'll figure it out later (i.e. set 'y' to like -5)
+
+	iw::Entity otherGuy = Space->CreateEntity<iw::Transform, iw::Mesh>();
+
+	otherGuy.Set<iw::Transform>(
+		iw::vector3(-5, 1, -16 /*starting location */ /*z axis is reversed xd (- is going twoards the top of the screen)*/), 
+		0.75f /*scale*/
+	);
+
+	otherGuy.Set<iw::Mesh>(Asset->Load<iw::Model>("Sphere")->GetMesh(0).MakeInstance()); // "Sphere" gets created at line 246 of SandboxLayer.cpp
+
+	if (currentLevelName == "levels/forest/forest02.json") {
+		delete sequence;
+		sequence = new iw::event_seq();
+		sequence->add(new iw::MoveToTarget(otherGuy, iw::vector3(-5, 1, -5))); // sample of what to kinda do
+		sequence->add(new iw::MoveToTarget(otherGuy, iw::vector3(-4, 1,  5))); // cutscene is going to be 
+		sequence->add(new iw::MoveToTarget(otherGuy, iw::vector3(-3, 1, -3)));
+		sequence->add(new iw::MoveToTarget(otherGuy, iw::vector3(-12, 1, 0)));
+		sequence->add(new iw::MoveToTarget(firstEnemy, iw::vector3(-10, 1, 0)));
 	}
 
 	return level;
@@ -583,7 +628,7 @@ iw::Entity LevelSystem::LoadFloor(
 }
 
 void LevelSystem::DestroyAll(
-	iw::Transform* transform)
+	iw::Transform* transform) // should be in engine somewhere
 {
 	if (transform) {
 		for (iw::Transform* child : transform->Children()) {

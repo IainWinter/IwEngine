@@ -18,10 +18,13 @@ namespace events {
 		IWEVENTS_API
 		~event_seq();
 
+		// break design pattern if it looks better xd
+
 		// Takes ownership of task
 		IWEVENTS_API void add   (event_task* task);
 
-		// Only removes doesnt delete. Call this before deleting the sequence to save the task.
+		// Only removes doesnt delete.
+		// Call this before deleting the sequence to save the task.
 		IWEVENTS_API void remove(event_task* task);
 
 		// Resets sequence & tasks

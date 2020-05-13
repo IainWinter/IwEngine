@@ -384,8 +384,10 @@ namespace iw {
 		//e.Set<iw::Transform>();
 		//e.Set<iw::Model>(*rock);
 
-		iw::MoveToTarget* move = new iw::MoveToTarget(playerSystem->GetPlayer(), iw::vector3(-10, 1, 0));
-		seq.add(move);
+		iw::MoveToTarget* move1 = new iw::MoveToTarget(playerSystem->GetPlayer(), iw::vector3(-10, 1, 0));
+		iw::MoveToTarget* move2 = new iw::MoveToTarget(playerSystem->GetPlayer(), iw::vector3(-10, 1, 10));
+		seq.add(move1);
+		seq.add(move2);
 
 		//iw::DestroyEntity* des = new iw::DestroyEntity(playerSystem->GetPlayer());
 		//seq.add(des);
@@ -554,6 +556,7 @@ namespace iw {
 			case iw::val(Actions::AT_NEXT_LEVEL): {
 				//PushSystemFront(playerSystem);
 				PushSystemFront(enemySystem);
+
 				break;
 			}
 			case iw::val(Actions::GAME_STATE): {

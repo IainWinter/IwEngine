@@ -14,16 +14,19 @@ namespace Engine {
 		Entity& entity;
 		vector3 target;
 		vector3 origin;
+		// add speed here
+
 		float startTime;
 		bool firstRun;
 
 	public:
 		MoveToTarget(
 			Entity& entity,
-			vector3 target)
+			vector3 target) // add speed here also
 			: entity(entity)
 			, target(target)
 			, origin(0)
+			// set speed value
 			, startTime(0)
 			, firstRun(true)
 		{}
@@ -59,7 +62,7 @@ namespace Engine {
 				firstRun  = false;
 			}
 
-			transform->Position = lerp(origin, target, Time::TotalTime() - startTime);
+			transform->Position = lerp(origin, target, Time::TotalTime() - startTime); // apply speed here (time * speed) 
 
 			return transform->Position == target;
 		}

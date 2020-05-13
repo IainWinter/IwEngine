@@ -6,6 +6,8 @@
 #include "Components/Level.h"
 #include "iw/graphics/Model.h"
 
+#include "iw/events/seq/event_seq.h"
+
 class LevelSystem
 	: public iw::System<iw::Transform, iw::Model, LevelDoor>
 {
@@ -28,6 +30,9 @@ private:
 	iw::Entity levelDoor;
 	iw::Color openColor;
 	iw::Color closedColor;
+
+	iw::event_seq* sequence; // For cut scenes, prob shouldnt be here
+	iw::Entity firstEnemy;
 
 public:
 	LevelSystem(
