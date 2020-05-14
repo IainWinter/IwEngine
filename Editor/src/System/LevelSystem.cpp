@@ -45,7 +45,7 @@ LevelSystem::LevelSystem(
 
 	//currentLevel = 0;
 
-	currentLevelName = "levels/forest/forest01.json";
+	currentLevelName = "levels/forest/forest05.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 63);
 	closedColor = iw::Color::From255(201, 66, 66, 63);
@@ -71,6 +71,7 @@ LevelSystem::LevelSystem(
 
 int LevelSystem::Initialize() {
 	Bus->push<ResetLevelEvent>();
+	//Bus->push<GoToNextLevelEvent>(currentLevelName, currentLevel.CameraFollow, currentLevel.InPosition, 0);
 
 	return 0;
 }
@@ -527,8 +528,8 @@ iw::Entity LevelSystem::LoadLevel(
 	// Spawning items
 	
 	if (currentLevelName == "levels/forest/forest05.a.json") {
-		Bus->push<SpawnItemEvent>(Item{ NOTE, 0 },       iw::vector3(0, 0.1f, 5), levelTransform);
-		Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 0 }, iw::vector3(0, 0.1f, 8), levelTransform);
+		Bus->push<SpawnItemEvent>(Item{ NOTE, 0 },       iw::vector3(0, 1, 5), levelTransform);
+		Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 0 }, iw::vector3(0, 1, 8), levelTransform);
 	}
 
 	// run a cut scene

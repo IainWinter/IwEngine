@@ -86,12 +86,21 @@ void EnemySystem::Update(
 			// this one secretly breaks the story xd
 			// spins to player quickly and does 1 / 2 firing moves
 			case EnemyType::MINI_BOSS_BOX_SPIN: {
+				// should rotate in same direction until at player
 				if (enemy->Timer < enemy->ChargeTime) {
 					iw::vector3 target = player.Find<iw::Transform>()->Position;
 					float       dir    = atan2(target.z - transform->Position.z, target.x - transform->Position.x);
 
 					transform->Rotation = iw::lerp(transform->Rotation, iw::quaternion::from_euler_angles(0, dir, 0), iw::Time::DeltaTime() * 4);
 				}
+
+				break;
+			}
+			case EnemyType::BOSS_FOREST: {
+				iw::vector3 target = player.Find<iw::Transform>()->Position;
+				float       dir    = atan2(target.z - transform->Position.z, target.x - transform->Position.x);
+
+				transform->Rotation = iw::quaternion::from_euler_angles(0, dir, 0);
 
 				break;
 			}
@@ -233,6 +242,97 @@ void EnemySystem::Update(
 						enemy->HasShot = false;
 					}
 				}
+				case EnemyType::BOSS_FOREST: {
+					const float time = enemy->FireTime - enemy->ChargeTime;
+
+					const float fire1 = enemy->ChargeTime + time * 1.0f / 3.0f;
+					const float fire2 = enemy->ChargeTime + time * 2.0f / 3.0f;
+
+					const float fire12 = (fire2 - fire1) * 0.5f;
+
+					int count = roundf(iw::Pi2 / enemy->Speed);
+
+					int dontShoot = count * 0.5f;
+
+					if (enemy->Timer >= fire2)
+					{
+						if (enemy->Timer2 == 0.0f) {
+							float rot = iw::Pi + iw::hPi * 0.5f * cos(enemy->Timer);
+
+							for (int i = 0; i <= count; i++) {
+								if (i != dontShoot
+									&& i != dontShoot - 1
+									&& i != dontShoot + 1)
+								{
+									iw::quaternion offset = iw::quaternion::from_euler_angles(0, -rot + enemy->Speed * i, 0);
+
+									iw::Transform* bullet = SpawnBullet(
+										enemy->Bullet,
+										transform->Position,
+										transform->Rotation.inverted() * offset,
+										entity.Index
+									);
+
+									transform->Parent()->AddChild(bullet);
+								}
+							}
+						}
+
+						enemy->Timer2 += iw::Time::DeltaTimeScaled();
+
+						if (enemy->Timer2 > 0.1f) {
+							enemy->Timer2 = 0.0f;
+						}
+
+						if (enemy->Timer <= fire2 + fire12) {
+							enemy->HasShot = false; // resets hasShot if not finished kinda scuff
+						}
+					}
+
+					else if (enemy->Timer >= fire1)
+					{
+						if (enemy->Timer2 == 0.0f) {
+							float rot = enemy->Timer * iw::Pi2 * 2;
+							iw::quaternion offset = iw::quaternion::from_euler_angles(0, rot, 0);
+
+							iw::Transform* bullet = SpawnBullet(
+								enemy->Bullet,
+								transform->Position,
+								transform->Rotation.inverted() * offset,
+								entity.Index
+							);
+
+							transform->Parent()->AddChild(bullet);
+						}
+
+						enemy->Timer2 += iw::Time::DeltaTimeScaled();
+
+						if (enemy->Timer2 > 0.02f) {
+							enemy->Timer2 = 0.0f;
+						}
+
+						if (enemy->Timer <= fire1 + fire12) {
+							enemy->HasShot = false;  // resets hasShot if not finished kinda scuff
+						}
+
+						else {
+							enemy->Timer = fire2 + fire12;
+						}
+					}
+
+					else
+					{
+						if (iw::randf() >= 0.0f) {
+							enemy->Timer = fire1;
+						}
+
+						else {
+							enemy->Timer = fire2;
+						}
+
+						enemy->HasShot = false;
+					}
+				}
 			}
 
 			enemy->Rotation = fmod(enemy->Rotation + enemy->Speed, iw::Pi2);
@@ -245,7 +345,6 @@ void EnemySystem::Update(
 		}
 
 		enemy->Timer  += iw::Time::DeltaTimeScaled();
-
 	}
 
 	if (   m_enemyCount == 0

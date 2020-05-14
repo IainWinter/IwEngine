@@ -3,10 +3,11 @@
 #include "Bullet.h"
 
 enum class REFLECT EnemyType {
-	SPIN = 0x00,
-	CIRCLE = 0x1,
+	SPIN               = 0x0,
+	CIRCLE,
 	SEEK,
-	MINI_BOSS_BOX_SPIN = 0x10
+	MINI_BOSS_BOX_SPIN = 0x10,
+	BOSS_FOREST        = 0x100
 };
 
 struct REFLECT Enemy {
