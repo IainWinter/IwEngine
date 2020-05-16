@@ -37,6 +37,10 @@ namespace Graphics {
 			Renderer* renderer) = 0;
 
 		IWGRAPHICS_API
+		virtual void EndShadowCast(
+			Renderer* renderer);
+
+		IWGRAPHICS_API
 		bool CanCastShadows() const;
 
 		IWGRAPHICS_API
@@ -68,7 +72,6 @@ namespace Graphics {
 		IWGRAPHICS_API
 		virtual void SetParticleShadowShader(
 			ref<Shader>& particleShadowShader);
-
 
 		//IWGRAPHICS_API
 		//virtual Camera& Cam() = 0;

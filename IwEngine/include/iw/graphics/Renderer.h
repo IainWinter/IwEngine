@@ -82,6 +82,7 @@ namespace Graphics {
 
 		// state cache
 		Camera*           m_camera;
+		Light*            m_light;
 		ref<MeshData>     m_meshData;
 		ref<Shader>       m_shader;
 		ref<Material>     m_material;

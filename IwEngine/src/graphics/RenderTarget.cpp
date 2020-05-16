@@ -54,5 +54,9 @@ namespace Graphics {
 	IFrameBuffer* RenderTarget::Handle() const {
 		return m_handle;
 	}
+
+	bool RenderTarget::IsInitialized() const {
+		return !!m_handle;
+	}
 }
 }

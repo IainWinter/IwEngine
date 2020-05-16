@@ -109,6 +109,10 @@ namespace RenderAPI {
 					glTexImage2D(gl_type, 0, gl_format, m_width, m_height, 0, TRANSLATE(format), gl_formatType, m_data);
 					break;
 				}
+				case TEX_3D: {
+					glTexImage3D(gl_type, 0, gl_format, m_width, m_height, m_width/*should be depth*/, 0, TRANSLATE(format), gl_formatType, m_data);
+					break;
+				}
 				case TEX_CUBE: {
 					for (unsigned i = 0; i < 6; i++) {
 						GLenum gl_face = GL_TEXTURE_CUBE_MAP_POSITIVE_X + i;

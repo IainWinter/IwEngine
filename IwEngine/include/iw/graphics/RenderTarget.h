@@ -48,6 +48,9 @@ namespace Graphics {
 
 		IWGRAPHICS_API
 		IFrameBuffer* Handle() const;
+
+		IWGRAPHICS_API
+		bool IsInitialized() const;
 	};
 }
 

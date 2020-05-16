@@ -55,7 +55,7 @@ namespace Graphics {
 	}
 
 	void Renderer::Begin() {
-		Device->Clear();
+		Device->Clear(); // errors
 
 		// clear queues
 	}
@@ -134,6 +134,8 @@ namespace Graphics {
 			return;
 		}
 
+		m_light = light;
+
 		Renderer::SetShader(useParticleShader ? light->ParticleShadowShader() : light->ShadowShader());
 		Renderer::SetTarget(light->ShadowTarget());
 
@@ -151,7 +153,7 @@ namespace Graphics {
 	}
 
 	void Renderer::EndShadowCast() {
-		m_target->Tex(0)->Handle()->GenerateMipMaps();
+		m_light->EndShadowCast(this);
 		Renderer::EndScene();
 	}
 
@@ -197,22 +199,20 @@ namespace Graphics {
 
 				Renderer::SetMaterial(mesh->Material());
 			}
+
+			IPipelineParam* ambiance = m_shader->Handle()->GetParam("ambiance");
+			if (ambiance) {
+				ambiance->SetAsFloat(m_ambiance);
+			}
 		}
 
 		else {
 			Device->SetWireframe(false);  // set some shadow material or whatever
 		}
 
-		Device->SetCullFace(BACK);
-
 		IPipelineParam* model = m_shader->Handle()->GetParam("model");
 		if (model) {
 			model->SetAsMat4(transform->WorldTransformation());
-		}
-
-		IPipelineParam* ambiance = m_shader->Handle()->GetParam("ambiance");
-		if (ambiance) {
-			ambiance->SetAsFloat(m_ambiance);
 		}
 
 		mesh->Draw(Device);
@@ -233,13 +233,26 @@ namespace Graphics {
 		//if (source == destination) return; // this prob has to be here
 
 		Renderer::BeginScene((Camera*)nullptr, target);
-		
 		Renderer::SetShader(shader);
 
 		if (source) {
-			shader->Handle()->GetParam("filterTexture")->SetAsTexture(
-				source->Tex(0)->Handle()
-			);
+			IPipelineParam* in = m_shader->Handle()->GetParam("inTexture");
+			if (in) {
+				in->SetAsTexture(source->Tex(0)->Handle());
+			}
+		}
+
+		if (target) {
+			IPipelineParam* out = m_shader->Handle()->GetParam("outTexture");
+			if (out) {
+				out->SetAsTexture(target->Tex(0)->Handle());
+			}
+		}
+
+		// Kidna sucks to need to have this here, should be draw like all other meshes but whatevvs
+
+		if (!m_quad.Data()->IsInitialized()) {
+			m_quad.Data()->Initialize(Device);
 		}
 
 		Renderer::SetMesh(&m_quad);
@@ -253,6 +266,10 @@ namespace Graphics {
 	{
 		if (m_target != target) {
 			if (target) {
+				if (!target->IsInitialized()) {
+					target->Initialize(Device);
+				}
+
 				Device->SetViewport(target->Width(), target->Height());
 				Device->SetFrameBuffer(target->Handle());
 			}

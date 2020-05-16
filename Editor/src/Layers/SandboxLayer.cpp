@@ -14,10 +14,11 @@
 #include "iw/engine/Systems/ParticleUpdateSystem.h"
 #include "iw/engine/Systems/EntityCleanupSystem.h"
 #include "iw/engine/Systems/Render/MeshRenderSystem.h"
-#include "iw/engine/Systems/Render/ModelRenderSystem.h"
-#include "iw/engine/Systems/Render/ParticleRenderSystem.h"
 #include "iw/engine/Systems/Render/MeshShadowRenderSystem.h"
+#include "iw/engine/Systems/Render/ModelRenderSystem.h"
+#include "iw/engine/Systems/Render/ModelVoxelRenderSystem.h"
 #include "iw/engine/Systems/Render/ModelShadowRenderSystem.h"
+#include "iw/engine/Systems/Render/ParticleRenderSystem.h"
 #include "iw/engine/Systems/Render/ParticleShadowRenderSystem.h"
 #include "iw/engine/Systems/Render/UiRenderSystem.h"
 #include "iw/engine/Systems/Debug/DrawCollidersSystem.h"
@@ -127,6 +128,7 @@ namespace iw {
 
 		// Shaders
 
+
 		ref<Shader> shader   = Asset->Load<Shader>("shaders/phong.shader");
 		ref<Shader> gaussian = Asset->Load<Shader>("shaders/filters/gaussian.shader");
 		ref<Shader> dirShadowShader    = Asset->Load<Shader>("shaders/lights/directional.shader");
@@ -134,6 +136,7 @@ namespace iw {
 		ref<Shader> dirIShadowShader   = Asset->Load<Shader>("shaders/lights/directional_instanced.shader");
 		ref<Shader> pointIShadowShader = Asset->Load<Shader>("shaders/lights/point_instanced.shader");
 		
+
 		Renderer->InitShader(shader,   CAMERA | SHADOWS | LIGHTS);
 		Renderer->InitShader(gaussian, CAMERA);
 		Renderer->InitShader(dirShadowShader,  CAMERA);
@@ -141,6 +144,11 @@ namespace iw {
 		Renderer->InitShader(dirIShadowShader);
 		Renderer->InitShader(pointIShadowShader);
 
+		// Voxel nonsense
+
+		ref<Shader> voxelize = Asset->Load<Shader>("shaders/vct/voxelize.shader");
+		Renderer->InitShader(voxelize, CAMERA);
+		
 		// Directional light shadow map textures & target
 
 		ref<Texture> dirShadowColor = ref<Texture>(new Texture(1024, 1024, TEX_2D, RG,    FLOAT, BORDER));
@@ -313,6 +321,8 @@ namespace iw {
 		PushSystem<iw::ParticleUpdateSystem>();
 		PushSystem<iw::EntityCleanupSystem>();
 
+		PushSystem<iw::ModelVoxelRenderSystem>(MainScene);
+
 		PushSystem<iw::    MeshShadowRenderSystem>(MainScene);
 		PushSystem<iw::   ModelShadowRenderSystem>(MainScene);
 		PushSystem<iw::ParticleShadowRenderSystem>(MainScene);
@@ -403,6 +413,22 @@ namespace iw {
 
 		MainScene->MainCamera()->SetProjection(iw::lerp(persp, ortho, blend));
 		
+		//Renderer->BeginScene(MainScene, voxelRT);
+
+		//for (auto e : Space->Query<iw::Transform, iw::Model>()) {
+		//	auto [t, m] = e.Components.Tie<ModelComponents>();
+
+		//	for (Mesh& mesh : m->GetMeshes()) {
+		//		//Renderer->BeforeDraw([&]() {
+		//		//	(*Renderer).SetShader(voxelize);
+		//		//});
+
+		//		Renderer->DrawMesh(t, &mesh);
+		//	}
+		//}
+
+		//Renderer->EndScene();
+
 		// Shadow maps
 
 		//for(Light* light : scene->DirectionalLights()) {

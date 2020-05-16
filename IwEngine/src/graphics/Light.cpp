@@ -1,4 +1,5 @@
 #include "iw/graphics/Light.h"
+#include "iw/graphics/Renderer.h"
 
 namespace iw {
 namespace Graphics {
@@ -23,6 +24,13 @@ namespace Graphics {
 
 	Light::~Light() {
 		delete m_shadowCamera;
+	}
+
+	void Light::EndShadowCast(
+		Renderer* renderer)
+	{
+		m_shadowTarget->Tex(0)->Handle()->GenerateMipMaps();
+		renderer->Device->SetCullFace(BACK);
 	}
 
 	bool Light::CanCastShadows() const {

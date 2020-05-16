@@ -22,6 +22,7 @@ namespace RenderAPI {
 
 	enum TextureType {
 		TEX_2D,
+		TEX_3D,
 		TEX_CUBE
 	};
 
