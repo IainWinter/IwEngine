@@ -39,10 +39,12 @@ namespace Graphics {
 		RenderOP block = RenderOP::NONE;
 		for (RenderItem& item : m_queue) {
 			switch (block) {
+				case RenderOP::NONE:
 				case RenderOP::BEGIN: {
 					switch (item.OP) {
 						case RenderOP::BEGIN_SCENE:  block = RenderOP::BEGIN_SCENE;  break;
 						case RenderOP::BEGIN_SHADOW: block = RenderOP::BEGIN_SHADOW; break;
+						case RenderOP::BEGIN:                                        break;
 						case RenderOP::END:                                          break;
 						default:                     invalid = true;                 break;
 					}
@@ -51,25 +53,22 @@ namespace Graphics {
 				}
 				case RenderOP::BEGIN_SCENE: {
 					switch (item.OP) {
-						case RenderOP::END_SCENE:    block = RenderOP::BEGIN;  break;
-						case RenderOP::DRAW_MESH:                              break;
-						case RenderOP::DRAW_MESH_INST:                         break;
-						default:                     invalid = true;           break;
+						case RenderOP::END_SCENE:    block = RenderOP::NONE; break;
+						case RenderOP::DRAW_MESH:                            break;
+						case RenderOP::DRAW_MESH_INST:                       break;
+						default:                     invalid = true;         break;
 					}
 
 					break;
 				}
 				case RenderOP::BEGIN_SHADOW: {
 					switch (item.OP) {
-						case RenderOP::END_SHADOW:   block = RenderOP::BEGIN;  break;
-						case RenderOP::DRAW_MESH:                              break;
-						case RenderOP::DRAW_MESH_INST:                         break;
-						default:                     invalid = true;           break;
+						case RenderOP::END_SHADOW:   block = RenderOP::NONE; break;
+						case RenderOP::DRAW_MESH:                            break;
+						case RenderOP::DRAW_MESH_INST:                       break;
+						default:                     invalid = true;         break;
 					}
 
-					break;
-				}
-				case RenderOP::NONE: {
 					break;
 				}
 				default: {

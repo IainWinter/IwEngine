@@ -158,6 +158,7 @@ namespace Graphics {
 		}
 	}
 
+	// not really an instance more of a bad copy xd
 	ref<Material> Material::MakeInstance() const {
 		return REF<Material>(*this);
 	}

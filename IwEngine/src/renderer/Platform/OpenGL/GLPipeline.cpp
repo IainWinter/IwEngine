@@ -12,6 +12,7 @@ namespace RenderAPI {
 		GLGeometryShader* geometryShader)
 		: m_bufferCount(0)
 		, m_textureCount(0)
+		, m_imageCount(0)
 	{
 		gl_id = glCreateProgram();
 
@@ -142,7 +143,7 @@ namespace RenderAPI {
 		}
 
 		std::string s(name);
-		GLPipelineParam* p = new GLPipelineParam(location, m_textureCount, s, type, typeSize, stride, count);
+		GLPipelineParam* p = new GLPipelineParam(location, m_textureCount, m_imageCount, s, type, typeSize, stride, count);
 
 		return m_params.emplace(s, p).first->second;
 	}
@@ -187,6 +188,7 @@ namespace RenderAPI {
 
 	void GLPipeline::Use() {
 		m_textureCount = 0;
+		m_imageCount   = 0;
 		glUseProgram(gl_id);
 	}
 }

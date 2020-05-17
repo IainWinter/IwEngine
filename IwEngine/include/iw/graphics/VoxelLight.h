@@ -18,7 +18,7 @@ namespace Graphics {
 		IWGRAPHICS_API
 		VoxelLight(
 			ref<Texture> voxelTexture,
-			ref<Shader>  voxelizerShader = nullptr,
+			ref<Shader>  voxelizerShader,
 			ref<Shader>  particleVoxelizerShader = nullptr);
 
 		GEN_copy(IWGRAPHICS_API, VoxelLight)
@@ -34,6 +34,9 @@ namespace Graphics {
 		IWGRAPHICS_API
 		void EndShadowCast(
 			Renderer* renderer) override;
+
+		IWGRAPHICS_API
+		bool CanCastShadows() const override;
 	};
 }
 

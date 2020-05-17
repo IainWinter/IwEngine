@@ -25,6 +25,7 @@ namespace RenderAPI {
 	{
 		switch (textureType) {
 			case TEX_2D:   return GL_TEXTURE_2D;
+			case TEX_3D:   return GL_TEXTURE_3D;
 			case TEX_CUBE: return GL_TEXTURE_CUBE_MAP;
 		}
 

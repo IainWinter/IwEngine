@@ -1,6 +1,7 @@
 #include "iw/renderer/Platform/OpenGL/GLPipelineParam.h"
 #include "iw/renderer/Platform/OpenGL/GLTexture.h"
 #include "iw/renderer/Platform/OpenGL/GLErrorCatch.h"
+#include "iw/renderer/Platform/OpenGL/GLTranslator.h"
 #include "gl/glew.h"
 
 namespace iw {
@@ -8,6 +9,7 @@ namespace RenderAPI {
 	GLPipelineParam::GLPipelineParam(
 		unsigned location,
 		unsigned& textureCount,
+		unsigned& imageCount,
 		std::string name,
 		UniformType type,
 		unsigned typeSize,
@@ -15,13 +17,15 @@ namespace RenderAPI {
 		unsigned count)
 		: m_location(location)
 		, m_textureCount(textureCount)
+		, m_imageCount(imageCount)
 		, m_name(name)
 		, m_type(type)
 		, m_typeSize(typeSize)
 		, m_stride(stride)
 		, m_count(count)
 	{
-		glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, (GLint*)&MAX_TEXTURES);
+		glGetIntegerv(GL_MAX_TEXTURE_UNITS, (GLint*)&MAX_TEXTURES);
+		glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, (GLint*)&MAX_IMAGES);
 	}
 
 	const std::string& GLPipelineParam::Name() const {
@@ -316,11 +320,38 @@ namespace RenderAPI {
 		glActiveTexture(GL_TEXTURE0 + index);
 
 		if (texture) {
-			static_cast<const GLTexture*>(texture)->Bind(); 
+			static_cast<const GLTexture*>(texture)->Bind();
 		}
 
 		else {
 			glBindTexture(GL_TEXTURE_2D, 0); // this is garbo
+		}
+	}
+
+	void GLPipelineParam::SetAsImage(
+		const ITexture* texture,
+		int index)
+	{
+		if (index < 0) {
+			index = m_imageCount++;
+		}
+
+#ifdef IW_DEBUG
+		if (index > MAX_IMAGES) {
+			LOG_WARNING << "Cannot bind more than " << MAX_IMAGES << " images!";
+		}
+#endif
+
+		//glUniform1i(m_location, index);
+		//glActiveTexture(GL_TEXTURE0 + index);
+
+		if (texture) {
+			const GLTexture* tex = static_cast<const GLTexture*>(texture);
+			glBindImageTexture(index, tex->Id(), 0, GL_TRUE, 0, GL_WRITE_ONLY, TRANSLATE(tex->Format(), tex->FormatType()));
+		}
+
+		else {
+			//glBindImageTexture(index, 0, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA8); // ???
 		}
 	}
 }

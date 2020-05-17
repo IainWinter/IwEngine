@@ -8,7 +8,9 @@ namespace Graphics {
 		const iw::ref<IDevice>& device)
 		: Device(device)
 		, m_camera(nullptr)
+		, m_light(nullptr)
 		, m_meshData(nullptr)
+		, m_state(RenderState::INVALID)
 	{
 		MeshDescription description;
 		description.DescribeBuffer(bName::POSITION, MakeLayout<float>(3));
@@ -153,6 +155,11 @@ namespace Graphics {
 	}
 
 	void Renderer::EndShadowCast() {
+		if (m_state != RenderState::SHADOW_MAP || !m_light) {
+			LOG_WARNING << "Tried to end shadow cast that never began!";
+			return;
+		}
+
 		m_light->EndShadowCast(this);
 		Renderer::EndScene();
 	}
@@ -162,22 +169,27 @@ namespace Graphics {
 		Mesh* mesh)
 	{
 		if (m_state == RenderState::INVALID) {
-			LOG_WARNING << "Tried to submit mesh to renderer while in an invalid state!";
+			LOG_WARNING << "Tried to draw mesh to renderer while in an invalid state!";
+			return;
+		}
+
+		if (!m_shader) {
+			LOG_WARNING << "Tried to draw mesh without a shader set!";
 			return;
 		}
 
 		if (!mesh->Data()) {
-			LOG_WARNING << "Tried to submit mesh without data to renderer!";
+			LOG_WARNING << "Tried to draw mesh without data to renderer!";
 			return;
 		}
 
 		if (!mesh->Material()) {
-			LOG_WARNING << "Tried to submit mesh without a material to renderer!";
+			LOG_WARNING << "Tried to draw mesh without a material to renderer!";
 			//return; this is not critical
 		}
 
 		else if (!mesh->Material()->Shader) {
-			LOG_WARNING << "Tried to submit mesh with a material that has no shader to renderer!";
+			LOG_WARNING << "Tried to draw mesh with a material that has no shader to renderer!";
 			return;
 		}
 
@@ -208,6 +220,11 @@ namespace Graphics {
 
 		else {
 			Device->SetWireframe(false);  // set some shadow material or whatever
+		}
+
+		if (!m_shader) {
+			LOG_WARNING << "Tried to draw mesh without setting an active shader!";
+			return;
 		}
 
 		IPipelineParam* model = m_shader->Handle()->GetParam("model");

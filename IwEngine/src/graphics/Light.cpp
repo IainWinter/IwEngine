@@ -29,7 +29,10 @@ namespace Graphics {
 	void Light::EndShadowCast(
 		Renderer* renderer)
 	{
-		m_shadowTarget->Tex(0)->Handle()->GenerateMipMaps();
+		if (m_shadowTarget) {
+			m_shadowTarget->Tex(0)->Handle()->GenerateMipMaps();
+		}
+
 		renderer->Device->SetCullFace(BACK);
 	}
 

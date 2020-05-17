@@ -16,7 +16,15 @@ namespace Engine {
 		};
 
 		Scene* m_scene;
-		Light* m_voxel;
+		Light* m_voxelize;
+
+		// For visualization
+		ref<RenderTarget> m_front;
+		ref<RenderTarget> m_back;
+
+		Mesh m_voxel;
+
+		bool m_visualize;
 
 	public:
 		IWENGINE_API

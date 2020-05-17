@@ -19,6 +19,7 @@ namespace RenderAPI {
 		unsigned gl_id;
 		unsigned m_bufferCount;
 		unsigned m_textureCount;
+		unsigned m_imageCount;
 
 	public:
 		IWRENDERER_API

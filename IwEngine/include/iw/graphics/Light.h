@@ -41,7 +41,7 @@ namespace Graphics {
 			Renderer* renderer);
 
 		IWGRAPHICS_API
-		bool CanCastShadows() const;
+		virtual bool CanCastShadows() const;
 
 		IWGRAPHICS_API
 		virtual bool Outdated() const;

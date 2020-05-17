@@ -56,8 +56,12 @@ namespace Graphics {
 	void VoxelLight::SetupShadowCast(
 		Renderer* renderer)
 	{
+		if (!m_voxelTexture->Handle()) {
+			m_voxelTexture->Initialize(renderer->Device);
+		}
+
 		renderer->SetTarget(nullptr);
-		renderer->Device->SetViewport(m_shadowTarget->Tex(0)->Width(), m_shadowTarget->Tex(0)->Height());
+		renderer->Device->SetViewport(m_voxelTexture->Width(), m_voxelTexture->Height());
 
 		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 		glDisable(GL_DEPTH_TEST);
@@ -68,7 +72,7 @@ namespace Graphics {
 
 		IPipelineParam* out = m_shadowShader->Handle()->GetParam("voxelTexture");
 		if (out) {
-			out->SetAsTexture(m_shadowTarget->Tex(0)->Handle());
+			out->SetAsImage(m_voxelTexture->Handle());
 		}
 	}
 
@@ -80,7 +84,11 @@ namespace Graphics {
 		//glEnable(GL_CULL_FACE);
 		//glEnable(GL_BLEND);
 
-		Light::EndShadowCast(renderer);
+		m_voxelTexture->Handle()->GenerateMipMaps();
+	}
+
+	bool VoxelLight::CanCastShadows() const {
+		return true;
 	}
 }
 }

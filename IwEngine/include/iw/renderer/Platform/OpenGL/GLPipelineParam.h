@@ -10,9 +10,11 @@ namespace RenderAPI {
 	{
 	private:
 		unsigned MAX_TEXTURES;
+		unsigned MAX_IMAGES;
 
 		unsigned  m_location;
 		unsigned& m_textureCount;
+		unsigned& m_imageCount;
 
 		std::string m_name;
 		UniformType m_type;
@@ -25,6 +27,7 @@ namespace RenderAPI {
 		GLPipelineParam(
 			unsigned location,
 			unsigned& textureCount,
+			unsigned& imageCount,
 			std::string name,
 			UniformType type,
 			unsigned typeSize,
@@ -99,6 +102,11 @@ namespace RenderAPI {
 
 		IWRENDERER_API
 		void SetAsTexture(
+			const ITexture* texture,
+			int index) override;
+
+		IWRENDERER_API
+		void SetAsImage(
 			const ITexture* texture,
 			int index) override;
 	};

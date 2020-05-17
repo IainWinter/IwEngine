@@ -168,15 +168,15 @@ namespace iw {
 
 		// Point light shadow map textures & target
 
-		ref<Texture> pointShadowDepth = ref<Texture>(new Texture(1024, 1024, TEX_CUBE, DEPTH, FLOAT, EDGE));
+		//ref<Texture> pointShadowDepth = ref<Texture>(new Texture(1024, 1024, TEX_CUBE, DEPTH, FLOAT, EDGE));
 
-		ref<RenderTarget> pointShadowTarget = REF<RenderTarget>(1024, 1024, true);
-		pointShadowTarget->AddTexture(pointShadowDepth);
+		//ref<RenderTarget> pointShadowTarget = REF<RenderTarget>(1024, 1024, true);
+		//pointShadowTarget->AddTexture(pointShadowDepth);
 
-		pointShadowTarget->Initialize(Renderer->Device);
+		//pointShadowTarget->Initialize(Renderer->Device);
 
 		Asset->Give<iw::Texture>("SunShadowMap",   dirShadowTarget->Tex(0));
-		Asset->Give<iw::Texture>("LightShadowMap", pointShadowTarget->Tex(0));
+		//Asset->Give<iw::Texture>("LightShadowMap", pointShadowTarget->Tex(0));
 
 		// Scene 
 
@@ -215,7 +215,7 @@ namespace iw {
 		def->Set("metallic", 0.2f);
 		def->Set("reflectance", 0.2f);
 		def->SetTexture("shadowMap",  dirShadowTarget->Tex(0));    // shouldnt really be part of material
-		def->SetTexture("shadowMap2", pointShadowTarget->Tex(0));
+		//def->SetTexture("shadowMap2", pointShadowTarget->Tex(0));
 		def->Initialize(Renderer->Device);
 
 		ref<Material> mat = Asset->Give<iw::Material>("materials/Default", def);

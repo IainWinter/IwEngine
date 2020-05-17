@@ -48,6 +48,7 @@ namespace RenderAPI {
 		, m_height(height)
 		, m_format(format)
 		, m_type(type)
+		, m_formatType(formatType)
 		, m_wrapX(wrap)
 		, m_wrapY(wrap)
 		, m_wrapZ(wrap)
@@ -87,23 +88,28 @@ namespace RenderAPI {
 
 		// need to add option for mip map levels
 
-		//if (data == nullptr) {
-		//	switch (type) {
-		//		case TEX_2D: {
-		//			glTexStorage2D(gl_type, 1, gl_format, m_width, m_height);
-		//			break;
-		//		}
-		//		case TEX_CUBE: {
-		//			for (unsigned i = 0; i < 6; i++) {
-		//				glTexStorage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 1, gl_format, m_width, m_height);
-		//			}
-//
-		//			break;
-		//		}
-		//	}
-		//}
+		if (data == nullptr) {
+			switch (type) {
+				case TEX_2D: {
+					glTexStorage2D(gl_type, 1, gl_format, m_width, m_height);
+					break;
+				}
+				case TEX_3D: {
+					glTexStorage3D(gl_type, 1, gl_format, m_width, m_height, m_width/*should be depth*/);
+					break;
+				}
+				case TEX_CUBE: {
+					for (unsigned i = 0; i < 6; i++) {
+						GLenum gl_face = GL_TEXTURE_CUBE_MAP_POSITIVE_X + i;
+						glTexStorage2D(gl_face, 1, gl_format, m_width, m_height);
+					}
 
-		//else {
+					break;
+				}
+			}
+		}
+
+		else {
 			switch (type) {
 				case TEX_2D: {
 					glTexImage2D(gl_type, 0, gl_format, m_width, m_height, 0, TRANSLATE(format), gl_formatType, m_data);
@@ -122,7 +128,7 @@ namespace RenderAPI {
 					break;
 				}
 			}
-		//}
+		}
 
 		// Need to pass options for these
 		glTexParameteri(gl_type, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);

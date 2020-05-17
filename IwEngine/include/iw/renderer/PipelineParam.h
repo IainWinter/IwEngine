@@ -81,8 +81,15 @@ namespace RenderAPI {
 		virtual void SetAsMat4(
 			const iw::matrix4& matrix) = 0;
 
+		// samplers
 		IWRENDERER_API
 		virtual void SetAsTexture(
+			const ITexture* texture,
+			int index = -1) = 0;
+
+		// image units
+		IWRENDERER_API
+		virtual void SetAsImage(
 			const ITexture* texture,
 			int index = -1) = 0;
 	};
