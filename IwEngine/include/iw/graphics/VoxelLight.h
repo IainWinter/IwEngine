@@ -6,7 +6,7 @@
 namespace iw {
 namespace Graphics {
 
-	// monks
+	// monksas
 
 	class VoxelLight
 		: public Light
@@ -14,9 +14,10 @@ namespace Graphics {
 	private:
 		ref<Texture> m_voxelTexture;
 	public:
-		// Takes ownership of camera ptr
+		// DOES NOT TAKE OWNERSHIP OF MAIN CAMERA
 		IWGRAPHICS_API
 		VoxelLight(
+			Camera*      mainCamera,
 			ref<Texture> voxelTexture,
 			ref<Shader>  voxelizerShader,
 			ref<Shader>  particleVoxelizerShader = nullptr);
@@ -25,7 +26,7 @@ namespace Graphics {
 		GEN_move(IWGRAPHICS_API, VoxelLight)
 
 		IWGRAPHICS_API
-		~VoxelLight() override = default;
+		~VoxelLight() override;
 
 		IWGRAPHICS_API
 		void SetupShadowCast(
@@ -37,6 +38,9 @@ namespace Graphics {
 
 		IWGRAPHICS_API
 		bool CanCastShadows() const override;
+
+		IWGRAPHICS_API
+		ref<Texture> VoxelTexture();
 	};
 }
 

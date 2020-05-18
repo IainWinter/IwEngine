@@ -61,14 +61,16 @@ namespace Graphics {
 			Transform Transform;
 			Mesh Mesh;
 
-			setup_draw_func SetupDraw;
+			setup_draw_func BeforeDraw;
+			setup_draw_func AfterDraw;
 		};
 
 		struct DrawMeshInstanceOP {
 			const Transform* Transform;
 			Mesh* Mesh;
 
-			setup_draw_func SetupDraw;
+			setup_draw_func BeforeDraw;
+			setup_draw_func AfterDraw;
 		};
 
 		struct FilterOP {
@@ -109,7 +111,8 @@ namespace Graphics {
 		int m_transparency;
 		vector3 m_position;
 
-		setup_draw_func m_setupDrawFunc; // gets set by 'BeforeDraw' and then consumed by 'DrawMesh'
+		setup_draw_func m_beforeDrawFunc; // gets set by 'BeforeDraw' and consumed by 'DrawMesh'
+		setup_draw_func m_afterDrawFunc;  // gets set by 'AfterDraw'  and consumed by 'DrawMesh'
 
 	public:
 		IWGRAPHICS_API
@@ -166,6 +169,12 @@ namespace Graphics {
 		//	this is useful when a mesh needs to be updated in different ways for seperate draw calls
 		IWGRAPHICS_API
 		void BeforeDraw(
+			const setup_draw_func& func);
+
+		// Set a function to run after a mesh gets drawn,
+		//	this is useful when settings need to be reset
+		IWGRAPHICS_API
+		void AfterDraw(
 			const setup_draw_func& func);
 
 		// if rendering a scene

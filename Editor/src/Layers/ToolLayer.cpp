@@ -17,6 +17,8 @@
 #include "iw/engine/Systems/Render/ModelShadowRenderSystem.h"
 #include "iw/engine/Systems/Render/ParticleShadowRenderSystem.h"
 
+#include "iw/engine/Systems/Render/ModelVoxelRenderSystem.h"
+
 #include "iw/input/Devices/Mouse.h"
 #include <iw\engine\Systems\PhysicsSystem.h>
 
@@ -103,21 +105,23 @@ namespace iw {
 
 		Entity cameraEntity = Space->CreateEntity<Transform, EditorCameraController>();
 
-		Transform* transform = cameraEntity.Set<Transform>(5);
+		Transform* transform = cameraEntity.Set<Transform>(0);
 		                       cameraEntity.Set<EditorCameraController>(camera);
 
 		camera->SetTrans(transform);
 
 		cameraSystem = new EditorCameraControllerSystem();
-		PushSystem<DrawCollidersSystem>(camera);
+		//PushSystem<DrawCollidersSystem>(camera);
 		PushSystem<PhysicsSystem>();
 
-		PushSystem<iw::    MeshShadowRenderSystem>(m_mainScene);
-		PushSystem<iw::   ModelShadowRenderSystem>(m_mainScene);
-		PushSystem<iw::ParticleShadowRenderSystem>(m_mainScene);
-		PushSystem<iw::          MeshRenderSystem>(m_mainScene);
-		PushSystem<iw::         ModelRenderSystem>(m_mainScene);
-		PushSystem<iw::      ParticleRenderSystem>(m_mainScene);
+		PushSystem<iw::ModelVoxelRenderSystem>(m_mainScene);
+
+		//PushSystem<iw::    MeshShadowRenderSystem>(m_mainScene);
+		//PushSystem<iw::   ModelShadowRenderSystem>(m_mainScene);
+		//PushSystem<iw::ParticleShadowRenderSystem>(m_mainScene);
+		//PushSystem<iw::          MeshRenderSystem>(m_mainScene);
+		//PushSystem<iw::         ModelRenderSystem>(m_mainScene);
+		//PushSystem<iw::      ParticleRenderSystem>(m_mainScene);
 
 		return Layer::Initialize();
 	}
@@ -158,30 +162,30 @@ namespace iw {
 		//	Renderer->EndScene();
 		//}
 
-		Renderer->BeginScene(camera);
+		//Renderer->BeginScene(camera);
 
-			Transform transform;
-			transform.Position = oldcamera->Position();
-			transform.Scale = vector3(0.75f, 0.75f, 0.75f);
+		//	Transform transform;
+		//	transform.Position = oldcamera->Position();
+		//	transform.Scale = vector3(0.75f, 0.75f, 0.75f);
 
-			Renderer->DrawMesh(transform, cameraMesh);
+		//	Renderer->DrawMesh(transform, cameraMesh);
 
-			for (PointLight* light : m_mainScene->PointLights()) {
-				transform.Position = light->Position();
-				transform.Scale    = 0.1f;
+		//	for (PointLight* light : m_mainScene->PointLights()) {
+		//		transform.Position = light->Position();
+		//		transform.Scale    = 0.1f;
 
-				Renderer->DrawMesh(transform, plightMesh);
-			}
+		//		Renderer->DrawMesh(transform, plightMesh);
+		//	}
 
-			for (DirectionalLight* light : m_mainScene->DirectionalLights()) {
-				transform.Position = light->Position();
-				transform.Rotation = light->Rotation();
-				transform.Scale = 0.1f;
+		//	for (DirectionalLight* light : m_mainScene->DirectionalLights()) {
+		//		transform.Position = light->Position();
+		//		transform.Rotation = light->Rotation();
+		//		transform.Scale = 0.1f;
 
-				Renderer->DrawMesh(transform, dlightMesh);
-			}
+		//		Renderer->DrawMesh(transform, dlightMesh);
+		//	}
 
-		Renderer->EndScene();
+		//Renderer->EndScene();
 
 		//for (Light* light : m_mainScene->Lights()) {
 		//	if (!light->CanCastShadows()) {
@@ -213,11 +217,11 @@ namespace iw {
 
 		//Renderer->EndScene();
 
-		Renderer->BeginScene(camera);
+		//Renderer->BeginScene(camera);
 
-			Renderer->DrawMesh(p, plightMesh);
+		//	Renderer->DrawMesh(p, plightMesh);
 
-		Renderer->EndScene();
+		//Renderer->EndScene();
 
 
 		//Renderer->BeginScene(m_mainScene->MainCamera());

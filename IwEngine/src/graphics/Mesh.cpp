@@ -321,6 +321,59 @@ namespace detail {
 		m_description = description;
 	}
 
+	void MeshData::TransformMeshData(
+		const Transform& transform)
+	{
+		if (m_description.HasBuffer(bName::POSITION)) {
+			BufferData buffer = GetBuffer(m_description.GetBufferIndex(bName::POSITION));
+			vector3* data     = buffer.Ptr<vector3>();
+
+			for (int i = 0; i < buffer.Count; i++) {
+				vector4 v = vector4(data[i], 1) * transform.WorldTransformation();
+				data[i] = v;
+			}
+
+			m_outdated = true;
+		}
+
+		if (m_description.HasBuffer(bName::NORMAL)) {
+			BufferData buffer = GetBuffer(m_description.GetBufferIndex(bName::NORMAL));
+			vector3*   data   = buffer.Ptr<vector3>();
+
+			for (int i = 0; i < buffer.Count; i++) {
+				vector4 v = vector4(data[i], 1) * transform.WorldTransformation();
+				data[i] = v;
+			}
+
+			m_outdated = true;
+		}
+
+		if (m_description.HasBuffer(bName::TANGENT)) {
+			BufferData buffer = GetBuffer(m_description.GetBufferIndex(bName::TANGENT));
+			vector3* data = buffer.Ptr<vector3>();
+
+			for (int i = 0; i < buffer.Count; i++) {
+				vector4 v = vector4(data[i], 1) * transform.WorldTransformation();
+				data[i] = v;
+			}
+
+			m_outdated = true;
+		}
+
+		if (m_description.HasBuffer(bName::BITANGENT)) {
+			BufferData buffer = GetBuffer(m_description.GetBufferIndex(bName::BITANGENT));
+			vector3* data = buffer.Ptr<vector3>();
+
+			for (int i = 0; i < buffer.Count; i++) {
+				vector4 v = vector4(data[i], 1) * transform.WorldTransformation();
+				data[i] = v;
+			}
+
+			m_outdated = true;
+		}
+
+	}
+
 	void MeshData::Initialize(
 		const ref<IDevice>& device)
 	{

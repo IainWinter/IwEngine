@@ -1,10 +1,7 @@
 #shader Vertex
 #version 430
 
-layout(std140, column_major) uniform Camera {
-	mat4 viewProj;
-	vec4 camPos;
-};
+#include shaders/camera.shader
 
 layout (location = 0) in vec3 vert;
 layout (location = 1) in vec3 normal;

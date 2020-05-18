@@ -3,10 +3,7 @@
 
 #define MAX_DIRECTIONAL_LIGHTS 4
 
-layout(std140, column_major) uniform Camera {
-	mat4 viewProj;
-	vec4 camPos;
-};
+#include shaders/camera.shader
 
 layout(std140, column_major) uniform Shadows {
 	int shadows_pad1, shadows_pad2, shadows_pad3;

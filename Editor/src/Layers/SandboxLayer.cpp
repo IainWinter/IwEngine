@@ -321,7 +321,7 @@ namespace iw {
 		PushSystem<iw::ParticleUpdateSystem>();
 		PushSystem<iw::EntityCleanupSystem>();
 
-		PushSystem<iw::ModelVoxelRenderSystem>(MainScene);
+		//PushSystem<iw::ModelVoxelRenderSystem>(MainScene);
 
 		PushSystem<iw::    MeshShadowRenderSystem>(MainScene);
 		PushSystem<iw::   ModelShadowRenderSystem>(MainScene);

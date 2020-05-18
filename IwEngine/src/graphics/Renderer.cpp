@@ -17,6 +17,7 @@ namespace Graphics {
 		description.DescribeBuffer(bName::UV,       MakeLayout<float>(2));
 
 		MeshData* data = MakePlane(description, 1, 1);
+		data->TransformMeshData(Transform(0, 1, quaternion::from_euler_angles(iw::Pi * 0.5f, 0, 0)));
 
 		m_quad = data->MakeInstance();
 	}
@@ -58,6 +59,7 @@ namespace Graphics {
 
 	void Renderer::Begin() {
 		Device->Clear(); // errors
+
 
 		// clear queues
 	}
@@ -281,7 +283,7 @@ namespace Graphics {
 	void Renderer::SetTarget(
 		const ref<RenderTarget>& target)
 	{
-		if (m_target != target) {
+		//if (m_target != target) {
 			if (target) {
 				if (!target->IsInitialized()) {
 					target->Initialize(Device);
@@ -297,16 +299,20 @@ namespace Graphics {
 			}
 
 			m_target = target;
-		}
+		//}
 	}
 
 	void Renderer::SetCamera(
 		Camera* camera)
 	{
+		matrix4 v   = matrix4::identity;
+		matrix4 p   = matrix4::identity;
 		matrix4 vp  = matrix4::identity;
 		vector3 pos = vector3::zero;
 
 		if (camera) {
+			v   = camera->View();
+			p   = camera->Projection();
 			vp  = camera->ViewProjection();
 			pos = camera->Position();
 		}
@@ -314,8 +320,10 @@ namespace Graphics {
 		if (   m_cameraData.CameraPos != pos	
 			|| m_cameraData.ViewProj  != vp)
 		{
-			m_cameraData.CameraPos = pos;
+			m_cameraData.View      = v;
+			m_cameraData.Proj      = p;
 			m_cameraData.ViewProj  = vp;
+			m_cameraData.CameraPos = pos;
 			Device->UpdateBuffer(m_cameraUBO, &m_cameraData);
 		}
 

@@ -6,24 +6,26 @@
 namespace iw {
 namespace Graphics {
 	VoxelLight::VoxelLight(
+		Camera*      mainCamera,
 		ref<Texture> voxelTexture,
 		ref<Shader>  voxelizerShader,
 		ref<Shader>  particleVoxelizerShader)
-		: Light(0, nullptr, nullptr, voxelizerShader, particleVoxelizerShader)
+		: Light(0, mainCamera, nullptr, voxelizerShader, particleVoxelizerShader)
 		, m_voxelTexture(voxelTexture)
 	{ }
 
 	VoxelLight::VoxelLight(
 		const VoxelLight& copy)
-		: Light(0, nullptr, nullptr, copy.m_shadowShader, copy.m_particleShadowShader)
+		: Light(0, copy.m_shadowCamera, nullptr, copy.m_shadowShader, copy.m_particleShadowShader)
 		, m_voxelTexture(copy.m_voxelTexture)
 	{}
 
 	VoxelLight::VoxelLight(
 		VoxelLight&& copy) noexcept
-		: Light(0, nullptr, nullptr, copy.m_shadowShader, copy.m_particleShadowShader)
+		: Light(0, copy.m_shadowCamera, nullptr, copy.m_shadowShader, copy.m_particleShadowShader)
 		, m_voxelTexture(copy.m_voxelTexture)
 	{
+		copy.m_shadowCamera         = nullptr;
 		copy.m_shadowShader         = nullptr;
 		copy.m_particleShadowShader = nullptr;
 		copy.m_voxelTexture         = nullptr;
@@ -32,6 +34,7 @@ namespace Graphics {
 	VoxelLight& VoxelLight::operator=(
 		const VoxelLight& copy)
 	{
+		m_shadowCamera         = copy.m_shadowCamera;
 		m_shadowShader         = copy.m_shadowShader;
 		m_particleShadowShader = copy.m_particleShadowShader;
 		m_voxelTexture         = copy.m_voxelTexture;
@@ -42,15 +45,21 @@ namespace Graphics {
 	VoxelLight& VoxelLight::operator=(
 		VoxelLight&& copy) noexcept
 	{
+		m_shadowCamera         = copy.m_shadowCamera;
 		m_shadowShader         = copy.m_shadowShader;
 		m_particleShadowShader = copy.m_particleShadowShader;
 		m_voxelTexture         = copy.m_voxelTexture;
 
+		copy.m_shadowCamera         = nullptr;
 		copy.m_shadowShader         = nullptr;
 		copy.m_particleShadowShader = nullptr;
 		copy.m_voxelTexture         = nullptr;
 
 		return *this;
+	}
+
+	VoxelLight::~VoxelLight() {
+		m_shadowCamera = nullptr; // save me from destruction!!
 	}
 
 	void VoxelLight::SetupShadowCast(
@@ -89,6 +98,10 @@ namespace Graphics {
 
 	bool VoxelLight::CanCastShadows() const {
 		return true;
+	}
+
+	ref<Texture> VoxelLight::VoxelTexture() {
+		return m_voxelTexture;
 	}
 }
 }

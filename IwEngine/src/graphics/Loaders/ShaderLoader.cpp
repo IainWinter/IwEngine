@@ -69,19 +69,19 @@ namespace Graphics {
 				size_t offset = j + 9;
 				std::string incldue = code.substr(offset, start - offset - 1);
 
-				code = code.erase(j - 1, start - j);
+				code.erase(j - 1, start - j);
+				code.insert(j, iw::ReadFile("assets/" + incldue));
 				j = end;
-
-				std::string source = name.substr(name.find_first_of(' ') + 1, name.find_first_of('\0') - name.find_first_of(' ') - 1);
-
+				
 				LOG_INFO << "\tGetting shader source from " << incldue;
-				code += iw::ReadFile("assets/" + incldue);
 			}
 
 			// Only make this when we need to
 			if (shader == nullptr) {
 				shader = new Shader();
 			}
+
+			LOG_INFO << code;
 
 			shader->AddShader(type, code.c_str());
 		}

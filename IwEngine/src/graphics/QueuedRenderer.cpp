@@ -139,11 +139,15 @@ namespace Graphics {
 				case RenderOP::DRAW_MESH: {
 					DrawMeshOP* draw = (DrawMeshOP*)item.Data;
 
-					if (draw->SetupDraw) {
-						draw->SetupDraw();
+					if (draw->BeforeDraw) {
+						draw->BeforeDraw();
 					}
 
 					Renderer::DrawMesh(draw->Transform, draw->Mesh);
+
+					if (draw->AfterDraw) {
+						draw->AfterDraw();
+					}
 
 					m_pool.free<DrawMeshOP>(draw);
 					break;
@@ -151,11 +155,15 @@ namespace Graphics {
 				case RenderOP::DRAW_MESH_INST: {
 					DrawMeshInstanceOP* draw = (DrawMeshInstanceOP*)item.Data;
 
-					if (draw->SetupDraw) {
-						draw->SetupDraw();
+					if (draw->BeforeDraw) {
+						draw->BeforeDraw();
 					}
 
 					Renderer::DrawMesh(draw->Transform, draw->Mesh);
+
+					if (draw->AfterDraw) {
+						draw->AfterDraw();
+					}
 
 					m_pool.free<DrawMeshInstanceOP>(draw);
 					break;
@@ -250,7 +258,13 @@ namespace Graphics {
 	void QueuedRenderer::BeforeDraw(
 		const setup_draw_func& func)
 	{
-		m_setupDrawFunc = func;
+		m_beforeDrawFunc = func;
+	}
+
+	void QueuedRenderer::AfterDraw(
+		const setup_draw_func& func)
+	{
+		m_afterDrawFunc = func;
 	}
 
 	void QueuedRenderer::DrawMesh(
@@ -264,9 +278,11 @@ namespace Graphics {
 		DrawMeshInstanceOP* op = m_pool.alloc<DrawMeshInstanceOP>();
 		op->Transform = transform;
 		op->Mesh      = mesh;
-		op->SetupDraw = m_setupDrawFunc;
+		op->BeforeDraw = m_beforeDrawFunc;
+		op->AfterDraw  = m_afterDrawFunc;
 
-		m_setupDrawFunc = nullptr; // reset for next call
+		m_beforeDrawFunc = nullptr; // reset for next call
+		m_afterDrawFunc  = nullptr; // reset for next call
 
 		m_queue.emplace_back(GenOrder(transform, mesh), RenderOP::DRAW_MESH_INST, op);
 	}
@@ -282,9 +298,11 @@ namespace Graphics {
 		DrawMeshOP* op = m_pool.alloc<DrawMeshOP>();
 		op->Transform = transform;
 		op->Mesh      = mesh;
-		op->SetupDraw = m_setupDrawFunc;
+		op->BeforeDraw = m_beforeDrawFunc;
+		op->AfterDraw  = m_afterDrawFunc;
 
-		m_setupDrawFunc = nullptr; // reset for next call
+		m_beforeDrawFunc = nullptr; // reset for next call
+		m_afterDrawFunc = nullptr; // reset for next call
 
 		m_queue.emplace_back(GenOrder(&transform, &mesh), RenderOP::DRAW_MESH, op);
 	}

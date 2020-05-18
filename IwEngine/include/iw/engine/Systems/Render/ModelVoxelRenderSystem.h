@@ -3,6 +3,7 @@
 #include "iw/engine/Core.h"
 #include "iw/engine/System.h"
 #include "iw/graphics/Model.h"
+#include "iw/graphics/VoxelLight.h"
 
 namespace iw {
 namespace Engine {
@@ -16,13 +17,14 @@ namespace Engine {
 		};
 
 		Scene* m_scene;
-		Light* m_voxelize;
+		VoxelLight* m_voxelize;
 
 		// For visualization
 		ref<RenderTarget> m_front;
 		ref<RenderTarget> m_back;
 
-		Mesh m_voxel;
+		Mesh m_bounds;
+		Mesh m_quad;
 
 		bool m_visualize;
 

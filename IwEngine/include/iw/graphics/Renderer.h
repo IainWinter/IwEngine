@@ -17,6 +17,8 @@
 namespace iw {
 namespace Graphics {
 	struct CameraData {
+		matrix4 View;
+		matrix4 Proj;
 		matrix4 ViewProj;
 		vector4 CameraPos;
 	};
@@ -190,6 +192,12 @@ namespace Graphics {
 			ref<Shader>& filter,
 			const ref<RenderTarget>& source,
 			const ref<RenderTarget>& target = nullptr);
+
+		IWGRAPHICS_API
+		/*const*/ Mesh ScreenQuad() const {
+			return m_quad.MakeInstance();
+		}
+
 	//private:
 		IWGRAPHICS_API
 		void SetTarget(

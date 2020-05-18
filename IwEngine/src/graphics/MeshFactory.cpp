@@ -497,6 +497,9 @@ namespace Graphics {
 		float stepX = 2.0f / xCount;
 		float stepZ = 2.0f / zCount;
 
+		float stepU = 1.0f / xCount;
+		float stepV = 1.0f / zCount;
+
 		vector3 offset = -(vector3::unit_x + vector3::unit_z);
 
 		for (unsigned x = 0; x <= xCount; x++) {
@@ -506,7 +509,7 @@ namespace Graphics {
 				verts[i] = offset + vector3(x * stepX, 0, z * stepZ);
 				
 				if (uvs) {
-					uvs[i] = vector2(x * stepX, z * stepZ);
+					uvs[i] = vector2(x * stepU, (zCount - z) * stepV);
 				}
 			}
 		}

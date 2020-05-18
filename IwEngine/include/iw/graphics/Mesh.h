@@ -81,15 +81,18 @@ namespace detail {
 			unsigned Count;
 			bool Initialized;
 
-			void*       Ptr()       { return Data.get(); }
-			const void* Ptr() const { return Data.get(); }
+			template<typename _t = void*>
+			      _t* Ptr()        { return (_t*)Data.get(); } // yak on em
+
+			template<typename _t = void*>
+			const _t* Ptr() const  { return (_t*)Data.get(); }
 		};
 
 		struct IndexData {
 			ref<unsigned[]> Index;
 			unsigned Count;
 
-			unsigned*       Ptr()       { return Index.get(); }
+			      unsigned* Ptr()       { return Index.get(); }
 			const unsigned* Ptr() const { return Index.get(); }
 		};
 
@@ -164,6 +167,10 @@ namespace detail {
 		IWGRAPHICS_API
 		void ConformMeshData(
 			const MeshDescription& description);
+
+		IWGRAPHICS_API
+		void TransformMeshData(
+			const Transform& transform);
 
 		IWGRAPHICS_API void Initialize(const ref<IDevice>& device); // Send the mesh data to video memory
 		IWGRAPHICS_API void Update    (const ref<IDevice>& device); // Updates the video memory copy of the mesh
