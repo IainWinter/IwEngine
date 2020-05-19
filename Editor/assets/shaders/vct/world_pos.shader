@@ -10,9 +10,8 @@ out vec3 WorldPos;
 uniform mat4 model;
 
 void main() {
-	vec4 worldPos = model * vec4(vert, 1);
-	WorldPos = worldPos.xyz;
-	gl_Position = viewProj * worldPos;
+	WorldPos = vec3(model * vec4(vert, 1));
+	gl_Position = viewProj * vec4(WorldPos, 1);
 }
 
 #shader Fragment

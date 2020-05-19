@@ -98,6 +98,12 @@ namespace Graphics {
 		m_particleShadowShader = particleShadowShader;
 	}
 
+	void Light::SetShadowCamera(
+		Camera* shadowCamera)
+	{
+		m_shadowCamera = shadowCamera;
+	}
+
 	/*void Light::PostProcess() {}
 
 	const iw::ref<Shader>& Light::LightShader() const {

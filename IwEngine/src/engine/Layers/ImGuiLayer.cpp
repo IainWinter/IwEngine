@@ -79,6 +79,10 @@ namespace Engine {
 			return io.WantCaptureMouse;
 		}
 
+		if (e.Device == DeviceType::RAW_MOUSE) {
+			return ImGui::GetIO().WantCaptureMouse;
+		}
+
 		return false;
 	}
 
@@ -93,6 +97,10 @@ namespace Engine {
 			}
 
 			return io.WantCaptureMouse;
+		}
+
+		if (e.Device == DeviceType::RAW_MOUSE) {
+			return ImGui::GetIO().WantCaptureMouse;
 		}
 
 		return false;

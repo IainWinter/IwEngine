@@ -195,6 +195,12 @@ namespace Graphics {
 		return Texture(this, xOffset, yOffset, width, height/*, minmap*/);
 	}
 
+	void Texture::Clear(
+		Color color)
+	{
+		m_handle->Clear(color.r, color.g, color.b, color.a);
+	}
+
 	int Texture::Width() const {
 		return m_width;
 	}

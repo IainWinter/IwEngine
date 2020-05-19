@@ -47,7 +47,7 @@ namespace Graphics {
 		virtual bool Outdated() const;
 
 		IWGRAPHICS_API       float              Intensity()    const;
-		IWGRAPHICS_API const vector3&           Position()     const;
+		IWGRAPHICS_API virtual const vector3&   Position()     const;
 		IWGRAPHICS_API const ref<RenderTarget>& ShadowTarget() const;
 		IWGRAPHICS_API const ref<Shader>&       ShadowShader() const;
 		IWGRAPHICS_API const ref<Shader>&       ParticleShadowShader() const;
@@ -58,7 +58,7 @@ namespace Graphics {
 			float intensity);
 
 		IWGRAPHICS_API
-		void SetPosition(
+		virtual void SetPosition(
 			const vector3& position);
 
 		IWGRAPHICS_API
@@ -73,6 +73,11 @@ namespace Graphics {
 		virtual void SetParticleShadowShader(
 			ref<Shader>& particleShadowShader);
 
+		IWGRAPHICS_API
+		virtual void SetShadowCamera(
+			Camera* shadowCamera);
+
+		//IWGRAPHICS_API
 		//IWGRAPHICS_API
 		//virtual Camera& Cam() = 0;
 		//

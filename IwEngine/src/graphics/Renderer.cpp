@@ -175,11 +175,6 @@ namespace Graphics {
 			return;
 		}
 
-		if (!m_shader) {
-			LOG_WARNING << "Tried to draw mesh without a shader set!";
-			return;
-		}
-
 		if (!mesh->Data()) {
 			LOG_WARNING << "Tried to draw mesh without data to renderer!";
 			return;
@@ -196,14 +191,6 @@ namespace Graphics {
 		}
 
 		Renderer::SetMesh(mesh);
-
-		if (!m_meshData->IsInitialized()) {
-			m_meshData->Initialize(Device);
-		}
-
-		if (m_meshData->IsOutdated()) {
-			m_meshData->Update(Device);
-		}
 
 		if (m_state == RenderState::SCENE) {
 			if (mesh->Material()) {
@@ -266,12 +253,6 @@ namespace Graphics {
 			if (out) {
 				out->SetAsTexture(target->Tex(0)->Handle());
 			}
-		}
-
-		// Kidna sucks to need to have this here, should be draw like all other meshes but whatevvs
-
-		if (!m_quad.Data()->IsInitialized()) {
-			m_quad.Data()->Initialize(Device);
 		}
 
 		Renderer::SetMesh(&m_quad);
@@ -340,6 +321,14 @@ namespace Graphics {
 		else if (m_meshData != mesh->Data()) {
 			m_meshData = mesh->Data();
 
+			if (!m_meshData->IsInitialized()) {
+				m_meshData->Initialize(Device);
+			}
+
+			if (m_meshData->IsOutdated()) {
+				m_meshData->Update(Device);
+			}
+
 			if (m_meshData) {
 				mesh->Bind(Device);
 			}
@@ -351,7 +340,13 @@ namespace Graphics {
 	{
 		//if (m_shader != shader) { // newed to reset tex unit count somehow before this is valid
 			m_shader = shader;
+
+			if (!m_shader->IsInitialized()) {
+				m_shader->Initialize(Device);
+			}
+
 			m_shader->Use(Device);
+
 		//}
 	}
 

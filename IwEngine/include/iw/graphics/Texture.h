@@ -64,6 +64,10 @@ namespace Graphics {
 			int mipmap = 0*/) const;
 
 		IWGRAPHICS_API
+		void Clear(
+			Color color = Color(0));
+
+		IWGRAPHICS_API
 		int Width() const;
 
 		IWGRAPHICS_API

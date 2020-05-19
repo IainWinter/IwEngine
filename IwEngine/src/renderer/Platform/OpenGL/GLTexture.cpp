@@ -188,6 +188,33 @@ namespace RenderAPI {
 		Unbind();
 	}
 
+	void GLTexture::Clear(
+		float r, 
+		float g, 
+		float b, 
+		float a) const
+	{
+		/*GLint gl_previous;
+		
+
+		switch (Type()) {
+			case TextureType::TEX_2D:   glGetIntegerv(GL_TEXTURE_BINDING_3D,       &gl_previous); break;
+			case TextureType::TEX_3D:   glGetIntegerv(GL_TEXTURE_BINDING_2D,       &gl_previous); break;
+			case TextureType::TEX_CUBE: glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, &gl_previous); break;
+			default: LOG_WARNING << "Tried to clear texture with an invalid texture type!";       break;
+		}*/
+
+		GLfloat color[4];
+		color[0] = r;
+		color[1] = g;
+		color[2] = b;
+		color[3] = a;
+
+		//glBindTexture(gl_type, gl_id);
+		glClearTexImage(gl_id, 0, GL_RGBA, GL_FLOAT, &color);
+		//glBindTexture(GL_TEXTURE_3D, previousBoundTextureID);
+	}
+
 	unsigned GLTexture::Id() const {
 		return gl_id;
 	}

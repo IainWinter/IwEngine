@@ -45,7 +45,7 @@ LevelSystem::LevelSystem(
 
 	//currentLevel = 0;
 
-	currentLevelName = "levels/forest/forest08.json";
+	currentLevelName = "levels/test.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 63);
 	closedColor = iw::Color::From255(201, 66, 66, 63);
@@ -185,6 +185,8 @@ bool LevelSystem::On(
 			break;
 		}
 		case iw::val(Actions::UNLOCK_LEVEL_DOOR): {
+			if (!levelDoor) break;
+
 			LevelDoor* door = levelDoor.Find<LevelDoor>();
 			door->State = LevelDoorState::OPEN;
 			door->ColorTimer = 0.25f;

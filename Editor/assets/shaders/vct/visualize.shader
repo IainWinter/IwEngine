@@ -8,12 +8,10 @@ layout (location = 1) in vec2 uv;
 
 out vec2 TexCoords;
 out vec3 CameraPos;
-out mat4 CameraView;
 
 void main() {
 	TexCoords = uv;
 	CameraPos = camPos.xyz;
-	CameraView = view;
 
 	gl_Position = vec4(vert, 1);
 }
@@ -26,7 +24,6 @@ void main() {
 
 in vec2 TexCoords;
 in vec3 CameraPos;
-in mat4 CameraView;
 
 out vec4 PixelColor;
 
@@ -39,11 +36,17 @@ vec3 scaleAndBias(vec3 p)          { return 0.5f * p + vec3(0.5f); }
 bool isInsideCube(vec3 p, float e) { return abs(p.x) < 1 + e && abs(p.y) < 1 + e && abs(p.z) < 1 + e; }
 
 void main() {
-	vec3 origin = isInsideCube(CameraPos, 0.2f)
-		? CameraPos
-		: texture(mat_front, TexCoords).xyz;
+	vec3 cameraPosition        = CameraPos;
+	vec2 textureCoordinateFrag = TexCoords;
 
-	vec3 direction = texture(mat_back, TexCoords).xyz - origin;
+	const float mipmapLevel = 0;
+
+	// Initialize ray.
+	const vec3 origin = isInsideCube(cameraPosition, 0.2f)
+		? cameraPosition
+		: texture(mat_front, textureCoordinateFrag).xyz;
+
+	vec3 direction = texture(mat_back, textureCoordinateFrag).xyz - origin;
 	const uint numberOfSteps = uint(INV_STEP_LENGTH * length(direction));
 	direction = normalize(direction);
 
@@ -51,7 +54,7 @@ void main() {
 	vec4 color = vec4(0.0f);
 	for (uint step = 0; step < numberOfSteps && color.a < 0.99f; ++step) {
 		const vec3 currentPoint = origin + STEP_LENGTH * step * direction;
-		vec4 currentSample = textureLod(mat_world, scaleAndBias(currentPoint), mat_level);
+		vec4 currentSample = textureLod(mat_world, scaleAndBias(currentPoint), mipmapLevel);
 		color += (1.0f - color.a) * currentSample;
 	}
 

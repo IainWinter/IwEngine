@@ -6,26 +6,24 @@
 namespace iw {
 namespace Graphics {
 	VoxelLight::VoxelLight(
-		Camera*      mainCamera,
 		ref<Texture> voxelTexture,
 		ref<Shader>  voxelizerShader,
 		ref<Shader>  particleVoxelizerShader)
-		: Light(0, mainCamera, nullptr, voxelizerShader, particleVoxelizerShader)
+		: Light(0, nullptr, nullptr, voxelizerShader, particleVoxelizerShader)
 		, m_voxelTexture(voxelTexture)
 	{ }
 
 	VoxelLight::VoxelLight(
 		const VoxelLight& copy)
-		: Light(0, copy.m_shadowCamera, nullptr, copy.m_shadowShader, copy.m_particleShadowShader)
+		: Light(0, nullptr, nullptr, copy.m_shadowShader, copy.m_particleShadowShader)
 		, m_voxelTexture(copy.m_voxelTexture)
 	{}
 
 	VoxelLight::VoxelLight(
 		VoxelLight&& copy) noexcept
-		: Light(0, copy.m_shadowCamera, nullptr, copy.m_shadowShader, copy.m_particleShadowShader)
+		: Light(0, nullptr, nullptr, copy.m_shadowShader, copy.m_particleShadowShader)
 		, m_voxelTexture(copy.m_voxelTexture)
 	{
-		copy.m_shadowCamera         = nullptr;
 		copy.m_shadowShader         = nullptr;
 		copy.m_particleShadowShader = nullptr;
 		copy.m_voxelTexture         = nullptr;
@@ -34,7 +32,6 @@ namespace Graphics {
 	VoxelLight& VoxelLight::operator=(
 		const VoxelLight& copy)
 	{
-		m_shadowCamera         = copy.m_shadowCamera;
 		m_shadowShader         = copy.m_shadowShader;
 		m_particleShadowShader = copy.m_particleShadowShader;
 		m_voxelTexture         = copy.m_voxelTexture;
@@ -45,12 +42,10 @@ namespace Graphics {
 	VoxelLight& VoxelLight::operator=(
 		VoxelLight&& copy) noexcept
 	{
-		m_shadowCamera         = copy.m_shadowCamera;
 		m_shadowShader         = copy.m_shadowShader;
 		m_particleShadowShader = copy.m_particleShadowShader;
 		m_voxelTexture         = copy.m_voxelTexture;
 
-		copy.m_shadowCamera         = nullptr;
 		copy.m_shadowShader         = nullptr;
 		copy.m_particleShadowShader = nullptr;
 		copy.m_voxelTexture         = nullptr;
@@ -58,26 +53,31 @@ namespace Graphics {
 		return *this;
 	}
 
-	VoxelLight::~VoxelLight() {
-		m_shadowCamera = nullptr; // save me from destruction!!
+	const vector3& VoxelLight::Position() const {
+		return m_position;
+	}
+
+	void VoxelLight::SetPosition(
+		const vector3& position)
+	{
+		m_position = position;
 	}
 
 	void VoxelLight::SetupShadowCast(
 		Renderer* renderer)
 	{
+		renderer->Device->SetViewport(m_voxelTexture->Width(), m_voxelTexture->Height());
+		
+		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+		glDisable(GL_CULL_FACE);
+		glDisable(GL_DEPTH_TEST);
+		glDisable(GL_BLEND);
+
 		if (!m_voxelTexture->Handle()) {
 			m_voxelTexture->Initialize(renderer->Device);
 		}
 
-		renderer->SetTarget(nullptr);
-		renderer->Device->SetViewport(m_voxelTexture->Width(), m_voxelTexture->Height());
-
-		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-		glDisable(GL_DEPTH_TEST);
-
-		// not sure if these are needed
-		//glDisable(GL_CULL_FACE);
-		//glDisable(GL_BLEND);
+		m_voxelTexture->Clear();
 
 		IPipelineParam* out = m_shadowShader->Handle()->GetParam("voxelTexture");
 		if (out) {
@@ -90,8 +90,8 @@ namespace Graphics {
 	{
 		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 		glEnable(GL_DEPTH_TEST);
-		//glEnable(GL_CULL_FACE);
-		//glEnable(GL_BLEND);
+		glEnable(GL_CULL_FACE);
+		glEnable(GL_BLEND);
 
 		m_voxelTexture->Handle()->GenerateMipMaps();
 	}

@@ -13,11 +13,12 @@ namespace Graphics {
 	{
 	private:
 		ref<Texture> m_voxelTexture;
+		vector3 m_position;
+
 	public:
 		// DOES NOT TAKE OWNERSHIP OF MAIN CAMERA
 		IWGRAPHICS_API
 		VoxelLight(
-			Camera*      mainCamera,
 			ref<Texture> voxelTexture,
 			ref<Shader>  voxelizerShader,
 			ref<Shader>  particleVoxelizerShader = nullptr);
@@ -25,8 +26,8 @@ namespace Graphics {
 		GEN_copy(IWGRAPHICS_API, VoxelLight)
 		GEN_move(IWGRAPHICS_API, VoxelLight)
 
-		IWGRAPHICS_API
-		~VoxelLight() override;
+		const vector3& Position() const override;
+		void SetPosition(const vector3& position) override;
 
 		IWGRAPHICS_API
 		void SetupShadowCast(

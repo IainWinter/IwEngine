@@ -143,11 +143,6 @@ namespace iw {
 		Renderer->InitShader(pointShadowShader);
 		Renderer->InitShader(dirIShadowShader);
 		Renderer->InitShader(pointIShadowShader);
-
-		// Voxel nonsense
-
-		ref<Shader> voxelize = Asset->Load<Shader>("shaders/vct/voxelize.shader");
-		Renderer->InitShader(voxelize, CAMERA);
 		
 		// Directional light shadow map textures & target
 
