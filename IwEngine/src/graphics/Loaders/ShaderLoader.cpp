@@ -64,14 +64,13 @@ namespace Graphics {
 					start = code.find('\0', j) + 1;
 				}
 
-				size_t end = code.find("#include", start);
-
 				size_t offset = j + 9;
 				std::string incldue = code.substr(offset, start - offset - 1);
 
 				code.erase(j - 1, start - j);
 				code.insert(j, iw::ReadFile("assets/" + incldue));
-				j = end;
+
+				j = code.find("#include", start);
 				
 				LOG_INFO << "\tGetting shader source from " << incldue;
 			}
@@ -81,7 +80,7 @@ namespace Graphics {
 				shader = new Shader();
 			}
 
-			LOG_INFO << code;
+			//LOG_INFO << code;
 
 			shader->AddShader(type, code.c_str());
 		}

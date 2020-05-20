@@ -14,10 +14,12 @@ namespace Graphics {
 		int m_height;
 		int m_channels;
 
-		TextureType       m_type;
-		TextureFormat     m_format;
-		TextureFormatType m_formatType;
-		TextureWrap       m_wrap;
+		TextureType         m_type;
+		TextureFormat       m_format;
+		TextureFormatType   m_formatType;
+		TextureWrap         m_wrap;
+		TextureFilter       m_filter;
+		TextureMipmapFilter m_mipmapFilter;
 
 		const Texture* m_parent;
 		int m_xOffset;
@@ -34,11 +36,13 @@ namespace Graphics {
 		Texture(
 			int width,
 			int height,
-			TextureType type,
-			TextureFormat format,
-			TextureFormatType formatType,
-			TextureWrap wrap,
-			unsigned char* colors = nullptr);
+			TextureType type                    = TEX_2D,
+			TextureFormat format                = RGBA,
+			TextureFormatType formatType        = UBYTE,
+			TextureWrap wrap                    = BORDER,
+			TextureFilter filtering             = LINEAR,
+			TextureMipmapFilter mipmapFiltering = LINEAR_LINEAR,
+			unsigned char* colors               = nullptr);
 
 		IWGRAPHICS_API
 		Texture(
@@ -63,9 +67,18 @@ namespace Graphics {
 			int height/*,
 			int mipmap = 0*/) const;
 
+		// texture needs to be initialized!
 		IWGRAPHICS_API
 		void Clear(
 			Color color = Color(0));
+
+		// texture needs to be initialized!
+		IWGRAPHICS_API
+		void SetBorderColor(
+			Color color);
+
+		IWGRAPHICS_API void SetFilter      (TextureFilter       filter);
+		IWGRAPHICS_API void SetMipmapFilter(TextureMipmapFilter mipmapFilter);
 
 		IWGRAPHICS_API
 		int Width() const;
@@ -84,6 +97,12 @@ namespace Graphics {
 
 		IWGRAPHICS_API
 		TextureWrap Wrap() const;
+
+		IWGRAPHICS_API
+		TextureFilter Filter() const;
+
+		IWGRAPHICS_API
+		TextureMipmapFilter MipmapFilter() const;
 
 		IWGRAPHICS_API
 		const Texture* Parent() const;

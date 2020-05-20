@@ -196,6 +196,8 @@ namespace RenderAPI {
 			TextureFormat format,
 			TextureFormatType formatType,
 			TextureWrap wrap,
+			TextureFilter filter,
+			TextureMipmapFilter mipmapFilter,
 			const void* data = nullptr) override;
 
 		IWRENDERER_API

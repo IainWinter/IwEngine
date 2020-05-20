@@ -24,6 +24,8 @@ uniform sampler2D mat_fontMap;
 
 in vec2 UV;
 
+out vec4 PixelColor;
+
 void main() {
 	vec4 color = vec4(mat_color, 1);
 
@@ -34,5 +36,5 @@ void main() {
 		}
 	}
 
-	gl_FragColor = color;
+	PixelColor = color;
 }

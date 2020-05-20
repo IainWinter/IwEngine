@@ -2,6 +2,7 @@
 #include "iw/renderer/Platform/OpenGL/GLPipelineParam.h"
 #include "iw/renderer/Platform/OpenGL/GLUniformBuffer.h"
 #include "iw/renderer/Platform/OpenGL/GLTranslator.h"
+#include "iw/renderer/Platform/OpenGL/GLErrorCatch.h"
 #include "gl/glew.h"
 
 namespace iw {
@@ -17,30 +18,30 @@ namespace RenderAPI {
 		gl_id = glCreateProgram();
 
 		if (vertexShader) {
-			glAttachShader(gl_id, vertexShader->VertexShader());
+			GL(glAttachShader(gl_id, vertexShader->VertexShader()));
 		}
 
 		if (fragmentShader) {
-			glAttachShader(gl_id, fragmentShader->FragmentShader());
+			GL(glAttachShader(gl_id, fragmentShader->FragmentShader()));
 		}
 
 		if (geometryShader) {
-			glAttachShader(gl_id, geometryShader->GeometryShader());
+			GL(glAttachShader(gl_id, geometryShader->GeometryShader()));
 		}
 
-		glLinkProgram(gl_id);
-		glValidateProgram(gl_id);
+		GL(glLinkProgram(gl_id));
+		GL(glValidateProgram(gl_id));
 
 		if (vertexShader) {
-			glDeleteShader(vertexShader->VertexShader());
+			GL(glDeleteShader(vertexShader->VertexShader()));
 		}
 
 		if (fragmentShader) {
-			glDeleteShader(fragmentShader->FragmentShader());
+			GL(glDeleteShader(fragmentShader->FragmentShader()));
 		}
 		
 		if(geometryShader) {
-			glDeleteShader(geometryShader->GeometryShader());
+			GL(glDeleteShader(geometryShader->GeometryShader()));
 		}
 
 		int ucount = UniformCount();
@@ -71,7 +72,7 @@ namespace RenderAPI {
 	}
 	
 	GLPipeline::~GLPipeline() {
-		glDeleteProgram(gl_id);
+		GL(glDeleteProgram(gl_id));
 		for (auto p : m_params) {
 			delete p.second;
 		}
@@ -83,13 +84,13 @@ namespace RenderAPI {
 
 	int GLPipeline::UniformCount() const {
 		int count;
-		glGetProgramiv(gl_id, GL_ACTIVE_UNIFORMS, &count);
+		GL(glGetProgramiv(gl_id, GL_ACTIVE_UNIFORMS, &count));
 		return count;
 	}
 
 	int GLPipeline::BufferCount() const {
 		int count;
-		glGetProgramiv(gl_id, GL_ACTIVE_UNIFORM_BLOCKS, &count);
+		GL(glGetProgramiv(gl_id, GL_ACTIVE_UNIFORM_BLOCKS, &count));
 		return count;
 	}
 
@@ -119,7 +120,7 @@ namespace RenderAPI {
 		char     name[128]; 
 		memset(name, '\0', 128);
 
-		glGetActiveUniform(gl_id, index, 128, &nameSize, &count, &gltype, name);
+		GL(glGetActiveUniform(gl_id, index, 128, &nameSize, &count, &gltype, name));
 		int location = glGetUniformLocation(gl_id, name);
 
 		if (location == -1) {
@@ -163,7 +164,7 @@ namespace RenderAPI {
 		}
 #endif
 
-		glUniformBlockBinding(gl_id, uniformIndex, index);
+		GL(glUniformBlockBinding(gl_id, uniformIndex, index));
 	}
 
 //	bool GLPipeline::IsTextureActive(
@@ -189,7 +190,7 @@ namespace RenderAPI {
 	void GLPipeline::Use() {
 		m_textureCount = 0;
 		m_imageCount   = 0;
-		glUseProgram(gl_id);
+		GL(glUseProgram(gl_id));
 	}
 }
 }

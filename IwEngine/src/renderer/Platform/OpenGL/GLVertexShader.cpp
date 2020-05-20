@@ -1,4 +1,5 @@
 #include "iw/renderer/Platform/OpenGL/GLVertexShader.h"
+#include "iw/renderer/Platform/OpenGL/GLErrorCatch.h"
 #include "iw/log/logger.h"
 #include "gl/glew.h"
 
@@ -8,22 +9,22 @@ namespace RenderAPI {
 		const char* source)
 	{
 		gl_id = glCreateShader(GL_VERTEX_SHADER);
-		glShaderSource(gl_id, 1, &source, nullptr);
-		glCompileShader(gl_id);
+		GL(glShaderSource(gl_id, 1, &source, nullptr));
+		GL(glCompileShader(gl_id));
 
 		int result;
-		glGetShaderiv(gl_id, GL_COMPILE_STATUS, &result);
+		GL(glGetShaderiv(gl_id, GL_COMPILE_STATUS, &result));
 		if (!result) {
 			int length;
-			glGetShaderiv(gl_id, GL_INFO_LOG_LENGTH, &length);
+			GL(glGetShaderiv(gl_id, GL_INFO_LOG_LENGTH, &length));
 
 			char* message = new char[length];
-			glGetShaderInfoLog(gl_id, length, &length, message);
+			GL(glGetShaderInfoLog(gl_id, length, &length, message));
 
 			LOG_ERROR << "Error compiling vertex shader " << message;
 
 			delete[] message;
-			glDeleteShader(gl_id);
+			GL(glDeleteShader(gl_id));
 		}
 	}
 

@@ -121,6 +121,30 @@ namespace RenderAPI {
 	}
 
 	GLint GLTranslator::Translate(
+		TextureFilter textureFilter)
+	{
+		switch (textureFilter) {
+			case NEAREST: return GL_NEAREST;
+			case LINEAR:  return GL_LINEAR;
+		}
+
+		return GL_INVALID_VALUE;
+	}
+
+	GLint GLTranslator::Translate(
+		TextureMipmapFilter textureMipmapFilter)
+	{
+		switch (textureMipmapFilter) {
+			case NEAREST_NEAREST: return GL_NEAREST_MIPMAP_NEAREST;
+			case NEAREST_LINEAR:  return GL_NEAREST_MIPMAP_LINEAR;
+			case LINEAR_NEAREST:  return GL_LINEAR_MIPMAP_NEAREST;
+			case LINEAR_LINEAR:   return GL_LINEAR_MIPMAP_LINEAR;
+		}
+
+		return GL_INVALID_VALUE;
+	}
+
+	GLint GLTranslator::Translate(
 		GLenum glenum,
 		unsigned& count)
 	{

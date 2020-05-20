@@ -132,17 +132,16 @@ namespace iw {
 		ref<Shader> shader   = Asset->Load<Shader>("shaders/phong.shader");
 		ref<Shader> gaussian = Asset->Load<Shader>("shaders/filters/gaussian.shader");
 		ref<Shader> dirShadowShader    = Asset->Load<Shader>("shaders/lights/directional.shader");
-		ref<Shader> pointShadowShader  = Asset->Load<Shader>("shaders/lights/point.shader");
+		//ref<Shader> pointShadowShader  = Asset->Load<Shader>("shaders/lights/point.shader");
 		ref<Shader> dirIShadowShader   = Asset->Load<Shader>("shaders/lights/directional_instanced.shader");
-		ref<Shader> pointIShadowShader = Asset->Load<Shader>("shaders/lights/point_instanced.shader");
+		//ref<Shader> pointIShadowShader = Asset->Load<Shader>("shaders/lights/point_instanced.shader");
 		
-
 		Renderer->InitShader(shader,   CAMERA | SHADOWS | LIGHTS);
 		Renderer->InitShader(gaussian, CAMERA);
 		Renderer->InitShader(dirShadowShader,  CAMERA);
-		Renderer->InitShader(pointShadowShader);
+		//Renderer->InitShader(pointShadowShader);
 		Renderer->InitShader(dirIShadowShader);
-		Renderer->InitShader(pointIShadowShader);
+		//Renderer->InitShader(pointIShadowShader);
 		
 		// Directional light shadow map textures & target
 
@@ -178,13 +177,13 @@ namespace iw {
 		//	Lights
 
 		sun   = new DirectionalLight(100, OrthographicCamera(60, 60, -100, 100), dirShadowTarget, dirShadowShader, dirIShadowShader);
-		//light = new PointLight(30, 30, pointShadowTarget, pointShadowShader, pointIShadowShader);
+		light = new PointLight(30, 30, nullptr, nullptr, nullptr);
 
 		sun->SetRotation(quaternion::from_euler_angles(1.433f, 0.0f, -0.525f));
-		//light->SetPosition(vector3(0, 10, 0));
+		light->SetPosition(vector3(0, 10, 0));
 
 		MainScene->AddLight(sun);
-		//MainScene->AddLight(light);
+		MainScene->AddLight(light);
 
 		//	Cameras
 

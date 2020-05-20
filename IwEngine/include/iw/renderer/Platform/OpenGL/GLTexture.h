@@ -11,23 +11,24 @@ namespace RenderAPI {
 	private:
 		unsigned gl_id;
 		int gl_type;
+		int gl_iformat;
 		int gl_format;
 		int gl_formatType;
-		int gl_wrapX;
-		int gl_wrapY;
-		int gl_wrapZ;
+		int gl_wrap;
+		int gl_filter;
+		int gl_mipmapFilter;
 
 		int m_width;
 		int m_height;
 		int m_channels;
 		//int m_depth;
 
-		TextureType       m_type;
-		TextureFormat     m_format;
-		TextureFormatType m_formatType;
-		TextureWrap       m_wrapX;
-		TextureWrap       m_wrapY;
-		TextureWrap       m_wrapZ;
+		TextureType         m_type;
+		TextureFormat       m_format;
+		TextureFormatType   m_formatType;
+		TextureWrap         m_wrap;
+		TextureFilter       m_filter;
+		TextureMipmapFilter m_mipmapFilter;
 
 		const void* m_data;
 
@@ -40,6 +41,8 @@ namespace RenderAPI {
 			TextureFormat format,
 			TextureFormatType formatType,
 			TextureWrap wrap,
+			TextureFilter filter,
+			TextureMipmapFilter mipmapFilter,
 			const void* data = nullptr);
 
 		//IWRENDERER_API
@@ -84,12 +87,18 @@ namespace RenderAPI {
 		IWRENDERER_API
 		void GenerateMipMaps() const override;
 
-		IWRENDERER_API
+		IWRENDERER_API 
 		void Clear(
-			float r,
-			float g,
-			float b,
-			float a = 1.0f) const override;
+			const void* color) const override;
+
+		// settings
+
+		IWRENDERER_API
+		void SetBorderColor(
+			const void* color) const override;
+
+		IWRENDERER_API void SetFilter      (TextureFilter       filter)       override;
+		IWRENDERER_API void SetMipmapFilter(TextureMipmapFilter mipmapFilter) override;
 
 		IWRENDERER_API
 		unsigned Id() const;
@@ -110,10 +119,13 @@ namespace RenderAPI {
 		TextureFormatType FormatType() const;
 
 		IWRENDERER_API
-		TextureWrap WrapX() const;
+		TextureWrap Wrap() const;
 
 		IWRENDERER_API
-		TextureWrap WrapY() const;
+		TextureFilter Filter() const;
+
+		IWRENDERER_API
+		TextureMipmapFilter MipmapFilter() const;
 	};
 }
 

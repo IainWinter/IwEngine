@@ -208,6 +208,8 @@ namespace RenderAPI {
 			TextureFormat format,
 			TextureFormatType formatType,
 			TextureWrap wrap,
+			TextureFilter filter,
+			TextureMipmapFilter mipmapFilter,
 			const void* data = nullptr) = 0;
 
 		IWRENDERER_API

@@ -39,10 +39,12 @@ namespace Graphics {
 		TextureAtlas(
 			int width,
 			int height,
-			TextureFormat format,
-			TextureFormatType type,
-			TextureWrap wrap,
-			unsigned char* colors = nullptr);
+			TextureFormat format             = RGBA,
+			TextureFormatType type           = UBYTE,
+			TextureWrap wrap                 = BORDER,
+			TextureFilter filter             = NEAREST,
+			TextureMipmapFilter mipmapFilter = NEAREST_NEAREST,
+			unsigned char* colors            = nullptr);
 
 		IWGRAPHICS_API
 		TextureAtlas(

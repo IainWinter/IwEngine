@@ -36,6 +36,14 @@ namespace RenderAPI {
 		virtual _i Translate(
 			TextureWrap textureWrap) = 0;
 
+		IWRENDERER_API
+		virtual _i Translate(
+			TextureFilter textureFilter) = 0;
+
+		IWRENDERER_API
+		virtual _i Translate(
+			TextureMipmapFilter textureMipmapFilter) = 0;
+
 		// Uniform type conversion
 		IWRENDERER_API
 		virtual _i Translate(

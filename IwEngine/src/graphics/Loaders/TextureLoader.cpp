@@ -46,7 +46,7 @@ namespace Graphics {
 
 		stbi_image_free(image);
 
-		return new Texture(width, height, TEX_2D, (TextureFormat)channels, UBYTE, REPEAT, colors);
+		return new Texture(width, height, TEX_2D, (TextureFormat)channels, UBYTE, REPEAT, NEAREST, NEAREST_NEAREST, colors);
 	}
 
 	void TextureLoader::FreeAsset(

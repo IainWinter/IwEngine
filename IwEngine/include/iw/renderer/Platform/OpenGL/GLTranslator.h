@@ -34,6 +34,14 @@ namespace RenderAPI {
 		GLint Translate(
 			TextureWrap textureWrap) override;
 
+		IWRENDERER_API
+		GLint Translate(
+			TextureFilter textureFilter) override;
+
+		IWRENDERER_API
+		GLint Translate(
+			TextureMipmapFilter textureMipmapFilter) override;
+
 		// Uniform type conversion
 		IWRENDERER_API
 		GLint Translate(

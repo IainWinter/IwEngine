@@ -47,7 +47,7 @@ namespace Graphics {
 
 		for (ShaderSource& shader : m_source) {
 			switch (shader.Type) {
-				case ShaderType::VERTEX:   vertex   = device->CreateVertexShader(shader.Source);   break;
+				case ShaderType::VERTEX:   vertex   = device->CreateVertexShader  (shader.Source); break;
 				case ShaderType::GEOMETRY: geometry = device->CreateGeometryShader(shader.Source); break;
 				case ShaderType::FRAGMENT: fragment = device->CreateFragmentShader(shader.Source); break;
 				default: LOG_WARNING << "Invalid shader type " << iw::val(shader.Type); break;

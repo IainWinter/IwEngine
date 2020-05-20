@@ -1,27 +1,8 @@
 #version 420
 
-#define MAX_POINT_LIGHTS 16
-#define MAX_DIRECTIONAL_LIGHTS 4
-
 #include shaders/vertex_texture_blend.shader
-
-struct PointLight {
-	vec3 Position;
-	float Radius;
-};
-
-struct DirectionalLight {
-	vec3 InvDirection;
-};
-
-layout(std140) uniform Lights {
-	int lights_pad1, lights_pad2;
-
-	int pointLightCount;
-	int directionalLightCount;
-	PointLight       pointLights      [MAX_POINT_LIGHTS];
-	DirectionalLight directionalLights[MAX_DIRECTIONAL_LIGHTS];
-};
+#include shaders/gamma_correction.shader
+#include shaders/lights.shader
 
 in vec3 WorldPos;
 in vec3 CameraPos;
@@ -81,26 +62,6 @@ float linstep(
 	float v)
 {
 	return clamp((v - l) / (h - l), 0.0, 1.0);
-}
-
-// Gamma correction
-
-vec3 sRGBToLinear(
-	vec3 sRGBCol)
-{
-	vec3 linearRGBLo = sRGBCol / 12.92f;
-	vec3 linearRGBHi = pow((sRGBCol + 0.055f) / 1.055f, vec3(2.4f));
-	vec3 linearRGB   = (length(sRGBCol) <= 0.04045f) ? linearRGBLo : linearRGBHi;
-	return linearRGB;
-}
-
-vec3 linearToSRGB(
-	vec3 linearCol)
-{
-	vec3 sRGBLo = linearCol * 12.92f;
-	vec3 sRGBHi = (pow(abs(linearCol), vec3(1.0f / 2.4f)) * 1.055f) - 0.055f;
-	vec3 sRGB   = (length(linearCol) <= 0.0031308f) ? sRGBLo : sRGBHi;
-	return sRGB;
 }
 
 // Shadows

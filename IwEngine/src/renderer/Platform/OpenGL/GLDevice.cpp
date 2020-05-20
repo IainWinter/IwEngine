@@ -318,9 +318,11 @@ namespace RenderAPI {
 		TextureFormat format,
 		TextureFormatType formatType,
 		TextureWrap wrap,
+		TextureFilter filter,
+		TextureMipmapFilter mipmapFilter,
 		const void* data)
 	{
-		return new GLTexture(width, height, type, format, formatType, wrap, data);
+		return new GLTexture(width, height, type, format, formatType, wrap, filter, mipmapFilter, data);
 	}
 
 	ITexture* GLDevice::CreateSubTexture(

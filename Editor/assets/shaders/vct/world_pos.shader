@@ -1,5 +1,5 @@
 #shader Vertex
-#version 430
+#version 450
 
 #include shaders/camera.shader
 
@@ -15,7 +15,7 @@ void main() {
 }
 
 #shader Fragment
-#version 430
+#version 450
 
 in vec3 WorldPos;
 

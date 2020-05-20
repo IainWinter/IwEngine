@@ -55,6 +55,18 @@ namespace RenderAPI {
 		MIRROR_EDGE
 	};
 
+	enum TextureFilter {
+		NEAREST,
+		LINEAR
+	};
+
+	enum TextureMipmapFilter {
+		NEAREST_NEAREST,
+		NEAREST_LINEAR,
+		LINEAR_NEAREST,
+		LINEAR_LINEAR,
+	};
+
 	enum BufferType {
 		VERTEX,
 		INDEX,

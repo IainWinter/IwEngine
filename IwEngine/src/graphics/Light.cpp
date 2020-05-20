@@ -15,11 +15,11 @@ namespace Graphics {
 		, m_shadowShader(shadowShader)
 		, m_particleShadowShader(particleShadowShader)
 	{
-#ifdef IW_DEBUG
-		if (!!shadowShader != !!shadowTarget) {
-			LOG_WARNING << "A light needs both a shader and a target or neither.";
-		}
-#endif
+//#ifdef IW_DEBUG
+//		if (!!shadowShader != !!shadowTarget) {
+//			LOG_WARNING << "A light needs both a shader and a target or neither.";
+//		}
+//#endif
 	}
 
 	Light::~Light() {

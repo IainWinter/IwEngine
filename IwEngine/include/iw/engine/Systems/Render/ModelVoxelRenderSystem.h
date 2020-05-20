@@ -39,6 +39,9 @@ namespace Engine {
 		IWENGINE_API
 		void Update(
 			EntityComponentArray& view);
+
+		IWENGINE_API
+		ref<Texture> VoxelWorld();
 	};
 }
 

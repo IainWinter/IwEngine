@@ -14,10 +14,14 @@ namespace RenderAPI {
 
 		IWRENDERER_API
 		virtual void Clear(
-			float r,
-			float g,
-			float b,
-			float a = 1.0f) const = 0;
+			const void* color) const = 0;
+
+		IWRENDERER_API
+		virtual void SetBorderColor(
+			const void* color) const = 0;
+
+		IWRENDERER_API virtual void SetFilter      (TextureFilter       filter)       = 0;
+		IWRENDERER_API virtual void SetMipmapFilter(TextureMipmapFilter mipmapFilter) = 0;
 	protected:
 		ITexture() = default;
 	};

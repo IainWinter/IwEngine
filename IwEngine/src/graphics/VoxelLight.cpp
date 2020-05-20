@@ -75,6 +75,7 @@ namespace Graphics {
 
 		if (!m_voxelTexture->Handle()) {
 			m_voxelTexture->Initialize(renderer->Device);
+			//m_voxelTexture->SetBorderColor(Color(1, 0, 0, 1));
 		}
 
 		m_voxelTexture->Clear();

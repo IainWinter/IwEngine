@@ -12,8 +12,10 @@ namespace Graphics {
 		TextureFormat format,
 		TextureFormatType type,
 		TextureWrap wrap,
+		TextureFilter filter,
+		TextureMipmapFilter mipmapFilter,
 		unsigned char* colors)
-		: Texture(width, height, TEX_2D, format, type, wrap, colors)
+		: Texture(width, height, TEX_2D, format, type, wrap, filter, mipmapFilter, colors)
 	{}
 
 	TextureAtlas::TextureAtlas(

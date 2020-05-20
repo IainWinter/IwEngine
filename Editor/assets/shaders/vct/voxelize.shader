@@ -1,5 +1,5 @@
 #shader Vertex
-#version 430
+#version 450
 
 layout (location = 0) in vec3 vert;
 
@@ -10,7 +10,7 @@ void main() {
 }
 
 #shader Geometry
-#version 430
+#version 450
 
 layout(triangles) in;
 layout(triangle_strip, max_vertices = 3) out;
@@ -48,22 +48,22 @@ void main() {
 }
 
 #shader Fragment
-#version 430
+#version 450
 
-uniform vec4 mat_baseColor;
+uniform vec4 baseColor;
 
 layout(RGBA8) uniform image3D voxelTexture;
 
-in vec3 worldPositionFrag;
+in vec3 WorldPos;
 
 vec3 scaleAndBias(vec3 p)                { return 0.5f * p + vec3(0.5f); }
 bool isInsideCube(const vec3 p, float e) { return abs(p.x) < 1 + e && abs(p.y) < 1 + e && abs(p.z) < 1 + e; }
 
 void main() {
-	if (!isInsideCube(worldPositionFrag, 0)) return;
+	if (!isInsideCube(WorldPos, 0)) return;
 
-	vec3  voxel = scaleAndBias(worldPositionFrag);
+	vec3  voxel = scaleAndBias(WorldPos);
 	ivec3 dim   = imageSize(voxelTexture);
 
-	imageStore(voxelTexture, ivec3(dim * voxel), mat_baseColor);
+	imageStore(voxelTexture, ivec3(dim * voxel), baseColor);
 }

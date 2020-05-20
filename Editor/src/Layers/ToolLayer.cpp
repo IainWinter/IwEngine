@@ -119,9 +119,9 @@ namespace iw {
 		//PushSystem<iw::    MeshShadowRenderSystem>(m_mainScene);
 		//PushSystem<iw::   ModelShadowRenderSystem>(m_mainScene);
 		//PushSystem<iw::ParticleShadowRenderSystem>(m_mainScene);
-		//PushSystem<iw::          MeshRenderSystem>(m_mainScene);
-		//PushSystem<iw::         ModelRenderSystem>(m_mainScene);
-		//PushSystem<iw::      ParticleRenderSystem>(m_mainScene);
+		PushSystem<iw::          MeshRenderSystem>(m_mainScene);
+		PushSystem<iw::         ModelRenderSystem>(m_mainScene);
+		PushSystem<iw::      ParticleRenderSystem>(m_mainScene);
 
 
 		return Layer::Initialize();
@@ -269,6 +269,22 @@ namespace iw {
 			vector3 rot = light->Rotation().euler_angles();
 			ImGui::SliderFloat3(ss.str().c_str(), (float*)&rot, -Pi, Pi);
 			light->SetRotation(quaternion::from_euler_angles(rot));
+		}
+
+		for (auto e : Space->Query<iw::Transform, iw::Model>()) {
+			auto [t, m] = e.Components.Tie<ModelComponents>();
+
+			std::stringstream ss;
+			ss << e.Index << " pos";
+
+			ImGui::SliderFloat3(ss.str().c_str(), (float*)&t->Position, -3, 3);
+
+			ss = std::stringstream();
+			ss << e.Index << " rot";
+
+			vector3 rot = t->Rotation.euler_angles();
+			ImGui::SliderFloat3(ss.str().c_str(), (float*)&rot, -Pi, Pi);
+			t->Rotation = quaternion::from_euler_angles(rot);
 		}
 
 		ImGui::End();

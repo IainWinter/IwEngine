@@ -19,6 +19,8 @@ void main() {
 #shader Fragment
 #version 450
 
+#include shaders/gamma_correction.shader
+
 #define STEP_LENGTH 0.005f
 #define INV_STEP_LENGTH 1.0f / STEP_LENGTH
 
@@ -30,35 +32,33 @@ out vec4 PixelColor;
 uniform sampler2D mat_back;
 uniform sampler2D mat_front;
 uniform sampler3D mat_world;
-uniform float mat_level;
+uniform int mat_level;
 
 vec3 scaleAndBias(vec3 p)          { return 0.5f * p + vec3(0.5f); }
 bool isInsideCube(vec3 p, float e) { return abs(p.x) < 1 + e && abs(p.y) < 1 + e && abs(p.z) < 1 + e; }
 
 void main() {
-	vec3 cameraPosition        = CameraPos;
-	vec2 textureCoordinateFrag = TexCoords;
+	float level = float(mat_level);
 
-	const float mipmapLevel = 0;
+	vec3 origin = isInsideCube(CameraPos, 0.2f) ? CameraPos
+												: texture(mat_front, TexCoords).xyz;
 
-	// Initialize ray.
-	const vec3 origin = isInsideCube(cameraPosition, 0.2f)
-		? cameraPosition
-		: texture(mat_front, textureCoordinateFrag).xyz;
-
-	vec3 direction = texture(mat_back, textureCoordinateFrag).xyz - origin;
-	const uint numberOfSteps = uint(INV_STEP_LENGTH * length(direction));
+	vec3 direction = texture(mat_back, TexCoords).xyz - origin;
+	float length = length(direction);
+	
 	direction = normalize(direction);
 
-	// Trace.
+	int steps = int(INV_STEP_LENGTH * length);
+
 	vec4 color = vec4(0.0f);
-	for (uint step = 0; step < numberOfSteps && color.a < 0.99f; ++step) {
-		const vec3 currentPoint = origin + STEP_LENGTH * step * direction;
-		vec4 currentSample = textureLod(mat_world, scaleAndBias(currentPoint), mipmapLevel);
-		color += (1.0f - color.a) * currentSample;
+	for (int step = 0; step < steps && color.a <= 1.0f; step++) {
+		vec3 p = origin + STEP_LENGTH * step * direction;
+		vec4 s = textureLod(mat_world, scaleAndBias(p), level);
+
+		color += (1.0f - color.a) * s;
 	}
 
-	color.rgb = pow(color.rgb, vec3(1.0 / 2.2));
+	color.rgb = linearToSRGB(color.rgb);
 
 	PixelColor = color;
 }
