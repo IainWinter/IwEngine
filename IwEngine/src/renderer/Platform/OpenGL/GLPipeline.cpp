@@ -153,9 +153,9 @@ namespace RenderAPI {
 		std::string name,
 		IUniformBuffer* buffer)
 	{
-		int index = m_bufferCount++; // cant be bigger than GL_MAN_UNIFORM_BUFFER_COUNT
-		
-		dynamic_cast<GLBuffer*>(buffer)->BindBase(index);
+		unsigned index = m_bufferCount++; // cant be bigger than GL_MAN_UNIFORM_BUFFER_COUNT
+
+		buffer->BindMyBase();
 
 		int uniformIndex = glGetUniformBlockIndex(gl_id, name.c_str());
 #ifdef IW_DEBUG

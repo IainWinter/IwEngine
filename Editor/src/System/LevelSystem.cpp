@@ -45,7 +45,7 @@ LevelSystem::LevelSystem(
 
 	//currentLevel = 0;
 
-	currentLevelName = "levels/forest/forest01.json";
+	currentLevelName = "levels/test.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 63);
 	closedColor = iw::Color::From255(201, 66, 66, 63);
@@ -312,7 +312,7 @@ iw::Entity LevelSystem::LoadLevel(
 				continue;
 			}
 
-			mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/phong.shader"));
+			mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/vct/vct.shader"));
 			mesh.Material()->SetTexture("shadowMap", Asset->Load<iw::Texture>("SunShadowMap"));   // shouldnt be part of material
 			mesh.Material()->SetTexture("shadowMap2", Asset->Load<iw::Texture>("LightShadowMap")); // shouldnt be part of material
 
@@ -609,7 +609,7 @@ iw::Entity LevelSystem::LoadFloor(
 			continue;
 		}
 
-		mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/phong.shader"));
+		mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/vct/vct.shader"));
 		mesh.Material()->SetTexture("shadowMap",  Asset->Load<iw::Texture>("SunShadowMap"));   // shouldnt be part of material
 		mesh.Material()->SetTexture("shadowMap2", Asset->Load<iw::Texture>("LightShadowMap")); // shouldnt be part of material
 

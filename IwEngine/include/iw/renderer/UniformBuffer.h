@@ -11,6 +11,9 @@ namespace RenderAPI {
 	public:
 		IWRENDERER_API
 		virtual ~IUniformBuffer() = default;
+
+		IWRENDERER_API
+		virtual void BindMyBase() const = 0;
 	protected:
 		IUniformBuffer() = default;
 	};

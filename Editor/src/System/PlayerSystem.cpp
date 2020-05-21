@@ -358,7 +358,7 @@ bool PlayerSystem::On(
 			// no break
 		}
 		case iw::val(Actions::RESET_LEVEL): {
-			m_playerModel->GetMesh(0).Material()->Set("baseColor", iw::Color(1));
+			m_playerModel->GetMesh(0).Material()->Set("baseColor", iw::Color(1, 0, 0));
 			break;
 		}
 	}

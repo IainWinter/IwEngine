@@ -37,7 +37,6 @@ namespace RenderAPI {
 		IWRENDERER_API
 		int BufferCount() const override;
 
-
 		IWRENDERER_API
 		unsigned Handle() const override;
 

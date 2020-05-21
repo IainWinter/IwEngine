@@ -19,6 +19,8 @@ namespace Engine {
 	int ModelVoxelRenderSystem::Initialize() {
 		ref<Shader> voxelize = Asset->Load<Shader>("shaders/vct/voxelize.shader");
 
+		Renderer->InitShader(voxelize, LIGHTS);
+
 		ref<Texture> voxelTexture = REF<Texture>(64, 64, TEX_3D, RGBA, FLOAT, BORDER, NEAREST, LINEAR_LINEAR);
 		m_voxelize = new VoxelLight(voxelTexture, voxelize);
 
@@ -39,8 +41,15 @@ namespace Engine {
 				}
 
 				Renderer->BeforeDraw([&]() {
-					float* baseColor = mesh.Material()->Get<float>("baseColor");
-					m_voxelize->ShadowShader()->Handle()->GetParam("baseColor")->SetAsFloats(baseColor, 4);
+					float* baseColor   = mesh.Material()->Get<float>("baseColor");
+					float* reflectance = mesh.Material()->Get<float>("reflectance");
+
+					IPipeline* pipeline = m_voxelize->ShadowShader()->Handle();
+
+					pipeline->GetParam("baseColor")  ->SetAsFloats(baseColor, 4);
+					pipeline->GetParam("reflectance")->SetAsFloat (*reflectance);
+
+					pipeline->GetParam("CameraPos")->SetAsFloats(&m_scene->MainCamera()->Position(), 3);
 				});
 
 				Renderer->DrawMesh(transform, &mesh);
@@ -49,7 +58,7 @@ namespace Engine {
 
 		Renderer->EndShadowCast();
 
-		if (!m_visualize) {
+		if (!m_visualize && !Keyboard::KeyDown(E)) {
 			return;
 		}
 

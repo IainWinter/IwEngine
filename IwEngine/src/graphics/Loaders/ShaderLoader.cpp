@@ -80,7 +80,7 @@ namespace Graphics {
 				shader = new Shader();
 			}
 
-			//LOG_INFO << code;
+			LOG_INFO << code;
 
 			shader->AddShader(type, code.c_str());
 		}

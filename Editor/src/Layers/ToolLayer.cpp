@@ -244,7 +244,7 @@ namespace iw {
 			ss << name << " Light pos";
 
 			vector3 pos = light->Position();
-			ImGui::SliderFloat3(ss.str().c_str(), (float*)&pos, -25, 25);
+			ImGui::SliderFloat3(ss.str().c_str(), (float*)&pos, -2, 2);
 			light->SetPosition(pos);
 
 			ss = std::stringstream();
@@ -260,7 +260,7 @@ namespace iw {
 			ss << name << " Light pos";
 
 			vector3 pos = light->Position();
-			ImGui::SliderFloat3(ss.str().c_str(), (float*)&pos, -25, 25);
+			ImGui::SliderFloat3(ss.str().c_str(), (float*)&pos, -2, 2);
 			light->SetPosition(pos);
 
 			ss = std::stringstream();
@@ -277,7 +277,7 @@ namespace iw {
 			std::stringstream ss;
 			ss << e.Index << " pos";
 
-			ImGui::SliderFloat3(ss.str().c_str(), (float*)&t->Position, -3, 3);
+			ImGui::SliderFloat3(ss.str().c_str(), (float*)&t->Position, -2, 2);
 
 			ss = std::stringstream();
 			ss << e.Index << " rot";

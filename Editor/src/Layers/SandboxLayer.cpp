@@ -129,14 +129,14 @@ namespace iw {
 		// Shaders
 
 
-		ref<Shader> shader   = Asset->Load<Shader>("shaders/phong.shader");
+		ref<Shader> shader   = Asset->Load<Shader>("shaders/vct/vct.shader");
 		ref<Shader> gaussian = Asset->Load<Shader>("shaders/filters/gaussian.shader");
 		ref<Shader> dirShadowShader    = Asset->Load<Shader>("shaders/lights/directional.shader");
 		//ref<Shader> pointShadowShader  = Asset->Load<Shader>("shaders/lights/point.shader");
 		ref<Shader> dirIShadowShader   = Asset->Load<Shader>("shaders/lights/directional_instanced.shader");
 		//ref<Shader> pointIShadowShader = Asset->Load<Shader>("shaders/lights/point_instanced.shader");
 		
-		Renderer->InitShader(shader,   CAMERA | SHADOWS | LIGHTS);
+		Renderer->InitShader(shader,   CAMERA | LIGHTS);
 		Renderer->InitShader(gaussian, CAMERA);
 		Renderer->InitShader(dirShadowShader,  CAMERA);
 		//Renderer->InitShader(pointShadowShader);
@@ -180,7 +180,7 @@ namespace iw {
 		light = new PointLight(30, 30, nullptr, nullptr, nullptr);
 
 		sun->SetRotation(quaternion::from_euler_angles(1.433f, 0.0f, -0.525f));
-		light->SetPosition(vector3(0, 10, 0));
+		light->SetPosition(vector3(0));
 
 		MainScene->AddLight(sun);
 		MainScene->AddLight(light);
@@ -204,7 +204,7 @@ namespace iw {
 		// Materials
 
 		Material* def = new Material(shader);
-		def->Set("baseColor", vector4(1, 1, 1, 1));
+		def->Set("baseColor", vector4(1, 0, 0, 1));
 		def->Set("roughness", 0.8f);
 		def->Set("metallic", 0.2f);
 		def->Set("reflectance", 0.2f);
@@ -217,14 +217,13 @@ namespace iw {
 		// Models
 
 		MeshDescription description;
-
 		description.DescribeBuffer(bName::POSITION,  MakeLayout<float>(3));
 		description.DescribeBuffer(bName::NORMAL,    MakeLayout<float>(3));
 		description.DescribeBuffer(bName::TANGENT,   MakeLayout<float>(3));
 		description.DescribeBuffer(bName::BITANGENT, MakeLayout<float>(3));
 		description.DescribeBuffer(bName::UV,        MakeLayout<float>(2));
 
-		Mesh smesh = MakeUvSphere(description, 25, 30)->MakeInstance();
+		Mesh smesh = MakeIcosphere(description, 5)->MakeInstance();
 		Mesh tmesh = MakeTetrahedron(description, 5)->MakeInstance();
 		Mesh bmesh = MakeCube(description)->MakeInstance();
 
