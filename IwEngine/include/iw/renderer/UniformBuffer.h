@@ -14,6 +14,14 @@ namespace RenderAPI {
 
 		IWRENDERER_API
 		virtual void BindMyBase() const = 0;
+
+		IWRENDERER_API
+		virtual unsigned MyBase() const = 0;
+
+		IWRENDERER_API
+		virtual void SetMyBase(
+			unsigned base) = 0;
+
 	protected:
 		IUniformBuffer() = default;
 	};

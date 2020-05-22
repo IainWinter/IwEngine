@@ -119,9 +119,9 @@ namespace iw {
 		//PushSystem<iw::    MeshShadowRenderSystem>(m_mainScene);
 		//PushSystem<iw::   ModelShadowRenderSystem>(m_mainScene);
 		//PushSystem<iw::ParticleShadowRenderSystem>(m_mainScene);
-		PushSystem<iw::          MeshRenderSystem>(m_mainScene);
+		//PushSystem<iw::          MeshRenderSystem>(m_mainScene);
 		PushSystem<iw::         ModelRenderSystem>(m_mainScene);
-		PushSystem<iw::      ParticleRenderSystem>(m_mainScene);
+		//PushSystem<iw::      ParticleRenderSystem>(m_mainScene);
 
 
 		return Layer::Initialize();

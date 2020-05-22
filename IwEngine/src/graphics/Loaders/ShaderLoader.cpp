@@ -80,7 +80,24 @@ namespace Graphics {
 				shader = new Shader();
 			}
 
-			LOG_INFO << code;
+#ifdef IW_DEBUG
+			std::string log = code;
+
+			int lineNumber = 0;
+			for (size_t currentIndex = 0;; currentIndex++) {
+				std::stringstream ss;
+				ss << ++lineNumber << "   ";
+
+				log.insert(currentIndex, ss.str());
+				currentIndex = log.find('\n', currentIndex + 1);
+
+				if (currentIndex == std::string::npos) {
+					break;
+				}
+			}
+
+			LOG_INFO << log;
+#endif
 
 			shader->AddShader(type, code.c_str());
 		}

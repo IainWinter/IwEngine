@@ -25,6 +25,13 @@ namespace RenderAPI {
 		void BindMyBase() const override;
 
 		IWRENDERER_API
+		unsigned MyBase() const override;
+
+		IWRENDERER_API
+		void SetMyBase(
+			unsigned base) override;
+
+		IWRENDERER_API
 		~GLUniformBuffer() = default;
 	};
 }

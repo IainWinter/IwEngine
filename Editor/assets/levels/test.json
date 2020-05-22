@@ -41,8 +41,8 @@
     "items": [
       {
         "ModelName": {
-          "size": 15,
-          "string": "models/cube.obj"
+          "size": 16,
+          "string": "models/cube.gltf"
         },
         "Transform": {
           "Position": {
@@ -65,8 +65,8 @@
       },
       {
         "ModelName": {
-          "size": 15,
-          "string": "models/cube.obj"
+          "size": 16,
+          "string": "models/cube.gltf"
         },
         "Transform": {
           "Position": {

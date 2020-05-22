@@ -1,5 +1,6 @@
 #include "iw/graphics/VoxelLight.h"
 #include "iw/graphics/QueuedRenderer.h"
+#include "iw/engine/Time.h"
 
 #include "gl/glew.h"
 
@@ -63,6 +64,8 @@ namespace Graphics {
 		m_position = position;
 	}
 
+	int i = 0;
+
 	void VoxelLight::SetupShadowCast(
 		Renderer* renderer)
 	{
@@ -75,14 +78,19 @@ namespace Graphics {
 
 		if (!m_voxelTexture->Handle()) {
 			m_voxelTexture->Initialize(renderer->Device);
-			//m_voxelTexture->SetBorderColor(Color(1, 0, 0, 1));
+			m_voxelTexture->SetBorderColor(Color(0, 0, 0, 0));
 		}
 
-		m_voxelTexture->Clear();
+		if(i == 3) {
+			m_voxelTexture->Clear();
+			i = 0;
+		}
 
-		IPipelineParam* out = m_shadowShader->Handle()->GetParam("voxelTexture");
-		if (out) {
-			out->SetAsImage(m_voxelTexture->Handle());
+		i++;
+
+		IPipelineParam* textureParam = m_shadowShader->Handle()->GetParam("voxelTexture");
+		if (textureParam) {
+			textureParam->SetAsImage(m_voxelTexture->Handle());
 		}
 	}
 

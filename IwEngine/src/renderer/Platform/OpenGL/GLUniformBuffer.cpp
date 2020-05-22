@@ -19,5 +19,15 @@ namespace RenderAPI {
 		GLBuffer::Bind();
 		GLBuffer::BindBase(m_base);
 	}
+
+	unsigned GLUniformBuffer::MyBase() const {
+		return m_base;
+	}
+
+	void GLUniformBuffer::SetMyBase(
+		unsigned base)
+	{
+		m_base = base;
+	}
 }
 }

@@ -21,11 +21,13 @@ namespace Engine {
 
 		Renderer->InitShader(voxelize, LIGHTS);
 
-		ref<Texture> voxelTexture = REF<Texture>(64, 64, TEX_3D, RGBA, FLOAT, BORDER, NEAREST, LINEAR_LINEAR);
+		ref<Texture> voxelTexture = REF<Texture>(64, 64, TEX_3D, RGBA, FLOAT, BORDER, LINEAR, LINEAR_LINEAR);
 		m_voxelize = new VoxelLight(voxelTexture, voxelize);
 
 		return 0;
 	}
+
+	int i = 0;
 
 	void ModelVoxelRenderSystem::Update(
 		EntityComponentArray& eca)
@@ -35,6 +37,10 @@ namespace Engine {
 		for (auto entity : eca) {
 			auto [transform, model] = entity.Components.Tie<Components>();
 			
+			vector3 scale    = transform->Scale;
+			vector3 position = transform->Position;
+
+
 			for (iw::Mesh& mesh : model->GetMeshes()) {
 				if (!mesh.Material()->GetTexture("voxelMap")) {
 					mesh.Material()->SetTexture("voxelMap", VoxelWorld());
@@ -42,21 +48,37 @@ namespace Engine {
 
 				Renderer->BeforeDraw([&]() {
 					float* baseColor   = mesh.Material()->Get<float>("baseColor");
-					float* reflectance = mesh.Material()->Get<float>("reflectance");
+					float  reflectance = mesh.Material()->Get<float>("reflectance")[0];
 
 					IPipeline* pipeline = m_voxelize->ShadowShader()->Handle();
 
-					pipeline->GetParam("baseColor")  ->SetAsFloats(baseColor, 4);
-					pipeline->GetParam("reflectance")->SetAsFloat (*reflectance);
+					IPipelineParam* baseColorParam   = pipeline->GetParam("baseColor");
+					IPipelineParam* reflectanceParam = pipeline->GetParam("reflectance");
+					IPipelineParam* ambianceParam    = pipeline->GetParam("ambiance");
 
-					pipeline->GetParam("CameraPos")->SetAsFloats(&m_scene->MainCamera()->Position(), 3);
+					if(baseColorParam)    baseColorParam  ->SetAsFloats(baseColor, 4);
+					if (reflectanceParam) reflectanceParam->SetAsFloat (reflectance);
+					if (ambianceParam)    ambianceParam   ->SetAsFloat (m_scene->Ambiance());
 				});
 
-				Renderer->DrawMesh(transform, &mesh);
+				if (i == 1) {
+					transform->Scale *= 0.5f;
+					transform->Position.x += randf() * 1.0f / 64.0f;
+					transform->Position.y += randf() * 1.0f / 64.0f;
+					transform->Position.z += randf() * 1.0f / 64.0f;
+					i = 0;
+				}
+
+				Renderer->DrawMesh(*transform, mesh);
 			}
+
+			transform->Scale    = scale;
+			transform->Position = position;
 		}
 
 		Renderer->EndShadowCast();
+
+		i++;
 
 		if (!m_visualize && !Keyboard::KeyDown(E)) {
 			return;

@@ -347,7 +347,7 @@ namespace RenderAPI {
 
 		if (texture) {
 			const GLTexture* tex = static_cast<const GLTexture*>(texture);
-			glBindImageTexture(index, tex->Id(), 0, GL_TRUE, 0, GL_WRITE_ONLY, TRANSLATE(tex->Format(), tex->FormatType()));
+			glBindImageTexture(index, tex->Id(), 0, GL_TRUE, 0, GL_READ_WRITE, TRANSLATE(tex->Format(), tex->FormatType()));
 		}
 
 		else {

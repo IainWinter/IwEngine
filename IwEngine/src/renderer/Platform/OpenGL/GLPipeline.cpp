@@ -153,18 +153,17 @@ namespace RenderAPI {
 		std::string name,
 		IUniformBuffer* buffer)
 	{
-		unsigned index = m_bufferCount++; // cant be bigger than GL_MAN_UNIFORM_BUFFER_COUNT
+		//unsigned index = m_bufferCount++; // cant be bigger than GL_MAN_UNIFORM_BUFFER_COUNT
 
 		buffer->BindMyBase();
 
 		int uniformIndex = glGetUniformBlockIndex(gl_id, name.c_str());
-#ifdef IW_DEBUG
 		if (uniformIndex == -1) {
 			LOG_WARNING << "Cannot find uniform buffer named " << name;
+			return;
 		}
-#endif
 
-		GL(glUniformBlockBinding(gl_id, uniformIndex, index));
+		GL(glUniformBlockBinding(gl_id, uniformIndex, buffer->MyBase()));
 	}
 
 //	bool GLPipeline::IsTextureActive(

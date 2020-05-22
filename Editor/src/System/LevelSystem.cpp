@@ -304,27 +304,34 @@ iw::Entity LevelSystem::LoadLevel(
 	iw::Transform* levelTransform = nullptr;
 	iw::Entity level;
 
+	int iii = 0;
+
 	for (ModelPrefab& prefab : currentLevel.Models) {
 		iw::ref<iw::Model> model = Asset->Load<iw::Model>(prefab.ModelName);
 
 		for (iw::Mesh& mesh : model->GetMeshes()) {
-			if (mesh.Data()->IsInitialized()) {
-				continue;
-			}
+			mesh.SetMaterial(mesh.Material()->MakeInstance());
 
 			mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/vct/vct.shader"));
 			mesh.Material()->SetTexture("shadowMap", Asset->Load<iw::Texture>("SunShadowMap"));   // shouldnt be part of material
 			mesh.Material()->SetTexture("shadowMap2", Asset->Load<iw::Texture>("LightShadowMap")); // shouldnt be part of material
 
+			mesh.Material()->SetTexture("diffuseMap",      Asset->Load<iw::Texture>("textures/bricks/baseColor.jpg"));
+			mesh.Material()->SetTexture("normalMap",       Asset->Load<iw::Texture>("textures/bricks/normal.jpg"));
+			mesh.Material()->SetTexture("reflectanceMap",  Asset->Load<iw::Texture>("textures/bricks/reflectance.jpg"));
+
 			mesh.Material()->Set("roughness", 0.9f);
 			mesh.Material()->Set("metallic", 0.1f);
 			mesh.Material()->Set("reflectance", 0.1f);
 
-			mesh.Material()->Initialize(Renderer->Device);
+			if (iii == 1) {
+				mesh.Material()->Set("baseColor", iw::Color(1, 0, 0));
+			}
+
+			iii++;
 
 			//floor->Meshes[i].SetIsStatic(true);
 			//mesh.Data()->GenTangents();
-			mesh.Data()->Initialize(Renderer->Device);
 		}
 
 		iw::Entity entity = Space->CreateEntity<iw::Transform, iw::Model>();

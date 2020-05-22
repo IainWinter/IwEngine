@@ -1,5 +1,6 @@
 #include "iw/renderer/Platform/OpenGL/GLBuffer.h"
 #include "iw/renderer/Platform/OpenGL/GLTranslator.h"
+#include "iw/renderer/Platform/OpenGL/GLErrorCatch.h"
 #include "gl/glew.h"
 
 namespace iw {
@@ -17,13 +18,13 @@ namespace RenderAPI {
 		, m_size(size) // Set in UpdateData
 		, m_data(data)
 	{
-		glGenBuffers(1, &gl_id);
+		GL(glGenBuffers(1, &gl_id));
 		Bind();
-		glBufferData(gl_type, size, data, gl_io);
+		GL(glBufferData(gl_type, size, data, gl_io));
 	}
 
 	GLBuffer::~GLBuffer() {
-		glDeleteBuffers(1, &gl_id);
+		GL(glDeleteBuffers(1, &gl_id));
 	}
 
 	void GLBuffer::UpdateData(
@@ -33,7 +34,7 @@ namespace RenderAPI {
 	{
 		if (size > m_size) {
 			m_size = size;
-			glNamedBufferData(gl_id, size, data, gl_io);
+			GL(glNamedBufferData(gl_id, size, data, gl_io));
 		}
 
 		else {
@@ -41,22 +42,22 @@ namespace RenderAPI {
 				size = m_size;
 			}
 
-			glNamedBufferSubData(gl_id, offset, size, data);
+			GL(glNamedBufferSubData(gl_id, offset, size, data));
 		}
 	}
 
 	void GLBuffer::Bind() const {
-		glBindBuffer(gl_type, gl_id);
+		GL(glBindBuffer(gl_type, gl_id));
 	}
 
 	void GLBuffer::BindBase(
 		unsigned index) const
 	{
-		glBindBufferBase(gl_type, index, gl_id);
+		GL(glBindBufferBase(gl_type, index, gl_id));
 	}
 
 	void GLBuffer::Unbind() const {
-		glBindBuffer(gl_type, 0);
+		GL(glBindBuffer(gl_type, 0));
 	}
 
 	unsigned GLBuffer::Id() const {
