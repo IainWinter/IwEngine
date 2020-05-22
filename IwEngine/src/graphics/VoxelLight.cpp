@@ -64,7 +64,7 @@ namespace Graphics {
 		m_position = position;
 	}
 
-	int i = 0;
+	//int i = 0;
 
 	void VoxelLight::SetupShadowCast(
 		Renderer* renderer)
@@ -81,12 +81,12 @@ namespace Graphics {
 			m_voxelTexture->SetBorderColor(Color(0, 0, 0, 0));
 		}
 
-		if(i == 3) {
+		//if(i == 2) {
 			m_voxelTexture->Clear();
-			i = 0;
-		}
+		//	i = 0;
+		//}
 
-		i++;
+		//i++;
 
 		IPipelineParam* textureParam = m_shadowShader->Handle()->GetParam("voxelTexture");
 		if (textureParam) {

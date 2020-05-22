@@ -21,17 +21,29 @@ namespace Engine {
 
 		Renderer->InitShader(voxelize, LIGHTS);
 
+		// Filtering has a big effect on preformance (LINEAR is more expensive)
 		ref<Texture> voxelTexture = REF<Texture>(64, 64, TEX_3D, RGBA, FLOAT, BORDER, LINEAR, LINEAR_LINEAR);
 		m_voxelize = new VoxelLight(voxelTexture, voxelize);
 
 		return 0;
 	}
 
-	int i = 0;
+	//int i = 0;
+	int d = 0;
+	float t = 0.0f;
 
 	void ModelVoxelRenderSystem::Update(
 		EntityComponentArray& eca)
 	{
+		if (t > 0.001f && Keyboard::KeyDown(F)) {
+			t = 0.0f;
+
+			d = (d + 20) % 1000;
+			Renderer->SetDebugState(d);
+		}
+
+		t += Time::DeltaTime();
+
 		Renderer->BeginShadowCast(m_voxelize, false, false);
 
 		for (auto entity : eca) {
@@ -61,13 +73,13 @@ namespace Engine {
 					if (ambianceParam)    ambianceParam   ->SetAsFloat (m_scene->Ambiance());
 				});
 
-				if (i == 1) {
-					transform->Scale *= 0.5f;
-					transform->Position.x += randf() * 1.0f / 64.0f;
-					transform->Position.y += randf() * 1.0f / 64.0f;
-					transform->Position.z += randf() * 1.0f / 64.0f;
-					i = 0;
-				}
+				//if (i == 1) {
+				//	transform->Scale *= 0.5f;
+				//	transform->Position.x += randf() * 1.0f / 64.0f;
+				//	transform->Position.y += randf() * 1.0f / 64.0f;
+				//	transform->Position.z += randf() * 1.0f / 64.0f;
+				//	i = 0;
+				//}
 
 				Renderer->DrawMesh(*transform, mesh);
 			}
@@ -78,7 +90,7 @@ namespace Engine {
 
 		Renderer->EndShadowCast();
 
-		i++;
+		//i++;
 
 		if (!m_visualize && !Keyboard::KeyDown(E)) {
 			return;

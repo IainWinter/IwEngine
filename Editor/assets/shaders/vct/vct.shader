@@ -9,12 +9,10 @@ layout(location = 2) in vec3 tangent;
 layout(location = 3) in vec3 bitangent;
 layout(location = 4) in vec2 uv;
 
+out vec3 CameraPos;
 out vec3 WorldPos;
 out vec2 TexCoords;
-out vec3 Normal;
-out vec3 Tangent;
-out vec3 BiTangent;
-out vec3 CameraPos;
+out mat3 TBN;
 
 uniform mat4 model;
 
@@ -22,12 +20,14 @@ void main() {
 	vec4 worldPos = model * vec4(vert, 1);
 	mat3 worldNom = transpose(inverse(mat3(model)));
 
+	vec3 T = normalize(worldNom * tangent);
+	vec3 B = normalize(worldNom * bitangent);
+	vec3 N = normalize(worldNom * normal);
+
+	CameraPos = camPos.xyz;
 	WorldPos  = worldPos.xyz;
 	TexCoords = uv;
-	Normal    = normalize(worldNom * normal);
-	Tangent   = normalize(worldNom * tangent);
-	BiTangent = normalize(worldNom * bitangent);
-	CameraPos = camPos.xyz;
+	TBN       = mat3(T, B, N);
 
 	gl_Position = viewProj * worldPos;
 }
@@ -39,13 +39,12 @@ void main() {
 
 #include shaders/lights.shader
 #include shaders/gamma_correction.shader
+#include shaders/vct/bounds.shader
 
+in vec3 CameraPos;
 in vec3 WorldPos;
 in vec2 TexCoords;
-in vec3 Normal;
-in vec3 Tangent;
-in vec3 BiTangent;
-in vec3 CameraPos;
+in mat3 TBN;
 
 out vec4 PixelColor;
 
@@ -62,19 +61,12 @@ uniform sampler2D mat_normalMap;
 uniform float mat_hasReflectanceMap;
 uniform sampler2D mat_reflectanceMap;
 
+uniform vec3 voxelBounds;
+
 uniform float voxelSize    = 1 / 32.0f;
 uniform float voxelSizeInv = 32.0f;
 uniform float ambiance;
-
-
-// -------------------------------------------------------
-//
-//                    Helper functions
-//
-// -------------------------------------------------------
-
-vec3 scaleAndBias(vec3 p)                { return 0.5f * p + vec3(0.5f); }
-bool isInsideCube(const vec3 p, float e) { return abs(p.x) < 1 + e && abs(p.y) < 1 + e && abs(p.z) < 1 + e; }
+uniform int d_state;
 
 vec3 orthogonal(
 	vec3 u)
@@ -93,37 +85,47 @@ vec3 orthogonal(
 //
 // -------------------------------------------------------
 
-// Returns a soft shadow blend by using shadow cone tracing.
-// Uses 2 samples per step, so it's pretty expensive.
 float TraceConeShadow(
-	vec3 from,
-	vec3 direction,
-	float targetDistance)
+	vec3 origin,       // Origin of cone
+	vec3 direction,	   // Direction of cone (normalized)
+	float ratio,       // Ratio of cone diameter to height (2 = 90deg)
+	float maxDistance)
 {
-	from += Normal * 0.05f; // Removes artifacts but makes self shadowing for dense meshes meh.
+	float shadow = 0;
 
-	float acc = 0;
-	float dist = voxelSize;
+	float distance = voxelSize * 4;  // Push out origin to avoid self-intersection
 
-	// I'm using a pretty big margin here since I use an emissive light ball with a pretty big radius in my demo scenes.
-	float STOP = targetDistance - voxelSize;
-
-	while (dist < STOP
-		&& acc < 1)
+	while (distance < maxDistance
+		&& shadow   < 1.0f)
 	{
-		vec3 c = from + dist * direction;
-		if (!isInsideCube(c, 0)) break;
-		c = scaleAndBias(c);
-		float l = pow(dist, 2); // Experimenting with inverse square falloff for shadows.
-		float s1 = 0.062 * textureLod(mat_voxelMap, c, 1 + 0.75 * l).a;
-		float s2 = 0.135 * textureLod(mat_voxelMap, c, 4.5      * l).a;
-		float s = s1 + s2;
-		acc += (1 - acc) * s;
-		dist += 0.9 * voxelSize * (1 + 0.05 * l);
+		vec3 position = origin + distance * direction;
+		
+		if (!isInsideCube(position, 0)) {
+			break;
+		}
+
+		position = scaleAndBias(position);
+
+		float diameter = max(voxelSize, ratio * distance);
+		float LOD      = log2(diameter * voxelSizeInv);
+		float sample1  = 0.062 * textureLod(mat_voxelMap, position, 1 + 0.75 * LOD).a; // idk where these numbers come from xd
+		float sample2  = 0.135 * textureLod(mat_voxelMap, position, 4.5      * LOD).a;
+		float sample_  = sample1 + sample2;
+		float weight   = 1.0f - shadow;
+
+		shadow += sample_ * weight;
+		distance += 0.4 * voxelSize * (1 + 0.05 * diameter);
 	}
 
-	return 1 - pow(smoothstep(0, 1, acc * 1.4), 1.0 / 1.4);
+	return 1 - pow(smoothstep(0, 1, shadow * 1.4), 1.0 / 1.4);
 }
+
+// -------------------------------------------------------
+//
+//      Sum color of voxels by tracing a ray (cone)
+//      through the mipmap levels of the voxel map
+//
+// -------------------------------------------------------
 
 vec4 TraceCone(
 	vec3 origin,       // Origin of cone
@@ -133,15 +135,21 @@ vec4 TraceCone(
 {
 	vec4 color = vec4(0.0f);
 
- 	float distance = voxelSize * 4; // push out the starting point to avoid self-intersection
+ 	float distance = voxelSize * 4; // Push out origin to avoid self-intersection
 
 	while (distance <= maxDistance
 		&& color.w  <  1.0f)
 	{
+		vec3 position = origin + direction * distance;
+		
+		if (!isInsideCube(position, 0)) { // Todo: Check if this is worth it
+			break;
+		}
+
+		position = scaleAndBias(position);
+
 		float diameter = max(voxelSize, ratio * distance);
 		float LOD      = log2(diameter * voxelSizeInv);
-
-		vec3  position = scaleAndBias(origin + direction * distance);
 		vec4  sample_  = textureLod(mat_voxelMap, position, LOD);
 		float weight   = 1.0f - color.w;
 
@@ -162,14 +170,13 @@ vec4 TraceCone(
 // -------------------------------------------------------
 
 vec3 BRDF_phong(
-	vec3 N,            // Normal of fragment
+	vec3 N,            // Normal      of fragment
 	vec3 V,            // Direction from camera to fragment
 	vec3 L,            // Direction from light  to fragment
-	vec3 baseColor,    // base color  of fragment (rgb)
-	float reflectance, // reflectance of fragment 
+	vec3 nL,           // Direction from light  to fragment (normalized)
+	float reflectance, // Reflectance of fragment
 	int blinn)         // blinn-phong or normal phong (1 or !1)
 {
-	vec3  nL = normalize(L);
 	float NdotL = clamp(dot(N, nL), 0.0f, 1.0f);
 
 	float diff = max(NdotL, 0.0);
@@ -177,37 +184,56 @@ vec3 BRDF_phong(
 
 	if (blinn == 1) {
 		vec3 halfwayDir = normalize(L + V);
-		spec = pow(max(dot(N, halfwayDir), 0.0), reflectance * 8.0);
+		spec = dot(N, halfwayDir);
 	}
 
 	else {
 		vec3 reflectDir = reflect(-L, N);
-		spec = pow(max(dot(V, reflectDir), 0.0), reflectance * 8.0);
+		spec = dot(V, reflectDir);
 	}
 
-	if (diff > 0) {
-		diff = min(diff, TraceConeShadow(WorldPos, nL, length(L)));
-	}
+	spec = max(pow(spec, reflectance * 8.0), 0.0);
 
-	vec3 specular = vec3(0.3) * spec; // bright white light color. should pass light color
-	return baseColor * diff + specular;
+	return /*light color*/ vec3(0.3f) * (diff + spec);
 }
 
 // -------------------------------------------------------
 //
-//              Indirect lighting functions
+//            Lighting summation functions
 //
 // -------------------------------------------------------
 
-vec3 indirectDiffuseLight(
-	vec3 W,            // WorldPos   of fragment
-	vec3 N,            // Normal     of fragment
-	vec3 T,            // Tangent    of fragment
-	vec3 B,            // Bitangent  of fragment
-	vec3 baseColor)    // Base color of fragment (rgb)
+vec3 directDiffuse(
+	vec3 W,            // WorldPos    of fragment
+	vec3 N,            // Normal      of fragment
+	vec3 V,            // Direction from camera to fragment
+	vec3 L,            // Direction from light  to fragment
+	float R,           // Radius of light
+	float reflectance, // Reflectance of fragment
+	int blinn)         // blinn-phong or normal phong (1 or !1)
+{
+	vec3 nL = normalize(L);
+
+	float coneRatio   = 0.05f;
+	float maxDistance = length(L);
+
+	vec3 diffuse = vec3(0.0f);
+
+	diffuse += BRDF_phong(N, V, L, nL, reflectance, 1)
+		     * DistanceAttenuation(L, R)
+		     * TraceConeShadow(W, nL, coneRatio, maxDistance);
+	
+	return diffuse;
+}
+
+vec3 indirectDiffuse(
+	vec3 W,            // WorldPos    of fragment
+	vec3 N,            // Normal      of fragment
+	vec3 T,            // Tangent     of fragment
+	vec3 B)            // Bitangent   of fragment
 {
 	float coneRatio   = 1.0f;
-	float maxDistance = 0.3f;
+	float maxDistance = 2.0f;
 
 	vec3 diffuse = vec3(0.0f);
 
@@ -220,14 +246,19 @@ vec3 indirectDiffuseLight(
 	return diffuse;
 }
 
-vec3 indirectSpecularLight(
+vec3 indirectSpecular(
 	vec3 W,            // WorldPos   of fragment
 	vec3 N,            // Normal     of fragment
-	vec3 V,            // Direction from camera to fragment
-	vec3 baseColor)    // Base color of fragment (rgb)
+	vec3 V)            // Direction from camera to fragment
 {
 	float coneRatio   = 0.2f;
-	float maxDistance = 1.0f;
+	float maxDistance = 2.0f;
+
+	// There are atificats at extreme angles, some form of the below if statement will fix it I think
+
+	//if (dot(-V, N) <= 0.1f) { 
+	//	return vec3(0.0f);
+	//}
 
 	return TraceCone(W, reflect(-V, N), coneRatio, maxDistance).xyz;
 }
@@ -244,9 +275,9 @@ void main() {
 
 	// Normal
 
-	vec3 normal = Normal;
+	vec3 normal = TBN[2];
 	if (mat_hasNormalMap == 1) {
-		normal = texture(mat_normalMap, TexCoords).xyz * vec3(2) - vec3(1);
+		normal = TBN * texture(mat_normalMap, TexCoords).xyz;
 	}
 
 	// Reflectance
@@ -256,11 +287,11 @@ void main() {
 		reflectance = texture(mat_reflectanceMap, TexCoords).r;
 	}
 
-	vec3 color = vec3(baseColor.rgb * ambiance);
+	vec3 color = vec3(ambiance);
 
+	vec3 T = normalize(TBN[0]);
+	vec3 B = normalize(TBN[1]);
 	vec3 N = normalize(normal);
-	vec3 T = normalize(Tangent);
-	vec3 B = normalize(BiTangent);
 	vec3 V = normalize(CameraPos - WorldPos);
 
 	for (int i = 0; i < pointLightCount; i++) {
@@ -268,10 +299,12 @@ void main() {
 		vec3 P  = pointLights[i].Position;
 		vec3 L  = P - WorldPos;
 
-		color += BRDF_phong(N, V, L, baseColor.rgb, reflectance, 0) * DistanceAttenuation(L, R); // Diffuse color
-		color += indirectDiffuseLight (WorldPos, N, T, B, baseColor.rgb);                        // Indirect diffuse color
-		color += indirectSpecularLight(WorldPos, N, V, baseColor.rgb);                           // Indirect specular color
+		color +=   directDiffuse (WorldPos, N, V, L, R, reflectance, 1);
+		color += indirectDiffuse (WorldPos, N, T, B);
+		color += indirectSpecular(WorldPos, N, V);
 	}
+
+	color *= baseColor.rgb;
 
 	PixelColor = vec4(linearToSRGB(color), baseColor.a);
 }

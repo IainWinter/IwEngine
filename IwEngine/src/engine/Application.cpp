@@ -256,7 +256,7 @@ namespace Engine {
 			ImGui::Text("Tick %i", iw::Time::Ticks());
 			ImGui::Text("Renderer took %4.4f ns", renderTime  * 1000000 /*/ (iw::Time::Ticks() - ticks)*/);
 			ImGui::Text("Physics  took %4.4f ns", physicsTime * 1000000 /*/ (iw::Time::Ticks() - ticks)*/);
-			ImGui::Text("Eventbus took %4.4f ns", eventTime * 1000000 /*/ (iw::Time::Ticks() - ticks)*/);
+			ImGui::Text("Eventbus took %4.4f ns", eventTime   * 1000000 /*/ (iw::Time::Ticks() - ticks)*/);
 
 			for (Layer* layer : m_layers) {
 				ImGui::Text("%4.4f ns - %s layer",   post_update_times[layer->Name()] * 1000000 /*/ (iw::Time::Ticks() - ticks)*/, layer->Name());

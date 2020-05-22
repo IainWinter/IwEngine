@@ -316,16 +316,16 @@ iw::Entity LevelSystem::LoadLevel(
 			mesh.Material()->SetTexture("shadowMap", Asset->Load<iw::Texture>("SunShadowMap"));   // shouldnt be part of material
 			mesh.Material()->SetTexture("shadowMap2", Asset->Load<iw::Texture>("LightShadowMap")); // shouldnt be part of material
 
-			mesh.Material()->SetTexture("diffuseMap",      Asset->Load<iw::Texture>("textures/bricks/baseColor.jpg"));
-			mesh.Material()->SetTexture("normalMap",       Asset->Load<iw::Texture>("textures/bricks/normal.jpg"));
-			mesh.Material()->SetTexture("reflectanceMap",  Asset->Load<iw::Texture>("textures/bricks/reflectance.jpg"));
+			mesh.Material()->SetTexture("diffuseMap",    nullptr); //Asset->Load<iw::Texture>("textures/bricks/baseColor.jpg"));
+			mesh.Material()->SetTexture("normalMap",     nullptr); //Asset->Load<iw::Texture>("textures/bricks/normal.jpg"));
+			mesh.Material()->SetTexture("reflectanceMap",nullptr); //Asset->Load<iw::Texture>("textures/bricks/reflectance.jpg"));
 
-			mesh.Material()->Set("roughness", 0.9f);
-			mesh.Material()->Set("metallic", 0.1f);
-			mesh.Material()->Set("reflectance", 0.1f);
+			//mesh.Material()->Set("roughness", 0.9f);
+			//mesh.Material()->Set("metallic", 0.1f);
+			mesh.Material()->Set("reflectance", 0.0f);
 
 			if (iii == 1) {
-				mesh.Material()->Set("baseColor", iw::Color(1, 0, 0));
+				mesh.Material()->Set("baseColor", iw::Color(0, 0, 1));
 			}
 
 			iii++;

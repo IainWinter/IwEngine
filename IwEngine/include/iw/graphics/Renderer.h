@@ -91,6 +91,8 @@ namespace Graphics {
 		ref<RenderTarget> m_target;
 		float m_ambiance;
 
+		int m_debugState = -1;
+
 	public:
 		IWGRAPHICS_API
 		Renderer(
@@ -120,6 +122,14 @@ namespace Graphics {
 		void Resize(
 			int width,
 			int height);
+
+		// Used for debudding shaders, will get passed as a uniformed named 'd_state' if not -1
+		void SetDebugState(
+			int state)
+		{
+			m_debugState = state;
+			LOG_DEBUG << "Set renderer debug state to " << state;
+		}
 
 		// binds buffers to shader and initializes it. TO BE PRIVATED
 		IWGRAPHICS_API

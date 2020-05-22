@@ -221,6 +221,13 @@ namespace Graphics {
 			model->SetAsMat4(transform->WorldTransformation());
 		}
 
+		if (m_debugState != -1) {
+			IPipelineParam* state = m_shader->Handle()->GetParam("d_state");
+			if (state) {
+				state->SetAsInt(m_debugState);
+			}
+		}
+
 		mesh->Draw(Device);
 	}
 

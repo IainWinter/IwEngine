@@ -20,6 +20,7 @@ void main() {
 #version 450
 
 #include shaders/gamma_correction.shader
+#include shaders/vct/bounds.shader
 
 #define STEP_LENGTH 0.005f
 #define INV_STEP_LENGTH 1.0f / STEP_LENGTH
@@ -33,9 +34,6 @@ uniform sampler2D mat_back;
 uniform sampler2D mat_front;
 uniform sampler3D mat_world;
 uniform int mat_level;
-
-vec3 scaleAndBias(vec3 p)          { return 0.5f * p + vec3(0.5f); }
-bool isInsideCube(vec3 p, float e) { return abs(p.x) < 1 + e && abs(p.y) < 1 + e && abs(p.z) < 1 + e; }
 
 void main() {
 	float level = float(mat_level);

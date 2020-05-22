@@ -59,6 +59,7 @@ void main() {
 #version 450
 
 #include shaders/lights.shader
+#include shaders/vct/bounds.shader
 
 in vec3 WorldPos;
 in vec3 Normal;
@@ -69,11 +70,6 @@ uniform float reflectance;
 uniform float ambiance;
 
 layout(RGBA8) uniform image3D voxelTexture;
-
-// Helper functions
-
-vec3 scaleAndBias(vec3 p)                { return 0.5f * p + vec3(0.5f); }
-bool isInsideCube(const vec3 p, float e) { return abs(p.x) < 1 + e && abs(p.y) < 1 + e && abs(p.z) < 1 + e; }
 
 // Simple version of the phong BRDF, only calcs diffuse color
 
