@@ -7,6 +7,8 @@ namespace Graphics {
 	struct DirectionalLight
 		: Light
 	{
+	private:
+		OrthographicCamera m_shadowCamera;
 	public:
 		IWGRAPHICS_API
 		DirectionalLight(
@@ -16,12 +18,6 @@ namespace Graphics {
 			ref<Shader>        shadowShader = nullptr,
 			ref<Shader>        particleShadowShader = nullptr);
 
-		GEN_copy(IWGRAPHICS_API, DirectionalLight)
-		GEN_move(IWGRAPHICS_API, DirectionalLight)
-
-		IWGRAPHICS_API
-		~DirectionalLight() override = default;
-
 		IWGRAPHICS_API
 		void SetupShadowCast(
 			Renderer* renderer) override;
@@ -29,12 +25,15 @@ namespace Graphics {
 		IWGRAPHICS_API
 		matrix4 ViewProjection() const;
 
-		IWGRAPHICS_API const quaternion& Rotation() const;
-		//IWGRAPHICS_API       quaternion& Rotation();
+		IWGRAPHICS_API
+		const quaternion& Rotation() const;
 
 		IWGRAPHICS_API
 		void SetRotation(
 			const quaternion& rotation);
+
+		IWGRAPHICS_API
+		Camera* ShadowCamera() const override;
 	};
 }
 

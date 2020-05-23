@@ -93,7 +93,7 @@ float TraceConeShadow(
 {
 	float shadow = 0;
 
-	float distance = voxelSize * 4;  // Push out origin to avoid self-intersection
+	float distance = voxelSize * 2;  // Push out origin to avoid self-intersection
 
 	while (distance < maxDistance
 		&& shadow   < 1.0f)

@@ -1,6 +1,8 @@
 #shader Vertex
 #version 450
 
+#include shaders/camera.shader
+
 layout(location = 0) in vec3 vert;
 layout(location = 1) in vec3 normal;
 
@@ -10,7 +12,7 @@ uniform mat4 model;
 
 void main() {
 	gNormal = normalize(transpose(inverse(mat3(model))) * normal);
-	gl_Position = model * vec4(vert, 1);
+	gl_Position = model * proj * vec4(vert, 1);
 }
 
 #shader Geometry

@@ -229,7 +229,7 @@ namespace Graphics {
 		m_shadow  = 0;
 		m_block   = 1;
 		m_camera += 1;
-		m_position = light->ShadowCamera() ? light->ShadowCamera()->Position() : 0;
+		m_position = light->Position();
 
 		BeginShadowOP* op = m_pool.alloc<BeginShadowOP>();
 		op->Light = light;

@@ -9,85 +9,33 @@ namespace Graphics {
 		ref<RenderTarget>  shadowTarget,
 		ref<Shader>        shadowShader,
 		ref<Shader>        particleShadowShader)
-		: Light(intensity, new OrthographicCamera(shadowCamera), 
-			shadowTarget, 
-			shadowShader, 
-			particleShadowShader)
+		: Light(intensity, shadowTarget, shadowShader, particleShadowShader)
+		, m_shadowCamera(shadowCamera)
 	{}
-
-	DirectionalLight::DirectionalLight(
-		const DirectionalLight& copy)
-		: Light(m_intensity, new OrthographicCamera(*(OrthographicCamera*)copy.m_shadowCamera),
-			copy.m_shadowTarget, 
-			copy.m_shadowShader, 
-			copy.m_particleShadowShader)
-	{}
-
-	DirectionalLight::DirectionalLight(
-		DirectionalLight&& copy) noexcept
-		: Light(m_intensity, copy.m_shadowCamera,
-			copy.m_shadowTarget,
-			copy.m_shadowShader,
-			copy.m_particleShadowShader)
-	{
-		copy.m_shadowCamera = nullptr;
-		copy.m_shadowTarget = nullptr;
-		copy.m_shadowShader = nullptr;
-		copy.m_particleShadowShader = nullptr;
-	}
-
-	DirectionalLight& DirectionalLight::operator=(
-		const DirectionalLight& copy)
-	{
-		m_intensity    = copy.m_intensity;
-		m_shadowCamera = new OrthographicCamera(*(OrthographicCamera*)copy.m_shadowCamera);
-		m_shadowTarget = copy.m_shadowTarget;
-		m_shadowShader = copy.m_shadowShader;
-		m_particleShadowShader = copy.m_particleShadowShader;
-
-		return *this;
-	}
-
-	DirectionalLight& DirectionalLight::operator=(
-		DirectionalLight&& copy) noexcept
-	{
-		m_intensity    = copy.m_intensity;
-		m_shadowCamera = copy.m_shadowCamera;
-		m_shadowTarget = copy.m_shadowTarget;
-		m_shadowShader = copy.m_shadowShader;
-		m_particleShadowShader = copy.m_particleShadowShader;
-
-		copy.m_shadowCamera = nullptr;
-		copy.m_shadowTarget = nullptr;
-		copy.m_shadowShader = nullptr;
-		copy.m_particleShadowShader = nullptr;
-
-		return *this;
-	}
 
 	void DirectionalLight::SetupShadowCast(
 		Renderer* renderer)
 	{
-		renderer->SetCamera(m_shadowCamera);
+		renderer->SetCamera(&m_shadowCamera);
 		renderer->Device->SetCullFace(BACK);
 	}
 
 	matrix4 DirectionalLight::ViewProjection() const {
-		return m_shadowCamera->ViewProjection();
+		return m_shadowCamera.ViewProjection();
 	}
 
 	const quaternion& DirectionalLight::Rotation() const {
-		return m_shadowCamera->Rotation();
+		return m_shadowCamera.Rotation();
 	}
-
-	//quaternion& DirectionalLight::Rotation() {
-	//	return m_shadowCamera->Rotation();
-	//}
 
 	void DirectionalLight::SetRotation(
 		const iw::quaternion& rotation)
 	{
-		m_shadowCamera->SetRotation(rotation);
+		m_shadowCamera.SetRotation(rotation);
+	}
+
+	Camera* DirectionalLight::ShadowCamera() const {
+		return (Camera*)&m_shadowCamera;
 	}
 }
 }

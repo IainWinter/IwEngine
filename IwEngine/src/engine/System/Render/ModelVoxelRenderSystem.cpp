@@ -19,7 +19,7 @@ namespace Engine {
 	int ModelVoxelRenderSystem::Initialize() {
 		ref<Shader> voxelize = Asset->Load<Shader>("shaders/vct/voxelize.shader");
 
-		Renderer->InitShader(voxelize, LIGHTS);
+		Renderer->InitShader(voxelize, CAMERA | LIGHTS);
 
 		// Filtering has a big effect on preformance (LINEAR is more expensive)
 		ref<Texture> voxelTexture = REF<Texture>(64, 64, TEX_3D, RGBA, FLOAT, BORDER, LINEAR, LINEAR_LINEAR);

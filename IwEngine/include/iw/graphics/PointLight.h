@@ -1,19 +1,18 @@
 #pragma once
 
 #include "Light.h"
-#include "Camera.h"
 
 namespace iw {
 namespace Graphics {
-	class PointLight
-		: public Light
+	struct PointLight
+		: Light
 	{
-	protected:
+	private:
 		float m_radius;
 		bool m_outdated;
+		PerspectiveCamera m_shadowCamera;
 
 	public:
-		// Takes ownership of camera ptr
 		IWGRAPHICS_API
 		PointLight(
 			float             radius       = 30.0f,
@@ -21,12 +20,6 @@ namespace Graphics {
 			ref<RenderTarget> shadowTarget = nullptr,
 			ref<Shader>       shadowShader = nullptr,
 			ref<Shader>       particleShadowShader = nullptr);
-
-		GEN_copy(IWGRAPHICS_API, PointLight)
-		GEN_move(IWGRAPHICS_API, PointLight)
-
-		IWGRAPHICS_API
-		~PointLight() override = default;
 
 		IWGRAPHICS_API
 		void SetupShadowCast(
@@ -45,6 +38,9 @@ namespace Graphics {
 		IWGRAPHICS_API
 		void SetShadowTarget(
 			ref<RenderTarget>& shadowTarget) override;
+
+		IWGRAPHICS_API
+		Camera* ShadowCamera() const override;
 	private:
 		void UpdateCamera();
 	};

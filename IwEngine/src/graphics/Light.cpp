@@ -4,26 +4,60 @@
 namespace iw {
 namespace Graphics {
 	Light::Light(
-		float power,
-		iw::Camera* camera,
+		float intensity,
 		iw::ref<RenderTarget> shadowTarget,
 		iw::ref<Shader> shadowShader,
 		iw::ref<Shader> particleShadowShader)
-		: m_intensity(power)
-		, m_shadowCamera(camera)
+		: m_intensity(intensity)
 		, m_shadowTarget(shadowTarget)
 		, m_shadowShader(shadowShader)
 		, m_particleShadowShader(particleShadowShader)
+	{}
+
+	Light::Light(
+		const Light& other)
+		: m_intensity(other.m_intensity)
+		, m_shadowTarget(other.m_shadowTarget)
+		, m_shadowShader(other.m_shadowShader)
+		, m_particleShadowShader(other.m_particleShadowShader)
+	{}
+
+	Light::Light(
+		Light&& other) noexcept
+		: m_intensity(other.m_intensity)
+		, m_shadowTarget(other.m_shadowTarget)
+		, m_shadowShader(other.m_shadowShader)
+		, m_particleShadowShader(other.m_particleShadowShader)
 	{
-//#ifdef IW_DEBUG
-//		if (!!shadowShader != !!shadowTarget) {
-//			LOG_WARNING << "A light needs both a shader and a target or neither.";
-//		}
-//#endif
+		other.m_shadowTarget = nullptr;
+		other.m_shadowShader = nullptr;
+		other.m_particleShadowShader = nullptr;
 	}
 
-	Light::~Light() {
-		delete m_shadowCamera;
+	Light& Light::operator=(
+		const Light& other)
+	{
+		m_intensity = other.m_intensity;
+		m_shadowTarget = other.m_shadowTarget;
+		m_shadowShader = other.m_shadowShader;
+		m_particleShadowShader = other.m_particleShadowShader;
+
+		return *this;
+	}
+
+	Light& Light::operator=(
+		Light&& other) noexcept
+	{
+		m_intensity = other.m_intensity;
+		m_shadowTarget = other.m_shadowTarget;
+		m_shadowShader = other.m_shadowShader;
+		m_particleShadowShader = other.m_particleShadowShader;
+
+		other.m_shadowTarget = nullptr;
+		other.m_shadowShader = nullptr;
+		other.m_particleShadowShader = nullptr;
+
+		return *this;
 	}
 
 	void Light::EndShadowCast(
@@ -41,7 +75,7 @@ namespace Graphics {
 	}
 
 	bool Light::Outdated() const {
-		return m_shadowCamera->Outdated();
+		return ShadowCamera()->Outdated();
 	}
 
 	float Light::Intensity() const {
@@ -49,7 +83,7 @@ namespace Graphics {
 	}
 
 	const vector3& Light::Position() const {
-		return m_shadowCamera->Position();
+		return ShadowCamera()->Position();
 	}
 
 	const iw::ref<RenderTarget>& Light::ShadowTarget() const {
@@ -64,10 +98,6 @@ namespace Graphics {
 		return m_particleShadowShader;
 	}
 
-	const Camera* Light::ShadowCamera() const {
-		return m_shadowCamera;
-	}
-
 	void Light::SetIntensity(
 		float intensity)
 	{
@@ -77,7 +107,7 @@ namespace Graphics {
 	void Light::SetPosition(
 		const vector3& position)
 	{
-		m_shadowCamera->SetPosition(position);
+		ShadowCamera()->SetPosition(position);
 	}
 
 	void Light::SetShadowTarget(
@@ -97,63 +127,5 @@ namespace Graphics {
 	{
 		m_particleShadowShader = particleShadowShader;
 	}
-
-	void Light::SetShadowCamera(
-		Camera* shadowCamera)
-	{
-		m_shadowCamera = shadowCamera;
-	}
-
-	/*void Light::PostProcess() {}
-
-	const iw::ref<Shader>& Light::LightShader() const {
-		return m_light;
-	}
-
-	const iw::ref<Shader>& Light::NullFilter() const {
-		return m_null;
-	}
-
-	const iw::ref<RenderTarget>& Light::ShadowTarget() const {
-		return m_shadowTarget;
-	}
-
-	const iw::ref<Shader>& Light::PostFilter() const {
-		return m_post;
-	}
-
-	const iw::ref<RenderTarget>& Light::PostTarget() const {
-		return m_postTarget;
-	}
-
-	void Light::SetLightShader(
-		iw::ref<Shader>& lightShader)
-	{
-		m_light = lightShader;
-	}
-
-	void Light::SetNullFilter(
-		iw::ref<Shader>& nullFilter)
-	{
-		m_null = nullFilter;
-	}
-
-	void Light::SetShadowTarget(
-		iw::ref<RenderTarget>& shadowTarget)
-	{
-		m_shadowTarget = shadowTarget;
-	}
-
-	void Light::SetPostFilter(
-		iw::ref<Shader>& post)
-	{
-		m_post = post;
-	}
-
-	void Light::SetPostTarget(
-		iw::ref<RenderTarget>& postTarget)
-	{
-		m_postTarget = postTarget;
-	}*/
 }
 }

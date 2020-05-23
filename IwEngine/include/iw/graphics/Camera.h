@@ -5,7 +5,7 @@
 
 namespace iw {
 namespace Graphics {
-	class IWGRAPHICS_API Camera {
+	struct IWGRAPHICS_API Camera {
 	protected:
 		iw::matrix4 m_view;
 	private:
@@ -64,8 +64,8 @@ namespace Graphics {
 
 	// Could probly do this better with strategy camera but this works for now cus there're are only 2 as far as I know
 
-	class IWGRAPHICS_API OrthographicCamera
-		: public Camera
+	struct IWGRAPHICS_API OrthographicCamera
+		: Camera
 	{
 	private:
 		iw::matrix4 m_projection;
@@ -111,8 +111,8 @@ namespace Graphics {
 		}
 	};
 
-	class IWGRAPHICS_API PerspectiveCamera
-		: public Camera
+	struct IWGRAPHICS_API PerspectiveCamera
+		: Camera
 	{
 	public:
 		/*float Fov; // something like this could be cool

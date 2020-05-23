@@ -10,67 +10,17 @@ namespace Graphics {
 		ref<Texture> voxelTexture,
 		ref<Shader>  voxelizerShader,
 		ref<Shader>  particleVoxelizerShader)
-		: Light(0, nullptr, nullptr, voxelizerShader, particleVoxelizerShader)
+		: Light(0, nullptr, voxelizerShader, particleVoxelizerShader)
 		, m_voxelTexture(voxelTexture)
-	{ }
-
-	VoxelLight::VoxelLight(
-		const VoxelLight& copy)
-		: Light(0, nullptr, nullptr, copy.m_shadowShader, copy.m_particleShadowShader)
-		, m_voxelTexture(copy.m_voxelTexture)
+		, m_shadowCamera(2, 2, -1, 1)
 	{}
-
-	VoxelLight::VoxelLight(
-		VoxelLight&& copy) noexcept
-		: Light(0, nullptr, nullptr, copy.m_shadowShader, copy.m_particleShadowShader)
-		, m_voxelTexture(copy.m_voxelTexture)
-	{
-		copy.m_shadowShader         = nullptr;
-		copy.m_particleShadowShader = nullptr;
-		copy.m_voxelTexture         = nullptr;
-	}
-
-	VoxelLight& VoxelLight::operator=(
-		const VoxelLight& copy)
-	{
-		m_shadowShader         = copy.m_shadowShader;
-		m_particleShadowShader = copy.m_particleShadowShader;
-		m_voxelTexture         = copy.m_voxelTexture;
-		
-		return *this;
-	}
-
-	VoxelLight& VoxelLight::operator=(
-		VoxelLight&& copy) noexcept
-	{
-		m_shadowShader         = copy.m_shadowShader;
-		m_particleShadowShader = copy.m_particleShadowShader;
-		m_voxelTexture         = copy.m_voxelTexture;
-
-		copy.m_shadowShader         = nullptr;
-		copy.m_particleShadowShader = nullptr;
-		copy.m_voxelTexture         = nullptr;
-
-		return *this;
-	}
-
-	const vector3& VoxelLight::Position() const {
-		return m_position;
-	}
-
-	void VoxelLight::SetPosition(
-		const vector3& position)
-	{
-		m_position = position;
-	}
-
-	//int i = 0;
 
 	void VoxelLight::SetupShadowCast(
 		Renderer* renderer)
 	{
 		renderer->Device->SetViewport(m_voxelTexture->Width(), m_voxelTexture->Height());
-		
+		renderer->SetCamera(ShadowCamera());
+
 		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 		glDisable(GL_CULL_FACE);
 		glDisable(GL_DEPTH_TEST);
@@ -81,12 +31,7 @@ namespace Graphics {
 			m_voxelTexture->SetBorderColor(Color(0, 0, 0, 0));
 		}
 
-		//if(i == 2) {
-			m_voxelTexture->Clear();
-		//	i = 0;
-		//}
-
-		//i++;
+		m_voxelTexture->Clear();
 
 		IPipelineParam* textureParam = m_shadowShader->Handle()->GetParam("voxelTexture");
 		if (textureParam) {
@@ -111,6 +56,10 @@ namespace Graphics {
 
 	ref<Texture> VoxelLight::VoxelTexture() {
 		return m_voxelTexture;
+	}
+	
+	Camera* VoxelLight::ShadowCamera() const {
+		return (Camera*)&m_shadowCamera;
 	}
 }
 }
