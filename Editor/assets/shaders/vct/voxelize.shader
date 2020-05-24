@@ -1,8 +1,6 @@
 #shader Vertex
 #version 450
 
-#include shaders/camera.shader
-
 layout(location = 0) in vec3 vert;
 layout(location = 1) in vec3 normal;
 
@@ -12,7 +10,7 @@ uniform mat4 model;
 
 void main() {
 	gNormal = normalize(transpose(inverse(mat3(model))) * normal);
-	gl_Position = model * proj * vec4(vert, 1);
+	gl_Position = model * vec4(vert, 1);
 }
 
 #shader Geometry
@@ -26,13 +24,15 @@ in vec3 gNormal[];
 out vec3 WorldPos;
 out vec3 Normal;
 
+uniform vec3 voxelBoundsScaleInv;
+
 void main() {
 	vec3 p1 = gl_in[1].gl_Position.xyz - gl_in[0].gl_Position.xyz;
 	vec3 p2 = gl_in[2].gl_Position.xyz - gl_in[0].gl_Position.xyz;
 	vec3 p = abs(cross(p1, p2));
 
 	for (int i = 0; i < 3; i++) {
-		WorldPos = gl_in[i].gl_Position.xyz;
+		WorldPos = gl_in[i].gl_Position.xyz * voxelBoundsScaleInv;
 		Normal = gNormal[i];
 
 		if (   p.z > p.x
@@ -71,6 +71,8 @@ uniform vec4  baseColor;
 uniform float reflectance;
 uniform float ambiance;
 
+uniform vec3 voxelBoundsScale;
+
 layout(RGBA8) uniform image3D voxelTexture;
 
 // Simple version of the phong BRDF, only calcs diffuse color
@@ -84,7 +86,7 @@ vec3 LightColor(
 }
 
 void main() {
-	if (!isInsideCube(WorldPos, 0)) return;
+	if (!isInsideCube(WorldPos, voxelBoundsScale, 0)) return;
 
 	vec4 color = vec4(0, 0, 0, baseColor.a);
 

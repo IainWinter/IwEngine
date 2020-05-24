@@ -48,6 +48,8 @@ in mat3 TBN;
 
 out vec4 PixelColor;
 
+// Material
+
 uniform vec4 mat_baseColor;
 uniform float mat_reflectance;
 uniform sampler3D mat_voxelMap;
@@ -61,10 +63,13 @@ uniform sampler2D mat_normalMap;
 uniform float mat_hasReflectanceMap;
 uniform sampler2D mat_reflectanceMap;
 
-uniform vec3 voxelBounds;
+// Voxel
+uniform vec3 voxelBoundsScale;
+uniform vec3 voxelBoundsScaleInv;
+uniform float voxelSizeInv;
+uniform float voxelSize;
 
-uniform float voxelSize    = 1 / 32.0f;
-uniform float voxelSizeInv = 32.0f;
+// Globals
 uniform float ambiance;
 uniform int d_state;
 
@@ -100,11 +105,11 @@ float TraceConeShadow(
 	{
 		vec3 position = origin + distance * direction;
 		
-		if (!isInsideCube(position, 0)) {
+		if (!isInsideCube(position, voxelBoundsScale, 0)) {
 			break;
 		}
 
-		position = scaleAndBias(position);
+		position = scaleAndBias(position * voxelBoundsScaleInv);
 
 		float diameter = max(voxelSize, ratio * distance);
 		float LOD      = log2(diameter * voxelSizeInv);
@@ -142,11 +147,11 @@ vec4 TraceCone(
 	{
 		vec3 position = origin + direction * distance;
 		
-		if (!isInsideCube(position, 0)) { // Todo: Check if this is worth it
+		if (!isInsideCube(position, voxelBoundsScale, 0)) { // Todo: Check if this is worth it
 			break;
 		}
 
-		position = scaleAndBias(position);
+		position = scaleAndBias(position * voxelBoundsScaleInv);
 
 		float diameter = max(voxelSize, ratio * distance);
 		float LOD      = log2(diameter * voxelSizeInv);

@@ -5,6 +5,7 @@ namespace Graphics {
 	Texture::Texture()
 		: m_width        (0)
 		, m_height       (0)
+		, m_depth        (0)
 		, m_channels     (0)
 		, m_type         (TEX_2D)
 		, m_format       (ALPHA)
@@ -20,8 +21,8 @@ namespace Graphics {
 	{}
 
 	Texture::Texture(
-		int width,
-		int height,
+		unsigned width,
+		unsigned height,
 		TextureType type,
 		TextureFormat format,
 		TextureFormatType formatType,
@@ -31,6 +32,7 @@ namespace Graphics {
 		unsigned char* colors)
 		: m_width       (width)
 		, m_height      (height)
+		, m_depth       (1)
 		, m_type        (type)
 		, m_format      (format)
 		, m_formatType  (formatType)
@@ -51,19 +53,50 @@ namespace Graphics {
 			case DEPTH:   m_channels = 1; break;
 			case STENCIL: m_channels = 1; break;
 		}
+	}
 
-		//if (!m_colors) {
-		//	m_colors = new unsigned char[m_width * m_height];
-		//	memset(m_colors, 0, m_width * m_height);
-		//}
+	Texture::Texture(
+		unsigned width,
+		unsigned height,
+		unsigned depth,
+		TextureType type,
+		TextureFormat format,
+		TextureFormatType formatType,
+		TextureWrap wrap,
+		TextureFilter filter,
+		TextureMipmapFilter mipmapFilter,
+		unsigned char* colors)
+		: m_width       (width)
+		, m_height      (height)
+		, m_depth       (depth)
+		, m_type        (type)
+		, m_format      (format)
+		, m_formatType  (formatType)
+		, m_wrap        (wrap)
+		, m_filter      (filter)
+		, m_mipmapFilter(mipmapFilter)
+		, m_parent      (nullptr)
+		, m_xOffset     (0)
+		, m_yOffset     (0)
+		, m_colors      (colors)
+		, m_handle      (nullptr)
+	{
+		switch (format) {
+			case ALPHA:   m_channels = 1; break;
+			case RG:      m_channels = 2; break;
+			case RGB:     m_channels = 3; break;
+			case RGBA:    m_channels = 4; break;
+			case DEPTH:   m_channels = 1; break;
+			case STENCIL: m_channels = 1; break;
+		}
 	}
 
 	Texture::Texture(
 		const Texture* parent,
 		int xOffset, 
 		int yOffset, 
-		int width, 
-		int height, 
+		unsigned width,
+		unsigned height,
 		unsigned char* colors)
 		: m_width       (width)
 		, m_height      (height)
@@ -105,7 +138,7 @@ namespace Graphics {
 		if (m_colors) {
 			delete m_colors;
 
-			size_t size = m_width * m_height * m_channels;
+			size_t size = m_width * m_height * m_depth * m_channels;
 			m_colors = new unsigned char[size];
 
 			if (other.m_colors) {
@@ -166,7 +199,7 @@ namespace Graphics {
 		if (m_colors) {
 			delete m_colors;
 
-			size_t size = m_width * m_height * m_channels;
+			size_t size = m_width * m_height * m_depth * m_channels;
 			m_colors = new unsigned char[size];
 
 			if (other.m_colors) {
@@ -213,7 +246,7 @@ namespace Graphics {
 				m_handle = device->CreateSubTexture(m_parent->Handle(), m_xOffset, m_yOffset, m_width, m_height);
 			}
 
-			else {
+			else { // no depth. for now it = height
 				m_handle = device->CreateTexture(m_width, m_height, m_type, m_format, m_formatType, m_wrap, m_filter, m_mipmapFilter, m_colors);
 			}
 		}
@@ -222,8 +255,8 @@ namespace Graphics {
 	Texture Texture::CreateSubTexture(
 		int xOffset, 
 		int yOffset, 
-		int width, 
-		int height/*,
+		unsigned width,
+		unsigned height/*,
 		int mipmap = 0*/) const
 	{
 		return Texture(this, xOffset, yOffset, width, height/*, minmap*/);
@@ -252,12 +285,24 @@ namespace Graphics {
 	void Texture::SetFilter(
 		TextureFilter filter)
 	{
+		m_filter = filter;
+
+		if (!m_handle) {
+			return;
+		}
+
 		m_handle->SetFilter(filter);
 	}
 
 	void Texture::SetMipmapFilter(
 		TextureMipmapFilter mipmapFilter)
 	{
+		m_mipmapFilter = mipmapFilter;
+
+		if (!m_handle) {
+			return;
+		}
+
 		m_handle->SetMipmapFilter(mipmapFilter);
 	}
 

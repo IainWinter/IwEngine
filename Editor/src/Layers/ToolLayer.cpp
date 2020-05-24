@@ -89,7 +89,7 @@ namespace iw {
 		MeshDescription description;
 		description.DescribeBuffer(bName::POSITION, MakeLayout<float>(3));
 
-		plightMesh = MakeIcosphere(description, 2)->MakeInstance();
+		plightMesh = MakeIcosphere  (description, 2)->MakeInstance();
 		dlightMesh = MakeTetrahedron(description, 2)->MakeInstance();
 		cameraMesh = MakeTetrahedron(description, 1)->MakeInstance();
 
@@ -114,7 +114,7 @@ namespace iw {
 		//PushSystem<DrawCollidersSystem>(camera);
 		PushSystem<PhysicsSystem>();
 
-		PushSystem<iw::ModelVoxelRenderSystem>(m_mainScene);
+		//PushSystem<iw::ModelVoxelRenderSystem>(m_mainScene);
 
 		//PushSystem<iw::    MeshShadowRenderSystem>(m_mainScene);
 		//PushSystem<iw::   ModelShadowRenderSystem>(m_mainScene);
@@ -244,7 +244,7 @@ namespace iw {
 			ss << name << " Light pos";
 
 			vector3 pos = light->Position();
-			ImGui::SliderFloat3(ss.str().c_str(), (float*)&pos, -2, 2);
+			ImGui::SliderFloat3(ss.str().c_str(), (float*)&pos, 0, 10);
 			light->SetPosition(pos);
 
 			ss = std::stringstream();
@@ -260,7 +260,7 @@ namespace iw {
 			ss << name << " Light pos";
 
 			vector3 pos = light->Position();
-			ImGui::SliderFloat3(ss.str().c_str(), (float*)&pos, -2, 2);
+			ImGui::SliderFloat3(ss.str().c_str(), (float*)&pos, 0, 10);
 			light->SetPosition(pos);
 
 			ss = std::stringstream();

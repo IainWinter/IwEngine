@@ -12,7 +12,7 @@ namespace Graphics {
 		ref<Shader>  particleVoxelizerShader)
 		: Light(0, nullptr, voxelizerShader, particleVoxelizerShader)
 		, m_voxelTexture(voxelTexture)
-		, m_shadowCamera(2, 2, -1, 1)
+		, m_shadowCamera()
 	{}
 
 	void VoxelLight::SetupShadowCast(
@@ -30,7 +30,7 @@ namespace Graphics {
 			m_voxelTexture->Initialize(renderer->Device);
 			m_voxelTexture->SetBorderColor(Color(0, 0, 0, 0));
 		}
-
+		
 		m_voxelTexture->Clear();
 
 		IPipelineParam* textureParam = m_shadowShader->Handle()->GetParam("voxelTexture");

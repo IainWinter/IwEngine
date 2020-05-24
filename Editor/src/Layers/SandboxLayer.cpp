@@ -180,7 +180,7 @@ namespace iw {
 		light = new PointLight(30, 30, nullptr, nullptr, nullptr);
 
 		sun->SetRotation(quaternion::from_euler_angles(1.433f, 0.0f, -0.525f));
-		light->SetPosition(vector3(0));
+		light->SetPosition(vector3(0, 5, 0));
 
 		MainScene->AddLight(sun);
 		MainScene->AddLight(light);
@@ -314,14 +314,14 @@ namespace iw {
 		PushSystem<iw::ParticleUpdateSystem>();
 		PushSystem<iw::EntityCleanupSystem>();
 
-		//PushSystem<iw::ModelVoxelRenderSystem>(MainScene);
+		PushSystem<iw::ModelVoxelRenderSystem>(MainScene);
 
-		PushSystem<iw::    MeshShadowRenderSystem>(MainScene);
-		PushSystem<iw::   ModelShadowRenderSystem>(MainScene);
-		PushSystem<iw::ParticleShadowRenderSystem>(MainScene);
-		PushSystem<iw::          MeshRenderSystem>(MainScene);
+		//PushSystem<iw::    MeshShadowRenderSystem>(MainScene);
+		//PushSystem<iw::   ModelShadowRenderSystem>(MainScene);
+		//PushSystem<iw::ParticleShadowRenderSystem>(MainScene);
+		//PushSystem<iw::          MeshRenderSystem>(MainScene);
 		PushSystem<iw::         ModelRenderSystem>(MainScene);
-		PushSystem<iw::      ParticleRenderSystem>(MainScene);
+		//PushSystem<iw::      ParticleRenderSystem>(MainScene);
 
 		PushSystem<iw::UiRenderSystem>(m_textCam);
 

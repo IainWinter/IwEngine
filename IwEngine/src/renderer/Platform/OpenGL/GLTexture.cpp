@@ -111,7 +111,7 @@ namespace RenderAPI {
 					break;
 				}
 				case TEX_3D: {
-					GL(glTexImage3D(gl_type, 0, gl_iformat, m_width, m_height, m_width/*should be depth*/, 0, gl_format, gl_formatType, m_data));
+					GL(glTexImage3D(gl_type, 0, gl_iformat, m_width, m_height, m_height/*should be depth*/, 0, gl_format, gl_formatType, m_data));
 					break;
 				}
 				case TEX_CUBE: {

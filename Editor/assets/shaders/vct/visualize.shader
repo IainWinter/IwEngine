@@ -22,9 +22,6 @@ void main() {
 #include shaders/gamma_correction.shader
 #include shaders/vct/bounds.shader
 
-#define STEP_LENGTH 0.005f
-#define INV_STEP_LENGTH 1.0f / STEP_LENGTH
-
 in vec2 TexCoords;
 in vec3 CameraPos;
 
@@ -35,28 +32,43 @@ uniform sampler2D mat_front;
 uniform sampler3D mat_world;
 uniform int mat_level;
 
+uniform vec3  voxelBoundsScale;
+uniform vec3  voxelBoundsScaleInv;
+uniform float voxelSize;
+
 void main() {
 	float level = float(mat_level);
 
-	vec3 origin = isInsideCube(CameraPos, 0.2f) ? CameraPos
-												: texture(mat_front, TexCoords).xyz;
+	vec3 origin = isInsideCube(CameraPos, voxelBoundsScale, 0.2f) 
+		? CameraPos
+		: texture(mat_front, TexCoords).xyz;
 
 	vec3 direction = texture(mat_back, TexCoords).xyz - origin;
-	float length = length(direction);
 	
+	float maxDistance = max(5, length(direction));
+	float distance    = 0;
+
 	direction = normalize(direction);
 
-	int steps = int(INV_STEP_LENGTH * length);
-
 	vec4 color = vec4(0.0f);
-	for (int step = 0; step < steps && color.a <= 1.0f; step++) {
-		vec3 p = origin + STEP_LENGTH * step * direction;
-		vec4 s = textureLod(mat_world, scaleAndBias(p), level);
 
-		color += (1.0f - color.a) * s;
+	while (distance <= maxDistance
+		&& color.w  < 1.0f)
+	{
+		vec3 position = origin + direction * distance;
+
+		if (!isInsideCube(position, voxelBoundsScale, 0)) { // Todo: Check if this is worth it
+			break;
+		}
+
+		position = scaleAndBias(position * voxelBoundsScaleInv);
+
+		vec4  sample_ = textureLod(mat_world, position, level);
+		float weight = 1.0f - color.w;
+
+		color += sample_ * weight;
+		distance += voxelSize * 0.01f;
 	}
-
-	color.rgb = linearToSRGB(color.rgb);
 
 	PixelColor = color;
 }

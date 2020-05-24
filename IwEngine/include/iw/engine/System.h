@@ -126,8 +126,6 @@ namespace Engine {
 		}
 	};
 
-	// have an event only system
-
 	template<
 		typename... _cs>
 	class System

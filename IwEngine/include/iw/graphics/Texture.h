@@ -10,9 +10,10 @@ namespace iw {
 namespace Graphics {
 	struct Texture {
 	protected:
-		int m_width;
-		int m_height;
-		int m_channels;
+		unsigned m_width;
+		unsigned m_height;
+		unsigned m_depth;
+		unsigned m_channels;
 
 		TextureType         m_type;
 		TextureFormat       m_format;
@@ -34,8 +35,21 @@ namespace Graphics {
 
 		IWGRAPHICS_API
 		Texture(
-			int width,
-			int height,
+			unsigned width,
+			unsigned height,
+			TextureType type                    = TEX_2D,
+			TextureFormat format                = RGBA,
+			TextureFormatType formatType        = UBYTE,
+			TextureWrap wrap                    = BORDER,
+			TextureFilter filtering             = LINEAR,
+			TextureMipmapFilter mipmapFiltering = LINEAR_LINEAR,
+			unsigned char* colors               = nullptr);
+
+		IWGRAPHICS_API
+		Texture(
+			unsigned width,
+			unsigned height,
+			unsigned depth,
 			TextureType type                    = TEX_2D,
 			TextureFormat format                = RGBA,
 			TextureFormatType formatType        = UBYTE,
@@ -49,8 +63,8 @@ namespace Graphics {
 			const Texture* parent,
 			int xOffset,
 			int yOffset,
-			int width,
-			int height,
+			unsigned width,
+			unsigned height,
 			unsigned char* colors = nullptr);
 
 		GEN_5(IWGRAPHICS_API, Texture)
@@ -63,8 +77,8 @@ namespace Graphics {
 		Texture CreateSubTexture(
 			int xOffset,
 			int yOffset,
-			int width,
-			int height/*,
+			unsigned width,
+			unsigned height/*,
 			int mipmap = 0*/) const;
 
 		// texture needs to be initialized!

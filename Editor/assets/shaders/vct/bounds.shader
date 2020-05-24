@@ -5,8 +5,10 @@ vec3 scaleAndBias(
 }
 
 bool isInsideCube(
-	vec3 p, 
-	float e) 
+	vec3 p,
+	vec3 c,
+	float e)
 { 
-	return abs(p.x) < 2 + e && abs(p.y) < 2 + e && abs(p.z) < 2 + e;
+	return abs(p.x) < c.x + e && abs(p.y) < c.y + e && abs(p.z) < c.z + e;
 }
+
