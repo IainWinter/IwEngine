@@ -19,8 +19,8 @@ namespace Engine {
 	float voxelSize    = 1.0f / (25.6f / 2);
 	float voxelSizeInv = 1.0f / voxelSize;
 
-	vector3 voxelBoundsScale(10, 5, 10);
-	vector3 voxelBoundsSize (256, 128, 256);
+	vector3 voxelBoundsScale(10, 10, 10);
+	vector3 voxelBoundsSize (256, 256, 256);
 	vector3 voxelBoundsScaleInv = vector3(1) / voxelBoundsScale;
 
 	int ModelVoxelRenderSystem::Initialize() {
