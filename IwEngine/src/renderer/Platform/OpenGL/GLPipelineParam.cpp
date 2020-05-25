@@ -330,7 +330,8 @@ namespace RenderAPI {
 
 	void GLPipelineParam::SetAsImage(
 		const ITexture* texture,
-		int index)
+		int index,
+		unsigned mipmap)
 	{
 		if (index < 0) {
 			index = m_imageCount++;
@@ -347,7 +348,7 @@ namespace RenderAPI {
 
 		if (texture) {
 			const GLTexture* tex = static_cast<const GLTexture*>(texture);
-			glBindImageTexture(index, tex->Id(), 0, GL_TRUE, 0, GL_READ_WRITE, TRANSLATE(tex->Format(), tex->FormatType()));
+			glBindImageTexture(index, tex->Id(), mipmap, GL_TRUE, 0, GL_READ_WRITE, TRANSLATE(tex->Format(), tex->FormatType()));
 		}
 
 		else {

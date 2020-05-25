@@ -91,6 +91,7 @@ namespace Graphics {
 		}
 	}
 
+	// cant handle 3d textures
 	Texture::Texture(
 		const Texture* parent,
 		int xOffset, 
@@ -118,6 +119,7 @@ namespace Graphics {
 		const Texture& other)
 		: m_width       (other.m_width)
 		, m_height      (other.m_height)
+		, m_depth       (other.m_depth)
 		, m_channels    (other.m_channels)
 		, m_type        (other.m_type)
 		, m_format      (other.m_format)
@@ -151,6 +153,7 @@ namespace Graphics {
 		Texture&& other) noexcept
 		: m_width       (other.m_width)
 		, m_height      (other.m_height)
+		, m_depth       (other.m_depth)
 		, m_channels    (other.m_channels)
 		, m_type        (other.m_type)
 		, m_format      (other.m_format)
@@ -178,6 +181,7 @@ namespace Graphics {
 	{
 		m_width        = other.m_width;
 		m_height       = other.m_height;
+		m_depth        = other.m_depth;
 		m_channels     = other.m_channels;
 		m_type         = other.m_type;
 		m_format       = other.m_format;
@@ -215,6 +219,7 @@ namespace Graphics {
 	{
 		m_width        = other.m_width;
 		m_height       = other.m_height;
+		m_depth        = other.m_depth;
 		m_channels     = other.m_channels;
 		m_type         = other.m_type;
 		m_format       = other.m_format;
@@ -306,12 +311,16 @@ namespace Graphics {
 		m_handle->SetMipmapFilter(mipmapFilter);
 	}
 
-	int Texture::Width() const {
+	unsigned Texture::Width() const {
 		return m_width;
 	}
 
-	int Texture::Height() const {
+	unsigned Texture::Height() const {
 		return m_height;
+	}
+
+	unsigned Texture::Depth() const {
+		return m_depth;
 	}
 
 	int Texture::Channels() const {

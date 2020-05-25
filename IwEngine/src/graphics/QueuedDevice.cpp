@@ -251,14 +251,14 @@ namespace Graphics {
 
 	}
 
-	iw::potential<IComputePipeline*> QueuedDevice::CreateComputePipeline(
+	iw::potential<IPipeline*> QueuedDevice::CreateComputePipeline(
 		iw::potential<IComputeShader*> computeShader)
 	{
-		return iw::potential<IComputePipeline*>();
+		return iw::potential<IPipeline*>();
 	}
 
 	void QueuedDevice::DestroyComputePipeline(
-		iw::potential<IComputePipeline*> computePipeline)
+		iw::potential<IPipeline*> computePipeline)
 	{
 
 	}

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Light.h"
+#include "ComputeShader.h"
 
 namespace iw {
 namespace Graphics {
@@ -9,14 +10,16 @@ namespace Graphics {
 	{
 	private:
 		ref<Texture> m_voxelTexture;
+		ref<ComputeShader> m_mipmapGenerationShader;
 		OrthographicCamera m_shadowCamera;
 
 	public:
 		IWGRAPHICS_API
 		VoxelLight(
-			ref<Texture> voxelTexture,
-			ref<Shader>  voxelizerShader,
-			ref<Shader>  particleVoxelizerShader = nullptr);
+			ref<Texture>       voxelTexture,
+			ref<Shader>        voxelizerShader,
+			ref<Shader>        particleVoxelizerShader = nullptr,
+			ref<ComputeShader> mipmapGenerationShader  = nullptr);
 
 		IWGRAPHICS_API
 		void SetupShadowCast(

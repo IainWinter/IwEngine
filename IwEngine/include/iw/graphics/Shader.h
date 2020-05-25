@@ -12,18 +12,18 @@ namespace Graphics {
 		INVALID,
 		VERTEX,
 		GEOMETRY,
-		FRAGMENT
+		FRAGMENT,
+		COMPUTE
 	};
 
 	struct Shader {
-	private:
+	protected:
 		struct ShaderSource {
+			ShaderType Type;
 			size_t SourceSize;
 			char* Source;
-			ShaderType Type;
 		};
 
-	private:
 		std::vector<ShaderSource> m_source;
 		IPipeline* m_handle;
 
@@ -42,8 +42,8 @@ namespace Graphics {
 		IWGRAPHICS_API
 		bool IsInitialized() const;
 
-		IWGRAPHICS_API void Initialize(const iw::ref<IDevice>& device);
-		IWGRAPHICS_API void Use       (const iw::ref<IDevice>& device) const;
+		IWGRAPHICS_API virtual void Initialize(const iw::ref<IDevice>& device);
+		IWGRAPHICS_API         void Use       (const iw::ref<IDevice>& device) const;
 	};
 }
 

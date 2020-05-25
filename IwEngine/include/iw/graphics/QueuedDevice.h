@@ -107,11 +107,11 @@ namespace Graphics {
 			iw::potential<IPipeline*> pipeline);
 
 		//Compute shader pipeline
-		iw::potential<IComputePipeline*> CreateComputePipeline(
+		iw::potential<IPipeline*> CreateComputePipeline(
 			iw::potential<IComputeShader*> computeShader);
 
 		void DestroyComputePipeline(
-			iw::potential<IComputePipeline*> computePipeline);
+			iw::potential<IPipeline*> computePipeline);
 	};
 }
 

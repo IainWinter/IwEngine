@@ -33,6 +33,12 @@ namespace RenderAPI {
 			std::string name,
 			IUniformBuffer* buffer) = 0;
 
+		IWRENDERER_API
+		virtual void GetComputeWorkGroupSize(
+			int& x,
+			int& y,
+			int& z) const = 0;
+
 		//IWRENDERER_API
 		//virtual bool IsTextureActive(
 		//	IPipelineParam* param) const = 0;

@@ -95,10 +95,13 @@ namespace Graphics {
 		IWGRAPHICS_API void SetMipmapFilter(TextureMipmapFilter mipmapFilter);
 
 		IWGRAPHICS_API
-		int Width() const;
+		unsigned Width() const;
 
 		IWGRAPHICS_API
-		int Height() const;
+		unsigned Height() const;
+
+		IWGRAPHICS_API
+		unsigned Depth() const;
 
 		IWGRAPHICS_API
 		int Channels() const;

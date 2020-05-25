@@ -175,16 +175,15 @@ namespace RenderAPI {
 		//Compute shader pipeline
 
 		IWRENDERER_API
-		virtual IComputePipeline* CreateComputePipeline(
+		virtual IPipeline* CreateComputePipeline(
 			IComputeShader* computeShader) override;
 
 		IWRENDERER_API
-		virtual void DestroyComputePipeline(
-			IComputePipeline* computePipeline) override;
-
-		IWRENDERER_API
-		virtual void SetComputePipeline(
-			IComputePipeline* ComputePipeline) override;
+		void DispatchComputePipeline(
+			IPipeline* computePipeline,
+			unsigned x,
+			unsigned y,
+			unsigned z) override;
 
 		// Textures
 

@@ -24,28 +24,27 @@ namespace Engine {
 	vector3 voxelBoundsScaleInv = vector3(1) / voxelBoundsScale;
 
 	int ModelVoxelRenderSystem::Initialize() {
-		ref<Shader> voxelize = Asset->Load<Shader>("shaders/vct/voxelize.shader");
-		Renderer->InitShader(voxelize, LIGHTS);
-
-		Renderer->SetShader(voxelize);
-
-		voxelize->Handle()->GetParam("voxelBoundsScale")   ->SetAsFloats(&voxelBoundsScale, 3);
-		voxelize->Handle()->GetParam("voxelBoundsScaleInv")->SetAsFloats(&voxelBoundsScaleInv, 3);
-
-		// Filtering has a big effect on preformance (LINEAR is more expensive)
-		ref<Texture> voxelTexture = REF<Texture>(voxelBoundsSize.x, voxelBoundsSize.y, TEX_3D, RGBA, FLOAT, BORDER, LINEAR, LINEAR_LINEAR);
-		m_voxelize = new VoxelLight(voxelTexture, voxelize);
-
-		m_voxelize->SetPosition(vector3(0, 2, 0));
-
 		ref<Shader> vct = Asset->Load<Shader>("shaders/vct/vct.shader"); // Gets init from layer
 		
 		Renderer->SetShader(vct);
-
 		vct->Handle()->GetParam("voxelBoundsScale")   ->SetAsFloats(&voxelBoundsScale, 3);
 		vct->Handle()->GetParam("voxelBoundsScaleInv")->SetAsFloats(&voxelBoundsScaleInv, 3);
 		vct->Handle()->GetParam("voxelSizeInv")       ->SetAsFloat (voxelSizeInv);
 		vct->Handle()->GetParam("voxelSize")          ->SetAsFloat (voxelSize);
+
+		ref<ComputeShader> mipmap = std::static_pointer_cast<ComputeShader>(Asset->Load<Shader>("shaders/vct/mipmap.shader"));
+
+		ref<Shader> voxelize = Asset->Load<Shader>("shaders/vct/voxelize.shader");
+		Renderer->InitShader(voxelize, LIGHTS);
+
+		Renderer->SetShader(voxelize);
+		voxelize->Handle()->GetParam("voxelBoundsScale")   ->SetAsFloats(&voxelBoundsScale, 3);
+		voxelize->Handle()->GetParam("voxelBoundsScaleInv")->SetAsFloats(&voxelBoundsScaleInv, 3);
+
+		ref<Texture> voxelTexture = REF<Texture>(voxelBoundsSize.x, voxelBoundsSize.y, voxelBoundsSize.z, TEX_3D, RGBA, FLOAT, BORDER, LINEAR, LINEAR_LINEAR);
+		m_voxelize = new VoxelLight(voxelTexture, voxelize, nullptr, mipmap);
+
+		m_voxelize->SetPosition(vector3(0, 2, 0));
 		
 		return 0;
 	}

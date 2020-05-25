@@ -14,12 +14,16 @@ namespace Graphics {
 		size_t size = strlen(source) + 1;
 
 		ShaderSource shader = {
+			type,
 			size,
-			(char*)malloc(size),
-			type
+			(char*)malloc(size)
 		};
 
-		if (!shader.Source) return;
+		if (!shader.Source) {
+			LOG_ERROR << "Failed to copy shader source into program!";
+			return;
+		}
+
 		memcpy(shader.Source, source, size);
 
 		m_source.push_back(shader);
@@ -41,7 +45,7 @@ namespace Graphics {
 			return;
 		}
 
-		IVertexShader* vertex = nullptr;
+		IVertexShader*   vertex   = nullptr;
 		IGeometryShader* geometry = nullptr;
 		IFragmentShader* fragment = nullptr;
 
@@ -50,7 +54,7 @@ namespace Graphics {
 				case ShaderType::VERTEX:   vertex   = device->CreateVertexShader  (shader.Source); break;
 				case ShaderType::GEOMETRY: geometry = device->CreateGeometryShader(shader.Source); break;
 				case ShaderType::FRAGMENT: fragment = device->CreateFragmentShader(shader.Source); break;
-				default: LOG_WARNING << "Invalid shader type " << iw::val(shader.Type); break;
+				default: LOG_WARNING << "Tried to initialize a shader with an invalid shader type " << iw::val(shader.Type); break;
 			}
 		}
 

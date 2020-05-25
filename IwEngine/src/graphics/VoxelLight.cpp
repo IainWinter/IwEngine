@@ -9,9 +9,11 @@ namespace Graphics {
 	VoxelLight::VoxelLight(
 		ref<Texture> voxelTexture,
 		ref<Shader>  voxelizerShader,
-		ref<Shader>  particleVoxelizerShader)
+		ref<Shader>  particleVoxelizerShader,
+		ref<ComputeShader>  mipmapGenerationShader)
 		: Light(0, nullptr, voxelizerShader, particleVoxelizerShader)
 		, m_voxelTexture(voxelTexture)
+		, m_mipmapGenerationShader(mipmapGenerationShader)
 		, m_shadowCamera()
 	{}
 
@@ -47,7 +49,36 @@ namespace Graphics {
 		glEnable(GL_CULL_FACE);
 		glEnable(GL_BLEND);
 
-		m_voxelTexture->Handle()->GenerateMipMaps();
+		if (!m_mipmapGenerationShader->IsInitialized()) {
+			m_mipmapGenerationShader->Initialize(renderer->Device);
+		}
+
+		renderer->SetShader(m_mipmapGenerationShader);
+
+		IPipelineParam* level  = m_mipmapGenerationShader->Handle()->GetParam("level");
+		IPipelineParam* source = m_mipmapGenerationShader->Handle()->GetParam("source");
+		IPipelineParam* target = m_mipmapGenerationShader->Handle()->GetParam("target");
+		
+		source->SetAsTexture(m_voxelTexture->Handle(), 0);
+
+		vector3 dim(m_voxelTexture->Width(), m_voxelTexture->Height(), m_voxelTexture->Depth());
+		unsigned levels = log2(dim.major()) + 1;
+
+		int xSize, ySize, zSize;
+		m_mipmapGenerationShader->Handle()->GetComputeWorkGroupSize(xSize, ySize, zSize);
+
+		for (int mip = 1; mip < levels; mip++) {
+			level ->SetAsInt(mip - 1);
+			target->SetAsImage(m_voxelTexture->Handle(), 1, mip);
+
+			int x = ((m_voxelTexture->Width()  >> mip) + xSize - 1) / xSize;
+			int y = ((m_voxelTexture->Height() >> mip) + ySize - 1) / ySize;
+			int z = ((m_voxelTexture->Depth()  >> mip) + zSize - 1) / zSize;
+
+			renderer->Device->DispatchComputePipeline(m_mipmapGenerationShader->Handle(), x, y, z);
+		}
+
+		//m_voxelTexture->Handle()->GenerateMipMaps();
 	}
 
 	bool VoxelLight::CanCastShadows() const {

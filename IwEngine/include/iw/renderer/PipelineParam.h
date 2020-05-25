@@ -91,7 +91,8 @@ namespace RenderAPI {
 		IWRENDERER_API
 		virtual void SetAsImage(
 			const ITexture* texture,
-			int index = -1) = 0;
+			int index       = -1,
+			unsigned mipmap =  0) = 0;
 	};
 }
 	using namespace RenderAPI;

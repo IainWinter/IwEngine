@@ -1,4 +1,5 @@
 #include "iw/graphics/Loaders/ShaderLoader.h"
+#include "iw/graphics/ComputeShader.h"
 #include "iw/util/io/File.h"
 
 namespace iw {
@@ -77,7 +78,13 @@ namespace Graphics {
 
 			// Only make this when we need to
 			if (shader == nullptr) {
-				shader = new Shader();
+				if (type == ShaderType::COMPUTE) {
+					shader = new ComputeShader();
+				}
+
+				else {
+					shader = new Shader();
+				}
 			}
 
 #ifdef IW_DEBUG
@@ -118,6 +125,10 @@ namespace Graphics {
 
 		else if (name == "Geometry") {
 			return ShaderType::GEOMETRY;
+		}
+
+		else if (name == "Compute") {
+			return ShaderType::COMPUTE;
 		}
 
 		return ShaderType::INVALID;

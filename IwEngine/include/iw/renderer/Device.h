@@ -11,7 +11,6 @@
 #include "GeometryShader.h"
 #include "ComputeShader.h"
 #include "Pipeline.h"
-#include "ComputePipeline.h"
 #include "Texture.h"
 #include "FrameBuffer.h"
 
@@ -184,19 +183,18 @@ namespace RenderAPI {
 		virtual void SetPipeline(
 			IPipeline* pipeline) = 0;
 
-		// Compute shader pipeline // prob doesnt do anyhting yet
+		// Compute shader pipeline
 
 		IWRENDERER_API
-		virtual IComputePipeline* CreateComputePipeline(
+		virtual IPipeline* CreateComputePipeline(
 			IComputeShader* computeShader) = 0;
 
 		IWRENDERER_API
-		virtual void DestroyComputePipeline(
-			IComputePipeline* computePipeline) = 0;
-
-		IWRENDERER_API
-		virtual void SetComputePipeline(
-			IComputePipeline* computePipeline) = 0;
+		virtual void DispatchComputePipeline(
+			IPipeline* computePipeline,
+			unsigned x = 0,
+			unsigned y = 0,
+			unsigned z = 0) = 0;
 
 		// Textures
 

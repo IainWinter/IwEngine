@@ -8,7 +8,6 @@
 #include "iw/renderer/Platform/OpenGL/GLGeometryShader.h"
 #include "iw/renderer/Platform/OpenGL/GLComputeShader.h"
 #include "iw/renderer/Platform/OpenGL/GLPipeline.h"
-#include "iw/renderer/Platform/OpenGL/GLComputePipeline.h"
 #include "iw/renderer/Platform/OpenGL/GLTexture.h"
 #include "iw/renderer/Platform/OpenGL/GLFrameBuffer.h"
 #include "iw/renderer/Platform/OpenGL/GLTranslator.h"
@@ -292,23 +291,21 @@ namespace RenderAPI {
 		static_cast<GLPipeline*>(pipeline)->Use();
 	}
 
-	IComputePipeline* GLDevice::CreateComputePipeline(
+	IPipeline* GLDevice::CreateComputePipeline(
 		IComputeShader* computeShader)
 	{
-		return new GLComputePipeline(
+		return new GLPipeline(
 			static_cast<GLComputeShader*>(computeShader));
 	}
 
-	void GLDevice::DestroyComputePipeline(
-		IComputePipeline* computePipeline)
+	void GLDevice::DispatchComputePipeline(
+		IPipeline* computePipeline, 
+		unsigned x, 
+		unsigned y, 
+		unsigned z)
 	{
-		delete computePipeline;
-	}
-
-	void GLDevice::SetComputePipeline(
-		IComputePipeline* computePipeline)
-	{
-		static_cast<GLComputePipeline*>(computePipeline)->Use();
+		static_cast<GLPipeline*>(computePipeline)
+			->DispatchCompute(x, y, z);
 	}
 
 	ITexture* GLDevice::CreateTexture(

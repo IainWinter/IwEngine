@@ -108,7 +108,8 @@ namespace RenderAPI {
 		IWRENDERER_API
 		void SetAsImage(
 			const ITexture* texture,
-			int index) override;
+			int index,
+			unsigned mipmap) override;
 	};
 }
 

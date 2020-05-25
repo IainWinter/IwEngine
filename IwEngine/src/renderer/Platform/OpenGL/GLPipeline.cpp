@@ -53,9 +53,9 @@ namespace RenderAPI {
 		LOG_DEBUG << "Shader #" << gl_id << " compiled with " << ucount << u << " & " << bcount << b << ":";
 
 		for (int i = 0; i < ucount; i++) {
-			IPipelineParam* uniform = GetParam(i);
+			IPipelineParam* uniform = GetParam(i); // scans all uniforms
 			if (!uniform) {
-				continue; // Check for null
+				continue;
 			}
 			
 			LOG_DEBUG << "\tUniform Location: " << uniform->Location() << " Name: " << uniform->Name();
@@ -68,6 +68,34 @@ namespace RenderAPI {
 			//}
 
 			//LOG_DEBUG << "\tBuffer Location: " << uniform->Location() << " Name: " << uniform->Name();
+		}
+	}
+
+	GLPipeline::GLPipeline(
+		GLComputeShader* computeShader)
+	{
+		gl_id = glCreateProgram();
+
+		GL(glAttachShader(gl_id, computeShader->ComputeShader()));
+		GL(glLinkProgram(gl_id));
+		GL(glValidateProgram(gl_id));
+		GL(glDeleteShader(computeShader->ComputeShader()));
+
+		int ucount = UniformCount();
+		int bcount = BufferCount();
+
+		const char* u = ucount == 1 ? " uniform" : " uniforms";
+		const char* b = bcount == 1 ? " block" : " blocks";
+
+		LOG_DEBUG << "Shader #" << gl_id << " compiled with " << ucount << u << " & " << bcount << b << ":";
+
+		for (int i = 0; i < ucount; i++) {
+			IPipelineParam* uniform = GetParam(i); // scans all uniforms
+			if (!uniform) {
+				continue;
+			}
+
+			LOG_DEBUG << "\tUniform Location: " << uniform->Location() << " Name: " << uniform->Name();
 		}
 	}
 	
@@ -164,6 +192,26 @@ namespace RenderAPI {
 		}
 
 		GL(glUniformBlockBinding(gl_id, uniformIndex, buffer->MyBase()));
+	}
+
+	void GLPipeline::GetComputeWorkGroupSize(
+		int& x, 
+		int& y, 
+		int& z) const
+	{
+		int buf[3];
+		glGetProgramiv(gl_id, GL_COMPUTE_WORK_GROUP_SIZE, buf);
+		x = buf[0];
+		y = buf[1];
+		z = buf[2];
+	}
+
+	void GLPipeline::DispatchCompute(
+		int x,
+		int y,
+		int z) const
+	{
+		glDispatchCompute(x, y, z);
 	}
 
 //	bool GLPipeline::IsTextureActive(

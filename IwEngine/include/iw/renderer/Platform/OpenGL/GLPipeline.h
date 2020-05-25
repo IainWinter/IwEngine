@@ -3,6 +3,7 @@
 #include "GLVertexShader.h"
 #include "GLFragmentShader.h"
 #include "GLGeometryShader.h"
+#include "GLComputeShader.h"
 #include "GlPipelineParam.h"
 #include "iw/renderer/Pipeline.h"
 #include <unordered_map>
@@ -29,6 +30,10 @@ namespace RenderAPI {
 			GLGeometryShader* geometryShader);
 
 		IWRENDERER_API
+		GLPipeline(
+			GLComputeShader* computeShader);
+
+		IWRENDERER_API
 		~GLPipeline();
 
 		IWRENDERER_API
@@ -52,6 +57,18 @@ namespace RenderAPI {
 		void SetBuffer(
 			std::string name,
 			IUniformBuffer* buffer) override;
+
+		IWRENDERER_API
+		void GetComputeWorkGroupSize(
+			int& x,
+			int& y,
+			int& z) const override;
+
+		IWRENDERER_API
+		void DispatchCompute(
+			int x,
+			int y,
+			int z) const /*override*/;
 
 		//IWRENDERER_API
 		//bool IsTextureActive(

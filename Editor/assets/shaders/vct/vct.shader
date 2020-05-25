@@ -73,16 +73,6 @@ uniform float voxelSize;
 uniform float ambiance;
 uniform int d_state;
 
-vec3 orthogonal(
-	vec3 u)
-{
-	vec3 v = vec3(0.99146, 0.11664, 0.05832); // Any normalized vector.
-	     u = normalize(u);
-	return abs(dot(u, v)) > 0.99999f
-		? cross(u, vec3(0, 1, 0))
-		: cross(u, v);
-}
-
 // -------------------------------------------------------
 //
 //   Calculate soft shadows by tracing a ray (cone)
@@ -119,7 +109,7 @@ float TraceConeShadow(
 		float weight   = 1.0f - shadow;
 
 		shadow += sample_ * weight;
-		distance += 0.4 * voxelSize * (1 + 0.05 * diameter);
+		distance += diameter;
 	}
 
 	return 1 - pow(smoothstep(0, 1, shadow * 1.4), 1.0 / 1.4);

@@ -7,8 +7,6 @@ namespace RenderAPI {
 	GLComputeShader::GLComputeShader(
 		const char* source)
 	{
-		LOG_INFO << "Loaded fragment shader...\n" << source;
-
 		gl_id = glCreateShader(GL_COMPUTE_SHADER);
 		glShaderSource(gl_id, 1, &source, nullptr);
 		glCompileShader(gl_id);
