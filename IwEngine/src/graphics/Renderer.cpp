@@ -59,8 +59,6 @@ namespace Graphics {
 
 	void Renderer::Begin() {
 		Device->Clear(); // errors
-
-
 		// clear queues
 	}
 
@@ -384,6 +382,7 @@ namespace Graphics {
 		m_lightData.PointLightCount = lights.size();
 		for (size_t i = 0; i < lights.size(); i++) {
 			m_lightData.PointLights[i].Position = lights[i]->Position();
+			//m_lightData.PointLights[i].Color    = 0.3f;
 			m_lightData.PointLights[i].Radius   = lights[i]->Radius();
 		}
 

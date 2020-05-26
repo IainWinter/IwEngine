@@ -39,6 +39,7 @@ namespace Graphics {
 
 		struct PointLightDescription {
 			vector3 Position;
+			//vector3 Color;
 			float Radius;
 		} PointLights[MAX_POINT_LIGHTS];
 

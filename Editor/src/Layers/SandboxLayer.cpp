@@ -185,7 +185,7 @@ namespace iw {
 		light->SetPosition(vector3(0, 5, 0));
 
 		MainScene->AddLight(sun);
-		MainScene->AddLight(light);
+		//MainScene->AddLight(light);
 
 		//	Cameras
 
@@ -206,10 +206,11 @@ namespace iw {
 		// Materials
 
 		Material* def = new Material(vct);
-		def->Set("baseColor", vector4(1, 0, 0, 1));
+		def->Set("baseColor", vector4(0.8f, 1.0f));
 		def->Set("roughness", 0.8f);
 		def->Set("metallic", 0.2f);
-		def->Set("reflectance", 0.2f);
+		def->Set("reflectance", 1.0f);
+		def->Set("emissive", 0.0f);
 		def->SetTexture("shadowMap",  dirShadowTarget->Tex(0));    // shouldnt really be part of material
 		//def->SetTexture("shadowMap2", pointShadowTarget->Tex(0));
 		def->Initialize(Renderer->Device);
@@ -278,25 +279,6 @@ namespace iw {
 		Physics->AddSolver(new ImpulseSolver());
 		Physics->AddSolver(new SmoothPositionSolver());
 
-		// Rendering pipeline
-		//
-		//generateShadowMap    = new GenerateShadowMap(Renderer, Space);
-		//postProcessShadowMap = new FilterTarget(Renderer);
-		//mainRender           = new Render(Renderer, Space);
-		//
-		//generateShadowMap   ->SetLight(light);
-		//postProcessShadowMap->SetIntermediate(targetBlur);
-		//postProcessShadowMap->SetShader(gaussian);
-		//mainRender          ->SetLight(light);
-		//mainRender          ->SetAmbiance(0.008f);
-		//mainRender          ->SetGamma(2.2f);
-		//
-		//pipeline.first(generateShadowMap)
-		//	.then(postProcessShadowMap)
-		//	.then(mainRender);
-		//
-		// Systems
-
 		// Systems
 
 		playerSystem = PushSystem<PlayerSystem>();
@@ -316,7 +298,6 @@ namespace iw {
 		PushSystem<iw::ParticleUpdateSystem>();
 		PushSystem<iw::EntityCleanupSystem>();
 
-		PushSystem<iw::ModelVoxelRenderSystem>(MainScene);
 
 		//PushSystem<iw::    MeshShadowRenderSystem>(MainScene);
 		//PushSystem<iw::   ModelShadowRenderSystem>(MainScene);
@@ -326,6 +307,8 @@ namespace iw {
 		//PushSystem<iw::      ParticleRenderSystem>(MainScene);
 
 		PushSystem<iw::UiRenderSystem>(m_textCam);
+
+		PushSystem<iw::ModelVoxelRenderSystem>(MainScene);
 
 		//PushSystem<iw::DrawCollidersSystem>(MainScene->MainCamera());
 
@@ -407,61 +390,6 @@ namespace iw {
 		seq.update();
 
 		MainScene->MainCamera()->SetProjection(iw::lerp(persp, ortho, blend));
-		
-		//Renderer->BeginScene(MainScene, voxelRT);
-
-		//for (auto e : Space->Query<iw::Transform, iw::Model>()) {
-		//	auto [t, m] = e.Components.Tie<ModelComponents>();
-
-		//	for (Mesh& mesh : m->GetMeshes()) {
-		//		//Renderer->BeforeDraw([&]() {
-		//		//	(*Renderer).SetShader(voxelize);
-		//		//});
-
-		//		Renderer->DrawMesh(t, &mesh);
-		//	}
-		//}
-
-		//Renderer->EndScene();
-
-		// Shadow maps
-
-		//for(Light* light : scene->DirectionalLights()) {
-		//	if (!light->CanCastShadows()) {
-		//		continue;
-		//	}
-		//
-		//	Renderer->BeginShadowCast(light);
-		//
-		//	for (auto m_e : Space->Query<Transform, Model>()) {
-		//		auto [m_t, m_m] = m_e.Components.Tie<ModelComponents>();
-		//
-		//		for (size_t i = 0; i < m_m->MeshCount; i++) {
-		//			//iw::ref<Texture> t = m_m->Meshes[i].Material->GetTexture("alphaMaskMap");
-		//
-		//			//ITexture* it = nullptr;
-		//			//if (t) {
-		//			//	it = t->Handle();
-		//			//}
-		//
-		//			//light->ShadowShader()->Handle()->GetParam("hasAlphaMask")->SetAsFloat(it != nullptr);
-		//			//light->ShadowShader()->Handle()->GetParam("alphaMask")->SetAsTexture(it, 0);
-		//			//light->ShadowShader()->Handle()->GetParam("alphaThreshold")->SetAsFloat(threshold);
-		//
-		//			Renderer->DrawMesh(m_t, &m_m->Meshes[i]);
-		//		}
-		//	}
-		//
-		//	Renderer->EndShadowCast();
-		//}
-
-		//float blurw = 1.0f / target->Width() * blurAmount;
-		//float blurh = 1.0f / target->Height() * blurAmount;
-
-		//generateShadowMap->SetThreshold(threshold);
-		//postProcessShadowMap->SetBlur(vector2(blurw, blurh));
-
-		//pipeline.execute();
 	}
 
 	void SandboxLayer::ImGui() {

@@ -29,6 +29,7 @@ EnemySystem::EnemySystem(
 int EnemySystem::Initialize() {
 	iw::Mesh sphere = Asset->Load<iw::Model>("Sphere")->GetMesh(0).MakeInstance();
 
+	sphere.Material()->SetShader(Asset->Load<iw::Shader>("shaders/phong.shader"));
 	sphere.Material()->Set("baseColor", iw::Color::From255(0, 213, 255, 191));
 
 	m_bulletModel.AddMesh(sphere);

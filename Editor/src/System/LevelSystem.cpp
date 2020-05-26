@@ -45,7 +45,7 @@ LevelSystem::LevelSystem(
 
 	//currentLevel = 0;
 
-	currentLevelName = "levels/forest/forest02.json";
+	currentLevelName = "levels/forest/forest01.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 63);
 	closedColor = iw::Color::From255(201, 66, 66, 63);
@@ -244,62 +244,7 @@ bool LevelSystem::On(
 iw::Entity LevelSystem::LoadLevel(
 	std::string name)
 {
-	//Space->Clear();
-
 	iw::JsonSerializer("assets/" + name).Read(currentLevel);
-
-	// Stage
-
-	//float scale = 2.0f;
-	//float scaleOutX = 1.6f;
-	//float scaleOutY = 1.8f;
-	//
-	//int x = 16 * scaleOutX;
-	//int y = 9 * scaleOutY;
-	//
-	//for (int l = 0; l < 1; l++) {
-	//	for (int i = -x; i < x; i += 4) {
-	//		LoadTree("models/forest/tree.dae", iw::Transform {
-	//			iw::vector3(i, 0, y),
-	//			scale,
-	//			iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
-	//				* iw::quaternion::from_axis_angle(iw::vector3::unit_y, rand() / (float)RAND_MAX * iw::Pi2)
-	//		});
-	//	}
-	//
-	//	for (int i = -x; i < x; i += 4) {
-	//		LoadTree("models/forest/tree.dae", iw::Transform {
-	//			iw::vector3(i, 0, -y),
-	//			scale,
-	//			iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
-	//				* iw::quaternion::from_axis_angle(iw::vector3::unit_y, rand() / (float)RAND_MAX * iw::Pi2)
-	//		});
-	//	}
-	//
-	//	for (int i = -y; i <= y; i += 3) {
-	//		LoadTree("models/forest/tree.dae", iw::Transform {
-	//			iw::vector3(x, 0, i),
-	//			scale,
-	//			iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
-	//				* iw::quaternion::from_axis_angle(iw::vector3::unit_y, rand() / (float)RAND_MAX * iw::Pi2)
-	//		});
-	//	}
-	//
-	//	for (int i = -y + 3; i < y; i += 3) {
-	//		LoadTree("models/forest/tree.dae", iw::Transform {
-	//			iw::vector3(-x, 0, i),
-	//			scale,
-	//			iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
-	//				* iw::quaternion::from_axis_angle(iw::vector3::unit_y, rand() / (float)RAND_MAX * iw::Pi2)
-	//		});
-	//	}
-	//
-	//	scaleOutX = 1.6f;
-	//	scaleOutY = 1.8f;
-	//
-	//	x = 16 * scaleOutX;
-	//	y = 9 * scaleOutY;
-	//}
 
 	iw::Transform* levelTransform = nullptr;
 	iw::Entity level;
@@ -312,31 +257,25 @@ iw::Entity LevelSystem::LoadLevel(
 		for (iw::Mesh& mesh : model->GetMeshes()) {
 			mesh.SetMaterial(mesh.Material()->MakeInstance());
 
-			if (iii == 0) { // ground
-				mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/vct/vct.shader"));
+			mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/vct/vct.shader"));
 
-				//mesh.Material()->SetTexture("diffuseMap", Asset->Load<iw::Texture>("textures/bricks/baseColor.jpg"));
-				//mesh.Material()->SetTexture("normalMap", Asset->Load<iw::Texture>("textures/bricks/normal.jpg"));
-				//mesh.Material()->SetTexture("reflectanceMap", Asset->Load<iw::Texture>("textures/bricks/reflectance.jpg"));
-			}
+			//if (iii == 0) { // ground
+			//	mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/vct/vct.shader"));
+			//}
 
-			else {
-				mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/phong.shader"));
-				
-				/*mesh.Material()->SetTexture("diffuseMap", nullptr);
-				mesh.Material()->SetTexture("normalMap", nullptr);
-				mesh.Material()->SetTexture("reflectanceMap", nullptr);*/
-			}
+			//else {
+			//	mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/phong.shader"));
+			//}
 
-
-			iii++;
+			//iii++;
 			
 			//mesh.Material()->SetTexture("shadowMap", Asset->Load<iw::Texture>("SunShadowMap"));   // shouldnt be part of material
 			//mesh.Material()->SetTexture("shadowMap2", Asset->Load<iw::Texture>("LightShadowMap")); // shouldnt be part of material
 
 			//mesh.Material()->Set("roughness", 0.9f);
 			//mesh.Material()->Set("metallic", 0.1f);
-			mesh.Material()->Set("reflectance", 1.0f);
+			mesh.Material()->Set("reflectance", 0.0f);
+			mesh.Material()->Set("refractive", 0.0f);
 
 			//if (iii == 1) {
 			//	mesh.Material()->Set("baseColor", iw::Color(0, 0, 1));
@@ -345,7 +284,7 @@ iw::Entity LevelSystem::LoadLevel(
 			//iii++;
 
 			//floor->Meshes[i].SetIsStatic(true);
-			//mesh.Data()->GenTangents();
+			//mesh.Data()->GenTangents()x;
 		}
 
 		iw::Entity entity = Space->CreateEntity<iw::Transform, iw::Model>();
@@ -400,7 +339,8 @@ iw::Entity LevelSystem::LoadLevel(
 			}
 		}
 
-		m->GetMesh(0).Material()->Set("baseColor", iw::Color(1, 0, 0));
+		m->GetMesh(0).Material()->Set("baseColor", iw::Color(1, 0.9f, 0.9f));
+		m->GetMesh(0).Material()->Set("reflectance", 1.0f);
 
 		//e->Timer = e->ChargeTime;
 
@@ -541,6 +481,8 @@ iw::Entity LevelSystem::LoadLevel(
 			material->Set("baseColor", closedColor);
 		}
 
+		//material->Set("emissive", 2.0f);
+
 		model->GetMesh(0).SetMaterial(material);
 
 		levelTransform->AddChild(transform);
@@ -566,94 +508,27 @@ iw::Entity LevelSystem::LoadLevel(
 	// to destory the enemy, just use the firstEnemy variable from line 346
 	// if it keeps crashing just make it move underground and I'll figure it out later (i.e. set 'y' to like -5)
 
-	if (currentLevelName == "levels/forest/forest02.json") {
-		Space->DestroyEntity(otherGuy.Index());
-		otherGuy = Space->CreateEntity<iw::Transform, iw::Mesh>();
+	//if (currentLevelName == "levels/forest/forest02.json") {
+	//	Space->DestroyEntity(otherGuy.Index());
+	//	otherGuy = Space->CreateEntity<iw::Transform, iw::Mesh>();
 
-		otherGuy.Set<iw::Transform>(
-			iw::vector3(-5, 1, -16 /*starting location */ /*z axis is reversed xd (- is going twoards the top of the screen)*/),
-			0.75f /*scale*/
-		);
+	//	otherGuy.Set<iw::Transform>(
+	//		iw::vector3(-5, 1, -16 /*starting location */ /*z axis is reversed xd (- is going twoards the top of the screen)*/),
+	//		0.75f /*scale*/
+	//	);
 
-		otherGuy.Set<iw::Mesh>(Asset->Load<iw::Model>("Sphere")->GetMesh(0).MakeInstance()); // "Sphere" gets created at line 246 of SandboxLayer.cpp
+	//	otherGuy.Set<iw::Mesh>(Asset->Load<iw::Model>("Sphere")->GetMesh(0).MakeInstance()); // "Sphere" gets created at line 246 of SandboxLayer.cpp
 
-		delete sequence;
-		sequence = new iw::event_seq();
-		sequence->add(new iw::MoveToTarget(otherGuy, iw::vector3(-5, 1, -5))); // sample of what to kinda do
-		sequence->add(new iw::MoveToTarget(otherGuy, iw::vector3(-4, 1,  5))); // cutscene is going to be 
-		sequence->add(new iw::MoveToTarget(otherGuy, iw::vector3(-3, 1, -3)));
-		sequence->add(new iw::MoveToTarget(otherGuy, iw::vector3(-12, 1, 0)));
-		sequence->add(new iw::MoveToTarget(firstEnemy, iw::vector3(-10, 1, 0)));
-	}
-
-	return level;
-}
-
-void LevelSystem::LoadTree(
-	std::string name,
-	iw::Transform transform)
-{
-	//iw::ref<iw::Model> tree = Asset->Load<iw::Model>(name);
-
-	//if (tree->Meshes[0].VertexArray == nullptr) {
-	//	for (size_t i = 0; i < tree->MeshCount; i++) {
-	//		iw::ref<iw::Material>& mat = tree->Meshes[i].Material;
-
-	//		mat->SetShader(Asset->Load<iw::Shader>("shaders/pbr.shader"));
-	//		mat->SetTexture("shadowMap",  Asset->Load<iw::Texture>("SunShadowMap"));   // shouldnt be part of material
-	//		mat->SetTexture("shadowMap2", Asset->Load<iw::Texture>("LightShadowMap")); // shouldnt be part of material
-	//		mat->Initialize(Renderer->Device);
-
-	//		mat->Set("roughness", 0.7f);
-	//		mat->Set("metallic", 0.0f);
-
-	//		tree->Meshes[i].GenTangents();
-	//		tree->Meshes[i].SetIsStatic(true);
-	//		tree->Meshes[i].Initialize(Renderer->Device);
-	//	}
+	//	delete sequence;
+	//	sequence = new iw::event_seq();
+	//	sequence->add(new iw::MoveToTarget(otherGuy, iw::vector3(-5, 1, -5))); // sample of what to kinda do
+	//	sequence->add(new iw::MoveToTarget(otherGuy, iw::vector3(-4, 1,  5))); // cutscene is going to be 
+	//	sequence->add(new iw::MoveToTarget(otherGuy, iw::vector3(-3, 1, -3)));
+	//	sequence->add(new iw::MoveToTarget(otherGuy, iw::vector3(-12, 1, 0)));
+	//	sequence->add(new iw::MoveToTarget(firstEnemy, iw::vector3(-10, 1, 0)));
 	//}
 
-	//iw::ref<iw::Texture> leavesAlpha = Asset->Load<iw::Texture>("textures/forest/tree/leaves/alpha.jpg");
-	//leavesAlpha->Initialize(Renderer->Device);
-
-	//tree->Meshes[1].Material->SetTexture("alphaMaskMap", leavesAlpha);
-
-	//iw::Entity ent = Space->CreateEntity<iw::Transform, iw::Model>();
-	//ent.Set<iw::Transform>(transform);
-	//ent.Set<iw::Model>(*tree);
-}
-
-iw::Entity LevelSystem::LoadFloor(
-	std::string name,
-	iw::Transform transform)
-{
-	iw::ref<iw::Model> floor = Asset->Load<iw::Model>(name);
-
-	for (iw::Mesh& mesh : floor->GetMeshes()) {
-		if (mesh.Data()->IsInitialized()) {
-			continue;
-		}
-
-		mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/vct/vct.shader"));
-		mesh.Material()->SetTexture("shadowMap",  Asset->Load<iw::Texture>("SunShadowMap"));   // shouldnt be part of material
-		mesh.Material()->SetTexture("shadowMap2", Asset->Load<iw::Texture>("LightShadowMap")); // shouldnt be part of material
-
-		mesh.Material()->Set("roughness", 0.9f);
-		mesh.Material()->Set("metallic", 0.1f);
-		mesh.Material()->Set("reflectance", 0.1f);
-
-		mesh.Material()->Initialize(Renderer->Device);
-
-		//floor->Meshes[i].SetIsStatic(true);
-		//mesh.Data()->GenTangents();
-		mesh.Data()->Initialize(Renderer->Device);
-	}
-
-	iw::Entity entity = Space->CreateEntity<iw::Transform, iw::Model>();
-	entity.Set<iw::Transform>(transform);
-	entity.Set<iw::Model>(*floor);
-
-	return entity;
+	return level;
 }
 
 void LevelSystem::DestroyAll(

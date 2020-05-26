@@ -67,6 +67,7 @@ void main() {
 #version 450
 
 #include shaders/lights.shader
+#include shaders/gamma_correction.shader
 #include shaders/vct/bounds.shader
 
 in vec3 WorldPos;
@@ -76,6 +77,7 @@ in vec2 TexCoords;
 // Material
 uniform vec4 mat_baseColor;
 uniform float mat_reflectance;
+uniform float mat_emissive;
 
 uniform float mat_hasDiffuseMap;
 uniform sampler2D mat_diffuseMap;
@@ -113,7 +115,7 @@ void main() {
 		baseColor = texture(mat_diffuseMap, TexCoords);
 	}
 
-	baseColor.rgb = /*sRGBToLinear*/(baseColor.rgb);
+	baseColor.rgb = sRGBToLinear(baseColor.rgb);
 
 	// Normal
 
@@ -129,23 +131,34 @@ void main() {
 		reflectance = texture(mat_reflectanceMap, TexCoords).r;
 	}
 
-	vec4 color = vec4(0, 0, 0, baseColor.a);
+	vec3 color = vec3(ambiance);
 
 	vec3 N = normalize(normal);
 	
 	for (int i = 0; i < pointLightCount; i++) {
-		float R = pointLights[i].Radius;
-		vec3  P = pointLights[i].Position;
-		vec3  L = P - WorldPos;
-	
-		color.xyz += LightColor(N, L, vec3(0.3f)) * DistanceAttenuation(L, R);
+		vec3 P = pointLights[i].Position;
+		vec3 L = P - WorldPos;
+
+		float lightRadius = pointLights[i].Radius;
+		vec3  lightColor  = vec3(1.0f);//pointLights[i].Color;
+
+		color += LightColor(N, L, lightColor)
+			   * DistanceAttenuation(L, lightRadius);
 	}
 
-	color.xyz *= baseColor.xyz;
-	color.xyz += baseColor.xyz * vec3(ambiance);
+	for (int i = 0; i < directionalLightCount; i++) {
+		vec3 L = directionalLights[0].InvDirection;
+
+		color += LightColor(N, L, vec3(1.0f));
+	}
+
+	color *= baseColor.rgb * baseColor.a;
+	color += baseColor.rgb * mat_emissive;
 
 	vec3  voxel = scaleAndBias(WorldPos);
 	ivec3 dim   = imageSize(voxelTexture);
 
-	imageStore(voxelTexture, ivec3(dim * voxel), color);
+	vec4 voxelColor = vec4(linearToSRGB(color), baseColor.a);
+
+	imageStore(voxelTexture, ivec3(dim * voxel), voxelColor);
 }

@@ -52,6 +52,7 @@ out vec4 PixelColor;
 
 uniform vec4 mat_baseColor;
 uniform float mat_reflectance;
+uniform float mat_refractive;
 
 uniform float mat_hasVoxelMap;
 uniform sampler3D mat_voxelMap;
@@ -74,6 +75,9 @@ uniform float voxelSize;
 // Globals
 uniform float ambiance;
 uniform int d_state;
+
+// Settings
+uniform int BLINN = 1;
 
 // -------------------------------------------------------
 //
@@ -135,7 +139,7 @@ vec4 TraceCone(
  	float distance = voxelSize * 4; // Push out origin to avoid self-intersection
 
 	while (distance <= maxDistance
-		&& color.w  <  1.0f)
+		&& color.a  <  1.0f)
 	{
 		vec3 position = origin + direction * distance;
 		
@@ -148,7 +152,7 @@ vec4 TraceCone(
 		float diameter = max(voxelSize, ratio * distance);
 		float LOD      = log2(diameter * voxelSizeInv);
 		vec4  sample_  = textureLod(mat_voxelMap, position, LOD);
-		float weight   = 1.0f - color.w;
+		float weight   = 1.0f - color.a;
 
 		color    += sample_ * weight;
 		distance += diameter;
@@ -162,65 +166,58 @@ vec4 TraceCone(
 
 // -------------------------------------------------------
 //
-//   Calculate direct lighting with a simple phong brdf
+//                 Lighting functions
 //
 // -------------------------------------------------------
 
-vec3 BRDF_phong(
-	vec3 N,            // Normal      of fragment
-	vec3 V,            // Direction from camera to fragment
-	vec3 L,            // Direction from light  to fragment
-	vec3 nL,           // Direction from light  to fragment (normalized)
-	float reflectance, // Reflectance of fragment
-	int blinn)         // blinn-phong or normal phong (1 or !1)
-{
-	float NdotL = clamp(dot(N, nL), 0.0f, 1.0f);
-
-	float diff = max(NdotL, 0.0);
-	float spec = 0.0;
-
-	if (blinn == 1) {
-		vec3 halfwayDir = normalize(L + V);
-		spec = dot(N, halfwayDir);
-	}
-
-	else {
-		vec3 reflectDir = reflect(-L, N);
-		spec = dot(V, reflectDir);
-	}
-
-	spec = max(pow(spec, reflectance * 8.0), 0.0);
-
-	return /*light color*/ vec3(0.3f) * (diff + spec);
-}
-
-// -------------------------------------------------------
-//
-//            Lighting summation functions
-//
-// -------------------------------------------------------
-
-vec3 directDiffuse(
+vec3 directLighting(
 	vec3 W,            // WorldPos    of fragment
 	vec3 N,            // Normal      of fragment
 	vec3 V,            // Direction from camera to fragment
 	vec3 L,            // Direction from light  to fragment
-	float R,           // Radius of light
+	vec3 lightColor,   // Color of light (rgb)
+	vec4 baseColor,    // Color of fragment (rgba)
 	float reflectance, // Reflectance of fragment
-	int blinn)         // blinn-phong or normal phong (1 or !1)
+	float refractive)  // Refractive index of fragment
 {
-	vec3 nL = normalize(L);
+	vec3  nL    = normalize(L);
+	float NdotL = dot(N, nL);
+
+	// Diffuse
+
+	float diff = max(NdotL, 0.0f);
+	
+	// Specular
+
+	float spec = 0.0f;
+
+	if (BLINN == 1) spec = dot(N, normalize(L + V));
+	else            spec = dot(V, reflect  (-L, N));
+
+	spec = max(pow(spec, reflectance * 8.0f), 0.0f);
+
+	// Refraction
+
+	float refr = 0.0f;
+	
+	if (baseColor.a < 1.0f) {
+		vec3 refraction = refract(V, N, 1.0f / refractive);
+		refr = max((1.0f - baseColor.a) * dot(refraction, nL), 0.0f);
+	}
+
+	// Shadow
 
 	float coneRatio   = 0.05f;
 	float maxDistance = length(L);
 
-	vec3 diffuse = vec3(0.0f);
+	float shadow = TraceConeShadow(W, nL, coneRatio, maxDistance);
 
-	diffuse += BRDF_phong(N, V, L, nL, reflectance, 1)
-		     * DistanceAttenuation(L, R)
-		     * TraceConeShadow(W, nL, coneRatio, maxDistance);
-	
-	return diffuse;
+	// Mix color
+
+	diff = min(shadow, diff) * baseColor.a;
+	spec = min(shadow, max(spec, refr));
+
+	return lightColor * (diff + spec);
 }
 
 vec3 indirectDiffuse(
@@ -260,6 +257,20 @@ vec3 indirectSpecular(
 	return TraceCone(W, reflect(-V, N), coneRatio, maxDistance).xyz;
 }
 
+// not used
+vec3 indirectRefractive(
+	vec3 W,            // WorldPos of fragment
+	vec3 N,            // Normal of fragment
+	vec3 V,            // Direction from camera to fragment
+	float refractive)  // Refractive index of fragment  
+{
+	float coneRatio = 0.2f;
+	float maxDistance = 10.0f;
+
+	vec3 refraction = refract(-V, N, 1.0f / refractive);
+	return TraceCone(W, refraction, coneRatio, maxDistance).xyz;
+}
+
 void main() {
 	// Color
 
@@ -268,7 +279,7 @@ void main() {
 		baseColor = texture(mat_diffuseMap, TexCoords);
 	}
 
-	baseColor.rgb = sRGBToLinear(baseColor.rgb);
+	baseColor.rgb = sRGBToLinear(baseColor.rgb); // should this only be for the texture?
 
 	// Normal
 
@@ -284,6 +295,10 @@ void main() {
 		reflectance = texture(mat_reflectanceMap, TexCoords).r;
 	}
 
+	// Refractive
+
+	float refractive = mat_refractive;
+
 	vec3 color = vec3(ambiance);
 
 	vec3 T = normalize(TBN[0]);
@@ -292,17 +307,37 @@ void main() {
 	vec3 V = normalize(CameraPos - WorldPos);
 
 	for (int i = 0; i < pointLightCount; i++) {
-		float R = pointLights[i].Radius;
-		vec3 P  = pointLights[i].Position;
-		vec3 L  = P - WorldPos;
+		vec3 P = pointLights[i].Position;
+		vec3 L = P - WorldPos;
 
-		color += directDiffuse(WorldPos, N, V, L, R, reflectance, 1);
+		float lightRadius = pointLights[i].Radius;
+		vec3  lightColor  = vec3(1.0f);//pointLights[i].Color;
+
+		color += directLighting(WorldPos, N, V, L, lightColor, baseColor, reflectance, refractive)
+		       * DistanceAttenuation(L, lightRadius);
 
 		if (mat_hasVoxelMap == 1) {
 			color += indirectDiffuse (WorldPos, N, T, B);
 			color += indirectSpecular(WorldPos, N, V);
 		}
 	}
+
+	for (int i = 0; i < directionalLightCount; i++) {
+		vec3 L = directionalLights[i].InvDirection * 100;
+
+		vec3 lightColor = vec3(1.0f);//directionalLights[i].Color;
+
+		color += directLighting(WorldPos, N, V, L, lightColor, baseColor, reflectance, refractive);
+
+		if (mat_hasVoxelMap == 1) {
+			color += indirectDiffuse (WorldPos, N, T, B);
+			color += indirectSpecular(WorldPos, N, V);
+		}
+	}
+
+	//if (baseColor.a < 1.0f) {
+	//	color = indirectRefractive(WorldPos, N, V, refractive);
+	//}
 
 	color *= baseColor.rgb;
 

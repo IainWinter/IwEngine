@@ -274,17 +274,34 @@ namespace iw {
 		for (auto e : Space->Query<iw::Transform, iw::Model>()) {
 			auto [t, m] = e.Components.Tie<ModelComponents>();
 
+			iw::CollisionObject* o = Space->FindComponent<iw::CollisionObject>(e.Handle);
+
 			std::stringstream ss;
 			ss << e.Index << " pos";
 
-			ImGui::SliderFloat3(ss.str().c_str(), (float*)&t->Position, -2, 2);
+			ImGui::SliderFloat3(ss.str().c_str(), (float*)&t->Position, 0, 10);
+
+			if(o) o->SetTrans(t);
 
 			ss = std::stringstream();
-			ss << e.Index << " rot";
+			ss << e.Index << " emi";
 
-			vector3 rot = t->Rotation.euler_angles();
-			ImGui::SliderFloat3(ss.str().c_str(), (float*)&rot, -Pi, Pi);
-			t->Rotation = quaternion::from_euler_angles(rot);
+			float* f = m->GetMesh(0).Material()->Get<float>("emissive");
+
+			if (f) {
+				ImGui::SliderFloat(ss.str().c_str(), f, 0, 20);
+			}
+
+
+			ss = std::stringstream();
+			ss << e.Index << " ref";
+
+			ImGui::SliderFloat(ss.str().c_str(),  m->GetMesh(0).Material()->Get<float>("reflectance"), 0, 1);
+
+			ss = std::stringstream();
+			ss << e.Index << " col";
+
+			ImGui::SliderFloat4(ss.str().c_str(), m->GetMesh(0).Material()->Get<float>("baseColor"), 0, 1);
 		}
 
 		ImGui::End();

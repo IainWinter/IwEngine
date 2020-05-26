@@ -19,8 +19,8 @@ namespace Engine {
 	float voxelSize    = 1.0f / (8.0f / 2);
 	float voxelSizeInv = 1.0f / voxelSize;
 
-	vector3 voxelBoundsScale(32,  8, 18);
-	vector3 voxelBoundsSize (256, 64, 144);
+	vector3 voxelBoundsScale(32,  16, 18);
+	vector3 voxelBoundsSize (256, 128, 144);
 	vector3 voxelBoundsScaleInv = vector3(1) / voxelBoundsScale;
 
 	int ModelVoxelRenderSystem::Initialize() {
@@ -44,7 +44,7 @@ namespace Engine {
 		ref<Texture> voxelTexture = REF<Texture>(voxelBoundsSize.x, voxelBoundsSize.y, voxelBoundsSize.z, TEX_3D, RGBA, FLOAT, BORDER, LINEAR, LINEAR_LINEAR);
 		m_voxelize = new VoxelLight(voxelTexture, voxelize, nullptr, mipmap);
 
-		m_voxelize->SetPosition(vector3(0, 2, 0));
+		m_voxelize->SetPosition(vector3(0, 8, 0));
 		
 		return 0;
 	}
@@ -87,6 +87,11 @@ namespace Engine {
 
 					IPipelineParam* ambianceParam = m_voxelize->ShadowShader()->Handle()->GetParam("ambiance");
 					if (ambianceParam) ambianceParam->SetAsFloat (m_scene->Ambiance());
+
+					//if (!mesh.Material()->Has("emissive")) {
+					//	IPipelineParam* ambianceParam = m_voxelize->ShadowShader()->Handle()->GetParam("mat_emissive"); // nice hack
+					//	if (ambianceParam) ambianceParam->SetAsFloat(0);
+					//}
 				});
 
 				//if (i == 1) {
@@ -199,7 +204,6 @@ namespace Engine {
 			Renderer->DrawMesh(Transform(), m_bounds);
 
 		Renderer->EndScene();
-
 
 		Renderer->BeginScene(m_scene->MainCamera(), nullptr);
 
