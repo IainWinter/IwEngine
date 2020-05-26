@@ -44,7 +44,7 @@ PlayerSystem::PlayerSystem()
 		playerPrefab.Speed        = 4.25f;
 		playerPrefab.DashTime     = 8 / 60.0f;
 		playerPrefab.ChargeTime = 0.2f;
-		playerPrefab.Health       = 300000;
+		playerPrefab.Health       = 3;
 
 #ifdef IW_DEBUG
 		iw::JsonSerializer(file).Write(playerPrefab);
@@ -358,7 +358,7 @@ bool PlayerSystem::On(
 			// no break
 		}
 		case iw::val(Actions::RESET_LEVEL): {
-			m_playerModel->GetMesh(0).Material()->Set("baseColor", iw::Color(1, 0, 0));
+			m_playerModel->GetMesh(0).Material()->Set("baseColor", iw::Color(1));
 			break;
 		}
 	}

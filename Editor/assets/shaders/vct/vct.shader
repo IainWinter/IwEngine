@@ -52,6 +52,8 @@ out vec4 PixelColor;
 
 uniform vec4 mat_baseColor;
 uniform float mat_reflectance;
+
+uniform float mat_hasVoxelMap;
 uniform sampler3D mat_voxelMap;
 
 uniform float mat_hasDiffuseMap;
@@ -294,9 +296,12 @@ void main() {
 		vec3 P  = pointLights[i].Position;
 		vec3 L  = P - WorldPos;
 
-		color +=   directDiffuse (WorldPos, N, V, L, R, reflectance, 1);
-		color += indirectDiffuse (WorldPos, N, T, B);
-		color += indirectSpecular(WorldPos, N, V);
+		color += directDiffuse(WorldPos, N, V, L, R, reflectance, 1);
+
+		if (mat_hasVoxelMap == 1) {
+			color += indirectDiffuse (WorldPos, N, T, B);
+			color += indirectSpecular(WorldPos, N, V);
+		}
 	}
 
 	color *= baseColor.rgb;

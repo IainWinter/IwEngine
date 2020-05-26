@@ -8,8 +8,8 @@ namespace iw {
 namespace RenderAPI {
 	GLPipelineParam::GLPipelineParam(
 		unsigned location,
-		unsigned& textureCount,
-		unsigned& imageCount,
+		unsigned textureCount,
+		unsigned imageCount,
 		std::string name,
 		UniformType type,
 		unsigned typeSize,
@@ -24,8 +24,8 @@ namespace RenderAPI {
 		, m_stride(stride)
 		, m_count(count)
 	{
-		glGetIntegerv(GL_MAX_TEXTURE_UNITS, (GLint*)&MAX_TEXTURES);
-		glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, (GLint*)&MAX_IMAGES);
+		glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, (GLint*)&MAX_TEXTURES);
+		glGetIntegerv(GL_MAX_IMAGE_UNITS, (GLint*)&MAX_IMAGES);
 	}
 
 	const std::string& GLPipelineParam::Name() const {
@@ -307,7 +307,7 @@ namespace RenderAPI {
 		int index)
 	{
 		if (index < 0) {
-			index = m_textureCount++;
+			index = m_textureCount;
 		}
 
 #ifdef IW_DEBUG
@@ -334,7 +334,7 @@ namespace RenderAPI {
 		unsigned mipmap)
 	{
 		if (index < 0) {
-			index = m_imageCount++;
+			index = m_imageCount;
 		}
 
 #ifdef IW_DEBUG

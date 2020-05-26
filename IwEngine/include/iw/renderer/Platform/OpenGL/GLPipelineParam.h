@@ -13,8 +13,8 @@ namespace RenderAPI {
 		unsigned MAX_IMAGES;
 
 		unsigned  m_location;
-		unsigned& m_textureCount;
-		unsigned& m_imageCount;
+		unsigned m_textureCount; // current index
+		unsigned m_imageCount;   // current index
 
 		std::string m_name;
 		UniformType m_type;
@@ -26,8 +26,8 @@ namespace RenderAPI {
 		IWRENDERER_API
 		GLPipelineParam(
 			unsigned location,
-			unsigned& textureCount,
-			unsigned& imageCount,
+			unsigned textureCount,
+			unsigned imageCount,
 			std::string name,
 			UniformType type,
 			unsigned typeSize,

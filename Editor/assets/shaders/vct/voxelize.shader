@@ -3,13 +3,16 @@
 
 layout(location = 0) in vec3 vert;
 layout(location = 1) in vec3 normal;
+layout(location = 4) in vec2 uv;
 
 out vec3 gNormal;
+out vec2 gTexCoords;
 
 uniform mat4 model;
 
 void main() {
 	gNormal = normalize(transpose(inverse(mat3(model))) * normal);
+	gTexCoords = uv;
 	gl_Position = model * vec4(vert, 1);
 }
 
@@ -20,9 +23,11 @@ layout(triangles) in;
 layout(triangle_strip, max_vertices = 3) out;
 
 in vec3 gNormal[];
+in vec2 gTexCoords[];
 
 out vec3 WorldPos;
 out vec3 Normal;
+out vec2 TexCoords;
 
 uniform vec3 voxelBoundsScaleInv;
 
@@ -34,6 +39,7 @@ void main() {
 	for (int i = 0; i < 3; i++) {
 		WorldPos = gl_in[i].gl_Position.xyz * voxelBoundsScaleInv;
 		Normal = gNormal[i];
+		TexCoords = gTexCoords[i];
 
 		if (   p.z > p.x
 			&& p.z > p.y)
@@ -65,15 +71,27 @@ void main() {
 
 in vec3 WorldPos;
 in vec3 Normal;
+in vec2 TexCoords;
 
-// material properties. No 'mat_' because this is technically a shadow cast
-uniform vec4  baseColor;
-uniform float reflectance;
-uniform float ambiance;
+// Material
+uniform vec4 mat_baseColor;
+uniform float mat_reflectance;
 
+uniform float mat_hasDiffuseMap;
+uniform sampler2D mat_diffuseMap;
+
+uniform float mat_hasNormalMap;
+uniform sampler2D mat_normalMap;
+
+uniform float mat_hasReflectanceMap;
+uniform sampler2D mat_reflectanceMap;
+
+// Voxel
 uniform vec3 voxelBoundsScale;
-
 layout(RGBA8) uniform image3D voxelTexture;
+
+// Globals
+uniform float ambiance;
 
 // Simple version of the phong BRDF, only calcs diffuse color
 
@@ -88,16 +106,39 @@ vec3 LightColor(
 void main() {
 	if (!isInsideCube(WorldPos, voxelBoundsScale, 0)) return;
 
+	// Color
+
+	vec4 baseColor = mat_baseColor;
+	if (mat_hasDiffuseMap == 1) {
+		baseColor = texture(mat_diffuseMap, TexCoords);
+	}
+
+	baseColor.rgb = /*sRGBToLinear*/(baseColor.rgb);
+
+	// Normal
+
+	vec3 normal = /*TBN[2]*/Normal;
+	if (mat_hasNormalMap == 1) {
+		normal = /*TBN * */texture(mat_normalMap, TexCoords).xyz;
+	}
+
+	// Reflectance
+
+	float reflectance = mat_reflectance;
+	if (mat_hasReflectanceMap == 1) {
+		reflectance = texture(mat_reflectanceMap, TexCoords).r;
+	}
+
 	vec4 color = vec4(0, 0, 0, baseColor.a);
 
-	vec3 N = normalize(Normal);
+	vec3 N = normalize(normal);
 	
 	for (int i = 0; i < pointLightCount; i++) {
 		float R = pointLights[i].Radius;
 		vec3  P = pointLights[i].Position;
 		vec3  L = P - WorldPos;
 	
-		color.xyz += LightColor(N, L, vec3(1)) * DistanceAttenuation(L, R);
+		color.xyz += LightColor(N, L, vec3(0.3f)) * DistanceAttenuation(L, R);
 	}
 
 	color.xyz *= baseColor.xyz;

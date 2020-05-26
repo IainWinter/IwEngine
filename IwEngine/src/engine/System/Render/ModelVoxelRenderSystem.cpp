@@ -16,11 +16,11 @@ namespace Engine {
 		, m_visualize(false)
 	{}
 
-	float voxelSize    = 1.0f / (25.6f / 2);
+	float voxelSize    = 1.0f / (8.0f / 2);
 	float voxelSizeInv = 1.0f / voxelSize;
 
-	vector3 voxelBoundsScale(10, 10, 10);
-	vector3 voxelBoundsSize (256, 256, 256);
+	vector3 voxelBoundsScale(32,  8, 18);
+	vector3 voxelBoundsSize (256, 64, 144);
 	vector3 voxelBoundsScaleInv = vector3(1) / voxelBoundsScale;
 
 	int ModelVoxelRenderSystem::Initialize() {
@@ -73,25 +73,20 @@ namespace Engine {
 			vector3 scale    = transform->Scale;
 			vector3 position = transform->Position;
 
-
 			for (iw::Mesh& mesh : model->GetMeshes()) {
 				if (!mesh.Material()->GetTexture("voxelMap")) {
 					mesh.Material()->SetTexture("voxelMap", VoxelWorld());
 				}
 
 				Renderer->BeforeDraw([&]() {
-					float* baseColor   = mesh.Material()->Get<float>("baseColor");
-					float  reflectance = mesh.Material()->Get<float>("reflectance")[0];
+					if (mesh.Material()->IsInitialized()) {
+						mesh.Material()->Initialize(Renderer->Device);
+					}
 
-					IPipeline* pipeline = m_voxelize->ShadowShader()->Handle();
+					mesh.Material()->Use(Renderer->Device, m_voxelize->ShadowShader());
 
-					IPipelineParam* baseColorParam   = pipeline->GetParam("baseColor");
-					IPipelineParam* reflectanceParam = pipeline->GetParam("reflectance");
-					IPipelineParam* ambianceParam    = pipeline->GetParam("ambiance");
-
-					if(baseColorParam)    baseColorParam  ->SetAsFloats(baseColor, 4);
-					if (reflectanceParam) reflectanceParam->SetAsFloat (reflectance);
-					if (ambianceParam)    ambianceParam   ->SetAsFloat (m_scene->Ambiance());
+					IPipelineParam* ambianceParam = m_voxelize->ShadowShader()->Handle()->GetParam("ambiance");
+					if (ambianceParam) ambianceParam->SetAsFloat (m_scene->Ambiance());
 				});
 
 				//if (i == 1) {
@@ -175,6 +170,10 @@ namespace Engine {
 			m_voxelize->VoxelTexture()->SetMipmapFilter(NEAREST_NEAREST);
 		}
 
+		// Visuals
+
+		// Back
+
 		Renderer->BeginScene(m_scene->MainCamera(), m_back, true);
 
 			Renderer->BeforeDraw([&]() {
@@ -201,7 +200,6 @@ namespace Engine {
 
 		Renderer->EndScene();
 
-		// Visuals
 
 		Renderer->BeginScene(m_scene->MainCamera(), nullptr);
 

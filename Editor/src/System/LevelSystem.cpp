@@ -45,7 +45,7 @@ LevelSystem::LevelSystem(
 
 	//currentLevel = 0;
 
-	currentLevelName = "levels/test.json";
+	currentLevelName = "levels/forest/forest02.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 63);
 	closedColor = iw::Color::From255(201, 66, 66, 63);
@@ -312,23 +312,37 @@ iw::Entity LevelSystem::LoadLevel(
 		for (iw::Mesh& mesh : model->GetMeshes()) {
 			mesh.SetMaterial(mesh.Material()->MakeInstance());
 
-			mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/vct/vct.shader"));
-			mesh.Material()->SetTexture("shadowMap", Asset->Load<iw::Texture>("SunShadowMap"));   // shouldnt be part of material
-			mesh.Material()->SetTexture("shadowMap2", Asset->Load<iw::Texture>("LightShadowMap")); // shouldnt be part of material
+			if (iii == 0) { // ground
+				mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/vct/vct.shader"));
 
-			mesh.Material()->SetTexture("diffuseMap",    nullptr); //Asset->Load<iw::Texture>("textures/bricks/baseColor.jpg"));
-			mesh.Material()->SetTexture("normalMap",     nullptr); //Asset->Load<iw::Texture>("textures/bricks/normal.jpg"));
-			mesh.Material()->SetTexture("reflectanceMap",nullptr); //Asset->Load<iw::Texture>("textures/bricks/reflectance.jpg"));
+				//mesh.Material()->SetTexture("diffuseMap", Asset->Load<iw::Texture>("textures/bricks/baseColor.jpg"));
+				//mesh.Material()->SetTexture("normalMap", Asset->Load<iw::Texture>("textures/bricks/normal.jpg"));
+				//mesh.Material()->SetTexture("reflectanceMap", Asset->Load<iw::Texture>("textures/bricks/reflectance.jpg"));
+			}
+
+			else {
+				mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/phong.shader"));
+				
+				/*mesh.Material()->SetTexture("diffuseMap", nullptr);
+				mesh.Material()->SetTexture("normalMap", nullptr);
+				mesh.Material()->SetTexture("reflectanceMap", nullptr);*/
+			}
+
+
+			iii++;
+			
+			//mesh.Material()->SetTexture("shadowMap", Asset->Load<iw::Texture>("SunShadowMap"));   // shouldnt be part of material
+			//mesh.Material()->SetTexture("shadowMap2", Asset->Load<iw::Texture>("LightShadowMap")); // shouldnt be part of material
 
 			//mesh.Material()->Set("roughness", 0.9f);
 			//mesh.Material()->Set("metallic", 0.1f);
-			mesh.Material()->Set("reflectance", 0.0f);
+			mesh.Material()->Set("reflectance", 1.0f);
 
-			if (iii == 1) {
-				mesh.Material()->Set("baseColor", iw::Color(0, 0, 1));
-			}
+			//if (iii == 1) {
+			//	mesh.Material()->Set("baseColor", iw::Color(0, 0, 1));
+			//}
 
-			iii++;
+			//iii++;
 
 			//floor->Meshes[i].SetIsStatic(true);
 			//mesh.Data()->GenTangents();
@@ -367,22 +381,26 @@ iw::Entity LevelSystem::LoadLevel(
 			firstEnemy = ent;
 		}
 
+		iw::Model* m;
+
 		switch (currentLevel.Enemies[i].Type) {
 			case EnemyType::MINI_BOSS_BOX_SPIN: {
 				e->Health = 3;
 				e->ScoreMultiple = 10;
 				t->Scale = 0.75f;
-				ent.Set<iw::Model>(*Asset->Load<iw::Model>("Box"));
+				m = ent.Set<iw::Model>(*Asset->Load<iw::Model>("Box"));
 
 				break;
 			}
 			default: {
 				e->Health = 1;
 				e->ScoreMultiple = 1;
-				ent.Set<iw::Model>(*Asset->Load<iw::Model>("Tetrahedron"));
+				m = ent.Set<iw::Model>(*Asset->Load<iw::Model>("Tetrahedron"));
 				break;
 			}
 		}
+
+		m->GetMesh(0).Material()->Set("baseColor", iw::Color(1, 0, 0));
 
 		//e->Timer = e->ChargeTime;
 

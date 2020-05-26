@@ -129,14 +129,16 @@ namespace iw {
 		// Shaders
 
 
-		ref<Shader> shader   = Asset->Load<Shader>("shaders/vct/vct.shader");
-		ref<Shader> gaussian = Asset->Load<Shader>("shaders/filters/gaussian.shader");
+		ref<Shader> vct                = Asset->Load<Shader>("shaders/vct/vct.shader");
+		ref<Shader> phong              = Asset->Load<Shader>("shaders/phong.shader");
+		ref<Shader> gaussian           = Asset->Load<Shader>("shaders/filters/gaussian.shader");
 		ref<Shader> dirShadowShader    = Asset->Load<Shader>("shaders/lights/directional.shader");
 		//ref<Shader> pointShadowShader  = Asset->Load<Shader>("shaders/lights/point.shader");
 		ref<Shader> dirIShadowShader   = Asset->Load<Shader>("shaders/lights/directional_instanced.shader");
 		//ref<Shader> pointIShadowShader = Asset->Load<Shader>("shaders/lights/point_instanced.shader");
 		
-		Renderer->InitShader(shader,   CAMERA | LIGHTS);
+		Renderer->InitShader(vct,   CAMERA | LIGHTS);
+		Renderer->InitShader(phong, CAMERA | SHADOWS | LIGHTS);
 		Renderer->InitShader(gaussian, CAMERA);
 		Renderer->InitShader(dirShadowShader,  CAMERA);
 		//Renderer->InitShader(pointShadowShader);
@@ -203,7 +205,7 @@ namespace iw {
 
 		// Materials
 
-		Material* def = new Material(shader);
+		Material* def = new Material(vct);
 		def->Set("baseColor", vector4(1, 0, 0, 1));
 		def->Set("roughness", 0.8f);
 		def->Set("metallic", 0.2f);

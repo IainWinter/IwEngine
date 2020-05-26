@@ -254,16 +254,16 @@ namespace Engine {
 			ImGui::SliderFloat("Smooth", &smooth, 0, 1);
 
 			ImGui::Text("Tick %i", iw::Time::Ticks());
-			ImGui::Text("Renderer took %4.4f ns", renderTime  * 1000000000 /*/ (iw::Time::Ticks() - ticks)*/);
-			ImGui::Text("Physics  took %4.4f ns", physicsTime * 1000000000 /*/ (iw::Time::Ticks() - ticks)*/);
-			ImGui::Text("Eventbus took %4.4f ns", eventTime   * 1000000000 /*/ (iw::Time::Ticks() - ticks)*/);
+			ImGui::Text("Renderer took %4.4f ms", renderTime  /*/ (iw::Time::Ticks() - ticks)*/);
+			ImGui::Text("Physics  took %4.4f ms", physicsTime /*/ (iw::Time::Ticks() - ticks)*/);
+			ImGui::Text("Eventbus took %4.4f ms", eventTime   /*/ (iw::Time::Ticks() - ticks)*/);
 
 			for (Layer* layer : m_layers) {
-				ImGui::Text("%4.4f ns - %s layer",   post_update_times[layer->Name()] * 1000000000 /*/ (iw::Time::Ticks() - ticks)*/, layer->Name());
-				ImGui::Text("%4.4f ns - %s systems", update_times     [layer->Name()] * 1000000000 /*/ (iw::Time::Ticks() - ticks)*/, layer->Name());
+				ImGui::Text("%4.4f ms - %s layer",   post_update_times[layer->Name()]/*/ (iw::Time::Ticks() - ticks)*/, layer->Name());
+				ImGui::Text("%4.4f ms - %s systems", update_times     [layer->Name()]/*/ (iw::Time::Ticks() - ticks)*/, layer->Name());
 
 				for (ISystem* system : layer->temp_GetSystems()) {
-					ImGui::Text("\t%4.4f ns - %s system", system_update_times[layer->Name()][system->Name()] * 1000000000 /*/ (iw::Time::Ticks() - ticks)*/, system->Name());
+					ImGui::Text("\t%4.4f ms - %s system", system_update_times[layer->Name()][system->Name()]/*/ (iw::Time::Ticks() - ticks)*/, system->Name());
 				}
 			}
 			ImGui::End();

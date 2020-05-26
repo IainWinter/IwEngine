@@ -169,10 +169,15 @@ namespace RenderAPI {
 			case UniformType::UINT:    typeSize = sizeof(unsigned); break;
 			case UniformType::FLOAT:   typeSize = sizeof(float);    break;
 			case UniformType::DOUBLE:  typeSize = sizeof(double);   break;
+			default: break;
 		}
 
 		std::string s(name);
 		GLPipelineParam* p = new GLPipelineParam(location, m_textureCount, m_imageCount, s, type, typeSize, stride, count);
+
+		if (type == UniformType::SAMPLER) {
+			m_textureCount++;
+		}
 
 		return m_params.emplace(s, p).first->second;
 	}

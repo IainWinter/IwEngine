@@ -164,11 +164,16 @@ namespace Graphics {
 	}
 
 	void Material::Use(
-		const iw::ref<IDevice>& device)
+		const iw::ref<IDevice>& device,
+		iw::ref<iw::Shader> shader)
 	{
 		if (!m_initialized) {
 			LOG_WARNING << "Cannot use material that has not been initialized!";
 			return;
+		}
+
+		if (!shader) {
+			shader = Shader;
 		}
 
 		//device->SetPipeline(Shader->Handle());
@@ -180,7 +185,7 @@ namespace Graphics {
 				continue;
 			}
 
-			IPipelineParam* param = Shader->Handle()->GetParam("mat_" + prop.Name);
+			IPipelineParam* param = shader->Handle()->GetParam("mat_" + prop.Name);
 
 			if (!param) {
 				LOG_WARNING << "Invalid property in material: " << prop.Name;
@@ -203,7 +208,7 @@ namespace Graphics {
 				continue;
 			}
 
-			IPipelineParam* param = Shader->Handle()->GetParam("mat_" + prop.Name);
+			IPipelineParam* param = shader->Handle()->GetParam("mat_" + prop.Name);
 
 			if (!param) {
 				LOG_WARNING << "Invalid texture in material: " << prop.Name;
