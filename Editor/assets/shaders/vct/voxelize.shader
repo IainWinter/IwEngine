@@ -153,7 +153,7 @@ void main() {
 	}
 
 	color *= baseColor.rgb * baseColor.a;
-	color += baseColor.rgb * mat_emissive;
+	color += baseColor.rgb * baseColor.a * mat_emissive;
 
 	vec3  voxel = scaleAndBias(WorldPos);
 	ivec3 dim   = imageSize(voxelTexture);

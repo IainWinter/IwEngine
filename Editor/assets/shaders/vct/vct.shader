@@ -74,9 +74,11 @@ uniform float voxelSize;
 
 // Globals
 uniform float ambiance;
+//uniform vec3 sky;
 uniform int d_state;
 
 // Settings
+uniform int SHADOWS = 1;
 uniform int BLINN = 1;
 
 // -------------------------------------------------------
@@ -143,7 +145,11 @@ vec4 TraceCone(
 	{
 		vec3 position = origin + direction * distance;
 		
-		if (!isInsideCube(position, voxelBoundsScale, 0)) { // Todo: Check if this is worth it
+		if (!isInsideCube(position, voxelBoundsScale, 0)) {
+			//if (dot(direction, vec3(0, 1, 0)) > 0.5f) {
+			//	color = vec4(sky, 1);
+			//}
+
 			break;
 		}
 
@@ -200,18 +206,24 @@ vec3 directLighting(
 
 	float refr = 0.0f;
 	
-	if (baseColor.a < 1.0f) {
-		vec3 refraction = refract(V, N, 1.0f / refractive);
-		refr = max((1.0f - baseColor.a) * dot(refraction, nL), 0.0f);
-	}
+	//if (baseColor.a < 1.0f) {
+	//	vec3 refraction = refract(V, N, 1.0f / refractive);
+	//	refr = max((1.0f - baseColor.a) * dot(refraction, nL), 0.0f);
+	//}
 
 	// Shadow
 
-	float coneRatio   = 0.05f;
-	float maxDistance = length(L);
+	float shadow = 1.0f;
 
-	float shadow = TraceConeShadow(W, nL, coneRatio, maxDistance);
+	if (   SHADOWS == 1
+		&& mat_hasVoxelMap == 1)
+	{
+		float coneRatio   = 0.05f;
+		float maxDistance = length(L);
 
+		shadow = TraceConeShadow(W, nL, coneRatio, maxDistance);
+	}
+	
 	// Mix color
 
 	diff = min(shadow, diff) * baseColor.a;
@@ -227,7 +239,7 @@ vec3 indirectDiffuse(
 	vec3 B)            // Bitangent   of fragment
 {
 	float coneRatio   = 1.0f;
-	float maxDistance = 2.0f;
+	float maxDistance = 16.0f;
 
 	vec3 diffuse = vec3(0.0f);
 
@@ -243,10 +255,11 @@ vec3 indirectDiffuse(
 vec3 indirectSpecular(
 	vec3 W,            // WorldPos   of fragment
 	vec3 N,            // Normal     of fragment
-	vec3 V)            // Direction from camera to fragment
+	vec3 V,            // Direction from camera to fragment
+	float reflectance) // Reflectance of fragment
 {
 	float coneRatio   = 0.2f;
-	float maxDistance = 2.0f;
+	float maxDistance = 16.0f;
 
 	// There are atificats at extreme angles, some form of the below if statement will fix it I think
 
@@ -254,22 +267,44 @@ vec3 indirectSpecular(
 	//	return vec3(0.0f);
 	//}
 
-	return TraceCone(W, reflect(-V, N), coneRatio, maxDistance).xyz;
+	if (reflectance == 0.0f) {
+		return vec3(0.0f);
+	}
+
+	return TraceCone(W, reflect(-V, N), coneRatio, maxDistance).xyz * reflectance;
+}
+
+vec3 indirectLighting(
+	vec3 W,
+	vec3 N,
+	vec3 T,
+	vec3 B,
+	vec3 V,
+	float reflectance)
+{
+	vec3 color = vec3(0);
+
+	if (mat_hasVoxelMap == 1) {
+		color += indirectDiffuse(WorldPos, N, T, B);	
+		color += indirectSpecular(WorldPos, N, V, reflectance);
+	}
+
+	return color;
 }
 
 // not used
-vec3 indirectRefractive(
-	vec3 W,            // WorldPos of fragment
-	vec3 N,            // Normal of fragment
-	vec3 V,            // Direction from camera to fragment
-	float refractive)  // Refractive index of fragment  
-{
-	float coneRatio = 0.2f;
-	float maxDistance = 10.0f;
-
-	vec3 refraction = refract(-V, N, 1.0f / refractive);
-	return TraceCone(W, refraction, coneRatio, maxDistance).xyz;
-}
+//vec3 indirectRefractive(
+//	vec3 W,            // WorldPos of fragment
+//	vec3 N,            // Normal of fragment
+//	vec3 V,            // Direction from camera to fragment
+//	float refractive)  // Refractive index of fragment  
+//{
+//	float coneRatio = 0.2f;
+//	float maxDistance = 100.0f;
+//
+//	vec3 refraction = refract(-V, N, 1.0f / refractive);
+//	return TraceCone(W, refraction, coneRatio, maxDistance).xyz;
+//}
 
 void main() {
 	// Color
@@ -316,23 +351,16 @@ void main() {
 		color += directLighting(WorldPos, N, V, L, lightColor, baseColor, reflectance, refractive)
 		       * DistanceAttenuation(L, lightRadius);
 
-		if (mat_hasVoxelMap == 1) {
-			color += indirectDiffuse (WorldPos, N, T, B);
-			color += indirectSpecular(WorldPos, N, V);
-		}
+		color += indirectLighting(WorldPos, N, T, B, V, reflectance);
 	}
 
 	for (int i = 0; i < directionalLightCount; i++) {
-		vec3 L = directionalLights[i].InvDirection * 100;
+		vec3 L = directionalLights[i].InvDirection * 16; // max distance is length of this vector, sun is 100m away i guess xd
 
 		vec3 lightColor = vec3(1.0f);//directionalLights[i].Color;
 
-		color += directLighting(WorldPos, N, V, L, lightColor, baseColor, reflectance, refractive);
-
-		if (mat_hasVoxelMap == 1) {
-			color += indirectDiffuse (WorldPos, N, T, B);
-			color += indirectSpecular(WorldPos, N, V);
-		}
+		color += directLighting  (WorldPos, N, V, L, lightColor, baseColor, reflectance, refractive);
+		color += indirectLighting(WorldPos, N, T, B, V, reflectance);
 	}
 
 	//if (baseColor.a < 1.0f) {

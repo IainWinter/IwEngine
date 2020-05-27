@@ -19,6 +19,10 @@ namespace iw {
 		EnemySystem*  enemySystem;
 		BulletSystem* bulletSystem;
 
+		// Shaders
+
+		ref<Shader> vct;
+
 		// Lights
 
 		DirectionalLight* sun;

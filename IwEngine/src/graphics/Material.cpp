@@ -188,8 +188,11 @@ namespace Graphics {
 			IPipelineParam* param = shader->Handle()->GetParam("mat_" + prop.Name);
 
 			if (!param) {
-				LOG_WARNING << "Invalid property in material: " << prop.Name;
-				prop.Active = false;
+				if (shader == Shader) {
+					LOG_WARNING << "Property in material not in shader: " << prop.Name;
+					prop.Active = false;
+				}
+
 				continue;
 			}
 
@@ -199,7 +202,7 @@ namespace Graphics {
 				case UniformType::UINT:   param->SetAsUInts  (prop.Data, prop.Stride, prop.Count); break;
 				case UniformType::FLOAT:  param->SetAsFloats (prop.Data, prop.Stride, prop.Count); break;
 				case UniformType::DOUBLE: param->SetAsDoubles(prop.Data, prop.Stride, prop.Count); break;
-				default: LOG_WARNING << "Invalid property in material: " << prop.Name; break;
+				default: LOG_WARNING << "Invalid property type in material: " << prop.Name; break;
 			}
 		}
 
@@ -211,8 +214,11 @@ namespace Graphics {
 			IPipelineParam* param = shader->Handle()->GetParam("mat_" + prop.Name);
 
 			if (!param) {
-				LOG_WARNING << "Invalid texture in material: " << prop.Name;
-				prop.Active = false;
+				if (shader == Shader) {
+					LOG_WARNING << "Texture in material not in shader: " << prop.Name;
+					prop.Active = false;
+				}
+
 				continue;
 			}
 

@@ -16,7 +16,7 @@ namespace Engine {
 		, m_visualize(false)
 	{}
 
-	float voxelSize    = 1.0f / (8.0f / 2);
+	float voxelSize    = 1.0f / (4.0f);
 	float voxelSizeInv = 1.0f / voxelSize;
 
 	vector3 voxelBoundsScale(32,  16, 18);
@@ -88,10 +88,10 @@ namespace Engine {
 					IPipelineParam* ambianceParam = m_voxelize->ShadowShader()->Handle()->GetParam("ambiance");
 					if (ambianceParam) ambianceParam->SetAsFloat (m_scene->Ambiance());
 
-					//if (!mesh.Material()->Has("emissive")) {
-					//	IPipelineParam* ambianceParam = m_voxelize->ShadowShader()->Handle()->GetParam("mat_emissive"); // nice hack
-					//	if (ambianceParam) ambianceParam->SetAsFloat(0);
-					//}
+					float* emissive = mesh.Material()->Get<float>("emissive");
+
+					IPipelineParam* emissiveParam = m_voxelize->ShadowShader()->Handle()->GetParam("mat_emissive"); // to reset the emissive value in the shader :(
+					if (emissiveParam) emissiveParam->SetAsFloat(emissive ? *emissive : 0);
 				});
 
 				//if (i == 1) {
@@ -154,7 +154,6 @@ namespace Engine {
 			Renderer->InitShader(visualize, CAMERA);
 
 			Renderer->SetShader(visualize);
-
 			visualize->Handle()->GetParam("voxelBoundsScale")   ->SetAsFloats(&voxelBoundsScale, 3);
 			visualize->Handle()->GetParam("voxelBoundsScaleInv")->SetAsFloats(&voxelBoundsScaleInv, 3);
 			visualize->Handle()->GetParam("voxelSize")          ->SetAsFloat (voxelSize);

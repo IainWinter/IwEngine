@@ -128,7 +128,7 @@ namespace Graphics {
 			std::string name)
 		{
 			if (!Has(name)) {
-				LOG_WARNING << "Tried to get property that doesnt exist: " << name;
+				//LOG_WARNING << "Tried to get property that doesnt exist: " << name;
 				return nullptr;
 			}
 

@@ -118,7 +118,7 @@ namespace iw {
 		textMat->Set("color", vector3(1));
 		textMat->SetTexture("fontMap", m_font->GetTexture(0));
 
-		Mesh textMesh = m_font->GenerateMesh("Use arrow keys to move and x to attack.\ni: debug menu\nt: freecam", .005f, 1);
+		Mesh textMesh = m_font->GenerateMesh("Use arrow keys to move and x to attack.\ni: debug menu  t: freecam\nv: shadows (low fps)  b: blinn (no impact)  e: show voxels (goodbye fps)", .005f, 1);
 		textMesh.SetMaterial(textMat);
 
 		iw::Entity textEnt = Space->CreateEntity<iw::Transform, iw::Mesh, iw::UiElement>();
@@ -129,7 +129,7 @@ namespace iw {
 		// Shaders
 
 
-		ref<Shader> vct                = Asset->Load<Shader>("shaders/vct/vct.shader");
+		            vct                = Asset->Load<Shader>("shaders/vct/vct.shader");
 		ref<Shader> phong              = Asset->Load<Shader>("shaders/phong.shader");
 		ref<Shader> gaussian           = Asset->Load<Shader>("shaders/filters/gaussian.shader");
 		ref<Shader> dirShadowShader    = Asset->Load<Shader>("shaders/lights/directional.shader");
@@ -145,6 +145,8 @@ namespace iw {
 		Renderer->InitShader(dirIShadowShader);
 		//Renderer->InitShader(pointIShadowShader);
 		
+		//vct->Handle()->GetParam("sky")->SetAsFloats(&iw::vector3(0.25f, .75f, 1.0f), 3);
+
 		// Directional light shadow map textures & target
 
 		ref<Texture> dirShadowColor = ref<Texture>(new Texture(1024, 1024, TEX_2D, RG,    FLOAT, BORDER));
@@ -226,9 +228,9 @@ namespace iw {
 		description.DescribeBuffer(bName::BITANGENT, MakeLayout<float>(3));
 		description.DescribeBuffer(bName::UV,        MakeLayout<float>(2));
 
-		Mesh smesh = MakeIcosphere(description, 5)->MakeInstance();
+		Mesh smesh = MakeIcosphere  (description, 5)->MakeInstance();
 		Mesh tmesh = MakeTetrahedron(description, 5)->MakeInstance();
-		Mesh bmesh = MakeCube(description)->MakeInstance();
+		Mesh bmesh = MakeCube       (description)   ->MakeInstance();
 
 		smesh.Data()->GenTangents();
 		tmesh.Data()->GenTangents();
@@ -298,13 +300,12 @@ namespace iw {
 		PushSystem<iw::ParticleUpdateSystem>();
 		PushSystem<iw::EntityCleanupSystem>();
 
-
 		//PushSystem<iw::    MeshShadowRenderSystem>(MainScene);
 		//PushSystem<iw::   ModelShadowRenderSystem>(MainScene);
 		//PushSystem<iw::ParticleShadowRenderSystem>(MainScene);
-		//PushSystem<iw::          MeshRenderSystem>(MainScene);
+		PushSystem<iw::          MeshRenderSystem>(MainScene);
 		PushSystem<iw::         ModelRenderSystem>(MainScene);
-		//PushSystem<iw::      ParticleRenderSystem>(MainScene);
+		PushSystem<iw::      ParticleRenderSystem>(MainScene);
 
 		PushSystem<iw::UiRenderSystem>(m_textCam);
 
@@ -383,6 +384,10 @@ namespace iw {
 		return Layer::Initialize();
 	}
 
+	float f = 0;
+	bool s = 1;
+	bool b = 1;
+
 	void SandboxLayer::PostUpdate() {
 		// Update particle system
 
@@ -390,6 +395,20 @@ namespace iw {
 		seq.update();
 
 		MainScene->MainCamera()->SetProjection(iw::lerp(persp, ortho, blend));
+
+		vct->Use(Renderer->Device);
+
+		if (Keyboard::KeyDown(V) && f > 0.2f) {
+			vct->Handle()->GetParam("SHADOWS")->SetAsInt(s = !s);
+			f = 0.0f;
+		}
+
+		if (Keyboard::KeyDown(B) && f > 0.2f) {
+			vct->Handle()->GetParam("BLINN")  ->SetAsInt(b = !b);
+			f = 0.0f;
+		}
+
+		f += Time::DeltaTime();
 	}
 
 	void SandboxLayer::ImGui() {

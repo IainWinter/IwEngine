@@ -21,7 +21,7 @@ int EnemyDeathCircleSystem::Initialize() {
 	iw::Mesh sphere = Asset->Load<iw::Model>("Sphere")->GetMesh(0).MakeInstance();
 
 	sphere.Material()->Set("baseColor", iw::Color::From255(0, 195, 255, 64));
-	//sphere.Material()->Set("emissive", 50.0f);
+	sphere.Material()->Set("emissive", 5.0f);
 	sphere.Material()->SetTransparency(iw::Transparency::ADD);
 	sphere.Material()->SetCastShadows(false);
 

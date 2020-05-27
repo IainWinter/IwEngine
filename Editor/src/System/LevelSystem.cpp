@@ -249,7 +249,7 @@ iw::Entity LevelSystem::LoadLevel(
 	iw::Transform* levelTransform = nullptr;
 	iw::Entity level;
 
-	int iii = 0;
+	//int iii = 0;
 
 	for (ModelPrefab& prefab : currentLevel.Models) {
 		iw::ref<iw::Model> model = Asset->Load<iw::Model>(prefab.ModelName);
@@ -257,17 +257,15 @@ iw::Entity LevelSystem::LoadLevel(
 		for (iw::Mesh& mesh : model->GetMeshes()) {
 			mesh.SetMaterial(mesh.Material()->MakeInstance());
 
-			mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/vct/vct.shader"));
-
 			//if (iii == 0) { // ground
-			//	mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/vct/vct.shader"));
+				mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/vct/vct.shader"));
 			//}
 
 			//else {
 			//	mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/phong.shader"));
 			//}
 
-			//iii++;
+	//		iii++;
 			
 			//mesh.Material()->SetTexture("shadowMap", Asset->Load<iw::Texture>("SunShadowMap"));   // shouldnt be part of material
 			//mesh.Material()->SetTexture("shadowMap2", Asset->Load<iw::Texture>("LightShadowMap")); // shouldnt be part of material
@@ -481,7 +479,7 @@ iw::Entity LevelSystem::LoadLevel(
 			material->Set("baseColor", closedColor);
 		}
 
-		//material->Set("emissive", 2.0f);
+		material->Set("emissive", 2.0f);
 
 		model->GetMesh(0).SetMaterial(material);
 

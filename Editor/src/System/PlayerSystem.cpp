@@ -56,7 +56,7 @@ PlayerSystem::PlayerSystem()
 
 int PlayerSystem::Initialize() {
 	m_playerModel = Asset->Load<iw::Model>("Player");
-	
+
 	player = Space->CreateEntity<iw::Transform, iw::Model, iw::SphereCollider, iw::Rigidbody, Player>();
 	
 	                         player.Set<iw::Model>(*m_playerModel);
@@ -359,6 +359,8 @@ bool PlayerSystem::On(
 		}
 		case iw::val(Actions::RESET_LEVEL): {
 			m_playerModel->GetMesh(0).Material()->Set("baseColor", iw::vector4(0.8f, 1.0f));
+			m_playerModel->GetMesh(0).Material()->Set("reflectance", 1.0f);
+			m_playerModel->GetMesh(0).Material()->Set("refractive", 1.0f);
 			break;
 		}
 	}
