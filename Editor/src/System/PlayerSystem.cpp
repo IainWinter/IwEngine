@@ -132,7 +132,7 @@ void PlayerSystem::Update(
 			if (   iw::almost_equal(body->Trans().Position.x, transitionTargetPosition.x, 2)
 				&& iw::almost_equal(body->Trans().Position.z, transitionTargetPosition.z, 2))
 			{
-				transition = false;
+				//transition = false;
 				body->Trans().Position = transitionTargetPosition;
 				body->SetIsTrigger(false);
 			}
