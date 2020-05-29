@@ -9,19 +9,8 @@
     "y": 0.000000
   },
   "Enemies": {
-    "size": 2,
+    "size": 1,
     "items": [
-      {
-        "Type": 0,
-        "Bullet": {
-          "Type": 0,
-          "Speed": 5.000000
-        },
-        "Speed": 0.2617994,
-        "FireTime": 0.120000,
-        "ChargeTime": 0.000000,
-        "Rotation": 0.000000
-      },
       {
         "Type": 0,
         "Bullet": {
@@ -36,15 +25,11 @@
     ]
   },
   "Positions": {
-    "size": 2,
+    "size": 1,
     "items": [
       {
-        "x": -9.000000,
-        "y": 5.000000
-      },
-      {
-        "x": 9.000000,
-        "y": -5.000000
+        "x": 6.000000,
+        "y": 3.000000
       }
     ]
   },
@@ -56,7 +41,7 @@
         "State": 1,
         "NextLevel": {
           "size": 27,
-          "string": "levels/forest/forest24.json"
+          "string": "levels/forest/forest03.json"
         }
       }
     ]
@@ -72,14 +57,15 @@
   },
   "Spheres": {
     "size": 0,
-    "items": []
+    "items": [
+    ]
   },
   "Capsules": {
     "size": 0,
     "items": []
   },
   "Planes": {
-    "size": 4,
+    "size": 6,
     "items": [
       {
         "Plane": {
@@ -88,7 +74,7 @@
             "y": 0.000000,
             "z": 0.000000
           },
-          "D": -28.000000
+          "D": -22.000000
         }
       },
       {
@@ -120,6 +106,26 @@
           },
           "D": -12.000000
         }
+      },
+      {
+        "Plane": {
+          "P": {
+            "x": 1.000000,
+            "y": 0.000000,
+            "z": -1.000000
+          },
+          "D": -18.000000
+        }
+      },
+      {
+        "Plane": {
+          "P": {
+            "x": 1.000000,
+            "y": 0.000000,
+            "z": 1.000000
+          },
+          "D": -18.000000
+        }
       }
     ]
   },
@@ -129,7 +135,7 @@
       {
         "ModelName": {
           "size": 25,
-          "string": "models/block/forest23.dae"
+          "string": "models/block/forest02.dae"
         },
         "Transform": {
           "Position": {

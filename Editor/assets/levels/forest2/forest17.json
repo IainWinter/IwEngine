@@ -1,23 +1,34 @@
 {
   "CameraFollow": false,
   "InPosition": {
-    "x": -22.000000,
-    "y": 0.000000
+    "x": 0.000000,
+    "y": -10.000000
   },
   "LevelLocation": {
-    "x": 64.000000,
-    "y": 0.000000
+    "x": 0.000000,
+    "y": 36.000000
   },
   "Enemies": {
-    "size": 2,
+    "size": 3,
     "items": [
+      {
+        "Type": 1,
+        "Bullet": {
+          "Type": 0,
+          "Speed": 5.000000
+        },
+        "Speed": 0.261799,
+        "FireTime": 3.00000,
+        "ChargeTime": 2.500000,
+        "Rotation": 0.000000
+      },
       {
         "Type": 0,
         "Bullet": {
           "Type": 0,
           "Speed": 5.000000
         },
-        "Speed": 0.2617994,
+        "Speed": 0.261799,
         "FireTime": 0.120000,
         "ChargeTime": 0.000000,
         "Rotation": 0.000000
@@ -28,7 +39,7 @@
           "Type": 0,
           "Speed": 5.000000
         },
-        "Speed": 0.2617994,
+        "Speed": 0.261799,
         "FireTime": 0.120000,
         "ChargeTime": 0.000000,
         "Rotation": 0.000000
@@ -36,15 +47,19 @@
     ]
   },
   "Positions": {
-    "size": 2,
+    "size": 3,
     "items": [
       {
-        "x": -9.000000,
+        "x": 16.000000,
+        "y": -5.000000
+      },
+      {
+        "x": 13.000000,
         "y": 5.000000
       },
       {
-        "x": 9.000000,
-        "y": -5.000000
+        "x": -6.000000,
+        "y": 1.000000
       }
     ]
   },
@@ -56,7 +71,7 @@
         "State": 1,
         "NextLevel": {
           "size": 27,
-          "string": "levels/forest/forest24.json"
+          "string": "levels/forest/forest18.json"
         }
       }
     ]
@@ -129,7 +144,7 @@
       {
         "ModelName": {
           "size": 25,
-          "string": "models/block/forest23.dae"
+          "string": "models/block/forest17.dae"
         },
         "Transform": {
           "Position": {

@@ -124,8 +124,8 @@ iw::Application* CreateApplication(
 	iw::InitOptions& options)
 {
 	options.WindowOptions = iw::WindowOptions {
-		1280,
-		720,
+		1920,
+		1080,
 		true,
 		iw::DisplayState::NORMAL
 	};

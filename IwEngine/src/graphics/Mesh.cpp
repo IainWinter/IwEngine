@@ -414,7 +414,7 @@ namespace detail {
 			VertexBufferLayout& layout = m_description.GetBufferLayout(i);
 
 			if (data.Initialized) {
-				device->UpdateVertexArrayData(m_vertexArray, i, data.Ptr(), data.Count * layout.GetStride());
+				device->UpdateVertexArrayData(m_vertexArray, i, data.Ptr(), data.Count * layout.GetStride()); // todo: crash here
 			}
 
 			else {

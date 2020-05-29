@@ -54,6 +54,9 @@ uniform vec4 mat_baseColor;
 uniform float mat_reflectance;
 uniform float mat_refractive;
 
+uniform int mat_indirectDiffuse = 1;
+uniform int mat_indirectSpecular = 1;
+
 uniform float mat_hasVoxelMap;
 uniform sampler3D mat_voxelMap;
 
@@ -285,8 +288,8 @@ vec3 indirectLighting(
 	vec3 color = vec3(0);
 
 	if (mat_hasVoxelMap == 1) {
-		color += indirectDiffuse(WorldPos, N, T, B);	
-		color += indirectSpecular(WorldPos, N, V, reflectance);
+		if (mat_indirectDiffuse  == 1) color += indirectDiffuse (WorldPos, N, T, B);
+		if (mat_indirectSpecular == 1) color += indirectSpecular(WorldPos, N, V, reflectance);
 	}
 
 	return color;
@@ -357,7 +360,7 @@ void main() {
 	for (int i = 0; i < directionalLightCount; i++) {
 		vec3 L = directionalLights[i].InvDirection * 16; // max distance is length of this vector, sun is 100m away i guess xd
 
-		vec3 lightColor = vec3(1.0f);//directionalLights[i].Color;
+		vec3 lightColor = vec3(0.5f);//directionalLights[i].Color;
 
 		color += directLighting  (WorldPos, N, V, L, lightColor, baseColor, reflectance, refractive);
 		color += indirectLighting(WorldPos, N, T, B, V, reflectance);

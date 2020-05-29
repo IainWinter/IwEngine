@@ -45,7 +45,8 @@ void GameCameraController::Update(
 
 			if (iw::Time::TotalTime() - timeout > 0
 				&& iw::almost_equal(t->Position.x, target.x, 2)
-				&& iw::almost_equal(t->Position.z, target.z, 2))
+				&& iw::almost_equal(t->Position.z, target.z, 2)
+				&& iw::DeltaTime() < 0.5f)
 			{
 				Bus->push<AtNextLevelEvent>(); // should be timed
 

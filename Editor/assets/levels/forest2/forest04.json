@@ -56,7 +56,7 @@
         "State": 1,
         "NextLevel": {
           "size": 27,
-          "string": "levels/forest/forest24.json"
+          "string": "levels/forest/forest05.json"
         }
       }
     ]
@@ -129,7 +129,7 @@
       {
         "ModelName": {
           "size": 25,
-          "string": "models/block/forest23.dae"
+          "string": "models/block/forest04.dae"
         },
         "Transform": {
           "Position": {

@@ -131,7 +131,7 @@ namespace Graphics {
 
 			int count = Shader->Handle()->UniformCount();
 			for (int i = 0; i < count; i++) {
-				IPipelineParam* uniform = Shader->Handle()->GetParam(i);
+				IPipelineParam* uniform = Shader->Handle()->GetParam(i); // this will prob fuck up if there are custom layouts
 				if (!uniform) {
 					continue; // Check for null
 				}
@@ -244,19 +244,19 @@ namespace Graphics {
 		Shader = shader;
 	}
 
-#define MAT_SETS(d, ut)                                \
+#define MAT_SETS(d, ut, ts)                            \
 	void Material::Set(                                \
 		std::string name,                              \
 		d data)                                        \
 	{                                                  \
-		SetProperty(name, &data, ut, sizeof(d), 1, 1); \
+		SetProperty(name, &data, ut, ts, 1, 1); \
 	}                                                  \
 
-	MAT_SETS(bool,     UniformType::BOOL) // bools are just ints so they need to be resized!!
-	MAT_SETS(int,      UniformType::INT)
-	MAT_SETS(unsigned, UniformType::UINT)
-	MAT_SETS(float,    UniformType::FLOAT)
-	MAT_SETS(double,   UniformType::DOUBLE)
+	MAT_SETS(bool,     UniformType::BOOL,   sizeof(int))       // bools are just ints (in glsl) so they need to be resized!!
+	MAT_SETS(int,      UniformType::INT,    sizeof(int))
+	MAT_SETS(unsigned, UniformType::UINT,   sizeof(unsigned))
+	MAT_SETS(float,    UniformType::FLOAT,  sizeof(float))
+	MAT_SETS(double,   UniformType::DOUBLE, sizeof(double))
 
 #undef MAT_SETS
 
@@ -270,7 +270,7 @@ namespace Graphics {
 			SetProperty(name, mp(data), ut, ts, stride, count); \
 		}                                                       \
 
-		MAT_SET(bool*,       UniformType::BOOL,   sizeof(int)) // bools are just ints so they need to be resized!!
+		MAT_SET(bool*,       UniformType::BOOL,   sizeof(int)) // ^ see above ^
 		MAT_SET(int*,        UniformType::INT,    sizeof(int))
 		MAT_SET(unsigned*,   UniformType::UINT,   sizeof(unsigned))
 		MAT_SET(float*,      UniformType::FLOAT,  sizeof(float))
@@ -304,10 +304,11 @@ namespace Graphics {
 			m_textures.push_back(prop);
 		}
 
-		std::string n(name);
+		std::string n(name);    // diffuseMap -> hasDiffuseMap
+		n[0] = toupper(n[0]);
+		n = "has" + n;
 
-		name[0] = toupper(name[0]);
-		Set("has" + name, texture != nullptr ? 1.0f : 0.0f);
+		Set(n, texture != nullptr ? 1.0f : 0.0f);
 	}
 
 	iw::ref<Texture> Material::GetTexture(

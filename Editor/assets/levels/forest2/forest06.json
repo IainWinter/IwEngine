@@ -9,7 +9,7 @@
     "y": 0.000000
   },
   "Enemies": {
-    "size": 2,
+    "size": 4,
     "items": [
       {
         "Type": 0,
@@ -32,19 +32,49 @@
         "FireTime": 0.120000,
         "ChargeTime": 0.000000,
         "Rotation": 0.000000
+      },
+      {
+        "Type": 0,
+        "Bullet": {
+          "Type": 0,
+          "Speed": 5.000000
+        },
+        "Speed": 0.2617994,
+        "FireTime": 0.120000,
+        "ChargeTime": 0.000000,
+        "Rotation": 0.1309
+      },
+      {
+        "Type": 0,
+        "Bullet": {
+          "Type": 0,
+          "Speed": 5.000000
+        },
+        "Speed": 0.2617994,
+        "FireTime": 0.120000,
+        "ChargeTime": 0.000000,
+        "Rotation": 0.1309
       }
     ]
   },
   "Positions": {
-    "size": 2,
+    "size": 4,
     "items": [
       {
         "x": -9.000000,
-        "y": 5.000000
+        "y": -6.000000
+      },
+      {
+        "x": -9.000000,
+        "y": 6.000000
+      },
+      {
+        "x": 10.000000,
+        "y": -4.900000
       },
       {
         "x": 9.000000,
-        "y": -5.000000
+        "y": 6.000000
       }
     ]
   },
@@ -56,7 +86,7 @@
         "State": 1,
         "NextLevel": {
           "size": 27,
-          "string": "levels/forest/forest24.json"
+          "string": "levels/forest/forest07.json"
         }
       }
     ]
@@ -75,8 +105,37 @@
     "items": []
   },
   "Capsules": {
-    "size": 0,
-    "items": []
+    "size": 2,
+    "items": [
+      {
+        "Center": {
+          "x": -9.100000,
+          "y": 0.000000,
+          "z": 3.500000
+        },
+        "Direction": {
+          "x": 1.000000,
+          "y": 0.000000,
+          "z": 0.000000
+        },
+        "Height": 7.000000,
+        "Radius": 0.500000
+      },
+      {
+        "Center": {
+          "x": 0.000000,
+          "y": 0.000000,
+          "z": 0.000000
+        },
+        "Direction": {
+          "x": 0.000000,
+          "y": 0.000000,
+          "z": 1.000000
+        },
+        "Height": 7.000000,
+        "Radius": 0.500000
+      }
+    ]
   },
   "Planes": {
     "size": 4,
@@ -129,7 +188,7 @@
       {
         "ModelName": {
           "size": 25,
-          "string": "models/block/forest23.dae"
+          "string": "models/block/forest06.dae"
         },
         "Transform": {
           "Position": {

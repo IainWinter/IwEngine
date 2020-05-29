@@ -15,6 +15,7 @@
 #include <vector>
 #include <unordered_map>
 #include <tuple>
+#include <string>
 
 namespace iw {
 namespace Graphics {
@@ -30,7 +31,7 @@ namespace Graphics {
 
 	struct Material {
 	public:
-		iw::ref<Shader> Shader;
+		ref<Shader> Shader;
 
 	private:
 		struct MaterialProperty {
@@ -45,11 +46,11 @@ namespace Graphics {
 
 		struct TextureProperty {
 			std::string Name;
-			iw::ref<Texture> Texture;
+			ref<Texture> Texture;
 			bool Active;
 		};
 
-		iw::linear_allocator m_alloc;
+		linear_allocator m_alloc;
 		std::vector<MaterialProperty> m_properties;
 		std::vector<TextureProperty>  m_textures;
 
@@ -68,25 +69,25 @@ namespace Graphics {
 
 		IWGRAPHICS_API
 		Material(
-			iw::ref<iw::Shader>& shader);
+			ref<iw::Shader>& shader);
 
 		GEN_5(IWGRAPHICS_API, Material);
 
 		IWGRAPHICS_API
 		void Initialize(
-			const iw::ref<IDevice>& device);
+			const ref<IDevice>& device);
 
 		IWGRAPHICS_API
 		ref<Material> MakeInstance() const;
 
 		IWGRAPHICS_API
 		void Use(
-			const iw::ref<IDevice>& device,
-			iw::ref<iw::Shader> shader = nullptr);
+			const ref<IDevice>& device,
+			ref<iw::Shader> shader = nullptr);
 
 		IWGRAPHICS_API
 		void SetShader(
-			iw::ref<iw::Shader>& shader);
+			ref<iw::Shader>& shader);
 
 #define MAT_SET(d)               \
 		IWGRAPHICS_API         \
@@ -115,9 +116,9 @@ namespace Graphics {
 		MAT_SET(unsigned*,   1, 1)
 		MAT_SET(float*,      1, 1)
 		MAT_SET(double*,     1, 1)
-		MAT_SET(iw::vector2, 2, 1)
-		MAT_SET(iw::vector3, 3, 1)
-		MAT_SET(iw::vector4, 4, 1)
+		MAT_SET(vector2, 2, 1)
+		MAT_SET(vector3, 3, 1)
+		MAT_SET(vector4, 4, 1)
 		MAT_SET(Color,       4, 1)
 
 #undef MAT_SET
@@ -138,10 +139,10 @@ namespace Graphics {
 		IWGRAPHICS_API
 		void SetTexture(
 			std::string name,
-			iw::ref<Texture> texture);
+			ref<Texture> texture);
 
 		IWGRAPHICS_API
-		iw::ref<Texture> GetTexture(
+		ref<Texture> GetTexture(
 			std::string name);
 
 		IWGRAPHICS_API
@@ -149,7 +150,7 @@ namespace Graphics {
 			std::string name) const;
 
 		IWGRAPHICS_API
-		iw::Transparency Transparency() const;
+		Transparency Transparency() const;
 
 		IWGRAPHICS_API
 		bool CastShadows() const;

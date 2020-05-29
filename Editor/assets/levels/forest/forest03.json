@@ -139,11 +139,11 @@
     ]
   },
   "Models": {
-    "size": 31,
+    "size": 32,
     "items": [
-      {
+       {
         "ModelName": {
-          "size": 31,
+          "size": 30,
           "string": "models/forest/forest_path.gltf"
         },
         "Transform": {
@@ -161,6 +161,30 @@
             "x": 0,
             "y": 0,
             "z": 0,
+            "w": 1
+          }
+        }
+      },
+      {
+        "ModelName": {
+          "size": 22,
+          "string": "models/forest/cart.dae"
+        },
+        "Transform": {
+          "Position": {
+            "x": 0,
+            "y": 1,
+            "z": 0
+          },
+          "Scale": {
+            "x": 2.8,
+            "y": 2.8,
+            "z": 2.8
+          },
+          "Rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0.08,
             "w": 1
           }
         }

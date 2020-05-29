@@ -275,6 +275,9 @@ iw::Entity LevelSystem::LoadLevel(
 			mesh.Material()->Set("reflectance", 0.0f);
 			mesh.Material()->Set("refractive", 0.0f);
 
+			mesh.Material()->Set("indirectDiffuse", 1);
+			mesh.Material()->Set("indirectSpecular", 0);
+
 			//if (iii == 1) {
 			//	mesh.Material()->Set("baseColor", iw::Color(0, 0, 1));
 			//}
@@ -480,6 +483,9 @@ iw::Entity LevelSystem::LoadLevel(
 		}
 
 		material->Set("emissive", 2.0f);
+
+		material->Set("indirectDiffuse",  0);
+		material->Set("indirectSpecular", 0);
 
 		model->GetMesh(0).SetMaterial(material);
 

@@ -213,6 +213,8 @@ namespace iw {
 		def->Set("metallic", 0.2f);
 		def->Set("reflectance", 1.0f);
 		def->Set("emissive", 0.0f);
+		def->Set("indirectDiffuse",  1);
+		def->Set("indirectSpecular", 1);
 		def->SetTexture("shadowMap",  dirShadowTarget->Tex(0));    // shouldnt really be part of material
 		//def->SetTexture("shadowMap2", pointShadowTarget->Tex(0));
 		def->Initialize(Renderer->Device);

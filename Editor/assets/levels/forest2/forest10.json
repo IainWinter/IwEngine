@@ -9,8 +9,19 @@
     "y": 0.000000
   },
   "Enemies": {
-    "size": 2,
+    "size": 3,
     "items": [
+      {
+        "Type": 1,
+        "Bullet": {
+          "Type": 0,
+          "Speed": 5.000000
+        },
+        "Speed": 0.261799,
+        "FireTime": 3.00000,
+        "ChargeTime": 2.500000,
+        "Rotation": 0.1309
+      },
       {
         "Type": 0,
         "Bullet": {
@@ -20,7 +31,7 @@
         "Speed": 0.2617994,
         "FireTime": 0.120000,
         "ChargeTime": 0.000000,
-        "Rotation": 0.000000
+        "Rotation": 3.141593
       },
       {
         "Type": 0,
@@ -36,15 +47,19 @@
     ]
   },
   "Positions": {
-    "size": 2,
+    "size": 3,
     "items": [
       {
-        "x": -9.000000,
-        "y": 5.000000
+        "x": 0.000000,
+        "y": 0.000000
       },
       {
-        "x": 9.000000,
+        "x": 5.000000,
         "y": -5.000000
+      },
+      {
+        "x": -5.000000,
+        "y": 5.000000
       }
     ]
   },
@@ -56,7 +71,7 @@
         "State": 1,
         "NextLevel": {
           "size": 27,
-          "string": "levels/forest/forest24.json"
+          "string": "levels/forest/forest11.json"
         }
       }
     ]
@@ -65,14 +80,31 @@
     "size": 1,
     "items": [
       {
-        "x": 28.000000,
-        "y": 0.000000
+        "x": 0.000000,
+        "y": 16.000000
       }
     ]
   },
   "Spheres": {
-    "size": 0,
-    "items": []
+    "size": 2,
+    "items": [
+      {
+        "Center": {
+          "x": -5.000000,
+          "y": 0.000000,
+          "z": -5.000000
+        },
+        "Radius": 2.500000
+      },
+      {
+        "Center": {
+          "x": 5.000000,
+          "y": 0.000000,
+          "z": 5.000000
+        },
+        "Radius": 2.500000
+      }
+    ]
   },
   "Capsules": {
     "size": 0,
@@ -108,7 +140,7 @@
             "y": 0.000000,
             "z": -1.000000
           },
-          "D": -11.000000
+          "D": -12.000000
         }
       },
       {
@@ -129,7 +161,7 @@
       {
         "ModelName": {
           "size": 25,
-          "string": "models/block/forest23.dae"
+          "string": "models/block/forest10.dae"
         },
         "Transform": {
           "Position": {
