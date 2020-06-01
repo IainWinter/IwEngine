@@ -9,8 +9,63 @@
     "y": 0.000000
   },
   "Enemies": {
-    "size": 2,
+    "size": 7,
     "items": [
+      {
+        "Type": 0,
+        "Bullet": {
+          "Type": 0,
+          "Speed": 5.000000
+        },
+        "Speed": 0.2617994,
+        "FireTime": 0.120000,
+        "ChargeTime": 0.000000,
+        "Rotation": 0.000000
+      },
+      {
+        "Type": 0,
+        "Bullet": {
+          "Type": 0,
+          "Speed": 5.000000
+        },
+        "Speed": 0.2617994,
+        "FireTime": 0.120000,
+        "ChargeTime": 0.000000,
+        "Rotation": 0.000000
+      },
+      {
+        "Type": 0,
+        "Bullet": {
+          "Type": 0,
+          "Speed": 5.000000
+        },
+        "Speed": 0.2617994,
+        "FireTime": 0.120000,
+        "ChargeTime": 0.000000,
+        "Rotation": 0.000000
+      },
+      {
+        "Type": 0,
+        "Bullet": {
+          "Type": 0,
+          "Speed": 5.000000
+        },
+        "Speed": 0.2617994,
+        "FireTime": 0.120000,
+        "ChargeTime": 0.000000,
+        "Rotation": 0.000000
+      },
+      {
+        "Type": 0,
+        "Bullet": {
+          "Type": 0,
+          "Speed": 5.000000
+        },
+        "Speed": 0.2617994,
+        "FireTime": 0.120000,
+        "ChargeTime": 0.000000,
+        "Rotation": 0.000000
+      },
       {
         "Type": 0,
         "Bullet": {
@@ -36,15 +91,35 @@
     ]
   },
   "Positions": {
-    "size": 2,
+    "size": 7,
     "items": [
       {
-        "x": -9.000000,
-        "y": 5.000000
+        "x": -12.500000,
+        "y": -6.000000
       },
       {
-        "x": 9.000000,
-        "y": -5.000000
+        "x": -2.500000,
+        "y": 6.000000
+      },
+      {
+        "x": 6.500000,
+        "y": -6.000000
+      },
+      {
+        "x": 13.000000,
+        "y": 0.000000
+      },
+      {
+        "x": 20.000000,
+        "y": 0.000000
+      },
+      {
+        "x": 16.000000,
+        "y": 4.000000
+      },
+      {
+        "x": 16.000000,
+        "y": -4.000000
       }
     ]
   },
@@ -75,8 +150,51 @@
     "items": []
   },
   "Capsules": {
-    "size": 0,
-    "items": []
+    "size": 3,
+    "items": [
+      {
+        "Center": {
+          "x": 5.000000,
+          "y": 0.000000,
+          "z": -6.000000
+        },
+        "Direction": {
+          "x": 0.000000,
+          "y": 0.000000,
+          "z": 1.000000
+        },
+        "Height": 6.000000,
+        "Radius": 0.500000
+      },
+      {
+        "Center": {
+          "x": -5.000000,
+          "y": 0.000000,
+          "z": 6.000000
+        },
+        "Direction": {
+          "x": 0.000000,
+          "y": 0.000000,
+          "z": 1.000000
+        },
+        "Height": 6.000000,
+        "Radius": 0.500000
+      },
+      {
+        "Center": {
+          "x": -15.000000,
+          "y": 0.000000,
+          "z": -6.000000
+        },
+        "Direction": {
+          "x": 0.000000,
+          "y": 0.000000,
+          "z": 1.000000
+        },
+        "Height": 6.000000,
+        "Radius": 0.500000
+      }
+    ]
   },
   "Planes": {
     "size": 4,
@@ -126,7 +244,7 @@
   "Models": {
     "size": 30,
     "items": [
-       {
+      {
         "ModelName": {
           "size": 30,
           "string": "models/forest/forest_path.gltf"
@@ -147,6 +265,78 @@
             "y": 0,
             "z": 0,
             "w": 1
+          }
+        }
+      },
+      {
+        "ModelName": {
+          "size": 25,
+          "string": "models/forest/barrier.dae"
+        },
+        "Transform": {
+          "Position": {
+            "x": 5.5,
+            "y": 0,
+            "z": -6
+          },
+          "Scale": {
+            "x": 0.6,
+            "y": 0.6,
+            "z": 0.6
+          },
+          "Rotation": {
+            "x": 0.5,
+            "y": -0.5,
+            "z": -0.5,
+            "w": 0.5
+          }
+        }
+      },
+      {
+        "ModelName": {
+          "size": 25,
+          "string": "models/forest/barrier.dae"
+        },
+        "Transform": {
+          "Position": {
+            "x": -4.5,
+            "y": 0,
+            "z": 6
+          },
+          "Scale": {
+            "x": 0.6,
+            "y": 0.6,
+            "z": 0.6
+          },
+          "Rotation": {
+            "x": 0.5,
+            "y": -0.5,
+            "z": -0.5,
+            "w": 0.5
+          }
+        }
+      },
+      {
+        "ModelName": {
+          "size": 25,
+          "string": "models/forest/barrier.dae"
+        },
+        "Transform": {
+          "Position": {
+            "x": -14.5,
+            "y": 0,
+            "z": -6
+          },
+          "Scale": {
+            "x": 0.6,
+            "y": 0.6,
+            "z": 0.6
+          },
+          "Rotation": {
+            "x": 0.5,
+            "y": -0.5,
+            "z": -0.5,
+            "w": 0.5
           }
         }
       },
