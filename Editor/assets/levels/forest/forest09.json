@@ -167,30 +167,6 @@
     "items": [
       {
         "ModelName": {
-          "size": 25,
-          "string": "models/forest/newrock.dae"
-        },
-        "Transform": {
-          "Position": {
-            "x": 0,
-            "y": -7,
-            "z": 0
-          },
-          "Scale": {
-            "x": 7.5,
-            "y": 7.5,
-            "z": 10
-          },
-          "Rotation": {
-            "x": 10,
-            "y": 0,
-            "z": 0,
-            "w": 1
-          }
-        }
-      },
-      {
-          "ModelName": {
           "size": 30,
           "string": "models/forest/forest_path.gltf"
         },
@@ -210,6 +186,30 @@
             "y": 0,
             "z": 0,
             "w": 1
+          }
+        }
+      },
+      {
+        "ModelName": {
+          "size": 25,
+          "string": "models/forest/newrock.dae"
+        },
+        "Transform": {
+          "Position": {
+            "x": 0,
+            "y": -5,
+            "z": 0
+          },
+          "Scale": {
+            "x": 7.5,
+            "y": 7.5,
+            "z": 10
+          },
+          "Rotation": {
+            "x": 1,
+            "y": 0,
+            "z": 0,
+            "w": 0
           }
         }
       },
