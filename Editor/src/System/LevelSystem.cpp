@@ -45,7 +45,7 @@ LevelSystem::LevelSystem(
 
 	//currentLevel = 0;
 
-	currentLevelName = "levels/forest/forest01.json";
+	currentLevelName = "levels/forest/forest14.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 63);
 	closedColor = iw::Color::From255(201, 66, 66, 63);
@@ -76,6 +76,9 @@ int LevelSystem::Initialize() {
 	return 0;
 }
 
+float speed = 1.0f; // garbo
+float timeout = 0.0f;
+
 void LevelSystem::Update(
 	iw::EntityComponentArray& view)
 {
@@ -94,35 +97,32 @@ void LevelSystem::Update(
 		sequence->update();
 	}
 
-	//if (transition) {
-	//	iw::Transform* current = levelEntity    .Find<iw::Transform>();
-	//	iw::Transform* next    = nextLevelEntity.Find<iw::Transform>();
+	if (transition) {
+		iw::Transform* current = levelEntity    .Find<iw::Transform>();
+		iw::Transform* next    = nextLevelEntity.Find<iw::Transform>();
 
-	//	iw::vector2 delta = currentLevel.LevelPosition * iw::Time::DeltaTime() * 0.5f;
-	//	
-	//	current->Position.x -= delta.x;
-	//	current->Position.z -= delta.y;
+		speed += 0.01f;
 
-	//	next->Position.x -= delta.x;
-	//	next->Position.z -= delta.y;
+		iw::vector3 target = currentLevel.LevelPosition;
+		target.z = target.y;
+		target.y = 0;
 
-	//	if (   delta.x > 0 ? next->Position.x <= 0 : next->Position.x >= 0
-	//		&& delta.y > 0 ? next->Position.z <= 0 : next->Position.z >= 0)
-	//	{
-	//		next->Position.x = 0;
-	//		next->Position.z = 0;
-	//		transition = false;
+		current->Position = iw::lerp(current->Position, -target,        iw::Time::DeltaTime() * speed);
+		next   ->Position = iw::lerp(next   ->Position, iw::vector3(0), iw::Time::DeltaTime() * speed);
 
-	//		iw::vector3 position;
-	//		position.x = currentLevel.InPosition.x;
-	//		position.z = currentLevel.InPosition.y;
+		if (   iw::Time::TotalTime() - timeout > 0
+			&& iw::almost_equal(next->Position.x, 0, 2)
+			&& iw::almost_equal(next->Position.z, 0, 2)
+			&& iw::DeltaTime() < 0.5f)
+		{
+			Bus->push<AtNextLevelEvent>();
 
-	//		Bus->push<StartNextLevelEvent>(currentLevel.CameraFollow);
-	//		Bus->push<StartLevelEvent>(position);
-	//	}
-	//}
-
-	//levelEntity.Find<iw::Transform>()->Rotation *= iw::quaternion::from_euler_angles(0, iw::Time::DeltaTime() * 0.1f, 0);
+			next->Position.x = 0.0f;
+			next->Position.z = 0.0f;
+			transition = false;
+			speed = 2;
+		}
+	}
 }
 
 bool LevelSystem::On(
@@ -213,6 +213,8 @@ bool LevelSystem::On(
 			transform->Position.x = lvpos.x;
 			transform->Position.z = lvpos.y;
 
+			transition = true;
+
 			Bus->push<GoToNextLevelEvent>(currentLevelName, currentLevel.CameraFollow, currentLevel.InPosition, lvpos);
 
 			break;
@@ -249,7 +251,7 @@ iw::Entity LevelSystem::LoadLevel(
 	iw::Transform* levelTransform = nullptr;
 	iw::Entity level;
 
-	//int iii = 0;
+	int iii = 0;
 
 	for (ModelPrefab& prefab : currentLevel.Models) {
 		iw::ref<iw::Model> model = Asset->Load<iw::Model>(prefab.ModelName);
@@ -257,17 +259,17 @@ iw::Entity LevelSystem::LoadLevel(
 		for (iw::Mesh& mesh : model->GetMeshes()) {
 			mesh.SetMaterial(mesh.Material()->MakeInstance());
 
-			//if (iii == 0) { // ground
+			if (iii == 0) { // ground
+				mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/phong.shader"));
+				mesh.Material()->SetTexture("shadowMap", Asset->Load<iw::Texture>("SunShadowMap"));
+			}
+
+			else {
 				mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/vct/vct.shader"));
-			//}
+			}
 
-			//else {
-			//	mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/phong.shader"));
-			//}
-
-	//		iii++;
+			iii++;
 			
-			//mesh.Material()->SetTexture("shadowMap", Asset->Load<iw::Texture>("SunShadowMap"));   // shouldnt be part of material
 			//mesh.Material()->SetTexture("shadowMap2", Asset->Load<iw::Texture>("LightShadowMap")); // shouldnt be part of material
 
 			//mesh.Material()->Set("roughness", 0.9f);

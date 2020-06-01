@@ -69,6 +69,9 @@ uniform sampler2D mat_normalMap;
 uniform float mat_hasReflectanceMap;
 uniform sampler2D mat_reflectanceMap;
 
+uniform float mat_hasShadowMap;
+uniform sampler2D mat_shadowMap;
+
 // Voxel
 uniform vec3 voxelBoundsScale;
 uniform vec3 voxelBoundsScaleInv;
@@ -222,17 +225,21 @@ vec3 directLighting(
 		&& mat_hasVoxelMap == 1)
 	{
 		float coneRatio   = 0.05f;
-		float maxDistance = length(L);
+		float maxDistance = 32.0f;
 
 		shadow = TraceConeShadow(W, nL, coneRatio, maxDistance);
+	}
+
+	else if (mat_hasShadowMap == 1.0f) {
+		shadow = texture(mat_shadowMap, TexCoords).a;
 	}
 	
 	// Mix color
 
-	diff = min(shadow, diff) * baseColor.a;
-	spec = min(shadow, max(spec, refr));
+	diff = diff * baseColor.a;
+	spec = max(spec, refr);
 
-	return lightColor * (diff + spec);
+	return lightColor * (diff + spec) * shadow;
 }
 
 vec3 indirectDiffuse(
@@ -358,9 +365,9 @@ void main() {
 	}
 
 	for (int i = 0; i < directionalLightCount; i++) {
-		vec3 L = directionalLights[i].InvDirection * 16; // max distance is length of this vector, sun is 100m away i guess xd
+		vec3 L = directionalLights[i].InvDirection;
 
-		vec3 lightColor = vec3(0.5f);//directionalLights[i].Color;
+		vec3 lightColor = vec3(1.0f);//directionalLights[i].Color;
 
 		color += directLighting  (WorldPos, N, V, L, lightColor, baseColor, reflectance, refractive);
 		color += indirectLighting(WorldPos, N, T, B, V, reflectance);

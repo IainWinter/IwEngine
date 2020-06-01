@@ -19,8 +19,8 @@ namespace Engine {
 	float voxelSize    = 1.0f / (4.0f);
 	float voxelSizeInv = 1.0f / voxelSize;
 
-	vector3 voxelBoundsScale(32,  16, 18);
-	vector3 voxelBoundsSize (256, 128, 144);
+	vector3 voxelBoundsScale(32, 32, 32);
+	vector3 voxelBoundsSize (256, 256, 256); // not squared :(
 	vector3 voxelBoundsScaleInv = vector3(1) / voxelBoundsScale;
 
 	int ModelVoxelRenderSystem::Initialize() {
@@ -38,13 +38,13 @@ namespace Engine {
 		Renderer->InitShader(voxelize, LIGHTS);
 
 		Renderer->SetShader(voxelize);
-		voxelize->Handle()->GetParam("voxelBoundsScale")   ->SetAsFloats(&voxelBoundsScale, 3);
+		voxelize->Handle()->GetParam("voxelBoundsScale")   ->SetAsFloats(&voxelBoundsScale,    3);
 		voxelize->Handle()->GetParam("voxelBoundsScaleInv")->SetAsFloats(&voxelBoundsScaleInv, 3);
 
 		ref<Texture> voxelTexture = REF<Texture>(voxelBoundsSize.x, voxelBoundsSize.y, voxelBoundsSize.z, TEX_3D, RGBA, FLOAT, BORDER, LINEAR, LINEAR_LINEAR);
 		m_voxelize = new VoxelLight(voxelTexture, voxelize, nullptr, mipmap);
 
-		m_voxelize->SetPosition(vector3(0, 8, 0));
+		m_voxelize->SetPosition(vector3(0, 16, 0));
 		
 		return 0;
 	}

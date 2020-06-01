@@ -26,10 +26,12 @@ private:
 
 	iw::vector3 movement;
 
-	bool left, right, up, down, dash, sprint, transition;
+	bool left, right, up, down, dash, sprint, transition, levelTransition;
 	iw::vector3 transitionStartPosition;
 	iw::vector3 transitionTargetPosition;
 	float begin;
+
+	float transitionSpeed;
 
 	unsigned m_activeConsumable;
 

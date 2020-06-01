@@ -21,6 +21,7 @@ PlayerSystem::PlayerSystem()
 	, dash(false)
 	, sprint(false)
 	, transition(false)
+	, levelTransition(false)
 	, begin(0)
 {
 #ifdef IW_DEBUG
@@ -99,6 +100,7 @@ int PlayerSystem::Initialize() {
 			playerComp->Timer = 0.0f;
 			playerBody->SetIsTrigger(true);
 
+			transitionSpeed = 1.5f;
 			transition = true;
 			transitionStartPosition  = playerTrans->Position;
 			transitionTargetPosition = playerTrans->Position + movement.normalized() * 12;
@@ -125,14 +127,25 @@ void PlayerSystem::Update(
 {
 	for (auto entity : view) {
 		auto [transform, body, player] = entity.Components.Tie<Components>();
+		
+		if (levelTransition) {
+			transitionSpeed += 0.01f;
+		}
 
-		if (transition) {
-			body->Trans().Position = iw::lerp(transitionStartPosition, transitionTargetPosition, (iw::Time::TotalTime() - begin));
+		if (transition || levelTransition) {
+			if (levelTransition) {
+				body->Trans().Position = iw::lerp(body->Trans().Position, transitionTargetPosition, iw::Time::DeltaTime() * transitionSpeed);
+			}
+
+			else {
+				body->Trans().Position = iw::lerp(transitionStartPosition, transitionTargetPosition, iw::Time::TotalTime() - begin);
+			}
 
 			if (   iw::almost_equal(body->Trans().Position.x, transitionTargetPosition.x, 2)
 				&& iw::almost_equal(body->Trans().Position.z, transitionTargetPosition.z, 2))
 			{
-				//transition = false;
+				transitionSpeed = 1.0f;
+				transition = false;
 				body->Trans().Position = transitionTargetPosition;
 				body->SetIsTrigger(false);
 			}
@@ -178,7 +191,7 @@ void PlayerSystem::Update(
 						LOG_INFO << distance;
 					}
 
-					if (dash
+					if (   dash
 						&& (up || down || left || right))
 					{
 						start = transform->Position;
@@ -325,15 +338,20 @@ bool PlayerSystem::On(
 
 			r->SetCol(nullptr);
 
-			transition = true;
+			transitionSpeed = 1.0f;
+			levelTransition = true;
 			transitionStartPosition  = iw::vector3(r->Trans().Position.x, 1, r->Trans().Position.z);
-			transitionTargetPosition = iw::vector3(event.CenterPosition.x + event.PlayerPosition.x, 1, event.CenterPosition.y + event.PlayerPosition.y);
+			transitionTargetPosition = iw::vector3(event.PlayerPosition.x, 1, event.PlayerPosition.y);
 			begin = iw::Time::TotalTime();
 
 			//t->Scale = 0;
 
 			//up = down = left = right = dash = sprint = false;
 
+			break;
+		}
+		case iw::val(Actions::AT_NEXT_LEVEL): {
+			levelTransition = false;
 			break;
 		}
 		case iw::val(Actions::START_LEVEL): {

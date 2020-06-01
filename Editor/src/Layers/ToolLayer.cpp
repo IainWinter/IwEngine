@@ -111,7 +111,7 @@ namespace iw {
 		camera->SetTrans(transform);
 
 		cameraSystem = new EditorCameraControllerSystem();
-		//PushSystem<DrawCollidersSystem>(camera);
+		PushSystem<DrawCollidersSystem>(camera);
 		PushSystem<PhysicsSystem>();
 
 		//PushSystem<iw::ModelVoxelRenderSystem>(m_mainScene);
@@ -279,29 +279,20 @@ namespace iw {
 			std::stringstream ss;
 			ss << e.Index << " pos";
 
-			ImGui::SliderFloat3(ss.str().c_str(), (float*)&t->Position, 0, 10);
+			ImGui::SliderFloat3(ss.str().c_str(), (float*)&t->Position, -15, 15);
+
+			ss = std::stringstream();
+			ss << e.Index << " scale";
+
+			ImGui::SliderFloat3(ss.str().c_str(), (float*)&t->Scale, 0, 15);
+
+			ss = std::stringstream();
+			ss << e.Index << " rotation";
+
+			ImGui::SliderFloat4(ss.str().c_str(), (float*)&t->Rotation, -1, 1);
+			t->Rotation.normalize();
 
 			if(o) o->SetTrans(t);
-
-			ss = std::stringstream();
-			ss << e.Index << " emi";
-
-			float* f = m->GetMesh(0).Material()->Get<float>("emissive");
-
-			if (f) {
-				ImGui::SliderFloat(ss.str().c_str(), f, 0, 20);
-			}
-
-
-			ss = std::stringstream();
-			ss << e.Index << " ref";
-
-			ImGui::SliderFloat(ss.str().c_str(),  m->GetMesh(0).Material()->Get<float>("reflectance"), 0, 1);
-
-			ss = std::stringstream();
-			ss << e.Index << " col";
-
-			ImGui::SliderFloat4(ss.str().c_str(), m->GetMesh(0).Material()->Get<float>("baseColor"), 0, 1);
 		}
 
 		ImGui::End();

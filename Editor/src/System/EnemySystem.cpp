@@ -161,14 +161,13 @@ void EnemySystem::Update(
 
 					const float fire12 = (fire2 - fire1) * 0.5f;
 
-					int count = roundf(iw::Pi2 / enemy->Speed);
-
-					int dontShoot = count * 0.5f;
-
 					if (enemy->Timer >= fire2)
 					{
 						if (enemy->Timer2 == 0.0f) {
 							float rot = iw::Pi + iw::hPi * 0.5f * cos(enemy->Timer);
+
+							int count = roundf(iw::Pi2 / enemy->Speed);
+							int dontShoot = count * 0.5f;
 
 							for (int i = 0; i <= count; i++) {
 								if (   i != dontShoot
@@ -191,7 +190,7 @@ void EnemySystem::Update(
 
 						enemy->Timer2 += iw::Time::DeltaTimeScaled();
 
-						if (enemy->Timer2 > 0.1f) {
+						if (enemy->Timer2 > 0.2f) {
 							enemy->Timer2 = 0.0f;
 						}
 
@@ -243,6 +242,8 @@ void EnemySystem::Update(
 
 						enemy->HasShot = false;
 					}
+
+					break;
 				}
 				case EnemyType::BOSS_FOREST: {
 					const float time = enemy->FireTime - enemy->ChargeTime;

@@ -253,7 +253,11 @@ namespace Engine {
 			ImGui::Begin("Times");
 			ImGui::SliderFloat("Smooth", &smooth, 0, 1);
 
-			ImGui::Text("Tick %i", iw::Time::Ticks());
+			ImGui::Text("Tick %i",              iw::Time::Ticks());
+			ImGui::Text("Total time %f",        iw::Time::TotalTime());
+			ImGui::Text("Delta time %f",        iw::Time::DeltaTime());
+			ImGui::Text("Delta time scaled %f", iw::Time::DeltaTimeScaled());
+			
 			ImGui::Text("Renderer took %4.4f ms", renderTime  * 1000/*/ (iw::Time::Ticks() - ticks)*/);
 			ImGui::Text("Physics  took %4.4f ms", physicsTime * 1000/*/ (iw::Time::Ticks() - ticks)*/);
 			ImGui::Text("Eventbus took %4.4f ms", eventTime   * 1000/*/ (iw::Time::Ticks() - ticks)*/);
