@@ -35,7 +35,7 @@ namespace Engine {
 		ref<ComputeShader> mipmap = std::static_pointer_cast<ComputeShader>(Asset->Load<Shader>("shaders/vct/mipmap.shader"));
 
 		ref<Shader> voxelize = Asset->Load<Shader>("shaders/vct/voxelize.shader");
-		Renderer->InitShader(voxelize, LIGHTS);
+		Renderer->InitShader(voxelize, LIGHTS | SHADOWS);
 
 		Renderer->SetShader(voxelize);
 		voxelize->Handle()->GetParam("voxelBoundsScale")   ->SetAsFloats(&voxelBoundsScale,    3);
@@ -88,10 +88,14 @@ namespace Engine {
 					IPipelineParam* ambianceParam = m_voxelize->ShadowShader()->Handle()->GetParam("ambiance");
 					if (ambianceParam) ambianceParam->SetAsFloat (m_scene->Ambiance());
 
-					float* emissive = mesh.Material()->Get<float>("emissive");
+					float*       emissive  = mesh.Material()->Get<float>("emissive");
+					ref<Texture> shadowMap = mesh.Material()->GetTexture("shadowMap");
 
 					IPipelineParam* emissiveParam = m_voxelize->ShadowShader()->Handle()->GetParam("mat_emissive"); // to reset the emissive value in the shader :(
 					if (emissiveParam) emissiveParam->SetAsFloat(emissive ? *emissive : 0);
+
+					IPipelineParam* shadowMapParam = m_voxelize->ShadowShader()->Handle()->GetParam("mat_shadowMap"); // to reset the emissive value in the shader :(
+					if (shadowMapParam) shadowMapParam->SetAsTexture(shadowMap ? shadowMap->Handle() : nullptr, 1);
 				});
 
 				//if (i == 1) {

@@ -1,7 +1,16 @@
 #shader Vertex
 #version 450
 
+#define MAX_DIRECTIONAL_LIGHTS 4
+
 #include shaders/camera.shader
+
+layout(std140, column_major) uniform Shadows {
+	int shadows_pad1, shadows_pad2, shadows_pad3;
+
+	int directionalLightSpaceCount;
+	mat4 directionalLightSpaces[MAX_DIRECTIONAL_LIGHTS];
+};
 
 layout(location = 0) in vec3 vert;
 layout(location = 1) in vec3 normal;
@@ -13,6 +22,7 @@ out vec3 CameraPos;
 out vec3 WorldPos;
 out vec2 TexCoords;
 out mat3 TBN;
+out vec4 DirectionalLightPos[MAX_DIRECTIONAL_LIGHTS];
 
 uniform mat4 model;
 
@@ -29,12 +39,17 @@ void main() {
 	TexCoords = uv;
 	TBN       = mat3(T, B, N);
 
+	for (int i = 0; i < directionalLightSpaceCount; i++) {
+		DirectionalLightPos[i] = directionalLightSpaces[i] * worldPos;
+	}
+
 	gl_Position = viewProj * worldPos;
 }
 
 #shader Fragment
 #version 450
 
+#define MAX_DIRECTIONAL_LIGHTS 4
 #define ISQRT2 0.707106
 
 #include shaders/lights.shader
@@ -45,32 +60,33 @@ in vec3 CameraPos;
 in vec3 WorldPos;
 in vec2 TexCoords;
 in mat3 TBN;
+in vec4 DirectionalLightPos[MAX_DIRECTIONAL_LIGHTS];
 
 out vec4 PixelColor;
 
 // Material
 
-uniform vec4 mat_baseColor;
+uniform vec4  mat_baseColor;
 uniform float mat_reflectance;
 uniform float mat_refractive;
 
 uniform int mat_indirectDiffuse = 1;
 uniform int mat_indirectSpecular = 1;
 
-uniform float mat_hasVoxelMap;
+uniform float     mat_hasVoxelMap;
 uniform sampler3D mat_voxelMap;
 
-uniform float mat_hasDiffuseMap;
+uniform float     mat_hasDiffuseMap;
 uniform sampler2D mat_diffuseMap;
 
-uniform float mat_hasNormalMap;
+uniform float     mat_hasNormalMap;
 uniform sampler2D mat_normalMap;
 
-uniform float mat_hasReflectanceMap;
+uniform float     mat_hasReflectanceMap;
 uniform sampler2D mat_reflectanceMap;
 
-uniform float mat_hasShadowMap;
-uniform sampler2D mat_shadowMap;
+uniform float     mat_hasShadowMap;       // take out of material at some point
+uniform sampler2D mat_shadowMap;          // take out of material at some point
 
 // Voxel
 uniform vec3 voxelBoundsScale;
@@ -86,6 +102,16 @@ uniform int d_state;
 // Settings
 uniform int SHADOWS = 1;
 uniform int BLINN = 1;
+
+// Math functions
+
+float linstep(
+	float l,
+	float h,
+	float v)
+{
+	return clamp((v - l) / (h - l), 0.0, 1.0);
+}
 
 // -------------------------------------------------------
 //
@@ -249,7 +275,7 @@ vec3 indirectDiffuse(
 	vec3 B)            // Bitangent   of fragment
 {
 	float coneRatio   = 1.0f;
-	float maxDistance = 16.0f;
+	float maxDistance = 2.0f;
 
 	vec3 diffuse = vec3(0.0f);
 
@@ -269,7 +295,7 @@ vec3 indirectSpecular(
 	float reflectance) // Reflectance of fragment
 {
 	float coneRatio   = 0.2f;
-	float maxDistance = 16.0f;
+	float maxDistance = 8.0f;
 
 	// There are atificats at extreme angles, some form of the below if statement will fix it I think
 
@@ -315,6 +341,32 @@ vec3 indirectLighting(
 //	vec3 refraction = refract(-V, N, 1.0f / refractive);
 //	return TraceCone(W, refraction, coneRatio, maxDistance).xyz;
 //}
+
+// Shadows
+
+float DirectionalLightShadow(
+	vec4 coords4)
+{
+	if (mat_hasShadowMap == 0) {
+		return 1.0f;
+	}
+
+	vec3 coords = (coords4.xyz / coords4.w) * 0.5 + 0.5;
+	vec2 moments = texture(mat_shadowMap, coords.xy).rg;
+	float compare = coords.z;
+
+	//if (compare > 1.0) { // test if like not having this brantch is faster?
+	//	return 1.0;
+	//}
+
+	float p = step(compare, moments.x);
+	float v = max(moments.y - moments.x * moments.x, 0.00002);
+
+	float d = compare - moments.x;
+	float pMax = linstep(0.2, 1.0, v / (v + d * d));
+
+	return min(max(p, pMax), 1.0);
+}
 
 void main() {
 	// Color
@@ -369,7 +421,9 @@ void main() {
 
 		vec3 lightColor = vec3(1.0f);//directionalLights[i].Color;
 
-		color += directLighting  (WorldPos, N, V, L, lightColor, baseColor, reflectance, refractive);
+		color += directLighting(WorldPos, N, V, L, lightColor, baseColor, reflectance, refractive)
+			   * DirectionalLightShadow(DirectionalLightPos[i]);
+
 		color += indirectLighting(WorldPos, N, T, B, V, reflectance);
 	}
 

@@ -41,7 +41,7 @@
   </library_effects>
   <library_images>
     <image id="dirt_grass_png" name="dirt_grass_png">
-      <init_from>textures/dirt%20grass.png</init_from>
+      <init_from>textures/forest_path/baseColor_grass.png</init_from>
     </image>
   </library_images>
   <library_materials>

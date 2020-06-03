@@ -84,8 +84,17 @@ bool GameCameraController::On(
 		//	break;
 		//}
 		case iw::val(Actions::START_LEVEL): {
-			follow = e.as<StartLevelEvent>().CameraFollow;
-			//transitionToCenter = !follow;
+			StartLevelEvent& event = e.as<StartLevelEvent>();
+
+			follow = event.CameraFollow;
+
+			//if (event.LevelName == "levels/forest/forest23.json") {
+			//	y = 41.25f;
+			//}
+//
+			//else {
+			//	y = 27.15f;
+			//}
 
 			break;
 		}

@@ -137,7 +137,7 @@ namespace iw {
 		ref<Shader> dirIShadowShader   = Asset->Load<Shader>("shaders/lights/directional_instanced.shader");
 		//ref<Shader> pointIShadowShader = Asset->Load<Shader>("shaders/lights/point_instanced.shader");
 		
-		Renderer->InitShader(vct,   CAMERA | LIGHTS);
+		Renderer->InitShader(vct,   CAMERA | SHADOWS | LIGHTS);
 		Renderer->InitShader(phong, CAMERA | SHADOWS | LIGHTS);
 		Renderer->InitShader(gaussian, CAMERA);
 		Renderer->InitShader(dirShadowShader,  CAMERA);
@@ -145,7 +145,8 @@ namespace iw {
 		Renderer->InitShader(dirIShadowShader);
 		//Renderer->InitShader(pointIShadowShader);
 		
-		//vct->Handle()->GetParam("sky")->SetAsFloats(&iw::vector3(0.25f, .75f, 1.0f), 3);
+		Renderer->SetShader(vct);
+		vct->Handle()->GetParam("SHADOWS")->SetAsInt(0);
 
 		// Directional light shadow map textures & target
 
@@ -387,7 +388,7 @@ namespace iw {
 	}
 
 	float f = 0;
-	bool s = 1;
+	bool s = 0;
 	bool b = 1;
 
 	void SandboxLayer::PostUpdate() {

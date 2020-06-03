@@ -45,7 +45,7 @@ LevelSystem::LevelSystem(
 
 	//currentLevel = 0;
 
-	currentLevelName = "levels/forest/forest18.json";
+	currentLevelName = "levels/forest/forest03.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 63);
 	closedColor = iw::Color::From255(201, 66, 66, 63);
@@ -180,7 +180,7 @@ bool LevelSystem::On(
 
 			levelEntity = LoadLevel(currentLevelName);
 
-			Bus->push<StartLevelEvent>(currentLevel.CameraFollow, currentLevel.InPosition);
+			Bus->push<StartLevelEvent>(currentLevelName, currentLevel.CameraFollow, currentLevel.InPosition);
 
 			break;
 		}
@@ -230,7 +230,7 @@ bool LevelSystem::On(
 				current->Position = 0;
 			}
 
-			Bus->push<StartLevelEvent>(currentLevel.CameraFollow, currentLevel.InPosition);
+			Bus->push<StartLevelEvent>(currentLevelName, currentLevel.CameraFollow, currentLevel.InPosition);
 
 			if (sequence) {
 				sequence->restart();
@@ -259,9 +259,8 @@ iw::Entity LevelSystem::LoadLevel(
 		for (iw::Mesh& mesh : model->GetMeshes()) {
 			mesh.SetMaterial(mesh.Material()->MakeInstance());
 
-			if (iii == 0 && false) { // ground
+			if (iii == 0 /*&& false*/) { // ground
 				mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/phong.shader"));
-				mesh.Material()->SetTexture("shadowMap", Asset->Load<iw::Texture>("SunShadowMap"));
 			}
 
 			else {
@@ -270,6 +269,7 @@ iw::Entity LevelSystem::LoadLevel(
 
 			iii++;
 			
+			mesh.Material()->SetTexture("shadowMap", Asset->Load<iw::Texture>("SunShadowMap"));
 			//mesh.Material()->SetTexture("shadowMap2", Asset->Load<iw::Texture>("LightShadowMap")); // shouldnt be part of material
 
 			//mesh.Material()->Set("roughness", 0.9f);
@@ -342,8 +342,8 @@ iw::Entity LevelSystem::LoadLevel(
 			}
 		}
 
-		m->GetMesh(0).Material()->Set("baseColor", iw::Color(1, 0.9f, 0.9f));
-		m->GetMesh(0).Material()->Set("reflectance", 1.0f);
+		//m->GetMesh(0).Material()->Set("baseColor", iw::Color(0.8f, 0.8f, 0.8f));
+		//m->GetMesh(0).Material()->Set("reflectance", 1.0f);
 
 		//e->Timer = e->ChargeTime;
 

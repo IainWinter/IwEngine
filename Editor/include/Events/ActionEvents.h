@@ -89,13 +89,16 @@ struct ResetLevelEvent
 struct StartLevelEvent
 	: iw::SingleEvent
 {
+	std::string LevelName;
 	bool CameraFollow;
 	iw::vector2 PlayerPosition;
 
 	StartLevelEvent(
+		std::string levelName,
 		bool cameraFollow,
 		iw::vector2 playerPosition)
 		: iw::SingleEvent(iw::val(Actions::START_LEVEL))
+		, LevelName(levelName)
 		, CameraFollow(cameraFollow)
 		, PlayerPosition(playerPosition)
 	{}
