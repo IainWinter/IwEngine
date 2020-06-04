@@ -263,7 +263,7 @@ iw::Entity LevelSystem::LoadLevel(
 		for (iw::Mesh& mesh : model->GetMeshes()) {
 			mesh.SetMaterial(mesh.Material()->MakeInstance());
 
-			if (iii == 0 /*&& false*/) { // ground
+			if (iii == 0 && false) { // ground
 				mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/phong.shader"));
 
 				if (mesh.Data()->Description().HasBuffer(iw::bName::COLOR)) {
@@ -274,6 +274,11 @@ iw::Entity LevelSystem::LoadLevel(
 
 			else {
 				mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/vct/vct.shader"));
+
+				if (mesh.Data()->Description().HasBuffer(iw::bName::COLOR)) {
+					mesh.Material()->SetTexture("diffuseMap2", Asset->Load<iw::Texture>("textures/dirt/baseColor.jpg"));
+					mesh.Material()->SetTexture("normalMap2", Asset->Load<iw::Texture>("textures/dirt/normal.jpg"));
+				}
 			}
 
 			iii++;

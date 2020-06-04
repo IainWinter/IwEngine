@@ -17,11 +17,13 @@ layout(location = 1) in vec3 normal;
 layout(location = 2) in vec3 tangent;
 layout(location = 3) in vec3 bitangent;
 layout(location = 4) in vec2 uv;
+layout(location = 5) in vec4 color;
 
 out vec3 CameraPos;
 out vec3 WorldPos;
 out vec2 TexCoords;
 out mat3 TBN;
+out vec4 Color;
 out vec4 DirectionalLightPos[MAX_DIRECTIONAL_LIGHTS];
 
 uniform mat4 model;
@@ -38,6 +40,7 @@ void main() {
 	WorldPos  = worldPos.xyz;
 	TexCoords = uv;
 	TBN       = mat3(T, B, N);
+	Color     = color;
 
 	for (int i = 0; i < directionalLightSpaceCount; i++) {
 		DirectionalLightPos[i] = directionalLightSpaces[i] * worldPos;
@@ -60,6 +63,7 @@ in vec3 CameraPos;
 in vec3 WorldPos;
 in vec2 TexCoords;
 in mat3 TBN;
+in vec4 Color;
 in vec4 DirectionalLightPos[MAX_DIRECTIONAL_LIGHTS];
 
 out vec4 PixelColor;
@@ -79,8 +83,14 @@ uniform sampler3D mat_voxelMap;
 uniform float     mat_hasDiffuseMap;
 uniform sampler2D mat_diffuseMap;
 
+uniform float     mat_hasDiffuseMap2; // seperate into another shader?
+uniform sampler2D mat_diffuseMap2;
+
 uniform float     mat_hasNormalMap;
 uniform sampler2D mat_normalMap;
+
+uniform float     mat_hasNormalMap2;
+uniform sampler2D mat_normalMap2;
 
 uniform float     mat_hasReflectanceMap;
 uniform sampler2D mat_reflectanceMap;
@@ -374,15 +384,29 @@ void main() {
 	vec4 baseColor = mat_baseColor;
 	if (mat_hasDiffuseMap == 1) {
 		baseColor = texture(mat_diffuseMap, TexCoords);
+		baseColor.rgb = sRGBToLinear(baseColor.rgb);
 	}
 
-	baseColor.rgb = sRGBToLinear(baseColor.rgb); // should this only be for the texture?
+	if (mat_hasDiffuseMap2 == 1) {
+		vec4 baseColor2 = texture(mat_diffuseMap2, TexCoords);
+		baseColor2.rgb = sRGBToLinear(baseColor2.rgb);
+
+		baseColor = baseColor  *         Color.r
+			      + baseColor2 * (1.0f - Color.r);
+	}
 
 	// Normal
 
 	vec3 normal = TBN[2];
 	if (mat_hasNormalMap == 1) {
 		normal = TBN * texture(mat_normalMap, TexCoords).xyz;
+	}
+
+	if (mat_hasNormalMap2 == 1) {
+		vec3 normal2 = TBN * texture(mat_normalMap2, TexCoords).xyz;
+
+		normal = normal  *         Color.r
+			   + normal2 * (1.0f - Color.r);
 	}
 
 	// Reflectance
@@ -394,9 +418,7 @@ void main() {
 
 	// Refractive
 
-	float refractive = mat_refractive;
-
-	vec3 color = vec3(ambiance);
+	float refractive = mat_refractive; 
 
 	vec3 T = normalize(TBN[0]);
 	vec3 B = normalize(TBN[1]);

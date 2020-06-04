@@ -95,6 +95,8 @@ namespace iw {
 
 		AudioSpaceStudio* studio = Audio->AsStudio();
 
+		Renderer->Device->Clear();
+
 		studio->SetVolume(0.25f);
 
 		studio->LoadMasterBank("Master.bank");
