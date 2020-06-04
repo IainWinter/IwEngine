@@ -27,6 +27,10 @@ namespace Engine {
 			vector3    scale    = vector3::one,
 			quaternion rotation = quaternion::identity);
 
+		IWCOMMON_API
+		static Transform FromMatrix(
+			matrix4 transformation);
+
 		IWCOMMON_API matrix4 Transformation() const;
 		IWCOMMON_API vector3 Forward()        const;
 		IWCOMMON_API vector3 Right()          const;
@@ -59,7 +63,8 @@ namespace Engine {
 
 		IWCOMMON_API
 		void SetParent(
-			Transform* transform);
+			Transform* transform,
+			bool cleanTree = true);
 	};
 }
 

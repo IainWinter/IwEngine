@@ -318,12 +318,12 @@ namespace iw {
 
 		// Particle test
 
-		ref<Shader> particleShader = Asset->Load<Shader>("shaders/particle/simple.shader");
-		Renderer->InitShader(particleShader);
+		ref<Shader> particleShader = Asset->Load<Shader>("shaders/particle/phong.shader");
+		Renderer->InitShader(particleShader, SHADOWS | LIGHTS);
 
 		iw::Material particleMaterial(particleShader);
 		particleMaterial.Set("color", Color::From255(0, 60, 10));
-		particleMaterial.Initialize(Renderer->Device);
+		particleMaterial.SetTexture("shadowMap", sun->ShadowTarget()->Tex(0));
 
 		Mesh particle = Asset->Load<Model>("models/forest/tuft_simple.dae")->GetMesh(0);
 		particle.SetMaterial(particleMaterial.MakeInstance());

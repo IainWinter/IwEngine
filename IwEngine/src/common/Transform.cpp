@@ -20,6 +20,16 @@ namespace Engine {
 		, m_parent(nullptr)
 	{}
 
+	Transform Transform::FromMatrix(
+		matrix4 transformation)
+	{
+		return { 
+			transformation.translation(), 
+			transformation.scale(), 
+			transformation.rotation()
+		};
+	}
+
 	matrix4 Transform::Transformation() const {
 		return matrix4::create_scale(Scale)
 			* matrix4::create_from_quaternion(Rotation)
@@ -170,19 +180,20 @@ namespace Engine {
 	}
 
 	void Transform::SetParent(
-		Transform* transform)
+		Transform* transform,
+		bool cleanTree)
 	{
 		if (m_parent == transform) {
 			return;
 		}
 
-		if (m_parent) {
+		if (cleanTree && m_parent) {
 			m_parent->RemoveChild(this);
 		}
 
 		m_parent = transform;
 
-		if (m_parent) {
+		if (cleanTree && m_parent) {
 			m_parent->AddChild(this);
 		}
 	}

@@ -73,7 +73,12 @@ namespace Engine {
 			vector3 scale    = transform->Scale;
 			vector3 position = transform->Position;
 
-			for (iw::Mesh& mesh : model->GetMeshes()) {
+			for (int i = 0; i < model->MeshCount(); i++) {
+				Mesh&     mesh = model->GetMesh(i);
+				Transform tran = model->GetTransform(i);
+
+				tran.SetParent(transform, false);
+
 				if (!mesh.Material()->GetTexture("voxelMap")) {
 					mesh.Material()->SetTexture("voxelMap", VoxelWorld());
 				}
@@ -98,15 +103,7 @@ namespace Engine {
 					if (shadowMapParam) shadowMapParam->SetAsTexture(shadowMap ? shadowMap->Handle() : nullptr, 1);
 				});
 
-				//if (i == 1) {
-				//	transform->Scale *= 0.5f;
-				//	transform->Position.x += randf() * 1.0f / 64.0f;
-				//	transform->Position.y += randf() * 1.0f / 64.0f;
-				//	transform->Position.z += randf() * 1.0f / 64.0f;
-				//	i = 0;
-				//}
-
-				Renderer->DrawMesh(*transform, mesh);
+				Renderer->DrawMesh(tran, mesh);
 			}
 
 			transform->Scale    = scale;

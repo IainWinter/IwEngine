@@ -15,8 +15,14 @@ namespace Engine {
 		
 		for (auto entity : eca) {
 			auto [transform, model] = entity.Components.Tie<Components>();
-			for (iw::Mesh& mesh : model->GetMeshes()) {
-				Renderer->DrawMesh(transform, &mesh);
+
+			for (int i = 0; i < model->MeshCount(); i++) {
+				Mesh&     mesh = model->GetMesh(i);
+				Transform tran = model->GetTransform(i);
+
+				tran.SetParent(transform, false);
+
+				Renderer->DrawMesh(tran, mesh);
 			}
 		}
 

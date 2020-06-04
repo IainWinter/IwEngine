@@ -14,12 +14,15 @@ layout(std140, column_major) uniform Shadows {
 
 layout (location = 0) in vec3 vert;
 layout (location = 1) in vec3 normal;
+//tangents
 layout (location = 4) in vec2 uv;
+layout (location = 5) in vec4 color;
 
 out vec3 WorldPos;
 out vec3 CameraPos;
 out vec2 TexCoords;
 out vec3 Normal;
+out vec4 Color;
 out vec4 DirectionalLightPos[MAX_DIRECTIONAL_LIGHTS];
 
 uniform mat4 model;
@@ -42,6 +45,7 @@ void main() {
 	CameraPos = camPos.xyz;
 	TexCoords = uv;
 	Normal    = normalize(modelVector * normal);
+	Color     = color;
 
 	for (int i = 0; i < directionalLightSpaceCount; i++) {
 		DirectionalLightPos[i] = directionalLightSpaces[i] * worldPos;

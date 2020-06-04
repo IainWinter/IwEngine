@@ -8,6 +8,7 @@ in vec3 WorldPos;
 in vec3 CameraPos;
 in vec2 TexCoords;
 in vec3 Normal;
+in vec4 Color;
 in vec4 DirectionalLightPos[MAX_DIRECTIONAL_LIGHTS];
 
 out vec4 FragColor;
@@ -19,23 +20,29 @@ uniform float blinn;
 
 // material parameters
 
-uniform vec4 mat_baseColor;
+uniform vec4  mat_baseColor;
 uniform float mat_reflectance;
 uniform float mat_ao;
 
-uniform float mat_hasDiffuseMap;
+uniform float     mat_hasDiffuseMap;
 uniform sampler2D mat_diffuseMap;
 
-uniform float mat_hasNormalMap;
+uniform float     mat_hasDiffuseMap2; // seperate into another shader?
+uniform sampler2D mat_diffuseMap2;
+
+uniform float     mat_hasNormalMap;
 uniform sampler2D mat_normalMap;
 
-uniform float mat_hasReflectanceMap;
+uniform float     mat_hasNormalMap2;
+uniform sampler2D mat_normalMap2;
+
+uniform float     mat_hasReflectanceMap;
 uniform sampler2D mat_reflectanceMap;
 
-uniform float mat_hasAoMap;
+uniform float     mat_hasAoMap;
 uniform sampler2D mat_aoMap;
 
-uniform float mat_hasAlphaMaskMap;
+uniform float     mat_hasAlphaMaskMap;
 uniform sampler2D mat_alphaMaskMap;
 
 uniform float     mat_hasShadowMap;       // take out of material at some point
@@ -151,7 +158,7 @@ vec3 BRDF(
 }
 
 void main() {
-	// Discard is in alpha mask
+	// Discard if in alpha mask
 
 	if (mat_hasAlphaMaskMap == 1) {
 		if (0.5 > texture(mat_alphaMaskMap, TexCoords).r) {
@@ -164,15 +171,29 @@ void main() {
 	vec4 baseColor = mat_baseColor;
 	if (mat_hasDiffuseMap == 1) {
 		baseColor = texture(mat_diffuseMap, TexCoords);
+		baseColor.rgb = sRGBToLinear(baseColor.rgb);
 	}
 
-	baseColor.rgb = sRGBToLinear(baseColor.rgb);
+	if (mat_hasDiffuseMap2 == 1) {
+		vec4 baseColor2 = texture(mat_diffuseMap2, TexCoords);
+		baseColor2.rgb = sRGBToLinear(baseColor2.rgb);
+
+		baseColor = baseColor  *         Color.r
+		          + baseColor2 * (1.0f - Color.r);
+	}
 
 	// Normal
 
 	vec3 normal = Normal;
 	if (mat_hasNormalMap == 1) {
-		normal = texture(mat_normalMap, TexCoords).xyz * vec3(2) - vec3(1);
+		normal = texture(mat_normalMap, TexCoords).xyz;
+	}
+
+	if (mat_hasNormalMap2 == 1) {
+		vec3 normal2 = texture(mat_normalMap2, TexCoords).xyz;
+
+		normal = normal  *         Color.r
+		       + normal2 * (1.0f - Color.r);
 	}
 
 	// Reflectance

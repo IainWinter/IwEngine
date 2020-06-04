@@ -129,7 +129,7 @@ void PlayerSystem::Update(
 		auto [transform, body, player] = entity.Components.Tie<Components>();
 		
 		if (levelTransition) {
-			transitionSpeed += 0.01f;
+			transitionSpeed += iw::Time::DeltaTime() * 5;
 		}
 
 		if (transition || levelTransition) {
@@ -310,7 +310,7 @@ bool PlayerSystem::On(
 
 	if (player.Index() != iw::EntityHandle::Empty.Index) {
 		Player* p = player.Find<Player>();
-		if (  !p->Damaged
+		if (  true //!p->Damaged
 			&& p->Health > 0)
 		{
 			p->Damaged = true;

@@ -90,14 +90,21 @@ namespace Graphics {
 		{
 			MeshDescription description;
 
-			VertexBufferLayout instanceLayout(1);
-			instanceLayout.Push<float>(4);
-			instanceLayout.Push<float>(4);
-			instanceLayout.Push<float>(4);
-			instanceLayout.Push<float>(4);
+			VertexBufferLayout instanceM(1);
+			instanceM.Push<float>(4);
+			instanceM.Push<float>(4);
+			instanceM.Push<float>(4);
+			instanceM.Push<float>(4);
+
+			VertexBufferLayout instanceMVP(1);
+			instanceMVP.Push<float>(4);
+			instanceMVP.Push<float>(4);
+			instanceMVP.Push<float>(4);
+			instanceMVP.Push<float>(4);
 
 			description.DescribeBuffer(bName::POSITION, MakeLayout<float>(3));
-			description.DescribeBuffer(bName::UV1,      instanceLayout);
+			description.DescribeBuffer(bName::UV1, instanceM);
+			description.DescribeBuffer(bName::UV2, instanceMVP);
 
 			mesh.Data()->ConformMeshData(description);
 
@@ -117,7 +124,9 @@ namespace Graphics {
 		}
 
 		void UpdateParticleMesh() {
-			if (m_needsToUpdateBuffer) {
+			if (    m_needsToUpdateBuffer
+				|| m_camera->Outdated())
+			{
 				for (unsigned i : m_delete) {
 					m_particles.erase(m_particles.begin() + i);
 				}
@@ -136,13 +145,17 @@ namespace Graphics {
 
 				for (unsigned i = 0; i < count; i++) {
 					models[i] = m_particles[i].Transform.WorldTransformation();
+				}
 
-					if (m_camera) {
+				m_mesh.Data()->SetBufferData(bName::UV1, count, models);
+
+				if (m_camera) {
+					for (unsigned i = 0; i < count; i++) {
 						models[i] *= m_camera->ViewProjection();
 					}
 				}
 
-				m_mesh.Data()->SetBufferData(bName::UV1, count, models);
+				m_mesh.Data()->SetBufferData(bName::UV2, count, models);
 
 				delete[] models;
 

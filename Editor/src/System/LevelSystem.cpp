@@ -45,7 +45,7 @@ LevelSystem::LevelSystem(
 
 	//currentLevel = 0;
 
-	currentLevelName = "levels/forest/forest03.json";
+	currentLevelName = "levels/forest/forest05.a.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 63);
 	closedColor = iw::Color::From255(201, 66, 66, 63);
@@ -101,11 +101,15 @@ void LevelSystem::Update(
 		iw::Transform* current = levelEntity    .Find<iw::Transform>();
 		iw::Transform* next    = nextLevelEntity.Find<iw::Transform>();
 
-		speed += 0.01f;
+		speed += iw::Time::DeltaTime() * 5;
 
 		iw::vector3 target = currentLevel.LevelPosition;
 		target.z = target.y;
 		target.y = 0;
+
+		//if (levelDoor.Find<LevelDoor>()->GoBack) {
+		//	target = -target;
+		//}
 
 		current->Position = iw::lerp(current->Position, -target,        iw::Time::DeltaTime() * speed);
 		next   ->Position = iw::lerp(next   ->Position, iw::vector3(0), iw::Time::DeltaTime() * speed);
@@ -261,6 +265,11 @@ iw::Entity LevelSystem::LoadLevel(
 
 			if (iii == 0 /*&& false*/) { // ground
 				mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/phong.shader"));
+
+				if (mesh.Data()->Description().HasBuffer(iw::bName::COLOR)) {
+					mesh.Material()->SetTexture("diffuseMap2", Asset->Load<iw::Texture>("textures/dirt/baseColor.jpg"));
+					mesh.Material()->SetTexture("normalMap2", Asset->Load<iw::Texture>("textures/dirt/normal.jpg"));
+				}
 			}
 
 			else {
@@ -429,7 +438,6 @@ iw::Entity LevelSystem::LoadLevel(
 			ent = Space->CreateEntity<iw::Transform, iw::CapsuleCollider, iw::CollisionObject>();
 		}
 
-
 		iw::Transform*       transform = ent.Set<iw::Transform>(iw::vector3::unit_y);
 		iw::CapsuleCollider* collider  = ent.Set<iw::CapsuleCollider>(prefab);
 		iw::CollisionObject* object    = ent.Set<iw::CollisionObject>();
@@ -503,8 +511,8 @@ iw::Entity LevelSystem::LoadLevel(
 	// Spawning items
 	
 	if (currentLevelName == "levels/forest/forest05.a.json") {
-		Bus->push<SpawnItemEvent>(Item{ NOTE, 0 },       iw::vector3(0, 1, 5), levelTransform);
-		Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 0 }, iw::vector3(0, 1, 8), levelTransform);
+		Bus->push<SpawnItemEvent>(Item{ NOTE, 0 },       iw::vector3(0, 3, -2), levelTransform);
+		Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 0 }, iw::vector3(0, 1, 3), levelTransform);
 	}
 
 	// run a cut scene

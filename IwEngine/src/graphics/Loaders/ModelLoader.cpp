@@ -25,6 +25,11 @@ namespace Graphics {
 		Material& material,
 		aiMaterial* aimaterial);
 
+	void AddNodeToModel(
+		aiNode* node,
+		std::vector<Mesh>& meshes,
+		Model* model);
+
 	MeshLoader::MeshLoader(
 		AssetManager& asset)
 		: AssetLoader(asset)
@@ -123,7 +128,7 @@ namespace Graphics {
 		//	aiTexture* texture = scene->mTextures[0];
 		//}
 
-		Model* model = new Model();
+		std::vector<Mesh> meshes;
 
 		for (size_t i = 0; i < scene->mNumMeshes; i++) {
 			const aiMesh* aimesh = scene->mMeshes[i];
@@ -144,15 +149,15 @@ namespace Graphics {
 			}
 
 			// max of 8
-			for (unsigned i = 0; i < aimesh->GetNumColorChannels(); i++) {
-				bName channel = (bName)((unsigned)bName::COLOR + i);
-				description.DescribeBuffer(channel, MakeLayout<float>(4));
-			}
-
-			// max of 8
 			for (unsigned i = 0; i < aimesh->GetNumUVChannels(); i++) {
 				bName channel = (bName)((unsigned)bName::UV + i);
 				description.DescribeBuffer(channel, MakeLayout<float>(aimesh->mNumUVComponents[i]));
+			}
+
+			// max of 8
+			for (unsigned i = 0; i < aimesh->GetNumColorChannels(); i++) { // todo: move back above uvs
+				bName channel = (bName)((unsigned)bName::COLOR + i);
+				description.DescribeBuffer(channel, MakeLayout<float>(4));
 			}
 
 			MeshData* data = new MeshData(description);
@@ -233,7 +238,7 @@ namespace Graphics {
 			Mesh mesh = data->MakeInstance();
 			mesh.SetMaterial(materials.at(aimesh->mMaterialIndex));
 
-			model->AddMesh(mesh);
+			meshes.push_back(mesh);
 						
 			//if (aimesh->HasBones()) {
 			//	aiBone* aibone = aimesh->mBones[i];
@@ -261,9 +266,41 @@ namespace Graphics {
 			//}
 		}
 
+		Model* model = new Model();
+
+		AddNodeToModel(scene->mRootNode, meshes, model);
+
 		importer.FreeScene();
 
 		return model;
+	}
+
+	void AddNodeToModel(
+		aiNode* node,
+		std::vector<Mesh>& meshes,
+		Model* model)
+	{
+		if (node->mNumMeshes > 0) {
+			matrix4 transformation(
+				node->mTransformation.a1, node->mTransformation.a2, node->mTransformation.a3, node->mTransformation.a4,
+				node->mTransformation.b1, node->mTransformation.b2, node->mTransformation.b3, node->mTransformation.b4,
+				node->mTransformation.c1, node->mTransformation.c2, node->mTransformation.c3, node->mTransformation.c4,
+				node->mTransformation.d1, node->mTransformation.d2, node->mTransformation.d3, node->mTransformation.d4);
+
+			transformation.transpose();
+
+			Transform transform = Transform::FromMatrix(transformation);
+
+			for (unsigned i = 0; i < node->mNumMeshes; i++) {
+				unsigned mesh = node->mMeshes[0];
+
+				model->AddMesh(meshes.at(mesh), transform);
+			}
+		}
+
+		for (unsigned i = 0; i < node->mNumChildren; i++) {
+			AddNodeToModel(node->mChildren[i], meshes, model);
+		}
 	}
 
 	void LoadTexture(

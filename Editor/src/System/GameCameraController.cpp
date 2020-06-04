@@ -58,43 +58,49 @@ bool GameCameraController::On(
 	iw::ActionEvent& e)
 {
 	switch (e.Action) {
-		//case iw::val(Actions::GOTO_NEXT_LEVEL): {
-		//	follow = false;
-		//	transitionToCenter = true;
-		//	timeout = iw::Time::TotalTime() + 1;
+		case iw::val(Actions::GOTO_NEXT_LEVEL): {
+			follow = false;
 
-		//	GoToNextLevelEvent& event = e.as<GoToNextLevelEvent>();
+			GoToNextLevelEvent& event = e.as<GoToNextLevelEvent>();
 
-		//	center.x = event.CenterPosition.x;
-		//	center.z = event.CenterPosition.y;
+			//center.x = event.CenterPosition.x;
+			//center.z = event.CenterPosition.y;
 
-		//	if (event.LevelName == "levels/forest/forest23.json") {
-		//		y = 41.25f;
-		//	}
+			if (event.LevelName == "levels/forest/forest23.json") {
+				y = 41.25f;
+			}
 
-		//	else {
-		//		y = 27.15f;
-		//	}
+			else if (event.LevelName == "levels/forest/forest05.a.json") {
+				y = 17.15f;
+			}
 
-		//	//if (event.CameraFollow) {
-		//	//	center.x += event.PlayerPosition.x;
-		//	//	center.z += event.PlayerPosition.y;
-		//	//}
+			else {
+				y = 27.15f;
+			}
 
-		//	break;
-		//}
+			//if (event.CameraFollow) {
+			//	center.x += event.PlayerPosition.x;
+			//	center.z += event.PlayerPosition.y;
+			//}
+
+			break;
+		}
 		case iw::val(Actions::START_LEVEL): {
 			StartLevelEvent& event = e.as<StartLevelEvent>();
 
 			follow = event.CameraFollow;
 
-			//if (event.LevelName == "levels/forest/forest23.json") {
-			//	y = 41.25f;
-			//}
-//
-			//else {
-			//	y = 27.15f;
-			//}
+			if (event.LevelName == "levels/forest/forest23.json") { // dont need only for starting in debug mode
+				y = 41.25f;
+			}
+
+			else if (event.LevelName == "levels/forest/forest05.a.json") {
+				y = 17.15f;
+			}
+
+			else {
+				y = 27.15f;
+			}
 
 			break;
 		}
