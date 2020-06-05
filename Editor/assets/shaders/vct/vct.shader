@@ -425,6 +425,8 @@ void main() {
 	vec3 N = normalize(normal);
 	vec3 V = normalize(CameraPos - WorldPos);
 
+	vec3 color = vec3(0);
+
 	for (int i = 0; i < pointLightCount; i++) {
 		vec3 P = pointLights[i].Position;
 		vec3 L = P - WorldPos;

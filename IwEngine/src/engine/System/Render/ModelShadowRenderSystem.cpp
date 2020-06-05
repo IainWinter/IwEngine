@@ -12,7 +12,9 @@ namespace Engine {
 		EntityComponentArray& eca)
 	{
 		for (iw::Light* light : m_scene->Lights()) {
-			if (!light->CanCastShadows()) {
+			if (   !light->CanCastShadows()
+				/*|| !light->Outdated()*/)
+			{
 				continue;
 			}
 
@@ -23,8 +25,12 @@ namespace Engine {
 
 				for (int i = 0; i < model->MeshCount(); i++) {
 					Mesh&     mesh = model->GetMesh(i);
-					Transform tran = model->GetTransform(i);
 
+					if (!mesh.Material()->CastShadows()) {
+						continue;
+					}
+
+					Transform tran = model->GetTransform(i);
 					tran.SetParent(transform, false);
 
 					Renderer->DrawMesh(tran, mesh);

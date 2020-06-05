@@ -45,7 +45,7 @@ LevelSystem::LevelSystem(
 
 	//currentLevel = 0;
 
-	currentLevelName = "levels/forest/forest05.a.json";
+	currentLevelName = "levels/forest/forest01.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 63);
 	closedColor = iw::Color::From255(201, 66, 66, 63);
@@ -78,6 +78,7 @@ int LevelSystem::Initialize() {
 
 float speed = 1.0f; // garbo
 float timeout = 0.0f;
+iw::vector2 lastLevelPosition = 0;
 
 void LevelSystem::Update(
 	iw::EntityComponentArray& view)
@@ -103,21 +104,26 @@ void LevelSystem::Update(
 
 		speed += iw::Time::DeltaTime() * 5;
 
+		LevelDoor* currentDoor = levelDoor.Find<LevelDoor>();
+		LevelDoor* nextDoor = nextLevelDoor.Find<LevelDoor>();
+
 		iw::vector3 target = currentLevel.LevelPosition;
+		if (   levelDoor != iw::EntityHandle::Empty
+			&& currentDoor && currentDoor->GoBack
+			|| nextDoor    && nextDoor->GoBack)
+		{
+			target = -lastLevelPosition;
+		}
+
 		target.z = target.y;
 		target.y = 0;
-
-		//if (levelDoor.Find<LevelDoor>()->GoBack) {
-		//	target = -target;
-		//}
 
 		current->Position = iw::lerp(current->Position, -target,        iw::Time::DeltaTime() * speed);
 		next   ->Position = iw::lerp(next   ->Position, iw::vector3(0), iw::Time::DeltaTime() * speed);
 
 		if (   iw::Time::TotalTime() - timeout > 0
 			&& iw::almost_equal(next->Position.x, 0, 2)
-			&& iw::almost_equal(next->Position.z, 0, 2)
-			&& iw::DeltaTime() < 0.5f)
+			&& iw::almost_equal(next->Position.z, 0, 2))
 		{
 			Bus->push<AtNextLevelEvent>();
 
@@ -184,6 +190,10 @@ bool LevelSystem::On(
 
 			levelEntity = LoadLevel(currentLevelName);
 
+			if (levelDoor == iw::EntityHandle::Empty) {
+				levelDoor = nextLevelDoor;
+			}
+
 			Bus->push<StartLevelEvent>(currentLevelName, currentLevel.CameraFollow, currentLevel.InPosition);
 
 			break;
@@ -192,6 +202,10 @@ bool LevelSystem::On(
 			if (!levelDoor) break;
 
 			LevelDoor* door = levelDoor.Find<LevelDoor>();
+			if (door == nullptr) {
+				door = nextLevelDoor.Find<LevelDoor>();
+			}
+
 			door->State = LevelDoorState::OPEN;
 			door->ColorTimer = 0.25f;
 
@@ -202,8 +216,23 @@ bool LevelSystem::On(
 
 			iw::vector2 lvpos = -currentLevel.LevelPosition;
 
-			currentLevelName = event.LevelName.length() > 0 ? event.LevelName : levelDoor.Find<LevelDoor>()->NextLevel;
-			nextLevelEntity  = LoadLevel(currentLevelName); // changes current level
+			if (event.LevelName.length() > 0) {
+				currentLevelName = event.LevelName;
+			}
+
+			else if (nextLevelDoor != iw::EntityHandle::Empty) {
+				currentLevelName = nextLevelDoor.Find<LevelDoor>()->NextLevel;
+			}
+
+			else if (levelDoor != iw::EntityHandle::Empty) {
+				currentLevelName = levelDoor.Find<LevelDoor>()->NextLevel;
+			}
+
+			else {
+				LOG_WARNING << ":(";
+			}
+
+			nextLevelEntity = LoadLevel(currentLevelName); // changes current level
 
 			if (event.GoBack) {
 				currentLevel.InPosition = -event.Position + event.Position.normalized() * 6;
@@ -227,8 +256,13 @@ bool LevelSystem::On(
 			if (nextLevelEntity != iw::EntityHandle::Empty) {
 				DestroyAll(levelEntity.Find<iw::Transform>());
 
+				lastLevelPosition = currentLevel.LevelPosition;
+
 				levelEntity = nextLevelEntity;
 				nextLevelEntity = iw::Entity();
+
+				levelDoor = nextLevelDoor;
+				nextLevelDoor = iw::Entity();
 
 				iw::Transform* current = levelEntity.Find<iw::Transform>();
 				current->Position = 0;
@@ -476,7 +510,7 @@ iw::Entity LevelSystem::LoadLevel(
 		iw::Entity ent = Space->CreateEntity<iw::Transform, iw::Model, iw::SphereCollider, iw::CollisionObject, LevelDoor>();
 	
 		if (i == 0) {
-			levelDoor = ent;
+			nextLevelDoor = ent;
 		}
 
 		LevelDoor*           door      = ent.Set<LevelDoor>(currentLevel.Doors[i]);
@@ -516,7 +550,7 @@ iw::Entity LevelSystem::LoadLevel(
 	// Spawning items
 	
 	if (currentLevelName == "levels/forest/forest05.a.json") {
-		Bus->push<SpawnItemEvent>(Item{ NOTE, 0 },       iw::vector3(0, 3, -2), levelTransform);
+		Bus->push<SpawnItemEvent>(Item{ NOTE, 0 },       iw::vector3(3, 1, -2), levelTransform);
 		Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 0 }, iw::vector3(0, 1, 3), levelTransform);
 	}
 

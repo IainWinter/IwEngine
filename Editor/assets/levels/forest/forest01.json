@@ -1,5 +1,5 @@
 {
-  "CameraFollow": true,
+  "CameraFollow": false,
   "InPosition": {
     "x": 0.000000,
     "y": 0.000000
@@ -33,7 +33,7 @@
     "size": 1,
     "items": [
       {
-        "x": 22.000000,
+        "x": 25.000000,
         "y": 0.000000
       }
     ]
@@ -56,7 +56,7 @@
             "y": 0.000000,
             "z": 0.000000
           },
-          "D": -28.000000
+          "D": -12.000000
         }
       },
       {
@@ -116,8 +116,8 @@
     "items": [
       {
         "ModelName": {
-          "size": 25,
-          "string": "models/block/forest01.dae"
+          "size": 27,
+          "string": "models/forest/forest01.gltf"
         },
         "Transform": {
           "Position": {

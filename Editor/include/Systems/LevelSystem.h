@@ -28,6 +28,7 @@ private:
 	bool transition;
 
 	iw::Entity levelDoor;
+	iw::Entity nextLevelDoor;
 	iw::Color openColor;
 	iw::Color closedColor;
 
