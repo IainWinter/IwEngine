@@ -16,7 +16,7 @@ namespace util {
 	public:
 		IWUTIL_API
 		linear_allocator(
-			size_t size);
+			size_t size = 128);
 
 		GEN_5(IWUTIL_API, linear_allocator);
 

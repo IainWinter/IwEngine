@@ -36,4 +36,9 @@ private:
 		iw::vector3 position,
 		iw::quaternion rot,
 		int index);
+
+	iw::Transform* SpawnEnemy(
+		Enemy prefab,
+		iw::vector3 position,
+		iw::vector3 velocity);
 };

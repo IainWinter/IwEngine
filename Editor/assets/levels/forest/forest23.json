@@ -12,7 +12,7 @@
     "size": 1,
     "items": [
       {
-        "Type": 16,
+        "Type": 256,
         "Bullet": {
           "Type": 0,
           "Speed": 5.000000

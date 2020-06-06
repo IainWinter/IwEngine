@@ -165,7 +165,7 @@ iw::Transform* ConsumableSystem::SpawnConsumable(
 
 	switch (prefab.Type) {
 		case SLOWMO: {
-			consumable.AddComponent<Slowmo>(3.0f);
+			consumable.Add<Slowmo>(3.0f);
 		}
 	}
 

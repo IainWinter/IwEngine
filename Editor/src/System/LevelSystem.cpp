@@ -45,7 +45,7 @@ LevelSystem::LevelSystem(
 
 	//currentLevel = 0;
 
-	currentLevelName = "levels/forest/forest22.json";
+	currentLevelName = "levels/forest/forest23.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 63);
 	closedColor = iw::Color::From255(201, 66, 66, 63);
@@ -105,12 +105,12 @@ void LevelSystem::Update(
 		speed += iw::Time::DeltaTime() * 5;
 
 		LevelDoor* currentDoor = levelDoor.Find<LevelDoor>();
-		LevelDoor* nextDoor = nextLevelDoor.Find<LevelDoor>();
+		//LevelDoor* nextDoor = nextLevelDoor.Find<LevelDoor>(); // was crashing because currentDoor was moved to nextDoor for some reason??
 
 		iw::vector3 target = currentLevel.LevelPosition;
 		if (   levelDoor != iw::EntityHandle::Empty
 			&& currentDoor && currentDoor->GoBack
-			|| nextDoor    && nextDoor->GoBack)
+			/*|| nextDoor    && nextDoor->GoBack*/)
 		{
 			target = -lastLevelPosition;
 		}
@@ -357,93 +357,8 @@ iw::Entity LevelSystem::LoadLevel(
 
 	// Enemies
 
-	firstEnemy = iw::Entity();
-
 	for (size_t i = 0; i < currentLevel.Enemies.size(); i++) {
-		iw::Entity ent = Space->CreateEntity<iw::Transform, iw::Model, iw::SphereCollider, iw::CollisionObject, Enemy>();
-		
-		Enemy*               e = ent.Set<Enemy>(currentLevel.Enemies[i]);
-		iw::Transform*       t = ent.Set<iw::Transform>();
-		iw::SphereCollider*  s = ent.Set<iw::SphereCollider>(iw::vector3::zero, 1.0f);
-		iw::CollisionObject* c = ent.Set<iw::CollisionObject>();
-
-		if (!firstEnemy) {
-			firstEnemy = ent;
-		}
-
-		iw::Model* m;
-
-		switch (currentLevel.Enemies[i].Type) {
-			case EnemyType::MINI_BOSS_BOX_SPIN: {
-				e->Health = 3;
-				e->ScoreMultiple = 10;
-				t->Scale = 0.75f;
-				m = ent.Set<iw::Model>(*Asset->Load<iw::Model>("Box"));
-
-				break;
-			}
-			default: {
-				e->Health = 1;
-				e->ScoreMultiple = 1;
-				m = ent.Set<iw::Model>(*Asset->Load<iw::Model>("Tetrahedron"));
-				break;
-			}
-		}
-
-		//m->GetMesh(0).Material()->Set("baseColor", iw::Color(0.8f, 0.8f, 0.8f));
-		//m->GetMesh(0).Material()->Set("reflectance", 1.0f);
-
-		//e->Timer = e->ChargeTime;
-
-		t->Position.x = currentLevel.Positions[i].x;
-		t->Position.z = currentLevel.Positions[i].y;
-		t->Position.y = 1;
-
-		levelTransform->AddChild(t);
-
-		c->SetCol(s);
-		c->SetTrans(t);
-		//c->SetIsTrigger(true); // temp should make collision layers
-
-		c->SetOnCollision([&](iw::Manifold& man, float dt) {
-			iw::Entity enemy  = Space->FindEntity<iw::CollisionObject>(man.ObjA);
-			iw::Entity player = Space->FindEntity<iw::Rigidbody>(man.ObjB);
-
-			if (!enemy || !player) {
-				return;
-			}
-
-			Enemy*  enemyComponent  = enemy .Find<Enemy>();
-			Player* playerComponent = player.Find<Player>();
-
-			if (!enemyComponent || !playerComponent) {
-				return;
-			}
-
-			if (playerComponent->Timer <= 0.0f) {
-				return;
-			}
-
-			enemyComponent->Health -= 1;
-
-			if (enemyComponent->Health > 0) {
-				return;
-			}
-
-			iw::Transform* transform  = enemy.Find<iw::Transform>();
-
-			float score = floor(5 * (1.0f - playerComponent->Timer / playerComponent->DashTime)) * 200 + 200;
-
-			Audio->AsStudio()->CreateInstance("enemyDeath");
-
-			Bus->push<SpawnEnemyDeath>(transform->Position, transform->Parent());
-			Bus->push<GiveScoreEvent>(transform->Position, score * enemyComponent->ScoreMultiple);
-
-			transform->SetParent(nullptr);
-			Space->DestroyEntity(enemy.Index());
-		});
-
-		Physics->AddCollisionObject(c);
+		Bus->send<SpawnEnemyEvent>(currentLevel.Enemies[i], currentLevel.Positions[i], 0, levelTransform);
 	}
 
 	// Colliders

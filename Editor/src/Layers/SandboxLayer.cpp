@@ -50,6 +50,8 @@
 #include "iw/engine/Events/Seq/MoveToTarget.h"
 #include "iw/engine/Events/Seq/DestroyEntity.h"
 
+#include "iw/entity/Prefab.h"
+
 namespace iw {
 	struct ModelUBO {
 		matrix4 model;
@@ -90,7 +92,6 @@ namespace iw {
 	iw::event_seq seq;
 
 	int SandboxLayer::Initialize() {
-
 		// Audio
 
 		AudioSpaceStudio* studio = Audio->AsStudio();

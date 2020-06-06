@@ -16,8 +16,11 @@ namespace ECS {
 		size_t Size;
 		const char* Name;
 
-		static size_t Hash(
-			std::initializer_list<iw::ref<Component>> components);
+		static inline size_t Hash(
+			std::initializer_list<iw::ref<Component>> components)
+		{
+			return Hash(components.begin(), components.end());
+		}
 
 		template<
 			typename _itr>

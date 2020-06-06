@@ -199,6 +199,29 @@ namespace ECS {
 		return Entity(entity, this);
 	}
 
+	IWENTITY_API
+	Entity Space::Instantiate(
+		const Prefab& prefab)
+	{
+		Entity entity = CreateEntity<>();
+
+		auto components  = prefab.Components();
+		auto compDataItr = prefab.ComponentData().begin();
+
+		for (iw::ref<Component> component : components) {
+			AddComponent(entity.Handle, component);
+			
+			iw::ref<EntityData>& data = m_entityManager.GetEntityData(entity.Index());
+			void* compData = m_componentManager.GetComponentPtr(data, component);
+
+			memcpy(compData, *compDataItr, component->Size);
+
+			compDataItr++;
+		}
+
+		return entity;
+	}
+
 	void Space::Clear() {
 #ifdef IW_USE_EVENTS
 		if (m_bus) {

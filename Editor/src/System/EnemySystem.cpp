@@ -298,19 +298,23 @@ void EnemySystem::Update(
 							float rot = enemy->Timer * iw::Pi2 * 2;
 							iw::quaternion offset = iw::quaternion::from_euler_angles(0, rot, 0);
 
-							iw::Transform* bullet = SpawnBullet(
-								enemy->Bullet,
-								transform->Position,
-								transform->Rotation.inverted() * offset,
-								entity.Index
-							);
+							Enemy child;
+							child.Bullet = enemy->Bullet;
+							child.Health = 1;
+							child.FireTime   = .5f;
+							child.ChargeTime = .1f;
+							child.Type = EnemyType::SPIN;
 
-							transform->Parent()->AddChild(bullet);
+							Bus->push<SpawnEnemyEvent>(
+								child,
+								transform->Position,
+								transform->Right()* transform->Rotation.inverted() * 5,
+								transform->Parent());
 						}
 
 						enemy->Timer2 += iw::Time::DeltaTimeScaled();
 
-						if (enemy->Timer2 > 0.02f) {
+						if (enemy->Timer2 > 0.2f) {
 							enemy->Timer2 = 0.0f;
 						}
 
@@ -367,6 +371,12 @@ bool EnemySystem::On(
 		case iw::val(Actions::START_LEVEL):
 		case iw::val(Actions::RESET_LEVEL): {
 			m_levelResetTimer = 0;
+			break;
+		}
+		case iw::val(Actions::SPAWN_ENEMY): {
+			SpawnEnemyEvent& event = e.as<SpawnEnemyEvent>();
+			iw::Transform* trans = SpawnEnemy(event.Enemy, event.Position, event.Velocity);
+			event.Level->AddChild(trans);
 			break;
 		}
 	}
@@ -446,6 +456,105 @@ iw::Transform* EnemySystem::SpawnBullet( // this should be in bullet system i gu
 	});
 
 	Physics->AddRigidbody(r);
+
+	return t;
+}
+
+iw::Transform* EnemySystem::SpawnEnemy(
+	Enemy prefab,
+	iw::vector3 position,
+	iw::vector3 velocity)
+{
+	iw::Entity ent = Space->CreateEntity<iw::Transform, iw::Model, iw::SphereCollider, Enemy>();
+
+	Enemy*               e = ent.Set<Enemy>(prefab);
+	iw::Transform*       t = ent.Set<iw::Transform>();
+	iw::SphereCollider*  s = ent.Set<iw::SphereCollider>(iw::vector3::zero, 1.0f);
+
+	iw::CollisionObject* c;
+
+	if (velocity.length_squared() == 0) {
+		c = ent.Set<iw::CollisionObject>();
+		Physics->AddCollisionObject(c);
+	}
+
+	else {
+		iw::Rigidbody* r = ent.Set<iw::Rigidbody>();
+		r->SetVelocity(velocity);
+		Physics->AddRigidbody(r);
+
+		c = r;
+	}
+
+	iw::Model* m;
+
+	switch (prefab.Type) {
+	case EnemyType::MINI_BOSS_BOX_SPIN: {
+		e->Health = 3;
+		e->ScoreMultiple = 10;
+		t->Scale = 0.75f;
+		m = ent.Set<iw::Model>(*Asset->Load<iw::Model>("Box"));
+
+		break;
+	}
+	default: {
+		e->Health = 1;
+		e->ScoreMultiple = 1;
+		m = ent.Set<iw::Model>(*Asset->Load<iw::Model>("Tetrahedron"));
+		break;
+	}
+	}
+
+	//m->GetMesh(0).Material()->Set("baseColor", iw::Color(0.8f, 0.8f, 0.8f));
+	//m->GetMesh(0).Material()->Set("reflectance", 1.0f);
+
+	//e->Timer = e->ChargeTime;
+
+	t->Position.x = position.x;
+	t->Position.z = position.y;
+	t->Position.y = 1;
+
+	c->SetCol(s);
+	c->SetTrans(t);
+	//c->SetIsTrigger(true); // temp should make collision layers
+
+	c->SetOnCollision([&](iw::Manifold& man, float dt) {
+		iw::Entity enemy = Space->FindEntity<iw::CollisionObject>(man.ObjA);
+		iw::Entity player = Space->FindEntity<iw::Rigidbody>(man.ObjB);
+
+		if (!enemy || !player) {
+			return;
+		}
+
+		Enemy* enemyComponent = enemy.Find<Enemy>();
+		Player* playerComponent = player.Find<Player>();
+
+		if (!enemyComponent || !playerComponent) {
+			return;
+		}
+
+		if (playerComponent->Timer <= 0.0f) {
+			return;
+		}
+
+		enemyComponent->Health -= 1;
+
+		if (enemyComponent->Health > 0) {
+			return;
+		}
+
+		iw::Transform* transform = enemy.Find<iw::Transform>();
+
+		float score = floor(5 * (1.0f - playerComponent->Timer / playerComponent->DashTime)) * 200 + 200;
+
+		Audio->AsStudio()->CreateInstance("enemyDeath");
+
+		Bus->push<SpawnEnemyDeath>(transform->Position, transform->Parent());
+		Bus->push<GiveScoreEvent>(transform->Position, score * enemyComponent->ScoreMultiple);
+
+		transform->SetParent(nullptr);
+		Space->DestroyEntity(enemy.Index());
+	});
 
 	return t;
 }

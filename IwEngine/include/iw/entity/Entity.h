@@ -51,7 +51,7 @@ namespace ECS {
 		template<
 			typename _c,
 			typename... _args>
-		_c* AddComponent(
+		_c* Add(
 			_args&&... args)
 		{
 #ifdef IW_DEBUG

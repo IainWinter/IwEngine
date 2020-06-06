@@ -96,10 +96,6 @@ bool GameCameraController::On(
 void GameCameraController::SetTarget(
 	std::string_view levelName)
 {
-	//if (levelName == "levels/forest/forest23.json") {
-	//	y = 41.25f;
-	//}
-
 	if (   levelName == "levels/forest/forest05.a.json"
 		|| levelName == "levels/forest/forest22.json")
 	{

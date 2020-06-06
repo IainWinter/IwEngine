@@ -6,6 +6,7 @@
 #include "iw/math/vector3.h"
 #include "iw/common/Components/Transform.h"
 #include "Components/Item.h"
+#include "Components/Enemy.h"
 
 enum class Actions
 	: int
@@ -13,7 +14,7 @@ enum class Actions
 	GAME_STATE, DEV_CONSOLE,
 	JUMP, RIGHT, FORWARD, USE,
 	RESET_LEVEL, START_LEVEL, UNLOCK_LEVEL_DOOR, LOAD_NEXT_LEVEL, GOTO_NEXT_LEVEL, AT_NEXT_LEVEL,
-	SPAWN_ENEMY_DEATH, SPAWN_ITEM, SPAWN_NOTE, SPAWN_CONSUMABLE,
+	SPAWN_ENEMY_DEATH, SPAWN_ENEMY, SPAWN_ITEM, SPAWN_NOTE, SPAWN_CONSUMABLE,
 	GIVE_SCORE
 };
 
@@ -175,6 +176,27 @@ struct SpawnEnemyDeath
 		iw::Transform* level)
 		: iw::SingleEvent(iw::val(Actions::SPAWN_ENEMY_DEATH))
 		, Position(position)
+		, Level(level)
+	{}
+};
+
+struct SpawnEnemyEvent
+	: iw::SingleEvent
+{
+	Enemy Enemy;
+	iw::vector3 Position;
+	iw::vector3 Velocity;
+	iw::Transform* Level;
+
+	SpawnEnemyEvent(
+		::Enemy enemy,
+		iw::vector3 position,
+		iw::vector3 velocity,
+		iw::Transform* level)
+		: iw::SingleEvent(iw::val(Actions::SPAWN_ENEMY))
+		, Enemy(enemy)
+		, Position(position)
+		, Velocity(velocity)
 		, Level(level)
 	{}
 };

@@ -4,6 +4,7 @@
 #include "ComponentManager.h"
 #include "ArchetypeManager.h"
 #include "EntityManager.h"
+#include "Prefab.h"
 #include "iw/log/logger.h"
 
 #ifdef IW_USE_EVENTS
@@ -97,6 +98,10 @@ namespace ECS {
 		Entity FindEntity(
 			const ref<Component>& component,
 			void* instance);
+
+		IWENTITY_API
+		Entity Instantiate(
+			const Prefab& prefab);
 
 		// Registers a component type with the component manager allowing it to be used in archetypes
 		template<
