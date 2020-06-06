@@ -39,4 +39,7 @@ public:
 
 	bool On(
 		iw::ActionEvent& e) override;
+
+	void SetTarget(
+		std::string_view levelName);
 };

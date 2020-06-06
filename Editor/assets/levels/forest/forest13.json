@@ -128,8 +128,8 @@
     "items": [
       {
         "ModelName": {
-          "size": 25,
-          "string": "models/block/forest13.dae"
+          "size": 27,
+          "string": "models/forest/forest13.gltf"
         },
         "Transform": {
           "Position": {

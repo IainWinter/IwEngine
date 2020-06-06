@@ -340,7 +340,7 @@ namespace iw {
 		s->SetCamera(MainScene->MainCamera());
 
 		s->SetUpdate([](auto s, auto p, auto c) {
-			if (c < 3000 &&  Keyboard::KeyDown(G)) {
+			if (false && c < 3000 &&  Keyboard::KeyDown(G)) {
 				for (int i = 0; i < 3000; i++) {
 					float x = iw::randf() * 32.0f;
 					float z = iw::randf() * 18.0f;

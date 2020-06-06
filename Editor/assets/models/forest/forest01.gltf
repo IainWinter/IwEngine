@@ -1007,12 +1007,12 @@
     "images" : [
         {
             "mimeType" : "image/jpeg",
-            "name" : "GroundForest008_NRM_1K",
+            "name" : "normal",
             "uri" : "textures/grass/normal.jpg"
         },
         {
             "mimeType" : "image/jpeg",
-            "name" : "GroundForest008_COL_1K",
+            "name" : "baseColor",
             "uri" : "textures/grass/baseColor.jpg"
         },
         {
@@ -1025,7 +1025,7 @@
         {
             "bufferView" : 0,
             "componentType" : 5126,
-            "count" : 4207,
+            "count" : 4263,
             "max" : [
                 32.02300262451172,
                 1.3277931213378906,
@@ -1041,19 +1041,19 @@
         {
             "bufferView" : 1,
             "componentType" : 5126,
-            "count" : 4207,
+            "count" : 4263,
             "type" : "VEC3"
         },
         {
             "bufferView" : 2,
             "componentType" : 5126,
-            "count" : 4207,
+            "count" : 4263,
             "type" : "VEC2"
         },
         {
             "bufferView" : 3,
             "componentType" : 5126,
-            "count" : 4207,
+            "count" : 4263,
             "type" : "VEC4"
         },
         {
@@ -1106,58 +1106,58 @@
     "bufferViews" : [
         {
             "buffer" : 0,
-            "byteLength" : 50484,
+            "byteLength" : 51156,
             "byteOffset" : 0
         },
         {
             "buffer" : 0,
-            "byteLength" : 50484,
-            "byteOffset" : 50484
+            "byteLength" : 51156,
+            "byteOffset" : 51156
         },
         {
             "buffer" : 0,
-            "byteLength" : 33656,
-            "byteOffset" : 100968
+            "byteLength" : 34104,
+            "byteOffset" : 102312
         },
         {
             "buffer" : 0,
-            "byteLength" : 67312,
-            "byteOffset" : 134624
+            "byteLength" : 68208,
+            "byteOffset" : 136416
         },
         {
             "buffer" : 0,
             "byteLength" : 12288,
-            "byteOffset" : 201936
+            "byteOffset" : 204624
         },
         {
             "buffer" : 0,
             "byteLength" : 6480,
-            "byteOffset" : 214224
+            "byteOffset" : 216912
         },
         {
             "buffer" : 0,
             "byteLength" : 6480,
-            "byteOffset" : 220704
+            "byteOffset" : 223392
         },
         {
             "buffer" : 0,
             "byteLength" : 4320,
-            "byteOffset" : 227184
+            "byteOffset" : 229872
         },
         {
             "buffer" : 0,
             "byteLength" : 8640,
-            "byteOffset" : 231504
+            "byteOffset" : 234192
         },
         {
             "buffer" : 0,
             "byteLength" : 1140,
-            "byteOffset" : 240144
+            "byteOffset" : 242832
         }
     ],
     "buffers" : [
         {
-            "byteLength" : 241284,
+            "byteLength" : 243972,
             "uri" : "forest01.bin"
         }
     ]

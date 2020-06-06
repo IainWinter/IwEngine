@@ -37,6 +37,7 @@ void GameCameraController::Update(
 		}
 
 		target.y = y;
+		//target.x = 0;
 
 		iw::quaternion camrot =
 			  iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
@@ -66,17 +67,7 @@ bool GameCameraController::On(
 			//center.x = event.CenterPosition.x;
 			//center.z = event.CenterPosition.y;
 
-			if (event.LevelName == "levels/forest/forest23.json") {
-				y = 41.25f;
-			}
-
-			else if (event.LevelName == "levels/forest/forest05.a.json") {
-				y = 17.15f;
-			}
-
-			else {
-				y = 27.15f;
-			}
+			SetTarget(event.LevelName);
 
 			//if (event.CameraFollow) {
 			//	center.x += event.PlayerPosition.x;
@@ -90,17 +81,7 @@ bool GameCameraController::On(
 
 			follow = event.CameraFollow;
 
-			if (event.LevelName == "levels/forest/forest23.json") { // dont need only for starting in debug mode
-				y = 41.25f;
-			}
-
-			else if (event.LevelName == "levels/forest/forest05.a.json") {
-				y = 17.15f;
-			}
-
-			else {
-				y = 27.15f;
-			}
+			SetTarget(event.LevelName);
 
 			break;
 		}
@@ -110,4 +91,22 @@ bool GameCameraController::On(
 	}
 
 	return false;
+}
+
+void GameCameraController::SetTarget(
+	std::string_view levelName)
+{
+	//if (levelName == "levels/forest/forest23.json") {
+	//	y = 41.25f;
+	//}
+
+	if (   levelName == "levels/forest/forest05.a.json"
+		|| levelName == "levels/forest/forest22.json")
+	{
+		y = 17.15f;
+	}
+
+	else {
+		y = 27.15f;
+	}
 }

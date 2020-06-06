@@ -160,6 +160,10 @@ void ScoreSystem::SpawnScore(
 	int score, 
 	iw::vector3 position)
 {
+	if (score == 0) {
+		return;
+	}
+
 	iw::Entity entity = Space->CreateEntity<iw::Transform, Score>();
 
 	entity.Set<iw::Transform>(position);

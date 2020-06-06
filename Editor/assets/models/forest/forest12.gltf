@@ -81,20 +81,18 @@
                 70,
                 71,
                 72,
-                73,
-                74,
-                75
+                73
             ]
         }
     ],
     "nodes" : [
         {
             "mesh" : 0,
-            "name" : "Plane.016"
+            "name" : "Plane.007"
         },
         {
             "mesh" : 1,
-            "name" : "Cone.719",
+            "name" : "Cone.771",
             "rotation" : [
                 0.5,
                 0.5,
@@ -114,7 +112,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.791",
+            "name" : "Cone.772",
             "rotation" : [
                 0.5,
                 0.5,
@@ -134,7 +132,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.792",
+            "name" : "Cone.1053",
             "rotation" : [
                 0.5,
                 0.5,
@@ -154,7 +152,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.793",
+            "name" : "Cone.1054",
             "rotation" : [
                 0.5,
                 0.5,
@@ -174,7 +172,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.794",
+            "name" : "Cone.1055",
             "rotation" : [
                 0.5,
                 0.5,
@@ -194,7 +192,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.795",
+            "name" : "Cone.1056",
             "rotation" : [
                 0.5,
                 0.5,
@@ -214,7 +212,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.796",
+            "name" : "Cone.1057",
             "rotation" : [
                 0.5,
                 0.5,
@@ -234,7 +232,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.797",
+            "name" : "Cone.1058",
             "rotation" : [
                 0.5,
                 0.5,
@@ -254,7 +252,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.798",
+            "name" : "Cone.1059",
             "rotation" : [
                 0.5,
                 0.5,
@@ -274,7 +272,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.799",
+            "name" : "Cone.1060",
             "rotation" : [
                 0.5,
                 0.5,
@@ -294,7 +292,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.800",
+            "name" : "Cone.1061",
             "rotation" : [
                 0.5,
                 0.5,
@@ -314,7 +312,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.801",
+            "name" : "Cone.1062",
             "rotation" : [
                 0.5,
                 0.5,
@@ -334,27 +332,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.802",
-            "rotation" : [
-                0.5,
-                0.5,
-                -0.5,
-                0.4999999701976776
-            ],
-            "scale" : [
-                1.6357622146606445,
-                1.6357622146606445,
-                1.6357622146606445
-            ],
-            "translation" : [
-                2.10296630859375,
-                -2.6947035789489746,
-                15.954116821289062
-            ]
-        },
-        {
-            "mesh" : 1,
-            "name" : "Cone.803",
+            "name" : "Cone.1064",
             "rotation" : [
                 0.5,
                 0.5,
@@ -374,7 +352,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.804",
+            "name" : "Cone.1065",
             "rotation" : [
                 0.5,
                 0.5,
@@ -394,7 +372,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.805",
+            "name" : "Cone.1066",
             "rotation" : [
                 0.5,
                 0.5,
@@ -414,7 +392,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.806",
+            "name" : "Cone.1067",
             "rotation" : [
                 0.5,
                 0.5,
@@ -434,27 +412,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.807",
-            "rotation" : [
-                0.5,
-                0.5,
-                -0.5,
-                0.4999999701976776
-            ],
-            "scale" : [
-                1.6357622146606445,
-                1.6357622146606445,
-                1.6357622146606445
-            ],
-            "translation" : [
-                -3.34814453125,
-                -2.4283058643341064,
-                15.595420837402344
-            ]
-        },
-        {
-            "mesh" : 1,
-            "name" : "Cone.808",
+            "name" : "Cone.1069",
             "rotation" : [
                 0.5,
                 0.5,
@@ -474,7 +432,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.809",
+            "name" : "Cone.1070",
             "rotation" : [
                 0.5,
                 0.5,
@@ -494,7 +452,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.810",
+            "name" : "Cone.1071",
             "rotation" : [
                 0.5,
                 0.5,
@@ -514,7 +472,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.811",
+            "name" : "Cone.1072",
             "rotation" : [
                 0.5,
                 0.5,
@@ -534,7 +492,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.812",
+            "name" : "Cone.1073",
             "rotation" : [
                 0.5,
                 0.5,
@@ -554,7 +512,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.813",
+            "name" : "Cone.1074",
             "rotation" : [
                 0.5,
                 0.5,
@@ -574,7 +532,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.814",
+            "name" : "Cone.1075",
             "rotation" : [
                 0.5,
                 0.5,
@@ -594,7 +552,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.815",
+            "name" : "Cone.1076",
             "rotation" : [
                 0.5,
                 0.5,
@@ -614,7 +572,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.816",
+            "name" : "Cone.1077",
             "rotation" : [
                 0.5,
                 0.5,
@@ -634,47 +592,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.817",
-            "rotation" : [
-                0.5,
-                0.5,
-                -0.5,
-                0.4999999701976776
-            ],
-            "scale" : [
-                1.3618543148040771,
-                1.3618543148040771,
-                1.3618543148040771
-            ],
-            "translation" : [
-                -3.087249755859375,
-                -2.0700254440307617,
-                13.262645721435547
-            ]
-        },
-        {
-            "mesh" : 1,
-            "name" : "Cone.818",
-            "rotation" : [
-                0.5,
-                0.5,
-                -0.5,
-                0.4999999701976776
-            ],
-            "scale" : [
-                1.3618543148040771,
-                1.3618543148040771,
-                1.3618543148040771
-            ],
-            "translation" : [
-                -0.121826171875,
-                -1.8012847900390625,
-                14.289831161499023
-            ]
-        },
-        {
-            "mesh" : 1,
-            "name" : "Cone.819",
+            "name" : "Cone.1080",
             "rotation" : [
                 0.5,
                 0.5,
@@ -694,7 +612,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.820",
+            "name" : "Cone.1081",
             "rotation" : [
                 0.5,
                 0.5,
@@ -714,7 +632,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.821",
+            "name" : "Cone.1082",
             "rotation" : [
                 0.5,
                 0.5,
@@ -734,7 +652,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.822",
+            "name" : "Cone.1083",
             "rotation" : [
                 0.5,
                 0.5,
@@ -754,7 +672,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.823",
+            "name" : "Cone.1084",
             "rotation" : [
                 0.5,
                 0.5,
@@ -774,7 +692,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.824",
+            "name" : "Cone.1085",
             "rotation" : [
                 0.5,
                 0.5,
@@ -794,7 +712,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.825",
+            "name" : "Cone.1086",
             "rotation" : [
                 0.5,
                 0.5,
@@ -814,7 +732,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.826",
+            "name" : "Cone.1087",
             "rotation" : [
                 0.5,
                 0.5,
@@ -834,7 +752,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.827",
+            "name" : "Cone.1088",
             "rotation" : [
                 0.5,
                 0.5,
@@ -854,7 +772,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.828",
+            "name" : "Cone.1089",
             "rotation" : [
                 0.5,
                 0.5,
@@ -874,7 +792,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.829",
+            "name" : "Cone.1090",
             "rotation" : [
                 0.5,
                 0.5,
@@ -894,7 +812,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.830",
+            "name" : "Cone.1091",
             "rotation" : [
                 0.5,
                 0.5,
@@ -914,7 +832,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.831",
+            "name" : "Cone.1092",
             "rotation" : [
                 0.5,
                 0.5,
@@ -934,7 +852,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.832",
+            "name" : "Cone.1093",
             "rotation" : [
                 0.5,
                 0.5,
@@ -954,7 +872,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.833",
+            "name" : "Cone.1094",
             "rotation" : [
                 0.5,
                 0.5,
@@ -974,7 +892,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.834",
+            "name" : "Cone.1095",
             "rotation" : [
                 0.5,
                 0.5,
@@ -994,7 +912,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.835",
+            "name" : "Cone.1096",
             "rotation" : [
                 0.5,
                 0.5,
@@ -1014,7 +932,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.836",
+            "name" : "Cone.1097",
             "rotation" : [
                 0.5,
                 0.5,
@@ -1034,7 +952,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.837",
+            "name" : "Cone.1098",
             "rotation" : [
                 0.5,
                 0.5,
@@ -1054,7 +972,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.838",
+            "name" : "Cone.1099",
             "rotation" : [
                 0.5,
                 0.5,
@@ -1074,7 +992,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.839",
+            "name" : "Cone.1100",
             "rotation" : [
                 0.5,
                 0.5,
@@ -1094,7 +1012,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.840",
+            "name" : "Cone.1101",
             "rotation" : [
                 0.5,
                 0.5,
@@ -1114,7 +1032,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.841",
+            "name" : "Cone.1102",
             "rotation" : [
                 0.5,
                 0.5,
@@ -1134,7 +1052,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.842",
+            "name" : "Cone.1103",
             "rotation" : [
                 0.5,
                 0.5,
@@ -1154,7 +1072,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.843",
+            "name" : "Cone.1104",
             "rotation" : [
                 0.5,
                 0.5,
@@ -1174,7 +1092,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.844",
+            "name" : "Cone.1105",
             "rotation" : [
                 0.5,
                 0.5,
@@ -1194,7 +1112,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.845",
+            "name" : "Cone.1106",
             "rotation" : [
                 0.5,
                 0.5,
@@ -1214,7 +1132,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.846",
+            "name" : "Cone.1107",
             "rotation" : [
                 0.5,
                 0.5,
@@ -1234,7 +1152,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.847",
+            "name" : "Cone.1108",
             "rotation" : [
                 0.5,
                 0.5,
@@ -1254,7 +1172,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.848",
+            "name" : "Cone.1109",
             "rotation" : [
                 0.5,
                 0.5,
@@ -1274,7 +1192,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.849",
+            "name" : "Cone.1110",
             "rotation" : [
                 0.5,
                 0.5,
@@ -1294,7 +1212,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.850",
+            "name" : "Cone.1111",
             "rotation" : [
                 0.5,
                 0.5,
@@ -1314,7 +1232,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.851",
+            "name" : "Cone.1112",
             "rotation" : [
                 0.5,
                 0.5,
@@ -1334,7 +1252,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.852",
+            "name" : "Cone.1113",
             "rotation" : [
                 0.5,
                 0.5,
@@ -1354,7 +1272,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.853",
+            "name" : "Cone.1114",
             "rotation" : [
                 0.5,
                 0.5,
@@ -1374,7 +1292,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.854",
+            "name" : "Cone.1115",
             "rotation" : [
                 0.5,
                 0.5,
@@ -1382,39 +1300,19 @@
                 0.4999999701976776
             ],
             "scale" : [
-                0.9335623383522034,
-                0.9335623383522034,
-                0.9335623383522034
+                1.0527293682098389,
+                1.0527293682098389,
+                1.0527293682098389
             ],
             "translation" : [
-                3.59600830078125,
+                3.1908960342407227,
                 -2.857565402984619,
-                13.6517333984375
+                14.818258285522461
             ]
         },
         {
             "mesh" : 1,
-            "name" : "Cone.855",
-            "rotation" : [
-                0.5,
-                0.5,
-                -0.5,
-                0.4999999701976776
-            ],
-            "scale" : [
-                1.0006816387176514,
-                1.0006816387176514,
-                1.0006816387176514
-            ],
-            "translation" : [
-                1.1531982421875,
-                -3.0812721252441406,
-                12.590194702148438
-            ]
-        },
-        {
-            "mesh" : 1,
-            "name" : "Cone.856",
+            "name" : "Cone.1117",
             "rotation" : [
                 0.5,
                 0.5,
@@ -1434,7 +1332,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.857",
+            "name" : "Cone.1118",
             "rotation" : [
                 0.5,
                 0.5,
@@ -1454,7 +1352,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.858",
+            "name" : "Cone.1119",
             "rotation" : [
                 0.5,
                 0.5,
@@ -1474,7 +1372,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.859",
+            "name" : "Cone.1120",
             "rotation" : [
                 0.5,
                 0.5,
@@ -1494,7 +1392,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.860",
+            "name" : "Cone.1121",
             "rotation" : [
                 0.5,
                 0.5,
@@ -1514,7 +1412,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.861",
+            "name" : "Cone.1122",
             "rotation" : [
                 0.5,
                 0.5,
@@ -1534,7 +1432,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.862",
+            "name" : "Cone.1123",
             "rotation" : [
                 0.5,
                 0.5,
@@ -1554,7 +1452,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.863",
+            "name" : "Cone.1124",
             "rotation" : [
                 0.5,
                 0.5,
@@ -1574,7 +1472,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cone.864",
+            "name" : "Cone.1125",
             "rotation" : [
                 0.5,
                 0.5,
@@ -1590,6 +1488,66 @@
                 21.5333251953125,
                 -1.437854290008545,
                 12.55270767211914
+            ]
+        },
+        {
+            "mesh" : 1,
+            "name" : "Cone.1126",
+            "rotation" : [
+                0.5,
+                0.5,
+                -0.5,
+                0.4999999701976776
+            ],
+            "scale" : [
+                1.112019419670105,
+                1.112019419670105,
+                1.112019419670105
+            ],
+            "translation" : [
+                27.209381103515625,
+                -2.9316749572753906,
+                -12.91807746887207
+            ]
+        },
+        {
+            "mesh" : 1,
+            "name" : "Cone.1127",
+            "rotation" : [
+                0.5,
+                0.5,
+                -0.5,
+                0.4999999701976776
+            ],
+            "scale" : [
+                1.112019419670105,
+                1.112019419670105,
+                1.112019419670105
+            ],
+            "translation" : [
+                30.554443359375,
+                -2.524465799331665,
+                -14.482638359069824
+            ]
+        },
+        {
+            "mesh" : 1,
+            "name" : "Cone.1128",
+            "rotation" : [
+                0.5,
+                0.5,
+                -0.5,
+                0.4999999701976776
+            ],
+            "scale" : [
+                0.8244640231132507,
+                0.8244640231132507,
+                0.8244640231132507
+            ],
+            "translation" : [
+                4.152812957763672,
+                -0.03365933895111084,
+                11.778816223144531
             ]
         }
     ],
@@ -1635,7 +1593,7 @@
     ],
     "meshes" : [
         {
-            "name" : "Plane.014",
+            "name" : "Plane.016",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1697,7 +1655,7 @@
         {
             "bufferView" : 0,
             "componentType" : 5126,
-            "count" : 4221,
+            "count" : 4336,
             "max" : [
                 32,
                 0,
@@ -1713,19 +1671,19 @@
         {
             "bufferView" : 1,
             "componentType" : 5126,
-            "count" : 4221,
+            "count" : 4336,
             "type" : "VEC3"
         },
         {
             "bufferView" : 2,
             "componentType" : 5126,
-            "count" : 4221,
+            "count" : 4336,
             "type" : "VEC2"
         },
         {
             "bufferView" : 3,
             "componentType" : 5126,
-            "count" : 4221,
+            "count" : 4336,
             "type" : "VEC4"
         },
         {
@@ -1778,59 +1736,59 @@
     "bufferViews" : [
         {
             "buffer" : 0,
-            "byteLength" : 50652,
+            "byteLength" : 52032,
             "byteOffset" : 0
         },
         {
             "buffer" : 0,
-            "byteLength" : 50652,
-            "byteOffset" : 50652
+            "byteLength" : 52032,
+            "byteOffset" : 52032
         },
         {
             "buffer" : 0,
-            "byteLength" : 33768,
-            "byteOffset" : 101304
+            "byteLength" : 34688,
+            "byteOffset" : 104064
         },
         {
             "buffer" : 0,
-            "byteLength" : 67536,
-            "byteOffset" : 135072
+            "byteLength" : 69376,
+            "byteOffset" : 138752
         },
         {
             "buffer" : 0,
             "byteLength" : 12288,
-            "byteOffset" : 202608
+            "byteOffset" : 208128
         },
         {
             "buffer" : 0,
             "byteLength" : 6480,
-            "byteOffset" : 214896
+            "byteOffset" : 220416
         },
         {
             "buffer" : 0,
             "byteLength" : 6480,
-            "byteOffset" : 221376
+            "byteOffset" : 226896
         },
         {
             "buffer" : 0,
             "byteLength" : 4320,
-            "byteOffset" : 227856
+            "byteOffset" : 233376
         },
         {
             "buffer" : 0,
             "byteLength" : 8640,
-            "byteOffset" : 232176
+            "byteOffset" : 237696
         },
         {
             "buffer" : 0,
             "byteLength" : 1140,
-            "byteOffset" : 240816
+            "byteOffset" : 246336
         }
     ],
     "buffers" : [
         {
-            "byteLength" : 241956,
-            "uri" : "forest09.bin"
+            "byteLength" : 247476,
+            "uri" : "forest12.bin"
         }
     ]
 }
