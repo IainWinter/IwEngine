@@ -70,9 +70,9 @@ namespace iw {
 	}
 
 	void Editor::App::FixedUpdate() {
-		if (GetLayer("Toolbox") == nullptr) {
+		//if (GetLayer("Toolbox") == nullptr) {
 			Application::FixedUpdate();
-		}
+		//}
 	}
 
 	bool App::HandleCommand(

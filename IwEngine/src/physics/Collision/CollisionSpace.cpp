@@ -14,7 +14,7 @@ namespace Physics {
 		}
 #endif
 
-		m_objects.push_back(object);
+		m_objects.insert(m_objects.begin(), object);
 	}
 
 	void CollisionSpace::RemoveCollisionObject(

@@ -70,6 +70,7 @@ int PlayerSystem::Initialize() {
 	r->SetCol(s);
 	r->SetTrans(t);
 	r->SetIsStatic(false);
+	r->SetSimGravity(true);
 
 	r->SetOnCollision([&](iw::Manifold& man, float dt) {
 		iw::Entity enemy  = Space->FindEntity<iw::CollisionObject>(man.ObjA);
@@ -369,7 +370,6 @@ bool PlayerSystem::On(
 			
 			r->SetCol(s);
 			r->SetTrans(t);
-			r->SetSimGravity(false);
 
 			transition = false; // put in player
 

@@ -308,7 +308,7 @@ void EnemySystem::Update(
 							Bus->push<SpawnEnemyEvent>(
 								child,
 								transform->Position,
-								transform->Right()* transform->Rotation.inverted() * 5,
+								iw::vector3(5),
 								transform->Parent());
 						}
 
@@ -467,42 +467,49 @@ iw::Transform* EnemySystem::SpawnEnemy(
 {
 	iw::Entity ent = Space->CreateEntity<iw::Transform, iw::Model, iw::SphereCollider, Enemy>();
 
-	Enemy*               e = ent.Set<Enemy>(prefab);
-	iw::Transform*       t = ent.Set<iw::Transform>();
-	iw::SphereCollider*  s = ent.Set<iw::SphereCollider>(iw::vector3::zero, 1.0f);
-
 	iw::CollisionObject* c;
 
 	if (velocity.length_squared() == 0) {
-		c = ent.Set<iw::CollisionObject>();
+		c = ent.Add<iw::CollisionObject>();
 		Physics->AddCollisionObject(c);
 	}
 
 	else {
-		iw::Rigidbody* r = ent.Set<iw::Rigidbody>();
-		r->SetVelocity(velocity);
-		Physics->AddRigidbody(r);
+		ent.RemoveComponent<Enemy>();
 
+		iw::Rigidbody* r = ent.Add<iw::Rigidbody>();
+		Physics->AddRigidbody(r);
+		
+		r->SetVelocity(velocity);
+		r->SetIsStatic(false);
+		r->SetSimGravity(true);
+
+		
 		c = r;
 	}
 
+	Enemy*               e = ent.Set<Enemy>(prefab);
+	iw::Transform*       t = ent.Set<iw::Transform>(iw::vector3(0, 1, 0), iw::vector3(1));
+	iw::SphereCollider*  s = ent.Set<iw::SphereCollider>(iw::vector3::zero, 1.0f);
+	
 	iw::Model* m;
-
+	
 	switch (prefab.Type) {
-	case EnemyType::MINI_BOSS_BOX_SPIN: {
-		e->Health = 3;
-		e->ScoreMultiple = 10;
-		t->Scale = 0.75f;
-		m = ent.Set<iw::Model>(*Asset->Load<iw::Model>("Box"));
+		case EnemyType::BOSS_FOREST:
+		case EnemyType::MINI_BOSS_BOX_SPIN: {
+			//e->Health = 3;
+			//e->ScoreMultiple = 10;
+			t->Scale = 0.75f;
+			m = ent.Set<iw::Model>(*Asset->Load<iw::Model>("Box"));
 
-		break;
-	}
-	default: {
-		e->Health = 1;
-		e->ScoreMultiple = 1;
-		m = ent.Set<iw::Model>(*Asset->Load<iw::Model>("Tetrahedron"));
-		break;
-	}
+			break;
+		}
+		default: {
+			//e->Health = 1;
+			//e->ScoreMultiple = 1;
+			m = ent.Set<iw::Model>(*Asset->Load<iw::Model>("Tetrahedron"));
+			break;
+		}
 	}
 
 	//m->GetMesh(0).Material()->Set("baseColor", iw::Color(0.8f, 0.8f, 0.8f));
@@ -516,6 +523,8 @@ iw::Transform* EnemySystem::SpawnEnemy(
 
 	c->SetCol(s);
 	c->SetTrans(t);
+	c->SetIsStatic(false);
+	
 	//c->SetIsTrigger(true); // temp should make collision layers
 
 	c->SetOnCollision([&](iw::Manifold& man, float dt) {

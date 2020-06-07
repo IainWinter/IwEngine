@@ -4,13 +4,20 @@ namespace iw {
 namespace Physics {
 	Rigidbody::Rigidbody(
 		bool isKinematic)
-		: m_invMass(1)
+		: m_gravity(0)
+		, m_force(0)
+		, m_velocity(0)
+		, m_lock(0)
+		, m_isLocked(0)
+		, m_invMass(1)
 		, m_takesGravity(true)
 		, m_simGravity(true)
 		, m_isKinematic(isKinematic)
 		, m_staticFriction(.5)
 		, m_dynamicFriction(.5)
 		, m_restitution(.5)
+		, m_lastTrans()
+		, m_nextTrans()
 	{
 		m_isDynamic = true;
 	}

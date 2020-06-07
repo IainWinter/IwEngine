@@ -6,8 +6,9 @@ namespace Physics {
 		: m_transform()
 		, m_collider(nullptr)
 		, m_isTrigger(false)
-		, m_isStatic(true)
+		, m_isStatic (true)
 		, m_isDynamic(false)
+		, m_onCollision()
 	{}
 
 	AABB CollisionObject::Bounds() const {

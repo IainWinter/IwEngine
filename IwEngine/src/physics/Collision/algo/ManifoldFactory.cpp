@@ -45,15 +45,15 @@ namespace algo {
 		const SphereCollider* a, const Transform* ta,
 		const PlaneCollider*  b, const Transform* tb)
 	{
-		vector3 A = a->Center  + ta->WorldPosition();
+		vector3 A  = a->Center + ta->WorldPosition();
+		float   Ar = a->Radius * ta->WorldScale().major();
+
 		vector3 N = b->Plane.P * tb->WorldRotation();
 		N.normalize();
 		
 		vector3 P = N * b->Plane.D + tb->WorldPosition();
 
-		float Ar = a->Radius * ta->WorldScale().x;
-
-		float d = (A - P).dot(N);
+		float d = (A - P).dot(N); // distance from center of sphere to plane surface
 
 		if (d > Ar) {
 			return {
@@ -65,11 +65,11 @@ namespace algo {
 		}
 		
 		vector3 B = A - N * d;
-		A = A - N * Ar;
+		        A = A - N * Ar;
 
 		return {
 			A, B,
-			N.normalized(),
+			N,
 			(B - A).length(),
 			true
 		};
