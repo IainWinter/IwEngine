@@ -1,12 +1,17 @@
 #include "iw/physics/Dynamics/SmoothPositionSolver.h"
 #include "iw/physics/Dynamics/Rigidbody.h"
 
+#include "iw/log/logger.h"
+
 namespace iw {
 namespace Physics {
 	void SmoothPositionSolver::Solve(
 		std::vector<CollisionObject*>& bodies,
-		std::vector<Manifold>& manifolds)
+		std::vector<Manifold>& manifolds,
+		scalar dt)
 	{
+		std::vector<std::pair<iw::vector3, iw::vector3>> deltas;
+
 		for (Manifold& manifold : manifolds) {
 			Rigidbody* aBody = manifold.ObjA->IsDynamic() ? (Rigidbody*)manifold.ObjA : nullptr;
 			Rigidbody* bBody = manifold.ObjB->IsDynamic() ? (Rigidbody*)manifold.ObjB : nullptr;
@@ -23,14 +28,34 @@ namespace Physics {
 				* fmax(resolution.length() - slop, 0.0f)
 				/ (aInvMass + bInvMass);
 		
-			//float neg = aBody ? 1.0f : -1.0f;
+			iw::vector3 deltaA;
+			iw::vector3 deltaB;
+
+			float negA  = bBody ? 1.0f : -1.0f;
+			float negB  = aBody ? 1.0f : -1.0f;
+			float negAB = aBody && bBody ? -1.0f : 1.0f;
 
 			if (aBody ? aBody->IsKinematic() : false) {
-				aBody->Trans().Position -= aInvMass * correction;
+				deltaA = negAB * negA * aInvMass * correction;
 			}
 
 			if (bBody ? bBody->IsKinematic() : false) {
-				bBody->Trans().Position += bInvMass * correction;
+				deltaB = negB * bInvMass * correction;
+			}
+
+			deltas.push_back(std::make_pair(deltaA, deltaB));
+		}
+
+		for (unsigned i = 0; i < manifolds.size(); i++) {
+			Rigidbody* aBody = manifolds[i].ObjA->IsDynamic() ? (Rigidbody*)manifolds[i].ObjA : nullptr;
+			Rigidbody* bBody = manifolds[i].ObjB->IsDynamic() ? (Rigidbody*)manifolds[i].ObjB : nullptr;
+
+			if (aBody ? aBody->IsKinematic() : false) {
+				aBody->Trans().Position += deltas[i].first;
+			}
+
+			if (bBody ? bBody->IsKinematic() : false) {
+				bBody->Trans().Position += deltas[i].second;
 			}
 		}
 	}

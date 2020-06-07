@@ -109,7 +109,7 @@ void EnemySystem::Update(
 		}
 
 		if (  !enemy->HasShot
-			&& enemy->Timer > enemy->ChargeTime)
+			&& enemy->Timer > enemy->ChargeTime) // on ground lmao
 		{
 			enemy->HasShot = true;
 
@@ -170,7 +170,7 @@ void EnemySystem::Update(
 							int dontShoot = count * 0.5f;
 
 							for (int i = 0; i <= count; i++) {
-								if (   i != dontShoot
+								if (i != dontShoot
 									&& i != dontShoot - 1
 									&& i != dontShoot + 1)
 								{
@@ -299,16 +299,24 @@ void EnemySystem::Update(
 							iw::quaternion offset = iw::quaternion::from_euler_angles(0, rot, 0);
 
 							Enemy child;
+							child.Type = EnemyType::SPIN;
 							child.Bullet = enemy->Bullet;
 							child.Health = 1;
-							child.FireTime   = .5f;
-							child.ChargeTime = .1f;
-							child.Type = EnemyType::SPIN;
+							child.Speed = 0.2617994;
+							child.FireTime = 0.120000;
+							child.ChargeTime = 0.000000;
+
+							iw::vector3 position = transform->Position + iw::vector3(sqrt(2), 0, 0) * offset;
+							iw::vector3 velocity = transform->Right() * transform->Rotation.inverted() * offset;
+
+							velocity.x *= 10;
+							velocity.y = 15;
+							velocity.z *= 10;
 
 							Bus->push<SpawnEnemyEvent>(
 								child,
-								transform->Position,
-								iw::vector3(5),
+								position,
+								velocity,
 								transform->Parent());
 						}
 
@@ -347,11 +355,11 @@ void EnemySystem::Update(
 
 		else if (enemy->Timer >= enemy->FireTime) {
 			enemy->HasShot = false;
-			enemy->Timer   = 0;
-			enemy->Timer2  = 0;
+			enemy->Timer = 0;
+			enemy->Timer2 = 0;
 		}
 
-		enemy->Timer  += iw::Time::DeltaTimeScaled();
+		enemy->Timer += iw::Time::DeltaTimeScaled();
 	}
 
 	if (   m_enemyCount == 0
@@ -409,8 +417,8 @@ iw::Transform* EnemySystem::SpawnBullet( // this should be in bullet system i gu
 	r->SetSimGravity(false);
 	r->SetRestitution(0.1f);
 	r->SetIsTrigger(true);
-	r->SetIsLocked(iw::vector3(0, 1, 0));
-	r->SetLock(iw::vector3(0, 1, 0));
+	//r->SetIsLocked(iw::vector3(0, 1, 0));
+	//r->SetLock(iw::vector3(0, 1, 0));
 
 	r->SetOnCollision([&](iw::Manifold& man, float dt) {
 		iw::Entity bullet = Space->FindEntity<iw::Rigidbody>(man.ObjA);
@@ -475,8 +483,6 @@ iw::Transform* EnemySystem::SpawnEnemy(
 	}
 
 	else {
-		ent.RemoveComponent<Enemy>();
-
 		iw::Rigidbody* r = ent.Add<iw::Rigidbody>();
 		Physics->AddRigidbody(r);
 		

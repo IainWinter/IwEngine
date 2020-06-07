@@ -10,7 +10,8 @@ namespace Physics {
 	public:
 		virtual void Solve(
 			std::vector<CollisionObject*>& objects,
-			std::vector<Manifold>& manifolds) = 0;
+			std::vector<Manifold>& manifolds,
+			scalar dt) = 0;
 	};
 }
 

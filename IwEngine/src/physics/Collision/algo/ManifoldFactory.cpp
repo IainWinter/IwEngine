@@ -69,8 +69,8 @@ namespace algo {
 
 		return {
 			A, B,
-			N,
-			(B - A).length(),
+			-N,
+			(A - B).length(),
 			true
 		};
 	}

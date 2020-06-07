@@ -4,7 +4,8 @@ namespace iw {
 namespace Physics {
 	void PositionSolver::Solve(
 		std::vector<CollisionObject*>& bodies,
-		std::vector<Manifold>& manifolds)
+		std::vector<Manifold>& manifolds,
+		scalar dt)
 	{
 		for (Manifold& manifold : manifolds) {
 			CollisionObject* aBody = manifold.ObjA;

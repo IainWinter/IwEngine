@@ -119,12 +119,9 @@ namespace Physics {
 	{
 		//for (int i = 0; i < 5; i++) {
 			for (Solver* solver : m_solvers) {
-				solver->Solve(m_objects, manifolds);
+				solver->Solve(m_objects, manifolds, dt);
 			}
 		//}
-		/*for (TimedSolver* solver : m_timedSolvers) {
-			solver->Solve(m_objects, manifolds, dt);
-		}*/
 	}
 
 	void CollisionSpace::SendCollisionCallbacks(

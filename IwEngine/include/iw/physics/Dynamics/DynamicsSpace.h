@@ -11,7 +11,6 @@ namespace Physics {
 	{
 	private:
 		//std::vector<Rigidbody*> m_rigidbodies;
-		//std::vector<TimedSolver*> m_timedSolvers;
 		iw::vector3 m_gravity;
 
 	public:

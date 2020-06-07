@@ -5,7 +5,8 @@ namespace iw {
 namespace Physics {
 	void ImpulseSolver::Solve(
 		std::vector<CollisionObject*>& objects,
-		std::vector<Manifold>& manifolds)
+		std::vector<Manifold>& manifolds,
+		scalar dt)
 	{
 		for (Manifold& manifold : manifolds) {
 			// Test for is each objects is dynamic or not
