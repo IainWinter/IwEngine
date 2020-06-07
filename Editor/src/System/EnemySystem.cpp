@@ -421,12 +421,11 @@ iw::Transform* EnemySystem::SpawnBullet( // this should be in bullet system i gu
 	//r->SetLock(iw::vector3(0, 1, 0));
 
 	r->SetOnCollision([&](iw::Manifold& man, float dt) {
-		iw::Entity bullet = Space->FindEntity<iw::Rigidbody>(man.ObjA);
+		iw::Entity bullet = Space->FindEntity(man.ObjA);
 		iw::Entity other  = Space->FindEntity(man.ObjB);
 
 		if (!bullet) {
-			bullet = Space->FindEntity<iw::Rigidbody>(man.ObjB);
-			other = Space->FindEntity(man.ObjA);
+			bullet = Space->FindEntity<iw::Rigidbody>(man.ObjA);
 		}
 
 		if (!other) {
@@ -435,6 +434,14 @@ iw::Transform* EnemySystem::SpawnBullet( // this should be in bullet system i gu
 
 		if (!bullet || !other) {
 			return;
+		}
+
+		if (  !bullet.Has<Bullet>()
+			&& other.Has<Bullet>())
+		{
+			iw::Entity tmp = bullet;
+			bullet = other;
+			other = bullet;
 		}
 
 		if (   other.Has<Bullet>()

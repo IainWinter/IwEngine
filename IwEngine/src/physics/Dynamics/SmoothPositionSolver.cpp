@@ -31,16 +31,12 @@ namespace Physics {
 			iw::vector3 deltaA;
 			iw::vector3 deltaB;
 
-			float negA  = bBody ? 1.0f : -1.0f;
-			float negB  = aBody ? 1.0f : -1.0f;
-			float negAB = aBody && bBody ? -1.0f : 1.0f;
-
 			if (aBody ? aBody->IsKinematic() : false) {
-				deltaA = negAB * negA * aInvMass * correction;
+				deltaA = -aInvMass * correction;
 			}
 
 			if (bBody ? bBody->IsKinematic() : false) {
-				deltaB = negB * bInvMass * correction;
+				deltaB = bInvMass * correction;
 			}
 
 			deltas.push_back(std::make_pair(deltaA, deltaB));
