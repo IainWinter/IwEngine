@@ -46,36 +46,15 @@ bool ItemSystem::On(
 bool ItemSystem::On(
 	iw::CollisionEvent& e)
 {
-	iw::Entity a = Space->FindEntity(e.ObjA);
-	if (a == iw::EntityHandle::Empty) {
-		a = Space->FindEntity<iw::Rigidbody>(e.ObjA);
+	iw::Entity itemEntity, otherEntity;
+	bool noent = GetEntitiesFromManifold<Item>(e.Manifold, itemEntity, otherEntity);
+	
+	if (noent) {
+		return false;
 	}
 
-	iw::Entity b = Space->FindEntity(e.ObjB);
-	if (b == iw::EntityHandle::Empty) {
-		b = Space->FindEntity<iw::Rigidbody>(e.ObjB);
-	}
-
-	iw::Entity entity;
-	iw::Entity other;
-	if (   a != iw::EntityHandle::Empty
-		&& a.Has<Item>())
-	{
-		entity = a;
-		other = b;
-	}
-
-	else if (b != iw::EntityHandle::Empty
-		&&   b.Has<Item>())
-	{
-		entity = b;
-		other = a;
-	}
-
-	if (   other != iw::EntityHandle::Empty
-		&& other.Has<Player>())
-	{
-		Item* item = entity.Find<Item>();
+	if (otherEntity.Has<Player>()) {
+		Item* item = itemEntity.Find<Item>();
 
 		switch (item->Type) {
 			case NOTE: {
@@ -92,8 +71,10 @@ bool ItemSystem::On(
 			}
 		}
 
-		entity.Find<iw::Transform>()->SetParent(nullptr);
-		Space->DestroyEntity(entity.Index());
+		Bus->push<iw::EntityDestroyEvent>(itemEntity);
+
+		//itemEntity.Find<iw::Transform>()->SetParent(nullptr);
+		//Space->DestroyEntity(itemEntity.Index());
 	}
 
 	return false;

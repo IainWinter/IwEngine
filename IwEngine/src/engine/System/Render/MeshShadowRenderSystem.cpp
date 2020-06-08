@@ -1,4 +1,5 @@
 #include "iw/engine/Systems/Render/MeshShadowRenderSystem.h"
+#include "iw/engine/Components/UiElement_temp.h"
 
 namespace iw {
 namespace Engine {
@@ -21,6 +22,10 @@ namespace Engine {
 			Renderer->BeginShadowCast(light);
 
 			for (auto entity : eca) {
+				if (Space->HasComponent<iw::UiElement>(entity.Handle)) {
+					continue;
+				}
+
 				auto [transform, mesh] = entity.Components.Tie<Components>();
 				
 				if (!mesh->Material()->CastShadows()) {

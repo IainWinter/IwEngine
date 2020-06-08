@@ -121,12 +121,14 @@ namespace iw {
 		textMat->Set("color", vector3(1));
 		textMat->SetTexture("fontMap", m_font->GetTexture(0));
 
+		Asset->Give<Material>("materials/Font", textMat);
+
 		Mesh textMesh = m_font->GenerateMesh("Use arrow keys to move and x to attack.\ni: debug menu  t: freecam\nv: shadows (low fps)  b: blinn (no impact)  e: show voxels (goodbye fps)", .005f, 1);
 		textMesh.SetMaterial(textMat);
 
 		iw::Entity textEnt = Space->CreateEntity<iw::Transform, iw::Mesh, iw::UiElement>();
 
-		             textEnt.Set<iw::Transform>(vector3(-6.8, -1.8, 0), vector3(1), quaternion::identity);
+		             textEnt.Set<iw::Transform>(vector3(-6.8, -1.8, 0));
 		m_textMesh = textEnt.Set<iw::Mesh>(textMesh);
 
 		// Shaders

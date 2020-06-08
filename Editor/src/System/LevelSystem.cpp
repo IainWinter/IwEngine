@@ -28,6 +28,13 @@
 #include "iw/reflect/Components/ModelPrefab.h"
 
 #include "iw/engine/Events/Seq/MoveToTarget.h"
+#include "iw/engine/Events/Seq/ShowText.h"
+#include "iw/engine/Events/Seq/DestroyEntity.h"
+#include "iw/engine/Components/UiElement_temp.h"
+
+struct OtherGuyTag {
+	int Health = 3;
+};
 
 LevelSystem::LevelSystem(
 	iw::Entity& player)
@@ -45,7 +52,7 @@ LevelSystem::LevelSystem(
 
 	//currentLevel = 0;
 
-	currentLevelName = "levels/forest/forest08.json";
+	currentLevelName = "levels/forest/forest01.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 63);
 	closedColor = iw::Color::From255(201, 66, 66, 63);
@@ -138,42 +145,19 @@ void LevelSystem::Update(
 bool LevelSystem::On(
 	iw::CollisionEvent& e)
 {
-	iw::Entity a = Space->FindEntity(e.ObjA);
-	if (a == iw::EntityHandle::Empty) {
-		a = Space->FindEntity<iw::Rigidbody>(e.ObjA);
-	}
+	iw::Entity doorEntity, playerEntity;
+	bool noent = GetEntitiesFromManifold<LevelDoor, Player>(e.Manifold, doorEntity, playerEntity);
 
-	iw::Entity b = Space->FindEntity(e.ObjB);
-	if (b == iw::EntityHandle::Empty) {
-		b = Space->FindEntity<iw::Rigidbody>(e.ObjB);
-	}
-
-	if (   a.Index() == iw::EntityHandle::Empty.Index
-		|| b.Index() == iw::EntityHandle::Empty.Index)
-	{
+	if (noent) {
 		return false;
 	}
 
-	iw::Entity doorEnt;
-	if (   a.Has<Player>()
-		&& b.Has<LevelDoor>())
-	{
-		doorEnt = b;
-	}
+	LevelDoor*     door = doorEntity.Find<LevelDoor>();
+	iw::Transform* tran = doorEntity.Find<iw::Transform>();
 
-	else if (b.Has<Player>()
-		&&   a.Has<LevelDoor>())
-	{
-		doorEnt = a;
-	}
-
-	if (doorEnt.Index() != iw::EntityHandle::Empty.Index) {
-		LevelDoor*     door = doorEnt.Find<LevelDoor>();
-		iw::Transform* tran = doorEnt.Find<iw::Transform>();
-		if (door->State == LevelDoorState::OPEN) {
-			door->State = LevelDoorState::LOCKED; // stops events from being spammed
-			Bus->push<LoadNextLevelEvent>(door->NextLevel, iw::vector2(tran->Position.x, tran->Position.z), door->GoBack);
-		}
+	if (door->State == LevelDoorState::OPEN) {
+		door->State = LevelDoorState::LOCKED; // stops events from being spammed
+		Bus->push<LoadNextLevelEvent>(door->NextLevel, iw::vector2(tran->Position.x, tran->Position.z), door->GoBack);
 	}
 
 	return false;
@@ -358,7 +342,16 @@ iw::Entity LevelSystem::LoadLevel(
 	// Enemies
 
 	for (size_t i = 0; i < currentLevel.Enemies.size(); i++) {
-		Bus->send<SpawnEnemyEvent>(currentLevel.Enemies[i], currentLevel.Positions[i], 0, levelTransform);
+		iw::vector3 position;
+		position.x = currentLevel.Positions[i].x;
+		position.z = currentLevel.Positions[i].y;
+		position.y = 1;
+
+		Bus->send<SpawnEnemyEvent>(currentLevel.Enemies[i], position, 0, levelTransform);
+
+		if (!firstEnemy) {
+			firstEnemy = Space->FindEntity(levelTransform->Children().back());
+		}
 	}
 
 	// Colliders
@@ -471,30 +464,90 @@ iw::Entity LevelSystem::LoadLevel(
 
 	// run a cut scene
 
-	// Lucas - edit this for now \/
-	// You can edit line 48 to make it start on level 2
-	// to destory the enemy, just use the firstEnemy variable from line 346
-	// if it keeps crashing just make it move underground and I'll figure it out later (i.e. set 'y' to like -5)
+	if (currentLevelName == "levels/forest/forest01.json") {
+		//delete sequence;
+		//sequence = new iw::event_seq();
 
-	//if (currentLevelName == "levels/forest/forest02.json") {
-	//	Space->DestroyEntity(otherGuy.Index());
-	//	otherGuy = Space->CreateEntity<iw::Transform, iw::Mesh>();
+		//iw::Mesh t = Asset->Load<iw::Font>("fonts/Arial.fnt")->GenerateMesh("A lone soldier longs for his king...", .005f, 1);
+		//t.SetMaterial(Asset->Load<iw::Material>("materials/Font"));
 
-	//	otherGuy.Set<iw::Transform>(
-	//		iw::vector3(-5, 1, -16 /*starting location */ /*z axis is reversed xd (- is going twoards the top of the screen)*/),
-	//		0.75f /*scale*/
-	//	);
+		//iw::ref<iw::Shader> shader = Asset->Load<iw::Shader>("shaders/simple.shader");
+		//Renderer->InitShader(shader, iw::CAMERA);
 
-	//	otherGuy.Set<iw::Mesh>(Asset->Load<iw::Model>("Sphere")->GetMesh(0).MakeInstance()); // "Sphere" gets created at line 246 of SandboxLayer.cpp
+		//iw::Material material(shader);
+		//material.Set("color", iw::Color(0, 0, 0));
 
-	//	delete sequence;
-	//	sequence = new iw::event_seq();
-	//	sequence->add(new iw::MoveToTarget(otherGuy, iw::vector3(-5, 1, -5))); // sample of what to kinda do
-	//	sequence->add(new iw::MoveToTarget(otherGuy, iw::vector3(-4, 1,  5))); // cutscene is going to be 
-	//	sequence->add(new iw::MoveToTarget(otherGuy, iw::vector3(-3, 1, -3)));
-	//	sequence->add(new iw::MoveToTarget(otherGuy, iw::vector3(-12, 1, 0)));
-	//	sequence->add(new iw::MoveToTarget(firstEnemy, iw::vector3(-10, 1, 0)));
-	//}
+		//iw::Mesh bg = Renderer->ScreenQuad().MakeInstance();
+		//bg.SetMaterial(REF<iw::Material>(material));
+
+		//iw::Entity text = Space->CreateEntity<iw::Transform, iw::Mesh, iw::UiElement>();
+		//iw::Entity back = Space->CreateEntity<iw::Transform, iw::Mesh, iw::UiElement>();
+
+		//text.Set<iw::Transform>(iw::vector3(0, 0, 2));
+		//text.Set<iw::Mesh>(t);
+
+		//back.Set<iw::Transform>(iw::vector3(0, 0, 1), 100);
+		//back.Set<iw::Mesh>(bg);
+
+		//sequence->add(new iw::ShowText(text, , , 5.0f));
+	}
+
+	else if (currentLevelName == "levels/forest/forest02.json") {
+		Space->DestroyEntity(otherGuy.Index());
+		otherGuy = Space->CreateEntity<iw::Transform, iw::Mesh, iw::CollisionObject, iw::SphereCollider, OtherGuyTag>();
+
+		otherGuy.Set<OtherGuyTag>();
+
+		iw::Transform* t = otherGuy.Set<iw::Transform>(
+			iw::vector3(-5, 1, -16),
+			0.75f
+		);
+
+		otherGuy.Set<iw::Mesh>(Asset->Load<iw::Model>("Sphere")->GetMesh(0).MakeInstance());
+
+		iw::CollisionObject* obj = otherGuy.Set<iw::CollisionObject>();
+		iw::SphereCollider*  col = otherGuy.Set<iw::SphereCollider>(0, 0.75f);
+
+		obj->SetOnCollision([&](iw::Manifold& man, float dt) {
+			iw::Entity guyEntity, bulletEntity;
+			bool noent = GetEntitiesFromManifold<OtherGuyTag, Bullet>(man, guyEntity, bulletEntity);
+
+			if (noent) {
+				return;
+			}
+
+			OtherGuyTag* guy  = guyEntity.Find<OtherGuyTag>();
+			iw::Mesh*    mesh = guyEntity.Find<iw::Mesh>();
+
+			guy->Health -= 1;
+
+			if (guy->Health < 0) guy->Health = 0;
+
+			float color = guy->Health / 3.0f;
+			mesh->Material()->Set("baseColor", iw::Color(0.8f, color, color, 1));
+
+			Audio->AsStudio()->CreateInstance("playerDamaged");
+		});
+
+		obj->SetTrans(t);
+		obj->SetCol(col);
+
+		Physics->AddCollisionObject(obj);
+
+		float speed = 4.5f;
+
+		delete sequence;
+		sequence = new iw::event_seq();
+		sequence->add(new iw::MoveToTarget(otherGuy, iw::vector3(-8, 1, -3), speed));
+		sequence->add(new iw::MoveToTarget(otherGuy, iw::vector3(-6, 1, -6), speed));
+		sequence->add(new iw::MoveToTarget(otherGuy, iw::vector3(-5, 1, -3), speed * 7.5f));
+		sequence->add(new iw::DestroyEntity(firstEnemy));
+		sequence->add(new iw::MoveToTarget(otherGuy, iw::vector3(-4, 1, 1), speed * 3.5f));
+		sequence->add(new iw::MoveToTarget(otherGuy, iw::vector3(3, 1, 0), speed));
+		sequence->add(new iw::MoveToTarget(otherGuy, iw::Transform(0, 0), 1.5f, false, true));
+		sequence->add(new iw::DestroyEntity(otherGuy));
+		//sequence->add(new iw::MoveToTarget(otherGuy, iw::vector3(-12, 1, 0)));
+	}
 
 	return level;
 }

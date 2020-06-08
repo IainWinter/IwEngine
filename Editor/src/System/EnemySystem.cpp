@@ -99,10 +99,12 @@ void EnemySystem::Update(
 				break;
 			}
 			case EnemyType::BOSS_FOREST: {
-				iw::vector3 target = player.Find<iw::Transform>()->Position;
-				float       dir    = atan2(target.z - transform->Position.z, target.x - transform->Position.x);
+				if (enemy->Timer < enemy->ChargeTime) {
+					iw::vector3 target = player.Find<iw::Transform>()->Position;
+					float       dir = atan2(target.z - transform->Position.z, target.x - transform->Position.x);
 
-				transform->Rotation = iw::quaternion::from_euler_angles(0, dir, 0);
+					transform->Rotation = iw::lerp(transform->Rotation, iw::quaternion::from_euler_angles(0, dir, 0), iw::Time::DeltaTime() * 4);
+				}
 
 				break;
 			}
@@ -262,22 +264,17 @@ void EnemySystem::Update(
 						if (enemy->Timer2 == 0.0f) {
 							float rot = iw::Pi + iw::hPi * 0.5f * cos(enemy->Timer);
 
-							for (int i = 0; i <= count; i++) {
-								if (i != dontShoot
-									&& i != dontShoot - 1
-									&& i != dontShoot + 1)
-								{
-									iw::quaternion offset = iw::quaternion::from_euler_angles(0, -rot + enemy->Speed * i, 0);
+							for (int i = 0; i < count; i++) {
+								iw::quaternion offset = iw::quaternion::from_euler_angles(0, -rot + enemy->Speed * i, 0);
 
-									iw::Transform* bullet = SpawnBullet(
-										enemy->Bullet,
-										transform->Position,
-										transform->Rotation.inverted() * offset,
-										entity.Index
-									);
+								iw::Transform* bullet = SpawnBullet(
+									enemy->Bullet,
+									transform->Position,
+									transform->Rotation.inverted() * offset,
+									entity.Index
+								);
 
-									transform->Parent()->AddChild(bullet);
-								}
+								transform->Parent()->AddChild(bullet);
 							}
 						}
 
@@ -295,23 +292,24 @@ void EnemySystem::Update(
 					else if (enemy->Timer >= fire1)
 					{
 						if (enemy->Timer2 == 0.0f) {
-							float rot = enemy->Timer * iw::Pi2 * 2;
-							iw::quaternion offset = iw::quaternion::from_euler_angles(0, rot, 0);
+							float rot = enemy->Timer * iw::Pi2 * 4;
 
-							Enemy child;
+							iw::quaternion offset = transform->Rotation.inverted()
+								* iw::quaternion::from_euler_angles(0, rot, 0);
+
+							Enemy child {};
 							child.Type = EnemyType::SPIN;
 							child.Bullet = enemy->Bullet;
-							child.Health = 1;
 							child.Speed = 0.2617994;
 							child.FireTime = 0.120000;
 							child.ChargeTime = 0.000000;
+							child.HasShot = false;
 
 							iw::vector3 position = transform->Position + iw::vector3(sqrt(2), 0, 0) * offset;
-							iw::vector3 velocity = transform->Right() * transform->Rotation.inverted() * offset;
+							iw::vector3 velocity = transform->Forward() * offset;
 
-							velocity.x *= 10;
+							velocity *= 5 + iw::randf();
 							velocity.y = 15;
-							velocity.z *= 10;
 
 							Bus->push<SpawnEnemyEvent>(
 								child,
@@ -322,12 +320,12 @@ void EnemySystem::Update(
 
 						enemy->Timer2 += iw::Time::DeltaTimeScaled();
 
-						if (enemy->Timer2 > 0.2f) {
+						if (enemy->Timer2 > 0.1f) {
 							enemy->Timer2 = 0.0f;
 						}
 
-						if (enemy->Timer <= fire1 + fire12) {
-							enemy->HasShot = false;  // resets hasShot if not finished kinda scuff
+						if (enemy->Timer <= fire1 + 0.4f) {
+							enemy->HasShot = false; // resets hasShot if not finished kinda scuff
 						}
 
 						else {
@@ -443,15 +441,15 @@ iw::Transform* EnemySystem::SpawnBullet( // this should be in bullet system i gu
 		}
 
 		else if (other.Has<EnemyDeathCircle>()) {
-			iw::Transform* otherTransform  = other .Find<iw::Transform>();
+			iw::Transform* otherTransform  = other.Find<iw::Transform>();
 
 			float score = ceil((bulletTransform->Position - otherTransform->Position).length()) * 10;
 			Bus->push<GiveScoreEvent>(bulletTransform->Position, score, false);
 		}
 
 		bulletTransform->SetParent(nullptr);
-		//Space->DestroyEntity(bullet.Index());
-		Bus->push<iw::EntityDestroyEvent>(bullet);
+		Space->DestroyEntity(bullet.Index());
+		//Bus->push<iw::EntityDestroyEvent>(bullet);
 	});
 
 	Physics->AddRigidbody(r);
@@ -485,7 +483,7 @@ iw::Transform* EnemySystem::SpawnEnemy(
 	}
 
 	Enemy*               e = ent.Set<Enemy>(prefab);
-	iw::Transform*       t = ent.Set<iw::Transform>(iw::vector3(0, 1, 0), iw::vector3(1));
+	iw::Transform*       t = ent.Set<iw::Transform>(position);
 	iw::SphereCollider*  s = ent.Set<iw::SphereCollider>(iw::vector3::zero, 1.0f);
 	
 	iw::Model* m;
@@ -508,21 +506,10 @@ iw::Transform* EnemySystem::SpawnEnemy(
 		}
 	}
 
-	//m->GetMesh(0).Material()->Set("baseColor", iw::Color(0.8f, 0.8f, 0.8f));
-	//m->GetMesh(0).Material()->Set("reflectance", 1.0f);
-
-	//e->Timer = e->ChargeTime;
-
-	t->Position.x = position.x;
-	t->Position.z = position.y;
-	t->Position.y = 1;
-
 	c->SetCol(s);
 	c->SetTrans(t);
 	c->SetIsStatic(false);
 	
-	//c->SetIsTrigger(true); // temp should make collision layers
-
 	c->SetOnCollision([&](iw::Manifold& man, float dt) {
 		iw::Entity enemyEntity, playerEntity;
 		bool noent = GetEntitiesFromManifold<Enemy, Player>(man, enemyEntity, playerEntity);
@@ -534,7 +521,9 @@ iw::Transform* EnemySystem::SpawnEnemy(
 		Enemy*  enemy  = enemyEntity .Find<Enemy>();
 		Player* player = playerEntity.Find<Player>();
 
-		if (player->Transition) {
+		if (   player->Transition
+			|| player->Timer <= 0.0f)
+		{
 			return;
 		}
 

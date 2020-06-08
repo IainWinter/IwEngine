@@ -134,10 +134,6 @@ namespace Engine {
 				b = t;
 			}
 
-			else {
-				return true;
-			}
-
 			if constexpr (std::is_same_v<_t2, void> == false) {
 				if (!b.Has<_t2>()) {
 					return true;

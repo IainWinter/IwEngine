@@ -15,12 +15,12 @@ namespace Engine {
 		Renderer->BeginScene(m_scene);
 		
 		for (auto entity : eca) {
-			auto [transform, mesh] = entity.Components.Tie<Components>();
-
 			if (Space->HasComponent<iw::UiElement>(entity.Handle)) {
 				continue;
 			}
 
+			auto [transform, mesh] = entity.Components.Tie<Components>();
+			
 			Renderer->DrawMesh(transform, mesh);
 		}
 			

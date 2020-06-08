@@ -76,36 +76,53 @@ int PlayerSystem::Initialize() {
 	r->SetLock    (iw::vector3::unit_y);
 
 	r->SetOnCollision([&](iw::Manifold& man, float dt) {
-		iw::Entity enemyEntity, playerEntity;
-		bool noent = GetEntitiesFromManifold<Enemy, Player>(man, enemyEntity, playerEntity);
+		iw::Entity playerEntity, otherEntity;
+		bool noent = GetEntitiesFromManifold<Player>(man, playerEntity, otherEntity);
 
 		if (noent) {
 			return;
 		}
 
-		Enemy*  enemy  = enemyEntity .Find<Enemy>();
 		Player* player = playerEntity.Find<Player>();
+		
+		if (otherEntity.Has<Enemy>()) {
+			Enemy* enemy = otherEntity.Find<Enemy>();
 
-		if (player->Timer <= 0) {
-			return;
+			if (player->Timer <= 0) {
+				return;
+			}
+
+			if (enemy->Health > 1) {
+				if (player->Transition) return; 
+
+				Player*        playerComp  = playerEntity.Find<Player>();
+				iw::Transform* playerTrans = playerEntity.Find<iw::Transform>();
+				iw::Rigidbody* playerBody  = playerEntity.Find<iw::Rigidbody>();
+
+				//playerComp->Timer = 0.0f; // causes the enemy to not detect damage
+				playerBody->SetIsTrigger(true);
+
+				QueueChange(&player->Transition, true);
+
+				player->TransitionSpeed = 1.5f;
+				player->TransitionStartPosition  = playerTrans->Position;
+				player->TransitionTargetPosition = playerTrans->Position + player->Movement.normalized() * 12;
+				player->Begin = iw::Time::TotalTime();
+			}
 		}
+		
+		else if (otherEntity.Has<Bullet>()) {
+			if (   true //!p->Damaged // stop taking more than 1 damage per frame
+				&& player->Health > 0)
+			{
+				player->Damaged = true;
+				player->Health -= 1;
 
-		if (enemy->Health > 1) {
-			if (player->Transition) return; 
+				float color = player->Health / 3.0f;
+				m_playerModel->GetMesh(0).Material()->Set("baseColor", iw::Color(0.8f, color, color, 1));
 
-			Player*        playerComp  = playerEntity.Find<Player>();
-			iw::Transform* playerTrans = playerEntity.Find<iw::Transform>();
-			iw::Rigidbody* playerBody  = playerEntity.Find<iw::Rigidbody>();
-
-			//playerComp->Timer = 0.0f; // causes the enemy to not detect damage
-			playerBody->SetIsTrigger(true);
-
-			QueueChange(&player->Transition, true);
-
-			player->TransitionSpeed = 1.5f;
-			player->TransitionStartPosition  = playerTrans->Position;
-			player->TransitionTargetPosition = playerTrans->Position + player->Movement.normalized() * 12;
-			player->Begin = iw::Time::TotalTime();
+				Audio->AsStudio()->CreateInstance("playerDamaged");
+			}
 		}
 	});
 
@@ -298,63 +315,6 @@ bool PlayerSystem::On(
 	}
 
 	return true;
-}
-
-bool PlayerSystem::On(
-	iw::CollisionEvent& event)
-{
-	// i frames
-	//Player* p = player.Find<Player>();
-
-	//if (p->Timer >= p->DashTime - 0.05f) {
-	//	return false;
-	//}
-
-	iw::Entity a = Space->FindEntity(event.ObjA);
-	if (a == iw::EntityHandle::Empty) {
-		a = Space->FindEntity<iw::Rigidbody>(event.ObjA);
-	}
-
-	iw::Entity b = Space->FindEntity(event.ObjB);
-	if (b == iw::EntityHandle::Empty) {
-		b = Space->FindEntity<iw::Rigidbody>(event.ObjB);
-	}
-
-	if (   a.Index() == iw::EntityHandle::Empty.Index
-		|| b.Index() == iw::EntityHandle::Empty.Index)
-	{
-		return false;
-	}
-
-	iw::Entity player;
-	if (   a.Has<Player>()
-		&& b.Has<Bullet>())
-	{
-		player = a;
-	}
-
-	else if (b.Has<Player>()
-		&&   a.Has<Bullet>())
-	{
-		player = b;
-	}
-
-	if (player.Index() != iw::EntityHandle::Empty.Index) {
-		Player* p = player.Find<Player>();
-		if (  true //!p->Damaged
-			&& p->Health > 0)
-		{
-			p->Damaged = true;
-			p->Health -= 1;
-
-			float color = p->Health / 3.0f;
-			m_playerModel->GetMesh(0).Material()->Set("baseColor", iw::Color(0.8f, color, color, 1));
-
-			Audio->AsStudio()->CreateInstance("playerDamaged");
-		}
-	}
-
-	return false;
 }
 
 bool PlayerSystem::On(

@@ -389,11 +389,7 @@ namespace Engine {
 		Manifold& manifold,
 		scalar dt)
 	{
-		Bus->push<CollisionEvent>(
-			manifold.ObjA, 
-			manifold.ObjB, 
-			manifold.PenetrationDepth, 
-			dt);
+		Bus->push<CollisionEvent>(manifold, dt);
 	}
 }
 }

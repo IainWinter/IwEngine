@@ -1,8 +1,7 @@
 #pragma once
 
-#include "iw/physics/IwPhysics.h"
-#include "iw/physics/Dynamics/Rigidbody.h"
 #include "iw/common/Events/EventGroups.h"
+#include "iw/physics/Collision/Manifold.h"
 #include "iw/events/event.h"
 
 namespace iw {
@@ -29,19 +28,13 @@ namespace Engine {
 	struct CollisionEvent
 		: PhysicsEvent
 	{
-		CollisionObject* ObjA;
-		CollisionObject* ObjB;
-		scalar PenetrationDepth;
+		Manifold Manifold;
 
 		CollisionEvent(
-			CollisionObject* objA,
-			CollisionObject* objB,
-			scalar pen,
+			iw::Manifold& manifold,
 			scalar dt)
 			: PhysicsEvent(PhysicsEventType::Collision, dt)
-			, ObjA(objA)
-			, ObjB(objB)
-			, PenetrationDepth(pen)
+			, Manifold(manifold)
 		{}
 	};
 }

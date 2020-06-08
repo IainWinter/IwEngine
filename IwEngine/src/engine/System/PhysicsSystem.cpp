@@ -20,6 +20,8 @@ namespace Engine {
 			
 			if (rigidbody->IsKinematic()) {
 				transform->Position = iw::lerp(rigidbody->LastTrans().Position, rigidbody->Trans().Position, accumulator / iw::FixedTime());
+				transform->Scale    = iw::lerp(rigidbody->LastTrans().Scale,    rigidbody->Trans().Scale,    accumulator / iw::FixedTime());
+				transform->Rotation = iw::lerp(rigidbody->LastTrans().Rotation, rigidbody->Trans().Rotation, accumulator / iw::FixedTime());
 			}
 		}
 
@@ -27,6 +29,8 @@ namespace Engine {
 			auto [transform, object] = entity.Components.Tie<OtherComponents>();
 
 			transform->Position = iw::lerp(transform->Position, object->Trans().Position, accumulator / iw::FixedTime());
+			transform->Scale    = iw::lerp(transform->Scale,    object->Trans().Scale,    accumulator / iw::FixedTime());
+			transform->Rotation = iw::lerp(transform->Rotation, object->Trans().Rotation, accumulator / iw::FixedTime());
 		}
 
 		accumulator += Time::DeltaTime();

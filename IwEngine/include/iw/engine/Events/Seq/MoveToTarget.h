@@ -12,21 +12,55 @@ namespace Engine {
 	{
 	private:
 		Entity& entity; // in future it would be awesome if there is a verison that doesnt need a reference
-		vector3 target;
-		vector3 origin;
-		// add speed here
+		Transform target;
+		Transform origin;
+		float speed;
 
 		float startTime;
 		bool firstRun;
 
+		bool pos, scl, rot;
+		float posS, sclS, rotS;
+
 	public:
 		MoveToTarget(
 			Entity& entity,
-			vector3 target) // add speed here also
+			vector3 target,
+			float speed = 1.0f,
+			bool pos = true,
+			bool scl = false,
+			bool rot = false) // add speed here also
 			: entity(entity)
 			, target(target)
+			, speed(speed)
+			, pos(pos)
+			, scl(scl)
+			, rot(rot)
+			, posS(0)
+			, sclS(0)
+			, rotS(0)
 			, origin(0)
-			// set speed value
+			, startTime(0)
+			, firstRun(true)
+		{}
+
+		MoveToTarget(
+			Entity& entity,
+			Transform target,
+			float speed = 1.0f,
+			bool pos = true,
+			bool scl = false,
+			bool rot = false)
+			: entity(entity)
+			, target(target)
+			, speed(speed)
+			, pos(pos)
+			, scl(scl)
+			, rot(rot)
+			, posS(0)
+			, sclS(0)
+			, rotS(0)
+			, origin(0)
 			, startTime(0)
 			, firstRun(true)
 		{}
@@ -57,14 +91,24 @@ namespace Engine {
 			}
 
 			if (firstRun) {
-				origin    = transform->Position;
+				origin    = *transform;
 				startTime = Time::TotalTime();
 				firstRun  = false;
+
+				posS = (origin.Position - target.Position).length() / speed;
+				sclS = (origin.Scale    - target.Scale)   .length() / speed;
+				rotS = (origin.Rotation - target.Rotation).length() / speed; // xd
 			}
 
-			transform->Position = lerp(origin, target, Time::TotalTime() - startTime); // apply speed here (time * speed) 
+			if(pos) transform->Position = lerp(origin.Position, target.Position, (Time::TotalTime() - startTime) / posS);
+			if(scl) transform->Scale    = lerp(origin.Scale,    target.Scale,    (Time::TotalTime() - startTime) / sclS);
+			if(rot) transform->Rotation = lerp(origin.Rotation, target.Rotation, (Time::TotalTime() - startTime) / rotS);
 
-			return transform->Position == target;
+			bool p = pos ? transform->Position == target.Position : true;
+			bool c = scl ? transform->Scale    == target.Scale    : true;
+			bool r = rot ? transform->Rotation == target.Rotation : true;
+
+			return p && c && r;
 		}
 	};
 	

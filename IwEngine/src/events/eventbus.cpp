@@ -34,7 +34,7 @@ namespace iw {
 
 			m_alloc.free(e, e->Size);
 
-			if (++i > 50) {
+			if (++i > 500) {
 				break;
 			}
 		}

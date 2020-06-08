@@ -80,7 +80,7 @@ namespace Physics {
 
 				if (   a->IsTrigger()
 					&& b->IsTrigger()
-					&& (a->IsDynamic() || b->IsDynamic()))
+					&& !(a->IsDynamic() || b->IsDynamic()))
 				{
 					continue;
 				}
