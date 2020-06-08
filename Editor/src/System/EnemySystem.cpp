@@ -421,27 +421,11 @@ iw::Transform* EnemySystem::SpawnBullet( // this should be in bullet system i gu
 	//r->SetLock(iw::vector3(0, 1, 0));
 
 	r->SetOnCollision([&](iw::Manifold& man, float dt) {
-		iw::Entity bullet = Space->FindEntity(man.ObjA);
-		iw::Entity other  = Space->FindEntity(man.ObjB);
+		iw::Entity bullet, other;
+		bool noent = GetEntitiesFromManifold<Bullet>(man, bullet, other);
 
-		if (!bullet) {
-			bullet = Space->FindEntity<iw::Rigidbody>(man.ObjA);
-		}
-
-		if (!other) {
-			other = Space->FindEntity<iw::Rigidbody>(man.ObjB);
-		}
-
-		if (!bullet || !other) {
+		if (noent) {
 			return;
-		}
-
-		if (  !bullet.Has<Bullet>()
-			&& other.Has<Bullet>())
-		{
-			iw::Entity tmp = bullet;
-			bullet = other;
-			other = bullet;
 		}
 
 		if (   other.Has<Bullet>()
@@ -497,7 +481,6 @@ iw::Transform* EnemySystem::SpawnEnemy(
 		r->SetIsStatic(false);
 		r->SetSimGravity(true);
 
-		
 		c = r;
 	}
 
@@ -510,16 +493,16 @@ iw::Transform* EnemySystem::SpawnEnemy(
 	switch (prefab.Type) {
 		case EnemyType::BOSS_FOREST:
 		case EnemyType::MINI_BOSS_BOX_SPIN: {
-			//e->Health = 3;
-			//e->ScoreMultiple = 10;
+			e->Health = 3;
+			e->ScoreMultiple = 10;
 			t->Scale = 0.75f;
 			m = ent.Set<iw::Model>(*Asset->Load<iw::Model>("Box"));
 
 			break;
 		}
 		default: {
-			//e->Health = 1;
-			//e->ScoreMultiple = 1;
+			e->Health = 1;
+			e->ScoreMultiple = 1;
 			m = ent.Set<iw::Model>(*Asset->Load<iw::Model>("Tetrahedron"));
 			break;
 		}
@@ -541,41 +524,37 @@ iw::Transform* EnemySystem::SpawnEnemy(
 	//c->SetIsTrigger(true); // temp should make collision layers
 
 	c->SetOnCollision([&](iw::Manifold& man, float dt) {
-		iw::Entity enemy = Space->FindEntity<iw::CollisionObject>(man.ObjA);
-		iw::Entity player = Space->FindEntity<iw::Rigidbody>(man.ObjB);
+		iw::Entity enemyEntity, playerEntity;
+		bool noent = GetEntitiesFromManifold<Enemy, Player>(man, enemyEntity, playerEntity);
 
-		if (!enemy || !player) {
+		if (noent) {
 			return;
 		}
 
-		Enemy* enemyComponent = enemy.Find<Enemy>();
-		Player* playerComponent = player.Find<Player>();
+		Enemy*  enemy  = enemyEntity .Find<Enemy>();
+		Player* player = playerEntity.Find<Player>();
 
-		if (!enemyComponent || !playerComponent) {
+		if (player->Transition) {
 			return;
 		}
 
-		if (playerComponent->Timer <= 0.0f) {
+		QueueChange(&enemy->Health, enemy->Health - 1);
+
+		if (enemy->Health - 1 > 0) {
 			return;
 		}
 
-		enemyComponent->Health -= 1;
+		iw::Transform* transform = enemyEntity.Find<iw::Transform>();
 
-		if (enemyComponent->Health > 0) {
-			return;
-		}
-
-		iw::Transform* transform = enemy.Find<iw::Transform>();
-
-		float score = floor(5 * (1.0f - playerComponent->Timer / playerComponent->DashTime)) * 200 + 200;
+		float score = floor(5 * (1.0f - player->Timer / player->DashTime)) * 200 + 200;
 
 		Audio->AsStudio()->CreateInstance("enemyDeath");
 
 		Bus->push<SpawnEnemyDeath>(transform->Position, transform->Parent());
-		Bus->push<GiveScoreEvent>(transform->Position, score * enemyComponent->ScoreMultiple);
+		Bus->push<GiveScoreEvent> (transform->Position, score * enemy->ScoreMultiple);
 
 		transform->SetParent(nullptr);
-		Space->DestroyEntity(enemy.Index());
+		Space->DestroyEntity(enemyEntity.Index());
 	});
 
 	return t;

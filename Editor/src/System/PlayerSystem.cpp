@@ -14,15 +14,15 @@ PlayerSystem::PlayerSystem()
 	: System("Player")
 	, playerPrefab()
 	, m_playerModel(nullptr)
-	, up(false)
-	, down(false)
-	, left(false)
-	, right(false)
-	, dash(false)
-	, sprint(false)
-	, transition(false)
-	, levelTransition(false)
-	, begin(0)
+	//, up(false)
+	//, down(false)
+	//, left(false)
+	//, right(false)
+	//, dash(false)
+	//, sprint(false)
+	//, transition(false)
+	//, levelTransition(false)
+	//, begin(0)
 {
 #ifdef IW_DEBUG
 	const char* file = "assets/prefabs/player.json";
@@ -42,10 +42,10 @@ PlayerSystem::PlayerSystem()
 
 	else {
 		// Default values
-		playerPrefab.Speed        = 4.25f;
-		playerPrefab.DashTime     = 8 / 60.0f;
+		playerPrefab.Speed      = 4.25f;
+		playerPrefab.DashTime   = 8 / 60.0f;
 		playerPrefab.ChargeTime = 0.2f;
-		playerPrefab.Health       = 3;
+		playerPrefab.Health     = 3;
 
 #ifdef IW_DEBUG
 		iw::JsonSerializer(file).Write(playerPrefab);
@@ -58,54 +58,54 @@ PlayerSystem::PlayerSystem()
 int PlayerSystem::Initialize() {
 	m_playerModel = Asset->Load<iw::Model>("Player");
 
-	player = Space->CreateEntity<iw::Transform, iw::Model, iw::SphereCollider, iw::Rigidbody, Player>();
+	m_player = Space->CreateEntity<iw::Transform, iw::Model, iw::SphereCollider, iw::Rigidbody, Player>();
 	
-	                         player.Set<iw::Model>(*m_playerModel);
-	                         player.Set<Player>(playerPrefab);
-	iw::Transform*       t = player.Set<iw::Transform>(iw::vector3(0, 1, 0), iw::vector3(1));
-	iw::SphereCollider*  s = player.Set<iw::SphereCollider>(iw::vector3::zero, 0.75f);
-	iw::Rigidbody*       r = player.Set<iw::Rigidbody>();
+	                        m_player.Set<Player>(playerPrefab);
+	                        m_player.Set<iw::Model>(*m_playerModel);
+	iw::Transform*      t = m_player.Set<iw::Transform>(iw::vector3(0, 1, 0), iw::vector3(1));
+	iw::SphereCollider* s = m_player.Set<iw::SphereCollider>(iw::vector3::zero, 0.75f);
+	iw::Rigidbody*      r = m_player.Set<iw::Rigidbody>();
 
 	//c->SetMass(1);
 	r->SetCol(s);
 	r->SetTrans(t);
 	r->SetIsStatic(false);
-	r->SetSimGravity(true);
+	r->SetSimGravity(false);
+
+	r->SetIsLocked(iw::vector3::unit_y);
+	r->SetLock    (iw::vector3::unit_y);
 
 	r->SetOnCollision([&](iw::Manifold& man, float dt) {
-		iw::Entity enemy  = Space->FindEntity<iw::CollisionObject>(man.ObjA);
-		iw::Entity player = Space->FindEntity<iw::Rigidbody>(man.ObjB);
+		iw::Entity enemyEntity, playerEntity;
+		bool noent = GetEntitiesFromManifold<Enemy, Player>(man, enemyEntity, playerEntity);
 
-		if (!enemy || !player) {
+		if (noent) {
 			return;
 		}
 
-		Enemy*  enemyComponent  = enemy .Find<Enemy>();
-		Player* playerComponent = player.Find<Player>();
+		Enemy*  enemy  = enemyEntity .Find<Enemy>();
+		Player* player = playerEntity.Find<Player>();
 
-		if (!enemyComponent || !playerComponent) {
+		if (player->Timer <= 0) {
 			return;
 		}
 
-		if (playerComponent->Timer <= 0) {
-			return;
-		}
+		if (enemy->Health > 1) {
+			if (player->Transition) return; 
 
-		if (enemyComponent->Type >= EnemyType::MINI_BOSS_BOX_SPIN) {
-			if (transition) return;
+			Player*        playerComp  = playerEntity.Find<Player>();
+			iw::Transform* playerTrans = playerEntity.Find<iw::Transform>();
+			iw::Rigidbody* playerBody  = playerEntity.Find<iw::Rigidbody>();
 
-			Player*        playerComp  = player.Find<Player>();
-			iw::Transform* playerTrans = player.Find<iw::Transform>();
-			iw::Rigidbody* playerBody  = player.Find<iw::Rigidbody>();
-
-			playerComp->Timer = 0.0f;
+			//playerComp->Timer = 0.0f; // causes the enemy to not detect damage
 			playerBody->SetIsTrigger(true);
 
-			transitionSpeed = 1.5f;
-			transition = true;
-			transitionStartPosition  = playerTrans->Position;
-			transitionTargetPosition = playerTrans->Position + movement.normalized() * 12;
-			begin = iw::Time::TotalTime();
+			QueueChange(&player->Transition, true);
+
+			player->TransitionSpeed = 1.5f;
+			player->TransitionStartPosition  = playerTrans->Position;
+			player->TransitionTargetPosition = playerTrans->Position + player->Movement.normalized() * 12;
+			player->Begin = iw::Time::TotalTime();
 		}
 	});
 
@@ -129,25 +129,37 @@ void PlayerSystem::Update(
 	for (auto entity : view) {
 		auto [transform, body, player] = entity.Components.Tie<Components>();
 		
-		if (levelTransition) {
-			transitionSpeed += iw::Time::DeltaTime() * 5;
+		if (player->LevelTransition) {
+			player->TransitionSpeed += iw::Time::DeltaTime() * 5;
 		}
 
-		if (transition || levelTransition) {
-			if (levelTransition) {
-				body->Trans().Position = iw::lerp(body->Trans().Position, transitionTargetPosition, iw::Time::DeltaTime() * transitionSpeed);
+		if (   player->Transition
+			|| player->LevelTransition)
+		{
+			iw::vector3& position = body->Trans().Position;
+
+			if (player->LevelTransition) {
+				position = iw::lerp(
+					position,
+					player->TransitionTargetPosition, 
+					iw::Time::DeltaTime() * player->TransitionSpeed
+				);
 			}
 
 			else {
-				body->Trans().Position = iw::lerp(transitionStartPosition, transitionTargetPosition, iw::Time::TotalTime() - begin);
+				position = iw::lerp(
+					player->TransitionStartPosition, 
+					player->TransitionTargetPosition, 
+					iw::Time::TotalTime() - player->Begin);
 			}
 
-			if (   iw::almost_equal(body->Trans().Position.x, transitionTargetPosition.x, 2)
-				&& iw::almost_equal(body->Trans().Position.z, transitionTargetPosition.z, 2))
+			if (   iw::almost_equal(position.x, player->TransitionTargetPosition.x, 2)
+				&& iw::almost_equal(position.z, player->TransitionTargetPosition.z, 2))
 			{
-				transitionSpeed = 1.0f;
-				transition = false;
-				body->Trans().Position = transitionTargetPosition;
+				position = player->TransitionTargetPosition;
+				player->TransitionSpeed = 1.0f;
+				player->Transition = false;
+				player->Timer = 0.0f;
 				body->SetIsTrigger(false);
 			}
 		}
@@ -165,26 +177,26 @@ void PlayerSystem::Update(
 			}
 
 			else {
-				movement = 0;
-				if (left)  movement.x -= 1;
-				if (right) movement.x += 1;
-				if (up)    movement.z -= 1;
-				if (down)  movement.z += 1;
+				player->Movement = 0;
+				if (player->Left)  player->Movement.x -= 1;
+				if (player->Right) player->Movement.x += 1;
+				if (player->Up)    player->Movement.z -= 1;
+				if (player->Down)  player->Movement.z += 1;
 
-				movement.normalize();
-				movement *= player->Speed;
+				player->Movement.normalize();
+				player->Movement *= player->Speed;
 
 				if (player->Timer > 0) {
-					movement *= 10 * player->Timer / player->DashTime;
+					player->Movement *= 10 * player->Timer / player->DashTime;
 				}
 
-				if (sprint) {
-					movement *= 2.0f;
+				if (player->Sprint) {
+					player->Movement *= 2.0f;
 				}
 
 				//body->Trans().Position += movement * iw::Time::DeltaTime();
 
-				body->SetVelocity(movement / iw::TimeScale());
+				body->SetVelocity(player->Movement / iw::TimeScale());
 
 				if (player->Timer <= -player->ChargeTime) {
 					if (distance == 0) {
@@ -192,8 +204,8 @@ void PlayerSystem::Update(
 						LOG_INFO << distance;
 					}
 
-					if (   dash
-						&& (up || down || left || right))
+					if (   player->Dash
+						&& (player->Up || player->Down || player->Left || player->Right))
 					{
 						start = transform->Position;
 						distance = 0;
@@ -231,31 +243,49 @@ void PlayerSystem::Update(
 }
 
 void PlayerSystem::OnPush() {
-	left = right = up = down = dash = sprint = transition = false;
+	if (!m_player) {
+		return;
+	}
+
+	Player* player = m_player.Find<Player>();
+
+	player->Left       = false;
+	player->Right      = false;
+	player->Up         = false;
+	player->Down       = false;
+	player->Dash       = false;
+	player->Sprint     = false;
+	player->Transition = false;
 }
 
 bool PlayerSystem::On(
 	iw::KeyEvent& event)
 {
+	if (!m_player) {
+		return false;
+	}
+
+	Player* player = m_player.Find<Player>();
+
 	switch (event.Button) {
 		case iw::UP: {
-			up = event.State;
+			player->Up = event.State;
 			break;
 		}
 		case iw::DOWN: {
-			down = event.State;
+			player->Down = event.State;
 			break; 
 		}
 		case iw::LEFT: {
-			left = event.State;
+			player->Left = event.State;
 			break; 
 		}
 		case iw::RIGHT: {
-			right = event.State;
+			player->Right = event.State;
 			break; 
 		}
 		case iw::X: {
-			dash = event.State;
+			player->Dash = event.State;
 			break;
 		}
 		case iw::R: {
@@ -334,32 +364,30 @@ bool PlayerSystem::On(
 		case iw::val(Actions::GOTO_NEXT_LEVEL): {
 			GoToNextLevelEvent& event = e.as<GoToNextLevelEvent>();
 
-			Player*        p = player.Find<Player>();
-			iw::Rigidbody* r = player.Find<iw::Rigidbody>();
+			Player*        p = m_player.Find<Player>();
+			iw::Rigidbody* r = m_player.Find<iw::Rigidbody>();
+
+			p->LevelTransition = true;
+			p->TransitionSpeed = 1.0f;
+			p->TransitionStartPosition  = iw::vector3(r->Trans().Position.x, 1, r->Trans().Position.z);
+			p->TransitionTargetPosition = iw::vector3(event.PlayerPosition.x, 1, event.PlayerPosition.y);
+			p->Begin = iw::Time::TotalTime();
 
 			r->SetCol(nullptr);
-
-			transitionSpeed = 1.0f;
-			levelTransition = true;
-			transitionStartPosition  = iw::vector3(r->Trans().Position.x, 1, r->Trans().Position.z);
-			transitionTargetPosition = iw::vector3(event.PlayerPosition.x, 1, event.PlayerPosition.y);
-			begin = iw::Time::TotalTime();
-
-			//t->Scale = 0;
-
-			//up = down = left = right = dash = sprint = false;
 
 			break;
 		}
 		case iw::val(Actions::AT_NEXT_LEVEL): {
-			levelTransition = false;
+			Player* p = m_player.Find<Player>();
+
+			p->LevelTransition = false;
 			break;
 		}
 		case iw::val(Actions::START_LEVEL): {
-			Player*              p = player.Find<Player>();
-			iw::Transform*       t = player.Find<iw::Transform>();
-			iw::Rigidbody*       r = player.Find<iw::Rigidbody>();
-			iw::SphereCollider*  s = player.Find<iw::SphereCollider>();
+			Player*              p = m_player.Find<Player>();
+			iw::Transform*       t = m_player.Find<iw::Transform>();
+			iw::Rigidbody*       r = m_player.Find<iw::Rigidbody>();
+			iw::SphereCollider*  s = m_player.Find<iw::SphereCollider>();
 
 			*p = playerPrefab;
 
@@ -371,7 +399,7 @@ bool PlayerSystem::On(
 			r->SetCol(s);
 			r->SetTrans(t);
 
-			transition = false; // put in player
+			p->Transition = false;
 
 			// no break
 		}

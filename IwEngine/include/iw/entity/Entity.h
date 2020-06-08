@@ -55,10 +55,10 @@ namespace ECS {
 			_args&&... args)
 		{
 #ifdef IW_DEBUG
-		if (!Space) {
-			LOG_ERROR << "Entity has no space!";
-			return nullptr;
-		}
+			if (!Space) {
+				LOG_ERROR << "Entity has no space!";
+				return false;
+			}
 #endif
 			if (Space->FindComponent<_c>(Handle)) {
 				return Space->SetComponent<_c>(Handle, std::forward<_args>(args)...);
@@ -71,10 +71,10 @@ namespace ECS {
 			typename _c>
 		void RemoveComponent() {
 #ifdef IW_DEBUG
-		if (!Space) {
-			LOG_ERROR << "Entity has no space!";
-			return;
-		}
+			if (!Space) {
+				LOG_ERROR << "Entity has no space!";
+				return false;
+			}
 #endif
 			Space->RemoveComponent<_c>(Handle);
 		}
@@ -86,10 +86,10 @@ namespace ECS {
 			_args&&... args)
 		{
 #ifdef IW_DEBUG
-		if (!Space) {
-			LOG_ERROR << "Entity has no space!";
-			return nullptr;
-		}
+			if (!Space) {
+				LOG_ERROR << "Entity has no space!";
+				return false;
+			}
 #endif
 			return Space->SetComponent<_c>(Handle, std::forward<_args>(args)...);
 		}
@@ -98,10 +98,10 @@ namespace ECS {
 			typename _c>
 		_c* Find() {
 #ifdef IW_DEBUG
-		if (!Space) {
-			LOG_ERROR << "Entity has no space!";
-			return nullptr;
-		}
+			if (!Space) {
+				LOG_ERROR << "Entity has no space!";
+				return false;
+			}
 #endif
 			return Space->FindComponent<_c>(Handle);
 		}
@@ -110,10 +110,10 @@ namespace ECS {
 			typename _c>
 		bool Has() {
 #ifdef IW_DEBUG
-		if (!Space) {
-			LOG_ERROR << "Entity has no space!";
-			return false;
-		}
+			if (!Space) {
+				LOG_ERROR << "Entity has no space!";
+				return false;
+			}
 #endif
 			return Space->HasComponent<_c>(Handle);
 		}

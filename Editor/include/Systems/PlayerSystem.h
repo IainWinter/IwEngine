@@ -22,16 +22,7 @@ private:
 	Player playerPrefab;
 	iw::ref<iw::Model> m_playerModel;
 
-	iw::Entity player;
-
-	iw::vector3 movement;
-
-	bool left, right, up, down, dash, sprint, transition, levelTransition;
-	iw::vector3 transitionStartPosition;
-	iw::vector3 transitionTargetPosition;
-	float begin;
-
-	float transitionSpeed;
+	iw::Entity m_player;
 
 	unsigned m_activeConsumable;
 
@@ -39,7 +30,7 @@ public:
 	PlayerSystem();
 
 	iw::Entity& GetPlayer() {
-		return player;
+		return m_player;
 	}
 
 	int Initialize() override;

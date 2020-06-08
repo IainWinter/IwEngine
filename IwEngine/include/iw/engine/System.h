@@ -106,6 +106,49 @@ namespace Engine {
 		const char* Name() const override {
 			return m_name;
 		}
+	protected:
+		// Tries to find entities with CollisionObject / Rigidbody components.
+		// Returns true if there were no entities.
+		// if _t2 is specified, checks if that component exists on entity 2
+		template<
+			typename _t1,
+			typename _t2 = void>
+		bool GetEntitiesFromManifold(
+			const Manifold& manifold,
+			iw::Entity& e1,
+			iw::Entity& e2)
+		{
+			iw::Entity a = Space->FindEntity(manifold.ObjA);
+			iw::Entity b = Space->FindEntity(manifold.ObjB);
+
+			if (!a) a = Space->FindEntity<iw::Rigidbody>(manifold.ObjA);
+			if (!b) b = Space->FindEntity<iw::Rigidbody>(manifold.ObjB);
+
+			if (!a || !b) return true;
+
+			if (   !a.Has<_t1>()
+				&& b.Has<_t1>())
+			{
+				iw::Entity t = a;
+				a = b;
+				b = t;
+			}
+
+			else {
+				return true;
+			}
+
+			if constexpr (std::is_same_v<_t2, void> == false) {
+				if (!b.Has<_t2>()) {
+					return true;
+				}
+			}
+
+			e1 = a;
+			e2 = b;
+
+			return false;
+		}
 	private:
 		friend class Layer;
 
@@ -131,10 +174,16 @@ namespace Engine {
 	class System
 		: public SystemBase
 	{
-	private:
+		struct PropChange { // only supports integral types
+			void* prop;
+			void* value;
+			size_t size;
+		};
 
+	private:
 		//std::queue<std::thread>      m_threads;
 		std::queue<size_t> m_delete; // Probly make it so space can queue component creation at the ComponentArray level because of templated bs
+		std::queue<PropChange> m_changes;
 
 	protected:
 		virtual void Update(
@@ -149,6 +198,21 @@ namespace Engine {
 			size_t index)
 		{
 			m_delete.push(index);
+		}
+
+		template<
+			typename _t>
+		void QueueChange(
+			_t* prop,
+			_t  value)
+		{
+			static_assert(std::is_integral_v<_t>); // make sure isnt like a vector or something
+
+			m_changes.push({
+				prop,
+				new (_t)(value),
+				sizeof(_t)
+			});
 		}
 	public:
 		System(
@@ -169,11 +233,19 @@ namespace Engine {
 			// Execute threads
 			Update(eca);
 
-			// Execute queues space operations
 			while (!m_delete.empty()) {
 				size_t index = m_delete.front();
 				Space->DestroyEntity(index);
 				m_delete.pop();
+			}
+
+			while (!m_changes.empty()) {
+				PropChange change = m_changes.front();
+
+				memcpy(change.prop, change.value, change.size);
+				delete change.value;
+
+				m_changes.pop();
 			}
 		}
 
