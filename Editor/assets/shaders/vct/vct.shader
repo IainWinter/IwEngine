@@ -229,7 +229,7 @@ vec3 directLighting(
 	float refractive)  // Refractive index of fragment
 {
 	vec3  nL    = normalize(L);
-	float NdotL = dot(N, nL);
+	float NdotL = clamp(dot(N, nL), 0.0f, 1.0f);
 
 	// Diffuse
 

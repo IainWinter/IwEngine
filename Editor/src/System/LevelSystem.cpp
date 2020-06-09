@@ -457,6 +457,9 @@ iw::Entity LevelSystem::LoadLevel(
 
 	// Spawning items
 	
+	delete sequence;
+	sequence = nullptr;
+
 	if (currentLevelName == "levels/forest/forest05.a.json") {
 		Bus->push<SpawnItemEvent>(Item{ NOTE, 0 },       iw::vector3(3, 1, -2), levelTransform);
 		Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 0 }, iw::vector3(0, 1, 3), levelTransform);
@@ -536,14 +539,13 @@ iw::Entity LevelSystem::LoadLevel(
 
 		float speed = 4.5f;
 
-		delete sequence;
 		sequence = new iw::event_seq();
 		sequence->add(new iw::MoveToTarget(otherGuy, iw::vector3(-8, 1, -3), speed));
 		sequence->add(new iw::MoveToTarget(otherGuy, iw::vector3(-6, 1, -6), speed));
 		sequence->add(new iw::MoveToTarget(otherGuy, iw::vector3(-5, 1, -3), speed * 7.5f));
 		sequence->add(new iw::DestroyEntity(firstEnemy));
 		sequence->add(new iw::MoveToTarget(otherGuy, iw::vector3(-4, 1, 1), speed * 3.5f));
-		sequence->add(new iw::MoveToTarget(otherGuy, iw::vector3(3, 1, 0), speed));
+		sequence->add(new iw::MoveToTarget(otherGuy, iw::vector3( 3, 1, 0), speed));
 		sequence->add(new iw::MoveToTarget(otherGuy, iw::Transform(0, 0), 1.5f, false, true));
 		sequence->add(new iw::DestroyEntity(otherGuy));
 		//sequence->add(new iw::MoveToTarget(otherGuy, iw::vector3(-12, 1, 0)));

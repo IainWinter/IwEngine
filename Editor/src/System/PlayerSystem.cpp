@@ -183,7 +183,7 @@ void PlayerSystem::Update(
 
 		else {
 			if (player->DeathTimer > 0) {
-				transform->Scale -= .75f / 1.0f * iw::Time::DeltaTime();
+				body->Trans().Scale -= .75f / 1.0f * iw::Time::DeltaTime();
 				body->SetVelocity(0.0f);
 
 				player->DeathTimer -= iw::Time::DeltaTime();
@@ -306,6 +306,8 @@ bool PlayerSystem::On(
 			break;
 		}
 		case iw::R: {
+			LOG_INFO << player->Up;
+
 			if (event.State) {
 				Bus->send<ResetLevelEvent>();
 			}
@@ -349,7 +351,17 @@ bool PlayerSystem::On(
 			iw::Rigidbody*       r = m_player.Find<iw::Rigidbody>();
 			iw::SphereCollider*  s = m_player.Find<iw::SphereCollider>();
 
+			bool up    = p->Up;
+			bool down  = p->Down;
+			bool left  = p->Left;
+			bool right = p->Right;
+
 			*p = playerPrefab;
+
+			p->Up    = up;
+			p->Down  = down;
+			p->Left  = left;
+			p->Right = right;
 
 			t->Position.x = e.as<StartLevelEvent>().PlayerPosition.x;
 			t->Position.z = e.as<StartLevelEvent>().PlayerPosition.y;

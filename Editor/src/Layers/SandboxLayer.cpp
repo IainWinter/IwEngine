@@ -310,7 +310,7 @@ namespace iw {
 
 		PushSystem<iw::    MeshShadowRenderSystem>(MainScene);
 		PushSystem<iw::   ModelShadowRenderSystem>(MainScene);
-		PushSystem<iw::ParticleShadowRenderSystem>(MainScene);
+		//PushSystem<iw::ParticleShadowRenderSystem>(MainScene);
 		PushSystem<iw::          MeshRenderSystem>(MainScene);
 		PushSystem<iw::         ModelRenderSystem>(MainScene);
 		PushSystem<iw::      ParticleRenderSystem>(MainScene);
@@ -324,14 +324,14 @@ namespace iw {
 		// Particle test
 
 		ref<Shader> particleShader = Asset->Load<Shader>("shaders/particle/phong.shader");
-		Renderer->InitShader(particleShader, SHADOWS | LIGHTS);
+		Renderer->InitShader(particleShader, SHADOWS | LIGHTS | CAMERA);
 
-		iw::Material particleMaterial(particleShader);
-		particleMaterial.Set("color", Color::From255(0, 60, 10));
-		particleMaterial.SetTexture("shadowMap", sun->ShadowTarget()->Tex(0));
-
-		Mesh particle = Asset->Load<Model>("models/forest/tuft_simple.dae")->GetMesh(0);
-		particle.SetMaterial(particleMaterial.MakeInstance());
+		//iw::Material particleMaterial(particleShader);
+		//particleMaterial.Set("baseColorMap", Color::From255(0, 60, 10));
+		//particleMaterial.SetTexture("shadowMap", sun->ShadowTarget()->Tex(0));
+		Mesh particle = Asset->Load<Model>("models/forest/grass.gltf")->GetMesh(0);
+		particle.Material()->SetShader(particleShader);
+		particle.Material()->Set("baseColor", iw::Color(1, 1, 1));
 
 		iw::Entity particleEntity = Space->CreateEntity<iw::Transform, iw::ParticleSystem<StaticParticle>>();
 
@@ -343,7 +343,7 @@ namespace iw {
 		s->SetCamera(MainScene->MainCamera());
 
 		s->SetUpdate([](auto s, auto p, auto c) {
-			if (false && c < 3000 &&  Keyboard::KeyDown(G)) {
+			if (c < 3000 && Keyboard::KeyDown(G)) {
 				for (int i = 0; i < 3000; i++) {
 					float x = iw::randf() * 32.0f;
 					float z = iw::randf() * 18.0f;
@@ -356,9 +356,9 @@ namespace iw {
 						trans.Position.z = z;
 						trans.Position.y = randf() * 0.5f + 0.25f;
 
-						trans.Scale.x = (randf() + 1.2f) * 0.2f;
-						trans.Scale.z = (randf() + 1.2f) * 0.2f;
-						trans.Scale.y = (randf() + 1.5f) * 0.5f;
+						//trans.Scale.x = (randf() + 1.2f) * 0.2f;
+						//trans.Scale.z = (randf() + 1.2f) * 0.2f;
+						//trans.Scale.y = (randf() + 1.5f) * 0.5f;
 
 						trans.Rotation = quaternion::from_euler_angles(0, randf() * 2.0f * Pi, 0.0f);
 

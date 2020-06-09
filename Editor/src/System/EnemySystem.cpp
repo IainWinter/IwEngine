@@ -46,12 +46,17 @@ void EnemySystem::Update(
 	for (auto entity : view) {
 		auto [transform, enemy] = entity.Components.Tie<Components>();
 
+		iw::CollisionObject* obj = Space->FindComponent<iw::CollisionObject>(entity.Handle);
+		if (!obj) {
+			obj = Space->FindComponent<iw::Rigidbody>(entity.Handle);
+		}
+
 		m_enemyCount++;
 
 		switch (enemy->Type) {
 			// spin to win ez
 			case EnemyType::SPIN: {
-				transform->Rotation *= iw::quaternion::from_euler_angles(0, -iw::Time::DeltaTimeScaled(), 0);
+				obj->Trans().Rotation *= iw::quaternion::from_euler_angles(0, -iw::Time::DeltaTimeScaled(), 0);
 				break;
 			}
 			// charge over time and then shoot a circle
@@ -70,7 +75,8 @@ void EnemySystem::Update(
 					enemy->RotSpeed *= 1 - 20 * iw::Time::DeltaTimeScaled();
 				}
 
-				transform->Rotation *= iw::quaternion::from_euler_angles(0, enemy->RotSpeed * iw::Time::DeltaTimeScaled(), 0);
+				obj->Trans().Rotation *= iw::quaternion::from_euler_angles(0, enemy->RotSpeed * iw::Time::DeltaTimeScaled(), 0);
+
 				break;
 			}
 			// lmao this one breaks the story
@@ -79,7 +85,7 @@ void EnemySystem::Update(
 				iw::vector3 target = player.Find<iw::Transform>()->Position;
 				float       dir    = atan2(target.z - transform->Position.z, target.x - transform->Position.x);
 
-				transform->Rotation = iw::quaternion::from_euler_angles(0, dir, 0);
+				obj->Trans().Rotation = iw::quaternion::from_euler_angles(0, dir, 0);
 				
 				// need to slerp
 
@@ -93,7 +99,7 @@ void EnemySystem::Update(
 					iw::vector3 target = player.Find<iw::Transform>()->Position;
 					float       dir    = atan2(target.z - transform->Position.z, target.x - transform->Position.x);
 
-					transform->Rotation = iw::lerp(transform->Rotation, iw::quaternion::from_euler_angles(0, dir, 0), iw::Time::DeltaTime() * 4);
+					obj->Trans().Rotation = iw::lerp(obj->Trans().Rotation, iw::quaternion::from_euler_angles(0, dir, 0), iw::Time::DeltaTime() * 4);
 				}
 
 				break;
@@ -103,7 +109,7 @@ void EnemySystem::Update(
 					iw::vector3 target = player.Find<iw::Transform>()->Position;
 					float       dir = atan2(target.z - transform->Position.z, target.x - transform->Position.x);
 
-					transform->Rotation = iw::lerp(transform->Rotation, iw::quaternion::from_euler_angles(0, dir, 0), iw::Time::DeltaTime() * 4);
+					obj->Trans().Rotation = iw::lerp(obj->Trans().Rotation, iw::quaternion::from_euler_angles(0, dir, 0), iw::Time::DeltaTime() * 4);
 				}
 
 				break;

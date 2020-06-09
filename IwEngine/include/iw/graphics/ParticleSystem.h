@@ -81,7 +81,7 @@ namespace Graphics {
 		void SetCamera(
 			const Camera* camera) // for optimization
 		{
-			m_needsToUpdateBuffer = m_camera != camera;
+			m_needsToUpdateBuffer |= m_camera != camera;
 			m_camera = camera;
 		}
 
@@ -103,6 +103,8 @@ namespace Graphics {
 			instanceMVP.Push<float>(4);
 
 			description.DescribeBuffer(bName::POSITION, MakeLayout<float>(3));
+			description.DescribeBuffer(bName::NORMAL,   MakeLayout<float>(3));
+			description.DescribeBuffer(bName::UV,       MakeLayout<float>(2));
 			description.DescribeBuffer(bName::UV1, instanceM);
 			description.DescribeBuffer(bName::UV2, instanceMVP);
 
@@ -127,6 +129,8 @@ namespace Graphics {
 			if (    m_needsToUpdateBuffer
 				|| m_camera->Outdated())
 			{
+				m_needsToUpdateBuffer = false;
+
 				for (unsigned i : m_delete) {
 					m_particles.erase(m_particles.begin() + i);
 				}
@@ -140,6 +144,10 @@ namespace Graphics {
 				m_spawn.clear();
 
 				unsigned count = m_particles.size();
+
+				if (count == 0) {
+					return;
+				}
 
 				matrix4* models = new matrix4[count];
 
@@ -158,8 +166,6 @@ namespace Graphics {
 				m_mesh.Data()->SetBufferData(bName::UV2, count, models);
 
 				delete[] models;
-
-				m_needsToUpdateBuffer = false;
 			}
 		}
 
@@ -174,14 +180,14 @@ namespace Graphics {
 			const Transform& transform = Transform())
 		{
 			m_spawn.emplace_back(transform, particle);
-			m_needsToUpdateBuffer = true;
+			m_needsToUpdateBuffer |= true;
 		}
 
 		void DeleteParticle(
 			unsigned index)
 		{
 			m_delete.push_back(index);
-			m_needsToUpdateBuffer = true;
+			m_needsToUpdateBuffer |= true;
 		}
 
 		void Update() {

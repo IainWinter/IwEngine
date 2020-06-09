@@ -316,7 +316,16 @@ namespace detail {
 			m_buffers.erase(m_buffers.begin() + i);
 		}
 
-		m_buffers.resize(description.GetBufferCount());
+		// This has only been tested with buffers in the same order 
+
+		for (bName name : description.GetBufferNames()) {
+			if (!m_description.HasBuffer(name)) {
+				unsigned index = description.GetBufferIndex(name);
+				m_buffers.emplace(m_buffers.begin() + index); // no args
+			}
+		}
+
+		//m_buffers.resize(description.GetBufferCount());
 
 		m_description = description;
 	}

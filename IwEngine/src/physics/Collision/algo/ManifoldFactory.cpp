@@ -132,7 +132,7 @@ namespace algo {
 
 		return {
 			A, D,
-			AtoD.normalized(),
+			-AtoD.normalized(),
 			AtoD.length(),
 			true
 		};

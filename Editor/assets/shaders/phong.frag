@@ -124,7 +124,7 @@ float getDistanceAtt(
 	return clamp(1.0 - dist2 * invSqrRadius, 0.0, 1.0) * 0.1f;
 }
 
-// BRDF
+// Phong
 
 vec3 BRDF(
 	vec3 N, 

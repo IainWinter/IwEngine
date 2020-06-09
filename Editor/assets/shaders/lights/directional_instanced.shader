@@ -1,11 +1,11 @@
 #shader Vertex
 #version 330
 
-layout(location = 0) in vec3 vert;
-layout(location = 2) in mat4 modelViewProj;
+layout(location = 1) in mat4 i_modelViewProj;
+layout(location = 2) in vec3 vert;
 
 void main() {
-	gl_Position = modelViewProj * vec4(vert, 1);
+	gl_Position = i_modelViewProj * vec4(vert, 1);
 }
 
 #shader Fragment
