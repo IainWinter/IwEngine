@@ -344,7 +344,7 @@ namespace iw {
 
 		s->SetUpdate([](auto s, auto p, auto c) {
 			if (c < 3000 && Keyboard::KeyDown(G)) {
-				for (int i = 0; i < 3000; i++) {
+				for (int i = 0; i < 30; i++) {
 					float x = iw::randf() * 32.0f;
 					float z = iw::randf() * 18.0f;
 
@@ -354,13 +354,12 @@ namespace iw {
 						Transform trans;
 						trans.Position.x = x;
 						trans.Position.z = z;
-						trans.Position.y = randf() * 0.5f + 0.25f;
-
+						trans.Position.y = 1;
 						//trans.Scale.x = (randf() + 1.2f) * 0.2f;
 						//trans.Scale.z = (randf() + 1.2f) * 0.2f;
 						//trans.Scale.y = (randf() + 1.5f) * 0.5f;
 
-						trans.Rotation = quaternion::from_euler_angles(0, randf() * 2.0f * Pi, 0.0f);
+						trans.Rotation = quaternion::from_euler_angles(Pi * 0.5f, 0/*randf() * 2.0f * Pi*/, 0.0f);
 
 						s->SpawnParticle(trans);
 					}
