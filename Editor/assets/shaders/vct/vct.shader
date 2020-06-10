@@ -98,7 +98,7 @@ uniform float ambiance;
 //uniform vec3 sky;
 uniform int d_state;
 
-uniform float maxConeLength = 2.0f;
+uniform float maxConeLength = 4.0f;
 
 // Settings
 uniform int SHADOWS = 1;
@@ -286,7 +286,7 @@ vec3 indirectSpecular(
 	float reflectance) // Reflectance of fragment
 {
 	float coneRatio   = 0.2f;
-	float maxDistance = maxConeLength;//8.0f;
+	float maxDistance = maxConeLength * 5;//8.0f;
 
 	// There are atificats at extreme angles, some form of the below if statement will fix it I think
 

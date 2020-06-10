@@ -1,17 +1,16 @@
 #pragma once
 
-#include "iw/events/seq/event_task.h"
+#include "EventTask.h"
 #include "iw/engine/Time.h"
-#include "iw/entity/Entity.h"
 #include "iw/physics/Dynamics/Rigidbody.h"
 
 namespace iw {
 namespace Engine {
 	struct MoveToTarget
-		: event_task
+		: EventTask
 	{
 	private:
-		Entity& entity; // in future it would be awesome if there is a verison that doesnt need a reference
+		Entity& entity; // plz no ref :(
 		Transform target;
 		Transform origin;
 		float speed;
@@ -23,27 +22,6 @@ namespace Engine {
 		float posS, sclS, rotS;
 
 	public:
-		MoveToTarget(
-			Entity& entity,
-			vector3 target,
-			float speed = 1.0f,
-			bool pos = true,
-			bool scl = false,
-			bool rot = false) // add speed here also
-			: entity(entity)
-			, target(target)
-			, speed(speed)
-			, pos(pos)
-			, scl(scl)
-			, rot(rot)
-			, posS(0)
-			, sclS(0)
-			, rotS(0)
-			, origin(0)
-			, startTime(0)
-			, firstRun(true)
-		{}
-
 		MoveToTarget(
 			Entity& entity,
 			Transform target,
@@ -95,20 +73,20 @@ namespace Engine {
 				startTime = Time::TotalTime();
 				firstRun  = false;
 
-				posS = (origin.Position - target.Position).length() / speed;
-				sclS = (origin.Scale    - target.Scale)   .length() / speed;
-				rotS = (origin.Rotation - target.Rotation).length() / speed; // xd
+				posS = speed / (origin.Position - target.Position).length();
+				sclS = speed / (origin.Scale    - target.Scale)   .length();
+				rotS = speed / (origin.Rotation - target.Rotation).length(); // xd
 			}
 
-			if(pos) transform->Position = lerp(origin.Position, target.Position, (Time::TotalTime() - startTime) / posS);
-			if(scl) transform->Scale    = lerp(origin.Scale,    target.Scale,    (Time::TotalTime() - startTime) / sclS);
-			if(rot) transform->Rotation = lerp(origin.Rotation, target.Rotation, (Time::TotalTime() - startTime) / rotS);
+			if(pos) transform->Position = lerp(origin.Position, target.Position, (Time::TotalTime() - startTime) * posS);
+			if(scl) transform->Scale    = lerp(origin.Scale,    target.Scale,    (Time::TotalTime() - startTime) * sclS);
+			if(rot) transform->Rotation = lerp(origin.Rotation, target.Rotation, (Time::TotalTime() - startTime) * rotS);
 
 			bool p = pos ? transform->Position == target.Position : true;
-			bool c = scl ? transform->Scale    == target.Scale    : true;
+			bool s = scl ? transform->Scale    == target.Scale    : true;
 			bool r = rot ? transform->Rotation == target.Rotation : true;
 
-			return p && c && r;
+			return p && s && r;
 		}
 	};
 	

@@ -190,8 +190,7 @@ namespace iw {
 		//light = new PointLight(30, 30, nullptr, nullptr, nullptr);
 
 		sun->SetColor(vector3(.241f, .102f, .034f) * 2);
-
-		sun->SetRotation(quaternion::from_euler_angles(1.433f, 0.0f, -0.525f));
+		sun->SetRotation(quaternion::from_euler_angles(1.338f, 0.0f, -0.836f));
 		//light->SetPosition(vector3(0, 5, 0));
 
 		MainScene->AddLight(sun);
@@ -414,8 +413,8 @@ namespace iw {
 
 		vct->Use(Renderer->Device);
 
-		ml = iw::lerp(ml, 1 / iw::DeltaTime() / 30, iw::Time::DeltaTime() * 0.1f);
-		vct->Handle()->GetParam("maxConeLength")->SetAsFloat(ml);
+		//ml = iw::lerp(ml, 1 / iw::DeltaTime() / 40, iw::Time::DeltaTime() * .1f);
+		//vct->Handle()->GetParam("maxConeLength")->SetAsFloat(ml);
 
 		if (Keyboard::KeyDown(V) && f > 0.2f) {
 			vct->Handle()->GetParam("SHADOWS")->SetAsInt(s = !s);

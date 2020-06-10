@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Events/Events.h"
+#include "iw/engine/Events/Seq/EventSequence.h"
 #include "iw/entity/Space.h"
 #include "iw/graphics/QueuedRenderer.h"
 #include "iw/asset/AssetManager.h"
@@ -144,6 +145,13 @@ namespace Engine {
 			e2 = b;
 
 			return false;
+		}
+
+		inline EventSequence CreateSequence() {
+			EventSequence seq;
+			seq.SetVars(Space, Renderer, Asset, Physics, Audio, Bus);
+
+			return seq;
 		}
 	private:
 		friend class Layer;

@@ -90,8 +90,23 @@
     "items": []
   },
   "Capsules": {
-    "size": 0,
-    "items": []
+    "size": 1,
+    "items": [
+      {
+        "Center": {
+          "x": -13.000000,
+          "y": 0.000000,
+          "z": -4.000000
+        },
+        "Direction": {
+          "x": 1.000000,
+          "y": 0.000000,
+          "z": 0.000000
+        },
+        "Height": 7.000000,
+        "Radius": 0.500000
+      }
+    ]
   },
   "Planes": {
     "size": 4,
@@ -139,9 +154,9 @@
     ]
   },
   "Models": {
-    "size": 1,
+    "size": 2,
     "items": [
-       {
+      {
         "ModelName": {
           "size": 27,
           "string": "models/forest/forest11.gltf"
@@ -156,6 +171,30 @@
             "x": 1,
             "y": 1,
             "z": 1
+          },
+          "Rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          }
+        }
+      },
+      {
+        "ModelName": {
+          "size": 25,
+          "string": "models/forest/barrier.dae"
+        },
+        "Transform": {
+          "Position": {
+            "x": -13,
+            "y": 0,
+            "z": -3.5
+          },
+          "Scale": {
+            "x": 0.7,
+            "y": 0.7,
+            "z": 0.7
           },
           "Rotation": {
             "x": 0,

@@ -40,7 +40,6 @@ LevelSystem::LevelSystem(
 	iw::Entity& player)
 	: iw::System<iw::Transform, iw::Model, LevelDoor>("Level")
 	, playerEntity(player)
-	, sequence(nullptr)
 {
 	//levels = {
 	//	"assets/levels/forest/level1.json",
@@ -52,7 +51,7 @@ LevelSystem::LevelSystem(
 
 	//currentLevel = 0;
 
-	currentLevelName = "levels/forest/forest08.json";
+	currentLevelName = "levels/forest/forest01.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 63);
 	closedColor = iw::Color::From255(201, 66, 66, 63);
@@ -101,9 +100,7 @@ void LevelSystem::Update(
 		}
 	}
 
-	if (sequence) {
-		sequence->update();
-	}
+	sequence.Update();
 
 	if (transition) {
 		iw::Transform* current = levelEntity    .Find<iw::Transform>();
@@ -180,6 +177,8 @@ bool LevelSystem::On(
 
 			Bus->push<StartLevelEvent>(currentLevelName, currentLevel.CameraFollow, currentLevel.InPosition);
 
+			sequence.Restart();
+
 			break;
 		}
 		case iw::val(Actions::UNLOCK_LEVEL_DOOR): {
@@ -254,9 +253,7 @@ bool LevelSystem::On(
 
 			Bus->push<StartLevelEvent>(currentLevelName, currentLevel.CameraFollow, currentLevel.InPosition);
 
-			if (sequence) {
-				sequence->restart();
-			}
+			sequence.Restart();
 
 			break;
 		}
@@ -457,12 +454,13 @@ iw::Entity LevelSystem::LoadLevel(
 
 	// Spawning items
 	
-	delete sequence;
-	sequence = nullptr;
+	sequence = CreateSequence();
+
+	//seq.SetVars(Space, Renderer, Asset, Physics, Audio, Bus);
 
 	if (currentLevelName == "levels/forest/forest05.a.json") {
 		Bus->push<SpawnItemEvent>(Item{ NOTE, 0 },       iw::vector3(3, 1, -2), levelTransform);
-		Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 0 }, iw::vector3(0, 1, 3), levelTransform);
+		Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 0 }, iw::vector3(0, 1, 3),  levelTransform);
 	}
 
 	// run a cut scene
@@ -539,16 +537,14 @@ iw::Entity LevelSystem::LoadLevel(
 
 		float speed = 4.5f;
 
-		sequence = new iw::event_seq();
-		sequence->add(new iw::MoveToTarget(otherGuy, iw::vector3(-8, 1, -3), speed));
-		sequence->add(new iw::MoveToTarget(otherGuy, iw::vector3(-6, 1, -6), speed));
-		sequence->add(new iw::MoveToTarget(otherGuy, iw::vector3(-5, 1, -3), speed * 7.5f));
-		sequence->add(new iw::DestroyEntity(firstEnemy));
-		sequence->add(new iw::MoveToTarget(otherGuy, iw::vector3(-4, 1, 1), speed * 3.5f));
-		sequence->add(new iw::MoveToTarget(otherGuy, iw::vector3( 3, 1, 0), speed));
-		sequence->add(new iw::MoveToTarget(otherGuy, iw::Transform(0, 0), 1.5f, false, true));
-		sequence->add(new iw::DestroyEntity(otherGuy));
-		//sequence->add(new iw::MoveToTarget(otherGuy, iw::vector3(-12, 1, 0)));
+		sequence.Add<iw::MoveToTarget> (otherGuy, iw::vector3(-8, 1, -3), speed);
+		sequence.Add<iw::MoveToTarget> (otherGuy, iw::vector3(-6, 1, -6), speed);
+		sequence.Add<iw::MoveToTarget> (otherGuy, iw::vector3(-5, 1, -3), speed * 7.5f);
+		sequence.Add<iw::DestroyEntity>(firstEnemy);
+		sequence.Add<iw::MoveToTarget> (otherGuy, iw::vector3(-4, 1, 1), speed * 3.5f);
+		sequence.Add<iw::MoveToTarget> (otherGuy, iw::vector3( 2, 1, 0), speed);
+		sequence.Add<iw::MoveToTarget> (otherGuy, iw::Transform(0, 0), 1.5f, false, true);
+		sequence.Add<iw::DestroyEntity>(otherGuy);
 	}
 
 	return level;

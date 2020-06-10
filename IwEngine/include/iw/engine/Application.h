@@ -7,12 +7,6 @@
 #include "EventStack.h"
 #include "InitOptions.h"
 #include "Layers/ImGuiLayer.h"
-#include "iw/entity/Space.h"
-#include "iw/audio/AudioSpace.h"
-#include "iw/physics/Dynamics/DynamicsSpace.h"
-#include "iw/events/eventbus.h"
-#include "iw/graphics/QueuedRenderer.h"
-#include "iw/asset/AssetManager.h"
 #include "iw/input/InputManager.h"
 #include "iw/util/queue/blocking_queue.h"
 #include <vector>
@@ -32,7 +26,7 @@ namespace Engine {
 
 	protected:
 		ref<Space>          Space;
-		ref<iw::QueuedRenderer> Renderer;
+		ref<QueuedRenderer> Renderer;
 		ref<AssetManager>   Asset;
 		ref<InputManager>   Input;
 		ref<Console>        Console;
@@ -149,6 +143,13 @@ namespace Engine {
 			m_layers.Pop(layer);
 
 			layer->OnPop();
+		}
+	protected:
+		inline EventSequence CreateSequence() {
+			EventSequence seq;
+			seq.SetVars(Space, Renderer, Asset, Physics, Audio, Bus);
+
+			return seq;
 		}
 	};
 }

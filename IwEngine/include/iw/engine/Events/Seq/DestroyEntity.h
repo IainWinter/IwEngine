@@ -1,26 +1,37 @@
 #pragma once
 
-#include "iw/events/seq/event_task.h"
-#include "iw/common/Components/Transform.h"
+#include "EventTask.h"
 #include "iw/entity/Entity.h"
+#include "iw/common/Components/Transform.h"
+#include "iw/entity/Events/EntityEvents.h"
 
 namespace iw {
 namespace Engine {
 	struct DestroyEntity
-		: event_task
+		: EventTask
 	{
 	private:
 		Entity& entity;
+		bool async;
 
 	public:
 		DestroyEntity(
-			Entity& entity)
+			Entity& entity,
+			bool async = false)
 			: entity(entity)
+			, async(async)
 		{}
 
 		bool update() override {
-			entity.Find<Transform>()->SetParent(nullptr);
-			entity.Space->DestroyEntity(entity.Index()); // this should set alive to false but doesnt. I think this is why its crashing
+			if (async) {
+				Bus->push<EntityDestroyEvent>(entity);
+			}
+
+			else {
+				entity.Find<Transform>()->SetParent(nullptr);
+				entity.Space->DestroyEntity(entity.Index());
+			}
+
 			return true;
 		}
 	};
