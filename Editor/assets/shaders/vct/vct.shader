@@ -1,16 +1,8 @@
 #shader Vertex
 #version 450
 
-#define MAX_DIRECTIONAL_LIGHTS 4
-
 #include shaders/camera.shader
-
-layout(std140, column_major) uniform Shadows {
-	int shadows_pad1, shadows_pad2, shadows_pad3;
-
-	int directionalLightSpaceCount;
-	mat4 directionalLightSpaces[MAX_DIRECTIONAL_LIGHTS];
-};
+#include shaders/shadows.vert
 
 layout(location = 0) in vec3 vert;
 layout(location = 1) in vec3 normal;
@@ -24,7 +16,6 @@ out vec3 WorldPos;
 out vec2 TexCoords;
 out mat3 TBN;
 out vec4 Color;
-out vec4 DirectionalLightPos[MAX_DIRECTIONAL_LIGHTS];
 
 uniform mat4 model;
 
@@ -42,9 +33,7 @@ void main() {
 	TBN       = mat3(T, B, N);
 	Color     = color;
 
-	for (int i = 0; i < directionalLightSpaceCount; i++) {
-		DirectionalLightPos[i] = directionalLightSpaces[i] * worldPos;
-	}
+	SetDirectionalLightPos(worldPos);
 
 	gl_Position = viewProj * worldPos;
 }
@@ -52,7 +41,6 @@ void main() {
 #shader Fragment
 #version 450
 
-#define MAX_DIRECTIONAL_LIGHTS 4
 #define ISQRT2 0.707106
 
 #include shaders/lights.shader
@@ -64,7 +52,6 @@ in vec3 WorldPos;
 in vec2 TexCoords;
 in mat3 TBN;
 in vec4 Color;
-in vec4 DirectionalLightPos[MAX_DIRECTIONAL_LIGHTS];
 
 out vec4 PixelColor;
 
@@ -98,6 +85,8 @@ uniform sampler2D mat_reflectanceMap;
 uniform float     mat_hasShadowMap;       // take out of material at some point
 uniform sampler2D mat_shadowMap;          // take out of material at some point
 
+#include shaders/shadows.frag
+
 // Voxel
 uniform vec3 voxelBoundsScale;
 uniform vec3 voxelBoundsScaleInv;
@@ -109,19 +98,11 @@ uniform float ambiance;
 //uniform vec3 sky;
 uniform int d_state;
 
+uniform float maxConeLength = 2.0f;
+
 // Settings
 uniform int SHADOWS = 1;
 uniform int BLINN = 1;
-
-// Math functions
-
-float linstep(
-	float l,
-	float h,
-	float v)
-{
-	return clamp((v - l) / (h - l), 0.0, 1.0);
-}
 
 // -------------------------------------------------------
 //
@@ -285,7 +266,7 @@ vec3 indirectDiffuse(
 	vec3 B)            // Bitangent   of fragment
 {
 	float coneRatio   = 1.0f;
-	float maxDistance = 2.0f;
+	float maxDistance = maxConeLength;//2.0f;
 
 	vec3 diffuse = vec3(0.0f);
 
@@ -305,7 +286,7 @@ vec3 indirectSpecular(
 	float reflectance) // Reflectance of fragment
 {
 	float coneRatio   = 0.2f;
-	float maxDistance = 8.0f;
+	float maxDistance = maxConeLength;//8.0f;
 
 	// There are atificats at extreme angles, some form of the below if statement will fix it I think
 
@@ -351,32 +332,6 @@ vec3 indirectLighting(
 //	vec3 refraction = refract(-V, N, 1.0f / refractive);
 //	return TraceCone(W, refraction, coneRatio, maxDistance).xyz;
 //}
-
-// Shadows
-
-float DirectionalLightShadow(
-	vec4 coords4)
-{
-	if (mat_hasShadowMap == 0) {
-		return 1.0f;
-	}
-
-	vec3 coords = (coords4.xyz / coords4.w) * 0.5 + 0.5;
-	vec2 moments = texture(mat_shadowMap, coords.xy).rg;
-	float compare = coords.z;
-
-	//if (compare > 1.0) { // test if like not having this brantch is faster?
-	//	return 1.0;
-	//}
-
-	float p = step(compare, moments.x);
-	float v = max(moments.y - moments.x * moments.x, 0.00002);
-
-	float d = compare - moments.x;
-	float pMax = linstep(0.2, 1.0, v / (v + d * d));
-
-	return min(max(p, pMax), 1.0);
-}
 
 void main() {
 	// Color
@@ -427,23 +382,23 @@ void main() {
 
 	vec3 color = vec3(0);
 
-	for (int i = 0; i < pointLightCount; i++) {
-		vec3 P = pointLights[i].Position;
-		vec3 L = P - WorldPos;
+	//for (int i = 0; i < lightCounts.x; i++) {
+	//	vec3 P = pointLights[i].Position.xyz;
+	//	vec3 L = P - WorldPos;
 
-		float lightRadius = pointLights[i].Radius;
-		vec3  lightColor  = vec3(1.0f);//pointLights[i].Color;
+	//	float lightRadius = pointLights[i].Position.w;
+	//	vec3  lightColor  = pointLights[i].Color.rgb;
 
-		color += directLighting(WorldPos, N, V, L, lightColor, baseColor, reflectance, refractive)
-		       * DistanceAttenuation(L, lightRadius);
+	//	color += directLighting(WorldPos, N, V, L, lightColor, baseColor, reflectance, refractive)
+	//	       * DistanceAttenuation(L, lightRadius);
 
-		color += indirectLighting(WorldPos, N, T, B, V, reflectance);
-	}
+	//	color += indirectLighting(WorldPos, N, T, B, V, reflectance);
+	//}
 
-	for (int i = 0; i < directionalLightCount; i++) {
-		vec3 L = directionalLights[i].InvDirection;
+	for (int i = 0; i < lightCounts.y; i++) {
+		vec3 L = directionalLights[i].InvDirection.xyz;
 
-		vec3 lightColor = vec3(1.0f);//directionalLights[i].Color;
+		vec3 lightColor = directionalLights[i].Color.rgb;
 
 		color += directLighting(WorldPos, N, V, L, lightColor, baseColor, reflectance, refractive)
 			   * DirectionalLightShadow(DirectionalLightPos[i]);

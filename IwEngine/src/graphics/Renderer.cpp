@@ -379,25 +379,26 @@ namespace Graphics {
 	void Renderer::SetPointLights(
 		const std::vector<PointLight*>& lights)
 	{
-		m_lightData.PointLightCount = lights.size();
-		for (size_t i = 0; i < lights.size(); i++) {
-			m_lightData.PointLights[i].Position = lights[i]->Position();
-			//m_lightData.PointLights[i].Color    = 0.3f;
-			m_lightData.PointLights[i].Radius   = lights[i]->Radius();
-		}
+		//m_lightData.lightCounts.x = lights.size();
+		//for (size_t i = 0; i < lights.size(); i++) {
+		//	m_lightData.PointLights[i].Position   = lights[i]->Position();
+		//	m_lightData.PointLights[i].Position.w = lights[i]->Radius();
+		//	m_lightData.PointLights[i].Color      = lights[i]->Color();
+		//}
 
-		Device->UpdateBuffer(m_lightUBO, &m_lightData);
+		//Device->UpdateBuffer(m_lightUBO, &m_lightData);
 	}
 
 	void Renderer::SetDirectionalLights(
 		const std::vector<DirectionalLight*>& lights)
 	{
-		m_lightData.DirectionalLightCount = lights.size();
+		m_lightData.LightCounts.y = lights.size();
 		for (size_t i = 0; i < lights.size(); i++) {
 			m_lightData.DirectionalLights[i].InvDirection = -vector3::unit_z * lights[i]->Rotation();
+			m_lightData.DirectionalLights[i].Color        = lights[i]->Color();
 		}
 
-		m_shadowData.DirectionalLightCount = lights.size();
+		m_shadowData.directionalLightCount.x = lights.size();
 		for (size_t i = 0; i < lights.size(); i++) {
 			m_shadowData.LightViewProj[i] = lights[i]->ViewProjection();
 		}

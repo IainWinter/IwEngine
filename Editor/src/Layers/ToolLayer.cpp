@@ -257,11 +257,11 @@ namespace iw {
 
 		for (DirectionalLight* light : m_mainScene->DirectionalLights()) {
 			std::stringstream ss;
-			ss << name << " Light pos";
+			ss << name << " Light col";
 
-			vector3 pos = light->Position();
-			ImGui::SliderFloat3(ss.str().c_str(), (float*)&pos, 0, 10);
-			light->SetPosition(pos);
+			vector3 col = light->Color();
+			ImGui::SliderFloat3(ss.str().c_str(), (float*)&col, 0, 1);
+			light->SetColor(col);
 
 			ss = std::stringstream();
 			ss << name++ << " Light rot";

@@ -2,20 +2,19 @@
 #define MAX_DIRECTIONAL_LIGHTS 4
 
 struct PointLight {
-	vec3 Position;
-	float Radius;
+	vec4 Position; //float Radius;
+	vec4 Color;
 };
 
 struct DirectionalLight {
-	vec3 InvDirection;
+	vec4 InvDirection;
+	vec4 Color;
 };
 
-layout(std140) uniform Lights {
-	int lights_pad1, lights_pad2;
-
-	int pointLightCount;
-	int directionalLightCount;
-	PointLight       pointLights[MAX_POINT_LIGHTS];
+layout(std140) uniform Lights{
+	//int lightCounts.x;
+	vec4 lightCounts; // x = point y = direct
+	//PointLight       pointLights[MAX_POINT_LIGHTS];
 	DirectionalLight directionalLights[MAX_DIRECTIONAL_LIGHTS];
 };
 

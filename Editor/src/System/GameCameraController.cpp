@@ -16,6 +16,7 @@ GameCameraController::GameCameraController(
 {}
 
 float y = 27.15f;
+float s = 1.0f;
 
 void GameCameraController::Update(
 	iw::EntityComponentArray& eca)
@@ -37,14 +38,34 @@ void GameCameraController::Update(
 		}
 
 		target.y = y;
+
+		if (target.z > 22) { // for 7.a
+			target.y += 7;
+		}
+
 		//target.x = 0;
 
-		iw::quaternion camrot =
-			  iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
-			* iw::quaternion::from_axis_angle(iw::vector3::unit_z, iw::Pi);
+		if (   !follow
+			&& iw::almost_equal(t->Position.x, target.x, 5)
+			&& iw::almost_equal(t->Position.y, target.y, 5)
+			&& iw::almost_equal(t->Position.z, target.z, 5))
+		{
+			t->Position = target;
+			s = speed;
+		}
 
-		t->Position = iw::lerp(t->Position, target, iw::Time::DeltaTime() * speed);
-		t->Rotation = iw::lerp(t->Rotation, camrot, iw::Time::DeltaTime() * speed);
+		else {
+			//iw::quaternion camrot =
+			//	iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
+			//	* iw::quaternion::from_axis_angle(iw::vector3::unit_z, iw::Pi);
+
+			if (!follow) {
+				s += iw::Time::DeltaTime() * 5;
+			}
+
+			t->Position = iw::lerp(t->Position, target, iw::Time::DeltaTime() * s);
+			//t->Rotation = iw::lerp(t->Rotation, camrot, iw::Time::DeltaTime() * speed);
+		}
 
 		//iw::PointLight* lamp = scene->PointLights()[0];
 
@@ -66,8 +87,10 @@ bool GameCameraController::On(
 
 			//center.x = event.CenterPosition.x;
 			//center.z = event.CenterPosition.y;
-
+			
 			SetTarget(event.LevelName);
+			follow = event.CameraFollow;
+			s = speed;
 
 			//if (event.CameraFollow) {
 			//	center.x += event.PlayerPosition.x;
@@ -79,9 +102,9 @@ bool GameCameraController::On(
 		case iw::val(Actions::START_LEVEL): {
 			StartLevelEvent& event = e.as<StartLevelEvent>();
 
-			follow = event.CameraFollow;
-
 			SetTarget(event.LevelName);
+			follow = event.CameraFollow;
+			s = speed;
 
 			break;
 		}
@@ -97,6 +120,7 @@ void GameCameraController::SetTarget(
 	std::string_view levelName)
 {
 	if (   levelName == "levels/forest/forest05.a.json"
+		|| levelName == "levels/forest/forest07.a.json"
 		|| levelName == "levels/forest/forest22.json")
 	{
 		y = 17.15f;

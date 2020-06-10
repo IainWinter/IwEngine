@@ -9,7 +9,6 @@ in vec3 CameraPos;
 in vec2 TexCoords;
 in vec3 Normal;
 in vec4 Color;
-in vec4 DirectionalLightPos[MAX_DIRECTIONAL_LIGHTS];
 
 out vec4 FragColor;
 
@@ -51,6 +50,8 @@ uniform sampler2D mat_shadowMap;          // take out of material at some point
 uniform float       mat_hasShadowMap2;    // take out of material at some point
 uniform samplerCube mat_shadowMap2;       // take out of material at some point
 
+#include shaders/shadows.frag
+
 const float PI = 3.14159265359f;
 
 // Math functions
@@ -61,40 +62,6 @@ float lerp(
 	float w)
 {
 	return a + w * (b - a);
-}
-
-float linstep(
-	float l, 
-	float h, 
-	float v)
-{
-	return clamp((v - l) / (h - l), 0.0, 1.0);
-}
-
-// Shadows
-
-float DirectionalLightShadow(
-	vec4 coords4)
-{
-	if (mat_hasShadowMap == 0) {
-		return 1.0f;
-	}
-
-	vec3 coords = (coords4.xyz / coords4.w) * 0.5 + 0.5;
-	vec2 moments = texture(mat_shadowMap, coords.xy).rg;
-	float compare = coords.z;
-
-	if (compare > 1.0) { // test if like not having this brantch is faster?
-		return 1.0;
-	}
-
-	float p = step(compare, moments.x);
-	float v = max(moments.y - moments.x * moments.x, 0.00002);
-
-	float d = compare - moments.x;
-	float pMax = linstep(0.2, 1.0, v / (v + d * d));
-
-	return min(max(p, pMax), 1.0);
 }
 
 float PointLightShadow(
@@ -215,19 +182,21 @@ void main() {
 
 	vec3 color = vec3(0);
 
-	for (int i = 0; i < pointLightCount; i++) {
-		vec3 P = pointLights[i].Position;
-		vec3 L = P - WorldPos;
-
-		float R = pointLights[i].Radius;
-
-		color += BRDF(N, V, L, baseColor.xyz, reflectance)
-		       * getDistanceAtt(L, 1 / pow(R, 2))
-			   * PointLightShadow(-L, R);
-	}
+//	for (int i = 0; i < lightCounts.x; i++) {
+//		vec3 P = pointLights[i].Position.xyz;
+//		vec3 L = P - WorldPos;
+//
+//		float R = pointLights[i].Position.w;
+//
+//		color += BRDF(N, V, L, baseColor.xyz, reflectance)
+//		       * getDistanceAtt(L, 1 / pow(R, 2))
+//			   * PointLightShadow(-L, R);
+//	}
 	
-	for (int i = 0; i < directionalLightCount; i++) {
-		vec3 L = directionalLights[i].InvDirection;
+	for (int i = 0; i < lightCounts.y; i++) {
+		vec3 L = directionalLights[i].InvDirection.xyz;
+
+		//vec3 lightColor = directionalLights[i].Color.rgb;
 
 		color += BRDF(N, V, L, baseColor.xyz, reflectance)
 		       * DirectionalLightShadow(DirectionalLightPos[i]);

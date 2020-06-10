@@ -24,27 +24,22 @@ namespace Graphics {
 	};
 
 	struct ShadowData {
-		int __pad1, __pad2, __pad3;
-
-		int DirectionalLightCount = 0;
+		vector4 directionalLightCount = 0; // .x
 		matrix4 LightViewProj[MAX_DIRECTIONAL_LIGHTS];
 	};
 
 	// might needs pad
 	struct LightData {
-		int __pad1, __pad2;
+		vector4 LightCounts = 0; // point .x, direct .y
 
-		int PointLightCount = 0;
-		int DirectionalLightCount = 0;
-
-		struct PointLightDescription {
-			vector3 Position;
-			//vector3 Color;
-			float Radius;
-		} PointLights[MAX_POINT_LIGHTS];
+		//struct PointLightDescription {
+		//	vector4 Position; //float Radius;
+		//	vector4 Color;
+		//} PointLights[MAX_POINT_LIGHTS];
 
 		struct DirectionalLightDescription {
-			vector3 InvDirection;
+			vector4 InvDirection;
+			vector4 Color;
 		} DirectionalLights[MAX_DIRECTIONAL_LIGHTS];
 	};
 

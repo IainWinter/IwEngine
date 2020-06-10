@@ -12,6 +12,7 @@ namespace Graphics {
 		, m_shadowTarget(shadowTarget)
 		, m_shadowShader(shadowShader)
 		, m_particleShadowShader(particleShadowShader)
+		, m_color(.3f)
 	{}
 
 	Light::Light(
@@ -104,6 +105,12 @@ namespace Graphics {
 		m_intensity = intensity;
 	}
 
+	void Light::SetColor(
+		const vector3& color)
+	{
+		m_color = color;
+	}
+
 	void Light::SetPosition(
 		const vector3& position)
 	{
@@ -126,6 +133,10 @@ namespace Graphics {
 		ref<Shader>& particleShadowShader)
 	{
 		m_particleShadowShader = particleShadowShader;
+	}
+	
+	const vector3& Light::Color() const {
+		return m_color;
 	}
 }
 }

@@ -20,7 +20,7 @@ namespace Engine {
 	float voxelSizeInv = 1.0f / voxelSize;
 
 	vector3 voxelBoundsScale(32, 32, 32);
-	vector3 voxelBoundsSize (256, 256, 256); // not squared :(
+	vector3 voxelBoundsSize (256, 256, 256);
 	vector3 voxelBoundsScaleInv = vector3(1) / voxelBoundsScale;
 
 	int ModelVoxelRenderSystem::Initialize() {
@@ -35,7 +35,7 @@ namespace Engine {
 		ref<ComputeShader> mipmap = std::static_pointer_cast<ComputeShader>(Asset->Load<Shader>("shaders/vct/mipmap.shader"));
 
 		ref<Shader> voxelize = Asset->Load<Shader>("shaders/vct/voxelize.shader");
-		Renderer->InitShader(voxelize, LIGHTS | SHADOWS);
+		Renderer->InitShader(voxelize, /*CAMERA | */LIGHTS | SHADOWS);
 
 		Renderer->SetShader(voxelize);
 		voxelize->Handle()->GetParam("voxelBoundsScale")   ->SetAsFloats(&voxelBoundsScale,    3);
@@ -44,8 +44,6 @@ namespace Engine {
 		ref<Texture> voxelTexture = REF<Texture>(voxelBoundsSize.x, voxelBoundsSize.y, voxelBoundsSize.z, TEX_3D, RGBA, FLOAT, BORDER, LINEAR, LINEAR_LINEAR);
 		m_voxelize = new VoxelLight(voxelTexture, voxelize, nullptr, mipmap);
 
-		m_voxelize->SetPosition(vector3(0, 16, 0));
-		
 		return 0;
 	}
 
@@ -56,6 +54,11 @@ namespace Engine {
 	void ModelVoxelRenderSystem::Update(
 		EntityComponentArray& eca)
 	{
+		//vector3 camPos = m_scene->MainCamera()->Position(); // no req plz :(
+		//camPos.y = 0;
+
+		//m_voxelize->SetPosition(camPos * voxelSize);
+
 		if (t > 0.001f && Keyboard::KeyDown(F)) {
 			t = 0.0f;
 

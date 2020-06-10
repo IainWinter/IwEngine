@@ -8,19 +8,19 @@ struct REFLECT Player {
 	REFLECT float ChargeTime;
 	REFLECT int   Health;
 
-	float Timer;
-	float DeathTimer;
-	bool  Damaged;
+	float Timer = 0;
+	float DeathTimer = 0;
+	bool  Damaged = false;
 
 	// just took form system
 
-	iw::vector3 Movement;
+	iw::vector3 Movement = 0;
 
-	bool Left, Right, Up, Down, Dash, Sprint, Transition, LevelTransition;
+	bool Left, Right, Up, Down, Dash, Sprint, Transition, LevelTransition = false;
 
-	iw::vector3 TransitionStartPosition;
-	iw::vector3 TransitionTargetPosition;
+	iw::vector3 TransitionStartPosition = 0;
+	iw::vector3 TransitionTargetPosition = 0;
 
-	float Begin;
-	float TransitionSpeed;
+	float Begin = 0;
+	float TransitionSpeed = 0;
 };

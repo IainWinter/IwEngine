@@ -127,5 +127,5 @@ void main() {
 			   * DirectionalLightShadow(DirectionalLightPos[i]);
 	}
 
-	FragColor = vec4(baseColor.rgb, 1);//vec4(color, baseColor.a);
+	FragColor = vec4(Normal, 1);//vec4(color, baseColor.a);
 }

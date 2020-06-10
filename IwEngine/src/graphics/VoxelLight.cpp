@@ -15,13 +15,15 @@ namespace Graphics {
 		, m_voxelTexture(voxelTexture)
 		, m_mipmapGenerationShader(mipmapGenerationShader)
 		, m_shadowCamera()
-	{}
+	{
+		//m_shadowCamera.SetRotation(quaternion::from_euler_angles(0, Pi, 0));
+	}
 
 	void VoxelLight::SetupShadowCast(
 		Renderer* renderer)
 	{
 		renderer->Device->SetViewport(m_voxelTexture->Width(), m_voxelTexture->Height());
-		renderer->SetCamera(ShadowCamera());
+		//renderer->SetCamera(ShadowCamera());
 
 		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 		glDisable(GL_CULL_FACE);
@@ -30,7 +32,7 @@ namespace Graphics {
 
 		if (!m_voxelTexture->Handle()) {
 			m_voxelTexture->Initialize(renderer->Device);
-			m_voxelTexture->SetBorderColor(Color(0, 0, 0, 0));
+			m_voxelTexture->SetBorderColor(iw::Color(0, 0, 0, 0));
 		}
 		
 		m_voxelTexture->Clear();

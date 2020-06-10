@@ -187,10 +187,12 @@ namespace iw {
 		//	Lights
 
 		sun   = new DirectionalLight(100, OrthographicCamera(60, 60, -100, 100), dirShadowTarget, dirShadowShader, dirIShadowShader);
-		light = new PointLight(30, 30, nullptr, nullptr, nullptr);
+		//light = new PointLight(30, 30, nullptr, nullptr, nullptr);
+
+		sun->SetColor(vector3(.241f, .102f, .034f) * 2);
 
 		sun->SetRotation(quaternion::from_euler_angles(1.433f, 0.0f, -0.525f));
-		light->SetPosition(vector3(0, 5, 0));
+		//light->SetPosition(vector3(0, 5, 0));
 
 		MainScene->AddLight(sun);
 		//MainScene->AddLight(light);
@@ -323,8 +325,8 @@ namespace iw {
 
 		// Particle test
 
-		ref<Shader> particleShader = Asset->Load<Shader>("shaders/particle/phong.shader");
-		Renderer->InitShader(particleShader, SHADOWS | LIGHTS | CAMERA);
+		ref<Shader> particleShader = Asset->Load<Shader>("shaders/particle/simple.shader");
+		Renderer->InitShader(particleShader/*, SHADOWS | LIGHTS | CAMERA*/);
 
 		//iw::Material particleMaterial(particleShader);
 		//particleMaterial.Set("baseColorMap", Color::From255(0, 60, 10));
@@ -359,7 +361,7 @@ namespace iw {
 						//trans.Scale.z = (randf() + 1.2f) * 0.2f;
 						//trans.Scale.y = (randf() + 1.5f) * 0.5f;
 
-						trans.Rotation = quaternion::from_euler_angles(Pi * 0.5f, 0/*randf() * 2.0f * Pi*/, 0.0f);
+						//trans.Rotation = quaternion::from_euler_angles(0/*Pi * 0.5f*/, 0/*randf() * 2.0f * Pi*/, 0.0f);
 
 						s->SpawnParticle(trans);
 					}
@@ -395,6 +397,8 @@ namespace iw {
 	bool s = 0;
 	bool b = 1;
 
+	float ml = 2.0f;
+
 	void SandboxLayer::PostUpdate() {
 		// Update particle system
 
@@ -403,7 +407,15 @@ namespace iw {
 
 		MainScene->MainCamera()->SetProjection(iw::lerp(persp, ortho, blend));
 
+		vector3 camPos = MainScene->MainCamera()->Position(); // no req
+		camPos.y = 0;
+
+		sun->SetPosition(camPos);
+
 		vct->Use(Renderer->Device);
+
+		ml = iw::lerp(ml, 1 / iw::DeltaTime() / 30, iw::Time::DeltaTime() * 0.1f);
+		vct->Handle()->GetParam("maxConeLength")->SetAsFloat(ml);
 
 		if (Keyboard::KeyDown(V) && f > 0.2f) {
 			vct->Handle()->GetParam("SHADOWS")->SetAsInt(s = !s);
@@ -425,6 +437,7 @@ namespace iw {
 		//ImGui::SliderFloat("Gamma", (float*)&mainRender->GetGamma(), 0, 5);
 		ImGui::SliderFloat("Camera blend", &blend, 0, 1);
 
+		ImGui::Text("Max Cone Length %f", ml);
 
 		//ImGui::SliderFloat("Shadow map blur", &blurAmount, 0, 5);
 		ImGui::SliderFloat("Shadow map threshold", &threshold, 0, 1);
