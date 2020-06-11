@@ -95,7 +95,7 @@ uniform float voxelSize;
 
 // Globals
 uniform float ambiance;
-//uniform vec3 sky;
+//uniform vec3 skyColor;
 uniform int d_state;
 
 uniform float maxConeLength = 4.0f;
@@ -169,10 +169,6 @@ vec4 TraceCone(
 		vec3 position = origin + direction * distance;
 		
 		if (!isInsideCube(position, voxelBoundsScale, 0)) {
-			//if (dot(direction, vec3(0, 1, 0)) > 0.5f) {
-			//	color = vec4(sky, 1);
-			//}
-
 			break;
 		}
 
@@ -186,6 +182,10 @@ vec4 TraceCone(
 		color    += sample_ * weight;
 		distance += diameter;
 	}
+
+	//if(color.a < 0.5f) {
+	//	color.rgb = skyColor * color.a;
+	//}
 
 	// decompress color range to decode limited HDR. Is this scuffed gamma correction?
 	//color.xyz *= 2.0;

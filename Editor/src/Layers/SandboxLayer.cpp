@@ -398,6 +398,8 @@ namespace iw {
 
 	float ml = 2.0f;
 
+	iw::vector3 skyColor;
+
 	void SandboxLayer::PostUpdate() {
 		// Update particle system
 
@@ -415,6 +417,8 @@ namespace iw {
 
 		//ml = iw::lerp(ml, 1 / iw::DeltaTime() / 40, iw::Time::DeltaTime() * .1f);
 		//vct->Handle()->GetParam("maxConeLength")->SetAsFloat(ml);
+
+		//vct->Handle()->GetParam("skyColor")->SetAsFloats(&skyColor, 3);
 
 		if (Keyboard::KeyDown(V) && f > 0.2f) {
 			vct->Handle()->GetParam("SHADOWS")->SetAsInt(s = !s);
@@ -437,6 +441,7 @@ namespace iw {
 		ImGui::SliderFloat("Camera blend", &blend, 0, 1);
 
 		ImGui::Text("Max Cone Length %f", ml);
+		ImGui::SliderFloat3("Sky color %f", (float*)&skyColor, 0, 1);
 
 		//ImGui::SliderFloat("Shadow map blur", &blurAmount, 0, 5);
 		ImGui::SliderFloat("Shadow map threshold", &threshold, 0, 1);
