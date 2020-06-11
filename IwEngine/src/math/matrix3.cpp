@@ -98,7 +98,7 @@ namespace iw {
 
 	void matrix3::invert() {
 		float det = determinant();
-		if (almost_equal(det, 0, 6)) {
+		if (almost_equal(det, 0.0f, 6)) {
 			throw std::invalid_argument("Determinant is zero, "
 				"therefore inverse matrix doesn't exist.");
 		}
@@ -120,7 +120,7 @@ namespace iw {
 
 	void matrix3::normalize() {
 		float det = determinant();
-		if (almost_equal(det, 0, 6)) {
+		if (almost_equal(det, 0.0f, 6)) {
 			return;
 		}
 
@@ -504,7 +504,7 @@ namespace iw {
 		const quaternion& rotation)
 	{
 		quaternion q = rotation;
-		if (!almost_equal(q.length_squared(), 1, 6)) {
+		if (!almost_equal(q.length_squared(), 1.0f, 6)) {
 			q.normalize();
 		}
 

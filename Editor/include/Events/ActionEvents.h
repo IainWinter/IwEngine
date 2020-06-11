@@ -7,6 +7,7 @@
 #include "iw/common/Components/Transform.h"
 #include "Components/Item.h"
 #include "Components/Enemy.h"
+#include "iw/entity/Entity.h"
 
 enum class Actions
 	: int
@@ -15,7 +16,8 @@ enum class Actions
 	JUMP, RIGHT, FORWARD, USE,
 	RESET_LEVEL, START_LEVEL, UNLOCK_LEVEL_DOOR, LOAD_NEXT_LEVEL, GOTO_NEXT_LEVEL, AT_NEXT_LEVEL,
 	SPAWN_ENEMY_DEATH, SPAWN_ENEMY, SPAWN_ITEM, SPAWN_NOTE, SPAWN_CONSUMABLE,
-	GIVE_SCORE
+	GIVE_SCORE,
+	SET_CAMERA_TARGET
 };
 
 struct DevConsoleEvent
@@ -260,5 +262,20 @@ struct GiveScoreEvent
 		, Position(position)
 		, Score(score)
 		, HalfScore(halfScore)
+	{}
+};
+
+struct SetCameraTargetEvent
+	: iw::SingleEvent
+{
+	iw::vector3 Target; // could be entity
+	bool ResetY;
+
+	SetCameraTargetEvent(
+		iw::vector3 target,
+		bool resetY = false)
+		: iw::SingleEvent(iw::val(Actions::SET_CAMERA_TARGET))
+		, Target(target)
+		, ResetY(resetY)
 	{}
 };

@@ -77,7 +77,7 @@ namespace iw {
 
 	void matrix2::invert() {
 		float det = determinant();
-		if (almost_equal(det, 0, 6)) {
+		if (almost_equal(det, 0.0f, 6)) {
 			throw std::invalid_argument("Determinant is zero, "
 				"therefore inverse matrix doesn't exist.");
 		}
@@ -93,7 +93,7 @@ namespace iw {
 
 	void matrix2::normalize() {
 		float det = determinant();
-		if (almost_equal(det, 0, 6)) {
+		if (almost_equal(det, 0.0f, 6)) {
 			return;
 		}
 

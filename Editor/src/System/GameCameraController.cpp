@@ -85,8 +85,7 @@ bool GameCameraController::On(
 
 			GoToNextLevelEvent& event = e.as<GoToNextLevelEvent>();
 
-			//center.x = event.CenterPosition.x;
-			//center.z = event.CenterPosition.y;
+			center = 0;
 			
 			SetTarget(event.LevelName);
 			follow = event.CameraFollow;
@@ -108,8 +107,22 @@ bool GameCameraController::On(
 
 			break;
 		}
+		case iw::val(Actions::SET_CAMERA_TARGET): {
+			SetCameraTargetEvent& event = e.as<SetCameraTargetEvent>();
+
+			center = event.Target;
+			y      = event.Target.y;
+			
+			if (event.ResetY) {
+				SetTarget("");
+			}
+
+			break;
+		}
 		case iw::val(Actions::DEV_CONSOLE): {
 			locked = !e.as<iw::ToggleEvent>().Active;
+
+			break;
 		}
 	}
 

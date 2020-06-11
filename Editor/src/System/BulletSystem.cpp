@@ -14,6 +14,14 @@ void BulletSystem::FixedUpdate(
 	for (auto entity : view) {
 		auto [transform, rigidbody, bullet] = entity.Components.Tie<Components>();
 
+		//if (bullet->Die) {
+		//	rigidbody->Trans().Scale -= rigidbody->Trans().Scale * iw::Time::DeltaTime() * 2;
+		//	if (rigidbody->Trans().Scale.x < 0.0f) {
+		//		transform->SetParent(nullptr);
+		//		Space->DestroyEntity(entity.Index);
+		//	}
+		//}
+
 		switch (bullet->Type) {
 			case SINE: {
 				float speed = (sin(bullet->Time * 5) + 1) * 0.5f;

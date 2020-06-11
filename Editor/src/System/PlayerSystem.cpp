@@ -113,7 +113,8 @@ int PlayerSystem::Initialize() {
 		
 		else if (otherEntity.Has<Bullet>()) {
 			if (   true //!p->Damaged // stop taking more than 1 damage per frame
-				&& player->Health > 0)
+				&& player->Health > 0
+				/*&& !otherEntity.Find<Bullet>()->Die*/)
 			{
 				player->Damaged = true;
 				player->Health -= 1;
@@ -223,6 +224,7 @@ void PlayerSystem::Update(
 					}
 
 					if (   player->Dash
+						&& player->Speed > 0.0f
 						&& (player->Up || player->Down || player->Left || player->Right))
 					{
 						start = transform->Position;

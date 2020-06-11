@@ -2,6 +2,10 @@
 #include <random>
 #include <cmath>
 
+#include "iw/math/vector2.h"
+#include "iw/math/vector3.h"
+#include "iw/math/vector4.h"
+
 namespace iw {
 namespace math {
 	float randf() {
@@ -37,7 +41,7 @@ namespace math {
 		float b,
 		unsigned int accuracy)
 	{
-		return fabsf(a - b) * fast_pow(10, accuracy) < 1; //didn't speed up much at all :c
+		return fabsf(a - b) * fast_pow(10, accuracy) < 1;
 	}
 }
 

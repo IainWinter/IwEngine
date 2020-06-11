@@ -18,7 +18,7 @@ void main() {
 #shader Fragment
 #version 330
 
-uniform vec3 mat_color;
+uniform vec4 mat_color;
 uniform float mat_hasFontMap;
 uniform sampler2D mat_fontMap;
 
@@ -27,13 +27,15 @@ in vec2 UV;
 out vec4 PixelColor;
 
 void main() {
-	vec4 color = vec4(mat_color, 1);
+	vec4 color = mat_color;
 
 	if (mat_hasFontMap == 1) {
-		color.a = texture2D(mat_fontMap, UV).a;
-		if (color.a < 0.5f) {
+		float a = texture2D(mat_fontMap, UV).a;
+		if (a < 0.5f) {
 			discard;
 		}
+
+		color.a *= a;
 	}
 
 	PixelColor = color;

@@ -118,12 +118,12 @@ namespace iw {
 		Renderer->InitShader(fontShader, CAMERA);
 
 		ref<Material> textMat = REF<Material>(fontShader);
-		textMat->Set("color", vector3(1));
+		textMat->Set("color", iw::Color(1));
 		textMat->SetTexture("fontMap", m_font->GetTexture(0));
 
 		Asset->Give<Material>("materials/Font", textMat);
 
-		Mesh textMesh = m_font->GenerateMesh("Use arrow keys to move and x to attack.\ni: debug menu  t: freecam\nv: shadows (low fps)  b: blinn (no impact)  e: show voxels (goodbye fps)", .005f, 1);
+		Mesh textMesh = m_font->GenerateMesh("(temp)\ni: debug menu  t: freecam\nv: shadows (low fps)  b: blinn (no impact)  e: show voxels (goodbye fps)", .005f, 1);
 		textMesh.SetMaterial(textMat);
 
 		iw::Entity textEnt = Space->CreateEntity<iw::Transform, iw::Mesh, iw::UiElement>();
@@ -521,20 +521,23 @@ namespace iw {
 	{
 		switch (e.Action) {
 			case iw::val(Actions::GOTO_NEXT_LEVEL): {
-				//playerSystem->On(e);
 				enemySystem ->On(e);
-				//PopSystem(playerSystem);
 				PopSystem(enemySystem);
 
-				if (e.as<GoToNextLevelEvent>().LevelName == "models/block/forest100.json") {
+				GoToNextLevelEvent& event = e.as<GoToNextLevelEvent>();
+
+				if      (event.LevelName == "models/block/forest100.json")
+				{
 					m_font->UpdateMesh(*m_textMesh, "ayy you've gotten to the boss congrats!\nsadly he's out today so\nhave some fun with the physics instead...\nmember you can press i/t", .004f, 1);
 				}
 
-				else if (e.as<GoToNextLevelEvent>().LevelName == "models/block/forest08.json") {
+				else if (event.LevelName == "models/block/forest08.json")
+				{
 					m_font->UpdateMesh(*m_textMesh, "So this would be a lil mini boss but that seems\nlike it would be annoying to program xd", .004f, 1);
 				}
 
-				else if (e.as<GoToNextLevelEvent>().LevelName == "models/block/forest01.json") {
+				else if (event.LevelName == "models/block/forest01.json")
+				{
 					m_font->UpdateMesh(*m_textMesh, "Lets go! You've finished the play test\nIf you got the time, post some feedback at\nhttps://winter.dev/demo", .004f, 1);
 				}
 

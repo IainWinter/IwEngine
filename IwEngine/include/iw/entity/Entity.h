@@ -48,6 +48,16 @@ namespace ECS {
 			return Handle.Alive;
 		}
 
+		void Destroy() {
+#ifdef IW_DEBUG
+			if (!Space) {
+				LOG_ERROR << "Entity has no space!";
+				return;
+			}
+#endif
+			Space->DestroyEntity(Index());
+		}
+
 		template<
 			typename _c,
 			typename... _args>

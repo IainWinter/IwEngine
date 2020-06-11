@@ -17,4 +17,6 @@ struct REFLECT Bullet {
 	float Time;
 	iw::vector3 initialVelocity;
 	int enemyIndex;
+
+	//bool Die = false;
 };

@@ -425,37 +425,42 @@ iw::Transform* EnemySystem::SpawnBullet( // this should be in bullet system i gu
 	//r->SetLock(iw::vector3(0, 1, 0));
 
 	r->SetOnCollision([&](iw::Manifold& man, float dt) {
-		iw::Entity bullet, other;
-		bool noent = GetEntitiesFromManifold<Bullet>(man, bullet, other);
+		iw::Entity bulletEntity, otherEntity;
+		bool noent = GetEntitiesFromManifold<Bullet>(man, bulletEntity, otherEntity);
 
 		if (noent) {
 			return;
 		}
 
-		if (   other.Has<Bullet>()
-			|| other.Has<Enemy>()/*.Index() == bullet.Find<Bullet>()->enemyIndex*/
-			|| other.Has<DontDeleteBullets>()
-			|| other.Has<LevelDoor>())
+		Bullet* bullet = bulletEntity.Find<Bullet>();
+		//if (bullet->Die) return;
+
+		if (   otherEntity.Has<Bullet>()
+			|| otherEntity.Has<Enemy>()/*.Index() == bullet.Find<Bullet>()->enemyIndex*/
+			|| otherEntity.Has<DontDeleteBullets>()
+			|| otherEntity.Has<LevelDoor>())
 		{
 			return;
 		}
 
-		iw::Transform* bulletTransform = bullet.Find<iw::Transform>();
+		iw::Transform* bulletTransform = bulletEntity.Find<iw::Transform>();
 
-		if (other.Has<Player>()) {
+		if (otherEntity.Has<Player>()) {
 			Bus->push<GiveScoreEvent>(bulletTransform->Position, 0, true);
 		}
 
-		else if (other.Has<EnemyDeathCircle>()) {
-			iw::Transform* otherTransform  = other.Find<iw::Transform>();
+		else if (otherEntity.Has<EnemyDeathCircle>()) {
+			iw::Transform* otherTransform  = otherEntity.Find<iw::Transform>();
 
 			float score = ceil((bulletTransform->Position - otherTransform->Position).length()) * 10;
 			Bus->push<GiveScoreEvent>(bulletTransform->Position, score, false);
 		}
 
+		/*bullet->Die = true;*/
+
 		bulletTransform->SetParent(nullptr);
-		Space->DestroyEntity(bullet.Index());
-		//Bus->push<iw::EntityDestroyEvent>(bullet);
+		Space->DestroyEntity(bulletEntity.Index());
+		//Bus->push<iw::EntityDestroyEvent>(bulletEntity);
 	});
 
 	Physics->AddRigidbody(r);

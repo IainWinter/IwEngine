@@ -85,7 +85,7 @@ namespace iw {
 
 	void quaternion::normalize_fast() {
 		float scale = length_fast();
-		if (almost_equal(scale, 0, 6)) {
+		if (almost_equal(scale, 0.0f, 6)) {
 			return;
 		}
 
@@ -97,7 +97,7 @@ namespace iw {
 
 	void quaternion::invert() {
 		float ls = length_squared();
-		if (almost_equal(ls, 0, 6)) {
+		if (almost_equal(ls, 0.0f, 6)) {
 			return;
 		}
 
@@ -115,14 +115,14 @@ namespace iw {
 
 	vector4 quaternion::axis_angle() const {
 		quaternion q = *this;
-		if (!almost_equal(q.length_squared(), 1, 6)) {
+		if (!almost_equal(q.length_squared(), 1.0f, 6)) {
 			q.normalize();
 		}
 
 		vector3 xyz = vector3(q.x, q.y, q.z);
 		float length = xyz.length();
 
-		if (almost_equal(length, 0, 6)) {
+		if (almost_equal(length, 0.0f, 6)) {
 			return vector4::zero;
 		}
 
@@ -131,7 +131,7 @@ namespace iw {
 
 	vector3 quaternion::euler_angles() const {
 		quaternion q = *this;
-		if (!almost_equal(q.length_squared(), 1, 6)) {
+		if (!almost_equal(q.length_squared(), 1.0f, 6)) {
 			q.normalize();
 		}
 

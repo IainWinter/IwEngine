@@ -29,11 +29,11 @@ int ScoreSystem::Initialize() {
 	textMatBad = REF<iw::Material>(fontShader);
 	textMat    = REF<iw::Material>(fontShader);
 
-	textMatBad->Set("color", iw::vector3(1, 0.1f, 0.1f));
+	textMatBad->Set("color", iw::Color(1, 0.1f, 0.1f));
 	textMatBad->SetTexture("fontMap", font->GetTexture(0));
 	textMatBad->SetTransparency(iw::Transparency::ADD);
 
-	textMat   ->Set("color", iw::vector3(1));
+	textMat   ->Set("color", iw::Color(1));
 	textMat   ->SetTexture("fontMap", font->GetTexture(0));
 	textMat   ->SetTransparency(iw::Transparency::ADD);
 

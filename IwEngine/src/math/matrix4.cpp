@@ -247,7 +247,7 @@ namespace iw {
 
 	void matrix4::normalize() {
 		float det = determinant();
-		if (almost_equal(det, 0, 6)) {
+		if (almost_equal(det, 0.0f, 6)) {
 			return;
 		}
 

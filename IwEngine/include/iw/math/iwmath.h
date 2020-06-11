@@ -14,6 +14,10 @@
 
 namespace iw {
 namespace math {
+	struct vector2;
+	struct vector3;
+	struct vector4;
+
 	/**
 	* Pi ~ 3.14
 	*/
@@ -74,8 +78,8 @@ namespace math {
 	*/
 	IWMATH_API
 	bool almost_equal(
-		float a, 
-		float b, 
+		float a,
+		float b,
 		unsigned int accuracy);
 
 	/**

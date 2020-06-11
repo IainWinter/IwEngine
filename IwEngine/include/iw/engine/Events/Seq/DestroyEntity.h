@@ -11,25 +11,27 @@ namespace Engine {
 		: EventTask
 	{
 	private:
-		Entity& entity;
+		Entity entity;
 		bool async;
 
 	public:
 		DestroyEntity(
-			Entity& entity,
+			Entity entity,
 			bool async = false)
 			: entity(entity)
 			, async(async)
 		{}
 
 		bool update() override {
+			if (!entity) return true;
+
 			if (async) {
 				Bus->push<EntityDestroyEvent>(entity);
 			}
 
 			else {
 				entity.Find<Transform>()->SetParent(nullptr);
-				entity.Space->DestroyEntity(entity.Index());
+				entity.Destroy();
 			}
 
 			return true;

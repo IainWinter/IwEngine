@@ -1,6 +1,6 @@
 #pragma once
 
-#include "iw/events/seq/event_task.h"
+#include "iw/engine/Events/Seq/ShowText.h"
 #include "iw/common/Components/Transform.h"
 #include "iw/entity/Entity.h"
 #include "iw/graphics/Font.h"
@@ -8,7 +8,7 @@
 namespace iw {
 namespace Engine {
 	struct ShowText
-		: event_task
+		: EventTask
 	{
 	private:
 		iw::Entity entity;
@@ -30,7 +30,7 @@ namespace Engine {
 		}
 
 		void reset() override {
-
+			
 		}
 
 		bool update() override {
