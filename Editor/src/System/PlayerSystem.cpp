@@ -167,7 +167,8 @@ void PlayerSystem::Update(
 				position = iw::lerp(
 					player->TransitionStartPosition, 
 					player->TransitionTargetPosition, 
-					iw::Time::TotalTime() - player->Begin);
+					iw::Time::TotalTime() - player->Begin
+				);
 			}
 
 			if (   iw::almost_equal(position.x, player->TransitionTargetPosition.x, 2)
@@ -384,11 +385,11 @@ bool PlayerSystem::On(
 		case iw::val(Actions::GAME_STATE): {
 			GameStateEvent& event = e.as<GameStateEvent>();
 			if (event.State == SOFT_RUN) {
-				//m_player.Find<Player>()->LevelTransition = false;
+				m_player.Find<Player>()->Speed = 4.5f;
 			}
 
-			else if (event.State = SOFT_PAUSE) {
-				//m_player.Find<Player>()->LevelTransition = true;
+			else if (event.State == SOFT_PAUSE) {
+				m_player.Find<Player>()->Speed = 0.0f;
 			}
 
 			break;

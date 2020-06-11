@@ -553,7 +553,6 @@ iw::Entity LevelSystem::LoadLevel(
 			Bus->send<GameStateEvent>(SOFT_RUN);
 			return true;
 		});
-
 	}
 
 	return level;
