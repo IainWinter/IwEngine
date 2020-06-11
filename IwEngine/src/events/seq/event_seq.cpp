@@ -20,6 +20,17 @@ namespace events {
 		m_tasks.push_back(task);
 	}
 
+	event_func* event_seq::add(
+		std::function<bool(void)> func)
+	{
+		event_func* task = new event_func();
+		task->func = func;
+
+		m_tasks.push_back(task);
+
+		return task;
+	}
+
 	void event_seq::remove(
 		event_task* task)
 	{

@@ -381,6 +381,18 @@ bool PlayerSystem::On(
 			m_playerModel->GetMesh(0).Material()->Set("refractive", 1.0f);
 			break;
 		}
+		case iw::val(Actions::GAME_STATE): {
+			GameStateEvent& event = e.as<GameStateEvent>();
+			if (event.State == SOFT_RUN) {
+				//m_player.Find<Player>()->LevelTransition = false;
+			}
+
+			else if (event.State = SOFT_PAUSE) {
+				//m_player.Find<Player>()->LevelTransition = true;
+			}
+
+			break;
+		}
 	}
 
 	return false;

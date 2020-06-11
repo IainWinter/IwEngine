@@ -42,6 +42,12 @@ namespace Engine {
 			add(task);
 		}
 
+		event_func* Add(
+			std::function<bool(void)> func)
+		{
+			return add(func);
+		}
+
 		void Remove(
 			EventTask* task)
 		{

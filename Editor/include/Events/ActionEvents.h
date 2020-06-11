@@ -29,7 +29,9 @@ struct DevConsoleEvent
 
 enum GameState {
 	PAUSED,
-	RUNNING
+	RUNNING,
+	SOFT_RUN,
+	SOFT_PAUSE,
 };
 
 struct GameStateEvent

@@ -537,6 +537,10 @@ iw::Entity LevelSystem::LoadLevel(
 
 		float speed = 4.5f;
 
+		sequence.Add([&]() {
+			Bus->send<GameStateEvent>(SOFT_PAUSE);
+			return true;
+		});
 		sequence.Add<iw::MoveToTarget> (otherGuy, iw::vector3(-8, 1, -3), speed);
 		sequence.Add<iw::MoveToTarget> (otherGuy, iw::vector3(-6, 1, -6), speed);
 		sequence.Add<iw::MoveToTarget> (otherGuy, iw::vector3(-5, 1, -3), speed * 7.5f);
@@ -545,6 +549,11 @@ iw::Entity LevelSystem::LoadLevel(
 		sequence.Add<iw::MoveToTarget> (otherGuy, iw::vector3( 2, 1, 0), speed);
 		sequence.Add<iw::MoveToTarget> (otherGuy, iw::Transform(0, 0), 1.5f, false, true);
 		sequence.Add<iw::DestroyEntity>(otherGuy);
+		sequence.Add([&]() {
+			Bus->send<GameStateEvent>(SOFT_RUN);
+			return true;
+		});
+
 	}
 
 	return level;

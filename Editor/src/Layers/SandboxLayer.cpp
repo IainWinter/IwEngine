@@ -555,7 +555,7 @@ namespace iw {
 					PushSystemFront(bulletSystem);
 				}
 
-				else {
+				else if (event.State == PAUSED) {
 					PopSystem(playerSystem);
 					PopSystem(enemySystem);
 					PopSystem(bulletSystem);

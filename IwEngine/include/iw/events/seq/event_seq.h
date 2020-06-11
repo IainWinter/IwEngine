@@ -2,9 +2,21 @@
 
 #include "event_task.h"
 #include <vector>
+#include <functional>
 
 namespace iw {
 namespace events {
+	struct event_func
+		: event_task
+	{
+		std::function<bool(void)> func;
+
+		bool update() override {
+			return func();
+		}
+	};
+
+
 	class event_seq {
 	private:
 		std::vector<event_task*> m_tasks;
@@ -24,6 +36,10 @@ namespace events {
 		IWEVENTS_API
 		void add(
 			event_task* task);
+
+		IWEVENTS_API
+		event_func* add(
+			std::function<bool(void)> func);
 
 		// Only removes doesnt delete.
 		// Call this before deleting the sequence to save the task.
