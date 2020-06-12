@@ -85,6 +85,8 @@ iw::Transform* EnemyDeathCircleSystem::SpawnDeathCircle(
 	iw::SphereCollider*  s = circle.Set<iw::SphereCollider> (iw::vector3::zero, 1);
 	iw::CollisionObject* c = circle.Set<iw::CollisionObject>();
 
+	m->GetMesh(0).SetMaterial(m->GetMesh(0).Material()->MakeInstance());
+
 	m->GetMesh(0).Material()->Set("baseColor", iw::Color::From255(0, 195, 255, 64));
 
 	c->SetCol(s);

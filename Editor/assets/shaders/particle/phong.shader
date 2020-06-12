@@ -17,7 +17,7 @@ void main() {
 	vec4 worldPos = i_model * vec4(vert, 1);
 
 	WorldPos  = worldPos.xyz;
-	Normal    = normal;
+	Normal    = transpose(inverse(mat3(i_model))) * normal;
 	TexCoords = uv;
 
 	SetDirectionalLightPos(worldPos);
@@ -50,6 +50,9 @@ uniform sampler2D mat_shadowMap;          // take out of material at some point
 
 // Settings
 uniform int BLINN = 1;
+
+// Globals
+uniform float ambiance;
 
 #include shaders/lights.shader
 #include shaders/camera.shader
@@ -97,9 +100,9 @@ void main() {
 		baseColor.rgb = sRGBToLinear(baseColor.rgb);
 	}
 
-	//if (baseColor.a < 0.5f) {
-	//	discard;
-	//}
+	if (baseColor.a < 0.5f) {
+		discard;
+	}
 
 	// Normal
 
@@ -118,14 +121,14 @@ void main() {
 	vec3 N = normalize(normal);
 	vec3 V = normalize(camPos.xyz - WorldPos);
 
-	vec3 color = vec3(0.0f);
+	vec3 color = baseColor.xyz * ambiance;
 
-	for (int i = 0; i < directionalLightCount; i++) {
-		vec3 L = directionalLights[i].InvDirection;
+	for (int i = 0; i < lightCounts.y; i++) {
+		vec3 L = directionalLights[i].InvDirection.xyz;
 
 		color += BRDF(N, V, L, baseColor, reflectance)
-			   * DirectionalLightShadow(DirectionalLightPos[i]);
+			   /** DirectionalLightShadow(DirectionalLightPos[i])*/;
 	}
 
-	FragColor = vec4(Normal, 1);//vec4(color, baseColor.a);
+	FragColor = vec4(color,1);
 }

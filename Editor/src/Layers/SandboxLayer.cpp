@@ -311,7 +311,7 @@ namespace iw {
 
 		PushSystem<iw::    MeshShadowRenderSystem>(MainScene);
 		PushSystem<iw::   ModelShadowRenderSystem>(MainScene);
-		//PushSystem<iw::ParticleShadowRenderSystem>(MainScene);
+		PushSystem<iw::ParticleShadowRenderSystem>(MainScene);
 		PushSystem<iw::          MeshRenderSystem>(MainScene);
 		PushSystem<iw::         ModelRenderSystem>(MainScene);
 		PushSystem<iw::      ParticleRenderSystem>(MainScene);
@@ -325,52 +325,53 @@ namespace iw {
 		// Particle test
 
 		ref<Shader> particleShader = Asset->Load<Shader>("shaders/particle/simple.shader");
-		Renderer->InitShader(particleShader/*, SHADOWS | LIGHTS | CAMERA*/);
+		Renderer->InitShader(particleShader, SHADOWS | LIGHTS /*| CAMERA*/);
 
 		//iw::Material particleMaterial(particleShader);
 		//particleMaterial.Set("baseColorMap", Color::From255(0, 60, 10));
-		//particleMaterial.SetTexture("shadowMap", sun->ShadowTarget()->Tex(0));
-		Mesh particle = Asset->Load<Model>("models/forest/grass.gltf")->GetMesh(0);
-		particle.Material()->SetShader(particleShader);
-		particle.Material()->Set("baseColor", iw::Color(1, 1, 1));
 
-		iw::Entity particleEntity = Space->CreateEntity<iw::Transform, iw::ParticleSystem<StaticParticle>>();
+		//Mesh particle = Asset->Load<Model>("models/forest/grass.gltf")->GetMesh(0);
+		//particle.Material()->SetShader(particleShader);
+		//particle.Material()->SetTexture("shadowMap", sun->ShadowTarget()->Tex(0));
+		//particle.Material()->Set("baseColor", iw::Color(1, 1, 1));
 
-		iw::Transform*                      t = particleEntity.Set<iw::Transform>();
-		iw::ParticleSystem<StaticParticle>* s = particleEntity.Set<iw::ParticleSystem<StaticParticle>>();
+		//iw::Entity particleEntity = Space->CreateEntity<iw::Transform, iw::ParticleSystem<StaticParticle>>();
 
-		s->SetTransform(t);
-		s->SetParticleMesh(particle);
-		s->SetCamera(MainScene->MainCamera());
+		//iw::Transform*                      t = particleEntity.Set<iw::Transform>();
+		//iw::ParticleSystem<StaticParticle>* s = particleEntity.Set<iw::ParticleSystem<StaticParticle>>();
 
-		s->SetUpdate([](auto s, auto p, auto c) {
-			if (c < 3000 && Keyboard::KeyDown(G)) {
-				for (int i = 0; i < 30; i++) {
-					float x = iw::randf() * 32.0f;
-					float z = iw::randf() * 18.0f;
+		//s->SetTransform(t);
+		//s->SetParticleMesh(particle);
+		//s->SetCamera(MainScene->MainCamera());
 
-					if (   abs(x) > 28.0f + randf() * 2.0f
-						|| abs(z) > 12.0f + randf() * 2.0f)
-					{
-						Transform trans;
-						trans.Position.x = x;
-						trans.Position.z = z;
-						trans.Position.y = 1;
-						//trans.Scale.x = (randf() + 1.2f) * 0.2f;
-						//trans.Scale.z = (randf() + 1.2f) * 0.2f;
-						//trans.Scale.y = (randf() + 1.5f) * 0.5f;
+		//s->SetUpdate([](auto s, auto p, auto c) {
+		//	if (c < 3000 && Keyboard::KeyDown(G)) {
+		//		for (int i = 0; i < 30; i++) {
+		//			float x = iw::randf() * 32.0f;
+		//			float z = iw::randf() * 18.0f;
 
-						//trans.Rotation = quaternion::from_euler_angles(0/*Pi * 0.5f*/, 0/*randf() * 2.0f * Pi*/, 0.0f);
+		//			if (   abs(x) > 28.0f + randf() * 2.0f
+		//				|| abs(z) > 12.0f + randf() * 2.0f)
+		//			{
+		//				Transform trans;
+		//				trans.Position.x = x;
+		//				trans.Position.z = z;
+		//				trans.Position.y = 1;
+		//				//trans.Scale.x = (randf() + 1.2f) * 0.2f;
+		//				//trans.Scale.z = (randf() + 1.2f) * 0.2f;
+		//				//trans.Scale.y = (randf() + 1.5f) * 0.5f;
 
-						s->SpawnParticle(trans);
-					}
-				}
+		//				//trans.Rotation = quaternion::from_euler_angles(0/*Pi * 0.5f*/, 0/*randf() * 2.0f * Pi*/, 0.0f);
 
-				return true;
-			}
+		//				s->SpawnParticle(trans);
+		//			}
+		//		}
 
-			return false;
-		});
+		//		return true;
+		//	}
+
+		//	return false;
+		//});
 
 		//iw::ref<iw::Model> rock = Asset->Load<iw::Model>("models/forest/ground.dae");
 
@@ -381,14 +382,48 @@ namespace iw {
 		//e.Set<iw::Transform>();
 		//e.Set<iw::Model>(*rock);
 
-		iw::MoveToTarget* move1 = new iw::MoveToTarget(playerSystem->GetPlayer(), iw::vector3(-10, 1, 0));
-		iw::MoveToTarget* move2 = new iw::MoveToTarget(playerSystem->GetPlayer(), iw::vector3(-10, 1, 10));
-		seq.add(move1);
-		seq.add(move2);
+		//iw::MoveToTarget* move1 = new iw::MoveToTarget(playerSystem->GetPlayer(), iw::vector3(-10, 1, 0));
+		//iw::MoveToTarget* move2 = new iw::MoveToTarget(playerSystem->GetPlayer(), iw::vector3(-10, 1, 10));
+		//seq.add(move1);
+		//seq.add(move2);
 
 		//iw::DestroyEntity* des = new iw::DestroyEntity(playerSystem->GetPlayer());
 		//seq.add(des);
 	
+
+		iw::ref<iw::Model> treeModel = Asset->Load<iw::Model>("models/forest/redmaple.gltf");
+		treeModel->GetMesh(0).Material()->SetShader(vct);
+
+		iw::ref<iw::Model> leafModel = Asset->Load<iw::Model>("models/forest/redleaf.gltf");
+		leafModel->GetMesh(0).Material()->SetShader(particleShader);
+		leafModel->GetMesh(0).Material()->SetTexture("shadowMap", sun->ShadowTarget()->Tex(0));
+		leafModel->GetMesh(0).Material()->Set("baseColor", iw::Color(1, 1, 1));
+
+		iw::Entity eeee = Space->CreateEntity<iw::Transform, iw::Model, iw::ParticleSystem<StaticParticle>>();
+
+		                                           eeee.Set<iw::Model>                         (*treeModel);
+		iw::Transform*                      tttt = eeee.Set<iw::Transform>                     (iw::vector3(5, 0, -5), .5f);
+		iw::ParticleSystem<StaticParticle>* ssss = eeee.Set<iw::ParticleSystem<StaticParticle>>();
+
+		ssss->SetTransform(tttt);
+		ssss->SetParticleMesh(leafModel->GetMesh(0));
+		ssss->SetCamera(MainScene->MainCamera());
+
+		iw::vector3* positions = (iw::vector3*)treeModel->GetMesh(0).Data()->Get(bName::POSITION);
+		iw::vector3* normals   = (iw::vector3*)treeModel->GetMesh(0).Data()->Get(bName::NORMAL);
+		iw::Color*   colors    = (iw::Color*)  treeModel->GetMesh(0).Data()->Get(bName::COLOR);
+
+		for (int i = 0; i < treeModel->GetMesh(0).Data()->GetCount(bName::COLOR); i++) {
+			if (colors[i].r > 0.5f) {
+				Transform t;
+				t.Position = positions[i] + randf();
+				t.Rotation = quaternion::from_look_at(t.Position + randf(), t.Position + normals[i], -iw::vector3::unit_y);
+				t.Scale = 1.2f + randf();
+
+				ssss->SpawnParticle(t);
+			}
+		}
+
 		return Layer::Initialize();
 	}
 

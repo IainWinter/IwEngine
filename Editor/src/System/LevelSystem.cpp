@@ -580,6 +580,31 @@ iw::Entity LevelSystem::LoadLevel(
 		sequence.Add<iw::DestroyEntity>(otherGuy, true);
 	}
 
+	else if (currentLevelName == "levels/forest/forest02.json") {
+	iw::Mesh t = Asset->Load<iw::Font>("fonts/Arial.fnt")->GenerateMesh("A lone soldier longs for his king...", .005f, 1);
+	t.SetMaterial(Asset->Load<iw::Material>("materials/Font")->MakeInstance());
+	t.Material()->Set("color", iw::Color(1, 1, 1, 0));
+
+	iw::Entity text = Space->CreateEntity<iw::Transform, iw::Mesh, iw::UiElement>();
+
+	text.Set<iw::Transform>(iw::vector3(0, 0, 2));
+	text.Set<iw::Mesh>(t);
+
+	sequence.Add([&]() {
+		Bus->send<GameStateEvent>(SOFT_PAUSE);
+		return true;
+	});
+	sequence.Add<iw::Delay>(1.0f);
+	sequence.Add<iw::FadeValue<float>>(t.Material()->Get<float>("color") + 3, 1.0f, 0.5f);
+	sequence.Add<iw::Delay>(2.0f);
+	sequence.Add<iw::FadeValue<float>>(t.Material()->Get<float>("color") + 3, 0.0f, 1);
+	sequence.Add<iw::DestroyEntity>(text, true);
+	sequence.Add([&]() {
+		Bus->send<GameStateEvent>(SOFT_RUN);
+		return true;
+	});
+	}
+
 	return level;
 }
 

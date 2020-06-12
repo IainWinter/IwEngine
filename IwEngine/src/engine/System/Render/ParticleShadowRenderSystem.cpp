@@ -24,6 +24,7 @@ namespace Engine {
 
 				if (system->GetParticleMesh().Material()->CastShadows()) {
 					Renderer->BeforeDraw([=]() {
+						psystem->GetParticleMesh().Material()->Use(Renderer->Device);
 						psystem->SetCamera(light->ShadowCamera());
 						psystem->UpdateParticleMesh();
 					});

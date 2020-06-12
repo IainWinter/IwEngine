@@ -9,7 +9,12 @@ layout(location = 4) in mat4 i_modelViewProj;
 
 out vec2 TexCoords;
 
+#include shaders/shadows.vert
+
 void main() {
+	vec4 worldPos = i_model * vec4(vert, 1);
+	SetDirectionalLightPos(worldPos);
+
 	TexCoords = uv;
 	gl_Position = i_modelViewProj * vec4(vert, 1);
 }
@@ -26,7 +31,30 @@ uniform vec4 mat_baseColor;
 uniform float     mat_hasDiffuseMap;
 uniform sampler2D mat_diffuseMap;
 
+uniform float     mat_hasShadowMap;       // take out of material at some point
+uniform sampler2D mat_shadowMap;          // take out of material at some point
+
+#include shaders/shadows.frag
+#include shaders/lights.shader
+
+uniform float ambiance;
+
 void main() {
-	FragColor.rgb = texture(mat_diffuseMap, TexCoords).rgb;
-	FragColor.a = 1;
+	vec4 baseColor = mat_baseColor;
+
+	if (mat_hasDiffuseMap == 1.0f) {
+		baseColor = texture(mat_diffuseMap, TexCoords);
+	}
+
+	if (baseColor.a < 0.5f) {
+		discard;
+	}
+
+	vec3 color = baseColor.rgb * ambiance;
+
+	for (int i = 0; i < lightCounts.y; i++) {
+		color += baseColor.rgb * DirectionalLightShadow(DirectionalLightPos[i]);
+	}
+
+	FragColor = vec4(color, baseColor.a);
 }
