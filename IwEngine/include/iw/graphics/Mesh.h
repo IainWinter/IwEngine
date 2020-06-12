@@ -110,6 +110,8 @@ namespace detail {
 
 		ref<MeshData> m_this;
 
+		std::string m_name;
+
 	public:
 		IWGRAPHICS_API
 		MeshData();
@@ -127,11 +129,9 @@ namespace detail {
 		IWGRAPHICS_API
 		bool IsOutdated() const;
 
-		IWGRAPHICS_API
-		MeshTopology Topology() const;
-
-		//IWGRAPHICS_API       MeshDescription& Description();
+		IWGRAPHICS_API       MeshTopology     Topology()    const;
 		IWGRAPHICS_API const MeshDescription& Description() const;
+		IWGRAPHICS_API const std::string&     Name()        const;
 
 		IWGRAPHICS_API void*       Get     (bName name);
 		IWGRAPHICS_API const void* Get     (bName name) const;
@@ -144,6 +144,10 @@ namespace detail {
 		IWGRAPHICS_API
 		void SetTopology(
 			MeshTopology topology);
+
+		IWGRAPHICS_API
+		void SetName(
+			const std::string& name);
 
 		IWGRAPHICS_API
 		void SetBufferData(
@@ -228,6 +232,10 @@ namespace detail {
 		IWGRAPHICS_API
 		void SetData(
 			ref<MeshData>& data);
+
+		inline bool IsEmpty() const {
+			return !m_data && !m_material;
+		}
 
 		IWGRAPHICS_API void Bind  (const ref<IDevice>& device);       // Binds the mesh for use
 		IWGRAPHICS_API void Unbind(const ref<IDevice>& device);       // Marks mesh as unbound (doesn't change renderer state [for now])

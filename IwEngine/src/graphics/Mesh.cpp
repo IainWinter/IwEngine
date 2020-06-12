@@ -117,12 +117,12 @@ namespace detail {
 		return m_topology;
 	}
 
-	//MeshDescription& MeshData::Description() {
-	//	return m_description;
-	//}
-
 	const MeshDescription& MeshData::Description() const {
 		return m_description;
+	}
+
+	const std::string& MeshData::Name() const {
+		return m_name;
 	}
 
 	void* MeshData::Get(
@@ -193,6 +193,12 @@ namespace detail {
 		MeshTopology topology)
 	{
 		m_topology = topology;
+	}
+
+	void MeshData::SetName(
+		const std::string& name)
+	{
+		m_name = name;
 	}
 
 	// Generate vertex normals by averaging the face normals of the surrounding faces

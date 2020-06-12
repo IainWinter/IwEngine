@@ -302,7 +302,7 @@ namespace Graphics {
 		op->AfterDraw  = m_afterDrawFunc;
 
 		m_beforeDrawFunc = nullptr; // reset for next call
-		m_afterDrawFunc = nullptr; // reset for next call
+		m_afterDrawFunc  = nullptr; // reset for next call
 
 		m_queue.emplace_back(GenOrder(&transform, &mesh), RenderOP::DRAW_MESH, op);
 	}

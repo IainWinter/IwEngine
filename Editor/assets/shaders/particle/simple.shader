@@ -34,10 +34,10 @@ uniform sampler2D mat_diffuseMap;
 uniform float     mat_hasShadowMap;       // take out of material at some point
 uniform sampler2D mat_shadowMap;          // take out of material at some point
 
+uniform float ambiance;
+
 #include shaders/shadows.frag
 #include shaders/lights.shader
-
-uniform float ambiance;
 
 void main() {
 	vec4 baseColor = mat_baseColor;

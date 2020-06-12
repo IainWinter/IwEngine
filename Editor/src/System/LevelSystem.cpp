@@ -35,6 +35,8 @@
 #include "iw/engine/Events/Seq/DestroyEntity.h"
 #include "iw/engine/Components/UiElement_temp.h"
 
+#include "iw/graphics/ParticleSystem.h"
+
 struct OtherGuyTag {
 	int Health = 3;
 };
@@ -81,6 +83,15 @@ LevelSystem::LevelSystem(
 int LevelSystem::Initialize() {
 	Bus->push<ResetLevelEvent>();
 	//Bus->push<GoToNextLevelEvent>(currentLevelName, currentLevel.CameraFollow, currentLevel.InPosition, 0);
+
+	// Leaves
+
+	iw::ref<iw::Shader> particleShader = Asset->Load<iw::Shader>("shaders/particle/simple.shader");
+
+	iw::ref<iw::Model> leafModel = Asset->Load<iw::Model>("models/forest/redleaf.gltf");
+	leafModel->GetMesh(0).Material()->SetShader(particleShader);
+	leafModel->GetMesh(0).Material()->SetTexture("shadowMap", Asset->Load<iw::Texture>("SunShadowMap"));
+	leafModel->GetMesh(0).Material()->Set("baseColor", iw::Color(1, 1, 1));
 
 	return 0;
 }
@@ -273,17 +284,16 @@ iw::Entity LevelSystem::LoadLevel(
 	iw::Transform* levelTransform = nullptr;
 	iw::Entity level;
 
-	int iii = 0;
-
 	for (ModelPrefab& prefab : currentLevel.Models) {
 		iw::ref<iw::Model> model = Asset->Load<iw::Model>(prefab.ModelName);
 
-		for (iw::Mesh& mesh : model->GetMeshes()) {
+		for (int i = 0; i < model->MeshCount(); i++) {
+			iw::Mesh&      mesh      = model->GetMesh(i);
+			iw::Transform& transform = model->GetTransform(i);
+
 			mesh.SetMaterial(mesh.Material()->MakeInstance());
 
-			if (iii == 0 && false) { // ground
-				mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/phong.shader"));
-
+			if (mesh.Data()->Name() != "Tree") { // Ground
 				if (mesh.Data()->Description().HasBuffer(iw::bName::COLOR)) {
 					mesh.Material()->SetTexture("diffuseMap2", Asset->Load<iw::Texture>("textures/dirt/baseColor.jpg"));
 					mesh.Material()->SetTexture("normalMap2", Asset->Load<iw::Texture>("textures/dirt/normal.jpg"));
@@ -291,16 +301,40 @@ iw::Entity LevelSystem::LoadLevel(
 			}
 
 			else {
-				mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/vct/vct.shader"));
+				iw::Entity leaves = Space->CreateEntity<iw::Transform, iw::ParticleSystem<>>();
 
-				if (mesh.Data()->Description().HasBuffer(iw::bName::COLOR)) {
-					mesh.Material()->SetTexture("diffuseMap2", Asset->Load<iw::Texture>("textures/dirt/baseColor.jpg"));
-					mesh.Material()->SetTexture("normalMap2", Asset->Load<iw::Texture>("textures/dirt/normal.jpg"));
+				iw::Transform*        tran = leaves.Set<iw::Transform>(transform);
+				iw::ParticleSystem<>* pSys = leaves.Set<iw::ParticleSystem<>>();
+
+				tran->SetParent(levelTransform);
+				iw::Mesh& leafMesh = Asset->Load<iw::Model>("models/forest/redleaf.gltf")->GetMesh(0);
+
+				pSys->SetTransform(tran);
+				pSys->SetParticleMesh(leafMesh);
+
+				// Spawn leaves on tree
+
+				iw::vector3* positions = (iw::vector3*)mesh.Data()->Get(iw::bName::POSITION);
+				iw::vector3* normals   = (iw::vector3*)mesh.Data()->Get(iw::bName::NORMAL);
+				iw::Color*   colors    = (iw::Color*)  mesh.Data()->Get(iw::bName::COLOR);
+				unsigned     count      = mesh.Data()->GetCount(iw::bName::COLOR);
+
+				for (int i = 0; i < count; i++) {
+					if (colors[i].r > 0.5f) {
+						iw::Transform t;
+						t.Position = iw::randf() + positions[i];
+						t.Scale    = iw::randf() + 1.2f;
+						t.Rotation = iw::quaternion::from_look_at(t.Position + iw::randf(), t.Position + normals[i], -iw::vector3::unit_y);
+
+						pSys->SpawnParticle(t);
+					}
 				}
+
+				pSys->UpdateParticleMesh();
 			}
 
-			iii++;
-			
+			mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/vct/vct.shader"));
+
 			mesh.Material()->SetTexture("shadowMap", Asset->Load<iw::Texture>("SunShadowMap"));
 			//mesh.Material()->SetTexture("shadowMap2", Asset->Load<iw::Texture>("LightShadowMap")); // shouldnt be part of material
 

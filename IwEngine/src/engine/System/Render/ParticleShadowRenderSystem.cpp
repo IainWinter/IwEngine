@@ -20,11 +20,11 @@ namespace Engine {
 
 			for (auto entity : eca) {
 				auto [transform, system] = entity.Components.Tie<Components>();
-				auto psystem = system; // not sure why it lamdas cant use the struct binding :c
+				auto psystem = system; // not sure why lamdas cant use the struct binding :c
 
 				if (system->GetParticleMesh().Material()->CastShadows()) {
 					Renderer->BeforeDraw([=]() {
-						psystem->GetParticleMesh().Material()->Use(Renderer->Device);
+						psystem->GetParticleMesh().Material()->Use(Renderer->Device, light->ParticleShadowShader());
 						psystem->SetCamera(light->ShadowCamera());
 						psystem->UpdateParticleMesh();
 					});

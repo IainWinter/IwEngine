@@ -87,7 +87,7 @@ namespace RenderAPI {
 		/*}*/                                                                              \
                                                                                            \
         if(err) {                                                                          \
-			LOG_WARNING << "Problem setting uniform " << m_name;                           \
+			printErr<gt>(v, count * stride);                                               \
 		}                                                                                  \
 	}                                                                                      \
 
@@ -254,7 +254,7 @@ namespace RenderAPI {
 		GLe(glUniformMatrix2fv(m_location, count, GL_FALSE, (float*)matrix));
 
 		if (err) {
-			LOG_WARNING << "Problem setting uniform " << m_name;
+			LOG_WARNING << "Problem setting uniform " << m_name << "@" << m_location;
 		}
 	}
 
@@ -267,7 +267,7 @@ namespace RenderAPI {
 		GLe(glUniformMatrix3fv(m_location, count, GL_FALSE, (float*)matrix));
 
 		if (err) {
-			LOG_WARNING << "Problem setting uniform " << m_name;
+			LOG_WARNING << "Problem setting uniform " << m_name << "@" << m_location;
 		}
 	}
 
@@ -280,7 +280,7 @@ namespace RenderAPI {
 		GLe(glUniformMatrix4fv(m_location, count, GL_FALSE, (float*)matrix));
 
 		if (err) {
-			LOG_WARNING << "Problem setting uniform " << m_name;
+			LOG_WARNING << "Problem setting uniform " << m_name << "@" << m_location;
 		}
 	}
 

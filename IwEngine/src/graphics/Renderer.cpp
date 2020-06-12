@@ -326,17 +326,17 @@ namespace Graphics {
 		else if (m_meshData != mesh->Data()) {
 			m_meshData = mesh->Data();
 
-			if (!m_meshData->IsInitialized()) {
-				m_meshData->Initialize(Device);
-			}
-
-			if (m_meshData->IsOutdated()) {
-				m_meshData->Update(Device);
-			}
-
 			if (m_meshData) {
 				mesh->Bind(Device);
 			}
+		}
+
+		if (!m_meshData->IsInitialized()) {
+			m_meshData->Initialize(Device);
+		}
+
+		if (m_meshData->IsOutdated()) {
+			m_meshData->Update(Device);
 		}
 	}
 

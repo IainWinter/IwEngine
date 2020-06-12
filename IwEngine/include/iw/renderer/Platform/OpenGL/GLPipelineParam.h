@@ -110,6 +110,28 @@ namespace RenderAPI {
 			const ITexture* texture,
 			int index,
 			unsigned mipmap) override;
+	private:
+		template<
+			typename _t>
+		void printErr(
+			const _t* t,
+			unsigned count)
+		{
+			std::stringstream ss;
+
+			ss << "(";
+
+			for (int i = 0; i < count; i++) {
+				ss << t[i];
+				if (i != count - 1) {
+					ss << ", ";
+				}
+			}
+
+			ss << ")";
+
+			LOG_WARNING << "Problem setting uniform " << m_name << "@" << m_location << " = " << ss.str();
+		}
 	};
 }
 

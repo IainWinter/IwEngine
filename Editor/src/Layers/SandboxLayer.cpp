@@ -311,7 +311,7 @@ namespace iw {
 
 		PushSystem<iw::    MeshShadowRenderSystem>(MainScene);
 		PushSystem<iw::   ModelShadowRenderSystem>(MainScene);
-		PushSystem<iw::ParticleShadowRenderSystem>(MainScene);
+		//PushSystem<iw::ParticleShadowRenderSystem>(MainScene);
 		PushSystem<iw::          MeshRenderSystem>(MainScene);
 		PushSystem<iw::         ModelRenderSystem>(MainScene);
 		PushSystem<iw::      ParticleRenderSystem>(MainScene);
@@ -391,38 +391,40 @@ namespace iw {
 		//seq.add(des);
 	
 
-		iw::ref<iw::Model> treeModel = Asset->Load<iw::Model>("models/forest/redmaple.gltf");
-		treeModel->GetMesh(0).Material()->SetShader(vct);
+		//iw::ref<iw::Model> treeModel = Asset->Load<iw::Model>("models/forest/redmaple.gltf");
+		//treeModel->GetMesh(0).Material()->SetShader(vct);
 
-		iw::ref<iw::Model> leafModel = Asset->Load<iw::Model>("models/forest/redleaf.gltf");
-		leafModel->GetMesh(0).Material()->SetShader(particleShader);
-		leafModel->GetMesh(0).Material()->SetTexture("shadowMap", sun->ShadowTarget()->Tex(0));
-		leafModel->GetMesh(0).Material()->Set("baseColor", iw::Color(1, 1, 1));
+		//iw::ref<iw::Model> leafModel = Asset->Load<iw::Model>("models/forest/redleaf.gltf");
+		//leafModel->GetMesh(0).Material()->SetShader(particleShader);
+		//leafModel->GetMesh(0).Material()->SetTexture("shadowMap", sun->ShadowTarget()->Tex(0));
+		//leafModel->GetMesh(0).Material()->Set("baseColor", iw::Color(1, 1, 1));
 
-		iw::Entity eeee = Space->CreateEntity<iw::Transform, iw::Model, iw::ParticleSystem<StaticParticle>>();
+		//iw::Entity leaves = Space->CreateEntity<iw::Transform, iw::Model, iw::ParticleSystem<StaticParticle>>();
 
-		                                           eeee.Set<iw::Model>                         (*treeModel);
-		iw::Transform*                      tttt = eeee.Set<iw::Transform>                     (iw::vector3(5, 0, -5), .5f);
-		iw::ParticleSystem<StaticParticle>* ssss = eeee.Set<iw::ParticleSystem<StaticParticle>>();
+		//                                           leaves.Set<iw::Model>                         (*treeModel);
+		//iw::Transform*                      tran = leaves.Set<iw::Transform>                     (iw::vector3(-5, 0, -5), .5f);
+		//iw::ParticleSystem<StaticParticle>* pSys = leaves.Set<iw::ParticleSystem<StaticParticle>>();
 
-		ssss->SetTransform(tttt);
-		ssss->SetParticleMesh(leafModel->GetMesh(0));
-		ssss->SetCamera(MainScene->MainCamera());
+		//pSys->SetTransform(tran);
+		//pSys->SetParticleMesh(leafModel->GetMesh(0));
+		//pSys->SetCamera(MainScene->MainCamera());
 
-		iw::vector3* positions = (iw::vector3*)treeModel->GetMesh(0).Data()->Get(bName::POSITION);
-		iw::vector3* normals   = (iw::vector3*)treeModel->GetMesh(0).Data()->Get(bName::NORMAL);
-		iw::Color*   colors    = (iw::Color*)  treeModel->GetMesh(0).Data()->Get(bName::COLOR);
+		//// Spawn leaves on tree
 
-		for (int i = 0; i < treeModel->GetMesh(0).Data()->GetCount(bName::COLOR); i++) {
-			if (colors[i].r > 0.5f) {
-				Transform t;
-				t.Position = positions[i] + randf();
-				t.Rotation = quaternion::from_look_at(t.Position + randf(), t.Position + normals[i], -iw::vector3::unit_y);
-				t.Scale = 1.2f + randf();
+		//iw::vector3* positions = (iw::vector3*)treeModel->GetMesh(0).Data()->Get(bName::POSITION);
+		//iw::vector3* normals   = (iw::vector3*)treeModel->GetMesh(0).Data()->Get(bName::NORMAL);
+		//iw::Color*   colors    = (iw::Color*)  treeModel->GetMesh(0).Data()->Get(bName::COLOR);
 
-				ssss->SpawnParticle(t);
-			}
-		}
+		//for (int i = 0; i < treeModel->GetMesh(0).Data()->GetCount(bName::COLOR); i++) {
+		//	if (colors[i].r > 0.5f) {
+		//		Transform t;
+		//		t.Position = positions[i] + randf();
+		//		t.Rotation = quaternion::from_look_at(t.Position + randf(), t.Position + normals[i], -iw::vector3::unit_y);
+		//		t.Scale = 1.2f + randf();
+
+		//		pSys->SpawnParticle(t);
+		//	}
+		//}
 
 		return Layer::Initialize();
 	}

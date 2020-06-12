@@ -235,6 +235,8 @@ namespace Graphics {
 			data->SetIndexData(indexCount, indices);
 			delete[] indices;
 
+			data->SetName(aimesh->mName.C_Str());
+
 			Mesh mesh = data->MakeInstance();
 			mesh.SetMaterial(materials.at(aimesh->mMaterialIndex));
 

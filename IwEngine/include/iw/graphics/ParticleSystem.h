@@ -137,7 +137,12 @@ namespace Graphics {
 
 				for (const particle_t& p : m_spawn) {
 					m_particles.push_back(p);
-					m_particles.back().Transform.SetParent(m_transform);
+				}
+
+				// Set parents after to not screw up child list in parent from stack dealloc
+
+				for (unsigned i = 1; i <= m_spawn.size(); i++) {
+					m_particles[m_particles.size() - i].Transform.SetParent(m_transform);
 				}
 
 				m_delete.clear();
@@ -156,6 +161,8 @@ namespace Graphics {
 				}
 
 				m_mesh.Data()->SetBufferData(bName::UV1, count, models);
+
+				LOG_INFO << "Updating particles";
 
 				if (m_camera) {
 					for (unsigned i = 0; i < count; i++) {

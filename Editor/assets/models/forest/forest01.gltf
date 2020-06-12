@@ -950,20 +950,24 @@
                 0,
                 0
             ],
-            "name" : "Forest_Tree",
+            "name" : "Tree",
+            "normalTexture" : {
+                "index" : 2,
+                "texCoord" : 0
+            },
             "pbrMetallicRoughness" : {
                 "baseColorTexture" : {
-                    "index" : 2,
+                    "index" : 3,
                     "texCoord" : 0
                 },
                 "metallicFactor" : 0,
-                "roughnessFactor" : 0.5
+                "roughnessFactor" : 0
             }
         }
     ],
     "meshes" : [
         {
-            "name" : "Plane.006",
+            "name" : "Ground.001",
             "primitives" : [
                 {
                     "attributes" : {
@@ -978,7 +982,7 @@
             ]
         },
         {
-            "name" : "Cone.001",
+            "name" : "Tree",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1002,6 +1006,9 @@
         },
         {
             "source" : 2
+        },
+        {
+            "source" : 3
         }
     ],
     "images" : [
@@ -1016,9 +1023,14 @@
             "uri" : "textures/grass/baseColor.jpg"
         },
         {
-            "mimeType" : "image/png",
-            "name" : "simpletree",
-            "uri" : "textures/simpletree.png"
+            "mimeType" : "image/jpeg",
+            "name" : "normal",
+            "uri" : "textures/tree/normal.jpg"
+        },
+        {
+            "mimeType" : "image/jpeg",
+            "name" : "baseColor",
+            "uri" : "textures/tree/baseColor.jpg"
         }
     ],
     "accessors" : [
@@ -1065,41 +1077,41 @@
         {
             "bufferView" : 5,
             "componentType" : 5126,
-            "count" : 540,
+            "count" : 3221,
             "max" : [
-                1.9999959468841553,
-                1.9999979734420776,
-                -1.2006299812128418e-06
+                4.369690418243408,
+                5.5018110275268555,
+                0.02628648281097412
             ],
             "min" : [
-                -2.0000040531158447,
-                -1.9999979734420776,
-                -16
+                -3.5405704975128174,
+                -4.906742095947266,
+                -21.52495765686035
             ],
             "type" : "VEC3"
         },
         {
             "bufferView" : 6,
             "componentType" : 5126,
-            "count" : 540,
+            "count" : 3221,
             "type" : "VEC3"
         },
         {
             "bufferView" : 7,
             "componentType" : 5126,
-            "count" : 540,
+            "count" : 3221,
             "type" : "VEC2"
         },
         {
             "bufferView" : 8,
             "componentType" : 5126,
-            "count" : 540,
+            "count" : 3221,
             "type" : "VEC4"
         },
         {
             "bufferView" : 9,
             "componentType" : 5123,
-            "count" : 570,
+            "count" : 6810,
             "type" : "SCALAR"
         }
     ],
@@ -1131,33 +1143,33 @@
         },
         {
             "buffer" : 0,
-            "byteLength" : 6480,
+            "byteLength" : 38652,
             "byteOffset" : 216912
         },
         {
             "buffer" : 0,
-            "byteLength" : 6480,
-            "byteOffset" : 223392
+            "byteLength" : 38652,
+            "byteOffset" : 255564
         },
         {
             "buffer" : 0,
-            "byteLength" : 4320,
-            "byteOffset" : 229872
+            "byteLength" : 25768,
+            "byteOffset" : 294216
         },
         {
             "buffer" : 0,
-            "byteLength" : 8640,
-            "byteOffset" : 234192
+            "byteLength" : 51536,
+            "byteOffset" : 319984
         },
         {
             "buffer" : 0,
-            "byteLength" : 1140,
-            "byteOffset" : 242832
+            "byteLength" : 13620,
+            "byteOffset" : 371520
         }
     ],
     "buffers" : [
         {
-            "byteLength" : 243972,
+            "byteLength" : 385140,
             "uri" : "forest01.bin"
         }
     ]
