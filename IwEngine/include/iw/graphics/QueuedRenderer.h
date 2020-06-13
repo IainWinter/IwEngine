@@ -13,7 +13,8 @@ namespace Graphics {
 	{
 	private:
 		using key = uint64_t;
-		using setup_draw_func = std::function<void()>;
+		using setup_draw_func  = std::function<void()>;
+		using setup_scene_func = setup_draw_func; // the same rn might be different but probs not
 
 		enum class Bits {
 			DEPTH        = 8 * sizeof(key) - 64, // 0000000000000000000000000000000000000000xxxxxxxxxxxxxxxxxxxxxxxx
@@ -49,12 +50,24 @@ namespace Graphics {
 			Camera* Camera;
 			ref<RenderTarget> Target;
 			bool Clear;
+
+			setup_draw_func BeforeScene;
+		};
+
+		struct EndSceneOP {
+			setup_draw_func AfterScene;
 		};
 
 		struct BeginShadowOP {
 			Light* Light;
 			bool UseParticleShader;
 			bool Clear;
+
+			setup_draw_func BeforeScene;
+		};
+
+		struct EndShadowOP {
+			setup_draw_func AfterScene;
 		};
 
 		struct DrawMeshOP {
@@ -114,6 +127,9 @@ namespace Graphics {
 		setup_draw_func m_beforeDrawFunc; // gets set by 'BeforeDraw' and consumed by 'DrawMesh'
 		setup_draw_func m_afterDrawFunc;  // gets set by 'AfterDraw'  and consumed by 'DrawMesh'
 
+		setup_scene_func m_beforeSceneFunc; // gets set by 'BeforeScene' and consumed by 'BeginScene' or 'BeginShadowCast'
+		setup_scene_func m_afterSceneFunc;  // gets set by 'AfterScene'  and consumed by 'EndScene'   or 'EndShadowCast'
+
 	public:
 		IWGRAPHICS_API
 		QueuedRenderer(
@@ -164,6 +180,18 @@ namespace Graphics {
 		// marks end of shadow cast, subsequent calls to SubmitMesh will be invalid
 		IWGRAPHICS_API
 		void EndShadowCast() override;
+
+		// Set a function to run before a scene starts,
+		//	this is useful for settings that apply to all the draw calls. ie depth testing
+		IWGRAPHICS_API
+		void BeforeScene(
+			const setup_scene_func& func);
+
+		// Set a function to run after a scene ends,
+		//	this is useful when settings need to be reset
+		IWGRAPHICS_API
+		void AfterScene(
+			const setup_scene_func& func);
 
 		// Set a function to run before a mesh gets drawn,
 		//	this is useful when a mesh needs to be updated in different ways for seperate draw calls

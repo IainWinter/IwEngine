@@ -1,4 +1,5 @@
 #include "iw/engine/Systems/Render/UiRenderSystem.h"
+#include "gl/glew.h"
 
 namespace iw {
 namespace Engine {
@@ -13,11 +14,19 @@ namespace Engine {
 	{
 		Renderer->BeginScene(m_camera);
 		
+		Renderer->BeforeScene([&]() {
+			glDisable(GL_DEPTH_TEST);
+		});
+
 		for (auto entity : eca) {
 			auto [transform, mesh, element] = entity.Components.Tie<Components>();
 			Renderer->DrawMesh(transform, mesh);
 		}
-			
+		
+		Renderer->AfterScene([&]() {
+			glEnable(GL_DEPTH_TEST);
+		});
+
 		Renderer->EndScene(); 
 	}
 }

@@ -112,6 +112,11 @@ namespace Graphics {
 				case RenderOP::BEGIN_SCENE: {
 					BeginSceneOP* scene = (BeginSceneOP*)item.Data;
 
+
+					if (scene->BeforeScene) {
+						scene->BeforeScene();
+					}
+
 					if (scene->Scene) {
 						Renderer::BeginScene(scene->Scene, scene->Target, scene->Clear);
 					}
@@ -123,17 +128,36 @@ namespace Graphics {
 					break;
 				}
 				case RenderOP::END_SCENE: {
+					EndSceneOP* scene = (EndSceneOP*)item.Data;
+
 					Renderer::EndScene();
+
+					if (scene->AfterScene) {
+						scene->AfterScene();
+					}
+
 					break;
 				}
 				case RenderOP::BEGIN_SHADOW: {
 					BeginShadowOP* shadow = (BeginShadowOP*)item.Data;
 
+					if (shadow->BeforeScene) {
+						shadow->BeforeScene();
+					}
+
 					Renderer::BeginShadowCast(shadow->Light, shadow->UseParticleShader, shadow->Clear);
+
 					break;					 
 				}							 
 				case RenderOP::END_SHADOW: {
+					EndShadowOP* shadow = (EndShadowOP*)item.Data;
+
 					Renderer::EndShadowCast();
+
+					if (shadow->AfterScene) {
+						shadow->AfterScene();
+					}
+
 					break;				
 				}						
 				case RenderOP::DRAW_MESH: {
@@ -217,6 +241,9 @@ namespace Graphics {
 		op->Camera = nullptr;
 		op->Target = target;
 		op->Clear  = clear;
+		op->BeforeScene = m_beforeSceneFunc;
+
+		m_beforeSceneFunc = nullptr; // reset for next call
 
 		m_queue.emplace_back(GenOrder(), RenderOP::BEGIN_SCENE, op);
 	}
@@ -235,6 +262,9 @@ namespace Graphics {
 		op->Light = light;
 		op->UseParticleShader = useParticleShader;
 		op->Clear = clear;
+		op->BeforeScene = m_beforeSceneFunc;
+
+		m_beforeSceneFunc = nullptr; // reset for next call
 
 		m_queue.emplace_back(GenOrder(), RenderOP::BEGIN_SHADOW, op);
 	}
@@ -244,7 +274,12 @@ namespace Graphics {
 		m_material     = 0;
 		m_transparency = 0;
 		
-		m_queue.emplace_back(GenOrder(), RenderOP::END_SCENE, nullptr);
+		EndSceneOP* op = m_pool.alloc<EndSceneOP>();
+		op->AfterScene = m_afterSceneFunc;
+
+		m_afterSceneFunc = nullptr; // reset for next call
+
+		m_queue.emplace_back(GenOrder(), RenderOP::END_SCENE, op);
 	}
 
 	void QueuedRenderer::EndShadowCast() {
@@ -252,7 +287,24 @@ namespace Graphics {
 		m_material     = 0;
 		m_transparency = 0;
 		
-		m_queue.emplace_back(GenOrder(), RenderOP::END_SHADOW, nullptr);
+		EndShadowOP* op = m_pool.alloc<EndShadowOP>();
+		op->AfterScene = m_afterSceneFunc;
+
+		m_afterSceneFunc = nullptr; // reset for next call
+
+		m_queue.emplace_back(GenOrder(), RenderOP::END_SHADOW, op);
+	}
+
+	void QueuedRenderer::BeforeScene(
+		const setup_scene_func& func)
+	{
+		m_beforeSceneFunc = func;
+	}
+
+	void QueuedRenderer::AfterScene(
+		const setup_scene_func& func)
+	{
+		m_afterSceneFunc = func;
 	}
 
 	void QueuedRenderer::BeforeDraw(
