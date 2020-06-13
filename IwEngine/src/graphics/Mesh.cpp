@@ -177,6 +177,25 @@ namespace detail {
 		m_outdated = true;
 	}
 
+	void MeshData::SetBufferDataPtr(
+		bName name,
+		unsigned count,
+		void* ptr)
+	{
+		if (!m_description.HasBuffer(name)) {
+			return;
+		}
+
+		unsigned index = m_description.GetBufferIndex(name);
+
+		BufferData& buffer = m_buffers[index];
+
+		buffer.Count = count;
+		buffer.Data = ref<char[]>((char*)ptr);
+
+		m_outdated = true;
+	}
+
 	void MeshData::SetIndexData(
 		unsigned count,
 		unsigned* data)

@@ -301,10 +301,10 @@ iw::Entity LevelSystem::LoadLevel(
 			}
 
 			else {
-				iw::Entity leaves = Space->CreateEntity<iw::Transform, iw::ParticleSystem<>>();
+				iw::Entity leaves = Space->CreateEntity<iw::Transform, iw::ParticleSystem<iw::StaticParticle>>();
 
-				iw::Transform*        tran = leaves.Set<iw::Transform>(transform);
-				iw::ParticleSystem<>* pSys = leaves.Set<iw::ParticleSystem<>>();
+				iw::Transform*                          tran = leaves.Set<iw::Transform>(transform);
+				iw::ParticleSystem<iw::StaticParticle>* pSys = leaves.Set<iw::ParticleSystem<iw::StaticParticle>>();
 
 				tran->SetParent(levelTransform);
 				iw::Mesh& leafMesh = Asset->Load<iw::Model>("models/forest/redleaf.gltf")->GetMesh(0);
@@ -329,8 +329,6 @@ iw::Entity LevelSystem::LoadLevel(
 						pSys->SpawnParticle(t);
 					}
 				}
-
-				pSys->UpdateParticleMesh();
 			}
 
 			mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/vct/vct.shader"));

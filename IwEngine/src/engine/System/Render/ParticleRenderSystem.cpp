@@ -18,14 +18,13 @@ namespace Engine {
 			auto psystem = system;
 
 			Renderer->BeforeDraw([=]() {
-				psystem->SetCamera(m_scene->MainCamera());
 				psystem->UpdateParticleMesh();
 			});
 
 			Renderer->DrawMesh(transform, &system->GetParticleMesh());
 		}
 			
-		Renderer->EndScene(); 
+		Renderer->EndScene();
 	}
 }
 }

@@ -5,10 +5,10 @@ layout(location = 0) in vec3 vert;
 layout(location = 1) in vec3 normal;
 layout(location = 2) in vec2 uv;
 layout(location = 3) in mat4 i_model;
-layout(location = 4) in mat4 i_modelViewProj;
 
 out vec2 TexCoords;
 
+#include shaders/camera.shader
 #include shaders/shadows.vert
 
 void main() {
@@ -16,7 +16,7 @@ void main() {
 	SetDirectionalLightPos(worldPos);
 
 	TexCoords = uv;
-	gl_Position = i_modelViewProj * vec4(vert, 1);
+	gl_Position = viewProj * worldPos;
 }
 
 #shader Fragment

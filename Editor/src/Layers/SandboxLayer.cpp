@@ -147,7 +147,7 @@ namespace iw {
 		Renderer->InitShader(gaussian, CAMERA);
 		Renderer->InitShader(dirShadowShader,  CAMERA);
 		//Renderer->InitShader(pointShadowShader);
-		Renderer->InitShader(dirIShadowShader);
+		Renderer->InitShader(dirIShadowShader, CAMERA);
 		//Renderer->InitShader(pointIShadowShader);
 		
 		Renderer->SetShader(vct);
@@ -311,7 +311,7 @@ namespace iw {
 
 		PushSystem<iw::    MeshShadowRenderSystem>(MainScene);
 		PushSystem<iw::   ModelShadowRenderSystem>(MainScene);
-		//PushSystem<iw::ParticleShadowRenderSystem>(MainScene);
+		PushSystem<iw::ParticleShadowRenderSystem>(MainScene);
 		PushSystem<iw::          MeshRenderSystem>(MainScene);
 		PushSystem<iw::         ModelRenderSystem>(MainScene);
 		PushSystem<iw::      ParticleRenderSystem>(MainScene);
@@ -325,7 +325,7 @@ namespace iw {
 		// Particle test
 
 		ref<Shader> particleShader = Asset->Load<Shader>("shaders/particle/simple.shader");
-		Renderer->InitShader(particleShader, SHADOWS | LIGHTS /*| CAMERA*/);
+		Renderer->InitShader(particleShader, SHADOWS | LIGHTS | CAMERA);
 
 		//iw::Material particleMaterial(particleShader);
 		//particleMaterial.Set("baseColorMap", Color::From255(0, 60, 10));

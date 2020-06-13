@@ -3,13 +3,15 @@
 
 layout(location = 0) in vec3 vert;
 layout(location = 2) in vec2 uv;
-layout(location = 4) in mat4 i_modelViewProj;
+layout(location = 3) in mat4 i_model;
 
 out vec2 TexCoords;
 
+#include shaders/camera.shader
+
 void main() {
 	TexCoords = uv;
-	gl_Position = i_modelViewProj * vec4(vert, 1);
+	gl_Position = viewProj * i_model * vec4(vert, 1);
 }
 
 #shader Fragment

@@ -156,6 +156,12 @@ namespace detail {
 			void* data);
 
 		IWGRAPHICS_API
+		void SetBufferDataPtr(
+			bName name,
+			unsigned count,
+			void* ptr);
+
+		IWGRAPHICS_API
 		void SetIndexData(
 			unsigned count,
 			unsigned* data);

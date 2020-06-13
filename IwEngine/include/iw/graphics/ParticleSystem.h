@@ -2,6 +2,7 @@
 
 #include "Mesh.h"
 #include "MeshFactory.h"
+#include "iw/util/memory/linear_allocator.h"
 #include <vector>
 #include <functional>
 
@@ -48,7 +49,7 @@ namespace Graphics {
 		_p m_prefab;
 
 		Transform* m_transform;
-		const Camera* m_camera; // for optimization
+		linear_allocator m_alloc;
 
 	public:
 		ParticleSystem() {
@@ -59,7 +60,6 @@ namespace Graphics {
 			};
 
 			m_transform = nullptr;
-			m_camera = nullptr;
 
 			srand(6783542);
 		}
@@ -78,13 +78,6 @@ namespace Graphics {
 			m_transform = transform;
 		}
 
-		void SetCamera(
-			const Camera* camera) // for optimization
-		{
-			m_needsToUpdateBuffer |= m_camera != camera;
-			m_camera = camera;
-		}
-
 		void SetParticleMesh(
 			const Mesh& mesh)
 		{
@@ -96,17 +89,10 @@ namespace Graphics {
 			instanceM.Push<float>(4);
 			instanceM.Push<float>(4);
 
-			VertexBufferLayout instanceMVP(1);
-			instanceMVP.Push<float>(4);
-			instanceMVP.Push<float>(4);
-			instanceMVP.Push<float>(4);
-			instanceMVP.Push<float>(4);
-
 			description.DescribeBuffer(bName::POSITION, MakeLayout<float>(3));
 			description.DescribeBuffer(bName::NORMAL,   MakeLayout<float>(3));
 			description.DescribeBuffer(bName::UV,       MakeLayout<float>(2));
 			description.DescribeBuffer(bName::UV1, instanceM);
-			description.DescribeBuffer(bName::UV2, instanceMVP);
 
 			mesh.Data()->ConformMeshData(description);
 
@@ -126,9 +112,7 @@ namespace Graphics {
 		}
 
 		void UpdateParticleMesh() {
-			if (    m_needsToUpdateBuffer
-				|| m_camera->Outdated())
-			{
+			if (m_needsToUpdateBuffer) {
 				m_needsToUpdateBuffer = false;
 
 				for (unsigned i : m_delete) {
@@ -145,34 +129,28 @@ namespace Graphics {
 					m_particles[m_particles.size() - i].Transform.SetParent(m_transform);
 				}
 
-				m_delete.clear();
-				m_spawn.clear();
-
 				unsigned count = m_particles.size();
+
+				if (    m_delete.size() != 0
+					|| m_spawn .size() != 0)
+				{
+					m_alloc.resize(count * sizeof(matrix4));
+				}
+
+				m_delete.clear();
+				m_spawn .clear();
 
 				if (count == 0) {
 					return;
 				}
 
-				matrix4* models = new matrix4[count];
+				matrix4* models = m_alloc.alloc<matrix4>(count);
 
 				for (unsigned i = 0; i < count; i++) {
 					models[i] = m_particles[i].Transform.WorldTransformation();
 				}
 
-				m_mesh.Data()->SetBufferData(bName::UV1, count, models);
-
-				LOG_INFO << "Updating particles";
-
-				if (m_camera) {
-					for (unsigned i = 0; i < count; i++) {
-						models[i] *= m_camera->ViewProjection();
-					}
-				}
-
-				m_mesh.Data()->SetBufferData(bName::UV2, count, models);
-
-				delete[] models;
+				m_mesh.Data()->SetBufferDataPtr(bName::UV1, count, models);
 			}
 		}
 
