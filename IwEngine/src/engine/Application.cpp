@@ -35,6 +35,7 @@ namespace Engine {
 		Console  = REF<iw::Console>(iw::make_getback(&Application::HandleCommand, this));
 		Physics  = REF<DynamicsSpace>();
 		Audio    = REF<AudioSpaceRaw>("assets/sounds/");
+		Task     = REF<thread_pool>(std::thread::hardware_concurrency());
 
 		PushOverlay<DebugLayer>();
 	}
@@ -124,6 +125,17 @@ namespace Engine {
 		Time::UpdateTime();
 		Time::SetFixedTime(1 / 50.0f);
 
+
+		// Thread pool test
+
+		Task->init();
+
+		for (int i = 0; i < 100; i++) {
+			Task->queue([&]() {
+				LOG_INFO << "Queue item";
+			});
+		}
+
 		return 0;
 	}
 
@@ -191,8 +203,6 @@ namespace Engine {
 		int layerNumber = 0;
 
 		for (Layer* layer : m_layers) {
-			float start = iw::DeltaTimeNow();
-
 			Renderer->SetLayer(layerNumber);
 			layer->PreUpdate();
 		}
@@ -258,16 +268,16 @@ namespace Engine {
 			ImGui::Text("Delta time %f",        iw::Time::DeltaTime());
 			ImGui::Text("Delta time scaled %f", iw::Time::DeltaTimeScaled());
 			
-			ImGui::Text("Renderer took %4.4f ms", renderTime  * 1000/*/ (iw::Time::Ticks() - ticks)*/);
-			ImGui::Text("Physics  took %4.4f ms", physicsTime * 1000/*/ (iw::Time::Ticks() - ticks)*/);
-			ImGui::Text("Eventbus took %4.4f ms", eventTime   * 1000/*/ (iw::Time::Ticks() - ticks)*/);
+			ImGui::Text("Renderer took %4.4f ms", renderTime  * 1000);
+			ImGui::Text("Physics  took %4.4f ms", physicsTime * 1000);
+			ImGui::Text("Eventbus took %4.4f ms", eventTime   * 1000);
 
 			for (Layer* layer : m_layers) {
-				ImGui::Text("%4.4f ms - %s layer",   post_update_times[layer->Name()] * 1000/*/ (iw::Time::Ticks() - ticks)*/, layer->Name());
-				ImGui::Text("%4.4f ms - %s systems", update_times     [layer->Name()] * 1000/*/ (iw::Time::Ticks() - ticks)*/, layer->Name());
+				ImGui::Text("%4.4f ms - %s layer",   post_update_times[layer->Name()] * 1000, layer->Name());
+				ImGui::Text("%4.4f ms - %s systems", update_times     [layer->Name()] * 1000, layer->Name());
 
 				for (ISystem* system : layer->temp_GetSystems()) {
-					ImGui::Text("\t%4.4f ms - %s system", system_update_times[layer->Name()][system->Name()] * 1000/*/ (iw::Time::Ticks() - ticks)*/, system->Name());
+					ImGui::Text("\t%4.4f ms - %s system", system_update_times[layer->Name()][system->Name()] * 1000, system->Name());
 				}
 			}
 			ImGui::End();

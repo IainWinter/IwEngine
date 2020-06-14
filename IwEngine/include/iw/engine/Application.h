@@ -8,9 +8,7 @@
 #include "InitOptions.h"
 #include "Layers/ImGuiLayer.h"
 #include "iw/input/InputManager.h"
-#include "iw/util/queue/blocking_queue.h"
-#include <vector>
-#include <thread>
+#include "iw/util/thread/thread_pool.h"
 
 namespace iw {
 namespace Engine {
@@ -33,6 +31,7 @@ namespace Engine {
 		ref<DynamicsSpace>  Physics;
 		ref<AudioSpace>     Audio;
 		ref<eventbus>       Bus;
+		ref<thread_pool>    Task;
 
 	public:
 		IWENGINE_API
