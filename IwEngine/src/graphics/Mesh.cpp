@@ -17,8 +17,7 @@ namespace detail {
 
 	MeshDescription::MeshDescription()
 		: m_hasInstancedBuffer(false)
-	{
-	}
+	{}
 
 	void MeshDescription::DescribeBuffer(
 		bName name,
@@ -29,6 +28,26 @@ namespace detail {
 
 		if (layout.GetInstanceStride() > 0) {
 			m_hasInstancedBuffer = true;
+		}
+	}
+
+	void MeshDescription::RemoveBuffer(
+		bName name)
+	{
+		if (!HasBuffer(name)) {
+			LOG_WARNING << "Tried to remove buffer that does not exist in description! " << (int)name;
+			return;
+		}
+
+		unsigned index = m_map.at(name);
+		m_map.erase(name);
+
+		m_layouts.erase(m_layouts.begin() + index);
+
+		for (auto& kv : m_map) {
+			if (kv.second > index) {
+				kv.second--;
+			}
 		}
 	}
 
@@ -103,6 +122,44 @@ namespace detail {
 
 	Mesh MeshData::MakeInstance() {
 		return Mesh(m_this);
+	}
+
+	ref<MeshData> MeshData::MakeLink() {
+		return MakeCopy(m_description, true);
+	}
+
+	ref<MeshData> MeshData::MakeCopy(
+		const MeshDescription& links,
+		bool linkIndex)
+	{
+		MeshData* data = new MeshData(m_description);
+		data->m_topology = m_topology;
+		data->m_name = m_name;
+
+		for (bName name : m_description.GetBufferNames()) {
+			unsigned index = m_description.GetBufferIndex(name); // both have same desc -> same index
+
+			BufferData& buffer = data->GetBuffer(index);
+			BufferData& other  =       GetBuffer(index);
+
+			if (links.HasBuffer(name)) {
+				buffer = other;
+			}
+
+			else {
+				data->SetBufferData(name, other.Count, other.Ptr());
+			}
+		}
+
+		if (linkIndex) {
+			data->m_index = m_index;
+		}
+
+		else {
+			data->SetIndexData(m_index.Count, m_index.Ptr());
+		}
+
+		return data->m_this;
 	}
 
 	bool MeshData::IsInitialized() const {

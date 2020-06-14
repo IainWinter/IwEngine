@@ -92,6 +92,7 @@ int LevelSystem::Initialize() {
 	leafModel->GetMesh(0).Material()->SetShader(particleShader);
 	leafModel->GetMesh(0).Material()->SetTexture("shadowMap", Asset->Load<iw::Texture>("SunShadowMap"));
 	leafModel->GetMesh(0).Material()->Set("baseColor", iw::Color(1, 1, 1));
+	leafModel->GetMesh(0).Material()->Initialize(Renderer->Device);
 
 	return 0;
 }
@@ -287,6 +288,18 @@ iw::Entity LevelSystem::LoadLevel(
 	for (ModelPrefab& prefab : currentLevel.Models) {
 		iw::ref<iw::Model> model = Asset->Load<iw::Model>(prefab.ModelName);
 
+		iw::Entity entity = Space->CreateEntity<iw::Transform, iw::Model>();
+		iw::Transform* t = entity.Set<iw::Transform>(prefab.Transform);
+		
+		if (levelTransform) {
+			levelTransform->AddChild(t);
+		}
+
+		else {
+			levelTransform = t;
+			level = entity;
+		}
+
 		for (int i = 0; i < model->MeshCount(); i++) {
 			iw::Mesh&      mesh      = model->GetMesh(i);
 			iw::Transform& transform = model->GetTransform(i);
@@ -307,7 +320,9 @@ iw::Entity LevelSystem::LoadLevel(
 				iw::ParticleSystem<iw::StaticParticle>* pSys = leaves.Set<iw::ParticleSystem<iw::StaticParticle>>();
 
 				tran->SetParent(levelTransform);
-				iw::Mesh& leafMesh = Asset->Load<iw::Model>("models/forest/redleaf.gltf")->GetMesh(0);
+				iw::Mesh leafMesh = Asset->Load<iw::Model>("models/forest/redleaf.gltf")->GetMesh(0);
+
+				leafMesh.SetData(leafMesh.Data()->MakeLink());
 
 				pSys->SetTransform(tran);
 				pSys->SetParticleMesh(leafMesh);
@@ -317,7 +332,7 @@ iw::Entity LevelSystem::LoadLevel(
 				iw::vector3* positions = (iw::vector3*)mesh.Data()->Get(iw::bName::POSITION);
 				iw::vector3* normals   = (iw::vector3*)mesh.Data()->Get(iw::bName::NORMAL);
 				iw::Color*   colors    = (iw::Color*)  mesh.Data()->Get(iw::bName::COLOR);
-				unsigned     count      = mesh.Data()->GetCount(iw::bName::COLOR);
+				unsigned     count     = mesh.Data()->GetCount(iw::bName::COLOR);
 
 				for (int i = 0; i < count; i++) {
 					if (colors[i].r > 0.5f) {
@@ -354,18 +369,7 @@ iw::Entity LevelSystem::LoadLevel(
 			//mesh.Data()->GenTangents()x;
 		}
 
-		iw::Entity entity = Space->CreateEntity<iw::Transform, iw::Model>();
-		iw::Transform* t = entity.Set<iw::Transform>(prefab.Transform);
-		                   entity.Set<iw::Model>(*model);
-
-		if(levelTransform) {
-			levelTransform->AddChild(t);
-		}
-
-		else {
-			levelTransform = t;
-			level = entity;
-		}
+		entity.Set<iw::Model>(*model);
 	}
 
 	// These should all be spawn x events
@@ -505,7 +509,7 @@ iw::Entity LevelSystem::LoadLevel(
 	if (currentLevelName == "levels/forest/forest01.json") {
 		iw::Mesh t = Asset->Load<iw::Font>("fonts/Arial.fnt")->GenerateMesh("A lone soldier longs for his king...", .005f, 1);
 		t.SetMaterial(Asset->Load<iw::Material>("materials/Font")->MakeInstance());
-		t.Material()->Set("color", iw::Color(1, 1, 1, 0));
+		t.Material()->Set("color", iw::Color(0, 0, 0, 1));
 
 		iw::ref<iw::Shader> shader = Asset->Load<iw::Shader>("shaders/simple.shader");
 		Renderer->InitShader(shader, iw::CAMERA);
@@ -532,8 +536,9 @@ iw::Entity LevelSystem::LoadLevel(
 			return true;
 		});
 		sequence.Add<iw::Delay>(1.0f);
-		sequence.Add<iw::FadeValue<float>>(t .Material()->Get<float>("color") + 3, 1.0f, 0.5f);
+		sequence.Add<iw::FadeValue<iw::vector4>>(t.Material()->Get<iw::vector4>("color"), iw::vector4(1), 0.5f);
 		sequence.Add<iw::Delay>(2.0f);
+		sequence.Add<iw::FadeValue<iw::vector4>>(t.Material()->Get<iw::vector4>("color"), iw::vector4(0, 0, 0, 1), 1);
 		sequence.Add<iw::FadeValue<float>>(t .Material()->Get<float>("color") + 3, 0.0f, 1);
 		sequence.Add<iw::FadeValue<float>>(bg.Material()->Get<float>("color") + 3, 0.0f, 0.5f);
 		sequence.Add<iw::DestroyEntity>(text, true);

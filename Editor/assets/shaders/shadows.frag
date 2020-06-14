@@ -25,7 +25,7 @@ float DirectionalLightShadow(
 	vec2 moments = texture(mat_shadowMap, coords.xy).rg;
 	float compare = coords.z;
 
-	if (compare > 1.0) { // test if like not having this brantch is faster?
+	if (compare > 1.0) { // test if not having this brantch is faster?
 		return 1.0;
 	}
 

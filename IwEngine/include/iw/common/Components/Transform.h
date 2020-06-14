@@ -65,6 +65,9 @@ namespace Engine {
 		void SetParent(
 			Transform* transform,
 			bool cleanTree = true);
+
+		IWCOMMON_API bool operator==(const Transform& other);
+		IWCOMMON_API bool operator!=(const Transform& other);
 	};
 }
 

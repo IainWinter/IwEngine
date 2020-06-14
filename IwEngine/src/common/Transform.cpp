@@ -197,5 +197,19 @@ namespace Engine {
 			m_parent->AddChild(this);
 		}
 	}
+
+	bool Transform::operator==(
+		const Transform& other)
+	{
+		return WorldPosition() == other.WorldPosition()
+			&& WorldScale()    == other.WorldScale()
+			&& WorldRotation() == other.WorldRotation();
+	}
+
+	bool Transform::operator!=(
+		const Transform& other)
+	{
+		return !this->operator==(other);
+	}
 }
 }

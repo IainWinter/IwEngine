@@ -1,4 +1,5 @@
 #include "iw/renderer/Platform/OpenGL/GLVertexArray.h"
+#include "iw/renderer/Platform/OpenGL/GLErrorCatch.h"
 #include "gl/glew.h"
 
 namespace iw {
@@ -30,15 +31,15 @@ namespace RenderAPI {
 		unsigned offset = 0;
 		unsigned i = index > 0 ? index : (unsigned)m_buffers.size();
 		for (const VertexBufferLayoutElement& element : layout.GetElements()) {
-			glEnableVertexAttribArray(i);
-			glVertexAttribDivisor(i, layout.GetInstanceStride());
-			glVertexAttribPointer(
+			GL(glEnableVertexAttribArray(i));
+			GL(glVertexAttribDivisor(i, layout.GetInstanceStride()));
+			GL(glVertexAttribPointer(
 				i,
 				element.Count,
 				element.Type,
 				element.Normalized,
 				layout.GetStride(), 
-				(const void*)offset);
+				(const void*)offset));
 
 			offset += element.Count * GetSizeOfType(element.Type);
 			++i;

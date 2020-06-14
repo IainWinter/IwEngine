@@ -112,7 +112,6 @@ namespace Graphics {
 				case RenderOP::BEGIN_SCENE: {
 					BeginSceneOP* scene = (BeginSceneOP*)item.Data;
 
-
 					if (scene->BeforeScene) {
 						scene->BeforeScene();
 					}

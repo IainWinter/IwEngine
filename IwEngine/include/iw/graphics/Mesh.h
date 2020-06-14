@@ -49,6 +49,10 @@ namespace detail {
 			VertexBufferLayout& layout);
 
 		IWGRAPHICS_API
+		void RemoveBuffer(
+			bName name);
+
+		IWGRAPHICS_API
 		bool HasBuffer(
 			bName name) const;
 
@@ -120,9 +124,20 @@ namespace detail {
 		MeshData(
 			const MeshDescription& description);
 
+		// Makes a make instance from the mesh data
 		IWGRAPHICS_API
 		Mesh MakeInstance();
 
+		// Makes a copy of the mesh data where the buffers point to the original buffers, copying no data
+		IWGRAPHICS_API
+		ref<MeshData> MakeLink();
+
+		// Makes a copy & linkes only the specified buffers
+		IWGRAPHICS_API
+		ref<MeshData> MakeCopy(
+			const MeshDescription& links = {},
+			bool linkIndex = false);
+		
 		IWGRAPHICS_API
 		bool IsInitialized() const;
 
@@ -224,6 +239,11 @@ namespace detail {
 
 		IWGRAPHICS_API
 		Mesh MakeInstance() const;
+
+		IWGRAPHICS_API
+		Mesh MakeCopy(
+			const MeshDescription& links = {},
+			bool linkIndex = true) const;
 
 		IWGRAPHICS_API       ref<iw::Material> Material();
 		IWGRAPHICS_API const ref<iw::Material> Material() const;

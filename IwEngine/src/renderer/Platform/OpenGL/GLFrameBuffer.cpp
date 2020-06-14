@@ -1,4 +1,5 @@
 #include "iw/renderer/Platform/OpenGL/GLFrameBuffer.h"
+#include "iw/renderer/Platform/OpenGL/GLErrorCatch.h"
 #include "gl/glew.h"
 
 namespace iw {
@@ -8,17 +9,17 @@ namespace RenderAPI {
 		: m_textureCount(0)
 		, m_noColor(noColor)
 	{
-		glGenFramebuffers(1, &gl_id);
+		GL(glGenFramebuffers(1, &gl_id));
 		Bind();
 
 		if (noColor) {
-			glDrawBuffer(GL_NONE);
-			glReadBuffer(GL_NONE);
+			GL(glDrawBuffer(GL_NONE));
+			GL(glReadBuffer(GL_NONE));
 		}
 	}
 
 	GLFrameBuffer::~GLFrameBuffer() {
-		glDeleteFramebuffers(1, &gl_id);
+		GL(glDeleteFramebuffers(1, &gl_id));
 	}
 
 	void GLFrameBuffer::AttachTexture(
@@ -35,20 +36,20 @@ namespace RenderAPI {
 		texture->Bind();
 
 		if (texture->Type() == TEX_2D) {
-			glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, texture->Id(), 0);
+			GL(glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, texture->Id(), 0));
 		}
 
 		else if (texture->Type() == TEX_CUBE) {
-			glFramebufferTexture(GL_FRAMEBUFFER, attachment, texture->Id(), 0);
+			GL(glFramebufferTexture(GL_FRAMEBUFFER, attachment, texture->Id(), 0));
 		}
 	}
 
 	void GLFrameBuffer::Bind() const {
-		glBindFramebuffer(GL_FRAMEBUFFER, gl_id);
+		GL(glBindFramebuffer(GL_FRAMEBUFFER, gl_id));
 	}
 
 	void GLFrameBuffer::Unbind() const {
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		GL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 	}
 
 	bool GLFrameBuffer::NoColor() const {

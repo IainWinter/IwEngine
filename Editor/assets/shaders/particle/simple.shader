@@ -39,6 +39,31 @@ uniform float ambiance;
 #include shaders/shadows.frag
 #include shaders/lights.shader
 
+float DirectionalLightShadow2(
+	vec4 coords4)
+{
+	if (mat_hasShadowMap == 0) {
+		return 1.0f;
+	}
+
+	vec3 coords = (coords4.xyz / coords4.w) * 0.5 + 0.5;
+	vec2 moments = texture(mat_shadowMap, coords.xy).rg;
+	float compare = coords.z;
+
+	if (compare > 1.0) { // test if not having this brantch is faster?
+		return 1.0;
+	}
+	
+	float p = step(compare, moments.x);
+	float v = max(moments.y - moments.x * moments.x, 0.00002);
+
+	float d = compare - moments.x;
+	float pMax = linstep(0.2, 1.0, v / (v + d * d));
+
+	return min(max(p, pMax), 1.0);
+}
+
+
 void main() {
 	vec4 baseColor = mat_baseColor;
 
@@ -53,7 +78,7 @@ void main() {
 	vec3 color = baseColor.rgb * ambiance;
 
 	for (int i = 0; i < lightCounts.y; i++) {
-		color += baseColor.rgb * DirectionalLightShadow(DirectionalLightPos[i]);
+		color += baseColor.rgb * DirectionalLightShadow2(DirectionalLightPos[i]);
 	}
 
 	FragColor = vec4(color, baseColor.a);

@@ -11,6 +11,7 @@
 #include "iw/renderer/Platform/OpenGL/GLTexture.h"
 #include "iw/renderer/Platform/OpenGL/GLFrameBuffer.h"
 #include "iw/renderer/Platform/OpenGL/GLTranslator.h"
+#include "iw/renderer/Platform/OpenGL/GLErrorCatch.h"
 #include "gl/glew.h"
 
 namespace iw {
@@ -33,11 +34,11 @@ namespace RenderAPI {
 		}
 
 		if (glTopology) {
-			glDrawElements(
+			GL(glDrawElements(
 				glTopology,
 				(int)count,
 				GL_UNSIGNED_INT,
-				(const void*)offset);
+				(const void*)offset));
 		}
 	}
 
@@ -56,30 +57,30 @@ namespace RenderAPI {
 		}
 
 		if (glTopology) {
-			glDrawElementsInstanced(
+			GL(glDrawElementsInstanced(
 				glTopology,
 				(int)count,
 				GL_UNSIGNED_INT,
 				(const void*)offset,
-				instanceCount);
+				instanceCount));
 		}
 	}
 	
 	void GLDevice::Clear() {
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 	}
 
 	void GLDevice::SetViewport(
 		int x, 
 		int y)
 	{
-		glViewport(0, 0, x, y);
+		GL(glViewport(0, 0, x, y));
 	}
 
 	void GLDevice::SetCullFace(
 		CullFace cull)
 	{
-		glCullFace(TRANSLATE(cull));
+		GL(glCullFace(TRANSLATE(cull)));
 	}
 
 	void GLDevice::SetWireframe(
@@ -87,12 +88,12 @@ namespace RenderAPI {
 	{
 		if (wireframe) {
 			//glDisable(GL_DEPTH_TEST);
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			GL(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
 		}
 
 		else {
 			//glEnable(GL_DEPTH_TEST);
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			GL(glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
 		}
 	}
 
@@ -133,7 +134,7 @@ namespace RenderAPI {
 		}
 
 		else {
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // dont like that this is here. Things are prob backwards tbh
+			GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)); // dont like that this is here. Things are prob backwards tbh
 		}
 	}
 
@@ -153,7 +154,7 @@ namespace RenderAPI {
 		}
 
 		else {
-			glBindBuffer(GL_ARRAY_BUFFER, 0); // dont like that this is here. Things are prob backwards tbh
+			GL(glBindBuffer(GL_ARRAY_BUFFER, 0)); // dont like that this is here. Things are prob backwards tbh
 		}
 	}
 
@@ -173,7 +174,7 @@ namespace RenderAPI {
 		}
 
 		else {
-			glBindBuffer(GL_UNIFORM_BUFFER, 0); // dont like that this is here. Things are prob backwards tbh
+			GL(glBindBuffer(GL_UNIFORM_BUFFER, 0)); // dont like that this is here. Things are prob backwards tbh
 		}
 	}
 
@@ -195,7 +196,7 @@ namespace RenderAPI {
 		}
 
 		else {
-			glBindVertexArray(0);
+			GL(glBindVertexArray(0));
 		}
 	}
 
@@ -348,7 +349,7 @@ namespace RenderAPI {
 		}
 
 		else {
-			glBindTexture(GL_TEXTURE_2D, 0);
+			GL(glBindTexture(GL_TEXTURE_2D, 0));
 		}
 	}
 
@@ -372,7 +373,7 @@ namespace RenderAPI {
 		}
 
 		else {
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			GL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 		}
 	}
 

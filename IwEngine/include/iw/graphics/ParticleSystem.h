@@ -49,6 +49,7 @@ namespace Graphics {
 		_p m_prefab;
 
 		Transform* m_transform;
+		Transform  m_lastTransform;
 		linear_allocator m_alloc;
 
 	public:
@@ -112,8 +113,11 @@ namespace Graphics {
 		}
 
 		void UpdateParticleMesh() {
-			if (m_needsToUpdateBuffer) {
+			if (   m_needsToUpdateBuffer
+				|| m_lastTransform != *m_transform)
+			{
 				m_needsToUpdateBuffer = false;
+				m_lastTransform = *m_transform;
 
 				for (unsigned i : m_delete) {
 					m_particles.erase(m_particles.begin() + i);

@@ -10,6 +10,10 @@ namespace Graphics {
 		, m_camera(nullptr)
 		, m_light(nullptr)
 		, m_meshData(nullptr)
+		, m_shader(nullptr)
+		, m_material(nullptr)
+		, m_target(nullptr)
+		, m_ambiance(.03f)
 		, m_state(RenderState::INVALID)
 	{
 		MeshDescription description;
@@ -63,7 +67,12 @@ namespace Graphics {
 	}
 
 	void Renderer::End() {
-		// nothing
+		m_camera   = nullptr;
+		m_light    = nullptr;
+		m_meshData = nullptr;
+		m_shader   = nullptr;
+		m_material = nullptr;
+		m_target   = nullptr;
 	}
 
 	void Renderer::InitShader(
@@ -323,20 +332,20 @@ namespace Graphics {
 			m_meshData = nullptr;
 		}
 
-		else if (m_meshData != mesh->Data()) {
-			m_meshData = mesh->Data();
-
-			if (m_meshData) {
+		else {
+			if (m_meshData != mesh->Data()) {
+				m_meshData = mesh->Data();
+				
+				if (!m_meshData->IsInitialized()) {
+					m_meshData->Initialize(Device);
+				}
+				
 				mesh->Bind(Device);
 			}
-		}
 
-		if (!m_meshData->IsInitialized()) {
-			m_meshData->Initialize(Device);
-		}
-
-		if (m_meshData->IsOutdated()) {
-			m_meshData->Update(Device);
+			if (m_meshData->IsOutdated()) {
+				m_meshData->Update(Device);
+			}
 		}
 	}
 

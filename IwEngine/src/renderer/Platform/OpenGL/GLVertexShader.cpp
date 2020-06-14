@@ -8,7 +8,7 @@ namespace RenderAPI {
 	GLVertexShader::GLVertexShader(
 		const char* source)
 	{
-		gl_id = glCreateShader(GL_VERTEX_SHADER);
+		GL(gl_id = glCreateShader(GL_VERTEX_SHADER));
 		GL(glShaderSource(gl_id, 1, &source, nullptr));
 		GL(glCompileShader(gl_id));
 
