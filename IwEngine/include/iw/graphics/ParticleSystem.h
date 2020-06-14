@@ -117,7 +117,9 @@ namespace Graphics {
 				|| m_lastTransform != *m_transform)
 			{
 				m_needsToUpdateBuffer = false;
-				m_lastTransform = *m_transform;
+				m_lastTransform.Position = m_transform->WorldPosition();
+				m_lastTransform.Scale    = m_transform->WorldScale();
+				m_lastTransform.Rotation = m_transform->WorldRotation();
 
 				for (unsigned i : m_delete) {
 					m_particles.erase(m_particles.begin() + i);
@@ -143,6 +145,8 @@ namespace Graphics {
 
 				m_delete.clear();
 				m_spawn .clear();
+
+				m_alloc.reset();
 
 				if (count == 0) {
 					return;

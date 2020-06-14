@@ -228,6 +228,7 @@ namespace detail {
 
 		buffer.Count = count;
 		buffer.Data = ref<char[]>(new char[size]);
+		buffer.m_Ptr = nullptr;
 
 		memcpy(buffer.Ptr(), data, size);
 
@@ -248,7 +249,7 @@ namespace detail {
 		BufferData& buffer = m_buffers[index];
 
 		buffer.Count = count;
-		buffer.Data = ref<char[]>((char*)ptr);
+		buffer.m_Ptr = ptr;
 
 		m_outdated = true;
 	}

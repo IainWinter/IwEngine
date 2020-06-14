@@ -82,14 +82,15 @@ namespace detail {
 	private:
 		struct BufferData {
 			ref<char[]> Data;
+			void* m_Ptr;
 			unsigned Count;
 			bool Initialized;
 
 			template<typename _t = void*>
-			      _t* Ptr()        { return (_t*)Data.get(); } // yak on em
+			      _t* Ptr()        { return m_Ptr ? (_t*)m_Ptr : (_t*)Data.get(); } // yak on em
 
 			template<typename _t = void*>
-			const _t* Ptr() const  { return (_t*)Data.get(); }
+			const _t* Ptr() const  { return m_Ptr ? (_t*)m_Ptr : (_t*)Data.get(); }
 		};
 
 		struct IndexData {
