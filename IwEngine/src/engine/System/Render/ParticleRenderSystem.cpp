@@ -11,13 +11,22 @@ namespace Engine {
 	void ParticleRenderSystem::Update(
 		EntityComponentArray& eca)
 	{
+		float ambiance = m_scene->Ambiance();
+		Renderer->BeforeScene([&]() {
+			m_scene->SetAmbiance(.5f); // for trees
+		});
+
+		Renderer->AfterScene([=]() {
+			m_scene->SetAmbiance(ambiance);
+		});
+
 		Renderer->BeginScene(m_scene);
-		
+
 		for (auto entity : eca) {
 			auto [transform, system] = entity.Components.Tie<Components>();
 			auto psystem = system;
 
-			Renderer->BeforeDraw([=]() {
+			Task->queue([=]() { // put in own system
 				psystem->UpdateParticleMesh();
 			});
 

@@ -5,6 +5,8 @@
 #include "iw/graphics/Model.h"
 #include "iw/graphics/VoxelLight.h"
 
+#include "iw/graphics/ParticleSystem.h"
+
 namespace iw {
 namespace Engine {
 	class ModelVoxelRenderSystem
@@ -14,6 +16,11 @@ namespace Engine {
 		struct Components {
 			Transform* Transform;
 			Model* Model;
+		};
+
+		struct PComponents {
+			Transform* Transform;
+			ParticleSystem<StaticParticle>* System;
 		};
 
 		Scene* m_scene;

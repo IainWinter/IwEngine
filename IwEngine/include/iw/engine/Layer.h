@@ -23,7 +23,7 @@ namespace Engine {
 		ref<DynamicsSpace>  Physics;
 		ref<AudioSpace>     Audio;
 		ref<eventbus>       Bus;
-
+		ref<thread_pool>    Task;
 		Scene* MainScene;
 
 	public:
@@ -119,7 +119,7 @@ namespace Engine {
 			Args&&... args)
 		{
 			S* system = new S(std::forward<Args>(args)...);
-			system->SetLayerVars(Space, Renderer, Asset, Physics, Audio, Bus);
+			system->SetLayerVars(Space, Renderer, Asset, Physics, Audio, Bus, Task);
 
 			PushSystem(system);
 			return system;
@@ -131,7 +131,7 @@ namespace Engine {
 			S* system)
 		{
 			LOG_INFO << "Pushed " << system->Name() << " system onto " << Name() << " layer";
-			system->SetLayerVars(Space, Renderer, Asset, Physics, Audio, Bus);
+			system->SetLayerVars(Space, Renderer, Asset, Physics, Audio, Bus, Task);
 			m_systems.PushBack(system);
 
 			system->OnPush();
@@ -144,7 +144,7 @@ namespace Engine {
 			Args&&... args)
 		{
 			S* system = new S(std::forward<Args>(args)...);
-			system->SetLayerVars(Space, Renderer, Asset, Physics, Audio, Bus);
+			system->SetLayerVars(Space, Renderer, Asset, Physics, Audio, Bus, Task);
 
 			PushSystemFront(system);
 			return system;
@@ -156,7 +156,7 @@ namespace Engine {
 			S* system)
 		{
 			LOG_INFO << "Pushed " << system->Name() << " system onto " << Name() << " layer";
-			system->SetLayerVars(Space, Renderer, Asset, Physics, Audio, Bus);
+			system->SetLayerVars(Space, Renderer, Asset, Physics, Audio, Bus, Task);
 			m_systems.PushFront(system);
 
 			system->OnPush();
@@ -193,7 +193,8 @@ namespace Engine {
 			ref<AssetManager> asset,
 			ref<DynamicsSpace> physics,
 			ref<AudioSpace> audio,
-			ref<eventbus> bus);
+			ref<eventbus> bus,
+			ref<thread_pool> task);
 	};
 }
 

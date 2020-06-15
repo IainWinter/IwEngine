@@ -8,8 +8,8 @@
 #include "iw/physics/Dynamics/DynamicsSpace.h"
 #include "iw/audio/AudioSpace.h"
 #include "iw/events/eventbus.h"
+#include "iw/util/thread/thread_pool.h"
 #include <queue>
-//#include <thread>
 
 namespace iw {
 namespace Engine {
@@ -64,6 +64,7 @@ namespace Engine {
 		ref<DynamicsSpace>       Physics;
 		ref<AudioSpace>          Audio;
 		ref<eventbus>            Bus;
+		ref<thread_pool>         Task;
 
 	public:
 		SystemBase(
@@ -157,19 +158,21 @@ namespace Engine {
 		friend class Layer;
 
 		void SetLayerVars(
-			iw::ref<iw::Space> space,
-			iw::ref<iw::QueuedRenderer> renderer,
-			iw::ref<AssetManager> asset,
-			iw::ref<DynamicsSpace> physics,
-			iw::ref<AudioSpace> audio,
-			iw::ref<iw::eventbus> bus)
+			ref<iw::Space> space,
+			ref<QueuedRenderer> renderer,
+			ref<AssetManager> asset,
+			ref<DynamicsSpace> physics,
+			ref<AudioSpace> audio,
+			ref<eventbus> bus,
+			ref<thread_pool> task)
 		{
-			Space = space;
+			Space    = space;
 			Renderer = renderer;
-			Asset = asset;
-			Physics = physics;
-			Audio = audio;
-			Bus = bus;
+			Asset    = asset;
+			Physics  = physics;
+			Audio    = audio;
+			Bus      = bus;
+			Task     = task;
 		}
 	};
 

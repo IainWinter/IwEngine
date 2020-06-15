@@ -8,7 +8,6 @@
 #include "InitOptions.h"
 #include "Layers/ImGuiLayer.h"
 #include "iw/input/InputManager.h"
-#include "iw/util/thread/thread_pool.h"
 
 namespace iw {
 namespace Engine {
@@ -90,7 +89,7 @@ namespace Engine {
 			Args&&... args)
 		{
 			L* layer = new L(std::forward<Args>(args)...);
-			layer->SetApplicationVars(Space, Renderer, Asset, Physics, Audio, Bus);
+			layer->SetApplicationVars(Space, Renderer, Asset, Physics, Audio, Bus, Task);
 
 			PushLayer(layer);
 			return layer;
@@ -103,7 +102,7 @@ namespace Engine {
 			Args&& ... args)
 		{
 			L* layer = new L(std::forward<Args>(args)...);
-			layer->SetApplicationVars(Space, Renderer, Asset, Physics, Audio, Bus);
+			layer->SetApplicationVars(Space, Renderer, Asset, Physics, Audio, Bus, Task);
 
 			PushOverlay(layer);
 			return layer;
@@ -115,7 +114,7 @@ namespace Engine {
 			L* layer)
 		{
 			LOG_INFO << "Pushed " << layer->Name() << " layer";
-			layer->SetApplicationVars(Space, Renderer, Asset, Physics, Audio, Bus);
+			layer->SetApplicationVars(Space, Renderer, Asset, Physics, Audio, Bus, Task);
 			m_layers.PushBack(layer);
 
 			layer->OnPush();
@@ -127,7 +126,7 @@ namespace Engine {
 			L* layer)
 		{
 			LOG_INFO << "Pushed " << layer->Name() << " overlay";
-			layer->SetApplicationVars(Space, Renderer, Asset, Physics, Audio, Bus);
+			layer->SetApplicationVars(Space, Renderer, Asset, Physics, Audio, Bus, Task);
 			m_layers.PushFront(layer);
 
 			layer->OnPush();

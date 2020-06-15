@@ -25,7 +25,6 @@ namespace Engine {
 				if (system->GetParticleMesh().Material()->CastShadows()) {
 					Renderer->BeforeDraw([=]() {
 						psystem->GetParticleMesh().Material()->Use(Renderer->Device, light->ParticleShadowShader());
-						psystem->UpdateParticleMesh();
 					});
 
 					Renderer->DrawMesh(*transform, system->GetParticleMesh());

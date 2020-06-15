@@ -335,11 +335,15 @@ iw::Entity LevelSystem::LoadLevel(
 				unsigned     count     = mesh.Data()->GetCount(iw::bName::COLOR);
 
 				for (int i = 0; i < count; i++) {
-					if (colors[i].r > 0.5f) {
+					if (   colors[i].r > 0.5f
+						&& iw::randf() > 0.5f)
+					{
+						iw::vector3 rand = iw::vector3(iw::randf(), iw::randf(), iw::randf());
+
 						iw::Transform t;
-						t.Position = iw::randf() + positions[i];
+						t.Position = positions[i];
 						t.Scale    = iw::randf() + 1.2f;
-						t.Rotation = iw::quaternion::from_look_at(t.Position + iw::randf(), t.Position + normals[i], -iw::vector3::unit_y);
+						t.Rotation = iw::quaternion::from_look_at(t.Position, rand * 0.5f + t.Position + iw::vector3::unit_y);
 
 						pSys->SpawnParticle(t);
 					}

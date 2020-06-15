@@ -18,8 +18,6 @@
 	#include "iw/log/sink/async_std_sink.h"
 #endif
 
-
-
 namespace iw {
 namespace Engine {
 	Application::Application()
@@ -29,7 +27,7 @@ namespace Engine {
 		m_device = ref<IDevice>(IDevice::Create());
 		Bus      = REF<eventbus>();
 		Space    = REF<iw::Space>();
-		Renderer = REF<iw::QueuedRenderer>(m_device);
+		Renderer = REF<QueuedRenderer>(m_device);
 		Asset    = REF<AssetManager>();
 		Input    = REF<InputManager>(Bus);
 		Console  = REF<iw::Console>(iw::make_getback(&Application::HandleCommand, this));
@@ -125,16 +123,9 @@ namespace Engine {
 		Time::UpdateTime();
 		Time::SetFixedTime(1 / 50.0f);
 
-
-		// Thread pool test
+		// Thread pool
 
 		Task->init();
-
-		for (int i = 0; i < 100; i++) {
-			Task->queue([&]() {
-				LOG_INFO << "Queue item";
-			});
-		}
 
 		return 0;
 	}

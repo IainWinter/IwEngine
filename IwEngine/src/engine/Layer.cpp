@@ -100,9 +100,9 @@ namespace Engine {
 	void Layer::UpdateSystems(std::unordered_map<const char*, float>& temp_debug, float smooth) {
 		for (ISystem* system : m_systems) {
 			float start = iw::Time::DeltaTimeNow();
-
+				
 			system->Update();
-
+				
 			float end = iw::Time::DeltaTimeNow();
 			temp_debug[system->Name()] = iw::lerp(temp_debug[system->Name()], end - start, smooth);
 		}
@@ -115,19 +115,21 @@ namespace Engine {
 	}
 
 	void Layer::SetApplicationVars(
-		iw::ref<iw::Space> space,
-		iw::ref<iw::QueuedRenderer> renderer,
-		iw::ref<AssetManager> asset,
-		iw::ref<DynamicsSpace> physics,
-		iw::ref<AudioSpace> audio,
-		iw::ref<iw::eventbus> bus)
+		ref<iw::Space> space,
+		ref<QueuedRenderer> renderer,
+		ref<AssetManager> asset,
+		ref<DynamicsSpace> physics,
+		ref<AudioSpace> audio,
+		ref<eventbus> bus,
+		ref<thread_pool> task)
 	{
 		Space    = space;
 		Renderer = renderer;
 		Asset    = asset;
 		Physics  = physics;
-		Audio  = audio;
+		Audio    = audio;
 		Bus      = bus;
+		Task     = task;
 	}
 }
 }

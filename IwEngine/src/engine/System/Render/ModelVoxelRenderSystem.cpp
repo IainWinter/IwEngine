@@ -34,22 +34,20 @@ namespace Engine {
 
 		ref<ComputeShader> mipmap = std::static_pointer_cast<ComputeShader>(Asset->Load<Shader>("shaders/vct/mipmap.shader"));
 
-		ref<Shader> voxelize = Asset->Load<Shader>("shaders/vct/voxelize.shader");
+		ref<Shader> voxelize      = Asset->Load<Shader>("shaders/vct/voxelize.shader");
+		ref<Shader> voxelize_inst = Asset->Load<Shader>("shaders/vct/voxelize_instanced.shader");
 		Renderer->InitShader(voxelize, /*CAMERA | */LIGHTS | SHADOWS);
+		Renderer->InitShader(voxelize_inst, /*CAMERA | */LIGHTS | SHADOWS);
 
 		Renderer->SetShader(voxelize);
 		voxelize->Handle()->GetParam("voxelBoundsScale")   ->SetAsFloats(&voxelBoundsScale,    3);
 		voxelize->Handle()->GetParam("voxelBoundsScaleInv")->SetAsFloats(&voxelBoundsScaleInv, 3);
 
 		ref<Texture> voxelTexture = REF<Texture>(voxelBoundsSize.x, voxelBoundsSize.y, voxelBoundsSize.z, TEX_3D, RGBA, FLOAT, BORDER, LINEAR, LINEAR_LINEAR);
-		m_voxelize = new VoxelLight(voxelTexture, voxelize, nullptr, mipmap);
+		m_voxelize = new VoxelLight(voxelTexture, voxelize, voxelize_inst, mipmap);
 
 		return 0;
 	}
-
-	//int i = 0;
-	int d = 0;
-	float t = 0.0f;
 
 	void ModelVoxelRenderSystem::Update(
 		EntityComponentArray& eca)
@@ -59,63 +57,87 @@ namespace Engine {
 
 		//m_voxelize->SetPosition(camPos * voxelSize);
 
-		if (t > 0.001f && Keyboard::KeyDown(F)) {
-			t = 0.0f;
+		//Renderer->BeginShadowCast(m_voxelize, false, false);
 
-			d = (d + 20) % 1000;
-			Renderer->SetDebugState(d);
-		}
+		//for (auto entity : eca) {
+		//	auto [transform, model] = entity.Components.Tie<Components>();
+		//	
+		//	for (int i = 0; i < model->MeshCount(); i++) {
+		//		Mesh&     mesh = model->GetMesh(i);
+		//		Transform tran = model->GetTransform(i);
 
-		t += Time::DeltaTime();
+		//		tran.SetParent(transform, false);
 
-		Renderer->BeginShadowCast(m_voxelize, false, false);
+		//		if (!mesh.Material()->GetTexture("voxelMap")) {
+		//			mesh.Material()->SetTexture("voxelMap", VoxelWorld());
+		//		}
 
-		for (auto entity : eca) {
-			auto [transform, model] = entity.Components.Tie<Components>();
-			
-			vector3 scale    = transform->Scale;
-			vector3 position = transform->Position;
+		//		Renderer->BeforeDraw([&]() {
+		//			if (mesh.Material()->IsInitialized()) {
+		//				mesh.Material()->Initialize(Renderer->Device);
+		//			}
 
-			for (int i = 0; i < model->MeshCount(); i++) {
-				Mesh&     mesh = model->GetMesh(i);
-				Transform tran = model->GetTransform(i);
+		//			mesh.Material()->Use(Renderer->Device, m_voxelize->ShadowShader());
 
-				tran.SetParent(transform, false);
+		//			IPipelineParam* ambianceParam = m_voxelize->ShadowShader()->Handle()->GetParam("ambiance");
+		//			if (ambianceParam) ambianceParam->SetAsFloat (m_scene->Ambiance());
 
-				if (!mesh.Material()->GetTexture("voxelMap")) {
-					mesh.Material()->SetTexture("voxelMap", VoxelWorld());
-				}
+		//			float*       emissive  = mesh.Material()->Get<float>("emissive");
+		//			ref<Texture> shadowMap = mesh.Material()->GetTexture("shadowMap");
 
-				Renderer->BeforeDraw([&]() {
-					if (mesh.Material()->IsInitialized()) {
-						mesh.Material()->Initialize(Renderer->Device);
-					}
+		//			IPipelineParam* emissiveParam = m_voxelize->ShadowShader()->Handle()->GetParam("mat_emissive"); // to reset the emissive value in the shader :(
+		//			if (emissiveParam) emissiveParam->SetAsFloat(emissive ? *emissive : 0);
 
-					mesh.Material()->Use(Renderer->Device, m_voxelize->ShadowShader());
+		//			IPipelineParam* shadowMapParam = m_voxelize->ShadowShader()->Handle()->GetParam("mat_shadowMap"); // to reset the emissive value in the shader :(
+		//			if (shadowMapParam) shadowMapParam->SetAsTexture(shadowMap ? shadowMap->Handle() : nullptr, 1);
+		//		});
 
-					IPipelineParam* ambianceParam = m_voxelize->ShadowShader()->Handle()->GetParam("ambiance");
-					if (ambianceParam) ambianceParam->SetAsFloat (m_scene->Ambiance());
+		//		Renderer->DrawMesh(tran, mesh);
+		//	}
+		//}
 
-					float*       emissive  = mesh.Material()->Get<float>("emissive");
-					ref<Texture> shadowMap = mesh.Material()->GetTexture("shadowMap");
+		//Renderer->EndShadowCast();
 
-					IPipelineParam* emissiveParam = m_voxelize->ShadowShader()->Handle()->GetParam("mat_emissive"); // to reset the emissive value in the shader :(
-					if (emissiveParam) emissiveParam->SetAsFloat(emissive ? *emissive : 0);
+		// Particle voxelize (temp)
 
-					IPipelineParam* shadowMapParam = m_voxelize->ShadowShader()->Handle()->GetParam("mat_shadowMap"); // to reset the emissive value in the shader :(
-					if (shadowMapParam) shadowMapParam->SetAsTexture(shadowMap ? shadowMap->Handle() : nullptr, 1);
-				});
+		Renderer->BeginShadowCast(m_voxelize, true, false);
 
-				Renderer->DrawMesh(tran, mesh);
+		for (auto entity : Space->Query<Transform, ParticleSystem<StaticParticle>>()) {
+			auto [transform, system] = entity.Components.Tie<PComponents>();
+
+			Mesh& mesh = system->GetParticleMesh();
+
+			if (!mesh.Material()->GetTexture("voxelMap")) {
+				mesh.Material()->SetTexture("voxelMap", VoxelWorld());
 			}
 
-			transform->Scale    = scale;
-			transform->Position = position;
+			Renderer->BeforeDraw([&]() {
+				if (mesh.Material()->IsInitialized()) {
+					mesh.Material()->Initialize(Renderer->Device);
+				}
+
+				mesh.Material()->Use(Renderer->Device, m_voxelize->ParticleShadowShader());
+
+				IPipelineParam* ambianceParam = m_voxelize->ParticleShadowShader()->Handle()->GetParam("ambiance");
+				if (ambianceParam) ambianceParam->SetAsFloat (m_scene->Ambiance());
+
+				float*       emissive  = mesh.Material()->Get<float>("emissive");
+				ref<Texture> shadowMap = mesh.Material()->GetTexture("shadowMap");
+
+				IPipelineParam* emissiveParam = m_voxelize->ParticleShadowShader()->Handle()->GetParam("mat_emissive"); // to reset the emissive value in the shader :(
+				if (emissiveParam) emissiveParam->SetAsFloat(emissive ? *emissive : 0);
+
+				IPipelineParam* shadowMapParam = m_voxelize->ParticleShadowShader()->Handle()->GetParam("mat_shadowMap"); // to reset the emissive value in the shader :(
+				if (shadowMapParam) shadowMapParam->SetAsTexture(shadowMap ? shadowMap->Handle() : nullptr, 1);
+			});
+
+			Renderer->DrawMesh(transform, &mesh);
 		}
 
 		Renderer->EndShadowCast();
 
-		//i++;
+
+
 
 		if (!m_visualize && !Keyboard::KeyDown(E)) {
 			if (m_voxelize->VoxelTexture()->Filter() == NEAREST) {

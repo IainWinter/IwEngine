@@ -114,7 +114,7 @@ namespace Graphics {
 
 		void UpdateParticleMesh() {
 			if (   m_needsToUpdateBuffer
-				|| m_lastTransform != *m_transform)
+				|| (m_transform && m_lastTransform != *m_transform))
 			{
 				m_needsToUpdateBuffer = false;
 				m_lastTransform.Position = m_transform->WorldPosition();
