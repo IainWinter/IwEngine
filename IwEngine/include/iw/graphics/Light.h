@@ -33,11 +33,20 @@ namespace Graphics {
 
 		IWGRAPHICS_API
 		virtual void SetupShadowCast(
-			Renderer* renderer) = 0;
+			Renderer* renderer);
 
 		IWGRAPHICS_API
 		virtual void EndShadowCast(
 			Renderer* renderer);
+
+		IWGRAPHICS_API
+		virtual void SetupShadowCast(
+			Renderer* renderer,
+			bool useParticleShader,
+			bool clear)
+		{
+			SetupShadowCast(renderer);
+		}
 
 		IWGRAPHICS_API virtual bool CanCastShadows() const;
 		IWGRAPHICS_API virtual bool Outdated()       const;

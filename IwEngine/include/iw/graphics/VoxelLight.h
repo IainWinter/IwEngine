@@ -13,6 +13,8 @@ namespace Graphics {
 		ref<ComputeShader> m_mipmapGenerationShader;
 		OrthographicCamera m_shadowCamera;
 
+		bool noMipmaps;
+
 	public:
 		IWGRAPHICS_API
 		VoxelLight(
@@ -23,7 +25,9 @@ namespace Graphics {
 
 		IWGRAPHICS_API
 		void SetupShadowCast(
-			Renderer* renderer) override;
+			Renderer* renderer,
+			bool useParticleShader,
+			bool clear) override;
 
 		IWGRAPHICS_API
 		void EndShadowCast(
@@ -37,6 +41,10 @@ namespace Graphics {
 
 		IWGRAPHICS_API
 		Camera* ShadowCamera() const override;
+
+		// sets flag for 1 run
+		IWGRAPHICS_API
+		void BlockGenerationOfMipmaps();
 	};
 }
 

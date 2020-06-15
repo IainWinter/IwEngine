@@ -61,6 +61,10 @@ namespace Graphics {
 		return *this;
 	}
 
+	void Light::SetupShadowCast(
+		Renderer* renderer)
+	{}
+
 	void Light::EndShadowCast(
 		Renderer* renderer)
 	{
@@ -68,7 +72,7 @@ namespace Graphics {
 			m_shadowTarget->Tex(0)->Handle()->GenerateMipMaps();
 		}
 
-		renderer->Device->SetCullFace(BACK);
+		renderer->Device->SetCullFace(BACK); // ? not sure what this is doing here
 	}
 
 	bool Light::CanCastShadows() const {

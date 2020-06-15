@@ -148,9 +148,12 @@ namespace Graphics {
 		m_light = light;
 
 		Renderer::SetShader(useParticleShader ? light->ParticleShadowShader() : light->ShadowShader());
-		Renderer::SetTarget(light->ShadowTarget());
+		
+		if (light->ShadowTarget()) {
+			Renderer::SetTarget(light->ShadowTarget());
+		}
 
-		light->SetupShadowCast(this);
+		light->SetupShadowCast(this, useParticleShader, clear);
 
 		if (clear) {
 			Device->Clear();
