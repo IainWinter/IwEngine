@@ -30,7 +30,7 @@ int ConsumableSystem::Initialize() {
 	iw::Mesh slowmo = iw::MakeIcosphere(description, 0)->MakeInstance();
 	slowmo.SetMaterial(Asset->Load<iw::Material>("materials/Default")->MakeInstance());
 
-	slowmo.Material()->Set("baseColor", iw::Color::From255(0, 0, 255));
+	slowmo.Material()->Set("baseColor", iw::Color::From255(112, 195, 255));
 	slowmo.Material()->Set("reflectance", 1.0f);
 	slowmo.Material()->Set("emissive", 2.0f);
 
