@@ -64,7 +64,7 @@ namespace ECS {
 
 #ifdef IW_USE_EVENTS
 		if (m_bus) {
-			m_bus->send<EntityDestroyedEvent>(Entity(entityData->Entity, this));
+			m_bus->send<EntityDestroyedEvent>(entityData->Entity);
 		}
 #endif
 
@@ -227,7 +227,7 @@ namespace ECS {
 		if (m_bus) {
 			for (const ref<EntityData>& data : m_entityManager.Entities()) {
 				if (data->Entity.Alive) {
-					m_bus->send<EntityDestroyedEvent>(Entity(data->Entity, this));
+					m_bus->send<EntityDestroyedEvent>(data->Entity);
 				}
 			}
 		}

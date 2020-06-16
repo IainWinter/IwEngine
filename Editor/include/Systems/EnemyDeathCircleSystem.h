@@ -19,6 +19,8 @@ private:
 	iw::Model m_deathCircleModel;
 	EnemyDeathCircle m_prefab;
 
+	bool m_charged;
+
 public:
 	EnemyDeathCircleSystem();
 

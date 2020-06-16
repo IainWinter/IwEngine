@@ -3,8 +3,8 @@
 #include "Mesh.h"
 #include "MeshFactory.h"
 #include "iw/util/memory/linear_allocator.h"
-#include <vector>
 #include <functional>
+#include <vector>
 
 namespace iw {
 namespace Graphics {
@@ -61,9 +61,9 @@ namespace Graphics {
 			};
 
 			m_transform = nullptr;
-
-			srand(6783542);
 		}
+
+		~ParticleSystem() = default;
 
 		Mesh& GetParticleMesh() {
 			return m_mesh;

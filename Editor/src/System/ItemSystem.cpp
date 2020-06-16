@@ -3,13 +3,12 @@
 
 #include "Components/Player.h"
 #include "Components/Note.h"
-#include "Components/Slowmo.h"
 
 #include "iw/engine/Time.h"
 #include "iw/physics/Collision/SphereCollider.h";
 #include "iw/physics/Collision/CollisionObject.h";
 #include "iw/audio/AudioSpaceStudio.h"
-#include "iw/graphics/Model.h"
+
 
 
 ItemSystem::ItemSystem()
@@ -26,7 +25,7 @@ int ItemSystem::Initialize() {
 	material->SetCastShadows(false);
 	note.SetMaterial(material);
 
-	m_noteMesh = note;
+	m_noteModel.AddMesh(note);
 
 	return 0;
 }
@@ -71,10 +70,10 @@ bool ItemSystem::On(
 			}
 		}
 
-		Bus->push<iw::EntityDestroyEvent>(itemEntity);
+		//Bus->push<iw::EntityDestroyEvent>(itemEntity.Handle);
 
-		//itemEntity.Find<iw::Transform>()->SetParent(nullptr);
-		//Space->DestroyEntity(itemEntity.Index());
+		itemEntity.Find<iw::Transform>()->SetParent(nullptr);
+		Space->DestroyEntity(itemEntity.Index());
 	}
 
 	return false;
@@ -84,10 +83,10 @@ iw::Transform* ItemSystem::SpawnItem(
 	Item prefab,
 	iw::vector3 position)
 {
-	iw::Entity entity = Space->CreateEntity<iw::Transform, iw::Mesh, iw::SphereCollider, iw::CollisionObject, Item>();
+	iw::Entity entity = Space->CreateEntity<iw::Transform, iw::Model, iw::SphereCollider, iw::CollisionObject, Item>();
 
 	                         entity.Set<Item>(prefab);
-	iw::Mesh*            m = entity.Set<iw::Mesh>(m_noteMesh);
+	                         entity.Set<iw::Model>(m_noteModel);
 	iw::Transform*       t = entity.Set<iw::Transform>(position, iw::vector3(0.65f, 0.9f, 0.9f), iw::quaternion::from_euler_angles(0, iw::Pi * 2 * rand() / RAND_MAX, 0));
 	iw::SphereCollider*  s = entity.Set<iw::SphereCollider>(iw::vector3::zero, 1);
 	iw::CollisionObject* c = entity.Set<iw::CollisionObject>();

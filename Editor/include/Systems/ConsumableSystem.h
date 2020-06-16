@@ -5,6 +5,7 @@
 #include "iw/engine/System.h"
 #include "iw/common/Components/Transform.h"
 #include "iw/graphics/Font.h"
+#include "iw/graphics/Model.h"
 
 #include <vector>
 
@@ -17,7 +18,8 @@ private:
 	bool m_usingItem;
 
 	std::vector<Consumable> m_prefabs;
-	iw::Mesh m_slowmo;
+	iw::Model m_slowmoModel;
+	iw::Model m_chargedKillModel;
 
 	iw::Entity& m_target;
 

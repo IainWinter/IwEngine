@@ -3,13 +3,13 @@
 #include "Components/Item.h"
 #include "iw/engine/System.h"
 #include "iw/common/Components/Transform.h"
-#include "iw/graphics/Mesh.h"
+#include "iw/graphics/Model.h"
 
 class ItemSystem
 	: public iw::SystemBase
 {
 private:
-	iw::Mesh m_noteMesh;
+	iw::Model m_noteModel;
 
 public:
 	ItemSystem();

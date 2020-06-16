@@ -56,7 +56,7 @@ LevelSystem::LevelSystem(
 
 	//currentLevel = 0;
 
-	currentLevelName = "levels/forest/forest01.json";
+	currentLevelName = "levels/forest/forest12.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 63);
 	closedColor = iw::Color::From255(201, 66, 66, 63);
@@ -280,6 +280,8 @@ bool LevelSystem::On(
 iw::Entity LevelSystem::LoadLevel(
 	std::string name)
 {
+	srand(298374);
+
 	iw::JsonSerializer("assets/" + name).Read(currentLevel);
 
 	iw::Transform* levelTransform = nullptr;
@@ -504,8 +506,13 @@ iw::Entity LevelSystem::LoadLevel(
 	//seq.SetVars(Space, Renderer, Asset, Physics, Audio, Bus);
 
 	if (currentLevelName == "levels/forest/forest05.a.json") {
-		Bus->push<SpawnItemEvent>(Item{ NOTE, 0 },       iw::vector3(3, 1, -2), levelTransform);
+		Bus->push<SpawnItemEvent>(Item{ NOTE,       0 }, iw::vector3(3, 1, -2), levelTransform);
 		Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 0 }, iw::vector3(0, 1, 3),  levelTransform);
+	}
+
+	else if (currentLevelName == "levels/forest/forest12.a.json") {
+		Bus->push<SpawnItemEvent>(Item{ NOTE,       1 }, iw::vector3(3, 1, -2), levelTransform);
+		Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 1 }, iw::vector3(0, 1, 3),  levelTransform);
 	}
 
 	// run a cut scene
@@ -555,7 +562,7 @@ iw::Entity LevelSystem::LoadLevel(
 
 	else if (currentLevelName == "levels/forest/forest02.json") {
 		Space->DestroyEntity(otherGuy.Index());
-		otherGuy = Space->CreateEntity<iw::Transform, iw::Mesh, iw::CollisionObject, iw::SphereCollider, OtherGuyTag>();
+		otherGuy = Space->CreateEntity<iw::Transform, iw::Model, iw::CollisionObject, iw::SphereCollider, OtherGuyTag>();
 
 		otherGuy.Set<OtherGuyTag>(2);
 
@@ -564,7 +571,7 @@ iw::Entity LevelSystem::LoadLevel(
 			0
 		);
 
-		otherGuy.Set<iw::Mesh>(Asset->Load<iw::Model>("Sphere")->GetMesh(0).MakeInstance());
+		otherGuy.Set<iw::Model>(*Asset->Load<iw::Model>("Sphere"));
 
 		iw::CollisionObject* obj = otherGuy.Set<iw::CollisionObject>();
 		iw::SphereCollider*  col = otherGuy.Set<iw::SphereCollider>(0, 0.75f);
@@ -578,14 +585,14 @@ iw::Entity LevelSystem::LoadLevel(
 			}
 
 			OtherGuyTag* guy  = guyEntity.Find<OtherGuyTag>();
-			iw::Mesh*    mesh = guyEntity.Find<iw::Mesh>();
+			iw::Mesh&    mesh = guyEntity.Find<iw::Model>()->GetMesh(0);
 
 			guy->Health -= 1;
 
 			if (guy->Health < 0) guy->Health = 0;
 
 			float color = guy->Health / 3.0f;
-			mesh->Material()->Set("baseColor", iw::Color(0.8f, color, color, 1));
+			mesh.Material()->Set("baseColor", iw::Color(0.8f, color, color, 1));
 
 			Audio->AsStudio()->CreateInstance("playerDamaged");
 		});
@@ -657,6 +664,10 @@ void LevelSystem::DestroyAll(
 			DestroyAll(child);
 		}
 
-		Space->DestroyEntity(Space->FindEntity(transform).Index());
+		iw::Entity e = Space->FindEntity(transform);
+
+		if (e) {
+			Space->DestroyEntity(e.Index());
+		}
 	}
 }

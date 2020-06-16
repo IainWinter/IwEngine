@@ -34,7 +34,7 @@ namespace Graphics {
 
 		if (!m_voxelTexture->Handle()) {
 			m_voxelTexture->Initialize(renderer->Device);
-			m_voxelTexture->SetBorderColor(iw::Color(0, 0, 0, 0));
+			m_voxelTexture->SetBorderColor(iw::Color(1, 0, 0, 1));
 		}
 
 		if (clear) {

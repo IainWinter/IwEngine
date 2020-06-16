@@ -15,11 +15,11 @@ namespace ECS {
 	struct EntityEvent
 		: event
 	{
-		Entity Entity;
+		EntityHandle Entity;
 
 		EntityEvent(
 			EntityEventType type,
-			iw::Entity entity)
+			EntityHandle entity)
 			: event(val(EventGroup::ENTITY), val(type))
 			, Entity(entity)
 		{}
@@ -29,7 +29,7 @@ namespace ECS {
 		: EntityEvent
 	{
 		EntityDestroyEvent(
-			iw::Entity entity)
+			EntityHandle entity)
 			: EntityEvent(EntityEventType::Destroy, entity)
 		{}
 	};
@@ -38,7 +38,7 @@ namespace ECS {
 		: EntityEvent
 	{
 		EntityDestroyedEvent(
-			iw::Entity entity)
+			EntityHandle entity)
 			: EntityEvent(EntityEventType::Destroyed, entity)
 		{}
 	};

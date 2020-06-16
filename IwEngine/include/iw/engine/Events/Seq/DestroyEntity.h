@@ -26,7 +26,7 @@ namespace Engine {
 			if (!entity) return true;
 
 			if (async) {
-				Bus->push<EntityDestroyEvent>(entity);
+				Bus->push<EntityDestroyEvent>(entity.Handle);
 			}
 
 			else {

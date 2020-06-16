@@ -101,12 +101,7 @@
     "nodes" : [
         {
             "mesh" : 0,
-            "name" : "Plane.003",
-            "translation" : [
-                0.1246795654296875,
-                0,
-                0
-            ]
+            "name" : "Plane.003"
         },
         {
             "mesh" : 1,
@@ -1932,12 +1927,12 @@
         },
         {
             "mimeType" : "image/jpeg",
-            "name" : "normal",
+            "name" : "treeNormal",
             "uri" : "textures/tree/normal.jpg"
         },
         {
             "mimeType" : "image/jpeg",
-            "name" : "baseColor",
+            "name" : "treeColor",
             "uri" : "textures/tree/baseColor.jpg"
         }
     ],

@@ -74,7 +74,7 @@ namespace Engine {
 				Mesh&     mesh = model->GetMesh(i);
 				Transform tran = model->GetTransform(i);
 
-				tran.SetParent(transform, false);
+				tran.SetParent(transform, false); // ?
 
 				if (!mesh.Material()->GetTexture("voxelMap")) {
 					mesh.Material()->SetTexture("voxelMap", VoxelWorld());

@@ -18,6 +18,11 @@ namespace Engine {
 			Model* Model;
 		};
 
+		struct MComponents {
+			Transform* Transform;
+			Mesh* Model;
+		};
+
 		struct PComponents {
 			Transform* Transform;
 			ParticleSystem<StaticParticle>* System;

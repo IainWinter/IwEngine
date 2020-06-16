@@ -48,9 +48,9 @@ namespace Engine {
 	bool PhysicsSystem::On(
 		EntityDestroyedEvent& e)
 	{
-		CollisionObject* object = e.Entity.Find<CollisionObject>();
+		CollisionObject* object = Space->FindComponent<CollisionObject>(e.Entity);
 		if (!object) {
-			object = e.Entity.Find<Rigidbody>();
+			object = Space->FindComponent<Rigidbody>(e.Entity);
 		}
 
 		if (object) {

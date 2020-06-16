@@ -215,7 +215,7 @@
                 1.2674823999404907
             ],
             "translation" : [
-                25.559404373168945,
+                25.559402465820312,
                 -0.1951076090335846,
                 -19.480918884277344
             ]
@@ -715,7 +715,7 @@
                 1.3115650415420532
             ],
             "translation" : [
-                10.704848289489746,
+                10.704849243164062,
                 -3.363171339035034,
                 -16.492738723754883
             ]
@@ -1024,12 +1024,12 @@
         },
         {
             "mimeType" : "image/jpeg",
-            "name" : "normal",
+            "name" : "treeNormal",
             "uri" : "textures/tree/normal.jpg"
         },
         {
             "mimeType" : "image/jpeg",
-            "name" : "baseColor",
+            "name" : "treeColor",
             "uri" : "textures/tree/baseColor.jpg"
         }
     ],

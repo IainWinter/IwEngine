@@ -134,6 +134,7 @@ void GameCameraController::SetTarget(
 {
 	if (   levelName == "levels/forest/forest05.a.json"
 		|| levelName == "levels/forest/forest07.a.json"
+		|| levelName == "levels/forest/forest12.a.json"
 		|| levelName == "levels/forest/forest22.json")
 	{
 		y = 17.15f;

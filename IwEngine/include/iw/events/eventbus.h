@@ -62,6 +62,10 @@ namespace events {
 
 			publish_event(&e);
 		}
+
+		size_t count() {
+			return m_events.size();
+		}
 	private:
 		IWEVENTS_API
 		void publish_event(

@@ -21,6 +21,7 @@ uniform float blinn;
 
 uniform vec4  mat_baseColor;
 uniform float mat_reflectance;
+uniform float mat_emissive;
 uniform float mat_ao;
 
 uniform float     mat_hasDiffuseMap;
@@ -202,8 +203,10 @@ void main() {
 		       * DirectionalLightShadow(DirectionalLightPos[i]);
 	}
 
-	vec3 ambient = max(ambiance - ao, 0) * baseColor.rgb;
-	color += ambient;
+	vec3 ambient  = max(ambiance - ao, 0) * baseColor.rgb;
+	vec3 emissive = mat_emissive * baseColor.rgb;
+
+	color += ambient + emissive;
 
 	FragColor = vec4(linearToSRGB(color), baseColor.a);
 }

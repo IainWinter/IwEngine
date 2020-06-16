@@ -17,7 +17,8 @@ enum class Actions
 	RESET_LEVEL, START_LEVEL, UNLOCK_LEVEL_DOOR, LOAD_NEXT_LEVEL, GOTO_NEXT_LEVEL, AT_NEXT_LEVEL,
 	SPAWN_ENEMY_DEATH, SPAWN_ENEMY, SPAWN_ITEM, SPAWN_NOTE, SPAWN_CONSUMABLE,
 	GIVE_SCORE,
-	SET_CAMERA_TARGET
+	SET_CAMERA_TARGET,
+	CHARGE_KILL_ACTIVE
 };
 
 struct DevConsoleEvent
@@ -277,5 +278,17 @@ struct SetCameraTargetEvent
 		: iw::SingleEvent(iw::val(Actions::SET_CAMERA_TARGET))
 		, Target(target)
 		, ResetY(resetY)
+	{}
+};
+
+struct ChargeKillEvent
+	: iw::SingleEvent
+{
+	float Timer;
+
+	ChargeKillEvent(
+		float timer)
+		: iw::SingleEvent(iw::val(Actions::CHARGE_KILL_ACTIVE))
+		, Timer(timer)
 	{}
 };

@@ -216,8 +216,8 @@ namespace iw {
 
 		Material* def = new Material(vct);
 		def->Set("baseColor", vector4(0.8f, 1.0f));
-		def->Set("roughness", 0.8f);
-		def->Set("metallic", 0.2f);
+		//def->Set("roughness", 0.8f);
+		//def->Set("metallic", 0.2f);
 		def->Set("reflectance", 1.0f);
 		def->Set("emissive", 0.0f);
 		def->Set("indirectDiffuse",  1);
@@ -473,12 +473,14 @@ namespace iw {
 	void SandboxLayer::ImGui() {
 		ImGui::Begin("Sandbox");
 
+		ImGui::Text("Events %i", Bus->count());
+
 		ImGui::SliderFloat("Ambiance", (float*)&MainScene->Ambiance(), 0, 1);
 		//ImGui::SliderFloat("Gamma", (float*)&mainRender->GetGamma(), 0, 5);
 		ImGui::SliderFloat("Camera blend", &blend, 0, 1);
 
 		ImGui::Text("Max Cone Length %f", ml);
-		ImGui::SliderFloat3("Sky color %f", (float*)&skyColor, 0, 1);
+		//ImGui::SliderFloat3("Sky color %f", (float*)&skyColor, 0, 1);
 
 		//ImGui::SliderFloat("Shadow map blur", &blurAmount, 0, 5);
 		ImGui::SliderFloat("Shadow map threshold", &threshold, 0, 1);

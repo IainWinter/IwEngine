@@ -15,6 +15,7 @@ EnemyDeathCircleSystem::EnemyDeathCircleSystem()
 	m_prefab.Radius   = 4.0f;
 	m_prefab.FadeTime = 0.4f;
 	m_prefab.Timer    = 0.0f;
+	m_charged = false;
 }
 
 int EnemyDeathCircleSystem::Initialize() {
@@ -64,10 +65,19 @@ void EnemyDeathCircleSystem::Update(
 bool EnemyDeathCircleSystem::On(
 	iw::ActionEvent& e)
 {
-	if (e.Action == iw::val(Actions::SPAWN_ENEMY_DEATH)) {
-		SpawnEnemyDeath& event = e.as<SpawnEnemyDeath>();
-		iw::Transform* circle = SpawnDeathCircle(m_prefab, event.Position);
-		circle->SetParent(event.Level);
+	switch (e.Action) {
+		case iw::val(Actions::SPAWN_ENEMY_DEATH): {
+			SpawnEnemyDeath& event = e.as<SpawnEnemyDeath>();
+			iw::Transform* circle = SpawnDeathCircle(m_prefab, event.Position);
+			circle->SetParent(event.Level);
+			break;
+		}
+		case iw::val(Actions::CHARGE_KILL_ACTIVE): {
+			ChargeKillEvent& event = e.as<ChargeKillEvent>();
+			m_charged = event.Timer > 0.0f;
+
+			break;
+		}
 	}
 
 	return false;
@@ -79,6 +89,9 @@ iw::Transform* EnemyDeathCircleSystem::SpawnDeathCircle(
 {
 	iw::Entity circle = Space->CreateEntity<iw::Transform, iw::Model, iw::SphereCollider, iw::CollisionObject, EnemyDeathCircle>();
 	
+	prefab.Radius   = m_charged ? 15.0f : prefab.Radius;
+	prefab.FadeTime = m_charged ?  2.0f : prefab.FadeTime;
+
 	                         circle.Set<EnemyDeathCircle>   (prefab);
 	iw::Model*           m = circle.Set<iw::Model>          (m_deathCircleModel);
 	iw::Transform*       t = circle.Set<iw::Transform>      (position, 0.0f);
