@@ -43,7 +43,7 @@ struct OtherGuyTag {
 
 LevelSystem::LevelSystem(
 	iw::Entity& player)
-	: iw::System<iw::Transform, iw::Model, LevelDoor>("Level")
+	: iw::System<iw::CollisionObject, iw::Model, LevelDoor>("Level")
 	, playerEntity(player)
 {
 	//levels = {
@@ -105,9 +105,9 @@ void LevelSystem::Update(
 	iw::EntityComponentArray& view)
 {
 	for (auto entity : view) {
-		auto [transform, model, door] = entity.Components.Tie<Components>();
+		auto [object, model, door] = entity.Components.Tie<Components>();
 
-		transform->Rotation *= iw::quaternion::from_euler_angles(iw::Time::DeltaTime() * .1f);
+		object->Trans().Rotation *= iw::quaternion::from_euler_angles(iw::Time::DeltaTime() * .1f);
 
 		if (door->ColorTimer > 0) {
 			door->ColorTimer -= iw::Time::DeltaTime();

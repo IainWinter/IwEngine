@@ -41,7 +41,7 @@ int ConsumableSystem::Initialize() {
 	iw::Mesh chargedKill = iw::MakeIcosphere(description, 0)->MakeInstance();
 	chargedKill.SetMaterial(Asset->Load<iw::Material>("materials/Default")->MakeInstance());
 
-	chargedKill.Material()->Set("baseColor", iw::Color::From255(255, 255, 0));
+	chargedKill.Material()->Set("baseColor", iw::Color::From255(255, 245, 112));
 	chargedKill.Material()->Set("reflectance", 1.0f);
 	chargedKill.Material()->Set("emissive", 2.0f);
 
@@ -75,6 +75,8 @@ void ConsumableSystem::Update(
 		float time = offset + iw::TotalTime();
 
 		iw::vector3 adj = target;
+		adj.y += 0.2f * sin(time);
+		
 		float rot = (count - index + 1.0f) / count + 1.0f;
 
 		if (consumable->Timer < 0) {
@@ -88,11 +90,14 @@ void ConsumableSystem::Update(
 			m_usingItem = false;
 		}
 
+		ConsumableType type;
+
+		if      (Space->HasComponent<Slowmo>    (entity.Handle)) type = SLOWMO;
+		else if (Space->HasComponent<ChargeKill>(entity.Handle)) type = CHARGE_KILL;
+		else return;
+
 		if (consumable->Timer > 0) {
 			consumable->Timer -= iw::Time::DeltaTime();
-
-			adj.y += iw::randf() * sin(time);
-			adj.z += iw::randf() * sin(time);
 
 			rot += 5;
 
@@ -104,18 +109,29 @@ void ConsumableSystem::Update(
 				transform->Scale = iw::lerp(transform->Scale, iw::vector3(0), iw::Time::DeltaTime() * 5);
 			}
 
-			if (Space->HasComponent<Slowmo>(entity.Handle)) {
-				if (m_used) {
-					iw::Time::SetTimeScale(0.3f);
-				}
+			switch (type) {
+				case SLOWMO: {
+					adj.y += iw::randf() * sin(time);
+					adj.z += iw::randf() * sin(time);
 
-				else {
-					iw::SetTimeScale(1.0f);
-				}
-			}
+					if (m_used) {
+						iw::Time::SetTimeScale(0.3f);
+					}
 
-			else if (Space->HasComponent<ChargeKill>(entity.Handle)) {
-				Bus->push<ChargeKillEvent>(consumable->Timer);
+					else {
+						iw::SetTimeScale(1.0f);
+					}
+					break;
+				}
+				case CHARGE_KILL: {
+					if (m_target.Find<iw::Rigidbody>()->Velocity().length_squared() != 0) {
+						adj = m_target.Find<iw::Transform>()->Position
+							+ m_target.Find<iw::Rigidbody>()->Velocity().normalized() * 2.0f;
+					}
+
+					Bus->push<ChargeKillEvent>(consumable->Timer);
+					break;
+				}
 			}
 		}
 
@@ -127,9 +143,26 @@ void ConsumableSystem::Update(
 			}
 		}
 	
+		switch (type) {
+			case SLOWMO: {
+				if (m_used) {
+					iw::Time::SetTimeScale(0.3f);
+				}
+
+				else {
+					iw::SetTimeScale(1.0f);
+				}
+				break;
+			}
+			case CHARGE_KILL: {
+				Bus->push<ChargeKillEvent>(consumable->Timer);
+				break;
+			}
+		}
+
 		transform->Position = iw::lerp(
 			transform->Position, 
-			adj + iw::vector3(0, 0.2f * sin(time), 0),
+			adj,
 			((totalOffset - offset) * (totalOffset - offset) + iw::Time::DeltaTime()) * 5
 		);
 

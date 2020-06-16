@@ -7,13 +7,14 @@
 #include "iw/graphics/Model.h"
 
 #include "iw/engine/Events/Seq/EventSequence.h"
+#include "iw/physics/Collision/CollisionObject.h"
 
 class LevelSystem
-	: public iw::System<iw::Transform, iw::Model, LevelDoor>
+	: public iw::System<iw::CollisionObject, iw::Model, LevelDoor>
 {
 public:
 	struct Components {
-		iw::Transform* Transform;
+		iw::CollisionObject* Transform;
 		iw::Model* Model;
 		LevelDoor* Door;
 	};
