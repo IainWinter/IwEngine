@@ -56,7 +56,7 @@ LevelSystem::LevelSystem(
 
 	//currentLevel = 0;
 
-	currentLevelName = "levels/forest/forest23.json";
+	currentLevelName = "levels/forest/forest01.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 63);
 	closedColor = iw::Color::From255(201, 66, 66, 63);
@@ -340,12 +340,12 @@ iw::Entity LevelSystem::LoadLevel(
 					if (   colors[i].r > 0.5f
 						&& iw::randf() > 0.5f)
 					{
-						iw::vector3 rand = iw::vector3(iw::randf(), iw::randf(), iw::randf());
+						iw::vector3 rand = iw::vector3(iw::randf(), iw::randf(), iw::randf()) * iw::Pi;
 
 						iw::Transform t;
 						t.Position = positions[i] + rand * 0.2f;
 						t.Scale    = iw::randf() + 1.2f;
-						t.Rotation = iw::quaternion::from_euler_angles(iw::vector3(iw::Pi, 0, 0) + rand * 0.2f);
+						t.Rotation = iw::quaternion::from_euler_angles(iw::vector3(iw::Pi + rand.x * 0.2f, rand.y, rand.z * 0.2f) );
 
 						pSys->SpawnParticle(t);
 					}
@@ -571,7 +571,9 @@ iw::Entity LevelSystem::LoadLevel(
 			0
 		);
 
-		otherGuy.Set<iw::Model>(*Asset->Load<iw::Model>("Sphere"));
+		iw::Model* model = otherGuy.Set<iw::Model>(*Asset->Load<iw::Model>("Sphere"));
+
+		model->GetMesh(0).Material()->Set("baseColor", iw::vector4(0.8f, 1.0f));
 
 		iw::CollisionObject* obj = otherGuy.Set<iw::CollisionObject>();
 		iw::SphereCollider*  col = otherGuy.Set<iw::SphereCollider>(0, 0.75f);

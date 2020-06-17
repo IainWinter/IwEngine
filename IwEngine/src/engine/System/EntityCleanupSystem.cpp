@@ -1,7 +1,7 @@
 #include "iw/engine/Systems/EntityCleanupSystem.h"
 #include "iw/engine/Time.h"
 
-#include "iw/graphics/Mesh.h"
+#include "iw/graphics/Model.h"
 
 #include "iw/graphics/ParticleSystem.h"
 
@@ -30,6 +30,11 @@ namespace Engine {
 		if (mesh) {
 			mesh->Data()    .reset();
 			mesh->Material().reset();
+		}
+
+		Model* model = Space->FindComponent<Model>(e.Entity);
+		if (model) {
+			model->~Model();
 		}
 
 		ParticleSystem<StaticParticle>* sys = Space->FindComponent<ParticleSystem<StaticParticle>>(e.Entity);

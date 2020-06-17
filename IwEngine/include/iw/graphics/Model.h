@@ -12,6 +12,8 @@ namespace Graphics {
 		std::vector<Transform> m_transforms;
 
 	public:
+		~Model() = default;
+
 		void AddMesh(
 			Mesh& mesh,
 			Transform& transform = Transform())
