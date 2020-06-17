@@ -116,6 +116,8 @@ namespace Graphics {
 		std::deque<RenderItem> m_queue;
 		pool_allocator m_pool;
 
+		float m_time;
+
 		int m_layer;
 		int m_shadow;
 		int m_camera;
@@ -123,7 +125,6 @@ namespace Graphics {
 		int m_material;
 		int m_transparency;
 		vector3 m_position;
-
 
 		//bool m_reverse;
 		setup_draw_func m_beforeDrawFunc; // gets set by 'BeforeDraw' and consumed by 'DrawMesh'
@@ -149,7 +150,8 @@ namespace Graphics {
 
 		// Clears screen buffer
 		IWGRAPHICS_API
-		void Begin() override;
+		void Begin(
+			float time = 1.0f) override;
 
 		// executes queue
 		IWGRAPHICS_API

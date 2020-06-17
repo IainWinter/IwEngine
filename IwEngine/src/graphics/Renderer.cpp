@@ -61,7 +61,11 @@ namespace Graphics {
 		Device->SetViewport(m_width, m_height);
 	}
 
-	void Renderer::Begin() {
+	void Renderer::Begin(
+		float time)
+	{
+		m_time = time;
+
 		Device->Clear(); // errors
 		// clear queues
 	}
@@ -229,6 +233,11 @@ namespace Graphics {
 		IPipelineParam* model = m_shader->Handle()->GetParam("model");
 		if (model) {
 			model->SetAsMat4(transform->WorldTransformation());
+		}
+
+		IPipelineParam* time = m_shader->Handle()->GetParam("time");
+		if (time) {
+			time->SetAsFloat(m_time);
 		}
 
 		if (m_debugState != -1) {

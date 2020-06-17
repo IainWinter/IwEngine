@@ -22,7 +22,10 @@ namespace Graphics {
 		m_layer = layer;
 	}
 
-	void QueuedRenderer::Begin() {
+	void QueuedRenderer::Begin(
+		float time)
+	{
+		m_time = time;
 		m_queue.emplace_back(0, RenderOP::BEGIN, nullptr);
 	}
 
@@ -102,7 +105,7 @@ namespace Graphics {
 			
 			switch (item.OP) {
 				case RenderOP::BEGIN: {
-					Renderer::Begin();
+					Renderer::Begin(m_time);
 					break;
 				}
 				case RenderOP::END: {

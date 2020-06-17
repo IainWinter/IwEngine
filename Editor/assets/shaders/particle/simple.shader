@@ -8,11 +8,34 @@ layout(location = 3) in mat4 i_model;
 
 out vec2 TexCoords;
 
+uniform float time;
+
 #include shaders/camera.shader
 #include shaders/shadows.vert
 
+mat4 rotationX(float angle) {
+	return mat4(1.0,		0,			0,			0,
+			 	0, 	cos(angle),	-sin(angle),		0,
+				0, 	sin(angle),	 cos(angle),		0,
+				0, 			0,			  0, 		1);
+}
+
+mat4 rotationY(float angle) {
+	return mat4(cos(angle),		0,		sin(angle),	0,
+			 			0,		1.0,			 0,	0,
+				-sin(angle),	0,		cos(angle),	0,
+						0, 		0,				0,	1);
+}
+
+mat4 rotationZ(float angle) {
+	return mat4(cos(angle),		-sin(angle),	0,	0,
+			 	sin(angle),		cos(angle),		0,	0,
+						0,				0,		1,	0,
+						0,				0,		0,	1);
+}
+
 void main() {
-	vec4 worldPos = i_model * vec4(vert, 1);
+	vec4 worldPos = i_model/* * rotationZ(sin(time * 0.01f * uv.y * 1 / sin(time * 0.01f * uv.x)))*/ * vec4(vert, 1);
 	SetDirectionalLightPos(worldPos);
 
 	TexCoords = uv;

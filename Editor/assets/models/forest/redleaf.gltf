@@ -15,7 +15,18 @@
     "nodes" : [
         {
             "mesh" : 0,
-            "name" : "TexturesCom_Branches0033_1_S"
+            "name" : "Leaf",
+            "rotation" : [
+                0.5,
+                0.4999999701976776,
+                -0.5000000596046448,
+                0.4999999701976776
+            ],
+            "translation" : [
+                0,
+                0,
+                0
+            ]
         }
     ],
     "materials" : [
@@ -40,7 +51,7 @@
     ],
     "meshes" : [
         {
-            "name" : "TexturesCom_Branches0033_1_S",
+            "name" : "Leaf",
             "primitives" : [
                 {
                     "attributes" : {
@@ -70,29 +81,29 @@
         {
             "bufferView" : 0,
             "componentType" : 5126,
-            "count" : 4,
+            "count" : 6,
             "max" : [
                 0.9019327759742737,
-                0.0007089071441441774,
-                0.514007568359375
+                0.514007568359375,
+                -0.0007088316488079727
             ],
             "min" : [
                 -0.09806722402572632,
-                0.0007088316488079727,
-                -0.6430546641349792
+                -0.6430546641349792,
+                -0.0007089071441441774
             ],
             "type" : "VEC3"
         },
         {
             "bufferView" : 1,
             "componentType" : 5126,
-            "count" : 4,
+            "count" : 6,
             "type" : "VEC3"
         },
         {
             "bufferView" : 2,
             "componentType" : 5126,
-            "count" : 4,
+            "count" : 6,
             "type" : "VEC2"
         },
         {
@@ -105,28 +116,28 @@
     "bufferViews" : [
         {
             "buffer" : 0,
-            "byteLength" : 48,
+            "byteLength" : 72,
             "byteOffset" : 0
         },
         {
             "buffer" : 0,
-            "byteLength" : 48,
-            "byteOffset" : 48
+            "byteLength" : 72,
+            "byteOffset" : 72
         },
         {
             "buffer" : 0,
-            "byteLength" : 32,
-            "byteOffset" : 96
+            "byteLength" : 48,
+            "byteOffset" : 144
         },
         {
             "buffer" : 0,
             "byteLength" : 12,
-            "byteOffset" : 128
+            "byteOffset" : 192
         }
     ],
     "buffers" : [
         {
-            "byteLength" : 140,
+            "byteLength" : 204,
             "uri" : "redleaf.bin"
         }
     ]

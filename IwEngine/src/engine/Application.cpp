@@ -182,7 +182,7 @@ namespace Engine {
 		// Update time (Sync)
 		Time::UpdateTime();
 
-		Renderer->Begin();
+		Renderer->Begin(iw::Time::TotalTime());
 
 		// Clear window and poll events (Sync)
 		//m_window->Clear();

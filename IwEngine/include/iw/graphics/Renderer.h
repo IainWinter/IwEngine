@@ -86,6 +86,7 @@ namespace Graphics {
 		ref<Material>     m_material;
 		ref<RenderTarget> m_target;
 		float m_ambiance;
+		float m_time;
 
 		int m_debugState = -1;
 
@@ -135,7 +136,8 @@ namespace Graphics {
 
 		// Clears screen buffer
 		IWGRAPHICS_API
-		virtual void Begin();
+		virtual void Begin(
+			float time = 0.0f);
 
 		// nothing
 		IWGRAPHICS_API

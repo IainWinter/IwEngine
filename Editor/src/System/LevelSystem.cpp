@@ -343,9 +343,9 @@ iw::Entity LevelSystem::LoadLevel(
 						iw::vector3 rand = iw::vector3(iw::randf(), iw::randf(), iw::randf());
 
 						iw::Transform t;
-						t.Position = positions[i];
+						t.Position = positions[i] + rand * 0.2f;
 						t.Scale    = iw::randf() + 1.2f;
-						t.Rotation = iw::quaternion::from_look_at(t.Position, rand * 0.5f + t.Position + iw::vector3::unit_y);
+						t.Rotation = iw::quaternion::from_euler_angles(iw::vector3(iw::Pi, 0, 0) + rand * 0.2f);
 
 						pSys->SpawnParticle(t);
 					}
