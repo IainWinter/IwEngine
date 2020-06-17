@@ -145,7 +145,7 @@ void ConsumableSystem::Update(
 	
 		switch (type) {
 			case SLOWMO: {
-				if (m_used) {
+				if (m_usingItem) {
 					iw::Time::SetTimeScale(0.3f);
 				}
 

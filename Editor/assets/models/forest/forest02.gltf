@@ -1940,15 +1940,15 @@
         {
             "bufferView" : 0,
             "componentType" : 5126,
-            "count" : 4800,
+            "count" : 4749,
             "max" : [
-                32.04419708251953,
+                32.28813552856445,
                 1.492241621017456,
                 18.05748176574707
             ],
             "min" : [
                 -33.00407409667969,
-                -3.6864722119389626e-07,
+                -0.1460101306438446,
                 -18.224227905273438
             ],
             "type" : "VEC3"
@@ -1956,25 +1956,25 @@
         {
             "bufferView" : 1,
             "componentType" : 5126,
-            "count" : 4800,
+            "count" : 4749,
             "type" : "VEC3"
         },
         {
             "bufferView" : 2,
             "componentType" : 5126,
-            "count" : 4800,
+            "count" : 4749,
             "type" : "VEC2"
         },
         {
             "bufferView" : 3,
             "componentType" : 5126,
-            "count" : 4800,
+            "count" : 4749,
             "type" : "VEC4"
         },
         {
             "bufferView" : 4,
             "componentType" : 5123,
-            "count" : 6336,
+            "count" : 6528,
             "type" : "SCALAR"
         },
         {
@@ -2021,58 +2021,58 @@
     "bufferViews" : [
         {
             "buffer" : 0,
-            "byteLength" : 57600,
+            "byteLength" : 56988,
             "byteOffset" : 0
         },
         {
             "buffer" : 0,
-            "byteLength" : 57600,
-            "byteOffset" : 57600
+            "byteLength" : 56988,
+            "byteOffset" : 56988
         },
         {
             "buffer" : 0,
-            "byteLength" : 38400,
-            "byteOffset" : 115200
+            "byteLength" : 37992,
+            "byteOffset" : 113976
         },
         {
             "buffer" : 0,
-            "byteLength" : 76800,
-            "byteOffset" : 153600
+            "byteLength" : 75984,
+            "byteOffset" : 151968
         },
         {
             "buffer" : 0,
-            "byteLength" : 12672,
-            "byteOffset" : 230400
-        },
-        {
-            "buffer" : 0,
-            "byteLength" : 38652,
-            "byteOffset" : 243072
+            "byteLength" : 13056,
+            "byteOffset" : 227952
         },
         {
             "buffer" : 0,
             "byteLength" : 38652,
-            "byteOffset" : 281724
+            "byteOffset" : 241008
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 38652,
+            "byteOffset" : 279660
         },
         {
             "buffer" : 0,
             "byteLength" : 25768,
-            "byteOffset" : 320376
+            "byteOffset" : 318312
         },
         {
             "buffer" : 0,
             "byteLength" : 51536,
-            "byteOffset" : 346144
+            "byteOffset" : 344080
         },
         {
             "buffer" : 0,
             "byteLength" : 13620,
-            "byteOffset" : 397680
+            "byteOffset" : 395616
         }
     ],
     "buffers" : [
         {
-            "byteLength" : 411300,
+            "byteLength" : 409236,
             "uri" : "forest02.bin"
         }
     ]

@@ -60,8 +60,93 @@
     "items": []
   },
   "Capsules": {
-    "size": 0,
-    "items": []
+    "size": 6,
+    "items": [
+      {
+        "Center": {
+          "x": 11.500000,
+          "y": 0.000000,
+          "z": 12.000000
+        },
+        "Direction": {
+          "x": 0.000000,
+          "y": 0.000000,
+          "z": 1.000000
+        },
+        "Height": 6.000000,
+        "Radius": 0.500000
+      },
+      {
+        "Center": {
+          "x": 11.500000,
+          "y": 0.000000,
+          "z": 0.000000
+        },
+        "Direction": {
+          "x": 0.000000,
+          "y": 0.000000,
+          "z": 1.000000
+        },
+        "Height": 6.000000,
+        "Radius": 0.500000
+      },
+      {
+        "Center": {
+          "x": 11.500000,
+          "y": 0.000000,
+          "z": -12.000000
+        },
+        "Direction": {
+          "x": 0.000000,
+          "y": 0.000000,
+          "z": 1.000000
+        },
+        "Height": 6.000000,
+        "Radius": 0.500000
+      },
+      {
+        "Center": {
+          "x": -11.500000,
+          "y": 0.000000,
+          "z": 12.000000
+        },
+        "Direction": {
+          "x": 0.000000,
+          "y": 0.000000,
+          "z": 1.000000
+        },
+        "Height": 6.000000,
+        "Radius": 0.500000
+      },
+      {
+        "Center": {
+          "x": -11.500000,
+          "y": 0.000000,
+          "z": 0.000000
+        },
+        "Direction": {
+          "x": 0.000000,
+          "y": 0.000000,
+          "z": 1.000000
+        },
+        "Height": 6.000000,
+        "Radius": 0.500000
+      },
+      {
+        "Center": {
+          "x": -11.500000,
+          "y": 0.000000,
+          "z": -12.000000
+        },
+        "Direction": {
+          "x": 0.000000,
+          "y": 0.000000,
+          "z": 1.000000
+        },
+        "Height": 6.000000,
+        "Radius": 0.500000
+      }
+    ]
   },
   "Planes": {
     "size": 5,
@@ -119,7 +204,7 @@
     ]
   },
   "Models": {
-    "size": 1,
+    "size": 7,
     "items": [
       {
         "ModelName": {
@@ -142,6 +227,150 @@
             "y": 0,
             "z": 0,
             "w": 1
+          }
+        }
+      },
+      {
+        "ModelName": {
+          "size": 25,
+          "string": "models/forest/barrier.dae"
+        },
+        "Transform": {
+          "Position": {
+            "x": 12,
+            "y": 0,
+            "z": 12
+          },
+          "Scale": {
+            "x": 0.6,
+            "y": 0.6,
+            "z": 0.6
+          },
+          "Rotation": {
+            "x": 0,
+            "y": -0.707,
+            "z": 0,
+            "w": 0.707
+          }
+        }
+      },
+      {
+        "ModelName": {
+          "size": 25,
+          "string": "models/forest/barrier.dae"
+        },
+        "Transform": {
+          "Position": {
+            "x": 12,
+            "y": 0,
+            "z": 0
+          },
+          "Scale": {
+            "x": 0.6,
+            "y": 0.6,
+            "z": 0.6
+          },
+          "Rotation": {
+            "x": 0,
+            "y": -0.707,
+            "z": 0,
+            "w": 0.707
+          }
+        }
+      },
+      {
+        "ModelName": {
+          "size": 25,
+          "string": "models/forest/barrier.dae"
+        },
+        "Transform": {
+          "Position": {
+            "x": 12,
+            "y": 0,
+            "z": -12
+          },
+          "Scale": {
+            "x": 0.6,
+            "y": 0.6,
+            "z": 0.6
+          },
+          "Rotation": {
+            "x": 0,
+            "y": -0.707,
+            "z": 0,
+            "w": 0.707
+          }
+        }
+      },
+      {
+        "ModelName": {
+          "size": 25,
+          "string": "models/forest/barrier.dae"
+        },
+        "Transform": {
+          "Position": {
+            "x": -12,
+            "y": 0,
+            "z": 12
+          },
+          "Scale": {
+            "x": 0.6,
+            "y": 0.6,
+            "z": 0.6
+          },
+          "Rotation": {
+            "x": 0,
+            "y": 0.707,
+            "z": 0,
+            "w": 0.707
+          }
+        }
+      },
+      {
+        "ModelName": {
+          "size": 25,
+          "string": "models/forest/barrier.dae"
+        },
+        "Transform": {
+          "Position": {
+            "x": -12,
+            "y": 0,
+            "z": 0
+          },
+          "Scale": {
+            "x": 0.6,
+            "y": 0.6,
+            "z": 0.6
+          },
+          "Rotation": {
+            "x": 0,
+            "y": 0.707,
+            "z": 0,
+            "w": 0.707
+          }
+        }
+      },
+      {
+        "ModelName": {
+          "size": 25,
+          "string": "models/forest/barrier.dae"
+        },
+        "Transform": {
+          "Position": {
+            "x": -12,
+            "y": 0,
+            "z": -12
+          },
+          "Scale": {
+            "x": 0.6,
+            "y": 0.6,
+            "z": 0.6
+          },
+          "Rotation": {
+            "x": 0,
+            "y": 0.707,
+            "z": 0,
+            "w": 0.707
           }
         }
       }

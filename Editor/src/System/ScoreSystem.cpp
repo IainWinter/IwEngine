@@ -99,8 +99,8 @@ void ScoreSystem::Update(
 
 	iw::Transform t;
 	iw::Transform tp;
-	t.Position = iw::vector3(-6.75, 5.5, 0);
-	tp.Position = iw::vector3(-6.75, 4.75, 0);
+	t.Position = iw::vector3(-7.75, 4.5, -5);
+	tp.Position = iw::vector3(-7.75, 3.75, -5);
 
 	if (totalScore < 0) {
 		totalScoreMesh.SetMaterial(textMatBad);

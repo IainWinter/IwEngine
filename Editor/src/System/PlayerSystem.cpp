@@ -84,7 +84,7 @@ int PlayerSystem::Initialize() {
 		}
 
 		Player* player = playerEntity.Find<Player>();
-		
+
 		if (otherEntity.Has<Enemy>()) {
 			Enemy* enemy = otherEntity.Find<Enemy>();
 
@@ -92,7 +92,7 @@ int PlayerSystem::Initialize() {
 				return;
 			}
 
-			if (enemy->Health > 1) {
+			if (enemy->Type >= EnemyType::MINI_BOSS_BOX_SPIN) {
 				if (player->Transition) return; 
 
 				Player*        playerComp  = playerEntity.Find<Player>();
@@ -102,11 +102,18 @@ int PlayerSystem::Initialize() {
 				//playerComp->Timer = 0.0f; // causes the enemy to not detect damage
 				playerBody->SetIsTrigger(true);
 
+				float distance = 0;
+				switch (enemy->Type) {
+					case EnemyType::MINI_BOSS_BOX_SPIN: distance = 12; break;
+					case EnemyType::BOSS_FOREST:        distance = 18; break;
+					default: return;
+				}
+
 				QueueChange(&player->Transition, true);
 
 				player->TransitionSpeed = 1.5f;
 				player->TransitionStartPosition  = playerTrans->Position;
-				player->TransitionTargetPosition = playerTrans->Position + player->Movement.normalized() * 12;
+				player->TransitionTargetPosition = playerTrans->Position + player->Movement.normalized() * distance;
 				player->Begin = iw::Time::TotalTime();
 			}
 		}
@@ -123,6 +130,15 @@ int PlayerSystem::Initialize() {
 				m_playerModel->GetMesh(0).Material()->Set("baseColor", iw::Color(0.8f, color, color, 1));
 
 				Audio->AsStudio()->CreateInstance("playerDamaged");
+			}
+		}
+
+		else {
+			if (iw::Time::TotalTime() - player->Begin > 0.5f) {
+				iw::Rigidbody* playerBody = playerEntity.Find<iw::Rigidbody>();
+
+				player->Transition = false; // if hit a wall
+				playerBody->SetIsTrigger(false);
 			}
 		}
 	});

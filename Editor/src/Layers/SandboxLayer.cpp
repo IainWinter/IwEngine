@@ -128,7 +128,7 @@ namespace iw {
 
 		iw::Entity textEnt = Space->CreateEntity<iw::Transform, iw::Mesh, iw::UiElement>();
 
-		             textEnt.Set<iw::Transform>(vector3(-6.8, -1.8, 0));
+		             textEnt.Set<iw::Transform>(vector3(-7.8, -2.8, -5));
 		m_textMesh = textEnt.Set<iw::Mesh>(textMesh);
 
 		// Shaders
@@ -199,7 +199,7 @@ namespace iw {
 		//	Cameras
 
 		MainScene->SetMainCamera(new PerspectiveCamera()); // projection from up top
-		m_textCam = new OrthographicCamera(vector3::one, quaternion::from_axis_angle(vector3::unit_y, Pi), 16, 9, -10, 10);
+		m_textCam = new OrthographicCamera(0, quaternion::from_axis_angle(vector3::unit_y, Pi), 16, 9, -10, 10);
 
 		iw::quaternion camrot = 
 			  iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
@@ -372,59 +372,6 @@ namespace iw {
 
 		//	return false;
 		//});
-
-		//iw::ref<iw::Model> rock = Asset->Load<iw::Model>("models/forest/ground.dae");
-
-		//rock->GetMesh(0).Material()->SetShader(shader);
-
-		//iw::Entity e = Space->CreateEntity<iw::Transform, iw::Model>();
-
-		//e.Set<iw::Transform>();
-		//e.Set<iw::Model>(*rock);
-
-		//iw::MoveToTarget* move1 = new iw::MoveToTarget(playerSystem->GetPlayer(), iw::vector3(-10, 1, 0));
-		//iw::MoveToTarget* move2 = new iw::MoveToTarget(playerSystem->GetPlayer(), iw::vector3(-10, 1, 10));
-		//seq.add(move1);
-		//seq.add(move2);
-
-		//iw::DestroyEntity* des = new iw::DestroyEntity(playerSystem->GetPlayer());
-		//seq.add(des);
-	
-
-		//iw::ref<iw::Model> treeModel = Asset->Load<iw::Model>("models/forest/redmaple.gltf");
-		//treeModel->GetMesh(0).Material()->SetShader(vct);
-
-		//iw::ref<iw::Model> leafModel = Asset->Load<iw::Model>("models/forest/redleaf.gltf");
-		//leafModel->GetMesh(0).Material()->SetShader(particleShader);
-		//leafModel->GetMesh(0).Material()->SetTexture("shadowMap", sun->ShadowTarget()->Tex(0));
-		//leafModel->GetMesh(0).Material()->Set("baseColor", iw::Color(1, 1, 1));
-
-		//iw::Entity leaves = Space->CreateEntity<iw::Transform, iw::Model, iw::ParticleSystem<StaticParticle>>();
-
-		//                                           leaves.Set<iw::Model>                         (*treeModel);
-		//iw::Transform*                      tran = leaves.Set<iw::Transform>                     (iw::vector3(-5, 0, -5), .5f);
-		//iw::ParticleSystem<StaticParticle>* pSys = leaves.Set<iw::ParticleSystem<StaticParticle>>();
-
-		//pSys->SetTransform(tran);
-		//pSys->SetParticleMesh(leafModel->GetMesh(0));
-		//pSys->SetCamera(MainScene->MainCamera());
-
-		//// Spawn leaves on tree
-
-		//iw::vector3* positions = (iw::vector3*)treeModel->GetMesh(0).Data()->Get(bName::POSITION);
-		//iw::vector3* normals   = (iw::vector3*)treeModel->GetMesh(0).Data()->Get(bName::NORMAL);
-		//iw::Color*   colors    = (iw::Color*)  treeModel->GetMesh(0).Data()->Get(bName::COLOR);
-
-		//for (int i = 0; i < treeModel->GetMesh(0).Data()->GetCount(bName::COLOR); i++) {
-		//	if (colors[i].r > 0.5f) {
-		//		Transform t;
-		//		t.Position = positions[i] + randf();
-		//		t.Rotation = quaternion::from_look_at(t.Position + randf(), t.Position + normals[i], -iw::vector3::unit_y);
-		//		t.Scale = 1.2f + randf();
-
-		//		pSys->SpawnParticle(t);
-		//	}
-		//}
 
 		return Layer::Initialize();
 	}

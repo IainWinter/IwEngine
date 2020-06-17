@@ -124,6 +124,8 @@ namespace Graphics {
 		int m_transparency;
 		vector3 m_position;
 
+
+		//bool m_reverse;
 		setup_draw_func m_beforeDrawFunc; // gets set by 'BeforeDraw' and consumed by 'DrawMesh'
 		setup_draw_func m_afterDrawFunc;  // gets set by 'AfterDraw'  and consumed by 'DrawMesh'
 
@@ -139,6 +141,11 @@ namespace Graphics {
 		IWGRAPHICS_API
 		void SetLayer(
 			int layer);
+
+		//// sets if distance should be in reverse order
+		//IWGRAPHICS_API
+		//void SetReverse(
+		//	bool reverse);
 
 		// Clears screen buffer
 		IWGRAPHICS_API

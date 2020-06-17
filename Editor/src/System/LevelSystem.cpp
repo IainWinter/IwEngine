@@ -56,7 +56,7 @@ LevelSystem::LevelSystem(
 
 	//currentLevel = 0;
 
-	currentLevelName = "levels/forest/forest12.json";
+	currentLevelName = "levels/forest/forest23.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 63);
 	closedColor = iw::Color::From255(201, 66, 66, 63);
@@ -521,14 +521,14 @@ iw::Entity LevelSystem::LoadLevel(
 		iw::Mesh t = Asset->Load<iw::Font>("fonts/Arial.fnt")->GenerateMesh("A lone soldier longs for his king...", .005f, 1);
 		t.SetMaterial(Asset->Load<iw::Material>("materials/Font")->MakeInstance());
 		t.Material()->Set("color", iw::Color(0, 0, 0, 1));
+		t.Material()->SetTransparency(iw::Transparency::ADD);
 
 		iw::ref<iw::Shader> shader = Asset->Load<iw::Shader>("shaders/simple.shader");
 		Renderer->InitShader(shader, iw::CAMERA);
 
-		float alpha = 1;
-
 		iw::Material material(shader);
-		material.Set("color", iw::Color(0, 0, 0, alpha));
+		material.Set("color", iw::Color(0, 0, 0, 1));
+		material.SetTransparency(iw::Transparency::ADD);
 
 		iw::Mesh bg = Renderer->ScreenQuad().MakeInstance();
 		bg.SetMaterial(REF<iw::Material>(material));
@@ -536,10 +536,10 @@ iw::Entity LevelSystem::LoadLevel(
 		iw::Entity text = Space->CreateEntity<iw::Transform, iw::Mesh, iw::UiElement>();
 		iw::Entity back = Space->CreateEntity<iw::Transform, iw::Mesh, iw::UiElement>();
 
-		text.Set<iw::Transform>(iw::vector3(0, 0, 2));
+		text.Set<iw::Transform>(iw::vector3(0, 0, 1));
 		text.Set<iw::Mesh>(t);
 
-		back.Set<iw::Transform>(iw::vector3(0, 0, 1), 100);
+		back.Set<iw::Transform>(iw::vector3(0, 0, -2), 100);
 		back.Set<iw::Mesh>(bg);
 
 		sequence.Add([&]() {
@@ -628,29 +628,92 @@ iw::Entity LevelSystem::LoadLevel(
 		sequence.Add<iw::DestroyEntity>(otherGuy, true);
 	}
 
-	else if (currentLevelName == "levels/forest/forest02.json") {
-	iw::Mesh t = Asset->Load<iw::Font>("fonts/Arial.fnt")->GenerateMesh("A lone soldier longs for his king...", .005f, 1);
-	t.SetMaterial(Asset->Load<iw::Material>("materials/Font")->MakeInstance());
-	t.Material()->Set("color", iw::Color(1, 1, 1, 0));
+	else if (currentLevelName == "levels/forest/forest07.json") {
+		iw::Mesh t = Asset->Load<iw::Font>("fonts/Arial.fnt")->GenerateMesh("Oh look it seems we've missed one...", .003f, 1);
+		t.SetMaterial(Asset->Load<iw::Material>("materials/Font")->MakeInstance());
+		t.Material()->Set("color", iw::Color(1, 1, 1, 0));
+		t.Material()->SetTransparency(iw::Transparency::ADD);
 
-	iw::Entity text = Space->CreateEntity<iw::Transform, iw::Mesh, iw::UiElement>();
+		iw::Entity text = Space->CreateEntity<iw::Transform, iw::Mesh, iw::UiElement>();
 
-	text.Set<iw::Transform>(iw::vector3(0, 0, 2));
-	text.Set<iw::Mesh>(t);
+		iw::vector3 pos = firstEnemy.Find<iw::Transform>()->Position;
+		pos.y = pos.z + .5f;
+		pos.z = -5;
+		
+		pos.x /= 32;
+		pos.x *= 9;
+		pos.x -= 0.5f;
 
-	sequence.Add([&]() {
-		Bus->send<GameStateEvent>(SOFT_PAUSE);
-		return true;
-	});
-	sequence.Add<iw::Delay>(1.0f);
-	sequence.Add<iw::FadeValue<float>>(t.Material()->Get<float>("color") + 3, 1.0f, 0.5f);
-	sequence.Add<iw::Delay>(2.0f);
-	sequence.Add<iw::FadeValue<float>>(t.Material()->Get<float>("color") + 3, 0.0f, 1);
-	sequence.Add<iw::DestroyEntity>(text, true);
-	sequence.Add([&]() {
-		Bus->send<GameStateEvent>(SOFT_RUN);
-		return true;
-	});
+		text.Set<iw::Transform>(pos);
+		text.Set<iw::Mesh>(t);
+
+		sequence.Add([&]() {
+			Bus->send<GameStateEvent>(PAUSED);
+			Bus->send<GameStateEvent>(SOFT_PAUSE);
+			return true;
+		});
+		sequence.Add<iw::Delay>(0.1f);
+		sequence.Add<iw::FadeValue<float>>(t.Material()->Get<float>("color") + 3, 1.0f, 2);
+		sequence.Add<iw::Delay>(1.5f);
+		sequence.Add<iw::FadeValue<float>>(t.Material()->Get<float>("color") + 3, 0.0f, 1.5f);
+		sequence.Add<iw::DestroyEntity>(text, true);
+		sequence.Add([&]() {
+			Bus->send<GameStateEvent>(RUNNING);
+			Bus->send<GameStateEvent>(SOFT_RUN);
+			return true;
+		});
+	}
+
+	else if (currentLevelName == "levels/forest/forest08.json") {
+
+		iw::ref<iw::Material> material = Asset->Load<iw::Material>("materials/Font")->MakeInstance();
+		material->Set("color", iw::Color(1, 1, 1, 0));
+		material->SetTransparency(iw::Transparency::ADD);
+		
+		iw::Mesh t = Asset->Load<iw::Font>("fonts/Arial.fnt")->GenerateMesh("How'd you get passed my guards?!", .003f, 1);
+		t.SetMaterial(material);
+
+		iw::Mesh t2 = Asset->Load<iw::Font>("fonts/Arial.fnt")->GenerateMesh("Wait no my men!! I'll never forgive you!!!", .003f, 1);
+		t2.SetMaterial(material->MakeInstance());
+
+		iw::Entity text = Space->CreateEntity<iw::Transform, iw::Mesh, iw::UiElement>();
+		iw::Entity text2 = Space->CreateEntity<iw::Transform, iw::Mesh, iw::UiElement>();
+
+		iw::vector3 pos = firstEnemy.Find<iw::Transform>()->Position;
+		pos.y = pos.z + .5f;
+		pos.z = -5;
+
+		pos.x /= 32;
+		pos.x *= 9;
+		pos.x -= 0.5f;
+
+		text.Set<iw::Transform>(pos);
+		text.Set<iw::Mesh>(t);
+
+		text2.Set<iw::Transform>(pos);
+		text2.Set<iw::Mesh>(t2);
+
+		sequence.Add([&]() {
+			Bus->send<GameStateEvent>(PAUSED);
+			Bus->send<GameStateEvent>(SOFT_PAUSE);
+			return true;
+		});
+		sequence.Add<iw::Delay>(0.1f);
+		sequence.Add<iw::FadeValue<float>>(t.Material()->Get<float>("color") + 3, 1.0f, 2);
+		sequence.Add<iw::Delay>(1.5f);
+		sequence.Add<iw::FadeValue<float>>(t.Material()->Get<float>("color") + 3, 0.0f, 1.5f);
+		sequence.Add<iw::DestroyEntity>(text, true);
+
+		sequence.Add<iw::FadeValue<float>>(t2.Material()->Get<float>("color") + 3, 1.0f, 2);
+		sequence.Add<iw::Delay>(1.5f);
+		sequence.Add<iw::FadeValue<float>>(t2.Material()->Get<float>("color") + 3, 0.0f, 1.5f);
+		sequence.Add<iw::DestroyEntity>(text2, true);
+
+		sequence.Add([&]() {
+			Bus->send<GameStateEvent>(RUNNING);
+			Bus->send<GameStateEvent>(SOFT_RUN);
+			return true;
+		});
 	}
 
 	return level;

@@ -275,6 +275,7 @@ namespace iw {
 			auto [t, m] = e.Components.Tie<ModelComponents>();
 
 			iw::CollisionObject* o = Space->FindComponent<iw::CollisionObject>(e.Handle);
+			if(!o)               o = Space->FindComponent<iw::Rigidbody>      (e.Handle);
 
 			std::stringstream ss;
 			ss << e.Index << " pos";

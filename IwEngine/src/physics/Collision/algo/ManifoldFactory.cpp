@@ -67,10 +67,12 @@ namespace algo {
 		vector3 B = A - N * d;
 		        A = A - N * Ar;
 
+		vector3 AtoB = B - A;
+
 		return {
 			A, B,
-			-N,
-			(A - B).length(),
+			-AtoB.normalized(), // this shouldnt be neg
+			AtoB.length(),
 			true
 		};
 	}
@@ -132,7 +134,7 @@ namespace algo {
 
 		return {
 			A, D,
-			-AtoD.normalized(),
+			AtoD.normalized(),
 			AtoD.length(),
 			true
 		};

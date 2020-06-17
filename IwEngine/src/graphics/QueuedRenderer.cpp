@@ -221,6 +221,9 @@ namespace Graphics {
 		op->Camera = camera;
 		op->Target = target;
 		op->Clear  = clear;
+		op->BeforeScene = m_beforeSceneFunc;
+
+		m_beforeSceneFunc = nullptr; // reset for next call
 
 		m_queue.emplace_back(GenOrder(), RenderOP::BEGIN_SCENE, op);
 	}
@@ -389,8 +392,8 @@ namespace Graphics {
 		key depth        = 0;
 		
 		if (m_camera) {
-			if (mesh) {
-				depth = 10000.0f * (m_position - (transform ? transform->Position : 0)).length_fast();
+			if (transform) {
+				depth = 10000.0f * (m_position - (transform ? transform->WorldPosition() : 0)).length_fast();
 			}
 		}
 

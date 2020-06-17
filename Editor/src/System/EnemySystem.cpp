@@ -41,7 +41,7 @@ int EnemySystem::Initialize() {
 void EnemySystem::Update(
 	iw::EntityComponentArray& view)
 {
-	m_enemyCount = 0;
+	unsigned enemyCount = 0;
 
 	for (auto entity : view) {
 		auto [transform, enemy] = entity.Components.Tie<Components>();
@@ -51,7 +51,7 @@ void EnemySystem::Update(
 			obj = Space->FindComponent<iw::Rigidbody>(entity.Handle);
 		}
 
-		m_enemyCount++;
+		enemyCount++;
 
 		switch (enemy->Type) {
 			// spin to win ez
@@ -298,7 +298,7 @@ void EnemySystem::Update(
 					else if (enemy->Timer >= fire1)
 					{
 						if (enemy->Timer2 == 0.0f) {
-							float rot = enemy->Timer * iw::Pi2 * 4;
+							float rot = iw::Time::TotalTime() * iw::Pi2 * 3;
 
 							iw::quaternion offset = transform->Rotation.inverted()
 								* iw::quaternion::from_euler_angles(0, rot, 0);
@@ -310,12 +310,13 @@ void EnemySystem::Update(
 							child.FireTime = 0.120000;
 							child.ChargeTime = 0.000000;
 							child.HasShot = false;
+							child.JustHit = false;
 
-							iw::vector3 position = transform->Position + iw::vector3(sqrt(2), 0, 0) * offset;
+							iw::vector3 position = transform->Position + iw::vector3(sqrt(2), 1, 0) * offset;
 							iw::vector3 velocity = transform->Forward() * offset;
 
-							velocity *= 5 + iw::randf();
-							velocity.y = 15;
+							velocity *= 7.0f + iw::randf() * 2;
+							velocity.y = 10.0f;
 
 							Bus->push<SpawnEnemyEvent>(
 								child,
@@ -326,7 +327,7 @@ void EnemySystem::Update(
 
 						enemy->Timer2 += iw::Time::DeltaTimeScaled();
 
-						if (enemy->Timer2 > 0.1f) {
+						if (enemy->Timer2 > 0.15f) {
 							enemy->Timer2 = 0.0f;
 						}
 
@@ -341,12 +342,13 @@ void EnemySystem::Update(
 
 					else
 					{
-						if (iw::randf() >= 0.0f) {
-							enemy->Timer = fire1;
-						}
-
-						else {
+						if (m_enemyCount > 4 || enemy->JustHit) {
 							enemy->Timer = fire2;
+							enemy->JustHit = false;
+						}
+						
+						else {
+							enemy->Timer = fire1;
 						}
 
 						enemy->HasShot = false;
@@ -366,7 +368,7 @@ void EnemySystem::Update(
 		enemy->Timer += iw::Time::DeltaTimeScaled();
 	}
 
-	if (   m_enemyCount == 0
+	if (   enemyCount == 0
 		&& m_levelResetTimer < 0.2f)
 	{
 		m_levelResetTimer += iw::Time::DeltaTime();
@@ -374,6 +376,8 @@ void EnemySystem::Update(
 			Bus->push<UnlockLevelDoorEvent>();
 		}
 	}
+
+	m_enemyCount = enemyCount;
 }
 
 bool EnemySystem::On(
@@ -490,6 +494,9 @@ iw::Transform* EnemySystem::SpawnEnemy(
 		r->SetIsStatic(false);
 		r->SetSimGravity(true);
 
+		r->SetStaticFriction(.5f);
+		r->SetDynamicFriction(.5f);
+
 		c = r;
 	}
 
@@ -538,7 +545,8 @@ iw::Transform* EnemySystem::SpawnEnemy(
 			return;
 		}
 
-		QueueChange(&enemy->Health, enemy->Health - 1);
+		QueueChange(&enemy->JustHit, true);
+		QueueChange(&enemy->Health,  enemy->Health - 1);
 
 		if (enemy->Health - 1 > 0) {
 			return;

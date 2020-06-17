@@ -11,7 +11,14 @@ namespace Physics {
 		const Physics::SphereCollider* sphere,
 		const Transform* sphereTransform) const
 	{
-		return sphere->TestCollision(sphereTransform, this, transform);
+		ManifoldPoints points = sphere->TestCollision(sphereTransform, this, transform);
+		iw::vector3 T = points.A;
+		points.A = points.B;
+		points.B = T;
+
+		//points.Normal = -points.Normal;
+
+		return points;
 	}
 
 	template<>
