@@ -18,6 +18,8 @@ GameCameraController::GameCameraController(
 float y = 27.15f;
 float s = 1.0f;
 
+bool zoomOut = false;
+
 void GameCameraController::Update(
 	iw::EntityComponentArray& eca)
 {
@@ -39,9 +41,11 @@ void GameCameraController::Update(
 
 		target.y = y;
 
-		if (target.z > 22) { // for 7.a
-			target.y += 7;
-		}
+		//if (   zoomOut
+		//	&& target.x > -4)
+		//{ // for 7.a
+		//	target.y += 7;
+		//}
 
 		//target.x = 0;
 
@@ -132,6 +136,8 @@ bool GameCameraController::On(
 void GameCameraController::SetTarget(
 	std::string_view levelName)
 {
+	zoomOut = false;
+
 	if (   levelName == "levels/forest/forest05.a.json"
 		|| levelName == "levels/forest/forest07.a.json"
 		|| levelName == "levels/forest/forest12.a.json"
@@ -142,5 +148,9 @@ void GameCameraController::SetTarget(
 
 	else {
 		y = 27.15f;
+	}
+
+	if (levelName == "levels/forest/forest07.a.json") {
+		zoomOut = true;
 	}
 }

@@ -408,6 +408,7 @@ bool PlayerSystem::On(
 
 			else if (event.State == SOFT_PAUSE) {
 				m_player.Find<Player>()->Speed = 0.0f;
+				m_player.Find<iw::Rigidbody>()->SetVelocity(0);
 			}
 
 			break;
