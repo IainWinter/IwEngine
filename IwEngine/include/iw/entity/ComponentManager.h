@@ -76,6 +76,10 @@ namespace ECS {
 			void* instance);
 
 		IWENTITY_API
+		bool SetEntityAliveState(
+			const iw::ref<EntityData>& entityData);
+
+		IWENTITY_API
 		void Clear();
 	private:
 		ChunkList* FindChunkList(

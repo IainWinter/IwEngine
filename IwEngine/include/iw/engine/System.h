@@ -190,6 +190,8 @@ namespace Engine {
 	private:
 		//std::queue<std::thread>      m_threads;
 		std::queue<size_t> m_delete; // Probly make it so space can queue component creation at the ComponentArray level because of templated bs
+		std::queue<EntityHandle> m_kill;
+
 		std::queue<PropChange> m_changes;
 
 	protected:
@@ -205,6 +207,12 @@ namespace Engine {
 			size_t index)
 		{
 			m_delete.push(index);
+		}
+
+		void QueueKillEntity(
+			EntityHandle handle)
+		{
+			m_kill.push(handle);
 		}
 
 		template<
@@ -241,9 +249,13 @@ namespace Engine {
 			Update(eca);
 
 			while (!m_delete.empty()) {
-				size_t index = m_delete.front();
-				Space->DestroyEntity(index);
+				Space->DestroyEntity(m_delete.front());
 				m_delete.pop();
+			}
+
+			while (!m_kill.empty()) {
+				Space->KillEntity(m_kill.front());
+				m_kill.pop();
 			}
 
 			while (!m_changes.empty()) {

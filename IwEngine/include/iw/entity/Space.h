@@ -48,39 +48,56 @@ namespace ECS {
 			const ref<Archetype>& archetype);
 
 		// Destroys an entity and its components
+		// Deprecated
 		IWENTITY_API
 		bool DestroyEntity(
-			size_t index);
+			size_t index); // prob can use handle
+
+		// Destroys an entity and its components
+		// USE THIS
+		//IWENTITY_API
+		bool DestroyEntity(
+			EntityHandle handle) { return DestroyEntity(handle.Index); } // temp
+
+		// Marks an entity as dead, gets skipped by iterator, doesn't touch components
+		IWENTITY_API
+		bool KillEntity(
+			EntityHandle handle);
+
+		// Marks an entity as alive, doesn't touch components
+		IWENTITY_API
+		Entity ReviveEntity(
+			EntityHandle handle);
 
 		// Adds a new component to an entity
 		IWENTITY_API
 		void AddComponent(
-			const EntityHandle& entity,
+			EntityHandle handle,
 			const ref<Component>& component);
 
 		// Removes a component from an entity
 		IWENTITY_API
 		void RemoveComponent(
-			const EntityHandle& entity,
+			EntityHandle handle,
 			const ref<Component>& component);
 
 		// Sets component data with a copy
 		IWENTITY_API
 		void* SetComponent(
-			const EntityHandle& entity,
+			EntityHandle handle,
 			const ref<Component>& component,
 			void* data);
 
 		// Finds a pointer to the component data of an entity
 		IWENTITY_API
 		void* FindComponent(
-			const EntityHandle& entity,
+			EntityHandle handle,
 			const ref<Component>& component);
 
 		// Returns true if the entities archetype contains the component
 		IWENTITY_API
 		bool HasComponent(
-			const EntityHandle& entity,
+			EntityHandle handle,
 			const ref<Component>& component);
 
 		// Makes a component query from a list of registered components
@@ -149,20 +166,20 @@ namespace ECS {
 			typename _c,
 			typename... _args>
 		_c* AddComponent(
-			const EntityHandle& entity,
+			EntityHandle handle,
 			_args&&... args)
 		{
-			AddComponent(entity, RegisterComponent<_c>());
-			return SetComponent<_c>(entity, args...);
+			AddComponent(handle, RegisterComponent<_c>());
+			return SetComponent<_c>(handle, args...);
 		}
 
 		// Removes a component from an entity
 		template<
 			typename _c>
 		void RemoveComponent(
-			const EntityHandle& entity)
+			EntityHandle handle)
 		{
-			RemoveComponent(entity, GetComponent<_c>());
+			RemoveComponent(handle, GetComponent<_c>());
 		}
 
 		// Sets component data by constructing it inplace
@@ -170,10 +187,10 @@ namespace ECS {
 			typename _c,
 			typename... _args>
 		_c* SetComponent(
-			const EntityHandle& entity,
+			EntityHandle handle,
 			_args&&... args)
 		{
-			ref<EntityData>& entityData = m_entityManager.GetEntityData(entity.Index);
+			ref<EntityData>& entityData = m_entityManager.GetEntityData(handle.Index);
 			ref<Component>   component  = GetComponent<_c>();
 
 			if (component) {
@@ -198,18 +215,18 @@ namespace ECS {
 		template<
 			typename _c>
 		_c* FindComponent(
-			const EntityHandle& entity)
+			EntityHandle handle)
 		{
-			return (_c*)FindComponent(entity, GetComponent<_c>());
+			return (_c*)FindComponent(handle, GetComponent<_c>());
 		}
 
 		// Returns true if the entities archetype contains the component
 		template<
 			typename _c>
 		bool HasComponent(
-			const EntityHandle& entity)
+			EntityHandle handle)
 		{
-			return HasComponent(entity, GetComponent<_c>());
+			return HasComponent(handle, GetComponent<_c>());
 		}
 
 		// Makes a component query from a list of registered components

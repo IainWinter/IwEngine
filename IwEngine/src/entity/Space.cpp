@@ -72,65 +72,88 @@ namespace ECS {
 			&& m_componentManager.DestroyComponentsData(entityData);
 	}
 
+	bool Space::KillEntity(
+		EntityHandle handle)
+	{
+		ref<EntityData>& entityData = m_entityManager.GetEntityData(handle.Index);
+		entityData->Entity.Alive = false;
+
+		return m_componentManager.SetEntityAliveState(entityData);
+	}
+
+	Entity Space::ReviveEntity(
+		EntityHandle handle)
+	{
+		ref<EntityData>& entityData = m_entityManager.GetEntityData(handle.Index);
+		entityData->Entity.Alive = true;
+
+		bool success = m_componentManager.SetEntityAliveState(entityData);
+		if (!success) {
+			return Entity(EntityHandle::Empty, this);
+		}
+
+		return Entity(entityData->Entity, this);
+	}
+
 	void Space::AddComponent(
-		const EntityHandle& entity,
+		EntityHandle handle,
 		const ref<Component>& component)
 	{
-		if (!m_entityManager.IsValidEntityIndex(entity.Index)) {
+		if (!m_entityManager.IsValidEntityIndex(handle.Index)) {
 			LOG_WARNING << "Tried to add a " << component->Name
-				        << " component to an entity with an invalid index " << entity.Index;
+				        << " component to an entity with an invalid index " << handle.Index;
 			return;
 		}
 
 		if (!component) {
-			LOG_WARNING << "Tried to add empty component from entity " << entity.Index;
+			LOG_WARNING << "Tried to add empty component from entity " << handle.Index;
 			return;
 		}
 
-		ref<EntityData>& entityData = m_entityManager   .GetEntityData(entity.Index);
+		ref<EntityData>& entityData = m_entityManager   .GetEntityData(handle.Index);
 		ref<Archetype>   archetype  = m_archetypeManager.AddComponent (entityData->Archetype, component);
 
 		MoveComponents(entityData, archetype);
 	}
 
 	void Space::RemoveComponent(
-		const EntityHandle& entity,
+		EntityHandle handle,
 		const ref<Component>& component)
 	{
-		if (!m_entityManager.IsValidEntityIndex(entity.Index)) {
+		if (!m_entityManager.IsValidEntityIndex(handle.Index)) {
 			LOG_WARNING << "Tried to remove a " << component->Name
-				        << " component from an entity with an invalid index " << entity.Index;
+				        << " component from an entity with an invalid index " << handle.Index;
 			return;
 		}
 
 		if (!component) {
-			LOG_WARNING << "Tried to remove empty component from entity " << entity.Index;
+			LOG_WARNING << "Tried to remove empty component from entity " << handle.Index;
 			return;
 		}
 
-		ref<EntityData>& entityData = m_entityManager   .GetEntityData  (entity.Index);
+		ref<EntityData>& entityData = m_entityManager   .GetEntityData  (handle.Index);
 		ref<Archetype>   archetype  = m_archetypeManager.RemoveComponent(entityData->Archetype, component);
 
 		MoveComponents(entityData, archetype);
 	}
 
 	void* Space::SetComponent(
-		const EntityHandle& entity,
+		EntityHandle handle,
 		const ref<Component>& component,
 		void* data)
 	{
-		if (!m_entityManager.IsValidEntityIndex(entity.Index)) {
+		if (!m_entityManager.IsValidEntityIndex(handle.Index)) {
 			LOG_WARNING << "Tried to set a " << component->Name
-				        << " component's data on an entity with an invalid index " << entity.Index;
+				        << " component's data on an entity with an invalid index " << handle.Index;
 			return nullptr;
 		}
 
 		if (!component) {
-			LOG_WARNING << "Tried to set empty component on entity " << entity.Index;
+			LOG_WARNING << "Tried to set empty component on entity " << handle.Index;
 			return nullptr;
 		}
 
-		ref<EntityData>& entityData = m_entityManager.GetEntityData(entity.Index);
+		ref<EntityData>& entityData = m_entityManager.GetEntityData(handle.Index);
 		void* ptr = m_componentManager.GetComponentPtr(entityData, component);
 		if (ptr) {
 			memcpy(ptr, data, component->Size); // should pass this all the way down to Chunk.h but ugh
@@ -139,34 +162,34 @@ namespace ECS {
 	}
 
 	void* Space::FindComponent(
-		const EntityHandle& entity,
+		EntityHandle handle,
 		const ref<Component>& component)
 	{
-		if (!m_entityManager.IsValidEntityIndex(entity.Index)) {
+		if (!m_entityManager.IsValidEntityIndex(handle.Index)) {
 			LOG_WARNING << "Tried to find a " << component->Name
-				        << " component on an entity with an invalid index " << entity.Index;
+				        << " component on an entity with an invalid index " << handle.Index;
 			return nullptr;
 		}
 
 		if (!component) {
-			LOG_WARNING << "Tried to find empty component on entity " << entity.Index;
+			LOG_WARNING << "Tried to find empty component on entity " << handle.Index;
 			return nullptr;
 		}
 
-		ref<EntityData>& entityData = m_entityManager.GetEntityData(entity.Index);
+		ref<EntityData>& entityData = m_entityManager.GetEntityData(handle.Index);
 		return m_componentManager.GetComponentPtr(entityData, component);
 	}
 
 	bool Space::HasComponent(
-		const EntityHandle& entity,
+		EntityHandle handle,
 		const ref<Component>& component)
 	{
 		if (!component) {
-			LOG_WARNING << "Tried to find empty component on entity " << entity.Index;
+			LOG_WARNING << "Tried to find empty component on entity " << handle.Index;
 			return false;
 		}
 
-		ref<EntityData>& entityData = m_entityManager.GetEntityData(entity.Index);
+		ref<EntityData>& entityData = m_entityManager.GetEntityData(handle.Index);
 		return entityData->Archetype->HasComponent(component);
 	}
 
@@ -203,21 +226,20 @@ namespace ECS {
 	Entity Space::Instantiate(
 		const Prefab& prefab)
 	{
-		Entity entity = CreateEntity<>();
+		ref<Archetype> archetype = m_archetypeManager.CreateArchetype(
+										&prefab.Components().front(), 
+										&prefab.Components().back());
 
-		auto components  = prefab.Components();
-		auto compDataItr = prefab.ComponentData().begin();
+		Entity entity = CreateEntity(archetype);
 
-		for (iw::ref<Component> component : components) {
-			AddComponent(entity.Handle, component);
-			
-			iw::ref<EntityData>& data = m_entityManager.GetEntityData(entity.Index());
-			void* compData = m_componentManager.GetComponentPtr(data, component);
+		//for (void* data : prefab.ComponentData()) {
+		//	iw::ref<EntityData>& data = m_entityManager.GetEntityData(entity.Index());
+		//	void* compData = m_componentManager.GetComponentPtr(data, component);
 
-			memcpy(compData, *compDataItr, component->Size);
+		//	memcpy(compData, *compDataItr, component->Size);
 
-			compDataItr++;
-		}
+		//	compDataItr++;
+		//}
 
 		return entity;
 	}
