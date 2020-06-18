@@ -11,14 +11,12 @@ ConsumableSystem::ConsumableSystem(
 	iw::Entity& target)
 	: iw::System<iw::Transform, Consumable>("Consumables")
 	, m_target(target)
-	, m_activeConsumable(-1)
-	, m_used(false)
 	, m_usingItem(false)
 {}
 
 int ConsumableSystem::Initialize() {
-	m_prefabs.push_back(Consumable{ SLOWMO,      true, 3.0f });
-	m_prefabs.push_back(Consumable{ CHARGE_KILL, true, 3.0f });
+	m_prefabs.push_back(Consumable{ 0, SLOWMO,      3.0f });
+	m_prefabs.push_back(Consumable{ 1, CHARGE_KILL, 3.0f });
 
 	iw::MeshDescription description;
 	description.DescribeBuffer(iw::bName::POSITION, iw::MakeLayout<float>(3));
@@ -53,8 +51,6 @@ int ConsumableSystem::Initialize() {
 void ConsumableSystem::Update(
 	iw::EntityComponentArray& view)
 {
-	// this could be made much better
-
 	iw::vector3 target = m_target.Find<iw::Transform>()->Position
 		               + iw::vector3(-1.0f, 1.0f, 0.75f);
 	
@@ -81,46 +77,34 @@ void ConsumableSystem::Update(
 
 		if (consumable->Timer < 0) {
 			iw::SetTimeScale(1.0f);
+			Bus->push<ChargeKillEvent>(0.0f);
 
-			Space->FindComponent<iw::Transform>(entity.Handle)->SetParent(nullptr);
-			QueueDestroyEntity(entity.Index);
+			QueueKillEntity (entity.Handle);
+			m_used.push_back(entity.Handle);
 
-			//Bus->push<iw::EntityDestroyEvent>(entity.Handle);
-				
 			m_usingItem = false;
 		}
 
-		ConsumableType type;
-
-		if      (Space->HasComponent<Slowmo>    (entity.Handle)) type = SLOWMO;
-		else if (Space->HasComponent<ChargeKill>(entity.Handle)) type = CHARGE_KILL;
-		else return;
-
-		if (consumable->Timer > 0) {
+		else if (consumable->Timer > 0) {
 			consumable->Timer -= iw::Time::DeltaTime();
 
 			rot += 5;
 
 			if (consumable->Timer + consumable->Time * 0.8f > consumable->Time) {
-				transform->Scale = iw::lerp(transform->Scale, iw::vector3(iw::randf() + 0.25f), iw::Time::DeltaTime() * 8);
+				transform->Scale = iw::lerp(transform->Scale, iw::vector3(iw::randf() * 0.2f + 0.3f), iw::Time::DeltaTime() * 8);
 			}
-
+			
 			else {
 				transform->Scale = iw::lerp(transform->Scale, iw::vector3(0), iw::Time::DeltaTime() * 5);
 			}
 
-			switch (type) {
+			switch (consumable->Type) {
 				case SLOWMO: {
 					adj.y += iw::randf() * sin(time);
 					adj.z += iw::randf() * sin(time);
 
-					if (m_used) {
-						iw::Time::SetTimeScale(0.3f);
-					}
+					iw::Time::SetTimeScale(0.3f);
 
-					else {
-						iw::SetTimeScale(1.0f);
-					}
 					break;
 				}
 				case CHARGE_KILL: {
@@ -136,30 +120,10 @@ void ConsumableSystem::Update(
 		}
 
 		else if (!m_usingItem && iw::Keyboard::KeyDown(iw::C)) {
-			if (consumable->IsActive) {
-				consumable->Timer = consumable->Time;
-				m_used = true;
-				m_usingItem = true;
-			}
+			consumable->Timer = consumable->Time;
+			m_usingItem = true;
 		}
 	
-		switch (type) {
-			case SLOWMO: {
-				if (m_usingItem) {
-					iw::Time::SetTimeScale(0.3f);
-				}
-
-				else {
-					iw::SetTimeScale(1.0f);
-				}
-				break;
-			}
-			case CHARGE_KILL: {
-				Bus->push<ChargeKillEvent>(consumable->Timer);
-				break;
-			}
-		}
-
 		transform->Position = iw::lerp(
 			transform->Position, 
 			adj,
@@ -188,24 +152,31 @@ bool ConsumableSystem::On(
 		case iw::val(Actions::SPAWN_CONSUMABLE): {
 			SpawnConsumableEvent& event = e.as<SpawnConsumableEvent>();
 			iw::Transform* consumable = SpawnConsumable(m_prefabs.at(event.Index));
-			m_activeConsumable = event.Index;
-			m_used = false;
+
 			break;
 		}
 		case iw::val(Actions::RESET_LEVEL): {
-			if (m_used && !m_usingItem && m_activeConsumable > -1) {
-				iw::Transform* consumable = SpawnConsumable(m_prefabs.at(m_activeConsumable));
-				m_used = false;
+			for (iw::EntityHandle handle : m_used) {
+				iw::Entity e = Space->ReviveEntity(handle);
+
+				iw::Transform* t = e.Find<iw::Transform>();
+				t->Scale = 0.25f;
+				t->Position = m_target.Find<iw::Transform>()->Position;
+
+				Consumable* c = e.Find<Consumable>();
+				*c = m_prefabs.at(c->Index);
 			}
+
+			m_used.clear();
 
 			break;
 		}
 		case iw::val(Actions::GOTO_NEXT_LEVEL): {
-			if (m_used) {
-				m_activeConsumable = -1;
+			for (iw::EntityHandle handle : m_used) {
+				Space->DestroyEntity(handle);
 			}
 
-			// should tp items back to start
+			m_used.clear();
 
 			break;
 		}

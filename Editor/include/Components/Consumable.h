@@ -1,13 +1,13 @@
 #pragma once
 
 enum ConsumableType {
-	SLOWMO, // Slow time for a second
-	CHARGE_KILL
+	SLOWMO,     // Slow time for a second
+	CHARGE_KILL // Large bullet kill rad
 };
 
 struct Consumable {
+	unsigned Index;
 	ConsumableType Type;
-	bool IsActive;
 
 	float Time;
 	float Timer;

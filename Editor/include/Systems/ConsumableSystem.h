@@ -13,9 +13,8 @@ class ConsumableSystem
 	: public iw::System<iw::Transform, Consumable>
 {
 private:
-	int m_activeConsumable;
-	bool m_used;
 	bool m_usingItem;
+	std::vector<iw::EntityHandle> m_used;
 
 	std::vector<Consumable> m_prefabs;
 	iw::Model m_slowmoModel;

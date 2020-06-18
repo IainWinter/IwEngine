@@ -21,6 +21,7 @@ int NoteSystem::Initialize() {
 
 	m_prefabs.push_back(Note { "A scroll with the words 'slow mo is bound to c.\nsave this for a hard level idiot' written on it.\nWhat could it be??",     1.5f, 0.0f });
 	m_prefabs.push_back(Note { "A scroll with the words 'charged kill is bound to c.\nsave ths for a hard level idiot' written on it.\nCould this be the answer???", 1.5f, 0.0f });
+	m_prefabs.push_back(Note { "", 1.5f, 0.0f });
 
 	return 0;
 }

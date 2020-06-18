@@ -54,14 +54,6 @@ public:
 
 	iw::Entity LoadLevel(
 		std::string name);
-
-	void LoadTree(
-		std::string name,
-		iw::Transform transform);
-
-	iw::Entity LoadFloor(
-		std::string name,
-		iw::Transform transform);
 private:
 	void DestroyAll(
 		iw::Transform* transform);
