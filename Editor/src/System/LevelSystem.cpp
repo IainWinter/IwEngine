@@ -46,7 +46,7 @@ LevelSystem::LevelSystem(
 	: iw::System<iw::CollisionObject, iw::Model, LevelDoor>("Level")
 	, playerEntity(player)
 {
-	currentLevelName = "levels/forest/forest07.json";
+	currentLevelName = "levels/forest/forest05.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 63);
 	closedColor = iw::Color::From255(201, 66, 66, 63);
@@ -267,6 +267,8 @@ iw::Entity LevelSystem::LoadLevel(
 	iw::Transform* levelTransform = nullptr;
 	iw::Entity level;
 
+	int ii = 0;
+
 	for (ModelPrefab& prefab : currentLevel.Models) {
 		iw::ref<iw::Model> model = Asset->Load<iw::Model>(prefab.ModelName);
 
@@ -339,11 +341,13 @@ iw::Entity LevelSystem::LoadLevel(
 
 			//mesh.Material()->Set("roughness", 0.9f);
 			//mesh.Material()->Set("metallic", 0.1f);
-			mesh.Material()->Set("reflectance", 0.0f);
-			mesh.Material()->Set("refractive", 0.0f);
+			//mesh.Material()->Set("reflectance", 0.0f);
+			//mesh.Material()->Set("refractive", 0.0f);
 
 			mesh.Material()->Set("indirectDiffuse", 1);
 			mesh.Material()->Set("indirectSpecular", 0);
+
+			mesh.Material()->Initialize(Renderer->Device);
 
 			//if (iii == 1) {
 			//	mesh.Material()->Set("baseColor", iw::Color(0, 0, 1));
@@ -356,6 +360,8 @@ iw::Entity LevelSystem::LoadLevel(
 		}
 
 		entity.Set<iw::Model>(*model);
+
+		ii++;
 	}
 
 	// These should all be spawn x events
@@ -500,123 +506,123 @@ iw::Entity LevelSystem::LoadLevel(
 
 	// run a cut scene
 
-	if (   !justHitGoBackDoor
-		&& !justResetLevel)
+	if (currentLevelName == "levels/forest/forest01.json") {
+		iw::Mesh t = Asset->Load<iw::Font>("fonts/Arial.fnt")->GenerateMesh("A lone soldier longs for his king...", .005f, 1);
+		t.SetMaterial(Asset->Load<iw::Material>("materials/Font")->MakeInstance());
+		t.Material()->Set("color", iw::Color(0, 0, 0, 1));
+		t.Material()->SetTransparency(iw::Transparency::ADD);
+
+		iw::ref<iw::Shader> shader = Asset->Load<iw::Shader>("shaders/simple.shader");
+		Renderer->InitShader(shader, iw::CAMERA);
+
+		iw::Material material(shader);
+		material.Set("color", iw::Color(0, 0, 0, 1));
+		material.SetTransparency(iw::Transparency::ADD);
+
+		iw::Mesh bg = Renderer->ScreenQuad().MakeInstance();
+		bg.SetMaterial(REF<iw::Material>(material));
+
+		iw::Entity text = Space->CreateEntity<iw::Transform, iw::Mesh, iw::UiElement>();
+		iw::Entity back = Space->CreateEntity<iw::Transform, iw::Mesh, iw::UiElement>();
+
+		text.Set<iw::Transform>(iw::vector3(0, 0, 1));
+		text.Set<iw::Mesh>(t);
+
+		back.Set<iw::Transform>(iw::vector3(0, 0, -2), 100);
+		back.Set<iw::Mesh>(bg);
+
+		sequence.Add([&]() {
+			Bus->send<GameStateEvent>(SOFT_PAUSE);
+			return true;
+			});
+		sequence.Add<iw::Delay>(1.0f);
+		sequence.Add<iw::FadeValue<iw::vector4>>(t.Material()->Get<iw::vector4>("color"), iw::vector4(1), 0.5f);
+		sequence.Add<iw::Delay>(2.0f);
+		sequence.Add<iw::FadeValue<iw::vector4>>(t.Material()->Get<iw::vector4>("color"), iw::vector4(0, 0, 0, 1), 1);
+		sequence.Add<iw::FadeValue<float>>(t.Material()->Get<float>("color") + 3, 0.0f, 1);
+		sequence.Add<iw::FadeValue<float>>(bg.Material()->Get<float>("color") + 3, 0.0f, 0.5f);
+		sequence.Add<iw::DestroyEntity>(text, true);
+		sequence.Add<iw::DestroyEntity>(back, true);
+		sequence.Add([&]() {
+			Bus->send<GameStateEvent>(SOFT_RUN);
+			return true;
+			});
+	}
+
+	if (currentLevelName == "levels/forest/forest02.json") {
+		Space->DestroyEntity(otherGuy.Index());
+		otherGuy = Space->CreateEntity<iw::Transform, iw::Model, iw::CollisionObject, iw::SphereCollider, OtherGuyTag>();
+
+		otherGuy.Set<OtherGuyTag>(2);
+
+		iw::Transform* t = otherGuy.Set<iw::Transform>(
+			iw::vector3(-18, 1, -15),
+			0
+		);
+
+		iw::Model* model = otherGuy.Set<iw::Model>(*Asset->Load<iw::Model>("Sphere"));
+
+		model->GetMesh(0).Material()->Set("baseColor", iw::vector4(0.8f, 1.0f));
+
+		iw::CollisionObject* obj = otherGuy.Set<iw::CollisionObject>();
+		iw::SphereCollider*  col = otherGuy.Set<iw::SphereCollider>(0, 0.75f);
+
+		obj->SetOnCollision([&](iw::Manifold& man, float dt) {
+			iw::Entity guyEntity, bulletEntity;
+			bool noent = GetEntitiesFromManifold<OtherGuyTag, Bullet>(man, guyEntity, bulletEntity);
+
+			if (noent) {
+				return;
+			}
+
+			OtherGuyTag* guy  = guyEntity.Find<OtherGuyTag>();
+			iw::Mesh&    mesh = guyEntity.Find<iw::Model>()->GetMesh(0);
+
+			guy->Health -= 1;
+
+			if (guy->Health < 0) guy->Health = 0;
+
+			float color = guy->Health / 3.0f;
+			mesh.Material()->Set("baseColor", iw::Color(0.8f, color, color, 1));
+
+			Audio->AsStudio()->CreateInstance("playerDamaged");
+		});
+
+		obj->SetTrans(t);
+		obj->SetCol(col);
+
+		Physics->AddCollisionObject(obj);
+
+		float speed = 6;
+
+		sequence.Add([&]() {
+			Bus->send<GameStateEvent>(SOFT_PAUSE);
+			Bus->send<SetCameraTargetEvent>(iw::vector3(-5, 17.15f, -2));
+			return true;
+		});
+		sequence.Add<iw::MoveToTarget> (otherGuy, iw::Transform(0, 0.75), 5, false, true);
+		sequence.Add<iw::MoveToTarget> (otherGuy, iw::vector3(-16, 1, -4), speed);
+		sequence.Add<iw::MoveToTarget> (otherGuy, iw::vector3(-10, 1, -7), speed);
+		sequence.Add<iw::MoveToTarget> (otherGuy, iw::vector3( -7, 1, -3.25f), speed);
+		sequence.Add<iw::PlaySound>("swordAttack");
+		sequence.Add<iw::MoveToTarget> (otherGuy, iw::vector3( -5, 1, -3), speed * 7.5f);
+		sequence.Add<iw::PlaySound>("enemyDeath");
+		sequence.Add<iw::DestroyEntity>(firstEnemy);
+		sequence.Add<iw::MoveToTarget> (otherGuy, iw::vector3( -3, 1, -2.75f), speed * 3.5f);
+		sequence.Add<iw::MoveToTarget> (otherGuy, iw::vector3(  0.5f, 1,  1.5f), speed);
+		sequence.Add<iw::MoveToTarget> (otherGuy, iw::Transform(0, 0), 1.5f, false, true);
+		sequence.Add([&]() {
+			Bus->send<GameStateEvent>(SOFT_RUN);
+			Bus->send<SetCameraTargetEvent>(0, true);
+			return true;
+		});
+		sequence.Add<iw::DestroyEntity>(otherGuy, true);
+	}
+
+	else if (!justHitGoBackDoor
+		  && !justResetLevel)
 	{
-		if (currentLevelName == "levels/forest/forest01.json") {
-			iw::Mesh t = Asset->Load<iw::Font>("fonts/Arial.fnt")->GenerateMesh("A lone soldier longs for his king...", .005f, 1);
-			t.SetMaterial(Asset->Load<iw::Material>("materials/Font")->MakeInstance());
-			t.Material()->Set("color", iw::Color(0, 0, 0, 1));
-			t.Material()->SetTransparency(iw::Transparency::ADD);
-
-			iw::ref<iw::Shader> shader = Asset->Load<iw::Shader>("shaders/simple.shader");
-			Renderer->InitShader(shader, iw::CAMERA);
-
-			iw::Material material(shader);
-			material.Set("color", iw::Color(0, 0, 0, 1));
-			material.SetTransparency(iw::Transparency::ADD);
-
-			iw::Mesh bg = Renderer->ScreenQuad().MakeInstance();
-			bg.SetMaterial(REF<iw::Material>(material));
-
-			iw::Entity text = Space->CreateEntity<iw::Transform, iw::Mesh, iw::UiElement>();
-			iw::Entity back = Space->CreateEntity<iw::Transform, iw::Mesh, iw::UiElement>();
-
-			text.Set<iw::Transform>(iw::vector3(0, 0, 1));
-			text.Set<iw::Mesh>(t);
-
-			back.Set<iw::Transform>(iw::vector3(0, 0, -2), 100);
-			back.Set<iw::Mesh>(bg);
-
-			sequence.Add([&]() {
-				Bus->send<GameStateEvent>(SOFT_PAUSE);
-				return true;
-			});
-			sequence.Add<iw::Delay>(1.0f);
-			sequence.Add<iw::FadeValue<iw::vector4>>(t.Material()->Get<iw::vector4>("color"), iw::vector4(1), 0.5f);
-			sequence.Add<iw::Delay>(2.0f);
-			sequence.Add<iw::FadeValue<iw::vector4>>(t.Material()->Get<iw::vector4>("color"), iw::vector4(0, 0, 0, 1), 1);
-			sequence.Add<iw::FadeValue<float>>(t .Material()->Get<float>("color") + 3, 0.0f, 1);
-			sequence.Add<iw::FadeValue<float>>(bg.Material()->Get<float>("color") + 3, 0.0f, 0.5f);
-			sequence.Add<iw::DestroyEntity>(text, true);
-			sequence.Add<iw::DestroyEntity>(back, true);
-			sequence.Add([&]() {
-				Bus->send<GameStateEvent>(SOFT_RUN);
-				return true;
-			});
-		}
-
-		else if (currentLevelName == "levels/forest/forest02.json") {
-			Space->DestroyEntity(otherGuy.Index());
-			otherGuy = Space->CreateEntity<iw::Transform, iw::Model, iw::CollisionObject, iw::SphereCollider, OtherGuyTag>();
-
-			otherGuy.Set<OtherGuyTag>(2);
-
-			iw::Transform* t = otherGuy.Set<iw::Transform>(
-				iw::vector3(-18, 1, -15),
-				0
-			);
-
-			iw::Model* model = otherGuy.Set<iw::Model>(*Asset->Load<iw::Model>("Sphere"));
-
-			model->GetMesh(0).Material()->Set("baseColor", iw::vector4(0.8f, 1.0f));
-
-			iw::CollisionObject* obj = otherGuy.Set<iw::CollisionObject>();
-			iw::SphereCollider*  col = otherGuy.Set<iw::SphereCollider>(0, 0.75f);
-
-			obj->SetOnCollision([&](iw::Manifold& man, float dt) {
-				iw::Entity guyEntity, bulletEntity;
-				bool noent = GetEntitiesFromManifold<OtherGuyTag, Bullet>(man, guyEntity, bulletEntity);
-
-				if (noent) {
-					return;
-				}
-
-				OtherGuyTag* guy  = guyEntity.Find<OtherGuyTag>();
-				iw::Mesh&    mesh = guyEntity.Find<iw::Model>()->GetMesh(0);
-
-				guy->Health -= 1;
-
-				if (guy->Health < 0) guy->Health = 0;
-
-				float color = guy->Health / 3.0f;
-				mesh.Material()->Set("baseColor", iw::Color(0.8f, color, color, 1));
-
-				Audio->AsStudio()->CreateInstance("playerDamaged");
-			});
-
-			obj->SetTrans(t);
-			obj->SetCol(col);
-
-			Physics->AddCollisionObject(obj);
-
-			float speed = 6;
-
-			sequence.Add([&]() {
-				Bus->send<GameStateEvent>(SOFT_PAUSE);
-				Bus->send<SetCameraTargetEvent>(iw::vector3(-5, 17.15f, -2));
-				return true;
-			});
-			sequence.Add<iw::MoveToTarget> (otherGuy, iw::Transform(0, 0.75), 5, false, true);
-			sequence.Add<iw::MoveToTarget> (otherGuy, iw::vector3(-16, 1, -4), speed);
-			sequence.Add<iw::MoveToTarget> (otherGuy, iw::vector3(-10, 1, -7), speed);
-			sequence.Add<iw::MoveToTarget> (otherGuy, iw::vector3( -7, 1, -3.25f), speed);
-			sequence.Add<iw::PlaySound>("swordAttack");
-			sequence.Add<iw::MoveToTarget> (otherGuy, iw::vector3( -5, 1, -3), speed * 7.5f);
-			sequence.Add<iw::PlaySound>("enemyDeath");
-			sequence.Add<iw::DestroyEntity>(firstEnemy);
-			sequence.Add<iw::MoveToTarget> (otherGuy, iw::vector3( -3, 1, -2.75f), speed * 3.5f);
-			sequence.Add<iw::MoveToTarget> (otherGuy, iw::vector3(  0.5f, 1,  1.5f), speed);
-			sequence.Add<iw::MoveToTarget> (otherGuy, iw::Transform(0, 0), 1.5f, false, true);
-			sequence.Add([&]() {
-				Bus->send<GameStateEvent>(SOFT_RUN);
-				Bus->send<SetCameraTargetEvent>(0, true);
-				return true;
-			});
-			sequence.Add<iw::DestroyEntity>(otherGuy, true);
-		}
-
-		else if (currentLevelName == "levels/forest/forest07.json") {
+		if (currentLevelName == "levels/forest/forest07.json") {
 			iw::Mesh t = Asset->Load<iw::Font>("fonts/Arial.fnt")->GenerateMesh("Oh look it seems we've missed one...", .003f, 1);
 			t.SetMaterial(Asset->Load<iw::Material>("materials/Font")->MakeInstance());
 			t.Material()->Set("color", iw::Color(1, 1, 1, 0));

@@ -207,19 +207,19 @@
       },
       {
         "ModelName": {
-          "size": 25,
-          "string": "models/forest/barrier.dae"
+          "size": 26,
+          "string": "models/forest/barrier.gltf"
         },
         "Transform": {
           "Position": {
             "x": -5,
             "y": 0,
-            "z": 3.5
+            "z": 3
           },
           "Scale": {
-            "x": 0.7,
-            "y": 0.7,
-            "z": 0.7
+            "x": 1,
+            "y": 1,
+            "z": 1
           },
           "Rotation": {
             "x": 0,

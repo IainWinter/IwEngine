@@ -64,7 +64,7 @@
     "items": [
       {
         "Center": {
-          "x": 11.500000,
+          "x": 12.000000,
           "y": 0.000000,
           "z": 12.000000
         },
@@ -78,7 +78,7 @@
       },
       {
         "Center": {
-          "x": 11.500000,
+          "x": 12.000000,
           "y": 0.000000,
           "z": 0.000000
         },
@@ -92,7 +92,7 @@
       },
       {
         "Center": {
-          "x": 11.500000,
+          "x": 12.000000,
           "y": 0.000000,
           "z": -12.000000
         },
@@ -106,7 +106,7 @@
       },
       {
         "Center": {
-          "x": -11.500000,
+          "x": -12.000000,
           "y": 0.000000,
           "z": 12.000000
         },
@@ -120,7 +120,7 @@
       },
       {
         "Center": {
-          "x": -11.500000,
+          "x": -12.000000,
           "y": 0.000000,
           "z": 0.000000
         },
@@ -134,7 +134,7 @@
       },
       {
         "Center": {
-          "x": -11.500000,
+          "x": -12.000000,
           "y": 0.000000,
           "z": -12.000000
         },
@@ -232,8 +232,8 @@
       },
       {
         "ModelName": {
-          "size": 25,
-          "string": "models/forest/barrier.dae"
+          "size": 26,
+          "string": "models/forest/barrier.gltf"
         },
         "Transform": {
           "Position": {
@@ -242,9 +242,9 @@
             "z": 12
           },
           "Scale": {
-            "x": 0.6,
-            "y": 0.6,
-            "z": 0.6
+            "x": 1,
+            "y": 1,
+            "z": 1
           },
           "Rotation": {
             "x": 0,
@@ -256,8 +256,8 @@
       },
       {
         "ModelName": {
-          "size": 25,
-          "string": "models/forest/barrier.dae"
+          "size": 26,
+          "string": "models/forest/barrier.gltf"
         },
         "Transform": {
           "Position": {
@@ -266,9 +266,9 @@
             "z": 0
           },
           "Scale": {
-            "x": 0.6,
-            "y": 0.6,
-            "z": 0.6
+            "x": 1,
+            "y": 1,
+            "z": 1
           },
           "Rotation": {
             "x": 0,
@@ -280,8 +280,8 @@
       },
       {
         "ModelName": {
-          "size": 25,
-          "string": "models/forest/barrier.dae"
+          "size": 26,
+          "string": "models/forest/barrier.gltf"
         },
         "Transform": {
           "Position": {
@@ -290,9 +290,9 @@
             "z": -12
           },
           "Scale": {
-            "x": 0.6,
-            "y": 0.6,
-            "z": 0.6
+            "x": 1,
+            "y": 1,
+            "z": 1
           },
           "Rotation": {
             "x": 0,
@@ -304,8 +304,8 @@
       },
       {
         "ModelName": {
-          "size": 25,
-          "string": "models/forest/barrier.dae"
+          "size": 26,
+          "string": "models/forest/barrier.gltf"
         },
         "Transform": {
           "Position": {
@@ -314,9 +314,9 @@
             "z": 12
           },
           "Scale": {
-            "x": 0.6,
-            "y": 0.6,
-            "z": 0.6
+            "x": 1,
+            "y": 1,
+            "z": 1
           },
           "Rotation": {
             "x": 0,
@@ -328,8 +328,8 @@
       },
       {
         "ModelName": {
-          "size": 25,
-          "string": "models/forest/barrier.dae"
+          "size": 26,
+          "string": "models/forest/barrier.gltf"
         },
         "Transform": {
           "Position": {
@@ -338,9 +338,9 @@
             "z": 0
           },
           "Scale": {
-            "x": 0.6,
-            "y": 0.6,
-            "z": 0.6
+            "x": 1,
+            "y": 1,
+            "z": 1
           },
           "Rotation": {
             "x": 0,
@@ -352,8 +352,8 @@
       },
       {
         "ModelName": {
-          "size": 25,
-          "string": "models/forest/barrier.dae"
+          "size": 26,
+          "string": "models/forest/barrier.gltf"
         },
         "Transform": {
           "Position": {
@@ -362,9 +362,9 @@
             "z": -12
           },
           "Scale": {
-            "x": 0.6,
-            "y": 0.6,
-            "z": 0.6
+            "x": 1,
+            "y": 1,
+            "z": 1
           },
           "Rotation": {
             "x": 0,

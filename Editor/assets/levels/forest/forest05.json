@@ -236,19 +236,19 @@
       },
       {
         "ModelName": {
-          "size": 25,
-          "string": "models/forest/barrier.dae"
+          "size": 26,
+          "string": "models/forest/barrier.gltf"
         },
         "Transform": {
           "Position": {
-            "x": -3.25,
+            "x": -4,
             "y": 0,
             "z": 0
           },
           "Scale": {
-            "x": 0.75,
-            "y": 0.75,
-            "z": 0.75
+            "x": 1,
+            "y": 1,
+            "z": 1
           },
           "Rotation": {
             "x": 0,
@@ -260,19 +260,19 @@
       },
       {
         "ModelName": {
-          "size": 25,
-          "string": "models/forest/barrier.dae"
+          "size": 26,
+          "string": "models/forest/barrier.gltf"
         },
         "Transform": {
           "Position": {
-            "x": 3.25,
+            "x": 4,
             "y": 0,
             "z": 0
           },
           "Scale": {
-            "x": 0.75,
-            "y": 0.75,
-            "z": 0.75
+            "x": 1,
+            "y": 1,
+            "z": 1
           },
           "Rotation": {
             "x": 0,

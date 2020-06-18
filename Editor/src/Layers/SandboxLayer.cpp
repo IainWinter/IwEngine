@@ -427,7 +427,7 @@ namespace iw {
 		ImGui::SliderFloat("Camera blend", &blend, 0, 1);
 
 		ImGui::Text("Max Cone Length %f", ml);
-		//ImGui::SliderFloat3("Sky color %f", (float*)&skyColor, 0, 1);
+		ImGui::SliderFloat3("Sky color %f", (float*)&skyColor, 0, 1);
 
 		//ImGui::SliderFloat("Shadow map blur", &blurAmount, 0, 5);
 		ImGui::SliderFloat("Shadow map threshold", &threshold, 0, 1);

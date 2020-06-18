@@ -17,7 +17,7 @@ namespace Graphics {
 		Renderer* renderer)
 	{
 		renderer->SetCamera(&m_shadowCamera);
-		renderer->Device->SetCullFace(BACK);
+		//renderer->Device->SetCullFace(BACK);
 	}
 
 	matrix4 DirectionalLight::ViewProjection() const {

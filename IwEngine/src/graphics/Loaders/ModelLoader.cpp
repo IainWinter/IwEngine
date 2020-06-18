@@ -40,11 +40,12 @@ namespace Graphics {
 	{
 		Assimp::Importer importer;
 		const aiScene* scene = importer.ReadFile(path,
-			aiProcess_CalcTangentSpace
+			  aiProcess_CalcTangentSpace
 			| aiProcess_Triangulate
 			| aiProcess_JoinIdenticalVertices
 			| aiProcess_SortByPType
-			| aiProcess_GenNormals);
+			| aiProcess_GenNormals
+			| aiProcess_FlipUVs);
 
 		if (!scene) {
 			LOG_WARNING << importer.GetErrorString();
