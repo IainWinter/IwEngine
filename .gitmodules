@@ -14,3 +14,7 @@
 	path = IwEngine/extern/json
 	url = https://github.com/sheredom/json.h
 	ignore = dirty
+[submodule "IwEngine/extern/imgui"]
+	path = IwEngine/extern/imgui
+	url = https://github.com/ocornut/imgui/
+	branch = docking
