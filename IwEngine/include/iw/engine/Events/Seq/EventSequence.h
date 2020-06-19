@@ -1,6 +1,7 @@
 #pragma once
 
 #include "EventTask.h"
+#include "iw/engine/AppVars.h"
 #include "iw/events/seq/event_seq.h"
 
 namespace iw {
@@ -13,12 +14,7 @@ namespace Engine {
 		: event_seq
 	{
 	private:
-		ref<Space>          Space;
-		ref<QueuedRenderer> Renderer;
-		ref<AssetManager>   Asset;
-		ref<DynamicsSpace>  Physics;
-		ref<AudioSpace>     Audio;
-		ref<eventbus>       Bus;
+		APP_VARS
 
 	public:
 		template<
@@ -38,7 +34,7 @@ namespace Engine {
 		void Add(
 			EventTask* task)
 		{
-			task->SetVars(Space, Renderer, Asset, Physics, Audio, Bus);
+			task->SetAppVars(MakeAppVars());
 			add(task);
 		}
 
@@ -78,21 +74,8 @@ namespace Engine {
 		friend class Layer;
 		friend class SystemBase;
 
-		void SetVars(
-			ref<iw::Space>      space,
-			ref<QueuedRenderer> renderer,
-			ref<AssetManager>   asset,
-			ref<DynamicsSpace>  physics,
-			ref<AudioSpace>     audio,
-			ref<eventbus>       bus)
-		{
-			Space = space;
-			Renderer = renderer;
-			Asset = asset;
-			Physics = physics;
-			Audio = audio;
-			Bus = bus;
-		}
+		SET_APP_VARS
+		MAKE_APP_VARS
 	};
 }
 

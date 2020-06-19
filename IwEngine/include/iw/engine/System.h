@@ -1,14 +1,8 @@
 #pragma once
 
+#include "AppVars.h"
 #include "Events/Events.h"
 #include "iw/engine/Events/Seq/EventSequence.h"
-#include "iw/entity/Space.h"
-#include "iw/graphics/QueuedRenderer.h"
-#include "iw/asset/AssetManager.h"
-#include "iw/physics/Dynamics/DynamicsSpace.h"
-#include "iw/audio/AudioSpace.h"
-#include "iw/events/eventbus.h"
-#include "iw/util/thread/thread_pool.h"
 #include <queue>
 
 namespace iw {
@@ -58,13 +52,16 @@ namespace Engine {
 		const char* m_name;
 
 	protected:
-		ref<Space>               Space;
-		ref<QueuedRenderer>      Renderer;
-		ref<AssetManager>        Asset;
-		ref<DynamicsSpace>       Physics;
-		ref<AudioSpace>          Audio;
 		ref<eventbus>            Bus;
 		ref<thread_pool>         Task;
+
+		ref<AudioSpace>          Audio;
+		ref<AssetManager>        Asset;
+		ref<Console>             Console;
+		ref<InputManager>        Input;
+		ref<DynamicsSpace>       Physics;
+		ref<QueuedRenderer>      Renderer;
+		ref<Space>               Space;
 
 	public:
 		SystemBase(
@@ -150,30 +147,15 @@ namespace Engine {
 
 		inline EventSequence CreateSequence() {
 			EventSequence seq;
-			seq.SetVars(Space, Renderer, Asset, Physics, Audio, Bus);
+			seq.SetAppVars(MakeAppVars());
 
 			return seq;
 		}
 	private:
 		friend class Layer;
 
-		void SetLayerVars(
-			ref<iw::Space> space,
-			ref<QueuedRenderer> renderer,
-			ref<AssetManager> asset,
-			ref<DynamicsSpace> physics,
-			ref<AudioSpace> audio,
-			ref<eventbus> bus,
-			ref<thread_pool> task)
-		{
-			Space    = space;
-			Renderer = renderer;
-			Asset    = asset;
-			Physics  = physics;
-			Audio    = audio;
-			Bus      = bus;
-			Task     = task;
-		}
+		SET_APP_VARS
+		MAKE_APP_VARS
 	};
 
 	template<

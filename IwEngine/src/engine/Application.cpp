@@ -383,6 +383,10 @@ namespace Engine {
 				(int)command.Tokens[1].Int);
 		}
 
+		else if (command.Verb == "quit") {
+			Bus->push<WindowEvent>(Closed, m_window->Id());
+		}
+
 		return false;
 	}
 

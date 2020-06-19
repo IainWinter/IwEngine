@@ -113,23 +113,5 @@ namespace Engine {
 			system->FixedUpdate();
 		}
 	}
-
-	void Layer::SetApplicationVars(
-		ref<iw::Space> space,
-		ref<QueuedRenderer> renderer,
-		ref<AssetManager> asset,
-		ref<DynamicsSpace> physics,
-		ref<AudioSpace> audio,
-		ref<eventbus> bus,
-		ref<thread_pool> task)
-	{
-		Space    = space;
-		Renderer = renderer;
-		Asset    = asset;
-		Physics  = physics;
-		Audio    = audio;
-		Bus      = bus;
-		Task     = task;
-	}
 }
 }

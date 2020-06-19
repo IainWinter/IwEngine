@@ -17,13 +17,8 @@ namespace Engine {
 		const char* m_name;
 		EventStack<ISystem*> m_systems; // layer doesnt own systems but prolly should
 	protected:
-		ref<Space>          Space;
-		ref<QueuedRenderer> Renderer;
-		ref<AssetManager>   Asset;
-		ref<DynamicsSpace>  Physics;
-		ref<AudioSpace>     Audio;
-		ref<eventbus>       Bus;
-		ref<thread_pool>    Task;
+		APP_VARS
+
 		Scene* MainScene;
 
 	public:
@@ -119,7 +114,7 @@ namespace Engine {
 			Args&&... args)
 		{
 			S* system = new S(std::forward<Args>(args)...);
-			system->SetLayerVars(Space, Renderer, Asset, Physics, Audio, Bus, Task);
+			system->SetAppVars(MakeAppVars());
 
 			PushSystem(system);
 			return system;
@@ -131,7 +126,7 @@ namespace Engine {
 			S* system)
 		{
 			LOG_INFO << "Pushed " << system->Name() << " system onto " << Name() << " layer";
-			system->SetLayerVars(Space, Renderer, Asset, Physics, Audio, Bus, Task);
+			system->SetAppVars(MakeAppVars());
 			m_systems.PushBack(system);
 
 			system->OnPush();
@@ -144,7 +139,7 @@ namespace Engine {
 			Args&&... args)
 		{
 			S* system = new S(std::forward<Args>(args)...);
-			system->SetLayerVars(Space, Renderer, Asset, Physics, Audio, Bus, Task);
+			system->SetAppVars(MakeAppVars());
 
 			PushSystemFront(system);
 			return system;
@@ -156,7 +151,7 @@ namespace Engine {
 			S* system)
 		{
 			LOG_INFO << "Pushed " << system->Name() << " system onto " << Name() << " layer";
-			system->SetLayerVars(Space, Renderer, Asset, Physics, Audio, Bus, Task);
+			system->SetAppVars(MakeAppVars());
 			m_systems.PushFront(system);
 
 			system->OnPush();
@@ -179,22 +174,15 @@ namespace Engine {
 	protected:
 		inline EventSequence CreateSequence() {
 			EventSequence seq;
-			seq.SetVars(Space, Renderer, Asset, Physics, Audio, Bus);
+			seq.SetAppVars(MakeAppVars());
 
 			return seq;
 		}
 	private:
 		friend class Application;
 
-		IWENGINE_API
-		void SetApplicationVars(
-			ref<iw::Space> space,
-			ref<QueuedRenderer> renderer,
-			ref<AssetManager> asset,
-			ref<DynamicsSpace> physics,
-			ref<AudioSpace> audio,
-			ref<eventbus> bus,
-			ref<thread_pool> task);
+		SET_APP_VARS
+		MAKE_APP_VARS
 	};
 }
 

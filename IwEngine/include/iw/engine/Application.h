@@ -7,7 +7,6 @@
 #include "EventStack.h"
 #include "InitOptions.h"
 #include "Layers/ImGuiLayer.h"
-#include "iw/input/InputManager.h"
 
 namespace iw {
 namespace Engine {
@@ -22,15 +21,7 @@ namespace Engine {
 		bool m_running;
 
 	protected:
-		ref<Space>          Space;
-		ref<QueuedRenderer> Renderer;
-		ref<AssetManager>   Asset;
-		ref<InputManager>   Input;
-		ref<Console>        Console;
-		ref<DynamicsSpace>  Physics;
-		ref<AudioSpace>     Audio;
-		ref<eventbus>       Bus;
-		ref<thread_pool>    Task;
+		APP_VARS
 
 	public:
 		IWENGINE_API
@@ -89,7 +80,7 @@ namespace Engine {
 			Args&&... args)
 		{
 			L* layer = new L(std::forward<Args>(args)...);
-			layer->SetApplicationVars(Space, Renderer, Asset, Physics, Audio, Bus, Task);
+			layer->SetAppVars(MakeAppVars());
 
 			PushLayer(layer);
 			return layer;
@@ -102,7 +93,7 @@ namespace Engine {
 			Args&& ... args)
 		{
 			L* layer = new L(std::forward<Args>(args)...);
-			layer->SetApplicationVars(Space, Renderer, Asset, Physics, Audio, Bus, Task);
+			layer->SetAppVars(MakeAppVars());
 
 			PushOverlay(layer);
 			return layer;
@@ -114,7 +105,7 @@ namespace Engine {
 			L* layer)
 		{
 			LOG_INFO << "Pushed " << layer->Name() << " layer";
-			layer->SetApplicationVars(Space, Renderer, Asset, Physics, Audio, Bus, Task);
+			layer->SetAppVars(MakeAppVars());
 			m_layers.PushBack(layer);
 
 			layer->OnPush();
@@ -126,7 +117,7 @@ namespace Engine {
 			L* layer)
 		{
 			LOG_INFO << "Pushed " << layer->Name() << " overlay";
-			layer->SetApplicationVars(Space, Renderer, Asset, Physics, Audio, Bus, Task);
+			layer->SetAppVars(MakeAppVars());
 			m_layers.PushFront(layer);
 
 			layer->OnPush();
@@ -145,10 +136,12 @@ namespace Engine {
 	protected:
 		inline EventSequence CreateSequence() {
 			EventSequence seq;
-			seq.SetVars(Space, Renderer, Asset, Physics, Audio, Bus);
+			seq.SetAppVars(MakeAppVars());
 
 			return seq;
 		}
+	private:
+		MAKE_APP_VARS
 	};
 }
 
