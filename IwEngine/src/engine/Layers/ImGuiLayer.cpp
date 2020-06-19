@@ -45,6 +45,8 @@ namespace Engine {
 			1000.0f / ImGui::GetIO().Framerate,
 			ImGui::GetIO().Framerate);
 
+		ImGui::PlotLines("Fps", iw::Time::Times().first, iw::Time::Times().second);
+
 		ImGui::End();
 	}
 

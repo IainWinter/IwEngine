@@ -46,7 +46,7 @@ LevelSystem::LevelSystem(
 	: iw::System<iw::CollisionObject, iw::Model, LevelDoor>("Level")
 	, playerEntity(player)
 {
-	currentLevelName = "levels/forest/forest05.json";
+	currentLevelName = "levels/forest/forest10.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 63);
 	closedColor = iw::Color::From255(201, 66, 66, 63);

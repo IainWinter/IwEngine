@@ -15,10 +15,9 @@ namespace Asset {
 	class AssetLoader
 		: public IAssetLoader
 	{
-	private:
-		std::unordered_map<std::string, iw::ref<_a>> m_loaded;
 	protected:
 		AssetManager& m_asset;
+		std::unordered_map<std::string, iw::ref<_a>> m_loaded;
 
 	private:
 		virtual _a* LoadAsset(

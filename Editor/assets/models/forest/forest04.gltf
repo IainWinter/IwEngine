@@ -2068,7 +2068,7 @@
             ]
         },
         {
-            "name" : "Cube.001",
+            "name" : "Cube.002",
             "primitives" : [
                 {
                     "attributes" : {
@@ -2105,16 +2105,6 @@
     "images" : [
         {
             "mimeType" : "image/jpeg",
-            "name" : "treeNormal",
-            "uri" : "textures/tree/normal.jpg"
-        },
-        {
-            "mimeType" : "image/jpeg",
-            "name" : "treeColor",
-            "uri" : "textures/tree/baseColor.jpg"
-        },
-        {
-            "mimeType" : "image/jpeg",
             "name" : "normal",
             "uri" : "textures/grass/normal.jpg"
         },
@@ -2122,6 +2112,16 @@
             "mimeType" : "image/jpeg",
             "name" : "baseColor",
             "uri" : "textures/grass/baseColor.jpg"
+        },
+        {
+            "mimeType" : "image/jpeg",
+            "name" : "treeNormal",
+            "uri" : "textures/tree/normal.jpg"
+        },
+        {
+            "mimeType" : "image/jpeg",
+            "name" : "treeColor",
+            "uri" : "textures/tree/baseColor.jpg"
         },
         {
             "mimeType" : "image/jpeg",
@@ -2218,35 +2218,35 @@
         {
             "bufferView" : 10,
             "componentType" : 5126,
-            "count" : 3836,
+            "count" : 649,
             "max" : [
-                0.5647572875022888,
-                0.6037499904632568,
-                1.1528329849243164
+                0.5563063621520996,
+                0.5116347670555115,
+                0.8699829578399658
             ],
             "min" : [
-                -0.5452573895454407,
-                -0.4624145030975342,
-                -0.8468537330627441
+                -0.5563371777534485,
+                -0.5536098480224609,
+                -1.1290346384048462
             ],
             "type" : "VEC3"
         },
         {
             "bufferView" : 11,
             "componentType" : 5126,
-            "count" : 3836,
+            "count" : 649,
             "type" : "VEC3"
         },
         {
             "bufferView" : 12,
             "componentType" : 5126,
-            "count" : 3836,
+            "count" : 649,
             "type" : "VEC2"
         },
         {
             "bufferView" : 13,
             "componentType" : 5123,
-            "count" : 19656,
+            "count" : 2730,
             "type" : "SCALAR"
         }
     ],
@@ -2303,28 +2303,28 @@
         },
         {
             "buffer" : 0,
-            "byteLength" : 46032,
+            "byteLength" : 7788,
             "byteOffset" : 392100
         },
         {
             "buffer" : 0,
-            "byteLength" : 46032,
-            "byteOffset" : 438132
+            "byteLength" : 7788,
+            "byteOffset" : 399888
         },
         {
             "buffer" : 0,
-            "byteLength" : 30688,
-            "byteOffset" : 484164
+            "byteLength" : 5192,
+            "byteOffset" : 407676
         },
         {
             "buffer" : 0,
-            "byteLength" : 39312,
-            "byteOffset" : 514852
+            "byteLength" : 5460,
+            "byteOffset" : 412868
         }
     ],
     "buffers" : [
         {
-            "byteLength" : 554164,
+            "byteLength" : 418328,
             "uri" : "forest04.bin"
         }
     ]

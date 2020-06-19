@@ -36,6 +36,18 @@ namespace Graphics {
 			return m_meshes.at(index);
 		}
 
+		Mesh& GetMesh(
+			std::string name)
+		{
+			for (Mesh& mesh : m_meshes) {
+				if (mesh.Data()->Name() == mesh.Data()->Name()) {
+					return  mesh;
+				}
+			}
+
+			return Mesh();
+		}
+
 		Transform& GetTransform(
 			unsigned index)
 		{

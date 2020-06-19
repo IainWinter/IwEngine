@@ -1983,7 +1983,7 @@
             ]
         },
         {
-            "name" : "Cube.001",
+            "name" : "Cube.002",
             "primitives" : [
                 {
                     "attributes" : {
@@ -2133,35 +2133,35 @@
         {
             "bufferView" : 10,
             "componentType" : 5126,
-            "count" : 3836,
+            "count" : 649,
             "max" : [
-                0.5647572875022888,
-                0.6037499904632568,
-                1.1528329849243164
+                0.5563063621520996,
+                0.5116347670555115,
+                0.8699829578399658
             ],
             "min" : [
-                -0.5452573895454407,
-                -0.4624145030975342,
-                -0.8468537330627441
+                -0.5563371777534485,
+                -0.5536098480224609,
+                -1.1290346384048462
             ],
             "type" : "VEC3"
         },
         {
             "bufferView" : 11,
             "componentType" : 5126,
-            "count" : 3836,
+            "count" : 649,
             "type" : "VEC3"
         },
         {
             "bufferView" : 12,
             "componentType" : 5126,
-            "count" : 3836,
+            "count" : 649,
             "type" : "VEC2"
         },
         {
             "bufferView" : 13,
             "componentType" : 5123,
-            "count" : 19656,
+            "count" : 2730,
             "type" : "SCALAR"
         }
     ],
@@ -2218,28 +2218,28 @@
         },
         {
             "buffer" : 0,
-            "byteLength" : 46032,
+            "byteLength" : 7788,
             "byteOffset" : 1092420
         },
         {
             "buffer" : 0,
-            "byteLength" : 46032,
-            "byteOffset" : 1138452
+            "byteLength" : 7788,
+            "byteOffset" : 1100208
         },
         {
             "buffer" : 0,
-            "byteLength" : 30688,
-            "byteOffset" : 1184484
+            "byteLength" : 5192,
+            "byteOffset" : 1107996
         },
         {
             "buffer" : 0,
-            "byteLength" : 39312,
-            "byteOffset" : 1215172
+            "byteLength" : 5460,
+            "byteOffset" : 1113188
         }
     ],
     "buffers" : [
         {
-            "byteLength" : 1254484,
+            "byteLength" : 1118648,
             "uri" : "forest05.bin"
         }
     ]

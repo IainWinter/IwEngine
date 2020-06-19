@@ -191,8 +191,8 @@
       },
       {
         "ModelName": {
-          "size": 25,
-          "string": "models/forest/newrock.dae"
+          "size": 23,
+          "string": "models/forest/rock.gltf"
         },
         "Transform": {
           "Position": {

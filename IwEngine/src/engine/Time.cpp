@@ -1,5 +1,6 @@
 #include "iw/engine/Time.h"
 #include "iw/log/logger.h"
+#include <vector>
 
 namespace iw {
 namespace Time {
@@ -9,6 +10,9 @@ namespace Time {
 	static float     time      = 0.0f;
 	static float     fixedTime = 0.2f;
 	static float     timeScale = 1.0f;
+
+	static std::vector<float> pastDt;
+	float smoothDeltaTime;
 
 	void SetFixedTime(
 		float duration) 
@@ -29,6 +33,20 @@ namespace Time {
 		time += DeltaTime();
 		deltaTime = std::chrono::high_resolution_clock::now() - now;
 		now = std::chrono::high_resolution_clock::now();
+
+		pastDt.push_back(DeltaTime());
+
+		float front = pastDt.front();
+
+		if (pastDt.size() > 3 / iw::Time::DeltaTime()) {
+			pastDt.erase(pastDt.begin());
+		}
+
+		float total = smoothDeltaTime * pastDt.size();
+		total -= front;
+		total += DeltaTime();
+
+		smoothDeltaTime = total / pastDt.size();
 	}
 
 	size_t Ticks() {
@@ -41,6 +59,11 @@ namespace Time {
 
 	float DeltaTime() {
 		return deltaTime.count() / 1000000000.0f;
+	}
+
+	float SmoothDeltaTime()
+	{
+		return smoothDeltaTime;
 	}
 
 	float DeltaTimeScaled() {
@@ -62,6 +85,10 @@ namespace Time {
 
 	float TimeScale() {
 		return timeScale;
+	}
+
+	std::pair<float*, size_t> Times() {
+		return std::make_pair<float*, size_t>(&pastDt.front(), pastDt.size());
 	}
 }
 }

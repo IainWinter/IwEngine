@@ -1,6 +1,6 @@
 {
     "asset" : {
-        "generator" : "Khronos glTF Blender I/O v1.0.5",
+        "generator" : "Khronos glTF Blender I/O v1.1.46",
         "version" : "2.0"
     },
     "scene" : 0,
@@ -15,18 +15,28 @@
     "nodes" : [
         {
             "mesh" : 0,
-            "name" : "Rock",
+            "name" : "Cube.015",
             "rotation" : [
-                0.7146667242050171,
-                0,
-                0,
-                -0.6994651556015015
+                0.4876178503036499,
+                0.4167487621307373,
+                0.6632817387580872,
+                -0.3854953348636627
+            ],
+            "scale" : [
+                7.5,
+                7.5,
+                7.5
             ]
         }
     ],
     "materials" : [
         {
             "doubleSided" : true,
+            "emissiveFactor" : [
+                0,
+                0,
+                0
+            ],
             "name" : "Rock",
             "normalTexture" : {
                 "index" : 0,
@@ -38,25 +48,21 @@
                     "texCoord" : 0
                 },
                 "metallicFactor" : 0,
-                "metallicRoughnessTexture" : {
-                    "index" : 2,
-                    "texCoord" : 0
-                }
+                "roughnessFactor" : 1
             }
         }
     ],
     "meshes" : [
         {
-            "name" : "Cube.012",
+            "name" : "Cube.002",
             "primitives" : [
                 {
                     "attributes" : {
                         "POSITION" : 0,
                         "NORMAL" : 1,
-                        "TANGENT" : 2,
-                        "TEXCOORD_0" : 3
+                        "TEXCOORD_0" : 2
                     },
-                    "indices" : 4,
+                    "indices" : 3,
                     "material" : 0
                 }
             ]
@@ -68,9 +74,6 @@
         },
         {
             "source" : 1
-        },
-        {
-            "source" : 2
         }
     ],
     "images" : [
@@ -81,87 +84,71 @@
         },
         {
             "mimeType" : "image/jpeg",
-            "name" : "albedo",
-            "uri" : "textures/rock/albedo.jpg"
-        },
-        {
-            "mimeType" : "image/jpeg",
-            "name" : "roughness",
-            "uri" : "textures/rock/roughness.jpg"
+            "name" : "baseColor",
+            "uri" : "textures/rock/baseColor.jpg"
         }
     ],
     "accessors" : [
         {
             "bufferView" : 0,
             "componentType" : 5126,
-            "count" : 2304,
+            "count" : 649,
             "max" : [
-                2.5167429447174072,
-                2.5077149868011475,
-                2.0180299282073975
+                0.5563063621520996,
+                0.5116347670555115,
+                0.8699829578399658
             ],
             "min" : [
-                -2.4832570552825928,
-                -2.492284059524536,
-                -1.981969952583313
+                -0.5563371777534485,
+                -0.5536098480224609,
+                -1.1290346384048462
             ],
             "type" : "VEC3"
         },
         {
             "bufferView" : 1,
             "componentType" : 5126,
-            "count" : 2304,
+            "count" : 649,
             "type" : "VEC3"
         },
         {
             "bufferView" : 2,
             "componentType" : 5126,
-            "count" : 2304,
-            "type" : "VEC4"
-        },
-        {
-            "bufferView" : 3,
-            "componentType" : 5126,
-            "count" : 2304,
+            "count" : 649,
             "type" : "VEC2"
         },
         {
-            "bufferView" : 4,
+            "bufferView" : 3,
             "componentType" : 5123,
-            "count" : 2304,
+            "count" : 2730,
             "type" : "SCALAR"
         }
     ],
     "bufferViews" : [
         {
             "buffer" : 0,
-            "byteLength" : 27648,
+            "byteLength" : 7788,
             "byteOffset" : 0
         },
         {
             "buffer" : 0,
-            "byteLength" : 27648,
-            "byteOffset" : 27648
+            "byteLength" : 7788,
+            "byteOffset" : 7788
         },
         {
             "buffer" : 0,
-            "byteLength" : 36864,
-            "byteOffset" : 55296
+            "byteLength" : 5192,
+            "byteOffset" : 15576
         },
         {
             "buffer" : 0,
-            "byteLength" : 18432,
-            "byteOffset" : 92160
-        },
-        {
-            "buffer" : 0,
-            "byteLength" : 4608,
-            "byteOffset" : 110592
+            "byteLength" : 5460,
+            "byteOffset" : 20768
         }
     ],
     "buffers" : [
         {
-            "byteLength" : 115200,
+            "byteLength" : 26228,
             "uri" : "rock.bin"
         }
     ]

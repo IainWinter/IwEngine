@@ -58,6 +58,12 @@ namespace Graphics {
 				aiMaterial* aimaterial = scene->mMaterials[i];
 				const char* ainame     = aimaterial->GetName().C_Str();
 
+				ref<iw::Material> loaded = m_asset.Load<iw::Material>(ainame);
+				if (loaded) {
+					materials.push_back(loaded);
+					continue;
+				}
+
 				Color diffuse;
 				Color ao;
 				//Color emissiveColor;
@@ -133,6 +139,28 @@ namespace Graphics {
 
 		for (size_t i = 0; i < scene->mNumMeshes; i++) {
 			const aiMesh* aimesh = scene->mMeshes[i];
+			const char* ainame = aimesh->mName.C_Str();
+
+			bool cont = false;
+
+			for (auto& model : m_loaded) {
+				for (iw::Mesh& mesh : model.second->GetMeshes()) {
+					if (mesh.Data()->Name() == ainame) {
+						meshes.push_back(mesh);
+
+						cont = true;
+						break;
+					}
+				}
+
+				if (cont) {
+					break;
+				}
+			}
+
+			if (cont) {
+				continue;
+			}
 
 			MeshDescription description;
 
