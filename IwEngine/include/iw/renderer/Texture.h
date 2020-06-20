@@ -22,6 +22,9 @@ namespace RenderAPI {
 
 		IWRENDERER_API virtual void SetFilter      (TextureFilter       filter)       = 0;
 		IWRENDERER_API virtual void SetMipmapFilter(TextureMipmapFilter mipmapFilter) = 0;
+
+		IWRENDERER_API
+		virtual unsigned Id() const = 0;
 	protected:
 		ITexture() = default;
 	};

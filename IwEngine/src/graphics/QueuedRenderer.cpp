@@ -100,6 +100,8 @@ namespace Graphics {
 
 		// execute
 
+		SetTarget(nullptr);
+
 		do {
 			RenderItem& item = m_queue.front(); m_queue.pop_front();
 			
@@ -207,6 +209,8 @@ namespace Graphics {
 		} while (!m_queue.empty());
 
 		m_pool.reset();
+
+		SetTarget(nullptr, false);
 	}
 
 	void QueuedRenderer::BeginScene(

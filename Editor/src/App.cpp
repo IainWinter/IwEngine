@@ -35,7 +35,7 @@ namespace iw {
 		context->AddDevice(k);
 
 		sandbox = PushLayer<SandboxLayer>(); //PushLayer<AimTrainerLayer>();
-		imgui   = PushLayer<ImGuiLayer>();
+		imgui   = PushLayer<ImGuiLayer>(/*Window()*/);
 	}
 
 	int App::Initialize(
@@ -108,7 +108,7 @@ namespace iw {
 		else if (command.Verb == "imgui") {
 			if (GetLayer("ImGui") == nullptr) {
 				PushLayer(imgui);
-				Bus->push<WindowResizedEvent>(Window().Id(), Renderer->Width(), Renderer->Height());
+				Bus->push<WindowResizedEvent>(Window()->Id(), Renderer->Width(), Renderer->Height());
 			}
 
 			else {

@@ -90,6 +90,8 @@ namespace Graphics {
 
 		int m_debugState = -1;
 
+		ref<RenderTarget> m_defaultTarget;
+
 	public:
 		IWGRAPHICS_API
 		Renderer(
@@ -119,6 +121,10 @@ namespace Graphics {
 		void Resize(
 			int width,
 			int height);
+
+		IWGRAPHICS_API
+		void SetDefaultTarget(
+			ref<RenderTarget> target);
 
 		// Used for debudding shaders, will get passed as a uniformed named 'd_state' if not -1
 		void SetDebugState(
@@ -209,7 +215,8 @@ namespace Graphics {
 	//private:
 		IWGRAPHICS_API
 		void SetTarget(
-			const ref<RenderTarget>& target);
+			const ref<RenderTarget>& target,
+			bool useDefault = true);
 
 		IWGRAPHICS_API
 		void SetCamera(

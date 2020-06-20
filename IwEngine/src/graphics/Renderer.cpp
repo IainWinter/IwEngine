@@ -61,6 +61,12 @@ namespace Graphics {
 		Device->SetViewport(m_width, m_height);
 	}
 
+	void Renderer::SetDefaultTarget(
+		ref<RenderTarget> target)
+	{
+		m_defaultTarget = target;
+	}
+
 	void Renderer::Begin(
 		float time)
 	{
@@ -288,7 +294,8 @@ namespace Graphics {
 	}
 
 	void Renderer::SetTarget(
-		const ref<RenderTarget>& target)
+		const ref<RenderTarget>& target,
+		bool useDefault)
 	{
 		//if (m_target != target) {
 			if (target) {
@@ -301,8 +308,16 @@ namespace Graphics {
 			}
 
 			else {
-				Device->SetViewport(m_width, m_height);
-				Device->SetFrameBuffer(nullptr);
+				if (   useDefault
+					&& m_defaultTarget)
+				{
+					SetTarget(m_defaultTarget);
+				}
+
+				else {
+					Device->SetViewport(m_width, m_height);
+					Device->SetFrameBuffer(nullptr);
+				}
 			}
 
 			m_target = target;

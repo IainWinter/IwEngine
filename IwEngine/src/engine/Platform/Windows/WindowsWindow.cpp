@@ -46,7 +46,7 @@ namespace Engine {
 		this->Options = options;
 
 		m_instance = GetModuleHandle(NULL);
-		MAKEINTATOM(RegClass(m_instance, _WndProc));
+		RegClass(m_instance, _WndProc);
 
 		HWND fake_hwnd = CreateWindow(
 			_T("Core"), _T("Fake Window"),
@@ -62,8 +62,7 @@ namespace Engine {
 		ZeroMemory(&fake_pfd, sizeof(fake_pfd));
 		fake_pfd.nSize = sizeof(fake_pfd);
 		fake_pfd.nVersion = 1;
-		fake_pfd.dwFlags = PFD_DRAW_TO_WINDOW
-			| PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+		fake_pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
 		fake_pfd.iPixelType = PFD_TYPE_RGBA;
 		fake_pfd.cColorBits = 32;
 		fake_pfd.cAlphaBits = 8;
@@ -171,10 +170,10 @@ namespace Engine {
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 
-#ifdef IW_DEBUG
-		glEnable(GL_DEBUG_OUTPUT);
-		glDebugMessageCallback(MessageCallback, 0);
-#endif
+//#ifdef IW_DEBUG
+//		glEnable(GL_DEBUG_OUTPUT);
+//		glDebugMessageCallback(MessageCallback, 0);
+//#endif
 
 		SetCursor(options.Cursor);
 		SetState(options.State);
@@ -254,14 +253,23 @@ namespace Engine {
 		Options.Cursor = show;
 	}
 
+	void* WindowsWindow::Handle() const {
+		return m_window;
+	}
+
+	void* WindowsWindow::Context() const {
+		return m_context;
+	}
+
 	LRESULT CALLBACK WindowsWindow::_WndProc(
 		HWND hwnd,
 		UINT msg,
 		WPARAM wParam,
 		LPARAM lParam)
 	{
-		WindowsWindow* me = reinterpret_cast<WindowsWindow*>(
-			GetWindowLongPtr(hwnd, GWLP_USERDATA));
+		LOG_INFO << "parent msg: " << msg;
+
+		WindowsWindow* me = reinterpret_cast<WindowsWindow*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
 		if (me) {
 			return me->HandleEvent(hwnd, msg, wParam, lParam);
 		}
@@ -275,7 +283,7 @@ namespace Engine {
 		WPARAM wParam,
 		LPARAM lParam)
 	{
-		OsEvent ose(Id(), msg, wParam, lParam);
+		OsEvent ose(Id(), hwnd, msg, wParam, lParam);
 		
 		switch (msg) {
 			case WM_INPUT: 
@@ -287,7 +295,7 @@ namespace Engine {
 
 		switch (msg) {
 			case WM_SIZE:
-				Bus->push<WindowResizedEvent>(Translate<WindowResizedEvent>(msg, Id(), wParam, lParam));
+				Bus->push<WindowResizedEvent>(Translate<WindowResizedEvent>(Id(), hwnd, msg, wParam, lParam));
 				break;
 			case WM_CLOSE:
 				Bus->push<WindowEvent>(Closed, Id());

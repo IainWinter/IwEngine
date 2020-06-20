@@ -87,43 +87,51 @@ namespace Engine {
 		{
 			bool error = false;
 
-			if (e.Group == iw::val(EventGroup::ACTION)) {
-				e.Handled = On((ActionEvent&)e);
-			}
-
-			else if (e.Group == iw::val(EventGroup::INPUT)) {
-				switch (e.Type) {
-					case InputEventType::MouseWheel:  e.Handled = On((MouseWheelEvent&) e); break;
-					case InputEventType::MouseMoved:  e.Handled = On((MouseMovedEvent&) e); break;
-					case InputEventType::MouseButton: e.Handled = On((MouseButtonEvent&)e); break;
-					case InputEventType::Key:    	    e.Handled = On((KeyEvent&)        e); break;
-					case InputEventType::KeyTyped:    e.Handled = On((KeyTypedEvent&)   e); break;
-					case InputEventType::Command: break;
-					default: error = true;
+			switch (e.Group) {
+				case iw::val(EventGroup::ACTION): {
+					e.Handled = On((ActionEvent&)e);
+					break;
 				}
-			}
-
-			else if (e.Group == iw::val(EventGroup::WINDOW)) {
-				switch (e.Type) {
-					case WindowEventType::Resized: e.Handled = On((WindowResizedEvent&)e); break;
-					case WindowEventType::Closed:  /*t.On((WindowClosedEvent&)e;*/   break;
-					default: error = true;
+				case iw::val(EventGroup::INPUT): {
+					switch (e.Type) {
+						case InputEventType::MouseWheel:  e.Handled = On((MouseWheelEvent&) e); break;
+						case InputEventType::MouseMoved:  e.Handled = On((MouseMovedEvent&) e); break;
+						case InputEventType::MouseButton: e.Handled = On((MouseButtonEvent&)e); break;
+						case InputEventType::Key:    	    e.Handled = On((KeyEvent&)        e); break;
+						case InputEventType::KeyTyped:    e.Handled = On((KeyTypedEvent&)   e); break;
+						//case InputEventType::Command:                                           break;
+						default: error = true;
+					}
+					break;
 				}
-			}
-
-			else if (e.Group == iw::val(EventGroup::PHYSICS)) {
-				switch (e.Type) {
-					case PhysicsEventType::Collision: e.Handled = On((CollisionEvent&)e); break;
-					default: error = true;
+				case iw::val(EventGroup::OS): {
+					e.Handled = On((OsEvent&)e);
+					break;
 				}
-			}
-
-			else if (e.Group == iw::val(EventGroup::ENTITY)) {
-				switch (e.Type) {
-					case EntityEventType::Destroy:   e.Handled = On((EntityDestroyEvent&)  e); break;
-					case EntityEventType::Destroyed: e.Handled = On((EntityDestroyedEvent&)e); break;
-					default: error = true;
+				case iw::val(EventGroup::WINDOW): {
+					switch (e.Type) {
+						case WindowEventType::Resized: e.Handled = On((WindowResizedEvent&)e); break;
+						case WindowEventType::Closed:  /*t.On((WindowClosedEvent&)e;*/   break;
+						default: error = true;
+					}
+					break;
 				}
+				case iw::val(EventGroup::PHYSICS): {
+					switch (e.Type) {
+						case PhysicsEventType::Collision: e.Handled = On((CollisionEvent&)e); break;
+						default: error = true;
+					}
+					break;
+				}
+				case iw::val(EventGroup::ENTITY): {
+					switch (e.Type) {
+						case EntityEventType::Destroy:   e.Handled = On((EntityDestroyEvent&)  e); break;
+						case EntityEventType::Destroyed: e.Handled = On((EntityDestroyedEvent&)e); break;
+						default: error = true;
+					}
+					break;
+				}
+				default: error = true;
 			}
 
 			if (error) {

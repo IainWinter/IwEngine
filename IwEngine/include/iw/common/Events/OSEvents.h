@@ -5,7 +5,6 @@
 #include "iw/events/event.h"
 #include "iw/util/enum/val.h"
 
-#define IW_PLATFORM_MIN 1
 #include "iw/common/Platform.h"
 
 namespace iw {
@@ -21,18 +20,21 @@ namespace Engine {
 		: iw::event
 	{
 #ifdef IW_PLATFORM_WINDOWS
-		unsigned int WindowId;
-		unsigned int Message;
+		unsigned WindowId;
+		HWND Handle;
+		unsigned Message;
 		WPARAM WParam;
 		LPARAM LParam;
 
 		OsEvent(
-			unsigned int windowId,
-			unsigned int message,
+			unsigned windowId,
+			HWND handle,
+			unsigned message,
 			WPARAM wparam,
 			LPARAM lparam)
 			: iw::event(iw::val(EventGroup::OS), iw::val(OsEventType::GENERIC))
 			, WindowId(windowId)
+			, Handle(handle)
 			, Message(message)
 			, WParam(wparam)
 			, LParam(lparam)

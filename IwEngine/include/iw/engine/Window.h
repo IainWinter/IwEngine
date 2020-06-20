@@ -42,6 +42,9 @@ namespace Engine {
 		virtual bool         Cursor() = 0;
 		virtual DisplayState State()  = 0;
 
+		virtual void* Handle()  const = 0;
+		virtual void* Context() const = 0;
+
 		static IWindow* Create();
 	};
 
@@ -50,14 +53,14 @@ namespace Engine {
 	{
 	protected:
 		WindowOptions Options;
-		iw::ref<InputManager> Input;
-		iw::ref<iw::eventbus> Bus;
+		ref<InputManager> Input;
+		ref<eventbus> Bus;
 
 	public:
 		virtual ~Window() {}
 
 		inline void SetEventbus(
-			iw::ref<iw::eventbus>& bus) override
+			ref<eventbus>& bus) override
 		{
 			Bus = bus;
 		}

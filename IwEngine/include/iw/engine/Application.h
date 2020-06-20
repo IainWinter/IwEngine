@@ -60,10 +60,8 @@ namespace Engine {
 			Manifold& manifold,
 			scalar dt);
 
-		IWENGINE_API
-		inline IWindow& Window() {
-			return *m_window;
-		}
+		IWENGINE_API inline const IWindow* Window() const { return m_window; }
+		IWENGINE_API inline       IWindow* Window()       { return m_window; }
 
 		template<
 			typename L = Layer>

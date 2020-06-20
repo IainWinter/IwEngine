@@ -101,7 +101,7 @@ namespace RenderAPI {
 		IWRENDERER_API void SetMipmapFilter(TextureMipmapFilter mipmapFilter) override;
 
 		IWRENDERER_API
-		unsigned Id() const;
+		unsigned Id() const override;
 
 		IWRENDERER_API
 		int Width() const;

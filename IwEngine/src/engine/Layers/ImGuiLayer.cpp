@@ -2,16 +2,25 @@
 #include "iw/log/logger.h"
 
 #include "OpenGL/imgui_impl_opengl3.h"
+#include "Windows/imgui_impl_win32.h"
 #include "iw/engine/Time.h"
 
-#include "..\extern\imgui\src\imgui_demo.cpp"
+#include "../extern/imgui/src/imgui_demo.cpp"
+
+//extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 namespace iw {
 namespace Engine {
-	ImGuiLayer::ImGuiLayer()
+	ImGuiLayer::ImGuiLayer(
+		IWindow* window)
 		: Layer("ImGui")
+		, m_window(window)
 		, m_context(nullptr)
-	{}
+	{
+		target = REF<RenderTarget>(1280, 720);
+		target->AddTexture(REF<Texture>(1280, 720));
+		target->AddTexture(REF<Texture>(1280, 720, TEX_2D, DEPTH, FLOAT));
+	}
 
 	ImGuiLayer::~ImGuiLayer() {}
 
@@ -22,69 +31,95 @@ namespace Engine {
 		//Bind();
 
 		ImGui::StyleColorsDark();
-		ImGui_ImplOpenGL3_Init("#version 410");
 
 		auto& io = ImGui::GetIO();
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+		if(m_window) io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+
+		if (m_window) ImGui_ImplWin32_Init(m_window->Handle(), m_window->Context());
+		ImGui_ImplOpenGL3_Init("#version 450");
+
+		//Renderer->SetDefaultTarget(target);
 
 		return 0;
 	}
 
+	void ImGuiLayer::OnPush() {
+		Renderer->SetDefaultTarget(target);
+	}
+
+	void ImGuiLayer::OnPop() {
+		Renderer->SetDefaultTarget(nullptr);
+	}
+
 	void ImGuiLayer::Destroy() {
 		ImGui_ImplOpenGL3_Shutdown();
+		if (m_window) ImGui_ImplWin32_Shutdown();
 		ImGui::DestroyContext();
 	}
 
-	void ImGuiLayer::Update() {
-		ImGui::GetIO().DeltaTime = Time::DeltaTime();
-	}
-
 	void ImGuiLayer::ImGui() {
-		// test
+		ImGui::GetIO().DeltaTime = Time::DeltaTime();
 
-		static bool dockspace_open = true;
-		static bool opt_fullscreen_persistant = true;
-		static ImGuiDockNodeFlags opt_flags = ImGuiDockNodeFlags_None;
-		bool opt_fullscreen = opt_fullscreen_persistant;
+		if (m_window) {
+			iw::vector2 pos = Mouse::ScreenPos();
 
-		// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
-		// because it would be confusing to have two docking targets within each others.
-		ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
-		if (opt_fullscreen)
-		{
-			ImGuiViewport* viewport = ImGui::GetMainViewport();
-			ImGui::SetNextWindowPos(viewport->Pos);
-			ImGui::SetNextWindowSize(viewport->Size);
-			ImGui::SetNextWindowViewport(viewport->ID);
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-			window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
-			window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+			ImGui::GetIO().MousePos.x = pos.x;
+			ImGui::GetIO().MousePos.y = pos.y;
 		}
 
-		// When using ImGuiDockNodeFlags_PassthruDockspace, DockSpace() will render our background and handle the pass-thru hole, so we ask Begin() to not render a background.
-		if (opt_flags & ImGuiDockNodeFlags_PassthruDockspace)
-			window_flags |= ImGuiWindowFlags_NoBackground;
+		//ImGui::Begin("ImGui Layer");
 
+		//ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
+		//	1000.0f / ImGui::GetIO().Framerate,
+		//	ImGui::GetIO().Framerate);
+
+		//ImGui::PlotLines("Fps", iw::Time::Times().first, iw::Time::Times().second);
+
+		//ImGui::End();
+
+	}
+
+	void ImGuiLayer::Begin() {
+		// Frame
+
+		ImGui_ImplOpenGL3_NewFrame();
+		if (m_window) ImGui_ImplWin32_NewFrame();
+		ImGui::NewFrame();
+
+		// Dockspace
+
+		ImGuiWindowFlags window_flags =
+			ImGuiWindowFlags_MenuBar
+			| ImGuiWindowFlags_NoDocking
+			| ImGuiWindowFlags_NoTitleBar
+			| ImGuiWindowFlags_NoCollapse
+			| ImGuiWindowFlags_NoResize
+			| ImGuiWindowFlags_NoMove
+			| ImGuiWindowFlags_NoBringToFrontOnFocus
+			| ImGuiWindowFlags_NoNavFocus;
+
+		ImGuiViewport* viewport = ImGui::GetMainViewport();
+		ImGui::SetNextWindowPos(viewport->Pos);
+		ImGui::SetNextWindowSize(viewport->Size);
+		ImGui::SetNextWindowViewport(viewport->ID);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-		ImGui::Begin("DockSpace Demo", &dockspace_open, window_flags);
-		ImGui::PopStyleVar();
 
-		if (opt_fullscreen)
-			ImGui::PopStyleVar(2);
+		ImGui::Begin("Dockspace", nullptr, window_flags);
+
+		ImGui::PopStyleVar();
+		ImGui::PopStyleVar(2);
 
 		// Dockspace
 		ImGuiIO& io = ImGui::GetIO();
-		if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
-		{
-			ImGuiID dockspace_id = ImGui::GetID("MyDockspace");
-			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), opt_flags);
-		}
+		ImGuiID dockspace_id = ImGui::GetID("Dockspace");
 
-		if (ImGui::BeginMenuBar())
-		{
-			if (ImGui::BeginMenu("File"))
-			{
+		ImGui::DockSpace(dockspace_id);
+
+		if (ImGui::BeginMenuBar()) {
+			if (ImGui::BeginMenu("File")) {
 				ImGui::Separator();
 				if (ImGui::MenuItem("Exit", NULL, false)) {
 					Console->QueueCommand("quit");
@@ -96,27 +131,39 @@ namespace Engine {
 			ImGui::EndMenuBar();
 		}
 
-		ImGui::Begin("ImGui Layer");
+		ImGui::Begin("Viewspace");
 
-		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
-			1000.0f / ImGui::GetIO().Framerate,
-			ImGui::GetIO().Framerate);
+		ImVec2 size;
+		size.x = target->Tex(0)->Width();
+		size.y = target->Tex(0)->Height();
 
-		ImGui::PlotLines("Fps", iw::Time::Times().first, iw::Time::Times().second);
+		unsigned id = target->Tex(0)->Handle()->Id();
+		ImGui::Image((void*)id, size, ImVec2(0, 1), ImVec2(1, 0));
 
 		ImGui::End();
-
-		ImGui::End();
-	}
-
-	void ImGuiLayer::Begin() {
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui::NewFrame();
 	}
 
 	void ImGuiLayer::End() {
+		// Dockspace
+
+		ImGui::End();
+
+		// Frame
+
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+		// Update and Render additional Platform Windows
+		// (Platform functions may change the current OpenGL context, so we save/restore it to make it easier to paste this code elsewhere.
+		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+		{
+			//m_window->ReleaseOwnership();
+
+			ImGui::UpdatePlatformWindows();
+			ImGui::RenderPlatformWindowsDefault();
+			
+			m_window->TakeOwnership();
+		}
 	}
 
 	bool ImGuiLayer::On(
@@ -132,19 +179,16 @@ namespace Engine {
 	bool ImGuiLayer::On(
 		MouseMovedEvent& e)
 	{
+		if (m_window) return false;
+
 		if (e.Device == DeviceType::MOUSE) {
 			auto& io = ImGui::GetIO();
+
 			io.MousePos.x = (float)e.X;
 			io.MousePos.y = (float)e.Y;
-
-			return io.WantCaptureMouse;
 		}
 
-		if (e.Device == DeviceType::RAW_MOUSE) {
-			return ImGui::GetIO().WantCaptureMouse;
-		}
-
-		return false;
+		return ImGui::GetIO().WantCaptureMouse;
 	}
 
 	bool ImGuiLayer::On(
@@ -154,17 +198,16 @@ namespace Engine {
 			auto& io = ImGui::GetIO();
 			if (io.WantCaptureMouse) {
 				io.MouseDown[e.Button - LMOUSE] = e.State;
-				return true;
 			}
-
-			return io.WantCaptureMouse;
 		}
 
-		if (e.Device == DeviceType::RAW_MOUSE) {
-			return ImGui::GetIO().WantCaptureMouse;
-		}
-
-		return false;
+		return ImGui::GetIO().WantCaptureMouse;
+	}
+	
+	bool ImGuiLayer::On(
+		OsEvent& e)
+	{
+		return false;// ImGui_ImplWin32_WndProcHandler(e.Handle, e.Message, e.WParam, e.LParam);
 	}
 }
 }

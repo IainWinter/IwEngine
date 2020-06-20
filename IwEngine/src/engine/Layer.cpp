@@ -80,6 +80,12 @@ namespace Engine {
 	}
 
 	bool Layer::On(
+		OsEvent& e)
+	{
+		return false;
+	}
+
+	bool Layer::On(
 		CollisionEvent& e)
 	{
 		return m_systems.On(e);

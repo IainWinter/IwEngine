@@ -5,6 +5,7 @@
 #include "InitOptions.h"
 #include "EventStack.h"
 #include "iw/graphics/Scene.h"
+#include "iw/common/Events/OSEvents.h"
 
 #undef PlaySound
 
@@ -73,6 +74,10 @@ namespace Engine {
 		// Window events
 
 		IWENGINE_API virtual bool On(WindowResizedEvent& e);
+
+		// Os events
+
+		IWENGINE_API virtual bool On(OsEvent& e);
 
 		// Physics events
 

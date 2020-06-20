@@ -333,33 +333,36 @@ namespace Engine {
 		iw::event& e)
 	{
 		bool error = false;
-		if (e.Group == iw::val(EventGroup::INPUT)) {
-			switch (e.Type) {
-				case iw::val(InputEventType::Command): {
-					InputCommandEvent& ice = e.as<InputCommandEvent>();
-					Console->QueueCommand(ice.Command);
-					e.Handled = true;
-					break;
+		switch (e.Group) {
+			case iw::val(EventGroup::INPUT): {
+				switch (e.Type) {
+					case iw::val(InputEventType::Command): {
+						InputCommandEvent& ice = e.as<InputCommandEvent>();
+						Console->QueueCommand(ice.Command);
+						e.Handled = true;
+						break;
+					}
 				}
-			}
-		}
 
-		else if (e.Group == iw::val(EventGroup::WINDOW)) {
-			switch (e.Type) {
-				case Closed: {
-					m_running = false;
-					e.Handled = true;
-					break;
-				}
-				case Resized: {
-					WindowResizedEvent& wre = e.as<WindowResizedEvent>();
-					Renderer->Resize(wre.Width, wre.Height);
-					e.Handled = true;
-					break;
-				}
-				default: {
-					error = true;
-					break;
+				break;
+			}
+			case iw::val(EventGroup::WINDOW): {
+				switch (e.Type) {
+					case Closed: {
+						m_running = false;
+						e.Handled = true;
+						break;
+					}
+					case Resized: {
+						WindowResizedEvent& wre = e.as<WindowResizedEvent>();
+						Renderer->Resize(wre.Width, wre.Height);
+						e.Handled = true;
+						break;
+					}
+					default: {
+						error = true;
+						break;
+					}
 				}
 			}
 		}
