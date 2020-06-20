@@ -10,8 +10,8 @@ namespace iw {
 namespace Graphics {
 	struct RenderTarget {
 	private:
-		int m_width;
-		int m_height;
+		unsigned m_width;
+		unsigned m_height;
 		bool m_noColor;
 		std::vector<iw::ref<Texture>> m_textures;
 
@@ -20,8 +20,6 @@ namespace Graphics {
 	public:
 		IWGRAPHICS_API
 		RenderTarget(
-			int width,
-			int height,
 			bool noColor = false);
 
 		IWGRAPHICS_API
@@ -37,14 +35,19 @@ namespace Graphics {
 			iw::ref<Texture> texture);
 
 		IWGRAPHICS_API
-		int Width() const;
+		unsigned Width() const;
 
 		IWGRAPHICS_API
-		int Height() const;
+		unsigned Height() const;
+
+		IWGRAPHICS_API
+		void Resize(
+			unsigned width,
+			unsigned height);
 
 		IWGRAPHICS_API
 		const iw::ref<Texture>& Tex(
-			int index) const;
+			unsigned index) const;
 
 		IWGRAPHICS_API
 		IFrameBuffer* Handle() const;

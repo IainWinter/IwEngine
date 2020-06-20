@@ -17,9 +17,11 @@ namespace Engine {
 		, m_window(window)
 		, m_context(nullptr)
 	{
-		target = REF<RenderTarget>(1280, 720);
+		target = REF<RenderTarget>();
 		target->AddTexture(REF<Texture>(1280, 720));
 		target->AddTexture(REF<Texture>(1280, 720, TEX_2D, DEPTH, FLOAT));
+
+		aspect = (float)target->Height() / target->Width();
 	}
 
 	ImGuiLayer::~ImGuiLayer() {}
@@ -133,9 +135,14 @@ namespace Engine {
 
 		ImGui::Begin("Viewspace");
 
-		ImVec2 size;
-		size.x = target->Tex(0)->Width();
-		size.y = target->Tex(0)->Height();
+		ImVec2 size  = ImGui::GetWindowSize();
+		size.y = size.x * aspect;
+
+		//target->Resize(size.x, size.y);
+
+		//ImVec2 size;
+		//size.x = target->Tex(0)->Width();
+		//size.y = target->Tex(0)->Height();
 
 		unsigned id = target->Tex(0)->Handle()->Id();
 		ImGui::Image((void*)id, size, ImVec2(0, 1), ImVec2(1, 0));

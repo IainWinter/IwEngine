@@ -35,7 +35,7 @@ int RacingLayer::Initialize() {
 	iw::ref<iw::Texture> dirShadowColor = iw::ref<iw::Texture>(new iw::Texture(1024, 1024, iw::TEX_2D, iw::RG,    iw::FLOAT, iw::BORDER));
 	iw::ref<iw::Texture> dirShadowDepth = iw::ref<iw::Texture>(new iw::Texture(1024, 1024, iw::TEX_2D, iw::DEPTH, iw::FLOAT, iw::BORDER));
 
-	iw::ref<iw::RenderTarget> dirShadowTarget = REF<iw::RenderTarget>(1024, 1024);
+	iw::ref<iw::RenderTarget> dirShadowTarget = REF<iw::RenderTarget>();
 	dirShadowTarget->AddTexture(dirShadowColor);
 	dirShadowTarget->AddTexture(dirShadowDepth);
 

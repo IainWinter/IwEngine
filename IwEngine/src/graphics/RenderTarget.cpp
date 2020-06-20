@@ -4,12 +4,8 @@
 namespace iw {
 namespace Graphics {
 	RenderTarget::RenderTarget(
-		int width,
-		int height,
 		bool noColor)
-		: m_width(width)
-		, m_height(height)
-		, m_noColor(noColor)
+		: m_noColor(noColor)
 		, m_handle(nullptr)
 	{}
 
@@ -34,19 +30,39 @@ namespace Graphics {
 	void RenderTarget::AddTexture(
 		iw::ref<Texture> texture)
 	{
-		m_textures.push_back(texture);
+		if (m_textures.size() == 0) {
+			Resize(texture->Width(), texture->Height());
+		}
+
+		if (   Width()  == texture->Width()
+			&& Height() == texture->Height())
+		{
+			m_textures.push_back(texture);
+		}
+
+		else {
+			LOG_WARNING << "Tried to add texture with different dim that target!"; // put w, w, h, h
+		}
 	}
 
-	int RenderTarget::Width() const {
+	unsigned RenderTarget::Width() const {
 		return m_width;
 	}
 
-	int RenderTarget::Height() const {
+	unsigned RenderTarget::Height() const {
 		return m_height;
 	}
 
+	void RenderTarget::Resize(
+		unsigned width,
+		unsigned height)
+	{
+		m_width  = width;
+		m_height = height;
+	}
+
 	const iw::ref<Texture>& RenderTarget::Tex(
-		int index) const
+		unsigned index) const
 	{
 		return m_textures.at(index);
 	}

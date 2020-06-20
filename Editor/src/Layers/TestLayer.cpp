@@ -71,7 +71,7 @@ namespace iw {
 		ref<Texture> dirShadowColor = ref<Texture>(new Texture(1024, 1024, TEX_2D, RG,    FLOAT, BORDER));
 		ref<Texture> dirShadowDepth = ref<Texture>(new Texture(1024, 1024, TEX_2D, DEPTH, FLOAT, BORDER));
 
-		dirShadowTarget = REF<RenderTarget>(1024, 1024);
+		dirShadowTarget = REF<RenderTarget>();
 		dirShadowTarget->AddTexture(dirShadowColor);
 		dirShadowTarget->AddTexture(dirShadowDepth);
 
@@ -81,7 +81,7 @@ namespace iw {
 
 		ref<Texture> pointShadowDepth = ref<Texture>(new Texture(1024, 1024, TEX_CUBE, DEPTH, FLOAT, EDGE));
 		
-		pointShadowTarget = REF<RenderTarget>(1024, 1024, true);
+		pointShadowTarget = REF<RenderTarget>(true);
 		pointShadowTarget->AddTexture(pointShadowDepth);
 
 		pointShadowTarget->Initialize(Renderer->Device);

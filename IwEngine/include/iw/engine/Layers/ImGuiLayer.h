@@ -14,6 +14,7 @@ namespace Engine {
 		void* m_context;
 
 		ref<RenderTarget> target;
+		float aspect;
 
 	public:
 		IWENGINE_API ImGuiLayer(

@@ -158,7 +158,7 @@ namespace iw {
 		ref<Texture> dirShadowColor = ref<Texture>(new Texture(1024, 1024, TEX_2D, RG,    FLOAT, BORDER));
 		ref<Texture> dirShadowDepth = ref<Texture>(new Texture(1024, 1024, TEX_2D, DEPTH, FLOAT, BORDER));
 
-		ref<RenderTarget> dirShadowTarget = REF<RenderTarget>(1024, 1024);
+		ref<RenderTarget> dirShadowTarget = REF<RenderTarget>();
 		dirShadowTarget->AddTexture(dirShadowColor);
 		dirShadowTarget->AddTexture(dirShadowDepth);
 
@@ -166,7 +166,7 @@ namespace iw {
 
 		//ref<Texture> texBlur = REF<Texture>(1024, 1024, TEX_2D, ALPHA, FLOAT, BORDER);
 
-		//ref<RenderTarget> targetBlur = REF<RenderTarget>(1024, 1024);
+		//ref<RenderTarget> targetBlur = REF<RenderTarget>();
 		//targetBlur->AddTexture(texBlur);
 		//targetBlur->Initialize(Renderer->Device);
 
@@ -174,7 +174,7 @@ namespace iw {
 
 		//ref<Texture> pointShadowDepth = ref<Texture>(new Texture(1024, 1024, TEX_CUBE, DEPTH, FLOAT, EDGE));
 
-		//ref<RenderTarget> pointShadowTarget = REF<RenderTarget>(1024, 1024, true);
+		//ref<RenderTarget> pointShadowTarget = REF<RenderTarget>(true);
 		//pointShadowTarget->AddTexture(pointShadowDepth);
 
 		//pointShadowTarget->Initialize(Renderer->Device);

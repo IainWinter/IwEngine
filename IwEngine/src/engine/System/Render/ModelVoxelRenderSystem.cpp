@@ -157,8 +157,8 @@ namespace Engine {
 			ref<Texture> backTex = REF<Texture>(Renderer->Width(), Renderer->Height(), TEX_2D, RGBA, FLOAT);
 			ref<Texture> frntTex = REF<Texture>(Renderer->Width(), Renderer->Height(), TEX_2D, RGBA, FLOAT);
 
-			m_back  = REF<RenderTarget>(Renderer->Width(), Renderer->Height());
-			m_front = REF<RenderTarget>(Renderer->Width(), Renderer->Height());
+			m_back  = REF<RenderTarget>();
+			m_front = REF<RenderTarget>();
 
 			m_back ->AddTexture(backTex);
 			m_front->AddTexture(frntTex);
