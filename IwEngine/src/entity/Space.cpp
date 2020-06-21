@@ -295,7 +295,9 @@ namespace ECS {
 		handles.reserve(data.size());
 
 		for (const ref<EntityData>& ed : data) {
-			handles.emplace_back(ed->Entity);
+			if (ed->Entity.Alive) {
+				handles.emplace_back(ed->Entity);
+			}
 		}
 
 		return handles;

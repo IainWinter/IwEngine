@@ -22,24 +22,20 @@ namespace Graphics {
 			m_transforms.push_back(transform);
 		}
 
-		/*void RemoveMesh(Mesh& mesh) {
-			m_meshes,era(mesh);
-		}*/
-
-		std::vector<Mesh>& GetMeshes() {
+		const std::vector<Mesh>& GetMeshes() const {
 			return m_meshes;
 		}
 
-		Mesh& GetMesh(
-			unsigned index)
+		const Mesh& GetMesh(
+			unsigned index) const
 		{
 			return m_meshes.at(index);
 		}
 
-		Mesh& GetMesh(
-			std::string name)
+		const Mesh& GetMesh(
+			std::string name) const
 		{
-			for (Mesh& mesh : m_meshes) {
+			for (const Mesh& mesh : m_meshes) {
 				if (mesh.Data()->Name() == mesh.Data()->Name()) {
 					return  mesh;
 				}
@@ -48,14 +44,36 @@ namespace Graphics {
 			return Mesh();
 		}
 
-		Transform& GetTransform(
-			unsigned index)
+		const Transform& GetTransform(
+			unsigned index) const
 		{
 			return m_transforms.at(index);
 		}
 
 		unsigned MeshCount() const {
 			return m_meshes.size();
+		}
+
+		std::vector<Mesh>& GetMeshes() {
+			return const_cast<std::vector<Mesh>&>(const_cast<const Model*>(this)->GetMeshes());
+		}
+
+		Mesh& GetMesh(
+			unsigned index)
+		{
+			return const_cast<Mesh&>(const_cast<const Model*>(this)->GetMesh(index));
+		}
+
+		Mesh& GetMesh(
+			std::string name)
+		{
+			return const_cast<Mesh&>(const_cast<const Model*>(this)->GetMesh(name));
+		}
+
+		Transform& GetTransform(
+			unsigned index)
+		{
+			return const_cast<Transform&>(const_cast<const Model*>(this)->GetTransform(index));
 		}
 	};
 }

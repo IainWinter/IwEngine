@@ -35,7 +35,7 @@ namespace Engine {
 		ImGui::StyleColorsDark();
 
 		auto& io = ImGui::GetIO();
-		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+		io.ConfigFlags = ImGuiConfigFlags_DockingEnable;
 		if(m_window) io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
 		if (m_window) ImGui_ImplWin32_Init(m_window->Handle(), m_window->Context());

@@ -267,7 +267,7 @@ namespace ECS {
 		Entity FindEntity(
 			_c* instance)
 		{
-			return FindEntity(GetComponent<_c>(), instance);
+			return FindEntity(GetComponent<_c>(), (void*)instance);
 		}
 
 // ---------------------------------------------------------

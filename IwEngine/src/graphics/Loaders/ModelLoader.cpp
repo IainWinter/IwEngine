@@ -144,7 +144,7 @@ namespace Graphics {
 			bool cont = false;
 
 			for (auto& model : m_loaded) {
-				for (iw::Mesh& mesh : model.second->GetMeshes()) {
+				for (const iw::Mesh& mesh : model.second->GetMeshes()) {
 					if (mesh.Data()->Name() == ainame) {
 						meshes.push_back(mesh);
 

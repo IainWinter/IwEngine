@@ -102,6 +102,7 @@ namespace detail {
 		, m_indexBuffer(nullptr)
 		, m_outdated(false)
 		, m_bound(false)
+		, m_name("unnamed")
 	{
 		m_this = ref<MeshData>(this, detail::DestroyMeshData);
 	}
@@ -114,6 +115,7 @@ namespace detail {
 		, m_indexBuffer(nullptr)
 		, m_outdated(false)
 		, m_bound(false)
+		, m_name("unnamed")
 	{
 		m_this = ref<MeshData>(this, detail::DestroyMeshData);
 

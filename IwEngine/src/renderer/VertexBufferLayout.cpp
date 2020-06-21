@@ -13,7 +13,7 @@ namespace RenderAPI {
 	void VertexBufferLayout::Push<float>(
 		unsigned count)
 	{
-		m_elements.push_back({ GL_FLOAT, count, GL_FALSE });
+		m_elements.push_back({ BufferLayoutType::FLOAT, GL_FLOAT, count, GL_FALSE });
 		m_stride += count * GetSizeOfType(GL_FLOAT);
 	}
 
@@ -21,7 +21,7 @@ namespace RenderAPI {
 	void VertexBufferLayout::Push<unsigned>(
 		unsigned count)
 	{
-		m_elements.push_back({ GL_UNSIGNED_INT, count, GL_FALSE });
+		m_elements.push_back({ BufferLayoutType::UINT, GL_UNSIGNED_INT, count, GL_FALSE });
 		m_stride += count * GetSizeOfType(GL_UNSIGNED_INT);
 	}
 
@@ -29,7 +29,7 @@ namespace RenderAPI {
 	void VertexBufferLayout::Push<unsigned char>(
 		unsigned count)
 	{
-		m_elements.push_back({ GL_UNSIGNED_BYTE, count, GL_TRUE });
+		m_elements.push_back({ BufferLayoutType::UCHAR, GL_UNSIGNED_BYTE, count, GL_TRUE });
 		m_stride += count * GetSizeOfType(GL_UNSIGNED_BYTE);
 	}
 

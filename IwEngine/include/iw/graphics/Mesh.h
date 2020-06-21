@@ -11,6 +11,7 @@
 #include <initializer_list>
 
 #include <functional>
+#include <string>
 
 namespace iw {
 namespace Graphics {
@@ -32,6 +33,32 @@ namespace detail {
 		COLOR, COLOR1, COLOR2, COLOR3, COLOR4, COLOR5, COLOR6, COLOR7,
 		UV,    UV1,    UV2,    UV3,    UV4,    UV5,    UV6,    UV7
 	};
+
+	static const char* getbNameStr(bName name) {
+		switch (name) {
+			case bName::POSITION:  return "Position";
+			case bName::NORMAL:    return "Normal";
+			case bName::TANGENT:   return "Tangent";
+			case bName::BITANGENT: return "BiTangent";
+			case bName::COLOR:	   return "Color";
+			case bName::COLOR1:	   return "Color 1";
+			case bName::COLOR2:	   return "Color 2";
+			case bName::COLOR3:	   return "Color 3";
+			case bName::COLOR4:	   return "Color 4";
+			case bName::COLOR5:	   return "Color 5";
+			case bName::COLOR6:	   return "Color 6";
+			case bName::COLOR7:	   return "Color 7";
+			case bName::UV:	   return "UV";
+			case bName::UV1:	   return "UV 1";
+			case bName::UV2:	   return "UV 2";
+			case bName::UV3:	   return "UV 3";
+			case bName::UV4:	   return "UV 4";
+			case bName::UV5:	   return "UV 5";
+			case bName::UV6:	   return "UV 6";
+			case bName::UV7:	   return "UV 7";
+			default:               return nullptr;
+		}
+	}
 
 	struct MeshDescription {
 	private:

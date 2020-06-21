@@ -6,8 +6,15 @@
 
 namespace iw {
 namespace RenderAPI {
+	enum class BufferLayoutType {
+		FLOAT,
+		UINT,
+		UCHAR
+	};
+
 	struct VertexBufferLayoutElement {
-		unsigned      Type; // should be UniformType
+		BufferLayoutType BType;
+		unsigned      Type;
 		unsigned      Count;
 		unsigned char Normalized;
 	};

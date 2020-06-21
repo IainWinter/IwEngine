@@ -65,13 +65,11 @@ namespace Graphics {
 
 		~ParticleSystem() = default;
 
-		Mesh& GetParticleMesh() {
-			return m_mesh;
-		}
+		      Mesh& GetParticleMesh()       { return m_mesh; }
+		const Mesh& GetParticleMesh() const { return m_mesh;}
 
-		Transform* GetTransform() {
-			return m_transform;
-		}
+		      Transform* GetTransform()       { return m_transform; }
+		const Transform* GetTransform() const { return m_transform; }
 
 		void SetTransform(
 			Transform* transform)
@@ -185,6 +183,10 @@ namespace Graphics {
 
 		void Update() {
 			m_needsToUpdateBuffer |= m_update(this, m_particles.data(), (unsigned)m_particles.size());
+		}
+
+		const std::vector<particle_t>& Particles() const {
+			return m_particles;
 		}
 	};
 }
