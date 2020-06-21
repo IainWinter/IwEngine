@@ -259,39 +259,22 @@ namespace Engine {
 			ImGui::Text("Delta time %f",        iw::Time::DeltaTime());
 			ImGui::Text("Delta time scaled %f", iw::Time::DeltaTimeScaled());
 			
-			ImGui::Text("Renderer took %4.4f ms", renderTime  * 1000);
-			ImGui::Text("Physics  took %4.4f ms", physicsTime * 1000);
-			ImGui::Text("Eventbus took %4.4f ms", eventTime   * 1000);
+			ImGui::Text("Renderer took %4.4f ms", renderTime * 1000.0f);
+			ImGui::Text("Physics  took %4.4f ms", physicsTime * 1000.0f);
+			ImGui::Text("Eventbus took %4.4f ms", eventTime * 1000.0f);
 
 			for (Layer* layer : m_layers) {
-				ImGui::Text("%4.4f ms - %s layer",   post_update_times[layer->Name()] * 1000, layer->Name());
-				ImGui::Text("%4.4f ms - %s systems", update_times     [layer->Name()] * 1000, layer->Name());
+				ImGui::Text("%4.4f ms - %s layer",   post_update_times[layer->Name()] * 1000.0f, layer->Name());
+				ImGui::Text("%4.4f ms - %s systems", update_times     [layer->Name()] * 1000.0f, layer->Name());
 
 				for (ISystem* system : layer->temp_GetSystems()) {
-					ImGui::Text("\t%4.4f ms - %s system", system_update_times[layer->Name()][system->Name()] * 1000, system->Name());
+					ImGui::Text("\t%4.4f ms - %s system", system_update_times[layer->Name()][system->Name()] * 1000.0f, system->Name());
 				}
 			}
 			ImGui::End();
 
 			imgui->End();
 		}
-
-		/*if (iw::Time::Ticks() % 100 == 0) {
-			ticks = iw::Time::Ticks() - 1;
-			for (auto p : update_times) {
-				p.second /= 100;
-			}
-
-			for (auto p : post_update_times) {
-				p.second /= 100;
-			}
-
-			for (auto p : system_update_times) {
-				for (auto q : p.second) {
-					q.second /= 100;
-				}
-			}
-		}*/
 
 		Audio->Update();
 

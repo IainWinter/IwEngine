@@ -32,7 +32,12 @@ namespace Engine {
 	void Layer::Update() {}
 	void Layer::PostUpdate() {}
 	void Layer::FixedUpdate() {}
-	void Layer::ImGui() {}
+	
+	void Layer::ImGui() {
+		for (ISystem* s : m_systems) {
+			s->ImGui();
+		}
+	}
 
 	void Layer::OnPush() {}
 	void Layer::OnPop() {}

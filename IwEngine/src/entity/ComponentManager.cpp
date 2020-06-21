@@ -214,7 +214,7 @@ namespace ECS {
 			}
 		}
 
-		return EntityComponentArray(std::move(begins), std::move(ends)); // pass it here
+		return EntityComponentArray(std::move(begins), std::move(ends));
 	}
 
 	ChunkList* ComponentManager::FindChunkList(

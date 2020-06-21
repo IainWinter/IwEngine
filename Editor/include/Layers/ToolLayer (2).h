@@ -38,6 +38,8 @@ namespace iw {
 		void OnPush() override;
 		void OnPop() override;
 
+		void PostUpdate() override;
+
 		void ImGui() override;
 
 		bool On(MouseButtonEvent& e) override;

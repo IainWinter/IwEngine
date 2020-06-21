@@ -13,14 +13,14 @@ namespace ECS {
 		bool   Alive;
 
 		bool operator==(
-			const EntityHandle& other)
+			const EntityHandle& other) const
 		{
 			return  Index   == other.Index
 				&& Version == other.Version;
 		}
 
 		bool operator!=(
-			const EntityHandle& other)
+			const EntityHandle& other) const
 		{
 			return !operator==(other);
 		}

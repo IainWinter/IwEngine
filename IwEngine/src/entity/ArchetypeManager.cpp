@@ -171,5 +171,9 @@ namespace ECS {
 		m_archetypes.clear();
 		m_pool.reset();
 	}
+
+	const std::vector<ref<Archetype>>& ArchetypeManager::Archetypes() const {
+		return m_archetypes;
+	}
 }
 }

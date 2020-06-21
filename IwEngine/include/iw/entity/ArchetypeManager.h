@@ -11,37 +11,40 @@ namespace iw {
 namespace ECS {
 	class ArchetypeManager {
 	private:
-		std::unordered_map<size_t, iw::ref<Archetype>> m_hashed;
-		std::vector<iw::ref<Archetype>> m_archetypes;
-		iw::pool_allocator m_pool;
+		std::unordered_map<size_t, ref<Archetype>> m_hashed;
+		std::vector<ref<Archetype>> m_archetypes;
+		pool_allocator m_pool;
 		
 	public:
 		IWENTITY_API
 		ArchetypeManager();
 
 		IWENTITY_API
-		iw::ref<Archetype>& CreateArchetype(
-			std::initializer_list<iw::ref<Component>> components);
+		ref<Archetype>& CreateArchetype(
+			std::initializer_list<ref<Component>> components);
 
 		IWENTITY_API
-		iw::ref<Archetype>& CreateArchetype(
-			const iw::ref<Component>* begin,
-			const iw::ref<Component>* end);
+		ref<Archetype>& CreateArchetype(
+			const ref<Component>* begin,
+			const ref<Component>* end);
 
 		IWENTITY_API
-		iw::ref<Archetype>& AddComponent(
-			iw::ref<Archetype> archetype, iw::ref<Component> component);
+		ref<Archetype>& AddComponent(
+			ref<Archetype> archetype, ref<Component> component);
 
 		IWENTITY_API
-		iw::ref<Archetype>& RemoveComponent(
-			iw::ref<Archetype> archetype, iw::ref<Component> component);
+		ref<Archetype>& RemoveComponent(
+			ref<Archetype> archetype, ref<Component> component);
 
 		IWENTITY_API
-		iw::ref<ArchetypeQuery> MakeQuery(
-			const iw::ref<ComponentQuery>& query);
+		ref<ArchetypeQuery> MakeQuery(
+			const ref<ComponentQuery>& query);
 
 		IWENTITY_API
 		void Clear();
+
+		IWENTITY_API
+		const std::vector<ref<Archetype>>& Archetypes() const;
 	};
 }
 

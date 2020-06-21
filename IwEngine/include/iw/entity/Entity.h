@@ -21,30 +21,30 @@ namespace ECS {
 		{}
 
 		bool operator==(
-			const EntityHandle& other)
+			const EntityHandle& other) const
 		{
 			return Handle == other;
 		}
 
 		bool operator!=(
-			const EntityHandle& other)
+			const EntityHandle& other) const
 		{
 			return !operator==(other);
 		}
 
-		operator bool() {
+		operator bool() const {
 			return *this != EntityHandle::Empty;
 		}
 
-		size_t Index() {
+		size_t Index() const {
 			return Handle.Index;
 		}
 
-		short Version() {
+		short Version() const {
 			return Handle.Version;
 		}
 
-		bool Alive() {
+		bool Alive() const {
 			return Handle.Alive;
 		}
 
@@ -118,7 +118,7 @@ namespace ECS {
 
 		template<
 			typename _c>
-		bool Has() {
+		bool Has() const {
 #ifdef IW_DEBUG
 			if (!Space) {
 				LOG_ERROR << "Entity has no space!";

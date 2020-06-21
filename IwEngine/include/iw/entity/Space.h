@@ -100,6 +100,10 @@ namespace ECS {
 			EntityHandle handle,
 			const ref<Component>& component);
 
+		IWENTITY_API
+		ref<Archetype> GetArchetype(
+			EntityHandle handle);
+
 		// Makes a component query from a list of registered components
 		IWENTITY_API
 		ref<ComponentQuery> MakeQuery(
@@ -120,6 +124,12 @@ namespace ECS {
 		Entity Instantiate(
 			const Prefab& prefab);
 
+// ---------------------------------------------------------
+//
+// Templated versions of above functions
+//
+// ---------------------------------------------------------
+
 		// Registers a component type with the component manager allowing it to be used in archetypes
 		template<
 			typename _c>
@@ -137,14 +147,13 @@ namespace ECS {
 		template<
 			typename _c>
 		ref<Component> GetComponent() {
-			return RegisterComponent<_c>();
-//			return GetComponent(
-//#ifdef IW_USE_REFLECTION
-//				GetType<_c>()
-//#else
-//				typeid(_c)
-//#endif
-//			);
+			return GetComponent(
+#ifdef IW_USE_REFLECTION
+				GetType<_c>()
+#else
+				typeid(_c)
+#endif
+			);
 		}
 
 		// Creates an archetype from a list of registed components
@@ -261,9 +270,21 @@ namespace ECS {
 			return FindEntity(GetComponent<_c>(), instance);
 		}
 
+// ---------------------------------------------------------
+//
+// 'Helper' functions
+//
+// ---------------------------------------------------------
+
 		// Clears space of entities and all component data
 		IWENTITY_API
 		void Clear();
+
+		IWENTITY_API
+		std::vector<EntityHandle> Entities() const;
+
+		IWENTITY_API
+		const std::vector<ref<Archetype>>& Archetypes() const;
 
 #ifdef IW_USE_EVENTS
 		void SetEventBus(

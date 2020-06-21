@@ -10,6 +10,7 @@
 #include "Systems/ItemSystem.h"
 #include "Systems/NoteSystem.h"
 #include "Systems/ConsumableSystem.h"
+#include "Systems/SpaceInspectorSystem.h"
 #include "iw/engine/Systems/PhysicsSystem.h"
 #include "iw/engine/Systems/ParticleUpdateSystem.h"
 #include "iw/engine/Systems/EntityCleanupSystem.h"
@@ -320,6 +321,8 @@ namespace iw {
 
 		PushSystem<iw::ModelVoxelRenderSystem>(MainScene);
 
+		PushSystem<SpaceInspectorSystem>();
+
 		//PushSystem<iw::DrawCollidersSystem>(MainScene->MainCamera());
 
 		// Particle test
@@ -454,26 +457,9 @@ namespace iw {
 			seq.restart();
 		}
 
-		//if (ImGui::Button("Save level")) {
-		//	JsonSerializer jout("assets/levels/working.json", true);
-		//	
-		//	Level level;
-		//	for (auto entity : Space->Query<Transform, Enemy>()) {
-		//		auto [transform, enemy] = entity.Components.Tie<EnemySystem::Components>();
-		//		level.Positions.push_back({ transform->Position.x, transform->Position.z });
-		//		level.Enemies.push_back(*enemy);
-		//	}
-
-		//	level.StageName = "models/grass/grass.obj";
-		//	
-		//	jout.Write(level);
-		//}
-
-		//if (ImGui::Button("Load level")) {
-		//	loadLevel = "assets/levels/forest/level1.bin";
-		//}
-
 		ImGui::End();
+
+		Layer::ImGui();
 	}
 
 	bool settexttocursor = false;
@@ -492,15 +478,6 @@ namespace iw {
 
 		return false;
 	}
-
-	//bool SandboxLayer::On(
-	//	KeyTypedEvent& e)
-	//{
-	//	str += e.Character;
-	//	font->UpdateMesh(textMesh, str, .01f, 1);
-
-	//	return false;
-	//}
 
 	bool SandboxLayer::On(
 		ActionEvent& e)

@@ -32,6 +32,7 @@ namespace Engine {
 
 		IWENGINE_API bool On(WindowResizedEvent& e) override;
 		IWENGINE_API bool On(MouseMovedEvent&    e) override;
+		IWENGINE_API bool On(MouseWheelEvent&    e) override;
 		IWENGINE_API bool On(MouseButtonEvent&   e) override;
 
 		IWENGINE_API bool On(OsEvent& e) override;

@@ -267,8 +267,6 @@ namespace Engine {
 		WPARAM wParam,
 		LPARAM lParam)
 	{
-		LOG_INFO << "parent msg: " << msg;
-
 		WindowsWindow* me = reinterpret_cast<WindowsWindow*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
 		if (me) {
 			return me->HandleEvent(hwnd, msg, wParam, lParam);

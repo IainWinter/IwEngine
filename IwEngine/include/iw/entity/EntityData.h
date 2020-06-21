@@ -9,7 +9,7 @@ namespace ECS {
 	struct EntityData {
 		EntityHandle Entity;
 		size_t ChunkIndex;
-		iw::ref<Archetype> Archetype;
+		ref<Archetype> Archetype;
 	};
 }
 

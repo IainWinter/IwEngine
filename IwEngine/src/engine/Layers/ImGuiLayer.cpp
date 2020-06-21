@@ -199,6 +199,19 @@ namespace Engine {
 	}
 
 	bool ImGuiLayer::On(
+		MouseWheelEvent& e)
+	{
+		if (e.Device == DeviceType::MOUSE) {
+			auto& io = ImGui::GetIO();
+			if (io.WantCaptureMouse) {
+				io.MouseWheel += e.Delta;
+			}
+		}
+
+		return ImGui::GetIO().WantCaptureMouse;
+	}
+
+	bool ImGuiLayer::On(
 		MouseButtonEvent& e)
 	{
 		if (e.Device == DeviceType::MOUSE) {

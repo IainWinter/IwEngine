@@ -13,6 +13,7 @@ namespace Engine {
 		virtual void Destroy() = 0;
 		virtual void Update() = 0;
 		virtual void FixedUpdate() = 0;
+		virtual void ImGui() = 0;
 
 		virtual void OnPush() = 0;
 		virtual void OnPop() = 0;
@@ -73,6 +74,7 @@ namespace Engine {
 		virtual void Destroy() {}
 		virtual void Update() {}
 		virtual void FixedUpdate() {}
+		virtual void ImGui() {}
 
 		virtual void OnPush() override {}
 		virtual void OnPop() override {}
