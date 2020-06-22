@@ -6,6 +6,8 @@
 #include "iw/common/Components/Transform.h"
 #include "iw/graphics/Model.h"
 #include "iw/graphics/ParticleSystem.h"
+#include "iw/physics/Collision/CollisionObject.h"
+#include "iw/physics/Dynamics/Rigidbody.h"
 
 namespace iw {
 namespace Editor {
@@ -29,10 +31,52 @@ namespace Editor {
 			EntityHandle& handle,
 			iw::Transform* cache);
 
-		void PrintTransform(const iw::Transform* transform);
-		void PrintMesh(const iw::Mesh* mesh);
-		void PrintModel(const iw::Model* model);
-		void PrintParticleSystem(const iw::ParticleSystem<>* system);
+		void PrintTransform(iw::Transform* transform, bool showParent = true);
+		void PrintMesh(iw::Mesh* mesh);
+		void PrintModel(iw::Model* model);
+		void PrintParticleSystem(iw::ParticleSystem<>* system);
+		void PrintCollisionObject(iw::CollisionObject* object);
+		void PrintRigidbody(iw::Rigidbody* body);
+
+		template<
+			typename _t>
+		void PrintCell(_t t)
+		{
+			std::stringstream ss;
+			ss << t;
+
+			ImGui::TableNextCell();
+			ImGui::Text(ss.str().c_str());
+		}
+
+		template<
+			typename _t>
+		void PrintHeader(_t t)
+		{
+			std::stringstream ss;
+			ss << t;
+
+			//ImGui::TableNextCell();
+			ImGui::TableSetupColumn(ss.str().c_str());
+		}
+
+		template<
+			typename _t>
+		void PrintEditCell(
+			_t* value)
+		{
+			ImGui::TableNextCell();
+			ImGui::PushID((void*)value);
+
+			     if constexpr (std::is_same_v<float, _t>)   ImGui::DragFloat ("", (float*)value);
+			else if constexpr (std::is_same_v<bool,  _t>)   ImGui::Checkbox  ("", (bool*) value);
+			else if constexpr (std::is_same_v<vector2, _t>) ImGui::DragFloat2("", (float*)value);
+			else if constexpr (std::is_same_v<vector3, _t>) ImGui::DragFloat3("", (float*)value);
+			else if constexpr (std::is_same_v<vector4, _t>
+				           || std::is_same_v<quaternion, _t>) ImGui::DragFloat4("", (float*)value);
+
+			ImGui::PopID();
+		}
 	};
 }
 

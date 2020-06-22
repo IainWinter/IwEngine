@@ -12,6 +12,8 @@
 #include "iw/audio/AudioSpaceRaw.h"
 #include <atomic>
 
+#include "imgui/imgui.h"
+
 #ifdef IW_DEBUG
 	#include "iw/log/sink/std_sink.h"
 #else

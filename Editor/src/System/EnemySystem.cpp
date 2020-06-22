@@ -31,7 +31,7 @@ int EnemySystem::Initialize() {
 
 	sphere.Material()->SetShader(Asset->Load<iw::Shader>("shaders/phong.shader"));
 	sphere.Material()->Set("baseColor", iw::Color::From255(0, 213, 255, 191));
-	sphere.Material()->Set("emissive", 5.0f);
+	sphere.Material()->Set("emissive", 2.0f);
 
 	m_bulletModel.AddMesh(sphere);
 

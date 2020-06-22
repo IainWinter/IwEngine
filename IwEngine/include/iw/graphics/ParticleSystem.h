@@ -188,6 +188,10 @@ namespace Graphics {
 		const std::vector<particle_t>& Particles() const {
 			return m_particles;
 		}
+
+		std::vector<particle_t>& Particles() {
+			return m_particles;
+		}
 	};
 }
 
