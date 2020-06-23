@@ -223,6 +223,18 @@ namespace Engine {
 
 		return ImGui::GetIO().WantCaptureMouse;
 	}
+
+	bool ImGuiLayer::On(KeyEvent& e)
+	{
+		if (e.Device == DeviceType::KEYBOARD) {
+			auto& io = ImGui::GetIO();
+			if (io.WantCaptureKeyboard) {
+				io.KeysDown[e.Button] = e.State;
+			}
+		}
+
+		return ImGui::GetIO().WantCaptureKeyboard;
+	}
 	
 	bool ImGuiLayer::On(
 		OsEvent& e)

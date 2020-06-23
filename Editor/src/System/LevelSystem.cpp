@@ -46,7 +46,7 @@ LevelSystem::LevelSystem(
 	: iw::System<iw::CollisionObject, iw::Model, LevelDoor>("Level")
 	, playerEntity(player)
 {
-	currentLevelName = "levels/forest/forest10.json";
+	currentLevelName = "levels/forest/forest01.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 63);
 	closedColor = iw::Color::From255(201, 66, 66, 63);
@@ -495,8 +495,8 @@ iw::Entity LevelSystem::LoadLevel(
 	}
 
 	else if (currentLevelName == "levels/forest/forest07.a.json") {
-		Bus->push<SpawnItemEvent>(Item{ NOTE,       1 }, iw::vector3(24, 1, 12), levelTransform);
-		Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 1 }, iw::vector3( 0, 1,  3), levelTransform);
+		Bus->push<SpawnItemEvent>(Item{ NOTE,       1 }, iw::vector3(24, 1, 8), levelTransform);
+		Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 1 }, iw::vector3( 0, 1, 3), levelTransform);
 	}
 
 	else if (currentLevelName == "levels/forest/forest12.a.json") {
