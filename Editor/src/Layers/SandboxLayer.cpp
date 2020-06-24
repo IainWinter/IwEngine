@@ -92,6 +92,8 @@ namespace iw {
 
 	iw::event_seq seq;
 
+	ref<Shader> fontShader;
+
 	int SandboxLayer::Initialize() {
 		// Audio
 
@@ -115,7 +117,7 @@ namespace iw {
 		m_font = Asset->Load<Font>("fonts/arial.fnt");
 		m_font->Initialize(Renderer->Device);
 
-		ref<Shader> fontShader = Asset->Load<Shader>("shaders/font.shader");
+		fontShader = Asset->Load<Shader>("shaders/font_simple.shader");
 		Renderer->InitShader(fontShader, CAMERA);
 
 		ref<Material> textMat = REF<Material>(fontShader);
@@ -124,7 +126,7 @@ namespace iw {
 
 		Asset->Give<Material>("materials/Font", textMat);
 
-		Mesh textMesh = m_font->GenerateMesh("(temp)\ni: debug menu  t: freecam\nv: shadows (low fps)  b: blinn (no impact)  e: show voxels (goodbye fps)", .005f, 1);
+		Mesh textMesh = m_font->GenerateMesh("(temp)\nr: restart level  i: debug menu  t: freecam\n e: show voxels (goodbye fps)\nfeedback: https://winter.dev/demo", .005f, 1);
 		textMesh.SetMaterial(textMat);
 
 		iw::Entity textEnt = Space->CreateEntity<iw::Transform, iw::Mesh, iw::UiElement>();
@@ -152,7 +154,7 @@ namespace iw {
 		//Renderer->InitShader(pointIShadowShader);
 		
 		Renderer->SetShader(vct);
-		vct->Handle()->GetParam("SHADOWS")->SetAsInt(0);
+		//vct->Handle()->GetParam("SHADOWS")->SetAsInt(0);
 
 		// Directional light shadow map textures & target
 
@@ -386,6 +388,8 @@ namespace iw {
 	float ml = 2.0f;
 
 	iw::vector3 skyColor;
+	float w123 = 0.5f;
+	float e123 = 1.0f;
 
 	void SandboxLayer::PostUpdate() {
 		// Update particle system
@@ -400,22 +404,27 @@ namespace iw {
 
 		sun->SetPosition(camPos);
 
+		//fontShader->Use(Renderer->Device);
+
+		//fontShader->Handle()->GetParam("width")->SetAsFloat(w123);
+		//fontShader->Handle()->GetParam("edge") ->SetAsFloat(e123);
+
 		vct->Use(Renderer->Device);
 
 		//ml = iw::lerp(ml, 1 / iw::DeltaTime() / 40, iw::Time::DeltaTime() * .1f);
-		//vct->Handle()->GetParam("maxConeLength")->SetAsFloat(ml);
+		vct->Handle()->GetParam("maxConeLength")->SetAsFloat(ml);
+		vct->Handle()->GetParam("skyColor")->SetAsFloats(&skyColor, 3);
 
-		//vct->Handle()->GetParam("skyColor")->SetAsFloats(&skyColor, 3);
 
-		if (Keyboard::KeyDown(V) && f > 0.2f) {
-			vct->Handle()->GetParam("SHADOWS")->SetAsInt(s = !s);
-			f = 0.0f;
-		}
+		//if (Keyboard::KeyDown(V) && f > 0.2f) {
+		//	vct->Handle()->GetParam("SHADOWS")->SetAsInt(s = !s);
+		//	f = 0.0f;
+		//}
 
-		if (Keyboard::KeyDown(B) && f > 0.2f) {
-			vct->Handle()->GetParam("BLINN")  ->SetAsInt(b = !b);
-			f = 0.0f;
-		}
+		//if (Keyboard::KeyDown(B) && f > 0.2f) {
+		//	vct->Handle()->GetParam("BLINN")  ->SetAsInt(b = !b);
+		//	f = 0.0f;
+		//}
 
 		f += Time::DeltaTime();
 	}
@@ -429,13 +438,16 @@ namespace iw {
 		//ImGui::SliderFloat("Gamma", (float*)&mainRender->GetGamma(), 0, 5);
 		ImGui::SliderFloat("Camera blend", &blend, 0, 1);
 
-		ImGui::Text("Max Cone Length %f", ml);
+		ImGui::DragFloat("Max Cone Length %f", &ml);
 		ImGui::SliderFloat3("Sky color %f", (float*)&skyColor, 0, 1);
 
 		//ImGui::SliderFloat("Shadow map blur", &blurAmount, 0, 5);
 		ImGui::SliderFloat("Shadow map threshold", &threshold, 0, 1);
 
 		ImGui::SliderFloat("Volume", &Audio->GetVolume(), 0, 1);
+
+		ImGui::DragFloat("Font width", &w123, .01f);
+		ImGui::DragFloat("Font edge",  &e123, .01f);
 
 		if (ImGui::Button("Start ambiance")) {
 			Audio->AsStudio()->StartInstance(forestInstance);

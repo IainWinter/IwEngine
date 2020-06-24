@@ -14,7 +14,7 @@ NoteSystem::NoteSystem()
 int NoteSystem::Initialize() {
 	m_font = Asset->Load<iw::Font>("fonts/arial.fnt");
 
-	m_material = REF<iw::Material>(Asset->Load<iw::Shader>("shaders/font.shader"));
+	m_material = REF<iw::Material>(Asset->Load<iw::Shader>("shaders/font_simple.shader"));
 
 	m_material->Set("color", iw::vector3(1));
 	m_material->SetTexture("fontMap", m_font->GetTexture(0));

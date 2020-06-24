@@ -11,7 +11,7 @@ namespace Engine {
 	{}
 
 	void DebugLayer::PostUpdate() {
-		while (logs.size() > 5) {
+		while (logs.size() > 20) {
 			logs.erase(logs.begin());
 		}
 	}

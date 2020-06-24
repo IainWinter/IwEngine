@@ -42,7 +42,7 @@ PlayerSystem::PlayerSystem()
 
 	else {
 		// Default values
-		playerPrefab.Speed      = 4.25f;
+		playerPrefab.Speed      = 4.0f;
 		playerPrefab.DashTime   = 8 / 60.0f;
 		playerPrefab.ChargeTime = 0.2f;
 		playerPrefab.Health     = 3;

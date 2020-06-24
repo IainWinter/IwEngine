@@ -58,7 +58,7 @@ namespace iw {
 
 		textMesh = font->GenerateMesh("", .01f, 1);
 
-		fontShader = Asset->Load<Shader>("shaders/font.shader");
+		fontShader = Asset->Load<Shader>("shaders/font_simple.shader");
 
 		iw::ref<Material> textMat = REF<Material>(fontShader);
 

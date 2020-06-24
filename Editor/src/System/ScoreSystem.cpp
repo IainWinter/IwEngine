@@ -26,7 +26,7 @@ int ScoreSystem::Initialize() {
 	font = Asset->Load<iw::Font>("fonts/arial.fnt");
 	//font->Initialize(Renderer->Device);
 
-	iw::ref<iw::Shader> fontShader = Asset->Load<iw::Shader>("shaders/font.shader");
+	iw::ref<iw::Shader> fontShader = Asset->Load<iw::Shader>("shaders/font_simple.shader");
 
 	textMatBad = REF<iw::Material>(fontShader);
 	textMat    = REF<iw::Material>(fontShader);

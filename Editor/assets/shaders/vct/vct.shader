@@ -98,10 +98,10 @@ uniform float ambiance;
 uniform vec3 skyColor;
 uniform int d_state;
 
-uniform float maxConeLength = 4.0f;
+uniform float maxConeLength = 2.0f;
 
 // Settings
-uniform int SHADOWS = 1;
+uniform int SHADOWS = 0;
 uniform int BLINN = 1;
 
 // -------------------------------------------------------
@@ -182,6 +182,9 @@ vec4 TraceCone(
 		color    += sample_ * weight;
 		distance += diameter;
 	}
+
+	color.rgb += skyColor * (1 - color.a);
+	color.a = 1.0f;
 
 	return color;
 }

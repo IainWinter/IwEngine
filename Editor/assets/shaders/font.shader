@@ -22,6 +22,9 @@ uniform vec4 mat_color;
 uniform float mat_hasFontMap;
 uniform sampler2D mat_fontMap;
 
+uniform float width = 0.1f;
+uniform float edge  = 0.2f;
+
 in vec2 UV;
 
 out vec4 PixelColor;
@@ -30,12 +33,10 @@ void main() {
 	vec4 color = mat_color;
 
 	if (mat_hasFontMap == 1) {
-		float a = texture2D(mat_fontMap, UV).a;
-		if (a < 0.5f) {
-			discard;
-		}
+		float distance = 1.0f - texture2D(mat_fontMap, UV).a;
+		float alpha = 1.0f - smoothstep(width, width + edge, distance);
 
-		color.a *= a;
+		color.a *= alpha;
 	}
 
 	PixelColor = color;

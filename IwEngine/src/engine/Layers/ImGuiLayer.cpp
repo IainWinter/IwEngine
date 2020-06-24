@@ -34,9 +34,13 @@ namespace Engine {
 
 		ImGui::StyleColorsDark();
 
+
 		auto& io = ImGui::GetIO();
 		io.ConfigFlags = ImGuiConfigFlags_DockingEnable;
 		if(m_window) io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+
+		ImFont* pFont = io.Fonts->AddFontFromFileTTF("assets/fonts/ttf/verdana.ttf", 15);
+		//ImGui::PushFont(pFont);
 
 		if (m_window) ImGui_ImplWin32_Init(m_window->Handle(), m_window->Context());
 		ImGui_ImplOpenGL3_Init("#version 450");
