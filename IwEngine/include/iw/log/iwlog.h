@@ -15,7 +15,8 @@ namespace log {
 		DEBUG,
 		WARN,
 		ERR,
-		TRACE
+		TRACE,
+		TIME,
 	};
 }
 

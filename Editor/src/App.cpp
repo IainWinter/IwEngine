@@ -63,7 +63,7 @@ namespace iw {
 		if (GetLayer("Toolbox") != nullptr) {
 			//sandbox->Update();
 			//sandbox->FixedUpdate();
-			//sandbox->UpdateSystems();
+			sandbox->UpdateSystems();
 		}
 
 		Application::Update();

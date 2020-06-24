@@ -17,12 +17,20 @@ ItemSystem::ItemSystem()
 
 int ItemSystem::Initialize() {
 	iw::MeshDescription   description = Asset->Load<iw::Model>("Sphere")->GetMesh(0).Data()->Description();
-	iw::ref<iw::Material> material    = Asset->Load<iw::Model>("Sphere")->GetMesh(0).Material()->MakeInstance();
+	iw::ref<iw::Material> material = Asset->Load<iw::Material>("materials/Default")->MakeInstance();
 
 	iw::Mesh note = iw::MakePlane(description, 1, 1)->MakeInstance();
 
-	material->Set("baseColor", iw::Color::From255(209, 195, 167));
-	material->SetCastShadows(false);
+	//material->Set("baseColor", iw::Color::From255(209, 195, 167));
+	//material->Set("emissive", 1.2f);
+	//material->Set("reflectance", 1.0f);
+
+	material->Set("reflectance", 0.0f);
+	material->Set("emissive", 1.0f);
+	material->Set("indirectDiffuse", 1);
+	material->Set("indirectSpecular", 1);
+
+	//material->SetCastShadows(false);
 	note.SetMaterial(material);
 
 	m_noteModel.AddMesh(note);

@@ -6,6 +6,8 @@
 #include "iw/engine/Time.h"
 #include "Components/EnemyDeathCircle.h"
 
+#include "iw/engine/Components/UiElement_temp.h"
+
 ScoreSystem::ScoreSystem(
 	iw::Entity& player,
 	iw::Camera* camera,
@@ -52,7 +54,7 @@ int ScoreSystem::Initialize() {
 void ScoreSystem::Update(
 	iw::EntityComponentArray& view)
 {
-	Renderer->BeginScene(camera); // use ui element
+	Renderer->BeginScene(camera);
 
 		for (auto entity : view) {
 			auto [transform, score] = entity.Components.Tie<Components>();
@@ -99,7 +101,7 @@ void ScoreSystem::Update(
 
 	iw::Transform t;
 	iw::Transform tp;
-	t.Position = iw::vector3(-7.75, 4.5, -5);
+	t.Position  = iw::vector3(-7.75, 4.5,  -5);
 	tp.Position = iw::vector3(-7.75, 3.75, -5);
 
 	if (totalScore < 0) {
@@ -117,6 +119,16 @@ void ScoreSystem::Update(
 	else if (potentialScore >= 0) {
 		potentialScoreMesh.SetMaterial(textMat);
 	}
+
+	// Temp should be ui element
+
+	//Renderer->BeforeScene([&]() {
+	//	Renderer->Device->SetDepthTest(false);
+	//});
+
+	//Renderer->AfterScene([&]() {
+	//	Renderer->Device->SetDepthTest(true);
+	//});
 
 	Renderer->BeginScene(uiCam);
 

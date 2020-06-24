@@ -3,15 +3,19 @@
 #include "iw/engine/Time.h"
 #include <unordered_map>
 
+#include "iw/log/logger.h"
+
 namespace iw {
 namespace Engine {
 	Layer::Layer(
-		const char* name)
+		std::string name)
 		: m_name(name)
 		, MainScene(new Scene())
 	{}
 
-	Layer::~Layer() {}
+	Layer::~Layer() {
+		delete MainScene;
+	}
 
 	int Layer::Initialize() {
 		for (ISystem* s : m_systems) {
@@ -108,14 +112,10 @@ namespace Engine {
 		return m_systems.On(e);
 	}
 
-	void Layer::UpdateSystems(std::unordered_map<const char*, float>& temp_debug, float smooth) {
+	void Layer::UpdateSystems() {
 		for (ISystem* system : m_systems) {
-			float start = iw::Time::DeltaTimeNow();
-				
+			LOG_TIME_SCOPE(system->Name() + " system");
 			system->Update();
-				
-			float end = iw::Time::DeltaTimeNow();
-			temp_debug[system->Name()] = iw::lerp(temp_debug[system->Name()], end - start, smooth);
 		}
 	}
 

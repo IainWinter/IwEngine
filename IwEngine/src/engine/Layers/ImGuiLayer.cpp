@@ -81,6 +81,32 @@ namespace Engine {
 		//ImGui::End();
 
 	}
+	
+	std::unordered_map<std::string, float> m_smooth;
+	float smoothing;
+
+	void PrintTimes(
+		iw::log_time& times)
+	{
+		m_smooth[times.name] = iw::lerp(m_smooth[times.name], times.time * 1000, min(1 - smoothing + .01, 1));
+		float time = m_smooth[times.name];
+
+		if (times.children.size() == 0) {
+			ImGui::Text("%s - %4.4fms", times.name.c_str(), m_smooth[times.name]);
+		}
+
+		else {
+			int id = (times.my_level << sizeof(int) / 2) | times.my_index;
+
+			if (ImGui::TreeNode(&id, "%s - %4.4fms", times.name.c_str(), m_smooth[times.name])) {
+				for (iw::log_time& child : times.children) {
+					PrintTimes(child);
+				}
+
+				ImGui::TreePop();
+			}
+		}
+	}
 
 	void ImGuiLayer::Begin() {
 		// Frame
@@ -89,7 +115,7 @@ namespace Engine {
 		if (m_window) ImGui_ImplWin32_NewFrame();
 		ImGui::NewFrame();
 
-		// Dockspace
+		// temp Dockspace
 
 		ImGuiWindowFlags window_flags =
 			ImGuiWindowFlags_MenuBar
@@ -133,10 +159,18 @@ namespace Engine {
 			ImGui::EndMenuBar();
 		}
 
-		ImGui::Begin("Viewspace");
+		// temp times
 
-		ImVec2 size  = ImGui::GetWindowSize();
-		size.y = size.x * aspect;
+		ImGui::Begin("Times");
+
+		ImGui::SliderFloat("Smooth", &smoothing, 0, 1, "%1.2f", .5);
+		PrintTimes(LOG_GET_TIMES());
+
+		ImGui::End();
+
+		// temp Viewspace
+
+		ImGui::Begin("Viewspace");
 
 		//target->Resize(size.x, size.y);
 
@@ -144,8 +178,13 @@ namespace Engine {
 		//size.x = target->Tex(0)->Width();
 		//size.y = target->Tex(0)->Height();
 
-		unsigned id = target->Tex(0)->Handle()->Id();
-		ImGui::Image((void*)id, size, ImVec2(0, 1), ImVec2(1, 0));
+		if (target->Tex(0)->Handle()) {
+			ImVec2 size = ImGui::GetWindowSize();
+			size.y = size.x * aspect;
+
+			unsigned id = target->Tex(0)->Handle()->Id();
+			ImGui::Image((void*)id, size, ImVec2(0, 1), ImVec2(1, 0));
+		}
 
 		ImGui::End();
 	}

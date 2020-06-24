@@ -50,6 +50,10 @@ namespace RenderAPI {
 		virtual void SetCullFace(
 			CullFace cull) = 0;
 
+		IWRENDERER_API
+		virtual void SetDepthTest(
+			bool depthTest) = 0;
+
 		// Buffers
 
 		IWRENDERER_API

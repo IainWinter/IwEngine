@@ -15,7 +15,7 @@ namespace Engine {
 
 	class Layer {
 	private:
-		const char* m_name;
+		std::string m_name;
 		EventStack<ISystem*> m_systems; // layer doesnt own systems but prolly should
 	protected:
 		APP_VARS
@@ -25,7 +25,7 @@ namespace Engine {
 	public:
 		IWENGINE_API
 		Layer(
-			const char* name);
+			std::string name);
 
 		IWENGINE_API
 		virtual ~Layer();
@@ -91,12 +91,12 @@ namespace Engine {
 		// System updates
 
 		IWENGINE_API
-		void UpdateSystems(std::unordered_map<const char*, float>& debugpoop, float smooth);
+		void UpdateSystems();
 
 		IWENGINE_API
 		void FixedUpdateSystems();
 
-		inline const char* Name() {
+		const std::string& Name() const {
 			return m_name;
 		}
 
@@ -130,7 +130,10 @@ namespace Engine {
 		void PushSystem(
 			S* system)
 		{
-			LOG_INFO << "Pushed " << system->Name() << " system onto " << Name() << " layer";
+			std::string sname = system->Name();
+			std::string lname = Name();
+
+			LOG_INFO << "Pushed " << sname << " system onto " << lname << " layer";
 			system->SetAppVars(MakeAppVars());
 			m_systems.PushBack(system);
 

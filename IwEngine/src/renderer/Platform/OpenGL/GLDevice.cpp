@@ -83,6 +83,18 @@ namespace RenderAPI {
 		GL(glCullFace(TRANSLATE(cull)));
 	}
 
+	void GLDevice::SetDepthTest(
+		bool depthTest)
+	{
+		if (depthTest) {
+			GL(glEnable(GL_DEPTH_TEST));
+		}
+
+		else {
+			GL(glDisable(GL_DEPTH_TEST));
+		}
+	}
+
 	void GLDevice::SetWireframe(
 		bool wireframe)
 	{

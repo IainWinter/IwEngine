@@ -321,7 +321,7 @@ namespace iw {
 
 		PushSystem<iw::ModelVoxelRenderSystem>(MainScene);
 
-		//PushSystem<SpaceInspectorSystem>();
+		PushSystem<SpaceInspectorSystem>();
 
 		//PushSystem<iw::DrawCollidersSystem>(MainScene->MainCamera());
 

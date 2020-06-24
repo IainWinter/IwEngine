@@ -4,6 +4,7 @@
 #include "Events/Events.h"
 #include "iw/engine/Events/Seq/EventSequence.h"
 #include <queue>
+#include <string>
 
 namespace iw {
 namespace Engine {
@@ -43,14 +44,14 @@ namespace Engine {
 		virtual bool On(EntityDestroyEvent& e) = 0;
 		virtual bool On(EntityDestroyedEvent& e) = 0;
 
-		virtual const char* Name() const = 0;
+		virtual const std::string& Name() const = 0;
 	};
 
 	class SystemBase
 		: public ISystem
 	{
 	private:
-		const char* m_name;
+		std::string m_name;
 
 	protected:
 		ref<eventbus>            Bus;
@@ -66,7 +67,7 @@ namespace Engine {
 
 	public:
 		SystemBase(
-			const char* name)
+			std::string name)
 			: m_name(name)
 		{}
 
@@ -104,7 +105,7 @@ namespace Engine {
 		virtual bool On(EntityDestroyEvent& e) override { return false; }
 		virtual bool On(EntityDestroyedEvent& e) override { return false; }
 
-		const char* Name() const override {
+		const std::string& Name() const override {
 			return m_name;
 		}
 	protected:

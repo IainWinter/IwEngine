@@ -33,6 +33,10 @@ namespace RenderAPI {
 		void SetCullFace(
 			CullFace cull) override;
 
+		IWRENDERER_API
+		virtual void SetDepthTest(
+			bool depthTest) override;
+
 		// State changes
 
 		IWRENDERER_API

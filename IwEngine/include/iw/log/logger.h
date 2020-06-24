@@ -4,15 +4,40 @@
 #include "sink/sink.h"
 #include <vector>
 #include <sstream>
+#include <string>
+
+#define IW_LOG_TIME
 
 namespace iw {
 namespace log {
+#ifdef IW_LOG_TIME
+	struct log_time {
+		std::string name = "Frame";
+		float time = 0;
+
+		unsigned my_level = 0;
+		unsigned my_index = 0;
+		std::vector<log_time> children;
+
+		void push_time(
+			std::string& name,
+			float begin,
+			unsigned level);
+
+		void pop_time(
+			float end,
+			unsigned current_level);
+	};
+#endif
 	class logger {
 	private:
 		std::vector<sink*> m_sinks;
 		std::string preamble = "[Pream] Start of log...";
-		bool m_tabbed;
-
+#ifdef IW_LOG_TIME
+		float(*m_get_time)();
+		log_time m_root = {};
+		unsigned m_current_level = 0;
+#endif
 	public:
 		template<
 			typename _sink_t,
@@ -48,7 +73,24 @@ namespace log {
 
 			sink_msg(level, str);
 		}
+#ifdef IW_LOG_TIME
+		IWLOG_API
+		void set_get_time(
+			float(*func)());
 
+		IWLOG_API
+		void push_time(
+			std::string name);
+
+		IWLOG_API
+		void pop_time();
+
+		IWLOG_API
+		log_time get_times();
+
+		IWLOG_API
+		void clear_times();
+#endif
 		IWLOG_API
 		void flush();
 
@@ -83,18 +125,36 @@ namespace log {
 			return *this;
 		}
 	};
+#ifdef IW_LOG_TIME
+	class log_time_view {
+	public:
+		IWLOG_API
+		log_time_view(
+			std::string name);
+
+		IWLOG_API
+		~log_time_view();
+	};
+#endif
 }
 
 	using namespace log;
 }
 
-#define LOG_SINK(_type_, _level_, ...)                               \
+#define LOG_SINK(_type_, _level_, ...)                              \
 	iw::logger::instance().make_sink<_type_>(_level_, __VA_ARGS__)
 
 #define LOG_FLUSH   iw::logger::instance().flush
 
-#define LOG_INFO    iw::log_view(iw::INFO)
-#define LOG_DEBUG   iw::log_view(iw::DEBUG)
-#define LOG_WARNING iw::log_view(iw::WARN)
-#define LOG_ERROR   iw::log_view(iw::ERR)
-#define LOG_TRACE   iw::log_view(iw::TRACE)
+#define LOG_INFO     iw::log_view(iw::INFO)
+#define LOG_DEBUG    iw::log_view(iw::DEBUG)
+#define LOG_WARNING  iw::log_view(iw::WARN)
+#define LOG_ERROR    iw::log_view(iw::ERR)
+#define LOG_TRACE    iw::log_view(iw::TRACE)
+
+#ifdef IW_LOG_TIME
+#	define LOG_SET_GET_TIME(func) logger::instance().set_get_time(func);
+#	define LOG_TIME_SCOPE(time) iw::log_time_view __keep_alive = iw::log_time_view(time)
+#	define LOG_GET_TIMES() logger::instance().get_times()
+#	define LOG_CLEAR_TIMES() logger::instance().clear_times()
+#endif

@@ -63,6 +63,8 @@ namespace Engine {
 		LOG_SINK(iw::file_sink,         iw::INFO,  "/logs/sandbox_info.log");
 		LOG_SINK(iw::file_sink,         iw::DEBUG, "/logs/sandbox_debug.log");
 
+		LOG_SET_GET_TIME(iw::Time::DeltaTimeNow);
+
 		// Events
 
 		Bus->subscribe(iw::make_callback(&Application::HandleEvent, this));
@@ -196,6 +198,8 @@ namespace Engine {
 		int layerNumber = 0;
 
 		for (Layer* layer : m_layers) {
+			LOG_TIME_SCOPE(layer->Name() + " layer pre update");
+
 			Renderer->SetLayer(layerNumber);
 			layer->PreUpdate();
 		}
@@ -208,14 +212,11 @@ namespace Engine {
 		layerNumber = 0;
 
 		for (Layer* layer : m_layers) {
-			float start = iw::Time::DeltaTimeNow();
+			LOG_TIME_SCOPE(layer->Name() + " layer update");
 
 			Renderer->SetLayer(layerNumber);
-			layer->UpdateSystems(system_update_times[layer->Name()], smooth);
+			layer->UpdateSystems();
 			layer->Update();
-
-			float end = iw::Time::DeltaTimeNow();
-			update_times[layer->Name()] = iw::lerp(update_times[layer->Name()], end - start, smooth);
 		}
 
 		// Pause until work is finished (ASync)
@@ -226,71 +227,48 @@ namespace Engine {
 		layerNumber = 0;
 
 		for (Layer* layer : m_layers) {
-			float start = iw::Time::DeltaTimeNow();
+			LOG_TIME_SCOPE(layer->Name() + " layer post update");
 
 			Renderer->SetLayer(layerNumber);
 			layer->PostUpdate();
-
-			float end = iw::Time::DeltaTimeNow();
-			post_update_times[layer->Name()] = iw::lerp(post_update_times[layer->Name()], end - start, smooth);
 		}
 
 		// Run through render queue! (Sync)
 
-		float renderStart = iw::Time::DeltaTimeNow();
+		{
+			LOG_TIME_SCOPE("Renderer");
+			Renderer->End();
+		}
 
-		Renderer->End();
+		{
+			LOG_TIME_SCOPE("Audio");
+			Audio->Update();
+		}
 
-		float renderEnd = iw::Time::DeltaTimeNow();
-		renderTime = iw::lerp(renderTime, renderEnd - renderStart, smooth);
+		{
+			LOG_TIME_SCOPE("Console & bus");
+			Console->ExecuteQueue();
+			Bus->publish();
+		}
 
 		// ImGui render (Sync)
 
 		ImGuiLayer* imgui = GetLayer<ImGuiLayer>("ImGui");
 		if (imgui) {
+			LOG_TIME_SCOPE("ImGui");
+
 			imgui->Begin();
 			for (Layer* layer : m_layers) {
 				layer->ImGui();
 			}
-
-			ImGui::Begin("Times");
-			ImGui::SliderFloat("Smooth", &smooth, 0, 1);
-
-			ImGui::Text("Tick %i",              iw::Time::Ticks());
-			ImGui::Text("Total time %f",        iw::Time::TotalTime());
-			ImGui::Text("Delta time %f",        iw::Time::DeltaTime());
-			ImGui::Text("Delta time scaled %f", iw::Time::DeltaTimeScaled());
-			
-			ImGui::Text("Renderer took %4.4f ms", renderTime * 1000.0f);
-			ImGui::Text("Physics  took %4.4f ms", physicsTime * 1000.0f);
-			ImGui::Text("Eventbus took %4.4f ms", eventTime * 1000.0f);
-
-			for (Layer* layer : m_layers) {
-				ImGui::Text("%4.4f ms - %s layer",   post_update_times[layer->Name()] * 1000.0f, layer->Name());
-				ImGui::Text("%4.4f ms - %s systems", update_times     [layer->Name()] * 1000.0f, layer->Name());
-
-				for (ISystem* system : layer->temp_GetSystems()) {
-					ImGui::Text("\t%4.4f ms - %s system", system_update_times[layer->Name()][system->Name()] * 1000.0f, system->Name());
-				}
-			}
-			ImGui::End();
-
 			imgui->End();
 		}
-
-		Audio->Update();
-
-		float eventStart = iw::Time::DeltaTimeNow();
-
-		Console->ExecuteQueue();
-		Bus->publish();
-
-		float eventEnd = iw::Time::DeltaTimeNow();
-		eventTime = iw::lerp(eventTime, eventEnd - eventStart, smooth);
 		
 		// Swap buffers (Sync)
 		
 		m_window->SwapBuffers();
+
+		LOG_CLEAR_TIMES();
 	}
 
 	void Application::FixedUpdate() {

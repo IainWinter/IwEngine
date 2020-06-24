@@ -12,13 +12,13 @@ namespace Engine {
 	void UiRenderSystem::Update(
 		EntityComponentArray& eca)
 	{
-		//Renderer->BeforeScene([&]() {
-		//	glDisable(GL_DEPTH_TEST);
-		//});
+		Renderer->BeforeScene([&]() {
+			glDisable(GL_DEPTH_TEST);
+		});
 
-		//Renderer->AfterScene([&]() {
-		//	glEnable(GL_DEPTH_TEST);
-		//});
+		Renderer->AfterScene([&]() {
+			glEnable(GL_DEPTH_TEST);
+		});
 
 		Renderer->BeginScene(m_camera);
 

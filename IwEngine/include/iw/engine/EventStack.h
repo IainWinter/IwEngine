@@ -2,6 +2,7 @@
 
 #include "iw/events/event.h"
 #include <vector>
+#include <string_view>
 
 namespace iw {
 namespace Engine {
@@ -71,10 +72,10 @@ namespace Engine {
 		}
 
 		T Get(
-			const char* name)
+			std::string_view name)
 		{
 			for (auto itr = m_items.begin(); itr != m_items.end(); itr++) {
-				if (strcmp((*itr)->Name(), name) == 0) {
+				if ((*itr)->Name() == name) {
 					return *itr;
 				}
 			}
