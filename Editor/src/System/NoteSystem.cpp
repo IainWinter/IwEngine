@@ -20,7 +20,7 @@ int NoteSystem::Initialize() {
 	m_material->SetTexture("fontMap", m_font->GetTexture(0));
 
 	m_prefabs.push_back(Note { "A scroll with the words 'slow mo is bound to c.\nsave this for a hard level idiot' written on it.\nWhat could it be??",     1.5f, 0.0f });
-	m_prefabs.push_back(Note { "A letter to the generals,\n\nThe king has spoken, you are to retreat your men as soon as possible. We don't want to break the ice just yet...\n\n\ - Intr", 1.5f, 0.0f });
+	m_prefabs.push_back(Note { "A letter to the generals,\n\nThe king has spoken, you are to retreat your\nmen as soon as possible. We don't want to break the ice just yet...\n\n\ - Intr", 1.5f, 0.0f });
 	m_prefabs.push_back(Note { "A scroll with the words 'charged kill is bound to c.\nsave ths for a hard level idiot' written on it.\nCould this be the answer???", 1.5f, 0.0f });
 
 	return 0;
