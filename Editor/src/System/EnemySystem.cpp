@@ -19,24 +19,14 @@
 #include "Events/ActionEvents.h"
 
 EnemySystem::EnemySystem(
-	iw::Entity& player)
+	iw::Entity& player,
+	iw::Prefab& bullet)
 	: iw::System<iw::Transform, Enemy>("Enemy")
 	, m_enemyCount(0)
 	, m_levelResetTimer(0)
 	, player(player)
+	, m_bullet(bullet)
 {}
-
-int EnemySystem::Initialize() {
-	iw::Mesh sphere = Asset->Load<iw::Model>("Sphere")->GetMesh(0).MakeInstance();
-
-	sphere.Material()->SetShader(Asset->Load<iw::Shader>("shaders/phong.shader"));
-	sphere.Material()->Set("baseColor", iw::Color::From255(0, 213, 255, 191));
-	sphere.Material()->Set("emissive", 2.0f);
-
-	m_bulletModel.AddMesh(sphere);
-
-	return 0;
-}
 
 void EnemySystem::Update(
 	iw::EntityComponentArray& view)
@@ -124,10 +114,10 @@ void EnemySystem::Update(
 			switch (enemy->Type) {
 				case EnemyType::SPIN: {
 					iw::Transform* bullet = SpawnBullet(
-						enemy->Bullet,
+						enemy->Bullet.Type,
+						enemy->Bullet.Speed,
 						transform->Position,
-						iw::quaternion::from_euler_angles(0, enemy->Rotation, 0),
-						entity.Index
+						iw::quaternion::from_euler_angles(0, enemy->Rotation, 0)
 					);
 
 					transform->Parent()->AddChild(bullet);
@@ -138,10 +128,10 @@ void EnemySystem::Update(
 					int count = roundf(iw::Pi2 / enemy->Speed);
 					for (float i = 0; i < count; i++) {
 						iw::Transform* bullet = SpawnBullet(
-							enemy->Bullet,
+							enemy->Bullet.Type,
+							enemy->Bullet.Speed,
 							transform->Position,
-							iw::quaternion::from_euler_angles(0, enemy->Rotation + enemy->Speed * i, 0),
-							entity.Index
+							iw::quaternion::from_euler_angles(0, enemy->Rotation + enemy->Speed * i, 0)
 						);
 
 						transform->Parent()->AddChild(bullet);
@@ -151,10 +141,10 @@ void EnemySystem::Update(
 				}
 				case EnemyType::SEEK: {
 					iw::Transform* bullet = SpawnBullet(
-						enemy->Bullet,
+						enemy->Bullet.Type,
+						enemy->Bullet.Speed,
 						transform->Position,
-						transform->Rotation.inverted(),
-						entity.Index
+						transform->Rotation.inverted()
 					);
 
 					transform->Parent()->AddChild(bullet);
@@ -185,10 +175,10 @@ void EnemySystem::Update(
 									iw::quaternion offset = iw::quaternion::from_euler_angles(0, -rot + enemy->Speed * i, 0);
 
 									iw::Transform* bullet = SpawnBullet(
-										enemy->Bullet,
+										enemy->Bullet.Type,
+										enemy->Bullet.Speed, 
 										transform->Position,
-										transform->Rotation.inverted() * offset,
-										entity.Index
+										transform->Rotation.inverted() * offset
 									);
 
 									transform->Parent()->AddChild(bullet);
@@ -214,10 +204,10 @@ void EnemySystem::Update(
 							iw::quaternion offset = iw::quaternion::from_euler_angles(0, rot, 0);
 
 							iw::Transform* bullet = SpawnBullet(
-								enemy->Bullet,
+								enemy->Bullet.Type,
+								enemy->Bullet.Speed, 
 								transform->Position,
-								transform->Rotation.inverted() * offset,
-								entity.Index
+								transform->Rotation.inverted() * offset
 							);
 
 							transform->Parent()->AddChild(bullet);
@@ -274,10 +264,10 @@ void EnemySystem::Update(
 								iw::quaternion offset = iw::quaternion::from_euler_angles(0, -rot + enemy->Speed * i, 0);
 
 								iw::Transform* bullet = SpawnBullet(
-									enemy->Bullet,
+									enemy->Bullet.Type,
+									enemy->Bullet.Speed,
 									transform->Position,
-									transform->Rotation.inverted() * offset,
-									entity.Index
+									transform->Rotation.inverted() * offset
 								);
 
 								transform->Parent()->AddChild(bullet);
@@ -400,72 +390,28 @@ bool EnemySystem::On(
 	return false;
 }
 
-iw::Transform* EnemySystem::SpawnBullet( // this should be in bullet system i guess
-	Bullet prefab,
+iw::Transform* EnemySystem::SpawnBullet(
+	BulletType type,
+	float speed,
 	iw::vector3 position,
-	iw::quaternion rot,
-	int index)
+	iw::quaternion rot)
 {
-	iw::Entity bullet = Space->CreateEntity<iw::Transform, iw::Model, iw::SphereCollider, iw::Rigidbody, Bullet>();
+	iw::Entity bullet = Space->Instantiate(m_bullet);
 	
-	                        bullet.Set<iw::Model>         (m_bulletModel);
-	Bullet*             b = bullet.Set<Bullet>            (prefab);
-	iw::Transform*      t = bullet.Set<iw::Transform>     (position + iw::vector3(sqrt(2), 0, 0) * rot, iw::vector3(.25f));
-	iw::SphereCollider* s = bullet.Set<iw::SphereCollider>(iw::vector3::zero, 0.5f);
-	iw::Rigidbody*      r = bullet.Set<iw::Rigidbody>     ();
+	Bullet*             b = bullet.Find<Bullet>();
+	iw::Transform*      t = bullet.Find<iw::Transform>();
+	iw::SphereCollider* s = bullet.Find<iw::SphereCollider>();
+	iw::Rigidbody*      r = bullet.Find<iw::Rigidbody>();
 
-	b->initialVelocity = iw::vector3::unit_x * rot * prefab.Speed;
+	b->Type  = type;
+	b->Speed = speed;
 
-	b->enemyIndex = index;
+	t->Rotation = rot;
+	t->Position = position + t->Forward() * sqrt(2);
 
-	r->SetMass(1);
 	r->SetCol(s);
 	r->SetTrans(t);
-	r->SetVelocity(b->initialVelocity);
-	r->SetSimGravity(false);
-	r->SetRestitution(0.1f);
-	r->SetIsTrigger(true);
-	//r->SetIsLocked(iw::vector3(0, 1, 0));
-	//r->SetLock(iw::vector3(0, 1, 0));
-
-	r->SetOnCollision([&](iw::Manifold& man, float dt) {
-		iw::Entity bulletEntity, otherEntity;
-		bool noent = GetEntitiesFromManifold<Bullet>(man, bulletEntity, otherEntity);
-
-		if (noent) {
-			return;
-		}
-
-		Bullet* bullet = bulletEntity.Find<Bullet>();
-		//if (bullet->Die) return;
-
-		if (   otherEntity.Has<Bullet>()
-			|| otherEntity.Has<Enemy>()/*.Index() == bullet.Find<Bullet>()->enemyIndex*/
-			|| otherEntity.Has<DontDeleteBullets>()
-			|| otherEntity.Has<LevelDoor>())
-		{
-			return;
-		}
-
-		iw::Transform* bulletTransform = bulletEntity.Find<iw::Transform>();
-
-		if (otherEntity.Has<Player>()) {
-			Bus->push<GiveScoreEvent>(bulletTransform->Position, 0, true);
-		}
-
-		else if (otherEntity.Has<EnemyDeathCircle>()) {
-			iw::Transform* otherTransform  = otherEntity.Find<iw::Transform>();
-
-			float score = ceil((bulletTransform->Position - otherTransform->Position).length()) * 10;
-			Bus->push<GiveScoreEvent>(bulletTransform->Position, score, false);
-		}
-
-		/*bullet->Die = true;*/
-
-		bulletTransform->SetParent(nullptr);
-		Space->DestroyEntity(bulletEntity.Index());
-		//Bus->push<iw::EntityDestroyEvent>(bulletEntity);
-	});
+	r->SetVelocity(iw::vector3::unit_x * rot * b->Speed);
 
 	Physics->AddRigidbody(r);
 

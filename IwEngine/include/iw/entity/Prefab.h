@@ -16,7 +16,7 @@ namespace ECS {
 	struct Prefab {
 	private:
 		std::vector<iw::ref<Component>> m_components;
-		std::vector<void*> m_componentData;
+		std::vector<char*> m_componentData; // offsets to m_memory.memory();
 		linear_allocator m_memory;
 
 	public:
@@ -48,6 +48,9 @@ namespace ECS {
 
 		IWENTITY_API
 		const std::vector<void*>& ComponentData() const;
+
+		IWENTITY_API
+		unsigned ComponentCount() const;
 	};
 
 }

@@ -9,7 +9,7 @@ namespace ECS {
 
 	void Prefab::Add(
 		iw::ref<Component> component,
-		void* prefab)
+		void* data)
 	{
 		if (!component) {
 			LOG_WARNING << "Tried to add an empty component to a prefab!";
@@ -20,44 +20,58 @@ namespace ECS {
 			LOG_WARNING << "Tried to add two of the same component to a prefab!";
 			return;
 		}
-
+		
 		m_components.push_back(component);
+
+		if (!data) {
+			return;
+		}
 
 		if (m_memory.size() + component->Size > m_memory.capacity()) { // kinda annoying to have to do
 			m_memory.resize(m_memory.capacity() * 2);
 		}
 
-		void* compData = m_memory.alloc(component->Size);
+		void* ptr = m_memory.alloc(component->Size);
 		
-		if (prefab) {
-			memcpy(compData, prefab, component->Size);
+		if (!ptr) {
+			LOG_ERROR << "Prefab failed to allocate memory for component!";
+			return;
 		}
 
-		m_componentData.push_back(compData);
+		component->DeepCopyFunc(ptr, data);
+		m_componentData.push_back((char*)ptr - m_memory.memory());
 	}
 
 	bool Prefab::Set(
 		iw::ref<Component> component,
-		void* prefab)
+		void* data)
 	{
 		if (!component) {
-			LOG_WARNING << "Tried to add an empty component to a prefab!";
+			LOG_WARNING << "Tried to set an empty component on a prefab!";
 			return false;
 		}
 
-		if (Has(component)) {
-			LOG_WARNING << "Tried to add two of the same component to a prefab!";
+		if (!Has(component)) {
+			LOG_WARNING << "Tried to set a component that doesn't exists in a prefab!";
 			return false;
 		}
 
-		if (prefab) {
-			auto itr = std::find(m_components.begin(), m_components.end(), component);
-			size_t index = std::distance(m_components.begin(), itr);
-
-			void* compData = m_componentData.at(index);
-
-			memcpy(compData, prefab, component->Size);
+		if (!data) {
+			LOG_WARNING << "Tried to set a component to null in a prefab!";
+			return false;
 		}
+
+		int index = 0;
+		for (; index < m_componentData.size(); index++) {
+			if (m_components[index] = component) {
+				break;
+			}
+		}
+
+		void* ptr = m_componentData.at(index); // guaranteed to exist
+
+		component->DeepCopyFunc(ptr, data);
+		m_componentData.push_back(ptr);
 
 		return true;
 	}
@@ -65,13 +79,14 @@ namespace ECS {
 	void Prefab::Remove(
 		iw::ref<Component> component)
 	{
-
+		// needs to clear linear alloc and then realloc every component :(
+		LOG_WARNING << "no impl";
 	}
 
 	bool Prefab::Has(
 		iw::ref<Component> component)
 	{
-		return false;
+		return std::find(m_components.begin(), m_components.end(), component) != m_components.end();
 	}
 
 	const std::vector<iw::ref<Component>>& Prefab::Components() const {
@@ -80,6 +95,10 @@ namespace ECS {
 
 	const std::vector<void*>& Prefab::ComponentData() const {
 		return m_componentData;
+	}
+
+	unsigned Prefab::ComponentCount() const {
+		return m_components.size();
 	}
 }
 }

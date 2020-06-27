@@ -14,9 +14,13 @@ struct REFLECT Bullet {
 	REFLECT BulletType Type;
 	REFLECT float      Speed;
 
-	float Time;
+	float Timer;
 	iw::vector3 initialVelocity;
-	int enemyIndex;
+};
 
-	//bool Die = false;
+struct BulletPackage {
+	REFLECT BulletType InnerType;
+	REFLECT float      InnerSpeed;
+
+	float Time;
 };

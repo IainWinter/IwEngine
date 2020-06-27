@@ -2,6 +2,8 @@
 #include "iw/events/callback.h"
 #include <assert.h>
 
+#include <algorithm>
+
 namespace iw {
 namespace ECS {
 	ArchetypeManager::ArchetypeManager()
@@ -36,17 +38,21 @@ namespace ECS {
 			archetype->Count = std::distance(begin, end);
 			archetype->Size  = totalSize;
 
-			size_t i = 0;
-			size_t size = 0;
-			for (auto itr = begin; itr != end; itr++) {
-				archetype->Layout[i].Component = *itr;
+			std::vector<ref<Component>> components(begin, end);
+
+			std::sort(components.begin(), components.end(), [](ref<Component>& a, ref<Component>& b) {
+				return a->Id < b->Id;
+			});
+
+			for (size_t i = 0, size = 0; i < components.size(); i++) {
+				ref<Component>& component = components[i];
+
+				archetype->Layout[i].Component = component;
 				archetype->Layout[i].Offset    = size;
 
-				size += (*itr)->Size;
+				size += component->Size;
 
 				archetype->Layout[i].Onset = totalSize - size;
-
-				i++;
 			}
 
 			archetype = m_archetypes.emplace_back(archetype);

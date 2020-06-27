@@ -31,6 +31,11 @@ namespace ECS {
 			component->Name = type.name();
 			component->Size = size;
 #endif
+			component->DeepCopyFunc = [size](void* ptr, void* data) {
+				memcpy(ptr, data, size);
+			};
+
+			component->Id = m_components.size();
 		}
 
 		return component;

@@ -134,13 +134,17 @@ namespace ECS {
 		template<
 			typename _c>
 		ref<Component>& RegisterComponent() {
-			return RegisterComponent(
+			ref<Component>& component = RegisterComponent(
 #ifdef IW_USE_REFLECTION
 				GetType<_c>(), GetType<_c>()->size
 #else
 				typeid(_c), sizeof(_c)
 #endif
 			);
+
+			component->DeepCopyFunc = iw::GetCopyFunc<_c>();
+
+			return component;
 		}
 
 		// Gets a registed component from the component manager if one exists
@@ -248,7 +252,7 @@ namespace ECS {
 		// Query for entities with the specified components
 		template<
 			typename... _cs>
-		EntityComponentArray Query() {
+		ECA<_cs...> Query() {
 			return Query(MakeQuery<_cs...>());
 		}
 

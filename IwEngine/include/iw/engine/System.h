@@ -3,6 +3,10 @@
 #include "AppVars.h"
 #include "Events/Events.h"
 #include "iw/engine/Events/Seq/EventSequence.h"
+
+// default includes
+#include "iw/engine/Time.h"
+
 #include <queue>
 #include <string>
 

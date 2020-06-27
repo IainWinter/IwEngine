@@ -163,12 +163,13 @@ namespace ECS {
 			return nullptr;
 		}
 
-		ref<EntityData>& entityData = m_entityManager.GetEntityData(handle.Index);
-		void* ptr = m_componentManager.GetComponentPtr(entityData, component);
-		if (ptr) {
-			memcpy(ptr, data, component->Size); // should pass this all the way down to Chunk.h but ugh
-			return ptr;
+		void* ptr = m_componentManager.GetComponentPtr(m_entityManager.GetEntityData(handle.Index), component);
+		
+		if (ptr && data) {
+			component->DeepCopyFunc(ptr, data);
 		}
+
+		return ptr;
 	}
 
 	void* Space::FindComponent(
@@ -255,19 +256,17 @@ namespace ECS {
 		const Prefab& prefab)
 	{
 		ref<Archetype> archetype = m_archetypeManager.CreateArchetype(
-										&prefab.Components().front(), 
-										&prefab.Components().back());
+										&prefab.Components().front(),
+										&prefab.Components().back() + 1);
 
 		Entity entity = CreateEntity(archetype);
 
-		//for (void* data : prefab.ComponentData()) {
-		//	iw::ref<EntityData>& data = m_entityManager.GetEntityData(entity.Index());
-		//	void* compData = m_componentManager.GetComponentPtr(data, component);
+		for (int i = 0; i < prefab.ComponentCount(); i++) {
+			ref<Component> component = prefab.Components()[i];
+			void*          data      = prefab.ComponentData()[i];
 
-		//	memcpy(compData, *compDataItr, component->Size);
-
-		//	compDataItr++;
-		//}
+			SetComponent(entity.Handle, component, data);
+		}
 
 		return entity;
 	}

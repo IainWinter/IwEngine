@@ -8,10 +8,75 @@
 #include "Layers/SandboxLayer.h"
 #include "Layers/ToolLayer.h"
 
+#include <string>
+#include <dxgiformat.h>
+
 //#include "Layers/AimTrainer.h"
 
 namespace iw {
+
+
 	App::App() {
+
+
+
+
+		//Vars
+		// Switch
+		//	Action
+		//	Action
+		//	Action
+		//	Action
+		// Action
+		// Action
+
+
+
+
+
+		// Sequencer
+		//	50% Action
+		//	50% Action 
+
+		// Components(Types)
+		//Bullet bullet;
+		//iw::Transform transform;
+
+		//// Switch (Types, Field)
+		//switch (bullet.Type) {
+		//	case LINE:    break;
+		//	case SINE:    break;
+		//	case ORBIT:   break;
+		//	case SEEK:    break;
+		//}
+
+		//struct Components {
+		//	std::vector<std::string> vars;
+		//	std::string text;
+
+		//	Components(
+		//		std::vector<std::string>& components)
+		//	{
+		//		std::stringstream ss;
+
+		//		for (int i = 0; i < components.size(); i++) {
+		//			ss << components[i] << "var" << i << ";";
+		//		}
+		//	}
+		//};
+
+
+
+		//std::vector<std::string> c;
+		//c.push_back(Space->RegisterComponent<Bullet>()->Name);
+		//c.push_back(Space->RegisterComponent<iw::Transform>()->Name);
+
+		//Components components(c);
+
+
+
+
+
 		Audio = REF<AudioSpaceStudio>("assets/sounds/");
 
 		iw::ref<Context> context = Input->CreateContext("Editor");

@@ -15,9 +15,6 @@ namespace Engine {
 		DebugLayer();
 
 		IWENGINE_API
-		void PostUpdate() override;
-
-		IWENGINE_API
 		void ImGui() override;
 
 		IWENGINE_API

@@ -14,17 +14,16 @@ public:
 		Enemy* Enemy;
 	};
 private:
-	iw::Model m_bulletModel;
 	int m_enemyCount;
 	float m_levelResetTimer;
 
 	iw::Entity& player;
+	iw::Prefab& m_bullet;
 
 public:
 	EnemySystem(
-		iw::Entity& player);
-
-	int Initialize() override;
+		iw::Entity& player,
+		iw::Prefab& prefab);
 
 	void Update(
 		iw::EntityComponentArray& view) override;
@@ -32,10 +31,10 @@ public:
 	bool On(iw::ActionEvent& e) override;
 private:
 	iw::Transform* SpawnBullet(
-		Bullet prefab,
+		BulletType type,
+		float speed,
 		iw::vector3 position,
-		iw::quaternion rot,
-		int index);
+		iw::quaternion rot);
 
 	iw::Transform* SpawnEnemy(
 		Enemy prefab,

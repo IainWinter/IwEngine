@@ -10,15 +10,12 @@ namespace Engine {
 		: Layer("Debug")
 	{}
 
-	void DebugLayer::PostUpdate() {
+	void DebugLayer::ImGui() {
 		while (logs.size() > 20) {
 			logs.erase(logs.begin());
 		}
-	}
 
-	void DebugLayer::ImGui() {
 		ImGui::Begin("Debug layer");
-
 
 		float time = Time::FixedTime();
 		ImGui::SliderFloat("Fixed timestep", &time, 0, 1);

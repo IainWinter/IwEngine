@@ -296,8 +296,8 @@ namespace iw {
 		// Systems
 
 		playerSystem = PushSystem<PlayerSystem>();
-		enemySystem  = PushSystem<EnemySystem>(playerSystem->GetPlayer());
 		bulletSystem = PushSystem<BulletSystem>(playerSystem->GetPlayer());
+		enemySystem  = PushSystem<EnemySystem>(playerSystem->GetPlayer(), bulletSystem->GetBulletPrefab());
 
 		PushSystem<GameCameraController>(playerSystem->GetPlayer(), MainScene);
 		PushSystem<LevelSystem>(playerSystem->GetPlayer());

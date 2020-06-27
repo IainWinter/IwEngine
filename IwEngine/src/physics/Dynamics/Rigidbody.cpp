@@ -4,7 +4,8 @@ namespace iw {
 namespace Physics {
 	Rigidbody::Rigidbody(
 		bool isKinematic)
-		: m_gravity(0)
+		: CollisionObject()
+		, m_gravity(0)
 		, m_force(0)
 		, m_velocity(0)
 		, m_lock(0)

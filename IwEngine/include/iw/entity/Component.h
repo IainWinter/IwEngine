@@ -2,11 +2,14 @@
 
 #include "IwEntity.h"
 #include <initializer_list>
+#include <functional>
 #include <typeindex>
 #include <vector>
 
 namespace iw {
 namespace ECS {
+	using _CopyFunc = std::function<void(void*, void*)>;
+
 	struct IWENTITY_API Component {
 #ifdef IW_USE_REFLECTION
 		const iw::Type* Type;
@@ -15,6 +18,10 @@ namespace ECS {
 #endif
 		size_t Size;
 		const char* Name;
+
+		size_t Id;
+
+		_CopyFunc DeepCopyFunc;
 
 		static inline size_t Hash(
 			std::initializer_list<iw::ref<Component>> components)
@@ -45,6 +52,19 @@ namespace ECS {
 		//std::vector<iw::ref<Component>> None;
 		//std::vector<iw::ref<Component>> Any;
 	};
+
+	template<
+		typename _t>
+	_CopyFunc GetCopyFunc() { // 8 squintillionzz iq
+		return [](void* ptr, void* data) {
+			_t* p = (_t*)ptr;
+			_t* d = (_t*)data;
+
+			new(p) _t(*d);
+
+			//*p = *d;
+		};
+	}
 }
 
 	using namespace ECS;

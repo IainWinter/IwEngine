@@ -4,6 +4,8 @@
 #include "ChunkList.h"
 #include <vector>
 
+#include <functional>
+
 namespace iw {
 namespace ECS {
 	class EntityComponentArray {
@@ -38,6 +40,9 @@ namespace ECS {
 				const ChunkListVec& ends,
 				size_t itrIndex);
 		};
+
+		template<typename... _c>
+		using func = std::function<void(EntityHandle, _c*...)>;
 	private:
 		ChunkListVec m_begins;
 		ChunkListVec m_ends;
@@ -53,6 +58,53 @@ namespace ECS {
 
 		IWENTITY_API
 		iterator end();
+
+		template<
+			typename... _c>
+		void Each(
+			func<_c...> function)
+		{
+			for (auto e : *this) {
+				callFunction<_c...>(
+					function,
+					e.Handle,
+					e.Components.Components,
+					std::make_index_sequence<sizeof...(_c)>{}
+				);
+			}
+		}
+	private:
+		template<
+			typename... _c,
+			size_t... _i>
+		void callFunction(
+			func<_c...> func,
+			EntityHandle handle,
+			void** args,
+			std::index_sequence<_i...>)
+		{
+			func(handle, (_c*)args[_i]...);
+		}
+	};
+
+	template<
+		typename... _c>
+	class ECA
+		: public EntityComponentArray
+	{
+	public:
+		using func = std::function<void(EntityHandle, _c*...)>;
+
+		ECA(
+			EntityComponentArray&& eca)
+			: EntityComponentArray(std::forward<EntityComponentArray>(eca))
+		{}
+
+		void Each(
+			func function)
+		{
+			EntityComponentArray::Each<_c...>(function);
+		}
 	};
 }
 
