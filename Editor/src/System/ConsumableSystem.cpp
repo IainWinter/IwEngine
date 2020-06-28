@@ -79,7 +79,7 @@ void ConsumableSystem::Update(
 			iw::SetTimeScale(1.0f);
 
 			Bus->push<ChargeKillEvent>(0.0f);
-			Space->QueueEntity(entity.Handle, iw::func_EntityDestroy);
+			Space->QueueEntity(entity.Handle, iw::func_Destroy);
 
 			m_used.push_back(entity.Handle);
 			m_usingItem = false;

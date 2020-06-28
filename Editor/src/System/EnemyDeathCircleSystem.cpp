@@ -41,7 +41,7 @@ void EnemyDeathCircleSystem::Update(
 
 		if (circle->Timer > 2 * circle->FadeTime) {
 			transform->SetParent(nullptr);
-			Space->QueueEntity(entity.Handle, iw::func_EntityDestroy);
+			Space->QueueEntity(entity.Handle, iw::func_Destroy);
 		}
 
 		else if (circle->Timer < circle->FadeTime) {

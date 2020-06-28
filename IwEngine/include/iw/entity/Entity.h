@@ -129,7 +129,7 @@ namespace ECS {
 		}
 	};
 
-	const func_EntityChange func_EntityDestroy = [](Entity e) {
+	const func_EntityChange func_Destroy = [](Entity e) {
 		e.Destroy();
 	};
 }

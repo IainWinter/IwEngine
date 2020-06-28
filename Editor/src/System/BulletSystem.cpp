@@ -140,14 +140,25 @@ void BulletSystem::FixedUpdate() {
 		if (bullet->Timer > package->TimeToExplode) {
 			iw::Entity bullet = Space->Instantiate(bulletPrefab);
 
-			bullet.Find<Bullet>()->Type  = package->InnerType;
-			bullet.Find<Bullet>()->Speed = package->InnerSpeed;
+			Bullet*             b = bullet.Find<Bullet>();
+			iw::Transform*      t = bullet.Find<iw::Transform>();
+			iw::SphereCollider* s = bullet.Find<iw::SphereCollider>();
+			iw::Rigidbody*      r = bullet.Find<iw::Rigidbody>();
 
-			bullet.Find<iw::Transform>()->Position = transform->Position;
+			b->Type    = package->InnerType;
+			b->Speed   = package->InnerSpeed;
+			b->Timer   = 0.0f;
 
-			bullet.Find<iw::Rigidbody>()->SetVelocity(iw::vector3(1, 0, 0));
+			t->Rotation = iw::quaternion::from_look_at(transform->Position, player.Find<iw::Transform>()->Position);
+			t->Position = transform->Position + t->Right() * sqrt(2);
 
-			Space->QueueEntity(entity, iw::func_EntityDestroy);
+			r->SetCol(s);
+			r->SetTrans(t);
+			r->SetVelocity(iw::vector3::unit_x * t->Rotation * b->Speed);
+
+			Physics->AddRigidbody(r);
+			
+			Space->QueueEntity(entity, iw::func_Destroy);
 		}
 	});
 }

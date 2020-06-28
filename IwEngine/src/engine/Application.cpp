@@ -148,8 +148,6 @@ namespace Engine {
 			while (m_running) {
 				Time::UpdateTime();
 
-				(*Renderer).Begin(iw::Time::TotalTime());
-
 				Update();
 
 				if (Time::RawFixedTime() == 0)
@@ -161,18 +159,6 @@ namespace Engine {
 				{
 					FixedUpdate();
 					accumulatedTime -= Time::RawFixedTime();
-				}
-
-				{
-					LOG_TIME_SCOPE("Renderer");
-					(*Renderer).End();
-				}
-
-				m_window->SwapBuffers();
-
-				{
-					LOG_TIME_SCOPE("Audio");
-					(*Audio).Update();
 				}
 
 				(*Space).ExecuteQueue();
@@ -200,6 +186,8 @@ namespace Engine {
 	}
 
 	void Application::Update() {
+		Renderer->Begin(iw::Time::TotalTime());
+
 		// Pre Update (Sync)
 		 
 		int layerNumber = 0;
@@ -251,6 +239,18 @@ namespace Engine {
 				layer->ImGui();
 			}
 			imgui->End();
+		}
+
+		{
+			LOG_TIME_SCOPE("Renderer");
+			Renderer->End();
+		}
+
+		m_window->SwapBuffers();
+
+		{
+			LOG_TIME_SCOPE("Audio");
+			Audio->Update();
 		}
 	}
 
