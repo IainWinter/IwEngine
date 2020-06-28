@@ -391,23 +391,22 @@ iw::Transform* EnemySystem::SpawnBullet(
 {
 	iw::Entity bullet = Space->Instantiate(m_bullet);
 	
-	Bullet*             b = bullet.Find<Bullet>();
-
-	b->Type    = enemyBullet.Type;
-	b->Package = enemyBullet.Package;
-	b->Speed   = enemyBullet.Speed;
-
-	if (b->Package) {
+	if (enemyBullet.Package) {
 		BulletPackage* p = bullet.Add<BulletPackage>();
 
-		p->InnerType = BulletType(b->Package & REMOVE_TYPE);
+		p->InnerType = BulletType(enemyBullet.Package & REMOVE_TYPE);
 		p->InnerSpeed    = 5.0f;
 		p->TimeToExplode = 3.0f;
 	}
 
+	Bullet*             b = bullet.Find<Bullet>();
 	iw::Transform*      t = bullet.Find<iw::Transform>();
 	iw::SphereCollider* s = bullet.Find<iw::SphereCollider>();
 	iw::Rigidbody*      r = bullet.Find<iw::Rigidbody>();
+
+	b->Type    = enemyBullet.Type;
+	b->Package = enemyBullet.Package;
+	b->Speed   = enemyBullet.Speed;
 
 	t->Rotation = rot;
 	t->Position = position + t->Right() * sqrt(2);
@@ -494,8 +493,8 @@ iw::Transform* EnemySystem::SpawnEnemy(
 			return;
 		}
 
-		QueueChange(&enemy->JustHit, true);
-		QueueChange(&enemy->Health,  enemy->Health - 1);
+		Space->QueueChange(&enemy->JustHit, true);
+		Space->QueueChange(&enemy->Health,  enemy->Health - 1);
 
 		if (enemy->Health - 1 > 0) {
 			return;

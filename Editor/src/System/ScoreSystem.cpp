@@ -83,7 +83,7 @@ void ScoreSystem::Update(
 			trans.Scale = 1.0f;
 
 			if (score->Timer >= score->Lifetime) {
-				QueueDestroyEntity(entity.Index);
+				Space->QueueEntity(entity.Handle, iw::func_EntityDestroy);
 			}
 
 			score->Timer += iw::Time::DeltaTime();

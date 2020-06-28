@@ -170,19 +170,6 @@ namespace Engine {
 	class System
 		: public SystemBase
 	{
-		struct PropChange { // only supports integral types
-			void* prop;
-			void* value;
-			size_t size;
-		};
-
-	private:
-		//std::queue<std::thread>      m_threads;
-		std::queue<size_t> m_delete; // Probly make it so space can queue component creation at the ComponentArray level because of templated bs
-		std::queue<EntityHandle> m_kill;
-
-		std::queue<PropChange> m_changes;
-
 	protected:
 		virtual void Update(
 			EntityComponentArray& view)
@@ -191,33 +178,6 @@ namespace Engine {
 		virtual void FixedUpdate(
 			EntityComponentArray& view)
 		{}
-
-		void QueueDestroyEntity(
-			size_t index)
-		{
-			m_delete.push(index);
-		}
-
-		void QueueKillEntity(
-			EntityHandle handle)
-		{
-			m_kill.push(handle);
-		}
-
-		template<
-			typename _t>
-		void QueueChange(
-			_t* prop,
-			_t  value)
-		{
-			static_assert(std::is_integral_v<_t>); // make sure isnt like a vector or something
-
-			m_changes.push({
-				prop,
-				new (_t)(value),
-				sizeof(_t)
-			});
-		}
 	public:
 		System(
 			const char* name)
@@ -236,25 +196,6 @@ namespace Engine {
 
 			// Execute threads
 			Update(eca);
-
-			while (!m_delete.empty()) {
-				Space->DestroyEntity(m_delete.front());
-				m_delete.pop();
-			}
-
-			while (!m_kill.empty()) {
-				Space->KillEntity(m_kill.front());
-				m_kill.pop();
-			}
-
-			while (!m_changes.empty()) {
-				PropChange change = m_changes.front();
-
-				memcpy(change.prop, change.value, change.size);
-				delete change.value;
-
-				m_changes.pop();
-			}
 		}
 
 		void FixedUpdate() override {
@@ -263,13 +204,6 @@ namespace Engine {
 
 			// Execute threads
 			FixedUpdate(eca);
-
-			// Execute queues space operations
-			while (!m_delete.empty()) {
-				size_t index = m_delete.front();
-				Space->DestroyEntity(index);
-				m_delete.pop();
-			}
 		}
 	};	
 }

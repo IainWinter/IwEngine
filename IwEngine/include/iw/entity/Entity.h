@@ -128,6 +128,10 @@ namespace ECS {
 			return Space->HasComponent<_c>(Handle);
 		}
 	};
+
+	const func_EntityChange func_EntityDestroy = [](Entity e) {
+		e.Destroy();
+	};
 }
 
 	using namespace ECS;

@@ -109,7 +109,7 @@ int PlayerSystem::Initialize() {
 					default: return;
 				}
 
-				QueueChange(&player->Transition, true);
+				Space->QueueChange(&player->Transition, true);
 
 				player->TransitionSpeed = 1.5f;
 				player->TransitionStartPosition  = playerTrans->Position;

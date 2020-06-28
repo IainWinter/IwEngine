@@ -6,6 +6,7 @@
 #include "EntityManager.h"
 #include "Prefab.h"
 #include "iw/log/logger.h"
+#include <queue>
 
 #ifdef IW_USE_EVENTS
 #	include "iw/events/eventbus.h"
@@ -14,6 +15,7 @@
 namespace iw {
 namespace ECS {
 	struct Entity;
+	using func_EntityChange = std::function<void(Entity)>;
 
 	class Space {
 	private:
@@ -24,6 +26,25 @@ namespace ECS {
 #ifdef IW_USE_EVENTS
 		ref<eventbus> m_bus;
 #endif
+
+		// idk if this should be here
+
+		struct PropChange { // only supports integral types
+			void* prop;
+			void* value;
+			func_DeepCopy copy;
+		};
+
+		struct EntityChange {
+			EntityHandle handle;
+			func_EntityChange func;
+		};
+
+		linear_allocator m_propMem;
+
+		// queue of stuff
+		std::queue<PropChange>   m_propQueue;
+		std::queue<EntityChange> m_entityQueue;
 
 	public:
 		// Registers a component type with the component manager allowing it to be used in archetypes
@@ -297,6 +318,40 @@ namespace ECS {
 			m_bus = bus;
 		}
 #endif
+// ---------------------------------------------------------
+//
+// 'Post frame' functions for queueing (might move to another class)
+//
+// ---------------------------------------------------------
+
+		template<
+			typename _t>
+		void QueueChange(
+			_t* prop,
+			_t  value)
+		{
+			static_assert(std::is_integral_v<_t>); // make sure isn't like a vector or something
+
+			m_propQueue.push({
+				prop,
+				new _t(value),
+				GetCopyFunc<_t>()
+			});
+		}
+
+		void QueueEntity(
+			EntityHandle entity,
+			func_EntityChange func)
+		{
+			m_entityQueue.push({
+				entity,
+				func
+			});
+		}
+
+		IWENTITY_API
+		void ExecuteQueue();
+
 	private:
 		// Moves components from one chunk list to another
 		void MoveComponents(

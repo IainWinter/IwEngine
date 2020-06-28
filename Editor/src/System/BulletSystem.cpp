@@ -144,6 +144,10 @@ void BulletSystem::FixedUpdate() {
 			bullet.Find<Bullet>()->Speed = package->InnerSpeed;
 
 			bullet.Find<iw::Transform>()->Position = transform->Position;
+
+			bullet.Find<iw::Rigidbody>()->SetVelocity(iw::vector3(1, 0, 0));
+
+			Space->QueueEntity(entity, iw::func_EntityDestroy);
 		}
 	});
 }

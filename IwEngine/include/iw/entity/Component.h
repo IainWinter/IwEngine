@@ -8,7 +8,7 @@
 
 namespace iw {
 namespace ECS {
-	using _CopyFunc = std::function<void(void*, void*)>;
+	using func_DeepCopy = std::function<void(void*, void*)>;
 
 	struct IWENTITY_API Component {
 #ifdef IW_USE_REFLECTION
@@ -21,7 +21,7 @@ namespace ECS {
 
 		size_t Id;
 
-		_CopyFunc DeepCopyFunc;
+		func_DeepCopy DeepCopyFunc;
 
 		static inline size_t Hash(
 			std::initializer_list<iw::ref<Component>> components)
@@ -55,7 +55,7 @@ namespace ECS {
 
 	template<
 		typename _t>
-	_CopyFunc GetCopyFunc() { // 8 squintillionzz iq
+	func_DeepCopy GetCopyFunc() { // 8 squintillionzz iq
 		return [](void* ptr, void* data) {
 			_t* p = (_t*)ptr;
 			_t* d = (_t*)data;

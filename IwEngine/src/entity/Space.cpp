@@ -306,6 +306,25 @@ namespace ECS {
 		return m_archetypeManager.Archetypes();
 	}
 
+	void Space::ExecuteQueue() {
+		while (!m_propQueue.empty()) {
+			PropChange& change = m_propQueue.front();
+
+			change.copy(change.prop, change.value);
+			delete change.value;
+
+			m_propQueue.pop();
+		}
+
+		while (!m_entityQueue.empty()) {
+			EntityChange& change = m_entityQueue.front();
+
+			change.func(Entity(change.handle, this));
+
+			m_entityQueue.pop();
+		}
+	}
+
 	void Space::MoveComponents(
 		ref<EntityData>& entityData,
 		const ref<Archetype>& archetype)

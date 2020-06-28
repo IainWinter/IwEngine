@@ -42,7 +42,7 @@ void NoteSystem::Update(
 				|| iw::Keyboard::KeyDown(iw::RIGHT))
 			{
 				Space->FindComponent<iw::Transform>(entity.Handle)->SetParent(nullptr);
-				QueueDestroyEntity(entity.Index);
+				Space->QueueEntity(entity.Handle, iw::func_EntityDestroy);
 
 				//Bus->push<iw::EntityDestroyEvent>(entity.Handle);
 				Bus->push<GameStateEvent>(SOFT_RUN);

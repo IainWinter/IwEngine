@@ -140,12 +140,16 @@ namespace Engine {
 
 		m_running = true;
 
-		// RenderAPI thread is the 'main' thread for the application (owns rendering context)
+		// Rendering thread is the 'main' thread for the application (owns rendering context)
 		m_renderThread = std::thread([&]() {
 			m_window->TakeOwnership();
 			
 			float accumulatedTime = 0;
 			while (m_running) {
+				Time::UpdateTime();
+
+				(*Renderer).Begin(iw::Time::TotalTime());
+
 				Update();
 
 				if (Time::RawFixedTime() == 0)
@@ -158,6 +162,28 @@ namespace Engine {
 					FixedUpdate();
 					accumulatedTime -= Time::RawFixedTime();
 				}
+
+				{
+					LOG_TIME_SCOPE("Renderer");
+					(*Renderer).End();
+				}
+
+				m_window->SwapBuffers();
+
+				{
+					LOG_TIME_SCOPE("Audio");
+					(*Audio).Update();
+				}
+
+				(*Space).ExecuteQueue();
+
+				{
+					LOG_TIME_SCOPE("Console & bus");
+					(*Console).ExecuteQueue();
+					(*Bus).publish();
+				}
+
+				LOG_CLEAR_TIMES();
 			}
 		});
 
@@ -173,26 +199,7 @@ namespace Engine {
 		Destroy();
 	}
 
-	std::unordered_map<const char*, float> update_times;
-	std::unordered_map<const char*, float> post_update_times;
-	std::unordered_map<const char*, std::unordered_map<const char*, float>> system_update_times;
-	float renderTime;
-	float eventTime;
-	float physicsTime;
-	size_t ticks;
-	float smooth = 0.004f;
-
 	void Application::Update() {
-		// Update time (Sync)
-		Time::UpdateTime();
-
-		Renderer->Begin(iw::Time::TotalTime());
-
-		// Clear window and poll events (Sync)
-		//m_window->Clear();
-
-		//m_workQueue.clear();
-
 		// Pre Update (Sync)
 		 
 		int layerNumber = 0;
@@ -233,24 +240,6 @@ namespace Engine {
 			layer->PostUpdate();
 		}
 
-		// Run through render queue! (Sync)
-
-		{
-			LOG_TIME_SCOPE("Renderer");
-			Renderer->End();
-		}
-
-		{
-			LOG_TIME_SCOPE("Audio");
-			Audio->Update();
-		}
-
-		{
-			LOG_TIME_SCOPE("Console & bus");
-			Console->ExecuteQueue();
-			Bus->publish();
-		}
-
 		// ImGui render (Sync)
 
 		ImGuiLayer* imgui = GetLayer<ImGuiLayer>("ImGui");
@@ -263,12 +252,6 @@ namespace Engine {
 			}
 			imgui->End();
 		}
-		
-		// Swap buffers (Sync)
-		
-		m_window->SwapBuffers();
-
-		LOG_CLEAR_TIMES();
 	}
 
 	void Application::FixedUpdate() {
@@ -277,12 +260,8 @@ namespace Engine {
 			layer->FixedUpdate();
 		}
 
-		float physicsStart = iw::Time::DeltaTimeNow();
-		
+		LOG_TIME_SCOPE("Physics");
 		Physics->Step(iw::Time::FixedTime());
-		
-		float physicsEnd = iw::Time::DeltaTimeNow();
-		physicsTime = iw::lerp(physicsTime, physicsEnd - physicsStart, smooth);
 	}
 
 	void Application::Destroy() {
