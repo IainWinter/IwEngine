@@ -137,28 +137,35 @@ void BulletSystem::FixedUpdate() {
 		auto bullet,
 		auto package)
 	{
-		if (bullet->Timer > package->TimeToExplode) {
-			iw::Entity bullet = Space->Instantiate(bulletPrefab);
+		for (float dir = 0.0f; dir < iw::Pi2; dir += iw::Pi2 / 6) {
+			if (bullet->Timer > package->TimeToExplode) {
+				iw::Entity bullet = Space->Instantiate(bulletPrefab);
 
-			Bullet*             b = bullet.Find<Bullet>();
-			iw::Transform*      t = bullet.Find<iw::Transform>();
-			iw::SphereCollider* s = bullet.Find<iw::SphereCollider>();
-			iw::Rigidbody*      r = bullet.Find<iw::Rigidbody>();
+				Bullet*             b = bullet.Find<Bullet>();
+				iw::Transform*      t = bullet.Find<iw::Transform>();
+				iw::SphereCollider* s = bullet.Find<iw::SphereCollider>();
+				iw::Rigidbody*      r = bullet.Find<iw::Rigidbody>();
 
-			b->Type    = package->InnerType;
-			b->Speed   = package->InnerSpeed;
-			b->Timer   = 0.0f;
+				b->Type    = package->InnerType;
+				b->Speed   = package->InnerSpeed;
+				b->Timer   = 0.0f;
 
-			t->Rotation = iw::quaternion::from_look_at(transform->Position, player.Find<iw::Transform>()->Position);
-			t->Position = transform->Position + t->Right() * sqrt(2);
+				//iw::vector3 target = player.Find<iw::Transform>()->Position;
+				//float       dir = atan2(target.z - transform->Position.z, target.x - transform->Position.x);
 
-			r->SetCol(s);
-			r->SetTrans(t);
-			r->SetVelocity(iw::vector3::unit_x * t->Rotation * b->Speed);
+				t->SetParent(transform->Parent());
 
-			Physics->AddRigidbody(r);
+				t->Rotation = iw::quaternion::from_euler_angles(0, dir, 0).inverted();
+				t->Position = transform->Position + t->Right() * sqrt(.25f);
+
+				r->SetCol(s);
+				r->SetTrans(t);
+				r->SetVelocity(iw::vector3::unit_x * t->Rotation * b->Speed);
+
+				Physics->AddRigidbody(r);
 			
-			Space->QueueEntity(entity, iw::func_Destroy);
+				Space->QueueEntity(entity, iw::func_Destroy);
+			}
 		}
 	});
 }
