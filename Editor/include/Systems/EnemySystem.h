@@ -31,8 +31,7 @@ public:
 	bool On(iw::ActionEvent& e) override;
 private:
 	iw::Transform* SpawnBullet(
-		BulletType type,
-		float speed,
+		Bullet enemyBullet,
 		iw::vector3 position,
 		iw::quaternion rot);
 

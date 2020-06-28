@@ -61,8 +61,6 @@ namespace ECS {
 			_t* d = (_t*)data;
 
 			new(p) _t(*d);
-
-			//*p = *d;
 		};
 	}
 }

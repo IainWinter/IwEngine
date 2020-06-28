@@ -14,11 +14,49 @@
 
 #include "Events/ActionEvents.h"
 
+#include "iw/events/binding.h"
+
 BulletSystem::BulletSystem(
 	iw::Entity& player)
 	: iw::SystemBase("Bullet")
 	, player(player)
 {}
+
+void BulletSystem::collide(iw::Manifold& man, iw::scalar dt)
+{
+	iw::Entity bulletEntity, otherEntity;
+	bool noent = GetEntitiesFromManifold<Bullet>(man, bulletEntity, otherEntity);
+
+	if (noent) {
+		return;
+	}
+
+	Bullet* bullet = bulletEntity.Find<Bullet>();
+
+	if (   otherEntity.Has<Bullet>()
+		|| otherEntity.Has<Enemy>()
+		|| otherEntity.Has<DontDeleteBullets>()
+		|| otherEntity.Has<LevelDoor>())
+	{
+		return;
+	}
+
+	iw::Transform* bulletTransform = bulletEntity.Find<iw::Transform>();
+
+	if (otherEntity.Has<Player>()) {
+		Bus->push<GiveScoreEvent>(bulletTransform->Position, 0, true);
+	}
+
+	else if (otherEntity.Has<EnemyDeathCircle>()) {
+		iw::Transform* otherTransform = otherEntity.Find<iw::Transform>();
+
+		float score = ceil((bulletTransform->Position - otherTransform->Position).length()) * 10;
+		Bus->push<GiveScoreEvent>(bulletTransform->Position, score, false);
+	}
+
+	bulletTransform->SetParent(nullptr);
+	Space->DestroyEntity(bulletEntity.Index());
+}
 
 int BulletSystem::Initialize() {
 	iw::Mesh mesh = Asset->Load<iw::Model>("Sphere")->GetMesh(0).MakeInstance();
@@ -34,40 +72,8 @@ int BulletSystem::Initialize() {
 	rigidbody.SetMass(1);
 	rigidbody.SetSimGravity(false);
 	rigidbody.SetIsTrigger(true);
-	rigidbody.SetOnCollision([&](iw::Manifold& man, float dt) {
-		iw::Entity bulletEntity, otherEntity;
-		bool noent = GetEntitiesFromManifold<Bullet>(man, bulletEntity, otherEntity);
 
-		if (noent) {
-			return;
-		}
-
-		Bullet* bullet = bulletEntity.Find<Bullet>();
-
-		if (   otherEntity.Has<Bullet>()
-			|| otherEntity.Has<Enemy>()
-			|| otherEntity.Has<DontDeleteBullets>()
-			|| otherEntity.Has<LevelDoor>())
-		{
-			return;
-		}
-
-		iw::Transform* bulletTransform = bulletEntity.Find<iw::Transform>();
-
-		if (otherEntity.Has<Player>()) {
-			Bus->push<GiveScoreEvent>(bulletTransform->Position, 0, true);
-		}
-
-		else if (otherEntity.Has<EnemyDeathCircle>()) {
-			iw::Transform* otherTransform = otherEntity.Find<iw::Transform>();
-
-			float score = ceil((bulletTransform->Position - otherTransform->Position).length()) * 10;
-			Bus->push<GiveScoreEvent>(bulletTransform->Position, score, false);
-		}
-
-		bulletTransform->SetParent(nullptr);
-		Space->DestroyEntity(bulletEntity.Index());
-	});
+	rigidbody.SetOnCollision(iw::bind<void, BulletSystem*, iw::Manifold&, float>(&BulletSystem::collide, this)); // garbo
 
 	iw::SphereCollider collider(0, 0.5f);
 
@@ -98,13 +104,13 @@ void BulletSystem::FixedUpdate() {
 		auto bullet)
 	{
 		if (bullet->Timer == 0.0f) {
-			bullet->initialVelocity = rigidbody->Velocity();
+			bullet->InitialVelocity = rigidbody->Velocity();
 		}
 
 		switch (bullet->Type) {
 			case SINE: {
 				float speed = (sin(bullet->Timer * 5) + 1) * 0.5f;
-				rigidbody->SetVelocity(bullet->initialVelocity * speed);
+				rigidbody->SetVelocity(bullet->InitialVelocity * speed);
 
 				break;
 			}
@@ -131,7 +137,7 @@ void BulletSystem::FixedUpdate() {
 		auto bullet,
 		auto package)
 	{
-		if (bullet->Timer > package->Time) {
+		if (bullet->Timer > package->TimeToExplode) {
 			iw::Entity bullet = Space->Instantiate(bulletPrefab);
 
 			bullet.Find<Bullet>()->Type  = package->InnerType;

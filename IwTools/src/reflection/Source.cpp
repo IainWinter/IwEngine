@@ -327,7 +327,7 @@ void ClassFinder::onEndOfTranslationUnit() {
             OUT <<
                 "#include \"" << c->FilePath() << "\""        "\n\n"
                 "namespace iw {"                              "\n"
-                "namespace Reflect {"                              "\n"
+                "namespace Reflect {"                         "\n"
                 "namespace detail {"                          "\n";
         }
 

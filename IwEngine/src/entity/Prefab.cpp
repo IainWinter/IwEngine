@@ -39,7 +39,8 @@ namespace ECS {
 		}
 
 		component->DeepCopyFunc(ptr, data);
-		m_componentData.push_back((char*)ptr - m_memory.memory());
+
+		m_offsets.push_back((char*)ptr - m_memory.memory());
 	}
 
 	bool Prefab::Set(
@@ -62,16 +63,13 @@ namespace ECS {
 		}
 
 		int index = 0;
-		for (; index < m_componentData.size(); index++) {
+		for (; index < ComponentCount(); index++) {
 			if (m_components[index] = component) {
 				break;
 			}
 		}
 
-		void* ptr = m_componentData.at(index); // guaranteed to exist
-
-		component->DeepCopyFunc(ptr, data);
-		m_componentData.push_back(ptr);
+		component->DeepCopyFunc(GetComponentData(index), data);
 
 		return true;
 	}
@@ -89,12 +87,16 @@ namespace ECS {
 		return std::find(m_components.begin(), m_components.end(), component) != m_components.end();
 	}
 
-	const std::vector<iw::ref<Component>>& Prefab::Components() const {
-		return m_components;
+	const iw::ref<Component>& Prefab::GetComponent(
+		unsigned index) const
+	{
+		return m_components.at(index);
 	}
 
-	const std::vector<void*>& Prefab::ComponentData() const {
-		return m_componentData;
+	void* Prefab::GetComponentData(
+		unsigned index) const
+	{
+		return m_memory.memory() + m_offsets.at(index);
 	}
 
 	unsigned Prefab::ComponentCount() const {

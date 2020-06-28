@@ -256,14 +256,14 @@ namespace ECS {
 		const Prefab& prefab)
 	{
 		ref<Archetype> archetype = m_archetypeManager.CreateArchetype(
-										&prefab.Components().front(),
-										&prefab.Components().back() + 1);
+										&prefab.GetComponent(0),
+										&prefab.GetComponent(prefab.ComponentCount() - 1) + 1);
 
 		Entity entity = CreateEntity(archetype);
 
 		for (int i = 0; i < prefab.ComponentCount(); i++) {
-			ref<Component> component = prefab.Components()[i];
-			void*          data      = prefab.ComponentData()[i];
+			ref<Component> component = prefab.GetComponent(i);
+			void*          data      = prefab.GetComponentData(i);
 
 			SetComponent(entity.Handle, component, data);
 		}

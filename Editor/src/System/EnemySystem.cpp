@@ -114,8 +114,7 @@ void EnemySystem::Update(
 			switch (enemy->Type) {
 				case EnemyType::SPIN: {
 					iw::Transform* bullet = SpawnBullet(
-						enemy->Bullet.Type,
-						enemy->Bullet.Speed,
+						enemy->Bullet,
 						transform->Position,
 						iw::quaternion::from_euler_angles(0, enemy->Rotation, 0)
 					);
@@ -128,8 +127,7 @@ void EnemySystem::Update(
 					int count = roundf(iw::Pi2 / enemy->Speed);
 					for (float i = 0; i < count; i++) {
 						iw::Transform* bullet = SpawnBullet(
-							enemy->Bullet.Type,
-							enemy->Bullet.Speed,
+							enemy->Bullet,
 							transform->Position,
 							iw::quaternion::from_euler_angles(0, enemy->Rotation + enemy->Speed * i, 0)
 						);
@@ -141,8 +139,7 @@ void EnemySystem::Update(
 				}
 				case EnemyType::SEEK: {
 					iw::Transform* bullet = SpawnBullet(
-						enemy->Bullet.Type,
-						enemy->Bullet.Speed,
+						enemy->Bullet,
 						transform->Position,
 						transform->Rotation.inverted()
 					);
@@ -175,8 +172,7 @@ void EnemySystem::Update(
 									iw::quaternion offset = iw::quaternion::from_euler_angles(0, -rot + enemy->Speed * i, 0);
 
 									iw::Transform* bullet = SpawnBullet(
-										enemy->Bullet.Type,
-										enemy->Bullet.Speed, 
+										enemy->Bullet,
 										transform->Position,
 										transform->Rotation.inverted() * offset
 									);
@@ -204,8 +200,7 @@ void EnemySystem::Update(
 							iw::quaternion offset = iw::quaternion::from_euler_angles(0, rot, 0);
 
 							iw::Transform* bullet = SpawnBullet(
-								enemy->Bullet.Type,
-								enemy->Bullet.Speed, 
+								enemy->Bullet,
 								transform->Position,
 								transform->Rotation.inverted() * offset
 							);
@@ -264,8 +259,7 @@ void EnemySystem::Update(
 								iw::quaternion offset = iw::quaternion::from_euler_angles(0, -rot + enemy->Speed * i, 0);
 
 								iw::Transform* bullet = SpawnBullet(
-									enemy->Bullet.Type,
-									enemy->Bullet.Speed,
+									enemy->Bullet,
 									transform->Position,
 									transform->Rotation.inverted() * offset
 								);
@@ -391,23 +385,32 @@ bool EnemySystem::On(
 }
 
 iw::Transform* EnemySystem::SpawnBullet(
-	BulletType type,
-	float speed,
+	Bullet enemyBullet,
 	iw::vector3 position,
 	iw::quaternion rot)
 {
 	iw::Entity bullet = Space->Instantiate(m_bullet);
 	
 	Bullet*             b = bullet.Find<Bullet>();
+
+	b->Type    = enemyBullet.Type;
+	b->Package = enemyBullet.Package;
+	b->Speed   = enemyBullet.Speed;
+
+	if (b->Package) {
+		BulletPackage* p = bullet.Add<BulletPackage>();
+
+		p->InnerType = BulletType(b->Package & REMOVE_TYPE);
+		p->InnerSpeed    = 5.0f;
+		p->TimeToExplode = 3.0f;
+	}
+
 	iw::Transform*      t = bullet.Find<iw::Transform>();
 	iw::SphereCollider* s = bullet.Find<iw::SphereCollider>();
 	iw::Rigidbody*      r = bullet.Find<iw::Rigidbody>();
 
-	b->Type  = type;
-	b->Speed = speed;
-
 	t->Rotation = rot;
-	t->Position = position + t->Forward() * sqrt(2);
+	t->Position = position + t->Right() * sqrt(2);
 
 	r->SetCol(s);
 	r->SetTrans(t);
