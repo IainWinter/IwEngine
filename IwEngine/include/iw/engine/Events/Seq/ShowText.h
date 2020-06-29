@@ -1,6 +1,6 @@
 #pragma once
 
-#include "iw/engine/Events/Seq/ShowText.h"
+#include "iw/engine/Events/Seq/EventTask.h"
 #include "iw/common/Components/Transform.h"
 #include "iw/entity/Entity.h"
 #include "iw/graphics/Font.h"

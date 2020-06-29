@@ -102,7 +102,7 @@ void ReflectedClass::Generate(
 {
     OUT <<
         "\t"  "template<>"                                               "\n"
-        "\t"      "inline const Class* GetClass(ClassTag<" << QualName() << ">) {"  "\n"
+        "\t"      "inline const Class* GetClass(ClassTag<::" << QualName() << ">) {"  "\n"
         "\t\t"        "static Class c = ";                     Print(out);
                 
         for (size_t i = 0; i < m_fields.size(); i++) {
@@ -121,7 +121,7 @@ void ReflectedClass::Generate(
 
     OUT <<
         "\t"  "template<size_t _s>"                                          "\n"
-        "\t"      "inline const Class* GetClass(ClassTag<" << QualName() << "[_s]>) {"  "\n"
+        "\t"      "inline const Class* GetClass(ClassTag<::" << QualName() << "[_s]>) {"  "\n"
         "\t\t"        "static Class c = ";                     PrintArray(out);
 
         for (size_t i = 0; i < m_fields.size(); i++) {
@@ -144,13 +144,13 @@ void ReflectedClass::Generate(
 void ReflectedClass::Print(
     raw_ostream& out) const
 {
-    OUT << "Class(\"" << QualName() << "\", sizeof(" << QualName() << "), " << m_fields.size() << ");\n";
+    OUT << "Class(\"" << QualName() << "\", sizeof(::" << QualName() << "), " << m_fields.size() << ");\n";
 }
 
 void ReflectedClass::PrintArray(
     raw_ostream& out) const
 {
-    OUT << "Class(\"" << QualName() << "\"\"[]\", sizeof(" << QualName() << "), " << m_fields.size() << ", _s);\n";
+    OUT << "Class(\"" << QualName() << "\"\"[]\", sizeof(::" << QualName() << "), " << m_fields.size() << ", _s);\n";
 }
 
 void ReflectedClass::AddField(
@@ -289,7 +289,7 @@ void ClassFinder::onEndOfTranslationUnit() {
         }
     }
 
-    const int FIRST = toWrite.size() - 1;
+    const int FIRST = (int)toWrite.size() - 1;
     const int LAST  = 0;
 
     for (int i = FIRST; i >= LAST; i--) {
@@ -398,7 +398,7 @@ void ClassFinder::FoundRecord(
     m_working.push(c);
 
     std::cout << "Record matched" << std::endl;
-    record->dump();
+    //record->dump();
 }
 
 void ClassFinder::FoundField(
