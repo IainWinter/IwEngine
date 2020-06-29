@@ -46,7 +46,7 @@ LevelSystem::LevelSystem(
 	: iw::System<iw::CollisionObject, iw::Model, LevelDoor>("Level")
 	, playerEntity(player)
 {
-	currentLevelName = "levels/canyon/forest01.json";
+	currentLevelName = "levels/canyon/canyon01.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 63);
 	closedColor = iw::Color::From255(201, 66, 66, 63);
@@ -334,7 +334,7 @@ iw::Entity LevelSystem::LoadLevel(
 				}
 			}
 
-			mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/vct/vct.shader"));
+			mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/phong.shader"));
 
 			mesh.Material()->SetTexture("shadowMap", Asset->Load<iw::Texture>("SunShadowMap"));
 			//mesh.Material()->SetTexture("shadowMap2", Asset->Load<iw::Texture>("LightShadowMap")); // shouldnt be part of material
