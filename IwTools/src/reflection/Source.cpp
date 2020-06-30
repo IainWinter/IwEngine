@@ -262,13 +262,25 @@ void ClassFinder::onEndOfTranslationUnit() {
             toWrite.push_back(c);
         }
     }
-
-    for (int i = 0; i < toWrite.size(); i++) {
+    /*for (int i = 0; i < toWrite.size(); i++) {
         for (int j = 0; i < toWrite.size(); j++) {
             if (i == j) break;
 
+            if()
+        }
+    }*/
+
+    for (int i = 0; i < toWrite.size(); i++) {
+        for (int j = i + 1; j < toWrite.size(); j++) {
+            //if (i == j) break;
+
             ReflectedClass* a = toWrite[i];
             ReflectedClass* b = toWrite[j];
+            
+            std::string sa = a->QualName();
+            std::string sb = b->QualName();
+            std::cout << sa;
+            std::cout << sb;
 
             if (a->Name() == b->Name()) {
                 if (    a->IsTemplateSpecialization()
@@ -276,7 +288,6 @@ void ClassFinder::onEndOfTranslationUnit() {
                 {
                     delete b;
                     toWrite.erase(toWrite.begin() + j);
-                    j = 0;
                 }
 
                 else if(!a->IsTemplateSpecialization()

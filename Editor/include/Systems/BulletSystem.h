@@ -9,6 +9,9 @@ private:
 	iw::Entity& player;
 	iw::Prefab bulletPrefab;
 
+	iw::Color baseColor;
+	iw::Color altColor;
+
 public:
 	BulletSystem(
 		iw::Entity& player);

@@ -21,4 +21,6 @@ struct REFLECT BulletPackage {
 	REFLECT BulletType InnerType;
 	REFLECT float      InnerSpeed;
 	REFLECT float      TimeToExplode = 3.0f; // no way to set this rn
+
+	bool Exploded = false;
 };

@@ -46,7 +46,7 @@ LevelSystem::LevelSystem(
 	: iw::System<iw::CollisionObject, iw::Model, LevelDoor>("Level")
 	, playerEntity(player)
 {
-	currentLevelName = "levels/canyon/forest01.json";
+	currentLevelName = "levels/canyon/canyon01.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 63);
 	closedColor = iw::Color::From255(201, 66, 66, 63);
@@ -80,10 +80,10 @@ void LevelSystem::Update(
 	for (auto entity : view) {
 		auto [object, model, door] = entity.Components.Tie<Components>();
 
-		object->Trans().Rotation *= iw::quaternion::from_euler_angles(iw::Time::DeltaTime() * .1f);
+		object->Trans().Rotation *= iw::quaternion::from_euler_angles(iw::Time::DeltaTimeScaled() * .1f);
 
 		if (door->ColorTimer > 0) {
-			door->ColorTimer -= iw::Time::DeltaTime();
+			door->ColorTimer -= iw::Time::DeltaTimeScaled();
 			model->GetMesh(0).Material()->Set("baseColor", iw::lerp<iw::vector4>(closedColor, openColor, 4 * (0.25f - door->ColorTimer)));
 		}
 	}
@@ -94,7 +94,7 @@ void LevelSystem::Update(
 		iw::Transform* current = levelEntity    .Find<iw::Transform>();
 		iw::Transform* next    = nextLevelEntity.Find<iw::Transform>();
 
-		speed += iw::Time::DeltaTime() * 5;
+		speed += iw::Time::DeltaTimeScaled() * 5;
 
 		LevelDoor* currentDoor = levelDoor.Find<LevelDoor>();
 		iw::vector3 target = currentLevel.LevelPosition;
@@ -105,20 +105,17 @@ void LevelSystem::Update(
 			target = -lastLevelPosition;
 		}
 
-		target.z = target.y;
-		target.y = 0;
-
-		current->Position = iw::lerp(current->Position, -target,        iw::Time::DeltaTime() * speed);
-		next   ->Position = iw::lerp(next   ->Position, iw::vector3(0), iw::Time::DeltaTime() * speed);
+		current->Position = iw::lerp(current->Position, -target,        iw::Time::DeltaTimeScaled() /** speed*/);
+		next   ->Position = iw::lerp(next   ->Position, iw::vector3(0), iw::Time::DeltaTimeScaled() /** speed*/);
 
 		if (   iw::Time::TotalTime() - timeout > 0
 			&& iw::almost_equal(next->Position.x, 0.0f, 2)
+			&& iw::almost_equal(next->Position.y, 0.0f, 2)
 			&& iw::almost_equal(next->Position.z, 0.0f, 2))
 		{
 			Bus->push<AtNextLevelEvent>();
 
-			next->Position.x = 0.0f;
-			next->Position.z = 0.0f;
+			next->Position = 0.0f;
 			transition = false;
 			speed = 2;
 		}
@@ -221,8 +218,7 @@ bool LevelSystem::On(
 			}
 
 			iw::Transform* transform = nextLevelEntity.Find<iw::Transform>();
-			transform->Position.x = lvpos.x;
-			transform->Position.z = lvpos.y;
+			transform->Position = lvpos;
 
 			transition = true;
 
@@ -534,7 +530,7 @@ iw::Entity LevelSystem::LoadLevel(
 		sequence.Add([&]() {
 			Bus->send<GameStateEvent>(SOFT_PAUSE);
 			return true;
-			});
+		});
 		sequence.Add<iw::Delay>(1.0f);
 		sequence.Add<iw::FadeValue<iw::vector4>>(t.Material()->Get<iw::vector4>("color"), iw::vector4(1), 0.5f);
 		sequence.Add<iw::Delay>(2.0f);
@@ -546,10 +542,10 @@ iw::Entity LevelSystem::LoadLevel(
 		sequence.Add([&]() {
 			Bus->send<GameStateEvent>(SOFT_RUN);
 			return true;
-			});
+		});
 	}
 
-	if (currentLevelName == "levels/forest/forest02.json") {
+	else if (currentLevelName == "levels/forest/forest02.json") {
 		Space->DestroyEntity(otherGuy.Index());
 		otherGuy = Space->CreateEntity<iw::Transform, iw::Model, iw::CollisionObject, iw::SphereCollider, OtherGuyTag>();
 

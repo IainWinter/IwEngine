@@ -391,6 +391,8 @@ namespace iw {
 	float w123 = 0.5f;
 	float e123 = 1.0f;
 
+	float ambiance = 0.03f;
+
 	void SandboxLayer::PostUpdate() {
 		// Update particle system
 
@@ -398,6 +400,8 @@ namespace iw {
 		seq.update();
 
 		MainScene->MainCamera()->SetProjection(iw::lerp(persp, ortho, blend));
+
+		MainScene->SetAmbiance(ambiance);
 
 		vector3 camPos = MainScene->MainCamera()->Position(); // no req
 		camPos.y = 0;
@@ -434,7 +438,7 @@ namespace iw {
 
 		ImGui::Text("Events %i", Bus->count());
 
-		ImGui::SliderFloat("Ambiance", (float*)&MainScene->Ambiance(), 0, 1);
+		ImGui::SliderFloat("Ambiance", (float*)&ambiance, 0, 1);
 		//ImGui::SliderFloat("Gamma", (float*)&mainRender->GetGamma(), 0, 5);
 		ImGui::SliderFloat("Camera blend", &blend, 0, 1);
 
@@ -443,6 +447,14 @@ namespace iw {
 
 		//ImGui::SliderFloat("Shadow map blur", &blurAmount, 0, 5);
 		ImGui::SliderFloat("Shadow map threshold", &threshold, 0, 1);
+
+
+		float time = Time::TimeScale();
+		ImGui::SliderFloat("Timescale", &time, 0, 2);
+
+		if (time != Time::TimeScale()) {
+			Time::SetTimeScale(time);
+		}
 
 		ImGui::SliderFloat("Volume", &Audio->GetVolume(), 0, 1);
 

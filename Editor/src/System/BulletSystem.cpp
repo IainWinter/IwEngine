@@ -20,6 +20,7 @@ BulletSystem::BulletSystem(
 	iw::Entity& player)
 	: iw::SystemBase("Bullet")
 	, player(player)
+	, baseColor(iw::Color::From255(0, 213, 255, 191))
 {}
 
 void BulletSystem::collide(iw::Manifold& man, iw::scalar dt)
@@ -62,7 +63,7 @@ int BulletSystem::Initialize() {
 	iw::Mesh mesh = Asset->Load<iw::Model>("Sphere")->GetMesh(0).MakeInstance();
 
 	mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/phong.shader"));
-	mesh.Material()->Set("baseColor", iw::Color::From255(0, 213, 255, 191));
+	mesh.Material()->Set("baseColor", baseColor);
 	mesh.Material()->Set("emissive", 2.0f);
 
 	iw::Model model;
@@ -95,7 +96,7 @@ int BulletSystem::Initialize() {
 
 void BulletSystem::FixedUpdate() {
 	auto bullets  = Space->Query<iw::Transform, iw::Rigidbody, Bullet>();
-	auto packages = Space->Query<iw::Transform, Bullet, BulletPackage>();
+	auto packages = Space->Query<iw::Transform, iw::Model, Bullet, BulletPackage>();
 
 	bullets.Each([&](
 		auto entity,
@@ -116,7 +117,22 @@ void BulletSystem::FixedUpdate() {
 			}
 			case ORBIT: {
 				iw::vector3 target = player.Find<iw::Transform>()->Position;
-				rigidbody->ApplyForce((target - transform->Position) * 0.5f);
+
+				iw::vector3 force = target - transform->Position;
+				force.x *= 0.5f;
+				force.z *= 0.5f;
+
+				rigidbody->ApplyForce(force);
+
+				if (transform->Position.y < 1) {
+					//iw::vector3 correction = rigidbody->Force();
+					//correction.x = 0;
+					//correction.z = 0;
+
+					//rigidbody->ApplyForce(-correction * (target.y - transform->Position.y));
+
+					rigidbody->Trans().Position.y = 1;
+				}
 
 				break;
 			}
@@ -134,11 +150,14 @@ void BulletSystem::FixedUpdate() {
 	packages.Each([&](
 		auto entity,
 		auto transform,
+		auto model,
 		auto bullet,
 		auto package)
 	{
-		for (float dir = 0.0f; dir < iw::Pi2; dir += iw::Pi2 / 6) {
-			if (bullet->Timer > package->TimeToExplode) {
+		if (bullet->Timer > package->TimeToExplode && !package->Exploded) {
+			package->Exploded = true;
+
+			for (float dir = 0.0f; dir < iw::Pi2; dir += iw::Pi2 / 6) {
 				iw::Entity bullet = Space->Instantiate(bulletPrefab);
 
 				Bullet*             b = bullet.Find<Bullet>();
@@ -164,6 +183,7 @@ void BulletSystem::FixedUpdate() {
 
 				Physics->AddRigidbody(r);
 			
+				//transform->SetParent(nullptr);
 				Space->QueueEntity(entity, iw::func_Destroy);
 			}
 		}

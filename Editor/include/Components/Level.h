@@ -12,8 +12,8 @@
 
 struct REFLECT Level {
 	REFLECT bool CameraFollow = false;
-	REFLECT iw::vector2 InPosition;
-	REFLECT iw::vector2 LevelPosition;
+	REFLECT iw::vector3 InPosition;
+	REFLECT iw::vector3 LevelPosition;
 
 	REFLECT std::vector<Enemy>       Enemies;
 	REFLECT std::vector<iw::vector2> Positions;

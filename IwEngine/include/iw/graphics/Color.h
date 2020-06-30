@@ -34,6 +34,14 @@ namespace Graphics {
 			, a(a)
 		{}
 
+		Color(
+			iw::vector4 rgba)
+			: r(rgba.x)
+			, g(rgba.y)
+			, b(rgba.z)
+			, a(rgba.w)
+		{}
+
 		operator iw::vector4() {
 			return iw::vector4(r, g, b, a);
 		}

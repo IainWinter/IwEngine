@@ -2,7 +2,8 @@
   "CameraFollow": false,
   "InPosition": {
     "x": 0.000000,
-    "y": -10.000000
+    "y": 1.000000,
+    "z": -10.000000
   },
   "LevelLocation": {
     "x": 0.000000,
