@@ -29,7 +29,7 @@ uniform sampler2D mat_shadowMap;    // take out of material at some point
 
 // Voxel
 uniform vec3 voxelBoundsScale;
-layout(RGBA8) uniform image3D voxelTexture;
+layout(rgba8) uniform image3D voxelTexture;
 
 // Globals
 uniform float ambiance;

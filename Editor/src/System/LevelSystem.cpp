@@ -330,7 +330,7 @@ iw::Entity LevelSystem::LoadLevel(
 				}
 			}
 
-			mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/vct/vct.shader"));
+			mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/phong.shader"));
 
 			mesh.Material()->SetTexture("shadowMap", Asset->Load<iw::Texture>("SunShadowMap"));
 			//mesh.Material()->SetTexture("shadowMap2", Asset->Load<iw::Texture>("LightShadowMap")); // shouldnt be part of material

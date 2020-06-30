@@ -4,7 +4,7 @@ layout(local_size_x = 16, local_size_y = 8, local_size_z = 1) in;
 
 uniform int level;
 layout(binding = 0)        uniform sampler3D source;
-layout(binding = 1, RGBA8) uniform image3D   target;
+layout(binding = 1, rgba8) uniform image3D   target;
 
 void main() {
 	ivec3 targetSize = imageSize(target);

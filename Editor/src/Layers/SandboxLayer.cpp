@@ -217,7 +217,7 @@ namespace iw {
 
 		// Materials
 
-		Material* def = new Material(vct);
+		Material* def = new Material(phong);
 		def->Set("baseColor", vector4(0.8f, 1.0f));
 		//def->Set("roughness", 0.8f);
 		//def->Set("metallic", 0.2f);
@@ -321,7 +321,7 @@ namespace iw {
 
 		PushSystem<iw::UiRenderSystem>(m_textCam);
 
-		PushSystem<iw::ModelVoxelRenderSystem>(MainScene);
+		//PushSystem<iw::ModelVoxelRenderSystem>(MainScene);
 
 		PushSystem<SpaceInspectorSystem>();
 

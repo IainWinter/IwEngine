@@ -148,6 +148,8 @@ namespace Engine {
 			while (m_running) {
 				Time::UpdateTime();
 
+				(*Renderer).Begin(iw::Time::TotalTime());
+
 				Update();
 
 				if (Time::RawFixedTime() == 0)
@@ -161,6 +163,11 @@ namespace Engine {
 					accumulatedTime -= Time::RawFixedTime();
 				}
 
+				{
+					LOG_TIME_SCOPE("Renderer");
+					(*Renderer).End();
+				}
+
 				(*Space).ExecuteQueue();
 
 				{
@@ -168,6 +175,24 @@ namespace Engine {
 					(*Console).ExecuteQueue();
 					(*Bus).publish();
 				}
+
+				{
+					LOG_TIME_SCOPE("Audio");
+					(*Audio).Update();
+				}
+
+				ImGuiLayer* imgui = GetLayer<ImGuiLayer>("ImGui");
+				if (imgui) {
+					LOG_TIME_SCOPE("ImGui");
+
+					imgui->Begin();
+					for (Layer* layer : m_layers) {
+						layer->ImGui();
+					}
+					imgui->End();
+				}
+
+				m_window->SwapBuffers();
 
 				LOG_CLEAR_TIMES();
 			}
@@ -186,8 +211,6 @@ namespace Engine {
 	}
 
 	void Application::Update() {
-		Renderer->Begin(iw::Time::TotalTime());
-
 		// Pre Update (Sync)
 		 
 		int layerNumber = 0;
@@ -226,31 +249,6 @@ namespace Engine {
 
 			Renderer->SetLayer(layerNumber);
 			layer->PostUpdate();
-		}
-
-		// ImGui render (Sync)
-
-		ImGuiLayer* imgui = GetLayer<ImGuiLayer>("ImGui");
-		if (imgui) {
-			LOG_TIME_SCOPE("ImGui");
-
-			imgui->Begin();
-			for (Layer* layer : m_layers) {
-				layer->ImGui();
-			}
-			imgui->End();
-		}
-
-		{
-			LOG_TIME_SCOPE("Renderer");
-			Renderer->End();
-		}
-
-		m_window->SwapBuffers();
-
-		{
-			LOG_TIME_SCOPE("Audio");
-			Audio->Update();
 		}
 	}
 
