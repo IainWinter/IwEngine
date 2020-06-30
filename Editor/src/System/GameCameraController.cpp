@@ -50,9 +50,9 @@ void GameCameraController::Update(
 		//target.x = 0;
 
 		if (   !follow
-			&& iw::almost_equal(t->Position.x, target.x, 5)
-			&& iw::almost_equal(t->Position.y, target.y, 5)
-			&& iw::almost_equal(t->Position.z, target.z, 5))
+			&& iw::almost_equal(t->Position.x, target.x, 2)
+			&& iw::almost_equal(t->Position.y, target.y, 2)
+			&& iw::almost_equal(t->Position.z, target.z, 2))
 		{
 			t->Position = target;
 			s = speed;
@@ -146,10 +146,10 @@ void GameCameraController::SetTarget(
 		y = 17.15f;
 	}
 
-	else if(levelName == "levels/canyon/canyon02.json")
+	/*else if(levelName == "levels/canyon/canyon02.json")
 	{
 		y = 22.15f;
-	}
+	}*/
 
 	else {
 		y = 27.15f;

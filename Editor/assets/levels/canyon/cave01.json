@@ -3,67 +3,35 @@
   "InPosition": {
     "x": 0.000000,
     "y": 1.000000,
-    "z": -10.000000
+    "z": 0.000000
   },
   "LevelLocation": {
     "x": 0.000000,
-    "y": 0.000000,
-    "z": 36.000000
+    "y": -36.000000,
+    "z": 0.000000
   },
   "Enemies": {
-    "size": 3,
+    "size": 1,
     "items": [
       {
         "Type": 0,
         "Bullet": {
-          "Type": 0,
+          "Type": 2,
           "Speed": 5.000000,
-          "Package": 0
+          "Package": 65536
         },
         "Speed": 0.2617994,
-        "FireTime": 0.120000,
+        "FireTime": 1.00000,
         "ChargeTime": 0.000000,
         "Rotation": 0.000000
-      },
-      {
-        "Type": 1,
-        "Bullet": {
-          "Type": 0,
-          "Speed": 5.000000,
-          "Package": 0
-        },
-        "Speed": 0.261799,
-        "FireTime": 2.50000,
-        "ChargeTime": 1.500000,
-        "Rotation": 0.1309
-      },
-      {
-        "Type": 1,
-        "Bullet": {
-          "Type": 0,
-          "Speed": 5.000000,
-          "Package": 0
-        },
-        "Speed": 0.261799,
-        "FireTime": 2.50000,
-        "ChargeTime": 1.500000,
-        "Rotation": 0.1309
       }
     ]
   },
   "Positions": {
-    "size": 3,
+    "size": 1,
     "items": [
       {
-        "x": 0.000000,
-        "y": 0.000000
-      },
-      {
-        "x": 12.000000,
-        "y": 0.000000
-      },
-      {
-        "x": -12.000000,
+        "x": 5.000000,
         "y": 0.000000
       }
     ]
@@ -76,7 +44,7 @@
         "State": 1,
         "NextLevel": {
           "size": 27,
-          "string": "levels/forest/forest12.json"
+          "string": "levels/forest/forest02.json"
         }
       }
     ]
@@ -85,7 +53,7 @@
     "size": 1,
     "items": [
       {
-        "x": 28.000000,
+        "x": 25.000000,
         "y": 0.000000
       }
     ]
@@ -95,26 +63,11 @@
     "items": []
   },
   "Capsules": {
-    "size": 1,
-    "items": [
-      {
-        "Center": {
-          "x": -13.000000,
-          "y": 0.000000,
-          "z": -4.000000
-        },
-        "Direction": {
-          "x": 1.000000,
-          "y": 0.000000,
-          "z": 0.000000
-        },
-        "Height": 7.000000,
-        "Radius": 0.500000
-      }
-    ]
+    "size": 0,
+    "items": []
   },
   "Planes": {
-    "size": 4,
+    "size": 6,
     "items": [
       {
         "Plane": {
@@ -123,7 +76,7 @@
             "y": 0.000000,
             "z": 0.000000
           },
-          "D": -21.000000
+          "D": -12.000000
         }
       },
       {
@@ -143,7 +96,7 @@
             "y": 0.000000,
             "z": -1.000000
           },
-          "D": -11.000000
+          "D": -14.000000
         }
       },
       {
@@ -153,48 +106,44 @@
             "y": 0.000000,
             "z": 1.000000
           },
-          "D": -11.000000
+          "D": -14.000000
+        }
+      },
+      {
+        "Plane": {
+          "P": {
+            "x": -1.000000,
+            "y": 0.000000,
+            "z": 1.000000
+          },
+          "D": -16.000000
+        }
+      },
+      {
+        "Plane": {
+          "P": {
+            "x": -1.000000,
+            "y": 0.000000,
+            "z": -1.000000
+          },
+          "D": -16.000000
         }
       }
     ]
   },
   "Models": {
-    "size": 2,
+    "size": 1,
     "items": [
       {
         "ModelName": {
-          "size": 27,
-          "string": "models/forest/forest11.gltf"
+          "size": 25,
+          "string": "models/canyon/cave01.gltf"
         },
         "Transform": {
           "Position": {
             "x": 0,
             "y": 0,
             "z": 0
-          },
-          "Scale": {
-            "x": 1,
-            "y": 1,
-            "z": 1
-          },
-          "Rotation": {
-            "x": 0,
-            "y": 0,
-            "z": 0,
-            "w": 1
-          }
-        }
-      },
-      {
-        "ModelName": {
-          "size": 26,
-          "string": "models/forest/barrier.gltf"
-        },
-        "Transform": {
-          "Position": {
-            "x": -13,
-            "y": 0,
-            "z": -4
           },
           "Scale": {
             "x": 1,

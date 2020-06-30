@@ -23,6 +23,7 @@ BulletSystem::BulletSystem(
 	, baseColor(iw::Color::From255(0, 213, 255, 191))
 {}
 
+// sucks that this needs to be here, need to fix lambdas to get it to work
 void BulletSystem::collide(iw::Manifold& man, iw::scalar dt)
 {
 	iw::Entity bulletEntity, otherEntity;
@@ -110,7 +111,7 @@ void BulletSystem::FixedUpdate() {
 
 		switch (bullet->Type) {
 			case SINE: {
-				float speed = (sin(bullet->Timer * 5) + 1) * 0.5f;
+				float speed = (sin(bullet->Timer * 5) + 1) * 0.75f;
 				rigidbody->SetVelocity(bullet->InitialVelocity * speed);
 
 				break;
@@ -183,9 +184,10 @@ void BulletSystem::FixedUpdate() {
 
 				Physics->AddRigidbody(r);
 			
-				//transform->SetParent(nullptr);
-				Space->QueueEntity(entity, iw::func_Destroy);
 			}
+
+			transform->SetParent(nullptr);
+			Space->QueueEntity(entity, iw::func_Destroy);
 		}
 	});
 }

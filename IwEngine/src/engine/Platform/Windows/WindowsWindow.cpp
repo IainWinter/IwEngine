@@ -158,7 +158,8 @@ namespace Engine {
 		
 		TakeOwnership();
 
-		glClearColor(70 / 255.0f, 85 / 255.0f, 100 / 255.0f, 1.0f);
+		//glClearColor(70 / 255.0f, 85 / 255.0f, 100 / 255.0f, 1.0f); sky blu
+		glClearColor(0, 0, 0, 1.0f); 
 		glEnable(GL_DEPTH_TEST);
 		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 

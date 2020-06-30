@@ -16,13 +16,9 @@ public:
 	BulletSystem(
 		iw::Entity& player);
 
-	~BulletSystem() {}
-
 	iw::Prefab& GetBulletPrefab() { return bulletPrefab; }
 
 	void collide(iw::Manifold& man, iw::scalar dt);
-
-	void f() {}
 
 	int Initialize()   override;
 	void FixedUpdate() override;

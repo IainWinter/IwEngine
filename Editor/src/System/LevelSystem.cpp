@@ -42,11 +42,13 @@ struct OtherGuyTag {
 };
 
 LevelSystem::LevelSystem(
-	iw::Entity& player)
+	iw::Entity& player,
+	iw::Scene* scene)
 	: iw::System<iw::CollisionObject, iw::Model, LevelDoor>("Level")
 	, playerEntity(player)
+	, scene(scene)
 {
-	currentLevelName = "levels/canyon/canyon01.json";
+	currentLevelName = "levels/canyon/canyon02.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 63);
 	closedColor = iw::Color::From255(201, 66, 66, 63);
@@ -55,7 +57,7 @@ LevelSystem::LevelSystem(
 }
 
 int LevelSystem::Initialize() {
-	Bus->push<ResetLevelEvent>();
+	Bus->send <ResetLevelEvent>();
 
 	// Leaves
 
@@ -72,7 +74,7 @@ int LevelSystem::Initialize() {
 
 float speed = 1.0f; // garbo
 float timeout = 0.0f;
-iw::vector2 lastLevelPosition = 0;
+iw::vector3 lastLevelPosition = 0;
 
 void LevelSystem::Update(
 	iw::EntityComponentArray& view)
@@ -105,8 +107,8 @@ void LevelSystem::Update(
 			target = -lastLevelPosition;
 		}
 
-		current->Position = iw::lerp(current->Position, -target,        iw::Time::DeltaTimeScaled() /** speed*/);
-		next   ->Position = iw::lerp(next   ->Position, iw::vector3(0), iw::Time::DeltaTimeScaled() /** speed*/);
+		current->Position = iw::lerp(current->Position, -target,        iw::Time::DeltaTimeScaled() * speed);
+		next   ->Position = iw::lerp(next   ->Position, iw::vector3(0), iw::Time::DeltaTimeScaled() * speed);
 
 		if (   iw::Time::TotalTime() - timeout > 0
 			&& iw::almost_equal(next->Position.x, 0.0f, 2)
@@ -170,6 +172,8 @@ bool LevelSystem::On(
 			Bus->push<StartLevelEvent>(currentLevelName, currentLevel.CameraFollow, currentLevel.InPosition);
 
 			sequence.Restart();
+
+			//playerEntity.Find<iw::Transform>()->SetParent(levelEntity.Find<iw::Transform>());
 
 			break;
 		}
@@ -330,7 +334,7 @@ iw::Entity LevelSystem::LoadLevel(
 				}
 			}
 
-			mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/phong.shader"));
+			mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/vct/vct.shader"));
 
 			mesh.Material()->SetTexture("shadowMap", Asset->Load<iw::Texture>("SunShadowMap"));
 			//mesh.Material()->SetTexture("shadowMap2", Asset->Load<iw::Texture>("LightShadowMap")); // shouldnt be part of material

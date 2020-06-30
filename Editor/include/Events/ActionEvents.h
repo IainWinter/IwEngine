@@ -132,8 +132,8 @@ struct LoadNextLevelEvent
 
 	LoadNextLevelEvent(
 		std::string levelName,
-		iw::vector2 position,
-		bool goback)
+		iw::vector2 position = iw::vector2::zero,
+		bool goback = false)
 		: iw::SingleEvent(iw::val(Actions::LOAD_NEXT_LEVEL))
 		, LevelName(levelName)
 		, Position(position)

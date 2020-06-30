@@ -11,6 +11,7 @@
 #include "Systems/NoteSystem.h"
 #include "Systems/ConsumableSystem.h"
 #include "Systems/SpaceInspectorSystem.h"
+#include "Systems/WorldHoleSystem.h"
 #include "iw/engine/Systems/PhysicsSystem.h"
 #include "iw/engine/Systems/ParticleUpdateSystem.h"
 #include "iw/engine/Systems/EntityCleanupSystem.h"
@@ -217,7 +218,7 @@ namespace iw {
 
 		// Materials
 
-		Material* def = new Material(phong);
+		Material* def = new Material(vct);
 		def->Set("baseColor", vector4(0.8f, 1.0f));
 		//def->Set("roughness", 0.8f);
 		//def->Set("metallic", 0.2f);
@@ -299,8 +300,10 @@ namespace iw {
 		bulletSystem = PushSystem<BulletSystem>(playerSystem->GetPlayer());
 		enemySystem  = PushSystem<EnemySystem>(playerSystem->GetPlayer(), bulletSystem->GetBulletPrefab());
 
+		LevelSystem* levelSystem = PushSystem<LevelSystem>(playerSystem->GetPlayer(), MainScene);
+		                           PushSystem<WorldHoleSystem>(levelSystem->GetLevel());
+
 		PushSystem<GameCameraController>(playerSystem->GetPlayer(), MainScene);
-		PushSystem<LevelSystem>(playerSystem->GetPlayer());
 		PushSystem<ScoreSystem>(playerSystem->GetPlayer(), MainScene->MainCamera(), m_textCam);
 		PushSystem<EnemyDeathCircleSystem>();
 		PushSystem<PhysicsSystem>();
@@ -310,7 +313,6 @@ namespace iw {
 		PushSystem<ConsumableSystem>(playerSystem->GetPlayer());
 
 		PushSystem<iw::ParticleUpdateSystem>();
-		PushSystem<iw::EntityCleanupSystem>();
 
 		PushSystem<iw::    MeshShadowRenderSystem>(MainScene);
 		PushSystem<iw::   ModelShadowRenderSystem>(MainScene);
@@ -321,9 +323,11 @@ namespace iw {
 
 		PushSystem<iw::UiRenderSystem>(m_textCam);
 
-		//PushSystem<iw::ModelVoxelRenderSystem>(MainScene);
+		PushSystem<iw::ModelVoxelRenderSystem>(MainScene);
 
 		PushSystem<SpaceInspectorSystem>();
+
+		PushSystem<iw::EntityCleanupSystem>();
 
 		//PushSystem<iw::DrawCollidersSystem>(MainScene->MainCamera());
 
@@ -513,24 +517,18 @@ namespace iw {
 
 				GoToNextLevelEvent& event = e.as<GoToNextLevelEvent>();
 
-				if      (event.LevelName == "models/block/forest100.json")
-				{
-					m_font->UpdateMesh(*m_textMesh, "ayy you've gotten to the boss congrats!\nsadly he's out today so\nhave some fun with the physics instead...\nmember you can press i/t", .004f, 1);
-				}
+				m_font->UpdateMesh(*m_textMesh, "", .01f, 1);
+				settexttocursor = false;
 
-				else if (event.LevelName == "models/block/forest08.json")
-				{
-					m_font->UpdateMesh(*m_textMesh, "So this would be a lil mini boss but that seems\nlike it would be annoying to program xd", .004f, 1);
-				}
-
-				else if (event.LevelName == "models/block/forest01.json")
-				{
-					m_font->UpdateMesh(*m_textMesh, "Lets go! You've finished the play test\nIf you got the time, post some feedback at\nhttps://winter.dev/demo", .004f, 1);
+				if (event.LevelName.find("canyon/cave") != std::string::npos) {
+					ml = 8.0f;
+					//MainScene->SetAmbiance(0.0003f);
+					ambiance = 0.003f;
 				}
 
 				else {
-					m_font->UpdateMesh(*m_textMesh, "", .01f, 1);
-					settexttocursor = false;
+					ml = 2.0f;
+					ambiance = 0.03f;
 				}
 
 				break;
