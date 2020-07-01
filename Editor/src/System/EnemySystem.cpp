@@ -394,7 +394,8 @@ iw::Transform* EnemySystem::SpawnBullet(
 	if (enemyBullet.Package) {
 		BulletPackage* p = bullet.Add<BulletPackage>();
 
-		p->InnerType = BulletType(enemyBullet.Package & REMOVE_TYPE);
+		p->Type      = PackageType(enemyBullet.Package & GET_TYPE);
+		p->InnerType = BulletType (enemyBullet.Package & REMOVE_TYPE);
 		p->InnerSpeed    = 5.0f;
 		p->TimeToExplode = 1.5f;
 	}

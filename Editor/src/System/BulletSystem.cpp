@@ -155,39 +155,54 @@ void BulletSystem::FixedUpdate() {
 		auto bullet,
 		auto package)
 	{
-		if (bullet->Timer > package->TimeToExplode && !package->Exploded) {
-			package->Exploded = true;
+		if (package->Exploded) return;
 
-			for (float dir = 0.0f; dir < iw::Pi2; dir += iw::Pi2 / 6) {
-				iw::Entity bullet = Space->Instantiate(bulletPrefab);
-
-				Bullet*             b = bullet.Find<Bullet>();
-				iw::Transform*      t = bullet.Find<iw::Transform>();
-				iw::SphereCollider* s = bullet.Find<iw::SphereCollider>();
-				iw::Rigidbody*      r = bullet.Find<iw::Rigidbody>();
-
-				b->Type    = package->InnerType;
-				b->Speed   = package->InnerSpeed;
-				b->Timer   = 0.0f;
-
-				//iw::vector3 target = player.Find<iw::Transform>()->Position;
-				//float       dir = atan2(target.z - transform->Position.z, target.x - transform->Position.x);
-
-				t->SetParent(transform->Parent());
-
-				t->Rotation = iw::quaternion::from_euler_angles(0, dir, 0).inverted();
-				t->Position = transform->Position + t->Right() * sqrt(.25f);
-
-				r->SetCol(s);
-				r->SetTrans(t);
-				r->SetVelocity(iw::vector3::unit_x * t->Rotation * b->Speed);
-
-				Physics->AddRigidbody(r);
-			
+		switch (package->Type) {
+			case PackageType::TIMER : {
+				if (bullet->Timer < package->TimeToExplode) {
+					return;
+				}
+				break;
 			}
-
-			transform->SetParent(nullptr);
-			Space->QueueEntity(entity, iw::func_Destroy);
+			case PackageType::DISTANCE: {
+				if ((transform->WorldPosition() - player.Find<iw::Transform>()->WorldPosition()).length_squared() > 25) {
+					return;
+				}
+				break;
+			}
+			default: {
+				LOG_WARNING << "Invalid bullet package type! " << package->Type;
+				return;
+			}
 		}
+
+		package->Exploded = true;
+
+		for (float dir = 0.0f; dir < iw::Pi2; dir += iw::Pi2 / 6) {
+			iw::Entity bullet = Space->Instantiate(bulletPrefab);
+
+			Bullet*             b = bullet.Find<Bullet>();
+			iw::Transform*      t = bullet.Find<iw::Transform>();
+			iw::SphereCollider* s = bullet.Find<iw::SphereCollider>();
+			iw::Rigidbody*      r = bullet.Find<iw::Rigidbody>();
+
+			b->Type  = package->InnerType;
+			b->Speed = package->InnerSpeed;
+			b->Timer = 0.0f;
+
+			t->SetParent(transform->Parent());
+
+			t->Rotation = iw::quaternion::from_euler_angles(0, dir, 0).inverted();
+			t->Position = transform->Position + t->Right() * sqrt(.25f);
+
+			r->SetCol(s);
+			r->SetTrans(t);
+			r->SetVelocity(iw::vector3::unit_x * t->Rotation * b->Speed);
+
+			Physics->AddRigidbody(r);
+		}
+
+		transform->SetParent(nullptr);
+		Space->QueueEntity(entity, iw::func_Destroy);
 	});
 }

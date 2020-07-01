@@ -30,7 +30,7 @@
         "Bullet": {
           "Type": 2,
           "Speed": 5.000000,
-          "Package": 65536
+          "Package": 131072
         },
         "Speed": 0.2617994,
         "FireTime": 1.00000,
@@ -42,7 +42,7 @@
         "Bullet": {
           "Type": 2,
           "Speed": 5.000000,
-          "Package": 65536
+          "Package": 131072
         },
         "Speed": 0.2617994,
         "FireTime": 1.00000,
