@@ -142,8 +142,7 @@ void GameCameraController::SetTarget(
 		|| levelName == "levels/forest/forest07.a.json"
 		|| levelName == "levels/forest/forest12.a.json"
 		|| levelName == "levels/forest/forest22.json"
-		|| levelName == "levels/canyon/cave01.json"
-		|| levelName == "levels/canyon/cave02.json")
+		|| levelName.find("cave")!= std::string::npos)
 	{
 		y = 17.15f;
 	}
