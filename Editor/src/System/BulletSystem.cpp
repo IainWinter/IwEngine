@@ -117,28 +117,44 @@ void BulletSystem::FixedUpdate() {
 				break;
 			}
 			case ORBIT: {
-				//iw::Transform* t = player.Find<iw::Transform>();
+				iw::vector3 vel = rigidbody->Velocity();
+				iw::vector3 dir = player.Find<iw::Transform>()->Position - transform->Position;
+
+				iw::vector3 nV = vel.normalized();
+				iw::vector3 nD = dir.normalized();
+
+				float dot = nV.dot(nD);
+
+				float rotSpeed = 10;
+				if (dot < 0) {
+					rotSpeed = -10;
+				}
+
+				else if (dot > .99f) {
+					break;
+				}
+
+				rigidbody->SetVelocity(vel * iw::quaternion::from_euler_angles(0, iw::Time::DeltaTime() * rotSpeed, 0));
 
 				//t->Rotation *= iw::quaternion::from_euler_angles(0, 10, 0);
 
+				//iw::vector3 target = player.Find<iw::Transform>()->Position;
 
-				iw::vector3 target = player.Find<iw::Transform>()->Position;
+				//iw::vector3 force = target - transform->Position;
+				////force.x *= 0.5f;
+				////force.z *= 0.5f;
 
-				iw::vector3 force = target - transform->Position;
-				force.x *= 0.5f;
-				force.z *= 0.5f;
+				//rigidbody->ApplyForce(force);
 
-				rigidbody->ApplyForce(force);
+				//if (transform->Position.y < 1) {
+				//	//iw::vector3 correction = rigidbody->Force();
+				//	//correction.x = 0;
+				//	//correction.z = 0;
 
-				if (transform->Position.y < 1) {
-					//iw::vector3 correction = rigidbody->Force();
-					//correction.x = 0;
-					//correction.z = 0;
+				//	//rigidbody->ApplyForce(-correction * (target.y - transform->Position.y));
 
-					//rigidbody->ApplyForce(-correction * (target.y - transform->Position.y));
-
-					rigidbody->Trans().Position.y = 1;
-				}
+				//	rigidbody->Trans().Position.y = 1;
+				//}
 
 				break;
 			}
@@ -160,6 +176,8 @@ void BulletSystem::FixedUpdate() {
 		auto bullet,
 		auto package)
 	{
+		return;
+
 		if (package->Exploded) return;
 
 		switch (package->Type) {
