@@ -117,6 +117,11 @@ void BulletSystem::FixedUpdate() {
 				break;
 			}
 			case ORBIT: {
+				//iw::Transform* t = player.Find<iw::Transform>();
+
+				//t->Rotation *= iw::quaternion::from_euler_angles(0, 10, 0);
+
+
 				iw::vector3 target = player.Find<iw::Transform>()->Position;
 
 				iw::vector3 force = target - transform->Position;

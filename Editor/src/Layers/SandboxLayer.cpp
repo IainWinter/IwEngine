@@ -520,10 +520,16 @@ namespace iw {
 				m_font->UpdateMesh(*m_textMesh, "", .01f, 1);
 				settexttocursor = false;
 
-				if (event.LevelName.find("canyon/cave") != std::string::npos) {
-					ml = 8.0f;
-					//MainScene->SetAmbiance(0.0003f);
-					ambiance = 0.003f;
+				if (event.LevelName.find("canyon") != std::string::npos) {
+					sun->SetRotation(iw::quaternion::from_euler_angles(1.0f, 0.0f, -0.35f));
+					sun->SetColor(vector3(1.0f, 0.64f, 0.37f));
+
+					if (event.LevelName.find("cave") != std::string::npos) {
+						sun->SetRotation(iw::quaternion::from_euler_angles(1.4f, 0.0f, -0.25f));
+
+						ml = 8.0f;
+						ambiance = 0.003f; //MainScene->SetAmbiance(0.0003f);
+					}
 				}
 
 				else {

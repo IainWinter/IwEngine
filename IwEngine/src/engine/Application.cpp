@@ -156,7 +156,7 @@ namespace Engine {
 					continue;
 
 				accumulatedTime += Time::DeltaTime();
-				while (m_running 
+				while (m_running
 					&& accumulatedTime >= Time::RawFixedTime())
 				{
 					FixedUpdate();
@@ -168,13 +168,13 @@ namespace Engine {
 					(*Renderer).End();
 				}
 
-				(*Space).ExecuteQueue();
-
 				{
 					LOG_TIME_SCOPE("Console & bus");
 					(*Console).ExecuteQueue();
 					(*Bus).publish();
 				}
+
+				(*Space).ExecuteQueue();
 
 				{
 					LOG_TIME_SCOPE("Audio");

@@ -44,6 +44,16 @@ namespace Engine {
 			sys->GetParticleMesh().Material().reset();
 		}
 
+		iw::Rigidbody* body = Space->FindComponent<iw::Rigidbody>(e.Entity);
+		if (body) {
+			Physics->RemoveCollisionObject(body);
+		}
+
+		iw::CollisionObject* obj = Space->FindComponent<iw::CollisionObject>(e.Entity);
+		if (obj) {
+			Physics->RemoveCollisionObject(obj);
+		}
+
 		return false;
 	}
 }

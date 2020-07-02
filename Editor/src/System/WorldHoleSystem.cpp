@@ -65,7 +65,7 @@ int WorldHoleSystem::Initialize() {
 
 	rigidbody.SetOnCollision(iw::bind<void, WorldHoleSystem*, iw::Manifold&, float>(&WorldHoleSystem::collide, this)); // garbo
 
-	iw::SphereCollider collider(0, 0.9f);
+	iw::SphereCollider collider(0, 0.85f);
 
 	iw::Transform transform(iw::vector3(0, 0.1f, 0), iw::vector3(5, 0.001f, 5));
 

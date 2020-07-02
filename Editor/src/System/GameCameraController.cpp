@@ -67,7 +67,7 @@ void GameCameraController::Update(
 				s += iw::Time::DeltaTimeScaled() * 5;
 			}
 
-			t->Position = iw::lerp(t->Position, target, iw::Time::DeltaTimeScaled() /** s*/);
+			t->Position = iw::lerp(t->Position, target, iw::Time::DeltaTimeScaled() * s);
 			//t->Rotation = iw::lerp(t->Rotation, camrot, iw::Time::DeltaTime() * speed);
 		}
 
@@ -141,7 +141,9 @@ void GameCameraController::SetTarget(
 	if (   levelName == "levels/forest/forest05.a.json"
 		|| levelName == "levels/forest/forest07.a.json"
 		|| levelName == "levels/forest/forest12.a.json"
-		|| levelName == "levels/forest/forest22.json")
+		|| levelName == "levels/forest/forest22.json"
+		|| levelName == "levels/canyon/cave01.json"
+		|| levelName == "levels/canyon/cave02.json")
 	{
 		y = 17.15f;
 	}
