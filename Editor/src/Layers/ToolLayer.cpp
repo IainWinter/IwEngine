@@ -44,6 +44,7 @@ namespace iw {
 		Scene* scene)
 		 : Layer("Toolbox")
 		, m_mainScene(scene)
+		, cameraSystem(nullptr)
 	{}
 
 	int ToolLayer::Initialize() {
@@ -104,26 +105,19 @@ namespace iw {
 		dlightMesh.SetMaterial(lightMaterial);
 		cameraMesh.SetMaterial(cameraMaterial);
 
-		camera = new PerspectiveCamera(1.7f, 1.777f, 0.01f, 1000.0f);
-
-		Entity cameraEntity = Space->CreateEntity<Transform, EditorCameraController>();
-
-		Transform* transform = cameraEntity.Set<Transform>(0);
-		                       cameraEntity.Set<EditorCameraController>(camera);
-
-		camera->SetTrans(transform);
-
-		cameraSystem = new EditorCameraControllerSystem();
-		PushSystem<DrawCollidersSystem>(camera);
+		cameraSystem = PushSystem<EditorCameraControllerSystem>();
+		
+		PushSystem<DrawCollidersSystem>(cameraSystem->GetCamera());
 		PushSystem<iw::EntityCleanupSystem>();
 		PushSystem<SpaceInspectorSystem>();
+
 
 		return Layer::Initialize();
 	}
 
 	void ToolLayer::OnPush() {
 		oldcamera = m_mainScene->MainCamera();
-		m_mainScene->SetMainCamera(camera);
+		m_mainScene->SetMainCamera(cameraSystem ? cameraSystem->GetCamera() : nullptr);
 	}
 
 	void ToolLayer::OnPop() {
@@ -208,19 +202,19 @@ namespace iw {
 
 		}
 
-		if (   e.Button == LMOUSE
-			&& e.Device == DeviceType::MOUSE)
-		{
-			if (e.State) {
-				PushSystem(cameraSystem);
-			}
+		//if (   e.Button == LMOUSE
+		//	&& e.Device == DeviceType::MOUSE)
+		//{
+		//	if (e.State) {
+		//		PushSystem(cameraSystem);
+		//	}
 
-			else {
-				while (GetSystem<EditorCameraControllerSystem>("Editor Camera Controller")) {
-					PopSystem(cameraSystem);
-				}
-			}
-		}
+		//	else {
+		//		while (GetSystem<EditorCameraControllerSystem>("Editor Camera Controller")) {
+		//			PopSystem(cameraSystem);
+		//		}
+		//	}
+		//}
 
 
 		return Layer::On(e);

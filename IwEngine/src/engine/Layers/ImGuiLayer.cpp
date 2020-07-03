@@ -267,7 +267,8 @@ namespace Engine {
 		return ImGui::GetIO().WantCaptureMouse;
 	}
 
-	bool ImGuiLayer::On(KeyEvent& e)
+	bool ImGuiLayer::On(
+		KeyEvent& e)
 	{
 		if (e.Device == DeviceType::KEYBOARD) {
 			auto& io = ImGui::GetIO();
