@@ -130,31 +130,11 @@ void BulletSystem::FixedUpdate() {
 					rotSpeed = -10;
 				}
 
-				else if (dot > .99f) {
-					break;
-				}
-
-				rigidbody->SetVelocity(vel * iw::quaternion::from_euler_angles(0, iw::Time::DeltaTime() * rotSpeed, 0));
-
-				//t->Rotation *= iw::quaternion::from_euler_angles(0, 10, 0);
-
-				//iw::vector3 target = player.Find<iw::Transform>()->Position;
-
-				//iw::vector3 force = target - transform->Position;
-				////force.x *= 0.5f;
-				////force.z *= 0.5f;
-
-				//rigidbody->ApplyForce(force);
-
-				//if (transform->Position.y < 1) {
-				//	//iw::vector3 correction = rigidbody->Force();
-				//	//correction.x = 0;
-				//	//correction.z = 0;
-
-				//	//rigidbody->ApplyForce(-correction * (target.y - transform->Position.y));
-
-				//	rigidbody->Trans().Position.y = 1;
+				//else if (dot > .99f) {
+				//	break;
 				//}
+
+				rigidbody->SetVelocity(vel * iw::matrix3::create_rotation_y(iw::Time::DeltaTime() * rotSpeed));
 
 				break;
 			}

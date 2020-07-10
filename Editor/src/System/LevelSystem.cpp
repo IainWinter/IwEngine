@@ -48,7 +48,7 @@ LevelSystem::LevelSystem(
 	, playerEntity(player)
 	, scene(scene)
 {
-	currentLevelName = "levels/canyon/cave02.json";
+	currentLevelName = "levels/canyon/cave03.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 63);
 	closedColor = iw::Color::From255(201, 66, 66, 63);
@@ -403,18 +403,7 @@ iw::Entity LevelSystem::LoadLevel(
 	}
 
 	for (iw::CapsuleCollider& prefab : currentLevel.Capsules) {
-		iw::Entity ent;
-		
-		if (   currentLevelName == "levels/forest/forest15.json"
-			|| currentLevelName == "levels/forest/forest16.json"
-			|| currentLevelName == "levels/forest/forest17.json")
-		{
-			ent = Space->CreateEntity<iw::Transform, iw::CapsuleCollider, iw::CollisionObject, DontDeleteBullets>();
-		}
-
-		else {
-			ent = Space->CreateEntity<iw::Transform, iw::CapsuleCollider, iw::CollisionObject>();
-		}
+		iw::Entity ent = Space->CreateEntity<iw::Transform, iw::CapsuleCollider, iw::CollisionObject>();
 
 		iw::Transform*       transform = ent.Set<iw::Transform>(iw::vector3::unit_y);
 		iw::CapsuleCollider* collider  = ent.Set<iw::CapsuleCollider>(prefab);
@@ -482,6 +471,26 @@ iw::Entity LevelSystem::LoadLevel(
 		object->SetCol(collider);
 		object->SetTrans(transform);
 		object->SetIsTrigger(true);
+
+		Physics->AddCollisionObject(object);
+	}
+
+	// Special colliders, should look into serialization of prefabs to not have to do this
+
+	if (currentLevelName == "levels/canyon/cave04.json") {
+		iw::Entity ent = Space->CreateEntity<iw::Transform, iw::CapsuleCollider, iw::CollisionObject, DontDeleteBullets>();
+
+		iw::CapsuleCollider capsule = iw::CapsuleCollider(iw::vector3(0.6, 0, -0.2), 29.8f, 2.2f);
+		capsule.Direction = iw::vector3::unit_x;
+
+		iw::Transform* transform      = ent.Set<iw::Transform>(iw::vector3::unit_y);
+		iw::CapsuleCollider* collider = ent.Set<iw::CapsuleCollider>(capsule);
+		iw::CollisionObject* object   = ent.Set<iw::CollisionObject>();
+
+		levelTransform->AddChild(transform);
+
+		object->SetCol(collider);
+		object->SetTrans(transform);
 
 		Physics->AddCollisionObject(object);
 	}
