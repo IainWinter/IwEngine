@@ -14,11 +14,17 @@ enum PackageType : unsigned {
 	DISTANCE = 1 << (sizeof(PackageType) * 4 + 1), // Explosed when close to a target
 
 
-	REMOVE_TYPE = 0b00000000000000001111111111111111
+	REMOVE_TYPE = 0b00000000000000001111111111111111,
+	GET_TYPE    = 0b11111111111111110000000000000000,
 };
 
-struct REFLECT BulletPackage {
-	REFLECT BulletType InnerType;
-	REFLECT float      InnerSpeed;
-	REFLECT float      TimeToExplode = 3.0f; // no way to set this rn
+struct BulletPackage {
+	PackageType Type;
+
+	BulletType InnerType;
+	float      InnerSpeed;
+	float      TimeToExplode = 3.0f; // no way to set this rn
+
+
+	bool Exploded = false;
 };

@@ -9,9 +9,9 @@
 #include "iw/util/memory/ref.h"
 
 #include <initializer_list>
-
 #include <functional>
 #include <string>
+#include <mutex>
 
 namespace iw {
 namespace Graphics {
@@ -139,6 +139,8 @@ namespace detail {
 
 		bool m_outdated;
 		bool m_bound;
+
+		std::mutex m_mutex;
 
 		ref<MeshData> m_this;
 

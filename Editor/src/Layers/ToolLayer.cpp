@@ -9,6 +9,8 @@
 #include "iw/graphics/Model.h"
 #include "imgui/imgui.h"
 
+#include "Systems/SpaceInspectorSystem.h"
+
 #include "iw/engine/Systems/ParticleUpdateSystem.h"
 #include "iw/engine/Systems/Render/MeshRenderSystem.h"
 #include "iw/engine/Systems/Render/ModelRenderSystem.h"
@@ -16,6 +18,7 @@
 #include "iw/engine/Systems/Render/MeshShadowRenderSystem.h"
 #include "iw/engine/Systems/Render/ModelShadowRenderSystem.h"
 #include "iw/engine/Systems/Render/ParticleShadowRenderSystem.h"
+#include "iw/engine/Systems/EntityCleanupSystem.h"
 
 #include "iw/engine/Systems/Render/ModelVoxelRenderSystem.h"
 
@@ -41,6 +44,7 @@ namespace iw {
 		Scene* scene)
 		 : Layer("Toolbox")
 		, m_mainScene(scene)
+		, cameraSystem(nullptr)
 	{}
 
 	int ToolLayer::Initialize() {
@@ -101,24 +105,19 @@ namespace iw {
 		dlightMesh.SetMaterial(lightMaterial);
 		cameraMesh.SetMaterial(cameraMaterial);
 
-		camera = new PerspectiveCamera(1.7f, 1.777f, 0.01f, 1000.0f);
+		cameraSystem = PushSystem<EditorCameraControllerSystem>();
+		
+		PushSystem<DrawCollidersSystem>(cameraSystem->GetCamera());
+		PushSystem<iw::EntityCleanupSystem>();
+		PushSystem<SpaceInspectorSystem>();
 
-		Entity cameraEntity = Space->CreateEntity<Transform, EditorCameraController>();
-
-		Transform* transform = cameraEntity.Set<Transform>(0);
-		                       cameraEntity.Set<EditorCameraController>(camera);
-
-		camera->SetTrans(transform);
-
-		cameraSystem = new EditorCameraControllerSystem();
-		PushSystem<DrawCollidersSystem>(camera);
 
 		return Layer::Initialize();
 	}
 
 	void ToolLayer::OnPush() {
 		oldcamera = m_mainScene->MainCamera();
-		m_mainScene->SetMainCamera(camera);
+		m_mainScene->SetMainCamera(cameraSystem ? cameraSystem->GetCamera() : nullptr);
 	}
 
 	void ToolLayer::OnPop() {
@@ -126,72 +125,47 @@ namespace iw {
 	}
 
 	void ToolLayer::ImGui() {
-		//ImGui::Begin("Toolbox");
-		//
-		//float amb = m_mainScene->Ambiance();
-		//ImGui::SliderFloat("Ambiance", &amb, 0, 1);
-		//m_mainScene->SetAmbiance(amb);
-		//
-		//char name = 'A';
-		//
-		//for (PointLight* light : m_mainScene->PointLights()) {
-		//	std::stringstream ss;
-		//	ss << name << " Light pos";
-		//
-		//	vector3 pos = light->Position();
-		//	ImGui::SliderFloat3(ss.str().c_str(), (float*)&pos, 0, 10);
-		//	light->SetPosition(pos);
-		//
-		//	ss = std::stringstream();
-		//	ss << name++ << " Light rad";
-		//
-		//	float rad = light->Radius();
-		//	ImGui::SliderFloat(ss.str().c_str(), &rad, 0, 100);
-		//	light->SetRadius(rad);
-		//}
-		//
-		//for (DirectionalLight* light : m_mainScene->DirectionalLights()) {
-		//	std::stringstream ss;
-		//	ss << name << " Light col";
-		//
-		//	vector3 col = light->Color();
-		//	ImGui::SliderFloat3(ss.str().c_str(), (float*)&col, 0, 1);
-		//	light->SetColor(col);
-		//
-		//	ss = std::stringstream();
-		//	ss << name++ << " Light rot";
-		//
-		//	vector3 rot = light->Rotation().euler_angles();
-		//	ImGui::SliderFloat3(ss.str().c_str(), (float*)&rot, -Pi, Pi);
-		//	light->SetRotation(quaternion::from_euler_angles(rot));
-		//}
-		//
-		//for (auto e : Space->Query<iw::Transform, iw::Model>()) {
-		//	auto [t, m] = e.Components.Tie<ModelComponents>();
-		//
-		//	iw::CollisionObject* o = Space->FindComponent<iw::CollisionObject>(e.Handle);
-		//	if(!o)               o = Space->FindComponent<iw::Rigidbody>      (e.Handle);
-		//
-		//	std::stringstream ss;
-		//	ss << e.Index << " pos";
-		//
-		//	ImGui::SliderFloat3(ss.str().c_str(), (float*)&t->Position, -15, 15);
-		//
-		//	ss = std::stringstream();
-		//	ss << e.Index << " scale";
-		//
-		//	ImGui::SliderFloat3(ss.str().c_str(), (float*)&t->Scale, 0, 15);
-		//
-		//	ss = std::stringstream();
-		//	ss << e.Index << " rotation";
-		//
-		//	ImGui::SliderFloat4(ss.str().c_str(), (float*)&t->Rotation, -1, 1);
-		//	t->Rotation.normalize();
-		//
-		//	if(o) o->SetTrans(t);
-		//}
-		//
-		//ImGui::End();
+		ImGui::Begin("Toolbox");
+		
+		float amb = m_mainScene->Ambiance();
+		ImGui::SliderFloat("Ambiance", &amb, 0, 1);
+		m_mainScene->SetAmbiance(amb);
+		
+		char name = 'A';
+		
+		for (PointLight* light : m_mainScene->PointLights()) {
+			std::stringstream ss;
+			ss << name << " Light pos";
+		
+			vector3 pos = light->Position();
+			ImGui::SliderFloat3(ss.str().c_str(), (float*)&pos, 0, 10);
+			light->SetPosition(pos);
+		
+			ss = std::stringstream();
+			ss << name++ << " Light rad";
+		
+			float rad = light->Radius();
+			ImGui::SliderFloat(ss.str().c_str(), &rad, 0, 100);
+			light->SetRadius(rad);
+		}
+		
+		for (DirectionalLight* light : m_mainScene->DirectionalLights()) {
+			std::stringstream ss;
+			ss << name << " Light col";
+		
+			vector3 col = light->Color();
+			ImGui::SliderFloat3(ss.str().c_str(), (float*)&col, 0, 1);
+			light->SetColor(col);
+		
+			ss = std::stringstream();
+			ss << name++ << " Light rot";
+		
+			vector3 rot = light->Rotation().euler_angles();
+			ImGui::SliderFloat3(ss.str().c_str(), (float*)&rot, -Pi, Pi);
+			light->SetRotation(quaternion::from_euler_angles(rot));
+		}
+		
+		ImGui::End();
 
 		return Layer::ImGui();
 	}
@@ -228,19 +202,19 @@ namespace iw {
 
 		}
 
-		if (   e.Button == LMOUSE
-			&& e.Device == DeviceType::MOUSE)
-		{
-			if (e.State) {
-				PushSystem(cameraSystem);
-			}
+		//if (   e.Button == LMOUSE
+		//	&& e.Device == DeviceType::MOUSE)
+		//{
+		//	if (e.State) {
+		//		PushSystem(cameraSystem);
+		//	}
 
-			else {
-				while (GetSystem<EditorCameraControllerSystem>("Editor Camera Controller")) {
-					PopSystem(cameraSystem);
-				}
-			}
-		}
+		//	else {
+		//		while (GetSystem<EditorCameraControllerSystem>("Editor Camera Controller")) {
+		//			PopSystem(cameraSystem);
+		//		}
+		//	}
+		//}
 
 
 		return Layer::On(e);

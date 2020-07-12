@@ -23,6 +23,7 @@ private:
 	Level currentLevel;
 
 	iw::Entity& playerEntity;
+	iw::Scene* scene;
 
 	iw::Entity levelEntity;
 	iw::Entity nextLevelEntity;
@@ -39,7 +40,8 @@ private:
 
 public:
 	LevelSystem(
-		iw::Entity& player);
+		iw::Entity& player,
+		iw::Scene* scene);
 
 	int Initialize() override;
 
@@ -54,6 +56,8 @@ public:
 
 	iw::Entity LoadLevel(
 		std::string name);
+
+	iw::Entity& GetLevel() { return levelEntity; }
 private:
 	void DestroyAll(
 		iw::Transform* transform);

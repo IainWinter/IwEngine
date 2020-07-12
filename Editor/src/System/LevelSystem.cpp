@@ -42,11 +42,13 @@ struct OtherGuyTag {
 };
 
 LevelSystem::LevelSystem(
-	iw::Entity& player)
+	iw::Entity& player,
+	iw::Scene* scene)
 	: iw::System<iw::CollisionObject, iw::Model, LevelDoor>("Level")
 	, playerEntity(player)
+	, scene(scene)
 {
-	currentLevelName = "levels/canyon/canyon01.json";
+	currentLevelName = "levels/canyon/cave03.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 63);
 	closedColor = iw::Color::From255(201, 66, 66, 63);
@@ -55,7 +57,7 @@ LevelSystem::LevelSystem(
 }
 
 int LevelSystem::Initialize() {
-	Bus->push<ResetLevelEvent>();
+	Bus->send <ResetLevelEvent>();
 
 	// Leaves
 
@@ -72,7 +74,7 @@ int LevelSystem::Initialize() {
 
 float speed = 1.0f; // garbo
 float timeout = 0.0f;
-iw::vector2 lastLevelPosition = 0;
+iw::vector3 lastLevelPosition = 0;
 
 void LevelSystem::Update(
 	iw::EntityComponentArray& view)
@@ -80,10 +82,10 @@ void LevelSystem::Update(
 	for (auto entity : view) {
 		auto [object, model, door] = entity.Components.Tie<Components>();
 
-		object->Trans().Rotation *= iw::quaternion::from_euler_angles(iw::Time::DeltaTime() * .1f);
+		object->Trans().Rotation *= iw::quaternion::from_euler_angles(iw::Time::DeltaTimeScaled() * .1f);
 
 		if (door->ColorTimer > 0) {
-			door->ColorTimer -= iw::Time::DeltaTime();
+			door->ColorTimer -= iw::Time::DeltaTimeScaled();
 			model->GetMesh(0).Material()->Set("baseColor", iw::lerp<iw::vector4>(closedColor, openColor, 4 * (0.25f - door->ColorTimer)));
 		}
 	}
@@ -94,7 +96,7 @@ void LevelSystem::Update(
 		iw::Transform* current = levelEntity    .Find<iw::Transform>();
 		iw::Transform* next    = nextLevelEntity.Find<iw::Transform>();
 
-		speed += iw::Time::DeltaTime() * 5;
+		speed += iw::Time::DeltaTimeScaled() * 5;
 
 		LevelDoor* currentDoor = levelDoor.Find<LevelDoor>();
 		iw::vector3 target = currentLevel.LevelPosition;
@@ -105,25 +107,23 @@ void LevelSystem::Update(
 			target = -lastLevelPosition;
 		}
 
-		target.z = target.y;
-		target.y = 0;
-
-		current->Position = iw::lerp(current->Position, -target,        iw::Time::DeltaTime() * speed);
-		next   ->Position = iw::lerp(next   ->Position, iw::vector3(0), iw::Time::DeltaTime() * speed);
+		current->Position = iw::lerp(current->Position, -target,        iw::Time::DeltaTimeScaled() * speed);
+		next   ->Position = iw::lerp(next   ->Position, iw::vector3(0), iw::Time::DeltaTimeScaled() * speed);
 
 		if (   iw::Time::TotalTime() - timeout > 0
 			&& iw::almost_equal(next->Position.x, 0.0f, 2)
+			&& iw::almost_equal(next->Position.y, 0.0f, 2)
 			&& iw::almost_equal(next->Position.z, 0.0f, 2))
 		{
 			Bus->push<AtNextLevelEvent>();
 
-			next->Position.x = 0.0f;
-			next->Position.z = 0.0f;
+			next->Position = 0.0f;
 			transition = false;
 			speed = 2;
 		}
 	}
 }
+
 //mike robawls
 bool justHitGoBackDoor = false;
 bool justResetLevel = false;
@@ -174,6 +174,8 @@ bool LevelSystem::On(
 
 			sequence.Restart();
 
+			//playerEntity.Find<iw::Transform>()->SetParent(levelEntity.Find<iw::Transform>());
+
 			break;
 		}
 		case iw::val(Actions::UNLOCK_LEVEL_DOOR): {
@@ -221,8 +223,7 @@ bool LevelSystem::On(
 			}
 
 			iw::Transform* transform = nextLevelEntity.Find<iw::Transform>();
-			transform->Position.x = lvpos.x;
-			transform->Position.z = lvpos.y;
+			transform->Position = lvpos;
 
 			transition = true;
 
@@ -336,7 +337,7 @@ iw::Entity LevelSystem::LoadLevel(
 				});
 			}
 
-			mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/phong.shader"));
+			mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/vct/vct.shader"));
 
 			mesh.Material()->SetTexture("shadowMap", Asset->Load<iw::Texture>("SunShadowMap"));
 			//mesh.Material()->SetTexture("shadowMap2", Asset->Load<iw::Texture>("LightShadowMap")); // shouldnt be part of material
@@ -404,18 +405,7 @@ iw::Entity LevelSystem::LoadLevel(
 	}
 
 	for (iw::CapsuleCollider& prefab : currentLevel.Capsules) {
-		iw::Entity ent;
-		
-		if (   currentLevelName == "levels/forest/forest15.json"
-			|| currentLevelName == "levels/forest/forest16.json"
-			|| currentLevelName == "levels/forest/forest17.json")
-		{
-			ent = Space->CreateEntity<iw::Transform, iw::CapsuleCollider, iw::CollisionObject, DontDeleteBullets>();
-		}
-
-		else {
-			ent = Space->CreateEntity<iw::Transform, iw::CapsuleCollider, iw::CollisionObject>();
-		}
+		iw::Entity ent = Space->CreateEntity<iw::Transform, iw::CapsuleCollider, iw::CollisionObject>();
 
 		iw::Transform*       transform = ent.Set<iw::Transform>(iw::vector3::unit_y);
 		iw::CapsuleCollider* collider  = ent.Set<iw::CapsuleCollider>(prefab);
@@ -487,6 +477,26 @@ iw::Entity LevelSystem::LoadLevel(
 		Physics->AddCollisionObject(object);
 	}
 
+	// Special colliders, should look into serialization of prefabs to not have to do this
+
+	if (currentLevelName == "levels/canyon/cave04.json") {
+		iw::Entity ent = Space->CreateEntity<iw::Transform, iw::CapsuleCollider, iw::CollisionObject, DontDeleteBullets>();
+
+		iw::CapsuleCollider capsule = iw::CapsuleCollider(iw::vector3(0.6, 0, -0.2), 29.8f, 2.2f);
+		capsule.Direction = iw::vector3::unit_x;
+
+		iw::Transform* transform      = ent.Set<iw::Transform>(iw::vector3::unit_y);
+		iw::CapsuleCollider* collider = ent.Set<iw::CapsuleCollider>(capsule);
+		iw::CollisionObject* object   = ent.Set<iw::CollisionObject>();
+
+		levelTransform->AddChild(transform);
+
+		object->SetCol(collider);
+		object->SetTrans(transform);
+
+		Physics->AddCollisionObject(object);
+	}
+
 	// Spawning items
 	
 	sequence = CreateSequence();
@@ -536,7 +546,7 @@ iw::Entity LevelSystem::LoadLevel(
 		sequence.Add([&]() {
 			Bus->send<GameStateEvent>(SOFT_PAUSE);
 			return true;
-			});
+		});
 		sequence.Add<iw::Delay>(1.0f);
 		sequence.Add<iw::FadeValue<iw::vector4>>(t.Material()->Get<iw::vector4>("color"), iw::vector4(1), 0.5f);
 		sequence.Add<iw::Delay>(2.0f);
@@ -548,10 +558,10 @@ iw::Entity LevelSystem::LoadLevel(
 		sequence.Add([&]() {
 			Bus->send<GameStateEvent>(SOFT_RUN);
 			return true;
-			});
+		});
 	}
 
-	if (currentLevelName == "levels/forest/forest02.json") {
+	else if (currentLevelName == "levels/forest/forest02.json") {
 		Space->DestroyEntity(otherGuy.Index());
 		otherGuy = Space->CreateEntity<iw::Transform, iw::Model, iw::CollisionObject, iw::SphereCollider, OtherGuyTag>();
 

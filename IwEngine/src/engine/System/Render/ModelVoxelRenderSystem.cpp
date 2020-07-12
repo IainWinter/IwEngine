@@ -80,7 +80,7 @@ namespace Engine {
 					mesh.Material()->SetTexture("voxelMap", VoxelWorld());
 				}
 
-				Renderer->BeforeDraw([&]() {
+				Renderer->BeforeDraw([=]() { // crash with & ? 
 					if (mesh.Material()->IsInitialized()) {
 						mesh.Material()->Initialize(Renderer->Device);
 					}

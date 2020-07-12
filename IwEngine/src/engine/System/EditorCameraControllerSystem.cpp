@@ -3,52 +3,63 @@
 #include "iw/engine/Time.h"
 #include <imgui/imgui.h>
 
-
 namespace iw {
 	EditorCameraControllerSystem::EditorCameraControllerSystem()
-		: System("Editor Camera Controller")
-		, speed(1)
+		: SystemBase("Editor Camera Controller")
+		, speed(5.0f)
+		, camera(new PerspectiveCamera(1.7f, 1.777f, 0.01f, 1000.0f))
 	{}
 
-	void EditorCameraControllerSystem::Update(
-		EntityComponentArray& eca)
+	int EditorCameraControllerSystem::Initialize() {
+		iw::Entity entity = Space->CreateEntity<Transform, EditorCameraController>();
+
+		cameraTransform = entity.Set<Transform>();
+		                  entity.Set<EditorCameraController>(camera);
+
+		camera->SetTrans(cameraTransform);
+
+		return 0;
+	}
+
+	void EditorCameraControllerSystem::Update()
 	{
-		for (auto entity : eca) {
-			auto [t, c] = entity.Components.Tie<Components>();
+		if (!active) return;
 
-			if (movement != 0) {
-				if (movement.x != 0) {
-					iw::vector3 rot = -t->Right();
-					t->Position += rot * movement.x * speed * Time::DeltaTime();
-				}
+		if (movement != 0) {
+			iw::vector3 delta;
 
-				if (movement.y != 0) {
-					t->Position += iw::vector3::unit_y * movement.y * speed * Time::DeltaTime();
-				}
-
-				if (movement.z != 0) {
-					iw::vector3 forward = t->Forward();
-					forward.y = 0;
-					forward.normalize();
-
-					if (forward.length_squared() == 0) {
-						forward = t->Right().cross(iw::vector3::unit_y);
-					}
-
-					t->Position += forward * movement.z * speed * Time::DeltaTime();
-				}
-			}
-			
-			if (rotation != 0) {
-				iw::quaternion deltaP = iw::quaternion::from_axis_angle(t->Right(), rotation.x);
-				iw::quaternion deltaY = iw::quaternion::from_axis_angle(-iw::vector3::unit_y, rotation.y);
-
-				t->Rotation = deltaP * t->Rotation;
-				t->Rotation = deltaY * t->Rotation;
+			if (movement.x != 0) {
+				delta += -cameraTransform->Right() * movement.x * speed * Time::DeltaTime();
 			}
 
-			rotation = 0;
+			if (movement.y != 0) {
+				delta += iw::vector3::unit_y * movement.y * speed * Time::DeltaTime();
+			}
+
+			if (movement.z != 0) {
+				iw::vector3 forward = cameraTransform->Forward();
+				forward.y = 0;
+				forward.normalize();
+
+				if (forward.length_squared() == 0) {
+					forward = cameraTransform->Right().cross(iw::vector3::unit_y);
+				}
+
+				delta += forward * movement.z * speed * Time::DeltaTime();
+			}
+
+			cameraTransform->Position += delta;
 		}
+			
+		if (rotation != 0) {
+			iw::quaternion deltaP = iw::quaternion::from_axis_angle(cameraTransform->Right(), rotation.x);
+			iw::quaternion deltaY = iw::quaternion::from_axis_angle(-iw::vector3::unit_y, rotation.y);
+
+			cameraTransform->Rotation = deltaP * cameraTransform->Rotation;
+			cameraTransform->Rotation = deltaY * cameraTransform->Rotation;
+		}
+
+		rotation = 0; // reset rotation
 	}
 
 	void EditorCameraControllerSystem::OnPush() {
@@ -97,8 +108,21 @@ namespace iw {
 	bool EditorCameraControllerSystem::On(
 		MouseButtonEvent& e)
 	{
-		if (e.Device == DeviceType::RAW_MOUSE && e.Button == RMOUSE) {
-			speed = e.State ? 100.0f : 10.0f;
+		if (e.Device == DeviceType::RAW_MOUSE) {
+			switch (e.Button) {
+				case RMOUSE: speed  = e.State ? 50.0f : 5.0f; break;
+				case MMOUSE: active = e.State;                break;
+			}
+		}
+
+		return false;
+	}
+
+	bool EditorCameraControllerSystem::On(
+		MouseWheelEvent& e)
+	{
+		if (e.Device == DeviceType::MOUSE) {
+			cameraTransform->Position += e.Delta * cameraTransform->Forward() * speed;
 		}
 
 		return false;

@@ -219,9 +219,12 @@ namespace detail {
 		unsigned count,
 		void* data)
 	{
+
 		if (!m_description.HasBuffer(name)) {
 			return;
 		}
+
+		std::unique_lock<std::mutex> lock(m_mutex);
 
 		unsigned index = m_description.GetBufferIndex(name);
 		unsigned size  = count * m_description.GetBufferLayout(index).GetStride();
@@ -246,6 +249,8 @@ namespace detail {
 			return;
 		}
 
+		std::unique_lock<std::mutex> lock(m_mutex);
+
 		unsigned index = m_description.GetBufferIndex(name);
 
 		BufferData& buffer = m_buffers[index];
@@ -260,6 +265,8 @@ namespace detail {
 		unsigned count,
 		unsigned* data)
 	{
+		std::unique_lock<std::mutex> lock(m_mutex);
+
 		m_index.Count = count;
 		m_index.Index = ref<unsigned[]>(new unsigned[count]);
 
@@ -271,12 +278,14 @@ namespace detail {
 	void MeshData::SetTopology(
 		MeshTopology topology)
 	{
+		std::unique_lock<std::mutex> lock(m_mutex);
 		m_topology = topology;
 	}
 
 	void MeshData::SetName(
 		const std::string& name)
 	{
+		std::unique_lock<std::mutex> lock(m_mutex);
 		m_name = name;
 	}
 
@@ -387,6 +396,8 @@ namespace detail {
 			return;
 		}
 
+		std::unique_lock<std::mutex> lock(m_mutex);
+
 		std::vector<unsigned> diff;
 
 		for (bName name : m_description.GetBufferNames()) {
@@ -418,6 +429,8 @@ namespace detail {
 	void MeshData::TransformMeshData(
 		const Transform& transform)
 	{
+		std::unique_lock<std::mutex> lock(m_mutex);
+
 		if (m_description.HasBuffer(bName::POSITION)) {
 			BufferData buffer = GetBuffer(m_description.GetBufferIndex(bName::POSITION));
 			vector3* data     = buffer.Ptr<vector3>();
@@ -478,6 +491,8 @@ namespace detail {
 			return;
 		}
 
+		std::unique_lock<std::mutex> lock(m_mutex);
+
 		m_vertexArray = device->CreateVertexArray();
 		m_indexBuffer = device->CreateIndexBuffer(GetIndexBuffer().Ptr(), GetIndexBuffer().Count);
 
@@ -502,6 +517,8 @@ namespace detail {
 			LOG_WARNING << "Mesh data is not out of date!";
 			return;
 		}
+
+		std::unique_lock<std::mutex> lock(m_mutex);
 
 		for (int i = 0; i < m_buffers.size(); i++) {
 			BufferData& data = GetBuffer(i);

@@ -7,39 +7,35 @@
 namespace iw {
 namespace Editor {
 	class EditorCameraControllerSystem
-		: public System<Transform, EditorCameraController>
+		: public SystemBase
 	{
-	public:
-		struct Components {
-			Transform* Transform;
-			EditorCameraController* Controller;
-		};
 	private:
 		iw::vector3 movement;
 		iw::vector2 rotation;
 		float speed;
+		bool active;
+
+		Camera* camera;
+		iw::Transform* cameraTransform;
 
 	public:
 		IWENGINE_API
 		EditorCameraControllerSystem();
 
-		//int Initialize() override;
+		int Initialize() override;
 
-		IWENGINE_API
-		void Update(
-			EntityComponentArray& eca) override;
-
+		void Update() override;
 		void OnPush() override;
-		void OnPop() override;
+		void OnPop()  override;
 
-		IWENGINE_API
 		bool On(KeyEvent& e) override;
-
-		IWENGINE_API
 		bool On(MouseMovedEvent& e) override;
-
-		IWENGINE_API
 		bool On(MouseButtonEvent& e) override;
+		bool On(MouseWheelEvent& e) override;
+
+		Camera* GetCamera() {
+			return camera;
+		}
 	};
 }
 

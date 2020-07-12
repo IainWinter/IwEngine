@@ -60,7 +60,13 @@ namespace ECS {
 			_t* p = (_t*)ptr;
 			_t* d = (_t*)data;
 
-			new(p) _t(*d);
+			if (!d) {
+				new (p) _t(); // :(
+			}
+
+			else {
+				new(p) _t(*d);
+			}
 		};
 	}
 }

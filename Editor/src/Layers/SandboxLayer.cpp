@@ -11,6 +11,7 @@
 #include "Systems/NoteSystem.h"
 #include "Systems/ConsumableSystem.h"
 #include "Systems/SpaceInspectorSystem.h"
+#include "Systems/WorldHoleSystem.h"
 #include "iw/engine/Systems/PhysicsSystem.h"
 #include "iw/engine/Systems/ParticleUpdateSystem.h"
 #include "iw/engine/Systems/EntityCleanupSystem.h"
@@ -217,7 +218,7 @@ namespace iw {
 
 		// Materials
 
-		Material* def = new Material(phong);
+		Material* def = new Material(vct);
 		def->Set("baseColor", vector4(0.8f, 1.0f));
 		//def->Set("roughness", 0.8f);
 		//def->Set("metallic", 0.2f);
@@ -299,8 +300,10 @@ namespace iw {
 		bulletSystem = PushSystem<BulletSystem>(playerSystem->GetPlayer());
 		enemySystem  = PushSystem<EnemySystem>(playerSystem->GetPlayer(), bulletSystem->GetBulletPrefab());
 
+		LevelSystem* levelSystem = PushSystem<LevelSystem>(playerSystem->GetPlayer(), MainScene);
+		                           PushSystem<WorldHoleSystem>(levelSystem->GetLevel());
+
 		PushSystem<GameCameraController>(playerSystem->GetPlayer(), MainScene);
-		PushSystem<LevelSystem>(playerSystem->GetPlayer());
 		PushSystem<ScoreSystem>(playerSystem->GetPlayer(), MainScene->MainCamera(), m_textCam);
 		PushSystem<EnemyDeathCircleSystem>();
 		PushSystem<PhysicsSystem>();
@@ -310,7 +313,6 @@ namespace iw {
 		PushSystem<ConsumableSystem>(playerSystem->GetPlayer());
 
 		PushSystem<iw::ParticleUpdateSystem>();
-		PushSystem<iw::EntityCleanupSystem>();
 
 		PushSystem<iw::    MeshShadowRenderSystem>(MainScene);
 		PushSystem<iw::   ModelShadowRenderSystem>(MainScene);
@@ -321,9 +323,11 @@ namespace iw {
 
 		PushSystem<iw::UiRenderSystem>(m_textCam);
 
-		//PushSystem<iw::ModelVoxelRenderSystem>(MainScene);
+		PushSystem<iw::ModelVoxelRenderSystem>(MainScene);
 
 		PushSystem<SpaceInspectorSystem>();
+
+		PushSystem<iw::EntityCleanupSystem>();
 
 		//PushSystem<iw::DrawCollidersSystem>(MainScene->MainCamera());
 
@@ -391,6 +395,8 @@ namespace iw {
 	float w123 = 0.5f;
 	float e123 = 1.0f;
 
+	float ambiance = 0.03f;
+
 	void SandboxLayer::PostUpdate() {
 		// Update particle system
 
@@ -398,6 +404,8 @@ namespace iw {
 		seq.update();
 
 		MainScene->MainCamera()->SetProjection(iw::lerp(persp, ortho, blend));
+
+		MainScene->SetAmbiance(ambiance);
 
 		vector3 camPos = MainScene->MainCamera()->Position(); // no req
 		camPos.y = 0;
@@ -434,7 +442,7 @@ namespace iw {
 
 		ImGui::Text("Events %i", Bus->count());
 
-		ImGui::SliderFloat("Ambiance", (float*)&MainScene->Ambiance(), 0, 1);
+		ImGui::SliderFloat("Ambiance", (float*)&ambiance, 0, 1);
 		//ImGui::SliderFloat("Gamma", (float*)&mainRender->GetGamma(), 0, 5);
 		ImGui::SliderFloat("Camera blend", &blend, 0, 1);
 
@@ -443,6 +451,14 @@ namespace iw {
 
 		//ImGui::SliderFloat("Shadow map blur", &blurAmount, 0, 5);
 		ImGui::SliderFloat("Shadow map threshold", &threshold, 0, 1);
+
+
+		float time = Time::TimeScale();
+		ImGui::SliderFloat("Timescale", &time, 0, 2);
+
+		if (time != Time::TimeScale()) {
+			Time::SetTimeScale(time);
+		}
 
 		ImGui::SliderFloat("Volume", &Audio->GetVolume(), 0, 1);
 
@@ -501,24 +517,24 @@ namespace iw {
 
 				GoToNextLevelEvent& event = e.as<GoToNextLevelEvent>();
 
-				if      (event.LevelName == "models/block/forest100.json")
-				{
-					m_font->UpdateMesh(*m_textMesh, "ayy you've gotten to the boss congrats!\nsadly he's out today so\nhave some fun with the physics instead...\nmember you can press i/t", .004f, 1);
-				}
+				m_font->UpdateMesh(*m_textMesh, "", .01f, 1);
+				settexttocursor = false;
 
-				else if (event.LevelName == "models/block/forest08.json")
-				{
-					m_font->UpdateMesh(*m_textMesh, "So this would be a lil mini boss but that seems\nlike it would be annoying to program xd", .004f, 1);
-				}
+				if (event.LevelName.find("canyon") != std::string::npos) {
+					sun->SetRotation(iw::quaternion::from_euler_angles(1.0f, 0.0f, -0.35f));
+					sun->SetColor(vector3(1.0f, 0.64f, 0.37f));
 
-				else if (event.LevelName == "models/block/forest01.json")
-				{
-					m_font->UpdateMesh(*m_textMesh, "Lets go! You've finished the play test\nIf you got the time, post some feedback at\nhttps://winter.dev/demo", .004f, 1);
+					if (event.LevelName.find("cave") != std::string::npos) {
+						sun->SetRotation(iw::quaternion::from_euler_angles(1.4f, 0.0f, -0.25f));
+
+						ml = 8.0f;
+						ambiance = 0.003f; //MainScene->SetAmbiance(0.0003f);
+					}
 				}
 
 				else {
-					m_font->UpdateMesh(*m_textMesh, "", .01f, 1);
-					settexttocursor = false;
+					ml = 2.0f;
+					ambiance = 0.03f;
 				}
 
 				break;

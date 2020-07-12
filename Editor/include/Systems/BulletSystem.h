@@ -9,17 +9,16 @@ private:
 	iw::Entity& player;
 	iw::Prefab bulletPrefab;
 
+	iw::Color baseColor;
+	iw::Color altColor;
+
 public:
 	BulletSystem(
 		iw::Entity& player);
 
-	~BulletSystem() {}
-
 	iw::Prefab& GetBulletPrefab() { return bulletPrefab; }
 
 	void collide(iw::Manifold& man, iw::scalar dt);
-
-	void f() {}
 
 	int Initialize()   override;
 	void FixedUpdate() override;

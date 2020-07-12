@@ -29,13 +29,13 @@ namespace ECS {
 		IWENTITY_API
 		void Add(
 			iw::ref<Component> component,
-			void* prefab = nullptr);
+			void* data = nullptr);
 
 		// Sets a component & data if given to the prefab. If the component does not exist no action is taken & false is returnd. True otherwise
 		IWENTITY_API
 		bool Set(
 			iw::ref<Component> component,
-			void* prefab = nullptr);
+			void* data = nullptr);
 
 		IWENTITY_API
 		void Remove(

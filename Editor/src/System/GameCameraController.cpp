@@ -50,9 +50,9 @@ void GameCameraController::Update(
 		//target.x = 0;
 
 		if (   !follow
-			&& iw::almost_equal(t->Position.x, target.x, 5)
-			&& iw::almost_equal(t->Position.y, target.y, 5)
-			&& iw::almost_equal(t->Position.z, target.z, 5))
+			&& iw::almost_equal(t->Position.x, target.x, 2)
+			&& iw::almost_equal(t->Position.y, target.y, 2)
+			&& iw::almost_equal(t->Position.z, target.z, 2))
 		{
 			t->Position = target;
 			s = speed;
@@ -64,10 +64,10 @@ void GameCameraController::Update(
 			//	* iw::quaternion::from_axis_angle(iw::vector3::unit_z, iw::Pi);
 
 			if (!follow) {
-				s += iw::Time::DeltaTime() * 5;
+				s += iw::Time::DeltaTimeScaled() * 5;
 			}
 
-			t->Position = iw::lerp(t->Position, target, iw::Time::DeltaTime() * s);
+			t->Position = iw::lerp(t->Position, target, iw::Time::DeltaTimeScaled() * s);
 			//t->Rotation = iw::lerp(t->Rotation, camrot, iw::Time::DeltaTime() * speed);
 		}
 
@@ -141,10 +141,16 @@ void GameCameraController::SetTarget(
 	if (   levelName == "levels/forest/forest05.a.json"
 		|| levelName == "levels/forest/forest07.a.json"
 		|| levelName == "levels/forest/forest12.a.json"
-		|| levelName == "levels/forest/forest22.json")
+		|| levelName == "levels/forest/forest22.json"
+		|| levelName.find("cave")!= std::string::npos)
 	{
 		y = 17.15f;
 	}
+
+	/*else if(levelName == "levels/canyon/canyon02.json")
+	{
+		y = 22.15f;
+	}*/
 
 	else {
 		y = 27.15f;

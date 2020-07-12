@@ -28,7 +28,7 @@ namespace impl {
 			float height,
 			float radius)
 			: Collider<V>(ColliderType::CAPSULE)
-			, Center(position)
+			, Center(center)
 			, Direction(V::unit_y)
 			, Height(height)
 			, Radius(radius)

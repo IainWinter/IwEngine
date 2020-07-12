@@ -97,12 +97,12 @@ struct StartLevelEvent
 {
 	std::string LevelName;
 	bool CameraFollow;
-	iw::vector2 PlayerPosition;
+	iw::vector3 PlayerPosition;
 
 	StartLevelEvent(
 		std::string levelName,
 		bool cameraFollow,
-		iw::vector2 playerPosition)
+		iw::vector3 playerPosition)
 		: iw::SingleEvent(iw::val(Actions::START_LEVEL))
 		, LevelName(levelName)
 		, CameraFollow(cameraFollow)
@@ -132,8 +132,8 @@ struct LoadNextLevelEvent
 
 	LoadNextLevelEvent(
 		std::string levelName,
-		iw::vector2 position,
-		bool goback)
+		iw::vector2 position = iw::vector2::zero,
+		bool goback = false)
 		: iw::SingleEvent(iw::val(Actions::LOAD_NEXT_LEVEL))
 		, LevelName(levelName)
 		, Position(position)
@@ -146,14 +146,14 @@ struct GoToNextLevelEvent
 {
 	std::string LevelName;
 	bool CameraFollow;
-	iw::vector2 PlayerPosition;
-	iw::vector2 CenterPosition;
+	iw::vector3 PlayerPosition;
+	iw::vector3 CenterPosition;
 
 	GoToNextLevelEvent(
 		std::string levelName,
 		bool cameraFollow,
-		iw::vector2 playerPosition,
-		iw::vector2 centerPosition)
+		iw::vector3 playerPosition,
+		iw::vector3 centerPosition)
 		: iw::SingleEvent(iw::val(Actions::GOTO_NEXT_LEVEL))
 		, LevelName(levelName)
 		, CameraFollow(cameraFollow)

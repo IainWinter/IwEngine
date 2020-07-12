@@ -24,7 +24,6 @@ namespace iw {
 
 		Scene* m_mainScene;
 
-		Camera* camera;
 		Camera* oldcamera;
 
 		EditorCameraControllerSystem* cameraSystem;

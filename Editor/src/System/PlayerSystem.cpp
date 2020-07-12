@@ -42,7 +42,7 @@ PlayerSystem::PlayerSystem()
 
 	else {
 		// Default values
-		playerPrefab.Speed      = 4.0f;
+		playerPrefab.Speed      = 4.25f;
 		playerPrefab.DashTime   = 8 / 60.0f;
 		playerPrefab.ChargeTime = 0.2f;
 		playerPrefab.Health     = 3;
@@ -350,8 +350,8 @@ bool PlayerSystem::On(
 
 			p->LevelTransition = true;
 			p->TransitionSpeed = 1.0f;
-			p->TransitionStartPosition  = iw::vector3(r->Trans().Position.x, 1, r->Trans().Position.z);
-			p->TransitionTargetPosition = iw::vector3(event.PlayerPosition.x, 1, event.PlayerPosition.y);
+			p->TransitionStartPosition  = r->Trans().Position;
+			p->TransitionTargetPosition = event.PlayerPosition;
 			p->Begin = iw::Time::TotalTime();
 
 			r->SetCol(nullptr);
@@ -382,9 +382,7 @@ bool PlayerSystem::On(
 			p->Left  = left;
 			p->Right = right;
 
-			t->Position.x = e.as<StartLevelEvent>().PlayerPosition.x;
-			t->Position.z = e.as<StartLevelEvent>().PlayerPosition.y;
-			t->Position.y = 1.0f;
+			t->Position = e.as<StartLevelEvent>().PlayerPosition;
 			t->Scale = 0.75f;
 			
 			r->SetCol(s);

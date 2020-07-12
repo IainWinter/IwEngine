@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IwGraphics.h"
+#include "iw/math/vector3.h"
 #include "iw/math/vector4.h"
 
 namespace iw {
@@ -33,6 +34,18 @@ namespace Graphics {
 			, b(b)
 			, a(a)
 		{}
+
+		Color(
+			iw::vector4 rgba)
+			: r(rgba.x)
+			, g(rgba.y)
+			, b(rgba.z)
+			, a(rgba.w)
+		{}
+
+		iw::vector3 rgb() const {
+			return iw::vector3(r, g, b);
+		}
 
 		operator iw::vector4() {
 			return iw::vector4(r, g, b, a);
