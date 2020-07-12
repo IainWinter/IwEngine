@@ -841,10 +841,10 @@
             "mesh" : 0,
             "name" : "Cube.349",
             "rotation" : [
-                0.7457365393638611,
-                0.16745033860206604,
-                0.6410229802131653,
-                0.07019322365522385
+                0.940290093421936,
+                0.1815441995859146,
+                0.2879027724266052,
+                -0.002899952232837677
             ],
             "scale" : [
                 7.339321613311768,
@@ -852,9 +852,9 @@
                 6.960669994354248
             ],
             "translation" : [
-                28.986637115478516,
+                29.688671112060547,
                 3.614170789718628,
-                -7.76701545715332
+                -7.019208908081055
             ]
         },
         {
@@ -1741,10 +1741,10 @@
             "mesh" : 0,
             "name" : "Cube.023",
             "rotation" : [
-                0.9161612391471863,
-                -0.1522110402584076,
-                0.3132859468460083,
-                0.1983238011598587
+                0.7709833979606628,
+                -0.23388904333114624,
+                0.5706765055656433,
+                0.1587732434272766
             ],
             "scale" : [
                 10.54384994506836,
@@ -1847,7 +1847,7 @@
                 0,
                 0
             ],
-            "name" : "Material",
+            "name" : "Dark",
             "pbrMetallicRoughness" : {
                 "baseColorFactor" : [
                     0,
@@ -1962,9 +1962,9 @@
         {
             "bufferView" : 4,
             "componentType" : 5126,
-            "count" : 8,
+            "count" : 4,
             "max" : [
-                42,
+                32,
                 0,
                 18
             ],
@@ -1978,19 +1978,19 @@
         {
             "bufferView" : 5,
             "componentType" : 5126,
-            "count" : 8,
+            "count" : 4,
             "type" : "VEC3"
         },
         {
             "bufferView" : 6,
             "componentType" : 5126,
-            "count" : 8,
+            "count" : 4,
             "type" : "VEC2"
         },
         {
             "bufferView" : 7,
             "componentType" : 5123,
-            "count" : 12,
+            "count" : 6,
             "type" : "SCALAR"
         },
         {
@@ -2051,48 +2051,48 @@
         },
         {
             "buffer" : 0,
-            "byteLength" : 96,
+            "byteLength" : 48,
             "byteOffset" : 26228
         },
         {
             "buffer" : 0,
-            "byteLength" : 96,
+            "byteLength" : 48,
+            "byteOffset" : 26276
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 32,
             "byteOffset" : 26324
         },
         {
             "buffer" : 0,
-            "byteLength" : 64,
-            "byteOffset" : 26420
-        },
-        {
-            "buffer" : 0,
-            "byteLength" : 24,
-            "byteOffset" : 26484
+            "byteLength" : 12,
+            "byteOffset" : 26356
         },
         {
             "buffer" : 0,
             "byteLength" : 720,
-            "byteOffset" : 26508
+            "byteOffset" : 26368
         },
         {
             "buffer" : 0,
             "byteLength" : 720,
-            "byteOffset" : 27228
+            "byteOffset" : 27088
         },
         {
             "buffer" : 0,
             "byteLength" : 480,
-            "byteOffset" : 27948
+            "byteOffset" : 27808
         },
         {
             "buffer" : 0,
             "byteLength" : 264,
-            "byteOffset" : 28428
+            "byteOffset" : 28288
         }
     ],
     "buffers" : [
         {
-            "byteLength" : 28692,
+            "byteLength" : 28552,
             "uri" : "cave01.bin"
         }
     ]

@@ -76,7 +76,7 @@
         "State": 1,
         "NextLevel": {
           "size": 25,
-          "string": "levels/canyon/cave05.json"
+          "string": "levels/canyon/cave08.json"
         }
       }
     ]
@@ -244,7 +244,7 @@
       {
         "ModelName": {
           "size": 25,
-          "string": "models/canyon/cave04.gltf"
+          "string": "models/canyon/cave06.gltf"
         },
         "Transform": {
           "Position": {
