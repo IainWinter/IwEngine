@@ -90,6 +90,9 @@ namespace log {
 
 		IWLOG_API
 		void clear_times();
+
+		IWLOG_API
+		void reset_times();
 #endif
 		IWLOG_API
 		void flush();
@@ -157,4 +160,5 @@ namespace log {
 #	define LOG_TIME_SCOPE(time) iw::log_time_view __keep_alive = iw::log_time_view(time)
 #	define LOG_GET_TIMES() logger::instance().get_times()
 #	define LOG_CLEAR_TIMES() logger::instance().clear_times()
+#	define LOG_RESET_TIMES() logger::instance().reset_times()
 #endif
