@@ -120,21 +120,9 @@ void BulletSystem::FixedUpdate() {
 				iw::vector3 vel = rigidbody->Velocity();
 				iw::vector3 dir = player.Find<iw::Transform>()->Position - transform->Position;
 
-				iw::vector3 nV = vel.normalized();
-				iw::vector3 nD = dir.normalized();
+				iw::vector3 delta = (dir - vel) * iw::Time::DeltaTime();
 
-				float dot = nV.dot(nD);
-
-				float rotSpeed = 10;
-				if (dot < 0) {
-					rotSpeed = -10;
-				}
-
-				//else if (dot > .99f) {
-				//	break;
-				//}
-
-				rigidbody->SetVelocity(vel * iw::matrix3::create_rotation_y(iw::Time::DeltaTime() * rotSpeed));
+				rigidbody->SetVelocity((vel + delta).normalized() * bullet->Speed);
 
 				break;
 			}
