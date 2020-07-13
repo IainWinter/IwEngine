@@ -11,16 +11,14 @@
 #include <string>
 #include <dxgiformat.h>
 
+#include <any>
+
+#include <iostream>
+
 //#include "Layers/AimTrainer.h"
 
 namespace iw {
-
-
 	App::App() {
-
-
-
-
 		//Vars
 		// Switch
 		//	Action

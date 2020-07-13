@@ -24,7 +24,9 @@ BulletSystem::BulletSystem(
 {}
 
 // sucks that this needs to be here, need to fix lambdas to get it to work
-void BulletSystem::collide(iw::Manifold& man, iw::scalar dt)
+void BulletSystem::collide(
+	iw::Manifold& man,
+	iw::scalar dt)
 {
 	iw::Entity bulletEntity, otherEntity;
 	bool noent = GetEntitiesFromManifold<Bullet>(man, bulletEntity, otherEntity);
@@ -98,7 +100,7 @@ int BulletSystem::Initialize() {
 void BulletSystem::FixedUpdate() {
 	auto bullets  = Space->Query<iw::Transform, iw::Rigidbody, Bullet>();
 	auto packages = Space->Query<iw::Transform, iw::Model, Bullet, BulletPackage>();
-
+	
 	bullets.Each([&](
 		auto entity,
 		auto transform,
@@ -117,12 +119,17 @@ void BulletSystem::FixedUpdate() {
 				break;
 			}
 			case ORBIT: {
-				iw::vector3 vel = rigidbody->Velocity();
-				iw::vector3 dir = player.Find<iw::Transform>()->Position - transform->Position;
+				if (bullet->Timer < 1.5f) {
+					iw::vector3 vel = rigidbody->Velocity();
+					iw::vector3 dir = player.Find<iw::Transform>()->Position - transform->Position;
 
-				iw::vector3 delta = (dir - vel) * iw::Time::DeltaTime();
+					iw::vector3 nV = vel.normalized();
+					iw::vector3 nD = dir.normalized();
 
-				rigidbody->SetVelocity((vel + delta).normalized() * bullet->Speed);
+					iw::vector3 delta = (nD - nV) * 0.225f;
+
+					rigidbody->SetVelocity((vel + delta).normalized() * bullet->Speed);
+				}
 
 				break;
 			}

@@ -14,28 +14,28 @@
     "size": 2,
     "items": [
       {
-        "Type": 1,
+        "Type": 0,
         "Bullet": {
           "Type": 2,
           "Speed": 5.000000,
           "Package": 0
         },
-        "Speed": 0.261799,
-        "FireTime": 3.00000,
-        "ChargeTime": 2.500000,
-        "Rotation": 0.000000
+        "Speed": 0.000000,
+        "FireTime": 0.650000,
+        "ChargeTime": 0.250000,
+        "Rotation": -1.570796
       },
       {
-        "Type": 1,
+        "Type": 0,
         "Bullet": {
           "Type": 2,
           "Speed": 5.000000,
           "Package": 0
         },
-        "Speed": 0.261799,
-        "FireTime": 3.00000,
-        "ChargeTime": 2.500000,
-        "Rotation": 0.000000
+        "Speed": 0.000000,
+        "FireTime": 0.650000,
+        "ChargeTime": 0.000000,
+        "Rotation": 1.570796
       }
     ]
   },

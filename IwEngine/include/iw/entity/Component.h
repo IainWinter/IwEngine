@@ -55,7 +55,7 @@ namespace ECS {
 
 	template<
 		typename _t>
-	func_DeepCopy GetCopyFunc() { // 8 squintillionzz iq
+	func_DeepCopy GetCopyFunc() {
 		return [](void* ptr, void* data) {
 			_t* p = (_t*)ptr;
 			_t* d = (_t*)data;
