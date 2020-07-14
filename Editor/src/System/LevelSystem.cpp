@@ -48,7 +48,7 @@ LevelSystem::LevelSystem(
 	, playerEntity(player)
 	, scene(scene)
 {
-	currentLevelName = "levels/canyon/cave05.json";
+	currentLevelName = "levels/canyon/cave07.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 63);
 	closedColor = iw::Color::From255(201, 66, 66, 63);
@@ -487,11 +487,11 @@ iw::Entity LevelSystem::LoadLevel(
 
 	else if (currentLevelName == "levels/canyon/cave07.json") {
 		dontDeleteBullets.push_back({ iw::vector3( 2.2, 0, -1.6), iw::vector3::unit_x,  6.7, 0.3 });
-		dontDeleteBullets.push_back({ iw::vector3( 3.2, 0,  1.6), iw::vector3::unit_x,  8.5, 0.3 });
+		dontDeleteBullets.push_back({ iw::vector3( 2.7, 0,  1.6), iw::vector3::unit_x,  7.4, 0.3 });
 		dontDeleteBullets.push_back({ iw::vector3( 0.5, 0,  14),  iw::vector3::unit_z, 23.8, 9   });
 		dontDeleteBullets.push_back({ iw::vector3(11.5, 0,  5.1), iw::vector3::unit_x, 11.7, 0.3 });
-		dontDeleteBullets.push_back({ iw::vector3(6.6,  0,  3.5), iw::vector3::unit_z,  4,   0.3 });
-		dontDeleteBullets.push_back({ iw::vector3(5.3,  0, -6.6), iw::vector3::unit_z, 10.6, 0.3 });
+		dontDeleteBullets.push_back({ iw::vector3( 6.1, 0,  3.5), iw::vector3::unit_z,  4,   0.3 });
+		dontDeleteBullets.push_back({ iw::vector3( 5.3, 0, -6.6), iw::vector3::unit_z, 10.6, 0.3 });
 		dontDeleteBullets.push_back({ iw::vector3(-1,   0, -6.6), iw::vector3::unit_z, 10.6, 0.3 });
 	}
 

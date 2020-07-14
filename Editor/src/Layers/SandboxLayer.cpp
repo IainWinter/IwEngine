@@ -527,6 +527,8 @@ namespace iw {
 					if (event.LevelName.find("cave") != std::string::npos) {
 						sun->SetRotation(iw::quaternion::from_euler_angles(1.4f, 0.0f, -0.25f));
 
+						// set shadow dimension
+
 						ml = 8.0f;
 						ambiance = 0.003f; //MainScene->SetAmbiance(0.0003f);
 					}
