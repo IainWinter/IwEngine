@@ -48,7 +48,7 @@ LevelSystem::LevelSystem(
 	, playerEntity(player)
 	, scene(scene)
 {
-	currentLevelName = "levels/canyon/cave07.json";
+	currentLevelName = "levels/canyon/cave08.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 63);
 	closedColor = iw::Color::From255(201, 66, 66, 63);
@@ -299,26 +299,27 @@ iw::Entity LevelSystem::LoadLevel(
 			}
 
 			else {
-					iw::Entity leaves = Space->CreateEntity<iw::Transform, iw::ParticleSystem<iw::StaticParticle>>();
+				iw::Entity leaves = Space->CreateEntity<iw::Transform, iw::ParticleSystem<iw::StaticParticle>>();
 
-					iw::Transform* tran = leaves.Set<iw::Transform>(transform);
-					iw::ParticleSystem<iw::StaticParticle>* pSys = leaves.Set<iw::ParticleSystem<iw::StaticParticle>>();
+				iw::Transform* tran = leaves.Set<iw::Transform>(transform);
+				iw::ParticleSystem<iw::StaticParticle>* pSys = leaves.Set<iw::ParticleSystem<iw::StaticParticle>>();
 
-					tran->SetParent(levelTransform);
-					iw::Mesh leafMesh = Asset->Load<iw::Model>("models/forest/redleaf.gltf")->GetMesh(0);
+				tran->SetParent(levelTransform);
+				iw::Mesh leafMesh = Asset->Load<iw::Model>("models/forest/redleaf.gltf")->GetMesh(0);
 
-					leafMesh.SetData(leafMesh.Data()->MakeLink());
+				leafMesh.SetData(leafMesh.Data()->MakeLink());
 
-					pSys->SetTransform(tran);
-					pSys->SetParticleMesh(leafMesh);
+				pSys->SetTransform(tran);
+				pSys->SetParticleMesh(leafMesh);
 
-					// Spawn leaves on tree
+				// Spawn leaves on tree
 
-				Task->queue([&]() {
+				//Task->queue([&]() {
 					iw::vector3* positions = (iw::vector3*)mesh.Data()->Get(iw::bName::POSITION);
-					iw::vector3* normals = (iw::vector3*)mesh.Data()->Get(iw::bName::NORMAL);
-					iw::Color* colors = (iw::Color*)  mesh.Data()->Get(iw::bName::COLOR);
-					unsigned     count = mesh.Data()->GetCount(iw::bName::COLOR);
+					iw::vector3* normals   = (iw::vector3*)mesh.Data()->Get(iw::bName::NORMAL);
+					iw::Color*   colors    = (iw::Color*)  mesh.Data()->Get(iw::bName::COLOR);
+
+					unsigned count = mesh.Data()->GetCount(iw::bName::COLOR);
 
 					for (int i = 0; i < count; i++) {
 						if (colors[i].r > 0.5f
@@ -334,7 +335,7 @@ iw::Entity LevelSystem::LoadLevel(
 							pSys->SpawnParticle(t);
 						}
 					}
-				});
+				//});
 			}
 
 			mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/vct/vct.shader"));

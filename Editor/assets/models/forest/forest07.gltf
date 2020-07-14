@@ -1656,10 +1656,9 @@
                     "attributes" : {
                         "POSITION" : 0,
                         "NORMAL" : 1,
-                        "TEXCOORD_0" : 2,
-                        "COLOR_0" : 3
+                        "TEXCOORD_0" : 2
                     },
-                    "indices" : 4,
+                    "indices" : 3,
                     "material" : 0
                 }
             ]
@@ -1669,12 +1668,11 @@
             "primitives" : [
                 {
                     "attributes" : {
-                        "POSITION" : 5,
-                        "NORMAL" : 6,
-                        "TEXCOORD_0" : 7,
-                        "COLOR_0" : 8
+                        "POSITION" : 4,
+                        "NORMAL" : 5,
+                        "TEXCOORD_0" : 6
                     },
-                    "indices" : 9,
+                    "indices" : 7,
                     "material" : 1
                 }
             ]
@@ -1747,20 +1745,14 @@
         },
         {
             "bufferView" : 3,
-            "componentType" : 5126,
-            "count" : 4457,
-            "type" : "VEC4"
-        },
-        {
-            "bufferView" : 4,
             "componentType" : 5123,
             "count" : 6144,
             "type" : "SCALAR"
         },
         {
-            "bufferView" : 5,
+            "bufferView" : 4,
             "componentType" : 5126,
-            "count" : 3221,
+            "count" : 2839,
             "max" : [
                 4.369690418243408,
                 5.5018110275268555,
@@ -1774,25 +1766,19 @@
             "type" : "VEC3"
         },
         {
-            "bufferView" : 6,
+            "bufferView" : 5,
             "componentType" : 5126,
-            "count" : 3221,
+            "count" : 2839,
             "type" : "VEC3"
         },
         {
-            "bufferView" : 7,
+            "bufferView" : 6,
             "componentType" : 5126,
-            "count" : 3221,
+            "count" : 2839,
             "type" : "VEC2"
         },
         {
-            "bufferView" : 8,
-            "componentType" : 5126,
-            "count" : 3221,
-            "type" : "VEC4"
-        },
-        {
-            "bufferView" : 9,
+            "bufferView" : 7,
             "componentType" : 5123,
             "count" : 6810,
             "type" : "SCALAR"
@@ -1816,43 +1802,33 @@
         },
         {
             "buffer" : 0,
-            "byteLength" : 71312,
+            "byteLength" : 12288,
             "byteOffset" : 142624
         },
         {
             "buffer" : 0,
-            "byteLength" : 12288,
-            "byteOffset" : 213936
+            "byteLength" : 34068,
+            "byteOffset" : 154912
         },
         {
             "buffer" : 0,
-            "byteLength" : 38652,
-            "byteOffset" : 226224
+            "byteLength" : 34068,
+            "byteOffset" : 188980
         },
         {
             "buffer" : 0,
-            "byteLength" : 38652,
-            "byteOffset" : 264876
-        },
-        {
-            "buffer" : 0,
-            "byteLength" : 25768,
-            "byteOffset" : 303528
-        },
-        {
-            "buffer" : 0,
-            "byteLength" : 51536,
-            "byteOffset" : 329296
+            "byteLength" : 22712,
+            "byteOffset" : 223048
         },
         {
             "buffer" : 0,
             "byteLength" : 13620,
-            "byteOffset" : 380832
+            "byteOffset" : 245760
         }
     ],
     "buffers" : [
         {
-            "byteLength" : 394452,
+            "byteLength" : 259380,
             "uri" : "forest07.bin"
         }
     ]
