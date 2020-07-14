@@ -48,7 +48,7 @@ LevelSystem::LevelSystem(
 	, playerEntity(player)
 	, scene(scene)
 {
-	currentLevelName = "levels/canyon/cave01.json";
+	currentLevelName = "levels/canyon/cave05.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 63);
 	closedColor = iw::Color::From255(201, 66, 66, 63);
@@ -479,19 +479,32 @@ iw::Entity LevelSystem::LoadLevel(
 
 	// Special colliders, should look into serialization of prefabs to not have to do this
 
+	std::vector<iw::CapsuleCollider> dontDeleteBullets;
+
 	if (currentLevelName == "levels/canyon/cave04.json") {
+		dontDeleteBullets.push_back({ iw::vector3(0.6, 0, -0.2), iw::vector3::unit_x, 29.8f, 2.2f });
+	}
+
+	else if (currentLevelName == "levels/canyon/cave07.json") {
+		dontDeleteBullets.push_back({ iw::vector3( 2.2, 0, -1.6), iw::vector3::unit_x,  6.7, 0.3 });
+		dontDeleteBullets.push_back({ iw::vector3( 3.2, 0,  1.6), iw::vector3::unit_x,  8.5, 0.3 });
+		dontDeleteBullets.push_back({ iw::vector3( 0.5, 0,  14),  iw::vector3::unit_z, 23.8, 9   });
+		dontDeleteBullets.push_back({ iw::vector3(11.5, 0,  5.1), iw::vector3::unit_x, 11.7, 0.3 });
+		dontDeleteBullets.push_back({ iw::vector3(6.6,  0,  3.5), iw::vector3::unit_z,  4,   0.3 });
+		dontDeleteBullets.push_back({ iw::vector3(5.3,  0, -6.6), iw::vector3::unit_z, 10.6, 0.3 });
+		dontDeleteBullets.push_back({ iw::vector3(-1,   0, -6.6), iw::vector3::unit_z, 10.6, 0.3 });
+	}
+
+	for (iw::CapsuleCollider& capsule : dontDeleteBullets) {
 		iw::Entity ent = Space->CreateEntity<iw::Transform, iw::CapsuleCollider, iw::CollisionObject, DontDeleteBullets>();
 
-		iw::CapsuleCollider capsule = iw::CapsuleCollider(iw::vector3(0.6, 0, -0.2), 29.8f, 2.2f);
-		capsule.Direction = iw::vector3::unit_x;
-
-		iw::Transform* transform      = ent.Set<iw::Transform>(iw::vector3::unit_y);
-		iw::CapsuleCollider* collider = ent.Set<iw::CapsuleCollider>(capsule);
-		iw::CollisionObject* object   = ent.Set<iw::CollisionObject>();
+		iw::Transform*       transform = ent.Set<iw::Transform>(iw::vector3::unit_y);
+		iw::CapsuleCollider* collider  = ent.Set<iw::CapsuleCollider>(capsule);
+		iw::CollisionObject* object    = ent.Set<iw::CollisionObject>();
 
 		levelTransform->AddChild(transform);
 
-		object->SetCol(collider);
+		object->SetCol  (collider);
 		object->SetTrans(transform);
 
 		Physics->AddCollisionObject(object);

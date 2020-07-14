@@ -90,8 +90,8 @@ namespace Editor {
 				vector3 lastAxis = axis;
 
 				PrintCell("Center"); PrintEditCell(&collider->Center);
-				PrintCell("Radius"); PrintEditCell(&collider->Radius);
 				PrintCell("Height"); PrintEditCell(&collider->Height);
+				PrintCell("Radius"); PrintEditCell(&collider->Radius);
 
 				PrintCell("Direction");
 

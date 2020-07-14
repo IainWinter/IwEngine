@@ -34,6 +34,18 @@ namespace impl {
 			, Radius(radius)
 		{}
 
+		CapsuleCollider(
+			V center,
+			V direction,
+			float height,
+			float radius)
+			: Collider<V>(ColliderType::CAPSULE)
+			, Center(center)
+			, Direction(direction)
+			, Height(height)
+			, Radius(radius)
+		{}
+
 		const AABB<V>& Bounds() override {
 			if (m_outdated) {
 				m_bounds = AABB<V>(
