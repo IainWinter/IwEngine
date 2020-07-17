@@ -424,15 +424,15 @@ namespace iw {
 		vct->Handle()->GetParam("skyColor")->SetAsFloats(&skyColor, 3);
 
 
-		//if (Keyboard::KeyDown(V) && f > 0.2f) {
-		//	vct->Handle()->GetParam("SHADOWS")->SetAsInt(s = !s);
-		//	f = 0.0f;
-		//}
+		if (Keyboard::KeyDown(V) && f > 0.2f) {
+			vct->Handle()->GetParam("SHADOWS")->SetAsInt(s = !s);
+			f = 0.0f;
+		}
 
-		//if (Keyboard::KeyDown(B) && f > 0.2f) {
-		//	vct->Handle()->GetParam("BLINN")  ->SetAsInt(b = !b);
-		//	f = 0.0f;
-		//}
+		if (Keyboard::KeyDown(B) && f > 0.2f) {
+			vct->Handle()->GetParam("BLINN")  ->SetAsInt(b = !b);
+			f = 0.0f;
+		}
 
 		f += Time::DeltaTime();
 	}

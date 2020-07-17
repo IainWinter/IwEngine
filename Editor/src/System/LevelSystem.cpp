@@ -47,7 +47,7 @@ LevelSystem::LevelSystem(
 	: iw::System<iw::CollisionObject, iw::Model, LevelDoor>("Level")
 	, playerEntity(player)
 	, scene(scene)
-{
+{ 
 	currentLevelName = "levels/canyon/cave08.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 63);
@@ -291,7 +291,7 @@ iw::Entity LevelSystem::LoadLevel(
 
 			mesh.SetMaterial(mesh.Material()->MakeInstance());
 
-			if (mesh.Data()->Name() != "Tree") { // Ground
+			if (mesh.Data()->Name().find("Tree") == std::string::npos) { // Ground
 				if (mesh.Data()->Description().HasBuffer(iw::bName::COLOR)) {
 					mesh.Material()->SetTexture("diffuseMap2", Asset->Load<iw::Texture>("textures/dirt/baseColor.jpg"));
 					mesh.Material()->SetTexture("normalMap2", Asset->Load<iw::Texture>("textures/dirt/normal.jpg"));
