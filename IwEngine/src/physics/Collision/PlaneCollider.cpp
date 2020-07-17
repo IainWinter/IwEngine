@@ -16,7 +16,7 @@ namespace Physics {
 		points.A = points.B;
 		points.B = T;
 
-		//points.Normal = -points.Normal;
+		points.Normal = -points.Normal;
 
 		return points;
 	}

@@ -56,17 +56,7 @@ namespace impl {
 			const impl::Collider<V>* collider,
 			const Transform* colliderTransform) const override
 		{
-			ManifoldPoints manifold = collider->TestCollision(colliderTransform, this, transform);
-
-			//vector3 tmp;
-
-			//tmp = manifold.A;
-			//manifold.A = manifold.B;
-			//manifold.B = tmp;
-
-			manifold.Normal = -manifold.Normal;
-
-			return manifold;
+			return collider->TestCollision(colliderTransform, this, transform);
 		}
 
 		IWPHYSICS_API

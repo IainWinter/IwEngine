@@ -71,7 +71,7 @@ namespace algo {
 
 		return {
 			A, B,
-			-AtoB.normalized(), // this shouldnt be neg
+			AtoB.normalized(),
 			AtoB.length(),
 			true
 		};
