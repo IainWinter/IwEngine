@@ -18,10 +18,6 @@ namespace Physics {
 		virtual void AddRigidbody(
 			Rigidbody* rigidbody);
 
-		//IWPHYSICS_API
-		//virtual void RemoveRigidbody(
-		//	Rigidbody* rigidbody);
-
 		IWPHYSICS_API
 		virtual void Step(
 			scalar dt);
@@ -37,8 +33,6 @@ namespace Physics {
 
 		void PredictTransforms(
 			scalar dt);
-
-		void SweepCastBodies();
 
 		void ClearForces();
 	};

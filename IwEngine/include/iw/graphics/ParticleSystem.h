@@ -35,7 +35,7 @@ namespace Graphics {
 	struct ParticleSystem {
 	public:
 		using particle_t = Particle<_p>;
-		using func_update = std::function<bool(ParticleSystem<StaticParticle>*, particle_t*, unsigned)>;
+		using func_update = std::function<bool(ParticleSystem<particle_t>*, particle_t*, unsigned)>;
 
 	private:
 		std::vector<particle_t> m_particles; // but the template works for now
@@ -56,7 +56,7 @@ namespace Graphics {
 		ParticleSystem() {
 			m_needsToUpdateBuffer = false;
 
-			m_update = [](ParticleSystem<StaticParticle>* s, particle_t*, unsigned) {
+			m_update = [](ParticleSystem<particle_t>* s, particle_t*, unsigned) {
 				return false;
 			};
 
@@ -193,6 +193,8 @@ namespace Graphics {
 			return m_particles;
 		}
 	};
+
+	using StaticPS = ParticleSystem<StaticParticle>();
 }
 
 	using namespace Graphics;

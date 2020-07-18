@@ -7,12 +7,10 @@ namespace Physics {
 	void CollisionSpace::AddCollisionObject(
 		CollisionObject* object)
 	{
-#ifdef IW_DEBUG
 		if (object == nullptr) {
 			LOG_WARNING << "Tried to add null object to collision space";
 			return;
 		}
-#endif
 
 		m_objects.insert(m_objects.begin(), object);
 	}
@@ -20,29 +18,28 @@ namespace Physics {
 	void CollisionSpace::RemoveCollisionObject(
 		CollisionObject* object)
 	{
-#ifdef IW_DEBUG
 		if (object == nullptr) {
-			LOG_WARNING << "Tried to remove null object to collision space";
+			LOG_WARNING << "Tried to remove null object from collision space";
 			return;
 		}
-#endif
 
 		auto itr = std::find(m_objects.begin(), m_objects.end(), object);
 		
 		if (itr != m_objects.end()) {
-			m_objects.erase(itr);
+			LOG_WARNING << "Tried to remove object that doesn't exist in the collision space";
+			return;
 		}
+
+		m_objects.erase(itr);
 	}
 
 	void CollisionSpace::AddSolver(
 		Solver* solver)
 	{
-#ifdef IW_DEBUG
 		if (solver == nullptr) {
 			LOG_WARNING << "Tried to add null solver to collision space";
 			return;
 		}
-#endif
 
 		m_solvers.push_back(solver);
 	}
@@ -50,21 +47,17 @@ namespace Physics {
 	void CollisionSpace::RemoveSolver(
 		Solver* solver)
 	{
-#ifdef IW_DEBUG
 		if (solver == nullptr) {
-			LOG_WARNING << "Tried to remove null solver to dynamics space";
+			LOG_WARNING << "Tried to remove null solver from dynamics space";
 			return;
 		}
-#endif
 
 		auto itr = std::find(m_solvers.begin(), m_solvers.end(), solver);
 
-#ifdef IW_DEBUG
-		if (itr != m_solvers.end()) {
+		if (itr == m_solvers.end()) {
 			LOG_WARNING << "Tried to remove solver that doesn't exist in the collision space";
 			return;
 		}
-#endif
 
 		m_solvers.erase(itr);
 	}
@@ -149,12 +142,10 @@ namespace Physics {
 	bool CollisionSpace::TestObject(
 		CollisionObject* object)
 	{
-#ifdef IW_DEBUG
 		if (object == nullptr) {
 			LOG_WARNING << "Tried to test null object against collision space";
 			return false;
 		}
-#endif
 
 		bool col = false;
 		for (CollisionObject* other : m_objects) {
@@ -172,14 +163,12 @@ namespace Physics {
 		CollisionObject* object, 
 		CollisionObject* other)
 	{
-#ifdef IW_DEBUG
 		if (   object == nullptr
 			|| other  == nullptr)
 		{
 			LOG_WARNING << "Tried to test null objects against each other";
 			return false;
 		}
-#endif
 
 		return object->Bounds().Intersects(other->Bounds());
 	}

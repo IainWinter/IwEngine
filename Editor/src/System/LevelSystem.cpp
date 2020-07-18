@@ -291,14 +291,18 @@ iw::Entity LevelSystem::LoadLevel(
 
 			mesh.SetMaterial(mesh.Material()->MakeInstance());
 
-			if (mesh.Data()->Name().find("Tree") == std::string::npos) { // Ground
+			if (mesh.Data()->Name().find("Ground") != std::string::npos)
+			{ 
 				if (mesh.Data()->Description().HasBuffer(iw::bName::COLOR)) {
 					mesh.Material()->SetTexture("diffuseMap2", Asset->Load<iw::Texture>("textures/dirt/baseColor.jpg"));
 					mesh.Material()->SetTexture("normalMap2", Asset->Load<iw::Texture>("textures/dirt/normal.jpg"));
 				}
+
+				iw::Entity plants = Space->CreateEntity<iw::Transform, iw::ParticleSystem<>>();
 			}
 
-			else {
+			else if(mesh.Data()->Name().find("Tree") != std::string::npos) 
+			{
 				iw::Entity leaves = Space->CreateEntity<iw::Transform, iw::ParticleSystem<iw::StaticParticle>>();
 
 				iw::Transform* tran = leaves.Set<iw::Transform>(transform);
