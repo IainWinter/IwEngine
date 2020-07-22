@@ -4,7 +4,6 @@
 namespace iw {
 namespace Physics {
 	void ImpulseSolver::Solve(
-		std::vector<CollisionObject*>& objects,
 		std::vector<Manifold>& manifolds,
 		scalar dt)
 	{

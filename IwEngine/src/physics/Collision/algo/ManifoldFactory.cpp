@@ -11,8 +11,8 @@ namespace algo {
 		vector3 A = a->Center + ta->WorldPosition();
 		vector3 B = b->Center + tb->WorldPosition();
 
-		float Ar = a->Radius * ta->WorldScale().x;
-		float Br = b->Radius * tb->WorldScale().x;
+		float Ar = a->Radius * ta->WorldScale().major();
+		float Br = b->Radius * tb->WorldScale().major();
 
 		vector3 AtoB = B - A;
 		vector3 BtoA = A - B;

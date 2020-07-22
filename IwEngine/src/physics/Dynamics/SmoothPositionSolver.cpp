@@ -6,7 +6,6 @@
 namespace iw {
 namespace Physics {
 	void SmoothPositionSolver::Solve(
-		std::vector<CollisionObject*>& bodies,
 		std::vector<Manifold>& manifolds,
 		scalar dt)
 	{

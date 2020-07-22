@@ -12,7 +12,7 @@ namespace Physics {
 			return;
 		}
 
-		m_objects.insert(m_objects.begin(), object);
+		m_objects.push_back(object);
 	}
 
 	void CollisionSpace::RemoveCollisionObject(
@@ -139,39 +139,39 @@ namespace Physics {
 
 	// going to need some sort of result to be returned. I like the idea of a lil iwcallback
 
-	bool CollisionSpace::TestObject(
-		CollisionObject* object)
-	{
-		if (object == nullptr) {
-			LOG_WARNING << "Tried to test null object against collision space";
-			return false;
-		}
+	//bool CollisionSpace::TestObject(
+	//	CollisionObject* object)
+	//{
+	//	if (object == nullptr) {
+	//		LOG_WARNING << "Tried to test null object against collision space";
+	//		return false;
+	//	}
 
-		bool col = false;
-		for (CollisionObject* other : m_objects) {
-			if (object == other) continue;
+	//	bool col = false;
+	//	for (CollisionObject* other : m_objects) {
+	//		if (object == other) continue;
 
-			col |= TestObjects(object, other);
+	//		col |= TestObjects(object, other);
 
-			// Would invoke callback with results if there is a collision
-		}
+	//		// Would invoke callback with results if there is a collision
+	//	}
 
-		return col;
-	}
+	//	return col;
+	//}
 
-	bool CollisionSpace::TestObjects(
-		CollisionObject* object, 
-		CollisionObject* other)
-	{
-		if (   object == nullptr
-			|| other  == nullptr)
-		{
-			LOG_WARNING << "Tried to test null objects against each other";
-			return false;
-		}
+	//bool CollisionSpace::TestObjects(
+	//	CollisionObject* object, 
+	//	CollisionObject* other)
+	//{
+	//	if (   object == nullptr
+	//		|| other  == nullptr)
+	//	{
+	//		LOG_WARNING << "Tried to test null objects against each other";
+	//		return false;
+	//	}
 
-		return object->Bounds().Intersects(other->Bounds());
-	}
+	//	return object->Bounds().Intersects(other->Bounds());
+	//}
 
 	//bool CollisionSpace::TestRay(
 	//	Ray* ray)

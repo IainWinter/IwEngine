@@ -30,11 +30,11 @@ namespace impl {
 		typename V>
 	struct Collider {
 	protected:
-		ColliderType m_type;
+		ColliderType m_type; // only used for debug nonsense
 		AABB<V> m_bounds;
-		bool m_outdated;
+		bool m_outdated;     // if the bounds are outdated
 
-		//M m_tensor;
+		//M m_tensor; // for angles
 
 	public:
 		Collider(

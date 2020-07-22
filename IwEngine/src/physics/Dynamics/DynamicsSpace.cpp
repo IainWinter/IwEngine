@@ -54,7 +54,7 @@ namespace Physics {
 					rigidbody->Trans().Position = 0;
 				}
 
-				rigidbody->SetVelocity(dt * rigidbody->Force() * rigidbody->Mass() + rigidbody->Velocity());
+				rigidbody->SetVelocity(dt * rigidbody->Force() * rigidbody->InvMass() + rigidbody->Velocity());
 				rigidbody->Trans().Position += dt * rigidbody->Velocity();
 
 				if (rigidbody->IsLocked().x) {

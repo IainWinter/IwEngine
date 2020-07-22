@@ -5,14 +5,12 @@
 
 namespace iw {
 namespace Physics {
-	struct Rigidbody;
-
 	struct Manifold {
 		CollisionObject* ObjA;
 		CollisionObject* ObjB;
-		iw::vector3 A;
-		iw::vector3 B;
-		iw::vector3 Normal;
+		vector3 A;
+		vector3 B;
+		vector3 Normal;
 		scalar PenetrationDepth;
 		bool HasCollision;
 

@@ -38,14 +38,14 @@ namespace Physics {
 		void ResolveConstrains(
 			scalar dt = 0);
 
-		IWPHYSICS_API
-		bool TestObject(
-			CollisionObject* object);
+		//IWPHYSICS_API
+		//bool TestObject(
+		//	CollisionObject* object);
 
-		IWPHYSICS_API
-		bool TestObjects(
-			CollisionObject* object,
-			CollisionObject* other);
+		//IWPHYSICS_API
+		//bool TestObjects(
+		//	CollisionObject* object,
+		//	CollisionObject* other);
 
 		//IWPHYSICS_API
 		//bool TestRay(

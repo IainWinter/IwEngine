@@ -30,7 +30,7 @@ namespace Physics {
 	}
 
 	void Rigidbody::ApplyGravity() {
-		ApplyForce(m_gravity);
+		ApplyForce(m_gravity * Mass());
 	}
 
 	const iw::vector3& Rigidbody::Gravity() const {

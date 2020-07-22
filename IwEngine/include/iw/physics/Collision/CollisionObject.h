@@ -12,8 +12,8 @@ namespace Physics {
 
 	class CollisionObject {
 	protected:
-		Transform m_transform;     // Position, rotation, and scale.
-		Collider* m_collider;      // Shape of the collision object (only 3d right now)
+		Transform m_transform;
+		Collider* m_collider;
 		bool m_isTrigger;
 		bool m_isStatic;
 		bool m_isDynamic;

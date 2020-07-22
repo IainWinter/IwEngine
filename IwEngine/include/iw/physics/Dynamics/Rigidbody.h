@@ -9,19 +9,19 @@ namespace Physics {
 		: public CollisionObject
 	{
 	private:
-		iw::vector3 m_gravity;  // Gravitational force on the rigidbody
-		iw::vector3 m_force;    // Net force on the rigidbody
-		iw::vector3 m_velocity; // Velocity of rigidbody
-		iw::vector3 m_lock;     // Lock to axis
-		iw::vector3 m_isLocked; // If its locked to the axis
+		vector3 m_gravity;  // Gravitational acceleration 
+		vector3 m_force;    // Net force
+		vector3 m_velocity;
+		vector3 m_lock;     // Lock to axis
+		vector3 m_isLocked; // If its locked to each axis casted to bool
 		scalar m_invMass;       // 1 / Mass of rigidbody
 		bool m_takesGravity;    // If the rigidbody will use its own gravity or take it from the space
 		bool m_simGravity;      // If the rigidbody will simulate gravity
 		bool m_isKinematic;     // If the rigidbody gets simulated. Still participates with collisions, but is unefected.
 
-		float m_staticFriction;  // Static friction coeffeicent
-		float m_dynamicFriction; // Dynamic friction coeffeicent
-		float m_restitution;     // Elasticity of collisions
+		scalar m_staticFriction;  // Static friction coefficient
+		scalar m_dynamicFriction; // Dynamic friction coefficient
+		scalar m_restitution;     // Elasticity of collisions
 
 		Transform m_lastTrans; // Where the rigidbody was last step
 		Transform m_nextTrans; // Where the rigidbody will be next step if there is no interference
@@ -121,15 +121,15 @@ namespace Physics {
 
 		IWPHYSICS_API
 		void SetStaticFriction(
-			float staticFriction);
+			scalar staticFriction);
 
 		IWPHYSICS_API
 		void SetDynamicFriction(
-			float dynamicFriction);
+			scalar dynamicFriction);
 
 		IWPHYSICS_API
 		void SetRestitution(
-			float restitution);
+			scalar restitution);
 
 		IWPHYSICS_API
 		void SetTrans(
