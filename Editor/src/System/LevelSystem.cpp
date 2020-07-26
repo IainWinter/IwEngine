@@ -141,6 +141,8 @@ bool LevelSystem::On(
 	LevelDoor*     door = doorEntity.Find<LevelDoor>();
 	iw::Transform* tran = doorEntity.Find<iw::Transform>();
 
+	if (!door) return true; // broken from query in GetEntitiesFromManifold
+
 	if (door->State == LevelDoorState::OPEN) {
 		door->State = LevelDoorState::LOCKED; // stops events from being spammed
 		Bus->push<LoadNextLevelEvent>(door->NextLevel, iw::vector2(tran->Position.x, tran->Position.z), door->GoBack);

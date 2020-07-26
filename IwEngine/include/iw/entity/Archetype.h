@@ -30,6 +30,12 @@ namespace ECS {
 			return nullptr;
 		}
 
+		ArchetypeLayout* GetLayout(
+			size_t index)
+		{
+			return &Layout[index];
+		}
+
 		bool HasComponent(
 			const iw::ref<Component>& component)
 		{

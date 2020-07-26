@@ -45,12 +45,52 @@ namespace ECS {
 	};
 
 	struct ComponentQuery {
-		size_t Count;
-		iw::ref<Component> Components[];
+	private:
+		std::vector<iw::ref<Component>> m_all;
+		std::vector<iw::ref<Component>> m_any;
+		std::vector<iw::ref<Component>> m_none;
 
-		//std::vector<iw::ref<Component>> All;
-		//std::vector<iw::ref<Component>> None;
-		//std::vector<iw::ref<Component>> Any;
+	public:
+		void SetAll(
+			std::initializer_list<iw::ref<Component>> components)
+		{
+			m_all = components;
+		}
+
+		void SetAny(
+			std::initializer_list<iw::ref<Component>> components)
+		{
+			m_any = components;
+		}
+
+		void SetNone(
+			std::initializer_list<iw::ref<Component>> components)
+		{
+			m_none = components;
+		}
+
+		const auto& GetAll()  { return m_all; }
+		const auto& GetAny()  { return m_any; }
+		const auto& GetNone() { return m_none; }
+
+		const auto GetComponents() {
+			std::vector<iw::ref<Component>> unique = GetAll();
+
+			for (const auto& c : GetAny()) {
+				if (std::find(unique.begin(), unique.end(), c) == unique.end()) {
+					unique.push_back(c);
+				}
+			}
+
+			//for (const auto& c : GetNone()) { // would make 'none' more important but costs time for only all + any 
+			//	auto itr = std::find(unique.begin(), unique.end(), c);
+			//	if (itr != unique.end()) {
+			//		unique.erase(itr);
+			//	}
+			//}
+
+			return unique;
+		}
 	};
 
 	template<

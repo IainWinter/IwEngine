@@ -62,7 +62,9 @@ namespace ECS {
 
 		IWENTITY_API
 		iw::ref<ComponentQuery> MakeQuery(
-			std::initializer_list<iw::ref<Component>> components);
+			std::initializer_list<iw::ref<Component>> all,
+			std::initializer_list<iw::ref<Component>> any = {},
+			std::initializer_list<iw::ref<Component>> none = {});
 
 		IWENTITY_API
 		EntityComponentArray Query(

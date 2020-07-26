@@ -3,7 +3,6 @@
 namespace iw {
 namespace Physics {
 	void PositionSolver::Solve(
-		std::vector<CollisionObject*>& bodies,
 		std::vector<Manifold>& manifolds,
 		scalar dt)
 	{

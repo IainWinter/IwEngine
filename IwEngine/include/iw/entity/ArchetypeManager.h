@@ -30,11 +30,13 @@ namespace ECS {
 
 		IWENTITY_API
 		ref<Archetype>& AddComponent(
-			ref<Archetype> archetype, ref<Component> component);
+			ref<Archetype> archetype,
+			ref<Component> component);
 
 		IWENTITY_API
 		ref<Archetype>& RemoveComponent(
-			ref<Archetype> archetype, ref<Component> component);
+			ref<Archetype> archetype,
+			ref<Component> component);
 
 		IWENTITY_API
 		ref<ArchetypeQuery> MakeQuery(

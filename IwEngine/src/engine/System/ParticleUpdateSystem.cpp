@@ -3,14 +3,26 @@
 namespace iw {
 namespace Engine {
 	ParticleUpdateSystem::ParticleUpdateSystem()
-		: System<ParticleSystem<StaticParticle>>("Particle Update")
+		: SystemBase("Particle Update")
 	{}
 
-	void ParticleUpdateSystem::Update(
-		EntityComponentArray& eca)
-	{
-		for (auto entity : eca) {
-			auto [system] = entity.Components.Tie<Components>();
+	int ParticleUpdateSystem::Initialize() {
+		query = Space->MakeQuery<ParticleSystem<StaticParticle>>();
+		query->SetAny({ Space->GetComponent<Transform>() });
+
+		return 0;
+	}
+
+	void ParticleUpdateSystem::Update() {
+		auto entities = Space->Query(query);
+
+		for (auto entity : entities) {
+			auto [transform, system] = entity.Components.Tie<Components>();
+
+			if (transform && !system->GetTransform()) {
+				system->SetTransform(transform);
+			}
+
 			system->Update();
 		}
 	}

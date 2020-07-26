@@ -112,7 +112,7 @@ namespace Physics {
 	{
 		//for (int i = 0; i < 5; i++) {
 			for (Solver* solver : m_solvers) {
-				solver->Solve(m_objects, manifolds, dt);
+				solver->Solve(manifolds, dt);
 			}
 		//}
 	}

@@ -20,6 +20,7 @@ namespace ECS {
 			Chunk* m_chunk;
 			size_t m_index;
 			iw::ref<Archetype> m_archetype;
+
 			iw::ref<ComponentDataIndices> m_indices;
 			iw::ref<ComponentData> m_data;
 
@@ -44,7 +45,7 @@ namespace ECS {
 				Chunk* chunk,
 				size_t index,
 				const iw::ref<Archetype>& archetype,
-				const iw::ref<ComponentQuery>& query,
+				const std::vector<iw::ref<Component>>& components,
 				iw::pool_allocator& componentPool);
 		};
 	private:

@@ -68,7 +68,7 @@ namespace ECS {
 	char* Chunk::GetComponentStream(
 		const ArchetypeLayout& layout)
 	{
-		return Buffer + (sizeof(EntityHandle) + layout.Offset) * Capacity; // no copy? \/
+		return Buffer + (sizeof(EntityHandle) + layout.Offset) * Capacity;
 	}
 
 	const char* Chunk::GetComponentStream(

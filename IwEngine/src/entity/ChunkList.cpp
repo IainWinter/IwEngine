@@ -37,7 +37,7 @@ namespace ECS {
 	}
 
 	EntityComponentData iterator::operator*() {
-		for (size_t i = 0; i < m_indices->Count; i++) {
+		for (size_t i = 0; i < m_indices->Count; i++) { // use raw pointers?
 			m_data->Components[i] = m_chunk->GetComponentPtr(
 				m_archetype->Layout[m_indices->Indices[i]], 
 				m_index
@@ -53,28 +53,35 @@ namespace ECS {
 		Chunk* chunk,
 		size_t index,
 		const iw::ref<Archetype>& archetype,
-		const iw::ref<ComponentQuery>& query,
+		const std::vector<iw::ref<Component>>& components,
 		iw::pool_allocator& componentPool)
 		: m_chunk(chunk)
 		, m_index(index)
 		, m_archetype(archetype)
 	{
+		size_t count = 0;
+		for (iw::ref<Component> component : components) {
+			if (archetype->HasComponent(component)) {
+				count++;
+			}
+		}
+
 		size_t cdSize = sizeof(ComponentData)
 			+ sizeof(size_t)
-			* query->Count;
+			* count;
 
 		m_data = componentPool.alloc_ref<ComponentData>(cdSize);
 		
 		size_t cdisSize = sizeof(ComponentDataIndices)
 			+ sizeof(size_t)
-			* query->Count;
+			* count;
 
 		m_indices = componentPool.alloc_ref<ComponentDataIndices>(cdisSize);
-	
-		m_indices->Count = query->Count;
-		for (size_t i = 0; i < query->Count; i++) {
+
+		m_indices->Count = count;
+		for (size_t i = 0; i < count; i++) {
 			for (size_t j = 0; j < archetype->Count; j++) {
-				if (query->Components[i]->Type == archetype->Layout[j].Component->Type) {
+				if (components[i]->Type == archetype->Layout[j].Component->Type) {
 					m_indices->Indices[i] = j;
 					break;
 				}
@@ -282,7 +289,7 @@ namespace ECS {
 			index = chunk->BeginIndex();
 		}
 
-		return iterator(m_root, index, m_archetype, query, m_componentPool);
+		return iterator(m_root, index, m_archetype, query->GetComponents(), m_componentPool);
 	}
 
 	iterator ChunkList::End(
@@ -298,7 +305,7 @@ namespace ECS {
 			index = chunk->EndIndex();
 		}
 
-		return iterator(nullptr, index, m_archetype, query, m_componentPool);
+		return iterator(nullptr, index, m_archetype, query->GetComponents(), m_componentPool);
 	}
 
 	Chunk* ChunkList::FindChunk(

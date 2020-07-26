@@ -132,6 +132,20 @@ namespace ECS {
 		return data;
 	}
 
+	iw::ref<ComponentQuery> ComponentManager::MakeQuery(
+		std::initializer_list<iw::ref<Component>> all,
+		std::initializer_list<iw::ref<Component>> any,
+		std::initializer_list<iw::ref<Component>> none)
+	{
+		iw::ref<ComponentQuery> query = m_componentPool.alloc_ref<ComponentQuery>();
+
+		query->SetAll(all);
+		query->SetAny(any);
+		query->SetNone(none);
+
+ 		return query;
+	}
+
 	EntityHandle ComponentManager::FindEntity(
 		iw::ref<ArchetypeQuery>& query,
 		const iw::ref<Component>& component, 
@@ -154,25 +168,6 @@ namespace ECS {
 		}
 
 		return EntityHandle::Empty;
-	}
-
-	iw::ref<ComponentQuery> ComponentManager::MakeQuery(
-		std::initializer_list<iw::ref<Component>> components)
-	{
-		size_t bufSize = sizeof(ComponentQuery)
-			+ sizeof(iw::ref<Component>)
-			* components.size();
-
-		iw::ref<ComponentQuery> query = m_componentPool.alloc_ref<ComponentQuery>(bufSize);
-
-		query->Count = components.size();
-
-		size_t i = 0;
-		for (iw::ref<Component> component : components) {
-			query->Components[i++] = component;
-		}
-
-		return query;
 	}
 
 	bool ComponentManager::SetEntityAliveState(

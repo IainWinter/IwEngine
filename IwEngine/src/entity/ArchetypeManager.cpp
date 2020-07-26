@@ -101,60 +101,92 @@ namespace ECS {
 	iw::ref<ArchetypeQuery> ArchetypeManager::MakeQuery(
 		const iw::ref<ComponentQuery>& query)
 	{
+		// All: Rigidbody Collider
+		// Any: Transform
+		// None: Bullet
+		//
+		// 
+
+		LOG_DEBUG << "Searching for";
+		
+		for (const iw::ref<Component>& component : query->GetComponents()) {
+			LOG_INFO << component->Name << " ";
+		}
+
 		std::vector<size_t> matches;
-		for (auto& archetype : m_archetypes) {
-			bool match = false;
-			for (size_t i = 0; i < query->Count; i++) {
-				bool hasComponent = false;
-				for (size_t j = 0; j < archetype->Count; j++) {
-					if (query->Components[i] == archetype->Layout[j].Component) {
-						hasComponent = true;
-						break;
-					}
-				}
+		for (const iw::ref<Archetype>& archetype : m_archetypes) {
+			bool match = true;
 
-				match = hasComponent;
+			// reject if archeptye has component in none list
 
-				if (!hasComponent) {
+			for (const iw::ref<Component>& component : query->GetNone()) {
+				if (archetype->HasComponent(component)) {
+					match = false;
 					break;
 				}
 			}
 
-			//if (query.Any.size() > 0) {
-			//	bool hasComponent = false;
-			//	for (size_t i = 0; i < query.Any.size(); i++) {
-			//		for (size_t j = 0; j < archetype->Count; j++) {
-			//			if (query.Any[j] == archetype->Layout[i].Component) {
-			//				hasComponent = true;
-			//				break;
-			//			}
-			//		}
-			//
-			//		if (hasComponent) {
+			if (!match) {
+				continue;
+			}
+
+			// reject if archetype doesnt have every component in all list
+
+			for (const iw::ref<Component>& component : query->GetAll()) {
+				if (!archetype->HasComponent(component)) {
+					match = false;
+					break;
+				}
+			}
+
+			if (!match) {
+				continue;
+			}
+
+			if (match) {
+				matches.push_back(archetype->Hash);
+			}
+
+			//LOG_INFO << "Archetype: ";
+
+			//for (size_t i = 0; i < archetype->Count; i++) {
+			//	LOG_INFO << archetype->GetLayout(i)->Component->Name << " ";
+			//}
+
+			//bool match = true;
+			//		
+			//// reject if archeptye has component in none list
+
+			//for (const iw::ref<Component>& component : query->GetNone()) {
+			//	if (archetype->HasComponent(component)) {
+			//		match = false;
+			//		break;
+			//	}
+			//}
+
+			//if (match) {
+			//	match = false;
+
+			//	// reject if archetype doesn't have a component in any list
+
+			//	for (const iw::ref<Component>& component : query->GetAny()) {
+			//		if (archetype->HasComponent(component)) {
+			//			match = true;
 			//			break;
 			//		}
 			//	}
-			//
-			//	match = hasComponent;
-			//}
-			//
-			//if (query.None.size() > 0) {
-			//	for (size_t i = 0; i < query.None.size(); i++) {
-			//		for (size_t j = 0; j < archetype->Count; j++) {
-			//			if (query.Any[j] == archetype->Layout[i].Component) {
-			//				match = false;
-			//				break;
-			//			}
-			//		}
-			//
-			//		if (!match) {
-			//			break;
-			//		}
+
+			//	if (!match) {
+
 			//	}
 			//}
 
 			if (match) {
-				matches.push_back(archetype->Hash);
+				LOG_WARNING << "accepted";
+			}
+
+			else {
+				LOG_ERROR << "rejected";
 			}
 		}
 

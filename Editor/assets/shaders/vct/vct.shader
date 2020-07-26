@@ -376,7 +376,7 @@ void main() {
 	vec3 N = normalize(normal);
 	vec3 V = normalize(CameraPos - WorldPos);
 
-	vec3 color = vec3(0);
+	vec3 color = vec3(ambiance);
 
 	//for (int i = 0; i < lightCounts.x; i++) {
 	//	vec3 P = pointLights[i].Position.xyz;

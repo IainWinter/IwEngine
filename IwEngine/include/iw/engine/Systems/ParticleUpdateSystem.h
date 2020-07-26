@@ -7,20 +7,25 @@
 namespace iw {
 namespace Engine {
 	class ParticleUpdateSystem
-		: public System<ParticleSystem<StaticParticle>> // need to figure out how to do the components for graphics stuff, they should all have some sort of wrapper
+		: public SystemBase // need to figure out how to do the components for graphics stuff, they should all have some sort of wrapper
 	{
 	public:
 		struct Components {
+			Transform* Transform;
 			ParticleSystem<StaticParticle>* ParticleSystem;
 		};
+
+		iw::ref<ComponentQuery> query;
 
 	public:
 		IWENGINE_API
 		ParticleUpdateSystem();
 
 		IWENGINE_API
-		void Update(
-			EntityComponentArray& view);
+		int Initialize() override;
+
+		IWENGINE_API
+		void Update() override;
 	};
 }
 
