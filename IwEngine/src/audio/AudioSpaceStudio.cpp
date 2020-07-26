@@ -1,6 +1,7 @@
 #include "iw/audio/AudioSpaceStudio.h"
 #include "iw/log/logger.h"
 #include "CHECK_ERROR.h"
+#include "fmod/fmod_studio.hpp"
 
 namespace iw {
 namespace Audio {
@@ -106,7 +107,7 @@ namespace Audio {
 			instance->setCallback((FMOD_STUDIO_EVENT_CALLBACK)__dontlookatme__RemoveInstanceFromList, FMOD_STUDIO_EVENT_CALLBACK_STOPPED);
 		}
 
-		return m_instances.size() - 1;
+		return (int)m_instances.size() - 1;
 	}
 
 	void AudioSpaceStudio::StartInstance(

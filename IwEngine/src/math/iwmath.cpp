@@ -41,7 +41,7 @@ namespace math {
 		float b,
 		unsigned int accuracy)
 	{
-		return fabsf(a - b) * fast_pow(10, accuracy) < 1;
+		return fabsf(a - b) * fast_pow(10, (float)accuracy) < 1;
 	}
 }
 

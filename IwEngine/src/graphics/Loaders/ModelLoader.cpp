@@ -3,13 +3,12 @@
 #include "iw/graphics/Mesh.h"
 #include "iw/graphics/Texture.h"
 #include "iw/log/logger.h"
+
 #include "assimp/Importer.hpp"
 #include "assimp/scene.h"
 #include "assimp/postprocess.h"
 #include "assimp/pbrmaterial.h"
 #include <vector>
-
-#include "assimp/pbrmaterial.h"
 
 namespace iw {
 namespace Graphics {

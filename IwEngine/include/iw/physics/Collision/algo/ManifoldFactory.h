@@ -24,6 +24,18 @@ namespace algo {
 	ManifoldPoints FindSphereCapsuleMaifoldPoints(
 		const SphereCollider*  a, const Transform* ta,
 		const CapsuleCollider* b, const Transform* tb);
+
+	// Swaps
+
+	IWPHYSICS_API
+	ManifoldPoints FindPlaneSphereMaifoldPoints(
+		const PlaneCollider*  a, const Transform* ta,
+		const SphereCollider* b, const Transform* tb);
+
+	IWPHYSICS_API
+	ManifoldPoints FindCapsuleSphereMaifoldPoints(
+		const CapsuleCollider* a, const Transform* ta,
+		const SphereCollider*  b, const Transform* tb);
 }
 }
 

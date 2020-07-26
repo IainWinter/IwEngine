@@ -112,7 +112,7 @@ project "IwEngine"
 		runtime "Release"
 		optimize "On"
 
-project "IwReflection"
+project "z_reflection"
 	kind "ConsoleApp"
 	language "C++"
 	location  (iwtoldir .. blddir .. "/reflection")

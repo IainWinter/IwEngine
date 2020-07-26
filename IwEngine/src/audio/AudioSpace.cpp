@@ -14,11 +14,11 @@ namespace Audio {
 	{}
 
 	AudioSpaceRaw* AudioSpace::AsRaw() {
-		return (AudioSpaceRaw*)this;
+		return (AudioSpaceRaw*)this; // use dynamic cast
 	}
 
 	AudioSpaceStudio* AudioSpace::AsStudio() {
-		return (AudioSpaceStudio*)this;
+		return (AudioSpaceStudio*)this; // use dynamic cast
 	}
 
 	std::string& AudioSpace::GetRootDir() {

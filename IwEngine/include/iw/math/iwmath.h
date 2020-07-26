@@ -7,7 +7,7 @@
 #endif
 
 #ifdef IW_PLATFORM_WINDOWS
-#	ifdef IW_BUILD_DLL
+#	ifdef IWMATH_DLL
 #		define IWMATH_API __declspec(dllexport)
 #	else
 #		define IWMATH_API __declspec(dllimport)

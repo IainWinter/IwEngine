@@ -107,11 +107,11 @@ namespace ECS {
 		//
 		// 
 
-		LOG_DEBUG << "Searching for";
-		
-		for (const iw::ref<Component>& component : query->GetComponents()) {
-			LOG_INFO << component->Name << " ";
-		}
+		//LOG_DEBUG << "Searching for";
+		//
+		//for (const iw::ref<Component>& component : query->GetComponents()) {
+		//	LOG_INFO << component->Name << " ";
+		//}
 
 		std::vector<size_t> matches;
 		for (const iw::ref<Archetype>& archetype : m_archetypes) {
@@ -181,13 +181,13 @@ namespace ECS {
 			//	}
 			//}
 
-			if (match) {
-				LOG_WARNING << "accepted";
-			}
+			//if (match) {
+			//	LOG_WARNING << "accepted";
+			//}
 
-			else {
-				LOG_ERROR << "rejected";
-			}
+			//else {
+			//	LOG_ERROR << "rejected";
+			//}
 		}
 
 		size_t bufSize = sizeof(ArchetypeQuery)

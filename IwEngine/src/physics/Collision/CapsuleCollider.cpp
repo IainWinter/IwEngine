@@ -11,14 +11,8 @@ namespace Physics {
 		const Physics::SphereCollider* sphere,
 		const Transform* sphereTransform) const
 	{
-		ManifoldPoints points = sphere->TestCollision(sphereTransform, this, transform);
-		iw::vector3 T = points.A;
-		points.A = points.B;
-		points.B = T;
-
-		points.Normal = -points.Normal;
-
-		return points;
+		return algo::FindCapsuleSphereMaifoldPoints(
+			this, transform, sphere, sphereTransform);
 	}
 
 	template<>
@@ -27,8 +21,7 @@ namespace Physics {
 		const CapsuleCollider* capsule, 
 		const Transform* capsuleTransform) const
 	{
-		return {};//algo::FindCapsuleCapsuleMaifoldPoints(
-			//this, transform, plane, planeTransform);
+		return {};
 	}
 
 	template<>

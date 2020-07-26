@@ -6,7 +6,7 @@
 namespace iw {
 namespace Physics {
 	template<>
-	ManifoldPoints SphereCollider::TestCollision(
+	inline ManifoldPoints SphereCollider::TestCollision(
 		const Transform* transform,
 		const SphereCollider* sphere,
 		const Transform* sphereTransform) const

@@ -15,6 +15,7 @@ namespace math {
 	* Represents a vector or point in 3D.
 	*/
 	struct REFLECT IWMATH_API vector3 {
+
 		/**
 		* A vector with components: 0, 0, 0.
 		*/

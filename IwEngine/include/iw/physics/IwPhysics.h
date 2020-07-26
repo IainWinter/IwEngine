@@ -1,7 +1,7 @@
 #pragma once
 
 #ifdef IW_PLATFORM_WINDOWS
-#	ifdef IW_BUILD_DLL
+#	ifdef IWPHYSICS_DLL
 #		define IWPHYSICS_API __declspec(dllexport)
 #else
 #		define IWPHYSICS_API __declspec(dllimport)
@@ -27,7 +27,11 @@ namespace Physics {
 	using namespace Physics;
 }
 
-#include "iw/reflection/Reflect.h"
+#ifdef IW_USE_REFLECTION
+#	include "iw\reflection\Reflect.h"
+#else
+#	define REFLECT 
+#endif
 
 #ifdef REFLECTING
 #	undef  IWPHYSICS_API

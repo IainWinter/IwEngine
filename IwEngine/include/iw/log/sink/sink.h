@@ -10,8 +10,8 @@ namespace log {
 		loglevel min_level;
 
 	public:
-		IWLOG_API
-		sink(loglevel level)
+		sink(
+			loglevel level)
 			: min_level(level) {}
 
 		IWLOG_API

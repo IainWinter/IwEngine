@@ -251,7 +251,6 @@ namespace ECS {
 		return Entity(entity, this);
 	}
 
-	IWENTITY_API
 	Entity Space::Instantiate(
 		const Prefab& prefab)
 	{

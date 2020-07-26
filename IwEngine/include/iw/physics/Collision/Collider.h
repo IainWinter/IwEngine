@@ -2,8 +2,8 @@
 
 #include "iw/physics/IwPhysics.h"
 #include "iw/physics/AABB.h"
-#include "iw/physics/Collision/ManifoldPoints.h"
 #include "iw/common/Components/Transform.h"
+#include "ManifoldPoints.h"
 
 namespace iw  {
 namespace Physics {
@@ -25,7 +25,6 @@ namespace impl {
 	template<typename V>
 	struct REFLECT PlaneCollider;
 
-
 	template<
 		typename V>
 	struct Collider {
@@ -43,7 +42,6 @@ namespace impl {
 			, m_outdated(true)
 		{}
 
-		IWPHYSICS_API
 		ColliderType Type() const {
 			return m_type;
 		}

@@ -1,7 +1,7 @@
 #pragma once
 
 #ifdef IW_PLATFORM_WINDOWS
-#	ifdef IW_BUILD_DLL
+#	ifdef IWENTITY_DLL
 #		define IWENTITY_API __declspec(dllexport)
 #else
 #		define IWENTITY_API __declspec(dllimport)
@@ -13,7 +13,8 @@
 #ifdef IW_USE_REFLECTION
 #	include "iw\reflection\Reflect.h"
 #else
-#	define REFLECT 
+#	define REFLECT
+#	include <typeindex>
 #endif
 
 namespace iw {

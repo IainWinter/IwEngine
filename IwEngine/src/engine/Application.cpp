@@ -86,8 +86,9 @@ namespace Engine {
 
 		// Space
 
+#ifdef IW_USE_EVENTS
 		Space->SetEventBus(Bus);
-
+#endif
 		// Window
 
 		m_window->SetEventbus(Bus);

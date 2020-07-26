@@ -139,6 +139,38 @@ namespace algo {
 			true
 		};
 	}
+
+	// Swaps
+
+	void SwapPoints(
+		ManifoldPoints& points)
+	{
+		iw::vector3 T = points.A;
+		points.A = points.B;
+		points.B = T;
+
+		points.Normal = -points.Normal;
+	}
+
+	ManifoldPoints FindPlaneSphereMaifoldPoints(
+		const PlaneCollider*  a, const Transform* ta, 
+		const SphereCollider* b, const Transform* tb)
+	{
+		ManifoldPoints points = FindSpherePlaneMaifoldPoints(b, tb, a, ta);
+		SwapPoints(points);
+
+		return points;
+	}
+
+	ManifoldPoints FindCapsuleSphereMaifoldPoints(
+		const CapsuleCollider* a, const Transform* ta,
+		const SphereCollider*  b, const Transform* tb)
+	{
+		ManifoldPoints points = FindSphereCapsuleMaifoldPoints(b, tb, a, ta);
+		SwapPoints(points);
+
+		return points;
+	}
 }
 }
 }

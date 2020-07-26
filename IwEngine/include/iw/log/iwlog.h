@@ -1,7 +1,7 @@
 #pragma once
 
 #ifdef IW_PLATFORM_WINDOWS
-#	ifdef IW_BUILD_DLL
+#	ifdef IWLOG_DLL
 #		define IWLOG_API __declspec(dllexport)
 #else
 #		define IWLOG_API __declspec(dllimport)

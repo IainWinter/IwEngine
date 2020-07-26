@@ -9,6 +9,7 @@
 namespace iw {
 namespace Engine {
 	struct REFLECT Transform {
+	public:
 		REFLECT vector3 Position;
 		REFLECT vector3 Scale;
 		REFLECT quaternion Rotation;
