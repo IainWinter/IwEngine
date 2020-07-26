@@ -13,7 +13,7 @@ namespace iw {
 namespace util {
 	class IWUTIL_API pool_allocator {
 	public:
-		class page {
+		class IWUTIL_API page {
 		private:
 			struct freemem {
 				char* mem;

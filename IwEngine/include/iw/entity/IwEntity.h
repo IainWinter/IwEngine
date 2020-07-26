@@ -11,9 +11,9 @@
 #include "iw/util/memory/ref.h"
 
 #ifdef IW_USE_REFLECTION
-#	include "iw/reflection/Reflect.h"
+#	include "iw\reflection\Reflect.h"
 #else
-#	include <typeindex>
+#	define REFLECT 
 #endif
 
 namespace iw {

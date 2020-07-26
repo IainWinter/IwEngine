@@ -8,7 +8,11 @@
 #	endif
 #endif
 
-#include "iw/reflection/Reflect.h"
+#ifdef IW_USE_REFLECTION
+#	include "iw\reflection\Reflect.h"
+#else
+#	define REFLECT 
+#endif
 
 #ifdef REFLECTING
 #	undef  IWCOMMON_API

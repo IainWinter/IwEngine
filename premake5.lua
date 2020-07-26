@@ -50,11 +50,11 @@ project "wMath"
 	}
 
 	includedirs {
-		iwengdir  .. incdir,
+		iwengdir  .. incdir
 	}
 
 	defines {
-		--"IW_USE_REFLECTION",
+		--"IW_USE_REFLECTION"
 	}
 
 	filter "system:windows"
@@ -89,7 +89,7 @@ project "wLog"
 	}
 
 	includedirs {
-		iwengdir  .. incdir,
+		iwengdir  .. incdir
 	}
 
 	filter "system:windows"
@@ -124,7 +124,7 @@ project "wUtil"
 	}
 
 	includedirs {
-		iwengdir  .. incdir,
+		iwengdir  .. incdir
 	}
 
 	links {
@@ -168,7 +168,7 @@ project "wAudio"
 	}
 
 	libdirs {
-		fmoddir .. "/lib/%{cfg.platform}",
+		fmoddir .. "/lib/%{cfg.platform}"
 	}
 
 	links {	
@@ -196,7 +196,7 @@ project "wAudio"
 		optimize "On"
 
 project "wAsset"
-	kind "StaticdLib"
+	kind "None"
 	language "C++"
 	location  (iwengdir .. blddir)
 	targetdir (iwengdir .. libdir)
@@ -220,6 +220,225 @@ project "wAsset"
 		systemversion "latest"
 		defines {
 			"IW_PLATFORM_WINDOWS"
+		}
+
+	filter "configurations:Debug"
+		defines "IW_DEBUG"
+		runtime "Debug"
+		symbols "On"
+
+	filter "configurations:Release"
+		defines "IW_RELEASE"
+		runtime "Release"
+		optimize "On"
+
+project "wEvents"
+	kind "SharedLib"
+	language "C++"
+	location  (iwengdir .. blddir)
+	targetdir (iwengdir .. bindir)
+	implibdir (iwengdir .. libdir)
+	objdir    (iwengdir .. blddir)
+
+	files {
+		iwengdir .. incdir .. "/iw/events/**.h",
+		iwengdir .. srcdir .. "/events/**.cpp"
+	}
+
+	includedirs {
+		iwengdir  .. incdir
+	}
+
+	links {
+		"wLog",
+		"wUtil"
+	}
+
+	filter "system:windows"
+		cppdialect "C++17"
+		systemversion "latest"
+		defines {
+			"IW_PLATFORM_WINDOWS",
+			"IW_BUILD_DLL"
+		}
+
+	filter "configurations:Debug"
+		defines "IW_DEBUG"
+		runtime "Debug"
+		symbols "On"
+
+	filter "configurations:Release"
+		defines "IW_RELEASE"
+		runtime "Release"
+		optimize "On"
+
+project "wCommon"
+	kind "SharedLib"
+	language "C++"
+	location  (iwengdir .. blddir)
+	targetdir (iwengdir .. bindir)
+	implibdir (iwengdir .. libdir)
+	objdir    (iwengdir .. blddir)
+
+	files {
+		iwengdir .. incdir .. "/iw/events/**.h",
+		iwengdir .. srcdir .. "/events/**.cpp"
+	}
+
+	includedirs {
+		iwengdir  .. incdir
+	}
+
+	links {
+		"wEvents",
+		"wUtil",
+		"wMath"
+	}
+
+	filter "system:windows"
+		cppdialect "C++17"
+		systemversion "latest"
+		defines {
+			"IW_PLATFORM_WINDOWS",
+			"IW_BUILD_DLL"
+		}
+
+	filter "configurations:Debug"
+		defines "IW_DEBUG"
+		runtime "Debug"
+		symbols "On"
+
+	filter "configurations:Release"
+		defines "IW_RELEASE"
+		runtime "Release"
+		optimize "On"
+
+project "wEntity"
+	kind "SharedLib"
+	language "C++"
+	location  (iwengdir .. blddir)
+	targetdir (iwengdir .. bindir)
+	implibdir (iwengdir .. libdir)
+	objdir    (iwengdir .. blddir)
+
+	files {
+		iwengdir .. incdir .. "/iw/events/**.h",
+		iwengdir .. srcdir .. "/events/**.cpp"
+	}
+
+	includedirs {
+		iwengdir  .. incdir
+	}
+
+	links {
+		"wEvents",
+		"wLog",
+		"wUtil",
+		"wMath"
+	}
+
+	filter "system:windows"
+		cppdialect "C++17"
+		systemversion "latest"
+		defines {
+			"IW_PLATFORM_WINDOWS",
+			"IW_BUILD_DLL"
+		}
+
+	filter "configurations:Debug"
+		defines "IW_DEBUG"
+		runtime "Debug"
+		symbols "On"
+
+	filter "configurations:Release"
+		defines "IW_RELEASE"
+		runtime "Release"
+		optimize "On"
+
+project "wRenderer"
+	kind "SharedLib"
+	language "C++"
+	location  (iwengdir .. blddir)
+	targetdir (iwengdir .. bindir)
+	implibdir (iwengdir .. libdir)
+	objdir    (iwengdir .. blddir)
+
+	files {
+		iwengdir .. incdir .. "/iw/renderer/**.h",
+		iwengdir .. srcdir .. "/renderer/**.cpp"
+	}
+
+	includedirs {
+		iwengdir  .. incdir,
+		glewdir   .. incdir,
+	}
+
+	links {
+		"wLog",
+		"wMath",
+		"GLEW",
+		"opengl32.lib"
+	}
+
+	filter "system:windows"
+		cppdialect "C++17"
+		systemversion "latest"
+		defines {
+			"IW_PLATFORM_WINDOWS",
+			"IW_BUILD_DLL"
+		}
+
+	filter "configurations:Debug"
+		defines "IW_DEBUG"
+		runtime "Debug"
+		symbols "On"
+
+	filter "configurations:Release"
+		defines "IW_RELEASE"
+		runtime "Release"
+		optimize "On"
+
+project "wGraphics"
+	kind "SharedLib"
+	language "C++"
+	location  (iwengdir .. blddir)
+	targetdir (iwengdir .. bindir)
+	implibdir (iwengdir .. libdir)
+	objdir    (iwengdir .. blddir)
+
+	files {
+		iwengdir .. incdir .. "/iw/graphics/**.h",
+		iwengdir .. srcdir .. "/graphics/**.cpp"
+	}
+
+	includedirs {
+		iwengdir  .. incdir,
+		glewdir   .. incdir,
+		assimpdir .. incdir,
+		assimpdir .. blddir .. incdir,
+		stbdir .. incdir,
+	}
+
+	libdirs {
+		assimpdir .. blddir .. "/code/%{cfg.buildcfg}",
+	}
+
+	links {
+		"wLog",
+		"wUtil",
+		"wMath",
+		"wCommon",
+		"wRenderer",
+		"GLEW",
+		"assimp-vc140-mt",
+	}
+
+	filter "system:windows"
+		cppdialect "C++17"
+		systemversion "latest"
+		defines {
+			"IW_PLATFORM_WINDOWS",
+			"IW_BUILD_DLL"
 		}
 
 	filter "configurations:Debug"
