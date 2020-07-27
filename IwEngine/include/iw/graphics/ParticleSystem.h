@@ -186,6 +186,11 @@ namespace Graphics {
 		}
 
 		void Update() {
+			if (!m_update) {
+				//LOG_WARNING << "Tried to update particle system with no update function!";
+				return;
+			}
+
 			m_needsToUpdateBuffer |= m_update(this, m_particles.data(), (unsigned)m_particles.size());
 		}
 

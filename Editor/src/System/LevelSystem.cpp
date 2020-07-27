@@ -57,7 +57,7 @@ LevelSystem::LevelSystem(
 }
 
 int LevelSystem::Initialize() {
-	Bus->send <ResetLevelEvent>();
+	Bus->send<ResetLevelEvent>();
 
 	// Leaves
 
@@ -141,7 +141,10 @@ bool LevelSystem::On(
 	LevelDoor*     door = doorEntity.Find<LevelDoor>();
 	iw::Transform* tran = doorEntity.Find<iw::Transform>();
 
-	if (!door) return true; // broken from query in GetEntitiesFromManifold
+	if (!door) {
+		LOG_INFO << "bad query";
+		return true;
+	}
 
 	if (door->State == LevelDoorState::OPEN) {
 		door->State = LevelDoorState::LOCKED; // stops events from being spammed
@@ -275,6 +278,11 @@ iw::Entity LevelSystem::LoadLevel(
 	for (ModelPrefab& prefab : currentLevel.Models) {
 		iw::ref<iw::Model> model = Asset->Load<iw::Model>(prefab.ModelName);
 
+		if (!model) {
+			LOG_ERROR << "Failed to load part of level;";
+			continue;
+		}
+
 		iw::Entity entity = Space->CreateEntity<iw::Transform, iw::Model>();
 		iw::Transform* t = entity.Set<iw::Transform>(prefab.Transform);
 		
@@ -300,47 +308,47 @@ iw::Entity LevelSystem::LoadLevel(
 					mesh.Material()->SetTexture("normalMap2", Asset->Load<iw::Texture>("textures/dirt/normal.jpg"));
 				}
 
-				iw::Entity plants = Space->CreateEntity<iw::Transform, iw::ParticleSystem<>>();
+				//iw::Entity plants = Space->CreateEntity<iw::Transform, iw::ParticleSystem<>>();
 			}
 
 			else if(mesh.Data()->Name().find("Tree") != std::string::npos) 
 			{
-				iw::Entity leaves = Space->CreateEntity<iw::Transform, iw::ParticleSystem<iw::StaticParticle>>();
+				//iw::Entity leaves = Space->CreateEntity<iw::Transform, iw::ParticleSystem<iw::StaticParticle>>();
 
-				iw::Transform* tran = leaves.Set<iw::Transform>(transform);
-				iw::ParticleSystem<iw::StaticParticle>* pSys = leaves.Set<iw::ParticleSystem<iw::StaticParticle>>();
+				//iw::Transform* tran = leaves.Set<iw::Transform>(transform);
+				//iw::ParticleSystem<iw::StaticParticle>* pSys = leaves.Set<iw::ParticleSystem<iw::StaticParticle>>();
 
-				tran->SetParent(levelTransform);
-				iw::Mesh leafMesh = Asset->Load<iw::Model>("models/forest/redleaf.gltf")->GetMesh(0);
+				//tran->SetParent(levelTransform);
+				//iw::Mesh leafMesh = Asset->Load<iw::Model>("models/forest/redleaf.gltf")->GetMesh(0);
 
-				leafMesh.SetData(leafMesh.Data()->MakeLink());
+				//leafMesh.SetData(leafMesh.Data()->MakeLink());
 
-				pSys->SetTransform(tran);
-				pSys->SetParticleMesh(leafMesh);
+				//pSys->SetTransform(tran);
+				//pSys->SetParticleMesh(leafMesh);
 
 				// Spawn leaves on tree
 
 				//Task->queue([&]() {
-					iw::vector3* positions = (iw::vector3*)mesh.Data()->Get(iw::bName::POSITION);
-					iw::vector3* normals   = (iw::vector3*)mesh.Data()->Get(iw::bName::NORMAL);
-					iw::Color*   colors    = (iw::Color*)  mesh.Data()->Get(iw::bName::COLOR);
+					//iw::vector3* positions = (iw::vector3*)mesh.Data()->Get(iw::bName::POSITION);
+					//iw::vector3* normals   = (iw::vector3*)mesh.Data()->Get(iw::bName::NORMAL);
+					//iw::Color*   colors    = (iw::Color*)  mesh.Data()->Get(iw::bName::COLOR);
 
-					unsigned count = mesh.Data()->GetCount(iw::bName::COLOR);
+					//unsigned count = mesh.Data()->GetCount(iw::bName::COLOR);
 
-					for (int i = 0; i < count; i++) {
-						if (colors[i].r > 0.5f
-							&& iw::randf() > 0.5f)
-						{
-							iw::vector3 rand = iw::vector3(iw::randf(), iw::randf(), iw::randf()) * iw::Pi;
+					//for (int i = 0; i < count; i++) {
+					//	if (colors[i].r > 0.5f
+					//		&& iw::randf() > 0.5f)
+					//	{
+					//		iw::vector3 rand = iw::vector3(iw::randf(), iw::randf(), iw::randf()) * iw::Pi;
 
-							iw::Transform t;
-							t.Position = positions[i] + rand * 0.2f;
-							t.Scale = iw::randf() + 1.2f;
-							t.Rotation = iw::quaternion::from_euler_angles(iw::vector3(iw::Pi + rand.x * 0.2f, rand.y, rand.z * 0.2f));
+					//		iw::Transform t;
+					//		t.Position = positions[i] + rand * 0.2f;
+					//		t.Scale = iw::randf() + 1.2f;
+					//		t.Rotation = iw::quaternion::from_euler_angles(iw::vector3(iw::Pi + rand.x * 0.2f, rand.y, rand.z * 0.2f));
 
-							pSys->SpawnParticle(t);
-						}
-					}
+					//		pSys->SpawnParticle(t);
+					//	}
+					//}
 				//});
 			}
 
@@ -754,9 +762,8 @@ void LevelSystem::DestroyAll(
 		}
 
 		iw::Entity e = Space->FindEntity(transform);
-
 		if (e) {
-			Space->DestroyEntity(e.Index());
+			e.Destroy();
 		}
 	}
 }

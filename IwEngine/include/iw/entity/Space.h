@@ -324,35 +324,35 @@ namespace ECS {
 //
 // ---------------------------------------------------------
 
+		IWENTITY_API
+		void ExecuteQueue();
+
 		template<
 			typename _t>
 		void QueueChange(
 			_t* prop,
 			_t  value)
 		{
-			static_assert(std::is_integral_v<_t>); // make sure isn't like a vector or something
+			static_assert(std::is_integral_v<_t>); // make sure isn't a vector or something
 
-			m_propQueue.push({
+			QueueEntity(
 				prop,
 				new _t(value),
 				GetCopyFunc<_t>()
-			});
-		}
-
-		void QueueEntity(
-			EntityHandle entity,
-			func_EntityChange func)
-		{
-			m_entityQueue.push({
-				entity,
-				func
-			});
+			);
 		}
 
 		IWENTITY_API
-		void ExecuteQueue();
-
+		void QueueEntity(
+			EntityHandle entity,
+			func_EntityChange func);
 	private:
+		IWENTITY_API
+		void QueueEntity(
+			void* prop,
+			void* change,
+			func_DeepCopy& copy);
+
 		// Moves components from one chunk list to another
 		void MoveComponents(
 			ref<EntityData>& entityData,

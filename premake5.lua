@@ -344,6 +344,10 @@ workspace "wEngine"
 			"wEvents"
 		}
 
+		defines {
+			"IW_USE_EVENTS"
+		}
+
 		filter "system:windows"
 			cppdialect "C++17"
 			systemversion "latest"

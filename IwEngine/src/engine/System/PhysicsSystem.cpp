@@ -44,20 +44,5 @@ namespace Engine {
 			accumulator = 0;
 		//}
 	}
-
-	bool PhysicsSystem::On(
-		EntityDestroyedEvent& e)
-	{
-		CollisionObject* object = Space->FindComponent<CollisionObject>(e.Entity);
-		if (!object) {
-			object = Space->FindComponent<Rigidbody>(e.Entity);
-		}
-
-		if (object) {
-			Physics->RemoveCollisionObject(object);
-		}
-
-		return false;
-	}
 }
 }

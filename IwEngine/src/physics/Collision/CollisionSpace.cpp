@@ -25,7 +25,7 @@ namespace Physics {
 
 		auto itr = std::find(m_objects.begin(), m_objects.end(), object);
 		
-		if (itr != m_objects.end()) {
+		if (itr == m_objects.end()) {
 			LOG_WARNING << "Tried to remove object that doesn't exist in the collision space";
 			return;
 		}

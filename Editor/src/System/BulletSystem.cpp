@@ -23,45 +23,6 @@ BulletSystem::BulletSystem(
 	, baseColor(iw::Color::From255(0, 213, 255, 191))
 {}
 
-// sucks that this needs to be here, need to fix lambdas to get it to work
-void BulletSystem::collide(
-	iw::Manifold& man,
-	iw::scalar dt)
-{
-	iw::Entity bulletEntity, otherEntity;
-	bool noent = GetEntitiesFromManifold<Bullet>(man, bulletEntity, otherEntity);
-
-	if (noent) {
-		return;
-	}
-
-	Bullet* bullet = bulletEntity.Find<Bullet>();
-
-	if (   otherEntity.Has<Bullet>()
-		|| otherEntity.Has<Enemy>()
-		|| otherEntity.Has<DontDeleteBullets>()
-		|| otherEntity.Has<LevelDoor>())
-	{
-		return;
-	}
-
-	iw::Transform* bulletTransform = bulletEntity.Find<iw::Transform>();
-
-	if (otherEntity.Has<Player>()) {
-		Bus->push<GiveScoreEvent>(bulletTransform->Position, 0, true);
-	}
-
-	else if (otherEntity.Has<EnemyDeathCircle>()) {
-		iw::Transform* otherTransform = otherEntity.Find<iw::Transform>();
-
-		float score = ceil((bulletTransform->Position - otherTransform->Position).length()) * 10;
-		Bus->push<GiveScoreEvent>(bulletTransform->Position, score, false);
-	}
-
-	bulletTransform->SetParent(nullptr);
-	Space->DestroyEntity(bulletEntity.Index());
-}
-
 int BulletSystem::Initialize() {
 	iw::Mesh mesh = Asset->Load<iw::Model>("Sphere")->GetMesh(0).MakeInstance();
 
@@ -76,8 +37,6 @@ int BulletSystem::Initialize() {
 	rigidbody.SetMass(1);
 	rigidbody.SetSimGravity(false);
 	rigidbody.SetIsTrigger(true);
-
-	rigidbody.SetOnCollision(iw::bind<void, BulletSystem*, iw::Manifold&, float>(&BulletSystem::collide, this)); // garbo
 
 	iw::SphereCollider collider(0, 0.5f);
 

@@ -130,18 +130,21 @@ namespace Engine {
 			if (!a) a = Space->FindEntity<iw::Rigidbody>(manifold.ObjA);
 			if (!b) b = Space->FindEntity<iw::Rigidbody>(manifold.ObjB);
 
-			if (!a || !b) return true;
+			if (!a || !b) return true; // no physics components
 
-			if (   !a.Has<_t1>()
-				&& b.Has<_t1>())
-			{
+			bool a1 = a.Has<_t1>();
+			bool b1 = b.Has<_t1>();
+
+			if (!a1 && !b1) return true; // no t1
+
+			if (b1) { // b has t1
 				iw::Entity t = a;
 				a = b;
 				b = t;
 			}
 
 			if constexpr (std::is_same_v<_t2, void> == false) {
-				if (!b.Has<_t2>()) {
+				if (!b.Has<_t2>()) { // no t2
 					return true;
 				}
 			}

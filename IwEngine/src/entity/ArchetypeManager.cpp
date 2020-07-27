@@ -101,20 +101,8 @@ namespace ECS {
 	iw::ref<ArchetypeQuery> ArchetypeManager::MakeQuery(
 		const iw::ref<ComponentQuery>& query)
 	{
-		// All: Rigidbody Collider
-		// Any: Transform
-		// None: Bullet
-		//
-		// 
-
-		//LOG_DEBUG << "Searching for";
-		//
-		//for (const iw::ref<Component>& component : query->GetComponents()) {
-		//	LOG_INFO << component->Name << " ";
-		//}
-
 		std::vector<size_t> matches;
-		for (const iw::ref<Archetype>& archetype : m_archetypes) {
+		for (const iw::ref<Archetype>& archetype : m_archetypes) { // not sure whats the best search order is...												   
 			bool match = true;
 
 			// reject if archeptye has component in none list
@@ -130,7 +118,7 @@ namespace ECS {
 				continue;
 			}
 
-			// reject if archetype doesnt have every component in all list
+			// reject if archetype doesn't have a component in all list
 
 			for (const iw::ref<Component>& component : query->GetAll()) {
 				if (!archetype->HasComponent(component)) {
@@ -143,51 +131,23 @@ namespace ECS {
 				continue;
 			}
 
-			if (match) {
-				matches.push_back(archetype->Hash);
+			// reject if archetype doesn't have at lest one component in any list
+
+			bool hasAComponent = false;
+			for (const iw::ref<Component>& component : query->GetAll()) {
+				if (archetype->HasComponent(component)) {				
+					hasAComponent = true;
+					break;
+				}
 			}
 
-			//LOG_INFO << "Archetype: ";
+			match = hasAComponent;
 
-			//for (size_t i = 0; i < archetype->Count; i++) {
-			//	LOG_INFO << archetype->GetLayout(i)->Component->Name << " ";
-			//}
+			if (!match) {
+				continue;
+			}
 
-			//bool match = true;
-			//		
-			//// reject if archeptye has component in none list
-
-			//for (const iw::ref<Component>& component : query->GetNone()) {
-			//	if (archetype->HasComponent(component)) {
-			//		match = false;
-			//		break;
-			//	}
-			//}
-
-			//if (match) {
-			//	match = false;
-
-			//	// reject if archetype doesn't have a component in any list
-
-			//	for (const iw::ref<Component>& component : query->GetAny()) {
-			//		if (archetype->HasComponent(component)) {
-			//			match = true;
-			//			break;
-			//		}
-			//	}
-
-			//	if (!match) {
-
-			//	}
-			//}
-
-			//if (match) {
-			//	LOG_WARNING << "accepted";
-			//}
-
-			//else {
-			//	LOG_ERROR << "rejected";
-			//}
+			matches.push_back(archetype->Hash);
 		}
 
 		size_t bufSize = sizeof(ArchetypeQuery)

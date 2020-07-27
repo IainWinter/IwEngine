@@ -19,11 +19,11 @@ namespace Engine {
 		for (auto entity : entities) {
 			auto [transform, system] = entity.Components.Tie<Components>();
 
-			if (transform && !system->GetTransform()) {
-				system->SetTransform(transform);
-			}
+			//if (transform && !system->GetTransform()) {
+			//	system->SetTransform(transform);
+			//}
 
-			system->Update();
+			//system->Update();
 		}
 	}
 }

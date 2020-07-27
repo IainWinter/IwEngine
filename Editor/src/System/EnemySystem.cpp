@@ -416,6 +416,41 @@ iw::Transform* EnemySystem::SpawnBullet(
 	r->SetTrans(t);
 	r->SetVelocity(iw::vector3::unit_x * rot * b->Speed);
 
+	r->SetOnCollision([&](iw::Manifold& man, float dt) { // put in prefab
+		iw::Entity bulletEntity, otherEntity;
+		bool noent = GetEntitiesFromManifold<Bullet>(man, bulletEntity, otherEntity);
+
+		if (noent) {
+			return;
+		}
+
+		Bullet* bullet = bulletEntity.Find<Bullet>();
+
+		if (otherEntity.Has<Bullet>()
+			|| otherEntity.Has<Enemy>()
+			|| otherEntity.Has<DontDeleteBullets>()
+			|| otherEntity.Has<LevelDoor>())
+		{
+			return;
+		}
+
+		iw::Transform* bulletTransform = bulletEntity.Find<iw::Transform>();
+
+		if (otherEntity.Has<Player>()) {
+			Bus->push<GiveScoreEvent>(bulletTransform->Position, 0, true);
+		}
+
+		else if (otherEntity.Has<EnemyDeathCircle>()) {
+			iw::Transform* otherTransform = otherEntity.Find<iw::Transform>();
+
+			float score = ceil((bulletTransform->Position - otherTransform->Position).length()) * 10;
+			Bus->push<GiveScoreEvent>(bulletTransform->Position, score, false);
+		}
+
+		bulletTransform->SetParent(nullptr);
+		Space->QueueEntity(bulletEntity.Handle, iw::func_Destroy);
+	});
+
 	Physics->AddRigidbody(r);
 
 	return t;
@@ -511,7 +546,7 @@ iw::Transform* EnemySystem::SpawnEnemy(
 		Bus->push<GiveScoreEvent> (transform->Position, score * enemy->ScoreMultiple);
 
 		transform->SetParent(nullptr);
-		Space->DestroyEntity(enemyEntity.Index());
+		Space->QueueEntity(enemyEntity.Handle, iw::func_Destroy);
 	});
 
 	return t;

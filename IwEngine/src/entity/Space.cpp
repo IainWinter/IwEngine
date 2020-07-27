@@ -324,6 +324,28 @@ namespace ECS {
 		}
 	}
 
+	void Space::QueueEntity(
+		EntityHandle entity,
+		func_EntityChange func)
+	{
+		m_entityQueue.push({
+			entity,
+			func
+		});
+	}
+
+	void Space::QueueEntity(
+		void* prop, 
+		void* change, 
+		func_DeepCopy& copy)
+	{
+		m_propQueue.push({
+			prop,
+			change,
+			copy
+		});
+	}
+
 	void Space::MoveComponents(
 		ref<EntityData>& entityData,
 		const ref<Archetype>& archetype)

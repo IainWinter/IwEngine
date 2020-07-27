@@ -28,9 +28,6 @@ namespace Engine {
 		IWENGINE_API
 		void FixedUpdate(
 			EntityComponentArray& view);
-
-		IWENGINE_API
-		bool On(EntityDestroyedEvent& e) override;
 	};
 }
 
