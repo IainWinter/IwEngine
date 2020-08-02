@@ -32,10 +32,10 @@ namespace Graphics {
 	struct LightData {
 		vector4 LightCounts = 0; // point .x, direct .y
 
-		//struct PointLightDescription {
-		//	vector4 Position; //float Radius;
-		//	vector4 Color;
-		//} PointLights[MAX_POINT_LIGHTS];
+		struct PointLightDescription {
+			vector4 Position; //vector3 Position float Radius;
+			vector4 Color;
+		} PointLights[MAX_POINT_LIGHTS];
 
 		struct DirectionalLightDescription {
 			vector4 InvDirection;

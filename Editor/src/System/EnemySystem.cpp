@@ -461,6 +461,9 @@ iw::Transform* EnemySystem::SpawnEnemy(
 	iw::vector3 position,
 	iw::vector3 velocity)
 {
+	// Example using an ECS that I'll cover in another video
+	// 'Physics' is the DynamicsWorld
+
 	iw::Entity ent = Space->CreateEntity<iw::Transform, iw::Model, iw::SphereCollider, Enemy>();
 
 	iw::CollisionObject* c;

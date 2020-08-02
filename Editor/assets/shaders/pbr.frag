@@ -1,25 +1,6 @@
 #version 420
 
-#define MAX_POINT_LIGHTS 16
-#define MAX_DIRECTIONAL_LIGHTS 4
-
-struct PointLight {
-	vec3 Position;
-	float Radius;
-};
-
-struct DirectionalLight {
-	vec3 InvDirection;
-};
-
-layout(std140) uniform Lights{
-	int lights_pad1, lights_pad2;
-
-	int pointLightCount;
-	int directionalLightCount;
-	PointLight       pointLights      [MAX_POINT_LIGHTS];
-	DirectionalLight directionalLights[MAX_DIRECTIONAL_LIGHTS];
-};
+#include shaders/lights.shader
 
 in vec3 WorldPos;
 in vec4 LightPos;
@@ -27,7 +8,6 @@ in vec3 CameraPos;
 in vec2 TexCoords;
 in vec3 Normal;
 in mat3 TBN;
-in vec4 DirectionalLightPos[MAX_DIRECTIONAL_LIGHTS];
 
 out vec4 FragColor;
 
@@ -74,6 +54,8 @@ uniform samplerCube mat_shadowMap2;       // take out of material at some point
 
 const float PI = 3.14159265359f;
 
+#include shaders/shadows.frag
+
 // Math functions
 
 float lerp(
@@ -82,14 +64,6 @@ float lerp(
 	float w)
 {
 	return a + w * (b - a);
-}
-
-float linstep(
-	float l, 
-	float h, 
-	float v)
-{
-	return clamp((v - l) / (h - l), 0.0, 1.0);
 }
 
 // Gamma correction
@@ -114,30 +88,6 @@ vec3 linearToSRGB(
 
 // Shadows
 
-float DirectionalLightShadow(
-	vec4 coords4)
-{
-	if (mat_hasShadowMap == 0) {
-		return 1.0f;
-	}
-
-	vec3 coords = (coords4.xyz / coords4.w) * 0.5 + 0.5;
-	vec2 moments = texture(mat_shadowMap, coords.xy).rg;
-	float compare = coords.z;
-
-	if (compare > 1.0) {
-		return 1.0;
-	}
-
-	float p = step(compare, moments.x);
-	float v = max(moments.y - moments.x * moments.x, 0.00002);
-
-	float d = compare - moments.x;
-	float pMax = linstep(0.2, 1.0, v / (v + d * d));
-
-	return min(max(p, pMax), 1.0);
-}
-
 float PointLightShadow(
 	vec3 NegL,
 	float R)
@@ -154,51 +104,6 @@ float PointLightShadow(
 
 	return shadow;
 }
-
- //#define SAMPLES_COUNT 32
- //#define INV_SAMPLES_COUNT (1.0f / SAMPLES_COUNT)
- //uniform sampler2D decal;
- //// decal texture
- //
- //uniform sampler2D spot;
- //// projected spotlight image
- //
- //uniform sampler2DShadow shadowMap;
- //// shadow map 
- //
- //uniform float fwidth;
- //uniform vec2 offsets[SAMPLES_COUNT];
- //
- //// these are passed down from vertex shader
- //varying vec4 shadowMapPos;
- //varying vec3 normal;
- //varying vec2 texCoord;
- //varying vec3 lightVec;
- //varying vec3 view;
- //
- //void main(void) {
-//	float shadow = 0;
-//	float fsize = shadowMapPos.w * fwidth;
-//	vec4 smCoord = shadowMapPos;
-//
-//	for (int i = 0; i<SAMPLES_COUNT; i++) {
-//		smCoord.xy = offsets[i] * fsize + shadowMapPos;
-//		shadow += texture2DProj(shadowMap, smCoord) * INV_SAMPLES_COUNT;
-//	}
-//
-//	vec3 N = normalize(normal);
-//	vec3 L = normalize(lightVec);
-//	vec3 V = normalize(view);
-//	vec3 R = reflect(-V, N);
-//
-//	// calculate diffuse dot product
-//	float NdotL = max(dot(N, L), 0);
-//
-//	// modulate lighting with the computed shadow value
-//	vec3 color = texture2D(decal, texCoord).xyz;
-//
-//	gl_FragColor.xyz = (color * NdotL + pow(max(dot(R, L), 0), 64)) * shadow * texture2DProj(spot, shadowMapPos) + color * 0.1;
-//}
 
 // PBR BRDF
 
@@ -245,16 +150,6 @@ float Fr_DisneyDiffuse(
 	float viewScatter  = F_Schlick(f0, fd90, NdotV).r;
 	
 	return lightScatter * viewScatter * energyFactor;
-}
-
-// attenuation
-
-float getDistanceAtt(
-	vec3 unormalizedLightVector,
-	float invSqrRadius)
-{
-	float dist2 = dot(unormalizedLightVector, unormalizedLightVector);
-	return clamp(1.0 - dist2 * invSqrRadius, 0.0, 1.0);
 }
 
 vec3 BRDF(
@@ -356,19 +251,19 @@ void main() {
 
 	vec3 color = vec3(0);
 
-	for (int i = 0; i < pointLightCount; i++) {
-		vec3 P = pointLights[i].Position;
+	for (int i = 0; i < lightCounts.x; i++) {
+		vec3 P = pointLights[i].Position.xyz;
 		vec3 L = P - WorldPos;
 
-		float R = pointLights[i].Radius;
+		float R = pointLights[i].Position.w;
 
 		color += BRDF(N, V, L, albedo.xyz, f0, f90, roughness, metallic) 
-		       * getDistanceAtt(L, 1 / pow(R, 2))
+		       * DistanceAttenuation(L, R)
 			   * PointLightShadow(-L, R);
 	}
 	
-	for (int i = 0; i < directionalLightCount; i++) {
-		vec3 L = directionalLights[i].InvDirection;
+	for (int i = 0; i < lightCounts.y; i++) {
+		vec3 L = directionalLights[i].InvDirection.xyz;
 
 		color += BRDF(N, V, L, albedo.xyz, f0, f90, roughness, metallic)
 		       * DirectionalLightShadow(DirectionalLightPos[i]);

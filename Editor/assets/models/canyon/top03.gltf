@@ -1,0 +1,323 @@
+{
+    "asset" : {
+        "generator" : "Khronos glTF Blender I/O v1.1.46",
+        "version" : "2.0"
+    },
+    "scene" : 0,
+    "scenes" : [
+        {
+            "name" : "Scene",
+            "nodes" : [
+                0,
+                1
+            ]
+        }
+    ],
+    "nodes" : [
+        {
+            "mesh" : 0,
+            "name" : "GroundTop3",
+            "translation" : [
+                -0.0087890625,
+                0,
+                -0.4805259704589844
+            ]
+        },
+        {
+            "mesh" : 1,
+            "name" : "Rock.001",
+            "rotation" : [
+                0.526787519454956,
+                0.17206326127052307,
+                -0.5002811551094055,
+                0.665288507938385
+            ],
+            "scale" : [
+                7.549405097961426,
+                7.549403667449951,
+                7.549404144287109
+            ],
+            "translation" : [
+                24.220977783203125,
+                1.2397210597991943,
+                -8.973865509033203
+            ]
+        }
+    ],
+    "materials" : [
+        {
+            "doubleSided" : true,
+            "emissiveFactor" : [
+                0,
+                0,
+                0
+            ],
+            "name" : "Forest_Ground",
+            "normalTexture" : {
+                "index" : 0,
+                "texCoord" : 0
+            },
+            "pbrMetallicRoughness" : {
+                "baseColorTexture" : {
+                    "index" : 1,
+                    "texCoord" : 0
+                },
+                "metallicFactor" : 0,
+                "roughnessFactor" : 1
+            }
+        },
+        {
+            "doubleSided" : true,
+            "emissiveFactor" : [
+                0,
+                0,
+                0
+            ],
+            "name" : "Rock no Shine",
+            "normalTexture" : {
+                "index" : 2,
+                "texCoord" : 0
+            },
+            "pbrMetallicRoughness" : {
+                "baseColorTexture" : {
+                    "index" : 3,
+                    "texCoord" : 0
+                },
+                "metallicFactor" : 0,
+                "roughnessFactor" : 1
+            }
+        }
+    ],
+    "meshes" : [
+        {
+            "name" : "Top3.Ground",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 0,
+                        "NORMAL" : 1,
+                        "TEXCOORD_0" : 2,
+                        "COLOR_0" : 3,
+                        "JOINTS_0" : 4,
+                        "WEIGHTS_0" : 5
+                    },
+                    "indices" : 6,
+                    "material" : 0
+                }
+            ]
+        },
+        {
+            "name" : "Cube.002",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 7,
+                        "NORMAL" : 8,
+                        "TEXCOORD_0" : 9,
+                        "COLOR_0" : 10
+                    },
+                    "indices" : 11,
+                    "material" : 1
+                }
+            ]
+        }
+    ],
+    "textures" : [
+        {
+            "source" : 0
+        },
+        {
+            "source" : 1
+        },
+        {
+            "source" : 2
+        },
+        {
+            "source" : 3
+        }
+    ],
+    "images" : [
+        {
+            "mimeType" : "image/jpeg",
+            "name" : "normal",
+            "uri" : "textures/rock/normal.jpg"
+        },
+        {
+            "mimeType" : "image/jpeg",
+            "name" : "baseColor",
+            "uri" : "textures/rock/baseColor.jpg"
+        },
+        {
+            "mimeType" : "image/jpeg",
+            "name" : "normal",
+            "uri" : "textures/grass/normal.jpg"
+        },
+        {
+            "mimeType" : "image/jpeg",
+            "name" : "baseColor",
+            "uri" : "textures/grass/baseColor.jpg"
+        }
+    ],
+    "accessors" : [
+        {
+            "bufferView" : 0,
+            "componentType" : 5126,
+            "count" : 10384,
+            "max" : [
+                32.643775939941406,
+                8.843279838562012,
+                13.569890975952148
+            ],
+            "min" : [
+                -33.032283782958984,
+                -0.235407292842865,
+                -15.717245101928711
+            ],
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 1,
+            "componentType" : 5126,
+            "count" : 10384,
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 2,
+            "componentType" : 5126,
+            "count" : 10384,
+            "type" : "VEC2"
+        },
+        {
+            "bufferView" : 3,
+            "componentType" : 5126,
+            "count" : 10384,
+            "type" : "VEC4"
+        },
+        {
+            "bufferView" : 4,
+            "componentType" : 5123,
+            "count" : 10384,
+            "type" : "VEC4"
+        },
+        {
+            "bufferView" : 5,
+            "componentType" : 5126,
+            "count" : 10384,
+            "type" : "VEC4"
+        },
+        {
+            "bufferView" : 6,
+            "componentType" : 5123,
+            "count" : 10386,
+            "type" : "SCALAR"
+        },
+        {
+            "bufferView" : 7,
+            "componentType" : 5126,
+            "count" : 649,
+            "max" : [
+                0.5563063621520996,
+                0.8699829578399658,
+                0.5536098480224609
+            ],
+            "min" : [
+                -0.5563371777534485,
+                -1.1290346384048462,
+                -0.5116347670555115
+            ],
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 8,
+            "componentType" : 5126,
+            "count" : 649,
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 9,
+            "componentType" : 5126,
+            "count" : 649,
+            "type" : "VEC2"
+        },
+        {
+            "bufferView" : 10,
+            "componentType" : 5126,
+            "count" : 649,
+            "type" : "VEC4"
+        },
+        {
+            "bufferView" : 11,
+            "componentType" : 5123,
+            "count" : 2730,
+            "type" : "SCALAR"
+        }
+    ],
+    "bufferViews" : [
+        {
+            "buffer" : 0,
+            "byteLength" : 124608,
+            "byteOffset" : 0
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 124608,
+            "byteOffset" : 124608
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 83072,
+            "byteOffset" : 249216
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 166144,
+            "byteOffset" : 332288
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 83072,
+            "byteOffset" : 498432
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 166144,
+            "byteOffset" : 581504
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 20772,
+            "byteOffset" : 747648
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 7788,
+            "byteOffset" : 768420
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 7788,
+            "byteOffset" : 776208
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 5192,
+            "byteOffset" : 783996
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 10384,
+            "byteOffset" : 789188
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 5460,
+            "byteOffset" : 799572
+        }
+    ],
+    "buffers" : [
+        {
+            "byteLength" : 805032,
+            "uri" : "top03.bin"
+        }
+    ]
+}

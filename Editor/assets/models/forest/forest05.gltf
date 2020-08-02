@@ -1959,9 +1959,10 @@
                     "attributes" : {
                         "POSITION" : 0,
                         "NORMAL" : 1,
-                        "TEXCOORD_0" : 2
+                        "TEXCOORD_0" : 2,
+                        "COLOR_0" : 3
                     },
-                    "indices" : 3,
+                    "indices" : 4,
                     "material" : 0
                 }
             ]
@@ -1971,25 +1972,26 @@
             "primitives" : [
                 {
                     "attributes" : {
-                        "POSITION" : 4,
-                        "NORMAL" : 5,
-                        "TEXCOORD_0" : 6
+                        "POSITION" : 5,
+                        "NORMAL" : 6,
+                        "TEXCOORD_0" : 7,
+                        "COLOR_0" : 8
                     },
-                    "indices" : 7,
+                    "indices" : 9,
                     "material" : 1
                 }
             ]
         },
         {
-            "name" : "Cube.002",
+            "name" : "RockLoPoly",
             "primitives" : [
                 {
                     "attributes" : {
-                        "POSITION" : 8,
-                        "NORMAL" : 9,
-                        "TEXCOORD_0" : 10
+                        "POSITION" : 10,
+                        "NORMAL" : 11,
+                        "TEXCOORD_0" : 12
                     },
-                    "indices" : 11,
+                    "indices" : 13,
                     "material" : 2
                 }
             ]
@@ -2078,12 +2080,18 @@
         },
         {
             "bufferView" : 3,
+            "componentType" : 5126,
+            "count" : 18230,
+            "type" : "VEC4"
+        },
+        {
+            "bufferView" : 4,
             "componentType" : 5123,
             "count" : 24576,
             "type" : "SCALAR"
         },
         {
-            "bufferView" : 4,
+            "bufferView" : 5,
             "componentType" : 5126,
             "count" : 2839,
             "max" : [
@@ -2099,25 +2107,31 @@
             "type" : "VEC3"
         },
         {
-            "bufferView" : 5,
+            "bufferView" : 6,
             "componentType" : 5126,
             "count" : 2839,
             "type" : "VEC3"
         },
         {
-            "bufferView" : 6,
+            "bufferView" : 7,
             "componentType" : 5126,
             "count" : 2839,
             "type" : "VEC2"
         },
         {
-            "bufferView" : 7,
+            "bufferView" : 8,
+            "componentType" : 5126,
+            "count" : 2839,
+            "type" : "VEC4"
+        },
+        {
+            "bufferView" : 9,
             "componentType" : 5123,
             "count" : 6810,
             "type" : "SCALAR"
         },
         {
-            "bufferView" : 8,
+            "bufferView" : 10,
             "componentType" : 5126,
             "count" : 649,
             "max" : [
@@ -2133,19 +2147,19 @@
             "type" : "VEC3"
         },
         {
-            "bufferView" : 9,
+            "bufferView" : 11,
             "componentType" : 5126,
             "count" : 649,
             "type" : "VEC3"
         },
         {
-            "bufferView" : 10,
+            "bufferView" : 12,
             "componentType" : 5126,
             "count" : 649,
             "type" : "VEC2"
         },
         {
-            "bufferView" : 11,
+            "bufferView" : 13,
             "componentType" : 5123,
             "count" : 2730,
             "type" : "SCALAR"
@@ -2169,53 +2183,63 @@
         },
         {
             "buffer" : 0,
-            "byteLength" : 49152,
+            "byteLength" : 291680,
             "byteOffset" : 583360
         },
         {
             "buffer" : 0,
-            "byteLength" : 34068,
-            "byteOffset" : 632512
+            "byteLength" : 49152,
+            "byteOffset" : 875040
         },
         {
             "buffer" : 0,
             "byteLength" : 34068,
-            "byteOffset" : 666580
+            "byteOffset" : 924192
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 34068,
+            "byteOffset" : 958260
         },
         {
             "buffer" : 0,
             "byteLength" : 22712,
-            "byteOffset" : 700648
+            "byteOffset" : 992328
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 45424,
+            "byteOffset" : 1015040
         },
         {
             "buffer" : 0,
             "byteLength" : 13620,
-            "byteOffset" : 723360
+            "byteOffset" : 1060464
         },
         {
             "buffer" : 0,
             "byteLength" : 7788,
-            "byteOffset" : 736980
+            "byteOffset" : 1074084
         },
         {
             "buffer" : 0,
             "byteLength" : 7788,
-            "byteOffset" : 744768
+            "byteOffset" : 1081872
         },
         {
             "buffer" : 0,
             "byteLength" : 5192,
-            "byteOffset" : 752556
+            "byteOffset" : 1089660
         },
         {
             "buffer" : 0,
             "byteLength" : 5460,
-            "byteOffset" : 757748
+            "byteOffset" : 1094852
         }
     ],
     "buffers" : [
         {
-            "byteLength" : 763208,
+            "byteLength" : 1100312,
             "uri" : "forest05.bin"
         }
     ]

@@ -415,14 +415,14 @@ namespace Graphics {
 	void Renderer::SetPointLights(
 		const std::vector<PointLight*>& lights)
 	{
-		//m_lightData.lightCounts.x = lights.size();
-		//for (size_t i = 0; i < lights.size(); i++) {
-		//	m_lightData.PointLights[i].Position   = lights[i]->Position();
-		//	m_lightData.PointLights[i].Position.w = lights[i]->Radius();
-		//	m_lightData.PointLights[i].Color      = lights[i]->Color();
-		//}
+		m_lightData.LightCounts.x = lights.size();
+		for (size_t i = 0; i < lights.size(); i++) {
+			m_lightData.PointLights[i].Position   = lights[i]->Position();
+			m_lightData.PointLights[i].Position.w = lights[i]->Radius();
+			m_lightData.PointLights[i].Color      = lights[i]->Color();
+		}
 
-		//Device->UpdateBuffer(m_lightUBO, &m_lightData);
+		Device->UpdateBuffer(m_lightUBO, &m_lightData);
 	}
 
 	void Renderer::SetDirectionalLights(

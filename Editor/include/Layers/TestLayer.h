@@ -10,7 +10,6 @@ namespace iw {
 		: public Layer
 	{
 	private:
-		Scene* scene;
 		ref<Shader> shader;
 
 		ref<RenderTarget> dirShadowTarget;
@@ -28,9 +27,5 @@ namespace iw {
 		void FixedUpdate() override;
 
 		void ImGui() override;
-
-		Scene* GetScene() {
-			return scene;
-		}
 	};
 }

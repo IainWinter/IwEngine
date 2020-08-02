@@ -48,7 +48,7 @@ LevelSystem::LevelSystem(
 	, playerEntity(player)
 	, scene(scene)
 { 
-	currentLevelName = "levels/canyon/cave08.json";
+	currentLevelName = "levels/canyon/top07.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 63);
 	closedColor = iw::Color::From255(201, 66, 66, 63);
@@ -313,42 +313,42 @@ iw::Entity LevelSystem::LoadLevel(
 
 			else if(mesh.Data()->Name().find("Tree") != std::string::npos) 
 			{
-				//iw::Entity leaves = Space->CreateEntity<iw::Transform, iw::ParticleSystem<iw::StaticParticle>>();
+				iw::Entity leaves = Space->CreateEntity<iw::Transform, iw::ParticleSystem<iw::StaticParticle>>();
 
-				//iw::Transform* tran = leaves.Set<iw::Transform>(transform);
-				//iw::ParticleSystem<iw::StaticParticle>* pSys = leaves.Set<iw::ParticleSystem<iw::StaticParticle>>();
+				iw::Transform* tran = leaves.Set<iw::Transform>(transform);
+				iw::ParticleSystem<iw::StaticParticle>* pSys = leaves.Set<iw::ParticleSystem<iw::StaticParticle>>();
 
-				//tran->SetParent(levelTransform);
-				//iw::Mesh leafMesh = Asset->Load<iw::Model>("models/forest/redleaf.gltf")->GetMesh(0);
+				tran->SetParent(levelTransform);
+				iw::Mesh leafMesh = Asset->Load<iw::Model>("models/forest/redleaf.gltf")->GetMesh(0);
 
-				//leafMesh.SetData(leafMesh.Data()->MakeLink());
+				leafMesh.SetData(leafMesh.Data()->MakeLink());
 
-				//pSys->SetTransform(tran);
-				//pSys->SetParticleMesh(leafMesh);
+				pSys->SetTransform(tran);
+				pSys->SetParticleMesh(leafMesh);
 
 				// Spawn leaves on tree
 
 				//Task->queue([&]() {
-					//iw::vector3* positions = (iw::vector3*)mesh.Data()->Get(iw::bName::POSITION);
-					//iw::vector3* normals   = (iw::vector3*)mesh.Data()->Get(iw::bName::NORMAL);
-					//iw::Color*   colors    = (iw::Color*)  mesh.Data()->Get(iw::bName::COLOR);
+					iw::vector3* positions = (iw::vector3*)mesh.Data()->Get(iw::bName::POSITION);
+					iw::vector3* normals   = (iw::vector3*)mesh.Data()->Get(iw::bName::NORMAL);
+					iw::Color*   colors    = (iw::Color*)  mesh.Data()->Get(iw::bName::COLOR);
 
-					//unsigned count = mesh.Data()->GetCount(iw::bName::COLOR);
+					unsigned count = mesh.Data()->GetCount(iw::bName::COLOR);
 
-					//for (int i = 0; i < count; i++) {
-					//	if (colors[i].r > 0.5f
-					//		&& iw::randf() > 0.5f)
-					//	{
-					//		iw::vector3 rand = iw::vector3(iw::randf(), iw::randf(), iw::randf()) * iw::Pi;
+					for (int i = 0; i < count; i++) {
+						if (   colors[i].r > 0.5f
+							&& iw::randf() > 0.5f)
+						{
+							iw::vector3 rand = iw::vector3(iw::randf(), iw::randf(), iw::randf()) * iw::Pi;
 
-					//		iw::Transform t;
-					//		t.Position = positions[i] + rand * 0.2f;
-					//		t.Scale = iw::randf() + 1.2f;
-					//		t.Rotation = iw::quaternion::from_euler_angles(iw::vector3(iw::Pi + rand.x * 0.2f, rand.y, rand.z * 0.2f));
+							iw::Transform t;
+							t.Position = positions[i] + rand * 0.2f;
+							t.Scale = iw::randf() + 1.2f;
+							t.Rotation = iw::quaternion::from_euler_angles(iw::vector3(iw::Pi + rand.x * 0.2f, rand.y, rand.z * 0.2f));
 
-					//		pSys->SpawnParticle(t);
-					//	}
-					//}
+							pSys->SpawnParticle(t);
+						}
+					}
 				//});
 			}
 

@@ -1,16 +1,8 @@
 #shader Vertex
 #version 420
 
-#define MAX_DIRECTIONAL_LIGHTS 4
-
 #include shaders/camera.shader
-
-layout(std140, column_major) uniform Shadows {
-	int shadows_pad1, shadows_pad2, shadows_pad3;
-
-	int directionalLightSpaceCount;
-	mat4 directionalLightSpaces[MAX_DIRECTIONAL_LIGHTS];
-};
+#include shaders/shadows.vert
 
 layout (location = 0) in vec3 vert;
 layout (location = 1) in vec3 normal;
@@ -23,7 +15,6 @@ out vec3 CameraPos;
 out vec2 TexCoords;
 out vec3 Normal;
 out mat3 TBN;
-out vec4 DirectionalLightPos[MAX_DIRECTIONAL_LIGHTS];
 
 uniform mat4 model;
 
@@ -53,9 +44,7 @@ void main() {
 	TBN = mat3(T, B, N);
 	Normal = normalize(modelVector * normal);
 
-	for (int i = 0; i < directionalLightSpaceCount; i++) {
-		DirectionalLightPos[i] = directionalLightSpaces[i] * worldPos;
-	}
+	SetDirectionalLightPos(worldPos);
 
 	gl_Position = viewProj * worldPos;
 }
