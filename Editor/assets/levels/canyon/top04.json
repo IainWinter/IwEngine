@@ -11,28 +11,76 @@
     "z": 31.000000
   },
   "Enemies": {
-    "size": 1,
+    "size": 4,
     "items": [
       {
         "Type": 1,
         "Bullet": {
-          "Type": 2,
+          "Type": 3,
           "Speed": 5.000000,
           "Package": 0
         },
-        "Speed": 0.2400000,
-        "FireTime": 1.500000,
-        "ChargeTime": 0.000000,
+        "Speed": 0.392699,
+        "FireTime": 2.400000,
+        "ChargeTime": 1.200000,
+        "Rotation": 0.000000
+      },
+      {
+        "Type": 1,
+        "Bullet": {
+          "Type": 3,
+          "Speed": 5.000000,
+          "Package": 0
+        },
+        "Speed": 0.392699,
+        "FireTime": 2.400000,
+        "ChargeTime": 1.200000,
+        "Rotation": 0.000000
+      },
+      {
+        "Type": 1,
+        "Bullet": {
+          "Type": 0,
+          "Speed": 5.000000,
+          "Package": 0
+        },
+        "Speed": 0.392699,
+        "FireTime": 2.400000,
+        "ChargeTime": 1.200000,
+        "Rotation": 0.000000
+      },
+      {
+        "Type": 1,
+        "Bullet": {
+          "Type": 0,
+          "Speed": 5.000000,
+          "Package": 0
+        },
+        "Speed": 0.392699,
+        "FireTime": 2.400000,
+        "ChargeTime": 1.200000,
         "Rotation": 0.000000
       }
     ]
   },
   "Positions": {
-    "size": 1,
+    "size": 4,
     "items": [
       {
-        "x": 17.800000,
-        "y": 0.000000
+        "x": -4.700000,
+        "y": -9.700000
+      },
+      {
+        "x": -4.700000,
+        "y": 0.300000
+      },
+      {
+        "x": -15.000000,
+        "y": -4.700000
+      },
+      {
+        "x": 5.000000,
+        "y": -4.700000
       }
     ]
   },
@@ -63,7 +111,7 @@
     "items": []
   },
   "Capsules": {
-    "size": 2,
+    "size": 3,
     "items": [
       {
         "Center": {
@@ -92,6 +140,20 @@
         },
         "Height": 14.700000,
         "Radius": 2.500000
+      },
+      {
+        "Center": {
+          "x": -4.700000,
+          "y": 0.000000,
+          "z": -4.700000
+        },
+        "Direction": {
+          "x": 0.000000,
+          "y": 1.000000,
+          "z": 0.000000
+        },
+        "Height": 10.000000,
+        "Radius": 3.200000
       }
     ]
   },

@@ -20,15 +20,22 @@ BulletSystem::BulletSystem(
 	iw::Entity& player)
 	: iw::SystemBase("Bullet")
 	, player(player)
-	, baseColor(iw::Color::From255(0, 213, 255, 191))
 {}
 
 int BulletSystem::Initialize() {
 	iw::Mesh mesh = Asset->Load<iw::Model>("Sphere")->GetMesh(0).MakeInstance();
 
-	mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/phong.shader"));
-	mesh.Material()->Set("baseColor", baseColor);
-	mesh.Material()->Set("emissive", 2.0f);
+	normalMat = mesh.Material();
+
+	normalMat->SetShader(Asset->Load<iw::Shader>("shaders/phong.shader"));
+	normalMat->Set("baseColor", iw::Color::From255(0, 213, 255, 191));
+	normalMat->Set("emissive", 2.0f);
+
+	orbitMat = normalMat->MakeInstance();
+	seekMat  = normalMat->MakeInstance();
+
+	orbitMat->Set("baseColor", iw::Color::From255(245, 134, 0, 191));
+	seekMat->Set("baseColor", iw::Color::From255(245, 0, 196, 191));
 
 	iw::Model model;
 	model.AddMesh(mesh);
@@ -68,6 +75,13 @@ void BulletSystem::FixedUpdate() {
 	{
 		if (bullet->Timer == 0.0f) {
 			bullet->InitialVelocity = rigidbody->Velocity();
+
+			iw::Mesh& mesh = Space->FindComponent<iw::Model>(entity)->GetMesh(0);
+
+			switch (bullet->Type) {
+				case ORBIT: mesh.SetMaterial(orbitMat); break;
+				case SEEK:  mesh.SetMaterial(seekMat);  break;
+			}
 		}
 
 		switch (bullet->Type) {
@@ -77,7 +91,7 @@ void BulletSystem::FixedUpdate() {
 
 				break;
 			}
-			case ORBIT: {
+			case SEEK: {
 				if (bullet->Timer < 1.5f) {
 					iw::vector3 vel = rigidbody->Velocity();
 					iw::vector3 dir = player.Find<iw::Transform>()->Position - transform->Position;
@@ -92,12 +106,20 @@ void BulletSystem::FixedUpdate() {
 
 				break;
 			}
-			case SEEK: {
-				iw::vector3 target = player.Find<iw::Transform>()->Position;
-				rigidbody->SetVelocity((target - transform->Position).normalized() * bullet->Speed);
+			case ORBIT: {
+				iw::vector3 vel = rigidbody->Velocity();
+				iw::vector3 dir = player.Find<iw::Transform>()->Position - transform->Position;
+
+				iw::vector3 nV = vel.normalized();
+				iw::vector3 nD = dir.normalized();
+
+				iw::vector3 delta = (nD - nV) * 0.225f;
+
+				rigidbody->SetVelocity((vel + delta).normalized() * bullet->Speed);
 
 				break;
 			}
+
 		}
 
 		bullet->Timer += iw::Time::FixedTime();

@@ -426,7 +426,7 @@ iw::Transform* EnemySystem::SpawnBullet(
 
 		Bullet* bullet = bulletEntity.Find<Bullet>();
 
-		if (otherEntity.Has<Bullet>()
+		if (   otherEntity.Has<Bullet>()
 			|| otherEntity.Has<Enemy>()
 			|| otherEntity.Has<DontDeleteBullets>()
 			|| otherEntity.Has<LevelDoor>())

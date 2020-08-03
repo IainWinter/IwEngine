@@ -32,7 +32,12 @@
                 21,
                 22,
                 23,
-                24
+                24,
+                25,
+                26,
+                27,
+                28,
+                29
             ]
         }
     ],
@@ -520,6 +525,106 @@
                 -2.217365264892578,
                 10.648069381713867
             ]
+        },
+        {
+            "mesh" : 3,
+            "name" : "Cone.037",
+            "rotation" : [
+                0.32172808051109314,
+                -0.6689919829368591,
+                0.5898641347885132,
+                0.3178066909313202
+            ],
+            "scale" : [
+                0.6937618851661682,
+                0.6937618851661682,
+                0.6937617659568787
+            ],
+            "translation" : [
+                -4.211912155151367,
+                -1.1509004831314087,
+                -3.6252880096435547
+            ]
+        },
+        {
+            "mesh" : 3,
+            "name" : "Cone.041",
+            "rotation" : [
+                0.28974875807762146,
+                -0.6348787546157837,
+                0.6233395934104919,
+                0.3527354896068573
+            ],
+            "scale" : [
+                0.8445302248001099,
+                0.844487726688385,
+                0.6938050389289856
+            ],
+            "translation" : [
+                -4.1945343017578125,
+                -1.1509004831314087,
+                -5.056194305419922
+            ]
+        },
+        {
+            "mesh" : 3,
+            "name" : "Cone.042",
+            "rotation" : [
+                -0.6857879161834717,
+                -0.14080800116062164,
+                0.041728850454092026,
+                -0.712830126285553
+            ],
+            "scale" : [
+                0.9302360415458679,
+                0.9301890134811401,
+                0.7642145752906799
+            ],
+            "translation" : [
+                -5.936378479003906,
+                -1.1509004831314087,
+                -5.2482500076293945
+            ]
+        },
+        {
+            "mesh" : 3,
+            "name" : "Cone.047",
+            "rotation" : [
+                -0.006251793820410967,
+                -0.739071786403656,
+                0.6718701720237732,
+                -0.04821059852838516
+            ],
+            "scale" : [
+                0.693761944770813,
+                0.6937618255615234,
+                0.6937617659568787
+            ],
+            "translation" : [
+                -5.774986267089844,
+                -1.1509004831314087,
+                -3.7276134490966797
+            ]
+        },
+        {
+            "mesh" : 3,
+            "name" : "Cone.048",
+            "rotation" : [
+                0.28974875807762146,
+                -0.6348787546157837,
+                0.6233395934104919,
+                0.3527354896068573
+            ],
+            "scale" : [
+                1.2707245349884033,
+                1.2706602811813354,
+                1.0439354181289673
+            ],
+            "translation" : [
+                -5.097417831420898,
+                -1.1509004831314087,
+                -4.165102005004883
+            ]
         }
     ],
     "materials" : [
@@ -563,6 +668,27 @@
                 },
                 "metallicFactor" : 0,
                 "roughnessFactor" : 1
+            }
+        },
+        {
+            "doubleSided" : true,
+            "emissiveFactor" : [
+                0,
+                0,
+                0
+            ],
+            "name" : "Tree.002",
+            "normalTexture" : {
+                "index" : 4,
+                "texCoord" : 0
+            },
+            "pbrMetallicRoughness" : {
+                "baseColorTexture" : {
+                    "index" : 5,
+                    "texCoord" : 0
+                },
+                "metallicFactor" : 0,
+                "roughnessFactor" : 0
             }
         }
     ],
@@ -612,6 +738,21 @@
                     "material" : 1
                 }
             ]
+        },
+        {
+            "name" : "Tree.002",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 15,
+                        "NORMAL" : 16,
+                        "TEXCOORD_0" : 17,
+                        "COLOR_0" : 18
+                    },
+                    "indices" : 19,
+                    "material" : 2
+                }
+            ]
         }
     ],
     "textures" : [
@@ -626,9 +767,25 @@
         },
         {
             "source" : 3
+        },
+        {
+            "source" : 4
+        },
+        {
+            "source" : 5
         }
     ],
     "images" : [
+        {
+            "mimeType" : "image/jpeg",
+            "name" : "normal",
+            "uri" : "textures/grass/normal.jpg"
+        },
+        {
+            "mimeType" : "image/jpeg",
+            "name" : "baseColor",
+            "uri" : "textures/grass/baseColor.jpg"
+        },
         {
             "mimeType" : "image/jpeg",
             "name" : "normal",
@@ -641,13 +798,13 @@
         },
         {
             "mimeType" : "image/jpeg",
-            "name" : "normal",
-            "uri" : "textures/grass/normal.jpg"
+            "name" : "treeNormal",
+            "uri" : "textures/tree/normal.jpg"
         },
         {
             "mimeType" : "image/jpeg",
-            "name" : "baseColor",
-            "uri" : "textures/grass/baseColor.jpg"
+            "name" : "treeColor",
+            "uri" : "textures/tree/baseColor.jpg"
         }
     ],
     "accessors" : [
@@ -770,6 +927,46 @@
             "componentType" : 5126,
             "count" : 649,
             "type" : "VEC4"
+        },
+        {
+            "bufferView" : 15,
+            "componentType" : 5126,
+            "count" : 2826,
+            "max" : [
+                4.369690418243408,
+                5.5018110275268555,
+                0.02628648281097412
+            ],
+            "min" : [
+                -3.5405704975128174,
+                -4.906742095947266,
+                -21.52495765686035
+            ],
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 16,
+            "componentType" : 5126,
+            "count" : 2826,
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 17,
+            "componentType" : 5126,
+            "count" : 2826,
+            "type" : "VEC2"
+        },
+        {
+            "bufferView" : 18,
+            "componentType" : 5126,
+            "count" : 2826,
+            "type" : "VEC4"
+        },
+        {
+            "bufferView" : 19,
+            "componentType" : 5123,
+            "count" : 6810,
+            "type" : "SCALAR"
         }
     ],
     "bufferViews" : [
@@ -847,11 +1044,36 @@
             "buffer" : 0,
             "byteLength" : 10384,
             "byteOffset" : 851680
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 33912,
+            "byteOffset" : 862064
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 33912,
+            "byteOffset" : 895976
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 22608,
+            "byteOffset" : 929888
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 45216,
+            "byteOffset" : 952496
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 13620,
+            "byteOffset" : 997712
         }
     ],
     "buffers" : [
         {
-            "byteLength" : 862064,
+            "byteLength" : 1011332,
             "uri" : "top02.bin"
         }
     ]

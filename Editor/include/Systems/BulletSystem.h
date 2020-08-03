@@ -9,8 +9,9 @@ private:
 	iw::Entity& player;
 	iw::Prefab bulletPrefab;
 
-	iw::Color baseColor;
-	iw::Color altColor;
+	iw::ref<iw::Material> normalMat;
+	iw::ref<iw::Material> orbitMat;
+	iw::ref<iw::Material> seekMat;
 
 public:
 	BulletSystem(

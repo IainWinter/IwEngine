@@ -48,7 +48,7 @@ LevelSystem::LevelSystem(
 	, playerEntity(player)
 	, scene(scene)
 { 
-	currentLevelName = "levels/canyon/top07.json";
+	currentLevelName = "levels/canyon/top05.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 63);
 	closedColor = iw::Color::From255(201, 66, 66, 63);

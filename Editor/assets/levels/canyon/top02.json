@@ -11,12 +11,78 @@
     "z": 0.000000
   },
   "Enemies": {
-    "size": 0,
-    "items": []
+    "size": 4,
+    "items": [
+      {
+        "Type": 0,
+        "Bullet": {
+          "Type": 3,
+          "Speed": 5.000000,
+          "Package": 0
+        },
+        "Speed": 0.000000,
+        "FireTime": 0.650000,
+        "ChargeTime": 0.000000,
+        "Rotation": 0.000000
+      },
+      {
+        "Type": 0,
+        "Bullet": {
+          "Type": 2,
+          "Speed": 7.000000,
+          "Package": 0
+        },
+        "Speed": 0.000000,
+        "FireTime": 0.650000,
+        "ChargeTime": 0.000000,
+        "Rotation": 0.000000
+      },
+      {
+        "Type": 0,
+        "Bullet": {
+          "Type": 2,
+          "Speed": 7.000000,
+          "Package": 0
+        },
+        "Speed": 0.000000,
+        "FireTime": 0.650000,
+        "ChargeTime": 0.000000,
+        "Rotation": 0.000000
+      },
+      {
+        "Type": 1,
+        "Bullet": {
+          "Type": 0,
+          "Speed": 5.000000,
+          "Package": 0
+        },
+        "Speed": 0.392699,
+        "FireTime": 2.000000,
+        "ChargeTime": 1.500000,
+        "Rotation": 0.000000
+      }
+    ]
   },
   "Positions": {
-    "size": 0,
-    "items": []
+    "size": 4,
+    "items": [
+      {
+        "x": 16.500000,
+        "y": -10.000000
+      },
+      {
+        "x": -14.000000,
+        "y": -8.000000
+      },
+      {
+        "x": -14.000000,
+        "y": 1.000000
+      },
+      {
+        "x": 6.000000,
+        "y": -5.000000
+      }
+    ]
   },
   "Doors": {
     "size": 1,
@@ -45,7 +111,7 @@
     "items": []
   },
   "Capsules": {
-    "size": 1,
+    "size": 2,
     "items": [
       {
         "Center": {
@@ -60,6 +126,20 @@
         },
         "Height": 14.000000,
         "Radius": 3.000000
+      },
+      {
+        "Center": {
+          "x": -4.700000,
+          "y": 0.000000,
+          "z": -4.700000
+        },
+        "Direction": {
+          "x": 0.000000,
+          "y": 1.000000,
+          "z": 0.000000
+        },
+        "Height": 10.000000,
+        "Radius": 2.000000
       }
     ]
   },

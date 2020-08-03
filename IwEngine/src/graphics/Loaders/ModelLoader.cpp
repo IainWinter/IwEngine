@@ -344,15 +344,15 @@ namespace Graphics {
 		aiString texturePath;
 		unsigned count = aimaterial->GetTextureCount(type);
 
-		std::vector<aiString> names;
+		//std::vector<aiString> names;
 
 		for (unsigned i = 0; i < count; i++) {
 			if (aimaterial->GetTexture(type, i, &texturePath) == AI_SUCCESS) {
-				if (std::find(names.begin(), names.end(), texturePath) != names.end()) {
-					continue;
-				}
+				//if (std::find(names.begin(), names.end(), texturePath) != names.end()) {
+				//	continue;
+				//}
 
-				names.push_back(texturePath);
+				//names.push_back(texturePath);
 				
 				std::stringstream ss;
 				

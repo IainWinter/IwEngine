@@ -21,7 +21,7 @@ namespace algo {
 		while (!colliding && tests < 5) {
 			iw::vector3 p = detail::Support(a, b, direction);
 
-			if (p.dot(direction) <= 0) {
+			if (p.dot(direction) < 0) {
 				break;
 			}
 
@@ -60,7 +60,7 @@ namespace detail {
 		const iw::vector3& direction)
 	{
 		return 0/*a->Col()->FurthestPoint(direction)
-			 - b->Col()->FurthestPoint(direction)*/;
+			 - b->Col()->FurthestPoint(-direction)*/;
 	}
 
 	//Line

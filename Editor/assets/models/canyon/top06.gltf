@@ -611,22 +611,22 @@
         {
             "mimeType" : "image/jpeg",
             "name" : "normal",
-            "uri" : "textures/rock/normal.jpg"
-        },
-        {
-            "mimeType" : "image/jpeg",
-            "name" : "baseColor",
-            "uri" : "textures/rock/baseColor.jpg"
-        },
-        {
-            "mimeType" : "image/jpeg",
-            "name" : "normal",
             "uri" : "textures/grass/normal.jpg"
         },
         {
             "mimeType" : "image/jpeg",
             "name" : "baseColor",
             "uri" : "textures/grass/baseColor.jpg"
+        },
+        {
+            "mimeType" : "image/jpeg",
+            "name" : "normal",
+            "uri" : "textures/rock/normal.jpg"
+        },
+        {
+            "mimeType" : "image/jpeg",
+            "name" : "baseColor",
+            "uri" : "textures/rock/baseColor.jpg"
         }
     ],
     "accessors" : [
