@@ -40,8 +40,8 @@ namespace Engine {
 		ParticleSystem<StaticParticle>* sys = Space->FindComponent<ParticleSystem<StaticParticle>>(e.Entity);
 		if (sys) {
 			sys->~ParticleSystem();
-			sys->GetParticleMesh().Data()    .reset();
-			sys->GetParticleMesh().Material().reset();
+			//sys->GetParticleMesh().Data()    .reset();
+			//sys->GetParticleMesh().Material().reset();
 		}
 
 		iw::Rigidbody* body = Space->FindComponent<iw::Rigidbody>(e.Entity);

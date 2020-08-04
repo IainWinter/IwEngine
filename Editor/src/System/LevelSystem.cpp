@@ -48,7 +48,7 @@ LevelSystem::LevelSystem(
 	, playerEntity(player)
 	, scene(scene)
 { 
-	currentLevelName = "levels/canyon/top05.json";
+	currentLevelName = "levels/canyon/top01.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 63);
 	closedColor = iw::Color::From255(201, 66, 66, 63);
@@ -56,18 +56,20 @@ LevelSystem::LevelSystem(
 	transition = false;
 }
 
-int LevelSystem::Initialize() {
-	Bus->send<ResetLevelEvent>();
+std::unordered_map<std::string, iw::StaticPS*> pSystems;
 
+int LevelSystem::Initialize() {
 	// Leaves
 
 	iw::ref<iw::Shader> particleShader = Asset->Load<iw::Shader>("shaders/particle/simple.shader");
+	Renderer->InitShader(particleShader, iw::SHADOWS | iw::LIGHTS | iw::CAMERA);
 
-	iw::ref<iw::Model> leafModel = Asset->Load<iw::Model>("models/forest/redleaf.gltf");
-	leafModel->GetMesh(0).Material()->SetShader(particleShader);
-	leafModel->GetMesh(0).Material()->SetTexture("shadowMap", Asset->Load<iw::Texture>("SunShadowMap"));
-	leafModel->GetMesh(0).Material()->Set("baseColor", iw::Color(1, 1, 1));
-	leafModel->GetMesh(0).Material()->Initialize(Renderer->Device);
+	iw::Mesh& leafMesh = Asset->Load<iw::Model>("models/forest/redleaf.gltf")->GetMesh(0);
+	leafMesh.Material()->SetShader(particleShader);
+	leafMesh.Material()->SetTexture("shadowMap", Asset->Load<iw::Texture>("SunShadowMap"));
+	leafMesh.Material()->Set("baseColor", iw::Color(1, 1, 1));
+
+	Bus->send<ResetLevelEvent>();
 
 	return 0;
 }
@@ -301,35 +303,34 @@ iw::Entity LevelSystem::LoadLevel(
 
 			mesh.SetMaterial(mesh.Material()->MakeInstance());
 
+			mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/vct/vct.shader"));
+
+			mesh.Material()->SetTexture("shadowMap", Asset->Load<iw::Texture>("SunShadowMap"));
+			//mesh.Material()->SetTexture("shadowMap2", Asset->Load<iw::Texture>("LightShadowMap")); // shouldnt be part of material
+
+			mesh.Material()->Set("indirectDiffuse", 1);
+			mesh.Material()->Set("indirectSpecular", 0);
+
 			if (mesh.Data()->Name().find("Ground") != std::string::npos)
 			{ 
 				if (mesh.Data()->Description().HasBuffer(iw::bName::COLOR)) {
 					mesh.Material()->SetTexture("diffuseMap2", Asset->Load<iw::Texture>("textures/dirt/baseColor.jpg"));
 					mesh.Material()->SetTexture("normalMap2", Asset->Load<iw::Texture>("textures/dirt/normal.jpg"));
 				}
-
-				//iw::Entity plants = Space->CreateEntity<iw::Transform, iw::ParticleSystem<>>();
 			}
-
-			else if(mesh.Data()->Name().find("Tree") != std::string::npos) 
+			
+			else if(mesh.Data()->Name().find("Tree") != std::string::npos)
 			{
-				iw::Entity leaves = Space->CreateEntity<iw::Transform, iw::ParticleSystem<iw::StaticParticle>>();
+				auto itr = pSystems.find(mesh.Data()->Name());
+				if (itr == pSystems.end()) {
+					iw::StaticPS* ps = new iw::StaticPS();
+					
+					iw::Mesh leafMesh = Asset->Load<iw::Model>("models/forest/redleaf.gltf")->GetMesh(0);
+					//leafMesh.SetData(leafMesh.Data()->MakeLink());
 
-				iw::Transform* tran = leaves.Set<iw::Transform>(transform);
-				iw::ParticleSystem<iw::StaticParticle>* pSys = leaves.Set<iw::ParticleSystem<iw::StaticParticle>>();
+					ps->SetParticleMesh(leafMesh);
 
-				tran->SetParent(levelTransform);
-				iw::Mesh leafMesh = Asset->Load<iw::Model>("models/forest/redleaf.gltf")->GetMesh(0);
-
-				leafMesh.SetData(leafMesh.Data()->MakeLink());
-
-				pSys->SetTransform(tran);
-				pSys->SetParticleMesh(leafMesh);
-
-				// Spawn leaves on tree
-
-				//Task->queue([&]() {
-					iw::vector3* positions = (iw::vector3*)mesh.Data()->Get(iw::bName::POSITION);
+					iw::vector3* positions = (iw::vector3*)mesh.Data()->Get(iw::bName::POSITION); // should only do this once and then use a model matrix in the particle shader
 					iw::vector3* normals   = (iw::vector3*)mesh.Data()->Get(iw::bName::NORMAL);
 					iw::Color*   colors    = (iw::Color*)  mesh.Data()->Get(iw::bName::COLOR);
 
@@ -341,41 +342,52 @@ iw::Entity LevelSystem::LoadLevel(
 						{
 							iw::vector3 rand = iw::vector3(iw::randf(), iw::randf(), iw::randf()) * iw::Pi;
 
-							iw::Transform t;
-							t.Position = positions[i] + rand * 0.2f;
-							t.Scale = iw::randf() + 1.2f;
-							t.Rotation = iw::quaternion::from_euler_angles(iw::vector3(iw::Pi + rand.x * 0.2f, rand.y, rand.z * 0.2f));
+							iw::Transform trans;
+							trans.Position = positions[i] + rand * 0.2f;
+							trans.Scale    = iw::randf() + 1.2f;
+							trans.Rotation = iw::quaternion::from_euler_angles(iw::vector3(iw::Pi + rand.x * 0.2f, rand.y, rand.z * 0.2f));
 
-							pSys->SpawnParticle(t);
+							ps->SpawnParticle(trans);
 						}
 					}
-				//});
+
+					ps->UpdateParticleMesh();
+
+					itr = pSystems.emplace(mesh.Data()->Name(), ps).first;
+				}
+
+				iw::Entity leaves = Space->CreateEntity<iw::Transform, iw::Mesh>();
+				
+				iw::Transform* t2 = leaves.Set<iw::Transform>(transform);
+								    leaves.Set<iw::Mesh>(itr->second->GetParticleMesh());
+
+				t2->SetParent(t);
 			}
-
-			mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/vct/vct.shader"));
-
-			mesh.Material()->SetTexture("shadowMap", Asset->Load<iw::Texture>("SunShadowMap"));
-			//mesh.Material()->SetTexture("shadowMap2", Asset->Load<iw::Texture>("LightShadowMap")); // shouldnt be part of material
-
-			//mesh.Material()->Set("roughness", 0.9f);
-			//mesh.Material()->Set("metallic", 0.1f);
-			//mesh.Material()->Set("reflectance", 0.0f);
-			//mesh.Material()->Set("refractive", 0.0f);
-
-			mesh.Material()->Set("indirectDiffuse", 1);
-			mesh.Material()->Set("indirectSpecular", 0);
-
-			mesh.Material()->Initialize(Renderer->Device);
-
-			//if (iii == 1) {
-			//	mesh.Material()->Set("baseColor", iw::Color(0, 0, 1));
-			//}
-
-			//iii++;
-
-			//floor->Meshes[i].SetIsStatic(true);
-			//mesh.Data()->GenTangents()x;
 		}
+
+		//iw::Entity trees = Space->CreateEntity<iw::Transform, iw::ParticleSystem<iw::StaticParticle>>();
+
+		//iw::Transform*                          tran = trees.Set<iw::Transform>();
+		//iw::ParticleSystem<iw::StaticParticle>* pSys = trees.Set<iw::ParticleSystem<iw::StaticParticle>>();
+
+		//tran->SetParent(levelTransform);
+		//pSys->SetTransform(tran);
+
+		//for (int i = 0; i < model->MeshCount(); i++) {
+		//	iw::Mesh&      mesh      = model->GetMesh(i);
+		//	iw::Transform& transform = model->GetTransform(i);
+
+		//	if (mesh.Data()->Name().find("Particle") != std::string::npos) {
+		//		if (!pSys->HasParticleMesh()) {
+		//			mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/particle/phong.shader"));
+		//			pSys->SetParticleMesh(mesh);
+		//		}
+
+		//		pSys->SpawnParticle(transform);
+		//		model->RemoveMesh(i);
+		//		i--;
+		//	}
+		//}
 
 		entity.Set<iw::Model>(*model);
 

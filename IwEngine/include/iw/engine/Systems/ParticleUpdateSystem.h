@@ -11,7 +11,6 @@ namespace Engine {
 	{
 	public:
 		struct Components {
-			Transform* Transform;
 			ParticleSystem<StaticParticle>* ParticleSystem;
 		};
 

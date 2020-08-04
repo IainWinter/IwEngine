@@ -8,7 +8,7 @@ namespace Engine {
 
 	int ParticleUpdateSystem::Initialize() {
 		query = Space->MakeQuery<ParticleSystem<StaticParticle>>();
-		query->SetAny({ Space->GetComponent<Transform>() });
+		//query->SetAny({ Space->GetComponent<Transform>() });
 
 		return 0;
 	}
@@ -17,13 +17,9 @@ namespace Engine {
 		auto entities = Space->Query(query);
 
 		for (auto entity : entities) {
-			auto [transform, system] = entity.Components.Tie<Components>();
+			auto [system] = entity.Components.Tie<Components>();
 
-			//if (transform && !system->GetTransform()) {
-			//	system->SetTransform(transform);
-			//}
-
-			//system->Update();
+			system->Update();
 		}
 	}
 }

@@ -50,6 +50,13 @@ namespace Graphics {
 			return m_transforms.at(index);
 		}
 
+		void RemoveMesh(
+			unsigned index)
+		{
+			m_meshes    .erase(m_meshes    .begin() + index);
+			m_transforms.erase(m_transforms.begin() + index);
+		}
+
 		unsigned MeshCount() const {
 			return m_meshes.size();
 		}

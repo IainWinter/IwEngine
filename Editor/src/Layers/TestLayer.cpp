@@ -68,6 +68,8 @@ namespace iw {
 		sphere->Initialize(Renderer->Device);
 		plane ->Initialize(Renderer->Device);
 
+		
+
 		// Directional light shadow map textures & target
 		
 		ref<Texture> dirShadowColor = ref<Texture>(new Texture(2024, 2024, TEX_2D, RG,    FLOAT, BORDER));
@@ -94,7 +96,7 @@ namespace iw {
 			Entity entity = Space->CreateEntity<Transform, Mesh, PlaneCollider, CollisionObject>();
 
 			Transform*       trans = entity.Set<Transform>(iw::vector3(0, 0, 0), vector3(22));
-			Mesh*            mesh  = entity.Set<Mesh>(plane->MakeInstance());
+			Mesh*            mesh  = entity.Set<Mesh>(sphere->Subtract(plane->MakeInstance().Data())->MakeInstance());
 			PlaneCollider*   col   = entity.Set<PlaneCollider>(vector3::unit_y, 0);
 			CollisionObject* obj   = entity.Set<CollisionObject>();
 
@@ -193,6 +195,8 @@ namespace iw {
 	}
 
 	void TestLayer::PostUpdate() {
+		
+
 		//for (Light* light : scene->Lights()) {
 		//	if (!light->CanCastShadows()) {
 		//		continue;

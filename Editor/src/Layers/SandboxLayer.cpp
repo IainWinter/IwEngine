@@ -333,8 +333,7 @@ namespace iw {
 
 		// Particle test
 
-		ref<Shader> particleShader = Asset->Load<Shader>("shaders/particle/simple.shader");
-		Renderer->InitShader(particleShader, SHADOWS | LIGHTS | CAMERA);
+
 
 		//iw::Material particleMaterial(particleShader);
 		//particleMaterial.Set("baseColorMap", Color::From255(0, 60, 10));
@@ -522,10 +521,11 @@ namespace iw {
 
 				if (event.LevelName.find("canyon") != std::string::npos) {
 					sun->SetRotation(iw::quaternion::from_euler_angles(1.0f, 0.0f, -0.35f));
-					sun->SetColor(vector3(1.0f, 0.64f, 0.37f));
+					sun->SetColor(vector3(1.0f, 0.64f, 0.37f) * 0.33f);
 
 					if (event.LevelName.find("cave") != std::string::npos) {
 						sun->SetRotation(iw::quaternion::from_euler_angles(1.4f, 0.0f, -0.25f));
+						sun->SetColor(vector3(1.0f, 0.64f, 0.37f));
 
 						// set shadow dimension
 

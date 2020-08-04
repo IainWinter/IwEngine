@@ -167,7 +167,12 @@ namespace detail {
 		ref<MeshData> MakeCopy(
 			const MeshDescription& links = {},
 			bool linkIndex = false);
-		
+
+		// Subtract two meshes. generates this - other, this.verts * other.verts - unique
+		IWGRAPHICS_API
+		ref<MeshData> Subtract(
+			const ref<MeshData> other) const;
+
 		IWGRAPHICS_API
 		bool IsInitialized() const;
 

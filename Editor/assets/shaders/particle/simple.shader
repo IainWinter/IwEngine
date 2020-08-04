@@ -9,6 +9,7 @@ layout(location = 3) in mat4 i_model;
 out vec2 TexCoords;
 
 uniform float time;
+uniform mat4 model;
 
 #include shaders/camera.shader
 #include shaders/shadows.vert
@@ -35,7 +36,7 @@ uniform float time;
 //}
 
 void main() {
-	vec4 worldPos = i_model/* * rotationZ(sin(time * 0.01f * uv.y * 1 / sin(time * 0.01f * uv.x)))*/ * vec4(vert, 1);
+	vec4 worldPos = model * i_model/* * rotationZ(sin(time * 0.01f * uv.y * 1 / sin(time * 0.01f * uv.x)))*/ * vec4(vert, 1);
 	SetDirectionalLightPos(worldPos);
 
 	TexCoords = uv;

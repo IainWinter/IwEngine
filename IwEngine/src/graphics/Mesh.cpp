@@ -164,6 +164,55 @@ namespace detail {
 		return data->m_this;
 	}
 
+	ref<MeshData> MeshData::Subtract(
+		const ref<MeshData> other) const
+	{	
+		MeshData* data = new MeshData();
+		data->m_topology = m_topology;
+		data->m_name = m_name + " subtracted from " + other->Name();
+
+		iw::vector3* iverts = (iw::vector3*)       Get(bName::POSITION);
+		iw::vector3* jverts = (iw::vector3*)other->Get(bName::POSITION);
+
+		unsigned icount =        GetCount(bName::POSITION);
+		unsigned jcount = other->GetCount(bName::POSITION);
+
+		iw::vector3* verts = new iw::vector3[icount * jcount];
+		unsigned*    index = new unsigned   [icount * jcount];
+
+		for (unsigned i = 0; i < icount; i++) {
+			for (unsigned j = 0; j < jcount; j++) {
+				verts[j + i * jcount] = iverts[i] + jverts[j];
+				index[j + i * jcount] = j + i * icount; // not sure
+			}
+		}
+
+		//for (unsigned i = 0; i < icount * jcount; i++) {
+		//	iw::vector3 a = verts[i];
+		//	iw::vector3 b;
+		//	float max = 0.0f;
+
+		//	for (unsigned j = 0; j < icount * jcount; j++) {
+		//		iw::vector3 v = verts[j + i * icount];
+		//		float distance = (a - v).length_squared();
+		//		if (distance > max) {
+		//			max = distance;
+		//			b = v;
+		//		}
+		//	}
+
+
+
+		//}
+
+		data->SetBufferDataPtr(bName::POSITION, icount * jcount, verts);
+		data->SetIndexData    (icount * jcount, index);
+
+		data->GenNormals();
+
+		return data->m_this;
+	}
+
 	bool MeshData::IsInitialized() const {
 		return !!m_vertexArray || !!m_indexBuffer;
 	}

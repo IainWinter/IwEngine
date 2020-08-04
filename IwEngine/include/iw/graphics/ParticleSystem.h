@@ -119,9 +119,9 @@ namespace Graphics {
 				|| (m_transform && m_lastTransform != *m_transform))
 			{
 				m_needsToUpdateBuffer = false;
-				m_lastTransform.Position = m_transform->WorldPosition();
-				m_lastTransform.Scale    = m_transform->WorldScale();
-				m_lastTransform.Rotation = m_transform->WorldRotation();
+				m_lastTransform.Position = m_transform ? m_transform->WorldPosition() : 0;
+				m_lastTransform.Scale    = m_transform ? m_transform->WorldScale()    : 0;
+				m_lastTransform.Rotation = m_transform ? m_transform->WorldRotation() : iw::quaternion(0);
 
 				for (unsigned i : m_delete) {
 					m_particles.erase(m_particles.begin() + i);
@@ -133,8 +133,10 @@ namespace Graphics {
 
 				// Set parents after to not screw up child list in parent from stack dealloc
 
-				for (unsigned i = 1; i <= m_spawn.size(); i++) {
-					m_particles[m_particles.size() - i].Transform.SetParent(m_transform);
+				if (m_transform) {
+					for (unsigned i = 1; i <= m_spawn.size(); i++) {
+						m_particles[m_particles.size() - i].Transform.SetParent(m_transform);
+					}
 				}
 
 				unsigned count = m_particles.size();
@@ -201,9 +203,13 @@ namespace Graphics {
 		std::vector<particle_t>& Particles() {
 			return m_particles;
 		}
+
+		bool HasParticleMesh() const {
+			return m_mesh.Data() != nullptr;
+		}
 	};
 
-	using StaticPS = ParticleSystem<StaticParticle>();
+	using StaticPS = ParticleSystem<StaticParticle>;
 }
 
 	using namespace Graphics;
