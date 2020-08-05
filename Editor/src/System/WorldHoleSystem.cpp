@@ -33,6 +33,12 @@ void WorldHoleSystem::collide(iw::Manifold& man, iw::scalar dt)
 
 	WorldHole* hole = holeEntity.Find<WorldHole>();
 
+	hole->Touched = true;
+
+	if (hole->Timer < hole->Time) {
+		return;
+	}
+
 	if (!hole->InTransition) {
 		hole->InTransition = true;
 
@@ -40,7 +46,7 @@ void WorldHoleSystem::collide(iw::Manifold& man, iw::scalar dt)
 
 		Task->queue([=]() {
 			Bus->push<SetCameraTargetEvent>(pos, true);
-			Bus->push<LoadNextLevelEvent>("levels/canyon/cave01.json");
+			Bus->push<LoadNextLevelEvent>(hole->CaveLevel);
 		});
 	}
 
@@ -82,8 +88,29 @@ int WorldHoleSystem::Initialize() {
 	return 0;
 }
 
-void WorldHoleSystem::FixedUpdate() {
-	auto bullets  = Space->Query<iw::Transform, iw::Rigidbody, Bullet>();
+void WorldHoleSystem::Update() {
+	auto holes  = Space->Query<WorldHole, iw::Model>();
+
+	holes.Each([](
+		auto entity,
+		auto hole,
+		auto model)
+	{
+		if(hole->Touched) {
+			hole->Timer += iw::Time::DeltaTime();
+
+			if (hole->Timer > hole->Time) {
+				hole->Timer = hole->Time;
+			}
+		}
+
+		auto material = model->GetMesh(0).Material();
+		
+		float color = hole->Time == 0.0f ? 0.0f : (hole->Time - hole->Timer) / hole->Time * 0.5f;
+
+		material->Set("baseColor", iw::Color(color, color, color, 1.0f));
+	});
+
 }
 
 bool WorldHoleSystem::On(
@@ -92,27 +119,59 @@ bool WorldHoleSystem::On(
 	if (e.Action == iw::val(Actions::START_LEVEL)) {
 		StartLevelEvent& event = e.as<StartLevelEvent>();
 
-		//if (event.LevelName == "levels/canyon/canyon01.json") {
-		//	SpawnHole(0);
-		//}
+		if (event.LevelName == "levels/canyon/canyon02.json") {
+			SpawnHole(0, false, "levels/canyon/cave01.json");
+		}
 
-		//if (event.LevelName == "levels/canyon/canyon02.json") {
-		//	SpawnHole(iw::vector3(8, 0, 6));
-		//	SpawnHole(iw::vector3(0, 0, -6));
-		//}
+		else if (event.LevelName == "levels/canyon/canyon03.json") {
+			SpawnHole(iw::vector3(-8,  0, -8), false, "levels/canyon/cave02.json");
+			SpawnHole(iw::vector3( 2,  0,  0), true,  "levels/canyon/cave02.json");
+			SpawnHole(iw::vector3( 12, 0,  8), false, "levels/canyon/cave02.json");
+		}
+
+		else if (event.LevelName == "levels/canyon/canyon04.json") {
+			SpawnHole(iw::vector3(0, 0, -6.5), false, "levels/canyon/cave03.json");
+			SpawnHole(iw::vector3(0, 0,  6.5), false, "levels/canyon/cave03.json");
+		}
+
+		else if (event.LevelName == "levels/canyon/canyon05.json") {
+			SpawnHole(iw::vector3(4, 0, 0), false, "levels/canyon/cave04.json");
+		}
+
+		else if (event.LevelName == "levels/canyon/canyon07.json") {
+			SpawnHole(iw::vector3(-12, 0, -8), false, "levels/canyon/cave07.json");
+			SpawnHole(iw::vector3(  0, 0,  4), false, "levels/canyon/cave07.json");
+		}
 	}
 
 	return false;
 }
 
 void WorldHoleSystem::SpawnHole(
-	iw::vector3 position)
+	iw::vector3 position,
+	bool crumble,
+	std::string caveLevel)
 {
 	iw::Entity hole = Space->Instantiate(holePrefab);
 
 	iw::Transform*      t = hole.Find<iw::Transform>();
 	iw::SphereCollider* c = hole.Find<iw::SphereCollider>();
 	iw::Rigidbody*      r = hole.Find<iw::Rigidbody>();
+	iw::Model*          m = hole.Find<iw::Model>();
+	WorldHole*          h = hole.Find<WorldHole>();
+
+	h->CaveLevel = caveLevel;
+
+	if (crumble) {
+		h->Time = 2.0f;
+		auto& mesh = m->GetMesh(0);
+		auto material = mesh.Material()->MakeInstance();
+		mesh.SetMaterial(material);
+	}
+
+	else {
+		h->Time = 0.0f;
+	}
 
 	t->Position = position;
 

@@ -99,7 +99,7 @@ void BulletSystem::FixedUpdate() {
 					iw::vector3 nV = vel.normalized();
 					iw::vector3 nD = dir.normalized();
 
-					iw::vector3 delta = (nD - nV) * 0.225f;
+					iw::vector3 delta = (nD - nV) * bullet->Speed * 0.045f * 2;
 
 					rigidbody->SetVelocity((vel + delta).normalized() * bullet->Speed);
 				}
@@ -113,7 +113,7 @@ void BulletSystem::FixedUpdate() {
 				iw::vector3 nV = vel.normalized();
 				iw::vector3 nD = dir.normalized();
 
-				iw::vector3 delta = (nD - nV) * 0.225f;
+				iw::vector3 delta = (nD - nV) * bullet->Speed * 0.045;
 
 				rigidbody->SetVelocity((vel + delta).normalized() * bullet->Speed);
 
@@ -132,18 +132,20 @@ void BulletSystem::FixedUpdate() {
 		auto bullet,
 		auto package)
 	{
-		return;
-
 		if (package->Exploded) return;
 
 		switch (package->Type) {
-			case PackageType::TIMER : {
+			case PackageType::TIMER: {
 				if (bullet->Timer < package->TimeToExplode) {
 					return;
 				}
 				break;
 			}
 			case PackageType::DISTANCE: {
+				if (bullet->Timer < 0.2) {
+					return;
+				}
+
 				if ((transform->WorldPosition() - player.Find<iw::Transform>()->WorldPosition()).length_squared() > 25) {
 					return;
 				}
@@ -157,7 +159,7 @@ void BulletSystem::FixedUpdate() {
 
 		package->Exploded = true;
 
-		for (float dir = 0.0f; dir < iw::Pi2; dir += iw::Pi2 / 6) {
+		for (float dir = 0.0f; dir < iw::Pi2; dir += iw::Pi2 / 4) {
 			iw::Entity bullet = Space->Instantiate(bulletPrefab);
 
 			Bullet*             b = bullet.Find<Bullet>();

@@ -16,9 +16,12 @@ public:
 	void collide(iw::Manifold& man, iw::scalar dt);
 
 	int Initialize()   override;
-	void FixedUpdate() override;
+	void Update() override;
 
 	bool On(iw::ActionEvent& e) override;
 private:
-	void SpawnHole(iw::vector3 position);
+	void SpawnHole(
+		iw::vector3 position,
+		bool crumble,
+		std::string caveLevel);
 };
