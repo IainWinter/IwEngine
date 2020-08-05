@@ -92,14 +92,14 @@ bool WorldHoleSystem::On(
 	if (e.Action == iw::val(Actions::START_LEVEL)) {
 		StartLevelEvent& event = e.as<StartLevelEvent>();
 
-		if (event.LevelName == "levels/canyon/canyon01.json") {
-			SpawnHole(0);
-		}
+		//if (event.LevelName == "levels/canyon/canyon01.json") {
+		//	SpawnHole(0);
+		//}
 
-		if (event.LevelName == "levels/canyon/canyon02.json") {
-			SpawnHole(iw::vector3(8, 0, 6));
-			SpawnHole(iw::vector3(0, 0, -6));
-		}
+		//if (event.LevelName == "levels/canyon/canyon02.json") {
+		//	SpawnHole(iw::vector3(8, 0, 6));
+		//	SpawnHole(iw::vector3(0, 0, -6));
+		//}
 	}
 
 	return false;

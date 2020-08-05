@@ -26,7 +26,7 @@
         "State": 1,
         "NextLevel": {
           "size": 27,
-          "string": "levels/canyon/canyon03.json"
+          "string": "levels/canyon/canyon06.json"
         }
       }
     ]
@@ -36,7 +36,7 @@
     "items": [
       {
         "x": 28.000000,
-        "y": 7.000000
+        "y": 0.000000
       }
     ]
   },
@@ -45,26 +45,11 @@
     "items": []
   },
   "Capsules": {
-    "size": 1,
-    "items": [
-      {
-        "Center": {
-          "x": -21.000000,
-          "y": 0.000000,
-          "z": -11.700000
-        },
-        "Direction": {
-          "x": 1.000000,
-          "y": 0.000000,
-          "z": 0.000000
-        },
-        "Height": 31.500000,
-        "Radius": 7.300000
-      }
-    ]
+    "size": 0,
+    "items": []
   },
   "Planes": {
-    "size": 5,
+    "size": 6,
     "items": [
       {
         "Plane": {
@@ -99,21 +84,31 @@
       {
         "Plane": {
           "P": {
-            "x": 0.110000,
+            "x": 0.000000,
             "y": 0.000000,
             "z": -1.000000
           },
-          "D": -8.000000
+          "D": -10.750000
         }
       },
       {
         "Plane": {
           "P": {
-            "x": -1.000000,
+            "x": -0.300000,
             "y": 0.000000,
-            "z":  1.000000
+            "z": -1.000000
           },
-          "D": -15.800000
+          "D": -11.550000
+        }
+      },
+      {
+        "Plane": {
+          "P": {
+            "x": -0.400000,
+            "y": 0.000000,
+            "z": 1.000000
+          },
+          "D": -13.550000
         }
       }
     ]
@@ -124,7 +119,7 @@
       {
         "ModelName": {
           "size": 27,
-          "string": "models/canyon/canyon02.gltf"
+          "string": "models/canyon/canyon05.gltf"
         },
         "Transform": {
           "Position": {
