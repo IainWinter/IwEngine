@@ -12,6 +12,12 @@ namespace math {
 		return ((float)rand() / RAND_MAX - 0.5f) * 2.0f;
 	}
 
+	int randi(
+		int max)
+	{
+		return roundf((float)rand() / RAND_MAX) * max;
+	}
+
 	float fast_inv_sqrt(
 		float x)
 	{

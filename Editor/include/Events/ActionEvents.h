@@ -7,6 +7,7 @@
 #include "iw/common/Components/Transform.h"
 #include "Components/Item.h"
 #include "Components/Enemy.h"
+#include "Components/Bullet.h"
 #include "iw/entity/Entity.h"
 
 enum class Actions
@@ -15,7 +16,7 @@ enum class Actions
 	GAME_STATE, DEV_CONSOLE,
 	JUMP, RIGHT, FORWARD, USE,
 	RESET_LEVEL, START_LEVEL, UNLOCK_LEVEL_DOOR, LOAD_NEXT_LEVEL, GOTO_NEXT_LEVEL, AT_NEXT_LEVEL,
-	SPAWN_ENEMY_DEATH, SPAWN_ENEMY, SPAWN_ITEM, SPAWN_NOTE, SPAWN_CONSUMABLE,
+	SPAWN_ENEMY_DEATH, SPAWN_ENEMY, SPAWN_BULLET, SPAWN_ITEM, SPAWN_NOTE, SPAWN_CONSUMABLE,
 	GIVE_SCORE,
 	SET_CAMERA_TARGET,
 	CHARGE_KILL_ACTIVE
@@ -202,6 +203,27 @@ struct SpawnEnemyEvent
 		, Enemy(enemy)
 		, Position(position)
 		, Velocity(velocity)
+		, Level(level)
+	{}
+};
+
+struct SpawnBulletEvent
+	: iw::SingleEvent
+{
+	Bullet Bullet;
+	iw::vector3 Position;
+	iw::quaternion Rotation;
+	iw::Transform* Level;
+
+	SpawnBulletEvent(
+		::Bullet bullet,
+		iw::vector3 position,
+		iw::quaternion rotation,
+		iw::Transform* level)
+		: iw::SingleEvent(iw::val(Actions::SPAWN_BULLET))
+		, Bullet(bullet)
+		, Position(position)
+		, Rotation(rotation)
 		, Level(level)
 	{}
 };

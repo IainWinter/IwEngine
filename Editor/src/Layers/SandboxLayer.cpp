@@ -296,9 +296,10 @@ namespace iw {
 
 		// Systems
 
-		playerSystem = PushSystem<PlayerSystem>();
-		bulletSystem = PushSystem<BulletSystem>(playerSystem->GetPlayer());
-		enemySystem  = PushSystem<EnemySystem>(playerSystem->GetPlayer(), bulletSystem->GetBulletPrefab());
+		playerSystem    = PushSystem<PlayerSystem>();
+		bulletSystem    = PushSystem<BulletSystem>(playerSystem->GetPlayer());
+		enemySystem     = PushSystem<EnemySystem>(playerSystem->GetPlayer(), bulletSystem->GetBulletPrefab());
+		enemyBossSystem = PushSystem<EnemyBossSystem>(playerSystem->GetPlayer());
 
 		LevelSystem* levelSystem = PushSystem<LevelSystem>(playerSystem->GetPlayer(), MainScene);
 		                           PushSystem<WorldHoleSystem>(levelSystem->GetLevel());
@@ -513,6 +514,7 @@ namespace iw {
 			case iw::val(Actions::GOTO_NEXT_LEVEL): {
 				enemySystem ->On(e);
 				PopSystem(enemySystem);
+				PopSystem(enemyBossSystem);
 
 				GoToNextLevelEvent& event = e.as<GoToNextLevelEvent>();
 
@@ -544,6 +546,7 @@ namespace iw {
 			case iw::val(Actions::AT_NEXT_LEVEL): {
 				//PushSystemFront(playerSystem);
 				PushSystemFront(enemySystem);
+				PushSystemFront(enemyBossSystem);
 
 				break;
 			}
@@ -553,12 +556,14 @@ namespace iw {
 				if (event.State == RUNNING) {
 					PushSystemFront(playerSystem);
 					PushSystemFront(enemySystem);
+					PushSystemFront(enemyBossSystem);
 					PushSystemFront(bulletSystem);
 				}
 
 				else if (event.State == PAUSED) {
 					PopSystem(playerSystem);
 					PopSystem(enemySystem);
+					PopSystem(enemyBossSystem);
 					PopSystem(bulletSystem);
 				}
 

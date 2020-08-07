@@ -1,6 +1,7 @@
 #pragma once
 
 #include "iw/engine/System.h"
+#include "Components/Bullet.h"
 
 class BulletSystem
 	: public iw::SystemBase
@@ -23,4 +24,12 @@ public:
 
 	int Initialize()   override;
 	void FixedUpdate() override;
+
+	bool On(iw::ActionEvent& e) override;
+
+private:
+	iw::Transform* SpawnBullet(
+		Bullet enemyBullet,
+		iw::vector3 position,
+		iw::quaternion rot);
 };

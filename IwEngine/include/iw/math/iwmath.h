@@ -48,10 +48,17 @@ namespace math {
 	constexpr float Phi = 1.61803398875f;
 
 	/**
-	* Returns a random float 0 - 1
+	* Returns a random float -1 - 1
 	*/
 	IWMATH_API
 	float randf();
+
+	/**
+	* Returns a random float 0 - max
+	*/
+	IWMATH_API
+	int randi(
+		int max = 1);
 
 	/**
 	* Returns an approximation of the inverse

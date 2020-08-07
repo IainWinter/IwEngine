@@ -1,13 +1,15 @@
 #pragma once
 
 #include "Bullet.h"
+#include <vector>
 
 enum class REFLECT EnemyType {
 	SPIN               = 0x0,
 	CIRCLE,
 	SEEK,
-	MINI_BOSS_BOX_SPIN = 0x10,
-	BOSS_FOREST        = 0x100
+	MINI_BOSS_FOREST = 0x10,
+	MINI_BOSS_CANYON = 0x11,
+	BOSS_FOREST      = 0x100
 };
 
 struct REFLECT Enemy {
@@ -32,4 +34,17 @@ struct REFLECT Enemy {
 	int ScoreMultiple;
 
 	bool JustHit;
+};
+
+struct Action {
+	unsigned Index;
+	float Time;
+};
+
+struct EnemyBoss {
+	std::vector<Action> Actions;
+	int CurrentAction = -1;
+
+	float ActionDelay;
+	float ActionTimer;
 };

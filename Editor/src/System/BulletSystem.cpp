@@ -22,6 +22,41 @@ BulletSystem::BulletSystem(
 	, player(player)
 {}
 
+void BulletSystem::collide(iw::Manifold& man, float dt) {
+	iw::Entity bulletEntity, otherEntity;
+	bool noent = GetEntitiesFromManifold<Bullet>(man, bulletEntity, otherEntity);
+
+	if (noent) {
+		return;
+	}
+
+	Bullet* bullet = bulletEntity.Find<Bullet>();
+
+	if (   otherEntity.Has<Bullet>()
+		|| otherEntity.Has<Enemy>()
+		|| otherEntity.Has<DontDeleteBullets>()
+		|| otherEntity.Has<LevelDoor>())
+	{
+		return;
+	}
+
+	iw::Transform* bulletTransform = bulletEntity.Find<iw::Transform>();
+
+	if (otherEntity.Has<Player>()) {
+		Bus->push<GiveScoreEvent>(bulletTransform->Position, 0, true);
+	}
+
+	else if (otherEntity.Has<EnemyDeathCircle>()) {
+		iw::Transform* otherTransform = otherEntity.Find<iw::Transform>();
+
+		float score = ceil((bulletTransform->Position - otherTransform->Position).length()) * 10;
+		Bus->push<GiveScoreEvent>(bulletTransform->Position, score, false);
+	}
+
+	bulletTransform->SetParent(nullptr);
+	Space->QueueEntity(bulletEntity.Handle, iw::func_Destroy);
+}
+
 int BulletSystem::Initialize() {
 	iw::Mesh mesh = Asset->Load<iw::Model>("Sphere")->GetMesh(0).MakeInstance();
 
@@ -44,6 +79,7 @@ int BulletSystem::Initialize() {
 	rigidbody.SetMass(1);
 	rigidbody.SetSimGravity(false);
 	rigidbody.SetIsTrigger(true);
+	rigidbody.SetOnCollision(iw::bind<void, BulletSystem*, iw::Manifold&, float>(&BulletSystem::collide, this)); // garbo
 
 	iw::SphereCollider collider(0, 0.5f);
 
@@ -186,4 +222,56 @@ void BulletSystem::FixedUpdate() {
 		transform->SetParent(nullptr);
 		Space->QueueEntity(entity, iw::func_Destroy);
 	});
+}
+
+bool BulletSystem::On(
+	iw::ActionEvent& e)
+{
+	switch (e.Action) {
+		case iw::val(Actions::SPAWN_BULLET): {
+			SpawnBulletEvent& event = e.as<SpawnBulletEvent>();
+			iw::Transform* trans = SpawnBullet(event.Bullet, event.Position, event.Rotation);
+			event.Level->AddChild(trans);
+			break;
+		}
+	}
+
+	return false;
+}
+
+iw::Transform* BulletSystem::SpawnBullet(
+	Bullet enemyBullet,
+	iw::vector3 position,
+	iw::quaternion rot)
+{
+	iw::Entity bullet = Space->Instantiate(bulletPrefab);
+
+	if (enemyBullet.Package) {
+		BulletPackage* p = bullet.Add<BulletPackage>();
+
+		p->Type = PackageType(enemyBullet.Package & GET_TYPE);
+		p->InnerType = BulletType(enemyBullet.Package & REMOVE_TYPE);
+		p->InnerSpeed = 5.0f;
+		p->TimeToExplode = 1.5f;
+	}
+
+	Bullet* b = bullet.Find<Bullet>();
+	iw::Transform* t = bullet.Find<iw::Transform>();
+	iw::SphereCollider* s = bullet.Find<iw::SphereCollider>();
+	iw::Rigidbody* r = bullet.Find<iw::Rigidbody>();
+
+	b->Type = enemyBullet.Type;
+	b->Package = enemyBullet.Package;
+	b->Speed = enemyBullet.Speed;
+
+	t->Rotation = rot;
+	t->Position = position + t->Right() * sqrt(2);
+
+	r->SetCol(s);
+	r->SetTrans(t);
+	r->SetVelocity(iw::vector3::unit_x * rot * b->Speed);
+
+	Physics->AddRigidbody(r);
+
+	return t;
 }

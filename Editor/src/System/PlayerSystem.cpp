@@ -92,7 +92,7 @@ int PlayerSystem::Initialize() {
 				return;
 			}
 
-			if (enemy->Type >= EnemyType::MINI_BOSS_BOX_SPIN) {
+			if (enemy->Type >= EnemyType::MINI_BOSS_FOREST) {
 				if (player->Transition) return; 
 
 				Player*        playerComp  = playerEntity.Find<Player>();
@@ -104,8 +104,9 @@ int PlayerSystem::Initialize() {
 
 				float distance = 0;
 				switch (enemy->Type) {
-					case EnemyType::MINI_BOSS_BOX_SPIN: distance = 12; break;
-					case EnemyType::BOSS_FOREST:        distance = 18; break;
+					case EnemyType::MINI_BOSS_CANYON:
+					case EnemyType::MINI_BOSS_FOREST: distance = 12; break;
+					case EnemyType::BOSS_FOREST:      distance = 18; break;
 					default: return;
 				}
 

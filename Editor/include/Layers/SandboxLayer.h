@@ -3,6 +3,7 @@
 #include "iw/engine/Layer.h"
 #include "Systems/PlayerSystem.h"
 #include "Systems/EnemySystem.h"
+#include "Systems/EnemyBossSystem.h"
 #include "Systems/BulletSystem.h"
 
 #include "iw/graphics/DirectionalLight.h"
@@ -16,7 +17,8 @@ namespace iw {
 	{
 	private:
 		PlayerSystem* playerSystem;
-		EnemySystem*  enemySystem;
+		EnemySystem* enemySystem;
+		EnemyBossSystem* enemyBossSystem;
 		BulletSystem* bulletSystem;
 
 		// Shaders

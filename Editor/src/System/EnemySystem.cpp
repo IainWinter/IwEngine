@@ -83,21 +83,13 @@ void EnemySystem::Update(
 			}
 			// this one secretly breaks the story xd
 			// spins to player quickly and does 1 / 2 firing moves
-			case EnemyType::MINI_BOSS_BOX_SPIN: {
+			case EnemyType::MINI_BOSS_FOREST:
+			case EnemyType::MINI_BOSS_CANYON:
+			case EnemyType::BOSS_FOREST: {
 				// should rotate in same direction until at player
 				if (enemy->Timer < enemy->ChargeTime) {
 					iw::vector3 target = player.Find<iw::Transform>()->Position;
 					float       dir    = atan2(target.z - transform->Position.z, target.x - transform->Position.x);
-
-					obj->Trans().Rotation = iw::lerp(obj->Trans().Rotation, iw::quaternion::from_euler_angles(0, dir, 0), iw::Time::DeltaTime() * 4);
-				}
-
-				break;
-			}
-			case EnemyType::BOSS_FOREST: {
-				if (enemy->Timer < enemy->ChargeTime) {
-					iw::vector3 target = player.Find<iw::Transform>()->Position;
-					float       dir = atan2(target.z - transform->Position.z, target.x - transform->Position.x);
 
 					obj->Trans().Rotation = iw::lerp(obj->Trans().Rotation, iw::quaternion::from_euler_angles(0, dir, 0), iw::Time::DeltaTime() * 4);
 				}
@@ -113,48 +105,82 @@ void EnemySystem::Update(
 
 			switch (enemy->Type) {
 				case EnemyType::SPIN: {
-					iw::Transform* bullet = SpawnBullet(
+					Bus->push<SpawnBulletEvent>(
 						enemy->Bullet,
 						transform->Position,
-						iw::quaternion::from_euler_angles(0, enemy->Rotation, 0)
+						iw::quaternion::from_euler_angles(0, enemy->Rotation, 0),
+						transform->Parent()
 					);
-
-					transform->Parent()->AddChild(bullet);
 
 					break;
 				}
 				case EnemyType::CIRCLE: {
 					int count = roundf(iw::Pi2 / enemy->Speed);
 					for (float i = 0; i < count; i++) {
-						iw::Transform* bullet = SpawnBullet(
+						Bus->push<SpawnBulletEvent>(
 							enemy->Bullet,
 							transform->Position,
-							iw::quaternion::from_euler_angles(0, enemy->Rotation + enemy->Speed * i, 0)
+							iw::quaternion::from_euler_angles(0, enemy->Rotation + enemy->Speed * i, 0),
+							transform->Parent()
 						);
-
-						transform->Parent()->AddChild(bullet);
 					}
 
 					break;
 				}
 				case EnemyType::SEEK: {
-					iw::Transform* bullet = SpawnBullet(
+					Bus->push<SpawnBulletEvent>(
 						enemy->Bullet,
 						transform->Position,
-						transform->Rotation.inverted()
+						transform->Rotation.inverted(),
+						transform->Parent()
 					);
-
-					transform->Parent()->AddChild(bullet);
 
 					break;
 				}
-				case EnemyType::MINI_BOSS_BOX_SPIN: {
+				case EnemyType::MINI_BOSS_CANYON: {
 					const float time = enemy->FireTime - enemy->ChargeTime;
 
-					const float fire1 = enemy->ChargeTime + time * 1.0f / 3.0f;
-					const float fire2 = enemy->ChargeTime + time * 2.0f / 3.0f;
+					const float fire1 = enemy->ChargeTime + time * 1.0f / 4.0f;
+					const float fire2 = enemy->ChargeTime + time * 2.0f / 4.0f;
+					const float fire3 = enemy->ChargeTime + time * 3.0f / 4.0f;
 
-					const float fire12 = (fire2 - fire1) * 0.5f;
+					const float fire12 = (fire2 - fire1) * 0.05f;
+
+					if (enemy->Timer >= fire3)
+					{
+						if (enemy->Timer2 == 0.0f) {
+							float rot = iw::Pi + iw::hPi * 0.5f * cos(enemy->Timer);
+
+							int count = roundf(iw::Pi2 / enemy->Speed);
+							int dontShoot = count * 0.5f;
+
+							for (int i = 0; i <= count; i++) {
+								if (   i != dontShoot
+									&& i != dontShoot - 1
+									&& i != dontShoot + 1)
+								{
+									iw::quaternion offset = iw::quaternion::from_euler_angles(0, -rot + enemy->Speed * i, 0);
+
+									Bus->push<SpawnBulletEvent>(
+										enemy->Bullet,
+										transform->Position,
+										transform->Rotation.inverted() * offset,
+										transform->Parent()
+									);
+								}
+							}
+						}
+
+						enemy->Timer2 += iw::Time::DeltaTimeScaled();
+
+						if (enemy->Timer2 > 0.2f) {
+							enemy->Timer2 = 0.0f;
+						}
+
+						if (enemy->Timer <= fire3 + fire12) {
+							enemy->HasShot = false; // resets hasShot if not finished kinda scuff
+						}
+					}
 
 					if (enemy->Timer >= fire2)
 					{
@@ -171,13 +197,12 @@ void EnemySystem::Update(
 								{
 									iw::quaternion offset = iw::quaternion::from_euler_angles(0, -rot + enemy->Speed * i, 0);
 
-									iw::Transform* bullet = SpawnBullet(
+									Bus->push<SpawnBulletEvent>(
 										enemy->Bullet,
 										transform->Position,
-										transform->Rotation.inverted() * offset
+										transform->Rotation.inverted()* offset,
+										transform->Parent()
 									);
-
-									transform->Parent()->AddChild(bullet);
 								}
 							}
 						}
@@ -199,13 +224,12 @@ void EnemySystem::Update(
 							float rot = enemy->Timer * iw::Pi2 * 2;
 							iw::quaternion offset = iw::quaternion::from_euler_angles(0, rot, 0);
 
-							iw::Transform* bullet = SpawnBullet(
+							Bus->push<SpawnBulletEvent>(
 								enemy->Bullet,
 								transform->Position,
-								transform->Rotation.inverted() * offset
+								transform->Rotation.inverted() * offset,
+								transform->Parent()
 							);
-
-							transform->Parent()->AddChild(bullet);
 						}
 
 						enemy->Timer2 += iw::Time::DeltaTimeScaled();
@@ -219,18 +243,24 @@ void EnemySystem::Update(
 						}
 
 						else {
-							enemy->Timer = fire2 + fire12;
+							enemy->Timer = fire2 - fire12;
 						}
 					}
 
 					else
 					{
-						if (iw::randf() >= 0.0f) {
+						float rando = iw::randf() * 0.5f + 1.0f;
+						
+						if (rando > 0.666f) {
 							enemy->Timer = fire1;
 						}
 
-						else {
+						else if (rando > 0.333f) {
 							enemy->Timer = fire2;
+						}
+
+						else {
+							enemy->Timer = fire3;
 						}
 
 						enemy->HasShot = false;
@@ -258,13 +288,12 @@ void EnemySystem::Update(
 							for (int i = 0; i < count; i++) {
 								iw::quaternion offset = iw::quaternion::from_euler_angles(0, -rot + enemy->Speed * i, 0);
 
-								iw::Transform* bullet = SpawnBullet(
+								Bus->push<SpawnBulletEvent>(
 									enemy->Bullet,
 									transform->Position,
-									transform->Rotation.inverted() * offset
+									transform->Rotation.inverted() * offset,
+									transform->Parent()
 								);
-
-								transform->Parent()->AddChild(bullet);
 							}
 						}
 
@@ -384,77 +413,42 @@ bool EnemySystem::On(
 	return false;
 }
 
-iw::Transform* EnemySystem::SpawnBullet(
-	Bullet enemyBullet,
-	iw::vector3 position,
-	iw::quaternion rot)
-{
-	iw::Entity bullet = Space->Instantiate(m_bullet);
-	
-	if (enemyBullet.Package) {
-		BulletPackage* p = bullet.Add<BulletPackage>();
-
-		p->Type      = PackageType(enemyBullet.Package & GET_TYPE);
-		p->InnerType = BulletType (enemyBullet.Package & REMOVE_TYPE);
-		p->InnerSpeed    = 5.0f;
-		p->TimeToExplode = 1.5f;
-	}
-
-	Bullet*             b = bullet.Find<Bullet>();
-	iw::Transform*      t = bullet.Find<iw::Transform>();
-	iw::SphereCollider* s = bullet.Find<iw::SphereCollider>();
-	iw::Rigidbody*      r = bullet.Find<iw::Rigidbody>();
-
-	b->Type    = enemyBullet.Type;
-	b->Package = enemyBullet.Package;
-	b->Speed   = enemyBullet.Speed;
-
-	t->Rotation = rot;
-	t->Position = position + t->Right() * sqrt(2);
-
-	r->SetCol(s);
-	r->SetTrans(t);
-	r->SetVelocity(iw::vector3::unit_x * rot * b->Speed);
-
-	r->SetOnCollision([&](iw::Manifold& man, float dt) { // put in prefab
-		iw::Entity bulletEntity, otherEntity;
-		bool noent = GetEntitiesFromManifold<Bullet>(man, bulletEntity, otherEntity);
-
-		if (noent) {
-			return;
-		}
-
-		Bullet* bullet = bulletEntity.Find<Bullet>();
-
-		if (   otherEntity.Has<Bullet>()
-			|| otherEntity.Has<Enemy>()
-			|| otherEntity.Has<DontDeleteBullets>()
-			|| otherEntity.Has<LevelDoor>())
-		{
-			return;
-		}
-
-		iw::Transform* bulletTransform = bulletEntity.Find<iw::Transform>();
-
-		if (otherEntity.Has<Player>()) {
-			Bus->push<GiveScoreEvent>(bulletTransform->Position, 0, true);
-		}
-
-		else if (otherEntity.Has<EnemyDeathCircle>()) {
-			iw::Transform* otherTransform = otherEntity.Find<iw::Transform>();
-
-			float score = ceil((bulletTransform->Position - otherTransform->Position).length()) * 10;
-			Bus->push<GiveScoreEvent>(bulletTransform->Position, score, false);
-		}
-
-		bulletTransform->SetParent(nullptr);
-		Space->QueueEntity(bulletEntity.Handle, iw::func_Destroy);
-	});
-
-	Physics->AddRigidbody(r);
-
-	return t;
-}
+//iw::Transform* EnemySystem::SpawnBullet(
+//	Bullet enemyBullet,
+//	iw::vector3 position,
+//	iw::quaternion rot)
+//{
+//	iw::Entity bullet = Space->Instantiate(m_bullet);
+//	
+//	if (enemyBullet.Package) {
+//		BulletPackage* p = bullet.Add<BulletPackage>();
+//
+//		p->Type      = PackageType(enemyBullet.Package & GET_TYPE);
+//		p->InnerType = BulletType (enemyBullet.Package & REMOVE_TYPE);
+//		p->InnerSpeed    = 5.0f;
+//		p->TimeToExplode = 1.5f;
+//	}
+//
+//	Bullet*             b = bullet.Find<Bullet>();
+//	iw::Transform*      t = bullet.Find<iw::Transform>();
+//	iw::SphereCollider* s = bullet.Find<iw::SphereCollider>();
+//	iw::Rigidbody*      r = bullet.Find<iw::Rigidbody>();
+//
+//	b->Type    = enemyBullet.Type;
+//	b->Package = enemyBullet.Package;
+//	b->Speed   = enemyBullet.Speed;
+//
+//	t->Rotation = rot;
+//	t->Position = position + t->Right() * sqrt(2);
+//
+//	r->SetCol(s);
+//	r->SetTrans(t);
+//	r->SetVelocity(iw::vector3::unit_x * rot * b->Speed);
+//
+//	Physics->AddRigidbody(r);
+//
+//	return t;
+//}
 
 iw::Transform* EnemySystem::SpawnEnemy(
 	Enemy prefab,
@@ -465,6 +459,21 @@ iw::Transform* EnemySystem::SpawnEnemy(
 	// 'Physics' is the DynamicsWorld
 
 	iw::Entity ent = Space->CreateEntity<iw::Transform, iw::Model, iw::SphereCollider, Enemy>();
+
+	switch (prefab.Type) {
+		case EnemyType::MINI_BOSS_FOREST:
+		case EnemyType::MINI_BOSS_CANYON:
+		case EnemyType::BOSS_FOREST:
+		{
+			EnemyBoss* boss = ent.Add<EnemyBoss>();
+			boss->Actions.push_back({ 0, 2.5f });
+			boss->Actions.push_back({ 1, 2.5f });
+
+			boss->ActionDelay = 3.5f;
+
+			break;
+		}
+	}
 
 	iw::CollisionObject* c;
 
@@ -490,23 +499,24 @@ iw::Transform* EnemySystem::SpawnEnemy(
 	Enemy*               e = ent.Set<Enemy>(prefab);
 	iw::Transform*       t = ent.Set<iw::Transform>(position);
 	iw::SphereCollider*  s = ent.Set<iw::SphereCollider>(iw::vector3::zero, 1.0f);
-	
-	iw::Model* m;
-	
+		
 	switch (prefab.Type) {
+		case EnemyType::MINI_BOSS_FOREST:
+		case EnemyType::MINI_BOSS_CANYON:
 		case EnemyType::BOSS_FOREST:
-		case EnemyType::MINI_BOSS_BOX_SPIN: {
+		{
 			e->Health = 3;
 			e->ScoreMultiple = 10;
 			t->Scale = 0.75f;
-			m = ent.Set<iw::Model>(*Asset->Load<iw::Model>("Box"));
+			ent.Set<iw::Model>(*Asset->Load<iw::Model>("Box"));
 
 			break;
 		}
 		default: {
 			e->Health = 1;
 			e->ScoreMultiple = 1;
-			m = ent.Set<iw::Model>(*Asset->Load<iw::Model>("Tetrahedron"));
+			ent.Set<iw::Model>(*Asset->Load<iw::Model>("Tetrahedron"));
+
 			break;
 		}
 	}
