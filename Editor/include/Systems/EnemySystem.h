@@ -29,12 +29,11 @@ public:
 		iw::EntityComponentArray& view) override;
 
 	bool On(iw::ActionEvent& e) override;
-private:
-	iw::Transform* SpawnBullet(
-		Bullet enemyBullet,
-		iw::vector3 position,
-		iw::quaternion rot);
 
+	int GetEnemyCount() const {
+		return m_enemyCount;
+	}
+private:
 	iw::Transform* SpawnEnemy(
 		Enemy prefab,
 		iw::vector3 position,

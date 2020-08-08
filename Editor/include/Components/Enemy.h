@@ -39,12 +39,14 @@ struct REFLECT Enemy {
 struct Action {
 	unsigned Index;
 	float Time;
+	float Delay;
+
+	int Condition = -1;
 };
 
 struct EnemyBoss {
 	std::vector<Action> Actions;
-	int CurrentAction = -1;
 
-	float ActionDelay;
-	float ActionTimer;
+	float ActionTimer = 0.0f;
+	int CurrentAction = -1;
 };

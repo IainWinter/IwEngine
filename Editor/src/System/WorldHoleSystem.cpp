@@ -64,12 +64,10 @@ int WorldHoleSystem::Initialize() {
 	iw::Model model;
 	model.AddMesh(mesh);
 
-	iw::Rigidbody rigidbody;
-	rigidbody.SetMass(1);
-	rigidbody.SetSimGravity(false);
-	rigidbody.SetIsTrigger(true);
+	iw::CollisionObject object;
+	object.SetIsTrigger(true);
 
-	rigidbody.SetOnCollision(iw::bind<void, WorldHoleSystem*, iw::Manifold&, float>(&WorldHoleSystem::collide, this)); // garbo
+	object.SetOnCollision(iw::bind<void, WorldHoleSystem*, iw::Manifold&, float>(&WorldHoleSystem::collide, this)); // garbo
 
 	iw::SphereCollider collider(0, 0.85f);
 
@@ -79,7 +77,7 @@ int WorldHoleSystem::Initialize() {
 	worldHole.InTransition = false;
 
 	holePrefab.Add(Space->RegisterComponent<iw::Transform>(), &transform);
-	holePrefab.Add(Space->RegisterComponent<iw::Rigidbody>(), &rigidbody);
+	holePrefab.Add(Space->RegisterComponent<iw::CollisionObject>(), &object);
 	holePrefab.Add(Space->RegisterComponent<iw::SphereCollider>(), &collider);
 	holePrefab.Add(Space->RegisterComponent<iw::Model>(), &model);
 	holePrefab.Add(Space->RegisterComponent<WorldHole>(), &worldHole);
@@ -89,12 +87,13 @@ int WorldHoleSystem::Initialize() {
 }
 
 void WorldHoleSystem::Update() {
-	auto holes  = Space->Query<WorldHole, iw::Model>();
+	auto holes  = Space->Query< iw::Transform, iw::Model, WorldHole>();
 
-	holes.Each([](
+	holes.Each([&](
 		auto entity,
-		auto hole,
-		auto model)
+		auto transform,
+		auto model,
+		auto hole)
 	{
 		if(hole->Touched) {
 			hole->Timer += iw::Time::DeltaTime();
@@ -109,6 +108,22 @@ void WorldHoleSystem::Update() {
 		float color = hole->Time == 0.0f ? 0.0f : (hole->Time - hole->Timer) / hole->Time * 0.5f;
 
 		material->Set("baseColor", iw::Color(color, color, color, 1.0f));
+
+		//if (hole->BulletTime > 0) {
+
+		//	hole->BulletTimer += iw::Time::DeltaTime();
+
+		//	if (hole->BulletTimer > hole->BulletTime) {
+
+		//		hole->BulletTimer = 0.0f;
+		//		Bus->push<SpawnBulletEvent>(
+		//			m_seekBullet,
+		//			transform->Position,
+		//			iw::quaternion::identity,
+		//			transform->Parent()
+		//		);
+		//	}
+		//}
 	});
 
 }
@@ -139,8 +154,8 @@ bool WorldHoleSystem::On(
 		}
 
 		else if (event.LevelName == "levels/canyon/canyon07.json") {
-			SpawnHole(iw::vector3(-12, 0, -8), false, "levels/canyon/cave07.json");
-			SpawnHole(iw::vector3(  0, 0,  4), false, "levels/canyon/cave07.json");
+			SpawnHole(iw::vector3(-18, 0, -7.5f), true, "levels/canyon/cave07.json");
+			SpawnHole(iw::vector3(  0, 0,     6), false, "levels/canyon/cave07.json");
 		}
 	}
 
@@ -154,11 +169,11 @@ void WorldHoleSystem::SpawnHole(
 {
 	iw::Entity hole = Space->Instantiate(holePrefab);
 
-	iw::Transform*      t = hole.Find<iw::Transform>();
-	iw::SphereCollider* c = hole.Find<iw::SphereCollider>();
-	iw::Rigidbody*      r = hole.Find<iw::Rigidbody>();
-	iw::Model*          m = hole.Find<iw::Model>();
-	WorldHole*          h = hole.Find<WorldHole>();
+	iw::Transform*       t = hole.Find<iw::Transform>();
+	iw::SphereCollider*  c = hole.Find<iw::SphereCollider>();
+	iw::CollisionObject* o = hole.Find<iw::CollisionObject>();
+	iw::Model*           m = hole.Find<iw::Model>();
+	WorldHole*           h = hole.Find<WorldHole>();
 
 	h->CaveLevel = caveLevel;
 
@@ -171,6 +186,7 @@ void WorldHoleSystem::SpawnHole(
 
 	else {
 		h->Time = 0.0f;
+		h->BulletTime = 2.0f;
 	}
 
 	t->Position = position;
@@ -179,7 +195,7 @@ void WorldHoleSystem::SpawnHole(
 		t->SetParent(currentLevel.Find<iw::Transform>());
 	}
 
-	r->SetCol(c);
-	r->SetTrans(t);
-	Physics->AddRigidbody(r);
+	o->SetCol(c);
+	o->SetTrans(t);
+	Physics->AddCollisionObject(o);
 }

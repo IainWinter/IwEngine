@@ -195,7 +195,7 @@ void BulletSystem::FixedUpdate() {
 
 		package->Exploded = true;
 
-		for (float dir = 0.0f; dir < iw::Pi2; dir += iw::Pi2 / 4) {
+		for (float dir = 0.0f; dir < iw::Pi2; dir += iw::Pi2 / 5) {
 			iw::Entity bullet = Space->Instantiate(bulletPrefab);
 
 			Bullet*             b = bullet.Find<Bullet>();
@@ -249,20 +249,20 @@ iw::Transform* BulletSystem::SpawnBullet(
 	if (enemyBullet.Package) {
 		BulletPackage* p = bullet.Add<BulletPackage>();
 
-		p->Type = PackageType(enemyBullet.Package & GET_TYPE);
+		p->Type     = PackageType(enemyBullet.Package & GET_TYPE);
 		p->InnerType = BulletType(enemyBullet.Package & REMOVE_TYPE);
 		p->InnerSpeed = 5.0f;
 		p->TimeToExplode = 1.5f;
 	}
 
-	Bullet* b = bullet.Find<Bullet>();
-	iw::Transform* t = bullet.Find<iw::Transform>();
+	Bullet*             b = bullet.Find<Bullet>();
+	iw::Transform*      t = bullet.Find<iw::Transform>();
 	iw::SphereCollider* s = bullet.Find<iw::SphereCollider>();
-	iw::Rigidbody* r = bullet.Find<iw::Rigidbody>();
+	iw::Rigidbody*      r = bullet.Find<iw::Rigidbody>();
 
-	b->Type = enemyBullet.Type;
+	b->Type    = enemyBullet.Type;
 	b->Package = enemyBullet.Package;
-	b->Speed = enemyBullet.Speed;
+	b->Speed   = enemyBullet.Speed;
 
 	t->Rotation = rot;
 	t->Position = position + t->Right() * sqrt(2);

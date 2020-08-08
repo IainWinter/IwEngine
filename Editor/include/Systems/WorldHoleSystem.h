@@ -1,6 +1,7 @@
 #pragma once
 
 #include "iw/engine/System.h"
+#include "Components/Bullet.h"
 
 class WorldHoleSystem
 	: public iw::SystemBase
@@ -8,6 +9,16 @@ class WorldHoleSystem
 private:
 	iw::Entity& currentLevel;
 	iw::Prefab holePrefab;
+
+	const Bullet m_seekBullet = {
+		BulletType::SEEK,
+		8.0f
+	};
+
+	const Bullet m_orbitBullet = {
+		BulletType::ORBIT,
+		8.0f
+	};
 
 public:
 	WorldHoleSystem(

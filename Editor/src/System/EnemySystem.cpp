@@ -137,236 +137,6 @@ void EnemySystem::Update(
 
 					break;
 				}
-				case EnemyType::MINI_BOSS_CANYON: {
-					const float time = enemy->FireTime - enemy->ChargeTime;
-
-					const float fire1 = enemy->ChargeTime + time * 1.0f / 4.0f;
-					const float fire2 = enemy->ChargeTime + time * 2.0f / 4.0f;
-					const float fire3 = enemy->ChargeTime + time * 3.0f / 4.0f;
-
-					const float fire12 = (fire2 - fire1) * 0.05f;
-
-					if (enemy->Timer >= fire3)
-					{
-						if (enemy->Timer2 == 0.0f) {
-							float rot = iw::Pi + iw::hPi * 0.5f * cos(enemy->Timer);
-
-							int count = roundf(iw::Pi2 / enemy->Speed);
-							int dontShoot = count * 0.5f;
-
-							for (int i = 0; i <= count; i++) {
-								if (   i != dontShoot
-									&& i != dontShoot - 1
-									&& i != dontShoot + 1)
-								{
-									iw::quaternion offset = iw::quaternion::from_euler_angles(0, -rot + enemy->Speed * i, 0);
-
-									Bus->push<SpawnBulletEvent>(
-										enemy->Bullet,
-										transform->Position,
-										transform->Rotation.inverted() * offset,
-										transform->Parent()
-									);
-								}
-							}
-						}
-
-						enemy->Timer2 += iw::Time::DeltaTimeScaled();
-
-						if (enemy->Timer2 > 0.2f) {
-							enemy->Timer2 = 0.0f;
-						}
-
-						if (enemy->Timer <= fire3 + fire12) {
-							enemy->HasShot = false; // resets hasShot if not finished kinda scuff
-						}
-					}
-
-					if (enemy->Timer >= fire2)
-					{
-						if (enemy->Timer2 == 0.0f) {
-							float rot = iw::Pi + iw::hPi * 0.5f * cos(enemy->Timer);
-
-							int count = roundf(iw::Pi2 / enemy->Speed);
-							int dontShoot = count * 0.5f;
-
-							for (int i = 0; i <= count; i++) {
-								if (i != dontShoot
-									&& i != dontShoot - 1
-									&& i != dontShoot + 1)
-								{
-									iw::quaternion offset = iw::quaternion::from_euler_angles(0, -rot + enemy->Speed * i, 0);
-
-									Bus->push<SpawnBulletEvent>(
-										enemy->Bullet,
-										transform->Position,
-										transform->Rotation.inverted()* offset,
-										transform->Parent()
-									);
-								}
-							}
-						}
-
-						enemy->Timer2 += iw::Time::DeltaTimeScaled();
-
-						if (enemy->Timer2 > 0.2f) {
-							enemy->Timer2 = 0.0f;
-						}
-
-						if (enemy->Timer <= fire2 + fire12) {
-							enemy->HasShot = false; // resets hasShot if not finished kinda scuff
-						}
-					}
-
-					else if (enemy->Timer >= fire1)
-					{
-						if (enemy->Timer2 == 0.0f) {
-							float rot = enemy->Timer * iw::Pi2 * 2;
-							iw::quaternion offset = iw::quaternion::from_euler_angles(0, rot, 0);
-
-							Bus->push<SpawnBulletEvent>(
-								enemy->Bullet,
-								transform->Position,
-								transform->Rotation.inverted() * offset,
-								transform->Parent()
-							);
-						}
-
-						enemy->Timer2 += iw::Time::DeltaTimeScaled();
-
-						if (enemy->Timer2 > 0.02f) {
-							enemy->Timer2 = 0.0f;
-						}
-
-						if (enemy->Timer <= fire1 + fire12) {
-							enemy->HasShot = false;  // resets hasShot if not finished kinda scuff
-						}
-
-						else {
-							enemy->Timer = fire2 - fire12;
-						}
-					}
-
-					else
-					{
-						float rando = iw::randf() * 0.5f + 1.0f;
-						
-						if (rando > 0.666f) {
-							enemy->Timer = fire1;
-						}
-
-						else if (rando > 0.333f) {
-							enemy->Timer = fire2;
-						}
-
-						else {
-							enemy->Timer = fire3;
-						}
-
-						enemy->HasShot = false;
-					}
-
-					break;
-				}
-				case EnemyType::BOSS_FOREST: {
-					const float time = enemy->FireTime - enemy->ChargeTime;
-
-					const float fire1 = enemy->ChargeTime + time * 1.0f / 3.0f;
-					const float fire2 = enemy->ChargeTime + time * 2.0f / 3.0f;
-
-					const float fire12 = (fire2 - fire1) * 0.5f;
-
-					int count = roundf(iw::Pi2 / enemy->Speed);
-
-					int dontShoot = count * 0.5f;
-
-					if (enemy->Timer >= fire2)
-					{
-						if (enemy->Timer2 == 0.0f) {
-							float rot = iw::Pi + iw::hPi * 0.5f * cos(enemy->Timer);
-
-							for (int i = 0; i < count; i++) {
-								iw::quaternion offset = iw::quaternion::from_euler_angles(0, -rot + enemy->Speed * i, 0);
-
-								Bus->push<SpawnBulletEvent>(
-									enemy->Bullet,
-									transform->Position,
-									transform->Rotation.inverted() * offset,
-									transform->Parent()
-								);
-							}
-						}
-
-						enemy->Timer2 += iw::Time::DeltaTimeScaled();
-
-						if (enemy->Timer2 > 0.1f) {
-							enemy->Timer2 = 0.0f;
-						}
-
-						if (enemy->Timer <= fire2 + fire12) {
-							enemy->HasShot = false; // resets hasShot if not finished kinda scuff
-						}
-					}
-
-					else if (enemy->Timer >= fire1)
-					{
-						if (enemy->Timer2 == 0.0f) {
-							float rot = iw::Time::TotalTime() * iw::Pi2 * 3;
-
-							iw::quaternion offset = transform->Rotation.inverted()
-								* iw::quaternion::from_euler_angles(0, rot, 0);
-
-							Enemy child {};
-							child.Type = EnemyType::SPIN;
-							child.Bullet = enemy->Bullet;
-							child.Speed = 0.2617994;
-							child.FireTime = 0.120000;
-							child.ChargeTime = 0.000000;
-							child.HasShot = false;
-							child.JustHit = false;
-
-							iw::vector3 position = transform->Position + iw::vector3(sqrt(2), 1, 0) * offset;
-							iw::vector3 velocity = transform->Forward() * offset;
-
-							velocity *= 7.0f + iw::randf() * 2;
-							velocity.y = 10.0f;
-
-							Bus->push<SpawnEnemyEvent>(
-								child,
-								position,
-								velocity,
-								transform->Parent());
-						}
-
-						enemy->Timer2 += iw::Time::DeltaTimeScaled();
-
-						if (enemy->Timer2 > 0.15f) {
-							enemy->Timer2 = 0.0f;
-						}
-
-						if (enemy->Timer <= fire1 + 0.4f) {
-							enemy->HasShot = false; // resets hasShot if not finished kinda scuff
-						}
-
-						else {
-							enemy->Timer = fire2 + fire12;
-						}
-					}
-
-					else
-					{
-						if (m_enemyCount > 4 || enemy->JustHit) {
-							enemy->Timer = fire2;
-							enemy->JustHit = false;
-						}
-						
-						else {
-							enemy->Timer = fire1;
-						}
-
-						enemy->HasShot = false;
-					}
-				}
 			}
 
 			enemy->Rotation = fmod(enemy->Rotation + enemy->Speed, iw::Pi2);
@@ -413,43 +183,6 @@ bool EnemySystem::On(
 	return false;
 }
 
-//iw::Transform* EnemySystem::SpawnBullet(
-//	Bullet enemyBullet,
-//	iw::vector3 position,
-//	iw::quaternion rot)
-//{
-//	iw::Entity bullet = Space->Instantiate(m_bullet);
-//	
-//	if (enemyBullet.Package) {
-//		BulletPackage* p = bullet.Add<BulletPackage>();
-//
-//		p->Type      = PackageType(enemyBullet.Package & GET_TYPE);
-//		p->InnerType = BulletType (enemyBullet.Package & REMOVE_TYPE);
-//		p->InnerSpeed    = 5.0f;
-//		p->TimeToExplode = 1.5f;
-//	}
-//
-//	Bullet*             b = bullet.Find<Bullet>();
-//	iw::Transform*      t = bullet.Find<iw::Transform>();
-//	iw::SphereCollider* s = bullet.Find<iw::SphereCollider>();
-//	iw::Rigidbody*      r = bullet.Find<iw::Rigidbody>();
-//
-//	b->Type    = enemyBullet.Type;
-//	b->Package = enemyBullet.Package;
-//	b->Speed   = enemyBullet.Speed;
-//
-//	t->Rotation = rot;
-//	t->Position = position + t->Right() * sqrt(2);
-//
-//	r->SetCol(s);
-//	r->SetTrans(t);
-//	r->SetVelocity(iw::vector3::unit_x * rot * b->Speed);
-//
-//	Physics->AddRigidbody(r);
-//
-//	return t;
-//}
-
 iw::Transform* EnemySystem::SpawnEnemy(
 	Enemy prefab,
 	iw::vector3 position,
@@ -461,15 +194,24 @@ iw::Transform* EnemySystem::SpawnEnemy(
 	iw::Entity ent = Space->CreateEntity<iw::Transform, iw::Model, iw::SphereCollider, Enemy>();
 
 	switch (prefab.Type) {
-		case EnemyType::MINI_BOSS_FOREST:
-		case EnemyType::MINI_BOSS_CANYON:
+		case EnemyType::MINI_BOSS_FOREST: {
+			EnemyBoss* boss = ent.Add<EnemyBoss>();
+			boss->Actions.push_back({ 0, 2.5f, 0.02f });
+			boss->Actions.push_back({ 1, 2.5f, 0.2f });
+
+			break;
+		}
+		case EnemyType::MINI_BOSS_CANYON: {
+			EnemyBoss* boss = ent.Add<EnemyBoss>();
+			boss->Actions.push_back({ 4, 2.5f, 0.2f });
+
+			break;
+		}
 		case EnemyType::BOSS_FOREST:
 		{
 			EnemyBoss* boss = ent.Add<EnemyBoss>();
-			boss->Actions.push_back({ 0, 2.5f });
-			boss->Actions.push_back({ 1, 2.5f });
-
-			boss->ActionDelay = 3.5f;
+			boss->Actions.push_back({ 2, 3.5f, 0.2f, 0 });
+			boss->Actions.push_back({ 3, 2.4f, 0.4f });
 
 			break;
 		}

@@ -138,12 +138,17 @@ void GameCameraController::SetTarget(
 {
 	zoomOut = false;
 
-	if (   levelName == "levels/forest/forest05.a.json"
-		|| levelName == "levels/forest/forest07.a.json"
-		|| levelName == "levels/forest/forest12.a.json"
-		|| levelName == "levels/forest/forest22.json"
+	if (//   levelName == "levels/forest/forest05.a.json"
+		//|| levelName == "levels/forest/forest07.a.json"
+		//|| levelName == "levels/forest/forest12.a.json"
+		/*||*/ 
+		   levelName == "levels/forest/forest22.json"
 		|| levelName.find("top")  != std::string::npos
-		|| levelName.find("cave") != std::string::npos)
+		|| levelName.find("cave") != std::string::npos
+		|| levelName.find(".a") != std::string::npos
+		|| levelName == "levels/canyon/canyon08.json"
+		|| levelName == "levels/canyon/canyon09.json"
+		|| levelName == "levels/canyon/canyon10.json")
 	{
 		y = 17.15f;
 	}

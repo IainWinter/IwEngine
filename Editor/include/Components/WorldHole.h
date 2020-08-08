@@ -10,4 +10,7 @@ struct WorldHole {
 
 	float Timer = 0.0f;
 	float Time;
+
+	float BulletTimer = 0.0f;
+	float BulletTime;
 };

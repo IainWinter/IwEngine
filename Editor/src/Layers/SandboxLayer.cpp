@@ -299,7 +299,7 @@ namespace iw {
 		playerSystem    = PushSystem<PlayerSystem>();
 		bulletSystem    = PushSystem<BulletSystem>(playerSystem->GetPlayer());
 		enemySystem     = PushSystem<EnemySystem>(playerSystem->GetPlayer(), bulletSystem->GetBulletPrefab());
-		enemyBossSystem = PushSystem<EnemyBossSystem>(playerSystem->GetPlayer());
+		enemyBossSystem = PushSystem<EnemyBossSystem>(playerSystem->GetPlayer(), enemySystem);
 
 		LevelSystem* levelSystem = PushSystem<LevelSystem>(playerSystem->GetPlayer(), MainScene);
 		                           PushSystem<WorldHoleSystem>(levelSystem->GetLevel());
