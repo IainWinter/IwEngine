@@ -25,6 +25,14 @@ namespace algo {
 		const SphereCollider*  a, const Transform* ta,
 		const CapsuleCollider* b, const Transform* tb);
 
+	// capsule vs plane
+
+	// mesh vs mesh
+	// sphere vs mesh
+	// capsule vs mesh
+	// plane vs mesh
+
+
 	// Swaps
 
 	IWPHYSICS_API

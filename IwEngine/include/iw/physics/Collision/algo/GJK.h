@@ -1,35 +1,37 @@
 #pragma once
 
 #include "iw/physics/IwPhysics.h" 
-#include "iw/physics/Collision/CollisionObject.h"
+#include "iw/physics/Collision/Collider.h"
+#include <array>
 
 namespace iw {
 namespace Physics {
 namespace algo {
 	bool GJK(
-		const CollisionObject* a,
-		const CollisionObject* b);
+		const Collider* colliderA,
+		const Collider* colliderB);
 
 namespace detail {
 	iw::vector3 Support(
-		const CollisionObject* a,
-		const CollisionObject* b,
+		const Collider* colliderA,
+		const Collider* colliderB,
 		const iw::vector3& direction);
 
-	iw::vector3 Simplex(
-		const iw::vector3& a,
-		const iw::vector3& b);
+	bool NextSimplex(
+		std::array<vector3, 4>& points,
+		vector3& direction);
 
-	iw::vector3 Simplex(
-		const iw::vector3& a,
-		const iw::vector3& b,
-		const iw::vector3& c);
+	bool Line(
+		std::array<vector3, 4>& points,
+		vector3& direction);
 
-	iw::vector3 Simplex(
-		const iw::vector3& a,
-		const iw::vector3& b,
-		const iw::vector3& c,
-		const iw::vector3& d);
+	bool Triangle(
+		std::array<vector3, 4>& points,
+		vector3& direction);
+
+	bool Tetrahedron(
+		std::array<vector3, 4>& points,
+		vector3& direction);
 
 	bool SameDirection(
 		const iw::vector3& direction,

@@ -1,152 +1,156 @@
 #include "iw/physics/Collision/algo/GJK.h"
 #include <vector>
+#include <array>
 
 namespace iw {
 namespace Physics {
 namespace algo {
 	bool GJK(
-		const CollisionObject* a,
-		const CollisionObject* b)
+		const Collider* colliderA,
+		const Collider* colliderB)
 	{
-		iw::vector3 points[4];
+		// Get initial support point in any direction
+		vector3 support = detail::Support(colliderA, colliderB, vector3::unit_x);
 
-		points[0] = detail::Support(a, b, iw::vector3::unit_x);
+		// Our simplex is an array of points, max count is 4
+		std::array<vector3, 4> points{ support };
 
-		iw::vector3 direction = -points[0];
+		// New direction is backwards from that point
+		vector3 direction = -support;
 
-		bool colliding = false;
-		int tests = 0;
-		int count = 1;
+		while (true) {
+			support = detail::Support(colliderA, colliderB, direction);
 
-		while (!colliding && tests < 5) {
-			iw::vector3 p = detail::Support(a, b, direction);
-
-			if (p.dot(direction) < 0) {
-				break;
+			if (support.dot(direction) < 0) {
+				return false; // no collision
 			}
 
-			tests++;
-			points[count++] = p;
+			points = { support, points[0], points[1], points[2] }; // add to front
 
-			switch (count) {
-				case 2: direction = detail::Simplex(p, points[0]);            break;
-				case 3: direction = detail::Simplex(p, points[1], points[0]); break;
-				case 4: {
-					direction = detail::Simplex(p, points[2], points[1], points[0]);
-					if (direction == 0) {
-						colliding = true;
-					}
-					
-					else {
-						points[0] = points[1];
-						points[1] = points[2];
-						points[2] = points[3];
-						count--;
-					}
-					
-					break;
-				}
+			if (detail::NextSimplex(points, direction)) {
+				return true;
 			}
 		}
-
-
-		return colliding;
 	}
 
 namespace detail {
-	iw::vector3 Support(
-		const CollisionObject* a,
-		const CollisionObject* b,
-		const iw::vector3& direction)
+	vector3 Support(
+		const Collider* colliderA,
+		const Collider* colliderB,
+		const vector3& direction)
 	{
-		return 0/*a->Col()->FurthestPoint(direction)
-			 - b->Col()->FurthestPoint(-direction)*/;
+		return colliderA->FindFurthestPoint( direction)
+			 - colliderB->FindFurthestPoint(-direction);
 	}
 
-	//Line
-	iw::vector3 Simplex(
-		const iw::vector3& a,
-		const iw::vector3& b)
+	bool NextSimplex(
+		std::array<vector3, 4>& points, 
+		vector3& direction)
 	{
-		if (SameDirection(b - a, -a)) {
-			return (b - a).cross(-a).cross(b - a);
+		switch (points.size()) {
+			case 2: return Line       (points, direction);
+			case 3: return Triangle   (points, direction);
+			case 4: return Tetrahedron(points, direction);
 		}
-
-		return -a;
+		
+		// never should be here
+		return false;
 	}
 
-	//Triangle
-	iw::vector3 Simplex(
-		const iw::vector3& a,
-		const iw::vector3& b,
-		const iw::vector3& c)
+	bool Line(
+		std::array<vector3, 4>& points,
+		vector3& direction)
 	{
-		iw::vector3 abc = (b - a).cross(c - a);
-		if (SameDirection(abc.cross(c - a), -a)) {
-			if (SameDirection(c - a, -a)) {
-				return (c - a).cross(-a).cross(c - a);
-			}
+		const vector3& a = points[0];
+		const vector3& b = points[1];
 
-			if (SameDirection(b - a, -a)) {
-				return (b - a).cross(-a).cross(b - a);
-			}
+		vector3 ab = b - a;
+		vector3 ao =   - a;
 
-			return -a;
+		if (SameDirection(ab, ao)) {
+			points = { a, b };
+			direction = ab.cross(ao).cross(ab);
 		}
 
-		if (SameDirection((b - a).cross(abc), -a)) {
-			if (SameDirection(b - a, -a)) {
-				return (b - a).cross(-a).cross(b - a);
-			}
-
-			return -a;
+		else {
+			points = { a };
+			direction = ao;
 		}
 
-		if (SameDirection(abc, -a)) {
-			return abc;
-		}
-
-		return -abc;
+		return false;
 	}
 
-	//Trapezoid
-	iw::vector3 Simplex(
-		const iw::vector3& a,
-		const iw::vector3& b,
-		const iw::vector3& c,
-		const iw::vector3& d)
+	bool Triangle(
+		std::array<vector3, 4>& points,
+		vector3& direction)
 	{
-		iw::vector3 abd = (b - a).cross(d - a);
-		iw::vector3 bcd = (c - b).cross(d - c);
-		iw::vector3 cad = (a - c).cross(d - a);
+		const vector3& a = points[0];
+		const vector3& b = points[1];
+		const vector3& c = points[2];
+
+		vector3 ab = b - a;
+		vector3 ac = c - a;
+		vector3 ao =   - a;
+
+		vector3 abc = ab.cross(ac);
+
+		if (SameDirection(abc.cross(ac), ao)) {
+			if (SameDirection(ac, ao)) {
+				points = { a, c };
+				direction = ac.cross(ao).cross(ac);
+			}
+
+			else {
+				return Line(points, direction);
+			}
+		}
+
+		else if (SameDirection(ab.cross(abc), ao)) {
+			return Line(points, direction);
+		}
+
+		else if (SameDirection(abc, ao)) {
+			direction = abc;
+		}
+
+		else {
+			direction = -abc;
+		}
+
+		return false;
+	}
+
+	bool Tetrahedron(
+		std::array<vector3, 4>& points,
+		vector3& direction)
+	{
+		vector3 a = points[0];
+		vector3 b = points[1];
+		vector3 c = points[2];
+		vector3 d = points[3];
+
+		vector3 abd = (b - a).cross(d - a);
+		vector3 bcd = (c - b).cross(d - c);
+		vector3 cad = (a - c).cross(d - a);
 
 		if (SameDirection(abd, -a)) {
-			iw::vector3 dir = Simplex(a, b, d);
-			if (abd != -dir) {
-				return dir;
-			}
+			return Triangle(points = { a, b, d }, direction);
 		}
 
 		if (SameDirection(bcd, -a)) {
-			iw::vector3 dir = Simplex(b, c, d);
-			if (bcd != -dir) {
-				return dir;
-			}
+			return Triangle(points = { b, c, d }, direction);
 		}
 
 		if (SameDirection(cad, -a)) {
-			iw::vector3 dir = Simplex(c, a, d);
-			if (cad != -dir) {
-				return dir;
-			}
+			return Triangle(points = { c, a, d }, direction);
 		}
 
-		return 0;
+		return true;
 	}
 
 	bool SameDirection(
-		const iw::vector3& direction,
-		const iw::vector3& ao)
+		const vector3& direction,
+		const vector3& ao)
 	{
 		return direction.dot(ao) > 0;
 	}

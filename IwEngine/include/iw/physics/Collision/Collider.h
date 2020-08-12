@@ -12,18 +12,22 @@ namespace Physics {
 		SPHERE,
 		CAPSULE,
 		PLANE,
-		//BOX
+		//BOX,
+		MESH
 	};
 
 namespace impl {
 	template<typename V>
-	struct REFLECT SphereCollider;
+	struct SphereCollider;
 
 	template<typename V>
-	struct REFLECT CapsuleCollider;
+	struct CapsuleCollider;
 
 	template<typename V>
-	struct REFLECT PlaneCollider;
+	struct PlaneCollider;
+
+	template<typename V>
+	struct MeshCollider;
 
 	template<
 		typename V>
@@ -52,6 +56,13 @@ namespace impl {
 		IWPHYSICS_API
 		virtual Transform Trans() const = 0;
 
+		IWPHYSICS_API
+		virtual V FindFurthestPoint(
+			V direction) const //= 0;
+		{
+			return V();
+		}
+
 		// dont like that you need to pass transforms
 
 		IWPHYSICS_API
@@ -77,6 +88,12 @@ namespace impl {
 			const Transform* transform,
 			const impl::PlaneCollider<V>* plane,
 			const Transform* planeTransform) const = 0;
+
+		IWPHYSICS_API
+		virtual ManifoldPoints TestCollision(
+			const Transform* transform,
+			const impl::MeshCollider<V>* mesh,
+			const Transform* meshTransform) const = 0;
 	};
 }
 
