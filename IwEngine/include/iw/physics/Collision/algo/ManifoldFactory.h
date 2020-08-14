@@ -5,11 +5,23 @@
 #include "iw/physics/Collision/SphereCollider.h"
 #include "iw/physics/Collision/CapsuleCollider.h"
 #include "iw/physics/Collision/PlaneCollider.h"
+#include "iw/physics/Collision/MeshCollider.h"
 #include "iw/physics/Collision/Manifold.h"
 
 namespace iw {
 namespace Physics {
 namespace algo {
+	// x = col impl
+	// o = col no impl
+	//   = no col
+
+	// ________| Sphere  | Capsule | Plane  | Mesh
+	// Sphere  |    x    |    x    |    x   |   o
+	// Capsule |    x    |    o    |    o   |   o
+	// Plane   |    x    |    o    |        |   o
+	// Mesh    |    o    |    o    |    o   |   x
+
+
 	IWPHYSICS_API
 	ManifoldPoints FindSphereSphereMaifoldPoints(
 		const SphereCollider* a, const Transform* ta,
@@ -25,12 +37,10 @@ namespace algo {
 		const SphereCollider*  a, const Transform* ta,
 		const CapsuleCollider* b, const Transform* tb);
 
-	// capsule vs plane
-
-	// mesh vs mesh
-	// sphere vs mesh
-	// capsule vs mesh
-	// plane vs mesh
+	IWPHYSICS_API
+	ManifoldPoints FindMeshMeshMaifoldPoints(
+		const MeshCollider* a, const Transform* ta,
+		const MeshCollider* b, const Transform* tb);
 
 
 	// Swaps

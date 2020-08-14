@@ -7,30 +7,67 @@
 namespace iw {
 namespace Physics {
 namespace algo {
-	bool GJK(
-		const Collider* colliderA,
-		const Collider* colliderB);
+	struct Simplex {
+	private:
+		std::array<vector3, 4> m_points;
+		unsigned m_size;
+
+	public:
+		Simplex()
+			: m_points({ 0, 0, 0, 0 })
+			, m_size(0)
+		{}
+
+		Simplex& operator=(std::initializer_list<vector3> list) {
+			m_size = list.size();
+			for (const vector3* v = list.begin(); v != list.end(); v++) {
+				m_points[std::distance(list.begin(), v)] = *v;
+			}
+
+			return *this;
+		}
+
+		void push_front(vector3 point) {
+			m_points = { point, m_points[0], m_points[1], m_points[2] };
+			m_size = m_size == 4 ? 4 : m_size + 1;
+		}
+
+		vector3& operator[](unsigned i) { return m_points[i]; }
+		unsigned size() const { return m_size; }
+
+		auto begin() const { return m_points.begin(); }
+		auto end()   const { return m_points.end() - (4 - m_size); }
+	};
+
+	std::pair<bool, Simplex> GJK(
+		const Collider* colliderA, const Transform* transformA,
+		const Collider* colliderB, const Transform* transformB);
+
+	ManifoldPoints EPA(
+		const Simplex& simplex,
+		const Collider* colliderA, const Transform* transformA,
+		const Collider* colliderB, const Transform* transformB);
 
 namespace detail {
 	iw::vector3 Support(
-		const Collider* colliderA,
-		const Collider* colliderB,
-		const iw::vector3& direction);
+		const Collider* colliderA, const Transform* transformA,
+		const Collider* colliderB, const Transform* transformB,
+		vector3 direction);
 
 	bool NextSimplex(
-		std::array<vector3, 4>& points,
+		Simplex& points,
 		vector3& direction);
 
 	bool Line(
-		std::array<vector3, 4>& points,
+		Simplex& points,
 		vector3& direction);
 
 	bool Triangle(
-		std::array<vector3, 4>& points,
+		Simplex& points,
 		vector3& direction);
 
 	bool Tetrahedron(
-		std::array<vector3, 4>& points,
+		Simplex& points,
 		vector3& direction);
 
 	bool SameDirection(

@@ -34,5 +34,14 @@ namespace Physics {
 		return algo::FindSpherePlaneMaifoldPoints(
 			this, transform, plane, planeTransform);
 	}
+
+	template<>
+	ManifoldPoints SphereCollider::TestCollision(
+		const Transform* transform,
+		const Physics::MeshCollider* mesh,
+		const Transform* meshTransform) const
+	{
+		return {};
+	}
 }
 }

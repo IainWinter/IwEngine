@@ -1,50 +1,116 @@
 #include "iw/physics/Collision/algo/GJK.h"
 #include <vector>
-#include <array>
 
 namespace iw {
 namespace Physics {
 namespace algo {
-	bool GJK(
-		const Collider* colliderA,
-		const Collider* colliderB)
+	std::pair<bool, Simplex> GJK(
+		const Collider* colliderA, const Transform* transformA,
+		const Collider* colliderB, const Transform* transformB)
 	{
 		// Get initial support point in any direction
-		vector3 support = detail::Support(colliderA, colliderB, vector3::unit_x);
+		vector3 support = detail::Support(colliderA, transformA, colliderB, transformB, vector3::unit_x);
 
-		// Our simplex is an array of points, max count is 4
-		std::array<vector3, 4> points{ support };
+		// Simplex is an array of points, max count is 4
+		Simplex points;
+		points.push_front(support);
 
 		// New direction is backwards from that point
 		vector3 direction = -support;
 
 		while (true) {
-			support = detail::Support(colliderA, colliderB, direction);
+			support = detail::Support(colliderA, transformA, colliderB, transformB, direction);
 
-			if (support.dot(direction) < 0) {
-				return false; // no collision
+			if (support.dot(direction) <= 0) {
+				return std::make_pair(false, points); // no collision
 			}
 
-			points = { support, points[0], points[1], points[2] }; // add to front
+			points.push_front(support);
 
 			if (detail::NextSimplex(points, direction)) {
-				return true;
+				return std::make_pair(true, points);
 			}
 		}
 	}
 
+	ManifoldPoints EPA(
+		const Simplex& simplex,
+		const Collider* colliderA, const Transform* transformA,
+		const Collider* colliderB, const Transform* transformB)
+	{
+		std::vector<vector3> polytope(simplex.begin(), simplex.end());
+
+		unsigned minI = 0;
+		unsigned minK = 0;
+		float   minDistance = FLT_MAX;
+		vector3 minNormal;
+
+		while (minDistance == FLT_MAX) {
+			for (unsigned i = 0; i < polytope.size(); i++) {
+				unsigned j = (i + 1) % polytope.size();
+				unsigned k = (i + 2) % polytope.size();
+
+				vector3 a = polytope[i];
+				vector3 b = polytope[j];
+				vector3 c = polytope[k];
+
+				vector3 ab = b - a;
+				vector3 ac = c - a;
+				vector3 ao =   - a;
+
+				vector3 abc = ab.cross(ac);
+
+				vector3 normal = abc.normalized();
+				float distance = normal.dot(ao);
+
+				if (distance < 0) {
+					distance *= -1;
+					normal   *= -1; // normal points away from origin, this is caused by inconsistant winding order
+				}
+
+				if (distance < minDistance) {
+					minDistance = distance;
+					minNormal   = normal;
+					minI = i;
+					minK = k;
+				}
+			}
+
+			vector3 support = detail::Support(colliderA, transformA, colliderB, transformB, minNormal);
+
+			float d1 = support.dot(minNormal);
+			float d2 = polytope[minI].dot(minNormal); // problem in here
+			float difference = abs(d1 - d2);
+
+			if (difference > 0.0001f) {
+				polytope.insert(polytope.begin() + minK, support); // add another point inbetween i and j
+				minDistance = FLT_MAX; // reset while loop
+			}
+		}
+
+		ManifoldPoints points;
+		points.A = 0;//?polytope[minI];
+		points.B = 0;//?polytope[minJ];
+
+		points.Normal = minNormal;
+		points.PenetrationDepth = minDistance;
+		points.HasCollision = true;
+
+		return points;
+	}
+
 namespace detail {
 	vector3 Support(
-		const Collider* colliderA,
-		const Collider* colliderB,
-		const vector3& direction)
+		const Collider* colliderA, const Transform* transformA,
+		const Collider* colliderB, const Transform* transformB,
+		vector3 direction)
 	{
-		return colliderA->FindFurthestPoint( direction)
-			 - colliderB->FindFurthestPoint(-direction);
+		return colliderA->FindFurthestPoint(transformA,  direction)
+			 - colliderB->FindFurthestPoint(transformB, -direction);
 	}
 
 	bool NextSimplex(
-		std::array<vector3, 4>& points, 
+		Simplex& points,
 		vector3& direction)
 	{
 		switch (points.size()) {
@@ -58,17 +124,16 @@ namespace detail {
 	}
 
 	bool Line(
-		std::array<vector3, 4>& points,
+		Simplex& points,
 		vector3& direction)
 	{
-		const vector3& a = points[0];
-		const vector3& b = points[1];
+		vector3 a = points[0];
+		vector3 b = points[1];
 
 		vector3 ab = b - a;
 		vector3 ao =   - a;
 
 		if (SameDirection(ab, ao)) {
-			points = { a, b };
 			direction = ab.cross(ao).cross(ab);
 		}
 
@@ -81,12 +146,12 @@ namespace detail {
 	}
 
 	bool Triangle(
-		std::array<vector3, 4>& points,
+		Simplex& points,
 		vector3& direction)
 	{
-		const vector3& a = points[0];
-		const vector3& b = points[1];
-		const vector3& c = points[2];
+		vector3 a = points[0];
+		vector3 b = points[1];
+		vector3 c = points[2];
 
 		vector3 ab = b - a;
 		vector3 ac = c - a;
@@ -101,27 +166,32 @@ namespace detail {
 			}
 
 			else {
-				return Line(points, direction);
+				return Line(points = { a, b }, direction);
 			}
 		}
 
-		else if (SameDirection(ab.cross(abc), ao)) {
-			return Line(points, direction);
-		}
-
-		else if (SameDirection(abc, ao)) {
-			direction = abc;
-		}
-
 		else {
-			direction = -abc;
+			if (SameDirection(ab.cross(abc), ao)) {
+				return Line(points = { a, b }, direction);
+			}
+
+			else {
+				if (SameDirection(abc, ao)) {
+					direction = abc;
+				}
+
+				else {
+					points = { a, c, b };
+					direction = -abc;
+				}
+			}
 		}
 
 		return false;
 	}
 
 	bool Tetrahedron(
-		std::array<vector3, 4>& points,
+		Simplex& points,
 		vector3& direction)
 	{
 		vector3 a = points[0];
@@ -129,20 +199,25 @@ namespace detail {
 		vector3 c = points[2];
 		vector3 d = points[3];
 
-		vector3 abd = (b - a).cross(d - a);
-		vector3 bcd = (c - b).cross(d - c);
-		vector3 cad = (a - c).cross(d - a);
+		vector3 ab = b - a;
+		vector3 ac = c - a;
+		vector3 ad = d - a;
+		vector3 ao =   - a;
 
-		if (SameDirection(abd, -a)) {
-			return Triangle(points = { a, b, d }, direction);
+		vector3 abc = ab.cross(ac);
+		vector3 acd = ac.cross(ad);
+		vector3 adb = ad.cross(ab);
+
+		if (SameDirection(abc, ao)) {
+			return Triangle(points = { a, b, c }, direction);
+		}
+		
+		if (SameDirection(acd, ao)) {
+			return Triangle(points = { a, c, d }, direction);
 		}
 
-		if (SameDirection(bcd, -a)) {
-			return Triangle(points = { b, c, d }, direction);
-		}
-
-		if (SameDirection(cad, -a)) {
-			return Triangle(points = { c, a, d }, direction);
+		if (SameDirection(adb, ao)) {
+			return Triangle(points = { a, d, b }, direction);
 		}
 
 		return true;

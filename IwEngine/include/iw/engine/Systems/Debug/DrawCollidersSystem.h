@@ -15,6 +15,7 @@ namespace Engine {
 
 		Mesh sphereInstance;
 		Mesh planeInstance;
+		Mesh cubeInstance;
 
 		ref<Material> material;
 

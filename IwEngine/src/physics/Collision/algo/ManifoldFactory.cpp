@@ -1,4 +1,5 @@
 #include "iw/physics/Collision/algo/ManifoldFactory.h"
+#include "iw/physics/Collision/algo/GJK.h"
 #include <iw\log\logger.h>
 
 namespace iw {
@@ -18,12 +19,7 @@ namespace algo {
 		vector3 BtoA = A - B;
 
 		if (AtoB.length() > Ar + Br) {
-			return { 
-				0, 0, 
-				0, 
-				0,
-				false
-			};
+			return {};
 		}
 
 		A += AtoB.normalized() * Ar;
@@ -56,12 +52,7 @@ namespace algo {
 		float d = (A - P).dot(N); // distance from center of sphere to plane surface
 
 		if (d > Ar) {
-			return {
-				0, 0,
-				0,
-				0,
-				false
-			};
+			return {};
 		}
 		
 		vector3 B = A - N * d;
@@ -119,12 +110,7 @@ namespace algo {
 		vector3 DtoA = A - D;
 
 		if (AtoD.length() > Ar + Br) {
-			return {
-				0, 0,
-				0,
-				0,
-				false
-			};
+			return {};
 		}
 
 		A += AtoD.normalized() * Ar;
@@ -138,6 +124,19 @@ namespace algo {
 			AtoD.length(),
 			true
 		};
+	}
+
+	ManifoldPoints FindMeshMeshMaifoldPoints(
+		const MeshCollider* a, const Transform* ta,
+		const MeshCollider* b, const Transform* tb)
+	{
+		auto result = GJK(a, ta, b, tb);
+
+		if (result.first) { // dont have to do if the collider is a trigger
+			return EPA(result.second, a, ta, b, tb);
+		}
+
+		return {};
 	}
 
 	// Swaps

@@ -76,6 +76,12 @@ namespace impl {
 			const Transform* transform,
 			const PlaneCollider<V>* plane,
 			const Transform* planeTransform) const override;
+
+		IWPHYSICS_API
+		ManifoldPoints TestCollision(
+			const Transform* transform,
+			const MeshCollider<V>* mesh,
+			const Transform* meshTransform) const override;
 	};
 }
 

@@ -10,6 +10,7 @@
 #include "iw/graphics/PointLight.h"
 #include <iw\physics\Collision\SphereCollider.h>
 #include <iw\physics\Collision\PlaneCollider.h>
+#include <iw\physics\Collision\MeshCollider.h>
 #include <iw\physics\Dynamics\SmoothPositionSolver.h>
 #include <iw\physics\Dynamics\ImpulseSolver.h>
 #include <iw\engine\Systems\PhysicsSystem.h>
@@ -20,6 +21,7 @@
 
 #include "iw/engine/Systems/Render/MeshRenderSystem.h"
 #include "iw/engine/Systems/Render/MeshShadowRenderSystem.h"
+#include "Systems/SpaceInspectorSystem.h"
 
 namespace iw {
 	struct MeshComponents {
@@ -36,6 +38,57 @@ namespace iw {
 		 : Layer("Test")
 	{
 		srand(time(nullptr));
+	}
+
+	float xOff = 0;
+
+	void TestLayer::SpawnCube() {
+		Entity entity = Space->CreateEntity<Transform, Mesh, MeshCollider, Rigidbody>();
+
+		Transform*      trans = entity.Set<Transform>(iw::vector3(xOff += 2.1f, 0, 0));
+		Mesh*           mesh  = entity.Set<Mesh>(sphere->MakeInstance());
+		MeshCollider*   col   = entity.Set<MeshCollider>(MeshCollider::MakeCube());
+		Rigidbody*      body  = entity.Set<Rigidbody>();
+
+		mesh->SetMaterial(REF<Material>(shader));
+
+		mesh->Material()->Set("albedo", iw::vector4(
+			.1,//rand() / (float)RAND_MAX,
+			rand() / (float)RAND_MAX,
+			rand() / (float)RAND_MAX,
+			1.0f)
+		);
+
+		mesh->Material()->Set("reflectance", rand() / (float)RAND_MAX);
+		mesh->Material()->Set("roughness", rand() / (float)RAND_MAX);
+		mesh->Material()->Set("metallic", rand() / (float)RAND_MAX);
+
+		mesh->Material()->SetTexture("shadowMap", pointShadowTarget->Tex(0));
+		//mesh->Material()->SetTexture("ww", pointShadowTarget->Tex(0));
+
+		mesh->Material()->Initialize(Renderer->Device);
+
+		body->SetTrans(trans);
+		body->SetCol(col);
+
+		//body->SetIsTrigger(true);
+
+		body->SetOnCollision([&](auto manifold, auto dt) {
+			ref<Material> mat1 = Space->FindEntity<Rigidbody>(manifold.ObjA).Find<Mesh>()->Material();
+			ref<Material> mat2 = Space->FindEntity<Rigidbody>(manifold.ObjB).Find<Mesh>()->Material();
+
+			mat1->Set("albedo", iw::vector4(1, 0.25, 0.25, 1));
+			mat2->Set("albedo", iw::vector4(1, 0.25, 0.25, 1));
+		});
+
+		//body->SetVelocity(iw::vector3(
+		//	2 * rand() / (float)RAND_MAX,
+		//	rand() / (float)RAND_MAX,
+		//	2 * rand() / (float)RAND_MAX - 2.5f));
+
+		body->SetDynamicFriction(0.1f);
+
+		Physics->AddRigidbody(body);
 	}
 
 	int TestLayer::Initialize() {
@@ -59,7 +112,7 @@ namespace iw {
 		description.DescribeBuffer(bName::BITANGENT, MakeLayout<float>(3));
 		description.DescribeBuffer(bName::UV,        MakeLayout<float>(2));
 
-		sphere = MakeIcosphere(description, 4);
+		sphere = MakeCube(description, 2);
 		plane  = MakePlane    (description, 1, 1);
 
 		//sphere->GenTangents();
@@ -96,7 +149,7 @@ namespace iw {
 			Entity entity = Space->CreateEntity<Transform, Mesh, PlaneCollider, CollisionObject>();
 
 			Transform*       trans = entity.Set<Transform>(iw::vector3(0, 0, 0), vector3(22));
-			Mesh*            mesh  = entity.Set<Mesh>(sphere->Subtract(plane->MakeInstance().Data())->MakeInstance());
+			Mesh*            mesh  = entity.Set<Mesh>(plane->MakeInstance());
 			PlaneCollider*   col   = entity.Set<PlaneCollider>(vector3::unit_y, 0);
 			CollisionObject* obj   = entity.Set<CollisionObject>();
 
@@ -176,7 +229,7 @@ namespace iw {
 
 		//delete sphere;
 
-		Physics->SetGravity(vector3(0, -9.81f, 0));
+		//Physics->SetGravity(vector3(0, -9.81f, 0));
 		Physics->AddSolver(new ImpulseSolver());
 		Physics->AddSolver(new SmoothPositionSolver());
 
@@ -189,88 +242,33 @@ namespace iw {
 		PushSystem<iw::MeshShadowRenderSystem>(MainScene);
 		PushSystem<iw::MeshRenderSystem>(MainScene);
 
+		PushSystem<iw::SpaceInspectorSystem>();
+
 		Time::SetFixedTime(0.05f);
+
+		SpawnCube();
+		SpawnCube();
 
 		return Layer::Initialize();
 	}
 
 	void TestLayer::PostUpdate() {
-		
-
-		//for (Light* light : scene->Lights()) {
-		//	if (!light->CanCastShadows()) {
-		//		continue;
-		//	}
-
-		//	Renderer->BeginShadowCast(light);
-
-		//	for (auto entity : Space->Query<Transform, Model>()) {
-		//		auto [transform, model] = entity.Components.Tie<ModelComponents>();
-
-		//		for (Mesh& mesh : model->GetMeshes()) {
-		//			if (mesh.Material()->CastShadows()) {
-		//				Renderer->DrawMesh(*transform, mesh);
-		//			}
-		//		}
-		//	}
-
-		//	Renderer->EndShadowCast();
-		//}
-
-		//Renderer->BeginScene(scene);
-
-		//for (auto entity : Space->Query<Transform, Mesh>()) {
-		//	auto [transform, mesh] = entity.Components.Tie<MeshComponents>();
-		//	Renderer->DrawMesh(transform, mesh);
-		//}
-
-		//Renderer->EndScene();
-
 
 	}
 
-	float mass = 100;
-
 	void TestLayer::FixedUpdate() {
+		auto entities = Space->Query<Mesh, MeshCollider>();
+
+		entities.Each([&](
+			auto entity,
+			auto mesh,
+			auto meshCollider)
+		{
+			mesh->Material()->Set("albedo", iw::vector4(1, 1, 1, 1));
+		});
+
 		if (Keyboard::KeyDown(E)) {
-			Entity entity = Space->CreateEntity<Transform, Mesh, SphereCollider, Rigidbody>();
-
-			Transform*      trans = entity.Set<Transform>(iw::vector3(0, 0, 0));
-			Mesh*           mesh  = entity.Set<Mesh>(sphere->MakeInstance());
-			SphereCollider* col   = entity.Set<SphereCollider>(vector3::zero, 1);
-			Rigidbody*      body  = entity.Set<Rigidbody>();
-
-			mesh->SetMaterial(REF<Material>(shader));
-
-			mesh->Material()->Set("albedo", iw::vector4(
-				rand() / (float)RAND_MAX,
-				rand() / (float)RAND_MAX,
-				rand() / (float)RAND_MAX,
-				1.0f)
-			);
-
-			mesh->Material()->Set("reflectance", rand() / (float)RAND_MAX);
-			mesh->Material()->Set("roughness", rand() / (float)RAND_MAX);
-			mesh->Material()->Set("metallic", rand() / (float)RAND_MAX);
-
-			mesh->Material()->SetTexture("shadowMap", pointShadowTarget->Tex(0));
-			//mesh->Material()->SetTexture("ww", pointShadowTarget->Tex(0));
-
-			mesh->Material()->Initialize(Renderer->Device);
-
-			body->SetMass(mass == 100 ? 1000 : mass);
-			body->SetTrans(trans);
-			body->SetCol(col);
-			body->SetVelocity(iw::vector3(
-				2 * rand() / (float)RAND_MAX,
-				rand() / (float)RAND_MAX,
-				2 * rand() / (float)RAND_MAX - 2.5f));
-
-			body->SetDynamicFriction(0.1f);
-
-			Physics->AddRigidbody(body);
-
-			mass *= 0.99f;
+			SpawnCube();
 		}
 
 		Physics->Step(Time::FixedTime());

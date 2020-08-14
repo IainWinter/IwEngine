@@ -26,6 +26,7 @@ namespace Engine {
 
 		MeshData* sphere  = MakeIcosphere(description, 2);
 		MeshData* plane   = MakePlane    (description, 5, 5);
+		MeshData* cube    = MakeCube     (description, 2);
 
 		sphere ->Initialize(Renderer->Device); // this should happen automatically when trying to render an uninitialized mesh
 		plane  ->Initialize(Renderer->Device);
@@ -35,6 +36,9 @@ namespace Engine {
 
 		planeInstance = plane->MakeInstance();
 		planeInstance.SetMaterial(material);
+
+		cubeInstance = cube->MakeInstance();
+		cubeInstance.SetMaterial(material);
 
 		return 0;
 	}
@@ -70,6 +74,9 @@ namespace Engine {
 				case ColliderType::PLANE: {
 					Renderer->DrawMesh(object->ColTrans(), planeInstance);
 					break; 
+				}
+				case ColliderType::MESH: {
+					Renderer->DrawMesh(object->Trans(), cubeInstance);
 				}
 			}
 		}

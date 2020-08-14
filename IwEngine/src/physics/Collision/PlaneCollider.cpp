@@ -32,5 +32,14 @@ namespace Physics {
 	{
 		return {};
 	}
+
+	template<>
+	ManifoldPoints PlaneCollider::TestCollision(
+		const Transform* transform,
+		const Physics::MeshCollider* mesh,
+		const Transform* meshTransform) const
+	{
+		return {};
+	}
 }
 }

@@ -5,7 +5,7 @@
 #include "iw/physics/Collision/SphereCollider.h"
 #include "iw/audio/AudioSpaceStudio.h"
 
-#include "Layers/SandboxLayer.h"
+#include "Layers/TestLayer.h"
 #include "Layers/ToolLayer.h"
 
 namespace iw {
@@ -32,7 +32,7 @@ namespace iw {
 		context->AddDevice(rm);
 		context->AddDevice(k);
 
-		sandbox = PushLayer<SandboxLayer>(); //PushLayer<AimTrainerLayer>();
+		sandbox = PushLayer<TestLayer>();
 		imgui   = PushLayer<ImGuiLayer>(/*Window()*/);
 	}
 

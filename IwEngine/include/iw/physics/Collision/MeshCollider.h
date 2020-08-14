@@ -17,69 +17,66 @@ namespace impl {
 
 	public:
 		MeshCollider()
-			: Collider<V>()
+			: Collider<V>(ColliderType::MESH)
 		{}
 
 		static MeshCollider MakeCube() {
 			MeshCollider collider;
-			collider.m_points.push_back(V(-1, -1, -1));
-			collider.m_points.push_back(V( 1, -1, -1));
-			collider.m_points.push_back(V( 1,  1, -1));
-			collider.m_points.push_back(V(-1,  1, -1));
-			collider.m_points.push_back(V(-1,  1,  1));
-			collider.m_points.push_back(V( 1,  1,  1));
-			collider.m_points.push_back(V( 1, -1,  1));
-			collider.m_points.push_back(V(-1, -1,  1));
+			collider.m_points.push_back(V(-1, -1, -1)); // 0 
+			collider.m_points.push_back(V(-1,  1, -1)); // 1 
+			collider.m_points.push_back(V( 1,  1, -1)); // 2 
+			collider.m_points.push_back(V( 1, -1, -1)); // 3 
+
+			collider.m_points.push_back(V(-1, -1,  1)); // 7
+			collider.m_points.push_back(V( 1, -1,  1)); // 6
+			collider.m_points.push_back(V( 1,  1,  1)); // 5
+			collider.m_points.push_back(V(-1,  1,  1)); // 4
 
 			return collider;
 		}
 
+		//IWPHYSICS_API
+		const AABB<V>& Bounds() { return AABB<V>(); }
+
+		//IWPHYSICS_API
+		Transform Trans() const { return Transform(); }
+
+		IWPHYSICS_API
 		V FindFurthestPoint(
-			V direction) const override
+			const Transform* transform,
+			V direction) const override;
+
+		ManifoldPoints TestCollision(
+			const Transform* transform,
+			const impl::Collider<V>* collider,
+			const Transform* colliderTransform) const override
 		{
-			V*    maxPoint;
-			float maxDistance = FLT_MIN;
-
-			for (V point : m_points) {
-				float distance = point.dot(direction);
-				if (distance > maxDistance) {
-					maxDistance = distance;
-					maxPoints   = point;
-				}
-			}
-
-			return maxPoint;
+			return collider->TestCollision(colliderTransform, this, transform);
 		}
 
 		IWPHYSICS_API
-		virtual ManifoldPoints TestCollision(
-			const Transform* transform,
-			const impl::Collider<V>* collider,
-			const Transform* colliderTransform) const = 0;
-
-		IWPHYSICS_API
-		virtual ManifoldPoints TestCollision(
+		ManifoldPoints TestCollision(
 			const Transform* transform,
 			const impl::SphereCollider<V>* sphere,
-			const Transform* sphereTransform) const = 0;
+			const Transform* sphereTransform) const override;
 
 		IWPHYSICS_API
-		virtual ManifoldPoints TestCollision(
+		ManifoldPoints TestCollision(
 			const Transform* transform,
 			const impl::CapsuleCollider<V>* capsule,
-			const Transform* capsuleTransform) const = 0;
+			const Transform* capsuleTransform) const override;
 
 		IWPHYSICS_API
-		virtual ManifoldPoints TestCollision(
+		ManifoldPoints TestCollision(
 			const Transform* transform,
 			const impl::PlaneCollider<V>* plane,
-			const Transform* planeTransform) const = 0;
+			const Transform* planeTransform) const override;
 
 		IWPHYSICS_API
-		virtual ManifoldPoints TestCollision(
+		ManifoldPoints TestCollision(
 			const Transform* transform,
 			const impl::MeshCollider<V>* mesh,
-			const Transform* meshTransform) const = 0;
+			const Transform* meshTransform) const override;
 	};
 }
 
