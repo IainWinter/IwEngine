@@ -27,6 +27,7 @@ FMOD_RESULT F_API FMOD_Memory_GetStats             (int *currentalloced, int *ma
 FMOD_RESULT F_API FMOD_Debug_Initialize            (FMOD_DEBUG_FLAGS flags, FMOD_DEBUG_MODE mode, FMOD_DEBUG_CALLBACK callback, const char *filename);
 FMOD_RESULT F_API FMOD_File_SetDiskBusy            (int busy);
 FMOD_RESULT F_API FMOD_File_GetDiskBusy            (int *busy);
+FMOD_RESULT F_API FMOD_Thread_SetAttributes        (FMOD_THREAD_TYPE type, FMOD_THREAD_AFFINITY affinity, FMOD_THREAD_PRIORITY priority, FMOD_THREAD_STACK_SIZE stacksize);
 
 /*
     FMOD System factory functions.  Use this to create an FMOD System Instance.  below you will see FMOD_System_Init/Close to get started.

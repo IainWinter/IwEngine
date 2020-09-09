@@ -128,15 +128,15 @@ namespace algo {
 
 	ManifoldPoints FindMeshMeshMaifoldPoints(
 		const MeshCollider* a, const Transform* ta,
-		const MeshCollider* b, const Transform* tb)
+		const MeshCollider* b, const Transform* tb) // could have bool for if we are only checking triggers, could save compute
 	{
 		auto result = GJK(a, ta, b, tb);
 
-		if (result.first) { // dont have to do if the collider is a trigger
+		if (result.first) {
 			return EPA(result.second, a, ta, b, tb);
 		}
 
-		return {};
+		return {0, 0, 0, 0, 0};
 	}
 
 	// Swaps

@@ -47,8 +47,8 @@ namespace algo {
 
 		while (minDistance == FLT_MAX) {
 			for (unsigned i = 0; i < polytope.size(); i++) {
-				unsigned j = (i + 1) % polytope.size();
-				unsigned k = (i + 2) % polytope.size();
+				unsigned j = (i + 1u) % polytope.size();
+				unsigned k = (i + 2u) % polytope.size();
 
 				vector3 a = polytope[i];
 				vector3 b = polytope[j];

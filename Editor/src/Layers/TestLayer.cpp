@@ -42,13 +42,15 @@ namespace iw {
 
 	float xOff = 0;
 
-	void TestLayer::SpawnCube() {
+	void TestLayer::SpawnCube(vector3 s) {
 		Entity entity = Space->CreateEntity<Transform, Mesh, MeshCollider, Rigidbody>();
 
-		Transform*      trans = entity.Set<Transform>(iw::vector3(xOff += 2.1f, 0, 0));
+		Transform*      trans = entity.Set<Transform>(iw::vector3(xOff, 0, 0), s);
 		Mesh*           mesh  = entity.Set<Mesh>(sphere->MakeInstance());
 		MeshCollider*   col   = entity.Set<MeshCollider>(MeshCollider::MakeCube());
 		Rigidbody*      body  = entity.Set<Rigidbody>();
+
+		xOff += 10;
 
 		mesh->SetMaterial(REF<Material>(shader));
 
@@ -71,8 +73,6 @@ namespace iw {
 		body->SetTrans(trans);
 		body->SetCol(col);
 
-		//body->SetIsTrigger(true);
-
 		body->SetOnCollision([&](auto manifold, auto dt) {
 			ref<Material> mat1 = Space->FindEntity<Rigidbody>(manifold.ObjA).Find<Mesh>()->Material();
 			ref<Material> mat2 = Space->FindEntity<Rigidbody>(manifold.ObjB).Find<Mesh>()->Material();
@@ -80,11 +80,6 @@ namespace iw {
 			mat1->Set("albedo", iw::vector4(1, 0.25, 0.25, 1));
 			mat2->Set("albedo", iw::vector4(1, 0.25, 0.25, 1));
 		});
-
-		//body->SetVelocity(iw::vector3(
-		//	2 * rand() / (float)RAND_MAX,
-		//	rand() / (float)RAND_MAX,
-		//	2 * rand() / (float)RAND_MAX - 2.5f));
 
 		body->SetDynamicFriction(0.1f);
 
@@ -112,7 +107,7 @@ namespace iw {
 		description.DescribeBuffer(bName::BITANGENT, MakeLayout<float>(3));
 		description.DescribeBuffer(bName::UV,        MakeLayout<float>(2));
 
-		sphere = MakeCube(description, 2);
+		sphere = &*Asset->Load<iw::Model>("models/cube.gltf")->GetMesh(0).Data();
 		plane  = MakePlane    (description, 1, 1);
 
 		//sphere->GenTangents();
@@ -247,7 +242,7 @@ namespace iw {
 		Time::SetFixedTime(0.05f);
 
 		SpawnCube();
-		SpawnCube();
+		SpawnCube(vector3(15, 1, 1));
 
 		return Layer::Initialize();
 	}
@@ -257,13 +252,15 @@ namespace iw {
 	}
 
 	void TestLayer::FixedUpdate() {
-		auto entities = Space->Query<Mesh, MeshCollider>();
+		auto entities = Space->Query<Rigidbody, Mesh, MeshCollider>();
 
 		entities.Each([&](
 			auto entity,
+			auto body,
 			auto mesh,
 			auto meshCollider)
 		{
+			body->Trans().Rotation *= iw::quaternion::from_euler_angles(0, iw::Time::FixedTime(), 0);
 			mesh->Material()->Set("albedo", iw::vector4(1, 1, 1, 1));
 		});
 

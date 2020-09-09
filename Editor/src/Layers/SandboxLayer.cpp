@@ -106,12 +106,15 @@ namespace iw {
 
 		studio->LoadMasterBank("Master.bank");
 		studio->LoadMasterBank("Master.strings.bank");
-		studio->CreateEvent("swordAttack");
-		studio->CreateEvent("forestAmbiance");
-		studio->CreateEvent("playerDamaged");
-		studio->CreateEvent("enemyDeath");
+		studio->CreateEvent("Ambiance/forest");
+		studio->CreateEvent("User/playerAttack");
+		studio->CreateEvent("User/playerDamaged");
+		studio->CreateEvent("User/enemyDeath");
+		studio->CreateEvent("Music/boss");
 
-		forestInstance = studio->CreateInstance("forestAmbiance", false);
+		forestInstance = studio->CreateInstance("Ambiance/forest", false);
+
+		//studio->CreateInstance("Music/boss", false);
 
 		// Fonts
 

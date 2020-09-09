@@ -295,7 +295,7 @@ iw::Transform* EnemySystem::SpawnEnemy(
 
 		float score = floor(5 * (1.0f - player->Timer / player->DashTime)) * 200 + 200;
 
-		Audio->AsStudio()->CreateInstance("enemyDeath");
+		Audio->AsStudio()->CreateInstance("User/enemyDeath");
 
 		Bus->push<SpawnEnemyDeath>(transform->Position, transform->Parent());
 		Bus->push<GiveScoreEvent> (transform->Position, score * enemy->ScoreMultiple);

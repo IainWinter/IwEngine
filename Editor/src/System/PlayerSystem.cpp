@@ -130,7 +130,7 @@ int PlayerSystem::Initialize() {
 				float color = player->Health / 3.0f;
 				m_playerModel->GetMesh(0).Material()->Set("baseColor", iw::Color(0.8f, color, color, 1));
 
-				Audio->AsStudio()->CreateInstance("playerDamaged");
+				Audio->AsStudio()->CreateInstance("User/playerDamaged");
 			}
 		}
 
@@ -248,7 +248,7 @@ void PlayerSystem::Update(
 						distance = 0;
 
 						player->Timer = player->DashTime;
-						Audio->AsStudio()->CreateInstance("swordAttack");
+						Audio->AsStudio()->CreateInstance("User/playerAttack");
 					}
 				}
 

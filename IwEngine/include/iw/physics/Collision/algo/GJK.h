@@ -19,17 +19,17 @@ namespace algo {
 		{}
 
 		Simplex& operator=(std::initializer_list<vector3> list) {
-			m_size = list.size();
-			for (const vector3* v = list.begin(); v != list.end(); v++) {
+			for (auto v = list.begin(); v != list.end(); v++) {
 				m_points[std::distance(list.begin(), v)] = *v;
 			}
+			m_size = list.size();
 
 			return *this;
 		}
 
 		void push_front(vector3 point) {
 			m_points = { point, m_points[0], m_points[1], m_points[2] };
-			m_size = m_size == 4 ? 4 : m_size + 1;
+			m_size = std::min(m_size + 1, 4u);
 		}
 
 		vector3& operator[](unsigned i) { return m_points[i]; }

@@ -21,7 +21,7 @@ namespace iw {
 	public:
 		TestLayer();
 
-		void SpawnCube();
+		void SpawnCube(vector3 s = 1);
 
 		int Initialize() override;
 
