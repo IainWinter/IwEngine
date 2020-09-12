@@ -118,6 +118,14 @@ namespace Engine {
 		return Rotation * parent;
 	}
 
+	void Transform::Apply(
+		iw::Transform& transform)
+	{
+		Position += transform.Position;
+		Rotation *= transform.Rotation;
+		Scale    *= transform.Scale;
+	}
+
 	size_t Transform::ChildCount() const {
 		return m_children.size();
 	}

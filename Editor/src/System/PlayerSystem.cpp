@@ -343,6 +343,19 @@ bool PlayerSystem::On(
 	iw::ActionEvent& e)
 {
 	switch (e.Action) {
+		case iw::val(Actions::LONG_DASH_ACTIVE): {
+			Player* player = m_player.Find<Player>();
+
+			if (e.as<LongDashEvent>().Active) {
+				player->DashTime = 32.0f / 60.0f;
+			}
+
+			else {
+				player->DashTime = playerPrefab.DashTime;
+			}
+
+			break;
+		}
 		case iw::val(Actions::GOTO_NEXT_LEVEL): {
 			GoToNextLevelEvent& event = e.as<GoToNextLevelEvent>();
 
@@ -384,7 +397,10 @@ bool PlayerSystem::On(
 			p->Right = right;
 
 			t->Position = e.as<StartLevelEvent>().PlayerPosition;
+			if(t->Position.y==0) t->Position.y = 1;
+
 			t->Scale = 0.75f;
+
 			
 			r->SetCol(s);
 			r->SetTrans(t);

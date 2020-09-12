@@ -44,6 +44,9 @@ namespace Engine {
 		IWCOMMON_API vector3    WorldScale()          const;
 		IWCOMMON_API quaternion WorldRotation()       const;
 
+		IWCOMMON_API void Apply(
+			Transform& transform);
+
 		IWCOMMON_API
 		size_t ChildCount() const;
 

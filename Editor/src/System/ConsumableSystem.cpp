@@ -6,177 +6,148 @@
 #include "iw/audio/AudioSpaceStudio.h"
 
 #include "iw/input/Devices/Keyboard.h"
+#include "Components/Player.h"
 
 ConsumableSystem::ConsumableSystem(
 	iw::Entity& target)
-	: iw::System<iw::Transform, Consumable>("Consumables")
+	: iw::SystemBase("Consumable")
 	, m_target(target)
-	, m_usingItem(false)
+	, m_isActive(false)
 {}
 
 int ConsumableSystem::Initialize() {
-	m_prefabs.push_back(Consumable{ 0, SLOWMO,      3.0f });
-	m_prefabs.push_back(Consumable{ 1, CHARGE_KILL, 3.0f });
+	m_prefabs.push_back(Consumable{ 0, SLOWMO,      iw::Color::From255(112, 195, 255), detail::action_Slowmo, detail::effect_Slowmo, 3.0f });
+	m_prefabs.push_back(Consumable{ 1, CHARGE_KILL, iw::Color::From255(255, 245, 112), detail::action_Charge, detail::effect_Slowmo, 3.0f });
+	m_prefabs.push_back(Consumable{ 2, LONG_DASH,   iw::Color::From255(190,   3, 252), detail::action_LgDash, detail::effect_Slowmo, 20 });
+
+	auto material = Asset->Load<iw::Material>("materials/Default")->MakeInstance();
+	material->Set("reflectance", 1.0f);
+	material->Set("emissive",    2.0f);
 
 	iw::MeshDescription description;
 	description.DescribeBuffer(iw::bName::POSITION, iw::MakeLayout<float>(3));
 	description.DescribeBuffer(iw::bName::NORMAL,   iw::MakeLayout<float>(3));
 	description.DescribeBuffer(iw::bName::UV,       iw::MakeLayout<float>(2));
 
-	// slow mo
-
-	iw::Mesh slowmo = iw::MakeIcosphere(description, 0)->MakeInstance();
-	slowmo.SetMaterial(Asset->Load<iw::Material>("materials/Default")->MakeInstance());
-
-	slowmo.Material()->Set("baseColor", iw::Color::From255(112, 195, 255));
-	slowmo.Material()->Set("reflectance", 1.0f);
-	slowmo.Material()->Set("emissive", 2.0f);
-
-	m_slowmoModel.AddMesh(slowmo);
-
-	// super charge
-
-	iw::Mesh chargedKill = iw::MakeIcosphere(description, 0)->MakeInstance();
-	chargedKill.SetMaterial(Asset->Load<iw::Material>("materials/Default")->MakeInstance());
-
-	chargedKill.Material()->Set("baseColor", iw::Color::From255(255, 245, 112));
-	chargedKill.Material()->Set("reflectance", 1.0f);
-	chargedKill.Material()->Set("emissive", 2.0f);
-
-	m_chargedKillModel.AddMesh(chargedKill);
+	m_mesh = iw::MakeIcosphere(description, 0)->MakeInstance();
+	m_mesh.SetMaterial(material);
 
 	return 0;
 }
 
-void ConsumableSystem::Update(
-	iw::EntityComponentArray& view)
+void ConsumableSystem::Update()
 {
+	auto entities = Space->Query<iw::Transform, Consumable>();
+
 	iw::vector3 target = m_target.Find<iw::Transform>()->Position
-		               + iw::vector3(-1.0f, 1.0f, 0.75f);
-	
-	float offset = 0.0f;
-	float totalOffset = 0.0f;
-	
-	int index = 0;
-	int count = 0;
+					   + iw::vector3(-1.0f, 1.0f, 0.75f);
 
-	for (auto entity : view) {
-		totalOffset += iw::Time::DeltaTimeScaled();
-		count++;
-	}
-
-	for (auto entity : view) {
-		auto [transform, consumable] = entity.Components.Tie<Components>();
-
-		float time = offset + iw::TotalTime();
-
-		iw::vector3 adj = target;
-		adj.y += 0.2f * sin(time);
+	entities.Each([&](
+		auto entity,
+		iw::Transform* transform,
+		Consumable*    consumable)
+	{
+		transform->Rotation *= iw::quaternion::from_euler_angles(iw::Time::DeltaTime());
+		transform->Position  = iw::lerp(transform->Position, target, iw::Time::DeltaTime() * 10);
 		
-		float rot = (count - index + 1.0f) / count + 1.0f;
+		target = transform->Position;
+		target.x -= 1.0f;
+	});
 
-		if (consumable->Timer < 0) {
-			iw::SetTimeScale(1.0f);
-
-			Bus->push<ChargeKillEvent>(0.0f);
-			Space->QueueEntity(entity.Handle, iw::func_Destroy);
-
-			m_used.push_back(entity.Handle);
-			m_usingItem = false;
-		}
-
-		else if (consumable->Timer > 0) {
-			consumable->Timer -= iw::Time::DeltaTime();
-
-			rot += 5;
-
-			if (consumable->Timer + consumable->Time * 0.8f > consumable->Time) {
-				transform->Scale = iw::lerp(transform->Scale, iw::vector3(iw::randf() * 0.2f + 0.3f), iw::Time::DeltaTime() * 8);
-			}
-			
-			else {
-				transform->Scale = iw::lerp(transform->Scale, iw::vector3(0), iw::Time::DeltaTime() * 5);
-			}
-
-			switch (consumable->Type) {
-				case SLOWMO: {
-					adj.y += iw::randf() * sin(time);
-					adj.z += iw::randf() * sin(time);
-
-					iw::Time::SetTimeScale(0.3f);
-
-					break;
-				}
-				case CHARGE_KILL: {
-					if (m_target.Find<iw::Rigidbody>()->Velocity().length_squared() != 0) {
-						adj = m_target.Find<iw::Transform>()->Position
-							+ m_target.Find<iw::Rigidbody>()->Velocity().normalized() * 2.0f;
-					}
-
-					Bus->push<ChargeKillEvent>(consumable->Timer);
-					break;
-				}
-			}
-		}
-
-		else if (!m_usingItem && iw::Keyboard::KeyDown(iw::C)) {
-			consumable->Timer = consumable->Time;
-			m_usingItem = true;
-		}
-	
-		transform->Position = iw::lerp(
-			transform->Position, 
-			adj,
-			((totalOffset - offset) * (totalOffset - offset) + iw::Time::DeltaTime()) * 5
-		);
-
-		transform->Rotation *= iw::quaternion::from_euler_angles(rot * iw::Time::DeltaTime());
-
-		if (   m_usingItem
-			&& index == 0)
+	if (m_isActive) {
+		entities.First([&](
+			auto entity,
+			iw::Transform* transform,
+			Consumable* consumable)
 		{
-			target.x -= 0.25f;
-		}
+			consumable->Timer += iw::Time::DeltaTime();
 
-		target.x -= 0.5f;
-		offset += iw::Time::DeltaTimeScaled();
+			if (consumable->Timer >= consumable->Time) {
+				consumable->Action(consumable, m_target, Bus.get(), true);
 
-		index++;
+				m_used.push_back(entity);
+				m_isActive = false;
+
+				Space->KillEntity(entity);
+			}
+
+			else {
+				                      consumable->Action(consumable, m_target, Bus.get(), false);
+				iw::Transform delta = consumable->Effect(consumable, m_target);
+
+				transform->Apply(delta);
+				transform->Scale = delta.Scale;
+			}
+
+			m_active = entity;
+		});
+	}
+	
+	// no items
+
+	if (entities.begin() == entities.end()) {
+		m_isActive = false;
 	}
 }
+
 
 bool ConsumableSystem::On(
 	iw::ActionEvent& e)
 {
 	switch (e.Action) {
+		case iw::val(Actions::USE): {
+			if (!m_isActive) {
+				m_isActive = true;
+			}
+
+			break;
+		}
 		case iw::val(Actions::SPAWN_CONSUMABLE): {
-			SpawnConsumableEvent& event = e.as<SpawnConsumableEvent>();
-			iw::Transform* consumable = SpawnConsumable(m_prefabs.at(event.Index));
+			iw::EntityHandle handle = SpawnConsumable(m_prefabs.at(e.as<SpawnConsumableEvent>().Index));
+			m_justGot.push_back(handle);
 
 			break;
 		}
 		case iw::val(Actions::RESET_LEVEL): {
+			if (m_isActive) {
+				Consumable* consumable = Space->FindComponent<Consumable>(m_active);
+				consumable->Action(consumable, m_target, Bus.get(), true);
+
+				Space->SetComponent<Consumable>(m_active, m_prefabs.at(consumable->Index));
+			}
+
 			for (iw::EntityHandle handle : m_used) {
 				iw::Entity e = Space->ReviveEntity(handle);
 
-				iw::Transform* t = e.Find<iw::Transform>();
-				t->Scale = 0.25f;
-				t->Position = m_target.Find<iw::Transform>()->Position;
+				e.Set<iw::Transform>(m_target.Find<iw::Transform>()->Position, 0.25f);
+				e.Set<Consumable>(m_prefabs.at(e.Find<Consumable>()->Index));
+			}
 
-				Consumable* c = e.Find<Consumable>();
-				*c = m_prefabs.at(c->Index);
+			for (iw::EntityHandle handle : m_justGot) {
+				Space->DestroyEntity(handle);
 			}
 
 			m_used.clear();
+			m_justGot.clear();
+			m_isActive = false;
 
 			break;
 		}
 		case iw::val(Actions::GOTO_NEXT_LEVEL): {
+			if (m_isActive) {
+				Consumable* consumable = Space->FindComponent<Consumable>(m_active);
+				consumable->Action(consumable, m_target, Bus.get(), true);
+
+				Space->DestroyEntity(m_active);
+			}
+
 			for (iw::EntityHandle handle : m_used) {
 				Space->DestroyEntity(handle);
 			}
 
 			m_used.clear();
+			m_justGot.clear();
+			m_isActive = false;
 
 			break;
 		}
@@ -185,7 +156,7 @@ bool ConsumableSystem::On(
 	return false;
 }
 
-iw::Transform* ConsumableSystem::SpawnConsumable(
+iw::EntityHandle ConsumableSystem::SpawnConsumable(
 	Consumable prefab)
 {
 	iw::Entity consumable = Space->CreateEntity<iw::Transform, iw::Model, Consumable>();
@@ -193,18 +164,101 @@ iw::Transform* ConsumableSystem::SpawnConsumable(
 	switch (prefab.Type) {
 		case SLOWMO: {
 			consumable.Add<Slowmo>();
-			consumable.Set<iw::Model>(m_slowmoModel);
 			break;
 		}
 		case CHARGE_KILL: {
 			consumable.Add<ChargeKill>();
-			consumable.Set<iw::Model>(m_chargedKillModel);
 			break;
 		}
 	}
 
-	iw::Transform* t = consumable.Set<iw::Transform>(iw::vector3(m_target.Find<iw::Transform>()->Position), 0.25f);
-	                   consumable.Set<Consumable>(prefab);
+	iw::Mesh mesh = m_mesh.MakeInstance();
+	mesh.Material()->Set("baseColor", prefab.Color);
 
-	return t;
+	iw::Model model;
+	model.AddMesh(mesh);
+
+	consumable.Set<iw::Transform>(iw::vector3(m_target.Find<iw::Transform>()->Position), 0.25f);
+	consumable.Set<Consumable>(prefab);
+	consumable.Set<iw::Model>(model);
+
+	return consumable.Handle;
+}
+
+namespace detail {
+	void action_Slowmo(
+		Consumable* slowmo,
+		iw::Entity& target,
+		iw::eventbus* bus,
+		bool finish)
+	{
+		if (finish) {
+			iw::Time::SetTimeScale(1.0f);
+		}
+
+		else {
+			iw::Time::SetTimeScale(0.3f);
+		}
+	}
+
+	void action_Charge(
+		Consumable* charge,
+		iw::Entity& target,
+		iw::eventbus* bus,
+		bool finish)
+	{
+		if (finish) {
+			bus->push<ChargeKillEvent>(0.0f);
+		}
+
+		else {
+			bus->push<ChargeKillEvent>(charge->Timer);
+		}
+	}
+
+	void action_LgDash(
+		Consumable* longDash, 
+		iw::Entity& target, 
+		iw::eventbus* bus, 
+		bool finish)
+	{
+		Player* player = target.Find<Player>();
+
+		if (player && player->Dash) {
+			longDash->Timer = 20 - 32 / 60.0f;
+		}
+
+		if (finish) {
+			bus->push<LongDashEvent>(false);
+		}
+
+		else {
+			bus->push<LongDashEvent>(true);
+		}
+	}
+
+	iw::Transform effect_Slowmo(
+		Consumable* slowmo,
+		iw::Entity& target)
+	{
+		iw::Transform delta;
+
+		delta.Position.x = iw::randf() * 0.1f;
+		delta.Position.z = iw::randf() * 0.1f;
+
+		delta.Scale = (slowmo->Time - slowmo->Timer) / slowmo->Time * 0.1f + .1f;
+
+		return delta;
+	}
+
+	iw::Transform effect_Charge( // doesnt really work because other items follow the first one maybe make it so that doesnt happen
+		Consumable* slowmo,
+		iw::Entity& target)
+	{
+		iw::Transform delta;
+
+		delta.Position = target.Find<iw::Rigidbody>()->Velocity().normalized();
+
+		return delta;
+	}
 }

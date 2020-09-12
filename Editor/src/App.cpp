@@ -20,7 +20,7 @@ namespace iw {
 		context->MapButton(iw::A    , "-right");
 		context->MapButton(iw::W    , "+forward");
 		context->MapButton(iw::S    , "-forward");
-		context->MapButton(iw::E    , "use");
+		context->MapButton(iw::C    , "use");
 		context->MapButton(iw::T    , "toolbox");
 		context->MapButton(iw::I    , "imgui");
 
@@ -86,6 +86,10 @@ namespace iw {
 
 		else if (command.Verb == "forward") {
 			Bus->push<ForwardEvent>(command.Active);
+		}
+
+		else if (command.Verb == "use") {
+			Bus->push<UseEvent>();
 		}
 
 		else if (command.Verb == "toolbox") {

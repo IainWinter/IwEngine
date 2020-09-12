@@ -73,6 +73,23 @@ namespace ECS {
 				);
 			}
 		}
+
+		template<
+			typename... _c>
+		void First(
+			func<_c...> function)
+		{
+			auto itr = begin();
+			if (itr == end()) return;
+
+			auto e = *itr;
+			callFunction<_c...>(
+				function,
+				e.Handle,
+				e.Components.Components,
+				std::make_index_sequence<sizeof...(_c)>{}
+			);
+		}
 	private:
 		template<
 			typename... _c,
@@ -104,6 +121,12 @@ namespace ECS {
 			func function)
 		{
 			EntityComponentArray::Each<_c...>(function);
+		}
+
+		void First(
+			func function)
+		{
+			EntityComponentArray::First<_c...>(function);
 		}
 	};
 }

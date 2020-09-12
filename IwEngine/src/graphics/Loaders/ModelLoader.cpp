@@ -141,26 +141,26 @@ namespace Graphics {
 			const aiMesh* aimesh = scene->mMeshes[i];
 			const char* ainame = aimesh->mName.C_Str();
 
-			bool cont = false;
+			//bool cont = false;
 
-			for (auto& model : m_loaded) {
-				for (const iw::Mesh& mesh : model.second->GetMeshes()) {
-					if (mesh.Data()->Name() == ainame) {
-						meshes.push_back(mesh);
+			//for (auto& model : m_loaded) {
+			//	for (const iw::Mesh& mesh : model.second->GetMeshes()) {
+			//		if (mesh.Data()->Name() == ainame) {
+			//			meshes.push_back(mesh);
 
-						cont = true;
-						break;
-					}
-				}
+			//			cont = true;
+			//			break;
+			//		}
+			//	}
 
-				if (cont) {
-					break;
-				}
-			}
+			//	if (cont) {
+			//		break;
+			//	}
+			//}
 
-			if (cont) {
-				continue;
-			}
+			//if (cont) {
+			//	continue;
+			//}
 
 			MeshDescription description;
 

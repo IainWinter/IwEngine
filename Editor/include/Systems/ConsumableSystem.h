@@ -10,35 +10,29 @@
 #include <vector>
 
 class ConsumableSystem
-	: public iw::System<iw::Transform, Consumable>
+	: public iw::SystemBase
 {
 private:
-	bool m_usingItem;
-	std::vector<iw::EntityHandle> m_used;
-
 	std::vector<Consumable> m_prefabs;
-	iw::Model m_slowmoModel;
-	iw::Model m_chargedKillModel;
+	iw::Mesh m_mesh;
+
+	std::vector<iw::EntityHandle> m_used;
+	std::vector<iw::EntityHandle> m_justGot;
+
+	iw::EntityHandle m_active;
+	bool m_isActive;
 
 	iw::Entity& m_target;
-
-public:
-	struct Components {
-		iw::Transform* Transform;
-		Consumable* Consumable;
-	};
 
 public:
 	ConsumableSystem(
 		iw::Entity& target);
 
 	int Initialize() override;
-
-	void Update(
-		iw::EntityComponentArray& view) override;
-
+	void Update() override;
+	
 	bool On(iw::ActionEvent& e) override;
 private:
-	iw::Transform* SpawnConsumable(
+	iw::EntityHandle SpawnConsumable(
 		Consumable prefab);
 };

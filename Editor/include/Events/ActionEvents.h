@@ -19,7 +19,7 @@ enum class Actions
 	SPAWN_ENEMY_DEATH, SPAWN_ENEMY, SPAWN_BULLET, SPAWN_ITEM, SPAWN_NOTE, SPAWN_CONSUMABLE,
 	GIVE_SCORE,
 	SET_CAMERA_TARGET,
-	CHARGE_KILL_ACTIVE
+	CHARGE_KILL_ACTIVE, LONG_DASH_ACTIVE
 };
 
 struct DevConsoleEvent
@@ -312,5 +312,17 @@ struct ChargeKillEvent
 		float timer)
 		: iw::SingleEvent(iw::val(Actions::CHARGE_KILL_ACTIVE))
 		, Timer(timer)
+	{}
+};
+
+struct LongDashEvent
+	: iw::SingleEvent
+{
+	bool Active;
+
+	LongDashEvent(
+		bool active)
+		: iw::SingleEvent(iw::val(Actions::LONG_DASH_ACTIVE))
+		, Active(active)
 	{}
 };

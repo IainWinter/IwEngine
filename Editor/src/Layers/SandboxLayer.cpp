@@ -12,6 +12,7 @@
 #include "Systems/ConsumableSystem.h"
 #include "Systems/SpaceInspectorSystem.h"
 #include "Systems/WorldHoleSystem.h"
+#include "Systems/SpecialBarrierSystem.h"
 #include "iw/engine/Systems/PhysicsSystem.h"
 #include "iw/engine/Systems/ParticleUpdateSystem.h"
 #include "iw/engine/Systems/EntityCleanupSystem.h"
@@ -306,6 +307,7 @@ namespace iw {
 
 		LevelSystem* levelSystem = PushSystem<LevelSystem>(playerSystem->GetPlayer(), MainScene);
 		                           PushSystem<WorldHoleSystem>(levelSystem->GetLevel());
+								   PushSystem<SpecialBarrierSystem>(levelSystem->GetLevel(), playerSystem->GetPlayer());
 
 		PushSystem<GameCameraController>(playerSystem->GetPlayer(), MainScene);
 		PushSystem<ScoreSystem>(playerSystem->GetPlayer(), MainScene->MainCamera(), m_textCam);
@@ -484,6 +486,18 @@ namespace iw {
 			Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 0 }, iw::vector3(0, 0.1f, 8), nullptr);
 		}
 
+		ImGui::SameLine();
+		
+		if (ImGui::Button("Spawn charge")) {
+			Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 1 }, iw::vector3(1, 0.1f, 8), nullptr);
+		}
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Spawn dash")) {
+			Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 2 }, iw::vector3(2, 0.1f, 8), nullptr);
+		}
+
 		if (ImGui::Button("Start seq")) {
 			seq.restart();
 		}
@@ -515,34 +529,9 @@ namespace iw {
 	{
 		switch (e.Action) {
 			case iw::val(Actions::GOTO_NEXT_LEVEL): {
-				enemySystem ->On(e);
+				enemySystem->On(e);
 				PopSystem(enemySystem);
 				PopSystem(enemyBossSystem);
-
-				GoToNextLevelEvent& event = e.as<GoToNextLevelEvent>();
-
-				m_font->UpdateMesh(*m_textMesh, "", .01f, 1);
-				settexttocursor = false;
-
-				if (event.LevelName.find("canyon") != std::string::npos) {
-					sun->SetRotation(iw::quaternion::from_euler_angles(1.0f, 0.0f, -0.35f));
-					sun->SetColor(vector3(1.0f, 0.64f, 0.37f) * 0.33f);
-
-					if (event.LevelName.find("cave") != std::string::npos) {
-						sun->SetRotation(iw::quaternion::from_euler_angles(1.4f, 0.0f, -0.25f));
-						sun->SetColor(vector3(1.0f, 0.64f, 0.37f));
-
-						// set shadow dimension
-
-						ml = 8.0f;
-						ambiance = 0.003f; //MainScene->SetAmbiance(0.0003f);
-					}
-				}
-
-				else {
-					ml = 2.0f;
-					ambiance = 0.03f;
-				}
 
 				break;
 			}
@@ -571,6 +560,38 @@ namespace iw {
 				}
 
 				break;
+			}
+		}
+
+		if (   e.Action == iw::val(Actions::START_LEVEL)
+			|| e.Action == iw::val(Actions::GOTO_NEXT_LEVEL))
+		{
+			std::string_view name 
+				= e.Action == iw::val(Actions::START_LEVEL)
+				? e.as<StartLevelEvent>().LevelName
+				: e.as<GoToNextLevelEvent>().LevelName;
+
+			m_font->UpdateMesh(*m_textMesh, "", .01f, 1);
+			settexttocursor = false;
+
+			if (name.find("canyon") != std::string::npos) {
+				sun->SetRotation(iw::quaternion::from_euler_angles(1.0f, 0.0f, -0.35f));
+				sun->SetColor(vector3(1.0f, 0.64f, 0.37f) * 0.33f);
+
+				if (name.find("cave") != std::string::npos) {
+					sun->SetRotation(iw::quaternion::from_euler_angles(1.4f, 0.0f, -0.25f));
+					sun->SetColor(vector3(1.0f, 0.64f, 0.37f));
+
+					// set shadow dimension
+
+					ml = 8.0f;
+					ambiance = 0.003f; //MainScene->SetAmbiance(0.0003f);
+				}
+			}
+
+			else {
+				ml = 2.0f;
+				ambiance = 0.03f;
 			}
 		}
 

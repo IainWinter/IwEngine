@@ -144,7 +144,7 @@ namespace Engine {
 
 		Renderer->EndShadowCast();
 
-		if (!m_visualize && !Keyboard::KeyDown(E)) {
+		if (!m_visualize && !Keyboard::KeyDown(V)) {
 			if (m_voxelize->VoxelTexture()->Filter() == NEAREST) {
 				m_voxelize->VoxelTexture()->SetFilter(LINEAR);
 				m_voxelize->VoxelTexture()->SetMipmapFilter(LINEAR_LINEAR);
