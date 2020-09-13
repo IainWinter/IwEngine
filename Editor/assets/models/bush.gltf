@@ -1,0 +1,149 @@
+{
+    "asset" : {
+        "generator" : "Khronos glTF Blender I/O v1.1.46",
+        "version" : "2.0"
+    },
+    "scene" : 0,
+    "scenes" : [
+        {
+            "name" : "Scene",
+            "nodes" : [
+                0
+            ]
+        }
+    ],
+    "nodes" : [
+        {
+            "mesh" : 0,
+            "name" : "A.002",
+            "rotation" : [
+                0.05355514585971832,
+                -0.0028881907928735018,
+                -0.05150453746318817,
+                0.9972315430641174
+            ],
+            "translation" : [
+                0,
+                1.01766037940979,
+                0
+            ]
+        }
+    ],
+    "materials" : [
+        {
+            "doubleSided" : true,
+            "emissiveFactor" : [
+                0,
+                0,
+                0
+            ],
+            "name" : "Bush",
+            "pbrMetallicRoughness" : {
+                "baseColorTexture" : {
+                    "index" : 0,
+                    "texCoord" : 0
+                },
+                "baseColorFactor" : [
+			0.5,
+			0.5,
+			0.5,
+			1.0
+		],
+                "metallicFactor" : 0,
+                "roughnessFactor" : 0.8409091234207153
+            }
+        }
+    ],
+    "meshes" : [
+        {
+            "name" : "Sphere.008",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 0,
+                        "NORMAL" : 1,
+                        "TEXCOORD_0" : 2
+                    },
+                    "indices" : 3,
+                    "material" : 0
+                }
+            ]
+        }
+    ],
+    "textures" : [
+        {
+            "source" : 0
+        }
+    ],
+    "images" : [
+        {
+            "mimeType" : "image/png",
+            "name" : "bush",
+            "uri" : "textures/bush/bush.png"
+        }
+    ],
+    "accessors" : [
+        {
+            "bufferView" : 0,
+            "componentType" : 5126,
+            "count" : 3456,
+            "max" : [
+                1.1358468532562256,
+                0.448250949382782,
+                1.1461766958236694
+            ],
+            "min" : [
+                -0.9990512728691101,
+                -1.275557279586792,
+                -1.0096664428710938
+            ],
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 1,
+            "componentType" : 5126,
+            "count" : 3456,
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 2,
+            "componentType" : 5126,
+            "count" : 3456,
+            "type" : "VEC2"
+        },
+        {
+            "bufferView" : 3,
+            "componentType" : 5123,
+            "count" : 4848,
+            "type" : "SCALAR"
+        }
+    ],
+    "bufferViews" : [
+        {
+            "buffer" : 0,
+            "byteLength" : 41472,
+            "byteOffset" : 0
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 41472,
+            "byteOffset" : 41472
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 27648,
+            "byteOffset" : 82944
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 9696,
+            "byteOffset" : 110592
+        }
+    ],
+    "buffers" : [
+        {
+            "byteLength" : 120288,
+            "uri" : "bush.bin"
+        }
+    ]
+}

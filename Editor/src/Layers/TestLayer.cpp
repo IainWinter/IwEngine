@@ -86,14 +86,18 @@ namespace iw {
 		Physics->AddRigidbody(body);
 	}
 
+	ref<Shader> dirShadowShader;
+
 	int TestLayer::Initialize() {
 		// Shaders
 
 		                    shader    = Asset->Load<Shader>("shaders/pbr.shader");
-		ref<Shader> dirShadowShader   = Asset->Load<Shader>("shaders/lights/directional.shader");
+		ref<Shader>         phong     = Asset->Load<Shader>("shaders/phong.shader");
+		            dirShadowShader   = Asset->Load<Shader>("shaders/lights/directional_transparent.shader");
 		ref<Shader> pointShadowShader = Asset->Load<Shader>("shaders/lights/point.shader");
 
 		Renderer->InitShader(shader,          CAMERA | SHADOWS | LIGHTS);
+		Renderer->InitShader(phong,          CAMERA | SHADOWS | LIGHTS);
 		Renderer->InitShader(dirShadowShader, CAMERA);
 		Renderer->InitShader(pointShadowShader);
 
@@ -115,8 +119,6 @@ namespace iw {
 
 		sphere->Initialize(Renderer->Device);
 		plane ->Initialize(Renderer->Device);
-
-		
 
 		// Directional light shadow map textures & target
 		
@@ -244,6 +246,16 @@ namespace iw {
 		SpawnCube();
 		SpawnCube(vector3(15, 1, 1));
 
+		// Bush
+		iw::Mesh bush = Asset->Load<iw::Model>("models/bush.gltf")->GetMesh(0);
+		bush.Material()->SetShader(phong);
+		bush.Material()->SetTransparency(iw::Transparency::ADD);
+
+		iw::Entity e = Space->CreateEntity<iw::Transform, iw::Mesh>();
+
+		e.Set<iw::Transform>(iw::vector3(5, 5, 2), 5);
+		e.Set<iw::Mesh>(bush);
+
 		return Layer::Initialize();
 	}
 
@@ -301,6 +313,8 @@ namespace iw {
 
 	}
 
+	float thresh = .5f;
+
 	void TestLayer::ImGui() {
 		ImGui::Begin("Test");
 
@@ -336,6 +350,12 @@ namespace iw {
 				mesh->Material()->Set("metallic",    rand() / (float)RAND_MAX);
 			}
 		}
+
+		ImGui::SliderFloat("alpha", &thresh, 0, 1);
+
+		dirShadowShader->Use(Renderer->Device);
+		dirShadowShader->Handle()->GetParam("alphaThreshold")->SetAsFloat(thresh);
+
 
 		//for (auto entity : Space->Query<Transform, Mesh>()) {
 		//	auto [transform, mesh] = entity.Components.Tie<MeshComponents>();

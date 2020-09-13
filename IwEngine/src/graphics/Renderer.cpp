@@ -211,17 +211,10 @@ namespace Graphics {
 		}
 
 		Renderer::SetMesh(mesh);
+		Renderer::SetMaterial(mesh->Material());
 
 		if (m_state == RenderState::SCENE) {
-			if (mesh->Material()) {
-				if (!mesh->Material()->IsInitialized()) {
-					mesh->Material()->Initialize(Device);
-				}
-
-				Renderer::SetMaterial(mesh->Material());
-			}
-
-			IPipelineParam* ambiance = m_shader->Handle()->GetParam("ambiance");
+			IPipelineParam* ambiance = m_shader->Handle()->GetParam("ambiance"); // not safe \/
 			if (ambiance) {
 				ambiance->SetAsFloat(m_ambiance);
 			}
@@ -393,14 +386,20 @@ namespace Graphics {
 
 	void Renderer::SetMaterial(
 		const ref<Material>& material)
-	{		
+	{
 		if (material) {
-			Renderer::SetShader(material->Shader);
+			if (!material->IsInitialized()) {
+				material->Initialize(Device);
+			}
+
+			if (m_state == RenderState::SCENE) {
+				Renderer::SetShader(material->Shader);
+			}
 		}
 
 		if (m_material != material) {
 			if (material) {
-				material->Use(Device);
+				material->Use(Device, m_shader);
 			}
 
 			else {

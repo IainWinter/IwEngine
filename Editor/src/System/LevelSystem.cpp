@@ -48,7 +48,7 @@ LevelSystem::LevelSystem(
 	, playerEntity(player)
 	, scene(scene)
 { 
-	currentLevelName = "levels/canyon/cave04.json";
+	currentLevelName = "levels/canyon/top01.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 63);
 	closedColor = iw::Color::From255(201, 66, 66, 63);
@@ -304,6 +304,11 @@ iw::Entity LevelSystem::LoadLevel(
 			mesh.SetMaterial(mesh.Material()->MakeInstance());
 
 			mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/vct/vct.shader"));
+			
+			if (mesh.Data()->Name().find("Bush") != std::string::npos) {
+				mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/phong.shader"));
+				mesh.Material()->Set("baseColor", iw::Color(0.7, 0.7, 0.6, 1));
+			}
 
 			mesh.Material()->SetTexture("shadowMap", Asset->Load<iw::Texture>("SunShadowMap"));
 			//mesh.Material()->SetTexture("shadowMap2", Asset->Load<iw::Texture>("LightShadowMap")); // shouldnt be part of material
@@ -312,7 +317,7 @@ iw::Entity LevelSystem::LoadLevel(
 			mesh.Material()->Set("indirectSpecular", 0);
 
 			if (mesh.Data()->Name().find("Ground") != std::string::npos)
-			{ 
+			{
 				if (mesh.Data()->Description().HasBuffer(iw::bName::COLOR)) {
 					mesh.Material()->SetTexture("diffuseMap2", Asset->Load<iw::Texture>("textures/dirt/baseColor.jpg"));
 					mesh.Material()->SetTexture("normalMap2", Asset->Load<iw::Texture>("textures/dirt/normal.jpg"));

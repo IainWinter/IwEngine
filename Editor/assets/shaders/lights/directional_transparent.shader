@@ -6,7 +6,7 @@
 uniform mat4 model;
 
 layout(location = 0) in vec3 vert;
-layout(location = 2) in vec2 uv;
+layout(location = 4) in vec2 uv;
 
 out vec2 UV;
 
@@ -18,14 +18,17 @@ void main() {
 #shader Fragment
 #version 420
 
-uniform sampler2D alphaMask;
-uniform float hasAlphaMask;
+uniform sampler2D mat_diffuseMap;
+uniform float mat_hasDiffuseMap;
+
+uniform sampler2D mat_alphaMask;
+uniform float mat_hasAlphaMask;
 uniform float alphaThreshold;
 
 in vec2 UV;
 
 void main() {
-	if (hasAlphaMask == 1 && alphaThreshold >= texture(alphaMask, UV).r) {
+	if ((mat_hasDiffuseMap == 1 && alphaThreshold >= texture(mat_diffuseMap, UV).a) || (mat_hasAlphaMask == 1 && alphaThreshold >= texture(mat_alphaMask, UV).r)) {
 		discard;
 	}
 

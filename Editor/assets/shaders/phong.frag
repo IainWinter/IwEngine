@@ -138,7 +138,7 @@ void main() {
 
 	vec4 baseColor = mat_baseColor;
 	if (mat_hasDiffuseMap == 1) {
-		baseColor = texture(mat_diffuseMap, TexCoords);
+		baseColor *= texture(mat_diffuseMap, TexCoords);
 		baseColor.rgb = sRGBToLinear(baseColor.rgb);
 	}
 
