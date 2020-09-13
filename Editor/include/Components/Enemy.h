@@ -48,5 +48,8 @@ struct EnemyBoss {
 	std::vector<Action> Actions;
 
 	float ActionTimer = 0.0f;
+	int FirstAction = -1;
 	int CurrentAction = -1;
+
+	bool JustSpawned = true;
 };

@@ -3304,22 +3304,22 @@
         {
             "mimeType" : "image/jpeg",
             "name" : "normal",
-            "uri" : "textures/grass/normal.jpg"
-        },
-        {
-            "mimeType" : "image/jpeg",
-            "name" : "baseColor",
-            "uri" : "textures/grass/baseColor.jpg"
-        },
-        {
-            "mimeType" : "image/jpeg",
-            "name" : "treeNormal",
             "uri" : "textures/tree/normal.jpg"
         },
         {
             "mimeType" : "image/jpeg",
-            "name" : "treeColor",
+            "name" : "baseColor",
             "uri" : "textures/tree/baseColor.jpg"
+        },
+        {
+            "mimeType" : "image/jpeg",
+            "name" : "treeNormal",
+            "uri" : "textures/grass/normal.jpg"
+        },
+        {
+            "mimeType" : "image/jpeg",
+            "name" : "treeColor",
+            "uri" : "textures/grass/baseColor.jpg"
         }
     ],
     "accessors" : [

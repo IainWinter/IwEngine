@@ -26,6 +26,7 @@ EnemyBossSystem::EnemyBossSystem(
 	: iw::SystemBase("Enemy Boss")
 	, m_player(player)
 	, m_enemySystem(enemySystem)
+	, m_musicInstance(-1)
 {}
 
 int EnemyBossSystem::Initialize() {
@@ -52,6 +53,29 @@ void EnemyBossSystem::Update() {
 		Enemy*           enemy,
 		EnemyBoss*       boss)
 	{
+		if (boss->JustSpawned) {
+			if (m_musicInstance != -1) {
+				Audio->AsStudio()->StopInstance(m_musicInstance);
+				Audio->AsStudio()->StartInstance(m_musicInstance);
+			}
+
+			else {
+				m_musicInstance = Audio->AsStudio()->CreateInstance("Music/boss", false);
+			}
+
+			boss->JustSpawned = false;
+			boss->CurrentAction = boss->FirstAction;
+		}
+
+		Audio->AsStudio()->SetInstanceParameter(m_musicInstance, "BossHealth", enemy->Health);
+
+		if (enemy->Health == 0) {
+			transform->SetParent(nullptr);
+			Space->QueueEntity(entity, iw::func_Destroy);
+			return;
+		}
+
+
 		if (enemy->ChargeTime > enemy->Timer) {
 			return;
 		}
@@ -77,7 +101,7 @@ void EnemyBossSystem::Update() {
 			boss->CurrentAction = index;
 		}
 		
-		Action& action = boss->Actions.at(boss->CurrentAction);
+		Action& action = boss->Actions.at(boss->CurrentAction); 
 
 		if (action.Time > enemy->Timer - enemy->ChargeTime) {
 			if (boss->ActionTimer == 0.0f) {

@@ -60,6 +60,12 @@ namespace Audio {
 			bool realeaseAtEnd = true);
 
 		IWAUDIO_API
+		void SetInstanceParameter(
+			int instance,
+			std::string name,
+			float value);
+
+		IWAUDIO_API
 		void RemoveInstance(
 			int index);
 

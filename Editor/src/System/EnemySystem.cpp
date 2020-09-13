@@ -213,6 +213,8 @@ iw::Transform* EnemySystem::SpawnEnemy(
 			boss->Actions.push_back({ 2, 3.5f, 0.2f, 0 });
 			boss->Actions.push_back({ 3, 2.4f, 0.4f });
 
+			boss->FirstAction = 1;
+
 			break;
 		}
 	}
@@ -287,6 +289,10 @@ iw::Transform* EnemySystem::SpawnEnemy(
 		Space->QueueChange(&enemy->JustHit, true);
 		Space->QueueChange(&enemy->Health,  enemy->Health - 1);
 
+		if (enemyEntity.Has<EnemyBoss>()) {
+			Audio->AsStudio()->CreateInstance("User/enemyDeath");
+		}
+		
 		if (enemy->Health - 1 > 0) {
 			return;
 		}
@@ -300,8 +306,10 @@ iw::Transform* EnemySystem::SpawnEnemy(
 		Bus->push<SpawnEnemyDeath>(transform->Position, transform->Parent());
 		Bus->push<GiveScoreEvent> (transform->Position, score * enemy->ScoreMultiple);
 
-		transform->SetParent(nullptr);
-		Space->QueueEntity(enemyEntity.Handle, iw::func_Destroy);
+		if (!enemyEntity.Has<EnemyBoss>()) {
+			transform->SetParent(nullptr);
+			Space->QueueEntity(enemyEntity.Handle, iw::func_Destroy);
+		}
 	});
 
 	return t;

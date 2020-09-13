@@ -115,8 +115,6 @@ namespace iw {
 
 		forestInstance = studio->CreateInstance("Ambiance/forest", false);
 
-		//studio->CreateInstance("Music/boss", false);
-
 		// Fonts
 
 		m_font = Asset->Load<Font>("fonts/arial.fnt");

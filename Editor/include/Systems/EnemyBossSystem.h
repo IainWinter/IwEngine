@@ -27,6 +27,8 @@ private:
 		8.0f
 	};
 
+	int m_musicInstance;
+
 public:
 	EnemyBossSystem(
 		iw::Entity& player,

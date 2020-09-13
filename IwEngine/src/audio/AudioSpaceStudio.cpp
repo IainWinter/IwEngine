@@ -110,6 +110,14 @@ namespace Audio {
 		return (int)m_instances.size() - 1;
 	}
 
+	void AudioSpaceStudio::SetInstanceParameter(
+		int instance,
+		std::string name,
+		float value)
+	{
+		m_instances.at(instance)->setParameterByName(name.c_str(), value);
+	}
+
 	void AudioSpaceStudio::StartInstance(
 		int index)
 	{
@@ -134,7 +142,7 @@ namespace Audio {
 		m_instances.at(index)->stop(FMOD_STUDIO_STOP_IMMEDIATE);
 	}
 
-	void AudioSpaceStudio::RemoveInstance(
+	void AudioSpaceStudio::RemoveInstance( // removeing breaks other index
 		int index)
 	{
 #ifdef IW_DEBUG
