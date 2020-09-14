@@ -615,7 +615,7 @@ iw::Entity LevelSystem::LoadLevel(
 			float color = guy->Health / 3.0f;
 			mesh.Material()->Set("baseColor", iw::Color(0.8f, color, color, 1));
 
-			Audio->AsStudio()->CreateInstance("playerDamaged");
+			Audio->AsStudio()->CreateInstance("User/playerDamaged");
 		});
 
 		obj->SetTrans(t);
