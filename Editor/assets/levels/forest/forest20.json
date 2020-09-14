@@ -41,7 +41,8 @@
         "Type": 1,
         "Bullet": {
           "Type": 0,
-          "Speed": 7.000000
+          "Speed": 7.000000,
+          "Package": 0
         },
         "Speed": 0.2617994,
         "FireTime": 4.000000,
@@ -52,7 +53,8 @@
         "Type": 1,
         "Bullet": {
           "Type": 0,
-          "Speed": 7.000000
+          "Speed": 7.000000,
+          "Package": 0
         },
         "Speed": 0.2617994,
         "FireTime": 4.000000,
