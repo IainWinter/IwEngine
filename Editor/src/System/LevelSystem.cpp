@@ -48,7 +48,7 @@ LevelSystem::LevelSystem(
 	, playerEntity(player)
 	, scene(scene)
 { 
-	currentLevelName = "levels/forest/forest20.json";
+	currentLevelName = "levels/canyon/top01.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 63);
 	closedColor = iw::Color::From255(201, 66, 66, 63);
@@ -308,6 +308,7 @@ iw::Entity LevelSystem::LoadLevel(
 			if (mesh.Data()->Name().find("Bush") != std::string::npos) {
 				mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/phong.shader"));
 				mesh.Material()->Set("baseColor", iw::Color(0.7, 0.7, 0.6, 1));
+				//mesh.Material()->SetTransparency(iw::Transparency::ADD);
 			}
 
 			mesh.Material()->SetTexture("shadowMap", Asset->Load<iw::Texture>("SunShadowMap"));

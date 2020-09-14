@@ -143,7 +143,7 @@ namespace iw {
 		            vct                = Asset->Load<Shader>("shaders/vct/vct.shader");
 		ref<Shader> phong              = Asset->Load<Shader>("shaders/phong.shader");
 		ref<Shader> gaussian           = Asset->Load<Shader>("shaders/filters/gaussian.shader");
-		ref<Shader> dirShadowShader    = Asset->Load<Shader>("shaders/lights/directional.shader");
+		ref<Shader> dirShadowShader    = Asset->Load<Shader>("shaders/lights/directional_transparent.shader");
 		//ref<Shader> pointShadowShader  = Asset->Load<Shader>("shaders/lights/point.shader");
 		ref<Shader> dirIShadowShader   = Asset->Load<Shader>("shaders/lights/directional_instanced.shader");
 		//ref<Shader> pointIShadowShader = Asset->Load<Shader>("shaders/lights/point_instanced.shader");

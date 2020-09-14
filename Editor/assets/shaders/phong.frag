@@ -150,6 +150,11 @@ void main() {
 		          + baseColor2 * (1.0f - Color.r);
 	}
 
+	// temp; just for bushes
+	if(0.5 > baseColor.a) {
+		discard;
+	}
+
 	// Normal
 
 	vec3 normal = Normal;
