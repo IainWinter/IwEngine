@@ -12,6 +12,13 @@ namespace ECS {
 		_cs Tie() {
 			return *reinterpret_cast<_cs*>(Components);
 		}
+
+		template<
+			typename _c,
+			size_t _i>
+		_c* Get() {
+			return reinterpret_cast<_c*>(Components[_i]);
+		}
 	};
 
 	struct ComponentDataIndices {

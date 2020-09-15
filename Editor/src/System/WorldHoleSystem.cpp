@@ -87,7 +87,7 @@ int WorldHoleSystem::Initialize() {
 }
 
 void WorldHoleSystem::Update() {
-	auto holes  = Space->Query< iw::Transform, iw::Model, WorldHole>();
+	auto holes  = Space->Query<iw::Transform, iw::Model, WorldHole>();
 
 	holes.Each([&](
 		auto entity,

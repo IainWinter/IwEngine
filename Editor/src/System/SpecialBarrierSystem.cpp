@@ -40,11 +40,12 @@ int SpecialBarrierSystem::Initialize() {
 }
 
 void SpecialBarrierSystem::Update() {
-	Space->Query<iw::CollisionObject, DontDeleteBullets>().Each([&](
-		auto entity, 
-		iw::CollisionObject* object,
-		auto)
-	{
+	auto query = Space->MakeQuery<iw::CollisionObject, DontDeleteBullets>();
+	query->SetNone({ Space->GetComponent<WorldHole>() });
+
+	for(auto entity : Space->Query(query)) {
+		iw::CollisionObject* object = entity.Components.Get<iw::CollisionObject, 0>();
+
 		if (dashThrough && player.Find<Player>()->Timer > 0.0f) {
 			object->SetIsTrigger(true);
 		}
@@ -52,7 +53,7 @@ void SpecialBarrierSystem::Update() {
 		else {
 			object->SetIsTrigger(false);
 		}
-	});
+	}
 }
 
 bool SpecialBarrierSystem::On(

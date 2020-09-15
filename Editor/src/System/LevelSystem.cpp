@@ -48,7 +48,7 @@ LevelSystem::LevelSystem(
 	, playerEntity(player)
 	, scene(scene)
 { 
-	currentLevelName = "levels/canyon/top01.json";
+	currentLevelName = "levels/canyon/canyon01.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 63);
 	closedColor = iw::Color::From255(201, 66, 66, 63);
@@ -371,10 +371,10 @@ iw::Entity LevelSystem::LoadLevel(
 			}
 		}
 
-		//iw::Entity trees = Space->CreateEntity<iw::Transform, iw::ParticleSystem<iw::StaticParticle>>();
+		//iw::Entity bushes = Space->CreateEntity<iw::Transform, iw::ParticleSystem<iw::StaticParticle>>();
 
-		//iw::Transform*                          tran = trees.Set<iw::Transform>();
-		//iw::ParticleSystem<iw::StaticParticle>* pSys = trees.Set<iw::ParticleSystem<iw::StaticParticle>>();
+		//iw::Transform*                          tran = bushes.Set<iw::Transform>();
+		//iw::ParticleSystem<iw::StaticParticle>* pSys = bushes.Set<iw::ParticleSystem<iw::StaticParticle>>();
 
 		//tran->SetParent(levelTransform);
 		//pSys->SetTransform(tran);
@@ -383,7 +383,7 @@ iw::Entity LevelSystem::LoadLevel(
 		//	iw::Mesh&      mesh      = model->GetMesh(i);
 		//	iw::Transform& transform = model->GetTransform(i);
 
-		//	if (mesh.Data()->Name().find("Particle") != std::string::npos) {
+		//	if (mesh.Data()->Name().find("Bush") != std::string::npos) {
 		//		if (!pSys->HasParticleMesh()) {
 		//			mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/particle/phong.shader"));
 		//			pSys->SetParticleMesh(mesh);
