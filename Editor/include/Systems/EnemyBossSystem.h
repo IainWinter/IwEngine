@@ -8,8 +8,8 @@ class EnemyBossSystem
 	: public iw::SystemBase
 {
 private:
-	using func_Action    = void(EnemyBossSystem::*)(iw::Transform*, Enemy*);
-	using func_Condition = bool(EnemyBossSystem::*)(iw::Transform*, Enemy*);
+	using func_Action    = void(EnemyBossSystem::*)(iw::Transform*, Enemy*, EnemyBoss*);
+	using func_Condition = bool(EnemyBossSystem::*)(iw::Transform*, Enemy*, EnemyBoss*);
 
 	iw::Entity& m_player;
 	const EnemySystem* m_enemySystem;
@@ -38,16 +38,18 @@ public:
 	void Update() override;
 
 private:
-	void action_forest_spin       (iw::Transform* transform, Enemy* enemy);
-	void action_forest_wave       (iw::Transform* transform, Enemy* enemy);
-	void action_forest_wave_gap   (iw::Transform* transform, Enemy* enemy);
-	void action_forest_enemy_fling(iw::Transform* transform, Enemy* enemy);
+	void action_forest_spin       (iw::Transform* transform, Enemy* enemy, EnemyBoss* boss);
+	void action_forest_wave       (iw::Transform* transform, Enemy* enemy, EnemyBoss* boss);
+	void action_forest_wave_gap   (iw::Transform* transform, Enemy* enemy, EnemyBoss* boss);
+	void action_forest_enemy_fling(iw::Transform* transform, Enemy* enemy, EnemyBoss* boss);
 
-	void action_canyon_front_at_player(iw::Transform* transform, Enemy* enemy);
-	void action_canyon_side_seek      (iw::Transform* transform, Enemy* enemy);
-	void action_canyon_back_orbit     (iw::Transform* transform, Enemy* enemy);
+	void action_canyon_front_at_player(iw::Transform* transform, Enemy* enemy, EnemyBoss* boss);
+	void action_canyon_side_seek      (iw::Transform* transform, Enemy* enemy, EnemyBoss* boss);
+	void action_canyon_back_orbit     (iw::Transform* transform, Enemy* enemy, EnemyBoss* boss);
 
-	bool condition_enemy_count_or_just_hit(iw::Transform* transform, Enemy* enemy);
-	bool condition_enemy_health_2         (iw::Transform* transform, Enemy* enemy);
-	bool condition_enemy_health_1         (iw::Transform* transform, Enemy* enemy);
+	void action_any_move_random(iw::Transform* transform, Enemy* enemy, EnemyBoss* boss);
+
+	bool condition_enemy_count_or_just_hit(iw::Transform* transform, Enemy* enemy, EnemyBoss* boss);
+	bool condition_enemy_health_2         (iw::Transform* transform, Enemy* enemy, EnemyBoss* boss);
+	bool condition_enemy_health_1         (iw::Transform* transform, Enemy* enemy, EnemyBoss* boss);
 };

@@ -42,6 +42,7 @@ struct Action {
 	float Delay;
 
 	int Condition = -1;
+	int EveryTime = -1; // -1 no; 1 enabled; 0 disabled
 };
 
 struct EnemyBoss {
@@ -52,4 +53,5 @@ struct EnemyBoss {
 	int CurrentAction = -1;
 
 	bool JustSpawned = true;
+	iw::vector3 Target;
 };

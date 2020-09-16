@@ -15,6 +15,7 @@ WorldHoleSystem::WorldHoleSystem(
 	iw::Entity& currentLevel)
 	: iw::SystemBase("World Hole")
 	, currentLevel(currentLevel)
+	, m_active(true)
 {}
 
 // sucks that this needs to be here, need to fix lambdas to get it to work
@@ -39,7 +40,7 @@ void WorldHoleSystem::collide(iw::Manifold& man, iw::scalar dt)
 		return;
 	}
 
-	if (!hole->InTransition) {
+	if (!hole->InTransition && m_active) {
 		hole->InTransition = true;
 
 		iw::vector3 pos = holeEntity.Find<iw::Transform>()->Position;
@@ -131,31 +132,39 @@ void WorldHoleSystem::Update() {
 bool WorldHoleSystem::On(
 	iw::ActionEvent& e)
 {
-	if (e.Action == iw::val(Actions::START_LEVEL)) {
-		StartLevelEvent& event = e.as<StartLevelEvent>();
+	switch (e.Action) {
+		case iw::val(Actions::START_LEVEL): {
+			StartLevelEvent& event = e.as<StartLevelEvent>();
 
-		if (event.LevelName == "levels/canyon/canyon02.json") {
-			SpawnHole(0, false, "levels/canyon/cave01.json");
+			if (event.LevelName == "levels/canyon/canyon02.json") {
+				SpawnHole(0, false, "levels/canyon/cave01.json");
+			}
+
+			else if (event.LevelName == "levels/canyon/canyon03.json") {
+				SpawnHole(iw::vector3(-8,  0, -8), false, "levels/canyon/cave02.json");
+				SpawnHole(iw::vector3( 2,  0,  0), true,  "levels/canyon/cave02.json");
+				SpawnHole(iw::vector3( 12, 0,  8), false, "levels/canyon/cave02.json");
+			}
+
+			else if (event.LevelName == "levels/canyon/canyon04.json") {
+				SpawnHole(iw::vector3(0, 0, -6.5), false, "levels/canyon/cave03.json");
+				SpawnHole(iw::vector3(0, 0,  6.5), false, "levels/canyon/cave03.json");
+			}
+
+			else if (event.LevelName == "levels/canyon/canyon05.json") {
+				SpawnHole(iw::vector3(4, 0, 0), false, "levels/canyon/cave04.json");
+			}
+
+			else if (event.LevelName == "levels/canyon/canyon07.json") {
+				SpawnHole(iw::vector3(-18, 0, -7.5f), true, "levels/canyon/cave07.json");
+				SpawnHole(iw::vector3(  0, 0,     6), false, "levels/canyon/cave07.json");
+			}
+
+			break;
 		}
-
-		else if (event.LevelName == "levels/canyon/canyon03.json") {
-			SpawnHole(iw::vector3(-8,  0, -8), false, "levels/canyon/cave02.json");
-			SpawnHole(iw::vector3( 2,  0,  0), true,  "levels/canyon/cave02.json");
-			SpawnHole(iw::vector3( 12, 0,  8), false, "levels/canyon/cave02.json");
-		}
-
-		else if (event.LevelName == "levels/canyon/canyon04.json") {
-			SpawnHole(iw::vector3(0, 0, -6.5), false, "levels/canyon/cave03.json");
-			SpawnHole(iw::vector3(0, 0,  6.5), false, "levels/canyon/cave03.json");
-		}
-
-		else if (event.LevelName == "levels/canyon/canyon05.json") {
-			SpawnHole(iw::vector3(4, 0, 0), false, "levels/canyon/cave04.json");
-		}
-
-		else if (event.LevelName == "levels/canyon/canyon07.json") {
-			SpawnHole(iw::vector3(-18, 0, -7.5f), true, "levels/canyon/cave07.json");
-			SpawnHole(iw::vector3(  0, 0,     6), false, "levels/canyon/cave07.json");
+		case iw::val(Actions::LONG_DASH_ACTIVE): {
+			m_active = !e.as<LongDashEvent>().Active;
+			break;
 		}
 	}
 

@@ -204,6 +204,7 @@ iw::Transform* EnemySystem::SpawnEnemy(
 		case EnemyType::MINI_BOSS_CANYON: {
 			EnemyBoss* boss = ent.Add<EnemyBoss>();
 			boss->Actions.push_back({ 4, 2.5f, 0.2f });
+			boss->Actions.push_back({ 7, 2.5f, 0.0f, -1, 1 });
 
 			break;
 		}

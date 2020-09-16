@@ -14,15 +14,15 @@
     "size": 1,
     "items": [
       {
-        "Type": 17,
+        "Type": 1,
         "Bullet": {
-          "Type": 0,
-          "Speed": 5.000000,
-          "Package": 0
+          "Type": 3,
+          "Speed": 8.000000,
+          "Package": 131072
         },
-        "Speed": 0.174533,
-        "FireTime": 4.00000,
-        "ChargeTime": 3.500000,
+        "Speed": 0.7853981,
+        "FireTime": 3.5,
+        "ChargeTime": 1.500000,
         "Rotation": 0.000000
       }
     ]

@@ -10,6 +10,8 @@ private:
 	iw::Entity& currentLevel;
 	iw::Prefab holePrefab;
 
+	bool m_active;
+
 	const Bullet m_seekBullet = {
 		BulletType::SEEK,
 		8.0f

@@ -106,6 +106,20 @@ namespace Physics {
 		SendCollisionCallbacks(triggers, dt);
 	}
 
+
+	IWPHYSICS_API
+	bool CollisionSpace::TestCollider(
+		const Collider& collider) const
+	{
+		for (CollisionObject* object : m_objects) {
+			if (object->Col()->TestCollision(&object->Trans(), &collider, &Transform()).HasCollision) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	void CollisionSpace::SolveManifolds(
 		std::vector<Manifold>& manifolds,
 		scalar dt)

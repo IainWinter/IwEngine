@@ -38,6 +38,10 @@ namespace Physics {
 		void ResolveConstrains(
 			scalar dt = 0);
 
+		IWPHYSICS_API
+		bool TestCollider(
+			const Collider& collider) const;
+
 		//IWPHYSICS_API
 		//bool TestObject(
 		//	CollisionObject* object);

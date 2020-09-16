@@ -38,21 +38,25 @@ int EnemyBossSystem::Initialize() {
 	m_actions.push_back(&EnemyBossSystem::action_canyon_front_at_player);
 	m_actions.push_back(&EnemyBossSystem::action_canyon_side_seek);
 	m_actions.push_back(&EnemyBossSystem::action_canyon_back_orbit);
-	
+
+	m_actions.push_back(&EnemyBossSystem::action_any_move_random);
+
 	m_conditions.push_back(&EnemyBossSystem::condition_enemy_count_or_just_hit);
 
 	return 0;
 }
 
 void EnemyBossSystem::Update() {
-	auto bosses = Space->Query<iw::Transform, Enemy, EnemyBoss>();
+	auto bosses = Space->Query<iw::CollisionObject, Enemy, EnemyBoss>();
 
 	bosses.Each([&](
 		iw::EntityHandle entity,
-		iw::Transform*   transform,
-		Enemy*           enemy,
-		EnemyBoss*       boss)
+		iw::CollisionObject*   object,
+		Enemy*     enemy,
+		EnemyBoss* boss)
 	{
+		iw::Transform* transform = Space->FindComponent<iw::Transform>(entity);
+
 		if (boss->JustSpawned) {
 			if (m_musicInstance != -1) {
 				Audio->AsStudio()->StopInstance(m_musicInstance);
@@ -85,8 +89,19 @@ void EnemyBossSystem::Update() {
 
 			for (int i = 0; i < boss->Actions.size(); i++) {
 				Action& action = boss->Actions.at(i);
-				if (action.Condition != -1) {
-					bool pickme = std::invoke(m_conditions.at(action.Condition), this, transform, enemy);
+				
+				if (action.EveryTime == 1) {
+					index = i;
+					action.EveryTime = 0;
+					break;
+				}
+
+				else if (action.EveryTime == 0) {
+					action.EveryTime = 1;
+				}
+
+				else if (action.Condition != -1) {
+					bool pickme = std::invoke(m_conditions.at(action.Condition), this, transform, enemy, boss);
 					if (pickme) {
 						index = i;
 						break;
@@ -95,7 +110,9 @@ void EnemyBossSystem::Update() {
 			}
 
 			if (index == -1) {
-				index = iw::randi(boss->Actions.size() - 1);
+				do {
+					index = iw::randi(boss->Actions.size() - 1);
+				} while (boss->Actions.at(index).EveryTime != -1);
 			}
 
 			boss->CurrentAction = index;
@@ -105,7 +122,7 @@ void EnemyBossSystem::Update() {
 
 		if (action.Time > enemy->Timer - enemy->ChargeTime) {
 			if (boss->ActionTimer == 0.0f) {
-				std::invoke(m_actions.at(action.Index), this, transform, enemy);
+				std::invoke(m_actions.at(action.Index), this, transform, enemy, boss);
 			}
 
 			boss->ActionTimer += iw::Time::DeltaTimeScaled();
@@ -120,12 +137,15 @@ void EnemyBossSystem::Update() {
 			boss->ActionTimer = 0;
 			boss->CurrentAction = -1;
 		}
+
+		object->SetTrans(transform);
 	});
 }
 
 void EnemyBossSystem::action_forest_spin(
 	iw::Transform* transform,
-	Enemy* enemy)
+	Enemy* enemy, 
+	EnemyBoss* boss)
 {
 	float rot = enemy->Timer * iw::Pi2 * 2;
 	iw::quaternion offset = iw::quaternion::from_euler_angles(0, rot, 0);
@@ -140,7 +160,8 @@ void EnemyBossSystem::action_forest_spin(
 
 void EnemyBossSystem::action_forest_wave(
 	iw::Transform* transform,
-	Enemy* enemy)
+	Enemy* enemy,
+	EnemyBoss* boss)
 {
 	float rot = iw::Pi + iw::hPi * 0.5f * cos(enemy->Timer);
 
@@ -166,7 +187,8 @@ void EnemyBossSystem::action_forest_wave(
 
 void EnemyBossSystem::action_forest_wave_gap(
 	iw::Transform* transform,
-	Enemy* enemy)
+	Enemy* enemy,
+	EnemyBoss* boss)
 {
 	int count = roundf(iw::Pi2 / enemy->Speed);
 	float rot = iw::Pi + iw::hPi * 0.5f * cos(enemy->Timer);
@@ -185,7 +207,8 @@ void EnemyBossSystem::action_forest_wave_gap(
 
 void EnemyBossSystem::action_forest_enemy_fling(
 	iw::Transform* transform,
-	Enemy* enemy)
+	Enemy* enemy,
+	EnemyBoss* boss)
 {
 	float rot = iw::Time::TotalTime() * iw::Pi2 * 3;
 
@@ -216,7 +239,8 @@ void EnemyBossSystem::action_forest_enemy_fling(
 
 void EnemyBossSystem::action_canyon_front_at_player(
 	iw::Transform* transform,
-	Enemy* enemy)
+	Enemy* enemy,
+	EnemyBoss* boss)
 {
 	int count = roundf(iw::hPi / enemy->Speed);
 	float rot = -iw::hPi * 0.5f;
@@ -233,13 +257,14 @@ void EnemyBossSystem::action_canyon_front_at_player(
 	}
 
 	if (enemy->Health <= 2 && iw::randf() > 0.6) {
-		action_canyon_side_seek(transform, enemy);
+		action_canyon_side_seek(transform, enemy, boss);
 	}
 }
 
 void EnemyBossSystem::action_canyon_side_seek(
 	iw::Transform* transform,
-	Enemy* enemy)
+	Enemy* enemy,
+	EnemyBoss* boss)
 {
 	int count = 4;
 	float rot = iw::hPi * 0.5f;
@@ -267,13 +292,14 @@ void EnemyBossSystem::action_canyon_side_seek(
 	}
 
 	if (enemy->Health == 1) {
-		action_canyon_back_orbit(transform, enemy);
+		action_canyon_back_orbit(transform, enemy, boss);
 	}
 }
 
 void EnemyBossSystem::action_canyon_back_orbit(
 	iw::Transform* transform,
-	Enemy* enemy)
+	Enemy* enemy,
+	EnemyBoss* boss)
 {
 	int count = roundf(iw::hPi / enemy->Speed);
 	float rot = iw::Pi + -iw::hPi * 0.5f;
@@ -290,23 +316,54 @@ void EnemyBossSystem::action_canyon_back_orbit(
 	}
 }
 
+void EnemyBossSystem::action_any_move_random(
+	iw::Transform* transform,
+	Enemy* enemy,
+	EnemyBoss* boss)
+{
+	// test if random position is not causing a collisoin
+	// move there
+
+	if (enemy->Timer - enemy->ChargeTime < iw::Time::DeltaTime()) {
+		int side = boss->Target.dot(iw::vector3::unit_x) > 0 ? -1 : 1;
+
+		iw::vector3 pos;
+		do {
+			pos = iw::vector3(side * 8 + iw::randf() * 4, 1, iw::randf() * 6);
+		} while (Physics->TestCollider(iw::SphereCollider(pos, 0)));
+		boss->Target = pos;
+	}
+
+	float actionTime = boss->Actions.at(boss->CurrentAction).Time;
+
+	transform->Position.x = iw::lerp(transform->Position.x, boss->Target.x, iw::Time::DeltaTime() * actionTime);
+	transform->Position.z = iw::lerp(transform->Position.z, boss->Target.z, iw::Time::DeltaTime() * actionTime);
+
+	//-pow((enemy->Timer - enemy->ChargeTime) - (enemy->Time - enemy->ChargeTime), 2) + pow(enemy->FireTime - enemy->ChargeTime, 2) + 1;
+
+	transform->Position.y = -pow((enemy->Timer - enemy->ChargeTime)*2 - actionTime, 2) + pow(actionTime, 2) + 1;
+}
+
 bool EnemyBossSystem::condition_enemy_count_or_just_hit(
 	iw::Transform* transform,
-	Enemy* enemy)
+	Enemy* enemy,
+	EnemyBoss* boss)
 {
 	return m_enemySystem->GetEnemyCount() > 4 || enemy->JustHit;
 }
 
 bool EnemyBossSystem::condition_enemy_health_2(
 	iw::Transform* transform,
-	Enemy* enemy)
+	Enemy* enemy,
+	EnemyBoss* boss)
 {
 	return enemy->Health == 2;
 }
 
 bool EnemyBossSystem::condition_enemy_health_1(
 	iw::Transform* transform,
-	Enemy* enemy)
+	Enemy* enemy,
+	EnemyBoss* boss)
 {
 	return enemy->Health == 1;
 }
