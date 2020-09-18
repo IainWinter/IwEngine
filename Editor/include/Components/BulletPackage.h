@@ -23,7 +23,7 @@ struct BulletPackage {
 
 	BulletType InnerType;
 	float      InnerSpeed;
-	float      TimeToExplode = 3.0f; // no way to set this rn
+	float      TimeToExplode = 4.0f; // no way to set this rn
 
 
 	bool Exploded = false;

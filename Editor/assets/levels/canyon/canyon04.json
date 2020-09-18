@@ -11,65 +11,33 @@
     "z": 0.000000
   },
   "Enemies": {
-    "size": 3,
+    "size": 1,
     "items": [
       {
-        "Type": 0,
+        "Type": 1,
         "Bullet": {
           "Type": 0,
           "Speed": 6.000000,
-          "Package": 0
-        },
-        "Speed": 0.2617994,
-        "FireTime": 0.120000,
-        "ChargeTime": 0.000000,
-        "Rotation": 0.000000
-      },
-      {
-        "Type": 1,
-        "Bullet": {
-          "Type": 2,
-          "Speed": 6.000000,
           "Package": 65536
         },
-        "Speed": 1.570796,
-        "FireTime": 2.00000,
-        "ChargeTime": 1.000000,
-        "Rotation": 0.000000
-      },
-      {
-        "Type": 1,
-        "Bullet": {
-          "Type": 2,
-          "Speed": 6.000000,
-          "Package": 65536
-        },
-        "Speed": 1.570796,
-        "FireTime": 2.00000,
-        "ChargeTime": 1.000000,
+        "Speed": 0.392699,
+        "FireTime": 3.00000,
+        "ChargeTime": 2.000000,
         "Rotation": 0.000000
       }
     ]
   },
   "Positions": {
-    "size": 3,
+    "size": 1,
     "items": [
       {
-        "x": 0.000000,
+        "x": 4.000000,
         "y": 0.000000
-      },
-      {
-        "x": 8.000000,
-        "y": 7.000000
-      },
-      {
-        "x": -8.000000,
-        "y": 7.000000
       }
     ]
   },
   "Doors": {
-    "size": 1,
+    "size": 2,
     "items": [
       {
         "GoBack": false,
@@ -78,15 +46,27 @@
           "size": 27,
           "string": "levels/canyon/canyon05.json"
         }
+      },
+      {
+        "GoBack": false,
+        "State": 0,
+        "NextLevel": {
+          "size": 29,
+          "string": "levels/canyon/canyon04.a.json"
+        }
       }
     ]
   },
   "DoorPositions": {
-    "size": 1,
+    "size": 2,
     "items": [
       {
         "x": 28.000000,
         "y": 0.000000
+      },
+      {
+        "x": 17.000000,
+        "y": -15.000000
       }
     ]
   },
@@ -95,8 +75,51 @@
     "items": []
   },
   "Capsules": {
-    "size": 0,
-    "items": []
+    "size": 3,
+    "items": [
+      {
+        "Center": {
+          "x": 0.000000,
+          "y": 0.000000,
+          "z": 0.000000
+        },
+        "Direction": {
+          "x": 0.000000,
+          "y": 0.000000,
+          "z": 1.000000
+        },
+        "Height": 6.000000,
+        "Radius": 0.500000
+      },
+      {
+        "Center": {
+          "x": 4.000000,
+          "y": 0.000000,
+          "z": 4.000000
+        },
+        "Direction": {
+          "x": 1.000000,
+          "y": 0.000000,
+          "z": 0.000000
+        },
+        "Height": 6.000000,
+        "Radius": 0.500000
+      },
+      {
+        "Center": {
+          "x": 4.000000,
+          "y": 0.000000,
+          "z": -4.000000
+        },
+        "Direction": {
+          "x": 1.000000,
+          "y": 0.000000,
+          "z": 0.000000
+        },
+        "Height": 6.000000,
+        "Radius": 0.500000
+      }
+    ]
   },
   "Planes": {
     "size": 4,
@@ -144,7 +167,7 @@
     ]
   },
   "Models": {
-    "size": 1,
+    "size": 4,
     "items": [
       {
         "ModelName": {
@@ -156,6 +179,78 @@
             "x": 0,
             "y": 0,
             "z": 0
+          },
+          "Scale": {
+            "x": 1,
+            "y": 1,
+            "z": 1
+          },
+          "Rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          }
+        }
+      },
+      {
+        "ModelName": {
+          "size": 26,
+          "string": "models/forest/barrier.gltf"
+        },
+        "Transform": {
+          "Position": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "Scale": {
+            "x": 1,
+            "y": 1,
+            "z": 1
+          },
+          "Rotation": {
+            "x": 0,
+            "y": -0.707,
+            "z": 0,
+            "w": 0.707
+          }
+        }
+      },
+      {
+        "ModelName": {
+          "size": 26,
+          "string": "models/forest/barrier.gltf"
+        },
+        "Transform": {
+          "Position": {
+            "x": 4,
+            "y": 0,
+            "z": 4
+          },
+          "Scale": {
+            "x": 1,
+            "y": 1,
+            "z": 1
+          },
+          "Rotation": {
+            "x": 0,
+            "y": 1,
+            "z": 0,
+            "w": 0
+          }
+        }
+      },
+      {
+        "ModelName": {
+          "size": 26,
+          "string": "models/forest/barrier.gltf"
+        },
+        "Transform": {
+          "Position": {
+            "x": 4,
+            "y": 0,
+            "z": -4
           },
           "Scale": {
             "x": 1,

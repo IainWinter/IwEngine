@@ -137,27 +137,27 @@ bool WorldHoleSystem::On(
 			StartLevelEvent& event = e.as<StartLevelEvent>();
 
 			if (event.LevelName == "levels/canyon/canyon02.json") {
-				SpawnHole(0, false, "levels/canyon/cave01.json");
+				SpawnHole(0, 5, false, "levels/canyon/cave01.json");
 			}
 
 			else if (event.LevelName == "levels/canyon/canyon03.json") {
-				SpawnHole(iw::vector3(-8,  0, -8), false, "levels/canyon/cave02.json");
-				SpawnHole(iw::vector3( 2,  0,  0), true,  "levels/canyon/cave02.json");
-				SpawnHole(iw::vector3( 12, 0,  8), false, "levels/canyon/cave02.json");
+				SpawnHole(iw::vector3(-8,  0, -8), 5, false, "levels/canyon/cave02.json");
+				SpawnHole(iw::vector3( 2,  0,  0), 5, true,  "levels/canyon/cave02.json");
+				SpawnHole(iw::vector3( 12, 0,  8), 5, false, "levels/canyon/cave02.json");
 			}
 
 			else if (event.LevelName == "levels/canyon/canyon04.json") {
-				SpawnHole(iw::vector3(0, 0, -6.5), false, "levels/canyon/cave03.json");
-				SpawnHole(iw::vector3(0, 0,  6.5), false, "levels/canyon/cave03.json");
+				SpawnHole(iw::vector3(4, 0, 0), 3.5f, true, "levels/canyon/cave03.json");
 			}
 
 			else if (event.LevelName == "levels/canyon/canyon05.json") {
-				SpawnHole(iw::vector3(4, 0, 0), false, "levels/canyon/cave04.json");
+				SpawnHole(iw::vector3(0, 0, -6.5), 5, false, "levels/canyon/cave04.json");
+				SpawnHole(iw::vector3(0, 0,  6.5), 5, false, "levels/canyon/cave04.json");
 			}
 
 			else if (event.LevelName == "levels/canyon/canyon07.json") {
-				SpawnHole(iw::vector3(-18, 0, -7.5f), true, "levels/canyon/cave07.json");
-				SpawnHole(iw::vector3(  0, 0,     6), false, "levels/canyon/cave07.json");
+				SpawnHole(iw::vector3(-18, 0, -7.5f), 5, true, "levels/canyon/cave07.json");
+				SpawnHole(iw::vector3(  0, 0,     6), 5, false, "levels/canyon/cave07.json");
 			}
 
 			break;
@@ -173,6 +173,7 @@ bool WorldHoleSystem::On(
 
 void WorldHoleSystem::SpawnHole(
 	iw::vector3 position,
+	iw::vector3 scale,
 	bool crumble,
 	std::string caveLevel)
 {
@@ -199,6 +200,8 @@ void WorldHoleSystem::SpawnHole(
 	}
 
 	t->Position = position;
+	t->Scale.x = scale.x;
+	t->Scale.z = scale.z;
 
 	if (currentLevel) {
 		t->SetParent(currentLevel.Find<iw::Transform>());

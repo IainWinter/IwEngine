@@ -98,7 +98,6 @@ void LevelSystem::Update(
 		iw::Transform* current = levelEntity    .Find<iw::Transform>();
 		iw::Transform* next    = nextLevelEntity.Find<iw::Transform>();
 
-		speed += iw::Time::DeltaTimeScaled() * 5;
 
 		LevelDoor* currentDoor = levelDoor.Find<LevelDoor>();
 		iw::vector3 target = currentLevel.LevelPosition;
@@ -108,6 +107,10 @@ void LevelSystem::Update(
 		{
 			target = -lastLevelPosition;
 		}
+
+		if (iw::Time::DeltaTimeScaled() > 0.2) return;
+
+		speed += iw::Time::DeltaTimeScaled() * 5;
 
 		current->Position = iw::lerp(current->Position, -target,        iw::Time::DeltaTimeScaled() * speed);
 		next   ->Position = iw::lerp(next   ->Position, iw::vector3(0), iw::Time::DeltaTimeScaled() * speed);
@@ -150,7 +153,7 @@ bool LevelSystem::On(
 
 	if (door->State == LevelDoorState::OPEN) {
 		door->State = LevelDoorState::LOCKED; // stops events from being spammed
-		Bus->push<LoadNextLevelEvent>(door->NextLevel, iw::vector2(tran->Position.x, tran->Position.z), door->GoBack);
+		Bus->push<LoadNextLevelEvent>(door->NextLevel, tran->Position, door->GoBack);
 	}
 
 	justHitGoBackDoor = door->GoBack;
@@ -201,7 +204,7 @@ bool LevelSystem::On(
 		case iw::val(Actions::LOAD_NEXT_LEVEL): {
 			LoadNextLevelEvent& event = e.as<LoadNextLevelEvent>();
 
-			iw::vector2 lvpos = -currentLevel.LevelPosition;
+			iw::vector3 lvpos = -currentLevel.LevelPosition;
 
 			if (event.LevelName.length() > 0) {
 				currentLevelName = event.LevelName;

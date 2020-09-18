@@ -301,11 +301,11 @@ void EnemyBossSystem::action_canyon_back_orbit(
 	Enemy* enemy,
 	EnemyBoss* boss)
 {
-	int count = roundf(iw::hPi / enemy->Speed);
+	int count = 4;
 	float rot = iw::Pi + -iw::hPi * 0.5f;
 
 	for (int i = 0; i < count; i++) {
-		iw::quaternion offset = iw::quaternion::from_euler_angles(0, rot + i * enemy->Speed, 0);
+		iw::quaternion offset = iw::quaternion::from_euler_angles(0, rot + i * iw::Pi / count, 0);
 
 		Bus->push<SpawnBulletEvent>(
 			m_orbitBullet,
@@ -329,19 +329,20 @@ void EnemyBossSystem::action_any_move_random(
 
 		iw::vector3 pos;
 		do {
-			pos = iw::vector3(side * 8 + iw::randf() * 4, 1, iw::randf() * 6);
-		} while (Physics->TestCollider(iw::SphereCollider(pos, 0)));
+			pos = iw::vector3(side * 15 /*+ iw::randf() * 4*/, 1, iw::randf() * 12);
+		} while (Physics->TestCollider(iw::SphereCollider(pos, 1)));
 		boss->Target = pos;
 	}
 
-	float actionTime = boss->Actions.at(boss->CurrentAction).Time;
+	transform->Position = boss->Target;
 
-	transform->Position.x = iw::lerp(transform->Position.x, boss->Target.x, iw::Time::DeltaTime() * actionTime);
-	transform->Position.z = iw::lerp(transform->Position.z, boss->Target.z, iw::Time::DeltaTime() * actionTime);
+	//float distance = iw::vector2(boss->Target.x - transform->Position.x, boss->Target.z - transform->Position.z).length_fast();
+	//float actionTime = boss->Actions.at(boss->CurrentAction).Time;
+	//float speed = distance / actionTime;
 
-	//-pow((enemy->Timer - enemy->ChargeTime) - (enemy->Time - enemy->ChargeTime), 2) + pow(enemy->FireTime - enemy->ChargeTime, 2) + 1;
-
-	transform->Position.y = -pow((enemy->Timer - enemy->ChargeTime)*2 - actionTime, 2) + pow(actionTime, 2) + 1;
+	//transform->Position.x = iw::lerp(transform->Position.x, boss->Target.x, iw::Time::DeltaTime() * actionTime);
+	//transform->Position.z = iw::lerp(transform->Position.z, boss->Target.z, iw::Time::DeltaTime() * actionTime);
+	//transform->Position.y = (-pow((enemy->Timer - enemy->ChargeTime)*2 - actionTime, 2) + pow(actionTime, 2)) * 3 + 1;
 }
 
 bool EnemyBossSystem::condition_enemy_count_or_just_hit(

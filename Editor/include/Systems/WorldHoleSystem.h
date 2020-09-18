@@ -35,6 +35,7 @@ public:
 private:
 	void SpawnHole(
 		iw::vector3 position,
+		iw::vector3 scale,
 		bool crumble,
 		std::string caveLevel);
 };

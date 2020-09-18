@@ -324,7 +324,12 @@ namespace Editor {
 
 			PrintCell("Position"); PrintEditCell(&transform->Position);
 			PrintCell("Scale");    PrintEditCell(&transform->Scale);
-			PrintCell("Rotation"); PrintEditCell(&transform->Rotation);
+
+			vector3 euler = transform->Rotation.euler_angles();
+
+			PrintCell("Rotation"); PrintEditCell(&euler);
+
+			transform->Rotation = iw::quaternion::from_euler_angles(euler);
 
 			if (showParent) {
 				EntityHandle parent = Space->FindEntity(transform->Parent()).Handle;

@@ -32,6 +32,7 @@ struct DevConsoleEvent
 };
 
 enum GameState {
+	NO_ACTION,
 	PAUSED,
 	RUNNING,
 	SOFT_RUN,
@@ -44,7 +45,7 @@ struct GameStateEvent
 	GameState State;
 
 	GameStateEvent(
-		GameState state)
+		GameState state = GameState::NO_ACTION)
 		: iw::SingleEvent(iw::val(Actions::GAME_STATE))
 		, State(state)
 	{}
@@ -124,16 +125,17 @@ struct LoadNextLevelEvent
 	: iw::SingleEvent
 {
 	std::string LevelName;
-	iw::vector2 Position;
+	iw::vector3 Position;
 	bool GoBack;
 
 	LoadNextLevelEvent()
 		: iw::SingleEvent(iw::val(Actions::LOAD_NEXT_LEVEL))
+		, GoBack(false)
 	{}
 
 	LoadNextLevelEvent(
 		std::string levelName,
-		iw::vector2 position = iw::vector2::zero,
+		iw::vector3 position = iw::vector3::zero,
 		bool goback = false)
 		: iw::SingleEvent(iw::val(Actions::LOAD_NEXT_LEVEL))
 		, LevelName(levelName)
