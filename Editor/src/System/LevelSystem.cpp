@@ -48,7 +48,7 @@ LevelSystem::LevelSystem(
 	, playerEntity(player)
 	, scene(scene)
 { 
-	currentLevelName = "levels/canyon/canyon03.json";
+	currentLevelName = "levels/canyon/cave06.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 63);
 	closedColor = iw::Color::From255(201, 66, 66, 63);
@@ -536,6 +536,10 @@ iw::Entity LevelSystem::LoadLevel(
 
 	else if (currentLevelName == "levels/canyon/cave04.json") {
 		Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 2 }, iw::vector3(22, 1, 7.5f), levelTransform);
+	}
+
+	else if (currentLevelName == "levels/canyon/cave06.json") {
+		Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 2 }, iw::vector3(4, 1, -9.5f), levelTransform);
 	}
 
 	// run a cut scene

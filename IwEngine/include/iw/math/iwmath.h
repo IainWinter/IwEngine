@@ -1,10 +1,6 @@
 #pragma once
 
-#ifdef IW_USE_REFLECTION
-#	include "iw\reflection\Reflect.h"
-#else
-#	define REFLECT 
-#endif
+#include "iw/reflection/ReflectDef.h"
 
 #ifdef IW_PLATFORM_WINDOWS
 #	ifdef IWMATH_DLL

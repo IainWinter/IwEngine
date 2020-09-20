@@ -51,7 +51,8 @@ workspace "wEngine"
 		}
 
 		includedirs {
-			iwengdir  .. incdir
+			iwengdir  .. incdir,
+			iwtoldir .. incdir
 		}
 
 		filter "system:windows"
@@ -86,7 +87,8 @@ workspace "wEngine"
 		}
 
 		includedirs {
-			iwengdir  .. incdir
+			iwengdir  .. incdir,
+			iwtoldir .. incdir
 		}
 
 		defines {
@@ -125,7 +127,8 @@ workspace "wEngine"
 		}
 
 		includedirs {
-			iwengdir  .. incdir
+			iwengdir  .. incdir,
+			iwtoldir .. incdir
 		}
 
 		links {
@@ -165,7 +168,8 @@ workspace "wEngine"
 
 		includedirs {
 			iwengdir  .. incdir,
-			fmoddir .. incdir
+			fmoddir .. incdir,
+			iwtoldir .. incdir
 		}
 
 		libdirs {
@@ -213,7 +217,8 @@ workspace "wEngine"
 		}
 
 		includedirs {
-			iwengdir  .. incdir
+			iwengdir  .. incdir,
+			iwtoldir .. incdir
 		}
 
 		links {	
@@ -252,7 +257,8 @@ workspace "wEngine"
 		}
 
 		includedirs {
-			iwengdir  .. incdir
+			iwengdir  .. incdir,
+			iwtoldir .. incdir
 		}
 
 		links {
@@ -292,7 +298,8 @@ workspace "wEngine"
 		}
 
 		includedirs {
-			iwengdir  .. incdir
+			iwengdir  .. incdir,
+			iwtoldir .. incdir
 		}
 
 		links {
@@ -334,7 +341,8 @@ workspace "wEngine"
 		}
 
 		includedirs {
-			iwengdir  .. incdir
+			iwengdir  .. incdir,
+			iwtoldir .. incdir
 		}
 
 		links {
@@ -382,6 +390,7 @@ workspace "wEngine"
 		includedirs {
 			iwengdir  .. incdir,
 			glewdir   .. incdir,
+			iwtoldir .. incdir
 		}
 
 		links {
@@ -431,7 +440,8 @@ workspace "wEngine"
 			glewdir   .. incdir,
 			stbdir    .. incdir,
 			assimpdir .. incdir,
-			assimpdir .. blddir .. incdir
+			assimpdir .. blddir .. incdir,
+			iwtoldir .. incdir
 		}
 
 		libdirs {
@@ -486,7 +496,8 @@ workspace "wEngine"
 		}
 
 		includedirs {
-			iwengdir  .. incdir
+			iwengdir  .. incdir,
+			iwtoldir .. incdir
 		}
 
 		links {
@@ -529,7 +540,8 @@ workspace "wEngine"
 		}
 
 		includedirs {
-			iwengdir  .. incdir
+			iwengdir  .. incdir,
+			iwtoldir .. incdir
 		}
 
 		links {
@@ -575,7 +587,8 @@ workspace "wEngine"
 			iwengdir  .. srcdir .. "/engine/Platform",
 			imguidir  .. incdir,
 			glewdir   .. incdir,
-			fmoddir   .. incdir
+			fmoddir   .. incdir,
+			iwtoldir .. incdir
 		}
 
 		links {
@@ -637,6 +650,7 @@ workspace "wEngine"
 			iwtoldir .. incdir,
 			imguidir .. incdir,
 			fmoddir  .. incdir,
+			iwtoldir .. incdir,
 			jsondir
 		}
 

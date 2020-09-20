@@ -45,10 +45,14 @@ void WorldHoleSystem::collide(iw::Manifold& man, iw::scalar dt)
 
 		iw::vector3 pos = holeEntity.Find<iw::Transform>()->Position;
 
-		Task->queue([=]() {
+		if (hole->CaveLevel.length() == 0) {
+			Bus->push<ResetLevelEvent>();
+		}
+
+		else {
 			Bus->push<SetCameraTargetEvent>(pos, true);
 			Bus->push<LoadNextLevelEvent>(hole->CaveLevel);
-		});
+		}
 	}
 
 	//bulletTransform->SetParent(nullptr);
@@ -156,8 +160,11 @@ bool WorldHoleSystem::On(
 			}
 
 			else if (event.LevelName == "levels/canyon/canyon07.json") {
-				SpawnHole(iw::vector3(-18, 0, -7.5f), 5, true, "levels/canyon/cave07.json");
-				SpawnHole(iw::vector3(  0, 0,     6), 5, false, "levels/canyon/cave07.json");
+				SpawnHole(iw::vector3(0, 0, 6), 5, false, "levels/canyon/cave06.json");
+			}
+
+			else if (event.LevelName == "levels/canyon/cave06.json") {
+				SpawnHole(iw::vector3(-17.2f, 0, 0), 4, true, "");
 			}
 
 			break;

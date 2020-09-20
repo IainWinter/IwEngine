@@ -12,6 +12,8 @@
 #include "Systems/ConsumableSystem.h"
 #include "Systems/SpaceInspectorSystem.h"
 #include "Systems/WorldHoleSystem.h"
+#include "Systems/WorldLadderSystem.h"
+#include "Systems/GameSaveStateSystem.h"
 #include "Systems/SpecialBarrierSystem.h"
 #include "iw/engine/Systems/PhysicsSystem.h"
 #include "iw/engine/Systems/ParticleUpdateSystem.h"
@@ -298,6 +300,8 @@ namespace iw {
 
 		// Systems
 
+		GameSaveStateSystem* saveSystem = PushSystem<GameSaveStateSystem>();
+
 		playerSystem    = PushSystem<PlayerSystem>();
 		bulletSystem    = PushSystem<BulletSystem>(playerSystem->GetPlayer());
 		enemySystem     = PushSystem<EnemySystem>(playerSystem->GetPlayer(), bulletSystem->GetBulletPrefab());
@@ -305,6 +309,7 @@ namespace iw {
 
 		LevelSystem* levelSystem = PushSystem<LevelSystem>(playerSystem->GetPlayer(), MainScene);
 		                           PushSystem<WorldHoleSystem>(levelSystem->GetLevel());
+		                           PushSystem<WorldLadderSystem>(levelSystem->GetLevel(), saveSystem->GetState());
 								   PushSystem<SpecialBarrierSystem>(levelSystem->GetLevel(), playerSystem->GetPlayer());
 
 		PushSystem<GameCameraController>(playerSystem->GetPlayer(), MainScene);
@@ -572,6 +577,9 @@ namespace iw {
 			m_font->UpdateMesh(*m_textMesh, "", .01f, 1);
 			settexttocursor = false;
 
+			ml = 2.0f;
+			ambiance = 0.03f;
+
 			if (name.find("canyon") != std::string::npos) {
 				sun->SetRotation(iw::quaternion::from_euler_angles(1.0f, 0.0f, -0.35f));
 				sun->SetColor(vector3(1.0f, 0.64f, 0.37f) * 0.33f);
@@ -585,11 +593,6 @@ namespace iw {
 					ml = 8.0f;
 					ambiance = 0.003f; //MainScene->SetAmbiance(0.0003f);
 				}
-			}
-
-			else {
-				ml = 2.0f;
-				ambiance = 0.03f;
 			}
 		}
 
