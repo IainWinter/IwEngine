@@ -6,6 +6,9 @@
 
 #include "iw/common/Components/Transform.h"
 #include "iw/graphics/Model.h"
+#include "Components/LevelDoor.h"
+#include "iw/physics/Collision/CollisionObject.h"
+#include "iw/physics/Collision/SphereCollider.h"
 
 WorldLadderSystem::WorldLadderSystem(
 	iw::Entity& currentLevel,
@@ -25,6 +28,8 @@ int WorldLadderSystem::Initialize() {
 	ladderPrefab.Add(Space->RegisterComponent<iw::Transform>());
 	ladderPrefab.Add(Space->RegisterComponent<iw::Model>(), model.get());
 	ladderPrefab.Add(Space->RegisterComponent<WorldLadder>());
+	ladderPrefab.Add(Space->RegisterComponent<iw::CollisionObject>());
+	ladderPrefab.Add(Space->RegisterComponent<iw::SphereCollider>());
 
 	return 0;
 }
@@ -78,11 +83,15 @@ bool WorldLadderSystem::On(
 			StartLevelEvent& event = e.as<StartLevelEvent>();
 
 			if (event.LevelName == "levels/canyon/cave03.a.json") {
-				SpawnLadder(0, iw::quaternion::identity, saveState->Cave03LadderDown, "levels/canyon/canyon04.a.json");
+				SpawnLadder(iw::vector3(15, 0, 4), iw::quaternion::from_euler_angles(0, -0.4f, 0), saveState->Cave03LadderDown, false, "levels/canyon/canyon04.a.json");
+			}
+
+			if (event.LevelName == "levels/canyon/canyon04.a.json") {
+				SpawnLadder(iw::vector3(15, 0, -4), iw::quaternion::from_euler_angles(0, -0.4f, 0), saveState->Cave03LadderDown, true, "levels/canyon/cave03.a.json");
 			}
 
 			else if (event.LevelName == "levels/canyon/cave06.json") {
-				SpawnLadder(iw::vector3(3.5f, 0, -14), iw::quaternion::from_euler_angles(0, 0.7f, 0), saveState->Cave06LadderDown, "levels/canyon/canyon07.a.json");
+				SpawnLadder(iw::vector3(3.5f, 0, -14), iw::quaternion::from_euler_angles(0, 0.7f, 0), saveState->Cave06LadderDown, false, "levels/canyon/canyon07.a.json");
 			}
 
 			break;
@@ -96,6 +105,7 @@ void WorldLadderSystem::SpawnLadder(
 	iw::vector3 position,
 	iw::quaternion rotation,
 	bool down,
+	bool above,
 	std::string level)
 {
 	iw::Entity ladder = Space->Instantiate(ladderPrefab);
@@ -103,10 +113,8 @@ void WorldLadderSystem::SpawnLadder(
 	iw::Transform* t = ladder.Find<iw::Transform>();
 	iw::Model*     m = ladder.Find<iw::Model>();
 	WorldLadder*   l = ladder.Find<WorldLadder>();
-
-	if (!down) {
-		position.y = 10.0f;
-	}
+	iw::CollisionObject* o = ladder.Find<iw::CollisionObject>();
+	iw::SphereCollider*  s = ladder.Find<iw::SphereCollider>();
 
 	t->Position = position;
 	t->Rotation = rotation;
@@ -115,4 +123,29 @@ void WorldLadderSystem::SpawnLadder(
 	l->Open = down;
 
 	t->SetParent(currentLevel.Find<iw::Transform>());
+
+	s->Radius = 1;
+	o->SetTrans(t);
+	o->SetCol(s);
+	o->SetIsTrigger(true);
+	o->SetOnCollision([&](iw::Manifold& man, float dt) {
+		iw::Entity ladder, player;
+		if (GetEntitiesFromManifold<WorldLadder, Player>(man, ladder, player)) {
+			return;
+		}
+
+		Bus->send<LoadNextLevelEvent>(ladder.Find<WorldLadder>()->Level);
+	});
+
+	Physics->AddCollisionObject(o);
+
+	if (above) {
+
+	}
+
+	else {
+		if (down) {
+			//m->GetTransform(0).Position.y = 10.0f;
+		}
+	}
 }

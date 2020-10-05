@@ -63,7 +63,11 @@ namespace Asset {
 		{
 			auto itr = m_loaders.find(typeid(_a).hash_code());
 			if (itr != m_loaders.end()) {
-				return std::static_pointer_cast<_a, void>(itr->second->Load("assets/" + filepath));
+				if (filepath.find_first_of(':') > 3) { // only if not A:\ or AA:\ or AAA:\ 
+					filepath = "assets/" + filepath;
+				}
+
+				return std::static_pointer_cast<_a, void>(itr->second->Load(filepath));
 			}
 
 			return nullptr;

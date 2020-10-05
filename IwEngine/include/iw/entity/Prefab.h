@@ -5,12 +5,6 @@
 #include "iw/util/memory/linear_allocator.h"
 #include <vector>
 
-// Making a prefab system! Goal is to make it so you can spawn one of these once setup (components with default data)
-// Making a prefab system! Goal is to make it so you can spawn one of these once setup (components with default data)
-// Making a prefab system! Goal is to make it so you can spawn one of these once setup (components with default data)
-// Making a prefab system! Goal is to make it so you can spawn one of these once setup (components with default data)
-// Making a prefab system! Goal is to make it so you can spawn one of these once setup (components with default data)
-
 namespace iw {
 namespace ECS {
 	struct Prefab {

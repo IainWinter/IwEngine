@@ -27,5 +27,7 @@ private:
 		iw::vector3 position,
 		iw::quaternion rotation,
 		bool down,
+		bool above,
 		std::string level);
+
 };

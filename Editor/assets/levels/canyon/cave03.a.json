@@ -19,7 +19,7 @@
     "items": []
   },
   "Doors": {
-    "size": 2,
+    "size": 1,
     "items": [
       {
         "GoBack": true,
@@ -28,27 +28,15 @@
           "size": 25,
           "string": "levels/canyon/cave03.json"
         }
-      },
-      {
-        "GoBack": false,
-        "State": 0,
-        "NextLevel": {
-          "size": 29,
-          "string": "levels/canyon/canyon04.a.json"
-        }
       }
     ]
   },
   "DoorPositions": {
-    "size": 2,
+    "size": 1,
     "items": [
       {
         "x": 12.800000,
         "y": 19.500000
-      },
-      {
-        "x": 13.000000,
-        "y": 1.000000
       }
     ]
   },
