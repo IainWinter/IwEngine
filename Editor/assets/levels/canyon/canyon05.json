@@ -16,25 +16,25 @@
       {
         "Type": 1,
         "Bullet": {
-          "Type": 2,
+          "Type": 3,
           "Speed": 6.000000,
           "Package": 65536
         },
         "Speed": 3.141593,
-        "FireTime": 3.00000,
-        "ChargeTime": 2.000000,
+        "FireTime": 2.00000,
+        "ChargeTime": 1.000000,
         "Rotation": 0.000000
       },
       {
         "Type": 1,
         "Bullet": {
-          "Type": 2,
+          "Type": 3,
           "Speed": 6.000000,
           "Package": 65536
         },
         "Speed": 1.570796,
-        "FireTime": 2.000000,
-        "ChargeTime": 1.000000,
+        "FireTime": 3.000000,
+        "ChargeTime": 2.000000,
         "Rotation": 0.000000
       }
     ]

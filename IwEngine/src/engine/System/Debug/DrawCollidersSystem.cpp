@@ -24,7 +24,7 @@ namespace Engine {
 
 		material->Initialize(Renderer->Device);
 
-		MeshData* sphere  = MakeUvSphere(description, 5, 5);
+		MeshData* sphere  = MakeIcosphere(description, 2);
 		MeshData* plane   = MakePlane    (description, 5, 5);
 		MeshData* cube    = MakeCube     (description, 2);
 

@@ -348,10 +348,12 @@ bool PlayerSystem::On(
 
 			if (e.as<LongDashEvent>().Active) {
 				player->DashTime = 32.0f / 60.0f;
+				player->Dash = true;
 			}
 
 			else {
 				player->DashTime = playerPrefab.DashTime;
+				player->Dash = false;
 			}
 
 			break;

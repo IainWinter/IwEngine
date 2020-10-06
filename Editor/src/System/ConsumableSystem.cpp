@@ -18,7 +18,7 @@ ConsumableSystem::ConsumableSystem(
 int ConsumableSystem::Initialize() {
 	m_prefabs.push_back(Consumable{ 0, SLOWMO,      iw::Color::From255(112, 195, 255), detail::action_Slowmo, detail::effect_Slowmo, 3.0f });
 	m_prefabs.push_back(Consumable{ 1, CHARGE_KILL, iw::Color::From255(255, 245, 112), detail::action_Charge, detail::effect_Slowmo, 3.0f });
-	m_prefabs.push_back(Consumable{ 2, LONG_DASH,   iw::Color::From255(190,   3, 252), detail::action_LgDash, detail::effect_Slowmo, 20 });
+	m_prefabs.push_back(Consumable{ 2, LONG_DASH,   iw::Color::From255(190,   3, 252), detail::action_LgDash, detail::effect_Slowmo, 32.0f / 60.0f });
 
 	auto material = Asset->Load<iw::Material>("materials/Default")->MakeInstance();
 	material->Set("reflectance", 1.0f);
@@ -224,9 +224,9 @@ namespace detail {
 	{
 		Player* player = target.Find<Player>();
 
-		if (player && player->Dash) {
-			longDash->Timer = 20 - 32 / 60.0f;
-		}
+		//if (player && player->Dash) {
+		//	longDash->Timer = 20 - 32 / 60.0f;
+		//}
 
 		if (finish) {
 			bus->push<LongDashEvent>(false);
