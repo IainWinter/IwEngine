@@ -172,7 +172,7 @@ void PlayerSystem::Update(
 			position = iw::lerp(
 				player->TransitionStartPosition,
 				player->TransitionTargetPosition,
-				time
+				1 - (1 - time) * (1 - time)
 			);
 
 			if (time > 1) {
@@ -346,7 +346,7 @@ bool PlayerSystem::On(
 			
 			p->Transition = true;
 			p->Begin = iw::Time::TotalTime();
-			p->TransitionSpeed = 1.0f;
+			p->TransitionSpeed = 0.75f;
 			p->TransitionStartPosition = r->Trans().Position;
 			p->TransitionTargetPosition = event.PlayerPosition;
 			r->SetCol(nullptr);

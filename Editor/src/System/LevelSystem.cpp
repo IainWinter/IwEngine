@@ -108,10 +108,10 @@ void LevelSystem::Update(
 
 		if (iw::Time::DeltaTimeScaled() > 0.2) return; // loading cause
 
-		float time = 1.0f * (iw::Time::TotalTime() - startTime);
+		float time = 0.75f * (iw::Time::TotalTime() - startTime);
 
-		current->Position = iw::lerp(iw::vector3(0), -target,        time);
-		next   ->Position = iw::lerp(target,         iw::vector3(0), time);
+		current->Position = iw::lerp(iw::vector3(0), -target,        1 - (1 - time) * (1 - time));
+		next   ->Position = iw::lerp(target,         iw::vector3(0), 1 - (1 - time) * (1 - time));
 
 		if (time > 1) {
 			Bus->push<AtNextLevelEvent>();

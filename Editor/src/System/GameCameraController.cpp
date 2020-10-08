@@ -52,9 +52,9 @@ void GameCameraController::Update(
 		}
 
 		else if (transition2) {
-			float time = 1.0f * (iw::Time::TotalTime() - startTime2);
+			float time = 0.75f * (iw::Time::TotalTime() - startTime2);
 
-			t->Position = iw::lerp(lastPosition, target, time);
+			t->Position = iw::lerp(lastPosition, target, 1 - (1 - time) * (1 - time)); // easeOutQuad
 
 			//iw::quaternion camrot =
 			//	iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
