@@ -163,40 +163,20 @@ void PlayerSystem::Update(
 {
 	for (auto entity : view) {
 		auto [transform, body, player] = entity.Components.Tie<Components>();
-		
-		if (player->LevelTransition) {
-			player->TransitionSpeed += iw::Time::DeltaTime() * 5;
-		}
 
-		if (   player->Transition
-			|| player->LevelTransition)
-		{
+		if (player->Transition) {
 			iw::vector3& position = body->Trans().Position;
 
-			if (player->LevelTransition) {
-				position = iw::lerp(
-					position,
-					player->TransitionTargetPosition, 
-					iw::Time::DeltaTime() * player->TransitionSpeed
-				);
-			}
+			float time = player->TransitionSpeed * (iw::Time::TotalTime() - player->Begin);
 
-			else {
-				position = iw::lerp(
-					player->TransitionStartPosition, 
-					player->TransitionTargetPosition, 
-					iw::Time::TotalTime() - player->Begin
-				);
-			}
+			position = iw::lerp(
+				player->TransitionStartPosition,
+				player->TransitionTargetPosition,
+				time
+			);
 
-			if (   iw::almost_equal(position.x, player->TransitionTargetPosition.x, 2)
-				&& iw::almost_equal(position.z, player->TransitionTargetPosition.z, 2))
-			{
-				position = player->TransitionTargetPosition;
-				player->TransitionSpeed = 1.0f;
+			if (time > 1) {
 				player->Transition = false;
-				player->Timer = 0.0f;
-				body->SetIsTrigger(false);
 			}
 		}
 
@@ -363,21 +343,19 @@ bool PlayerSystem::On(
 
 			Player*        p = m_player.Find<Player>();
 			iw::Rigidbody* r = m_player.Find<iw::Rigidbody>();
-
-			p->LevelTransition = true;
-			p->TransitionSpeed = 1.0f;
-			p->TransitionStartPosition  = r->Trans().Position;
-			p->TransitionTargetPosition = event.PlayerPosition;
+			
+			p->Transition = true;
 			p->Begin = iw::Time::TotalTime();
-
+			p->TransitionSpeed = 1.0f;
+			p->TransitionStartPosition = r->Trans().Position;
+			p->TransitionTargetPosition = event.PlayerPosition;
 			r->SetCol(nullptr);
 
 			break;
 		}
 		case iw::val(Actions::AT_NEXT_LEVEL): {
-			Player* p = m_player.Find<Player>();
+			//Player* p = m_player.Find<Player>();
 
-			p->LevelTransition = false;
 			break;
 		}
 		case iw::val(Actions::START_LEVEL): {
@@ -403,7 +381,6 @@ bool PlayerSystem::On(
 
 			t->Scale = 0.75f;
 
-			
 			r->SetCol(s);
 			r->SetTrans(t);
 

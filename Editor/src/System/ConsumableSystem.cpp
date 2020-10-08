@@ -222,7 +222,7 @@ namespace detail {
 		iw::eventbus* bus, 
 		bool finish)
 	{
-		Player* player = target.Find<Player>();
+		//Player* player = target.Find<Player>();
 
 		//if (player && player->Dash) {
 		//	longDash->Timer = 20 - 32 / 60.0f;

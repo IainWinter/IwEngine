@@ -16,9 +16,13 @@ GameCameraController::GameCameraController(
 {}
 
 float y = 27.15f;
-float s = 1.0f;
+
+float startTime2 = 0;
+bool firstTransition = false;
+iw::vector3 lastPosition = 0;
 
 bool zoomOut = false;
+bool transition2 = false;
 
 void GameCameraController::Update(
 	iw::EntityComponentArray& eca)
@@ -41,42 +45,31 @@ void GameCameraController::Update(
 
 		target.y = y;
 
-		//if (   zoomOut
-		//	&& target.x > -4)
-		//{ // for 7.a
-		//	target.y += 7;
-		//}
-
-		//target.x = 0;
-
-		if (   !follow
-			&& iw::almost_equal(t->Position.x, target.x, 2)
-			&& iw::almost_equal(t->Position.y, target.y, 2)
-			&& iw::almost_equal(t->Position.z, target.z, 2))
-		{
-			t->Position = target;
-			s = speed;
+		if (firstTransition) {
+			lastPosition = t->Position;
+			firstTransition = false;
+			transition2 = true;
 		}
 
-		else {
+		else if (transition2) {
+			float time = 1.0f * (iw::Time::TotalTime() - startTime2);
+
+			t->Position = iw::lerp(lastPosition, target, time);
+
 			//iw::quaternion camrot =
 			//	iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
 			//	* iw::quaternion::from_axis_angle(iw::vector3::unit_z, iw::Pi);
-
-			if (!follow) {
-				s += iw::Time::DeltaTimeScaled() * 5;
-			}
-
-			t->Position = iw::lerp(t->Position, target, iw::Time::DeltaTimeScaled() * s);
 			//t->Rotation = iw::lerp(t->Rotation, camrot, iw::Time::DeltaTime() * speed);
+
+			if (time > 1) {
+				t->Position = target;
+				transition2 = false;
+			}
 		}
 
-		//iw::PointLight* lamp = scene->PointLights()[0];
-
-		//iw::vector3 subpos = m_target.Find<iw::Transform>()->Position;
-		//subpos.y = 1;
-
-		//lamp->SetPosition(subpos);
+		else {
+			t->Position = iw::lerp(t->Position, target, iw::DeltaTimeScaled() * 2);
+		}
 	}
 }
 
@@ -90,24 +83,21 @@ bool GameCameraController::On(
 			GoToNextLevelEvent& event = e.as<GoToNextLevelEvent>();
 
 			center = 0;
-			
-			SetTarget(event.LevelName);
 			follow = event.CameraFollow;
-			s = speed;
 
-			//if (event.CameraFollow) {
-			//	center.x += event.PlayerPosition.x;
-			//	center.z += event.PlayerPosition.y;
-			//}
+			startTime2 = iw::TotalTime();
+			firstTransition = true;
+
+			SetTarget(event.LevelName);
 
 			break;
 		}
 		case iw::val(Actions::START_LEVEL): {
 			StartLevelEvent& event = e.as<StartLevelEvent>();
 
-			SetTarget(event.LevelName);
 			follow = event.CameraFollow;
-			s = speed;
+
+			SetTarget(event.LevelName);
 
 			break;
 		}

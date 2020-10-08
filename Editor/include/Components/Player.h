@@ -16,7 +16,7 @@ struct REFLECT Player {
 
 	iw::vector3 Movement = 0;
 
-	bool Left, Right, Up, Down, Dash, Sprint, Transition, LevelTransition = false;
+	bool Left, Right, Up, Down, Dash, Sprint, Transition;
 
 	iw::vector3 TransitionStartPosition = 0;
 	iw::vector3 TransitionTargetPosition = 0;

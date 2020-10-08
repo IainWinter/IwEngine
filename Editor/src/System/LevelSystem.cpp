@@ -48,7 +48,7 @@ LevelSystem::LevelSystem(
 	, playerEntity(player)
 	, scene(scene)
 { 
-	currentLevelName = "levels/canyon/canyon05.json";
+	currentLevelName = "levels/canyon/top07.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 63);
 	closedColor = iw::Color::From255(201, 66, 66, 63);
@@ -74,8 +74,7 @@ int LevelSystem::Initialize() {
 	return 0;
 }
 
-float speed = 1.0f; // garbo
-float timeout = 0.0f;
+float startTime = 0;
 iw::vector3 lastLevelPosition = 0;
 
 void LevelSystem::Update(
@@ -98,7 +97,6 @@ void LevelSystem::Update(
 		iw::Transform* current = levelEntity    .Find<iw::Transform>();
 		iw::Transform* next    = nextLevelEntity.Find<iw::Transform>();
 
-
 		LevelDoor* currentDoor = levelDoor.Find<LevelDoor>();
 		iw::vector3 target = currentLevel.LevelPosition;
 
@@ -108,23 +106,18 @@ void LevelSystem::Update(
 			target = -lastLevelPosition;
 		}
 
-		if (iw::Time::DeltaTimeScaled() > 0.2) return;
+		if (iw::Time::DeltaTimeScaled() > 0.2) return; // loading cause
 
-		speed += iw::Time::DeltaTimeScaled() * 5;
+		float time = 1.0f * (iw::Time::TotalTime() - startTime);
 
-		current->Position = iw::lerp(current->Position, -target,        iw::Time::DeltaTimeScaled() * speed);
-		next   ->Position = iw::lerp(next   ->Position, iw::vector3(0), iw::Time::DeltaTimeScaled() * speed);
+		current->Position = iw::lerp(iw::vector3(0), -target,        time);
+		next   ->Position = iw::lerp(target,         iw::vector3(0), time);
 
-		if (   iw::Time::TotalTime() - timeout > 0
-			&& iw::almost_equal(next->Position.x, 0.0f, 2)
-			&& iw::almost_equal(next->Position.y, 0.0f, 2)
-			&& iw::almost_equal(next->Position.z, 0.0f, 2))
-		{
+		if (time > 1) {
 			Bus->push<AtNextLevelEvent>();
 
 			next->Position = 0.0f;
 			transition = false;
-			speed = 2;
 		}
 	}
 }
@@ -261,6 +254,10 @@ bool LevelSystem::On(
 
 			sequence.Restart();
 
+			break;
+		}
+		case iw::val(Actions::GOTO_NEXT_LEVEL): {
+			startTime = iw::Time::TotalTime();
 			break;
 		}
 	}
