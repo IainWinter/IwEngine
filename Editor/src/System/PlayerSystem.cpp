@@ -77,9 +77,7 @@ int PlayerSystem::Initialize() {
 
 	r->SetOnCollision([&](iw::Manifold& man, float dt) {
 		iw::Entity playerEntity, otherEntity;
-		bool noent = GetEntitiesFromManifold<Player>(man, playerEntity, otherEntity);
-
-		if (noent) {
+		if (GetEntitiesFromManifold<Player>(man, playerEntity, otherEntity)) {
 			return;
 		}
 
@@ -135,12 +133,10 @@ int PlayerSystem::Initialize() {
 		}
 
 		else {
-			if (iw::Time::TotalTime() - player->Begin > 0.5f) {
-				iw::Rigidbody* playerBody = playerEntity.Find<iw::Rigidbody>();
+			iw::Rigidbody* playerBody = playerEntity.Find<iw::Rigidbody>();
 
-				player->Transition = false; // if hit a wall
-				playerBody->SetIsTrigger(false);
-			}
+			player->Transition = false; // if hit a wall
+			playerBody->SetIsTrigger(false);
 		}
 	});
 

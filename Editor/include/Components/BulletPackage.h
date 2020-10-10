@@ -10,6 +10,8 @@ enum BulletType : unsigned {
 };
 
 enum PackageType : unsigned {
+	NONE,
+
 	TIMER    = 1 << (sizeof(PackageType) * 4 + 0), // Explodes on a timer
 	DISTANCE = 1 << (sizeof(PackageType) * 4 + 1), // Explosed when close to a target
 

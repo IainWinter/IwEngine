@@ -31,5 +31,10 @@ private:
 	iw::Transform* SpawnBullet(
 		Bullet enemyBullet,
 		iw::vector3 position,
-		iw::quaternion rot);
+		iw::quaternion rot,
+		float dist = 2);
+
+	void SpawnBulletsFromPackage(
+		iw::Transform* transform,
+		BulletPackage* package);
 };

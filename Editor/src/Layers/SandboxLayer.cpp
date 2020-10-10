@@ -486,19 +486,19 @@ namespace iw {
 		}
 
 		if (ImGui::Button("Spawn slowmo")) {
-			Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 0 }, iw::vector3(0, 0.1f, 8), nullptr);
+			Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 0 }, playerSystem->GetPlayer().Find<iw::Transform>()->Position, nullptr);
 		}
 
 		ImGui::SameLine();
 		
 		if (ImGui::Button("Spawn charge")) {
-			Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 1 }, iw::vector3(1, 0.1f, 8), nullptr);
+			Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 1 }, playerSystem->GetPlayer().Find<iw::Transform>()->Position, nullptr);
 		}
 
 		ImGui::SameLine();
 
 		if (ImGui::Button("Spawn dash")) {
-			Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 2 }, iw::vector3(2, 0.1f, 8), nullptr);
+			Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 2 }, playerSystem->GetPlayer().Find<iw::Transform>()->Position, nullptr);
 		}
 
 		if (ImGui::Button("Start seq")) {

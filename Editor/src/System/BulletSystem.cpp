@@ -53,6 +53,13 @@ void BulletSystem::collide(iw::Manifold& man, float dt) {
 		Bus->push<GiveScoreEvent>(bulletTransform->Position, score, false);
 	}
 
+	else if (bullet->Package) {
+		SpawnBulletsFromPackage(
+			bulletEntity.Find<iw::Transform>(),
+			bulletEntity.Find<BulletPackage>()
+		);
+	}
+
 	bulletTransform->SetParent(nullptr);
 	Space->QueueEntity(bulletEntity.Handle, iw::func_Destroy);
 }
@@ -178,7 +185,7 @@ void BulletSystem::FixedUpdate() {
 				break;
 			}
 			case PackageType::DISTANCE: {
-				if (bullet->Timer < 0.2) {
+				if (bullet->Timer < 0.7) {
 					return;
 				}
 
@@ -193,31 +200,9 @@ void BulletSystem::FixedUpdate() {
 			}
 		}
 
+		SpawnBulletsFromPackage(transform, package);
+
 		package->Exploded = true;
-
-		for (float dir = 0.0f; dir < iw::Pi2; dir += iw::Pi2 / 5) {
-			iw::Entity bullet = Space->Instantiate(bulletPrefab);
-
-			Bullet*             b = bullet.Find<Bullet>();
-			iw::Transform*      t = bullet.Find<iw::Transform>();
-			iw::SphereCollider* s = bullet.Find<iw::SphereCollider>();
-			iw::Rigidbody*      r = bullet.Find<iw::Rigidbody>();
-
-			b->Type  = package->InnerType;
-			b->Speed = package->InnerSpeed;
-			b->Timer = 0.0f;
-
-			t->SetParent(transform->Parent());
-
-			t->Rotation = iw::quaternion::from_euler_angles(0, dir, 0).inverted();
-			t->Position = transform->Position + t->Right() * sqrt(.25f);
-
-			r->SetCol(s);
-			r->SetTrans(t);
-			r->SetVelocity(iw::vector3::unit_x * t->Rotation * b->Speed);
-
-			Physics->AddRigidbody(r);
-		}
 
 		transform->SetParent(nullptr);
 		Space->QueueEntity(entity, iw::func_Destroy);
@@ -242,7 +227,8 @@ bool BulletSystem::On(
 iw::Transform* BulletSystem::SpawnBullet(
 	Bullet enemyBullet,
 	iw::vector3 position,
-	iw::quaternion rot)
+	iw::quaternion rot,
+	float dist)
 {
 	iw::Entity bullet = Space->Instantiate(bulletPrefab);
 
@@ -263,9 +249,10 @@ iw::Transform* BulletSystem::SpawnBullet(
 	b->Type    = enemyBullet.Type;
 	b->Package = enemyBullet.Package;
 	b->Speed   = enemyBullet.Speed;
+	b->Package = enemyBullet.Package;
 
 	t->Rotation = rot;
-	t->Position = position + t->Right() * sqrt(2);
+	t->Position = position + t->Right() * sqrt(dist);
 
 	r->SetCol(s);
 	r->SetTrans(t);
@@ -274,4 +261,26 @@ iw::Transform* BulletSystem::SpawnBullet(
 	Physics->AddRigidbody(r);
 
 	return t;
+}
+
+void BulletSystem::SpawnBulletsFromPackage(
+	iw::Transform* transform,
+	BulletPackage* package)
+{
+	for (float dir = 0.0f; dir < iw::Pi2; dir += iw::Pi2 / 5) {
+		Bullet bullet;
+		bullet.Type  = package->InnerType;
+		bullet.Speed = package->InnerSpeed;
+
+		iw::Transform* t = SpawnBullet(
+			bullet,
+			transform->Position,
+			iw::quaternion::from_euler_angles(0, dir, 0).inverted(),
+			0.25f
+		);
+
+		if (transform->Parent()) {
+			t->SetParent(transform->Parent());
+		}
+	}
 }

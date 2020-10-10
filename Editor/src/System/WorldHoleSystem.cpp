@@ -160,11 +160,13 @@ bool WorldHoleSystem::On(
 			}
 
 			else if (event.LevelName == "levels/canyon/canyon07.json") {
-				SpawnHole(iw::vector3(-4, 0, 5), 3, false, "levels/canyon/cave06.json");
-				SpawnHole(iw::vector3(-2, 0, 5), 3, false, "levels/canyon/cave06.json");
+				SpawnHole(iw::vector3(-5, 0, 9), 3, false, "levels/canyon/cave06.json");
+				SpawnHole(iw::vector3(-3, 0, 5), 3, false, "levels/canyon/cave06.json");
+				SpawnHole(iw::vector3(-4, 0, 6), 3, false, "levels/canyon/cave06.json");
 				SpawnHole(iw::vector3( 0, 0, 5), 3, false, "levels/canyon/cave06.json");
-				SpawnHole(iw::vector3( 2, 0, 5), 3, false, "levels/canyon/cave06.json");
-				SpawnHole(iw::vector3( 4, 0, 5), 3, false, "levels/canyon/cave06.json");
+				SpawnHole(iw::vector3( 3, 0, 5), 3, false, "levels/canyon/cave06.json");
+				SpawnHole(iw::vector3( 4, 0, 6), 3, false, "levels/canyon/cave06.json");
+				SpawnHole(iw::vector3( 5, 0, 9), 3, false, "levels/canyon/cave06.json");
 			}
 
 			else if (event.LevelName == "levels/canyon/cave06.json") {

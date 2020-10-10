@@ -131,7 +131,8 @@ namespace Editor {
 
 		template<
 			typename _t>
-		void PrintCell(_t t)
+		void PrintCell(
+			_t t)
 		{
 			std::stringstream ss;
 			ss << t;
@@ -142,7 +143,8 @@ namespace Editor {
 
 		template<
 			typename _t>
-		void PrintHeader(_t t)
+		void PrintHeader(
+			_t t)
 		{
 			std::stringstream ss;
 			ss << t;

@@ -26,7 +26,7 @@
         "State": 1,
         "NextLevel": {
           "size": 27,
-          "string": "levels/canyon/canyon01.json"
+          "string": "levels/canyon/canyon02.json"
         }
       }
     ]
