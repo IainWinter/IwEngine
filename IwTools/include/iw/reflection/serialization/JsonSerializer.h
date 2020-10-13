@@ -227,6 +227,7 @@ namespace Reflect {
 
 					std::string str(number->number);
 					switch (type->type) {
+						case IntegralType::BOOL:               *(bool*)              value = str[0] == '1';         break;
 						case IntegralType::CHAR:               *(char*)              value = str[0];                break;
 						case IntegralType::SHORT:              *(short*)             value = std::stol(str);        break;
 						case IntegralType::INT:                *(int*)               value = std::stoi(str);        break;

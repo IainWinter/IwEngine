@@ -27,6 +27,16 @@ int GameSaveStateSystem::Initialize() {
 	return 0;
 }
 
+bool GameSaveStateSystem::On(
+	iw::ActionEvent& e)
+{
+	if (e.Action == iw::val(Actions::GAME_SAVE)) {
+		iw::JsonSerializer(m_file, true).Write(*m_state);
+	}
+
+	return false;
+}
+
 GameSaveState* GameSaveStateSystem::GetState() {
 	return m_state;
 }

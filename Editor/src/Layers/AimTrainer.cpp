@@ -4,10 +4,8 @@
 #include "Systems/GameCameraController.h"
 #include "Systems/CarControllerSystem.h"
 #include "iw/engine/Systems/LerpCameraControllerSystem.h"
-#include "iw/engine/Systems/Render/MeshRenderSystem.h"
-#include "iw/engine/Systems/Render/ModelRenderSystem.h"
-#include "iw/engine/Systems/Render/MeshShadowRenderSystem.h"
-#include "iw/engine/Systems/Render/ModelShadowRenderSystem.h"
+#include "iw/engine/Systems/Render/RenderSystem.h"
+#include "iw/engine/Systems/Render/ShadowRenderSystem.h"
 #include "iw/engine/Systems/PhysicsSystem.h"
 
 #include "iw/engine/Time.h"
@@ -91,11 +89,9 @@ int AimTrainerLayer::Initialize() {
 	                    player.Set<iw::Mesh>(box);
 	iw::Transform* tt = player.Set<iw::Transform>(iw::vector3(0, 5, -5));
 
-	PushSystem<iw::MeshShadowRenderSystem>(MainScene);
-	PushSystem<iw::ModelShadowRenderSystem>(MainScene);
+	PushSystem<iw::ShadowRenderSystem>(MainScene);
 	//PushSystem<iw::ParticleShadowRenderSystem>(MainScene);
-	PushSystem<iw::MeshRenderSystem>(MainScene);
-	PushSystem<iw::ModelRenderSystem>(MainScene);
+	PushSystem<iw::RenderSystem>(MainScene);
 	//PushSystem<iw::ParticleRenderSystem>(MainScene);
 	//PushSystem<iw::LerpCameraControllerSystem>(player);
 	//PushSystem<iw::PhysicsSystem>();

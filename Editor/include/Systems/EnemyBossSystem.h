@@ -2,6 +2,7 @@
 
 #include "iw/engine/System.h"
 #include "Systems/EnemySystem.h"
+#include "Components/GameSaveState.h"
 #include <vector>
 
 class EnemyBossSystem
@@ -13,6 +14,8 @@ private:
 
 	iw::Entity& m_player;
 	const EnemySystem* m_enemySystem;
+
+	const GameSaveState* m_saveState;
 
 	std::vector<func_Action> m_actions;
 	std::vector<func_Condition> m_conditions;
@@ -32,10 +35,13 @@ private:
 public:
 	EnemyBossSystem(
 		iw::Entity& player,
-		const EnemySystem* enemySystem);
+		const EnemySystem* enemySystem,
+		const GameSaveState* saveState);
 
 	int Initialize() override;
 	void Update() override;
+
+	bool On(iw::ActionEvent& e) override;
 
 private:
 	void action_forest_spin       (iw::Transform* transform, Enemy* enemy, EnemyBoss* boss);

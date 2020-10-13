@@ -16,5 +16,7 @@ public:
 
 	int Initialize() override;
 
+	bool On(iw::ActionEvent& e) override;
+
 	GameSaveState* GetState();
 };

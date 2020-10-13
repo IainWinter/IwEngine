@@ -20,20 +20,20 @@ struct REFLECT Enemy {
 	REFLECT float ChargeTime;
 	REFLECT float Rotation;
 
-	float Timer;
-	bool  HasShot;
+	float Timer = 0;
+	bool  HasShot = false;
 
 	// only for boss
-	float Timer2;
+	float Timer2 = 0;
 
 	// only for circle might get removed
-	float RotSpeed;
+	float RotSpeed = 0;
 
 	// only really for bosses
-	int Health;
-	int ScoreMultiple;
+	int Health = 0;
+	int ScoreMultiple = 0;
 
-	bool JustHit;
+	bool JustHit = 0;
 };
 
 struct Action {

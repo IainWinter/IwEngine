@@ -107,12 +107,23 @@ namespace Physics {
 	}
 
 
-	IWPHYSICS_API
 	bool CollisionSpace::TestCollider(
 		const Collider& collider) const
 	{
 		for (CollisionObject* object : m_objects) {
 			if (object->Col()->TestCollision(&object->Trans(), &collider, &Transform()).HasCollision) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	bool CollisionSpace::TestObject(
+		const CollisionObject* _object) const
+	{
+		for (const CollisionObject* object : m_objects) {
+			if (object->Col()->TestCollision(&object->Trans(), _object->Col(), &_object->Trans()).HasCollision) {
 				return true;
 			}
 		}

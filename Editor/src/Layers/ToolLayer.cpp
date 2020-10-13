@@ -12,11 +12,9 @@
 #include "Systems/SpaceInspectorSystem.h"
 
 #include "iw/engine/Systems/ParticleUpdateSystem.h"
-#include "iw/engine/Systems/Render/MeshRenderSystem.h"
-#include "iw/engine/Systems/Render/ModelRenderSystem.h"
+#include "iw/engine/Systems/Render/RenderSystem.h"
 #include "iw/engine/Systems/Render/ParticleRenderSystem.h"
-#include "iw/engine/Systems/Render/MeshShadowRenderSystem.h"
-#include "iw/engine/Systems/Render/ModelShadowRenderSystem.h"
+#include "iw/engine/Systems/Render/ShadowRenderSystem.h"
 #include "iw/engine/Systems/Render/ParticleShadowRenderSystem.h"
 #include "iw/engine/Systems/EntityCleanupSystem.h"
 

@@ -48,7 +48,7 @@ LevelSystem::LevelSystem(
 	, playerEntity(player)
 	, scene(scene)
 { 
-	currentLevelName = "levels/canyon/canyon08.json";
+	currentLevelName = "levels/canyon/canyon06.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 63);
 	closedColor = iw::Color::From255(201, 66, 66, 63);
@@ -87,7 +87,13 @@ void LevelSystem::Update(
 
 		if (door->ColorTimer > 0) {
 			door->ColorTimer -= iw::Time::DeltaTimeScaled();
-			model->GetMesh(0).Material()->Set("baseColor", iw::lerp<iw::vector4>(closedColor, openColor, 4 * (0.25f - door->ColorTimer)));
+
+			if (door->State == LevelDoorState::OPEN) {
+				model->GetMesh(0).Material()->Set("baseColor", iw::lerp<iw::vector4>(closedColor, openColor, 4 * (0.25f - door->ColorTimer)));
+			}
+			else {
+				model->GetMesh(0).Material()->Set("baseColor", iw::lerp<iw::vector4>(openColor, closedColor, 4 * (0.25f - door->ColorTimer)));
+			}
 		}
 	}
 
@@ -97,15 +103,15 @@ void LevelSystem::Update(
 		iw::Transform* current = levelEntity    .Find<iw::Transform>();
 		iw::Transform* next    = nextLevelEntity.Find<iw::Transform>();
 
-		LevelDoor* currentDoor = levelDoor.Find<LevelDoor>();
 		iw::vector3 target = currentLevel.LevelPosition;
 
-		if (   levelDoor != iw::EntityHandle::Empty
-			&& currentDoor && currentDoor->GoBack)
-		{
-			target = -lastLevelPosition;
+		if (levelDoor != iw::EntityHandle::Empty) {
+			LevelDoor* currentDoor = levelDoor.Find<LevelDoor>();
+			if (currentDoor && currentDoor->GoBack) {
+				target = -lastLevelPosition;
+			}
 		}
-
+		
 		if (iw::Time::DeltaTimeScaled() > 0.2) return; // loading cause
 
 		float time = 0.75f * (iw::Time::TotalTime() - startTime);
@@ -173,7 +179,7 @@ bool LevelSystem::On(
 				levelDoor = nextLevelDoor;
 			}
 
-			Bus->push<StartLevelEvent>(currentLevelName, currentLevel.CameraFollow, currentLevel.InPosition);
+			Bus->push<StartLevelEvent>(currentLevelName, currentLevel.CameraFollow, currentLevel.InPosition, levelEntity.Find<iw::Transform>());
 
 			sequence.Restart();
 
@@ -184,18 +190,22 @@ bool LevelSystem::On(
 		case iw::val(Actions::UNLOCK_LEVEL_DOOR): {
 			if (!levelDoor) break;
 
+			UnlockLevelDoorEvent& event = e.as<UnlockLevelDoorEvent>();
+
 			LevelDoor* door = levelDoor.Find<LevelDoor>();
 			if (door == nullptr) {
 				door = nextLevelDoor.Find<LevelDoor>();
 			}
 
-			door->State = LevelDoorState::OPEN;
+			door->State = event.State;
 			door->ColorTimer = 0.25f;
 
 			break;
 		}
 		case iw::val(Actions::LOAD_NEXT_LEVEL): {
 			LoadNextLevelEvent& event = e.as<LoadNextLevelEvent>();
+
+			Bus->send<GameSave>();
 
 			iw::vector3 lvpos = -currentLevel.LevelPosition;
 
@@ -250,7 +260,7 @@ bool LevelSystem::On(
 				current->Position = 0;
 			}
 
-			Bus->push<StartLevelEvent>(currentLevelName, currentLevel.CameraFollow, currentLevel.InPosition);
+			Bus->push<StartLevelEvent>(currentLevelName, currentLevel.CameraFollow, currentLevel.InPosition, levelEntity.Find<iw::Transform>());
 
 			sequence.Restart();
 

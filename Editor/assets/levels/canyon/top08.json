@@ -19,26 +19,12 @@
     "items": []
   },
   "Doors": {
-    "size": 1,
-    "items": [
-      {
-        "GoBack": false,
-        "State": 1,
-        "NextLevel": {
-          "size": 27,
-          "string": "levels/canyon/canyon02.json"
-        }
-      }
-    ]
+    "size": 0,
+    "items": []
   },
   "DoorPositions": {
-    "size": 1,
-    "items": [
-      {
-        "x": 14.000000,
-        "y":  13.000000
-      }
-    ]
+    "size": 0,
+    "items": []
   },
   "Spheres": {
     "size": 0,

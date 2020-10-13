@@ -9,6 +9,7 @@
 #include "Components/Enemy.h"
 #include "Components/Bullet.h"
 #include "iw/entity/Entity.h"
+#include "Components/LevelDoor.h"
 
 enum class Actions
 	: int
@@ -19,7 +20,8 @@ enum class Actions
 	SPAWN_ENEMY_DEATH, SPAWN_ENEMY, SPAWN_BULLET, SPAWN_ITEM, SPAWN_NOTE, SPAWN_CONSUMABLE,
 	GIVE_SCORE,
 	SET_CAMERA_TARGET,
-	CHARGE_KILL_ACTIVE, LONG_DASH_ACTIVE
+	CHARGE_KILL_ACTIVE, LONG_DASH_ACTIVE,
+	GAME_SAVE,
 };
 
 struct DevConsoleEvent
@@ -48,6 +50,14 @@ struct GameStateEvent
 		GameState state = GameState::NO_ACTION)
 		: iw::SingleEvent(iw::val(Actions::GAME_STATE))
 		, State(state)
+	{}
+};
+
+struct GameSave
+	: iw::SingleEvent
+{
+	GameSave()
+		: iw::SingleEvent(iw::val(Actions::GAME_SAVE))
 	{}
 };
 
@@ -100,15 +110,18 @@ struct StartLevelEvent
 	std::string LevelName;
 	bool CameraFollow;
 	iw::vector3 PlayerPosition;
+	iw::Transform* Level;
 
 	StartLevelEvent(
 		std::string levelName,
 		bool cameraFollow,
-		iw::vector3 playerPosition)
+		iw::vector3 playerPosition,
+		iw::Transform* level)
 		: iw::SingleEvent(iw::val(Actions::START_LEVEL))
 		, LevelName(levelName)
 		, CameraFollow(cameraFollow)
 		, PlayerPosition(playerPosition)
+		, Level(level)
 	{}
 };
 
@@ -116,8 +129,12 @@ struct StartLevelEvent
 struct UnlockLevelDoorEvent
 	: iw::SingleEvent
 {
-	UnlockLevelDoorEvent()
+	LevelDoorState State;
+
+	UnlockLevelDoorEvent(
+		bool state = true)
 		: iw::SingleEvent(iw::val(Actions::UNLOCK_LEVEL_DOOR))
+		, State(state ? LevelDoorState::OPEN : LevelDoorState::LOCKED)
 	{}
 };
 

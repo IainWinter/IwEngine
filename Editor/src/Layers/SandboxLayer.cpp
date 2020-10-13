@@ -18,11 +18,9 @@
 #include "iw/engine/Systems/PhysicsSystem.h"
 #include "iw/engine/Systems/ParticleUpdateSystem.h"
 #include "iw/engine/Systems/EntityCleanupSystem.h"
-#include "iw/engine/Systems/Render/MeshRenderSystem.h"
-#include "iw/engine/Systems/Render/MeshShadowRenderSystem.h"
-#include "iw/engine/Systems/Render/ModelRenderSystem.h"
+#include "iw/engine/Systems/Render/RenderSystem.h"
+#include "iw/engine/Systems/Render/ShadowRenderSystem.h"
 #include "iw/engine/Systems/Render/ModelVoxelRenderSystem.h"
-#include "iw/engine/Systems/Render/ModelShadowRenderSystem.h"
 #include "iw/engine/Systems/Render/ParticleRenderSystem.h"
 #include "iw/engine/Systems/Render/ParticleShadowRenderSystem.h"
 #include "iw/engine/Systems/Render/UiRenderSystem.h"
@@ -305,7 +303,7 @@ namespace iw {
 		playerSystem    = PushSystem<PlayerSystem>();
 		bulletSystem    = PushSystem<BulletSystem>(playerSystem->GetPlayer());
 		enemySystem     = PushSystem<EnemySystem>(playerSystem->GetPlayer(), bulletSystem->GetBulletPrefab());
-		enemyBossSystem = PushSystem<EnemyBossSystem>(playerSystem->GetPlayer(), enemySystem);
+		enemyBossSystem = PushSystem<EnemyBossSystem>(playerSystem->GetPlayer(), enemySystem, saveSystem->GetState());
 
 		LevelSystem* levelSystem = PushSystem<LevelSystem>(playerSystem->GetPlayer(), MainScene);
 		                           PushSystem<WorldHoleSystem>(levelSystem->GetLevel());
@@ -323,11 +321,9 @@ namespace iw {
 
 		PushSystem<iw::ParticleUpdateSystem>();
 
-		PushSystem<iw::    MeshShadowRenderSystem>(MainScene);
-		PushSystem<iw::   ModelShadowRenderSystem>(MainScene);
+		PushSystem<iw::        ShadowRenderSystem>(MainScene);
 		PushSystem<iw::ParticleShadowRenderSystem>(MainScene);
-		PushSystem<iw::          MeshRenderSystem>(MainScene);
-		PushSystem<iw::         ModelRenderSystem>(MainScene);
+		PushSystem<iw::              RenderSystem>(MainScene);
 		PushSystem<iw::      ParticleRenderSystem>(MainScene);
 
 		PushSystem<iw::UiRenderSystem>(m_textCam);

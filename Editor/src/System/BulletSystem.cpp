@@ -24,10 +24,13 @@ BulletSystem::BulletSystem(
 
 void BulletSystem::collide(iw::Manifold& man, float dt) {
 	iw::Entity bulletEntity, otherEntity;
-	bool noent = GetEntitiesFromManifold<Bullet>(man, bulletEntity, otherEntity);
-
-	if (noent) {
+	if (GetEntitiesFromManifold<Bullet>(man, bulletEntity, otherEntity)) {
 		return;
+	}
+
+	iw::CollisionObject* o = otherEntity.Find<iw::CollisionObject>();
+	if (!o) {
+		o = otherEntity.Find<iw::Rigidbody>();
 	}
 
 	Bullet* bullet = bulletEntity.Find<Bullet>();
@@ -35,7 +38,8 @@ void BulletSystem::collide(iw::Manifold& man, float dt) {
 	if (   otherEntity.Has<Bullet>()
 		|| otherEntity.Has<Enemy>()
 		|| otherEntity.Has<DontDeleteBullets>()
-		|| otherEntity.Has<LevelDoor>())
+		|| otherEntity.Has<LevelDoor>()
+		|| (!otherEntity.Has<EnemyDeathCircle>() && o->IsTrigger()))
 	{
 		return;
 	}
@@ -118,13 +122,6 @@ void BulletSystem::FixedUpdate() {
 	{
 		if (bullet->Timer == 0.0f) {
 			bullet->InitialVelocity = rigidbody->Velocity();
-
-			iw::Mesh& mesh = Space->FindComponent<iw::Model>(entity)->GetMesh(0);
-
-			switch (bullet->Type) {
-				case ORBIT: mesh.SetMaterial(orbitMat); break;
-				case SEEK:  mesh.SetMaterial(seekMat);  break;
-			}
 		}
 
 		switch (bullet->Type) {
@@ -216,7 +213,11 @@ bool BulletSystem::On(
 		case iw::val(Actions::SPAWN_BULLET): {
 			SpawnBulletEvent& event = e.as<SpawnBulletEvent>();
 			iw::Transform* trans = SpawnBullet(event.Bullet, event.Position, event.Rotation);
-			event.Level->AddChild(trans);
+			
+			if (trans) {
+				event.Level->AddChild(trans);
+			}
+
 			break;
 		}
 	}
@@ -258,7 +259,19 @@ iw::Transform* BulletSystem::SpawnBullet(
 	r->SetTrans(t);
 	r->SetVelocity(iw::vector3::unit_x * rot * b->Speed);
 
+	//if (Physics->TestObject(r)) {
+	//	bullet.Destroy();
+	//	return nullptr;
+	//}
+
 	Physics->AddRigidbody(r);
+
+	iw::Mesh& mesh = bullet.Find<iw::Model>()->GetMesh(0);
+
+	switch (b->Type) {
+		case ORBIT: mesh.SetMaterial(orbitMat); break;
+		case SEEK:  mesh.SetMaterial(seekMat);  break;
+	}
 
 	return t;
 }
@@ -279,7 +292,7 @@ void BulletSystem::SpawnBulletsFromPackage(
 			0.25f
 		);
 
-		if (transform->Parent()) {
+		if (transform && transform->Parent()) {
 			t->SetParent(transform->Parent());
 		}
 	}

@@ -19,8 +19,8 @@
 
 #include "iw/engine/Systems/EditorCameraControllerSystem.h"
 
-#include "iw/engine/Systems/Render/MeshRenderSystem.h"
-#include "iw/engine/Systems/Render/MeshShadowRenderSystem.h"
+#include "iw/engine/Systems/Render/RenderSystem.h"
+#include "iw/engine/Systems/Render/ShadowRenderSystem.h"
 #include "Systems/SpaceInspectorSystem.h"
 
 namespace iw {
@@ -236,8 +236,8 @@ namespace iw {
 		
 		PushSystem<PhysicsSystem>();
 
-		PushSystem<iw::MeshShadowRenderSystem>(MainScene);
-		PushSystem<iw::MeshRenderSystem>(MainScene);
+		PushSystem<iw::ShadowRenderSystem>(MainScene);
+		PushSystem<iw::RenderSystem>(MainScene);
 
 		PushSystem<iw::SpaceInspectorSystem>();
 

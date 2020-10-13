@@ -23,10 +23,10 @@ public:
 
 	bool On(iw::ActionEvent& e) override;
 private:
-	void SpawnLadder(
+	iw::Transform* SpawnLadder(
 		iw::vector3 position,
 		iw::quaternion rotation,
-		bool down,
+		bool* down_saveState,
 		bool above,
 		std::string level);
 

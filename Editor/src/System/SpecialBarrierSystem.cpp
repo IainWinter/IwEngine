@@ -71,18 +71,22 @@ bool SpecialBarrierSystem::On(
 			std::vector<iw::CapsuleCollider> colliders;
 
 			if (name == "levels/canyon/cave04.json") {
-				colliders.push_back({ iw::vector3(0.6, 0, -0.2), iw::vector3::unit_x, 29.8f, 2.2f });
+				colliders.push_back({ iw::vector3(0.6f, 0, -0.2f), iw::vector3::unit_x, 29.8f, 2.2f });
+			}
+
+			else if (name == "levels/canyon/cave06.json") {
+				colliders.push_back({ iw::vector3(6.4f, 0, -4.4f), iw::vector3::unit_x, 60, 2 });
 			}
 
 			else if (name == "levels/canyon/cave07.json") {
-				colliders.push_back({ iw::vector3( 2.2, 0, -1.6), iw::vector3::unit_x,  6.7, 0.3 });
-				colliders.push_back({ iw::vector3( 2.7, 0,  1.6), iw::vector3::unit_x,  7.4, 0.3 });
-				colliders.push_back({ iw::vector3( 0.5, 0,  14 ), iw::vector3::unit_z, 23.8, 9   });
-				colliders.push_back({ iw::vector3(11.5, 0,  5.1), iw::vector3::unit_x, 11.7, 0.3 });
-				colliders.push_back({ iw::vector3( 6.1, 0,  3.5), iw::vector3::unit_z,  4,   0.3 });
-				colliders.push_back({ iw::vector3( 5.3, 0, -6.6), iw::vector3::unit_z, 10.6, 0.3 });
-				colliders.push_back({ iw::vector3(-1,   0, -6.6), iw::vector3::unit_z, 10.6, 0.3 });
-			}
+				colliders.push_back({ iw::vector3( 2.2f, 0, -1.6f), iw::vector3::unit_x,  6.7f, 0.3f });
+				colliders.push_back({ iw::vector3( 2.7f, 0,  1.6f), iw::vector3::unit_x,  7.4f, 0.3f });
+				colliders.push_back({ iw::vector3( 0.5f, 0,  14 ), iw::vector3::unit_z, 23.8f, 9   });
+				colliders.push_back({ iw::vector3(11.5f, 0,  5.1f), iw::vector3::unit_x, 11.7f, 0.3f });
+				colliders.push_back({ iw::vector3( 6.1f, 0,  3.5f), iw::vector3::unit_z,  4,   0.3f });
+				colliders.push_back({ iw::vector3( 5.3f, 0, -6.6f), iw::vector3::unit_z, 10.6f, 0.3f });
+				colliders.push_back({ iw::vector3(-1,   0, -6.6f), iw::vector3::unit_z, 10.6f, 0.3f });
+			}		
 
 			for (iw::CapsuleCollider& collider : colliders) {
 				iw::Transform* transform = SpawnSpecialBarrier(collider);

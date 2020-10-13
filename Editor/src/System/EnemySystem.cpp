@@ -176,6 +176,9 @@ bool EnemySystem::On(
 			SpawnEnemyEvent& event = e.as<SpawnEnemyEvent>();
 			iw::Transform* trans = SpawnEnemy(event.Enemy, event.Position, event.Velocity);
 			event.Level->AddChild(trans);
+
+			m_levelResetTimer = 0;
+
 			break;
 		}
 	}
@@ -188,9 +191,6 @@ iw::Transform* EnemySystem::SpawnEnemy(
 	iw::vector3 position,
 	iw::vector3 velocity)
 {
-	// Example using an ECS that I'll cover in another video
-	// 'Physics' is the DynamicsWorld
-
 	iw::Entity ent = Space->CreateEntity<iw::Transform, iw::Model, iw::SphereCollider, Enemy>();
 
 	switch (prefab.Type) {

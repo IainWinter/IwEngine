@@ -22,10 +22,12 @@
 
 EnemyBossSystem::EnemyBossSystem(
 	iw::Entity& player,
-	const EnemySystem* enemySystem)
+	const EnemySystem* enemySystem,
+	const GameSaveState* saveState)
 	: iw::SystemBase("Enemy Boss")
 	, m_player(player)
 	, m_enemySystem(enemySystem)
+	, m_saveState(saveState)
 	, m_musicInstance(-1)
 {}
 
@@ -140,6 +142,71 @@ void EnemyBossSystem::Update() {
 
 		object->SetTrans(transform);
 	});
+}
+
+bool EnemyBossSystem::On(
+	iw::ActionEvent& e)
+{
+	switch (e.Action) {
+		case iw::val(Actions::START_LEVEL): {
+			StartLevelEvent& event = e.as<StartLevelEvent>();
+			if (   event.LevelName == "levels/canyon/canyon06.json"
+				&& !m_saveState->Canyon03BossKilled)
+			{
+				iw::Entity entity = Space->CreateEntity<iw::Transform, iw::CollisionObject, iw::SphereCollider>();
+
+				iw::Transform*       t = entity.Set<iw::Transform>(iw::vector3(13, 0, -4));
+				iw::SphereCollider*  c = entity.Set<iw::SphereCollider>(0, 4);
+				iw::CollisionObject* o = entity.Set<iw::CollisionObject>();
+
+				t->SetParent(event.Level);
+
+				o->SetTrans(t);
+				o->SetCol(c);
+
+				o->SetIsTrigger(true);
+				o->SetOnCollision([&](auto man, auto dt) {
+					iw::Entity p, m;
+					if (GetEntitiesFromManifold<Player>(man, p, m)) {
+						return;
+					}
+
+					Bullet bullet;
+					bullet.Type = BulletType::LINE;
+					bullet.Speed = 5;
+					bullet.Package = PackageType::NONE;
+
+					Enemy boss; // need prefabs abnle to be saves and levels too!! see canyon03 for these values
+					boss.Type = EnemyType::MINI_BOSS_CANYON;
+					boss.Bullet = bullet;
+					boss.Speed = 0.174533f;
+					boss.FireTime = 4;
+					boss.ChargeTime = 2;
+					boss.Rotation = 0;
+				
+					Bus->push<SpawnEnemyEvent>(boss, iw::vector3(12, 9, 6), 0, m.Find<iw::Transform>()->Parent());
+					Bus->push<UnlockLevelDoorEvent>(false);
+
+					m.Find<iw::Transform>()->SetParent(nullptr);
+					m.Destroy();
+				});
+
+				Physics->AddCollisionObject(o);
+			}
+			break;
+		}
+		case iw::val(Actions::RESET_LEVEL):
+		case iw::val(Actions::GOTO_NEXT_LEVEL): { // not sure if next level 
+			if (m_musicInstance != -1) {
+				Audio->AsStudio()->StopInstance(m_musicInstance);
+				Audio->AsStudio()->RemoveInstance(m_musicInstance);
+				m_musicInstance = -1;
+			}
+			break;
+		}
+	}
+
+	return false;
 }
 
 void EnemyBossSystem::action_forest_spin(
@@ -329,8 +396,8 @@ void EnemyBossSystem::action_any_move_random(
 
 		iw::vector3 pos;
 		do {
-			pos = iw::vector3(side * 15 /*+ iw::randf() * 4*/, 1, iw::randf() * 12);
-		} while (Physics->TestCollider(iw::SphereCollider(pos, 1)));
+			pos = iw::vector3(side * 12.5f + iw::randf() * 5, 1, iw::randf() * 12);
+		} while (Physics->TestCollider(iw::SphereCollider(pos, 2)));
 		boss->Target = pos;
 	}
 

@@ -151,22 +151,22 @@ namespace Audio {
 			return;
 		}
 #endif
+
 		m_instances.at(index)->release();
-		m_instances.erase(m_instances.begin() + index);
+
+		m_instances.at(index) = nullptr; // remove only if at the end to keep instances correct
+		while (m_instances.back() == nullptr) {
+			m_instances.pop_back();
+		}
+
+		//m_instances.erase(m_instances.begin() + index);
 	}
 
 	void AudioSpaceStudio::RemoveInstance(
 		FMOD::Studio::EventInstance* instance)
 	{
-		auto itr = std::find(m_instances.begin(), m_instances.end(), instance);
-#ifdef IW_DEBUG
-		if (itr == m_instances.end()) {
-			LOG_WARNING << "Cannot remove instance " << instance << "; cannot find instance!";
-			return;
-		}
-#endif
-		instance->release();
-		m_instances.erase(itr);
+		auto itr = std::find(m_instances.begin(), m_instances.end(), instance); // isnt this redundant cus they ptrs???
+		RemoveInstance(std::distance(m_instances.begin(), itr));
 	}
 
 	FMOD_RESULT __dontlookatme__RemoveInstanceFromList(

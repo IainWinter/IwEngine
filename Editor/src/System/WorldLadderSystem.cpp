@@ -35,44 +35,43 @@ int WorldLadderSystem::Initialize() {
 }
 
 void WorldLadderSystem::Update() {
-	//auto ladders = Space->Query<iw::Transform, iw::Model, WorldLadder>();
+	auto ladders = Space->Query<iw::Transform, iw::Model, WorldLadder>();
 
-	//ladders.Each([&](
-	//	auto entity,
-	//	auto transform,
-	//	auto model,
-	//	auto hole)
-	//{
-	//	if(hole->Touched) {
-	//		hole->Timer += iw::Time::DeltaTime();
+	ladders.Each([&](
+		auto entity,
+		auto transform,
+		auto model,
+		auto ladder)
+	{
+		if(ladder->Transition) {
+			if (ladder->Above) {
+				iw::vector3& a = model->GetTransform(0).Position;
+				iw::vector3& b = model->GetTransform(1).Position;
+				iw::vector3& c = model->GetTransform(2).Position;
+				iw::vector3& d = model->GetTransform(3).Position;
+				
+				float delta = iw::DeltaTime() * ladder->Speed;
 
-	//		if (hole->Timer > hole->Time) {
-	//			hole->Timer = hole->Time;
-	//		}
-	//	}
+				a.y -= delta;
 
-	//	auto material = model->GetMesh(0).Material();
-	//	
-	//	float color = hole->Time == 0.0f ? 0.0f : (hole->Time - hole->Timer) / hole->Time * 0.5f;
+				if (a.y < -5) {
+					b.y -= delta;
+				}
 
-	//	material->Set("baseColor", iw::Color(color, color, color, 1.0f));
+				if (b.y < -5) {
+					c.y -= delta;
+				}
 
-	//	//if (hole->BulletTime > 0) {
+				if (c.y < -5) {
+					ladder->Transition = false;
+					ladder->Open = !ladder->Open;
+					*ladder->SaveState = true;
+				}
 
-	//	//	hole->BulletTimer += iw::Time::DeltaTime();
-
-	//	//	if (hole->BulletTimer > hole->BulletTime) {
-
-	//	//		hole->BulletTimer = 0.0f;
-	//	//		Bus->push<SpawnBulletEvent>(
-	//	//			m_seekBullet,
-	//	//			transform->Position,
-	//	//			iw::quaternion::identity,
-	//	//			transform->Parent()
-	//	//		);
-	//	//	}
-	//	//}
-	//});
+				ladder->Speed += iw::DeltaTime() * 9.81;
+			}
+		}
+	});
 }
 
 bool WorldLadderSystem::On(
@@ -83,15 +82,29 @@ bool WorldLadderSystem::On(
 			StartLevelEvent& event = e.as<StartLevelEvent>();
 
 			if (event.LevelName == "levels/canyon/cave03.a.json") {
-				SpawnLadder(iw::vector3(15, 0, 4), iw::quaternion::from_euler_angles(0, -0.4f, 0), saveState->Cave03LadderDown, false, "levels/canyon/canyon04.a.json");
+				SpawnLadder(iw::vector3(15, 0, 4), iw::quaternion::from_euler_angles(0, -0.4f, 0), &saveState->Cave03LadderDown, false, "levels/canyon/canyon04.a.json");
 			}
 
 			if (event.LevelName == "levels/canyon/canyon04.a.json") {
-				SpawnLadder(iw::vector3(15, 0, -4), iw::quaternion::from_euler_angles(0, -0.4f, 0), saveState->Cave03LadderDown, true, "levels/canyon/cave03.a.json");
+				SpawnLadder(iw::vector3(-2, 0, -4), iw::quaternion::from_euler_angles(0, -0.4f, 0), &saveState->Cave03LadderDown, true, "levels/canyon/cave03.a.json");
 			}
 
 			else if (event.LevelName == "levels/canyon/cave06.json") {
-				SpawnLadder(iw::vector3(3.5f, 0, -14), iw::quaternion::from_euler_angles(0, 0.7f, 0), saveState->Cave06LadderDown, false, "levels/canyon/canyon07.a.json");
+				SpawnLadder(iw::vector3(3.5f, 0, -14), iw::quaternion::from_euler_angles(0, 0.7f, 0), &saveState->Cave06LadderDown, false, "levels/canyon/canyon07.a.json");
+			}
+
+			else if (event.LevelName == "levels/canyon/canyon07.a.json") {
+				SpawnLadder(iw::vector3(2, 0, -5), iw::quaternion::from_euler_angles(0, 0.7f, 0), &saveState->Cave06LadderDown, true, "levels/canyon/cave06.json");
+			}
+
+			else if (event.LevelName == "levels/canyon/top08.json") {
+				iw::Transform* t = SpawnLadder(iw::vector3(15, -5, 14), iw::quaternion::from_euler_angles(0.3f, -0.2f, 0), &saveState->Top08LadderDown, true, "levels/canyon/canyon02.json");
+				Space->FindEntity(t).Find<iw::SphereCollider>()->Center = iw::vector3(0, 5.8f, -3.5f); // position collider higher up
+			}
+
+			else if (event.LevelName == "levels/canyon/canyon02.json") {
+				iw::Transform* t = SpawnLadder(iw::vector3(-1.3f, 0, -9.8f), iw::quaternion::from_euler_angles(0.3f, -0.2f, 0), nullptr, false, "levels/canyon/top08.json");
+				Space->FindEntity(t).Find<iw::Model>()->RemoveMesh(3);
 			}
 
 			break;
@@ -101,10 +114,10 @@ bool WorldLadderSystem::On(
 	return false;
 }
 
-void WorldLadderSystem::SpawnLadder(
+iw::Transform* WorldLadderSystem::SpawnLadder(
 	iw::vector3 position,
 	iw::quaternion rotation,
-	bool down,
+	bool* down_saveState,
 	bool above,
 	std::string level)
 {
@@ -120,7 +133,9 @@ void WorldLadderSystem::SpawnLadder(
 	t->Rotation = rotation;
 
 	l->Level = level;
-	l->Open = down;
+	l->Open = down_saveState ? *down_saveState : false;
+	l->Above = above;
+	l->SaveState = down_saveState;
 
 	t->SetParent(currentLevel.Find<iw::Transform>());
 
@@ -134,18 +149,44 @@ void WorldLadderSystem::SpawnLadder(
 			return;
 		}
 
-		Bus->send<LoadNextLevelEvent>(ladder.Find<WorldLadder>()->Level);
+		WorldLadder* wLadder = ladder.Find<WorldLadder>();
+
+		if (wLadder->Open) {
+			Bus->send<LoadNextLevelEvent>(wLadder->Level);
+		}
+
+		else {
+			wLadder->Transition = true;
+		}
 	});
 
 	Physics->AddCollisionObject(o);
 
 	if (above) {
+		if (l->Open) {
+			m->GetTransform(0).Position.y = -10.0f;
+			m->GetTransform(1).Position.y = -5.0f;
+			m->GetTransform(2).Position.y = 0.0f;
+			m->GetTransform(3).Position.y = 5.0f;
+		}
 
+		else {
+			m->GetTransform(0).Position.y = 3.5f;
+			m->GetTransform(1).Position.y = 4.0f;
+			m->GetTransform(2).Position.y = 4.5f;
+			m->GetTransform(3).Position.y = 5.0f;
+
+			m->GetTransform(1).Position.z = -0.1f;
+			m->GetTransform(2).Position.z = -0.2f;
+			m->GetTransform(3).Position.z = -0.3f;
+		}
 	}
 
 	else {
-		if (down) {
-			//m->GetTransform(0).Position.y = 10.0f;
+		if (!l->Open) {
+			m->GetTransform(0).Position.y = 10.0f;
 		}
 	}
+
+	return t;
 }

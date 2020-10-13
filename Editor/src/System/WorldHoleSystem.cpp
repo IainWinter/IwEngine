@@ -169,10 +169,6 @@ bool WorldHoleSystem::On(
 				SpawnHole(iw::vector3( 5, 0, 9), 3, false, "levels/canyon/cave06.json");
 			}
 
-			else if (event.LevelName == "levels/canyon/cave06.json") {
-				SpawnHole(iw::vector3(-17.2f, 0, 0), 4, true, "");
-			}
-
 			break;
 		}
 		case iw::val(Actions::LONG_DASH_ACTIVE): {

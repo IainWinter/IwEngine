@@ -4,10 +4,8 @@
 #include "Systems/GameCameraController.h"
 #include "Systems/CarControllerSystem.h"
 #include "iw/engine/Systems/LerpCameraControllerSystem.h"
-#include "iw/engine/Systems/Render/MeshRenderSystem.h"
-#include "iw/engine/Systems/Render/ModelRenderSystem.h"
-#include "iw/engine/Systems/Render/MeshShadowRenderSystem.h"
-#include "iw/engine/Systems/Render/ModelShadowRenderSystem.h"
+#include "iw/engine/Systems/Render/RenderSystem.h"
+#include "iw/engine/Systems/Render/ShadowRenderSystem.h"
 #include "iw/engine/Systems/PhysicsSystem.h"
 
 #include "iw/engine/Time.h"
@@ -86,10 +84,8 @@ int RacingLayer::Initialize() {
 	iw::Rigidbody* r =        player.Set<iw::Rigidbody>();
 	iw::CapsuleCollider* c  = player.Set<iw::CapsuleCollider>();
 
-	PushSystem<iw::MeshRenderSystem>(MainScene);
-	PushSystem<iw::ModelRenderSystem>(MainScene);
-	PushSystem<iw::ModelShadowRenderSystem>(MainScene);
-	PushSystem<iw::ModelShadowRenderSystem>(MainScene);
+	PushSystem<iw::RenderSystem>(MainScene);
+	PushSystem<iw::ShadowRenderSystem>(MainScene);
 	PushSystem<iw::LerpCameraControllerSystem>(player);
 	PushSystem<CarControllerSystem>();
 	PushSystem<iw::PhysicsSystem>();
