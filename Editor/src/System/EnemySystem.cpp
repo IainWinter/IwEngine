@@ -282,7 +282,7 @@ iw::Transform* EnemySystem::SpawnEnemy(
 		Player* player = playerEntity.Find<Player>();
 
 		if (   player->Transition
-			|| player->Timer <= 0.0f)
+			|| player->Timer <= 0.0f) // Exit if player isn't attacking
 		{
 			return;
 		}
@@ -294,7 +294,7 @@ iw::Transform* EnemySystem::SpawnEnemy(
 			Audio->AsStudio()->CreateInstance("User/enemyDeath");
 		}
 		
-		if (enemy->Health - 1 > 0) {
+		if (enemy->Health > 1) { // Exit if enemy has more health
 			return;
 		}
 
@@ -307,10 +307,8 @@ iw::Transform* EnemySystem::SpawnEnemy(
 		Bus->push<SpawnEnemyDeath>(transform->Position, transform->Parent());
 		Bus->push<GiveScoreEvent> (transform->Position, score * enemy->ScoreMultiple);
 
-		if (!enemyEntity.Has<EnemyBoss>()) {
-			transform->SetParent(nullptr);
-			Space->QueueEntity(enemyEntity.Handle, iw::func_Destroy);
-		}
+		transform->SetParent(nullptr);
+		Space->QueueEntity(enemyEntity.Handle, iw::func_Destroy);
 	});
 
 	return t;

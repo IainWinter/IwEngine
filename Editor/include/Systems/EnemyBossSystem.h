@@ -15,7 +15,7 @@ private:
 	iw::Entity& m_player;
 	const EnemySystem* m_enemySystem;
 
-	const GameSaveState* m_saveState;
+	GameSaveState* m_saveState;
 
 	std::vector<func_Action> m_actions;
 	std::vector<func_Condition> m_conditions;
@@ -36,7 +36,7 @@ public:
 	EnemyBossSystem(
 		iw::Entity& player,
 		const EnemySystem* enemySystem,
-		const GameSaveState* saveState);
+		GameSaveState* saveState);
 
 	int Initialize() override;
 	void Update() override;

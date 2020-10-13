@@ -23,7 +23,7 @@
 EnemyBossSystem::EnemyBossSystem(
 	iw::Entity& player,
 	const EnemySystem* enemySystem,
-	const GameSaveState* saveState)
+	GameSaveState* saveState)
 	: iw::SystemBase("Enemy Boss")
 	, m_player(player)
 	, m_enemySystem(enemySystem)
@@ -75,12 +75,11 @@ void EnemyBossSystem::Update() {
 
 		Audio->AsStudio()->SetInstanceParameter(m_musicInstance, "BossHealth", enemy->Health);
 
-		if (enemy->Health == 0) {
-			transform->SetParent(nullptr);
-			Space->QueueEntity(entity, iw::func_Destroy);
-			return;
+		if (   enemy->Health == 0
+			&& enemy->Type == EnemyType::MINI_BOSS_CANYON)
+		{
+			m_saveState->Canyon03BossKilled = true;
 		}
-
 
 		if (enemy->ChargeTime > enemy->Timer) {
 			return;
@@ -196,6 +195,7 @@ bool EnemyBossSystem::On(
 			break;
 		}
 		case iw::val(Actions::RESET_LEVEL):
+		case iw::val(Actions::AT_NEXT_LEVEL):
 		case iw::val(Actions::GOTO_NEXT_LEVEL): { // not sure if next level 
 			if (m_musicInstance != -1) {
 				Audio->AsStudio()->StopInstance(m_musicInstance);
