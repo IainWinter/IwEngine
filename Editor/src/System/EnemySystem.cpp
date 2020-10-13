@@ -307,8 +307,10 @@ iw::Transform* EnemySystem::SpawnEnemy(
 		Bus->push<SpawnEnemyDeath>(transform->Position, transform->Parent());
 		Bus->push<GiveScoreEvent> (transform->Position, score * enemy->ScoreMultiple);
 
-		transform->SetParent(nullptr);
-		Space->QueueEntity(enemyEntity.Handle, iw::func_Destroy);
+		if (!enemyEntity.Has<EnemyBoss>()) {
+			transform->SetParent(nullptr);
+			Space->QueueEntity(enemyEntity.Handle, iw::func_Destroy);
+		}
 	});
 
 	return t;

@@ -79,6 +79,9 @@ void EnemyBossSystem::Update() {
 			&& enemy->Type == EnemyType::MINI_BOSS_CANYON)
 		{
 			m_saveState->Canyon03BossKilled = true;
+
+			transform->SetParent(nullptr);
+			Space->QueueEntity(entity, iw::func_Destroy);
 		}
 
 		if (enemy->ChargeTime > enemy->Timer) {
