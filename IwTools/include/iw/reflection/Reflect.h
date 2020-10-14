@@ -55,8 +55,16 @@ namespace detail {
 	const Type* GetType(
 		TypeTag<_t>)
 	{
+		static bool enumerated = false; // blocks infinite recursion
+		static const Type* type;
+
 		if constexpr (!std::is_arithmetic_v<_t>) {
-			return GetClass(ClassTag<_t>());
+			if (!enumerated) {
+				enumerated = true;
+				type = GetClass(ClassTag<_t>());
+			}
+
+			return type;
 		}
 
 		assert("No reflection information for type");
