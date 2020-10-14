@@ -69,7 +69,7 @@ int LevelSystem::Initialize() {
 	leafMesh.Material()->SetTexture("shadowMap", Asset->Load<iw::Texture>("SunShadowMap"));
 	leafMesh.Material()->Set("baseColor", iw::Color(1, 1, 1));
 
-	Bus->send<ResetLevelEvent>();
+	//Bus->send<ResetLevelEvent>();
 
 	return 0;
 }

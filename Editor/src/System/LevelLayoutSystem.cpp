@@ -8,6 +8,7 @@
 
 LevelLayoutSystem::LevelLayoutSystem()
 	: iw::SystemBase("Level Layout")
+	, m_currentWorld(nullptr)
 {}
 
 int LevelLayoutSystem::Initialize() {
@@ -86,14 +87,15 @@ int LevelLayoutSystem::Initialize() {
 	iw::JsonSerializer("C:/dev/IwEngine/Editor/assets/levels/canyon.json").Write(*canyon01);
 	iw::JsonSerializer("C:/dev/IwEngine/Editor/assets/levels/cavTop.json").Write(*cave01);
 
-	WorldLayout* canyon = new WorldLayout();
-	WorldLayout* cavTop = new WorldLayout();
+	WorldLayout* canyon = new WorldLayout(canyon01);
+	WorldLayout* cavTop = new WorldLayout(cave01);
 
-	canyon->FillWorld(canyon01, startingLevel);
+	m_worlds.push_back(canyon);
+	m_worlds.push_back(cavTop);
 
-	if (canyon->CurrentLevel == nullptr) {
-		cavTop->FillWorld(cave01, startingLevel);
-	}
+	FillWorlds(startingLevel);
+
+	Bus->push<LoadLevelEvent>(m_currentWorld->CurrentLevel->LevelName);
 
 	return 0;
 }
@@ -106,20 +108,6 @@ bool LevelLayoutSystem::On(
 	iw::ActionEvent& e)
 {
 	switch (e.Action) {
-		case iw::val(Actions::RESET_LEVEL): {
-			break;
-		}
-		case iw::val(Actions::UNLOCK_LEVEL_DOOR): {
-			break;
-		}
-		case iw::val(Actions::LOAD_NEXT_LEVEL): {
-			
-
-			break;
-		}
-		case iw::val(Actions::AT_NEXT_LEVEL): {
-			break;
-		}
 		case iw::val(Actions::GOTO_CONNECTED_LEVEL): {
 			GotoConnectedLevelEvent& event = e.as<GotoConnectedLevelEvent>();
 
@@ -153,6 +141,18 @@ bool LevelLayoutSystem::On(
 	return false;
 }
 
+void LevelLayoutSystem::FillWorlds(
+	const std::string& untilLevel)
+{
+	for (WorldLayout* world : m_worlds) {
+		world->FillWorld(untilLevel);
+		if (world->CurrentLevel) {
+			m_currentWorld = world;
+			break;
+		}
+	}
+}
+
 // World Layout
 
 void LevelLayoutSystem::WorldLayout::ToNextLevel(
@@ -168,10 +168,8 @@ void LevelLayoutSystem::WorldLayout::ToPreviousLevel() {
 }
 
 void LevelLayoutSystem::WorldLayout::FillWorld(
-	LevelLayout* layout,
 	const std::string& untilLevel)
 {
-	CurrentLevel = layout;
 	while (CurrentLevel && CurrentLevel->LevelName != untilLevel) {
 		int next = 0;
 

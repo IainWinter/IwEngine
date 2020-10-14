@@ -3,6 +3,7 @@
 #include "iw/engine/System.h"
 #include "Events/ActionEvents.h"
 #include "Components/LevelLayout.h"
+#include <vector>
 #include <stack>
 
 class LevelLayoutSystem
@@ -13,13 +14,17 @@ private:
 		std::stack<LevelLayout*> PreviousLevels;
 		LevelLayout* CurrentLevel;
 
+		WorldLayout(
+			LevelLayout* currentLevel)
+			: CurrentLevel(currentLevel)
+		{}
+
 		void ToNextLevel(
 			unsigned index);
 
 		void ToPreviousLevel();
 
 		void FillWorld(
-			LevelLayout* layout,
 			const std::string& untilLevel);
 	};
 
@@ -34,5 +39,6 @@ public:
 
 	bool On(iw::ActionEvent& e) override;
 private:
-
+	void FillWorlds(
+		const std::string& untilLevel);
 };

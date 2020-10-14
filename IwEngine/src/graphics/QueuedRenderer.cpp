@@ -399,8 +399,8 @@ namespace Graphics {
 		key depth        = 0;
 		
 		if (m_camera) {
-			if (transform) {
-				depth = 10000.0f * (m_position - (transform ? transform->WorldPosition() : 0)).length_fast();
+			if (transform) {  // should map to clip planes we have 16 mil res which should be more than enough
+				depth = 1000000 * (m_position - (transform ? transform->WorldPosition() : 0)).length_squared(); 
 			}
 		}
 

@@ -125,6 +125,7 @@ namespace Graphics {
 		int m_material;
 		int m_transparency;
 		vector3 m_position;
+		vector2 m_cameraClipPlane;
 
 		//bool m_reverse;
 		setup_draw_func m_beforeDrawFunc; // gets set by 'BeforeDraw' and consumed by 'DrawMesh'
