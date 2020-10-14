@@ -47,8 +47,8 @@ LevelSystem::LevelSystem(
 	: iw::System<iw::CollisionObject, iw::Model, LevelDoor>("Level")
 	, playerEntity(player)
 	, scene(scene)
-{ 
-	currentLevelName = "levels/canyon/cave06.json";
+{
+	currentLevelName = "levels/canyon/canyon01.json";
 
 	openColor   = iw::Color::From255(66, 201, 66, 63);
 	closedColor = iw::Color::From255(201, 66, 66, 63);
@@ -88,12 +88,19 @@ void LevelSystem::Update(
 		if (door->ColorTimer > 0) {
 			door->ColorTimer -= iw::Time::DeltaTimeScaled();
 
+			iw::Color a, b; 
+
 			if (door->State == LevelDoorState::OPEN) {
-				model->GetMesh(0).Material()->Set("baseColor", iw::lerp<iw::vector4>(closedColor, openColor, 4 * (0.25f - door->ColorTimer)));
+				a = closedColor;
+				b = openColor;
 			}
+
 			else {
-				model->GetMesh(0).Material()->Set("baseColor", iw::lerp<iw::vector4>(openColor, closedColor, 4 * (0.25f - door->ColorTimer)));
+				a = openColor;
+				b = closedColor;
 			}
+
+			model->GetMesh(0).Material()->Set("baseColor", iw::lerp<iw::vector4>(a, b, 4 * (0.25f - door->ColorTimer)));
 		}
 	}
 
@@ -193,15 +200,31 @@ bool LevelSystem::On(
 			UnlockLevelDoorEvent& event = e.as<UnlockLevelDoorEvent>();
 
 			LevelDoor* door = levelDoor.Find<LevelDoor>();
-			if (door == nullptr) {
+			if (   door == nullptr
+				&& nextLevelDoor)
+			{
 				door = nextLevelDoor.Find<LevelDoor>();
 			}
 
-			door->State = event.State;
-			door->ColorTimer = 0.25f;
+			if (door) {
+				door->State = event.State;
+				door->ColorTimer = 0.25f;
+			}
 
 			break;
 		}
+		case iw::val(Actions::LOAD_LEVEL): {
+			LoadLevelEvent& event = e.as<LoadLevelEvent>();
+
+			LoadLevel(event.LevelName);
+
+			break;
+		}
+
+		case iw::val(Actions::UNLOAD_LEVEL): {
+			break;
+		}
+
 		case iw::val(Actions::LOAD_NEXT_LEVEL): {
 			LoadNextLevelEvent& event = e.as<LoadNextLevelEvent>();
 

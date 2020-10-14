@@ -17,6 +17,9 @@ enum class Actions
 	GAME_STATE, DEV_CONSOLE,
 	JUMP, RIGHT, FORWARD, USE,
 	RESET_LEVEL, START_LEVEL, UNLOCK_LEVEL_DOOR, LOAD_NEXT_LEVEL, GOTO_NEXT_LEVEL, AT_NEXT_LEVEL,
+
+	GOTO_CONNECTED_LEVEL, UNLOAD_LEVEL, LOAD_LEVEL,
+
 	SPAWN_ENEMY_DEATH, SPAWN_ENEMY, SPAWN_BULLET, SPAWN_ITEM, SPAWN_NOTE, SPAWN_CONSUMABLE,
 	GIVE_SCORE,
 	SET_CAMERA_TARGET,
@@ -181,6 +184,48 @@ struct GoToNextLevelEvent
 		, CenterPosition(centerPosition)
 	{}
 };
+
+// new level layout events
+
+struct GotoConnectedLevelEvent
+	: iw::SingleEvent
+{
+	unsigned Index;
+
+	GotoConnectedLevelEvent(
+		unsigned index = 0)
+		: iw::SingleEvent(iw::val(Actions::GOTO_CONNECTED_LEVEL))
+		, Index(index)
+	{}
+};
+
+struct UnloadLevelEvent
+	: iw::SingleEvent
+{
+	std::string LevelName;
+
+	UnloadLevelEvent(
+		std::string name)
+		: iw::SingleEvent(iw::val(Actions::UNLOAD_LEVEL))
+		, LevelName(name)
+	{}
+};
+
+
+struct LoadLevelEvent
+	: iw::SingleEvent
+{
+	std::string LevelName;
+
+	LoadLevelEvent(
+		std::string name)
+		: iw::SingleEvent(iw::val(Actions::LOAD_LEVEL))
+		, LevelName(name)
+	{}
+};
+
+
+
 
 struct AtNextLevelEvent
 	: iw::SingleEvent

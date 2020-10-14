@@ -91,7 +91,7 @@
         "GoBack": false,
         "State": 1,
         "NextLevel": {
-          "size": 25,
+          "size": 24,
           "string": "levels/canyon/top03.json"
         }
       }

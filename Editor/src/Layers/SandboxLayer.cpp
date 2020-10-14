@@ -4,6 +4,7 @@
 
 #include "Systems/BulletSystem.h"
 #include "Systems/LevelSystem.h"
+#include "Systems/LevelLayoutSystem.h"
 #include "Systems/EnemyDeathCircleSystem.h"
 #include "Systems/GameCameraController.h"
 #include "Systems/ScoreSystem.h"
@@ -305,10 +306,12 @@ namespace iw {
 		enemyBossSystem = PushSystem<EnemyBossSystem>(playerSystem->GetPlayer(), enemySystem, saveSystem->GetState());
 		enemySystem     = PushSystem<EnemySystem>(playerSystem->GetPlayer(), bulletSystem->GetBulletPrefab());
 
+								   PushSystem<LevelLayoutSystem>();
 		LevelSystem* levelSystem = PushSystem<LevelSystem>(playerSystem->GetPlayer(), MainScene);
 		                           PushSystem<WorldHoleSystem>(levelSystem->GetLevel());
 		                           PushSystem<WorldLadderSystem>(levelSystem->GetLevel(), saveSystem->GetState());
 								   PushSystem<SpecialBarrierSystem>(levelSystem->GetLevel(), playerSystem->GetPlayer());
+
 
 		PushSystem<GameCameraController>(playerSystem->GetPlayer(), MainScene);
 		PushSystem<ScoreSystem>(playerSystem->GetPlayer(), MainScene->MainCamera(), m_textCam);

@@ -81,6 +81,8 @@ bool WorldLadderSystem::On(
 		case iw::val(Actions::START_LEVEL): {
 			StartLevelEvent& event = e.as<StartLevelEvent>();
 
+			LOG_INFO << "Welcome to level '" << event.LevelName << "'";
+
 			if (event.LevelName == "levels/canyon/cave03.a.json") {
 				SpawnLadder(iw::vector3(15, 0, 4), iw::quaternion::from_euler_angles(0, -0.4f, 0), &saveState->Cave03LadderDown, false, "levels/canyon/canyon04.a.json");
 			}
