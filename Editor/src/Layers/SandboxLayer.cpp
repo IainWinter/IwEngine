@@ -309,7 +309,7 @@ namespace iw {
 								   PushSystem<LevelLayoutSystem>();
 		LevelSystem* levelSystem = PushSystem<LevelSystem>(playerSystem->GetPlayer(), MainScene);
 		                           PushSystem<WorldHoleSystem>(levelSystem->GetLevel());
-		                           PushSystem<WorldLadderSystem>(levelSystem->GetLevel(), saveSystem->GetState());
+		                           PushSystem<WorldLadderSystem>(saveSystem->GetState());
 								   PushSystem<SpecialBarrierSystem>(levelSystem->GetLevel(), playerSystem->GetPlayer());
 
 

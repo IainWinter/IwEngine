@@ -23,7 +23,7 @@ namespace Engine {
 	{
 		Transform* transform = Space->FindComponent<Transform>(e.Entity);
 		if (transform) {
-			//transform->SetParent(nullptr); //causes problems for some reason
+			transform->SetParent(nullptr); //causes problems for some reason
 		}
 
 		Mesh* mesh = Space->FindComponent<Mesh>(e.Entity);

@@ -58,6 +58,26 @@ namespace ECS {
 			Space->DestroyEntity(Index());
 		}
 
+		void Kill() {
+#ifdef IW_DEBUG
+			if (!Space) {
+				LOG_ERROR << "Entity has no space!";
+				return;
+			}
+#endif
+			Space->KillEntity(Handle);
+		}
+
+		void Revive() {
+#ifdef IW_DEBUG
+			if (!Space) {
+				LOG_ERROR << "Entity has no space!";
+				return;
+			}
+#endif
+			Space->ReviveEntity(Handle);
+		}
+
 		template<
 			typename _c,
 			typename... _args>

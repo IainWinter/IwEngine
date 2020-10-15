@@ -59,6 +59,9 @@ LevelSystem::LevelSystem(
 std::unordered_map<std::string, iw::StaticPS*> pSystems;
 
 int LevelSystem::Initialize() {
+	iw::Entity e = Space->CreateEntity<iw::Transform>();
+	m_worldtransform = e.Set<iw::Transform>();
+
 	// Leaves
 
 	iw::ref<iw::Shader> particleShader = Asset->Load<iw::Shader>("shaders/particle/simple.shader");
@@ -135,9 +138,7 @@ void LevelSystem::Update(
 	}
 }
 
-//mike robawls
-bool justHitGoBackDoor = false;
-bool justResetLevel = false;
+int oiioi = 0;
 
 bool LevelSystem::On(
 	iw::CollisionEvent& e)
@@ -157,12 +158,13 @@ bool LevelSystem::On(
 		return true;
 	}
 
-	if (door->State == LevelDoorState::OPEN) {
+	if (oiioi  == 0 &&door->State == LevelDoorState::OPEN) {
+		oiioi = 1;
 		door->State = LevelDoorState::LOCKED; // stops events from being spammed
-		Bus->push<LoadNextLevelEvent>(door->NextLevel, tran->Position, door->GoBack);
-	}
+		//Bus->push<LoadNextLevelEvent>(door->NextLevel, tran->Position, door->GoBack);
 
-	justHitGoBackDoor = door->GoBack;
+		Bus->push<GotoConnectedLevelEvent>(door->Index);
+	}
 
 	return false;
 }
@@ -172,101 +174,104 @@ bool LevelSystem::On(
 {
 	switch (e.Action) {
 		case iw::val(Actions::RESET_LEVEL): {
-			if (levelEntity != iw::EntityHandle::Empty) {
-				DestroyAll(levelEntity.Find<iw::Transform>());
-			}
+			m_worldtransform->Position = 0;
+			//LoadLevel(currentLevelName, "");
 
-			justResetLevel = true;
+			//if (levelDoor == iw::EntityHandle::Empty) {
+			//	levelDoor = nextLevelDoor;
+			//}
 
-			levelEntity = LoadLevel(currentLevelName);
+			//Bus->push<StartLevelEvent>(currentLevelName);
 
-			justResetLevel = false;
-
-			if (levelDoor == iw::EntityHandle::Empty) {
-				levelDoor = nextLevelDoor;
-			}
-
-			Bus->push<StartLevelEvent>(currentLevelName, currentLevel.CameraFollow, currentLevel.InPosition, levelEntity.Find<iw::Transform>());
-
-			sequence.Restart();
+			//sequence.Restart();
 
 			//playerEntity.Find<iw::Transform>()->SetParent(levelEntity.Find<iw::Transform>());
 
 			break;
 		}
 		case iw::val(Actions::UNLOCK_LEVEL_DOOR): {
-			if (!levelDoor) break;
-
 			UnlockLevelDoorEvent& event = e.as<UnlockLevelDoorEvent>();
 
-			LevelDoor* door = levelDoor.Find<LevelDoor>();
-			if (   door == nullptr
-				&& nextLevelDoor)
-			{
-				door = nextLevelDoor.Find<LevelDoor>();
-			}
-
-			if (door) {
+			Space->Query<LevelDoor>().Each([&](auto, auto door) {
 				door->State = event.State;
 				door->ColorTimer = 0.25f;
-			}
+			});
 
 			break;
 		}
 		case iw::val(Actions::LOAD_LEVEL): {
 			LoadLevelEvent& event = e.as<LoadLevelEvent>();
 
-			LoadLevel(event.LevelName);
+			LoadLevel(event.LevelName, event.PreviousName);
 
 			break;
 		}
 
 		case iw::val(Actions::UNLOAD_LEVEL): {
+			std::string levelName = e.as<UnloadLevelEvent>().LevelName;
+
+			auto itr = m_loadedLevels.find(levelName);
+			if (itr != m_loadedLevels.end()) {
+				DestroyAll(Space->FindComponent<iw::Transform>(itr->second.first));
+			}
+
 			break;
 		}
 
-		case iw::val(Actions::LOAD_NEXT_LEVEL): {
-			LoadNextLevelEvent& event = e.as<LoadNextLevelEvent>();
+		case iw::val(Actions::START_LEVEL): {
+			StartLevelEvent& event = e.as<StartLevelEvent>();
 
-			Bus->send<GameSave>();
+			auto [entity, level] = m_loadedLevels.at(event.LevelName);
 
-			iw::vector3 lvpos = -currentLevel.LevelPosition;
-
-			if (event.LevelName.length() > 0) {
-				currentLevelName = event.LevelName;
-			}
-
-			else if (nextLevelDoor != iw::EntityHandle::Empty) {
-				currentLevelName = nextLevelDoor.Find<LevelDoor>()->NextLevel;
-			}
-
-			else if (levelDoor != iw::EntityHandle::Empty) {
-				currentLevelName = levelDoor.Find<LevelDoor>()->NextLevel;
-			}
-
-			else {
-				LOG_WARNING << ":(";
-			}
-
-			nextLevelEntity = LoadLevel(currentLevelName); // changes current level
-
-			if (event.GoBack) {
-				currentLevel.InPosition = -event.Position + event.Position.normalized() * 6;
-			}
-
-			else {
-				lvpos = currentLevel.LevelPosition;
-			}
-
-			iw::Transform* transform = nextLevelEntity.Find<iw::Transform>();
-			transform->Position = lvpos;
-
-			transition = true;
-
-			Bus->push<GoToNextLevelEvent>(currentLevelName, currentLevel.CameraFollow, currentLevel.InPosition, lvpos);
+			event.CameraFollow   = level.CameraFollow;
+			event.PlayerPosition = level.InPosition;
+			event.Level = Space->FindComponent<iw::Transform>(entity);
 
 			break;
 		}
+
+		//case iw::val(Actions::LOAD_NEXT_LEVEL): {
+		//	LoadNextLevelEvent& event = e.as<LoadNextLevelEvent>();
+
+		//	Bus->send<GameSave>();
+
+		//	iw::vector3 lvpos = -currentLevel.LevelPosition;
+
+		//	if (event.LevelName.length() > 0) {
+		//		currentLevelName = event.LevelName;
+		//	}
+
+		//	else if (nextLevelDoor != iw::EntityHandle::Empty) {
+		//		currentLevelName = nextLevelDoor.Find<LevelDoor>()->NextLevel;
+		//	}
+
+		//	else if (levelDoor != iw::EntityHandle::Empty) {
+		//		currentLevelName = levelDoor.Find<LevelDoor>()->NextLevel;
+		//	}
+
+		//	else {
+		//		LOG_WARNING << ":(";
+		//	}
+
+		//	nextLevelEntity = LoadLevel(currentLevelName); // changes current level
+
+		//	if (event.GoBack) {
+		//		currentLevel.InPosition = -event.Position + event.Position.normalized() * 6;
+		//	}
+
+		//	else {
+		//		lvpos = currentLevel.LevelPosition;
+		//	}
+
+		//	iw::Transform* transform = nextLevelEntity.Find<iw::Transform>();
+		//	transform->Position = lvpos;
+
+		//	transition = true;
+
+		//	Bus->push<GoToNextLevelEvent>(currentLevelName, currentLevel.CameraFollow, currentLevel.InPosition, lvpos);
+
+		//	break;
+		//}
 		case iw::val(Actions::AT_NEXT_LEVEL): {
 			if (nextLevelEntity != iw::EntityHandle::Empty) {
 				DestroyAll(levelEntity.Find<iw::Transform>());
@@ -283,7 +288,7 @@ bool LevelSystem::On(
 				current->Position = 0;
 			}
 
-			Bus->push<StartLevelEvent>(currentLevelName, currentLevel.CameraFollow, currentLevel.InPosition, levelEntity.Find<iw::Transform>());
+			Bus->push<StartLevelEvent>(currentLevelName);
 
 			sequence.Restart();
 
@@ -293,169 +298,178 @@ bool LevelSystem::On(
 			startTime = iw::Time::TotalTime();
 			break;
 		}
+		case iw::val(Actions::ACTIVATE_LEVEL): {
+			ActivateLevelEvent& event = e.as<ActivateLevelEvent>();
+			auto itr = m_loadedLevels.find(event.LevelName);
+
+			if (itr != m_loadedLevels.end()) {
+				ActivateLevel(event.LevelName);
+				
+				if (!event.FirstLoad) {
+					m_worldtransform->Position = itr->second.second.LevelPosition;
+				}
+			}
+
+			break;
+		}
+		case iw::val(Actions::DEACTIVATE_LEVEL): {
+			std::string& name = e.as<ActivateLevelEvent>().LevelName;
+			if (m_loadedLevels.find(name) != m_loadedLevels.end()) {
+				DeactivateLevel(name);
+			}
+			break;
+		}
 	}
 
 	return false;
 }
 
-iw::Entity LevelSystem::LoadLevel(
-	std::string name)
+std::pair<iw::EntityHandle, Level> LevelSystem::LoadLevel(
+	const std::string& name,
+	const std::string& from)
 {
 	srand(298374);
 
-	iw::JsonSerializer("assets/" + name).Read(currentLevel);
+	iw::Entity levelEntity;
+	Level level;
 
 	iw::Transform* levelTransform = nullptr;
-	iw::Entity level;
+	bool reset = false;
 
-	int ii = 0;
+	auto itr = m_loadedLevels.find(name);
+	if (itr != m_loadedLevels.end()) {
+		levelTransform = Space->FindComponent<iw::Transform>(itr->second.first);
+		reset = true;
+	}
 
-	for (ModelPrefab& prefab : currentLevel.Models) {
-		iw::ref<iw::Model> model = Asset->Load<iw::Model>(prefab.ModelName);
-
-		if (!model) {
-			LOG_ERROR << "Failed to load part of level;";
-			continue;
-		}
-
-		iw::Entity entity = Space->CreateEntity<iw::Transform, iw::Model>();
-		iw::Transform* t = entity.Set<iw::Transform>(prefab.Transform);
+	if (!reset) {
+		iw::JsonSerializer("assets/" + name).Read(level);
 		
-		if (levelTransform) {
-			levelTransform->AddChild(t);
-		}
+		// Models
 
-		else {
-			levelTransform = t;
-			level = entity;
-		}
+		for (ModelPrefab& prefab : level.Models) {
+			iw::ref<iw::Model> model = Asset->Load<iw::Model>(prefab.ModelName);
 
-		for (int i = 0; i < model->MeshCount(); i++) {
-			iw::Mesh&      mesh      = model->GetMesh(i);
-			iw::Transform& transform = model->GetTransform(i);
-
-			mesh.SetMaterial(mesh.Material()->MakeInstance());
-
-			mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/vct/vct.shader"));
-			
-			if (mesh.Data()->Name().find("Bush") != std::string::npos) {
-				mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/phong.shader"));
-				//mesh.Material()->Set("baseColor", iw::Color(0.7, 0.7, 0.6, 1));
-				//mesh.Material()->SetTransparency(iw::Transparency::ADD);
+			if (!model) {
+				LOG_ERROR << "Failed to load part of level;";
+				continue;
 			}
 
-			mesh.Material()->SetTexture("shadowMap", Asset->Load<iw::Texture>("SunShadowMap"));
-			//mesh.Material()->SetTexture("shadowMap2", Asset->Load<iw::Texture>("LightShadowMap")); // shouldnt be part of material
+			iw::Entity entity = Space->CreateEntity<iw::Transform, iw::Model>();
 
-			mesh.Material()->Set("indirectDiffuse", 1);
-			mesh.Material()->Set("indirectSpecular", 0);
+			iw::Transform* t = entity.Set<iw::Transform>(prefab.Transform);
+		
+			if (levelTransform) {
+				levelTransform->AddChild(t);
+			}
 
-			if (mesh.Data()->Name().find("Ground") != std::string::npos)
-			{
-				if (mesh.Data()->Description().HasBuffer(iw::bName::COLOR)) {
-					mesh.Material()->SetTexture("diffuseMap2", Asset->Load<iw::Texture>("textures/dirt/baseColor.jpg"));
-					mesh.Material()->SetTexture("normalMap2", Asset->Load<iw::Texture>("textures/dirt/normal.jpg"));
+			else {
+				levelTransform = t;
+				levelEntity = entity;
+			}
+
+			for (int i = 0; i < model->MeshCount(); i++) {
+				iw::Mesh&      mesh      = model->GetMesh(i);
+				iw::Transform& transform = model->GetTransform(i);
+
+				mesh.SetMaterial(mesh.Material()->MakeInstance());
+
+				mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/vct/vct.shader"));
+			
+				if (mesh.Data()->Name().find("Bush") != std::string::npos) {
+					mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/phong.shader"));
+					//mesh.Material()->Set("baseColor", iw::Color(0.7, 0.7, 0.6, 1));
+					//mesh.Material()->SetTransparency(iw::Transparency::ADD);
 				}
-			}
+
+				mesh.Material()->SetTexture("shadowMap", Asset->Load<iw::Texture>("SunShadowMap"));
+				//mesh.Material()->SetTexture("shadowMap2", Asset->Load<iw::Texture>("LightShadowMap")); // shouldnt be part of material
+
+				mesh.Material()->Set("indirectDiffuse", 1);
+				mesh.Material()->Set("indirectSpecular", 0);
+
+				if (mesh.Data()->Name().find("Ground") != std::string::npos) {
+					if (mesh.Data()->Description().HasBuffer(iw::bName::COLOR)) {
+						mesh.Material()->SetTexture("diffuseMap2", Asset->Load<iw::Texture>("textures/dirt/baseColor.jpg"));
+						mesh.Material()->SetTexture("normalMap2", Asset->Load<iw::Texture>("textures/dirt/normal.jpg"));
+					}
+				}
 			
-			else if(mesh.Data()->Name().find("Tree") != std::string::npos)
-			{
-				auto itr = pSystems.find(mesh.Data()->Name());
-				if (itr == pSystems.end()) {
-					iw::StaticPS* ps = new iw::StaticPS();
+				else if(mesh.Data()->Name().find("Tree") != std::string::npos) {
+					auto itr = pSystems.find(mesh.Data()->Name());
+					if (itr == pSystems.end()) {
+						iw::StaticPS* ps = new iw::StaticPS();
 					
-					iw::Mesh leafMesh = Asset->Load<iw::Model>("models/forest/redleaf.gltf")->GetMesh(0);
-					//leafMesh.SetData(leafMesh.Data()->MakeLink());
+						iw::Mesh leafMesh = Asset->Load<iw::Model>("models/forest/redleaf.gltf")->GetMesh(0);
+						//leafMesh.SetData(leafMesh.Data()->MakeLink());
 
-					ps->SetParticleMesh(leafMesh);
+						ps->SetParticleMesh(leafMesh);
 
-					iw::vector3* positions = (iw::vector3*)mesh.Data()->Get(iw::bName::POSITION); // should only do this once and then use a model matrix in the particle shader
-					iw::vector3* normals   = (iw::vector3*)mesh.Data()->Get(iw::bName::NORMAL);
-					iw::Color*   colors    = (iw::Color*)  mesh.Data()->Get(iw::bName::COLOR);
+						iw::vector3* positions = (iw::vector3*)mesh.Data()->Get(iw::bName::POSITION); // should only do this once and then use a model matrix in the particle shader
+						iw::vector3* normals   = (iw::vector3*)mesh.Data()->Get(iw::bName::NORMAL);
+						iw::Color*   colors    = (iw::Color*)  mesh.Data()->Get(iw::bName::COLOR);
 
-					unsigned count = mesh.Data()->GetCount(iw::bName::COLOR);
+						unsigned count = mesh.Data()->GetCount(iw::bName::COLOR);
 
-					for (int i = 0; i < count; i++) {
-						if (   colors[i].r > 0.5f
-							&& iw::randf() > 0.5f)
-						{
-							iw::vector3 rand = iw::vector3(iw::randf(), iw::randf(), iw::randf()) * iw::Pi;
+						for (int i = 0; i < count; i++) {
+							if (   colors[i].r > 0.5f
+								&& iw::randf() > 0.5f)
+							{
+								iw::vector3 rand = iw::vector3(iw::randf(), iw::randf(), iw::randf()) * iw::Pi;
 
-							iw::Transform trans;
-							trans.Position = positions[i] + rand * 0.2f;
-							trans.Scale    = iw::randf() + 1.2f;
-							trans.Rotation = iw::quaternion::from_euler_angles(iw::vector3(iw::Pi + rand.x * 0.2f, rand.y, rand.z * 0.2f));
+								iw::Transform trans;
+								trans.Position = positions[i] + rand * 0.2f;
+								trans.Scale    = iw::randf() + 1.2f;
+								trans.Rotation = iw::quaternion::from_euler_angles(iw::vector3(iw::Pi + rand.x * 0.2f, rand.y, rand.z * 0.2f));
 
-							ps->SpawnParticle(trans);
+								ps->SpawnParticle(trans);
+							}
 						}
+
+						ps->UpdateParticleMesh();
+
+						itr = pSystems.emplace(mesh.Data()->Name(), ps).first;
 					}
 
-					ps->UpdateParticleMesh();
-
-					itr = pSystems.emplace(mesh.Data()->Name(), ps).first;
-				}
-
-				iw::Entity leaves = Space->CreateEntity<iw::Transform, iw::Mesh>();
+					iw::Entity leaves = Space->CreateEntity<iw::Transform, iw::Mesh>();
 				
-				iw::Transform* t2 = leaves.Set<iw::Transform>(transform);
-								    leaves.Set<iw::Mesh>(itr->second->GetParticleMesh());
+					iw::Transform* t2 = leaves.Set<iw::Transform>(transform);
+										leaves.Set<iw::Mesh>(itr->second->GetParticleMesh());
 
-				t2->SetParent(t);
+					t2->SetParent(t);
+				}
 			}
+
+			entity.Set<iw::Model>(*model);
 		}
 
-		//iw::Entity bushes = Space->CreateEntity<iw::Transform, iw::ParticleSystem<iw::StaticParticle>>();
+		m_worldtransform->AddChild(levelTransform);
 
-		//iw::Transform*                          tran = bushes.Set<iw::Transform>();
-		//iw::ParticleSystem<iw::StaticParticle>* pSys = bushes.Set<iw::ParticleSystem<iw::StaticParticle>>();
-
-		//tran->SetParent(levelTransform);
-		//pSys->SetTransform(tran);
-
-		//for (int i = 0; i < model->MeshCount(); i++) {
-		//	iw::Mesh&      mesh      = model->GetMesh(i);
-		//	iw::Transform& transform = model->GetTransform(i);
-
-		//	if (mesh.Data()->Name().find("Bush") != std::string::npos) {
-		//		if (!pSys->HasParticleMesh()) {
-		//			mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/particle/phong.shader"));
-		//			pSys->SetParticleMesh(mesh);
-		//		}
-
-		//		pSys->SpawnParticle(transform);
-		//		model->RemoveMesh(i);
-		//		i--;
-		//	}
-		//}
-
-		entity.Set<iw::Model>(*model);
-
-		ii++;
+		m_loadedLevels.emplace(name, std::make_pair(levelEntity.Handle, level));
 	}
 
-	// These should all be spawn x events
-	// Not really sure what the best way to sort loading levels is. Im sure it will become apparent in time
-
-	// Enemies
-
-	firstEnemy = iw::Entity();
-
-	for (size_t i = 0; i < currentLevel.Enemies.size(); i++) {
-		iw::vector3 position;
-		position.x = currentLevel.Positions[i].x;
-		position.z = currentLevel.Positions[i].y;
-		position.y = 1;
-
-		Bus->send<SpawnEnemyEvent>(currentLevel.Enemies[i], position, 0, levelTransform);
-
-		if (!firstEnemy) {
-			firstEnemy = Space->FindEntity(levelTransform->Children().back());
-		}
+	else {
+		level = itr->second.second;
 	}
+
+	if (from.length() > 0) {
+		iw::Transform* prev = Space->FindComponent<iw::Transform>(m_loadedLevels.at(from).first);
+		levelTransform->Position = prev->Position + level.LevelPosition;
+	}
+
+	return { levelEntity.Handle, level };
+}
+
+void LevelSystem::ActivateLevel(
+	const std::string& name)
+{
+	auto [handle, level] = m_loadedLevels.at(name);
+
+	iw::Transform* levelTransform = Space->FindComponent<iw::Transform>(handle);
 
 	// Colliders
 
-	for (iw::PlaneCollider& prefab : currentLevel.Planes) {
+	for (iw::PlaneCollider& prefab : level.Planes) {
 		iw::Entity ent = Space->CreateEntity<iw::Transform, iw::PlaneCollider, iw::CollisionObject>();
 		
 		iw::Transform*       transform = ent.Set<iw::Transform>();
@@ -470,7 +484,7 @@ iw::Entity LevelSystem::LoadLevel(
 		Physics->AddCollisionObject(object);
 	}
 
-	for (iw::CapsuleCollider& prefab : currentLevel.Capsules) {
+	for (iw::CapsuleCollider& prefab : level.Capsules) {
 		iw::Entity ent = Space->CreateEntity<iw::Transform, iw::CapsuleCollider, iw::CollisionObject>();
 
 		iw::Transform*       transform = ent.Set<iw::Transform>(iw::vector3::unit_y);
@@ -485,7 +499,7 @@ iw::Entity LevelSystem::LoadLevel(
 		Physics->AddCollisionObject(object);
 	}
 
-	for (iw::SphereCollider& prefab : currentLevel.Spheres) {
+	for (iw::SphereCollider& prefab : level.Spheres) {
 		iw::Entity ent = Space->CreateEntity<iw::Transform, iw::SphereCollider, iw::CollisionObject>();
 
 		iw::Transform*       transform = ent.Set<iw::Transform>(iw::vector3::unit_y);
@@ -502,18 +516,20 @@ iw::Entity LevelSystem::LoadLevel(
 
 	// Doors
 
-	for (size_t i = 0; i < currentLevel.Doors.size(); i++) {
+	for (size_t i = 0; i < level.Doors.size(); i++) {
 		iw::Entity ent = Space->CreateEntity<iw::Transform, iw::Model, iw::SphereCollider, iw::CollisionObject, LevelDoor>();
 	
 		if (i == 0) {
 			nextLevelDoor = ent;
 		}
 
-		LevelDoor*           door      = ent.Set<LevelDoor>(currentLevel.Doors[i]);
+		LevelDoor*           door      = ent.Set<LevelDoor>(level.Doors[i]);
 		iw::Model*           model     = ent.Set<iw::Model>(*Asset->Load<iw::Model>("Door"));
-		iw::Transform*       transform = ent.Set<iw::Transform>(iw::vector3(currentLevel.DoorPositions[i].x, 1, currentLevel.DoorPositions[i].y), 5.0f);
+		iw::Transform*       transform = ent.Set<iw::Transform>(iw::vector3(level.DoorPositions[i].x, 1, level.DoorPositions[i].y), 5.0f);
 		iw::SphereCollider*  collider  = ent.Set<iw::SphereCollider>(iw::vector3::zero, 1.0f);
 		iw::CollisionObject* object    = ent.Set<iw::CollisionObject>();
+
+		door->Index = i + 1; // tmp
 
 		iw::ref<iw::Material> material = model->GetMesh(0).Material()->MakeInstance();
 
@@ -543,38 +559,55 @@ iw::Entity LevelSystem::LoadLevel(
 		Physics->AddCollisionObject(object);
 	}
 
+	// Enemies
+
+	firstEnemy = iw::Entity();
+
+	for (size_t i = 0; i < level.Enemies.size(); i++) {
+		iw::vector3 position;
+		position.x = level.Positions[i].x;
+		position.z = level.Positions[i].y;
+		position.y = 1;
+
+		Bus->send<SpawnEnemyEvent>(level.Enemies[i], position, 0, levelTransform);
+
+		if (!firstEnemy) {
+			firstEnemy = Space->FindEntity(levelTransform->Children().back());
+		}
+	}
+
 	// should look into serialization of prefabs to not have to do this
 
 	// Spawning items
 	
 	sequence = CreateSequence();
 
-	if (currentLevelName == "levels/forest/forest05.a.json") {
+	if (name == "levels/forest/forest05.a.json") {
 		Bus->push<SpawnItemEvent>(Item{ NOTE,       0 }, iw::vector3(3, 1, -2), levelTransform);
 		Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 0 }, iw::vector3(0, 1, 3),  levelTransform);
 	}
 
-	else if (currentLevelName == "levels/forest/forest07.a.json") {
+	else if (name == "levels/forest/forest07.a.json") {
 		Bus->push<SpawnItemEvent>(Item{ NOTE,       1 }, iw::vector3(24, 1, 8), levelTransform);
 		Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 0 }, iw::vector3(8, 1, 0), levelTransform);
 	}
 
-	else if (currentLevelName == "levels/forest/forest12.a.json") {
+	else if (name == "levels/forest/forest12.a.json") {
 		Bus->push<SpawnItemEvent>(Item{ NOTE,       2 }, iw::vector3(3, 1, -2), levelTransform);
 		Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 1 }, iw::vector3(0, 1,  3), levelTransform);
 	}
 
-	else if (currentLevelName == "levels/canyon/cave04.json") {
+	else if (name == "levels/canyon/cave04.json") {
 		Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 2 }, iw::vector3(22, 1, 7.5f), levelTransform);
 	}
 
-	else if (currentLevelName == "levels/canyon/cave06.json") {
+	else if (name == "levels/canyon/cave06.json") {
 		Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 2 }, iw::vector3(4, 1, -9.5f), levelTransform);
 	}
 
 	// run a cut scene
 
-	if (currentLevelName == "levels/forest/forest01.json") {
+	if (name == "levels/forest/forest01.json") {
 		iw::Mesh t = Asset->Load<iw::Font>("fonts/Arial.fnt")->GenerateMesh("A lone soldier longs for his king...", .005f, 1);
 		t.SetMaterial(Asset->Load<iw::Material>("materials/Font")->MakeInstance());
 		t.Material()->Set("color", iw::Color(0, 0, 0, 1));
@@ -617,7 +650,7 @@ iw::Entity LevelSystem::LoadLevel(
 		});
 	}
 
-	else if (currentLevelName == "levels/forest/forest02.json") {
+	else if (name == "levels/forest/forest02.json") {
 		Space->DestroyEntity(otherGuy.Index());
 		otherGuy = Space->CreateEntity<iw::Transform, iw::Model, iw::CollisionObject, iw::SphereCollider, OtherGuyTag>();
 
@@ -687,98 +720,125 @@ iw::Entity LevelSystem::LoadLevel(
 		sequence.Add<iw::DestroyEntity>(otherGuy, true);
 	}
 
-	else if (!justHitGoBackDoor
-		  && !justResetLevel)
-	{
-		if (currentLevelName == "levels/forest/forest07.json") {
-			iw::Mesh t = Asset->Load<iw::Font>("fonts/Arial.fnt")->GenerateMesh("Oh look it seems we've missed one...", .003f, 1);
-			t.SetMaterial(Asset->Load<iw::Material>("materials/Font")->MakeInstance());
-			t.Material()->Set("color", iw::Color(1, 1, 1, 0));
-			t.Material()->SetTransparency(iw::Transparency::ADD);
+	if (name == "levels/forest/forest07.json") {
+		iw::Mesh t = Asset->Load<iw::Font>("fonts/Arial.fnt")->GenerateMesh("Oh look it seems we've missed one...", .003f, 1);
+		t.SetMaterial(Asset->Load<iw::Material>("materials/Font")->MakeInstance());
+		t.Material()->Set("color", iw::Color(1, 1, 1, 0));
+		t.Material()->SetTransparency(iw::Transparency::ADD);
 
-			iw::Entity text = Space->CreateEntity<iw::Transform, iw::Mesh, iw::UiElement>();
+		iw::Entity text = Space->CreateEntity<iw::Transform, iw::Mesh, iw::UiElement>();
 
-			iw::vector3 pos = firstEnemy.Find<iw::Transform>()->Position;
-			pos.y = pos.z + .5f;
-			pos.z = -5;
+		iw::vector3 pos = firstEnemy.Find<iw::Transform>()->Position;
+		pos.y = pos.z + .5f;
+		pos.z = -5;
 		
-			pos.x /= 32;
-			pos.x *= 9;
-			pos.x -= 0.5f;
+		pos.x /= 32;
+		pos.x *= 9;
+		pos.x -= 0.5f;
 
-			text.Set<iw::Transform>(pos);
-			text.Set<iw::Mesh>(t);
+		text.Set<iw::Transform>(pos);
+		text.Set<iw::Mesh>(t);
 
-			sequence.Add([&]() {
-				Bus->send<GameStateEvent>(SOFT_PAUSE);
-				Bus->send<GameStateEvent>(PAUSED);
-				return true;
-			});
-			sequence.Add<iw::Delay>(0.1f);
-			sequence.Add<iw::FadeValue<float>>(t.Material()->Get<float>("color") + 3, 1.0f, 2);
-			sequence.Add<iw::Delay>(1.5f);
-			sequence.Add<iw::FadeValue<float>>(t.Material()->Get<float>("color") + 3, 0.0f, 1.5f);
-			sequence.Add<iw::DestroyEntity>(text, true);
-			sequence.Add([&]() {
-				Bus->send<GameStateEvent>(RUNNING);
-				Bus->send<GameStateEvent>(SOFT_RUN);
-				return true;
-			});
-		}
-
-		else if (currentLevelName == "levels/forest/forest08.json") {
-			iw::ref<iw::Material> material = Asset->Load<iw::Material>("materials/Font")->MakeInstance();
-			material->Set("color", iw::Color(1, 1, 1, 0));
-			material->SetTransparency(iw::Transparency::ADD);
-		
-			iw::Mesh t = Asset->Load<iw::Font>("fonts/Arial.fnt")->GenerateMesh("Who are you?\nHow'd you get passed my guards?!", .003f, 1);
-			t.SetMaterial(material);
-
-			iw::Mesh t2 = Asset->Load<iw::Font>("fonts/Arial.fnt")->GenerateMesh("Wait no my men!! I'll never forgive you!!!", .003f, 1);
-			t2.SetMaterial(material->MakeInstance());
-
-			iw::Entity text  = Space->CreateEntity<iw::Transform, iw::Mesh, iw::UiElement>();
-			iw::Entity text2 = Space->CreateEntity<iw::Transform, iw::Mesh, iw::UiElement>();
-
-			iw::vector3 pos = firstEnemy.Find<iw::Transform>()->Position;
-			pos.y = pos.z + .5f;
-			pos.z = -5;
-
-			pos.x /= 32;
-			pos.x *= 9;
-			pos.x -= 0.5f;
-
-			text.Set<iw::Transform>(pos);
-			text.Set<iw::Mesh>(t);
-
-			text2.Set<iw::Transform>(pos);
-			text2.Set<iw::Mesh>(t2);
-
-			sequence.Add([&]() {
-				Bus->send<GameStateEvent>(SOFT_PAUSE);
-				Bus->send<GameStateEvent>(PAUSED);
-				return true;
-			});
-			sequence.Add<iw::Delay>(0.1f);
-			sequence.Add<iw::FadeValue<float>>(t.Material()->Get<float>("color") + 3, 1.0f, 2);
-			sequence.Add<iw::Delay>(1.5f);
-			sequence.Add<iw::FadeValue<float>>(t.Material()->Get<float>("color") + 3, 0.0f, 1.5f);
-			sequence.Add<iw::DestroyEntity>(text, true);
-
-			sequence.Add<iw::FadeValue<float>>(t2.Material()->Get<float>("color") + 3, 1.0f, 2);
-			sequence.Add<iw::Delay>(1.5f);
-			sequence.Add<iw::FadeValue<float>>(t2.Material()->Get<float>("color") + 3, 0.0f, 1.5f);
-			sequence.Add<iw::DestroyEntity>(text2, true);
-
-			sequence.Add([&]() {
-				Bus->send<GameStateEvent>(RUNNING);
-				Bus->send<GameStateEvent>(SOFT_RUN);
-				return true;
-			});
-		}
+		sequence.Add([&]() {
+			Bus->send<GameStateEvent>(SOFT_PAUSE);
+			Bus->send<GameStateEvent>(PAUSED);
+			return true;
+		});
+		sequence.Add<iw::Delay>(0.1f);
+		sequence.Add<iw::FadeValue<float>>(t.Material()->Get<float>("color") + 3, 1.0f, 2);
+		sequence.Add<iw::Delay>(1.5f);
+		sequence.Add<iw::FadeValue<float>>(t.Material()->Get<float>("color") + 3, 0.0f, 1.5f);
+		sequence.Add<iw::DestroyEntity>(text, true);
+		sequence.Add([&]() {
+			Bus->send<GameStateEvent>(RUNNING);
+			Bus->send<GameStateEvent>(SOFT_RUN);
+			return true;
+		});
 	}
 
-	return level;
+	else if (name == "levels/forest/forest08.json") {
+		iw::ref<iw::Material> material = Asset->Load<iw::Material>("materials/Font")->MakeInstance();
+		material->Set("color", iw::Color(1, 1, 1, 0));
+		material->SetTransparency(iw::Transparency::ADD);
+		
+		iw::Mesh t = Asset->Load<iw::Font>("fonts/Arial.fnt")->GenerateMesh("Who are you?\nHow'd you get passed my guards?!", .003f, 1);
+		t.SetMaterial(material);
+
+		iw::Mesh t2 = Asset->Load<iw::Font>("fonts/Arial.fnt")->GenerateMesh("Wait no my men!! I'll never forgive you!!!", .003f, 1);
+		t2.SetMaterial(material->MakeInstance());
+
+		iw::Entity text  = Space->CreateEntity<iw::Transform, iw::Mesh, iw::UiElement>();
+		iw::Entity text2 = Space->CreateEntity<iw::Transform, iw::Mesh, iw::UiElement>();
+
+		iw::vector3 pos = firstEnemy.Find<iw::Transform>()->Position;
+		pos.y = pos.z + .5f;
+		pos.z = -5;
+
+		pos.x /= 32;
+		pos.x *= 9;
+		pos.x -= 0.5f;
+
+		text.Set<iw::Transform>(pos);
+		text.Set<iw::Mesh>(t);
+
+		text2.Set<iw::Transform>(pos);
+		text2.Set<iw::Mesh>(t2);
+
+		sequence.Add([&]() {
+			Bus->send<GameStateEvent>(SOFT_PAUSE);
+			Bus->send<GameStateEvent>(PAUSED);
+			return true;
+		});
+		sequence.Add<iw::Delay>(0.1f);
+		sequence.Add<iw::FadeValue<float>>(t.Material()->Get<float>("color") + 3, 1.0f, 2);
+		sequence.Add<iw::Delay>(1.5f);
+		sequence.Add<iw::FadeValue<float>>(t.Material()->Get<float>("color") + 3, 0.0f, 1.5f);
+		sequence.Add<iw::DestroyEntity>(text, true);
+
+		sequence.Add<iw::FadeValue<float>>(t2.Material()->Get<float>("color") + 3, 1.0f, 2);
+		sequence.Add<iw::Delay>(1.5f);
+		sequence.Add<iw::FadeValue<float>>(t2.Material()->Get<float>("color") + 3, 0.0f, 1.5f);
+		sequence.Add<iw::DestroyEntity>(text2, true);
+
+		sequence.Add([&]() {
+			Bus->send<GameStateEvent>(RUNNING);
+			Bus->send<GameStateEvent>(SOFT_RUN);
+			return true;
+		});
+	}
+}
+
+void LevelSystem::DeactivateLevel(
+	const std::string& name)
+{
+	auto [handle, level] = m_loadedLevels.at(name);
+
+	iw::Transform* levelTransform = Space->FindComponent<iw::Transform>(handle);
+
+	auto func = [&](auto e, auto transform, auto) {
+		if (transform->Parent() == levelTransform) {
+			Space->DestroyEntity(e);
+		}
+	};
+
+	Space->Query<iw::Transform, Enemy> ().Each(func);
+	Space->Query<iw::Transform, Bullet>().Each(func);
+	Space->Query<iw::Transform, Item>  ().Each(func);
+	Space->Query<iw::Transform, LevelDoor>().Each(func);
+	Space->Query<iw::Transform, iw::CollisionObject>().Each(func);
+	Space->Query<iw::Transform, iw::Rigidbody>().Each(func);
+
+	//iw::Transform* transform = Space->FindComponent<iw::Transform>(m_loadedLevels.at(name).first);
+
+	//for (iw::Transform* child : transform->Children()) {
+	//	iw::Entity entity = Space->FindEntity(child);
+
+	//	LOG_INFO << entity.Index();
+
+	//	if (entity.Has<iw::CollisionObject>() || entity.Has<iw::Rigidbody>()) {
+	//		entity.Destroy();
+	//	}
+	//}
 }
 
 void LevelSystem::DestroyAll(

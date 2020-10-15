@@ -34,6 +34,8 @@ namespace Engine {
 			transform->Position = iw::lerp(transform->Position, object->Trans().Position, accumulator / iw::FixedTime());
 			transform->Scale    = iw::lerp(transform->Scale,    object->Trans().Scale,    accumulator / iw::FixedTime());
 			transform->Rotation = iw::lerp(transform->Rotation, object->Trans().Rotation, accumulator / iw::FixedTime());
+
+			//object->Trans().SetParent(transform->Parent());
 		}
 	}
 

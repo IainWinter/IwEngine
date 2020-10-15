@@ -11,10 +11,8 @@
 #include "iw/physics/Collision/SphereCollider.h"
 
 WorldLadderSystem::WorldLadderSystem(
-	iw::Entity& currentLevel,
 	GameSaveState* saveState)
 	: iw::SystemBase("World Ladder")
-	, currentLevel(currentLevel)
 	, saveState(saveState)
 {}
 
@@ -80,6 +78,8 @@ bool WorldLadderSystem::On(
 	switch (e.Action) {
 		case iw::val(Actions::START_LEVEL): {
 			StartLevelEvent& event = e.as<StartLevelEvent>();
+
+			currentLevel = Space->FindEntity(event.Level); // pass to functions
 
 			LOG_INFO << "Welcome to level '" << event.LevelName << "'";
 

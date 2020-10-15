@@ -9,6 +9,9 @@
 #include "iw/engine/Events/Seq/EventSequence.h"
 #include "iw/physics/Collision/CollisionObject.h"
 
+#include <unordered_map>
+#include <string>
+
 class LevelSystem
 	: public iw::System<iw::CollisionObject, iw::Model, LevelDoor>
 {
@@ -38,6 +41,10 @@ private:
 	iw::Entity firstEnemy;
 	iw::Entity otherGuy;
 
+
+	std::unordered_map<std::string, std::pair<iw::EntityHandle, Level>> m_loadedLevels;
+	iw::Transform* m_worldtransform;
+
 public:
 	LevelSystem(
 		iw::Entity& player,
@@ -54,11 +61,18 @@ public:
 	bool On(
 		iw::ActionEvent& event);
 
-	iw::Entity LoadLevel(
-		std::string name);
-
 	iw::Entity& GetLevel() { return levelEntity; }
 private:
+	std::pair<iw::EntityHandle, Level> LoadLevel(
+		const std::string& name,
+		const std::string& from);
+
+	void ActivateLevel(
+		const std::string& name);
+
+	void DeactivateLevel(
+		const std::string& name);
+
 	void DestroyAll(
 		iw::Transform* transform);
 };

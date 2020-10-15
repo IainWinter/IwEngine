@@ -19,6 +19,7 @@ enum class Actions
 	RESET_LEVEL, START_LEVEL, UNLOCK_LEVEL_DOOR, LOAD_NEXT_LEVEL, GOTO_NEXT_LEVEL, AT_NEXT_LEVEL,
 
 	GOTO_CONNECTED_LEVEL, UNLOAD_LEVEL, LOAD_LEVEL,
+	ACTIVATE_LEVEL, DEACTIVATE_LEVEL,
 
 	SPAWN_ENEMY_DEATH, SPAWN_ENEMY, SPAWN_BULLET, SPAWN_ITEM, SPAWN_NOTE, SPAWN_CONSUMABLE,
 	GIVE_SCORE,
@@ -116,15 +117,15 @@ struct StartLevelEvent
 	iw::Transform* Level;
 
 	StartLevelEvent(
-		std::string levelName,
+		std::string levelName/*,
 		bool cameraFollow,
 		iw::vector3 playerPosition,
-		iw::Transform* level)
+		iw::Transform* level*/)
 		: iw::SingleEvent(iw::val(Actions::START_LEVEL))
-		, LevelName(levelName)
+		, LevelName(levelName)/*
 		, CameraFollow(cameraFollow)
 		, PlayerPosition(playerPosition)
-		, Level(level)
+		, Level(level)*/
 	{}
 };
 
@@ -190,12 +191,39 @@ struct GoToNextLevelEvent
 struct GotoConnectedLevelEvent
 	: iw::SingleEvent
 {
-	unsigned Index;
+	int Index;
 
 	GotoConnectedLevelEvent(
-		unsigned index = 0)
+		int index)
 		: iw::SingleEvent(iw::val(Actions::GOTO_CONNECTED_LEVEL))
 		, Index(index)
+	{}
+};
+
+struct ActivateLevelEvent
+	: iw::SingleEvent
+{
+	std::string LevelName;
+	bool FirstLoad;
+
+	ActivateLevelEvent(
+		std::string name,
+		bool firstLoad)
+		: iw::SingleEvent(iw::val(Actions::ACTIVATE_LEVEL))
+		, LevelName(name)
+		, FirstLoad(firstLoad)
+	{}
+};
+
+struct DeactivateLevelEvent
+	: iw::SingleEvent
+{
+	std::string LevelName;
+
+	DeactivateLevelEvent(
+		std::string name)
+		: iw::SingleEvent(iw::val(Actions::DEACTIVATE_LEVEL))
+		, LevelName(name)
 	{}
 };
 
@@ -216,11 +244,14 @@ struct LoadLevelEvent
 	: iw::SingleEvent
 {
 	std::string LevelName;
+	std::string PreviousName;
 
 	LoadLevelEvent(
-		std::string name)
+		std::string name,
+		std::string from)
 		: iw::SingleEvent(iw::val(Actions::LOAD_LEVEL))
 		, LevelName(name)
+		, PreviousName(from)
 	{}
 };
 

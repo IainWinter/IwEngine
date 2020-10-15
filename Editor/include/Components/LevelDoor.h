@@ -15,4 +15,6 @@ struct REFLECT LevelDoor {
 	REFLECT std::string NextLevel;
 
 	float ColorTimer;
+
+	int Index = 0;
 };

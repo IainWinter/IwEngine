@@ -8,14 +8,13 @@ class WorldLadderSystem
 	: public iw::SystemBase
 {
 private:
-	iw::Entity& currentLevel;
+	iw::Entity currentLevel; // get rid of thjis
 	GameSaveState* saveState;
 
 	iw::Prefab ladderPrefab;
 
 public:
 	WorldLadderSystem(
-		iw::Entity& currentLevel,
 		GameSaveState* saveState);
 
 	int Initialize()   override;

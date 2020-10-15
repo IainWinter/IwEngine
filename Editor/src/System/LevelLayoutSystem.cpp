@@ -69,6 +69,7 @@ int LevelLayoutSystem::Initialize() {
 	cave05 .AddConnection(cave06);
 	cave04 .AddConnection(cave05);
 	cave03 .AddConnection(cave04);
+	cave03 .AddConnection(cave03a);
 	cave02 .AddConnection(cave03);
 	cave01->AddConnection(cave02);
 
@@ -95,7 +96,7 @@ int LevelLayoutSystem::Initialize() {
 
 	FillWorlds(startingLevel);
 
-	Bus->push<LoadLevelEvent>(m_currentWorld->CurrentLevel->LevelName);
+	Bus->push<GotoConnectedLevelEvent>(0);
 
 	return 0;
 }
@@ -108,31 +109,49 @@ bool LevelLayoutSystem::On(
 	iw::ActionEvent& e)
 {
 	switch (e.Action) {
+		case iw::val(Actions::RESET_LEVEL): {
+			Bus->send<DeactivateLevelEvent>(m_currentWorld->CurrentLevel->LevelName);
+			Bus->send<StartLevelEvent>(m_currentWorld->CurrentLevel->LevelName);
+			Bus->send<ActivateLevelEvent>(m_currentWorld->CurrentLevel->LevelName, false);
+
+			break;
+		}
 		case iw::val(Actions::GOTO_CONNECTED_LEVEL): {
 			GotoConnectedLevelEvent& event = e.as<GotoConnectedLevelEvent>();
 
-			if (event.Index == -1) {
+			Bus->push<DeactivateLevelEvent>(m_currentWorld->CurrentLevel->LevelName);
+
+			if (event.Index < 0) {
 				m_currentWorld->ToPreviousLevel();
 			}
 
 			else {
 				// unload previous level & its connections that arnt the level that we are about to be on
 
-				for (unsigned i = 0; i < m_currentWorld->PreviousLevels.top()->Connections.size(); i++) {
-					if (i != event.Index) {
-						Bus->push<UnloadLevelEvent>(m_currentWorld->PreviousLevels.top()->Connections.at(i).LevelName);
-					}
-				}
-				Bus->push<UnloadLevelEvent>(m_currentWorld->PreviousLevels.top()->LevelName);
+				//for (unsigned i = 0; i < m_currentWorld->PreviousLevels.top()->Connections.size(); i++) {
+				//	if (i != event.Index - 1) {
+				//		Bus->send<UnloadLevelEvent>(m_currentWorld->PreviousLevels.top()->Connections.at(i).LevelName);
+				//	}
+				//}
+				//Bus->send<UnloadLevelEvent>(m_currentWorld->PreviousLevels.top()->LevelName);
 
-				m_currentWorld->ToNextLevel(event.Index);
+				if (event.Index > 0) {
+					m_currentWorld->ToNextLevel(event.Index - 1);
+				}
+
+				else {
+					Bus->push<LoadLevelEvent>(m_currentWorld->CurrentLevel->LevelName, "");
+				}
 
 				// Load all connections to new current level
 
-				for (LevelLayout& connection : m_currentWorld->CurrentLevel->Connections){
-					Bus->push<LoadLevelEvent>(connection.LevelName);
+				for (LevelLayout& connection : m_currentWorld->CurrentLevel->Connections) {
+					Bus->push<LoadLevelEvent>(connection.LevelName, m_currentWorld->CurrentLevel->LevelName);
 				}
 			}
+
+			Bus->push<StartLevelEvent>(m_currentWorld->CurrentLevel->LevelName);
+			Bus->push<ActivateLevelEvent>(m_currentWorld->CurrentLevel->LevelName, event.Index == 0);
 
 			break;
 		}
