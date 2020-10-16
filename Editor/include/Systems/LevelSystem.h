@@ -60,8 +60,6 @@ public:
 
 	bool On(
 		iw::ActionEvent& event);
-
-	iw::Entity& GetLevel() { return levelEntity; }
 private:
 	std::pair<iw::EntityHandle, Level> LoadLevel(
 		const std::string& name,

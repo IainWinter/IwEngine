@@ -7,7 +7,6 @@ class WorldHoleSystem
 	: public iw::SystemBase
 {
 private:
-	iw::Entity& currentLevel;
 	iw::Prefab holePrefab;
 
 	bool m_active;
@@ -23,17 +22,16 @@ private:
 	};
 
 public:
-	WorldHoleSystem(
-		iw::Entity& currentLevel);
+	WorldHoleSystem();
 
 	void collide(iw::Manifold& man, iw::scalar dt);
 
-	int Initialize()   override;
+	int Initialize() override;
 	void Update() override;
 
 	bool On(iw::ActionEvent& e) override;
 private:
-	void SpawnHole(
+	iw::Transform* SpawnHole(
 		iw::vector3 position,
 		iw::vector3 scale,
 		bool crumble,

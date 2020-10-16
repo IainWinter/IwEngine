@@ -204,14 +204,14 @@ struct ActivateLevelEvent
 	: iw::SingleEvent
 {
 	std::string LevelName;
-	bool FirstLoad;
+	int Direction; // 1 forward, 0 reset, -1 backward
 
 	ActivateLevelEvent(
 		std::string name,
-		bool firstLoad)
+		int direction)
 		: iw::SingleEvent(iw::val(Actions::ACTIVATE_LEVEL))
 		, LevelName(name)
-		, FirstLoad(firstLoad)
+		, Direction(direction)
 	{}
 };
 

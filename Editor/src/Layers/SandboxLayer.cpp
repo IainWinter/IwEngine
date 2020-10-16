@@ -306,11 +306,11 @@ namespace iw {
 		enemyBossSystem = PushSystem<EnemyBossSystem>(playerSystem->GetPlayer(), enemySystem, saveSystem->GetState());
 		enemySystem     = PushSystem<EnemySystem>(playerSystem->GetPlayer(), bulletSystem->GetBulletPrefab());
 
-								   PushSystem<LevelLayoutSystem>();
-		LevelSystem* levelSystem = PushSystem<LevelSystem>(playerSystem->GetPlayer(), MainScene);
-		                           PushSystem<WorldHoleSystem>(levelSystem->GetLevel());
-		                           PushSystem<WorldLadderSystem>(saveSystem->GetState());
-								   PushSystem<SpecialBarrierSystem>(levelSystem->GetLevel(), playerSystem->GetPlayer());
+		PushSystem<LevelLayoutSystem>();
+		PushSystem<LevelSystem>(playerSystem->GetPlayer(), MainScene);
+		PushSystem<WorldHoleSystem>();
+		PushSystem<WorldLadderSystem>(saveSystem->GetState());
+		PushSystem<SpecialBarrierSystem>(playerSystem->GetPlayer());
 
 
 		PushSystem<GameCameraController>(playerSystem->GetPlayer(), MainScene);

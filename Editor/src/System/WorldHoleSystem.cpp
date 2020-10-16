@@ -11,10 +11,8 @@
 #include "iw/graphics/Model.h"
 #include "iw/events/binding.h"
 
-WorldHoleSystem::WorldHoleSystem(
-	iw::Entity& currentLevel)
+WorldHoleSystem::WorldHoleSystem()
 	: iw::SystemBase("World Hole")
-	, currentLevel(currentLevel)
 	, m_active(true)
 {}
 
@@ -141,32 +139,32 @@ bool WorldHoleSystem::On(
 			StartLevelEvent& event = e.as<StartLevelEvent>();
 
 			if (event.LevelName == "levels/canyon/canyon02.json") {
-				SpawnHole(0, 5, false, "levels/canyon/cave01.json");
+				event.Level->AddChild(SpawnHole(0, 5, false, "levels/canyon/cave01.json"));
 			}
 
 			else if (event.LevelName == "levels/canyon/canyon03.json") {
-				SpawnHole(iw::vector3(-8,  0, -8), 5, false, "levels/canyon/cave02.json");
-				SpawnHole(iw::vector3( 2,  0,  0), 5, true,  "levels/canyon/cave02.json");
-				SpawnHole(iw::vector3( 12, 0,  8), 5, false, "levels/canyon/cave02.json");
+				event.Level->AddChild(SpawnHole(iw::vector3(-8,  0, -8), 5, false, "levels/canyon/cave02.json"));
+				event.Level->AddChild(SpawnHole(iw::vector3( 2,  0,  0), 5, true,  "levels/canyon/cave02.json"));
+				event.Level->AddChild(SpawnHole(iw::vector3( 12, 0,  8), 5, false, "levels/canyon/cave02.json"));
 			}
 
 			else if (event.LevelName == "levels/canyon/canyon04.json") {
-				SpawnHole(iw::vector3(4, 0, 0), 3.5f, true, "levels/canyon/cave03.json");
+				event.Level->AddChild(SpawnHole(iw::vector3(4, 0, 0), 3.5f, true, "levels/canyon/cave03.json"));
 			}
 
 			else if (event.LevelName == "levels/canyon/canyon05.json") {
-				SpawnHole(iw::vector3(0, 0, -6.5), 5, false, "levels/canyon/cave04.json");
-				SpawnHole(iw::vector3(0, 0,  6.5), 5, false, "levels/canyon/cave04.json");
+				event.Level->AddChild(SpawnHole(iw::vector3(0, 0, -6.5), 5, false, "levels/canyon/cave04.json"));
+				event.Level->AddChild(SpawnHole(iw::vector3(0, 0,  6.5), 5, false, "levels/canyon/cave04.json"));
 			}
 
 			else if (event.LevelName == "levels/canyon/canyon07.json") {
-				SpawnHole(iw::vector3(-5, 0, 9), 3, false, "levels/canyon/cave06.json");
-				SpawnHole(iw::vector3(-3, 0, 5), 3, false, "levels/canyon/cave06.json");
-				SpawnHole(iw::vector3(-4, 0, 6), 3, false, "levels/canyon/cave06.json");
-				SpawnHole(iw::vector3( 0, 0, 5), 3, false, "levels/canyon/cave06.json");
-				SpawnHole(iw::vector3( 3, 0, 5), 3, false, "levels/canyon/cave06.json");
-				SpawnHole(iw::vector3( 4, 0, 6), 3, false, "levels/canyon/cave06.json");
-				SpawnHole(iw::vector3( 5, 0, 9), 3, false, "levels/canyon/cave06.json");
+				event.Level->AddChild(SpawnHole(iw::vector3(-5, 0, 9), 3, false, "levels/canyon/cave06.json"));
+				event.Level->AddChild(SpawnHole(iw::vector3(-3, 0, 5), 3, false, "levels/canyon/cave06.json"));
+				event.Level->AddChild(SpawnHole(iw::vector3(-4, 0, 6), 3, false, "levels/canyon/cave06.json"));
+				event.Level->AddChild(SpawnHole(iw::vector3( 0, 0, 5), 3, false, "levels/canyon/cave06.json"));
+				event.Level->AddChild(SpawnHole(iw::vector3( 3, 0, 5), 3, false, "levels/canyon/cave06.json"));
+				event.Level->AddChild(SpawnHole(iw::vector3( 4, 0, 6), 3, false, "levels/canyon/cave06.json"));
+				event.Level->AddChild(SpawnHole(iw::vector3( 5, 0, 9), 3, false, "levels/canyon/cave06.json"));
 			}
 
 			break;
@@ -180,7 +178,7 @@ bool WorldHoleSystem::On(
 	return false;
 }
 
-void WorldHoleSystem::SpawnHole(
+iw::Transform* WorldHoleSystem::SpawnHole(
 	iw::vector3 position,
 	iw::vector3 scale,
 	bool crumble,
@@ -212,11 +210,9 @@ void WorldHoleSystem::SpawnHole(
 	t->Scale.x = scale.x;
 	t->Scale.z = scale.z;
 
-	if (currentLevel) {
-		t->SetParent(currentLevel.Find<iw::Transform>());
-	}
-
 	o->SetCol(c);
 	o->SetTrans(t);
 	Physics->AddCollisionObject(o);
+
+	return t;
 }

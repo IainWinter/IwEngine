@@ -12,7 +12,7 @@ LevelLayoutSystem::LevelLayoutSystem()
 {}
 
 int LevelLayoutSystem::Initialize() {
-	std::string startingLevel = "levels/canyon/cave03.json";
+	std::string startingLevel = "levels/canyon/canyon01.json";
 
 	LevelLayout* canyon01 = new LevelLayout(); // keep all alive
 	LevelLayout* cave01   = new LevelLayout();
@@ -111,8 +111,8 @@ bool LevelLayoutSystem::On(
 	switch (e.Action) {
 		case iw::val(Actions::RESET_LEVEL): {
 			Bus->send<DeactivateLevelEvent>(m_currentWorld->CurrentLevel->LevelName);
-			Bus->send<StartLevelEvent>(m_currentWorld->CurrentLevel->LevelName);
-			Bus->send<ActivateLevelEvent>(m_currentWorld->CurrentLevel->LevelName, false);
+			Bus->send<StartLevelEvent>     (m_currentWorld->CurrentLevel->LevelName);
+			Bus->send<ActivateLevelEvent>  (m_currentWorld->CurrentLevel->LevelName, false);
 
 			break;
 		}
@@ -121,6 +121,7 @@ bool LevelLayoutSystem::On(
 
 			Bus->push<DeactivateLevelEvent>(m_currentWorld->CurrentLevel->LevelName);
 
+			// -1 to previous level, activate now 'current' level
 			if (event.Index < 0) {
 				m_currentWorld->ToPreviousLevel();
 			}
@@ -128,12 +129,17 @@ bool LevelLayoutSystem::On(
 			else {
 				// unload previous level & its connections that arnt the level that we are about to be on
 
-				//for (unsigned i = 0; i < m_currentWorld->PreviousLevels.top()->Connections.size(); i++) {
-				//	if (i != event.Index - 1) {
-				//		Bus->send<UnloadLevelEvent>(m_currentWorld->PreviousLevels.top()->Connections.at(i).LevelName);
-				//	}
-				//}
-				//Bus->send<UnloadLevelEvent>(m_currentWorld->PreviousLevels.top()->LevelName);
+				if (   event.Index == 1
+					&& m_currentWorld->PreviousLevels.size() > 0)
+				{
+					for (unsigned i = 0; i < m_currentWorld->CurrentLevel->Connections.size(); i++) {
+						if (i != event.Index - 1) {
+							Bus->send<UnloadLevelEvent>(m_currentWorld->CurrentLevel->Connections.at(i).LevelName);
+						}
+					}
+
+					Bus->send<UnloadLevelEvent>(m_currentWorld->PreviousLevels.top()->LevelName);
+				}
 
 				if (event.Index > 0) {
 					m_currentWorld->ToNextLevel(event.Index - 1);
@@ -150,8 +156,8 @@ bool LevelLayoutSystem::On(
 				}
 			}
 
-			Bus->push<StartLevelEvent>(m_currentWorld->CurrentLevel->LevelName);
-			Bus->push<ActivateLevelEvent>(m_currentWorld->CurrentLevel->LevelName, event.Index == 0);
+			Bus->push<StartLevelEvent>   (m_currentWorld->CurrentLevel->LevelName);
+			Bus->push<ActivateLevelEvent>(m_currentWorld->CurrentLevel->LevelName, event.Index);
 
 			break;
 		}

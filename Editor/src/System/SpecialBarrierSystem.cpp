@@ -12,31 +12,28 @@
 #include "iw/events/binding.h"
 
 SpecialBarrierSystem::SpecialBarrierSystem(
-	iw::Entity& currentLevel,
 	iw::Entity& player)
 	: iw::SystemBase("Special Barrier")
-	, currentLevel(currentLevel)
 	, player(player)
 	, dashThrough(false)
 {}
 
 // sucks that this needs to be here, need to fix lambdas to get it to work
-void SpecialBarrierSystem::collide(iw::Manifold& man, iw::scalar dt)
+void SpecialBarrierSystem::collide(
+	iw::Manifold& man,
+	iw::scalar dt)
 {
 	iw::Entity barrierEntity, playerEntity;
-	bool noent = GetEntitiesFromManifold<DontDeleteBullets, Player>(man, barrierEntity, playerEntity);
-
-	if (noent) {
+	if (GetEntitiesFromManifold<DontDeleteBullets, Player>(man, barrierEntity, playerEntity)) {
 		return;
 	}
 
-	if (dashThrough && playerEntity.Find<Player>()->Timer <= 0 && man.PenetrationDepth > 0.25f) {
+	if (   dashThrough
+		&& man.PenetrationDepth > 0.25f
+		&& playerEntity.Find<Player>()->Timer <= 0)
+	{
 		Bus->push<ResetLevelEvent>();
 	}
-}
-
-int SpecialBarrierSystem::Initialize() {
-	return 0;
 }
 
 void SpecialBarrierSystem::Update() {
@@ -46,7 +43,9 @@ void SpecialBarrierSystem::Update() {
 	for(auto entity : Space->Query(query)) {
 		iw::CollisionObject* object = entity.Components.Get<iw::CollisionObject, 0>();
 
-		if (dashThrough && player.Find<Player>()->Timer > 0.0f) {
+		if (   dashThrough
+			&& player.Find<Player>()->Timer > 0.0f)
+		{
 			object->SetIsTrigger(true);
 		}
 
@@ -62,36 +61,28 @@ bool SpecialBarrierSystem::On(
 	switch (e.Action) {
 		case iw::val(Actions::LONG_DASH_ACTIVE): {
 			dashThrough = e.as<LongDashEvent>().Active;
-
 			break;
 		}
 		case iw::val(Actions::START_LEVEL): {
-			std::string name = e.as<StartLevelEvent>().LevelName;
+			StartLevelEvent& event = e.as<StartLevelEvent>();
 
-			std::vector<iw::CapsuleCollider> colliders;
-
-			if (name == "levels/canyon/cave04.json") {
-				colliders.push_back({ iw::vector3(0.6f, 0, -0.2f), iw::vector3::unit_x, 29.8f, 2.2f });
+			if (event.LevelName == "levels/canyon/cave04.json") {
+				event.Level->AddChild(SpawnSpecialBarrier({iw::vector3(0.6f, 0, -0.2f), iw::vector3::unit_x, 29.8f, 2.2f }));
 			}
 
-			else if (name == "levels/canyon/cave06.json") {
-				colliders.push_back({ iw::vector3(6.4f, 0, -4.4f), iw::vector3::unit_x, 60, 2 });
+			else if (event.LevelName == "levels/canyon/cave06.json") {
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3(6.4f, 0, -4.4f), iw::vector3::unit_x, 60, 2 }));
 			}
 
-			else if (name == "levels/canyon/cave07.json") {
-				colliders.push_back({ iw::vector3( 2.2f, 0, -1.6f), iw::vector3::unit_x,  6.7f, 0.3f });
-				colliders.push_back({ iw::vector3( 2.7f, 0,  1.6f), iw::vector3::unit_x,  7.4f, 0.3f });
-				colliders.push_back({ iw::vector3( 0.5f, 0,  14 ), iw::vector3::unit_z, 23.8f, 9   });
-				colliders.push_back({ iw::vector3(11.5f, 0,  5.1f), iw::vector3::unit_x, 11.7f, 0.3f });
-				colliders.push_back({ iw::vector3( 6.1f, 0,  3.5f), iw::vector3::unit_z,  4,   0.3f });
-				colliders.push_back({ iw::vector3( 5.3f, 0, -6.6f), iw::vector3::unit_z, 10.6f, 0.3f });
-				colliders.push_back({ iw::vector3(-1,   0, -6.6f), iw::vector3::unit_z, 10.6f, 0.3f });
+			else if (event.LevelName == "levels/canyon/cave07.json") {
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3( 2.2f, 0, -1.6f), iw::vector3::unit_x,  6.7f, 0.3f }));
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3( 2.7f, 0,  1.6f), iw::vector3::unit_x,  7.4f, 0.3f }));
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3( 0.5f, 0, 14   ), iw::vector3::unit_z, 23.8f, 9    }));
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3(11.5f, 0,  5.1f), iw::vector3::unit_x, 11.7f, 0.3f }));
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3( 6.1f, 0,  3.5f), iw::vector3::unit_z,  4,    0.3f }));
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3( 5.3f, 0, -6.6f), iw::vector3::unit_z, 10.6f, 0.3f }));
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3(-1,    0, -6.6f), iw::vector3::unit_z, 10.6f, 0.3f }));
 			}		
-
-			for (iw::CapsuleCollider& collider : colliders) {
-				iw::Transform* transform = SpawnSpecialBarrier(collider);
-				currentLevel.Find<iw::Transform>()->AddChild(transform);
-			}
 
 			break;
 		}

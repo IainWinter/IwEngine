@@ -138,15 +138,11 @@ void LevelSystem::Update(
 	}
 }
 
-int oiioi = 0;
-
 bool LevelSystem::On(
 	iw::CollisionEvent& e)
 {
 	iw::Entity doorEntity, playerEntity;
-	bool noent = GetEntitiesFromManifold<LevelDoor, Player>(e.Manifold, doorEntity, playerEntity);
-
-	if (noent) {
+	if (GetEntitiesFromManifold<LevelDoor, Player>(e.Manifold, doorEntity, playerEntity)) {
 		return false;
 	}
 
@@ -158,8 +154,7 @@ bool LevelSystem::On(
 		return true;
 	}
 
-	if (oiioi  == 0 &&door->State == LevelDoorState::OPEN) {
-		oiioi = 1;
+	if (door->State == LevelDoorState::OPEN) {
 		door->State = LevelDoorState::LOCKED; // stops events from being spammed
 		//Bus->push<LoadNextLevelEvent>(door->NextLevel, tran->Position, door->GoBack);
 
@@ -173,22 +168,6 @@ bool LevelSystem::On(
 	iw::ActionEvent& e)
 {
 	switch (e.Action) {
-		case iw::val(Actions::RESET_LEVEL): {
-			m_worldtransform->Position = 0;
-			//LoadLevel(currentLevelName, "");
-
-			//if (levelDoor == iw::EntityHandle::Empty) {
-			//	levelDoor = nextLevelDoor;
-			//}
-
-			//Bus->push<StartLevelEvent>(currentLevelName);
-
-			//sequence.Restart();
-
-			//playerEntity.Find<iw::Transform>()->SetParent(levelEntity.Find<iw::Transform>());
-
-			break;
-		}
 		case iw::val(Actions::UNLOCK_LEVEL_DOOR): {
 			UnlockLevelDoorEvent& event = e.as<UnlockLevelDoorEvent>();
 
@@ -229,49 +208,6 @@ bool LevelSystem::On(
 
 			break;
 		}
-
-		//case iw::val(Actions::LOAD_NEXT_LEVEL): {
-		//	LoadNextLevelEvent& event = e.as<LoadNextLevelEvent>();
-
-		//	Bus->send<GameSave>();
-
-		//	iw::vector3 lvpos = -currentLevel.LevelPosition;
-
-		//	if (event.LevelName.length() > 0) {
-		//		currentLevelName = event.LevelName;
-		//	}
-
-		//	else if (nextLevelDoor != iw::EntityHandle::Empty) {
-		//		currentLevelName = nextLevelDoor.Find<LevelDoor>()->NextLevel;
-		//	}
-
-		//	else if (levelDoor != iw::EntityHandle::Empty) {
-		//		currentLevelName = levelDoor.Find<LevelDoor>()->NextLevel;
-		//	}
-
-		//	else {
-		//		LOG_WARNING << ":(";
-		//	}
-
-		//	nextLevelEntity = LoadLevel(currentLevelName); // changes current level
-
-		//	if (event.GoBack) {
-		//		currentLevel.InPosition = -event.Position + event.Position.normalized() * 6;
-		//	}
-
-		//	else {
-		//		lvpos = currentLevel.LevelPosition;
-		//	}
-
-		//	iw::Transform* transform = nextLevelEntity.Find<iw::Transform>();
-		//	transform->Position = lvpos;
-
-		//	transition = true;
-
-		//	Bus->push<GoToNextLevelEvent>(currentLevelName, currentLevel.CameraFollow, currentLevel.InPosition, lvpos);
-
-		//	break;
-		//}
 		case iw::val(Actions::AT_NEXT_LEVEL): {
 			if (nextLevelEntity != iw::EntityHandle::Empty) {
 				DestroyAll(levelEntity.Find<iw::Transform>());
@@ -305,8 +241,12 @@ bool LevelSystem::On(
 			if (itr != m_loadedLevels.end()) {
 				ActivateLevel(event.LevelName);
 				
-				if (!event.FirstLoad) {
-					m_worldtransform->Position = itr->second.second.LevelPosition;
+				if (event.Direction > 0) {
+					m_worldtransform->Position -= itr->second.second.LevelPosition;
+				}
+
+				else if (event.Direction < 0) {
+					m_worldtransform->Position = 0;
 				}
 			}
 
@@ -317,6 +257,7 @@ bool LevelSystem::On(
 			if (m_loadedLevels.find(name) != m_loadedLevels.end()) {
 				DeactivateLevel(name);
 			}
+
 			break;
 		}
 	}
@@ -529,7 +470,14 @@ void LevelSystem::ActivateLevel(
 		iw::SphereCollider*  collider  = ent.Set<iw::SphereCollider>(iw::vector3::zero, 1.0f);
 		iw::CollisionObject* object    = ent.Set<iw::CollisionObject>();
 
-		door->Index = i + 1; // tmp
+		// temp
+		if (door->GoBack) {
+			door->Index = -1;
+		}
+
+		else {
+			door->Index = i + 1;
+		}
 
 		iw::ref<iw::Material> material = model->GetMesh(0).Material()->MakeInstance();
 
