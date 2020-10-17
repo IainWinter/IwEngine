@@ -38,10 +38,6 @@ namespace events {
 		void push(
 			_args&&... args)
 		{
-			if (m_events.size() > 1000) {
-				return;
-			}
-
 			_e* e = m_alloc.alloc<_e>();
 			if (e != nullptr) {
 				new(e) _e(std::forward<_args>(args)...);

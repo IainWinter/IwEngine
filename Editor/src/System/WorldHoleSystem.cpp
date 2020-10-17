@@ -16,47 +16,6 @@ WorldHoleSystem::WorldHoleSystem()
 	, m_active(true)
 {}
 
-// sucks that this needs to be here, need to fix lambdas to get it to work
-void WorldHoleSystem::collide(iw::Manifold& man, iw::scalar dt)
-{
-	iw::Entity holeEntity, otherEntity;
-	bool noent = GetEntitiesFromManifold<WorldHole>(man, holeEntity, otherEntity);
-
-	if (noent) {
-		return;
-	}
-
-	if (!otherEntity.Has<Player>()) {
-		return;
-	}
-
-	WorldHole* hole = holeEntity.Find<WorldHole>();
-
-	hole->Touched = true;
-
-	if (hole->Timer < hole->Time) {
-		return;
-	}
-
-	if (!hole->InTransition && m_active) {
-		hole->InTransition = true;
-
-		iw::vector3 pos = holeEntity.Find<iw::Transform>()->Position;
-
-		if (hole->CaveLevel.length() == 0) {
-			Bus->push<ResetLevelEvent>();
-		}
-
-		else {
-			Bus->push<SetCameraTargetEvent>(pos, true);
-			Bus->push<LoadNextLevelEvent>(hole->CaveLevel);
-		}
-	}
-
-	//bulletTransform->SetParent(nullptr);
-	//Space->DestroyEntity(bulletEntity.Index());
-}
-
 int WorldHoleSystem::Initialize() {
 	iw::Mesh mesh = Asset->Load<iw::Model>("Sphere")->GetMesh(0).MakeInstance();
 
@@ -69,8 +28,6 @@ int WorldHoleSystem::Initialize() {
 
 	iw::CollisionObject object;
 	object.SetIsTrigger(true);
-
-	object.SetOnCollision(iw::bind<void, WorldHoleSystem*, iw::Manifold&, float>(&WorldHoleSystem::collide, this)); // garbo
 
 	iw::SphereCollider collider(0, 0.85f);
 
@@ -212,6 +169,44 @@ iw::Transform* WorldHoleSystem::SpawnHole(
 
 	o->SetCol(c);
 	o->SetTrans(t);
+
+	o->SetOnCollision([&](
+		auto man,
+		auto)
+	{
+		iw::Entity holeEntity, otherEntity;
+		if (GetEntitiesFromManifold<WorldHole>(man, holeEntity, otherEntity)) {
+			return;
+		}
+
+		if (!otherEntity.Has<Player>()) {
+			return;
+		}
+
+		WorldHole* hole = holeEntity.Find<WorldHole>();
+
+		hole->Touched = true;
+
+		if (hole->Timer < hole->Time) {
+			return;
+		}
+
+		if (   m_active
+			&& !hole->InTransition)
+		{
+			hole->InTransition = true;
+
+			if (hole->CaveLevel.length() == 0) {
+				Bus->push<ResetLevelEvent>();
+			}
+
+			else {
+				Bus->push<SetCameraTargetEvent>(holeEntity.Find<iw::Transform>()->Position, true);
+				Bus->push<GotoLevelEvent>(hole->CaveLevel);
+			}
+		}
+	});
+
 	Physics->AddCollisionObject(o);
 
 	return t;

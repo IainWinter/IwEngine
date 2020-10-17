@@ -23,15 +23,13 @@ private:
 	iw::ref<iw::Model> m_playerModel;
 
 	iw::Entity m_player;
+	iw::Transform*& m_worldTransform;
 
 	unsigned m_activeConsumable;
 
 public:
-	PlayerSystem();
-
-	iw::Entity& GetPlayer() {
-		return m_player;
-	}
+	PlayerSystem(
+		iw::Transform*& worldTransform);
 
 	int Initialize() override;
 
@@ -40,6 +38,10 @@ public:
 
 	void OnPush() override;
 
-	bool On(iw::KeyEvent& event);
-	bool On(iw::ActionEvent& event);
+	bool On(iw::KeyEvent& e);
+	bool On(iw::ActionEvent& eent);
+
+	iw::Entity& GetPlayer() {
+		return m_player;
+	}
 };

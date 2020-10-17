@@ -165,11 +165,10 @@ bool EnemyBossSystem::On(
 
 				o->SetTrans(t);
 				o->SetCol(c);
-
 				o->SetIsTrigger(true);
-				o->SetOnCollision([&](auto man, auto dt) {
-					iw::Entity p, m;
-					if (GetEntitiesFromManifold<Player>(man, p, m)) {
+				o->SetOnCollision([&](auto man, auto) {
+					iw::Entity player, me;
+					if (GetEntitiesFromManifold<Player>(man, player, me)) {
 						return;
 					}
 
@@ -178,7 +177,7 @@ bool EnemyBossSystem::On(
 					bullet.Speed = 5;
 					bullet.Package = PackageType::NONE;
 
-					Enemy boss; // need prefabs abnle to be saves and levels too!! see canyon03 for these values
+					Enemy boss; // need prefabs to be saved and levels too!! see canyon03.json for these values
 					boss.Type = EnemyType::MINI_BOSS_CANYON;
 					boss.Bullet = bullet;
 					boss.Speed = 0.174533f;
@@ -186,11 +185,10 @@ bool EnemyBossSystem::On(
 					boss.ChargeTime = 2;
 					boss.Rotation = 0;
 				
-					Bus->push<SpawnEnemyEvent>(boss, iw::vector3(12, 9, 6), 0, m.Find<iw::Transform>()->Parent());
+					Bus->push<SpawnEnemyEvent>(boss, iw::vector3(12, 9, 6), 0, me.Find<iw::Transform>()->Parent());
 					Bus->push<UnlockLevelDoorEvent>(false);
 
-					m.Find<iw::Transform>()->SetParent(nullptr);
-					m.Destroy();
+					me.Destroy();
 				});
 
 				Physics->AddCollisionObject(o);

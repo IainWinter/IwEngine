@@ -10,10 +10,12 @@
 
 #include "Components/Enemy.h"
 
-PlayerSystem::PlayerSystem()
+PlayerSystem::PlayerSystem(
+	iw::Transform*& worldTransform)
 	: System("Player")
 	, playerPrefab()
 	, m_playerModel(nullptr)
+	, m_worldTransform(worldTransform)
 	//, up(false)
 	//, down(false)
 	//, left(false)
@@ -65,6 +67,8 @@ int PlayerSystem::Initialize() {
 	iw::Transform*      t = m_player.Set<iw::Transform>(iw::vector3(0, 1, 0), iw::vector3(1));
 	iw::SphereCollider* s = m_player.Set<iw::SphereCollider>(iw::vector3::zero, 0.75f);
 	iw::Rigidbody*      r = m_player.Set<iw::Rigidbody>();
+
+	t->SetParent(m_worldTransform);
 
 	//c->SetMass(1);
 	r->SetCol(s);
@@ -334,23 +338,31 @@ bool PlayerSystem::On(
 
 			break;
 		}
-		case iw::val(Actions::GOTO_NEXT_LEVEL): {
-			GoToNextLevelEvent& event = e.as<GoToNextLevelEvent>();
+		case iw::val(Actions::TRANSITION_TO_LEVEL): {
+			TransitionToLevelEvent& event = e.as<TransitionToLevelEvent>();
 
 			Player*        p = m_player.Find<Player>();
 			iw::Rigidbody* r = m_player.Find<iw::Rigidbody>();
 			
-			p->Transition = true;
-			p->Begin = iw::Time::TotalTime();
-			p->TransitionSpeed = 0.75f;
-			p->TransitionStartPosition = r->Trans().Position;
-			p->TransitionTargetPosition = event.PlayerPosition;
-			r->SetCol(nullptr);
+			iw::vector3 previous = r->Trans().Position;
 
-			break;
-		}
-		case iw::val(Actions::AT_NEXT_LEVEL): {
-			//Player* p = m_player.Find<Player>();
+			float start = iw::TotalTime();
+			float wait = 1.0f;
+
+			if (event.PlayerPosition.y == 0) event.PlayerPosition.y = 1;
+
+			Task->queue([=]() {
+				while (iw::TotalTime() - start < wait) {
+					r->Trans().Position = iw::lerp(
+						previous,
+						event.PlayerPosition,
+						iw::TotalTime() - start);
+				}
+
+				r->Trans().Position = event.PlayerPosition;
+			});
+
+			r->SetCol(nullptr);
 
 			break;
 		}
@@ -373,8 +385,6 @@ bool PlayerSystem::On(
 			p->Right = right;
 
 			t->Position = e.as<StartLevelEvent>().PlayerPosition;
-			if(t->Position.y==0) t->Position.y = 1;
-
 			t->Scale = 0.75f;
 
 			r->SetCol(s);

@@ -18,8 +18,8 @@ enum class Actions
 	JUMP, RIGHT, FORWARD, USE,
 	RESET_LEVEL, START_LEVEL, UNLOCK_LEVEL_DOOR, LOAD_NEXT_LEVEL, GOTO_NEXT_LEVEL, AT_NEXT_LEVEL,
 
-	GOTO_CONNECTED_LEVEL, UNLOAD_LEVEL, LOAD_LEVEL,
-	ACTIVATE_LEVEL, DEACTIVATE_LEVEL,
+	GOTO_CONNECTED_LEVEL, GOTO_LEVEL, UNLOAD_LEVEL, LOAD_LEVEL,
+	ACTIVATE_LEVEL, DEACTIVATE_LEVEL, TRANSITION_TO_LEVEL,
 
 	SPAWN_ENEMY_DEATH, SPAWN_ENEMY, SPAWN_BULLET, SPAWN_ITEM, SPAWN_NOTE, SPAWN_CONSUMABLE,
 	GIVE_SCORE,
@@ -200,6 +200,18 @@ struct GotoConnectedLevelEvent
 	{}
 };
 
+struct GotoLevelEvent
+	: iw::SingleEvent
+{
+	std::string LevelName;
+
+	GotoLevelEvent(
+		std::string levelName)
+		: iw::SingleEvent(iw::val(Actions::GOTO_LEVEL))
+		, LevelName(levelName)
+	{}
+};
+
 struct ActivateLevelEvent
 	: iw::SingleEvent
 {
@@ -255,7 +267,26 @@ struct LoadLevelEvent
 	{}
 };
 
+struct TransitionToLevelEvent
+	: iw::SingleEvent
+{
+	std::string LevelName;
+	bool CameraFollow;
+	iw::vector3 PlayerPosition;
+	iw::vector3 CenterPosition;
 
+	TransitionToLevelEvent(
+		std::string levelName,
+		bool cameraFollow,
+		iw::vector3 playerPosition,
+		iw::vector3 centerPosition)
+		: iw::SingleEvent(iw::val(Actions::TRANSITION_TO_LEVEL))
+		, LevelName(levelName)
+		, CameraFollow(cameraFollow)
+		, PlayerPosition(playerPosition)
+		, CenterPosition(centerPosition)
+	{}
+};
 
 
 struct AtNextLevelEvent

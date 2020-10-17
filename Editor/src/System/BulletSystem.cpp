@@ -22,52 +22,6 @@ BulletSystem::BulletSystem(
 	, player(player)
 {}
 
-void BulletSystem::collide(iw::Manifold& man, float dt) {
-	iw::Entity bulletEntity, otherEntity;
-	if (GetEntitiesFromManifold<Bullet>(man, bulletEntity, otherEntity)) {
-		return;
-	}
-
-	iw::CollisionObject* o = otherEntity.Find<iw::CollisionObject>();
-	if (!o) {
-		o = otherEntity.Find<iw::Rigidbody>();
-	}
-
-	Bullet* bullet = bulletEntity.Find<Bullet>();
-
-	if (   otherEntity.Has<Bullet>()
-		|| otherEntity.Has<Enemy>()
-		|| otherEntity.Has<DontDeleteBullets>()
-		|| otherEntity.Has<LevelDoor>()
-		|| (!otherEntity.Has<EnemyDeathCircle>() && o->IsTrigger()))
-	{
-		return;
-	}
-
-	iw::Transform* bulletTransform = bulletEntity.Find<iw::Transform>();
-
-	if (otherEntity.Has<Player>()) {
-		Bus->push<GiveScoreEvent>(bulletTransform->Position, 0, true);
-	}
-
-	else if (otherEntity.Has<EnemyDeathCircle>()) {
-		iw::Transform* otherTransform = otherEntity.Find<iw::Transform>();
-
-		float score = ceil((bulletTransform->Position - otherTransform->Position).length()) * 10;
-		Bus->push<GiveScoreEvent>(bulletTransform->Position, score, false);
-	}
-
-	else if (bullet->Package) {
-		SpawnBulletsFromPackage(
-			bulletEntity.Find<iw::Transform>(),
-			bulletEntity.Find<BulletPackage>()
-		);
-	}
-
-	bulletTransform->SetParent(nullptr);
-	Space->QueueEntity(bulletEntity.Handle, iw::func_Destroy);
-}
-
 int BulletSystem::Initialize() {
 	iw::Mesh mesh = Asset->Load<iw::Model>("Sphere")->GetMesh(0).MakeInstance();
 
@@ -90,7 +44,6 @@ int BulletSystem::Initialize() {
 	rigidbody.SetMass(1);
 	rigidbody.SetSimGravity(false);
 	rigidbody.SetIsTrigger(true);
-	rigidbody.SetOnCollision(iw::bind<void, BulletSystem*, iw::Manifold&, float>(&BulletSystem::collide, this)); // garbo
 
 	iw::SphereCollider collider(0, 0.5f);
 
@@ -134,7 +87,7 @@ void BulletSystem::FixedUpdate() {
 			case SEEK: {
 				if (bullet->Timer < 1.5f) {
 					iw::vector3 vel = rigidbody->Velocity();
-					iw::vector3 dir = player.Find<iw::Transform>()->Position - transform->Position;
+					iw::vector3 dir = player.Find<iw::Transform>()->WorldPosition() - transform->Position;
 
 					iw::vector3 nV = vel.normalized();
 					iw::vector3 nD = dir.normalized();
@@ -148,7 +101,7 @@ void BulletSystem::FixedUpdate() {
 			}
 			case ORBIT: {
 				iw::vector3 vel = rigidbody->Velocity();
-				iw::vector3 dir = player.Find<iw::Transform>()->Position - transform->Position;
+				iw::vector3 dir = player.Find<iw::Transform>()->WorldPosition() - transform->Position;
 
 				iw::vector3 nV = vel.normalized();
 				iw::vector3 nD = dir.normalized();
@@ -258,6 +211,51 @@ iw::Transform* BulletSystem::SpawnBullet(
 	r->SetCol(s);
 	r->SetTrans(t);
 	r->SetVelocity(iw::vector3::unit_x * rot * b->Speed);
+	r->SetOnCollision([&](auto man, auto) {
+		iw::Entity bulletEntity, otherEntity;
+		if (GetEntitiesFromManifold<Bullet>(man, bulletEntity, otherEntity)) {
+			return;
+		}
+
+		iw::CollisionObject* o = otherEntity.Find<iw::CollisionObject>();
+		if (!o) {
+			o = otherEntity.Find<iw::Rigidbody>();
+		}
+
+		Bullet* bullet = bulletEntity.Find<Bullet>();
+
+		if (   otherEntity.Has<Bullet>()
+			|| otherEntity.Has<Enemy>()
+			|| otherEntity.Has<DontDeleteBullets>()
+			|| otherEntity.Has<LevelDoor>()
+			|| (!otherEntity.Has<EnemyDeathCircle>() && o->IsTrigger()))
+		{
+			return;
+		}
+
+		iw::Transform* bulletTransform = bulletEntity.Find<iw::Transform>();
+
+		if (otherEntity.Has<Player>()) {
+			Bus->push<GiveScoreEvent>(bulletTransform->Position, 0, true);
+		}
+
+		else if (otherEntity.Has<EnemyDeathCircle>()) {
+			iw::Transform* otherTransform = otherEntity.Find<iw::Transform>();
+
+			float score = ceil((bulletTransform->Position - otherTransform->Position).length()) * 10;
+			Bus->push<GiveScoreEvent>(bulletTransform->Position, score, false);
+		}
+
+		else if (bullet->Package) {
+			SpawnBulletsFromPackage(
+				bulletEntity.Find<iw::Transform>(),
+				bulletEntity.Find<BulletPackage>()
+			);
+		}
+
+		bulletTransform->SetParent(nullptr);
+		Space->QueueEntity(bulletEntity.Handle, iw::func_Destroy);
+	});
 
 	//if (Physics->TestObject(r)) {
 	//	bullet.Destroy();

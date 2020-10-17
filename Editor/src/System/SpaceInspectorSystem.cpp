@@ -234,7 +234,7 @@ namespace Editor {
 										break;
 									}
 									default: {
-										ss << "unknow";
+										ss << "unknown";
 										break;
 									}
 								}
@@ -251,6 +251,21 @@ namespace Editor {
 					ImGui::EndTable();
 				}
 			}
+		}
+
+		ImGui::End();
+
+		ImGui::Begin("Physics Inspector");
+
+		ImGui::Text("Count: %i", Physics->CollisionObjects().size());
+
+		for (iw::CollisionObject* o : Physics->CollisionObjects()) {
+			iw::Entity e = Space->FindEntity(o);
+			if (!e) {
+				e = Space->FindEntity<iw::Rigidbody>(o);
+			}
+
+			ImGui::Text("Entity id: %i v: %i", e.Index(), e.Version());
 		}
 
 		ImGui::End();

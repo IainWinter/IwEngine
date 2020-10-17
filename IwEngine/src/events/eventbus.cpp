@@ -22,7 +22,7 @@ namespace iw {
 	void eventbus::publish() {
 		std::unique_lock<std::mutex> lock(m_mutex);
 
-		int i = 0;
+		int count = 0;
 
 		while (!m_events.empty()) {
 			event* e = m_events.pop();
@@ -34,7 +34,7 @@ namespace iw {
 
 			m_alloc.free(e, e->Size);
 
-			if (++i > 500) {
+			if (++count > 500) {
 				break;
 			}
 		}

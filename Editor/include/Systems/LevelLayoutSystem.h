@@ -1,10 +1,11 @@
 #pragma once
 
 #include "iw/engine/System.h"
-#include "Events/ActionEvents.h"
-#include "Components/LevelLayout.h"
 #include <vector>
 #include <stack>
+
+#include "Events/ActionEvents.h"
+#include "Components/LevelLayout.h"
 
 class LevelLayoutSystem
 	: public iw::SystemBase
@@ -26,6 +27,8 @@ private:
 
 		void FillWorld(
 			const std::string& untilLevel);
+
+		void UnwindWorld();
 	};
 
 	std::vector<WorldLayout*> m_worlds;
@@ -34,10 +37,9 @@ private:
 public:
 	LevelLayoutSystem();
 
-	int Initialize() override;
-	void Update() override;
+	int Initialize();
 
-	bool On(iw::ActionEvent& e) override;
+	bool On(iw::ActionEvent& e);
 private:
 	void FillWorlds(
 		const std::string& untilLevel);

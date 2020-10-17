@@ -301,13 +301,15 @@ namespace iw {
 
 		GameSaveStateSystem* saveSystem = PushSystem<GameSaveStateSystem>();
 
-		playerSystem    = PushSystem<PlayerSystem>();
+								   PushSystem<LevelLayoutSystem>();
+		LevelSystem* levelSystem = PushSystem<LevelSystem>();
+
+		playerSystem    = PushSystem<PlayerSystem>(levelSystem->GetWorldTransform());
 		bulletSystem    = PushSystem<BulletSystem>(playerSystem->GetPlayer());
 		enemyBossSystem = PushSystem<EnemyBossSystem>(playerSystem->GetPlayer(), enemySystem, saveSystem->GetState());
 		enemySystem     = PushSystem<EnemySystem>(playerSystem->GetPlayer(), bulletSystem->GetBulletPrefab());
 
-		PushSystem<LevelLayoutSystem>();
-		PushSystem<LevelSystem>(playerSystem->GetPlayer(), MainScene);
+		
 		PushSystem<WorldHoleSystem>();
 		PushSystem<WorldLadderSystem>(saveSystem->GetState());
 		PushSystem<SpecialBarrierSystem>(playerSystem->GetPlayer());
@@ -336,58 +338,6 @@ namespace iw {
 		PushSystem<SpaceInspectorSystem>();
 
 		PushSystem<iw::EntityCleanupSystem>();
-
-		//PushSystem<iw::DrawCollidersSystem>(MainScene->MainCamera());
-
-		// Particle test
-
-
-
-		//iw::Material particleMaterial(particleShader);
-		//particleMaterial.Set("baseColorMap", Color::From255(0, 60, 10));
-
-		//Mesh particle = Asset->Load<Model>("models/forest/grass.gltf")->GetMesh(0);
-		//particle.Material()->SetShader(particleShader);
-		//particle.Material()->SetTexture("shadowMap", sun->ShadowTarget()->Tex(0));
-		//particle.Material()->Set("baseColor", iw::Color(1, 1, 1));
-
-		//iw::Entity particleEntity = Space->CreateEntity<iw::Transform, iw::ParticleSystem<StaticParticle>>();
-
-		//iw::Transform*                      t = particleEntity.Set<iw::Transform>();
-		//iw::ParticleSystem<StaticParticle>* s = particleEntity.Set<iw::ParticleSystem<StaticParticle>>();
-
-		//s->SetTransform(t);
-		//s->SetParticleMesh(particle);
-		//s->SetCamera(MainScene->MainCamera());
-
-		//s->SetUpdate([](auto s, auto p, auto c) {
-		//	if (c < 3000 && Keyboard::KeyDown(G)) {
-		//		for (int i = 0; i < 30; i++) {
-		//			float x = iw::randf() * 32.0f;
-		//			float z = iw::randf() * 18.0f;
-
-		//			if (   abs(x) > 28.0f + randf() * 2.0f
-		//				|| abs(z) > 12.0f + randf() * 2.0f)
-		//			{
-		//				Transform trans;
-		//				trans.Position.x = x;
-		//				trans.Position.z = z;
-		//				trans.Position.y = 1;
-		//				//trans.Scale.x = (randf() + 1.2f) * 0.2f;
-		//				//trans.Scale.z = (randf() + 1.2f) * 0.2f;
-		//				//trans.Scale.y = (randf() + 1.5f) * 0.5f;
-
-		//				//trans.Rotation = quaternion::from_euler_angles(0/*Pi * 0.5f*/, 0/*randf() * 2.0f * Pi*/, 0.0f);
-
-		//				s->SpawnParticle(trans);
-		//			}
-		//		}
-
-		//		return true;
-		//	}
-
-		//	return false;
-		//});
 
 		return Layer::Initialize();
 	}

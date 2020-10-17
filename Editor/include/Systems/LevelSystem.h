@@ -25,9 +25,6 @@ private:
 	std::string currentLevelName;
 	Level currentLevel;
 
-	iw::Entity& playerEntity;
-	iw::Scene* scene;
-
 	iw::Entity levelEntity;
 	iw::Entity nextLevelEntity;
 	bool transition;
@@ -43,23 +40,23 @@ private:
 
 
 	std::unordered_map<std::string, std::pair<iw::EntityHandle, Level>> m_loadedLevels;
-	iw::Transform* m_worldtransform;
+	iw::Transform* m_worldTransform;
+	iw::vector3 m_previousLevelLocation;
 
 public:
-	LevelSystem(
-		iw::Entity& player,
-		iw::Scene* scene);
+	LevelSystem();
 
 	int Initialize() override;
 
 	void Update(
 		iw::EntityComponentArray& view) override;
 
-	bool On(
-		iw::CollisionEvent& event);
+	bool On(iw::CollisionEvent& e);
+	bool On(iw::ActionEvent& e);
 
-	bool On(
-		iw::ActionEvent& event);
+	iw::Transform*& GetWorldTransform() {
+		return m_worldTransform;
+	}
 private:
 	std::pair<iw::EntityHandle, Level> LoadLevel(
 		const std::string& name,

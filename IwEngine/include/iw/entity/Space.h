@@ -12,6 +12,8 @@
 #	include "iw/events/eventbus.h"
 #endif
 
+// !!!! major bug with chunks getting cleared while iterating !!!! solve is to q everything i think
+
 namespace iw {
 namespace ECS {
 	struct Entity;

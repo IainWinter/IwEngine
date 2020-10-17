@@ -9,67 +9,28 @@ GameCameraController::GameCameraController(
 	: System("Game Camera Controller")
 	, m_target(target)
 	, scene(scene)
-	, locked(false)
 	, follow(true)
-	, transitionToCenter(false)
 	, speed(2.0)
 {}
-
-float y = 27.15f;
-
-float startTime2 = 0;
-bool firstTransition = false;
-iw::vector3 lastPosition = 0;
-
-bool zoomOut = false;
-bool transition2 = false;
 
 void GameCameraController::Update(
 	iw::EntityComponentArray& eca)
 {
-	if (locked == true) {
-		return;
-	}
-
 	for (auto entity : eca) {
 		auto [t, c] = entity.Components.Tie<Components>();
 
-		iw::vector3 target;
 		if (follow) {
-			target = m_target.Find<iw::Transform>()->Position;
-		}
+			iw::vector3 target = m_target.Find<iw::Transform>()->WorldPosition();
+			target.y = y;
 
-		else {
-			target = center;
-		}
-
-		target.y = y;
-
-		if (firstTransition) {
-			lastPosition = t->Position;
-			firstTransition = false;
-			transition2 = true;
-		}
-
-		else if (transition2) {
-			float time = 0.75f * (iw::Time::TotalTime() - startTime2);
-
-			t->Position = iw::lerp(lastPosition, target, 1 - (1 - time) * (1 - time)); // easeOutQuad
-
-			//iw::quaternion camrot =
-			//	iw::quaternion::from_axis_angle(iw::vector3::unit_x, iw::Pi / 2)
-			//	* iw::quaternion::from_axis_angle(iw::vector3::unit_z, iw::Pi);
-			//t->Rotation = iw::lerp(t->Rotation, camrot, iw::Time::DeltaTime() * speed);
-
-			if (time > 1) {
-				t->Position = target;
-				transition2 = false;
-			}
-		}
-
-		else {
 			t->Position = iw::lerp(t->Position, target, iw::DeltaTimeScaled() * 2);
 		}
+
+		else {
+			t->Position = center;
+		}
+
+		previous = t->Position;
 	}
 }
 
@@ -77,27 +38,27 @@ bool GameCameraController::On(
 	iw::ActionEvent& e)
 {
 	switch (e.Action) {
-		case iw::val(Actions::GOTO_NEXT_LEVEL): {
-			follow = false;
-
-			GoToNextLevelEvent& event = e.as<GoToNextLevelEvent>();
-
-			center = 0;
-			follow = event.CameraFollow;
-
-			startTime2 = iw::TotalTime();
-			firstTransition = true;
-
-			SetTarget(event.LevelName);
-
-			break;
-		}
-		case iw::val(Actions::START_LEVEL): {
-			StartLevelEvent& event = e.as<StartLevelEvent>();
+		case iw::val(Actions::TRANSITION_TO_LEVEL): {
+			TransitionToLevelEvent& event = e.as<TransitionToLevelEvent>();
 
 			follow = event.CameraFollow;
-
 			SetTarget(event.LevelName);
+
+			if (!follow) {
+				float start = iw::TotalTime();
+				float wait = 1.0f;
+
+				Task->queue([=]() {
+					while (iw::ease(iw::TotalTime() - start) < wait) {
+						center = iw::lerp(
+							previous,
+							iw::vector3(0, y, 0),
+							iw::ease(iw::TotalTime() - start));
+					}
+
+					center = iw::vector3(0, y, 0);
+				});
+			}
 
 			break;
 		}
@@ -126,16 +87,10 @@ bool GameCameraController::On(
 void GameCameraController::SetTarget(
 	std::string_view levelName)
 {
-	zoomOut = false;
-
-	if (//   levelName == "levels/forest/forest05.a.json"
-		//|| levelName == "levels/forest/forest07.a.json"
-		//|| levelName == "levels/forest/forest12.a.json"
-		/*||*/ 
-		   levelName == "levels/forest/forest22.json"
+	if (   levelName == "levels/forest/forest22.json"
 		|| levelName.find("top")  != std::string::npos
 		|| levelName.find("cave") != std::string::npos
-		|| levelName.find(".a") != std::string::npos
+		|| levelName.find(".a")   != std::string::npos
 		|| levelName == "levels/canyon/canyon08.json"
 		|| levelName == "levels/canyon/canyon09.json"
 		|| levelName == "levels/canyon/canyon10.json")
@@ -143,16 +98,7 @@ void GameCameraController::SetTarget(
 		y = 17.15f;
 	}
 
-	/*else if(levelName == "levels/canyon/canyon02.json")
-	{
-		y = 22.15f;
-	}*/
-
 	else {
 		y = 27.15f;
-	}
-
-	if (levelName == "levels/forest/forest07.a.json") {
-		zoomOut = true;
 	}
 }

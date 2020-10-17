@@ -24,8 +24,6 @@ private:
 public:
 	WorldHoleSystem();
 
-	void collide(iw::Manifold& man, iw::scalar dt);
-
 	int Initialize() override;
 	void Update() override;
 

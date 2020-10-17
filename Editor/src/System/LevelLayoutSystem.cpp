@@ -94,15 +94,9 @@ int LevelLayoutSystem::Initialize() {
 	m_worlds.push_back(canyon);
 	m_worlds.push_back(cavTop);
 
-	FillWorlds(startingLevel);
-
-	Bus->push<GotoConnectedLevelEvent>(0);
+	Bus->push<GotoLevelEvent>(startingLevel);
 
 	return 0;
-}
-
-void LevelLayoutSystem::Update() {
-
 }
 
 bool LevelLayoutSystem::On(
@@ -110,9 +104,24 @@ bool LevelLayoutSystem::On(
 {
 	switch (e.Action) {
 		case iw::val(Actions::RESET_LEVEL): {
-			Bus->send<DeactivateLevelEvent>(m_currentWorld->CurrentLevel->LevelName);
-			Bus->send<StartLevelEvent>     (m_currentWorld->CurrentLevel->LevelName);
-			Bus->send<ActivateLevelEvent>  (m_currentWorld->CurrentLevel->LevelName, false);
+			Bus->push<DeactivateLevelEvent>(m_currentWorld->CurrentLevel->LevelName);
+			Bus->push<ActivateLevelEvent>  (m_currentWorld->CurrentLevel->LevelName, 0);
+
+			break;
+		}
+		case iw::val(Actions::GOTO_LEVEL): {
+			GotoLevelEvent& event = e.as<GotoLevelEvent>();
+
+			FillWorlds(event.LevelName);
+
+			Bus->push<UnloadLevelEvent>("All");
+
+			Bus->push<LoadLevelEvent>(m_currentWorld->CurrentLevel->LevelName, "");
+			for (LevelLayout& connection : m_currentWorld->CurrentLevel->Connections) {
+				Bus->push<LoadLevelEvent>(connection.LevelName, m_currentWorld->CurrentLevel->LevelName);
+			}
+
+			Bus->push<ActivateLevelEvent>(m_currentWorld->CurrentLevel->LevelName, 101);
 
 			break;
 		}
@@ -127,21 +136,16 @@ bool LevelLayoutSystem::On(
 			}
 
 			else {
-				// unload previous level & its connections that arnt the level that we are about to be on
-
 				if (   event.Index == 1
-					&& m_currentWorld->PreviousLevels.size() > 0)
+					&& m_currentWorld->PreviousLevels.size() > 1) // index = 1 means that we are moving to next full level
 				{
-					for (unsigned i = 0; i < m_currentWorld->CurrentLevel->Connections.size(); i++) {
-						if (i != event.Index - 1) {
-							Bus->send<UnloadLevelEvent>(m_currentWorld->CurrentLevel->Connections.at(i).LevelName);
-						}
+					for (unsigned i = 1; i < m_currentWorld->CurrentLevel->Connections.size(); i++) {
+						Bus->push<UnloadLevelEvent>(m_currentWorld->CurrentLevel->Connections.at(i).LevelName);
 					}
-
-					Bus->send<UnloadLevelEvent>(m_currentWorld->PreviousLevels.top()->LevelName);
+					Bus->push<UnloadLevelEvent>(m_currentWorld->PreviousLevels.top()->LevelName);
 				}
 
-				if (event.Index > 0) {
+				if (event.Index > 0) { // if the index is > 0 then we arn't resetting the level & need to move
 					m_currentWorld->ToNextLevel(event.Index - 1);
 				}
 
@@ -156,7 +160,6 @@ bool LevelLayoutSystem::On(
 				}
 			}
 
-			Bus->push<StartLevelEvent>   (m_currentWorld->CurrentLevel->LevelName);
 			Bus->push<ActivateLevelEvent>(m_currentWorld->CurrentLevel->LevelName, event.Index);
 
 			break;
@@ -195,6 +198,8 @@ void LevelLayoutSystem::WorldLayout::ToPreviousLevel() {
 void LevelLayoutSystem::WorldLayout::FillWorld(
 	const std::string& untilLevel)
 {
+	UnwindWorld();
+
 	while (CurrentLevel && CurrentLevel->LevelName != untilLevel) {
 		int next = 0;
 
@@ -205,5 +210,11 @@ void LevelLayoutSystem::WorldLayout::FillWorld(
 		}
 
 		ToNextLevel(next);
+	}
+}
+
+void LevelLayoutSystem::WorldLayout::UnwindWorld() {
+	while (PreviousLevels.size() > 0) {
+		ToPreviousLevel();
 	}
 }

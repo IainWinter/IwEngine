@@ -49,6 +49,12 @@ namespace math {
 	{
 		return fabsf(a - b) * fast_pow(10, (float)accuracy) < 1;
 	}
+
+	float ease(
+		float time)
+	{
+		return 1 - (1 - time) * (1 - time);
+	}
 }
 
 	using namespace math;

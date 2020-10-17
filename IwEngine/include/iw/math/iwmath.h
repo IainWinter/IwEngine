@@ -89,6 +89,15 @@ namespace math {
 		float b,
 		unsigned int accuracy);
 
+	/*
+	* Returns 1 - (1 - x) * (1 - x).
+	*
+	* @param x A floating point number.
+	*/
+	IWMATH_API
+	float ease(
+		float time);
+
 	/**
 	* Returns the linear interpolation from a to b by w.
 	*

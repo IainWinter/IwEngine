@@ -13,12 +13,10 @@ public:
 		iw::CameraController* Controller;
 	};
 private:
-	bool locked;
-	bool follow;
-	bool transitionToCenter;
+	bool follow, locked;
 
-	iw::vector3 center;
-	float speed;
+	iw::vector3 previous, center;
+	float speed, y;
 
 	iw::Entity& m_target;
 	iw::Scene* scene;

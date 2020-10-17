@@ -41,12 +41,8 @@ struct OtherGuyTag {
 	int Health = 3;
 };
 
-LevelSystem::LevelSystem(
-	iw::Entity& player,
-	iw::Scene* scene)
+LevelSystem::LevelSystem()
 	: iw::System<iw::CollisionObject, iw::Model, LevelDoor>("Level")
-	, playerEntity(player)
-	, scene(scene)
 {
 	currentLevelName = "levels/canyon/canyon01.json";
 
@@ -60,7 +56,7 @@ std::unordered_map<std::string, iw::StaticPS*> pSystems;
 
 int LevelSystem::Initialize() {
 	iw::Entity e = Space->CreateEntity<iw::Transform>();
-	m_worldtransform = e.Set<iw::Transform>();
+	m_worldTransform = e.Set<iw::Transform>();
 
 	// Leaves
 
@@ -108,34 +104,6 @@ void LevelSystem::Update(
 	}
 
 	sequence.Update();
-
-	if (transition) {
-		iw::Transform* current = levelEntity    .Find<iw::Transform>();
-		iw::Transform* next    = nextLevelEntity.Find<iw::Transform>();
-
-		iw::vector3 target = currentLevel.LevelPosition;
-
-		if (levelDoor != iw::EntityHandle::Empty) {
-			LevelDoor* currentDoor = levelDoor.Find<LevelDoor>();
-			if (currentDoor && currentDoor->GoBack) {
-				target = -lastLevelPosition;
-			}
-		}
-		
-		if (iw::Time::DeltaTimeScaled() > 0.2) return; // loading cause
-
-		float time = 0.75f * (iw::Time::TotalTime() - startTime);
-
-		current->Position = iw::lerp(iw::vector3(0), -target,        1 - (1 - time) * (1 - time));
-		next   ->Position = iw::lerp(target,         iw::vector3(0), 1 - (1 - time) * (1 - time));
-
-		if (time > 1) {
-			Bus->push<AtNextLevelEvent>();
-
-			next->Position = 0.0f;
-			transition = false;
-		}
-	}
 }
 
 bool LevelSystem::On(
@@ -172,15 +140,16 @@ bool LevelSystem::On(
 			UnlockLevelDoorEvent& event = e.as<UnlockLevelDoorEvent>();
 
 			Space->Query<LevelDoor>().Each([&](auto, auto door) {
-				door->State = event.State;
-				door->ColorTimer = 0.25f;
+				if (door->State != event.State) {
+					door->State = event.State;
+					door->ColorTimer = 0.25f;
+				}
 			});
 
 			break;
 		}
 		case iw::val(Actions::LOAD_LEVEL): {
 			LoadLevelEvent& event = e.as<LoadLevelEvent>();
-
 			LoadLevel(event.LevelName, event.PreviousName);
 
 			break;
@@ -189,65 +158,85 @@ bool LevelSystem::On(
 		case iw::val(Actions::UNLOAD_LEVEL): {
 			std::string levelName = e.as<UnloadLevelEvent>().LevelName;
 
-			auto itr = m_loadedLevels.find(levelName);
-			if (itr != m_loadedLevels.end()) {
-				DestroyAll(Space->FindComponent<iw::Transform>(itr->second.first));
+			if (levelName == "All") {
+				for (auto pair : m_loadedLevels) {
+					DeactivateLevel(pair.first);
+					Space->QueueEntity(pair.second.first, iw::func_Destroy);
+				}
+
+				m_loadedLevels.clear();
+			}
+
+			else {
+				auto itr = m_loadedLevels.find(levelName);
+				if (itr != m_loadedLevels.end()) {
+					DeactivateLevel(itr->first);
+					Space->QueueEntity(itr->second.first, iw::func_Destroy);
+					m_loadedLevels.erase(itr);
+				}
 			}
 
 			break;
 		}
-
 		case iw::val(Actions::START_LEVEL): {
 			StartLevelEvent& event = e.as<StartLevelEvent>();
 
 			auto [entity, level] = m_loadedLevels.at(event.LevelName);
 
 			event.CameraFollow   = level.CameraFollow;
-			event.PlayerPosition = level.InPosition;
+			event.PlayerPosition = -m_worldTransform->Position + level.InPosition;
 			event.Level = Space->FindComponent<iw::Transform>(entity);
 
 			break;
 		}
-		case iw::val(Actions::AT_NEXT_LEVEL): {
-			if (nextLevelEntity != iw::EntityHandle::Empty) {
-				DestroyAll(levelEntity.Find<iw::Transform>());
-
-				lastLevelPosition = currentLevel.LevelPosition;
-
-				levelEntity = nextLevelEntity;
-				nextLevelEntity = iw::Entity();
-
-				levelDoor = nextLevelDoor;
-				nextLevelDoor = iw::Entity();
-
-				iw::Transform* current = levelEntity.Find<iw::Transform>();
-				current->Position = 0;
-			}
-
-			Bus->push<StartLevelEvent>(currentLevelName);
-
-			sequence.Restart();
-
-			break;
-		}
-		case iw::val(Actions::GOTO_NEXT_LEVEL): {
-			startTime = iw::Time::TotalTime();
-			break;
-		}
 		case iw::val(Actions::ACTIVATE_LEVEL): {
 			ActivateLevelEvent& event = e.as<ActivateLevelEvent>();
-			auto itr = m_loadedLevels.find(event.LevelName);
 
+			auto itr = m_loadedLevels.find(event.LevelName);
 			if (itr != m_loadedLevels.end()) {
+
+				Level& level = itr->second.second;
+
 				ActivateLevel(event.LevelName);
 				
-				if (event.Direction > 0) {
-					m_worldtransform->Position -= itr->second.second.LevelPosition;
+				iw::vector3 target;
+
+				if (event.Direction == 101) {
+					m_worldTransform->Position = 0;
+				}
+
+				else if (event.Direction > 0) {
+					m_previousLevelLocation = m_worldTransform->Position;
+					target = m_previousLevelLocation - itr->second.second.LevelPosition;
 				}
 
 				else if (event.Direction < 0) {
-					m_worldtransform->Position = 0;
+					target = m_previousLevelLocation;
 				}
+
+				else {
+					Bus->push<StartLevelEvent>(event.LevelName); // if reset just start & exit
+					break;
+				}
+
+				Bus->push<TransitionToLevelEvent>(event.LevelName, 
+					level.CameraFollow, -target + level.InPosition, level.LevelPosition);
+
+				float start = iw::TotalTime();                  // if not transition then start
+				float wait  = 1.0f;
+
+				Task->queue([=]() {
+					while (iw::TotalTime() - start < wait) {
+						m_worldTransform->Position = iw::lerp(
+							m_previousLevelLocation,
+							target,
+							iw::TotalTime() - start);
+					}
+
+					m_worldTransform->Position = target;
+
+					Bus->push<StartLevelEvent>(event.LevelName);
+				});
 			}
 
 			break;
@@ -384,7 +373,7 @@ std::pair<iw::EntityHandle, Level> LevelSystem::LoadLevel(
 			entity.Set<iw::Model>(*model);
 		}
 
-		m_worldtransform->AddChild(levelTransform);
+		m_worldTransform->AddChild(levelTransform);
 
 		m_loadedLevels.emplace(name, std::make_pair(levelEntity.Handle, level));
 	}
@@ -765,32 +754,17 @@ void LevelSystem::DeactivateLevel(
 
 	auto func = [&](auto e, auto transform, auto) {
 		if (transform->Parent() == levelTransform) {
-			Space->DestroyEntity(e);
+			Space->QueueEntity(e, iw::func_Destroy);
 		}
 	};
 
-	Space->Query<iw::Transform, Enemy> ().Each(func);
-	Space->Query<iw::Transform, Bullet>().Each(func);
-	Space->Query<iw::Transform, Item>  ().Each(func);
 	Space->Query<iw::Transform, LevelDoor>().Each(func);
 	Space->Query<iw::Transform, iw::CollisionObject>().Each(func);
 	Space->Query<iw::Transform, iw::Rigidbody>().Each(func);
-
-	//iw::Transform* transform = Space->FindComponent<iw::Transform>(m_loadedLevels.at(name).first);
-
-	//for (iw::Transform* child : transform->Children()) {
-	//	iw::Entity entity = Space->FindEntity(child);
-
-	//	LOG_INFO << entity.Index();
-
-	//	if (entity.Has<iw::CollisionObject>() || entity.Has<iw::Rigidbody>()) {
-	//		entity.Destroy();
-	//	}
-	//}
 }
 
 void LevelSystem::DestroyAll(
-	iw::Transform* transform) // should be in engine somewhere
+	iw::Transform* transform) // dont use this, somehow some physics objects loose their parents?? 
 {
 	if (transform) {
 		for (iw::Transform* child : transform->Children()) {
