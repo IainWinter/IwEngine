@@ -51,12 +51,14 @@ namespace Graphics {
 		IWGRAPHICS_API virtual bool CanCastShadows() const;
 		IWGRAPHICS_API virtual bool Outdated()       const;
 
-		IWGRAPHICS_API virtual       float              Intensity()            const;
-		IWGRAPHICS_API virtual const vector3&           Color()                const;
-		IWGRAPHICS_API virtual const vector3&           Position()             const;
-		IWGRAPHICS_API virtual const ref<RenderTarget>& ShadowTarget()         const;
-		IWGRAPHICS_API virtual const ref<Shader>&       ShadowShader()         const;
-		IWGRAPHICS_API virtual const ref<Shader>&       ParticleShadowShader() const;
+		IWGRAPHICS_API virtual float             Intensity()            const;
+		IWGRAPHICS_API virtual vector3           Color()                const;
+		IWGRAPHICS_API virtual vector3           Position()             const;
+		IWGRAPHICS_API virtual vector3           WorldPosition()        const;
+
+		IWGRAPHICS_API virtual ref<RenderTarget> ShadowTarget()         const;
+		IWGRAPHICS_API virtual ref<Shader>       ShadowShader()         const;
+		IWGRAPHICS_API virtual ref<Shader>       ParticleShadowShader() const;
 
 		IWGRAPHICS_API virtual void SetIntensity(           float              intensity);
 		IWGRAPHICS_API virtual void SetColor(         const vector3&           color);

@@ -119,9 +119,10 @@ namespace Graphics {
 				|| (m_transform && m_lastTransform != *m_transform))
 			{
 				m_needsToUpdateBuffer = false;
-				m_lastTransform.Position = m_transform ? m_transform->WorldPosition() : 0;
-				m_lastTransform.Scale    = m_transform ? m_transform->WorldScale()    : 0;
-				m_lastTransform.Rotation = m_transform ? m_transform->WorldRotation() : iw::quaternion(0);
+				m_lastTransform.Position = m_transform ? m_transform->Position : 0;
+				m_lastTransform.Scale    = m_transform ? m_transform->Scale    : 0;
+				m_lastTransform.Rotation = m_transform ? m_transform->Rotation : quaternion::identity;
+				m_lastTransform.SetParent(m_transform->Parent());
 
 				for (unsigned i : m_delete) {
 					m_particles.erase(m_particles.begin() + i);
@@ -159,7 +160,7 @@ namespace Graphics {
 				matrix4* models = m_alloc.alloc<matrix4>(count);
 
 				for (unsigned i = 0; i < count; i++) {
-					models[i] = m_particles[i].Transform.WorldTransformation();
+					models[i] = m_particles[i].Transform.WorldTransformation(); // somewhere there is 'World' where it should be local :<
 				}
 
 				m_mesh.Data()->SetBufferDataPtr(bName::UV1, count, models);
@@ -202,6 +203,10 @@ namespace Graphics {
 
 		std::vector<particle_t>& Particles() {
 			return m_particles;
+		}
+
+		unsigned ParticleCount() const {
+			return m_particles.size() + m_spawn.size() - m_delete.size();
 		}
 
 		bool HasParticleMesh() const {

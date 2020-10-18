@@ -31,11 +31,11 @@ namespace Graphics {
 
 		bool Outdated() const;
 
-		const vector3& Position() const;
-		//      vector3& Position();
+		vector3 Position() const;
+		vector3 WorldPosition() const;
 
-		const quaternion& Rotation() const;
-		//      quaternion& Rotation();
+		quaternion Rotation() const;
+		quaternion WorldRotation() const;
 
 		matrix4 View();
 		matrix4 View() const;

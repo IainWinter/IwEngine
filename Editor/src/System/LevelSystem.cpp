@@ -223,14 +223,14 @@ bool LevelSystem::On(
 					level.CameraFollow, -target + level.InPosition, level.LevelPosition);
 
 				float start = iw::TotalTime();                  // if not transition then start
-				float wait  = 1.0f;
+				float wait = 1.25f;
 
 				Task->queue([=]() {
 					while (iw::TotalTime() - start < wait) {
 						m_worldTransform->Position = iw::lerp(
 							m_previousLevelLocation,
 							target,
-							iw::TotalTime() - start);
+							iw::ease(iw::TotalTime() - start, wait));
 					}
 
 					m_worldTransform->Position = target;
@@ -303,35 +303,32 @@ std::pair<iw::EntityHandle, Level> LevelSystem::LoadLevel(
 				iw::Transform& transform = model->GetTransform(i);
 
 				mesh.SetMaterial(mesh.Material()->MakeInstance());
-
 				mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/vct/vct.shader"));
+				mesh.Material()->SetTexture("shadowMap", Asset->Load<iw::Texture>("SunShadowMap")); //mesh.Material()->SetTexture("shadowMap2", Asset->Load<iw::Texture>("LightShadowMap")); // shouldnt be part of material
+				mesh.Material()->Set("indirectDiffuse",  1);
+				mesh.Material()->Set("indirectSpecular", 0);
 			
-				if (mesh.Data()->Name().find("Bush") != std::string::npos) {
+				if (     mesh.Data()->Name().find("Bush")   != std::string::npos) {
 					mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/phong.shader"));
-					//mesh.Material()->Set("baseColor", iw::Color(0.7, 0.7, 0.6, 1));
-					//mesh.Material()->SetTransparency(iw::Transparency::ADD);
+					mesh.SetCullMe(true);
 				}
 
-				mesh.Material()->SetTexture("shadowMap", Asset->Load<iw::Texture>("SunShadowMap"));
-				//mesh.Material()->SetTexture("shadowMap2", Asset->Load<iw::Texture>("LightShadowMap")); // shouldnt be part of material
-
-				mesh.Material()->Set("indirectDiffuse", 1);
-				mesh.Material()->Set("indirectSpecular", 0);
-
-				if (mesh.Data()->Name().find("Ground") != std::string::npos) {
+				else if (mesh.Data()->Name().find("Ground") != std::string::npos) {
 					if (mesh.Data()->Description().HasBuffer(iw::bName::COLOR)) {
 						mesh.Material()->SetTexture("diffuseMap2", Asset->Load<iw::Texture>("textures/dirt/baseColor.jpg"));
 						mesh.Material()->SetTexture("normalMap2", Asset->Load<iw::Texture>("textures/dirt/normal.jpg"));
 					}
 				}
 			
-				else if(mesh.Data()->Name().find("Tree") != std::string::npos) {
+				else if (mesh.Data()->Name().find("Tree")   != std::string::npos) {
 					auto itr = pSystems.find(mesh.Data()->Name());
 					if (itr == pSystems.end()) {
 						iw::StaticPS* ps = new iw::StaticPS();
 					
 						iw::Mesh leafMesh = Asset->Load<iw::Model>("models/forest/redleaf.gltf")->GetMesh(0);
 						//leafMesh.SetData(leafMesh.Data()->MakeLink());
+
+						leafMesh.SetCullMe(true);
 
 						ps->SetParticleMesh(leafMesh);
 
@@ -369,6 +366,32 @@ std::pair<iw::EntityHandle, Level> LevelSystem::LoadLevel(
 					t2->SetParent(t);
 				}
 			}
+
+			/*iw::Entity bushes = Space->CreateEntity<iw::Transform, iw::ParticleSystem<iw::StaticParticle>>();
+
+			iw::Transform*                          tran = bushes.Set<iw::Transform>();
+			iw::ParticleSystem<iw::StaticParticle>* pSys = bushes.Set<iw::ParticleSystem<iw::StaticParticle>>();
+
+			tran->SetParent(levelTransform);
+			pSys->SetTransform(tran);
+
+			for (int i = 0; i < model->MeshCount(); i++) {
+				iw::Mesh&      mesh      = model->GetMesh(i);
+				iw::Transform& transform = model->GetTransform(i);
+
+				if (mesh.Data()->Name().find("Bush") != std::string::npos) {
+					if (!pSys->HasParticleMesh()) {
+						mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/particle/phong.shader"));
+						pSys->SetParticleMesh(mesh);
+					}
+
+					pSys->SpawnParticle(transform);
+					model->RemoveMesh(i);
+					i--;
+				}
+			}
+
+			if (pSys->ParticleCount() == 0) bushes.Destroy();*/
 
 			entity.Set<iw::Model>(*model);
 		}

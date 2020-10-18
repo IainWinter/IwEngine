@@ -315,7 +315,7 @@ namespace iw {
 		PushSystem<SpecialBarrierSystem>(playerSystem->GetPlayer());
 
 
-		PushSystem<GameCameraController>(playerSystem->GetPlayer(), MainScene);
+		PushSystem<GameCameraController>(playerSystem->GetPlayer());
 		PushSystem<ScoreSystem>(playerSystem->GetPlayer(), MainScene->MainCamera(), m_textCam);
 		PushSystem<EnemyDeathCircleSystem>();
 		PushSystem<PhysicsSystem>();
@@ -364,7 +364,7 @@ namespace iw {
 
 		MainScene->SetAmbiance(ambiance);
 
-		vector3 camPos = MainScene->MainCamera()->Position(); // no req
+		vector3 camPos = MainScene->MainCamera()->WorldPosition(); // no req
 		camPos.y = 0;
 
 		sun->SetPosition(camPos);
@@ -431,7 +431,7 @@ namespace iw {
 		}
 
 		if (ImGui::Button("Next level (don't spam)")) {
-			Bus->push<LoadNextLevelEvent>();
+			Bus->push<GotoConnectedLevelEvent>(1);
 		}
 
 		if (ImGui::Button("Spawn slowmo")) {

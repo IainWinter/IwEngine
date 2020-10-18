@@ -12,16 +12,17 @@ LevelLayoutSystem::LevelLayoutSystem()
 {}
 
 int LevelLayoutSystem::Initialize() {
-	std::string startingLevel = "levels/canyon/canyon01.json";
+	std::string startingLevel = "levels/canyon/cave03.a.json";
 
 	LevelLayout* canyon01 = new LevelLayout(); // keep all alive
 	LevelLayout* cave01   = new LevelLayout();
+	LevelLayout* top01    = new LevelLayout();
 
 	LevelLayout /***^***/ canyon02, canyon03,  canyon04, canyon04a, canyon05,
 	            canyon06, canyon07, canyon07a, canyon08, canyon09,  canyon10,
 	            /**^**/ cave02, cave03, cave03a, cave04,
 	            cave05, cave06, cave07, cave08,
-	            top01, top02, top03, top04,
+	            /****/ top02, top03, top04,
 	            top05, top06, top07, top08;
 
 	canyon01->LevelName = "levels/canyon/canyon01.json";
@@ -47,23 +48,23 @@ int LevelLayoutSystem::Initialize() {
 	cave07 .LevelName = "levels/canyon/cave07.json";
 	cave08 .LevelName = "levels/canyon/cave08.json";
 
-	top01.LevelName = "levels/canyon/top01.json";
-	top02.LevelName = "levels/canyon/top02.json"; 
-	top03.LevelName = "levels/canyon/top03.json"; 
-	top04.LevelName = "levels/canyon/top04.json";
-	top05.LevelName = "levels/canyon/top05.json";
-	top06.LevelName = "levels/canyon/top06.json";
-	top07.LevelName = "levels/canyon/top07.json";
-	top08.LevelName = "levels/canyon/top08.json";
+	top01->LevelName = "levels/canyon/top01.json";
+	top02 .LevelName = "levels/canyon/top02.json"; 
+	top03 .LevelName = "levels/canyon/top03.json"; 
+	top04 .LevelName = "levels/canyon/top04.json";
+	top05 .LevelName = "levels/canyon/top05.json";
+	top06 .LevelName = "levels/canyon/top06.json";
+	top07 .LevelName = "levels/canyon/top07.json";
+	top08 .LevelName = "levels/canyon/top08.json";
 
-	top06.AddConnection(top07);
-	top05.AddConnection(top06);
-	top04.AddConnection(top05);
-	top03.AddConnection(top04);
-	top02.AddConnection(top03);
-	top01.AddConnection(top02);
+	top07 .AddConnection(top08);
+	top06 .AddConnection(top07);
+	top05 .AddConnection(top06);
+	top04 .AddConnection(top05);
+	top03 .AddConnection(top04);
+	top02 .AddConnection(top03);
+	top01->AddConnection(top02);
 
-	cave08 .AddConnection(top01);
 	cave07 .AddConnection(cave08);
 	cave06 .AddConnection(cave07);
 	cave05 .AddConnection(cave06);
@@ -89,10 +90,12 @@ int LevelLayoutSystem::Initialize() {
 	iw::JsonSerializer("C:/dev/IwEngine/Editor/assets/levels/cavTop.json").Write(*cave01);
 
 	WorldLayout* canyon = new WorldLayout(canyon01);
-	WorldLayout* cavTop = new WorldLayout(cave01);
+	WorldLayout* cave   = new WorldLayout(cave01);
+	WorldLayout* top    = new WorldLayout(top01);
 
 	m_worlds.push_back(canyon);
-	m_worlds.push_back(cavTop);
+	m_worlds.push_back(cave);
+	m_worlds.push_back(top);
 
 	Bus->push<GotoLevelEvent>(startingLevel);
 

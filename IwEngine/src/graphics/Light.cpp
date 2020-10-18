@@ -87,19 +87,27 @@ namespace Graphics {
 		return m_intensity;
 	}
 
-	const vector3& Light::Position() const {
+	vector3 Light::Color() const {
+		return m_color;
+	}
+
+	vector3 Light::Position() const {
 		return ShadowCamera()->Position();
 	}
 
-	const iw::ref<RenderTarget>& Light::ShadowTarget() const {
+	vector3 Light::WorldPosition() const {
+		return ShadowCamera()->WorldPosition();
+	}
+
+	ref<RenderTarget> Light::ShadowTarget() const {
 		return m_shadowTarget;
 	}
 
-	const iw::ref<Shader>& Light::ShadowShader() const {
+	ref<Shader> Light::ShadowShader() const {
 		return m_shadowShader;
 	}
 
-	const ref<Shader>& Light::ParticleShadowShader() const {
+	ref<Shader> Light::ParticleShadowShader() const {
 		return m_particleShadowShader;
 	}
 
@@ -137,10 +145,6 @@ namespace Graphics {
 		ref<Shader>& particleShadowShader)
 	{
 		m_particleShadowShader = particleShadowShader;
-	}
-	
-	const vector3& Light::Color() const {
-		return m_color;
 	}
 }
 }

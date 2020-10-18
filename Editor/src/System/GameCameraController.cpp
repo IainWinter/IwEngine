@@ -4,13 +4,11 @@
 #include <imgui/imgui.h>
 
 GameCameraController::GameCameraController(
-	iw::Entity& target,
-	iw::Scene* scene)
+	iw::Entity& target)
 	: System("Game Camera Controller")
 	, m_target(target)
-	, scene(scene)
-	, follow(true)
-	, speed(2.0)
+	, m_follow(true)
+	, m_speed(2.0)
 {}
 
 void GameCameraController::Update(
@@ -19,18 +17,22 @@ void GameCameraController::Update(
 	for (auto entity : eca) {
 		auto [t, c] = entity.Components.Tie<Components>();
 
-		if (follow) {
-			iw::vector3 target = m_target.Find<iw::Transform>()->WorldPosition();
-			target.y = y;
+		if (t->Parent() == nullptr) {
+			t->SetParent(m_target.Find<iw::Transform>()->Parent());
+		}
 
-			t->Position = iw::lerp(t->Position, target, iw::DeltaTimeScaled() * 2);
+		if (m_follow) {
+			iw::vector3 target = m_target.Find<iw::Transform>()->Position;
+			target.y = m_y;
+
+			t->Position = iw::lerp(t->Position, target, iw::DeltaTimeScaled() * m_speed);
 		}
 
 		else {
-			t->Position = center;
+			t->Position = m_center;
 		}
 
-		previous = t->Position;
+		m_previous = t->Position;
 	}
 }
 
@@ -41,32 +43,35 @@ bool GameCameraController::On(
 		case iw::val(Actions::TRANSITION_TO_LEVEL): {
 			TransitionToLevelEvent& event = e.as<TransitionToLevelEvent>();
 
-			follow = event.CameraFollow;
+			m_follow = false;
 			SetTarget(event.LevelName);
 
-			if (!follow) {
-				float start = iw::TotalTime();
-				float wait = 1.0f;
+			float start = iw::TotalTime();
+			float wait = 1.25f;
 
-				Task->queue([=]() {
-					while (iw::ease(iw::TotalTime() - start) < wait) {
-						center = iw::lerp(
-							previous,
-							iw::vector3(0, y, 0),
-							iw::ease(iw::TotalTime() - start));
-					}
+			iw::vector3 target = event.CameraFollow
+				? event.PlayerPosition
+				: event.CenterPosition;
 
-					center = iw::vector3(0, y, 0);
-				});
-			}
+			Task->queue([=]() {
+				while (iw::TotalTime() - start < wait) {
+					m_center = iw::lerp(
+						m_previous,
+						iw::vector3(target.x, m_y, target.z),
+						iw::ease(iw::TotalTime() - start, wait));
+				}
+
+				m_center = iw::vector3(target.x, m_y, target.z);
+				m_follow = event.CameraFollow;
+			});
 
 			break;
 		}
 		case iw::val(Actions::SET_CAMERA_TARGET): {
 			SetCameraTargetEvent& event = e.as<SetCameraTargetEvent>();
 
-			center = event.Target;
-			y      = event.Target.y;
+			m_center = event.Target;
+			m_y      = event.Target.y;
 			
 			if (event.ResetY) {
 				SetTarget("");
@@ -75,7 +80,7 @@ bool GameCameraController::On(
 			break;
 		}
 		case iw::val(Actions::DEV_CONSOLE): {
-			locked = !e.as<iw::ToggleEvent>().Active;
+			m_locked = !e.as<iw::ToggleEvent>().Active;
 
 			break;
 		}
@@ -95,10 +100,10 @@ void GameCameraController::SetTarget(
 		|| levelName == "levels/canyon/canyon09.json"
 		|| levelName == "levels/canyon/canyon10.json")
 	{
-		y = 17.15f;
+		m_y = 17.15f;
 	}
 
 	else {
-		y = 27.15f;
+		m_y = 27.15f;
 	}
 }

@@ -347,7 +347,7 @@ bool PlayerSystem::On(
 			iw::vector3 previous = r->Trans().Position;
 
 			float start = iw::TotalTime();
-			float wait = 1.0f;
+			float wait = 1.25f;
 
 			if (event.PlayerPosition.y == 0) event.PlayerPosition.y = 1;
 

@@ -221,7 +221,7 @@ namespace Graphics {
 		m_shadow  = 1;
 		m_block   = 1;
 		m_camera += 1;
-		m_position = camera ? camera->Position() : vector3::zero;
+		m_position = camera ? camera->WorldPosition() : vector3::zero;
 
 		BeginSceneOP* op = m_pool.alloc<BeginSceneOP>();
 		op->Scene  = nullptr;
@@ -243,7 +243,7 @@ namespace Graphics {
 		m_shadow  = 1;
 		m_block   = 1;
 		m_camera += 1;
-		m_position = scene->MainCamera()->Position();
+		m_position = scene->MainCamera()->WorldPosition();
 
 		BeginSceneOP* op = m_pool.alloc<BeginSceneOP>();
 		op->Scene  = scene;
@@ -265,7 +265,7 @@ namespace Graphics {
 		m_shadow  = 0;
 		m_block   = 1;
 		m_camera += 1;
-		m_position = light->Position();
+		m_position = light->WorldPosition();
 
 		BeginShadowOP* op = m_pool.alloc<BeginShadowOP>();
 		op->Light = light;
@@ -332,6 +332,15 @@ namespace Graphics {
 		const Transform* transform,
 		Mesh* mesh)
 	{
+		if (mesh->CullMe()) { // temp
+			auto [x, y, z] = transform->WorldPosition();
+
+			if (   m_position.x - 32 > x
+				|| m_position.x + 32 < x
+				|| m_position.z - 32 > z
+				|| m_position.z + 32 < z) return;
+		}
+		
 		m_block        = 2;
 		m_material     =     mesh->Material() ? mesh->Material()->__GetOrder()   : 0;
 		m_transparency = val(mesh->Material() ? mesh->Material()->Transparency() : Transparency::NONE);
@@ -352,6 +361,15 @@ namespace Graphics {
 		const Transform& transform,
 		Mesh& mesh)
 	{
+		if (mesh.CullMe()) { // temp same as above ^^
+			auto [x, y, z] = transform.WorldPosition();
+
+			if (   m_position.x - 32 > x
+				|| m_position.x + 32 < x
+				|| m_position.z - 32 > z
+				|| m_position.z + 32 < z) return;
+		}
+
 		m_block        = 2;
 		m_material     =     mesh.Material() ? mesh.Material()->__GetOrder()   : 0;
 		m_transparency = val(mesh.Material() ? mesh.Material()->Transparency() : Transparency::NONE);

@@ -72,7 +72,7 @@ void EnemySystem::Update(
 			// lmao this one breaks the story
 			// 
 			case EnemyType::SEEK: {
-				iw::vector3 target = player.Find<iw::Transform>()->Position;
+				iw::vector3 target = player.Find<iw::Transform>()->WorldPosition();
 				float       dir    = atan2(target.z - transform->Position.z, target.x - transform->Position.x);
 
 				obj->Trans().Rotation = iw::quaternion::from_euler_angles(0, dir, 0);
@@ -88,7 +88,7 @@ void EnemySystem::Update(
 			case EnemyType::BOSS_FOREST: {
 				// should rotate in same direction until at player
 				if (enemy->Timer < enemy->ChargeTime) {
-					iw::vector3 target = player.Find<iw::Transform>()->Position;
+					iw::vector3 target = player.Find<iw::Transform>()->WorldPosition();
 					float       dir    = atan2(target.z - transform->Position.z, target.x - transform->Position.x);
 
 					obj->Trans().Rotation = iw::lerp(obj->Trans().Rotation, iw::quaternion::from_euler_angles(0, dir, 0), iw::Time::DeltaTime() * 4);

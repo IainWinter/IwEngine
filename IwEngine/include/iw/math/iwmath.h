@@ -96,7 +96,8 @@ namespace math {
 	*/
 	IWMATH_API
 	float ease(
-		float time);
+		float time,
+		float scale = 1.0f);
 
 	/**
 	* Returns the linear interpolation from a to b by w.

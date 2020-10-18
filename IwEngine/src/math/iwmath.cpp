@@ -51,9 +51,10 @@ namespace math {
 	}
 
 	float ease(
-		float time)
+		float time,
+		float scale)
 	{
-		return 1 - (1 - time) * (1 - time);
+		return 1 - (1 - time / scale) * (1 - time / scale);
 	}
 }
 

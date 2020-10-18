@@ -24,8 +24,12 @@ namespace Graphics {
 		return m_shadowCamera.ViewProjection();
 	}
 
-	const quaternion& DirectionalLight::Rotation() const {
+	quaternion DirectionalLight::Rotation() const {
 		return m_shadowCamera.Rotation();
+	}
+
+	quaternion DirectionalLight::WorldRotation() const {
+		return ShadowCamera()->WorldRotation();
 	}
 
 	void DirectionalLight::SetRotation(

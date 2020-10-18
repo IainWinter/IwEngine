@@ -329,7 +329,7 @@ namespace Graphics {
 			v   = camera->View();
 			p   = camera->Projection();
 			vp  = camera->ViewProjection();
-			pos = camera->Position();
+			pos = camera->WorldPosition();
 		}
 
 		if (   m_cameraData.CameraPos != pos	
@@ -416,7 +416,7 @@ namespace Graphics {
 	{
 		m_lightData.LightCounts.x = lights.size();
 		for (size_t i = 0; i < lights.size(); i++) {
-			m_lightData.PointLights[i].Position   = lights[i]->Position();
+			m_lightData.PointLights[i].Position   = lights[i]->WorldPosition();
 			m_lightData.PointLights[i].Position.w = lights[i]->Radius();
 			m_lightData.PointLights[i].Color      = lights[i]->Color();
 		}
@@ -429,7 +429,7 @@ namespace Graphics {
 	{
 		m_lightData.LightCounts.y = lights.size();
 		for (size_t i = 0; i < lights.size(); i++) {
-			m_lightData.DirectionalLights[i].InvDirection = -vector3::unit_z * lights[i]->Rotation();
+			m_lightData.DirectionalLights[i].InvDirection = -vector3::unit_z * lights[i]->WorldRotation();
 			m_lightData.DirectionalLights[i].Color        = lights[i]->Color();
 		}
 

@@ -264,6 +264,8 @@ namespace detail {
 		ref<MeshData> m_data;
 		ref<Material> m_material;
 
+		bool m_cullMe = false; // temp
+
 	public:
 		IWGRAPHICS_API
 		Mesh() = default;
@@ -296,6 +298,18 @@ namespace detail {
 
 		inline bool IsEmpty() const {
 			return !m_data && !m_material;
+		}
+
+		// temp
+
+		inline bool CullMe() const {
+			return m_cullMe;
+		}
+
+		inline void SetCullMe(
+			bool cullme)
+		{
+			m_cullMe = cullme;
 		}
 
 		IWGRAPHICS_API void Bind  (const ref<IDevice>& device);       // Binds the mesh for use

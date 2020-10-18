@@ -1,6 +1,7 @@
 #pragma once
 
 #include "iw/reflection/Reflect.h"
+#include "iw/math/vector3.h"
 #include <string>
 #include <vector>
 

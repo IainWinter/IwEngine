@@ -13,18 +13,16 @@ public:
 		iw::CameraController* Controller;
 	};
 private:
-	bool follow, locked;
+	bool m_follow, m_locked;
 
-	iw::vector3 previous, center;
-	float speed, y;
+	iw::vector3 m_previous, m_center;
+	float m_speed, m_y;
 
 	iw::Entity& m_target;
-	iw::Scene* scene;
 
 public:
 	GameCameraController(
-		iw::Entity& target,
-		iw::Scene* scene);
+		iw::Entity& target);
 
 	void SetLocked(
 		bool locked)
@@ -37,7 +35,7 @@ public:
 
 	bool On(
 		iw::ActionEvent& e) override;
-
+private:
 	void SetTarget(
 		std::string_view levelName);
 };

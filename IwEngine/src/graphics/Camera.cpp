@@ -113,12 +113,20 @@ namespace Graphics {
 			|| Rotation() != m_rotation;
 	}
 
-	const vector3& Camera::Position() const {
+	vector3 Camera::Position() const {
 		return m_transform ? m_transform->Position : m_position;
 	}
 
-	const quaternion& Camera::Rotation() const {
+	vector3 Camera::WorldPosition() const {
+		return m_transform ? m_transform->WorldPosition() : m_position;
+	}
+
+	quaternion Camera::Rotation() const {
 		return m_transform ? m_transform->Rotation : m_rotation;
+	}
+
+	quaternion Camera::WorldRotation() const {
+		return m_transform ? m_transform->WorldRotation() : m_rotation;
 	}
 
 	//vector3& Camera::Position() {
@@ -171,13 +179,13 @@ namespace Graphics {
 
 	void Camera::RecalculateView() {
 		m_view = matrix4::create_look_at(
-			Position(),
-			Position() + vector3::unit_z * Rotation(),
-			vector3::unit_y * Rotation());
+			WorldPosition(),
+			WorldPosition() + vector3::unit_z * WorldRotation(),
+			vector3::unit_y * WorldRotation());
 
 
-		m_position = Position();
-		m_rotation = Rotation();
+		m_position = WorldPosition();
+		m_rotation = WorldRotation();
 
 		m_outdated = false;
 	}
