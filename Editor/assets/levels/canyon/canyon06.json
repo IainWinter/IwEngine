@@ -11,27 +11,43 @@
     "z": 0.000000
   },
   "Enemies": {
-    "size": 1,
+    "size": 2,
     "items": [
       {
         "Type": 1,
         "Bullet": {
           "Type": 0,
-          "Speed": 20.000000,
+          "Speed": 5.000000,
           "Package": 65538
         },
         "Speed": 0.392699,
         "FireTime": 5.00000,
-        "ChargeTime": 2.000000,
+        "ChargeTime": 1.600000,
         "Rotation": 0.196349
+      },
+      {
+        "Type": 0,
+        "Bullet": {
+          "Type": 0,
+          "Speed": 5.000000,
+          "Package": 65536
+        },
+        "Speed": 0.5235987,
+        "FireTime": 0.240000,
+        "ChargeTime": 0.000000,
+        "Rotation": 3.1415927
       }
     ]
   },
   "Positions": {
-    "size": 1,
+    "size": 2,
     "items": [
       {
-        "x": 0.000000,
+        "x": -6.500000,
+        "y": -5.500000
+      },
+      {
+        "x": 4.000000,
         "y": 0.000000
       }
     ]
@@ -63,7 +79,7 @@
     "items": []
   },
   "Capsules": {
-    "size": 2,
+    "size": 3,
     "items": [
       {
         "Center": {
@@ -81,16 +97,30 @@
       },
       {
         "Center": {
-          "x": -18.000000,
+          "x": -10.000000,
           "y": 0.000000,
-          "z": 0.000000
+          "z": -6.500000
         },
         "Direction": {
           "x": 0.000000,
           "y": 0.000000,
           "z": 1.000000
         },
-        "Height": 6.000000,
+        "Height": 7.200000,
+        "Radius": 0.500000
+      },
+      {
+        "Center": {
+          "x": -3.000000,
+          "y": 0.000000,
+          "z": -6.500000
+        },
+        "Direction": {
+          "x": 0.000000,
+          "y": 0.000000,
+          "z": 1.000000
+        },
+        "Height": 7.200000,
         "Radius": 0.500000
       }
     ]
@@ -161,7 +191,7 @@
     ]
   },
   "Models": {
-    "size": 2,
+    "size": 3,
     "items": [
       {
         "ModelName": {
@@ -194,12 +224,36 @@
         },
         "Transform": {
           "Position": {
-            "x": -18,
+            "x": -3,
             "y": 0,
-            "z": 0
+            "z": -6.5
           },
           "Scale": {
-            "x": 1,
+            "x": 1.2,
+            "y": 1,
+            "z": 1
+          },
+          "Rotation": {
+            "x": 0,
+            "y": -0.707,
+            "z": 0,
+            "w": 0.707
+          }
+        }
+      },
+      {
+        "ModelName": {
+          "size": 26,
+          "string": "models/forest/barrier.gltf"
+        },
+        "Transform": {
+          "Position": {
+            "x": -10,
+            "y": 0,
+            "z": -6.5
+          },
+          "Scale": {
+            "x": 1.2,
             "y": 1,
             "z": 1
           },

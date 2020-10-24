@@ -30,15 +30,19 @@ namespace Graphics {
 			float ambiance);
 
 		IWGRAPHICS_API
-		void AddLight(
+		bool AddLight(
 			PointLight* pointLight);
 
 		IWGRAPHICS_API
-		void AddLight(
-			DirectionalLight* pointLight);
+		bool AddLight(
+			DirectionalLight* directionalLight);
 
 		IWGRAPHICS_API
-		void RemoveLight(
+		bool AddLight(
+			Light* light);
+
+		IWGRAPHICS_API
+		bool RemoveLight(
 			const Light* light);
 
 		IWGRAPHICS_API

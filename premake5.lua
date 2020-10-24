@@ -29,9 +29,9 @@ workspace "wEngine"
 
 	os.execute ("cmake -S " .. assimpdir  .. " -B " .. assimpdir .. blddir)
 
-	--filter "platforms:x64" -- doesnt filter
-		--print("---------------------------- 64 ----------------------------")
-		--os.execute ("cmake -S " .. llvmdir .. "/llvm -B " .. llvmdir .. blddir .. " -DLLVM_ENABLE_PROJECTS=clang -A x64 -Thost=x64 -DLLVM_TEMPORARILY_ALLOW_OLD_TOOLCHAIN=ON -DLLVM_TARGETS_TO_BUILD='X86'")
+	filter "platforms:x64" -- doesnt filter
+		print("---------------------------- 64 ----------------------------")
+		os.execute ("cmake -S " .. llvmdir .. "/llvm -B " .. llvmdir .. blddir .. " -DLLVM_ENABLE_PROJECTS=clang -A x64 -Thost=x64 -DLLVM_TEMPORARILY_ALLOW_OLD_TOOLCHAIN=ON -DLLVM_TARGETS_TO_BUILD='X86'")
 
 	--filter "platforms:x32"
 	--	print("---------------------------- 32 ----------------------------")

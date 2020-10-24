@@ -257,13 +257,16 @@ struct LoadLevelEvent
 {
 	std::string LevelName;
 	std::string PreviousName;
+	bool Previous;
 
 	LoadLevelEvent(
 		std::string name,
-		std::string from)
+		std::string from,
+		bool previous = false)
 		: iw::SingleEvent(iw::val(Actions::LOAD_LEVEL))
 		, LevelName(name)
 		, PreviousName(from)
+		, Previous(previous)
 	{}
 };
 

@@ -39,7 +39,7 @@ void ConsumableSystem::Update()
 {
 	auto entities = Space->Query<iw::Transform, Consumable>();
 
-	iw::vector3 target = m_target.Find<iw::Transform>()->Position
+	iw::vector3 target = m_target.Find<iw::Transform>()->WorldPosition()
 					   + iw::vector3(-1.0f, 1.0f, 0.75f);
 
 	entities.Each([&](

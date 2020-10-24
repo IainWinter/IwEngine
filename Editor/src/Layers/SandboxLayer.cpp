@@ -306,8 +306,8 @@ namespace iw {
 
 		playerSystem    = PushSystem<PlayerSystem>(levelSystem->GetWorldTransform());
 		bulletSystem    = PushSystem<BulletSystem>(playerSystem->GetPlayer());
-		enemyBossSystem = PushSystem<EnemyBossSystem>(playerSystem->GetPlayer(), enemySystem, saveSystem->GetState());
 		enemySystem     = PushSystem<EnemySystem>(playerSystem->GetPlayer(), bulletSystem->GetBulletPrefab());
+		enemyBossSystem = PushSystem<EnemyBossSystem>(playerSystem->GetPlayer(), enemySystem, saveSystem->GetState());
 
 		
 		PushSystem<WorldHoleSystem>();
@@ -435,19 +435,19 @@ namespace iw {
 		}
 
 		if (ImGui::Button("Spawn slowmo")) {
-			Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 0 }, playerSystem->GetPlayer().Find<iw::Transform>()->Position, nullptr);
+			Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 0 }, playerSystem->GetPlayer().Find<iw::Transform>()->WorldPosition(), nullptr);
 		}
 
 		ImGui::SameLine();
 		
 		if (ImGui::Button("Spawn charge")) {
-			Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 1 }, playerSystem->GetPlayer().Find<iw::Transform>()->Position, nullptr);
+			Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 1 }, playerSystem->GetPlayer().Find<iw::Transform>()->WorldPosition(), nullptr);
 		}
 
 		ImGui::SameLine();
 
 		if (ImGui::Button("Spawn dash")) {
-			Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 2 }, playerSystem->GetPlayer().Find<iw::Transform>()->Position, nullptr);
+			Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 2 }, playerSystem->GetPlayer().Find<iw::Transform>()->WorldPosition(), nullptr);
 		}
 
 		if (ImGui::Button("Start seq")) {

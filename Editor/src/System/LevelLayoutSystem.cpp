@@ -12,7 +12,7 @@ LevelLayoutSystem::LevelLayoutSystem()
 {}
 
 int LevelLayoutSystem::Initialize() {
-	std::string startingLevel = "levels/canyon/cave03.a.json";
+	std::string startingLevel = "levels/canyon/canyon06.json";
 
 	LevelLayout* canyon01 = new LevelLayout(); // keep all alive
 	LevelLayout* cave01   = new LevelLayout();
@@ -120,8 +120,15 @@ bool LevelLayoutSystem::On(
 			Bus->push<UnloadLevelEvent>("All");
 
 			Bus->push<LoadLevelEvent>(m_currentWorld->CurrentLevel->LevelName, "");
-			for (LevelLayout& connection : m_currentWorld->CurrentLevel->Connections) {
-				Bus->push<LoadLevelEvent>(connection.LevelName, m_currentWorld->CurrentLevel->LevelName);
+			
+			if (m_currentWorld->CurrentLevel->Connections.size() == 0) {
+				Bus->push<LoadLevelEvent>(m_currentWorld->PreviousLevels.top()->LevelName, m_currentWorld->CurrentLevel->LevelName, true);
+			}
+
+			else {
+				for (LevelLayout& connection : m_currentWorld->CurrentLevel->Connections) {
+					Bus->push<LoadLevelEvent>(connection.LevelName, m_currentWorld->CurrentLevel->LevelName);
+				}
 			}
 
 			Bus->push<ActivateLevelEvent>(m_currentWorld->CurrentLevel->LevelName, 101);
@@ -140,7 +147,7 @@ bool LevelLayoutSystem::On(
 
 			else {
 				if (   event.Index == 1
-					&& m_currentWorld->PreviousLevels.size() > 1) // index = 1 means that we are moving to next full level
+					&& m_currentWorld->PreviousLevels.size() > 1) // index = 1 means that we are moving to next full level, opposed to a side room
 				{
 					for (unsigned i = 1; i < m_currentWorld->CurrentLevel->Connections.size(); i++) {
 						Bus->push<UnloadLevelEvent>(m_currentWorld->CurrentLevel->Connections.at(i).LevelName);
@@ -148,13 +155,14 @@ bool LevelLayoutSystem::On(
 					Bus->push<UnloadLevelEvent>(m_currentWorld->PreviousLevels.top()->LevelName);
 				}
 
+				std::string from = "";
+
 				if (event.Index > 0) { // if the index is > 0 then we arn't resetting the level & need to move
+					from = m_currentWorld->CurrentLevel->LevelName;
 					m_currentWorld->ToNextLevel(event.Index - 1);
 				}
 
-				else {
-					Bus->push<LoadLevelEvent>(m_currentWorld->CurrentLevel->LevelName, "");
-				}
+				Bus->push<LoadLevelEvent>(m_currentWorld->CurrentLevel->LevelName, from);
 
 				// Load all connections to new current level
 

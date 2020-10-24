@@ -14,6 +14,7 @@ namespace Graphics {
 		, m_voxelTexture(voxelTexture)
 		, m_mipmapGenerationShader(mipmapGenerationShader)
 		, m_shadowCamera()
+		, noMipmaps(false)
 	{
 		//m_shadowCamera.SetRotation(quaternion::from_euler_angles(0, Pi, 0));
 	}

@@ -60,7 +60,8 @@ public:
 private:
 	std::pair<iw::EntityHandle, Level> LoadLevel(
 		const std::string& name,
-		const std::string& from);
+		const std::string& from,
+		bool previous);
 
 	void ActivateLevel(
 		const std::string& name);

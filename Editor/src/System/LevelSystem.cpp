@@ -150,7 +150,7 @@ bool LevelSystem::On(
 		}
 		case iw::val(Actions::LOAD_LEVEL): {
 			LoadLevelEvent& event = e.as<LoadLevelEvent>();
-			LoadLevel(event.LevelName, event.PreviousName);
+			LoadLevel(event.LevelName, event.PreviousName, event.Previous);
 
 			break;
 		}
@@ -220,7 +220,7 @@ bool LevelSystem::On(
 				}
 
 				Bus->push<TransitionToLevelEvent>(event.LevelName, 
-					level.CameraFollow, -target + level.InPosition, level.LevelPosition);
+					level.CameraFollow, -target + level.InPosition, -target);
 
 				float start = iw::TotalTime();                  // if not transition then start
 				float wait = 1.25f;
@@ -256,7 +256,8 @@ bool LevelSystem::On(
 
 std::pair<iw::EntityHandle, Level> LevelSystem::LoadLevel(
 	const std::string& name,
-	const std::string& from)
+	const std::string& from,
+	bool previous)
 {
 	srand(298374);
 
@@ -405,7 +406,12 @@ std::pair<iw::EntityHandle, Level> LevelSystem::LoadLevel(
 		level = itr->second.second;
 	}
 
-	if (from.length() > 0) {
+	if (previous) {
+		m_previousLevelLocation = m_loadedLevels.at(from).second.LevelPosition;
+		levelTransform->Position = -m_previousLevelLocation;
+	}
+
+	else if (from.length() > 0) {
 		iw::Transform* prev = Space->FindComponent<iw::Transform>(m_loadedLevels.at(from).first);
 		levelTransform->Position = prev->Position + level.LevelPosition;
 	}

@@ -20,7 +20,7 @@ namespace Engine {
 	float voxelSizeInv = 1.0f / voxelSize;
 
 	vector3 voxelBoundsScale(32);
-	vector3 voxelBoundsSize (256);
+	vector3 voxelBoundsSize (256 * 1.2f);
 	vector3 voxelBoundsScaleInv = vector3(1) / voxelBoundsScale;
 
 	int ModelVoxelRenderSystem::Initialize() {
@@ -50,16 +50,18 @@ namespace Engine {
 		ref<Texture> voxelTexture = REF<Texture>(voxelBoundsSize.x, voxelBoundsSize.y, voxelBoundsSize.z, TEX_3D, RGBA, FLOAT, BORDER, LINEAR, LINEAR_LINEAR);
 		m_voxelize = new VoxelLight(voxelTexture, voxelize, voxelize_inst, mipmap);
 
+		//m_scene->AddLight(m_voxelize);
+
 		return 0;
 	}
 
 	void ModelVoxelRenderSystem::Update(
 		EntityComponentArray& eca)
 	{
-		//vector3 camPos = m_scene->MainCamera()->Position(); // no req plz :(
-		//camPos.y = 0;
+		vector3 camPos = m_scene->MainCamera()->Position(); // no req plz :(
+		camPos.y = 0;
 
-		//m_voxelize->SetPosition(camPos * voxelSize);
+		m_voxelize->SetPosition(camPos);
 
 		Renderer->BeforeScene([&]() {
 			m_voxelize->BlockGenerationOfMipmaps();

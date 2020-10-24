@@ -19,35 +19,57 @@ namespace Graphics {
 		m_ambiance = ambiance;
 	}
 
-	void Scene::AddLight(
+	bool Scene::AddLight(
 		PointLight* pointLight)
 	{
-		auto itr = std::find(m_pointLights.begin(), m_pointLights.end(), pointLight);
+		bool noLight = AddLight((Light*)pointLight);
 
-		if (itr != m_pointLights.end()) {
-			LOG_WARNING << "Tried to add duplicate light!";
-			return;
+		if (!noLight) {
+			LOG_WARNING << "Tried to add duplicate directional light!";
 		}
 
-		m_pointLights.push_back(pointLight);
-		m_lights     .push_back(pointLight);
+		else {
+			m_pointLights.push_back(pointLight);
+		}
+
+		return noLight;
 	}
 
-	void Scene::AddLight(
-		DirectionalLight* pointLight)
+	bool Scene::AddLight(
+		DirectionalLight* directionalLight)
 	{
-		auto itr = std::find(m_directionalLights.begin(), m_directionalLights.end(), pointLight);
+		bool noLight = AddLight((Light*)directionalLight);
 
-		if (itr != m_directionalLights.end()) {
-			LOG_WARNING << "Tried to add duplicate light!";
-			return;
+		if (!noLight) {
+			LOG_WARNING << "Tried to add duplicate directional light!";
 		}
 
-		m_directionalLights.push_back(pointLight);
-		m_lights           .push_back(pointLight);
+		else {
+			m_directionalLights.push_back(directionalLight);
+		}
+
+		return noLight;
 	}
 
-	void Scene::RemoveLight(
+	bool Scene::AddLight(
+		Light* light)
+	{
+		auto itr = std::find(m_lights.begin(), m_lights.end(), light);
+
+		bool foundLight = itr != m_lights.end();
+
+		if (foundLight) {
+			LOG_WARNING << "Tried to add duplicate light!";
+		}
+
+		else {
+			m_lights.push_back(light);
+		}
+
+		return !foundLight;
+	}
+
+	bool Scene::RemoveLight(
 		const Light* light)
 	{
 		auto itr  = std::find(m_lights.begin(), m_lights.end(), light);
@@ -55,16 +77,24 @@ namespace Graphics {
 		auto itrd = std::find(m_directionalLights.begin(), m_directionalLights.end(), light);
 
 		if (itrp != m_pointLights.end()) {
-			m_lights     .erase(itr);
 			m_pointLights.erase(itrp);
 		}
 
 		else if (itrd != m_directionalLights.end()) {
-			m_lights           .erase(itr);
 			m_directionalLights.erase(itrd);
 		}
 
-		LOG_WARNING << "Tried to remove light that does not exists!";
+		bool foundLight = itr != m_lights.end();
+
+		if (foundLight) {
+			m_lights.erase(itr);
+		}
+
+		else {
+			LOG_WARNING << "Tried to remove light that does not exists!";
+		}
+
+		return foundLight;
 	}
 
 	Camera* Scene::MainCamera() {

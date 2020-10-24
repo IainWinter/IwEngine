@@ -167,6 +167,10 @@ bool EnemyBossSystem::On(
 				o->SetCol(c);
 				o->SetIsTrigger(true);
 				o->SetOnCollision([&](auto man, auto) {
+					if (m_enemySystem && m_enemySystem->GetEnemyCount() != 0) {
+						return;
+					}
+
 					iw::Entity player, me;
 					if (GetEntitiesFromManifold<Player>(man, player, me)) {
 						return;

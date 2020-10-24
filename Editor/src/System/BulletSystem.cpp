@@ -193,6 +193,8 @@ iw::Transform* BulletSystem::SpawnBullet(
 		p->InnerType = BulletType(enemyBullet.Package & REMOVE_TYPE);
 		p->InnerSpeed = 5.0f;
 		p->TimeToExplode = 1.8f;
+
+		//bullet.Set<iw::Model>(*Asset->Load<iw::Model>("Tetrahedron").get());
 	}
 
 	Bullet*             b = bullet.Find<Bullet>();
@@ -207,6 +209,10 @@ iw::Transform* BulletSystem::SpawnBullet(
 
 	t->Rotation = rot;
 	t->Position = position + t->Right() * sqrt(dist);
+
+	if (enemyBullet.Package) {
+		t->Scale *= 1.5f;
+	}
 
 	r->SetCol(s);
 	r->SetTrans(t);
