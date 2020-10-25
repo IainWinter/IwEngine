@@ -21,7 +21,7 @@
           "Package": 65536
         },
         "Speed": 0.5235988,
-        "FireTime": 0.240000,
+        "FireTime": 0.280000,
         "ChargeTime": 0.000000,
         "Rotation": 0.000000
       },
@@ -33,7 +33,7 @@
           "Package": 65536
         },
         "Speed": 0.5235988,
-        "FireTime": 0.240000,
+        "FireTime": 0.280000,
         "ChargeTime": 0.000000,
         "Rotation": 0.000000
       }

@@ -12,14 +12,14 @@ LevelLayoutSystem::LevelLayoutSystem()
 {}
 
 int LevelLayoutSystem::Initialize() {
-	std::string startingLevel = "levels/canyon/canyon06.json";
+	std::string startingLevel = "levels/canyon/cave01.json";
 
 	LevelLayout* canyon01 = new LevelLayout(); // keep all alive
 	LevelLayout* cave01   = new LevelLayout();
 	LevelLayout* top01    = new LevelLayout();
 
 	LevelLayout /***^***/ canyon02, canyon03,  canyon04, canyon04a, canyon05,
-	            canyon06, canyon07, canyon07a, canyon08, canyon09,  canyon10,
+	            canyon06, canyon07, canyon07a, canyon08, canyon09,  canyon10, canyon11,
 	            /**^**/ cave02, cave03, cave03a, cave04,
 	            cave05, cave06, cave07, cave08,
 	            /****/ top02, top03, top04,
@@ -36,7 +36,8 @@ int LevelLayoutSystem::Initialize() {
 	canyon07a.LevelName = "levels/canyon/canyon07.a.json";
 	canyon08 .LevelName = "levels/canyon/canyon08.json";
 	canyon09 .LevelName = "levels/canyon/canyon09.json";
-	canyon10 .LevelName = "levels/canyon/canyon11.json";
+	canyon10 .LevelName = "levels/canyon/canyon10.json";
+	canyon11 .LevelName = "levels/canyon/canyon11.json";
 
 	cave01->LevelName = "levels/canyon/cave01.json";
 	cave02 .LevelName = "levels/canyon/cave02.json";
@@ -74,6 +75,7 @@ int LevelLayoutSystem::Initialize() {
 	cave02 .AddConnection(cave03);
 	cave01->AddConnection(cave02);
 
+	canyon10 .AddConnection (canyon11);
 	canyon09 .AddConnection(canyon10);
 	canyon08 .AddConnection(canyon09);
 	canyon07 .AddConnection(canyon08);
@@ -107,28 +109,24 @@ bool LevelLayoutSystem::On(
 {
 	switch (e.Action) {
 		case iw::val(Actions::RESET_LEVEL): {
-			Bus->push<DeactivateLevelEvent>(m_currentWorld->CurrentLevel->LevelName);
-			Bus->push<ActivateLevelEvent>  (m_currentWorld->CurrentLevel->LevelName, 0);
+			Bus->push<DeactivateLevelEvent>(CurrentLevelName());
+			Bus->push<ActivateLevelEvent>  (CurrentLevelName(), 0);
 
 			break;
 		}
 		case iw::val(Actions::GOTO_LEVEL): {
 			GotoLevelEvent& event = e.as<GotoLevelEvent>();
 
+			// Bus->push<DeactivateLevelEvent>(CurrentLevelName()); not sure if this is needed?
+
 			FillWorlds(event.LevelName);
 
 			Bus->push<UnloadLevelEvent>("All");
 
-			Bus->push<LoadLevelEvent>(m_currentWorld->CurrentLevel->LevelName, "");
-			
-			if (m_currentWorld->CurrentLevel->Connections.size() == 0) {
-				Bus->push<LoadLevelEvent>(m_currentWorld->PreviousLevels.top()->LevelName, m_currentWorld->CurrentLevel->LevelName, true);
-			}
-
-			else {
-				for (LevelLayout& connection : m_currentWorld->CurrentLevel->Connections) {
-					Bus->push<LoadLevelEvent>(connection.LevelName, m_currentWorld->CurrentLevel->LevelName);
-				}
+			Bus->push<LoadLevelEvent>(CurrentLevelName());
+			Bus->push<LoadLevelEvent>(PreviousLevelName(), CurrentLevelName(), true);
+			for (LevelLayout& connection : m_currentWorld->CurrentLevel->Connections) {
+				Bus->push<LoadLevelEvent>(connection.LevelName, CurrentLevelName());
 			}
 
 			Bus->push<ActivateLevelEvent>(m_currentWorld->CurrentLevel->LevelName, 101);
@@ -138,40 +136,30 @@ bool LevelLayoutSystem::On(
 		case iw::val(Actions::GOTO_CONNECTED_LEVEL): {
 			GotoConnectedLevelEvent& event = e.as<GotoConnectedLevelEvent>();
 
-			Bus->push<DeactivateLevelEvent>(m_currentWorld->CurrentLevel->LevelName);
+			Bus->push<DeactivateLevelEvent>(CurrentLevelName());
 
-			// -1 to previous level, activate now 'current' level
+			if (event.Index == 1) { // 1 = to next full level, unload previous level, + current level connections
+				for (unsigned i = 1; i < m_currentWorld->CurrentLevel->Connections.size(); i++) {
+					Bus->push<UnloadLevelEvent>(m_currentWorld->CurrentLevel->Connections.at(i).LevelName);
+				}
+				Bus->push<UnloadLevelEvent>(PreviousLevelName());
+			}
+
 			if (event.Index < 0) {
-				m_currentWorld->ToPreviousLevel();
+				m_currentWorld->ToPreviousLevel(); // this is wrong somehow
+				Bus->push<LoadLevelEvent>(PreviousLevelName(), CurrentLevelName(), true);
 			}
 
 			else {
-				if (   event.Index == 1
-					&& m_currentWorld->PreviousLevels.size() > 1) // index = 1 means that we are moving to next full level, opposed to a side room
-				{
-					for (unsigned i = 1; i < m_currentWorld->CurrentLevel->Connections.size(); i++) {
-						Bus->push<UnloadLevelEvent>(m_currentWorld->CurrentLevel->Connections.at(i).LevelName);
-					}
-					Bus->push<UnloadLevelEvent>(m_currentWorld->PreviousLevels.top()->LevelName);
-				}
-
-				std::string from = "";
-
-				if (event.Index > 0) { // if the index is > 0 then we arn't resetting the level & need to move
-					from = m_currentWorld->CurrentLevel->LevelName;
-					m_currentWorld->ToNextLevel(event.Index - 1);
-				}
-
-				Bus->push<LoadLevelEvent>(m_currentWorld->CurrentLevel->LevelName, from);
-
-				// Load all connections to new current level
-
-				for (LevelLayout& connection : m_currentWorld->CurrentLevel->Connections) {
-					Bus->push<LoadLevelEvent>(connection.LevelName, m_currentWorld->CurrentLevel->LevelName);
-				}
+				m_currentWorld->ToNextLevel(event.Index - 1);
+				Bus->push<LoadLevelEvent>(CurrentLevelName(), PreviousLevelName());
 			}
 
-			Bus->push<ActivateLevelEvent>(m_currentWorld->CurrentLevel->LevelName, event.Index);
+			for (LevelLayout& connection : m_currentWorld->CurrentLevel->Connections) {
+				Bus->push<LoadLevelEvent>(connection.LevelName, CurrentLevelName());
+			}
+
+			Bus->push<ActivateLevelEvent>(CurrentLevelName(), event.Index);
 
 			break;
 		}
@@ -190,6 +178,18 @@ void LevelLayoutSystem::FillWorlds(
 			break;
 		}
 	}
+}
+
+std::string& LevelLayoutSystem::CurrentLevelName() {
+	return m_currentWorld->CurrentLevel->LevelName;
+}
+
+std::string LevelLayoutSystem::PreviousLevelName() {
+	if (m_currentWorld->PreviousLevels.size() == 0) {
+		return "";
+	}
+
+	return m_currentWorld->PreviousLevels.top()->LevelName;
 }
 
 // World Layout

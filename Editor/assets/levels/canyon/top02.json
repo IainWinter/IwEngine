@@ -85,7 +85,7 @@
     ]
   },
   "Doors": {
-    "size": 2,
+    "size": 1,
     "items": [
       {
         "GoBack": false,
@@ -94,27 +94,15 @@
           "size": 24,
           "string": "levels/canyon/top03.json"
         }
-      },
-      {
-        "GoBack": true,
-        "State": 1,
-        "NextLevel": {
-          "size": 0,
-          "string": ""
-        }
       }
     ]
   },
   "DoorPositions": {
-    "size": 2,
+    "size": 1,
     "items": [
       {
         "x": -25.000000,
         "y": -16.500000
-      },
-      {
-        "x": 35.000000,
-        "y": 0.000000
       }
     ]
   },

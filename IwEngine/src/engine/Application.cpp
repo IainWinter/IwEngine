@@ -131,6 +131,8 @@ namespace Engine {
 
 		Task->init();
 
+		LOG_INFO << "Application initialized";
+
 		return 0;
 	}
 

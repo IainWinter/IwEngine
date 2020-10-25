@@ -11,28 +11,44 @@
     "z": 0.000000
   },
   "Enemies": {
-    "size": 1,
+    "size": 2,
     "items": [
       {
-        "Type": 1,
+        "Type": 0,
         "Bullet": {
           "Type": 0,
           "Speed": 6.000000,
           "Package": 65538
         },
         "Speed": 1.256637,
-        "FireTime": 3.000000,
-        "ChargeTime": 2.000000,
+        "FireTime": 0.600000,
+        "ChargeTime": 0.000000,
         "Rotation": -1.570796
+      },
+      {
+        "Type": 1,
+        "Bullet": {
+          "Type": 3,
+          "Speed": 5.000000,
+          "Package": 65536
+        },
+        "Speed": 0.7853982,
+        "FireTime": 3.2,
+        "ChargeTime": 2.8,
+        "Rotation": 0
       }
     ]
   },
   "Positions": {
-    "size": 1,
+    "size": 2,
     "items": [
       {
         "x": 0.000000,
         "y": 0.700000
+      },
+      {
+        "x": 13.000000,
+        "y": 1.000000
       }
     ]
   },

@@ -19,12 +19,26 @@
     "items": []
   },
   "Doors": {
-    "size": 0,
-    "items": []
+    "size": 1,
+    "items": [
+      {
+        "GoBack": true,
+        "State": 0,
+        "NextLevel": {
+          "size": 0,
+          "string": ""
+        }
+      }
+    ]
   },
   "DoorPositions": {
-    "size": 0,
-    "items": []
+    "size": 1,
+    "items": [
+      {
+        "x": -32.000000,
+        "y": 0.000000
+      }
+    ]
   },
   "Spheres": {
     "size": 0,

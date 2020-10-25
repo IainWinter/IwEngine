@@ -23,7 +23,7 @@
     "items": [
       {
         "GoBack": false,
-        "State": 1,
+        "State": 0,
         "NextLevel": {
           "size": 25,
           "string": "levels/canyon/cave02.json"

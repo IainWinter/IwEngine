@@ -11,12 +11,78 @@
     "z": 0.000000
   },
   "Enemies": {
-    "size": 0,
-    "items": []
+    "size": 4,
+    "items": [
+      {
+        "Type": 0,
+        "Bullet": {
+          "Type": 3,
+          "Speed": 8.000000,
+          "Package": 65536
+        },
+        "Speed": 0.000000,
+        "FireTime": 1.00000,
+        "ChargeTime": 0.0,
+        "Rotation": -1.570796
+      },
+      {
+        "Type": 0,
+        "Bullet": {
+          "Type": 3,
+          "Speed": 8.000000,
+          "Package": 65536
+        },
+        "Speed": 0.000000,
+        "FireTime": 1.00000,
+        "ChargeTime": 0.5,
+        "Rotation": -1.570796
+      },
+      {
+        "Type": 1,
+        "Bullet": {
+          "Type": 0,
+          "Speed": 6.000000,
+          "Package": 65536
+        },
+        "Speed": 0.392699,
+        "FireTime": 3.00000,
+        "ChargeTime": 2.000000,
+        "Rotation": 0.000000
+      },
+      {
+        "Type": 1,
+        "Bullet": {
+          "Type": 0,
+          "Speed": 6.000000,
+          "Package": 65536
+        },
+        "Speed": 0.52359877,
+        "FireTime": 3.00000,
+        "ChargeTime": 2.000000,
+        "Rotation": 0.000000
+      }
+    ]
   },
   "Positions": {
-    "size": 0,
-    "items": []
+    "size": 4,
+    "items": [
+      {
+        "x": 3.000000,
+        "y": -8.00000
+      },
+      {
+        "x": 5.000000,
+        "y": -6.00000
+      },
+      {
+        "x": -10.000000,
+        "y": -7.00000
+      },
+      {
+        "x": 20.500000,
+        "y": -3.50000
+      }
+    ]
   },
   "Doors": {
     "size": 1,

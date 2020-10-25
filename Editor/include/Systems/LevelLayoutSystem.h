@@ -43,4 +43,7 @@ public:
 private:
 	void FillWorlds(
 		const std::string& untilLevel);
+
+	std::string& CurrentLevelName();
+	std::string  PreviousLevelName();
 };

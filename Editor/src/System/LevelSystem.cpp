@@ -150,6 +150,11 @@ bool LevelSystem::On(
 		}
 		case iw::val(Actions::LOAD_LEVEL): {
 			LoadLevelEvent& event = e.as<LoadLevelEvent>();
+			
+			if (event.LevelName.length() == 0) {
+				break;
+			}
+
 			LoadLevel(event.LevelName, event.PreviousName, event.Previous);
 
 			break;
@@ -222,7 +227,7 @@ bool LevelSystem::On(
 				Bus->push<TransitionToLevelEvent>(event.LevelName, 
 					level.CameraFollow, -target + level.InPosition, -target);
 
-				float start = iw::TotalTime();                  // if not transition then start
+				float start = iw::TotalTime();
 				float wait = 1.25f;
 
 				Task->queue([=]() {

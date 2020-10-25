@@ -261,7 +261,7 @@ struct LoadLevelEvent
 
 	LoadLevelEvent(
 		std::string name,
-		std::string from,
+		std::string from = "",
 		bool previous = false)
 		: iw::SingleEvent(iw::val(Actions::LOAD_LEVEL))
 		, LevelName(name)
