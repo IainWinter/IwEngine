@@ -47,7 +47,7 @@ bool GameCameraController::On(
 			SetTarget(event.LevelName);
 
 			float start = iw::TotalTime();
-			float wait = 1.25f;
+			float wait = 1.5f;
 
 			iw::vector3 target = event.CameraFollow
 				? event.PlayerPosition

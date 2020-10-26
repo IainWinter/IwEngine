@@ -122,7 +122,7 @@ namespace Graphics {
 				m_lastTransform.Position = m_transform ? m_transform->Position : 0;
 				m_lastTransform.Scale    = m_transform ? m_transform->Scale    : 0;
 				m_lastTransform.Rotation = m_transform ? m_transform->Rotation : quaternion::identity;
-				m_lastTransform.SetParent(m_transform->Parent());
+				m_lastTransform.SetParent(m_transform ? m_transform->Parent() : nullptr);
 
 				for (unsigned i : m_delete) {
 					m_particles.erase(m_particles.begin() + i);

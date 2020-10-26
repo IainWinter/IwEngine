@@ -12,7 +12,66 @@ LevelLayoutSystem::LevelLayoutSystem()
 {}
 
 int LevelLayoutSystem::Initialize() {
-	std::string startingLevel = "levels/canyon/cave01.json";
+	std::string startingLevel = "levels/canyon/canyon05.json";
+
+	LevelLayout* forest01 = new LevelLayout();
+
+	LevelLayout   forest02, forest03, forest04, forest05, forest05a, forest06, forest07, forest07a,
+		forest08, forest09, forest10, forest11, forest12, forest12a, forest13,  forest14,
+		forest15, forest16, forest17, forest18, forest19, forest20,  forest21, forest22, forest23;
+
+	forest01->LevelName = "levels/forest/forest01.json";
+	forest02 .LevelName = "levels/forest/forest02.json";
+	forest03 .LevelName = "levels/forest/forest03.json";
+	forest04 .LevelName = "levels/forest/forest04.json";
+	forest05 .LevelName = "levels/forest/forest05.json";
+	forest05a.LevelName = "levels/forest/forest05.a.json";
+	forest06 .LevelName = "levels/forest/forest06.json";
+	forest07 .LevelName = "levels/forest/forest07.json";
+	forest07a.LevelName = "levels/forest/forest07.a.json";
+	forest08 .LevelName = "levels/forest/forest08.json";
+	forest09 .LevelName = "levels/forest/forest09.json";
+	forest10 .LevelName = "levels/forest/forest10.json";
+	forest11 .LevelName = "levels/forest/forest11.json";
+	forest12 .LevelName = "levels/forest/forest12.json";
+	forest12a.LevelName = "levels/forest/forest12a.json";
+	forest13 .LevelName = "levels/forest/forest13.json";
+	forest14 .LevelName = "levels/forest/forest14.json";
+	forest15 .LevelName = "levels/forest/forest15.json";
+	forest16 .LevelName = "levels/forest/forest16.json";
+	forest17 .LevelName = "levels/forest/forest17.json";
+	forest18 .LevelName = "levels/forest/forest18.json";
+	forest19 .LevelName = "levels/forest/forest19.json";
+	forest20 .LevelName = "levels/forest/forest20.json";
+	forest21 .LevelName = "levels/forest/forest21.json";
+	forest22 .LevelName = "levels/forest/forest22.json";
+	forest23 .LevelName = "levels/forest/forest23.json";
+
+	forest22 .AddConnection(forest23);
+	forest21 .AddConnection(forest22);
+	forest20 .AddConnection(forest21);
+	forest19 .AddConnection(forest20);
+	forest18 .AddConnection(forest19);
+	forest17 .AddConnection(forest18);
+	forest16 .AddConnection(forest17);
+	forest15 .AddConnection(forest16);
+	forest14 .AddConnection(forest15);
+	forest13 .AddConnection(forest14);
+	forest12 .AddConnection(forest13);
+	forest12 .AddConnection(forest12a);
+	forest11 .AddConnection(forest12);
+	forest10 .AddConnection(forest11);
+	forest09 .AddConnection(forest10);
+	forest08 .AddConnection(forest09);
+	forest07 .AddConnection(forest08);
+	forest07 .AddConnection(forest07a);
+	forest06 .AddConnection(forest07);
+	forest05 .AddConnection(forest06);
+	forest05 .AddConnection(forest05a);
+	forest04 .AddConnection(forest05);
+	forest03 .AddConnection(forest04);
+	forest02 .AddConnection(forest03);
+	forest01->AddConnection(forest02);
 
 	LevelLayout* canyon01 = new LevelLayout(); // keep all alive
 	LevelLayout* cave01   = new LevelLayout();
@@ -88,12 +147,16 @@ int LevelLayoutSystem::Initialize() {
 	canyon02 .AddConnection(canyon03);
 	canyon01->AddConnection(canyon02);
 
+	iw::JsonSerializer("C:/dev/IwEngine/Editor/assets/levels/forest.json").Write(*forest01);
 	iw::JsonSerializer("C:/dev/IwEngine/Editor/assets/levels/canyon.json").Write(*canyon01);
 	iw::JsonSerializer("C:/dev/IwEngine/Editor/assets/levels/cavTop.json").Write(*cave01);
 
+	WorldLayout* forest = new WorldLayout(forest01);
 	WorldLayout* canyon = new WorldLayout(canyon01);
 	WorldLayout* cave   = new WorldLayout(cave01);
 	WorldLayout* top    = new WorldLayout(top01);
+
+	m_worlds.push_back(forest);
 
 	m_worlds.push_back(canyon);
 	m_worlds.push_back(cave);
@@ -110,7 +173,7 @@ bool LevelLayoutSystem::On(
 	switch (e.Action) {
 		case iw::val(Actions::RESET_LEVEL): {
 			Bus->push<DeactivateLevelEvent>(CurrentLevelName());
-			Bus->push<ActivateLevelEvent>  (CurrentLevelName(), 0);
+			Bus->push<ActivateLevelEvent>  (CurrentLevelName());
 
 			break;
 		}
@@ -129,7 +192,7 @@ bool LevelLayoutSystem::On(
 				Bus->push<LoadLevelEvent>(connection.LevelName, CurrentLevelName());
 			}
 
-			Bus->push<ActivateLevelEvent>(m_currentWorld->CurrentLevel->LevelName, 101);
+			Bus->push<ActivateLevelEvent>(CurrentLevelName(), "", 101);
 
 			break;
 		}
@@ -138,28 +201,40 @@ bool LevelLayoutSystem::On(
 
 			Bus->push<DeactivateLevelEvent>(CurrentLevelName());
 
-			if (event.Index == 1) { // 1 = to next full level, unload previous level, + current level connections
-				for (unsigned i = 1; i < m_currentWorld->CurrentLevel->Connections.size(); i++) {
+			// If we are moving to the next full level, unload previous level before moving
+			if (event.Index == 1) {
+				Bus->push<UnloadLevelEvent>(PreviousLevelName());
+
+				// Unload all but main connections for current level before moving
+				for (int i = 1; i < m_currentWorld->CurrentLevel->Connections.size(); i++) {
 					Bus->push<UnloadLevelEvent>(m_currentWorld->CurrentLevel->Connections.at(i).LevelName);
 				}
-				Bus->push<UnloadLevelEvent>(PreviousLevelName());
 			}
 
+			std::string from = CurrentLevelName();
+
+			// If we are moving to previous level, load previous' previous level
 			if (event.Index < 0) {
+				if (m_currentWorld->CurrentLevel->Connections.size() > 0) {
+					Bus->push<UnloadLevelEvent>(m_currentWorld->CurrentLevel->Connections.at(0).LevelName);
+				}
+
 				m_currentWorld->ToPreviousLevel(); // this is wrong somehow
+
 				Bus->push<LoadLevelEvent>(PreviousLevelName(), CurrentLevelName(), true);
 			}
 
 			else {
 				m_currentWorld->ToNextLevel(event.Index - 1);
-				Bus->push<LoadLevelEvent>(CurrentLevelName(), PreviousLevelName());
 			}
 
+			// Load all connections for new level
 			for (LevelLayout& connection : m_currentWorld->CurrentLevel->Connections) {
 				Bus->push<LoadLevelEvent>(connection.LevelName, CurrentLevelName());
 			}
-
-			Bus->push<ActivateLevelEvent>(CurrentLevelName(), event.Index);
+			
+			// Activate new level
+			Bus->push<ActivateLevelEvent>(CurrentLevelName(), from, event.Index);
 
 			break;
 		}

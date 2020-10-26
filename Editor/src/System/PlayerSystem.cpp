@@ -16,15 +16,6 @@ PlayerSystem::PlayerSystem(
 	, playerPrefab()
 	, m_playerModel(nullptr)
 	, m_worldTransform(worldTransform)
-	//, up(false)
-	//, down(false)
-	//, left(false)
-	//, right(false)
-	//, dash(false)
-	//, sprint(false)
-	//, transition(false)
-	//, levelTransition(false)
-	//, begin(0)
 {
 #ifdef IW_DEBUG
 	const char* file = "assets/prefabs/player.json";
@@ -347,7 +338,7 @@ bool PlayerSystem::On(
 			iw::vector3 previous = r->Trans().Position;
 
 			float start = iw::TotalTime();
-			float wait = 1.25f;
+			float wait = 1.5f;
 
 			if (event.PlayerPosition.y == 0) event.PlayerPosition.y = 1;
 
@@ -356,7 +347,7 @@ bool PlayerSystem::On(
 					r->Trans().Position = iw::lerp(
 						previous,
 						event.PlayerPosition,
-						iw::TotalTime() - start);
+						(iw::TotalTime() - start) / wait);
 				}
 
 				r->Trans().Position = event.PlayerPosition;

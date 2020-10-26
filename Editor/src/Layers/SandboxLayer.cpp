@@ -480,20 +480,21 @@ namespace iw {
 		ActionEvent& e)
 	{
 		switch (e.Action) {
-			case iw::val(Actions::GOTO_NEXT_LEVEL): {
-				enemySystem->On(e);
-				PopSystem(enemySystem);
-				PopSystem(enemyBossSystem);
+			//case iw::val(Actions::GOTO_LEVEL):
+			//case iw::val(Actions::GOTO_CONNECTED_LEVEL): {
+			//	enemySystem->On(e);
+			//	PopSystem(enemySystem);
+			//	PopSystem(enemyBossSystem);
 
-				break;
-			}
-			case iw::val(Actions::AT_NEXT_LEVEL): {
-				//PushSystemFront(playerSystem);
-				PushSystemFront(enemySystem);
-				PushSystemFront(enemyBossSystem);
+			//	break;
+			//}
+			//case iw::val(Actions::AT_NEXT_LEVEL): {
+			//	//PushSystemFront(playerSystem);
+			//	PushSystemFront(enemySystem);
+			//	PushSystemFront(enemyBossSystem);
 
-				break;
-			}
+			//	break;
+			//}
 			case iw::val(Actions::GAME_STATE): {
 				GameStateEvent& event = e.as<GameStateEvent>();
 

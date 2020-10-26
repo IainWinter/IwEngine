@@ -16,7 +16,6 @@ namespace events {
 		}
 	};
 
-
 	class event_seq {
 	private:
 		std::vector<event_task*> m_tasks;
@@ -46,6 +45,10 @@ namespace events {
 		IWEVENTS_API
 		void remove(
 			event_task* task);
+
+		// Deletes all events, remove them before clearing to save them. 
+		IWEVENTS_API
+		void clear();
 
 		// Resets sequence & tasks
 		IWEVENTS_API

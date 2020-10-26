@@ -155,7 +155,10 @@ bool EnemyBossSystem::On(
 			if (   event.LevelName == "levels/canyon/canyon06.json"
 				&& !m_saveState->Canyon03BossKilled)
 			{
-				iw::Entity entity = Space->CreateEntity<iw::Transform, iw::CollisionObject, iw::SphereCollider>();
+				iw::Entity entity = Space->CreateEntity<
+					iw::Transform, 
+					iw::CollisionObject, 
+					iw::SphereCollider>();
 
 				iw::Transform*       t = entity.Set<iw::Transform>(iw::vector3(13, 0, -4));
 				iw::SphereCollider*  c = entity.Set<iw::SphereCollider>(0, 4);
@@ -177,25 +180,21 @@ bool EnemyBossSystem::On(
 					}
 
 					Bullet bullet;
-					bullet.Type = BulletType::LINE;
-					bullet.Speed = 5;
+					bullet.Type = BulletType::LINE; bullet.Speed = 5; 
 					bullet.Package = PackageType::NONE;
 
-					Enemy boss; // need prefabs to be saved and levels too!! see canyon03.json for these values
-					boss.Type = EnemyType::MINI_BOSS_CANYON;
-					boss.Bullet = bullet;
-					boss.Speed = 0.174533f;
-					boss.FireTime = 4;
-					boss.ChargeTime = 2;
-					boss.Rotation = 0;
+					Enemy boss;
+					boss.Type = EnemyType::MINI_BOSS_CANYON; boss.Bullet = bullet;
+					boss.Speed = 0.174533f; boss.FireTime = 4; boss.ChargeTime = 2; boss.Rotation = 0;
 				
-					Bus->push<SpawnEnemyEvent>(boss, iw::vector3(12, 9, 6), 0, me.Find<iw::Transform>()->Parent());
+					Bus->push<SpawnEnemyEvent>(boss, iw::vector3(12, 9, 6), 0, 
+						me.Find<iw::Transform>()->Parent());
 					Bus->push<UnlockLevelDoorEvent>(false);
 
 					me.Destroy();
 				});
 
-				Physics->AddCollisionObject(o);
+				Physics->AddCollisionObject(o); 
 			}
 			break;
 		}

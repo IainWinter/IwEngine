@@ -9,9 +9,7 @@ namespace events {
 	{}
 
 	event_seq::~event_seq() {
-		for (event_task* task : m_tasks) {
-			delete task;
-		}
+		clear();
 	}
 
 	void event_seq::add(
@@ -35,6 +33,14 @@ namespace events {
 		event_task* task)
 	{
 		m_tasks.erase(std::find(m_tasks.begin(), m_tasks.end(), task));
+	}
+
+	void event_seq::clear() {
+		for (event_task* task : m_tasks) {
+			delete task;
+		}
+
+		m_tasks.clear();
 	}
 
 	void event_seq::reset() {

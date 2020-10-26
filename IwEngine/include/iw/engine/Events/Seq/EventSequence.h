@@ -44,6 +44,14 @@ namespace Engine {
 			return add(func);
 		}
 
+		void Once(
+			std::function<bool(void)> func)
+		{
+			clear();
+			add(func);
+			start();
+		}
+
 		void Remove(
 			EventTask* task)
 		{

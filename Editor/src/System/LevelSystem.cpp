@@ -192,6 +192,8 @@ bool LevelSystem::On(
 			event.PlayerPosition = -m_worldTransform->Position + level.InPosition;
 			event.Level = Space->FindComponent<iw::Transform>(entity);
 
+			sequence.Restart();
+
 			break;
 		}
 		case iw::val(Actions::ACTIVATE_LEVEL): {
@@ -211,24 +213,28 @@ bool LevelSystem::On(
 				}
 
 				else if (event.Direction > 0) {
-					m_previousLevelLocation = m_worldTransform->Position;
-					target = m_previousLevelLocation - itr->second.second.LevelPosition;
+					target = m_worldTransform->Position - itr->second.second.LevelPosition;
 				}
 
 				else if (event.Direction < 0) {
-					target = m_previousLevelLocation;
+					auto pitr = m_loadedLevels.find(event.PreviousName);
+					if (pitr != m_loadedLevels.end()) {
+						target = m_worldTransform->Position + pitr->second.second.LevelPosition;
+					}
 				}
 
 				else {
 					Bus->push<StartLevelEvent>(event.LevelName); // if reset just start & exit
 					break;
 				}
+				
+				m_previousLevelLocation = m_worldTransform->Position;
 
 				Bus->push<TransitionToLevelEvent>(event.LevelName, 
 					level.CameraFollow, -target + level.InPosition, -target);
 
 				float start = iw::TotalTime();
-				float wait = 1.25f;
+				float wait = 1.5f;
 
 				Task->queue([=]() {
 					while (iw::TotalTime() - start < wait) {
@@ -411,14 +417,16 @@ std::pair<iw::EntityHandle, Level> LevelSystem::LoadLevel(
 		level = itr->second.second;
 	}
 
-	if (previous) {
-		m_previousLevelLocation = m_loadedLevels.at(from).second.LevelPosition;
-		levelTransform->Position = -m_previousLevelLocation;
-	}
-
-	else if (from.length() > 0) {
+	if (from.length() > 0) {
 		iw::Transform* prev = Space->FindComponent<iw::Transform>(m_loadedLevels.at(from).first);
-		levelTransform->Position = prev->Position + level.LevelPosition;
+		iw::vector3 prePos = m_loadedLevels.at(from).second.LevelPosition;
+		if (previous) {
+			levelTransform->Position = prev->Position - prePos;
+		}
+
+		else {
+			levelTransform->Position = prev->Position + level.LevelPosition;
+		}
 	}
 
 	return { levelEntity.Handle, level };

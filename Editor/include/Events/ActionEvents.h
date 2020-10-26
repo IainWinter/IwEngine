@@ -216,13 +216,16 @@ struct ActivateLevelEvent
 	: iw::SingleEvent
 {
 	std::string LevelName;
+	std::string PreviousName;
 	int Direction; // 1 forward, 0 reset, -1 backward
 
 	ActivateLevelEvent(
 		std::string name,
-		int direction)
+		std::string from = "",
+		int direction = 0)
 		: iw::SingleEvent(iw::val(Actions::ACTIVATE_LEVEL))
 		, LevelName(name)
+		, PreviousName(from)
 		, Direction(direction)
 	{}
 };

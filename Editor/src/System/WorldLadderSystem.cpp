@@ -83,11 +83,16 @@ bool WorldLadderSystem::On(
 
 			LOG_INFO << "Welcome to level '" << event.LevelName << "'";
 
+			if (event.LevelName == "levels/canyon/cave01.json") {
+				iw::Transform* t = SpawnLadder(iw::vector3(-4, 0, 0), iw::quaternion::from_euler_angles(0, -0.6f, 0), nullptr, true, "levels/canyon/canyon02.json");
+				Space->FindEntity(t).Find<iw::Model>()->GetTransform(0).Position.y = 14.5f;
+			}
+
 			if (event.LevelName == "levels/canyon/cave03.a.json") {
 				SpawnLadder(iw::vector3(15, 0, 4), iw::quaternion::from_euler_angles(0, -0.4f, 0), &saveState->Cave03LadderDown, false, "levels/canyon/canyon04.a.json");
 			}
 
-			if (event.LevelName == "levels/canyon/canyon04.a.json") {
+			else if (event.LevelName == "levels/canyon/canyon04.a.json") {
 				SpawnLadder(iw::vector3(-2, 0, -4), iw::quaternion::from_euler_angles(0, -0.4f, 0), &saveState->Cave03LadderDown, true, "levels/canyon/cave03.a.json");
 			}
 
