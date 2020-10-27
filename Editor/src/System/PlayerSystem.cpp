@@ -337,23 +337,25 @@ bool PlayerSystem::On(
 			
 			iw::vector3 previous = r->Trans().Position;
 
+			if (event.PlayerPosition.y == 0) event.PlayerPosition.y = 1;
+			
+			auto player = r;
+
 			float start = iw::TotalTime();
 			float wait = 1.5f;
 
-			if (event.PlayerPosition.y == 0) event.PlayerPosition.y = 1;
-
 			Task->queue([=]() {
 				while (iw::TotalTime() - start < wait) {
-					r->Trans().Position = iw::lerp(
+					player->Trans().Position = iw::lerp(
 						previous,
 						event.PlayerPosition,
 						(iw::TotalTime() - start) / wait);
 				}
 
-				r->Trans().Position = event.PlayerPosition;
+				player->Trans().Position = event.PlayerPosition;
 			});
 
-			r->SetCol(nullptr);
+			player->SetCol(nullptr);
 
 			break;
 		}

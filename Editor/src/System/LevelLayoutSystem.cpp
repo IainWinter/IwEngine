@@ -12,7 +12,7 @@ LevelLayoutSystem::LevelLayoutSystem()
 {}
 
 int LevelLayoutSystem::Initialize() {
-	std::string startingLevel = "levels/canyon/canyon07.json";
+	std::string startingLevel = "levels/canyon/canyon08.json";
 
 	LevelLayout* forest01 = new LevelLayout();
 
@@ -134,7 +134,7 @@ int LevelLayoutSystem::Initialize() {
 	cave02 .AddConnection(cave03);
 	cave01->AddConnection(cave02);
 
-	canyon10 .AddConnection (canyon11);
+	canyon10 .AddConnection(canyon11);
 	canyon09 .AddConnection(canyon10);
 	canyon08 .AddConnection(canyon09);
 	canyon07 .AddConnection(canyon08);
@@ -149,7 +149,8 @@ int LevelLayoutSystem::Initialize() {
 
 	iw::JsonSerializer("C:/dev/IwEngine/Editor/assets/levels/forest.json").Write(*forest01);
 	iw::JsonSerializer("C:/dev/IwEngine/Editor/assets/levels/canyon.json").Write(*canyon01);
-	iw::JsonSerializer("C:/dev/IwEngine/Editor/assets/levels/cavTop.json").Write(*cave01);
+	iw::JsonSerializer("C:/dev/IwEngine/Editor/assets/levels/cave.json").Write(*cave01);
+	iw::JsonSerializer("C:/dev/IwEngine/Editor/assets/levels/top.json").Write(*top01);
 
 	WorldLayout* forest = new WorldLayout(forest01);
 	WorldLayout* canyon = new WorldLayout(canyon01);
