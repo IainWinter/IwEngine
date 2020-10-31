@@ -159,7 +159,6 @@ bool LevelSystem::On(
 
 			break;
 		}
-
 		case iw::val(Actions::UNLOAD_LEVEL): {
 			std::string levelName = e.as<UnloadLevelEvent>().LevelName;
 

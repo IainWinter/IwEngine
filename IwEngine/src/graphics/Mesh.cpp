@@ -342,7 +342,8 @@ namespace detail {
 	void MeshData::GenNormals(
 		bool smooth)
 	{
-		if (!m_description.HasBuffer(bName::POSITION)) return;
+		if (   !m_description.HasBuffer(bName::POSITION)
+			|| !m_description.HasBuffer(bName::NORMAL)) return;
 
 		// check if mesh description has normals
 

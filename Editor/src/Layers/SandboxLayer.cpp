@@ -244,6 +244,52 @@ namespace iw {
 		description.DescribeBuffer(bName::BITANGENT, MakeLayout<float>(3));
 		description.DescribeBuffer(bName::UV,        MakeLayout<float>(2));
 
+		MeshDescription d;
+		d.DescribeBuffer(bName::POSITION, iw::MakeLayout<float>(3));
+		d.DescribeBuffer(bName::NORMAL,   iw::MakeLayout<float>(3));
+
+		//srand(5324);
+		////if (pos.y > 0 && w > 0) w -= randf();
+
+		//auto sphere = [](
+		//	vector3 pos,
+		//	size_t, size_t, size_t,
+		//	float***)
+		//{
+		//	return 10 -pos.length() > 0 ? 1 : 0;
+		//};
+
+		//auto jitter = [](
+		//	vector3 pos,
+		//	size_t x, size_t y, size_t z,
+		//	float*** weights)
+		//{
+		//	float left  = weights[x-1][y]  [z];
+		//	float right = weights[x+1][y]  [z];
+		//	float bot   = weights[x]  [y-1][z];
+		//	float top   = weights[x]  [y+1][z];
+		//	float front = weights[x]  [y]  [z-1];
+		//	float back  = weights[x]  [y]  [z+1];
+
+		//	if (   left + right + front + back == 1
+		//		&& weights[x][y-1][z]          < 0)          return 0.0f;
+
+		//	if (left + right + bot + top + front + back < 0) return 0.0f;
+
+		//	     if (randf() > 0.8f) return left;
+		//	else if (randf() > 0.8f) return right;
+		//	else if (randf() > 0.8f) return front;
+		//	else if (randf() > 0.8f) return back;
+		//	else if (randf() > 0.2f) return top;
+		//	else if (randf() > 0.2f) return bot;
+
+		//	return 0.0f;
+		//};
+
+		//Mesh smesh = iw::GenerateFromVoxels(
+		//	d, 0, vector3(15, 10, 15), .5f,
+		//	{ sphere, jitter, jitter , jitter , jitter , jitter })->MakeInstance();
+
 		Mesh smesh = MakeIcosphere  (description, 5)->MakeInstance();
 		Mesh tmesh = MakeTetrahedron(description, 5)->MakeInstance();
 		Mesh bmesh = MakeCube       (description)   ->MakeInstance();
@@ -258,7 +304,7 @@ namespace iw {
 
 		Model smodel;
 		smodel.AddMesh(smesh);
-		
+
 		Model tmodel;
 		tmodel.AddMesh(tmesh);
 

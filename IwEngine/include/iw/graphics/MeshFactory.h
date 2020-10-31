@@ -3,6 +3,7 @@
 #include "Mesh.h"
 #include "iw/util/algorithm/pair_hash.h"
 #include <unordered_map>
+#include <functional>
 
 namespace iw {
 namespace Graphics {
@@ -49,6 +50,18 @@ namespace Graphics {
 	MeshData* MakeCube(
 		const MeshDescription& description, // can only return a default cube
 		unsigned resolution = 0); // resolution doesnt do anything rn
+
+	// Rock
+
+	IWGRAPHICS_API
+	MeshData* GenerateFromVoxels(
+		const MeshDescription& description,
+		vector3 min,
+		vector3 max,
+		vector3 d,
+		std::initializer_list<
+			std::function<float(vector3, size_t, size_t, size_t, float***)>> passes);
+
 
 namespace detail {
 	using IndexPair   = std::pair<unsigned, unsigned>;
@@ -103,6 +116,57 @@ namespace detail {
 		unsigned first,
 		unsigned second,
 		unsigned& currentUvCount);
+
+	unsigned CreateVertexForEdgeVector(
+		IndexLookup& lookup,
+		std::vector<vector3>& verts,
+		vector3* source,
+		unsigned first,
+		unsigned second,
+		unsigned offset);
+
+	// put this is linear_alloc, find an algo for n dimensions would be cool
+
+	//https://stackoverflow.com/questions/340943/c-multi-dimensional-arrays-on-the-heap
+	template<
+		typename _t>
+	_t*** new3D(
+		unsigned N1,
+		unsigned N2,
+		unsigned N3)
+	{
+	    _t*** array = new _t**[N1];
+
+	    array[0]    = new _t*[N1*N2];
+	    array[0][0] = new _t [N1*N2*N3];
+
+	    for (unsigned i = 0; i < N1; i++) {
+		   if (i < N1 - 1) {
+			  array[0  ][(i+1)*N2] = &(array[0][0][(i+1)*N2*N3]);
+			  array[i+1]           = &(array[0   ][(i+1)*N2]);
+		   }
+
+		   for (unsigned j = 0; j < N2; j++) {
+			   if (j > 0) {
+				   array[i][j] = array[i][j-1] + N3;
+			   }
+
+			   std::fill(array[i][j], array[i][j] + N3, 0);
+		   }
+	    }
+
+	    return array;
+	};
+
+	template<
+		typename _t>
+	void delete3D(
+		_t*** array)
+	{
+	    delete[] array[0][0]; 
+	    delete[] array[0];
+	    delete[] array;
+	};
 }
 }
 

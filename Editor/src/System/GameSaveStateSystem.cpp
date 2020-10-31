@@ -32,6 +32,8 @@ bool GameSaveStateSystem::On(
 {
 	if (e.Action == iw::val(Actions::GAME_SAVE)) {
 		iw::JsonSerializer(m_file, true).Write(*m_state);
+
+		LOG_INFO << "Saved game";
 	}
 
 	return false;

@@ -141,28 +141,34 @@ void ScoreSystem::Update(
 bool ScoreSystem::On(
 	iw::ActionEvent& e)
 {
-	if (e.Action == iw::val(Actions::GIVE_SCORE)) {
-		GiveScoreEvent& event = e.as<GiveScoreEvent>();
-		
-		if (event.HalfScore) {
-			int score = potentialScore / 2;
-			score = score - (score % 50);
+	switch (e.Action) {
+		case iw::val(Actions::GIVE_SCORE): {
+			GiveScoreEvent& event = e.as<GiveScoreEvent>();
 
-			SpawnScore(-score, event.Position);
+			if (event.HalfScore) {
+				int score = potentialScore / 2;
+				score = score - (score % 50);
+
+				SpawnScore(-score, event.Position);
+			}
+
+			else {
+				SpawnScore(event.Score, event.Position);
+			}
+
+			break;
 		}
 
-		else {
-			SpawnScore(event.Score, event.Position);
+		case iw::val(Actions::GOTO_LEVEL):
+		case iw::val(Actions::GOTO_CONNECTED_LEVEL): {
+			totalScore += potentialScore;
+			potentialScore = 0;
+			break;
 		}
-	}
-
-	else if (e.Action == iw::val(Actions::GOTO_NEXT_LEVEL)) {
-		totalScore += potentialScore;
-		potentialScore = 0;
-	}
-
-	else if (e.Action == iw::val(Actions::RESET_LEVEL)) {
-		potentialScore = 0;
+		case iw::val(Actions::GOTO_NEXT_LEVEL): {
+			potentialScore = 0;
+			break;
+		}
 	}
 
 	return false;

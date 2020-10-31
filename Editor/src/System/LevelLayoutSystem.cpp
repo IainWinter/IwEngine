@@ -12,7 +12,7 @@ LevelLayoutSystem::LevelLayoutSystem()
 {}
 
 int LevelLayoutSystem::Initialize() {
-	std::string startingLevel = "levels/canyon/canyon08.json";
+	std::string startingLevel = "levels/canyon/canyon01.json";
 
 	LevelLayout* forest01 = new LevelLayout();
 
@@ -239,6 +239,12 @@ bool LevelLayoutSystem::On(
 
 			break;
 		}
+	}
+
+	if (   e.Action == iw::val(Actions::GOTO_LEVEL)
+		|| e.Action == iw::val(Actions::GOTO_CONNECTED_LEVEL))
+	{
+		Bus->push<GameSave>();
 	}
 
 	return false;
