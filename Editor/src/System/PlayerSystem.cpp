@@ -203,7 +203,11 @@ void PlayerSystem::Update(
 
 				//body->Trans().Position += movement * iw::Time::DeltaTime();
 
-				body->SetVelocity(player->Movement / iw::TimeScale());
+				iw::vector3 velocity = body->Velocity();
+				velocity.x = player->Movement.x / iw::TimeScale();
+				velocity.z = player->Movement.z / iw::TimeScale();
+
+				body->SetVelocity(velocity);
 
 				if (player->Timer <= -player->ChargeTime) {
 					if (distance == 0) {
@@ -382,6 +386,11 @@ bool PlayerSystem::On(
 
 			r->SetCol(s);
 			r->SetTrans(t);
+			r->SetIsLocked(iw::vector3(0, 1, 0));
+
+			r->SetSimGravity(0);
+			r->SetVelocity(0);
+			r->SetForce(0);
 
 			p->Transition = false;
 

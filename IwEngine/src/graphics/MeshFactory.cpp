@@ -658,8 +658,8 @@ namespace Graphics {
 		vector3 min,
 		vector3 max,
 		vector3 d,
-		std::initializer_list <
-		std::function<float(vector3, size_t, size_t, size_t, float***) >> passes)
+		std::vector<
+		std::function<float(vector3, size_t, size_t, size_t, float***)>> passes)
 	{
 		// Generate a cube of voxels
 		// Destroy voxels 

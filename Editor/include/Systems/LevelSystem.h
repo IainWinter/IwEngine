@@ -22,22 +22,12 @@ public:
 		LevelDoor* Door;
 	};
 private:
-	std::string currentLevelName;
-	Level currentLevel;
-
-	iw::Entity levelEntity;
-	iw::Entity nextLevelEntity;
-	bool transition;
-
-	iw::Entity levelDoor;
-	iw::Entity nextLevelDoor;
 	iw::Color openColor;
 	iw::Color closedColor;
 
 	iw::EventSequence sequence; // For cut scenes, prob shouldnt be here
 	iw::Entity firstEnemy;
 	iw::Entity otherGuy;
-
 
 	std::unordered_map<std::string, std::pair<iw::EntityHandle, Level>> m_loadedLevels;
 	iw::Transform* m_worldTransform;

@@ -1,8 +1,10 @@
 #pragma once
 
 #include "Components/Item.h"
-#include "iw/engine/System.h"
+#include "Components/GameSaveState.h"
+
 #include "iw/common/Components/Transform.h"
+#include "iw/engine/System.h"
 #include "iw/graphics/Model.h"
 
 class ItemSystem
@@ -10,9 +12,11 @@ class ItemSystem
 {
 private:
 	iw::Model m_noteModel;
+	GameSaveState* m_saveState;
 
 public:
-	ItemSystem();
+	ItemSystem(
+		GameSaveState* saveState);
 
 	int Initialize() override;
 
@@ -21,5 +25,6 @@ public:
 private:
 	iw::Transform* SpawnItem(
 		Item prefab,
-		iw::vector3 position);
+		iw::vector3 position,
+		std::string saveState);
 };

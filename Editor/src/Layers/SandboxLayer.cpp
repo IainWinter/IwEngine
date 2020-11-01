@@ -244,52 +244,6 @@ namespace iw {
 		description.DescribeBuffer(bName::BITANGENT, MakeLayout<float>(3));
 		description.DescribeBuffer(bName::UV,        MakeLayout<float>(2));
 
-		MeshDescription d;
-		d.DescribeBuffer(bName::POSITION, iw::MakeLayout<float>(3));
-		d.DescribeBuffer(bName::NORMAL,   iw::MakeLayout<float>(3));
-
-		//srand(5324);
-		////if (pos.y > 0 && w > 0) w -= randf();
-
-		//auto sphere = [](
-		//	vector3 pos,
-		//	size_t, size_t, size_t,
-		//	float***)
-		//{
-		//	return 10 -pos.length() > 0 ? 1 : 0;
-		//};
-
-		//auto jitter = [](
-		//	vector3 pos,
-		//	size_t x, size_t y, size_t z,
-		//	float*** weights)
-		//{
-		//	float left  = weights[x-1][y]  [z];
-		//	float right = weights[x+1][y]  [z];
-		//	float bot   = weights[x]  [y-1][z];
-		//	float top   = weights[x]  [y+1][z];
-		//	float front = weights[x]  [y]  [z-1];
-		//	float back  = weights[x]  [y]  [z+1];
-
-		//	if (   left + right + front + back == 1
-		//		&& weights[x][y-1][z]          < 0)          return 0.0f;
-
-		//	if (left + right + bot + top + front + back < 0) return 0.0f;
-
-		//	     if (randf() > 0.8f) return left;
-		//	else if (randf() > 0.8f) return right;
-		//	else if (randf() > 0.8f) return front;
-		//	else if (randf() > 0.8f) return back;
-		//	else if (randf() > 0.2f) return top;
-		//	else if (randf() > 0.2f) return bot;
-
-		//	return 0.0f;
-		//};
-
-		//Mesh smesh = iw::GenerateFromVoxels(
-		//	d, 0, vector3(15, 10, 15), .5f,
-		//	{ sphere, jitter, jitter , jitter , jitter , jitter })->MakeInstance();
-
 		Mesh smesh = MakeIcosphere  (description, 5)->MakeInstance();
 		Mesh tmesh = MakeTetrahedron(description, 5)->MakeInstance();
 		Mesh bmesh = MakeCube       (description)   ->MakeInstance();
@@ -366,7 +320,7 @@ namespace iw {
 		PushSystem<EnemyDeathCircleSystem>();
 		PushSystem<PhysicsSystem>();
 
-		PushSystem<ItemSystem>();
+		PushSystem<ItemSystem>(saveSystem->GetState());
 		PushSystem<NoteSystem>();
 		PushSystem<ConsumableSystem>(playerSystem->GetPlayer());
 
@@ -400,7 +354,68 @@ namespace iw {
 
 	float ambiance = 0.03f;
 
+	float tick = 0;
+	int iiii = 0;
 	void SandboxLayer::PostUpdate() {
+		srand(3);
+
+		std::vector<std::function<float(vector3 pos,
+			size_t x, size_t y, size_t z,
+			float*** weights)>> list;
+
+		if (iw::TotalTime() - tick > 1) {
+			tick = iw::TotalTime();
+			iiii++;
+
+			auto sphere = [](
+				vector3 pos,
+				size_t, size_t y, size_t,
+				float***)
+			{
+				return y == 1 /*|| 1 - pos.length()*/ > 0 ? 1 : 0;
+			};
+
+			auto jitter = [](
+				vector3 pos,
+				size_t x, size_t y, size_t z,
+				float*** weights)
+			{
+				float left  = weights[x-1][y]  [z];
+				float right = weights[x+1][y]  [z];
+				float bot   = weights[x]  [y-1][z];
+				float top   = weights[x]  [y+1][z];
+				float front = weights[x]  [y]  [z-1];
+				float back  = weights[x]  [y]  [z+1];
+
+				if (   left + right + front + back == 1
+					&& weights[x][y-1][z]          < 0)          return 0.0f;
+
+				if (left + right + bot + top + front + back < 0) return 0.0f;
+
+					 if (randf() > 0.9f) return left;
+				else if (randf() > 0.9f) return right;
+				else if (randf() > 0.9f) return front;
+				else if (randf() > 0.9f) return back;
+				else if (randf() > 0) return top;
+				else if (randf() > 0) return bot;
+
+				return 0.0f;
+			};
+
+			MeshDescription d;
+			d.DescribeBuffer(bName::POSITION, iw::MakeLayout<float>(3));
+			d.DescribeBuffer(bName::NORMAL, iw::MakeLayout<float>(3));
+
+			list.push_back(sphere);
+			for (int i = 0; i < iiii; i++) {
+				list.push_back(jitter);
+			}
+
+			playerSystem->GetPlayer().Find<iw::Model>()->GetMesh(0).SetData(iw::GenerateFromVoxels(
+				d, 0, vector3(30, 30, 30), .5,
+				list)->MakeLink());
+		}
+
 		// Update particle system
 
 		//font->UpdateMesh(textMesh, std::to_string(1.0f / Time::DeltaTime()), 0.01f, 1); //fps
@@ -562,13 +577,8 @@ namespace iw {
 			}
 		}
 
-		if (   e.Action == iw::val(Actions::START_LEVEL)
-			|| e.Action == iw::val(Actions::GOTO_NEXT_LEVEL))
-		{
-			std::string_view name 
-				= e.Action == iw::val(Actions::START_LEVEL)
-				? e.as<StartLevelEvent>().LevelName
-				: e.as<GoToNextLevelEvent>().LevelName;
+		if (e.Action == iw::val(Actions::START_LEVEL)) {
+			std::string_view name = e.as<StartLevelEvent>().LevelName;
 
 			m_font->UpdateMesh(*m_textMesh, "", .01f, 1);
 			settexttocursor = false;
@@ -580,7 +590,9 @@ namespace iw {
 				sun->SetRotation(iw::quaternion::from_euler_angles(1.0f, 0.0f, -0.35f));
 				sun->SetColor(vector3(1.0f, 0.64f, 0.37f) * 0.33f);
 
-				if (name.find("cave") != std::string::npos) {
+				if (   name.find("cave") != std::string::npos
+					|| name.find(".a")    != std::string::npos)
+				{
 					sun->SetRotation(iw::quaternion::from_euler_angles(1.4f, 0.0f, -0.25f));
 					sun->SetColor(vector3(1.0f, 0.64f, 0.37f));
 

@@ -133,7 +133,8 @@ bool ConsumableSystem::On(
 
 			break;
 		}
-		case iw::val(Actions::GOTO_NEXT_LEVEL): {
+		case iw::val(Actions::GOTO_LEVEL):
+		case iw::val(Actions::GOTO_CONNECTED_LEVEL): {
 			if (m_isActive) {
 				Consumable* consumable = Space->FindComponent<Consumable>(m_active);
 				consumable->Action(consumable, m_target, Bus.get(), true);

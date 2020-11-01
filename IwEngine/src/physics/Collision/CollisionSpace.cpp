@@ -100,10 +100,17 @@ namespace Physics {
 			}
 		}
 
-		SolveManifolds(manifolds, dt);
-
 		SendCollisionCallbacks(manifolds, dt);
 		SendCollisionCallbacks(triggers, dt);
+
+		std::vector<Manifold> actuallyCollideded;
+		for (Manifold& manifold : manifolds) {
+			if (manifold.HasCollision) {
+				actuallyCollideded.push_back(manifold); // big copy for no reason :(
+			}
+		}
+
+		SolveManifolds(actuallyCollideded, dt);
 	}
 
 

@@ -110,8 +110,8 @@ bool WorldHoleSystem::On(
 			}
 
 			else if (event.LevelName == "levels/canyon/canyon05.json") {
-				event.Level->AddChild(SpawnHole(iw::vector3(0, 0, -5.5), 5, false, "levels/canyon/cave04.json"));
-				event.Level->AddChild(SpawnHole(iw::vector3(0, 0,  5.5), 5, false, "levels/canyon/cave04.json"));
+				event.Level->AddChild(SpawnHole(iw::vector3(0, 0, -6), 5, false, "levels/canyon/cave04.json"));
+				event.Level->AddChild(SpawnHole(iw::vector3(0, 0,  6), 5, false, "levels/canyon/cave04.json"));
 			}
 
 			else if (event.LevelName == "levels/canyon/canyon07.json") {

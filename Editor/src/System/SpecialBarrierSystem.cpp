@@ -28,11 +28,31 @@ void SpecialBarrierSystem::collide(
 		return;
 	}
 
-	if (   dashThrough
-		&& man.PenetrationDepth > 0.25f
-		&& playerEntity.Find<Player>()->Timer <= 0)
-	{
-		Bus->push<ResetLevelEvent>();
+	if (man.PenetrationDepth > 0.5f) {
+		man.HasCollision = false;
+
+		if (   !dashThrough
+			&& playerEntity.Find<Player>()->Timer <= 0)
+		{
+			iw::Rigidbody* body = playerEntity.Find<iw::Rigidbody>();
+
+			body->SetSimGravity(true);
+			body->SetIsLocked(0);
+			body->SetCol(nullptr);
+
+			playerEntity.Find<Player>()->Speed = 0;
+
+			float start = iw::TotalTime();
+			float wait = 2.00f;
+
+			Task->queue([=]() {
+				while (iw::TotalTime() - start < wait) {
+					// spin lock
+				}
+
+				Bus->push<ResetLevelEvent>();
+			});
+		}
 	}
 }
 

@@ -16,8 +16,8 @@ enum class Actions
 {
 	GAME_STATE, DEV_CONSOLE,
 	JUMP, RIGHT, FORWARD, USE,
-	RESET_LEVEL, START_LEVEL, UNLOCK_LEVEL_DOOR, LOAD_NEXT_LEVEL, GOTO_NEXT_LEVEL, AT_NEXT_LEVEL,
 
+	RESET_LEVEL, START_LEVEL, UNLOCK_LEVEL_DOOR,
 	GOTO_CONNECTED_LEVEL, GOTO_LEVEL, UNLOAD_LEVEL, LOAD_LEVEL,
 	ACTIVATE_LEVEL, DEACTIVATE_LEVEL, TRANSITION_TO_LEVEL,
 
@@ -142,50 +142,6 @@ struct UnlockLevelDoorEvent
 	{}
 };
 
-struct LoadNextLevelEvent
-	: iw::SingleEvent
-{
-	std::string LevelName;
-	iw::vector3 Position;
-	bool GoBack;
-
-	LoadNextLevelEvent()
-		: iw::SingleEvent(iw::val(Actions::LOAD_NEXT_LEVEL))
-		, GoBack(false)
-	{}
-
-	LoadNextLevelEvent(
-		std::string levelName,
-		iw::vector3 position = iw::vector3::zero,
-		bool goback = false)
-		: iw::SingleEvent(iw::val(Actions::LOAD_NEXT_LEVEL))
-		, LevelName(levelName)
-		, Position(position)
-		, GoBack(goback)
-	{}
-};
-
-struct GoToNextLevelEvent
-	: iw::SingleEvent
-{
-	std::string LevelName;
-	bool CameraFollow;
-	iw::vector3 PlayerPosition;
-	iw::vector3 CenterPosition;
-
-	GoToNextLevelEvent(
-		std::string levelName,
-		bool cameraFollow,
-		iw::vector3 playerPosition,
-		iw::vector3 centerPosition)
-		: iw::SingleEvent(iw::val(Actions::GOTO_NEXT_LEVEL))
-		, LevelName(levelName)
-		, CameraFollow(cameraFollow)
-		, PlayerPosition(playerPosition)
-		, CenterPosition(centerPosition)
-	{}
-};
-
 // new level layout events
 
 struct GotoConnectedLevelEvent
@@ -294,15 +250,6 @@ struct TransitionToLevelEvent
 	{}
 };
 
-
-struct AtNextLevelEvent
-	: iw::SingleEvent
-{
-	AtNextLevelEvent()
-		: iw::SingleEvent(iw::val(Actions::AT_NEXT_LEVEL))
-	{}
-};
-
 struct SpawnEnemyDeath
 	: iw::SingleEvent
 {
@@ -367,14 +314,18 @@ struct SpawnItemEvent
 	iw::vector3 Position;
 	iw::Transform* Level;
 
+	std::string SaveState;
+
 	SpawnItemEvent(
 		::Item item,
 		iw::vector3 position,
-		iw::Transform* level)
+		iw::Transform* level,
+		std::string saveState = "")
 		: iw::SingleEvent(iw::val(Actions::SPAWN_ITEM))
 		, Item(item)
 		, Position(position)
 		, Level(level)
+		, SaveState(saveState)
 	{}
 };
 

@@ -198,9 +198,7 @@ bool EnemyBossSystem::On(
 			}
 			break;
 		}
-		case iw::val(Actions::RESET_LEVEL):
-		case iw::val(Actions::AT_NEXT_LEVEL):
-		case iw::val(Actions::GOTO_NEXT_LEVEL): { // not sure if next level 
+		case iw::val(Actions::ACTIVATE_LEVEL): { // not sure if next level 
 			if (m_musicInstance != -1) {
 				Audio->AsStudio()->StopInstance(m_musicInstance);
 				Audio->AsStudio()->RemoveInstance(m_musicInstance);

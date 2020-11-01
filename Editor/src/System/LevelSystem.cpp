@@ -44,12 +44,8 @@ struct OtherGuyTag {
 LevelSystem::LevelSystem()
 	: iw::System<iw::CollisionObject, iw::Model, LevelDoor>("Level")
 {
-	currentLevelName = "levels/canyon/canyon01.json";
-
 	openColor   = iw::Color::From255(66, 201, 66, 63);
 	closedColor = iw::Color::From255(201, 66, 66, 63);
-
-	transition = false;
 }
 
 std::unordered_map<std::string, iw::StaticPS*> pSystems;
@@ -67,8 +63,6 @@ int LevelSystem::Initialize() {
 	leafMesh.Material()->SetShader(particleShader);
 	leafMesh.Material()->SetTexture("shadowMap", Asset->Load<iw::Texture>("SunShadowMap"));
 	leafMesh.Material()->Set("baseColor", iw::Color(1, 1, 1));
-
-	//Bus->send<ResetLevelEvent>();
 
 	return 0;
 }
@@ -117,15 +111,8 @@ bool LevelSystem::On(
 	LevelDoor*     door = doorEntity.Find<LevelDoor>();
 	iw::Transform* tran = doorEntity.Find<iw::Transform>();
 
-	if (!door) {
-		LOG_INFO << "bad query";
-		return true;
-	}
-
 	if (door->State == LevelDoorState::OPEN) {
 		door->State = LevelDoorState::LOCKED; // stops events from being spammed
-		//Bus->push<LoadNextLevelEvent>(door->NextLevel, tran->Position, door->GoBack);
-
 		Bus->push<GotoConnectedLevelEvent>(door->Index);
 	}
 
@@ -199,55 +186,56 @@ bool LevelSystem::On(
 			ActivateLevelEvent& event = e.as<ActivateLevelEvent>();
 
 			auto itr = m_loadedLevels.find(event.LevelName);
-			if (itr != m_loadedLevels.end()) {
-
-				Level& level = itr->second.second;
-
-				ActivateLevel(event.LevelName);
-				
-				iw::vector3 target;
-
-				if (event.Direction == 101) {
-					m_worldTransform->Position = 0;
-				}
-
-				else if (event.Direction > 0) {
-					target = m_worldTransform->Position - itr->second.second.LevelPosition;
-				}
-
-				else if (event.Direction < 0) {
-					auto pitr = m_loadedLevels.find(event.PreviousName);
-					if (pitr != m_loadedLevels.end()) {
-						target = m_worldTransform->Position + pitr->second.second.LevelPosition;
-					}
-				}
-
-				else {
-					Bus->push<StartLevelEvent>(event.LevelName); // if reset just start & exit
-					break;
-				}
-				
-				m_previousLevelLocation = m_worldTransform->Position;
-
-				Bus->push<TransitionToLevelEvent>(event.LevelName, 
-					level.CameraFollow, -target + level.InPosition, -target);
-
-				float start = iw::TotalTime();
-				float wait = 1.5f;
-
-				Task->queue([=]() {
-					while (iw::TotalTime() - start < wait) {
-						m_worldTransform->Position = iw::lerp(
-							m_previousLevelLocation,
-							target,
-							iw::ease(iw::TotalTime() - start, wait));
-					}
-
-					m_worldTransform->Position = target;
-
-					Bus->push<StartLevelEvent>(event.LevelName);
-				});
+			if (itr == m_loadedLevels.end()) {
+				break;
 			}
+
+			Level& level = itr->second.second;
+
+			ActivateLevel(event.LevelName);
+
+			iw::vector3 target;
+
+			if (event.Direction == 101) {
+				m_worldTransform->Position = 0;
+			}
+
+			else if (event.Direction > 0) {
+				target = m_worldTransform->Position - itr->second.second.LevelPosition;
+			}
+
+			else if (event.Direction < 0) {
+				auto pitr = m_loadedLevels.find(event.PreviousName);
+				if (pitr != m_loadedLevels.end()) {
+					target = m_worldTransform->Position + pitr->second.second.LevelPosition;
+				}
+			}
+
+			else {
+				Bus->push<StartLevelEvent>(event.LevelName); // if reset just start & exit
+				break;
+			}
+				
+			m_previousLevelLocation = m_worldTransform->Position;
+
+			Bus->push<TransitionToLevelEvent>(event.LevelName, 
+				level.CameraFollow, -target + level.InPosition, -target);
+
+			float start = iw::TotalTime();
+			float wait = 1.5f;
+
+			Task->queue([=]() {
+				while (iw::TotalTime() - start < wait) {
+					m_worldTransform->Position = iw::lerp(
+						m_previousLevelLocation,
+						target,
+						iw::ease(iw::TotalTime() - start, wait));
+				}
+
+				m_worldTransform->Position = target;
+
+				Bus->push<StartLevelEvent>(event.LevelName);
+			});
 
 			break;
 		}
@@ -490,10 +478,6 @@ void LevelSystem::ActivateLevel(
 	for (size_t i = 0; i < level.Doors.size(); i++) {
 		iw::Entity ent = Space->CreateEntity<iw::Transform, iw::Model, iw::SphereCollider, iw::CollisionObject, LevelDoor>();
 	
-		if (i == 0) {
-			nextLevelDoor = ent;
-		}
-
 		LevelDoor*           door      = ent.Set<LevelDoor>(level.Doors[i]);
 		iw::Model*           model     = ent.Set<iw::Model>(*Asset->Load<iw::Model>("Door"));
 		iw::Transform*       transform = ent.Set<iw::Transform>(iw::vector3(level.DoorPositions[i].x, 1, level.DoorPositions[i].y), 5.0f);
@@ -559,29 +543,6 @@ void LevelSystem::ActivateLevel(
 	// Spawning items
 	
 	sequence = CreateSequence();
-
-	if (name == "levels/forest/forest05.a.json") {
-		Bus->push<SpawnItemEvent>(Item{ NOTE,       0 }, iw::vector3(3, 1, -2), levelTransform);
-		Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 0 }, iw::vector3(0, 1, 3),  levelTransform);
-	}
-
-	else if (name == "levels/forest/forest07.a.json") {
-		Bus->push<SpawnItemEvent>(Item{ NOTE,       1 }, iw::vector3(24, 1, 8), levelTransform);
-		Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 0 }, iw::vector3(8, 1, 0), levelTransform);
-	}
-
-	else if (name == "levels/forest/forest12.a.json") {
-		Bus->push<SpawnItemEvent>(Item{ NOTE,       2 }, iw::vector3(3, 1, -2), levelTransform);
-		Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 1 }, iw::vector3(0, 1,  3), levelTransform);
-	}
-
-	else if (name == "levels/canyon/cave04.json") {
-		Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 2 }, iw::vector3(22, 1, 7.5f), levelTransform);
-	}
-
-	else if (name == "levels/canyon/cave06.json") {
-		Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 2 }, iw::vector3(4, 1, -9.5f), levelTransform);
-	}
 
 	// run a cut scene
 

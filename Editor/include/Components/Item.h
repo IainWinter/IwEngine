@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 enum ItemType {
 	NOTE,        // Show a note
 	CONSUMABLE,  // Give an item
@@ -9,4 +11,6 @@ enum ItemType {
 struct Item {
 	ItemType Type;
 	unsigned Id;
+
+	std::string SaveState;
 };

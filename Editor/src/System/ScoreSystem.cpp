@@ -158,14 +158,12 @@ bool ScoreSystem::On(
 
 			break;
 		}
-
-		case iw::val(Actions::GOTO_LEVEL):
-		case iw::val(Actions::GOTO_CONNECTED_LEVEL): {
+		case iw::val(Actions::ACTIVATE_LEVEL): {
 			totalScore += potentialScore;
 			potentialScore = 0;
 			break;
 		}
-		case iw::val(Actions::GOTO_NEXT_LEVEL): {
+		case iw::val(Actions::RESET_LEVEL): {
 			potentialScore = 0;
 			break;
 		}
