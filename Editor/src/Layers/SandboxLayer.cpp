@@ -354,67 +354,68 @@ namespace iw {
 
 	float ambiance = 0.03f;
 
-	float tick = 0;
-	int iiii = 0;
+	//float tick = 0;
+	//int iiii = 0;
+
 	void SandboxLayer::PostUpdate() {
-		srand(3);
+		//srand(3);
 
-		std::vector<std::function<float(vector3 pos,
-			size_t x, size_t y, size_t z,
-			float*** weights)>> list;
+		//std::vector<std::function<float(vector3 pos,
+		//	size_t x, size_t y, size_t z,
+		//	float*** weights)>> list;
 
-		if (iw::TotalTime() - tick > 1) {
-			tick = iw::TotalTime();
-			iiii++;
+		//if (iw::TotalTime() - tick > 1) {
+		//	tick = iw::TotalTime();
+		//	iiii++;
 
-			auto sphere = [](
-				vector3 pos,
-				size_t, size_t y, size_t,
-				float***)
-			{
-				return y == 1 /*|| 1 - pos.length()*/ > 0 ? 1 : 0;
-			};
+		//	auto sphere = [](
+		//		vector3 pos,
+		//		size_t, size_t y, size_t,
+		//		float***)
+		//	{
+		//		return y == 1 /*|| 1 - pos.length()*/ > 0 ? 1 : 0;
+		//	};
 
-			auto jitter = [](
-				vector3 pos,
-				size_t x, size_t y, size_t z,
-				float*** weights)
-			{
-				float left  = weights[x-1][y]  [z];
-				float right = weights[x+1][y]  [z];
-				float bot   = weights[x]  [y-1][z];
-				float top   = weights[x]  [y+1][z];
-				float front = weights[x]  [y]  [z-1];
-				float back  = weights[x]  [y]  [z+1];
+		//	auto jitter = [](
+		//		vector3 pos,
+		//		size_t x, size_t y, size_t z,
+		//		float*** weights)
+		//	{
+		//		float left  = weights[x-1][y]  [z];
+		//		float right = weights[x+1][y]  [z];
+		//		float bot   = weights[x]  [y-1][z];
+		//		float top   = weights[x]  [y+1][z];
+		//		float front = weights[x]  [y]  [z-1];
+		//		float back  = weights[x]  [y]  [z+1];
 
-				if (   left + right + front + back == 1
-					&& weights[x][y-1][z]          < 0)          return 0.0f;
+		//		if (   left + right + front + back == 1
+		//			&& weights[x][y-1][z]          < 0)          return 0.0f;
 
-				if (left + right + bot + top + front + back < 0) return 0.0f;
+		//		if (left + right + bot + top + front + back < 0) return 0.0f;
 
-					 if (randf() > 0.9f) return left;
-				else if (randf() > 0.9f) return right;
-				else if (randf() > 0.9f) return front;
-				else if (randf() > 0.9f) return back;
-				else if (randf() > 0) return top;
-				else if (randf() > 0) return bot;
+		//			 if (randf() > 0.9f) return left;
+		//		else if (randf() > 0.9f) return right;
+		//		else if (randf() > 0.9f) return front;
+		//		else if (randf() > 0.9f) return back;
+		//		else if (randf() > 0) return top;
+		//		else if (randf() > 0) return bot;
 
-				return 0.0f;
-			};
+		//		return 0.0f;
+		//	};
 
-			MeshDescription d;
-			d.DescribeBuffer(bName::POSITION, iw::MakeLayout<float>(3));
-			d.DescribeBuffer(bName::NORMAL, iw::MakeLayout<float>(3));
+		//	MeshDescription d;
+		//	d.DescribeBuffer(bName::POSITION, iw::MakeLayout<float>(3));
+		//	d.DescribeBuffer(bName::NORMAL, iw::MakeLayout<float>(3));
 
-			list.push_back(sphere);
-			for (int i = 0; i < iiii; i++) {
-				list.push_back(jitter);
-			}
+		//	list.push_back(sphere);
+		//	for (int i = 0; i < iiii; i++) {
+		//		list.push_back(jitter);
+		//	}
 
-			playerSystem->GetPlayer().Find<iw::Model>()->GetMesh(0).SetData(iw::GenerateFromVoxels(
-				d, 0, vector3(30, 30, 30), .5,
-				list)->MakeLink());
-		}
+		//	playerSystem->GetPlayer().Find<iw::Model>()->GetMesh(0).SetData(iw::GenerateFromVoxels(
+		//		d, 0, vector3(30, 30, 30), .5,
+		//		list)->MakeLink());
+		//}
 
 		// Update particle system
 

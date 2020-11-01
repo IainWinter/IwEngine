@@ -27,6 +27,7 @@ private:
 		iw::quaternion rotation,
 		bool* down_saveState,
 		bool above,
-		std::string level);
+		std::string level,
+		iw::vector3 inPosition);
 
 };

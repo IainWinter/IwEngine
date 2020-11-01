@@ -84,37 +84,37 @@ bool WorldLadderSystem::On(
 			LOG_INFO << "Welcome to level '" << event.LevelName << "'";
 
 			if (event.LevelName == "levels/canyon/cave01.json") {
-				iw::Transform* t = SpawnLadder(iw::vector3(-4, 0, 0), iw::quaternion::from_euler_angles(0, -0.6f, 0), nullptr, true, "levels/canyon/canyon02.json");
+				iw::Transform* t = SpawnLadder(iw::vector3(-4, 0, 0), iw::quaternion::from_euler_angles(0, -0.6f, 0), nullptr, true, "levels/canyon/canyon02.json", iw::vector3(6, 1, 0));
 				Space->FindEntity(t).Find<iw::Model>()->GetTransform(0).Position.y = 14.5f;
 			}
 
 			if (event.LevelName == "levels/canyon/cave03.a.json") {
-				SpawnLadder(iw::vector3(15, 0, 4), iw::quaternion::from_euler_angles(0, -0.4f, 0), &saveState->Cave03LadderDown, false, "levels/canyon/canyon04.a.json");
+				SpawnLadder(iw::vector3(15, 0, 4), iw::quaternion::from_euler_angles(0, -0.4f, 0), &saveState->Cave03LadderDown, false, "levels/canyon/canyon04.a.json", iw::vector3(0, 1, -2));
 			}
 
 			else if (event.LevelName == "levels/canyon/canyon04.a.json") {
-				SpawnLadder(iw::vector3(-2, 0, -4), iw::quaternion::from_euler_angles(0, -0.4f, 0), &saveState->Cave03LadderDown, true, "levels/canyon/cave03.a.json");
+				SpawnLadder(iw::vector3(-2, 0, -4), iw::quaternion::from_euler_angles(0, -0.4f, 0), &saveState->Cave03LadderDown, true, "levels/canyon/cave03.a.json", iw::vector3(16, 1, 6));
 			}
 
 			else if (event.LevelName == "levels/canyon/cave06.json") {
-				SpawnLadder(iw::vector3(3.5f, 0, -14), iw::quaternion::from_euler_angles(0, 0.7f, 0), &saveState->Cave06LadderDown, false, "levels/canyon/canyon07.a.json");
+				SpawnLadder(iw::vector3(3.5f, 0, -14), iw::quaternion::from_euler_angles(0, 0.7f, 0), &saveState->Cave06LadderDown, false, "levels/canyon/canyon07.a.json", iw::vector3(1, 1, -4));
 			}
 
 			else if (event.LevelName == "levels/canyon/cave08.json") {
-				SpawnLadder(iw::vector3(8, 0, 0), iw::quaternion::from_euler_angles(0, 1.57f, 0), nullptr, false, "levels/canyon/top01.json");
+				SpawnLadder(iw::vector3(8, 0, 0), iw::quaternion::from_euler_angles(0, 1.57f, 0), nullptr, false, "levels/canyon/top01.json", 0);
 			}
 
 			else if (event.LevelName == "levels/canyon/canyon07.a.json") {
-				SpawnLadder(iw::vector3(2, 0, -5), iw::quaternion::from_euler_angles(0, 0.7f, 0), &saveState->Cave06LadderDown, true, "levels/canyon/cave06.json");
+				SpawnLadder(iw::vector3(2, 0, -5), iw::quaternion::from_euler_angles(0, 0.7f, 0), &saveState->Cave06LadderDown, true, "levels/canyon/cave06.json", iw::vector3(2, 1, -12));
 			}
 
 			else if (event.LevelName == "levels/canyon/top08.json") {
-				iw::Transform* t = SpawnLadder(iw::vector3(15, -5, 14), iw::quaternion::from_euler_angles(0.3f, -0.2f, 0), &saveState->Top08LadderDown, true, "levels/canyon/canyon02.json");
+				iw::Transform* t = SpawnLadder(iw::vector3(15, -5, 14), iw::quaternion::from_euler_angles(0.3f, -0.2f, 0), &saveState->Top08LadderDown, true, "levels/canyon/canyon02.json", iw::vector3(-1.5f, 1, -7.5f));
 				Space->FindEntity(t).Find<iw::SphereCollider>()->Center = iw::vector3(0, 5.8f, -3.5f); // position collider higher up
 			}
 
 			else if (event.LevelName == "levels/canyon/canyon02.json") {
-				iw::Transform* t = SpawnLadder(iw::vector3(-1.3f, 0, -9.8f), iw::quaternion::from_euler_angles(0.3f, -0.2f, 0), &saveState->Top08LadderDown, false, "levels/canyon/top08.json");
+				iw::Transform* t = SpawnLadder(iw::vector3(-1.3f, 0, -9.8f), iw::quaternion::from_euler_angles(0.3f, -0.2f, 0), &saveState->Top08LadderDown, false, "levels/canyon/top08.json", iw::vector3(15, 1, 12));
 				Space->FindEntity(t).Find<iw::Model>()->RemoveMesh(3);
 			}
 
@@ -130,7 +130,8 @@ iw::Transform* WorldLadderSystem::SpawnLadder(
 	iw::quaternion rotation,
 	bool* down_saveState,
 	bool above,
-	std::string level)
+	std::string level,
+	iw::vector3 inPosition)
 {
 	iw::Entity ladder = Space->Instantiate(ladderPrefab);
 
@@ -147,6 +148,7 @@ iw::Transform* WorldLadderSystem::SpawnLadder(
 	l->Open = down_saveState ? *down_saveState : true;
 	l->Above = above;
 	l->SaveState = down_saveState;
+	l->InPosition = inPosition;
 
 	t->SetParent(currentLevel.Find<iw::Transform>());
 
@@ -163,7 +165,7 @@ iw::Transform* WorldLadderSystem::SpawnLadder(
 		WorldLadder* wLadder = ladder.Find<WorldLadder>();
 
 		if (wLadder->Open) {
-			Bus->send<GotoLevelEvent>(wLadder->Level);
+			Bus->send<GotoLevelEvent>(wLadder->Level, wLadder->InPosition);
 		}
 
 		else {

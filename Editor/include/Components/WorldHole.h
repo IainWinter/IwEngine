@@ -7,6 +7,7 @@ struct WorldHole {
 
 	bool Touched = false;
 	std::string CaveLevel;
+	iw::vector3 InPosition;
 
 	float Timer = 0.0f;
 	float Time;

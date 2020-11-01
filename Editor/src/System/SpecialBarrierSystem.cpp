@@ -95,13 +95,14 @@ bool SpecialBarrierSystem::On(
 			}
 
 			else if (event.LevelName == "levels/canyon/cave07.json") {
-				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3( 2.2f, 0, -1.6f), iw::vector3::unit_x,  6.7f, 0.3f }));
-				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3( 2.7f, 0,  1.6f), iw::vector3::unit_x,  7.4f, 0.3f }));
-				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3( 0.5f, 0, 14   ), iw::vector3::unit_z, 23.8f, 9    }));
-				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3(11.5f, 0,  5.1f), iw::vector3::unit_x, 11.7f, 0.3f }));
-				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3( 6.1f, 0,  3.5f), iw::vector3::unit_z,  4,    0.3f }));
-				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3( 5.3f, 0, -6.6f), iw::vector3::unit_z, 10.6f, 0.3f }));
-				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3(-1,    0, -6.6f), iw::vector3::unit_z, 10.6f, 0.3f }));
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3( 2.2f, 0, -1.6f),  iw::vector3::unit_x,  6.7f, 0.3f }));
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3( 2.7f, 0,  1.6f),  iw::vector3::unit_x,  7.4f, 0.3f }));
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3( 0.5f, 0, 14   ),  iw::vector3::unit_z, 23.8f, 9    }));
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3(10.7f, 0,  10.9f), iw::vector3::unit_x, 24.4f, 5.8f }));
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3( 6.1f, 0,  3.5f),  iw::vector3::unit_z,  4,    0.3f }));
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3( 5.3f, 0, -6.6f),  iw::vector3::unit_z, 10.6f, 0.3f }));
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3(-1,    0, -6.6f),  iw::vector3::unit_z, 10.6f, 0.3f }));
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3( 2.1,  0, -6.6f),  iw::vector3::unit_z, 10.0f, 2.7f }));
 			}		
 
 			break;

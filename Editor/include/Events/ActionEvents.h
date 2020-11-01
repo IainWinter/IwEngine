@@ -160,11 +160,14 @@ struct GotoLevelEvent
 	: iw::SingleEvent
 {
 	std::string LevelName;
+	iw::vector3 InPosition;
 
 	GotoLevelEvent(
-		std::string levelName)
+		std::string levelName,
+		iw::vector3 inPosition)
 		: iw::SingleEvent(iw::val(Actions::GOTO_LEVEL))
 		, LevelName(levelName)
+		, InPosition(inPosition)
 	{}
 };
 
@@ -175,14 +178,18 @@ struct ActivateLevelEvent
 	std::string PreviousName;
 	int Direction; // 1 forward, 0 reset, -1 backward
 
+	iw::vector3 InPosition;
+
 	ActivateLevelEvent(
 		std::string name,
 		std::string from = "",
-		int direction = 0)
+		int direction = 0,
+		iw::vector3 inPosition = 0)
 		: iw::SingleEvent(iw::val(Actions::ACTIVATE_LEVEL))
 		, LevelName(name)
 		, PreviousName(from)
 		, Direction(direction)
+		, InPosition(inPosition)
 	{}
 };
 

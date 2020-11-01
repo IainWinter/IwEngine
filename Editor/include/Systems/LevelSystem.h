@@ -32,6 +32,7 @@ private:
 	std::unordered_map<std::string, std::pair<iw::EntityHandle, Level>> m_loadedLevels;
 	iw::Transform* m_worldTransform;
 	iw::vector3 m_previousLevelLocation;
+	iw::vector3 m_lastInPosition;
 
 public:
 	LevelSystem();

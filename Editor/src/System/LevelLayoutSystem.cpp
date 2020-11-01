@@ -12,7 +12,7 @@ LevelLayoutSystem::LevelLayoutSystem()
 {}
 
 int LevelLayoutSystem::Initialize() {
-	std::string startingLevel = "levels/canyon/canyon01.json";
+	std::string startingLevel = "levels/canyon/cave07.json";
 
 	LevelLayout* forest01 = new LevelLayout();
 
@@ -163,7 +163,7 @@ int LevelLayoutSystem::Initialize() {
 	m_worlds.push_back(cave);
 	m_worlds.push_back(top);
 
-	Bus->push<GotoLevelEvent>(startingLevel);
+	Bus->push<GotoLevelEvent>(startingLevel, 0);
 
 	return 0;
 }
@@ -193,7 +193,7 @@ bool LevelLayoutSystem::On(
 				Bus->push<LoadLevelEvent>(connection.LevelName, CurrentLevelName());
 			}
 
-			Bus->push<ActivateLevelEvent>(CurrentLevelName(), "", 101);
+			Bus->push<ActivateLevelEvent>(CurrentLevelName(), "", 101, event.InPosition);
 
 			break;
 		}
@@ -235,7 +235,7 @@ bool LevelLayoutSystem::On(
 			}
 			
 			// Activate new level
-			Bus->push<ActivateLevelEvent>(CurrentLevelName(), from, event.Index);
+			Bus->push<ActivateLevelEvent>(CurrentLevelName(), from, event.Index, 0); // get inposition from event
 
 			break;
 		}

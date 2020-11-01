@@ -10,4 +10,6 @@ struct WorldLadder {
 	bool Transition = false;
 	float Speed = 1;
 	bool* SaveState = nullptr;
+
+	iw::vector3 InPosition;
 };

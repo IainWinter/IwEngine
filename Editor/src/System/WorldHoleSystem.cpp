@@ -95,33 +95,35 @@ bool WorldHoleSystem::On(
 		case iw::val(Actions::START_LEVEL): {
 			StartLevelEvent& event = e.as<StartLevelEvent>();
 
+			// inpos is the same as location for now but might need tuning on some levels
+
 			if (event.LevelName == "levels/canyon/canyon02.json") {
-				event.Level->AddChild(SpawnHole(0, 5, false, "levels/canyon/cave01.json"));
+				event.Level->AddChild(SpawnHole(0, 5, false, "levels/canyon/cave01.json", 0));
 			}
 
 			else if (event.LevelName == "levels/canyon/canyon03.json") {
-				event.Level->AddChild(SpawnHole(iw::vector3(-8,  0, -8), 5, false, "levels/canyon/cave02.json"));
-				event.Level->AddChild(SpawnHole(iw::vector3( 2,  0,  0), 5, true,  "levels/canyon/cave02.json"));
-				event.Level->AddChild(SpawnHole(iw::vector3( 12, 0,  8), 5, false, "levels/canyon/cave02.json"));
+				event.Level->AddChild(SpawnHole(iw::vector3(-8,  0, -8), 5, false, "levels/canyon/cave02.json", iw::vector3(-2.7f, 0, -8.5f)));
+				event.Level->AddChild(SpawnHole(iw::vector3( 2,  0,  0), 5, true,  "levels/canyon/cave02.json", iw::vector3(0, 0, 0)));
+				event.Level->AddChild(SpawnHole(iw::vector3( 12, 0,  8), 5, false, "levels/canyon/cave02.json", iw::vector3(13.25f, 0, 8.75f)));
 			}
 
 			else if (event.LevelName == "levels/canyon/canyon04.json") {
-				event.Level->AddChild(SpawnHole(iw::vector3(4, 0, 0), 3.5f, true, "levels/canyon/cave03.json"));
+				event.Level->AddChild(SpawnHole(iw::vector3(4, 0, 0), 3.5f, true, "levels/canyon/cave03.json", iw::vector3(4, 0, 0)));
 			}
 
 			else if (event.LevelName == "levels/canyon/canyon05.json") {
-				event.Level->AddChild(SpawnHole(iw::vector3(0, 0, -6), 5, false, "levels/canyon/cave04.json"));
-				event.Level->AddChild(SpawnHole(iw::vector3(0, 0,  6), 5, false, "levels/canyon/cave04.json"));
+				event.Level->AddChild(SpawnHole(iw::vector3(0, 0, -6), 5, false, "levels/canyon/cave04.json", iw::vector3(0, 0, -4)));
+				event.Level->AddChild(SpawnHole(iw::vector3(0, 0,  6), 5, false, "levels/canyon/cave04.json", iw::vector3(0, 0, 6)));
 			}
 
 			else if (event.LevelName == "levels/canyon/canyon07.json") {
-				event.Level->AddChild(SpawnHole(iw::vector3(-5, 0, 9), 3, false, "levels/canyon/cave06.json"));
-				event.Level->AddChild(SpawnHole(iw::vector3(-3, 0, 5), 3, false, "levels/canyon/cave06.json"));
-				event.Level->AddChild(SpawnHole(iw::vector3(-4, 0, 6), 3, false, "levels/canyon/cave06.json"));
-				event.Level->AddChild(SpawnHole(iw::vector3( 0, 0, 5), 3, false, "levels/canyon/cave06.json"));
-				event.Level->AddChild(SpawnHole(iw::vector3( 3, 0, 5), 3, false, "levels/canyon/cave06.json"));
-				event.Level->AddChild(SpawnHole(iw::vector3( 4, 0, 6), 3, false, "levels/canyon/cave06.json"));
-				event.Level->AddChild(SpawnHole(iw::vector3( 5, 0, 9), 3, false, "levels/canyon/cave06.json"));
+				event.Level->AddChild(SpawnHole(iw::vector3(-5, 0, 9), 3, false, "levels/canyon/cave06.json", iw::vector3(-5, 0, 9)));
+				event.Level->AddChild(SpawnHole(iw::vector3(-3, 0, 5), 3, false, "levels/canyon/cave06.json", iw::vector3(-3, 0, 5)));
+				event.Level->AddChild(SpawnHole(iw::vector3(-4, 0, 6), 3, false, "levels/canyon/cave06.json", iw::vector3(-4, 0, 6)));
+				event.Level->AddChild(SpawnHole(iw::vector3( 0, 0, 5), 3, false, "levels/canyon/cave06.json", iw::vector3( 0, 0, 5)));
+				event.Level->AddChild(SpawnHole(iw::vector3( 3, 0, 5), 3, false, "levels/canyon/cave06.json", iw::vector3( 3, 0, 5)));
+				event.Level->AddChild(SpawnHole(iw::vector3( 4, 0, 6), 3, false, "levels/canyon/cave06.json", iw::vector3( 4, 0, 6)));
+				event.Level->AddChild(SpawnHole(iw::vector3( 5, 0, 9), 3, false, "levels/canyon/cave06.json", iw::vector3( 5, 0, 9)));
 			}
 
 			break;
@@ -139,7 +141,8 @@ iw::Transform* WorldHoleSystem::SpawnHole(
 	iw::vector3 position,
 	iw::vector3 scale,
 	bool crumble,
-	std::string caveLevel)
+	std::string caveLevel,
+	iw::vector3 inPosition)
 {
 	iw::Entity hole = Space->Instantiate(holePrefab);
 
@@ -150,6 +153,7 @@ iw::Transform* WorldHoleSystem::SpawnHole(
 	WorldHole*           h = hole.Find<WorldHole>();
 
 	h->CaveLevel = caveLevel;
+	h->InPosition = inPosition;
 
 	if (crumble) {
 		h->Time = 2.0f;
@@ -202,7 +206,7 @@ iw::Transform* WorldHoleSystem::SpawnHole(
 
 			else {
 				Bus->push<SetCameraTargetEvent>(holeEntity.Find<iw::Transform>()->Position, true);
-				Bus->push<GotoLevelEvent>(hole->CaveLevel);
+				Bus->push<GotoLevelEvent>(hole->CaveLevel, hole->InPosition);
 			}
 		}
 	});

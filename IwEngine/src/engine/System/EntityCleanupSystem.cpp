@@ -23,6 +23,10 @@ namespace Engine {
 	{
 		Transform* transform = Space->FindComponent<Transform>(e.Entity);
 		if (transform) {
+			//for (iw::Transform* child : transform->Children()) {
+			//	Space->QueueEntity(Space->FindEntity(child).Handle, func_Destroy);
+			//}
+
 			transform->SetParent(nullptr); //causes problems for some reason
 		}
 

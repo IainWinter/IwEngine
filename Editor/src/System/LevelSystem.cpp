@@ -113,7 +113,7 @@ bool LevelSystem::On(
 
 	if (door->State == LevelDoorState::OPEN) {
 		door->State = LevelDoorState::LOCKED; // stops events from being spammed
-		Bus->push<GotoConnectedLevelEvent>(door->Index);
+		Bus->push<GotoConnectedLevelEvent>(door->Index); // pass player in position from door
 	}
 
 	return false;
@@ -175,7 +175,7 @@ bool LevelSystem::On(
 			auto [entity, level] = m_loadedLevels.at(event.LevelName);
 
 			event.CameraFollow   = level.CameraFollow;
-			event.PlayerPosition = -m_worldTransform->Position + level.InPosition;
+			event.PlayerPosition = -m_worldTransform->Position + m_lastInPosition;
 			event.Level = Space->FindComponent<iw::Transform>(entity);
 
 			sequence.Restart();
@@ -218,8 +218,10 @@ bool LevelSystem::On(
 				
 			m_previousLevelLocation = m_worldTransform->Position;
 
+			m_lastInPosition = event.InPosition == 0 ? level.InPosition : event.InPosition;
+
 			Bus->push<TransitionToLevelEvent>(event.LevelName, 
-				level.CameraFollow, -target + level.InPosition, -target);
+				level.CameraFollow, -target + m_lastInPosition, -target); // get player in position from event, not level
 
 			float start = iw::TotalTime();
 			float wait = 1.5f;
@@ -760,9 +762,25 @@ void LevelSystem::DeactivateLevel(
 		}
 	};
 
+	//auto q = Space->MakeQuery<iw::Transform>();
+	//
+	//q->SetAny({
+	//	Space->GetComponent<LevelDoor>(),
+	//	Space->GetComponent<iw::CollisionObject>(),
+	//	Space->GetComponent<iw::Rigidbody>(),
+	//	Space->GetComponent<iw::Model>(),
+	//	Space->GetComponent<iw::Mesh>(),
+	//});
+	//
+	//Space->Query(q).Each<>([](auto e) {
+	//
+	//});
+
 	Space->Query<iw::Transform, LevelDoor>().Each(func);
 	Space->Query<iw::Transform, iw::CollisionObject>().Each(func);
 	Space->Query<iw::Transform, iw::Rigidbody>().Each(func);
+	//Space->Query<iw::Transform, iw::Model>().Each(func);
+	//Space->Query<iw::Transform, iw::Mesh>().Each(func);
 }
 
 void LevelSystem::DestroyAll(

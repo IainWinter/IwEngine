@@ -69,7 +69,20 @@ bool ItemSystem::On(
 			}
 
 			else if (event.LevelName == "levels/canyon/canyon07.json") {
-				Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 0 }, iw::vector3(0, 1, 9), event.Level, "Canyon07ItemPickedUp");
+				Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 0 }, iw::vector3(0, -.5, 9), event.Level, "Canyon07ItemPickedUp");
+				Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 1 }, iw::vector3(0,  .5, 9), event.Level, "Canyon07Item2PickedUp");
+			}
+
+			else if (event.LevelName == "levels/canyon/canyon10.json") {
+				Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 0 }, iw::vector3(-8, 1, -9.5f), event.Level, "Canyon10ItemPickedUp");
+			}
+
+			else if (event.LevelName == "levels/canyon/top03.json") {
+				Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 0 }, iw::vector3(0, 1, 9.5f), event.Level, "Top03ItemPickedUp");
+			}
+
+			else if (event.LevelName == "levels/canyon/top08.json") {
+				Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 2 }, iw::vector3(5, 1, 0), event.Level, "Top08ItemPickedUp");
 			}
 
 			break;

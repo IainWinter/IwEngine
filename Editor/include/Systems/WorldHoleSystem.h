@@ -33,5 +33,6 @@ private:
 		iw::vector3 position,
 		iw::vector3 scale,
 		bool crumble,
-		std::string caveLevel);
+		std::string caveLevel,
+		iw::vector3 inPosition);
 };
