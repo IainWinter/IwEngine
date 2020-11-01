@@ -325,7 +325,7 @@ void EnemyBossSystem::action_canyon_front_at_player(
 		);
 	}
 
-	if (enemy->Health <= 2 && iw::randf() > 0.6) {
+	if (enemy->Health <= 2 && iw::randf() > -.25f) {
 		action_canyon_side_seek(transform, enemy, boss);
 	}
 }

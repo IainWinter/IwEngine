@@ -114,7 +114,7 @@ bool WorldLadderSystem::On(
 			}
 
 			else if (event.LevelName == "levels/canyon/canyon02.json") {
-				iw::Transform* t = SpawnLadder(iw::vector3(-1.3f, 0, -9.8f), iw::quaternion::from_euler_angles(0.3f, -0.2f, 0), &saveState->Top08LadderDown, false, "levels/canyon/top08.json", iw::vector3(15, 1, 12));
+				iw::Transform* t = SpawnLadder(iw::vector3(-1.3f, 0, -9.8f), iw::quaternion::from_euler_angles(0.3f, -0.2f, 0), &saveState->Top08LadderDown, false, "levels/canyon/top08.json", iw::vector3(15, 1, 8));
 				Space->FindEntity(t).Find<iw::Model>()->RemoveMesh(3);
 			}
 

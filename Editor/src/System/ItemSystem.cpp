@@ -82,7 +82,7 @@ bool ItemSystem::On(
 			}
 
 			else if (event.LevelName == "levels/canyon/top08.json") {
-				Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 2 }, iw::vector3(5, 1, 0), event.Level, "Top08ItemPickedUp");
+				Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 2 }, iw::vector3(11, 1, 0), event.Level, "Top08ItemPickedUp");
 			}
 
 			break;

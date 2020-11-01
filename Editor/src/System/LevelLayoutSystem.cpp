@@ -12,7 +12,7 @@ LevelLayoutSystem::LevelLayoutSystem()
 {}
 
 int LevelLayoutSystem::Initialize() {
-	std::string startingLevel = "levels/canyon/cave07.json";
+	std::string startingLevel = "levels/canyon/canyon11.json";
 
 	LevelLayout* forest01 = new LevelLayout();
 

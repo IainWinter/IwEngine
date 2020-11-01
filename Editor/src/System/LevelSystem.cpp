@@ -309,9 +309,12 @@ std::pair<iw::EntityHandle, Level> LevelSystem::LoadLevel(
 				mesh.Material()->Set("indirectDiffuse",  1);
 				mesh.Material()->Set("indirectSpecular", 0);
 			
-				if (     mesh.Data()->Name().find("Bush")   != std::string::npos) {
+				if (mesh.Data()->Name().find("Bush") != std::string::npos) {
 					mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/phong.shader"));
-					mesh.SetCullMe(true);
+
+					if (name.find("top") != std::string::npos) {
+						mesh.SetCullMe(true); // cull on levels with hundreds of leaves
+					}
 				}
 
 				else if (mesh.Data()->Name().find("Ground") != std::string::npos) {
@@ -321,7 +324,7 @@ std::pair<iw::EntityHandle, Level> LevelSystem::LoadLevel(
 					}
 				}
 			
-				else if (mesh.Data()->Name().find("Tree")   != std::string::npos) {
+				else if (mesh.Data()->Name().find("Tree") != std::string::npos) {
 					auto itr = pSystems.find(mesh.Data()->Name());
 					if (itr == pSystems.end()) {
 						iw::StaticPS* ps = new iw::StaticPS();
@@ -329,7 +332,9 @@ std::pair<iw::EntityHandle, Level> LevelSystem::LoadLevel(
 						iw::Mesh leafMesh = Asset->Load<iw::Model>("models/forest/redleaf.gltf")->GetMesh(0);
 						//leafMesh.SetData(leafMesh.Data()->MakeLink());
 
-						leafMesh.SetCullMe(true);
+						if (name.find("top") != std::string::npos) {
+							leafMesh.SetCullMe(true); // cull on levels with hundreds of leaves
+						}
 
 						ps->SetParticleMesh(leafMesh);
 
