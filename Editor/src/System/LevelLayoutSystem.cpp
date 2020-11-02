@@ -12,7 +12,7 @@ LevelLayoutSystem::LevelLayoutSystem()
 {}
 
 int LevelLayoutSystem::Initialize() {
-	std::string startingLevel = "levels/canyon/canyon11.json";
+	std::string startingLevel = "levels/river/river01.json";
 
 	LevelLayout* forest01 = new LevelLayout();
 
@@ -147,21 +147,33 @@ int LevelLayoutSystem::Initialize() {
 	canyon02 .AddConnection(canyon03);
 	canyon01->AddConnection(canyon02);
 
-	iw::JsonSerializer("C:/dev/IwEngine/Editor/assets/levels/forest.json").Write(*forest01);
-	iw::JsonSerializer("C:/dev/IwEngine/Editor/assets/levels/canyon.json").Write(*canyon01);
-	iw::JsonSerializer("C:/dev/IwEngine/Editor/assets/levels/cave.json").Write(*cave01);
-	iw::JsonSerializer("C:/dev/IwEngine/Editor/assets/levels/top.json").Write(*top01);
+	LevelLayout* river01 = new LevelLayout();
+
+	river01->LevelName = "levels/river/river01.json";
+
+
+
+	//iw::JsonSerializer("C:/dev/IwEngine/Editor/assets/levels/forest.json").Write(*forest01);
+	//iw::JsonSerializer("C:/dev/IwEngine/Editor/assets/levels/canyon.json").Write(*canyon01);
+	//iw::JsonSerializer("C:/dev/IwEngine/Editor/assets/levels/cave.json").Write(*cave01);
+	//iw::JsonSerializer("C:/dev/IwEngine/Editor/assets/levels/top.json").Write(*top01);
 
 	WorldLayout* forest = new WorldLayout(forest01);
+	
 	WorldLayout* canyon = new WorldLayout(canyon01);
 	WorldLayout* cave   = new WorldLayout(cave01);
 	WorldLayout* top    = new WorldLayout(top01);
+
+	WorldLayout* river = new WorldLayout(river01);
+
 
 	m_worlds.push_back(forest);
 
 	m_worlds.push_back(canyon);
 	m_worlds.push_back(cave);
 	m_worlds.push_back(top);
+	
+	m_worlds.push_back(river);
 
 	Bus->push<GotoLevelEvent>(startingLevel, 0);
 
