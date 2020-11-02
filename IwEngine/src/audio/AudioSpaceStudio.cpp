@@ -115,18 +115,22 @@ namespace Audio {
 		std::string name,
 		float value)
 	{
+		if (0 > instance || instance >= m_instances.size()) {
+			LOG_WARNING << "Cannot start instance " << instance << "; index out of range!";
+			return;
+		}
+
 		m_instances.at(instance)->setParameterByName(name.c_str(), value);
 	}
 
 	void AudioSpaceStudio::StartInstance(
-		int index)
+		int index) // make unsigned
 	{
-#ifdef IW_DEBUG
 		if (0 > index || index >= m_instances.size()) {
 			LOG_WARNING << "Cannot start instance " << index << "; index out of range!";
 			return;
 		}
-#endif
+
 		m_instances.at(index)->start();
 	}
 

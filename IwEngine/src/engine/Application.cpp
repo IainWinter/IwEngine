@@ -104,7 +104,7 @@ namespace Engine {
 
 		if (status = Audio->Initialize()) {
 			LOG_ERROR << "Audio space failed to initialize with error code " << status;
-			return status;
+			//return status;
 		}
 
 		Renderer->SetWidth (options.WindowOptions.Width);
