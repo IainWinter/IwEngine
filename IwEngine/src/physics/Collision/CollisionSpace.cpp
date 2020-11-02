@@ -118,7 +118,9 @@ namespace Physics {
 		const Collider& collider) const
 	{
 		for (CollisionObject* object : m_objects) {
-			if (object->Col()->TestCollision(&object->Trans(), &collider, &Transform()).HasCollision) {
+			if (   object->Col()
+				&& object->Col()->TestCollision(&object->Trans(), &collider, &Transform()).HasCollision)
+			{
 				return true;
 			}
 		}
@@ -130,7 +132,9 @@ namespace Physics {
 		const CollisionObject* _object) const
 	{
 		for (const CollisionObject* object : m_objects) {
-			if (object->Col()->TestCollision(&object->Trans(), _object->Col(), &_object->Trans()).HasCollision) {
+			if (   object->Col()
+				&& object->Col()->TestCollision(&object->Trans(), _object->Col(), &_object->Trans()).HasCollision)
+			{
 				return true;
 			}
 		}
