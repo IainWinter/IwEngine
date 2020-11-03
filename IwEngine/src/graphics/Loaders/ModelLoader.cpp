@@ -70,15 +70,20 @@ namespace Graphics {
 				//float roughness = 0.2f;
 				//float ambientOcclusion;
 				
-				aiGetMaterialColor(aimaterial, AI_MATKEY_COLOR_DIFFUSE, (aiColor4D*)&diffuse); 
-				aiGetMaterialColor(aimaterial, AI_MATKEY_COLOR_AMBIENT, (aiColor4D*)&ao);
+				aiGetMaterialColor(aimaterial, AI_MATKEY_COLOR_DIFFUSE,  (aiColor4D*)&diffuse); 
+				aiGetMaterialColor(aimaterial, AI_MATKEY_COLOR_AMBIENT,  (aiColor4D*)&ao);
 				aiGetMaterialColor(aimaterial, AI_MATKEY_COLOR_EMISSIVE, (aiColor4D*)&emissiveColor);
+
 
 				//aiGetMaterialFloat(aimaterial, AI_MATKEY_SHININESS, &metallic);
 
 				//metallic /= 4 * 128; // obj files scale this by 4? and then opengl by 128???
 
 				Material material;
+
+				if (diffuse.a < 1.0f) {
+					material.SetTransparency(Transparency::ADD); // not sure if there is a way to get this value from the aimat
+				}
 
 				// Loaded  value
 				// Scanned description
