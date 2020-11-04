@@ -69,11 +69,13 @@ namespace Graphics {
 				//float metallic;
 				//float roughness = 0.2f;
 				//float ambientOcclusion;
-				
+				//float specular;
+
 				aiGetMaterialColor(aimaterial, AI_MATKEY_COLOR_DIFFUSE,  (aiColor4D*)&diffuse); 
 				aiGetMaterialColor(aimaterial, AI_MATKEY_COLOR_AMBIENT,  (aiColor4D*)&ao);
 				aiGetMaterialColor(aimaterial, AI_MATKEY_COLOR_EMISSIVE, (aiColor4D*)&emissiveColor);
 
+				//aiGetMaterialFloat(aimaterial, AI_MATKEY_COLOR_SPECULAR, (float*)&specular);
 
 				//aiGetMaterialFloat(aimaterial, AI_MATKEY_SHININESS, &metallic);
 
@@ -92,6 +94,8 @@ namespace Graphics {
 				material.Set("baseColor", diffuse);
 				material.Set("ao", ao.a);
 				material.Set("emissive", emissiveColor.rgb().length());
+
+				//material.Set("reflectance", specular);
 
 				//material.SetFloats("emissiveColor", &emissiveColor, 4);
 				//material.SetFloat("metallic", metallic);

@@ -10,11 +10,10 @@ enum class REFLECT LevelDoorState {
 };
 
 struct REFLECT LevelDoor {
-	REFLECT bool GoBack;
 	REFLECT LevelDoorState State;
-	REFLECT std::string NextLevel;
+
+	REFLECT int Index;
+	REFLECT iw::vector3 InPosition;
 
 	float ColorTimer;
-
-	int Index = 0;
 };

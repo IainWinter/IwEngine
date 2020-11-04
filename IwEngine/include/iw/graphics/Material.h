@@ -33,7 +33,6 @@ namespace Graphics {
 	public:
 		ref<Shader> Shader;
 
-	private:
 		struct MaterialProperty {
 			std::string Name;
 			void* Data;
@@ -49,6 +48,7 @@ namespace Graphics {
 			ref<Texture> Texture;
 			bool Active;
 		};
+	private:
 
 		linear_allocator m_alloc;
 		std::vector<MaterialProperty> m_properties;
@@ -175,6 +175,14 @@ namespace Graphics {
 
 		int __GetOrder() const {
 			return m_order;
+		}
+
+		std::vector<MaterialProperty>& Properties() {
+			return m_properties;
+		}
+
+		std::vector<TextureProperty>& Textures() {
+			return m_textures;
 		}
 	private:
 		IWGRAPHICS_API

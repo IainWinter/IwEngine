@@ -603,6 +603,14 @@ namespace iw {
 					ambiance = 0.003f; //MainScene->SetAmbiance(0.0003f);
 				}
 			}
+
+			else if (name.find("river") != std::string::npos) {
+				sun->SetRotation(iw::quaternion::from_euler_angles(2, 0, 0.9f));
+				sun->SetColor(vector3(0.665387f, 0.665387f, 1.0f) * 0.041f);
+
+				ml = 8.0f;
+				ambiance = 0.006f;
+			}
 		}
 
 		return Layer::On(e);

@@ -149,9 +149,13 @@ int LevelLayoutSystem::Initialize() {
 
 	LevelLayout* river01 = new LevelLayout();
 
+	LevelLayout river02/*, river02b, river03a, river03b, river04a, river04b, river05a, river05b,
+				river06a, river06b, river07a, river07b, river08a, river08b, river09a, river09b*/;
+
 	river01->LevelName = "levels/river/river01.json";
+	river02. LevelName = "levels/river/river02.json";
 
-
+	river01->AddConnection(river02);
 
 	//iw::JsonSerializer("C:/dev/IwEngine/Editor/assets/levels/forest.json").Write(*forest01);
 	//iw::JsonSerializer("C:/dev/IwEngine/Editor/assets/levels/canyon.json").Write(*canyon01);
@@ -215,7 +219,7 @@ bool LevelLayoutSystem::On(
 			Bus->push<DeactivateLevelEvent>(CurrentLevelName());
 
 			// If we are moving to the next full level, unload previous level before moving
-			if (event.Index == 1) {
+			if (event.Index < 10) {
 				Bus->push<UnloadLevelEvent>(PreviousLevelName());
 
 				// Unload all but main connections for current level before moving
@@ -247,7 +251,7 @@ bool LevelLayoutSystem::On(
 			}
 			
 			// Activate new level
-			Bus->push<ActivateLevelEvent>(CurrentLevelName(), from, event.Index, 0); // get inposition from event
+			Bus->push<ActivateLevelEvent>(CurrentLevelName(), from, event.Index, event.InPosition); // get inposition from event
 
 			break;
 		}

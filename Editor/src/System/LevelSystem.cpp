@@ -113,7 +113,7 @@ bool LevelSystem::On(
 
 	if (door->State == LevelDoorState::OPEN) {
 		door->State = LevelDoorState::LOCKED; // stops events from being spammed
-		Bus->push<GotoConnectedLevelEvent>(door->Index); // pass player in position from door
+		Bus->push<GotoConnectedLevelEvent>(door->Index, door->InPosition); // pass player in position from door
 	}
 
 	return false;
@@ -303,11 +303,9 @@ std::pair<iw::EntityHandle, Level> LevelSystem::LoadLevel(
 				iw::Mesh&      mesh      = model->GetMesh(i);
 				iw::Transform& transform = model->GetTransform(i);
 
-				mesh.SetMaterial(mesh.Material()->MakeInstance());
+				//mesh.SetMaterial(mesh.Material()->MakeInstance());
 				mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/vct/vct.shader"));
 				mesh.Material()->SetTexture("shadowMap", Asset->Load<iw::Texture>("SunShadowMap")); //mesh.Material()->SetTexture("shadowMap2", Asset->Load<iw::Texture>("LightShadowMap")); // shouldnt be part of material
-				mesh.Material()->Set("indirectDiffuse",  1);
-				mesh.Material()->Set("indirectSpecular", 0);
 			
 				if (mesh.Data()->Name().find("Bush") != std::string::npos) {
 					mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/phong.shader"));
@@ -315,9 +313,17 @@ std::pair<iw::EntityHandle, Level> LevelSystem::LoadLevel(
 					if (name.find("top") != std::string::npos) {
 						mesh.SetCullMe(true); // cull on levels with hundreds of leaves
 					}
+
+					if (name.find("river") != std::string::npos) {
+						mesh.Material()->Set("baseColor", iw::Color(.4f, .4f, .4f, 1.0f));
+						mesh.Material()->Set("ao", -0.025f);
+					}
 				}
 
 				else if (mesh.Data()->Name().find("Ground") != std::string::npos) {
+					mesh.Material()->Set("indirectDiffuse", 1);
+					mesh.Material()->Set("indirectSpecular", 0);
+
 					if (mesh.Data()->Description().HasBuffer(iw::bName::COLOR)) {
 						mesh.Material()->SetTexture("diffuseMap2", Asset->Load<iw::Texture>("textures/dirt/baseColor.jpg"));
 						mesh.Material()->SetTexture("normalMap2", Asset->Load<iw::Texture>("textures/dirt/normal.jpg"));
@@ -325,12 +331,14 @@ std::pair<iw::EntityHandle, Level> LevelSystem::LoadLevel(
 				}
 			
 				else if (mesh.Data()->Name().find("Tree") != std::string::npos) {
+					mesh.Material()->Set("indirectDiffuse", 1);
+					mesh.Material()->Set("indirectSpecular", 0);
+
 					auto itr = pSystems.find(mesh.Data()->Name());
 					if (itr == pSystems.end()) {
 						iw::StaticPS* ps = new iw::StaticPS();
 					
 						iw::Mesh leafMesh = Asset->Load<iw::Model>("models/forest/redleaf.gltf")->GetMesh(0);
-						//leafMesh.SetData(leafMesh.Data()->MakeLink());
 
 						if (name.find("top") != std::string::npos) {
 							leafMesh.SetCullMe(true); // cull on levels with hundreds of leaves
@@ -338,7 +346,8 @@ std::pair<iw::EntityHandle, Level> LevelSystem::LoadLevel(
 
 						ps->SetParticleMesh(leafMesh);
 
-						iw::vector3* positions = (iw::vector3*)mesh.Data()->Get(iw::bName::POSITION); // should only do this once and then use a model matrix in the particle shader
+						// should only do this once and then use a model matrix in the particle shader
+						iw::vector3* positions = (iw::vector3*)mesh.Data()->Get(iw::bName::POSITION);
 						iw::vector3* normals   = (iw::vector3*)mesh.Data()->Get(iw::bName::NORMAL);
 						iw::Color*   colors    = (iw::Color*)  mesh.Data()->Get(iw::bName::COLOR);
 
@@ -370,6 +379,14 @@ std::pair<iw::EntityHandle, Level> LevelSystem::LoadLevel(
 										leaves.Set<iw::Mesh>(itr->second->GetParticleMesh());
 
 					t2->SetParent(t);
+				}
+
+				else if (mesh.Data()->Name().find("Wet")   != std::string::npos
+					  || mesh.Data()->Name().find("Water") != std::string::npos)
+				{
+					mesh.Material()->Set("indirectDiffuse", 1);
+					mesh.Material()->Set("indirectSpecular", 1);
+					mesh.Material()->Set("reflectance", 0.25f);
 				}
 			}
 
@@ -490,15 +507,6 @@ void LevelSystem::ActivateLevel(
 		iw::Transform*       transform = ent.Set<iw::Transform>(iw::vector3(level.DoorPositions[i].x, 1, level.DoorPositions[i].y), 5.0f);
 		iw::SphereCollider*  collider  = ent.Set<iw::SphereCollider>(iw::vector3::zero, 1.0f);
 		iw::CollisionObject* object    = ent.Set<iw::CollisionObject>();
-
-		// temp
-		if (door->GoBack) {
-			door->Index = -1;
-		}
-
-		else {
-			door->Index = i + 1;
-		}
 
 		iw::ref<iw::Material> material = model->GetMesh(0).Material()->MakeInstance();
 

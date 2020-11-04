@@ -31,6 +31,8 @@ int BulletSystem::Initialize() {
 	normalMat->Set("baseColor", iw::Color::From255(0, 213, 255, 191));
 	normalMat->Set("emissive", 2.0f);
 
+	normalMat->SetTransparency(iw::Transparency::ADD);
+
 	orbitMat = normalMat->MakeInstance();
 	seekMat  = normalMat->MakeInstance();
 

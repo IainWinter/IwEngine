@@ -389,6 +389,9 @@ namespace Editor {
 			m_selectedMeshData = mesh->Data();
 		}
 
+		ImGui::Text("Material");
+		PrintMaterial(mesh->Material().get());
+
 		ImGui::PopID();
 	}
 
@@ -410,6 +413,46 @@ namespace Editor {
 		}
 
 		ImGui::PopID();
+	}
+
+	void SpaceInspectorSystem::PrintMaterial(
+		iw::Material* material)
+	{
+		if (!material) return;
+
+		ImGui::PushID(material);
+
+		if (ImGui::BeginTable("Material", 2)) {
+			ImGui::TableSetupColumn("", 0, 0.3f);
+			ImGui::TableSetupColumn("", 0, 0.7f);
+
+			for (iw::Material::MaterialProperty property : material->Properties()) {
+				switch (property.Type) {
+					case iw::UniformType::FLOAT: {
+						if (property.Name.find("has") != std::string::npos) {
+							bool b = *(float*)property.Data == 1.0f ? true : false;
+
+							PrintCell(property.Name); PrintEditCell(&b);
+							
+							material->Set(property.Name, b ? 1.0f : 0.0f);
+
+							break;
+						}
+
+						switch (property.Stride) {
+							case 1: PrintCell(property.Name); PrintEditCell((float		*)property.Data); break;
+							case 2: PrintCell(property.Name); PrintEditCell((iw::vector2*)property.Data, 0, 1, 0.01f); break;
+							case 3: PrintCell(property.Name); PrintEditCell((iw::vector3*)property.Data, 0, 1, 0.01f); break;
+							case 4: PrintCell(property.Name); PrintEditCell((iw::vector4*)property.Data, 0, 1, 0.01f); break;
+						}
+
+						break;
+					}
+				}
+			}
+
+			ImGui::EndTable();
+		}
 	}
 
 	void SpaceInspectorSystem::PrintParticleSystem(

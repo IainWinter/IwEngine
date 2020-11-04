@@ -38,6 +38,7 @@ namespace Editor {
 		void PrintTransform(iw::Transform* transform, bool showParent = true);
 		void PrintMesh(iw::Mesh* mesh);
 		void PrintModel(iw::Model* model);
+		void PrintMaterial(iw::Material* material);
 		void PrintParticleSystem(iw::ParticleSystem<>* system);
 		void PrintCollisionObject(iw::CollisionObject* object);
 		void PrintRigidbody(iw::Rigidbody* body);
@@ -156,17 +157,20 @@ namespace Editor {
 		template<
 			typename _t>
 		void PrintEditCell(
-			_t* value)
+			_t* value,
+			float min = 0, // should get form _t
+			float max = 0,
+			float rate = 0.1f)
 		{
 			ImGui::TableNextCell();
 			ImGui::PushID((void*)value);
 
-			     if constexpr (std::is_same_v<float, _t>)   ImGui::DragFloat ("", (float*)value, 0.1f);
-			else if constexpr (std::is_same_v<bool,  _t>)   ImGui::Checkbox  ("", (bool*) value);
-			else if constexpr (std::is_same_v<vector2, _t>) ImGui::DragFloat2("", (float*)value, 0.1f);
-			else if constexpr (std::is_same_v<vector3, _t>) ImGui::DragFloat3("", (float*)value, 0.1f);
+			     if constexpr (std::is_same_v<float, _t>)      ImGui::DragFloat ("", (float*)value, rate, min, max);
+			else if constexpr (std::is_same_v<bool,  _t>)      ImGui::Checkbox  ("", (bool*) value);
+			else if constexpr (std::is_same_v<vector2, _t>)    ImGui::DragFloat2("", (float*)value, rate, min, max);
+			else if constexpr (std::is_same_v<vector3, _t>)    ImGui::DragFloat3("", (float*)value, rate, min, max);
 			else if constexpr (std::is_same_v<vector4, _t>
-				           || std::is_same_v<quaternion, _t>) ImGui::DragFloat4("", (float*)value, 0.1f);
+				           || std::is_same_v<quaternion, _t>) ImGui::DragFloat4("", (float*)value, rate, min, max);
 
 			ImGui::PopID();
 		}

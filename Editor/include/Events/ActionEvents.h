@@ -148,11 +148,14 @@ struct GotoConnectedLevelEvent
 	: iw::SingleEvent
 {
 	int Index;
+	iw::vector3 InPosition;
 
 	GotoConnectedLevelEvent(
-		int index)
+		int index,
+		iw::vector3 inPosition = 0)
 		: iw::SingleEvent(iw::val(Actions::GOTO_CONNECTED_LEVEL))
 		, Index(index)
+		, InPosition(inPosition)
 	{}
 };
 
@@ -164,7 +167,7 @@ struct GotoLevelEvent
 
 	GotoLevelEvent(
 		std::string levelName,
-		iw::vector3 inPosition)
+		iw::vector3 inPosition = 0)
 		: iw::SingleEvent(iw::val(Actions::GOTO_LEVEL))
 		, LevelName(levelName)
 		, InPosition(inPosition)

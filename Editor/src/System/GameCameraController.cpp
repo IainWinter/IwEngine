@@ -95,13 +95,18 @@ void GameCameraController::SetTarget(
 	if (   levelName == "levels/forest/forest22.json"
 		|| levelName.find("top")   != std::string::npos
 		|| levelName.find("cave")  != std::string::npos
-		|| levelName.find("river") != std::string::npos
 		|| levelName.find(".a")    != std::string::npos
 		|| levelName == "levels/canyon/canyon08.json"
 		|| levelName == "levels/canyon/canyon09.json"
-		|| levelName == "levels/canyon/canyon10.json")
+		|| levelName == "levels/canyon/canyon10.json"
+		|| levelName == "levels/river/river01.json")
 	{
 		m_y = 17.15f;
+	}
+
+	else if (levelName.find("river") != std::string::npos)
+	{
+		m_y = 20.0f;
 	}
 
 	else {
