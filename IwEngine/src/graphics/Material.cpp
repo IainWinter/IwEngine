@@ -362,6 +362,16 @@ namespace Graphics {
 		m_wireframe = wireframe;
 	}
 
+	void Material::SetName(
+		std::string& name)
+	{
+		m_name = name;
+	}
+
+	const std::string& Material::Name() const {
+		return m_name;
+	}
+
 	void Material::SetProperty(
 		std::string name,
 		const void* data,

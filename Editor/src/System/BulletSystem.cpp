@@ -169,7 +169,7 @@ bool BulletSystem::On(
 			SpawnBulletEvent& event = e.as<SpawnBulletEvent>();
 			iw::Transform* trans = SpawnBullet(event.Bullet, event.Position, event.Rotation);
 			
-			if (trans) {
+			if (event.Level && trans) { // how is event.Level null?
 				event.Level->AddChild(trans);
 			}
 

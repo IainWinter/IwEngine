@@ -155,6 +155,15 @@ namespace Engine {
 			return false;
 		}
 
+		inline CollisionObject* GetPhysicsComponent(
+			iw::EntityHandle e)
+		{
+			CollisionObject* c = Space->FindComponent<CollisionObject>(e);
+			if (!c) c = Space->FindComponent<Rigidbody>(e);
+
+			return c;
+		}
+
 		inline EventSequence CreateSequence() {
 			EventSequence seq;
 			seq.SetAppVars(MakeAppVars());

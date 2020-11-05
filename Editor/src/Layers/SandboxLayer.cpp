@@ -16,6 +16,8 @@
 #include "Systems/WorldLadderSystem.h"
 #include "Systems/GameSaveStateSystem.h"
 #include "Systems/SpecialBarrierSystem.h"
+#include "Systems/RiverBarrierSystem.h"
+#include "Systems/RiverRaftEnemySystem.h"
 #include "iw/engine/Systems/PhysicsSystem.h"
 #include "iw/engine/Systems/ParticleUpdateSystem.h"
 #include "iw/engine/Systems/EntityCleanupSystem.h"
@@ -309,6 +311,8 @@ namespace iw {
 		enemySystem     = PushSystem<EnemySystem>(playerSystem->GetPlayer(), bulletSystem->GetBulletPrefab());
 		enemyBossSystem = PushSystem<EnemyBossSystem>(playerSystem->GetPlayer(), enemySystem, saveSystem->GetState());
 
+		PushSystem<RiverBarrierSystem>();
+		PushSystem<RiverRaftEnemySystem>();
 		
 		PushSystem<WorldHoleSystem>();
 		PushSystem<WorldLadderSystem>(saveSystem->GetState());

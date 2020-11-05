@@ -103,7 +103,11 @@ bool SpecialBarrierSystem::On(
 				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3( 5.3f, 0, -6.6f),  iw::vector3::unit_z, 10.6f, 0.3f }));
 				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3(-1,    0, -6.6f),  iw::vector3::unit_z, 10.6f, 0.3f }));
 				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3( 2.1,  0, -6.6f),  iw::vector3::unit_z, 10.0f, 2.7f }));
-			}		
+			}
+
+			else if (event.LevelName == "levels/river/river02.json") {
+				event.Level->AddChild(SpawnSpecialBarrier({ 0, iw::vector3::unit_x, 100, 8 }));
+			}
 
 			break;
 		}

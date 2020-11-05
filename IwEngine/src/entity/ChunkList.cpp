@@ -215,7 +215,7 @@ namespace ECS {
 			void* from = chunk->GetComponentPtr(layout, index);
 			if (!from) continue; // not sure if this can ever trip
 
-			memmove(ptr, from, component->Size); // could put this in Chunk.h if it sounds better
+			component->DeepCopyFunc(ptr, from);
 		}
 
 		return true;

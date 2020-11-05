@@ -82,6 +82,7 @@ namespace Graphics {
 				//metallic /= 4 * 128; // obj files scale this by 4? and then opengl by 128???
 
 				Material material;
+				material.SetName(std::string(aimaterial->GetName().C_Str()));
 
 				if (diffuse.a < 1.0f) {
 					material.SetTransparency(Transparency::ADD); // not sure if there is a way to get this value from the aimat

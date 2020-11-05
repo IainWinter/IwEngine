@@ -153,7 +153,7 @@ int LevelLayoutSystem::Initialize() {
 				river06a, river06b, river07a, river07b, river08a, river08b, river09a, river09b*/;
 
 	river01->LevelName = "levels/river/river01.json";
-	river02. LevelName = "levels/river/river02.json";
+	river02 .LevelName = "levels/river/river02.json";
 
 	river01->AddConnection(river02);
 

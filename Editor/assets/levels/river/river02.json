@@ -3,7 +3,7 @@
   "InPosition": {
     "x": -22.000000,
     "y": 1.000000,
-    "z": 0.000000
+    "z": -13.500000
   },
   "LevelLocation": {
     "x": 64.000000,
@@ -11,17 +11,30 @@
     "z": 0.000000
   },
   "Enemies": {
-    "size": 2,
+    "size": 3,
     "items": [
       {
         "Type": 0,
         "Bullet": {
           "Type": 0,
           "Speed": 5.000000,
-          "Package": 0
+          "Package": 65536
         },
-        "Speed": 0.2617994,
-        "FireTime": 0.120000,
+        "Speed": 0.5235988,
+        "FireTime": 0.240000,
+        "ChargeTime": 0.000000,
+        "Rotation": 0.000000
+      },
+
+      {
+        "Type": 0,
+        "Bullet": {
+          "Type": 0,
+          "Speed": 5.000000,
+          "Package": 65536
+        },
+        "Speed": 0.5235988,
+        "FireTime": 0.240000,
         "ChargeTime": 0.000000,
         "Rotation": 0.000000
       },
@@ -40,15 +53,20 @@
     ]
   },
   "Positions": {
-    "size": 2,
+    "size": 3,
     "items": [
       {
         "x": 0,
-        "y": 12.5
+        "y": -21
       },
+
       {
         "x": 0,
-        "y": -12.5
+        "y": 18
+      },
+      {
+        "x": 8,
+        "y": 14
       }
     ]
   },
@@ -56,21 +74,21 @@
     "size": 2,
     "items": [
       {
-        "State": 1,
+        "State": 0,
         "Index": 1,
         "InPosition": {
           "x": -28.0,
           "y": 1.0,
-          "z": 10.5
+          "z": 17.0
         }
       },
       {
-        "State": 1,
+        "State": 0,
         "Index": 1,
         "InPosition": {
           "x": -28.0,
           "y": 1.0,
-          "z": -10.5
+          "z": -17.0
         }
       }
     ]
@@ -93,21 +111,77 @@
     "items": []
   },
   "Capsules": {
-    "size": 1,
+    "size": 5,
     "items": [
       {
         "Center": {
-          "x": 0.000000,
+          "x": -11.000000,
           "y": 0.000000,
-          "z": 0.000000
+          "z": -15.000000
         },
         "Direction": {
           "x": 1.000000,
           "y": 0.000000,
           "z": 0.000000
         },
-        "Height": 100.000000,
-        "Radius": 8.000000
+        "Height": 6.000000,
+        "Radius": 0.500000
+      },
+      {
+        "Center": {
+          "x": 0.000000,
+          "y": 0.000000,
+          "z": -19.000000
+        },
+        "Direction": {
+          "x": 1.000000,
+          "y": 0.000000,
+          "z": 0.000000
+        },
+        "Height": 6.000000,
+        "Radius": 0.500000
+      },
+      {
+        "Center": {
+          "x": 11.000000,
+          "y": 0.000000,
+          "z": -15.000000
+        },
+        "Direction": {
+          "x": 1.000000,
+          "y": 0.000000,
+          "z": 0.000000
+        },
+        "Height": 6.000000,
+        "Radius": 0.500000
+      },
+      {
+        "Center": {
+          "x": -8.000000,
+          "y": 0.000000,
+          "z": 16.000000
+        },
+        "Direction": {
+          "x": 1.000000,
+          "y": 0.000000,
+          "z": 0.000000
+        },
+        "Height": 6.000000,
+        "Radius": 0.500000
+      },
+      {
+        "Center": {
+          "x": 8.000000,
+          "y": 0.000000,
+          "z": 16.000000
+        },
+        "Direction": {
+          "x": 1.000000,
+          "y": 0.000000,
+          "z": 0.000000
+        },
+        "Height": 6.000000,
+        "Radius": 0.500000
       }
     ]
   },
@@ -157,7 +231,7 @@
     ]
   },
   "Models": {
-    "size": 1,
+    "size": 6,
     "items": [
       {
         "ModelName": {
@@ -180,6 +254,126 @@
             "y": 0,
             "z": 0,
             "w": 1
+          }
+        }
+      },
+      {
+        "ModelName": {
+          "size": 26,
+          "string": "models/forest/barrier.gltf"
+        },
+        "Transform": {
+          "Position": {
+            "x": -11,
+            "y": 0,
+            "z": -15
+          },
+          "Scale": {
+            "x": 1,
+            "y": 1,
+            "z": 1
+          },
+          "Rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          }
+        }
+      },
+      {
+        "ModelName": {
+          "size": 26,
+          "string": "models/forest/barrier.gltf"
+        },
+        "Transform": {
+          "Position": {
+            "x": 0,
+            "y": 0,
+            "z": -19
+          },
+          "Scale": {
+            "x": 1,
+            "y": 1,
+            "z": 1
+          },
+          "Rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          }
+        }
+      },
+      {
+        "ModelName": {
+          "size": 26,
+          "string": "models/forest/barrier.gltf"
+        },
+        "Transform": {
+          "Position": {
+            "x": 11,
+            "y": 0,
+            "z": -15
+          },
+          "Scale": {
+            "x": 1,
+            "y": 1,
+            "z": 1
+          },
+          "Rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          }
+        }
+      },
+      {
+        "ModelName": {
+          "size": 26,
+          "string": "models/forest/barrier.gltf"
+        },
+        "Transform": {
+          "Position": {
+            "x": -8,
+            "y": 0,
+            "z": 16
+          },
+          "Scale": {
+            "x": 1,
+            "y": 1,
+            "z": 1
+          },
+          "Rotation": {
+            "x": 0,
+            "y": -1,
+            "z": 0,
+            "w": 0
+          }
+        }
+      },
+      {
+        "ModelName": {
+          "size": 26,
+          "string": "models/forest/barrier.gltf"
+        },
+        "Transform": {
+          "Position": {
+            "x": 8,
+            "y": 0,
+            "z": 16
+          },
+          "Scale": {
+            "x": 1,
+            "y": 1,
+            "z": 1
+          },
+          "Rotation": {
+            "x": 0,
+            "y": -1,
+            "z": 0,
+            "w": 0
           }
         }
       }

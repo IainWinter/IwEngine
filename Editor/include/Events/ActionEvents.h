@@ -283,6 +283,8 @@ struct SpawnEnemyEvent
 	iw::vector3 Velocity;
 	iw::Transform* Level;
 
+	iw::Entity SpawnedEnemy; // gets set in EnemySystem
+
 	SpawnEnemyEvent(
 		::Enemy enemy,
 		iw::vector3 position,

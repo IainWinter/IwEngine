@@ -4,7 +4,7 @@
 #include <vector>
 
 enum class REFLECT EnemyType {
-	SPIN               = 0x0,
+	SPIN             = 0x0,
 	CIRCLE,
 	SEEK,
 	MINI_BOSS_FOREST = 0x10,
@@ -54,4 +54,11 @@ struct EnemyBoss {
 
 	bool JustSpawned = true;
 	iw::vector3 Target;
+};
+
+struct RaftEnemy {
+	unsigned PathIndex = 0;
+
+	float Timer = 0.0f;
+	float Speed = 5.0f;
 };

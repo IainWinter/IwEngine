@@ -49,12 +49,13 @@ namespace Graphics {
 			bool Active;
 		};
 	private:
-
 		linear_allocator m_alloc;
 		std::vector<MaterialProperty> m_properties;
 		std::vector<TextureProperty>  m_textures;
 
 		std::unordered_map<std::string, unsigned> m_index; // also done in pipeline seems bad
+
+		std::string m_name;
 
 		Transparency m_transparency;
 		bool m_castShadows;
@@ -172,6 +173,13 @@ namespace Graphics {
 		IWGRAPHICS_API
 		void SetWireframe(
 			bool wireframe);
+
+		IWGRAPHICS_API
+		void SetName(
+			std::string& name);
+
+		IWGRAPHICS_API
+		const std::string& Name() const;
 
 		int __GetOrder() const {
 			return m_order;

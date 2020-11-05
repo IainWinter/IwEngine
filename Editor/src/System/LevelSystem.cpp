@@ -113,7 +113,7 @@ bool LevelSystem::On(
 
 	if (door->State == LevelDoorState::OPEN) {
 		door->State = LevelDoorState::LOCKED; // stops events from being spammed
-		Bus->push<GotoConnectedLevelEvent>(door->Index, door->InPosition); // pass player in position from door
+		Bus->push<GotoConnectedLevelEvent>(door->Connection, door->InPosition); // pass player in position from door
 	}
 
 	return false;
@@ -303,24 +303,26 @@ std::pair<iw::EntityHandle, Level> LevelSystem::LoadLevel(
 				iw::Mesh&      mesh      = model->GetMesh(i);
 				iw::Transform& transform = model->GetTransform(i);
 
-				//mesh.SetMaterial(mesh.Material()->MakeInstance());
 				mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/vct/vct.shader"));
-				mesh.Material()->SetTexture("shadowMap", Asset->Load<iw::Texture>("SunShadowMap")); //mesh.Material()->SetTexture("shadowMap2", Asset->Load<iw::Texture>("LightShadowMap")); // shouldnt be part of material
+				mesh.Material()->SetTexture("shadowMap", Asset->Load<iw::Texture>("SunShadowMap")); 
 			
-				if (mesh.Data()->Name().find("Bush") != std::string::npos) {
+				if (mesh.Data()->Name().find("Bush") != std::string::npos) {					
 					mesh.Material()->SetShader(Asset->Load<iw::Shader>("shaders/phong.shader"));
 
 					if (name.find("top") != std::string::npos) {
-						mesh.SetCullMe(true); // cull on levels with hundreds of leaves
+						mesh.SetCullMe(true);
 					}
 
 					if (name.find("river") != std::string::npos) {
 						mesh.Material()->Set("baseColor", iw::Color(.4f, .4f, .4f, 1.0f));
 						mesh.Material()->Set("ao", -0.025f);
+						mesh.SetCullMe(true);
 					}
 				}
 
 				else if (mesh.Data()->Name().find("Ground") != std::string::npos) {
+					mesh.SetMaterial(mesh.Material()->MakeInstance());
+
 					mesh.Material()->Set("indirectDiffuse", 1);
 					mesh.Material()->Set("indirectSpecular", 0);
 
@@ -381,12 +383,22 @@ std::pair<iw::EntityHandle, Level> LevelSystem::LoadLevel(
 					t2->SetParent(t);
 				}
 
-				else if (mesh.Data()->Name().find("Wet")   != std::string::npos
-					  || mesh.Data()->Name().find("Water") != std::string::npos)
+				else if (mesh.Data()->Name().find("Wet")   != std::string::npos)
 				{
 					mesh.Material()->Set("indirectDiffuse", 1);
 					mesh.Material()->Set("indirectSpecular", 1);
 					mesh.Material()->Set("reflectance", 0.25f);
+				}
+
+				else if (mesh.Data()->Name().find("Water") != std::string::npos) {
+					mesh.Material()->Set("indirectDiffuse", 1);
+					mesh.Material()->Set("indirectSpecular", 1);
+					mesh.Material()->Set("reflectance", 1.0f);
+				}
+
+				else {
+					mesh.Material()->Set("indirectDiffuse",  1);
+					mesh.Material()->Set("indirectSpecular", 0);
 				}
 			}
 

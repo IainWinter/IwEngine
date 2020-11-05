@@ -141,7 +141,6 @@ namespace Engine {
 	void Transform::AddChild(
 		Transform* transform)
 	{
-#ifdef IW_DEBUG
 		if (std::find(m_children.begin(), m_children.end(), transform) != m_children.end()) {
 			LOG_ERROR << "Tried to add duplicate child!";
 			return;
@@ -151,7 +150,6 @@ namespace Engine {
 			LOG_ERROR << "Tried to add null child";
 			return;
 		}
-#endif
 
 		transform->m_parent = this;
 		m_children.push_back(transform);
@@ -160,7 +158,6 @@ namespace Engine {
 	void Transform::RemoveChild(
 		Transform* transform)
 	{
-#ifdef IW_DEBUG
 		if (std::find(m_children.begin(), m_children.end(), transform) == m_children.end()) {
 			LOG_ERROR << "Tried to rmeove child that doesn't exist!";
 			return;
@@ -170,7 +167,6 @@ namespace Engine {
 			LOG_ERROR << "Tried to remove null child!";
 			return;
 		}
-#endif
 
 		transform->m_parent = nullptr;
 

@@ -86,6 +86,12 @@ namespace Asset {
 			return m_loaded.at(name);
 		}
 
+		bool HasLoaded(
+			const std::string& name)
+		{
+			return m_loaded.find(name) != m_loaded.end();
+		}
+
 		virtual void Release(
 			iw::ref<_a> resource)
 		{

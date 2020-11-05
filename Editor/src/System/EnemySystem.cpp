@@ -174,8 +174,10 @@ bool EnemySystem::On(
 		}
 		case iw::val(Actions::SPAWN_ENEMY): {
 			SpawnEnemyEvent& event = e.as<SpawnEnemyEvent>();
-			iw::Transform* trans = SpawnEnemy(event.Enemy, event.Position, event.Velocity);
-			event.Level->AddChild(trans);
+
+			iw::Transform* t = SpawnEnemy(event.Enemy, event.Position, event.Velocity);
+			event.Level->AddChild(t);
+			event.SpawnedEnemy = Space->FindEntity(t);
 
 			m_levelResetTimer = 0;
 

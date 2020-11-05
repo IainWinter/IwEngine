@@ -12,7 +12,7 @@ enum class REFLECT LevelDoorState {
 struct REFLECT LevelDoor {
 	REFLECT LevelDoorState State;
 
-	REFLECT int Index;
+	REFLECT int Connection;
 	REFLECT iw::vector3 InPosition;
 
 	float ColorTimer;

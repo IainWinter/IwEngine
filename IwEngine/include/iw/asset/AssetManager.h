@@ -100,6 +100,15 @@ namespace Asset {
 
 			return nullptr;
 		}
+
+		template<
+			typename _a>
+		bool HasLoaded(
+			const std::string& name)
+		{
+			auto itr = m_loaders.find(typeid(_a).hash_code());
+			return itr->second->HasLoaded(name);
+		}
 	};
 }
 
