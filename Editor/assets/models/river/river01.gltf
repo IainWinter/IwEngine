@@ -12691,12 +12691,13 @@
       }
     },
     {
+      "doubleSided": true,
       "emissiveFactor": [
         0,
         0,
         0
       ],
-      "name": "Wet Rock.001",
+      "name": "Wet Rock",
       "normalTexture": {
         "index": 6,
         "texCoord": 0
@@ -12813,7 +12814,7 @@
     }
   ],
   "images": [
-        {
+    {
       "mimeType": "image/jpeg",
       "name": "grassnormal",
       "uri": "textures/grass/normal.jpg"

@@ -30,7 +30,7 @@ int RiverRaftEnemySystem::Initialize()
 		enemy.Speed = 0.2617994;
 		enemy.FireTime = 0.12f;
 		enemy.ChargeTime = 0;
-		enemy.Rotation = 0;
+		enemy.Rotation = iw::randf() * iw::Pi;
 		enemy.Bullet = bullet;
 
 		float wait = 3.0f;
@@ -40,7 +40,8 @@ int RiverRaftEnemySystem::Initialize()
 
 			while (iw::TotalTime() - start < wait) {} // spin lock
 
-			if (!m_currentLevel) continue; // level not yet started
+			if (  !m_currentLevel
+				|| m_path.size() == 0) continue; // level not yet started or no path
 
 			Bus->push<SpawnEnemyEvent>(enemy, m_path.at(0), 0, m_currentLevel);
 		}
@@ -103,9 +104,9 @@ bool RiverRaftEnemySystem::On(
 				m_path.push_back(iw::vector3( 36, 1, 0));
 			}
 
-			//Space->Query<RaftEnemy>().Each([&](auto e, auto) {
-			//	Space->QueueEntity(e, iw::func_Destroy);
-			//});
+			Space->Query<RaftEnemy>().Each([&](auto e, auto) {
+				Space->QueueEntity(e, iw::func_Destroy);
+			});
 
 			m_currentLevel = event.Level;
 

@@ -149,12 +149,32 @@ int LevelLayoutSystem::Initialize() {
 
 	LevelLayout* river01 = new LevelLayout();
 
-	LevelLayout river02/*, river02b, river03a, river03b, river04a, river04b, river05a, river05b,
-				river06a, river06b, river07a, river07b, river08a, river08b, river09a, river09b*/;
+	LevelLayout river02, river03, river04, river05, river06, river07, river08, 
+		river09, river10, river11, river12;
 
 	river01->LevelName = "levels/river/river01.json";
 	river02 .LevelName = "levels/river/river02.json";
+	river03 .LevelName = "levels/river/river03.json";
+	river04 .LevelName = "levels/river/river04.json";
+	river05 .LevelName = "levels/river/river05.json";
+	river06 .LevelName = "levels/river/river06.json";
+	river07 .LevelName = "levels/river/river07.json";
+	river08 .LevelName = "levels/river/river08.json";
+	river09 .LevelName = "levels/river/river09.json";
+	river10 .LevelName = "levels/river/river10.json";
+	river11 .LevelName = "levels/river/river11.json";
+	river12 .LevelName = "levels/river/river12.json";
 
+	river11 .AddConnection(river12);
+	river10 .AddConnection(river11);
+	river09 .AddConnection(river10);
+	river08 .AddConnection(river09);
+	river07 .AddConnection(river08);
+	river06 .AddConnection(river07);
+	river05 .AddConnection(river06);
+	river04 .AddConnection(river05);
+	river03 .AddConnection(river04);
+	river02 .AddConnection(river03);
 	river01->AddConnection(river02);
 
 	//iw::JsonSerializer("C:/dev/IwEngine/Editor/assets/levels/forest.json").Write(*forest01);
