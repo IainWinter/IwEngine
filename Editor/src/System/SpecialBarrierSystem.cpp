@@ -28,7 +28,7 @@ void SpecialBarrierSystem::collide(
 		return;
 	}
 
-	if (man.PenetrationDepth > 0.5f) {
+	if (man.PenetrationDepth > 1) {
 		man.HasCollision = false;
 
 		if (   !dashThrough
@@ -105,8 +105,76 @@ bool SpecialBarrierSystem::On(
 				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3( 2.1,  0, -6.6f),  iw::vector3::unit_z, 10.0f, 2.7f }));
 			}
 
-			else if (event.LevelName == "levels/river/river02.json") {
+			else if (event.LevelName == "levels/river/river02.json"
+				  || event.LevelName == "levels/river/river03.json"
+				  || event.LevelName == "levels/river/river08.json")
+			{
 				event.Level->AddChild(SpawnSpecialBarrier({ 0, iw::vector3::unit_x, 100, 8 }));
+			}
+
+			else if (event.LevelName == "levels/river/river04.json") {
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3(-16.6f, 0, 0.7f),  iw::vector3::unit_x, 35.9f, 7.5f }));
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3(-8.0f, 0, -7.3f),  iw::vector3::unit_z, 17.3f, 4.0f }));
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3(-8.0f, 0, -13.0f), iw::vector3::unit_x, 13.0f, 3.5f }));
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3(-2.2f, 0, -16.1f), iw::vector3::unit_x, 31.0f, 5.0f }));
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3(8.5f, 0, -15.0f),  iw::vector3::unit_x,  15.0f, 4.5f }));
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3(14.0f, 0, -12.0f), iw::vector3::unit_x, 13.5f, 4.0f }));
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3(18.0f, 0, -8.0f),  iw::vector3::unit_x, 13.0f, 4.0f }));
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3(28.0f, 0, -3.5f),  iw::vector3::unit_x, 25.0f, 8.8f }));
+			}
+
+			else if (event.LevelName == "levels/river/river05.json") {
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3(-18, 0, 0),    iw::vector3::unit_x, 50, 8 }));
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3( 27, 0, 0),    iw::vector3::unit_x, 30, 8 }));
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3( 15.5f, 0, 0), iw::vector3::unit_z, 15, 4.5f }));
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3( 3.7f,  0, 0), iw::vector3::unit_z, 15, 4.5f }));
+			}
+
+			else if (event.LevelName == "levels/river/river06.json") {
+				event.Level->AddChild(SpawnSpecialBarrier({ 0, iw::vector3::unit_x, 100, 8 }));
+				
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3(-9.4f, 0, 8.4f),  iw::vector3::unit_x, 11, 2 }));
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3( 5.7f, 0, 18.6f), iw::vector3::unit_x, 31, 2.9f }));
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3(-7.5f, 0, 16.2f), iw::vector3::unit_x, 12, 3.2f }));
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3(19.0f, 0, 28.0f), iw::vector3::unit_x, 22.1f, 6.5f }));
+			}
+
+			else if (event.LevelName == "levels/river/river07.json") {
+				event.Level->AddChild(SpawnSpecialBarrier({ 0, iw::vector3::unit_x, 100, 8 }));
+
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3( 0, 0, -6.5f), iw::vector3::unit_z, 21, 8 }));
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3(-4, 0, -36),   iw::vector3::unit_z, 30, 8 }));
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3(-3, 0, -25),   iw::vector3::unit_x, 15, 4.5f }));
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3(-2, 0, -13),   iw::vector3::unit_x, 15, 4.5f }));
+			}
+
+			else if (event.LevelName == "levels/river/river09.json") {
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3( 15, 0, 0),   iw::vector3::unit_x, 50, 8 }));
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3(-30, 0, 0),    iw::vector3::unit_x, 30, 8 }));
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3(-18.5f, 0, 0), iw::vector3::unit_z, 15, 4.5f }));
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3(-6.6f,  0, 0), iw::vector3::unit_z, 15, 4.5f }));
+			}
+
+			else if (event.LevelName == "levels/river/river10.json") {
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3(-21.0f, 0, 0), iw::vector3::unit_x, 50, 8 }));
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3( 10.5f, 0, 0), iw::vector3::unit_x, 29, 8 }));
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3(5,  0, 7),     iw::vector3::unit_x, 15, 1 }));
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3(30, 0, 4.5f),  iw::vector3::unit_x, 22, 8.5f }));
+
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3(-9, 0, -11),   iw::vector3::unit_z, 14.5f, 4.5f }));
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3(0, 0, -18.7f), iw::vector3::unit_x, 20, 2 }));
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3(10, 0, -7),    iw::vector3::unit_z, 22, 6 }));
+
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3(-5, 0, -16.5f), iw::vector3::unit_x, 6.5f, 1 }));
+				event.Level->AddChild(SpawnSpecialBarrier({ iw::vector3(-6, 0, -7),     iw::vector3::unit_x, 12, 3 }));
+			}
+
+			else if (event.LevelName == "levels/river/river11.json") {
+
+			}
+
+			else if (event.LevelName == "levels/river/river12.json") {
+
 			}
 
 			break;

@@ -32,7 +32,7 @@ namespace iw {
 		context->AddDevice(rm);
 		context->AddDevice(k);
 
-		sandbox = PushLayer<SandboxLayer>();
+		sandbox = PushLayer<SandboxLayer>(); // model system breaks in test layer
 		imgui   = PushLayer<ImGuiLayer>(/*Window()*/);
 	}
 

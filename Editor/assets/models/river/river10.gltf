@@ -14167,12 +14167,12 @@
     {
       "mimeType": "image/jpeg",
       "name": "normal",
-      "uri": "textures/wood/normal.jpg"
+      "uri": "textures/wetrock/normal.jpg"
     },
     {
       "mimeType": "image/jpeg",
       "name": "baseColor",
-      "uri": "textures/wood/baseColor.jpg"
+      "uri": "textures/wetrock/baseColor.jpg"
     }
   ],
   "accessors": [

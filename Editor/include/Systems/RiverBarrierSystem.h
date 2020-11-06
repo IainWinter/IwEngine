@@ -7,9 +7,14 @@ class RiverBarrierSystem
 {
 private:
 	std::vector<iw::Entity> m_barriers;
+	iw::Entity& m_player;
+	iw::Entity m_halfway;
 
 public:
-	RiverBarrierSystem();
+	RiverBarrierSystem(
+		iw::Entity& player);
+
+	void Update() override;
 
 	bool On(iw::ActionEvent& e) override;
 };

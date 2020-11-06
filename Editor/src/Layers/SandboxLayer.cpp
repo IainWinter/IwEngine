@@ -311,7 +311,7 @@ namespace iw {
 		enemySystem     = PushSystem<EnemySystem>(playerSystem->GetPlayer(), bulletSystem->GetBulletPrefab());
 		enemyBossSystem = PushSystem<EnemyBossSystem>(playerSystem->GetPlayer(), enemySystem, saveSystem->GetState());
 
-		PushSystem<RiverBarrierSystem>();
+		PushSystem<RiverBarrierSystem>(playerSystem->GetPlayer());
 		PushSystem<RiverRaftEnemySystem>();
 		
 		PushSystem<WorldHoleSystem>();

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "iw/engine/System.h"
+#include "Components/Enemy.h"
 
 class RiverRaftEnemySystem
 	: public iw::SystemBase
@@ -10,6 +11,8 @@ private:
 
 	iw::Transform* m_currentLevel;
 	bool m_running;
+
+	Enemy m_spin;
 
 public:
 	RiverRaftEnemySystem();
