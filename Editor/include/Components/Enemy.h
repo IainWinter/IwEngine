@@ -58,6 +58,7 @@ struct EnemyBoss {
 
 struct RaftEnemy {
 	unsigned PathIndex = 0;
+	unsigned IntraPathIndex = 0;
 
 	float Timer = 0.0f;
 	float Speed = 5.0f;

@@ -48,7 +48,7 @@ bool RiverBarrierSystem::On(
 			float side = event.PlayerPosition.z > 0 ? 1 : -1;
 
 			if (m_halfway) {
-				Space->DestroyEntity(m_halfway);
+				Space->QueueEntity(m_halfway.Handle, iw::func_Destroy);
 			}
 
 			m_halfway = Space->CreateEntity<iw::Transform, iw::CollisionObject, iw::PlaneCollider>();

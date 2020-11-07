@@ -19,40 +19,12 @@
     "items": []
   },
   "Doors": {
-    "size": 2,
-    "items": [
-      {
-        "State": 0,
-        "Index": 1,
-        "InPosition": {
-          "x": -28.0,
-          "y": 1.0,
-          "z": 17.0
-        }
-      },
-      {
-        "State": 0,
-        "Index": 1,
-        "InPosition": {
-          "x": -28.0,
-          "y": 1.0,
-          "z": -17.0
-        }
-      }
-    ]
+    "size": 0,
+    "items": []
   },
   "DoorPositions": {
-    "size": 2,
-    "items": [
-      {
-        "x": 28.000000,
-        "y": 11.000000
-      },
-      {
-        "x": 28.000000,
-        "y": -14.000000
-      }
-    ]
+    "size": 0,
+    "items": []
   },
   "Spheres": {
     "size": 0,

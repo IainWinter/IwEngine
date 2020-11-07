@@ -14334,22 +14334,22 @@
     {
       "mimeType": "image/jpeg",
       "name": "normal",
-      "uri": "textures/wood/normal.jpg"
-    },
-    {
-      "mimeType": "image/jpeg",
-      "name": "baseColor",
-      "uri": "textures/wood/baseColor.jpg"
-    },
-    {
-      "mimeType": "image/jpeg",
-      "name": "normal",
       "uri": "textures/wetrock/normal.jpg"
     },
     {
       "mimeType": "image/jpeg",
       "name": "baseColor",
       "uri": "textures/wetrock/baseColor.jpg"
+    },
+    {
+      "mimeType": "image/jpeg",
+      "name": "normal",
+      "uri": "textures/wood/normal.jpg"
+    },
+    {
+      "mimeType": "image/jpeg",
+      "name": "baseColor",
+      "uri": "textures/wood/baseColor.jpg"
     }
   ],
   "accessors": [
