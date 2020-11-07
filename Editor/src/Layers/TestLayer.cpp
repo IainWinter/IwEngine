@@ -246,16 +246,6 @@ namespace iw {
 		SpawnCube();
 		SpawnCube(vector3(15, 1, 1));
 
-		// Bush
-		iw::Mesh bush = Asset->Load<iw::Model>("models/bush.gltf")->GetMesh(0);
-		bush.Material()->SetShader(phong);
-		bush.Material()->SetTransparency(iw::Transparency::ADD);
-
-		iw::Entity e = Space->CreateEntity<iw::Transform, iw::Mesh>();
-
-		e.Set<iw::Transform>(iw::vector3(5, 5, 2), 5);
-		e.Set<iw::Mesh>(bush);
-
 		return Layer::Initialize();
 	}
 
@@ -281,36 +271,6 @@ namespace iw {
 		}
 
 		Physics->Step(Time::FixedTime());
-
-
-		//auto entities = Space->Query<Transform, Rigidbody>();
-
-
-		//int i = 0;
-
-		//entities.Each([&](
-		//	auto entity, 
-		//	auto transform,
-		//	auto rigidbody)
-		//{
-		//	if (i == 0) {
-		//		//MainScene->PointLights()[0]->SetPosition(transform->Position);
-		//	}
-
-		//	i++;
-		//	entities.Each([&](
-		//		auto entity2,
-		//		auto transform2,
-		//		auto rigidbody2)
-		//	{
-		//			vector3 dir = transform2->Position - transform->Position;
-		//			float grav = rigidbody->Mass() * rigidbody2->Mass() / (1 + dir.length_squared());
-
-		//			rigidbody->ApplyForce ( dir.normalized() * grav);
-		//			rigidbody2->ApplyForce(-dir.normalized() * grav);
-		//	});
-		//});
-
 	}
 
 	float thresh = .5f;

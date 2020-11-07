@@ -132,9 +132,9 @@ namespace algo {
 	{
 		auto result = GJK(a, ta, b, tb);
 
-		//if (result.first) {
+		if (result.first) {
 			return EPA(result.second, a, ta, b, tb);
-		//}
+		}
 
 		return {0, 0, 0, 0, result.first};
 	}

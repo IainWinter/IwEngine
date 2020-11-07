@@ -41,7 +41,6 @@ namespace algo {
 		std::vector<vector3> polytope(simplex.begin(), simplex.end());
 
 		unsigned minI = 0;
-		unsigned minK = 0;
 		float   minDistance = FLT_MAX;
 		vector3 minNormal;
 
@@ -72,7 +71,6 @@ namespace algo {
 					minDistance = distance;
 					minNormal   = normal;
 					minI = i;
-					minK = k;
 				}
 			}
 
@@ -83,7 +81,7 @@ namespace algo {
 			float difference = abs(d1 - d2);
 
 			if (difference > 0.0001f) {
-				polytope.insert(polytope.begin() + minK, support); // add another point inbetween i and j
+				polytope.insert(polytope.begin() + minI, support); // add another point inbetween i and j
 				minDistance = FLT_MAX; // reset while loop
 			}
 		}
