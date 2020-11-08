@@ -18,7 +18,7 @@ namespace Engine {
 		ImGui::Begin("Debug layer");
 
 		float time = Time::FixedTime();
-		ImGui::SliderFloat("Fixed timestep", &time, 0, 1);
+		ImGui::SliderFloat("Fixed timestep", &time, 0.001f, 1);
 
 		if (time != Time::FixedTime()) {
 			Time::SetFixedTime(time);

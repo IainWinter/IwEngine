@@ -40,17 +40,18 @@ namespace iw {
 		srand(time(nullptr));
 	}
 
-	float xOff = 0;
-
 	void TestLayer::SpawnCube(vector3 s) {
 		Entity entity = Space->CreateEntity<Transform, Mesh, MeshCollider, Rigidbody>();
 
-		Transform*      trans = entity.Set<Transform>(iw::vector3(xOff, 0, 0), s);
+		Transform*      trans = entity.Set<Transform>(iw::vector3(0, 0, 0), s);
 		Mesh*           mesh  = entity.Set<Mesh>(sphere->MakeInstance());
 		MeshCollider*   col   = entity.Set<MeshCollider>(MeshCollider::MakeCube());
 		Rigidbody*      body  = entity.Set<Rigidbody>();
 
-		xOff += 10;
+		trans->Rotation = quaternion::from_euler_angles(iw::randf() * iw::Pi2, iw::randf() * iw::Pi2, iw::randf() * iw::Pi2);
+		trans->Position = vector3(iw::randf()) * 10;
+
+		body->SetMass((iw::randf() + 1) * 10);
 
 		mesh->SetMaterial(REF<Material>(shader));
 
@@ -72,6 +73,7 @@ namespace iw {
 
 		body->SetTrans(trans);
 		body->SetCol(col);
+		body->SetIsStatic(false);
 
 		body->SetOnCollision([&](auto manifold, auto dt) {
 			ref<Material> mat1 = Space->FindEntity<Rigidbody>(manifold.ObjA).Find<Mesh>()->Material();
@@ -206,10 +208,10 @@ namespace iw {
 
 		// lights
 
-		//PointLight* light = new PointLight(12.0f, 1.0f);
-		//light->SetPosition(iw::vector3(-4.5f, 8.0f, 10.0f));
-		//light->SetShadowShader(pointShadowShader);
-		//light->SetShadowTarget(pointShadowTarget);
+		PointLight* light = new PointLight(12.0f, 1.0f);
+		light->SetPosition(iw::vector3(-4.5f, 8.0f, 10.0f));
+		light->SetShadowShader(pointShadowShader);
+		light->SetShadowTarget(pointShadowTarget);
 
 		//PointLight* light2 = new PointLight(12.0f, 1.0f);
 		//light2->SetPosition(iw::vector3( 4.5f, 8.0f, 10.0f));
@@ -221,7 +223,7 @@ namespace iw {
 
 		// scene
 
-		//MainScene->AddLight(light);
+		MainScene->AddLight(light);
 		MainScene->AddLight(dirLight);
 
 		//delete sphere;
@@ -262,15 +264,18 @@ namespace iw {
 			auto mesh,
 			auto meshCollider)
 		{
-			body->Trans().Rotation *= iw::quaternion::from_euler_angles(0, iw::Time::FixedTime(), 0);
+			//body->Trans().Rotation *= iw::quaternion::from_euler_angles(0, iw::Time::FixedTime(), 0);
 			mesh->Material()->Set("albedo", iw::vector4(1, 1, 1, 1));
+			
+			entities.Each([&](
+				auto entity1,
+				auto body1,
+				auto mesh1,
+				auto meshCollider1)
+			{
+				body->ApplyForce((body1->Trans().Position - body->Trans().Position));
+			});
 		});
-
-		if (Keyboard::KeyDown(E)) {
-			SpawnCube();
-		}
-
-		Physics->Step(Time::FixedTime());
 	}
 
 	float thresh = .5f;
@@ -292,6 +297,10 @@ namespace iw {
 			quaternion rot = light->Rotation();
 			ImGui::SliderFloat4("Light rot", (float*)&rot, 0, 1);
 			light->SetRotation(rot.normalized());
+		}
+
+		if (ImGui::Button("Spawn Cube")) {
+			SpawnCube(vector3(iw::randf() + 1, iw::randf() + 1, iw::randf() + 1) * (iw::randf() + 1) * 10);
 		}
 
 		if (ImGui::Button("Shuffle properties")) {

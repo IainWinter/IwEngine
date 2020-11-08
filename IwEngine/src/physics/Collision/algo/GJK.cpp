@@ -18,11 +18,12 @@ namespace algo {
 		// New direction is backwards from that point
 		vector3 direction = -support;
 
-		while (true) {
+		size_t iterations = 0;
+		while (iterations++ < 32) {
 			support = detail::Support(colliderA, transformA, colliderB, transformB, direction);
 
 			if (support.dot(direction) <= 0) {
-				return std::make_pair(false, points); // no collision
+				break;
 			}
 
 			points.push_front(support);
@@ -31,6 +32,8 @@ namespace algo {
 				return std::make_pair(true, points);
 			}
 		}
+
+		return std::make_pair(false, points); // no collision
 	}
 
 	ManifoldPoints EPA(
@@ -39,56 +42,65 @@ namespace algo {
 		const Collider* colliderB, const Transform* transformB)
 	{
 		std::vector<vector3> polytope(simplex.begin(), simplex.end());
+		std::vector<size_t>  index = {
+			0, 2, 1,
+			0, 1, 3,
+			0, 3, 2,
+			1, 2, 3,
+		};
 
-		unsigned minI = 0;
-		float   minDistance = FLT_MAX;
-		vector3 minNormal;
+		vector3  minNormal;
+		float    minDistance = FLT_MAX;
+		size_t   minTriangle = 0;
 
 		while (minDistance == FLT_MAX) {
-			for (unsigned i = 0; i < polytope.size(); i++) {
-				unsigned j = (i + 1u) % polytope.size();
-				unsigned k = (i + 2u) % polytope.size();
+			for (size_t i = 0; i < index.size(); i += 3) {
+				vector3 a = polytope[index[i    ]];
+				vector3 b = polytope[index[i + 1]];
+				vector3 c = polytope[index[i + 2]];
 
-				vector3 a = polytope[i];
-				vector3 b = polytope[j];
-				vector3 c = polytope[k];
-
-				vector3 ab = b - a;
-				vector3 ac = c - a;
-				vector3 ao =   - a;
-
-				vector3 abc = ab.cross(ac);
-
-				vector3 normal = abc.normalized();
-				float distance = normal.dot(ao);
+				vector3 normal = (b - a).cross(c - a).normalized();
+				float distance = normal.dot(-a);
 
 				if (distance < 0) {
+					normal   *= -1;
 					distance *= -1;
-					normal   *= -1; // normal points away from origin, this is caused by inconsistant winding order
 				}
 
 				if (distance < minDistance) {
-					minDistance = distance;
 					minNormal   = normal;
-					minI = i;
+					minDistance = distance;
+					minTriangle = i;
 				}
 			}
 
 			vector3 support = detail::Support(colliderA, transformA, colliderB, transformB, minNormal);
 
-			float d1 = support.dot(minNormal);
-			float d2 = polytope[minI].dot(minNormal); // problem in here
-			float difference = abs(d1 - d2);
+			if (std::find(polytope.begin(), polytope.end(), support) == polytope.end()) {
+				minDistance = FLT_MAX;
 
-			if (difference > 0.0001f) {
-				polytope.insert(polytope.begin() + minI, support); // add another point inbetween i and j
-				minDistance = FLT_MAX; // reset while loop
+				size_t a = index[minTriangle    ];
+				size_t b = index[minTriangle + 1];
+				size_t c = index[minTriangle + 2];
+				size_t d = polytope.size();
+
+				index.pop_back();
+				index.pop_back();
+				index.pop_back();
+
+				index.push_back(a); index.push_back(d); index.push_back(b);
+				index.push_back(b); index.push_back(d); index.push_back(c);
+				index.push_back(a); index.push_back(c); index.push_back(d);
+
+				polytope.push_back(support);
 			}
 		}
 
+		vector3 o = polytope[index[minTriangle]];
+
 		ManifoldPoints points;
-		points.A = 0;//?polytope[minI];
-		points.B = 0;//?polytope[minJ];
+		points.A = o - minNormal * minDistance;
+		points.B = o + minNormal * minDistance;
 
 		points.Normal = minNormal;
 		points.PenetrationDepth = minDistance;
