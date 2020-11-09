@@ -126,9 +126,9 @@ namespace algo {
 		};
 	}
 
-	ManifoldPoints FindMeshMeshMaifoldPoints(
-		const MeshCollider* a, const Transform* ta,
-		const MeshCollider* b, const Transform* tb) // could have bool for if we are only checking triggers, could save compute
+	ManifoldPoints FindGJKMaifoldPoints(
+		const Collider* a, const Transform* ta,
+		const Collider* b, const Transform* tb) // could have bool for if we are only checking triggers, could save compute
 	{
 		auto result = GJK(a, ta, b, tb);
 

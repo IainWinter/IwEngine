@@ -44,6 +44,11 @@ namespace impl {
 			return transform;
 		}
 
+		IWPHYSICS_API
+		V FindFurthestPoint(
+			const Transform* transform,
+			V direction) const override;
+
 		ManifoldPoints TestCollision(
 			const Transform* transform,
 			const Collider<V>* collider,

@@ -35,6 +35,16 @@ namespace impl {
 			return collider;
 		}
 
+		static MeshCollider MakeTetrahedron() {
+			MeshCollider collider;
+			collider.m_points.push_back(V(cos(Pi2 * 0 / 3), -1, sin(Pi2 * 0 / 3)));
+			collider.m_points.push_back(V(cos(Pi2 * 1 / 3), -1, sin(Pi2 * 1 / 3)));
+			collider.m_points.push_back(V(cos(Pi2 * 2 / 3), -1, sin(Pi2 * 2 / 3)));
+			collider.m_points.push_back(V(0, 1, 0));
+
+			return collider;
+		}
+
 		//IWPHYSICS_API
 		const AABB<V>& Bounds() { return AABB<V>(); }
 

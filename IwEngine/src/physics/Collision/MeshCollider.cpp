@@ -41,7 +41,8 @@ namespace Physics {
 		const Physics::SphereCollider* sphere,
 		const Transform* sphereTransform) const
 	{
-		return ManifoldPoints();
+		return algo::FindGJKMaifoldPoints(
+			this, transform, sphere, sphereTransform);
 	}
 
 	template<>
@@ -50,7 +51,8 @@ namespace Physics {
 		const Physics::CapsuleCollider* capsule,
 		const Transform* capsuleTransform) const
 	{
-		return ManifoldPoints();
+		return algo::FindGJKMaifoldPoints(
+			this, transform, capsule, capsuleTransform);
 	}
 
 	template<>
@@ -59,7 +61,8 @@ namespace Physics {
 		const Physics::PlaneCollider* plane,
 		const Transform* planeTransform) const
 	{
-		return ManifoldPoints();
+		return algo::FindGJKMaifoldPoints(
+			this, transform, plane, planeTransform);
 	}
 
 	template<>
@@ -68,7 +71,7 @@ namespace Physics {
 		const MeshCollider* mesh,
 		const Transform* meshTransform) const
 	{
-		return algo::FindMeshMeshMaifoldPoints(
+		return algo::FindGJKMaifoldPoints(
 			this, transform, mesh, meshTransform);
 	}
 }

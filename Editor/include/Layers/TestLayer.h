@@ -16,6 +16,9 @@ namespace iw {
 		ref<RenderTarget> pointShadowTarget;
 
 		MeshData* sphere;
+		MeshData* tetrahedron;
+		MeshData* cube;
+
 		MeshData* plane;
 
 	public:

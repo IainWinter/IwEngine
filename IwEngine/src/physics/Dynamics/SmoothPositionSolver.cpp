@@ -18,13 +18,11 @@ namespace Physics {
 			scalar aInvMass = aBody ? aBody->InvMass() : 0.0f;
 			scalar bInvMass = bBody ? bBody->InvMass() : 0.0f;
 
-			iw::vector3 resolution = manifold.B - manifold.A;
-
 			const float percent = 0.8f;
 			const float slop = 0.01f;
 
 			iw::vector3 correction = manifold.Normal * percent
-				* fmax(resolution.length() - slop, 0.0f)
+				* fmax(manifold.PenetrationDepth- slop, 0.0f)
 				/ (aInvMass + bInvMass);
 		
 			iw::vector3 deltaA;

@@ -36,7 +36,7 @@ namespace Physics {
 	template<>
 	ManifoldPoints CapsuleCollider::TestCollision(
 		const Transform* transform, 
-		const Physics::MeshCollider* mesh, 
+		const Physics::MeshCollider* mesh,
 		const Transform* meshTransform) const
 	{
 		return {};

@@ -38,9 +38,9 @@ namespace algo {
 		const CapsuleCollider* b, const Transform* tb);
 
 	IWPHYSICS_API
-	ManifoldPoints FindMeshMeshMaifoldPoints(
-		const MeshCollider* a, const Transform* ta,
-		const MeshCollider* b, const Transform* tb);
+	ManifoldPoints FindGJKMaifoldPoints(
+		const Collider* a, const Transform* ta,
+		const Collider* b, const Transform* tb);
 
 
 	// Swaps

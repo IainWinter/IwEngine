@@ -16,12 +16,14 @@
 #include <iw\engine\Systems\PhysicsSystem.h>
 #include "iw/input/Devices/Keyboard.h"
 #include "iw/physics/Collision/PositionSolver.h"
+#include "iw/graphics/MeshFactory.h"
 
 #include "iw/engine/Systems/EditorCameraControllerSystem.h"
 
 #include "iw/engine/Systems/Render/RenderSystem.h"
 #include "iw/engine/Systems/Render/ShadowRenderSystem.h"
 #include "Systems/SpaceInspectorSystem.h"
+
 
 namespace iw {
 	struct MeshComponents {
@@ -41,11 +43,28 @@ namespace iw {
 	}
 
 	void TestLayer::SpawnCube(vector3 s) {
-		Entity entity = Space->CreateEntity<Transform, Mesh, MeshCollider, Rigidbody>();
+		Entity entity = Space->CreateEntity<Transform, Mesh, Rigidbody>();
+
+
+		Mesh* mesh;
+		Collider* col;
+
+		if (randf() > 0.5f) {
+			col  = entity.Add<SphereCollider>(0, 1);
+			mesh = entity.Set<Mesh>(sphere->MakeInstance());
+		}
+
+		else if (randf() > 0.5f) {
+			col  = entity.Add<MeshCollider>(MeshCollider::MakeTetrahedron());
+			mesh = entity.Set<Mesh>(tetrahedron->MakeInstance());
+		}
+
+		else {
+			col  = entity.Add<MeshCollider>(MeshCollider::MakeCube());
+			mesh = entity.Set<Mesh>(cube->MakeInstance());
+		}
 
 		Transform*      trans = entity.Set<Transform>(iw::vector3(0, 0, 0), s);
-		Mesh*           mesh  = entity.Set<Mesh>(sphere->MakeInstance());
-		MeshCollider*   col   = entity.Set<MeshCollider>(MeshCollider::MakeCube());
 		Rigidbody*      body  = entity.Set<Rigidbody>();
 
 		trans->Rotation = quaternion::from_euler_angles(iw::randf() * iw::Pi2, iw::randf() * iw::Pi2, iw::randf() * iw::Pi2);
@@ -74,6 +93,8 @@ namespace iw {
 		body->SetTrans(trans);
 		body->SetCol(col);
 		body->SetIsStatic(false);
+		body->SetRestitution(0);
+		body->SetMass((iw::randf() + 1.5f) * 5);
 
 		body->SetOnCollision([&](auto manifold, auto dt) {
 			ref<Material> mat1 = Space->FindEntity<Rigidbody>(manifold.ObjA).Find<Mesh>()->Material();
@@ -113,14 +134,13 @@ namespace iw {
 		description.DescribeBuffer(bName::BITANGENT, MakeLayout<float>(3));
 		description.DescribeBuffer(bName::UV,        MakeLayout<float>(2));
 
-		sphere = &*Asset->Load<iw::Model>("models/cube.gltf")->GetMesh(0).Data();
+		sphere      = MakeIcosphere(description, 3);
+		tetrahedron = MakeTetrahedron(description, 1);
+		cube        = MakeCube(description, 1);
 		plane  = MakePlane    (description, 1, 1);
 
 		//sphere->GenTangents();
 		//plane ->GenTangents();
-
-		sphere->Initialize(Renderer->Device);
-		plane ->Initialize(Renderer->Device);
 
 		// Directional light shadow map textures & target
 		
@@ -300,7 +320,7 @@ namespace iw {
 		}
 
 		if (ImGui::Button("Spawn Cube")) {
-			SpawnCube(vector3(iw::randf() + 1, iw::randf() + 1, iw::randf() + 1) * (iw::randf() + 1) * 10);
+			SpawnCube(vector3(iw::randf() + 3, iw::randf() + 3, iw::randf() + 3));
 		}
 
 		if (ImGui::Button("Shuffle properties")) {

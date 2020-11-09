@@ -45,6 +45,11 @@ namespace algo {
 
 	ManifoldPoints EPA(
 		const Simplex& simplex,
+		const Collider2* colliderA, const Transform* transformA,
+		const Collider2* colliderB, const Transform* transformB);
+
+	ManifoldPoints EPA(
+		const Simplex& simplex,
 		const Collider* colliderA, const Transform* transformA,
 		const Collider* colliderB, const Transform* transformB);
 

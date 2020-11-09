@@ -36,6 +36,60 @@ namespace algo {
 		return std::make_pair(false, points); // no collision
 	}
 
+	//ManifoldPoints EPA(
+	//	const Simplex& simplex,
+	//	const Collider2* colliderA, const Transform* transformA,
+	//	const Collider2* colliderB, const Transform* transformB)
+	//{
+	//	std::vector<vector2> polytope(simplex.begin(), simplex.end());
+
+	//	vector2 minNormal;
+	//	float   minDistance = FLT_MAX;
+	//	size_t  minIndex = 0;
+
+	//	while (minDistance == FLT_MAX) {
+	//		for (size_t i = 0; i < polytope.size(); i++) {
+	//			vector2 a = polytope[i];
+	//			vector2 b = polytope[(i + 1) % polytope.size()];
+
+	//			vector2 ab = b - a;
+
+	//			vector2 normal = vector2(ab.y, -ab.x).normalized();
+	//			float distance = normal.dot(-a);
+
+	//			if (distance < 0) {
+	//				normal   *= -1;
+	//				distance *= -1;
+	//			}
+
+	//			if (distance < minDistance) {
+	//				minNormal   = normal;
+	//				minDistance = distance;
+	//				minIndex    = i;
+	//			}
+	//		}
+
+	//		vector3 support = detail::Support(colliderA, transformA, colliderB, transformB, minNormal);
+
+	//		if (std::find(polytope.begin(), polytope.end(), support) == polytope.end()) {
+	//			minDistance = FLT_MAX;
+	//			polytope.push_back(support);
+	//		}
+	//	}
+
+	//	vector3 o = polytope[index[minTriangle]];
+
+	//	ManifoldPoints points;
+	//	points.A = o - minNormal * minDistance;
+	//	points.B = o + minNormal * minDistance;
+
+	//	points.Normal = minNormal;
+	//	points.PenetrationDepth = minDistance;
+	//	points.HasCollision = true;
+
+	//	return points;
+	//}
+
 	ManifoldPoints EPA(
 		const Simplex& simplex,
 		const Collider* colliderA, const Transform* transformA,
@@ -49,9 +103,9 @@ namespace algo {
 			1, 2, 3,
 		};
 
-		vector3  minNormal;
-		float    minDistance = FLT_MAX;
-		size_t   minTriangle = 0;
+		vector3 minNormal;
+		float   minDistance = FLT_MAX;
+		size_t  minTriangle = 0;
 
 		while (minDistance == FLT_MAX) {
 			for (size_t i = 0; i < index.size(); i += 3) {
@@ -84,13 +138,11 @@ namespace algo {
 				size_t c = index[minTriangle + 2];
 				size_t d = polytope.size();
 
-				index.pop_back();
-				index.pop_back();
-				index.pop_back();
+				index.pop_back();   index.pop_back();   index.pop_back();
 
-				index.push_back(a); index.push_back(d); index.push_back(b);
-				index.push_back(b); index.push_back(d); index.push_back(c);
 				index.push_back(a); index.push_back(c); index.push_back(d);
+				index.push_back(b); index.push_back(d); index.push_back(c);
+				index.push_back(a); index.push_back(d); index.push_back(b);
 
 				polytope.push_back(support);
 			}
@@ -99,8 +151,8 @@ namespace algo {
 		vector3 o = polytope[index[minTriangle]];
 
 		ManifoldPoints points;
-		points.A = o - minNormal * minDistance;
-		points.B = o + minNormal * minDistance;
+		points.A = o + minNormal * minDistance;
+		points.B = o - minNormal * minDistance;
 
 		points.Normal = minNormal;
 		points.PenetrationDepth = minDistance;

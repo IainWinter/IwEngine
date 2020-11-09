@@ -6,6 +6,14 @@
 namespace iw {
 namespace Physics {
 	template<>
+	vector3 SphereCollider::FindFurthestPoint(
+		const Transform* transform,
+		vector3 direction) const
+	{
+		return Center + Radius * vector3::unit_x * transform->WorldRotation();
+	}
+
+	template<>
 	inline ManifoldPoints SphereCollider::TestCollision(
 		const Transform* transform,
 		const SphereCollider* sphere,
@@ -41,7 +49,8 @@ namespace Physics {
 		const Physics::MeshCollider* mesh,
 		const Transform* meshTransform) const
 	{
-		return {};
+		return algo::FindGJKMaifoldPoints(
+			this, transform, mesh, meshTransform);
 	}
 }
 }
