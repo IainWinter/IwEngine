@@ -42,19 +42,19 @@ namespace iw {
 		srand(time(nullptr));
 	}
 
+	int x = 0;
 	void TestLayer::SpawnCube(vector3 s) {
 		Entity entity = Space->CreateEntity<Transform, Mesh, Rigidbody>();
-
 
 		Mesh* mesh;
 		Collider* col;
 
-		if (randf() > 0.5f) {
-			col  = entity.Add<SphereCollider>(0, 1);
-			mesh = entity.Set<Mesh>(sphere->MakeInstance());
-		}
+		//if (randf() > 0.5f) {
+		//	col  = entity.Add<SphereCollider>(0, 1);
+		//	mesh = entity.Set<Mesh>(sphere->MakeInstance());
+		//}
 
-		else if (randf() > 0.5f) {
+		if (randf() > 0.5f) {
 			col  = entity.Add<MeshCollider>(MeshCollider::MakeTetrahedron());
 			mesh = entity.Set<Mesh>(tetrahedron->MakeInstance());
 		}
@@ -64,11 +64,11 @@ namespace iw {
 			mesh = entity.Set<Mesh>(cube->MakeInstance());
 		}
 
-		Transform*      trans = entity.Set<Transform>(iw::vector3(0, 0, 0), s);
+		Transform*      trans = entity.Set<Transform>(iw::vector3(x += 2.1f, 0, 0), s);
 		Rigidbody*      body  = entity.Set<Rigidbody>();
 
-		trans->Rotation = quaternion::from_euler_angles(iw::randf() * iw::Pi2, iw::randf() * iw::Pi2, iw::randf() * iw::Pi2);
-		trans->Position = vector3(iw::randf()) * 10;
+		//trans->Rotation = quaternion::from_euler_angles(iw::randf() * iw::Pi2, iw::randf() * iw::Pi2, iw::randf() * iw::Pi2);
+		//trans->Position = vector3(iw::randf()) * 10;
 
 		body->SetMass((iw::randf() + 1) * 10);
 
@@ -97,11 +97,16 @@ namespace iw {
 		body->SetMass((iw::randf() + 1.5f) * 5);
 
 		body->SetOnCollision([&](auto manifold, auto dt) {
-			ref<Material> mat1 = Space->FindEntity<Rigidbody>(manifold.ObjA).Find<Mesh>()->Material();
-			ref<Material> mat2 = Space->FindEntity<Rigidbody>(manifold.ObjB).Find<Mesh>()->Material();
+			Mesh* m1 = Space->FindEntity<Rigidbody>(manifold.ObjA).Find<Mesh>();
+			Mesh* m2 = Space->FindEntity<Rigidbody>(manifold.ObjB).Find<Mesh>();
 
-			mat1->Set("albedo", iw::vector4(1, 0.25, 0.25, 1));
-			mat2->Set("albedo", iw::vector4(1, 0.25, 0.25, 1));
+			if (m1) {
+				m1->Material()->Set("albedo", iw::vector4(1, 0.25, 0.25, 1));
+			}
+
+			if (m2) {
+				m2->Material()->Set("albedo", iw::vector4(1, 0.25, 0.25, 1));
+			}
 		});
 
 		body->SetDynamicFriction(0.1f);
@@ -137,7 +142,7 @@ namespace iw {
 		sphere      = MakeIcosphere(description, 3);
 		tetrahedron = MakeTetrahedron(description, 1);
 		cube        = MakeCube(description, 1);
-		plane  = MakePlane    (description, 1, 1);
+		plane       = MakePlane(description, 1, 1);
 
 		//sphere->GenTangents();
 		//plane ->GenTangents();
@@ -174,11 +179,11 @@ namespace iw {
 
 			mesh->SetMaterial(REF<Material>(shader));
 
-			mesh->Material()->Set("albedo", iw::vector4(1.0f));
+			mesh->Material()->Set("albedo", iw::Color(0.002f, 0.144f, 0.253f));
 
-			mesh->Material()->Set("reflectance", rand() / (float)RAND_MAX);
-			mesh->Material()->Set("roughness",   rand() / (float)RAND_MAX);
-			mesh->Material()->Set("metallic",    rand() / (float)RAND_MAX);
+			mesh->Material()->Set("reflectance", 0.06f);
+			mesh->Material()->Set("roughness",   0.8f);
+			mesh->Material()->Set("metallic",    0.8f);
 			
 			mesh->Material()->SetTexture("shadowMap",  dirShadowTarget  ->Tex(0));
 			//mesh->Material()->SetTexture("shadowMap2", pointShadowTarget->Tex(0));
@@ -266,7 +271,7 @@ namespace iw {
 		Time::SetFixedTime(0.05f);
 
 		SpawnCube();
-		SpawnCube(vector3(15, 1, 1));
+		SpawnCube();
 
 		return Layer::Initialize();
 	}
@@ -287,14 +292,14 @@ namespace iw {
 			//body->Trans().Rotation *= iw::quaternion::from_euler_angles(0, iw::Time::FixedTime(), 0);
 			mesh->Material()->Set("albedo", iw::vector4(1, 1, 1, 1));
 			
-			entities.Each([&](
-				auto entity1,
-				auto body1,
-				auto mesh1,
-				auto meshCollider1)
-			{
-				body->ApplyForce((body1->Trans().Position - body->Trans().Position));
-			});
+			//entities.Each([&](
+			//	auto entity1,
+			//	auto body1,
+			//	auto mesh1,
+			//	auto meshCollider1)
+			//{
+			//	body->ApplyForce((body1->Trans().Position - body->Trans().Position));
+			//});
 		});
 	}
 

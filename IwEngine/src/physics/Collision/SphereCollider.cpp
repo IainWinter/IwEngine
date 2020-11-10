@@ -10,7 +10,7 @@ namespace Physics {
 		const Transform* transform,
 		vector3 direction) const
 	{
-		return Center + Radius * vector3::unit_x * transform->WorldRotation();
+		return transform->WorldPosition() + Center + Radius * direction.normalized() * transform->WorldScale().major();
 	}
 
 	template<>

@@ -42,51 +42,51 @@ namespace algo {
 	//	const Collider2* colliderB, const Transform* transformB)
 	//{
 	//	std::vector<vector2> polytope(simplex.begin(), simplex.end());
-
+	//
 	//	vector2 minNormal;
 	//	float   minDistance = FLT_MAX;
 	//	size_t  minIndex = 0;
-
+	//
 	//	while (minDistance == FLT_MAX) {
 	//		for (size_t i = 0; i < polytope.size(); i++) {
 	//			vector2 a = polytope[i];
 	//			vector2 b = polytope[(i + 1) % polytope.size()];
-
+	//
 	//			vector2 ab = b - a;
-
+	//
 	//			vector2 normal = vector2(ab.y, -ab.x).normalized();
 	//			float distance = normal.dot(-a);
-
+	//
 	//			if (distance < 0) {
 	//				normal   *= -1;
 	//				distance *= -1;
 	//			}
-
+	//
 	//			if (distance < minDistance) {
 	//				minNormal   = normal;
 	//				minDistance = distance;
 	//				minIndex    = i;
 	//			}
 	//		}
-
+	//
 	//		vector3 support = detail::Support(colliderA, transformA, colliderB, transformB, minNormal);
-
+	//
 	//		if (std::find(polytope.begin(), polytope.end(), support) == polytope.end()) {
 	//			minDistance = FLT_MAX;
 	//			polytope.push_back(support);
 	//		}
 	//	}
-
+	//
 	//	vector3 o = polytope[index[minTriangle]];
-
+	//
 	//	ManifoldPoints points;
 	//	points.A = o - minNormal * minDistance;
 	//	points.B = o + minNormal * minDistance;
-
+	//
 	//	points.Normal = minNormal;
 	//	points.PenetrationDepth = minDistance;
 	//	points.HasCollision = true;
-
+	//
 	//	return points;
 	//}
 
@@ -97,24 +97,27 @@ namespace algo {
 	{
 		std::vector<vector3> polytope(simplex.begin(), simplex.end());
 		std::vector<size_t>  index = {
-			0, 2, 1,
-			0, 1, 3,
-			0, 3, 2,
-			1, 2, 3,
+			0, 1, 2,
+			0, 3, 1,
+			0, 2, 3,
+			1, 3, 2
 		};
 
 		vector3 minNormal;
 		float   minDistance = FLT_MAX;
 		size_t  minTriangle = 0;
 
-		while (minDistance == FLT_MAX) {
+		size_t iterations = 0;
+		while (iterations++ < 32 // remove the need with this by thing below
+			&& minDistance == FLT_MAX)
+		{
 			for (size_t i = 0; i < index.size(); i += 3) {
 				vector3 a = polytope[index[i    ]];
 				vector3 b = polytope[index[i + 1]];
 				vector3 c = polytope[index[i + 2]];
 
 				vector3 normal = (b - a).cross(c - a).normalized();
-				float distance = normal.dot(-a);
+				float distance = normal.dot(a);
 
 				if (distance < 0) {
 					normal   *= -1;
@@ -130,7 +133,7 @@ namespace algo {
 
 			vector3 support = detail::Support(colliderA, transformA, colliderB, transformB, minNormal);
 
-			if (std::find(polytope.begin(), polytope.end(), support) == polytope.end()) {
+			if (std::find(polytope.begin(), polytope.end(), support) == polytope.end()) { // test for points that is really far instead of exactly more far to exit faster with sphere
 				minDistance = FLT_MAX;
 
 				size_t a = index[minTriangle    ];
@@ -138,7 +141,9 @@ namespace algo {
 				size_t c = index[minTriangle + 2];
 				size_t d = polytope.size();
 
-				index.pop_back();   index.pop_back();   index.pop_back();
+				index.erase(index.begin() + minTriangle + 2);
+				index.erase(index.begin() + minTriangle + 1);
+				index.erase(index.begin() + minTriangle    );
 
 				index.push_back(a); index.push_back(c); index.push_back(d);
 				index.push_back(b); index.push_back(d); index.push_back(c);
@@ -148,14 +153,14 @@ namespace algo {
 			}
 		}
 
-		vector3 o = polytope[index[minTriangle]];
+		//vector3 o = polytope[index[minTriangle]];
 
 		ManifoldPoints points;
-		points.A = o + minNormal * minDistance;
-		points.B = o - minNormal * minDistance;
+		//points.A = /*o + minNormal * minDistance*/0;
+		//points.B = /*o-*/ -minNormal * (minDistance + 0.001);
 
-		points.Normal = minNormal;
-		points.PenetrationDepth = minDistance;
+		points.Normal = -minNormal; // is this backwards or are all the solvers backwards lol
+		points.PenetrationDepth = minDistance + 0.001f;
 		points.HasCollision = true;
 
 		return points;

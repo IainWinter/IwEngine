@@ -22,7 +22,7 @@ namespace Physics {
 			const float slop = 0.01f;
 
 			iw::vector3 correction = manifold.Normal * percent
-				* fmax(manifold.PenetrationDepth- slop, 0.0f)
+				* fmax(manifold.PenetrationDepth - slop, 0.0f)
 				/ (aInvMass + bInvMass);
 		
 			iw::vector3 deltaA;
