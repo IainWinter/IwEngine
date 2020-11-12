@@ -90,67 +90,97 @@ namespace algo {
 	//	return points;
 	//}
 
+#ifndef EPA_MAX_ITER
+#	define EPA_MAX_ITER 32
+#endif
+
 	ManifoldPoints EPA(
 		const Simplex& simplex,
 		const Collider* colliderA, const Transform* transformA,
 		const Collider* colliderB, const Transform* transformB)
 	{
 		std::vector<vector3> polytope(simplex.begin(), simplex.end());
-		std::vector<size_t>  index = {
+		std::vector<size_t>  faces = {
 			0, 1, 2,
 			0, 3, 1,
 			0, 2, 3,
 			1, 3, 2
 		};
+		
+		auto [normals, minFace] = detail::GetFaceNormals(polytope, faces);
 
 		vector3 minNormal;
 		float   minDistance = FLT_MAX;
-		size_t  minTriangle = 0;
-
+		
 		size_t iterations = 0;
-		while (iterations++ < 32 // remove the need with this by thing below
-			&& minDistance == FLT_MAX)
-		{
-			for (size_t i = 0; i < index.size(); i += 3) {
-				vector3 a = polytope[index[i    ]];
-				vector3 b = polytope[index[i + 1]];
-				vector3 c = polytope[index[i + 2]];
+		while (minDistance == FLT_MAX) {
+			minNormal   = normals[minFace].xyz();
+			minDistance = normals[minFace].w;
 
-				vector3 normal = (b - a).cross(c - a).normalized();
-				float distance = normal.dot(a);
-
-				if (distance < 0) {
-					normal   *= -1;
-					distance *= -1;
-				}
-
-				if (distance < minDistance) {
-					minNormal   = normal;
-					minDistance = distance;
-					minTriangle = i;
-				}
+			if (iterations++ > EPA_MAX_ITER) {
+				break;
 			}
 
 			vector3 support = detail::Support(colliderA, transformA, colliderB, transformB, minNormal);
+			float sDistance = minNormal.dot(support);
 
-			if (std::find(polytope.begin(), polytope.end(), support) == polytope.end()) { // test for points that is really far instead of exactly more far to exit faster with sphere
+			if (fabsf(sDistance - minDistance) > 0.001f) {
 				minDistance = FLT_MAX;
 
-				size_t a = index[minTriangle    ];
-				size_t b = index[minTriangle + 1];
-				size_t c = index[minTriangle + 2];
-				size_t d = polytope.size();
+				std::vector<std::pair<size_t, size_t>> looseEdges;
 
-				index.erase(index.begin() + minTriangle + 2);
-				index.erase(index.begin() + minTriangle + 1);
-				index.erase(index.begin() + minTriangle    );
+				for (size_t i = 0; i < normals.size(); i++) {
+					if (detail::SameDirection(normals[i], support)) {
+						size_t f = i * 3;
 
-				index.push_back(a); index.push_back(c); index.push_back(d);
-				index.push_back(b); index.push_back(d); index.push_back(c);
-				index.push_back(a); index.push_back(d); index.push_back(b);
+						detail::AddIfLooseEdge(looseEdges, faces, f,     f + 1);
+						detail::AddIfLooseEdge(looseEdges, faces, f + 1, f + 2);
+						detail::AddIfLooseEdge(looseEdges, faces, f + 2, f    );
+
+						faces[f + 2] = faces.back(); faces.pop_back();
+						faces[f + 1] = faces.back(); faces.pop_back();
+						faces[f    ] = faces.back(); faces.pop_back();
+
+						normals[i] = normals.back(); normals.pop_back();
+
+						i--;
+					}
+				}
+
+				if (looseEdges.size() == 0) {
+					break;
+				}
+
+				std::vector<size_t> newFaces;
+				for (auto [edge1, edge2] : looseEdges) {
+					newFaces.push_back(edge1);
+					newFaces.push_back(edge2);
+					newFaces.push_back(polytope.size());
+				}
 
 				polytope.push_back(support);
+
+				auto [newNormals, newMinFace] = detail::GetFaceNormals(polytope, newFaces);
+
+				float newMinDistance = FLT_MAX;
+				for (size_t i = 0; i < normals.size(); i++) {
+					if (normals[i].w < newMinDistance) {
+						newMinDistance = normals[i].w;
+						minFace = i;
+					}
+				}
+
+				if (newNormals[newMinFace].w < newMinDistance) {
+					minFace = newMinFace + normals.size();
+				}
+
+				faces  .insert(faces  .end(), newFaces  .begin(), newFaces  .end());
+				normals.insert(normals.end(), newNormals.begin(), newNormals.end());
 			}
+		}
+
+		if (minDistance == FLT_MAX) {
+			return {};
 		}
 
 		//vector3 o = polytope[index[minTriangle]];
@@ -159,7 +189,7 @@ namespace algo {
 		//points.A = /*o + minNormal * minDistance*/0;
 		//points.B = /*o-*/ -minNormal * (minDistance + 0.001);
 
-		points.Normal = -minNormal; // is this backwards or are all the solvers backwards lol
+		points.Normal = -minNormal; // is this backwards or are all the solvers backwards??
 		points.PenetrationDepth = minDistance + 0.001f;
 		points.HasCollision = true;
 
@@ -174,6 +204,59 @@ namespace detail {
 	{
 		return colliderA->FindFurthestPoint(transformA,  direction)
 			 - colliderB->FindFurthestPoint(transformB, -direction);
+	}
+
+	std::pair<std::vector<vector4>, size_t> GetFaceNormals(
+		const std::vector<vector3>& polytope,
+		const std::vector<size_t>&  faces)
+	{
+		std::vector<vector4> normals;
+		int minTriangle = -1;
+
+		for (size_t i = 0; i < faces.size(); i += 3) {
+			vector3 a = polytope[faces[i    ]];
+			vector3 b = polytope[faces[i + 1]];
+			vector3 c = polytope[faces[i + 2]];
+
+			vector3 normal = (b - a).cross(c - a).normalized();
+			float distance = normal.dot(a);
+
+			if (distance < 0) { // shouldnt need this
+				normal   *= -1;
+				distance *= -1;
+			}
+
+			normals.emplace_back(normal, distance);
+
+			if (   minTriangle == -1
+				|| distance < normals[minTriangle].w)
+			{
+				minTriangle = i / 3;
+			}
+		}
+
+		return { normals, minTriangle };
+	}
+
+	void AddIfLooseEdge(
+		std::vector<std::pair<size_t, size_t>>& edges,
+		const std::vector<size_t>& faces,
+		size_t a,
+		size_t b)
+	{
+		auto reverse = std::find(
+			edges.begin(),
+			edges.end(),
+			std::make_pair(faces[b], faces[a])
+		);
+
+		if (reverse != edges.end()) {
+			edges.erase(reverse);
+		}
+
+		else {
+			edges.emplace_back(faces[a], faces[b]);
+		}
 	}
 
 	bool NextSimplex(

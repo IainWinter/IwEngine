@@ -53,24 +53,22 @@ namespace iw {
 		//	col  = entity.Add<SphereCollider>(0, 1);
 		//	mesh = entity.Set<Mesh>(sphere->MakeInstance());
 		//}
-
-		if (randf() > 0.5f) {
+//
+		//if (randf() > 0.5f) {
 			col  = entity.Add<MeshCollider>(MeshCollider::MakeTetrahedron());
 			mesh = entity.Set<Mesh>(tetrahedron->MakeInstance());
-		}
+		//}
 
-		else {
-			col  = entity.Add<MeshCollider>(MeshCollider::MakeCube());
-			mesh = entity.Set<Mesh>(cube->MakeInstance());
-		}
+		//else {
+		//	col  = entity.Add<MeshCollider>(MeshCollider::MakeCube());
+		//	mesh = entity.Set<Mesh>(cube->MakeInstance());
+		//}
 
 		Transform*      trans = entity.Set<Transform>(iw::vector3(x += 2.1f, 0, 0), s);
 		Rigidbody*      body  = entity.Set<Rigidbody>();
 
 		//trans->Rotation = quaternion::from_euler_angles(iw::randf() * iw::Pi2, iw::randf() * iw::Pi2, iw::randf() * iw::Pi2);
 		//trans->Position = vector3(iw::randf()) * 10;
-
-		body->SetMass((iw::randf() + 1) * 10);
 
 		mesh->SetMaterial(REF<Material>(shader));
 
@@ -93,7 +91,7 @@ namespace iw {
 		body->SetTrans(trans);
 		body->SetCol(col);
 		body->SetIsStatic(false);
-		body->SetRestitution(0);
+		body->SetRestitution(1);
 		body->SetMass((iw::randf() + 1.5f) * 5);
 
 		body->SetOnCollision([&](auto manifold, auto dt) {
@@ -125,7 +123,7 @@ namespace iw {
 		ref<Shader> pointShadowShader = Asset->Load<Shader>("shaders/lights/point.shader");
 
 		Renderer->InitShader(shader,          CAMERA | SHADOWS | LIGHTS);
-		Renderer->InitShader(phong,          CAMERA | SHADOWS | LIGHTS);
+		Renderer->InitShader(phong,           CAMERA | SHADOWS | LIGHTS);
 		Renderer->InitShader(dirShadowShader, CAMERA);
 		Renderer->InitShader(pointShadowShader);
 
@@ -253,7 +251,7 @@ namespace iw {
 
 		//delete sphere;
 
-		//Physics->SetGravity(vector3(0, -9.81f, 0));
+		Physics->SetGravity(vector3(0, -9.81f, 0));
 		Physics->AddSolver(new ImpulseSolver());
 		Physics->AddSolver(new SmoothPositionSolver());
 
@@ -277,7 +275,16 @@ namespace iw {
 	}
 
 	void TestLayer::PostUpdate() {
+		auto entities = Space->Query<Rigidbody, Mesh, MeshCollider>();
 
+		entities.Each([&](
+			auto entity,
+			auto body,
+			auto mesh,
+			auto meshCollider)
+		{
+			body->Trans().Rotation *= iw::quaternion::from_euler_angles(iw::Time::DeltaTimeScaled(), iw::Time::DeltaTimeScaled(), iw::Time::DeltaTimeScaled());
+		});
 	}
 
 	void TestLayer::FixedUpdate() {
@@ -289,17 +296,16 @@ namespace iw {
 			auto mesh,
 			auto meshCollider)
 		{
-			//body->Trans().Rotation *= iw::quaternion::from_euler_angles(0, iw::Time::FixedTime(), 0);
 			mesh->Material()->Set("albedo", iw::vector4(1, 1, 1, 1));
 			
-			//entities.Each([&](
-			//	auto entity1,
-			//	auto body1,
-			//	auto mesh1,
-			//	auto meshCollider1)
-			//{
-			//	body->ApplyForce((body1->Trans().Position - body->Trans().Position));
-			//});
+			entities.Each([&](
+				auto entity1,
+				auto body1,
+				auto mesh1,
+				auto meshCollider1)
+			{
+				body->ApplyForce((body1->Trans().Position - body->Trans().Position));
+			});
 		});
 	}
 

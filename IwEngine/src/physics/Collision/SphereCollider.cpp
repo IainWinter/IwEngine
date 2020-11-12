@@ -10,11 +10,12 @@ namespace Physics {
 		const Transform* transform,
 		vector3 direction) const
 	{
-		return transform->WorldPosition() + Center + Radius * direction.normalized() * transform->WorldScale().major();
+		return Center + transform->WorldPosition()
+			 + Radius * direction.normalized() * transform->WorldScale().major();
 	}
 
 	template<>
-	inline ManifoldPoints SphereCollider::TestCollision(
+	ManifoldPoints SphereCollider::TestCollision(
 		const Transform* transform,
 		const SphereCollider* sphere,
 		const Transform* sphereTransform) const

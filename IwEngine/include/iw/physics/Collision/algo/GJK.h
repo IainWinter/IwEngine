@@ -3,6 +3,7 @@
 #include "iw/physics/IwPhysics.h" 
 #include "iw/physics/Collision/Collider.h"
 #include <array>
+#include <vector>
 
 namespace iw {
 namespace Physics {
@@ -45,19 +46,24 @@ namespace algo {
 
 	ManifoldPoints EPA(
 		const Simplex& simplex,
-		const Collider2* colliderA, const Transform* transformA,
-		const Collider2* colliderB, const Transform* transformB);
-
-	ManifoldPoints EPA(
-		const Simplex& simplex,
 		const Collider* colliderA, const Transform* transformA,
 		const Collider* colliderB, const Transform* transformB);
 
 namespace detail {
-	iw::vector3 Support(
+	vector3 Support(
 		const Collider* colliderA, const Transform* transformA,
 		const Collider* colliderB, const Transform* transformB,
 		vector3 direction);
+
+	std::pair<std::vector<vector4>, size_t> GetFaceNormals(
+		const std::vector<vector3>& polytope,
+		const std::vector<size_t>&  faces);
+
+	void AddIfLooseEdge(
+		std::vector<std::pair<size_t, size_t>>& edges,
+		const std::vector<size_t>& faces,
+		size_t a,
+		size_t b);
 
 	bool NextSimplex(
 		Simplex& points,

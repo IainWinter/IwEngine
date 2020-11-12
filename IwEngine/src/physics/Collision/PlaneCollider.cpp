@@ -39,7 +39,8 @@ namespace Physics {
 		const Physics::MeshCollider* mesh,
 		const Transform* meshTransform) const
 	{
-		return {};
+		return algo::FindPlaneMeshMaifoldPoints(
+			this, transform, mesh, meshTransform);
 	}
 }
 }

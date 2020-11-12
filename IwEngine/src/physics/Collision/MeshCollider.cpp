@@ -61,7 +61,7 @@ namespace Physics {
 		const Physics::PlaneCollider* plane,
 		const Transform* planeTransform) const
 	{
-		return algo::FindGJKMaifoldPoints(
+		return algo::FindMeshPlaneMaifoldPoints(
 			this, transform, plane, planeTransform);
 	}
 

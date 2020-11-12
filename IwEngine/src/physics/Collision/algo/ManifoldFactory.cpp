@@ -126,6 +126,33 @@ namespace algo {
 		};
 	}
 
+	ManifoldPoints FindPlaneMeshMaifoldPoints(
+		const PlaneCollider* a, const Transform* ta,
+		const MeshCollider*  b, const Transform* tb)
+	{
+		vector3 N = a->Plane.P * ta->WorldRotation();
+		N.normalize();
+
+		vector3 P = N * a->Plane.D + ta->WorldPosition();
+
+		vector3 B = b->FindFurthestPoint(tb, -N);
+
+		vector3 BtoP = P - B;
+		
+		float distance = BtoP.dot(N);
+
+		if (distance < 0) {
+			return {};
+		}
+
+		return {
+			B, P,
+			-N,
+			distance,
+			true
+		};
+	}
+
 	ManifoldPoints FindGJKMaifoldPoints(
 		const Collider* a, const Transform* ta,
 		const Collider* b, const Transform* tb) // could have bool for if we are only checking triggers, could save compute
@@ -156,6 +183,16 @@ namespace algo {
 		const SphereCollider* b, const Transform* tb)
 	{
 		ManifoldPoints points = FindSpherePlaneMaifoldPoints(b, tb, a, ta);
+		SwapPoints(points);
+
+		return points;
+	}
+
+	ManifoldPoints FindMeshPlaneMaifoldPoints(
+		const MeshCollider*  a, const Transform* ta,
+		const PlaneCollider* b, const Transform* tb)
+	{
+		ManifoldPoints points = FindPlaneMeshMaifoldPoints(b, tb, a, ta);
 		SwapPoints(points);
 
 		return points;

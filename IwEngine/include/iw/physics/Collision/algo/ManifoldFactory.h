@@ -16,11 +16,10 @@ namespace algo {
 	//   = no col
 
 	// ________| Sphere  | Capsule | Plane  | Mesh
-	// Sphere  |    x    |    x    |    x   |   o
+	// Sphere  |    x    |    x    |    x   |   x
 	// Capsule |    x    |    o    |    o   |   o
 	// Plane   |    x    |    o    |        |   o
 	// Mesh    |    o    |    o    |    o   |   x
-
 
 	IWPHYSICS_API
 	ManifoldPoints FindSphereSphereMaifoldPoints(
@@ -38,6 +37,11 @@ namespace algo {
 		const CapsuleCollider* b, const Transform* tb);
 
 	IWPHYSICS_API
+	ManifoldPoints FindPlaneMeshMaifoldPoints(
+		const PlaneCollider* a, const Transform* ta,
+		const MeshCollider*  b, const Transform* tb);
+
+	IWPHYSICS_API
 	ManifoldPoints FindGJKMaifoldPoints(
 		const Collider* a, const Transform* ta,
 		const Collider* b, const Transform* tb);
@@ -49,6 +53,11 @@ namespace algo {
 	ManifoldPoints FindPlaneSphereMaifoldPoints(
 		const PlaneCollider*  a, const Transform* ta,
 		const SphereCollider* b, const Transform* tb);
+
+	IWPHYSICS_API
+	ManifoldPoints FindMeshPlaneMaifoldPoints(
+		const MeshCollider*  a, const Transform* ta,
+		const PlaneCollider* b, const Transform* tb);
 
 	IWPHYSICS_API
 	ManifoldPoints FindCapsuleSphereMaifoldPoints(
