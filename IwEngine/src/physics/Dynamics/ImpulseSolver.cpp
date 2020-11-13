@@ -18,16 +18,16 @@ namespace Physics {
 			vector3 rVel = bVel - aVel;
 			scalar  nSpd = rVel.dot(manifold.Normal);
 
-			scalar aInvMass = aBody ? aBody->InvMass() : 0.0f;
-			scalar bInvMass = bBody ? bBody->InvMass() : 0.0f;
+			scalar aInvMass = aBody ? aBody->InvMass() : 1.0f;
+			scalar bInvMass = bBody ? bBody->InvMass() : 1.0f;
 
 			// Impluse
 
 			if (nSpd >= 0)
 				continue;
 
-			scalar e = (aBody ? aBody->Restitution() : 0.0f)
-				     * (bBody ? bBody->Restitution() : 0.0f);
+			scalar e = (aBody ? aBody->Restitution() : 1.0f)
+				     * (bBody ? bBody->Restitution() : 1.0f);
 
 			scalar j = -(1.0f + e) * nSpd / (aInvMass + bInvMass);
 

@@ -38,8 +38,8 @@ namespace algo {
 
 	//ManifoldPoints EPA(
 	//	const Simplex& simplex,
-	//	const Collider2* colliderA, const Transform* transformA,
-	//	const Collider2* colliderB, const Transform* transformB)
+	//	const Collider* colliderA, const Transform* transformA,
+	//	const Collider* colliderB, const Transform* transformB)
 	//{
 	//	std::vector<vector2> polytope(simplex.begin(), simplex.end());
 	//
@@ -69,20 +69,16 @@ namespace algo {
 	//			}
 	//		}
 	//
-	//		vector3 support = detail::Support(colliderA, transformA, colliderB, transformB, minNormal);
+	//		vector2 support = detail::Support(colliderA, transformA, colliderB, transformB, minNormal);
+	//		float sDistance = minNormal.dot(support);
 	//
-	//		if (std::find(polytope.begin(), polytope.end(), support) == polytope.end()) {
+	//		if (fabsf(sDistance - minDistance) > 0.001f) {
 	//			minDistance = FLT_MAX;
-	//			polytope.push_back(support);
+	//			polytope.insert(polytope.begin() + minIndex, support);
 	//		}
 	//	}
 	//
-	//	vector3 o = polytope[index[minTriangle]];
-	//
 	//	ManifoldPoints points;
-	//	points.A = o - minNormal * minDistance;
-	//	points.B = o + minNormal * minDistance;
-	//
 	//	points.Normal = minNormal;
 	//	points.PenetrationDepth = minDistance;
 	//	points.HasCollision = true;
@@ -124,7 +120,7 @@ namespace algo {
 			vector3 support = detail::Support(colliderA, transformA, colliderB, transformB, minNormal);
 			float sDistance = minNormal.dot(support);
 
-			if (fabsf(sDistance - minDistance) > 0.001f) {
+			if (abs(sDistance - minDistance) > 0.001f) {
 				minDistance = FLT_MAX;
 
 				std::vector<std::pair<size_t, size_t>> looseEdges;
@@ -183,13 +179,9 @@ namespace algo {
 			return {};
 		}
 
-		//vector3 o = polytope[index[minTriangle]];
-
 		ManifoldPoints points;
-		//points.A = /*o + minNormal * minDistance*/0;
-		//points.B = /*o-*/ -minNormal * (minDistance + 0.001);
 
-		points.Normal = -minNormal; // is this backwards or are all the solvers backwards??
+		points.Normal = -minNormal;
 		points.PenetrationDepth = minDistance + 0.001f;
 		points.HasCollision = true;
 
@@ -221,7 +213,7 @@ namespace detail {
 			vector3 normal = (b - a).cross(c - a).normalized();
 			float distance = normal.dot(a);
 
-			if (distance < 0) { // shouldnt need this
+			if (distance < 0) {
 				normal   *= -1;
 				distance *= -1;
 			}

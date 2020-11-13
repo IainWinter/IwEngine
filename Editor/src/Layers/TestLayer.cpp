@@ -55,16 +55,16 @@ namespace iw {
 		//}
 //
 		//if (randf() > 0.5f) {
-			col  = entity.Add<MeshCollider>(MeshCollider::MakeTetrahedron());
-			mesh = entity.Set<Mesh>(tetrahedron->MakeInstance());
+			//col  = entity.Add<MeshCollider>(MeshCollider::MakeTetrahedron());
+			//mesh = entity.Set<Mesh>(tetrahedron->MakeInstance());
 		//}
 
 		//else {
-		//	col  = entity.Add<MeshCollider>(MeshCollider::MakeCube());
-		//	mesh = entity.Set<Mesh>(cube->MakeInstance());
+			col  = entity.Add<MeshCollider>(MeshCollider::MakeCube());
+			mesh = entity.Set<Mesh>(cube->MakeInstance());
 		//}
 
-		Transform*      trans = entity.Set<Transform>(iw::vector3(x += 2.1f, 0, 0), s);
+		Transform*      trans = entity.Set<Transform>(iw::vector3(x += 2, 0, 0), s);
 		Rigidbody*      body  = entity.Set<Rigidbody>();
 
 		//trans->Rotation = quaternion::from_euler_angles(iw::randf() * iw::Pi2, iw::randf() * iw::Pi2, iw::randf() * iw::Pi2);
@@ -275,16 +275,16 @@ namespace iw {
 	}
 
 	void TestLayer::PostUpdate() {
-		auto entities = Space->Query<Rigidbody, Mesh, MeshCollider>();
+		//auto entities = Space->Query<Rigidbody, Mesh, MeshCollider>();
 
-		entities.Each([&](
-			auto entity,
-			auto body,
-			auto mesh,
-			auto meshCollider)
-		{
-			body->Trans().Rotation *= iw::quaternion::from_euler_angles(iw::Time::DeltaTimeScaled(), iw::Time::DeltaTimeScaled(), iw::Time::DeltaTimeScaled());
-		});
+		//entities.Each([&](
+		//	auto entity,
+		//	auto body,
+		//	auto mesh,
+		//	auto meshCollider)
+		//{
+		//	body->Trans().Rotation *= iw::quaternion::from_euler_angles(iw::Time::DeltaTimeScaled(), 0, 0);
+		//});
 	}
 
 	void TestLayer::FixedUpdate() {
@@ -298,14 +298,14 @@ namespace iw {
 		{
 			mesh->Material()->Set("albedo", iw::vector4(1, 1, 1, 1));
 			
-			entities.Each([&](
-				auto entity1,
-				auto body1,
-				auto mesh1,
-				auto meshCollider1)
-			{
-				body->ApplyForce((body1->Trans().Position - body->Trans().Position));
-			});
+			//entities.Each([&](
+			//	auto entity1,
+			//	auto body1,
+			//	auto mesh1,
+			//	auto meshCollider1)
+			//{
+			//	body->ApplyForce((body1->Trans().Position - body->Trans().Position));
+			//});
 		});
 	}
 
