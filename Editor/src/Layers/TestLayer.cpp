@@ -49,22 +49,25 @@ namespace iw {
 		Mesh* mesh;
 		Collider* col;
 
-		//if (randf() > 0.5f) {
-		//	col  = entity.Add<SphereCollider>(0, 1);
-		//	mesh = entity.Set<Mesh>(sphere->MakeInstance());
-		//}
-//
-		//if (randf() > 0.5f) {
-			//col  = entity.Add<MeshCollider>(MeshCollider::MakeTetrahedron());
-			//mesh = entity.Set<Mesh>(tetrahedron->MakeInstance());
-		//}
+		if (randf() > 0.75f) {
+			col  = entity.Add<SphereCollider>(0, 1);
+			mesh = entity.Set<Mesh>(sphere->MakeInstance());
 
-		//else {
+			s.x = s.z;
+			s.y = s.z; // make uniform scale if where because thats how their collider works
+		}
+
+		else if (randf() > 0.0f) {
+			col  = entity.Add<MeshCollider>(MeshCollider::MakeTetrahedron());
+			mesh = entity.Set<Mesh>(tetrahedron->MakeInstance());
+		}
+
+		else {
 			col  = entity.Add<MeshCollider>(MeshCollider::MakeCube());
 			mesh = entity.Set<Mesh>(cube->MakeInstance());
-		//}
+		}
 
-		Transform*      trans = entity.Set<Transform>(iw::vector3(x += 2, 0, 0), s);
+		Transform*      trans = entity.Set<Transform>(iw::vector3(0, 10, 0), s, iw::quaternion::from_euler_angles(randf() + 1, randf() + 1, randf() + 1));
 		Rigidbody*      body  = entity.Set<Rigidbody>();
 
 		//trans->Rotation = quaternion::from_euler_angles(iw::randf() * iw::Pi2, iw::randf() * iw::Pi2, iw::randf() * iw::Pi2);
@@ -73,15 +76,15 @@ namespace iw {
 		mesh->SetMaterial(REF<Material>(shader));
 
 		mesh->Material()->Set("albedo", iw::vector4(
-			.1,//rand() / (float)RAND_MAX,
-			rand() / (float)RAND_MAX,
-			rand() / (float)RAND_MAX,
+			randf() + 1,
+			randf() + 1,
+			randf() + 1,
 			1.0f)
 		);
 
-		mesh->Material()->Set("reflectance", rand() / (float)RAND_MAX);
-		mesh->Material()->Set("roughness", rand() / (float)RAND_MAX);
-		mesh->Material()->Set("metallic", rand() / (float)RAND_MAX);
+		mesh->Material()->Set("reflectance", .5f * (randf() + 1));
+		mesh->Material()->Set("roughness",   .5f * (randf() + 1));
+		mesh->Material()->Set("metallic",    .5f * (randf() + 1));
 
 		mesh->Material()->SetTexture("shadowMap", pointShadowTarget->Tex(0));
 		//mesh->Material()->SetTexture("ww", pointShadowTarget->Tex(0));
@@ -92,20 +95,22 @@ namespace iw {
 		body->SetCol(col);
 		body->SetIsStatic(false);
 		body->SetRestitution(1);
-		body->SetMass((iw::randf() + 1.5f) * 5);
+		//body->SetMass((iw::randf() + 1.5f) * 5);
 
-		body->SetOnCollision([&](auto manifold, auto dt) {
-			Mesh* m1 = Space->FindEntity<Rigidbody>(manifold.ObjA).Find<Mesh>();
-			Mesh* m2 = Space->FindEntity<Rigidbody>(manifold.ObjB).Find<Mesh>();
+		body->SetVelocity(vector3(25 * (iw::randf() + .5f), 25 * (iw::randf() + .5f), 25 * (iw::randf() + .5f)));
 
-			if (m1) {
-				m1->Material()->Set("albedo", iw::vector4(1, 0.25, 0.25, 1));
-			}
+		//body->SetOnCollision([&](auto manifold, auto dt) {
+		//	Mesh* m1 = Space->FindEntity<Rigidbody>(manifold.ObjA).Find<Mesh>();
+		//	Mesh* m2 = Space->FindEntity<Rigidbody>(manifold.ObjB).Find<Mesh>();
 
-			if (m2) {
-				m2->Material()->Set("albedo", iw::vector4(1, 0.25, 0.25, 1));
-			}
-		});
+		//	if (m1) {
+		//		m1->Material()->Set("albedo", iw::vector4(1, 0.25, 0.25, 1));
+		//	}
+
+		//	if (m2) {
+		//		m2->Material()->Set("albedo", iw::vector4(1, 0.25, 0.25, 1));
+		//	}
+		//});
 
 		body->SetDynamicFriction(0.1f);
 
@@ -285,28 +290,34 @@ namespace iw {
 		//{
 		//	body->Trans().Rotation *= iw::quaternion::from_euler_angles(iw::Time::DeltaTimeScaled(), 0, 0);
 		//});
+
+
+		if (Keyboard::KeyDown(E)) {
+			SpawnCube(vector3(1.5f * (iw::randf() + 1.25f), 1.5f * (iw::randf() + 1.25f), 1.5f * (iw::randf() + 1.25f)));
+		}
+
 	}
 
 	void TestLayer::FixedUpdate() {
-		auto entities = Space->Query<Rigidbody, Mesh, MeshCollider>();
+		//auto entities = Space->Query<Rigidbody, Mesh, MeshCollider>();
 
-		entities.Each([&](
-			auto entity,
-			auto body,
-			auto mesh,
-			auto meshCollider)
-		{
-			mesh->Material()->Set("albedo", iw::vector4(1, 1, 1, 1));
-			
-			//entities.Each([&](
-			//	auto entity1,
-			//	auto body1,
-			//	auto mesh1,
-			//	auto meshCollider1)
-			//{
-			//	body->ApplyForce((body1->Trans().Position - body->Trans().Position));
-			//});
-		});
+		//entities.Each([&](
+		//	auto entity,
+		//	auto body,
+		//	auto mesh,
+		//	auto meshCollider)
+		//{
+		//	mesh->Material()->Set("albedo", iw::vector4(1, 1, 1, 1));
+		//	
+		//	//entities.Each([&](
+		//	//	auto entity1,
+		//	//	auto body1,
+		//	//	auto mesh1,
+		//	//	auto meshCollider1)
+		//	//{
+		//	//	body->ApplyForce((body1->Trans().Position - body->Trans().Position));
+		//	//});
+		//});
 	}
 
 	float thresh = .5f;
@@ -331,7 +342,7 @@ namespace iw {
 		}
 
 		if (ImGui::Button("Spawn Cube")) {
-			SpawnCube(vector3(iw::randf() + 3, iw::randf() + 3, iw::randf() + 3));
+			SpawnCube(vector3(3 * (iw::randf() + .5f), 3 * (iw::randf() + .5f), 3 * (iw::randf() + .5f)));
 		}
 
 		if (ImGui::Button("Shuffle properties")) {

@@ -123,15 +123,15 @@ namespace algo {
 			if (abs(sDistance - minDistance) > 0.001f) {
 				minDistance = FLT_MAX;
 
-				std::vector<std::pair<size_t, size_t>> looseEdges;
+				std::vector<std::pair<size_t, size_t>> uniqueEdges;
 
 				for (size_t i = 0; i < normals.size(); i++) {
 					if (detail::SameDirection(normals[i], support)) {
 						size_t f = i * 3;
 
-						detail::AddIfLooseEdge(looseEdges, faces, f,     f + 1);
-						detail::AddIfLooseEdge(looseEdges, faces, f + 1, f + 2);
-						detail::AddIfLooseEdge(looseEdges, faces, f + 2, f    );
+						detail::AddIfUniqueEdge(uniqueEdges, faces, f,     f + 1);
+						detail::AddIfUniqueEdge(uniqueEdges, faces, f + 1, f + 2);
+						detail::AddIfUniqueEdge(uniqueEdges, faces, f + 2, f    );
 
 						faces[f + 2] = faces.back(); faces.pop_back();
 						faces[f + 1] = faces.back(); faces.pop_back();
@@ -143,12 +143,12 @@ namespace algo {
 					}
 				}
 
-				if (looseEdges.size() == 0) {
+				if (uniqueEdges.size() == 0) {
 					break;
 				}
 
 				std::vector<size_t> newFaces;
-				for (auto [edge1, edge2] : looseEdges) {
+				for (auto [edge1, edge2] : uniqueEdges) {
 					newFaces.push_back(edge1);
 					newFaces.push_back(edge2);
 					newFaces.push_back(polytope.size());
@@ -230,16 +230,16 @@ namespace detail {
 		return { normals, minTriangle };
 	}
 
-	void AddIfLooseEdge(
+	void AddIfUniqueEdge(
 		std::vector<std::pair<size_t, size_t>>& edges,
 		const std::vector<size_t>& faces,
 		size_t a,
 		size_t b)
 	{
-		auto reverse = std::find(
-			edges.begin(),
-			edges.end(),
-			std::make_pair(faces[b], faces[a])
+		auto reverse = std::find(              //      0--<--3
+			edges.begin(),                     //     / \ B /   A: 2-0
+			edges.end(),                       //    / A \ /    B: 0-2
+			std::make_pair(faces[b], faces[a]) //   1-->--2
 		);
 
 		if (reverse != edges.end()) {

@@ -59,7 +59,7 @@ namespace detail {
 		const std::vector<vector3>& polytope,
 		const std::vector<size_t>&  faces);
 
-	void AddIfLooseEdge(
+	void AddIfUniqueEdge(
 		std::vector<std::pair<size_t, size_t>>& edges,
 		const std::vector<size_t>& faces,
 		size_t a,
