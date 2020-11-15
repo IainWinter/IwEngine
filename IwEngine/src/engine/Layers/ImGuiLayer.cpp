@@ -92,6 +92,10 @@ namespace Engine {
 	void PrintTimes(
 		iw::log_time& times)
 	{
+		if (times.name == "Physics") {
+			LOG_INFO << "Physics - " << times.time;
+		}
+
 		m_smooth[times.name] = iw::lerp(m_smooth[times.name], times.time * 1000, min(1 - smoothing + .01, 1));
 		float time = m_smooth[times.name];
 

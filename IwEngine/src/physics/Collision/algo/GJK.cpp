@@ -203,7 +203,8 @@ namespace detail {
 		const std::vector<size_t>&  faces)
 	{
 		std::vector<vector4> normals;
-		int minTriangle = -1;
+		size_t minTriangle = 0;
+		float  minDistance = FLT_MAX;
 
 		for (size_t i = 0; i < faces.size(); i += 3) {
 			vector3 a = polytope[faces[i    ]];
@@ -220,10 +221,9 @@ namespace detail {
 
 			normals.emplace_back(normal, distance);
 
-			if (   minTriangle == -1
-				|| distance < normals[minTriangle].w)
-			{
+			if (distance < minDistance) {
 				minTriangle = i / 3;
+				minDistance = distance;
 			}
 		}
 

@@ -123,13 +123,11 @@ namespace Graphics {
 		//float m_aspect;
 
 	public:
-		PerspectiveCamera() = default;
-
 		PerspectiveCamera(
-			float fov,
-			float aspect,
-			float zNear,
-			float zFar);
+			float fov    = 100 * Pi / 180,
+			float aspect = 16.0f / 9,
+			float zNear  = 0.01f,
+			float zFar   = 1000.0f);
 
 		PerspectiveCamera(
 			Transform* transform,

@@ -17,8 +17,8 @@ namespace Graphics {
 	IWGRAPHICS_API
 	MeshData* MakeUvSphere(
 		const MeshDescription& description,
-		unsigned latCount,
-		unsigned lonCount);
+		unsigned latCount = 16,
+		unsigned lonCount = 32);
 
 	// Capsule
 
@@ -34,15 +34,15 @@ namespace Graphics {
 	IWGRAPHICS_API
 	MeshData* MakeTetrahedron(
 		const MeshDescription& description,
-		unsigned int resolution);
+		unsigned int resolution = 0);
 
 	// Plane
 
 	IWGRAPHICS_API
 	MeshData* MakePlane(
 		const MeshDescription& description,
-		unsigned xCount,
-		unsigned zCount);
+		unsigned xCount = 5,
+		unsigned zCount = 5);
 
 	// Cube
 
