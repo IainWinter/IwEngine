@@ -69,8 +69,8 @@ bool ItemSystem::On(
 			}
 
 			else if (event.LevelName == "levels/canyon/canyon07.json") {
-				Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 0 }, iw::vector3(0, -.5, 9), event.Level, "Canyon07ItemPickedUp");
-				Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 1 }, iw::vector3(0,  .5, 9), event.Level, "Canyon07Item2PickedUp");
+				Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 0 }, iw::vector3(-.5, 1, 9), event.Level, "Canyon07ItemPickedUp");
+				Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 1 }, iw::vector3(.5,  1, 9), event.Level, "Canyon07Item2PickedUp");
 			}
 
 			else if (event.LevelName == "levels/canyon/canyon10.json") {
@@ -83,6 +83,15 @@ bool ItemSystem::On(
 
 			else if (event.LevelName == "levels/canyon/top08.json") {
 				Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 2 }, iw::vector3(11, 1, 0), event.Level, "Top08ItemPickedUp");
+			}
+
+			else if (event.LevelName == "levels/river/river02.json") {
+				Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 0 }, iw::vector3(0, 1, -11), event.Level);
+				Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 0 }, iw::vector3(0, 1,  11),  event.Level);
+			}
+
+			else if (event.LevelName == "levels/river/river03.json") {
+				Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 2 }, iw::vector3(16, 1, -15), event.Level);
 			}
 
 			break;
