@@ -3,6 +3,11 @@
 #include "Components/BulletPackage.h"
 #include "iw/math/vector3.h"
 
+struct BulletReversal {
+	float Timer;
+	float Time;
+};
+
 struct REFLECT Bullet {
 	REFLECT BulletType Type  = BulletType::LINE;
 	REFLECT float      Speed = 0;

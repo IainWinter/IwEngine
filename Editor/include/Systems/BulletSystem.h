@@ -14,13 +14,13 @@ private:
 	iw::ref<iw::Material> orbitMat;
 	iw::ref<iw::Material> seekMat;
 
+	iw::ref<iw::Material> reverseMat;
+
 public:
 	BulletSystem(
 		iw::Entity& player);
 
 	iw::Prefab& GetBulletPrefab() { return bulletPrefab; }
-
-	void collide(iw::Manifold& man, iw::scalar dt);
 
 	int Initialize()   override;
 	void FixedUpdate() override;
@@ -35,6 +35,7 @@ private:
 		float dist = 2);
 
 	void SpawnBulletsFromPackage(
+		Bullet* parentBullet,
 		iw::Transform* transform,
 		BulletPackage* package);
 };

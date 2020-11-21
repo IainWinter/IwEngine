@@ -1,8 +1,13 @@
 #pragma once
 
-struct EnemyDeathCircle {
-	float Radius;
-	float FadeTime;
+enum class CircleEffects {
+	ENEMY_DEATH_CIRCLE,
+	BULLET_REVERSAL
+};
 
-	float Timer;
+struct EffectCircle {
+	CircleEffects Effect = CircleEffects::ENEMY_DEATH_CIRCLE;
+	float Radius = 4.0f;
+	float FadeTime = 0.4f;
+	float Timer = 0.0f;
 };

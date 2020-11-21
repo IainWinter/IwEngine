@@ -11,6 +11,7 @@ enum ConsumableType {
 	SLOWMO,      // Slow time for a second
 	CHARGE_KILL, // Large bullet kill
 	LONG_DASH,   // Dash over gaps
+	BULLET_REVERSAL // Fire close by bullets back at enemies
 };
 
 struct Consumable;
@@ -34,9 +35,10 @@ struct Slowmo {};
 struct ChargeKill {};
 
 namespace detail {
-	void action_Slowmo(Consumable* slowmo, iw::Entity& target, iw::eventbus* bus, bool finish);
-	void action_Charge(Consumable* slowmo, iw::Entity& target, iw::eventbus* bus, bool finish);
-	void action_LgDash(Consumable* slowmo, iw::Entity& target, iw::eventbus* bus, bool finish);
+	void action_Slowmo  (Consumable* slowmo, iw::Entity& target, iw::eventbus* bus, bool finish);
+	void action_Charge  (Consumable* slowmo, iw::Entity& target, iw::eventbus* bus, bool finish);
+	void action_LgDash  (Consumable* slowmo, iw::Entity& target, iw::eventbus* bus, bool finish);
+	void action_Breverse(Consumable* slowmo, iw::Entity& target, iw::eventbus* bus, bool finish);
 
 	iw::Transform effect_Slowmo(Consumable* slowmo, iw::Entity& target);
 	iw::Transform effect_Charge(Consumable* slowmo, iw::Entity& target);

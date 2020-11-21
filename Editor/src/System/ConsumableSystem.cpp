@@ -16,9 +16,10 @@ ConsumableSystem::ConsumableSystem(
 {}
 
 int ConsumableSystem::Initialize() {
-	m_prefabs.push_back(Consumable{ 0, SLOWMO,      iw::Color::From255(112, 195, 255), detail::action_Slowmo, detail::effect_Slowmo, 3.0f });
-	m_prefabs.push_back(Consumable{ 1, CHARGE_KILL, iw::Color::From255(255, 245, 112), detail::action_Charge, detail::effect_Slowmo, 3.0f });
-	m_prefabs.push_back(Consumable{ 2, LONG_DASH,   iw::Color::From255(190,   3, 252), detail::action_LgDash, detail::effect_Slowmo, 32.0f / 60.0f });
+	m_prefabs.push_back(Consumable{ 0, SLOWMO,          iw::Color::From255(112, 195, 255), detail::action_Slowmo, detail::effect_Slowmo, 3.0f });
+	m_prefabs.push_back(Consumable{ 1, CHARGE_KILL,     iw::Color::From255(255, 245, 112), detail::action_Charge, detail::effect_Slowmo, 3.0f });
+	m_prefabs.push_back(Consumable{ 2, LONG_DASH,       iw::Color::From255(190,   3, 252), detail::action_LgDash, detail::effect_Slowmo, 32.0f / 60.0f });
+	m_prefabs.push_back(Consumable{ 2, BULLET_REVERSAL, iw::Color::From255(255,  54,  54), detail::action_Breverse, detail::effect_Slowmo, 0.0f });
 
 	auto material = Asset->Load<iw::Material>("materials/Default")->MakeInstance();
 	material->Set("reflectance", 1.0f);
@@ -60,7 +61,6 @@ void ConsumableSystem::Update()
 			iw::Transform* transform,
 			Consumable* consumable)
 		{
-			consumable->Timer += iw::Time::DeltaTime();
 
 			if (consumable->Timer >= consumable->Time) {
 				consumable->Action(consumable, m_target, Bus.get(), true);
@@ -79,6 +79,7 @@ void ConsumableSystem::Update()
 				transform->Scale = delta.Scale;
 			}
 
+			consumable->Timer += iw::Time::DeltaTime();
 			m_active = entity;
 		});
 	}
@@ -159,7 +160,7 @@ bool ConsumableSystem::On(
 
 iw::EntityHandle ConsumableSystem::SpawnConsumable(
 	Consumable prefab)
-{
+{ 
 	iw::Entity consumable = Space->CreateEntity<iw::Transform, iw::Model, Consumable>();
 
 	switch (prefab.Type) {
@@ -229,12 +230,18 @@ namespace detail {
 		//	longDash->Timer = 20 - 32 / 60.0f;
 		//}
 
-		if (finish) {
-			bus->push<LongDashEvent>(false);
-		}
+		bus->push<LongDashEvent>(!finish);
+	}
 
-		else {
-			bus->push<LongDashEvent>(true);
+	void action_Breverse(
+		Consumable* bulletReversal,
+		iw::Entity& target,
+		iw::eventbus* bus,
+		bool finish)
+	{
+		if (finish) {
+			iw::Transform* t = target.Find<iw::Transform>();
+			bus->push<BulletReversalEvent>(t->Position, t->Parent());
 		}
 	}
 

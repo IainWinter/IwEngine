@@ -17,6 +17,8 @@ struct REFLECT GameSaveState {
 	bool GetState(
 		std::string state)
 	{
+		if (state == "") false ;
+
 		auto itr = IntraState.find(state);
 		if (itr == IntraState.end()) {
 			itr = IntraState.emplace(state, false).first;
@@ -29,6 +31,8 @@ struct REFLECT GameSaveState {
 		std::string state,
 		bool value)
 	{
+		if (state == "") return;
+
 		auto itr = IntraState.find(state);
 		if (itr != IntraState.end()) {
 			itr->second = value;

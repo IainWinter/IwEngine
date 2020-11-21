@@ -24,7 +24,7 @@ enum class Actions
 	SPAWN_ENEMY_DEATH, SPAWN_ENEMY, SPAWN_BULLET, SPAWN_ITEM, SPAWN_NOTE, SPAWN_CONSUMABLE,
 	GIVE_SCORE,
 	SET_CAMERA_TARGET,
-	CHARGE_KILL_ACTIVE, LONG_DASH_ACTIVE,
+	CHARGE_KILL_ACTIVE, LONG_DASH_ACTIVE, BULLET_REVERSAL_ACTIVE,
 	GAME_SAVE,
 };
 
@@ -411,13 +411,25 @@ struct ChargeKillEvent
 };
 
 struct LongDashEvent
-	: iw::SingleEvent
+	: iw::ToggleEvent
 {
-	bool Active;
-
 	LongDashEvent(
 		bool active)
-		: iw::SingleEvent(iw::val(Actions::LONG_DASH_ACTIVE))
-		, Active(active)
+		: iw::ToggleEvent(iw::val(Actions::LONG_DASH_ACTIVE), active)
+	{}
+};
+
+struct BulletReversalEvent
+	: iw::SingleEvent
+{
+	iw::vector3 Position;
+	iw::Transform* Parent;
+
+	BulletReversalEvent(
+		iw::vector3 position,
+		iw::Transform* parent)
+		: iw::SingleEvent(iw::val(Actions::BULLET_REVERSAL_ACTIVE))
+		, Position(position)
+		, Parent(parent)
 	{}
 };

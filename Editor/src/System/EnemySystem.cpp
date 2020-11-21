@@ -273,41 +273,56 @@ iw::Transform* EnemySystem::SpawnEnemy(
 	c->SetIsStatic(false);
 	
 	c->SetOnCollision([&](iw::Manifold& man, float dt) {
-		iw::Entity enemyEntity, playerEntity;
-		bool noent = GetEntitiesFromManifold<Enemy, Player>(man, enemyEntity, playerEntity);
-
-		if (noent) {
+		iw::Entity enemyEntity, otherEntity;
+		if (GetEntitiesFromManifold<Enemy>(man, enemyEntity, otherEntity)) {
 			return;
 		}
 
-		Enemy*  enemy  = enemyEntity .Find<Enemy>();
-		Player* player = playerEntity.Find<Player>();
+		Enemy* enemy = enemyEntity .Find<Enemy>();
+		
+		float score = 1000;
 
-		if (   player->Transition
-			|| player->Timer <= 0.0f) // Exit if player isn't attacking
-		{
-			return;
+		if (otherEntity.Has<Player>()) {
+			Player* player = otherEntity.Find<Player>();
+
+			if (   player->Transition
+				|| player->Timer <= 0.0f) // Exit if player isn't attacking
+			{
+				return;
+			}
+
+			score = floor(5 * (1.0f - player->Timer / player->DashTime)) * 200 + 200;
+		}
+
+		else if (otherEntity.Has<Bullet>()) {
+			Bullet* bullet= otherEntity.Find<Bullet>();
+
+			if (bullet->Type != REVERSED) { // Exit if bullet isn't reversed
+				return;
+			}
+		}
+
+		else {
+			return; // exit if not player/bullet
 		}
 
 		Space->QueueChange(&enemy->JustHit, true);
-		Space->QueueChange(&enemy->Health,  enemy->Health - 1);
+		Space->QueueChange(&enemy->Health, enemy->Health - 1);
 
 		if (enemyEntity.Has<EnemyBoss>()) {
 			Audio->AsStudio()->CreateInstance("User/enemyDeath");
 		}
-		
+
 		if (enemy->Health > 1) { // Exit if enemy has more health
 			return;
 		}
 
 		iw::Transform* transform = enemyEntity.Find<iw::Transform>();
 
-		float score = floor(5 * (1.0f - player->Timer / player->DashTime)) * 200 + 200;
-
 		Audio->AsStudio()->CreateInstance("User/enemyDeath");
 
 		Bus->push<SpawnEnemyDeath>(transform->Position, transform->Parent());
-		Bus->push<GiveScoreEvent> (transform->Position, score * enemy->ScoreMultiple);
+		Bus->push<GiveScoreEvent>(transform->Position, score * enemy->ScoreMultiple);
 
 		if (!enemyEntity.Has<EnemyBoss>()) {
 			transform->SetParent(nullptr);

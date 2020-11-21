@@ -6,7 +6,8 @@ enum BulletType : unsigned {
 	LINE,  // Moves in line with constant velocity
 	SINE,  // Moves in line with velocity on a sine wave
 	SEEK,   // Moves towards a target with constant velocity
-	ORBIT // Adds a force towards a target, causing an orbit
+	ORBIT, // Adds a force towards a target, causing an orbit
+	REVERSED
 };
 
 enum PackageType : unsigned {

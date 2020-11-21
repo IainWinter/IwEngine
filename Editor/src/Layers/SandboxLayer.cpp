@@ -5,7 +5,7 @@
 #include "Systems/BulletSystem.h"
 #include "Systems/LevelSystem.h"
 #include "Systems/LevelLayoutSystem.h"
-#include "Systems/EnemyDeathCircleSystem.h"
+#include "Systems/CircleEffectSystem.h"
 #include "Systems/GameCameraController.h"
 #include "Systems/ScoreSystem.h"
 #include "Systems/ItemSystem.h"
@@ -321,7 +321,7 @@ namespace iw {
 
 		PushSystem<GameCameraController>(playerSystem->GetPlayer());
 		PushSystem<ScoreSystem>(playerSystem->GetPlayer(), MainScene->MainCamera(), m_textCam);
-		PushSystem<EnemyDeathCircleSystem>();
+		PushSystem<CircleEffectSystem>();
 		PushSystem<PhysicsSystem>();
 
 		PushSystem<ItemSystem>(saveSystem->GetState());
@@ -514,6 +514,12 @@ namespace iw {
 
 		if (ImGui::Button("Spawn dash")) {
 			Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 2 }, playerSystem->GetPlayer().Find<iw::Transform>()->WorldPosition(), nullptr);
+		}
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Spawn bullet reversal")) {
+			Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 3 }, playerSystem->GetPlayer().Find<iw::Transform>()->WorldPosition(), nullptr);
 		}
 
 		if (ImGui::Button("Start seq")) {
