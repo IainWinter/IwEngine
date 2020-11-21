@@ -66,12 +66,13 @@ int BulletSystem::Initialize() {
 }
 
 void BulletSystem::FixedUpdate() {
-	auto bullets  = Space->Query<iw::Transform, iw::Rigidbody, Bullet>();
+	auto bullets  = Space->Query<iw::Transform, iw::Model, iw::Rigidbody, Bullet>();
 	auto packages = Space->Query<iw::Transform, iw::Model, Bullet, BulletPackage>();
 	
 	bullets.Each([&](
 		auto entity,
 		auto transform,
+		auto model,
 		auto rigidbody,
 		auto bullet)
 	{
@@ -83,6 +84,8 @@ void BulletSystem::FixedUpdate() {
 			case SINE: {
 				float speed = (sin(bullet->Timer * 5) + 1) * 0.75f;
 				rigidbody->SetVelocity(bullet->InitialVelocity * speed);
+				rigidbody->Trans().Scale = (sin(bullet->Timer * 5) + 1) * 0.05f + 0.15f;
+				model->GetMesh(0).Material()->Set("emissive", (sin(iw::Pi + bullet->Timer * 5) + 1) * 5 + 2.0f);
 
 				break;
 			}

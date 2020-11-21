@@ -22,11 +22,12 @@
     "size": 1,
     "items": [
       {
-        "GoBack": false,
         "State": 1,
-        "NextLevel": {
-          "size": 27,
-          "string": "levels/canyon/canyon02.json"
+        "Connection": 1,
+        "InPosition": {
+    	  "x": -22.000000,
+    	  "y": 1.000000,
+   	  "z": 0.000000
         }
       }
     ]

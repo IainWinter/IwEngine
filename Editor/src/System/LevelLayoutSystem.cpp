@@ -12,12 +12,12 @@ LevelLayoutSystem::LevelLayoutSystem()
 {}
 
 int LevelLayoutSystem::Initialize() {
-	std::string startingLevel = "levels/river/river01.json";
+	std::string startingLevel = "levels/river/river03.json";
 
 	LevelLayout* forest01 = new LevelLayout();
 
 	LevelLayout   forest02, forest03, forest04, forest05, forest05a, forest06, forest07, forest07a,
-		forest08, forest09, forest10, forest11, forest12, forest12a, forest13,  forest14,
+		forest08, forest09, forest10, forest11, forest12, forest12a, forest13, forest14,
 		forest15, forest16, forest17, forest18, forest19, forest20,  forest21, forest22, forest23;
 
 	forest01->LevelName = "levels/forest/forest01.json";

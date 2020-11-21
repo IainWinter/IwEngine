@@ -13,7 +13,7 @@ namespace iw {
 	int EditorCameraControllerSystem::Initialize() {
 		iw::Entity entity = Space->CreateEntity<Transform, EditorCameraController>();
 
-		cameraTransform = entity.Set<Transform>();
+		cameraTransform = entity.Set<Transform>(vector3(0, 10, -30));
 		                  entity.Set<EditorCameraController>(camera);
 
 		camera->SetTrans(cameraTransform);

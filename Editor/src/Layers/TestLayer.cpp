@@ -49,12 +49,11 @@ namespace iw {
 		Mesh* mesh;
 		Collider* col;
 
-		if (randf() > 0.0f) {
-			col  = entity.Add<SphereCollider>(0, 1);
-			mesh = entity.Set<Mesh>(sphere->MakeInstance());
+		if (randf() > 0.5f) {
 
-			s.x = s.z;
-			s.y = s.z; // make uniform scale if where because thats how their collider works
+
+			col = entity.Add<MeshCollider>(MeshCollider::MakeCube());
+			mesh = entity.Set<Mesh>(cube->MakeInstance());
 		}
 
 		else if (randf() > 0.0f) {
@@ -63,15 +62,18 @@ namespace iw {
 		}
 
 		else {
-			col  = entity.Add<MeshCollider>(MeshCollider::MakeCube());
-			mesh = entity.Set<Mesh>(cube->MakeInstance());
+			col = entity.Add<SphereCollider>(0, 1);
+			mesh = entity.Set<Mesh>(sphere->MakeInstance());
+
+			s.x = s.z;
+			s.y = s.z; // make uniform scale if where because thats how their collider works
 		}
 
-		Transform*      trans = entity.Set<Transform>(iw::vector3(x += 5, 1, 0), s/*, iw::quaternion::from_euler_angles(randf() + 1, randf() + 1, randf() + 1)*/);
+		Transform*      trans = entity.Set<Transform>(iw::vector3(x += 5, 0, 0), s/*, iw::quaternion::from_euler_angles(randf() + 1, randf() + 1, randf() + 1)*/);
 		Rigidbody*      body  = entity.Set<Rigidbody>();
 
 		//trans->Rotation = quaternion::from_euler_angles(iw::randf() * iw::Pi2, iw::randf() * iw::Pi2, iw::randf() * iw::Pi2);
-		//trans->Position = vector3(iw::randf()) * 10;
+		trans->Position = vector3(iw::randf()) * 10;
 
 		mesh->SetMaterial(REF<Material>(shader));
 
@@ -101,11 +103,15 @@ namespace iw {
 
 		if (locked) {
 			body->SetIsLocked(1);
-			body->SetLock(0);
+			body->SetLock(vector3(0, 15, 0));
 			body->SetSimGravity(false);
+
+			body->SetRestitution(0);
+			body->SetDynamicFriction(1);
+			body->SetStaticFriction(1);
 		}
 		else {
-			//body->SetVelocity(vector3(25 * (iw::randf() + .5f), 25 * (iw::randf() + .5f), 25 * (iw::randf() + .5f)));
+			body->SetVelocity(vector3(25 * (iw::randf() + .5f), 25 * (iw::randf() + .5f), 25 * (iw::randf() + .5f)));
 		}
 
 		//body->SetOnCollision([&](auto manifold, auto dt) {
@@ -243,10 +249,10 @@ namespace iw {
 
 		// lights
 
-		PointLight* light = new PointLight(12.0f, 1.0f);
-		light->SetPosition(iw::vector3(-4.5f, 8.0f, 10.0f));
-		light->SetShadowShader(pointShadowShader);
-		light->SetShadowTarget(pointShadowTarget);
+		//PointLight* light = new PointLight(12.0f, 1.0f);
+		//light->SetPosition(iw::vector3(-4.5f, 8.0f, 10.0f));
+		//light->SetShadowShader(pointShadowShader);
+		//light->SetShadowTarget(pointShadowTarget);
 
 		//PointLight* light2 = new PointLight(12.0f, 1.0f);
 		//light2->SetPosition(iw::vector3( 4.5f, 8.0f, 10.0f));
@@ -258,7 +264,7 @@ namespace iw {
 
 		// scene
 
-		MainScene->AddLight(light);
+		//MainScene->AddLight(light);
 		MainScene->AddLight(dirLight);
 
 		//delete sphere;
@@ -283,7 +289,7 @@ namespace iw {
 		srand(19);
 		//SpawnCube(vector3(1, 5, 20), 1000, true);
 
-		SpawnCube();
+		SpawnCube(5, 100, true);
 		SpawnCube();
 
 		//SpawnCube();
@@ -301,33 +307,36 @@ namespace iw {
 		//	auto mesh,
 		//	auto meshCollider)
 		//{
-		//	body->Trans().Rotation *= iw::quaternion::from_euler_angles(0, iw::Time::DeltaTimeScaled(), 0);
+		//	body->Trans().Rotation *= iw::quaternion::from_euler_angles(iw::Time::DeltaTimeScaled() * .5f);
 		//});
 
 		if (Keyboard::KeyDown(E)) {
 			SpawnCube(vector3(1.5f * (iw::randf() + 1.25f), 1.5f * (iw::randf() + 1.25f), 1.5f * (iw::randf() + 1.25f)));
 		}
 
+		if (Keyboard::KeyDown(R)) {
+			SpawnCube(1.75f);
+		}
 	}
 
 	void TestLayer::FixedUpdate() {
-		//auto entities = Space->Query<Rigidbody, Mesh>();
+		auto entities = Space->Query<Rigidbody, Mesh>();
 
-		//entities.Each([&](
-		//	auto entity,
-		//	auto body,
-		//	auto mesh)
-		//{
-		//	//mesh->Material()->Set("albedo", iw::vector4(1, 1, 1, 1));
-		//	
-		//	entities.Each([&](
-		//		auto entity1,
-		//		auto body1,
-		//		auto mesh1)
-		//	{
-		//		body->ApplyForce((body1->Trans().Position - body->Trans().Position));
-		//	});
-		//});
+		entities.Each([&](
+			auto entity,
+			auto body,
+			auto mesh)
+		{
+			//mesh->Material()->Set("albedo", iw::vector4(1, 1, 1, 1));
+			
+			entities.Each([&](
+				auto entity1,
+				auto body1,
+				auto mesh1)
+			{
+				body->ApplyForce(body1->Mass() * (body1->Trans().Position - body->Trans().Position) * .1f);
+			});
+		});
 	}
 
 	float thresh = .5f;
