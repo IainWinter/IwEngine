@@ -91,7 +91,7 @@ bool ItemSystem::On(
 			}
 
 			else if (event.LevelName == "levels/river/river03.json") {
-				Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 2 }, iw::vector3(16, 1, -15), event.Level);
+				Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 2 }, iw::vector3(13, 1, -16), event.Level);
 			}
 
 			break;
