@@ -213,17 +213,6 @@ namespace Graphics {
 		Renderer::SetMesh(mesh);
 		Renderer::SetMaterial(mesh->Material());
 
-		if (m_state == RenderState::SCENE) {
-			IPipelineParam* ambiance = m_shader->Handle()->GetParam("ambiance"); // not safe \/
-			if (ambiance) {
-				ambiance->SetAsFloat(m_ambiance);
-			}
-		}
-
-		else {
-			Device->SetWireframe(false);  // set some shadow material or whatever
-		}
-
 		if (!m_shader) {
 			LOG_WARNING << "Tried to draw mesh without setting an active shader!";
 			return;
@@ -232,18 +221,6 @@ namespace Graphics {
 		IPipelineParam* model = m_shader->Handle()->GetParam("model");
 		if (model) {
 			model->SetAsMat4(transform->WorldTransformation());
-		}
-
-		IPipelineParam* time = m_shader->Handle()->GetParam("time");
-		if (time) {
-			time->SetAsFloat(m_time);
-		}
-
-		if (m_debugState != -1) {
-			IPipelineParam* state = m_shader->Handle()->GetParam("d_state");
-			if (state) {
-				state->SetAsInt(m_debugState);
-			}
 		}
 
 		mesh->Draw(Device);
@@ -259,11 +236,12 @@ namespace Graphics {
 	void Renderer::ApplyFilter(
 		iw::ref<Shader>& shader,
 		const ref<RenderTarget>& source,
-		const ref<RenderTarget>& target)
+		const ref<RenderTarget>& target,
+		Camera* camera)
 	{
 		//if (source == destination) return; // this prob has to be here
 
-		Renderer::BeginScene((Camera*)nullptr, target);
+		Renderer::BeginScene(camera, target);
 		Renderer::SetShader(shader);
 
 		if (source) {
@@ -380,6 +358,29 @@ namespace Graphics {
 			}
 
 			m_shader->Use(Device);
+
+			if (m_state == RenderState::SCENE) {
+				IPipelineParam* ambiance = m_shader->Handle()->GetParam("ambiance"); // not safe \/
+				if (ambiance) {
+					ambiance->SetAsFloat(m_ambiance);
+				}
+			}
+
+			else {
+				Device->SetWireframe(false);  // set some shadow material or whatever
+			}
+
+			IPipelineParam* time = m_shader->Handle()->GetParam("time");
+			if (time) {
+				time->SetAsFloat(m_time);
+			}
+
+			if (m_debugState != -1) {
+				IPipelineParam* state = m_shader->Handle()->GetParam("d_state");
+				if (state) {
+					state->SetAsInt(m_debugState);
+				}
+			}
 
 		//}
 	}

@@ -94,6 +94,14 @@ bool ItemSystem::On(
 				Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 2 }, iw::vector3(13, 1, -16), event.Level);
 			}
 
+			else if (event.LevelName == "levels/river/river04.json") {
+				Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 3 }, iw::vector3(-15, 1, -9), event.Level);
+			}
+
+			else if (event.LevelName == "levels/river/river06.json") {
+				Bus->push<SpawnItemEvent>(Item{ CONSUMABLE, 3 }, iw::vector3(9, 1, 24), event.Level);
+			}
+
 			break;
 		}
 		case iw::val(Actions::SPAWN_ITEM): {

@@ -199,7 +199,7 @@ namespace Graphics {
 				case RenderOP::APPLY_FILTER: {
 					FilterOP* filter = (FilterOP*)item.Data;
 
-					Renderer::ApplyFilter(filter->Filter, filter->Source, filter->Target);
+					Renderer::ApplyFilter(filter->Filter, filter->Source, filter->Target, filter->Camera);
 
 					m_pool.free<FilterOP>(filter);
 					break;
@@ -389,7 +389,8 @@ namespace Graphics {
 	void QueuedRenderer::ApplyFilter(
 		ref<Shader>& filter,
 		const ref<RenderTarget>& source,
-		const ref<RenderTarget>& target)
+		const ref<RenderTarget>& target,
+		Camera* camera)
 	{
 		m_block        = 0;
 		m_material     = 0;
@@ -400,6 +401,7 @@ namespace Graphics {
 		op->Filter = filter;
 		op->Source = source;
 		op->Target = target;
+		op->Camera = camera;
 
 		m_queue.emplace_back(GenOrder(), RenderOP::APPLY_FILTER, op);
 	}

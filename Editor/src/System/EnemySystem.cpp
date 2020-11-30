@@ -176,10 +176,10 @@ bool EnemySystem::On(
 			SpawnEnemyEvent& event = e.as<SpawnEnemyEvent>();
 
 			iw::Transform* t = SpawnEnemy(event.Enemy, event.Position, event.Velocity);
-			event.Level->AddChild(t);
-			event.SpawnedEnemy = Space->FindEntity(t);
-
-			m_levelResetTimer = 0;
+			if (t) {
+				event.Level->AddChild(t);
+				event.SpawnedEnemy = Space->FindEntity(t);
+			}
 
 			break;
 		}

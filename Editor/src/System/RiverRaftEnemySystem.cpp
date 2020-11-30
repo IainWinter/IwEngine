@@ -193,16 +193,13 @@ bool RiverRaftEnemySystem::On(
 				m_paths.at(0).push_back(iw::vector3(36, 1, 0));
 
 				m_paths.emplace_back();
-				m_paths.at(1).push_back(iw::vector3(36 - 108, 1, 0));
-				m_paths.at(1).push_back(iw::vector3(36 - 86, 1, 0));
+				m_paths.at(1).push_back(iw::vector3(36 - 116, 1, 0));
 				m_paths.at(1).push_back(iw::vector3(36 - 64, 1, 0));
 
 				m_paths.at(1).push_back(iw::vector3(36, 1, 0));
 
 				m_paths.emplace_back();
-				m_paths.at(1).push_back(iw::vector3(36 - 130, 1, 0));
-				m_paths.at(2).push_back(iw::vector3(36 - 108, 1, 0));
-				m_paths.at(2).push_back(iw::vector3(36 - 86, 1, 0));
+				m_paths.at(2).push_back(iw::vector3(36 - 122, 1, 0));
 				m_paths.at(2).push_back(iw::vector3(36 - 64, 1, 0));
 
 				m_paths.at(2).push_back(iw::vector3(36, 1, 0));

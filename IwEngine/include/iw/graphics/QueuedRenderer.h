@@ -90,6 +90,7 @@ namespace Graphics {
 			ref<Shader> Filter;
 			ref<RenderTarget> Source;
 			ref<RenderTarget> Target;
+			Camera* Camera;
 		};
 
 		struct RenderItem {
@@ -236,7 +237,8 @@ namespace Graphics {
 		void ApplyFilter(
 			ref<Shader>& filter,
 			const ref<RenderTarget>& source,
-			const ref<RenderTarget>& target = nullptr) override;
+			const ref<RenderTarget>& target = nullptr,
+			Camera* camera = nullptr) override;
 	private:
 		key GenOrder(
 			const Transform* transform = nullptr,

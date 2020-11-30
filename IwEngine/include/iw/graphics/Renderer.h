@@ -205,7 +205,8 @@ namespace Graphics {
 		virtual void ApplyFilter(
 			ref<Shader>& filter,
 			const ref<RenderTarget>& source,
-			const ref<RenderTarget>& target = nullptr);
+			const ref<RenderTarget>& target = nullptr,
+			Camera* camera = nullptr);
 
 		IWGRAPHICS_API
 		/*const*/ Mesh ScreenQuad() const {

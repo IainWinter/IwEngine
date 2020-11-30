@@ -1,44 +1,32 @@
 #include "Layers/RayMarchingLayer.h"
-#include "iw/engine/Components/CameraController.h"
+#include "iw/engine/Systems/EditorCameraControllerSystem.h"
 
 namespace iw {
 	RayMarchingLayer::RayMarchingLayer()
 		 : Layer("Ray Marching")
+		, shader(nullptr)
+		, camera(nullptr)
 	{
 		srand(time(nullptr));
 	}
 
 	int RayMarchingLayer::Initialize() {
-		// Shaders
-
 		shader = Asset->Load<Shader>("shaders/rt.shader");
 
-		Renderer->InitShader(shader);
-
-		// Camera controller
-
-		//camera = new PerspectiveCamera(1.17f, 1.77f, .01f, 100.0f);
-
-		//Entity entity = Space->CreateEntity<Transform, CameraController>();
-
-		//Transform* transform = entity.Set<Transform>(vector3(0, 6, -5));
-		//	                   entity.Set<CameraController>(camera);
-
-		//camera->SetTrans(transform);
-
-		// Systems
-
-		//PushSystem<EditorCameraController>();
+		camera = PushSystem<EditorCameraControllerSystem>()->GetCamera();
 		
-		return Layer::Initialize();
+		if (int err = Layer::Initialize()) {
+			return err;
+		}
+
+		camera->SetPosition(vector3(0, 2, 10));
+		//camera->SetRotation(quaternion::from_look_at(camera->Position()).inverted());
+
+		return 0;
 	}
 
 	void RayMarchingLayer::PostUpdate() {
-		//Renderer->BeginScene(camera);
-
-		Renderer->ApplyFilter(shader, nullptr);
-
-		//Renderer->EndScene();
+		Renderer->ApplyFilter(shader, nullptr, nullptr, camera);
 	}
 
 	void RayMarchingLayer::ImGui() {

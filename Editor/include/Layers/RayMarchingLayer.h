@@ -16,9 +16,7 @@ namespace iw {
 		RayMarchingLayer();
 
 		int Initialize() override;
-
 		void PostUpdate() override;
-
 		void ImGui() override;
 	};
 }

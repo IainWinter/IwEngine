@@ -237,7 +237,7 @@ iw::Transform* BulletSystem::SpawnBullet(
 
 		Bullet* bullet = bulletEntity.Find<Bullet>();
 
-		if (   bullet->Type != REVERSED
+		if (   true //bullet->Type != REVERSED
 			&&(otherEntity.Has<Bullet>()
 			|| otherEntity.Has<Enemy>()
 			|| otherEntity.Has<DontDeleteBullets>()
@@ -251,9 +251,9 @@ iw::Transform* BulletSystem::SpawnBullet(
 			switch (possibleEffect->Effect) {
 			case CircleEffects::BULLET_REVERSAL: {
 				bullet->Type = REVERSED;
-
+				
 				iw::Rigidbody* r = bulletEntity.Find<iw::Rigidbody>();
-				r->SetVelocity((r->Trans().WorldPosition() - o->Trans().WorldPosition()).normalized() * bullet->Speed);
+				r->SetVelocity((r->Trans().WorldPosition() - o->Trans().WorldPosition()).normalized() * bullet->Speed * 1.5f);
 
 				bulletEntity.Find<iw::Model>()->GetMesh(0).SetMaterial(reverseMat);
 
