@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Device.h"
-
 #include "iw/math/vector2.h"
 
 namespace iw {

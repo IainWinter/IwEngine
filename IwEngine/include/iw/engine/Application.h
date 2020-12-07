@@ -1,12 +1,8 @@
 #pragma once
 
-#include "Core.h"
-#include "Task.h"
-#include "Window.h"
-#include "Console.h"
-#include "EventStack.h"
-#include "InitOptions.h"
-#include "Layers/ImGuiLayer.h"
+#include "iw/engine/Window.h"
+#include "iw/engine/InitOptions.h"
+#include "iw/engine/Layer.h"
 
 namespace iw {
 namespace Engine {

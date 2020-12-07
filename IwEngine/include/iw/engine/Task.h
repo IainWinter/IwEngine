@@ -1,4 +1,5 @@
-#include "Core.h"
+#pragma once
+
 #include <thread>
 #include <condition_variable>
 #include <functional>

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "iw/engine/Core.h"
 #include "iw/engine/AppVars.h"
 #include "iw/events/seq/event_task.h"
 

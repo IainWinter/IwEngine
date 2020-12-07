@@ -133,167 +133,194 @@ namespace iw {
 	ref<Shader> dirShadowShader;
 
 	int TestLayer::Initialize() {
-		// Shaders
+		iw::MeshDescription description;
+		description.DescribeBuffer(iw::bName::POSITION, iw::MakeLayout<float>(3));
+		description.DescribeBuffer(iw::bName::NORMAL, iw::MakeLayout<float>(3));
+		description.DescribeBuffer(iw::bName::TANGENT, iw::MakeLayout<float>(3));
+		description.DescribeBuffer(iw::bName::BITANGENT, iw::MakeLayout<float>(3));
+		description.DescribeBuffer(iw::bName::UV, iw::MakeLayout<float>(2));
 
-		                    shader    = Asset->Load<Shader>("shaders/pbr.shader");
-		ref<Shader>         phong     = Asset->Load<Shader>("shaders/phong.shader");
-		            dirShadowShader   = Asset->Load<Shader>("shaders/lights/directional_transparent.shader");
-		ref<Shader> pointShadowShader = Asset->Load<Shader>("shaders/lights/point.shader");
+		iw::ref<iw::Shader> phong = Asset->Load<iw::Shader>("shaders/phong.shader");
+		Renderer->InitShader(phong, iw::CAMERA | iw::SHADOWS | iw::LIGHTS);
 
-		Renderer->InitShader(shader,          CAMERA | SHADOWS | LIGHTS);
-		Renderer->InitShader(phong,           CAMERA | SHADOWS | LIGHTS);
-		Renderer->InitShader(dirShadowShader, CAMERA);
-		Renderer->InitShader(pointShadowShader);
+		iw::ref<iw::Material> default = REF<iw::Material>(phong);
+		default->Set("baseColor", iw::Color(1));
 
-		// Models
+		iw::Mesh plane = iw::MakePlane(description)->MakeInstance();
+		plane.SetMaterial(default);
 
-		MeshDescription description;
-
-		description.DescribeBuffer(bName::POSITION,  MakeLayout<float>(3));
-		description.DescribeBuffer(bName::NORMAL,    MakeLayout<float>(3));
-		description.DescribeBuffer(bName::TANGENT,   MakeLayout<float>(3));
-		description.DescribeBuffer(bName::BITANGENT, MakeLayout<float>(3));
-		description.DescribeBuffer(bName::UV,        MakeLayout<float>(2));
-
-		sphere      = MakeIcosphere(description, 3);
-		tetrahedron = MakeTetrahedron(description, 1);
-		cube        = MakeCube(description, 1);
-		plane       = MakePlane(description, 1, 1);
-
-		//sphere->GenTangents();
-		//plane ->GenTangents();
-
-		// Directional light shadow map textures & target
-		
-		ref<Texture> dirShadowColor = ref<Texture>(new Texture(2024, 2024, TEX_2D, RG,    FLOAT, BORDER));
-		ref<Texture> dirShadowDepth = ref<Texture>(new Texture(2024, 2024, TEX_2D, DEPTH, FLOAT, BORDER));
-
-		dirShadowTarget = REF<RenderTarget>();
-		dirShadowTarget->AddTexture(dirShadowColor);
-		dirShadowTarget->AddTexture(dirShadowDepth);
-
-		dirShadowTarget->Initialize(Renderer->Device);
-
-		// Point light shadow map textures & target
-
-		ref<Texture> pointShadowDepth = ref<Texture>(new Texture(1024, 1024, TEX_CUBE, DEPTH, FLOAT, EDGE));
-		
-		pointShadowTarget = REF<RenderTarget>(true);
-		pointShadowTarget->AddTexture(pointShadowDepth);
-
-		pointShadowTarget->Initialize(Renderer->Device);
-
-		// Floor
-
-		{
-			Entity entity = Space->CreateEntity<Transform, Mesh, PlaneCollider, CollisionObject>();
-
-			Transform*       trans = entity.Set<Transform>(iw::vector3(0, 0, 0), vector3(22));
-			Mesh*            mesh  = entity.Set<Mesh>(plane->MakeInstance());
-			PlaneCollider*   col   = entity.Set<PlaneCollider>(vector3::unit_y, 0);
-			CollisionObject* obj   = entity.Set<CollisionObject>();
-
-			mesh->SetMaterial(REF<Material>(shader));
-
-			mesh->Material()->Set("albedo", iw::Color(0.002f, 0.144f, 0.253f));
-
-			mesh->Material()->Set("reflectance", 0.06f);
-			mesh->Material()->Set("roughness",   0.8f);
-			mesh->Material()->Set("metallic",    0.8f);
-			
-			mesh->Material()->SetTexture("shadowMap",  dirShadowTarget  ->Tex(0));
-			//mesh->Material()->SetTexture("shadowMap2", pointShadowTarget->Tex(0));
-
-			mesh->Material()->Initialize(Renderer->Device);
-
-			obj->SetTrans(trans);
-			obj->SetCol(col);
-
-			Physics->AddCollisionObject(obj);
-		}
-
-		{
-			PlaneCollider*   col1 = new PlaneCollider(vector3( 0, 0,  1), -20);
-			PlaneCollider*   col2 = new PlaneCollider(vector3( 0, 0, -1), -20);
-			PlaneCollider*   col3 = new PlaneCollider(vector3( 1, 0,  0), -20);
-			PlaneCollider*   col4 = new PlaneCollider(vector3(-1, 0,  0), -20);
-
-			CollisionObject* obj1 = new CollisionObject();
-			CollisionObject* obj2 = new CollisionObject();
-			CollisionObject* obj3 = new CollisionObject();
-			CollisionObject* obj4 = new CollisionObject();
-
-			obj1->SetCol(col1);
-			obj2->SetCol(col2);
-			obj3->SetCol(col3);
-			obj4->SetCol(col4);
-
-			Physics->AddCollisionObject(obj1);
-			Physics->AddCollisionObject(obj2);
-			Physics->AddCollisionObject(obj3);
-			Physics->AddCollisionObject(obj4);
-		}
-
-		// Camera controller
-		
-		//Camera* camera = new PerspectiveCamera(1.17f, 1.77f, .01f, 1000.0f);
-
-		//{
-		//	Entity entity = Space->CreateEntity<Transform, EditorCameraController>();
-
-		//	Transform* transform = entity.Set<Transform>(vector3(0, 6, -5));
-		//	                       entity.Set<EditorCameraController>(camera);
-
-		//	camera->SetTrans(transform);
-		//}
-
-		// lights
-
-		//PointLight* light = new PointLight(12.0f, 1.0f);
-		//light->SetPosition(iw::vector3(-4.5f, 8.0f, 10.0f));
-		//light->SetShadowShader(pointShadowShader);
-		//light->SetShadowTarget(pointShadowTarget);
-
-		//PointLight* light2 = new PointLight(12.0f, 1.0f);
-		//light2->SetPosition(iw::vector3( 4.5f, 8.0f, 10.0f));
-
-		DirectionalLight* dirLight = new DirectionalLight(10, OrthographicCamera(60, 60, -100, 100));
-		dirLight->SetRotation(quaternion(0.872f, 0.0f, 0.303f, 0.384f));
-		dirLight->SetShadowShader(dirShadowShader);
-		dirLight->SetShadowTarget(dirShadowTarget);
-
-		// scene
-
-		//MainScene->AddLight(light);
-		MainScene->AddLight(dirLight);
-
-		//delete sphere;
-
-		Physics->SetGravity(vector3(0, -9.81f, 0));
-		Physics->AddSolver(new ImpulseSolver());
-		Physics->AddSolver(new SmoothPositionSolver());
+		iw::Entity floor = Space->CreateEntity<iw::Transform, iw::Mesh>();
+		floor.Set<iw::Transform>(0, 50);
+		floor.Set<iw::Mesh>(plane);
 
 		EditorCameraControllerSystem* system = PushSystem<EditorCameraControllerSystem>();
-
 		MainScene->SetMainCamera(system->GetCamera());
-		
-		PushSystem<PhysicsSystem>();
 
-		PushSystem<iw::ShadowRenderSystem>(MainScene);
 		PushSystem<iw::RenderSystem>(MainScene);
 
-		PushSystem<iw::SpaceInspectorSystem>();
 
-		Time::SetFixedTime(0.05f);
 
-		srand(19);
-		//SpawnCube(vector3(1, 5, 20), 1000, true);
+		//// Shaders
 
-		SpawnCube(5, 100, true);
-		SpawnCube();
+		//                    shader    = Asset->Load<Shader>("shaders/pbr.shader");
+		//ref<Shader>         phong     = Asset->Load<Shader>("shaders/phong.shader");
+		//            dirShadowShader   = Asset->Load<Shader>("shaders/lights/directional_transparent.shader");
+		//ref<Shader> pointShadowShader = Asset->Load<Shader>("shaders/lights/point.shader");
 
+		//Renderer->InitShader(shader,          CAMERA | SHADOWS | LIGHTS);
+		//Renderer->InitShader(phong,           CAMERA | SHADOWS | LIGHTS);
+		//Renderer->InitShader(dirShadowShader, CAMERA);
+		//Renderer->InitShader(pointShadowShader);
+
+		//// Models
+
+		//MeshDescription description;
+
+		//description.DescribeBuffer(bName::POSITION,  MakeLayout<float>(3));
+		//description.DescribeBuffer(bName::NORMAL,    MakeLayout<float>(3));
+		//description.DescribeBuffer(bName::TANGENT,   MakeLayout<float>(3));
+		//description.DescribeBuffer(bName::BITANGENT, MakeLayout<float>(3));
+		//description.DescribeBuffer(bName::UV,        MakeLayout<float>(2));
+
+		//sphere      = MakeIcosphere(description, 3);
+		//tetrahedron = MakeTetrahedron(description, 1);
+		//cube        = MakeCube(description, 1);
+		//plane       = MakePlane(description, 1, 1);
+
+		////sphere->GenTangents();
+		////plane ->GenTangents();
+
+		//// Directional light shadow map textures & target
+		//
+		//ref<Texture> dirShadowColor = ref<Texture>(new Texture(2024, 2024, TEX_2D, RG,    FLOAT, BORDER));
+		//ref<Texture> dirShadowDepth = ref<Texture>(new Texture(2024, 2024, TEX_2D, DEPTH, FLOAT, BORDER));
+
+		//dirShadowTarget = REF<RenderTarget>();
+		//dirShadowTarget->AddTexture(dirShadowColor);
+		//dirShadowTarget->AddTexture(dirShadowDepth);
+
+		//dirShadowTarget->Initialize(Renderer->Device);
+
+		//// Point light shadow map textures & target
+
+		//ref<Texture> pointShadowDepth = ref<Texture>(new Texture(1024, 1024, TEX_CUBE, DEPTH, FLOAT, EDGE));
+		//
+		//pointShadowTarget = REF<RenderTarget>(true);
+		//pointShadowTarget->AddTexture(pointShadowDepth);
+
+		//pointShadowTarget->Initialize(Renderer->Device);
+
+		//// Floor
+
+		//{
+		//	Entity entity = Space->CreateEntity<Transform, Mesh, PlaneCollider, CollisionObject>();
+
+		//	Transform*       trans = entity.Set<Transform>(iw::vector3(0, 0, 0), vector3(22));
+		//	Mesh*            mesh  = entity.Set<Mesh>(plane->MakeInstance());
+		//	PlaneCollider*   col   = entity.Set<PlaneCollider>(vector3::unit_y, 0);
+		//	CollisionObject* obj   = entity.Set<CollisionObject>();
+
+		//	mesh->SetMaterial(REF<Material>(shader));
+
+		//	mesh->Material()->Set("albedo", iw::Color(0.002f, 0.144f, 0.253f));
+
+		//	mesh->Material()->Set("reflectance", 0.06f);
+		//	mesh->Material()->Set("roughness",   0.8f);
+		//	mesh->Material()->Set("metallic",    0.8f);
+		//	
+		//	mesh->Material()->SetTexture("shadowMap",  dirShadowTarget  ->Tex(0));
+		//	//mesh->Material()->SetTexture("shadowMap2", pointShadowTarget->Tex(0));
+
+		//	mesh->Material()->Initialize(Renderer->Device);
+
+		//	obj->SetTrans(trans);
+		//	obj->SetCol(col);
+
+		//	Physics->AddCollisionObject(obj);
+		//}
+
+		//{
+		//	PlaneCollider*   col1 = new PlaneCollider(vector3( 0, 0,  1), -20);
+		//	PlaneCollider*   col2 = new PlaneCollider(vector3( 0, 0, -1), -20);
+		//	PlaneCollider*   col3 = new PlaneCollider(vector3( 1, 0,  0), -20);
+		//	PlaneCollider*   col4 = new PlaneCollider(vector3(-1, 0,  0), -20);
+
+		//	CollisionObject* obj1 = new CollisionObject();
+		//	CollisionObject* obj2 = new CollisionObject();
+		//	CollisionObject* obj3 = new CollisionObject();
+		//	CollisionObject* obj4 = new CollisionObject();
+
+		//	obj1->SetCol(col1);
+		//	obj2->SetCol(col2);
+		//	obj3->SetCol(col3);
+		//	obj4->SetCol(col4);
+
+		//	Physics->AddCollisionObject(obj1);
+		//	Physics->AddCollisionObject(obj2);
+		//	Physics->AddCollisionObject(obj3);
+		//	Physics->AddCollisionObject(obj4);
+		//}
+
+		//// Camera controller
+		//
+		////Camera* camera = new PerspectiveCamera(1.17f, 1.77f, .01f, 1000.0f);
+
+		////{
+		////	Entity entity = Space->CreateEntity<Transform, EditorCameraController>();
+
+		////	Transform* transform = entity.Set<Transform>(vector3(0, 6, -5));
+		////	                       entity.Set<EditorCameraController>(camera);
+
+		////	camera->SetTrans(transform);
+		////}
+
+		//// lights
+
+		////PointLight* light = new PointLight(12.0f, 1.0f);
+		////light->SetPosition(iw::vector3(-4.5f, 8.0f, 10.0f));
+		////light->SetShadowShader(pointShadowShader);
+		////light->SetShadowTarget(pointShadowTarget);
+
+		////PointLight* light2 = new PointLight(12.0f, 1.0f);
+		////light2->SetPosition(iw::vector3( 4.5f, 8.0f, 10.0f));
+
+		//DirectionalLight* dirLight = new DirectionalLight(10, OrthographicCamera(60, 60, -100, 100));
+		//dirLight->SetRotation(quaternion(0.872f, 0.0f, 0.303f, 0.384f));
+		//dirLight->SetShadowShader(dirShadowShader);
+		//dirLight->SetShadowTarget(dirShadowTarget);
+
+		//// scene
+
+		////MainScene->AddLight(light);
+		//MainScene->AddLight(dirLight);
+
+		////delete sphere;
+
+		//Physics->SetGravity(vector3(0, -9.81f, 0));
+		//Physics->AddSolver(new ImpulseSolver());
+		//Physics->AddSolver(new SmoothPositionSolver());
+
+		//EditorCameraControllerSystem* system = PushSystem<EditorCameraControllerSystem>();
+
+		//MainScene->SetMainCamera(system->GetCamera());
+		//
+		//PushSystem<PhysicsSystem>();
+
+		//PushSystem<iw::ShadowRenderSystem>(MainScene);
+		//PushSystem<iw::RenderSystem>(MainScene);
+
+		//PushSystem<iw::SpaceInspectorSystem>();
+
+		//Time::SetFixedTime(0.05f);
+
+		//srand(19);
+		////SpawnCube(vector3(1, 5, 20), 1000, true);
+
+		//SpawnCube(5, 100, true);
 		//SpawnCube();
-		//SpawnCube();
+
+		////SpawnCube();
+		////SpawnCube();
 
 		return Layer::Initialize();
 	}

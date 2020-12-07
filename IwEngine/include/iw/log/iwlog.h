@@ -10,7 +10,9 @@
 
 namespace iw {
 namespace log {
-	enum loglevel {
+	enum class loglevel
+		: int
+	{
 		INFO,
 		DEBUG,
 		WARN,

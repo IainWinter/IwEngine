@@ -1,7 +1,6 @@
 #pragma once
 
-#include "EventTask.h"
-#include "iw/engine/AppVars.h"
+#include "iw/engine/Events/Seq/EventTask.h"
 #include "iw/events/seq/event_seq.h"
 
 namespace iw {

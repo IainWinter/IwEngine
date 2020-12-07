@@ -5,7 +5,7 @@
 
 namespace iw {
 namespace log {
-	class sink {
+	class IWLOG_API sink {
 	protected:
 		loglevel min_level;
 
@@ -14,15 +14,12 @@ namespace log {
 			loglevel level)
 			: min_level(level) {}
 
-		IWLOG_API
 		virtual ~sink() = default;
 
-		IWLOG_API
 		virtual void log(
 			loglevel level,
 			std::string& msg) = 0;
 
-		IWLOG_API
 		virtual void flush() = 0;
 
 		inline bool should_log(

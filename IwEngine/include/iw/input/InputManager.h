@@ -1,12 +1,9 @@
 #pragma once
 
-#include "iwinput.h"
 #include "Context.h"
-#include "Devices/Device.h"
 #include "Devices/Mouse.h"
 #include "Devices/Keyboard.h"
 #include "iw/events/eventbus.h"
-#include "iw/util/memory/ref.h"
 #include <vector>
 
 namespace iw {

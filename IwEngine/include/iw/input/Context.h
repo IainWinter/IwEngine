@@ -1,12 +1,8 @@
 #pragma once
 
-#include "iwinput.h"
 #include "InputState.h"
 #include "Devices/Device.h"
-#include "iw/events/event.h"
-#include "iw/events/callback.h"
 #include "iw/util/memory/ref.h"
-#include <string>
 
 namespace iw {
 namespace Input {
@@ -16,7 +12,7 @@ namespace Input {
 	private:
 		friend class InputManager;
 
-		std::vector<iw::ref<Device>> m_devices;
+		std::vector<ref<Device>> m_devices;
 		std::unordered_map<InputName, std::string> m_commands; // well this could also be somewhere with an event bus or 
 
 	public:
@@ -34,11 +30,11 @@ namespace Input {
 
 		IWINPUT_API
 		void AddDevice(
-			iw::ref<Device>& device);
+			ref<Device>& device);
 
 		IWINPUT_API
 		void RemoveDevice(
-			iw::ref<Device>& device);
+			ref<Device>& device);
 
 		IWINPUT_API
 		void MapButton(

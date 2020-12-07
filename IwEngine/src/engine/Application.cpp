@@ -1,6 +1,5 @@
 #include "iw/engine/Application.h"
 #include "iw/engine/Layers/DebugLayer.h"
-#include "iw/engine/Time.h"
 #include "iw/log/logger.h"
 #include "iw/log/sink/file_sink.h"
 #include "iw/events/callback.h"
@@ -12,7 +11,9 @@
 #include "iw/audio/AudioSpaceRaw.h"
 #include <atomic>
 
-#include "imgui/imgui.h"
+#ifdef IW_IMGUI
+#	include "iw/engine/Layers/ImGuiLayer.h"
+#endif
 
 #ifdef IW_DEBUG
 	#include "iw/log/sink/std_sink.h"
@@ -32,7 +33,7 @@ namespace Engine {
 		Renderer = REF<QueuedRenderer>(m_device);
 		Asset    = REF<AssetManager>();
 		Input    = REF<InputManager>(Bus);
-		Console  = REF<iw::Console>(iw::make_getback(&Application::HandleCommand, this));
+		Console  = REF<iw::Console>(make_getback(&Application::HandleCommand, this));
 		Physics  = REF<DynamicsSpace>();
 		Audio    = REF<AudioSpaceRaw>("assets/sounds/");
 		Task     = REF<thread_pool>(std::thread::hardware_concurrency());
@@ -54,25 +55,25 @@ namespace Engine {
 		// Logging
 
 #ifdef IW_DEBUG
-		LOG_SINK(iw::stdout_sink, iw::INFO);
-		LOG_SINK(iw::stderr_sink, iw::ERR);
+		LOG_SINK(stdout_sink, INFO);
+		LOG_SINK(stderr_sink, ERR);
 #else
-		LOG_SINK(iw::async_stdout_sink, iw::INFO);
-		LOG_SINK(iw::async_stderr_sink, iw::ERR);
+		LOG_SINK(async_stdout_sink, loglevel::INFO);
+		LOG_SINK(async_stderr_sink, loglevel::ERR);
 #endif
-		LOG_SINK(iw::file_sink,         iw::INFO,  "/logs/sandbox_info.log");
-		LOG_SINK(iw::file_sink,         iw::DEBUG, "/logs/sandbox_debug.log");
+		LOG_SINK(file_sink,         loglevel::INFO,  "/logs/sandbox_info.log");
+		LOG_SINK(file_sink,         loglevel::DEBUG, "/logs/sandbox_debug.log");
 
-		LOG_SET_GET_TIME(iw::Time::DeltaTimeNow);
+		LOG_SET_GET_TIME(Time::DeltaTimeNow);
 
 		// Events
 
-		Bus->subscribe(iw::make_callback(&Application::HandleEvent, this));
-		Bus->subscribe(iw::make_callback(&InputManager::HandleEvent, Input.get()));
+		Bus->subscribe(make_callback(&Application::HandleEvent, this));
+		Bus->subscribe(make_callback(&InputManager::HandleEvent, Input.get()));
 		
 		// Physics
 
-		Physics->SetCollisionCallback(iw::make_callback(&Application::HandleCollision, this));
+		Physics->SetCollisionCallback(make_callback(&Application::HandleCollision, this));
 
 		// Asset Loader
 
@@ -150,7 +151,7 @@ namespace Engine {
 			while (m_running) {
 				Time::UpdateTime();
 
-				(*Renderer).Begin(iw::Time::TotalTime());
+				(*Renderer).Begin(Time::TotalTime());
 
 				Update();
 
@@ -183,6 +184,7 @@ namespace Engine {
 					(*Audio).Update();
 				}
 
+#ifdef IW_IMGUI
 				ImGuiLayer* imgui = GetLayer<ImGuiLayer>("ImGui");
 				if (imgui) {
 					LOG_TIME_SCOPE("ImGui");
@@ -193,6 +195,7 @@ namespace Engine {
 					}
 					imgui->End();
 				}
+#endif
 
 				m_window->SwapBuffers();
 
@@ -261,7 +264,7 @@ namespace Engine {
 		}
 
 		LOG_TIME_SCOPE("Physics");
-		Physics->Step(iw::Time::FixedTime());
+		Physics->Step(Time::FixedTime());
 	}
 
 	void Application::Destroy() {
@@ -272,13 +275,13 @@ namespace Engine {
 	}
 
 	void Application::HandleEvent(
-		iw::event& e)
+		event& e)
 	{
 		bool error = false;
 		switch (e.Group) {
-			case iw::val(EventGroup::INPUT): {
+			case val(EventGroup::INPUT): {
 				switch (e.Type) {
-					case iw::val(InputEventType::Command): {
+					case val(InputEventType::Command): {
 						InputCommandEvent& ice = e.as<InputCommandEvent>();
 						Console->QueueCommand(ice.Command);
 						e.Handled = true;
@@ -288,7 +291,7 @@ namespace Engine {
 
 				break;
 			}
-			case iw::val(EventGroup::WINDOW): {
+			case val(EventGroup::WINDOW): {
 				switch (e.Type) {
 					case Closed: {
 						m_running = false;

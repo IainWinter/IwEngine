@@ -1,8 +1,7 @@
 #pragma once
 
-#include "AppVars.h"
-#include "Events/Events.h"
 #include "iw/engine/Events/Seq/EventSequence.h"
+#include "iw/engine/Events/Events.h"
 
 // default includes
 #include "iw/engine/Time.h"
@@ -58,16 +57,7 @@ namespace Engine {
 		std::string m_name;
 
 	protected:
-		ref<eventbus>            Bus;
-		ref<thread_pool>         Task;
-
-		ref<AudioSpace>          Audio;
-		ref<AssetManager>        Asset;
-		ref<Console>             Console;
-		ref<InputManager>        Input;
-		ref<DynamicsSpace>       Physics;
-		ref<QueuedRenderer>      Renderer;
-		ref<Space>               Space;
+		APP_VARS
 
 	public:
 		SystemBase(

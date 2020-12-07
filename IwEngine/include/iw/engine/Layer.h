@@ -1,11 +1,10 @@
 #pragma once
 
-#include "Core.h"
-#include "System.h"
-#include "InitOptions.h"
-#include "EventStack.h"
+#include "iw/engine/System.h"
+#include "iw/engine/EventStack.h"
+
+// default includes
 #include "iw/graphics/Scene.h"
-#include "iw/common/Events/OSEvents.h"
 
 #undef PlaySound
 

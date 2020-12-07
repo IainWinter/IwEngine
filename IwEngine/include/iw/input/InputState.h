@@ -1,6 +1,6 @@
 #pragma once
 
-#include "IwInput.h"
+#include "iwinput.h"
 #include <cstring>
 
 namespace iw {

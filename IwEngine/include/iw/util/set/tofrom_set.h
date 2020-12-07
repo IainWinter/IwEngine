@@ -1,10 +1,7 @@
 #pragma once
 
 #include "iw/util/iwutil.h"
-#include "iw/util/type/type_traits.h"
-#include <algorithm>
 #include <assert.h>
-#include <functional>
 #include <list>
 #include <unordered_map>
 

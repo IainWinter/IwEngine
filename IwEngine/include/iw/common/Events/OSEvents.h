@@ -1,9 +1,8 @@
 #pragma once
 
 #include "iw/common/iwcommon.h"
-#include "EventGroups.h"
 #include "iw/events/event.h"
-#include "iw/util/enum/val.h"
+#include "EventGroups.h"
 
 #include "iw/common/Platform.h"
 
@@ -17,7 +16,7 @@ namespace Engine {
 	};
 
 	struct OsEvent
-		: iw::event
+		: event
 	{
 #ifdef IW_PLATFORM_WINDOWS
 		unsigned WindowId;

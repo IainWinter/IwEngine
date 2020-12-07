@@ -62,7 +62,7 @@ namespace iw {
 		: m_level(level)
 	{
 		logger::instance().log(m_level, "\n");
-		logger::instance().log(m_level, tags[level]);
+		logger::instance().log(m_level, tags[(int)level]);
 	}
 #ifdef IW_LOG_TIME
 	log_time_view::log_time_view(

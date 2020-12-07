@@ -23,11 +23,9 @@ namespace ECS {
 		
 		m_components.push_back(component);
 
-		//if (!data) {
-		//	return;
-		//}
-
-		if (m_memory.size() + component->Size > m_memory.capacity()) { // kinda annoying to have to do
+		while (m_memory.capacity() < 16*1014
+			&& m_memory.size() + component->Size > m_memory.capacity())  // kinda annoying to have to do this here
+		{
 			m_memory.resize(m_memory.capacity() * 2);
 		}
 

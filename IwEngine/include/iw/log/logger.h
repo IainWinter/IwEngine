@@ -1,10 +1,8 @@
 #pragma once
 
-#include "iwlog.h"
 #include "sink/sink.h"
 #include <vector>
 #include <sstream>
-#include <string>
 
 #define IW_LOG_TIME
 
@@ -34,8 +32,8 @@ namespace log {
 		std::vector<sink*> m_sinks;
 		std::string preamble = "[Pream] Start of log...";
 #ifdef IW_LOG_TIME
-		float(*m_get_time)();
-		log_time m_root = {};
+		float(*m_get_time)()     = nullptr;
+		log_time m_root          = {};
 		unsigned m_current_level = 0;
 #endif
 	public:
@@ -49,7 +47,7 @@ namespace log {
 			_sink_t* sink = new _sink_t(level, std::forward<_Args_T>(args)...);
 			m_sinks.push_back(sink);
 
-			sink->log(INFO, preamble);
+			sink->log(level, preamble);
 		}
 
 		template<
@@ -129,13 +127,11 @@ namespace log {
 		}
 	};
 #ifdef IW_LOG_TIME
-	class log_time_view {
+	class IWLOG_API log_time_view {
 	public:
-		IWLOG_API
 		log_time_view(
 			std::string name);
 
-		IWLOG_API
 		~log_time_view();
 	};
 #endif
@@ -149,11 +145,11 @@ namespace log {
 
 #define LOG_FLUSH   iw::logger::instance().flush
 
-#define LOG_INFO     iw::log_view(iw::INFO)
-#define LOG_DEBUG    iw::log_view(iw::DEBUG)
-#define LOG_WARNING  iw::log_view(iw::WARN)
-#define LOG_ERROR    iw::log_view(iw::ERR)
-#define LOG_TRACE    iw::log_view(iw::TRACE)
+#define LOG_INFO     iw::log_view(iw::loglevel::INFO)
+#define LOG_DEBUG    iw::log_view(iw::loglevel::DEBUG)
+#define LOG_WARNING  iw::log_view(iw::loglevel::WARN)
+#define LOG_ERROR    iw::log_view(iw::loglevel::ERR)
+#define LOG_TRACE    iw::log_view(iw::loglevel::TRACE)
 
 #ifdef IW_LOG_TIME
 #	define LOG_SET_GET_TIME(func) logger::instance().set_get_time(func);

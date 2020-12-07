@@ -1,9 +1,7 @@
 #pragma once
 
-#include "iw/events/eventbus.h"
-#include "WindowOptions.h"
+#include "iw/engine/WindowOptions.h"
 #include "iw/input/InputManager.h"
-#include "iw/util/memory/ref.h"
 
 namespace iw {
 namespace Engine {
