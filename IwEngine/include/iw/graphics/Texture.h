@@ -8,6 +8,8 @@
 
 namespace iw {
 namespace Graphics {
+	// needs to be remade 
+
 	struct Texture {
 	protected:
 		unsigned m_width;
@@ -74,6 +76,10 @@ namespace Graphics {
 			const iw::ref<IDevice>& device);
 
 		IWGRAPHICS_API
+		void Update(
+			const iw::ref<IDevice>& device);
+
+		IWGRAPHICS_API
 		Texture CreateSubTexture(
 			int xOffset,
 			int yOffset,
@@ -132,6 +138,13 @@ namespace Graphics {
 
 		IWGRAPHICS_API
 		unsigned char* Colors() const;
+
+		IWGRAPHICS_API
+		unsigned char* CreateColors(
+			bool evenIfNotNull = false);
+
+		IWGRAPHICS_API
+		size_t ColorCount() const;
 
 		IWGRAPHICS_API
 		ITexture* Handle() const;

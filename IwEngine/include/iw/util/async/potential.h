@@ -5,7 +5,7 @@
 
 namespace iw {
 namespace util {
-	// Shared pointer for values not yet initialized
+	// Shared pointer for values not yet initialized, just use c++ 20 version
 	template<
 		typename _t>
 	class potential {

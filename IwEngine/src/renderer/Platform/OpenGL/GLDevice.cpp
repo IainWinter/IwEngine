@@ -347,6 +347,19 @@ namespace RenderAPI {
 			->CreateSubTexture(xOffset, yOffset, width, height, mipmap);
 	}
 
+	void GLDevice::SetTextureData(
+		const ITexture* texture,
+		const ITexture* source,
+		int xOffset,
+		int yOffset,
+		int width,
+		int height,
+		int mipmap)
+	{
+		static_cast<const GLTexture*>(texture)
+			->SetTextureData(static_cast<const GLTexture*>(source), xOffset, yOffset, width, height, mipmap);
+	}
+
 	void GLDevice::DestroyTexture(
 		ITexture* texture)
 	{

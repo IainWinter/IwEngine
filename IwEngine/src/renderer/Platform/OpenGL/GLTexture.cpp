@@ -157,11 +157,24 @@ namespace RenderAPI {
 
 		GLTexture* sub = new GLTexture(width, height, m_type, m_format, m_formatType, m_wrap, m_filter, m_mipmapFilter);
 		if (m_data) {
-			GL(glTextureSubImage2D(sub->Id(), mipmap, xOffset, yOffset, width, height, gl_format, gl_formatType, m_data));
-			GenerateMipMaps();
+			sub->SetTextureData(this, xOffset, yOffset, width, height, mipmap);
 		}
 
 		return sub;
+	}
+
+	void GLTexture::SetTextureData(
+		const GLTexture* source,
+		int xOffset,
+		int yOffset,
+		int width,
+		int height,
+		int mipmap) const
+	{
+		if (m_data) {
+			GL(glTextureSubImage2D(gl_id, mipmap, xOffset, yOffset, width, height, gl_format, gl_formatType, source->m_data));
+			GenerateMipMaps();
+		}
 	}
 
 	void GLTexture::Bind() const {

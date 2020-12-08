@@ -55,6 +55,13 @@ namespace Graphics {
 			return iw::vector4(r, g, b, a);
 		}
 
+		operator unsigned int() const {
+			return unsigned int(r * 255u) << 0
+				| unsigned int(g * 255u) << 8
+				| unsigned int(b * 255u) << 16
+				| unsigned int(a * 255u) << 24;
+		}
+
 		static Color From255(
 			int r,
 			int g,

@@ -224,6 +224,16 @@ namespace RenderAPI {
 			int mipmap = 0) = 0;
 
 		IWRENDERER_API
+		virtual void SetTextureData(
+			const ITexture* texture,
+			const ITexture* source,
+			int xOffset,
+			int yOffset,
+			int width,
+			int height,
+			int mipmap) = 0;
+
+		IWRENDERER_API
 		virtual void DestroyTexture(
 			ITexture* texture) = 0;
 

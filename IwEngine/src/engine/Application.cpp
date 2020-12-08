@@ -55,8 +55,8 @@ namespace Engine {
 		// Logging
 
 #ifdef IW_DEBUG
-		LOG_SINK(stdout_sink, INFO);
-		LOG_SINK(stderr_sink, ERR);
+		LOG_SINK(stdout_sink, loglevel::INFO);
+		LOG_SINK(stderr_sink, loglevel::ERR);
 #else
 		LOG_SINK(async_stdout_sink, loglevel::INFO);
 		LOG_SINK(async_stderr_sink, loglevel::ERR);

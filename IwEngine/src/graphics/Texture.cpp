@@ -137,15 +137,9 @@ namespace Graphics {
 
 		m_handle = nullptr;
 
-		if (m_colors) {
-			delete m_colors;
-
-			size_t size = m_width * m_height * m_depth * m_channels;
-			m_colors = new unsigned char[size];
-
-			if (other.m_colors) {
-				memcpy(m_colors, other.m_colors, size);
-			}
+		CreateColors(other.m_colors != nullptr);
+		if (other.m_colors) {
+			memcpy(m_colors, other.m_colors, ColorCount());
 		}
 	}
 
@@ -200,15 +194,9 @@ namespace Graphics {
 
 		m_handle = nullptr;
 
-		if (m_colors) {
-			delete m_colors;
-
-			size_t size = m_width * m_height * m_depth * m_channels;
-			m_colors = new unsigned char[size];
-
-			if (other.m_colors) {
-				memcpy(m_colors, other.m_colors, size);
-			}
+		CreateColors(other.m_colors != nullptr);
+		if (other.m_colors) {
+			memcpy(m_colors, other.m_colors, ColorCount());
 		}
 
 		return *this;
@@ -243,18 +231,27 @@ namespace Graphics {
 		const iw::ref<IDevice>& device)
 	{
 		if (m_handle) {
-			// Update
+			LOG_WARNING << "Texture already initialized!";
+			return;
 		}
 
-		else {
-			if (IsSubTexture()) {
-				m_handle = device->CreateSubTexture(m_parent->Handle(), m_xOffset, m_yOffset, m_width, m_height);
-			}
-
-			else { // no depth. for now it = height
-				m_handle = device->CreateTexture(m_width, m_height, m_type, m_format, m_formatType, m_wrap, m_filter, m_mipmapFilter, m_colors);
-			}
+		if (IsSubTexture()) {
+			m_handle = device->CreateSubTexture(m_parent->Handle(), m_xOffset, m_yOffset, m_width, m_height);
 		}
+
+		else { // no depth. for now it = height
+			m_handle = device->CreateTexture(m_width, m_height, m_type, m_format, m_formatType, m_wrap, m_filter, m_mipmapFilter, m_colors);
+		}
+	}
+
+	void Texture::Update(
+		const iw::ref<IDevice>& device)
+	{
+		if (!m_handle) {
+			Initialize(device);
+		}
+
+		device->SetTextureData(m_handle, m_handle, 0, 0, m_width, m_height, 0);
 	}
 
 	Texture Texture::CreateSubTexture(
@@ -270,11 +267,13 @@ namespace Graphics {
 	void Texture::Clear(
 		Color color)
 	{
-		if (!m_handle) {
-			return;
+		if (m_handle) {
+			m_handle->Clear(&color);
 		}
 
-		m_handle->Clear(&color);
+		if (m_colors) {
+			memset(m_colors, 0, ColorCount()); // get right color from arg
+		}
 	}
 
 	void Texture::SetBorderColor(
@@ -361,6 +360,22 @@ namespace Graphics {
 
 	unsigned char* Texture::Colors() const {
 		return m_colors;
+	}
+
+	unsigned char* Texture::CreateColors(
+		bool evenIfNotNull)
+	{
+		if (!m_colors || evenIfNotNull) {
+			delete m_colors;
+
+			m_colors = new unsigned char[ColorCount()];
+		}
+
+		return m_colors;
+	}
+
+	size_t Texture::ColorCount() const {
+		return m_width * m_height * m_depth * m_channels; // convert everything to size_t 
 	}
 
 	ITexture* Texture::Handle() const {

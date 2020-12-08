@@ -5,15 +5,17 @@
 #include "iw/graphics/Camera.h"
 
 namespace iw {
-	class RayMarchingLayer
+	class SimpleSandLayer
 		: public Layer
 	{
 	private:
 		ref<Shader> shader;
 		Camera*     camera;
+		iw::ref<RenderTarget> target;
+		iw::ref<Texture> texture;
 
 	public:
-		RayMarchingLayer();
+		SimpleSandLayer();
 
 		int Initialize() override;
 		void PostUpdate() override;

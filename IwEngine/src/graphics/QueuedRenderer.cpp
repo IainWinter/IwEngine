@@ -41,6 +41,10 @@ namespace Graphics {
 
 		RenderOP block = RenderOP::NONE;
 		for (RenderItem& item : m_queue) {
+			if (item.OP == RenderOP::APPLY_FILTER) {
+				continue;
+			}
+
 			switch (block) {
 				case RenderOP::NONE:
 				case RenderOP::BEGIN: {

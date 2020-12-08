@@ -56,6 +56,30 @@ namespace math {
 	{
 		return 1 - (1 - time / scale) * (1 - time / scale);
 	}
+
+	template<>
+	float clamp(
+		const float& x,
+		const float& min,
+		const float& max)
+	{
+		if (min > x) return min;
+		if (max < x) return max;
+
+		return x;
+	}
+
+	template<>
+	vector2 clamp(
+		const vector2& v,
+		const vector2& min,
+		const vector2& max)
+	{
+		return vector2(
+			clamp(v.x, min.x, max.x),
+			clamp(v.y, min.y, max.y)
+		);
+	}
 }
 
 	using namespace math;

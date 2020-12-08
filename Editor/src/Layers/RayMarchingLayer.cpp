@@ -20,19 +20,13 @@ namespace iw {
 		}
 
 		camera->SetPosition(vector3(0, 2, 10));
-		//camera->SetRotation(quaternion::from_look_at(camera->Position()).inverted());
+		camera->SetRotation(quaternion::from_look_at(camera->Position()).inverted());
 
 		return 0;
 	}
 
 	void RayMarchingLayer::PostUpdate() {
 		Renderer->ApplyFilter(shader, nullptr, nullptr, camera);
-	}
-
-	void RayMarchingLayer::ImGui() {
-		//ImGui::Begin("Test");
-
-		//ImGui::End();
 	}
 }
 

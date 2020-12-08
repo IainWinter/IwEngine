@@ -139,16 +139,18 @@ namespace math {
 	}
 
 	template<>
-	inline float clamp(
+	IWMATH_API
+	float clamp(
 		const float& x,
 		const float& min,
-		const float& max)
-	{
-		if (min > x) return min;
-		if (max < x) return max;
+		const float& max);
 
-		return x;
-	}
+	template<>
+	IWMATH_API
+	vector2 clamp(
+		const vector2& v,
+		const vector2& min,
+		const vector2& max);
 }
 
 	using namespace math;

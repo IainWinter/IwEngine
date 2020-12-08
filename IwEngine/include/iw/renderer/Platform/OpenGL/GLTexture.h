@@ -79,6 +79,15 @@ namespace RenderAPI {
 			int mipmap = 0) const;
 
 		IWRENDERER_API
+		void SetTextureData(
+			const GLTexture* target,
+			int xOffset,
+			int yOffset,
+			int width,
+			int height,
+			int mipmap) const;
+
+		IWRENDERER_API
 		void Bind() const;
 
 		IWRENDERER_API
