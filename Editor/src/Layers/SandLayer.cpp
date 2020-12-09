@@ -35,33 +35,41 @@ namespace iw {
 			m_swap[getCoords(texture, x, y)] = _SAND;
 		}
 
-		playerTransform.Position = vector2(100, 100);
+		           player = Space->CreateEntity<iw::Transform, Tile, Player>();
+		iw::Entity enemy  = Space->CreateEntity<iw::Transform, Tile, Enemy2>();
+
+		player.Set<iw::Transform>(iw::vector2(texture->Width() / 2, texture->Height() / 2 + 100));
+		player.Set<Tile>(Tile {{
+						   vector2(1, 0), vector2(1, 0),
+			vector2(0, 1), vector2(1, 1), vector2(2, 1), vector2(3, 1),
+			vector2(0, 2), vector2(1, 2), vector2(2, 2), vector2(3, 2),
+			vector2(0, 3),                               vector2(3, 3),
+			vector2(0, 4),                               vector2(3, 4)
+		}});
+		player.Set<Player>();
+
+		enemy.Set<iw::Transform>(iw::vector2(texture->Width(), texture->Height()));
+		enemy.Set<Tile>(Tile {{
+			vector2(1, 0),								 vector2(3, 0),
+			vector2(0, 1), vector2(1, 1), vector2(2, 1), vector2(3, 1),
+			vector2(0, 2), vector2(1, 2), vector2(2, 2), vector2(3, 2),
+			vector2(0, 3),                               vector2(3, 3),
+			vector2(0, 4),                               vector2(3, 4)
+		}});
 
 		return 0;
 	}
 
 	void SandLayer::PostUpdate() {
 		vector2 pos = mousePos / m_scale;
-		vector2 p = pMousePos;
-
 		pos.x = floor(pos.x);
 		pos.y = floor(texture->Height() - pos.y);
-
-		std::vector<vector2> playerCoords;
-		for (vector2& v : playerCellLocations) {
-			playerCoords.push_back(v + playerTransform.Position);
-			playerCoords.push_back(v + enemyTransform.Position);
-		}
-
-		for (vector2& v : playerCoords) {
-			setCell(texture, v.x, v.y, _METAL);
-		}
 
 		if(Keyboard::KeyDown(iw::E) || Keyboard::KeyDown(iw::F) || Keyboard::KeyDown(iw::R)) {
 			for (int i = 0; i < 200; i++) {
 			for (int ii = 0; ii < 20; ii++) {
-				if (inBounds(texture, p.x + i, p.y + ii)) {
-					size_t index = getCoords(texture, p.x + i, p.y + ii);
+				if (inBounds(texture, pos.x + i, pos.y + ii)) {
+					size_t index = getCoords(texture, pos.x + i, pos.y + ii);
 
 					if (Keyboard::KeyDown(iw::E)) {
 						m_swap[index] = _SAND;
@@ -79,27 +87,39 @@ namespace iw {
 			}
 		}
 
-		fireTimeout -= iw::DeltaTime();
-
-		if (   fireTimeout < 0
-			&&(Mouse::ButtonDown(iw::LMOUSE)
-			|| Mouse::ButtonDown(iw::RMOUSE)))
+		Space->Query<iw::Transform, Tile>().Each([&](
+			auto e,
+			auto t,
+			auto a)
 		{
-			fireTimeout = Mouse::ButtonDown(iw::LMOUSE) ? .1f : .01f;
+			for (vector2 v : a->Locations) {
+				v.x += t->Position.x;
+				v.y += t->Position.y;
 
-			vector2 direction = (pos - playerTransform.Position).normalized();
-
-			p = playerTransform.Position + direction * 5 + vector2(iw::randf(), iw::randf()) * 5;
-
-			if (inBounds(texture, p.x, p.y)) {
-				size_t index = getCoords(texture, p.x, p.y);
-
-				m_swap[index] = Mouse::ButtonDown(iw::LMOUSE) ? _BULLET : _LASER;
-				m_swap[index].Direction = direction * (Mouse::ButtonDown(iw::LMOUSE) ? 10 : 25);
+				setCell(texture, v.x, v.y, _METAL);
 			}
-		}
+		});
 
-		pMousePos = pos;
+		Space->Query<iw::Transform, Tile, Player>().Each([&](
+			auto,
+			auto t,
+			auto,
+			auto p)
+		{
+			p->FireTimeout -= iw::DeltaTime();
+
+			if (   p->FireTimeout < 0
+				&& p->FireButtons != 0)
+			{
+				p->FireTimeout = p->FireButtons.x == 1 ? .1f : .01f;
+
+				vector2 direction = (pos - t->Position).normalized();
+				iw::vector2 point = t->Position + direction * 5 + vector2(iw::randf(), iw::randf()) * 5;
+
+				Cell* c = setCell(texture, point.x, point.y, p->FireButtons.x == 1 ? _BULLET : _LASER);
+				if(c) c->Direction = direction * (p->FireButtons.x == 1 ? 10 : 25);
+			}
+		});
 
 		for (size_t x = 0; x < texture->Width();  x++)
 		for (size_t y = 0; y < texture->Height(); y++) {
@@ -139,33 +159,55 @@ namespace iw {
 			((unsigned int*)texture->Colors())[i] = m_cells[i].Color; // assign RGBA all at once
 		}
 
-		// Erase
-		std::vector<vector2> removeCoords;
-		for (vector2& v : playerCoords) {
-			if (!inBounds(texture, v.x, v.y)) continue;
-			if (m_swap[getCoords(texture, v.x, v.y)].Type == _METAL.Type) {
-				m_cells[getCoords(texture, v.x, v.y)] = _EMPTY;
-				m_swap [getCoords(texture, v.x, v.y)] = _EMPTY;
+		Space->Query<iw::Transform, Tile>().Each([&](
+			auto e,
+			auto t,
+			auto a)
+		{
+			for (vector2 v : a->Locations) {
+				v.x += t->Position.x;
+				v.y += t->Position.y;
+
+				if (!inBounds(texture, v.x, v.y)) continue;
+				Cell& cell = getCell(texture, v.x, v.y);
+
+				if (cell.Type == _METAL.Type) {
+					setCell(texture, v.x, v.y, _EMPTY);
+				}
+
+				else {
+					//v.x = -100000; // `delete`
+					//v.y = -100000;
+				}
 			}
-
-			else {
-				removeCoords.push_back(v);
-			}
-		}
-
-		for (vector2& v : removeCoords) {
-			playerCoords.erase(std::find(playerCoords.begin(), playerCoords.end(), v));
-		}
-
-		playerTransform.Position +=(playerTransform.Right() * movement.x * 60
-								  + playerTransform.Up()    * movement.y * 60)
-								  * iw::DeltaTime() * m_scale;
-
-		enemyTransform.Position = iw::lerp(
-			enemyTransform.Position, 
-			playerTransform.Position + 100 * iw::vector2(cos(iw::TotalTime()), sin(iw::TotalTime())), 
-			iw::DeltaTime());
+		});
 		
+		Space->Query<iw::Transform, Tile, Player>().Each([&](
+			auto,
+			auto t,
+			auto,
+			auto p)
+		{
+			t->Position += (t->Right() * p->Movement.x * 60
+				+ t->Up() * p->Movement.y * 60)
+				* iw::DeltaTime() * m_scale;
+		});
+
+		Space->Query<iw::Transform, Tile, Enemy2>().Each([&](
+			auto,
+			auto t,
+			auto,
+			auto)
+		{
+			t->Position = iw::lerp<vector2>(
+				t->Position,
+				iw::vector2(
+					texture->Width() / 2 + cos(iw::TotalTime()),
+					texture->Height() / 2 + sin(iw::TotalTime())
+				),
+				iw::DeltaTime());
+		});
+
 		texture->Update(Renderer->Device); // should be auto in apply filter
 		Renderer->ApplyFilter(shader, target, nullptr);
 	}
@@ -174,6 +216,18 @@ namespace iw {
 		MouseMovedEvent& e)
 	{
 		mousePos = { e.X, e.Y };
+		player.Find<Player>()->MousePos = mousePos;
+		return false;
+	}
+
+	bool SandLayer::On(
+		MouseButtonEvent& e)
+	{
+		switch (e.Button) {
+			case iw::val(LMOUSE): player.Find<Player>()->FireButtons.x = e.State ? 1 : 0; break;
+			case iw::val(RMOUSE): player.Find<Player>()->FireButtons.y = e.State ? 1 : 0; break;
+		}
+
 		return false;
 	}
 
@@ -181,11 +235,11 @@ namespace iw {
 		KeyEvent& e)
 	{
 		switch (e.Button) {
-			case iw::val(A):     movement.x -= e.State ? 1 : -1; break;
-			case iw::val(D):     movement.x += e.State ? 1 : -1; break;
+			case iw::val(A): player.Find<Player>()->Movement.x -= e.State ? 1 : -1; break;
+			case iw::val(D): player.Find<Player>()->Movement.x += e.State ? 1 : -1; break;
 
-			case iw::val(W):     movement.y += e.State ? 1 : -1; break;
-			case iw::val(S):     movement.y -= e.State ? 1 : -1; break;
+			case iw::val(W): player.Find<Player>()->Movement.y += e.State ? 1 : -1; break;
+			case iw::val(S): player.Find<Player>()->Movement.y -= e.State ? 1 : -1; break;
 		}
 
 		return false;

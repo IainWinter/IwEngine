@@ -26,6 +26,21 @@ struct Cell {
 	float Life;
 };
 
+struct Tile {
+	std::vector<iw::vector2> Locations;
+};
+
+struct Player {
+	iw::vector3 Movement;
+	iw::vector2 pMousePos, MousePos;
+	iw::vector2 FireButtons;
+	float FireTimeout = 0;
+};
+
+struct Enemy2 {
+
+};
+
 namespace iw {
 	class SandLayer
 		: public Layer
@@ -57,23 +72,7 @@ namespace iw {
 
 		iw::vector2 movement;
 
-		iw::Transform playerTransform; 
-		iw::Transform enemyTransform;
-
-
-		//   0123
-		//0   ..
-		//1  ....
-		//2  ....
-		//3  .  .
-		//4  .  .
-		vector2 playerCellLocations[14] {
-			               vector2(1, 0), vector2(1, 0),
-			vector2(0, 1), vector2(1, 1), vector2(2, 1), vector2(3, 1),
-			vector2(0, 2), vector2(1, 2), vector2(2, 2), vector2(3, 2),
-			vector2(0, 3),                               vector2(3, 3),
-			vector2(0, 4),                               vector2(3, 4)
-		};
+		iw::Entity player;
 
 	public:
 		SandLayer();
@@ -81,8 +80,8 @@ namespace iw {
 		int Initialize() override;
 		void PostUpdate() override;
 
-		bool On(
-			MouseMovedEvent& e) override;
+		bool On(MouseMovedEvent& e) override;
+		bool On(MouseButtonEvent& e) override;
 
 		bool SandLayer::On(
 			KeyEvent& e) override;
