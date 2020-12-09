@@ -112,16 +112,16 @@ namespace iw {
 
 	float vector3::major() const {
 		float major = x;
-		if (y > major) major = y;
-		if (z > major) major = z;
+		if (abs(y) > abs(major)) major = y;
+		if (abs(z) > abs(major)) major = z;
 
 		return major;
 	}
 
 	float vector3::minor() const {
 		float minor = x;
-		if (y < minor) minor = y;
-		if (z < minor) minor = z;
+		if (abs(y) < abs(minor)) minor = y;
+		if (abs(z) < abs(minor)) minor = z;
 
 		return minor;
 	}

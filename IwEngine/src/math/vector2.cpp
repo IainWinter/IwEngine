@@ -86,13 +86,13 @@ namespace iw {
 	}
 
 	float vector2::major() const {
-		if (x > y) return x;
-		else       return y;
+		if (abs(x) > abs(y)) return x;
+		else                 return y;
 	}
 
 	float vector2::minor() const {
-		if (x < y) return x;
-		else       return y;
+		if (abs(x) < abs(y)) return x;
+		else                 return y;
 	}
 
 	vector2 vector2::operator+(

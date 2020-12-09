@@ -30,50 +30,72 @@ namespace iw {
 		m_cells.resize(texture->ColorCount() / texture->Channels());
 		m_swap .resize(texture->ColorCount() / texture->Channels());
 
-		for (size_t x = 200; x < texture->Width() - 200; x++)
-		for (size_t y = 0; y < texture->Height(); y++) {
+		for (size_t x = 0; x < texture->Width(); x++)
+		for (size_t y = 0; y < texture->Height() - 200; y++) {
 			m_swap[getCoords(texture, x, y)] = _SAND;
 		}
+
+		playerTransform.Position = vector2(100, 100);
 
 		return 0;
 	}
 
 	void SandLayer::PostUpdate() {
 		vector2 pos = mousePos / m_scale;
+		vector2 p = pMousePos;
+
 		pos.x = floor(pos.x);
 		pos.y = floor(texture->Height() - pos.y);
 
-		vector2 p = pMousePos;
-		for (int i = 0; i < 200; i++) {
-			if (inBounds(texture, p.x + i, p.y)) {
-				size_t index = getCoords(texture, p.x + i, p.y);
+		std::vector<vector2> playerCoords;
+		for (vector2& v : playerCellLocations) {
+			playerCoords.push_back(v + playerTransform.Position);
+			playerCoords.push_back(v + enemyTransform.Position);
+		}
 
-				if (Keyboard::KeyDown(iw::E)) {
-					m_swap[index] = _SAND;
-				}
+		for (vector2& v : playerCoords) {
+			setCell(texture, v.x, v.y, _METAL);
+		}
 
-				else if (Keyboard::KeyDown(iw::F)) {
-					m_swap[index] = _WATER;
-				}
+		if(Keyboard::KeyDown(iw::E) || Keyboard::KeyDown(iw::F) || Keyboard::KeyDown(iw::R)) {
+			for (int i = 0; i < 200; i++) {
+			for (int ii = 0; ii < 20; ii++) {
+				if (inBounds(texture, p.x + i, p.y + ii)) {
+					size_t index = getCoords(texture, p.x + i, p.y + ii);
 
-				else if (Keyboard::KeyDown(iw::R)) {
-					m_swap[index] = _ROCK;
+					if (Keyboard::KeyDown(iw::E)) {
+						m_swap[index] = _SAND;
+					}
+
+					else if (Keyboard::KeyDown(iw::F)) {
+						m_swap[index] = _WATER;
+					}
+
+					else if (Keyboard::KeyDown(iw::R)) {
+						m_swap[index] = _ROCK;
+					}
 				}
+			}
 			}
 		}
 
-		if (Mouse::ButtonDown(iw::LMOUSE) || Mouse::ButtonDown(iw::RMOUSE)) {
-			if (iw::randf() > .5f) {
-				vector2 direction = (pos - playerTransform.Position).normalized();
+		fireTimeout -= iw::DeltaTime();
 
-				p = playerTransform.Position + direction * 5 + vector2(iw::randf(), iw::randf()) * 5;
+		if (   fireTimeout < 0
+			&&(Mouse::ButtonDown(iw::LMOUSE)
+			|| Mouse::ButtonDown(iw::RMOUSE)))
+		{
+			fireTimeout = Mouse::ButtonDown(iw::LMOUSE) ? .1f : .01f;
 
-				if (inBounds(texture, p.x, p.y)) {
-					size_t index = getCoords(texture, p.x, p.y);
+			vector2 direction = (pos - playerTransform.Position).normalized();
 
-					m_swap[index] = Mouse::ButtonDown(iw::LMOUSE) ? _BULLET : _LASER;
-					m_swap[index].Direction = direction * (Mouse::ButtonDown(iw::LMOUSE) ? 7 : 15);
-				}
+			p = playerTransform.Position + direction * 5 + vector2(iw::randf(), iw::randf()) * 5;
+
+			if (inBounds(texture, p.x, p.y)) {
+				size_t index = getCoords(texture, p.x, p.y);
+
+				m_swap[index] = Mouse::ButtonDown(iw::LMOUSE) ? _BULLET : _LASER;
+				m_swap[index].Direction = direction * (Mouse::ButtonDown(iw::LMOUSE) ? 10 : 25);
 			}
 		}
 
@@ -94,45 +116,22 @@ namespace iw {
 					break;
 				}
 				case CellType::BULLET: {
-					MoveForward(x, y, cell, _BULLET);
+					auto result = MoveForward(x, y, cell, _BULLET);
+					if (result.first) {
+						HitLikeBullet(result.second.x, result.second.y, cell);
+					}
 					break;
 				}
 				case CellType::LASER: {
-					MoveForward(x, y, cell, _LASER);
+					auto result = MoveForward(x, y, cell, _LASER);
+					if (result.first) {
+						HitLikeLaser(result.second.x, result.second.y, cell);
+					}
 					break;
 				}
 			}
 		}
 
-		//const Cell& swappedCell = m_swap[i];
-		//
-		//if (   swappedCell.Type != CellType::EMPTY
-		//	&& swappedCell.Velocity.length_squared() >= 1)
-		//{
-		//	size_t dX = x + (size_t)iw::clamp(swappedCell.Velocity.x, -1.f, 1.f);
-		//	size_t dY = y + (size_t)iw::clamp(swappedCell.Velocity.y, -1.f, 1.f);
-		//
-		//	if (   inBounds(texture, dX, dY)
-		//		&& isEmpty(texture, dX, dY))
-		//	{
-		//		size_t vi = getCoords(texture, dX, dY);
-		//		m_cells[vi] = swappedCell;
-		//		m_cells[i] = _EMPTY;
-		//		i = vi;
-		//	}
-		//}
-
-
-		std::vector<vector2> playerCoords;
-		for (vector2& v : playerCellLocations) {
-			//vector4 pos = vector4(v, 5, 1) * playerTransform.WorldTransformation();
-			//LOG_INFO << pos;
-			playerCoords.push_back(v + playerTransform.Position);
-		}
-
-		for (vector2& v : playerCoords) {
-			setCell(texture, v.x, v.y, _METAL);
-		}
 
 		// Swap buffers
 		for (size_t i = 0; i < texture->ColorCount() / texture->Channels(); i++) {
@@ -141,63 +140,32 @@ namespace iw {
 		}
 
 		// Erase
+		std::vector<vector2> removeCoords;
 		for (vector2& v : playerCoords) {
 			if (!inBounds(texture, v.x, v.y)) continue;
-			m_cells[getCoords(texture, v.x, v.y)] = _EMPTY;
-			m_swap [getCoords(texture, v.x, v.y)] = _EMPTY;
+			if (m_swap[getCoords(texture, v.x, v.y)].Type == _METAL.Type) {
+				m_cells[getCoords(texture, v.x, v.y)] = _EMPTY;
+				m_swap [getCoords(texture, v.x, v.y)] = _EMPTY;
+			}
+
+			else {
+				removeCoords.push_back(v);
+			}
 		}
 
-		//for (size_t x = 0; x < texture->Width();  x++)
-		//for (size_t y = 0; y < texture->Height(); y++) {
-		//	if (isColor(texture, x, y, _SAND)) {
-		//		bool down = isEmpty(texture, x,     y - 1);
-		//		bool left = isEmpty(texture, x - 1, y - 1);
-		//		bool rght = isEmpty(texture, x + 1, y - 1);
-		//	
-		//		if (down || left || rght) {
-		//			setColor(texture, x, y, 0);
-		//		}
-
-		//		if      (down) setColor(texture, x,     y - 1, _SAND);
-		//		else if (left) setColor(texture, x - 1, y - 1, _SAND);
-		//		else if (rght) setColor(texture, x + 1, y - 1, _SAND);
-		//	}
-
-		//	else if (isColor(texture, x, y, _LASER)) {
-		//		bool down = isEmpty(texture, x, y - 1);
-		//		unsigned char life = getLifetime(texture, x, y);
-
-		//		if (down) {
-		//			setColor(texture, x, y - 1, _LASER); // Expand laser
-		//			setLifetime(texture, x, y - 1, life);
-		//		}
-
-		//		else if (getColor(texture, x, y - 1) != _LASER) {
-		//			setLifetime(texture, x, y,  life/2);
-
-		//			if (getColor(texture, x, y - 1) != _ROCK) {
-		//				setColor(texture, x, y - 1, _CLEAR); // Destroy stuff hit by it
-		//			}
-		//		}
-
-		//		if (life != 0) {
-		//			setLifetime(texture, x, y, life * .6);
-		//		}
-
-		//		else {
-		//			setColor(texture, x, y, _CLEAR);
-		//		}
-		//	}
-
-		//	//if (x == pos.x && y == pos.y) {
-		//	//	setColor(texture, x, y, _SAND);
-		//	//}
-		//}
+		for (vector2& v : removeCoords) {
+			playerCoords.erase(std::find(playerCoords.begin(), playerCoords.end(), v));
+		}
 
 		playerTransform.Position +=(playerTransform.Right() * movement.x * 60
 								  + playerTransform.Up()    * movement.y * 60)
 								  * iw::DeltaTime() * m_scale;
 
+		enemyTransform.Position = iw::lerp(
+			enemyTransform.Position, 
+			playerTransform.Position + 100 * iw::vector2(cos(iw::TotalTime()), sin(iw::TotalTime())), 
+			iw::DeltaTime());
+		
 		texture->Update(Renderer->Device); // should be auto in apply filter
 		Renderer->ApplyFilter(shader, target, nullptr);
 	}
@@ -225,7 +193,8 @@ namespace iw {
 
 	void SandLayer::MoveLikeSand(
 		size_t x, size_t y,
-		const Cell& cell, const Cell& replacement)
+		const Cell& cell,
+		const Cell& replacement)
 	{
 		bool down = isEmpty(texture, x,     y - 1);
 		bool left = isEmpty(texture, x - 1, y - 1);
@@ -242,7 +211,8 @@ namespace iw {
 
 	void SandLayer::MoveLikeWater(
 		size_t x, size_t y,
-		const Cell& cell, const Cell& replacement)
+		const Cell& cell,
+		const Cell& replacement)
 	{
 		bool down     = isEmpty(texture, x, y - 1);
 		bool downleft = isEmpty(texture, x - 1, y - 1);
@@ -261,48 +231,158 @@ namespace iw {
 		else if (rght)     setCell(texture, x + 1, y, replacement);
 	}
 
-	void SandLayer::MoveForward(
+	std::pair<bool, iw::vector2> SandLayer::MoveForward(
 		size_t x, size_t y,
 		const Cell& cell,
 		const Cell& replacement)
 	{
-		vector2 direction = cell.Direction;
-		size_t destX = x + size_t(direction.x);
-		size_t destY = y + size_t(direction.y);
+		bool hasHit = false;
+		iw::vector2 hitLocation;
 
-		bool forward = isEmpty(texture, destX, destY);
+		std::vector<iw::vector2> cellpos = FillLine(
+			x, y, 
+			x + cell.Direction.x, y + cell.Direction.y
+		);
 
-		if (cell.Life < 0) {
-			setCell(texture, x, y, _EMPTY);
-		}
-				
-		else if (forward) {
-			Cell* c = setCell(texture, destX, destY, replacement);
-			if (c) c->Direction = cell.Direction;
-		}
+		for (int i = 0; i < cellpos.size(); i++) {
+			float destX = cellpos[i].x;
+			float destY = cellpos[i].y;
 
-		else if (inBounds(texture, destX, destY)) {
-			Cell& hit = m_cells[getCoords(texture, destX, destY)];
+			bool forward = isEmpty(texture, destX, destY);
 
-			Cell tmp = cell;
-			tmp.Life -= iw::DeltaTime();
+			if (cell.Life < 0) {
+				setCell(texture, x, y, _EMPTY);
+			}
 
-			if (hit.Type != replacement.Type) {
-				hit.Life -= cell.Direction.length() * 2;
-				if (hit.Life < 0) {
-					Cell* c = setCell(texture, destX, destY, replacement);
-					if (c) {
-						c->Direction = (cell.Direction + iw::vector2(iw::randf(), iw::randf())) * .9f;
-						c->Life = cell.Life / 2;
+			else if (forward) {
+				Cell* c = setCell(texture, destX, destY, replacement);
+				if (c) {
+					if (i == cellpos.size() - 1) {
+						c->Direction = cell.Direction;
 					}
 
-					tmp.Life /= 2;
+					else {
+						c->Direction = 0;
+					}
 				}
 			}
 
+			else if (!hasHit && inBounds(texture, destX, destY)) {
+				// replace current cell with lower life
+				Cell tmp = cell;
 
-			setCell(texture, x, y, tmp); // replace current cell with lower life
+				CellType hitType = getCell(texture, destX, destY).Type;
+
+				if (hitType != cell.Type/* && (hitType != CellType::DEBRIS || iw::randf() > .8f)*/) {
+					hasHit = true;
+					hitLocation = iw::vector2(destX, destY);
+
+					tmp.Life /= 2;
+				}
+
+				tmp.Life -= iw::DeltaTime();
+				setCell(texture, x, y, tmp);
+
+				if (hasHit) {
+					break;
+				}
+			}
 		}
+
+		return { hasHit, hitLocation };
+	}
+
+	void SandLayer::HitLikeBullet(
+		size_t x, size_t y,
+		const Cell& cell)
+	{
+		Cell& hit = m_cells[getCoords(texture, x, y)];
+
+		if (hit.Type != cell.Type) {
+			hit.Life -= cell.Direction.length() * 2;
+			if (hit.Life < 0) {
+				Cell* c = setCell(texture, x, y, cell);
+				if (c) {
+					float l = c->Direction.length();
+					c->Direction += iw::vector2(iw::randf(), iw::randf()) * cell.Direction.length() / 2;
+
+					c->Direction.normalize();
+					c->Direction *= l;
+
+					c->Life = cell.Life - iw::DeltaTime() / 5;
+				}
+			}
+		}
+	}
+	
+	void SandLayer::HitLikeLaser(
+		size_t x, size_t y,
+		const Cell& cell)
+	{
+		Cell& hit = getCell(texture, x, y);
+
+		if (hit.Type != cell.Type) {
+			hit.Life -= cell.Direction.length() * 2;
+			if (hit.Life < 0) {
+				Cell* c = setCell(texture, x, y, cell);
+				if (c) {
+					float l = c->Direction.length();
+					c->Direction += iw::vector2(iw::randf(), iw::randf()) * cell.Direction.length() / 4;
+
+					c->Direction.normalize();
+					c->Direction *= l;
+
+					c->Life = cell.Life - iw::DeltaTime() / 10;
+				}
+
+				//for (size_t i = x - 5; i < x + 5; i++)
+				//for (size_t j = y - 5; j < y + 5; j++) {
+				//	if (   inBounds(texture, i, j)
+				//		&& getCell(texture, i, j).Type != cell.Type)
+				//	{
+				//		if (iw::randf() > .5) {
+				//			setCell(texture, i, j, _DEBRIS);
+				//		}
+				//
+				//		else {
+				//			setCell(texture, i, j, _EMPTY);
+				//		}
+				//	}
+				//}
+			}
+		}
+	}
+
+	std::vector<iw::vector2> SandLayer::FillLine(
+		int x,  int y,
+		int x2, int y2)
+	{
+		std::vector<iw::vector2> positions; // https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
+
+		int dx =  abs(x2 - x);
+		int dy = -abs(y2 - y);
+		int sx = x < x2 ? 1 : -1;
+		int sy = y < y2 ? 1 : -1;
+		int err = dx + dy;  /* error value e_xy */
+		
+		while (true) {
+			positions.emplace_back(x, y);
+
+			if (x == x2 && y == y2) break;
+			
+			int e2 = 2 * err;
+			if (e2 >= dy) { /* e_xy + e_x > 0 */
+				err += dy;
+				x += sx;
+			}
+
+			if (e2 <= dx) { /* e_xy + e_y < 0 */
+				err += dx;
+				y += sy;
+			}
+		}
+
+		return positions;
 	}
 }
 

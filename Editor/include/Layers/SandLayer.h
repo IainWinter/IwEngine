@@ -7,11 +7,14 @@
 
 enum class CellType {
 	EMPTY,
+
 	SAND,
 	WATER,
 	ROCK,
-	LASER,
 	METAL,
+	DEBRIS,
+
+	LASER,
 	BULLET
 };
 
@@ -38,19 +41,25 @@ namespace iw {
 		std::vector<Cell> m_cells;
 		std::vector<Cell> m_swap;
 
-		const Cell _SAND   = { CellType::SAND,   Color::From255(237, 201, 175), 0, 5 };
-		const Cell _WATER  = { CellType::WATER,  Color::From255(175, 201, 237), 0, 0 };
-		const Cell _ROCK   = { CellType::ROCK,   Color::From255(201, 201, 201), 0, 0 };
-		const Cell _METAL  = { CellType::METAL,  Color::From255(230, 230, 230),  0, 3 };
-		const Cell _LASER  = { CellType::LASER,  Color::From255(255,   0,   0), 0, .03f };
-		const Cell _BULLET = { CellType::BULLET, Color::From255(255,   255, 0), 0, .02f };
 		const Cell _EMPTY  = { CellType::EMPTY,  Color(0), 0, 0 };
 
+		const Cell _SAND   = { CellType::SAND,   Color::From255(237, 201, 175), 0, 1 };
+		const Cell _WATER  = { CellType::WATER,  Color::From255(175, 201, 237), 0, 0 };
+		const Cell _ROCK   = { CellType::ROCK,   Color::From255(201, 201, 201), 0, 0 };
+		const Cell _METAL  = { CellType::METAL,  Color::From255(230, 230, 230), 0, 100 };
+		const Cell _DEBRIS = { CellType::DEBRIS, Color::From255(150, 150, 150), 0, 1 };
+
+		const Cell _LASER  = { CellType::LASER,  Color::From255(255,   0,   0), 0, .06f };
+		const Cell _BULLET = { CellType::BULLET, Color::From255(255,   255, 0), 0, .02f };
+
 		iw::vector2 pMousePos, mousePos;
+		float fireTimeout = 0;
 
 		iw::vector2 movement;
 
-		iw::Transform playerTransform;  
+		iw::Transform playerTransform; 
+		iw::Transform enemyTransform;
+
 
 		//   0123
 		//0   ..
@@ -64,7 +73,7 @@ namespace iw {
 			vector2(0, 2), vector2(1, 2), vector2(2, 2), vector2(3, 2),
 			vector2(0, 3),                               vector2(3, 3),
 			vector2(0, 4),                               vector2(3, 4)
-		};						  
+		};
 
 	public:
 		SandLayer();
@@ -88,10 +97,22 @@ namespace iw {
 			const Cell& cell,
 			const Cell& replacement);
 
-		void MoveForward(
+		std::pair<bool, iw::vector2> MoveForward(
 			size_t x, size_t y,
 			const Cell& cell,
 			const Cell& replacement);
+
+		void HitLikeBullet(
+			size_t x, size_t y,
+			const Cell& replacement);
+
+		void HitLikeLaser(
+			size_t x, size_t y,
+			const Cell& replacement);
+
+		std::vector<iw::vector2> FillLine(
+			int x,  int y,
+			int x2, int y2);
 
 		size_t getCoords(
 			const ref<Texture>& texture,
@@ -126,6 +147,13 @@ namespace iw {
 			}
 
 			return nullptr;
+		}
+
+		Cell& getCell(
+			const ref<Texture>& texture,
+			size_t x, size_t y)
+		{
+			return m_cells[getCoords(texture, x, y)];
 		}
 	};
 }

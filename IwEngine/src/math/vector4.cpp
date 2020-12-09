@@ -137,18 +137,18 @@ namespace iw {
 
 	float vector4::major() const {
 		float major = x;
-		if (y > major) major = y;
-		if (z > major) major = z;
-		if (w > major) major = w;
+		if (abs(y) > abs(major)) major = y;
+		if (abs(z) > abs(major)) major = z;
+		if (abs(w) > abs(major)) major = w;
 
 		return major;
 	}
 
 	float vector4::minor() const {
 		float minor = x;
-		if (y < minor) minor = y;
-		if (z < minor) minor = z;
-		if (w < minor) minor = w;
+		if (abs(y) < abs(minor)) minor = y;
+		if (abs(z) < abs(minor)) minor = z;
+		if (abs(w) < abs(minor)) minor = w;
 
 		return minor;
 	}
