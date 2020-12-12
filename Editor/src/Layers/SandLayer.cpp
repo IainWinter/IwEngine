@@ -8,7 +8,7 @@ namespace iw {
 		 : Layer("Ray Marching")
 		, shader(nullptr)
 		, target (nullptr)
-		, world(SandWorld(192, 1080, 25.f))
+		, world(SandWorld(200, 1080, 5.f))
 	{
 		srand(time(nullptr));
 	}
@@ -200,9 +200,9 @@ namespace iw {
 
 		// Sand update
 
-		stepTimer -= iw::DeltaTime();
-		if (stepTimer < 0 && Keyboard::KeyDown(V)) {
-			stepTimer = .05;
+		//stepTimer -= iw::DeltaTime();
+		//if (stepTimer < 0 && Keyboard::KeyDown(V)) {
+		//	stepTimer = .05;
 
 			for(auto& [location, chunk] : world.m_chunks) {
 				for (int x = 0; x < chunk.m_width;  x++)
@@ -263,7 +263,7 @@ namespace iw {
 			}
 
 			world.CommitAdditions();
-		}
+		//}
 
 		// Swap buffers
 
@@ -276,23 +276,21 @@ namespace iw {
 
 		unsigned int* colors = (unsigned int*)target->Tex(0)->Colors();
 
-		for (auto [location, chunk] : world.GetVisibleChunks(x, y, x2, y2)) {
-			int minX = location.x * chunk->m_width;
-			int minY = location.y * chunk->m_height;
-
+		for (auto& [_, chunk] : world.GetVisibleChunks(x, y, x2, y2)) {
 			for (int y = 0; y < chunk->m_height; y++) {
 			for (int x = 0; x < chunk->m_width;  x++) {
-				int texi = (minX + x) + (minY + y) * target->Tex(0)->Width();
+				int texi = (chunk->m_x + x) + (chunk->m_y + y) * target->Tex(0)->Width();
 
 				colors[texi] = chunk->GetCell(x, y).Color; // assign rgba at the same time
 
-				if (Keyboard::KeyDown(K)) {
-					if (x == chunk->m_width - 1 || y == chunk->m_height - 1) {
-						colors[texi] = iw::Color(1, 0, 0, 1);
-					}
-				}
+				//if (Keyboard::KeyDown(K)) {
+				//	if (x == 0 || y == 0) {
+				//		colors[texi] = iw::Color(1, 0, 0, 1);
+				//	}
+				//}
 			}
 			}
+
 			//for (int i = 0; i < world.ChunkWidth() * world.ChunkHeight(); i++) {
 			//	((unsigned int*)target->Tex(0)->Colors())[i] = chunk->Cells[i].Color; // assign RGBA all at once
 			//}

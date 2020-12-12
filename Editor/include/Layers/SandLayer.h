@@ -176,9 +176,8 @@ struct SandWorld {
 		, m_scale(scale)
 		, m_cachedChunk(nullptr)
 	{
-		for (size_t i = 0; i <= 10; i++) {
-			m_chunks.emplace(iw::vector2(i, 0), SandChunk(i*m_chunkWidth, 0, m_chunkWidth, m_chunkHeight));
-		}
+		for (size_t i  = 0; i  <= 10;  i++)
+			m_chunks.emplace(iw::vector2(0, i), SandChunk(0, i * m_chunkWidth, m_chunkWidth, m_chunkHeight));
 	}
 
 	std::vector<std::pair<iw::vector2, SandChunk*>> GetVisibleChunks(
@@ -190,8 +189,8 @@ struct SandWorld {
 		auto [chunkX,  chunkY]  = GetChunkCoordsAndIntraXY(x,  y);
 		auto [chunkX2, chunkY2] = GetChunkCoordsAndIntraXY(x2, y2);
 
-		for(int cx = chunkX; cx < chunkX2; cx++)
-		for(int cy = chunkY; cy < chunkY2; cy++) {
+		for(int cx = chunkX; cx </*=*/ chunkX2; cx++)
+		for(int cy = chunkY; cy <  chunkY2; cy++) {
 			SandChunk* chunk = GetChunk(cx, cy);
 			if (chunk) {
 				visible.emplace_back(iw::vector2(cx, cy), chunk);
@@ -291,16 +290,22 @@ private:
 	{
 		chunk = m_cachedChunk;
 
-		bool notUpdated = m_cachedChunk ? m_cachedChunk->InBounds(x, y, true) : false;
-		if (!notUpdated) {
-			auto [chunkX, chunkY] = GetChunkCoordsAndIntraXY(x, y);
+		auto [chunkX, chunkY] = GetChunkCoordsAndIntraXY(x, y);
+
+		bool notCached = m_cachedChunk
+			?       m_cachedChunk->m_x / m_chunkWidth  == chunkX
+				&& m_cachedChunk->m_y / m_chunkHeight == chunkY
+				&& m_cachedChunk->InBounds(x, y)
+			: false;
+
+		if (!notCached) {
 			chunk = GetChunk(chunkX, chunkY);
 			if (chunk) {
 				m_cachedChunk = chunk;
 			}
 		}
 
-		return notUpdated;
+		return notCached;
 	}
 
 	SandChunk* GetChunk(
