@@ -181,6 +181,8 @@ namespace util {
 			memset(addr, 0xff, size);
 #endif
 
+			m_size -= size;
+
 			if (   m_previous
 				&& m_freelist.size() == 1)
 			{
@@ -194,11 +196,9 @@ namespace util {
 					}
 
 					m_next = nullptr;
-					delete this;
+					delete this; // ? is this even valid ?
 				}
 			}
-
-			m_size -= size;
 
 			return true;
 		}

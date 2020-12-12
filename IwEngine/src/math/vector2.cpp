@@ -206,8 +206,13 @@ namespace iw {
 	bool vector2::operator==(
 		const vector2& other) const
 	{
-		return almost_equal(x, other.x, 6)
-			&& almost_equal(y, other.y, 6);
+		return x == other.x
+			&& y == other.y;
+
+		// should specialize almost_equal
+
+		//return almost_equal(x, other.x, 6)
+		//	&& almost_equal(y, other.y, 6);
 	}
 
 	bool vector2::operator!=(

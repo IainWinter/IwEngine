@@ -7,9 +7,8 @@ namespace iw {
 	SandLayer::SandLayer()
 		 : Layer("Ray Marching")
 		, shader(nullptr)
-		, texture(nullptr)
 		, target (nullptr)
-		, m_scale(2.5)
+		, world(SandWorld(192, 1080, 25.f))
 	{
 		srand(time(nullptr));
 	}
@@ -21,8 +20,13 @@ namespace iw {
 
 		shader = Asset->Load<Shader>("shaders/texture.shader");
 
-		texture = REF<Texture>(Renderer->Width()  / m_scale, Renderer->Height() / m_scale, TEX_2D, RGBA);
-		texture->SetFilter(NEAREST);
+		iw::ref<iw::Texture> texture = REF<iw::Texture>(
+			Renderer->Width()  / world.m_scale,
+			Renderer->Height() / world.m_scale, 
+			iw::TEX_2D,
+			iw::RGBA
+		);
+		texture->SetFilter(iw::NEAREST);
 		texture->CreateColors();
 		texture->Clear();
 
@@ -35,23 +39,21 @@ namespace iw {
 	}
 
 	void SandLayer::PostUpdate() {
+		// Game update
+
 		if (reset) {
-			m_cells.clear();
-			m_swap .clear();
+			world.m_chunks.find(0)->second.Reset();
 
-			m_cells.resize(texture->ColorCount() / texture->Channels());
-			m_swap .resize(texture->ColorCount() / texture->Channels());
-
-			for (size_t x = 0; x < texture->Width(); x++)
-				for (size_t y = 0; y < texture->Height() - 300; y++) {
-					m_swap[getCoords(x, y)] = _SAND;
-				}
+			//for (int x = 0; x < world.m_chunkWidth; x++)
+			//for (int y = 0; y < world.m_chunkHeight - 300; y++) {
+			//	world.m_chunks.find(0)->second.SetCell(x, y, _SAND);
+			//}
 
 			Space->Clear();
 
 			player = Space->CreateEntity<iw::Transform, Tile, Player>();
 
-			player.Set<iw::Transform>(iw::vector2(texture->Width() / 2, texture->Height() / 2 + 100));
+			player.Set<iw::Transform>(iw::vector2(world.m_chunkWidth / 2, world.m_chunkHeight / 2 + 100));
 			player.Set<Tile>(std::vector<iw::vector2> {
 				vector2(1, 0), vector2(1, 0),
 					vector2(0, 1), vector2(1, 1), vector2(2, 1), vector2(3, 1),
@@ -64,255 +66,292 @@ namespace iw {
 			reset = false;
 		}
 
+		//spawnEnemy -= iw::DeltaTime();
+		//if (spawnEnemy < 0) {
+		//	iw::Entity enemy = Space->CreateEntity<iw::Transform, Tile, Enemy2>();
+		//	enemy.Set<iw::Transform>(iw::vector2(world.m_chunkWidth * iw::randf(), world.m_chunkHeight + 100 * iw::randf()));
+		//	enemy.Set<Tile>(std::vector<iw::vector2> {
+		//		vector2(1, 0), vector2(3, 0),
+		//			vector2(0, 1), vector2(1, 1), vector2(2, 1), vector2(3, 1),
+		//			vector2(0, 2), vector2(1, 2), vector2(2, 2), vector2(3, 2),
+		//			vector2(0, 3), vector2(3, 3),
+		//			vector2(0, 4), vector2(3, 4)
+		//	});
+		//	enemy.Set<Enemy2>(iw::vector2(world.m_chunkWidth * .4f * (iw::randf() + 1), 200 + (world.m_chunkHeight - 200) * .4f * (iw::randf() + 1)));
 
-		spawnEnemy -= iw::DeltaTime();
-		if (spawnEnemy < 0) {
-			iw::Entity enemy = Space->CreateEntity<iw::Transform, Tile, Enemy2>();
-			enemy.Set<iw::Transform>(iw::vector2(texture->Width() * iw::randf(), texture->Height() + 100 * iw::randf()));
-			enemy.Set<Tile>(std::vector<iw::vector2> {
-				vector2(1, 0), vector2(3, 0),
-					vector2(0, 1), vector2(1, 1), vector2(2, 1), vector2(3, 1),
-					vector2(0, 2), vector2(1, 2), vector2(2, 2), vector2(3, 2),
-					vector2(0, 3), vector2(3, 3),
-					vector2(0, 4), vector2(3, 4)
-			});
-			enemy.Set<Enemy2>(iw::vector2(texture->Width() * .4f * (iw::randf() + 1), 200 + (texture->Height() - 200) * .4f * (iw::randf() + 1)));
+		//	spawnEnemy = iw::randf() + 1;
+		//}
 
-			spawnEnemy = iw::randf() + 1;
-		}
-
-		gravPos.y = 200;
-		gravPos.x = sin(iw::TotalTime() / 10) * texture->Width() / 1.1f;
-
-
-		//if (player.Find<Player>()->Movement != 0 || player.Find<Player>()->FireButtons != 0) {
-
-		vector2 pos = mousePos / m_scale;
+		vector2 pos = mousePos / world.m_scale;
 		pos.x = floor(pos.x);
-		pos.y = floor(texture->Height() - pos.y);
+		pos.y = floor(world.m_chunkHeight - pos.y); // find correct valuer
 		
 		gravPos = pos;
 
-		if(Keyboard::KeyDown(iw::E) || Keyboard::KeyDown(iw::F) || Keyboard::KeyDown(iw::R)) {
-			for (int i = 0; i < 20; i++) {
-			for (int ii = 0; ii < 20; ii++) {
-				if (inBounds(pos.x + i, pos.y + ii)) {
-					size_t index = getCoords(pos.x + i, pos.y + ii);
+		if(Keyboard::KeyDown(iw::E) || Keyboard::KeyDown(iw::C) || Keyboard::KeyDown(iw::F) || Keyboard::KeyDown(iw::R)) {
+			for (int i = 0; i < 1; i++) {
+			for (int ii = 0; ii < 1; ii++) {
+				if (Keyboard::KeyDown(iw::C)) {
+					world.SetCell(pos.x + i, pos.y + ii, _SAND);
+				}
 
-					if (Keyboard::KeyDown(iw::E)) {
-						m_swap[index] = _SAND;
-					}
+				else if (Keyboard::KeyDown(iw::F)) {
+					world.SetCell(pos.x + i, pos.y + ii, _WATER);
+				}
 
-					else if (Keyboard::KeyDown(iw::F)) {
-						m_swap[index] = _WATER;
-					}
+				else if (Keyboard::KeyDown(iw::E)) {
+					world.SetCell(pos.x + i, pos.y + ii, _EMPTY);
+				}
 
-					else if (Keyboard::KeyDown(iw::R)) {
-						m_swap[index] = _ROCK;
-					}
+				else if (Keyboard::KeyDown(iw::R)) {
+					world.SetCell(pos.x + i, pos.y + ii, _ROCK);
 				}
 			}
 			}
 		}
 
-		Space->Query<iw::Transform, Tile>().Each([&](
-			auto e,
-			auto t,
-			auto a)
-		{
-			if (a->Locations.size() < a->InitialLocationsSize / 3) {
-				if ((*Space).HasComponent<Player>(e)) {
-					reset = true;
-				}
+		//Space->Query<iw::Transform, Tile>().Each([&](
+		//	auto e,
+		//	auto t,
+		//	auto a)
+		//{
+		//	if (a->Locations.size() < a->InitialLocationsSize / 3) {
+		//		if ((*Space).HasComponent<Player>(e)) {
+		//			reset = true;
+		//		}
 
-				(*Space).QueueEntity(e, iw::func_Destroy);
-				return;
-			}
+		//		(*Space).QueueEntity(e, iw::func_Destroy);
+		//		return;
+		//	}
 
-			for (size_t i = 0; i < a->Locations.size(); i++) {
-				vector2 v = a->Locations[i];
-				v.x += t->Position.x;
-				v.y += t->Position.y;
+		//	for (int i = 0; i < a->Locations.size(); i++) {
+		//		vector2 v = a->Locations[i];
+		//		v.x += t->Position.x;
+		//		v.y += t->Position.y;
 
-				if (!inBounds(v.x, v.y)) continue;
-				
-				Cell& cell = getCell(v.x, v.y);
+		//		if (!world.InBounds(v.x, v.y)) continue;
+		//		
+		//		Cell& cell = world.GetCell(v.x, v.y);
 
-				if (   cell.Type == CellType::EMPTY
-					|| cell.TileId == a->TileId)
-				{
-					setCell(v.x, v.y, _METAL);
-				}
+		//		if (   cell.Type == CellType::EMPTY
+		//			|| cell.TileId == a->TileId)
+		//		{
+		//			world.SetCell(v.x, v.y, _METAL);
+		//		}
 
-				else {
-					a->Locations[i] = a->Locations.back(); a->Locations.pop_back();
-					i--;
-				}
-			}
+		//		else {
+		//			a->Locations[i] = a->Locations.back(); a->Locations.pop_back();
+		//			i--;
+		//		}
+		//	}
 
-			for (vector2 v : a->Locations) {
-				v.x += t->Position.x;
-				v.y += t->Position.y;
+		//	for (vector2 v : a->Locations) {
+		//		v.x += t->Position.x;
+		//		v.y += t->Position.y;
 
-				Cell* c = setCell(v.x, v.y, _METAL);
-				if (c) {
-					c->TileId = a->TileId;
-				}
-			}
-		});
+		//		Cell* c = world.SetCell(v.x, v.y,  _METAL);
+		//		if (c) {
+		//			c->TileId = a->TileId;
+		//		}
+		//	}
+		//});
 
-		Space->Query<iw::Transform, Tile, Player>().Each([&](
-			auto,
-			auto t,
-			auto a,
-			auto p)
-		{
-			p->FireTimeout -= iw::DeltaTime();
+		//Space->Query<iw::Transform, Tile, Player>().Each([&](
+		//	auto,
+		//	auto t,
+		//	auto a,
+		//	auto p)
+		//{
+		//	p->FireTimeout -= iw::DeltaTime();
 
-			if (   p->FireTimeout < 0
-				&& p->FireButtons != 0)
-			{
-				p->FireTimeout = p->FireButtons.x == 1 ? .05f : .001f;
+		//	if (   p->FireTimeout < 0
+		//		&& p->FireButtons != 0)
+		//	{
+		//		p->FireTimeout = p->FireButtons.x == 1 ? .05f : .001f;
 
-				float speed      = p->FireButtons.x == 1 ?      10 :     25;
-				const Cell& shot = p->FireButtons.x == 1 ? _BULLET : _LASER;
+		//		float speed      = p->FireButtons.x == 1 ?      10 :     /*2*/5;
+		//		const Cell& shot = p->FireButtons.x == 1 ? _BULLET : _LASER;
 
-				Fire(t->Position, pos, speed, shot, a->TileId);
-			}
-		});
+		//		Fire(t->Position, pos, speed, shot, a->TileId);
+		//	}
+		//});
 
-		Space->Query<iw::Transform, Tile, Enemy2>().Each([&](
-			auto,
-			auto t,
-			auto a,
-			auto p)
-		{
-			p->FireTimeout -= iw::DeltaTime();
+		//Space->Query<iw::Transform, Tile, Enemy2>().Each([&](
+		//	auto,
+		//	auto t,
+		//	auto a,
+		//	auto p)
+		//{
+		//	p->FireTimeout -= iw::DeltaTime();
 
-			if (p->FireTimeout < 0) {
-				p->FireTimeout = (iw::randf() + 2) * .5f;
+		//	if (p->FireTimeout < 0) {
+		//		p->FireTimeout = (iw::randf() + 2) * .5f;
 
-				vector2 target = player.Find<iw::Transform>()->Position;
-			
-				float speed = 5;
-				const Cell& shot = _LASER;
+		//		vector2 target = player.Find<iw::Transform>()->Position;
+		//	
+		//		float speed = 5;
+		//		const Cell& shot = _LASER;
 
-				Fire(t->Position, target, speed, shot, a->TileId);
-			}
-		});
+		//		Fire(t->Position, target, speed, shot, a->TileId);
+		//	}
+		//});
 
-		for (size_t x = 0; x < texture->Width();  x++)
-		for (size_t y = 0; y < texture->Height(); y++) {
-			Cell& cell = getCell(x, y);
+		//world.CommitAdditions();
 
-			if (cell.Gravitised) {
-				vector2 dir = gravPos - vector2(x, y);
+		// Sand update
 
-				float div = 2;
-				while (abs((dir / div).major()) > 1) {
-					dir /= div;
-					div = iw::clamp(div - iw::randf(), 1.2f, 2.f);
-				}
+		stepTimer -= iw::DeltaTime();
+		if (stepTimer < 0 && Keyboard::KeyDown(V)) {
+			stepTimer = .05;
 
-				Cell& scell = getCell(x, y, true);
+			for(auto& [location, chunk] : world.m_chunks) {
+				for (int x = 0; x < chunk.m_width;  x++)
+				for (int y = 0; y < chunk.m_height; y++) {
+					Cell& cell = chunk.GetCell(x, y);
 
-				cell.Direction += dir + iw::DeltaTime();
-				scell.Direction += dir + iw::DeltaTime();
+					if (cell.Gravitised) {
+						vector2 dir = gravPos - vector2(x, y);
 
-				cell.Direction *= .9f;
-				scell.Direction *= .9f;
+						float div = 2;
+						while (abs((dir / div).major()) > 1) {
+							dir /= div;
+							div = iw::clamp(div - iw::randf(), 1.2f, 2.f);
+						}
 
-				cell.Direction  = iw::clamp<vector2>(cell.Direction, -5, 5);
-				scell.Direction = iw::clamp<vector2>(scell.Direction, -5, 5);
-			}
+						Cell& scell = chunk.GetCell(x, y, true);
 
-			switch (cell.Type) {
-				case CellType::SAND: {
-					MoveLikeSand(x, y, cell, cell);
-					break;
-				}
-				case CellType::WATER: {
-					MoveLikeWater(x, y, cell, _WATER);
-					break;
-				}
-				case CellType::BULLET: {
-					auto result = MoveForward(x, y, cell, _BULLET);
-					if (result.first) {
-						HitLikeBullet(result.second.x, result.second.y, cell);
+						cell.Direction  += dir + iw::DeltaTime();
+						scell.Direction += dir + iw::DeltaTime();
+
+						cell.Direction  *= .9f;
+						scell.Direction *= .9f;
+
+						cell.Direction  = iw::clamp<vector2>(cell.Direction, -5, 5);
+						scell.Direction = iw::clamp<vector2>(scell.Direction, -5, 5);
 					}
-					break;
-				}
-				case CellType::LASER: {
-					auto result = MoveForward(x, y, cell, _LASER);
-					if (result.first) {
-						HitLikeLaser(result.second.x, result.second.y, cell);
+
+					// X and y need to be in world coords now
+
+					int worldX = x + location.x * chunk.m_width;
+					int worldY = y + location.y * chunk.m_height;
+
+					switch (cell.Type) {
+						case CellType::SAND: {
+							MoveLikeSand(worldX, worldY, cell, cell);
+							break;
+						}
+						case CellType::WATER: {
+							MoveLikeWater(worldX, worldY, cell, _WATER);
+							break;
+						}
+						case CellType::BULLET: {
+							auto result = MoveForward(worldX, worldY, cell, _BULLET);
+							if (result.first) {
+								HitLikeBullet(result.second.x, result.second.y, cell);
+							}
+							break;
+						}
+						case CellType::LASER: {
+							auto result = MoveForward(worldX, worldY, cell, _LASER);
+							if (result.first) {
+								HitLikeLaser(result.second.x, result.second.y, cell);
+							}
+							break;
+						}
 					}
-					break;
 				}
 			}
+
+			world.CommitAdditions();
 		}
 
 		// Swap buffers
-		for (size_t i = 0; i < texture->ColorCount() / texture->Channels(); i++) {
-			m_cells[i] = m_swap[i];
-			((unsigned int*)texture->Colors())[i] = m_cells[i].Color; // assign RGBA all at once
-		}
 
-		Space->Query<iw::Transform, Tile>().Each([&](
-			auto e,
-			auto t,
-			auto a)
-		{
-			for (size_t i = 0; i < a->Locations.size(); i++) {
-				vector2 v = a->Locations[i];
-				v.x += t->Position.x;
-				v.y += t->Position.y;
+		// Get chunks that need rendering and only render those to a single texture
 
-				if (!inBounds(v.x, v.y)) continue;
-				
-				Cell& cell = getCell(v.x, v.y);
+		int x  = 0; // camera frustrum
+		int y  = 0;
+		int x2 = target->Tex(0)->Width();
+		int y2 = target->Tex(0)->Height();
 
-				if (cell.Type == CellType::EMPTY) continue;
+		unsigned int* colors = (unsigned int*)target->Tex(0)->Colors();
 
-				if (cell.TileId == a->TileId) {
-					setCell(v.x, v.y, _EMPTY);
-				}
+		for (auto [location, chunk] : world.GetVisibleChunks(x, y, x2, y2)) {
+			int minX = location.x * chunk->m_width;
+			int minY = location.y * chunk->m_height;
 
-				else {
-					a->Locations[i] = a->Locations.back(); a->Locations.pop_back();
-					i--;
+			for (int y = 0; y < chunk->m_height; y++) {
+			for (int x = 0; x < chunk->m_width;  x++) {
+				int texi = (minX + x) + (minY + y) * target->Tex(0)->Width();
+
+				colors[texi] = chunk->GetCell(x, y).Color; // assign rgba at the same time
+
+				if (Keyboard::KeyDown(K)) {
+					if (x == chunk->m_width - 1 || y == chunk->m_height - 1) {
+						colors[texi] = iw::Color(1, 0, 0, 1);
+					}
 				}
 			}
-		});
-		
-		Space->Query<iw::Transform, Tile, Player>().Each([&](
-			auto,
-			auto t,
-			auto,
-			auto p)
-		{
-			t->Position += (t->Right() * p->Movement.x * 60
-				+ t->Up() * p->Movement.y * 60)
-				* iw::DeltaTime() * m_scale;
-		});
+			}
+			//for (int i = 0; i < world.ChunkWidth() * world.ChunkHeight(); i++) {
+			//	((unsigned int*)target->Tex(0)->Colors())[i] = chunk->Cells[i].Color; // assign RGBA all at once
+			//}
+		}
 
-		Space->Query<iw::Transform, Tile, Enemy2>().Each([&](
-			auto e,
-			auto t,
-			auto,
-			auto p)
-		{
-			t->Position = iw::lerp<vector2>(
-				t->Position,
-				iw::vector2(
-					p->Spot.x + cos(iw::TotalTime() + e.Index / 5) * 100,
-					p->Spot.y + sin(iw::TotalTime() + e.Index / 5) * 100
-				),
-				iw::DeltaTime());
-		});
-		//}
+		//Space->Query<iw::Transform, Tile>().Each([&](
+		//	auto e,
+		//	auto t,
+		//	auto a)
+		//{
+		//	for (int i = 0; i < a->Locations.size(); i++) {
+		//		vector2 v = a->Locations[i];
+		//		v.x += t->Position.x;
+		//		v.y += t->Position.y;
 
-		texture->Update(Renderer->Device); // should be auto in apply filter
+		//		if (!world.InBounds(v.x, v.y)) continue;
+		//		
+		//		Cell& cell = world.GetCell(v.x, v.y, true);
+
+		//		if (cell.Type == CellType::EMPTY) continue;
+
+		//		if (cell.TileId == a->TileId) {
+		//			world.SetCell(v.x, v.y, _EMPTY);
+		//		}
+
+		//		else {
+		//			a->Locations[i] = a->Locations.back(); a->Locations.pop_back();
+		//			i--;
+		//		}
+		//	}
+		//});
+		//
+		//world.CommitAdditions();
+
+		//Space->Query<iw::Transform, Player>().Each([&](
+		//	auto,
+		//	auto t,
+		//	auto p)
+		//{
+		//	t->Position += (t->Right() * p->Movement.x * 60
+		//		+ t->Up() * p->Movement.y * 60)
+		//		* iw::DeltaTime() * world.m_scale;
+		//});
+
+		//Space->Query<iw::Transform, Enemy2>().Each([&](
+		//	auto e,
+		//	auto t,
+		//	auto p)
+		//{
+		//	t->Position = iw::lerp<vector2>(
+		//		t->Position,
+		//		iw::vector2(
+		//			p->Spot.x + cos(iw::TotalTime() + e.Index / 5) * 100,
+		//			p->Spot.y + sin(iw::TotalTime() + e.Index / 5) * 100
+		//		),
+		//		iw::DeltaTime());
+		//});
+
+		target->Tex(0)->Update(Renderer->Device); // should be auto in apply filter
 		Renderer->ApplyFilter(shader, target, nullptr);
 	}
 
@@ -363,126 +402,141 @@ namespace iw {
 	}
 
 	void SandLayer::MoveLikeSand(
-		size_t x, size_t y,
+		int x, int y,
 		Cell& cell,
 		const Cell& replacement)
 	{
 		vector2 d = cell.Direction;
 
-		if (abs(d.major()) < 1) return;
+		//if (abs(d.major()) < 1) {
+		//	LOG_INFO << "Sand with d = 0!";
+		//	return;
+		//}
 
-		vector2 l = vector2( d.y, -d.x) + d;
-		vector2 r = vector2(-d.y,  d.x) + d;
+		vector2 l = vector2(ceil ( d.y + d.x), floor(-d.x + d.y));
+		vector2 r = vector2(floor(-d.y + d.x), ceil ( d.x + d.y));
 
-		bool down = isEmpty(x + int(d.x), y + int(d.y), true);
-		bool left = isEmpty(x + int(l.x), y + int(l.y), true);
-		bool rght = isEmpty(x + int(r.x), y + int(r.y), true);
+		bool down = world.IsEmpty(x + int(d.x), y + int(d.y), true);
+		bool left = world.IsEmpty(x + int(l.x), y + int(l.y), true);
+		bool rght = world.IsEmpty(x + int(r.x), y + int(r.y), true);
 
 		if (down || left || rght) {
-			setCell(x, y, _EMPTY);
+			world.SetCell(x, y, _EMPTY);
 		}
 
-		if      (down) setCell(x + int(d.x), y + int(d.y), replacement);
-		else if (left) setCell(x + int(l.x), y + int(l.y), replacement);
-		else if (rght) setCell(x + int(r.x), y + int(r.y), replacement);
+		if      (down) world.SetCell(x + int(d.x), y + int(d.y), replacement);
+		else if (left) world.SetCell(x + int(l.x), y + int(l.y), replacement);
+		else if (rght) world.SetCell(x + int(r.x), y + int(r.y), replacement);
 	}
 
 	void SandLayer::MoveLikeWater(
-		size_t x, size_t y,
+		int x, int y,
 		const Cell& cell,
 		const Cell& replacement)
 	{
-		bool down     = isEmpty(x,     y - 1, true);
-		bool downleft = isEmpty(x - 1, y - 1, true) && iw::randf() > 0;
-		bool downrght = isEmpty(x + 1, y - 1, true) && iw::randf() > 0;
-		bool left     = isEmpty(x - 1, y,     true) && iw::randf() > 0;
-		bool rght     = isEmpty(x + 1, y,     true) && iw::randf() > 0;
+		bool down     = world.IsEmpty(x,     y - 1, true);
+		bool left     = world.IsEmpty(x - 1, y,     true);
+		bool rght     = world.IsEmpty(x + 1, y,     true);
 
-		if (down || downleft || downrght || left || rght) {
-			setCell(x, y, _EMPTY);
+		if (down || left || rght) {
+			world.SetCell(x, y, _EMPTY);
 		}
 
-		if      (down)     setCell(x, y - 1,     replacement);
-		else if (downleft) setCell(x - 1, y - 1, replacement);
-		else if (downrght) setCell(x + 1, y - 1, replacement);
-		else if (left)     setCell(x - 1, y, replacement);
-		else if (rght)     setCell(x + 1, y, replacement);
+		if      (down) world.SetCell(x,     y - 1, replacement);
+		else if (left) world.SetCell(x - 1, y,     replacement);
+		else if (rght) world.SetCell(x + 1, y,     replacement);
 	}
 
 	std::pair<bool, iw::vector2> SandLayer::MoveForward(
-		size_t x, size_t y,
-		const Cell& cell,
+		int x, int y,
+		Cell& cell,
 		const Cell& replacement)
 	{
 		bool hasHit = false;
 		iw::vector2 hitLocation;
 
-		std::vector<iw::vector2> cellpos = FillLine(
-			x, y, 
-			x + cell.Direction.x, y + cell.Direction.y
-		);
+		if (cell.Life < 0) {
+			world.SetCell(x, y, _EMPTY);
+		}
 
-		for (int i = 0; i < cellpos.size(); i++) {
-			float destX = cellpos[i].x;
-			float destY = cellpos[i].y;
+		else {
+			std::vector<iw::vector2> cellpos = FillLine(
+				floor(x), floor(y),
+				ceil(x + cell.Direction.x), ceil(y + cell.Direction.y)
+			);
 
-			bool forward = isEmpty(destX, destY);
+			for (int i = 0; i < cellpos.size(); i++) {
+				float destX = cellpos[i].x;
+				float destY = cellpos[i].y;
 
-			if (cell.Life < 0) {
-				setCell(x, y, _EMPTY);
-			}
+				bool forward = world.IsEmpty(destX, destY, true);
 
-			else if (forward) {
-				Cell* c = setCell(destX, destY, replacement);
-				if (c) {
-					if (i == cellpos.size() - 1) {
-						c->Direction = cell.Direction;
+				if (forward) {
+					Cell* c = world.SetCell(destX, destY, replacement);
+					if (c) {
+						if (i == cellpos.size() - 1) {
+							c->Direction = cell.Direction;
+						}
+
+						else {
+							c->Direction = 0;
+						}
+
+						c->TileId = cell.TileId;
 					}
-
-					else {
-						c->Direction = 0;
-					}
-
-					c->TileId = cell.TileId;
-				}
-			}
-
-			else if (  !hasHit
-					&& inBounds(destX, destY))
-			{
-				// replace current cell with lower life
-				Cell tmp = cell;
-				Cell& hit = getCell(destX, destY);
-				if (   hit.Type   != cell.Type
-					&& hit.TileId != cell.TileId)
-				{
-					hasHit = true;
-					hitLocation = iw::vector2(destX, destY);
-
-					tmp.Life /= 2;
 				}
 
-				tmp.Life -= iw::DeltaTime();
-				setCell(x, y, tmp);
+				else if (!hasHit && world.InBounds(destX, destY)) {
+					Cell& hit = world.GetCell(destX, destY, true);
+					if (   hit.Type   != cell.Type
+						&& hit.TileId != cell.TileId)
+					{
+						hasHit = true;
+						hitLocation = iw::vector2(destX, destY);
+					}
 
-				if (hasHit) {
-					break;
+					if (hasHit) {
+						break;
+					}
 				}
 			}
 		}
+
+		cell.Life -= iw::DeltaTime();
 
 		return { hasHit, hitLocation };
 	}
 
 	void SandLayer::HitLikeBullet(
-		size_t x, size_t y,
-		const Cell& cell)
+		int x, int y,
+		Cell& cell)
 	{
-		Cell& hit = getCell(x, y);
+		Cell& hit = world.GetCell(x, y);
 
 		hit.Life -= cell.Direction.length() * 2;
 		if (hit.Life < 0) {
-			Cell* c = setCell(x, y, cell);
+			Cell* c = world.SetCell(x, y, cell);
+			if (c) {
+				float l = c->Direction.length();
+
+				c->Direction += iw::vector2(iw::randf(), iw::randf()) * l;
+				c->Direction.normalize();
+				c->Direction *= l;
+
+				c->Life = cell.Life / 2;
+			}
+		}
+	}
+	
+	void SandLayer::HitLikeLaser(
+		int x, int y,
+		Cell& cell)
+	{
+		Cell& hit = world.GetCell(x, y);
+
+		hit.Life -= cell.Direction.length() * 2;
+		if (hit.Life <= 0) {
+			Cell* c = world.SetCell(x, y, cell);
 			if (c) {
 				float l = c->Direction.length();
 
@@ -490,34 +544,11 @@ namespace iw {
 				c->Direction.normalize();
 				c->Direction *= l;
 
-				c->Life = cell.Life - iw::DeltaTime() / 5;
-			}
-		}
-	}
-	
-	void SandLayer::HitLikeLaser(
-		size_t x, size_t y,
-		const Cell& cell)
-	{
-		Cell& hit = getCell(x, y);
-
-		hit.Life -= cell.Direction.length() * 2;
-		if (hit.Life < 0) {
-			LOG_INFO << "Hit";
-
-			Cell* c = setCell(x, y, cell);
-			if (c) {
-				float l = c->Direction.length();
-
-				c->Direction += iw::vector2(iw::randf(), iw::randf()) * l / 4;
-				c->Direction.normalize();
-				c->Direction *= l;
-
-				c->Life = cell.Life - iw::DeltaTime() / 10;
+				c->Life = cell.Life / 2;
 			}
 
-			//for (size_t i = x - 5; i < x + 5; i++)
-			//for (size_t j = y - 5; j < y + 5; j++) {
+			//for (int i = x - 5; i < x + 5; i++)
+			//for (int j = y - 5; j < y + 5; j++) {
 			//	if (   inBounds(i, j)
 			//		&& getCell(i, j).Type != cell.Type)
 			//	{

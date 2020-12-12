@@ -4,6 +4,13 @@
 #include "iw/graphics/Shader.h"
 #include "iw/graphics/Camera.h"
 #include <vector>
+#include <unordered_map>
+
+struct v2i_hash {
+	int operator() (const iw::vector2& v) const {
+		return (int)v.x ^ (int)v.y;
+	}
+};
 
 enum class CellType {
 	EMPTY,
@@ -27,13 +34,13 @@ struct Cell {
 
 	bool Gravitised = false;
 
-	size_t TileId = 0; // 0 = not part of tile
+	int TileId = 0; // 0 = not part of tile
 };
 
 struct Tile {
 	std::vector<iw::vector2> Locations;
-	const size_t InitialLocationsSize = 0;
-	size_t TileId;
+	const int InitialLocationsSize = 0;
+	int TileId;
 
 	Tile() = default;
 
@@ -47,7 +54,7 @@ struct Tile {
 			Locations.push_back(v * 2 + iw::vector2(0, 0) - 4);
 		}
 
-		static size_t s_tileId = 1;
+		static int s_tileId = 1;
 		TileId = s_tileId++;
 	}
 };
@@ -64,6 +71,250 @@ struct Enemy2 {
 	float FireTimeout = 0;
 };
 
+struct SandChunk {
+	std::vector<Cell> Cells;
+	std::unordered_map<size_t, Cell> m_additions;
+
+	size_t m_width;
+	size_t m_height;
+	int m_x;
+	int m_y;
+
+	SandChunk() = default;
+
+	SandChunk(int x, int y, int width, int height)
+		: m_x(x), m_y(y)
+		, m_width(width), m_height(height)
+	{
+		Cells.resize(m_width * m_height);
+	}
+
+	void Reset() {
+		size_t size = Cells.size();
+		Cells.clear(); Cells.resize(size);
+	}
+
+	void CommitAdditions() {
+		for (auto& [index, cell] : m_additions) {
+			Cells[index] = cell;
+		}
+
+		m_additions.clear();
+	}
+
+	size_t GetIndex(
+		int x, int y)
+	{
+		return x + y * m_width;
+	}
+
+	bool InBounds(
+		int x, int y, bool inWorldCoords = false)
+	{
+		if (inWorldCoords) {
+			return  m_x <= x && x < m_x + m_width
+				&& m_y <= y && y < m_y + m_height;
+		}
+
+		return  0 <= x && x < m_width
+			&& 0 <= y && y < m_height;
+	}
+
+	bool IsEmpty(
+		int x, int y,
+		bool bothBuffers = false)
+	{
+		bool isEmpty = GetCell(x, y).Type == CellType::EMPTY;
+
+		if (bothBuffers && isEmpty) {
+			return GetCell(x, y, true).Type == CellType::EMPTY;
+		}
+
+		return isEmpty;
+	}
+
+	Cell* SetCell(
+		int x, int y,
+		const Cell& cell) // could be ref
+	{
+		size_t index = GetIndex(x, y);
+		return &m_additions.emplace(index, cell).first->second;
+	}
+
+	Cell& GetCell(
+		int x, int y,
+		bool bothBuffers = false)
+	{
+		size_t index = GetIndex(x, y);
+
+		Cell* cell = &Cells[index];
+
+		if (cell->Type == CellType::EMPTY && bothBuffers) {
+			auto itr = m_additions.find(index);
+			if (itr != m_additions.end()) {
+				cell = &itr->second;
+			}
+		}
+
+		return *cell;
+	}
+};
+
+struct SandWorld {
+	float m_scale;
+	int m_chunkWidth;
+	int m_chunkHeight;
+	std::unordered_map<iw::vector2, SandChunk, v2i_hash> m_chunks;
+	SandChunk* m_cachedChunk;
+
+	SandWorld(
+		int width,
+		int height,
+		float scale)
+		: m_chunkWidth (width / scale)
+		, m_chunkHeight(height / scale)
+		, m_scale(scale)
+		, m_cachedChunk(nullptr)
+	{
+		for (size_t i = 0; i <= 10; i++) {
+			m_chunks.emplace(iw::vector2(i, 0), SandChunk(i*m_chunkWidth, 0, m_chunkWidth, m_chunkHeight));
+		}
+	}
+
+	std::vector<std::pair<iw::vector2, SandChunk*>> GetVisibleChunks(
+		int x,  int y,
+		int x2, int y2)
+	{
+		std::vector<std::pair<iw::vector2, SandChunk*>> visible;
+
+		auto [chunkX,  chunkY]  = GetChunkCoordsAndIntraXY(x,  y);
+		auto [chunkX2, chunkY2] = GetChunkCoordsAndIntraXY(x2, y2);
+
+		for(int cx = chunkX; cx < chunkX2; cx++)
+		for(int cy = chunkY; cy < chunkY2; cy++) {
+			SandChunk* chunk = GetChunk(cx, cy);
+			if (chunk) {
+				visible.emplace_back(iw::vector2(cx, cy), chunk);
+			}
+		}
+
+		return visible;
+	}
+
+	void CommitAdditions() {
+		for (auto& [_, chunk] : m_chunks) {
+			chunk.CommitAdditions();
+		}
+	}
+
+	size_t ChunkWidth() {
+		return m_chunkWidth;
+	}
+
+	size_t ChunkHeight() {
+		return m_chunkHeight;
+	}
+
+	bool InBounds(
+		int x, int y)
+	{
+		SandChunk* chunk;
+		UpdateCache(x, y, chunk);
+		if (chunk) {
+			return chunk->InBounds(x, y);
+		}
+
+		return false;
+	}
+
+	bool IsEmpty(
+		int x, int y,
+		bool bothBuffers = false)
+	{
+		SandChunk* chunk;
+		UpdateCache(x, y, chunk);
+		if (chunk) {
+			return chunk->IsEmpty(x, y, bothBuffers);
+		}
+
+		return false;
+	}
+
+	Cell* SetCell(
+		int x, int y,
+		const Cell& cell)
+	{
+		SandChunk* chunk;
+		UpdateCache(x, y, chunk);
+		if (chunk) {
+			return chunk->SetCell(x, y, cell);
+		}
+
+		return nullptr;
+	}
+
+	Cell& GetCell(
+		int x, int y,
+		bool bothBuffers = false)
+	{
+		return m_cachedChunk->GetCell(x, y, bothBuffers);
+	}
+private:
+	std::pair<int, int> GetChunkCoordsAndIntraXY(int& x, int& y) {
+		int chunkX, chunkY;
+
+		if (x >= 0) {
+			chunkX = x / m_chunkWidth;
+			x      = x % m_chunkWidth;
+		}
+
+		else {
+			chunkX = (-m_chunkWidth + x) / m_chunkWidth;
+			x      = ( m_chunkWidth + x) % m_chunkWidth;
+		}
+
+		if (y >= 0) {
+			chunkY = y / m_chunkHeight;
+			y      = y % m_chunkHeight;
+		}
+
+		else {
+			chunkY = (-m_chunkHeight + y) / m_chunkHeight;
+			y      = ( m_chunkHeight + y) % m_chunkHeight;
+		}
+
+		return {chunkX, chunkY};
+	}
+
+	bool UpdateCache(
+		int& x, int& y, SandChunk*& chunk)
+	{
+		chunk = m_cachedChunk;
+
+		bool notUpdated = m_cachedChunk ? m_cachedChunk->InBounds(x, y, true) : false;
+		if (!notUpdated) {
+			auto [chunkX, chunkY] = GetChunkCoordsAndIntraXY(x, y);
+			chunk = GetChunk(chunkX, chunkY);
+			if (chunk) {
+				m_cachedChunk = chunk;
+			}
+		}
+
+		return notUpdated;
+	}
+
+	SandChunk* GetChunk(
+		int chunkX, int chunkY)
+	{
+		auto itr = m_chunks.find(iw::vector2(chunkX, chunkY));
+		if (itr != m_chunks.end()) {
+			return &itr->second;
+		}
+
+		return nullptr;
+	}
+};
+
 namespace iw {
 	class SandLayer
 		: public Layer
@@ -71,13 +322,7 @@ namespace iw {
 	private:
 		ref<Shader> shader;
 
-		ref<Texture> texture;
 		ref<RenderTarget> target;
-
-		float m_scale;
-
-		std::vector<Cell> m_cells;
-		std::vector<Cell> m_swap;
 
 		const Cell _EMPTY  = { CellType::EMPTY,  Color(0), 0, 0 };
 
@@ -101,6 +346,10 @@ namespace iw {
 
 		bool reset = false;
 
+		SandWorld world;
+
+		float stepTimer = 0;
+
 	public:
 		SandLayer();
 
@@ -112,45 +361,45 @@ namespace iw {
 		bool On(KeyEvent& e) override;
 	private:
 		void MoveLikeSand(
-			size_t x, size_t y,
+			int x, int y,
 			Cell& cell,
 			const Cell& replacement);
 
 		void MoveLikeWater(
-			size_t x, size_t y,
+			int x, int y,
 			const Cell& cell,
 			const Cell& replacement);
 
 		std::pair<bool, iw::vector2> MoveForward(
-			size_t x, size_t y,
-			const Cell& cell,
+			int x, int y,
+			Cell& cell,
 			const Cell& replacement);
 
 		void HitLikeBullet(
-			size_t x, size_t y,
-			const Cell& replacement);
+			int x, int y,
+			Cell& cell);
 
 		void HitLikeLaser(
-			size_t x, size_t y,
-			const Cell& replacement);
+			int x, int y,
+			Cell& cell);
 
 		void Fire(
 			vector2 position,
 			vector2 target,
 			float speed,
 			const Cell& cell,
-			size_t whoFiredId)
+			int whoFiredId)
 		{
 			vector2 direction = (target - position).normalized();
 			iw::vector2 point = position + direction * iw::vector2(5, 7) + vector2(iw::randf(), iw::randf()) * 5;
 
-			if (    inBounds(point.x, point.y)
-				&& getCell(point.x, point.y).Type != CellType::EMPTY)
+			if (	   world.InBounds(point.x, point.y)
+				&& world.GetCell(point.x, point.y).Type != CellType::EMPTY)
 			{
 				return;
 			}
 
-			Cell* c = setCell(point.x, point.y, cell);
+			Cell* c = world.SetCell(point.x, point.y, cell);
 			if (c) {
 				c->Direction = direction * speed;
 				c->TileId = whoFiredId;
@@ -160,56 +409,5 @@ namespace iw {
 		std::vector<iw::vector2> FillLine(
 			int x,  int y,
 			int x2, int y2);
-
-		size_t getCoords(
-			size_t x, size_t y)
-		{
-			return x + y * texture->Width();
-		}
-
-		bool inBounds(
-			size_t x, size_t y)
-		{
-			return  x < texture->Width()
-				&& y < texture->Height();
-		}
-
-		bool isEmpty(
-			size_t x, size_t y,
-			bool bothBuffers = false)
-		{
-			if (!inBounds(x, y)) return false;
-			if (bothBuffers) {
-				return  m_cells[getCoords(x, y)].Type == _EMPTY.Type
-					&& m_swap[getCoords(x, y)].Type == _EMPTY.Type;
-			}
-
-			return m_cells[getCoords(x, y)].Type == _EMPTY.Type;
-		}
-
-		Cell* setCell(
-			size_t x, size_t y,
-			const Cell& cell,
-			bool bothBuffers = false)
-		{
-			if (inBounds(x, y)) {
-				size_t index = getCoords(x, y);
-
-				if (bothBuffers) {
-					m_cells[index] = cell;
-				}
-
-				return &(m_swap[index] = cell);
-			}
-
-			return nullptr;
-		}
-
-		Cell& getCell(
-			size_t x, size_t y,
-			bool getFromSwap = false)
-		{
-			return getFromSwap ? m_swap[getCoords(x, y)] : m_cells[getCoords(x, y)];
-		}
 	};
 }
