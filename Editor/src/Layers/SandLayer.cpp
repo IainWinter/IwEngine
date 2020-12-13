@@ -19,7 +19,7 @@ namespace iw {
 		 : Layer("Ray Marching")
 		, shader(nullptr)
 		, target (nullptr)
-		, world(SandWorld(1920, 1080, 1, 10, 3.f))
+		, world(SandWorld(1920, 1080, 1, 10, 2.f))
 	{
 		srand(time(nullptr));
 	}
@@ -50,6 +50,8 @@ namespace iw {
 	}
 
 	void SandLayer::PostUpdate() {
+		LOG_INFO << iw::DeltaTime();
+
 		// Game update
 
 		if (reset) {
@@ -215,17 +217,25 @@ namespace iw {
 		//if (stepTimer < 0 && Keyboard::KeyDown(V)) {
 		//	stepTimer = .05;
 
-		std::atomic<int> chunkCount = world.m_chunks.size();
+		std::mutex chunkCountMutex;
+		std::condition_variable chunkCountCV;
+		int chunkCount = world.m_chunks.size();
+
 		for(auto& pair: world.m_chunks) {
 			Task->queue([&]() {
 				SandWorker(world, pair.second).UpdateChunk();
-				chunkCount--;
+
+				{
+					std::unique_lock lock(chunkCountMutex);
+					chunkCount--;
+				}
+
+				chunkCountCV.notify_one();
 			});
 		}
 
-		while (chunkCount != 0) {
-
-		}
+		std::unique_lock lock(chunkCountMutex);
+		chunkCountCV.wait(lock, [&](){ return chunkCount == 0; });
 
 		world.CommitAdditions();
 		//}
@@ -234,17 +244,20 @@ namespace iw {
 
 		// Get chunks that need rendering and only render those to a single texture
 
-		int x  = 0; // camera frustrum
-		int y  = 0;
-		int x2 = target->Tex(0)->Width();
-		int y2 = target->Tex(0)->Height();
+		int width  = target->Tex(0)->Width();
+		int height = target->Tex(0)->Height();
+
+		int x = 0;//player.Find<iw::Transform>()->Position.x - width / 2; // camera frustrum
+		int y = 0;//player.Find<iw::Transform>()->Position.y - height / 2;
+		int x2 = x + width;
+		int y2 = y + height;
 
 		unsigned int* colors = (unsigned int*)target->Tex(0)->Colors();
 
 		for (auto& [_, chunk] : world.GetVisibleChunks(x, y, x2, y2)) {
 			for (int y = 0; y < chunk->m_height; y++) {
 			for (int x = 0; x < chunk->m_width;  x++) {
-				int texi = (chunk->m_x + x) + (chunk->m_y + y) * target->Tex(0)->Width();
+				int texi = (chunk->m_x + x) + (chunk->m_y + y) * width;
 
 				colors[texi] = chunk->GetCell(x, y).Color; // assign rgba at the same time
 
@@ -457,22 +470,25 @@ void SandWorker::MoveLikeSand(
 	Cell& cell,
 	const Cell& replacement)
 {
-	iw::vector2 d = cell.Direction;
+	int downX = x + cell.dX;
+	int downY = y + cell.dY;
 
-	iw::vector2 l = iw::vector2(ceil(d.y + d.x), floor(-d.x + d.y));
-	iw::vector2 r = iw::vector2(floor(-d.y + d.x), ceil(d.x + d.y));
+	int leftX = x + cell.dY + cell.dX;
+	int leftY = y - cell.dX + cell.dY;
 
-	bool down = IsEmpty(x + int(d.x), y + int(d.y), true);
-	bool left = IsEmpty(x + int(l.x), y + int(l.y), true);
-	bool rght = IsEmpty(x + int(r.x), y + int(r.y), true);
+	int rightX = x - cell.dY + cell.dX;
+	int rightY = y + cell.dX + cell.dY;
 
-	if (down || left || rght) {
+	bool moved = true;
+
+	if		(IsEmpty(downX, downY, true))   SetCell(downX, downY, replacement);
+	else if (IsEmpty(leftX, leftY, true))   SetCell(leftX, leftY, replacement);
+	else if (IsEmpty(rightX, rightY, true)) SetCell(rightX, rightY, replacement);
+	else moved = false;
+
+	if (moved) {
 		SetCell(x, y, _EMPTY);
 	}
-
-	if		(down) SetCell(x + int(d.x), y + int(d.y), replacement);
-	else if (left) SetCell(x + int(l.x), y + int(l.y), replacement);
-	else if (rght) SetCell(x + int(r.x), y + int(r.y), replacement);
 }
 
 void SandWorker::MoveLikeWater(
@@ -506,11 +522,7 @@ std::pair<bool, iw::vector2> SandWorker::MoveForward(
 	}
 
 	else {
-		std::vector<iw::vector2> cellpos = iw::FillLine(
-			floor(x),					 floor(y),
-			ceil (x + cell.Direction.x), ceil (y + cell.Direction.y)
-		);
-
+		std::vector<iw::vector2> cellpos = iw::FillLine(x, y, x + cell.dX, y + cell.dY);
 		for (int i = 0; i < cellpos.size(); i++) {
 			float destX = cellpos[i].x;
 			float destY = cellpos[i].y;
@@ -521,11 +533,13 @@ std::pair<bool, iw::vector2> SandWorker::MoveForward(
 				Cell* c = SetCell(destX, destY, replacement);
 				if (c) {
 					if (i == cellpos.size() - 1) {
-						c->Direction = cell.Direction;
+						c->dX = cell.dX;
+						c->dY = cell.dY;
 					}
 
 					else {
-						c->Direction = 0;
+						c->dY = 0;
+						c->dX = 0;
 					}
 
 					c->TileId = cell.TileId;
@@ -557,19 +571,16 @@ void SandWorker::HitLikeBullet(
 	int x, int y,
 	Cell& cell)
 {
-	Cell& hit = GetCell(x, y);
+	cell.Life /= 2;
 
-	hit.Life -= cell.Direction.length() * 2;
+	Cell& hit = GetCell(x, y, true);
+
+	hit.Life -= cell.Speed();
 	if (hit.Life < 0) {
 		Cell* c = SetCell(x, y, cell);
 		if (c) {
-			float l = c->Direction.length();
-
-			c->Direction += iw::vector2(iw::randf(), iw::randf()) * l;
-			c->Direction.normalize();
-			c->Direction *= l;
-
-			c->Life = cell.Life / 2;
+			c->dX += iw::randi(5);
+			c->dY += iw::randi(5);
 		}
 	}
 }
@@ -578,19 +589,16 @@ void SandWorker::HitLikeLaser(
 	int x, int y,
 	Cell& cell)
 {
-	Cell& hit = GetCell(x, y);
+	cell.Life /= 2;
 
-	hit.Life -= cell.Direction.length() * 2;
+	Cell& hit = GetCell(x, y, true);
+
+	hit.Life -= cell.Speed();
 	if (hit.Life <= 0) {
 		Cell* c = SetCell(x, y, cell);
 		if (c) {
-			float l = c->Direction.length();
-
-			c->Direction += iw::vector2(iw::randf(), iw::randf()) * l / 2;
-			c->Direction.normalize();
-			c->Direction *= l;
-
-			c->Life = cell.Life / 2;
+			c->dX += iw::randi(5);
+			c->dY += iw::randi(5);
 		}
 
 		//for (int i = x - 5; i < x + 5; i++)

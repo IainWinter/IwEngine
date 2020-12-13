@@ -31,11 +31,17 @@ struct Cell {
 	iw::Color Color;
 
 	float Life = 0;
-	iw::vector2 Direction = -iw::vector2::unit_y;
+	int dX = 0;
+	int dY = -1; // Velocity
 
 	bool Gravitised = false;
 
 	int TileId = 0; // 0 = not part of tile
+
+	float Speed() {
+		return (dX > 0 ? dX : -dX)
+			+ (dY > 0 ? dY : -dY); // approx
+	}
 };
 
 struct Tile {
@@ -478,7 +484,8 @@ namespace iw {
 
 			Cell* c = world.SetCell(point.x, point.y, cell);
 			if (c) {
-				c->Direction = direction * speed;
+				c->dX = ceil(direction.x * speed);
+				c->dY = ceil(direction.y * speed);
 				c->TileId = whoFiredId;
 			}
 		}
