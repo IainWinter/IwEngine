@@ -5,6 +5,7 @@
 #include "iw/graphics/Camera.h"
 #include <vector>
 #include <unordered_map>
+#include <mutex>
 
 struct v2i_hash {
 	int operator() (const iw::vector2& v) const {
@@ -75,6 +76,8 @@ struct SandChunk {
 	std::vector<Cell> Cells;
 	std::unordered_map<size_t, Cell> m_additions;
 
+	std::unordered_map<size_t, Cell> m_threadedAdditionQueue;
+
 	size_t m_width;
 	size_t m_height;
 	int m_x;
@@ -100,6 +103,12 @@ struct SandChunk {
 		}
 
 		m_additions.clear();
+
+		for (auto& [index, cell] : m_threadedAdditionQueue) {
+			Cells[index] = cell;
+		}
+
+		m_threadedAdditionQueue.clear();
 	}
 
 	size_t GetIndex(
@@ -109,7 +118,8 @@ struct SandChunk {
 	}
 
 	bool InBounds(
-		int x, int y, bool inWorldCoords = false)
+		int x, int y,
+		bool inWorldCoords = false)
 	{
 		if (inWorldCoords) {
 			return  m_x <= x && x < m_x + m_width
@@ -122,12 +132,13 @@ struct SandChunk {
 
 	bool IsEmpty(
 		int x, int y,
-		bool bothBuffers = false)
+		bool bothBuffers = false,
+		bool threaded = false)
 	{
 		bool isEmpty = GetCell(x, y).Type == CellType::EMPTY;
 
 		if (bothBuffers && isEmpty) {
-			return GetCell(x, y, true).Type == CellType::EMPTY;
+			return GetCell(x, y, true, threaded).Type == CellType::EMPTY;
 		}
 
 		return isEmpty;
@@ -135,24 +146,39 @@ struct SandChunk {
 
 	Cell* SetCell(
 		int x, int y,
-		const Cell& cell) // could be ref
+		const Cell& cell,
+		bool threaded = false) // could be ref
 	{
 		size_t index = GetIndex(x, y);
+
+		if (threaded) {
+			return &m_threadedAdditionQueue.emplace(index, cell).first->second;
+		}
+
 		return &m_additions.emplace(index, cell).first->second;
 	}
 
 	Cell& GetCell(
 		int x, int y,
-		bool bothBuffers = false)
+		bool bothBuffers = false,
+		bool threaded = false)
 	{
 		size_t index = GetIndex(x, y);
 
 		Cell* cell = &Cells[index];
 
 		if (cell->Type == CellType::EMPTY && bothBuffers) {
-			auto itr = m_additions.find(index);
-			if (itr != m_additions.end()) {
-				cell = &itr->second;
+			if (threaded) {
+				auto itr = m_threadedAdditionQueue.find(index);
+				if (itr != m_threadedAdditionQueue.end()) {
+					cell = &itr->second;
+				}
+			}
+			else {
+				auto itr = m_additions.find(index);
+				if (itr != m_additions.end()) {
+					cell = &itr->second;
+				}
 			}
 		}
 
@@ -164,20 +190,24 @@ struct SandWorld {
 	float m_scale;
 	int m_chunkWidth;
 	int m_chunkHeight;
+
 	std::unordered_map<iw::vector2, SandChunk, v2i_hash> m_chunks;
-	SandChunk* m_cachedChunk;
+	std::mutex m_additionMutex;
 
 	SandWorld(
 		int width,
 		int height,
+		int chunksX,
+		int chunksY,
 		float scale)
-		: m_chunkWidth (width / scale)
-		, m_chunkHeight(height / scale)
+		: m_chunkWidth (width / scale / chunksX)
+		, m_chunkHeight(height / scale / chunksY)
 		, m_scale(scale)
-		, m_cachedChunk(nullptr)
 	{
-		for (size_t i  = 0; i  <= 10;  i++)
-			m_chunks.emplace(iw::vector2(0, i), SandChunk(0, i * m_chunkWidth, m_chunkWidth, m_chunkHeight));
+		for (size_t x  = 0; x  < chunksX; x++)
+		for (size_t y  = 0; y  < chunksY; y++) {
+			m_chunks.emplace(iw::vector2(x, y), SandChunk(x * m_chunkWidth, y * m_chunkHeight, m_chunkWidth, m_chunkHeight));
+		}
 	}
 
 	std::vector<std::pair<iw::vector2, SandChunk*>> GetVisibleChunks(
@@ -189,7 +219,7 @@ struct SandWorld {
 		auto [chunkX,  chunkY]  = GetChunkCoordsAndIntraXY(x,  y);
 		auto [chunkX2, chunkY2] = GetChunkCoordsAndIntraXY(x2, y2);
 
-		for(int cx = chunkX; cx </*=*/ chunkX2; cx++)
+		for(int cx = chunkX; cx < chunkX2; cx++)
 		for(int cy = chunkY; cy <  chunkY2; cy++) {
 			SandChunk* chunk = GetChunk(cx, cy);
 			if (chunk) {
@@ -206,6 +236,12 @@ struct SandWorld {
 		}
 	}
 
+	void Reset() {
+		for (auto& [_, chunk] : m_chunks) {
+			chunk.Reset();
+		}
+	}
+
 	size_t ChunkWidth() {
 		return m_chunkWidth;
 	}
@@ -217,9 +253,7 @@ struct SandWorld {
 	bool InBounds(
 		int x, int y)
 	{
-		SandChunk* chunk;
-		UpdateCache(x, y, chunk);
-		if (chunk) {
+		if (SandChunk* chunk = GetChunkAndMapCoords(x, y)) {
 			return chunk->InBounds(x, y);
 		}
 
@@ -230,9 +264,12 @@ struct SandWorld {
 		int x, int y,
 		bool bothBuffers = false)
 	{
-		SandChunk* chunk;
-		UpdateCache(x, y, chunk);
-		if (chunk) {
+		if (SandChunk* chunk = GetChunkAndMapCoords(x, y)) {
+			if (bothBuffers) {
+				std::unique_lock lock(m_additionMutex);
+				return chunk->IsEmpty(x, y, bothBuffers, true);
+			}
+
 			return chunk->IsEmpty(x, y, bothBuffers);
 		}
 
@@ -243,10 +280,9 @@ struct SandWorld {
 		int x, int y,
 		const Cell& cell)
 	{
-		SandChunk* chunk;
-		UpdateCache(x, y, chunk);
-		if (chunk) {
-			return chunk->SetCell(x, y, cell);
+		if (SandChunk* chunk = GetChunkAndMapCoords(x, y)) {
+			std::unique_lock lock(m_additionMutex);
+			return chunk->SetCell(x, y, cell, true);
 		}
 
 		return nullptr;
@@ -256,7 +292,13 @@ struct SandWorld {
 		int x, int y,
 		bool bothBuffers = false)
 	{
-		return m_cachedChunk->GetCell(x, y, bothBuffers);
+		SandChunk* chunk = GetChunkAndMapCoords(x, y);
+		if (bothBuffers) {
+			std::unique_lock lock(m_additionMutex);
+			return chunk->GetCell(x, y, bothBuffers, true);
+		}
+
+		return chunk->GetCell(x, y, bothBuffers);
 	}
 private:
 	std::pair<int, int> GetChunkCoordsAndIntraXY(int& x, int& y) {
@@ -285,27 +327,11 @@ private:
 		return {chunkX, chunkY};
 	}
 
-	bool UpdateCache(
-		int& x, int& y, SandChunk*& chunk)
+	SandChunk* GetChunkAndMapCoords(
+		int& x, int& y)
 	{
-		chunk = m_cachedChunk;
-
 		auto [chunkX, chunkY] = GetChunkCoordsAndIntraXY(x, y);
-
-		bool notCached = m_cachedChunk
-			?       m_cachedChunk->m_x / m_chunkWidth  == chunkX
-				&& m_cachedChunk->m_y / m_chunkHeight == chunkY
-				&& m_cachedChunk->InBounds(x, y)
-			: false;
-
-		if (!notCached) {
-			chunk = GetChunk(chunkX, chunkY);
-			if (chunk) {
-				m_cachedChunk = chunk;
-			}
-		}
-
-		return notCached;
+		return GetChunk(chunkX, chunkY);
 	}
 
 	SandChunk* GetChunk(
@@ -320,6 +346,85 @@ private:
 	}
 };
 
+class SandWorker {
+private:
+	SandWorld& m_world;
+	SandChunk& m_chunk;
+
+public:
+	SandWorker(SandWorld& world, SandChunk& chunk) : m_world(world), m_chunk(chunk) {}
+
+	bool InBounds(
+		int x, int y)
+	{
+		if (m_chunk.InBounds(x, y)) {
+			return true;
+		}
+
+		return m_world.InBounds(x + m_chunk.m_x, y + m_chunk.m_y);
+	}
+
+	bool IsEmpty(
+		int x, int y,
+		bool bothBuffers = false)
+	{
+		if (m_chunk.InBounds(x, y)) {
+			return m_chunk.IsEmpty(x, y, bothBuffers);
+		}
+
+		return m_world.IsEmpty(x + m_chunk.m_x, y + m_chunk.m_y, bothBuffers);
+	}
+
+	Cell* SetCell(
+		int x, int y,
+		const Cell& cell)
+	{
+		if (m_chunk.InBounds(x, y)) {
+			return m_chunk.SetCell(x, y, cell);
+		}
+
+		return m_world.SetCell(x + m_chunk.m_x, y + m_chunk.m_y, cell);
+	}
+
+	Cell& GetCell(
+		int x, int y,
+		bool bothBuffers = false)
+	{
+		if (m_chunk.InBounds(x, y)) {
+			return m_chunk.GetCell(x, y, bothBuffers);
+		}
+
+		return m_world.GetCell(x + m_chunk.m_x, y + m_chunk.m_y, bothBuffers);
+	}
+
+	void UpdateChunk();
+
+	 // move to child class
+
+	void MoveLikeSand(
+		int x, int y,
+		Cell& cell,
+		const Cell& replacement);
+
+	void MoveLikeWater(
+		int x, int y,
+		const Cell& cell,
+		const Cell& replacement);
+
+	std::pair<bool, iw::vector2> MoveForward(
+		int x, int y,
+		Cell& cell,
+		const Cell& replacement);
+
+	void HitLikeBullet(
+		int x, int y,
+		Cell& cell);
+
+	void HitLikeLaser(
+		int x, int y,
+		Cell& cell);
+};
+
 namespace iw {
 	class SandLayer
 		: public Layer
@@ -328,17 +433,7 @@ namespace iw {
 		ref<Shader> shader;
 
 		ref<RenderTarget> target;
-
-		const Cell _EMPTY  = { CellType::EMPTY,  Color(0), 0, 0 };
-
-		const Cell _SAND   = { CellType::SAND,   Color::From255(237, 201, 175), 1 };
-		const Cell _WATER  = { CellType::WATER,  Color::From255(175, 201, 237)};
-		const Cell _ROCK   = { CellType::ROCK,   Color::From255(201, 201, 201)};
-		const Cell _METAL  = { CellType::METAL,  Color::From255(230, 230, 230), 10 };
-		const Cell _DEBRIS = { CellType::DEBRIS, Color::From255(150, 150, 150), 1 };
-
-		const Cell _LASER  = { CellType::LASER,  Color::From255(255,   0,   0), .06f };
-		const Cell _BULLET = { CellType::BULLET, Color::From255(255,   255, 0), .02f };
+		ref<Texture> texture;
 
 		iw::vector2 pMousePos, mousePos;
 		float fireTimeout = 0;
@@ -365,29 +460,6 @@ namespace iw {
 		bool On(MouseButtonEvent& e) override;
 		bool On(KeyEvent& e) override;
 	private:
-		void MoveLikeSand(
-			int x, int y,
-			Cell& cell,
-			const Cell& replacement);
-
-		void MoveLikeWater(
-			int x, int y,
-			const Cell& cell,
-			const Cell& replacement);
-
-		std::pair<bool, iw::vector2> MoveForward(
-			int x, int y,
-			Cell& cell,
-			const Cell& replacement);
-
-		void HitLikeBullet(
-			int x, int y,
-			Cell& cell);
-
-		void HitLikeLaser(
-			int x, int y,
-			Cell& cell);
-
 		void Fire(
 			vector2 position,
 			vector2 target,
@@ -410,9 +482,9 @@ namespace iw {
 				c->TileId = whoFiredId;
 			}
 		}
-
-		std::vector<iw::vector2> FillLine(
-			int x,  int y,
-			int x2, int y2);
 	};
+
+	std::vector<iw::vector2> FillLine(
+		int x, int y,
+		int x2, int y2);
 }
