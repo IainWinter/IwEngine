@@ -13,7 +13,7 @@ struct v2i_hash {
 	}
 };
 
-enum class CellType {
+enum class CellType : short {
 	EMPTY,
 
 	SAND,
@@ -34,7 +34,11 @@ struct Cell {
 	int dX = 0;
 	int dY = -1; // Velocity
 
-	bool Gravitised = false;
+	//iw::vector2 Pos;
+	//iw::vector2 Vel;
+
+	//int CanReplicate = true;
+	//bool Gravitised = false;
 
 	int TileId = 0; // 0 = not part of tile
 
@@ -79,42 +83,84 @@ struct Enemy2 {
 };
 
 struct SandChunk {
-	std::vector<Cell> Cells;
+private:
 	std::unordered_map<size_t, Cell> m_additions;
+	std::unordered_map<size_t, Cell> m_threadedAdditions;
+	std::mutex m_threadedAdditionMutex;
+	std::vector<Cell> m_cells;
+	int m_nonEmptyCellCount;
 
-	std::unordered_map<size_t, Cell> m_threadedAdditionQueue;
-
-	size_t m_width;
-	size_t m_height;
-	int m_x;
-	int m_y;
+public:
+	const int m_width; // should be private
+	const int m_height;
+	const int m_x;
+	const int m_y;
 
 	SandChunk() = default;
+
+	SandChunk(SandChunk&& move) noexcept
+		: m_cells(move.m_cells)
+		, m_additions(move.m_additions)
+		, m_threadedAdditions(move.m_threadedAdditions)
+		, m_threadedAdditionMutex() // Make another mutex
+		, m_width(move.m_width)
+		, m_height(move.m_height)
+		, m_x(move.m_x)
+		, m_y(move.m_y)
+	{}
 
 	SandChunk(int x, int y, int width, int height)
 		: m_x(x), m_y(y)
 		, m_width(width), m_height(height)
 	{
-		Cells.resize(m_width * m_height);
+		m_cells.resize(m_width * m_height);
 	}
 
 	void Reset() {
-		size_t size = Cells.size();
-		Cells.clear(); Cells.resize(size);
+		size_t size = m_cells.size();
+		m_cells.clear(); m_cells.resize(size);
 	}
 
 	void CommitAdditions() {
 		for (auto& [index, cell] : m_additions) {
-			Cells[index] = cell;
+			Cell& assign = m_cells[index];
+
+			if (    cell  .Type == CellType::EMPTY
+				&& assign.Type != CellType::EMPTY)
+			{
+				m_nonEmptyCellCount--;
+			}
+
+			else if (cell  .Type != CellType::EMPTY
+				 && assign.Type == CellType::EMPTY)
+			{
+				m_nonEmptyCellCount++;
+			}
+
+			assign = cell;
 		}
 
 		m_additions.clear();
 
-		for (auto& [index, cell] : m_threadedAdditionQueue) {
-			Cells[index] = cell;
+		for (auto& [index, cell] : m_threadedAdditions) {
+			Cell& assign = m_cells[index];
+
+			if (    cell  .Type == CellType::EMPTY
+				&& assign.Type != CellType::EMPTY)
+			{
+				m_nonEmptyCellCount--;
+			}
+
+			else if (cell  .Type != CellType::EMPTY
+				 && assign.Type == CellType::EMPTY)
+			{
+				m_nonEmptyCellCount++;
+			}
+
+			assign = cell;
 		}
 
-		m_threadedAdditionQueue.clear();
+		m_threadedAdditions.clear();
 	}
 
 	size_t GetIndex(
@@ -134,6 +180,10 @@ struct SandChunk {
 
 		return  0 <= x && x < m_width
 			&& 0 <= y && y < m_height;
+	}
+
+	bool IsEmpty() {
+		return m_nonEmptyCellCount == 0;
 	}
 
 	bool IsEmpty(
@@ -156,12 +206,21 @@ struct SandChunk {
 		bool threaded = false) // could be ref
 	{
 		size_t index = GetIndex(x, y);
+		Cell* out = nullptr;
 
 		if (threaded) {
-			return &m_threadedAdditionQueue.emplace(index, cell).first->second;
+			std::unique_lock lock(m_threadedAdditionMutex);
+			out = &(m_threadedAdditions[index] = cell);
 		}
 
-		return &m_additions.emplace(index, cell).first->second;
+		else {
+			out = &(m_additions[index] = cell);
+		}
+
+		//out->Pos.x = x;
+		//out->Pos.y = y;
+
+		return out;
 	}
 
 	Cell& GetCell(
@@ -170,18 +229,19 @@ struct SandChunk {
 		bool threaded = false)
 	{
 		size_t index = GetIndex(x, y);
-
-		Cell* cell = &Cells[index];
+		Cell* cell = &m_cells[index];
 
 		if (cell->Type == CellType::EMPTY && bothBuffers) {
 			if (threaded) {
-				auto itr = m_threadedAdditionQueue.find(index);
-				if (itr != m_threadedAdditionQueue.end()) {
+				std::unique_lock lock(m_threadedAdditionMutex);
+				const auto itr = m_threadedAdditions.find(index);
+				if (itr != m_threadedAdditions.end()) {
 					cell = &itr->second;
 				}
 			}
+
 			else {
-				auto itr = m_additions.find(index);
+				const auto itr = m_additions.find(index);
 				if (itr != m_additions.end()) {
 					cell = &itr->second;
 				}
@@ -193,12 +253,13 @@ struct SandChunk {
 };
 
 struct SandWorld {
-	float m_scale;
+private:
+
+public:
+	std::unordered_map<size_t, SandChunk> m_chunks;  // all should be private
+	float m_scale; 
 	int m_chunkWidth;
 	int m_chunkHeight;
-
-	std::unordered_map<iw::vector2, SandChunk, v2i_hash> m_chunks;
-	std::mutex m_additionMutex;
 
 	SandWorld(
 		int width,
@@ -210,26 +271,31 @@ struct SandWorld {
 		, m_chunkHeight(height / scale / chunksY)
 		, m_scale(scale)
 	{
-		for (size_t x  = 0; x  < chunksX; x++)
-		for (size_t y  = 0; y  < chunksY; y++) {
-			m_chunks.emplace(iw::vector2(x, y), SandChunk(x * m_chunkWidth, y * m_chunkHeight, m_chunkWidth, m_chunkHeight));
+		for (int x = -chunksX/2; x < chunksX/2; x++)
+		for (int y = -chunksY/2; y < chunksY/2; y++) {
+			m_chunks.emplace(
+				GetChunkIndex(x, y),
+				SandChunk(
+					m_chunkWidth * x, m_chunkHeight * y,
+					m_chunkWidth,     m_chunkHeight)
+			);
 		}
 	}
 
-	std::vector<std::pair<iw::vector2, SandChunk*>> GetVisibleChunks(
+	std::vector<SandChunk*> GetVisibleChunks(
 		int x,  int y,
 		int x2, int y2)
 	{
-		std::vector<std::pair<iw::vector2, SandChunk*>> visible;
+		std::vector<SandChunk*> visible;
 
 		auto [chunkX,  chunkY]  = GetChunkCoordsAndIntraXY(x,  y);
 		auto [chunkX2, chunkY2] = GetChunkCoordsAndIntraXY(x2, y2);
 
 		for(int cx = chunkX; cx < chunkX2; cx++)
-		for(int cy = chunkY; cy <  chunkY2; cy++) {
+		for(int cy = chunkY; cy < chunkY2; cy++) {
 			SandChunk* chunk = GetChunk(cx, cy);
 			if (chunk) {
-				visible.emplace_back(iw::vector2(cx, cy), chunk);
+				visible.push_back(chunk);
 			}
 		}
 
@@ -272,7 +338,6 @@ struct SandWorld {
 	{
 		if (SandChunk* chunk = GetChunkAndMapCoords(x, y)) {
 			if (bothBuffers) {
-				std::unique_lock lock(m_additionMutex);
 				return chunk->IsEmpty(x, y, bothBuffers, true);
 			}
 
@@ -287,7 +352,6 @@ struct SandWorld {
 		const Cell& cell)
 	{
 		if (SandChunk* chunk = GetChunkAndMapCoords(x, y)) {
-			std::unique_lock lock(m_additionMutex);
 			return chunk->SetCell(x, y, cell, true);
 		}
 
@@ -300,7 +364,6 @@ struct SandWorld {
 	{
 		SandChunk* chunk = GetChunkAndMapCoords(x, y);
 		if (bothBuffers) {
-			std::unique_lock lock(m_additionMutex);
 			return chunk->GetCell(x, y, bothBuffers, true);
 		}
 
@@ -343,12 +406,24 @@ private:
 	SandChunk* GetChunk(
 		int chunkX, int chunkY)
 	{
-		auto itr = m_chunks.find(iw::vector2(chunkX, chunkY));
+		auto itr = m_chunks.find(GetChunkIndex(chunkX, chunkY));
+		/*if (itr == m_chunks.end()) {
+			itr = m_chunks.emplace(
+					iw::vector2(chunkX, chunkY),
+					SandChunk(m_chunkWidth * chunkX, m_chunkHeight * chunkY,
+							m_chunkWidth,          m_chunkHeight)
+				).first;
+		}*/
+
 		if (itr != m_chunks.end()) {
 			return &itr->second;
 		}
 
-		return nullptr;
+		return nullptr;//&itr->second;
+	}
+
+	size_t GetChunkIndex(int chunkX, int chunkY) {
+		return size_t(chunkX) | size_t(chunkY) << (sizeof(size_t)*8/2); // find better hash
 	}
 };
 
@@ -482,10 +557,16 @@ namespace iw {
 				return;
 			}
 
+			float div = 2;
+			while (abs((direction / div).major()) > 1) {
+				direction /= div;
+				div = iw::clamp(div - iw::randf(), 1.2f, 2.f);
+			}
+
 			Cell* c = world.SetCell(point.x, point.y, cell);
 			if (c) {
-				c->dX = ceil(direction.x * speed);
-				c->dY = ceil(direction.y * speed);
+				c->dX = direction.x * speed;
+				c->dY = direction.y * speed;
 				c->TileId = whoFiredId;
 			}
 		}
