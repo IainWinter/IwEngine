@@ -58,18 +58,6 @@ namespace math {
 	}
 
 	template<>
-	float clamp(
-		const float& x,
-		const float& min,
-		const float& max)
-	{
-		if (min > x) return min;
-		if (max < x) return max;
-
-		return x;
-	}
-
-	template<>
 	vector2 clamp(
 		const vector2& v,
 		const vector2& min,

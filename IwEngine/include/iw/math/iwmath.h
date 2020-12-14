@@ -135,15 +135,11 @@ namespace math {
 		const _t& min,
 		const _t& max)
 	{
-		static_assert("no impl for clamp of type t");
-	}
+		if (min > x) return min;
+		if (max < x) return max;
 
-	template<>
-	IWMATH_API
-	float clamp(
-		const float& x,
-		const float& min,
-		const float& max);
+		return x;
+	}
 
 	template<>
 	IWMATH_API
