@@ -10,14 +10,14 @@ const Cell _METAL = { CellType::METAL,  iw::Color::From255(230, 230, 230), 10 };
 const Cell _DEBRIS = { CellType::DEBRIS, iw::Color::From255(150, 150, 150), 1 };
 
 const Cell _LASER = { CellType::LASER,  iw::Color::From255(255,   0,   0), .06f };
-const Cell _BULLET = { CellType::BULLET, iw::Color::From255(255,   255, 0), .02f };
+const Cell _BULLET = { CellType::BULLET, iw::Color::From255(255,   255, 0), .2f };
 
 namespace iw {
 	SandLayer::SandLayer()
 		 : Layer("Ray Marching")
 		, shader(nullptr)
 		, target (nullptr)
-		, world(SandWorld(1920*2, 1080*2, 10, 10, 2.f))
+		, world(SandWorld(1920, 1080, 10, 10, 2.f))
 	{
 		srand(time(nullptr));
 	}
@@ -155,7 +155,7 @@ namespace iw {
 
 				if (!world.InBounds(v.x, v.y)) continue;
 				
-				Cell& cell = world.GetCell(v.x, v.y);
+				const Cell& cell = world.GetCell(v.x, v.y);
 
 				if (   cell.Type == CellType::EMPTY
 					|| cell.TileId == a->TileId)
@@ -173,10 +173,10 @@ namespace iw {
 				v.x += t->Position.x;
 				v.y += t->Position.y;
 
-				Cell* c = world.SetCell(v.x, v.y,  _METAL);
-				if (c) {
-					c->TileId = a->TileId;
-				}
+				Cell me = _METAL;
+				me.TileId = a->TileId;
+
+				world.SetCell(v.x, v.y, me);
 			}
 		});
 
@@ -220,13 +220,13 @@ namespace iw {
 			}
 		});
 
-		world.CommitAdditions();
-
 		// Sand update
 
 		//stepTimer -= iw::DeltaTime();
 		//if (stepTimer < 0 /*&& Keyboard::KeyDown(V)*/) {
 			//stepTimer = 1 / 60.0f;
+
+			world.m_currentTick += 1;
 
 			std::mutex chunkCountMutex;
 			std::condition_variable chunkCountCV;
@@ -256,8 +256,6 @@ namespace iw {
 
 			std::unique_lock lock(chunkCountMutex);
 			chunkCountCV.wait(lock, [&](){ return chunkCount == 0; });
-
-			world.CommitAdditions();
 		//}
 
 		// Swap buffers
@@ -312,7 +310,7 @@ namespace iw {
 
 				if (!world.InBounds(v.x, v.y)) continue;
 				
-				Cell& cell = world.GetCell(v.x, v.y, true);
+				const Cell& cell = world.GetCell(v.x, v.y);
 
 				if (cell.Type == CellType::EMPTY) continue;
 
@@ -327,7 +325,7 @@ namespace iw {
 			}
 		});
 		
-		world.CommitAdditions();
+		//world.CommitAdditions();
 
 		Space->Query<iw::Transform, Player>().Each([&](
 			auto,
@@ -437,9 +435,12 @@ namespace iw {
 }
 
 void SandWorker::UpdateChunk() {
-	for (int x = 0; x < m_chunk.m_width; x++)
-	for (int y = 0; y < m_chunk.m_height; y++) {
-		Cell& cell = m_chunk.GetCell(x, y);
+	for (int x = m_chunk.m_width-1; x >= 0 ;  x--)
+	for (int y = m_chunk.m_height-1; y >= 0 ; y--) {
+		if (CellAlreadyUpdated(x, y)) continue;
+
+		Cell cell = m_chunk.GetCell(x, y);
+
 
 		// Would go in grav worker or something
 
@@ -493,7 +494,7 @@ void SandWorker::UpdateChunk() {
 
 void SandWorker::MoveLikeSand(
 	int x, int y,
-	Cell& cell,
+	const Cell& cell,
 	const Cell& replacement)
 {
 	int px = x;//cell.Pos.x;
@@ -513,9 +514,9 @@ void SandWorker::MoveLikeSand(
 
 	bool moved = true;
 
-	if		(IsEmpty(downX,      downY,      true)) SetCell(downX,      downY,      replacement);
-	else if (IsEmpty(downLeftX,  downLeftY,  true)) SetCell(downLeftX,  downLeftY,  replacement);
-	else if (IsEmpty(downRightX, downRightY, true)) SetCell(downRightX, downRightY, replacement);
+	if		(IsEmpty(downX,      downY))      SetCell(downX,      downY,      replacement);
+	else if (IsEmpty(downLeftX,  downLeftY))  SetCell(downLeftX,  downLeftY,  replacement);
+	else if (IsEmpty(downRightX, downRightY)) SetCell(downRightX, downRightY, replacement);
 	else moved = false;
 
 	//cell.Vel.y -= 1;
@@ -540,16 +541,16 @@ void SandWorker::MoveLikeWater(
 	int downY = y + cell.dY;
 
 	int leftX = x + cell.dY + cell.dX;
-	int leftY = y - cell.dX/* + cell.dY*/;
+	int leftY = y - cell.dX;
 
 	int rightX = x - cell.dY + cell.dX;
-	int rightY = y + cell.dX/* + cell.dY*/;
+	int rightY = y + cell.dX;
 
 	bool moved = true;
 
-	if		(IsEmpty(downX,  downY,  true)) SetCell(downX,  downY,  replacement);
-	else if (IsEmpty(leftX,  leftY,  true)) SetCell(leftX,  leftY,  replacement);
-	else if (IsEmpty(rightX, rightY, true)) SetCell(rightX, rightY, replacement);
+	if		(IsEmpty(downX,  downY))  SetCell(downX,  downY,  replacement);
+	else if (IsEmpty(leftX,  leftY))  SetCell(leftX,  leftY,  replacement);
+	else if (IsEmpty(rightX, rightY)) SetCell(rightX, rightY, replacement);
 	else moved = false;
 
 	if (moved) {
@@ -571,7 +572,7 @@ void SandWorker::MoveLikeWater(
 
 std::pair<bool, iw::vector2> SandWorker::MoveForward(
 	int x, int y,
-	Cell& cell,
+	const Cell& cell,
 	const Cell& replacement)
 {
 	bool hasHit = false;
@@ -587,27 +588,21 @@ std::pair<bool, iw::vector2> SandWorker::MoveForward(
 			float destX = cellpos[i].x;
 			float destY = cellpos[i].y;
 
-			bool forward = IsEmpty(destX, destY, true);
+			bool forward = IsEmpty(destX, destY);
 
 			if (forward) {
-				Cell* c = SetCell(destX, destY, replacement);
-				if (c) {
-					if (i == cellpos.size() - 1) {
-						c->dX = cell.dX;
-						c->dY = cell.dY;
-					}
+				bool last = i == (cellpos.size() - 1);
 
-					else {
-						c->dY = 0;
-						c->dX = 0;
-					}
+				Cell replace = replacement;
+				replace.TileId = cell.TileId;
+				replace.dX = last ? cell.dX : 0;
+				replace.dY = last ? cell.dY : 0;
 
-					c->TileId = cell.TileId;
-				}
+				SetCell(destX, destY, replace);
 			}
 
 			else if (!hasHit && InBounds(destX, destY)) {
-				Cell& hit = GetCell(destX, destY, true);
+				Cell hit = GetCell(destX, destY);
 				if (   hit.Type   != cell.Type
 					&& hit.TileId != cell.TileId)
 				{
@@ -620,46 +615,51 @@ std::pair<bool, iw::vector2> SandWorker::MoveForward(
 				}
 			}
 		}
-	}
 
-	cell.Life -= iw::DeltaTime();
+		Cell replace = cell;
+		replace.Life -= iw::DeltaTime();
+
+		SetCell(x, y, replace);
+	}
 
 	return { hasHit, hitLocation };
 }
 
 void SandWorker::HitLikeBullet(
 	int x, int y,
-	Cell& cell)
+	const Cell& bullet)
 {
-	//cell.Life /= 2;
+	Cell hit = GetCell(x, y);
 
-	Cell& hit = GetCell(x, y, true);
-
-	hit.Life -= cell.Speed();
+	hit.Life -= bullet.Speed();
 	if (hit.Life < 0) {
-		Cell* c = SetCell(x, y, cell);
-		if (c) {
-			c->dX += iw::randi(6) - 3;
-			c->dY += iw::randi(6) - 3;
-		}
+		Cell cell = bullet;
+		cell.dX += iw::randi(6) - 3;
+		cell.dY += iw::randi(6) - 3;
+		cell.Life /= 2;
+
+		SetCell(x, y, cell);
+	}
+
+	else {
+		SetCell(x, y, hit);
 	}
 }
 
 void SandWorker::HitLikeLaser(
 	int x, int y,
-	Cell& cell)
+	const Cell& laser)
 {
-	//cell.Life /= 2;
+	Cell hit = GetCell(x, y);
 
-	Cell& hit = GetCell(x, y, true);
-
-	hit.Life -= cell.Speed();
+	hit.Life -= laser.Speed();
 	if (hit.Life <= 0) {
-		Cell* c = SetCell(x, y, cell);
-		if (c) {
-			c->dX += iw::randi(4) - 2;
-			c->dY += iw::randi(4) - 2;
-		}
+		Cell cell = laser;
+		cell.dX += iw::randi(4) - 2;
+		cell.dY += iw::randi(4) - 2;
+		cell.Life /= 2;
+
+		SetCell(x, y, cell);
 
 		//for (int i = x - 5; i < x + 5; i++)
 		//for (int j = y - 5; j < y + 5; j++) {
@@ -675,5 +675,9 @@ void SandWorker::HitLikeLaser(
 		//		}
 		//	}
 		//}
+	}
+
+	else {
+		SetCell(x, y, hit);
 	}
 }
