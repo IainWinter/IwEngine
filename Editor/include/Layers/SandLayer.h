@@ -99,7 +99,7 @@ struct Tile {
 struct SandChunk {
 private:
 	std::vector<LockingCell> m_cells;
-	std::atomic<int> m_nonEmptyCellCount;
+	std::atomic<int> m_emptyCellCount;
 
 public:
 	const int m_width; // should be private
@@ -112,14 +112,14 @@ public:
 	SandChunk(int x, int y, int width, int height)
 		: m_x(x), m_y(y)
 		, m_width(width), m_height(height)
-		, m_nonEmptyCellCount(0)
+		, m_emptyCellCount(0)
 	{
 		m_cells.resize(m_width * m_height);
 	}
 
-	SandChunk(SandChunk&& move)
+	SandChunk(SandChunk&& move) noexcept
 		: m_cells(move.m_cells)
-		, m_nonEmptyCellCount(move.m_nonEmptyCellCount.load())
+		, m_emptyCellCount(move.m_emptyCellCount.load())
 		, m_width (move.m_width)
 		, m_height(move.m_height)
 		, m_x     (move.m_x)
@@ -127,6 +127,8 @@ public:
 	{}
 
 	void Reset() {
+		m_emptyCellCount = 0;
+
 		size_t size = m_cells.size();
 		m_cells.clear();
 		m_cells.resize(size);
@@ -152,7 +154,7 @@ public:
 	}
 
 	bool IsEmpty() {
-		return m_nonEmptyCellCount == 0;
+		return m_emptyCellCount == 0;
 	}
 
 	bool IsEmpty(
@@ -181,13 +183,13 @@ public:
 		if (    cell.Type == CellType::EMPTY
 			&& pcellType != CellType::EMPTY)
 		{
-			m_nonEmptyCellCount--;
+			++m_emptyCellCount;
 		}
 		
 		else if (cell.Type != CellType::EMPTY
 			 && pcellType == CellType::EMPTY)
 		{
-			m_nonEmptyCellCount++;
+			--m_emptyCellCount;
 		}
 
 		LockingCell& assign = m_cells[GetIndex(x, y)];
@@ -213,6 +215,12 @@ public:
 
 		std::unique_lock lock(out.Mutex);
 		return out.Cell;
+	}
+
+	const Cell& GetCellUnsafe(
+		int x, int y)
+	{
+		return m_cells[GetIndex(x, y)].Cell;
 	}
 };
 
@@ -254,7 +262,7 @@ public:
 		std::vector<SandChunk*> visible;
 
 		auto [chunkX,  chunkY]  = GetChunkCoordsAndIntraXY(x,  y);
-		auto [chunkX2, chunkY2] = GetChunkCoordsAndIntraXY(x2, y2);
+		auto [chunkX2, chunkY2] = GetChunkCoordsAndIntraXY(x2, y2, true);
 
 		for(int cx = chunkX; cx < chunkX2; cx++)
 		for(int cy = chunkY; cy < chunkY2; cy++) {
@@ -327,14 +335,24 @@ public:
 			->GetCell(x, y);
 	}
 private:
-	std::pair<int, int> GetChunkCoordsAndIntraXY(int& x, int& y) {
+	std::pair<int, int> GetChunkCoordsAndIntraXY(
+		int& x, int& y,
+		bool inclusive = false)
+	{
 		int chunkX, chunkY;
 
-		chunkX = x / m_chunkWidth;
-		x      = x % m_chunkWidth;
+		if (inclusive) {
+			chunkX = (int)ceil(float(x) / m_chunkWidth);//(x + m_chunkWidth - 1) / m_chunkWidth;
+			chunkY = (int)ceil(float(y) / m_chunkHeight);//(y + m_chunkHeight - 1) / m_chunkHeight;
+		}
 
-		chunkY = y / m_chunkHeight;
-		y      = y % m_chunkHeight;
+		else {
+			chunkX = x / m_chunkWidth;
+			chunkY = y / m_chunkHeight;
+		}
+
+		x = x % m_chunkWidth;
+		y = y % m_chunkHeight;
 
 		if (x < 0) {
 			x += m_chunkWidth;
@@ -512,7 +530,7 @@ namespace iw {
 			int whoFiredId)
 		{
 			vector2 direction = (target - position).normalized();
-			iw::vector2 point = position + direction * iw::vector2(5, 7) + vector2(iw::randf(), iw::randf()) * 5;
+			iw::vector2 point = position + direction * iw::vector2(8, 10) + vector2(iw::randf(), iw::randf()) * 5;
 
 			if (	   world.InBounds(point.x, point.y)
 				&& world.GetCell (point.x, point.y).Type != CellType::EMPTY)
