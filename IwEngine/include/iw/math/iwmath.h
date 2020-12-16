@@ -121,12 +121,12 @@ namespace math {
 	}
 
 	/**
-	* Returns tje the value clamped inbetween min and max.
+	* Returns the the value clamped between min and max.
 	*
 	* @param a Value to be clamped.
 	* @param min Min value of range.
 	* @param max Max value of range.
-	* @tparam _t Any type that is specialized.
+	* @tparam _t Any type that implements '>' and '<' operators.
 	*/
 	template<
 		typename _t>

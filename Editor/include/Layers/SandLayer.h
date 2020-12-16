@@ -7,11 +7,15 @@
 #include <unordered_map>
 #include <mutex>
 
+//#include "iw/util/memory/pool_allocator.h"
+
 struct Player {
 	iw::vector3 Movement = 0;
 	iw::vector2 pMousePos = 0, MousePos = 0;
 	iw::vector2 FireButtons = 0;
 	float FireTimeout = 0;
+
+	float Velocity = 0;
 };
 
 struct Enemy2 {
@@ -35,6 +39,7 @@ enum class CellType : short {
 	DEBRIS,
 
 	LASER,
+	eLASER,
 	BULLET
 };
 
@@ -55,6 +60,7 @@ struct Cell {
 	int TileId = 0; // 0 = not part of tile
 
 	int LastUpdateTick = 0;
+	int SplitCount = 0;
 
 	float Speed() const {
 		return (dX > 0 ? dX : -dX)
@@ -81,14 +87,14 @@ struct Tile {
 
 	Tile() = default;
 
-	Tile(std::vector<iw::vector2> locations)
+	Tile(std::vector<iw::vector2> locations, size_t scale)
 		: InitialLocationsSize(locations.size() * 4)
 	{
 		for (iw::vector2& v : locations) {
-			Locations.push_back(v * 2 + iw::vector2(1, 0) - 4);
-			Locations.push_back(v * 2 + iw::vector2(1, 1) - 4);
-			Locations.push_back(v * 2 + iw::vector2(0, 1) - 4);
-			Locations.push_back(v * 2 + iw::vector2(0, 0) - 4);
+			for (size_t x = 0; x < scale; x++)
+			for (size_t y = 0; y < scale; y++) {
+				Locations.push_back(v * scale + iw::vector2(x, y) - scale);
+			}
 		}
 
 		static int s_tileId = 1;
@@ -226,13 +232,27 @@ public:
 
 struct SandWorld {
 private:
+	bool m_fixedChunks;
+	std::mutex m_chunksMutex;
+
+	//iw::pool_allocator m_chunkMem;
 
 public:
 	std::unordered_map<int, SandChunk> m_chunks;  // all should be private
-	float m_scale; 
-	int m_chunkWidth;
-	int m_chunkHeight;
+	const float m_scale;
+	const int m_chunkWidth;
+	const int m_chunkHeight;
 	int m_currentTick = 0;
+
+	SandWorld(
+		int chunkWidth,
+		int chunkHeight,
+		float scale)
+		: m_chunkWidth (chunkWidth  / scale)
+		, m_chunkHeight(chunkHeight / scale)
+		, m_scale(scale)
+		, m_fixedChunks(false)
+	{}
 
 	SandWorld(
 		int width,
@@ -240,9 +260,10 @@ public:
 		int chunksX,
 		int chunksY,
 		float scale)
-		: m_chunkWidth (width / scale / chunksX)
+		: m_chunkWidth (width  / scale / chunksX)
 		, m_chunkHeight(height / scale / chunksY)
 		, m_scale(scale)
+		, m_fixedChunks(true)
 	{
 		for (int x = -chunksX/2; x < chunksX/2; x++)
 		for (int y = -chunksY/2; y < chunksY/2; y++) {
@@ -377,20 +398,32 @@ private:
 	SandChunk* GetChunk(
 		int chunkX, int chunkY)
 	{
-		auto itr = m_chunks.find(GetChunkIndex(chunkX, chunkY));
-		/*if (itr == m_chunks.end()) {
-			itr = m_chunks.emplace(
-					iw::vector2(chunkX, chunkY),
-					SandChunk(m_chunkWidth * chunkX, m_chunkHeight * chunkY,
-							m_chunkWidth,          m_chunkHeight)
-				).first;
-		}*/
-
-		if (itr != m_chunks.end()) {
-			return &itr->second;
+		if (abs(chunkX) > 10 || abs(chunkY) > 10) {
+			return nullptr;
 		}
 
-		return nullptr;//&itr->second;
+		if (m_fixedChunks) {
+			auto itr = m_chunks.find(GetChunkIndex(chunkX, chunkY));
+			if (itr != m_chunks.end()) {
+				return &itr->second;
+			}
+
+			return nullptr;
+		}
+
+		else {
+			std::unique_lock lock(m_chunksMutex); // could also queue new chunks
+			auto itr = m_chunks.find(GetChunkIndex(chunkX, chunkY));
+			if (itr != m_chunks.end()) {
+				return &itr->second;
+			}
+
+			return &m_chunks.emplace(
+					GetChunkIndex(chunkX, chunkY),
+					SandChunk(m_chunkWidth * chunkX, m_chunkHeight * chunkY,
+							m_chunkWidth,		   m_chunkHeight)
+				).first->second;
+		}
 	}
 
 	int GetChunkIndex(int chunkX, int chunkY) {
@@ -479,11 +512,13 @@ public:
 		const Cell& replacement);
 
 	void HitLikeBullet(
-		int x, int y,
+		int x,  int y,
+		int lx, int ly,
 		const Cell& cell);
 
 	void HitLikeLaser(
-		int x, int y,
+		int x,  int y,
+		int lx, int ly,
 		const Cell& cell);
 };
 
@@ -529,8 +564,10 @@ namespace iw {
 			const Cell& projectile,
 			int whoFiredId)
 		{
-			vector2 direction = (target - position).normalized();
-			iw::vector2 point = position + direction * iw::vector2(8, 10) + vector2(iw::randf(), iw::randf()) * 5;
+			iw::vector2 direction = (target - position).normalized();
+			iw::vector2 normal = vector2(-direction.y, direction.x);
+
+			iw::vector2 point = position + direction * 25 + normal * iw::randf() * 15;
 
 			if (	   world.InBounds(point.x, point.y)
 				&& world.GetCell (point.x, point.y).Type != CellType::EMPTY)
