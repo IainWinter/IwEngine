@@ -1,23 +1,24 @@
 #include "Layers/SandLayer.h"
 #include "iw/engine/Systems/EditorCameraControllerSystem.h"
 
-const Cell _EMPTY = { CellType::EMPTY,  iw::Color(0), 0, 0 };
+const Cell _EMPTY  = { CellType::EMPTY,  iw::Color(0), 0, 0 };
 
-const Cell _SAND = { CellType::SAND,   iw::Color::From255(237, 201, 175), 1 };
-const Cell _WATER = { CellType::WATER,  iw::Color::From255(175, 201, 237) };
-const Cell _ROCK = { CellType::ROCK,   iw::Color::From255(201, 201, 201) };
-const Cell _METAL = { CellType::METAL,  iw::Color::From255(230, 230, 230), 10 };
+const Cell _SAND   = { CellType::SAND,   iw::Color::From255(237, 201, 175), 1 };
+const Cell _WATER  = { CellType::WATER,  iw::Color::From255(175, 201, 237) };
+const Cell _ROCK   = { CellType::ROCK,   iw::Color::From255(201, 201, 201) };
+const Cell _METAL  = { CellType::METAL,  iw::Color::From255(230, 230, 230), 10 };
 const Cell _DEBRIS = { CellType::DEBRIS, iw::Color::From255(150, 150, 150), 1 };
 
-const Cell _LASER = { CellType::LASER,  iw::Color::From255(255,   0,   0), .06f };
-const Cell _BULLET = { CellType::BULLET, iw::Color::From255(255,   255, 0), .02f };
+const Cell _LASER  = { CellType::LASER,  iw::Color::From255(255, 0,   0), .06f };
+const Cell _eLASER = { CellType::eLASER, iw::Color::From255(0, 200, 255),  1 };
+const Cell _BULLET = { CellType::BULLET, iw::Color::From255(255, 255, 0), .02f };
 
 namespace iw {
 	SandLayer::SandLayer()
 		 : Layer("Ray Marching")
 		, shader(nullptr)
 		, target (nullptr)
-		, world(SandWorld(1920, 1080, 2, 6, 2.f))
+		, world(SandWorld(200, 200, 2))
 	{
 		srand(time(nullptr));
 	}
@@ -55,15 +56,15 @@ namespace iw {
 		if (reset) {
 			world.Reset();
 
-			for (int x = -300; x < 300; x++)
-			for (int y = -200; y < -50; y++) {
-				world.SetCell(x, y, _SAND);
-			}
+			//for (int x = -300; x < 300; x++)
+			//for (int y = -200; y < -50; y++) {
+			//	world.SetCell(x, y, _SAND);
+			//}
 
-			for (int x = -(int)texture->Width()/2; x < (int)texture->Width()/2; x++)
-			for (int y = -100; y < -50; y++) {
-				world.SetCell(x, y, _WATER);
-			}
+			//for (int x = -(int)texture->Width()/2; x < (int)texture->Width()/2; x++)
+			//for (int y = -100; y < -50; y++) {
+			//	world.SetCell(x, y, _WATER);
+			//}
 
 			Space->Clear();
 
@@ -71,12 +72,12 @@ namespace iw {
 
 			player.Set<iw::Transform>();
 			player.Set<Tile>(std::vector<iw::vector2> {
-				vector2(1, 0), vector2(1, 0),
+								   vector2(1, 0),
 					vector2(0, 1), vector2(1, 1), vector2(2, 1), vector2(3, 1),
 					vector2(0, 2), vector2(1, 2), vector2(2, 2), vector2(3, 2),
-					vector2(0, 3), vector2(3, 3),
-					vector2(0, 4), vector2(3, 4)
-			});
+					vector2(0, 3),							     vector2(3, 3),
+					vector2(0, 4),							     vector2(3, 4)
+			}, 5);
 			player.Set<Player>();
 
 			reset = false;
@@ -87,12 +88,12 @@ namespace iw {
 			iw::Entity enemy = Space->CreateEntity<iw::Transform, Tile, Enemy2>();
 			enemy.Set<iw::Transform>(iw::vector2(texture->Width() * iw::randf(), texture->Height() + 100 * (1+iw::randf())));
 			enemy.Set<Tile>(std::vector<iw::vector2> {
-				vector2(1, 0), vector2(3, 0),
+								   vector2(1, 0),				 vector2(3, 0),
 					vector2(0, 1), vector2(1, 1), vector2(2, 1), vector2(3, 1),
 					vector2(0, 2), vector2(1, 2), vector2(2, 2), vector2(3, 2),
-					vector2(0, 3), vector2(3, 3),
-					vector2(0, 4), vector2(3, 4)
-			});
+					vector2(0, 3),								 vector2(3, 3),
+					vector2(0, 4),								 vector2(3, 4)
+			}, 2);
 			enemy.Set<Enemy2>(iw::vector2(texture->Width() * .4f * iw::randf(), (texture->Height() - 200) * .4f * (iw::randf() + 1)));
 
 			spawnEnemy = iw::randf() + 1;
@@ -100,17 +101,19 @@ namespace iw {
 
 		 // camera frustrum, mostly used at the bottom, but needed for screen mouse pos to world pos
 
+		vector2 playerLocation = player.Find<iw::Transform>()->Position;
+
 		int height = target->Tex(0)->Height();
 		int width  = target->Tex(0)->Width();
 
-		int fy = -(int)texture->Height()/2;//player.Find<iw::Transform>()->Position.y - height / 2;
-		int fx = -(int)texture->Width() /2;//player.Find<iw::Transform>()->Position.x - width  / 2;
+		int fy = playerLocation.y - height / 2;
+		int fx = playerLocation.x - width  / 2;
 		int fy2 = fy + height;
 		int fx2 = fx + width;
 
 		vector2 pos = mousePos / world.m_scale;
 		pos.x = floor(pos.x) + fx;
-		pos.y = floor(texture->Height() - pos.y) + fy; // find correct valuer
+		pos.y = floor(texture->Height() - pos.y) + fy;
 		
 		gravPos = pos;
 
@@ -154,9 +157,8 @@ namespace iw {
 			}
 
 			for (int i = 0; i < a->Locations.size(); i++) {
-				vector2 v = a->Locations[i];
-				v.x += int(t->Position.x);
-				v.y += int(t->Position.y);
+				vector4 vv = vector4(a->Locations[i], 0, 1) * t->Transformation().transposed();
+				vector2 v = vector2(vv.x, vv.y);
 
 				if (!world.InBounds(v.x, v.y)) continue;
 				
@@ -190,9 +192,9 @@ namespace iw {
 			if (   p->FireTimeout < 0
 				&& p->FireButtons != 0)
 			{
-				p->FireTimeout = p->FireButtons.x == 1 ? .1f : .001f;
+				p->FireTimeout = p->FireButtons.x == 1 ? .05f : .001f;
 
-				float speed      = p->FireButtons.x == 1 ?      15 :     25;
+				float speed      = p->FireButtons.x == 1 ?       6 :     15;
 				const Cell& shot = p->FireButtons.x == 1 ? _BULLET : _LASER;
 
 				Fire(t->Position, pos, speed, shot, a->TileId);
@@ -208,22 +210,17 @@ namespace iw {
 			p->FireTimeout -= iw::DeltaTime();
 
 			if (p->FireTimeout < 0) {
-				p->FireTimeout = (iw::randf() + 2) * .5f;
+				p->FireTimeout = (iw::randf() + 2) * 2;
 
-				vector2 target = player.Find<iw::Transform>()->Position;
-			
-				float speed = 5;
-				const Cell& shot = _LASER;
-
-				Fire(t->Position, target, speed, shot, a->TileId);
+				Fire(t->Position, playerLocation, 5, _eLASER, a->TileId);
 			}
 		});
 
 		// Sand update
 
 		//stepTimer -= iw::DeltaTime();
-		//if (stepTimer < 0 && Keyboard::KeyDown(V)/**/) {
-		//	stepTimer = 1 / 20.0f;
+		//if (stepTimer < 0 /*&& Keyboard::KeyDown(V)*/) {
+		//	stepTimer = 1 / 180.0f;
 
 			std::mutex chunkCountMutex;
 			std::condition_variable chunkCountCV;
@@ -231,6 +228,10 @@ namespace iw {
 
 			for(auto& pair: world.m_chunks) {
 				if (pair.second.IsEmpty()) {
+					continue;
+				}
+
+				if ((iw::vector2(pair.second.m_x, pair.second.m_y) - playerLocation).length() > fx2 - fx) {
 					continue;
 				}
 
@@ -251,11 +252,12 @@ namespace iw {
 				});
 			}
 
-			LOG_INFO << "Need to update " << chunkCount << " chunks. dt is " << iw::DeltaTime() << " seconds (" << 1 / iw::DeltaTime() << "fps)";
+			//LOG_INFO << "Need to update " << chunkCount << " chunks. dt is " << iw::DeltaTime() << " seconds (" << 1 / iw::DeltaTime() << "fps)";
 
 			std::unique_lock lock(chunkCountMutex);
 			chunkCountCV.wait(lock, [&](){ return chunkCount == 0; });
-		//}
+		
+			//}
 
 		// Swap buffers
 
@@ -274,15 +276,17 @@ namespace iw {
 
 				colors[texi] = chunk->GetCellUnsafe(x, y).Color; // assign rgba at the same time
 
-				//if (x == 0 || y == 0) {
-				//	colors[texi] = iw::Color(1, 0, 0, 1);
-				//}
+				if (x == 0 || y == 0) {
+					colors[texi] = iw::Color(1, 0, 0, 1);
+				}
 
-	/*			if (Keyboard::KeyDown(K)) {
+				/*
+				if (Keyboard::KeyDown(K)) {
 					if (x == 0 || y == 0) {
 						colors[texi] = iw::Color(1, 0, 0, 1);
 					}
-				}*/
+				}
+				*/
 			}
 		}
 
@@ -292,9 +296,7 @@ namespace iw {
 			auto a)
 		{
 			for (int i = 0; i < a->Locations.size(); i++) {
-				vector2 v = a->Locations[i];
-				v.x += int(t->Position.x);
-				v.y += int(t->Position.y);
+				vector2 v = vector4(a->Locations[i], 0, 1) * t->Transformation().transposed();;
 
 				if (!world.InBounds(v.x, v.y)) continue;
 				
@@ -318,8 +320,11 @@ namespace iw {
 			auto t,
 			auto p)
 		{
-			t->Position.x += p->Movement.x * 60 * world.m_scale * iw::DeltaTime();
-			t->Position.y += p->Movement.y * 60 * world.m_scale * iw::DeltaTime();
+			p->Velocity *= 1 - iw::DeltaTime();
+			p->Velocity = iw::clamp<float>(p->Velocity + p->Movement.y * iw::DeltaTime() * 3, -15, 15);
+
+			t->Position += t->Up() * p->Velocity;
+			t->Rotation *= iw::quaternion::from_euler_angles(0, 0, -p->Movement.x * iw::DeltaTime());
 		});
 
 		Space->Query<iw::Transform, Enemy2>().Each([&](
@@ -462,14 +467,21 @@ void SandWorker::UpdateChunk() {
 			case CellType::BULLET: {
 				auto result = MoveForward(x, y, cell, _BULLET);
 				if (result.first) {
-					HitLikeBullet(result.second.x, result.second.y, cell);
+					HitLikeBullet(result.second.x, result.second.y, x, y, cell);
 				}
 				break;
 			}
 			case CellType::LASER: {
 				auto result = MoveForward(x, y, cell, _LASER);
 				if (result.first) {
-					HitLikeLaser(result.second.x, result.second.y, cell);
+					HitLikeLaser(result.second.x, result.second.y, x, y, cell);
+				}
+				break;
+			}
+			case CellType::eLASER: {
+				auto result = MoveForward(x, y, cell, _eLASER);
+				if (result.first) {
+					HitLikeLaser(result.second.x, result.second.y, x, y, cell);
 				}
 				break;
 			}
@@ -598,8 +610,8 @@ std::pair<bool, iw::vector2> SandWorker::MoveForward(
 
 			else if (!hasHit && InBounds(destX, destY)) {
 				Cell hit = GetCell(destX, destY);
-				if (   hit.Type   != cell.Type
-					&& hit.TileId != cell.TileId)
+				if (   //hit.Type   != cell.Type
+					/*&&*/ hit.TileId != cell.TileId)
 				{
 					hasHit = true;
 					hitLocation = iw::vector2(destX, destY);
@@ -613,6 +625,8 @@ std::pair<bool, iw::vector2> SandWorker::MoveForward(
 
 		Cell replace = cell;
 		replace.Life = life;
+		replace.dX = 0;
+		replace.dY = 0;
 
 		SetCell(x, y, replace);
 	}
@@ -621,16 +635,19 @@ std::pair<bool, iw::vector2> SandWorker::MoveForward(
 }
 
 void SandWorker::HitLikeBullet(
-	int x, int y,
+	int x,  int y,
+	int lx, int ly,
 	const Cell& bullet)
 {
-	Cell hit = GetCell(x, y);
+	float speed = bullet.Speed();
 
-	hit.Life -= bullet.Speed();
+	Cell hit = GetCell(x, y);
+	hit.Life -= speed;
+
 	if (hit.Life < 0) {
 		Cell cell = bullet;
-		cell.dX += iw::randi(6) - 3;
-		cell.dY += iw::randi(6) - 3;
+		cell.dX = iw::clamp<int>(cell.dX + iw::randi(6) - 3, cell.dX * 0.5f, cell.dX * 1.5f);
+		cell.dY = iw::clamp<int>(cell.dY + iw::randi(6) - 3, cell.dY * 0.5f, cell.dY * 1.5f);
 		cell.Life *= .95f;
 
 		SetCell(x, y, cell);
@@ -642,19 +659,38 @@ void SandWorker::HitLikeBullet(
 }
 
 void SandWorker::HitLikeLaser(
-	int x, int y,
+	int x,  int y,
+	int lx, int ly,
 	const Cell& laser)
 {
-	Cell hit = GetCell(x, y);
+	float speed = laser.Speed();
 
-	hit.Life -= laser.Speed();
+	if (speed == 0) {
+		return;
+	}
+
+	Cell hit = GetCell(x, y);
+	hit.Life -= speed;
+
+	if (   hit.Type == CellType::LASER 
+		|| hit.Type == CellType::eLASER)
+	{
+		SetCell(lx + laser.dX, ly + laser.dY, laser);
+		SetCell(lx, ly, _EMPTY);
+
+		return;
+	}
+
 	if (hit.Life <= 0) {
 		Cell cell = laser;
 		cell.dX += iw::randi(6) - 3;
 		cell.dY += iw::randi(6) - 3;
-		cell.Life /= 2;
+		cell.Life *= .95f;
+		//cell.SplitCount++;
 
-		SetCell(x, y, cell);
+		//if (cell.SplitCount < 5) {
+			SetCell(x, y, cell);
+		//}
 
 		//for (int i = x - 5; i < x + 5; i++)
 		//for (int j = y - 5; j < y + 5; j++) {
