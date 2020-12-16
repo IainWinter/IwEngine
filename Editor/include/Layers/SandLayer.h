@@ -6,6 +6,7 @@
 #include <vector>
 #include <unordered_map>
 #include <mutex>
+#include <atomic>
 
 struct Player {
 	iw::vector3 Movement = 0;
