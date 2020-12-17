@@ -6,6 +6,7 @@
 #include <vector>
 #include <unordered_map>
 #include <mutex>
+#include <atomic>
 
 //#include "iw/util/memory/pool_allocator.h"
 
