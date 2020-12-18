@@ -25,12 +25,12 @@ namespace math {
 			reset(diag);
 		}
 
-		matrix(
-			vector_c columns...)
-		{
-			reset(0);
-			// todo: impl
-		};
+		//matrix(
+		//	vector_c columns...)
+		//{
+		//	reset(0);
+		//	// todo: impl
+		//};
 
 		//matrix() from other matrix
 
@@ -117,15 +117,25 @@ namespace math {
 			return total;
 		}
 
-		vector_c operator*(
-			const vector_r& other) const
+		vector_r operator*(
+			const vector_c& other) const
 		{
-			vector_c total;
+			vector_r total;
 			for (size_t i = 0; i < _cols; i++) {
 				total.components[i] = other.dot(columns[i]);
 			}
 			return total;
 		}
+
+		//vector_r operator*(
+		//	const vector_c& other) const
+		//{
+		//	vector_r total;
+		//	for (size_t i = 0; i < _cols; i++) {
+		//		total.components[i] = other.dot(columns[i]);
+		//	}
+		//	return total;
+		//}
 
 		friend std::ostream& operator<<(
 			std::ostream& ostream,

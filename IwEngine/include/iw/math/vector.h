@@ -47,6 +47,13 @@ namespace math {
 		}
 
 		//template<
+		//	size_t _c = _count,
+		//	typename = typename std::enable_if_t<_c == 1>>
+		//operator _t() {
+		//	return components[0];
+		//}
+
+		//template<
 		//	size_t   _countAnother,
 		//	typename _tAnother>
 		//vector(
