@@ -8,6 +8,8 @@
 #include <mutex>
 #include <atomic>
 
+#include <random>
+
 //#include "iw/util/memory/pool_allocator.h"
 
 struct Player {
@@ -24,13 +26,19 @@ struct Enemy2 {
 	float FireTimeout = 0;
 };
 
-struct v2i_hash {
-	int operator() (const iw::vector2& v) const {
-		return (int)v.x ^ (int)v.y;
-	}
+enum class CellProperties : char {
+	MOVE_DOWN           = 0b00000001,
+	MOVE_DOWN_SIDE      = 0b00000010,
+	MOVE_SIDE           = 0b00000100,
+	MOVE_FORWARD        = 0b00001000,
+	HIT_LIKE_PROJECTILE = 0b00010000,
+	HIT_LIKE_BEAM       = 0b00100000
 };
+inline CellProperties operator|(CellProperties a,CellProperties b){return static_cast<CellProperties>(iw::val(a)|iw::val(b));}
+inline char           operator&(CellProperties a,CellProperties b){return iw::val(a)&iw::val(b);}
 
-enum class CellType : short {
+
+enum class CellType : char {
 	EMPTY,
 
 	SAND,
@@ -46,27 +54,33 @@ enum class CellType : short {
 
 struct Cell {
 	CellType Type;
+	CellProperties Props;
+
 	iw::Color Color;
 
-	float Life = 0;
-	int dX = 0;
-	int dY = -1; // Velocity
+	float Life = 0; // Life until the cell will die, only some cells use this
 
-	//iw::vector2 Pos;
-	//iw::vector2 Vel;
+	int dX = 0;    // Velocity
+	int dY = -1;
 
-	//int CanReplicate = true;
-	//bool Gravitised = false;
+	int TileId = 0; // Tile id, 0 means that it belongs to noone
 
-	int TileId = 0; // 0 = not part of tile
+	int LastUpdateTick = 0; // Used to check if the cell has been updated in the current tick
 
-	int LastUpdateTick = 0;
-	int SplitCount = 0;
-
-	float Speed() const {
+	float Speed() const {  // Manhattan distance of velocity
 		return (dX > 0 ? dX : -dX)
-			+ (dY > 0 ? dY : -dY); // approx
+			+ (dY > 0 ? dY : -dY);
 	}
+
+	static void SetDefault(CellType type, const Cell& cell) {
+		m_defaults.emplace(type, cell);
+	}
+
+	static const Cell& GetDefault(CellType type) {
+		return m_defaults.at(type);
+	}
+private:
+	static std::unordered_map<CellType, Cell> m_defaults;
 };
 
 struct LockingCell {
@@ -495,29 +509,39 @@ public:
 
 	void UpdateChunk();
 
-	 // move to child class
+	// maybe these ones are good to have in parent?
 
-	void MoveLikeSand(
+	bool MoveDown(
 		int x, int y,
 		const Cell& cell,
-		const Cell& replacement);
+		const Cell& replace);
 
-	void MoveLikeWater(
+	bool MoveDownSide(
 		int x, int y,
 		const Cell& cell,
-		const Cell& replacement);
+		const Cell& replace);
 
-	std::pair<bool, iw::vector2> MoveForward(
+	bool MoveSide(
 		int x, int y,
 		const Cell& cell,
-		const Cell& replacement);
+		const Cell& replace);
 
-	void HitLikeBullet(
+	bool MoveForward(
+		int x, int y,
+		const Cell& cell,
+		const Cell& replace,
+		bool& hit,
+		int& hitx, int& hity);
+
+	/////////////////////////////////////////////
+	// move to child class
+
+	void HitLikeProj(
 		int x,  int y,
 		int lx, int ly,
 		const Cell& cell);
 
-	void HitLikeLaser(
+	void HitLikeBeam(
 		int x,  int y,
 		int lx, int ly,
 		const Cell& cell);
@@ -547,6 +571,8 @@ namespace iw {
 		SandWorld world;
 
 		float stepTimer = 0;
+
+		std::mt19937 m_stars;
 
 	public:
 		SandLayer();
