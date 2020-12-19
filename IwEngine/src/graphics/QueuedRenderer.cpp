@@ -247,7 +247,7 @@ namespace Graphics {
 		m_shadow  = 1;
 		m_block   = 1;
 		m_camera += 1;
-		m_position = scene->MainCamera()->WorldPosition();
+		m_position = scene->MainCamera() ? scene->MainCamera()->WorldPosition() : vector3::zero;
 
 		BeginSceneOP* op = m_pool.alloc<BeginSceneOP>();
 		op->Scene  = scene;

@@ -272,6 +272,18 @@ namespace Graphics {
 		}
 
 		if (m_colors) {
+			//switch (m_channels) {
+			//case 1:
+			//	break;
+			//case 2:
+			//	break;
+			//case 3:
+			//	break;
+			//case 4:
+			//	break;
+			//}
+
+
 			memset(m_colors, 0, ColorCount()); // get right color from arg
 		}
 	}

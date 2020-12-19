@@ -703,6 +703,16 @@ namespace detail {
 		return mesh;
 	}
 
+	Mesh Mesh::MakeCopy(
+		const MeshDescription& links,
+		bool linkIndex) const
+	{
+		Mesh mesh = MakeInstance();
+		mesh.SetData(Data()->MakeCopy(links, linkIndex));
+		
+		return mesh;
+	}
+
 	ref<iw::Material> Mesh::Material() {
 		return m_material;
 	}

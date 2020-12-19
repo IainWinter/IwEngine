@@ -31,15 +31,14 @@ namespace RenderAPI {
 			case LINES:     glTopology = GL_LINES;     break;
 			case TRIANGLES: glTopology = GL_TRIANGLES; break;
 			case QUADS:     glTopology = GL_QUADS;	   break;
+			default: return;
 		}
 
-		if (glTopology) {
-			GL(glDrawElements(
-				glTopology,
-				(int)count,
-				GL_UNSIGNED_INT,
-				(const void*)offset));
-		}
+		GL(glDrawElements(
+			glTopology,
+			(int)count,
+			GL_UNSIGNED_INT,
+			(const void*)offset));
 	}
 
 	void GLDevice::DrawElementsInstanced(
@@ -54,16 +53,15 @@ namespace RenderAPI {
 			case LINES:     glTopology = GL_LINES;     break;
 			case TRIANGLES: glTopology = GL_TRIANGLES; break;
 			case QUADS:     glTopology = GL_QUADS;	   break;
+			default: return;
 		}
 
-		if (glTopology) {
-			GL(glDrawElementsInstanced(
-				glTopology,
-				(int)count,
-				GL_UNSIGNED_INT,
-				(const void*)offset,
-				instanceCount));
-		}
+		GL(glDrawElementsInstanced(
+			glTopology,
+			(int)count,
+			GL_UNSIGNED_INT,
+			(const void*)offset,
+			instanceCount));
 	}
 	
 	void GLDevice::Clear() {
