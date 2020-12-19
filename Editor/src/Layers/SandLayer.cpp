@@ -7,15 +7,11 @@ std::unordered_map<CellType, Cell> Cell::m_defaults = {};
 
 namespace iw {
 	SandLayer::SandLayer()
-		 : Layer("Ray Marching")
-		, shader(nullptr)
-		, target (nullptr)
+		: Layer("Ray Marching")
+		, m_sandTexture(nullptr)
 		, world(SandWorld(200, 200, 2))
+		, reset(true)
 	{
-		//matrix<>
-
-		//vector<2> t = m * d3;
-
 		srand(time(nullptr));
 	}
 
@@ -54,54 +50,81 @@ namespace iw {
 		Cell::SetDefault(CellType::eLASER, elaser);
 		Cell::SetDefault(CellType::BULLET, bullet);
 
-		//for (float x = 0; x < 2; x += .1) 
-		//for (float y = 0; y < 2; y += .1) {
-		//	vector<2> in(x, y);
-
-		//	matrix<2, 2> layer1;
-		//	layer1.columns[0] = { -1,  1 };
-		//	layer1.columns[1] = {  1, -1 };
-
-		//	vector<2> after1 = layer1 * in - vector<2>(.6, 1.4);
-
-		//	for (float& f : after1.components) {
-		//		if (f > 0) f = 1;
-		//		else	   f = 0;
-		//	}
-
-		//	matrix<1, 2> layer2;
-		//	layer2.columns[0] = { 1, 1 };
-
-		//	vector<1> out = layer2 * after1 - vector<1>(-.8);
-
-		//	for (float& f : out.components) {
-		//		if (f > 0) f = 1;
-		//		else	   f = 0;
-		//	}
-
-		//	LOG_INFO << "(" << x << "," << y << ") = " << out;
-		//}
-
 		if (int err = Layer::Initialize()) { 
 			return err;
 		}
 
-		shader = Asset->Load<Shader>("shaders/texture.shader");
+		// Sand
 
-		texture = REF<iw::Texture>(
+		iw::ref<iw::Shader> sandShader = Asset->Load<Shader>("shaders/texture.shader");
+
+		m_sandTexture = REF<iw::Texture>(
 			Renderer->Width()  / world.m_scale,
 			Renderer->Height() / world.m_scale, 
 			iw::TEX_2D,
 			iw::RGBA
 		);
-		texture->SetFilter(iw::NEAREST);
-		texture->CreateColors();
-		texture->Clear();
+		m_sandTexture->SetFilter(iw::NEAREST);
+		m_sandTexture->CreateColors();
+		m_sandTexture->Clear();
 
-		target = REF<RenderTarget>();
-		target->AddTexture(texture);
+		iw::ref<iw::Material> sandScreenMat = REF<iw::Material>(sandShader);
+		sandScreenMat->SetTexture("texture", m_sandTexture);
 
-		reset = true;
+		m_sandScreen = Renderer->ScreenQuad().MakeInstance();
+		m_sandScreen.SetMaterial(sandScreenMat);
+
+		// Stars
+
+		iw::ref<iw::Shader> starsShader = Asset->Load<Shader>("shaders/particle/simple_point.shader");
+
+		//iw::ref<iw::Texture> starTexture = REF<iw::Texture>(1, 1, iw::TEX_2D, iw::RGBA);
+		//starTexture->SetFilter(iw::NEAREST);
+		//starTexture->CreateColors();
+		//starTexture->Clear();
+
+//		((unsigned int*)starTexture->Colors())[50] = INT_MAX;
+
+		//int i = starTexture->ColorCount() / 2 - 2;
+		//starTexture->Colors()[i  ] = 255;
+		//starTexture->Colors()[i+1] = 255;
+		//starTexture->Colors()[i+2] = 255;
+		//starTexture->Colors()[i+3] = 255;
+
+		/*for (unsigned char* c = starTexture->Colors(); c != starTexture->Colors() + starTexture->ColorCount(); c++) {
+			*c = 255;
+		}*/
+
+		iw::ref<iw::Material> starMat = REF<iw::Material>(starsShader);
+		//starMat->SetTexture("texture", starTexture);
+
+		starMat->Set("color", iw::Color(1));
+
+		iw::Mesh starMesh = Renderer->ScreenQuad().MakeCopy();
+
+		iw::vector3* p  = (iw::vector3*)starMesh.Data()->Get(bName::POSITION);
+		iw::vector2* u  = (iw::vector2*)starMesh.Data()->Get(bName::UV);
+		unsigned int* i = starMesh.Data()->GetIndex();
+
+		starMesh.Data()->SetBufferData(bName::POSITION, 1, p);
+		starMesh.Data()->SetBufferData(bName::UV,       1, u);
+		starMesh.Data()->SetIndexData(1, i);
+
+		starMesh.SetMaterial(starMat);
+
+		starMesh.Data()->SetTopology(iw::MeshTopology::POINTS);
+
+		m_stars.SetParticleMesh(starMesh);
+
+		m_stars.SetTransform(new iw::Transform(0, .1f));
+
+		for (int i = 0; i < 2000; i++) {
+			m_stars.SpawnParticle(iw::Transform(
+				iw::vector2(Renderer->Width() * iw::randf() / 2,
+							Renderer->Width() * iw::randf() / 2)));
+		}
+
+		m_stars.UpdateParticleMesh();
 
 		return 0;
 	}
@@ -111,19 +134,11 @@ namespace iw {
 
 		world.m_currentTick += 1;
 
+		int height = m_sandTexture->Height();
+		int width  = m_sandTexture->Width();
+
 		if (reset) {
 			world.Reset();
-
-			//for (int x = -300; x < 300; x++)
-			//for (int y = -200; y < -50; y++) {
-			//	world.SetCell(x, y, _SAND);
-			//}
-
-			//for (int x = -(int)texture->Width()/2; x < (int)texture->Width()/2; x++)
-			//for (int y = -100; y < -50; y++) {
-			//	world.SetCell(x, y, _WATER);
-			//}
-
 			Space->Clear();
 
 			player = Space->CreateEntity<iw::Transform, Tile, Player>();
@@ -135,8 +150,24 @@ namespace iw {
 					vector2(0, 2), vector2(1, 2), vector2(2, 2), vector2(3, 2),
 					vector2(0, 3),							     vector2(3, 3),
 					vector2(0, 4),							     vector2(3, 4)
-			}, 5);
+			}, -5);
 			player.Set<Player>();
+
+			//for (int i = 1; i < m_sandTexture->Width(); i++) {
+			//	world.SetCell(i-width/2, 0, Cell::GetDefault(CellType::ROCK));
+			//}
+
+			//for (int i = 1; i < m_sandTexture->Width(); i++) {
+			//	world.SetCell(i-width/2, m_sandTexture->Height()-1, Cell::GetDefault(CellType::ROCK));
+			//}
+
+			//for (int i = 1; i < m_sandTexture->Height(); i++) {
+			//	world.SetCell(0, i-height/2, Cell::GetDefault(CellType::ROCK));
+			//}
+
+			//for (int i = 1; i < m_sandTexture->Height(); i++) {
+			//	world.SetCell(m_sandTexture->Width() - 1, i-height/2, Cell::GetDefault(CellType::ROCK));
+			//}
 
 			reset = false;
 		}
@@ -144,7 +175,7 @@ namespace iw {
 		spawnEnemy -= iw::DeltaTime();
 		if (spawnEnemy < 0) {
 			iw::Entity enemy = Space->CreateEntity<iw::Transform, Tile, Enemy2>();
-			enemy.Set<iw::Transform>(iw::vector2(texture->Width() * iw::randf(), texture->Height() + 100 * (1+iw::randf())));
+			enemy.Set<iw::Transform>(iw::vector2(1000 * iw::randf()));
 			enemy.Set<Tile>(std::vector<iw::vector2> {
 								   vector2(1, 0),				 vector2(3, 0),
 					vector2(0, 1), vector2(1, 1), vector2(2, 1), vector2(3, 1),
@@ -152,18 +183,14 @@ namespace iw {
 					vector2(0, 3),								 vector2(3, 3),
 					vector2(0, 4),								 vector2(3, 4)
 			}, 2);
-			enemy.Set<Enemy2>(iw::vector2(texture->Width() * .4f * iw::randf(), (texture->Height() - 200) * .4f * (iw::randf() + 1)));
+			enemy.Set<Enemy2>(iw::vector2(100 * iw::randf(), 100 * iw::randf()));
 
 			spawnEnemy = iw::randf() + 10;
 		}
 
-		 // camera frustrum, mostly used at the bottom, but needed for screen mouse pos to world pos
-
+		// camera frustrum, mostly used at the bottom, but needed for screen mouse pos to world pos
 		vector2 playerLocation = player.Find<iw::Transform>()->Position;
-
-		int height = target->Tex(0)->Height();
-		int width  = target->Tex(0)->Width();
-
+		
 		int fy = playerLocation.y - height / 2;
 		int fx = playerLocation.x - width  / 2;
 		int fy2 = fy + height;
@@ -171,7 +198,7 @@ namespace iw {
 
 		vector2 pos = mousePos / world.m_scale;
 		pos.x = floor(pos.x) + fx;
-		pos.y = floor(texture->Height() - pos.y) + fy;
+		pos.y = floor(height - pos.y) + fy;
 		
 		gravPos = pos;
 
@@ -318,8 +345,11 @@ namespace iw {
 
 		// Swap buffers
 
-		target->Tex(0)->Clear();
-		unsigned int* colors = (unsigned int*)target->Tex(0)->Colors();
+
+		iw::ref<iw::Texture> sandTex = m_sandTexture;//m_sandScreen.Material()->GetTexture("texture");
+			 
+		sandTex->Clear();
+		unsigned int* colors = (unsigned int*)sandTex->Colors(); // cast from r, g, b, a to rgba
 
 		//m_stars.seed(1);
 
@@ -342,17 +372,17 @@ namespace iw {
 				//const Cell& cell = chunk->GetCellUnsafe(x, y);
 
 				//if (cell.Type != CellType::EMPTY) {
-					colors[texi] = chunk->GetCellUnsafe(x, y).Color; // assign rgba at the same time
+					colors[texi] = chunk->GetCellUnsafe(x, y).Color;
 				//}
 
 				//else {
 				//}
 
-				/*
 				if (x == 0 || y == 0) {
 					colors[texi] = iw::Color(1, 0, 0, 1);
 				}
 
+				/*
 				if (Keyboard::KeyDown(K)) {
 					if (x == 0 || y == 0) {
 						colors[texi] = iw::Color(1, 0, 0, 1);
@@ -361,6 +391,17 @@ namespace iw {
 				*/
 			}
 		}
+
+		sandTex->Update(Renderer->Device); // should be auto in renderer 
+
+
+		m_stars.GetTransform()->Position = iw::vector2(-playerLocation.x, -playerLocation.y) / 10000;
+
+
+		Renderer->BeginScene(MainScene);
+			Renderer->DrawMesh(m_stars.GetTransform(), &m_stars.GetParticleMesh());
+			Renderer->DrawMesh(iw::Transform(), m_sandScreen);
+		Renderer->EndScene();
 
 		Space->Query<iw::Transform, Tile>().Each([&](
 			auto e,
@@ -397,6 +438,14 @@ namespace iw {
 
 			t->Position += t->Up() * p->Velocity;
 			t->Rotation *= iw::quaternion::from_euler_angles(0, 0, -p->Movement.x * iw::DeltaTime());
+
+			//if (   t->Position.x < -world.m_chunkWidth  * 10 + world.m_chunkWidth
+			//	|| t->Position.y < -world.m_chunkHeight * 10 + world.m_chunkHeight
+			//	|| t->Position.x >  world.m_chunkWidth  * 10 - world.m_chunkWidth
+			//	|| t->Position.y >  world.m_chunkHeight * 10 - world.m_chunkHeight)
+			//{
+			//	p->Velocity -= iw::DeltaTime();
+			//}
 		});
 
 		Space->Query<iw::Transform, Enemy2>().Each([&](
@@ -413,8 +462,7 @@ namespace iw {
 				iw::DeltaTime());
 		});
 
-		target->Tex(0)->Update(Renderer->Device); // should be auto in apply filter
-		Renderer->ApplyFilter(shader, target, nullptr);
+		//Renderer->ApplyFilter(m_shader, m_target, nullptr);
 	}
 
 	bool SandLayer::On(
@@ -550,8 +598,8 @@ void SandWorker::UpdateChunk() {
 			continue;
 		}
 
-		if		(cell.Props & CellProperties::HIT_LIKE_BEAM)	   { HitLikeBeam(x, y, hitx, hity, cell); }
-		else if (cell.Props & CellProperties::HIT_LIKE_PROJECTILE) { HitLikeProj(x, y, hitx, hity, cell); }
+		if		(cell.Props & CellProperties::HIT_LIKE_BEAM)	   { HitLikeBeam(hitx, hity, x, y, cell); }
+		else if (cell.Props & CellProperties::HIT_LIKE_PROJECTILE) { HitLikeProj(hitx, hity, x, y, cell); }
 	}
 }
 
@@ -627,13 +675,12 @@ bool SandWorker::MoveForward(
 	int x, int y,
 	const Cell& cell,
 	const Cell& replace,
-	bool& hit,
-	int& hitx, int& hity)
+	bool& hit, int& hitx, int& hity)
 {
 	float life = cell.Life - iw::DeltaTime();
 
 	if (life < 0) {
-		SetCell(x, y, Cell::GetDefault(CellType::EMPTY));
+		return true;
 	}
 
 	else {
@@ -673,7 +720,7 @@ bool SandWorker::MoveForward(
 		SetCell(x, y, replacement);
 	}
 
-	return true;
+	return false;
 }
 
 void SandWorker::HitLikeProj(
@@ -688,8 +735,8 @@ void SandWorker::HitLikeProj(
 
 	if (hit.Life < 0) {
 		Cell cell = bullet;
-		cell.dX += iw::clamp<int>(iw::randi(100) - 50, cell.dX * .8, cell.dX * 1.2);
-		cell.dY += iw::clamp<int>(iw::randi(100) - 50, cell.dY * .8, cell.dY * 1.2);
+		cell.dX = iw::clamp<int>(cell.dX + iw::randi(100) - 50, cell.dX * .8 - 50, cell.dX * 1.2 + 50);
+		cell.dY = iw::clamp<int>(cell.dY + iw::randi(100) - 50, cell.dY * .8 - 50, cell.dY * 1.2 + 50);
 		cell.Life *= 1 - iw::DeltaTime() * 5;
 
 		SetCell(x, y, cell);
@@ -707,10 +754,6 @@ void SandWorker::HitLikeBeam(
 {
 	float speed = laser.Speed();
 
-	if (speed == 0) {
-		return;
-	}
-
 	Cell hit = GetCell(x, y);
 	hit.Life -= speed;
 
@@ -725,8 +768,8 @@ void SandWorker::HitLikeBeam(
 
 	if (hit.Life <= 0) {
 		Cell cell = laser;
-		cell.dX += iw::clamp<int>(iw::randi(100) - 50, cell.dX * .8, cell.dX * 1.2);
-		cell.dY += iw::clamp<int>(iw::randi(100) - 50, cell.dY * .8, cell.dY * 1.2);
+		cell.dX = iw::clamp<int>(cell.dX + iw::randi(100) - 50, cell.dX * .8 - 50, cell.dX * 1.2 + 50);
+		cell.dY = iw::clamp<int>(cell.dY + iw::randi(100) - 50, cell.dY * .8 - 50, cell.dY * 1.2 + 50);
 		cell.Life *= 1 - iw::DeltaTime() * 5;
 
 		SetCell(x, y, cell);

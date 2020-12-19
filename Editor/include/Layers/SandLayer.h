@@ -10,6 +10,8 @@
 
 #include <random>
 
+#include "iw/graphics/ParticleSystem.h"
+
 //#include "iw/util/memory/pool_allocator.h"
 
 struct Player {
@@ -36,7 +38,6 @@ enum class CellProperties : char {
 };
 inline CellProperties operator|(CellProperties a,CellProperties b){return static_cast<CellProperties>(iw::val(a)|iw::val(b));}
 inline char           operator&(CellProperties a,CellProperties b){return iw::val(a)&iw::val(b);}
-
 
 enum class CellType : char {
 	EMPTY,
@@ -102,12 +103,12 @@ struct Tile {
 
 	Tile() = default;
 
-	Tile(std::vector<iw::vector2> locations, size_t scale)
+	Tile(std::vector<iw::vector2> locations, int scale)
 		: InitialLocationsSize(locations.size() * 4)
 	{
 		for (iw::vector2& v : locations) {
-			for (size_t x = 0; x < scale; x++)
-			for (size_t y = 0; y < scale; y++) {
+			for (int x = 0; x < abs(scale); x++)
+			for (int y = 0; y < abs(scale); y++) {
 				Locations.push_back(v * scale + iw::vector2(x, y) - scale);
 			}
 		}
@@ -413,7 +414,7 @@ private:
 	SandChunk* GetChunk(
 		int chunkX, int chunkY)
 	{
-		if (abs(chunkX) > 10 || abs(chunkY) > 10) {
+		if (abs(chunkX) > 100 || abs(chunkY) > 100) {
 			return nullptr;
 		}
 
@@ -552,10 +553,10 @@ namespace iw {
 		: public Layer
 	{
 	private:
-		ref<Shader> shader;
+		ref<Texture> m_sandTexture; // shorter access than through mesh->material->gettexture
+		iw::Mesh m_sandScreen;
 
-		ref<RenderTarget> target;
-		ref<Texture> texture;
+		iw::StaticPS m_stars;
 
 		iw::vector2 pMousePos, mousePos;
 		float fireTimeout = 0;
@@ -571,8 +572,6 @@ namespace iw {
 		SandWorld world;
 
 		float stepTimer = 0;
-
-		std::mt19937 m_stars;
 
 	public:
 		SandLayer();

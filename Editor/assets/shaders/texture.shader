@@ -16,11 +16,15 @@ void main() {
 
 in vec2 FragPos;
 
-uniform sampler2D inTexture;
+uniform sampler2D mat_texture;
 
 out vec4 FragColor;
 
 void main() {
-	vec3 color = texture(inTexture, FragPos).rgb;
-	FragColor = vec4(color, 1);
+	vec4 color = texture(mat_texture, FragPos);
+	if(color.a < 0.5) {
+		discard;
+	}
+
+	FragColor = color;
 }
