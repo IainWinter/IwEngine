@@ -9,7 +9,7 @@ namespace iw {
 	SandLayer::SandLayer()
 		: Layer("Ray Marching")
 		, m_sandTexture(nullptr)
-		, world(SandWorld(200, 200, 2))
+		, world(SandWorld(256, 256, 2))
 		, reset(true)
 	{
 		srand(time(nullptr));
@@ -26,7 +26,7 @@ namespace iw {
 		Cell elaser = { CellType::eLASER, CellProperties::MOVE_FORWARD | CellProperties::HIT_LIKE_BEAM };
 		Cell bullet = { CellType::BULLET, CellProperties::MOVE_FORWARD | CellProperties::HIT_LIKE_PROJECTILE };
 
-		empty  .Color = iw::Color::From255(  0,   0,   0);
+		empty  .Color = iw::Color::From255(  0,   0,   0, 0);
 		sand   .Color = iw::Color::From255(237, 201, 175);
 		water  .Color = iw::Color::From255(175, 201, 237);
 		rock   .Color = iw::Color::From255(201, 201, 201);
@@ -116,12 +116,14 @@ namespace iw {
 
 		m_stars.SetParticleMesh(starMesh);
 
-		m_stars.SetTransform(new iw::Transform(0, .1f));
+		m_stars.SetTransform(new iw::Transform(0, 0.1f));
 
 		for (int i = 0; i < 2000; i++) {
 			m_stars.SpawnParticle(iw::Transform(
 				iw::vector2(Renderer->Width() * iw::randf() / 2,
-							Renderer->Width() * iw::randf() / 2)));
+							Renderer->Width() * iw::randf() / 2),
+				.2f * (iw::randf() + 1.1f)
+			));
 		}
 
 		m_stars.UpdateParticleMesh();
@@ -130,9 +132,11 @@ namespace iw {
 	}
 
 	void SandLayer::PostUpdate() {
-		// Game update
+		// Sand step
 
-		world.m_currentTick += 1;
+		world.Step();
+
+		// Game update
 
 		int height = m_sandTexture->Height();
 		int width  = m_sandTexture->Width();
@@ -150,7 +154,7 @@ namespace iw {
 					vector2(0, 2), vector2(1, 2), vector2(2, 2), vector2(3, 2),
 					vector2(0, 3),							     vector2(3, 3),
 					vector2(0, 4),							     vector2(3, 4)
-			}, -5);
+			}, 5);
 			player.Set<Player>();
 
 			//for (int i = 1; i < m_sandTexture->Width(); i++) {
@@ -171,6 +175,7 @@ namespace iw {
 
 			reset = false;
 		}
+
 
 		spawnEnemy -= iw::DeltaTime();
 		if (spawnEnemy < 0) {
@@ -220,8 +225,8 @@ namespace iw {
 				cell = Cell::GetDefault(CellType::ROCK);
 			}
 			
-			for (int  i = 0; i  < 20; i++)
-			for (int ii = 0; ii < 20; ii++) {
+			for (int  i = 0; i  < 50; i++)
+			for (int ii = 0; ii < 50; ii++) {
 				world.SetCell(pos.x + i, pos.y + ii, cell);
 			}
 		}
@@ -242,6 +247,9 @@ namespace iw {
 
 			for (int i = 0; i < a->Locations.size(); i++) {
 				vector2 v = vector4(a->Locations[i], 0, 1) * t->Transformation().transposed();
+				
+				v.x = ceil(v.x);
+				v.y = ceil(v.y);
 
 				if (!world.InBounds(v.x, v.y)) continue;
 				
@@ -303,48 +311,62 @@ namespace iw {
 		// Sand update
 
 		//stepTimer -= iw::DeltaTime();
-		//if (stepTimer < 0 /*&& Keyboard::KeyDown(V)*/) {
-		//	stepTimer = 1 / 180.0f;
+		//if (stepTimer < 0 && Keyboard::KeyDown(V)/**/) {
+		//	stepTimer = 1 / 100.0f;
 
 			std::mutex chunkCountMutex;
 			std::condition_variable chunkCountCV;
 			int chunkCount = 0;
 
-			for(auto& pair: world.m_chunks) {
-				if (pair.second.IsEmpty()) {
-					continue;
-				}
+			int minX = fx  / world.m_chunkWidth - world.m_chunkWidth * 2;
+			int maxX = fx2 / world.m_chunkWidth + world.m_chunkWidth * 2;
 
-				if ((iw::vector2(pair.second.m_x, pair.second.m_y) - playerLocation).length() > fx2 - fx) {
-					continue;
-				}
+			int minY = fx  / world.m_chunkHeight - world.m_chunkHeight * 2;
+			int maxY = fx2 / world.m_chunkHeight + world.m_chunkHeight * 2;
 
-				{
-					std::unique_lock lock(chunkCountMutex);
-					chunkCount++;
-				}
+			//if (world.m_currentTick % 2 == 0) {
+			//	minX -= 1;
+			//	minY -= 1;
+			//}
 
-				Task->queue([&]() {
-					SandWorker(world, pair.second).UpdateChunk();
+			for (int px = 0; px < 2; px++)
+			for (int py = 0; py < 2; py++) {
+				for(int x = minX+px; x < maxX; x += 2)
+				for(int y = minY+py; y < maxY; y += 2) {
+					SandChunk* chunk = world.GetChunk(x, y);
+					if (!chunk || chunk->IsEmpty()) continue; // or break?
+
+					if ((iw::vector2(chunk->m_x, chunk->m_y) - playerLocation).length() > world.m_chunkWidth * 10) {
+						continue;
+					}
 
 					{
 						std::unique_lock lock(chunkCountMutex);
-						chunkCount--;
+						chunkCount++;
 					}
 
-					chunkCountCV.notify_one();
-				});
-			}
+					Task->queue([&, chunk]() {
+						SandWorker(world, *chunk).UpdateChunk();
 
-			//LOG_INFO << "Need to update " << chunkCount << " chunks. dt is " << iw::DeltaTime() << " seconds (" << 1 / iw::DeltaTime() << "fps)";
+						{
+							std::unique_lock lock(chunkCountMutex);
+							chunkCount--;
+						}
+
+						chunkCountCV.notify_one();
+					});
+				}
+			}
 
 			std::unique_lock lock(chunkCountMutex);
 			chunkCountCV.wait(lock, [&](){ return chunkCount == 0; });
-		
+
+			for(auto& pair: world.m_chunks) {
+				pair.second.CommitMovedCells(world.m_currentTick);
+			}
 		//}
 
 		// Swap buffers
-
 
 		iw::ref<iw::Texture> sandTex = m_sandTexture;//m_sandScreen.Material()->GetTexture("texture");
 			 
@@ -352,6 +374,8 @@ namespace iw {
 		unsigned int* colors = (unsigned int*)sandTex->Colors(); // cast from r, g, b, a to rgba
 
 		//m_stars.seed(1);
+
+		bool showChunks = Keyboard::KeyDown(K);
 
 		for (SandChunk* chunk : world.GetVisibleChunks(fx, fy, fx2, fy2)) {
 			int startY = iw::clamp(fy  - chunk->m_y, 0, chunk->m_height);
@@ -363,40 +387,35 @@ namespace iw {
 			for (int x = startX; x < endX; x++) {
 				int texi = (chunk->m_x + x - fx) + (chunk->m_y + y - fy) * width;
 
-#undef max
-
-				//if (m_stars() < m_stars.max() / 2000) {
-				//	colors[texi] = INT_MAX;
-				//}
-
-				//const Cell& cell = chunk->GetCellUnsafe(x, y);
-
-				//if (cell.Type != CellType::EMPTY) {
-					colors[texi] = chunk->GetCellUnsafe(x, y).Color;
-				//}
-
-				//else {
-				//}
-
-				if (x == 0 || y == 0) {
-					colors[texi] = iw::Color(1, 0, 0, 1);
-				}
-
-				/*
-				if (Keyboard::KeyDown(K)) {
+				if (showChunks) {
 					if (x == 0 || y == 0) {
 						colors[texi] = iw::Color(1, 0, 0, 1);
 					}
+
+					if (x == chunk->m_minX || y == chunk->m_minY) {
+						colors[texi] = iw::Color(0, 1, 0, 1);
+					}
+
+					if (x == chunk->m_maxX || y == chunk->m_maxY) {
+						colors[texi] = iw::Color(0, 1, 0, 1);
+					}
+
+					const Cell& cell = chunk->GetCellUnsafe(x, y);
+
+					if (cell.Type != CellType::EMPTY) {
+						colors[texi] = cell.Color;
+					}
 				}
-				*/
+
+				else {
+					colors[texi] = chunk->GetCellUnsafe(x, y).Color;
+				}
 			}
 		}
 
 		sandTex->Update(Renderer->Device); // should be auto in renderer 
 
-
-		m_stars.GetTransform()->Position = iw::vector2(-playerLocation.x, -playerLocation.y) / 10000;
-
+		m_stars.GetTransform()->Position = iw::vector2(-playerLocation.x, -playerLocation.y) / 5000;
 
 		Renderer->BeginScene(MainScene);
 			Renderer->DrawMesh(m_stars.GetTransform(), &m_stars.GetParticleMesh());
@@ -410,6 +429,9 @@ namespace iw {
 		{
 			for (int i = 0; i < a->Locations.size(); i++) {
 				vector2 v = vector4(a->Locations[i], 0, 1) * t->Transformation().transposed();
+
+				v.x = ceil(v.x);
+				v.y = ceil(v.y);
 
 				if (!world.InBounds(v.x, v.y)) continue;
 				
@@ -434,17 +456,25 @@ namespace iw {
 			auto p)
 		{
 			p->Velocity *= 1 - iw::DeltaTime();
-			p->Velocity = iw::clamp<float>(p->Velocity + p->Movement.y * iw::DeltaTime() * 3, -15, 15);
+			p->Velocity = iw::clamp<float>(p->Velocity + p->Movement.y * iw::DeltaTime() * 3, -25, 25);
 
-			t->Position += t->Up() * p->Velocity;
-			t->Rotation *= iw::quaternion::from_euler_angles(0, 0, -p->Movement.x * iw::DeltaTime());
+			vector3 up = t->Up();
+			up.y = -up.y;
+
+			t->Position += up * p->Velocity;
+			t->Rotation *= iw::quaternion::from_euler_angles(0, 0, p->Movement.x * iw::DeltaTime());
+
+			//if (t->Position.length() > 100) {
+				//t->Rotation = iw::lerp(t->Rotation, iw::quaternion::from_look_at(t->Position, 0, t->Up()), .1f);
+				//p->Velocity += iw::DeltaTime();
+			//}
 
 			//if (   t->Position.x < -world.m_chunkWidth  * 10 + world.m_chunkWidth
 			//	|| t->Position.y < -world.m_chunkHeight * 10 + world.m_chunkHeight
 			//	|| t->Position.x >  world.m_chunkWidth  * 10 - world.m_chunkWidth
 			//	|| t->Position.y >  world.m_chunkHeight * 10 - world.m_chunkHeight)
 			//{
-			//	p->Velocity -= iw::DeltaTime();
+			//	p->Velocity *= -1;
 			//}
 		});
 
@@ -461,8 +491,6 @@ namespace iw {
 				),
 				iw::DeltaTime());
 		});
-
-		//Renderer->ApplyFilter(m_shader, m_target, nullptr);
 	}
 
 	bool SandLayer::On(
@@ -545,8 +573,8 @@ namespace iw {
 }
 
 void SandWorker::UpdateChunk() {
-	for (int x = 0;                  x <  m_chunk.m_width; x++)
-	for (int y = m_chunk.m_height-1; y >= 0;               y--) {
+	for (int x = m_chunk.m_minX;   x <  m_chunk.m_maxX; x++)
+	for (int y = m_chunk.m_maxY-1; y >= m_chunk.m_minY; y--) {
 		
 		if (CellAlreadyUpdated(x, y)) continue;
 
@@ -613,10 +641,10 @@ bool SandWorker::MoveDown(
 
 	bool down = IsEmpty(downX, downY);
 	if (down) {
-		SetCell(downX, downY, replace);
+		MoveCell(x, y, downX, downY);
 	}
 
-	return down;
+	return false;
 }
 
 bool SandWorker::MoveDownSide(
@@ -639,10 +667,10 @@ bool SandWorker::MoveDownSide(
 		downRight = rand ? false : true;
 	}
 
-	if		(downLeft)	SetCell(downLeftX,  downLeftY,  replace);
-	else if (downRight) SetCell(downRightX, downRightY, replace);
+	if		(downLeft)	MoveCell(x, y, downLeftX,  downLeftY);
+	else if (downRight) MoveCell(x, y, downRightX, downRightY);
 
-	return downLeft || downRight;
+	return false;
 }
 
 bool SandWorker::MoveSide(
@@ -665,10 +693,10 @@ bool SandWorker::MoveSide(
 		right = rand ? false : true;
 	}
 
-	if		(left)	SetCell(leftX,	leftY,	replace);
-	else if (right) SetCell(rightX, rightY, replace);
+	if		(left)	MoveCell(x, y, leftX,	leftY);
+	else if (right) MoveCell(x, y, rightX, rightY);
 
-	return left || right;
+	return false;
 }
 
 bool SandWorker::MoveForward(
@@ -684,7 +712,7 @@ bool SandWorker::MoveForward(
 	}
 
 	else {
-		std::vector<iw::vector2> cellpos = iw::FillLine(x, y, x + cell.dX * iw::DeltaTime(), y + cell.dY * iw::DeltaTime());
+		std::vector<iw::vector2> cellpos = iw::FillLine(x, y, ceil(x + cell.dX * iw::DeltaTime()), ceil(y + cell.dY * iw::DeltaTime()));
 		for (int i = 0; i < cellpos.size(); i++) {
 			float destX = cellpos[i].x;
 			float destY = cellpos[i].y;

@@ -121,35 +121,62 @@ struct Tile {
 struct SandChunk {
 private:
 	std::vector<LockingCell> m_cells;
-	std::atomic<int> m_emptyCellCount;
+	std::unordered_map<size_t, std::vector<size_t>> m_changes;
+	std::atomic<int> m_filledCellCount;
 
 public:
-	const int m_width; // should be private
-	const int m_height;
 	const int m_x;
 	const int m_y;
+	const int m_width; // should be private
+	const int m_height;
+
+	int m_minX, m_minY,
+	    m_maxX, m_maxY; // rect around things to update
+
+	int m_lastUpdateTick;
 
 	SandChunk() = default;
 
-	SandChunk(int x, int y, int width, int height)
+	SandChunk(
+		int x, int y,
+		size_t width, size_t height,
+		int currentTick)
 		: m_x(x), m_y(y)
 		, m_width(width), m_height(height)
-		, m_emptyCellCount(0)
+		, m_filledCellCount(0)
+		, m_minX(m_width)
+		, m_minY(m_height)
+		, m_maxX(-1)
+		, m_maxY(-1)
+		, m_lastUpdateTick(currentTick)
 	{
 		m_cells.resize(m_width * m_height);
 	}
 
-	SandChunk(SandChunk&& move) noexcept
+	SandChunk(
+		SandChunk&& move) noexcept
 		: m_cells(move.m_cells)
-		, m_emptyCellCount(move.m_emptyCellCount.load())
+		, m_filledCellCount(move.m_filledCellCount.load())
 		, m_width (move.m_width)
 		, m_height(move.m_height)
-		, m_x     (move.m_x)
-		, m_y     (move.m_y)
+		, m_x(move.m_x)
+		, m_y(move.m_y)
+		, m_minX(move.m_minX)
+		, m_minY(move.m_minY)
+		, m_maxX(move.m_maxX)
+		, m_maxY(move.m_maxY)
+		, m_lastUpdateTick(move.m_lastUpdateTick)
 	{}
 
+	void Step(
+		int currentTick)
+	{
+		ResetRect(currentTick);
+	}
+
 	void Reset() {
-		m_emptyCellCount = 0;
+		m_filledCellCount = 0;
+		m_lastUpdateTick = 0;
 
 		size_t size = m_cells.size();
 		m_cells.clear();
@@ -176,7 +203,7 @@ public:
 	}
 
 	bool IsEmpty() {
-		return m_emptyCellCount == 0;
+		return m_filledCellCount == 0;
 	}
 
 	bool IsEmpty(
@@ -191,8 +218,50 @@ public:
 	{
 		LockingCell& out = m_cells[GetIndex(x, y)];
 
-		std::unique_lock lock(out.Mutex);
+		//std::unique_lock lock(out.Mutex);
 		return currentTick == out.Cell.LastUpdateTick;
+	}
+
+	// new move cell idea
+	//	Let cells move into the same cell, but then when commiting,
+	//	pick a random one to actually move there
+
+	void MoveCell(
+		int x,   int y,
+		int xto, int yto)
+	{
+		size_t index   = GetIndex(x,   y);
+		size_t indexto = GetIndex(xto, yto);
+
+		auto itr = m_changes.find(indexto);
+		if (itr == m_changes.end()) {
+			m_changes.emplace(indexto, std::vector<size_t> { index });
+		}
+
+		else {
+			itr->second.push_back(index);
+		}
+	}
+
+	void CommitMovedCells(
+		int currentTick)
+	{
+		if (m_changes.size() == 0) return;
+
+		for (auto& [indexto, possible] : m_changes) {
+			size_t index = possible.at(iw::randi(possible.size() - 1));
+
+			m_cells[indexto].Cell = m_cells[index].Cell; // does this conflict anything?
+			m_cells[index].Cell = Cell::GetDefault(CellType::EMPTY); // this cant be here pass in arg
+
+			m_cells[indexto].Cell.LastUpdateTick = currentTick; // set current tick
+
+			UpdateRect(indexto % m_width, indexto / m_width);
+		}
+
+		m_changes.clear();
+
+		m_lastUpdateTick = currentTick;
 	}
 
 	void SetCell(
@@ -205,20 +274,24 @@ public:
 		if (    cell.Type == CellType::EMPTY
 			&& pcellType != CellType::EMPTY)
 		{
-			++m_emptyCellCount;
+			--m_filledCellCount;
 		}
 		
 		else if (cell.Type != CellType::EMPTY
 			 && pcellType == CellType::EMPTY)
 		{
-			--m_emptyCellCount;
+			++m_filledCellCount;
 		}
 
 		LockingCell& assign = m_cells[GetIndex(x, y)];
 
-		std::unique_lock lock(assign.Mutex);
+		//std::unique_lock lock(assign.Mutex);
 		assign.Cell = cell;
 		assign.Cell.LastUpdateTick = currentTick;
+
+		UpdateRect(x, y);
+
+		m_lastUpdateTick = currentTick;
 	}
 
 	CellType GetCellType(
@@ -226,7 +299,7 @@ public:
 	{
 		LockingCell& out = m_cells[GetIndex(x, y)];
 
-		std::unique_lock lock(out.Mutex);
+		//std::unique_lock lock(out.Mutex);
 		return out.Cell.Type;
 	}
 
@@ -235,7 +308,7 @@ public:
 	{
 		LockingCell& out = m_cells[GetIndex(x, y)];
 
-		std::unique_lock lock(out.Mutex);
+		//std::unique_lock lock(out.Mutex);
 		return out.Cell;
 	}
 
@@ -244,13 +317,50 @@ public:
 	{
 		return m_cells[GetIndex(x, y)].Cell;
 	}
+private:
+	void UpdateRect(
+		int x, int y)
+	{
+		if (x <= m_minX) {
+			m_minX = iw::clamp(x - 1, 0, m_width);
+		}
+
+		if (y <= m_minY) {
+			m_minY = iw::clamp(y - 1, 0, m_height);
+		}
+
+		if (x >= m_maxX) {
+			m_maxX = iw::clamp(x + 1, 0, m_width);
+		}
+
+		if (y >= m_maxY) {
+			m_maxY = iw::clamp(y + 1, 0, m_height);
+		}
+	}
+
+	void ResetRect(
+		int currentTick)
+	{
+		//if (currentTick % 10 == 0) {
+		//	m_minX = iw::clamp(m_minX + 1, 0, m_width);
+		//	m_minY = iw::clamp(m_minY + 1, 0, m_height);
+		//	m_maxX = iw::clamp(m_maxX - 1, 0, m_width);
+		//	m_maxY = iw::clamp(m_maxY - 1, 0, m_height);
+		//}
+
+		if(IsEmpty()) {
+			m_minX = m_width;
+			m_minY = m_height;
+			m_maxX = -1;
+			m_maxY = -1;
+		}
+	}
 };
 
 struct SandWorld {
 private:
 	bool m_fixedChunks;
 	std::mutex m_chunksMutex;
-
 	//iw::pool_allocator m_chunkMem;
 
 public:
@@ -287,29 +397,30 @@ public:
 				GetChunkIndex(x, y),
 				SandChunk(
 					m_chunkWidth * x, m_chunkHeight * y,
-					m_chunkWidth,     m_chunkHeight)
+					m_chunkWidth,     m_chunkHeight,
+					m_currentTick)
 			);
 		}
 	}
 
-	std::vector<SandChunk*> GetVisibleChunks(
-		int x,  int y,
-		int x2, int y2)
-	{
-		std::vector<SandChunk*> visible;
+	void Step() {
+		m_currentTick++;
 
-		auto [chunkX,  chunkY]  = GetChunkCoordsAndIntraXY(x,  y);
-		auto [chunkX2, chunkY2] = GetChunkCoordsAndIntraXY(x2, y2, true);
+		std::vector<int> toRemove;
 
-		for(int cx = chunkX; cx < chunkX2; cx++)
-		for(int cy = chunkY; cy < chunkY2; cy++) {
-			SandChunk* chunk = GetChunk(cx, cy);
-			if (chunk) {
-				visible.push_back(chunk);
+		for (auto& [location, chunk] : m_chunks) {
+			if (m_currentTick - chunk.m_lastUpdateTick > 1 / iw::DeltaTime() * 5) {
+				toRemove.push_back(location);
+			}
+
+			else {
+				chunk.Step(m_currentTick);
 			}
 		}
 
-		return visible;
+		for (int index : toRemove) {
+			m_chunks.erase(index);
+		}
 	}
 
 	void Reset() {
@@ -371,7 +482,38 @@ public:
 		return GetChunkAndMapCoords(x, y)
 			->GetCell(x, y);
 	}
-private:
+
+	SandChunk* GetChunk(
+		int chunkX, int chunkY)
+	{
+		auto itr = m_chunks.find(GetChunkIndex(chunkX, chunkY));
+		if (itr != m_chunks.end()) {
+			return &itr->second;
+		}
+
+		return nullptr;
+	}
+
+	std::vector<SandChunk*> GetVisibleChunks(
+		int x,  int y,
+		int x2, int y2)
+	{
+		std::vector<SandChunk*> visible;
+
+		auto [chunkX,  chunkY]  = GetChunkCoordsAndIntraXY(x,  y);
+		auto [chunkX2, chunkY2] = GetChunkCoordsAndIntraXY(x2, y2, true);
+
+		for(int cx = chunkX; cx < chunkX2; cx++)
+		for(int cy = chunkY; cy < chunkY2; cy++) {
+			SandChunk* chunk = GetChunkOrMakeNew(cx, cy);
+			if (chunk) {
+				visible.push_back(chunk);
+			}
+		}
+
+		return visible;
+	}
+private: 
 	std::pair<int, int> GetChunkCoordsAndIntraXY(
 		int& x, int& y,
 		bool inclusive = false)
@@ -391,12 +533,12 @@ private:
 		x = x % m_chunkWidth;
 		y = y % m_chunkHeight;
 
-		if (x < 0) {
+		if (x < 0 && !inclusive) {
 			x += m_chunkWidth;
 			chunkX--;
 		}
 
-		if (y < 0) {
+		if (y < 0 && !inclusive) {
 			y += m_chunkHeight;
 			chunkY--;
 		}
@@ -408,10 +550,10 @@ private:
 		int& x, int& y)
 	{
 		auto [chunkX, chunkY] = GetChunkCoordsAndIntraXY(x, y);
-		return GetChunk(chunkX, chunkY);
+		return GetChunkOrMakeNew(chunkX, chunkY);
 	}
 
-	SandChunk* GetChunk(
+	SandChunk* GetChunkOrMakeNew(
 		int chunkX, int chunkY)
 	{
 		if (abs(chunkX) > 100 || abs(chunkY) > 100) {
@@ -419,12 +561,7 @@ private:
 		}
 
 		if (m_fixedChunks) {
-			auto itr = m_chunks.find(GetChunkIndex(chunkX, chunkY));
-			if (itr != m_chunks.end()) {
-				return &itr->second;
-			}
-
-			return nullptr;
+			return GetChunk(chunkX, chunkY);
 		}
 
 		else {
@@ -437,7 +574,8 @@ private:
 			return &m_chunks.emplace(
 					GetChunkIndex(chunkX, chunkY),
 					SandChunk(m_chunkWidth * chunkX, m_chunkHeight * chunkY,
-							m_chunkWidth,		   m_chunkHeight)
+							m_chunkWidth,		   m_chunkHeight,
+							m_currentTick)
 				).first->second;
 		}
 	}
@@ -487,15 +625,31 @@ public:
 		return m_world.IsEmpty(x + m_chunk.m_x, y + m_chunk.m_y);
 	}
 
+	void MoveCell(
+		int x,   int y,
+		int xto, int yto)
+	{
+		if (m_chunk.InBounds(xto, yto)) {
+			m_chunk.MoveCell(x, y, xto, yto);
+		}
+
+		else {
+			m_world.SetCell(xto + m_chunk.m_x, yto + m_chunk.m_y, m_chunk.GetCell(x, y));
+			m_chunk.SetCell(x, y, Cell::GetDefault(CellType::EMPTY), m_world.m_currentTick);
+		}
+	}
+
 	void SetCell(
 		int x, int y,
 		const Cell& cell)
 	{
 		if (m_chunk.InBounds(x, y)) {
-			return m_chunk.SetCell(x, y, cell, m_world.m_currentTick);
+			m_chunk.SetCell(x, y, cell, m_world.m_currentTick);
 		}
 
-		return m_world.SetCell(x + m_chunk.m_x, y + m_chunk.m_y, cell);
+		else {
+			m_world.SetCell(x + m_chunk.m_x, y + m_chunk.m_y, cell);
+		}
 	}
 
 	Cell GetCell(
