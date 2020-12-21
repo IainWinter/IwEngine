@@ -128,7 +128,7 @@ struct Tile {
 
 struct SandChunk {
 private:
-	std::vector<LockingCell> m_cells;
+	LockingCell* m_cells;
 	std::unordered_map<size_t, std::vector<size_t>> m_changes;
 	std::atomic<int> m_filledCellCount;
 
@@ -146,10 +146,13 @@ public:
 	SandChunk() = default;
 
 	SandChunk(
+		LockingCell* cells,
 		int x, int y,
 		size_t width, size_t height,
 		int currentTick)
-		: m_x(x), m_y(y)
+		: m_cells(cells)
+		, m_x(x)
+		, m_y(y) 
 		, m_width(width), m_height(height)
 		, m_filledCellCount(0)
 		, m_minX(m_width)
@@ -157,9 +160,7 @@ public:
 		, m_maxX(-1)
 		, m_maxY(-1)
 		, m_lastUpdateTick(currentTick)
-	{
-		m_cells.resize(m_width * m_height);
-	}
+	{}
 
 	SandChunk(
 		SandChunk&& move) noexcept
@@ -186,9 +187,10 @@ public:
 		m_filledCellCount = 0;
 		m_lastUpdateTick = 0;
 
-		size_t size = m_cells.size();
-		m_cells.clear();
-		m_cells.resize(size);
+		LockingCell default;
+		default.Cell = Cell::GetDefault(CellType::EMPTY);
+
+		std::fill(m_cells, m_cells + m_width * m_height, default);
 	}
 
 	size_t GetIndex(
@@ -369,7 +371,7 @@ struct SandWorld {
 private:
 	bool m_fixedChunks;
 	std::mutex m_chunksMutex;
-	//iw::pool_allocator m_chunkMem;
+	iw::pool_allocator m_chunkMem;
 
 public:
 	iw::sparse_set<int, SandChunk*> m_chunks;
@@ -388,6 +390,8 @@ public:
 		, m_chunkHeight(chunkHeight / scale)
 		, m_scale(scale)
 		, m_fixedChunks(false)
+		, m_chunkMem((sizeof(LockingCell) * m_chunkWidth * m_chunkHeight
+				  + sizeof(SandChunk)) * 16)
 	{}
 
 	SandWorld(
@@ -400,6 +404,8 @@ public:
 		, m_chunkHeight(height / scale / chunksY)
 		, m_scale(scale)
 		, m_fixedChunks(true)
+		, m_chunkMem((sizeof(LockingCell) * m_chunkWidth * m_chunkHeight
+				  + sizeof(SandChunk)) * 16)
 	{
 		for (int x = -chunksX/2; x < chunksX/2; x++)
 		for (int y = -chunksY/2; y < chunksY/2; y++) {
@@ -577,7 +583,9 @@ private:
 
 			return m_chunks.emplace(
 					GetChunkIndex(chunkX, chunkY),
-					new SandChunk(m_chunkWidth * chunkX, m_chunkHeight * chunkY,
+					new SandChunk(
+						m_chunkMem.alloc<SandChunk>(),
+							m_chunkWidth * chunkX, m_chunkHeight * chunkY,
 							m_chunkWidth,		   m_chunkHeight,
 							m_currentTick)
 				);
