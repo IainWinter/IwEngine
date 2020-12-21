@@ -11,6 +11,9 @@
 #include <random>
 
 #include "iw/graphics/ParticleSystem.h"
+#include "iw/graphics/Font.h"
+
+#include "iw/util/set/sparse_set.h"
 
 //#include "iw/util/memory/pool_allocator.h"
 
@@ -94,6 +97,11 @@ struct LockingCell {
 		: Cell(copy.Cell)
 		, Mutex()
 	{}
+
+	LockingCell& operator=(const LockingCell& copy) {
+		Cell = copy.Cell;
+		return *this;
+	}
 };
 
 struct Tile {
@@ -125,10 +133,10 @@ private:
 	std::atomic<int> m_filledCellCount;
 
 public:
-	const int m_x;
-	const int m_y;
-	const int m_width; // should be private
-	const int m_height;
+	int m_x;
+	int m_y;
+	int m_width; // should be private
+	int m_height;
 
 	int m_minX, m_minY,
 	    m_maxX, m_maxY; // rect around things to update
@@ -364,7 +372,9 @@ private:
 	//iw::pool_allocator m_chunkMem;
 
 public:
-	std::unordered_map<int, SandChunk> m_chunks;  // all should be private
+	iw::sparse_set<int, SandChunk*> m_chunks;
+
+	//std::unordered_map<int, SandChunk> m_chunks;  // all should be private
 	const float m_scale;
 	const int m_chunkWidth;
 	const int m_chunkHeight;
@@ -393,13 +403,7 @@ public:
 	{
 		for (int x = -chunksX/2; x < chunksX/2; x++)
 		for (int y = -chunksY/2; y < chunksY/2; y++) {
-			m_chunks.emplace(
-				GetChunkIndex(x, y),
-				SandChunk(
-					m_chunkWidth * x, m_chunkHeight * y,
-					m_chunkWidth,     m_chunkHeight,
-					m_currentTick)
-			);
+			GetChunkOrMakeNew(x, y);
 		}
 	}
 
@@ -408,13 +412,13 @@ public:
 
 		std::vector<int> toRemove;
 
-		for (auto& [location, chunk] : m_chunks) {
-			if (m_currentTick - chunk.m_lastUpdateTick > 1 / iw::DeltaTime() * 5) {
-				toRemove.push_back(location);
+		for (auto itr = m_chunks.begin(); itr != m_chunks.end(); itr++) {
+			if (m_currentTick - (*itr)->m_lastUpdateTick > 1 / iw::DeltaTime() * 5) {
+				toRemove.push_back(itr.sparse_index());
 			}
 
 			else {
-				chunk.Step(m_currentTick);
+				(*itr)->Step(m_currentTick);
 			}
 		}
 
@@ -424,8 +428,8 @@ public:
 	}
 
 	void Reset() {
-		for (auto& [_, chunk] : m_chunks) {
-			chunk.Reset();
+		for (SandChunk* chunk : m_chunks) {
+			chunk->Reset();
 		}
 	}
 
@@ -488,7 +492,7 @@ public:
 	{
 		auto itr = m_chunks.find(GetChunkIndex(chunkX, chunkY));
 		if (itr != m_chunks.end()) {
-			return &itr->second;
+			return *itr;																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																			itr;
 		}
 
 		return nullptr;
@@ -568,20 +572,20 @@ private:
 			std::unique_lock lock(m_chunksMutex); // could also queue new chunks
 			auto itr = m_chunks.find(GetChunkIndex(chunkX, chunkY));
 			if (itr != m_chunks.end()) {
-				return &itr->second;
+				return *itr;
 			}
 
-			return &m_chunks.emplace(
+			return m_chunks.emplace(
 					GetChunkIndex(chunkX, chunkY),
-					SandChunk(m_chunkWidth * chunkX, m_chunkHeight * chunkY,
+					new SandChunk(m_chunkWidth * chunkX, m_chunkHeight * chunkY,
 							m_chunkWidth,		   m_chunkHeight,
 							m_currentTick)
-				).first->second;
+				);
 		}
 	}
 
 	int GetChunkIndex(int chunkX, int chunkY) {
-		return chunkX + chunkY * 1000; // 1000 = max chunk y pos, seems bad
+		return (100+chunkX) + (100+chunkY) * 100; // 1000 = max chunk y pos, seems bad
 
 		//return size_t(chunkX) | size_t(chunkY) << (sizeof(size_t)*8/2-1); // find better hash
 	}
@@ -711,6 +715,9 @@ namespace iw {
 		iw::Mesh m_sandScreen;
 
 		iw::StaticPS m_stars;
+
+		iw::ref<iw::Font> m_font;
+		Mesh m_textMesh;
 
 		iw::vector2 pMousePos, mousePos;
 		float fireTimeout = 0;

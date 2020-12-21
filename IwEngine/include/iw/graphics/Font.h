@@ -242,6 +242,19 @@ namespace Graphics {
 		IWGRAPHICS_API
 		Font* Build();
 	};
+
+
+	struct Text {
+		ref<Font> Font;
+		Mesh Mesh;
+
+		float m_size = 0.005f;
+		float m_scalar = 1;
+
+		void Update(std::string text) {
+			Font->UpdateMesh(Mesh, text, m_size, m_scalar);
+		}
+	};
 }
 
 	using namespace Graphics;

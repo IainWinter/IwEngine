@@ -16,6 +16,21 @@ namespace iw {
 	}
 
 	int SandLayer::Initialize() {
+		m_font = Asset->Load<iw::Font>("fonts/arial.fnt");
+		m_font->Initialize(Renderer->Device);
+
+		iw::ref<iw::Shader> fontShader = Asset->Load<Shader>("shaders/font_simple.shader");
+		Renderer->InitShader(fontShader, CAMERA);
+
+		ref<Material> textMat = REF<Material>(fontShader);
+		textMat->Set("color", iw::Color(1));
+		textMat->SetTexture("fontMap", m_font->GetTexture(0));
+
+		Asset->Give<Material>("materials/Font", textMat);
+
+		m_textMesh = m_font->GenerateMesh("", .005f, 1);
+		m_textMesh.SetMaterial(textMat);
+
 		Cell empty  = { CellType::EMPTY };
 		Cell sand   = { CellType::SAND,  CellProperties::MOVE_DOWN | CellProperties::MOVE_DOWN_SIDE };
 		Cell water  = { CellType::WATER, CellProperties::MOVE_DOWN | CellProperties::MOVE_SIDE };
@@ -361,8 +376,8 @@ namespace iw {
 			std::unique_lock lock(chunkCountMutex);
 			chunkCountCV.wait(lock, [&](){ return chunkCount == 0; });
 
-			for(auto& pair: world.m_chunks) {
-				pair.second.CommitMovedCells(world.m_currentTick);
+			for(SandChunk* chunk: world.m_chunks) {
+				chunk->CommitMovedCells(world.m_currentTick);
 			}
 		//}
 
@@ -417,9 +432,15 @@ namespace iw {
 
 		m_stars.GetTransform()->Position = iw::vector2(-playerLocation.x, -playerLocation.y) / 5000;
 
+		std::stringstream sb;
+		sb << iw::DeltaTime() << " " << 1 / iw::DeltaTime();
+
+		m_font->UpdateMesh(m_textMesh, sb.str(), 0.001, 1);
+
 		Renderer->BeginScene(MainScene);
 			Renderer->DrawMesh(m_stars.GetTransform(), &m_stars.GetParticleMesh());
 			Renderer->DrawMesh(iw::Transform(), m_sandScreen);
+			Renderer->DrawMesh(iw::Transform(), m_textMesh);
 		Renderer->EndScene();
 
 		Space->Query<iw::Transform, Tile>().Each([&](
