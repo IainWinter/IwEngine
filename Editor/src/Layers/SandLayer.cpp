@@ -344,10 +344,13 @@ namespace iw {
 			//	minY -= 1;
 			//}
 
+			auto [minCX, minCY] = world.GetChunkCoordsAndIntraXY(minX, minY);
+			auto [maxCX, maxCY] = world.GetChunkCoordsAndIntraXY(maxX, maxY, true);
+
 			for (int px = 0; px < 2; px++)
 			for (int py = 0; py < 2; py++) {
-				for(int x = minX+px; x < maxX; x += 2)
-				for(int y = minY+py; y < maxY; y += 2) {
+				for(int x = minCX+px; x < maxCX; x += 2)
+				for(int y = minCY+py; y < maxCY; y += 2) {
 					SandChunk* chunk = world.GetChunk(x, y);
 					if (!chunk || chunk->IsEmpty()) continue; // or break?
 

@@ -89,13 +89,13 @@ private:
 
 struct LockingCell {
 	Cell Cell;
-	std::mutex Mutex;
+	//std::mutex Mutex;
 
 	LockingCell() = default;
 
 	LockingCell(const LockingCell& copy)
 		: Cell(copy.Cell)
-		, Mutex()
+		//, Mutex()
 	{}
 
 	LockingCell& operator=(const LockingCell& copy) {
@@ -128,11 +128,12 @@ struct Tile {
 
 struct SandChunk {
 private:
-	LockingCell* m_cells;
 	std::unordered_map<size_t, std::vector<size_t>> m_changes;
 	std::atomic<int> m_filledCellCount;
 
 public:
+	LockingCell* m_cells;
+
 	int m_x;
 	int m_y;
 	int m_width; // should be private
@@ -390,8 +391,7 @@ public:
 		, m_chunkHeight(chunkHeight / scale)
 		, m_scale(scale)
 		, m_fixedChunks(false)
-		, m_chunkMem((sizeof(LockingCell) * m_chunkWidth * m_chunkHeight
-				  + sizeof(SandChunk)) * 16)
+		, m_chunkMem((sizeof(LockingCell) * chunkWidth * chunkHeight / scale) * 16)
 	{}
 
 	SandWorld(
@@ -404,8 +404,7 @@ public:
 		, m_chunkHeight(height / scale / chunksY)
 		, m_scale(scale)
 		, m_fixedChunks(true)
-		, m_chunkMem((sizeof(LockingCell) * m_chunkWidth * m_chunkHeight
-				  + sizeof(SandChunk)) * 16)
+		, m_chunkMem((sizeof(LockingCell) * m_chunkWidth * m_chunkHeight) * 16)
 	{
 		for (int x = -chunksX/2; x < chunksX/2; x++)
 		for (int y = -chunksY/2; y < chunksY/2; y++) {
@@ -429,6 +428,7 @@ public:
 		}
 
 		for (int index : toRemove) {
+			m_chunkMem.free(m_chunks.at(index)->m_cells, sizeof(LockingCell)*m_chunkWidth*m_chunkHeight);
 			m_chunks.erase(index);
 		}
 	}
@@ -523,7 +523,7 @@ public:
 
 		return visible;
 	}
-private: 
+
 	std::pair<int, int> GetChunkCoordsAndIntraXY(
 		int& x, int& y,
 		bool inclusive = false)
@@ -555,7 +555,7 @@ private:
 
 		return {chunkX, chunkY};
 	}
-
+private: 
 	SandChunk* GetChunkAndMapCoords(
 		int& x, int& y)
 	{
@@ -584,7 +584,7 @@ private:
 			return m_chunks.emplace(
 					GetChunkIndex(chunkX, chunkY),
 					new SandChunk(
-						m_chunkMem.alloc<SandChunk>(),
+							m_chunkMem.alloc<LockingCell>(sizeof(LockingCell)*m_chunkWidth*m_chunkHeight),
 							m_chunkWidth * chunkX, m_chunkHeight * chunkY,
 							m_chunkWidth,		   m_chunkHeight,
 							m_currentTick)
