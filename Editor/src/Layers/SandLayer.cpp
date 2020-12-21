@@ -333,18 +333,18 @@ namespace iw {
 			std::condition_variable chunkCountCV;
 			int chunkCount = 0;
 
-			int minX = fx  / world.m_chunkWidth - world.m_chunkWidth * 2;
-			int maxX = fx2 / world.m_chunkWidth + world.m_chunkWidth * 2;
+			int minX = fx  - world.m_chunkWidth * 2;
+			int maxX = fx2 + world.m_chunkWidth * 2;
 
-			int minY = fx  / world.m_chunkHeight - world.m_chunkHeight * 2;
-			int maxY = fx2 / world.m_chunkHeight + world.m_chunkHeight * 2;
+			int minY = fy  - world.m_chunkHeight * 2;
+			int maxY = fy2 + world.m_chunkHeight * 2;
 
 			//if (world.m_currentTick % 2 == 0) {
 			//	minX -= 1;
 			//	minY -= 1;
 			//}
 
-			auto [minCX, minCY] = world.GetChunkCoordsAndIntraXY(minX, minY);
+			auto [minCX, minCY] = world.GetChunkCoordsAndIntraXY(minX, minY); // need to find a way to update all chunks
 			auto [maxCX, maxCY] = world.GetChunkCoordsAndIntraXY(maxX, maxY, true);
 
 			for (int px = 0; px < 2; px++)
@@ -354,9 +354,9 @@ namespace iw {
 					SandChunk* chunk = world.GetChunk(x, y);
 					if (!chunk || chunk->IsEmpty()) continue; // or break?
 
-					if ((iw::vector2(chunk->m_x, chunk->m_y) - playerLocation).length() > world.m_chunkWidth * 10) {
-						continue;
-					}
+					//if ((iw::vector2(chunk->m_x, chunk->m_y) - playerLocation).length() > world.m_chunkWidth * 20) {
+					//	continue;
+					//}
 
 					{
 						std::unique_lock lock(chunkCountMutex);
@@ -376,8 +376,10 @@ namespace iw {
 				}
 			}
 
-			std::unique_lock lock(chunkCountMutex);
-			chunkCountCV.wait(lock, [&](){ return chunkCount == 0; });
+			{
+				std::unique_lock lock(chunkCountMutex);
+				chunkCountCV.wait(lock, [&]() { return chunkCount == 0; });
+			}
 
 			for(SandChunk* chunk: world.m_chunks) {
 				chunk->CommitMovedCells(world.m_currentTick);
@@ -394,41 +396,62 @@ namespace iw {
 		//m_stars.seed(1);
 
 		bool showChunks = Keyboard::KeyDown(K);
+		//chunkCount = 0; // this is already set to 0 but we could reset for reability
+		//std::condition_variable chunkCountCV; // not sure how reusing these work
 
 		for (SandChunk* chunk : world.GetVisibleChunks(fx, fy, fx2, fy2)) {
-			int startY = iw::clamp(fy  - chunk->m_y, 0, chunk->m_height);
-			int startX = iw::clamp(fx  - chunk->m_x, 0, chunk->m_width);
-			int endY   = iw::clamp(fy2 - chunk->m_y, 0, chunk->m_height);
-			int endX   = iw::clamp(fx2 - chunk->m_x, 0, chunk->m_width);
-
-			for (int y = startY; y < endY; y++)
-			for (int x = startX; x < endX; x++) {
-				int texi = (chunk->m_x + x - fx) + (chunk->m_y + y - fy) * width;
-
-				if (showChunks) {
-					if (x == 0 || y == 0) {
-						colors[texi] = iw::Color(1, 0, 0, 1);
-					}
-
-					if (x == chunk->m_minX || y == chunk->m_minY) {
-						colors[texi] = iw::Color(0, 1, 0, 1);
-					}
-
-					if (x == chunk->m_maxX || y == chunk->m_maxY) {
-						colors[texi] = iw::Color(0, 1, 0, 1);
-					}
-
-					const Cell& cell = chunk->GetCellUnsafe(x, y);
-
-					if (cell.Type != CellType::EMPTY) {
-						colors[texi] = cell.Color;
-					}
-				}
-
-				else {
-					colors[texi] = chunk->GetCellUnsafe(x, y).Color;
-				}
+			{
+				std::unique_lock lock(chunkCountMutex);
+				chunkCount++;
 			}
+
+			Task->queue([=, &chunkCount, &chunkCountCV, &chunkCountMutex]() {
+				int startY = iw::clamp(fy  - chunk->m_y, 0, chunk->m_height);
+				int startX = iw::clamp(fx  - chunk->m_x, 0, chunk->m_width);
+				int endY   = iw::clamp(fy2 - chunk->m_y, 0, chunk->m_height);
+				int endX   = iw::clamp(fx2 - chunk->m_x, 0, chunk->m_width);
+
+				for (int y = startY; y < endY; y++)
+				for (int x = startX; x < endX; x++) {
+					int texi = (chunk->m_x + x - fx) + (chunk->m_y + y - fy) * width;
+
+					if (showChunks) {
+						if (x == 0 || y == 0) {
+							colors[texi] = iw::Color(1, 0, 0, 1);
+						}
+
+						if (x == chunk->m_minX || y == chunk->m_minY) {
+							colors[texi] = iw::Color(0, 1, 0, 1);
+						}
+
+						if (x == chunk->m_maxX || y == chunk->m_maxY) {
+							colors[texi] = iw::Color(0, 1, 0, 1);
+						}
+
+						const Cell& cell = chunk->GetCellUnsafe(x, y);
+
+						if (cell.Type != CellType::EMPTY) {
+							colors[texi] = cell.Color;
+						}
+					}
+
+					else {
+						colors[texi] = chunk->GetCellUnsafe(x, y).Color;
+					}
+				}
+
+				{
+					std::unique_lock lock(chunkCountMutex);
+					chunkCount--;
+
+					chunkCountCV.notify_one();
+				}
+			});
+		}
+
+		{
+			std::unique_lock lock(chunkCountMutex);
+			chunkCountCV.wait(lock, [&]() { return chunkCount == 0; });
 		}
 
 		sandTex->Update(Renderer->Device); // should be auto in renderer 

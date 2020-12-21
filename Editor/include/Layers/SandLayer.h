@@ -260,6 +260,10 @@ public:
 		if (m_changes.size() == 0) return;
 
 		for (auto& [indexto, possible] : m_changes) {
+			if (possible.size() == 0) {
+				continue;
+			}
+
 			size_t index = possible.at(iw::randi(possible.size() - 1));
 
 			m_cells[indexto].Cell = m_cells[index].Cell; // does this conflict anything?
@@ -270,7 +274,9 @@ public:
 			UpdateRect(indexto % m_width, indexto / m_width);
 		}
 
-		m_changes.clear();
+		for (auto& [indexto, possible] : m_changes) {
+			possible.clear();
+		}
 
 		m_lastUpdateTick = currentTick;
 	}
@@ -352,13 +358,6 @@ private:
 	void ResetRect(
 		int currentTick)
 	{
-		//if (currentTick % 10 == 0) {
-		//	m_minX = iw::clamp(m_minX + 1, 0, m_width);
-		//	m_minY = iw::clamp(m_minY + 1, 0, m_height);
-		//	m_maxX = iw::clamp(m_maxX - 1, 0, m_width);
-		//	m_maxY = iw::clamp(m_maxY - 1, 0, m_height);
-		//}
-
 		if(IsEmpty()) {
 			m_minX = m_width;
 			m_minY = m_height;
@@ -418,7 +417,9 @@ public:
 		std::vector<int> toRemove;
 
 		for (auto itr = m_chunks.begin(); itr != m_chunks.end(); itr++) {
-			if (m_currentTick - (*itr)->m_lastUpdateTick > 1 / iw::DeltaTime() * 5) {
+			if (    (*itr)->IsEmpty()
+				&& m_currentTick - (*itr)->m_lastUpdateTick > 1 / iw::DeltaTime() * 5)
+			{
 				toRemove.push_back(itr.sparse_index());
 			}
 
