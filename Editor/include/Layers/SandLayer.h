@@ -91,23 +91,6 @@ private:
 	static std::unordered_map<CellType, Cell> m_defaults;
 };
 
-struct LockingCell {
-	Cell Cell;
-	//std::mutex Mutex;
-
-	LockingCell() = default;
-
-	LockingCell(const LockingCell& copy)
-		: Cell(copy.Cell)
-		//, Mutex()
-	{}
-
-	LockingCell& operator=(const LockingCell& copy) {
-		Cell = copy.Cell;
-		return *this;
-	}
-};
-
 struct Tile {
 	std::vector<iw::vector2> Locations;
 	const int InitialLocationsSize = 0;
@@ -134,9 +117,10 @@ struct SandChunk {
 private:
 	std::vector<std::pair<size_t, size_t>> m_changes; // destination, source
 	std::atomic<int> m_filledCellCount;
+	std::mutex m_cellsMutex;
 
 public:
-	LockingCell* m_cells;
+	Cell* m_cells;
 
 	int m_x;
 	int m_y;
@@ -151,7 +135,7 @@ public:
 	SandChunk() = default;
 
 	SandChunk(
-		LockingCell* cells,
+		Cell* cells,
 		int x, int y,
 		size_t width, size_t height,
 		int currentTick)
@@ -182,6 +166,24 @@ public:
 		, m_lastUpdateTick(move.m_lastUpdateTick)
 	{}
 
+	SandChunk& operator=(
+		const SandChunk& copy) noexcept
+	{
+		m_cells		   = copy.m_cells;
+		m_filledCellCount = copy.m_filledCellCount.load();
+		m_width		   = copy.m_width;
+		m_height		   = copy.m_height;
+		m_x			   = copy.m_x;
+		m_y			   = copy.m_y;
+		m_minX		   = copy.m_minX;
+		m_minY		   = copy.m_minY;
+		m_maxX		   = copy.m_maxX;
+		m_maxY		   = copy.m_maxY;
+		m_lastUpdateTick  = copy.m_lastUpdateTick;
+
+		return *this;
+	}
+
 	void Step(
 		int currentTick)
 	{
@@ -192,10 +194,7 @@ public:
 		m_filledCellCount = 0;
 		m_lastUpdateTick = 0;
 
-		LockingCell default;
-		default.Cell = Cell::GetDefault(CellType::EMPTY);
-
-		std::fill(m_cells, m_cells + m_width * m_height, default);
+		memset(m_cells, 0, sizeof(Cell) * m_width * m_height);
 	}
 
 	size_t GetIndex(
@@ -231,10 +230,10 @@ public:
 		int x, int y,
 		int currentTick)
 	{
-		LockingCell& out = m_cells[GetIndex(x, y)];
+		Cell& out = m_cells[GetIndex(x, y)];
 
 		//std::unique_lock lock(out.Mutex);
-		return currentTick == out.Cell.LastUpdateTick;
+		return currentTick == out.LastUpdateTick;
 	}
 
 	// new move cell idea
@@ -245,19 +244,7 @@ public:
 		int x,   int y,
 		int xto, int yto)
 	{
-		size_t index   = GetIndex(x,   y);
-		size_t indexto = GetIndex(xto, yto);
-
-		m_changes.emplace_back(indexto, index);
-
-		/*auto itr = m_changes.find(indexto);
-		if (itr == m_changes.end()) {
-			m_changes.emplace(indexto, std::vector<size_t> { index });
-		}
-
-		else {
-			itr->second.push_back(index);
-		}*/
+		m_changes.emplace_back(GetIndex(xto, yto), GetIndex(x, y));
 	}
 
 	void CommitMovedCells(
@@ -277,10 +264,10 @@ public:
 				size_t dest = m_changes[rand].first;
 				size_t src  = m_changes[rand].second;
 
-				m_cells[dest].Cell = m_cells[src].Cell;
-				m_cells[src].Cell = Cell::GetDefault(CellType::EMPTY); // this cant be here pass in arg
+				m_cells[dest] = m_cells[src];
+				m_cells[src]= Cell::GetDefault(CellType::EMPTY); // this cant be here pass in arg
 
-				m_cells[dest].Cell.LastUpdateTick = currentTick; // set current tick
+				m_cells[dest].LastUpdateTick = currentTick; // set current tick
 
 				UpdateRect(dest % m_width, dest / m_width);
 
@@ -289,25 +276,6 @@ public:
 		}
 
 		m_changes.clear();
-
-		//for (auto& [indexto, possible] : m_changes) {
-		//	if (possible.size() == 0) {
-		//		continue;
-		//	}
-
-		//	size_t index = possible.at(iw::randi(possible.size() - 1));
-
-		//	m_cells[indexto].Cell = m_cells[index].Cell; // does this conflict anything?
-		//	m_cells[index].Cell = Cell::GetDefault(CellType::EMPTY); // this cant be here pass in arg
-
-		//	m_cells[indexto].Cell.LastUpdateTick = currentTick; // set current tick
-
-		//	UpdateRect(indexto % m_width, indexto / m_width);
-		//}
-
-		//for (auto& [indexto, possible] : m_changes) {
-		//	possible.clear();
-		//}
 
 		m_lastUpdateTick = currentTick;
 	}
@@ -331,11 +299,13 @@ public:
 			++m_filledCellCount;
 		}
 
-		LockingCell& assign = m_cells[GetIndex(x, y)];
+		{
+			Cell& assign = m_cells[GetIndex(x, y)];
 
-		//std::unique_lock lock(assign.Mutex);
-		assign.Cell = cell;
-		assign.Cell.LastUpdateTick = currentTick;
+			//std::unique_lock lock(m_cellsMutex);
+			assign = cell;
+			assign.LastUpdateTick = currentTick;
+		}
 
 		UpdateRect(x, y);
 
@@ -345,25 +315,25 @@ public:
 	CellType GetCellType(
 		int x, int y)
 	{
-		LockingCell& out = m_cells[GetIndex(x, y)];
+		Cell& out = m_cells[GetIndex(x, y)];
 
 		//std::unique_lock lock(out.Mutex);
-		return out.Cell.Type;
+		return out.Type;
 	}
 
 	Cell GetCell(
 		int x, int y)
 	{
-		LockingCell& out = m_cells[GetIndex(x, y)];
+		Cell& out = m_cells[GetIndex(x, y)];
 
 		//std::unique_lock lock(out.Mutex);
-		return out.Cell;
+		return out;
 	}
 
 	const Cell& GetCellUnsafe(
 		int x, int y)
 	{
-		return m_cells[GetIndex(x, y)].Cell;
+		return m_cells[GetIndex(x, y)];
 	}
 private:
 	void UpdateRect(
@@ -421,7 +391,7 @@ public:
 		, m_chunkHeight(chunkHeight / scale)
 		, m_scale(scale)
 		, m_fixedChunks(false)
-		, m_chunkMem((sizeof(LockingCell) * chunkWidth * chunkHeight / scale) * 16)
+		, m_chunkMem((sizeof(Cell) * chunkWidth * chunkHeight / scale) * 16)
 	{}
 
 	SandWorld(
@@ -434,7 +404,7 @@ public:
 		, m_chunkHeight(height / scale / chunksY)
 		, m_scale(scale)
 		, m_fixedChunks(true)
-		, m_chunkMem((sizeof(LockingCell) * m_chunkWidth * m_chunkHeight) * 16)
+		, m_chunkMem((sizeof(Cell) * m_chunkWidth * m_chunkHeight) * 16)
 	{
 		for (int x = -chunksX/2; x < chunksX/2; x++)
 		for (int y = -chunksY/2; y < chunksY/2; y++) {
@@ -460,7 +430,7 @@ public:
 		}
 
 		for (int index : toRemove) {
-			m_chunkMem.free(m_chunks.at(index)->m_cells, sizeof(LockingCell)*m_chunkWidth*m_chunkHeight);
+			m_chunkMem.free(m_chunks.at(index)->m_cells, sizeof(Cell)*m_chunkWidth*m_chunkHeight);
 			m_chunks.erase(index);
 		}
 	}
@@ -628,7 +598,7 @@ private:
 			return m_chunks.emplace(
 					GetChunkIndex(chunkX, chunkY),
 					new SandChunk(
-							m_chunkMem.alloc<LockingCell>(sizeof(LockingCell)*m_chunkWidth*m_chunkHeight),
+							m_chunkMem.alloc<Cell>(sizeof(Cell)*m_chunkWidth*m_chunkHeight),
 							m_chunkWidth * chunkX, m_chunkHeight * chunkY,
 							m_chunkWidth,		   m_chunkHeight,
 							m_currentTick)
