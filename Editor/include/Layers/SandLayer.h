@@ -64,8 +64,10 @@ struct Cell {
 
 	float Life = 0; // Life until the cell will die, only some cells use this
 
-	int dX = 0;    // Velocity
-	int dY = -1;
+	float pX =  0;  // 'Position'
+	float pY =  0;
+	float dX =  0;  // Velocity
+	float dY = -1;
 
 	int TileId = 0; // Tile id, 0 means that it belongs to noone
 
@@ -117,7 +119,7 @@ struct Tile {
 		for (iw::vector2& v : locations) {
 			for (int x = 0; x < abs(scale); x++)
 			for (int y = 0; y < abs(scale); y++) {
-				Locations.push_back(v * scale + iw::vector2(x, y) - scale);
+				Locations.push_back(v * scale + iw::vector2(x, y) - scale*2);
 			}
 		}
 
@@ -556,6 +558,18 @@ public:
 
 		return {chunkX, chunkY};
 	}
+
+	std::pair<float, float> GetIntraChunkCoords(
+		float x, float y)
+	{
+		x = fmod(x, m_chunkWidth);
+		y = fmod(y, m_chunkHeight);
+
+		if (x < -1) x += m_chunkWidth;    // -1 not 0 because anything 1 < x < -1 rounds to 0 w/ ints
+		if (y < -1) y += m_chunkHeight;
+
+		return {x, y};
+	}
 private: 
 	SandChunk* GetChunkAndMapCoords(
 		int& x, int& y)
@@ -765,6 +779,8 @@ namespace iw {
 
 			iw::vector2 point = position + direction * 25 + normal * iw::randf() * 15;
 
+			//direction = (target - point).normalized();
+
 			if (	   world.InBounds(point.x, point.y)
 				&& world.GetCell (point.x, point.y).Type != CellType::EMPTY)
 			{
@@ -777,16 +793,20 @@ namespace iw {
 				div = iw::clamp(div - iw::randf(), 1.2f, 2.f);
 			}
 
+			auto [px, py] = world.GetIntraChunkCoords(point.x, point.y);
+
 			Cell cell = projectile;
+			cell.TileId = whoFiredId;
+			cell.pX = px;
+			cell.pY = py;
 			cell.dX = direction.x * speed;
 			cell.dY = direction.y * speed;
-			cell.TileId = whoFiredId;
 
 			world.SetCell(point.x, point.y, cell);
 		}
 	};
 
-	std::vector<iw::vector2> FillLine(
+	std::vector<std::pair<int, int>> FillLine(
 		int x, int y,
 		int x2, int y2);
 }

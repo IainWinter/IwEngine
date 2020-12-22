@@ -172,25 +172,8 @@ namespace iw {
 			}, 5);
 			player.Set<Player>();
 
-			//for (int i = 1; i < m_sandTexture->Width(); i++) {
-			//	world.SetCell(i-width/2, 0, Cell::GetDefault(CellType::ROCK));
-			//}
-
-			//for (int i = 1; i < m_sandTexture->Width(); i++) {
-			//	world.SetCell(i-width/2, m_sandTexture->Height()-1, Cell::GetDefault(CellType::ROCK));
-			//}
-
-			//for (int i = 1; i < m_sandTexture->Height(); i++) {
-			//	world.SetCell(0, i-height/2, Cell::GetDefault(CellType::ROCK));
-			//}
-
-			//for (int i = 1; i < m_sandTexture->Height(); i++) {
-			//	world.SetCell(m_sandTexture->Width() - 1, i-height/2, Cell::GetDefault(CellType::ROCK));
-			//}
-
 			reset = false;
 		}
-
 
 		spawnEnemy -= iw::DeltaTime();
 		if (spawnEnemy < 0) {
@@ -325,13 +308,13 @@ namespace iw {
 
 		// Sand update
 
+		std::mutex chunkCountMutex;
+		std::condition_variable chunkCountCV;
+		int chunkCount = 0;
+
 		//stepTimer -= iw::DeltaTime();
 		//if (stepTimer < 0 && Keyboard::KeyDown(V)/**/) {
-		//	stepTimer = 1 / 100.0f;
-
-			std::mutex chunkCountMutex;
-			std::condition_variable chunkCountCV;
-			int chunkCount = 0;
+		//	stepTimer = 1 / 12.0f;
 
 			int minX = fx  - world.m_chunkWidth * 2;
 			int maxX = fx2 + world.m_chunkWidth * 2;
@@ -586,11 +569,11 @@ namespace iw {
 		return false;
 	}
 
-	std::vector<iw::vector2> FillLine(
+	std::vector<std::pair<int, int>> FillLine(
 		int x,  int y,
 		int x2, int y2)
 	{
-		std::vector<iw::vector2> positions; // https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
+		std::vector<std::pair<int, int>> positions; // https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
 
 		int dx =  abs(x2 - x);
 		int dy = -abs(y2 - y);
@@ -758,42 +741,70 @@ bool SandWorker::MoveForward(
 		return true;
 	}
 
-	else {
-		std::vector<iw::vector2> cellpos = iw::FillLine(x, y, ceil(x + cell.dX * iw::DeltaTime()), ceil(y + cell.dY * iw::DeltaTime()));
-		for (int i = 0; i < cellpos.size(); i++) {
-			float destX = cellpos[i].x;
-			float destY = cellpos[i].y;
+	Cell replacement = cell;
 
-			bool forward = IsEmpty(destX, destY);
+	if (cell.Speed() > 0) {
+		float dsX = cell.dX * iw::DeltaTime();
+		float dsY = cell.dY * iw::DeltaTime();
 
-			if (forward) {
-				bool last = i == (cellpos.size() - 1);
+		float destXactual = cell.pX + dsX;
+		float destYactual = cell.pY + dsY;
 
-				Cell replacement = replace;
-				replacement.TileId = cell.TileId;
-				replacement.dX = last ? cell.dX : 0;
-				replacement.dY = last ? cell.dY : 0;
-
-				SetCell(destX, destY, replacement);
-			}
-
-			else if (InBounds(destX, destY)
-				  && GetCell (destX, destY).TileId != cell.TileId)
-			{
-				hit = true;
-				hitx = destX;
-				hity = destY;
-				break;
-			}
+		std::vector<std::pair<int, int>> cellpos = iw::FillLine(cell.pX, cell.pY, destXactual, destYactual);
+		
+		if (cellpos.size() == 1) { // line is only source cell because it didnt move far enough, could calc before calling FillLine ezpz
+			replacement.pX += dsX;
+			replacement.pY += dsY;
 		}
 
-		Cell replacement = cell;
-		replacement.Life = life;
-		replacement.dX = 0;
-		replacement.dY = 0;
+		else {
+			dsX /= cellpos.size() - 1;
+			dsY /= cellpos.size() - 1;
 
-		SetCell(x, y, replacement);
+			for (int i = 1; i < cellpos.size(); i++) {
+				int destX = cellpos[i].first;
+				int destY = cellpos[i].second;
+
+				bool forward = IsEmpty(destX, destY);
+
+				if (forward) {
+					bool last = i == (cellpos.size() - 1);
+
+					Cell next = replace;
+					next.TileId = cell.TileId;
+					next.dX = last ? cell.dX : 0;
+					next.dY = last ? cell.dY : 0;
+					next.pX = dsX * i + cell.pX;
+					next.pY = dsY * i + cell.pY;
+
+					destX = next.pX;
+					destY = next.pY;
+
+					auto [cx, cy] = m_world.GetIntraChunkCoords(next.pX, next.pY);
+					next.pX = cx;
+					next.pY = cy;
+
+					SetCell(destX, destY, next);
+				}
+
+				else if (InBounds(destX, destY)
+					  && GetCell (destX, destY).TileId != cell.TileId)
+				{
+					hit = true;
+					hitx = destX;
+					hity = destY;
+					break;
+				}
+			}
+
+			replacement.dX = 0;
+			replacement.dY = 0;
+		}
 	}
+
+	replacement.Life = life;
+	
+	SetCell(x, y, replacement);
 
 	return false;
 }
