@@ -73,6 +73,8 @@ struct Cell {
 
 	int LastUpdateTick = 0; // Used to check if the cell has been updated in the current tick
 
+	bool Gravitised = false; // If this cell should react to gravity
+
 	float Speed() const {  // Manhattan distance of velocity
 		return (dX > 0 ? dX : -dX)
 			+ (dY > 0 ? dY : -dY);
@@ -130,7 +132,7 @@ struct Tile {
 
 struct SandChunk {
 private:
-	std::unordered_map<size_t, std::vector<size_t>> m_changes;
+	std::vector<std::pair<size_t, size_t>> m_changes; // destination, source
 	std::atomic<int> m_filledCellCount;
 
 public:
@@ -246,14 +248,16 @@ public:
 		size_t index   = GetIndex(x,   y);
 		size_t indexto = GetIndex(xto, yto);
 
-		auto itr = m_changes.find(indexto);
+		m_changes.emplace_back(indexto, index);
+
+		/*auto itr = m_changes.find(indexto);
 		if (itr == m_changes.end()) {
 			m_changes.emplace(indexto, std::vector<size_t> { index });
 		}
 
 		else {
 			itr->second.push_back(index);
-		}
+		}*/
 	}
 
 	void CommitMovedCells(
@@ -261,24 +265,49 @@ public:
 	{
 		if (m_changes.size() == 0) return;
 
-		for (auto& [indexto, possible] : m_changes) {
-			if (possible.size() == 0) {
-				continue;
+		std::sort(m_changes.begin(), m_changes.end(), [](auto& a, auto& b) { return a.first < b.first; });
+
+		size_t ip = 0;
+
+		for (size_t i = 1; i < m_changes.size(); i++) {
+			if (m_changes[i - 1].first != m_changes[i].first) {
+				
+				size_t rand = ip + iw::randi(i - ip - 1);
+
+				size_t dest = m_changes[rand].first;
+				size_t src  = m_changes[rand].second;
+
+				m_cells[dest].Cell = m_cells[src].Cell;
+				m_cells[src].Cell = Cell::GetDefault(CellType::EMPTY); // this cant be here pass in arg
+
+				m_cells[dest].Cell.LastUpdateTick = currentTick; // set current tick
+
+				UpdateRect(dest % m_width, dest / m_width);
+
+				ip = i;
 			}
-
-			size_t index = possible.at(iw::randi(possible.size() - 1));
-
-			m_cells[indexto].Cell = m_cells[index].Cell; // does this conflict anything?
-			m_cells[index].Cell = Cell::GetDefault(CellType::EMPTY); // this cant be here pass in arg
-
-			m_cells[indexto].Cell.LastUpdateTick = currentTick; // set current tick
-
-			UpdateRect(indexto % m_width, indexto / m_width);
 		}
 
-		for (auto& [indexto, possible] : m_changes) {
-			possible.clear();
-		}
+		m_changes.clear();
+
+		//for (auto& [indexto, possible] : m_changes) {
+		//	if (possible.size() == 0) {
+		//		continue;
+		//	}
+
+		//	size_t index = possible.at(iw::randi(possible.size() - 1));
+
+		//	m_cells[indexto].Cell = m_cells[index].Cell; // does this conflict anything?
+		//	m_cells[index].Cell = Cell::GetDefault(CellType::EMPTY); // this cant be here pass in arg
+
+		//	m_cells[indexto].Cell.LastUpdateTick = currentTick; // set current tick
+
+		//	UpdateRect(indexto % m_width, indexto / m_width);
+		//}
+
+		//for (auto& [indexto, possible] : m_changes) {
+		//	possible.clear();
+		//}
 
 		m_lastUpdateTick = currentTick;
 	}
@@ -581,7 +610,7 @@ private:
 	SandChunk* GetChunkOrMakeNew(
 		int chunkX, int chunkY)
 	{
-		if (abs(chunkX) > 100 || abs(chunkY) > 100) {
+		if (abs(chunkX) > 500 || abs(chunkY) > 500) {
 			return nullptr;
 		}
 
@@ -608,7 +637,7 @@ private:
 	}
 
 	int GetChunkIndex(int chunkX, int chunkY) {
-		return (100+chunkX) + (100+chunkY) * 100; // 1000 = max chunk y pos, seems bad
+		return (100+chunkX) + (1000+chunkY) * 100; // 1000 = max chunk y pos, seems bad
 
 		//return size_t(chunkX) | size_t(chunkY) << (sizeof(size_t)*8/2-1); // find better hash
 	}
@@ -787,10 +816,9 @@ namespace iw {
 				return;
 			}
 
-			float div = 2;
+			float div = 1.7f;
 			while (abs((direction / div).major()) > 1) {
 				direction /= div;
-				div = iw::clamp(div - iw::randf(), 1.2f, 2.f);
 			}
 
 			auto [px, py] = world.GetIntraChunkCoords(point.x, point.y);

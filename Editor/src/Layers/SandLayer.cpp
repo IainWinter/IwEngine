@@ -223,6 +223,10 @@ namespace iw {
 				cell = Cell::GetDefault(CellType::ROCK);
 			}
 			
+			if (Keyboard::KeyDown(iw::G)) {
+				cell.Gravitised = true;
+			}
+
 			for (int  i = 0; i  < 50; i++)
 			for (int ii = 0; ii < 50; ii++) {
 				world.SetCell(pos.x + i, pos.y + ii, cell);
@@ -359,6 +363,8 @@ namespace iw {
 				}
 			}
 
+			int chunksUpdatedCount = chunkCount;
+
 			{
 				std::unique_lock lock(chunkCountMutex);
 				chunkCountCV.wait(lock, [&]() { return chunkCount == 0; });
@@ -441,15 +447,33 @@ namespace iw {
 
 		m_stars.GetTransform()->Position = iw::vector2(-playerLocation.x, -playerLocation.y) / 5000;
 
-		std::stringstream sb;
-		sb << iw::DeltaTime() << " " << 1 / iw::DeltaTime();
-
-		m_font->UpdateMesh(m_textMesh, sb.str(), 0.001, 1);
-
 		Renderer->BeginScene(MainScene);
 			Renderer->DrawMesh(m_stars.GetTransform(), &m_stars.GetParticleMesh());
 			Renderer->DrawMesh(iw::Transform(), m_sandScreen);
+
+			Renderer->BeforeDraw([&]() {
+				std::stringstream sb;
+				sb << iw::DeltaTime() << " " << 1 / iw::DeltaTime();
+				m_font->UpdateMesh(m_textMesh, sb.str(), 0.001, 1);
+			});
+
 			Renderer->DrawMesh(iw::Transform(), m_textMesh);
+
+			Renderer->BeforeDraw([&, playerLocation]() {
+				std::stringstream sb;
+				sb << playerLocation;
+				m_font->UpdateMesh(m_textMesh, sb.str(), 0.001, 1);
+			});
+
+			Renderer->DrawMesh(iw::Transform(-.2f), m_textMesh);
+			
+			Renderer->BeforeDraw([&, playerLocation]() {
+				std::stringstream sb;
+				sb << chunksUpdatedCount;
+				m_font->UpdateMesh(m_textMesh, sb.str(), 0.001, 1);
+				});
+
+			Renderer->DrawMesh(iw::Transform(-.4f), m_textMesh);
 		Renderer->EndScene();
 
 		Space->Query<iw::Transform, Tile>().Each([&](
@@ -612,26 +636,17 @@ void SandWorker::UpdateChunk() {
 
 		// Would go in grav worker or something
 
-		//if (cell.Gravitised) {
-		//	vector2 dir = gravPos - vector2(x, y);
+		if (cell.Gravitised) {
+			iw::vector2 dir = iw::vector2(128+64, 128+64) - iw::vector2(m_chunk.m_x, m_chunk.m_y);
 
-		//	float div = 2;
-		//	while (abs((dir / div).major()) > 1) {
-		//		dir /= div;
-		//		div = iw::clamp(div - iw::randf(), 1.2f, 2.f);
-		//	}
+			float div = 1.7f;
+			while (abs((dir / div).major()) > 1) {
+				dir /= div;
+			}
 
-		//	Cell& scell = chunk.GetCell(x, y, true);
-
-		//	cell.Direction  += dir + iw::DeltaTime();
-		//	scell.Direction += dir + iw::DeltaTime();
-
-		//	cell.Direction  *= .9f;
-		//	scell.Direction *= .9f;
-
-		//	cell.Direction  = iw::clamp<vector2>(cell.Direction, -5, 5);
-		//	scell.Direction = iw::clamp<vector2>(scell.Direction, -5, 5);
-		//}
+			cell.dX = iw::clamp((dir.x + iw::DeltaTime()) * 0.9f, -5.f, 5.f);
+			cell.dY = iw::clamp((dir.y + iw::DeltaTime()) * 0.9f, -5.f, 5.f);
+		}
 
 		const Cell& replacement = Cell::GetDefault(cell.Type);
 
@@ -761,7 +776,7 @@ bool SandWorker::MoveForward(
 			dsX /= cellpos.size() - 1;
 			dsY /= cellpos.size() - 1;
 
-			for (int i = 1; i < cellpos.size(); i++) {
+			for (int i = 1; i < cellpos.size(); i++) { // i = 0 is x, y so we dont need to check it
 				int destX = cellpos[i].first;
 				int destY = cellpos[i].second;
 
