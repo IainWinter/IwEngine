@@ -8,8 +8,6 @@ int __brushSize = 50;
 
 float __stepTimeThresh = 0;//1.f / 1200;
 
-
-
 std::unordered_map<CellType, Cell> Cell::m_defaults = {};
 
 namespace iw {
@@ -179,6 +177,19 @@ namespace iw {
 			}, 5);
 			player.Set<Player>();
 
+
+			iw::Entity asteroid = Space->CreateEntity<iw::Transform, Tile>();
+
+			asteroid.Set<iw::Transform>();
+			asteroid.Set<Tile>(std::vector<iw::vector2> {
+								   vector2(1, 0),
+					vector2(0, 1), vector2(1, 1), vector2(2, 1), vector2(3, 1),
+					vector2(0, 2), vector2(1, 2), vector2(2, 2), vector2(3, 2),
+					vector2(0, 3),							     vector2(3, 3),
+					vector2(0, 4),							     vector2(3, 4)
+			}, 5);
+			asteroid.Set<Asteroid>(iw::vector2(iw::randf(), iw::randf()));
+
 			reset = false;
 		}
 
@@ -331,11 +342,11 @@ namespace iw {
 		if (__stepTimeThresh == 0 || (__stepTimeThresh > 0 && stepTimer < 0 && Keyboard::KeyDown(V)/**/)) {
 			stepTimer = __stepTimeThresh;
 
-			int minX = fx  - world.m_chunkWidth * 2;
-			int maxX = fx2 + world.m_chunkWidth * 2;
+			int minX = fx  - world.m_chunkWidth * 2 - 64000;
+			int maxX = fx2 + world.m_chunkWidth * 2 + 64000;
 
-			int minY = fy  - world.m_chunkHeight * 2;
-			int maxY = fy2 + world.m_chunkHeight * 2;
+			int minY = fy  - world.m_chunkHeight * 2 - 64000;
+			int maxY = fy2 + world.m_chunkHeight * 2 + 64000;
 
 			//if (world.m_currentTick % 2 == 0) {
 			//	minX -= 1;
@@ -345,12 +356,16 @@ namespace iw {
 			auto [minCX, minCY] = world.GetChunkCoordsAndIntraXY(minX, minY); // need to find a way to update all chunks
 			auto [maxCX, maxCY] = world.GetChunkCoordsAndIntraXY(maxX, maxY, true);
 
+			std::vector<SandChunk*> updatedChunks;
+
 			for (int px = 0; px < 2; px++)
 			for (int py = 0; py < 2; py++) {
 				for(int x = minCX+px; x < maxCX; x += 2)
 				for(int y = minCY+py; y < maxCY; y += 2) {
 					SandChunk* chunk = world.GetChunk(x, y);
 					if (!chunk || chunk->IsEmpty()) continue; // or break?
+
+					updatedChunks.push_back(chunk);
 
 					{
 						std::unique_lock lock(chunkCountMutex);
@@ -373,10 +388,10 @@ namespace iw {
 			chunksUpdatedCount = chunkCount;
 
 			// Random chunk update
-
+			
 			//int randomChunkX = iw::randf() * 10;
 			//int randomChunkY = iw::randf() * 10;
-
+			//
 			//int quad = iw::randi(3);
 			//
 			//switch (quad) {
@@ -401,7 +416,7 @@ namespace iw {
 			//		break;
 			//	}
 			//}
-
+			//
 			//SandChunk* randomChunk = world.GetChunk(randomChunkX, randomChunkY); // make sure that chunk isnt one already being updated :<
 			//if (randomChunk) {
 			//	randomChunk->SetFullRect();
@@ -413,7 +428,7 @@ namespace iw {
 				chunkCountCV.wait(lock, [&]() { return chunkCount == 0; });
 			}
 
-			for(SandChunk* chunk: world.m_chunks) {
+			for(SandChunk* chunk : updatedChunks) {
 				chunk->CommitMovedCells(world.m_currentTick);
 			}
 		}

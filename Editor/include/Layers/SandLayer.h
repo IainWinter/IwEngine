@@ -31,6 +31,10 @@ struct Enemy2 {
 	float FireTimeout = 0;
 };
 
+struct Asteroid {
+	iw::vector2 Velocity;
+};
+
 enum class CellProperties : char {
 	MOVE_DOWN           = 0b00000001,
 	MOVE_DOWN_SIDE      = 0b00000010,
@@ -433,11 +437,11 @@ public:
 		std::vector<int> toRemove;
 
 		for (auto itr = m_chunks.begin(); itr != m_chunks.end(); itr++) {
-			//if (    (*itr)->IsEmpty()
-			//	&& m_currentTick - (*itr)->m_lastUpdateTick > 1 / iw::DeltaTime() * 5)
-			//{
-			//	toRemove.push_back(itr.sparse_index());
-			//}
+			if (    (*itr)->IsEmpty()
+				&& m_currentTick - (*itr)->m_lastUpdateTick > 1 / iw::DeltaTime() * 5)
+			{
+				toRemove.push_back(itr.sparse_index());
+			}
 		}
 
 		for (int index : toRemove) {
@@ -617,8 +621,8 @@ private:
 		}
 	}
 
-	int GetChunkIndex(int chunkX, int chunkY) {
-		return (100+chunkX) + (1000+chunkY) * 100; // 1000 = max chunk y pos, seems bad
+	int GetChunkIndex(int chunkX, int chunkY) { // find a way to tightly fit this
+		return (500+chunkX) + (500 +chunkY) * 1000; // 1000 = max chunk y pos, seems bad
 
 		//return size_t(chunkX) | size_t(chunkY) << (sizeof(size_t)*8/2-1); // find better hash
 	}
