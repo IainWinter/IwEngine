@@ -3,13 +3,20 @@
 
 #include "iw/math/matrix.h"
 
+int __chunkScale = 2;
+int __brushSize = 50;
+
+float __stepTimeThresh = 0;//1.f / 1200;
+
+
+
 std::unordered_map<CellType, Cell> Cell::m_defaults = {};
 
 namespace iw {
 	SandLayer::SandLayer()
 		: Layer("Ray Marching")
 		, m_sandTexture(nullptr)
-		, world(SandWorld(256, 256, 2))
+		, world(SandWorld(256, 256, __chunkScale))
 		, reset(true)
 	{
 		srand(time(nullptr));
@@ -227,8 +234,8 @@ namespace iw {
 				cell.Gravitised = true;
 			}
 
-			for (int  i = 0; i  < 50; i++)
-			for (int ii = 0; ii < 50; ii++) {
+			for (int  i = 0; i  < __brushSize; i++)
+			for (int ii = 0; ii < __brushSize; ii++) {
 				world.SetCell(pos.x + i, pos.y + ii, cell);
 			}
 		}
@@ -315,10 +322,14 @@ namespace iw {
 		std::mutex chunkCountMutex;
 		std::condition_variable chunkCountCV;
 		int chunkCount = 0;
+		int chunksUpdatedCount = 0;
 
-		//stepTimer -= iw::DeltaTime();
-		//if (stepTimer < 0 && Keyboard::KeyDown(V)/**/) {
-		//	stepTimer = 1 / 12.0f;
+		//int randomChunkX = playerLocation.x / world.m_chunkWidth  * iw::randf() * 10;
+		//int randomChunkY = playerLocation.y / world.m_chunkHeight * iw::randf() * 10;
+
+		stepTimer -= iw::DeltaTime();
+		if (__stepTimeThresh == 0 || (__stepTimeThresh > 0 && stepTimer < 0 && Keyboard::KeyDown(V)/**/)) {
+			stepTimer = __stepTimeThresh;
 
 			int minX = fx  - world.m_chunkWidth * 2;
 			int maxX = fx2 + world.m_chunkWidth * 2;
@@ -341,10 +352,6 @@ namespace iw {
 					SandChunk* chunk = world.GetChunk(x, y);
 					if (!chunk || chunk->IsEmpty()) continue; // or break?
 
-					//if ((iw::vector2(chunk->m_x, chunk->m_y) - playerLocation).length() > world.m_chunkWidth * 20) {
-					//	continue;
-					//}
-
 					{
 						std::unique_lock lock(chunkCountMutex);
 						chunkCount++;
@@ -363,7 +370,43 @@ namespace iw {
 				}
 			}
 
-			int chunksUpdatedCount = chunkCount;
+			chunksUpdatedCount = chunkCount;
+
+			// Random chunk update
+
+			//int randomChunkX = iw::randf() * 10;
+			//int randomChunkY = iw::randf() * 10;
+
+			//int quad = iw::randi(3);
+			//
+			//switch (quad) {
+			//	case 0: {
+			//		randomChunkX = minCX - (iw::randf() + 2) * 2;
+			//		randomChunkY = minCY + iw::randf() * (maxCY - minCY) * 1.4;
+			//		break;
+			//	}
+			//	case 1: {
+			//		randomChunkX = maxCX + (iw::randf() + 2) * 2;
+			//		randomChunkY = maxCY + iw::randf() * (maxCY - minCY) * 1.4;
+			//		break;
+			//	}
+			//	case 2: {
+			//		randomChunkX = minCX + iw::randf() * (maxCX - minCX) * 1.4;
+			//		randomChunkY = minCY - (iw::randf() + 2) * 2;
+			//		break;
+			//	}
+			//	case 3: { 
+			//		randomChunkX = maxCX + iw::randf() * (maxCX - minCX) * 1.4;
+			//		randomChunkY = maxCY + (iw::randf() + 2) * 2;
+			//		break;
+			//	}
+			//}
+
+			//SandChunk* randomChunk = world.GetChunk(randomChunkX, randomChunkY); // make sure that chunk isnt one already being updated :<
+			//if (randomChunk) {
+			//	randomChunk->SetFullRect();
+			//	SandWorker(world, *randomChunk).UpdateChunk();
+			//}
 
 			{
 				std::unique_lock lock(chunkCountMutex);
@@ -373,7 +416,7 @@ namespace iw {
 			for(SandChunk* chunk: world.m_chunks) {
 				chunk->CommitMovedCells(world.m_currentTick);
 			}
-		//}
+		}
 
 		// Swap buffers
 
@@ -407,6 +450,12 @@ namespace iw {
 					if (showChunks) {
 						if (x == 0 || y == 0) {
 							colors[texi] = iw::Color(1, 0, 0, 1);
+
+							//if (   randomChunkX == chunk->m_x / chunk->m_width 
+							//	&& randomChunkY == chunk->m_y / chunk->m_height)
+							//{
+							//	colors[texi] = iw::Color(0, 0, 1, 1);
+							//}
 						}
 
 						if (x == chunk->m_minX || y == chunk->m_minY) {
@@ -471,7 +520,7 @@ namespace iw {
 				std::stringstream sb;
 				sb << chunksUpdatedCount;
 				m_font->UpdateMesh(m_textMesh, sb.str(), 0.001, 1);
-				});
+			});
 
 			Renderer->DrawMesh(iw::Transform(-.4f), m_textMesh);
 		Renderer->EndScene();
@@ -509,8 +558,11 @@ namespace iw {
 			auto t,
 			auto p)
 		{
-			p->Velocity *= 1 - iw::DeltaTime();
-			p->Velocity = iw::clamp<float>(p->Velocity + p->Movement.y * iw::DeltaTime() * 3, -25, 25);
+			if (p->Movement.y == 0) {
+				p->Velocity *= .99f;
+			}
+
+			p->Velocity = iw::clamp<float>(p->Velocity + p->Movement.y * iw::DeltaTime() * 3, -20, 20);
 
 			vector3 up = t->Up();
 			up.y = -up.y;
@@ -629,29 +681,32 @@ namespace iw {
 void SandWorker::UpdateChunk() {
 	for (int x = m_chunk.m_minX;   x <  m_chunk.m_maxX; x++)
 	for (int y = m_chunk.m_maxY-1; y >= m_chunk.m_minY; y--) {
-		
+
 		if (CellAlreadyUpdated(x, y)) continue;
 
 		Cell cell = m_chunk.GetCell(x, y);
 
+		if ((int)cell.Props == 0) {
+			continue;
+		}
+
 		// Would go in grav worker or something
 
 		if (cell.Gravitised) {
-			iw::vector2 dir = iw::vector2(128+64, 128+64) - iw::vector2(m_chunk.m_x, m_chunk.m_y);
+			iw::vector2 dir = iw::vector2(80, 80) - iw::vector2(x + m_chunk.m_x, y + m_chunk.m_y);
 
-			float div = 1.7f;
+			float div = 2;
 			while (abs((dir / div).major()) > 1) {
 				dir /= div;
+				div = iw::clamp(div += iw::randf(), 1.2f, 1.8f); 
 			}
 
-			cell.dX = iw::clamp((dir.x + iw::DeltaTime()) * 0.9f, -5.f, 5.f);
-			cell.dY = iw::clamp((dir.y + iw::DeltaTime()) * 0.9f, -5.f, 5.f);
+			cell.dX = iw::clamp((dir.x + iw::DeltaTime()) * 0.9f, -64.f, 64.f);
+			cell.dY = iw::clamp((dir.y + iw::DeltaTime()) * 0.9f, -64.f, 64.f);
 		}
 
 		const Cell& replacement = Cell::GetDefault(cell.Type);
 
-		bool moved = true;
-		
 		bool hit = false;
 		int hitx, hity;
 
@@ -659,13 +714,6 @@ void SandWorker::UpdateChunk() {
 		else if (cell.Props & CellProperties::MOVE_DOWN_SIDE && MoveDownSide(x, y, cell, replacement)) {}
 		else if (cell.Props & CellProperties::MOVE_SIDE      && MoveSide    (x, y, cell, replacement)) {}
 		else if (cell.Props & CellProperties::MOVE_FORWARD   && MoveForward (x, y, cell, replacement, hit, hitx, hity)) {}
-		else {
-			moved = false;
-		}
-		
-		if (moved) {
-			SetCell(x, y, Cell::GetDefault(CellType::EMPTY));
-		}
 
 		if (!hit) {
 			continue;
@@ -674,6 +722,9 @@ void SandWorker::UpdateChunk() {
 		if		(cell.Props & CellProperties::HIT_LIKE_BEAM)	   { HitLikeBeam(hitx, hity, x, y, cell); }
 		else if (cell.Props & CellProperties::HIT_LIKE_PROJECTILE) { HitLikeProj(hitx, hity, x, y, cell); }
 	}
+
+
+	//SetCell(0, 0, Cell::GetDefault(CellType::SAND));
 }
 
 bool SandWorker::MoveDown(
@@ -685,11 +736,12 @@ bool SandWorker::MoveDown(
 	int downY = y + cell.dY;
 
 	bool down = IsEmpty(downX, downY);
+
 	if (down) {
 		MoveCell(x, y, downX, downY);
 	}
 
-	return false;
+	return down;
 }
 
 bool SandWorker::MoveDownSide(
@@ -715,7 +767,7 @@ bool SandWorker::MoveDownSide(
 	if		(downLeft)	MoveCell(x, y, downLeftX,  downLeftY);
 	else if (downRight) MoveCell(x, y, downRightX, downRightY);
 
-	return false;
+	return downLeft || downRight;
 }
 
 bool SandWorker::MoveSide(
@@ -741,7 +793,7 @@ bool SandWorker::MoveSide(
 	if		(left)	MoveCell(x, y, leftX,	leftY);
 	else if (right) MoveCell(x, y, rightX, rightY);
 
-	return false;
+	return left || right;
 }
 
 bool SandWorker::MoveForward(
@@ -753,6 +805,7 @@ bool SandWorker::MoveForward(
 	float life = cell.Life - iw::DeltaTime();
 
 	if (life < 0) {
+		SetCell(x, y, Cell::GetDefault(CellType::EMPTY));
 		return true;
 	}
 

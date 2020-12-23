@@ -143,27 +143,12 @@ public:
 		, m_x(x)
 		, m_y(y) 
 		, m_width(width), m_height(height)
+		, m_lastUpdateTick(currentTick)
 		, m_filledCellCount(0)
 		, m_minX(m_width)
 		, m_minY(m_height)
 		, m_maxX(-1)
 		, m_maxY(-1)
-		, m_lastUpdateTick(currentTick)
-	{}
-
-	SandChunk(
-		SandChunk&& move) noexcept
-		: m_cells(move.m_cells)
-		, m_filledCellCount(move.m_filledCellCount.load())
-		, m_width (move.m_width)
-		, m_height(move.m_height)
-		, m_x(move.m_x)
-		, m_y(move.m_y)
-		, m_minX(move.m_minX)
-		, m_minY(move.m_minY)
-		, m_maxX(move.m_maxX)
-		, m_maxY(move.m_maxY)
-		, m_lastUpdateTick(move.m_lastUpdateTick)
 	{}
 
 	SandChunk& operator=(
@@ -182,12 +167,6 @@ public:
 		m_lastUpdateTick  = copy.m_lastUpdateTick;
 
 		return *this;
-	}
-
-	void Step(
-		int currentTick)
-	{
-		ResetRect(currentTick);
 	}
 
 	void Reset() {
@@ -232,46 +211,48 @@ public:
 	{
 		Cell& out = m_cells[GetIndex(x, y)];
 
-		//std::unique_lock lock(out.Mutex);
+		//std::unique_lock lock(m_cellsMutex);
 		return currentTick == out.LastUpdateTick;
 	}
-
-	// new move cell idea
-	//	Let cells move into the same cell, but then when commiting,
-	//	pick a random one to actually move there
 
 	void MoveCell(
 		int x,   int y,
 		int xto, int yto)
 	{
+		std::unique_lock lock(m_cellsMutex);
 		m_changes.emplace_back(GetIndex(xto, yto), GetIndex(x, y));
 	}
 
 	void CommitMovedCells(
 		int currentTick)
 	{
-		if (m_changes.size() == 0) return;
+		ResetRect();
+
+		for (size_t i = 0; i < m_changes.size(); i++) {
+			if (m_cells[m_changes[i].first].Type != CellType::EMPTY) {
+				if (m_changes[i].first == m_changes[i].second) {
+					UpdateRect(m_changes[i].first % m_width,
+							 m_changes[i].first / m_width);
+				}
+
+				m_changes[i] = m_changes.back(); m_changes.pop_back();
+				i--;
+			}
+		}
 
 		std::sort(m_changes.begin(), m_changes.end(), [](auto& a, auto& b) { return a.first < b.first; });
 
 		size_t ip = 0;
 
-		for (size_t i = 1; i < m_changes.size(); i++) {
-			if (m_changes[i - 1].first != m_changes[i].first) {
-				
-				size_t rand = ip + iw::randi(i - ip - 1);
+		for (size_t i = 0; i < m_changes.size(); i++) {
+			if (    i + 1 == m_changes.size()
+				|| m_changes[i + 1].first != m_changes[i].first)
+			{
+				size_t rand = ip + iw::randi(i - ip);
 
-				size_t dest = m_changes[rand].first;
-				size_t src  = m_changes[rand].second;
+				MoveCell(m_changes[rand], currentTick);
 
-				m_cells[dest] = m_cells[src];
-				m_cells[src]= Cell::GetDefault(CellType::EMPTY); // this cant be here pass in arg
-
-				m_cells[dest].LastUpdateTick = currentTick; // set current tick
-
-				UpdateRect(dest % m_width, dest / m_width);
-
-				ip = i;
+				ip = i + 1;
 			}
 		}
 
@@ -300,16 +281,17 @@ public:
 		}
 
 		{
-			Cell& assign = m_cells[GetIndex(x, y)];
+			size_t index = GetIndex(x, y);
 
-			//std::unique_lock lock(m_cellsMutex);
+			Cell& assign = m_cells[index];
+
+			std::unique_lock lock(m_cellsMutex);
 			assign = cell;
 			assign.LastUpdateTick = currentTick;
+
+			m_changes.emplace_back(index, index); // for rect update
+			m_lastUpdateTick = currentTick;
 		}
-
-		UpdateRect(x, y);
-
-		m_lastUpdateTick = currentTick;
 	}
 
 	CellType GetCellType(
@@ -317,7 +299,7 @@ public:
 	{
 		Cell& out = m_cells[GetIndex(x, y)];
 
-		//std::unique_lock lock(out.Mutex);
+		std::unique_lock lock(m_cellsMutex);
 		return out.Type;
 	}
 
@@ -326,7 +308,7 @@ public:
 	{
 		Cell& out = m_cells[GetIndex(x, y)];
 
-		//std::unique_lock lock(out.Mutex);
+		std::unique_lock lock(m_cellsMutex);
 		return out;
 	}
 
@@ -335,54 +317,85 @@ public:
 	{
 		return m_cells[GetIndex(x, y)];
 	}
+
+	void SetFullRect() {
+		UpdateRect(0, 0);
+		UpdateRect(m_width, m_height);
+	}
 private:
 	void UpdateRect(
 		int x, int y)
 	{
 		if (x <= m_minX) {
-			m_minX = iw::clamp(x - 1, 0, m_width);
+			m_minX = iw::clamp(x - 2, 0, m_width);
 		}
 
 		if (y <= m_minY) {
-			m_minY = iw::clamp(y - 1, 0, m_height);
+			m_minY = iw::clamp(y - 2, 0, m_height);
 		}
 
 		if (x >= m_maxX) {
-			m_maxX = iw::clamp(x + 1, 0, m_width);
+			m_maxX = iw::clamp(x + 2, 0, m_width);
 		}
 
 		if (y >= m_maxY) {
-			m_maxY = iw::clamp(y + 1, 0, m_height);
+			m_maxY = iw::clamp(y + 2, 0, m_height);
 		}
 	}
 
-	void ResetRect(
+	void ResetRect() {
+		m_minX = m_width;
+		m_minY = m_height;
+		m_maxX = -1;
+		m_maxY = -1;
+	}
+
+	void MoveCell(
+		std::pair<size_t, size_t> change,
 		int currentTick)
 	{
-		if(IsEmpty()) {
-			m_minX = m_width;
-			m_minY = m_height;
-			m_maxX = -1;
-			m_maxY = -1;
+		size_t dest = change.first;
+		size_t src  = change.second;
+
+		Cell& destC = m_cells[dest];
+		Cell& srcC  = m_cells[src];
+
+		if (    srcC .Type == CellType::EMPTY
+			&& destC.Type != CellType::EMPTY)
+		{
+			--m_filledCellCount;
 		}
+		
+		else if (    srcC.Type  != CellType::EMPTY
+				&& destC.Type == CellType::EMPTY)
+		{
+			++m_filledCellCount;
+		}
+
+		destC = srcC;
+		destC.LastUpdateTick = currentTick;
+		srcC = Cell::GetDefault(CellType::EMPTY); // this cant be here pass in arg
+
+		UpdateRect(src  % m_width, src  / m_width);
+		UpdateRect(dest % m_width, dest / m_width);
 	}
 };
 
 struct SandWorld {
+public:
+	iw::sparse_set<int, SandChunk*> m_chunks;
+
+	const float m_scale; // all should be private
+	const int m_chunkWidth;
+	const int m_chunkHeight;
+	const int m_chunkCellSizeInBytes;
+	int m_currentTick = 0;
 private:
 	bool m_fixedChunks;
 	std::mutex m_chunksMutex;
 	iw::pool_allocator m_chunkMem;
 
 public:
-	iw::sparse_set<int, SandChunk*> m_chunks;
-
-	//std::unordered_map<int, SandChunk> m_chunks;  // all should be private
-	const float m_scale;
-	const int m_chunkWidth;
-	const int m_chunkHeight;
-	int m_currentTick = 0;
-
 	SandWorld(
 		int chunkWidth,
 		int chunkHeight,
@@ -390,8 +403,9 @@ public:
 		: m_chunkWidth (chunkWidth  / scale)
 		, m_chunkHeight(chunkHeight / scale)
 		, m_scale(scale)
+		, m_chunkCellSizeInBytes(sizeof(Cell) * m_chunkWidth * m_chunkHeight)
+		, m_chunkMem(m_chunkCellSizeInBytes * 16)
 		, m_fixedChunks(false)
-		, m_chunkMem((sizeof(Cell) * chunkWidth * chunkHeight / scale) * 16)
 	{}
 
 	SandWorld(
@@ -403,8 +417,9 @@ public:
 		: m_chunkWidth (width  / scale / chunksX)
 		, m_chunkHeight(height / scale / chunksY)
 		, m_scale(scale)
+		, m_chunkCellSizeInBytes(sizeof(Cell)* m_chunkWidth * m_chunkHeight)
+		, m_chunkMem(m_chunkCellSizeInBytes * 16)
 		, m_fixedChunks(true)
-		, m_chunkMem((sizeof(Cell) * m_chunkWidth * m_chunkHeight) * 16)
 	{
 		for (int x = -chunksX/2; x < chunksX/2; x++)
 		for (int y = -chunksY/2; y < chunksY/2; y++) {
@@ -418,19 +433,15 @@ public:
 		std::vector<int> toRemove;
 
 		for (auto itr = m_chunks.begin(); itr != m_chunks.end(); itr++) {
-			if (    (*itr)->IsEmpty()
-				&& m_currentTick - (*itr)->m_lastUpdateTick > 1 / iw::DeltaTime() * 5)
-			{
-				toRemove.push_back(itr.sparse_index());
-			}
-
-			else {
-				(*itr)->Step(m_currentTick);
-			}
+			//if (    (*itr)->IsEmpty()
+			//	&& m_currentTick - (*itr)->m_lastUpdateTick > 1 / iw::DeltaTime() * 5)
+			//{
+			//	toRemove.push_back(itr.sparse_index());
+			//}
 		}
 
 		for (int index : toRemove) {
-			m_chunkMem.free(m_chunks.at(index)->m_cells, sizeof(Cell)*m_chunkWidth*m_chunkHeight);
+			m_chunkMem.free(m_chunks.at(index)->m_cells, m_chunkCellSizeInBytes);
 			m_chunks.erase(index);
 		}
 	}
@@ -598,7 +609,7 @@ private:
 			return m_chunks.emplace(
 					GetChunkIndex(chunkX, chunkY),
 					new SandChunk(
-							m_chunkMem.alloc<Cell>(sizeof(Cell)*m_chunkWidth*m_chunkHeight),
+							m_chunkMem.alloc<Cell>(m_chunkCellSizeInBytes),
 							m_chunkWidth * chunkX, m_chunkHeight * chunkY,
 							m_chunkWidth,		   m_chunkHeight,
 							m_currentTick)
