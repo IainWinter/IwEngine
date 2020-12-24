@@ -35,6 +35,32 @@ struct Asteroid {
 	iw::vector2 Velocity;
 };
 
+
+// Block coords    0, 0, width, height
+
+// World coords    -inf, -inf -> inf, inf
+
+std::pair<uint16_t, uint16_t> GetBlockCoord(
+	int32_t worldX, int32_t worldY)
+{
+	uint32_t x = worldX / 
+}
+
+uint32_t GetChunkIndex(
+	int32_t worldX, int32_t worldY)
+{
+	uint16_t 
+}
+
+// World -> map of blocks
+
+
+// Worker world -> mapped coords
+
+
+
+// Bit field of properties
+
 enum class CellProperties : char {
 	MOVE_DOWN           = 0b00000001,
 	MOVE_DOWN_SIDE      = 0b00000010,
@@ -45,6 +71,8 @@ enum class CellProperties : char {
 };
 inline CellProperties operator|(CellProperties a,CellProperties b){return static_cast<CellProperties>(iw::val(a)|iw::val(b));}
 inline char           operator&(CellProperties a,CellProperties b){return iw::val(a)&iw::val(b);}
+
+// Hard type of cell for special situations
 
 enum class CellType : char {
 	EMPTY,
@@ -116,6 +144,8 @@ struct Tile {
 		TileId = s_tileId++;
 	}
 };
+
+// World 
 
 struct SandChunk {
 private:
