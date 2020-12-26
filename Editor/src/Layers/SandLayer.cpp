@@ -5,7 +5,6 @@
 
 int __chunkScale = 2;
 int __brushSize = 50;
-
 float __stepTimeThresh = 0;//1.f / 1200;
 
 std::unordered_map<CellType, Cell> Cell::m_defaults = {};
