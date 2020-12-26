@@ -1,5 +1,6 @@
 #include "Source.h"
 #include <sstream>
+#include <filesystem>
 
 #define OUT out
 
@@ -311,6 +312,9 @@ void ClassFinder::onEndOfTranslationUnit() {
         if (c->HasWrittenToDisk()) {
             flag = sys::fs::OpenFlags::OF_Append;
         }
+        
+        // make folder tree
+        std::filesystem::create_directories(std::filesystem::path(c->OutPath()).parent_path()); 
 
         std::error_code error;
         raw_fd_ostream out(c->OutPath(), error, flag);
