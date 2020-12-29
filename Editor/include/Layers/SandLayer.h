@@ -59,8 +59,6 @@ struct Asteroid {
 
 // Worker world -> mapped coords
 
-
-
 // Bit field of properties
 
 enum class CellProperties : char {

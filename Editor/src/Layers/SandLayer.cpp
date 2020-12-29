@@ -20,6 +20,12 @@ namespace iw {
 	}
 
 	int SandLayer::Initialize() {
+		if (int err = Layer::Initialize()) {
+			return err;
+		}
+
+		// Font
+
 		m_font = Asset->Load<iw::Font>("fonts/arial.fnt");
 		m_font->Initialize(Renderer->Device);
 
@@ -34,6 +40,8 @@ namespace iw {
 
 		m_textMesh = m_font->GenerateMesh("", .005f, 1);
 		m_textMesh.SetMaterial(textMat);
+
+		// Sand
 
 		Cell empty  = { CellType::EMPTY };
 		Cell sand   = { CellType::SAND,  CellProperties::MOVE_DOWN | CellProperties::MOVE_DOWN_SIDE };
@@ -69,11 +77,7 @@ namespace iw {
 		Cell::SetDefault(CellType::eLASER, elaser);
 		Cell::SetDefault(CellType::BULLET, bullet);
 
-		if (int err = Layer::Initialize()) { 
-			return err;
-		}
-
-		// Sand
+		// Sand rendering
 
 		iw::ref<iw::Shader> sandShader = Asset->Load<Shader>("shaders/texture.shader");
 

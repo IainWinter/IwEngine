@@ -3,184 +3,229 @@
 
 namespace iw {
 	SimpleSandLayer::SimpleSandLayer()
-		 : Layer("Ray Marching")
-		, shader(nullptr)
-		, camera(nullptr)
-		, target(nullptr)
+		: Layer("Simple Sand")
+		, m_world(1920, 1080, 2) // screen width and height
 	{
 		srand(time(nullptr));
 	}
 
-	float scale = 7;
+
+
+
+
+
+
 
 	int SimpleSandLayer::Initialize() {
-		shader = Asset->Load<Shader>("shaders/texture.shader");
+		iw::ref<iw::Shader> sandShader = Asset->Load<Shader>("shaders/texture.shader");
 
-		//camera = PushSystem<EditorCameraControllerSystem>()->GetCamera();
-		
-		if (int err = Layer::Initialize()) {
-			return err;
+		m_sandTexture = REF<iw::Texture>(
+			m_world.m_width,
+			m_world.m_height,
+			iw::TEX_2D,
+			iw::RGBA
+		);
+		m_sandTexture->SetFilter(iw::NEAREST);
+		m_sandTexture->CreateColors();
+		m_sandTexture->Clear();
+
+		iw::ref<iw::Material> sandScreenMat = REF<iw::Material>(sandShader);
+		sandScreenMat->SetTexture("texture", m_sandTexture);
+
+		m_sandMesh = Renderer->ScreenQuad().MakeInstance();
+		m_sandMesh.SetMaterial(sandScreenMat);
+
+		// Setup values for cells
+
+		_EMPTY = {
+			CellType::EMPTY,
+			CellProperties::NONE,
+			iw::Color::From255(0, 0, 0, 0)
+		};
+
+		_SAND = { 
+			CellType::SAND,
+			CellProperties::MOVE_DOWN | CellProperties::MOVE_DOWN_SIDE,
+			iw::Color::From255(235, 200, 175)
+		};
+
+		_WATER = {
+			CellType::WATER,
+			CellProperties::MOVE_DOWN | CellProperties::MOVE_SIDE,
+			iw::Color::From255(175, 200, 235)
+		};
+
+		_ROCK = {
+			CellType::ROCK,
+			CellProperties::NONE,
+			iw::Color::From255(200, 200, 200)
+		};
+
+		Tile t = {
+			{
+				              {2,0},
+				       {1,1}, {2,1}, 
+				{0,2}, {1,2}, {2,2}, {3,2},
+				{0,3}, {1,3}, {2,3}, {3,3},
+				{0,4},               {3,4},
+				{0,5},               {3,5},
+				{0,6},               {3,6},
+			},
+			200, 200
+		};
+
+		std::vector<std::pair<int, int>> ast;
+
+		float random = 0;
+
+		for (float p = 0; p < Pi2; p += 0.04f) {
+			float x = cos(p);
+			float y = sin(p);
+
+			random += iw::randf();
+
+			for (float s = 0; s < 100+random; s += 0.04f) {
+				if (std::find(ast.begin(), ast.end(), std::make_pair<int, int>(x * s, y * s)) == ast.end()) {
+					ast.emplace_back(x * s, y * s);
+				}
+			}
 		}
 
-		//camera->SetPosition(vector3(0, 2, 10));
-		//camera->SetRotation(quaternion::from_look_at(camera->Position()).inverted());
+		Tile t2 = {
+			ast,
+			200, 200
+		};
 
-		texture = REF<Texture>(Renderer->Width() / scale, Renderer->Height() / scale, iw::TextureType::TEX_2D, iw::TextureFormat::RG);
-		texture->CreateColors();
-		texture->Clear();
-		texture->SetFilter(iw::TextureFilter::NEAREST);
-
-		target = REF<RenderTarget>();
-		target->AddTexture(texture);
+		m_tiles.push_back(t2);
 
 		return 0;
 	}
 
-	unsigned char _CLEAR = 0;
-	unsigned char _SAND  = -1;
-	unsigned char _LASER  = 200;
-	unsigned char _ROCK = 50;
-
-	bool outOfBounds(ref<Texture> texture, size_t x, size_t y) {
-		return x >= texture->Width() || y >= texture->Height();
-	}
-
-	size_t getCoords(ref<Texture> texture, size_t x, size_t y) {
-		if (outOfBounds(texture, x, y)) {
-			return 0;
-		}
-
-		return x * texture->Channels() + y * texture->Channels() * texture->Width();
-	}
-
-	bool isColor(ref<Texture> texture, size_t x, size_t y, unsigned char color) {
-		return texture->Colors()[getCoords(texture, x, y)] == color;
-	}
-
-	bool isEmpty(ref<Texture> texture, size_t x, size_t y) {
-		if (outOfBounds(texture, x, y)) {
-			return false;
-		}
-
-		return isColor(texture, x, y, _CLEAR);
-	}
-
-	void setColor(ref<Texture> texture, size_t x, size_t y, unsigned char color) {
-		if (outOfBounds(texture, x, y)) {
-			return;
-		}
-
-		texture->Colors()[getCoords(texture, x, y)    ] = color;
-		texture->Colors()[getCoords(texture, x, y) + 1] = -1; // full life
-	}
-
-	unsigned char getColor(ref<Texture> texture, size_t x, size_t y) {
-		if (outOfBounds(texture, x, y)) {
-			return _ROCK;
-		}
-
-		return texture->Colors()[getCoords(texture, x, y)];
-	}
-
-	unsigned char getLifetime(ref<Texture> texture, size_t x, size_t y) {
-		if (outOfBounds(texture, x, y)) {
-			return 0;
-		}
-
-		return texture->Colors()[getCoords(texture, x, y) + 1];
-	}
-
-	void setLifetime(ref<Texture> texture, size_t x, size_t y, unsigned char life) {
-		if (outOfBounds(texture, x, y)) {
-			return;
-		}
-
-		texture->Colors()[getCoords(texture, x, y) + 1] = life;
-	}
-
-	int imgx = -1;
-
 	void SimpleSandLayer::PostUpdate() {
-		vector2 pos = Mouse::ScreenPos() / scale;
-		pos.y = texture->Height() - pos.y;
+		vector2 pos = Mouse::ScreenPos() / m_world.m_scale;
+		pos.y = m_world.m_height - pos.y;
 
-		LOG_INFO << 1 / iw::DeltaTime();
+		if (Mouse::ButtonDown(iw::LMOUSE)) {
+			Cell placeMe = _EMPTY;
 
-		//LOG_INFO << pos << (int)getColor(texture, pos.x, pos.y);
+				 if (Keyboard::KeyDown(iw::S)) placeMe = _SAND;
+			else if (Keyboard::KeyDown(iw::W)) placeMe = _WATER;
+			else if (Keyboard::KeyDown(iw::R)) placeMe = _ROCK;
+
+			for (size_t x = 0; x < 20; x++)
+			for (size_t y = 0; y < 20; y++) {
+				if (!m_world.InBounds(pos.x + x, pos.y + y)) continue;
+				
+				m_world.SetCell(x, y, placeMe);
+			}
+		}
+
+		if (Keyboard::KeyDown(iw::LEFT))  m_tiles[0].X -= 1;
+		if (Keyboard::KeyDown(iw::RIGHT)) m_tiles[0].X += 1;
+		if (Keyboard::KeyDown(iw::UP))    m_tiles[0].Y += 1;
+		if (Keyboard::KeyDown(iw::DOWN))  m_tiles[0].Y -= 1;
+
+		for (Tile& tile : m_tiles) {
+			for (auto [x, y] : tile.Positions) {
+				x += tile.X;
+				y += tile.Y;
+
+				if (m_world.InBounds(x, y)) {
+					// what happens if the cell is already full?
+					m_world.SetCell(x, y, _ROCK);
+				}
+			}
+		}
+
+		// Update cells
+
+		for (size_t x = 0; x < m_world.m_width;  x++)
+		for (size_t y = 0; y < m_world.m_height; y++) {
+			const Cell& cell = m_world.GetCell(x, y);
+
+				 if (cell.Props & CellProperties::MOVE_DOWN		 && MoveDown	(x, y, cell)) {}
+			else if (cell.Props & CellProperties::MOVE_DOWN_SIDE && MoveDownSide(x, y, cell)) {}
+			else if (cell.Props & CellProperties::MOVE_SIDE		 && MoveSide	(x, y, cell)) {}
+		}
+
+		m_world.CommitCells();
 		
-		//if (++imgx < texture->Width()) {
-		//	setColor(texture, imgx, texture->Height() - 1, _LASER);
-		//}
+		// Update the sand texture
 
-		if (Keyboard::KeyDown(iw::S)) {
-			setColor(texture, pos.x, pos.y, _SAND);
-			//setColor(texture, pos.x - 1, pos.y, _SAND);
-			//setColor(texture, pos.x + 1, pos.y, _SAND);
-			//setColor(texture, pos.x, pos.y + 1, _SAND);
-			//setColor(texture, pos.x, pos.y + 2, _SAND);
-			//setColor(texture, pos.x, pos.y + 3, _SAND);
-			//setColor(texture, pos.x, pos.y + 4, _SAND);
-			//setColor(texture, pos.x, pos.y + 5, _SAND);
+		unsigned int* pixels = (unsigned int*)m_sandTexture->Colors();
+		for (size_t i = 0; i < m_world.m_width * m_world.m_height; i++) {
+			pixels[i] = m_world.GetCell(i).Color;
 		}
 
-		else if (Keyboard::KeyDown(iw::Z)) {
-			setColor(texture, pos.x, pos.y, _LASER);
+		if (m_world.InBounds(pos.x, pos.y)) {
+			pixels[m_world.GetIndex(pos.x, pos.y)] = iw::Color(1, 0, 0);
 		}
+		
+		for (Tile& tile : m_tiles) {
+			for (auto [x, y] : tile.Positions) {
+				x += tile.X;
+				y += tile.Y;
 
-		else if (Keyboard::KeyDown(iw::R)) {
-			setColor(texture, pos.x, pos.y, _ROCK);
-		}
-
-		for (size_t x = 0; x < texture->Width();  x++)
-		for (size_t y = 0; y < texture->Height(); y++) {
-			if (isColor(texture, x, y, _SAND)) {
-				bool down = isEmpty(texture, x,     y - 1);
-				bool left = isEmpty(texture, x - 1, y - 1);
-				bool rght = isEmpty(texture, x + 1, y - 1);
-			
-				if (down || left || rght) {
-					setColor(texture, x, y, 0);
-				}
-
-				if      (down) setColor(texture, x,     y - 1, _SAND);
-				else if (left) setColor(texture, x - 1, y - 1, _SAND);
-				else if (rght) setColor(texture, x + 1, y - 1, _SAND);
-			}
-
-			else if (isColor(texture, x, y, _LASER)) {
-				bool down = isEmpty(texture, x, y - 1);
-				unsigned char life = getLifetime(texture, x, y);
-
-				if (down) {
-					setColor(texture, x, y - 1, _LASER); // Expand laser
-					setLifetime(texture, x, y - 1, life);
-				}
-
-				else if (getColor(texture, x, y - 1) != _LASER) {
-					setLifetime(texture, x, y,  life/2);
-
-					if (getColor(texture, x, y - 1) != _ROCK) {
-						setColor(texture, x, y - 1, _CLEAR); // Destroy stuff hit by it
-					}
-				}
-
-				if (life != 0) {
-					setLifetime(texture, x, y, life * .6);
-				}
-
-				else {
-					setColor(texture, x, y, _CLEAR);
+				if (m_world.InBounds(x, y)) {
+					// what happens if the cell is no longer part of the tile?
+					m_world.SetCell(x, y, _EMPTY);
 				}
 			}
-
-			//if (x == pos.x && y == pos.y) {
-			//	setColor(texture, x, y, _SAND);
-			//}
 		}
 
-		texture->Update(Renderer->Device); // should be auto in apply filter
+		// Draw the sand to the screen
 
-		Renderer->ApplyFilter(shader, target, nullptr);
+		m_sandTexture->Update(Renderer->Device);
+
+		Renderer->BeginScene(MainScene);
+		Renderer->	DrawMesh(iw::Transform(), m_sandMesh);
+		Renderer->EndScene();
+	}
+	
+	bool SimpleSandLayer::MoveDown(
+		size_t x, size_t y,
+		const Cell& cell)
+	{
+		bool down = m_world.IsEmpty(x, y - 1);
+		if (down) {
+			m_world.MoveCell(x, y, x, y - 1);
+		}
+
+		return down;
+	}
+	
+	bool SimpleSandLayer::MoveDownSide(
+		size_t x, size_t y,
+		const Cell& cell)
+	{
+		bool downLeft  = m_world.IsEmpty(x - 1, y - 1);
+		bool downRight = m_world.IsEmpty(x + 1, y - 1);
+
+		if (downLeft && downRight) {
+			bool rand = iw::randf() > 0;
+			downLeft = rand ? true : false;
+			downRight = rand ? false : true;
+		}
+
+		if		(downLeft)	m_world.MoveCell(x, y, x - 1, y - 1);
+		else if (downRight) m_world.MoveCell(x, y, x + 1, y - 1);
+
+		return downLeft || downRight;
+	}
+
+	bool SimpleSandLayer::MoveSide(
+		size_t x, size_t y,
+		const Cell& cell)
+	{
+		bool left  = m_world.IsEmpty(x - 1, y);
+		bool right = m_world.IsEmpty(x + 1, y);
+
+		ShuffleIfTrue(left, right);
+
+			 if	(left)  m_world.MoveCell(x, y, x - 1, y);
+		else if (right)	m_world.MoveCell(x, y, x + 1, y);
+
+		return left || right;
 	}
 }
 
