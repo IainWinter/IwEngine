@@ -101,26 +101,7 @@ namespace iw {
 
 		iw::ref<iw::Shader> starsShader = Asset->Load<Shader>("shaders/particle/simple_point.shader");
 
-		//iw::ref<iw::Texture> starTexture = REF<iw::Texture>(1, 1, iw::TEX_2D, iw::RGBA);
-		//starTexture->SetFilter(iw::NEAREST);
-		//starTexture->CreateColors();
-		//starTexture->Clear();
-
-//		((unsigned int*)starTexture->Colors())[50] = INT_MAX;
-
-		//int i = starTexture->ColorCount() / 2 - 2;
-		//starTexture->Colors()[i  ] = 255;
-		//starTexture->Colors()[i+1] = 255;
-		//starTexture->Colors()[i+2] = 255;
-		//starTexture->Colors()[i+3] = 255;
-
-		/*for (unsigned char* c = starTexture->Colors(); c != starTexture->Colors() + starTexture->ColorCount(); c++) {
-			*c = 255;
-		}*/
-
 		iw::ref<iw::Material> starMat = REF<iw::Material>(starsShader);
-		//starMat->SetTexture("texture", starTexture);
-
 		starMat->Set("color", iw::Color(1));
 
 		iw::Mesh starMesh = Renderer->ScreenQuad().MakeCopy();
@@ -129,16 +110,13 @@ namespace iw {
 		iw::vector2* u  = (iw::vector2*)starMesh.Data()->Get(bName::UV);
 		unsigned int* i = starMesh.Data()->GetIndex();
 
+		starMesh.Data()->SetTopology(iw::MeshTopology::POINTS);
 		starMesh.Data()->SetBufferData(bName::POSITION, 1, p);
 		starMesh.Data()->SetBufferData(bName::UV,       1, u);
 		starMesh.Data()->SetIndexData(1, i);
-
 		starMesh.SetMaterial(starMat);
 
-		starMesh.Data()->SetTopology(iw::MeshTopology::POINTS);
-
 		m_stars.SetParticleMesh(starMesh);
-
 		m_stars.SetTransform(new iw::Transform(0, 0.1f));
 
 		for (int i = 0; i < 2000; i++) {
@@ -270,13 +248,12 @@ namespace iw {
 
 			for (int i = 0; i < a->Locations.size(); i++) {
 				vector2 v = vector4(a->Locations[i], 0, 1) * t->Transformation().transposed();
-				
-				v.x = ceil(v.x);
-				v.y = ceil(v.y);
+				int x = v.x;
+				int y = v.y;
 
-				if (!world.InBounds(v.x, v.y)) continue;
+				if (!world.InBounds(x, y)) continue;
 				
-				const Cell& cell = world.GetCell(v.x, v.y);
+				const Cell& cell = world.GetCell(x, y);
 
 				if (   cell.Type   == CellType::EMPTY
 					|| cell.TileId == a->TileId
@@ -286,7 +263,7 @@ namespace iw {
 					me.TileId = a->TileId;
 					me.Life = 1;
 
-					world.SetCell(v.x, v.y, me);
+					world.SetCell(x, y, me);
 				}
 
 				else {
@@ -366,7 +343,7 @@ namespace iw {
 				for(int x = minCX+px; x < maxCX; x += 2)
 				for(int y = minCY+py; y < maxCY; y += 2) {
 					SandChunk* chunk = world.GetChunk(x, y);
-					if (!chunk || chunk->IsEmpty()) continue; // or break?
+					if (!chunk || chunk->IsEmpty()) continue;
 
 					updatedChunks.push_back(chunk);
 
@@ -484,7 +461,7 @@ namespace iw {
 							colors[texi] = iw::Color(0, 1, 0, 1);
 						}
 
-						const Cell& cell = chunk->GetCellUnsafe(x, y);
+						const Cell& cell = chunk->GetCell(x, y);
 
 						if (cell.Type != CellType::EMPTY) {
 							colors[texi] = cell.Color;
@@ -492,7 +469,7 @@ namespace iw {
 					}
 
 					else {
-						colors[texi] = chunk->GetCellUnsafe(x, y).Color;
+						colors[texi] = chunk->GetCell(x, y).Color;
 					}
 				}
 
@@ -700,7 +677,7 @@ void SandWorker::UpdateChunk() {
 	for (int x = m_chunk.m_minX;   x <  m_chunk.m_maxX; x++)
 	for (int y = m_chunk.m_maxY-1; y >= m_chunk.m_minY; y--) {
 
-		if (CellAlreadyUpdated(x, y)) continue;
+		if (CellUpdated(x, y)) continue;
 
 		Cell cell = m_chunk.GetCell(x, y);
 
@@ -777,9 +754,8 @@ bool SandWorker::MoveDownSide(
 	bool downRight = IsEmpty(downRightX, downRightY);
 
 	if (downLeft && downRight) {
-		bool rand = iw::randf() > 0;
-		downLeft  = rand ? true  : false;
-		downRight = rand ? false : true;
+		downLeft  = iw::randf() > 0;
+		downRight = !downLeft;
 	}
 
 	if		(downLeft)	MoveCell(x, y, downLeftX,  downLeftY);
@@ -803,9 +779,8 @@ bool SandWorker::MoveSide(
 	bool right = IsEmpty(rightX, rightY);
 
 	if (left && right) {
-		bool rand = iw::randf() > 0;
-		left  = rand ? true  : false;
-		right = rand ? false : true;
+		left  = iw::randf() > 0;
+		right = !left;
 	}
 
 	if		(left)	MoveCell(x, y, leftX,	leftY);
@@ -866,9 +841,9 @@ bool SandWorker::MoveForward(
 					destX = next.pX;
 					destY = next.pY;
 
-					auto [cx, cy] = m_world.GetIntraChunkCoords(next.pX, next.pY);
-					next.pX = cx;
-					next.pY = cy;
+					//auto [cx, cy] = m_world.GetIntraChunkCoords(next.pX, next.pY);
+					//next.pX = cx;
+					//next.pY = cy;
 
 					SetCell(destX, destY, next);
 				}

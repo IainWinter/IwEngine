@@ -1,5 +1,6 @@
 #include "Layers/SimpleSandLayer.h"
-#include "iw/engine/Systems/EditorCameraControllerSystem.h"
+
+#include "Sand/SandUpdateSystem.h"
 
 namespace iw {
 	SimpleSandLayer::SimpleSandLayer()
@@ -9,32 +10,7 @@ namespace iw {
 		srand(time(nullptr));
 	}
 
-
-
-
-
-
-
-
 	int SimpleSandLayer::Initialize() {
-		iw::ref<iw::Shader> sandShader = Asset->Load<Shader>("shaders/texture.shader");
-
-		m_sandTexture = REF<iw::Texture>(
-			m_world.m_width,
-			m_world.m_height,
-			iw::TEX_2D,
-			iw::RGBA
-		);
-		m_sandTexture->SetFilter(iw::NEAREST);
-		m_sandTexture->CreateColors();
-		m_sandTexture->Clear();
-
-		iw::ref<iw::Material> sandScreenMat = REF<iw::Material>(sandShader);
-		sandScreenMat->SetTexture("texture", m_sandTexture);
-
-		m_sandMesh = Renderer->ScreenQuad().MakeInstance();
-		m_sandMesh.SetMaterial(sandScreenMat);
-
 		// Setup values for cells
 
 		_EMPTY = {
@@ -61,76 +37,68 @@ namespace iw {
 			iw::Color::From255(200, 200, 200)
 		};
 
-		Tile t = {
+		Tile ship = {
 			{
-				              {2,0},
-				       {1,1}, {2,1}, 
-				{0,2}, {1,2}, {2,2}, {3,2},
+				              {2,6},
+				       {1,5}, {2,5}, 
+				{0,4}, {1,4}, {2,4}, {3,4},
 				{0,3}, {1,3}, {2,3}, {3,3},
-				{0,4},               {3,4},
-				{0,5},               {3,5},
-				{0,6},               {3,6},
+				{0,2},               {3,2},
+				{0,1},               {3,1},
+				{0,0},               {3,0},
 			},
-			200, 200
-		};
-
-		std::vector<std::pair<int, int>> ast;
-
-		float random = 0;
-
-		for (float p = 0; p < Pi2; p += 0.04f) {
-			float x = cos(p);
-			float y = sin(p);
-
-			random += iw::randf();
-
-			for (float s = 0; s < 100+random; s += 0.04f) {
-				if (std::find(ast.begin(), ast.end(), std::make_pair<int, int>(x * s, y * s)) == ast.end()) {
-					ast.emplace_back(x * s, y * s);
-				}
+			{
+							  _ROCK,
+					   _ROCK, _ROCK,
+				_ROCK, _ROCK, _ROCK, _ROCK,
+				_ROCK, _ROCK, _ROCK, _ROCK,
+				_ROCK,               _ROCK,
+				_ROCK,               _ROCK,
+				_ROCK,               _ROCK,
 			}
-		}
-
-		Tile t2 = {
-			ast,
-			200, 200
 		};
 
-		m_tiles.push_back(t2);
+		iw::Entity shipEntity = Space->CreateEntity<iw::Transform, Tile>();
+		shipEntity.Set<iw::Transform>(200);
+		shipEntity.Set<Tile>(ship);
+
+		PushSystem<SandUpdateSystem>(m_world, shipEntity.Handle);
 
 		return 0;
 	}
 
 	void SimpleSandLayer::PostUpdate() {
 		vector2 pos = Mouse::ScreenPos() / m_world.m_scale;
-		pos.y = m_world.m_height - pos.y;
+		pos.y = Renderer->Height() - pos.y;
 
 		if (Mouse::ButtonDown(iw::LMOUSE)) {
 			Cell placeMe = _EMPTY;
 
-				 if (Keyboard::KeyDown(iw::S)) placeMe = _SAND;
+			     if (Keyboard::KeyDown(iw::S)) placeMe = _SAND;
 			else if (Keyboard::KeyDown(iw::W)) placeMe = _WATER;
 			else if (Keyboard::KeyDown(iw::R)) placeMe = _ROCK;
 
-			for (size_t x = 0; x < 20; x++)
-			for (size_t y = 0; y < 20; y++) {
-				if (!m_world.InBounds(pos.x + x, pos.y + y)) continue;
+			for (size_t x = pos.x; x < pos.x + 20; x++)
+			for (size_t y = pos.y; y < pos.y + 20; y++) {
+				if (!m_world.InBounds(x, y)) continue;
 				
 				m_world.SetCell(x, y, placeMe);
 			}
 		}
 
-		if (Keyboard::KeyDown(iw::LEFT))  m_tiles[0].X -= 1;
-		if (Keyboard::KeyDown(iw::RIGHT)) m_tiles[0].X += 1;
-		if (Keyboard::KeyDown(iw::UP))    m_tiles[0].Y += 1;
-		if (Keyboard::KeyDown(iw::DOWN))  m_tiles[0].Y -= 1;
+		//if (Keyboard::KeyDown(iw::LEFT))  m_tiles[0].X -= 1;
+		//if (Keyboard::KeyDown(iw::RIGHT)) m_tiles[0].X += 1;
+		//if (Keyboard::KeyDown(iw::UP))    m_tiles[0].Y += 1;
+		//if (Keyboard::KeyDown(iw::DOWN))  m_tiles[0].Y -= 1;
 
 		for (Tile& tile : m_tiles) {
 			for (auto [x, y] : tile.Positions) {
-				x += tile.X;
-				y += tile.Y;
+				//x += tile.X;
+				//y += tile.Y;
 
 				if (m_world.InBounds(x, y)) {
+					// Call collision callback
+
 					// what happens if the cell is already full?
 					m_world.SetCell(x, y, _ROCK);
 				}
@@ -163,10 +131,12 @@ namespace iw {
 		
 		for (Tile& tile : m_tiles) {
 			for (auto [x, y] : tile.Positions) {
-				x += tile.X;
-				y += tile.Y;
+				//x += tile.X;
+				//y += tile.Y;
 
 				if (m_world.InBounds(x, y)) {
+					// Call collision callback, could be a differnt one or just a bool flag that says that something collidded with me instead of i collided with something
+
 					// what happens if the cell is no longer part of the tile?
 					m_world.SetCell(x, y, _EMPTY);
 				}
@@ -178,10 +148,10 @@ namespace iw {
 		m_sandTexture->Update(Renderer->Device);
 
 		Renderer->BeginScene(MainScene);
-		Renderer->	DrawMesh(iw::Transform(), m_sandMesh);
+			Renderer->DrawMesh(iw::Transform(), m_sandMesh);
 		Renderer->EndScene();
 	}
-	
+
 	bool SimpleSandLayer::MoveDown(
 		size_t x, size_t y,
 		const Cell& cell)
@@ -202,9 +172,8 @@ namespace iw {
 		bool downRight = m_world.IsEmpty(x + 1, y - 1);
 
 		if (downLeft && downRight) {
-			bool rand = iw::randf() > 0;
-			downLeft = rand ? true : false;
-			downRight = rand ? false : true;
+			downLeft  = iw::randf() > 0;
+			downRight = !downLeft;
 		}
 
 		if		(downLeft)	m_world.MoveCell(x, y, x - 1, y - 1);
