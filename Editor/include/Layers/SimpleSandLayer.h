@@ -15,11 +15,7 @@ namespace iw {
 
 		SandWorld m_world;
 		std::vector<Tile> m_tiles;
-
-		Cell _EMPTY;
-		Cell _SAND;
-		Cell _WATER;
-		Cell _ROCK;
+		iw::Entity shipEntity;
 
 	public:
 		SimpleSandLayer();

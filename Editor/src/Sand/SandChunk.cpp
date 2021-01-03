@@ -1,5 +1,6 @@
 #include "Sand/SandChunk.h"
 #include <algorithm>
+#include <iw/log/logger.h>
 
 SandChunk::SandChunk()
 	: m_cells(nullptr)
@@ -26,35 +27,38 @@ SandChunk::SandChunk(
 	ResetRect();
 }
 
-SandChunk& SandChunk::operator=(
+SandChunk::SandChunk(
 	const SandChunk& copy)
+	: m_cells(copy.m_cells)
+	, m_x(copy.m_x)
+	, m_y(copy.m_y)
+	, m_width (copy.m_width)
+	, m_height(copy.m_height)
+	, m_filledCellCount(copy.m_filledCellCount.load())
 {
-	m_cells           = copy.m_cells;
-	m_filledCellCount = copy.m_filledCellCount.load();
-
 	ResetRect();
-
-	return *this;
 }
 
 void SandChunk::SetCell(
-	ChunkCoords coords,
+	WorldCoord x, WorldCoord y,
 	const Cell& cell,
 	Tick currentTick)
 {
-	Index index = GetIndex(coords);
+	Index index = GetIndex(x, y);
 	
+	std::unique_lock lock(m_setChangesMutex);
+
 	SetCellData(index, cell, currentTick);
-	m_changes.emplace_back(index, index); // for rect update
+	m_setChanges.push_back(index); // for rect update
 }
 
 void SandChunk::MoveCell(
-	ChunkCoords from,
-	ChunkCoords to)
+	WorldCoord x, WorldCoord   y,
+	WorldCoord xTo, WorldCoord yTo)
 {
 	m_changes.emplace_back(
-		GetIndex(to),
-		GetIndex(from)
+		GetIndex(xTo, yTo),
+		GetIndex(x,   y)
 	);
 }
 
@@ -63,19 +67,22 @@ void SandChunk::CommitMovedCells(
 {
 	ResetRect();
 
+	for (Index index : m_setChanges) {
+		UpdateRect(index % m_width, index / m_width);
+	}
+
+	m_setChanges.clear();
+
 	// remove moves that have their destinations filled
 	//	also do special update for 'set' cells (dest == source)
 	for (size_t i = 0; i < m_changes.size(); i++) {
 		if (m_cells[m_changes[i].first].Type != CellType::EMPTY) {
-			if (m_changes[i].first == m_changes[i].second) {
-				UpdateRect(m_changes[i].first % m_width,
-					       m_changes[i].first / m_width);
-			}
-
 			m_changes[i] = m_changes.back(); m_changes.pop_back();
 			i--;
 		}
 	}
+
+	if (m_changes.size() == 0) return;
 
 	// sort by destination
 
@@ -89,7 +96,7 @@ void SandChunk::CommitMovedCells(
 
 	m_changes.emplace_back(-1, -1); // to catch last change
 
-	for (size_t i = 0; i < m_changes.size(); i++) {
+	for (size_t i = 0; i < m_changes.size() - 1; i++) {
 		if (m_changes[i + 1].first != m_changes[i].first) {
 			MoveCellData(m_changes[ip + iw::randi(i - ip)], currentTick);
 			ip = i + 1;
@@ -109,23 +116,13 @@ void SandChunk::ResetRect() {
 }
 
 void SandChunk::UpdateRect(
-	ChunkCoord x, ChunkCoord y)
+	WorldCoord x, WorldCoord y)
 {
-	if (x <= m_minX) {
-		m_minX = iw::clamp<uint16_t>(x - 2, 0, m_width);
-	}
+	if (x <= m_minX) m_minX = iw::clamp<WorldCoord>(x - 2, 0, m_width);
+	if (x >= m_maxX) m_maxX = iw::clamp<WorldCoord>(x + 2, 0, m_width);
 
-	if (y <= m_minY) {
-		m_minY = iw::clamp<uint16_t>(y - 2, 0, m_height);
-	}
-
-	if (x >= m_maxX) {
-		m_maxX = iw::clamp<uint16_t>(x + 2, 0, m_width);
-	}
-
-	if (y >= m_maxY) {
-		m_maxY = iw::clamp<uint16_t>(y + 2, 0, m_height);
-	}
+	if (y <= m_minY) m_minY = iw::clamp<WorldCoord>(y - 2, 0, m_height);
+	if (y >= m_maxY) m_maxY = iw::clamp<WorldCoord>(y + 2, 0, m_height);
 }
 
 void SandChunk::MoveCellData(

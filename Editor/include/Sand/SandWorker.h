@@ -15,7 +15,19 @@ public:
 		, m_chunk(chunk)
 	{}
 
-	virtual void UpdateChunk() = 0;
+	void UpdateChunk() {
+		for (WorldCoord i = 0; i < m_chunk.m_width * m_chunk.m_height; i++) {
+			WorldCoord x = i % m_chunk.m_width  + m_chunk.m_x;
+			WorldCoord y = i / m_chunk.m_height + m_chunk.m_y;
+
+			UpdateCell(x, y, m_chunk.m_cells[i]);
+		}
+	}
+
+	virtual void UpdateCell(
+		WorldCoord x,
+		WorldCoord y,
+		Cell& cell) = 0;
 protected:
 	bool InBounds(
 		WorldCoord x, WorldCoord y)
@@ -28,7 +40,7 @@ protected:
 		WorldCoord x, WorldCoord y)
 	{
 		if (m_chunk.InBounds(x, y)) {
-			return m_chunk.IsEmpty(m_world.GetChunkCoords(x, y));
+			return m_chunk.IsEmpty(x, y);
 		}
 
 		return m_world.IsEmpty(x, y);
@@ -38,7 +50,7 @@ protected:
 		WorldCoord x, WorldCoord y)
 	{
 		if (m_chunk.InBounds(x, y)) {
-			return m_chunk.GetCell(m_world.GetChunkCoords(x, y));
+			return m_chunk.GetCell(x, y);
 		}
 
 		return m_world.GetCell(x, y);
@@ -49,9 +61,28 @@ protected:
 		const Cell& cell)
 	{
 		if (m_chunk.InBounds(x, y)) {
-			return m_chunk.SetCell(m_world.GetChunkCoords(x, y), cell, m_world.m_currentTick);
+			return m_chunk.SetCell(x, y, cell, m_world.m_currentTick);
 		}
 
 		return m_world.SetCell(x, y, cell);
+	}
+
+	void MoveCell(
+		WorldCoord x,   WorldCoord y,
+		WorldCoord xTo, WorldCoord yTo)
+	{
+		if (    m_chunk.InBounds(x, y)
+			&& m_chunk.InBounds(xTo, yTo))
+		{
+			m_chunk.MoveCell(
+				x,   y,
+				xTo, yTo
+			);
+		}
+
+		else {
+			m_world.SetCell(xTo, yTo, m_world.GetCell(x, y));
+			m_world.SetCell(x,   y,   Cell::GetDefault(CellType::EMPTY));
+		}
 	}
 };

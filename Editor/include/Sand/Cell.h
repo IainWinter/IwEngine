@@ -9,8 +9,8 @@ using Tick = size_t;
 using Index = unsigned int;
 using IndexPair = std::pair<Index, Index>;
 
-using ChunkCoord = unsigned int;
-using WorldCoord = int;
+using ChunkCoord  = /*unsigned*/ int;
+using WorldCoord  = int;
 using ChunkCoords = std::pair<ChunkCoord, ChunkCoord>;
 using WorldCoords = std::pair<WorldCoord, WorldCoord>;
 
@@ -61,8 +61,8 @@ struct Cell {
 			+ (dY > 0 ? dY : -dY);
 	}
 
-	static void        SetDefault(CellType type,const Cell& cell){m_defaults.emplace(type, cell);}
-	static const Cell& GetDefault(CellType type)                 {return m_defaults.at(type);}
+	static inline void        SetDefault(CellType type,const Cell& cell){m_defaults.emplace(type, cell);}
+	static inline const Cell& GetDefault(CellType type)                 {return m_defaults.at(type);}
 private:
-	static std::unordered_map<CellType, Cell> m_defaults;
+	static inline std::unordered_map<CellType, Cell> m_defaults;
 };

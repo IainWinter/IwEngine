@@ -5,7 +5,7 @@
 
 // update & render, render could be its own system
 
-class SandUpdateSystem : iw::SystemBase {
+class SandUpdateSystem : public iw::SystemBase {
 private:
 	iw::Scene* m_scene;
 

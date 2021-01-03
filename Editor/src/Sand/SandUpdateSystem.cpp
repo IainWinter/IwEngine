@@ -37,13 +37,34 @@ int SandUpdateSystem::Initialize() {
 }
 
 void SandUpdateSystem::Update() {
+	iw::ref<iw::Texture> texture = m_sandMesh.Material()->GetTexture("texture");
+
 	iw::vector2 playerLocation = Space->FindComponent<iw::Transform>(m_cameraEntity)->Position;
 		
 	// camera frustrum
-	int fy  = playerLocation.y - m_world.m_chunkHeight / 2;
-	int fx  = playerLocation.x - m_world.m_chunkWidth  / 2;
-	int fy2 = fy + m_world.m_chunkHeight;
-	int fx2 = fx + m_world.m_chunkWidth;
+	int fx  = /*playerLocation.x*/ -(int)texture->Width()  / 2;
+	int fy  = /*playerLocation.y*/ -(int)texture->Height() / 2;
+	int fx2 = fx + texture->Width();
+	int fy2 = fy + texture->Height();
+
+	iw::vector2 pos = iw::Mouse::ScreenPos() / m_world.m_scale;
+	pos.x = floor(pos.x) + fx;
+	pos.y = floor(texture->Height() - pos.y) + fy;
+
+	if (iw::Mouse::ButtonDown(iw::LMOUSE)) {
+		Cell placeMe = Cell::GetDefault(CellType::EMPTY);
+
+			 if (iw::Keyboard::KeyDown(iw::S)) placeMe = Cell::GetDefault(CellType::SAND);
+		else if (iw::Keyboard::KeyDown(iw::W)) placeMe = Cell::GetDefault(CellType::WATER);
+		else if (iw::Keyboard::KeyDown(iw::R)) placeMe = Cell::GetDefault(CellType::ROCK);
+
+		for (size_t x = pos.x; x < pos.x + 20; x++)
+		for (size_t y = pos.y; y < pos.y + 20; y++) {
+			if (!m_world.InBounds(x, y)) continue;
+				
+			m_world.SetCell(x, y, placeMe);
+		}
+	}
 
 	// Move tiles (outside of this system)
 
@@ -57,7 +78,7 @@ void SandUpdateSystem::Update() {
 		for (size_t i = 0; i < tile->CellCount(); i++) {
 			auto [x, y] = tile->Positions[i];
 
-			iw::vector2 v = iw::vector4(x, y, 0, 1) * transform->Transformation();
+			iw::vector2 v = iw::vector4(x, y, 0, 1) * transform->Transformation().transposed();
 			x = v.x;
 			y = v.y;
 
@@ -75,9 +96,9 @@ void SandUpdateSystem::Update() {
 			}
 		}
 
-		if (tile->CellCount() < tile->InitialCellCount * 0.25) {
-			Space->QueueEntity(entity, iw::func_Destroy);
-		}
+		//if (tile->CellCount() < tile->InitialCellCount * 0.25) {
+		//	Space->QueueEntity(entity, iw::func_Destroy);
+		//}
 	});
 
 	// Update cells
@@ -89,20 +110,16 @@ void SandUpdateSystem::Update() {
 	if (m_timeStep == 0 || (m_timeStep <= 0.0f && (!m_debugStep || iw::Keyboard::KeyDown(iw::SPACE)))) {
 		m_stepTimer = m_timeStep;
 
-		std::vector<SandChunk*> chunksUpdated;
-
-		for (SandChunk& chunk : m_world.m_chunks) {
-			if (chunk.IsAllEmpty()) continue;
+		for (SandChunk* chunk : m_world.m_chunks) {
+			if (chunk->IsAllEmpty()) continue;
 
 			{ std::unique_lock lock(chunkCountMutex); chunkCount++; }
 
-			chunksUpdated.push_back(&chunk);
-
 			Task->queue([&]() {
-				for (int x = chunk.m_minX; x < chunk.m_maxX; x++)
-				for (int y = chunk.m_minY; y < chunk.m_maxY; y++) {
-					for (SandWorker& worker : m_world.m_workers) {
-						worker.UpdateChunk();
+				for (int x = chunk->m_minX; x < chunk->m_maxX; x++)
+				for (int y = chunk->m_minY; y < chunk->m_maxY; y++) {
+					for (SandWorker* worker : m_world.m_workers) {
+						worker->UpdateChunk();
 					}
 				}
 
@@ -111,60 +128,47 @@ void SandUpdateSystem::Update() {
 				chunkCountCV.notify_one();
 			});
 		}
+		
+		{ std::unique_lock lock(chunkCountMutex); chunkCountCV.wait(lock, [&]() { return chunkCount == 0; }); }
 
-		chunkCountCV.wait(std::unique_lock(chunkCountMutex), [&]() { return chunkCount == 0; });
-
-		for (SandChunk* chunk : chunksUpdated) {
+		for (SandChunk* chunk : m_world.m_chunks) {
 			chunk->CommitMovedCells(m_world.m_currentTick);
 		}
 	}
 
 	// Copy sand colors to a texture
 
-	iw::ref<iw::Texture> texture = m_sandMesh.Material()->GetTexture("texture");
-	texture->Clear();
-
 	unsigned int* colors = (unsigned int*)texture->Colors();
+	texture->Clear();
 
 	bool showChunks = iw::Keyboard::KeyDown(iw::K);
 
+	int cc = 0;
+
 	for (SandChunk* chunk : m_world.GetVisibleChunks(fx, fy, fx2, fy2)) {
-		{ std::unique_lock lock(chunkCountMutex); chunkCount++;	}
+		//if (chunk->IsAllEmpty()) continue;
 
-		Task->queue([=, &chunkCount, &chunkCountCV, &chunkCountMutex]() {
-			int startY = iw::clamp(fy  - chunk->m_y, 0, chunk->m_height);
-			int startX = iw::clamp(fx  - chunk->m_x, 0, chunk->m_width);
-			int endY   = iw::clamp(fy2 - chunk->m_y, 0, chunk->m_height);
-			int endX   = iw::clamp(fx2 - chunk->m_x, 0, chunk->m_width);
+		cc++;
 
-			for (int y = startY; y < endY; y++)
-			for (int x = startX; x < endX; x++) {
-				int texi = (chunk->m_x + x - fx) + (chunk->m_y + y - fy) * width;
+		//{ std::unique_lock lock(chunkCountMutex); chunkCount++;	}
+
+		//Task->queue([&]() {
+			WorldCoord startY = iw::clamp<WorldCoord>(fy  - chunk->m_y, 0, chunk->m_height);
+			WorldCoord startX = iw::clamp<WorldCoord>(fx  - chunk->m_x, 0, chunk->m_width);
+			WorldCoord endY   = iw::clamp<WorldCoord>(fy2 - chunk->m_y, 0, chunk->m_height);
+			WorldCoord endX   = iw::clamp<WorldCoord>(fx2 - chunk->m_x, 0, chunk->m_width);
+
+			for (WorldCoord y = startY; y < endY; y++)
+			for (WorldCoord x = startX; x < endX; x++) {
+				int texi = (chunk->m_x + x - fx) + (chunk->m_y + y - fy) * texture->Width();
 
 				if (showChunks) {
-					if (x == 0 || y == 0) {
-						colors[texi] = iw::Color(1, 0, 0, 1);
-
-						//if (   randomChunkX == chunk->m_x / chunk->m_width 
-						//	&& randomChunkY == chunk->m_y / chunk->m_height)
-						//{
-						//	colors[texi] = iw::Color(0, 0, 1, 1);
-						//}
-					}
-
-					if (x == chunk->m_minX || y == chunk->m_minY) {
-						colors[texi] = iw::Color(0, 1, 0, 1);
-					}
-
-					if (x == chunk->m_maxX || y == chunk->m_maxY) {
-						colors[texi] = iw::Color(0, 1, 0, 1);
-					}
+					if (x == 0 || y == 0)                         colors[texi] = iw::Color(1, 0, 0, 1);
+					if (x == chunk->m_minX || y == chunk->m_minY) colors[texi] = iw::Color(0, 1, 0, 1);
+					if (x == chunk->m_maxX || y == chunk->m_maxY) colors[texi] = iw::Color(0, 1, 0, 1);
 
 					const Cell& cell = chunk->GetCell(x, y);
-
-					if (cell.Type != CellType::EMPTY) {
-						colors[texi] = cell.Color;
-					}
+					if (cell.Type != CellType::EMPTY) colors[texi] = cell.Color;
 				}
 
 				else {
@@ -172,21 +176,22 @@ void SandUpdateSystem::Update() {
 				}
 			}
 
-			{
-				std::unique_lock lock(chunkCountMutex);
-				chunkCount--;
+			//{ std::unique_lock lock(chunkCountMutex); chunkCount--; }
 
-				chunkCountCV.notify_one();
-			}
-		});
+			//chunkCountCV.notify_one();
+		//});
 	}
 
-	{
-		std::unique_lock lock(chunkCountMutex);
-		chunkCountCV.wait(lock, [&]() { return chunkCount == 0; });
-	}
+	LOG_INFO << cc << " " << m_world.m_chunks.size();
+	
+	//{ std::unique_lock lock(chunkCountMutex); chunkCountCV.wait(lock, [&]() { return chunkCount == 0; }); }
 
 	// Draw the texture on the screen
+
+	// why does this need to be scaled by the scale??? seemly makes no sense
+
+	int iii = iw::clamp<int>(pos.x + pos.y * texture->Width(), 0, texture->Width() * texture->Height());
+	colors[iii] = iw::Color(1, 0, 0);
 
 	texture->Update(Renderer->Device);
 
@@ -194,7 +199,6 @@ void SandUpdateSystem::Update() {
 		Renderer->DrawMesh(iw::Transform(), m_sandMesh);
 	Renderer->EndScene();
 
-		
 	Space->Query<iw::Transform, Tile>().Each([&](
 		iw::EntityHandle entity,
 		iw::Transform* transform, 
@@ -203,7 +207,7 @@ void SandUpdateSystem::Update() {
 		for (size_t i = 0; i < tile->CellCount(); i++) {
 			auto [x, y] = tile->Positions[i];
 
-			iw::vector2 v = iw::vector4(x, y, 0, 1) * transform->Transformation();
+			iw::vector2 v = iw::vector4(x, y, 0, 1) * transform->Transformation().transposed();
 			x = v.x;
 			y = v.y;
 
