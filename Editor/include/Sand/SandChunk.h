@@ -7,11 +7,13 @@
 
 struct SandChunk {
 private:
-	std::vector<IndexPair> m_changes;    // destination, source
-	std::vector<Index>     m_setChanges;
-
+	//std::vector<IndexPair> m_changes;    // source, destination
+	//std::vector<Index>  m_setChanges;
 	std::mutex m_setChangesMutex;
+
 public:
+	std::vector<std::pair<WorldCoords, WorldCoords>> m_changes;
+
 	Cell* m_cells; // doesn't own this memory
 
 	const WorldCoord m_x;
@@ -24,12 +26,15 @@ public:
 
 	std::atomic<uint32_t> m_filledCellCount;
 
+	Tick m_lastTick;
+
 	SandChunk();
 
 	SandChunk(
 		Cell* cells,
 		WorldCoord x,     WorldCoord y,
-		ChunkCoord width, ChunkCoord height);
+		ChunkCoord width, ChunkCoord height,
+		Tick currentTick);
 
 	SandChunk(const SandChunk& copy);
 
@@ -44,6 +49,12 @@ public:
 			&& y >= m_y && y < m_y + m_height;
 	}
 
+	bool CellAlreadyUpdated(
+		WorldCoord x, WorldCoord y) const
+	{
+		return GetCell(x, y).LastUpdateTick == m_lastTick;
+	}
+
 	bool IsEmpty(
 		WorldCoord x, WorldCoord y) const
 	{
@@ -56,21 +67,16 @@ public:
 		x -= m_x;
 		y -= m_y;
 
-		if (x < 0 || y < 0 || x >= m_width || y >= m_height) {
-			return 0;
-		}
-
-		return x + y * m_width; // map coords here
+		return x + y * m_width;
 	}
 
 	Index GetIndexDirect(
 		ChunkCoord x, ChunkCoord y) const
 	{
-		return x + y * m_width; // map coords here
+		return x + y * m_width;
 	}
 
 	const Cell& GetCellDirect(ChunkCoord x, ChunkCoord y) const { return m_cells[GetIndexDirect(x, y)]; }
-
 
 	const Cell& GetCell(WorldCoord x, WorldCoord y) const { return m_cells[GetIndex(x, y)]; }
 	      Cell& GetCell(WorldCoord x, WorldCoord y)       { return m_cells[GetIndex(x, y)]; }
@@ -81,7 +87,7 @@ public:
 		Tick currentTick);
 
 	void MoveCell(
-		WorldCoord x, WorldCoord   y,
+		WorldCoord x,  WorldCoord  y,
 		WorldCoord xTo, WorldCoord yTo);
 
 	void CommitMovedCells(

@@ -15,6 +15,9 @@ public:
 	Tick m_currentTick;
 	std::vector<SandChunk*> m_chunks;
 	std::vector<SandWorker*> m_workers;
+
+	std::vector<std::pair<WorldCoords, WorldCoords>> m_changes;
+
 private:
 	std::unordered_map<WorldCoords, Index, iw::pair_hash> m_chunkLookup;
 
@@ -22,6 +25,7 @@ private:
 	iw::pool_allocator m_cells;
 
 	std::mutex m_chunksMutex;
+	std::mutex m_changesMutex;
 
 public:
 	SandWorld(
@@ -64,22 +68,72 @@ public:
 	}
 
 	void Step() {
-		std::vector<WorldCoords> remove;
+		m_currentTick++;
+	}
 
+	void CommitCells() {
 		for (SandChunk* chunk : m_chunks) {
-			if (chunk->IsAllEmpty()) {
-				remove.emplace_back(
-					chunk->m_x % m_chunkWidth,
-					chunk->m_y / m_chunkHeight);
+			m_changes.insert(m_changes.end(), chunk->m_changes.begin(), chunk->m_changes.end());
+			chunk->CommitMovedCells(m_currentTick);
+		}
+
+		// remove moves that have their destinations filled
+
+		for (size_t i = 0; i < m_changes.size(); i++) {
+			if (GetCell(m_changes[i].second).Type != CellType::EMPTY) {
+				m_changes[i] = m_changes.back(); m_changes.pop_back();
+				i--;
 			}
 		}
 
-		for (WorldCoords coords : remove) {
-			m_chunks.erase(m_chunks.begin() + m_chunkLookup.at(coords));
-			m_chunkLookup.erase(m_chunkLookup.find(coords));
-		}
-	}
+		if (m_changes.size() > 0) {
+			// sort by destination
 
+			std::sort(m_changes.begin(), m_changes.end(),
+				[](auto& a, auto& b) { return a.second < b.second; }
+			);
+
+			// pick random source for each destination
+
+			size_t ip = 0;
+
+			auto end = m_changes.back(); // to catch last change
+			end.second.first += 1;
+			m_changes.push_back(end);
+
+			for (size_t i = 0; i < m_changes.size() - 1; i++) {
+				if (m_changes[i + 1].second != m_changes[i].second) {
+					WorldCoord x   = m_changes[i].first.first;
+					WorldCoord y   = m_changes[i].first.second;
+					WorldCoord xTo = m_changes[i].second.first;
+					WorldCoord yTo = m_changes[i].second.second;
+
+					SetCell(xTo, yTo, GetCell(x, y));
+					SetCell(x,   y,   Cell::GetDefault(CellType::EMPTY));
+
+					ip = i + 1;
+				}
+			}
+
+			m_changes.clear();
+		}
+
+		//std::vector<WorldCoords> remove;
+
+		//for (SandChunk* chunk : m_chunks) {
+		//	if (chunk->IsAllEmpty() && m_currentTick - chunk->m_lastTick > 5) {
+		//		remove.emplace_back(
+		//			chunk->m_x % m_chunkWidth,
+		//			chunk->m_y / m_chunkHeight);
+		//	}
+		//}
+
+		//for (WorldCoords coords : remove) {
+		//	m_chunks.erase(m_chunks.begin() + m_chunkLookup.at(coords));
+		//	m_chunkLookup.erase(m_chunkLookup.find(coords));
+		//}
+	}
+	
 	bool InBounds(
 		WorldCoord x, WorldCoord y)
 	{
@@ -103,11 +157,30 @@ public:
 		return GetChunk(x, y)->GetCell(x, y);
 	}
 
+	const Cell& GetCell(
+		WorldCoords coords)
+	{
+		return GetChunk(coords.first, coords.second)
+			 ->GetCell(coords.first, coords.second);
+	}
+
 	void SetCell(
 		WorldCoord x, WorldCoord y,
 		const Cell& cell)
 	{
 		GetChunk(x, y)->SetCell(x, y, cell, m_currentTick);
+	}
+
+	void MoveCell(
+		WorldCoord x,   WorldCoord y,
+		WorldCoord xTo, WorldCoord yTo)
+	{
+		std::unique_lock lock(m_changesMutex);
+
+		m_changes.emplace_back(
+			std::make_pair(x,   y),
+			std::make_pair(xTo, yTo)
+		);
 	}
 
 	WorldCoords GetChunkLocation(
@@ -159,12 +232,6 @@ private:
 	SandChunk* GetChunkFromLocation(
 		WorldCoords location, bool dontCreateChunks = false)
 	{
-		if (    abs(location.first)  > 100
-			|| abs(location.second) > 100)
-		{
-			return nullptr;
-		}
-
 		std::unique_lock lock(m_chunksMutex);
 
 		auto itr = m_chunkLookup.find(location);
@@ -185,7 +252,8 @@ private:
 		SandChunk* chunk = new SandChunk(
 			m_cells.alloc<Cell>(m_cellChunkSizeInBytes),
 			m_chunkWidth * location.first, m_chunkHeight * location.second,
-			m_chunkWidth, m_chunkHeight
+			m_chunkWidth, m_chunkHeight,
+			m_currentTick
 		);
 
 		m_chunkLookup.emplace(location, m_chunks.size()).first;

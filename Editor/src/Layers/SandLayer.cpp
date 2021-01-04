@@ -4,8 +4,9 @@
 #include "iw/math/matrix.h"
 
 int __chunkScale = 2;
-int __brushSize = 50;
-float __stepTimeThresh = 0;;
+int __brushSizeX = 50;
+int __brushSizeY = 50;
+float __stepTimeThresh = 0;
 
 namespace iw {
 	SandLayer::SandLayer()
@@ -130,8 +131,7 @@ namespace iw {
 		return 0;
 	}
 
-	void SandLayer::PostUpdate() {
-
+	void SandLayer::PostUpdate() {	
 		// Game update
 
 		int height = m_sandTexture->Height();
@@ -184,6 +184,51 @@ namespace iw {
 		//	spawnEnemy = iw::randf() + 10;
 		//}
 
+		Space->Query<iw::Transform, Player>().Each([&](
+			auto,
+			auto t,
+			auto p)
+		{
+			if (p->Movement.y == 0) {
+				p->Velocity *= .99f;
+			}
+
+			p->Velocity = iw::clamp<float>(p->Velocity + p->Movement.y * iw::DeltaTime() * 3, -20, 20);
+
+			vector3 up = t->Up();
+			up.y = -up.y;
+
+			t->Position += up * p->Velocity;
+			t->Rotation *= iw::quaternion::from_euler_angles(0, 0, p->Movement.x * iw::DeltaTime());
+
+			//if (t->Position.length() > 100) {
+				//t->Rotation = iw::lerp(t->Rotation, iw::quaternion::from_look_at(t->Position, 0, t->Up()), .1f);
+				//p->Velocity += iw::DeltaTime();
+			//}
+
+			//if (   t->Position.x < -world.m_chunkWidth  * 10 + world.m_chunkWidth
+			//	|| t->Position.y < -world.m_chunkHeight * 10 + world.m_chunkHeight
+			//	|| t->Position.x >  world.m_chunkWidth  * 10 - world.m_chunkWidth
+			//	|| t->Position.y >  world.m_chunkHeight * 10 - world.m_chunkHeight)
+			//{
+			//	p->Velocity *= -1;
+			//}
+		});
+
+		Space->Query<iw::Transform, Enemy2>().Each([&](
+			auto e,
+			auto t,
+			auto p)
+		{
+			t->Position = iw::lerp<vector2>(
+				t->Position,
+				iw::vector2(
+					p->Spot.x + cos(iw::TotalTime() + e.Index / 5) * 100,
+					p->Spot.y + sin(iw::TotalTime() + e.Index / 5) * 100
+				),
+				iw::DeltaTime());
+		});
+
 		// camera frustrum, mostly used at the bottom, but needed for screen mouse pos to world pos
 		vector2 playerLocation = player.Find<iw::Transform>()->Position;
 		
@@ -220,8 +265,8 @@ namespace iw {
 				cell.Gravitised = true;
 			}
 
-			for (int  i = 0; i  < __brushSize; i++)
-			for (int ii = 0; ii < __brushSize; ii++) {
+			for (int  i = 0; i  < __brushSizeX; i++)
+			for (int ii = 0; ii < __brushSizeY; ii++) {
 				world.SetCell(pos.x + i, pos.y + ii, cell);
 			}
 		}
@@ -309,12 +354,11 @@ namespace iw {
 		int chunkCount = 0;
 		int chunksUpdatedCount = 0;
 
-		//int randomChunkX = playerLocation.x / world.m_chunkWidth  * iw::randf() * 10;
-		//int randomChunkY = playerLocation.y / world.m_chunkHeight * iw::randf() * 10;
-
 		stepTimer -= iw::DeltaTime();
 		if (__stepTimeThresh == 0 || (__stepTimeThresh > 0 && stepTimer < 0 && Keyboard::KeyDown(V)/**/)) {
 			stepTimer = __stepTimeThresh;
+			
+			world.Step();
 
 			int minX = fx  - world.m_chunkWidth * 2;
 			int maxX = fx2 + world.m_chunkWidth * 2;
@@ -357,14 +401,8 @@ namespace iw {
 				}
 			}
 
-			for(SandChunk* chunk : world.m_chunks) {
-				chunk->CommitMovedCells(world.m_currentTick);
-			}
+			world.CommitCells();
 		}
-
-		//// Sand step
-
-		//world.Step();
 
 		// Swap buffers
 
@@ -396,6 +434,12 @@ namespace iw {
 					int texi = (chunk->m_x + x - fx) + (chunk->m_y + y - fy) * width;
 
 					if (showChunks) {
+						const Cell& cell = chunk->GetCellDirect(x, y);
+
+						if (cell.Type != CellType::EMPTY) {
+							colors[texi] = cell.Color;
+						}
+
 						if (x == 0 || y == 0) {
 							colors[texi] = iw::Color(chunk->IsAllEmpty() ? 0 : 1, 0, chunk->IsAllEmpty() ? 1 : 0, 1);
 						}
@@ -404,12 +448,6 @@ namespace iw {
 							|| x == chunk->m_maxX || y == chunk->m_maxY)
 						{
 							colors[texi] = iw::Color(0, 1, 0, 1);
-						}
-
-						const Cell& cell = chunk->GetCellDirect(x, y);
-
-						if (cell.Type != CellType::EMPTY) {
-							colors[texi] = cell.Color;
 						}
 					}
 
@@ -473,9 +511,6 @@ namespace iw {
 			for (int i = 0; i < a->Locations.size(); i++) {
 				vector2 v = vector4(a->Locations[i], 0, 1) * t->Transformation().transposed();
 
-				v.x = ceil(v.x);
-				v.y = ceil(v.y);
-
 				if (!world.InBounds(v.x, v.y)) continue;
 				
 				const Cell& cell = world.GetCell(v.x, v.y);
@@ -491,51 +526,6 @@ namespace iw {
 					i--;
 				}
 			}
-		});
-		
-		Space->Query<iw::Transform, Player>().Each([&](
-			auto,
-			auto t,
-			auto p)
-		{
-			if (p->Movement.y == 0) {
-				p->Velocity *= .99f;
-			}
-
-			p->Velocity = iw::clamp<float>(p->Velocity + p->Movement.y * iw::DeltaTime() * 3, -20, 20);
-
-			vector3 up = t->Up();
-			up.y = -up.y;
-
-			t->Position += up * p->Velocity;
-			t->Rotation *= iw::quaternion::from_euler_angles(0, 0, p->Movement.x * iw::DeltaTime());
-
-			//if (t->Position.length() > 100) {
-				//t->Rotation = iw::lerp(t->Rotation, iw::quaternion::from_look_at(t->Position, 0, t->Up()), .1f);
-				//p->Velocity += iw::DeltaTime();
-			//}
-
-			//if (   t->Position.x < -world.m_chunkWidth  * 10 + world.m_chunkWidth
-			//	|| t->Position.y < -world.m_chunkHeight * 10 + world.m_chunkHeight
-			//	|| t->Position.x >  world.m_chunkWidth  * 10 - world.m_chunkWidth
-			//	|| t->Position.y >  world.m_chunkHeight * 10 - world.m_chunkHeight)
-			//{
-			//	p->Velocity *= -1;
-			//}
-		});
-
-		Space->Query<iw::Transform, Enemy2>().Each([&](
-			auto e,
-			auto t,
-			auto p)
-		{
-			t->Position = iw::lerp<vector2>(
-				t->Position,
-				iw::vector2(
-					p->Spot.x + cos(iw::TotalTime() + e.Index / 5) * 100,
-					p->Spot.y + sin(iw::TotalTime() + e.Index / 5) * 100
-				),
-				iw::DeltaTime());
 		});
 	}
 
@@ -758,7 +748,7 @@ bool DefaultSandWorker::MoveForward(
 		}
 
 		else {
-			float step = 1 / cellpos.size();
+			float step = 1.f / (cellpos.size() - 2);
 
 			for (int i = 1; i < cellpos.size() - 1; i++) { // i = 0 is x, y so we dont need to check it
 				int destX = cellpos[i].first;
@@ -769,7 +759,9 @@ bool DefaultSandWorker::MoveForward(
 				if (forward) {
 					Cell next = replace;
 					next.TileId = cell.TileId;
-					SetCell(cell.pX * step * i, cell.pY * step * i, next);
+					next.pX = cell.pX + dsX * step * i;
+					next.pY = cell.pY + dsY * step * i;
+					SetCell(next.pX, next.pY, next);
 				}
 
 				else if (InBounds(destX, destY)

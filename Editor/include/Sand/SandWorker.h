@@ -17,10 +17,12 @@ public:
 
 	void UpdateChunk() {
 		for (WorldCoord i = 0; i < m_chunk.m_width * m_chunk.m_height; i++) {
+			Cell& cell = m_chunk.m_cells[i];
+			if (m_world.m_currentTick <= cell.LastUpdateTick) continue;
+
 			WorldCoord x = i % m_chunk.m_width  + m_chunk.m_x;
 			WorldCoord y = i / m_chunk.m_height + m_chunk.m_y;
-
-			UpdateCell(x, y, m_chunk.m_cells[i]);
+			UpdateCell(x, y, cell);
 		}
 	}
 
@@ -81,8 +83,13 @@ protected:
 		}
 
 		else {
-			m_world.SetCell(xTo, yTo, m_world.GetCell(x, y));
-			m_world.SetCell(x,   y,   Cell::GetDefault(CellType::EMPTY));
+			m_world.MoveCell(
+				x, y,
+				xTo, yTo
+			);
+
+			//m_world.SetCell(xTo, yTo, m_world.GetCell(x, y));
+			//m_world.SetCell(x,   y,   Cell::GetDefault(CellType::EMPTY));
 		}
 	}
 };
