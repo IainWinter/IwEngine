@@ -44,26 +44,29 @@ SandChunk::SandChunk(
 }
 
 void SandChunk::SetCell(
-	WorldCoord x, WorldCoord y,
+	Index index,
 	const Cell& cell,
 	Tick currentTick)
 {
 	m_lastTick = currentTick;
 
-	Index index = GetIndex(x, y);
-	
-	std::unique_lock lock(m_setChangesMutex);
+	std::unique_lock lock(m_changesMutex);
+
 	SetCellData(index, cell, currentTick);
 	UpdateRect(index % m_width, index / m_width);
 }
 
 void SandChunk::MoveCell(
+	SandChunk* sourceChunk,
 	WorldCoord x,   WorldCoord y,
 	WorldCoord xTo, WorldCoord yTo)
 {
+	std::unique_lock lock(m_changesMutex);
+
 	m_changes.emplace_back(
-		std::make_pair(x,   y),
-		std::make_pair(xTo, yTo)
+		sourceChunk,
+		sourceChunk->GetIndex(x, y),
+		GetIndex(xTo, yTo)
 	);
 }
 
@@ -74,41 +77,43 @@ void SandChunk::CommitMovedCells(
 
 	ResetRect();
 
-	//for (Index index : m_setChanges) {
-	//	UpdateRect(index % m_width, index / m_width);
-	//}
+	// remove moves that have their destinations filled
 
-	//m_setChanges.clear();
+	constexpr size_t _CHUNK = 0;
+	constexpr size_t _SRC   = 1;
+	constexpr size_t _DEST  = 2;
 
-	//// remove moves that have their destinations filled
+	for (size_t i = 0; i < m_changes.size(); i++) {
+		if (m_cells[std::get<_DEST>(m_changes[i])].Type != CellType::EMPTY) {
+			m_changes[i] = m_changes.back(); m_changes.pop_back();
+			i--;
+		}
+	}
 
-	//for (size_t i = 0; i < m_changes.size(); i++) {
-	//	if (m_cells[m_changes[i].second].Type != CellType::EMPTY) {
-	//		m_changes[i] = m_changes.back(); m_changes.pop_back();
-	//		i--;
-	//	}
-	//}
+	if (m_changes.size() == 0) return;
 
-	//if (m_changes.size() == 0) return;
+	// sort by destination
 
-	//// sort by destination
+	std::sort(m_changes.begin(), m_changes.end(),
+		[=](auto& a, auto& b) { return std::get<2>(a) < std::get<2>(b); } // cant pass _DEST (constexpr) I guess
+	);
 
-	//std::sort(m_changes.begin(), m_changes.end(),
-	//	[](auto& a, auto& b) { return a.second < b.second; }
-	//);
+	// pick random source for each destination
 
-	//// pick random source for each destination
+	size_t ip = 0;
 
-	//size_t ip = 0;
+	m_changes.emplace_back(nullptr, -1, -1); // to catch last change
 
-	//m_changes.emplace_back(-1, -1); // to catch last change
+	for (size_t i = 0; i < m_changes.size() - 1; i++) {
+		if (std::get<_DEST>(m_changes[i + 1]) != std::get<_DEST>(m_changes[i])) {
+			auto [sourceChunk, src, dest] = m_changes[ip + iw::randi(i - ip)];
 
-	//for (size_t i = 0; i < m_changes.size() - 1; i++) {
-	//	if (m_changes[i + 1].second != m_changes[i].second) {
-	//		MoveCellData(m_changes[ip + iw::randi(i - ip)], currentTick);
-	//		ip = i + 1;
-	//	}
-	//}
+			SetCellData(dest, sourceChunk->GetCell(src), currentTick);
+			sourceChunk->SetCell(src, Cell::GetDefault(CellType::EMPTY), currentTick);
+
+			ip = i + 1;
+		}
+	}
 
 	m_changes.clear();
 }
@@ -130,20 +135,6 @@ void SandChunk::UpdateRect(
 
 	if (y <= m_minY) m_minY = iw::clamp<WorldCoord>(y - 2, 0, m_height);
 	if (y >= m_maxY) m_maxY = iw::clamp<WorldCoord>(y + 2, 0, m_height);
-}
-
-void SandChunk::MoveCellData(
-	IndexPair change,
-	Tick currentTick)
-{
-	uint32_t src  = change.first;
-	uint32_t dest = change.second;
-
-	SetCellData(dest, m_cells[src], currentTick);
-	SetCellData(src, Cell::GetDefault(CellType::EMPTY), currentTick);
-
-	UpdateRect(src  % m_width, src  / m_width);
-	UpdateRect(dest % m_width, dest / m_width);
 }
 
 void SandChunk::SetCellData(

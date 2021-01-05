@@ -76,20 +76,15 @@ protected:
 		if (    m_chunk.InBounds(x, y)
 			&& m_chunk.InBounds(xTo, yTo))
 		{
-			m_chunk.MoveCell(
-				x,   y,
-				xTo, yTo
-			);
+			m_chunk.MoveCell(x, y, xTo, yTo);
+		}
+
+		else if (m_chunk.InBounds(x, y)) {
+			m_world.MoveCell(x, y, xTo, yTo);
 		}
 
 		else {
-			m_world.MoveCell(
-				x, y,
-				xTo, yTo
-			);
-
-			//m_world.SetCell(xTo, yTo, m_world.GetCell(x, y));
-			//m_world.SetCell(x,   y,   Cell::GetDefault(CellType::EMPTY));
+			m_chunk.MoveCell(m_world.GetChunk(x, y), x, y, xTo, yTo);
 		}
 	}
 };

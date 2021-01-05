@@ -2,18 +2,16 @@
 
 #include "Cell.h"
 #include <vector>
+#include <tuple>
 #include <atomic>
 #include <mutex>
 
 struct SandChunk {
 private:
-	//std::vector<IndexPair> m_changes;    // source, destination
-	//std::vector<Index>  m_setChanges;
-	std::mutex m_setChangesMutex;
+	std::vector<std::tuple<SandChunk*, Index, Index>> m_changes; // source, destination
+	std::mutex m_changesMutex;
 
 public:
-	std::vector<std::pair<WorldCoords, WorldCoords>> m_changes;
-
 	Cell* m_cells; // doesn't own this memory
 
 	const WorldCoord m_x;
@@ -80,14 +78,31 @@ public:
 
 	const Cell& GetCell(WorldCoord x, WorldCoord y) const { return m_cells[GetIndex(x, y)]; }
 	      Cell& GetCell(WorldCoord x, WorldCoord y)       { return m_cells[GetIndex(x, y)]; }
+		 Cell& GetCell(Index index)				    { return m_cells[index]; }
 
 	void SetCell(
 		WorldCoord x, WorldCoord y,
 		const Cell& cell,
+		Tick currentTick)
+	{
+		SetCell(GetIndex(x, y), cell , currentTick);
+	}
+
+	void SetCell(
+		Index index,
+		const Cell& cell,
 		Tick currentTick);
 
 	void MoveCell(
-		WorldCoord x,  WorldCoord  y,
+		WorldCoord x,   WorldCoord y,
+		WorldCoord xTo, WorldCoord yTo)
+	{
+		MoveCell(this, x, y, xTo, yTo);
+	}
+
+	void MoveCell(
+		SandChunk* source,
+		WorldCoord x,   WorldCoord y,
 		WorldCoord xTo, WorldCoord yTo);
 
 	void CommitMovedCells(
@@ -97,10 +112,6 @@ private:
 
 	void UpdateRect(
 		WorldCoord x, WorldCoord y);
-
-	void MoveCellData(
-		IndexPair change,
-		Tick currentTick);
 
 	void SetCellData(
 		Index index,

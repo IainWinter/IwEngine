@@ -3,7 +3,7 @@
 
 #include "iw/math/matrix.h"
 
-int __chunkScale = 2;
+int __chunkScale = 1;
 int __brushSizeX = 50;
 int __brushSizeY = 50;
 float __stepTimeThresh = 0;
@@ -377,20 +377,13 @@ namespace iw {
 					
 					if (!chunk || chunk->IsAllEmpty()) continue;
 
+					{ std::unique_lock lock(chunkCountMutex); chunkCount++; }
 					chunksUpdatedCount += chunk->m_filledCellCount;
-					{
-						std::unique_lock lock(chunkCountMutex);
-						chunkCount++;
-					}
 
 					Task->queue([&, chunk]() {
 						DefaultSandWorker(world, *chunk).UpdateChunk();
 
-						{
-							std::unique_lock lock(chunkCountMutex);
-							chunkCount--;
-						}
-
+						{ std::unique_lock lock(chunkCountMutex); chunkCount--; }
 						chunkCountCV.notify_one();
 					});
 				}
@@ -399,6 +392,22 @@ namespace iw {
 					std::unique_lock lock(chunkCountMutex);
 					chunkCountCV.wait(lock, [&]() { return chunkCount == 0; });
 				}
+			}
+
+			for (SandChunk* chunk : world.m_chunks) {
+				{ std::unique_lock lock(chunkCountMutex); chunkCount++; }
+
+				Task->queue([&, chunk]() {
+					chunk->CommitMovedCells(world.m_currentTick);
+
+					{ std::unique_lock lock(chunkCountMutex); chunkCount--; }
+					chunkCountCV.notify_one();
+				});
+			}
+
+			{
+				std::unique_lock lock(chunkCountMutex);
+				chunkCountCV.wait(lock, [&]() { return chunkCount == 0; });
 			}
 
 			world.CommitCells();
@@ -411,17 +420,10 @@ namespace iw {
 		sandTex->Clear();
 		unsigned int* colors = (unsigned int*)sandTex->Colors(); // cast from r, g, b, a to rgba
 
-		//m_stars.seed(1);
-
 		bool showChunks = Keyboard::KeyDown(K);
-		//chunkCount = 0; // this is already set to 0 but we could reset for reability
-		//std::condition_variable chunkCountCV; // not sure how reusing these work
 
 		for (SandChunk* chunk : world.GetVisibleChunks(fx, fy, fx2, fy2)) {
-			{
-				std::unique_lock lock(chunkCountMutex);
-				chunkCount++;
-			}
+			{ std::unique_lock lock(chunkCountMutex); chunkCount++; }
 
 			Task->queue([=, &chunkCount, &chunkCountCV, &chunkCountMutex]() {
 				int startY = iw::clamp(fy  - chunk->m_y, 0, chunk->m_height);
@@ -456,12 +458,8 @@ namespace iw {
 					}
 				}
 
-				{
-					std::unique_lock lock(chunkCountMutex);
-					chunkCount--;
-
-					chunkCountCV.notify_one();
-				}
+				{ std::unique_lock lock(chunkCountMutex); chunkCount--; }
+				chunkCountCV.notify_one();
 			});
 		}
 
@@ -478,29 +476,24 @@ namespace iw {
 			Renderer->DrawMesh(m_stars.GetTransform(), &m_stars.GetParticleMesh());
 			Renderer->DrawMesh(iw::Transform(), m_sandScreen);
 
-			Renderer->BeforeDraw([&]() {
-				std::stringstream sb;
-				sb << iw::DeltaTime() << " " << 1 / iw::DeltaTime();
-				m_font->UpdateMesh(m_textMesh, sb.str(), 0.001, 1);
-			});
-
-			Renderer->DrawMesh(iw::Transform(), m_textMesh);
-
-			Renderer->BeforeDraw([&, playerLocation]() {
-				std::stringstream sb;
-				sb << playerLocation;
-				m_font->UpdateMesh(m_textMesh, sb.str(), 0.001, 1);
-			});
-
-			Renderer->DrawMesh(iw::Transform(-.2f), m_textMesh);
-			
-			Renderer->BeforeDraw([&, playerLocation, chunksUpdatedCount]() {
-				std::stringstream sb;
-				sb << chunksUpdatedCount;
-				m_font->UpdateMesh(m_textMesh, sb.str(), 0.001, 1);
-			});
-
-			Renderer->DrawMesh(iw::Transform(-.4f), m_textMesh);
+			//Renderer->BeforeDraw([&]() {
+			//	std::stringstream sb;
+			//	sb << iw::DeltaTime() << " " << 1 / iw::DeltaTime();
+			//	m_font->UpdateMesh(m_textMesh, sb.str(), 0.001, 1);
+			//});
+			//Renderer->DrawMesh(iw::Transform(), m_textMesh);
+			//Renderer->BeforeDraw([&, playerLocation]() {
+			//	std::stringstream sb;
+			//	sb << playerLocation;
+			//	m_font->UpdateMesh(m_textMesh, sb.str(), 0.001, 1);
+			//});
+			//Renderer->DrawMesh(iw::Transform(-.2f), m_textMesh);
+			//Renderer->BeforeDraw([&, playerLocation, chunksUpdatedCount]() {
+			//	std::stringstream sb;
+			//	sb << chunksUpdatedCount;
+			//	m_font->UpdateMesh(m_textMesh, sb.str(), 0.001, 1);
+			//});
+			//Renderer->DrawMesh(iw::Transform(-.4f), m_textMesh);
 		Renderer->EndScene();
 
 		Space->Query<iw::Transform, Tile>().Each([&](
@@ -759,9 +752,7 @@ bool DefaultSandWorker::MoveForward(
 				if (forward) {
 					Cell next = replace;
 					next.TileId = cell.TileId;
-					next.pX = cell.pX + dsX * step * i;
-					next.pY = cell.pY + dsY * step * i;
-					SetCell(next.pX, next.pY, next);
+					SetCell(cell.pX + dsX * step * i, cell.pY + dsY * step * i, next);
 				}
 
 				else if (InBounds(destX, destY)
