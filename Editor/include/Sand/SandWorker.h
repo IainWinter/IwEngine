@@ -69,6 +69,19 @@ protected:
 		return m_world.SetCell(x, y, cell);
 	}
 
+	void SetCellQueued(
+		WorldCoord x, WorldCoord y,
+		const Cell& cell)
+	{
+		if (m_chunk.InBounds(x, y)) {
+			m_chunk.SetCellQueued(x, y, cell);
+		}
+
+		else {
+			m_world.SetCellQueued(x, y, cell);
+		}
+	}
+
 	void MoveCell(
 		WorldCoord x,   WorldCoord y,
 		WorldCoord xTo, WorldCoord yTo)
@@ -86,5 +99,39 @@ protected:
 		else {
 			m_chunk.MoveCell(m_world.GetChunk(x, y), x, y, xTo, yTo);
 		}
+	}
+
+	// Helper functions
+
+	std::vector<std::pair<int, int>> FillLine(
+		int x,  int y,
+		int x2, int y2)
+	{
+		std::vector<std::pair<int, int>> positions; // https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
+
+		int dx =  abs(x2 - x);
+		int dy = -abs(y2 - y);
+		int sx = x < x2 ? 1 : -1;
+		int sy = y < y2 ? 1 : -1;
+		int err = dx + dy;  /* error value e_xy */
+		
+		while (true) {
+			positions.emplace_back(x, y);
+
+			if (x == x2 && y == y2) break;
+			
+			int e2 = 2 * err;
+			if (e2 >= dy) { /* e_xy + e_x > 0 */
+				err += dy;
+				x += sx;
+			}
+
+			if (e2 <= dx) { /* e_xy + e_y < 0 */
+				err += dx;
+				y += sy;
+			}
+		}
+
+		return positions;
 	}
 };

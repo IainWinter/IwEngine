@@ -2,8 +2,8 @@
 
 #include "SandChunk.h"
 #include "iw/util/algorithm/pair_hash.h"
+#include "iw/util/memory/pool_allocator.h"
 #include <vector>
-
 #include <concurrent_unordered_map.h>
 
 class SandWorker;
@@ -74,7 +74,7 @@ public:
 		for (SandChunk* chunk : m_chunks) {
 			if (    chunk
 				&& chunk->IsAllEmpty()
-				&& m_currentTick - chunk->m_lastTick > 5)
+				&& m_currentTick - chunk->m_lastTick > 15)
 			{
 				remove.emplace_back(
 					chunk->m_x / m_chunkWidth,
@@ -133,6 +133,13 @@ public:
 		const Cell& cell)
 	{
 		GetChunk(x, y)->SetCell(x, y, cell, m_currentTick);
+	}
+
+	void SetCellQueued(
+		WorldCoord x, WorldCoord y,
+		const Cell& cell)
+	{
+		GetChunk(x, y)->SetCellQueued(x, y, cell);
 	}
 
 	void MoveCell(

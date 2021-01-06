@@ -50,10 +50,22 @@ void SandChunk::SetCell(
 {
 	m_lastTick = currentTick;
 
-	std::unique_lock lock(m_changesMutex);
+	std::unique_lock lock(m_setMutex);
 
 	SetCellData(index, cell, currentTick);
 	UpdateRect(index % m_width, index / m_width);
+}
+
+void SandChunk::SetCellQueued(
+	WorldCoord x, WorldCoord y,
+	const Cell& cell)
+{
+	std::unique_lock lock(m_setChangesMutex);
+
+	m_setQueue.emplace_back(
+		GetIndex(x, y),
+		cell
+	);
 }
 
 void SandChunk::MoveCell(
@@ -73,9 +85,14 @@ void SandChunk::MoveCell(
 void SandChunk::CommitMovedCells(
 	Tick currentTick)
 {
-	//m_lastCurrentTick = currentTick;
-
 	ResetRect();
+
+	for (auto& [index, cell] : m_setQueue) {
+		SetCellData(index, cell, currentTick);
+		UpdateRect(index % m_width, index / m_height);
+	}
+
+	m_setQueue.clear();
 
 	// remove moves that have their destinations filled
 
@@ -107,6 +124,8 @@ void SandChunk::CommitMovedCells(
 	for (size_t i = 0; i < m_changes.size() - 1; i++) {
 		if (std::get<_DEST>(m_changes[i + 1]) != std::get<_DEST>(m_changes[i])) {
 			auto [sourceChunk, src, dest] = m_changes[ip + iw::randi(i - ip)];
+
+			UpdateRect(dest % m_width, dest / m_height);
 
 			SetCellData(dest, sourceChunk->GetCell(src), currentTick);
 			sourceChunk->SetCell(src, Cell::GetDefault(CellType::EMPTY), currentTick);

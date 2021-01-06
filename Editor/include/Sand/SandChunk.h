@@ -8,7 +8,10 @@
 
 struct SandChunk {
 private:
+	std::vector<std::tuple<Index, Cell>> m_setQueue;
 	std::vector<std::tuple<SandChunk*, Index, Index>> m_changes; // source, destination
+	std::mutex m_setMutex;
+	std::mutex m_setChangesMutex;
 	std::mutex m_changesMutex;
 
 public:
@@ -92,6 +95,10 @@ public:
 		Index index,
 		const Cell& cell,
 		Tick currentTick);
+
+	void SetCellQueued(
+		WorldCoord x, WorldCoord y,
+		const Cell& cell);
 
 	void MoveCell(
 		WorldCoord x,   WorldCoord y,

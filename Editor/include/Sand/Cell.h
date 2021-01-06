@@ -35,10 +35,20 @@ enum class CellProperties {
 	MOVE_SIDE           = 0b00000100,
 	MOVE_FORWARD        = 0b00001000,
 	HIT_LIKE_PROJECTILE = 0b00010000,
-	HIT_LIKE_BEAM       = 0b00100000
+	HIT_LIKE_BEAM       = 0b00100000,
+	MOVE_SHARED_USER    = 0b01000000
 };
 inline CellProperties operator|(CellProperties a,CellProperties b){return CellProperties(iw::val(a)|iw::val(b));}
 inline auto           operator&(CellProperties a,CellProperties b){return iw::val(a)&iw::val(b);}
+
+struct SharedCellData {
+	float vx = 0;
+	float vy = 0;
+
+	float px = 0;
+	float py = 0;
+	float angle = 0;
+};
 
 struct Cell {
 	CellType       Type  = CellType::EMPTY;
@@ -47,14 +57,15 @@ struct Cell {
 	iw::Color Color;
 
 	float Life = 0; // Life until the cell will die, only some cells use this
-	float pX =  0;  // 'Position'
-	float pY =  0;
-	float dX =  0;  // Velocity
-	float dY = -1;
+	float pX = 0;   // 'Position'
+	float pY = 0;
+	float dX = 0;   // Velocity
+	float dY = 0;
 
 	int TileId = 0;          // Tile id, 0 means that it belongs to noone
 	int LastUpdateTick = 0;  // Used to check if the cell has been updated in the current tick
 	bool Gravitised = false; // If this cell should react to gravity
+	SharedCellData* User = nullptr;    // Any data from user
 
 	float Speed() const {  // Manhattan distance of velocity
 		return (dX > 0 ? dX : -dX)

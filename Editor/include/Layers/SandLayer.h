@@ -35,81 +35,8 @@ struct Asteroid {
 	iw::vector2 Velocity;
 };
 
-#include "Sand/Cell.h"
-
-struct Tile {
-	std::vector<iw::vector2> Locations;
-	const int InitialLocationsSize = 0;
-	int TileId = 0;
-
-	Tile() = default;
-
-	Tile(std::vector<iw::vector2> locations, int scale)
-		: InitialLocationsSize(locations.size() * 4)
-	{
-		for (iw::vector2& v : locations) {
-			for (int x = 0; x < abs(scale); x++)
-			for (int y = 0; y < abs(scale); y++) {
-				Locations.push_back(v * scale + iw::vector2(x, y) - scale*2);
-			}
-		}
-
-		static int s_tileId = 1;
-		TileId = s_tileId++;
-	}
-};
-
-#include "Sand/SandWorker.h"
-
-class DefaultSandWorker : public SandWorker {
-public:
-	DefaultSandWorker(
-		SandWorld& world, SandChunk& chunk)
-		: SandWorker(world, chunk)
-	{}
-
-	void UpdateCell(
-		WorldCoord x,
-		WorldCoord y,
-		Cell& cell) override;
-
-	// maybe these ones are good to have in parent?
-
-	bool MoveDown(
-		int x, int y,
-		Cell& cell,
-		const Cell& replace);
-
-	bool MoveDownSide(
-		int x, int y,
-		Cell& cell,
-		const Cell& replace);
-
-	bool MoveSide(
-		int x, int y,
-		Cell& cell,
-		const Cell& replace);
-
-	bool MoveForward(
-		int x, int y,
-		Cell& cell,
-		const Cell& replace,
-		bool& hit,
-		int& hitx, int& hity);
-
-	/////////////////////////////////////////////
-	// move to child class
-
-	void HitLikeProj(
-		int x,  int y,
-		int lx, int ly,
-		const Cell& cell);
-
-	void HitLikeBeam(
-		int x,  int y,
-		int lx, int ly,
-		const Cell& cell);
-};
+#include "Sand/Workers/DefaultSandWorker.h"
+#include "Sand/Tile.h"
 
 namespace iw {
 	class SandLayer
@@ -128,8 +55,6 @@ namespace iw {
 		float fireTimeout = 0;
 
 		iw::Entity player;
-
-		iw::vector2 gravPos;
 
 		float spawnEnemy = 0;
 
@@ -176,9 +101,23 @@ namespace iw {
 
 			world.SetCell(point.x, point.y, cell);
 		}
-	};
 
-	std::vector<std::pair<int, int>> FillLine(
-		int x, int y,
-		int x2, int y2);
+		void Reset();
+
+		int UpdateSandWorld   (int fx, int fy, int fx2, int fy2);
+		void UpdateSandTexture(int fx, int fy, int fx2, int fy2);
+
+		void PasteTiles();
+		void RemoveTiles();
+
+		std::pair<int, int> TranslatePoint(vector2 v, vector2 p, float a) {
+			float s = sin(a);
+			float c = cos(a);
+
+			return {
+				ceil(v.x * c - v.y * s + p.x),
+				ceil(v.x * s + v.y * c + p.y)
+			};
+		}
+	};
 }

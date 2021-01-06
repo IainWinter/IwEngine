@@ -5,11 +5,14 @@
 namespace iw {
 namespace math {
 	/**
-	* Compute Perlin noise at coordinates x, y.
-	* Returns a random float -1 - 1
+	* Compute Perlin noise at coordinates x, y, z
+	* Returns a random float 0 - 1
 	*/
 	IWMATH_API
-	float perlin(float x, float y);
+	float perlin(
+		float x,
+		float y = 0,
+		float z = 0);
 }
 
 	using namespace math;
