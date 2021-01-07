@@ -87,7 +87,13 @@ void SandChunk::CommitMovedCells(
 {
 	ResetRect();
 
-	for (auto& [index, cell] : m_setQueue) {
+	for (Index index : m_keepAlive) {
+		UpdateRect(index % m_width, index / m_height);
+	}
+
+	m_keepAlive.clear();
+
+	for (auto& [index, cell] : m_setQueue) { // could prob combine these
 		SetCellData(index, cell, currentTick);
 		UpdateRect(index % m_width, index / m_height);
 	}

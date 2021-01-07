@@ -35,19 +35,21 @@ void DefaultSandWorker::UpdateCell(
 	bool hit = false;
 	int hitx, hity;
 
-	if		(cell.Props & CellProperties::MOVE_DOWN      && MoveDown    (x, y, cell, replacement)) {}
+		 if (cell.Props & CellProperties::MOVE_SHARED_USER && MoveAsSharedUser(x, y, cell, replacement)) {}
+
+	else if (cell.Props & CellProperties::MOVE_DOWN      && MoveDown    (x, y, cell, replacement)) {}
 	else if (cell.Props & CellProperties::MOVE_DOWN_SIDE && MoveDownSide(x, y, cell, replacement)) {}
 	else if (cell.Props & CellProperties::MOVE_SIDE      && MoveSide    (x, y, cell, replacement)) {}
 	else if (cell.Props & CellProperties::MOVE_FORWARD   && MoveForward (x, y, cell, replacement, hit, hitx, hity)) {}
 
-	else if (cell.Props & CellProperties::MOVE_SHARED_USER && MoveAsSharedUser(x, y, cell, replacement)) {}
 
 	if (!hit) {
 		return;
 	}
 
-	if		(cell.Props & CellProperties::HIT_LIKE_BEAM)	   { HitLikeBeam(hitx, hity, x, y, cell); }
-	else if (cell.Props & CellProperties::HIT_LIKE_PROJECTILE) { HitLikeProj(hitx, hity, x, y, cell); }
+	if		(cell.Props & CellProperties::HIT_LIKE_BEAM)	   { HitLikeBeam   (hitx, hity, x, y, cell); }
+	else if (cell.Props & CellProperties::HIT_LIKE_PROJECTILE) { HitLikeProj   (hitx, hity, x, y, cell); }
+	else if (cell.Props & CellProperties::HIT_LIKE_MISSILE)    { HitLikeMissile(hitx, hity, x, y, cell); }
 }
 
 bool DefaultSandWorker::MoveDown(
@@ -61,6 +63,9 @@ bool DefaultSandWorker::MoveDown(
 	bool down = IsEmpty(downX, downY);
 
 	if (down) {
+		cell.pX += cell.dX;
+		cell.pY += cell.dY;
+
 		MoveCell(x, y, downX, downY);
 	}
 
@@ -123,58 +128,60 @@ bool DefaultSandWorker::MoveForward(
 	const Cell& replace,
 	bool& hit, int& hitx, int& hity)
 {
-	cell.Life -= iw::DeltaTime();
+	if (cell.Life > 0 && cell.Speed() > 0) {
+		iw::vector2 minv(cell.dX, cell.dY);
+		minv.normalize();
+		minv *= 1 / iw::DeltaTime();
+		minv *= cell.Speed();
 
-	if (cell.Life <= 0) {
-		SetCell(x, y, Cell::GetDefault(CellType::EMPTY));
-	}
-
-	else if (cell.Speed() > 0) {
-		float dsX = cell.dX * iw::DeltaTime();
-		float dsY = cell.dY * iw::DeltaTime();
+		float dsX = minv.x * iw::DeltaTime();
+		float dsY = minv.y * iw::DeltaTime();
 
 		float destXactual = cell.pX + dsX;
 		float destYactual = cell.pY + dsY;
 
 		std::vector<std::pair<int, int>> cellpos = FillLine(cell.pX, cell.pY, destXactual, destYactual);
 		
-		if (cellpos.size() == 1) { // line is only source cell because it didnt move far enough, could calc before calling FillLine ezpz
-			cell.pX += dsX;
-			cell.pY += dsY;
-		}
+		float step = 1.f / (cellpos.size() - 2);
 
-		else {
-			float step = 1.f / (cellpos.size() - 2);
+		for (int i = 1; i < cellpos.size() - 1; i++) { // i = 0 is x, y so we dont need to check it
+			int destX = cellpos[i].first;
+			int destY = cellpos[i].second;
 
-			for (int i = 1; i < cellpos.size() - 1; i++) { // i = 0 is x, y so we dont need to check it
-				int destX = cellpos[i].first;
-				int destY = cellpos[i].second;
+			bool forward = IsEmpty(destX, destY);
 
-				bool forward = IsEmpty(destX, destY);
-
-				if (forward) {
-					Cell next = replace;
-					next.TileId = cell.TileId;
-					SetCell(cell.pX + dsX * step * i, cell.pY + dsY * step * i, next);
-				}
-
-				else if (InBounds(destX, destY)
-					  && GetCell (destX, destY).TileId != cell.TileId)
-				{
-					hit = true;
-					hitx = destX;
-					hity = destY;
-					break;
-				}
+			if (forward) {
+				Cell next = replace;
+				next.TileId = cell.TileId;
+				SetCell(cell.pX + dsX * step * i, cell.pY + dsY * step * i, next);
 			}
 
-			if (!hit) {
-				cell.pX = destXactual;
-				cell.pY = destYactual;
-				cell.Life = replace.Life;
-				MoveCell(x, y, destXactual, destYactual);
+			else if (InBounds(destX, destY)
+				  && GetCell (destX, destY).TileId != cell.TileId)
+			{
+				hit = true;
+				hitx = destX;
+				hity = destY;
+				break;
 			}
 		}
+
+		if (!hit) {
+			cell.pX = destXactual;
+			cell.pY = destYactual;
+			cell.Life = replace.Life;
+			MoveCell(x, y, destXactual, destYactual);
+		}
+	}
+
+	cell.Life -= iw::DeltaTime();
+
+	if (cell.Life <= 0) {
+		SetCell(x, y, Cell::GetDefault(CellType::EMPTY));
+	}
+
+	else {
+		KeepAlive(x, y);
 	}
 
 	return false;
@@ -187,17 +194,59 @@ bool DefaultSandWorker::MoveAsSharedUser(
 {
 	if (!cell.User) return false;
 
-	float s = sin(cell.User->angle);
-	float c = cos(cell.User->angle);
+	switch (cell.User->Type) {
+		case SharedCellType::MISSILE: {
+			if (cell.Speed() > 0) {
+				SetCell(x - cell.dX, y - cell.dY, Cell::GetDefault(CellType::SAND));
+			}
 
-	int px = ceil(cell.User->px + cell.pX * c - cell.pY * s);
-	int py = ceil(cell.User->py + cell.pX * s + cell.pY * c);
+			break;
+		}
+		case SharedCellType::ASTEROID: {
+			//if (CurrentTick() % 2 == 0) {
+			//	float dx = cell.dX;
+			//	float dy = cell.dY;
+			//
+			//	iw::vector2 dir(cell.User->cX - cell.pX, cell.User->cY - cell.pY);
+			//
+			//	float div = 2;
+			//	while (abs((dir / div).major()) > 1) {
+			//		dir /= div;
+			//		div = iw::clamp(div += iw::randf(), 1.2f, 1.8f);
+			//	}
+			//
+			//	cell.dX = dir.x;
+			//	cell.dY = dir.y;
 
-	if (   IsEmpty(px, py)
-		|| GetCell(px, py).User == cell.User)
-	{
-		SetCellQueued(px, py, cell);
-		SetCell(x, y, Cell::GetDefault(CellType::EMPTY));
+			//	/*cell.dX = iw::clamp<int>(cell.User->cX - cell.pX, -1, 1);
+			//	cell.dY = iw::clamp<int>(cell.User->cY - cell.pY, -1, 1);*/
+			//
+			//	MoveDown    (x, y, cell, replace);
+			//	MoveSide    (x, y, cell, replace);
+			//	MoveDownSide(x, y, cell, replace);
+			//
+			//	cell.dX = dx;
+			//	cell.dY = dy;
+			//}
+			//
+			//else {
+				float s = sin(cell.User->angle);
+				float c = cos(cell.User->angle);
+
+				int px = ceil(cell.User->pX + cell.pX * c - cell.pY * s);
+				int py = ceil(cell.User->pY + cell.pX * s + cell.pY * c);
+
+				if (   px != x
+					|| py != y
+					|| IsEmpty(px, py)
+					|| GetCell(px, py).User == cell.User)
+				{
+					SetCellQueued(px, py, cell);
+					SetCell(x, y, Cell::GetDefault(CellType::EMPTY));
+				}
+			//}
+			break;
+		}
 	}
 
 	return true;
@@ -206,18 +255,22 @@ bool DefaultSandWorker::MoveAsSharedUser(
 void DefaultSandWorker::HitLikeProj(
 	int x,  int y,
 	int lx, int ly,
-	const Cell& bullet)
+	Cell& bullet)
 {
 	float speed = bullet.Speed();
 
 	Cell hit = GetCell(x, y);
 	hit.Life -= speed;
 
-	if (hit.Life < 0) {
+	bullet.SplitCount++;
+
+	if (hit.Life < 0 && bullet.SplitCount < 5) {
 		Cell cell = bullet;
 		cell.dX = iw::clamp<int>(cell.dX + iw::randi(100) - 50, cell.dX * .8 - 50, cell.dX * 1.2 + 50);
 		cell.dY = iw::clamp<int>(cell.dY + iw::randi(100) - 50, cell.dY * .8 - 50, cell.dY * 1.2 + 50);
-		cell.Life *= 1 - iw::DeltaTime() * 5;
+		cell.Life -= iw::DeltaTime() * 2;
+		cell.SplitCount++;
+
 
 		SetCell(x, y, cell);
 	}
@@ -230,32 +283,51 @@ void DefaultSandWorker::HitLikeProj(
 void DefaultSandWorker::HitLikeBeam(
 	int x,  int y,
 	int lx, int ly,
-	const Cell& laser)
+	Cell& laser)
 {
 	float speed = laser.Speed();
 
 	Cell hit = GetCell(x, y);
 	hit.Life -= speed;
 
-	if (   hit.Type == CellType::LASER 
-		|| hit.Type == CellType::eLASER)
-	{
-		SetCell(lx + laser.dX, ly + laser.dY, laser);
-		SetCell(lx, ly, Cell::GetDefault(CellType::EMPTY));
+	laser.SplitCount++;
 
-		return;
-	}
+	//if (   hit.Type == CellType::LASER 
+	//	|| hit.Type == CellType::eLASER)
+	//{
+	//	SetCell(lx + laser.dX, ly + laser.dY, laser);
+	//	SetCell(lx, ly, Cell::GetDefault(CellType::EMPTY));
 
-	if (hit.Life <= 0) {
+	//	return;
+	//}
+
+	if (hit.Life <= 0 && laser.SplitCount < 5) {
 		Cell cell = laser;
 		cell.dX = iw::clamp<int>(cell.dX + iw::randi(100) - 50, cell.dX * .8 - 50, cell.dX * 1.2 + 50);
 		cell.dY = iw::clamp<int>(cell.dY + iw::randi(100) - 50, cell.dY * .8 - 50, cell.dY * 1.2 + 50);
-		cell.Life *= 1 - iw::DeltaTime() * 5;
+		cell.Life -= iw::DeltaTime() * 2;
 
 		SetCell(x, y, cell);
 	}
 
 	else {
 		SetCell(x, y, hit);
+	}
+}
+
+void DefaultSandWorker::HitLikeMissile(
+	int x,  int y,
+	int mx, int my,
+	Cell& missile)
+{
+	float speed = missile.Speed();
+
+	SetCell(mx, my, Cell::GetDefault(CellType::EMPTY));
+
+	for(int i = -50; i < 50; i++)
+	for(int j = -50; j < 50; j++) {
+		if (iw::randf() > 0.5f) {
+			SetCell(x, y, Cell::GetDefault(CellType::DEBRIS));
+		}
 	}
 }

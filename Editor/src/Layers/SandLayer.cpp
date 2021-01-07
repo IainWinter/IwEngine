@@ -5,7 +5,7 @@
 
 #include "iw/math/noise.h"
 
-int __chunkScale = 1;
+int __chunkScale = 2;
 int __brushSizeX = 50;
 int __brushSizeY = 50;
 float __stepTimeThresh = 0;
@@ -69,7 +69,7 @@ namespace iw {
 
 		laser .Life = 0.06f;
 		elaser.Life = 1.00f;
-		bullet.Life = 0.02f;
+		bullet.Life = 0.06f;
 
 		Cell::SetDefault(CellType::EMPTY,  empty);
 		Cell::SetDefault(CellType::SAND,   sand);
@@ -157,21 +157,21 @@ namespace iw {
 		pos.x = floor(pos.x) + fx;
 		pos.y = floor(height - pos.y) + fy;
 
-		//spawnEnemy -= iw::DeltaTime();
-		//if (spawnEnemy < 0) {
-		//	iw::Entity enemy = Space->CreateEntity<iw::Transform, Tile, Enemy2>();
-		//	enemy.Set<iw::Transform>(iw::vector2(1000 * iw::randf()));
-		//	enemy.Set<Tile>(std::vector<iw::vector2> {
-		//						   vector2(1, 0),				 vector2(3, 0),
-		//			vector2(0, 1), vector2(1, 1), vector2(2, 1), vector2(3, 1),
-		//			vector2(0, 2), vector2(1, 2), vector2(2, 2), vector2(3, 2),
-		//			vector2(0, 3),								 vector2(3, 3),
-		//			vector2(0, 4),								 vector2(3, 4)
-		//	}, 2);
-		//	enemy.Set<Enemy2>(iw::vector2(100 * iw::randf(), 100 * iw::randf()));
-		//
-		//	spawnEnemy = iw::randf() + 10;
-		//}
+		spawnEnemy -= iw::DeltaTime();
+		if (spawnEnemy < 0) {
+			iw::Entity enemy = Space->CreateEntity<iw::Transform, Tile, Enemy2>();
+			enemy.Set<iw::Transform>(iw::vector2(1000 * iw::randf()));
+			enemy.Set<Tile>(std::vector<iw::vector2> {
+								   vector2(1, 0),				 vector2(3, 0),
+					vector2(0, 1), vector2(1, 1), vector2(2, 1), vector2(3, 1),
+					vector2(0, 2), vector2(1, 2), vector2(2, 2), vector2(3, 2),
+					vector2(0, 3),								 vector2(3, 3),
+					vector2(0, 4),								 vector2(3, 4)
+			}, 2);
+			enemy.Set<Enemy2>(iw::vector2(100 * iw::randf(), 100 * iw::randf()));
+		
+			spawnEnemy = iw::randf() + 10;
+		}
 
 		Space->Query<iw::Transform, Player, Tile>().Each([&](
 			auto,
@@ -183,26 +183,42 @@ namespace iw {
 				p->Velocity *= .99f;
 			}
 
-			p->Velocity = iw::clamp<float>(p->Velocity + p->Movement.y * iw::DeltaTime() * 3, -20, 20);
+			p->Velocity = iw::clamp<float>(p->Velocity + p->Movement.y, -100, 100);
 
 			vector3 vel = t->Up() * p->Velocity;
 			//vel.y = -vel.y;
 
 			float rot = -p->Movement.x * iw::DeltaTime();
 
-			t->Position += vel;
+			t->Position += vel * iw::DeltaTime() * 3;
 			t->Rotation *= iw::quaternion::from_euler_angles(0, 0, rot);
-
 			p->FireTimeout -= iw::DeltaTime();
+
 			if (   p->FireTimeout < 0
 				&& p->FireButtons != 0)
 			{
-				p->FireTimeout = p->FireButtons.x == 1 ? .05f : .001f;
+				if (p->FireButtons.x == 1) {
+					p->FireTimeout = 0.075f;
+					Fire(t->Position, pos, 5, Cell::GetDefault(CellType::BULLET), a->TileId);
+				}
 
-				float speed      = p->FireButtons.x == 1 ?                                600 :                              1500;
-				const Cell& shot = p->FireButtons.x == 1 ? Cell::GetDefault(CellType::BULLET) : Cell::GetDefault(CellType::LASER);
+				else if (p->FireButtons.y == 1) {
+					p->FireTimeout = 0.001f;
+					Fire(t->Position, pos, 15, Cell::GetDefault(CellType::LASER), a->TileId);
+				}
 
-				Fire(t->Position, pos, speed, shot, a->TileId);
+				else if (p->FireButtons.z == 1) {
+					p->FireTimeout = 0.1f;
+
+					Cell missile = Cell::GetDefault(CellType::METAL);
+					missile.User = new SharedCellData(); // memory leak
+					missile.User->Type = SharedCellType::MISSILE;
+					missile.Props = CellProperties::MOVE_SHARED_USER | CellProperties::MOVE_FORWARD | CellProperties::HIT_LIKE_MISSILE;
+
+					vector2 v = t->Position + t->Right() * (iw::randf() > 0 ? 1 : -1);
+
+					Fire(t->Position, v, 3, missile, a->TileId);
+				}
 			}
 		});
 
@@ -225,7 +241,7 @@ namespace iw {
 			if (p->FireTimeout < 0) {
 				p->FireTimeout = (iw::randf() + 2) * 2;
 
-				Fire(t->Position, playerLocation, 800, Cell::GetDefault(CellType::eLASER), a->TileId);
+				Fire(t->Position, playerLocation, 12.5f, Cell::GetDefault(CellType::eLASER), a->TileId);
 			}
 		});
 
@@ -263,6 +279,7 @@ namespace iw {
 		if (__stepTimeThresh == 0 || (__stepTimeThresh > 0 && stepTimer < 0 && Keyboard::KeyDown(V)/**/)) {
 			stepTimer = __stepTimeThresh;
 			PasteTiles();
+			UpdateSharedUserData();
 			updatedCellCount = UpdateSandWorld(fx, fy, fx2, fy2);
 			UpdateSandTexture(fx, fy, fx2, fy2);
 			RemoveTiles();
@@ -326,37 +343,47 @@ namespace iw {
 				if (e.State == 1 && p->Movement.y == -1) break;
 				p->Movement.y -= e.State ? 1 : -1; break;
 			}
+			case iw::val(SPACE): {
+				p->FireButtons.z = e.State ? 1 : -1; break;
+			}
 		}
 
 		return false;
 	}
 	
 	void SandLayer::Reset() {
-		srand(iw::Ticks());
-
 		world.Reset();
 		Space->Clear();
 
-		player = Space->CreateEntity<iw::Transform, Tile, /*SharedCellData,*/ Player>();
+		player = Space->CreateEntity<iw::Transform, Tile, Player>();
 
 		player.Set<iw::Transform>();
 		player.Set<Tile>(std::vector<iw::vector2> {
-								vector2(1, 0),
-				vector2(0, 1), vector2(1, 1), vector2(2, 1), vector2(3, 1),
+				               vector2(1, 4),
+				vector2(0, 3), vector2(1, 3), vector2(2, 3), vector2(3, 3),
 				vector2(0, 2), vector2(1, 2), vector2(2, 2), vector2(3, 2),
-				vector2(0, 3),							     vector2(3, 3),
-				vector2(0, 4),							     vector2(3, 4)
+				vector2(0, 1),							     vector2(3, 1),
+				vector2(0, 0),							     vector2(3, 0)
 		}, 5);
-		//player.Set<SharedCellData>();
 		player.Set<Player>();
 
 		// asteroid //
 
-		for (int a = 0; a < 1; a++) {
-			float xOff = iw::randf() * a + iw::randf();
-			float yOff = iw::randf() * a + iw::randf();
+		srand(iw::Ticks());
 
-			std::vector<iw::vector2> cells;
+		for (int a = 0; a < 3; a++) {
+			iw::Entity asteroid = Space->CreateEntity<iw::Transform, SharedCellData>();
+
+								asteroid.Set<iw::Transform>(vector2(iw::randf() * 200, iw::randf() * 200));
+			SharedCellData* d = asteroid.Set<SharedCellData>();
+			
+			float xOff = (2+a) * 100 + iw::randf() * 50;
+			float yOff = (2+a) * 100 + iw::randf() * 50;
+
+			d->pX = xOff; // Initial location
+			d->pY = yOff;
+
+			int count = 0;
 			for(int i = -150; i < 150; i++)
 			for(int j = -150; j < 150; j++) {
 				float x = i;
@@ -364,44 +391,28 @@ namespace iw {
 
 				float dist = sqrt(x*x + y*y);
 
-				if (dist < (iw::perlin(x/100 + xOff, y/100 + yOff) + 1) * 75) {
-					cells.emplace_back(i, j);
+				if (dist < (iw::perlin(x/70 + xOff, y/70 + yOff) + 1) * 75) {
+					Cell c = Cell::GetDefault(CellType::ROCK);
+					c.User = d;
+					c.pX = x; // Local position to shared user
+					c.pY = y;
+
+					d->vX = iw::randf();
+					d->vY = iw::randf();
+
+					d->cX += x;
+					d->cX += y;
+					count += 1;
+
+					c.Props = CellProperties::MOVE_SHARED_USER;
+
+					world.SetCell(x + xOff, y + yOff, c);
 				}
 			}
 
-			iw::Entity asteroid = Space->CreateEntity<iw::Transform, Tile, /*SharedCellData,*/ Asteroid>();
-
-			asteroid.Set<iw::Transform>(vector2(iw::randf() * 200, iw::randf() * 200));
-			asteroid.Set<Tile>(cells, 1);
-			//asteroid.Set<SharedCellData>();
-			asteroid.Set<Asteroid>(vector2(iw::randf(), iw::randf())*10);
+			d->cX /= count;
+			d->cY /= count;
 		}
-
-		// Paste in tiles, should be everyframe and testing for newly spawned tiles
-
-		//Space->Query<iw::Transform, Tile, SharedCellData>().Each([&](
-		//	auto e,
-		//	auto t,
-		//	auto a,
-		//	auto s)
-		//{
-		//	for (int i = 0; i < a->Locations.size(); i++) {
-		//		int x = a->Locations[i].x;
-		//		int y = a->Locations[i].y;
-
-		//		if (!world.InBounds(x, y)) continue;
-		//			
-		//		Cell me = Cell::GetDefault(CellType::METAL);
-		//		me.Props = CellProperties::MOVE_SHARED_USER;
-		//		me.Life = 1;
-		//		me.pX = t->Position.x + x;
-		//		me.pY = t->Position.y + y;
-		//		me.TileId = a->TileId;
-		//		me.User = s;
-
-		//		world.SetCell(x, y, me);
-		//	}
-		//});
 	}
 
 	int SandLayer::UpdateSandWorld(
@@ -415,14 +426,14 @@ namespace iw {
 		int chunkCount = 0;
 		int cellssUpdatedCount = 0;
 
-		int minX = fx  - world.m_chunkWidth * 2;
-		int maxX = fx2 + world.m_chunkWidth * 2;
+		int minX = fx  - world.m_chunkWidth * 10;
+		int maxX = fx2 + world.m_chunkWidth * 10;
 
-		int minY = fy  - world.m_chunkHeight * 2;
-		int maxY = fy2 + world.m_chunkHeight * 2;
+		int minY = fy  - world.m_chunkHeight * 10;
+		int maxY = fy2 + world.m_chunkHeight * 10;
 
-		auto [minCX, minCY] = world.GetChunkLocation(minX, minY); // need to find a way to update all chunks
-		auto [maxCX, maxCY] = world.GetChunkLocation(maxX, maxY/*, true*/); // for inclusive / exclusive
+		auto [minCX, minCY] = world.GetChunkLocation(minX, minY);
+		auto [maxCX, maxCY] = world.GetChunkLocation(maxX, maxY);
 
 		for (int px = 0; px < 2; px++)
 		for (int py = 0; py < 2; py++) {
@@ -534,21 +545,24 @@ namespace iw {
 		sandTex->Update(Renderer->Device); // should be auto in renderer 
 	}
 	
+	void SandLayer::UpdateSharedUserData() {
+		Space->Query<SharedCellData>().Each([](
+			auto e,
+			auto s)
+		{
+			s->pX += s->vX * iw::DeltaTime();
+			s->pY += s->vY * iw::DeltaTime();
+
+			//s->angle += iw::DeltaTime();
+		});
+	}
+
 	void SandLayer::PasteTiles() {
 		Space->Query<iw::Transform, Tile>().Each([&](
 			auto e,
 			auto t,
 			auto a)
 		{
-			if (a->Locations.size() < a->InitialLocationsSize / 3) {
-				if ((*Space).HasComponent<Player>(e)) {
-					reset = true;
-				}
-
-				(*Space).QueueEntity(e, iw::func_Destroy);
-				return;
-			}
-
 			float angle = t->Rotation.euler_angles().z;
 
 			for (int i = 0; i < a->Locations.size(); i++) {
@@ -573,6 +587,15 @@ namespace iw {
 					a->Locations[i] = a->Locations.back(); a->Locations.pop_back();
 					i--;
 				}
+			}
+
+			if (a->Locations.size() < a->InitialLocationsSize / 3) {
+				if ((*Space).HasComponent<Player>(e)) {
+					reset = true;
+				}
+
+				(*Space).QueueEntity(e, iw::func_Destroy);
+				return;
 			}
 		});
 	}

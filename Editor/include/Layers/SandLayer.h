@@ -20,7 +20,7 @@
 struct Player {
 	iw::vector3 Movement = 0;
 	iw::vector2 pMousePos = 0, MousePos = 0;
-	iw::vector2 FireButtons = 0;
+	iw::vector3 FireButtons = 0;
 	float FireTimeout = 0;
 
 	float Velocity = 0;
@@ -31,8 +31,9 @@ struct Enemy2 {
 	float FireTimeout = 0;
 };
 
-struct Asteroid {
-	iw::vector2 Velocity;
+struct Missile {
+	float tX = 0;
+	float tY = 0;
 };
 
 #include "Sand/Workers/DefaultSandWorker.h"
@@ -104,9 +105,10 @@ namespace iw {
 
 		void Reset();
 
-		int UpdateSandWorld   (int fx, int fy, int fx2, int fy2);
+		int  UpdateSandWorld  (int fx, int fy, int fx2, int fy2);
 		void UpdateSandTexture(int fx, int fy, int fx2, int fy2);
 
+		void UpdateSharedUserData();
 		void PasteTiles();
 		void RemoveTiles();
 

@@ -31,6 +31,18 @@ public:
 		WorldCoord y,
 		Cell& cell) = 0;
 protected:
+	Tick CurrentTick() const {
+		return m_world.m_currentTick;
+	}
+
+	int Width() const {
+		return m_chunk.m_width; //u -> s
+	}
+
+	int Height() const {
+		return m_chunk.m_height;
+	}
+
 	bool InBounds(
 		WorldCoord x, WorldCoord y)
 	{
@@ -46,6 +58,14 @@ protected:
 		}
 
 		return m_world.IsEmpty(x, y);
+	}
+
+	void KeepAlive(
+		WorldCoord x, WorldCoord y)
+	{
+		if (m_chunk.InBounds(x, y)) {
+			return m_chunk.KeepAlive(x, y);
+		}
 	}
 
 	const Cell& GetCell(
@@ -100,38 +120,38 @@ protected:
 			m_chunk.MoveCell(m_world.GetChunk(x, y), x, y, xTo, yTo);
 		}
 	}
+};
 
-	// Helper functions
+// Helper functions
 
-	std::vector<std::pair<int, int>> FillLine(
-		int x,  int y,
-		int x2, int y2)
-	{
-		std::vector<std::pair<int, int>> positions; // https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
+inline std::vector<std::pair<int, int>> FillLine(
+	int x,  int y,
+	int x2, int y2)
+{
+	std::vector<std::pair<int, int>> positions; // https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
 
-		int dx =  abs(x2 - x);
-		int dy = -abs(y2 - y);
-		int sx = x < x2 ? 1 : -1;
-		int sy = y < y2 ? 1 : -1;
-		int err = dx + dy;  /* error value e_xy */
+	int dx =  abs(x2 - x);
+	int dy = -abs(y2 - y);
+	int sx = x < x2 ? 1 : -1;
+	int sy = y < y2 ? 1 : -1;
+	int err = dx + dy;  /* error value e_xy */
 		
-		while (true) {
-			positions.emplace_back(x, y);
+	while (true) {
+		positions.emplace_back(x, y);
 
-			if (x == x2 && y == y2) break;
+		if (x == x2 && y == y2) break;
 			
-			int e2 = 2 * err;
-			if (e2 >= dy) { /* e_xy + e_x > 0 */
-				err += dy;
-				x += sx;
-			}
-
-			if (e2 <= dx) { /* e_xy + e_y < 0 */
-				err += dx;
-				y += sy;
-			}
+		int e2 = 2 * err;
+		if (e2 >= dy) { /* e_xy + e_x > 0 */
+			err += dy;
+			x += sx;
 		}
 
-		return positions;
+		if (e2 <= dx) { /* e_xy + e_y < 0 */
+			err += dx;
+			y += sy;
+		}
 	}
-};
+
+	return positions;
+}

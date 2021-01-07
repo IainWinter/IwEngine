@@ -24,6 +24,8 @@ private:
 	const size_t m_cellChunkSizeInBytes;
 	iw::pool_allocator m_cells;
 
+	std::mutex m_chunksMutex;
+
 public:
 	SandWorld(
 		WorldCoord width,
@@ -221,6 +223,8 @@ private:
 		);
 
 		m_chunkLookup.insert({ location, chunk });
+
+		std::unique_lock lock(m_chunksMutex);
 		m_chunks.push_back(chunk);
 
 		return chunk;

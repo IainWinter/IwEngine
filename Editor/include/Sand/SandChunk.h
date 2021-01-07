@@ -10,6 +10,7 @@ struct SandChunk {
 private:
 	std::vector<std::tuple<Index, Cell>> m_setQueue;
 	std::vector<std::tuple<SandChunk*, Index, Index>> m_changes; // source, destination
+	std::vector<Index> m_keepAlive;
 	std::mutex m_setMutex;
 	std::mutex m_setChangesMutex;
 	std::mutex m_changesMutex;
@@ -75,6 +76,13 @@ public:
 		ChunkCoord x, ChunkCoord y) const
 	{
 		return x + y * m_width;
+	}
+
+	// unsafe
+	void KeepAlive(
+		WorldCoord x, WorldCoord y)
+	{
+		m_keepAlive.push_back(GetIndex(x, y));
 	}
 
 	const Cell& GetCellDirect(ChunkCoord x, ChunkCoord y) const { return m_cells[GetIndexDirect(x, y)]; }

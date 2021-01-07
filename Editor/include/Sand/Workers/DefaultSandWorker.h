@@ -47,10 +47,15 @@ public:
 	void HitLikeProj(
 		int x,  int y,
 		int lx, int ly,
-		const Cell& cell);
+		Cell& cell);
 
 	void HitLikeBeam(
 		int x,  int y,
 		int lx, int ly,
-		const Cell& cell);
+		Cell& cell);
+
+	void HitLikeMissile(
+		int x,  int y,
+		int mx, int my,
+		Cell& missile);
 };

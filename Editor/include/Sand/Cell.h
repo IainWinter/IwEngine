@@ -29,25 +29,37 @@ enum class CellType {
 };
 
 enum class CellProperties {
-	NONE                = 0b00000000,
-	MOVE_DOWN           = 0b00000001,
-	MOVE_DOWN_SIDE      = 0b00000010,
-	MOVE_SIDE           = 0b00000100,
-	MOVE_FORWARD        = 0b00001000,
-	HIT_LIKE_PROJECTILE = 0b00010000,
-	HIT_LIKE_BEAM       = 0b00100000,
-	MOVE_SHARED_USER    = 0b01000000
+	NONE                = 0b0000000000000000,
+	MOVE_DOWN           = 0b0000000000000001,
+	MOVE_DOWN_SIDE      = 0b0000000000000010,
+	MOVE_SIDE           = 0b0000000000000100,
+	MOVE_FORWARD        = 0b0000000000001000,
+	MOVE_SHARED_USER    = 0b0000000000010000,
+	HIT_LIKE_PROJECTILE = 0b0000000000100000,
+	HIT_LIKE_BEAM       = 0b0000000001000000,
+	HIT_LIKE_MISSILE    = 0b0000000010000000,
 };
 inline CellProperties operator|(CellProperties a,CellProperties b){return CellProperties(iw::val(a)|iw::val(b));}
 inline auto           operator&(CellProperties a,CellProperties b){return iw::val(a)&iw::val(b);}
 
-struct SharedCellData {
-	float vx = 0;
-	float vy = 0;
+enum class SharedCellType {
+	NONE,
+	ASTEROID,
+	MISSILE
+};
 
-	float px = 0;
-	float py = 0;
+struct SharedCellData {
+	float pX = 0; // Position
+	float pY = 0;
 	float angle = 0;
+
+	float vX = 0; // Velocity
+	float vY = 0;
+
+	float cX = 0; // Center
+	float cY = 0;
+
+	SharedCellType Type = SharedCellType::NONE;
 };
 
 struct Cell {
@@ -62,14 +74,15 @@ struct Cell {
 	float dX = 0;   // Velocity
 	float dY = 0;
 
+	int SplitCount = 0; // to stop lazers and bullets from splitting to much
+
 	int TileId = 0;          // Tile id, 0 means that it belongs to noone
 	int LastUpdateTick = 0;  // Used to check if the cell has been updated in the current tick
 	bool Gravitised = false; // If this cell should react to gravity
 	SharedCellData* User = nullptr;    // Any data from user
 
 	float Speed() const {  // Manhattan distance of velocity
-		return (dX > 0 ? dX : -dX)
-			+ (dY > 0 ? dY : -dY);
+		return sqrt(dX*dX + dY*dY);
 	}
 
 	static inline void        SetDefault(CellType type,const Cell& cell){m_defaults.emplace(type, cell);}
