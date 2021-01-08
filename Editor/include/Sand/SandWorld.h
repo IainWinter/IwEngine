@@ -215,6 +215,8 @@ private:
 	SandChunk* CreateChunk(
 		WorldCoords location)
 	{
+		//LOG_INFO << location.first << " " << location.second;
+
 		SandChunk* chunk = new SandChunk(
 			m_cells.alloc<Cell>(m_cellChunkSizeInBytes),
 			m_chunkWidth * location.first, m_chunkHeight * location.second,

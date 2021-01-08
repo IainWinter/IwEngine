@@ -40,16 +40,15 @@ void DefaultSandWorker::UpdateCell(
 	else if (cell.Props & CellProperties::MOVE_DOWN      && MoveDown    (x, y, cell, replacement)) {}
 	else if (cell.Props & CellProperties::MOVE_DOWN_SIDE && MoveDownSide(x, y, cell, replacement)) {}
 	else if (cell.Props & CellProperties::MOVE_SIDE      && MoveSide    (x, y, cell, replacement)) {}
+	else if (cell.Props & CellProperties::MOVE_RANDOM    && MoveRandom  (x, y, cell, replacement)) {}
 	else if (cell.Props & CellProperties::MOVE_FORWARD   && MoveForward (x, y, cell, replacement, hit, hitx, hity)) {}
 
-
-	if (!hit) {
-		return;
-	}
-
+	if      (hit)
 	if		(cell.Props & CellProperties::HIT_LIKE_BEAM)	   { HitLikeBeam   (hitx, hity, x, y, cell); }
 	else if (cell.Props & CellProperties::HIT_LIKE_PROJECTILE) { HitLikeProj   (hitx, hity, x, y, cell); }
 	else if (cell.Props & CellProperties::HIT_LIKE_MISSILE)    { HitLikeMissile(hitx, hity, x, y, cell); }
+	
+	if (cell.Props & CellProperties::DELETE_TIME && DeleteWithTime(x, y, cell)) {}
 }
 
 bool DefaultSandWorker::MoveDown(
@@ -122,13 +121,38 @@ bool DefaultSandWorker::MoveSide(
 	return left || right;
 }
 
+bool DefaultSandWorker::MoveRandom(
+	int x, int y,
+	Cell& cell,
+	const Cell& replace)
+{
+	cell.pX += cell.dX * iw::randf();
+	cell.pY += cell.dY * iw::randf();
+
+	int dx = round(cell.pX);
+	int dy = round(cell.pY);
+
+	bool d = IsEmpty(dx, dy) || GetCell(x, y).Precedence < cell.Precedence;
+
+	if (d) {
+		MoveCell(x, y, dx, dy);
+	}
+
+	return d;
+}
+
 bool DefaultSandWorker::MoveForward(
 	int x, int y,
 	Cell& cell,
 	const Cell& replace,
 	bool& hit, int& hitx, int& hity)
 {
-	if (cell.Life > 0 && cell.Speed() > 0) {
+	if (cell.Speed() > 0) {
+		if (cell.User) {
+			cell.dX = cell.User->vX;
+			cell.dY = cell.User->vY;
+		}
+
 		iw::vector2 minv(cell.dX, cell.dY);
 		minv.normalize();
 		minv *= 1 / iw::DeltaTime();
@@ -137,14 +161,19 @@ bool DefaultSandWorker::MoveForward(
 		float dsX = minv.x * iw::DeltaTime();
 		float dsY = minv.y * iw::DeltaTime();
 
+		//ds  = iw::clamp<float>(dsX, -3, 3);
+		//dsY = iw::clamp<float>(dsY, -3, 3);
+
 		float destXactual = cell.pX + dsX;
 		float destYactual = cell.pY + dsY;
 
 		std::vector<std::pair<int, int>> cellpos = FillLine(cell.pX, cell.pY, destXactual, destYactual);
 		
-		float step = 1.f / (cellpos.size() - 2);
+		float step = 1.f / (cellpos.size() - 1);
 
-		for (int i = 1; i < cellpos.size() - 1; i++) { // i = 0 is x, y so we dont need to check it
+		for (int i = 1; i < cellpos.size(); i++) {
+			bool last = i == cellpos.size() - 1;
+
 			int destX = cellpos[i].first;
 			int destY = cellpos[i].second;
 
@@ -152,8 +181,14 @@ bool DefaultSandWorker::MoveForward(
 
 			if (forward) {
 				Cell next = replace;
+				next.pX = cell.pX + dsX * step * i;
+				next.pY = cell.pY + dsY * step * i;
+				next.dX = last ? cell.dX : 0;
+				next.dY = last ? cell.dY : 0;
+				next.User = cell.User;
 				next.TileId = cell.TileId;
-				SetCell(cell.pX + dsX * step * i, cell.pY + dsY * step * i, next);
+				next.SplitCount = cell.SplitCount;
+				SetCell(next.pX, next.pY, next);
 			}
 
 			else if (InBounds(destX, destY)
@@ -165,23 +200,11 @@ bool DefaultSandWorker::MoveForward(
 				break;
 			}
 		}
-
-		if (!hit) {
-			cell.pX = destXactual;
-			cell.pY = destYactual;
-			cell.Life = replace.Life;
-			MoveCell(x, y, destXactual, destYactual);
-		}
 	}
 
-	cell.Life -= iw::DeltaTime();
-
-	if (cell.Life <= 0) {
-		SetCell(x, y, Cell::GetDefault(CellType::EMPTY));
-	}
-
-	else {
-		KeepAlive(x, y);
+	if (!hit) {
+		cell.dX = 0;
+		cell.dY = 0;
 	}
 
 	return false;
@@ -195,19 +218,12 @@ bool DefaultSandWorker::MoveAsSharedUser(
 	if (!cell.User) return false;
 
 	switch (cell.User->Type) {
-		case SharedCellType::MISSILE: {
-			if (cell.Speed() > 0) {
-				SetCell(x - cell.dX, y - cell.dY, Cell::GetDefault(CellType::SAND));
-			}
-
-			break;
-		}
 		case SharedCellType::ASTEROID: {
 			//if (CurrentTick() % 2 == 0) {
 			//	float dx = cell.dX;
 			//	float dy = cell.dY;
 			//
-			//	iw::vector2 dir(cell.User->cX - cell.pX, cell.User->cY - cell.pY);
+			//	iw::vector2 dir(cell.User->pX - cell.pX, cell.User->pY - cell.pY);
 			//
 			//	float div = 2;
 			//	while (abs((dir / div).major()) > 1) {
@@ -227,29 +243,43 @@ bool DefaultSandWorker::MoveAsSharedUser(
 			//
 			//	cell.dX = dx;
 			//	cell.dY = dy;
-			//}
 			//
-			//else {
-				float s = sin(cell.User->angle);
-				float c = cos(cell.User->angle);
-
-				int px = ceil(cell.User->pX + cell.pX * c - cell.pY * s);
-				int py = ceil(cell.User->pY + cell.pX * s + cell.pY * c);
-
-				if (   px != x
-					|| py != y
-					|| IsEmpty(px, py)
-					|| GetCell(px, py).User == cell.User)
-				{
-					SetCellQueued(px, py, cell);
-					SetCell(x, y, Cell::GetDefault(CellType::EMPTY));
-				}
+			//  return false;
 			//}
 			break;
 		}
 	}
 
-	return true;
+	float s = sin(cell.User->angle);
+	float c = cos(cell.User->angle);
+
+	int px = ceil(cell.User->pX + cell.pX * c - cell.pY * s);
+	int py = ceil(cell.User->pY + cell.pX * s + cell.pY * c);
+
+	if (   px != x
+		|| py != y
+		|| IsEmpty(px, py)
+		|| GetCell(px, py).User == cell.User)
+	{
+		SetCellQueued(px, py, cell);
+		SetCell(x, y, Cell::GetDefault(CellType::EMPTY));
+	}
+
+	return false;
+}
+
+bool DefaultSandWorker::DeleteWithTime(
+	int x, int y,
+	Cell& cell)
+{
+	cell.Life -= iw::DeltaTime();
+	if (cell.Life < 0) {
+		SetCell(x, y, Cell::GetDefault(CellType::EMPTY));
+
+		return true;
+	}
+
+	return false;
 }
 
 void DefaultSandWorker::HitLikeProj(
@@ -262,17 +292,13 @@ void DefaultSandWorker::HitLikeProj(
 	Cell hit = GetCell(x, y);
 	hit.Life -= speed;
 
-	bullet.SplitCount++;
+	bullet.dX = iw::clamp(bullet.dX + iw::randf()*2, -10.f, 10.f);
+	bullet.dY = iw::clamp(bullet.dY + iw::randf()*2, -10.f, 10.f);
 
-	if (hit.Life < 0 && bullet.SplitCount < 5) {
-		Cell cell = bullet;
-		cell.dX = iw::clamp<int>(cell.dX + iw::randi(100) - 50, cell.dX * .8 - 50, cell.dX * 1.2 + 50);
-		cell.dY = iw::clamp<int>(cell.dY + iw::randi(100) - 50, cell.dY * .8 - 50, cell.dY * 1.2 + 50);
-		cell.Life -= iw::DeltaTime() * 2;
-		cell.SplitCount++;
-
-
-		SetCell(x, y, cell);
+	if (hit.Life < 0 && bullet.SplitCount < 2) {
+		bullet.SplitCount++;
+		SetCell(x, y, bullet);
+		SetCell(x+iw::randi(2)-1, y+iw::randi(2)-1, bullet);
 	}
 
 	else {
@@ -290,8 +316,6 @@ void DefaultSandWorker::HitLikeBeam(
 	Cell hit = GetCell(x, y);
 	hit.Life -= speed;
 
-	laser.SplitCount++;
-
 	//if (   hit.Type == CellType::LASER 
 	//	|| hit.Type == CellType::eLASER)
 	//{
@@ -301,11 +325,13 @@ void DefaultSandWorker::HitLikeBeam(
 	//	return;
 	//}
 
-	if (hit.Life <= 0 && laser.SplitCount < 5) {
+	laser.SplitCount++;
+	laser.dX = iw::clamp(laser.dX + iw::randf() * 5, -10.f, 10.f);
+	laser.dY = iw::clamp(laser.dY + iw::randf() * 5, -10.f, 10.f);
+
+	if (hit.Life <= 0 && laser.SplitCount < 10) {
 		Cell cell = laser;
-		cell.dX = iw::clamp<int>(cell.dX + iw::randi(100) - 50, cell.dX * .8 - 50, cell.dX * 1.2 + 50);
-		cell.dY = iw::clamp<int>(cell.dY + iw::randi(100) - 50, cell.dY * .8 - 50, cell.dY * 1.2 + 50);
-		cell.Life -= iw::DeltaTime() * 2;
+		//cell.Life -= iw::DeltaTime() * 2;
 
 		SetCell(x, y, cell);
 	}
@@ -322,12 +348,25 @@ void DefaultSandWorker::HitLikeMissile(
 {
 	float speed = missile.Speed();
 
-	SetCell(mx, my, Cell::GetDefault(CellType::EMPTY));
-
+	missile.Life = 0;
+	
 	for(int i = -50; i < 50; i++)
 	for(int j = -50; j < 50; j++) {
-		if (iw::randf() > 0.5f) {
-			SetCell(x, y, Cell::GetDefault(CellType::DEBRIS));
+		if (   iw::randf() > 0 && sqrt(i*i+j*j) < 35 + iw::randf() * 15
+			&& GetCell(x+i, y+j).TileId != missile.TileId)
+		{
+			Cell cell = iw::randf() > 0
+				? Cell::GetDefault(CellType::SMOKE)
+				: Cell::GetDefault(CellType::EXPLOSION);
+
+			cell.pX = x + i;
+			cell.pY = y + j;
+			cell.dX *= 5;
+			cell.dY *= 5;
+			cell.TileId = missile.TileId;
+			cell.Life *= (iw::randf() + 1) * 2;
+
+			SetCell(x+i, y+j, cell);
 		}
 	}
 }

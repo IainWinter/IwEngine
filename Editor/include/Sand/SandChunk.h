@@ -96,7 +96,7 @@ public:
 		const Cell& cell,
 		Tick currentTick)
 	{
-		SetCell(GetIndex(x, y), cell , currentTick);
+		SetCell(GetIndex(x, y), cell, currentTick);
 	}
 
 	void SetCell(

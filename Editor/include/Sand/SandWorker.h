@@ -124,11 +124,11 @@ protected:
 
 // Helper functions
 
-inline std::vector<std::pair<int, int>> FillLine(
+inline std::vector<WorldCoords> FillLine(
 	int x,  int y,
 	int x2, int y2)
 {
-	std::vector<std::pair<int, int>> positions; // https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
+	std::vector<WorldCoords> positions; // https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
 
 	int dx =  abs(x2 - x);
 	int dy = -abs(y2 - y);

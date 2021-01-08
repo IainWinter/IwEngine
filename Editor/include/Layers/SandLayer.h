@@ -34,6 +34,8 @@ struct Enemy2 {
 struct Missile {
 	float tX = 0;
 	float tY = 0;
+
+	int TileId = 0;
 };
 
 #include "Sand/Workers/DefaultSandWorker.h"
@@ -84,14 +86,13 @@ namespace iw {
 		{
 			iw::vector2 direction = (target - position).normalized();
 			iw::vector2 normal = vector2(-direction.y, direction.x);
-
 			iw::vector2 point = position + direction * 25 + normal * iw::randf() * 15;
 
-			//direction = (target - point).normalized();
+			//direction = (target - point).normalized(); // for point precision
 
-			if (!world.IsEmpty(point.x, point.y)) {
-				return;
-			}
+			//if (!world.IsEmpty(point.x, point.y)) {
+			//	return;
+			//}
 
 			Cell cell = projectile;
 			cell.TileId = whoFiredId;
@@ -101,6 +102,45 @@ namespace iw {
 			cell.dY = direction.y * speed;
 
 			world.SetCell(point.x, point.y, cell);
+		}
+
+		void FireMissile(
+			vector2 position,
+			vector2 target,
+			float speed,
+			const Cell& projectile,
+			int whoFiredId)
+		{
+			iw::vector2 dir = (target - position).normalized();
+			iw::vector2 normal = vector2(-dir.y, dir.x);
+			iw::vector2 point = position + dir * 25 + normal * iw::randf() * 15;
+
+			//direction = (target - point).normalized(); // for point precision
+
+			iw::Entity e = Space->CreateEntity<iw::Transform, Missile, SharedCellData>();
+			iw::Transform*  trans   = e.Set<iw::Transform>(point);
+			Missile*        missile = e.Set<Missile>();
+			SharedCellData* user    = e.Set<SharedCellData>();
+
+			missile->TileId = whoFiredId;
+
+			user->pX = point.x + dir.x/2;
+			user->pY = point.y + dir.y/2;
+			user->vX = dir.x * speed;
+			user->vY = dir.y * speed;
+			user->angle = atan2(dir.y, dir.x);
+
+			user->Special = trans;
+
+			Cell cell = projectile;
+			cell.TileId = whoFiredId;
+			cell.User = user;
+			cell.pX = point.x;
+			cell.pY = point.y;
+			cell.dX = dir.x * speed;
+			cell.dY = dir.y * speed;
+
+			world.SetCell(cell.pX, cell.pY, cell);
 		}
 
 		void Reset();

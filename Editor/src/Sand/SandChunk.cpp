@@ -107,7 +107,11 @@ void SandChunk::CommitMovedCells(
 	constexpr size_t _DEST  = 2;
 
 	for (size_t i = 0; i < m_changes.size(); i++) {
-		if (m_cells[std::get<_DEST>(m_changes[i])].Type != CellType::EMPTY) {
+		Cell& src  = m_cells[std::get<_SRC> (m_changes[i])];
+		Cell& dest = m_cells[std::get<_DEST>(m_changes[i])];
+		if (   dest.Type != CellType::EMPTY
+			&& dest.Precedence <= src.Precedence)
+		{
 			m_changes[i] = m_changes.back(); m_changes.pop_back();
 			i--;
 		}
@@ -179,6 +183,18 @@ void SandChunk::SetCellData(
 			&& dest.Type == CellType::EMPTY)
 	{
 		++m_filledCellCount;
+	}
+
+	if (dest.User != cell.User) {
+		if (dest.User) {
+			std::unique_lock lock(dest.User->m_userCountMutex);
+			dest.User->UserCount--;
+		}
+
+		if (cell.User) {
+			std::unique_lock lock(cell.User->m_userCountMutex);
+			cell.User->UserCount++;
+		}
 	}
 
 	dest = cell;

@@ -1,10 +1,15 @@
 #include "Sand/SandWorker.h"
+#include "iw/entity/Space.h"
+#include "iw/common/Components/Transform.h"
 
 class DefaultSandWorker : public SandWorker {
+private:
+	iw::ref<iw::Space> Space;
 public:
-	DefaultSandWorker(
-		SandWorld& world, SandChunk& chunk)
+	DefaultSandWorker(                    // not default anymore \ /
+		SandWorld& world, SandChunk& chunk, iw::ref<iw::Space> space)
 		: SandWorker(world, chunk)
+		, Space(space)
 	{}
 
 	void UpdateCell(
@@ -29,6 +34,11 @@ public:
 		Cell& cell,
 		const Cell& replace);
 
+	bool MoveRandom(
+		int x, int y,
+		Cell& cell,
+		const Cell& replace);
+
 	bool MoveForward(
 		int x, int y,
 		Cell& cell,
@@ -40,6 +50,10 @@ public:
 		int x, int y,
 		Cell& cell,
 		const Cell& replace);
+
+	bool DeleteWithTime(
+		int x, int y,
+		Cell& cell);
 
 	/////////////////////////////////////////////
 	// move to child class

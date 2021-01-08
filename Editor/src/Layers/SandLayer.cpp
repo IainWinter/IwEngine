@@ -44,15 +44,19 @@ namespace iw {
 
 		// Sand
 
-		Cell empty  = { CellType::EMPTY };
-		Cell sand   = { CellType::SAND,  CellProperties::MOVE_DOWN | CellProperties::MOVE_DOWN_SIDE };
-		Cell water  = { CellType::WATER, CellProperties::MOVE_DOWN | CellProperties::MOVE_SIDE };
-		Cell rock   = { CellType::ROCK  };
-		Cell metal  = { CellType::METAL };
-		Cell debris = { CellType::DEBRIS };
-		Cell laser  = { CellType::LASER,  CellProperties::MOVE_FORWARD | CellProperties::HIT_LIKE_BEAM };
-		Cell elaser = { CellType::eLASER, CellProperties::MOVE_FORWARD | CellProperties::HIT_LIKE_BEAM };
-		Cell bullet = { CellType::BULLET, CellProperties::MOVE_FORWARD | CellProperties::HIT_LIKE_PROJECTILE };
+		Cell empty   = { CellType::EMPTY };
+		Cell sand    = { CellType::SAND,  CellProperties::MOVE_DOWN | CellProperties::MOVE_DOWN_SIDE };
+		Cell water   = { CellType::WATER, CellProperties::MOVE_DOWN | CellProperties::MOVE_SIDE };
+		Cell rock    = { CellType::ROCK  };
+		Cell metal   = { CellType::METAL };
+		Cell debris  = { CellType::DEBRIS };
+		Cell smoke   = { CellType::SMOKE,     CellProperties::MOVE_RANDOM | CellProperties::DELETE_TIME };
+		Cell explosn = { CellType::EXPLOSION, CellProperties::MOVE_RANDOM | CellProperties::DELETE_TIME };
+		
+		Cell laser   = { CellType::LASER,   CellProperties::MOVE_FORWARD | CellProperties::DELETE_TIME | CellProperties::HIT_LIKE_BEAM };
+		Cell elaser  = { CellType::eLASER,  CellProperties::MOVE_FORWARD | CellProperties::DELETE_TIME | CellProperties::HIT_LIKE_BEAM };
+		Cell bullet  = { CellType::BULLET,  CellProperties::MOVE_FORWARD | CellProperties::DELETE_TIME | CellProperties::HIT_LIKE_PROJECTILE };
+		Cell missile = { CellType::MISSILE, CellProperties::MOVE_FORWARD | CellProperties::DELETE_TIME | CellProperties::HIT_LIKE_MISSILE };
 
 		empty  .Color = iw::Color::From255(  0,   0,   0, 0);
 		sand   .Color = iw::Color::From255(237, 201, 175);
@@ -60,26 +64,45 @@ namespace iw {
 		rock   .Color = iw::Color::From255(201, 201, 201);
 		metal  .Color = iw::Color::From255(230, 230, 230);
 		debris .Color = iw::Color::From255(150, 150, 150);
+		smoke  .Color = iw::Color::From255(200, 200, 200);
+		explosn.Color = iw::Color::From255(255,  66,  33);
 		laser  .Color = iw::Color::From255(255,   0,   0);
 		elaser .Color = iw::Color::From255(  0, 200, 255);
 		bullet .Color = iw::Color::From255(255, 255,   0);
+		missile.Color = metal.Color;
 
 		sand .dY = -1;
 		water.dY = -1;
+		smoke.dX = smoke.dY = .5f;
+		explosn.dX = explosn.dY = .6f;
 
-		laser .Life = 0.06f;
-		elaser.Life = 1.00f;
-		bullet.Life = 0.06f;
+		laser .Life  = 0.06f;
+		elaser.Life  = 1.00f;
+		bullet.Life  = 0.01f;
+		missile.Life = 0.05f;
+		explosn.Life = 0.6f;
+		smoke.Life   = 0.5f;
 
-		Cell::SetDefault(CellType::EMPTY,  empty);
-		Cell::SetDefault(CellType::SAND,   sand);
-		Cell::SetDefault(CellType::WATER,  water);
-		Cell::SetDefault(CellType::ROCK,   rock);
-		Cell::SetDefault(CellType::METAL,  metal);
-		Cell::SetDefault(CellType::DEBRIS, debris);
-		Cell::SetDefault(CellType::LASER,  laser);
-		Cell::SetDefault(CellType::eLASER, elaser);
-		Cell::SetDefault(CellType::BULLET, bullet);
+		smoke.Precedence   = 0;
+		explosn.Precedence = 10;
+		laser  .Precedence = 5;
+		elaser .Precedence = 5;
+		bullet .Precedence = 5;
+		missile.Precedence = 9;
+
+		Cell::SetDefault(CellType::EMPTY,     empty);
+		Cell::SetDefault(CellType::SAND,      sand);
+		Cell::SetDefault(CellType::WATER,     water);
+		Cell::SetDefault(CellType::ROCK,      rock);
+		Cell::SetDefault(CellType::METAL,     metal);
+		Cell::SetDefault(CellType::DEBRIS,    debris);
+		Cell::SetDefault(CellType::SMOKE,     smoke);
+		Cell::SetDefault(CellType::EXPLOSION, explosn);
+
+		Cell::SetDefault(CellType::LASER,     laser);
+		Cell::SetDefault(CellType::eLASER,    elaser);
+		Cell::SetDefault(CellType::BULLET,    bullet);
+		Cell::SetDefault(CellType::MISSILE,   missile);
 
 		// Sand rendering
 
@@ -157,21 +180,21 @@ namespace iw {
 		pos.x = floor(pos.x) + fx;
 		pos.y = floor(height - pos.y) + fy;
 
-		spawnEnemy -= iw::DeltaTime();
-		if (spawnEnemy < 0) {
-			iw::Entity enemy = Space->CreateEntity<iw::Transform, Tile, Enemy2>();
-			enemy.Set<iw::Transform>(iw::vector2(1000 * iw::randf()));
-			enemy.Set<Tile>(std::vector<iw::vector2> {
-								   vector2(1, 0),				 vector2(3, 0),
-					vector2(0, 1), vector2(1, 1), vector2(2, 1), vector2(3, 1),
-					vector2(0, 2), vector2(1, 2), vector2(2, 2), vector2(3, 2),
-					vector2(0, 3),								 vector2(3, 3),
-					vector2(0, 4),								 vector2(3, 4)
-			}, 2);
-			enemy.Set<Enemy2>(iw::vector2(100 * iw::randf(), 100 * iw::randf()));
-		
-			spawnEnemy = iw::randf() + 10;
-		}
+		//spawnEnemy -= iw::DeltaTime();
+		//if (spawnEnemy < 0) {
+		//	iw::Entity enemy = Space->CreateEntity<iw::Transform, Tile, Enemy2>();
+		//	enemy.Set<iw::Transform>(iw::vector2(1000 * iw::randf()));
+		//	enemy.Set<Tile>(std::vector<iw::vector2> {
+		//						   vector2(1, 0),				 vector2(3, 0),
+		//			vector2(0, 1), vector2(1, 1), vector2(2, 1), vector2(3, 1),
+		//			vector2(0, 2), vector2(1, 2), vector2(2, 2), vector2(3, 2),
+		//			vector2(0, 3),								 vector2(3, 3),
+		//			vector2(0, 4),								 vector2(3, 4)
+		//	}, 2);
+		//	enemy.Set<Enemy2>(iw::vector2(100 * iw::randf(), 100 * iw::randf()));
+		//
+		//	spawnEnemy = iw::randf() + 10;
+		//}
 
 		Space->Query<iw::Transform, Player, Tile>().Each([&](
 			auto,
@@ -208,16 +231,9 @@ namespace iw {
 				}
 
 				else if (p->FireButtons.z == 1) {
-					p->FireTimeout = 0.1f;
-
-					Cell missile = Cell::GetDefault(CellType::METAL);
-					missile.User = new SharedCellData(); // memory leak
-					missile.User->Type = SharedCellType::MISSILE;
-					missile.Props = CellProperties::MOVE_SHARED_USER | CellProperties::MOVE_FORWARD | CellProperties::HIT_LIKE_MISSILE;
-
-					vector2 v = t->Position + t->Right() * (iw::randf() > 0 ? 1 : -1);
-
-					Fire(t->Position, v, 3, missile, a->TileId);
+					p->FireTimeout = 0.01f;
+					vector2 d = t->Position + t->Right() * (iw::randf() > 0 ? 1 : -1);
+					FireMissile(t->Position, d, 2, Cell::GetDefault(CellType::MISSILE), a->TileId);
 				}
 			}
 		});
@@ -243,6 +259,39 @@ namespace iw {
 
 				Fire(t->Position, playerLocation, 12.5f, Cell::GetDefault(CellType::eLASER), a->TileId);
 			}
+		});
+
+		auto space = Space;
+
+		Space->Query<iw::Transform, Missile, SharedCellData>().Each([&, space](
+			auto e,
+			auto t,
+			auto m,
+			auto s)
+		{
+			if (s->UserCount == 0) {
+				space->QueueEntity(e, iw::func_Destroy);
+				return;
+			}
+
+			// Spawn smoke
+				
+			iw::vector2 v(s->vX, s->vY);
+			v.normalize();
+
+			Cell smoke = Cell::GetDefault(CellType::SMOKE);
+			smoke.TileId = m->TileId;
+			smoke.pX = s->pX - v.x*3;
+			smoke.pY = s->pY - v.y*3;
+
+			// normalize speed
+				
+			world.SetCellQueued(smoke.pX, smoke.pY, smoke);
+
+			// Move shared cells but not really?
+
+			//s->vX *= (1 + iw::DeltaTime());
+			//s->vY *= (1 + iw::DeltaTime());
 		});
 
 		if(Keyboard::KeyDown(iw::E) || Keyboard::KeyDown(iw::C) || Keyboard::KeyDown(iw::F) || Keyboard::KeyDown(iw::R)) {
@@ -334,7 +383,6 @@ namespace iw {
 				if (e.State == 1 && p->Movement.x == -1) break;
 				p->Movement.x -= e.State ? 1 : -1; break;
 			}
-							 
 			case iw::val(W): {
 				if (e.State == 1 && p->Movement.y == 1) break;
 				p->Movement.y += e.State ? 1 : -1; break;
@@ -397,8 +445,8 @@ namespace iw {
 					c.pX = x; // Local position to shared user
 					c.pY = y;
 
-					d->vX = iw::randf();
-					d->vY = iw::randf();
+					d->vX = iw::randf()/100;
+					d->vY = iw::randf()/100;
 
 					d->cX += x;
 					d->cX += y;
@@ -447,7 +495,7 @@ namespace iw {
 				cellssUpdatedCount += chunk->m_filledCellCount;
 
 				Task->queue([&, chunk]() {
-					DefaultSandWorker(world, *chunk).UpdateChunk();
+					DefaultSandWorker(world, *chunk, Space).UpdateChunk();
 
 					{ std::unique_lock lock(chunkCountMutex); chunkCount--; }
 					chunkCountCV.notify_one();
@@ -550,8 +598,8 @@ namespace iw {
 			auto e,
 			auto s)
 		{
-			s->pX += s->vX * iw::DeltaTime();
-			s->pY += s->vY * iw::DeltaTime();
+			s->pX += s->vX;
+			s->pY += s->vY;
 
 			//s->angle += iw::DeltaTime();
 		});
