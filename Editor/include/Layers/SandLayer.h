@@ -28,7 +28,21 @@ struct Player {
 
 struct Enemy2 {
 	iw::vector2 Spot = 0;
+	iw::vector2 Vel = 0;
+
+	float TurnRad = 0.25f;
 	float FireTimeout = 0;
+};
+
+struct EnemyBase {
+	float Energy = 0;
+
+	float NextGroup = 10;
+	float EnemyCost = 5;
+
+	float FireTimer = 0;
+	float FireTimeout = 4;
+	float FireTime = 3;
 };
 
 struct Missile {

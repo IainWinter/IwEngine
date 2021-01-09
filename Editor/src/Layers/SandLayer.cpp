@@ -186,21 +186,45 @@ namespace iw {
 		pos.x = floor(pos.x) + fx;
 		pos.y = floor(height - pos.y) + fy;
 
-		spawnEnemy -= iw::DeltaTime();
-		if (spawnEnemy < 0) {
-			iw::Entity enemy = Space->CreateEntity<iw::Transform, Tile, Enemy2>();
-			enemy.Set<iw::Transform>(iw::vector2(1000 * iw::randf()));
-			enemy.Set<Tile>(std::vector<iw::vector2> {
-								   vector2(1, 0),				 vector2(3, 0),
-					vector2(0, 1), vector2(1, 1), vector2(2, 1), vector2(3, 1),
-					vector2(0, 2), vector2(1, 2), vector2(2, 2), vector2(3, 2),
-					vector2(0, 3),								 vector2(3, 3),
-					vector2(0, 4),								 vector2(3, 4)
-			}, 2);
-			enemy.Set<Enemy2>(iw::vector2(100 * iw::randf(), 100 * iw::randf()));
-		
-			spawnEnemy = iw::randf() + 2;
-		}
+		Space->Query<iw::Transform, EnemyBase, Tile>().Each([&](
+			auto, 
+			auto t,
+			auto b, 
+			auto a)
+		{
+			t->Rotation *= iw::quaternion::from_euler_angles(0, 0, iw::DeltaTime());
+
+			b->Energy += iw::DeltaTime();
+
+			float enemy = iw::randf() + 3;
+			float group = enemy * 10 + 10;
+
+			while (b->Energy > b->NextGroup) {
+				b->Energy -= b->EnemyCost;
+
+				iw::Entity enemy = Space->CreateEntity<iw::Transform, Tile, Enemy2>();
+				enemy.Set<iw::Transform>(t->Position + 200*iw::vector2(iw::randf(), iw::randf()));
+				enemy.Set<Tile>(std::vector<iw::vector2> {
+					vector2(1, 0), vector2(3, 0),
+						vector2(0, 1), vector2(1, 1), vector2(2, 1), vector2(3, 1),
+						vector2(0, 2), vector2(1, 2), vector2(2, 2), vector2(3, 2),
+						vector2(0, 3), vector2(3, 3),
+						vector2(0, 4), vector2(3, 4)
+				}, 2);
+				enemy.Set<Enemy2>(iw::vector2(100 * iw::randf(), 100 * iw::randf()));
+			}
+			
+			b->FireTimer -= iw::DeltaTime();
+
+			if (b->FireTimer > 0) {
+				Fire(t->Position + (playerLocation - t->Position).normalized() * 100, 
+					playerLocation, 0, Cell::GetDefault(CellType::LASER), a->TileId, true);
+			}
+
+			else if (b->FireTimer < -b->FireTimeout) {
+				b->FireTimer = b->FireTime + iw::randf();
+			}
+		});
 
 		Space->Query<iw::Transform, Player, Tile>().Each([&](
 			auto,
@@ -250,13 +274,15 @@ namespace iw {
 			auto p,
 			auto a)
 		{
-			t->Position = iw::lerp<vector2>(
-				t->Position,
-				iw::vector2(
-					p->Spot.x + cos(iw::TotalTime() + e.Index / 5) * 100,
-					p->Spot.y + sin(iw::TotalTime() + e.Index / 5) * 100
-				),
-				iw::DeltaTime());
+			p->Spot.x = cos(iw::TotalTime() + e.Index / 5) * 100;
+			p->Spot.y = sin(iw::TotalTime() + e.Index / 5) * 100;
+
+			iw::vector2 nD = (p->Spot - t->Position).normalized();
+			iw::vector2 delta = (nD - p->Vel) * p->Vel.length() * p->TurnRad;
+
+			p->Vel = (p->Vel + delta).normalized() * p->Vel.length();
+
+			t->Position += p->Vel;
 
 			p->FireTimeout -= iw::DeltaTime();
 			if (p->FireTimeout < 0) {
@@ -479,6 +505,18 @@ namespace iw {
 				vector2(0, 0),							     vector2(3, 0)
 		}, 5);
 		player.Set<Player>();
+
+		// enemy base //
+
+		iw::Entity e = Space->CreateEntity<iw::Transform, EnemyBase, Tile>();
+		e.Set<iw::Transform>(iw::vector2(1000, 0));
+		e.Set<EnemyBase>();
+		e.Set<Tile>(std::vector<iw::vector2> {
+				               vector2(1, 2),
+				vector2(0, 1), vector2(1, 1), vector2(2, 1),
+				               vector2(0, 0),                
+		}, 20);
+
 
 		// asteroid //
 
