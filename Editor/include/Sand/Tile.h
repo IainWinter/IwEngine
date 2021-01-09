@@ -8,6 +8,8 @@ struct Tile {
 	const int InitialLocationsSize = 0;
 	int TileId = 0;
 
+	int Precedence = 10;
+
 	Tile() = default;
 
 	Tile(std::vector<iw::vector2> locations, int scale)

@@ -5,7 +5,7 @@
 
 #include "iw/math/noise.h"
 
-int __chunkScale = 2;
+double __chunkScale = 1.5f;
 int __brushSizeX = 50;
 int __brushSizeY = 50;
 float __stepTimeThresh = 0;
@@ -14,7 +14,7 @@ namespace iw {
 	SandLayer::SandLayer()
 		: Layer("Ray Marching")
 		, m_sandTexture(nullptr)
-		, world(SandWorld(100, 100, __chunkScale))
+		, world(SandWorld(96, 96, __chunkScale))
 		, reset(true)
 	{
 		srand(time(nullptr));
@@ -64,8 +64,8 @@ namespace iw {
 		rock   .Color = iw::Color::From255(201, 201, 201);
 		metal  .Color = iw::Color::From255(230, 230, 230);
 		debris .Color = iw::Color::From255(150, 150, 150);
-		smoke  .Color = iw::Color::From255(200, 200, 200);
 		explosn.Color = iw::Color::From255(255,  66,  33);
+		smoke  .Color = explosn.Color; //lerped to -> iw::Color::From255(100, 100, 100);
 		laser  .Color = iw::Color::From255(255,   0,   0);
 		elaser .Color = iw::Color::From255(  0, 200, 255);
 		bullet .Color = iw::Color::From255(255, 255,   0);
@@ -74,21 +74,27 @@ namespace iw {
 		sand .dY = -1;
 		water.dY = -1;
 		smoke.dX = smoke.dY = .5f;
-		explosn.dX = explosn.dY = .6f;
+		explosn.dX = explosn.dY = 2;
+
+		bullet.dX  = 500; // Initial speeds
+		laser.dX   = 1500;
+		elaser.dX  = 1000;
+		missile.dX = 200;
 
 		laser .Life  = 0.06f;
 		elaser.Life  = 1.00f;
 		bullet.Life  = 0.01f;
 		missile.Life = 0.05f;
-		explosn.Life = 0.6f;
+		explosn.Life = 0.06f;
 		smoke.Life   = 0.5f;
 
-		smoke.Precedence   = 0;
-		explosn.Precedence = 10;
-		laser  .Precedence = 5;
-		elaser .Precedence = 5;
-		bullet .Precedence = 5;
-		missile.Precedence = 9;
+		empty  .Precedence = 0;
+		smoke  .Precedence = 1;
+		explosn.Precedence = 100;
+		laser  .Precedence = 15;
+		elaser .Precedence = 15;
+		bullet .Precedence = 15;
+		missile.Precedence = 101;
 
 		Cell::SetDefault(CellType::EMPTY,     empty);
 		Cell::SetDefault(CellType::SAND,      sand);
@@ -180,21 +186,21 @@ namespace iw {
 		pos.x = floor(pos.x) + fx;
 		pos.y = floor(height - pos.y) + fy;
 
-		//spawnEnemy -= iw::DeltaTime();
-		//if (spawnEnemy < 0) {
-		//	iw::Entity enemy = Space->CreateEntity<iw::Transform, Tile, Enemy2>();
-		//	enemy.Set<iw::Transform>(iw::vector2(1000 * iw::randf()));
-		//	enemy.Set<Tile>(std::vector<iw::vector2> {
-		//						   vector2(1, 0),				 vector2(3, 0),
-		//			vector2(0, 1), vector2(1, 1), vector2(2, 1), vector2(3, 1),
-		//			vector2(0, 2), vector2(1, 2), vector2(2, 2), vector2(3, 2),
-		//			vector2(0, 3),								 vector2(3, 3),
-		//			vector2(0, 4),								 vector2(3, 4)
-		//	}, 2);
-		//	enemy.Set<Enemy2>(iw::vector2(100 * iw::randf(), 100 * iw::randf()));
-		//
-		//	spawnEnemy = iw::randf() + 10;
-		//}
+		spawnEnemy -= iw::DeltaTime();
+		if (spawnEnemy < 0) {
+			iw::Entity enemy = Space->CreateEntity<iw::Transform, Tile, Enemy2>();
+			enemy.Set<iw::Transform>(iw::vector2(1000 * iw::randf()));
+			enemy.Set<Tile>(std::vector<iw::vector2> {
+								   vector2(1, 0),				 vector2(3, 0),
+					vector2(0, 1), vector2(1, 1), vector2(2, 1), vector2(3, 1),
+					vector2(0, 2), vector2(1, 2), vector2(2, 2), vector2(3, 2),
+					vector2(0, 3),								 vector2(3, 3),
+					vector2(0, 4),								 vector2(3, 4)
+			}, 2);
+			enemy.Set<Enemy2>(iw::vector2(100 * iw::randf(), 100 * iw::randf()));
+		
+			spawnEnemy = iw::randf() + 2;
+		}
 
 		Space->Query<iw::Transform, Player, Tile>().Each([&](
 			auto,
@@ -208,12 +214,12 @@ namespace iw {
 
 			p->Velocity = iw::clamp<float>(p->Velocity + p->Movement.y, -100, 100);
 
-			vector3 vel = t->Up() * p->Velocity;
+			vector3 vel = t->Up() * p->Velocity * iw::DeltaTime() * 3;
 			//vel.y = -vel.y;
 
 			float rot = -p->Movement.x * iw::DeltaTime();
 
-			t->Position += vel * iw::DeltaTime() * 3;
+			t->Position += vel;
 			t->Rotation *= iw::quaternion::from_euler_angles(0, 0, rot);
 			p->FireTimeout -= iw::DeltaTime();
 
@@ -221,19 +227,19 @@ namespace iw {
 				&& p->FireButtons != 0)
 			{
 				if (p->FireButtons.x == 1) {
-					p->FireTimeout = 0.075f;
-					Fire(t->Position, pos, 5, Cell::GetDefault(CellType::BULLET), a->TileId);
+					p->FireTimeout = 0.035f;
+					Fire(t->Position, pos, vel, Cell::GetDefault(CellType::BULLET), a->TileId, true);
 				}
 
 				else if (p->FireButtons.y == 1) {
 					p->FireTimeout = 0.001f;
-					Fire(t->Position, pos, 15, Cell::GetDefault(CellType::LASER), a->TileId);
+					Fire(t->Position, pos, 0, Cell::GetDefault(CellType::LASER), a->TileId, false);
 				}
 
 				else if (p->FireButtons.z == 1) {
 					p->FireTimeout = 0.01f;
 					vector2 d = t->Position + t->Right() * (iw::randf() > 0 ? 1 : -1);
-					FireMissile(t->Position, d, 2, Cell::GetDefault(CellType::MISSILE), a->TileId);
+					FireMissile(t->Position, d, Cell::GetDefault(CellType::MISSILE), a->TileId);
 				}
 			}
 		});
@@ -252,49 +258,101 @@ namespace iw {
 				),
 				iw::DeltaTime());
 
-
 			p->FireTimeout -= iw::DeltaTime();
 			if (p->FireTimeout < 0) {
 				p->FireTimeout = (iw::randf() + 2) * 2;
 
-				Fire(t->Position, playerLocation, 12.5f, Cell::GetDefault(CellType::eLASER), a->TileId);
+				Fire(t->Position, playerLocation, 0, Cell::GetDefault(CellType::eLASER), a->TileId, true);
 			}
 		});
 
-		auto space = Space;
+		auto space = Space; // :<
 
-		Space->Query<iw::Transform, Missile, SharedCellData>().Each([&, space](
+		Space->Query<Missile, SharedCellData>().Each([&, space](
 			auto e,
-			auto t,
 			auto m,
 			auto s)
 		{
+			s->Timer += iw::DeltaTime();
+
 			if (s->UserCount == 0) {
 				space->QueueEntity(e, iw::func_Destroy);
 				return;
 			}
 
-			// Spawn smoke
+			if (   s->Timer > m->WaitTime
+				&& s->Timer < m->WaitTime + m->BurnTime)
+			{
+				iw::vector2 mpos(s->pX, s->pY);
+				iw::vector2 mvel(s->vX, s->vY);
 				
-			iw::vector2 v(s->vX, s->vY);
-			v.normalize();
+				iw::vector2 nV = mvel.normalized();
 
-			Cell smoke = Cell::GetDefault(CellType::SMOKE);
-			smoke.TileId = m->TileId;
-			smoke.pX = s->pX - v.x*3;
-			smoke.pY = s->pY - v.y*3;
+				iw::vector2 closest = pos;
+				float minDist = FLT_MAX;
+				space->Query<iw::Transform, Enemy2>().Each([&](
+					auto,
+					auto t2,
+					auto)
+				{
+					iw::vector2 v = t2->Position - mpos;
+					if (v.length_squared() < minDist) {
+						minDist = v.length_squared();
+						closest = t2->Position;
+					}
+				});
 
-			// normalize speed
+				if (minDist != FLT_MAX) {
+					if (minDist < 800) {
+						s->Hit = true; // explode
+						return;
+					}
+					
+					iw::vector2 nD = (closest - mpos).normalized();
+					iw::vector2 delta = (nD - nV) * s->Speed * m->TurnRad;
+
+					mvel = (mvel + delta).normalized()* s->Speed;
+					
+					s->vX = mvel.x;
+					s->vY = mvel.y;
+				}
 				
-			world.SetCellQueued(smoke.pX, smoke.pY, smoke);
+				s->Speed = iw::clamp<float>(s->Speed * (1 + iw::DeltaTime() * 3),
+					Cell::GetDefault(CellType::MISSILE).Speed(),
+					Cell::GetDefault(CellType::MISSILE).Speed()*2
+				);
 
-			// Move shared cells but not really?
+				// Spawn smoke
 
-			//s->vX *= (1 + iw::DeltaTime());
-			//s->vY *= (1 + iw::DeltaTime());
+				iw::vector2 spos = mpos - mvel * iw::DeltaTime() * 4;
+
+				Cell smoke = Cell::GetDefault(CellType::SMOKE);
+				smoke.TileId = m->TileId;
+				smoke.pX = spos.x;
+				smoke.pY = spos.y;
+				smoke.Life = 10 + iw::randf() * 3;
+
+				// normalize speed ?
+
+				world.SetCell(smoke.pX, smoke.pY, smoke);
+			}
+
+			if (s->Hit) {
+				iw::vector2 v(s->pX - s->hX, s->pY - s->hY);
+				v.normalize();
+
+				s->vX += v.x * (iw::randf() + 1)/5;
+				s->vY += v.y * (iw::randf() + 1)/5;
+				s->Hit = false;
+			}
 		});
 
-		if(Keyboard::KeyDown(iw::E) || Keyboard::KeyDown(iw::C) || Keyboard::KeyDown(iw::F) || Keyboard::KeyDown(iw::R)) {
+		if(    Keyboard::KeyDown(iw::E)
+			|| Keyboard::KeyDown(iw::C) 
+			|| Keyboard::KeyDown(iw::F) 
+			|| Keyboard::KeyDown(iw::R)
+			|| Keyboard::KeyDown(iw::Q))
+		{
 			Cell cell;
 			if (Keyboard::KeyDown(iw::C)) {
 				cell = Cell::GetDefault(CellType::SAND);
@@ -302,6 +360,11 @@ namespace iw {
 
 			else if (Keyboard::KeyDown(iw::F)) {
 				cell = Cell::GetDefault(CellType::WATER);
+			}
+
+			else if (Keyboard::KeyDown(iw::Q)) {
+				cell = Cell::GetDefault(CellType::SMOKE);
+				cell.Life = 10;
 			}
 
 			else if (Keyboard::KeyDown(iw::E)) {
@@ -318,6 +381,8 @@ namespace iw {
 
 			for (int  i = 0; i  < __brushSizeX; i++)
 			for (int ii = 0; ii < __brushSizeY; ii++) {
+				cell.pX = pos.x + i;
+				cell.pY = pos.y + ii;
 				world.SetCell(pos.x + i, pos.y + ii, cell);
 			}
 		}
@@ -598,8 +663,8 @@ namespace iw {
 			auto e,
 			auto s)
 		{
-			s->pX += s->vX;
-			s->pY += s->vY;
+			s->pX += s->vX * iw::DeltaTime();
+			s->pY += s->vY * iw::DeltaTime();
 
 			//s->angle += iw::DeltaTime();
 		});
@@ -622,7 +687,7 @@ namespace iw {
 
 				if (   cell.Type   == CellType::EMPTY
 					|| cell.TileId == a->TileId
-					||(cell.Type == CellType::eLASER && cell.Speed() == 0))
+					|| cell.Precedence < a->Precedence)
 				{
 					Cell me = Cell::GetDefault(CellType::METAL);
 					me.TileId = a->TileId;
@@ -665,7 +730,9 @@ namespace iw {
 
 				if (cell.Type == CellType::EMPTY) continue;
 
-				if (cell.TileId == a->TileId) {
+				if (   cell.TileId == a->TileId
+					|| cell.Precedence < a->Precedence)
+				{
 					world.SetCell(x, y, Cell::GetDefault(CellType::EMPTY));
 				}
 

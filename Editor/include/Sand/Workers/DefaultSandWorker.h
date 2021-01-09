@@ -17,6 +17,11 @@ public:
 		WorldCoord y,
 		Cell& cell) override;
 
+	void UpdateHitCell(
+		WorldCoord hx, WorldCoord hy,
+		WorldCoord x,  WorldCoord y,
+		Cell& cell) override;
+
 	// maybe these ones are good to have in parent?
 
 	bool MoveDown(

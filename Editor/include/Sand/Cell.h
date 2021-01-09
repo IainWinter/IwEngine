@@ -61,6 +61,9 @@ struct SharedCellData {
 	float vX = 0; // Velocity
 	float vY = 0;
 
+	float Speed = 0;
+	float Timer = 0;
+
 	float cX = 0; // Center
 	float cY = 0;
 
@@ -68,11 +71,16 @@ struct SharedCellData {
 
 	void* Special = nullptr;
 
+	bool Hit = false;
+	int hX = 0;
+	int hY = 0;
+
 	std::mutex m_userCountMutex;
 	int UserCount = 0;
 
-	SharedCellData():m_userCountMutex(){}
+	// uhg
 
+	SharedCellData():m_userCountMutex(){}
 	SharedCellData(const SharedCellData& copy)
 		: pX(copy.pX)
 		, pY(copy.pY)
@@ -86,7 +94,6 @@ struct SharedCellData {
 		, m_userCountMutex()
 		, UserCount(copy.UserCount)
 	{}
-
 	SharedCellData& operator=(const SharedCellData& copy){
 		pX        = copy.pX;
 		pY        = copy.pY;
@@ -121,7 +128,7 @@ struct Cell {
 	bool Gravitised = false; // If this cell should react to gravity
 	SharedCellData* User = nullptr; // Shared data
 
-	int Precedence = 0;
+	int Precedence = 10;
 
 	float Speed() const {  // Manhattan distance of velocity
 		return sqrt(dX*dX + dY*dY);

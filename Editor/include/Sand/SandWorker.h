@@ -30,6 +30,11 @@ public:
 		WorldCoord x,
 		WorldCoord y,
 		Cell& cell) = 0;
+
+	virtual void UpdateHitCell(
+		WorldCoord hx, WorldCoord hy,
+		WorldCoord x,  WorldCoord y,
+		Cell& cell) {}
 protected:
 	Tick CurrentTick() const {
 		return m_world.m_currentTick;
@@ -48,6 +53,13 @@ protected:
 	{
 		return  m_chunk.InBounds(x, y)
 			|| m_world.InBounds(x, y);
+	}
+
+	bool HasPrecedence(
+		WorldCoord x,  WorldCoord y,
+		WorldCoord tx, WorldCoord ty)
+	{
+		return GetCell(x, y).Precedence > GetCell(tx, ty).Precedence;
 	}
 
 	bool IsEmpty(

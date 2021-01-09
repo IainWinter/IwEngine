@@ -25,11 +25,11 @@ namespace iw {
 		context->MapButton(iw::I    , "imgui");
 
 		iw::ref<Device> m  = Input->CreateDevice<Mouse>();
-		iw::ref<Device> rm = Input->CreateDevice<RawMouse>();
+		//iw::ref<Device> rm = Input->CreateDevice<RawMouse>();
 		iw::ref<Device> k  = Input->CreateDevice<RawKeyboard>();
 		
 		context->AddDevice(m);
-		context->AddDevice(rm);
+		//context->AddDevice(rm);
 		context->AddDevice(k);
 
 		sandbox = PushLayer<SandLayer>(); // model system breaks in test layer
@@ -126,10 +126,10 @@ iw::Application* CreateApplication(
 	iw::InitOptions& options)
 {
 	options.WindowOptions = iw::WindowOptions {
-		1920,
-		1080,
+		1920*4/3,
+		1080*4/3,
 		true,
-		iw::DisplayState::NORMAL
+		iw::DisplayState::BORDERLESS
 	};
 
 	return new iw::App();

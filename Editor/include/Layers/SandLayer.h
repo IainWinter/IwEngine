@@ -35,6 +35,10 @@ struct Missile {
 	float tX = 0;
 	float tY = 0;
 
+	float TurnRad = 0.025f;
+	float WaitTime = 0.5f;
+	float BurnTime = 1;
+
 	int TileId = 0;
 };
 
@@ -80,26 +84,31 @@ namespace iw {
 		void Fire(
 			vector2 position,
 			vector2 target,
-			float speed,
+			vector2 vel,
 			const Cell& projectile,
-			int whoFiredId)
+			int whoFiredId,
+			bool atPoint)
 		{
 			iw::vector2 direction = (target - position).normalized();
 			iw::vector2 normal = vector2(-direction.y, direction.x);
 			iw::vector2 point = position + direction * 25 + normal * iw::randf() * 15;
 
-			//direction = (target - point).normalized(); // for point precision
+			if(atPoint) {
+				direction = (target - point).normalized(); // for point precision
+			}
 
 			//if (!world.IsEmpty(point.x, point.y)) {
 			//	return;
 			//}
 
+			float speed = projectile.Speed();
+
 			Cell cell = projectile;
 			cell.TileId = whoFiredId;
 			cell.pX = point.x;
 			cell.pY = point.y;
-			cell.dX = direction.x * speed;
-			cell.dY = direction.y * speed;
+			cell.dX = direction.x * speed + vel.x;
+			cell.dY = direction.y * speed + vel.y;
 
 			world.SetCell(point.x, point.y, cell);
 		}
@@ -107,7 +116,6 @@ namespace iw {
 		void FireMissile(
 			vector2 position,
 			vector2 target,
-			float speed,
 			const Cell& projectile,
 			int whoFiredId)
 		{
@@ -117,20 +125,28 @@ namespace iw {
 
 			//direction = (target - point).normalized(); // for point precision
 
-			iw::Entity e = Space->CreateEntity<iw::Transform, Missile, SharedCellData>();
-			iw::Transform*  trans   = e.Set<iw::Transform>(point);
+			float speed = projectile.Speed();
+
+			iw::Entity e = Space->CreateEntity<Missile, SharedCellData>();
 			Missile*        missile = e.Set<Missile>();
 			SharedCellData* user    = e.Set<SharedCellData>();
 
 			missile->TileId = whoFiredId;
+			missile->TurnRad = 0.025 + (iw::randf() + 1) / 25;
+			missile->WaitTime = 0.5f + iw::randf()/10;
+			missile->BurnTime = 2 + iw::randf();
+
+			dir.x += iw::randf()/10;
+			dir.y += iw::randf()/10;
 
 			user->pX = point.x + dir.x/2;
 			user->pY = point.y + dir.y/2;
 			user->vX = dir.x * speed;
 			user->vY = dir.y * speed;
+			user->Speed = speed;
 			user->angle = atan2(dir.y, dir.x);
 
-			user->Special = trans;
+			user->Special = missile;
 
 			Cell cell = projectile;
 			cell.TileId = whoFiredId;

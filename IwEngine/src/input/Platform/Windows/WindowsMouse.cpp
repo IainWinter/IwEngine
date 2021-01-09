@@ -84,11 +84,18 @@ namespace Input {
 			|| e.Message == WM_MOUSEMOVE
 			|| e.Message == WM_MOUSEWHEEL)
 		{
+			POINT p;
+			p.x = LOWORD(e.LParam);
+			p.y = HIWORD(e.LParam);
+
+			ScreenToClient(e.Handle, &p);
+
 			input.Name  = MOUSEX;
-			input.State = LOWORD(e.LParam);
+			input.State = p.x;
 
 			input.Name2  = MOUSEY;
-			input.State2 = HIWORD(e.LParam);
+			input.State2 = p.y;
+
 			return input;
 		}
 

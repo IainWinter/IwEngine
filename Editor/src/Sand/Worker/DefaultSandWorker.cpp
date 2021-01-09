@@ -30,6 +30,10 @@ void DefaultSandWorker::UpdateCell(
 		cell.dY = iw::clamp((dir.y + iw::DeltaTime()) * 0.9f, -64.f, 64.f);
 	}
 
+	if (cell.Type == CellType::SMOKE) {
+		cell.Color = iw::lerp<iw::vector4>(cell.Color, iw::Color::From255(100, 100, 100), iw::DeltaTime()*10);
+	}
+
 	const Cell& replacement = Cell::GetDefault(cell.Type);
 
 	bool hit = false;
@@ -43,12 +47,27 @@ void DefaultSandWorker::UpdateCell(
 	else if (cell.Props & CellProperties::MOVE_RANDOM    && MoveRandom  (x, y, cell, replacement)) {}
 	else if (cell.Props & CellProperties::MOVE_FORWARD   && MoveForward (x, y, cell, replacement, hit, hitx, hity)) {}
 
-	if      (hit)
-	if		(cell.Props & CellProperties::HIT_LIKE_BEAM)	   { HitLikeBeam   (hitx, hity, x, y, cell); }
-	else if (cell.Props & CellProperties::HIT_LIKE_PROJECTILE) { HitLikeProj   (hitx, hity, x, y, cell); }
-	else if (cell.Props & CellProperties::HIT_LIKE_MISSILE)    { HitLikeMissile(hitx, hity, x, y, cell); }
+	if(hit) {
+		UpdateHitCell(hitx, hity, x, y, cell);
+	}
 	
 	if (cell.Props & CellProperties::DELETE_TIME && DeleteWithTime(x, y, cell)) {}
+}
+
+void DefaultSandWorker::UpdateHitCell(
+	WorldCoord hx, WorldCoord hy,
+	WorldCoord x,  WorldCoord y,
+	Cell& cell)
+{
+	if (cell.User) {
+		cell.User->Hit = true;
+		cell.User->hX = hx;
+		cell.User->hY = hy;
+	}
+
+	if		(cell.Props & CellProperties::HIT_LIKE_BEAM)	   { HitLikeBeam   (hx, hy, x, y, cell); }
+	else if (cell.Props & CellProperties::HIT_LIKE_PROJECTILE) { HitLikeProj   (hx, hy, x, y, cell); }
+	else if (cell.Props & CellProperties::HIT_LIKE_MISSILE)    { HitLikeMissile(hx, hy, x, y, cell); }
 }
 
 bool DefaultSandWorker::MoveDown(
@@ -132,10 +151,15 @@ bool DefaultSandWorker::MoveRandom(
 	int dx = round(cell.pX);
 	int dy = round(cell.pY);
 
-	bool d = IsEmpty(dx, dy) || GetCell(x, y).Precedence < cell.Precedence;
+	bool d = IsEmpty(dx, dy);
 
 	if (d) {
 		MoveCell(x, y, dx, dy);
+	}
+
+	else if (HasPrecedence(x, y, dx, dy)) {
+		SetCell(dx, dy, cell);
+		SetCell(x, y, Cell::GetDefault(CellType::EMPTY)); // could eject
 	}
 
 	return d;
@@ -151,18 +175,20 @@ bool DefaultSandWorker::MoveForward(
 		if (cell.User) {
 			cell.dX = cell.User->vX;
 			cell.dY = cell.User->vY;
+
+			if (cell.User->Hit) {
+				hit = true;
+				hitx = x;
+				hity = y;
+				return true;
+			}
 		}
 
-		iw::vector2 minv(cell.dX, cell.dY);
-		minv.normalize();
-		minv *= 1 / iw::DeltaTime();
-		minv *= cell.Speed();
+		float dsX = cell.dX * iw::DeltaTime(); // need to find a way to scale velocity with time without making it 
+		float dsY = cell.dY * iw::DeltaTime(); // so when the framerate is so high that things dont move less than a single cell
 
-		float dsX = minv.x * iw::DeltaTime();
-		float dsY = minv.y * iw::DeltaTime();
-
-		//ds  = iw::clamp<float>(dsX, -3, 3);
-		//dsY = iw::clamp<float>(dsY, -3, 3);
+		//ds  = iw::clamp<float>(dsX, -3, 3); // clamp to make speed for threading between chunks
+		//dsY = iw::clamp<float>(dsY, -3, 3); // should be width/2, height/2 - -> +
 
 		float destXactual = cell.pX + dsX;
 		float destYactual = cell.pY + dsY;
@@ -177,9 +203,16 @@ bool DefaultSandWorker::MoveForward(
 			int destX = cellpos[i].first;
 			int destY = cellpos[i].second;
 
-			bool forward = IsEmpty(destX, destY);
-
-			if (forward) {
+			if (  !IsEmpty(destX, destY)
+				&& GetCell(destX, destY).TileId != cell.TileId)
+			{
+ 				hit = true;
+				hitx = destX;
+				hity = destY;
+				break;
+			}
+			
+			else if (HasPrecedence(x, y, destX, destY)) {
 				Cell next = replace;
 				next.pX = cell.pX + dsX * step * i;
 				next.pY = cell.pY + dsY * step * i;
@@ -188,16 +221,9 @@ bool DefaultSandWorker::MoveForward(
 				next.User = cell.User;
 				next.TileId = cell.TileId;
 				next.SplitCount = cell.SplitCount;
-				SetCell(next.pX, next.pY, next);
-			}
+				//next.Life = last ? next.Life : next.Life / replace.Speed(); // or something?
 
-			else if (InBounds(destX, destY)
-				  && GetCell (destX, destY).TileId != cell.TileId)
-			{
-				hit = true;
-				hitx = destX;
-				hity = destY;
-				break;
+				SetCell(next.pX, next.pY, next);
 			}
 		}
 	}
@@ -292,18 +318,22 @@ void DefaultSandWorker::HitLikeProj(
 	Cell hit = GetCell(x, y);
 	hit.Life -= speed;
 
-	bullet.dX = iw::clamp(bullet.dX + iw::randf()*2, -10.f, 10.f);
-	bullet.dY = iw::clamp(bullet.dY + iw::randf()*2, -10.f, 10.f);
-
-	if (hit.Life < 0 && bullet.SplitCount < 2) {
+	if (   hit.Life < 0
+		&& bullet.SplitCount < 2)
+	{
 		bullet.SplitCount++;
 		SetCell(x, y, bullet);
-		SetCell(x+iw::randi(2)-1, y+iw::randi(2)-1, bullet);
+		//SetCell(x+iw::randi(2)-1, y+iw::randi(2)-1, bullet);
 	}
 
 	else {
 		SetCell(x, y, hit);
 	}
+
+	float max = Cell::GetDefault(bullet.Type).Speed();
+
+	bullet.dX = iw::clamp(bullet.dX + iw::randf()*100, -max*1.2f, max*1.2f);
+	bullet.dY = iw::clamp(bullet.dY + iw::randf()*100, -max*1.2f, max*1.2f);
 }
 
 void DefaultSandWorker::HitLikeBeam(
@@ -316,29 +346,24 @@ void DefaultSandWorker::HitLikeBeam(
 	Cell hit = GetCell(x, y);
 	hit.Life -= speed;
 
-	//if (   hit.Type == CellType::LASER 
-	//	|| hit.Type == CellType::eLASER)
-	//{
-	//	SetCell(lx + laser.dX, ly + laser.dY, laser);
-	//	SetCell(lx, ly, Cell::GetDefault(CellType::EMPTY));
-
-	//	return;
-	//}
-
-	laser.SplitCount++;
-	laser.dX = iw::clamp(laser.dX + iw::randf() * 5, -10.f, 10.f);
-	laser.dY = iw::clamp(laser.dY + iw::randf() * 5, -10.f, 10.f);
-
-	if (hit.Life <= 0 && laser.SplitCount < 10) {
-		Cell cell = laser;
-		//cell.Life -= iw::DeltaTime() * 2;
-
-		SetCell(x, y, cell);
+	if (hit.Life <= 0 && laser.SplitCount < 5) {
+		laser.SplitCount++;
+		SetCell(x, y, laser);
 	}
 
 	else {
 		SetCell(x, y, hit);
 	}
+
+	float max = Cell::GetDefault(laser.Type).Speed();
+
+	iw::vector2 v = iw::vector2(laser.dX, laser.dY);
+	v = iw::clamp<iw::vector2>(v + 100*iw::vector2(iw::randf(), iw::randf()), -max, max);
+	v.normalize();
+	v *= max;
+
+	laser.dX = v.x;
+	laser.dY = v.y;
 }
 
 void DefaultSandWorker::HitLikeMissile(
@@ -350,23 +375,38 @@ void DefaultSandWorker::HitLikeMissile(
 
 	missile.Life = 0;
 	
-	for(int i = -50; i < 50; i++)
-	for(int j = -50; j < 50; j++) {
-		if (   iw::randf() > 0 && sqrt(i*i+j*j) < 35 + iw::randf() * 15
-			&& GetCell(x+i, y+j).TileId != missile.TileId)
+	int size = 60 + iw::randi(20);
+
+	for(int i = -size; i < size; i++)
+	for(int j = -size; j < size; j++) {
+		int dx = x + i;
+		int dy = y + j;
+		const Cell& dest = GetCell(dx, dy);
+
+		if (   dest.TileId != missile.TileId
+			&& iw::randf() > 0
+			&& sqrt(i*i+j*j) < (35.f + iw::randf() * 15.f))
 		{
-			Cell cell = iw::randf() > 0
+			bool smoke = iw::randf() > 0;
+
+			Cell cell = smoke
 				? Cell::GetDefault(CellType::SMOKE)
 				: Cell::GetDefault(CellType::EXPLOSION);
 
 			cell.pX = x + i;
 			cell.pY = y + j;
-			cell.dX *= 5;
-			cell.dY *= 5;
+			cell.dX *= smoke ? 5 : 1;
+			cell.dY *= smoke ? 5 : 1;
 			cell.TileId = missile.TileId;
-			cell.Life *= (iw::randf() + 1) * 2;
+			cell.Life *= smoke ? 10+iw::randf()*3 : 1 / cell.Speed() * (iw::randf() + 1) * 2;
 
 			SetCell(x+i, y+j, cell);
+		}
+
+		else if (dest.Type == CellType::MISSILE) {
+			dest.User->Hit = true;
+			dest.User->hX = x;
+			dest.User->hY = y;
 		}
 	}
 }
