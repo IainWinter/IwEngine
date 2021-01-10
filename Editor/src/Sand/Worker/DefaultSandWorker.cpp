@@ -204,7 +204,7 @@ bool DefaultSandWorker::MoveForward(
 			int destY = cellpos[i].second;
 
 			if (  !IsEmpty(destX, destY)
-				&& GetCell(destX, destY).TileId != cell.TileId)
+				/*&& GetCell(destX, destY).TileId != cell.TileId*/)
 			{
  				hit = true;
 				hitx = destX;
@@ -383,8 +383,8 @@ void DefaultSandWorker::HitLikeMissile(
 		int dy = y + j;
 		const Cell& dest = GetCell(dx, dy);
 
-		if (   dest.TileId != missile.TileId
-			&& iw::randf() > 0
+		if (   /*dest.TileId != missile.TileId
+			&& */iw::randf() > 0
 			&& sqrt(i*i+j*j) < (35.f + iw::randf() * 15.f))
 		{
 			bool smoke = iw::randf() > 0;

@@ -5,10 +5,11 @@
 
 #include "iw/math/noise.h"
 
-double __chunkScale = 1.5f;
+double __chunkScale = 2;
 int __brushSizeX = 50;
 int __brushSizeY = 50;
-float __stepTimeThresh = 0;
+float __stepTime = 0;
+bool __stepDebug = false;
 
 namespace iw {
 	SandLayer::SandLayer()
@@ -186,45 +187,47 @@ namespace iw {
 		pos.x = floor(pos.x) + fx;
 		pos.y = floor(height - pos.y) + fy;
 
-		Space->Query<iw::Transform, EnemyBase, Tile>().Each([&](
-			auto, 
-			auto t,
-			auto b, 
-			auto a)
+		if(    Keyboard::KeyDown(iw::E)
+			|| Keyboard::KeyDown(iw::C) 
+			|| Keyboard::KeyDown(iw::F) 
+			|| Keyboard::KeyDown(iw::R)
+			|| Keyboard::KeyDown(iw::Q))
 		{
-			t->Rotation *= iw::quaternion::from_euler_angles(0, 0, iw::DeltaTime());
+			Cell cell;
+			if (Keyboard::KeyDown(iw::C)) {
+				cell = Cell::GetDefault(CellType::SAND);
+			}
 
-			b->Energy += iw::DeltaTime();
+			else if (Keyboard::KeyDown(iw::F)) {
+				cell = Cell::GetDefault(CellType::WATER);
+			}
 
-			float enemy = iw::randf() + 3;
-			float group = enemy * 10 + 10;
+			else if (Keyboard::KeyDown(iw::Q)) {
+				cell = Cell::GetDefault(CellType::SMOKE);
+				cell.Life = 10000;
+				cell.dX = 10;
+				cell.dY = 10;
+			}
 
-			while (b->Energy > b->NextGroup) {
-				b->Energy -= b->EnemyCost;
+			else if (Keyboard::KeyDown(iw::E)) {
+				cell = Cell::GetDefault(CellType::EMPTY);
+			}
 
-				iw::Entity enemy = Space->CreateEntity<iw::Transform, Tile, Enemy2>();
-				enemy.Set<iw::Transform>(t->Position + 200*iw::vector2(iw::randf(), iw::randf()));
-				enemy.Set<Tile>(std::vector<iw::vector2> {
-					vector2(1, 0), vector2(3, 0),
-						vector2(0, 1), vector2(1, 1), vector2(2, 1), vector2(3, 1),
-						vector2(0, 2), vector2(1, 2), vector2(2, 2), vector2(3, 2),
-						vector2(0, 3), vector2(3, 3),
-						vector2(0, 4), vector2(3, 4)
-				}, 2);
-				enemy.Set<Enemy2>(iw::vector2(100 * iw::randf(), 100 * iw::randf()));
+			else if (Keyboard::KeyDown(iw::R)) {
+				cell = Cell::GetDefault(CellType::ROCK);
 			}
 			
-			b->FireTimer -= iw::DeltaTime();
-
-			if (b->FireTimer > 0) {
-				Fire(t->Position + (playerLocation - t->Position).normalized() * 100, 
-					playerLocation, 0, Cell::GetDefault(CellType::LASER), a->TileId, true);
+			if (Keyboard::KeyDown(iw::G)) {
+				cell.Gravitised = true;
 			}
 
-			else if (b->FireTimer < -b->FireTimeout) {
-				b->FireTimer = b->FireTime + iw::randf();
+			for (int  i = 0; i  < __brushSizeX; i++)
+			for (int ii = 0; ii < __brushSizeY; ii++) {
+				cell.pX = pos.x + i;
+				cell.pY = pos.y + ii;
+				world.SetCell(pos.x + i, pos.y + ii, cell);
 			}
-		});
+		}
 
 		Space->Query<iw::Transform, Player, Tile>().Each([&](
 			auto,
@@ -265,6 +268,46 @@ namespace iw {
 					vector2 d = t->Position + t->Right() * (iw::randf() > 0 ? 1 : -1);
 					FireMissile(t->Position, d, Cell::GetDefault(CellType::MISSILE), a->TileId);
 				}
+			}
+		});
+
+		Space->Query<iw::Transform, EnemyBase, Tile>().Each([&](
+			auto, 
+			auto t,
+			auto b, 
+			auto a)
+		{
+			t->Rotation *= iw::quaternion::from_euler_angles(0, 0, iw::DeltaTime()/60);
+
+			b->Energy += iw::DeltaTime();
+
+			float enemy = iw::randf() + 3;
+			float group = enemy * 10 + 10;
+
+			while (b->Energy > b->NextGroup) {
+				b->Energy -= b->EnemyCost;
+
+				iw::Entity enemy = Space->CreateEntity<iw::Transform, Tile, Enemy2>();
+				enemy.Set<iw::Transform>(t->Position + 200*iw::vector2(iw::randf(), iw::randf()));
+				enemy.Set<Tile>(std::vector<iw::vector2> {
+					vector2(1, 0), vector2(3, 0),
+						vector2(0, 1), vector2(1, 1), vector2(2, 1), vector2(3, 1),
+						vector2(0, 2), vector2(1, 2), vector2(2, 2), vector2(3, 2),
+						vector2(0, 3), vector2(3, 3),
+						vector2(0, 4), vector2(3, 4)
+				}, 3);
+				enemy.Set<Enemy2>(iw::vector2(100 * iw::randf(), 100 * iw::randf()));
+			}
+			
+			b->FireTimer -= iw::DeltaTime();
+
+			if (b->FireTimer > 0) {
+				Fire(t->Position + (playerLocation - t->Position).normalized() * 100, 
+					playerLocation, 0, Cell::GetDefault(CellType::LASER), a->TileId, false);
+			}
+
+			else if (b->FireTimer < -b->FireTimeout) {
+				b->FireTimer = b->FireTime + iw::randf();
 			}
 		});
 
@@ -314,12 +357,10 @@ namespace iw {
 				
 				iw::vector2 nV = mvel.normalized();
 
-				iw::vector2 closest = pos;
+				iw::vector2 closest;
 				float minDist = FLT_MAX;
 				space->Query<iw::Transform, Enemy2>().Each([&](
-					auto,
-					auto t2,
-					auto)
+					auto, auto t2, auto)
 				{
 					iw::vector2 v = t2->Position - mpos;
 					if (v.length_squared() < minDist) {
@@ -373,54 +414,12 @@ namespace iw {
 			}
 		});
 
-		if(    Keyboard::KeyDown(iw::E)
-			|| Keyboard::KeyDown(iw::C) 
-			|| Keyboard::KeyDown(iw::F) 
-			|| Keyboard::KeyDown(iw::R)
-			|| Keyboard::KeyDown(iw::Q))
-		{
-			Cell cell;
-			if (Keyboard::KeyDown(iw::C)) {
-				cell = Cell::GetDefault(CellType::SAND);
-			}
-
-			else if (Keyboard::KeyDown(iw::F)) {
-				cell = Cell::GetDefault(CellType::WATER);
-			}
-
-			else if (Keyboard::KeyDown(iw::Q)) {
-				cell = Cell::GetDefault(CellType::SMOKE);
-				cell.Life = 10;
-			}
-
-			else if (Keyboard::KeyDown(iw::E)) {
-				cell = Cell::GetDefault(CellType::EMPTY);
-			}
-
-			else if (Keyboard::KeyDown(iw::R)) {
-				cell = Cell::GetDefault(CellType::ROCK);
-			}
-			
-			if (Keyboard::KeyDown(iw::G)) {
-				cell.Gravitised = true;
-			}
-
-			for (int  i = 0; i  < __brushSizeX; i++)
-			for (int ii = 0; ii < __brushSizeY; ii++) {
-				cell.pX = pos.x + i;
-				cell.pY = pos.y + ii;
-				world.SetCell(pos.x + i, pos.y + ii, cell);
-			}
-		}
-
-		int updatedCellCount = 0;
-
 		stepTimer -= iw::DeltaTime();
-		if (__stepTimeThresh == 0 || (__stepTimeThresh > 0 && stepTimer < 0 && Keyboard::KeyDown(V)/**/)) {
-			stepTimer = __stepTimeThresh;
+		if (stepTimer <= 0 && (!__stepDebug || Keyboard::KeyDown(V))) {
+			stepTimer = __stepTime;
 			PasteTiles();
 			UpdateSharedUserData();
-			updatedCellCount = UpdateSandWorld(fx, fy, fx2, fy2);
+			UpdateSandWorld(fx, fy, fx2, fy2);
 			UpdateSandTexture(fx, fy, fx2, fy2);
 			RemoveTiles();
 		}
@@ -432,9 +431,9 @@ namespace iw {
 			Renderer->DrawMesh(m_stars.GetTransform(), &m_stars.GetParticleMesh());
 			Renderer->DrawMesh(iw::Transform(), m_sandScreen);
 
-			Renderer->BeforeDraw([&, playerLocation, updatedCellCount]() {
+			Renderer->BeforeDraw([&, playerLocation]() {
 				std::stringstream sb;
-				sb << updatedCellCount;
+				sb << 1 / iw::DeltaTime();
 				m_font->UpdateMesh(m_textMesh, sb.str(), 0.001, 1);
 			});
 			Renderer->DrawMesh(iw::Transform(-.4f), m_textMesh);
@@ -514,8 +513,8 @@ namespace iw {
 		e.Set<Tile>(std::vector<iw::vector2> {
 				               vector2(1, 2),
 				vector2(0, 1), vector2(1, 1), vector2(2, 1),
-				               vector2(0, 0),                
-		}, 20);
+				               vector2(1, 0),                
+		}, 100);
 
 
 		// asteroid //
@@ -716,12 +715,16 @@ namespace iw {
 		{
 			float angle = t->Rotation.euler_angles().z;
 
+			SandChunk* chunk = nullptr;
+
 			for (int i = 0; i < a->Locations.size(); i++) {
 				auto [x, y] = TranslatePoint(a->Locations[i], t->Position, angle);
 
-				if (!world.InBounds(x, y)) continue;
-				
-				const Cell& cell = world.GetCell(x, y);
+				if (!chunk || !chunk->InBounds(x, y)) {
+					chunk = world.GetChunk(x, y);
+				}
+
+				const Cell& cell = chunk->GetCell(x, y);
 
 				if (   cell.Type   == CellType::EMPTY
 					|| cell.TileId == a->TileId
@@ -731,7 +734,7 @@ namespace iw {
 					me.TileId = a->TileId;
 					me.Life = 1;
 
-					world.SetCell(x, y, me);
+					chunk->SetCell(x, y, me, world.m_currentTick);
 				}
 
 				else {
@@ -759,19 +762,23 @@ namespace iw {
 		{
 			float angle = t->Rotation.euler_angles().z;
 
+			SandChunk* chunk = nullptr;
+
 			for (int i = 0; i < a->Locations.size(); i++) {
 				auto [x, y] = TranslatePoint(a->Locations[i], t->Position, angle);
 
-				if (!world.InBounds(x, y)) continue;
+				if (!chunk || !chunk->InBounds(x, y)) {
+					chunk = world.GetChunk(x, y);
+				}
 				
-				const Cell& cell = world.GetCell(x, y);
+				const Cell& cell = chunk->GetCell(x, y);
 
 				if (cell.Type == CellType::EMPTY) continue;
 
 				if (   cell.TileId == a->TileId
 					|| cell.Precedence < a->Precedence)
 				{
-					world.SetCell(x, y, Cell::GetDefault(CellType::EMPTY));
+					chunk->SetCell(x, y, Cell::GetDefault(CellType::EMPTY), world.m_currentTick);
 				}
 
 				else {
