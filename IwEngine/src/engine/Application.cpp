@@ -51,6 +51,7 @@ namespace Engine {
 		// Time
 
 		Time::UpdateTime();
+		Time::SetFixedTime(1 / 50.0f); // default, should pass in options
 
 		// Logging
 
@@ -126,7 +127,6 @@ namespace Engine {
 		// Time again!
 
 		Time::UpdateTime();
-		Time::SetFixedTime(1 / 50.0f);
 
 		// Thread pool
 
@@ -163,7 +163,8 @@ namespace Engine {
 					&& accumulatedTime >= Time::RawFixedTime())
 				{
 					FixedUpdate();
-					accumulatedTime -= Time::RawFixedTime();
+					//accumulatedTime -= Time::RawFixedTime(); // causes a runaway slowdown when physics update takes too long
+					accumulatedTime = 0;                       // not sure how to fix that, i think setting it to 0 is wrong tho so idk
 				}
 
 				{
