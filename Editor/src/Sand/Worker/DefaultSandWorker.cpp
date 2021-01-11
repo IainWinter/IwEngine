@@ -26,12 +26,12 @@ void DefaultSandWorker::UpdateCell(
 			div = iw::clamp(div += iw::randf(), 1.2f, 1.8f); 
 		}
 
-		cell.dX = iw::clamp((dir.x + iw::DeltaTime()) * 0.9f, -64.f, 64.f);
-		cell.dY = iw::clamp((dir.y + iw::DeltaTime()) * 0.9f, -64.f, 64.f);
+		cell.dX = iw::clamp((dir.x + __stepTime) * 0.9f, -64.f, 64.f);
+		cell.dY = iw::clamp((dir.y + __stepTime) * 0.9f, -64.f, 64.f);
 	}
 
 	if (cell.Type == CellType::SMOKE) {
-		cell.Color = iw::lerp<iw::vector4>(cell.Color, iw::Color::From255(100, 100, 100), iw::DeltaTime()*10);
+		cell.Color = iw::lerp<iw::vector4>(cell.Color, iw::Color::From255(100, 100, 100), __stepTime*10);
 	}
 
 	const Cell& replacement = Cell::GetDefault(cell.Type);
@@ -184,8 +184,8 @@ bool DefaultSandWorker::MoveForward(
 			}
 		}
 
-		float dsX = cell.dX * iw::DeltaTime(); // need to find a way to scale velocity with time without making it 
-		float dsY = cell.dY * iw::DeltaTime(); // so when the framerate is so high that things dont move less than a single cell
+		float dsX = cell.dX * __stepTime; // need to find a way to scale velocity with time without making it 
+		float dsY = cell.dY * __stepTime; // so when the framerate is so high that things dont move less than a single cell
 
 		//ds  = iw::clamp<float>(dsX, -3, 3); // clamp to make speed for threading between chunks
 		//dsY = iw::clamp<float>(dsY, -3, 3); // should be width/2, height/2 - -> +
@@ -203,25 +203,28 @@ bool DefaultSandWorker::MoveForward(
 			int destX = cellpos[i].first;
 			int destY = cellpos[i].second;
 
+			cell.pX += dsX * step;
+			cell.pY += dsY * step;
+
 			if (  !IsEmpty(destX, destY)
-				/*&& GetCell(destX, destY).TileId != cell.TileId*/)
+				&& HasPrecedence(x, y, destX, destY))
 			{
  				hit = true;
 				hitx = destX;
 				hity = destY;
+
 				break;
 			}
 			
-			else if (HasPrecedence(x, y, destX, destY)) {
+			else {
 				Cell next = replace;
-				next.pX = cell.pX + dsX * step * i;
-				next.pY = cell.pY + dsY * step * i;
+				next.pX = cell.pX;
+				next.pY = cell.pY;
 				next.dX = last ? cell.dX : 0;
 				next.dY = last ? cell.dY : 0;
 				next.User = cell.User;
 				next.TileId = cell.TileId;
 				next.SplitCount = cell.SplitCount;
-				//next.Life = last ? next.Life : next.Life / replace.Speed(); // or something?
 
 				SetCell(next.pX, next.pY, next);
 			}
@@ -288,7 +291,7 @@ bool DefaultSandWorker::MoveAsSharedUser(
 		|| GetCell(px, py).User == cell.User)
 	{
 		SetCellQueued(px, py, cell);
-		SetCell(x, y, Cell::GetDefault(CellType::EMPTY));
+		SetCellQueued(x, y, Cell::GetDefault(CellType::EMPTY));
 	}
 
 	return false;
@@ -298,7 +301,7 @@ bool DefaultSandWorker::DeleteWithTime(
 	int x, int y,
 	Cell& cell)
 {
-	cell.Life -= iw::DeltaTime();
+	cell.Life -= __stepTime;
 	if (cell.Life < 0) {
 		SetCell(x, y, Cell::GetDefault(CellType::EMPTY));
 
@@ -313,57 +316,70 @@ void DefaultSandWorker::HitLikeProj(
 	int lx, int ly,
 	Cell& bullet)
 {
-	float speed = bullet.Speed();
-
-	Cell hit = GetCell(x, y);
-	hit.Life -= speed;
-
-	if (   hit.Life < 0
-		&& bullet.SplitCount < 2)
-	{
-		bullet.SplitCount++;
-		SetCell(x, y, bullet);
-		//SetCell(x+iw::randi(2)-1, y+iw::randi(2)-1, bullet);
-	}
-
-	else {
-		SetCell(x, y, hit);
-	}
-
 	float max = Cell::GetDefault(bullet.Type).Speed();
 
-	bullet.dX = iw::clamp(bullet.dX + iw::randf()*100, -max*1.2f, max*1.2f);
-	bullet.dY = iw::clamp(bullet.dY + iw::randf()*100, -max*1.2f, max*1.2f);
+	if (bullet.SplitCount < 4) {
+		int px = iw::randi(2) - 1;
+		int py = iw::randi(2) - 1;
+
+		if (lx != px || ly != py) {
+			bullet.SplitCount++;
+
+			Cell c = bullet;
+			c.dX += max/2 * iw::randf();
+			c.dY += max/2 * iw::randf();
+			c.pX += px;
+			c.pY += py;
+
+			SetCell(c.pX, c.pY, c);
+		}
+
+		bullet.dX += max/5 * iw::randf();
+		bullet.dY += max/5 * iw::randf();
+
+		SetCell(x, y, bullet);
+	}
+}
+
+void RandomizeVector(iw::vector2& v, float max, float a) {
+	v = iw::clamp<iw::vector2>(v + max / a * iw::vector2(iw::randf(), iw::randf()), -max, max);
+	v.normalize();
+	v *= max;
 }
 
 void DefaultSandWorker::HitLikeBeam(
 	int x,  int y,
 	int lx, int ly,
-	Cell& laser)
+	Cell& beam)
 {
-	float speed = laser.Speed();
+	float max = Cell::GetDefault(beam.Type).Speed();
+	iw::vector2 v(beam.dX, beam.dY);
 
-	Cell hit = GetCell(x, y);
-	hit.Life -= speed;
+	if (beam.SplitCount < 5) {
+		int px = iw::randi(2) - 1;
+		int py = iw::randi(2) - 1;
 
-	if (hit.Life <= 0 && laser.SplitCount < 5) {
-		laser.SplitCount++;
-		SetCell(x, y, laser);
+		if (lx != px || ly != py) {
+			beam.SplitCount++;
+
+			RandomizeVector(v, max, 10);
+
+			Cell c = beam;
+			c.dX = v.x;
+			c.dY = v.y;
+			c.pX += px;
+			c.pY += py;
+
+			SetCell(c.pX, c.pY, c);
+		}
+
+		RandomizeVector(v, max, 5);
+
+		beam.dX = v.x;
+		beam.dY = v.y;
+
+		SetCell(x, y, beam);
 	}
-
-	else {
-		SetCell(x, y, hit);
-	}
-
-	float max = Cell::GetDefault(laser.Type).Speed();
-
-	iw::vector2 v = iw::vector2(laser.dX, laser.dY);
-	v = iw::clamp<iw::vector2>(v + 100*iw::vector2(iw::randf(), iw::randf()), -max, max);
-	v.normalize();
-	v *= max;
-
-	laser.dX = v.x;
-	laser.dY = v.y;
 }
 
 void DefaultSandWorker::HitLikeMissile(

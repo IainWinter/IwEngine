@@ -108,7 +108,10 @@ namespace iw {
 			iw::vector2 point = position + direction * 25 + normal * iw::randf() * 15;
 
 			if(atPoint) {
-				direction = (target - point).normalized(); // for point precision
+				iw::vector2 d = target - point;
+				if (d.length_squared() > 10000) {
+					direction = d.normalized(); // for point precision
+				}
 			}
 
 			//if (!world.IsEmpty(point.x, point.y)) {
@@ -175,10 +178,10 @@ namespace iw {
 
 		void Reset();
 
-		int  UpdateSandWorld  (int fx, int fy, int fx2, int fy2);
+		int  UpdateSandWorld  (int fx, int fy, int fx2, int fy2, float deltaTime);
 		void UpdateSandTexture(int fx, int fy, int fx2, int fy2);
 
-		void UpdateSharedUserData();
+		void UpdateSharedUserData(float deltaTime);
 		void PasteTiles();
 		void RemoveTiles();
 

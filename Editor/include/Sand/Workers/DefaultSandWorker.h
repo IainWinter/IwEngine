@@ -5,11 +5,14 @@
 class DefaultSandWorker : public SandWorker {
 private:
 	iw::ref<iw::Space> Space;
+	float __stepTime;
+
 public:
 	DefaultSandWorker(                    // not default anymore \ /
-		SandWorld& world, SandChunk& chunk, iw::ref<iw::Space> space)
+		SandWorld& world, SandChunk& chunk, iw::ref<iw::Space> space, float stepTime)
 		: SandWorker(world, chunk)
 		, Space(space)
+		, __stepTime(stepTime)
 	{}
 
 	void UpdateCell(

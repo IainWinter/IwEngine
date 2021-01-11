@@ -129,8 +129,8 @@ iw::Application* CreateApplication(
 		1920*4/3,
 		1080*4/3,
 		true,
-		iw::DisplayState::BORDERLESS
+		iw::DisplayState::NORMAL
 	};
-
+	
 	return new iw::App();
 }

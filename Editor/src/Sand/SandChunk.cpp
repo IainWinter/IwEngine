@@ -93,7 +93,13 @@ void SandChunk::CommitMovedCells(
 
 	m_keepAlive.clear();
 
+	std::sort(m_setQueue.begin(), m_setQueue.end(),
+		[=](auto& a, auto& b) { return std::get<1>(a).Precedence < std::get<1>(b).Precedence; }
+	);
+
 	for (auto& [index, cell] : m_setQueue) { // could prob combine these
+		if (GetCell(index).Precedence >= cell.Precedence) continue;
+
 		SetCellData(index, cell, currentTick);
 		UpdateRect(index % m_width, index / m_height);
 	}

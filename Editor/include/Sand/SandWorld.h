@@ -68,9 +68,7 @@ public:
 
 	void Step() {
 		m_currentTick++;
-	}
 
-	void CommitCells() {
 		std::vector<WorldCoords> remove;
 
 		for (SandChunk* chunk : m_chunks) {
@@ -99,8 +97,9 @@ public:
 			m_chunks.erase(std::find(m_chunks.begin(), m_chunks.end(), chunk));
 			m_chunkLookup.unsafe_erase(m_chunkLookup.find(coords));
 		}
+
 	}
-	
+
 	bool InBounds(
 		WorldCoord x, WorldCoord y)
 	{
