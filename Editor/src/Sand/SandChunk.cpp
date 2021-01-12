@@ -43,29 +43,34 @@ SandChunk::SandChunk(
 	ResetRect();
 }
 
+void SandChunk::KeepAlive(
+	Index index)
+{
+	std::unique_lock lock(m_keepAliveMutex);
+	m_keepAlive.push_back(index);
+}
+
 void SandChunk::SetCell(
 	Index index,
 	const Cell& cell,
 	Tick currentTick)
 {
-	m_lastTick = currentTick;
+	KeepAlive(index);
 
 	std::unique_lock lock(m_setMutex);
-
 	SetCellData(index, cell, currentTick);
-	UpdateRect(index % m_width, index / m_width);
+	m_lastTick = currentTick;
 }
 
 void SandChunk::SetCellQueued(
 	WorldCoord x, WorldCoord y,
 	const Cell& cell)
 {
-	std::unique_lock lock(m_setChangesMutex);
+	Index index = GetIndex(x, y);
+	KeepAlive(index);
 
-	m_setQueue.emplace_back(
-		GetIndex(x, y),
-		cell
-	);
+	std::unique_lock lock(m_setChangesMutex);
+	m_setQueue.emplace_back(index, cell);
 }
 
 void SandChunk::MoveCell(
@@ -74,8 +79,7 @@ void SandChunk::MoveCell(
 	WorldCoord xTo, WorldCoord yTo)
 {
 	std::unique_lock lock(m_changesMutex);
-
-	m_changes.emplace_back(
+	m_moveQueue.emplace_back(
 		sourceChunk,
 		sourceChunk->GetIndex(x, y),
 		GetIndex(xTo, yTo)
@@ -85,7 +89,9 @@ void SandChunk::MoveCell(
 void SandChunk::CommitMovedCells(
 	Tick currentTick)
 {
-	ResetRect();
+	//ResetRect();
+
+	// KEEP ALIVES
 
 	for (Index index : m_keepAlive) {
 		UpdateRect(index % m_width, index / m_height);
@@ -93,18 +99,27 @@ void SandChunk::CommitMovedCells(
 
 	m_keepAlive.clear();
 
+	// SETS
+
+	for (size_t i = 0; i < m_setQueue.size(); i++) {
+		auto& [index, cell] = m_setQueue[i];
+		if (GetCell(index).Precedence >= cell.Precedence) {
+			m_setQueue[i] = m_setQueue.back(); m_setQueue.pop_back();
+			i--;
+		}
+	}
+
 	std::sort(m_setQueue.begin(), m_setQueue.end(),
 		[=](auto& a, auto& b) { return std::get<1>(a).Precedence < std::get<1>(b).Precedence; }
 	);
 
-	for (auto& [index, cell] : m_setQueue) { // could prob combine these
-		if (GetCell(index).Precedence >= cell.Precedence) continue;
-
+	for (auto& [index, cell] : m_setQueue) {
 		SetCellData(index, cell, currentTick);
-		UpdateRect(index % m_width, index / m_height);
 	}
 
 	m_setQueue.clear();
+
+	// MOVES
 
 	// remove moves that have their destinations filled
 
@@ -112,23 +127,23 @@ void SandChunk::CommitMovedCells(
 	constexpr size_t _SRC   = 1;
 	constexpr size_t _DEST  = 2;
 
-	for (size_t i = 0; i < m_changes.size(); i++) {
-		Cell& src  = m_cells[std::get<_SRC> (m_changes[i])];
-		Cell& dest = m_cells[std::get<_DEST>(m_changes[i])];
+	for (size_t i = 0; i < m_moveQueue.size(); i++) {
+		Cell& src  = m_cells[std::get<_SRC> (m_moveQueue[i])];
+		Cell& dest = m_cells[std::get<_DEST>(m_moveQueue[i])];
 		
 		if (   dest.Type != CellType::EMPTY
 			&& dest.Precedence >= src.Precedence)
 		{
-			m_changes[i] = m_changes.back(); m_changes.pop_back();
+			m_moveQueue[i] = m_moveQueue.back(); m_moveQueue.pop_back();
 			i--;
 		}
 	}
 
-	if (m_changes.size() == 0) return;
+	if (m_moveQueue.size() == 0) return;
 
 	// sort by destination
 
-	std::sort(m_changes.begin(), m_changes.end(),
+	std::sort(m_moveQueue.begin(), m_moveQueue.end(),
 		[=](auto& a, auto& b) { return std::get<2>(a) < std::get<2>(b); } // cant pass _DEST (constexpr) I guess
 	);
 
@@ -136,11 +151,11 @@ void SandChunk::CommitMovedCells(
 
 	size_t ip = 0;
 
-	m_changes.emplace_back(nullptr, -1, -1); // to catch last change
+	m_moveQueue.emplace_back(nullptr, -1, -1); // to catch last change
 
-	for (size_t i = 0; i < m_changes.size() - 1; i++) {
-		if (std::get<_DEST>(m_changes[i + 1]) != std::get<_DEST>(m_changes[i])) {
-			auto [sourceChunk, src, dest] = m_changes[ip + iw::randi(i - ip)];
+	for (size_t i = 0; i < m_moveQueue.size() - 1; i++) {
+		if (std::get<_DEST>(m_moveQueue[i + 1]) != std::get<_DEST>(m_moveQueue[i])) {
+			auto [sourceChunk, src, dest] = m_moveQueue[ip + iw::randi(i - ip)];
 
 			UpdateRect(dest % m_width, dest / m_height);
 
@@ -151,7 +166,8 @@ void SandChunk::CommitMovedCells(
 		}
 	}
 
-	m_changes.clear();
+	m_moveQueue.clear();
+	m_lastTick = currentTick;
 }
 
 // Private
@@ -164,13 +180,13 @@ void SandChunk::ResetRect() {
 }
 
 void SandChunk::UpdateRect(
-	WorldCoord x, WorldCoord y)
+	WorldCoord x, WorldCoord y) // damn this doesnt really work :< idk what other approachs there are
 {
-	if (x <= m_minX) m_minX = iw::clamp<WorldCoord>(x - 2, 0, m_width);
-	if (x >= m_maxX) m_maxX = iw::clamp<WorldCoord>(x + 2, 0, m_width);
+	if (x <= m_minX) m_minX = iw::clamp<WorldCoord>(x - 5, 0, m_width);
+	if (x >= m_maxX) m_maxX = iw::clamp<WorldCoord>(x + 5, 0, m_width);
 
-	if (y <= m_minY) m_minY = iw::clamp<WorldCoord>(y - 2, 0, m_height);
-	if (y >= m_maxY) m_maxY = iw::clamp<WorldCoord>(y + 2, 0, m_height);
+	if (y <= m_minY) m_minY = iw::clamp<WorldCoord>(y - 5, 0, m_height);
+	if (y >= m_maxY) m_maxY = iw::clamp<WorldCoord>(y + 5, 0, m_height);
 }
 
 void SandChunk::SetCellData(

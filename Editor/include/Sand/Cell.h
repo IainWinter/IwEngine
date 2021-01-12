@@ -61,8 +61,8 @@ struct SharedCellData {
 	float vX = 0; // Velocity
 	float vY = 0;
 
-	float Speed = 0;
-	float Timer = 0;
+	//float Speed = 0;
+	//float Timer = 0;
 
 	float cX = 0; // Center
 	float cY = 0;

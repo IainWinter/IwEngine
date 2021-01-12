@@ -9,11 +9,12 @@
 struct SandChunk {
 private:
 	std::vector<std::tuple<Index, Cell>> m_setQueue;
-	std::vector<std::tuple<SandChunk*, Index, Index>> m_changes; // source, destination
+	std::vector<std::tuple<SandChunk*, Index, Index>> m_moveQueue; // source, destination
 	std::vector<Index> m_keepAlive;
 	std::mutex m_setMutex;
 	std::mutex m_setChangesMutex;
 	std::mutex m_changesMutex;
+	std::mutex m_keepAliveMutex;
 
 public:
 	Cell* m_cells; // doesn't own this memory
@@ -78,18 +79,21 @@ public:
 		return x + y * m_width;
 	}
 
-	// unsafe
-	void KeepAlive(
-		WorldCoord x, WorldCoord y)
-	{
-		m_keepAlive.push_back(GetIndex(x, y));
-	}
-
 	const Cell& GetCellDirect(ChunkCoord x, ChunkCoord y) const { return m_cells[GetIndexDirect(x, y)]; }
+	      Cell& GetCellDirect(ChunkCoord x, ChunkCoord y)       { return m_cells[GetIndexDirect(x, y)]; }
 
 	const Cell& GetCell(WorldCoord x, WorldCoord y) const { return m_cells[GetIndex(x, y)]; }
 	      Cell& GetCell(WorldCoord x, WorldCoord y)       { return m_cells[GetIndex(x, y)]; }
 		 Cell& GetCell(Index index)				    { return m_cells[index]; }
+
+	void KeepAlive(
+		WorldCoord x, WorldCoord y)
+	{
+		KeepAlive(GetIndex(x, y));
+	}
+
+	void KeepAlive(
+		Index index);
 
 	void SetCell(
 		WorldCoord x, WorldCoord y,
@@ -122,9 +126,9 @@ public:
 
 	void CommitMovedCells(
 		Tick currentTick);
-private:
-	void ResetRect();
 
+	void ResetRect();
+private:
 	void UpdateRect(
 		WorldCoord x, WorldCoord y);
 

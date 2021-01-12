@@ -207,7 +207,7 @@ bool DefaultSandWorker::MoveForward(
 			cell.pY += dsY * step;
 
 			if (  !IsEmpty(destX, destY)
-				&& HasPrecedence(x, y, destX, destY))
+				&& GetCell(destX, destY).TileId != cell.TileId)
 			{
  				hit = true;
 				hitx = destX;
@@ -216,7 +216,7 @@ bool DefaultSandWorker::MoveForward(
 				break;
 			}
 			
-			else {
+			else if (HasPrecedence(x, y, destX, destY)) {
 				Cell next = replace;
 				next.pX = cell.pX;
 				next.pY = cell.pY;
@@ -230,6 +230,8 @@ bool DefaultSandWorker::MoveForward(
 			}
 		}
 	}
+
+	KeepAlive(x, y);
 
 	if (!hit) {
 		cell.dX = 0;

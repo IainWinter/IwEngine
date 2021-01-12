@@ -97,7 +97,6 @@ public:
 			m_chunks.erase(std::find(m_chunks.begin(), m_chunks.end(), chunk));
 			m_chunkLookup.unsafe_erase(m_chunkLookup.find(coords));
 		}
-
 	}
 
 	bool InBounds(

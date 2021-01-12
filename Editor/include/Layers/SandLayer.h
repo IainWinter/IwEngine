@@ -23,33 +23,82 @@ struct Player {
 	iw::vector3 FireButtons = 0;
 	float FireTimeout = 0;
 
-	float Velocity = 0;
+	float Speed = 0;
 };
 
-struct Enemy2 {
-	iw::vector2 Spot = 0;
-	iw::vector2 Vel = 0;
+struct Physical {
+	iw::vector2 Velocity;
 
-	float TurnRad = 0.25f;
-	float FireTimeout = 0;
+	iw::vector2 Target;
+	float Speed = 200;
+	float TurnRadius = 0.025f;
+	bool HasTarget = false;
+};
+
+struct Flocking { }; // Tag, could have strength of flocking forces
+
+struct EnemyBase;
+
+struct EnemySupplyShip {
+	float MaxRez = 10000;
+};
+
+struct EnemyShip {
+	EnemyBase* Command; // To request commands from
+	float ChecekCommandTimer = 0;
+	float ChecekCommandTime = 5.0f;
+
+	bool RezLow = false;
+	bool AtObjective = false;
+	bool AttackMode = false;
+
+	int ObjectivesCount = 0;
+
+	iw::vector2 Objective = 0; // Current location to move twoards (get from Command)
+	//iw::vector2 Velocity  = 0;
+	float Speed = 200;
+
+	float TurnRad = 0.025f;
+	float FireTimer = 0;
+	float FireTime = 2.5f;
+
+	float Rez = 100; // Start with 100 + whatever the cost was to make
+	float MinRez = 10;
+
+	float RezToFireLaser = 5;
 };
 
 struct EnemyBase {
-	float Energy = 0;
+	EnemyBase* MainBase = nullptr; // Null if main base
+
+	std::vector<EnemyShip*> NeedsObjective;
+	std::vector<std::pair<float, iw::vector2>> PlayerLocations;
+
+	iw::vector3 EstPlayerLocation; // xy + radius
+
+	float Rez = 0;
 
 	float NextGroup = 10;
 	float EnemyCost = 5;
 
 	float FireTimer = 0;
-	float FireTimeout = 4;
-	float FireTime = 3;
+	float FireTime = 10;
+
+	void RequestObjective(EnemyShip* ship) {
+		NeedsObjective.push_back(ship);
+	}
+
+	void LocatedPlayer(iw::vector2 position) {
+		PlayerLocations.emplace_back(iw::TotalTime(), position);
+	}
 };
 
 struct Missile {
 	float tX = 0;
 	float tY = 0;
-
 	float TurnRad = 0.025f;
+
+	float Timer = 0;
 	float WaitTime = 0.5f;
 	float BurnTime = 1;
 
@@ -85,6 +134,8 @@ namespace iw {
 
 		float stepTimer = 0;
 
+		int updatedCellCount = 0;
+
 	public:
 		SandLayer();
 
@@ -96,13 +147,15 @@ namespace iw {
 		bool On(KeyEvent& e) override;
 	private:
 		void Fire(
-			vector2 position,
+			iw::Transform* transform,
 			vector2 target,
 			vector2 vel,
 			const Cell& projectile,
-			int whoFiredId,
 			bool atPoint)
 		{
+			iw::vector2 position = transform->Position;
+			int whoFiredId = Space->FindEntity<iw::Transform>(transform).Find<Tile>()->TileId;
+
 			iw::vector2 direction = (target - position).normalized();
 			iw::vector2 normal = vector2(-direction.y, direction.x);
 			iw::vector2 point = position + direction * 25 + normal * iw::randf() * 15;
@@ -131,43 +184,45 @@ namespace iw {
 		}
 
 		void FireMissile(
-			vector2 position,
+			iw::Transform* transform,
 			vector2 target,
-			const Cell& projectile,
-			int whoFiredId)
+			const Cell& projectile)
 		{
+			iw::vector2 position = transform->Position;
+			int whoFiredId = Space->FindEntity<iw::Transform>(transform).Find<Tile>()->TileId;
+
 			iw::vector2 dir = (target - position).normalized();
 			iw::vector2 normal = vector2(-dir.y, dir.x);
 			iw::vector2 point = position + dir * 25 + normal * iw::randf() * 15;
 
-			//direction = (target - point).normalized(); // for point precision
-
-			float speed = projectile.Speed();
-
-			iw::Entity e = Space->CreateEntity<Missile, SharedCellData>();
-			Missile*        missile = e.Set<Missile>();
-			SharedCellData* user    = e.Set<SharedCellData>();
-
-			missile->TileId = whoFiredId;
-			missile->TurnRad = 0.025 + (iw::randf() + 1) / 25;
-			missile->WaitTime = 0.5f + iw::randf()/10;
-			missile->BurnTime = 2 + iw::randf();
-
+			// lil random spice
 			dir.x += iw::randf()/10;
 			dir.y += iw::randf()/10;
 
-			user->pX = point.x + dir.x/2;
-			user->pY = point.y + dir.y/2;
-			user->vX = dir.x * speed;
-			user->vY = dir.y * speed;
-			user->Speed = speed;
-			user->angle = atan2(dir.y, dir.x);
+			float speed = projectile.Speed();
 
-			user->Special = missile;
+			iw::Entity e = Space->CreateEntity<SharedCellData, Missile, Physical>();
+			SharedCellData* u = e.Set<SharedCellData>();
+			Missile*        m = e.Set<Missile>();
+			Physical*       p = e.Set<Physical>();
+
+			m->TileId = whoFiredId;
+			m->TurnRad = 0.025 + (iw::randf() + 1) / 25;
+			m->WaitTime = 0.5f + iw::randf()/10;
+			m->BurnTime = 2 + iw::randf();
+
+			u->pX = point.x + dir.x/2;
+			u->pY = point.y + dir.y/2;
+			u->vX = dir.x * speed;
+			u->vY = dir.y * speed;
+			u->angle = atan2(dir.y, dir.x);
+			u->Special = m;
+
+			p->Speed = speed;
 
 			Cell cell = projectile;
 			cell.TileId = whoFiredId;
-			cell.User = user;
+			cell.User = u;
 			cell.pX = point.x;
 			cell.pY = point.y;
 			cell.dX = dir.x * speed;
@@ -181,7 +236,6 @@ namespace iw {
 		int  UpdateSandWorld  (int fx, int fy, int fx2, int fy2, float deltaTime);
 		void UpdateSandTexture(int fx, int fy, int fx2, int fy2);
 
-		void UpdateSharedUserData(float deltaTime);
 		void PasteTiles();
 		void RemoveTiles();
 

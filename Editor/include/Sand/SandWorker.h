@@ -15,15 +15,23 @@ public:
 		, m_chunk(chunk)
 	{}
 
-	void UpdateChunk() {
-		for (WorldCoord i = 0; i < m_chunk.m_width * m_chunk.m_height; i++) {
-			Cell& cell = m_chunk.m_cells[i];
+	int UpdateChunk() {
+		int cellsUpdatedCount = 0;
+
+		if (m_world.m_currentTick - m_chunk.m_lastTick >= 2) {
+			m_chunk.ResetRect();
+		}
+
+		for(WorldCoord x = m_chunk.m_minX; x < m_chunk.m_maxX; x++)
+		for(WorldCoord y = m_chunk.m_minY; y < m_chunk.m_maxY; y++) {
+			Cell& cell = m_chunk.GetCellDirect(x, y);
 			if (m_world.m_currentTick <= cell.LastUpdateTick) continue;
 
-			WorldCoord x = i % m_chunk.m_width  + m_chunk.m_x;
-			WorldCoord y = i / m_chunk.m_height + m_chunk.m_y;
-			UpdateCell(x, y, cell);
+			UpdateCell(x + m_chunk.m_x, y + m_chunk.m_y, cell);
+			cellsUpdatedCount++;
 		}
+
+		return cellsUpdatedCount;
 	}
 
 	virtual void UpdateCell(
