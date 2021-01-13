@@ -213,20 +213,18 @@ void SandChunk::SetCellData(
 		++m_filledCellCount;
 	}
 
-	if (dest.Share && dest.Share->Stale) dest.Share = nullptr; // reset stale shared data
+	if (dest.Share && dest.Share->Stale) dest.Share = nullptr; // reset stale shared data ('cell' is set in worker UpdateChunk)
 
-	if (dest.Share != cell.Share) {
-		if (dest.Share) {
-			std::unique_lock lock(dest.Share->m_userMutex);
-			dest.Share->UserCount--;
-			dest.Share->UserTypeCounts[dest.Type]--;
-		}
+	if (dest.Share) {
+		std::unique_lock lock(dest.Share->m_userMutex); // somehow lasers from supply ships arnt having their shares made stale? 
+		dest.Share->UserCount--;
+		dest.Share->UserTypeCounts[dest.Type]--;
+	}
 
-		if (cell.Share) {
-			std::unique_lock lock(cell.Share->m_userMutex);
-			cell.Share->UserCount++;
-			cell.Share->UserTypeCounts[cell.Type]++;
-		}
+	if (cell.Share) {
+		std::unique_lock lock(cell.Share->m_userMutex);
+		cell.Share->UserCount++;
+		cell.Share->UserTypeCounts[cell.Type]++;
 	}
 
 	dest = cell;

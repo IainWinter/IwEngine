@@ -145,8 +145,6 @@ namespace iw {
 
 		int updatedCellCount = 0;
 
-		std::vector<iw::vector2> m_asteriodLocations; // list of asteroids, remove this use Space
-
 		std::vector<iw::Entity> m_userCleanup; // need to wait one frame to delete shared user data
 	public:
 		SandLayer();

@@ -430,7 +430,7 @@ namespace iw {
 				}
 			});
 
-			Space->Query<iw::Transform, EnemyBase>().Each([&](auto, auto t, auto b) {
+			Space->Query<iw::Transform, EnemyBase>().Each([&, space](auto, auto t, auto b) {
 				t->Rotation *= iw::quaternion::from_euler_angles(0, 0, deltaTime/60);
 
 				b->EstPlayerLocation.z += iw::DeltaTime() * 2500; // Should be 5000km within 2 seconds
@@ -507,29 +507,34 @@ namespace iw {
 				else if (b->Rez > b->SupplyShipCost) {
 					b->Rez -= b->SupplyShipCost;
 
-					iw::Entity supplyShip = Space->CreateEntity<iw::Transform, Tile, EnemyShip, EnemySupplyShip, Physical, Flocking, SharedCellData>();
-					supplyShip.Set<Tile>(std::vector<iw::vector2> {
-						vector2(0, 0),				                 vector2(3, 0),
-						vector2(0, 1), vector2(1, 1), vector2(2, 1), vector2(3, 1), vector2(4, 1), vector2(5, 1),
-						vector2(0, 2), vector2(1, 2), vector2(2, 2), vector2(3, 2), vector2(4, 2), vector2(5, 2),
-						vector2(0, 3),                               vector2(3, 3),
-						vector2(0, 4)
-					}, 5);
-					iw::Transform*   st = supplyShip.Set<iw::Transform>(t->Position + 200*iw::vector2(iw::randf(), iw::randf()));
-					EnemyShip*       s  = supplyShip.Set<EnemyShip>(b);
-					Physical*        p  = supplyShip.Set<Physical>((st->Position - t->Position).normalized() * s->Speed);
-					SharedCellData*  d  = supplyShip.Set<SharedCellData>();
-					EnemySupplyShip* ss = supplyShip.Set<EnemySupplyShip>();
+					std::vector<iw::vector2> objectives; // only do this when needed
+					space->Query<iw::Transform, Asteroid>().Each([&](auto e, auto t, auto) {
+						objectives.push_back(t->Position);
+					});
+					
+					if(objectives.size() > 0) {
+						iw::Entity supplyShip = Space->CreateEntity<iw::Transform, Tile, EnemyShip, EnemySupplyShip, Physical, Flocking, SharedCellData>();
+						supplyShip.Set<Tile>(std::vector<iw::vector2> {
+							vector2(0, 0),				                 vector2(3, 0),
+							vector2(0, 1), vector2(1, 1), vector2(2, 1), vector2(3, 1), vector2(4, 1), vector2(5, 1),
+							vector2(0, 2), vector2(1, 2), vector2(2, 2), vector2(3, 2), vector2(4, 2), vector2(5, 2),
+							vector2(0, 3),                               vector2(3, 3),
+							vector2(0, 4)
+						}, 5);
+						iw::Transform*   st = supplyShip.Set<iw::Transform>(t->Position + 200*iw::vector2(iw::randf(), iw::randf()));
+						EnemyShip*       s  = supplyShip.Set<EnemyShip>(b);
+						Physical*        p  = supplyShip.Set<Physical>((st->Position - t->Position).normalized() * s->Speed);
+						SharedCellData*  d  = supplyShip.Set<SharedCellData>();
+						EnemySupplyShip* ss = supplyShip.Set<EnemySupplyShip>();
 
-					s->Objectives = m_asteriodLocations;
-					s->Objective = s->Objectives.back();
+						s->Objectives = objectives;
+						s->Objective = s->Objectives.back();
 
-					p->Target = 0;
-					p->HasTarget = true;
+						p->Target = 0;
+						p->HasTarget = true;
 
-					d->RecordHitCells = true;
-
-					b->SupplyShipCost *= 2;
+						d->RecordHitCells = true;
+					}
 				}
 			
 				b->FireTimer -= deltaTime;
@@ -754,7 +759,6 @@ namespace iw {
 	void SandLayer::Reset() {
 		world.Reset();
 		Space->Clear();
-		m_asteriodLocations.clear();
 
 		player = Space->CreateEntity<iw::Transform, Tile, Player>();
 
@@ -795,8 +799,6 @@ namespace iw {
 		for (int a = 0; a < 3; a++) {
 			float xOff = (2+a) * 100 + iw::randf() * 50;
 			float yOff = (2+a) * 100 + iw::randf() * 50;
-
-			m_asteriodLocations.emplace_back(xOff, yOff); // this isnt really needed if we have the space
 
 			iw::Entity asteroid = Space->CreateEntity<iw::Transform, SharedCellData, Physical, Asteroid>();
 			iw::Transform*  t = asteroid.Set<iw::Transform>(xOff, yOff);
