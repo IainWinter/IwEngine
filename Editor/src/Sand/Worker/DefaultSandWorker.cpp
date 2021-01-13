@@ -59,10 +59,14 @@ void DefaultSandWorker::UpdateHitCell(
 	WorldCoord x,  WorldCoord y,
 	Cell& cell)
 {
-	if (cell.User) {
-		cell.User->Hit = true;
-		cell.User->hX = hx;
-		cell.User->hY = hy;
+	if (cell.Share) {
+		cell.Share->Hit = true;
+		cell.Share->hX = hx;
+		cell.Share->hY = hy;
+
+		if (cell.Share->RecordHitCells) {
+			cell.Share->RecordHit(x, y, GetCell(hx, hy));
+		}
 	}
 
 	if		(cell.Props & CellProperties::HIT_LIKE_BEAM)	   { HitLikeBeam   (hx, hy, x, y, cell); }
@@ -171,12 +175,14 @@ bool DefaultSandWorker::MoveForward(
 	const Cell& replace,
 	bool& hit, int& hitx, int& hity)
 {
-	if (cell.Speed() > 0) {
-		if (cell.User) {
-			cell.dX = cell.User->vX;
-			cell.dY = cell.User->vY;
+	//cell.Life -= iw::DeltaTime();
 
-			if (cell.User->Hit) {
+	if (cell.Speed() > 0 && cell.Life > 0) {
+		if (cell.Share && cell.Share->UsedForMotion) {
+			cell.dX = cell.Share->vX;
+			cell.dY = cell.Share->vY;
+
+			if (cell.Share->Hit) {
 				hit = true;
 				hitx = x;
 				hity = y;
@@ -222,7 +228,7 @@ bool DefaultSandWorker::MoveForward(
 				next.pY = cell.pY;
 				next.dX = last ? cell.dX : 0;
 				next.dY = last ? cell.dY : 0;
-				next.User = cell.User;
+				next.Share = cell.Share;
 				next.TileId = cell.TileId;
 				next.SplitCount = cell.SplitCount;
 
@@ -246,9 +252,9 @@ bool DefaultSandWorker::MoveAsSharedUser(
 	Cell& cell,
 	const Cell& replace)
 {
-	if (!cell.User) return false;
+	if (!cell.Share) return false;
 
-	switch (cell.User->Type) {
+	switch (cell.Share->Type) {
 		case SharedCellType::ASTEROID: {
 			//if (CurrentTick() % 2 == 0) {
 			//	float dx = cell.dX;
@@ -281,16 +287,16 @@ bool DefaultSandWorker::MoveAsSharedUser(
 		}
 	}
 
-	float s = sin(cell.User->angle);
-	float c = cos(cell.User->angle);
+	float s = sin(cell.Share->angle);
+	float c = cos(cell.Share->angle);
 
-	int px = ceil(cell.User->pX + cell.pX * c - cell.pY * s);
-	int py = ceil(cell.User->pY + cell.pX * s + cell.pY * c);
+	int px = ceil(cell.Share->pX + cell.pX * c - cell.pY * s);
+	int py = ceil(cell.Share->pY + cell.pX * s + cell.pY * c);
 
 	if (   px != x
 		|| py != y
 		|| IsEmpty(px, py)
-		|| GetCell(px, py).User == cell.User)
+		|| GetCell(px, py).Share == cell.Share)
 	{
 		SetCellQueued(px, py, cell);
 		SetCellQueued(x, y, Cell::GetDefault(CellType::EMPTY));
@@ -304,7 +310,7 @@ bool DefaultSandWorker::DeleteWithTime(
 	Cell& cell)
 {
 	cell.Life -= __stepTime;
-	if (cell.Life < 0) {
+	if (cell.Life <= 0) {
 		SetCell(x, y, Cell::GetDefault(CellType::EMPTY));
 
 		return true;
@@ -313,14 +319,25 @@ bool DefaultSandWorker::DeleteWithTime(
 	return false;
 }
 
+// HOW HITS (SHOULD) WORK
+
+// should remove life, damage if hit pres > beam pres, if not just change direction
+
 void DefaultSandWorker::HitLikeProj(
 	int x,  int y,
 	int lx, int ly,
 	Cell& bullet)
 {
+	bullet.Life /= 2;
+
 	float max = Cell::GetDefault(bullet.Type).Speed();
 
-	if (bullet.SplitCount < 4) {
+	bullet.dX += max/5 * iw::randf();
+	bullet.dY += max/5 * iw::randf();
+
+	if (   bullet.SplitCount < bullet.MaxSplitCount
+		&& HasPrecedence(x, y, lx, ly))
+	{
 		int px = iw::randi(2) - 1;
 		int py = iw::randi(2) - 1;
 
@@ -335,10 +352,7 @@ void DefaultSandWorker::HitLikeProj(
 
 			SetCell(c.pX, c.pY, c);
 		}
-
-		bullet.dX += max/5 * iw::randf();
-		bullet.dY += max/5 * iw::randf();
-
+		
 		SetCell(x, y, bullet);
 	}
 }
@@ -354,10 +368,24 @@ void DefaultSandWorker::HitLikeBeam(
 	int lx, int ly,
 	Cell& beam)
 {
+	beam.Life /= 2;
+
 	float max = Cell::GetDefault(beam.Type).Speed();
 	iw::vector2 v(beam.dX, beam.dY);
 
-	if (beam.SplitCount < 5) {
+	RandomizeVector(v, max, 5);
+	beam.dX = v.x;
+	beam.dY = v.y;
+
+	Cell hit = GetCell(x, y);
+
+	if (hit.Precedence > beam.Precedence) {
+		hit.Life -= beam.Speed();
+	}
+
+	if (   beam.SplitCount < beam.MaxSplitCount
+		&& hit.Life <= 0)
+	{
 		int px = iw::randi(2) - 1;
 		int py = iw::randi(2) - 1;
 
@@ -375,12 +403,11 @@ void DefaultSandWorker::HitLikeBeam(
 			SetCell(c.pX, c.pY, c);
 		}
 
-		RandomizeVector(v, max, 5);
-
-		beam.dX = v.x;
-		beam.dY = v.y;
-
 		SetCell(x, y, beam);
+	}
+
+	else {
+		SetCell(x, y, hit);
 	}
 }
 
@@ -422,9 +449,9 @@ void DefaultSandWorker::HitLikeMissile(
 		}
 
 		else if (dest.Type == CellType::MISSILE) {
-			dest.User->Hit = true;
-			dest.User->hX = x;
-			dest.User->hY = y;
+			dest.Share->Hit = true;
+			dest.Share->hX = x;
+			dest.Share->hY = y;
 		}
 	}
 }

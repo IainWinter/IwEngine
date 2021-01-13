@@ -3,6 +3,7 @@
 #include "iw/graphics/Color.h"
 #include "iw/util/enum/val.h"
 #include <unordered_map>
+#include <functional>
 #include <mutex>
 
 using Tick = size_t;
@@ -26,8 +27,11 @@ enum class CellType {
 	SMOKE,
 	EXPLOSION,
 
+	REZ,
+
 	LASER,
 	eLASER,
+	mLASER,
 	BULLET,
 	MISSILE
 };
@@ -48,12 +52,59 @@ enum class CellProperties {
 inline CellProperties operator|(CellProperties a,CellProperties b){return CellProperties(iw::val(a)|iw::val(b));}
 inline auto           operator&(CellProperties a,CellProperties b){return iw::val(a)&iw::val(b);}
 
+struct SharedCellData;
+
+struct Cell {
+	CellType       Type  = CellType::EMPTY;
+	CellProperties Props = CellProperties::NONE;
+
+	iw::Color Color;
+
+	float Life = 0; // Life until the cell will die, only some cells use this
+	float pX = 0;   // 'Position'
+	float pY = 0;
+	float dX = 0;   // Velocity
+	float dY = 0;
+
+	int SplitCount = 0; // to stop lazers and bullets from splitting to much
+	int MaxSplitCount = 0;
+
+	int TileId = 0;          // Tile id, 0 means that it belongs to noone
+	int LastUpdateTick = 0;  // Used to check if the cell has been updated in the current tick
+	bool Gravitised = false; // If this cell should react to gravity
+	SharedCellData* Share = nullptr; // Shared data
+
+	int Precedence = 20;
+
+	float Speed() const {  // Manhattan distance of velocity
+		return sqrt(dX*dX + dY*dY);
+	}
+
+	static inline void        SetDefault(CellType type,const Cell& cell){m_defaults.emplace(type, cell);}
+	static inline const Cell& GetDefault(CellType type)                 {return m_defaults.at(type);}
+private:
+	static inline std::unordered_map<CellType, Cell> m_defaults;
+};
+
 enum class SharedCellType {
 	NONE,
 	ASTEROID
 };
 
 struct SharedCellData {
+	bool Stale = false; // If share should be removed from the cells
+
+	bool UsedForMotion = false;
+
+	bool RecordHitCells = false;
+	std::vector<std::tuple<WorldCoords, Cell>> HitCells;
+	std::mutex m_hitCellsMutex;
+
+	void RecordHit(WorldCoord x, WorldCoord y, const Cell& cell) {
+		std::unique_lock lock(m_hitCellsMutex);
+		HitCells.emplace_back(std::make_pair(x, y), cell);
+	}
+
 	float pX = 0; // Position
 	float pY = 0;
 	float angle = 0;
@@ -75,12 +126,13 @@ struct SharedCellData {
 	int hX = 0;
 	int hY = 0;
 
-	std::mutex m_userCountMutex;
-	int UserCount = 0;
+	int UserCount = 0; // Total count
+	std::unordered_map<CellType, int> UserTypeCounts; // Count of each type
+	std::mutex m_userMutex;
 
 	// uhg
 
-	SharedCellData():m_userCountMutex(){}
+	SharedCellData() {}
 	SharedCellData(const SharedCellData& copy)
 		: pX(copy.pX)
 		, pY(copy.pY)
@@ -91,51 +143,29 @@ struct SharedCellData {
 		, cY(copy.cY)
 		, Type(copy.Type)
 		, Special(copy.Special)
-		, m_userCountMutex()
 		, UserCount(copy.UserCount)
+		, UserTypeCounts(copy.UserTypeCounts)
+		, UsedForMotion(copy.UsedForMotion)
+		, RecordHitCells(copy.RecordHitCells)
+		, HitCells(copy.HitCells)
+		, Stale(copy.Stale)
 	{}
 	SharedCellData& operator=(const SharedCellData& copy){
-		pX        = copy.pX;
-		pY        = copy.pY;
-		angle     = copy.angle;
-		vX        = copy.vX;
-		vY        = copy.vY;
-		cX        = copy.cX;
-		cY        = copy.cY;
-		Type      = copy.Type;
+		pX = copy.pX;
+		pY = copy.pY;
+		angle = copy.angle;
+		vX = copy.vX;
+		vY = copy.vY;
+		cX = copy.cX;
+		cY = copy.cY;
+		Type  = copy.Type;
 		Special = copy.Special;
 		UserCount = copy.UserCount;
+		UserTypeCounts = copy.UserTypeCounts;
+		UsedForMotion = copy.UsedForMotion;
+		RecordHitCells = copy.RecordHitCells;
+		HitCells = copy.HitCells;
+		Stale = copy.Stale;
 		return *this;
 	}
-};
-
-struct Cell {
-	CellType       Type  = CellType::EMPTY;
-	CellProperties Props = CellProperties::NONE;
-
-	iw::Color Color;
-
-	float Life = 0; // Life until the cell will die, only some cells use this
-	float pX = 0;   // 'Position'
-	float pY = 0;
-	float dX = 0;   // Velocity
-	float dY = 0;
-
-	int SplitCount = 0; // to stop lazers and bullets from splitting to much
-
-	int TileId = 0;          // Tile id, 0 means that it belongs to noone
-	int LastUpdateTick = 0;  // Used to check if the cell has been updated in the current tick
-	bool Gravitised = false; // If this cell should react to gravity
-	SharedCellData* User = nullptr; // Shared data
-
-	int Precedence = 10;
-
-	float Speed() const {  // Manhattan distance of velocity
-		return sqrt(dX*dX + dY*dY);
-	}
-
-	static inline void        SetDefault(CellType type,const Cell& cell){m_defaults.emplace(type, cell);}
-	static inline const Cell& GetDefault(CellType type)                 {return m_defaults.at(type);}
-private:
-	static inline std::unordered_map<CellType, Cell> m_defaults;
 };

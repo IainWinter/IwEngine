@@ -86,10 +86,13 @@ void SandChunk::MoveCell(
 	);
 }
 
-void SandChunk::CommitMovedCells(
+bool SandChunk::CommitMovedCells(
 	Tick currentTick)
 {
-	//ResetRect();
+	bool changed = m_keepAlive.size() > 0 || m_setQueue.size() > 0 || m_moveQueue.size() > 0;
+	if (!changed) return false;
+
+	ResetRect();
 
 	// KEEP ALIVES
 
@@ -139,7 +142,7 @@ void SandChunk::CommitMovedCells(
 		}
 	}
 
-	if (m_moveQueue.size() == 0) return;
+	if (m_moveQueue.size() == 0) return changed;
 
 	// sort by destination
 
@@ -168,6 +171,8 @@ void SandChunk::CommitMovedCells(
 
 	m_moveQueue.clear();
 	m_lastTick = currentTick;
+
+	return changed;
 }
 
 // Private
@@ -182,11 +187,11 @@ void SandChunk::ResetRect() {
 void SandChunk::UpdateRect(
 	WorldCoord x, WorldCoord y) // damn this doesnt really work :< idk what other approachs there are
 {
-	if (x <= m_minX) m_minX = iw::clamp<WorldCoord>(x - 5, 0, m_width);
-	if (x >= m_maxX) m_maxX = iw::clamp<WorldCoord>(x + 5, 0, m_width);
+	//if (x <= m_minX) m_minX = iw::clamp<WorldCoord>(x - 2, 0, m_width);
+	//if (x >= m_maxX) m_maxX = iw::clamp<WorldCoord>(x + 2, 0, m_width);
 
-	if (y <= m_minY) m_minY = iw::clamp<WorldCoord>(y - 5, 0, m_height);
-	if (y >= m_maxY) m_maxY = iw::clamp<WorldCoord>(y + 5, 0, m_height);
+	//if (y <= m_minY) m_minY = iw::clamp<WorldCoord>(y - 2, 0, m_height);
+	//if (y >= m_maxY) m_maxY = iw::clamp<WorldCoord>(y + 2, 0, m_height);
 }
 
 void SandChunk::SetCellData(
@@ -208,15 +213,19 @@ void SandChunk::SetCellData(
 		++m_filledCellCount;
 	}
 
-	if (dest.User != cell.User) {
-		if (dest.User) {
-			std::unique_lock lock(dest.User->m_userCountMutex);
-			dest.User->UserCount--;
+	if (dest.Share && dest.Share->Stale) dest.Share = nullptr; // reset stale shared data
+
+	if (dest.Share != cell.Share) {
+		if (dest.Share) {
+			std::unique_lock lock(dest.Share->m_userMutex);
+			dest.Share->UserCount--;
+			dest.Share->UserTypeCounts[dest.Type]--;
 		}
 
-		if (cell.User) {
-			std::unique_lock lock(cell.User->m_userCountMutex);
-			cell.User->UserCount++;
+		if (cell.Share) {
+			std::unique_lock lock(cell.Share->m_userMutex);
+			cell.Share->UserCount++;
+			cell.Share->UserTypeCounts[cell.Type]++;
 		}
 	}
 

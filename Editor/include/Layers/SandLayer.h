@@ -18,12 +18,15 @@
 //#include "iw/util/memory/pool_allocator.h"
 
 struct Player {
-	iw::vector3 Movement = 0;
+	iw::vector3 Movement = 0; // up, side, boost
+	iw::vector3 FireButtons = 0; // bullet, laser (tmp), missiles
 	iw::vector2 pMousePos = 0, MousePos = 0;
-	iw::vector3 FireButtons = 0;
 	float FireTimeout = 0;
 
 	float Speed = 0;
+
+	float BoostFuel = 0;
+	float MaxBoostFuel = 7; // seconds
 };
 
 struct Physical {
@@ -33,15 +36,22 @@ struct Physical {
 	float Speed = 200;
 	float TurnRadius = 0.025f;
 	bool HasTarget = false;
+
+	bool AttractTarget = false;
 };
+
+struct Asteroid { };
 
 struct Flocking { }; // Tag, could have strength of flocking forces
 
 struct EnemyBase;
 
-struct EnemySupplyShip {
-	float MaxRez = 10000;
+struct EnemySupplyShip { // attack mode = flee
+	int MaxRez = 10000;
+	int CapturedRez = 0;
 };
+
+struct EnemyAttackShip { }; // Tag, attack mode = fight player
 
 struct EnemyShip {
 	EnemyBase* Command; // To request commands from
@@ -52,9 +62,11 @@ struct EnemyShip {
 	bool AtObjective = false;
 	bool AttackMode = false;
 
-	int ObjectivesCount = 0;
+	bool Homecoming = false;
 
-	iw::vector2 Objective = 0; // Current location to move twoards (get from Command)
+	iw::vector2 Objective; // Current location to move twoards (get from Command)
+	std::vector<iw::vector2> Objectives; // Random location to move to, same for each group spawned
+
 	//iw::vector2 Velocity  = 0;
 	float Speed = 200;
 
@@ -62,34 +74,31 @@ struct EnemyShip {
 	float FireTimer = 0;
 	float FireTime = 2.5f;
 
-	float Rez = 100; // Start with 100 + whatever the cost was to make
-	float MinRez = 10;
+	int Rez = 100; // Start with 100 + whatever the cost was to make
+	int MinRez = 10;
 
-	float RezToFireLaser = 5;
+	int RezToFireLaser = 5;
 };
 
 struct EnemyBase {
 	EnemyBase* MainBase = nullptr; // Null if main base
 
 	std::vector<EnemyShip*> NeedsObjective;
-	std::vector<std::pair<float, iw::vector2>> PlayerLocations;
+	//std::vector<std::pair<float, iw::vector2>> PlayerLocations; // would be for tracking but that is too hard probz
 
-	iw::vector3 EstPlayerLocation; // xy + radius
+	iw::vector3 EstPlayerLocation = iw::vector3(0,0, FLT_MAX); // xy + radius
 
 	float Rez = 0;
 
 	float NextGroup = 10;
-	float EnemyCost = 5;
+	float AttackShipCost = 5;
+	float SupplyShipCost = 50;
 
 	float FireTimer = 0;
 	float FireTime = 10;
 
 	void RequestObjective(EnemyShip* ship) {
 		NeedsObjective.push_back(ship);
-	}
-
-	void LocatedPlayer(iw::vector2 position) {
-		PlayerLocations.emplace_back(iw::TotalTime(), position);
 	}
 };
 
@@ -136,6 +145,9 @@ namespace iw {
 
 		int updatedCellCount = 0;
 
+		std::vector<iw::vector2> m_asteriodLocations; // list of asteroids, remove this use Space
+
+		std::vector<iw::Entity> m_userCleanup; // need to wait one frame to delete shared user data
 	public:
 		SandLayer();
 
@@ -144,7 +156,10 @@ namespace iw {
 
 		bool On(MouseMovedEvent& e) override;
 		bool On(MouseButtonEvent& e) override;
+		bool On(MouseWheelEvent& e) override;
 		bool On(KeyEvent& e) override;
+
+		bool On(EntityDestroyedEvent& e) override;
 	private:
 		void Fire(
 			iw::Transform* transform,
@@ -222,7 +237,7 @@ namespace iw {
 
 			Cell cell = projectile;
 			cell.TileId = whoFiredId;
-			cell.User = u;
+			cell.Share = u;
 			cell.pX = point.x;
 			cell.pY = point.y;
 			cell.dX = dir.x * speed;

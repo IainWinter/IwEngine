@@ -5,11 +5,11 @@
 
 #include "iw/math/noise.h"
 
-double __chunkScale = 2;
+double __chunkScale = 1;
 int __brushSizeX = 50;
 int __brushSizeY = 50;
-float __stepTime = 1/30.f;
-bool __stepDebug = true;
+float __stepTime = 1/80.f;
+bool __stepDebug = false;
 
 namespace iw {
 	SandLayer::SandLayer()
@@ -54,8 +54,11 @@ namespace iw {
 		Cell smoke   = { CellType::SMOKE,     CellProperties::MOVE_RANDOM | CellProperties::DELETE_TIME };
 		Cell explosn = { CellType::EXPLOSION, CellProperties::MOVE_RANDOM | CellProperties::DELETE_TIME };
 		
+		Cell rez     = { CellType::REZ };
+
 		Cell laser   = { CellType::LASER,   CellProperties::MOVE_FORWARD | CellProperties::DELETE_TIME | CellProperties::HIT_LIKE_BEAM };
 		Cell elaser  = { CellType::eLASER,  CellProperties::MOVE_FORWARD | CellProperties::DELETE_TIME | CellProperties::HIT_LIKE_BEAM };
+		Cell mlaser  = { CellType::mLASER,  CellProperties::MOVE_FORWARD | CellProperties::DELETE_TIME | CellProperties::HIT_LIKE_BEAM };
 		Cell bullet  = { CellType::BULLET,  CellProperties::MOVE_FORWARD | CellProperties::DELETE_TIME | CellProperties::HIT_LIKE_PROJECTILE };
 		Cell missile = { CellType::MISSILE, CellProperties::MOVE_FORWARD | CellProperties::DELETE_TIME | CellProperties::HIT_LIKE_MISSILE };
 
@@ -66,24 +69,30 @@ namespace iw {
 		metal  .Color = iw::Color::From255(230, 230, 230);
 		debris .Color = iw::Color::From255(150, 150, 150);
 		explosn.Color = iw::Color::From255(255,  66,  33);
-		smoke  .Color = explosn.Color; //lerped to -> iw::Color::From255(100, 100, 100);
+
+		rez    .Color = iw::Color::From255(0, 255, 30/*, 200*/);
+
+		smoke  .Color = explosn.Color; // lerped to -> iw::Color::From255(100, 100, 100);
 		laser  .Color = iw::Color::From255(255,   0,   0);
 		elaser .Color = iw::Color::From255(  0, 200, 255);
+		mlaser .Color = iw::Color::From255(255, 128, 20);
 		bullet .Color = iw::Color::From255(255, 255,   0);
 		missile.Color = metal.Color;
 
 		sand .dY = -1;
 		water.dY = -1;
-		smoke.dX = smoke.dY = .5f;
+		smoke.dX   = smoke.dY = .5f;
 		explosn.dX = explosn.dY = 2;
 
 		bullet.dX  = 500; // Initial speeds
 		laser.dX   = 1500;
 		elaser.dX  = 1000;
+		mlaser.dX  = 2000;
 		missile.dX = 200;
 
 		laser .Life  = 0.06f;
 		elaser.Life  = 1.00f;
+		//mlaser.Life  = 0.01f;
 		bullet.Life  = 0.01f;
 		missile.Life = 0.05f;
 		explosn.Life = 0.06f;
@@ -92,10 +101,18 @@ namespace iw {
 		empty  .Precedence = 0;
 		smoke  .Precedence = 1;
 		explosn.Precedence = 100;
+
+		rez    .Precedence = 1000;
+
 		laser  .Precedence = 15;
 		elaser .Precedence = 15;
+		mlaser .Precedence = 1001;
 		bullet .Precedence = 15;
-		missile.Precedence = 101;
+		missile.Precedence = 15;
+
+		bullet.MaxSplitCount = 5;
+		laser .MaxSplitCount = 5;
+		elaser.MaxSplitCount = 1;
 
 		Cell::SetDefault(CellType::EMPTY,     empty);
 		Cell::SetDefault(CellType::SAND,      sand);
@@ -105,9 +122,12 @@ namespace iw {
 		Cell::SetDefault(CellType::DEBRIS,    debris);
 		Cell::SetDefault(CellType::SMOKE,     smoke);
 		Cell::SetDefault(CellType::EXPLOSION, explosn);
+		
+		Cell::SetDefault(CellType::REZ,       rez);
 
 		Cell::SetDefault(CellType::LASER,     laser);
 		Cell::SetDefault(CellType::eLASER,    elaser);
+		Cell::SetDefault(CellType::mLASER,    mlaser);
 		Cell::SetDefault(CellType::BULLET,    bullet);
 		Cell::SetDefault(CellType::MISSILE,   missile);
 
@@ -235,10 +255,21 @@ namespace iw {
 		if (stepTimer <= 0 && (!__stepDebug || Keyboard::KeyDown(V))) {
 			Space->Query<iw::Transform, Player>().Each([&](auto, auto t, auto p) {
 				if (p->Movement.y == 0) {
-					p->Speed *= .99f;
+					p->Speed = iw::lerp(p->Speed, 0.f, deltaTime);
 				}
 
-				p->Speed = iw::clamp<float>(p->Speed + p->Movement.y, -100, 100);
+				else if (p->Movement.z == 1 && p->BoostFuel > 0) {
+					p->BoostFuel -= iw::DeltaTime();
+					p->Speed = iw::lerp(p->Speed, 300.f, deltaTime *5);
+				}
+
+				else {
+					p->Speed = iw::clamp<float>(p->Speed + p->Movement.y, -100, 100);
+				}
+				
+				if (p->Movement.z == 0) {
+					p->BoostFuel = iw::clamp<float>(p->BoostFuel + deltaTime/10, 0, p->MaxBoostFuel);
+				}
 
 				vector3 vel = t->Up() * p->Speed *  deltaTime * 3;
 				//vel.y = -vel.y;
@@ -259,7 +290,7 @@ namespace iw {
 					
 					else if (p->FireButtons.y == 1) {
 						p->FireTimeout = 0.001f;
-						Fire(t, pos, 0, Cell::GetDefault(CellType::LASER), false);
+						Fire(t, pos, 0, Cell::GetDefault(CellType::mLASER), false);
 					}
 
 					else if (p->FireButtons.z == 1) {
@@ -267,6 +298,8 @@ namespace iw {
 						vector2 d = t->Position + t->Right() * (iw::randf() > 0 ? 1 : -1);
 						FireMissile(t, d, Cell::GetDefault(CellType::MISSILE));
 					}
+
+					p->FireButtons.z = 0; // need to reset because its on scroll wheel :/
 				}
 			});
 
@@ -278,7 +311,7 @@ namespace iw {
 				iw::vector2 avgForward = 0;
 				int count = 0;
 
-				space->Query<iw::Transform, Flocking, Physical>().Each([&](auto e2, auto t2, auto f2, auto p2) {
+				space->Query<iw::Transform, Physical>().Each([&](auto e2, auto t2, auto p2) {
 					if (e == e2) return;
 					
 					iw::vector2 away = t->Position - t2->Position;
@@ -292,27 +325,36 @@ namespace iw {
 					count      += 1;
 				});
 
+				iw::vector2 at = t->Position - p->Target;
+
+				if (at.length_squared() < 200*200) {
+					avgAway += at * (p->AttractTarget ? -1 : 1)/2;
+				}
+
 				if (count > 0) {
 					avgAway    /= count;
 					avgCenter  /= count; avgCenter -= t->Position;
 					avgForward /= count;
 				}
 
-				p->Velocity = iw::lerp(p->Velocity, p->Velocity + avgAway /*+ avgCenter*/ + avgForward, deltaTime*5);
+				p->Velocity = iw::lerp(p->Velocity, p->Velocity + avgAway /*+ avgCenter*/ + avgForward/10, deltaTime*5);
 
 				// Target force
 				iw::vector2 nVel = (p->Velocity).normalized();
-				iw::vector2 nDir = (p->Target - t->Position  /*+ avgAway + avgCenter + avgForward*/).normalized();
+				iw::vector2 nDir = (p->Target - t->Position).normalized();
 				iw::vector2 delta = (nDir - nVel) * p->Speed * p->TurnRadius;
 
 				p->Velocity = (p->Velocity + delta).normalized() * p->Speed;
 			});
-			
+
 			Space->Query<iw::Transform, EnemyShip, Physical>().Each([&](auto, auto t, auto s, auto p) {
 				// Check for another command every few seconds
 
-				s->RezLow = s->Rez <= s->MinRez;
-				s->AtObjective = (t->Position - s->Objective).length_squared() < 40*40; // 400 meters form objective
+				s->RezLow      = s->Rez <= s->MinRez;
+				s->AtObjective = (t->Position - s->Objective)  .length_squared() < 300*300;    // 300 meters form objective
+				//s->AttackMode  = (t->Position - playerLocation).length_squared() < 2500*2500; // 2500 meters from player
+
+				p->AttractTarget = s->Homecoming;
 
 				s->ChecekCommandTimer -= deltaTime;
 				if (s->ChecekCommandTimer <= 0) {
@@ -322,88 +364,173 @@ namespace iw {
 
 				// Always move twoards objective
 
-				if (s->AtObjective) {
-					//p->Speed /= s->Speed;
-					//p->Target.x = s->Objective.x + 100*cos(iw::TotalTime());
-					//p->Target.y = s->Objective.y + 100*sin(iw::TotalTime());
+				if (s->AttackMode) {
+					p->Speed = iw::lerp(p->Speed, s->Speed*2, iw::DeltaTime()); // fast when attacking
+				}
+
+				else if (s->AtObjective) {
+					p->Speed = iw::lerp(p->Speed, s->Speed/5, iw::DeltaTime()); // slow at objective
 				}
 
 				else {
-					p->Target = s->Objective;
-					p->Speed  = s->Speed;
+					p->Speed = iw::lerp(p->Speed, s->Speed, iw::DeltaTime()); // normal
+				}
+				
+				p->Target = s->Objective;
+			});
+
+			Space->Query<iw::Transform, EnemyShip, EnemyAttackShip>().Each([&](auto, auto t, auto s, auto) {
+				if (s->AttackMode) {
+					s->FireTimer -= deltaTime;
+					if (s->FireTimer <= 0) {
+						s->FireTimer = s->FireTime * (iw::randf() + 1.1f);
+						s->Rez -= s->RezToFireLaser;
+
+						Fire(t, playerLocation, 0, Cell::GetDefault(CellType::eLASER), true); // should shoot forward, not just at player location
+					}
+
+					s->Objective = playerLocation;
+				}
+			});
+
+			Space->Query<iw::Transform, EnemyShip, EnemySupplyShip>().Each([&, space](auto e, auto t, auto s, auto ss) {
+				SharedCellData* user = space->FindComponent<SharedCellData>(e); // not in query because it should be an option
+
+				for (auto [coords, cell] : user->HitCells) {
+					if (cell.Type == CellType::REZ) {
+						ss->CapturedRez = iw::clamp<>(ss->CapturedRez + 1, 0, ss->MaxRez);
+					}
 				}
 
-				// If player is near, enter attack mode and start fighting
+				if (s->AttackMode) {
+					iw::vector2 commandLocation = space->FindEntity(s->Command).Find<iw::Transform>()->Position;
+					iw::vector2 c = t->Position - commandLocation;
+					iw::vector2 a = t->Position - playerLocation;
 
-				if (   !s->AttackMode
-					&& (t->Position - player.Find<iw::Transform>()->Position).length_squared() > 800*800) // make them need to actually see you, could do a simple raycast through cells
-				{  
-					s->AttackMode = true;
+					if (c.length_squared() <= a.length_squared()) {
+						s->Objective = commandLocation;
+						s->Homecoming = true;
+					}
+					else {
+						s->Objective = (t->Position - playerLocation).normalized() * 3000; // try and get 3 km away
+					}
 				}
 
-				//if (p->AttackMode) {
-				//	p->FireTimer -= deltaTime;
-				//	if (p->FireTimer <= 0) {
-				//		p->FireTimer = p->FireTime * (iw::randf() + 1.1f);
-				//		p->Rez -= p->RezToFireLaser;
-				//		Fire(t, playerLocation, 0, Cell::GetDefault(CellType::eLASER), true); // should shoot forward
-				//	}
+				else if (ss->CapturedRez >= ss->MaxRez) {
+					s->Homecoming = true; // go home
+					// wait could put as not below, idk if there should be behaviour here
+				}
+
+				else if (s->AtObjective) {
+					s->ChecekCommandTimer = 1;
+
+					Cell p = Cell::GetDefault(CellType::LASER);
+					p.Share = user;
+					Fire(t, s->Objective, 0, p, -1);
+				}
 			});
 
 			Space->Query<iw::Transform, EnemyBase>().Each([&](auto, auto t, auto b) {
 				t->Rotation *= iw::quaternion::from_euler_angles(0, 0, deltaTime/60);
 
+				b->EstPlayerLocation.z += iw::DeltaTime() * 2500; // Should be 5000km within 2 seconds
+
 				for (EnemyShip* ship : b->NeedsObjective) {
-					if (ship->RezLow) {						 // send ship home if it has little rez
-						ship->Objective = t->Position; 
+					if (ship->AttackMode) { // If player is found
+						b->EstPlayerLocation = iw::vector3(playerLocation, 0);
 					}
 
-					else if (ship->AtObjective) {
-						iw::vector2 rand = iw::vector2(iw::randf(), iw::randf()).normalized();
+					// send ship home if it has little rez, could do suicide mission if base is looking grim
+					if (ship->RezLow || ship->Homecoming) {
+						ship->AtObjective = true;
+						ship->Objectives.clear();
+					}
 
-						if (b->EstPlayerLocation.z < 5000) { // send ship twoards player if est location is good enough 
-							ship->Objective = b->EstPlayerLocation + b->EstPlayerLocation.z * rand;
+					if (ship->AtObjective) {
+						// send ship twoards player if est location is good enough 
+						if (   b->EstPlayerLocation.z < 2500
+							&& space->FindEntity(ship).Has<EnemyAttackShip>())
+						{
+							iw::vector2 v = b->EstPlayerLocation + b->EstPlayerLocation.z * ship->Objectives.back().normalized();
+							ship->Objectives.push_back(v);
 						}
 
-						else if (ship->ObjectivesCount < 2) {
-							ship->Objective = 100000 * rand; // send ship to another random location if est location is bad
+						// send ship home if it has gotten to all objectives
+						else if (ship->Objectives.size() == 0) {
+							ship->Homecoming = true;
+							ship->Objectives.push_back(t->Position);
 						}
-
-						else {                               // send ship home if it has gotten to both objectives
-							ship->Objective = t->Position;
-						}
-
-						ship->ObjectivesCount++;
+						
+						// send ship to next objective
+						ship->Objective = ship->Objectives.back(); ship->Objectives.pop_back();
 					}
 				}
-
 				b->NeedsObjective.clear();
 
-				b->Rez /*+*/= /*deltaTime**/50; // grow with ship supplies
+				b->Rez += deltaTime * 50; // grow with ship supplies
 
 				float enemy = iw::randf() + 3;
 				float group = enemy * 10 + 10;
 
-				while (b->Rez > b->NextGroup) {
-					b->Rez -= b->EnemyCost;
+				if(false) // if attack ships
+				{
+					std::vector<iw::vector2> objectives; // only do this when needed
+					for (int i = 0; i < 3 + iw::randf(); i++) {
+						objectives.emplace_back(iw::randf() * 1000, iw::randf() * 1000);
+					}
 
-					iw::Entity ship = Space->CreateEntity<iw::Transform, Tile, EnemyShip, Physical, Flocking>();
-					ship.Set<Tile>(std::vector<iw::vector2> {
-									   vector2(1, 0),				 vector2(3, 0),
-						vector2(0, 1), vector2(1, 1), vector2(2, 1), vector2(3, 1),
-						vector2(0, 2), vector2(1, 2), vector2(2, 2), vector2(3, 2),
-						vector2(0, 3),                               vector2(3, 3),
-						vector2(0, 4),                               vector2(3, 4)
-					}, 3);
-					iw::Transform* st = ship.Set<iw::Transform>(t->Position + 200*iw::vector2(iw::randf(), iw::randf()));
-					EnemyShip*     s  = ship.Set<EnemyShip>(b);
-					Physical*      p  = ship.Set<Physical>((st->Position - t->Position).normalized() * s->Speed);
+					while (b->Rez > b->NextGroup) {
+						b->Rez -= b->AttackShipCost;
+
+						iw::Entity attackShip = Space->CreateEntity<iw::Transform, Tile, EnemyShip, EnemyAttackShip, Physical, Flocking>();
+						attackShip.Set<Tile>(std::vector<iw::vector2> {
+										   vector2(1, 0),				 vector2(3, 0),
+							vector2(0, 1), vector2(1, 1), vector2(2, 1), vector2(3, 1),
+							vector2(0, 2), vector2(1, 2), vector2(2, 2), vector2(3, 2),
+							vector2(0, 3),                               vector2(3, 3),
+							vector2(0, 4),                               vector2(3, 4)
+						}, 3);
+						iw::Transform* st = attackShip.Set<iw::Transform>(t->Position + 200*iw::vector2(iw::randf(), iw::randf()));
+						EnemyShip*     s  = attackShip.Set<EnemyShip>(b);
+						Physical*      p  = attackShip.Set<Physical>((st->Position - t->Position).normalized() * s->Speed);
 				
-					p->Target = 0;
-					p->HasTarget = true;
+						s->Objectives = objectives;
+						s->Objective  = s->Objectives.back();
+
+						p->Target = 0;
+						p->HasTarget = true;
+					}
+
+					b->NextGroup = 1000000;
 				}
 
-				b->NextGroup = 1000000;
+				else if (b->Rez > b->SupplyShipCost) {
+					b->Rez -= b->SupplyShipCost;
+
+					iw::Entity supplyShip = Space->CreateEntity<iw::Transform, Tile, EnemyShip, EnemySupplyShip, Physical, Flocking, SharedCellData>();
+					supplyShip.Set<Tile>(std::vector<iw::vector2> {
+						vector2(0, 0),				                 vector2(3, 0),
+						vector2(0, 1), vector2(1, 1), vector2(2, 1), vector2(3, 1), vector2(4, 1), vector2(5, 1),
+						vector2(0, 2), vector2(1, 2), vector2(2, 2), vector2(3, 2), vector2(4, 2), vector2(5, 2),
+						vector2(0, 3),                               vector2(3, 3),
+						vector2(0, 4)
+					}, 5);
+					iw::Transform*   st = supplyShip.Set<iw::Transform>(t->Position + 200*iw::vector2(iw::randf(), iw::randf()));
+					EnemyShip*       s  = supplyShip.Set<EnemyShip>(b);
+					Physical*        p  = supplyShip.Set<Physical>((st->Position - t->Position).normalized() * s->Speed);
+					SharedCellData*  d  = supplyShip.Set<SharedCellData>();
+					EnemySupplyShip* ss = supplyShip.Set<EnemySupplyShip>();
+
+					s->Objectives = m_asteriodLocations;
+					s->Objective = s->Objectives.back();
+
+					p->Target = 0;
+					p->HasTarget = true;
+
+					d->RecordHitCells = true;
+
+					b->SupplyShipCost *= 2;
+				}
 			
 				b->FireTimer -= deltaTime;
 				if (b->FireTimer > 0) {
@@ -480,21 +607,51 @@ namespace iw {
 				s->vX = p->Velocity.x;
 				s->vY = p->Velocity.y;
 			});
-			Space->Query<SharedCellData>()          .Each([&, space](auto e, auto s) {
+			
+			// Move by vel, delete entity if not a Tile and 0 shared cells
+
+			auto q = Space->MakeQuery<SharedCellData>(); q->SetNone({ Space->GetComponent<Tile>() });
+			for (auto itr : Space->Query(q)) {
+				SharedCellData* s = itr.Components.Get<SharedCellData, 0>();
 				if (s->UserCount == 0) {
-					space->QueueEntity(e, iw::func_Destroy);
+					s->Stale = true;
+					space->QueueEntity(itr.Handle, iw::func_Destroy);
 					return;
 				}
-
+				
 				s->pX += s->vX * deltaTime;
 				s->pY += s->vY * deltaTime;
+
+				s->HitCells.clear(); // need to clear here because game logic runs after sand world update
+			}
+
+			// Destroy asteroid entity if out of rez
+
+			Space->Query<SharedCellData, Asteroid>().Each([&, space](auto e, SharedCellData* s, auto) {
+				if (s->UserTypeCounts[CellType::REZ] < 1000) {
+					s->Stale = true;
+					space->QueueEntity(e, iw::func_Destroy);
+				}
 			});
 
-			stepTimer = deltaTime;
-			PasteTiles();
+			// Sand update
+
+			                   PasteTiles();
 			updatedCellCount = UpdateSandWorld(fx, fy, fx2, fy2, deltaTime);
-			UpdateSandTexture(fx, fy, fx2, fy2);
-			RemoveTiles();
+			                   UpdateSandTexture(fx, fy, fx2, fy2);
+			                   RemoveTiles();
+
+			// Reset hit for shared cells
+
+			for (auto itr : Space->Query<SharedCellData>()) {
+				SharedCellData* s = itr.Components.Get<SharedCellData, 0>();
+
+				s->Hit = false;
+				s->hX = 0;
+				s->hY = 0;
+			}
+
+			stepTimer = deltaTime;
 		}
 
 		m_stars.GetTransform()->Position = iw::vector2(-playerLocation.x, -playerLocation.y) / 5000;
@@ -538,6 +695,32 @@ namespace iw {
 	}
 
 	bool SandLayer::On(
+		EntityDestroyedEvent& e)
+	{
+		if (EnemyShip* ship = Space->FindComponent<EnemyShip>(e.Entity)) {
+			iw::vector2 commandPosition = Space->FindEntity(ship->Command).Find<iw::Transform>()->Position;
+
+			if (   ship->Homecoming     // At base
+				&& ship->AtObjective
+				&& ship->Objective == commandPosition)
+			{ 
+				EnemySupplyShip* supply = Space->FindEntity(ship).Find<EnemySupplyShip>();
+				ship->Command->Rez += ship->Rez + supply ? supply->CapturedRez : 0;
+			}
+		}
+
+		return false;
+	}
+
+	bool SandLayer::On(
+		MouseWheelEvent& e)
+	{
+		if (!player) return false;
+		Player* p = player.Find<Player>();
+		p->FireButtons.z = e.Delta == 0 ? 0 : 1;
+	}
+
+	bool SandLayer::On(
 		KeyEvent& e)
 	{
 		if (!player) return false;
@@ -561,7 +744,7 @@ namespace iw {
 				p->Movement.y -= e.State ? 1 : -1; break;
 			}
 			case iw::val(SPACE): {
-				p->FireButtons.z = e.State ? 1 : -1; break;
+				p->Movement.z = e.State ? 1 : 0; break; // (int)
 			}
 		}
 
@@ -571,6 +754,7 @@ namespace iw {
 	void SandLayer::Reset() {
 		world.Reset();
 		Space->Clear();
+		m_asteriodLocations.clear();
 
 		player = Space->CreateEntity<iw::Transform, Tile, Player>();
 
@@ -595,18 +779,28 @@ namespace iw {
 				               vector2(1, 0),                
 		}, 100);
 
+		//iw::Entity e1 = Space->CreateEntity<iw::Transform, EnemyBase, Tile>();
+		//e1.Set<iw::Transform>(iw::vector2(600, 600));
+		//e1.Set<EnemyBase>();
+		//e1.Set<Tile>(std::vector<iw::vector2> {
+		//	vector2(1, 2),
+		//		vector2(0, 1), vector2(1, 1), vector2(2, 1),
+		//		vector2(1, 0),
+		//}, 75);
+
 		// asteroid //
 
 		srand(iw::Ticks());
 
 		for (int a = 0; a < 3; a++) {
-			//iw::Entity asteroid = Space->CreateEntity<iw::Transform, Tile>();
-
-			//iw::Transform* t = asteroid.Set<iw::Transform>(vector2(iw::randf() * 200, iw::randf() * 200));
-			//Tile*          d = asteroid.Set<Tile>();
-			
 			float xOff = (2+a) * 100 + iw::randf() * 50;
 			float yOff = (2+a) * 100 + iw::randf() * 50;
+
+			m_asteriodLocations.emplace_back(xOff, yOff); // this isnt really needed if we have the space
+
+			iw::Entity asteroid = Space->CreateEntity<iw::Transform, SharedCellData, Physical, Asteroid>();
+			iw::Transform*  t = asteroid.Set<iw::Transform>(xOff, yOff);
+			SharedCellData* s = asteroid.Set<SharedCellData>();
 
 			int count = 0;
 			for(int i = -150; i < 150; i++)
@@ -617,21 +811,19 @@ namespace iw {
 				float dist = sqrt(x*x + y*y);
 
 				if (dist < (iw::perlin(x/70 + xOff, y/70 + yOff) + 1) * 75) {
+					Cell c;
 					if (dist < (iw::perlin(x/10 + xOff, y/10 + yOff) + 1) * 25) {
-						world.SetCell(x + xOff, y + yOff, Cell::GetDefault(CellType::METAL)); // make this rez
+						c = Cell::GetDefault(CellType::REZ);
+					}
+					else {
+						c = Cell::GetDefault(CellType::ROCK);
 					}
 
-					else {
-						world.SetCell(x + xOff, y + yOff, Cell::GetDefault(CellType::ROCK));
-					}
+					c.Share = s;
+					world.SetCell(x + xOff, y + yOff, c);
 				}
 			}
 		}
-
-		/*for(int x =  15; x < 30; x++)
-			world.SetCell(x, y, Cell::GetDefault(CellType::ROCK));
-		for(int y = -10; y < 10; y++) {
-		}*/
 	}
 
 	int SandLayer::UpdateSandWorld(
@@ -639,12 +831,6 @@ namespace iw {
 		int fx2, int fy2,
 		float deltaTime)
 	{
-		//if (Mouse::ButtonDown(iw::LMOUSE)) {
-		//	Cell c = Cell::GetDefault(CellType::BULLET);
-		//	c.pX = -50; c.pY = 0;
-		//	world.SetCell(-50, 0, c);
-		//}
-
 		world.Step();
 
 		std::mutex chunkCountMutex;
@@ -661,23 +847,29 @@ namespace iw {
 		auto [minCX, minCY] = world.GetChunkLocation(minX, minY);
 		auto [maxCX, maxCY] = world.GetChunkLocation(maxX, maxY);
 
+		std::vector<SandChunk*> chunksUpdated;
+
 		for (int px = 0; px < 2; px++)
 		for (int py = 0; py < 2; py++) {
 			for (int x = minCX + px; x < maxCX; x += 2)
 			for (int y = minCY + py; y < maxCY; y += 2) {
 				SandChunk* chunk = world.GetChunkDirect(x, y);
-					
-				if (!chunk || chunk->IsAllEmpty()) continue;
+
+				if (!chunk) continue;
+
+				chunksUpdated.push_back(chunk);
+
+				if (chunk->IsAllEmpty()) continue;
 
 				{ std::unique_lock lock(chunkCountMutex); chunkCount++; }
-				cellsUpdatedCount += chunk->m_filledCellCount;
+				cellsUpdatedCount += chunk->m_width*chunk->m_height; // would be area of rect
 
-				//Task->queue([&, chunk]() {
-					int numCellsUpdated = DefaultSandWorker(world, *chunk, Space, deltaTime).UpdateChunk();
+				Task->queue([&, chunk]() {
+					DefaultSandWorker(world, *chunk, Space, deltaTime).UpdateChunk();
 
-					{ std::unique_lock lock(chunkCountMutex); chunkCount--; cellsUpdatedCount += numCellsUpdated; }
+					{ std::unique_lock lock(chunkCountMutex); chunkCount--; }
 					chunkCountCV.notify_one();
-				//});
+				});
 			}
 
 			{
@@ -686,13 +878,13 @@ namespace iw {
 			}
 		}
 		
-		chunkCount = world.m_chunks.size();
-		
-		for (SandChunk* chunk : world.m_chunks) {
+		chunkCount = chunksUpdated.size();
+
+		for (SandChunk* chunk : chunksUpdated) {
 			Task->queue([&, chunk]() {
 				chunk->CommitMovedCells(world.m_currentTick);
 
-				{ std::unique_lock lock(chunkCountMutex); chunkCount--; }
+				{  std::unique_lock lock(chunkCountMutex); chunkCount--; }
 				chunkCountCV.notify_one();
 			});
 		}
@@ -808,6 +1000,10 @@ namespace iw {
 			if (a->Locations.size() < a->InitialLocationsSize / 3) {
 				if ((*Space).HasComponent<Player>(e)) {
 					reset = true;
+				}
+
+				if (SharedCellData* share = Space->FindComponent<SharedCellData>(e)) {
+					share->Stale = true;
 				}
 
 				(*Space).QueueEntity(e, iw::func_Destroy);

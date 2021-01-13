@@ -124,7 +124,7 @@ public:
 		WorldCoord x,   WorldCoord y,
 		WorldCoord xTo, WorldCoord yTo);
 
-	void CommitMovedCells(
+	bool CommitMovedCells(
 		Tick currentTick);
 
 	void ResetRect();
@@ -134,6 +134,6 @@ private:
 
 	void SetCellData(
 		Index index,
-		const Cell& cell,
+		const Cell& cell, // cant be const because of shared cleanup
 		Tick currentTick);
 };
