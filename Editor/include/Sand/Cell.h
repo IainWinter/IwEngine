@@ -2,9 +2,11 @@
 
 #include "iw/graphics/Color.h"
 #include "iw/util/enum/val.h"
+#include "iw/math/vector2.h"
 #include <unordered_map>
 #include <functional>
 #include <mutex>
+#include <set>
 
 using Tick = size_t;
 
@@ -76,6 +78,8 @@ struct Cell {
 
 	int Precedence = 20;
 
+	bool UseFloatingPosition = false;
+
 	float Speed() const {  // Manhattan distance of velocity
 		return sqrt(dX*dX + dY*dY);
 	}
@@ -92,8 +96,6 @@ enum class SharedCellType {
 };
 
 struct SharedCellData {
-	bool Stale = false; // If share should be removed from the cells
-
 	bool UsedForMotion = false;
 
 	bool RecordHitCells = false;
@@ -127,7 +129,8 @@ struct SharedCellData {
 	int hY = 0;
 
 	int UserCount = 0; // Total count
-	std::unordered_map<CellType, int> UserTypeCounts; // Count of each type
+	std::unordered_map<CellType, std::pair<int, iw::vector2>> UserTypeCounts; // Count of each type, avg location
+	std::set<Cell*> m_users; // for cleanup
 	std::mutex m_userMutex;
 
 	// uhg
@@ -148,7 +151,7 @@ struct SharedCellData {
 		, UsedForMotion(copy.UsedForMotion)
 		, RecordHitCells(copy.RecordHitCells)
 		, HitCells(copy.HitCells)
-		, Stale(copy.Stale)
+		, m_users(copy.m_users)
 	{}
 	SharedCellData& operator=(const SharedCellData& copy){
 		pX = copy.pX;
@@ -165,7 +168,7 @@ struct SharedCellData {
 		UsedForMotion = copy.UsedForMotion;
 		RecordHitCells = copy.RecordHitCells;
 		HitCells = copy.HitCells;
-		Stale = copy.Stale;
+		m_users = copy.m_users;
 		return *this;
 	}
 };

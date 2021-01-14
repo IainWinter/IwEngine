@@ -130,7 +130,7 @@ public:
 	void ResetRect();
 private:
 	void UpdateRect(
-		WorldCoord x, WorldCoord y);
+		Index index);
 
 	void SetCellData(
 		Index index,

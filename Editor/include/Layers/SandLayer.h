@@ -47,7 +47,7 @@ struct Flocking { }; // Tag, could have strength of flocking forces
 struct EnemyBase;
 
 struct EnemySupplyShip { // attack mode = flee
-	int MaxRez = 10000;
+	int MaxRez = 1500; // 3x return
 	int CapturedRez = 0;
 };
 
@@ -63,6 +63,7 @@ struct EnemyShip {
 	bool AttackMode = false;
 
 	bool Homecoming = false;
+	bool WantGoHome = false;
 
 	iw::vector2 Objective; // Current location to move twoards (get from Command)
 	std::vector<iw::vector2> Objectives; // Random location to move to, same for each group spawned
@@ -88,14 +89,16 @@ struct EnemyBase {
 
 	iw::vector3 EstPlayerLocation = iw::vector3(0,0, FLT_MAX); // xy + radius
 
-	float Rez = 0;
+	float Rez = 1000;
 
-	float NextGroup = 10;
-	float AttackShipCost = 5;
-	float SupplyShipCost = 50;
+	float AttackShipCost = 100;
+	float SupplyShipCost = 500;
 
 	float FireTimer = 0;
 	float FireTime = 10;
+
+	float UseRezTimer = 0;
+	float UseRezTime = 5;
 
 	void RequestObjective(EnemyShip* ship) {
 		NeedsObjective.push_back(ship);

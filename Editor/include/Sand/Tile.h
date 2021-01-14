@@ -25,6 +25,20 @@ struct Tile {
 		static int s_tileId = 1;
 		TileId = s_tileId++;
 	}
+
+	iw::vector2 FurthestPoint(iw::vector2 d) {
+		iw::vector2 furthest;
+		float maxDist = FLT_MIN;
+		for (iw::vector2& v : Locations) {
+			float dist = v.dot(d);
+			if (dist > maxDist) {
+				maxDist = dist;
+				furthest = v;
+			}
+		}
+
+		return furthest;
+	}
 };
 
 //struct Tile {

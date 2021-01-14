@@ -19,9 +19,6 @@ public:
 		for(WorldCoord x = 0/*m_chunk.m_minX*/; x < m_chunk.m_width /*m_chunk.m_maxX*/; x++)
 		for(WorldCoord y = 0/*m_chunk.m_minY*/; y < m_chunk.m_height/*m_chunk.m_maxY*/; y++) {
 			Cell& cell = m_chunk.GetCellDirect(x, y);
-
-			if (cell.Share && cell.Share->Stale) cell.Share = nullptr; // reset stale shared data
-
 			if (m_world.m_currentTick <= cell.LastUpdateTick) continue;
 
 			UpdateCell(x + m_chunk.m_x, y + m_chunk.m_y, cell);

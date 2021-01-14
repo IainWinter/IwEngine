@@ -97,7 +97,7 @@ bool SandChunk::CommitMovedCells(
 	// KEEP ALIVES
 
 	for (Index index : m_keepAlive) {
-		UpdateRect(index % m_width, index / m_height);
+		UpdateRect(index);
 	}
 
 	m_keepAlive.clear();
@@ -160,7 +160,7 @@ bool SandChunk::CommitMovedCells(
 		if (std::get<_DEST>(m_moveQueue[i + 1]) != std::get<_DEST>(m_moveQueue[i])) {
 			auto [sourceChunk, src, dest] = m_moveQueue[ip + iw::randi(i - ip)];
 
-			UpdateRect(dest % m_width, dest / m_height);
+			UpdateRect(dest);
 
 			SetCellData(dest, sourceChunk->GetCell(src), currentTick);
 			sourceChunk->SetCell(src, Cell::GetDefault(CellType::EMPTY), currentTick);
@@ -185,8 +185,11 @@ void SandChunk::ResetRect() {
 }
 
 void SandChunk::UpdateRect(
-	WorldCoord x, WorldCoord y) // damn this doesnt really work :< idk what other approachs there are
+	Index index) // damn this doesnt really work :< idk what other approachs there are
 {
+	int x = index % m_width;
+	int y = index / m_height;
+
 	//if (x <= m_minX) m_minX = iw::clamp<WorldCoord>(x - 2, 0, m_width);
 	//if (x >= m_maxX) m_maxX = iw::clamp<WorldCoord>(x + 2, 0, m_width);
 
@@ -213,20 +216,41 @@ void SandChunk::SetCellData(
 		++m_filledCellCount;
 	}
 
-	if (dest.Share && dest.Share->Stale) dest.Share = nullptr; // reset stale shared data ('cell' is set in worker UpdateChunk)
+	float posX = cell.pX;
+	float posY = cell.pY;
+
+	if (!cell.UseFloatingPosition) {
+		posX = index % m_width  + m_x;
+		posY = index / m_height + m_y;
+	}
 
 	if (dest.Share) {
-		std::unique_lock lock(dest.Share->m_userMutex); // somehow lasers from supply ships arnt having their shares made stale? 
+		std::unique_lock lock(dest.Share->m_userMutex);
 		dest.Share->UserCount--;
-		dest.Share->UserTypeCounts[dest.Type]--;
+
+		auto& [count, location] = dest.Share->UserTypeCounts[dest.Type];
+		location = location * count - iw::vector2(dest.pX, dest.pY);
+		count--;
+		location /= (count == 0 ? 1 : count);
+
+		dest.Share->m_users.erase(&dest);
 	}
 
 	if (cell.Share) {
 		std::unique_lock lock(cell.Share->m_userMutex);
 		cell.Share->UserCount++;
-		cell.Share->UserTypeCounts[cell.Type]++;
+
+		auto& [count, location] = cell.Share->UserTypeCounts[cell.Type];
+		location = location * count + iw::vector2(posX, posY);
+		count++;
+		location /= count;
+
+		cell.Share->m_users.emplace(&dest);
 	}
 
 	dest = cell;
 	dest.LastUpdateTick = currentTick;
+
+	dest.pX = posX;
+	dest.pY = posY;
 }
