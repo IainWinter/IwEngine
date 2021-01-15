@@ -135,6 +135,19 @@ struct SharedCellData {
 	std::set<Cell*> m_users; // for cleanup
 	std::mutex m_userMutex;
 
+	float Radius() {
+		iw::vector2 furthest;
+
+		for (Cell* cell : m_users) {
+			iw::vector2 v(cell->pX, cell->pY);
+			if (v.length_squared() > furthest.length_squared()) {
+				furthest = v;
+			}
+		}
+
+		return furthest.length();
+	}
+
 	// uhg
 
 	SharedCellData() {}

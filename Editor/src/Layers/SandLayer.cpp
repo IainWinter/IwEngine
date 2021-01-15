@@ -12,6 +12,7 @@ int __arenaSizeBuf = 5;
 int __brushSizeX = 50;
 int __brushSizeY = 50;
 float __stepTime = 1/80.f;
+float __slowStepTime = 10.f;
 bool __stepDebug = false;
 
 namespace iw {
@@ -263,6 +264,14 @@ namespace iw {
 			}
 		}
 
+		slowStepTimer -= iw::DeltaTime();
+		if (slowStepTimer <= 0 && (!__stepDebug || Keyboard::KeyDown(V))) {
+			slowStepTimer = __slowStepTime;
+			Space->Query<SharedCellData, Physical>().Each([&](auto, auto s, auto p) {
+				p->Radius = s->Radius();
+			});
+		}
+
 		stepTimer -=  iw::DeltaTime();
 		if (stepTimer <= 0 && (!__stepDebug || Keyboard::KeyDown(V))) {
 			Space->Query<iw::Transform, Player, Physical>().Each([&](auto, auto t, auto p, auto pp) {
@@ -331,7 +340,7 @@ namespace iw {
 					if (e == e2) return;
 					
 					iw::vector2 away = t->Position - t2->Position;
-					if (away.length_squared() > 200*200) {
+					if (away.length_squared() > p2->Radius*p2->Radius) {
 						return;
 					}
 
@@ -351,7 +360,7 @@ namespace iw {
 				if(p->HasTarget) {
 					iw::vector2 at = t->Position - p->Target;
 
-					if (at.length_squared() < 200*200) {
+					if (at.length_squared() < p->TargetRadius*p->TargetRadius) {
 						avgAway += at * (p->AttractTarget ? -1 : 1)/2;
 					}
 				}
@@ -527,7 +536,7 @@ namespace iw {
 
 						for (int i = 0; i < enemyCount; i++) {
 							iw::Entity attackShip = Space->CreateEntity<iw::Transform, Tile, EnemyShip, EnemyAttackShip, Physical, Flocking>();
-							attackShip.Set<Tile>(std::vector<iw::vector2> {
+							Tile* tile =        attackShip.Set<Tile>(std::vector<iw::vector2> {
 												vector2(1, 0),				 vector2(3, 0),
 								vector2(0, 1), vector2(1, 1), vector2(2, 1), vector2(3, 1),
 								vector2(0, 2), vector2(1, 2), vector2(2, 2), vector2(3, 2),
@@ -542,8 +551,7 @@ namespace iw {
 							s->Objectives = objectives;
 							s->Objective  = s->Objectives.back();
 
-							p->Target = 0;
-							p->HasTarget = true;
+							p->Radius = tile->Radius();
 						}
 					}
 
@@ -587,9 +595,8 @@ namespace iw {
 							s->Objectives = objectives;
 							s->Objective = s->Objectives.back();
 
-							p->Target = 0;
-							p->HasTarget = true;
 							p->Velocity = (st->Position - t->Position).normalized() * s->Speed;
+							p->Radius = tile->Radius();
 
 							d->RecordHitCells = true;
 						}
@@ -931,30 +938,71 @@ namespace iw {
 
 		srand(iw::Ticks());
 
+		//for (int a = 0; a < 3; a++) {
+		//	float xOff = (2+a) * 100 + iw::randf() * 50;
+		//	float yOff = (2+a) * 100 + iw::randf() * 50;
+
+		//	iw::Entity asteroid = Space->CreateEntity<iw::Transform, SharedCellData, Physical, Asteroid>();
+		//	iw::Transform*  t = asteroid.Set<iw::Transform>(xOff, yOff);
+		//	SharedCellData* s = asteroid.Set<SharedCellData>();
+
+		//	int count = 0;
+		//	for(int i = -150; i < 150; i++)
+		//	for(int j = -150; j < 150; j++) {
+		//		float x = i; // throught there might need to be a remap but idk
+		//		float y = j;
+
+		//		float dist = sqrt(x*x + y*y);
+
+		//		if (dist < (iw::perlin(x/70 + xOff, y/70 + yOff) + 1) * 75) {
+		//			Cell c;
+		//			if (dist < (iw::perlin(x/10 + xOff, y/10 + yOff) + 1) * 25) {
+		//				c = Cell::GetDefault(CellType::REZ);
+		//			}
+		//			else {
+		//				c = Cell::GetDefault(CellType::ROCK);
+		//			}
+
+		//			c.Share = s;
+		//			world.SetCell(x + xOff, y + yOff, c);
+		//		}
+		//	}
+		//}
+
+		Cell base;
+
+		if (iw::randf() > 0) {
+			base = Cell::GetDefault(CellType::SMOKE);
+		}
+
+		else {
+			base = Cell::GetDefault(CellType::ROCK);
+		}
+
 		for (int a = 0; a < 3; a++) {
-			float xOff = (2+a) * 100 + iw::randf() * 50;
-			float yOff = (2+a) * 100 + iw::randf() * 50;
+			float xOff = (2+a) * 500 + iw::randf() * 500;
+			float yOff = (2+a) * 500 + iw::randf() * 500;
 
 			iw::Entity asteroid = Space->CreateEntity<iw::Transform, SharedCellData, Physical, Asteroid>();
 			iw::Transform*  t = asteroid.Set<iw::Transform>(xOff, yOff);
 			SharedCellData* s = asteroid.Set<SharedCellData>();
 
 			int count = 0;
-			for(int i = -150; i < 150; i++)
-			for(int j = -150; j < 150; j++) {
-				float x = i;
-				float y = j;
+			for(int i = 0; i < 900; i++) {
+				iw::vector2 v(iw::randf(), iw::randf());
+				v.normalize();
+				v *= iw::randf() * 300;
 
-				float dist = sqrt(x*x + y*y);
+				float x = v.x; // see above
+				float y = v.y;
 
-				if (dist < (iw::perlin(x/70 + xOff, y/70 + yOff) + 1) * 75) {
-					Cell c;
-					if (dist < (iw::perlin(x/10 + xOff, y/10 + yOff) + 1) * 25) {
-						c = Cell::GetDefault(CellType::REZ);
-					}
-					else {
-						c = Cell::GetDefault(CellType::ROCK);
-					}
+				if (sqrt(x*x + y*y) < (iw::perlin(x/70 + xOff, y/70 + yOff) + 1) * 300) {
+					Cell c = base;
+
+					c.dX = iw::randf() / 10;
+					c.dY = iw::randf() / 10;
+
+					c.Life = 100000000; // remove death prob
 
 					c.Share = s;
 					world.SetCell(x + xOff, y + yOff, c);

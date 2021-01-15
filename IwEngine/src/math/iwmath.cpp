@@ -15,7 +15,7 @@ namespace math {
 	int randi(
 		int max)
 	{
-		return roundf((float)rand() / RAND_MAX) * max;
+		return randf() * max;
 	}
 
 	float fast_inv_sqrt(

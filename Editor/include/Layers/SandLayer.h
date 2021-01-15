@@ -37,6 +37,9 @@ struct Physical {
 	bool HasTarget = false;
 
 	bool AttractTarget = false;
+
+	float Radius = 100;
+	float TargetRadius = 200;
 };
 
 struct Asteroid { };
@@ -149,6 +152,7 @@ namespace iw {
 		SandWorld world;
 
 		float stepTimer = 0;
+		float slowStepTimer = 0;
 
 		int updatedCellCount = 0;
 

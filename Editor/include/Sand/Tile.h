@@ -39,6 +39,17 @@ struct Tile {
 
 		return furthest;
 	}
+
+	float Radius() {
+		iw::vector2 furthest;
+		for (iw::vector2& v : Locations) {
+			if (v.length_squared() > furthest.length_squared()) {
+				furthest = v;
+			}
+		}
+
+		return furthest.length();
+	}
 };
 
 //struct Tile {
