@@ -182,6 +182,8 @@ bool DefaultSandWorker::MoveForward(
 			cell.dX = cell.Share->vX;
 			cell.dY = cell.Share->vY;
 
+			cell.Life = cell.Share->Life;
+
 			if (cell.Share->Hit) {
 				hit = true;
 				hitx = x;
@@ -209,6 +211,8 @@ bool DefaultSandWorker::MoveForward(
 			int destX = cellpos[i].first;
 			int destY = cellpos[i].second;
 
+			if(!InBounds(destX, destY)) break;
+
 			cell.pX += dsX * step;
 			cell.pY += dsY * step;
 
@@ -231,6 +235,7 @@ bool DefaultSandWorker::MoveForward(
 				next.Share = cell.Share;
 				next.TileId = cell.TileId;
 				next.SplitCount = cell.SplitCount;
+				next.Life = cell.Life;
 
 				SetCell(next.pX, next.pY, next);
 			}
@@ -426,6 +431,7 @@ void DefaultSandWorker::HitLikeMissile(
 	for(int j = -size; j < size; j++) {
 		int dx = x + i;
 		int dy = y + j;
+
 		const Cell& dest = GetCell(dx, dy);
 
 		if (   /*dest.TileId != missile.TileId

@@ -9,7 +9,7 @@ namespace ECS {
 		: short
 	{
 		Destroy,
-		Destroyed
+		Destroyed // need a component added and removed to clean up references to pointers etc.
 	};
 
 	struct EntityEvent

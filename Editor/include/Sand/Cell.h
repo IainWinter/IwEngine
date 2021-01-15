@@ -107,6 +107,8 @@ struct SharedCellData {
 		HitCells.emplace_back(std::make_pair(x, y), cell);
 	}
 
+	float Life = 0;
+
 	float pX = 0; // Position
 	float pY = 0;
 	float angle = 0;

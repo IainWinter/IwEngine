@@ -20,10 +20,9 @@
 struct Player {
 	iw::vector3 Movement = 0; // up, side, boost
 	iw::vector3 FireButtons = 0; // bullet, laser (tmp), missiles
-	iw::vector2 pMousePos = 0, MousePos = 0;
-	float FireTimeout = 0;
+	iw::vector2 pMousePos = 0, MousePos = 0; // dont need to be here
 
-	float Speed = 0;
+	float FireTimeout = 0;
 
 	float BoostFuel = 0;
 	float MaxBoostFuel = 7; // seconds
@@ -42,7 +41,10 @@ struct Physical {
 
 struct Asteroid { };
 
-struct Flocking { }; // Tag, could have strength of flocking forces
+struct Flocking {
+	bool Active = true;
+	//int FlockingWith = 0; // always 0, but then only another id
+}; // should have strength of flocking forces
 
 struct EnemyBase;
 
@@ -61,6 +63,8 @@ struct EnemyShip {
 	bool RezLow = false;
 	bool AtObjective = false;
 	bool AttackMode = false;
+
+	bool PlayerVisible = false;
 
 	bool Homecoming = false;
 	bool WantGoHome = false;
@@ -84,7 +88,7 @@ struct EnemyShip {
 struct EnemyBase {
 	EnemyBase* MainBase = nullptr; // Null if main base
 
-	std::vector<EnemyShip*> NeedsObjective;
+	std::vector<iw::EntityHandle> NeedsObjective;
 	//std::vector<std::pair<float, iw::vector2>> PlayerLocations; // would be for tracking but that is too hard probz
 
 	iw::vector3 EstPlayerLocation = iw::vector3(0,0, FLT_MAX); // xy + radius
@@ -100,7 +104,7 @@ struct EnemyBase {
 	float UseRezTimer = 0;
 	float UseRezTime = 5;
 
-	void RequestObjective(EnemyShip* ship) {
+	void RequestObjective(iw::EntityHandle ship) {
 		NeedsObjective.push_back(ship);
 	}
 };
@@ -112,7 +116,7 @@ struct Missile {
 
 	float Timer = 0;
 	float WaitTime = 0.5f;
-	float BurnTime = 1;
+	float BurnTime = 3;
 
 	int TileId = 0;
 };
@@ -149,6 +153,7 @@ namespace iw {
 		int updatedCellCount = 0;
 
 		std::vector<iw::Entity> m_userCleanup; // need to wait one frame to delete shared user data
+
 	public:
 		SandLayer();
 
@@ -217,24 +222,31 @@ namespace iw {
 
 			float speed = projectile.Speed();
 
-			iw::Entity e = Space->CreateEntity<SharedCellData, Missile, Physical>();
+			iw::Entity e = Space->CreateEntity<iw::Transform, SharedCellData, Missile, Physical, Flocking>();
+			iw::Transform*  t = e.Set<iw::Transform>(point + dir/2);
 			SharedCellData* u = e.Set<SharedCellData>();
 			Missile*        m = e.Set<Missile>();
 			Physical*       p = e.Set<Physical>();
+			Flocking*		 f = e.Set<Flocking>();
 
 			m->TileId = whoFiredId;
 			m->TurnRad = 0.025 + (iw::randf() + 1) / 25;
 			m->WaitTime = 0.5f + iw::randf()/10;
 			m->BurnTime = 2 + iw::randf();
 
+			u->UsedForMotion = true;
 			u->pX = point.x + dir.x/2;
 			u->pY = point.y + dir.y/2;
-			u->vX = dir.x * speed;
-			u->vY = dir.y * speed;
 			u->angle = atan2(dir.y, dir.x);
 			u->Special = m;
+			u->Life = projectile.Life;
 
 			p->Speed = speed;
+			p->Velocity = dir * speed;
+			p->AttractTarget = true;
+			p->TurnRadius = 0.05f;
+
+			f->Active = false;
 
 			Cell cell = projectile;
 			cell.TileId = whoFiredId;
@@ -263,6 +275,26 @@ namespace iw {
 				ceil(v.x * c - v.y * s + p.x),
 				ceil(v.x * s + v.y * c + p.y)
 			};
+		}
+
+		std::vector<const Cell*> RayCast(
+			int x, int y,
+			int x2, int y2)
+		{
+			std::vector<WorldCoords> points = FillLine(x, y, x2, y2);
+
+			std::vector<const Cell*> cells;
+			cells.reserve(points.size());
+
+			for (auto [x, y] : points) {
+				if (!world.InBounds(x, y)) break;
+				const Cell* cell = &world.GetCell(x, y);
+				if (cell->Type != CellType::EMPTY) {
+					cells.push_back(&world.GetCell(x, y));
+				}
+			}
+
+			return cells;
 		}
 	};
 }

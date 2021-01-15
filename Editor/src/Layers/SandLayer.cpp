@@ -5,7 +5,10 @@
 
 #include "iw/math/noise.h"
 
-double __chunkScale = 1;
+double __chunkScale = 2;
+int __chunkSize = 200;
+int __arenaSize = 100;
+int __arenaSizeBuf = 5;
 int __brushSizeX = 50;
 int __brushSizeY = 50;
 float __stepTime = 1/80.f;
@@ -15,9 +18,12 @@ namespace iw {
 	SandLayer::SandLayer()
 		: Layer("Ray Marching")
 		, m_sandTexture(nullptr)
-		, world(SandWorld(200, 200, __chunkScale))
+		, world(SandWorld(__chunkSize, __chunkSize, __chunkScale))
 		, reset(true)
 	{
+		world.SetMaxChunks(__arenaSize, __arenaSize);
+
+		__chunkSize /= __chunkScale;
 		srand(time(nullptr));
 	}
 
@@ -259,39 +265,41 @@ namespace iw {
 
 		stepTimer -=  iw::DeltaTime();
 		if (stepTimer <= 0 && (!__stepDebug || Keyboard::KeyDown(V))) {
-			Space->Query<iw::Transform, Player>().Each([&](auto, auto t, auto p) {
+			Space->Query<iw::Transform, Player, Physical>().Each([&](auto, auto t, auto p, auto pp) {
 				if (p->Movement.y == 0) {
-					p->Speed = iw::lerp(p->Speed, 0.f, deltaTime);
+					pp->Speed = iw::lerp(pp->Speed, 0.f, deltaTime);
 				}
 
 				else if (p->Movement.z == 1 && p->BoostFuel > 0) {
 					p->BoostFuel -= iw::DeltaTime();
-					p->Speed = iw::lerp(p->Speed, 300.f, deltaTime *5);
+					pp->Speed = iw::lerp(pp->Speed, 800.f, deltaTime*10);
 				}
 
 				else {
-					p->Speed = iw::clamp<float>(p->Speed + p->Movement.y, -100, 100);
+					pp->Speed = iw::clamp<float>(pp->Speed + p->Movement.y, -500, 500);
 				}
 				
 				if (p->Movement.z == 0) {
 					p->BoostFuel = iw::clamp<float>(p->BoostFuel + deltaTime/10, 0, p->MaxBoostFuel);
 				}
 
-				vector3 vel = t->Up() * p->Speed *  deltaTime * 3;
-				//vel.y = -vel.y;
-
-				float rot = /**/-p->Movement.x *  deltaTime;
-
-				t->Position += vel;
+				float rot = -p->Movement.x *  deltaTime;
 				t->Rotation *= iw::quaternion::from_euler_angles(0, 0, rot);
-				p->FireTimeout -= deltaTime;
 
+				if (t->Position.length_squared() >= (__arenaSize-__arenaSizeBuf)*(__arenaSize-__arenaSizeBuf) * __chunkSize*__chunkSize) {
+					float angle = atan2(t->Position.y, t->Position.x);
+					t->Rotation = /*iw::lerp(t->Rotation, */iw::quaternion::from_euler_angles(0, 0, angle)/*, deltaTime)*/;
+				}
+
+				pp->Velocity = t->Up() * pp->Speed;
+					
+				p->FireTimeout -= deltaTime;
 				if (   p->FireTimeout < 0
 					&& p->FireButtons != 0)
 				{
 					if (p->FireButtons.x == 1) {
 						p->FireTimeout = 0.035f;
-						Fire(t, pos, vel, Cell::GetDefault(CellType::BULLET), true);
+						Fire(t, pos, /*pp->Velocity*/0, Cell::GetDefault(CellType::BULLET), true);
 					}
 					
 					else if (p->FireButtons.y == 1) {
@@ -312,6 +320,8 @@ namespace iw {
 			auto space = Space; // :<
 
 			Space->Query<iw::Transform, Flocking, Physical>().Each([&, space](auto e, auto t, auto f, auto p) {
+				if (!f->Active) return; // for missiles
+
 				iw::vector2 avgAway = 0;
 				iw::vector2 avgCenter = 0;
 				iw::vector2 avgForward = 0;
@@ -331,16 +341,19 @@ namespace iw {
 					count      += 1;
 				});
 
-				iw::vector2 at = t->Position - p->Target;
-
-				if (at.length_squared() < 200*200) {
-					avgAway += at * (p->AttractTarget ? -1 : 1)/2;
-				}
 
 				if (count > 0) {
 					avgAway    /= count;
 					avgCenter  /= count; avgCenter -= t->Position;
 					avgForward /= count;
+				}
+				
+				if(p->HasTarget) {
+					iw::vector2 at = t->Position - p->Target;
+
+					if (at.length_squared() < 200*200) {
+						avgAway += at * (p->AttractTarget ? -1 : 1)/2;
+					}
 				}
 
 				p->Velocity = iw::lerp(p->Velocity, p->Velocity + avgAway /*+ avgCenter*/ + avgForward/10, deltaTime*5);
@@ -353,19 +366,19 @@ namespace iw {
 				p->Velocity = (p->Velocity + delta).normalized() * p->Speed;
 			});
 
-			Space->Query<iw::Transform, EnemyShip, Physical>().Each([&](auto, auto t, auto s, auto p) {
+			Space->Query<iw::Transform, EnemyShip, Physical>().Each([&](auto e, auto t, auto s, auto p) {
 				// Check for another command every few seconds
 
 				s->RezLow      = s->Rez <= s->MinRez;
 				s->AtObjective = (t->Position - s->Objective)  .length_squared() < 300*300;    // 300 meters form objective
-				//s->AttackMode  = (t->Position - playerLocation).length_squared() < 2500*2500; // 2500 meters from player
+				s->AttackMode  = s->PlayerVisible; //(t->Position - playerLocation).length_squared() < 2500*2500; // 2500 meters from player
 
 				p->AttractTarget = s->Homecoming;
 
 				s->ChecekCommandTimer -= deltaTime;
 				if (s->ChecekCommandTimer <= 0) {
 					s->ChecekCommandTimer = s->ChecekCommandTime;
-					s->Command->RequestObjective(s);
+					s->Command->RequestObjective(e);
 				}
 
 				// Always move twoards objective
@@ -437,7 +450,7 @@ namespace iw {
 				}
 
 				if (!s->AtObjective && ss->CapturedRez >= ss->MaxRez) {
-					s->ChecekCommandTimer = 1;
+					s->ChecekCommandTimer = 3; // wait at command for 3 seconds
 				}
 			});
 
@@ -446,7 +459,10 @@ namespace iw {
 
 				b->EstPlayerLocation.z += iw::DeltaTime() * 2500; // Should be 5000km within 2 seconds
 
-				for (EnemyShip* ship : b->NeedsObjective) {
+				for (iw::EntityHandle& entity : b->NeedsObjective) {
+					EnemyShip* ship = Space->FindComponent<EnemyShip>(entity);
+					if (!ship) continue;
+
 					if (ship->AttackMode) { // If player is found
 						b->EstPlayerLocation = iw::vector3(playerLocation, 0);
 					}
@@ -467,20 +483,22 @@ namespace iw {
 
 						// send ship twoards player if est location is good enough 
 						else if (   b->EstPlayerLocation.z < 2500
-							&& space->FindEntity(ship).Has<EnemyAttackShip>())
+							&& space->HasComponent<EnemyAttackShip>(entity))
 						{
 							iw::vector2 v = b->EstPlayerLocation + b->EstPlayerLocation.z * ship->Objectives.back().normalized();
 							ship->Objectives.push_back(v);
 						}
 
 						// give supplies to base and destory ship if at home base
-						else if (ship->Homecoming) {
-							EnemySupplyShip* supply = Space->FindEntity(ship).Find<EnemySupplyShip>();
-							ship->Command->Rez += ship->Rez + supply ? supply->CapturedRez : 0;
+						else if (ship->Homecoming && Space->HasComponent<EnemySupplyShip>(entity)) {
+							EnemySupplyShip* supply = Space->FindComponent<EnemySupplyShip>(entity);
+							b->Rez += ship->Rez + supply ? supply->CapturedRez : 0;
+							b->UseRezTimer += 2; // take 2 seconds to 'process'
 
-							space->QueueEntity(Space->FindEntity(ship).Handle, iw::func_Destroy);
-
+							space->DestroyEntity(entity);
 							supplyShipCout--;
+
+							continue;
 						}
 
 						// send ship to next objective
@@ -496,35 +514,36 @@ namespace iw {
 					b->UseRezTimer = b->UseRezTime;
 
 					// if attack ships
-					if(iw::randf() < 0)  {
-						if(b->Rez >= b->AttackShipCost) {
-							float enemyCount = iw::clamp(iw::randi(4) + 3.f, 7.f, b->Rez/b->AttackShipCost);
-							b->Rez -= b->AttackShipCost * enemyCount;
+					if(    b->Rez >= b->AttackShipCost
+						&& iw::randf() < 0)
+					{
+						float enemyCount = iw::clamp(iw::randi(4) + 3.f, 7.f, b->Rez/b->AttackShipCost);
+						b->Rez -= b->AttackShipCost * enemyCount;
 							
-							std::vector<iw::vector2> objectives; // only do this when needed
-							for (int i = 0; i < 3 + iw::randf(); i++) {
-								objectives.emplace_back(iw::randf() * 1000, iw::randf() * 1000);
-							}
+						std::vector<iw::vector2> objectives; // only do this when needed
+						for (int i = 0; i < 3 + iw::randf(); i++) {
+							objectives.emplace_back(iw::randf() * 1000, iw::randf() * 1000);
+						}
 
-							for (int i = 0; i < enemyCount; i++) {
-								iw::Entity attackShip = Space->CreateEntity<iw::Transform, Tile, EnemyShip, EnemyAttackShip, Physical, Flocking>();
-								attackShip.Set<Tile>(std::vector<iw::vector2> {
-												   vector2(1, 0),				 vector2(3, 0),
-									vector2(0, 1), vector2(1, 1), vector2(2, 1), vector2(3, 1),
-									vector2(0, 2), vector2(1, 2), vector2(2, 2), vector2(3, 2),
-									vector2(0, 3),                               vector2(3, 3),
-									vector2(0, 4),                               vector2(3, 4)
-								}, 3);
-								iw::Transform* st = attackShip.Set<iw::Transform>(t->Position + 200*iw::vector2(iw::randf(), iw::randf()));
-								EnemyShip*     s  = attackShip.Set<EnemyShip>(b);
-								Physical*      p  = attackShip.Set<Physical>((st->Position - t->Position).normalized() * s->Speed);
-				
-								s->Objectives = objectives;
-								s->Objective  = s->Objectives.back();
+						for (int i = 0; i < enemyCount; i++) {
+							iw::Entity attackShip = Space->CreateEntity<iw::Transform, Tile, EnemyShip, EnemyAttackShip, Physical, Flocking>();
+							attackShip.Set<Tile>(std::vector<iw::vector2> {
+												vector2(1, 0),				 vector2(3, 0),
+								vector2(0, 1), vector2(1, 1), vector2(2, 1), vector2(3, 1),
+								vector2(0, 2), vector2(1, 2), vector2(2, 2), vector2(3, 2),
+								vector2(0, 3),                               vector2(3, 3),
+								vector2(0, 4),                               vector2(3, 4)
+							}, 3);
+							iw::Transform* st = attackShip.Set<iw::Transform>(t->Position + 200*iw::vector2(iw::randf(), iw::randf()));
+							EnemyShip*     s  = attackShip.Set<EnemyShip>(b);
+							Physical*      p  = attackShip.Set<Physical>((st->Position - t->Position).normalized() * s->Speed);
+												attackShip.Set<Flocking>();
 
-								p->Target = 0;
-								p->HasTarget = true;
-							}
+							s->Objectives = objectives;
+							s->Objective  = s->Objectives.back();
+
+							p->Target = 0;
+							p->HasTarget = true;
 						}
 					}
 
@@ -534,8 +553,9 @@ namespace iw {
 
 						std::vector<iw::vector2> objectives; // only do this when needed
 						space->Query<iw::Transform, SharedCellData, Asteroid>().Each([&](auto e, auto t, auto s, auto) {
-							objectives.push_back(s->UserTypeCounts[CellType::REZ].second);
-							LOG_INFO << objectives.front();
+							if (s->UserTypeCounts[CellType::REZ].first > 100) {
+								objectives.push_back(s->UserTypeCounts[CellType::REZ].second);
+							}
 						});
 					
 						if(objectives.size() > 0) {
@@ -554,6 +574,7 @@ namespace iw {
 							Physical*        p  = supplyShip.Set<Physical>();
 							SharedCellData*  d  = supplyShip.Set<SharedCellData>();
 							EnemySupplyShip* ss = supplyShip.Set<EnemySupplyShip>();
+					   							  supplyShip.Set<Flocking>();
 
 							tile->TileId = space->HasComponent<Tile>(e) ? space->FindComponent<Tile>(e)->TileId : 0;
 
@@ -582,11 +603,13 @@ namespace iw {
 				}
 			});
 
-			Space->Query<SharedCellData, Missile, Physical>().Each([&, space](auto, auto s, auto m, auto p) {
+			Space->Query<SharedCellData, Missile, Physical, Flocking>().Each([&, space](auto e, auto s, auto m, auto p, auto f) {
 				m->Timer += deltaTime;
 				if (   m->Timer > m->WaitTime
 					&& m->Timer < m->WaitTime + m->BurnTime)
 				{
+					f->Active = true;
+
 					iw::vector2 mpos(s->pX, s->pY);
 					iw::vector2 mvel(s->vX, s->vY);
 				
@@ -612,10 +635,14 @@ namespace iw {
 						p->HasTarget = true;
 					}
 
-				
-					p->Speed = iw::clamp<float>(p->Speed * (1 + deltaTime * 3),
+					p->Speed = iw::clamp<float>(p->Speed + 300 * deltaTime,
 						Cell::GetDefault(CellType::MISSILE).Speed(),
-						Cell::GetDefault(CellType::MISSILE).Speed()*2
+						Cell::GetDefault(CellType::MISSILE).Speed()*5
+					);
+
+					s->Life = iw::clamp<float>(s->Life - 3 * deltaTime,
+						Cell::GetDefault(CellType::MISSILE).Life / 5,
+						Cell::GetDefault(CellType::MISSILE).Life
 					);
 
 					// Spawn smoke
@@ -631,13 +658,38 @@ namespace iw {
 					world.SetCell(smoke.pX, smoke.pY, smoke);
 				}
 
+				else if (m->Timer > m->WaitTime + m->BurnTime) {
+					f->Active = false;
+
+					//space->QueueEntity(e, [](Entity entity) { // cont do this until there is an entity changed event
+					//	entity.RemoveComponent<Flocking>(); // remove flocking after fuel has run out
+					//});
+				}
+
 				if (s->Hit) { // if inside of another missiles blast, change velocity a lil
 					iw::vector2 v(s->pX - s->hX, s->pY - s->hY);
 					v.normalize();
 
-					s->vX += v.x * (iw::randf() + 1)/5;
-					s->vY += v.y * (iw::randf() + 1)/5;
+					p->Velocity.x += v.x * (iw::randf() + 1)/5;
+					p->Velocity.y += v.y * (iw::randf() + 1)/5;
 					s->Hit = false;
+				}
+			});
+
+			// Turn around objects getting close to outside arena
+
+			Space->Query<iw::Transform, Physical>().Each([&](auto, auto t, auto p) {
+				if (t->Position.length_squared() >= (__arenaSize-__arenaSizeBuf)*(__arenaSize-__arenaSizeBuf) * __chunkSize*__chunkSize) {
+					p->Velocity = iw::lerp<iw::vector2>(p->Velocity, -t->Position, deltaTime/5);
+
+					// Target force
+					iw::vector2 nVel = (p->Velocity).normalized();
+					iw::vector2 nDir = (p->Target - t->Position).normalized();
+					iw::vector2 delta = (nDir - nVel) * p->Speed * p->TurnRadius;
+
+					p->Velocity = (p->Velocity + delta).normalized() * p->Speed;
+					
+					p->Target = -t->Position.normalized() * 100;
 				}
 			});
 
@@ -650,31 +702,30 @@ namespace iw {
 				s->vX = p->Velocity.x;
 				s->vY = p->Velocity.y;
 			});
+			Space->Query<SharedCellData>().Each([&](auto e, auto s) {
+				s->pX += s->vX * deltaTime;
+				s->pY += s->vY * deltaTime;
+
+				s->HitCells.clear();
+			});
 			
-			// Move by vel, delete entity if not a Tile and 0 shared cells
+			//Space->Query<iw::Transform, SharedCellData>().Each([&](auto e, auto t, auto s) {
+			//	s->pX = t->Position.x;
+			//	s->pY = t->Position.y;
+			//});
+
+			// Paste tiles up where to keep tile cells after they die
+							   PasteTiles();
+
+			// Desotry entities with tile/shareddata if they have no more cells
 
 			auto q = Space->MakeQuery<SharedCellData>(); q->SetNone({ Space->GetComponent<Tile>() });
 			for (auto itr : Space->Query(q)) {
 				SharedCellData* s = itr.Components.Get<SharedCellData, 0>();
 				if (s->UserCount == 0) {
 					space->QueueEntity(itr.Handle, iw::func_Destroy);
-					return;
 				}
-				
-				s->pX += s->vX * deltaTime;
-				s->pY += s->vY * deltaTime;
 			}
-
-			// Destroy asteroid entity if out of rez
-
-			Space->Query<SharedCellData, Asteroid>().Each([&, space](auto e, SharedCellData* s, auto) {
-				if (s->UserTypeCounts[CellType::REZ].first < 1000) {
-					space->QueueEntity(e, iw::func_Destroy);
-				}
-			});
-			Space->Query<SharedCellData>().Each([&](auto, auto s) {
-				s->HitCells.clear(); // need to clear here because game logic runs after sand world update
-			});
 			Space->Query<Tile>().Each([&, space](auto e, Tile* tile) {
 				if (tile->Locations.size() < tile->InitialLocationsSize / 3) {
 					if (space->HasComponent<Player>(e)) {
@@ -686,23 +737,42 @@ namespace iw {
 				}
 			});
 
+			if (reset) return;
+
 			// Need to execute the queue here to clean up shared cells
 
 			Space->ExecuteQueue();
 
+			// Line of sight checks need to see Tiles
+			Space->Query<iw::Transform, EnemyShip, Tile>().Each([&](auto, auto t, auto s, auto a) {
+				iw::vector2 d = playerLocation - t->Position;
+				d.normalize();
+				d *= 600; // max sightline
+
+				auto cells = RayCast(t->Position.x, t->Position.y, t->Position.x + d.x, t->Position.y + d.y);
+
+				for (const Cell* c : cells) {
+					if (c->TileId == a->TileId) continue;
+					
+					if (c->TileId == 0) {
+						s->PlayerVisible = false;
+						break;
+					}
+
+					if (c->TileId == player.Find<Tile>()->TileId) {
+						s->PlayerVisible = true;
+						break;
+					}
+				}
+			});
+
 			// Sand update
 
-							   PasteTiles();
 			updatedCellCount = UpdateSandWorld  (fx, fy, fx2, fy2, deltaTime);
 			                   UpdateSandTexture(fx, fy, fx2, fy2);
 			                   RemoveTiles();
 
 			// Reset hit for shared cell
-
-			//Space->Query<SharedCellData>().Each([&](auto, auto s) {
-			//	s->HitCells.clear(); // need to clear here because game logic runs after sand world update
-			//	});
-
 
 			//for (auto itr : Space->Query<SharedCellData>()) {
 			//	SharedCellData* s = itr.Components.Get<SharedCellData, 0>();
@@ -822,7 +892,7 @@ namespace iw {
 		world.Reset();
 		Space->Clear();
 
-		player = Space->CreateEntity<iw::Transform, Tile, Player>();
+		player = Space->CreateEntity<iw::Transform, Tile, Player, Physical>();
 
 		player.Set<iw::Transform>();
 		player.Set<Tile>(std::vector<iw::vector2> {
@@ -833,6 +903,9 @@ namespace iw {
 				vector2(0, 0),							     vector2(3, 0)
 		}, 5);
 		player.Set<Player>();
+		Physical* p = player.Set<Physical>();
+
+		p->Speed = 500;
 
 		//// enemy base //
 
@@ -1042,6 +1115,8 @@ namespace iw {
 					chunk = world.GetChunk(x, y);
 				}
 
+				if (!chunk) continue;
+
 				const Cell& cell = chunk->GetCell(x, y);
 
 				if (   cell.Type   == CellType::EMPTY
@@ -1080,6 +1155,8 @@ namespace iw {
 					chunk = world.GetChunk(x, y);
 				}
 				
+				if (!chunk) continue;
+
 				const Cell& cell = chunk->GetCell(x, y);
 
 				if (cell.Type == CellType::EMPTY) continue;

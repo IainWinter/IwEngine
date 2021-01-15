@@ -58,6 +58,10 @@ protected:
 		WorldCoord x,  WorldCoord y,
 		WorldCoord tx, WorldCoord ty)
 	{
+		if (!InBounds(x, y) || !InBounds(tx, ty)) {
+			return false;
+		}
+
 		return GetCell(x, y).Precedence > GetCell(tx, ty).Precedence;
 	}
 

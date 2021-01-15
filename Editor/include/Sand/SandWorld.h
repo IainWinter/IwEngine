@@ -17,6 +17,10 @@ public:
 	Tick m_currentTick;
 	std::vector<SandWorker*> m_workers;
 	std::vector<SandChunk*> m_chunks;
+
+	WorldCoord m_maxChunkLocationX;
+	WorldCoord m_maxChunkLocationY;
+
 private:
 	Concurrency::concurrent_unordered_map<WorldCoords, SandChunk*, iw::pair_hash> m_chunkLookup;
 	// is this standard with all visual studio envs?
@@ -59,6 +63,11 @@ public:
 		, m_fixedChunks(false)
 		, m_currentTick(0)
 	{}
+
+	void SetMaxChunks(int x, int y) {
+		m_maxChunkLocationX = x;
+		m_maxChunkLocationY = y;
+	}
 
 	void Reset() {
 		m_cells.reset();
@@ -132,21 +141,28 @@ public:
 		WorldCoord x, WorldCoord y,
 		const Cell& cell)
 	{
-		GetChunk(x, y)->SetCell(x, y, cell, m_currentTick);
+		if (SandChunk* chunk = GetChunk(x, y)) {
+			chunk->SetCell(x, y, cell, m_currentTick);
+		}
 	}
 
 	void SetCellQueued(
 		WorldCoord x, WorldCoord y,
 		const Cell& cell)
 	{
-		GetChunk(x, y)->SetCellQueued(x, y, cell);
+		if (SandChunk* chunk = GetChunk(x, y)) {
+			chunk->SetCellQueued(x, y, cell);
+		}
 	}
 
 	void MoveCell(
 		WorldCoord x,   WorldCoord y,
 		WorldCoord xTo, WorldCoord yTo)
 	{
-		GetChunk(xTo, yTo)->MoveCell(GetChunk(x, y), x, y, xTo, yTo);
+		if (SandChunk* src  = GetChunk(x,   y))
+		if (SandChunk* dest = GetChunk(xTo, yTo)) {
+			dest->MoveCell(src, x, y, xTo, yTo);
+		}
 	}
 
 	WorldCoords GetChunkLocation(
@@ -213,7 +229,12 @@ private:
 	SandChunk* CreateChunk(
 		WorldCoords location)
 	{
-		//LOG_INFO << location.first << " " << location.second;
+		auto [lx, ly] = location;
+		if(     lx < -m_maxChunkLocationX || ly < -m_maxChunkLocationY
+			|| lx >  m_maxChunkLocationX || ly >  m_maxChunkLocationY)
+		{
+			return nullptr;
+		}
 
 		SandChunk* chunk = new SandChunk(
 			m_cells.alloc<Cell>(m_cellChunkSizeInBytes),
