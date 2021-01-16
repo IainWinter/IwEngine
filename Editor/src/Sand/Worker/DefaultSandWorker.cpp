@@ -81,8 +81,15 @@ bool DefaultSandWorker::MoveDown(
 {
 	int downX = x + cell.dX;
 	int downY = y + cell.dY;
+	bool down = false;
 
-	bool down = IsEmpty(downX, downY);
+	int i = 1;
+	do {
+		downX = x + cell.dX / i;
+		downX = x + cell.dX / i;
+		down = IsEmpty(downX, downY);
+		i *= 2;
+	} while (!down && downX != x && downY != y);
 
 	if (down) {
 		cell.pX += cell.dX;
@@ -359,6 +366,16 @@ void DefaultSandWorker::HitLikeProj(
 		}
 		
 		SetCell(x, y, bullet);
+	}
+
+	else {
+		iw::vector2 v(bullet.dX, bullet.dY);
+		v.normalize();
+		v /= v.minor();
+
+		if (IsEmpty(x+v.x, y+v.y)) {
+			SetCell(x+v.x, y+v.y, bullet);
+		}
 	}
 }
 

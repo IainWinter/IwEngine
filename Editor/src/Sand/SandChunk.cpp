@@ -162,6 +162,10 @@ bool SandChunk::CommitMovedCells(
 
 			UpdateRect(dest);
 
+			if (dest > m_width * m_height || src > m_width * m_height) {
+				LOG_INFO << "asd";
+			}
+
 			SetCellData(dest, sourceChunk->GetCell(src), currentTick);
 			sourceChunk->SetCell(src, Cell::GetDefault(CellType::EMPTY), currentTick);
 
@@ -220,8 +224,8 @@ void SandChunk::SetCellData(
 	float posY = cell.pY;
 
 	if (!cell.UseFloatingPosition) {
-		posX = index % m_width  + m_x;
-		posY = index / m_height + m_y;
+		posX = int(index) % m_width  + m_x;
+		posY = int(index) / m_height + m_y;
 	}
 
 	if (dest.Share) {

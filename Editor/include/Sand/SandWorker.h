@@ -132,7 +132,10 @@ protected:
 		}
 
 		else {
-			m_chunk.MoveCell(m_world.GetChunk(x, y), x, y, xTo, yTo);
+			SandChunk* chunk = m_world.GetChunk(x, y);
+			if (chunk) {
+				m_chunk.MoveCell(chunk, x, y, xTo, yTo);
+			}
 		}
 	}
 };
@@ -166,6 +169,19 @@ inline std::vector<WorldCoords> FillLine(
 			err += dx;
 			y += sy;
 		}
+	}
+
+	return positions;
+}
+
+inline std::vector<WorldCoords> FillCircle(
+	int x,  int y,
+	int radius)
+{
+	std::vector<WorldCoords> positions; // https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
+
+	for (float a = 0; a < iw::Pi2; a += iw::Pi/180) {
+		positions.emplace_back(x+cos(a)*radius, y+sin(a)*radius);
 	}
 
 	return positions;

@@ -268,6 +268,8 @@ namespace iw {
 		int  UpdateSandWorld  (int fx, int fy, int fx2, int fy2, float deltaTime);
 		void UpdateSandTexture(int fx, int fy, int fx2, int fy2);
 
+		void PasteTile(iw::Transform* transform, Tile* tile, bool death = 0, float deltaTime = 0);
+
 		void PasteTiles();
 		void RemoveTiles();
 
@@ -291,7 +293,10 @@ namespace iw {
 			cells.reserve(points.size());
 
 			for (auto [x, y] : points) {
-				if (!world.InBounds(x, y)) break;
+				auto [cx, cy] = world.GetChunkLocation(x, y);
+				SandChunk* chunk = world.GetChunkDirect(cx, cy);
+				if (!chunk) break;
+
 				const Cell* cell = &world.GetCell(x, y);
 				if (cell->Type != CellType::EMPTY) {
 					cells.push_back(&world.GetCell(x, y));

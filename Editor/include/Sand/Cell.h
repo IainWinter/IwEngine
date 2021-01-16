@@ -35,7 +35,10 @@ enum class CellType {
 	eLASER,
 	mLASER,
 	BULLET,
-	MISSILE
+	MISSILE,
+
+
+	DEBUG
 };
 
 enum class CellProperties {
@@ -139,7 +142,7 @@ struct SharedCellData {
 		iw::vector2 furthest;
 
 		for (Cell* cell : m_users) {
-			iw::vector2 v(cell->pX, cell->pY);
+			iw::vector2 v(cell->pX-pX, cell->pY-pY);
 			if (v.length_squared() > furthest.length_squared()) {
 				furthest = v;
 			}
