@@ -52,7 +52,8 @@ enum class CellProperties {
 	HIT_LIKE_PROJECTILE = 0b0000000001000000,
 	HIT_LIKE_BEAM       = 0b0000000010000000,
 	HIT_LIKE_MISSILE    = 0b0000000100000000,
-	DELETE_TIME         = 0b0000001000000000,
+	HIT_AND_REPLACE     = 0b0000001000000000,
+	DELETE_TIME         = 0b0000010000000000
 };
 inline CellProperties operator|(CellProperties a,CellProperties b){return CellProperties(iw::val(a)|iw::val(b));}
 inline auto           operator&(CellProperties a,CellProperties b){return iw::val(a)&iw::val(b);}
@@ -64,6 +65,8 @@ struct Cell {
 	CellProperties Props = CellProperties::NONE;
 
 	iw::Color Color;
+
+	float Timer = 0; // Timer forever
 
 	float Life = 0; // Life until the cell will die, only some cells use this
 	float pX = 0;   // 'Position'

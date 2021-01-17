@@ -45,7 +45,8 @@ public:
 	bool MoveRandom(
 		int x, int y,
 		Cell& cell,
-		const Cell& replace);
+		const Cell& replace,
+		bool& hit, int& hitx, int& hity);
 
 	bool MoveForward(
 		int x, int y,
@@ -77,6 +78,11 @@ public:
 		Cell& cell);
 
 	void HitLikeMissile(
+		int x,  int y,
+		int mx, int my,
+		Cell& missile);
+
+	void HitAndReplace(
 		int x,  int y,
 		int mx, int my,
 		Cell& missile);

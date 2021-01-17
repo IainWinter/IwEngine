@@ -17,6 +17,32 @@ void DefaultSandWorker::UpdateCell(
 
 	// Would go in grav worker or something
 
+	cell.Timer += __stepTime;
+
+	if (   cell.Timer > .1
+		&& (cell.Type == CellType::mLASER || cell.Type == CellType::eLASER || cell.Type == CellType::LASER)
+		&& cell.Props & CellProperties::MOVE_FORWARD)
+{
+		if (cell.Speed() == 0 || cell.Type == CellType::mLASER) {
+			(int&)cell.Props |=  int(CellProperties::MOVE_RANDOM  | CellProperties::HIT_AND_REPLACE);
+			(int&)cell.Props &= ~int(CellProperties::MOVE_FORWARD | CellProperties::HIT_LIKE_BEAM);
+		
+			if (cell.Speed() > 0) { // only mining
+				cell.Life = 1;
+				cell.Precedence = 1001; // more than rez
+				cell.dX = 5 * iw::randf();
+				cell.dY = 5 * iw::randf();
+			}
+
+			else {
+				cell.Life = .2 * (iw::randf() + 1.1f);
+				cell.dX = 3 * iw::randf();
+				cell.dY = 3 * iw::randf();
+				cell.Precedence = 1;
+			}
+		}
+	}
+
 	if (cell.Gravitised) {
 		iw::vector2 dir = iw::vector2(80, 80) - iw::vector2(x, y);
 
@@ -44,7 +70,7 @@ void DefaultSandWorker::UpdateCell(
 	else if (cell.Props & CellProperties::MOVE_DOWN      && MoveDown    (x, y, cell, replacement)) {}
 	else if (cell.Props & CellProperties::MOVE_DOWN_SIDE && MoveDownSide(x, y, cell, replacement)) {}
 	else if (cell.Props & CellProperties::MOVE_SIDE      && MoveSide    (x, y, cell, replacement)) {}
-	else if (cell.Props & CellProperties::MOVE_RANDOM    && MoveRandom  (x, y, cell, replacement)) {}
+	else if (cell.Props & CellProperties::MOVE_RANDOM    && MoveRandom  (x, y, cell, replacement, hit, hitx, hity)) {}
 	else if (cell.Props & CellProperties::MOVE_FORWARD   && MoveForward (x, y, cell, replacement, hit, hitx, hity)) {}
 
 	if(hit) {
@@ -72,6 +98,7 @@ void DefaultSandWorker::UpdateHitCell(
 	if		(cell.Props & CellProperties::HIT_LIKE_BEAM)	   { HitLikeBeam   (hx, hy, x, y, cell); }
 	else if (cell.Props & CellProperties::HIT_LIKE_PROJECTILE) { HitLikeProj   (hx, hy, x, y, cell); }
 	else if (cell.Props & CellProperties::HIT_LIKE_MISSILE)    { HitLikeMissile(hx, hy, x, y, cell); }
+	else if (cell.Props & CellProperties::HIT_AND_REPLACE)     { HitAndReplace (hx, hy, x, y, cell); }
 }
 
 bool DefaultSandWorker::MoveDown(
@@ -96,6 +123,11 @@ bool DefaultSandWorker::MoveDown(
 		cell.pY += cell.dY;
 
 		MoveCell(x, y, downX, downY);
+	}
+
+	else {
+		cell.dX = replace.dX;
+		cell.dY = replace.dY;
 	}
 
 	return down;
@@ -154,7 +186,8 @@ bool DefaultSandWorker::MoveSide(
 bool DefaultSandWorker::MoveRandom(
 	int x, int y,
 	Cell& cell,
-	const Cell& replace)
+	const Cell& replace,
+	bool& hit, int& hitx, int& hity)
 {
 	cell.pX += cell.dX * iw::randf();
 	cell.pY += cell.dY * iw::randf();
@@ -169,8 +202,10 @@ bool DefaultSandWorker::MoveRandom(
 	}
 
 	else if (HasPrecedence(x, y, dx, dy)) {
-		SetCell(dx, dy, cell);
-		SetCell(x, y, Cell::GetDefault(CellType::EMPTY)); // could eject
+		hit = true;
+		hitx = dx;
+		hity = dy;
+		d = true;
 	}
 
 	return d;
@@ -243,6 +278,7 @@ bool DefaultSandWorker::MoveForward(
 				next.TileId = cell.TileId;
 				next.SplitCount = cell.SplitCount;
 				next.Life = cell.Life;
+				next.Timer = cell.Timer;
 
 				SetCell(next.pX, next.pY, next);
 			}
@@ -369,13 +405,13 @@ void DefaultSandWorker::HitLikeProj(
 	}
 
 	else {
-		iw::vector2 v(bullet.dX, bullet.dY);
-		v.normalize();
-		v /= v.minor();
+		//iw::vector2 v(bullet.dX, bullet.dY);
+		//v.normalize();
+		//v /= v.minor();
 
-		if (IsEmpty(x+v.x, y+v.y)) {
-			SetCell(x+v.x, y+v.y, bullet);
-		}
+		//if (IsEmpty(x+v.x, y+v.y)) {
+		//	SetCell(x+v.x, y+v.y, bullet);
+		//}
 	}
 }
 
@@ -467,6 +503,7 @@ void DefaultSandWorker::HitLikeMissile(
 			cell.dY *= smoke ? 5 : 1;
 			cell.TileId = missile.TileId;
 			cell.Life *= smoke ? 10+iw::randf()*3 : 1 / cell.Speed() * (iw::randf() + 1) * 2;
+			cell.Timer = missile.Timer;
 
 			SetCell(x+i, y+j, cell);
 		}
@@ -477,4 +514,13 @@ void DefaultSandWorker::HitLikeMissile(
 			dest.Share->hY = y;
 		}
 	}
+}
+
+void DefaultSandWorker::HitAndReplace(
+	int x, int y,
+	int cx, int cy,
+	Cell& cell)
+{
+	SetCell(x, y, cell);
+	SetCell(cx, cy, Cell::GetDefault(CellType::EMPTY)); // could eject hit cell with velocity
 }

@@ -40,6 +40,8 @@ struct Physical {
 
 	float Radius = 100;
 	float TargetRadius = 200;
+
+	bool Solid = true; // for dust cloud avoidance
 };
 
 struct Asteroid { };
@@ -81,6 +83,8 @@ struct EnemyShip {
 	float TurnRad = 0.025f;
 	float FireTimer = 0;
 	float FireTime = 2.5f;
+
+	iw::vector2 FireDirection = 0;
 
 	int Rez = 100; // Start with 100 + whatever the cost was to make
 	int MinRez = 10;
@@ -295,7 +299,7 @@ namespace iw {
 			for (auto [x, y] : points) {
 				auto [cx, cy] = world.GetChunkLocation(x, y);
 				SandChunk* chunk = world.GetChunkDirect(cx, cy);
-				if (!chunk) break;
+				if (!chunk) continue;
 
 				const Cell* cell = &world.GetCell(x, y);
 				if (cell->Type != CellType::EMPTY) {

@@ -162,10 +162,6 @@ bool SandChunk::CommitMovedCells(
 
 			UpdateRect(dest);
 
-			if (dest > m_width * m_height || src > m_width * m_height) {
-				LOG_INFO << "asd";
-			}
-
 			SetCellData(dest, sourceChunk->GetCell(src), currentTick);
 			sourceChunk->SetCell(src, Cell::GetDefault(CellType::EMPTY), currentTick);
 

@@ -10,6 +10,8 @@ struct Tile {
 
 	int Precedence = 10;
 
+	bool ExplodeOnDeath = true;
+
 	Tile() = default;
 
 	Tile(std::vector<iw::vector2> locations, int scale)
