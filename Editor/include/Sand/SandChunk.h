@@ -28,6 +28,7 @@ public:
 		      m_maxX, m_maxY; // rect around cells to update
 
 	std::atomic<uint32_t> m_filledCellCount;
+	std::atomic<uint32_t> m_filledCellsWithProps;
 
 	Tick m_lastTick;
 
@@ -43,6 +44,10 @@ public:
 
 	bool IsAllEmpty() const {
 		return m_filledCellCount == 0;
+	}
+
+	bool IsAllNoProps() const {
+		return m_filledCellsWithProps == 0;
 	}
 
 	bool	InBounds(

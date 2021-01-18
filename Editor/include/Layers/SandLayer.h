@@ -100,7 +100,7 @@ struct EnemyBase {
 
 	iw::vector3 EstPlayerLocation = iw::vector3(0,0, FLT_MAX); // xy + radius
 
-	float Rez = 1000;
+	float Rez = 10000;
 
 	float AttackShipCost = 100;
 	float SupplyShipCost = 500;

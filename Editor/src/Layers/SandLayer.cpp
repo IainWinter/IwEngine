@@ -1,14 +1,16 @@
 #include "Layers/SandLayer.h"
 #include "iw/engine/Systems/EditorCameraControllerSystem.h"
+#include "iw/audio/AudioSpaceStudio.h"
 
 #include "iw/math/matrix.h"
 
 #include "iw/math/noise.h"
 
-double __chunkScale = 2;
+
+double __chunkScale = 1;
 int __chunkSize = 128;
-int __arenaSize = 100;
-int __arenaSizeBuf = 5;
+int __arenaSize = 20;
+int __arenaSizeBuf = 1;
 int __brushSizeX = 50;
 int __brushSizeY = 50;
 float __stepTime = 1/60.f;
@@ -26,7 +28,6 @@ namespace iw {
 	{
 		world.SetMaxChunks(__arenaSize, __arenaSize);
 
-		__chunkSize /= __chunkScale;
 		srand(time(nullptr));
 	}
 
@@ -34,6 +35,18 @@ namespace iw {
 		if (int err = Layer::Initialize()) {
 			return err;
 		}
+
+		// Music
+
+		//AudioSpaceStudio* studio = Audio->AsStudio();
+
+		//studio->SetVolume(0.25f);
+		//studio->LoadMasterBank("SpaceGame/Master.bank");
+		//studio->LoadMasterBank("SpaceGame/Master.strings.bank");
+		//studio->CreateEvent("Music/Attack");
+
+		//auto forestInstance = studio->CreateInstance("Music/Attack", false);
+		//Audio->AsStudio()->StartInstance(forestInstance);
 
 		// Font
 
@@ -101,11 +114,11 @@ namespace iw {
 		mlaser.dX  = 2000;
 		missile.dX = 200;
 
-		debug.Life = 1/60.f;
+		debug.Life = 2*__stepTime;
 		laser .Life  = 0.06f;
 		elaser.Life  = 1.00f;
 		mlaser.Life  = 0.25f;
-		bullet.Life  = 0.01f;
+		bullet.Life  = 0.001f;
 		missile.Life = 0.05f;
 		explosn.Life = 0.06f;
 		smoke.Life   = 0.5f;
@@ -285,26 +298,27 @@ namespace iw {
 		stepTimer -=  deltaTime;
 		if (stepTimer <= 0 && (!__stepDebug || Keyboard::KeyDown(V))) {
 			Space->Query<iw::Transform, Player, Physical>().Each([&](auto, auto t, auto p, auto pp) {
-				if (p->Movement.y == 0) {
-					pp->Speed = iw::lerp(pp->Speed, 0.f, deltaTime);
-				}
+				// boost
+				
+				float speed = 250;
 
-				else if (p->Movement.z == 1 && p->BoostFuel > 0) {
+				if (p->Movement.z == 1 && p->BoostFuel > 0) {
 					p->BoostFuel -= deltaTime;
-					pp->Speed = iw::lerp(pp->Speed, 1000.f, deltaTime*10); // acceleration
-				}
-
-				else {
-					pp->Speed = iw::clamp<float>(pp->Speed + p->Movement.y * 10, -500, 500);
+					speed = 750.f;								// speed is acceleration
 				}
 				
-				if (p->Movement.z == 0) {
+				else if (p->Movement.z == 0) {
 					p->BoostFuel = iw::clamp<float>(p->BoostFuel + deltaTime/10, 0, p->MaxBoostFuel);
 				}
 
-				float rot = -p->Movement.x *  deltaTime;
-				t->Rotation *= iw::quaternion::from_euler_angles(0, 0, rot);
+				int jerkTime = p->Movement.y == 0 ? 10 : 2;
 
+				pp->Speed = iw::clamp(iw::lerp(pp->Speed, p->Movement.y * speed, deltaTime/jerkTime), 0.f, speed);
+				
+
+				float rot = -p->Movement.x * deltaTime;
+				t->Rotation *= iw::quaternion::from_euler_angles(0, 0, rot);
+				
 				// Dont allow going out of bounds
 
 				if (t->Position.length_squared() >= (__arenaSize-__arenaSizeBuf)*(__arenaSize-__arenaSizeBuf) * __chunkSize*__chunkSize) {
@@ -312,8 +326,25 @@ namespace iw {
 					t->Rotation = /*iw::lerp(t->Rotation, */iw::quaternion::from_euler_angles(0, 0, angle)/*, deltaTime)*/;
 				}
 
-				pp->Velocity = t->Up() * pp->Speed;
-					
+				// Target force, make own funciton in iwmath, i guess a turn twoards
+				iw::vector2 nVel = (pp->Velocity).normalized();
+				iw::vector2 nDir = t->Up();
+				iw::vector2 delta = (nDir - nVel) * pp->Speed * pp->TurnRadius;
+
+				pp->Velocity = (pp->Velocity + delta).normalized() * abs(pp->Speed);
+
+#ifndef _DEBUG
+				for (auto [x, y] : FillLine(t->Position.x, t->Position.y, t->Position.x + pp->Velocity.x, t->Position.y + pp->Velocity.y)) {
+					if (world.IsEmpty(x, y)) world.SetCell(x, y, Cell::GetDefault(CellType::DEBUG));
+				}
+
+				for (auto [x, y] : FillLine(t->Position.x, t->Position.y, t->Position.x + t->Up().x*pp->Speed, t->Position.y + t->Up().y*pp->Speed)) {
+					Cell c = Cell::GetDefault(CellType::DEBUG);
+					c.Color = iw::Color(1, 1, 0);
+					if (world.IsEmpty(x, y)) world.SetCell(x, y, c);
+				}
+#endif
+
 				// Bullets n such
 
 				p->FireTimeout -= deltaTime;
@@ -321,8 +352,8 @@ namespace iw {
 					&& p->FireButtons != 0)
 				{
 					if (p->FireButtons.x == 1) {
-						p->FireTimeout = 0.43333f/4;
-						Fire(t, pos, pp->Velocity, Cell::GetDefault(CellType::BULLET), true);
+						p->FireTimeout = 0.025;
+						Fire(t, pos+iw::vector2(iw::randf(), iw::randf())*5, pp->Velocity, Cell::GetDefault(CellType::BULLET), true);
 					}
 					
 					else if (p->FireButtons.y == 1) {
@@ -351,18 +382,23 @@ namespace iw {
 				int count = 0;
 
 				space->Query<iw::Transform, Physical>().Each([&](auto e2, auto t2, auto p2) {
-					if (   e == e2
-						|| (p->HasTarget && (t2->Position - p->Target).length_squared() < 20*20)) // deviates when mining but not much
+					if (e == e2) return;
+
+					if (   p->HasTarget
+						&& p->AttractTarget
+						&& (p->Target - t2->Position).length_squared() < 20*20)
 					{
 						return;
 					}
+
+					// deviates when mining but not much
 
 					iw::vector2 away = t->Position - t2->Position;
 					if (away.length_squared() > p2->Radius*p2->Radius) { // exit if too far or current target (above)
 						return;
 					}
 
-					away *= p2->Radius / iw::clamp(away.length() - p2->Radius/2.5f, 1.f, p2->Radius);
+					away *= p2->Radius / iw::clamp(away.length() - p2->Radius/2, 1.f, p2->Radius);
 
 #ifdef _DEBUG
 					for (auto [x, y] : FillCircle(t2->Position.x, t2->Position.y, p2->Radius)) {
@@ -407,8 +443,8 @@ namespace iw {
 					if (world.IsEmpty(x, y)) world.SetCell(x, y, c);
 				}
 #endif
-
-				p->Velocity = iw::lerp(p->Velocity, p->Velocity + avgAway /*+ avgCenter*/ + avgForward, deltaTime);
+				// Flocking force
+				p->Velocity = iw::lerp(p->Velocity, p->Velocity + avgAway /*+ avgCenter*/ /*+ avgForward*/, deltaTime);
 
 #ifdef _DEBUG
 				for (auto [x, y] : FillLine(t->Position.x, t->Position.y, t->Position.x + p->Velocity.x, t->Position.y + p->Velocity.y)) {
@@ -417,7 +453,7 @@ namespace iw {
 					if (world.IsEmpty(x, y)) world.SetCell(x, y, c);
 				}
 #endif
-				// Target force
+				// Target force, make own funciton in iwmath, i guess a turn twoards
 				iw::vector2 nVel = (p->Velocity).normalized();
 				iw::vector2 nDir = (p->Target - t->Position).normalized();
 				iw::vector2 delta = (nDir - nVel) * p->Speed * p->TurnRadius;
@@ -475,7 +511,7 @@ namespace iw {
 			});
 
 			Space->Query<iw::Transform, EnemyShip, EnemyAttackShip>().Each([&](auto, auto t, auto s, auto) {
-				if (s->AttackMode) {
+				if (s->AttackMode && (playerLocation - t->Position).length_squared() < 200*200) {
 					s->FireTimer -= deltaTime;
 					if (s->FireTimer <= 0) {
 						s->FireTimer = s->FireTime * (iw::randf() + 1.1f);
@@ -510,14 +546,14 @@ namespace iw {
 					iw::vector2 c = t->Position - commandLocation;
 					iw::vector2 a = t->Position + pv.normalized() * 500;
 
-					if (ss->CapturedRez >= ss->MaxRez && c.length_squared() <= a.length_squared()) {
+					if (ss->CapturedRez >= ss->MaxRez || c.length_squared() <= a.length_squared()) {
 						s->WantGoHome = true;
 					}
 					else {
 						s->Objective = a; // try and get 500 m away
 					}
 
-					if (pv.length_squared() < 500*500) { // fire at player if 500 m of less
+					if (pv.length_squared() < 200*200) { // fire at player if 200 m of less
 						s->FireDirection = iw::lerp(s->FireDirection, playerLocation, deltaTime);
 						if (s->FireDirection.dot(playerLocation) > playerLocation.length_squared()*0.75f) {
 							Fire(t, s->FireDirection, 0, Cell::GetDefault(CellType::mLASER), -1);
@@ -598,20 +634,21 @@ namespace iw {
 						}
 					}
 
+					// send attack ships twoards player if est location is good enough 
+					else if (space->HasComponent<EnemyAttackShip>(entity)
+						  && b->EstPlayerLocation.z < 2500)
+					{
+						iw::vector2 v = b->EstPlayerLocation + b->EstPlayerLocation.z * ship->Objectives.back().normalized();
+						ship->Objectives = { v };
+						ship->AtObjective = true;
+					}
+
 					if (ship->AtObjective) {
 						// send ship home if it has gotten to all objectives
 						if (ship->Objectives.size() == 0) {
 							ship->Homecoming = true;
 							ship->Objectives.push_back(t->Position); // one of these gets removed, kinda dumb
 							ship->Objectives.push_back(t->Position);
-						}
-
-						// send attack ships twoards player if est location is good enough 
-						else if (   b->EstPlayerLocation.z < 2500
-							&& space->HasComponent<EnemyAttackShip>(entity))
-						{
-							iw::vector2 v = b->EstPlayerLocation + b->EstPlayerLocation.z * ship->Objectives.back().normalized();
-							ship->Objectives.push_back(v);
 						}
 
 						// give supplies to base and destory ship if at home base
@@ -1067,13 +1104,17 @@ namespace iw {
 
 		srand(iw::Ticks());
 
-		for (int i = 0; i < 20; i++) {
-			iw::vector2 v(iw::randf(), iw::randf());
-			v.normalize();
-			v *= iw::randf() * 1000;/* __arenaSize*__chunkSize;*/
+		int number = __arenaSize;
 
-			float xOff = v.x;
-			float yOff = v.y;
+		iw::vector2 point = iw::vector2(iw::randf(), iw::randf()).normalized() * __arenaSize*__chunkSize;
+		iw::vector2 dir = -point / number*2;
+		iw::vector2 curve = iw::vector2(-point.y, point.x).normalized() / __arenaSize;
+
+		for (int i = 0; i < number; i++) {
+			float xOff = point.x;
+			float yOff = point.y;
+
+			point += dir + 100*iw::vector2(iw::randf(), iw::randf()) + (curve += curve);
 
 			if ((playerSpawn - iw::vector2(xOff, yOff)).length_squared() < 250*250) {
 				i--; continue;
@@ -1201,17 +1242,17 @@ namespace iw {
 
 				chunksUpdated.push_back(chunk);
 
-				if (chunk->IsAllEmpty()) continue;
+				if (chunk->IsAllEmpty() || chunk->IsAllNoProps()) continue;
 
 				{ std::unique_lock lock(chunkCountMutex); chunkCount++; }
 				cellsUpdatedCount += chunk->m_width*chunk->m_height; // would be area of rect
 
-			//	Task->queue([&, chunk]() {
+				Task->queue([&, chunk]() {
 					DefaultSandWorker(world, *chunk, Space, deltaTime).UpdateChunk();
 
 					{ std::unique_lock lock(chunkCountMutex); chunkCount--; }
 					chunkCountCV.notify_one();
-				//});
+				});
 			}
 
 			{
@@ -1223,12 +1264,12 @@ namespace iw {
 		chunkCount = chunksUpdated.size();
 
 		for (SandChunk* chunk : chunksUpdated) {
-			//Task->queue([&, chunk]() {
+			Task->queue([&, chunk]() {
 				chunk->CommitMovedCells(world.m_currentTick);
 
 				{  std::unique_lock lock(chunkCountMutex); chunkCount--; }
 				chunkCountCV.notify_one();
-			//});
+			});
 		}
 
 		{
@@ -1333,6 +1374,8 @@ namespace iw {
 				die = true;
 				tile->Locations[i] = tile->Locations.back(); tile->Locations.pop_back();
 				i--;
+
+				continue;
 			}
 
 			if (die) {

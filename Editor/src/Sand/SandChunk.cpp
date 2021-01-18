@@ -210,10 +210,22 @@ void SandChunk::SetCellData(
 		--m_filledCellCount;
 	}
 		
-	else if (  cell.Type != CellType::EMPTY
-			&& dest.Type == CellType::EMPTY)
+	else if (cell.Type != CellType::EMPTY
+	      && dest.Type == CellType::EMPTY)
 	{
 		++m_filledCellCount;
+	}
+
+	if (   cell.Props == CellProperties::NONE
+		&& dest.Props != CellProperties::NONE)
+	{
+		--m_filledCellsWithProps;
+	}
+
+	else if (cell.Props != CellProperties::NONE
+		  && dest.Props == CellProperties::NONE)
+	{
+		++m_filledCellsWithProps;
 	}
 
 	float posX = cell.pX;
