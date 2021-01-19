@@ -103,6 +103,7 @@ enum class SharedCellType {
 
 struct SharedCellData {
 	bool UsedForMotion = false;
+	bool AssignMotion = false;
 
 	bool RecordHitCells = false;
 	std::vector<std::tuple<WorldCoords, Cell>> HitCells;

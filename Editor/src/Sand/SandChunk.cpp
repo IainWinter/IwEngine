@@ -162,6 +162,10 @@ bool SandChunk::CommitMovedCells(
 
 			UpdateRect(dest);
 
+			if (!sourceChunk) {
+				LOG_ERROR << "Null source chunk in move!";
+			}
+
 			SetCellData(dest, sourceChunk->GetCell(src), currentTick);
 			sourceChunk->SetCell(src, Cell::GetDefault(CellType::EMPTY), currentTick);
 
@@ -238,7 +242,6 @@ void SandChunk::SetCellData(
 
 	if (dest.Share) {
 		std::unique_lock lock(dest.Share->m_userMutex);
-		dest.Share->UserCount--;
 
 		auto& [count, location] = dest.Share->UserTypeCounts[dest.Type];
 		location = location * count - iw::vector2(dest.pX, dest.pY);
@@ -246,11 +249,11 @@ void SandChunk::SetCellData(
 		location /= (count == 0 ? 1 : count);
 
 		dest.Share->m_users.erase(&dest);
+		dest.Share->UserCount--;
 	}
 
 	if (cell.Share) {
 		std::unique_lock lock(cell.Share->m_userMutex);
-		cell.Share->UserCount++;
 
 		auto& [count, location] = cell.Share->UserTypeCounts[cell.Type];
 		location = location * count + iw::vector2(posX, posY);
@@ -258,6 +261,7 @@ void SandChunk::SetCellData(
 		location /= count;
 
 		cell.Share->m_users.emplace(&dest);
+		cell.Share->UserCount++;
 	}
 
 	dest = cell;

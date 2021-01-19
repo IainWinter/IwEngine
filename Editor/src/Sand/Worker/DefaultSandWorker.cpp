@@ -237,8 +237,8 @@ bool DefaultSandWorker::MoveForward(
 		float dsX = cell.dX * __stepTime; // need to find a way to scale velocity with time without making it 
 		float dsY = cell.dY * __stepTime; // so when the framerate is so high that things dont move less than a single cell
 
-		//ds  = iw::clamp<float>(dsX, -3, 3); // clamp to make speed for threading between chunks
-		//dsY = iw::clamp<float>(dsY, -3, 3); // should be width/2, height/2 - -> +
+		dsX = iw::clamp<float>(dsX, -Width() /2+1,  Width()/2-1); // clamp to make speed for threading between chunks
+		dsY = iw::clamp<float>(dsY, -Height()/2+1, Height()/2-1); // should be width/2, height/2 - -> +
 
 		float destXactual = cell.pX + dsX;
 		float destYactual = cell.pY + dsY;
@@ -484,6 +484,8 @@ void DefaultSandWorker::HitLikeMissile(
 	for(int j = -size; j < size; j++) {
 		int dx = x + i;
 		int dy = y + j;
+		
+		if (!InBounds(dx, dy)) continue;
 
 		const Cell& dest = GetCell(dx, dy);
 
@@ -497,15 +499,15 @@ void DefaultSandWorker::HitLikeMissile(
 				? Cell::GetDefault(CellType::SMOKE)
 				: Cell::GetDefault(CellType::EXPLOSION);
 
-			cell.pX = x + i;
-			cell.pY = y + j;
+			cell.pX = dx;
+			cell.pY = dy;
 			cell.dX *= smoke ? 5 : 1;
 			cell.dY *= smoke ? 5 : 1;
 			cell.TileId = missile.TileId;
 			cell.Life *= smoke ? 10+iw::randf()*3 : 1 / cell.Speed() * (iw::randf() + 1) * 2;
 			cell.Timer = missile.Timer;
 
-			SetCell(x+i, y+j, cell);
+			SetCell(dx, dy, cell);
 		}
 
 		else if (dest.Type == CellType::MISSILE) {

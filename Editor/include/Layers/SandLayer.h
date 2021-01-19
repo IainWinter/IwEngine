@@ -82,7 +82,7 @@ struct EnemyShip {
 
 	float TurnRad = 0.025f;
 	float FireTimer = 0;
-	float FireTime = 2.5f;
+	float FireTime = 0.5f;
 
 	iw::vector2 FireDirection = 0;
 
@@ -100,10 +100,10 @@ struct EnemyBase {
 
 	iw::vector3 EstPlayerLocation = iw::vector3(0,0, FLT_MAX); // xy + radius
 
-	float Rez = 10000;
+	int Rez = 1000; // Start with ability to spawn 10 ships
 
-	float AttackShipCost = 100;
-	float SupplyShipCost = 500;
+	int AttackShipCost = 100;
+	int SupplyShipCost = 500;
 
 	float FireTimer = 0;
 	float FireTime = 10;
@@ -243,8 +243,7 @@ namespace iw {
 			m->BurnTime = 2 + iw::randf();
 
 			u->UsedForMotion = true;
-			u->pX = point.x + dir.x/2;
-			u->pY = point.y + dir.y/2;
+			u->AssignMotion  = true;
 			u->angle = atan2(dir.y, dir.x);
 			u->Special = m;
 			u->Life = projectile.Life;
