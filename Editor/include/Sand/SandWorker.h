@@ -153,8 +153,10 @@ inline std::vector<WorldCoords> FillLine(
 	int sx = x < x2 ? 1 : -1;
 	int sy = y < y2 ? 1 : -1;
 	int err = dx + dy;  /* error value e_xy */
-		
-	while (true) {
+
+	int count = 0;
+
+	while (true && count++ < 3000) {
 		positions.emplace_back(x, y);
 
 		if (x == x2 && y == y2) break;

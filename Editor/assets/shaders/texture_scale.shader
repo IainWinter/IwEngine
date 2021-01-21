@@ -19,11 +19,13 @@ void main() {
 in vec2 FragPos;
 
 uniform sampler2D mat_texture;
+uniform float mat_textureScale = 1;
+uniform vec2 mat_textureOffset = vec2(0, 0);
 
 out vec4 FragColor;
 
 void main() {
-	vec4 color = texture(mat_texture, FragPos);
+	vec4 color = texture(mat_texture, (FragPos + mat_textureOffset) / mat_textureScale);
 	if(color.a < 0.5) {
 		discard;
 	}

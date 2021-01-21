@@ -139,6 +139,9 @@ namespace iw {
 		ref<Texture> m_sandTexture; // shorter access than through mesh->material->gettexture
 		iw::Mesh m_sandScreen;
 
+		ref<Texture> m_minimapTexture;
+		iw::Mesh m_minimapScreen;
+
 		iw::StaticPS m_stars;
 
 		iw::ref<iw::Font> m_font;
@@ -266,8 +269,6 @@ namespace iw {
 			world.SetCell(cell.pX, cell.pY, cell);
 		}
 
-		void Reset();
-
 		int  UpdateSandWorld  (int fx, int fy, int fx2, int fy2, float deltaTime);
 		void UpdateSandTexture(int fx, int fy, int fx2, int fy2);
 
@@ -275,6 +276,33 @@ namespace iw {
 
 		void PasteTiles();
 		void RemoveTiles();
+
+		void Reset();
+
+		void _SpawnCluster(float x, float y, float s, int n);
+		void GenerateWorld();
+
+		void ExecuteAndWait(
+			std::vector<SandChunk*>& chunks,
+			std::function<void(SandChunk*)> func)
+		{
+			std::mutex chunkCountMutex;
+			std::condition_variable chunkCountCV;
+			int chunkCount = 0;
+
+			for (SandChunk* chunk : chunks) {
+				{ std::unique_lock lock(chunkCountMutex); chunkCount++; }
+				Task->queue([&, chunk, func]() {
+					func(chunk);
+
+					{ std::unique_lock lock(chunkCountMutex); chunkCount--; }
+					chunkCountCV.notify_one();
+				});
+			}
+
+			std::unique_lock lock(chunkCountMutex);
+			chunkCountCV.wait(lock, [&]() { return chunkCount == 0; });
+		}
 
 		std::pair<int, int> TranslatePoint(vector2 v, vector2 p, float a) {
 			float s = sin(a);

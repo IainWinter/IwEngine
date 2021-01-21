@@ -190,6 +190,10 @@ namespace math {
 		friend vector2 operator*(
 			float left,
 			const vector2& right);
+
+		inline static vector2 random() {
+			return vector2(randf(), randf()).normalized();
+		}
 	};
 }
 

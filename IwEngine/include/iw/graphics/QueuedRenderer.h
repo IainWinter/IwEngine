@@ -171,7 +171,7 @@ namespace Graphics {
 		// set scene lights if provided, no action if null
 		IWGRAPHICS_API
 		void BeginScene(
-			Scene* scene = nullptr,
+			Scene* scene /*= nullptr*/,
 			const ref<RenderTarget>& target = nullptr,
 			bool clear = false) override;
 
