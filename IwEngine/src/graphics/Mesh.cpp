@@ -652,7 +652,7 @@ namespace detail {
 		BufferData& data,
 		unsigned index)
 	{
-		if (!data.Ptr()) {
+		if (!data.Ptr()) { // todo: this causes a crash in the vertexarray update because the index is wrong for subsequent buffers
 			return;
 		}
 

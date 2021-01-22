@@ -1,0 +1,1 @@
+@xcopy C:\dev\IwEngine\Editor\assets\shaders C:\dev\IwEngine\Editor\build\assets\shaders\  /e /y /f /i

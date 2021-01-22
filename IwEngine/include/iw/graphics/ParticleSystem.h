@@ -93,8 +93,8 @@ namespace Graphics {
 			instanceM.Push<float>(4);
 
 			description.DescribeBuffer(bName::POSITION, MakeLayout<float>(3));
-			description.DescribeBuffer(bName::NORMAL,   MakeLayout<float>(3));
-			description.DescribeBuffer(bName::UV,       MakeLayout<float>(2));
+			//description.DescribeBuffer(bName::NORMAL,   MakeLayout<float>(3));
+			description.DescribeBuffer(bName::UV,       MakeLayout<float>(2)); // just for space game default Renderer->ScreenQuad has no normals
 			description.DescribeBuffer(bName::UV1, instanceM);
 
 			mesh.Data()->ConformMeshData(description);
@@ -142,10 +142,10 @@ namespace Graphics {
 
 				unsigned count = m_particles.size();
 
-				if (    m_delete.size() != 0
-					|| m_spawn .size() != 0)
+				if (    /*m_delete.size() != 0
+					|| */m_spawn .size() != 0)
 				{
-					m_alloc.resize(count * sizeof(matrix4));
+					m_alloc.resize(count * sizeof(matrix4)); // todo: crashes on resize thats smaller
 				}
 
 				m_delete.clear();
@@ -153,9 +153,9 @@ namespace Graphics {
 
 				m_alloc.reset();
 
-				if (count == 0) {
+				/*if (count == 0) {
 					return;
-				}
+				}*/
 
 				matrix4* models = m_alloc.alloc<matrix4>(count);
 

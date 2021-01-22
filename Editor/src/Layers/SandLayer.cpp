@@ -195,13 +195,47 @@ namespace iw {
 		m_minimapTexture->CreateColors();
 		m_minimapTexture->Clear();
 
-		iw::ref<iw::Material> minimapScreenMat = REF<iw::Material>(Asset->Load<Shader>("shaders/texture_scale.shader"));
-		minimapScreenMat->SetTexture("texture", m_minimapTexture);
-		minimapScreenMat->Set("textureScale", 2.0f);
-		minimapScreenMat->Set("textureOffset", iw::vector2(0, 0));
+		iw::ref<iw::Material> minimapMat = REF<iw::Material>(Asset->Load<Shader>("shaders/SpaceGame/minimap.shader"));
+		minimapMat->SetTexture("texture", m_minimapTexture);
 
 		m_minimapScreen = Renderer->ScreenQuad().MakeCopy();
-		m_minimapScreen.SetMaterial(minimapScreenMat);
+		m_minimapScreen.SetMaterial(minimapMat);
+
+		// ammo counts
+
+		/*m_ammoTexture = REF<iw::Texture>(
+
+		);*/
+
+		iw::ref<iw::Material> ammoMat = REF<iw::Material>(Asset->Load<Shader>("shaders/SpaceGame/ammo.shader"));
+		//ammoMat->SetTexture("texture", m_minimapTexture);
+		ammoMat->Set("color", iw::Color(1, 0, 0));
+		ammoMat->SetTransparency(iw::Transparency::ADD);
+
+		m_ammoScreen = Renderer->ScreenQuad().MakeCopy();
+		m_ammoScreen.SetMaterial(ammoMat);
+
+		// bullet particle system
+
+		iw::ref<iw::Material> bulletMat = REF<iw::Material>(Asset->Load<Shader>("shaders/particle/simple_color.shader"));
+		bulletMat->Set("color", iw::Color::From255(196, 141, 37));
+		bulletMat->SetTransparency(iw::Transparency::ADD);
+		
+		iw::Mesh bulletMesh = Renderer->ScreenQuad().MakeCopy();
+		bulletMesh.Data()->TransformMeshData(iw::Transform(0, iw::vector2(2.5f, .1)));
+		bulletMesh.SetMaterial(bulletMat);
+
+		m_bullets.SetParticleMesh(bulletMesh);
+
+		iw::ref<iw::Material> missileMat = bulletMat->MakeInstance();
+		missileMat->Set("color", iw::Color::From255(230, 230, 230));
+		missileMat->SetTransparency(iw::Transparency::ADD);
+
+		iw::Mesh missileMesh = Renderer->ScreenQuad().MakeCopy();
+		missileMesh.Data()->TransformMeshData(iw::Transform(0, iw::vector2(.1, 2.5f)));
+		missileMesh.SetMaterial(missileMat);
+
+		m_missiles.SetParticleMesh(missileMesh);
 
 		//// UI Component ideas
 
@@ -303,7 +337,7 @@ namespace iw {
 		int width  = m_sandTexture->Width();
 
 		vector2 playerLocation = player ? player.Find<iw::Transform>()->Position : 0;
-		
+
 		// camera frustrum
 		int fy = iw::clamp<int>(playerLocation.y - height / 2, -__worldSize, __worldSize);
 		int fx = iw::clamp<int>(playerLocation.x - width  / 2, -__worldSize, __worldSize);
@@ -984,8 +1018,12 @@ namespace iw {
 				if (   p->FireTimeout < 0
 					&& p->FireButtons != 0)
 				{
-					if (p->FireButtons.x == 1) {
+					if (   p->FireButtons.x == 1
+						&& p->BulletAmmo > 0)
+					{
 						p->FireTimeout = 0.025;
+						p->BulletAmmo--;
+						
 						Fire(t, target +iw::vector2(iw::randf(), iw::randf())*5, pp->Velocity, Cell::GetDefault(CellType::BULLET), true);
 					}
 					
@@ -994,13 +1032,39 @@ namespace iw {
 						Fire(t, target, 0, Cell::GetDefault(CellType::LASER), false);
 					}
 
-					else if (p->FireButtons.z == 1) {
+					else if (p->FireButtons.z == 1
+						  && p->MissileAmmo > 0)
+					{
 						p->FireTimeout = 0.01f;
+						p->MissileAmmo--;
+
 						vector2 d = t->Position + t->Right() * (iw::randf() > 0 ? 1 : -1);
 						FireMissile(t, d, Cell::GetDefault(CellType::MISSILE));
 					}
 
 					p->FireButtons.z = 0; // need to reset because its on scroll wheel :/
+				}
+
+				// recharge bullets
+
+				else if (p->FireTimeout < -0.25f) {
+					if (   p->FireButtons.x == 0
+						&& p->BulletAmmo < p->MaxBulletAmmo)
+					{
+						p->BulletAmmo += 1;
+						if (p->BulletAmmo % 5 == 0) {
+							p->FireTimeout = 0;
+						}
+					}
+
+					if (   p->FireButtons.z == 0
+						&& p->MissileAmmo < p->MaxMissileAmmo)
+					{
+						p->MissileAmmo += 1;
+						if (p->MissileAmmo % 2 == 0) { // get by mining rez not regen, this breaks timer btw
+							p->FireTimeout = 0;
+						}
+					}
 				}
 			});
 
@@ -1122,20 +1186,86 @@ namespace iw {
 
 		m_stars.GetTransform()->Position = iw::vector2(-playerLocation.x, -playerLocation.y) / 5000;
 
-		// Main render
+		int playerBulletAmmo = player ? player.Find<Player>()->BulletAmmo : 0;
+		int playerMissileAmmo = player ? player.Find<Player>()->MissileAmmo : 0;
 
-		m_minimapScreen.Material()->Set("textureOffset", (playerLocation+__worldSize)/(__worldSize*2));
+		// Render
+
+		m_minimapScreen.Material()->Set("textureOffset", (playerLocation + __worldSize) / (__worldSize * 2));
+
+		while (playerBulletAmmo != m_bullets.ParticleCount()) {
+			if (playerBulletAmmo > m_bullets.ParticleCount()) {
+				
+				int x = m_bullets.ParticleCount() / 5;
+
+				m_bullets.SpawnParticle(iw::Transform(iw::vector2(
+					2.25f + x * 6.1f,
+					m_bullets.ParticleCount() * 1.1f - x * 5.5
+				)));
+			}
+
+			else {
+				m_bullets.DeleteParticle(m_bullets.ParticleCount() - 1);
+			}
+		}
+
+		while (playerMissileAmmo != m_missiles.ParticleCount()) {
+			if (playerMissileAmmo > m_missiles.ParticleCount()) {
+				
+				int x = m_missiles.ParticleCount() / 2;
+
+				m_missiles.SpawnParticle(iw::Transform(iw::vector2(
+					m_missiles.ParticleCount() * 1.1f + x * 0.5,
+					0
+				)));
+			}
+
+			else {
+				m_missiles.DeleteParticle(m_missiles.ParticleCount() - 1);
+			}
+		}
 
 		Renderer->BeginScene();
-			Renderer->DrawMesh(m_stars.GetTransform(), &m_stars.GetParticleMesh());
-			Renderer->DrawMesh(iw::Transform(), m_sandScreen);
+
+			// UI
 
 			iw::vector2 aspect(1, float(Renderer->Width()) / Renderer->Height());
 			
-			iw::vector2 upos(.8, -1);
-			iw::vector2 uscale = .1 * aspect;
+			// minimap
 
-			Renderer->DrawMesh(iw::Transform(0, 1/*upos + uscale, uscale*/), m_minimapScreen);
+			iw::vector2 mPos(1, -1);
+			iw::vector2 mScale = .15 * aspect;
+
+			if (Keyboard::KeyDown(iw::M)) {
+				mScale *= 2;
+				m_minimapScreen.Material()->Set("textureScale", 3.f);
+			}
+			else {
+				m_minimapScreen.Material()->Set("textureScale", 8.f);
+			}
+
+			Renderer->DrawMesh(iw::Transform(iw::vector3(mPos + iw::vector2(-mScale.x, mScale.y), -1), mScale), m_minimapScreen);
+
+			// ammo
+
+			//iw::vector2 aPos(-1, -1);
+			//iw::vector2 aScale = iw::vector2(.2, .05) * aspect;
+
+			//Renderer->DrawMesh(iw::Transform(iw::vector3(aPos + aScale, -1), aScale), m_ammoScreen);
+
+			iw::vector2 bPos(-1, -1);
+			iw::vector2 bScale = iw::vector2(.005, .005) * aspect;
+
+			m_bullets.UpdateParticleMesh();
+			Renderer->DrawMesh(iw::Transform(iw::vector3(bPos + bScale, -0.5), bScale), m_bullets.GetParticleMesh());
+
+			iw::vector2 iPos(-1, -.93);
+			iw::vector2 iScale = iw::vector2(.005, .005) * aspect;
+
+			m_missiles.UpdateParticleMesh();
+			Renderer->DrawMesh(iw::Transform(iw::vector3(iPos + iScale, -0.5), iScale), m_missiles.GetParticleMesh());
+
+			// Debug
 
 			Renderer->BeforeDraw([&, playerLocation, deltaTime]() {
 				std::stringstream sb;
@@ -1144,6 +1274,10 @@ namespace iw {
 			});
 			Renderer->DrawMesh(iw::Transform(-.4f), m_textMesh);
 
+			// Main render
+
+			Renderer->DrawMesh(m_stars.GetTransform(), &m_stars.GetParticleMesh());
+			Renderer->DrawMesh(iw::Transform(), m_sandScreen);
 		Renderer->EndScene();
 	}
 
@@ -1431,6 +1565,7 @@ namespace iw {
 						LOG_INFO << "asd";
 					}
 
+					// Theme the minimap based on tileid, enemys should be red everything else green or something idk
 					miniColors[texi] = chunk->GetCellDirect(x, y).Color;
 				}
 
@@ -1578,6 +1713,8 @@ namespace iw {
 #endif
 
 		for (float a = 0; a < iw::Pi2; a += __asteroidRadius*2*2/r) { // arc of asteroid belt
+			break;
+
 			float x = v.x + cos(a) * r;
 			float y = v.y + sin(a) * r;
 
@@ -1591,6 +1728,8 @@ namespace iw {
 		iw::vector2 avgEnemyBaseLocation;
 
 		for (int i = 0; i < 3; i++) { // random clusters
+			break;
+
 			iw::vector2 clusterLocation = iw::vector2::random() * (iw::randf()* __arenaRadius/3+__arenaRadius/2);
 			float clusterCount = iw::randi(25) + 25;
 			float clusterSize = (iw::randf()+2) * __asteroidRadius * clusterCount/10;

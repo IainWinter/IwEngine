@@ -163,7 +163,7 @@ bool SandChunk::CommitMovedCells(
 			UpdateRect(dest);
 
 			if (!sourceChunk) {
-				LOG_ERROR << "Null source chunk in move!";
+				LOG_ERROR << "Null source chunk in move!"; // not cause of crash, must be chunks that has been deleted but idk how that would be because they are only deleted after calling this function
 			}
 
 			SetCellData(dest, sourceChunk->GetCell(src), currentTick);

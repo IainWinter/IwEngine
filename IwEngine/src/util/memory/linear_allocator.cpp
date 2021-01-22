@@ -114,7 +114,7 @@ namespace iw {
 	void linear_allocator::resize(
 		size_t size)
 	{
-		void* memory = realloc(m_memory, size);
+		void* memory = realloc(m_memory, size);    // todo: causes crashes on resize that's smaller??
 		if (!memory) {
 			memory = malloc(size);
 			assert(memory);

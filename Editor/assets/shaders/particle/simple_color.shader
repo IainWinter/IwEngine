@@ -2,9 +2,8 @@
 #version 330
 
 layout(location = 0) in vec3 vert;
-layout(location = 1) in vec3 normal;
-layout(location = 2) in vec2 uv;
-layout(location = 3) in mat4 i_model;
+layout(location = 1) in vec2 uv;
+layout(location = 2) in mat4 i_model;
 
 out vec2 TexCoords;
 
@@ -26,7 +25,6 @@ in vec2 TexCoords;
 out vec4 FragColor;
 
 uniform vec4 mat_color;
-
 uniform float ambiance;
 
 void main() {

@@ -12,6 +12,7 @@
 
 #include "iw/graphics/ParticleSystem.h"
 #include "iw/graphics/Font.h"
+#include "iw/graphics/ParticleSystem.h"
 
 #include "iw/util/set/sparse_set.h"
 
@@ -26,6 +27,12 @@ struct Player {
 
 	float BoostFuel = 0;
 	float MaxBoostFuel = 7; // seconds
+
+	int BulletAmmo    = 50; // 50 rounds max, recharge when not firing
+	int MaxBulletAmmo = 50;
+
+	int MissileAmmo    = 25; // 25 missiles max, recharge by mining rez
+	int MaxMissileAmmo = 25;
 };
 
 struct Physical {
@@ -141,6 +148,12 @@ namespace iw {
 
 		ref<Texture> m_minimapTexture;
 		iw::Mesh m_minimapScreen;
+
+		ref<Texture> m_ammoTexture;
+		iw::Mesh m_ammoScreen;
+
+		iw::StaticPS m_bullets;
+		iw::StaticPS m_missiles;
 
 		iw::StaticPS m_stars;
 
