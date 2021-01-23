@@ -25,14 +25,14 @@ struct Player {
 
 	float FireTimeout = 0;
 
-	float BoostFuel = 0;
-	float MaxBoostFuel = 7; // seconds
-
 	int BulletAmmo    = 50; // 50 rounds max, recharge when not firing
 	int MaxBulletAmmo = 50;
 
-	int MissileAmmo    = 25; // 25 missiles max, recharge by mining rez
-	int MaxMissileAmmo = 25;
+	int MissileAmmo    = 24; // 24 missiles max, recharge by mining rez
+	int MaxMissileAmmo = 24;
+
+	float Energy = 100;    // 1 second of boost is 10 energy, 1 second of mLASER is 33 energy
+	float MaxEnergy = 100;
 };
 
 struct Physical {
@@ -146,12 +146,14 @@ namespace iw {
 		ref<Texture> m_sandTexture; // shorter access than through mesh->material->gettexture
 		iw::Mesh m_sandScreen;
 
-		ref<Texture> m_minimapTexture;
+		ref<Texture> m_minimapTexture; // ^^
 		iw::Mesh m_minimapScreen;
 
-		ref<Texture> m_ammoTexture;
-		iw::Mesh m_ammoScreen;
-
+		iw::Mesh m_teleScreen;
+		iw::Mesh m_bulletIconScreen;
+		iw::Mesh m_missileIconScreen;
+		iw::Mesh m_energyIconScreen;
+		iw::Mesh m_energyScreen;
 		iw::StaticPS m_bullets;
 		iw::StaticPS m_missiles;
 

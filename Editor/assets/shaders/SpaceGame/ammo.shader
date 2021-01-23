@@ -27,10 +27,30 @@ vec2 gridScale = gridCount + gridBorder;
 vec4 gridColor = vec4(1, 1, 1, .1);
 
 void main() {
-	vec2 gridCoords = FragPos*gridScale;
-	vec2 gridOffset = fract(gridCoords);
-	vec2 gridLine = 1.0 - step(gridBorder, gridOffset);
-	float isGrid = clamp(gridLine.x + gridLine.y, 0.0, 1.0);
+	float r = .05;
+	float d = 1 - 3*r;
 
-	FragColor = mix(vec4(1, 0, 0, 1), gridColor, isGrid);
+	float dist = length(max(abs(FragPos*2-1), d) - d) - r;
+
+	if (dist > .1) {	
+		discard;		
+	}
+
+	else if (dist > .09) {
+		FragColor = vec4(.5, 0, 1, 1);
+	}
+	
+	else {
+		FragColor = vec4(.05, 0, .1, 1);
+	}	
+	
+
+	//FragColor = vec4(dist, dist, dist, 1);
+
+	//vec2 gridCoords = FragPos*gridScale;
+	//vec2 gridOffset = fract(gridCoords);
+	//vec2 gridLine = 1.0 - step(gridBorder, gridOffset);
+	//float isGrid = clamp(gridLine.x + gridLine.y, 0.0, 1.0);
+
+	//FragColor = mix(vec4(1, 0, 0, 1), gridColor, isGrid);
 }

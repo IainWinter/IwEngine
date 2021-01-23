@@ -33,7 +33,7 @@ vec4 gridColor = vec4(1, 1, 1, .1);
 void main() {
 	float dist = 1-length(FragPos*2-1);
 
-	if(dist > .1) {
+	if (dist > .1) {
 		vec2 coords = FragPos/mat_textureScale + mat_textureOffset - 0.5/mat_textureScale;
 		vec4 color = texture(mat_texture, coords) * dist;
 

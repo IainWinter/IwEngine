@@ -198,43 +198,70 @@ namespace iw {
 		iw::ref<iw::Material> minimapMat = REF<iw::Material>(Asset->Load<Shader>("shaders/SpaceGame/minimap.shader"));
 		minimapMat->SetTexture("texture", m_minimapTexture);
 
-		m_minimapScreen = Renderer->ScreenQuad().MakeCopy();
+		m_minimapScreen = Renderer->ScreenQuad().MakeInstance();
 		m_minimapScreen.SetMaterial(minimapMat);
 
 		// ammo counts
 
-		/*m_ammoTexture = REF<iw::Texture>(
+		iw::ref<iw::Material> teleMat = REF<iw::Material>(Asset->Load<Shader>("shaders/SpaceGame/ammo.shader"));
+		teleMat->SetTransparency(iw::Transparency::ADD);
 
-		);*/
+		m_teleScreen = Renderer->ScreenQuad().MakeInstance();
+		m_teleScreen.SetMaterial(teleMat);
 
-		iw::ref<iw::Material> ammoMat = REF<iw::Material>(Asset->Load<Shader>("shaders/SpaceGame/ammo.shader"));
-		//ammoMat->SetTexture("texture", m_minimapTexture);
-		ammoMat->Set("color", iw::Color(1, 0, 0));
-		ammoMat->SetTransparency(iw::Transparency::ADD);
+		// icons
 
-		m_ammoScreen = Renderer->ScreenQuad().MakeCopy();
-		m_ammoScreen.SetMaterial(ammoMat);
+		iw::ref<iw::Texture> energyIconTex  = Asset->Load<iw::Texture>("textures/SpaceGame/energy_icon.png");
+		iw::ref<iw::Texture> bulletIconTex  = Asset->Load<iw::Texture>("textures/SpaceGame/bullet_icon.png");
+		iw::ref<iw::Texture> missileIconTex = Asset->Load<iw::Texture>("textures/SpaceGame/missile_icon.png");
+		energyIconTex ->SetFilter(iw::NEAREST);
+		bulletIconTex ->SetFilter(iw::NEAREST);
+		missileIconTex->SetFilter(iw::NEAREST);
 
-		// bullet particle system
+		iw::ref<iw::Material> energyIconMat  = REF<iw::Material>(Asset->Load<Shader>("shaders/texture.shader"));
+		iw::ref<iw::Material> bulletIconMat  = REF<iw::Material>(Asset->Load<Shader>("shaders/texture.shader"));
+		iw::ref<iw::Material> missileIconMat = REF<iw::Material>(Asset->Load<Shader>("shaders/texture.shader"));
+		energyIconMat ->SetTexture("texture", energyIconTex);
+		bulletIconMat ->SetTexture("texture", bulletIconTex);
+		missileIconMat->SetTexture("texture", missileIconTex);
+		energyIconMat ->SetTransparency(iw::Transparency::ADD);
+		bulletIconMat ->SetTransparency(iw::Transparency::ADD);
+		missileIconMat->SetTransparency(iw::Transparency::ADD);
 
+		m_energyIconScreen = Renderer->ScreenQuad().MakeInstance();
+		m_bulletIconScreen  = Renderer->ScreenQuad().MakeInstance();
+		m_missileIconScreen = Renderer->ScreenQuad().MakeInstance();
+		m_energyIconScreen .SetMaterial(energyIconMat);
+		m_bulletIconScreen .SetMaterial(bulletIconMat);
+		m_missileIconScreen.SetMaterial(missileIconMat);
+
+		// Energy
+
+		iw::ref<iw::Material> energyMat = REF<iw::Material>(Asset->Load<Shader>("shaders/simple_color.shader"));
 		iw::ref<iw::Material> bulletMat = REF<iw::Material>(Asset->Load<Shader>("shaders/particle/simple_color.shader"));
-		bulletMat->Set("color", iw::Color::From255(196, 141, 37));
-		bulletMat->SetTransparency(iw::Transparency::ADD);
-		
-		iw::Mesh bulletMesh = Renderer->ScreenQuad().MakeCopy();
-		bulletMesh.Data()->TransformMeshData(iw::Transform(0, iw::vector2(2.5f, .1)));
-		bulletMesh.SetMaterial(bulletMat);
-
-		m_bullets.SetParticleMesh(bulletMesh);
-
 		iw::ref<iw::Material> missileMat = bulletMat->MakeInstance();
+		energyMat ->Set("color", iw::Color::From255(0,   255,   0));
+		bulletMat ->Set("color", iw::Color::From255(196, 141,  37));
 		missileMat->Set("color", iw::Color::From255(230, 230, 230));
+		energyMat ->SetTransparency(iw::Transparency::ADD);
+		bulletMat ->SetTransparency(iw::Transparency::ADD);
 		missileMat->SetTransparency(iw::Transparency::ADD);
+		
+		m_energyScreen = Renderer->ScreenQuad().MakeInstance();
+		m_energyScreen.SetMaterial(energyMat);
 
+		// bullet & missile particle system
+
+		iw::Mesh bulletMesh  = Renderer->ScreenQuad().MakeCopy();
 		iw::Mesh missileMesh = Renderer->ScreenQuad().MakeCopy();
+		
+		bulletMesh.Data()->TransformMeshData(iw::Transform(0, iw::vector2(2.5f, .1)));
 		missileMesh.Data()->TransformMeshData(iw::Transform(0, iw::vector2(.1, 2.5f)));
+
+		bulletMesh.SetMaterial(bulletMat);
 		missileMesh.SetMaterial(missileMat);
 
+		m_bullets.SetParticleMesh(bulletMesh);
 		m_missiles.SetParticleMesh(missileMesh);
 
 		//// UI Component ideas
@@ -282,14 +309,9 @@ namespace iw {
 
 		//iw::Entity miniMap = Space->CreateEntity<iw::Transform, UIComponent>();
 
-
-
-
-
-
 		// Stars
 
-		iw::ref<iw::Shader> starsShader = Asset->Load<Shader>("shaders/particle/simple_point.shader");
+		iw::ref<iw::Shader> starsShader = Asset->Load<Shader>("shaders/particle/simple_color.shader");
 
 		iw::ref<iw::Material> starMat = REF<iw::Material>(starsShader);
 		starMat->Set("color", iw::Color(1));
@@ -957,13 +979,11 @@ namespace iw {
 				
 				float speed = 250;
 
-				if (p->Movement.z == 1 && p->BoostFuel > 0) {
-					p->BoostFuel -= deltaTime;
+				if (   p->Movement.z == 1
+					&& p->Energy > 0)
+				{
+					p->Energy -= 10 * deltaTime;
 					speed = 750.f;								// speed is acceleration
-				}
-				
-				else if (p->Movement.z == 0) {
-					p->BoostFuel = iw::clamp<float>(p->BoostFuel + deltaTime/10, 0, p->MaxBoostFuel);
 				}
 
 				int jerkTime = p->Movement.y == 0 ? 10 : 2;
@@ -1015,7 +1035,7 @@ namespace iw {
 				//}
 
 				p->FireTimeout -= deltaTime;
-				if (   p->FireTimeout < 0
+				if (   p->FireTimeout <  0
 					&& p->FireButtons != 0)
 				{
 					if (   p->FireButtons.x == 1
@@ -1027,9 +1047,13 @@ namespace iw {
 						Fire(t, target +iw::vector2(iw::randf(), iw::randf())*5, pp->Velocity, Cell::GetDefault(CellType::BULLET), true);
 					}
 					
-					else if (p->FireButtons.y == 1) {
+					else if (p->FireButtons.y == 1
+						  && p->Energy > 0)
+					{
+						p->Energy -= deltaTime * 33;
+
 						p->FireTimeout = 0.001f;
-						Fire(t, target, 0, Cell::GetDefault(CellType::LASER), false);
+						Fire(t, target, 0, Cell::GetDefault(CellType::mLASER), false);
 					}
 
 					else if (p->FireButtons.z == 1
@@ -1047,24 +1071,32 @@ namespace iw {
 
 				// recharge bullets
 
-				else if (p->FireTimeout < -0.25f) {
-					if (   p->FireButtons.x == 0
+				else if (p->FireTimeout <= -0.25f) {
+					if (   p->FireTimeout < -0.5f
+						&& p->FireButtons.x == 0
 						&& p->BulletAmmo < p->MaxBulletAmmo)
 					{
 						p->BulletAmmo += 1;
 						if (p->BulletAmmo % 5 == 0) {
-							p->FireTimeout = 0;
+							p->FireTimeout = -0.25f;
 						}
 					}
 
-					if (   p->FireButtons.z == 0
-						&& p->MissileAmmo < p->MaxMissileAmmo)
+					if (   p->FireButtons.y == 0 // no mining
+						&& p->Movement.z    == 0 // no boost
+						&& p->Energy < p->MaxEnergy) // has no delay, should prob have another timer for each recharge
 					{
-						p->MissileAmmo += 1;
-						if (p->MissileAmmo % 2 == 0) { // get by mining rez not regen, this breaks timer btw
-							p->FireTimeout = 0;
-						}
+						p->Energy += deltaTime * 10;
 					}
+
+					//if (   p->FireButtons.z == 0
+					//	&& p->MissileAmmo < p->MaxMissileAmmo)
+					//{
+					//	p->MissileAmmo += 1;
+					//	if (p->MissileAmmo % 2 == 0) { // get by mining rez not regen, this breaks timer btw
+					//		p->FireTimeout = 0;
+					//	}
+					//}
 				}
 			});
 
@@ -1185,39 +1217,44 @@ namespace iw {
 		}
 
 		m_stars.GetTransform()->Position = iw::vector2(-playerLocation.x, -playerLocation.y) / 5000;
+		m_minimapScreen.Material()->Set("textureOffset", (playerLocation + __worldSize) / (__worldSize * 2));
 
-		int playerBulletAmmo = player ? player.Find<Player>()->BulletAmmo : 0;
+		int playerBulletAmmo  = player ? player.Find<Player>()->BulletAmmo : 0;
 		int playerMissileAmmo = player ? player.Find<Player>()->MissileAmmo : 0;
+		float energy          = player ? player.Find<Player>()->Energy : 0;
+		float maxEnergy       = player ? player.Find<Player>()->MaxEnergy : 0; // need cus its a %
 
 		// Render
 
-		m_minimapScreen.Material()->Set("textureOffset", (playerLocation + __worldSize) / (__worldSize * 2));
 
-		while (playerBulletAmmo != m_bullets.ParticleCount()) {
+		while (playerBulletAmmo  != m_bullets .ParticleCount()) {
 			if (playerBulletAmmo > m_bullets.ParticleCount()) {
 				
 				int x = m_bullets.ParticleCount() / 5;
 
-				m_bullets.SpawnParticle(iw::Transform(iw::vector2(
-					2.25f + x * 6.1f,
-					m_bullets.ParticleCount() * 1.1f - x * 5.5
-				)));
+				m_bullets.SpawnParticle(iw::Transform(
+					iw::vector2(
+						x * 6,
+						m_bullets.ParticleCount() - x * 5
+					) + iw::vector2(2.5, .1)
+				));
 			}
 
 			else {
 				m_bullets.DeleteParticle(m_bullets.ParticleCount() - 1);
 			}
 		}
-
 		while (playerMissileAmmo != m_missiles.ParticleCount()) {
 			if (playerMissileAmmo > m_missiles.ParticleCount()) {
 				
 				int x = m_missiles.ParticleCount() / 2;
 
-				m_missiles.SpawnParticle(iw::Transform(iw::vector2(
-					m_missiles.ParticleCount() * 1.1f + x * 0.5,
-					0
-				)));
+				m_missiles.SpawnParticle(iw::Transform(
+					iw::vector2(
+						m_missiles.ParticleCount() * 1 + x * 0.5,
+						0
+					) + iw::vector2(.1, 2.5)
+				));
 			}
 
 			else {
@@ -1225,45 +1262,76 @@ namespace iw {
 			}
 		}
 
+		m_bullets .UpdateParticleMesh();
+		m_missiles.UpdateParticleMesh();
+
 		Renderer->BeginScene();
 
 			// UI
 
-			iw::vector2 aspect(1, float(Renderer->Width()) / Renderer->Height());
+			// can scale by pixels or % of screen
+			iw::vector2 pixels(1.0f / Renderer->Width(), 1.0f / Renderer->Height());
+			iw::vector2 aspect(1.0f, float(Renderer->Width()) / Renderer->Height());
+																							 //iw::vector2 aspectY(float(Renderer->Height()) / Renderer->Width(), 1); // could be useful
 			
 			// minimap
 
-			iw::vector2 mPos(1, -1);
-			iw::vector2 mScale = .15 * aspect;
+			iw::vector2 mapPos(1, -1);
+			iw::vector2 mapScale = .15 * aspect;
 
 			if (Keyboard::KeyDown(iw::M)) {
-				mScale *= 2;
+				mapScale *= 2;
 				m_minimapScreen.Material()->Set("textureScale", 3.f);
 			}
 			else {
 				m_minimapScreen.Material()->Set("textureScale", 8.f);
 			}
 
-			Renderer->DrawMesh(iw::Transform(iw::vector3(mPos + iw::vector2(-mScale.x, mScale.y), -1), mScale), m_minimapScreen);
+			Renderer->DrawMesh(iw::Transform(iw::vector3(mapPos + iw::vector2(-mapScale.x, mapScale.y), -1), mapScale), m_minimapScreen);
 
-			// ammo
+			float hide = 0;
 
-			//iw::vector2 aPos(-1, -1);
-			//iw::vector2 aScale = iw::vector2(.2, .05) * aspect;
+			if (Keyboard::KeyDown(iw::H)) {
+				hide = 300;
+			}
 
-			//Renderer->DrawMesh(iw::Transform(iw::vector3(aPos + aScale, -1), aScale), m_ammoScreen);
+			// tele
 
-			iw::vector2 bPos(-1, -1);
-			iw::vector2 bScale = iw::vector2(.005, .005) * aspect;
+			float teleZ = -.05;
 
-			m_bullets.UpdateParticleMesh();
-			Renderer->DrawMesh(iw::Transform(iw::vector3(bPos + bScale, -0.5), bScale), m_bullets.GetParticleMesh());
+			iw::vector3 telePos = iw::vector2(-1, -1) - iw::vector2(100, 900 + hide)*pixels;
+			iw::vector3 teleScale = 600 * pixels;
 
-			iw::vector2 iPos(-1, -.93);
-			iw::vector2 iScale = iw::vector2(.005, .005) * aspect;
+			Renderer->DrawMesh(iw::Transform(iw::vector3(telePos + teleScale, teleZ), teleScale), m_teleScreen);
 
-			m_missiles.UpdateParticleMesh();
-			Renderer->DrawMesh(iw::Transform(iw::vector3(iPos + iScale, -0.5), iScale), m_missiles.GetParticleMesh());
+			// energy
+
+			float iconZ = -0.1f;
+
+			iw::vector2 dispScale  =     16*pixels;
+			iw::vector2 iconScale  =     48*pixels;
+			iw::vector2 iconPos    = -1 + 8*pixels;
+			float       iconMargin =      8*pixels.y;
+
+			iw::vector2 eiScale = iconScale/2;
+
+			iw::vector2 eiPos = iconPos + iw::vector2(iconScale.x, -hide);
+			iw::vector2 biPos = iconPos + iw::vector2(0, 2*  eiScale.y + iconMargin - hide);
+			iw::vector2 miPos = biPos   + iw::vector2(0, 2*iconScale.y + iconMargin - hide);
+
+			Renderer->DrawMesh(iw::Transform(iw::vector3(eiPos + eiScale,   iconZ), eiScale),   m_energyIconScreen);
+			Renderer->DrawMesh(iw::Transform(iw::vector3(biPos + iconScale, iconZ), iconScale), m_bulletIconScreen);
+			Renderer->DrawMesh(iw::Transform(iw::vector3(miPos + iconScale, iconZ), iconScale), m_missileIconScreen);
+
+			iw::vector2 ePos = eiPos + iw::vector2(eiScale.x*2 + iconMargin, eiScale.y/2 - hide);
+			iw::vector2 bPos = biPos + iw::vector2(iconScale.x * 2, 0 - hide);
+			iw::vector2 mPos = miPos + iw::vector2(iconScale.x * 2, 0 - hide);
+
+			iw::vector2 eScale = dispScale * iw::vector2(energy/maxEnergy * 25, 1);
+
+			Renderer->DrawMesh(iw::Transform(iw::vector3(ePos + eScale,    iconZ), eScale),    m_energyScreen);
+			Renderer->DrawMesh(iw::Transform(iw::vector3(bPos + dispScale, iconZ), dispScale), m_bullets.GetParticleMesh());
+			Renderer->DrawMesh(iw::Transform(iw::vector3(mPos + dispScale, iconZ), dispScale), m_missiles.GetParticleMesh());
 
 			// Debug
 
@@ -1713,8 +1781,6 @@ namespace iw {
 #endif
 
 		for (float a = 0; a < iw::Pi2; a += __asteroidRadius*2*2/r) { // arc of asteroid belt
-			break;
-
 			float x = v.x + cos(a) * r;
 			float y = v.y + sin(a) * r;
 
@@ -1728,8 +1794,6 @@ namespace iw {
 		iw::vector2 avgEnemyBaseLocation;
 
 		for (int i = 0; i < 3; i++) { // random clusters
-			break;
-
 			iw::vector2 clusterLocation = iw::vector2::random() * (iw::randf()* __arenaRadius/3+__arenaRadius/2);
 			float clusterCount = iw::randi(25) + 25;
 			float clusterSize = (iw::randf()+2) * __asteroidRadius * clusterCount/10;
