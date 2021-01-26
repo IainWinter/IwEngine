@@ -5,7 +5,7 @@
 #include "iw/physics/Collision/SphereCollider.h"
 #include "iw/audio/AudioSpaceStudio.h"
 
-#include "Layers/SandLayer.h"
+#include "Layers/FactorySandLayer.h"
 #include "Layers/ToolLayer.h"
 
 namespace iw {
@@ -32,7 +32,7 @@ namespace iw {
 		//context->AddDevice(rm);
 		context->AddDevice(k);
 
-		sandbox = PushLayer<SandLayer>(); // model system breaks in test layer
+		sandbox = PushLayer<FactorySandLayer>(); // model system breaks in test layer
 		imgui   = PushLayer<ImGuiLayer>(/*Window()*/);
 	}
 
@@ -126,8 +126,8 @@ iw::Application* CreateApplication(
 	iw::InitOptions& options)
 {
 	options.WindowOptions = iw::WindowOptions {
-		1920,
-		1080,
+		1920/**4/3*/,
+		1080/**4/3*/,
 		true,
 		iw::DisplayState::NORMAL
 	};

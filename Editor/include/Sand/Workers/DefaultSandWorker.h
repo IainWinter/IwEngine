@@ -86,4 +86,6 @@ public:
 		int x,  int y,
 		int mx, int my,
 		Cell& missile);
+
+	void SpawnExplosion(int x, int y, int size, int tileId, bool onlyExp = false);
 };

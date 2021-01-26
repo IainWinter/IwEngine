@@ -44,20 +44,28 @@ void DefaultSandWorker::UpdateCell(
 	}
 
 	if (cell.Gravitised) {
-		iw::vector2 dir = iw::vector2(80, 80) - iw::vector2(x, y);
+		iw::vector2 dir = iw::vector2(0, -10);
 
-		float div = 2;
-		while (abs((dir / div).major()) > 1) {
-			dir /= div;
-			div = iw::clamp(div += iw::randf(), 1.2f, 1.8f); 
-		}
+		//float div = 2;
+		//while (abs((dir / div).major()) > 1) {
+		//	dir /= div;
+		//	div = iw::clamp(div += iw::randf(), 1.2f, 1.8f); 
+		//}
 
-		cell.dX = iw::clamp((dir.x + __stepTime) * 0.9f, -64.f, 64.f);
-		cell.dY = iw::clamp((dir.y + __stepTime) * 0.9f, -64.f, 64.f);
+		cell.dX += iw::clamp((dir.x * __stepTime) * 0.9f, -64.f, 64.f);
+		cell.dY += iw::clamp((dir.y * __stepTime), -64.f, 64.f);
 	}
 
 	if (cell.Type == CellType::SMOKE) {
 		cell.Color = iw::lerp<iw::vector4>(cell.Color, iw::Color::From255(100, 100, 100), __stepTime*10);
+	}
+
+	if (cell.Type == CellType::WATER && CurrentTick() % 2 == 0) {
+		if (InBounds(x, y + 1) && GetCell(x, y + 1).Type == CellType::SAND) {
+			SetCell(x, y + 1, cell);
+			SetCell(x, y, Cell::GetDefault(CellType::SAND));
+			return;
+		}
 	}
 
 	const Cell& replacement = Cell::GetDefault(cell.Type);
@@ -341,13 +349,36 @@ bool DefaultSandWorker::MoveAsSharedUser(
 	int px = ceil(cell.Share->pX + cell.pX * c - cell.pY * s);
 	int py = ceil(cell.Share->pY + cell.pX * s + cell.pY * c);
 
-	if (   px != x
-		|| py != y
-		|| IsEmpty(px, py)
-		|| GetCell(px, py).Share == cell.Share)
-	{
-		SetCellQueued(px, py, cell);
-		SetCellQueued(x, y, Cell::GetDefault(CellType::EMPTY));
+	int one = 1 / __stepTime; // distance to move one cell
+
+
+
+	// try each space between x and px / y and py
+
+	// go until there is a collision
+
+	// this doesnt really work
+
+	if (px != x || py != y) {
+		if (!IsEmpty(px, py) && GetCell(px, py).Share != cell.Share) {
+			px = IsEmpty(px, y) ? px : x;
+			py = IsEmpty(py, y) ? py : y;
+		}
+
+		if (IsEmpty(px, py) || GetCell(px, py).Share == cell.Share) {
+			SetCellQueued(px, py, cell);
+			SetCell(x, y, Cell::GetDefault(CellType::EMPTY));
+		}
+
+		else {
+			cell.Share->pX = x;
+			cell.Share->pY = y;
+
+			//cell.Share.Collision = iw::vector2(cell.Share->vX, cell.Share->vY);
+
+			cell.Share->vX = 0;
+			cell.Share->vY = 0;
+		}
 	}
 
 	return false;
@@ -402,6 +433,8 @@ void DefaultSandWorker::HitLikeProj(
 		}
 		
 		SetCell(x, y, bullet);
+
+		SpawnExplosion(x, y, 2, bullet.TileId, true);
 	}
 
 	else {
@@ -474,48 +507,9 @@ void DefaultSandWorker::HitLikeMissile(
 	int mx, int my,
 	Cell& missile)
 {
-	float speed = missile.Speed();
-
 	missile.Life = 0;
-	
-	int size = 60 + iw::randi(20);
-
-	for(int i = -size; i < size; i++)
-	for(int j = -size; j < size; j++) {
-		int dx = x + i;
-		int dy = y + j;
-		
-		if (!InBounds(dx, dy)) continue;
-
-		const Cell& dest = GetCell(dx, dy);
-
-		if (   /*dest.TileId != missile.TileId
-			&& */iw::randf() > 0
-			&& sqrt(i*i+j*j) < (35.f + iw::randf() * 15.f))
-		{
-			bool smoke = iw::randf() > 0;
-
-			Cell cell = smoke
-				? Cell::GetDefault(CellType::SMOKE)
-				: Cell::GetDefault(CellType::EXPLOSION);
-
-			cell.pX = dx;
-			cell.pY = dy;
-			cell.dX *= smoke ? 5 : 1;
-			cell.dY *= smoke ? 5 : 1;
-			cell.TileId = missile.TileId;
-			cell.Life *= smoke ? 10+iw::randf()*3 : 1 / cell.Speed() * (iw::randf() + 1) * 2;
-			cell.Timer = missile.Timer;
-
-			SetCell(dx, dy, cell);
-		}
-
-		else if (dest.Type == CellType::MISSILE) {
-			dest.Share->Hit = true;
-			dest.Share->hX = x;
-			dest.Share->hY = y;
-		}
-	}
+	SpawnExplosion(x, y, 60 + iw::randi(20), missile.TileId, true);
+	//SpawnExplosion(x, y, 60 + iw::randi(20), missile.TileId, false);
 }
 
 void DefaultSandWorker::HitAndReplace(
@@ -525,4 +519,60 @@ void DefaultSandWorker::HitAndReplace(
 {
 	SetCell(x, y, cell);
 	SetCell(cx, cy, Cell::GetDefault(CellType::EMPTY)); // could eject hit cell with velocity
+}
+
+void DefaultSandWorker::SpawnExplosion(
+	int x, int y,
+	int size,
+	int tileId,
+	bool onlyExp)
+{
+	for(int i = -size; i < size; i++)
+	for(int j = -size; j < size; j++) {
+		int dx = x + i;
+		int dy = y + j;
+		
+		if (!InBounds(dx, dy)) continue;
+
+		const Cell& dest = GetCell(dx, dy);
+
+		if (   dest.TileId != tileId
+			&& sqrt(i*i+j*j) < (35.f + iw::randf() * 15.f))
+		{
+			if (iw::randf() > 0) {
+				bool smoke = !onlyExp && iw::randf() > 0;
+
+				Cell cell = smoke
+					? Cell::GetDefault(CellType::SMOKE)
+					: Cell::GetDefault(CellType::EXPLOSION);
+
+				cell.pX = dx;
+				cell.pY = dy;
+				cell.dX *= smoke ? 5 : 1;
+				cell.dY *= smoke ? 5 : 1;
+				cell.TileId = tileId;
+				cell.Life *= smoke ? 10+iw::randf()*3 : 1 / cell.Speed() * (iw::randf() + 1) * 2;
+				//cell.Timer = missile.Timer;
+
+				SetCell(dx, dy, cell);
+			}
+
+			else if (dest.TileId != tileId) {
+				Cell d = dest;
+				(int&)d.Props |= (int)CellProperties::MOVE_DOWN;
+				d.dX = (dx - x);
+				d.dY = (dy - y);
+
+				d.Gravitised = true;
+
+				SetCell(dx, dy, d);
+			}
+		}
+
+		else if (dest.Type == CellType::MISSILE) {
+			//dest.Share->Hit = true;
+			dest.Share->vX += 100 * iw::randf();
+			dest.Share->vY += 100 * iw::randf();
+		}
+	}
 }

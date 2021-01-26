@@ -25,8 +25,8 @@ struct Player {
 
 	float FireTimeout = 0;
 
-	int BulletAmmo    = 50; // 50 rounds max, recharge when not firing
-	int MaxBulletAmmo = 50;
+	//int BulletAmmo    = 50; // 50 rounds max, recharge when not firing
+	//int MaxBulletAmmo = 50;
 
 	int MissileAmmo    = 46; // 24 missiles max, recharge by mining rez
 	int MaxMissileAmmo = 46;
@@ -58,6 +58,8 @@ struct Flocking {
 	//int FlockingWith = 0; // always 0, but then only another id
 }; // should have strength of flocking forces
 
+struct EnemyBase;
+
 struct EnemySupplyShip { // attack mode = flee
 	int MaxRez = 1500; // 3x return
 	int CapturedRez = 0;
@@ -66,6 +68,10 @@ struct EnemySupplyShip { // attack mode = flee
 struct EnemyAttackShip { }; // Tag, attack mode = fight player
 
 struct EnemyShip {
+	EnemyBase* Command; // To request commands from
+	float ChecekCommandTimer = 0;
+	float ChecekCommandTime = 5.0f;
+
 	bool RezLow = false;
 	bool AtObjective = false;
 	bool AttackMode = false;
@@ -78,6 +84,7 @@ struct EnemyShip {
 	iw::vector2 Objective; // Current location to move twoards (get from Command)
 	std::vector<iw::vector2> Objectives; // Random location to move to, same for each group spawned
 
+	//iw::vector2 Velocity  = 0;
 	float Speed = 200;
 
 	float TurnRad = 0.025f;
@@ -90,6 +97,30 @@ struct EnemyShip {
 	int MinRez = 10;
 
 	int RezToFireLaser = 5;
+};
+
+struct EnemyBase {
+	EnemyBase* MainBase = nullptr; // Null if main base
+
+	std::vector<iw::EntityHandle> NeedsObjective;
+	//std::vector<std::pair<float, iw::vector2>> PlayerLocations; // would be for tracking but that is too hard probz
+
+	iw::vector3 EstPlayerLocation = iw::vector3(0,0, FLT_MAX); // xy + radius
+
+	int Rez = 1000; // Start with ability to spawn 10 ships
+
+	int AttackShipCost = 100;
+	int SupplyShipCost = 500;
+
+	float FireTimer = 0;
+	float FireTime = 10;
+
+	float UseRezTimer = 0;
+	float UseRezTime = 5;
+
+	void RequestObjective(iw::EntityHandle ship) {
+		NeedsObjective.push_back(ship);
+	}
 };
 
 struct Missile {
@@ -108,7 +139,7 @@ struct Missile {
 #include "Sand/Tile.h"
 
 namespace iw {
-	class SandLayer
+	class SpaceSandLayer
 		: public Layer
 	{
 	private:
@@ -143,17 +174,14 @@ namespace iw {
 		SandWorld world;
 
 		float stepTimer = 0;
+		float slowStepTimer = 0;
 
 		int updatedCellCount = 0;
 
 		std::vector<iw::Entity> m_userCleanup; // need to wait one frame to delete shared user data
 
-		float nextLevelTimer;
-		float nextLevelTime = 30;
-		float nextPlayerLocation;
-
 	public:
-		SandLayer();
+		SpaceSandLayer();
 
 		int Initialize() override;
 		void PostUpdate() override;
@@ -204,14 +232,13 @@ namespace iw {
 
 		void FireMissile(
 			iw::Transform* transform,
-			vector2 offset,
 			vector2 target,
 			const Cell& projectile)
 		{
 			iw::vector2 position = transform->Position;
 			int whoFiredId = Space->FindEntity<iw::Transform>(transform).Find<Tile>()->TileId;
 
-			iw::vector2 dir = (offset - position).normalized();
+			iw::vector2 dir = (target - position).normalized();
 			iw::vector2 normal = vector2(-dir.y, dir.x);
 			iw::vector2 point = position + dir * 25 + normal * iw::randf() * 15;
 
@@ -243,7 +270,6 @@ namespace iw {
 			p->Velocity = dir * speed;
 			p->AttractTarget = true;
 			p->TurnRadius = 0.05f;
-			p->Target = target;
 
 			f->Active = false;
 
@@ -269,7 +295,7 @@ namespace iw {
 		void Reset();
 
 		void _SpawnCluster(float x, float y, float s, int n);
-		void GenerateWorld(float playerY);
+		void GenerateWorld();
 
 		void ExecuteAndWait(
 			std::vector<SandChunk*>& chunks,

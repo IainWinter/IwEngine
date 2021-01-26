@@ -286,7 +286,7 @@ namespace Graphics {
 				}
 
 				else {
-					Device->SetViewport(m_width, m_height);
+					Device->SetViewport(m_width, m_height); // dont comment above
 					Device->SetFrameBuffer(nullptr);
 				}
 			}

@@ -86,6 +86,8 @@ struct Cell {
 
 	bool UseFloatingPosition = false;
 
+	bool Filled = false;
+
 	float Speed() const {  // Manhattan distance of velocity
 		return sqrt(dX*dX + dY*dY);
 	}
@@ -149,6 +151,10 @@ struct SharedCellData {
 			iw::vector2 v(cell->pX-pX, cell->pY-pY);
 			if (v.length_squared() > furthest.length_squared()) {
 				furthest = v;
+			}
+
+			if (cell->pX == 0 || cell->pY == 0) {
+				furthest = 0;
 			}
 		}
 

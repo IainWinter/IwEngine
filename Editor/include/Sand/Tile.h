@@ -4,6 +4,7 @@
 #include <vector>
 
 struct Tile {
+	std::vector<iw::vector2> FullLocations; // copy for healing / frame
 	std::vector<iw::vector2> Locations;
 	const int InitialLocationsSize = 0;
 	int TileId = 0;
@@ -20,12 +21,14 @@ struct Tile {
 		for (iw::vector2& v : locations) {
 			for (int x = 0; x < abs(scale); x++)
 			for (int y = 0; y < abs(scale); y++) {
-				Locations.push_back(v * scale + iw::vector2(x, y) - scale*2);
+				Locations.push_back(v * scale + iw::vector2(x, y) - scale/2);
 			}
 		}
 
 		static int s_tileId = 1;
 		TileId = s_tileId++;
+
+		FullLocations = Locations;
 	}
 
 	iw::vector2 FurthestPoint(iw::vector2 d) {

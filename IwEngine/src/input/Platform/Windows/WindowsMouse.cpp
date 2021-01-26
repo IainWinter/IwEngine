@@ -88,7 +88,7 @@ namespace Input {
 			p.x = LOWORD(e.LParam);
 			p.y = HIWORD(e.LParam);
 
-			ScreenToClient(e.Handle, &p);
+			//ScreenToClient(e.Handle, &p);
 
 			input.Name  = MOUSEX;
 			input.State = p.x;
