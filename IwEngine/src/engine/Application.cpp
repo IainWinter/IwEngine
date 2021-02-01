@@ -264,7 +264,7 @@ namespace Engine {
 			layer->FixedUpdate();
 		}
 
-		LOG_TIME_SCOPE("Physics");
+		LOG_TIME_SCOPE("Physics"); // this is going to have to be made an option, or another function that you can override to stop it so you can call it in a custon loop later
 		Physics->Step(Time::FixedTime());
 	}
 

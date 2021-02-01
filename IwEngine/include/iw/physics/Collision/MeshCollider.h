@@ -16,8 +16,9 @@ namespace impl {
 		std::vector<V> m_points;
 
 	public:
-		MeshCollider()
+		MeshCollider(std::vector<V> points = {})
 			: Collider<V>(ColliderType::MESH)
+			, m_points(points)
 		{}
 
 		static MeshCollider MakeCube() {

@@ -115,6 +115,9 @@ namespace iw {
 		smoke.dX   = smoke.dY = .5f;
 		explosn.dX = explosn.dY = 2;
 
+		sand .Gravitised = true;
+		water.Gravitised = true;
+
 		bullet.dX  = 1200; // Initial speeds
 		laser.dX   = 1750;
 		elaser.dX  = 800;

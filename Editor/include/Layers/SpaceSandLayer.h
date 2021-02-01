@@ -159,6 +159,11 @@ namespace iw {
 
 		iw::StaticPS m_stars;
 
+		iw::Mesh testMesh;
+		iw::ref<iw::RenderTarget> testOutput;
+		iw::vector2 testOutputOffset;
+		iw::Mesh testMeshOutputView;
+
 		iw::ref<iw::Font> m_font;
 		Mesh m_textMesh;
 
@@ -317,16 +322,6 @@ namespace iw {
 
 			std::unique_lock lock(chunkCountMutex);
 			chunkCountCV.wait(lock, [&]() { return chunkCount == 0; });
-		}
-
-		std::pair<int, int> TranslatePoint(vector2 v, vector2 p, float a) {
-			float s = sin(a);
-			float c = cos(a);
-
-			return {
-				ceil(v.x * c - v.y * s + p.x),
-				ceil(v.x * s + v.y * c + p.y)
-			};
 		}
 
 		std::vector<const Cell*> RayCast(

@@ -5,7 +5,7 @@
 #include "iw/physics/Collision/SphereCollider.h"
 #include "iw/audio/AudioSpaceStudio.h"
 
-#include "Layers/FactorySandLayer.h"
+#include "Layers/SpaceSandLayer.h"
 #include "Layers/ToolLayer.h"
 
 namespace iw {
@@ -32,7 +32,7 @@ namespace iw {
 		//context->AddDevice(rm);
 		context->AddDevice(k);
 
-		sandbox = PushLayer<FactorySandLayer>(); // model system breaks in test layer
+		sandbox = PushLayer<SpaceSandLayer>(); // model system breaks in test layer
 		imgui   = PushLayer<ImGuiLayer>(/*Window()*/);
 	}
 

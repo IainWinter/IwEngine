@@ -6,6 +6,7 @@
 
 #include "iw/math/noise.h"
 
+#include "iw/common/algos/MarchingCubes.h"
 
 double __chunkScale = 1.5f;
 int __chunkSize = 150;
@@ -1163,6 +1164,28 @@ namespace iw {
 				}
 			});
 
+		// NEW PROCESS
+
+			// MoveTilesToPhysics() Move cells from inside of AABB with the same tileid into a field, scan field for polygon, make triangles
+			Space->Query<iw::Transform, Tile>().Each([&](
+				iw::EntityHandle e,
+				iw::Transform* transform,
+				Tile* tile)
+			{
+				tile->Initialize(transform, world, Asset); // exits if already inited
+
+				auto [field, sizeX, sizeY] = tile->GetCurrentField();
+
+				if (!field) return; // exit if tile hasent been pasted yet
+
+				for(size_t x = 0; x < sizeX; x++)
+				for(size_t y = 0; y < sizeY; y++) {
+					if ((field[x + y * sizeX] & 0x00ffffff) > 0) {
+						world.SetCell(transform->Position.x + x, transform->Position.y + y, Cell::GetDefault(CellType::EMPTY));
+					}
+				}
+			});
+
 			// Turn around objects getting close to outside arena
 
 			Space->Query<iw::Transform, Physical>().Each([&](auto e, auto t, auto p) {
@@ -1235,38 +1258,69 @@ namespace iw {
 
 			Space->ExecuteQueue();
 
-			// Sand update
+			// Physics->Step()      Run physics
 
-			// Paste tiles up where to keep tile cells after they die
+			// UpdateSandWorld()    Run sand
+			updatedCellCount = UpdateSandWorld(fx, fy, fx2, fy2, deltaTime);
 
-							   PasteTiles();
-			// Line of sight checks need to see Tiles
-			
-			Space->Query<iw::Transform, EnemyShip, Tile>().Each([&](auto, auto t, auto s, auto a) {
-				iw::vector2 d = playerLocation - t->Position;
-				d.normalize();
-				d *= 1000; // max sightline
+			// PasteTiles()         Move cells from field back into the world, on collision eject cells
+			Space->Query<iw::Transform, Tile>().Each([&](
+				iw::EntityHandle e,
+				iw::Transform* transform,
+				Tile* tile)
+			{
+				float angle = transform->Rotation.euler_angles().z;
 
-				auto cells = RayCast(t->Position.x, t->Position.y, t->Position.x + d.x, t->Position.y + d.y);
+				tile->Update(angle, Renderer->ImmediateMode());
 
-				for (const Cell* c : cells) {
-					if (c->TileId == a->TileId) continue;
-					
-					if (c->TileId == 0) {
-						s->PlayerVisible = false;
-						break;
-					}
+				auto [field, sizeX, sizeY] = tile->GetCurrentField();
 
-					if (c->TileId == player.Find<Tile>()->TileId) {
-						s->PlayerVisible = true;
-						break;
+				for(size_t x = 0; x < sizeX; x++)
+				for(size_t y = 0; y < sizeY; y++) {
+					if ((field[x + y * sizeX] & 0x00ffffff) > 0) {
+						world.SetCell(transform->Position.x + x, transform->Position.y + y, Cell::GetDefault(CellType::METAL));
 					}
 				}
 			});
 
-			updatedCellCount = UpdateSandWorld  (fx, fy, fx2, fy2, deltaTime);
-			                   UpdateSandTexture(fx, fy, fx2, fy2);
-			                   RemoveTiles();
+			// UpdateSandTexture()
+			UpdateSandTexture(fx, fy, fx2, fy2);
+
+			// Render
+
+			// END NEW PROCESS
+
+
+			// old Sand update
+
+			// Paste tiles up where to keep tile cells after they die
+							 // PasteTiles();
+			// Line of sight checks need to see Tiles
+			
+			//Space->Query<iw::Transform, EnemyShip, Tile>().Each([&](auto, auto t, auto s, auto a) {
+			//	iw::vector2 d = playerLocation - t->Position;
+			//	d.normalize();
+			//	d *= 1000; // max sightline
+//
+			//	auto cells = RayCast(t->Position.x, t->Position.y, t->Position.x + d.x, t->Position.y + d.y);
+//
+			//	for (const Cell* c : cells) {
+			//		if (c->TileId == a->TileId) continue;
+			//		
+			//		if (c->TileId == 0) {
+			//			s->PlayerVisible = false;
+			//			break;
+			//		}
+//
+			//		if (c->TileId == player.Find<Tile>()->TileId) {
+			//			s->PlayerVisible = true;
+			//			break;
+			//		}
+			//	}
+			//});
+
+			//updatedCellCount = UpdateSandWorld  (fx, fy, fx2, fy2, deltaTime);
+			                  // RemoveTiles();
 
 			// Reset hit for shared cell
 
@@ -1288,7 +1342,6 @@ namespace iw {
 		float maxEnergy       = player ? player.Find<Player>()->MaxEnergy : 0; // need cus its a %
 
 		// Render
-
 
 		//while (playerBulletAmmo  != m_bullets .ParticleCount()) {
 		//	if (playerBulletAmmo > m_bullets.ParticleCount()) {
@@ -1409,6 +1462,7 @@ namespace iw {
 
 			Renderer->DrawMesh(m_stars.GetTransform(), &m_stars.GetParticleMesh());
 			Renderer->DrawMesh(iw::Transform(), m_sandScreen);
+
 		Renderer->EndScene();
 	}
 
@@ -1575,12 +1629,12 @@ namespace iw {
 		chunkCount = chunksUpdated.size();
 
 		for (SandChunk* chunk : chunksUpdated) {
-			Task->queue([&, chunk]() {
+			//Task->queue([&, chunk]() {
 				chunk->CommitMovedCells(world.m_currentTick);
 
 				{  std::unique_lock lock(chunkCountMutex); chunkCount--; }
 				chunkCountCV.notify_one();
-			});
+			//});
 		}
 
 		{
@@ -1745,7 +1799,7 @@ namespace iw {
 				tile->Locations[i] = tile->Locations.back(); tile->Locations.pop_back();
 				i--;
 
-				continue; // donht spawn particle
+				continue; // dont spawn particle
 			}
 
 			if (die) {
@@ -1821,6 +1875,8 @@ namespace iw {
 	}
 
 	void SpaceSandLayer::GenerateWorld() {
+		goto player;
+
 		float __arenaRadius = (__arenaSize - __arenaSizeBuf) * __chunkSize;
 		float __asteroidRadius = 150;
 
@@ -1888,13 +1944,25 @@ namespace iw {
 		//avgEnemyBaseLocation /= 3;
 		//avgEnemyBaseLocation.normalize();
 		//avgEnemyBaseLocation *= __arenaRadius;
-
+	
+	player:
 		iw::vector3 playerLocation = 0;// -avgEnemyBaseLocation;
 
 		//while (!world.IsEmpty(playerLocation.x, playerLocation.y)) // try to not destroy player on spawn, not perfect should check in circles
 		//{
 		//	playerLocation += iw::vector2::random()*__asteroidRadius;
 		//}
+
+		//temp
+		iw::Entity e = Space->CreateEntity<iw::Transform, EnemyBase, Tile>();
+		e.Set<iw::Transform>(100);
+		e.Set<EnemyBase>();
+		e.Set<Tile>(std::vector<iw::vector2> {
+								vector2(1, 2),
+				vector2(0, 1), vector2(1, 1), vector2(2, 1),
+								vector2(1, 0),                
+		}, 50);
+		//end temp
 
 		player = Space->CreateEntity<iw::Transform, Tile, Player, Physical, SharedCellData>();
 
@@ -1905,7 +1973,6 @@ namespace iw {
 				vector2(0, 2), vector2(1, 2), vector2(2, 2), vector2(3, 2),
 				vector2(0, 1),							     vector2(3, 1),
 				vector2(0, 0),							     vector2(3, 0),
-				vector2(0, -1),							     vector2(3, -1)
 		}, 6);
 		player.Set<Player>();
 		Physical*       p = player.Set<Physical>();

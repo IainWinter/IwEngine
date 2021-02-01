@@ -11,7 +11,10 @@ namespace impl {
 		REFLECT V Min;
 		REFLECT V Max;
 
-		AABB() = default;
+		AABB() 
+			: Min(FLT_MAX)
+			, Max(FLT_MIN)
+		{}
 
 		AABB(
 			const V& min,

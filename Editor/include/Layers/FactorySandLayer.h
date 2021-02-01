@@ -49,6 +49,8 @@ namespace iw {
 
 		iw::StaticPS m_stars;
 
+		iw::Mesh testMesh;
+
 		iw::ref<iw::Font> m_font;
 		Mesh m_textMesh;
 
@@ -70,7 +72,7 @@ namespace iw {
 		std::vector<iw::Entity> m_userCleanup; // need to wait one frame to delete shared user data
 
 		float nextLevelTimer = 0;
-		float nextLevelTime = 2;
+		float nextLevelTime = .5;
 		float levelTime = 2;
 		std::vector<std::tuple<float, float, int>> nextLevels;
 

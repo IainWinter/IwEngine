@@ -5,7 +5,9 @@
 #include "iw/math/matrix.h"
 
 #include "iw/math/noise.h"
+#include "iw/common/algos/MarchingCubes.h"
 
+#include "iw/physics/Collision/MeshCollider.h"
 
 double __chunkScale = 4.f;
 int __chunkSize = 200;
@@ -19,7 +21,7 @@ bool __stepDebug = false;
 int __worldSize = __arenaSize * __chunkSize / __chunkScale; // gets set below
 
 int __worldSizeX = 1;
-int __worldSizeY = 2;
+int __worldSizeY = 5;
 
 int __seaHeight = 125;
 
@@ -92,6 +94,8 @@ namespace iw {
 		Cell bullet  = { CellType::BULLET,  CellProperties::MOVE_FORWARD | CellProperties::DELETE_TIME | CellProperties::HIT_LIKE_PROJECTILE };
 		Cell missile = { CellType::MISSILE, CellProperties::MOVE_FORWARD | CellProperties::DELETE_TIME | CellProperties::HIT_LIKE_MISSILE };
 
+		Cell bomb    = { CellType::BOMB, CellProperties::MOVE_DOWN | CellProperties::MOVE_DOWN_SIDE };
+
 		empty  .Color = iw::Color::From255(  0,   0,   0, 0);
 		debug  .Color = iw::Color::From255(255,   0,   0);
 		sand   .Color = iw::Color::From255(237/2, 201/2, 175/2);
@@ -110,6 +114,8 @@ namespace iw {
 		bullet .Color = iw::Color::From255(255, 255,   0);
 		missile.Color = metal.Color;
 
+		bomb.Color = iw::Color::From255(50, 230, 50);
+
 		sand .dY = -1;
 		water.dY = -1;
 		smoke.dX   = smoke.dY = .5f;
@@ -120,6 +126,8 @@ namespace iw {
 		elaser.dX  = 800;
 		mlaser.dX  = 2000;
 		missile.dX = 200;
+		
+		bomb .dY = -1;
 
 		debug.Life = 2*__stepTime;
 		laser .Life  = 0.06f;
@@ -171,6 +179,7 @@ namespace iw {
 		Cell::SetDefault(CellType::mLASER,    mlaser);
 		Cell::SetDefault(CellType::BULLET,    bullet);
 		Cell::SetDefault(CellType::MISSILE,   missile);
+		Cell::SetDefault(CellType::BOMB,      bomb);
 
 		// Sand rendering
 
@@ -323,7 +332,7 @@ namespace iw {
 		vector2 playerLocation = player ? player.Find<iw::Transform>()->Position : 0;
 
 		// camera frustrum
-		int fy = iw::clamp<int>(-height / 2, -__worldSize, __worldSize);
+		int fy = iw::clamp<int>(playerLocation.y - height / 2, -__worldSize, __worldSize);
 		int fx = iw::clamp<int>(-width  / 2, -__worldSize, __worldSize);
 		int fy2 = iw::clamp<int>(fy + height, -__worldSize, __worldSize);
 		int fx2 = iw::clamp<int>(fx + width,  -__worldSize, __worldSize);
@@ -392,11 +401,32 @@ namespace iw {
 
 			// Sand spawning
 
+			if (Keyboard::KeyDown(iw::O)) {
+				world.SetCell(pos.x, pos.y, Cell::GetDefault(CellType::BOMB));
+			}
+
 			nextLevelTimer -= deltaTime;
 			if (nextLevelTimer < 0) {
 				nextLevelTimer = nextLevelTime;
-				levelTime += 0.1f;
-				nextLevels.emplace_back(levelTime, iw::randf() * __worldSizeX / 2, iw::randi(2));
+
+				int type = 0;
+				float time = levelTime;
+
+				float r = (iw::randf() + 1) / 2;
+				if (r > 0.90) {
+					type = 2;
+					time = 0;
+				}
+
+				else if (r > .5) {
+					type = 1;
+				}
+
+				else {
+					type = 0;
+				}
+
+				nextLevels.emplace_back(time, iw::randf() * __worldSizeX, type);
 			}
 
 			for (int i = 0; i < nextLevels.size(); i++) {
@@ -405,6 +435,7 @@ namespace iw {
 				switch (type) {
 					case 0: world.SetCell(location, __worldSizeY, Cell::GetDefault(CellType::SAND));  break;
 					case 1: world.SetCell(location, __worldSizeY, Cell::GetDefault(CellType::WATER)); break;
+					case 2: world.SetCell(location, __worldSizeY, Cell::GetDefault(CellType::BOMB)); break;
 				}
 
 				time -= deltaTime;
@@ -413,28 +444,6 @@ namespace iw {
 					i--;
 				}
 			}
-
-			// Player
-
-			Space->Query<iw::Transform, Tile, Player>().Each([&](
-				iw::EntityHandle entity,
-				iw::Transform* transform,
-				Tile* tile,
-				Player* player)
-			{
-				transform->Position += player->Velocity;
-
-				if (   player->Fire
-					/*&& player->BulletAmmo > 0 */)
-				{
-					player->FireTimeout = 0.1;
-					Fire(transform, pos, Cell::GetDefault(CellType::BULLET), tile->TileId, true);
-				}
-			});
-
-							   PasteTiles();
-			updatedCellCount = UpdateSandWorld  (fx, fy, fx2, fy2, deltaTime);
-			                   UpdateSandTexture(fx, fy, fx2, fy2);
 
 			// Player
 
@@ -468,8 +477,20 @@ namespace iw {
 				player->OnGround = colY;
 
 				player->Velocity = { vx, vy };
+				transform->Position += player->Velocity;
+
+				if (   player->Fire
+					/*&& player->BulletAmmo > 0 */)
+				{
+					player->FireTimeout = 0.1;
+					Fire(transform, pos, Cell::GetDefault(CellType::BULLET), tile->TileId, true);
+				}
 			});
 
+
+							   PasteTiles();
+			updatedCellCount = UpdateSandWorld  (fx, fy, fx2, fy2, deltaTime);
+			                   UpdateSandTexture(fx, fy, fx2, fy2);
 							   RemoveTiles();
 		}
 
@@ -481,18 +502,21 @@ namespace iw {
 
 			//// Debug
 
-			Renderer->BeforeDraw([&, playerLocation, deltaTime]() {
-				std::stringstream sb;
-				sb << nextLevelTimer;
-				//sb << updatedCellCount << "\n" << deltaTime << "\n" << playerLocation << "\n" << mousePos;
-				m_font->UpdateMesh(m_textMesh, sb.str(), 0.001, 1);
-			});
-			Renderer->DrawMesh(iw::Transform(-.4f), m_textMesh);
+			//Renderer->BeforeDraw([&, playerLocation, deltaTime]() {
+			//	std::stringstream sb;
+			//	sb << nextLevelTimer;
+			//	//sb << updatedCellCount << "\n" << deltaTime << "\n" << playerLocation << "\n" << mousePos;
+			//	m_font->UpdateMesh(m_textMesh, sb.str(), 0.001, 1);
+			//});
+			//Renderer->DrawMesh(iw::Transform(-.4f), m_textMesh);
 
-			// Main render
+			//// Main render
 
 			Renderer->DrawMesh(m_stars.GetTransform(), &m_stars.GetParticleMesh());
 			Renderer->DrawMesh(iw::Transform(), m_sandScreen);
+
+			Renderer->DrawMesh(iw::Transform(0, 1, iw::quaternion::from_euler_angles(iw::Pi, 0, 0)), testMesh);
+
 		Renderer->EndScene();
 	}
 
@@ -563,10 +587,95 @@ namespace iw {
 
 		player = Space->CreateEntity<iw::Transform, Player, Tile>();
 		player.Set<iw::Transform>();
-		player.Set<Tile>(std::vector<iw::vector2> {
-			vector2(0, 0)
-		}, 2);
+		Tile* tile = player.Set<Tile>(std::vector<iw::vector2> {
+			vector2(0, 0),
+			vector2(1, 0),
+			vector2(2, 0),
+			vector2(2, 1),
+			vector2(2, 2),
+		}, 3);
 		player.Set<Player>();
+
+		// testing
+
+		// Here's the process
+
+		// Game logic update
+
+		// Move cells from inside of AABB with the same tileid into a field
+		// Scan field for polygon, if something is inside of the ABBB, also make triangles and do collision detection
+		// Run physics
+		// Run sand
+		// Move cells from field back into the world, on collision eject cells
+		
+		// Render cells
+
+		iw::AABB2 bounds = tile->AABB();
+
+		//auto [sizeX, sizeY] = bounds.Max - bounds.Min;
+
+		// turn tile into field
+
+		unsigned field[17*17] = {
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0,
+			0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0,
+			0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+		};
+
+		std::vector<iw::vector2> polygon = iw::common::MakePolygonFromField(field, 17, 17, 1u);
+		std::vector<unsigned>    index   = iw::common::TriangulatePolygon(polygon);
+
+		float maxLength = 0;
+		for (iw::vector2& v : polygon) {
+			if (v.length_squared() > maxLength) {
+				maxLength = v.length_squared();
+			}
+		}
+
+		maxLength = sqrt(maxLength);
+
+		for (iw::vector2& v : polygon) {
+			v /= maxLength;
+		}
+
+		iw::MeshDescription description;
+		description.DescribeBuffer(bName::POSITION, MakeLayout<float>(2));
+
+		iw::MeshData* data = new iw::MeshData(description);
+
+		data->SetBufferData(bName::POSITION, polygon.size(), polygon.data());
+		data->SetIndexData(index.size(), index.data());
+
+		iw::ref<iw::Texture> texture = REF<iw::Texture>(17, 17);
+		texture->CreateColors();
+		texture->SetFilter(iw::NEAREST);
+		for (int i = 0; i < 17 * 17; i++) {
+			((unsigned*)texture->Colors())[i] = field[i] == 1 ? -1 : 0;
+		}
+
+		iw::ref<iw::Material> material = REF<iw::Material>(Asset->Load<iw::Shader>("shaders/texture2D.shader"));
+		material->SetTexture("texture", texture);
+
+		testMesh = data->MakeInstance();
+		testMesh.SetMaterial(material);
+
+
+
+
 
 		// shared cell player
 		//player = Space->CreateEntity<Player, SharedCellData>();
@@ -781,8 +890,8 @@ namespace iw {
 			else {
 				anyCollision = true;
 				if (!test) {
-					tile->Locations[i] = tile->Locations.back(); tile->Locations.pop_back();
-					i--;
+					//tile->Locations[i] = tile->Locations.back(); tile->Locations.pop_back();
+					//i--;
 				}
 
 				else {
@@ -834,8 +943,8 @@ namespace iw {
 				}
 
 				else {
-					a->Locations[i] = a->Locations.back(); a->Locations.pop_back();
-					i--;
+					//a->Locations[i] = a->Locations.back(); a->Locations.pop_back();
+					//i--;
 				}
 			}
 		});

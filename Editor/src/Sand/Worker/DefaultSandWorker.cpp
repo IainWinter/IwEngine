@@ -68,6 +68,22 @@ void DefaultSandWorker::UpdateCell(
 		}
 	}
 
+	if (cell.Type == CellType::SAND && CurrentTick() % 2 == 0) {
+		int dir = iw::randf() > 0 ? 1 : - 1;
+		
+		if (InBounds(x + dir, y) && GetCell(x + dir, y).Type == CellType::WATER) {
+			SetCell(x + dir, y, cell);
+			SetCell(x, y, Cell::GetDefault(CellType::WATER));
+			return;
+		}
+	}
+
+	if (cell.Type == CellType::BOMB && cell.Timer > 3) {
+		SetCell(x, y, Cell::GetDefault(CellType::EMPTY));
+		SpawnExplosion(x, y, 10, -1, true);
+		return;
+	}
+
 	const Cell& replacement = Cell::GetDefault(cell.Type);
 
 	bool hit = false;
@@ -529,6 +545,8 @@ void DefaultSandWorker::SpawnExplosion(
 {
 	for(int i = -size; i < size; i++)
 	for(int j = -size; j < size; j++) {
+		if(i*i+j*j > size*size) continue;
+
 		int dx = x + i;
 		int dy = y + j;
 		
@@ -536,10 +554,8 @@ void DefaultSandWorker::SpawnExplosion(
 
 		const Cell& dest = GetCell(dx, dy);
 
-		if (   dest.TileId != tileId
-			&& sqrt(i*i+j*j) < (35.f + iw::randf() * 15.f))
-		{
-			if (iw::randf() > 0) {
+		if (dest.TileId != tileId) {
+			if (iw::randf() > .5f) {
 				bool smoke = !onlyExp && iw::randf() > 0;
 
 				Cell cell = smoke
@@ -559,11 +575,12 @@ void DefaultSandWorker::SpawnExplosion(
 
 			else if (dest.TileId != tileId) {
 				Cell d = dest;
-				(int&)d.Props |= (int)CellProperties::MOVE_DOWN;
-				d.dX = (dx - x);
-				d.dY = (dy - y);
-
+				(int&)d.Props |= int(CellProperties::MOVE_DOWN | CellProperties::MOVE_DOWN_SIDE);
 				d.Gravitised = true;
+
+				iw::vector2 v = iw::vector2(dx - x, dy - y).normalized() * 5;
+				d.dX = v.x;
+				d.dY = v.y;
 
 				SetCell(dx, dy, d);
 			}

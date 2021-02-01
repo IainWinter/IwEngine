@@ -8,6 +8,16 @@
 #include <mutex>
 #include <set>
 
+inline iw::vector2 TranslatePoint(iw::vector2 v, iw::vector2 p, float a) { // maybe put in common
+	float s = sin(a);
+	float c = cos(a);
+
+	return {
+		v.x * c - v.y * s + p.x,
+		v.x * s + v.y * c + p.y
+	};
+}
+
 using Tick = size_t;
 
 using Index = unsigned int;
@@ -37,6 +47,7 @@ enum class CellType {
 	BULLET,
 	MISSILE,
 
+	BOMB,
 
 	DEBUG
 };
