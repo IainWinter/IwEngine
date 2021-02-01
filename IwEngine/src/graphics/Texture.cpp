@@ -381,6 +381,7 @@ namespace Graphics {
 			delete m_colors;
 
 			m_colors = new unsigned char[ColorCount()];
+			Clear();
 		}
 
 		return m_colors;

@@ -15,7 +15,7 @@ namespace RenderAPI {
 		TextureWrap wrap,
 		TextureFilter filter,
 		TextureMipmapFilter mipmapFilter,
-		const void* data)
+		void* data)
 		: m_width       (width)
 		, m_height      (height)
 		, m_format      (format)
@@ -258,6 +258,10 @@ namespace RenderAPI {
 	
 	TextureMipmapFilter GLTexture::MipmapFilter() const {
 		return m_mipmapFilter;
+	}
+
+	void* GLTexture::Data() const {
+		return m_data;
 	}
 }
 }

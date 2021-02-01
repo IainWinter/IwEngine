@@ -30,7 +30,7 @@ namespace RenderAPI {
 		TextureFilter       m_filter;
 		TextureMipmapFilter m_mipmapFilter;
 
-		const void* m_data;
+		void* m_data;
 
 	public:
 		IWRENDERER_API
@@ -43,7 +43,7 @@ namespace RenderAPI {
 			TextureWrap wrap,
 			TextureFilter filter,
 			TextureMipmapFilter mipmapFilter,
-			const void* data = nullptr);
+			void* data = nullptr);
 
 		//IWRENDERER_API
 		//GLTexture(
@@ -135,6 +135,9 @@ namespace RenderAPI {
 
 		IWRENDERER_API
 		TextureMipmapFilter MipmapFilter() const;
+
+		IWRENDERER_API
+		void* Data() const;
 	};
 }
 

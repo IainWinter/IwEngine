@@ -31,6 +31,10 @@ namespace Graphics {
 			const iw::ref<IDevice>& device);
 
 		IWGRAPHICS_API
+		void ReadPixels(
+			const iw::ref<IDevice>& device);
+
+		IWGRAPHICS_API
 		void AddTexture(
 			iw::ref<Texture> texture);
 

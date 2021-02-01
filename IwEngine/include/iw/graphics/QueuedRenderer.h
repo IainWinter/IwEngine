@@ -140,6 +140,10 @@ namespace Graphics {
 		QueuedRenderer(
 			const ref<IDevice>& device);
 
+		Renderer* ImmediateMode() {
+			return this;
+		}
+
 		// sets current layer for ordering
 		IWGRAPHICS_API
 		void SetLayer(

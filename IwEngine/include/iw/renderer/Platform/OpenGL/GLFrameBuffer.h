@@ -2,6 +2,7 @@
 
 #include "GLTexture.h"
 #include "iw/renderer/FrameBuffer.h"
+#include <vector>
 
 namespace iw {
 namespace RenderAPI {
@@ -12,6 +13,7 @@ namespace RenderAPI {
 		unsigned gl_id;
 		unsigned m_textureCount;
 		bool m_noColor;
+		std::vector<std::pair<int, GLTexture*>> m_attachments;
 
 	public:
 		IWRENDERER_API
@@ -24,6 +26,9 @@ namespace RenderAPI {
 		IWRENDERER_API
 		void AttachTexture(
 			GLTexture* texture);
+
+		IWRENDERER_API
+		void ReadPixels();
 
 		IWRENDERER_API
 		void Bind() const;

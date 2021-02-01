@@ -212,7 +212,7 @@ namespace RenderAPI {
 			TextureWrap wrap,
 			TextureFilter filter,
 			TextureMipmapFilter mipmapFilter,
-			const void* data = nullptr) = 0;
+			void* data = nullptr) = 0;
 
 		IWRENDERER_API
 		virtual ITexture* CreateSubTexture(
@@ -259,6 +259,10 @@ namespace RenderAPI {
 		virtual void AttachTextureToFrameBuffer(
 			IFrameBuffer* frameBuffer,
 			ITexture* texture) = 0;
+
+		IWRENDERER_API
+		virtual void ReadPixelsFromFrameBuffer(
+			IFrameBuffer* frameBuffer) = 0;
 
 		IWRENDERER_API
 		static IDevice* Create();

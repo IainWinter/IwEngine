@@ -328,7 +328,7 @@ namespace RenderAPI {
 		TextureWrap wrap,
 		TextureFilter filter,
 		TextureMipmapFilter mipmapFilter,
-		const void* data)
+		void* data)
 	{
 		return new GLTexture(width, height, type, format, formatType, wrap, filter, mipmapFilter, data);
 	}
@@ -406,6 +406,14 @@ namespace RenderAPI {
 	{
 		static_cast<GLFrameBuffer*>(frameBuffer)
 			->AttachTexture(static_cast<GLTexture*>(texture));
+	}
+
+	
+	void GLDevice::ReadPixelsFromFrameBuffer(
+		IFrameBuffer* frameBuffer)
+	{
+		static_cast<GLFrameBuffer*>(frameBuffer)
+			->ReadPixels();
 	}
 }
 }

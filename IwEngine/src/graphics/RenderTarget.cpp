@@ -1,5 +1,4 @@
 #include "iw/graphics/RenderTarget.h"
-#include <assert.h>
 
 namespace iw {
 namespace Graphics {
@@ -25,6 +24,12 @@ namespace Graphics {
 	{
 		device->SetFrameBuffer(m_handle);
 		device->SetViewport(m_width, m_height);
+	}
+
+	void RenderTarget::ReadPixels(
+		const iw::ref<IDevice>& device)
+	{
+		device->ReadPixelsFromFrameBuffer(m_handle);
 	}
 
 	void RenderTarget::AddTexture(

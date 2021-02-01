@@ -1,5 +1,6 @@
 #include "iw/renderer/Platform/OpenGL/GLFrameBuffer.h"
 #include "iw/renderer/Platform/OpenGL/GLErrorCatch.h"
+#include "iw/renderer/Platform/OpenGL/GLTranslator.h"
 #include "gl/glew.h"
 
 namespace iw {
@@ -25,12 +26,14 @@ namespace RenderAPI {
 	void GLFrameBuffer::AttachTexture(
 		GLTexture* texture)
 	{
-		GLint attachment = 0;
+		GLenum attachment = 0;
 		switch (texture->Format()) {
 			case DEPTH:   attachment = GL_DEPTH_ATTACHMENT;   break;
 			case STENCIL: attachment = GL_STENCIL_ATTACHMENT; break;
 			default:      attachment = GL_COLOR_ATTACHMENT0 + m_textureCount++;
 		}
+
+		m_attachments.emplace_back(attachment, texture);
 
 		Bind();
 		texture->Bind();
@@ -42,6 +45,23 @@ namespace RenderAPI {
 		else if (texture->Type() == TEX_CUBE) {
 			GL(glFramebufferTexture(GL_FRAMEBUFFER, attachment, texture->Id(), 0));
 		}
+
+		texture->Unbind();
+		Unbind();
+	}
+
+	void GLFrameBuffer::ReadPixels() {
+		Bind();
+		
+		for (auto [attachment, texture] : m_attachments) {
+			GLint format     = GLTranslator::Instance().Translate(texture->Format());
+			GLint formatType = GLTranslator::Instance().Translate(texture->FormatType());
+			
+			glReadBuffer(attachment);
+			glReadPixels(0, 0, texture->Width(), texture->Height(), format, formatType, texture->Data());
+		}
+
+		Unbind();
 	}
 
 	void GLFrameBuffer::Bind() const {
