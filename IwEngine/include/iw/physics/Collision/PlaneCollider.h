@@ -58,7 +58,7 @@ namespace impl {
 		{
 			return collider->TestCollision(colliderTransform, this, transform);
 		}
-
+		
 		IWPHYSICS_API
 		ManifoldPoints TestCollision(
 			const Transform* transform,
@@ -72,6 +72,14 @@ namespace impl {
 			const Transform* capsuleTransform) const override;
 
 		IWPHYSICS_API
+		ManifoldPoints TestCollision(
+			const Transform* transform,
+			const CylinderCollider<V>* cylinder,
+			const Transform* capsuleTransform) const override
+		{
+			return {};
+		}
+
 		ManifoldPoints TestCollision(
 			const Transform* transform,
 			const PlaneCollider<V>* plane,

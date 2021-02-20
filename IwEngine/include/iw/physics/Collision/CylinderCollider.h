@@ -7,7 +7,7 @@ namespace Physics {
 namespace impl {
 	template<
 		typename V>
-	struct REFLECT CapsuleCollider
+	struct REFLECT CylinderCollider
 		: Collider<V>
 	{
 		REFLECT V Center;
@@ -15,31 +15,31 @@ namespace impl {
 		REFLECT float Height;
 		REFLECT float Radius;
 
-		CapsuleCollider()
-			: Collider<V>(ColliderType::CAPSULE)
+		CylinderCollider()
+			: Collider<V>(ColliderType::CYLINDER)
 			, Center(0.0f)
 			, Direction(V::unit_y)
 			, Height(2.0f)
 			, Radius(0.5f)
 		{}
 
-		CapsuleCollider(
+		CylinderCollider(
 			V center,
 			float height,
 			float radius)
-			: Collider<V>(ColliderType::CAPSULE)
+			: Collider<V>(ColliderType::CYLINDER)
 			, Center(center)
 			, Direction(V::unit_y)
 			, Height(height)
 			, Radius(radius)
 		{}
 
-		CapsuleCollider(
+		CylinderCollider(
 			V center,
 			V direction,
 			float height,
 			float radius)
-			: Collider<V>(ColliderType::CAPSULE)
+			: Collider<V>(ColliderType::CYLINDER)
 			, Center(center)
 			, Direction(direction)
 			, Height(height)
@@ -62,7 +62,7 @@ namespace impl {
 		Transform Trans() const override {
 			Transform transform;
 			transform.Position = Center;
-			//transform.Scale    = vector3(Radius, Height / 2, Radius); // todo: why would this be commented?
+			//transform.Scale    = vector3(Radius, Height / 2, Radius);
 
 			if      (Direction == V::unit_x) {
 				transform.Rotation = quaternion::from_axis_angle(V::unit_z, Pi / 2);
@@ -86,7 +86,7 @@ namespace impl {
 		{
 			return collider->TestCollision(colliderTransform, this, transform);
 		}
-
+		
 		IWPHYSICS_API
 		ManifoldPoints TestCollision(
 			const Transform* transform,
@@ -122,9 +122,9 @@ namespace impl {
 	};
 }
 
-	using CapsuleCollider2 = impl::CapsuleCollider<iw::vector2>;
-	using CapsuleCollider  = impl::CapsuleCollider<iw::vector3>;
-	using CapsuleCollider4 = impl::CapsuleCollider<iw::vector4>;
+	using CylinderCollider2 = impl::CylinderCollider<iw::vector2>;
+	using CylinderCollider  = impl::CylinderCollider<iw::vector3>;
+	using CylinderCollider4 = impl::CylinderCollider<iw::vector4>;
 }
 
 	using namespace Physics;

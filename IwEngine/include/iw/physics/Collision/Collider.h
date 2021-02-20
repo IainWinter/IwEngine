@@ -5,12 +5,15 @@
 #include "iw/common/Components/Transform.h"
 #include "ManifoldPoints.h"
 
+#include "iw/log/logger.h" // tmp
+
 namespace iw  {
 namespace Physics {
 
 	enum class ColliderType {
 		SPHERE,
 		CAPSULE,
+		CYLINDER,
 		PLANE,
 		//BOX,
 		MESH
@@ -22,6 +25,9 @@ namespace impl {
 
 	template<typename V>
 	struct CapsuleCollider;
+
+	template<typename V>
+	struct CylinderCollider;
 
 	template<typename V>
 	struct PlaneCollider;
@@ -61,6 +67,7 @@ namespace impl {
 			const Transform* transform,
 			V direction) const //= 0;
 		{
+			LOG_WARNING << "Tried to find furthest point of a collider that doesn't impl function!";
 			return V();
 		}
 
@@ -82,6 +89,12 @@ namespace impl {
 		virtual ManifoldPoints TestCollision(
 			const Transform* transform,
 			const impl::CapsuleCollider<V>* capsule,
+			const Transform* capsuleTransform) const = 0;
+
+		IWPHYSICS_API
+		virtual ManifoldPoints TestCollision(
+			const Transform* transform,
+			const impl::CylinderCollider<V>* cylinder,
 			const Transform* capsuleTransform) const = 0;
 
 		IWPHYSICS_API

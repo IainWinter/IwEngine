@@ -10,6 +10,11 @@ namespace Physics {
 		const Transform* transform,
 		vector3 direction) const
 	{
+		//vector3 xz = vector3(direction.x, 0, direction.z).normalized() * Radius;   // todo: make cylender collider
+		//xz.y = (direction.y < 0) ? -Radius : Radius; // low : high
+
+		//return xz * transform->WorldScale().major() + Center + transform->WorldPosition();
+
 		return Center + transform->WorldPosition()
 			 + Radius * direction.normalized() * transform->WorldScale().major();
 	}
