@@ -416,9 +416,9 @@ namespace iw {
 			//	list.push_back(jitter);
 			//}
 
-			playerSystem->GetPlayer().Find<iw::Model>()->GetMesh(0).SetData(iw::GenerateFromTexels(
-				d, 0, vector3(30, 30), .5,
-				list)->MakeLink());
+			//playerSystem->GetPlayer().Find<iw::Model>()->GetMesh(0).SetData(iw::GenerateFromVoxels(
+			//	d, 0, vector3(30, 30), .5,
+			//	list)->MakeLink());
 		}
 
 		// Update particle system

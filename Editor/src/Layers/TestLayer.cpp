@@ -49,7 +49,7 @@ namespace iw {
 		Mesh* mesh;
 		Collider* col;
 
-		if (randf() > 0.5f) {
+		/*if (randf() > 0.5f) {
 
 
 			col = entity.Add<MeshCollider>(MeshCollider::MakeCube());
@@ -61,7 +61,7 @@ namespace iw {
 			mesh = entity.Set<Mesh>(tetrahedron->MakeInstance());
 		}
 
-		else {
+		else */{
 			col = entity.Add<SphereCollider>(0, 1);
 			mesh = entity.Set<Mesh>(sphere->MakeInstance());
 
@@ -316,11 +316,11 @@ namespace iw {
 		srand(19);
 		//SpawnCube(vector3(1, 5, 20), 1000, true);
 
-		SpawnCube(5, 100, true);
-		SpawnCube();
+		//SpawnCube(5, 100, true);
+		//SpawnCube();
 
-		//SpawnCube();
-		//SpawnCube();
+		SpawnCube(5);
+		SpawnCube();
 
 		return Layer::Initialize();
 	}
@@ -361,7 +361,7 @@ namespace iw {
 				auto body1,
 				auto mesh1)
 			{
-				body->ApplyForce(body1->Mass() * (body1->Trans().Position - body->Trans().Position) * .1f);
+				body->ApplyForce(body1->Mass() * (body1->Trans().Position - body->Trans().Position) * .5f);
 			});
 		});
 	}
