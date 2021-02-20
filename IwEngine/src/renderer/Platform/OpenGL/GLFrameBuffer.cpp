@@ -54,11 +54,11 @@ namespace RenderAPI {
 		Bind();
 		
 		for (auto [attachment, texture] : m_attachments) {
-			GLint format     = GLTranslator::Instance().Translate(texture->Format());
-			GLint formatType = GLTranslator::Instance().Translate(texture->FormatType());
-			
 			glReadBuffer(attachment);
-			glReadPixels(0, 0, texture->Width(), texture->Height(), format, formatType, texture->Data());
+			glReadPixels(0, 0, texture->Width(), texture->Height(),
+				TRANSLATE(texture->Format()),
+				TRANSLATE(texture->FormatType()),
+				texture->Data());
 		}
 
 		Unbind();

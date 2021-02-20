@@ -64,6 +64,10 @@ namespace Graphics {
 	{
 		m_width  = width;
 		m_height = height;
+
+		for(iw::ref<iw::Texture>& tex : m_textures) {
+			tex->SetPixels(m_width, m_height);
+		}
 	}
 
 	const iw::ref<Texture>& RenderTarget::Tex(

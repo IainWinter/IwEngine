@@ -29,6 +29,16 @@ namespace Graphics {
 		float height = 2.0f,
 		float radius = 0.5f);
 
+	// Cylinder / pipe
+
+	IWGRAPHICS_API
+	MeshData* MakeCylinder(
+		const MeshDescription& description,
+		unsigned latCount = 5,
+		unsigned lonCount = 5,
+		float topRadius = 1,
+		float botRadius = 1);
+
 	//Tris
 
 	IWGRAPHICS_API

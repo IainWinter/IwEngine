@@ -17,6 +17,12 @@ namespace RenderAPI {
 			const void* color) const = 0;
 
 		IWRENDERER_API
+		virtual void SetPixels(
+			unsigned width,
+			unsigned height,
+			void* data) = 0;
+
+		IWRENDERER_API
 		virtual void SetBorderColor(
 			const void* color) const = 0;
 

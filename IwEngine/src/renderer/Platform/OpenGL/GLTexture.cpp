@@ -79,7 +79,7 @@ namespace RenderAPI {
 		}
 
 		GL(glGenTextures(1, &gl_id));
-		Bind();
+		
 
 		// need to add option for mip map levels
 
@@ -105,33 +105,16 @@ namespace RenderAPI {
 		//}
 
 		//else {
-			switch (type) {
-				case TEX_2D: {
-					GL(glTexImage2D(gl_type, 0, gl_iformat, m_width, m_height, 0, gl_format, gl_formatType, m_data));
-					break;
-				}
-				case TEX_3D: {
-					GL(glTexImage3D(gl_type, 0, gl_iformat, m_width, m_height, m_height/*should be depth*/, 0, gl_format, gl_formatType, m_data));
-					break;
-				}
-				case TEX_CUBE: {
-					for (unsigned i = 0; i < 6; i++) {
-						GLenum gl_face = GL_TEXTURE_CUBE_MAP_POSITIVE_X + i;
-						GL(glTexImage2D(gl_face, 0, gl_iformat, m_width, m_height, 0, gl_format, gl_formatType, m_data));
-					}
-
-					break;
-				}
-			}
+			SetPixels(width, height, data);
 		//}
+
+		Bind();
 
 		GL(glTexParameteri(gl_type, GL_TEXTURE_MAG_FILTER, gl_filter));
 		GL(glTexParameteri(gl_type, GL_TEXTURE_MIN_FILTER, gl_mipmapFilter));
 		GL(glTexParameteri(gl_type, GL_TEXTURE_WRAP_S, gl_wrap));
 		GL(glTexParameteri(gl_type, GL_TEXTURE_WRAP_T, gl_wrap));
 		GL(glTexParameteri(gl_type, GL_TEXTURE_WRAP_R, gl_wrap));
-
-		GL(glGenerateMipmap(gl_type));
 
 		//GLfloat color[4] = {1, 1, 1, 1}; // not always RGBA!!!
 		//SetBorderColor(color); // only for shadows, but works as a default?
@@ -163,7 +146,7 @@ namespace RenderAPI {
 		return sub;
 	}
 
-	void GLTexture::SetTextureData(
+	void GLTexture::SetTextureData( // bad name
 		const GLTexture* source,
 		int xOffset,
 		int yOffset,
@@ -195,6 +178,41 @@ namespace RenderAPI {
 		const void* color) const
 	{
 		GL(glClearTexImage(gl_id, 0, gl_format, gl_formatType, color));
+	}
+
+	void GLTexture::SetPixels(
+		unsigned width,
+		unsigned height,
+		void* data)
+	{
+		Bind();
+
+		m_width  = width;
+		m_height = height;
+		m_data   = data;
+
+		switch (m_type) {
+			case TEX_2D: {
+				GL(glTexImage2D(gl_type, 0, gl_iformat, m_width, m_height, 0, gl_format, gl_formatType, m_data));
+				break;
+			}
+			case TEX_3D: {
+				GL(glTexImage3D(gl_type, 0, gl_iformat, m_width, m_height, m_height/*should be depth*/, 0, gl_format, gl_formatType, m_data));
+				break;
+			}
+			case TEX_CUBE: {
+				for (unsigned i = 0; i < 6; i++) {
+					GLenum gl_face = GL_TEXTURE_CUBE_MAP_POSITIVE_X + i;
+					GL(glTexImage2D(gl_face, 0, gl_iformat, m_width, m_height, 0, gl_format, gl_formatType, m_data));
+				}
+
+				break;
+			}
+		}
+
+		GL(glGenerateMipmap(gl_type));
+
+		Unbind();
 	}
 
 	void GLTexture::SetBorderColor(

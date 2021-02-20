@@ -5,6 +5,30 @@
 
 namespace iw {
 namespace Graphics {
+
+namespace helpers {
+	inline iw::vector4* _MakeCircleArray(
+		unsigned pointCount)
+	{
+		iw::vector4* points = new iw::vector4[pointCount];
+
+		float calcH = 0.0f;
+		float calcV = 0.0f;
+
+		for (int i = 0; i < pointCount; i++) { // this code is duplicated in MakeCylinder, todo: consolidate
+			points[i].x = sin(calcH);
+			points[i].z = cos(calcH);
+			points[i].y = cos(calcV);
+			points[i].w = sin(calcV);
+
+			calcH += 2 * Pi / (pointCount + 1);
+			calcV +=     Pi / (pointCount + 1);
+		}
+
+		return points;
+	}
+}
+
 	// Icosphere
 
 	static const unsigned IcoVertCount  = 12;
@@ -298,24 +322,11 @@ namespace Graphics {
 		}
 
 		// calculate points around a circle
-		float* pX = new float[points];
-		float* pZ = new float[points];
-		float* pY = new float[points];
-		float* pR = new float[points];
 
-		float calcH = 0.0f;
-		float calcV = 0.0f;
-
-		for (int i = 0; i < points; i++) {
-			pX[i] = sin(calcH);
-			pZ[i] = cos(calcH);
-			pY[i] = cos(calcV);
-			pR[i] = sin(calcV);
-
-			calcH += 2 * Pi / resolution;
-			calcV +=     Pi / resolution;
-		}
+		iw::vector4* circle = helpers::_MakeCircleArray(points);
 		
+		// Capsule generation vars
+
 		float yOff = (height - radius * 2.0f) * 0.5f;
 		if (yOff < 0) {
 			yOff = 0;
@@ -332,9 +343,9 @@ namespace Graphics {
 		for (int y = 0; y < top; y++) {
 			for (int x = 0; x < points; x++) {
 				verts[v] = vector3(
-					pX[x] * pR[y],
-					pY[y],
-					pZ[x] * pR[y]
+					circle[x].x * circle[y].w,
+					circle[y].y,
+					circle[x].z * circle[y].w
 				) * radius;
 
 				verts[v].y += yOff;
@@ -355,9 +366,9 @@ namespace Graphics {
 		for (int y = btm; y < points; y++) {
 			for (int x = 0; x < points; x++) {
 				verts[v] = vector3(
-					pX[x] * pR[y], 
-					pY[y], 
-					pZ[x] * pR[y]) * radius;
+					circle[x].x * circle[y].w, 
+					circle[y].y, 
+					circle[x].z * circle[y].w) * radius;
 
 				verts[v].y -= yOff;
 
@@ -372,7 +383,7 @@ namespace Graphics {
 			}
 		}
 
-		// Index
+		// Index, connects top and bottom
 
 		unsigned i = 0;
 		for (int y = 0; y < resolution + 1; y++) {
@@ -403,12 +414,23 @@ namespace Graphics {
 		delete[] verts;
 		delete[] uvs;
 		delete[] indices;
-		delete[] pX;
-		delete[] pZ;
-		delete[] pY;
-		delete[] pR;
+		delete[] circle;
 
 		return data;
+	}
+
+	MeshData* MakeCylinder(
+		const MeshDescription& description,
+		unsigned latCount,
+		unsigned lonCount,
+		float topRadius,
+		float botRadius)
+	{
+		iw::vector4* circle = helpers::_MakeCircleArray(lonCount);
+
+
+
+		return nullptr;
 	}
 
 	MeshData* MakeTetrahedron(

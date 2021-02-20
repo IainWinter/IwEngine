@@ -96,7 +96,7 @@ namespace common {
 
 		chain.pop_back();
 
-		for (int i = 1; i < chain.size() - 1; i++) {
+		for (size_t i = 1; i < chain.size() - 1; i++) {
 			if (   (chain.at(i).x == chain.at(i + 1).x
 				|| chain.at(i).y == chain.at(i + 1).y)
 				&&(chain.at(i).x == chain.at(i - 1).x

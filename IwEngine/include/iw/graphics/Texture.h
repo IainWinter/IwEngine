@@ -92,6 +92,12 @@ namespace Graphics {
 		void Clear(
 			Color color = Color(0));
 
+		IWGRAPHICS_API
+		void SetPixels(
+			unsigned width,
+			unsigned height,
+			void* data = nullptr);
+
 		// texture needs to be initialized!
 		IWGRAPHICS_API
 		void SetBorderColor(

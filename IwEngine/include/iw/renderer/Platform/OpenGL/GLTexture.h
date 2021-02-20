@@ -103,6 +103,12 @@ namespace RenderAPI {
 		// settings
 
 		IWRENDERER_API
+		void SetPixels(
+			unsigned width,
+			unsigned height,
+			void* data) override;
+
+		IWRENDERER_API
 		void SetBorderColor(
 			const void* color) const override;
 

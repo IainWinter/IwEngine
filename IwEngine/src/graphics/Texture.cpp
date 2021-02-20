@@ -288,6 +288,19 @@ namespace Graphics {
 		}
 	}
 
+	void Texture::SetPixels(
+		unsigned width,
+		unsigned height,
+		void* data) // assuming is null
+	{
+		m_width  = width;
+		m_height = height;
+
+		CreateColors(true);
+
+		m_handle->SetPixels(width, height, m_colors);
+	}
+
 	void Texture::SetBorderColor(
 		Color color)
 	{
@@ -378,7 +391,7 @@ namespace Graphics {
 		bool evenIfNotNull)
 	{
 		if (!m_colors || evenIfNotNull) {
-			delete m_colors;
+			delete[] m_colors;
 
 			m_colors = new unsigned char[ColorCount()];
 			Clear();
