@@ -15,7 +15,11 @@ namespace math {
 	int randi(
 		int max)
 	{
-		return (randf()+1)/2 * max;
+ 		if (max < 0) {
+			return -(rand() % (abs(max) + 1)); // todo: annoying branch
+		}
+ 
+		return rand() % (max + 1);
 	}
 
 	float fast_inv_sqrt(
