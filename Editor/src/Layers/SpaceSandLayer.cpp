@@ -8,7 +8,7 @@
 
 #include "iw/common/algos/MarchingCubes.h"
 
-double __chunkScale = 1.5f;
+double __chunkScale = 1.5f * 2;
 int __chunkSize = 150;
 int __arenaSize = 50;
 int __arenaSizeBuf = 1;
@@ -20,7 +20,7 @@ bool __stepDebug = false;
 
 int __worldSize = -1; // gets set below
 
-//#define _DEBUG 1
+#undef _DEBUG
 
 namespace iw {
 	SpaceSandLayer::SpaceSandLayer()
@@ -432,6 +432,65 @@ namespace iw {
 		if (stepTimer <= 0 && (!__stepDebug || Keyboard::KeyDown(V))) {
 			stepTimer = __stepTime;
 
+	// NEW PROCESS
+
+			// MoveTilesToPhysics() Move cells from inside of AABB with the same tileid into a field, scan field for polygon, make triangles
+			Space->Query<iw::Transform, Tile>().Each([&](
+				iw::EntityHandle e,
+				iw::Transform* transform,
+				Tile* tile)
+			{
+				tile->Initialize(transform, world, Asset); // exits if already inited
+
+				auto [field, sizeX, sizeY] = tile->GetCurrentField();
+				auto [offX, offY]          = tile->GetCurrentOffset();
+
+				if (!field) return; // exit if tile hasent been pasted yet
+
+				SandChunk* chunk = nullptr;
+
+				for(size_t x = 0; x < sizeX; x++)
+				for(size_t y = 0; y < sizeY; y++) {
+					unsigned f = field[x + y * sizeX];
+					
+					if (f == 0) continue;
+
+					CellType type = (CellType) (f & 0xff000000);
+					unsigned indx =             f & 0x00ffffff;
+
+					int px = ceil(transform->Position.x + x + offX);
+					int py = ceil(transform->Position.y + y + offY);
+
+					if (!chunk || !chunk->InBounds(px, py)) {
+						chunk = world.GetChunk(px, py);
+					}
+
+					if (!chunk) continue;
+
+					// might not even need this check, but is a good safeguard against disturbing nontiles
+					if (!world.GetCell(px, py).TileId == tile->TileId) {
+						tile->RemoveCell(indx, Renderer->ImmediateMode());
+					}
+
+					chunk->SetCellData_dirty(chunk->GetIndex(px, py), Cell::GetDefault(CellType::EMPTY)); // see comment from below version
+
+					// this might not be needed if the later loop takes care of it??
+					
+					//else {
+						//world.GetCell(px, py).dX = iw::randf()*5;
+						//world.GetCell(px, py).dY = iw::randf()*5;
+						//world.GetCell(px, py).Props = CellProperties::MOVE_DOWN;
+
+					//}
+				}
+
+				//if (Keyboard::KeyDown(iw::Y)) {
+				//	tile->EjectTriangle(0);
+				//}
+			});
+
+	// GAME LOGIC
+
 			// Update one radius per frame
 
 			int index = 0;
@@ -721,7 +780,7 @@ namespace iw {
 			});
 
 			Space->Query<iw::Transform, EnemyBase>().Each([&, space](auto e, auto t, auto b) {
-				t->Rotation *= iw::quaternion::from_euler_angles(0, 0, deltaTime/60);
+				t->Rotation *= iw::quaternion::from_euler_angles(0, 0, deltaTime);
 
 				b->EstPlayerLocation.z += deltaTime * 2500; // Should be 5000km within 2 seconds
 
@@ -806,7 +865,7 @@ namespace iw {
 				//b->Rez += deltaTime;
 
 				b->UseRezTimer -= deltaTime;
-				if (   b->UseRezTimer <= 0
+				if (   false && b->UseRezTimer <= 0
 					//&& b->Rez > 0
 					|| Keyboard::KeyDown(iw::L))
 				{
@@ -1164,27 +1223,6 @@ namespace iw {
 				}
 			});
 
-		// NEW PROCESS
-
-			// MoveTilesToPhysics() Move cells from inside of AABB with the same tileid into a field, scan field for polygon, make triangles
-			Space->Query<iw::Transform, Tile>().Each([&](
-				iw::EntityHandle e,
-				iw::Transform* transform,
-				Tile* tile)
-			{
-				tile->Initialize(transform, world, Asset); // exits if already inited
-
-				auto [field, sizeX, sizeY] = tile->GetCurrentField();
-
-				if (!field) return; // exit if tile hasent been pasted yet
-
-				for(size_t x = 0; x < sizeX; x++)
-				for(size_t y = 0; y < sizeY; y++) {
-					if ((field[x + y * sizeX] & 0x00ffffff) > 0) {
-						world.SetCell(transform->Position.x + x, transform->Position.y + y, Cell::GetDefault(CellType::EMPTY));
-					}
-				}
-			});
 
 			// Turn around objects getting close to outside arena
 
@@ -1258,12 +1296,12 @@ namespace iw {
 
 			Space->ExecuteQueue();
 
-			// Physics->Step()      Run physics
+	// PHYSICS & SAND STEP    Physics->Step()      Run physics
 
 			// UpdateSandWorld()    Run sand
 			updatedCellCount = UpdateSandWorld(fx, fy, fx2, fy2, deltaTime);
 
-			// PasteTiles()         Move cells from field back into the world, on collision eject cells
+	// PASTE PHYSICS OBJECTS BACK PasteTiles()         Move cells from field back into the world, on collision eject cells
 			Space->Query<iw::Transform, Tile>().Each([&](
 				iw::EntityHandle e,
 				iw::Transform* transform,
@@ -1274,16 +1312,48 @@ namespace iw {
 				tile->Update(angle, Renderer->ImmediateMode());
 
 				auto [field, sizeX, sizeY] = tile->GetCurrentField();
+				auto [offX, offY]          = tile->GetCurrentOffset();
+
+				Cell c = Cell::GetDefault(CellType::METAL);
+				c.TileId = tile->TileId;
+
+				SandChunk* chunk = nullptr;
 
 				for(size_t x = 0; x < sizeX; x++)
 				for(size_t y = 0; y < sizeY; y++) {
-					if ((field[x + y * sizeX] & 0x00ffffff) > 0) {
-						world.SetCell(transform->Position.x + x, transform->Position.y + y, Cell::GetDefault(CellType::METAL));
+					unsigned f = field[x + y * sizeX];
+					
+					if (f == 0) continue;
+
+					CellType type = (CellType) (f & 0xff000000);
+					unsigned indx =             f & 0x00ffffff;
+
+					int px = ceil(transform->Position.x + x + offX);
+					int py = ceil(transform->Position.y + y + offY);
+
+					if (!chunk || !chunk->InBounds(px, py)) {
+						chunk = world.GetChunk(px, py);
 					}
+
+					if (!chunk) continue;
+
+					if (!chunk->IsEmpty(px, py)) {
+						tile->RemoveCell(indx, Renderer->ImmediateMode());
+					}
+
+					chunk->SetCellData_dirty(chunk->GetIndex(px, py), c); // check presedense
+
+					//else {
+						//world.GetCell(px, py).dX = iw::randf() * 5;
+						//world.GetCell(px, py).dY = iw::randf() * 5;
+						//world.GetCell(px, py).Props = CellProperties::MOVE_DOWN;
+
+						//world.SetCell(transform->Position.x + x, transform->Position.y + y, Cell::GetDefault(CellType::METAL));
+					//}
 				}
 			});
 
-			// UpdateSandTexture()
+	// RENDER UpdateSandTexture()
 			UpdateSandTexture(fx, fy, fx2, fy2);
 
 			// Render
@@ -1610,7 +1680,7 @@ namespace iw {
 				if (chunk->IsAllEmpty() || chunk->IsAllNoProps()) continue;
 
 				{ std::unique_lock lock(chunkCountMutex); chunkCount++; }
-				cellsUpdatedCount += chunk->m_width*chunk->m_height; // would be area of rect
+				cellsUpdatedCount += (chunk->m_maxX-chunk->m_minX)* (chunk->m_maxY - chunk->m_minY);
 
 				Task->queue([&, chunk]() {
 					DefaultSandWorker(world, *chunk, Space, deltaTime).UpdateChunk();
@@ -1620,6 +1690,7 @@ namespace iw {
 				});
 			}
 
+			// Wait for batch to finish
 			{
 				std::unique_lock lock(chunkCountMutex);
 				chunkCountCV.wait(lock, [&]() { return chunkCount == 0; });
@@ -1629,14 +1700,15 @@ namespace iw {
 		chunkCount = chunksUpdated.size();
 
 		for (SandChunk* chunk : chunksUpdated) {
-			//Task->queue([&, chunk]() {
+			Task->queue([&, chunk]() {
 				chunk->CommitMovedCells(world.m_currentTick);
 
 				{  std::unique_lock lock(chunkCountMutex); chunkCount--; }
 				chunkCountCV.notify_one();
-			//});
+			});
 		}
 
+		// Wait for commits
 		{
 			std::unique_lock lock(chunkCountMutex);
 			chunkCountCV.wait(lock, [&]() { return chunkCount == 0; });
@@ -1958,10 +2030,10 @@ namespace iw {
 		e.Set<iw::Transform>(100);
 		e.Set<EnemyBase>();
 		e.Set<Tile>(std::vector<iw::vector2> {
-								vector2(1, 2),
-				vector2(0, 1), vector2(1, 1), vector2(2, 1),
-								vector2(1, 0),                
-		}, 50);
+				//				vector2(0, 2),
+				///*vector2(0, 1),*/ vector2(0, 1), /*vector2(2, 1),*/
+							vector2(0, 0),                
+		}, 30);
 		//end temp
 
 		player = Space->CreateEntity<iw::Transform, Tile, Player, Physical, SharedCellData>();

@@ -75,26 +75,26 @@ void SandUpdateSystem::Update() {
 		iw::Transform* transform, 
 		Tile* tile)
 	{
-		for (size_t i = 0; i < tile->CellCount(); i++) {
-			auto [x, y] = tile->Positions[i];
+		//for (size_t i = 0; i < tile->CellCount(); i++) {
+		//	auto [x, y] = tile->Positions[i];
 
-			iw::vector2 v = iw::vector4(x, y, 0, 1) * transform->Transformation().transposed();
-			x = v.x;
-			y = v.y;
+		//	iw::vector2 v = iw::vector4(x, y, 0, 1) * transform->Transformation().transposed();
+		//	x = v.x;
+		//	y = v.y;
 
-			if (m_world.InBounds(x, y)) {
-				if (m_world.IsEmpty(x, y)) {
-					m_world.SetCell(x, y, tile->Cells[i]);
-				}
+		//	if (m_world.InBounds(x, y)) {
+		//		if (m_world.IsEmpty(x, y)) {
+		//			m_world.SetCell(x, y, tile->Cells[i]);
+		//		}
 
-				else {
-					if (true /* call tile collision callback */) {
-						tile->RemoveCell(i);
-						i--;
-					}
-				}
-			}
-		}
+		//		else {
+		//			if (true /* call tile collision callback */) {
+		//				tile->RemoveCell(i);
+		//				i--;
+		//			}
+		//		}
+		//	}
+		//}
 
 		//if (tile->CellCount() < tile->InitialCellCount * 0.25) {
 		//	Space->QueueEntity(entity, iw::func_Destroy);
@@ -204,27 +204,27 @@ void SandUpdateSystem::Update() {
 		iw::Transform* transform, 
 		Tile* tile)
 	{
-		for (size_t i = 0; i < tile->CellCount(); i++) {
-			auto [x, y] = tile->Positions[i];
+		//for (size_t i = 0; i < tile->CellCount(); i++) {
+		//	auto [x, y] = tile->Positions[i];
 
-			iw::vector2 v = iw::vector4(x, y, 0, 1) * transform->Transformation().transposed();
-			x = v.x;
-			y = v.y;
+		//	iw::vector2 v = iw::vector4(x, y, 0, 1) * transform->Transformation().transposed();
+		//	x = v.x;
+		//	y = v.y;
 
-			if (m_world.InBounds(x, y)) {
-				const Cell& cell = m_world.GetCell(x, y);
+		//	if (m_world.InBounds(x, y)) {
+		//		const Cell& cell = m_world.GetCell(x, y);
 
-				if (cell.TileId == tile->TileId) {
-					m_world.SetCell(x, y, Cell::GetDefault(CellType::EMPTY));
-				}
+		//		if (cell.TileId == tile->TileId) {
+		//			m_world.SetCell(x, y, Cell::GetDefault(CellType::EMPTY));
+		//		}
 
-				else {
-					if (true /* call tile collision callback 2 */) {
-						tile->RemoveCell(i);
-						i--;
-					}
-				}
-			}
-		}
+		//		else {
+		//			if (true /* call tile collision callback 2 */) {
+		//				tile->RemoveCell(i);
+		//				i--;
+		//			}
+		//		}
+		//	}
+		//}
 	});
 }

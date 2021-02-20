@@ -133,6 +133,10 @@ public:
 		Tick currentTick);
 
 	void ResetRect();
+
+	void SetCellData_dirty(
+		Index index,
+		const Cell& cell);
 private:
 	void UpdateRect(
 		Index index);

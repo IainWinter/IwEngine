@@ -188,17 +188,25 @@ void SandChunk::ResetRect() {
 	m_maxY = -1;
 }
 
+
 void SandChunk::UpdateRect(
 	Index index) // damn this doesnt really work :< idk what other approachs there are
 {
 	int x = index % m_width;
-	int y = index / m_height;
+	int y = index / m_width;
 
-	//if (x <= m_minX) m_minX = iw::clamp<WorldCoord>(x - 2, 0, m_width);
-	//if (x >= m_maxX) m_maxX = iw::clamp<WorldCoord>(x + 2, 0, m_width);
+	if (x <= m_minX) m_minX = iw::clamp<WorldCoord>(x - 2, 0, m_width);
+	if (x >= m_maxX) m_maxX = iw::clamp<WorldCoord>(x + 2, 0, m_width);
 
-	//if (y <= m_minY) m_minY = iw::clamp<WorldCoord>(y - 2, 0, m_height);
-	//if (y >= m_maxY) m_maxY = iw::clamp<WorldCoord>(y + 2, 0, m_height);
+	if (y <= m_minY) m_minY = iw::clamp<WorldCoord>(y - 2, 0, m_height);
+	if (y >= m_maxY) m_maxY = iw::clamp<WorldCoord>(y + 2, 0, m_height);
+}
+
+void SandChunk::SetCellData_dirty(
+	Index index, 
+	const Cell& cell)
+{
+	m_cells[index] = cell;
 }
 
 void SandChunk::SetCellData(
@@ -208,6 +216,9 @@ void SandChunk::SetCellData(
 {
 	Cell& dest = m_cells[index];
 
+	float posX = cell.pX;
+	float posY = cell.pY;
+
 	if (   cell.Type == CellType::EMPTY
 		&& dest.Type != CellType::EMPTY)
 	{
@@ -215,7 +226,7 @@ void SandChunk::SetCellData(
 	}
 		
 	else if (cell.Type != CellType::EMPTY
-	      && dest.Type == CellType::EMPTY)
+			&& dest.Type == CellType::EMPTY)
 	{
 		++m_filledCellCount;
 	}
@@ -227,13 +238,10 @@ void SandChunk::SetCellData(
 	}
 
 	else if (cell.Props != CellProperties::NONE
-		  && dest.Props == CellProperties::NONE)
+			&& dest.Props == CellProperties::NONE)
 	{
 		++m_filledCellsWithProps;
 	}
-
-	float posX = cell.pX;
-	float posY = cell.pY;
 
 	if (!cell.UseFloatingPosition) {
 		posX = int(index) % m_width  + m_x;

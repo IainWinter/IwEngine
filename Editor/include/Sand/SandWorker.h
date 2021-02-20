@@ -16,8 +16,8 @@ public:
 	{}
 
 	void UpdateChunk() {
-		for(WorldCoord x = 0/*m_chunk.m_minX*/; x < m_chunk.m_width /*m_chunk.m_maxX*/; x++)
-		for(WorldCoord y = 0/*m_chunk.m_minY*/; y < m_chunk.m_height/*m_chunk.m_maxY*/; y++) {
+		for(WorldCoord x = 0/*m_chunk.m_minX*/; x < m_chunk.m_width; x++)
+		for(WorldCoord y = 0/*m_chunk.m_minY*/; y < m_chunk.m_height; y++) {
 			Cell& cell = m_chunk.GetCellDirect(x, y);
 			if (m_world.m_currentTick <= cell.LastUpdateTick) continue;
 
@@ -121,6 +121,12 @@ protected:
 		WorldCoord x,   WorldCoord y,
 		WorldCoord xTo, WorldCoord yTo)
 	{
+		//if (    abs(xTo - x) > m_world.m_chunkWidth
+		//	|| abs(yTo - y) > m_world.m_chunkHeight)
+		//{
+		//	return;
+		//}
+
 		if (    m_chunk.InBounds(x, y)
 			&& m_chunk.InBounds(xTo, yTo))
 		{

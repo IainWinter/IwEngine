@@ -1,20 +1,26 @@
 #pragma once
 
 #include "Cell.h"
-#include <vector>
 #include "iw/graphics/Mesh.h"
 #include "iw/graphics/RenderTarget.h"
 #include "iw/graphics/Renderer.h"
 #include "iw/physics/AABB.h"
 #include "iw/common/algos/MarchingCubes.h"
+#include <vector>
 
 struct Tile {
 	// new process
 private:
 	iw::AABB2 m_bounds;
 
-	bool m_needsUpdate = true;
+	bool m_aabbNeedsUpdate = true;
+	bool m_sourceNeedsUpdate = true;
 	bool m_initialized = false;
+
+	iw::vector2 m_currentOffset;
+
+	std::vector<iw::vector2> m_polygon;
+	std::vector<unsigned>    m_index;
 
 public:
 	iw::Mesh Body;
@@ -30,62 +36,53 @@ public:
 
 		iw::AABB2 bounds = AABB();
 
-		int sizeX = bounds.Max.x - bounds.Min.x+3;
-		int sizeY = bounds.Max.y - bounds.Min.y+3;
+		int sizeX = bounds.Max.x - bounds.Min.x + 3; // not +2 because texture size is exclusive?? that shouldnt be the case tho
+		int sizeY = bounds.Max.y - bounds.Min.y + 3;
 
 		iw::ref<iw::Texture> texture = REF<iw::Texture>(sizeX, sizeY);
 		texture->SetFilter(iw::NEAREST);
-	
+		texture->SetMipmapFilter(iw::NEAREST_NEAREST);
+
 		unsigned* colors = (unsigned*)texture->CreateColors();
 
 		for (iw::vector2& v : Locations) {
 			int x = v.x + 1; // I think this is always safe
 			int y = v.y + 1;
-			colors[x + y * sizeX] = Cell::GetDefault(CellType::METAL).Color;
+			int i = x + y * sizeX;
+			colors[i] = ((unsigned)Cell::GetDefault(CellType::METAL).Type << 24) | i;
 		}
 
-		std::vector<iw::vector2> polygon = iw::common::MakePolygonFromField(colors, sizeX, sizeY, 1u);
-		std::vector<unsigned>    index   = iw::common::TriangulatePolygon(polygon);
+		m_polygon = iw::common::MakePolygonFromField(colors, sizeX, sizeY, 1u);
+		m_index   = iw::common::TriangulatePolygon(m_polygon);
 
-		iw::vector2 avgv;
-		iw::vector2 minv = FLT_MAX;
-		for (iw::vector2& v : polygon) {         // somewhere the scaling is off
-			v /= iw::vector2(sizeX, sizeY);
-			avgv += v;
-			if (minv.length_squared() > v.length_squared()) minv = v;
+		for (iw::vector2& v : m_polygon) v = v / iw::vector2(sizeX, sizeY);
+
+		std::vector<iw::vector2> uv = m_polygon;
+
+		for (iw::vector2& v : m_polygon) {
+			v = (v - 0.5) * 2;
+			v *= iw::vector2(sizeX - 3, sizeY - 3) / iw::vector2(sizeX, sizeY);
 		}
 
-		std::vector<iw::vector2> uvs = polygon;
+		//// this may not be needed
+		//iw::vector2 avg;
+		//for (iw::vector2& v : m_polygon) { avg += v; } avg /= m_polygon.size();
+		//for (iw::vector2& v : m_polygon) { v -= avg; }
 
-		for (iw::vector2& v : uvs) {
-			v += minv;
-		}
-
-		avgv /= polygon.size();
-		for (iw::vector2& v : polygon) {
-			v -= avgv;
-			///v *= 2;
-		}
+		iw::ref<iw::Material> material = REF<iw::Material>(asset->Load<iw::Shader>("shaders/texture2D.shader"));
+		material->SetTexture("texture", texture);
 
 		iw::MeshDescription description;
 		description.DescribeBuffer(iw::bName::POSITION, iw::MakeLayout<float>(2));
 		description.DescribeBuffer(iw::bName::UV,       iw::MakeLayout<float>(2));
 
-		iw::MeshData* data = new iw::MeshData(description);
-		data->SetBufferData(iw::bName::POSITION, polygon.size(), polygon.data());
-		data->SetBufferData(iw::bName::UV,       uvs    .size(), uvs    .data());
-		data->SetIndexData(index.size(), index.data());
-
-		iw::ref<iw::Material> material = REF<iw::Material>(asset->Load<iw::Shader>("shaders/texture2D.shader"));
-		material->SetTexture("texture", texture);
-		//material->SetWireframe(true);
-
-		Body = data->MakeInstance();
+		Body = (new iw::MeshData(description))->MakeInstance();
+		Body.Data()->SetBufferData(iw::bName::UV, uv.size(), uv.data());
 		Body.SetMaterial(material);
 	}
 
 	void Update(float angle, iw::Renderer* renderer) {
-		if (!m_needsUpdate) return;
+		if (!m_initialized) return; // Tried to update before initialize, happens on enemy spawn
 
 		iw::AABB2 bounds = AABB();
 
@@ -110,21 +107,94 @@ public:
 		int sizeX = max.x - min.x;
 		int sizeY = max.y - min.y;
 
-		iw::ref<iw::Texture> out = REF<iw::Texture>(sizeX, sizeY);
-		out->CreateColors();
+		iw::ref<iw::Texture> source = Body.Material()->GetTexture("texture");
+		iw::vector2 srcDim = source->Dimensions();
+		iw::vector2 newDim = iw::vector2(sizeX, sizeY);
 
-		Target = REF<iw::RenderTarget>();
-		Target->AddTexture(out);
+		if (m_sourceNeedsUpdate) {
+			m_sourceNeedsUpdate = false;
+			source->Update(renderer->Device);
+		}
+
+		bool scalingNeedsUpdate = !Target || sizeX != Target->Width() || sizeY != Target->Height();
+
+		if (scalingNeedsUpdate) {
+			LOG_INFO << "Rescaled";
+
+			std::vector<iw::vector2> polygon = m_polygon;
+			for (iw::vector2& v : polygon) {
+				v *= srcDim / newDim; // todo: this eqwuation is wrong, correct one needs to be found
+			}
+
+			Body.Data()->SetBufferData(iw::bName::POSITION, polygon.size(), polygon.data());
+			Body.Data()->SetIndexData (                     m_index.size(), m_index.data());
+		}
+
+		if (!Target) {
+			iw::ref<iw::Texture> out = REF<iw::Texture>(sizeX, sizeY);
+			out->SetFilter(iw::NEAREST);
+			out->SetMipmapFilter(iw::NEAREST_NEAREST);
+			out->CreateColors();
+
+			Target = REF<iw::RenderTarget>();
+			Target->AddTexture(out);
+		}
+
+		else if (scalingNeedsUpdate) {
+			Target->Resize(sizeX, sizeY);
+		}
 
 		iw::quaternion rot = iw::quaternion::from_euler_angles(iw::Pi/*messy*/, 0, angle);
 
-		renderer->Begin();
-		renderer->BeginScene((iw::Camera*)nullptr, Target, true);
-		renderer->DrawMesh(iw::Transform(0, 1, rot), Body);
-		renderer->EndScene();
-		renderer->End();
+		//renderer->iw::Renderer::Begin(); // queue these?, todo: queued renderer shouldnt derive renderer, just take one
+		renderer->iw::Renderer::BeginScene((iw::Camera*)nullptr, Target, true);
+		renderer->iw::Renderer::DrawMesh(iw::Transform(0, 1, rot), Body);
+		renderer->iw::Renderer::EndScene();
+		//renderer->iw::Renderer::End();
 
 		Target->ReadPixels(renderer->Device);
+
+		m_currentOffset = (srcDim - newDim) / 2;
+	}
+
+	void RemoveCell(
+		size_t index,
+		iw::Renderer* renderer)
+	{
+		auto [field, sizeX, sizeY] = GetSourceField();
+
+		size_t x = index % sizeX;
+		size_t y = index / sizeX;
+
+		field[x + y * sizeX] = 0;
+		m_aabbNeedsUpdate = true; // could be more efficient
+		m_sourceNeedsUpdate = true;
+	}
+
+	//void EjectTriangle(
+	//	size_t triIndex,
+	//	iw::ref<iw::Space>& space)
+	//{
+	//	size_t index = triIndex / 3;
+
+	//	unsigned tri[3]{
+	//		m_index.at(index + 2),
+	//		m_index.at(index + 1),
+	//		m_index.at(index + 0),
+	//	};
+
+	//	m_index.erase(m_index.begin() + index + 2);
+	//	m_index.erase(m_index.begin() + index + 1);
+	//	m_index.erase(m_index.begin() + index + 0);
+
+	//	iw::Mesh body = Body.MakeCopy(Body.Data()->Description(), false);
+	//	body.Data()->SetIndexData(3, tri);
+
+	//	Tile tile();
+	//}
+
+	iw::vector2 GetCurrentOffset() {
+		return m_currentOffset;
 	}
 
 	std::tuple<unsigned*, size_t, size_t> GetSourceField() {
@@ -141,6 +211,8 @@ public:
 		return { (unsigned*)field->Colors(), field->Width(), field->Height() };
 	}
 
+// old process
+
 	std::vector<iw::vector2> FullLocations; // copy for healing / frame
 	std::vector<iw::vector2> Locations;
 	const int InitialLocationsSize = 0;
@@ -156,8 +228,8 @@ public:
 		: InitialLocationsSize(locations.size() * scale)
 	{
 		for (iw::vector2& v : locations) {
-			for (int x = 0; x < abs(scale); x++)
-			for (int y = 0; y < abs(scale); y++) {
+			for (int y = 0; y <= abs(scale); y++) 
+			for (int x = 0; x <= abs(scale); x++) {
 				Locations.push_back(v * scale + iw::vector2(x, y)/* - scale/2*/);
 			}
 		}
@@ -194,7 +266,8 @@ public:
 	}
 
 	iw::AABB2 AABB() {
-		if (!m_needsUpdate) return m_bounds;
+		if (!m_aabbNeedsUpdate) return m_bounds;
+		m_aabbNeedsUpdate = false;
 
 		iw::AABB2 bounds;
 		for (iw::vector2& v : Locations) {

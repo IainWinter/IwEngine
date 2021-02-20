@@ -130,14 +130,14 @@ bool DefaultSandWorker::MoveDown(
 	Cell& cell,
 	const Cell& replace)
 {
-	int downX = x + cell.dX;
-	int downY = y + cell.dY;
+	int downX = ceil(x + cell.dX);
+	int downY = ceil(y + cell.dY);
 	bool down = false;
 
 	int i = 1;
 	do {
-		downX = x + cell.dX / i;
-		downX = x + cell.dX / i;
+		downX = ceil(x + cell.dX / i);
+		downY = ceil(y + cell.dY / i);
 		down = IsEmpty(downX, downY);
 		i *= 2;
 	} while (!down && downX != x && downY != y);
@@ -230,6 +230,10 @@ bool DefaultSandWorker::MoveRandom(
 		hitx = dx;
 		hity = dy;
 		d = true;
+	}
+
+	else {
+		KeepAlive(x, y);
 	}
 
 	return d;
@@ -576,11 +580,11 @@ void DefaultSandWorker::SpawnExplosion(
 			else if (dest.TileId != tileId) {
 				Cell d = dest;
 				(int&)d.Props |= int(CellProperties::MOVE_DOWN | CellProperties::MOVE_DOWN_SIDE);
-				d.Gravitised = true;
+				//d.Gravitised = true;
 
-				iw::vector2 v = iw::vector2(dx - x, dy - y).normalized() * 5;
-				d.dX = v.x;
-				d.dY = v.y;
+				iw::vector2 v = (iw::vector2(dx - x, dy - y) / size + .1f) * 10;
+				d.dX = v.x + iw::randf() * 5;
+				d.dY = v.y + iw::randf() * 5;
 
 				SetCell(dx, dy, d);
 			}

@@ -238,8 +238,8 @@ private:
 
 		SandChunk* chunk = new SandChunk(
 			m_cells.alloc<Cell>(m_cellChunkSizeInBytes),
-			m_chunkWidth * location.first, m_chunkHeight * location.second,
-			m_chunkWidth,                  m_chunkHeight,
+			m_chunkWidth * lx, m_chunkHeight * ly,
+			m_chunkWidth,      m_chunkHeight,
 			m_currentTick
 		);
 
