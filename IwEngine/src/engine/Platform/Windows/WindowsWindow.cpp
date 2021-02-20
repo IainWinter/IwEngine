@@ -64,7 +64,7 @@ namespace Engine {
 		fake_pfd.nVersion = 1;
 		fake_pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
 		fake_pfd.iPixelType = PFD_TYPE_RGBA;
-		fake_pfd.cColorBits = 32;
+		fake_pfd.cColorBits = 24; // not 32
 		fake_pfd.cAlphaBits = 8;
 		fake_pfd.cDepthBits = 24;
 
@@ -114,7 +114,7 @@ namespace Engine {
 			WGL_DOUBLE_BUFFER_ARB, GL_TRUE,
 			WGL_PIXEL_TYPE_ARB, WGL_TYPE_RGBA_ARB,
 			WGL_ACCELERATION_ARB, WGL_FULL_ACCELERATION_ARB,
-			WGL_COLOR_BITS_ARB, 32,
+			WGL_COLOR_BITS_ARB, 24, // really not 32 lol
 			WGL_ALPHA_BITS_ARB, 8,
 			WGL_DEPTH_BITS_ARB, 24,
 			WGL_STENCIL_BITS_ARB, 8,
@@ -159,14 +159,16 @@ namespace Engine {
 		TakeOwnership();
 
 		//glClearColor(70 / 255.0f, 85 / 255.0f, 100 / 255.0f, 1.0f); sky blu
-		glClearColor(0, 0, 0, 1.0f); 
+		glClearColor(0, 0, 0, 0); // black clear 
 		glEnable(GL_DEPTH_TEST);
 		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+		//glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+
 		wglSwapIntervalEXT(0); //-1 for adaptive vsync 0 for off 1 for on
 
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		//glEnable(GL_BLEND);
+		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
