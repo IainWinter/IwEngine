@@ -7,8 +7,8 @@
 
 struct Tile {
 	std::vector<std::pair<int, int>> Positions;
-	int X = 0;
-	int Y = 0;
+	float X = 0;
+	float Y = 0;
 };
 
 class SimpleSandWorker : public SandWorker {
@@ -25,7 +25,6 @@ private:
 	bool MoveDownSide(size_t x, size_t y, const Cell& cell);
 	bool MoveSide    (size_t x, size_t y, const Cell& cell);
 };
-
 
 namespace iw {
 	class SimpleSandLayer
@@ -57,3 +56,28 @@ inline void ShuffleIfTrue(bool& a, bool& b) {
 		b = !a;
 	}
 }
+
+
+//if(     cell.Type              == CellType::SAND
+//	&& GetCell(x, y - 1).Type == CellType::WATER)
+//{
+//	cell = Cell::GetDefault(CellType::WATER);
+//	SetCell(x, y - 1, Cell::GetDefault(CellType::SAND));
+//	return;
+//}
+
+//if (cell.Type == CellType::SAND
+//	&& GetCell(x + 1, y - 1).Type == CellType::WATER)
+//{
+//	cell = Cell::GetDefault(CellType::WATER);
+//	SetCell(x + 1, y - 1, Cell::GetDefault(CellType::SAND));
+//	return;
+//}
+
+//if (cell.Type == CellType::SAND
+//	&& GetCell(x - 1, y - 1).Type == CellType::WATER)
+//{
+//	cell = Cell::GetDefault(CellType::WATER);
+//	SetCell(x - 1, y - 1, Cell::GetDefault(CellType::SAND));
+//	return;
+//}

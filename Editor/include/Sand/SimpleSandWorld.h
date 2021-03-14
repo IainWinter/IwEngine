@@ -6,10 +6,17 @@
 #include <algorithm>
 //#include <mutex>
 
+#pragma once
+
+#include "Cell.h"
+#include <array>
+#include <vector>
+#include <algorithm>
+//#include <mutex>
+
+#include <concurrent_unordered_map.h>
+
 class SandChunk {
-private:
-	std::vector<std::tuple<SandChunk*, size_t, size_t>> m_changes; // source chunk, source, destination
-	//std::mutex m_filledCellCountMutex;
 public:
 	Cell* m_cells;
 
@@ -24,14 +31,16 @@ public:
 	int m_minY;
 	int m_maxX;
 	int m_maxY;
+private:
+	std::vector<std::tuple<SandChunk*, size_t, size_t>> m_changes; // source chunk, source, destination
+	std::vector<size_t> m_keepAlive;
+	std::mutex m_filledCellCountMutex;
 
 public:
 	SandChunk(
-		Cell* cells,
 		size_t width, size_t height,
 		int x, int y)
-		: m_cells(cells)
-		, m_width(width)
+		: m_width(width)
 		, m_height(height)
 		, m_x(x * width)
 		, m_y(y * height)
@@ -42,7 +51,13 @@ public:
 		, m_minY(m_height)
 		, m_maxX(0)
 		, m_maxY(0)
-	{}
+	{
+		m_cells = new Cell[width * height];
+	}
+
+	~SandChunk() {
+		delete[] m_cells;
+	}
 
 	// Getting cells
 
@@ -51,13 +66,19 @@ public:
 	}
 
 	Cell& GetCell(size_t index) {
-		KeepAlive(index % m_width, index / m_width);
 		return m_cells[index];
 	}
 
 	// Setting & moving cells
 
-	void SetCell(int x, int y, const Cell& cell) { SetCell(GetIndex(x, y), cell); }
+	void SetCell(
+		int x, int y,
+		const Cell& cell)
+	{
+		size_t index = GetIndex(x, y);
+		KeepAlive(index);
+		SetCell(index, cell);
+	}
 
 	void SetCell(
 		size_t index,
@@ -68,20 +89,18 @@ public:
 		if (    dest.Type == CellType::EMPTY
 			&& cell.Type != CellType::EMPTY) // Filling a cell
 		{
-			//std::unique_lock lock(m_filledCellCountMutex);
+			std::unique_lock lock(m_filledCellCountMutex);
 			m_filledCellCount++;
 		}
 
 		else if (dest.Type != CellType::EMPTY
 			&&  cell.Type == CellType::EMPTY) // Removing a filled cell
 		{
-			//std::unique_lock lock(m_filledCellCountMutex);
+			std::unique_lock lock(m_filledCellCountMutex);
 			m_filledCellCount--;
 		}
 
 		dest = cell;
-
-		KeepAlive(index % m_width, index / m_width);
 	}
 
 	void MoveCell(
@@ -99,7 +118,13 @@ public:
 #define _DEST 2
 
 	void CommitCells() {
-		ResetRect();
+		//ResetRect();
+
+		for (size_t index : m_keepAlive) {
+			UpdateRect(index);
+		}
+
+		m_keepAlive.clear();
 
 		// remove moves that have their destinations filled
 
@@ -128,10 +153,13 @@ public:
 			if (std::get<_DEST>(m_changes[i + 1]) != std::get<_DEST>(m_changes[i])) {
 				size_t rand = iprev + iw::randi(i - iprev);
 
-				auto [chunk, src, dest] = m_changes[rand];
+				auto [chunk, src, dst] = m_changes[rand];
 
-				       SetCell(dest, chunk->GetCell(src));
-				chunk->SetCell(src,  Cell());
+				       SetCell(dst, chunk->GetCell(src));
+				chunk->SetCell(src, Cell());
+
+				       UpdateRect(dst);
+				chunk->UpdateRect(src);
 
 				iprev = i + 1;
 			}
@@ -153,15 +181,16 @@ public:
 			&& y >= m_y && y < int(m_y + m_height);
 	}
 
-	bool IsEmpty (int x, int y) {
+	bool IsEmpty(int x, int y) {
 		return GetCell(x, y).Type == CellType::EMPTY;
 	}
 
 	void KeepAlive(int x, int y) {
-		m_minX = iw::clamp<int>(min(x - 3, m_minX), 0, m_width);
-		m_minY = iw::clamp<int>(min(y - 3, m_minY), 0, m_height);
-		m_maxX = iw::clamp<int>(max(x + 3, m_maxX), 0, m_width);
-		m_maxY = iw::clamp<int>(max(y + 3, m_maxY), 0, m_height);
+		KeepAlive(GetIndex(x, y));
+	}
+
+	void KeepAlive(size_t index) {
+		m_keepAlive.push_back(index);
 	}
 
 	void ResetRect() {
@@ -170,22 +199,27 @@ public:
 		m_maxX = -1;
 		m_maxY = -1;
 	}
+private:
+	void UpdateRect(size_t index) {
+		int x = index % m_width;
+		int y = index / m_width;
+
+		m_minX = iw::clamp<int>(min(x - 2, m_minX), 0, m_width);
+		m_maxX = iw::clamp<int>(max(x + 2, m_maxX), 0, m_width);
+		m_minY = iw::clamp<int>(min(y - 2, m_minY), 0, m_height);
+		m_maxY = iw::clamp<int>(max(y + 2, m_maxY), 0, m_height);
+	}
+
 };
 
 class SandWorld {
 public:
 	const size_t m_chunkWidth;
 	const size_t m_chunkHeight;
-	const size_t m_chunkSizeInBytes;
 	const double m_scale;
-
+	std::array<std::vector<SandChunk*>, 9> m_chunkBatches;
 private:
-	iw::pool_allocator m_cells;
-	iw::pool_allocator m_chunks;
-
-	std::array<std::vector<SandChunk*>, 4> m_chunkBatches;
-	std::unordered_map<std::pair<int, int>, SandChunk*, iw::pair_hash> m_chunkLookup;
-
+	Concurrency::concurrent_unordered_map<std::pair<int, int>, SandChunk*, iw::pair_hash> m_chunkLookup;
 	std::mutex m_chunkMutex;
 
 public:
@@ -195,9 +229,6 @@ public:
 		double scale)
 		: m_chunkWidth (chunkWidth  / scale)
 		, m_chunkHeight(chunkHeight / scale)
-		, m_chunkSizeInBytes(sizeof(Cell) * m_chunkWidth * m_chunkHeight)
-		, m_cells(m_chunkSizeInBytes * 16)
-		, m_chunks(sizeof(SandChunk) * 16)
 		, m_scale(scale)
 	{}
 
@@ -245,6 +276,12 @@ public:
 			&& GetChunk(x, y)->IsEmpty(x, y);
 	}
 
+	void KeepAlive(int x, int y) {
+		if (SandChunk* chunk = GetChunk(x, y)) {
+			chunk->KeepAlive(x, y);
+		}
+	}
+
 	SandChunk* GetChunk(
 		int x, int y)
 	{
@@ -278,67 +315,44 @@ public:
 		};
 	}
 
-	std::array<std::vector<SandChunk*>, 4> GetChunkBatches() const {
-		return m_chunkBatches;
-	}
-
 	void RemoveEmptyChunks() {
-		std::vector<std::tuple<size_t, size_t, std::pair<int, int>>> remove;
-
-		for (size_t b = 0; b < m_chunkBatches      .size(); b++)
-		for (size_t i = 0; i < m_chunkBatches.at(b).size(); i++) {
-
-			SandChunk* chunk = m_chunkBatches.at(b).at(i);
+		for (auto& batch : m_chunkBatches)
+		for (size_t i = 0; i < batch.size(); i++) {
+			SandChunk* chunk = batch.at(i);
 
 			if (chunk->m_filledCellCount == 0) {
-				remove.emplace_back(b, i, GetChunkLocation(chunk->m_x, chunk->m_y));
+				m_chunkLookup.unsafe_erase(GetChunkLocation(chunk->m_x, chunk->m_y));
+				batch[i] = batch.back(); batch.pop_back();
+				i--;
+
+				delete chunk;
 			}
 		}
-
-		for (auto& [batch, index, location] : remove) {
-			LOG_INFO << "Removing chunk " << location.first << " " << location.second;
-
-			SandChunk*& chunk = m_chunkBatches.at(batch).at(index);
-
-			m_cells .free(chunk->m_cells, m_chunkSizeInBytes);
-			m_chunks.free(chunk);
-
-			chunk = m_chunkBatches.at(batch).back();
-			m_chunkLookup.erase(m_chunkLookup.find(location));
-		}
-
-		for (auto [batch, _, __] : remove) {
-			m_chunkBatches.at(batch).pop_back();
-		}
 	}
-
 private:
 	SandChunk* CreateChunk(
 		std::pair<int, int> location)
 	{
 		auto [lx, ly] = location;
 
-		if(     lx < -100 || ly < -100
-			|| lx >  100 || ly >  100) // could pass in a world limit to constructor
+		if(     lx < -10 || ly < -10
+			|| lx >  10 || ly >  10) // could pass in a world limit to constructor
 		{
 			return nullptr;
 		}
 
-		SandChunk* chunk = m_chunks.alloc<SandChunk>();
-		new (chunk) SandChunk(
-			m_cells.alloc<Cell>(m_chunkSizeInBytes),
-			m_chunkWidth, m_chunkHeight, lx, ly
-		);
+		SandChunk* chunk = new SandChunk(
+			m_chunkWidth, m_chunkHeight, lx, ly);
 
-		int batch = int(lx % 2 == 0)
-			     | int(ly % 2 == 0) << 1;
+		int batch = (3 + lx % 3) % 3
+			     + (3 + ly % 3) % 3 * 3;
 
 		m_chunkLookup.insert({ location, chunk });
 
-		//{
-			//std::unique_lock lock(m_chunkMutex);
+		{
+			std::unique_lock lock(m_chunkMutex);
 			m_chunkBatches.at(batch).push_back(chunk);
-		//}
+		}
 
 		return chunk;
 	}
@@ -364,8 +378,8 @@ public:
 		for (int y = m_chunk->m_minY; y < m_chunk->m_maxY; y++) {
 			Cell& cell = m_chunk->GetCell(x + y * m_chunk->m_width);
 
-			size_t px = x + m_chunk->m_x;
-			size_t py = y + m_chunk->m_y;
+			int px = x + m_chunk->m_x;
+			int py = y + m_chunk->m_y;
 
 			UpdateCell(px, py, cell);
 		}
@@ -404,6 +418,29 @@ public:
 		int x,   int y,
 		int xto, int yto)
 	{
+		int pingX = 0, pingY = 0;
+
+		if (x == m_chunk->m_x)                         m_world.KeepAlive(x - 1, y    ); //pingX = -1;
+		if (x == m_chunk->m_x + m_chunk->m_width  - 1) m_world.KeepAlive(x + 1, y    ); //pingX =  1;
+		if (y == m_chunk->m_y)                         m_world.KeepAlive(x,     y - 1); //pingY = -1;
+		if (y == m_chunk->m_y + m_chunk->m_height - 1) m_world.KeepAlive(x,     y + 1); //pingY =  1;
+
+		//if (pingX != 0) {
+		//	LOG_INFO << "Ping x: " << pingX;
+		//	m_world.KeepAlive(x + pingX, y);
+		//}
+
+		//if (pingY != 0) {
+		//	LOG_INFO << "Ping y: " << pingY;
+		//	m_world.KeepAlive(x, y + pingY);
+		//}
+
+		//if (pingX != 0 && pingY != 0) {
+		//	LOG_INFO << "Ping x/y: " << pingX << "/" << pingY;
+
+		//	m_world.KeepAlive(x + pingX, y + pingY);
+		//}
+
 		if (m_chunk->InBounds(x,   y  ))
 		if (m_chunk->InBounds(xto, yto)) {
 			return m_chunk->MoveCell(m_chunk, x, y, xto, yto);

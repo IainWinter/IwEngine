@@ -4,7 +4,7 @@ size_t __width = 1920;
 size_t __height = 1080;
 
 size_t __chunkSize = 200;
-double __cellScale = 2;
+double __cellScale = 4;
 
 namespace iw {
 	SimpleSandLayer::SimpleSandLayer()
@@ -18,15 +18,20 @@ namespace iw {
 
 	int SimpleSandLayer::Initialize() {
 
-		for (int i = 0; i < 100; i++) {
-			bool fizz = i % 3 == 0;
-			bool buzz = i % 5 == 0;
 
-			     if (fizz && buzz) LOG_INFO << "Fizzbuzz";
-			else if (fizz)         LOG_INFO << "Fizz";
-			else if (buzz)         LOG_INFO << "Buzz";
-			else                   LOG_INFO << i;
-		}
+		//std::vector<int> ints;
+		//ints.push_back(1);
+		//ints.push_back(2);
+		//ints.push_back(3);
+
+		//for (std::vector<int>::iterator it = ints.begin(); it != ints.end(); it++) {
+		//	ints.push_back(*it);
+		//}
+
+		//for (int& i : ints) {
+		//	ints.push_back(i);
+		//}
+
 
 		iw::ref<iw::Shader> sandShader = Asset->Load<Shader>("shaders/texture.shader");
 
@@ -72,6 +77,10 @@ namespace iw {
 			iw::Color::From255(200, 200, 200)
 		};
 
+		Cell::SetDefault(CellType::SAND, _SAND);
+		Cell::SetDefault(CellType::WATER, _WATER);
+		Cell::SetDefault(CellType::ROCK, _ROCK);
+
 		Tile t = {
 			{
 				              {2,0},
@@ -90,6 +99,8 @@ namespace iw {
 		return 0;
 	}
 
+	float timer__asdasd = 0;
+
 	void SimpleSandLayer::PostUpdate() {
 
 		// camera frustrum
@@ -102,7 +113,7 @@ namespace iw {
 		int fx2 = fx + width;
 		int fy2 = fy + height;
 
-		vector2 pos = Mouse::ScreenPos() / m_world.m_scale + iw::vector2(fx, fy);
+		vector2 pos = Mouse::ScreenPos() / m_world.m_scale + iw::vector2(fx, -fy);
 		pos.y = height - pos.y;
 
 		if (Mouse::ButtonDown(iw::LMOUSE)) {
@@ -119,15 +130,19 @@ namespace iw {
 			}
 		}
 
-		if (Keyboard::KeyDown(iw::LEFT))  m_tiles[0].X -= 1;
-		if (Keyboard::KeyDown(iw::RIGHT)) m_tiles[0].X += 1;
-		if (Keyboard::KeyDown(iw::UP))    m_tiles[0].Y += 1;
-		if (Keyboard::KeyDown(iw::DOWN))  m_tiles[0].Y -= 1;
+		if (Keyboard::KeyDown(iw::LEFT))  m_tiles[0].X -= iw::DeltaTime()*50;
+		if (Keyboard::KeyDown(iw::RIGHT)) m_tiles[0].X += iw::DeltaTime()*50;
+		if (Keyboard::KeyDown(iw::UP))    m_tiles[0].Y += iw::DeltaTime()*50;
+		if (Keyboard::KeyDown(iw::DOWN))  m_tiles[0].Y -= iw::DeltaTime()*50;
+
+		timer__asdasd -= iw::DeltaTime();
+		if(timer__asdasd <= 0) {
+		timer__asdasd = 1 / 10000000.0f;
 
 		for (Tile& tile : m_tiles) {
 			for (auto [x, y] : tile.Positions) {
-				x += tile.X;
-				y += tile.Y;
+				x += ceil(tile.X);
+				y += ceil(tile.Y);
 
 				if (m_world.InBounds(x, y)) {
 					// what happens if the cell is already full?
@@ -144,42 +159,47 @@ namespace iw {
 
 		m_world.RemoveEmptyChunks();
 
-		for (auto& batch : m_world.GetChunkBatches()) {
+		for (auto& batch : m_world.m_chunkBatches) {
 			for (SandChunk* chunk : batch) {
 
-				//{ std::unique_lock lock(mutex); chunkCount++; }
+				{ std::unique_lock lock(mutex); chunkCount++; }
 
-				//Task->queue([&, chunk]() {
+				Task->queue([&, chunk]() {
 					SimpleSandWorker(m_world, chunk).UpdateChunk();
 
-					//{ std::unique_lock lock(mutex); chunkCount--; }
-					//cond.notify_one();
-				//});
-			}
+					{ std::unique_lock lock(mutex); chunkCount--; }
+					cond.notify_one();
+				});
+			} // could this loop through with only one chunk updated if it was too quick?
 
 			// wait for batch to finish updating
-			//std::unique_lock lock(mutex);
-			//cond.wait(lock, [&]() { return chunkCount == 0; });
+			std::unique_lock lock(mutex);
+			cond.wait(lock, [&]() { return chunkCount == 0; });
 		}
 
-		for (auto&      batch : m_world.GetChunkBatches())
-		for (SandChunk* chunk : batch)                    {
-
-			//{ std::unique_lock lock(mutex); chunkCount++; }
-
-			//Task->queue([&, chunk]() {
-				chunk->CommitCells();
-
-				//{ std::unique_lock lock(mutex); chunkCount--; }
-				//cond.notify_one();
-			//});
+		for (auto& batch : m_world.m_chunkBatches) {
+			for (SandChunk* chunk : batch) {
+				chunk->ResetRect();
+			}
 		}
 
-		// Wait for all chunks to be commited
-		//{
-		//	std::unique_lock lock(mutex);
-		//	cond.wait(lock, [&]() { return chunkCount == 0; });
-		//}
+		for (auto& batch : m_world.m_chunkBatches) {
+			for (SandChunk* chunk : batch) {
+
+				{ std::unique_lock lock(mutex); chunkCount++; }
+
+				Task->queue([&, chunk]() {
+					chunk->CommitCells();
+
+					{ std::unique_lock lock(mutex); chunkCount--; }
+					cond.notify_one();
+				});
+			}
+
+			// Wait for batch to be commited
+			std::unique_lock lock(mutex);
+			cond.wait(lock, [&]() { return chunkCount == 0; });
+		}
 
 		// Update the sand texture
 
@@ -211,6 +231,11 @@ namespace iw {
 				for (int x = startX; x < endX; x++) {
 					int texi = (chunk->m_x + x - fx) + (chunk->m_y + y - fy) * width;
 
+					const Cell& cell = chunk->m_cells[x + y * chunk->m_width];
+					if (cell.Type != CellType::EMPTY) {
+						pixels[texi] = cell.Color;
+					}
+
 					if (_debugShowChunkBounds) {
 						if (   (y == chunk->m_minY || y == chunk->m_maxY) && (x >= chunk->m_minX && x <= chunk->m_maxX)
 							|| (x == chunk->m_minX || x == chunk->m_maxX) && (y >= chunk->m_minY && y <= chunk->m_maxY))
@@ -221,13 +246,25 @@ namespace iw {
 						else if (x % __chunkSize == 0
 							 ||  y % __chunkSize == 0)
 						{
-							pixels[texi] = chunk->m_filledCellCount == 0 ? iw::Color(0, 0, 1) : iw::Color(1, 0, 0);
-						}
-					}
+							auto [lx, ly] = m_world.GetChunkLocation(chunk->m_x, chunk->m_y);
+							int batch = abs(lx % 3) + abs(ly % 3) * 3;
 
-					const Cell& cell = chunk->m_cells[x + y * chunk->m_width];
-					if (cell.Type != CellType::EMPTY) {
-						pixels[texi] = cell.Color;
+							iw::Color color;
+
+							switch (batch) {
+							case 0: color = iw::Color::From255(255,   0, 255); break;
+							case 1: color = iw::Color::From255(255,   0,   0); break;
+							case 2: color = iw::Color::From255(255, 128,   0); break;
+							case 3: color = iw::Color::From255(255, 255,   0); break;
+							case 4: color = iw::Color::From255(128, 255,   0); break;
+							case 5: color = iw::Color::From255(0,   255,   0); break;
+							case 6: color = iw::Color::From255(0,   255, 128); break;
+							case 7: color = iw::Color::From255(0,   128, 255); break;
+							case 8: color = iw::Color::From255(0,     0, 255); break;
+							}
+
+							pixels[texi] = color;
+						}
 					}
 				}
 
@@ -273,8 +310,8 @@ namespace iw {
 
 		for (Tile& tile : m_tiles) {
 			for (auto [x, y] : tile.Positions) {
-				x += tile.X;
-				y += tile.Y;
+				x += ceil(tile.X);
+				y += ceil(tile.Y);
 
 				if (m_world.InBounds(x, y)) {
 					// what happens if the cell is no longer part of the tile?
@@ -282,7 +319,7 @@ namespace iw {
 				}
 			}
 		}
-
+		}
 		// Draw the sand to the screen
 
 		m_sandTexture->Update(Renderer->Device);
@@ -399,7 +436,7 @@ bool SimpleSandWorker::MoveSide(
 
 	ShuffleIfTrue(left, right);
 
-			if	(left)  MoveCell(x, y, x - 1, y);
+	     if (left)  MoveCell(x, y, x - 1, y);
 	else if (right)	MoveCell(x, y, x + 1, y);
 
 	return left || right;
