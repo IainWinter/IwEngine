@@ -19,7 +19,6 @@
 
 #define REFLECT __attribute__((annotate("reflect")))
 
-
 namespace iw {
 namespace Reflect {
 namespace detail {
