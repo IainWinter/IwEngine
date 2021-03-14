@@ -28,6 +28,26 @@ namespace util {
 		LOG_WARNING << error;
 	}
 
+	bool WriteFile(
+		const std::string& filePath,
+		const std::string& contents)
+	{
+		FILE* file;
+		errno_t errorCode = fopen_s(&file, filePath.c_str(), "wb");
+		if (file) {
+			fseek(file, 0, SEEK_END);
+			rewind(file);
+			fwrite(&contents[0], 1, contents.size(), file);
+			fclose(file);
+		}
+
+		else {
+			ReportError(errorCode, filePath);
+		}
+
+		return file != nullptr;
+	}
+
 	std::string ReadFile(
 		const std::string& filePath)
 	{
