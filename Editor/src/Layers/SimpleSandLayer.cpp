@@ -3,7 +3,7 @@
 size_t __width = 1920;
 size_t __height = 1080;
 
-size_t __chunkSize = 200;
+size_t __chunkSize = 256;
 double __cellScale = 4;
 
 namespace iw {
@@ -103,6 +103,11 @@ namespace iw {
 
 	void SimpleSandLayer::PostUpdate() {
 
+		for (int i = -int(m_world.m_chunkWidth) * 5; i < int(m_world.m_chunkWidth * 5); i++)
+			m_world.SetCell(i, m_world.m_chunkHeight*5, _WATER);
+
+		LOG_INFO << iw::DeltaTime()*1000 << "ms " << 1 / iw::DeltaTime() << "fps";
+
 		// camera frustrum
 
 		size_t width = m_sandTexture->Width();
@@ -175,12 +180,6 @@ namespace iw {
 			// wait for batch to finish updating
 			std::unique_lock lock(mutex);
 			cond.wait(lock, [&]() { return chunkCount == 0; });
-		}
-
-		for (auto& batch : m_world.m_chunkBatches) {
-			for (SandChunk* chunk : batch) {
-				chunk->ResetRect();
-			}
 		}
 
 		for (auto& batch : m_world.m_chunkBatches) {

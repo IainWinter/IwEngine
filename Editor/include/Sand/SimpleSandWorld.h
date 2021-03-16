@@ -20,21 +20,19 @@ class SandChunk {
 public:
 	Cell* m_cells;
 
-	const size_t m_width;
-	const size_t m_height;
-	const int m_x;
-	const int m_y;
+	const size_t m_width, m_height;
+	const int m_x, m_y;
 
 	size_t m_filledCellCount;
 
-	int m_minX; // Dirty rect
-	int m_minY;
-	int m_maxX;
-	int m_maxY;
+	int m_minX, m_minY,
+	    m_maxX, m_maxY; // Dirty rect
+
 private:
 	std::vector<std::tuple<SandChunk*, size_t, size_t>> m_changes; // source chunk, source, destination
-	std::vector<size_t> m_keepAlive;
-	std::mutex m_filledCellCountMutex;
+
+	int m_minXw, m_minYw,
+	    m_maxXw, m_maxYw; // working dirty rect
 
 public:
 	SandChunk(
@@ -46,13 +44,10 @@ public:
 		, m_y(y * height)
 
 		, m_filledCellCount(0)
-
-		, m_minX(m_width)
-		, m_minY(m_height)
-		, m_maxX(0)
-		, m_maxY(0)
 	{
 		m_cells = new Cell[width * height];
+		UpdateRect();
+		UpdateRect();
 	}
 
 	~SandChunk() {
@@ -75,9 +70,8 @@ public:
 		int x, int y,
 		const Cell& cell)
 	{
-		size_t index = GetIndex(x, y);
-		KeepAlive(index);
-		SetCell(index, cell);
+		KeepAlive(x, y);
+		SetCell(GetIndex(x, y), cell);
 	}
 
 	void SetCell(
@@ -89,14 +83,12 @@ public:
 		if (    dest.Type == CellType::EMPTY
 			&& cell.Type != CellType::EMPTY) // Filling a cell
 		{
-			std::unique_lock lock(m_filledCellCountMutex);
 			m_filledCellCount++;
 		}
 
 		else if (dest.Type != CellType::EMPTY
 			&&  cell.Type == CellType::EMPTY) // Removing a filled cell
 		{
-			std::unique_lock lock(m_filledCellCountMutex);
 			m_filledCellCount--;
 		}
 
@@ -118,14 +110,6 @@ public:
 #define _DEST 2
 
 	void CommitCells() {
-		//ResetRect();
-
-		for (size_t index : m_keepAlive) {
-			UpdateRect(index);
-		}
-
-		m_keepAlive.clear();
-
 		// remove moves that have their destinations filled
 
 		for (size_t i = 0; i < m_changes.size(); i++) {
@@ -158,14 +142,16 @@ public:
 				       SetCell(dst, chunk->GetCell(src));
 				chunk->SetCell(src, Cell());
 
-				       UpdateRect(dst);
-				chunk->UpdateRect(src);
+				       KeepAlive(dst);
+				chunk->KeepAlive(src);
 
 				iprev = i + 1;
 			}
 		}
 
 		m_changes.clear();
+
+		UpdateRect();
 	}
 
 	// Helpers
@@ -186,30 +172,30 @@ public:
 	}
 
 	void KeepAlive(int x, int y) {
-		KeepAlive(GetIndex(x, y));
+		x -= m_x;
+		y -= m_y;
+
+		m_minXw = iw::clamp<int>(min(x - 2, m_minXw), 0, m_width);
+		m_minYw = iw::clamp<int>(min(y - 2, m_minYw), 0, m_height);
+		m_maxXw = iw::clamp<int>(max(x + 2, m_maxXw), 0, m_width);
+		m_maxYw = iw::clamp<int>(max(y + 2, m_maxYw), 0, m_height);
 	}
 
 	void KeepAlive(size_t index) {
-		m_keepAlive.push_back(index);
-	}
-
-	void ResetRect() {
-		m_minX = m_width;
-		m_minY = m_height;
-		m_maxX = -1;
-		m_maxY = -1;
+		KeepAlive(index % m_width + m_x, index / m_width + m_y);
 	}
 private:
-	void UpdateRect(size_t index) {
-		int x = index % m_width;
-		int y = index / m_width;
+	void UpdateRect() {
+		m_minX = m_minXw;
+		m_minY = m_minYw;
+		m_maxX = m_maxXw;
+		m_maxY = m_maxYw;
 
-		m_minX = iw::clamp<int>(min(x - 2, m_minX), 0, m_width);
-		m_maxX = iw::clamp<int>(max(x + 2, m_maxX), 0, m_width);
-		m_minY = iw::clamp<int>(min(y - 2, m_minY), 0, m_height);
-		m_maxY = iw::clamp<int>(max(y + 2, m_maxY), 0, m_height);
+		m_minXw = m_width;
+		m_minYw = m_height;
+		m_maxXw = -1;
+		m_maxYw = -1;
 	}
-
 };
 
 class SandWorld {
@@ -335,8 +321,8 @@ private:
 	{
 		auto [lx, ly] = location;
 
-		if(     lx < -10 || ly < -10
-			|| lx >  10 || ly >  10) // could pass in a world limit to constructor
+		if (    lx < -5 || ly < -5
+		     || lx >  5 || ly >  5) // could pass in a world limit to constructor
 		{
 			return nullptr;
 		}
@@ -344,8 +330,10 @@ private:
 		SandChunk* chunk = new SandChunk(
 			m_chunkWidth, m_chunkHeight, lx, ly);
 
-		int batch = (3 + lx % 3) % 3
-			     + (3 + ly % 3) % 3 * 3;
+		const int c = 3;
+
+		int batch = (c + lx % c) % c
+			     + (c + ly % c) % c * c;
 
 		m_chunkLookup.insert({ location, chunk });
 

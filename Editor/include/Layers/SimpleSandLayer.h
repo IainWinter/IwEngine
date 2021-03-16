@@ -16,6 +16,30 @@ public:
 	SimpleSandWorker(SandWorld& world, SandChunk* chunk) : SandWorker(world, chunk) {}
 
 	void UpdateCell(int x, int y, Cell& cell) override {
+		//if(     cell.Type              == CellType::SAND
+		//	&& GetCell(x, y - 1).Type == CellType::WATER)
+		//{
+		//	cell = Cell::GetDefault(CellType::WATER);
+		//	SetCell(x, y - 1, Cell::GetDefault(CellType::SAND));
+		//	return;
+		//}
+
+		//if (    cell.Type == CellType::SAND
+		//	&& GetCell(x + 1, y - 1).Type == CellType::WATER)
+		//{
+		//	cell = Cell::GetDefault(CellType::WATER);
+		//	SetCell(x + 1, y - 1, Cell::GetDefault(CellType::SAND));
+		//	return;
+		//}
+
+		//if (    cell.Type == CellType::SAND
+		//	&& GetCell(x - 1, y - 1).Type == CellType::WATER)
+		//{
+		//	cell = Cell::GetDefault(CellType::WATER);
+		//	SetCell(x - 1, y - 1, Cell::GetDefault(CellType::SAND));
+		//	return;
+		//}
+
 			if (cell.Props & CellProperties::MOVE_DOWN      && MoveDown    (x, y, cell)) {}
 		else if (cell.Props & CellProperties::MOVE_DOWN_SIDE && MoveDownSide(x, y, cell)) {}
 		else if (cell.Props & CellProperties::MOVE_SIDE      && MoveSide    (x, y, cell)) {}
@@ -58,26 +82,3 @@ inline void ShuffleIfTrue(bool& a, bool& b) {
 }
 
 
-//if(     cell.Type              == CellType::SAND
-//	&& GetCell(x, y - 1).Type == CellType::WATER)
-//{
-//	cell = Cell::GetDefault(CellType::WATER);
-//	SetCell(x, y - 1, Cell::GetDefault(CellType::SAND));
-//	return;
-//}
-
-//if (cell.Type == CellType::SAND
-//	&& GetCell(x + 1, y - 1).Type == CellType::WATER)
-//{
-//	cell = Cell::GetDefault(CellType::WATER);
-//	SetCell(x + 1, y - 1, Cell::GetDefault(CellType::SAND));
-//	return;
-//}
-
-//if (cell.Type == CellType::SAND
-//	&& GetCell(x - 1, y - 1).Type == CellType::WATER)
-//{
-//	cell = Cell::GetDefault(CellType::WATER);
-//	SetCell(x - 1, y - 1, Cell::GetDefault(CellType::SAND));
-//	return;
-//}
