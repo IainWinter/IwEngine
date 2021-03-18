@@ -31,6 +31,10 @@ public:
 private:
 	std::vector<std::tuple<SandChunk*, size_t, size_t>> m_changes; // source chunk, source, destination
 
+	std::mutex m_filledCellCountMutex;
+	std::mutex m_changesMutex;
+	std::mutex m_workingRectMutex;
+
 	int m_minXw, m_minYw,
 	    m_maxXw, m_maxYw; // working dirty rect
 
@@ -70,8 +74,9 @@ public:
 		int x, int y,
 		const Cell& cell)
 	{
-		KeepAlive(x, y);
-		SetCell(GetIndex(x, y), cell);
+		size_t index = GetIndex(x, y);
+		SetCell(index, cell);
+		KeepAlive(index);
 	}
 
 	void SetCell(
@@ -83,12 +88,14 @@ public:
 		if (    dest.Type == CellType::EMPTY
 			&& cell.Type != CellType::EMPTY) // Filling a cell
 		{
+			std::unique_lock lock(m_filledCellCountMutex);
 			m_filledCellCount++;
 		}
 
 		else if (dest.Type != CellType::EMPTY
 			&&  cell.Type == CellType::EMPTY) // Removing a filled cell
 		{
+			std::unique_lock lock(m_filledCellCountMutex);
 			m_filledCellCount--;
 		}
 
@@ -100,6 +107,8 @@ public:
 		int x,   int y,
 		int xto, int yto)
 	{
+		std::unique_lock lock(m_changesMutex);
+
 		m_changes.emplace_back(
 			source,
 			source->GetIndex(x, y),
@@ -150,8 +159,6 @@ public:
 		}
 
 		m_changes.clear();
-
-		UpdateRect();
 	}
 
 	// Helpers
@@ -172,29 +179,27 @@ public:
 	}
 
 	void KeepAlive(int x, int y) {
-		x -= m_x;
-		y -= m_y;
+		KeepAlive(GetIndex(x, y));
+	}
+
+	void KeepAlive(size_t index) {
+		std::unique_lock lock(m_workingRectMutex);
+
+		int x = index % m_width;
+		int y = index / m_width;
 
 		m_minXw = iw::clamp<int>(min(x - 2, m_minXw), 0, m_width);
 		m_minYw = iw::clamp<int>(min(y - 2, m_minYw), 0, m_height);
 		m_maxXw = iw::clamp<int>(max(x + 2, m_maxXw), 0, m_width);
 		m_maxYw = iw::clamp<int>(max(y + 2, m_maxYw), 0, m_height);
 	}
-
-	void KeepAlive(size_t index) {
-		KeepAlive(index % m_width + m_x, index / m_width + m_y);
-	}
-private:
+//private:
 	void UpdateRect() {
-		m_minX = m_minXw;
-		m_minY = m_minYw;
-		m_maxX = m_maxXw;
-		m_maxY = m_maxYw;
-
-		m_minXw = m_width;
-		m_minYw = m_height;
-		m_maxXw = -1;
-		m_maxYw = -1;
+		// Update current; reset working
+		m_minX = m_minXw;  m_minXw = m_width;
+		m_minY = m_minYw;  m_minYw = m_height;
+		m_maxX = m_maxXw;  m_maxXw = -1;
+		m_maxY = m_maxYw;  m_maxYw = -1;	
 	}
 };
 
@@ -203,7 +208,7 @@ public:
 	const size_t m_chunkWidth;
 	const size_t m_chunkHeight;
 	const double m_scale;
-	std::array<std::vector<SandChunk*>, 9> m_chunkBatches;
+	std::array<std::vector<SandChunk*>, 4> m_chunkBatches;
 private:
 	Concurrency::concurrent_unordered_map<std::pair<int, int>, SandChunk*, iw::pair_hash> m_chunkLookup;
 	std::mutex m_chunkMutex;
@@ -330,7 +335,7 @@ private:
 		SandChunk* chunk = new SandChunk(
 			m_chunkWidth, m_chunkHeight, lx, ly);
 
-		const int c = 3;
+		const int c = 2;
 
 		int batch = (c + lx % c) % c
 			     + (c + ly % c) % c * c;
@@ -408,26 +413,14 @@ public:
 	{
 		int pingX = 0, pingY = 0;
 
-		if (x == m_chunk->m_x)                         m_world.KeepAlive(x - 1, y    ); //pingX = -1;
-		if (x == m_chunk->m_x + m_chunk->m_width  - 1) m_world.KeepAlive(x + 1, y    ); //pingX =  1;
-		if (y == m_chunk->m_y)                         m_world.KeepAlive(x,     y - 1); //pingY = -1;
-		if (y == m_chunk->m_y + m_chunk->m_height - 1) m_world.KeepAlive(x,     y + 1); //pingY =  1;
+		if (x == m_chunk->m_x)                         pingX = -1;
+		if (x == m_chunk->m_x + m_chunk->m_width  - 1) pingX =  1;
+		if (y == m_chunk->m_y)                         pingY = -1;
+		if (y == m_chunk->m_y + m_chunk->m_height - 1) pingY =  1;
 
-		//if (pingX != 0) {
-		//	LOG_INFO << "Ping x: " << pingX;
-		//	m_world.KeepAlive(x + pingX, y);
-		//}
-
-		//if (pingY != 0) {
-		//	LOG_INFO << "Ping y: " << pingY;
-		//	m_world.KeepAlive(x, y + pingY);
-		//}
-
-		//if (pingX != 0 && pingY != 0) {
-		//	LOG_INFO << "Ping x/y: " << pingX << "/" << pingY;
-
-		//	m_world.KeepAlive(x + pingX, y + pingY);
-		//}
+		if (pingX != 0)               m_world.KeepAlive(x + pingX, y);
+		if (pingY != 0)               m_world.KeepAlive(x,         y + pingY);
+		if (pingX != 0 && pingY != 0) m_world.KeepAlive(x + pingX, y + pingY);
 
 		if (m_chunk->InBounds(x,   y  ))
 		if (m_chunk->InBounds(xto, yto)) {

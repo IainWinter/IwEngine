@@ -3,8 +3,8 @@
 size_t __width = 1920;
 size_t __height = 1080;
 
-size_t __chunkSize = 256;
-double __cellScale = 4;
+size_t __chunkSize = 128;
+double __cellScale = 2;
 
 namespace iw {
 	SimpleSandLayer::SimpleSandLayer()
@@ -17,22 +17,6 @@ namespace iw {
 	}
 
 	int SimpleSandLayer::Initialize() {
-
-
-		//std::vector<int> ints;
-		//ints.push_back(1);
-		//ints.push_back(2);
-		//ints.push_back(3);
-
-		//for (std::vector<int>::iterator it = ints.begin(); it != ints.end(); it++) {
-		//	ints.push_back(*it);
-		//}
-
-		//for (int& i : ints) {
-		//	ints.push_back(i);
-		//}
-
-
 		iw::ref<iw::Shader> sandShader = Asset->Load<Shader>("shaders/texture.shader");
 
 		m_sandTexture = REF<iw::Texture>(
@@ -101,12 +85,22 @@ namespace iw {
 
 	float timer__asdasd = 0;
 
+	float min_frame_time = FLT_MAX;
+	float max_frame_time = FLT_MIN;
+
 	void SimpleSandLayer::PostUpdate() {
 
-		for (int i = -int(m_world.m_chunkWidth) * 5; i < int(m_world.m_chunkWidth * 5); i++)
-			m_world.SetCell(i, m_world.m_chunkHeight*5, _WATER);
+		for (int i = -int(m_world.m_chunkWidth) * 5; i < int(m_world.m_chunkWidth * 6); i++)
+			if(iw::randf() > .99)
+				m_world.SetCell(i, m_world.m_chunkHeight*5, _WATER);
 
-		LOG_INFO << iw::DeltaTime()*1000 << "ms " << 1 / iw::DeltaTime() << "fps";
+		if (iw::DeltaTime() > max_frame_time)
+			max_frame_time = iw::DeltaTime();
+
+		if (iw::DeltaTime() < min_frame_time)
+			min_frame_time = iw::DeltaTime();
+
+		LOG_INFO << iw::DeltaTime()*1000 << "ms " << 1 / iw::DeltaTime() << "fps" << " min:" << min_frame_time << "ms max:" << max_frame_time << "ms";
 
 		// camera frustrum
 
@@ -128,8 +122,8 @@ namespace iw {
 			else if (Keyboard::KeyDown(iw::W)) placeMe = _WATER;
 			else if (Keyboard::KeyDown(iw::R)) placeMe = _ROCK;
 
-			for (size_t x = pos.x; x < pos.x + 20; x++)
-			for (size_t y = pos.y; y < pos.y + 20; y++) {
+			for (int x = pos.x; x < pos.x + 20; x++)
+			for (int y = pos.y; y < pos.y + 20; y++) {
 				if (!m_world.InBounds(x, y)) continue;
 				m_world.SetCell(x, y, placeMe);
 			}
@@ -175,8 +169,10 @@ namespace iw {
 					{ std::unique_lock lock(mutex); chunkCount--; }
 					cond.notify_one();
 				});
-			} // could this loop through with only one chunk updated if it was too quick?
+			}
 
+		}
+		{
 			// wait for batch to finish updating
 			std::unique_lock lock(mutex);
 			cond.wait(lock, [&]() { return chunkCount == 0; });
@@ -194,10 +190,18 @@ namespace iw {
 					cond.notify_one();
 				});
 			}
+		}
 
-			// Wait for batch to be commited
+		{
+			// Wait for all chunks to to be commited
 			std::unique_lock lock(mutex);
 			cond.wait(lock, [&]() { return chunkCount == 0; });
+		}
+
+		for (auto& batch : m_world.m_chunkBatches) {
+			for (SandChunk* chunk : batch) {
+				chunk->UpdateRect();
+			}
 		}
 
 		// Update the sand texture
@@ -246,7 +250,11 @@ namespace iw {
 							 ||  y % __chunkSize == 0)
 						{
 							auto [lx, ly] = m_world.GetChunkLocation(chunk->m_x, chunk->m_y);
-							int batch = abs(lx % 3) + abs(ly % 3) * 3;
+							
+							const int c = 2;
+
+							int batch = (c + lx % c) % c
+								      + (c + ly % c) % c * c;
 
 							iw::Color color;
 
@@ -278,26 +286,6 @@ namespace iw {
 			cond.wait(lock, [&]() { return chunkCount == 0; });
 		}
 
-		//for (size_t i = 0; i < width * height; i++) {
-		//	size_t x = i % width;
-		//	size_t y = i / width;
-		//	
-		//	if (!chunk || !chunk->InBounds(x, y)) {
-		//		chunk = m_world.GetChunk(x, y);
-		//	}
-
-		//	if (  (x % __chunkSize == 0
-		//		|| y % __chunkSize == 0)
-		//		&& _debugShowChunkBounds)
-		//	{
-		//		pixels[i] = iw::Color(1, 0, 0);
-		//	}
-
-		//	else {
-		//		pixels[i] = chunk->GetCell(i % width, i / width).Color;
-		//	}
-		//}
-
 		// Mouse cursor
 
 		size_t mouseIndex = size_t(pos.x - fx) + size_t(pos.y - fy) * width;
@@ -318,6 +306,7 @@ namespace iw {
 				}
 			}
 		}
+
 		}
 		// Draw the sand to the screen
 
