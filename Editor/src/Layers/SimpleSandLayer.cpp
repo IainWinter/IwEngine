@@ -1,10 +1,23 @@
 #include "Layers/SimpleSandLayer.h"
 
+#include "iw/graphics/Font.h"
+
 size_t __width = 1920;
 size_t __height = 1080;
 
-size_t __chunkSize = 128;
-double __cellScale = 2;
+size_t __chunkSize = 256;
+double __cellScale = 4;
+
+iw::Mesh text_stats;
+iw::ref<iw::Font> font_stats;
+
+void UpdateStats(int cellUpdateCount, int chunkCount) {
+	std::stringstream sb;
+	sb.precision(2);
+	sb << std::fixed << iw::DeltaTime() * 1000 << "ms\n" << 1 / iw::DeltaTime() << "fps\n" << cellUpdateCount << " cells updated\n" << chunkCount << " chunks";
+
+	font_stats->UpdateMesh(text_stats, sb.str(), .001f, 1);
+}
 
 namespace iw {
 	SimpleSandLayer::SimpleSandLayer()
@@ -17,6 +30,12 @@ namespace iw {
 	}
 
 	int SimpleSandLayer::Initialize() {
+		font_stats = Asset->Load<iw::Font>("fonts/arial.fnt");
+		text_stats = font_stats->GenerateMesh("", 1, 1);
+		text_stats.SetMaterial(REF<iw::Material>(Asset->Load<iw::Shader>("shaders/font_simple.shader")));
+		text_stats.Material()->SetTexture("fontMap", Asset->Load<iw::Texture>("textures/fonts/arial.png"));
+		text_stats.Material()->Set("color", iw::Color(1));
+
 		iw::ref<iw::Shader> sandShader = Asset->Load<Shader>("shaders/texture.shader");
 
 		m_sandTexture = REF<iw::Texture>(
@@ -80,27 +99,26 @@ namespace iw {
 
 		m_tiles.push_back(t);
 
+
+		for (int i = -int(m_world.m_chunkWidth) * 5; i < int(m_world.m_chunkWidth * 6); i++)
+			m_world.SetCell(i, m_world.m_chunkHeight * 4, _ROCK);
+
+
+		for (int i = -100; i < 100; i++)
+			m_world.SetCell(m_world.m_chunkHeight * -5 - 50 + i, i*i/200, _ROCK);
+
+		for (int i = -100; i < 100; i++)
+			m_world.SetCell(m_world.m_chunkHeight *  5 + 50 + i, i*i/200, _ROCK);
+
 		return 0;
 	}
 
 	float timer__asdasd = 0;
 
-	float min_frame_time = FLT_MAX;
-	float max_frame_time = FLT_MIN;
-
 	void SimpleSandLayer::PostUpdate() {
-
-		for (int i = -int(m_world.m_chunkWidth) * 5; i < int(m_world.m_chunkWidth * 6); i++)
-			if(iw::randf() > .99)
-				m_world.SetCell(i, m_world.m_chunkHeight*5, _WATER);
-
-		if (iw::DeltaTime() > max_frame_time)
-			max_frame_time = iw::DeltaTime();
-
-		if (iw::DeltaTime() < min_frame_time)
-			min_frame_time = iw::DeltaTime();
-
-		LOG_INFO << iw::DeltaTime()*1000 << "ms " << 1 / iw::DeltaTime() << "fps" << " min:" << min_frame_time << "ms max:" << max_frame_time << "ms";
+		//for (int i = -int(m_world.m_chunkWidth) * 5; i < int(m_world.m_chunkWidth * 6); i++)
+		//	if(iw::randf() > .99)
+		//		m_world.SetCell(i, m_world.m_chunkHeight*5, _WATER);
 
 		// camera frustrum
 
@@ -129,14 +147,10 @@ namespace iw {
 			}
 		}
 
-		if (Keyboard::KeyDown(iw::LEFT))  m_tiles[0].X -= iw::DeltaTime()*50;
-		if (Keyboard::KeyDown(iw::RIGHT)) m_tiles[0].X += iw::DeltaTime()*50;
-		if (Keyboard::KeyDown(iw::UP))    m_tiles[0].Y += iw::DeltaTime()*50;
-		if (Keyboard::KeyDown(iw::DOWN))  m_tiles[0].Y -= iw::DeltaTime()*50;
-
-		timer__asdasd -= iw::DeltaTime();
-		if(timer__asdasd <= 0) {
-		timer__asdasd = 1 / 10000000.0f;
+		if (Keyboard::KeyDown(iw::LEFT))  m_tiles[0].X -= iw::DeltaTime()*150;
+		if (Keyboard::KeyDown(iw::RIGHT)) m_tiles[0].X += iw::DeltaTime()*150;
+		if (Keyboard::KeyDown(iw::UP))    m_tiles[0].Y += iw::DeltaTime()*150;
+		if (Keyboard::KeyDown(iw::DOWN))  m_tiles[0].Y -= iw::DeltaTime()*150;
 
 		for (Tile& tile : m_tiles) {
 			for (auto [x, y] : tile.Positions) {
@@ -152,56 +166,37 @@ namespace iw {
 
 		// Update cells
 
-		std::mutex mutex;
-		std::condition_variable cond;
-		int chunkCount = 0;
-
 		m_world.RemoveEmptyChunks();
 
-		for (auto& batch : m_world.m_chunkBatches) {
-			for (SandChunk* chunk : batch) {
+		std::mutex mutex;
+		std::condition_variable cond;
 
-				{ std::unique_lock lock(mutex); chunkCount++; }
-
+		auto doForAllChunks = [&](std::function<void(SandChunk*)> func) {
+			int chunkCount = m_world.m_chunks.size();
+			
+			for (SandChunk* chunk : m_world.m_chunks) {
 				Task->queue([&, chunk]() {
-					SimpleSandWorker(m_world, chunk).UpdateChunk();
+					func(chunk);
 
 					{ std::unique_lock lock(mutex); chunkCount--; }
 					cond.notify_one();
 				});
 			}
 
-		}
-		{
-			// wait for batch to finish updating
 			std::unique_lock lock(mutex);
 			cond.wait(lock, [&]() { return chunkCount == 0; });
-		}
+		};
+		
+		doForAllChunks([&](SandChunk* chunk) {
+			SimpleSandWorker(m_world, chunk).UpdateChunk();
+		});
 
-		for (auto& batch : m_world.m_chunkBatches) {
-			for (SandChunk* chunk : batch) {
+		doForAllChunks([&](SandChunk* chunk) {
+			chunk->CommitCells();
+		});
 
-				{ std::unique_lock lock(mutex); chunkCount++; }
-
-				Task->queue([&, chunk]() {
-					chunk->CommitCells();
-
-					{ std::unique_lock lock(mutex); chunkCount--; }
-					cond.notify_one();
-				});
-			}
-		}
-
-		{
-			// Wait for all chunks to to be commited
-			std::unique_lock lock(mutex);
-			cond.wait(lock, [&]() { return chunkCount == 0; });
-		}
-
-		for (auto& batch : m_world.m_chunkBatches) {
-			for (SandChunk* chunk : batch) {
-				chunk->UpdateRect();
-			}
+		for (SandChunk* chunk : m_world.m_chunks) {
+			chunk->UpdateRect();
 		}
 
 		// Update the sand texture
@@ -214,7 +209,7 @@ namespace iw {
 		auto [minCX, minCY] = m_world.GetChunkLocation(fx,  fy);
 		auto [maxCX, maxCY] = m_world.GetChunkLocation(fx2, fy2);
 
-		chunkCount = 0; // reset chunk count
+		int chunkCount = 0;
 
 		for (int cx = minCX-1; cx <= maxCX; cx++)
 		for (int cy = minCY-1; cy <= maxCY; cy++) {
@@ -249,28 +244,7 @@ namespace iw {
 						else if (x % __chunkSize == 0
 							 ||  y % __chunkSize == 0)
 						{
-							auto [lx, ly] = m_world.GetChunkLocation(chunk->m_x, chunk->m_y);
-							
-							const int c = 2;
-
-							int batch = (c + lx % c) % c
-								      + (c + ly % c) % c * c;
-
-							iw::Color color;
-
-							switch (batch) {
-							case 0: color = iw::Color::From255(255,   0, 255); break;
-							case 1: color = iw::Color::From255(255,   0,   0); break;
-							case 2: color = iw::Color::From255(255, 128,   0); break;
-							case 3: color = iw::Color::From255(255, 255,   0); break;
-							case 4: color = iw::Color::From255(128, 255,   0); break;
-							case 5: color = iw::Color::From255(0,   255,   0); break;
-							case 6: color = iw::Color::From255(0,   255, 128); break;
-							case 7: color = iw::Color::From255(0,   128, 255); break;
-							case 8: color = iw::Color::From255(0,     0, 255); break;
-							}
-
-							pixels[texi] = color;
+							pixels[texi] = iw::Color(1, 0, 0);
 						}
 					}
 				}
@@ -307,14 +281,18 @@ namespace iw {
 			}
 		}
 
-		}
+		//UpdateStats(cellUpdateCount, m_world.m_chunks.size());
+
+
 		// Draw the sand to the screen
 
 		m_sandTexture->Update(Renderer->Device);
 
 		Renderer->BeginScene(MainScene);
 		Renderer->	DrawMesh(iw::Transform(), m_sandMesh);
+		//Renderer->	DrawMesh(iw::Transform(iw::vector3(-.95, -.6, 0)), text_stats);
 		Renderer->EndScene();
+
 
 	//	// for vid
 	//	{

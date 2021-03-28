@@ -239,15 +239,66 @@ namespace iw {
 	}
 }
 
+
+// This function adds 1
+
+int LogicError(int x) {
+	return x + 20;
+}
+
+// This function adds 2e5 with threads
+
+int ThreadingError(int x) {
+	std::thread threadA = std::thread([&]() {
+		for (int i = 0; i < 1e5; i++) {
+			x += 1;
+		}
+	});
+
+	std::thread threadB = std::thread([&]() {
+		for (int i = 0; i < 1e5; i++) {
+			x += 1;
+		}
+	});
+
+	threadA.join();
+	threadB.join();
+
+	return x;
+}
+
+
+
+
 iw::Application* CreateApplication(
 	iw::InitOptions& options)
 {
 	options.WindowOptions = iw::WindowOptions {
 		1920/**4/3*/,
 		1080/**4/3*/,
-		true,
+		false,
 		iw::DisplayState::NORMAL
 	};
 	
+	// Consistent problems
+
+	int l1 = LogicError(1); // Expected 2, got 21
+	int l2 = LogicError(2); // Expected 3, got 22
+	int l3 = LogicError(3); // Expected 4, got 23
+	int l4 = LogicError(4); // Expected 5, got 24
+	int l5 = LogicError(5); // Expected 6, got 25
+
+	// Random problems
+
+	int t1 = ThreadingError(1e1); // Expected 200010, got 131523
+	int t2 = ThreadingError(1e2); // Expected 200100, got 142835
+	int t3 = ThreadingError(1e3); // Expected 201000, got 136223
+	int t4 = ThreadingError(1e4); // Expected 210000, got 164462
+	int t5 = ThreadingError(1e5); // Expected 300000, got 221677
+
 	return new iw::App();
 }
+
+
+
+

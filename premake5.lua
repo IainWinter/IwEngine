@@ -2,6 +2,7 @@ iwengdir  = path.getabsolute("IwEngine")
 sndbxdir  = path.getabsolute("Sandbox")
 edtordir  = path.getabsolute("Editor")
 iwtoldir  = path.getabsolute("IwTools")
+sandgamedir  = path.getabsolute("Games/SandGame")
 glewdir   = iwengdir .. "/extern/glew"
 imguidir  = iwengdir .. "/extern/imgui"
 assimpdir = iwengdir .. "/extern/assimp"
@@ -678,7 +679,75 @@ workspace "wEngine"
 			--"xcopy /y /f \"" .. fmoddir   ..           "/bin/%{cfg.platform}/fmodstudio.dll\" \""       .. edtordir .. bindir .. "\"",
 			"xcopy /y /f \"" .. iwengdir  .. bindir .. "/*.dll\" \""                             .. edtordir .. bindir .. "\""--,
 			--"xcopy /e /y /f /i \"" .. edtordir  .. resdir .. "\" \"" .. edtordir .. blddir .. resdir .. "\"",
-			--"xcopy /e /y /f /i \"" .. edtordir  .. resdir .. "\" \"" .. edtordir .. bindir .. resdir .. "\""
+		}
+
+		defines {
+		}
+
+		filter "system:windows"
+			cppdialect "C++17"
+			systemversion "latest"
+			defines {
+				"IW_PLATFORM_WINDOWS"
+			}
+
+		filter "configurations:Debug"
+			defines "IW_DEBUG"
+			runtime "Debug"
+			symbols "On"
+
+		filter "configurations:Release"
+			defines "IW_RELEASE"
+			runtime "Release"
+			optimize "On"
+
+	project "a_SandGame"
+		kind "WindowedApp"
+		language "C++"
+		location  (sandgamedir .. blddir)
+		targetdir (sandgamedir .. bindir)
+		objdir    (sandgamedir .. blddir)
+
+		files {
+			sandgamedir .. incdir .. "/**.h",
+			sandgamedir .. srcdir .. "/**.h",
+			sandgamedir .. srcdir .. "/**.cpp"
+		}
+
+		includedirs {
+			sandgamedir .. incdir,
+			iwengdir .. incdir,
+			iwtoldir .. incdir,
+			imguidir .. incdir,
+			fmoddir  .. incdir,
+			iwtoldir .. incdir,
+			jsondir
+		}
+
+		links {
+			"wLog",
+			"wMath",
+			"wUtil",
+			"wAudio",
+			"wEvents",
+			"wCommon",
+			"wEntity",
+			"wGraphics",
+			"wRenderer", -- only beacuse of MakeLayout
+			"wInput",
+			"wPhysics",
+			"wEngine",
+			"ImGui",
+			"GLEW",
+			"opengl32.lib"
+		}
+
+		prebuildcommands  {
+			--"xcopy /y /f \"" .. assimpdir .. blddir .. "/code/%{cfg.buildcfg}/assimp-vc140-mt.dll\" \"" .. sandgamedir .. bindir .. "\"",
+			--"xcopy /y /f \"" .. fmoddir   ..           "/bin/%{cfg.platform}/fmod.dll\" \""             .. sandgamedir .. bindir .. "\"",
+			--"xcopy /y /f \"" .. fmoddir   ..           "/bin/%{cfg.platform}/fmodstudio.dll\" \""       .. sandgamedir .. bindir .. "\"",
+			"xcopy /y /f \"" .. iwengdir  .. bindir .. "/*.dll\" \""                             .. edtordir .. bindir .. "\""--,
+			--"xcopy /e /y /f /i \"" .. sandgamedir  .. resdir .. "\" \"" .. sandgamedir .. blddir .. resdir .. "\"",
 		}
 
 		defines {

@@ -77,31 +77,31 @@ struct Cell {
 
 	iw::Color Color;
 
-	float Timer = 0; // Timer forever
+	//float Timer = 0; // Timer forever
 
-	float Life = 0; // Life until the cell will die, only some cells use this
-	float pX = 0;   // 'Position'
-	float pY = 0;
-	float dX = 0;   // Velocity
-	float dY = 0;
+	//float Life = 0; // Life until the cell will die, only some cells use this
+	//float pX = 0;   // 'Position'
+	//float pY = 0;
+	//float dX = 0;   // Velocity
+	//float dY = 0;
 
-	int SplitCount = 0; // to stop lazers and bullets from splitting to much
-	int MaxSplitCount = 0;
+	//int SplitCount = 0; // to stop lazers and bullets from splitting to much
+	//int MaxSplitCount = 0;
 
-	int TileId = 0;          // Tile id, 0 means that it belongs to noone
-	int LastUpdateTick = 0;  // Used to check if the cell has been updated in the current tick
-	bool Gravitised = false; // If this cell should react to gravity
-	SharedCellData* Share = nullptr; // Shared data
+	//int TileId = 0;          // Tile id, 0 means that it belongs to noone
+	//int LastUpdateTick = 0;  // Used to check if the cell has been updated in the current tick
+	//bool Gravitised = false; // If this cell should react to gravity
+	//SharedCellData* Share = nullptr; // Shared data
 
-	int Precedence = 20;
+	//int Precedence = 20;
 
-	bool UseFloatingPosition = false;
+	//bool UseFloatingPosition = false;
 
-	bool Filled = false;
+	//bool Filled = false;
 
-	float Speed() const {  // Manhattan distance of velocity
-		return sqrt(dX*dX + dY*dY);
-	}
+	//float Speed() const {  // Manhattan distance of velocity
+	//	return sqrt(dX*dX + dY*dY);
+	//}
 
 	static inline void        SetDefault(CellType type,const Cell& cell){m_defaults.emplace(type, cell);}
 	static inline const Cell& GetDefault(CellType type)                 {return m_defaults.at(type);}
@@ -155,22 +155,22 @@ struct SharedCellData {
 	std::set<Cell*> m_users; // for cleanup
 	std::mutex m_userMutex;
 
-	float Radius() {
-		iw::vector2 furthest;
+	//float Radius() {
+	//	iw::vector2 furthest;
 
-		for (Cell* cell : m_users) {
-			iw::vector2 v(cell->pX-pX, cell->pY-pY);
-			if (v.length_squared() > furthest.length_squared()) {
-				furthest = v;
-			}
+	//	for (Cell* cell : m_users) {
+	//		iw::vector2 v(cell->pX-pX, cell->pY-pY);
+	//		if (v.length_squared() > furthest.length_squared()) {
+	//			furthest = v;
+	//		}
 
-			if (cell->pX == 0 || cell->pY == 0) {
-				furthest = 0;
-			}
-		}
+	//		if (cell->pX == 0 || cell->pY == 0) {
+	//			furthest = 0;
+	//		}
+	//	}
 
-		return furthest.length();
-	}
+	//	return furthest.length();
+	//}
 
 	// uhg
 
