@@ -27,8 +27,8 @@ int WINAPI WinMain(
 	iw::InitOptions options;
 
 	iw::Application* app = CreateApplication(options);
-	int status;
-	if (status = app->Initialize(options)) {
+
+	if (int status = app->Initialize(options)) {
 		LOG_ERROR
 			<< "Application initilization failed with error code "
 			<< status;
@@ -48,6 +48,11 @@ int WINAPI WinMain(
 }
 
 #endif
+
+// If in editor with macro
+
+extern "C" __declspec(dllexport)
+iw::Application* GetApplicationForEditor();
 
 // Application Life Cycle
 //

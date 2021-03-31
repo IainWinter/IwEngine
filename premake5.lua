@@ -633,7 +633,7 @@ workspace "wEngine"
 			optimize "On"
 	
 	project "a_wEditor"
-		kind "WindowedApp"
+		kind "SharedLib"
 		language "C++"
 		location  (edtordir .. blddir)
 		targetdir (edtordir .. bindir)

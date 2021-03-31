@@ -5,42 +5,37 @@ namespace iw {
 namespace Engine {
 	Console::Console(
 		const HandlerFunc& handler)
-		: m_handler(handler)
-		, m_alloc(1024)
+		: m_alloc(1024)
 		, m_strbuf(1024)
 	{
-
+		AddHandler(handler);
 	}
 
-	void Console::HandleEvent(
-		iw::event& e)
+	void Console::AddHandler(
+		HandlerFunc handler)
 	{
-
+		m_handlers.push_back(handler);
 	}
 
 	void Console::ExecuteCommand(
 		const std::string& command)
 	{
 		std::unique_lock<std::mutex> lock(m_mutex);
-
-		Command c = AllocCommand(command);
-		m_handler(c);
+		SendCommandEvents(AllocCommand(command));
 	}
 
 	void Console::QueueCommand(
 		const std::string& command)
 	{
 		std::unique_lock<std::mutex> lock(m_mutex);
-
-		Command c = AllocCommand(command);
-		m_commands.push(c);
+		m_commands.push(AllocCommand(command));
 	}
 
 	void Console::ExecuteQueue() {
 		std::unique_lock<std::mutex> lock(m_mutex);
 
 		while (!m_commands.empty()) {
-			m_handler(m_commands.pop());
+			SendCommandEvents(m_commands.pop());
 		}
 
 		m_alloc.reset();
@@ -142,6 +137,15 @@ namespace Engine {
 		const std::string& command)
 	{
 		return Token();
+	}
+
+	void Console::SendCommandEvents(
+		Command& c)
+	{
+		bool handled = false;
+		for (auto itr = m_handlers.begin(); itr != m_handlers.end() && !handled; itr++) {
+			handled = (*itr)(c);
+		}
 	}
 }
 }

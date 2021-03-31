@@ -15,9 +15,9 @@ namespace Engine {
 
 		std::thread m_renderThread;
 		bool m_running;
-
-	protected:
+	public:
 		APP_VARS
+	//protected:
 
 	public:
 		IWENGINE_API

@@ -712,7 +712,7 @@ namespace iw {
 		return matrix4(
 			x, 0, 0, 0,
 			0, y, 0, 0,
-			a, b, c, -1,
+			a, b, c, -1, // <--- is this wrong????
 			0, 0, d, 0);
 
 		//float x = 2.0f * zNear / (right - left);

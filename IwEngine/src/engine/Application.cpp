@@ -8,7 +8,7 @@
 #include "iw/graphics/Loaders/TextureLoader.h"
 #include "iw/graphics/Loaders/ShaderLoader.h"
 #include "iw/graphics/Loaders/FontLoader.h"
-#include "iw/audio/AudioSpaceRaw.h"
+#include "iw/audio/AudioSpaceStudio.h"
 #include <atomic>
 
 #ifdef IW_IMGUI
@@ -35,7 +35,7 @@ namespace Engine {
 		Input    = REF<InputManager>(Bus);
 		Console  = REF<iw::Console>(make_getback(&Application::HandleCommand, this));
 		Physics  = REF<DynamicsSpace>();
-		Audio    = REF<AudioSpaceRaw>("assets/sounds/");
+		Audio    = REF<AudioSpaceStudio>("assets/sounds/");
 		Task     = REF<thread_pool>(std::thread::hardware_concurrency());
 
 		PushOverlay<DebugLayer>();

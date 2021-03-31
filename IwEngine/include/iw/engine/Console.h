@@ -30,7 +30,7 @@ namespace Engine {
 
 	class Console {
 	public:
-		using HandlerFunc = iw::getback<bool, const Command&>;
+		using HandlerFunc = std::function<bool(const Command&)>;
 
 	private:
 		std::mutex m_mutex;
@@ -38,7 +38,7 @@ namespace Engine {
 		iw::linear_allocator m_strbuf;
 		iw::blocking_queue<Command> m_commands;
 
-		HandlerFunc m_handler;
+		std::vector<HandlerFunc> m_handlers;
 
 	public:
 		IWENGINE_API
@@ -46,8 +46,8 @@ namespace Engine {
 			const HandlerFunc& handler);
 
 		IWENGINE_API
-		void HandleEvent(
-			iw::event& e);
+		void AddHandler(
+			HandlerFunc handler);
 
 		IWENGINE_API
 		void ExecuteCommand(
@@ -65,6 +65,9 @@ namespace Engine {
 
 		Token ParseToken(
 			const std::string& command);
+
+		void SendCommandEvents(
+			Command& c);
 	};
 }
 
