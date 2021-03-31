@@ -44,57 +44,15 @@ namespace impl {
 			return transform;
 		}
 
-		IWPHYSICS_API
 		V FindFurthestPoint(
 			const Transform* transform,
-			V direction) const override;
-
-		ManifoldPoints TestCollision(
-			const Transform* transform,
-			const Collider<V>* collider,
-			const Transform* colliderTransform) const override
+			V direction) const override
 		{
-			return collider->TestCollision(colliderTransform, this, transform);
+			return Center + transform->WorldPosition()
+				+ Radius * direction.normalized() * transform->WorldScale().major();
 		}
-
-		IWPHYSICS_API
-		ManifoldPoints TestCollision(
-			const Transform* transform,
-			const SphereCollider<V>* sphere,
-			const Transform* sphereTransform) const override;
-
-		IWPHYSICS_API
-		ManifoldPoints TestCollision(
-			const Transform* transform,
-			const CapsuleCollider<V>* capsule,
-			const Transform* capsuleTransform) const override;
-
-		IWPHYSICS_API
-		ManifoldPoints TestCollision(
-			const Transform* transform,
-			const CylinderCollider<V>* cylinder,
-			const Transform* capsuleTransform) const override
-		{
-			return {};
-		}
-
-		IWPHYSICS_API
-		ManifoldPoints TestCollision(
-			const Transform* transform,
-			const PlaneCollider<V>* plane,
-			const Transform* planeTransform) const override;
-
-		IWPHYSICS_API
-		ManifoldPoints TestCollision(
-			const Transform* transform,
-			const MeshCollider<V>* mesh,
-			const Transform* meshTransform) const override;
 	};
 }
-
-	using SphereCollider2 = impl::SphereCollider<iw::vector2>;
-	using SphereCollider  = impl::SphereCollider<iw::vector3>;
-	using SphereCollider4 = impl::SphereCollider<iw::vector4>;
 }
 
 	using namespace Physics;

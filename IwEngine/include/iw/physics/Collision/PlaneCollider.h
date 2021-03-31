@@ -50,52 +50,8 @@ namespace impl {
 
 			return transform;
 		}
-
-		ManifoldPoints TestCollision(
-			const Transform* transform,
-			const impl::Collider<V>* collider,
-			const Transform* colliderTransform) const override
-		{
-			return collider->TestCollision(colliderTransform, this, transform);
-		}
-		
-		IWPHYSICS_API
-		ManifoldPoints TestCollision(
-			const Transform* transform,
-			const SphereCollider<V>* sphere,
-			const Transform* sphereTransform) const override;
-
-		IWPHYSICS_API
-		ManifoldPoints TestCollision(
-			const Transform* transform,
-			const CapsuleCollider<V>* capsule,
-			const Transform* capsuleTransform) const override;
-
-		IWPHYSICS_API
-		ManifoldPoints TestCollision(
-			const Transform* transform,
-			const CylinderCollider<V>* cylinder,
-			const Transform* capsuleTransform) const override
-		{
-			return {};
-		}
-
-		ManifoldPoints TestCollision(
-			const Transform* transform,
-			const PlaneCollider<V>* plane,
-			const Transform* planeTransform) const override;
-
-		IWPHYSICS_API
-		ManifoldPoints TestCollision(
-			const Transform* transform,
-			const MeshCollider<V>* mesh,
-			const Transform* meshTransform) const override;
 	};
 }
-
-	using PlaneCollider2 = impl::PlaneCollider<iw::vector2>;
-	using PlaneCollider  = impl::PlaneCollider<iw::vector3>;
-	using PlaneCollider4 = impl::PlaneCollider<iw::vector4>;
 }
 
 	using namespace Physics;

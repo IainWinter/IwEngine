@@ -5,7 +5,7 @@
 namespace iw {
 namespace Physics {
 namespace algo {
-	ManifoldPoints FindSphereSphereMaifoldPoints(
+	ManifoldPoints TestCollision(
 		const SphereCollider* a, const Transform* ta,
 		const SphereCollider* b, const Transform* tb)
 	{
@@ -37,7 +37,7 @@ namespace algo {
 
 	// Transforms dont work for plane
 
-	ManifoldPoints FindSpherePlaneMaifoldPoints(
+	ManifoldPoints TestCollision(
 		const SphereCollider* a, const Transform* ta,
 		const PlaneCollider*  b, const Transform* tb)
 	{
@@ -68,7 +68,7 @@ namespace algo {
 		};
 	}
 
-	ManifoldPoints FindSphereCapsuleMaifoldPoints(
+	ManifoldPoints TestCollision(
 		const SphereCollider*  a, const Transform* ta,
 		const CapsuleCollider* b, const Transform* tb)
 	{
@@ -126,7 +126,7 @@ namespace algo {
 		};
 	}
 
-	ManifoldPoints FindPlaneMeshMaifoldPoints(
+	ManifoldPoints TestCollision(
 		const PlaneCollider* a, const Transform* ta,
 		const MeshCollider*  b, const Transform* tb)
 	{
@@ -178,31 +178,31 @@ namespace algo {
 		points.Normal = -points.Normal;
 	}
 
-	ManifoldPoints FindPlaneSphereMaifoldPoints(
+	ManifoldPoints TestCollision(
 		const PlaneCollider*  a, const Transform* ta, 
 		const SphereCollider* b, const Transform* tb)
 	{
-		ManifoldPoints points = FindSpherePlaneMaifoldPoints(b, tb, a, ta);
+		ManifoldPoints points = TestCollision(b, tb, a, ta);
 		SwapPoints(points);
 
 		return points;
 	}
 
-	ManifoldPoints FindMeshPlaneMaifoldPoints(
+	ManifoldPoints TestCollision(
 		const MeshCollider*  a, const Transform* ta,
 		const PlaneCollider* b, const Transform* tb)
 	{
-		ManifoldPoints points = FindPlaneMeshMaifoldPoints(b, tb, a, ta);
+		ManifoldPoints points = TestCollision(b, tb, a, ta);
 		SwapPoints(points);
 
 		return points;
 	}
 
-	ManifoldPoints FindCapsuleSphereMaifoldPoints(
+	ManifoldPoints TestCollision(
 		const CapsuleCollider* a, const Transform* ta,
 		const SphereCollider*  b, const Transform* tb)
 	{
-		ManifoldPoints points = FindSphereCapsuleMaifoldPoints(b, tb, a, ta);
+		ManifoldPoints points = TestCollision(b, tb, a, ta);
 		SwapPoints(points);
 
 		return points;

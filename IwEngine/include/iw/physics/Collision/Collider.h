@@ -70,50 +70,32 @@ namespace impl {
 			LOG_WARNING << "Tried to find furthest point of a collider that doesn't impl function!";
 			return V();
 		}
-
-		// dont like that you need to pass transforms
-
-		IWPHYSICS_API
-		virtual ManifoldPoints TestCollision(
-			const Transform* transform,
-			const impl::Collider<V>* collider,
-			const Transform* colliderTransform) const = 0;
-
-		IWPHYSICS_API
-		virtual ManifoldPoints TestCollision(
-			const Transform* transform,
-			const impl::SphereCollider<V>* sphere,
-			const Transform* sphereTransform) const = 0;
-
-		IWPHYSICS_API
-		virtual ManifoldPoints TestCollision(
-			const Transform* transform,
-			const impl::CapsuleCollider<V>* capsule,
-			const Transform* capsuleTransform) const = 0;
-
-		IWPHYSICS_API
-		virtual ManifoldPoints TestCollision(
-			const Transform* transform,
-			const impl::CylinderCollider<V>* cylinder,
-			const Transform* capsuleTransform) const = 0;
-
-		IWPHYSICS_API
-		virtual ManifoldPoints TestCollision(
-			const Transform* transform,
-			const impl::PlaneCollider<V>* plane,
-			const Transform* planeTransform) const = 0;
-
-		IWPHYSICS_API
-		virtual ManifoldPoints TestCollision(
-			const Transform* transform,
-			const impl::MeshCollider<V>* mesh,
-			const Transform* meshTransform) const = 0;
 	};
 }
 
 	using Collider2 = impl::Collider<iw::vector2>;
 	using Collider  = impl::Collider<iw::vector3>;
 	using Collider4 = impl::Collider<iw::vector4>;
+
+	using SphereCollider2 = impl::SphereCollider<iw::vector2>;
+	using SphereCollider  = impl::SphereCollider<iw::vector3>;
+	using SphereCollider4 = impl::SphereCollider<iw::vector4>;
+
+	using CapsuleCollider2 = impl::CapsuleCollider<iw::vector2>;
+	using CapsuleCollider  = impl::CapsuleCollider<iw::vector3>;
+	using CapsuleCollider4 = impl::CapsuleCollider<iw::vector4>;
+
+	using CylinderCollider2 = impl::CylinderCollider<iw::vector2>;
+	using CylinderCollider  = impl::CylinderCollider<iw::vector3>;
+	using CylinderCollider4 = impl::CylinderCollider<iw::vector4>;
+
+	using PlaneCollider2 = impl::PlaneCollider<iw::vector2>;
+	using PlaneCollider  = impl::PlaneCollider<iw::vector3>;
+	using PlaneCollider4 = impl::PlaneCollider<iw::vector4>;
+
+	using MeshCollider2 = impl::MeshCollider<iw::vector2>;
+	using MeshCollider  = impl::MeshCollider<iw::vector3>;
+	using MeshCollider4 = impl::MeshCollider<iw::vector4>;
 }
 
 	using namespace Physics;

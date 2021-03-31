@@ -1,4 +1,5 @@
 #include "iw/physics/Collision/CollisionSpace.h"
+#include "iw/physics/Collision/algo/ManifoldFactory.h"
 #include "iw/log/logger.h"
 #include <assert.h>
 
@@ -84,7 +85,7 @@ namespace Physics {
 					continue;
 				}
 
-				ManifoldPoints points = a->Col()->TestCollision(&a->Trans(), b->Col(), &b->Trans());
+				ManifoldPoints points = TestCollision(a->Col(), &a->Trans(), b->Col(), &b->Trans()); //;a->Col()->TestCollision(&a->Trans(), b->Col(), &b->Trans());
 				if (points.HasCollision) {
 					// establish more formal rules for what can collide with what
 					if (   a->IsTrigger()
@@ -119,7 +120,7 @@ namespace Physics {
 	{
 		for (CollisionObject* object : m_objects) {
 			if (   object->Col()
-				&& object->Col()->TestCollision(&object->Trans(), &collider, &Transform()).HasCollision)
+				&& TestCollision(object->Col(), &object->Trans(), &collider, &Transform()).HasCollision)
 			{
 				return true;
 			}
@@ -133,7 +134,7 @@ namespace Physics {
 	{
 		for (const CollisionObject* object : m_objects) {
 			if (   object->Col()
-				&& object->Col()->TestCollision(&object->Trans(), _object->Col(), &_object->Trans()).HasCollision)
+				&& TestCollision(object->Col(), &object->Trans(), _object->Col(), &_object->Trans()).HasCollision)
 			{
 				return true;
 			}

@@ -79,52 +79,12 @@ namespace impl {
 			return transform;
 		}
 
-		ManifoldPoints TestCollision(
-			const Transform* transform,
-			const Collider<V>* collider,
-			const Transform* colliderTransform) const override
-		{
-			return collider->TestCollision(colliderTransform, this, transform);
-		}
-		
-		IWPHYSICS_API
-		ManifoldPoints TestCollision(
-			const Transform* transform,
-			const SphereCollider<V>* sphere,
-			const Transform* sphereTransform) const override;
-
-		IWPHYSICS_API
-		ManifoldPoints TestCollision(
-			const Transform* transform,
-			const CapsuleCollider<V>* capsule,
-			const Transform* capsuleTransform) const override;
-
-		IWPHYSICS_API
-		ManifoldPoints TestCollision(
-			const Transform* transform,
-			const CylinderCollider<V>* cylinder,
-			const Transform* capsuleTransform) const override
-		{
-			return {};
-		}
-
-		IWPHYSICS_API
-		ManifoldPoints TestCollision(
-			const Transform* transform,
-			const PlaneCollider<V>* plane,
-			const Transform* planeTransform) const override;
-
-		IWPHYSICS_API
-		ManifoldPoints TestCollision(
-			const Transform* transform,
-			const MeshCollider<V>* mesh,
-			const Transform* meshTransform) const override;
+		// for FFP
+		//vector3 xz = vector3(direction.x, 0, direction.z).normalized() * Radius;   // todo: make cylender collider
+		//xz.y = (direction.y < 0) ? -Radius : Radius; // low : high
+		//return xz * transform->WorldScale().major() + Center + transform->WorldPosition();
 	};
 }
-
-	using CylinderCollider2 = impl::CylinderCollider<iw::vector2>;
-	using CylinderCollider  = impl::CylinderCollider<iw::vector3>;
-	using CylinderCollider4 = impl::CylinderCollider<iw::vector4>;
 }
 
 	using namespace Physics;

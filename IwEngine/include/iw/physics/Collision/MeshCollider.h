@@ -46,63 +46,38 @@ namespace impl {
 			return collider;
 		}
 
-		//IWPHYSICS_API
 		const AABB<V>& Bounds() { return AABB<V>(); }
-
-		//IWPHYSICS_API
 		Transform Trans() const { return Transform(); }
 
-		IWPHYSICS_API
 		V FindFurthestPoint(
 			const Transform* transform,
-			V direction) const override;
-
-		ManifoldPoints TestCollision(
-			const Transform* transform,
-			const impl::Collider<V>* collider,
-			const Transform* colliderTransform) const override
+			V direction) const override
 		{
-			return collider->TestCollision(colliderTransform, this, transform);
+			//vector4 dir = vector4(direction, 1);
+			//dir *= transform->WorldTransformation().inverted(); // I think we can transform the direction instead of the collider here
+
+			//direction = dir.xyz();
+
+			V     maxPoint;
+			float maxDistance = -FLT_MAX;
+
+			for (V point : m_points) {
+				point = V(vector4(point, 1) * transform->WorldTransformation().transposed());
+
+				float distance = point.dot(direction);
+				if (distance > maxDistance) {
+					maxDistance = distance;
+					maxPoint = point;
+				}
+			}
+
+			//vector4 mp = vector4(maxPoint, 1);  // and then transform the final point?
+			//mp *= transform->WorldTransformation();
+
+			return maxPoint;//mp.xyz();
 		}
-		
-		IWPHYSICS_API
-		ManifoldPoints TestCollision(
-			const Transform* transform,
-			const SphereCollider<V>* sphere,
-			const Transform* sphereTransform) const override;
-
-		IWPHYSICS_API
-		ManifoldPoints TestCollision(
-			const Transform* transform,
-			const CapsuleCollider<V>* capsule,
-			const Transform* capsuleTransform) const override;
-
-		IWPHYSICS_API
-		ManifoldPoints TestCollision(
-			const Transform* transform,
-			const CylinderCollider<V>* cylinder,
-			const Transform* capsuleTransform) const override
-		{
-			return {};
-		}
-
-		IWPHYSICS_API
-		ManifoldPoints TestCollision(
-			const Transform* transform,
-			const PlaneCollider<V>* plane,
-			const Transform* planeTransform) const override;
-
-		IWPHYSICS_API
-		ManifoldPoints TestCollision(
-			const Transform* transform,
-			const MeshCollider<V>* mesh,
-			const Transform* meshTransform) const override;
 	};
 }
-
-	using MeshCollider2 = impl::MeshCollider<iw::vector2>;
-	using MeshCollider  = impl::MeshCollider<iw::vector3>;
-	using MeshCollider4 = impl::MeshCollider<iw::vector4>;
 }
 
 	using namespace Physics;
