@@ -5,8 +5,8 @@
 size_t __width = 1920;
 size_t __height = 1080;
 
-size_t __chunkSize = 256;
-double __cellScale = 4;
+double __cellScale = 2;
+size_t __chunkSize = 64 * __cellScale;
 
 iw::Mesh text_stats;
 iw::ref<iw::Font> font_stats;
@@ -370,12 +370,15 @@ bool SimpleSandWorker::MoveDown(
 	size_t x, size_t y,
 	const Cell& cell)
 {
-	bool down = IsEmpty(x, y - 1);
-	if (down) {
-		MoveCell(x, y, x, y - 1);
+	for (int i = 1; i > 0; i--) {
+		bool down = IsEmpty(x, y - i);
+		if (down) {
+			MoveCell(x, y, x, y - i);
+			return true;
+		}
 	}
 
-	return down;
+	return false;
 }
 	
 bool SimpleSandWorker::MoveDownSide(
@@ -397,13 +400,17 @@ bool SimpleSandWorker::MoveSide(
 	size_t x, size_t y,
 	const Cell& cell)
 {
-	bool left  = IsEmpty(x - 1, y);
-	bool right = IsEmpty(x + 1, y);
+	for (int i = 1; i > 0; i--) {
+		bool left  = IsEmpty(x - i, y);
+		bool right = IsEmpty(x + i, y);
 
-	ShuffleIfTrue(left, right);
+		ShuffleIfTrue(left, right);
 
-	     if (left)  MoveCell(x, y, x - 1, y);
-	else if (right)	MoveCell(x, y, x + 1, y);
+			 if (left)  MoveCell(x, y, x - i, y);
+		else if (right)	MoveCell(x, y, x + i, y);
 
-	return left || right;
+		if (left || right) return true;
+	}
+
+	return false;
 }
