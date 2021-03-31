@@ -89,9 +89,12 @@ namespace log {
 		IWLOG_API
 		void clear_times();
 
-		IWLOG_API
-		void reset_times();
+		//IWLOG_API
+		//void reset_times();
 #endif
+		IWLOG_API
+		void reset();
+
 		IWLOG_API
 		void flush();
 
@@ -139,6 +142,8 @@ namespace log {
 
 	using namespace log;
 }
+
+#define LOG_RESET iw::logger::instance().reset
 
 #define LOG_SINK(_type_, _level_, ...)                              \
 	iw::logger::instance().make_sink<_type_>(_level_, __VA_ARGS__)

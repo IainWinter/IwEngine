@@ -6,19 +6,13 @@
 
 namespace iw {
 namespace Editor {
-	class App
-		: public iw::Application
-	{
-	public:
+	class App : public iw::Application {
 	private:
-		ImGuiLayer* imgui;
-
-		Layer* toolbox;
-		Layer* sandbox;
+		ImGuiLayer* imgui = nullptr;
+		Layer* toolbox = nullptr;
+		Layer* sandbox = nullptr;
 
 	public:
-		App();
-
 		int Initialize(
 			iw::InitOptions& options) override;
 

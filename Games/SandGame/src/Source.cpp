@@ -11,8 +11,7 @@ void Reload(std::wstring dll, HINSTANCE& hInst) {
 	hInst = LoadLibrary(dll.c_str());
 
 	if (!hInst) {
-		//LOG_ERROR << "Failed to load library " << dll;
-		// set hinst to set value? or just null
+		LOG_ERROR << "Failed to load library " << dll.c_str();
 	}
 }
 
@@ -21,7 +20,7 @@ _t LoadFunction(HINSTANCE hInst, std::string function) {
 	_t funcPtr = (_t)GetProcAddress(hInst, function.c_str());
 
 	if (!funcPtr) {
-		//LOG_ERROR << "Failed to load function " << function;
+		LOG_ERROR << "Failed to load function " << function;
 	}
 
 	return funcPtr;
@@ -29,45 +28,64 @@ _t LoadFunction(HINSTANCE hInst, std::string function) {
 
 class EditorApp : public iw::Application {
 private:
-	iw::Application* m_game = nullptr;
+	iw::InitOptions& options;
 
 public:
+	iw::Application* m_gameNew = nullptr;
+	iw::Application* m_game    = nullptr;
+
+	EditorApp(iw::InitOptions& options): options(options) {}
+
 	int Initialize(iw::InitOptions& options) {
+		return InitGame();
+	}
+
+	void Run() {
+		while (m_game) {
+			if (!m_game->Window()->Handle()) {
+				InitGame();
+			}
+
+			m_game->Run();
+			
+			delete m_game;
+			m_game = m_gameNew;
+			m_gameNew = nullptr;
+		}
+	}
+
+	void ReloadGame() {
+		HINSTANCE gameInst;
+		Reload(L"a_wEditor.dll", gameInst);
+		m_gameNew = LoadFunction<GETAPP_FUNC>(gameInst, "GetApplicationForEditor")();
+	}
+
+	int InitGame() {
 		int err = m_game->Initialize(options);
-		if (err) return err;
-		
-		//m_game->PushLayer<TooLayer>();
 
 		m_game->Console->AddHandler([&](const iw::Command& e) {
+			if (e.Verb == "quit") {
+				ReloadGame();
+			}
 
-			ReloadGame();
+			else if (e.Verb == "toolbox") {
+				m_game->Bus->push<iw::InputCommandEvent>("quit");
+			}
 
 			return false;
 		});
 
-		return 0;
-	}
-
-	void Run() {
-		m_game->Run();
-	}
-
-	void ReloadGame() {
-		if (m_game) {
-			m_game->Console->QueueCommand("quit");
-		}
-
-		HINSTANCE gameInst;
-		Reload(L"a_wEditor.dll", gameInst);
-		m_game = LoadFunction<GETAPP_FUNC>(gameInst, "GetApplicationForEditor")();
+		return err;
 	}
 };
 
 iw::Application* CreateApplication(
 	iw::InitOptions& options)
 {
-	EditorApp* app = new EditorApp();
+	EditorApp* app = new EditorApp(options);
 	app->ReloadGame();
+
+	app->m_game = app->m_gameNew;
 
 	return app;
 }

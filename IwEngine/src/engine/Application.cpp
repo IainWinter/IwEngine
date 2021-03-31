@@ -15,7 +15,7 @@
 #	include "iw/engine/Layers/ImGuiLayer.h"
 #endif
 
-#ifdef IW_DEBUG
+#ifdef not IW_DEBUG
 	#include "iw/log/sink/std_sink.h"
 #else
 	#include "iw/log/sink/async_std_sink.h"
@@ -37,8 +37,6 @@ namespace Engine {
 		Physics  = REF<DynamicsSpace>();
 		Audio    = REF<AudioSpaceStudio>("assets/sounds/");
 		Task     = REF<thread_pool>(std::thread::hardware_concurrency());
-
-		PushOverlay<DebugLayer>();
 	}
 
 	Application::~Application() {
@@ -48,6 +46,16 @@ namespace Engine {
 	int Application::Initialize(
 		InitOptions& options)
 	{
+		//bool console = true; // maybe should be in Init?
+		//if (console) {
+			AllocConsole();
+			FILE* fo, * fe;
+			freopen_s(&fo, "CONOUT$", "w", stdout);
+			freopen_s(&fe, "CONERR$", "w", stderr);
+		//}
+
+		PushOverlay<DebugLayer>();
+
 		// Time
 
 		Time::UpdateTime();
@@ -55,7 +63,7 @@ namespace Engine {
 
 		// Logging
 
-#ifdef IW_DEBUG
+#ifdef not IW_DEBUG
 		LOG_SINK(stdout_sink, loglevel::INFO);
 		LOG_SINK(stderr_sink, loglevel::ERR);
 #else
@@ -269,10 +277,18 @@ namespace Engine {
 	}
 
 	void Application::Destroy() {
-		m_window->Destroy();
 		for (Layer* layer : m_layers) {
 			layer->Destroy();
 		}
+
+		m_window->Destroy();
+
+		LOG_FLUSH();
+		LOG_RESET();
+
+		//if (console) {
+			FreeConsole();
+		//}
 	}
 
 	void Application::HandleEvent(

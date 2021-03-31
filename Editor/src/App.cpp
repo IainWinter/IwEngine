@@ -13,48 +13,41 @@
 #include <stack>
 
 namespace iw {
-	App::App() {
-		iw::ref<Context> context = Input->CreateContext("Editor");
-		
-		context->MapButton(iw::SPACE, "+jump");
-		context->MapButton(iw::SHIFT, "-jump");
-		context->MapButton(iw::D    , "+right");
-		context->MapButton(iw::A    , "-right");
-		context->MapButton(iw::W    , "+forward");
-		context->MapButton(iw::S    , "-forward");
-		context->MapButton(iw::C    , "use");
-		context->MapButton(iw::T    , "toolbox");
-		context->MapButton(iw::I    , "imgui");
-
-		iw::ref<Device> m  = Input->CreateDevice<Mouse>();
-		//iw::ref<Device> rm = Input->CreateDevice<RawMouse>();
-		iw::ref<Device> k  = Input->CreateDevice<RawKeyboard>();
-		
-		context->AddDevice(m);
-		//context->AddDevice(rm);
-		context->AddDevice(k);
-
-		sandbox = PushLayer<SandboxLayer>(); // model system breaks in test layer
-		imgui   = PushLayer<ImGuiLayer>(Window());
-	}
-
 	int App::Initialize(
 		iw::InitOptions& options)
 	{
+		sandbox = PushLayer<SandboxLayer>(); // model system breaks in test layer
+		imgui   = PushLayer<ImGuiLayer>(Window());
+
 		int err = Application::Initialize(options);
 
 		if (!err) {
-			ImGuiLayer* imgui = GetLayer<ImGuiLayer>("ImGui");
+			iw::ref<Context> context = Input->CreateContext("Game");
+		
+			context->MapButton(iw::SPACE, "+jump");
+			context->MapButton(iw::SHIFT, "-jump");
+			context->MapButton(iw::D    , "+right");
+			context->MapButton(iw::A    , "-right");
+			context->MapButton(iw::W    , "+forward");
+			context->MapButton(iw::S    , "-forward");
+			context->MapButton(iw::C    , "use");
+			context->MapButton(iw::T    , "toolbox");
+			context->MapButton(iw::I    , "imgui");
+
+			context->AddDevice(Input->CreateDevice<Mouse>());
+			context->AddDevice(Input->CreateDevice<RawKeyboard>());
+			//context->AddDevice(Input->CreateDevice<RawMouse>());
+
 			if (imgui) {
 				imgui->BindContext();
 			}
+
+			toolbox = PushLayer<ToolLayer>(sandbox->GetMainScene());
+			err = toolbox->Initialize();
+
+			PopLayer(toolbox);
+			PopLayer(imgui);
 		}
-
-		toolbox = PushLayer<ToolLayer>(sandbox->GetMainScene());
-		err = toolbox->Initialize();
-
-		PopLayer(toolbox);
-		PopLayer(imgui);
 
 		return err;
 	}

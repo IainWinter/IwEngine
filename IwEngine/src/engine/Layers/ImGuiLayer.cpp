@@ -37,7 +37,7 @@ namespace Engine {
 
 		auto& io = ImGui::GetIO();
 		io.ConfigFlags = ImGuiConfigFlags_DockingEnable;
-		if(m_window) io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+		//if(m_window) io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
 		ImFont* pFont = io.Fonts->AddFontFromFileTTF("assets/fonts/ttf/verdana.ttf", 15);
 		//ImGui::PushFont(pFont);
@@ -51,7 +51,8 @@ namespace Engine {
 	}
 
 	void ImGuiLayer::OnPush() {
-		Renderer->SetDefaultTarget(target);
+		if(m_context)
+			Renderer->SetDefaultTarget(target);
 	}
 
 	void ImGuiLayer::OnPop() {
@@ -126,7 +127,7 @@ namespace Engine {
 		// temp Dockspace
 
 		ImGuiWindowFlags window_flags =
-			ImGuiWindowFlags_MenuBar
+			  ImGuiWindowFlags_MenuBar
 			| ImGuiWindowFlags_NoDocking
 			| ImGuiWindowFlags_NoTitleBar
 			| ImGuiWindowFlags_NoCollapse

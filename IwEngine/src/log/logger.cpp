@@ -46,6 +46,17 @@ namespace iw {
 		m_root = {};
 	}
 #endif
+	void logger::reset() {
+		for (sink* sink : m_sinks) {
+			delete sink;
+		}
+		m_sinks.clear();
+
+#ifdef IW_LOG_TIME
+		clear_times();
+#endif
+	}
+
 	void logger::flush() {
 		for (sink* sink : m_sinks) {
 			sink->flush();

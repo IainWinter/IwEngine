@@ -14,15 +14,20 @@ namespace log {
 		struct logbit {
 			loglevel level;
 			std::string text;
+
+			bool poison = false;
 		};
 
 		iw::blocking_queue<logbit> m_messages;
 		std::thread m_thread;
+
 	private:
 		IWLOG_API
 		void async_logger() {
 			while (true) {
 				logbit log = m_messages.pop();
+				if (log.poison) break;
+
 				async_log(log.level, log.text);
 			}
 		}
@@ -36,6 +41,7 @@ namespace log {
 
 		IWLOG_API
 		virtual ~async_sink() {
+			m_messages.push({loglevel::INFO, "", true});
 			m_thread.join();
 		}
 

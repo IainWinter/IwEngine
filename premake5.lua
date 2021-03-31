@@ -619,7 +619,8 @@ workspace "wEngine"
 			systemversion "latest"
 			defines {
 				"IW_PLATFORM_WINDOWS",
-				"IWENGINE_DLL"
+				"IWENGINE_DLL",
+				"IW_IMGUI"
 			}
 
 		filter "configurations:Debug"
@@ -688,7 +689,8 @@ workspace "wEngine"
 			cppdialect "C++17"
 			systemversion "latest"
 			defines {
-				"IW_PLATFORM_WINDOWS"
+				"IW_PLATFORM_WINDOWS",
+				"IW_IMGUI"  -- not sure if this needs to be here
 			}
 
 		filter "configurations:Debug"
@@ -757,7 +759,8 @@ workspace "wEngine"
 			cppdialect "C++17"
 			systemversion "latest"
 			defines {
-				"IW_PLATFORM_WINDOWS"
+				"IW_PLATFORM_WINDOWS",
+				"IW_IMGUI" -- not sure if this needs to be here
 			}
 
 		filter "configurations:Debug"

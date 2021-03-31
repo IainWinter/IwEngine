@@ -16,14 +16,6 @@ int WINAPI WinMain(
 	LPSTR cmdline,
 	int cmdshow)
 {
-	bool console = true;
-	if (console) {
-		AllocConsole();
-		FILE *fo, *fe;
-		freopen_s(&fo, "CONOUT$", "w", stdout);
-		freopen_s(&fe, "CONERR$", "w", stderr);
-	}
-
 	iw::InitOptions options;
 
 	iw::Application* app = CreateApplication(options);
@@ -39,12 +31,6 @@ int WINAPI WinMain(
 	}
 
 	delete app;
-
-	LOG_FLUSH();
-
-	if (console) {
-		FreeConsole();
-	}
 }
 
 #endif

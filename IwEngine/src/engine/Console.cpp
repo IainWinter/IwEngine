@@ -20,14 +20,12 @@ namespace Engine {
 	void Console::ExecuteCommand(
 		const std::string& command)
 	{
-		std::unique_lock<std::mutex> lock(m_mutex);
 		SendCommandEvents(AllocCommand(command));
 	}
 
 	void Console::QueueCommand(
 		const std::string& command)
 	{
-		std::unique_lock<std::mutex> lock(m_mutex);
 		m_commands.push(AllocCommand(command));
 	}
 
@@ -52,6 +50,8 @@ namespace Engine {
 		while (std::getline(stream, token, ' ')) {
 			tokens.push_back(token);
 		}
+
+		std::unique_lock<std::mutex> lock(m_mutex); // this could be smarter
 
 		char* original = m_strbuf.alloc<char>(tokens[0].size() + 1); // needs to resize sometimes
 		strcpy(original, tokens[0].c_str());
