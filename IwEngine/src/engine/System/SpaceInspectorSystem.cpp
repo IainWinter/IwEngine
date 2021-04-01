@@ -1,8 +1,8 @@
-#include "Systems/SpaceInspectorSystem.h"
+#include "iw/engine/Systems/SpaceInspectorSystem.h"
 #include "iw/engine/Time.h"
 #include "imgui/imgui.h"
 
-#include "..\imgui\src\imgui_demo.cpp"
+//#include "../../../extern/imgui/src/imgui_demo.cpp"
 
 namespace iw {
 namespace Editor {
@@ -270,7 +270,7 @@ namespace Editor {
 
 		ImGui::End();
 
-		ImGui::ShowDemoWindow();
+		//ImGui::ShowDemoWindow();
 	}
 
 	void SpaceInspectorSystem::AddEntityToHierarchy(

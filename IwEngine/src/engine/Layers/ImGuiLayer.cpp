@@ -239,8 +239,12 @@ namespace Engine {
 		if (e.Device == DeviceType::MOUSE) {
 			auto& io = ImGui::GetIO();
 
-			io.MousePos.x = (float)e.X;
-			io.MousePos.y = (float)e.Y;
+			iw::vector2 screenPos = iw::Mouse::ScreenPos();
+
+			LOG_INFO << screenPos;
+
+			io.MousePos.x = (float)screenPos.x;
+			io.MousePos.y = (float)screenPos.y;
 		}
 
 		return ImGui::GetIO().WantCaptureMouse;

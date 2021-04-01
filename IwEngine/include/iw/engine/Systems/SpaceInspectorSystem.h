@@ -26,10 +26,10 @@ namespace Editor {
 		ref<MeshData> m_selectedMeshData;
 
 	public:
-		SpaceInspectorSystem();
+		IWENGINE_API SpaceInspectorSystem();
 
-		void Update() override;
-		void ImGui()  override;
+		IWENGINE_API void Update() override;
+		IWENGINE_API void ImGui()  override;
 	private:
 		void AddEntityToHierarchy(
 			EntityHandle& handle,

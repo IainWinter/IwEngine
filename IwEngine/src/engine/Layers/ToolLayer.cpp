@@ -1,5 +1,4 @@
-#include "Layers/ToolLayer.h"
-#include "Events/ActionEvents.h"
+#include "iw/engine/Layers/ToolLayer.h"
 #include "iw/engine/Systems/Debug/DrawCollidersSystem.h"
 #include "iw/engine/Components/CameraController.h"
 #include "iw/physics/Collision/PlaneCollider.h"
@@ -9,7 +8,7 @@
 #include "iw/graphics/Model.h"
 #include "imgui/imgui.h"
 
-#include "Systems/SpaceInspectorSystem.h"
+#include "iw/engine/Systems/SpaceInspectorSystem.h"
 
 #include "iw/engine/Systems/ParticleUpdateSystem.h"
 #include "iw/engine/Systems/Render/RenderSystem.h"
@@ -38,9 +37,7 @@ namespace iw {
 		CameraController* Controller;
 	};
 
-	ToolLayer::ToolLayer(
-		Scene* scene)
-		 : Layer("Toolbox")
+	ToolLayer::ToolLayer(Scene* scene) : Layer("Toolbox")
 		, m_mainScene(scene)
 		, cameraSystem(nullptr)
 	{}

@@ -29,16 +29,15 @@ namespace iw {
 		EditorCameraControllerSystem* cameraSystem;
 
 	public:
-		ToolLayer(
-			Scene* scene);
+		IWENGINE_API
+		ToolLayer(Scene* scene);
 
-		int Initialize() override;
+		IWENGINE_API int  Initialize() override;
+		IWENGINE_API void OnPush() override;
+		IWENGINE_API void OnPop() override;
+		IWENGINE_API void ImGui() override;
 
-		void OnPush() override;
-		void OnPop() override;
-
-		void ImGui() override;
-
+		IWENGINE_API
 		bool On(MouseButtonEvent& e) override;
 	};
 }

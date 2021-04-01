@@ -1,30 +1,21 @@
 #pragma once 
 
 #include "iw/engine/EntryPoint.h"
-#include "iw/engine/Layers/ImGuiLayer.h"
-#include "iw/engine/Layer.h"
 
-namespace iw {
-namespace Editor {
-	class App : public iw::Application {
-	private:
-		ImGuiLayer* imgui = nullptr;
-		Layer* toolbox = nullptr;
-		Layer* sandbox = nullptr;
+class App : public iw::Application {
+public:
+	App();
 
-	public:
-		int Initialize(
-			iw::InitOptions& options) override;
+	int Initialize(
+		iw::InitOptions& options) override;
 
-		void Update() override;
-		void FixedUpdate() override;
+	//void Update() override;
+	//void FixedUpdate() override;
 
-		bool HandleCommand(
-			const Command& command) override;
+	bool HandleCommand(
+		const iw::Command& command) override;
 
-		//void HandleCollision(
-		//	Manifold& manifold,
-		//	scalar dt) override;
-	};
-}
-}
+	//void HandleCollision(
+	//	Manifold& manifold,
+	//	scalar dt) override;
+};

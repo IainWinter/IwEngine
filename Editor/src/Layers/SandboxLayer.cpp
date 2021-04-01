@@ -11,7 +11,6 @@
 #include "Systems/ItemSystem.h"
 #include "Systems/NoteSystem.h"
 #include "Systems/ConsumableSystem.h"
-#include "Systems/SpaceInspectorSystem.h"
 #include "Systems/WorldHoleSystem.h"
 #include "Systems/WorldLadderSystem.h"
 #include "Systems/GameSaveStateSystem.h"
@@ -338,8 +337,6 @@ namespace iw {
 		PushSystem<iw::UiRenderSystem>(m_textCam);
 
 		PushSystem<iw::ModelVoxelRenderSystem>(MainScene);
-
-		PushSystem<SpaceInspectorSystem>();
 
 		PushSystem<iw::EntityCleanupSystem>();
 

@@ -1,6 +1,10 @@
 #include "iw/engine/EntryPoint.h"
 #include <string>
 
+#include "iw/engine/Events/Events.h"
+#include "iw/engine/Layers/ImGuiLayer.h"
+#include "iw/engine/Layers/ToolLayer.h"
+
 using GETAPP_FUNC = iw::Application*(*)();
 
 void Reload(std::wstring dll, HINSTANCE& hInst) {
@@ -30,6 +34,10 @@ class EditorApp : public iw::Application {
 private:
 	iw::InitOptions& options;
 
+	iw::ImGuiLayer* imgui = nullptr;
+	iw::Layer* toolbox = nullptr;
+	iw::Layer* sandbox = nullptr;
+
 public:
 	iw::Application* m_gameNew = nullptr;
 	iw::Application* m_game    = nullptr;
@@ -49,8 +57,7 @@ public:
 			m_game->Run();
 			
 			delete m_game;
-			m_game = m_gameNew;
-			m_gameNew = nullptr;
+			m_game = m_gameNew; m_gameNew = nullptr;
 		}
 	}
 
@@ -61,15 +68,49 @@ public:
 	}
 
 	int InitGame() {
+		sandbox = m_game->GetLayer("Sandbox");
+		
+		if (imgui)         m_game->PushLayer(imgui);
+		else       imgui = m_game->PushLayer<iw::ImGuiLayer>();
+
+		if (toolbox)           m_game->PushLayer(toolbox);
+		else         toolbox = m_game->PushLayer<iw::ToolLayer>(sandbox->GetMainScene());
+
 		int err = m_game->Initialize(options);
 
-		m_game->Console->AddHandler([&](const iw::Command& e) {
-			if (e.Verb == "quit") {
+		if (imgui) {
+			imgui->BindContext();
+		}
+
+		m_game->Console->AddHandler([&](const iw::Command& command) {
+			if (command.Verb == "reload") {
+				m_game->PopLayer(imgui);
+				m_game->PopLayer(toolbox);
 				ReloadGame();
 			}
 
-			else if (e.Verb == "toolbox") {
-				m_game->Bus->push<iw::InputCommandEvent>("quit");
+			else if (command.Verb == "toolbox") { // in editor
+				bool dev = GetLayer("Toolbox") != nullptr;
+				if (dev) {
+					m_game->PopLayer(toolbox);
+					m_game->PushLayer(sandbox);
+				}
+
+				else {
+					m_game->PushLayer(toolbox);
+					m_game->PopLayer(sandbox);
+				}
+			}
+
+			else if (command.Verb == "imgui") {
+				if (GetLayer("ImGui") == nullptr) {
+					m_game->PushLayer(imgui);
+					Bus->push<iw::WindowResizedEvent>(Window()->Id(), Renderer->Width(), Renderer->Height());
+				}
+
+				else {
+					m_game->PopLayer(imgui);
+				}
 			}
 
 			return false;

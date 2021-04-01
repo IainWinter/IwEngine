@@ -8,8 +8,8 @@
 #include "Components/Item.h"
 #include "Components/Enemy.h"
 #include "Components/Bullet.h"
-#include "iw/entity/Entity.h"
 #include "Components/LevelDoor.h"
+#include "iw/entity/Entity.h"
 
 enum class Actions
 	: int
