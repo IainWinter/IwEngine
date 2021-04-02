@@ -2,7 +2,7 @@ iwengdir  = path.getabsolute("IwEngine")
 sndbxdir  = path.getabsolute("Sandbox")
 edtordir  = path.getabsolute("Editor")
 iwtoldir  = path.getabsolute("IwTools")
-sandgamedir  = path.getabsolute("Games/SandGame")
+exprtdir  = path.getabsolute("_export")
 glewdir   = iwengdir .. "/extern/glew"
 imguidir  = iwengdir .. "/extern/imgui"
 assimpdir = iwengdir .. "/extern/assimp"
@@ -186,6 +186,8 @@ workspace "wEngine"
 		prebuildcommands {
 			"xcopy /y /f \"" .. fmoddir .. "/bin/%{cfg.platform}/fmod.dll\" \""       .. iwengdir .. bindir .. "\"",
 			"xcopy /y /f \"" .. fmoddir .. "/bin/%{cfg.platform}/fmodstudio.dll\" \"" .. iwengdir .. bindir .. "\"",
+			"xcopy /y /f \"" .. fmoddir .. "/lib/%{cfg.platform}/fmod.lib\" \""       .. iwengdir .. libdir .. "\"",
+			"xcopy /y /f \"" .. fmoddir .. "/lib/%{cfg.platform}/fmodstudio.lib\" \"" .. iwengdir .. libdir .. "\""
 		}
 
 		filter "system:windows"
@@ -402,7 +404,8 @@ workspace "wEngine"
 		}
 
 		prebuildcommands {
-			"xcopy /y /f \"" .. glewdir .. bindir .. "/GLEW.dll\" \"" .. edtordir .. bindir .. "\""
+			"xcopy /y /f \"" .. glewdir .. bindir .. "/GLEW.dll\" \"" .. iwengdir .. bindir .. "\"",
+			"xcopy /y /f \"" .. glewdir .. libdir .. "/GLEW.lib\" \"" .. iwengdir .. libdir .. "\""
 		}
 
 		filter "system:windows"
@@ -462,7 +465,8 @@ workspace "wEngine"
 		}
 
 		prebuildcommands  {
-			"xcopy /y /f \"" .. assimpdir .. blddir .. "/code/%{cfg.buildcfg}/assimp-vc140-mt.dll\" \"" .. iwengdir .. bindir .. "\""
+			"xcopy /y /f \"" .. assimpdir .. blddir .. "/code/%{cfg.buildcfg}/assimp-vc140-mt.dll\" \"" .. iwengdir .. bindir .. "\"",
+			"xcopy /y /f \"" .. assimpdir .. blddir .. "/code/%{cfg.buildcfg}/assimp-vc140-mt.lib\" \"" .. iwengdir .. libdir .. "\""
 		}
 
 		filter "system:windows"
@@ -584,11 +588,11 @@ workspace "wEngine"
 		}
 
 		includedirs {
-			iwengdir  .. incdir,
-			iwengdir  .. srcdir .. "/engine/Platform",
-			imguidir  .. incdir,
-			glewdir   .. incdir,
-			fmoddir   .. incdir,
+			iwengdir .. incdir,
+			iwengdir .. srcdir .. "/engine/Platform",
+			imguidir .. incdir,
+			glewdir  .. incdir,
+			fmoddir  .. incdir,
 			iwtoldir .. incdir
 		}
 
@@ -607,6 +611,18 @@ workspace "wEngine"
 			"ImGui",
 			"GLEW",
 			"opengl32.lib"
+		}
+
+		postbuildcommands {
+			"xcopy /y /f \""    .. iwengdir .. bindir .. "/*.dll\" \"" .. exprtdir .. bindir .. "/\"",
+			"xcopy /y /f \""    .. iwengdir .. libdir .. "/*.lib\" \"" .. exprtdir .. libdir .. "/\"",
+			"xcopy /y /f /e \"" .. iwengdir .. incdir .. "/*\" \""     .. exprtdir .. incdir .. "/\"",
+			"xcopy /y /f /e \"" .. iwtoldir .. incdir .. "/*\" \""     .. exprtdir .. incdir .. "/\"",
+			"xcopy /y /f /e \"" .. imguidir .. incdir .. "/*\" \""     .. exprtdir .. incdir .. "/\"",
+			"xcopy /y /f /e \"" .. fmoddir  .. incdir .. "/*\" \""     .. exprtdir .. incdir .. "/\"",
+			"xcopy /y /f    \"" .. jsondir            .. "/*.h\" \""   .. exprtdir .. incdir .. "/json/\"",
+
+			"xcopy /y /f \"" .. imguidir .. libdir .. "/ImGui.lib\" \"" .. exprtdir .. libdir .. "\""
 		}
 
 		defines {
@@ -650,9 +666,9 @@ workspace "wEngine"
 			edtordir .. incdir,
 			iwengdir .. incdir,
 			iwtoldir .. incdir,
+			iwtoldir .. incdir,
 			imguidir .. incdir,
 			fmoddir  .. incdir,
-			iwtoldir .. incdir,
 			jsondir
 		}
 
@@ -674,12 +690,9 @@ workspace "wEngine"
 			"opengl32.lib"
 		}
 
-		prebuildcommands  {
-			--"xcopy /y /f \"" .. assimpdir .. blddir .. "/code/%{cfg.buildcfg}/assimp-vc140-mt.dll\" \"" .. edtordir .. bindir .. "\"",
-			--"xcopy /y /f \"" .. fmoddir   ..           "/bin/%{cfg.platform}/fmod.dll\" \""             .. edtordir .. bindir .. "\"",
-			--"xcopy /y /f \"" .. fmoddir   ..           "/bin/%{cfg.platform}/fmodstudio.dll\" \""       .. edtordir .. bindir .. "\"",
-			"xcopy /y /f \"" .. iwengdir  .. bindir .. "/*.dll\" \""                             .. edtordir .. bindir .. "\""--,
-			--"xcopy /e /y /f /i \"" .. edtordir  .. resdir .. "\" \"" .. edtordir .. blddir .. resdir .. "\"",
+		prebuildcommands {
+			"xcopy /y /f \"" .. iwengdir  .. bindir .. "/*.dll\" \"" .. edtordir .. bindir .. "/\"",
+			"xcopy /y /f \"" .. iwengdir  .. libdir .. "/*.lib\" \"" .. edtordir .. libdir .. "/\""
 		}
 
 		defines {
@@ -691,76 +704,6 @@ workspace "wEngine"
 			defines {
 				"IW_PLATFORM_WINDOWS",
 				"IW_IMGUI"  -- not sure if this needs to be here
-			}
-
-		filter "configurations:Debug"
-			defines "IW_DEBUG"
-			runtime "Debug"
-			symbols "On"
-
-		filter "configurations:Release"
-			defines "IW_RELEASE"
-			runtime "Release"
-			optimize "On"
-
-	project "a_SandGame"
-		kind "WindowedApp"
-		language "C++"
-		location  (sandgamedir .. blddir)
-		targetdir (sandgamedir .. bindir)
-		objdir    (sandgamedir .. blddir)
-
-		files {
-			sandgamedir .. incdir .. "/**.h",
-			sandgamedir .. srcdir .. "/**.h",
-			sandgamedir .. srcdir .. "/**.cpp"
-		}
-
-		includedirs {
-			sandgamedir .. incdir,
-			iwengdir .. incdir,
-			iwtoldir .. incdir,
-			imguidir .. incdir,
-			fmoddir  .. incdir,
-			iwtoldir .. incdir,
-			jsondir
-		}
-
-		links {
-			"wLog",
-			"wMath",
-			"wUtil",
-			"wAudio",
-			"wEvents",
-			"wCommon",
-			"wEntity",
-			"wGraphics",
-			"wRenderer", -- only beacuse of MakeLayout
-			"wInput",
-			"wPhysics",
-			"wEngine",
-			"ImGui",
-			"GLEW",
-			"opengl32.lib"
-		}
-
-		prebuildcommands  {
-			--"xcopy /y /f \"" .. assimpdir .. blddir .. "/code/%{cfg.buildcfg}/assimp-vc140-mt.dll\" \"" .. sandgamedir .. bindir .. "\"",
-			--"xcopy /y /f \"" .. fmoddir   ..           "/bin/%{cfg.platform}/fmod.dll\" \""             .. sandgamedir .. bindir .. "\"",
-			--"xcopy /y /f \"" .. fmoddir   ..           "/bin/%{cfg.platform}/fmodstudio.dll\" \""       .. sandgamedir .. bindir .. "\"",
-			"xcopy /y /f \"" .. iwengdir  .. bindir .. "/*.dll\" \""                             .. edtordir .. bindir .. "\""--,
-			--"xcopy /e /y /f /i \"" .. sandgamedir  .. resdir .. "\" \"" .. sandgamedir .. blddir .. resdir .. "\"",
-		}
-
-		defines {
-		}
-
-		filter "system:windows"
-			cppdialect "C++17"
-			systemversion "latest"
-			defines {
-				"IW_PLATFORM_WINDOWS",
-				"IW_IMGUI" -- not sure if this needs to be here
 			}
 
 		filter "configurations:Debug"

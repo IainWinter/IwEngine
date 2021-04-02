@@ -103,9 +103,7 @@ namespace iw {
 		cameraSystem = PushSystem<EditorCameraControllerSystem>();
 		
 		PushSystem<DrawCollidersSystem>(cameraSystem->GetCamera());
-		PushSystem<iw::EntityCleanupSystem>();
 		PushSystem<SpaceInspectorSystem>();
-
 
 		return Layer::Initialize();
 	}

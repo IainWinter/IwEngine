@@ -239,7 +239,7 @@ namespace Engine {
 		if (e.Device == DeviceType::MOUSE) {
 			auto& io = ImGui::GetIO();
 
-			iw::vector2 screenPos = iw::Mouse::ScreenPos();
+			iw::vector2 screenPos = iw::vector2(e.X, e.Y)/*iw::Mouse::ScreenPos()*/;
 
 			LOG_INFO << screenPos;
 
