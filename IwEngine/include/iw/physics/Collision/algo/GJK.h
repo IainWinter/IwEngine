@@ -30,7 +30,7 @@ namespace algo {
 
 		void push_front(vector3 point) {
 			m_points = { point, m_points[0], m_points[1], m_points[2] };
-			m_size = std::min(m_size + 1, 4u);
+			m_size = min(m_size + 1, 4u);
 		}
 
 		vector3& operator[](unsigned i) { return m_points[i]; }

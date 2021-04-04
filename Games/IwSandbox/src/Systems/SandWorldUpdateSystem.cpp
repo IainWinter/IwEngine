@@ -64,7 +64,7 @@ void SandWorldUpdateSystem::Update() {
 
 
 
-	bool _debugShowChunkBounds = iw::Keyboard::KeyDown(iw::C);
+	bool _debugShowChunkBounds =! iw::Keyboard::KeyDown(iw::C);
 
 	unsigned int* pixels = (unsigned int*)m_texture->Colors();
 	m_texture->Clear();

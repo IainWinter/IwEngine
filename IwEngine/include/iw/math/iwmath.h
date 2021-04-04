@@ -19,6 +19,16 @@
 #	define IWMATH_API 
 #endif
 
+// From winmindef
+
+#ifndef max
+#define max(a,b)            (((a) > (b)) ? (a) : (b))
+#endif
+
+#ifndef min
+#define min(a,b)            (((a) < (b)) ? (a) : (b))
+#endif
+
 namespace iw {
 namespace math {
 	struct vector2;
@@ -146,38 +156,6 @@ namespace math {
 		if (max < x) return max;
 
 		return x;
-	}
-
-	/**
-	* Returns the the min of two objects. Returns a if '='
-	*
-	* @param a Value to be considered.
-	* @param b Another value to be considered.
-	* @tparam _t Any type that implements '>' and '<' operators.
-	*/
-	template<
-		typename _t>
-	_t min(
-		const _t& a,
-		const _t& b)
-	{
-		return a <= b ? a : b;
-	}
-
-	/**
-	* Returns the the max of two objects. Returns a if '='
-	*
-	* @param a Value to be considered.
-	* @param b Another value to be considered.
-	* @tparam _t Any type that implements '>' and '<' operators.
-	*/
-	template<
-		typename _t>
-	_t max(
-		const _t& a,
-		const _t& b)
-	{
-		return a >= b ? a : b;
 	}
 
 	template<>
