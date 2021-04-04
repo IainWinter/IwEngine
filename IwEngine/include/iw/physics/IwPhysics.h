@@ -27,7 +27,7 @@ namespace Physics {
 	using namespace Physics;
 }
 
-#include "iw/reflection/ReflectDef.h"
+// for templates?
 
 #ifdef REFLECTING
 #	undef  IWPHYSICS_API

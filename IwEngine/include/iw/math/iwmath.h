@@ -1,6 +1,13 @@
 #pragma once
 
-#include "iw/reflection/ReflectDef.h"
+// cant use reflrection folder because its not a reference, this works just as well but needs to be repeated
+#ifdef IW_USE_REFLECTION
+#	include "iw\reflection\Reflect.h"
+#else
+#	ifndef REFLECT
+#		define REFLECT
+#	endif
+#endif
 
 #ifdef IW_PLATFORM_WINDOWS
 #	ifdef IWMATH_DLL
@@ -129,7 +136,7 @@ namespace math {
 	* @tparam _t Any type that implements '>' and '<' operators.
 	*/
 	template<
-		typename _t>
+		typename _t> // should _t be a ref or not const refds
 	_t clamp(
 		const _t& x,
 		const _t& min,
@@ -139,6 +146,38 @@ namespace math {
 		if (max < x) return max;
 
 		return x;
+	}
+
+	/**
+	* Returns the the min of two objects. Returns a if '='
+	*
+	* @param a Value to be considered.
+	* @param b Another value to be considered.
+	* @tparam _t Any type that implements '>' and '<' operators.
+	*/
+	template<
+		typename _t>
+	_t min(
+		const _t& a,
+		const _t& b)
+	{
+		return a <= b ? a : b;
+	}
+
+	/**
+	* Returns the the max of two objects. Returns a if '='
+	*
+	* @param a Value to be considered.
+	* @param b Another value to be considered.
+	* @tparam _t Any type that implements '>' and '<' operators.
+	*/
+	template<
+		typename _t>
+	_t max(
+		const _t& a,
+		const _t& b)
+	{
+		return a >= b ? a : b;
 	}
 
 	template<>
