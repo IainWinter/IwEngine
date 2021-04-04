@@ -65,14 +65,14 @@ namespace Engine {
 			: m_name(name)
 		{}
 
-		virtual int  Initialize() { return 0;  }
+		virtual int  Initialize() { return 0; }
 		virtual void Destroy() {}
 		virtual void Update() {}
 		virtual void FixedUpdate() {}
 		virtual void ImGui() {}
 
 		virtual void OnPush() override {}
-		virtual void OnPop() override {}
+		virtual void OnPop()  override {}
 
 		// Action Events
 
