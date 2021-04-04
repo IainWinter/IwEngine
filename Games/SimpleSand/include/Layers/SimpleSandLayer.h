@@ -1,9 +1,7 @@
 #pragma once 
 
 #include "iw/engine/Layer.h"
-
 #include "Sand/SimpleSandWorld.h"
-//#include "Sand/Tile.h"
 
 struct Tile {
 	std::vector<std::pair<int, int>> Positions;

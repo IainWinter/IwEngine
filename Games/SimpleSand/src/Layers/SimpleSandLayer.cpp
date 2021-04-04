@@ -103,7 +103,6 @@ namespace iw {
 		for (int i = -int(m_world.m_chunkWidth) * 5; i < int(m_world.m_chunkWidth * 6); i++)
 			m_world.SetCell(i, m_world.m_chunkHeight * 4, _ROCK);
 
-
 		for (int i = -100; i < 100; i++)
 			m_world.SetCell(m_world.m_chunkHeight * -5 - 50 + i, i*i/200, _ROCK);
 
@@ -282,7 +281,6 @@ namespace iw {
 		}
 
 		//UpdateStats(cellUpdateCount, m_world.m_chunks.size());
-
 
 		// Draw the sand to the screen
 
