@@ -1,5 +1,6 @@
 iwengdir  = path.getabsolute("../_export")
-gamedir  = path.getabsolute("SpaceSand")
+gamedir  = path.getabsolute("IwSandbox")--path.getabsolute("SpaceSand")
+
 
 cfgname = "%{cfg.buildcfg}.%{cfg.system}.%{cfg.architecture}"
 bindir  = "/bin/" .. cfgname
@@ -14,7 +15,8 @@ workspace "wGames"
 	startproject "SandGame"
 	location (gamedir .. blddir)
 
-	project "SpaceSand"
+	project "Iw Sandbox"
+	--project "SpaceSand"
 		kind "WindowedApp"
 		language "C++"
 		location  (gamedir .. blddir)
@@ -51,10 +53,11 @@ workspace "wGames"
 			"wEngine",
 			"ImGui",
 			"GLEW",
-			"opengl32.lib"
+			"opengl32.lib",
+			"wSand"
 		}
 
-		postbuildcommands {
+		prebuildcommands {
 			"xcopy /y /f \""    .. iwengdir .. bindir .. "/*.dll\" \"" .. gamedir .. bindir .. "/\""
 		}
 

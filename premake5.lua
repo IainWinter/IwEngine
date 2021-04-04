@@ -2,6 +2,7 @@ iwengdir  = path.getabsolute("IwEngine")
 sndbxdir  = path.getabsolute("Sandbox")
 edtordir  = path.getabsolute("Editor")
 iwtoldir  = path.getabsolute("IwTools")
+plugins_dir = path.getabsolute("Plugins") -- start adding _
 exprtdir  = path.getabsolute("_export")
 glewdir   = iwengdir .. "/extern/glew"
 imguidir  = iwengdir .. "/extern/imgui"
@@ -25,8 +26,10 @@ workspace "wEngine"
 	startproject "a_wEditor"
 	location (iwengdir .. blddir)
 
+group "extern"
 	include (glewdir) --temp and annoying
 	include (imguidir)
+group ""
 
 	os.execute ("cmake -S " .. assimpdir  .. " -B " .. assimpdir .. blddir)
 
@@ -545,7 +548,7 @@ workspace "wEngine"
 		}
 
 		includedirs {
-			iwengdir  .. incdir,
+			iwengdir .. incdir,
 			iwtoldir .. incdir
 		}
 
@@ -648,8 +651,67 @@ workspace "wEngine"
 			defines "IW_RELEASE"
 			runtime "Release"
 			optimize "On"
+
+group "Plugins"
 	
-	project "a_wEditor"
+	sand_dir = plugins_dir .. "/Sand"
+
+	project "wSand"
+		kind "SharedLib"
+		language "C++"
+		location  (sand_dir .. blddir)
+		targetdir (sand_dir .. bindir)
+		implibdir (sand_dir .. libdir)
+		objdir    (sand_dir .. blddir)
+
+		files {
+			sand_dir  .. incdir .. "/**.h",
+			sand_dir  .. srcdir .. "/**.h",
+			sand_dir  .. srcdir .. "/**.cpp"
+		}
+
+		includedirs {
+			sand_dir .. incdir,
+			iwengdir .. incdir
+		}
+
+		links {
+			"wMath",
+			"wUtil",
+			"wGraphics" -- maybe breakout engine into a core and something else, need to be able to make systems in plugins eg.
+			
+		}
+
+		postbuildcommands {
+			"xcopy /y /f \"" .. sand_dir .. bindir .. "/*.dll\" \"" .. exprtdir .. bindir .. "/\"",
+			"xcopy /y /f \"" .. sand_dir .. libdir .. "/*.lib\" \"" .. exprtdir .. libdir .. "/\"",
+			"xcopy /y /f /e \"" .. sand_dir .. incdir .. "/*\" \""  .. exprtdir .. incdir .. "/plugins/\""
+		}
+
+		defines {
+		}
+
+		filter "system:windows"
+			cppdialect "C++17"
+			systemversion "latest"
+			defines {
+				"IW_PLATFORM_WINDOWS",
+				"IW_PLUGIN_SAND_DLL"
+			}
+
+		filter "configurations:Debug"
+			defines "IW_DEBUG"
+			runtime "Debug"
+			symbols "On"
+
+		filter "configurations:Release"
+			defines "IW_RELEASE"
+			runtime "Release"
+			optimize "On"
+group ""
+
+group "Tools"
+	project "wEditor"
 		kind "SharedLib"
 		language "C++"
 		location  (edtordir .. blddir)
@@ -716,7 +778,7 @@ workspace "wEngine"
 			runtime "Release"
 			optimize "On"
 
-	project "z_wReflector"
+	project "wReflector"
 		kind "ConsoleApp"
 		language "C++"
 		location  (iwtoldir .. blddir .. "/reflection")
@@ -862,6 +924,8 @@ workspace "wEngine"
 			defines "IW_RELEASE"
 			runtime "Release"
 			optimize "On"
+
+group ""
 
 --postbuildcommands {
 	--"xcopy /y /f \"" .. iwengdir  .. bindir .. "/IwEngine.dll\" \"" .. edtordir .. bindir .. "\"",
