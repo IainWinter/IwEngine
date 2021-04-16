@@ -11,19 +11,14 @@ SandChunk::SandChunk(
 	, m_y(y * height)
 	, m_filledCellCount(0)
 {
-	m_cells = new Cell[width * height];
 	UpdateRect();
 	UpdateRect();
-}
-
-SandChunk::~SandChunk() {
-	delete[] m_cells;
 }
 
 // Getting cells
 
-Cell& SandChunk::GetCell(int x, int y) { return GetCell(GetIndex(x, y)); }
-Cell& SandChunk::GetCell(size_t index) { return m_cells[index]; }
+//Cell& SandChunk::GetCell(int x, int y) { return GetCell(GetIndex(x, y)); }
+//Cell& SandChunk::GetCell(size_t index) { return m_cells[index]; }
 
 // Setting & moving cells
 
@@ -38,7 +33,7 @@ void SandChunk::SetCell(
 	size_t index,
 	const Cell& cell)
 {
-	Cell& dest = m_cells[index];
+	Cell& dest = GetCell(index);// m_cells[index];
 
 	if (   dest.Type == CellType::EMPTY
 		&& cell.Type != CellType::EMPTY) // Filling a cell
@@ -56,6 +51,18 @@ void SandChunk::SetCell(
 	}
 
 	dest = cell;
+
+	// set location if its not set, this is a hack
+
+	if (dest.x == 0 && dest.y == 0) {
+		dest.x = m_x + index % m_width;
+		dest.y = m_y + index / m_width;
+	}
+
+	// set location everytime it changed whole number???? 
+
+	dest.x = float(dest.x - int(dest.x)) + index % m_width + m_x;
+	dest.y = float(dest.y - int(dest.y)) + index / m_width + m_y;
 
 	KeepAlive(index);
 }
@@ -79,7 +86,7 @@ void SandChunk::CommitCells() {
 	// remove moves that have their destinations filled
 
 	for (size_t i = 0; i < m_changes.size(); i++) {
-		const Cell& dest = m_cells[std::get<_DEST>(m_changes[i])];
+		const Cell& dest = GetCell(std::get<_DEST>(m_changes[i]));
 
 		if (dest.Type != CellType::EMPTY) {
 			m_changes[i] = m_changes.back(); m_changes.pop_back();

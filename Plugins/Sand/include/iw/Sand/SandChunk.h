@@ -9,7 +9,21 @@ IW_PLUGIN_SAND_BEGIN
 
 class SandChunk {
 public:
-	Cell* m_cells;
+	// First field is always Cells
+	// Next field can be anything?
+
+	// Type& t =  GetField<Type>(index i, int x, int y)
+
+	// In world could have map of type_id and index
+
+	// m_world.GetField<Type>(int x, int y)
+	//     -> GetChunk(x, y)->GetField<Type>(typeToIndex[typeid], x, y)
+
+	// m_world.AddField<Type>()
+	//     -> 
+
+	//Cell* m_cells;	
+	std::vector<void*> m_fields;
 
 	const int m_width, m_height;
 	const int m_x, m_y;
@@ -31,12 +45,30 @@ private:
 
 public:
 	IW_PLUGIN_SAND_API SandChunk(int width, int height, int x, int y);
-	IW_PLUGIN_SAND_API ~SandChunk();
 
 	// Getting cells
 
-	IW_PLUGIN_SAND_API Cell& GetCell(int x, int y);
-	IW_PLUGIN_SAND_API Cell& GetCell(size_t index);
+	//IW_PLUGIN_SAND_API Cell& GetCell(int x, int y);
+	//IW_PLUGIN_SAND_API Cell& GetCell(size_t index);
+
+	template<typename _t = Cell>
+	_t& GetCell(int x, int y, size_t field = 0) {
+		return GetCell(GetIndex(x, y), field);
+	}
+
+	template<typename _t = Cell>
+	_t& GetCell(size_t index, size_t field = 0) {
+		return GetField<Cell>(field)[index];
+	}
+
+	template<typename _t = Cell>
+	_t* GetField(size_t index = 0) {
+		return (_t*)m_fields[index];
+	}
+
+	void AddField(void* field) {
+		m_fields.push_back(field);
+	}
 
 	// Setting & moving cells
 

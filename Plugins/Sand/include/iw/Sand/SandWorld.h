@@ -2,6 +2,7 @@
 
 #include "SandChunk.h"
 #include "iw/util/algorithm/pair_hash.h"
+#include "iw/util/memory/pool_allocator.h"
 #include <concurrent_unordered_map.h>
 
 IW_PLUGIN_SAND_BEGIN
@@ -12,13 +13,35 @@ public:
 	const size_t m_chunkHeight;
 	const double m_scale;
 
+	bool m_expandWorld;
+
 	std::vector<SandChunk*> m_chunks;
 private:
 	Concurrency::concurrent_unordered_map<std::pair<int, int>, SandChunk*, iw::pair_hash> m_chunkLookup;
 	std::mutex m_chunkMutex;
 
+	struct Field {
+		iw::pool_allocator* memory;
+		size_t size;
+	};
+
+	std::vector<Field> m_fields;
+
 public:
+
+	template<typename _t>
+	void AddField() {
+		iw::pool_allocator* field = new iw::pool_allocator(16 * sizeof(_t) * m_chunkWidth * m_chunkHeight);
+
+		m_fields.push_back({ field, sizeof(_t) });
+
+		//for (SandChunk* chunk : m_chunks) {
+		//	
+		//}
+	}
+
 	IW_PLUGIN_SAND_API SandWorld(size_t chunkWidth, size_t chunkHeight, double scale);
+	IW_PLUGIN_SAND_API SandWorld(size_t screenSizeX, size_t screenSizeY, size_t numberOfChunksX, size_t numberOfChunksY, double scale);
 
 	IW_PLUGIN_SAND_API Cell& GetCell(int x, int y);
 

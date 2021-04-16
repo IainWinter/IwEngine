@@ -12,9 +12,12 @@ SandWorker::SandWorker(
 // Updating cells
 
 void SandWorker::UpdateChunk() {
+
+	Cell* cells = m_chunk->GetField();
+
 	for (int x = m_chunk->m_minX; x < m_chunk->m_maxX; x++)
 	for (int y = m_chunk->m_minY; y < m_chunk->m_maxY; y++) {
-		Cell& cell = m_chunk->GetCell(x + y * m_chunk->m_width);
+		Cell& cell = cells[x + y * m_chunk->m_width];
 
 		if (cell.Props == CellProperties::NONE) continue;
 
@@ -72,6 +75,14 @@ void SandWorker::MoveCell(
 	}
 
 	return m_world.MoveCell(x, y, xto, yto);
+}
+
+void SandWorker::KeepAlive(int x, int y) {
+	if (m_chunk->InBounds(x, y)) {
+		return m_chunk->KeepAlive(x, y);
+	}
+
+	return m_world.KeepAlive(x, y);
 }
 
 // Helpers

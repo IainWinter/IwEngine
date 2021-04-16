@@ -23,14 +23,19 @@ enum class CellType {
 
 	SAND,
 	WATER,
-	ROCK
+	ROCK,
+
+	WOOD, FIRE, SMOKE
 };
 
 enum class CellProperties {
-	NONE                = 0b0000000000000000,
-	MOVE_DOWN           = 0b0000000000000001,
-	MOVE_DOWN_SIDE      = 0b0000000000000010,
-	MOVE_SIDE           = 0b0000000000000100
+	NONE           = 0b0000000000000000,
+	MOVE_DOWN      = 0b0000000000000001,
+	MOVE_DOWN_SIDE = 0b0000000000000010,
+	MOVE_SIDE      = 0b0000000000000100,
+	MOVE_RANDOM    = 0b0000000000001000,
+	MOVE_FORCE     = 0b0000000000010000,
+	BURN           = 0b0000000000100000
 };
 inline CellProperties operator|(CellProperties a,CellProperties b){return CellProperties(int(a)|int(b));}
 inline auto           operator&(CellProperties a,CellProperties b){return int(a)&int(b);}
@@ -42,6 +47,8 @@ struct Cell {
 	CellProperties Props = CellProperties::NONE;
 	
 	iw::Color Color;
+
+	float x, y, dx, dy, time;
 
 	static inline void        SetDefault(CellType type,const Cell& cell){m_defaults.emplace(type, cell);}
 	static inline const Cell& GetDefault(CellType type)                 {return m_defaults.at(type);}
