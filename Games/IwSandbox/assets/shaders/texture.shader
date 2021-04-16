@@ -19,12 +19,13 @@ void main() {
 in vec2 FragPos;
 
 uniform sampler2D mat_texture;
+uniform int mat_useAlpha;
 
 out vec4 FragColor;
 
 void main() {
 	vec4 color = texture(mat_texture, FragPos);
-	if(color.a < 0.5) {
+	if (mat_useAlpha == 1 && color.a < 0.5) {
 		discard;
 	}
 

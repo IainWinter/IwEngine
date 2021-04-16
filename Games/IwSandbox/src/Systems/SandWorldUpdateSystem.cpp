@@ -1,9 +1,93 @@
 #include "Systems/SandWorldUpdateSystem.h"
 #include "plugins/iw/Sand/Workers/SimpleSandWorker.h"
 
+//void MoveInDirection(
+//	int dx, int dy, 
+//	int x, int y, 
+//	const iw::Cell& cell)
+//{
+//	// move cell at x,y by dx, dy
+//}
+//
+//void test() {
+//	int x; int y; iw::Cell& cell;
+//
+//	using namespace std::placeholders;
+//
+//	auto moveUp = std::bind(MoveInDirection,  0,  1, _1, _2, _3);
+//	auto moveDn = std::bind(MoveInDirection,  0, -1, _1, _2, _3);
+//	auto moveLt = std::bind(MoveInDirection, -1,  1, _1, _2, _3);
+//	auto moveRt = std::bind(MoveInDirection,  1,  1, _1, _2, _3);
+//
+//	moveUp(x, y, cell);
+//	moveDn(x, y, cell);
+//	moveLt(x, y, cell);
+//	moveRt(x, y, cell);
+//}
+
+class FireSandWorker : public iw::SimpleSandWorker {
+public:
+	FireSandWorker(iw::SandWorld& world, iw::SandChunk* chunk) : iw::SimpleSandWorker(world, chunk) {}
+
+	void UpdateCell(int x, int y, iw::Cell& cell) override {
+
+		if (cell.Type == iw::CellType::SMOKE) {
+			cell.time += iw::DeltaTime();
+
+			if (cell.time > 10 + iw::randf() * 5) {
+				SetCell(x, y, iw::Cell::GetDefault(iw::CellType::EMPTY));
+				return;
+			}
+		}
+
+		if (cell.Props & iw::CellProperties::BURN && BurnFire(x, y, cell)) {}
+		else
+
+		SimpleSandWorker::UpdateCell(x, y, cell);
+	}
+private:
+	bool BurnFire(
+		int x, int y,
+		iw::Cell& cell)
+	{
+		//m_chunk->GetField<HeadField>(x, y);
+
+		cell.time += iw::DeltaTime();
+
+		float r = iw::randf();
+
+		if (cell.time > 5 + r) {
+			SetCell(x, y, iw::Cell::GetDefault(iw::CellType::EMPTY));
+		}
+
+		//else
+		//if (   cell.time > 1
+		//	&& IsEmpty(x, y + 1))
+		//{
+		//	SetCell(x, y + 1, iw::Cell::GetDefault(iw::CellType::FIRE));
+		//}
+
+		else {
+			for(int xx = -1; xx <= 1; xx++)
+			for(int yy = -1; yy <= 1; yy++) {
+				if (xx == 0 && yy == 0) continue; 
+
+				if (   InBounds(x + xx, y + yy)
+					&& GetCell (x + xx, y + yy).Type == iw::CellType::WOOD)
+				{
+					SetCell(x + xx, y + yy, iw::Cell::GetDefault(iw::randf() > .99f ? iw::CellType::FIRE : iw::CellType::SMOKE));
+					break;
+				}
+			}
+		}
+
+		KeepAlive(x, y);
+
+		return false;
+	}
+};
+
 int SandWorldUpdateSystem::Initialize() {
-
-
 	return 0;
 }
 
@@ -27,7 +111,7 @@ void SandWorldUpdateSystem::Update() {
 
 	// Update cells
 
-	m_world.RemoveEmptyChunks();
+	//m_world.RemoveEmptyChunks();
 
 	std::mutex mutex;
 	std::condition_variable cond;
@@ -49,7 +133,7 @@ void SandWorldUpdateSystem::Update() {
 	};
 		
 	doForAllChunks([&](iw::SandChunk* chunk) {
-		iw::SimpleSandWorker(m_world, chunk).UpdateChunk();
+		FireSandWorker(m_world, chunk).UpdateChunk();
 	});
 
 	doForAllChunks([&](iw::SandChunk* chunk) {
@@ -62,9 +146,7 @@ void SandWorldUpdateSystem::Update() {
 
 	// Update the sand texture
 
-
-
-	bool _debugShowChunkBounds =! iw::Keyboard::KeyDown(iw::C);
+	bool _debugShowChunkBounds = iw::Keyboard::KeyDown(iw::C);
 
 	unsigned int* pixels = (unsigned int*)m_texture->Colors();
 	m_texture->Clear();
@@ -87,12 +169,14 @@ void SandWorldUpdateSystem::Update() {
 			int endY   = iw::clamp<int>(m_fy2 - chunk->m_y, 0, chunk->m_height);
 			int endX   = iw::clamp<int>(m_fx2 - chunk->m_x, 0, chunk->m_width);
 
+			iw::Cell* cells = chunk->GetField();
+
 			// sand texture
 			for (int y = startY; y < endY; y++)
 			for (int x = startX; x < endX; x++) {
 				int texi = (chunk->m_x + x - m_fx) + (chunk->m_y + y - m_fy) * m_texture->Width();
 
-				const iw::Cell& cell = chunk->m_cells[x + y * chunk->m_width];
+				const iw::Cell& cell = cells[x + y * chunk->m_width];
 				if (cell.Type != iw::CellType::EMPTY) {
 					pixels[texi] = cell.Color;
 				}
