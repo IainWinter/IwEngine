@@ -95,7 +95,7 @@ namespace util {
 		_t* alloc(
 			size_t size = sizeof(_t))
 		{
-			return (_t*)alloc<void>(size);
+			return (_t*)alloc(size);
 		}
 
 		template<
@@ -103,7 +103,7 @@ namespace util {
 		ref<_t> alloc_ref(
 			size_t size = sizeof(_t))
 		{
-			return std::static_pointer_cast<_t, void>(alloc_ref<void>(size));
+			return std::static_pointer_cast<_t, void>(alloc_ref(size));
 		}
 
 		template<
@@ -113,19 +113,16 @@ namespace util {
 			size_t size = sizeof(_t))
 		{
 			addr->~_t();
-			return free<void>(addr, size);
+			return free((void*)addr, size);
 		}
 
-		template<>
-		void* alloc<void>(
+		void* alloc(
 			size_t size);
 
-		template<>
-		ref<void> alloc_ref<void>(
+		ref<void> alloc_ref(
 			size_t size);
 
-		template<>
-		bool free<void>(
+		bool free(
 			void* addr,
 			size_t size);
 

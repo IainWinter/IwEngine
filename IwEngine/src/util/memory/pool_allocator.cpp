@@ -37,23 +37,20 @@ namespace util {
 		return *this;
 	}
 
-	template<>
-	void* pool_allocator::alloc<void>(
+	void* pool_allocator::alloc(
 		size_t size)
 	{
 		std::unique_lock<std::mutex> lock(m_mutex);
 		return m_root->alloc(size);
 	}
 
-	template<>
-	ref<void> pool_allocator::alloc_ref<void>(
+	ref<void> pool_allocator::alloc_ref(
 		size_t size)
 	{
 		return ref<void>(alloc<void>(size), std::bind(&pool_allocator::free<void>, this, _1, size));
 	}
 
-	template<>
-	bool pool_allocator::free<void>(
+	bool pool_allocator::free(
 		void* addr,
 		size_t size)
 	{
