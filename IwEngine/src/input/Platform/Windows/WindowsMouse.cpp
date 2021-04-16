@@ -31,6 +31,11 @@ namespace Input {
 		return vector2(p.x, p.y);
 	}
 
+	vector2 Mouse::ClientPos() {
+		POINT p; GetCursorPos(&p); ScreenToClient(WindowFromPoint(p), &p);
+		return vector2(p.x, p.y);
+	}
+
 	DeviceInput WindowsMouse::TranslateOsEvent(
 		const OsEvent& e)
 	{

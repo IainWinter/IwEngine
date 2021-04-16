@@ -14,18 +14,14 @@ namespace Input {
 		static Translation CreateTranslation();
 
 	public:
-		MouseBase(
-			DeviceType type)
+		MouseBase(DeviceType type)
 			: Device(type)
 		{}
 
 		virtual ~MouseBase() = default;
 
-		static unsigned int Translate(
-			InputName key);
-
-		static InputName Translate(
-			unsigned int oskey);
+		static unsigned int Translate(InputName key);
+		static InputName    Translate(unsigned int oskey);
 	};
 
 	class IWINPUT_API Mouse
@@ -38,13 +34,11 @@ namespace Input {
 
 		virtual ~Mouse() = default;
 
-		static bool ButtonDown(
-			InputName button);
-
-		static bool ButtonUp(
-			InputName button);
+		static bool ButtonDown(InputName button);
+		static bool ButtonUp  (InputName button);
 
 		static vector2 ScreenPos();
+		static vector2 ClientPos();
 
 		static Mouse* Create();
 	};
