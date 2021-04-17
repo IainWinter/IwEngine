@@ -24,6 +24,7 @@ enum class CellType {
 	SAND,
 	WATER,
 	ROCK,
+	STONE,
 
 	WOOD, FIRE, SMOKE
 };
@@ -40,18 +41,38 @@ enum class CellProperties {
 inline CellProperties operator|(CellProperties a,CellProperties b){return CellProperties(int(a)|int(b));}
 inline auto           operator&(CellProperties a,CellProperties b){return int(a)&int(b);}
 
-struct SharedCellData;
+enum class CellStyle {
+	NONE,
+	RANDOM_STATIC,
+	SHIMMER
+};
 
 struct Cell {
 	CellType       Type  = CellType::EMPTY;
 	CellProperties Props = CellProperties::NONE;
+	CellStyle      Style = CellStyle::NONE;
 	
 	iw::Color Color;
+	iw::Color StyleColor;
+
+	float StyleOffset;
 
 	float x, y, dx, dy, time;
 
-	static inline void        SetDefault(CellType type,const Cell& cell){m_defaults.emplace(type, cell);}
-	static inline const Cell& GetDefault(CellType type)                 {return m_defaults.at(type);}
+	static inline void SetDefault(
+		CellType type,
+		const Cell& cell)
+	{
+		m_defaults.emplace(type, cell);
+	}
+
+	static inline const Cell& GetDefault(
+		CellType type)
+	{
+		Cell& cell = m_defaults.at(type);
+		cell.StyleOffset = iw::randf();
+		return cell;
+	}
 private:
 	static inline std::unordered_map<CellType, Cell> m_defaults;
 };

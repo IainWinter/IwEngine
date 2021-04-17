@@ -59,7 +59,7 @@ void SandChunk::SetCell(
 		dest.y = m_y + index / m_width;
 	}
 
-	// set location everytime it changed whole number???? 
+	// set location everytime it changed whole number
 
 	dest.x = float(dest.x - int(dest.x)) + index % m_width + m_x;
 	dest.y = float(dest.y - int(dest.y)) + index / m_width + m_y;

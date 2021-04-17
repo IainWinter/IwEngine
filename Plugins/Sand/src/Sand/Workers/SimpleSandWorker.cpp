@@ -109,19 +109,15 @@ bool SimpleSandWorker::MoveSide(
 	int x, int y,
 	const Cell& cell)
 {
-	for (int i = 1; i > 0; i--) {
-		bool left  = IsEmpty(x - i, y);
-		bool right = IsEmpty(x + i, y);
+	bool left  = IsEmpty(x - 1, y);
+	bool right = IsEmpty(x + 1, y);
 
-		ShuffleIfTrue(left, right);
+	ShuffleIfTrue(left, right);
 
-			 if (left)  MoveCell(x, y, x - i, y);
-		else if (right)	MoveCell(x, y, x + i, y);
+		 if (left)  MoveCell(x, y, x - 1, y);
+	else if (right)	MoveCell(x, y, x + 1, y);
 
-		if (left || right) return true;
-	}
-
-	return false;
+	return left || right;
 }
 
 bool SimpleSandWorker::MoveRandom(

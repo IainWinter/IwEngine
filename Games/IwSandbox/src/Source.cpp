@@ -11,10 +11,6 @@
 // basic sand simulation
 // allow users to add differnt types of cells if they discover a new one
 
-struct HeatField {
-	float Tempeture;
-};
-
 using namespace iw::plugins::Sand;
 
 class SandLayer : public iw::Layer {
@@ -58,49 +54,69 @@ public:
 		Cell _EMPTY = {
 			CellType::EMPTY,
 			CellProperties::NONE,
+			CellStyle::NONE,
 			iw::Color::From255(0, 0, 0, 0)
 		};
 
 		Cell _SAND = {
 			CellType::SAND,
 			CellProperties::MOVE_FORCE | CellProperties::MOVE_DOWN | CellProperties::MOVE_DOWN_SIDE,
-			iw::Color::From255(235, 200, 175)
+			CellStyle::RANDOM_STATIC,
+			iw::Color::From255(235, 200, 175),
+			iw::Color::From255(25, 25, 25, 0)
 		};
 
 		Cell _WATER = {
 			CellType::WATER,
 			CellProperties::MOVE_FORCE | CellProperties::MOVE_DOWN | CellProperties::MOVE_SIDE,
-			iw::Color::From255(175, 200, 235)
+			CellStyle::SHIMMER,
+			iw::Color::From255(175, 200, 235),
+			iw::Color::From255(25, 25, 25, 0)
 		};
 
 		Cell _ROCK = {
 			CellType::ROCK,
 			CellProperties::NONE,
+			CellStyle::NONE,
 			iw::Color::From255(200, 200, 200)
+		};
+
+		Cell _STONE = {
+			CellType::STONE,
+			CellProperties::MOVE_DOWN | CellProperties::MOVE_FORCE,
+			CellStyle::RANDOM_STATIC,
+			iw::Color::From255(200, 200, 200),
+			iw::Color::From255(10, 10, 10, 0),
 		};
 
 		Cell _WOOD = {
 			CellType::WOOD,
 			CellProperties::NONE,
-			iw::Color::From255(171, 121, 56)
+			CellStyle::RANDOM_STATIC,
+			iw::Color::From255(171, 121, 56),
+			iw::Color::From255(15, 10, 10, 0)
 		};
 
 		Cell _FIRE = {
 			CellType::FIRE,
 			CellProperties::MOVE_FORCE | CellProperties::BURN | CellProperties::MOVE_RANDOM,
-			iw::Color::From255(255, 98, 0)
+			CellStyle::NONE,
+			iw::Color::From255(255, 98, 0) // figure out how to blend colors properly, this makes it magenta because red gets overflown??? but still happens with 200
 		};
 
 		Cell _SMOKE = {
 			CellType::SMOKE,
 			CellProperties::MOVE_FORCE | CellProperties::MOVE_RANDOM,
-			iw::Color::From255(100, 100, 100)
+			iw::CellStyle::RANDOM_STATIC,
+			iw::Color::From255(100, 100, 100),
+			iw::Color::From255(25, 25, 25, 0)
 		};
 
 		Cell::SetDefault(CellType::EMPTY, _EMPTY);
 		Cell::SetDefault(CellType::SAND,  _SAND);
 		Cell::SetDefault(CellType::WATER, _WATER);
 		Cell::SetDefault(CellType::ROCK, _ROCK);
+		Cell::SetDefault(CellType::STONE, _STONE);
 		Cell::SetDefault(CellType::WOOD, _WOOD);
 		Cell::SetDefault(CellType::FIRE, _FIRE);
 		Cell::SetDefault(CellType::SMOKE,  _SMOKE);
@@ -164,14 +180,27 @@ public:
 		//FluidCubeAddVelocity(cube, 50, 50, sin(iw::TotalTime()) / 10, .1);
 
 		if(iw::Mouse::ButtonDown(iw::RMOUSE)) {
-			for (int x = p.x; x < p.x + 5; x++)
-			for (int y = p.y; y < p.y + 5; y++) {
 
-				FluidCubeAddDensity(cube, x, y, 1);
+			if (iw::Keyboard::KeyDown(iw::H)) {
+				for (int x = p.x-3; x < p.x + 3; x++)
+				for (int y = p.y-3; y < p.y + 3; y++) {
+					iw::vector2 v = p - iw::vector2(x, y);
+					v.normalize();
+					v *= -1;
 
-				FluidCubeAddVelocity(cube, x, y,
-					iw::clamp<float>((p.x - lastP.x)/10, -1, 1),
-					iw::clamp<float>((p.y - lastP.y)/10, -1, 1));
+					FluidCubeAddDensity (cube, x, y, 100);
+					FluidCubeAddVelocity(cube, x, y, v.x, v.y);
+				}
+			}
+
+			else {
+				for (int x = p.x; x < p.x + 5; x++)
+				for (int y = p.y; y < p.y + 5; y++) {
+					FluidCubeAddDensity (cube, x, y, 1);
+					FluidCubeAddVelocity(cube, x, y,
+						iw::clamp<float>((p.x - lastP.x)/10, -1, 1),
+						iw::clamp<float>((p.y - lastP.y)/10, -1, 1));
+				}
 			}
 
 			lastP = p;
@@ -202,8 +231,9 @@ public:
 				int i = xx + yy * cube->size;
 
 				Cell& cell = chunk->GetCell(index);
+				float& temp = chunk->GetCell<HeatField>(index, 1).Tempeture;
 
-				if (cell.Type == iw::CellType::FIRE) {
+				if (cell.Type == CellType::FIRE) {
 					FluidCubeAddDensity (cube, xx, yy, iw::DeltaTime() / 2);
 					FluidCubeAddVelocity(cube, xx, yy, 
 						(sin(iw::TotalTime() * 50) + iw::randf()) * iw::DeltaTime() / 100, 
@@ -211,10 +241,14 @@ public:
 					);
 				}
 
+				if (cell.Type == CellType::SAND && cube->density[i] > .8 && temp > 800 && iw::randf() > .9f) {
+					chunk->SetCell(index, Cell::GetDefault(CellType::STONE));
+				}
+
 				if (cell.Props & CellProperties::MOVE_FORCE) {
-					if (cell.Type == CellType::WATER || cell.Type == CellType::SAND) {
-						cell.dy -= iw::DeltaTime() / 10;
-					}
+					//if (!(cell.Props & CellProperties::MOVE_RANDOM)) {
+					//	cell.dy -= iw::DeltaTime() * 9.8f;
+					//}
 				}
 
 				else {
@@ -227,8 +261,8 @@ public:
 					Cell& cell = chunk->GetCell(index);
 
 					if (cell.Type != iw::CellType::EMPTY) {
-						cell.dx += cube->Vx[i] * sqrt(cube->density[i]);
-						cell.dy += cube->Vy[i] * sqrt(cube->density[i]);
+						cell.dx += cube->Vx[i] * sqrt(cube->density[i])*4;
+						cell.dy += cube->Vy[i] * sqrt(cube->density[i])*4;
 
 						chunk->KeepAlive(index);
 					}
@@ -243,17 +277,19 @@ public:
 
 		for (int i = 0; i < cube->size*cube->size; i++) {
 			iw::Color c(iw::clamp<float>(cube->density[i], 0, 1));
-			colors[i] = c;
+			colors[i] = c.to32();
 		}
 
-		colors[int(p.x) + int(p.y) * cube->size] = iw::Color(1);
+		colors[int(p.x) + int(p.y) * cube->size] = iw::Color(1).to32();
 
 		m_airScreenTexture ->Update(Renderer->Device);
 		m_sandScreenTexture->Update(Renderer->Device);
 
+		iw::vector3 aspect = iw::vector3(float(Renderer->Height()) / Renderer->Width(), 1, 1);
+
 		Renderer->BeginScene(MainScene);
-			Renderer->DrawMesh(iw::Transform(), m_sandScreenMesh);
-			Renderer->DrawMesh(iw::Transform(), m_airScreenMesh);
+			Renderer->DrawMesh(iw::Transform(0, aspect), m_sandScreenMesh);
+			Renderer->DrawMesh(iw::Transform(0, aspect), m_airScreenMesh);
 		Renderer->EndScene();
 
 		//while (!iw::Keyboard::KeyDown(iw::N)) {
@@ -271,6 +307,7 @@ public:
 				 if (iw::Keyboard::KeyDown(iw::S)) placeMe = CellType::SAND;
 			else if (iw::Keyboard::KeyDown(iw::W)) placeMe = CellType::WATER;
 			else if (iw::Keyboard::KeyDown(iw::R)) placeMe = CellType::ROCK;
+			else if (iw::Keyboard::KeyDown(iw::T)) placeMe = CellType::STONE;
 			else if (iw::Keyboard::KeyDown(iw::F)) placeMe = CellType::FIRE;
 			else if (iw::Keyboard::KeyDown(iw::M)) placeMe = CellType::SMOKE;
 			else if (iw::Keyboard::KeyDown(iw::O)) placeMe = CellType::WOOD;
@@ -281,8 +318,7 @@ public:
 					continue;
 
 				Cell cell = Cell::GetDefault(placeMe);
-				cell.x = x;
-				cell.y = y;
+				cell.StyleOffset = iw::randf();
 
 				m_world->SetCell(x, y, cell);
 			}

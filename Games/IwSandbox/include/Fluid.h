@@ -58,7 +58,7 @@ void FluidCubeFree(FluidCube* cube)
 	free(cube);
 }
 
-static void set_bnd(int b, float* x, int N)
+static void set_bnd(int b, float* x, int N) // this function is prob slightly wrong
 {
 	for (int i = 1; i < N - 1; i++) {
 		x[IX(i, 0)] = b == 2 ? -x[IX(i, 1)] : x[IX(i, 1)];

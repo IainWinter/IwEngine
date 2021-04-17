@@ -53,12 +53,12 @@ public:
 
 	template<typename _t = Cell>
 	_t& GetCell(int x, int y, size_t field = 0) {
-		return GetCell(GetIndex(x, y), field);
+		return GetCell<_t>(GetIndex(x, y), field);
 	}
 
 	template<typename _t = Cell>
 	_t& GetCell(size_t index, size_t field = 0) {
-		return GetField<Cell>(field)[index];
+		return GetField<_t>(field)[index];
 	}
 
 	template<typename _t = Cell>

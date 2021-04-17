@@ -50,8 +50,6 @@ private:
 		int x, int y,
 		iw::Cell& cell)
 	{
-		//m_chunk->GetField<HeadField>(x, y);
-
 		cell.time += iw::DeltaTime();
 
 		float r = iw::randf();
@@ -70,12 +68,16 @@ private:
 		else {
 			for(int xx = -1; xx <= 1; xx++)
 			for(int yy = -1; yy <= 1; yy++) {
+				float& temp = m_chunk->GetCell<HeatField>(x, y, 1).Tempeture;
+				temp = iw::clamp<float>(temp + iw::DeltaTime() * 100, 0, 1000);
+
 				if (xx == 0 && yy == 0) continue; 
 
-				if (   InBounds(x + xx, y + yy)
+				if (   iw::randf() > .99f/*temp > 451*/
+					&& InBounds(x + xx, y + yy)
 					&& GetCell (x + xx, y + yy).Type == iw::CellType::WOOD)
 				{
-					SetCell(x + xx, y + yy, iw::Cell::GetDefault(iw::randf() > .99f ? iw::CellType::FIRE : iw::CellType::SMOKE));
+					SetCell(x + xx, y + yy, iw::Cell::GetDefault(/*iw::randf() > .99f ?*/ iw::CellType::FIRE /*: iw::CellType::SMOKE*/));
 					break;
 				}
 			}
@@ -170,29 +172,49 @@ void SandWorldUpdateSystem::Update() {
 			int endX   = iw::clamp<int>(m_fx2 - chunk->m_x, 0, chunk->m_width);
 
 			iw::Cell* cells = chunk->GetField();
+			HeatField* heat = chunk->GetField<HeatField>(1);
 
 			// sand texture
 			for (int y = startY; y < endY; y++)
 			for (int x = startX; x < endX; x++) {
 				int texi = (chunk->m_x + x - m_fx) + (chunk->m_y + y - m_fy) * m_texture->Width();
 
-				const iw::Cell& cell = cells[x + y * chunk->m_width];
+				iw::Cell& cell = cells[x + y * chunk->m_width];
+				float&    temp = heat [x + y * chunk->m_width].Tempeture;
+
+				temp *= (1 -iw::DeltaTime());
+
 				if (cell.Type != iw::CellType::EMPTY) {
-					pixels[texi] = cell.Color;
+					iw::vector4 accent = cell.StyleColor.rgba();
+
+					switch (cell.Style) {
+						case iw::CellStyle::RANDOM_STATIC: {
+							accent *= cell.StyleOffset;
+							break;
+						}
+						case iw::CellStyle::SHIMMER: {
+							accent *= sin(cell.StyleOffset + cell.StyleOffset * 5 * iw::TotalTime());
+							break;
+						}
+					}
+
+					accent = iw::lerp(accent, iw::vector4(1), temp / 1000);
+
+					pixels[texi] = iw::Color(cell.Color + accent).to32();
 				}
 
 				if (_debugShowChunkBounds) {
 					if (   (y == chunk->m_minY || y == chunk->m_maxY) && (x >= chunk->m_minX && x <= chunk->m_maxX)
 						|| (x == chunk->m_minX || x == chunk->m_maxX) && (y >= chunk->m_minY && y <= chunk->m_maxY))
 					{
-						pixels[texi] = iw::Color(0, 1, 0);
+						pixels[texi] = iw::Color(0, 1, 0).to32();
 					}
 						
 					else 
 					if (    x % m_world.m_chunkWidth  == 0
 						||  y % m_world.m_chunkHeight == 0)
 					{
-						pixels[texi] = iw::Color(1, 0, 0);
+						pixels[texi] = iw::Color(1, 0, 0).to32();
 					}
 				}
 			}

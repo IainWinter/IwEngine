@@ -12,6 +12,10 @@ struct Tile {
 	float Y = 0;
 };
 
+struct HeatField {
+	float Tempeture;
+};
+
 // Handles updating and rendering the sand texture,
 //	rendering should be put into a mesh rendering system using the ecs
 

@@ -31,13 +31,16 @@ public:
 
 	template<typename _t>
 	void AddField() {
-		iw::pool_allocator* field = new iw::pool_allocator(16 * sizeof(_t) * m_chunkWidth * m_chunkHeight);
+		size_t fieldSize = sizeof(_t) * m_chunkWidth * m_chunkHeight;
 
-		m_fields.push_back({ field, sizeof(_t) });
+		m_fields.push_back({
+			new iw::pool_allocator(16 * fieldSize),
+			sizeof(_t)
+		});
 
-		//for (SandChunk* chunk : m_chunks) {
-		//	
-		//}
+		for (SandChunk* chunk : m_chunks) {
+			chunk->AddField(m_fields.back().memory->alloc(fieldSize));
+		}
 	}
 
 	IW_PLUGIN_SAND_API SandWorld(size_t chunkWidth, size_t chunkHeight, double scale);
