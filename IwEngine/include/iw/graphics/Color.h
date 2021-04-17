@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IwGraphics.h"
+#include "iw/math/vector2.h"
 #include "iw/math/vector3.h"
 #include "iw/math/vector4.h"
 
@@ -9,57 +10,28 @@ namespace Graphics {
 	struct Color {
 		float r, g, b, a;
 
-		Color()
-			: r(0)
-			, g(0)
-			, b(0)
-			, a(0)
-		{}
+		Color() : r(0), g(0), b(0), a(0) {}
 
-		Color(
-			float rgba)
-			: r(rgba)
-			, g(rgba)
-			, b(rgba)
-			, a(rgba)
-		{}
+		Color(float r, float g, float b, float a = 1.0f) : r(r),      g(g),      b(b),      a(a)      {}
+		Color(float rgba)                                : r(rgba),   g(rgba) ,  b(rgba),   a(rgba)   {}
+		Color(vector3 rgb)                               : r(rgb .x), g(rgb .y), b(rgb .z), a(1)      {}
+		Color(vector4 rgba)                              : r(rgba.x), g(rgba.y), b(rgba.z), a(rgba.w) {}
 
-		Color(
-			float r,
-			float g,
-			float b,
-			float a = 1.0f)
-			: r(r)
-			, g(g)
-			, b(b)
-			, a(a)
-		{}
+		vector2 rg()   const { return vector3(r, g); }
+		vector3 rgb()  const { return vector3(r, g, b); }
+		vector4 rgba() const { return vector4(r, g, b, a); }
 
-		Color(
-			iw::vector4 rgba)
-			: r(rgba.x)
-			, g(rgba.y)
-			, b(rgba.z)
-			, a(rgba.w)
-		{}
-
-		iw::vector3 rgb() const {
-			return iw::vector3(r, g, b);
+		uint32_t to32() const {
+			return clamp<unsigned>(r * 255, 0, 255) << 0
+				| clamp<unsigned>(g * 255, 0, 255) << 8
+				| clamp<unsigned>(b * 255, 0, 255) << 16
+				| clamp<unsigned>(a * 255, 0, 255) << 24; // Not sure if this should be clamped or let to explode?
 		}
 
-		operator iw::vector4() {
-			return iw::vector4(r, g, b, a);
-		}
-
-		operator iw::vector4() const {
-			return iw::vector4(r, g, b, a);
-		}
-
-		operator unsigned int() const {
-			return unsigned int(r * 255u) << 0
-				| unsigned int(g * 255u) << 8
-				| unsigned int(b * 255u) << 16
-				| unsigned int(a * 255u) << 24;
+		Color operator+(
+			const Color& other) const
+		{
+			return Color(r + other.r, g + other.g, b + other.b, a + other.a);
 		}
 
 		static Color From255(
