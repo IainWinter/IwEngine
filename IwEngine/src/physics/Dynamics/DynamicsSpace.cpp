@@ -16,8 +16,8 @@ namespace Physics {
 		}
 #endif
 
-		if (rigidbody->TakesGravity()) {
-			rigidbody->SetGravity(m_gravity);
+		if (rigidbody->TakesGravity) {
+			rigidbody->Gravity = m_gravity;
 		}
 
 		AddCollisionObject(rigidbody);
@@ -41,11 +41,11 @@ namespace Physics {
 
 			rigidbody->SetLastTrans(rigidbody->Trans());
 
-			if (rigidbody->IsKinematic()) {
-				if (   isnan(rigidbody->Velocity().length_squared())
-					|| isinf(rigidbody->Velocity().length_squared()))
+			if (rigidbody->IsKinematic) {
+				if (   isnan(rigidbody->Velocity.length_squared())
+					|| isinf(rigidbody->Velocity.length_squared()))
 				{
-					rigidbody->SetVelocity(0);
+					rigidbody->Velocity = 0;
 				}
 
 				if (   isnan(rigidbody->Trans().Position.length_squared())
@@ -54,19 +54,19 @@ namespace Physics {
 					rigidbody->Trans().Position = 0;
 				}
 
-				rigidbody->SetVelocity(dt * rigidbody->Force() * rigidbody->InvMass() + rigidbody->Velocity());
-				rigidbody->Trans().Position += dt * rigidbody->Velocity();
+				rigidbody->Velocity += dt * rigidbody->NetForce * rigidbody->InvMass;
+				rigidbody->Trans().Position += dt * rigidbody->Velocity;
 
-				if (rigidbody->IsLocked().x) {
-					rigidbody->Trans().Position.x = rigidbody->Lock().x;
+				if (rigidbody->IsAxisLocked.x) {
+					rigidbody->Trans().Position.x = rigidbody->AxisLock.x;
 				}
 
-				if (rigidbody->IsLocked().y) {
-					rigidbody->Trans().Position.y = rigidbody->Lock().y;
+				if (rigidbody->IsAxisLocked.y) {
+					rigidbody->Trans().Position.y = rigidbody->AxisLock.y;
 				}
 
-				if (rigidbody->IsLocked().z) {
-					rigidbody->Trans().Position.z = rigidbody->Lock().z;
+				if (rigidbody->IsAxisLocked.z) {
+					rigidbody->Trans().Position.z = rigidbody->AxisLock.z;
 				}
 			}
 		}
@@ -90,8 +90,8 @@ namespace Physics {
 			if (!object->IsDynamic()) continue;
 
 			Rigidbody* rigidbody = (Rigidbody*)object;
-			if (rigidbody->TakesGravity() && rigidbody->IsKinematic()) {
-				rigidbody->SetGravity(m_gravity);
+			if (rigidbody->TakesGravity && rigidbody->IsKinematic) {
+				rigidbody->Gravity = m_gravity;
 			}
 		}
 	}
@@ -101,7 +101,7 @@ namespace Physics {
 			if (!object->IsDynamic()) continue;
 
 			Rigidbody* rigidbody = (Rigidbody*)object;
-			if (rigidbody->SimGravity() && rigidbody->IsKinematic()) {
+			if (rigidbody->SimGravity && rigidbody->IsKinematic) {
 				rigidbody->ApplyGravity();
 			}
 		}
@@ -114,28 +114,28 @@ namespace Physics {
 			if (!object->IsDynamic()) continue;
 
 			Rigidbody* rigidbody = (Rigidbody*)object;
-			if (rigidbody->IsKinematic()) {
+			if (rigidbody->IsKinematic) {
 				Transform t = rigidbody->Trans();
-				vector3   v = rigidbody->Velocity();
+				vector3   v = rigidbody->Velocity;
 
-				if (rigidbody->IsLocked().x) {
-					t.Position.x = rigidbody->Lock().x;
+				if (rigidbody->IsAxisLocked.x) {
+					t.Position.x = rigidbody->AxisLock.x;
 					v.x = 0;
 				}
 
-				if (rigidbody->IsLocked().y) {
-					t.Position.y = rigidbody->Lock().y;
+				if (rigidbody->IsAxisLocked.y) {
+					t.Position.y = rigidbody->AxisLock.y;
 					v.y = 0;
 				}
 
-				if (rigidbody->IsLocked().z) {
-					t.Position.z = rigidbody->Lock().z;
+				if (rigidbody->IsAxisLocked.z) {
+					t.Position.z = rigidbody->AxisLock.z;
 					v.z = 0;
 				}
 
-				t.Position += dt * v + dt * dt * rigidbody->Force() * rigidbody->InvMass();
+				t.Position += dt * v + dt * dt * rigidbody->NetForce * rigidbody->InvMass;
 
-				rigidbody->SetVelocity(v);
+				rigidbody->Velocity = v;
 				rigidbody->SetNextTrans(t);
 			}
 		}
@@ -146,8 +146,8 @@ namespace Physics {
 			if (!object->IsDynamic()) continue;
 			Rigidbody* rigidbody = (Rigidbody*)object;
 
-			if (rigidbody->IsKinematic()) {
-				rigidbody->SetForce(0.0f);
+			if (rigidbody->IsKinematic) {
+				rigidbody->NetForce = 0;
 			}
 		}
 	}

@@ -63,12 +63,12 @@ public:
 
 	void ReloadGame() {
 		HINSTANCE gameInst;
-		Reload(L"a_wEditor.dll", gameInst);
+		Reload(L"C:/dev/IwEngine/Games/PhysicsProject/bin/Debug.windows.x86_64/Physics project.dll", gameInst);
 		m_gameNew = LoadFunction<GETAPP_FUNC>(gameInst, "GetApplicationForEditor")();
 	}
 
 	int InitGame() {
-		sandbox = m_game->GetLayer("Sandbox");
+		sandbox = m_game->GetLayer("Test");
 		
 		if (imgui)         m_game->PushLayer(imgui);
 		else       imgui = m_game->PushLayer<iw::ImGuiLayer>();

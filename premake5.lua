@@ -712,7 +712,7 @@ group ""
 
 group "Tools"
 	project "wEditor"
-		kind "SharedLib"
+		kind "WindowedApp"
 		language "C++"
 		location  (edtordir .. blddir)
 		targetdir (edtordir .. bindir)

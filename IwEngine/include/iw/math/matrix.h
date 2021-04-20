@@ -2,6 +2,7 @@
 
 #include "iwmath.h"
 #include "vector.h"
+#include <initializer_list>
 
 namespace iw {
 namespace math {
@@ -12,7 +13,9 @@ namespace math {
 		using vector_c = vector<_rows, _t>;
 		using vector_r = vector<_cols, _t>;
 
-		//static const matrix identity;
+		static constexpr size_t rows = _rows;
+		static constexpr size_t cols = _cols;
+		static constexpr size_t size = cols * rows;
 
 		REFLECT union {
 			REFLECT _t components[_cols*_rows];
@@ -25,54 +28,110 @@ namespace math {
 			reset(diag);
 		}
 
-		//matrix(
-		//	vector_c columns...)
-		//{
-		//	reset(0);
-		//	// todo: impl
-		//};
+		matrix(
+			_t elements[_cols*_rows])
+		{
+			for(size_t i = 0; i < size; i++) {
+				components[i] = elements[i];
+			}
+		}
 
-		//matrix() from other matrix
+		matrix(
+			std::initializer_list<_t> list)
+		{
+			assert(list.size() == size, "Must provide correct number of components to matrix constructor");
+
+			for (auto itr = list.begin(); itr != list.end(); itr++) {
+				size_t i = std::distance(list.begin(), itr);
+				size_t index = (i % cols) * rows + i / cols; // todo: use this for inplace transpose, converts from row major to column major
+
+				components[index] = *itr;
+			}
+		}
 
 		vector_r row(
 			size_t row) const
 		{
 			vector_r r;
-			for (size_t i = 0; i < _cols; i++) {
+			for (size_t i = 0; i < cols; i++) {
 				r.components[i] = columns[i][row];
 			}
+
 			return r;
 		}
 
 		void reset(
 			_t diag)
 		{
-			memset(components, 0, _cols*_rows*sizeof(_t));
-			for (size_t i = 0; i < _cols; i++) {
+			for (size_t i = 0; i < cols * _rows; i++) {
+				components[i] = _t();
+			}
+
+			for (size_t i = 0; i < cols; i++) {
 				columns[i][i] = diag;
 			}
 		}
 
-		_t determinant() const {
-			_t det = 0; // todo: impl https://www.mathsisfun.com/algebra/matrix-determinant.html
-		 //	for (size_t i = 0; i < _count; i += _cols) {
-			//	det += elements[]
-			//}
+		_t determinant() const { // https://www.youtube.com/watch?v=BX3Kq6-nQps
+			static_assert(cols == rows, "Determinant requires square matrix");
+
+			_t det = 0;
+			if constexpr (cols == 1) {
+				det = components[0];
+			}
+
+			else if constexpr (cols == 2) {
+				det = components[0] * components[3]
+				    - components[1] * components[2];
+			}
+
+			else { // else is needed for matrix compile
+				int sign = 1;
+				for (size_t i = 0; i < cols; i++) {
+
+					matrix<cols - 1, rows - 1> inner;
+
+					size_t q = 0;
+					for (size_t c = 0; c < cols; c++) {
+						if (c == i) continue;
+
+						for (size_t r = 0; r < inner.rows; r++) {
+							inner.columns[q][r] = columns[c][r + 1];
+						}
+						q++;
+					}
+
+					det += sign * columns[i][0] * inner.determinant();
+					sign *= -1;
+				}
+			}
+
 			return det;
 		}
 
 		_t trace() const {
-			_t trace = 0;
-			for (size_t i = 0; i < _count; i += _cols + 1) {
-				det += elements[i];
+			_t result = 0;
+			for (size_t i = 0; i < size; i += _cols + 1) {
+				result += elements[i];
 			}
-			return trace;
+
+			return result;
 		}
 
-		matrix transposed() const {
-			matrix tmp = *this;
-			tmp.transpose();
-			return tmp;
+		matrix<rows, cols> transposed() const {
+			//if constexpr (_cols == _rows) { // If square, can be done inplace
+			//	matrix tmp = *this;
+			//	tmp.transpose();
+			//	return tmp;
+			//}
+
+			matrix<rows, cols> result;
+
+			for (size_t i = 0; i < rows; i++) {
+				result.columns[i] = row(i);
+			}
+
+			return result;
 		}
 
 		matrix inverted() const {
@@ -87,75 +146,65 @@ namespace math {
 			return tmp;
 		}
 
-		void transpose() {
-			// todo: impl
-		}
+		//void transpose() {
+		//	static_assert(_cols == _rows);
+		//	// todo: impl
+		//}
 
-		void invert() {
-			// todo: impl
-		}
+		//void invert() {
+		//	// todo: impl
+		//}
 
 		void normalize() {
 			_t det = determinant();
 			if (almost_equal(det, 0, 6)) {
 				return;
 			}
-
 			*this /= det;
 		}
 
 		template<
-			size_t _c = _cols>
-		matrix<_c, _rows> operator*(
-			const matrix<_c, _cols>& other) const
+			size_t _c = cols>
+		matrix<_c, rows> operator*(
+			const matrix<_c, cols>& other) const
 		{
-			matrix<_c, _rows> total;
+			matrix<_c, rows> result;
 			for (size_t c = 0; c < _c;    c++)
-			for (size_t r = 0; r < _cols; r++) {
-				total.columns[c][r] = row(r).dot(other.columns[c]);
+			for (size_t r = 0; r < cols; r++) {
+				result.columns[c][r] = row(r).dot(other.columns[c]);
 			}
-			return total;
+			return result;
 		}
 
 		vector_r operator*(
 			const vector_c& other) const
 		{
-			vector_r total;
-			for (size_t i = 0; i < _cols; i++) {
-				total.components[i] = other.dot(columns[i]);
+			vector_r result;
+			for (size_t i = 0; i < cols; i++) {
+				result.components[i] = other.dot(columns[i]);
 			}
-			return total;
+			return result;
 		}
-
-		//vector_r operator*(
-		//	const vector_c& other) const
-		//{
-		//	vector_r total;
-		//	for (size_t i = 0; i < _cols; i++) {
-		//		total.components[i] = other.dot(columns[i]);
-		//	}
-		//	return total;
-		//}
 
 		friend std::ostream& operator<<(
 			std::ostream& ostream,
 			const matrix& mat)
 		{
 			ostream << "[";
-			for (	size_t r = 0; r < _rows; r++) {
-				for (size_t c = 0; c < _cols; c++) {
+			for (	size_t r = 0; r < rows; r++) {
+				for (size_t c = 0; c < cols; c++) {
 					if (c == 0 && r != 0) {
 						ostream << " ";
 					}
 
 					ostream << mat.columns[c][r];
 
-					if (c < _cols - 1) {
+					if (c < cols - 1) {
 						ostream << " ";
 					}
 				}
 
-				if (r < _rows - 1) {
+				if (r < rows - 1) {
 					ostream << "\n";
 				}
 			}

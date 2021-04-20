@@ -13,31 +13,31 @@ namespace Physics {
 			Rigidbody* aBody = manifold.ObjA->IsDynamic() ? (Rigidbody*)manifold.ObjA : nullptr;
 			Rigidbody* bBody = manifold.ObjB->IsDynamic() ? (Rigidbody*)manifold.ObjB : nullptr;
 
-			vector3 aVel = aBody ? aBody->Velocity() : 0.0f;
-			vector3 bVel = bBody ? bBody->Velocity() : 0.0f;
+			vector3 aVel = aBody ? aBody->Velocity : 0.0f;
+			vector3 bVel = bBody ? bBody->Velocity : 0.0f;
 			vector3 rVel = bVel - aVel;
 			scalar  nSpd = rVel.dot(manifold.Normal);
 
-			scalar aInvMass = aBody ? aBody->InvMass() : 1.0f;
-			scalar bInvMass = bBody ? bBody->InvMass() : 1.0f;
+			scalar aInvMass = aBody ? aBody->InvMass : 1.0f;
+			scalar bInvMass = bBody ? bBody->InvMass : 1.0f;
 
 			// Impluse
 
 			if (nSpd >= 0)
 				continue;
 
-			scalar e = (aBody ? aBody->Restitution() : 1.0f)
-				     * (bBody ? bBody->Restitution() : 1.0f);
+			scalar e = (aBody ? aBody->Restitution : 1.0f)
+				     * (bBody ? bBody->Restitution : 1.0f);
 
 			scalar j = -(1.0f + e) * nSpd / (aInvMass + bInvMass);
 
 			vector3 impluse = j * manifold.Normal;
 
-			if (aBody ? aBody->IsKinematic() : false) {
+			if (aBody ? aBody->IsKinematic : false) {
 				aVel -= impluse * aInvMass;
 			}
 
-			if (bBody ? bBody->IsKinematic() : false) {
+			if (bBody ? bBody->IsKinematic : false) {
 				bVel += impluse * bInvMass;
 			}
 
@@ -49,10 +49,10 @@ namespace Physics {
 			iw::vector3 tangent = (rVel - nSpd * manifold.Normal).normalized();
 			scalar      fVel = rVel.dot(tangent);
 
-			scalar aSF = aBody ? aBody->StaticFriction()  : 0.0f;
-			scalar bSF = bBody ? bBody->StaticFriction()  : 0.0f;
-			scalar aDF = aBody ? aBody->DynamicFriction() : 0.0f;
-			scalar bDF = bBody ? bBody->DynamicFriction() : 0.0f;
+			scalar aSF = aBody ? aBody->StaticFriction  : 0.0f;
+			scalar bSF = bBody ? bBody->StaticFriction  : 0.0f;
+			scalar aDF = aBody ? aBody->DynamicFriction : 0.0f;
+			scalar bDF = bBody ? bBody->DynamicFriction : 0.0f;
 			scalar mu  = iw::vector2(aSF, bSF).length();
 
 			scalar f  = -fVel / (aInvMass + bInvMass);
@@ -67,12 +67,12 @@ namespace Physics {
 				friction = -j * tangent * mu;
 			}
 
-			if (aBody ? aBody->IsKinematic() : false) {
-				aBody->SetVelocity(aVel - friction * aInvMass);
+			if (aBody ? aBody->IsKinematic : false) {
+				aBody->Velocity = aVel - friction * aInvMass;
 			}
 
-			if (bBody ? bBody->IsKinematic() : false) {
-				bBody->SetVelocity(bVel + friction * bInvMass);
+			if (bBody ? bBody->IsKinematic : false) {
+				bBody->Velocity = bVel + friction * bInvMass;
 			}
 		}
 	}

@@ -511,64 +511,42 @@ namespace Editor {
 
 		ImGui::PushID(body);
 
-		vector3 gravity         = body->Gravity();
-		vector3 force           = body->Force();
-		vector3 velocity        = body->Velocity();
-		vector3 lock            = body->Lock();
-		vector3 isLocked        = body->IsLocked();
-		float   mass            = body->Mass();
-		bool    takesGravity    = body->TakesGravity();
-		bool    simGravity      = body->SimGravity();
-		bool    isKinematic     = body->IsKinematic();
-		float   staticFriction  = body->StaticFriction();
-		float   dynamicFriction = body->DynamicFriction();
-		float   restitution     = body->Restitution();
-
 		if (ImGui::BeginTable("Rigidbody", 2)) {
 			ImGui::TableSetupColumn("", 0, 0.3f);
 			ImGui::TableSetupColumn("", 0, 0.7f);
 
-			PrintCell("Gravity");  PrintEditCell(&gravity);
-			PrintCell("Force");    PrintEditCell(&force);
-			PrintCell("Velocity"); PrintEditCell(&velocity);
-			PrintCell("Lock");     PrintEditCell(&lock);
+			PrintCell("Gravity");  PrintEditCell(&body->Gravity);
+			PrintCell("Force");    PrintEditCell(&body->NetForce);
+			PrintCell("Velocity"); PrintEditCell(&body->Velocity);
+			PrintCell("Lock");     PrintEditCell(&body->AxisLock);
 
 			PrintCell("Lock axis");
 
-			bool x = isLocked.x;
-			bool y = isLocked.y;
-			bool z = isLocked.z;
+			bool x = body->IsAxisLocked.x;
+			bool y = body->IsAxisLocked.y;
+			bool z = body->IsAxisLocked.z;
 
 			ImGui::TableNextCell();
 			ImGui::Checkbox("X", &x); ImGui::SameLine();
 			ImGui::Checkbox("Y", &y); ImGui::SameLine();
 			ImGui::Checkbox("Z", &z);
 
-			isLocked = vector3(x, y, z);
+			body->IsAxisLocked = vector3(x, y, z);
+
+			float mass = body->Mass();
 
 			PrintCell("Mass");             PrintEditCell(&mass);
-			PrintCell("Takes gravity");    PrintEditCell(&takesGravity);
-			PrintCell("Simulate gravity"); PrintEditCell(&simGravity);
-			PrintCell("Kinemtaic");        PrintEditCell(&isKinematic);
-			PrintCell("Static friction");  PrintEditCell(&staticFriction);
-			PrintCell("Dynamic friction"); PrintEditCell(&dynamicFriction);
-			PrintCell("Restitution");      PrintEditCell(&restitution);
+			PrintCell("Takes gravity");    PrintEditCell(&body->TakesGravity);
+			PrintCell("Simulate gravity"); PrintEditCell(&body->SimGravity);
+			PrintCell("Kinemtaic");        PrintEditCell(&body->IsKinematic);
+			PrintCell("Static friction");  PrintEditCell(&body->StaticFriction);
+			PrintCell("Dynamic friction"); PrintEditCell(&body->DynamicFriction);
+			PrintCell("Restitution");      PrintEditCell(&body->Restitution);
+
+			body->SetMass(mass);
 
 			ImGui::EndTable();
 		}
-
-		body->SetGravity        (gravity);
-		body->SetForce          (force);
-		body->SetVelocity       (velocity);
-		body->SetLock           (lock);
-		body->SetIsLocked       (isLocked);
-		body->SetMass           (mass);
-		body->SetTakesGravity   (takesGravity);
-		body->SetSimGravity     (simGravity);
-		body->SetIsKinematic    (isKinematic);
-		body->SetStaticFriction (staticFriction);
-		body->SetDynamicFriction(dynamicFriction);
-		body->SetRestitution    (restitution);
 
 		PrintCollisionObject(body);
 

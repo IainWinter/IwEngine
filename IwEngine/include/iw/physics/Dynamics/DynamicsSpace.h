@@ -22,6 +22,7 @@ namespace Physics {
 		virtual void Step(
 			scalar dt);
 
+		IWPHYSICS_API
 		const iw::vector3& Gravity();
 
 		IWPHYSICS_API

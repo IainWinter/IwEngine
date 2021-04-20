@@ -15,7 +15,7 @@
 #	include "iw/engine/Layers/ImGuiLayer.h"
 #endif
 
-#ifdef not IW_DEBUG
+#ifdef IW_DEBUG
 	#include "iw/log/sink/std_sink.h"
 #else
 	#include "iw/log/sink/async_std_sink.h"
@@ -63,7 +63,7 @@ namespace Engine {
 
 		// Logging
 
-#ifdef not IW_DEBUG
+#ifdef IW_DEBUG
 		LOG_SINK(stdout_sink, loglevel::INFO);
 		LOG_SINK(stderr_sink, loglevel::ERR);
 #else

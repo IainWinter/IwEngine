@@ -43,8 +43,6 @@ namespace impl {
 		AABB<V> m_bounds;
 		bool m_outdated;     // if the bounds are outdated
 
-		//M m_tensor; // for angles
-
 	public:
 		Collider(
 			ColliderType type)

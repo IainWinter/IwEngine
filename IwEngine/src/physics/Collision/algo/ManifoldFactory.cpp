@@ -25,12 +25,12 @@ namespace algo {
 		A += AtoB.normalized() * Ar;
 		B += BtoA.normalized() * Br;
 
-		AtoB = B - A;
+		BtoA = A - B;
 
 		return {
 			A, B,
-			AtoB.normalized(),
-			AtoB.length(),
+			BtoA.normalized(),
+			BtoA.length(),
 			true
 		};
 	}
@@ -58,12 +58,12 @@ namespace algo {
 		vector3 B = A - N * d;
 		        A = A - N * Ar;
 
-		vector3 AtoB = B - A;
+		vector3 BtoA = A - B;
 
 		return {
 			A, B,
-			AtoB.normalized(),
-			AtoB.length(),
+			BtoA.normalized(),
+			BtoA.length(),
 			true
 		};
 	}
@@ -116,12 +116,12 @@ namespace algo {
 		A += AtoD.normalized() * Ar;
 		D += DtoA.normalized() * Br;
 
-		AtoD = D - A;
+		DtoA = A - D;
 
 		return {
 			A, D,
-			AtoD.normalized(),
-			AtoD.length(),
+			DtoA.normalized(),
+			DtoA.length(),
 			true
 		};
 	}
@@ -147,7 +147,7 @@ namespace algo {
 
 		return {
 			B, P,
-			-N,
+			N,
 			distance,
 			true
 		};

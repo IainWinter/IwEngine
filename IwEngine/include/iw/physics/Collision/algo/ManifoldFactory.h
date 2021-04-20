@@ -46,6 +46,13 @@ namespace algo {
 		const Collider* a, const Transform* ta,
 		const Collider* b, const Transform* tb);
 
+	inline ManifoldPoints TestCollision(
+		const MeshCollider* a, const Transform* ta,
+		const MeshCollider* b, const Transform* tb)
+	{
+		return FindGJKMaifoldPoints(a, ta, b, tb);
+	}
+	
 	// Swaps
 
 	IWPHYSICS_API
@@ -69,14 +76,18 @@ namespace algo {
 	inline ManifoldPoints TestCollision(const CapsuleCollider* a, const Transform* ta, const PlaneCollider*   b, const Transform* tb) {return {};}
 	inline ManifoldPoints TestCollision(const PlaneCollider*   a, const Transform* ta, const PlaneCollider*   b, const Transform* tb) {return {};}
 	inline ManifoldPoints TestCollision(const PlaneCollider*   a, const Transform* ta, const CapsuleCollider* b, const Transform* tb) {return {};}
+	inline ManifoldPoints TestCollision(const SphereCollider*  a, const Transform* ta, const MeshCollider*    b, const Transform* tb) {return {};}
+	inline ManifoldPoints TestCollision(const MeshCollider*    a, const Transform* ta, const SphereCollider*  b, const Transform* tb) { return {}; }
+	inline ManifoldPoints TestCollision(const CapsuleCollider* a, const Transform* ta, const MeshCollider*    b, const Transform* tb) {return {};}
+	inline ManifoldPoints TestCollision(const MeshCollider*    a, const Transform* ta, const CapsuleCollider* b, const Transform* tb) {return {};}
 }
 
 inline ManifoldPoints TestCollision(
 		const Collider* a, const Transform* ta,
 		const Collider* b, const Transform* tb)
 	{
-		if (    a->Type() == ColliderType::MESH
-			|| b->Type() == ColliderType::MESH)
+		if (     (a->Type() == ColliderType::MESH  || b->Type() == ColliderType::MESH)
+			&& !(a->Type() == ColliderType::PLANE || b->Type() == ColliderType::PLANE))
 		{
 			return algo::FindGJKMaifoldPoints(a, ta, b, tb);
 		}
@@ -95,6 +106,10 @@ inline ManifoldPoints TestCollision(
 				PlaneCollider* X = (PlaneCollider*)x;\
 				E\
 				break;}\
+			case ColliderType::MESH:{\
+				MeshCollider* X = (MeshCollider*)x;\
+				E\
+				break;}\
 		}\
 
 		FIND_TYPE(a, A, FIND_TYPE(b, B, return algo::TestCollision(A, ta, B, tb);))
@@ -105,10 +120,7 @@ inline ManifoldPoints TestCollision(
 			//	CylinderCollider* X = (CylinderCollider*)x;\
 			//	E\
 			//	break;}\
-			//case ColliderType::MESH:{\
-			//	MeshCollider* X = (MeshCollider*)x;\
-			//	E\
-			//	break;}\
+
 
 	using namespace Physics;
 }

@@ -181,7 +181,7 @@ namespace algo {
 
 		ManifoldPoints points;
 
-		points.Normal = -minNormal;
+		points.Normal = minNormal;
 		points.PenetrationDepth = minDistance + 0.001f;
 		points.HasCollision = true;
 
