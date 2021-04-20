@@ -29,6 +29,9 @@ private:
 	FluidCube* cube;
 	int size = 150;
 
+	int gridSize = 16;
+	iw::vector2 sP, wP, gP; // sand pos, wind pos, grid pos
+
 public:
 	SandLayer()
 		: iw::Layer("Sandbox")
@@ -112,6 +115,14 @@ public:
 			iw::Color::From255(25, 25, 25, 0)
 		};
 
+		Cell _BELT = {
+			CellType::BELT,
+			CellProperties::CONVEYOR,
+			iw::CellStyle::SHIMMER,
+			iw::Color::From255(201, 129, 56),
+			iw::Color::From255(25, 25, 25, 0)
+		};
+
 		Cell::SetDefault(CellType::EMPTY, _EMPTY);
 		Cell::SetDefault(CellType::SAND,  _SAND);
 		Cell::SetDefault(CellType::WATER, _WATER);
@@ -119,7 +130,8 @@ public:
 		Cell::SetDefault(CellType::STONE, _STONE);
 		Cell::SetDefault(CellType::WOOD, _WOOD);
 		Cell::SetDefault(CellType::FIRE, _FIRE);
-		Cell::SetDefault(CellType::SMOKE,  _SMOKE);
+		Cell::SetDefault(CellType::SMOKE, _SMOKE);
+		Cell::SetDefault(CellType::BELT,  _BELT);
 
 		player = Space->CreateEntity<Tile>();
 		player.Set<Tile>(Tile {{
@@ -140,9 +152,7 @@ public:
 
 		m_sandUpdate = PushSystem<SandWorldUpdateSystem>(*m_world, m_sandScreenTexture);
 
-
 		//iw::ref<iw::Shader> compute = Asset->Load<iw::Shader>("shaders/");
-
 
 		return 0;
 	}
@@ -159,6 +169,15 @@ public:
 		int fy2 = fy + height;
 
 		m_sandUpdate->SetCamera(fx, fy, fx2, fy2);
+		
+		wP = iw::Mouse::ClientPos() / iw::vector2(Renderer->Width(), Renderer->Height()) * size;
+		wP.y = size - 1 - wP.y;
+		wP = iw::clamp<iw::vector2>(wP, 1, cube->size - 1);
+
+		sP = iw::Mouse::ClientPos() / m_world->m_scale + iw::vector2(fx, -fy);
+		sP.y = height - sP.y;
+
+		gP = iw::vector2(int(sP.x / gridSize), int(sP.y / gridSize)) * gridSize;
 
 		if (iw::Keyboard::KeyDown(iw::LEFT))  tile->X -= iw::DeltaTime()*150;
 		if (iw::Keyboard::KeyDown(iw::RIGHT)) tile->X += iw::DeltaTime()*150;
@@ -171,20 +190,11 @@ public:
 	iw::vector2 lastP;
 
 	void PostUpdate() {
-		iw::vector2 p = iw::Mouse::ClientPos() / iw::vector2(Renderer->Width(), Renderer->Height()) * size;
-		p.y = size-1 - p.y;
-
-		p = iw::clamp<iw::vector2>(p, 1, cube->size-1);
-
-		//FluidCubeAddDensity(cube, 50, 50, 1);
-		//FluidCubeAddVelocity(cube, 50, 50, sin(iw::TotalTime()) / 10, .1);
-
 		if(iw::Mouse::ButtonDown(iw::RMOUSE)) {
-
 			if (iw::Keyboard::KeyDown(iw::H)) {
-				for (int x = p.x-3; x < p.x + 3; x++)
-				for (int y = p.y-3; y < p.y + 3; y++) {
-					iw::vector2 v = p - iw::vector2(x, y);
+				for (int x = wP.x-3; x < wP.x + 3; x++)
+				for (int y = wP.y-3; y < wP.y + 3; y++) {
+					iw::vector2 v = wP - iw::vector2(x, y);
 					v.normalize();
 					v *= -1;
 
@@ -194,16 +204,18 @@ public:
 			}
 
 			else {
-				for (int x = p.x; x < p.x + 5; x++)
-				for (int y = p.y; y < p.y + 5; y++) {
+				for (int x = wP.x; x < wP.x + 5; x++)
+				for (int y = wP.y; y < wP.y + 5; y++) {
 					FluidCubeAddDensity (cube, x, y, 1);
 					FluidCubeAddVelocity(cube, x, y,
-						iw::clamp<float>((p.x - lastP.x)/10, -1, 1),
-						iw::clamp<float>((p.y - lastP.y)/10, -1, 1));
+						iw::clamp<float>((wP.x - lastP.x)/10, -1, 1),
+						iw::clamp<float>((wP.y - lastP.y)/10, -1, 1));
 				}
 			}
 
-			lastP = p;
+			if (!iw::Keyboard::KeyDown(iw::P)) {
+				lastP = wP;
+			}
 		}
 
 		float visc = 10;
@@ -217,7 +229,7 @@ public:
 		}
 
 		for (SandChunk* chunk : m_world->m_chunks) {
-			for (int x = 0; x < chunk->m_width;  x++) {
+			for (int x = 0; x < chunk->m_width;  x++)
 			for (int y = 0; y < chunk->m_height; y++) {
 
 				int index = x + y * chunk->m_width;
@@ -236,12 +248,12 @@ public:
 				if (cell.Type == CellType::FIRE) {
 					FluidCubeAddDensity (cube, xx, yy, iw::DeltaTime() / 2);
 					FluidCubeAddVelocity(cube, xx, yy, 
-						(sin(iw::TotalTime() * 50) + iw::randf()) * iw::DeltaTime() / 100, 
-						iw::DeltaTime() / 50
+						(sin(iw::TotalTime() * 50) + iw::randf()) * iw::DeltaTime() / 300, 
+						iw::DeltaTime() / 100
 					);
 				}
 
-				if (cell.Type == CellType::SAND && cube->density[i] > .8 && temp > 800 && iw::randf() > .9f) {
+				if (cell.Type == CellType::SAND && /*cube->density[i] > .8 &&*/ temp > 100) {
 					chunk->SetCell(index, Cell::GetDefault(CellType::STONE));
 				}
 
@@ -268,19 +280,20 @@ public:
 					}
 				}
 			}
-			}
 		}
 
 		// Rendering
 
-		unsigned* colors = (unsigned*)m_airScreenTexture->Colors();
+		unsigned* windColor = (unsigned*)m_airScreenTexture ->Colors();
 
 		for (int i = 0; i < cube->size*cube->size; i++) {
 			iw::Color c(iw::clamp<float>(cube->density[i], 0, 1));
-			colors[i] = c.to32();
+			windColor[i] = c.to32();
 		}
 
-		colors[int(p.x) + int(p.y) * cube->size] = iw::Color(1).to32();
+		windColor[int(wP.x) + int(wP.y) * m_airScreenTexture->Width()]  = iw::Color(1).to32();
+
+		DrawMouseGrid();
 
 		m_airScreenTexture ->Update(Renderer->Device);
 		m_sandScreenTexture->Update(Renderer->Device);
@@ -291,16 +304,25 @@ public:
 			Renderer->DrawMesh(iw::Transform(0, aspect), m_sandScreenMesh);
 			Renderer->DrawMesh(iw::Transform(0, aspect), m_airScreenMesh);
 		Renderer->EndScene();
+	}
 
-		//while (!iw::Keyboard::KeyDown(iw::N)) {
+	void DrawMouseGrid() {
+		unsigned* sandColor = (unsigned*)m_sandScreenTexture->Colors();
+		int width = m_sandScreenTexture->Width();
 
-		//}
+		auto draw = [&](int x, int y) {
+			sandColor[x + y * width] = iw::Color(1).to32();
+		};
+
+		auto [x, y] = gP;
+
+		for (int i = 1; i < gridSize; i++) draw(x + i,        y); 
+		for (int i = 1; i < gridSize; i++) draw(x + i,        y + gridSize);
+		for (int i = 1; i < gridSize; i++) draw(x,            y + i);
+		for (int i = 1; i < gridSize; i++) draw(x + gridSize, y + i);
 	}
 
 	void DrawWithMouse(int fx, int fy, int width, int height) {
-		iw::vector2 pos = iw::Mouse::ClientPos() / m_world->m_scale /*/ m_world->m_scale*/ + iw::vector2(fx, -fy);
-		pos.y = height - pos.y;
-
 		if (iw::Mouse::ButtonDown(iw::LMOUSE)) {
 			CellType placeMe = CellType::EMPTY;
 
@@ -311,9 +333,10 @@ public:
 			else if (iw::Keyboard::KeyDown(iw::F)) placeMe = CellType::FIRE;
 			else if (iw::Keyboard::KeyDown(iw::M)) placeMe = CellType::SMOKE;
 			else if (iw::Keyboard::KeyDown(iw::O)) placeMe = CellType::WOOD;
+			else if (iw::Keyboard::KeyDown(iw::C)) placeMe = CellType::BELT;
 
-			for (int x = pos.x; x < pos.x + 10; x++)
-			for (int y = pos.y; y < pos.y + 10; y++) {
+			for (int x = gP.x; x < gP.x + gridSize; x++)
+			for (int y = gP.y; y < gP.y + gridSize; y++) {
 				if (!m_world->InBounds(x, y))
 					continue;
 
@@ -350,11 +373,20 @@ public:
 
 		return mesh;
 	}
+
+	bool On(iw::MouseWheelEvent& e) {
+		gridSize = iw::clamp<int>(gridSize + e.Delta, 1, 64);
+		return false;
+	}
 };
 
 class App : public iw::Application {
 public:
 	int Initialize(iw::InitOptions& options) override {
+
+		iw::ref<iw::Context> context = Input->CreateContext("Game");
+		context->AddDevice(Input->CreateDevice<iw::Mouse>());
+
 		PushLayer<SandLayer>();
 		return iw::Application::Initialize(options);
 	}

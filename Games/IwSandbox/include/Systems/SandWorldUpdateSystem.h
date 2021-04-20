@@ -34,8 +34,7 @@ public:
 		, m_texture(texture)
 	{}
 
-	int  Initialize() override;
-	void Update()     override;
+	void Update() override;
 
 	void SetCamera(
 		int fx,  int fy,

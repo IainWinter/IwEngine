@@ -25,9 +25,9 @@
 //	moveRt(x, y, cell);
 //}
 
-class FireSandWorker : public iw::SimpleSandWorker {
+class GameSandWorker : public iw::SimpleSandWorker {
 public:
-	FireSandWorker(iw::SandWorld& world, iw::SandChunk* chunk) : iw::SimpleSandWorker(world, chunk) {}
+	GameSandWorker(iw::SandWorld& world, iw::SandChunk* chunk) : iw::SimpleSandWorker(world, chunk) {}
 
 	void UpdateCell(int x, int y, iw::Cell& cell) override {
 
@@ -40,7 +40,8 @@ public:
 			}
 		}
 
-		if (cell.Props & iw::CellProperties::BURN && BurnFire(x, y, cell)) {}
+		if (cell.Props & iw::CellProperties::BURN     && BurnFire(x, y, cell)) {}
+		if (cell.Props & iw::CellProperties::CONVEYOR && MoveConveyor(x, y, cell)) {}
 		else
 
 		SimpleSandWorker::UpdateCell(x, y, cell);
@@ -87,11 +88,33 @@ private:
 
 		return false;
 	}
-};
 
-int SandWorldUpdateSystem::Initialize() {
-	return 0;
-}
+	bool MoveConveyor(
+		int x, int y, 
+		iw::Cell& cell)
+	{
+		int i = 1;
+		while (GetCell(x, y - i).Type == iw::CellType::BELT) {
+			i++;
+		}
+
+		for (int j = 1; j <= i; j++) {
+			if (InBounds(x, y + j)) {
+				iw::Cell& above = GetCell(x, y + j);
+
+				if (above.Props & iw::CellProperties::MOVE_DOWN) {
+					MoveCell(x, y + j, x + 1, y + j);
+				}
+
+				else {
+					break;
+				}
+			}
+		}
+
+		return false;
+	}
+};
 
 void SandWorldUpdateSystem::Update() {
 	// Paste tiles
@@ -135,7 +158,7 @@ void SandWorldUpdateSystem::Update() {
 	};
 		
 	doForAllChunks([&](iw::SandChunk* chunk) {
-		FireSandWorker(m_world, chunk).UpdateChunk();
+		GameSandWorker(m_world, chunk).UpdateChunk();
 	});
 
 	doForAllChunks([&](iw::SandChunk* chunk) {
