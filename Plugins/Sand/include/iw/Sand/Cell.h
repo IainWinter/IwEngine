@@ -26,7 +26,7 @@ enum class CellType {
 	ROCK,
 	STONE,
 
-	WOOD, FIRE, SMOKE
+	WOOD, FIRE, SMOKE, BELT
 };
 
 enum class CellProperties {
@@ -36,7 +36,9 @@ enum class CellProperties {
 	MOVE_SIDE      = 0b0000000000000100,
 	MOVE_RANDOM    = 0b0000000000001000,
 	MOVE_FORCE     = 0b0000000000010000,
-	BURN           = 0b0000000000100000
+
+	BURN     = 0b0000000000100000,
+	CONVEYOR = 0b0000000001000000
 };
 inline CellProperties operator|(CellProperties a,CellProperties b){return CellProperties(int(a)|int(b));}
 inline auto           operator&(CellProperties a,CellProperties b){return int(a)&int(b);}
