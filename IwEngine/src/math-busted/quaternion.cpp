@@ -65,12 +65,6 @@ namespace iw {
 		return tmp;
 	}
 
-	quaternion quaternion::conjugated() const {
-		quaternion tmp = *this;
-		tmp.conjugate();
-		return tmp;
-	}
-
 	void quaternion::normalize() {
 		float scale = length();
 		if (scale == 0) {
@@ -96,18 +90,6 @@ namespace iw {
 	}
 
 	void quaternion::invert() {
-		float ls = length_squared();
-		if (almost_equal(ls, 0.0f, 6)) {
-			return;
-		}
-
-		x = -x / ls;
-		y = -y / ls;
-		z = -z / ls;
-		w = w / ls;
-	}
-
-	void quaternion::conjugate() {
 		x = -x;
 		y = -y;
 		z = -z;
@@ -178,35 +160,16 @@ namespace iw {
 			other.w * w - other.x * x - other.y * y - other.z * z);
 	}
 
-	quaternion quaternion::operator+=(
-		const quaternion& other)
-	{
-		return *this = *this + other;
-	}
-
-	quaternion quaternion::operator-=(
-		const quaternion& other)
-	{
-		return *this = *this - other;
-	}
-
-	quaternion quaternion::operator*=(
-		const quaternion& other)
-	{
-		return *this = *this * other;
-	}
-
 	quaternion quaternion::operator*(
 		float other) const
 	{
 		return quaternion(x * other, y * other, z * other, w * other);
 	}
 
-	quaternion quaternion::operator*=(
-		float other)
-	{
-		return *this = *this * other;
-	}
+	quaternion& quaternion::operator+=(const quaternion& other) { return *this = *this + other; }
+	quaternion& quaternion::operator-=(const quaternion& other) { return *this = *this - other; }
+	quaternion& quaternion::operator*=(const quaternion& other) { return *this = *this * other; }
+	quaternion& quaternion::operator*=(      float       other) { return *this = *this * other; }
 
 	bool quaternion::operator==(
 		const quaternion& other) const
@@ -351,38 +314,6 @@ namespace iw {
 		q.w = (m01 - m10) * num2;
 
 		return q;
-
-
-		//float dot = up.dot(target - eye);
-
-		//if (abs(dot + 1.0f) < 0.00001f) {
-		//	return quaternion(up, Pi);
-		//}
-
-		//if (abs(dot - 1.0f) < 0.00001f) {
-		//	return quaternion::identity;
-		//}
-
-		//float angle = acos(dot);
-		//vector3 axis = up.cross(target - eye).normalized();
-
-		//return from_axis_angle(axis, angle);
-
-		//vector3 forward = (target - eye).normalized();
-		//float dot = vector3::unit_z.dot(forward);
-
-		//if (abs(dot + 1.0f) < 0.00001f) {
-		//	return quaternion(up, Pi);
-		//}
-
-		//if (abs(dot - 1.0f) < 0.00001f) {
-		//	return quaternion::identity;
-		//}
-
-		//float angle  = acos(dot);
-		//vector3 axis = vector3::unit_z.cross(forward).normalized();
-
-		//return from_axis_angle(axis, angle);
 	}
 
 	std::ostream& math::operator<<(

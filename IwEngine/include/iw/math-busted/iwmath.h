@@ -31,6 +31,26 @@
 
 namespace iw {
 namespace math {
+	template<
+		size_t _columns,
+		size_t _rows,
+		typename _t = float>
+	struct mat;
+
+
+	template<
+		size_t _columns,
+		size_t _rows,
+		typename _t = float>
+	struct matrix;
+	
+	template<
+		size_t _rows,
+		typename _t = float>
+	using vector = mat<1, _rows, _t>;
+
+
+
 	struct vector2;
 	struct vector3;
 	struct vector4;

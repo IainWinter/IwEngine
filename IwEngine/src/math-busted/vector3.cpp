@@ -257,9 +257,7 @@ namespace iw {
 
 		const vector3& v = *this;
 
-		return 2.0f * u.dot(v)  * u
-			+ (s*s  - u.dot(u)) * v
-			+  2.0f * s * u.cross(v);
+		return v + ((u.cross(v) * s) + u.cross(u.cross(v))) * 2.0f;
 	}
 
 	vector3& vector3::operator*=(
