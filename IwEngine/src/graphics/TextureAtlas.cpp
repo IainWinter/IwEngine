@@ -28,16 +28,16 @@ namespace Graphics {
 		: Texture(std::forward<Texture>(texture))
 	{}
 
-	iw::vector2 TextureAtlas::MapCoords(
+	glm::vec2 TextureAtlas::MapCoords(
 		int tile,
-		iw::vector2 coords) const
+		glm::vec2 coords) const
 	{
 		const TexBounds& bounds = m_bounds.at(tile);
 
 		int x = bounds.X + bounds.Width  - bounds.X;
 		int y = bounds.Y + bounds.Height - bounds.Y;
 
-		return iw::vector2(x, y) * coords;
+		return glm::vec2(x, y) * coords;
 	}
 
 	iw::ref<Texture> TextureAtlas::GetSubTexture(
@@ -62,7 +62,7 @@ namespace Graphics {
 	}
 
 	//void TextureAtlas::GenTexBounds(
-	//	iw::vector4 backgroundColor)
+	//	iw::glm::vec4 backgroundColor)
 	//{
 	//	// algo for finding texture bounds
 	//}

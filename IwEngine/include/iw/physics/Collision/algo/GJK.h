@@ -10,16 +10,16 @@ namespace Physics {
 namespace algo {
 	struct Simplex {
 	private:
-		std::array<vector3, 4> m_points;
+		std::array<glm::vec3, 4> m_points;
 		unsigned m_size;
 
 	public:
 		Simplex()
-			: m_points({ 0, 0, 0, 0 })
+			: m_points(/*{ 0, 0, 0, 0 }*/)
 			, m_size(0)
 		{}
 
-		Simplex& operator=(std::initializer_list<vector3> list) {
+		Simplex& operator=(std::initializer_list<glm::vec3> list) {
 			for (auto v = list.begin(); v != list.end(); v++) {
 				m_points[std::distance(list.begin(), v)] = *v;
 			}
@@ -28,12 +28,12 @@ namespace algo {
 			return *this;
 		}
 
-		void push_front(vector3 point) {
+		void push_front(glm::vec3 point) {
 			m_points = { point, m_points[0], m_points[1], m_points[2] };
-			m_size = min(m_size + 1, 4u);
+			m_size = glm::min(m_size + 1, 4u);
 		}
 
-		vector3& operator[](unsigned i) { return m_points[i]; }
+		glm::vec3& operator[](unsigned i) { return m_points[i]; }
 		unsigned size() const { return m_size; }
 
 		auto begin() const { return m_points.begin(); }
@@ -50,13 +50,13 @@ namespace algo {
 		const Collider* colliderB, const Transform* transformB);
 
 namespace detail {
-	vector3 Support(
+	glm::vec3 Support(
 		const Collider* colliderA, const Transform* transformA,
 		const Collider* colliderB, const Transform* transformB,
-		vector3 direction);
+		glm::vec3 direction);
 
-	std::pair<std::vector<vector4>, size_t> GetFaceNormals(
-		const std::vector<vector3>& polytope,
+	std::pair<std::vector<glm::vec4>, size_t> GetFaceNormals(
+		const std::vector<glm::vec3>& polytope,
 		const std::vector<size_t>&  faces);
 
 	void AddIfUniqueEdge(
@@ -67,23 +67,23 @@ namespace detail {
 
 	bool NextSimplex(
 		Simplex& points,
-		vector3& direction);
+		glm::vec3& direction);
 
 	bool Line(
 		Simplex& points,
-		vector3& direction);
+		glm::vec3& direction);
 
 	bool Triangle(
 		Simplex& points,
-		vector3& direction);
+		glm::vec3& direction);
 
 	bool Tetrahedron(
 		Simplex& points,
-		vector3& direction);
+		glm::vec3& direction);
 
 	bool SameDirection(
-		const iw::vector3& direction,
-		const iw::vector3& ao);
+		const glm::vec3& direction,
+		const glm::vec3& ao);
 }
 }
 }

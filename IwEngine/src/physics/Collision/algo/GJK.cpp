@@ -9,20 +9,20 @@ namespace algo {
 		const Collider* colliderB, const Transform* transformB)
 	{
 		// Get initial support point in any direction
-		vector3 support = detail::Support(colliderA, transformA, colliderB, transformB, vector3::unit_x);
+		glm::vec3 support = detail::Support(colliderA, transformA, colliderB, transformB, glm::vec3(1, 0, 0));
 
 		// Simplex is an array of points, max count is 4
 		Simplex points;
 		points.push_front(support);
 
 		// New direction is backwards from that point
-		vector3 direction = -support;
+		glm::vec3 direction = -support;
 
 		size_t iterations = 0;
 		while (iterations++ < 32) {
 			support = detail::Support(colliderA, transformA, colliderB, transformB, direction);
 
-			if (support.dot(direction) <= 0) {
+			if (glm::dot(support, direction) <= 0) {
 				break;
 			}
 
@@ -41,20 +41,20 @@ namespace algo {
 	//	const Collider* colliderA, const Transform* transformA,
 	//	const Collider* colliderB, const Transform* transformB)
 	//{
-	//	std::vector<vector2> polytope(simplex.begin(), simplex.end());
+	//	std::vector<glm::vec2> polytope(simplex.begin(), simplex.end());
 	//
-	//	vector2 minNormal;
+	//	glm::vec2 minNormal;
 	//	float   minDistance = FLT_MAX;
 	//	size_t  minIndex = 0;
 	//
 	//	while (minDistance == FLT_MAX) {
 	//		for (size_t i = 0; i < polytope.size(); i++) {
-	//			vector2 a = polytope[i];
-	//			vector2 b = polytope[(i + 1) % polytope.size()];
+	//			glm::vec2 a = polytope[i];
+	//			glm::vec2 b = polytope[(i + 1) % polytope.size()];
 	//
-	//			vector2 ab = b - a;
+	//			glm::vec2 ab = b - a;
 	//
-	//			vector2 normal = vector2(ab.y, -ab.x).normalized();
+	//			glm::vec2 normal = glm::vec2(ab.y, -ab.x).normalized();
 	//			float distance = normal.dot(-a);
 	//
 	//			if (distance < 0) {
@@ -69,7 +69,7 @@ namespace algo {
 	//			}
 	//		}
 	//
-	//		vector2 support = detail::Support(colliderA, transformA, colliderB, transformB, minNormal);
+	//		glm::vec2 support = detail::Support(colliderA, transformA, colliderB, transformB, minNormal);
 	//		float sDistance = minNormal.dot(support);
 	//
 	//		if (fabsf(sDistance - minDistance) > 0.001f) {
@@ -95,7 +95,7 @@ namespace algo {
 		const Collider* colliderA, const Transform* transformA,
 		const Collider* colliderB, const Transform* transformB)
 	{
-		std::vector<vector3> polytope(simplex.begin(), simplex.end());
+		std::vector<glm::vec3> polytope(simplex.begin(), simplex.end());
 		std::vector<size_t>  faces = {
 			0, 1, 2,
 			0, 3, 1,
@@ -105,20 +105,20 @@ namespace algo {
 		
 		auto [normals, minFace] = detail::GetFaceNormals(polytope, faces);
 
-		vector3 minNormal;
+		glm::vec3 minNormal;
 		float   minDistance = FLT_MAX;
 		
 		size_t iterations = 0;
 		while (minDistance == FLT_MAX) {
-			minNormal   = normals[minFace].xyz();
+			minNormal   = glm::vec3(normals[minFace]);
 			minDistance = normals[minFace].w;
 
 			if (iterations++ > EPA_MAX_ITER) {
 				break;
 			}
 
-			vector3 support = detail::Support(colliderA, transformA, colliderB, transformB, minNormal);
-			float sDistance = minNormal.dot(support);
+			glm::vec3 support = detail::Support(colliderA, transformA, colliderB, transformB, minNormal);
+			float sDistance = glm::dot(minNormal, support);
 
 			if (abs(sDistance - minDistance) > 0.001f) {
 				minDistance = FLT_MAX;
@@ -189,30 +189,30 @@ namespace algo {
 	}
 
 namespace detail {
-	vector3 Support(
+	glm::vec3 Support(
 		const Collider* colliderA, const Transform* transformA,
 		const Collider* colliderB, const Transform* transformB,
-		vector3 direction)
+		glm::vec3 direction)
 	{
 		return colliderA->FindFurthestPoint(transformA,  direction)
 			 - colliderB->FindFurthestPoint(transformB, -direction);
 	}
 
-	std::pair<std::vector<vector4>, size_t> GetFaceNormals(
-		const std::vector<vector3>& polytope,
+	std::pair<std::vector<glm::vec4>, size_t> GetFaceNormals(
+		const std::vector<glm::vec3>& polytope,
 		const std::vector<size_t>&  faces)
 	{
-		std::vector<vector4> normals;
+		std::vector<glm::vec4> normals;
 		size_t minTriangle = 0;
 		float  minDistance = FLT_MAX;
 
 		for (size_t i = 0; i < faces.size(); i += 3) {
-			vector3 a = polytope[faces[i    ]];
-			vector3 b = polytope[faces[i + 1]];
-			vector3 c = polytope[faces[i + 2]];
+			glm::vec3 a = polytope[faces[i    ]];
+			glm::vec3 b = polytope[faces[i + 1]];
+			glm::vec3 c = polytope[faces[i + 2]];
 
-			vector3 normal = (b - a).cross(c - a).normalized();
-			float distance = normal.dot(a);
+			glm::vec3 normal = glm::normalize(glm::cross(b - a, c - a));
+			float distance = glm::dot(normal, a);
 
 			if (distance < 0) {
 				normal   *= -1;
@@ -253,7 +253,7 @@ namespace detail {
 
 	bool NextSimplex(
 		Simplex& points,
-		vector3& direction)
+		glm::vec3& direction)
 	{
 		switch (points.size()) {
 			case 2: return Line       (points, direction);
@@ -267,16 +267,16 @@ namespace detail {
 
 	bool Line(
 		Simplex& points,
-		vector3& direction)
+		glm::vec3& direction)
 	{
-		vector3 a = points[0];
-		vector3 b = points[1];
+		glm::vec3 a = points[0];
+		glm::vec3 b = points[1];
 
-		vector3 ab = b - a;
-		vector3 ao =   - a;
+		glm::vec3 ab = b - a;
+		glm::vec3 ao =   - a;
 
 		if (SameDirection(ab, ao)) {
-			direction = ab.cross(ao).cross(ab);
+			direction = glm::cross(glm::cross(ab, ao), ab);
 		}
 
 		else {
@@ -289,22 +289,22 @@ namespace detail {
 
 	bool Triangle(
 		Simplex& points,
-		vector3& direction)
+		glm::vec3& direction)
 	{
-		vector3 a = points[0];
-		vector3 b = points[1];
-		vector3 c = points[2];
+		glm::vec3 a = points[0];
+		glm::vec3 b = points[1];
+		glm::vec3 c = points[2];
 
-		vector3 ab = b - a;
-		vector3 ac = c - a;
-		vector3 ao =   - a;
+		glm::vec3 ab = b - a;
+		glm::vec3 ac = c - a;
+		glm::vec3 ao =   - a;
 
-		vector3 abc = ab.cross(ac);
+		glm::vec3 abc = glm::cross(ab, ac);
 
-		if (SameDirection(abc.cross(ac), ao)) {
+		if (SameDirection(glm::cross(abc, ac), ao)) {
 			if (SameDirection(ac, ao)) {
 				points = { a, c };
-				direction = ac.cross(ao).cross(ac);
+				direction = glm::cross(glm::cross(ac, ao), ac);
 			}
 
 			else {
@@ -313,7 +313,7 @@ namespace detail {
 		}
 
 		else {
-			if (SameDirection(ab.cross(abc), ao)) {
+			if (SameDirection(glm::cross(ab, abc), ao)) {
 				return Line(points = { a, b }, direction);
 			}
 
@@ -334,21 +334,21 @@ namespace detail {
 
 	bool Tetrahedron(
 		Simplex& points,
-		vector3& direction)
+		glm::vec3& direction)
 	{
-		vector3 a = points[0];
-		vector3 b = points[1];
-		vector3 c = points[2];
-		vector3 d = points[3];
+		glm::vec3 a = points[0];
+		glm::vec3 b = points[1];
+		glm::vec3 c = points[2];
+		glm::vec3 d = points[3];
 
-		vector3 ab = b - a;
-		vector3 ac = c - a;
-		vector3 ad = d - a;
-		vector3 ao =   - a;
+		glm::vec3 ab = b - a;
+		glm::vec3 ac = c - a;
+		glm::vec3 ad = d - a;
+		glm::vec3 ao =   - a;
 
-		vector3 abc = ab.cross(ac);
-		vector3 acd = ac.cross(ad);
-		vector3 adb = ad.cross(ab);
+		glm::vec3 abc = glm::cross(ab, ac);
+		glm::vec3 acd = glm::cross(ac, ad);
+		glm::vec3 adb = glm::cross(ad, ab);
 
 		if (SameDirection(abc, ao)) {
 			return Triangle(points = { a, b, c }, direction);
@@ -366,10 +366,10 @@ namespace detail {
 	}
 
 	bool SameDirection(
-		const vector3& direction,
-		const vector3& ao)
+		const glm::vec3& direction,
+		const glm::vec3& ao)
 	{
-		return direction.dot(ao) > 0;
+		return glm::dot(direction, ao) > 0;
 	}
 }
 }

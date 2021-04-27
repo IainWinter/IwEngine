@@ -8,7 +8,7 @@ namespace iw {
 namespace Physics {
 	template<
 		typename T,
-		typename V = iw::vector3,
+		typename V = glm::vec3,
 		typename K = int>
 	class Grid {
 	private:
@@ -53,11 +53,11 @@ namespace Physics {
 			const AABB& bounds);
 
 		template<>
-		K GetKey<iw::vector2>(
+		K GetKey<glm::vec2>(
 			const V& position,
 			const AABB& bounds)
 		{
-			iw::vector3 key = (bounds.Center() + position) / m_cellDimensions;
+			glm::vec3 key = (bounds.Center() + position) / m_cellDimensions;
 			K x = (K)key.x;
 			K y = (K)key.y;
 
@@ -68,11 +68,11 @@ namespace Physics {
 		}
 
 		template<>
-		K GetKey<iw::vector3>(
+		K GetKey<glm::vec3>(
 			const V& position,
 			const AABB& bounds)
 		{
-			iw::vector3 key = (bounds.Center() + position) / m_cellDimensions;
+			glm::vec3 key = (bounds.Center() + position) / m_cellDimensions;
 			K x = (K)key.x;
 			K y = (K)key.y;
 			K z = (K)key.z;
@@ -85,11 +85,11 @@ namespace Physics {
 		}
 
 		template<>
-		K GetKey<iw::vector4>(
+		K GetKey<glm::vec4>(
 			const V& position,
 			const AABB& bounds)
 		{
-			iw::vector3 key = (bounds.Center() + position) / m_cellDimensions;
+			glm::vec3 key = (bounds.Center() + position) / m_cellDimensions;
 			K x = (K)key.x;
 			K y = (K)key.y;
 			K z = (K)key.z;

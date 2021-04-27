@@ -15,7 +15,7 @@ namespace impl {
 
 		PlaneCollider()
 			: Collider<V>(ColliderType::PLANE)
-			, Plane(0.0f, 0.0f)
+			, Plane(glm::vec3(0.0f), 0.0f)
 		{}
 
 		PlaneCollider(
@@ -42,11 +42,11 @@ namespace impl {
 
 		Transform Trans() const override {
 			Transform transform;
-			transform.Position = Plane.P.normalized() * Plane.D;
-			transform.Scale    = 10.0f; // should be width, height when made non infinite
+			transform.Position = glm::normalize(Plane.P) * Plane.D;
+			transform.Scale    = glm::vec3(10.0f); // should be width, height when made non infinite
 
-			transform.Rotation =  quaternion::from_look_at(-Plane.P);
-			transform.Rotation *= quaternion::from_axis_angle(transform.Right(), -Pi / 2);
+			transform.Rotation =  glm::lookAt(glm::vec3(0), -Plane.P, glm::vec3(0, 1, 0));
+			transform.Rotation *= glm::angleAxis(-glm::pi<float>() * 0.5f, transform.Right());
 
 			return transform;
 		}

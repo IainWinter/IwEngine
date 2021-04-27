@@ -9,9 +9,14 @@
 #include "iw/util/memory/ref.h"
 #include "iw/util/tuple/foreach.h"
 #include "iw/util/memory/linear_allocator.h"
-#include "iw/math/vector2.h"
-#include "iw/math/vector3.h"
-#include "iw/math/vector4.h"
+//#include "iw/math/vector2.h"
+//#include "iw/math/vector3.h"
+//#include "iw/math/vector4.h"
+
+#include "glm/vec2.hpp"
+#include "glm/vec3.hpp"
+#include "glm/vec4.hpp"
+
 #include <vector>
 #include <unordered_map>
 #include <tuple>
@@ -117,9 +122,9 @@ namespace Graphics {
 		MAT_SET(unsigned*,   1, 1)
 		MAT_SET(float*,      1, 1)
 		MAT_SET(double*,     1, 1)
-		MAT_SET(vector2, 2, 1)
-		MAT_SET(vector3, 3, 1)
-		MAT_SET(vector4, 4, 1)
+		MAT_SET(glm::vec2, 2, 1)
+		MAT_SET(glm::vec3, 3, 1)
+		MAT_SET(glm::vec4, 4, 1)
 		MAT_SET(Color,       4, 1)
 
 #undef MAT_SET

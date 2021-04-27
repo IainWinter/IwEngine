@@ -13,10 +13,10 @@ namespace Physics {
 			Rigidbody* aBody = manifold.ObjA->IsDynamic() ? (Rigidbody*)manifold.ObjA : nullptr;
 			Rigidbody* bBody = manifold.ObjB->IsDynamic() ? (Rigidbody*)manifold.ObjB : nullptr;
 
-			vector3 aVel = aBody ? aBody->Velocity : 0.0f;
-			vector3 bVel = bBody ? bBody->Velocity : 0.0f;
-			vector3 rVel = bVel - aVel;
-			scalar  nSpd = rVel.dot(manifold.Normal);
+			glm::vec3 aVel = aBody ? aBody->Velocity : glm::vec3(0.0f);
+			glm::vec3 bVel = bBody ? bBody->Velocity : glm::vec3(0.0f);
+			glm::vec3 rVel = bVel - aVel;
+			scalar  nSpd = glm::dot(rVel, manifold.Normal);
 
 			scalar aInvMass = aBody ? aBody->InvMass : 1.0f;
 			scalar bInvMass = bBody ? bBody->InvMass : 1.0f;
@@ -31,7 +31,7 @@ namespace Physics {
 
 			scalar j = -(1.0f + e) * nSpd / (aInvMass + bInvMass);
 
-			vector3 impluse = j * manifold.Normal;
+			glm::vec3 impluse = j * manifold.Normal;
 
 			if (aBody ? aBody->IsKinematic : false) {
 				aVel -= impluse * aInvMass;
@@ -44,26 +44,26 @@ namespace Physics {
 			// Friction
 
 			rVel = bVel - aVel;
-			nSpd = rVel.dot(manifold.Normal);
+			nSpd = glm::dot(rVel, manifold.Normal);
 
-			iw::vector3 tangent = (rVel - nSpd * manifold.Normal).normalized();
-			scalar      fVel = rVel.dot(tangent);
+			glm::vec3 tangent = glm::normalize(rVel - nSpd * manifold.Normal);
+			scalar      fVel = glm::dot(rVel, tangent);
 
 			scalar aSF = aBody ? aBody->StaticFriction  : 0.0f;
 			scalar bSF = bBody ? bBody->StaticFriction  : 0.0f;
 			scalar aDF = aBody ? aBody->DynamicFriction : 0.0f;
 			scalar bDF = bBody ? bBody->DynamicFriction : 0.0f;
-			scalar mu  = iw::vector2(aSF, bSF).length();
+			scalar mu  = glm::vec2(aSF, bSF).length();
 
 			scalar f  = -fVel / (aInvMass + bInvMass);
 
-			vector3 friction;
+			glm::vec3 friction;
 			if (abs(f) < j * mu) {
 				friction = f * tangent;
 			}
 
 			else {
-				mu = vector2(aDF, bDF).length();
+				mu = glm::vec2(aDF, bDF).length();
 				friction = -j * tangent * mu;
 			}
 

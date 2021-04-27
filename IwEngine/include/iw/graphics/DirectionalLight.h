@@ -23,14 +23,14 @@ namespace Graphics {
 			Renderer* renderer) override;
 
 		IWGRAPHICS_API
-		matrix4 ViewProjection() const;
+		glm::mat4 ViewProjection() const;
 
-		IWGRAPHICS_API quaternion Rotation() const;
-		IWGRAPHICS_API quaternion WorldRotation() const;
+		IWGRAPHICS_API glm::quat Rotation() const;
+		IWGRAPHICS_API glm::quat WorldRotation() const;
 
 		IWGRAPHICS_API
 		void SetRotation(
-			const quaternion& rotation);
+			const glm::quat& rotation);
 
 		IWGRAPHICS_API
 		Camera* ShadowCamera() const override;

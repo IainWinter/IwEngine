@@ -291,8 +291,8 @@ namespace Graphics {
 			//	aibone->mOffsetMatrix.Decompose(scale, rot, pos);
 			//
 			//	Bone bone;
-			//	bone.Offset.Position = iw::vector3(pos.x,     pos.y,   pos.z);
-			//	bone.Offset.Scale    = iw::vector3(scale.x, scale.y, scale.z);
+			//	bone.Offset.Position = glm::vec3(pos.x,     pos.y,   pos.z);
+			//	bone.Offset.Scale    = glm::vec3(scale.x, scale.y, scale.z);
 			//	bone.Offset.Rotation = iw::quaternion::from_euler_angles(rot.x, rot.y, rot.z);
 			//
 			//	bone.WeightCount = aibone->mNumWeights;
@@ -322,13 +322,13 @@ namespace Graphics {
 		Model* model)
 	{
 		if (node->mNumMeshes > 0) {
-			matrix4 transformation(
+			glm::mat4 transformation(
 				node->mTransformation.a1, node->mTransformation.a2, node->mTransformation.a3, node->mTransformation.a4,
 				node->mTransformation.b1, node->mTransformation.b2, node->mTransformation.b3, node->mTransformation.b4,
 				node->mTransformation.c1, node->mTransformation.c2, node->mTransformation.c3, node->mTransformation.c4,
 				node->mTransformation.d1, node->mTransformation.d2, node->mTransformation.d3, node->mTransformation.d4);
-
-			transformation.transpose();
+			
+			glm::transpose(transformation);
 
 			Transform transform = Transform::FromMatrix(transformation);
 

@@ -171,13 +171,13 @@ namespace detail {
 		data->m_topology = m_topology;
 		data->m_name = m_name + " subtracted from " + other->Name();
 
-		iw::vector3* iverts = (iw::vector3*)       Get(bName::POSITION);
-		iw::vector3* jverts = (iw::vector3*)other->Get(bName::POSITION);
+		glm::vec3* iverts = (glm::vec3*)       Get(bName::POSITION);
+		glm::vec3* jverts = (glm::vec3*)other->Get(bName::POSITION);
 
 		unsigned icount =        GetCount(bName::POSITION);
 		unsigned jcount = other->GetCount(bName::POSITION);
 
-		iw::vector3* verts = new iw::vector3[icount * jcount];
+		glm::vec3* verts = new glm::vec3[icount * jcount];
 		unsigned*    index = new unsigned   [icount * jcount];
 
 		for (unsigned i = 0; i < icount; i++) {
@@ -188,12 +188,12 @@ namespace detail {
 		}
 
 		//for (unsigned i = 0; i < icount * jcount; i++) {
-		//	iw::vector3 a = verts[i];
-		//	iw::vector3 b;
+		//	glm::vec3 a = verts[i];
+		//	glm::vec3 b;
 		//	float max = 0.0f;
 
 		//	for (unsigned j = 0; j < icount * jcount; j++) {
-		//		iw::vector3 v = verts[j + i * icount];
+		//		glm::vec3 v = verts[j + i * icount];
 		//		float distance = (a - v).length_squared();
 		//		if (distance > max) {
 		//			max = distance;
@@ -347,22 +347,22 @@ namespace detail {
 
 		// check if mesh description has normals
 
-		vector3*  positions = (vector3*)Get(bName::POSITION);
+		glm::vec3*  positions = (glm::vec3*)Get(bName::POSITION);
 		unsigned* index     = GetIndex();
 		
-		vector3* normals = new vector3[GetCount(bName::POSITION)];
+		glm::vec3* normals = new glm::vec3[GetCount(bName::POSITION)];
 
 		for (unsigned i = 0; i < GetIndexCount(); i += 3) {
-			vector3& v1 = positions[index[i + 0]];
-			vector3& v2 = positions[index[i + 1]];
-			vector3& v3 = positions[index[i + 2]];
+			glm::vec3& v1 = positions[index[i + 0]];
+			glm::vec3& v2 = positions[index[i + 1]];
+			glm::vec3& v3 = positions[index[i + 2]];
 
-			vector3 face = (v2 - v1).cross(v3 - v1).normalized();
+			glm::vec3 face = glm::normalize(glm::cross(v2 - v1, v3 - v1));
 
 			if (smooth) {
-				normals[index[i + 0]] = (normals[index[i + 0]] + face).normalized();
-				normals[index[i + 1]] = (normals[index[i + 1]] + face).normalized();
-				normals[index[i + 2]] = (normals[index[i + 2]] + face).normalized();
+				normals[index[i + 0]] = glm::normalize(normals[index[i + 0]] + face);
+				normals[index[i + 1]] = glm::normalize(normals[index[i + 1]] + face);
+				normals[index[i + 2]] = glm::normalize(normals[index[i + 2]] + face);
 			}
 
 			else {
@@ -373,6 +373,10 @@ namespace detail {
 		}
 
 		SetBufferData(bName::NORMAL, GetCount(bName::POSITION), normals);
+	}
+
+	float cross_length(glm::vec2 a, glm::vec2 b) { // another copy in marching cubes.h in common
+		return a.x * b.y - a.y * b.x;
 	}
 
 	// Generate tangents and bitangents from vertex normals and uv corrds
@@ -394,36 +398,36 @@ namespace detail {
 			GenNormals(smooth);
 		}
 
-		vector3*  positions = (vector3*)Get(bName::POSITION);
-		vector2*  uvs       = (vector2*)Get(bName::UV);
+		glm::vec3*  positions = (glm::vec3*)Get(bName::POSITION);
+		glm::vec2*  uvs       = (glm::vec2*)Get(bName::UV);
 		unsigned* index     = GetIndex();
 
 		// check if mesh description has tangents and bi tangents
 
-		vector3* tangents  = new vector3[GetCount(bName::NORMAL)];
-		vector3* btangents = new vector3[GetCount(bName::NORMAL)];
+		glm::vec3* tangents  = new glm::vec3[GetCount(bName::NORMAL)];
+		glm::vec3* btangents = new glm::vec3[GetCount(bName::NORMAL)];
 
 		unsigned v = 0;
 		for (unsigned i = 0; i < GetIndexCount(); i += 3) {
-			vector3& pos1 = positions[index[i + 0]];
-			vector3& pos2 = positions[index[i + 1]];
-			vector3& pos3 = positions[index[i + 2]];
-			vector2& uv1 = uvs[index[i + 0]];
-			vector2& uv2 = uvs[index[i + 1]];
-			vector2& uv3 = uvs[index[i + 2]];
+			glm::vec3& pos1 = positions[index[i + 0]];
+			glm::vec3& pos2 = positions[index[i + 1]];
+			glm::vec3& pos3 = positions[index[i + 2]];
+			glm::vec2& uv1 = uvs[index[i + 0]];
+			glm::vec2& uv2 = uvs[index[i + 1]];
+			glm::vec2& uv3 = uvs[index[i + 2]];
 
-			vector3 edge1 = pos2 - pos1;
-			vector3 edge2 = pos3 - pos1;
-			vector2 duv1 = uv2 - uv1;
-			vector2 duv2 = uv3 - uv1;
+			glm::vec3 edge1 = pos2 - pos1;
+			glm::vec3 edge2 = pos3 - pos1;
+			glm::vec2 duv1 = uv2 - uv1;
+			glm::vec2 duv2 = uv3 - uv1;
 
-			float f = 1.0f / duv1.cross_length(duv2);
+			float f = 1.0f / cross_length(duv1, duv2);
 
-			vector3 tangent   = f * (edge1 * duv2.y - edge2 * duv1.y);
-			vector3 bitangent = f * (edge2 * duv1.x - edge1 * duv2.x);
+			glm::vec3 tangent   = f * (edge1 * duv2.y - edge2 * duv1.y);
+			glm::vec3 bitangent = f * (edge2 * duv1.x - edge1 * duv2.x);
 
-			tangent  .normalize();
-			bitangent.normalize();
+			glm::normalize(tangent);
+			glm::normalize(bitangent);
 
 			tangents[index[i + 0]] = tangent;
 			tangents[index[i + 1]] = tangent;
@@ -483,10 +487,10 @@ namespace detail {
 
 		if (m_description.HasBuffer(bName::POSITION)) {
 			BufferData buffer = GetBuffer(m_description.GetBufferIndex(bName::POSITION));
-			vector3* data     = buffer.Ptr<vector3>();
+			glm::vec3* data     = buffer.Ptr<glm::vec3>();
 
 			for (int i = 0; i < buffer.Count; i++) {
-				vector4 v = vector4(data[i], 1) * transform.WorldTransformation();
+				glm::vec4 v = glm::vec4(data[i], 1) * transform.WorldTransformation();
 				data[i] = v;
 			}
 
@@ -495,10 +499,10 @@ namespace detail {
 
 		if (m_description.HasBuffer(bName::NORMAL)) {
 			BufferData buffer = GetBuffer(m_description.GetBufferIndex(bName::NORMAL));
-			vector3*   data   = buffer.Ptr<vector3>();
+			glm::vec3*   data   = buffer.Ptr<glm::vec3>();
 
 			for (int i = 0; i < buffer.Count; i++) {
-				vector4 v = vector4(data[i], 1) * transform.WorldTransformation();
+				glm::vec4 v = glm::vec4(data[i], 1) * transform.WorldTransformation();
 				data[i] = v;
 			}
 
@@ -507,10 +511,10 @@ namespace detail {
 
 		if (m_description.HasBuffer(bName::TANGENT)) {
 			BufferData buffer = GetBuffer(m_description.GetBufferIndex(bName::TANGENT));
-			vector3* data = buffer.Ptr<vector3>();
+			glm::vec3* data = buffer.Ptr<glm::vec3>();
 
 			for (int i = 0; i < buffer.Count; i++) {
-				vector4 v = vector4(data[i], 1) * transform.WorldTransformation();
+				glm::vec4 v = glm::vec4(data[i], 1) * transform.WorldTransformation();
 				data[i] = v;
 			}
 
@@ -519,10 +523,10 @@ namespace detail {
 
 		if (m_description.HasBuffer(bName::BITANGENT)) {
 			BufferData buffer = GetBuffer(m_description.GetBufferIndex(bName::BITANGENT));
-			vector3* data = buffer.Ptr<vector3>();
+			glm::vec3* data = buffer.Ptr<glm::vec3>();
 
 			for (int i = 0; i < buffer.Count; i++) {
-				vector4 v = vector4(data[i], 1) * transform.WorldTransformation();
+				glm::vec4 v = glm::vec4(data[i], 1) * transform.WorldTransformation();
 				data[i] = v;
 			}
 

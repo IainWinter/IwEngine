@@ -53,7 +53,7 @@ namespace impl {
 			const Transform* transform,
 			V direction) const override
 		{
-			//vector4 dir = vector4(direction, 1);
+			//glm::vec4 dir = glm::vec4(direction, 1);
 			//dir *= transform->WorldTransformation().inverted(); // I think we can transform the direction instead of the collider here
 
 			//direction = dir.xyz();
@@ -62,16 +62,16 @@ namespace impl {
 			float maxDistance = -FLT_MAX;
 
 			for (V point : m_points) {
-				point = V(vector4(point, 1) * transform->WorldTransformation().transposed());
+				point = V(glm::vec4(point, 1) * glm::transpose(transform->WorldTransformation()));
 
-				float distance = point.dot(direction);
+				float distance = glm::dot(point, direction);
 				if (distance > maxDistance) {
 					maxDistance = distance;
 					maxPoint = point;
 				}
 			}
 
-			//vector4 mp = vector4(maxPoint, 1);  // and then transform the final point?
+			//glm::vec4 mp = glm::vec4(maxPoint, 1);  // and then transform the final point?
 			//mp *= transform->WorldTransformation();
 
 			return maxPoint;//mp.xyz();
@@ -90,24 +90,24 @@ namespace impl {
 //	using namespace iw;
 //
 //struct Collider {
-//	virtual vector3 FindFurthestPoint(
-//		vector3 direction) const = 0;
+//	virtual glm::vec3 FindFurthestPoint(
+//		glm::vec3 direction) const = 0;
 //};
 //
 //struct MeshCollider
 //	: Collider
 //{
 //private:
-//	std::vector<vector3> m_points;
+//	std::vector<glm::vec3> m_points;
 //
 //public:
-//	vector3 FindFurthestPoint(
-//		vector3 direction) const override
+//	glm::vec3 FindFurthestPoint(
+//		glm::vec3 direction) const override
 //	{
-//		vector3 maxPoint;
+//		glm::vec3 maxPoint;
 //		float   maxDistance = -FLT_MAX;
 //
-//		for (vector3 point : m_points) {
+//		for (glm::vec3 point : m_points) {
 //			float distance = point.dot(direction);
 //			if (distance > maxDistance) {
 //				maxDistance = distance;
@@ -119,10 +119,10 @@ namespace impl {
 //	}
 //};
 //
-//vector3 Support(
+//glm::vec3 Support(
 //	const Collider* colliderA,
 //	const Collider* colliderB,
-//	vector3 direction)
+//	glm::vec3 direction)
 //{
 //	return colliderA->FindFurthestPoint( direction)
 //		- colliderB->FindFurthestPoint(-direction);
@@ -130,7 +130,7 @@ namespace impl {
 //
 //struct Simplex {
 //private:
-//	std::array<vector3, 4> m_points;
+//	std::array<glm::vec3, 4> m_points;
 //	unsigned m_size;
 //
 //public:
@@ -139,7 +139,7 @@ namespace impl {
 //		, m_size(0)
 //	{}
 //
-//	Simplex& operator=(std::initializer_list<vector3> list) {
+//	Simplex& operator=(std::initializer_list<glm::vec3> list) {
 //		for (auto* v = list.begin(); v != list.end(); v++) {
 //			m_points[std::distance(list.begin(), v)] = *v;
 //		}
@@ -148,12 +148,12 @@ namespace impl {
 //		return *this;
 //	}
 //
-//	void push_front(vector3 point) {
+//	void push_front(glm::vec3 point) {
 //		m_points = { point, m_points[0], m_points[1], m_points[2] };
 //		m_size = m_size == 4 ? 4 : m_size + 1;
 //	}
 //
-//	vector3& operator[](unsigned i) { return m_points[i]; }
+//	glm::vec3& operator[](unsigned i) { return m_points[i]; }
 //	unsigned size() const { return m_size; }
 //
 //	auto begin() const { return m_points.begin(); }
@@ -162,19 +162,19 @@ namespace impl {
 //
 //bool Line(
 //	Simplex& points,
-//	vector3& direction) { return false; }
+//	glm::vec3& direction) { return false; }
 //
 //bool Triangle(
 //	Simplex& points,
-//	vector3& direction) { return false; }
+//	glm::vec3& direction) { return false; }
 //
 //bool Tetrahedron(
 //	Simplex& points,
-//	vector3& direction) { return false; }
+//	glm::vec3& direction) { return false; }
 //
 //bool NextSimplex(
 //	Simplex& points,
-//	vector3& direction)
+//	glm::vec3& direction)
 //{
 //	switch (points.size()) {
 //		case 2: return Line       (points, direction);
@@ -192,14 +192,14 @@ namespace impl {
 //	const Collider* colliderB)
 //{
 //	// Get initial support point in any direction
-//	vector3 support = Support(colliderA, colliderB, vector3::unit_x);
+//	glm::vec3 support = Support(colliderA, colliderB, glm::vec3::unit_x);
 //
 //	// Simplex is an array of points, max count is 4
 //	Simplex points;
 //	points.push_front(support);
 //
 //	// New direction is towards the origin
-//	vector3 direction = -support;
+//	glm::vec3 direction = -support;
 //
 //	while (true) {
 //		support = Support(colliderA, colliderB, direction);

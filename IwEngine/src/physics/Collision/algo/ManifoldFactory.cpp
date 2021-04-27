@@ -2,6 +2,8 @@
 #include "iw/physics/Collision/algo/GJK.h"
 #include <iw\log\logger.h>
 
+#include "glm/common.hpp"
+
 namespace iw {
 namespace Physics {
 namespace algo {
@@ -9,27 +11,27 @@ namespace algo {
 		const SphereCollider* a, const Transform* ta,
 		const SphereCollider* b, const Transform* tb)
 	{
-		vector3 A = a->Center + ta->WorldPosition();
-		vector3 B = b->Center + tb->WorldPosition();
+		glm::vec3 A = a->Center + ta->WorldPosition();
+		glm::vec3 B = b->Center + tb->WorldPosition();
 
-		float Ar = a->Radius * ta->WorldScale().major();
-		float Br = b->Radius * tb->WorldScale().major();
+		float Ar = a->Radius * major(ta->WorldScale());
+		float Br = b->Radius * major(tb->WorldScale());
 
-		vector3 AtoB = B - A;
-		vector3 BtoA = A - B;
+		glm::vec3 AtoB = B - A;
+		glm::vec3 BtoA = A - B;
 
 		if (AtoB.length() > Ar + Br) {
 			return {};
 		}
 
-		A += AtoB.normalized() * Ar;
-		B += BtoA.normalized() * Br;
+		A += glm::normalize(AtoB) * Ar;
+		B += glm::normalize(BtoA) * Br;
 
 		BtoA = A - B;
 
 		return {
 			A, B,
-			BtoA.normalized(),
+			glm::normalize(BtoA),
 			BtoA.length(),
 			true
 		};
@@ -41,28 +43,26 @@ namespace algo {
 		const SphereCollider* a, const Transform* ta,
 		const PlaneCollider*  b, const Transform* tb)
 	{
-		vector3 A  = a->Center + ta->WorldPosition();
-		float   Ar = a->Radius * ta->WorldScale().major();
+		glm::vec3 A  = a->Center + ta->WorldPosition();
+		float     Ar = a->Radius * major(ta->WorldScale());
 
-		vector3 N = b->Plane.P * tb->WorldRotation();
-		N.normalize();
-		
-		vector3 P = N * b->Plane.D + tb->WorldPosition();
+		glm::vec3 N = glm::normalize(b->Plane.P * tb->WorldRotation());
+		glm::vec3 P = N * b->Plane.D + tb->WorldPosition();
 
-		float d = (A - P).dot(N); // distance from center of sphere to plane surface
+		float d = glm::dot(A - P, N); // distance from center of sphere to plane surface
 
 		if (d > Ar) {
 			return {};
 		}
 		
-		vector3 B = A - N * d;
+		glm::vec3 B = A - N * d;
 		        A = A - N * Ar;
 
-		vector3 BtoA = A - B;
+		glm::vec3 BtoA = A - B;
 
 		return {
 			A, B,
-			BtoA.normalized(),
+			glm::normalize(BtoA),
 			BtoA.length(),
 			true
 		};
@@ -75,52 +75,54 @@ namespace algo {
 		float Bhs = 1.0f;
 		float Brs = 1.0f;
 
-		vector3 s = tb->WorldScale();
-		if (b->Direction == vector3::unit_x) {
+		glm::vec3 s = tb->WorldScale();
+		if (b->Direction == glm::vec3(1, 0, 0)) {
 			Bhs = s.x;
-			Brs = vector2(s.y, s.z).major();
+			Brs = major(glm::vec2(s.y, s.z));
 		}
 
-		else if (b->Direction == vector3::unit_y) {
+		else if (b->Direction == glm::vec3(0, 1, 0)) {
 			Bhs = s.y;
-			Brs = vector2(s.x, s.z).major();
+			Brs = major(glm::vec2(s.x, s.z));
 		}
 
-		else if (b->Direction == vector3::unit_z) {
+		else if (b->Direction == glm::vec3(0, 0, 1)) {
 			Bhs = s.z;
-			Brs = vector2(s.x, s.y).major();
+			Brs = major(glm::vec2(s.x, s.y));
 		}
 
-		vector3 offset = b->Direction * tb->WorldRotation() * (b->Height * Bhs / 2 - b->Radius * Brs);
+		glm::vec3 offset = b->Direction * tb->WorldRotation() * (b->Height * Bhs / 2 - b->Radius * Brs);
 
-		vector3 A = a->Center          + ta->WorldPosition();
-		vector3 B = b->Center - offset + tb->WorldPosition();
-		vector3 C = b->Center + offset + tb->WorldPosition(); // might not be correct
+		glm::vec3 A = a->Center          + ta->WorldPosition();
+		glm::vec3 B = b->Center - offset + tb->WorldPosition();
+		glm::vec3 C = b->Center + offset + tb->WorldPosition(); // might not be correct
 		
-		float Ar = a->Radius * ta->WorldScale().major();
+		float Ar = a->Radius * major(ta->WorldScale());
 		float Br = b->Radius * Brs;
 
-		vector3 BtoA = A - B;
-		vector3 BtoC = C - B;
+		glm::vec3 BtoA = A - B;
+		glm::vec3 BtoC = C - B;
 
-		float   d = iw::clamp(BtoC.normalized().dot(BtoA), 0.0f, BtoC.length());
-		vector3 D = B + BtoC.normalized() * d;
+		float   d = glm::clamp<float>(glm::dot(glm::normalize(BtoC), BtoA), 0.0f, BtoC.length());
+		glm::vec3 D = B + glm::normalize(BtoC) * d;
 
-		vector3 AtoD = D - A;
-		vector3 DtoA = A - D;
+		glm::vec3 AtoD = D - A;
+		glm::vec3 DtoA = A - D;
 
 		if (AtoD.length() > Ar + Br) {
 			return {};
 		}
 
-		A += AtoD.normalized() * Ar;
-		D += DtoA.normalized() * Br;
+
+
+		A += glm::normalize(AtoD) * Ar;
+		D += glm::normalize(DtoA) * Br;
 
 		DtoA = A - D;
 
 		return {
 			A, D,
-			DtoA.normalized(),
+			glm::normalize(DtoA),
 			DtoA.length(),
 			true
 		};
@@ -130,16 +132,16 @@ namespace algo {
 		const PlaneCollider* a, const Transform* ta,
 		const MeshCollider*  b, const Transform* tb)
 	{
-		vector3 N = a->Plane.P * ta->WorldRotation();
-		N.normalize();
+		glm::vec3 N = a->Plane.P * ta->WorldRotation();
+		glm::normalize(N);
 
-		vector3 P = N * a->Plane.D + ta->WorldPosition();
+		glm::vec3 P = N * a->Plane.D + ta->WorldPosition();
 
-		vector3 B = b->FindFurthestPoint(tb, -N);
+		glm::vec3 B = b->FindFurthestPoint(tb, -N);
 
-		vector3 BtoP = P - B;
+		glm::vec3 BtoP = P - B;
 		
-		float distance = BtoP.dot(N);
+		float distance = glm::dot(BtoP, N);
 
 		if (distance < 0) {
 			return {};
@@ -163,7 +165,7 @@ namespace algo {
 			return EPA(result.second, a, ta, b, tb);
 		}
 
-		return {0, 0, 0, 0, result.first};
+		return {glm::vec3(), glm::vec3(), glm::vec3(), 0, result.first};
 	}
 
 	// Swaps
@@ -171,7 +173,7 @@ namespace algo {
 	void SwapPoints(
 		ManifoldPoints& points)
 	{
-		iw::vector3 T = points.A;
+		glm::vec3 T = points.A;
 		points.A = points.B;
 		points.B = T;
 

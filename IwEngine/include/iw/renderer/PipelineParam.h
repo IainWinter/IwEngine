@@ -3,9 +3,14 @@
 #include "IwRenderer.h"
 #include "Texture.h"
 #include "PipelineParamType.h"
-#include "iw/math/matrix2.h"
-#include "iw/math/matrix3.h"
-#include "iw/math/matrix4.h"
+//#include "iw/math/matrix2.h"
+//#include "iw/math/matrix3.h"
+//#include "iw/math/matrix4.h"
+
+#include "glm/mat2x2.hpp"
+#include "glm/mat3x3.hpp"
+#include "glm/mat4x4.hpp"
+
 #include "iw/log/logger.h"
 
 namespace iw {
@@ -71,15 +76,15 @@ namespace RenderAPI {
 
 		IWRENDERER_API
 		virtual void SetAsMat2(
-			const iw::matrix2& matrix) = 0;
+			const glm::mat2& matrix) = 0;
 
 		IWRENDERER_API
 		virtual void SetAsMat3(
-			const iw::matrix3& matrix) = 0;
+			const glm::mat3& matrix) = 0;
 
 		IWRENDERER_API
 		virtual void SetAsMat4(
-			const iw::matrix4& matrix) = 0;
+			const glm::mat4& matrix) = 0;
 
 		// samplers
 		IWRENDERER_API

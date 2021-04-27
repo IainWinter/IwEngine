@@ -119,9 +119,9 @@ namespace Graphics {
 				|| (m_transform && m_lastTransform != *m_transform))
 			{
 				m_needsToUpdateBuffer = false;
-				m_lastTransform.Position = m_transform ? m_transform->Position : 0;
-				m_lastTransform.Scale    = m_transform ? m_transform->Scale    : 0;
-				m_lastTransform.Rotation = m_transform ? m_transform->Rotation : quaternion::identity;
+				m_lastTransform.Position = m_transform ? m_transform->Position : glm::vec3();
+				m_lastTransform.Scale    = m_transform ? m_transform->Scale    : glm::vec3();
+				m_lastTransform.Rotation = m_transform ? m_transform->Rotation : glm::quat();
 				m_lastTransform.SetParent(m_transform ? m_transform->Parent() : nullptr);
 
 				for (unsigned i : m_delete) {
@@ -145,7 +145,7 @@ namespace Graphics {
 				if (    /*m_delete.size() != 0
 					|| */m_spawn .size() != 0)
 				{
-					m_alloc.resize(count * sizeof(matrix4)); // todo: crashes on resize thats smaller
+					m_alloc.resize(count * sizeof(glm::mat4)); // todo: crashes on resize thats smaller
 				}
 
 				m_delete.clear();
@@ -157,7 +157,7 @@ namespace Graphics {
 					return;
 				}*/
 
-				matrix4* models = m_alloc.alloc<matrix4>(count);
+				glm::mat4* models = m_alloc.alloc<glm::mat4>(count);
 
 				for (unsigned i = 0; i < count; i++) {
 					models[i] = m_particles[i].Transform.WorldTransformation(); // somewhere there is 'World' where it should be local :<

@@ -20,20 +20,20 @@ namespace Graphics {
 		//renderer->Device->SetCullFace(BACK);
 	}
 
-	matrix4 DirectionalLight::ViewProjection() const {
+	glm::mat4 DirectionalLight::ViewProjection() const {
 		return m_shadowCamera.ViewProjection();
 	}
 
-	quaternion DirectionalLight::Rotation() const {
+	glm::quat DirectionalLight::Rotation() const {
 		return m_shadowCamera.Rotation();
 	}
 
-	quaternion DirectionalLight::WorldRotation() const {
+	glm::quat DirectionalLight::WorldRotation() const {
 		return ShadowCamera()->WorldRotation();
 	}
 
 	void DirectionalLight::SetRotation(
-		const iw::quaternion& rotation)
+		const glm::quat& rotation)
 	{
 		m_shadowCamera.SetRotation(rotation);
 	}

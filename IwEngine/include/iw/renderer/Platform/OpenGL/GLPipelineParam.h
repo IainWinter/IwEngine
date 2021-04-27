@@ -90,15 +90,15 @@ namespace RenderAPI {
 
 		IWRENDERER_API
 		void SetAsMat2(
-			const iw::matrix2& matrix) override;
+			const glm::mat2& matrix) override;
 
 		IWRENDERER_API
 		void SetAsMat3(
-			const iw::matrix3& matrix) override;
+			const glm::mat3& matrix) override;
 
 		IWRENDERER_API
 		void SetAsMat4(
-			const iw::matrix4& matrix) override;
+			const glm::mat4& matrix) override;
 
 		IWRENDERER_API
 		void SetAsTexture(

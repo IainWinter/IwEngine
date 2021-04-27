@@ -9,7 +9,7 @@ namespace Physics {
 		std::vector<Manifold>& manifolds,
 		scalar dt)
 	{
-		std::vector<std::pair<iw::vector3, iw::vector3>> deltas;
+		std::vector<std::pair<glm::vec3, glm::vec3>> deltas;
 
 		for (Manifold& manifold : manifolds) {
 			Rigidbody* aBody = manifold.ObjA->IsDynamic() ? (Rigidbody*)manifold.ObjA : nullptr;
@@ -21,12 +21,12 @@ namespace Physics {
 			const float percent = 0.8f;
 			const float slop = 0.01f;
 
-			iw::vector3 correction = manifold.Normal * percent
+			glm::vec3 correction = manifold.Normal * percent
 				* fmax(manifold.PenetrationDepth - slop, 0.0f)
 				/ (aInvMass + bInvMass);
 		
-			iw::vector3 deltaA;
-			iw::vector3 deltaB;
+			glm::vec3 deltaA;
+			glm::vec3 deltaB;
 
 			if (aBody ? aBody->IsKinematic : false) {
 				deltaA = -aInvMass * correction;

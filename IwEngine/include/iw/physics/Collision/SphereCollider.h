@@ -38,8 +38,8 @@ namespace impl {
 
 		Transform Trans() const override {
 			Transform transform;
-			transform.Position = Center;
-			transform.Scale    = Radius;
+			transform.Position = glm::vec3(Center);
+			transform.Scale    = glm::vec3(Radius);
 
 			return transform;
 		}
@@ -49,7 +49,7 @@ namespace impl {
 			V direction) const override
 		{
 			return Center + transform->WorldPosition()
-				+ Radius * direction.normalized() * transform->WorldScale().major();
+				+ Radius * glm::normalize(direction) * major(transform->WorldScale());
 		}
 	};
 }

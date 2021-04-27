@@ -1,5 +1,5 @@
 #include "iw/graphics/Loaders/TextureLoader.h"
-#include "iw/math/vector3.h"
+//#include "iw/math/vector3.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/std_image.h"

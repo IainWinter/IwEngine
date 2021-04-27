@@ -8,12 +8,14 @@ namespace iw {
 		: SystemBase("Editor Camera Controller")
 		, speed(5.0f)
 		, camera(new PerspectiveCamera(1.7f, 1.777f, 0.01f, 1000.0f))
+		, movement()
+		, rotation()
 	{}
 
 	int EditorCameraControllerSystem::Initialize() {
 		iw::Entity entity = Space->CreateEntity<Transform, EditorCameraController>();
 
-		cameraTransform = entity.Set<Transform>(vector3(0, 10, -30));
+		cameraTransform = entity.Set<Transform>(glm::vec3(0, 10, -30));
 		                  entity.Set<EditorCameraController>(camera);
 
 		camera->SetTrans(cameraTransform);
@@ -25,24 +27,24 @@ namespace iw {
 	{
 		if (!active) return;
 
-		if (movement != 0) {
-			iw::vector3 delta;
+		if (glm::length(movement) != 0) {
+			glm::vec3 delta = glm::vec3();
 
 			if (movement.x != 0) {
 				delta += -cameraTransform->Right() * movement.x * speed * Time::DeltaTime();
 			}
 
 			if (movement.y != 0) {
-				delta += iw::vector3::unit_y * movement.y * speed * Time::DeltaTime();
+				delta += glm::vec3(0, 1, 0) * movement.y * speed * Time::DeltaTime();
 			}
 
 			if (movement.z != 0) {
-				iw::vector3 forward = cameraTransform->Forward();
+				glm::vec3 forward = cameraTransform->Forward();
 				forward.y = 0;
-				forward.normalize();
+				forward = glm::normalize(forward);
 
-				if (forward.length_squared() == 0) {
-					forward = cameraTransform->Right().cross(iw::vector3::unit_y);
+				if (glm::length2(forward) == 0) {
+					forward = glm::cross(cameraTransform->Right(), glm::vec3(0, 1, 0));
 				}
 
 				delta += forward * movement.z * speed * Time::DeltaTime();
@@ -51,15 +53,15 @@ namespace iw {
 			cameraTransform->Position += delta;
 		}
 			
-		if (rotation != 0) {
-			iw::quaternion deltaP = iw::quaternion::from_axis_angle(cameraTransform->Right(), rotation.x);
-			iw::quaternion deltaY = iw::quaternion::from_axis_angle(-iw::vector3::unit_y, rotation.y);
+		if (glm::length(rotation) != 0) {
+			glm::quat deltaP = glm::angleAxis(rotation.x, cameraTransform->Right());
+			glm::quat deltaY = glm::angleAxis(rotation.y, -glm::vec3(0, 1, 0));
 
 			cameraTransform->Rotation = deltaP * cameraTransform->Rotation;
 			cameraTransform->Rotation = deltaY * cameraTransform->Rotation;
 		}
 
-		rotation = 0; // reset rotation
+		rotation = glm::vec3(); // reset rotation
 	}
 
 	void EditorCameraControllerSystem::OnPush() {
@@ -74,7 +76,7 @@ namespace iw {
 	}
 
 	void EditorCameraControllerSystem::OnPop() {
-		movement = 0;
+		movement = glm::vec3(0);
 	}
 
 	bool EditorCameraControllerSystem::On(

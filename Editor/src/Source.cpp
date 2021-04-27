@@ -5,6 +5,8 @@
 #include "iw/engine/Layers/ImGuiLayer.h"
 #include "iw/engine/Layers/ToolLayer.h"
 
+//#include "iw/math/matrix.h"
+
 using GETAPP_FUNC = iw::Application*(*)();
 
 void Reload(std::wstring dll, HINSTANCE& hInst) {
@@ -62,12 +64,41 @@ public:
 	}
 
 	void ReloadGame() {
+
+
+		
+		//iw::mat<2, 1> dasd;
+
+
+		//iw::matrix<2, 2, float> mat = { 1, 2, 3, 4 };
+		//iw::matrix<1, 2, float> vec{ 1, 2 };
+
+		//iw::det(mat);
+
+		//iw::vector<2> row = mat.row(0);
+
+
+
+		//iw::matrix<1, 2> m = mat * vec;
+
+		//LOG_INFO << m;
+
 		HINSTANCE gameInst;
 		Reload(L"C:/dev/IwEngine/Games/PhysicsProject/bin/Debug.windows.x86_64/Physics project.dll", gameInst);
 		m_gameNew = LoadFunction<GETAPP_FUNC>(gameInst, "GetApplicationForEditor")();
 	}
 
 	int InitGame() {
+
+
+
+		//iw::matrix<2, 2> mat {
+		//	1, 2, 
+		//	3, 4
+		//};
+
+		//iw::invert(mat);
+
 		sandbox = m_game->GetLayer("Test");
 		
 		if (imgui)         m_game->PushLayer(imgui);
@@ -84,6 +115,9 @@ public:
 		if (imgui) {
 			imgui->BindContext();
 		}
+
+		err = imgui->Initialize();
+		m_game->PopLayer(imgui);
 
 		m_game->Console->AddHandler([&](const iw::Command& command) {
 			if (command.Verb == "reload") {

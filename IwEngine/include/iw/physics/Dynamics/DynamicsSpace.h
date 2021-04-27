@@ -11,7 +11,7 @@ namespace Physics {
 	{
 	private:
 		//std::vector<Rigidbody*> m_rigidbodies;
-		iw::vector3 m_gravity;
+		glm::vec3 m_gravity;
 
 	public:
 		IWPHYSICS_API
@@ -23,11 +23,11 @@ namespace Physics {
 			scalar dt);
 
 		IWPHYSICS_API
-		const iw::vector3& Gravity();
+		const glm::vec3& Gravity();
 
 		IWPHYSICS_API
 		void SetGravity(
-			const iw::vector3& gravity);
+			const glm::vec3& gravity);
 	private:
 		void TrySetGravity();
 		void TryApplyGravity();

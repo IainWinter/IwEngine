@@ -140,21 +140,21 @@ namespace RenderAPI {
 	}
 
 	void GLPipelineParam::SetAsMat2(
-		const iw::matrix2& matrix)
+		const glm::mat2& matrix)
 	{
-		SetAsMat2s(&matrix);
+		SetAsMat2s(&matrix[0][0]);
 	}
 
 	void GLPipelineParam::SetAsMat3(
-		const iw::matrix3& matrix)
+		const glm::mat3& matrix)
 	{
-		SetAsMat3s(&matrix);
+		SetAsMat3s(&matrix[0][0]);
 	}
 
 	void GLPipelineParam::SetAsMat4(
-		const iw::matrix4& matrix)
+		const glm::mat4& matrix)
 	{
-		SetAsMat4s(&matrix);
+		SetAsMat4s(&matrix[0][0]);
 	}
 
 	void GLPipelineParam::SetAsTexture(

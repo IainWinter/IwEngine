@@ -4,6 +4,8 @@ namespace iw {
 namespace Graphics {
 	Camera::Camera()
 		: m_transform(nullptr)
+		, m_position()
+		, m_rotation(1.f, 0, 0, 0)
 	{
 		RecalculateView();
 	}
@@ -11,13 +13,15 @@ namespace Graphics {
 	Camera::Camera(
 		Transform* transform)
 		: m_transform(transform)
+		, m_position()
+		, m_rotation(1.f, 0, 0, 0)
 	{
 		RecalculateView();
 	}
 
 	Camera::Camera(
-		const vector3& position,
-		const quaternion& rotation)
+		const glm::vec3& position,
+		const glm::quat& rotation)
 		: m_transform(nullptr)
 		, m_position(position)
 		, m_rotation(rotation)
@@ -77,7 +81,7 @@ namespace Graphics {
 		return *this;
 	}*/
 
-	matrix4 Camera::View() {
+	glm::mat4 Camera::View() {
 		if (Outdated()) {
 			RecalculateView();
 		}
@@ -85,7 +89,7 @@ namespace Graphics {
 		return m_view;
 	}
 
-	matrix4 Camera::View() const {
+	glm::mat4 Camera::View() const {
 		return m_view;
 	}
 
@@ -97,12 +101,19 @@ namespace Graphics {
 	}
 
 	void Camera::SetView(
-		const matrix4& view)
+		const glm::mat4& view)
 	{
 		m_view = view;
 
-		SetPosition(m_view.translation());
-		SetRotation(m_view.rotation());
+		glm::quat rotation;
+		glm::vec3 translation;
+		glm::vec3 scale;
+		glm::vec3 skew;
+		glm::vec4 perspective;
+		glm::decompose(m_view, scale, rotation, translation, skew, perspective);
+
+		SetPosition(translation);
+		SetRotation(rotation);
 
 		m_outdated = false;
 	}
@@ -113,19 +124,19 @@ namespace Graphics {
 			|| Rotation() != m_rotation;
 	}
 
-	vector3 Camera::Position() const {
+	glm::vec3 Camera::Position() const {
 		return m_transform ? m_transform->Position : m_position;
 	}
 
-	vector3 Camera::WorldPosition() const {
+	glm::vec3 Camera::WorldPosition() const {
 		return m_transform ? m_transform->WorldPosition() : m_position;
 	}
 
-	quaternion Camera::Rotation() const {
+	glm::quat Camera::Rotation() const {
 		return m_transform ? m_transform->Rotation : m_rotation;
 	}
 
-	quaternion Camera::WorldRotation() const {
+	glm::quat Camera::WorldRotation() const {
 		return m_transform ? m_transform->WorldRotation() : m_rotation;
 	}
 
@@ -133,12 +144,12 @@ namespace Graphics {
 	//	return m_transform ? m_transform->Position : m_position;
 	//}
 
-	//quaternion& Camera::Rotation() {
+	//glm::quat& Camera::Rotation() {
 	//	return m_transform ? m_transform->Rotation : m_rotation;
 	//}
 
 	void Camera::SetPosition(
-		const vector3& position)
+		const glm::vec3& position)
 	{
 		if (Position() != position) {
 			if (m_transform) {
@@ -154,7 +165,7 @@ namespace Graphics {
 	}
 
 	void Camera::SetRotation(
-		const quaternion& rotation)
+		const glm::quat& rotation)
 	{
 		if (Rotation() != rotation) {
 			if (m_transform) {
@@ -169,20 +180,21 @@ namespace Graphics {
 		}
 	}
 
-	matrix4 Camera::ViewProjection() {
-		return View() * Projection();
+	glm::mat4 Camera::ViewProjection() {
+		return Projection() * View();
 	}
 
-	matrix4 Camera::ViewProjection() const {
-		return View() * Projection();
+	glm::mat4 Camera::ViewProjection() const {
+		return Projection() * View();
 	}
 
 	void Camera::RecalculateView() {
-		m_view = matrix4::create_look_at(
-			WorldPosition(),
-			WorldPosition() + vector3::unit_z * WorldRotation(),
-			vector3::unit_y * WorldRotation());
 
+		glm::vec3 pos = WorldPosition();
+		glm::vec3 forward = pos + glm::vec3(0, 0, 1) * WorldRotation();
+		glm::vec3 up = glm::vec3(0, 1, 0) * WorldRotation();
+
+		m_view = glm::lookAt(pos, forward, up);
 
 		m_position = WorldPosition();
 		m_rotation = WorldRotation();
@@ -211,8 +223,8 @@ namespace Graphics {
 	}
 
 	OrthographicCamera::OrthographicCamera(
-		const vector3& position,
-		const quaternion& rotation,
+		const glm::vec3& position,
+		const glm::quat& rotation,
 		float width,
 		float height,
 		float zNear,
@@ -228,7 +240,7 @@ namespace Graphics {
 		float zNear, 
 		float zFar)
 	{
-		m_projection = matrix4::create_orthographic(width, height, zNear, zFar);
+		m_projection = glm::ortho(0.f, width, 0.f, height, zNear, zFar);
 	}
 	
 	PerspectiveCamera::PerspectiveCamera(
@@ -252,8 +264,8 @@ namespace Graphics {
 	}
 
 	PerspectiveCamera::PerspectiveCamera(
-		const vector3& position,
-		const quaternion& rotation,
+		const glm::vec3& position,
+		const glm::quat& rotation,
 		float fov,
 		float aspect,
 		float zNear,
@@ -269,7 +281,7 @@ namespace Graphics {
 		float zNear, 
 		float zFar)
 	{
-		m_projection = matrix4::create_perspective_field_of_view(fov, aspect, zNear, zFar);
+		m_projection = glm::perspective(fov, aspect, zNear, zFar);
 	}
 }
 }

@@ -9,15 +9,16 @@ namespace Physics {
 		: public CollisionObject
 	{
 	public:
-		vector3 Gravity;  // Gravitational acceleration 
-		vector3 NetForce;    // Net force
-		vector3 Velocity;
+		glm::vec3 Gravity;  // Gravitational acceleration 
+		glm::vec3 NetForce;    // Net force
+		glm::vec3 Velocity;
 
-		vector3 AngularVelocity;
-		matrix3 Inertia = matrix3::identity; // for testing
+		glm::vec3 NetTorque;
+		glm::vec3 AngularVelocity;
+		glm::mat3 Inertia = glm::mat3(1); // for testing
 
-		vector3 AxisLock;     // Lock to axis
-		vector3 IsAxisLocked; // If its locked to each axis casted to bool
+		glm::vec3 AxisLock;     // Lock to axis
+		glm::vec3 IsAxisLocked; // If its locked to each axis casted to bool
 
 		scalar InvMass;       // 1 / Mass of rigidbody
 		bool TakesGravity;    // If the rigidbody will use its own gravity or take it from the space
@@ -34,7 +35,8 @@ namespace Physics {
 	public:
 		IWPHYSICS_API Rigidbody(bool isKinematic = true);
 
-		IWPHYSICS_API void ApplyForce(const iw::vector3& force);
+		IWPHYSICS_API void ApplyForce (const glm::vec3& force, const glm::vec3& position = glm::vec3());
+		IWPHYSICS_API void ApplyTorque(const glm::vec3& torque);
 		IWPHYSICS_API void ApplyGravity();
 
 		IWPHYSICS_API const Transform& LastTrans() const;
@@ -47,7 +49,7 @@ namespace Physics {
 		IWPHYSICS_API void SetLastTrans(const Transform& lastTrans);
 		IWPHYSICS_API void SetNextTrans(const Transform& nextTrans);
 
-		IWPHYSICS_API void Move(const iw::vector3 delta);
+		IWPHYSICS_API void Move(const glm::vec3 delta);
 	};
 }
 

@@ -17,29 +17,29 @@
 namespace iw {
 namespace Graphics {
 	struct CameraData {
-		matrix4 View;
-		matrix4 Proj;
-		matrix4 ViewProj;
-		vector4 CameraPos;
+		glm::mat4 View;
+		glm::mat4 Proj;
+		glm::mat4 ViewProj;
+		glm::vec4 CameraPos;
 	};
 
 	struct ShadowData {
-		vector4 directionalLightCount = 0; // .x
-		matrix4 LightViewProj[MAX_DIRECTIONAL_LIGHTS];
+		glm::vec4 directionalLightCount; // .x
+		glm::mat4 LightViewProj[MAX_DIRECTIONAL_LIGHTS];
 	};
 
 	// might needs pad
 	struct LightData {
-		vector4 LightCounts = 0; // point .x, direct .y
+		glm::vec4 LightCounts; // point .x, direct .y
 
 		struct PointLightDescription {
-			vector4 Position; //vector3 Position float Radius;
-			vector4 Color;
+			glm::vec4 Position; //glm::vec3 Position float Radius;
+			glm::vec4 Color;
 		} PointLights[MAX_POINT_LIGHTS];
 
 		struct DirectionalLightDescription {
-			vector4 InvDirection;
-			vector4 Color;
+			glm::vec4 InvDirection;
+			glm::vec4 Color;
 		} DirectionalLights[MAX_DIRECTIONAL_LIGHTS];
 	};
 

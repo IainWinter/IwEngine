@@ -87,8 +87,8 @@ namespace Editor {
 				ImGui::TableSetupColumn("", 0, 0.3f);
 				ImGui::TableSetupColumn("", 0, 0.7f);
 
-				vector3 axis     = collider->Direction;
-				vector3 lastAxis = axis;
+				glm::vec3 axis     = collider->Direction;
+				glm::vec3 lastAxis = axis;
 
 				PrintCell("Center"); PrintEditCell(&collider->Center);
 				PrintCell("Height"); PrintEditCell(&collider->Height);
@@ -106,7 +106,7 @@ namespace Editor {
 				ImGui::Checkbox("Z", &z);
 
 				if (x || y || z) {
-					axis = vector3(x, y, z);
+					axis = glm::vec3(x, y, z);
 
 					if (axis.x != lastAxis.x) {
 						axis.y = 0;
@@ -165,12 +165,12 @@ namespace Editor {
 			ImGui::TableNextCell();
 			ImGui::PushID((void*)value);
 
-			     if constexpr (std::is_same_v<float, _t>)      ImGui::DragFloat ("", (float*)value, rate, min, max);
-			else if constexpr (std::is_same_v<bool,  _t>)      ImGui::Checkbox  ("", (bool*) value);
-			else if constexpr (std::is_same_v<vector2, _t>)    ImGui::DragFloat2("", (float*)value, rate, min, max);
-			else if constexpr (std::is_same_v<vector3, _t>)    ImGui::DragFloat3("", (float*)value, rate, min, max);
-			else if constexpr (std::is_same_v<vector4, _t>
-				           || std::is_same_v<quaternion, _t>) ImGui::DragFloat4("", (float*)value, rate, min, max);
+			     if constexpr (std::is_same_v<float, _t>)     ImGui::DragFloat ("", (float*)value, rate, min, max);
+			else if constexpr (std::is_same_v<bool,  _t>)     ImGui::Checkbox  ("", (bool*) value);
+			else if constexpr (std::is_same_v<glm::vec2, _t>) ImGui::DragFloat2("", (float*)value, rate, min, max);
+			else if constexpr (std::is_same_v<glm::vec3, _t>) ImGui::DragFloat3("", (float*)value, rate, min, max);
+			else if constexpr (std::is_same_v<glm::vec4, _t>
+				           || std::is_same_v<glm::quat, _t>) ImGui::DragFloat4("", (float*)value, rate, min, max);
 
 			ImGui::PopID();
 		}

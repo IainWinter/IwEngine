@@ -159,7 +159,7 @@ namespace Graphics {
 		bool IsSubTexture() const;
 
 		IWGRAPHICS_API
-		iw::vector2 Dimensions() const;
+		glm::vec2 Dimensions() const;
 	};
 }
 

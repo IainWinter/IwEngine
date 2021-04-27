@@ -129,8 +129,8 @@ bool SimpleSandWorker::MoveRandom(
 	//cell.y += cell.dy * iw::randf();
 
 
-	int xx = x + /*iw::randf() * cell.dx;*/ iw::randi(2) - 1;
-	int yy = y + /*iw::randf() * cell.dy;*/ iw::randi(2) - 1;
+	int xx = x + /*iw::randf() * cell.dx;*/ glm::linearRand(-1.f, 1.f);;
+	int yy = y + /*iw::randf() * cell.dy;*/ glm::linearRand(-1.f, 1.f);;
 
 	bool r = IsEmpty(xx, yy);
 

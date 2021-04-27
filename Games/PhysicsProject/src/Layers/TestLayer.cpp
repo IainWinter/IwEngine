@@ -24,8 +24,7 @@
 #include "iw/engine/Systems/Render/ShadowRenderSystem.h"
 //#include "Systems/SpaceInspectorSystem.h"
 
-#include "iw/math/vector.h"
-#include "iw/math/matrix.h"
+#include "glm/gtc/random.hpp"
 
 namespace iw {
 	struct MeshComponents {
@@ -45,48 +44,46 @@ namespace iw {
 	}
 
 	int x = 0;
-	Entity TestLayer::SpawnCube(vector3 s, float m, bool locked) {
+	Entity TestLayer::SpawnCube(glm::vec3 s, float m, bool locked) {
 		Entity entity = Space->CreateEntity<Transform, Mesh, Rigidbody>();
 
 		Mesh* mesh;
 		Collider* col;
 
-		//if (randf() > 0.5f) {
-			//col = entity.Add<MeshCollider>(MeshCollider::MakeCube());
-			//mesh = entity.Set<Mesh>(cube->MakeInstance());
-		//}
+		if (x > 0) {
+			col = entity.Add<MeshCollider>(MeshCollider::MakeCube());
+			mesh = entity.Set<Mesh>(cube->MakeInstance());
+		}
 
 		//else if (randf() > 0.0f) {
 		//	col  = entity.Add<MeshCollider>(MeshCollider::MakeTetrahedron());
 		//	mesh = entity.Set<Mesh>(tetrahedron->MakeInstance());
 		//}
 
-		//else {
-			col = entity.Add<SphereCollider>(0, 1);
+		else {
+			col = entity.Add<SphereCollider>(glm::vec3(0), 1);
 			mesh = entity.Set<Mesh>(sphere->MakeInstance());
 
-		//	s.x = s.z;
-		//	s.y = s.z; // make uniform scale if where because thats how their collider works
-		//}
+			s.x = s.z;
+			s.y = s.z; // make uniform scale if where because thats how their collider works
+		}
 
-		Transform*      trans = entity.Set<Transform>(iw::vector3(x += 5, 10, 0), s/*, iw::quaternion::from_euler_angles(randf() + 1, randf() + 1, randf() + 1)*/);
+		Transform*      trans = entity.Set<Transform>(glm::vec3(x += 5, 10, 0), s/*, iw::quaternion::from_euler_angles(randf() + 1, randf() + 1, randf() + 1)*/);
 		Rigidbody*      body  = entity.Set<Rigidbody>();
 
 		//trans->Rotation = quaternion::from_euler_angles(iw::randf() * iw::Pi2, iw::randf() * iw::Pi2, iw::randf() * iw::Pi2);
-		trans->Position = vector3(iw::randf()) * 10;
+		trans->Position = glm::ballRand(10.f);
 
 		mesh->SetMaterial(REF<Material>(shader));
 
-		mesh->Material()->Set("albedo", iw::vector4(
-			randf() + 1,
-			randf() + 1,
-			randf() + 1,
+		mesh->Material()->Set("albedo", glm::vec4(
+			glm::ballRand(1.f),
 			1.0f)
 		);
 
-		mesh->Material()->Set("reflectance", .5f * (randf() + 1));
-		mesh->Material()->Set("roughness",   .5f * (randf() + 1));
-		mesh->Material()->Set("metallic",    .5f * (randf() + 1));
+		mesh->Material()->Set("reflectance", .5f * glm::linearRand(0.f, 1.f));
+		mesh->Material()->Set("roughness",   .5f * glm::linearRand(0.f, 1.f));
+		mesh->Material()->Set("metallic",    .5f * glm::linearRand(0.f, 1.f));
 
 		mesh->Material()->SetTexture("shadowMap", pointShadowTarget->Tex(0));
 		//mesh->Material()->SetTexture("ww", pointShadowTarget->Tex(0));
@@ -102,8 +99,8 @@ namespace iw {
 		body->SetMass(m);
 
 		if (locked) {
-			body->IsAxisLocked = 1;
-			body->AxisLock = vector3(0, 15, 0);
+			body->IsAxisLocked = glm::vec3();
+			body->AxisLock = glm::vec3(0, 15, 0);
 			body->SimGravity = false;
 
 			body->Restitution = 0;
@@ -144,7 +141,7 @@ namespace iw {
 		description.DescribeBuffer(bName::BITANGENT, MakeLayout<float>(3));
 		description.DescribeBuffer(bName::UV,        MakeLayout<float>(2));
 
-		sphere      = MakeIcosphere(description, 3);
+		sphere      = MakeIcosphere(description, 4);
 		tetrahedron = MakeTetrahedron(description, 1);
 		cube        = MakeCube(description, 1);
 		plane       = MakePlane(description, 1, 1);
@@ -174,9 +171,9 @@ namespace iw {
 		{
 			Ground = Space->CreateEntity<Transform, Mesh, PlaneCollider, CollisionObject>();
 
-			Transform*       trans = Ground.Set<Transform>(iw::vector3(0, -2, 0), vector3(22));
+			Transform*       trans = Ground.Set<Transform>(glm::vec3(0, -2, 0), glm::vec3(22));
 			Mesh*            mesh  = Ground.Set<Mesh>(plane->MakeInstance());
-			PlaneCollider*   col   = Ground.Set<PlaneCollider>(vector3::unit_y, 0);
+			PlaneCollider*   col   = Ground.Set<PlaneCollider>(glm::vec3(0, 1, 0), 0);
 			CollisionObject* obj   = Ground.Set<CollisionObject>();
 
 			mesh->SetMaterial(REF<Material>(shader));
@@ -198,10 +195,10 @@ namespace iw {
 		}
 
 		{
-			PlaneCollider*   col1 = new PlaneCollider(vector3( 0, 0,  1), -20);
-			PlaneCollider*   col2 = new PlaneCollider(vector3( 0, 0, -1), -20);
-			PlaneCollider*   col3 = new PlaneCollider(vector3( 1, 0,  0), -20);
-			PlaneCollider*   col4 = new PlaneCollider(vector3(-1, 0,  0), -20);
+			PlaneCollider*   col1 = new PlaneCollider(glm::vec3( 0, 0,  1), -20);
+			PlaneCollider*   col2 = new PlaneCollider(glm::vec3( 0, 0, -1), -20);
+			PlaneCollider*   col3 = new PlaneCollider(glm::vec3( 1, 0,  0), -20);
+			PlaneCollider*   col4 = new PlaneCollider(glm::vec3(-1, 0,  0), -20);
 
 			CollisionObject* obj1 = new CollisionObject();
 			CollisionObject* obj2 = new CollisionObject();
@@ -220,7 +217,7 @@ namespace iw {
 		}
 
 		DirectionalLight* dirLight = new DirectionalLight(10, OrthographicCamera(60, 60, -100, 100));
-		dirLight->SetRotation(quaternion(0.872f, 0.0f, 0.303f, 0.384f));
+		dirLight->SetRotation(glm::quat(0.872f, 0.0f, 0.303f, 0.384f));
 		dirLight->SetShadowShader(dirShadowShader);
 		dirLight->SetShadowTarget(dirShadowTarget);
 
@@ -230,7 +227,7 @@ namespace iw {
 
 		//delete sphere;
 
-		Physics->SetGravity(vector3(0, -9.81f, 0));
+		//Physics->SetGravity(vector3(0, -9.81f, 0));
 		//Physics->AddSolver(new ImpulseSolver());
 		//Physics->AddSolver(new SmoothPositionSolver());
 
@@ -246,85 +243,66 @@ namespace iw {
 
 		srand(19);
 
-		Ball = SpawnCube(2);
+		Ball = SpawnCube(glm::vec3(2));
+
+		Ball.Find<iw::Rigidbody>()->SimGravity = false;
+
+		Box = SpawnCube(glm::vec3(2));
+
+		TestDebug = SpawnCube(glm::vec3(.1));
+		TestDebug.Find<iw::Rigidbody>()->IsKinematic = false;
 
 		return Layer::Initialize();
 	}
 
-	void TestLayer::FixedUpdate() {
+	void TestLayer::FixedUpdate() { // https://blog.gtiwari333.com/2009/12/c-c-code-gauss-jordan-method-for.html
+		// Position ball
 
-		matrix<6, 3> mat({
-			1, 2, 3, 1, 0, 0,
-			4, 5, 6, 0, 1, 0,
-			7, 2, 9, 0, 0, 1
-		});
+		glm::vec3& targetPos = Ball.Find<Rigidbody>()->Trans().Position;
+		targetPos.y = 10;
+		//pos.x = cos(iw::TotalTime()) * 10;
+		//pos.z = sin(iw::TotalTime()) * 10;
 
-		// Fills in identity
+		// Move box twoards ball
 
-		for (size_t r = 0; r < mat.rows; r++)
-		for (size_t c = 0; c < mat.cols; c++) {
-			if (c == r + mat.rows) {
-				mat.columns[c][r] = 1;
-			}
-		}
+		//vector3 r = 1; auto [x, y, z] = r;
 
-		/************** partial pivoting **************/
+		//float beta = 1;
+		//float dt = iw::FixedTime();
+		//
+		//Transform* transform = Box.Find<iw::Transform>();
+		//Rigidbody* rigidbody = Box.Find<iw::Rigidbody>();
 
-		for (size_t r = mat.rows; r > 0; r--) {
-			if (mat.columns[0][r - 1] >= mat.columns[0][r]) continue;
+		//rigidbody->Trans().Rotation *= quaternion(iw::FixedTime(), iw::FixedTime(), iw::FixedTime(), 1);
 
-			for (size_t c = 0; c < mat.cols; c++) {
-				float t = mat.columns[c][r];
-				mat.columns[c][r]     = mat.columns[c][r - 1];
-				mat.columns[c][r - 1] = t;
-			}
-		}
+		//vector3 cornerPos = transform->Position + r * transform->Scale * matrix3::create_from_quaternion(transform->Rotation).inverted();
 
-		/********** reducing to diagonal  matrix ***********/
+		//TestDebug.Find<iw::Rigidbody>()->Trans().Position = cornerPos;
 
-		for (size_t r = 0; r < mat.rows; r++)
-		for (size_t c = 0; c < mat.rows; c++) {
-			if (c == r) continue;
+		//matrix<3, 3> invMass = matrix<3, 3>(rigidbody->InvMass);
+		//matrix<3, 3> invInrt = inverted(matrix<3, 3>());
 
-			float d = mat.columns[r][c] / mat.columns[r][r];
+		//vector3& c = cornerPos - targetPos;
+		//vector3& v = rigidbody->Velocity + rigidbody->AngularVelocity.cross(r);
 
-			for (size_t k = 0; k < mat.cols; k++) {
-				mat.columns[k][c] -= mat.columns[k][r] * d;
-			}
-		}
+		//auto [cx, cy, cz] = -(v + (beta / dt) * c);
+		//vector<3> C = vector<3>{ cx, cy, cz };
 
-		/************** reducing to unit matrix *************/
+		//matrix<3, 3> s = Skew(vector<3>{-x, -y, -z});
+		//matrix<3, 3> k = invMass + s * invInrt * transposed(s);
+		//vector<3> l = inverted(k) * C;
 
-		for (size_t r = 0; r < mat.rows; r++) {
-			float d = mat.columns[r][r];
+		//vector<3> dv = invMass * l;
+		//vector<3> da = (invInrt * transposed(s)) * l;
 
-			for (size_t c = 0; c < mat.cols; c++) {
-				mat.columns[c][r] = mat.columns[c][r] / d;
-			}
-		}
+		//auto [dvx, dvy, dvz] = dv.components;
+		//auto [dax, day, daz] = da.components;
 
-		//matrix<4, 4> mat({
-		//	1, 3, 5, 9,
-		//	1, 3, 1, 7, 
-		//	4, 3, 9, 7, 
-		//	5, 2, 0, 9
-		//});
+		//rigidbody->Velocity += vector3(dvx, dvy, dvz);
+		//rigidbody->Velocity *= .98f;
 
-		//float det = mat.determinant();
-
-
-
-		float beta = .1;
-		float dt = iw::FixedTime();
-		
-		float& y  = Ball.Find<iw::Transform>()->Position.y;
-		float& vy = Ball.Find<iw::Rigidbody>()->Velocity.y;
-
-		vy += Physics->Gravity().y;
-
-		if (y <= 0) {
-			vy = -beta / dt * y;
-		}
+		//rigidbody->AngularVelocity += vector3(dax, day, daz);
+		//rigidbody->AngularVelocity *= .98f;
 	}
 
 	float thresh = .5f;
@@ -333,7 +311,7 @@ namespace iw {
 		ImGui::Begin("Test");
 
 		for (PointLight* light : MainScene->PointLights()) {
-			vector3 pos = light->Position();
+			glm::vec3 pos = light->Position();
 			ImGui::SliderFloat3("Light pos", (float*)&pos, -25, 25);
 			light->SetPosition(pos);
 
@@ -343,15 +321,15 @@ namespace iw {
 		}
 
 		for (DirectionalLight* light : MainScene->DirectionalLights()) {
-			quaternion rot = light->Rotation();
+			glm::quat rot = light->Rotation();
 			ImGui::SliderFloat4("Light rot", (float*)&rot, 0, 1);
-			light->SetRotation(rot.normalized());
+			light->SetRotation(glm::normalize(rot));
 		}
 
 		if (ImGui::Button("Spawn Cube")) {
 			srand(3);
 			for (int i = 0; i < 50; i++) {
-				SpawnCube(vector3(1.5f * (iw::randf() + 1.25f), 1.5f * (iw::randf() + 1.25f), 1.5f * (iw::randf() + 1.25f)));
+				SpawnCube(glm::ballRand(1.5f) + 1.25f);
 			}
 		}
 
@@ -359,10 +337,8 @@ namespace iw {
 			for (auto entity : Space->Query<Transform, Mesh>()) {
 				auto [transform, mesh] = entity.Components.Tie<MeshComponents>();
 
-				mesh->Material()->Set("albedo", iw::vector4(
-					rand() / (float)RAND_MAX,
-					rand() / (float)RAND_MAX,
-					rand() / (float)RAND_MAX,
+				mesh->Material()->Set("albedo", glm::vec4(
+					glm::ballRand(1.f),
 					1.0f)
 				);
 

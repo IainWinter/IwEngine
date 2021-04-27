@@ -9,7 +9,7 @@
 namespace iw {
 namespace Engine {
 	struct Voxel {
-		iw::vector2 Coords;
+		glm::vec2 Coords;
 	};
 
 	struct Chunk {

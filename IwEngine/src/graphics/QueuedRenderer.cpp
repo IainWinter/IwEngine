@@ -225,7 +225,7 @@ namespace Graphics {
 		m_shadow  = 1;
 		m_block   = 1;
 		m_camera += 1;
-		m_position = camera ? camera->WorldPosition() : vector3::zero;
+		m_position = camera ? camera->WorldPosition() : glm::vec3();
 
 		BeginSceneOP* op = m_pool.alloc<BeginSceneOP>();
 		op->Scene  = nullptr;
@@ -247,7 +247,7 @@ namespace Graphics {
 		m_shadow  = 1;
 		m_block   = 1;
 		m_camera += 1;
-		m_position = scene->MainCamera() ? scene->MainCamera()->WorldPosition() : vector3::zero;
+		m_position = scene->MainCamera() ? scene->MainCamera()->WorldPosition() : glm::vec3();
 
 		BeginSceneOP* op = m_pool.alloc<BeginSceneOP>();
 		op->Scene  = scene;
@@ -337,12 +337,16 @@ namespace Graphics {
 		Mesh* mesh)
 	{
 		if (mesh->CullMe()) { // temp
-			auto [x, y, z] = transform->WorldPosition();
 
-			if (   m_position.x - 32 > x
-				|| m_position.x + 32 < x
-				|| m_position.z - 32 > z
-				|| m_position.z + 32 < z) return;
+			glm::vec3 pos = transform->WorldPosition();
+
+			if (   m_position.x - 32 > pos.x
+				|| m_position.x + 32 < pos.x
+				|| m_position.z - 32 > pos.z
+				|| m_position.z + 32 < pos.z)
+			{
+				return;
+			}
 		}
 		
 		m_block        = 2;
@@ -366,12 +370,15 @@ namespace Graphics {
 		Mesh& mesh)
 	{
 		if (mesh.CullMe()) { // temp same as above ^^
-			auto [x, y, z] = transform.WorldPosition();
+			glm::vec3 pos = transform.WorldPosition();
 
-			if (   m_position.x - 32 > x
-				|| m_position.x + 32 < x
-				|| m_position.z - 32 > z
-				|| m_position.z + 32 < z) return;
+			if (   m_position.x - 32 > pos.x
+				|| m_position.x + 32 < pos.x
+				|| m_position.z - 32 > pos.z
+				|| m_position.z + 32 < pos.z)
+			{
+				return;
+			}
 		}
 
 		m_block        = 2;
@@ -424,7 +431,7 @@ namespace Graphics {
 		
 		if (m_camera) {
 			if (transform) {  // should map to clip planes we have 16 mil res which should be more than enough
-				depth = 1000000 * (m_position - (transform ? transform->WorldPosition() : 0)).length_squared(); 
+				depth = 1000000 * glm::length2(m_position - (transform ? transform->WorldPosition() : glm::vec3())); 
 			}
 		}
 

@@ -5,9 +5,9 @@
 namespace iw {
 namespace Physics {
 	struct ManifoldPoints {
-		iw::vector3 A;
-		iw::vector3 B;
-		iw::vector3 Normal;
+		glm::vec3 A;
+		glm::vec3 B;
+		glm::vec3 Normal;
 		scalar PenetrationDepth;
 		bool HasCollision;
 	};

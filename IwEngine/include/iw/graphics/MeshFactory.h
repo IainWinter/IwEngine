@@ -66,71 +66,71 @@ namespace Graphics {
 	IWGRAPHICS_API
 	MeshData* GenerateFromVoxels(
 		const MeshDescription& description,
-		vector3 min,
-		vector3 max,
-		vector3 d,
+		glm::vec3 min,
+		glm::vec3 max,
+		glm::vec3 d,
 		std::vector<
-			std::function<float(vector3, size_t, size_t, size_t, float***)>> passes);
+			std::function<float(glm::vec3, size_t, size_t, size_t, float***)>> passes);
 
 
 namespace detail {
 	using IndexPair   = std::pair<unsigned, unsigned>;
 	using IndexLookup = std::unordered_map<IndexPair, unsigned, pair_hash>;
-	using VertList    = std::vector<vector3>;
+	using VertList    = std::vector<glm::vec3>;
 
 	// Icosphere
 	static const unsigned  IcoVertCount;
 	static const unsigned  IcoIndexCount;
-	static const vector3*  IcoVerts;
-	static const vector2*  IcoUvs;
+	static const glm::vec3*  IcoVerts;
+	static const glm::vec2*  IcoUvs;
 	static const unsigned* IcoIndex;
 
 	// Tetrahedron
 	static const unsigned  TriVertCount;
 	static const unsigned  TriUvCount;
 	static const unsigned  TriIndexCount;
-	static const vector3*  TriVerts;
-	static const vector2*  TriUvs;
+	static const glm::vec3*  TriVerts;
+	static const glm::vec2*  TriUvs;
 	static const unsigned* TriIndex;
 
 	// Cube
 
 	static const unsigned CubeVertCount;
 	static const unsigned CubeIndexCount;
-	static vector3*  CubeVerts;
-	static vector2*  CubeUvs;
+	static glm::vec3*  CubeVerts;
+	static glm::vec2*  CubeUvs;
 	static unsigned* CubeIndex;
 
 	void SubDevideVerts(
-		vector3* verts,
+		glm::vec3* verts,
 		unsigned* index,
 		unsigned& currentIndexCount,
 		unsigned& currentVertCount);
 
 	void SubDevideUvs(
-		vector2* uvs,
+		glm::vec2* uvs,
 		const unsigned* index,
 		unsigned indexCount,
 		unsigned& currentUvCount);
 
 	unsigned CreateVertexForEdge(
 		IndexLookup& lookup,
-		vector3* verts,
+		glm::vec3* verts,
 		unsigned first,
 		unsigned second,
 		unsigned& currentVertCount);
 
 	unsigned CreateUvsForEdge(
 		IndexLookup& lookup,
-		vector2* uvs,
+		glm::vec2* uvs,
 		unsigned first,
 		unsigned second,
 		unsigned& currentUvCount);
 
 	unsigned CreateVertexForEdgeVector(
 		IndexLookup& lookup,
-		std::vector<vector3>& verts,
-		vector3* source,
+		std::vector<glm::vec3>& verts,
+		glm::vec3* source,
 		unsigned first,
 		unsigned second,
 		unsigned offset);
@@ -183,7 +183,7 @@ namespace detail {
 //#include <tuple>
 //
 //namespace prims {
-//////std::tuple<unsigned*, vector3*, vector2*> MakePlane(
+//////std::tuple<unsigned*, glm::vec3*, glm::vec2*> MakePlane(
 //////	unsigned xCount,
 //////	unsigned zCount)
 //////{
@@ -201,8 +201,8 @@ namespace detail {
 //////	unsigned vertCount = (xCount + 1) * (zCount + 1); // |  /   |  /   |
 //////	                                                  // •------•------•
 //////	unsigned* indices = new unsigned[indexCount];
-//////	vector3* verts = new vector3[vertCount];
-//////	vector2* uvs   = new vector2[vertCount];
+//////	glm::vec3* verts = new vector3[vertCount];
+//////	glm::vec2* uvs   = new vector2[vertCount];
 //////
 //////	// Verts
 //////
@@ -214,7 +214,7 @@ namespace detail {
 //////
 //////	// Translte origin instead of loop variables
 //////
-//////	vector3 offset = vector3(-1, 0, -1);
+//////	glm::vec3 offset = glm::vec3(-1, 0, -1);
 //////
 //////	for (unsigned x = 0; x <= xCount; x++) {
 //////	for (unsigned z = 0; z <= zCount; z++) {
@@ -223,8 +223,8 @@ namespace detail {
 //////		// 'Forward' is typically -Z so either the verts or UVs need
 //////		// to be flipped to align textures correctly
 //////
-//////		verts[i] = vector3(x * xStep, 0,          z  * zStep) + offset;
-//////		uvs  [i] = vector2(x * uStep,   (zCount - z) * vStep);
+//////		verts[i] = glm::vec3(x * xStep, 0,          z  * zStep) + offset;
+//////		uvs  [i] = glm::vec2(x * uStep,   (zCount - z) * vStep);
 //////	}
 //////	}
 //////
@@ -260,7 +260,7 @@ namespace detail {
 //////}
 //////
 //////
-//////std::tuple<unsigned*, vector3*, vector2*> MakeUvSphere(
+//////std::tuple<unsigned*, glm::vec3*, glm::vec2*> MakeUvSphere(
 //////	unsigned latCount,
 //////	unsigned lonCount)
 //////{
@@ -281,8 +281,8 @@ namespace detail {
 //////	unsigned vertCount = (lonCount + 1) * (latCount + 1);
 //////
 //////	unsigned* indices = new unsigned[indexCount];
-//////	vector3* verts = new vector3[vertCount];
-//////	vector2* uvs   = new vector2[vertCount];
+//////	glm::vec3* verts = new vector3[vertCount];
+//////	glm::vec2* uvs   = new vector2[vertCount];
 //////
 //////	// Verts
 //////
@@ -291,13 +291,13 @@ namespace detail {
 //////
 //////	for (unsigned lat = 0, v = 0; lat <= latCount; lat++) {
 //////	for (unsigned lon = 0;        lon <= lonCount; lon++, v++) {
-//////		verts[v] = vector3(                           
+//////		verts[v] = glm::vec3(                           
 //////			cos(lon * lonStep) * sin(lat * latStep), // Circle equations from UVs
 //////			cos(lat * latStep - Pi),                 // with Counter-clock wise 
 //////			sin(lon * lonStep) * sin(lat * latStep)  // winding
 //////		);
 //////				
-//////		uvs[v] = vector2(           // This is a UV spehre, so UVs map directly
+//////		uvs[v] = glm::vec2(           // This is a UV spehre, so UVs map directly
 //////			(float)lon / lonCount, // to the verts. This is effectivly a Mercator
 //////			(float)lat / latCount  // projection
 //////		);                          
@@ -385,7 +385,7 @@ namespace detail {
 //////	return { indices, verts, uvs };
 //////}
 //////
-//////std::tuple<unsigned*, vector3*, vector2*> MakeCapsule(
+//////std::tuple<unsigned*, glm::vec3*, glm::vec2*> MakeCapsule(
 //////	unsigned resolution,
 //////	float height,
 //////	float radius)
@@ -415,8 +415,8 @@ namespace detail {
 //////	unsigned vertCount = (lonCount + 1) * (latCount + 1);
 //////
 //////	unsigned* indices = new unsigned[indexCount];
-//////	vector3* verts = new vector3[vertCount];
-//////	vector2* uvs   = new vector2[vertCount];
+//////	glm::vec3* verts = new vector3[vertCount];
+//////	glm::vec2* uvs   = new vector2[vertCount];
 //////
 //////	// Verts
 //////
@@ -429,7 +429,7 @@ namespace detail {
 //////
 //////	for (unsigned lat = 0, v = 0; lat <= latCount; lat++) {
 //////	for (unsigned lon = 0;        lon <= lonCount; lon++, v++) {
-//////		verts[v] = vector3(                           
+//////		verts[v] = glm::vec3(                           
 //////			cos(lon * lonStep) * sin(lat * latStep), // Circle equations from UVs
 //////			cos(lat * latStep - Pi),                 // with Counter-clock wise 
 //////			sin(lon * lonStep) * sin(lat * latStep)  // winding
@@ -445,7 +445,7 @@ namespace detail {
 //////		// UVs are almost the same as UV sphere, but V needs to be scaled
 //////		// to fit the height
 //////
-//////		uvs[v] = vector2(
+//////		uvs[v] = glm::vec2(
 //////			(float)lon / lonCount,
 //////			(verts[v].y + height) * 0.5f / height
 //////		);
@@ -553,54 +553,54 @@ namespace detail {
 //static const unsigned IcoVertCount  = 12;
 //static const unsigned IcoIndexCount = 60;
 //
-//static const vector3 IcoVerts[] = {
-//	vector3(     0, -ICO_X, -ICO_Z),
-//	vector3(-ICO_X, -ICO_Z,      0),
-//	vector3( ICO_Z,      0, -ICO_X),
-//	vector3( ICO_X, -ICO_Z,      0),
-//	vector3( ICO_X,  ICO_Z,      0),
-//	vector3(-ICO_X, -ICO_Z,      0),
-//	vector3( ICO_Z,      0,  ICO_X),
-//	vector3(     0, -ICO_X,  ICO_Z),
-//	vector3( ICO_X,  ICO_Z,      0),
-//	vector3(-ICO_X, -ICO_Z,      0),
-//	vector3(     0,  ICO_X,  ICO_Z),
-//	vector3(-ICO_Z,      0,  ICO_X),
-//	vector3( ICO_X,  ICO_Z,      0),
-//	vector3(-ICO_X, -ICO_Z,      0),
-//	vector3(-ICO_X,  ICO_Z,      0),
-//	vector3(-ICO_Z,      0, -ICO_X),
-//	vector3( ICO_X,  ICO_Z,      0),
-//	vector3(-ICO_X, -ICO_Z,      0),
-//	vector3(    0,   ICO_X, -ICO_Z),
-//	vector3(    0,  -ICO_X, -ICO_Z),
-//	vector3( ICO_X,  ICO_Z,      0),
-//	vector3( ICO_Z,      0, -ICO_X)
+//static const glm::vec3 IcoVerts[] = {
+//	glm::vec3(     0, -ICO_X, -ICO_Z),
+//	glm::vec3(-ICO_X, -ICO_Z,      0),
+//	glm::vec3( ICO_Z,      0, -ICO_X),
+//	glm::vec3( ICO_X, -ICO_Z,      0),
+//	glm::vec3( ICO_X,  ICO_Z,      0),
+//	glm::vec3(-ICO_X, -ICO_Z,      0),
+//	glm::vec3( ICO_Z,      0,  ICO_X),
+//	glm::vec3(     0, -ICO_X,  ICO_Z),
+//	glm::vec3( ICO_X,  ICO_Z,      0),
+//	glm::vec3(-ICO_X, -ICO_Z,      0),
+//	glm::vec3(     0,  ICO_X,  ICO_Z),
+//	glm::vec3(-ICO_Z,      0,  ICO_X),
+//	glm::vec3( ICO_X,  ICO_Z,      0),
+//	glm::vec3(-ICO_X, -ICO_Z,      0),
+//	glm::vec3(-ICO_X,  ICO_Z,      0),
+//	glm::vec3(-ICO_Z,      0, -ICO_X),
+//	glm::vec3( ICO_X,  ICO_Z,      0),
+//	glm::vec3(-ICO_X, -ICO_Z,      0),
+//	glm::vec3(    0,   ICO_X, -ICO_Z),
+//	glm::vec3(    0,  -ICO_X, -ICO_Z),
+//	glm::vec3( ICO_X,  ICO_Z,      0),
+//	glm::vec3( ICO_Z,      0, -ICO_X)
 //};
 //
-//static const vector3 IcoUvs[] = {
-//	vector2(0.0,      0.157461),
-//	vector2(0.090909, 0.0),
-//	vector2(0.090909, 0.314921),  //
-//	vector2(0.181818, 0.157461),  // Verts & UVs are ordered by U then Y coords,
-//	vector2(0.181818, 0.472382),  //
-//	vector2(0.272727, 0.0),       //      4   8   C   G   K
-//	vector2(0.272727, 0.314921),  //     / \ / \ / \ / \ / \ 
-//	vector2(0.363636, 0.157461),  //    2---6---A---E---I---L
-//	vector2(0.363636, 0.472382),  //   / \ / \ / \ / \ / \ /
-//	vector2(0.454545, 0.0),       //  0---3---7---B---F---J
-//	vector2(0.454545, 0.314921),  //   \ / \ / \ / \ / \ /
-//	vector2(0.545454, 0.157461),  //    1   5   9   D	  H
-//	vector2(0.545454, 0.472382),  //
-//	vector2(0.636363, 0.0),       // [4, 8, C, G, K] have the same position vert
-//	vector2(0.636363, 0.314921),  // [1, 5, 9, D, H] have the same position vert
-//	vector2(0.727272, 0.157461),  // [0, J]          have the same position vert
-//	vector2(0.727272, 0.472382),  // [2, L]          have the same position vert
-//	vector2(0.818181, 0.0),       // 
-//	vector2(0.818181, 0.314921),
-//	vector2(0.90909,  0.157461),
-//	vector2(0.90909,  0.472382),
-//	vector2(1.0,      0.314921)
+//static const glm::vec3 IcoUvs[] = {
+//	glm::vec2(0.0,      0.157461),
+//	glm::vec2(0.090909, 0.0),
+//	glm::vec2(0.090909, 0.314921),  //
+//	glm::vec2(0.181818, 0.157461),  // Verts & UVs are ordered by U then Y coords,
+//	glm::vec2(0.181818, 0.472382),  //
+//	glm::vec2(0.272727, 0.0),       //      4   8   C   G   K
+//	glm::vec2(0.272727, 0.314921),  //     / \ / \ / \ / \ / \ 
+//	glm::vec2(0.363636, 0.157461),  //    2---6---A---E---I---L
+//	glm::vec2(0.363636, 0.472382),  //   / \ / \ / \ / \ / \ /
+//	glm::vec2(0.454545, 0.0),       //  0---3---7---B---F---J
+//	glm::vec2(0.454545, 0.314921),  //   \ / \ / \ / \ / \ /
+//	glm::vec2(0.545454, 0.157461),  //    1   5   9   D	  H
+//	glm::vec2(0.545454, 0.472382),  //
+//	glm::vec2(0.636363, 0.0),       // [4, 8, C, G, K] have the same position vert
+//	glm::vec2(0.636363, 0.314921),  // [1, 5, 9, D, H] have the same position vert
+//	glm::vec2(0.727272, 0.157461),  // [0, J]          have the same position vert
+//	glm::vec2(0.727272, 0.472382),  // [2, L]          have the same position vert
+//	glm::vec2(0.818181, 0.0),       // 
+//	glm::vec2(0.818181, 0.314921),
+//	glm::vec2(0.90909,  0.157461),
+//	glm::vec2(0.90909,  0.472382),
+//	glm::vec2(1.0,      0.314921)
 //};
 //
 //static const unsigned IcoIndex[] = {
@@ -626,7 +626,7 @@ namespace detail {
 //	18, 21, 20
 //};
 //
-//std::tuple<unsigned*, vector3*, vector2*> MakeIcosphere(
+//std::tuple<unsigned*, glm::vec3*, glm::vec2*> MakeIcosphere(
 //	unsigned resolution)
 //{
 //	// For every resolution, each face of the initial mesh gets split into 4 triangles.
@@ -645,8 +645,8 @@ namespace detail {
 //	unsigned vertCount = 22 + 60 * (1 - res) / -3;
 //
 //	unsigned* indices = new unsigned[indexCount];
-//	vector3* verts = new vector3[vertCount];
-//	vector2* uvs   = new vector2[vertCount];
+//	glm::vec3* verts = new vector3[vertCount];
+//	glm::vec2* uvs   = new vector2[vertCount];
 //
 //	memcpy(indices, IcoIndex, IcoIndexCount * sizeof(unsigned));
 //	memcpy(verts, IcoVerts, IcoVertCount * sizeof(vector3));
@@ -672,8 +672,8 @@ namespace detail {
 //}
 //
 //void SubDevideVerts(
-//	vector3* verts,
-//	vector2* uvs,
+//	glm::vec3* verts,
+//	glm::vec2* uvs,
 //	unsigned* index,
 //	unsigned& currentIndexCount,
 //	unsigned& currentVertCount)
@@ -721,8 +721,8 @@ namespace detail {
 //
 //unsigned CreateVertexForEdge(
 //	IndexLookup& lookup,
-//	vector3* verts,
-//	vector2* uvs, 
+//	glm::vec3* verts,
+//	glm::vec2* uvs, 
 //	unsigned first,
 //	unsigned second,
 //	unsigned& currentVertCount)

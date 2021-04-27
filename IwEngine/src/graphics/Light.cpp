@@ -87,15 +87,15 @@ namespace Graphics {
 		return m_intensity;
 	}
 
-	vector3 Light::Color() const {
+	glm::vec3 Light::Color() const {
 		return m_color;
 	}
 
-	vector3 Light::Position() const {
+	glm::vec3 Light::Position() const {
 		return ShadowCamera()->Position();
 	}
 
-	vector3 Light::WorldPosition() const {
+	glm::vec3 Light::WorldPosition() const {
 		return ShadowCamera()->WorldPosition();
 	}
 
@@ -118,13 +118,13 @@ namespace Graphics {
 	}
 
 	void Light::SetColor(
-		const vector3& color)
+		const glm::vec3& color)
 	{
 		m_color = color;
 	}
 
 	void Light::SetPosition(
-		const vector3& position)
+		const glm::vec3& position)
 	{
 		ShadowCamera()->SetPosition(position);
 	}

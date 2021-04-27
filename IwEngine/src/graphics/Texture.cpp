@@ -412,8 +412,8 @@ namespace Graphics {
 		return !!m_parent;
 	}
 
-	iw::vector2 Texture::Dimensions() const {
-		return iw::vector2(m_width, m_height);
+	glm::vec2 Texture::Dimensions() const {
+		return glm::vec2(m_width, m_height);
 	}
 }
 }

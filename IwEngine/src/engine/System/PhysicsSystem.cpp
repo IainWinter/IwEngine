@@ -1,6 +1,8 @@
 #include "iw/engine/Systems/PhysicsSystem.h"
 #include "iw/engine/Time.h"
 
+#include "glm/gtx/compatibility.hpp"
+
 namespace iw {
 namespace Engine {
 	PhysicsSystem::PhysicsSystem()
@@ -18,22 +20,25 @@ namespace Engine {
 	{
 		accumulator += Time::DeltaTime();
 
+		float a = glm::clamp(accumulator / iw::FixedTime(), 0.f, 1.f);
+
+
 		for (auto entity : eca) {
 			auto [transform, rigidbody] = entity.Components.Tie<Components>();
 			
 			//if (rigidbody->IsKinematic()) {
-				transform->Position = iw::lerp(rigidbody->LastTrans().Position, rigidbody->Trans().Position, accumulator / iw::FixedTime());
-				transform->Scale    = iw::lerp(rigidbody->LastTrans().Scale,    rigidbody->Trans().Scale,    accumulator / iw::FixedTime());
-				transform->Rotation = iw::lerp(rigidbody->LastTrans().Rotation, rigidbody->Trans().Rotation, accumulator / iw::FixedTime());
+				transform->Position = glm::lerp(rigidbody->LastTrans().Position, rigidbody->Trans().Position, a);
+				transform->Scale    = glm::lerp(rigidbody->LastTrans().Scale,    rigidbody->Trans().Scale,    a);
+				transform->Rotation = glm::lerp(rigidbody->LastTrans().Rotation, rigidbody->Trans().Rotation, a);
 			//}
 		}
 
 		for (auto entity : Space->Query<Transform, CollisionObject>()) {
 			auto [transform, object] = entity.Components.Tie<OtherComponents>();
 
-			transform->Position = iw::lerp(transform->Position, object->Trans().Position, accumulator / iw::FixedTime());
-			transform->Scale    = iw::lerp(transform->Scale,    object->Trans().Scale,    accumulator / iw::FixedTime());
-			transform->Rotation = iw::lerp(transform->Rotation, object->Trans().Rotation, accumulator / iw::FixedTime());
+			transform->Position = glm::lerp(transform->Position, object->Trans().Position, a);
+			transform->Scale    = glm::lerp(transform->Scale,    object->Trans().Scale,    a);
+			transform->Rotation = glm::lerp(transform->Rotation, object->Trans().Rotation, a);
 
 			//object->Trans().SetParent(transform->Parent());
 		}

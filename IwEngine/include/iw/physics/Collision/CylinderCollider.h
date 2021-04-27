@@ -62,7 +62,7 @@ namespace impl {
 		Transform Trans() const override {
 			Transform transform;
 			transform.Position = Center;
-			//transform.Scale    = vector3(Radius, Height / 2, Radius);
+			//transform.Scale    = glm::vec3(Radius, Height / 2, Radius);
 
 			if      (Direction == V::unit_x) {
 				transform.Rotation = quaternion::from_axis_angle(V::unit_z, Pi / 2);
@@ -80,7 +80,7 @@ namespace impl {
 		}
 
 		// for FFP
-		//vector3 xz = vector3(direction.x, 0, direction.z).normalized() * Radius;   // todo: make cylender collider
+		//glm::vec3 xz = glm::vec3(direction.x, 0, direction.z).normalized() * Radius;   // todo: make cylender collider
 		//xz.y = (direction.y < 0) ? -Radius : Radius; // low : high
 		//return xz * transform->WorldScale().major() + Center + transform->WorldPosition();
 	};

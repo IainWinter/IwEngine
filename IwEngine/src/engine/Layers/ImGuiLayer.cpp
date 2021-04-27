@@ -7,6 +7,8 @@
 
 #include "../extern/imgui/src/imgui_demo.cpp"
 
+#include "glm/gtx/compatibility.hpp"
+
 //extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 namespace iw {
@@ -69,7 +71,7 @@ namespace Engine {
 		ImGui::GetIO().DeltaTime = Time::DeltaTime();
 
 		if (m_window) {
-			iw::vector2 pos = Mouse::ScreenPos();
+			glm::vec2 pos = Mouse::ScreenPos();
 
 			ImGui::GetIO().MousePos.x = pos.x;
 			ImGui::GetIO().MousePos.y = pos.y;
@@ -93,11 +95,7 @@ namespace Engine {
 	void PrintTimes(
 		iw::log_time& times)
 	{
-		if (times.name == "Physics") {
-			LOG_INFO << "Physics - " << times.time;
-		}
-
-		m_smooth[times.name] = iw::lerp(m_smooth[times.name], times.time * 1000, min(1 - smoothing + .01, 1));
+		m_smooth[times.name] = glm::lerp(m_smooth[times.name], times.time * 1000, glm::min(1 - smoothing + .01f, 1.f));
 		float time = m_smooth[times.name];
 
 		if (times.children.size() == 0) {
@@ -239,9 +237,7 @@ namespace Engine {
 		if (e.Device == DeviceType::MOUSE) {
 			auto& io = ImGui::GetIO();
 
-			iw::vector2 screenPos = iw::vector2(e.X, e.Y)/*iw::Mouse::ScreenPos()*/;
-
-			LOG_INFO << screenPos;
+			glm::vec2 screenPos = glm::vec2(e.X, e.Y)/*iw::Mouse::ScreenPos()*/;
 
 			io.MousePos.x = (float)screenPos.x;
 			io.MousePos.y = (float)screenPos.y;

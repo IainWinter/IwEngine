@@ -340,11 +340,11 @@ namespace Editor {
 			PrintCell("Position"); PrintEditCell(&transform->Position);
 			PrintCell("Scale");    PrintEditCell(&transform->Scale);
 
-			vector3 euler = transform->Rotation.euler_angles();
+			glm::vec3 euler = glm::eulerAngles(transform->Rotation);
 
 			PrintCell("Rotation"); PrintEditCell(&euler);
 
-			transform->Rotation = iw::quaternion::from_euler_angles(euler);
+			transform->Rotation = glm::quat(euler);
 
 			if (showParent) {
 				EntityHandle parent = Space->FindEntity(transform->Parent()).Handle;
@@ -441,9 +441,9 @@ namespace Editor {
 
 						switch (property.Stride) {
 							case 1: PrintCell(property.Name); PrintEditCell((float		*)property.Data); break;
-							case 2: PrintCell(property.Name); PrintEditCell((iw::vector2*)property.Data, 0, 1, 0.01f); break;
-							case 3: PrintCell(property.Name); PrintEditCell((iw::vector3*)property.Data, 0, 1, 0.01f); break;
-							case 4: PrintCell(property.Name); PrintEditCell((iw::vector4*)property.Data, 0, 1, 0.01f); break;
+							case 2: PrintCell(property.Name); PrintEditCell((glm::vec2*)property.Data, 0, 1, 0.01f); break;
+							case 3: PrintCell(property.Name); PrintEditCell((glm::vec3*)property.Data, 0, 1, 0.01f); break;
+							case 4: PrintCell(property.Name); PrintEditCell((glm::vec4*)property.Data, 0, 1, 0.01f); break;
 						}
 
 						break;
@@ -515,10 +515,12 @@ namespace Editor {
 			ImGui::TableSetupColumn("", 0, 0.3f);
 			ImGui::TableSetupColumn("", 0, 0.7f);
 
-			PrintCell("Gravity");  PrintEditCell(&body->Gravity);
-			PrintCell("Force");    PrintEditCell(&body->NetForce);
-			PrintCell("Velocity"); PrintEditCell(&body->Velocity);
-			PrintCell("Lock");     PrintEditCell(&body->AxisLock);
+			PrintCell("Gravity");          PrintEditCell(&body->Gravity);
+			PrintCell("Net Force");        PrintEditCell(&body->NetForce);
+			PrintCell("Net Torque");       PrintEditCell(&body->NetTorque);
+			PrintCell("Velocity");         PrintEditCell(&body->Velocity);
+			PrintCell("Angular Velocity"); PrintEditCell(&body->AngularVelocity);
+			PrintCell("Lock");             PrintEditCell(&body->AxisLock);
 
 			PrintCell("Lock axis");
 
@@ -531,7 +533,7 @@ namespace Editor {
 			ImGui::Checkbox("Y", &y); ImGui::SameLine();
 			ImGui::Checkbox("Z", &z);
 
-			body->IsAxisLocked = vector3(x, y, z);
+			body->IsAxisLocked = glm::vec3(x, y, z);
 
 			float mass = body->Mass();
 

@@ -98,7 +98,7 @@ namespace Graphics {
 
 		int lineHeightPixels = m_lightHeight - padHeight;
 
-		iw::vector2 scale = iw::vector2(
+		glm::vec2 scale = glm::vec2(
 			size / lineHeightPixels * m_size * ratio,
 			size / lineHeightPixels * m_size
 		);
@@ -106,11 +106,11 @@ namespace Graphics {
 		unsigned indexCount = count * 6;
 		unsigned vertCount  = count * 4;
 
-		unsigned*    indices = new unsigned   [indexCount];
-		iw::vector3* verts   = new iw::vector3[vertCount];
-		iw::vector2* uvs     = new iw::vector2[vertCount];
+		unsigned*  indices = new unsigned [indexCount];
+		glm::vec3* verts   = new glm::vec3[vertCount];
+		glm::vec2* uvs     = new glm::vec2[vertCount];
 
-		iw::vector2 cursor;
+		glm::vec2 cursor;
 		unsigned vert = 0;
 		unsigned index = 0;
 		for (std::string line : lines) {
@@ -121,8 +121,8 @@ namespace Graphics {
 				const Character& c = GetCharacter(char1);
 				int kerning = GetKerning(char1, char2);
 
-				iw::vector2 dim(c.Width - padWidth, c.Height - padHeight);
-				iw::vector2 tex(GetTexture(c.Page)->Width(), GetTexture(c.Page)->Height());
+				glm::vec2 dim(c.Width - padWidth, c.Height - padHeight);
+				glm::vec2 tex(GetTexture(c.Page)->Width(), GetTexture(c.Page)->Height());
 
 				float u = (c.X + m_padding.Left) / tex.x;
 				float v = (c.Y + m_padding.Top) / tex.y;
@@ -134,15 +134,15 @@ namespace Graphics {
 				float maxX = x + dim.x * scale.x;
 				float minY = y - dim.y * scale.y;
 
-				verts[vert + 0] = iw::vector3(   x,    y, 0);
-				verts[vert + 1] = iw::vector3(   x, minY, 0);
-				verts[vert + 2] = iw::vector3(maxX,    y, 0);
-				verts[vert + 3] = iw::vector3(maxX, minY, 0);
+				verts[vert + 0] = glm::vec3(   x,    y, 0);
+				verts[vert + 1] = glm::vec3(   x, minY, 0);
+				verts[vert + 2] = glm::vec3(maxX,    y, 0);
+				verts[vert + 3] = glm::vec3(maxX, minY, 0);
 
-				uvs[vert + 0] = iw::vector2(   u,    v);
-				uvs[vert + 1] = iw::vector2(   u, maxV);
-				uvs[vert + 2] = iw::vector2(maxU,    v);
-				uvs[vert + 3] = iw::vector2(maxU, maxV);
+				uvs[vert + 0] = glm::vec2(   u,    v);
+				uvs[vert + 1] = glm::vec2(   u, maxV);
+				uvs[vert + 2] = glm::vec2(maxU,    v);
+				uvs[vert + 3] = glm::vec2(maxU, maxV);
 
 				indices[index + 0] = vert;
 				indices[index + 1] = vert + 1;

@@ -44,9 +44,9 @@ namespace impl {
 	};
 }
 
-	using AABB2 = impl::AABB<iw::vector2>;
-	using AABB  = impl::AABB<iw::vector3>;
-	using AABB4 = impl::AABB<iw::vector4>;
+	using AABB2 = impl::AABB<glm::vec2>;
+	using AABB  = impl::AABB<glm::vec3>;
+	using AABB4 = impl::AABB<glm::vec4>;
 }
 
 	using namespace Physics;

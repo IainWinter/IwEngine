@@ -275,9 +275,9 @@ namespace Graphics {
 		MAT_SET(unsigned*,   UniformType::UINT,   sizeof(unsigned))
 		MAT_SET(float*,      UniformType::FLOAT,  sizeof(float))
 		MAT_SET(double*,     UniformType::DOUBLE, sizeof(double))
-		MAT_SET(iw::vector2, UniformType::FLOAT,  sizeof(float), &)
-		MAT_SET(iw::vector3, UniformType::FLOAT,  sizeof(float), &)
-		MAT_SET(iw::vector4, UniformType::FLOAT,  sizeof(float), &)
+		MAT_SET(glm::vec2,   UniformType::FLOAT,  sizeof(float), &)
+		MAT_SET(glm::vec3,   UniformType::FLOAT,  sizeof(float), &)
+		MAT_SET(glm::vec4,   UniformType::FLOAT,  sizeof(float), &)
 		MAT_SET(Color,       UniformType::FLOAT,  sizeof(float), &)
 
 #undef MAT_SET

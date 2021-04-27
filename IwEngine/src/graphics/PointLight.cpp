@@ -27,13 +27,13 @@ namespace Graphics {
 			return;
 		}
 
-		matrix4 cube[6];
-		cube[0] = matrix4::create_look_at(Position(), Position() + vector3::unit_x, -vector3::unit_y) * m_shadowCamera.Projection();
-		cube[1] = matrix4::create_look_at(Position(), Position() - vector3::unit_x, -vector3::unit_y) * m_shadowCamera.Projection();
-		cube[2] = matrix4::create_look_at(Position(), Position() + vector3::unit_y,  vector3::unit_z) * m_shadowCamera.Projection();
-		cube[3] = matrix4::create_look_at(Position(), Position() - vector3::unit_y, -vector3::unit_z) * m_shadowCamera.Projection();
-		cube[4] =                                                                                       m_shadowCamera.ViewProjection();
-		cube[5] = matrix4::create_look_at(Position(), Position() - vector3::unit_z, -vector3::unit_y) * m_shadowCamera.Projection();
+		glm::mat4 cube[6];
+		cube[0] = glm::lookAt(Position(), Position() + glm::vec3(1, 0, 0), -glm::vec3(0, 1, 0)) * m_shadowCamera.Projection();
+		cube[1] = glm::lookAt(Position(), Position() - glm::vec3(1, 0, 0), -glm::vec3(0, 1, 0)) * m_shadowCamera.Projection();
+		cube[2] = glm::lookAt(Position(), Position() + glm::vec3(0, 1, 0),  glm::vec3(0, 0, 1)) * m_shadowCamera.Projection();
+		cube[3] = glm::lookAt(Position(), Position() - glm::vec3(0, 1, 0), -glm::vec3(0, 0, 1)) * m_shadowCamera.Projection();
+		cube[4] =                                                                                 m_shadowCamera.ViewProjection();
+		cube[5] = glm::lookAt(Position(), Position() - glm::vec3(0, 0, 1), -glm::vec3(0, 1, 0)) * m_shadowCamera.Projection();
 
 		m_shadowShader->Handle()->GetParam("light_mats[0]") ->SetAsMat4s(cube, 6);
 		m_shadowShader->Handle()->GetParam("light_pos")     ->SetAsFloats(&Position(), 3);
@@ -85,8 +85,8 @@ namespace Graphics {
 //#endif
 			PerspectiveCamera camera(
 				Position(), 
-				quaternion::from_axis_angle(vector3::unit_z, Pi),
-				Pi / 2,
+				glm::angleAxis(glm::pi<float>(), glm::vec3(0, 0, 1)),
+				glm::pi<float>() * 0.5f,
 				m_shadowTarget->Width() / m_shadowTarget->Height(),
 				0.01f,
 				Radius()

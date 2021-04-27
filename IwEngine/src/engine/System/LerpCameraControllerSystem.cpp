@@ -2,6 +2,8 @@
 #include "iw/engine/Time.h"
 #include <imgui/imgui.h>
 
+#include "glm/gtx/compatibility.hpp"
+
 namespace iw {
 	LerpCameraControllerSystem::LerpCameraControllerSystem(
 		iw::Entity target)
@@ -22,7 +24,7 @@ namespace iw {
 		for (auto entity : eca) {
 			auto [t, c] = entity.Components.Tie<Components>();
 
-			iw::vector3 target;
+			glm::vec3 target;
 			if (m_target != iw::EntityHandle::Empty && follow) {
 				target = m_target.Find<iw::Transform>()->Position;
 			}
@@ -30,10 +32,10 @@ namespace iw {
 			target.y += 2;
 			target.x -= 5;
 
-			iw::quaternion camrot = iw::quaternion::from_axis_angle(iw::vector3::unit_y, iw::Pi / 2);
+			glm::quat camrot = glm::angleAxis(glm::pi<float>() * 0.5f, glm::vec3(0, 1, 0));
 
-			t->Position = iw::lerp(t->Position, target, iw::Time::DeltaTime() * speed);
-			t->Rotation = iw::lerp(t->Rotation, camrot, iw::Time::DeltaTime() * speed);
+			t->Position = glm::lerp(t->Position, target, iw::Time::DeltaTime() * speed);
+			t->Rotation = glm::lerp(t->Rotation, camrot, iw::Time::DeltaTime() * speed);
 		}
 	}
 }

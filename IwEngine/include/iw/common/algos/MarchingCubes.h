@@ -1,24 +1,25 @@
 #pragma once
 
 #include <vector>
-#include "iw/math/vector2.h"
+//#include "iw/math/vector2.h"
+#include "glm/vec2.hpp"
 
 namespace iw {
 namespace common {
 	template<
 		typename _t>
-	std::vector<iw::vector2> MakePolygonFromField(
+	std::vector<glm::vec2> MakePolygonFromField(
 		_t* field,
 		size_t width, size_t height,
 		_t threshhold)
 	{
-		std::vector<iw::vector2> edges;
+		std::vector<glm::vec2> edges;
 
-		iw::vector2 midPoints[4] = {
-			iw::vector2(0.5, 0),
-			iw::vector2(1,   0.5),
-			iw::vector2(0.5, 1),
-			iw::vector2(0,   0.5),
+		glm::vec2 midPoints[4] = {
+			glm::vec2(0.5, 0),
+			glm::vec2(1,   0.5),
+			glm::vec2(0.5, 1),
+			glm::vec2(0,   0.5),
 		};
 
 		int _ = -1;
@@ -68,7 +69,7 @@ namespace common {
 				int edgeIndex = edgeIndices[state][k];
 				if (edgeIndex == _) continue;
 
-				iw::vector2 vert = midPoints[edgeIndex];
+				glm::vec2 vert = midPoints[edgeIndex];
 				vert.x += i;
 				vert.y += j;
 
@@ -76,7 +77,7 @@ namespace common {
 			}
 		}
 
-		std::vector<iw::vector2> chain = {
+		std::vector<glm::vec2> chain = {
 			edges[0],
 			edges[1]
 		};
@@ -110,39 +111,41 @@ namespace common {
 		return chain;
 	}
 
+	float cross_length(glm::vec2 a, glm::vec2 b) {
+		return a.x * b.y - a.y * b.x;
+	}
+
 		// put these in cpp
 
 	// true = clockwise, false = counter-clockwise
-	inline bool IsClockwise(iw::vector2 a, iw::vector2 b, iw::vector2 c) {
-		return (b - a).cross_length(c - a) > 0;
+	inline bool IsClockwise(glm::vec2 a, glm::vec2 b, glm::vec2 c) {
+		return  cross_length(b - a, c - a) > 0;
 	}
 
-	inline bool HasPoint(iw::vector2 a, iw::vector2 b, iw::vector2 c, iw::vector2 p) {
+	inline bool HasPoint(glm::vec2 a, glm::vec2 b, glm::vec2 c, glm::vec2 p) {
 		if ((a.x - b.x) / (a.y - b.y) == (a.x - c.x) / (a.y - c.y)) {
 			return true; // points are on a line
 		}
 
-		iw::vector2 v  = p;
-		iw::vector2 v0 = a;
-		iw::vector2 v1 = b - a;
-		iw::vector2 v2 = c - a;
+		glm::vec2 v  = p;
+		glm::vec2 v0 = a;
+		glm::vec2 v1 = b - a;
+		glm::vec2 v2 = c - a;
 
-		float ca =  (v.cross_length(v2) - v0.cross_length(v2)) / v1.cross_length(v2);
-		float cb = -(v.cross_length(v1) - v0.cross_length(v1)) / v1.cross_length(v2);
+		float ca =  (cross_length(v, v2) - cross_length(v0, v2)) / cross_length(v1, v2);
+		float cb = -(cross_length(v, v1) - cross_length(v0, v1)) / cross_length(v1, v2);
 
 		return ca > 0 && cb > 0 && ca + cb < 1;
 	}
 
 	inline std::vector<unsigned> TriangulatePolygon(
-		const std::vector<iw::vector2>& polygon)
+		const std::vector<glm::vec2>& polygon)
 	{
 		std::vector<unsigned> triangles;
 
-		std::vector<std::pair<iw::vector2, size_t>> working; // copy a version with the correct indices
+		std::vector<std::pair<glm::vec2, size_t>> working; // copy a version with the correct indices
 		for (size_t i = 0; i < polygon.size(); i++) {
 			working.emplace_back(polygon.at(i), i);
-
-			LOG_INFO << polygon.at(i);
 		}
 
 		while (working.size() >/*=*/ 3) {

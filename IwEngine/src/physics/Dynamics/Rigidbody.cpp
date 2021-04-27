@@ -17,9 +17,17 @@ namespace Physics {
 	}
 
 	void Rigidbody::ApplyForce(
-		const iw::vector3& force)
+		const glm::vec3& force,
+		const glm::vec3& position)
 	{
 		NetForce += force;
+		ApplyTorque(glm::cross(position, force));
+	}
+
+	void Rigidbody::ApplyTorque(
+		const glm::vec3& torque)
+	{
+		NetTorque += torque;
 	}
 
 	void Rigidbody::ApplyGravity() {
@@ -65,7 +73,7 @@ namespace Physics {
 	}
 
 	void Rigidbody::Move(
-		const iw::vector3 delta)
+		const glm::vec3 delta)
 	{		
 		m_transform.Position += delta;
 		Velocity = delta;

@@ -2,7 +2,7 @@
 
 #include "IwGraphics.h"
 #include "Material.h"
-#include "Bone.h"
+#include "iw/common/Components/Transform.h"
 #include "iw/renderer/VertexArray.h"
 #include "iw/renderer/IndexBuffer.h"
 #include "iw/renderer/Device.h"

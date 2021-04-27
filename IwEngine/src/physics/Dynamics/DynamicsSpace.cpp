@@ -42,20 +42,30 @@ namespace Physics {
 			rigidbody->SetLastTrans(rigidbody->Trans());
 
 			if (rigidbody->IsKinematic) {
-				if (   isnan(rigidbody->Velocity.length_squared())
-					|| isinf(rigidbody->Velocity.length_squared()))
+
+				Transform& transform = rigidbody->Trans();
+
+				if (   isnan(glm::length2(rigidbody->Velocity))
+					|| isinf(glm::length2(rigidbody->Velocity)))
 				{
-					rigidbody->Velocity = 0;
+					rigidbody->Velocity = glm::vec3();
 				}
 
-				if (   isnan(rigidbody->Trans().Position.length_squared())
-					|| isinf(rigidbody->Trans().Position.length_squared()))
+				if (   isnan(glm::length2(rigidbody->Trans().Position))
+					|| isinf(glm::length2(rigidbody->Trans().Position)))
 				{
-					rigidbody->Trans().Position = 0;
+					transform.Position = glm::vec3();
 				}
 
 				rigidbody->Velocity += dt * rigidbody->NetForce * rigidbody->InvMass;
-				rigidbody->Trans().Position += dt * rigidbody->Velocity;
+				transform. Position += dt * rigidbody->Velocity;
+
+				rigidbody->AngularVelocity += dt * rigidbody->NetTorque * rigidbody->Inertia;
+				transform.Rotation = (glm::quat(1.0, rigidbody->AngularVelocity * dt / 2.f) * transform.Rotation);
+
+				//transform .Rotation *= quaternion::from_axis_angle(rigidbody->AngularVelocity.normalized(), dt * rigidbody->AngularVelocity.length());
+
+				// Axis lock should be through constraints I think
 
 				if (rigidbody->IsAxisLocked.x) {
 					rigidbody->Trans().Position.x = rigidbody->AxisLock.x;
@@ -74,12 +84,12 @@ namespace Physics {
 		ClearForces();
 	}
 
-	const iw::vector3& DynamicsSpace::Gravity() {
+	const glm::vec3& DynamicsSpace::Gravity() {
 		return m_gravity;
 	}
 
 	void DynamicsSpace::SetGravity(
-		const iw::vector3& gravity)
+		const glm::vec3& gravity)
 	{
 		m_gravity = gravity;
 		TrySetGravity();
@@ -116,7 +126,7 @@ namespace Physics {
 			Rigidbody* rigidbody = (Rigidbody*)object;
 			if (rigidbody->IsKinematic) {
 				Transform t = rigidbody->Trans();
-				vector3   v = rigidbody->Velocity;
+				glm::vec3   v = rigidbody->Velocity;
 
 				if (rigidbody->IsAxisLocked.x) {
 					t.Position.x = rigidbody->AxisLock.x;
@@ -147,7 +157,8 @@ namespace Physics {
 			Rigidbody* rigidbody = (Rigidbody*)object;
 
 			if (rigidbody->IsKinematic) {
-				rigidbody->NetForce = 0;
+				rigidbody->NetForce  = glm::vec3();
+				rigidbody->NetTorque = glm::vec3();
 			}
 		}
 	}

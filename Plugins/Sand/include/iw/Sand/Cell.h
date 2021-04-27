@@ -3,6 +3,8 @@
 #include "iw/graphics/Color.h"
 #include <unordered_map>
 
+#include "glm/gtc/random.hpp"
+
 #define IW_PLUGIN_SAND_BEGIN namespace iw {namespace plugins {namespace Sand {
 #define IW_PLUGIN_SAND_END }using namespace Sand; }using namespace plugins; }
 
@@ -72,7 +74,7 @@ struct Cell {
 		CellType type)
 	{
 		Cell& cell = m_defaults.at(type);
-		cell.StyleOffset = iw::randf();
+		cell.StyleOffset = glm::linearRand(-1.f, 1.f);
 		return cell;
 	}
 private:

@@ -18,8 +18,8 @@ workspace "wGames"
 	project "Physics project"
 	--project "Iw Sandbox"
 	--project "SpaceSand"
-		--kind "SharedLib"
-		kind "WindowedApp"
+		kind "SharedLib"
+		--kind "WindowedApp"
 		language "C++"
 		location  (gamedir .. blddir)
 		targetdir (gamedir .. bindir)

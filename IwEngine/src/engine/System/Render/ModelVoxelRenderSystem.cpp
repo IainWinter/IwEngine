@@ -19,9 +19,9 @@ namespace Engine {
 	float voxelSize    = 1.0f / (4.0f);
 	float voxelSizeInv = 1.0f / voxelSize;
 
-	vector3 voxelBoundsScale(32);
-	vector3 voxelBoundsSize (256 * 1.2f);
-	vector3 voxelBoundsScaleInv = vector3(1) / voxelBoundsScale;
+	glm::vec3 voxelBoundsScale(32);
+	glm::vec3 voxelBoundsSize (256 * 1.2f);
+	glm::vec3 voxelBoundsScaleInv = glm::vec3(1) / voxelBoundsScale;
 
 	int ModelVoxelRenderSystem::Initialize() {
 		ref<Shader> vct = Asset->Load<Shader>("shaders/vct/vct.shader"); // Gets init from layer
@@ -58,7 +58,7 @@ namespace Engine {
 	void ModelVoxelRenderSystem::Update(
 		EntityComponentArray& eca)
 	{
-		vector3 camPos = m_scene->MainCamera()->Position(); // no req plz :(
+		glm::vec3 camPos = m_scene->MainCamera()->Position(); // no req plz :(
 		camPos.y = 0;
 
 		m_voxelize->SetPosition(camPos);
@@ -179,7 +179,7 @@ namespace Engine {
 			m_bounds = MakeCube(description)->MakeInstance();			
 			m_bounds.SetMaterial(vmaterial.MakeInstance());
 
-			m_bounds.Data()->TransformMeshData(Transform(0, voxelBoundsScale));
+			m_bounds.Data()->TransformMeshData(Transform(glm::vec3(), voxelBoundsScale));
 
 			// Quad
 

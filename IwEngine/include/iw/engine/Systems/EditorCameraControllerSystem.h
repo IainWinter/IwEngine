@@ -10,8 +10,8 @@ namespace Editor {
 		: public SystemBase
 	{
 	private:
-		iw::vector3 movement;
-		iw::vector2 rotation;
+		glm::vec3 movement;
+		glm::vec2 rotation;
 		float speed;
 		bool active;
 

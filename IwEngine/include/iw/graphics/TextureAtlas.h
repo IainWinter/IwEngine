@@ -57,9 +57,9 @@ namespace Graphics {
 		GEN_default5(IWGRAPHICS_API, TextureAtlas)
 
 		IWGRAPHICS_API
-		iw::vector2 MapCoords(
+		glm::vec2 MapCoords(
 			int tile,
-			iw::vector2 coords) const;
+			glm::vec2 coords) const;
 
 		IWGRAPHICS_API
 		iw::ref<Texture> GetSubTexture(
@@ -72,7 +72,7 @@ namespace Graphics {
 		//// Generate bounds based on largest areas without the 'backgroundColor' surrounding
 		//IWGRAPHICS_API
 		//void GenTexBounds(
-		//	iw::vector4 backgroundColor);
+		//	iw::glm::vec4 backgroundColor);
 
 		// Split texture into equal rectangles
 		IWGRAPHICS_API

@@ -1,8 +1,6 @@
 #pragma once
 
-#include "iw/math/vector2.h"
-#include "iw/math/vector3.h"
-#include "iw/math/vector4.h"
+#include "IwPhysics.h"
 
 namespace iw {
 namespace Physics {
@@ -39,9 +37,9 @@ namespace impl {
 	};
 }
 
-	using Plane2 = impl::Plane<iw::vector2>;
-	using Plane  = impl::Plane<iw::vector3>;
-	using Plane4 = impl::Plane<iw::vector4>;
+	using Plane2 = impl::Plane<glm::vec2>;
+	using Plane  = impl::Plane<glm::vec3>;
+	using Plane4 = impl::Plane<glm::vec4>;
 }
 
 	using namespace Physics;

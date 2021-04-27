@@ -71,8 +71,8 @@ namespace Graphics {
 		
 			source->SetAsTexture(m_voxelTexture->Handle(), 0);
 
-			vector3 dim(m_voxelTexture->Width(), m_voxelTexture->Height(), m_voxelTexture->Depth());
-			unsigned levels = log2(dim.major()) + 1;
+			glm::vec3 dim(m_voxelTexture->Width(), m_voxelTexture->Height(), m_voxelTexture->Depth());
+			unsigned levels = log2(glm::max(glm::max(dim.x, dim.y), dim.z)) + 1;
 
 			int xSize, ySize, zSize;
 			m_mipmapGenerationShader->Handle()->GetComputeWorkGroupSize(xSize, ySize, zSize);

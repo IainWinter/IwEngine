@@ -1,18 +1,20 @@
 #pragma once
 
 #include "iw/common/iwcommon.h"
-#include "iw/math/vector3.h"
-#include "iw/math/matrix4.h"
-#include "iw/math/quaternion.h"
+#include "glm/vec3.hpp"
+#include "glm/mat4x4.hpp"
+#include "glm/gtx/quaternion.hpp"
 #include <vector>
+
+#include "glm/gtx/matrix_decompose.hpp"
 
 namespace iw {
 namespace Engine {
 	struct REFLECT Transform {
 	public:
-		REFLECT vector3 Position;
-		REFLECT vector3 Scale;
-		REFLECT quaternion Rotation;
+		REFLECT glm::vec3 Position;
+		REFLECT glm::vec3 Scale;
+		REFLECT glm::quat Rotation;
 	private:
 		std::vector<Transform*> m_children;
 		Transform* m_parent;
@@ -23,26 +25,26 @@ namespace Engine {
 
 		IWCOMMON_API
 		Transform(
-			vector3    position,
-			vector3    scale    = vector3::one,
-			quaternion rotation = quaternion::identity);
+			glm::vec3 position,
+			glm::vec3 scale    = glm::vec3(1),
+			glm::quat rotation = glm::quat(1, 0, 0, 0));
 
 		IWCOMMON_API
 		static Transform FromMatrix(
-			matrix4 transformation);
+			glm::mat4 transformation);
 
-		IWCOMMON_API matrix4 Transformation() const;
-		IWCOMMON_API vector3 Forward()        const;
-		IWCOMMON_API vector3 Right()          const;
-		IWCOMMON_API vector3 Up()             const;
+		IWCOMMON_API glm::mat4 Transformation() const;
+		IWCOMMON_API glm::vec3 Forward()        const;
+		IWCOMMON_API glm::vec3 Right()          const;
+		IWCOMMON_API glm::vec3 Up()             const;
 
-		IWCOMMON_API matrix4    WorldTransformation() const;
-		IWCOMMON_API vector3    WorldForward()        const;
-		IWCOMMON_API vector3    WorldRight()          const;
-		IWCOMMON_API vector3    WorldUp()             const;
-		IWCOMMON_API vector3    WorldPosition()       const;
-		IWCOMMON_API vector3    WorldScale()          const;
-		IWCOMMON_API quaternion WorldRotation()       const;
+		IWCOMMON_API glm::mat4 WorldTransformation() const;
+		IWCOMMON_API glm::vec3 WorldForward()        const;
+		IWCOMMON_API glm::vec3 WorldRight()          const;
+		IWCOMMON_API glm::vec3 WorldUp()             const;
+		IWCOMMON_API glm::vec3 WorldPosition()       const;
+		IWCOMMON_API glm::vec3 WorldScale()          const;
+		IWCOMMON_API glm::quat WorldRotation()       const;
 
 		IWCOMMON_API void Apply(
 			Transform& transform);
@@ -53,13 +55,8 @@ namespace Engine {
 		IWCOMMON_API       std::vector<Transform*>& Children();
 		IWCOMMON_API const std::vector<Transform*>& Children() const;
 
-		IWCOMMON_API
-		void AddChild(
-			Transform* transform);
-
-		IWCOMMON_API
-		void RemoveChild(
-			Transform* transform);
+		IWCOMMON_API void AddChild   (Transform* transform);
+		IWCOMMON_API void RemoveChild(Transform* transform);
 
 		IWCOMMON_API       Transform* Parent();
 		IWCOMMON_API const Transform* Parent() const;

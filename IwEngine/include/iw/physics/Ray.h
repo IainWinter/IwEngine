@@ -37,9 +37,9 @@ namespace impl {
 	};
 }
 
-	using Ray2 = impl::Ray<iw::vector2>;
-	using Ray  = impl::Ray<iw::vector3>;
-	using Ray4 = impl::Ray<iw::vector4>;
+	using Ray2 = impl::Ray<glm::vec2>;
+	using Ray  = impl::Ray<glm::vec3>;
+	using Ray4 = impl::Ray<glm::vec4>;
 }
 
 	using namespace Physics;

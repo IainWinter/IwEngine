@@ -4,16 +4,16 @@
 namespace iw {
 namespace Engine {
 	Transform::Transform() 
-		: Position(vector3::zero)
-		, Scale(vector3::one)
-		, Rotation(quaternion::identity)
+		: Position(glm::vec3(1))
+		, Scale(glm::vec3(1))
+		, Rotation(glm::quat(1, 0, 0, 0))
 		, m_parent(nullptr)
 	{}
 
 	Transform::Transform(
-		vector3 position, 
-		vector3 scale, 
-		quaternion rotation)
+		glm::vec3 position,
+		glm::vec3 scale,
+		glm::quat rotation)
 		: Position(position)
 		, Scale(scale)
 		, Rotation(rotation)
@@ -21,45 +21,54 @@ namespace Engine {
 	{}
 
 	Transform Transform::FromMatrix(
-		matrix4 transformation)
+		glm::mat4 transformation)
 	{
+		glm::vec3 scale;
+		glm::quat rotation;
+		glm::vec3 translation;
+		glm::vec3 skew;
+		glm::vec4 perspective;
+		glm::decompose(transformation, scale, rotation, translation, skew, perspective);
+
 		return { 
-			transformation.translation(), 
-			transformation.scale(), 
-			transformation.rotation()
+			translation, 
+			scale, 
+			rotation
 		};
 	}
 
-	matrix4 Transform::Transformation() const {
-		return matrix4::create_scale(Scale)
-			* matrix4::create_from_quaternion(Rotation)
-			* matrix4::create_translation(Position);
+	glm::mat4 Transform::Transformation() const {
+		glm::mat4 m = glm::toMat4      (Rotation);
+		          m = glm::scale    (m, Scale);
+		          m = glm::translate(m, Position);
+		
+		return m;
 	}
 
-	vector3 Transform::Forward() const {
-		return vector3::unit_z * Rotation;
+	glm::vec3 Transform::Forward() const {
+		return glm::vec3(0, 0, 1) * Rotation;
 	}
 
-	vector3 Transform::Right() const {
-		return vector3::unit_x * Rotation;
+	glm::vec3 Transform::Right() const {
+		return glm::vec3(1, 0, 0) * Rotation;
 	}
 
-	vector3 Transform::Up() const {
-		return vector3::unit_y * Rotation;
+	glm::vec3 Transform::Up() const {
+		return glm::vec3(0, 1, 0) * Rotation;
 	}
 
-	matrix4 Transform::WorldTransformation() const {
-		matrix4 parent = matrix4::identity;
+	glm::mat4 Transform::WorldTransformation() const {
+		glm::mat4 parent(1);
 
 		if (m_parent) {
 			parent = m_parent->WorldTransformation();
 		}
 
-		return Transformation() * parent;
+		return parent * Transformation();
 	}
 
-	vector3 Transform::WorldForward() const {
-		quaternion parent = quaternion::identity;
+	glm::vec3 Transform::WorldForward() const {
+		glm::quat parent(1, 0, 0, 0);
 
 		if (m_parent) {
 			parent = m_parent->WorldRotation();
@@ -68,8 +77,8 @@ namespace Engine {
 		return Forward() * parent;
 	}
 
-	vector3 Transform::WorldRight() const {
-		quaternion parent = quaternion::identity;
+	glm::vec3 Transform::WorldRight() const {
+		glm::quat parent(1, 0, 0, 0);
 
 		if (m_parent) {
 			parent = m_parent->WorldRotation();
@@ -78,8 +87,8 @@ namespace Engine {
 		return Right() * parent;
 	}
 
-	vector3 Transform::WorldUp() const {
-		quaternion parent = quaternion::identity;
+	glm::vec3 Transform::WorldUp() const {
+		glm::quat parent(1, 0, 0, 0);
 
 		if (m_parent) {
 			parent = m_parent->WorldRotation();
@@ -88,8 +97,8 @@ namespace Engine {
 		return Up() * parent;
 	}
 
-	vector3 Transform::WorldPosition() const {
-		vector3 parent = vector3::zero;
+	glm::vec3 Transform::WorldPosition() const {
+		glm::vec3 parent(0);
 
 		if (m_parent) {
 			parent = m_parent->WorldPosition();
@@ -98,8 +107,8 @@ namespace Engine {
 		return Position + parent;
 	}
 
-	vector3 Transform::WorldScale() const {
-		vector3 parent = vector3::one;
+	glm::vec3 Transform::WorldScale() const {
+		glm::vec3 parent(1);
 
 		if (m_parent) {
 			parent = m_parent->WorldScale();
@@ -108,8 +117,8 @@ namespace Engine {
 		return Scale * parent;
 	}
 
-	quaternion Transform::WorldRotation() const {
-		quaternion parent = quaternion::identity;
+	glm::quat Transform::WorldRotation() const {
+		glm::quat parent(1, 0, 0, 0);
 
 		if (m_parent) {
 			parent = m_parent->WorldRotation();

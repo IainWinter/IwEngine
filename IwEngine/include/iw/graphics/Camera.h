@@ -7,11 +7,13 @@ namespace iw {
 namespace Graphics {
 	struct IWGRAPHICS_API Camera {
 	protected:
-		iw::matrix4 m_view;
+		glm::mat4 m_view;
 	private:
-		Transform*     m_transform;
-		iw::vector3    m_position;
-		iw::quaternion m_rotation;
+		Transform* m_transform;
+
+		glm::vec3 m_position;
+		glm::quat m_rotation;
+
 		bool m_outdated;
 
 	public:
@@ -21,8 +23,8 @@ namespace Graphics {
 			Transform* transform);
 
 		Camera(
-			const vector3& position,
-			const quaternion& rotation);
+			const glm::vec3& position,
+			const glm::quat& rotation);
 
 		//GEN_copy(, Camera)
 		//GEN_move(, Camera)
@@ -31,33 +33,33 @@ namespace Graphics {
 
 		bool Outdated() const;
 
-		vector3 Position() const;
-		vector3 WorldPosition() const;
+		glm::vec3 Position() const;
+		glm::vec3 WorldPosition() const;
 
-		quaternion Rotation() const;
-		quaternion WorldRotation() const;
+		glm::quat Rotation() const;
+		glm::quat WorldRotation() const;
 
-		matrix4 View();
-		matrix4 View() const;
-		matrix4 ViewProjection();
-		matrix4 ViewProjection() const;
+		glm::mat4 View();
+		glm::mat4 View() const;
+		glm::mat4 ViewProjection();
+		glm::mat4 ViewProjection() const;
 
-		virtual iw::matrix4 Projection() const = 0;
+		virtual glm::mat4 Projection() const = 0;
 
 		void SetTrans(
 			Transform* transform);
 
 		void SetView(
-			const iw::matrix4& view);
+			const glm::mat4& view);
 
 		void SetPosition(
-			const vector3& rotation);
+			const glm::vec3& rotation);
 
 		void SetRotation(
-			const quaternion& rotation);
+			const glm::quat& rotation);
 
 		virtual void SetProjection(
-			const iw::matrix4& projection) = 0;
+			const glm::mat4& projection) = 0;
 	private:
 		void RecalculateView();
 	};
@@ -68,7 +70,7 @@ namespace Graphics {
 		: Camera
 	{
 	private:
-		iw::matrix4 m_projection;
+		glm::mat4 m_projection = glm::mat4();
 
 	public:
 		OrthographicCamera() = default;
@@ -87,8 +89,8 @@ namespace Graphics {
 			float zFar);
 
 		OrthographicCamera(
-			const vector3& position,
-			const quaternion& rotation,
+			const glm::vec3& position,
+			const glm::quat& rotation,
 			float width,
 			float height,
 			float zNear,
@@ -101,12 +103,12 @@ namespace Graphics {
 			float zFar);
 
 		inline void SetProjection(
-			const iw::matrix4& projection) override
+			const glm::mat4& projection) override
 		{
 			m_projection = projection;
 		}
 
-		inline iw::matrix4 Projection() const override {
+		inline glm::mat4 Projection() const override {
 			return m_projection;
 		}
 	};
@@ -118,13 +120,13 @@ namespace Graphics {
 		/*float Fov; // something like this could be cool
 		float Aspect;*/
 	private:
-		iw::matrix4 m_projection;
+		glm::mat4 m_projection = glm::mat4();;
 		//float m_fov;
 		//float m_aspect;
 
 	public:
 		PerspectiveCamera(
-			float fov    = 100 * Pi / 180,
+			float fov    = 100 * glm::pi<float>() / 180,
 			float aspect = 16.0f / 9,
 			float zNear  = 0.01f,
 			float zFar   = 1000.0f);
@@ -137,8 +139,8 @@ namespace Graphics {
 			float zFar);
 
 		PerspectiveCamera(
-			const vector3& position,
-			const quaternion& rotation,
+			const glm::vec3& position,
+			const glm::quat& rotation,
 			float fov,
 			float aspect,
 			float zNear,
@@ -151,12 +153,12 @@ namespace Graphics {
 			float zFar);
 
 		inline void SetProjection(
-			const iw::matrix4& projection) override
+			const glm::mat4& projection) override
 		{
 			m_projection = projection;
 		}
 
-		inline iw::matrix4 Projection() const override {
+		inline glm::mat4 Projection() const override {
 			return m_projection;
 		}
 	};

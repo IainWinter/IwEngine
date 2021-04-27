@@ -11,6 +11,7 @@ stbdir    = iwengdir .. "/extern/stb"
 llvmdir   = iwengdir .. "/extern/llvm"
 jsondir   = iwengdir .. "/extern/json"
 fmoddir   = iwengdir .. "/extern/fmod"
+glmdir    = iwengdir .. "/extern/glm"
 
 cfgname = "%{cfg.buildcfg}.%{cfg.system}.%{cfg.architecture}"
 bindir  = "/bin/" .. cfgname
@@ -27,7 +28,7 @@ workspace "wEngine"
 	location (iwengdir .. blddir)
 
 group "extern"
-	include (glewdir) --temp and annoying
+	include (glewdir)
 	include (imguidir)
 group ""
 
@@ -55,7 +56,7 @@ group ""
 		}
 
 		includedirs {
-			iwengdir  .. incdir,
+			iwengdir .. incdir,
 			iwtoldir .. incdir
 		}
 
@@ -77,45 +78,47 @@ group ""
 			runtime "Release"
 			optimize "On"
 
-	project "wMath"
-		kind "SharedLib"
-		language "C++"
-		location  (iwengdir .. blddir)
-		targetdir (iwengdir .. bindir)
-		implibdir (iwengdir .. libdir)
-		objdir    (iwengdir .. blddir)
+-- replacing with glm to finish school project on time, will comeback to this...
 
-		files {
-			iwengdir .. incdir .. "/iw/math/**.h",
-			iwengdir .. srcdir .. "/math/**.cpp"
-		}
+	-- project "wMath"
+	-- 	kind "SharedLib"
+	-- 	language "C++"
+	-- 	location  (iwengdir .. blddir)
+	-- 	targetdir (iwengdir .. bindir)
+	-- 	implibdir (iwengdir .. libdir)
+	-- 	objdir    (iwengdir .. blddir)
 
-		includedirs {
-			iwengdir  .. incdir,
-			iwtoldir .. incdir
-		}
+	-- 	files {
+	-- 		iwengdir .. incdir .. "/iw/math/**.h",
+	-- 		iwengdir .. srcdir .. "/math/**.cpp"
+	-- 	}
 
-		defines {
-			--"IW_USE_REFLECTION"
-		}
+	-- 	includedirs {
+	-- 		iwengdir  .. incdir,
+	-- 		iwtoldir .. incdir
+	-- 	}
 
-		filter "system:windows"
-			cppdialect "C++17"
-			systemversion "latest"
-			defines {
-				"IW_PLATFORM_WINDOWS",
-				"IWMATH_DLL"
-			}
+	-- 	defines {
+	-- 		--"IW_USE_REFLECTION"
+	-- 	}
 
-		filter "configurations:Debug"
-			defines "IW_DEBUG"
-			runtime "Debug"
-			symbols "On"
+	-- 	filter "system:windows"
+	-- 		cppdialect "C++17"
+	-- 		systemversion "latest"
+	-- 		defines {
+	-- 			"IW_PLATFORM_WINDOWS",
+	-- 			"IWMATH_DLL"
+	-- 		}
 
-		filter "configurations:Release"
-			defines "IW_RELEASE"
-			runtime "Release"
-			optimize "On"
+	-- 	filter "configurations:Debug"
+	-- 		defines "IW_DEBUG"
+	-- 		runtime "Debug"
+	-- 		symbols "On"
+
+	-- 	filter "configurations:Release"
+	-- 		defines "IW_RELEASE"
+	-- 		runtime "Release"
+	-- 		optimize "On"
 
 	project "wUtil"
 		kind "SharedLib"
@@ -305,12 +308,13 @@ group ""
 
 		includedirs {
 			iwengdir  .. incdir,
-			iwtoldir .. incdir
+			iwtoldir .. incdir,
+			glmdir .. incdir
 		}
 
 		links {
 			"wLog",
-			"wMath",
+			--"wMath",
 			"wUtil",
 			"wEvents"
 		}
@@ -348,12 +352,13 @@ group ""
 
 		includedirs {
 			iwengdir  .. incdir,
-			iwtoldir .. incdir
+			iwtoldir .. incdir,
+			--glmdir .. incdir
 		}
 
 		links {
 			"wLog",
-			"wMath",
+			--"wMath", -- builds fine without math, makes sense to me
 			"wUtil",
 			"wEvents"
 		}
@@ -396,12 +401,13 @@ group ""
 		includedirs {
 			iwengdir  .. incdir,
 			glewdir   .. incdir,
-			iwtoldir .. incdir
+			iwtoldir .. incdir,
+			glmdir .. incdir
 		}
 
 		links {
 			"wLog",
-			"wMath",
+			--"wMath", -- only some 6 pipeline functions use matrix and could prob be passed by void/float*
 			"GLEW",
 			"opengl32.lib"
 		}
@@ -448,7 +454,8 @@ group ""
 			stbdir    .. incdir,
 			assimpdir .. incdir,
 			assimpdir .. blddir .. incdir,
-			iwtoldir .. incdir
+			iwtoldir .. incdir,
+			glmdir .. incdir
 		}
 
 		libdirs {
@@ -457,7 +464,7 @@ group ""
 
 		links {
 			"wLog",
-			"wMath",
+			--"wMath",
 			"wUtil",
 			"wRenderer",
 			"wEvents",
@@ -500,17 +507,19 @@ group ""
 
 		files {
 			iwengdir .. incdir .. "/iw/input/**.h",
-			iwengdir .. srcdir .. "/input/**.cpp"
+			iwengdir .. srcdir .. "/input/**.cpp",
+			glmdir .. incdir
 		}
 
 		includedirs {
 			iwengdir  .. incdir,
-			iwtoldir .. incdir
+			iwtoldir .. incdir,
+			glmdir .. incdir
 		}
 
 		links {
 			"wLog",
-			"wMath",
+			--"wMath",
 			"wUtil",
 			"wEvents",
 			"wCommon"
@@ -549,12 +558,13 @@ group ""
 
 		includedirs {
 			iwengdir .. incdir,
-			iwtoldir .. incdir
+			iwtoldir .. incdir,
+			glmdir .. incdir
 		}
 
 		links {
 			"wLog",
-			"wMath",
+			--"wMath",
 			"wCommon"
 		}
 
@@ -596,12 +606,13 @@ group ""
 			imguidir .. incdir,
 			glewdir  .. incdir,
 			fmoddir  .. incdir,
-			iwtoldir .. incdir
+			iwtoldir .. incdir,
+			glmdir .. incdir
 		}
 
 		links {
 			"wLog",
-			"wMath",
+			--"wMath",
 			"wUtil",
 			"wAudio",
 			"wEvents",
@@ -625,7 +636,9 @@ group ""
 			"xcopy /y /f /e \"" .. fmoddir  .. incdir .. "/*\" \""     .. exprtdir .. incdir .. "/\"",
 			"xcopy /y /f    \"" .. jsondir            .. "/*.h\" \""   .. exprtdir .. incdir .. "/json/\"",
 
-			"xcopy /y /f \"" .. imguidir .. libdir .. "/ImGui.lib\" \"" .. exprtdir .. libdir .. "\""
+			"xcopy /y /f \"" .. imguidir .. libdir .. "/ImGui.lib\" \"" .. exprtdir .. libdir .. "\"",
+
+			"xcopy /y /f /e \"" .. glmdir .. incdir .. "/*\" \""     .. exprtdir .. incdir .. "/\"",
 		}
 
 		defines {
@@ -672,11 +685,12 @@ group "Plugins"
 
 		includedirs {
 			sand_dir .. incdir,
-			iwengdir .. incdir
+			iwengdir .. incdir,
+			glmdir .. incdir
 		}
 
 		links {
-			"wMath",
+			--"wMath",
 			"wUtil",
 			"wGraphics" -- maybe breakout engine into a core and something else, need to be able to make systems in plugins eg.
 			
@@ -731,12 +745,13 @@ group "Tools"
 			iwtoldir .. incdir,
 			imguidir .. incdir,
 			fmoddir  .. incdir,
-			jsondir
+			jsondir,
+			glmdir .. incdir
 		}
 
 		links {
 			"wLog",
-			"wMath",
+			--"wMath",
 			"wUtil",
 			"wAudio",
 			"wEvents",

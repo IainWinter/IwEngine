@@ -7,10 +7,10 @@ namespace iw {
 namespace Graphics {
 
 namespace helpers {
-	inline iw::vector4* _MakeCircleArray(
+	inline glm::vec4* _MakeCircleArray(
 		unsigned pointCount)
 	{
-		iw::vector4* points = new iw::vector4[pointCount];
+		glm::vec4* points = new glm::vec4[pointCount];
 
 		float calcH = 0.0f;
 		float calcV = 0.0f;
@@ -21,8 +21,8 @@ namespace helpers {
 			points[i].y = cos(calcV);
 			points[i].w = sin(calcV);
 
-			calcH += 2 * Pi / (pointCount + 1);
-			calcV +=     Pi / (pointCount + 1);
+			calcH += 2 * glm::pi<float>() / (pointCount + 1);
+			calcV +=     glm::pi<float>() / (pointCount + 1);
 		}
 
 		return points;
@@ -34,19 +34,19 @@ namespace helpers {
 	static const unsigned IcoVertCount  = 12;
 	static const unsigned IcoIndexCount = 60;
 
-	static const vector3 IcoVerts[] = {
-		vector3(-ICO_X,  0,	     ICO_Z),
-		vector3( ICO_X,  0,	     ICO_Z),
-		vector3(-ICO_X,  0,     -ICO_Z),
-		vector3( ICO_X,  0,     -ICO_Z),
-		vector3(0,		 ICO_Z,  ICO_X),
-		vector3(0,		 ICO_Z, -ICO_X),
-		vector3(0,      -ICO_Z,  ICO_X),
-		vector3(0,	    -ICO_Z, -ICO_X),
-		vector3( ICO_Z,  ICO_X,  0),
-		vector3(-ICO_Z,  ICO_X,  0),
-		vector3( ICO_Z, -ICO_X,  0),
-		vector3(-ICO_Z, -ICO_X,  0)
+	static const glm::vec3 IcoVerts[] = {
+		glm::vec3(-ICO_X,  0,	     ICO_Z),
+		glm::vec3( ICO_X,  0,	     ICO_Z),
+		glm::vec3(-ICO_X,  0,     -ICO_Z),
+		glm::vec3( ICO_X,  0,     -ICO_Z),
+		glm::vec3(0,		 ICO_Z,  ICO_X),
+		glm::vec3(0,		 ICO_Z, -ICO_X),
+		glm::vec3(0,      -ICO_Z,  ICO_X),
+		glm::vec3(0,	    -ICO_Z, -ICO_X),
+		glm::vec3( ICO_Z,  ICO_X,  0),
+		glm::vec3(-ICO_Z,  ICO_X,  0),
+		glm::vec3( ICO_Z, -ICO_X,  0),
+		glm::vec3(-ICO_Z, -ICO_X,  0)
 	};
 
 	static const unsigned IcoIndex[] = {
@@ -78,18 +78,18 @@ namespace helpers {
 	static const unsigned TriUvCount    = 4;
 	static const unsigned TriIndexCount = 12;
 
-	static const vector3 TriVerts[] = {
-		vector3(cos(Pi2 * 0 / 3), -1, sin(Pi2 * 0 / 3)),
-		vector3(cos(Pi2 * 1 / 3), -1, sin(Pi2 * 1 / 3)),
-		vector3(cos(Pi2 * 2 / 3), -1, sin(Pi2 * 2 / 3)),
-		vector3(0, 1, 0),
+	static const glm::vec3 TriVerts[] = {
+		glm::vec3(cos(glm::pi<float>() * 2 * 0 / 3), -1, sin(glm::pi<float>() * 2 * 0 / 3)),
+		glm::vec3(cos(glm::pi<float>() * 2 * 1 / 3), -1, sin(glm::pi<float>() * 2 * 1 / 3)),
+		glm::vec3(cos(glm::pi<float>() * 2 * 2 / 3), -1, sin(glm::pi<float>() * 2 * 2 / 3)),
+		glm::vec3(0, 1, 0),
 	};
 
-	static const vector2 TriUvs[] = {
-		vector2(0,    0),
-		vector2(1,    0),
-		vector2(0.5f, 1),
-		vector2(1,    1),
+	static const glm::vec2 TriUvs[] = {
+		glm::vec2(0,    0),
+		glm::vec2(1,    0),
+		glm::vec2(0.5f, 1),
+		glm::vec2(1,    1),
 	};
 
 	static const unsigned TriIndex[] = {
@@ -104,26 +104,26 @@ namespace helpers {
 	static const unsigned CubeVertCount  = 8;
 	static const unsigned CubeIndexCount = 36;
 
-	static vector3 CubeVerts[] = {
-		vector3(-1, -1, -1),
-		vector3( 1, -1, -1),
-		vector3( 1,  1, -1),
-		vector3(-1,  1, -1),
-		vector3(-1,  1,  1),
-		vector3( 1,  1,  1),
-		vector3( 1, -1,  1),
-		vector3(-1, -1,  1),
+	static glm::vec3 CubeVerts[] = {
+		glm::vec3(-1, -1, -1),
+		glm::vec3( 1, -1, -1),
+		glm::vec3( 1,  1, -1),
+		glm::vec3(-1,  1, -1),
+		glm::vec3(-1,  1,  1),
+		glm::vec3( 1,  1,  1),
+		glm::vec3( 1, -1,  1),
+		glm::vec3(-1, -1,  1),
 	};
 
-	static vector2 CubeUvs[] = {
-		vector2(0, 0),
-		vector2(1, 0),
-		vector2(1, 1),
-		vector2(0, 1),
-		vector2(0, 1),
-		vector2(1, 1),
-		vector2(1, 0),
-		vector2(0, 0),
+	static glm::vec2 CubeUvs[] = {
+		glm::vec2(0, 0),
+		glm::vec2(1, 0),
+		glm::vec2(1, 1),
+		glm::vec2(0, 1),
+		glm::vec2(0, 1),
+		glm::vec2(1, 1),
+		glm::vec2(1, 0),
+		glm::vec2(0, 0),
 	};
 
 	static const unsigned CubeIndex[] = {
@@ -158,10 +158,10 @@ namespace helpers {
 		unsigned vertCount  = 12 + (30 * res);
 
 		unsigned* indices = new unsigned[indexCount];
-		vector3*  verts   = new vector3 [vertCount];
+		glm::vec3*  verts   = new glm::vec3 [vertCount];
 
 		memcpy(indices, IcoIndex, IcoIndexCount * sizeof(unsigned));
-		memcpy(verts,   IcoVerts, IcoVertCount  * sizeof(vector3));
+		memcpy(verts,   IcoVerts, IcoVertCount  * sizeof(glm::vec3));
 
 		// Verts & Index
 
@@ -174,7 +174,7 @@ namespace helpers {
 		// Makes it a sphere
 
 		for (unsigned i = 0; i < vertCount; i++) {
-			verts[i].normalize();
+			glm::normalize(verts[i]);
 		}
 
 		MeshData* data = new MeshData(description);
@@ -211,32 +211,32 @@ namespace helpers {
 		}
 
 		unsigned* indices = new unsigned[indexCount];
-		vector3*  verts   = new vector3 [vertCount];
-		vector2*  uvs     = nullptr;
+		glm::vec3*  verts   = new glm::vec3 [vertCount];
+		glm::vec2*  uvs     = nullptr;
 		
 		if (description.HasBuffer(bName::UV)) {
-			uvs = new vector2[vertCount];
+			uvs = new glm::vec2[vertCount];
 		}
 
 		// Verts
 
-		float lonStep = Pi2 / lonCount;
-		float latStep = Pi  / latCount;
+		float lonStep = 2 * glm::pi<float>() / lonCount;
+		float latStep =     glm::pi<float>() / latCount;
 
 		size_t vert = 0;
 		for (unsigned lat = 0; lat <= latCount; lat++) {
 			for (unsigned lon = 0; lon <= lonCount; lon++) {
-				float y = sin(-Pi / 2 + lat * latStep);
+				float y = sin(-glm::pi<float>() / 2 + lat * latStep);
 				float x = cos(lon * lonStep) * sin(lat * latStep);
 				float z = sin(lon * lonStep) * sin(lat * latStep);
 
 				float u = (float)lon / lonCount;
 				float v = (float)lat / latCount;
 
-				verts[vert] = vector3(x, y, z);
+				verts[vert] = glm::vec3(x, y, z);
 				
 				if (uvs) {
-					uvs[vert] = vector2(u, v);
+					uvs[vert] = glm::vec2(u, v);
 				}
 
 				vert++;
@@ -314,16 +314,16 @@ namespace helpers {
 		unsigned vertCount  = points * (points + 1);
 
 		unsigned* indices = new unsigned[indexCount];
-		vector3*  verts   = new vector3 [vertCount];
-		vector2*  uvs     = nullptr;
+		glm::vec3*  verts   = new glm::vec3 [vertCount];
+		glm::vec2*  uvs     = nullptr;
 
 		if (description.HasBuffer(bName::UV)) {
-			uvs = new vector2[vertCount];
+			uvs = new glm::vec2[vertCount];
 		}
 
 		// calculate points around a circle
 
-		iw::vector4* circle = helpers::_MakeCircleArray(points);
+		glm::vec4* circle = helpers::_MakeCircleArray(points);
 		
 		// Capsule generation vars
 
@@ -342,7 +342,7 @@ namespace helpers {
 
 		for (int y = 0; y < top; y++) {
 			for (int x = 0; x < points; x++) {
-				verts[v] = vector3(
+				verts[v] = glm::vec3(
 					circle[x].x * circle[y].w,
 					circle[y].y,
 					circle[x].z * circle[y].w
@@ -351,7 +351,7 @@ namespace helpers {
 				verts[v].y += yOff;
 
 				if (uvs) {
-					uvs[v] = vector2(
+					uvs[v] = glm::vec2(
 						1.0f - stepX * x,
 						(verts[v].y + (height * 0.5f)) / height
 					);
@@ -365,7 +365,7 @@ namespace helpers {
 
 		for (int y = btm; y < points; y++) {
 			for (int x = 0; x < points; x++) {
-				verts[v] = vector3(
+				verts[v] = glm::vec3(
 					circle[x].x * circle[y].w, 
 					circle[y].y, 
 					circle[x].z * circle[y].w) * radius;
@@ -373,7 +373,7 @@ namespace helpers {
 				verts[v].y -= yOff;
 
 				if(uvs) {
-					uvs[v] = vector2(
+					uvs[v] = glm::vec2(
 						1.0f - stepX * x, 
 						(verts[v].y + (height * 0.5f)) / height
 					);
@@ -426,7 +426,7 @@ namespace helpers {
 		float topRadius,
 		float botRadius)
 	{
-		iw::vector4* circle = helpers::_MakeCircleArray(lonCount);
+		glm::vec4* circle = helpers::_MakeCircleArray(lonCount);
 
 
 
@@ -448,18 +448,18 @@ namespace helpers {
 		unsigned vertCount  = 4 + (6 * res);
 
 		unsigned* indices = new unsigned[indexCount];
-		vector3*  verts   = new vector3 [vertCount];
-		vector2*  uvs     = nullptr;
+		glm::vec3*  verts   = new glm::vec3 [vertCount];
+		glm::vec2*  uvs     = nullptr;
 
 		if (description.HasBuffer(bName::UV)) {
-			uvs = new vector2[vertCount];
+			uvs = new glm::vec2[vertCount];
 		}
 
 		memcpy(indices, TriIndex, TriIndexCount * sizeof(unsigned));
-		memcpy(verts,   TriVerts, TriVertCount  * sizeof(vector3));
+		memcpy(verts,   TriVerts, TriVertCount  * sizeof(glm::vec3));
 
 		if (uvs) {
-			memcpy(uvs, TriUvs, TriUvCount * sizeof(vector2));
+			memcpy(uvs, TriUvs, TriUvCount * sizeof(glm::vec2));
 		}
 
 		// Verts & Index
@@ -509,11 +509,11 @@ namespace helpers {
 		unsigned vertCount  = (xCount + 1) * (zCount + 1);
 
 		unsigned* indices = new unsigned[indexCount];
-		vector3*  verts   = new vector3 [vertCount];
-		vector2*  uvs     = nullptr;
+		glm::vec3*  verts   = new glm::vec3 [vertCount];
+		glm::vec2*  uvs     = nullptr;
 
 		if (description.HasBuffer(bName::UV)) {
-			uvs = new vector2[vertCount];
+			uvs = new glm::vec2[vertCount];
 		}
 
 		float stepX = 2.0f / xCount;
@@ -522,16 +522,16 @@ namespace helpers {
 		float stepU = 1.0f / xCount;
 		float stepV = 1.0f / zCount;
 
-		vector3 offset = -(vector3::unit_x + vector3::unit_z);
+		glm::vec3 offset = -(glm::vec3(1, 0, 0) + glm::vec3(0, 0, 1));
 
 		for (unsigned x = 0; x <= xCount; x++) {
 			for (unsigned z = 0; z <= zCount; z++) {
 				unsigned i = z + x * (zCount + 1);
 
-				verts[i] = offset + vector3(x * stepX, 0, z * stepZ);
+				verts[i] = offset + glm::vec3(x * stepX, 0, z * stepZ);
 				
 				if (uvs) {
-					uvs[i] = vector2(x * stepU, (zCount - z) * stepV);
+					uvs[i] = glm::vec2(x * stepU, (zCount - z) * stepV);
 				}
 			}
 		}
@@ -587,18 +587,18 @@ namespace helpers {
 		unsigned vertCount  = 8  /*+ resolution*/;
 
 		unsigned* indices = new unsigned[indexCount];
-		vector3* verts    = new vector3[vertCount];
-		vector2* uvs      = nullptr;
+		glm::vec3* verts    = new glm::vec3[vertCount];
+		glm::vec2* uvs      = nullptr;
 
 		if (description.HasBuffer(bName::UV)) {
-			uvs = new vector2[vertCount];
+			uvs = new glm::vec2[vertCount];
 		}
 
 		memcpy(indices, CubeIndex, CubeIndexCount * sizeof(unsigned));
-		memcpy(verts,   CubeVerts, CubeVertCount * sizeof(vector3));
+		memcpy(verts,   CubeVerts, CubeVertCount * sizeof(glm::vec3));
 
 		if (uvs) {
-			memcpy(uvs, CubeUvs, CubeVertCount * sizeof(vector2));
+			memcpy(uvs, CubeUvs, CubeVertCount * sizeof(glm::vec2));
 		}
 
 		//// Verts
@@ -616,10 +616,10 @@ namespace helpers {
 		//		float u = (float)lon / lonCount;
 		//		float v = (float)lat / latCount;
 		//
-		//		verts[vert] = vector3(x, y, z);
+		//		verts[vert] = glm::vec3(x, y, z);
 		//
 		//		if (uvs) {
-		//			uvs[vert] = vector2(u, v);
+		//			uvs[vert] = glm::vec2(u, v);
 		//		}
 		//
 		//		vert++;
@@ -677,11 +677,11 @@ namespace helpers {
 
 	MeshData* GenerateFromVoxels(
 		const MeshDescription& description,
-		vector3 min,
-		vector3 max,
-		vector3 d,
+		glm::vec3 min,
+		glm::vec3 max,
+		glm::vec3 d,
 		std::vector<
-		std::function<float(vector3, size_t, size_t, size_t, float***)>> passes)
+		std::function<float(glm::vec3, size_t, size_t, size_t, float***)>> passes)
 	{
 		// Generate a cube of voxels
 		// Destroy voxels 
@@ -945,7 +945,11 @@ namespace helpers {
 			{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}
 		};
 
-		auto [dX, dY, dZ] = d;
+		float dX = d.x;
+		float dY = d.y;
+		float dZ = d.z;
+
+		//auto [dX, dY, dZ] = d;
 
 		std::pair<int, int> edges[12] = {
 			{0, 1},
@@ -975,12 +979,12 @@ namespace helpers {
 		{
 			auto pass = *(passes.begin() + p);
 			weights[x][y][z] += pass(
-				min + d * vector3(x, y, z),
+				min + d * glm::vec3(x, y, z),
 				x, y, z, weights);
 		}
 
 		detail::IndexLookup lookup;
-		std::vector<vector3>  verts;
+		std::vector<glm::vec3>  verts;
 		std::vector<unsigned> index;
 
 		for (size_t y = 0; y < Y - 1; y++)
@@ -1012,15 +1016,15 @@ namespace helpers {
 
 			if (cubeIndex == 0 || cubeIndex == 255) continue;
 
-			vector3 cubeVerts[] = {
-				vector3(xp,      yp,      zp),
-				vector3(xp + dX, yp,      zp),
-				vector3(xp + dX, yp,      zp + dZ),
-				vector3(xp,      yp,      zp + dZ),
-				vector3(xp,      yp + dY, zp),
-				vector3(xp + dX, yp + dY, zp),
-				vector3(xp + dX, yp + dY, zp + dZ),
-				vector3(xp,      yp + dY, zp + dZ)
+			glm::vec3 cubeVerts[] = {
+				glm::vec3(xp,      yp,      zp),
+				glm::vec3(xp + dX, yp,      zp),
+				glm::vec3(xp + dX, yp,      zp + dZ),
+				glm::vec3(xp,      yp,      zp + dZ),
+				glm::vec3(xp,      yp + dY, zp),
+				glm::vec3(xp + dX, yp + dY, zp),
+				glm::vec3(xp + dX, yp + dY, zp + dZ),
+				glm::vec3(xp,      yp + dY, zp + dZ)
 			};
 
 			int* tris = triTable[cubeIndex];
@@ -1030,9 +1034,9 @@ namespace helpers {
 				auto [b0, b1] = edges[tris[v + 1]];
 				auto [c0, c1] = edges[tris[v + 2]];
 
-				vector3 mid0 = (cubeVerts[a0] + cubeVerts[a1]) / 2;
-				vector3 mid1 = (cubeVerts[b0] + cubeVerts[b1]) / 2;
-				vector3 mid2 = (cubeVerts[c0] + cubeVerts[c1]) / 2;
+				glm::vec3 mid0 = (cubeVerts[a0] + cubeVerts[a1]) * 0.5f;
+				glm::vec3 mid1 = (cubeVerts[b0] + cubeVerts[b1]) * 0.5f;
+				glm::vec3 mid2 = (cubeVerts[c0] + cubeVerts[c1]) * 0.5f;
 
 				verts.push_back(mid0);
 				verts.push_back(mid1);
@@ -1057,7 +1061,7 @@ namespace helpers {
 
 namespace detail {
 	void SubDevideVerts(
-		vector3* verts,
+		glm::vec3* verts,
 		unsigned* index,
 		unsigned& currentIndexCount,
 		unsigned& currentVertCount)
@@ -1093,7 +1097,7 @@ namespace detail {
 	*/
 
 	void SubDevideUvs(
-		vector2* uvs,
+		glm::vec2* uvs,
 		const unsigned* index,
 		unsigned indexCount,
 		unsigned& currentUvCount)
@@ -1108,7 +1112,7 @@ namespace detail {
 
 	unsigned CreateVertexForEdge(
 		IndexLookup& lookup,
-		vector3* verts,
+		glm::vec3* verts,
 		unsigned first,
 		unsigned second,
 		unsigned& currentVertCount)
@@ -1119,7 +1123,7 @@ namespace detail {
 		if (inserted.second) {
 			auto& edge0 = verts[first];
 			auto& edge1 = verts[second];
-			auto point = (edge0 + edge1) / 2;
+			auto point = (edge0 + edge1) * 0.5f;
 			verts[currentVertCount++] = point;
 		}
 
@@ -1128,7 +1132,7 @@ namespace detail {
 
 	unsigned CreateUvsForEdge(
 		IndexLookup& lookup,
-		vector2* uvs,
+		glm::vec2* uvs,
 		unsigned first,
 		unsigned second,
 		unsigned& currentUvCount)
@@ -1139,7 +1143,7 @@ namespace detail {
 		if (inserted.second) {
 			auto& edge0 = uvs[first];
 			auto& edge1 = uvs[second];
-			auto point = (edge0 + edge1) / 2;
+			auto point = (edge0 + edge1) * 0.5f;
 			uvs[currentUvCount++] = point;
 		}
 
@@ -1148,8 +1152,8 @@ namespace detail {
 
 	unsigned CreateVertexForEdgeVector(
 		IndexLookup& lookup,
-		std::vector<vector3>& verts,
-		vector3* source,
+		std::vector<glm::vec3>& verts,
+		glm::vec3* source,
 		unsigned first,
 		unsigned second,
 		unsigned offset)
@@ -1160,8 +1164,8 @@ namespace detail {
 
 		auto inserted = lookup.insert({ key, verts.size() });
 		if (inserted.second) {
-			vector3& edge0 = source[first];
-			vector3& edge1 = source[second];
+			glm::vec3& edge0 = source[first];
+			glm::vec3& edge1 = source[second];
 			verts.push_back((edge0 + edge1) / 2.0f);
 		}
 

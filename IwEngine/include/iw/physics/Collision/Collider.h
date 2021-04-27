@@ -71,29 +71,29 @@ namespace impl {
 	};
 }
 
-	using Collider2 = impl::Collider<iw::vector2>;
-	using Collider  = impl::Collider<iw::vector3>;
-	using Collider4 = impl::Collider<iw::vector4>;
+	using Collider2 = impl::Collider<glm::vec2>;
+	using Collider  = impl::Collider<glm::vec3>;
+	using Collider4 = impl::Collider<glm::vec4>;
 
-	using SphereCollider2 = impl::SphereCollider<iw::vector2>;
-	using SphereCollider  = impl::SphereCollider<iw::vector3>;
-	using SphereCollider4 = impl::SphereCollider<iw::vector4>;
+	using SphereCollider2 = impl::SphereCollider<glm::vec2>;
+	using SphereCollider  = impl::SphereCollider<glm::vec3>;
+	using SphereCollider4 = impl::SphereCollider<glm::vec4>;
 
-	using CapsuleCollider2 = impl::CapsuleCollider<iw::vector2>;
-	using CapsuleCollider  = impl::CapsuleCollider<iw::vector3>;
-	using CapsuleCollider4 = impl::CapsuleCollider<iw::vector4>;
+	using CapsuleCollider2 = impl::CapsuleCollider<glm::vec2>;
+	using CapsuleCollider  = impl::CapsuleCollider<glm::vec3>;
+	using CapsuleCollider4 = impl::CapsuleCollider<glm::vec4>;
 
-	using CylinderCollider2 = impl::CylinderCollider<iw::vector2>;
-	using CylinderCollider  = impl::CylinderCollider<iw::vector3>;
-	using CylinderCollider4 = impl::CylinderCollider<iw::vector4>;
+	using CylinderCollider2 = impl::CylinderCollider<glm::vec2>;
+	using CylinderCollider  = impl::CylinderCollider<glm::vec3>;
+	using CylinderCollider4 = impl::CylinderCollider<glm::vec4>;
 
-	using PlaneCollider2 = impl::PlaneCollider<iw::vector2>;
-	using PlaneCollider  = impl::PlaneCollider<iw::vector3>;
-	using PlaneCollider4 = impl::PlaneCollider<iw::vector4>;
+	using PlaneCollider2 = impl::PlaneCollider<glm::vec2>;
+	using PlaneCollider  = impl::PlaneCollider<glm::vec3>;
+	using PlaneCollider4 = impl::PlaneCollider<glm::vec4>;
 
-	using MeshCollider2 = impl::MeshCollider<iw::vector2>;
-	using MeshCollider  = impl::MeshCollider<iw::vector3>;
-	using MeshCollider4 = impl::MeshCollider<iw::vector4>;
+	using MeshCollider2 = impl::MeshCollider<glm::vec2>;
+	using MeshCollider  = impl::MeshCollider<glm::vec3>;
+	using MeshCollider4 = impl::MeshCollider<glm::vec4>;
 }
 
 	using namespace Physics;

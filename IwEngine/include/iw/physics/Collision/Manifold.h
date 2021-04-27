@@ -8,9 +8,9 @@ namespace Physics {
 	struct Manifold {
 		CollisionObject* ObjA;
 		CollisionObject* ObjB;
-		vector3 A;
-		vector3 B;
-		vector3 Normal;
+		glm::vec3 A;
+		glm::vec3 B;
+		glm::vec3 Normal;
 		scalar PenetrationDepth;
 		bool HasCollision;
 

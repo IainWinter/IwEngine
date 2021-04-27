@@ -4,6 +4,8 @@
 #include "iw/engine/Time.h"
 #include "iw/physics/Dynamics/Rigidbody.h"
 
+#include "glm/gtx/compatibility.hpp"
+
 namespace iw {
 namespace Engine {
 	struct MoveToTarget
@@ -38,7 +40,7 @@ namespace Engine {
 			, posS(0)
 			, sclS(0)
 			, rotS(0)
-			, origin(0)
+			, origin()
 			, startTime(0)
 			, firstRun(true)
 		{}
@@ -78,9 +80,9 @@ namespace Engine {
 				rotS = speed / (origin.Rotation - target.Rotation).length(); // xd
 			}
 
-			if(pos) transform->Position = lerp(origin.Position, target.Position, (Time::TotalTime() - startTime) * posS);
-			if(scl) transform->Scale    = lerp(origin.Scale,    target.Scale,    (Time::TotalTime() - startTime) * sclS);
-			if(rot) transform->Rotation = lerp(origin.Rotation, target.Rotation, (Time::TotalTime() - startTime) * rotS);
+			if(pos) transform->Position = glm::lerp(origin.Position, target.Position, (Time::TotalTime() - startTime) * posS);
+			if(scl) transform->Scale    = glm::lerp(origin.Scale,    target.Scale,    (Time::TotalTime() - startTime) * sclS);
+			if(rot) transform->Rotation = glm::lerp(origin.Rotation, target.Rotation, (Time::TotalTime() - startTime) * rotS);
 
 			bool p = pos ? transform->Position == target.Position : true;
 			bool s = scl ? transform->Scale    == target.Scale    : true;

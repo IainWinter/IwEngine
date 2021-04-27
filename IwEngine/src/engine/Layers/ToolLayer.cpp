@@ -61,7 +61,7 @@ namespace iw {
 
 		iw::ref<Material> textMat = REF<Material>(fontShader);
 
-		textMat->Set("color", iw::vector3(1, .25f, 1));
+		textMat->Set("color", glm::vec3(1, .25f, 1));
 		textMat->SetTexture("fontMap", font->GetTexture(0));
 
 		textMesh.SetMaterial(textMat);
@@ -130,7 +130,7 @@ namespace iw {
 			std::stringstream ss;
 			ss << name << " Light pos";
 		
-			vector3 pos = light->Position();
+			glm::vec3 pos = light->Position();
 			ImGui::SliderFloat3(ss.str().c_str(), (float*)&pos, 0, 10);
 			light->SetPosition(pos);
 		
@@ -146,16 +146,16 @@ namespace iw {
 			std::stringstream ss;
 			ss << name << " Light col";
 		
-			vector3 col = light->Color();
+			glm::vec3 col = light->Color();
 			ImGui::SliderFloat3(ss.str().c_str(), (float*)&col, 0, 1);
 			light->SetColor(col);
 		
 			ss = std::stringstream();
 			ss << name++ << " Light rot";
 		
-			vector3 rot = light->Rotation().euler_angles();
-			ImGui::SliderFloat3(ss.str().c_str(), (float*)&rot, -Pi, Pi);
-			light->SetRotation(quaternion::from_euler_angles(rot));
+			glm::vec3 rot = glm::eulerAngles(light->Rotation());
+			ImGui::SliderFloat3(ss.str().c_str(), (float*)&rot, -glm::pi<float>(), glm::pi<float>());
+			light->SetRotation(glm::quat(rot));
 		}
 		
 		ImGui::End();

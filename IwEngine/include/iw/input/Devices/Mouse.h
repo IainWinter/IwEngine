@@ -1,7 +1,9 @@
 #pragma once
 
 #include "Device.h"
-#include "iw/math/vector2.h"
+//#include "iw/math/vector2.h"
+
+#include "glm/vec2.hpp"
 
 namespace iw {
 namespace Input {
@@ -37,8 +39,8 @@ namespace Input {
 		static bool ButtonDown(InputName button);
 		static bool ButtonUp  (InputName button);
 
-		static vector2 ScreenPos();
-		static vector2 ClientPos();
+		static glm::vec2 ScreenPos();
+		static glm::vec2 ClientPos();
 
 		static Mouse* Create();
 	};

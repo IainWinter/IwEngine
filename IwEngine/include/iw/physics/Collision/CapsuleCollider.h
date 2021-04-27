@@ -62,18 +62,18 @@ namespace impl {
 		Transform Trans() const override {
 			Transform transform;
 			transform.Position = Center;
-			//transform.Scale    = vector3(Radius, Height / 2, Radius); // todo: why would this be commented?
+			//transform.Scale    = glm::vec3(Radius, Height / 2, Radius); // todo: why would this be commented?
 
-			if      (Direction == V::unit_x) {
-				transform.Rotation = quaternion::from_axis_angle(V::unit_z, Pi / 2);
+			if      (Direction == glm::vec3(1, 0, 0)) {
+				transform.Rotation = glm::angleAxis(glm::pi<float>() * 0.5f, glm::vec3(0, 0, 1));
 			}
 
-			else if (Direction == V::unit_y) {
-				transform.Rotation = quaternion::identity;
+			else if (Direction == glm::vec3(0, 1, 0)) {
+				transform.Rotation = glm::quat();
 			}
 
-			else if (Direction == V::unit_z) {
-				transform.Rotation = quaternion::from_axis_angle(V::unit_x, Pi / 2);
+			else if (Direction == glm::vec3(0, 0, 1)) {
+				transform.Rotation = glm::angleAxis(glm::pi<float>() * 0.5f, glm::vec3(1, 0, 0));
 			}
 
 			return transform;
