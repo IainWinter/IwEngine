@@ -58,7 +58,7 @@ namespace impl {
 
 			//direction = dir.xyz();
 
-			V     maxPoint;
+			V     maxPoint = V();
 			float maxDistance = -FLT_MAX;
 
 			for (V point : m_points) {

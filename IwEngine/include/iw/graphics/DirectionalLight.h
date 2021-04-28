@@ -13,7 +13,7 @@ namespace Graphics {
 		IWGRAPHICS_API
 		DirectionalLight(
 			float              intensity    = 10.0f,
-			OrthographicCamera shadowCamera = OrthographicCamera(32, 32, -100, 100),
+			OrthographicCamera shadowCamera = OrthographicCamera(32, 32, -500, 500),
 			ref<RenderTarget>  shadowTarget = nullptr,
 			ref<Shader>        shadowShader = nullptr,
 			ref<Shader>        particleShadowShader = nullptr);

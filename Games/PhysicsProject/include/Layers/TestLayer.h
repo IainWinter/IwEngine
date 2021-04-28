@@ -22,13 +22,16 @@ namespace iw {
 
 		MeshData* plane;
 
-		Entity Ball, Box, TestDebug;
+		Entity Ball, Box, Box2, Box3, Box4, TestDebug;
 		Entity Ground;
 
 	public:
 		TestLayer();
 
 		Entity SpawnCube(glm::vec3 s = glm::vec3(1), float m = 1, bool locked = false);
+
+		void CorrectVelocity(Entity entity, Entity target, glm::vec3 offset);
+
 
 		int Initialize() override;
 		void FixedUpdate() override;

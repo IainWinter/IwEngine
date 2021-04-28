@@ -38,11 +38,17 @@ namespace Engine {
 	}
 
 	glm::mat4 Transform::Transformation() const {
-		glm::mat4 m = glm::toMat4      (Rotation);
-		          m = glm::scale    (m, Scale);
-		          m = glm::translate(m, Position);
-		
-		return m;
+
+		float     angle = glm::angle(Rotation);
+		glm::vec3 axis  = glm::axis (Rotation);
+
+		glm::mat4 mat(1);
+
+		mat = glm::translate(mat, Position);
+		mat = glm::rotate(mat, angle, axis);
+		mat = glm::scale(mat, Scale);
+
+		return mat;
 	}
 
 	glm::vec3 Transform::Forward() const {

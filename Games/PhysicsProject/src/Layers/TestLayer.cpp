@@ -25,6 +25,7 @@
 //#include "Systems/SpaceInspectorSystem.h"
 
 #include "glm/gtc/random.hpp"
+#include "glm/gtx/matrix_cross_product.hpp"
 
 namespace iw {
 	struct MeshComponents {
@@ -216,8 +217,8 @@ namespace iw {
 			Physics->AddCollisionObject(obj4);
 		}
 
-		DirectionalLight* dirLight = new DirectionalLight(10, OrthographicCamera(60, 60, -100, 100));
-		dirLight->SetRotation(glm::quat(0.872f, 0.0f, 0.303f, 0.384f));
+		DirectionalLight* dirLight = new DirectionalLight(10, OrthographicCamera(32, 32, -100, 100));
+		dirLight->SetRotation(glm::quat(-0.7f, 0.3f, 0.5f, -0.4f));
 		dirLight->SetShadowShader(dirShadowShader);
 		dirLight->SetShadowTarget(dirShadowTarget);
 
@@ -227,7 +228,7 @@ namespace iw {
 
 		//delete sphere;
 
-		//Physics->SetGravity(vector3(0, -9.81f, 0));
+		Physics->SetGravity(glm::vec3(0, -9.81f, 0));
 		//Physics->AddSolver(new ImpulseSolver());
 		//Physics->AddSolver(new SmoothPositionSolver());
 
@@ -243,11 +244,14 @@ namespace iw {
 
 		srand(19);
 
-		Ball = SpawnCube(glm::vec3(2));
+		Ball = SpawnCube(glm::vec3(.1));
 
 		Ball.Find<iw::Rigidbody>()->SimGravity = false;
 
-		Box = SpawnCube(glm::vec3(2));
+		Box  = SpawnCube(glm::vec3(1));
+		Box2 = SpawnCube(glm::vec3(1));
+		Box3 = SpawnCube(glm::vec3(1));
+		Box4 = SpawnCube(glm::vec3(1));
 
 		TestDebug = SpawnCube(glm::vec3(.1));
 		TestDebug.Find<iw::Rigidbody>()->IsKinematic = false;
@@ -255,54 +259,68 @@ namespace iw {
 		return Layer::Initialize();
 	}
 
-	void TestLayer::FixedUpdate() { // https://blog.gtiwari333.com/2009/12/c-c-code-gauss-jordan-method-for.html
-		// Position ball
+	void TestLayer::CorrectVelocity(Entity entity, Entity target, glm::vec3 offset) {
+		using namespace glm;
 
-		glm::vec3& targetPos = Ball.Find<Rigidbody>()->Trans().Position;
-		targetPos.y = 10;
-		//pos.x = cos(iw::TotalTime()) * 10;
-		//pos.z = sin(iw::TotalTime()) * 10;
+		Transform targetTrans = target.Find<Rigidbody>()->Trans();
 
-		// Move box twoards ball
+		vec3& targetPos = targetTrans.Position + targetTrans.Rotation * (targetTrans.Scale * offset);
 
-		//vector3 r = 1; auto [x, y, z] = r;
+		float beta = .1f;
+		float dt = iw::FixedTime();
+		
+		Transform* transform = &entity.Find<iw::Rigidbody>()->Trans();
+		Rigidbody* rigidbody =  entity.Find<iw::Rigidbody>();
 
-		//float beta = 1;
-		//float dt = iw::FixedTime();
-		//
-		//Transform* transform = Box.Find<iw::Transform>();
-		//Rigidbody* rigidbody = Box.Find<iw::Rigidbody>();
+		vec3 r = transform->Rotation * (transform->Scale * vec3(1));
 
-		//rigidbody->Trans().Rotation *= quaternion(iw::FixedTime(), iw::FixedTime(), iw::FixedTime(), 1);
+		vec3 cornerPos = transform->Position + r;
+		TestDebug.Find<iw::Rigidbody>()->Trans().Position = cornerPos;
 
-		//vector3 cornerPos = transform->Position + r * transform->Scale * matrix3::create_from_quaternion(transform->Rotation).inverted();
+		mat3 invMass      = mat3(rigidbody->InvMass);
+		mat3 invInrtLocal = mat3(rigidbody->InvMass);
 
-		//TestDebug.Find<iw::Rigidbody>()->Trans().Position = cornerPos;
+		vec4 x = vec4(1.0f, 0.0f, 0.0f, 1.0f) * transform->WorldTransformation();
+		vec4 y = vec4(0.0f, 1.0f, 0.0f, 1.0f) * transform->WorldTransformation();
+		vec4 z = vec4(0.0f, 0.0f, 1.0f, 1.0f) * transform->WorldTransformation();
 
-		//matrix<3, 3> invMass = matrix<3, 3>(rigidbody->InvMass);
-		//matrix<3, 3> invInrt = inverted(matrix<3, 3>());
+		mat3 world2Local = transpose(mat3(
+			vec3(x.x, x.y, x.z),
+			vec3(y.x, y.y, y.z),
+			vec3(z.x, z.y, z.z)
+		));
 
-		//vector3& c = cornerPos - targetPos;
-		//vector3& v = rigidbody->Velocity + rigidbody->AngularVelocity.cross(r);
+		mat3 invInrtWorld = transpose(world2Local) * invInrtLocal * world2Local;
 
-		//auto [cx, cy, cz] = -(v + (beta / dt) * c);
-		//vector<3> C = vector<3>{ cx, cy, cz };
+		vec3 c = cornerPos - targetPos;
+		vec3 v = rigidbody->Velocity + cross(rigidbody->AngularVelocity, r);
 
-		//matrix<3, 3> s = Skew(vector<3>{-x, -y, -z});
-		//matrix<3, 3> k = invMass + s * invInrt * transposed(s);
-		//vector<3> l = inverted(k) * C;
+		mat3 s = matrixCross3(-r);
+		mat3 k = invMass + s * invInrtWorld * transpose(s);
+		vec3 lambda = inverse(k) * -(v + c * beta / dt);
 
-		//vector<3> dv = invMass * l;
-		//vector<3> da = (invInrt * transposed(s)) * l;
+		rigidbody->Velocity += invMass * lambda;
+		rigidbody->Velocity *= 0.98f;
 
-		//auto [dvx, dvy, dvz] = dv.components;
-		//auto [dax, day, daz] = da.components;
+		rigidbody->AngularVelocity += (invInrtWorld * transpose(s)) * lambda;
+		rigidbody->AngularVelocity *= .98f;
+	}
 
-		//rigidbody->Velocity += vector3(dvx, dvy, dvz);
-		//rigidbody->Velocity *= .98f;
+	void TestLayer::FixedUpdate() {
 
-		//rigidbody->AngularVelocity += vector3(dax, day, daz);
-		//rigidbody->AngularVelocity *= .98f;
+		glm::vec3& ball = Ball.Find<iw::Rigidbody>()->Trans().Position;
+
+		ball.y = 10;
+		ball.x = 10 * sin(iw::TotalTime());
+		ball.z = 10 * cos(iw::TotalTime());
+
+		for (size_t i = 0; i < 10; i++)
+		{
+			CorrectVelocity(Box, Ball, glm::vec3(0));
+			CorrectVelocity(Box2, Box, glm::vec3(-1, -1, -1));
+			CorrectVelocity(Box3, Box2, glm::vec3(-1, -1, -1));
+			CorrectVelocity(Box4, Box3, glm::vec3(-1, -1, -1));
+		}
 	}
 
 	float thresh = .5f;
@@ -322,7 +340,7 @@ namespace iw {
 
 		for (DirectionalLight* light : MainScene->DirectionalLights()) {
 			glm::quat rot = light->Rotation();
-			ImGui::SliderFloat4("Light rot", (float*)&rot, 0, 1);
+			ImGui::SliderFloat4("Light rot", (float*)&rot, -1, 1);
 			light->SetRotation(glm::normalize(rot));
 		}
 

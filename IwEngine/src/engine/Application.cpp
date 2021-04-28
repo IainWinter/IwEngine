@@ -166,13 +166,18 @@ namespace Engine {
 				if (Time::RawFixedTime() == 0)
 					continue;
 
+				int fixedIterations = 0;
+
 				accumulatedTime += Time::DeltaTime();
 				while (m_running
-					&& accumulatedTime >= Time::RawFixedTime())
+					&& accumulatedTime >= Time::RawFixedTime()
+					&& fixedIterations < 10)
 				{
 					FixedUpdate();
-					//accumulatedTime -= Time::RawFixedTime(); // causes a runaway slowdown when physics update takes too long
-					accumulatedTime = 0;                       // not sure how to fix that, i think setting it to 0 is wrong tho so idk
+					accumulatedTime -= Time::RawFixedTime(); // causes a runaway slowdown when physics update takes too long
+					//accumulatedTime = 0;                       // not sure how to fix that, i think setting it to 0 is wrong tho so idk
+
+					fixedIterations++;
 				}
 
 				{

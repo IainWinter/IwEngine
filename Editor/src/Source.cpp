@@ -84,7 +84,7 @@ public:
 		//LOG_INFO << m;
 
 		HINSTANCE gameInst;
-		Reload(L"C:/dev/IwEngine/Games/PhysicsProject/bin/Debug.windows.x86_64/Physics project.dll", gameInst);
+		Reload(L"C:/dev/IwEngine/Games/PhysicsProject/bin/Release.windows.x86_64/Physics project.dll", gameInst);
 		m_gameNew = LoadFunction<GETAPP_FUNC>(gameInst, "GetApplicationForEditor")();
 	}
 

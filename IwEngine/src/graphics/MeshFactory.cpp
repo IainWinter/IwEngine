@@ -157,11 +157,11 @@ namespace helpers {
 		unsigned indexCount = 60 * res;
 		unsigned vertCount  = 12 + (30 * res);
 
-		unsigned* indices = new unsigned[indexCount];
-		glm::vec3*  verts   = new glm::vec3 [vertCount];
+		unsigned* indices = new unsigned [indexCount];
+		glm::vec3*  verts = new glm::vec3[vertCount];
 
-		memcpy(indices, IcoIndex, IcoIndexCount * sizeof(unsigned));
-		memcpy(verts,   IcoVerts, IcoVertCount  * sizeof(glm::vec3));
+		for (size_t i = 0; i < IcoIndexCount; i++) indices[i] = IcoIndex[i];
+		for (size_t i = 0; i < IcoVertCount;  i++) verts[i] = IcoVerts[i];
 
 		// Verts & Index
 
@@ -174,7 +174,7 @@ namespace helpers {
 		// Makes it a sphere
 
 		for (unsigned i = 0; i < vertCount; i++) {
-			glm::normalize(verts[i]);
+			verts[i] = glm::normalize(verts[i]);
 		}
 
 		MeshData* data = new MeshData(description);

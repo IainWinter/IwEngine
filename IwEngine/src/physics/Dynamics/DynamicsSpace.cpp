@@ -23,12 +23,14 @@ namespace Physics {
 		AddCollisionObject(rigidbody);
 	}
 
+	float oldw = 0;
+
 	void DynamicsSpace::Step(
 		scalar dt)
 	{
 		TryApplyGravity();
 
-		PredictTransforms(dt);
+		//PredictTransforms(dt);
 
 		//SweepPredictedBodies();
 
@@ -61,9 +63,27 @@ namespace Physics {
 				transform. Position += dt * rigidbody->Velocity;
 
 				rigidbody->AngularVelocity += dt * rigidbody->NetTorque * rigidbody->Inertia;
-				transform.Rotation = (glm::quat(1.0, rigidbody->AngularVelocity * dt / 2.f) * transform.Rotation);
 
-				//transform .Rotation *= quaternion::from_axis_angle(rigidbody->AngularVelocity.normalized(), dt * rigidbody->AngularVelocity.length());
+				glm::vec3 axisNorm = rigidbody->AngularVelocity;
+
+				if (glm::length(axisNorm) == 0) {
+					axisNorm = glm::vec3(0, 0, 1);
+				}
+				
+				else {
+					axisNorm = glm::normalize(axisNorm);
+
+					//rigidbody->Trans().Scale.x = 2;
+					//oldw = transform.Rotation.w;
+				}
+
+				glm::quat rot = glm::angleAxis(glm::length(rigidbody->AngularVelocity) * dt, axisNorm);
+				transform.Rotation = rot * transform.Rotation;
+				
+				if (oldw > 0 && transform.Rotation.w < 0) {
+					//rigidbody->Trans().Scale.x = 10;
+					//LOG_INFO << "stop";
+				}
 
 				// Axis lock should be through constraints I think
 

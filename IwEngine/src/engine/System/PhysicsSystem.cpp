@@ -26,19 +26,27 @@ namespace Engine {
 		for (auto entity : eca) {
 			auto [transform, rigidbody] = entity.Components.Tie<Components>();
 			
+			transform->Position = rigidbody->Trans().Position;
+			transform->Scale    = rigidbody->Trans().Scale;
+			transform->Rotation = rigidbody->Trans().Rotation;
+
 			//if (rigidbody->IsKinematic()) {
-				transform->Position = glm::lerp(rigidbody->LastTrans().Position, rigidbody->Trans().Position, a);
-				transform->Scale    = glm::lerp(rigidbody->LastTrans().Scale,    rigidbody->Trans().Scale,    a);
-				transform->Rotation = glm::lerp(rigidbody->LastTrans().Rotation, rigidbody->Trans().Rotation, a);
+				//transform->Position = glm::lerp(rigidbody->LastTrans().Position,  rigidbody->Trans().Position, a);
+				//transform->Scale    = glm::lerp(rigidbody->LastTrans().Scale,     rigidbody->Trans().Scale,    a);
+				//transform->Rotation = glm::slerp(rigidbody->LastTrans().Rotation, rigidbody->Trans().Rotation, a);
 			//}
 		}
 
 		for (auto entity : Space->Query<Transform, CollisionObject>()) {
 			auto [transform, object] = entity.Components.Tie<OtherComponents>();
 
-			transform->Position = glm::lerp(transform->Position, object->Trans().Position, a);
-			transform->Scale    = glm::lerp(transform->Scale,    object->Trans().Scale,    a);
-			transform->Rotation = glm::lerp(transform->Rotation, object->Trans().Rotation, a);
+			transform->Position = object->Trans().Position;
+			transform->Scale    = object->Trans().Scale;
+			transform->Rotation = object->Trans().Rotation;
+
+			//transform->Position = glm::lerp(transform->Position, object->Trans().Position, a);
+			//transform->Scale    = glm::lerp(transform->Scale,    object->Trans().Scale,    a);
+			//transform->Rotation = glm::slerp(transform->Rotation, object->Trans().Rotation, a);
 
 			//object->Trans().SetParent(transform->Parent());
 		}

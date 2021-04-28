@@ -189,7 +189,6 @@ namespace Graphics {
 	}
 
 	void Camera::RecalculateView() {
-
 		glm::vec3 pos = WorldPosition();
 		glm::vec3 forward = pos + glm::vec3(0, 0, 1) * WorldRotation();
 		glm::vec3 up = glm::vec3(0, 1, 0) * WorldRotation();
@@ -240,7 +239,7 @@ namespace Graphics {
 		float zNear, 
 		float zFar)
 	{
-		m_projection = glm::ortho(0.f, width, 0.f, height, zNear, zFar);
+		m_projection = glm::ortho(-width / 2, width / 2, -height / 2, height / 2, zNear, zFar);
 	}
 	
 	PerspectiveCamera::PerspectiveCamera(

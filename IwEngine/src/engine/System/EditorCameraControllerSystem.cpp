@@ -54,11 +54,11 @@ namespace iw {
 		}
 			
 		if (glm::length(rotation) != 0) {
-			glm::quat deltaP = glm::angleAxis(rotation.x, cameraTransform->Right());
-			glm::quat deltaY = glm::angleAxis(rotation.y, -glm::vec3(0, 1, 0));
+			glm::quat deltaP = glm::angleAxis(rotation.x, -cameraTransform->Right());
+			glm::quat deltaY = glm::angleAxis(rotation.y, glm::vec3(0, 1, 0));
 
-			cameraTransform->Rotation = deltaP * cameraTransform->Rotation;
-			cameraTransform->Rotation = deltaY * cameraTransform->Rotation;
+			cameraTransform->Rotation *= deltaP * deltaY;//*cameraTransform->Rotation;
+			//cameraTransform->Rotation = deltaY * cameraTransform->Rotation;
 		}
 
 		rotation = glm::vec3(); // reset rotation
