@@ -23,8 +23,6 @@ namespace Physics {
 		AddCollisionObject(rigidbody);
 	}
 
-	float oldw = 0;
-
 	void DynamicsSpace::Step(
 		scalar dt)
 	{
@@ -64,27 +62,14 @@ namespace Physics {
 
 				rigidbody->AngularVelocity += dt * rigidbody->NetTorque * rigidbody->Inertia;
 
-				glm::vec3 axisNorm = rigidbody->AngularVelocity;
+				glm::quat rot = glm::angleAxis(
+					glm::length(rigidbody->AngularVelocity) * dt, 
+					glm::length(rigidbody->AngularVelocity) == 0 ? glm::vec3(0, 0, 1) 
+																 : glm::normalize(rigidbody->AngularVelocity)
+				);
 
-				if (glm::length(axisNorm) == 0) {
-					axisNorm = glm::vec3(0, 0, 1);
-				}
-				
-				else {
-					axisNorm = glm::normalize(axisNorm);
-
-					//rigidbody->Trans().Scale.x = 2;
-					//oldw = transform.Rotation.w;
-				}
-
-				glm::quat rot = glm::angleAxis(glm::length(rigidbody->AngularVelocity) * dt, axisNorm);
 				transform.Rotation = rot * transform.Rotation;
 				
-				if (oldw > 0 && transform.Rotation.w < 0) {
-					//rigidbody->Trans().Scale.x = 10;
-					//LOG_INFO << "stop";
-				}
-
 				// Axis lock should be through constraints I think
 
 				if (rigidbody->IsAxisLocked.x) {

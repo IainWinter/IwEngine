@@ -69,7 +69,7 @@ namespace iw {
 			s.y = s.z; // make uniform scale if where because thats how their collider works
 		}
 
-		Transform*      trans = entity.Set<Transform>(glm::vec3(x += 5, 10, 0), s/*, iw::quaternion::from_euler_angles(randf() + 1, randf() + 1, randf() + 1)*/);
+		Transform*      trans = entity.Set<Transform>(glm::vec3(0, 15, 0), s/*, iw::quaternion::from_euler_angles(randf() + 1, randf() + 1, randf() + 1)*/);
 		Rigidbody*      body  = entity.Set<Rigidbody>();
 
 		//trans->Rotation = quaternion::from_euler_angles(iw::randf() * iw::Pi2, iw::randf() * iw::Pi2, iw::randf() * iw::Pi2);
@@ -100,7 +100,7 @@ namespace iw {
 		body->SetMass(m);
 
 		if (locked) {
-			body->IsAxisLocked = glm::vec3();
+			body->IsAxisLocked = glm::vec3(1);
 			body->AxisLock = glm::vec3(0, 15, 0);
 			body->SimGravity = false;
 
@@ -109,7 +109,8 @@ namespace iw {
 			body->StaticFriction  =1;
 		}
 		else {
-			//body->Velocity = vector3(25 * (iw::randf() + .5f), 25 * (iw::randf() + .5f), 25 * (iw::randf() + .5f));
+			//body->Velocity = glm::ballRand(5.f);
+			//body->AngularVelocity = glm::ballRand(5.f);
 		}
 
 		Physics->AddRigidbody(body);
@@ -228,7 +229,7 @@ namespace iw {
 
 		//delete sphere;
 
-		Physics->SetGravity(glm::vec3(0, -9.81f, 0));
+		//Physics->SetGravity(glm::vec3(0, -9.81f, 0));
 		//Physics->AddSolver(new ImpulseSolver());
 		//Physics->AddSolver(new SmoothPositionSolver());
 
@@ -244,14 +245,32 @@ namespace iw {
 
 		srand(19);
 
-		Ball = SpawnCube(glm::vec3(.1));
+		Z = SpawnCube(glm::vec3(.1));
 
-		Ball.Find<iw::Rigidbody>()->SimGravity = false;
+		A = SpawnCube(glm::vec3(1));
+		B = SpawnCube(glm::vec3(1));
 
-		Box  = SpawnCube(glm::vec3(1));
-		Box2 = SpawnCube(glm::vec3(1));
-		Box3 = SpawnCube(glm::vec3(1));
-		Box4 = SpawnCube(glm::vec3(1));
+		//iw::SetTimeScale(.01);
+
+		testMultiply();
+		testTranspose();
+
+		Constraint* one = new VelocityConstraint();
+		one->A = Z.Find<iw::Rigidbody>();
+		one->B = A.Find<iw::Rigidbody>();
+
+		one->B->Trans().Position = glm::vec3(-1, 14, -1);
+
+		Constraint* two = new VelocityConstraint();
+		two->A = A.Find<iw::Rigidbody>();
+		two->B = B.Find<iw::Rigidbody>();
+
+		mechanism.Constraints.push_back(one);
+		mechanism.Constraints.push_back(two);
+
+		mechanism.Bodies.insert(one->A);
+		mechanism.Bodies.insert(one->B);
+		mechanism.Bodies.insert(two->B);
 
 		TestDebug = SpawnCube(glm::vec3(.1));
 		TestDebug.Find<iw::Rigidbody>()->IsKinematic = false;
@@ -307,20 +326,29 @@ namespace iw {
 	}
 
 	void TestLayer::FixedUpdate() {
+		Transform* transform = &A.Find<iw::Rigidbody>()->Trans();
 
-		glm::vec3& ball = Ball.Find<iw::Rigidbody>()->Trans().Position;
+		glm::vec3 r = transform->Rotation * (transform->Scale * glm::vec3(1));
+		glm::vec3 cornerPos = transform->Position + r;
 
-		ball.y = 10;
-		ball.x = 10 * sin(iw::TotalTime());
-		ball.z = 10 * cos(iw::TotalTime());
+		TestDebug.Find<iw::Rigidbody>()->Trans().Position = cornerPos;
 
-		for (size_t i = 0; i < 10; i++)
-		{
-			CorrectVelocity(Box, Ball, glm::vec3(0));
-			CorrectVelocity(Box2, Box, glm::vec3(-1, -1, -1));
-			CorrectVelocity(Box3, Box2, glm::vec3(-1, -1, -1));
-			CorrectVelocity(Box4, Box3, glm::vec3(-1, -1, -1));
-		}
+		mechanism.init();
+		mechanism.solve();
+
+		//glm::vec3& ball = Ball.Find<iw::Rigidbody>()->Trans().Position;
+
+		//ball.y = 10;
+		//ball.x = 10 * sin(iw::TotalTime());
+		//ball.z = 10 * cos(iw::TotalTime());
+
+		//for (size_t i = 0; i < 10; i++)
+		//{
+		//	CorrectVelocity(Box, Ball, glm::vec3(0));
+		//	CorrectVelocity(Box2, Box, glm::vec3(-1, -1, -1));
+		//	CorrectVelocity(Box3, Box2, glm::vec3(-1, -1, -1));
+		//	CorrectVelocity(Box4, Box3, glm::vec3(-1, -1, -1));
+		//}
 	}
 
 	float thresh = .5f;
