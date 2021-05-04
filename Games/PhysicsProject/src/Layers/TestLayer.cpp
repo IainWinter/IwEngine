@@ -13,6 +13,9 @@
 #include <iw\physics\Collision\MeshCollider.h>
 #include <iw\physics\Dynamics\SmoothPositionSolver.h>
 #include <iw\physics\Dynamics\ImpulseSolver.h>
+
+#include "iw/physics/Dynamics/Mechanism.h"
+
 #include <iw\engine\Systems\PhysicsSystem.h>
 #include "iw/input/Devices/Keyboard.h"
 #include "iw/physics/Collision/PositionSolver.h"
@@ -68,6 +71,8 @@ namespace iw {
 			s.x = s.z;
 			s.y = s.z; // make uniform scale if where because thats how their collider works
 		}
+
+		x += 5;
 
 		Transform*      trans = entity.Set<Transform>(glm::vec3(0, 15, 0), s/*, iw::quaternion::from_euler_angles(randf() + 1, randf() + 1, randf() + 1)*/);
 		Rigidbody*      body  = entity.Set<Rigidbody>();
@@ -218,8 +223,8 @@ namespace iw {
 			Physics->AddCollisionObject(obj4);
 		}
 
-		DirectionalLight* dirLight = new DirectionalLight(10, OrthographicCamera(32, 32, -100, 100));
-		dirLight->SetRotation(glm::quat(-0.7f, 0.3f, 0.5f, -0.4f));
+		DirectionalLight* dirLight = new DirectionalLight(10, OrthographicCamera(64, 64, -100, 100));
+		dirLight->SetRotation(glm::lookAt(glm::vec3(), glm::vec3(-1, -5, -1), glm::vec3(0, 1, 0)));
 		dirLight->SetShadowShader(dirShadowShader);
 		dirLight->SetShadowTarget(dirShadowTarget);
 
@@ -229,9 +234,11 @@ namespace iw {
 
 		//delete sphere;
 
-		//Physics->SetGravity(glm::vec3(0, -9.81f, 0));
-		//Physics->AddSolver(new ImpulseSolver());
-		//Physics->AddSolver(new SmoothPositionSolver());
+		Physics->SetGravity(glm::vec3(0, -9.81f, 0));
+		Physics->AddSolver(new ImpulseSolver());
+		Physics->AddSolver(new SmoothPositionSolver());
+
+		//iw::SetTimeScale(.01);
 
 		EditorCameraControllerSystem* system = PushSystem<EditorCameraControllerSystem>();
 
@@ -245,35 +252,55 @@ namespace iw {
 
 		srand(19);
 
-		Z = SpawnCube(glm::vec3(.1));
+		Entity last = SpawnCube(glm::vec3(.1));
+		Entity current;
 
-		A = SpawnCube(glm::vec3(1));
-		B = SpawnCube(glm::vec3(1));
+		iw::Mechanism* mechanism = new iw::Mechanism();
 
-		//iw::SetTimeScale(.01);
+		Entity a = SpawnCube(glm::vec3(.2, .2, 4));
+		Entity b = SpawnCube(glm::vec3(.2, .2, 4));
+		Entity c = SpawnCube(glm::vec3(.2, .2, 4));
+		Entity d = SpawnCube(glm::vec3(.2, .2, 4));
 
-		testMultiply();
-		testTranspose();
+		Constraint* ab = new VelocityConstraint(glm::vec3(-1), glm::vec3(-1));
+		Constraint* bc = new VelocityConstraint(glm::vec3(-1), glm::vec3(-1));
+		Constraint* cd = new VelocityConstraint(glm::vec3(-1), glm::vec3(-1));
+		Constraint* da = new VelocityConstraint(glm::vec3(-1), glm::vec3(-1));
 
-		Constraint* one = new VelocityConstraint();
-		one->A = Z.Find<iw::Rigidbody>();
-		one->B = A.Find<iw::Rigidbody>();
+		ab->A = a.Find<Rigidbody>();
+		ab->B = b.Find<Rigidbody>();
+		
+		bc->A = b.Find<Rigidbody>();
+		bc->B = c.Find<Rigidbody>();
+		
+		cd->A = c.Find<Rigidbody>();
+		cd->B = d.Find<Rigidbody>();
+		
+		da->A = d.Find<Rigidbody>();
+		da->B = a.Find<Rigidbody>();
 
-		one->B->Trans().Position = glm::vec3(-1, 14, -1);
+		mechanism->Constraints.push_back(ab);
+		mechanism->Constraints.push_back(bc);
+		mechanism->Constraints.push_back(cd);
+		mechanism->Constraints.push_back(da);
 
-		Constraint* two = new VelocityConstraint();
-		two->A = A.Find<iw::Rigidbody>();
-		two->B = B.Find<iw::Rigidbody>();
+		//for (int i = 0; i < 5; i++) {
 
-		mechanism.Constraints.push_back(one);
-		mechanism.Constraints.push_back(two);
+		//	current = SpawnCube();
 
-		mechanism.Bodies.insert(one->A);
-		mechanism.Bodies.insert(one->B);
-		mechanism.Bodies.insert(two->B);
+		//	Constraint* c = new VelocityConstraint(glm::vec3(i == 0 ? 0 : -1), glm::vec3(1));
+		//	c->A = last   .Find<iw::Rigidbody>();
+		//	c->B = current.Find<iw::Rigidbody>();
 
-		TestDebug = SpawnCube(glm::vec3(.1));
-		TestDebug.Find<iw::Rigidbody>()->IsKinematic = false;
+		//	mechanism->Constraints.push_back(c);
+
+		//	last = current;
+		//}
+
+		Physics->AddMechanism(mechanism);
+
+		//TestDebug = SpawnCube(glm::vec3(.1));
+		//TestDebug.Find<iw::Rigidbody>()->IsKinematic = false;
 
 		return Layer::Initialize();
 	}
@@ -294,7 +321,7 @@ namespace iw {
 		vec3 r = transform->Rotation * (transform->Scale * vec3(1));
 
 		vec3 cornerPos = transform->Position + r;
-		TestDebug.Find<iw::Rigidbody>()->Trans().Position = cornerPos;
+		//TestDebug.Find<iw::Rigidbody>()->Trans().Position = cornerPos;
 
 		mat3 invMass      = mat3(rigidbody->InvMass);
 		mat3 invInrtLocal = mat3(rigidbody->InvMass);
@@ -326,15 +353,20 @@ namespace iw {
 	}
 
 	void TestLayer::FixedUpdate() {
-		Transform* transform = &A.Find<iw::Rigidbody>()->Trans();
+		//Transform* transform = &A.Find<iw::Rigidbody>()->Trans();
 
-		glm::vec3 r = transform->Rotation * (transform->Scale * glm::vec3(1));
-		glm::vec3 cornerPos = transform->Position + r;
+		//glm::vec3 r = transform->Rotation * (transform->Scale * glm::vec3(1));
+		//glm::vec3 cornerPos = transform->Position + r;
 
-		TestDebug.Find<iw::Rigidbody>()->Trans().Position = cornerPos;
+		//TestDebug.Find<iw::Rigidbody>()->Trans().Position = cornerPos;
 
-		mechanism.init();
-		mechanism.solve();
+		//Z.Find<iw::Rigidbody>()->Velocity.x = cos(iw::TotalTime() / 5);
+		//Z.Find<iw::Rigidbody>()->Velocity.z = sin(iw::TotalTime() / 5);
+
+		//Z.Find<iw::Rigidbody>()->Velocity.y = 0;
+
+		//mechanism.init();
+		//mechanism.solve();
 
 		//glm::vec3& ball = Ball.Find<iw::Rigidbody>()->Trans().Position;
 

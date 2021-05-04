@@ -1,7 +1,8 @@
 #pragma once
 
 #include "iw/physics/Collision/CollisionSpace.h"
-#include "Rigidbody.h"
+//#include "Rigidbody.h"
+#include "Mechanism.h"
 //#include "iw/physics/Collision/TimedSolver.h"
 
 namespace iw {
@@ -13,10 +14,16 @@ namespace Physics {
 		//std::vector<Rigidbody*> m_rigidbodies;
 		glm::vec3 m_gravity;
 
+		std::vector<Mechanism*> m_mechanisms;
+
 	public:
 		IWPHYSICS_API
 		virtual void AddRigidbody(
 			Rigidbody* rigidbody);
+
+		IWPHYSICS_API
+		virtual void AddMechanism(
+			Mechanism* mechanism);
 
 		IWPHYSICS_API
 		virtual void Step(

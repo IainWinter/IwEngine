@@ -92,6 +92,12 @@ namespace iw {
 		dlightMesh = MakeTetrahedron(description, 2)->MakeInstance();
 		cameraMesh = MakeTetrahedron(description, 1)->MakeInstance();
 
+		dlightMesh.Data()->TransformMeshData(Transform(
+			glm::vec3(), 
+			glm::vec3(1), 
+			glm::quat(glm::vec3(glm::pi<float>() / 2, 0, 0)))
+		);
+
 		plightMesh.Data()->Initialize(Renderer->Device);
 		dlightMesh.Data()->Initialize(Renderer->Device);
 		cameraMesh.Data()->Initialize(Renderer->Device);
@@ -106,6 +112,20 @@ namespace iw {
 		PushSystem<SpaceInspectorSystem>();
 
 		return Layer::Initialize();
+	}
+
+	void ToolLayer::PostUpdate() {
+		Renderer->BeginScene(m_mainScene->MainCamera());
+
+		for (DirectionalLight* dlight : m_mainScene->DirectionalLights()) {
+			Transform transform;
+			transform.Position = dlight->WorldPosition();
+			transform.Rotation = dlight->WorldRotation();
+
+			Renderer->DrawMesh(transform, dlightMesh);
+		}
+
+		Renderer->EndScene();
 	}
 
 	void ToolLayer::OnPush() {

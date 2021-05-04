@@ -52,15 +52,15 @@ namespace Engine {
 	}
 
 	glm::vec3 Transform::Forward() const {
-		return glm::vec3(0, 0, 1) * Rotation;
+		return Rotation * glm::vec3(0, 0, 1);
 	}
 
 	glm::vec3 Transform::Right() const {
-		return glm::vec3(1, 0, 0) * Rotation;
+		return Rotation * glm::vec3(1, 0, 0);
 	}
 
 	glm::vec3 Transform::Up() const {
-		return glm::vec3(0, 1, 0) * Rotation;
+		return Rotation * glm::vec3(0, 1, 0);
 	}
 
 	glm::mat4 Transform::WorldTransformation() const {

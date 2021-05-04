@@ -429,7 +429,7 @@ namespace Graphics {
 	{
 		m_lightData.LightCounts.y = lights.size();
 		for (size_t i = 0; i < lights.size(); i++) {
-			m_lightData.DirectionalLights[i].InvDirection = glm::vec4(glm::vec3(0, 0, 1) * glm::inverse(lights[i]->WorldRotation()), 0);
+			m_lightData.DirectionalLights[i].InvDirection = glm::vec4(lights[i]->WorldRotation() * glm::vec3(0, 0, -1), 0);
 			m_lightData.DirectionalLights[i].Color        = glm::vec4(lights[i]->Color(), 1);
 		}
 

@@ -190,8 +190,8 @@ namespace Graphics {
 
 	void Camera::RecalculateView() {
 		glm::vec3 pos = WorldPosition();
-		glm::vec3 forward = pos + glm::vec3(0, 0, 1) * WorldRotation();
-		glm::vec3 up = glm::vec3(0, 1, 0) * WorldRotation();
+		glm::vec3 forward = pos + WorldRotation() * glm::vec3(0, 0, 1);
+		glm::vec3 up      =       WorldRotation() * glm::vec3(0, 1, 0);
 
 		m_view = glm::lookAt(pos, forward, up);
 

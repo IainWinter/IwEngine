@@ -35,8 +35,9 @@ namespace Engine {
 	void Layer::PreUpdate() {}
 	void Layer::Update() {}
 	void Layer::PostUpdate() {}
+
 	void Layer::FixedUpdate() {}
-	
+
 	void Layer::ImGui() {
 		for (ISystem* s : m_systems) {
 			s->ImGui();

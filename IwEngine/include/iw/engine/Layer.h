@@ -29,34 +29,21 @@ namespace Engine {
 		IWENGINE_API
 		virtual ~Layer();
 
-		IWENGINE_API
-		virtual int Initialize();
+		IWENGINE_API virtual int  Initialize();
+		IWENGINE_API virtual void Destroy();
 
 		// Sync Updates
 
-		IWENGINE_API
-		virtual void Destroy();
+		IWENGINE_API virtual void ImGui();
 
-		IWENGINE_API
-		virtual void ImGui();
+		IWENGINE_API virtual void PreUpdate();
+		IWENGINE_API virtual void Update(); // this one should be in thread pool btw 'AsyncUpdate' is maybe a better name
+		IWENGINE_API virtual void PostUpdate();
 
-		IWENGINE_API
-		virtual void PreUpdate();
+		IWENGINE_API virtual void FixedUpdate();
 
-		IWENGINE_API
-		virtual void Update();
-
-		IWENGINE_API
-		virtual void PostUpdate();
-
-		IWENGINE_API
-		virtual void FixedUpdate();
-
-		IWENGINE_API
-		virtual void OnPush();
-
-		IWENGINE_API
-		virtual void OnPop();
+		IWENGINE_API virtual void OnPush();
+		IWENGINE_API virtual void OnPop();
 
 		// Action events
 

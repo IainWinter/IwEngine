@@ -33,6 +33,8 @@ namespace iw {
 		ToolLayer(Scene* scene);
 
 		IWENGINE_API int  Initialize() override;
+		IWENGINE_API void PostUpdate() override;
+
 		IWENGINE_API void OnPush() override;
 		IWENGINE_API void OnPop() override;
 		IWENGINE_API void ImGui() override;

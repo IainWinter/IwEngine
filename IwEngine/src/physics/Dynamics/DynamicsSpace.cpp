@@ -20,7 +20,13 @@ namespace Physics {
 			rigidbody->Gravity = m_gravity;
 		}
 
-		AddCollisionObject(rigidbody);
+		AddCollisionObject(rigidbody); // checks dups
+	}
+
+	void DynamicsSpace::AddMechanism(
+		Mechanism* mechanism)
+	{
+		m_mechanisms.push_back(mechanism); // maybe check dups
 	}
 
 	void DynamicsSpace::Step(
@@ -39,49 +45,62 @@ namespace Physics {
 
 			Rigidbody* rigidbody = (Rigidbody*)object;
 
-			rigidbody->SetLastTrans(rigidbody->Trans());
-
-			if (rigidbody->IsKinematic) {
-
-				Transform& transform = rigidbody->Trans();
-
-				if (   isnan(glm::length2(rigidbody->Velocity))
-					|| isinf(glm::length2(rigidbody->Velocity)))
-				{
-					rigidbody->Velocity = glm::vec3();
-				}
-
-				if (   isnan(glm::length2(rigidbody->Trans().Position))
-					|| isinf(glm::length2(rigidbody->Trans().Position)))
-				{
-					transform.Position = glm::vec3();
-				}
-
-				rigidbody->Velocity += dt * rigidbody->NetForce * rigidbody->InvMass;
-				transform. Position += dt * rigidbody->Velocity;
-
+			if (rigidbody->IsKinematic)
+			{
+				rigidbody->Velocity        += dt * rigidbody->NetForce  * rigidbody->InvMass;
 				rigidbody->AngularVelocity += dt * rigidbody->NetTorque * rigidbody->Inertia;
 
-				glm::quat rot = glm::angleAxis(
-					glm::length(rigidbody->AngularVelocity) * dt, 
-					glm::length(rigidbody->AngularVelocity) == 0 ? glm::vec3(0, 0, 1) 
-																 : glm::normalize(rigidbody->AngularVelocity)
-				);
-
-				transform.Rotation = rot * transform.Rotation;
-				
-				// Axis lock should be through constraints I think
-
 				if (rigidbody->IsAxisLocked.x) {
-					rigidbody->Trans().Position.x = rigidbody->AxisLock.x;
+					rigidbody->Velocity.x = 0;
 				}
 
 				if (rigidbody->IsAxisLocked.y) {
-					rigidbody->Trans().Position.y = rigidbody->AxisLock.y;
+					rigidbody->Velocity.y = 0;
 				}
 
 				if (rigidbody->IsAxisLocked.z) {
-					rigidbody->Trans().Position.z = rigidbody->AxisLock.z;
+					rigidbody->Velocity.z = 0;
+				}
+			}
+		}
+
+		for (Mechanism* mech : m_mechanisms) {
+			mech->init();
+			mech->solve(dt);
+		}
+
+		for (CollisionObject* object : m_objects) {
+			if (!object->IsDynamic()) continue;
+
+			Rigidbody* rigidbody = (Rigidbody*)object;
+
+			rigidbody->SetLastTrans(rigidbody->Trans());
+
+			if (rigidbody->IsKinematic)
+			{
+				Transform& transform = rigidbody->Trans();
+
+				glm::quat rot = glm::angleAxis(
+					glm::length(rigidbody->AngularVelocity) * dt,
+					glm::length(rigidbody->AngularVelocity) == 0 ? glm::vec3(0, 0, 1)
+					                                             : glm::normalize(rigidbody->AngularVelocity)
+				);
+
+				transform.Position += dt * rigidbody->Velocity;
+				transform.Rotation = rot * transform.Rotation;
+
+				// Axis lock should be through constraints I think
+
+				if (rigidbody->IsAxisLocked.x) {
+					transform.Position.x = rigidbody->AxisLock.x;
+				}
+
+				if (rigidbody->IsAxisLocked.y) {
+					transform.Position.y = rigidbody->AxisLock.y;
+				}
+
+				if (rigidbody->IsAxisLocked.z) {
+					transform.Position.z = rigidbody->AxisLock.z;
 				}
 			}
 		}
