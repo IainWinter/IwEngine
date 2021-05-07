@@ -83,8 +83,16 @@ public:
 
 		//LOG_INFO << m;
 
+		std::wstring path;
+
+#ifdef IW_DEBUG
+		path = L"C:/dev/IwEngine/Games/PhysicsProject/bin/Debug.windows.x86_64/Physics project.dll";
+#else
+		path = L"C:/dev/IwEngine/Games/PhysicsProject/bin/Release.windows.x86_64/Physics project.dll";
+#endif
+
 		HINSTANCE gameInst;
-		Reload(L"C:/dev/IwEngine/Games/PhysicsProject/bin/Release.windows.x86_64/Physics project.dll", gameInst);
+		Reload(path.c_str(), gameInst);
 		m_gameNew = LoadFunction<GETAPP_FUNC>(gameInst, "GetApplicationForEditor")();
 	}
 

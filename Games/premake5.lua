@@ -1,5 +1,5 @@
 iwengdir  = path.getabsolute("../_export")
-gamedir  = path.getabsolute("PhysicsProject")--path.getabsolute("IwSandbox")--path.getabsolute("SpaceSand")
+gamedir  = path.getabsolute("IwSandbox") --path.getabsolute("PhysicsProject") --path.getabsolute("SpaceSand")
 
 
 cfgname = "%{cfg.buildcfg}.%{cfg.system}.%{cfg.architecture}"
@@ -15,11 +15,11 @@ workspace "wGames"
 	startproject "SandGame"
 	location (gamedir .. blddir)
 
-	project "Physics project"
-	--project "Iw Sandbox"
+	--project "Physics project"
+	project "Iw Sandbox"
 	--project "SpaceSand"
-		kind "SharedLib"
-		--kind "WindowedApp"
+		--kind "SharedLib"
+		kind "WindowedApp"
 		language "C++"
 		location  (gamedir .. blddir)
 		targetdir (gamedir .. bindir)

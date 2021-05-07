@@ -1,6 +1,8 @@
 #include "Systems/SandWorldUpdateSystem.h"
 #include "plugins/iw/Sand/Workers/SimpleSandWorker.h"
 
+#include "iw/math/iwmath.h"
+
 //void MoveInDirection(
 //	int dx, int dy, 
 //	int x, int y, 
@@ -208,7 +210,7 @@ void SandWorldUpdateSystem::Update() {
 				temp *= (1 -iw::DeltaTime());
 
 				if (cell.Type != iw::CellType::EMPTY) {
-					iw::vector4 accent = cell.StyleColor.rgba();
+					glm::vec4 accent = cell.StyleColor.rgba();
 
 					switch (cell.Style) {
 						case iw::CellStyle::RANDOM_STATIC: {
@@ -221,7 +223,7 @@ void SandWorldUpdateSystem::Update() {
 						}
 					}
 
-					accent = iw::lerp(accent, iw::vector4(1), temp / 1000);
+					accent = iw::lerp(accent, glm::vec4(1), temp / 1000);
 
 					pixels[texi] = iw::Color(cell.Color + accent).to32();
 				}

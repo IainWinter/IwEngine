@@ -79,46 +79,47 @@ group ""
 			optimize "On"
 
 -- replacing with glm to finish school project on time, will comeback to this...
+-- LOL glm is templated but hardcoded to max 4x4??????????????????????????????????????????????
 
-	-- project "wMath"
-	-- 	kind "SharedLib"
-	-- 	language "C++"
-	-- 	location  (iwengdir .. blddir)
-	-- 	targetdir (iwengdir .. bindir)
-	-- 	implibdir (iwengdir .. libdir)
-	-- 	objdir    (iwengdir .. blddir)
+	project "wMath"
+		kind "SharedLib"
+		language "C++"
+		location  (iwengdir .. blddir)
+		targetdir (iwengdir .. bindir)
+		implibdir (iwengdir .. libdir)
+		objdir    (iwengdir .. blddir)
 
-	-- 	files {
-	-- 		iwengdir .. incdir .. "/iw/math/**.h",
-	-- 		iwengdir .. srcdir .. "/math/**.cpp"
-	-- 	}
+		files {
+			iwengdir .. incdir .. "/iw/math/**.h",
+			iwengdir .. srcdir .. "/math/**.cpp"
+		}
 
-	-- 	includedirs {
-	-- 		iwengdir  .. incdir,
-	-- 		iwtoldir .. incdir
-	-- 	}
+		includedirs {
+			iwengdir  .. incdir,
+			iwtoldir .. incdir
+		}
 
-	-- 	defines {
-	-- 		--"IW_USE_REFLECTION"
-	-- 	}
+		defines {
+			--"IW_USE_REFLECTION"
+		}
 
-	-- 	filter "system:windows"
-	-- 		cppdialect "C++17"
-	-- 		systemversion "latest"
-	-- 		defines {
-	-- 			"IW_PLATFORM_WINDOWS",
-	-- 			"IWMATH_DLL"
-	-- 		}
+		filter "system:windows"
+			cppdialect "C++17"
+			systemversion "latest"
+			defines {
+				"IW_PLATFORM_WINDOWS",
+				"IWMATH_DLL"
+			}
 
-	-- 	filter "configurations:Debug"
-	-- 		defines "IW_DEBUG"
-	-- 		runtime "Debug"
-	-- 		symbols "On"
+		filter "configurations:Debug"
+			defines "IW_DEBUG"
+			runtime "Debug"
+			symbols "On"
 
-	-- 	filter "configurations:Release"
-	-- 		defines "IW_RELEASE"
-	-- 		runtime "Release"
-	-- 		optimize "On"
+		filter "configurations:Release"
+			defines "IW_RELEASE"
+			runtime "Release"
+			optimize "On"
 
 	project "wUtil"
 		kind "SharedLib"

@@ -6,6 +6,7 @@
 
 #include "Fluid.h"
 
+#include "iw/math/matrix.h"
 
 // what does this need to do
 // basic sand simulation
@@ -30,7 +31,7 @@ private:
 	int size = 150;
 
 	int gridSize = 16;
-	iw::vector2 sP, wP, gP; // sand pos, wind pos, grid pos
+	iw::vec2 sP, wP, gP; // sand pos, wind pos, grid pos
 
 public:
 	SandLayer()
@@ -169,15 +170,15 @@ public:
 		int fy2 = fy + height;
 
 		m_sandUpdate->SetCamera(fx, fy, fx2, fy2);
-		
-		wP = iw::Mouse::ClientPos() / iw::vector2(Renderer->Width(), Renderer->Height()) * size;
-		wP.y = size - 1 - wP.y;
-		wP = iw::clamp<iw::vector2>(wP, 1, cube->size - 1);
 
-		sP = iw::Mouse::ClientPos() / m_world->m_scale + iw::vector2(fx, -fy);
-		sP.y = height - sP.y;
+		wP = iw::Mouse::ClientPos() / iw::vec2(Renderer->Width(), Renderer->Height()) * size;
+		wP.y() = size - 1 - wP.y();
+		wP = iw::clamp<iw::matrix>(wP, iw::vec2(1, 1), iw::vec2(cube->size - 1, cube->size - 1));
 
-		gP = iw::vector2(int(sP.x / gridSize), int(sP.y / gridSize)) * gridSize;
+		sP = iw::Mouse::ClientPos() / m_world->m_scale + iw::vec2(fx, -fy);
+		sP.y() = height - sP.y();
+
+		gP = iw::vec2(int(sP.x() / gridSize), int(sP.y() / gridSize)) * gridSize;
 
 		if (iw::Keyboard::KeyDown(iw::LEFT))  tile->X -= iw::DeltaTime()*150;
 		if (iw::Keyboard::KeyDown(iw::RIGHT)) tile->X += iw::DeltaTime()*150;
@@ -187,29 +188,27 @@ public:
 		DrawWithMouse(fx, fy, width, height);
 	}
 
-	iw::vector2 lastP;
+	iw::vec2 lastP;
 
 	void PostUpdate() {
 		if(iw::Mouse::ButtonDown(iw::RMOUSE)) {
 			if (iw::Keyboard::KeyDown(iw::H)) {
-				for (int x = wP.x-3; x < wP.x + 3; x++)
-				for (int y = wP.y-3; y < wP.y + 3; y++) {
-					iw::vector2 v = wP - iw::vector2(x, y);
-					v.normalize();
-					v *= -1;
+				for (int x = wP.x() - 3; x < wP.x() + 3; x++)
+				for (int y = wP.y() - 3; y < wP.y() + 3; y++) {
+					iw::vec2 v = iw::normalize(iw::vec2(x, y) - wP);
 
 					FluidCubeAddDensity (cube, x, y, 100);
-					FluidCubeAddVelocity(cube, x, y, v.x, v.y);
+					FluidCubeAddVelocity(cube, x, y, v.x(), v.y());
 				}
 			}
 
 			else {
-				for (int x = wP.x; x < wP.x + 5; x++)
-				for (int y = wP.y; y < wP.y + 5; y++) {
+				for (int x = wP.x(); x < wP.x() + 5; x++)
+				for (int y = wP.y(); y < wP.y() + 5; y++) {
 					FluidCubeAddDensity (cube, x, y, 1);
 					FluidCubeAddVelocity(cube, x, y,
-						iw::clamp<float>((wP.x - lastP.x)/10, -1, 1),
-						iw::clamp<float>((wP.y - lastP.y)/10, -1, 1));
+						iw::clamp<float>((wP.x() - lastP.x()) / 10, -1, 1),
+						iw::clamp<float>((wP.y() - lastP.y()) / 10, -1, 1));
 				}
 			}
 
@@ -291,18 +290,18 @@ public:
 			windColor[i] = c.to32();
 		}
 
-		windColor[int(wP.x) + int(wP.y) * m_airScreenTexture->Width()]  = iw::Color(1).to32();
+		windColor[int(wP.x()) + int(wP.y()) * m_airScreenTexture->Width()]  = iw::Color(1).to32();
 
 		DrawMouseGrid();
 
 		m_airScreenTexture ->Update(Renderer->Device);
 		m_sandScreenTexture->Update(Renderer->Device);
 
-		iw::vector3 aspect = iw::vector3(float(Renderer->Height()) / Renderer->Width(), 1, 1);
+		glm::vec3 aspect = glm::vec3(float(Renderer->Height()) / Renderer->Width(), 1, 1);
 
 		Renderer->BeginScene(MainScene);
-			Renderer->DrawMesh(iw::Transform(0, aspect), m_sandScreenMesh);
-			Renderer->DrawMesh(iw::Transform(0, aspect), m_airScreenMesh);
+			Renderer->DrawMesh(iw::Transform(glm::vec3(0), aspect), m_sandScreenMesh);
+			Renderer->DrawMesh(iw::Transform(glm::vec3(0), aspect), m_airScreenMesh);
 		Renderer->EndScene();
 	}
 
@@ -314,7 +313,8 @@ public:
 			sandColor[x + y * width] = iw::Color(1).to32();
 		};
 
-		auto [x, y] = gP;
+		float x = gP.x();
+		float y = gP.y();
 
 		for (int i = 1; i < gridSize; i++) draw(x + i,        y); 
 		for (int i = 1; i < gridSize; i++) draw(x + i,        y + gridSize);
@@ -323,6 +323,9 @@ public:
 	}
 
 	void DrawWithMouse(int fx, int fy, int width, int height) {
+
+		LOG_INFO << gP;
+
 		if (iw::Mouse::ButtonDown(iw::LMOUSE)) {
 			CellType placeMe = CellType::EMPTY;
 
@@ -335,8 +338,8 @@ public:
 			else if (iw::Keyboard::KeyDown(iw::O)) placeMe = CellType::WOOD;
 			else if (iw::Keyboard::KeyDown(iw::C)) placeMe = CellType::BELT;
 
-			for (int x = gP.x; x < gP.x + gridSize; x++)
-			for (int y = gP.y; y < gP.y + gridSize; y++) {
+			for (int x = gP.x(); x < gP.x() + gridSize; x++)
+			for (int y = gP.y(); y < gP.y() + gridSize; y++) {
 				if (!m_world->InBounds(x, y))
 					continue;
 
