@@ -54,23 +54,23 @@ namespace iw {
 		Mesh* mesh;
 		Collider* col;
 
-		if (x > 0) {
+		//if (x > 0) {
 			col = entity.Add<MeshCollider>(MeshCollider::MakeCube());
 			mesh = entity.Set<Mesh>(cube->MakeInstance());
-		}
+		//}
 
 		//else if (randf() > 0.0f) {
 		//	col  = entity.Add<MeshCollider>(MeshCollider::MakeTetrahedron());
 		//	mesh = entity.Set<Mesh>(tetrahedron->MakeInstance());
 		//}
 
-		else {
-			col = entity.Add<SphereCollider>(glm::vec3(0), 1);
-			mesh = entity.Set<Mesh>(sphere->MakeInstance());
+		//else {
+		//	col = entity.Add<SphereCollider>(glm::vec3(0), 1);
+		//	mesh = entity.Set<Mesh>(sphere->MakeInstance());
 
-			s.x = s.z;
-			s.y = s.z; // make uniform scale if where because thats how their collider works
-		}
+		//	s.x = s.z;
+		//	s.y = s.z; // make uniform scale if where because thats how their collider works
+		//}
 
 		x += 5;
 
@@ -234,11 +234,12 @@ namespace iw {
 
 		//delete sphere;
 
-		Physics->SetGravity(glm::vec3(0, -9.81f, 0));
-		Physics->AddSolver(new ImpulseSolver());
-		Physics->AddSolver(new SmoothPositionSolver());
+		//Physics->SetGravity(glm::vec3(0, -9.81f, 0));
+		//Physics->AddSolver(new ImpulseSolver());
+		//Physics->AddSolver(new SmoothPositionSolver());
 
-		//iw::SetTimeScale(.01);
+		//Time::SetFixedTime(0.02f);
+		//Time::SetTimeScale(0.01f);
 
 		EditorCameraControllerSystem* system = PushSystem<EditorCameraControllerSystem>();
 
@@ -248,41 +249,66 @@ namespace iw {
 		PushSystem<iw::ShadowRenderSystem>(MainScene);
 		PushSystem<iw::RenderSystem>(MainScene);
 
-		Time::SetFixedTime(0.05f);
-
 		srand(19);
 
-		Entity last = SpawnCube(glm::vec3(.1));
-		Entity current;
+		/*Entity last = SpawnCube(glm::vec3(.1));
+		Entity current;*/
 
-		iw::Mechanism* mechanism = new iw::Mechanism();
+		//iw::Mechanism* mechanism = new iw::Mechanism();
 
-		Entity a = SpawnCube(glm::vec3(.2, .2, 4));
-		Entity b = SpawnCube(glm::vec3(.2, .2, 4));
-		Entity c = SpawnCube(glm::vec3(.2, .2, 4));
-		Entity d = SpawnCube(glm::vec3(.2, .2, 4));
+		Entity a = SpawnCube(glm::vec3(.2));
+		Entity b = SpawnCube(glm::vec3(2));
+		//Entity c = SpawnCube(glm::vec3(2));
+		//Entity d = SpawnCube(glm::vec3(2));
 
-		Constraint* ab = new VelocityConstraint(glm::vec3(-1), glm::vec3(-1));
-		Constraint* bc = new VelocityConstraint(glm::vec3(-1), glm::vec3(-1));
-		Constraint* cd = new VelocityConstraint(glm::vec3(-1), glm::vec3(-1));
-		Constraint* da = new VelocityConstraint(glm::vec3(-1), glm::vec3(-1));
+		//a.Find<iw::Rigidbody>()->SetCol(nullptr);
+		//a.RemoveComponent<iw::MeshCollider>();
 
-		ab->A = a.Find<Rigidbody>();
-		ab->B = b.Find<Rigidbody>();
+		VelocityConstraint* ab = new BallInSocketConstraint(
+			a.Find<iw::Rigidbody>(),
+			b.Find<iw::Rigidbody>(),
+			from_glm(glm::vec3( 0)), 
+			from_glm(glm::vec3(-1))
+		);
 		
-		bc->A = b.Find<Rigidbody>();
-		bc->B = c.Find<Rigidbody>();
-		
-		cd->A = c.Find<Rigidbody>();
-		cd->B = d.Find<Rigidbody>();
-		
-		da->A = d.Find<Rigidbody>();
-		da->B = a.Find<Rigidbody>();
+		//VelocityConstraint* bc = new BallInSocketConstraint(
+		//	b.Find<iw::Rigidbody>(),
+		//	c.Find<iw::Rigidbody>(),
+		//	from_glm(glm::vec3( 1)), 
+		//	from_glm(glm::vec3(-1))
+		//);
 
-		mechanism->Constraints.push_back(ab);
-		mechanism->Constraints.push_back(bc);
-		mechanism->Constraints.push_back(cd);
-		mechanism->Constraints.push_back(da);
+		//VelocityConstraint* bd = new BallInSocketConstraint(
+		//	b.Find<iw::Rigidbody>(),
+		//	d.Find<iw::Rigidbody>(),
+		//	from_glm(glm::vec3(-1, 1, -1)),
+		//	from_glm(glm::vec3(-1))
+		//);
+
+		Physics->AddConstraint(ab);
+		//Physics->AddConstraint(bc);
+		//Physics->AddConstraint(bd);
+		
+		//Constraint* bc = new VelocityConstraint(glm::vec3(-1), glm::vec3(-1));
+		//Constraint* cd = new VelocityConstraint(glm::vec3(-1), glm::vec3(-1));
+		//Constraint* da = new VelocityConstraint(glm::vec3(-1), glm::vec3(-1));
+
+		//ab->A = a.Find<Rigidbody>();
+		//ab->B = b.Find<Rigidbody>();
+		//
+		//bc->A = b.Find<Rigidbody>();
+		//bc->B = c.Find<Rigidbody>();
+		//
+		//cd->A = c.Find<Rigidbody>();
+		//cd->B = d.Find<Rigidbody>();
+		//
+		//da->A = d.Find<Rigidbody>();
+		//da->B = a.Find<Rigidbody>();
+
+		//mechanism->Constraints.push_back(ab);
+		//mechanism->Constraints.push_back(bc);
+		//mechanism->Constraints.push_back(cd);
+		//mechanism->Constraints.push_back(da);
 
 		//for (int i = 0; i < 5; i++) {
 
@@ -297,7 +323,7 @@ namespace iw {
 		//	last = current;
 		//}
 
-		Physics->AddMechanism(mechanism);
+		//Physics->AddMechanism(mechanism);
 
 		//TestDebug = SpawnCube(glm::vec3(.1));
 		//TestDebug.Find<iw::Rigidbody>()->IsKinematic = false;

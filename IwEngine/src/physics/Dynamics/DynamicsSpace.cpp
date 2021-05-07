@@ -23,10 +23,16 @@ namespace Physics {
 		AddCollisionObject(rigidbody); // checks dups
 	}
 
-	void DynamicsSpace::AddMechanism(
-		Mechanism* mechanism)
+	//void DynamicsSpace::AddMechanism(
+	//	Mechanism* mechanism)
+	//{
+	//	m_mechanisms.push_back(mechanism); // maybe check dups
+	//}
+
+	void DynamicsSpace::AddConstraint(
+		VelocityConstraint* constraint)
 	{
-		m_mechanisms.push_back(mechanism); // maybe check dups
+		m_constraints.push_back(constraint);
 	}
 
 	void DynamicsSpace::Step(
@@ -64,10 +70,19 @@ namespace Physics {
 			}
 		}
 
-		for (Mechanism* mech : m_mechanisms) {
-			mech->init();
-			mech->solve(dt);
+		for (VelocityConstraint* c : m_constraints) {
+			c->init(dt);
 		}
+
+		for(int i = 0; i < 10; i++)
+		for (VelocityConstraint* c : m_constraints) {
+			c->solve(dt); // div by iteration count?
+		}
+
+		//for (Mechanism* mech : m_mechanisms) {
+		//	mech->init();
+		//	mech->solve(dt);
+		//}
 
 		for (CollisionObject* object : m_objects) {
 			if (!object->IsDynamic()) continue;
