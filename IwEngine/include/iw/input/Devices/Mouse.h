@@ -1,9 +1,7 @@
 #pragma once
 
 #include "Device.h"
-//#include "iw/math/vector2.h"
-
-#include "glm/vec2.hpp"
+#include "iw/math/matrix.h" // maybe just use the forward declared version
 
 namespace iw {
 namespace Input {
@@ -39,8 +37,8 @@ namespace Input {
 		static bool ButtonDown(InputName button);
 		static bool ButtonUp  (InputName button);
 
-		static glm::vec2 ScreenPos();
-		static glm::vec2 ClientPos();
+		static vec2 ScreenPos();
+		static vec2 ClientPos();
 
 		static Mouse* Create();
 	};

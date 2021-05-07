@@ -71,10 +71,10 @@ namespace Engine {
 		ImGui::GetIO().DeltaTime = Time::DeltaTime();
 
 		if (m_window) {
-			glm::vec2 pos = Mouse::ScreenPos();
+			iw::vec2 pos = Mouse::ScreenPos();
 
-			ImGui::GetIO().MousePos.x = pos.x;
-			ImGui::GetIO().MousePos.y = pos.y;
+			ImGui::GetIO().MousePos.x = pos.x();
+			ImGui::GetIO().MousePos.y = pos.y();
 		}
 
 		//ImGui::Begin("ImGui Layer");

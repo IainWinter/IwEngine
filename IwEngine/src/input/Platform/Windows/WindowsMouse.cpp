@@ -26,14 +26,14 @@ namespace Input {
 		return !ButtonDown(button);
 	}
 
-	glm::vec2 Mouse::ScreenPos() {
+	vec2 Mouse::ScreenPos() {
 		POINT p; GetCursorPos(&p);
-		return glm::vec2(p.x, p.y);
+		return vec2(p.x, p.y);
 	}
 
-	glm::vec2 Mouse::ClientPos() {
+	vec2 Mouse::ClientPos() {
 		POINT p; GetCursorPos(&p); ScreenToClient(WindowFromPoint(p), &p);
-		return glm::vec2(p.x, p.y);
+		return vec2(p.x, p.y);
 	}
 
 	DeviceInput WindowsMouse::TranslateOsEvent(

@@ -1,5 +1,7 @@
 #include "iw/math/noise.h"
 
+#include <cmath> // only used for 'floor' function
+
 namespace iw {
 namespace math {
     //============= https://www.openprocessing.org/sketch/58104 =====================

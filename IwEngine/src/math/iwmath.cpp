@@ -2,10 +2,6 @@
 #include <random>
 #include <cmath>
 
-#include "iw/math/vector2.h"
-#include "iw/math/vector3.h"
-#include "iw/math/vector4.h"
-
 namespace iw {
 namespace math {
 	float randf() {
@@ -61,17 +57,17 @@ namespace math {
 		return 1 - (1 - time / scale) * (1 - time / scale);
 	}
 
-	template<>
-	vector2 clamp(
-		const vector2& v,
-		const vector2& min,
-		const vector2& max)
-	{
-		return vector2(
-			clamp(v.x, min.x, max.x),
-			clamp(v.y, min.y, max.y)
-		);
-	}
+	//template<>
+	//vec<2> clamp(
+	//	const vec<2>& v,
+	//	const vec<2>& min,
+	//	const vec<2>& max)
+	//{
+	//	return vector2(
+	//		clamp(v.x, min.x, max.x),
+	//		clamp(v.y, min.y, max.y)
+	//	);
+	//}
 }
 
 	using namespace math;

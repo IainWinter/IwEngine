@@ -31,29 +31,20 @@
 
 namespace iw {
 namespace math {
-	template<
-		size_t _columns,
-		size_t _rows,
-		typename _t = float>
+
+	// Forward decl matrix.h
+
+	template<typename _t>
+	struct matitr;
+
+	struct matrix;
+
+	template<size_t _height, size_t _width>
 	struct mat;
 
+	template<size_t _height>
+	struct vec;
 
-	template<
-		size_t _columns,
-		size_t _rows,
-		typename _t = float>
-	struct matrix;
-	
-	template<
-		size_t _rows,
-		typename _t = float>
-	using vector = mat<1, _rows, _t>;
-
-
-
-	struct vector2;
-	struct vector3;
-	struct vector4;
 
 	/**
 	* Pi ~ 3.14
@@ -178,12 +169,8 @@ namespace math {
 		return x;
 	}
 
-	template<>
-	IWMATH_API
-	vector2 clamp(
-		const vector2& v,
-		const vector2& min,
-		const vector2& max);
+
+	//}
 }
 
 	using namespace math;

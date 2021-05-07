@@ -11,17 +11,19 @@ namespace Engine {
 	{}
 
 	void DebugLayer::ImGui() {
-		while (logs.size() > 20) {
-			logs.erase(logs.begin());
-		}
-
 		ImGui::Begin("Debug layer");
 
 		float time = Time::FixedTime();
 		ImGui::SliderFloat("Fixed timestep", &time, 0.001f, 1);
 
-		if (time != Time::FixedTime()) {
-			Time::SetFixedTime(time);
+		float scale = Time::TimeScale();
+		ImGui::SliderFloat("Timescale", &scale, 0, 5);
+
+		if (time  != Time::FixedTime()) Time::SetFixedTime(time);
+		if (scale != Time::TimeScale()) Time::SetTimeScale(scale);
+
+		while (logs.size() > 20) {
+			logs.erase(logs.begin());
 		}
 
 		ImGui::Text("Last 20 Events");

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "vector2.h"
+#include "iw/math/iwmath.h"
 
 namespace iw {
 namespace math {
