@@ -428,7 +428,7 @@ namespace helpers {
 	{
 		glm::vec4* circle = helpers::_MakeCircleArray(lonCount);
 
-
+		assert(false);
 
 		return nullptr;
 	}
@@ -524,20 +524,21 @@ namespace helpers {
 
 		glm::vec3 offset = -(glm::vec3(1, 0, 0) + glm::vec3(0, 0, 1));
 
-		for (unsigned x = 0; x <= xCount; x++) {
-			for (unsigned z = 0; z <= zCount; z++) {
-				unsigned i = z + x * (zCount + 1);
+		for (unsigned x = 0; x <= xCount; x++)
+		for (unsigned z = 0; z <= zCount; z++)
+		{
+			unsigned i = z + x * (zCount + 1);
 
-				verts[i] = offset + glm::vec3(x * stepX, 0, z * stepZ);
+			verts[i] = offset + glm::vec3(x * stepX, 0, z * stepZ);
 				
-				if (uvs) {
-					uvs[i] = glm::vec2(x * stepU, (zCount - z) * stepV);
-				}
+			if (uvs) {
+				uvs[i] = glm::vec2(x * stepU, (zCount - z) * stepV);
 			}
 		}
 
 		unsigned i = 0, v = 0;
-		while(v <= vertCount - (zCount + 3)) {
+		while (v <= vertCount - (zCount + 3))
+		{
 			indices[i++] = v;
 			indices[i++] = v + 1; 
 			indices[i++] = v + zCount + 1;

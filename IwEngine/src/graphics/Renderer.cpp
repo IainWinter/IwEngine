@@ -21,7 +21,7 @@ namespace Graphics {
 		description.DescribeBuffer(bName::UV,       MakeLayout<float>(2));
 
 		MeshData* data = MakePlane(description, 1, 1);
-		data->TransformMeshData(Transform(glm::vec3(), glm::vec3(1), glm::quat(glm::vec3(glm::pi<float>() * 0.5f, 0, 0))));
+		data->TransformMeshData(Transform(glm::vec3(), glm::vec3(1), glm::quat(glm::vec3(-glm::pi<float>() * 0.5f, 0, 0))));
 
 		m_quad = data->MakeInstance();
 	}
