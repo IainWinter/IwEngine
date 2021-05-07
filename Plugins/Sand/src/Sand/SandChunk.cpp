@@ -108,7 +108,7 @@ void SandChunk::CommitCells() {
 
 	for (size_t i = 0; i < m_changes.size() - 1; i++) {
 		if (std::get<_DEST>(m_changes[i + 1]) != std::get<_DEST>(m_changes[i])) {
-			size_t rand = iprev + std::rand() % ((i - iprev) + 1);
+			size_t rand = iprev + iw::randi(i - iprev);
 
 			auto [chunk, src, dst] = m_changes[rand];
 
@@ -150,10 +150,10 @@ void SandChunk::KeepAlive(size_t index) {
 
 	std::unique_lock lock(m_workingRectMutex);
 
-	m_minXw = glm::clamp(glm::min(x - 2, m_minXw), 0, m_width);
-	m_minYw = glm::clamp(glm::min(y - 2, m_minYw), 0, m_height);
-	m_maxXw = glm::clamp(glm::max(x + 2, m_maxXw), 0, m_width);
-	m_maxYw = glm::clamp(glm::max(y + 2, m_maxYw), 0, m_height);
+	m_minXw = iw::clamp(min(x - 2, m_minXw), 0, m_width);
+	m_minYw = iw::clamp(min(y - 2, m_minYw), 0, m_height);
+	m_maxXw = iw::clamp(max(x + 2, m_maxXw), 0, m_width);
+	m_maxYw = iw::clamp(max(y + 2, m_maxYw), 0, m_height);
 }
 
 void SandChunk::UpdateRect() {

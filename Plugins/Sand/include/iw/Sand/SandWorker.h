@@ -28,7 +28,7 @@ public:
 
 	inline void ShuffleIfTrue(bool& a, bool& b) {
 		if (a && b) {
-			a = glm::linearRand(0.f, 1.f) > 0;
+			a = iw::randf() > 0;
 			b = !a;
 		}
 	}

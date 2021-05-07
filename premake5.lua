@@ -691,7 +691,7 @@ group "Plugins"
 		}
 
 		links {
-			--"wMath",
+			"wMath",
 			"wUtil",
 			"wGraphics" -- maybe breakout engine into a core and something else, need to be able to make systems in plugins eg.
 			
