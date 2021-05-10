@@ -39,8 +39,9 @@ public:
 	{}
 
 	int Initialize() override {
-		m_world = new SandWorld(Renderer->Width(), Renderer->Height(), 6, 4, 4);
+		m_world = new SandWorld(Renderer->Width(), Renderer->Height(), 6, 3, 4);
 		m_world->AddField<HeatField>();
+
 
 		/*struct WindField {
 			float dx, dy;
@@ -227,7 +228,8 @@ public:
 			cube->density[i] = iw::clamp<float>(cube->density[i] * .99f, 0, 1);
 		}
 
-		for (SandChunk* chunk : m_world->m_chunks) {
+		for (auto& chunks : m_world->m_batches)
+		for (SandChunk* chunk : chunks) {
 			for (int x = 0; x < chunk->m_width;  x++)
 			for (int y = 0; y < chunk->m_height; y++) {
 
@@ -242,7 +244,7 @@ public:
 				int i = xx + yy * cube->size;
 
 				Cell& cell = chunk->GetCell(index);
-				float& temp = chunk->GetCell<HeatField>(index, 1).Tempeture;
+				float& temp = chunk->GetCell<HeatField>(index, 2).Tempeture;
 
 				if (cell.Type == CellType::FIRE) {
 					FluidCubeAddDensity (cube, xx, yy, iw::DeltaTime() / 2);
@@ -252,14 +254,19 @@ public:
 					);
 				}
 
-				if (cell.Type == CellType::SAND && /*cube->density[i] > .8 &&*/ temp > 100) {
-					chunk->SetCell(index, Cell::GetDefault(CellType::STONE));
-				}
+				//else if (cell.Type != CellType::EMPTY && !m_world->IsEmpty(x, y - 1)) {
+				//	cube->Vx[i] *= -1; // scale with density & weight of cell
+				//	cube->Vy[i] *= -1;
+				//}
+
+				//if (cell.Type == CellType::SAND && /*cube->density[i] > .8 &&*/ temp > 100) {
+				//	chunk->SetCell(index, Cell::GetDefault(CellType::STONE));
+				//}
 
 				if (cell.Props & CellProperties::MOVE_FORCE) {
-					//if (!(cell.Props & CellProperties::MOVE_RANDOM)) {
-					//	cell.dy -= iw::DeltaTime() * 9.8f;
-					//}
+					if (!(cell.Props & CellProperties::MOVE_RANDOM) /*&& chunk->IsEmpty(x, y - 1)*/) {
+						cell.dy -= iw::DeltaTime() * 2;
+					}
 				}
 
 				else {
@@ -323,9 +330,6 @@ public:
 	}
 
 	void DrawWithMouse(int fx, int fy, int width, int height) {
-
-		LOG_INFO << gP;
-
 		if (iw::Mouse::ButtonDown(iw::LMOUSE)) {
 			CellType placeMe = CellType::EMPTY;
 

@@ -11,6 +11,9 @@ SandWorld::SandWorld(
 	, m_scale(scale)
 	, m_expandWorld(true)
 {
+	m_batches.resize(m_batchGridSize * m_batchGridSize);
+
+	AddField<Cell>();
 	AddField<Cell>();
 }
 
@@ -25,6 +28,9 @@ SandWorld::SandWorld(
 	, m_scale(scale)
 	, m_expandWorld(true)
 {
+	m_batches.resize(m_batchGridSize * m_batchGridSize);
+
+	AddField<Cell>();
 	AddField<Cell>();
 
 	for(size_t x = 0; x < numberOfChunksX; x++)
@@ -38,9 +44,10 @@ SandWorld::SandWorld(
 // Getting cells
 
 Cell& SandWorld::GetCell(
-	int x, int y)
+	int x, int y,
+	size_t field)
 {
-	return GetChunk(x, y)->GetCell(x, y);
+	return GetChunk(x, y)->GetCell(x, y, field);
 }
 
 // Setting & moving cells
@@ -61,6 +68,16 @@ void SandWorld::MoveCell(
 	if (SandChunk* src  = GetChunk(x, y))
 	if (SandChunk* dest = GetChunk(xto, yto)) {
 		dest->MoveCell(src, x, y, xto, yto);
+	}
+}
+
+void SandWorld::PushCell(
+	int x,   int y,
+	int xto, int yto)
+{
+	if (SandChunk* src  = GetChunk(x, y))
+	if (SandChunk* dest = GetChunk(xto, yto)) {
+		dest->PushCell(src, x, y, xto, yto);
 	}
 }
 
@@ -101,20 +118,21 @@ std::pair<int, int> SandWorld::GetChunkLocation(
 }
 
 void SandWorld::RemoveEmptyChunks() {
-	for (size_t i = 0; i < m_chunks.size(); i++) {
-		SandChunk* chunk = m_chunks.at(i);
+	for (auto& chunks : m_batches)
+	for (size_t i = 0; i < chunks.size(); i++) {
+		SandChunk* chunk = chunks.at(i);
 
 		if (chunk->m_filledCellCount == 0) {
 			m_chunkLookup.unsafe_erase(GetChunkLocation(chunk->m_x, chunk->m_y));
-			m_chunks[i] = m_chunks.back(); m_chunks.pop_back();
+			chunks[i] = chunks.back(); chunks.pop_back();
 			i--;
 
 			for (size_t i = 0; i < m_fields.size(); i++) {
 				Field& field = m_fields[i];
 				
 				field.memory->free(
-					chunk->m_fields[i],
-					field.size * m_chunkWidth * m_chunkHeight
+					chunk->m_fields[i].cells,
+					FieldSize(field.cellSize)
 				);
 			}
 		}
@@ -161,14 +179,19 @@ SandChunk* SandWorld::CreateChunk(
 	SandChunk* chunk = new SandChunk(m_chunkWidth, m_chunkHeight, lx, ly);
 
 	for (Field& field : m_fields) {
-		chunk->AddField(field.memory->alloc(field.size * m_chunkWidth * m_chunkHeight));
+		AddFieldToChunk(chunk, field);
 	}
 
 	m_chunkLookup.insert({ location, chunk });
 
+	int c = m_batchGridSize;
+
+	int batch = (c + lx % c) % c
+		      + (c + ly % c) % c * c;
+
 	{
 		std::unique_lock lock(m_chunkMutex);
-		m_chunks.push_back(chunk);
+		m_batches.at(batch).push_back(chunk);
 	}
 
 	return chunk;

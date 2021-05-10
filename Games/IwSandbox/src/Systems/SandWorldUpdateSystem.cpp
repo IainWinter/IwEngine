@@ -71,7 +71,7 @@ private:
 		else {
 			for(int xx = -1; xx <= 1; xx++)
 			for(int yy = -1; yy <= 1; yy++) {
-				float& temp = m_chunk->GetCell<HeatField>(x, y, 1).Tempeture;
+				float& temp = m_chunk->GetCell<HeatField>(x, y, 2).Tempeture;
 				temp = iw::clamp<float>(temp + iw::DeltaTime() * 100, 0, 1000);
 
 				if (xx == 0 && yy == 0) continue; 
@@ -95,22 +95,25 @@ private:
 		int x, int y, 
 		iw::Cell& cell)
 	{
+		if (GetCell(x, y + 1).Type == iw::CellType::BELT) return true;
+
 		int i = 1;
 		while (GetCell(x, y - i).Type == iw::CellType::BELT) {
 			i++;
 		}
 
 		for (int j = 1; j <= i; j++) {
-			if (InBounds(x, y + j)) {
-				iw::Cell& above = GetCell(x, y + j);
+			if ( IsEmpty(x,     y + j)) break;
+			if (!IsEmpty(x + 1, y + j)) continue;
 
-				if (above.Props & iw::CellProperties::MOVE_DOWN) {
-					MoveCell(x, y + j, x + 1, y + j);
-				}
+			iw::Cell& above = GetCell(x, y + j);
 
-				else {
-					break;
-				}
+			if (above.Props & iw::CellProperties::MOVE_DOWN) {
+				PushCell(x, y + j, x + 1, y + j);
+			}
+
+			else {
+				break;
 			}
 		}
 
@@ -118,8 +121,20 @@ private:
 	}
 };
 
+float timer__ = 0.0;
+
 void SandWorldUpdateSystem::Update() {
 	// Paste tiles
+
+	//timer__ -= iw::DeltaTime();
+	//if (timer__ > 0) {
+	//	return;
+	//}
+
+	//if (!iw::Keyboard::KeyDown(iw::J)) return;
+
+	//timer__ = .05f;
+
 
 	Space->Query<Tile>().Each([&](
 		auto entity,
@@ -143,33 +158,37 @@ void SandWorldUpdateSystem::Update() {
 	std::mutex mutex;
 	std::condition_variable cond;
 
-	auto doForAllChunks = [&](std::function<void(iw::SandChunk*)> func) {
-		int chunkCount = m_world.m_chunks.size();
+	auto doForAllChunks = [&](std::function<void(iw::SandChunk*)> func)
+	{		
+		for (auto& chunks : m_world.m_batches)
+		{
+			int chunkCount = chunks.size();
 			
-		for (iw::SandChunk* chunk : m_world.m_chunks) {
-			Task->queue([&, chunk]() {
-				func(chunk);
+			for (iw::SandChunk* chunk : chunks) {
+				Task->queue([&, chunk]() {
+					func(chunk);
 
-				{ std::unique_lock lock(mutex); chunkCount--; }
-				cond.notify_one();
-			});
+					{ std::unique_lock lock(mutex); chunkCount--; }
+					cond.notify_one();
+				});
+			}
+
+			std::unique_lock lock(mutex);
+			cond.wait(lock, [&]() { return chunkCount == 0; });
 		}
-
-		std::unique_lock lock(mutex);
-		cond.wait(lock, [&]() { return chunkCount == 0; });
 	};
-		
-	doForAllChunks([&](iw::SandChunk* chunk) {
-		GameSandWorker(m_world, chunk).UpdateChunk();
-	});
 
-	doForAllChunks([&](iw::SandChunk* chunk) {
-		chunk->CommitCells();
-	});
+	//for (int i = 0; i < 4; i++) {
+		m_world.m_frameCount += 1;
 
-	for (iw::SandChunk* chunk : m_world.m_chunks) {
-		chunk->UpdateRect();
-	}
+		doForAllChunks([&](iw::SandChunk* chunk) {
+			GameSandWorker(m_world, chunk).UpdateChunk();
+		});
+
+		doForAllChunks([&](iw::SandChunk* chunk) {
+			chunk->CommitCells();
+		});
+	//}
 
 	// Update the sand texture
 
@@ -196,8 +215,8 @@ void SandWorldUpdateSystem::Update() {
 			int endY   = iw::clamp<int>(m_fy2 - chunk->m_y, 0, chunk->m_height);
 			int endX   = iw::clamp<int>(m_fx2 - chunk->m_x, 0, chunk->m_width);
 
-			iw::Cell* cells = chunk->GetField();
-			HeatField* heat = chunk->GetField<HeatField>(1);
+			iw::Cell* cells = chunk->GetField(0).cells;
+			HeatField* heat = chunk->GetField<HeatField>(2).cells;
 
 			// sand texture
 			for (int y = startY; y < endY; y++)
@@ -208,6 +227,40 @@ void SandWorldUpdateSystem::Update() {
 				float&    temp = heat [x + y * chunk->m_width].Tempeture;
 
 				temp *= (1 -iw::DeltaTime());
+
+				if (_debugShowChunkBounds) {
+					if (   (y == chunk->m_minY || y == chunk->m_maxY) && (x >= chunk->m_minX && x <= chunk->m_maxX)
+						|| (x == chunk->m_minX || x == chunk->m_maxX) && (y >= chunk->m_minY && y <= chunk->m_maxY))
+					{
+						pixels[texi] = iw::Color(0, 1, 0).to32();
+					}
+						
+					else 
+					if (    x % m_world.m_chunkWidth  == 0
+						||  y % m_world.m_chunkHeight == 0)
+					{
+						int c = m_world.m_batchGridSize;
+
+						int batch = (c + cx % c) % c
+								  + (c + cy % c) % c * c;
+
+						iw::Color color;
+
+						switch (batch) {
+						case 0: color = iw::Color::From255(255,   0, 255); break;
+						case 1: color = iw::Color::From255(255,   0,   0); break;
+						case 2: color = iw::Color::From255(255, 128,   0); break;
+						case 3: color = iw::Color::From255(255, 255,   0); break;
+						case 4: color = iw::Color::From255(128, 255,   0); break;
+						case 5: color = iw::Color::From255(0,   255,   0); break;
+						case 6: color = iw::Color::From255(0,   255, 128); break;
+						case 7: color = iw::Color::From255(0,   128, 255); break;
+						case 8: color = iw::Color::From255(0,     0, 255); break;
+						}
+
+						pixels[texi] = color.to32();
+					}
+				}
 
 				if (cell.Type != iw::CellType::EMPTY) {
 					glm::vec4 accent = cell.StyleColor.rgba();
@@ -228,20 +281,7 @@ void SandWorldUpdateSystem::Update() {
 					pixels[texi] = iw::Color(cell.Color + accent).to32();
 				}
 
-				if (_debugShowChunkBounds) {
-					if (   (y == chunk->m_minY || y == chunk->m_maxY) && (x >= chunk->m_minX && x <= chunk->m_maxX)
-						|| (x == chunk->m_minX || x == chunk->m_maxX) && (y >= chunk->m_minY && y <= chunk->m_maxY))
-					{
-						pixels[texi] = iw::Color(0, 1, 0).to32();
-					}
-						
-					else 
-					if (    x % m_world.m_chunkWidth  == 0
-						||  y % m_world.m_chunkHeight == 0)
-					{
-						pixels[texi] = iw::Color(1, 0, 0).to32();
-					}
-				}
+				
 			}
 
 			{ std::unique_lock lock(mutex); chunkCount--; }

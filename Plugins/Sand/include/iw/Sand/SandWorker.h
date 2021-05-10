@@ -19,7 +19,9 @@ public:
 	IW_PLUGIN_SAND_API Cell& GetCell(int x, int y);
 
 	IW_PLUGIN_SAND_API void SetCell (int x, int y, const Cell& cell);
+
 	IW_PLUGIN_SAND_API void MoveCell(int x, int y, int xto, int yto);
+	IW_PLUGIN_SAND_API void PushCell(int x, int y, int xto, int yto);
 
 	IW_PLUGIN_SAND_API void KeepAlive(int x, int y);
 
