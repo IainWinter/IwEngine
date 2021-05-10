@@ -101,47 +101,96 @@ namespace helpers {
 
 	// Cube
 
-	static const unsigned CubeVertCount  = 8;
+	static const unsigned CubeVertCount  = 24;
 	static const unsigned CubeIndexCount = 36;
 
 	static glm::vec3 CubeVerts[] = {
 		glm::vec3(-1, -1, -1),
+		glm::vec3(-1, -1, -1),
+		glm::vec3(-1, -1, -1),
+
 		glm::vec3( 1, -1, -1),
+		glm::vec3( 1, -1, -1),
+		glm::vec3( 1, -1, -1),
+		
 		glm::vec3( 1,  1, -1),
+		glm::vec3( 1,  1, -1),
+		glm::vec3( 1,  1, -1),
+		
 		glm::vec3(-1,  1, -1),
+		glm::vec3(-1,  1, -1),
+		glm::vec3(-1,  1, -1),
+		
 		glm::vec3(-1,  1,  1),
+		glm::vec3(-1,  1,  1),
+		glm::vec3(-1,  1,  1),
+		
 		glm::vec3( 1,  1,  1),
+		glm::vec3( 1,  1,  1),
+		glm::vec3( 1,  1,  1),
+		
 		glm::vec3( 1, -1,  1),
+		glm::vec3( 1, -1,  1),
+		glm::vec3( 1, -1,  1),
+		
+		glm::vec3(-1, -1,  1),
+		glm::vec3(-1, -1,  1),
 		glm::vec3(-1, -1,  1),
 	};
 
 	static glm::vec2 CubeUvs[] = {
 		glm::vec2(0, 0),
+		glm::vec2(0, 0),
+		glm::vec2(0, 0),
+
 		glm::vec2(1, 0),
+		glm::vec2(1, 0),
+		glm::vec2(1, 0),
+		
 		glm::vec2(1, 1),
+		glm::vec2(1, 1),
+		glm::vec2(1, 1),
+		
 		glm::vec2(0, 1),
 		glm::vec2(0, 1),
+		glm::vec2(0, 1),
+		
+		glm::vec2(0, 1),
+		glm::vec2(0, 1),
+		glm::vec2(0, 1),
+		
 		glm::vec2(1, 1),
+		glm::vec2(1, 1),
+		glm::vec2(1, 1),
+		
 		glm::vec2(1, 0),
+		glm::vec2(1, 0),
+		glm::vec2(1, 0),
+		
+		glm::vec2(0, 0),
+		glm::vec2(0, 0),
 		glm::vec2(0, 0),
 	};
 
 	static const unsigned CubeIndex[] = {
-		0, 2, 1, // front
-		0, 3, 2,
-		2, 3, 4, // top
-		2, 4, 5,
-		1, 2, 5, // right
-		1, 5, 6,
-		0, 7, 4, // left
-		0, 4, 3,
-		5, 4, 7, // back
-		5, 7, 6,
-		0, 6, 7, // bottom
-		0, 1, 6
-	};
+		0, 6, 3,    // front
+		0, 9, 6,
 
-	// default rad should be .5 not 1
+		8, 11, 14,  // top
+		8, 14, 17,
+
+		4,  7, 16,  // right
+		4, 16, 19,
+
+		1, 22, 13,  // left
+		1, 13, 10,
+
+		15, 12, 21, // back
+		15, 21, 18,
+
+		2, 20, 23,  // bottom
+		2,  5, 20
+	};
 
 	MeshData* MakeIcosphere(
 		const MeshDescription& description,
@@ -161,7 +210,7 @@ namespace helpers {
 		glm::vec3*  verts = new glm::vec3[vertCount];
 
 		for (size_t i = 0; i < IcoIndexCount; i++) indices[i] = IcoIndex[i];
-		for (size_t i = 0; i < IcoVertCount;  i++) verts[i] = IcoVerts[i];
+		for (size_t i = 0; i < IcoVertCount;  i++) verts[i]   = IcoVerts[i];
 
 		// Verts & Index
 
@@ -580,12 +629,12 @@ namespace helpers {
 		unsigned resolution)
 	{
 		if (!description.HasBuffer(bName::POSITION)) {
-			LOG_WARNING << "Cannot generate a UvSphere for a mesh description that does not contain at least a POSITION buffer!";
+			LOG_WARNING << "Cannot generate a Cube for a mesh description that does not contain at least a POSITION buffer!";
 			return nullptr;
 		}
 
 		unsigned indexCount = 36 /*+ resolution*/;
-		unsigned vertCount  = 8  /*+ resolution*/;
+		unsigned vertCount  = 24  /*+ resolution*/;
 
 		unsigned* indices = new unsigned[indexCount];
 		glm::vec3* verts    = new glm::vec3[vertCount];
@@ -595,11 +644,11 @@ namespace helpers {
 			uvs = new glm::vec2[vertCount];
 		}
 
-		memcpy(indices, CubeIndex, CubeIndexCount * sizeof(unsigned));
-		memcpy(verts,   CubeVerts, CubeVertCount * sizeof(glm::vec3));
+		for (int i = 0; i < CubeIndexCount; i++) indices[i] = CubeIndex[i];
+		for (int i = 0; i < CubeVertCount;  i++) verts  [i] = CubeVerts[i];
 
 		if (uvs) {
-			memcpy(uvs, CubeUvs, CubeVertCount * sizeof(glm::vec2));
+			for (int i = 0; i < CubeVertCount; i++) uvs[i] = CubeUvs[i];
 		}
 
 		//// Verts
