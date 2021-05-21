@@ -4,7 +4,7 @@
 namespace iw {
 namespace Engine {
 	Transform::Transform() 
-		: Position(glm::vec3(1))
+		: Position(glm::vec3(0))
 		, Scale(glm::vec3(1))
 		, Rotation(glm::quat(1, 0, 0, 0))
 		, m_parent(nullptr)

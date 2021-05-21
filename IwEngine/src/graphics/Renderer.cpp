@@ -85,7 +85,7 @@ namespace Graphics {
 		m_target   = nullptr;
 	}
 
-	void Renderer::InitShader(
+	ref<Shader>& Renderer::InitShader(
 		iw::ref<Shader>& shader,
 		int bindings)
 	{
@@ -108,6 +108,8 @@ namespace Graphics {
 			//	shader->Program->SetBuffer("Material", m_materialUBO);
 			//}
 		}
+
+		return shader;
 	}
 
 	void Renderer::BeginScene(

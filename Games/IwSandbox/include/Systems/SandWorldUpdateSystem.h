@@ -8,8 +8,10 @@
 // should go into sand library
 struct Tile {
 	std::vector<std::pair<int, int>> Positions;
-	float X = 0;
-	float Y = 0;
+	float  X = 0;
+	float  Y = 0;
+	float vX = 0;
+	float vY = 0;
 };
 
 struct HeatField {

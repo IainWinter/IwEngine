@@ -159,6 +159,11 @@ public:
 		return 0;
 	}
 
+	bool __up   = false,
+		__down  = false, 
+		__left  = false,
+		__right = false;
+
 	void PreUpdate() {
 		Tile* tile = player.Find<Tile>();
 
@@ -181,10 +186,25 @@ public:
 
 		gP = iw::vec2(int(sP.x() / gridSize), int(sP.y() / gridSize)) * gridSize;
 
-		if (iw::Keyboard::KeyDown(iw::LEFT))  tile->X -= iw::DeltaTime()*150;
-		if (iw::Keyboard::KeyDown(iw::RIGHT)) tile->X += iw::DeltaTime()*150;
-		if (iw::Keyboard::KeyDown(iw::UP))    tile->Y += iw::DeltaTime()*150;
-		if (iw::Keyboard::KeyDown(iw::DOWN))  tile->Y -= iw::DeltaTime()*150;
+		if (iw::Keyboard::KeyDown(iw::LEFT))  tile->vX = -150;
+		if (iw::Keyboard::KeyDown(iw::RIGHT)) tile->vX = 150;
+		if (iw::Keyboard::KeyDown(iw::UP))    tile->vY = 150;
+		if (iw::Keyboard::KeyDown(iw::DOWN))  tile->vY -= 15;
+
+		__left  = iw::Keyboard::KeyDown(iw::LEFT);
+		__right = iw::Keyboard::KeyDown(iw::RIGHT);
+
+		if (!(__left || __right)) {
+			tile->vX *= .9;
+		}
+
+		tile->vY -= 6;
+		
+		float nX = tile->X + tile->vX * iw::DeltaTime();
+		float nY = tile->Y + tile->vY * iw::DeltaTime();
+
+		if (m_world->IsEmpty(nX,      tile->Y)) tile->X = nX; else tile->vX = 0;
+		if (m_world->IsEmpty(tile->X, nY))      tile->Y = nY; else tile->vY = 0;
 
 		DrawWithMouse(fx, fy, width, height);
 	}
@@ -222,7 +242,7 @@ public:
 		float diff = .1;
 		float dt = iw::DeltaTime();
 
-		FluidCubeStep(cube);
+		//FluidCubeStep(cube);
 
 		for (int i = 0; i < cube->size * cube->size; i++) {
 			cube->density[i] = iw::clamp<float>(cube->density[i] * .99f, 0, 1);

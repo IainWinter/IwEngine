@@ -25,6 +25,7 @@
 
 #include "iw/math/matrix.h" // should go in a translation type file
 #include "glm/vec3.hpp"
+#include "glm/mat3x3.hpp"
 
 namespace iw {
 namespace math_translation {
@@ -34,6 +35,14 @@ namespace math_translation {
 		result.set(0, v.x);
 		result.set(1, v.y);
 		result.set(2, v.z);
+
+		return result;
+	}
+
+	inline mat<3, 3> from_glm(glm::mat3 v) {
+		mat<3, 3> result;
+
+		for (int i = 0; i < 9; i++) result.elements[i] = v[i / 3][i % 3];
 
 		return result;
 	}

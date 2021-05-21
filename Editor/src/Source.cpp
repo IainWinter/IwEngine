@@ -40,6 +40,9 @@ private:
 	iw::Layer* toolbox = nullptr;
 	iw::Layer* sandbox = nullptr;
 
+	std::wstring projectName          = L"PixelArt";
+	std:: string projectMainLayerName =  "Pixelation";
+
 public:
 	iw::Application* m_gameNew = nullptr;
 	iw::Application* m_game    = nullptr;
@@ -83,13 +86,23 @@ public:
 
 		//LOG_INFO << m;
 
-		std::wstring path;
+		std::wstringstream buf;
 
 #ifdef IW_DEBUG
-		path = L"C:/dev/IwEngine/Games/PhysicsProject/bin/Debug.windows.x86_64/Physics project.dll";
+		buf << L"C:/dev/IwEngine/Games/";
+		buf << projectName;
+		buf << "/bin/Debug.windows.x86_64/";
+		buf << projectName;
+		buf << ".dll";
 #else
-		path = L"C:/dev/IwEngine/Games/PhysicsProject/bin/Release.windows.x86_64/Physics project.dll";
+		buf << L"C:/dev/IwEngine/Games/";
+		buf << projectName;
+		buf << "/bin/Release.windows.x86_64/";
+		buf << projectName;
+		buf << ".dll";
 #endif
+
+		std::wstring path = buf.str();
 
 		HINSTANCE gameInst;
 		Reload(path.c_str(), gameInst);
@@ -107,7 +120,7 @@ public:
 
 		//iw::invert(mat);
 
-		sandbox = m_game->GetLayer("Test");
+		sandbox = m_game->GetLayer(projectMainLayerName.c_str());
 		
 		if (imgui)         m_game->PushLayer(imgui);
 		else       imgui = m_game->PushLayer<iw::ImGuiLayer>();

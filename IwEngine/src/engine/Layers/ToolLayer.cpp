@@ -1,6 +1,5 @@
 #include "iw/engine/Layers/ToolLayer.h"
 #include "iw/engine/Systems/Debug/DrawCollidersSystem.h"
-#include "iw/engine/Components/CameraController.h"
 #include "iw/physics/Collision/PlaneCollider.h"
 #include "iw/graphics/MeshFactory.h"
 #include "iw/graphics/Shader.h"
@@ -34,7 +33,7 @@ namespace iw {
 
 	struct CameraComponents {
 		Transform* Transform;
-		CameraController* Controller;
+		Camera* Controller;
 	};
 
 	ToolLayer::ToolLayer(Scene* scene) : Layer("Toolbox")

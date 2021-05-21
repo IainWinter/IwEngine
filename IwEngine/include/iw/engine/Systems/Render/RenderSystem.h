@@ -10,13 +10,18 @@ namespace Engine {
 	{
 	private:
 		Scene* m_scene;
+		ref<RenderTarget> m_target;
+		bool m_clear;
+
 		ref<ComponentQuery> m_models;
 		ref<ComponentQuery> m_meshes;
 
 	public:
 		IWENGINE_API
 		RenderSystem(
-			Scene* m_scene);
+			Scene* scene,
+			ref<RenderTarget> target = nullptr,
+			bool clear = false);
 
 		IWENGINE_API
 		int Initialize() override;

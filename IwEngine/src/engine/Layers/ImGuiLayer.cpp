@@ -73,8 +73,8 @@ namespace Engine {
 		if (m_window) {
 			iw::vec2 pos = Mouse::ScreenPos();
 
-			ImGui::GetIO().MousePos.x = pos.x();
-			ImGui::GetIO().MousePos.y = pos.y();
+			ImGui::GetIO().MousePos.x = pos.x;
+			ImGui::GetIO().MousePos.y = pos.y;
 		}
 
 		//ImGui::Begin("ImGui Layer");

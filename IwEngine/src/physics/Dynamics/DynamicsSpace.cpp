@@ -134,6 +134,10 @@ namespace Physics {
 		TrySetGravity();
 	}
 
+	const std::vector<VelocityConstraint*>& DynamicsSpace::VelocityConstraints() const {
+		return m_constraints;
+	}
+
 	void DynamicsSpace::TrySetGravity() {
 		for (CollisionObject* object : m_objects) {
 			if (!object->IsDynamic()) continue;

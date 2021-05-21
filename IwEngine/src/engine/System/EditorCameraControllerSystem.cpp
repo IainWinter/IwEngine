@@ -7,16 +7,18 @@ namespace iw {
 	EditorCameraControllerSystem::EditorCameraControllerSystem()
 		: SystemBase("Editor Camera Controller")
 		, speed(5.0f)
-		, camera(new PerspectiveCamera(1.7f, 1.777f, 0.01f, 1000.0f))
+		, camera(nullptr)
+		, cameraTransform(nullptr)
+		, active(true)
 		, movement()
 		, rotation()
 	{}
 
 	int EditorCameraControllerSystem::Initialize() {
-		iw::Entity entity = Space->CreateEntity<Transform, EditorCameraController>();
+		iw::Entity entity = Space->CreateEntity<Transform, PerspectiveCamera>();
 
 		cameraTransform = entity.Set<Transform>(glm::vec3(0, 10, -30));
-		                  entity.Set<EditorCameraController>(camera);
+		camera          = entity.Set<PerspectiveCamera>(1.7f, 1.777f, 0.01f, 1000.0f);
 
 		camera->SetTrans(cameraTransform);
 

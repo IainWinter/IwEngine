@@ -2,12 +2,16 @@
 
 #include "iw/engine/Core.h"
 #include "iw/engine/System.h"
-#include "iw/engine/Components/EditorCameraController.h"
 
 namespace iw {
 namespace Editor {
+	struct CameraController {
+		virtual Camera* GetCamera() = 0;
+	};
+
 	class EditorCameraControllerSystem
 		: public SystemBase
+		, public CameraController
 	{
 	private:
 		glm::vec3 movement;
@@ -15,7 +19,7 @@ namespace Editor {
 		float speed;
 		bool active;
 
-		Camera* camera;
+		Camera* camera; // Creates but doesnt own? idk if the system should delete this or not
 		iw::Transform* cameraTransform;
 
 	public:
@@ -33,7 +37,7 @@ namespace Editor {
 		bool On(MouseButtonEvent& e) override;
 		bool On(MouseWheelEvent& e) override;
 
-		Camera* GetCamera() {
+		Camera* GetCamera() override {
 			return camera;
 		}
 	};

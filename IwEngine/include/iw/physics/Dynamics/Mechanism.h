@@ -43,7 +43,7 @@ namespace iw {
 		matrix P; // saved impluse
 
 		matrix E; // position error
-		float biasStrength = .01f; // strength of position correction
+		float biasStrength = .1f; // strength of position correction
 
 		VelocityConstraint(
 			Rigidbody* a,
@@ -77,7 +77,7 @@ namespace iw {
 				y.set(1, 1);
 				z.set(2, 1);
 			
-				matrix invInrtLocal = matrix(3, 3, r->InvMass);
+				matrix invInrtLocal = from_glm(r->Inertia);
 			
 				matrix X = transformation * x;
 				matrix Y = transformation * y;
@@ -95,7 +95,7 @@ namespace iw {
 				W.set(i + 1,  r->InvMass);             // |     1/mass                       |
 				W.set(i + 2,  r->InvMass);             // |         1/mass                   |
 				W.set(i + 3,  invInrtWorld.get(0, 0)); // |              [                 ] |
-				W.set(i + 4,  invInrtWorld.get(1, 2)); // |              | inertial tensor | |
+				W.set(i + 4,  invInrtWorld.get(1, 1)); // |              | inertial tensor | |
 				W.set(i + 5,  invInrtWorld.get(2, 2)); // [              [  (world space)  ] ]
 
 				r = B;
@@ -139,9 +139,9 @@ namespace iw {
 			if ( A->IsAxisLocked.y && !B->IsAxisLocked.y) { impluse.get(7) -= impluse.get(1); impluse.get(1) = 0; }
 			if ( A->IsAxisLocked.z && !B->IsAxisLocked.z) { impluse.get(8) -= impluse.get(2); impluse.get(2) = 0; }
 
-			if (!A->IsAxisLocked.x &&  B->IsAxisLocked.x) { impluse.get(1) -= impluse.get(6); impluse.get(6) = 0; }
-			if (!A->IsAxisLocked.y &&  B->IsAxisLocked.y) { impluse.get(2) -= impluse.get(7); impluse.get(7) = 0; }
-			if (!A->IsAxisLocked.z &&  B->IsAxisLocked.z) { impluse.get(3) -= impluse.get(8); impluse.get(8) = 0; }
+			if (!A->IsAxisLocked.x &&  B->IsAxisLocked.x) { impluse.get(1) += impluse.get(6); impluse.get(6) = 0; }
+			if (!A->IsAxisLocked.y &&  B->IsAxisLocked.y) { impluse.get(2) += impluse.get(7); impluse.get(7) = 0; }
+			if (!A->IsAxisLocked.z &&  B->IsAxisLocked.z) { impluse.get(3) += impluse.get(8); impluse.get(8) = 0; }
 
 			Rigidbody* r = A;
 			for (size_t i = 0; i < 12; i += 6) {
@@ -152,8 +152,8 @@ namespace iw {
 				r->AngularVelocity.y += impluse.get(i + 4);
 				r->AngularVelocity.z += impluse.get(i + 5);
 
-				//r->       Velocity *= 1 - dt;
-				//r->AngularVelocity *= 1 - dt;
+				//r->Velocity        *= 0.98f;
+				//r->AngularVelocity *= 0.98f;
 
 				r = B;
 			}

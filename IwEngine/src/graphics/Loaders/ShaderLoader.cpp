@@ -51,7 +51,7 @@ namespace Graphics {
 				}
 
 				LOG_INFO << "\tGetting " << name << " shader source from " << include;
-				code = iw::ReadFile("assets/" + include);
+				code = iw::ReadFile(m_asset.RootPath() + include);
 			}
 
 			else {
@@ -69,7 +69,7 @@ namespace Graphics {
 				std::string incldue = code.substr(offset, start - offset - 1);
 
 				code.erase(j - 1, start - j);
-				code.insert(j, iw::ReadFile("assets/" + incldue));
+				code.insert(j, iw::ReadFile(m_asset.RootPath() + incldue));
 
 				j = code.find("#include", start);
 				

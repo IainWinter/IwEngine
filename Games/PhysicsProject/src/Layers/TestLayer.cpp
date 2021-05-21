@@ -30,6 +30,8 @@
 #include "glm/gtc/random.hpp"
 #include "glm/gtx/matrix_cross_product.hpp"
 
+//#include "iw/reflection/serialization/JsonSerializer.h"
+
 namespace iw {
 	struct MeshComponents {
 		Transform* Transform;
@@ -83,7 +85,7 @@ namespace iw {
 		mesh->SetMaterial(REF<Material>(shader));
 
 		mesh->Material()->Set("albedo", glm::vec4(
-			glm::ballRand(1.f),
+			glm::ballRand(.5f) + glm::vec3(.5f),
 			1.0f)
 		);
 
@@ -178,7 +180,7 @@ namespace iw {
 		{
 			Ground = Space->CreateEntity<Transform, Mesh, PlaneCollider, CollisionObject>();
 
-			Transform*       trans = Ground.Set<Transform>(glm::vec3(0, -2, 0), glm::vec3(22));
+			Transform*       trans = Ground.Set<Transform>(glm::vec3(0, -2, 0), glm::vec3(22)); // for project idk why if this isnt here the lights break
 			Mesh*            mesh  = Ground.Set<Mesh>(plane->MakeInstance());
 			PlaneCollider*   col   = Ground.Set<PlaneCollider>(glm::vec3(0, 1, 0), 0);
 			CollisionObject* obj   = Ground.Set<CollisionObject>();
@@ -256,39 +258,123 @@ namespace iw {
 
 		//iw::Mechanism* mechanism = new iw::Mechanism();
 
-		Entity a = SpawnCube(glm::vec3(.2));
-		Entity b = SpawnCube(glm::vec3(2));
-		//Entity c = SpawnCube(glm::vec3(2));
-		//Entity d = SpawnCube(glm::vec3(2));
-
-		//a.Find<iw::Rigidbody>()->SetCol(nullptr);
-		//a.RemoveComponent<iw::MeshCollider>();
-
-		VelocityConstraint* ab = new BallInSocketConstraint(
-			a.Find<iw::Rigidbody>(),
-			b.Find<iw::Rigidbody>(),
-			from_glm(glm::vec3( 0)), 
-			from_glm(glm::vec3(-1))
-		);
+		int demo = 1;
+		if (demo == 0)
+		{
+			Entity a = SpawnCube(glm::vec3(.2));
+			Entity b = SpawnCube(glm::vec3(2));
+			Entity c = SpawnCube(glm::vec3(2));
 		
-		//VelocityConstraint* bc = new BallInSocketConstraint(
-		//	b.Find<iw::Rigidbody>(),
-		//	c.Find<iw::Rigidbody>(),
-		//	from_glm(glm::vec3( 1)), 
-		//	from_glm(glm::vec3(-1))
-		//);
+			Entity d = SpawnCube(glm::vec3(2));
+			Entity e = SpawnCube(glm::vec3(2));
+			Entity f = SpawnCube(glm::vec3(2));
+			Entity g = SpawnCube(glm::vec3(2));
 
-		//VelocityConstraint* bd = new BallInSocketConstraint(
-		//	b.Find<iw::Rigidbody>(),
-		//	d.Find<iw::Rigidbody>(),
-		//	from_glm(glm::vec3(-1, 1, -1)),
-		//	from_glm(glm::vec3(-1))
-		//);
+			VelocityConstraint* ab = new BallInSocketConstraint(
+				a.Find<iw::Rigidbody>(),
+				b.Find<iw::Rigidbody>(),
+				from_glm(glm::vec3( 0)), 
+				from_glm(glm::vec3(-1))
+			);
 
-		Physics->AddConstraint(ab);
-		//Physics->AddConstraint(bc);
-		//Physics->AddConstraint(bd);
+			a.Find<iw::Rigidbody>()->IsAxisLocked = glm::vec3(1);
+			a.Find<iw::Rigidbody>()->AxisLock     = glm::vec3(0, 10, 0);
 		
+			VelocityConstraint* bc = new BallInSocketConstraint(
+				b.Find<iw::Rigidbody>(),
+				c.Find<iw::Rigidbody>(),
+				from_glm(glm::vec3( 1)), 
+				from_glm(glm::vec3(-1))
+			);
+
+			VelocityConstraint* cd = new BallInSocketConstraint(
+				c.Find<iw::Rigidbody>(),
+				d.Find<iw::Rigidbody>(),
+				from_glm(glm::vec3(1)),
+				from_glm(glm::vec3(-1))
+			);
+
+			VelocityConstraint* de = new BallInSocketConstraint(
+				d.Find<iw::Rigidbody>(),
+				e.Find<iw::Rigidbody>(),
+				from_glm(glm::vec3(1)),
+				from_glm(glm::vec3(-1))
+			);
+
+			VelocityConstraint* ef = new BallInSocketConstraint(
+				e.Find<iw::Rigidbody>(),
+				f.Find<iw::Rigidbody>(),
+				from_glm(glm::vec3(1)),
+				from_glm(glm::vec3(-1))
+			);
+
+			VelocityConstraint* fg = new BallInSocketConstraint(
+				f.Find<iw::Rigidbody>(),
+				g.Find<iw::Rigidbody>(),
+				from_glm(glm::vec3(1)),
+				from_glm(glm::vec3(-1))
+			);
+
+			Physics->AddConstraint(ab);
+			Physics->AddConstraint(bc);
+			Physics->AddConstraint(cd);
+			Physics->AddConstraint(de);
+			Physics->AddConstraint(ef);
+			Physics->AddConstraint(fg);
+
+			Ground.Find<iw::CollisionObject>()->Trans().Position.y = -200;
+
+			Physics->SetGravity(glm::vec3(0, -9.81f, 0));
+		}
+		
+		else
+		if (demo == 1)
+		{
+			Entity a = SpawnCube(glm::vec3(.5, .5, 5));
+			Entity b = SpawnCube(glm::vec3(2));
+			Entity c = SpawnCube(glm::vec3(.5, .5, 5));
+			Entity d = SpawnCube(glm::vec3(2));
+
+			VelocityConstraint* ab = new BallInSocketConstraint(
+				a.Find<iw::Rigidbody>(),
+				b.Find<iw::Rigidbody>(),
+				from_glm(glm::vec3( 1, 1, -1)), 
+				from_glm(glm::vec3(-1, 1, 1))
+			);
+
+			VelocityConstraint* bc = new BallInSocketConstraint(
+				b.Find<iw::Rigidbody>(),
+				c.Find<iw::Rigidbody>(),
+				from_glm(glm::vec3( 1)), 
+				from_glm(glm::vec3(-1, 1, -1))
+			);
+
+			VelocityConstraint* cd = new BallInSocketConstraint(
+				c.Find<iw::Rigidbody>(),
+				d.Find<iw::Rigidbody>(),
+				from_glm(glm::vec3(-1, 1, 1)),
+				from_glm(glm::vec3(1, 1, -1))
+			);
+
+			VelocityConstraint* da = new BallInSocketConstraint(
+				d.Find<iw::Rigidbody>(),
+				a.Find<iw::Rigidbody>(),
+				from_glm(glm::vec3(-1, 1, -1)),
+				from_glm(glm::vec3(1))
+			);
+
+			Physics->AddConstraint(ab);
+			Physics->AddConstraint(bc);
+			Physics->AddConstraint(cd);
+			Physics->AddConstraint(da);
+
+			b.Find<iw::Rigidbody>()->Gravity.y = -10;
+			d.Find<iw::Rigidbody>()->Gravity.y = 5;
+
+			Physics->AddSolver(new ImpulseSolver());
+			Physics->AddSolver(new SmoothPositionSolver());
+		}
+
 		//Constraint* bc = new VelocityConstraint(glm::vec3(-1), glm::vec3(-1));
 		//Constraint* cd = new VelocityConstraint(glm::vec3(-1), glm::vec3(-1));
 		//Constraint* da = new VelocityConstraint(glm::vec3(-1), glm::vec3(-1));
@@ -332,51 +418,57 @@ namespace iw {
 	}
 
 	void TestLayer::CorrectVelocity(Entity entity, Entity target, glm::vec3 offset) {
-		using namespace glm;
+		//using namespace glm;
 
-		Transform targetTrans = target.Find<Rigidbody>()->Trans();
+		//Transform targetTrans = target.Find<Rigidbody>()->Trans();
 
-		vec3& targetPos = targetTrans.Position + targetTrans.Rotation * (targetTrans.Scale * offset);
+		//vec3& targetPos = targetTrans.Position + targetTrans.Rotation * (targetTrans.Scale * offset);
 
-		float beta = .1f;
-		float dt = iw::FixedTime();
-		
-		Transform* transform = &entity.Find<iw::Rigidbody>()->Trans();
-		Rigidbody* rigidbody =  entity.Find<iw::Rigidbody>();
+		//float beta = .1f;
+		//float dt = iw::FixedTime();
+		//
+		//Transform* transform = &entity.Find<iw::Rigidbody>()->Trans();
+		//Rigidbody* rigidbody =  entity.Find<iw::Rigidbody>();
 
-		vec3 r = transform->Rotation * (transform->Scale * vec3(1));
+		//vec3 r = transform->Rotation * (transform->Scale * vec3(1));
 
-		vec3 cornerPos = transform->Position + r;
-		//TestDebug.Find<iw::Rigidbody>()->Trans().Position = cornerPos;
+		//vec3 cornerPos = transform->Position + r;
+		////TestDebug.Find<iw::Rigidbody>()->Trans().Position = cornerPos;
 
-		mat3 invMass      = mat3(rigidbody->InvMass);
-		mat3 invInrtLocal = mat3(rigidbody->InvMass);
+		//mat3 invMass      = mat3(rigidbody->InvMass);
+		//mat3 invInrtLocal = mat3(rigidbody->InvMass);
 
-		vec4 x = vec4(1.0f, 0.0f, 0.0f, 1.0f) * transform->WorldTransformation();
-		vec4 y = vec4(0.0f, 1.0f, 0.0f, 1.0f) * transform->WorldTransformation();
-		vec4 z = vec4(0.0f, 0.0f, 1.0f, 1.0f) * transform->WorldTransformation();
+		//vec4 x = vec4(1.0f, 0.0f, 0.0f, 1.0f) * transform->WorldTransformation();
+		//vec4 y = vec4(0.0f, 1.0f, 0.0f, 1.0f) * transform->WorldTransformation();
+		//vec4 z = vec4(0.0f, 0.0f, 1.0f, 1.0f) * transform->WorldTransformation();
 
-		mat3 world2Local = transpose(mat3(
-			vec3(x.x, x.y, x.z),
-			vec3(y.x, y.y, y.z),
-			vec3(z.x, z.y, z.z)
-		));
+		//mat3 world2Local = transpose(mat3(
+		//	vec3(x.x, x.y, x.z),
+		//	vec3(y.x, y.y, y.z),
+		//	vec3(z.x, z.y, z.z)
+		//));
 
-		mat3 invInrtWorld = transpose(world2Local) * invInrtLocal * world2Local;
+		//mat3 invInrtWorld = transpose(world2Local) * invInrtLocal * world2Local;
 
-		vec3 c = cornerPos - targetPos;
-		vec3 v = rigidbody->Velocity + cross(rigidbody->AngularVelocity, r);
+		//vec3 c = cornerPos - targetPos;
+		//vec3 v = rigidbody->Velocity + cross(rigidbody->AngularVelocity, r);
 
-		mat3 s = matrixCross3(-r);
-		mat3 k = invMass + s * invInrtWorld * transpose(s);
-		vec3 lambda = inverse(k) * -(v + c * beta / dt);
+		//mat3 s = matrixCross3(-r);
+		//mat3 k = invMass + s * invInrtWorld * transpose(s);
+		//vec3 lambda = inverse(k) * -(v + c * beta / dt);
 
-		rigidbody->Velocity += invMass * lambda;
-		rigidbody->Velocity *= 0.98f;
+		//rigidbody->Velocity += invMass * lambda;
+		//rigidbody->Velocity *= 0.98f;
 
-		rigidbody->AngularVelocity += (invInrtWorld * transpose(s)) * lambda;
-		rigidbody->AngularVelocity *= .98f;
+		//rigidbody->AngularVelocity += (invInrtWorld * transpose(s)) * lambda;
+		//rigidbody->AngularVelocity *= .98f;
 	}
+
+
+	std::vector<float> angularEnergy;
+	std::vector<float> linearEnergy;
+	std::vector<float> totalEnergy;
+	std::vector<float> totalError;
 
 	void TestLayer::FixedUpdate() {
 		//Transform* transform = &A.Find<iw::Rigidbody>()->Trans();
@@ -407,11 +499,59 @@ namespace iw {
 		//	CorrectVelocity(Box3, Box2, glm::vec3(-1, -1, -1));
 		//	CorrectVelocity(Box4, Box3, glm::vec3(-1, -1, -1));
 		//}
+
+		float linear  = 0;
+		float angular = 0;
+
+		float error = 0;
+
+		Space->Query<iw::Rigidbody>().Each([&](
+			EntityHandle e,
+			iw::Rigidbody* r)
+		{
+			linear  += 1 / 2.0f * r->Mass() * glm::dot(r->Velocity, r->Velocity);
+			angular += 1 / 2.0f * glm::dot(r->Inertia * r->AngularVelocity, r->Inertia * r->AngularVelocity);
+		});
+
+		for (iw::VelocityConstraint* constraint : Physics->VelocityConstraints()) {
+			error += iw::length((constraint->E * (iw::FixedTime() / constraint->biasStrength)).col_begin(0));
+		}
+
+		linearEnergy.push_back(linear);
+		angularEnergy.push_back(angular);
+		totalEnergy.push_back(linear + angular);
+		totalError.push_back(error);
+
+
+		//if (totalError.size() > 333) {
+		//	linearEnergy.erase(linearEnergy.begin());
+		//	angularEnergy.erase(angularEnergy.begin());
+		//	totalEnergy.erase(totalEnergy.begin());
+		//	totalError.erase(totalError.begin());
+		//}
 	}
 
 	float thresh = .5f;
 
+
+
 	void TestLayer::ImGui() {
+
+		ImGui::Begin("Results");
+
+		ImGui::PlotLines("Total error", totalError.data(), totalError.size(), 0, 0, FLT_MAX, FLT_MAX, ImVec2(0, 100));
+		ImGui::PlotLines("Linear  kinetic energy", linearEnergy.data(), linearEnergy.size(), 0, 0, FLT_MAX, FLT_MAX, ImVec2(0, 100));
+		ImGui::PlotLines("Angular kinetic energy", angularEnergy.data(), angularEnergy.size(), 0, 0, FLT_MAX, FLT_MAX, ImVec2(0, 100));
+		ImGui::PlotLines("Total   kinetic energy", totalEnergy.data(), totalEnergy.size(), 0, 0, FLT_MAX, FLT_MAX, ImVec2(0, 100));
+
+		if (ImGui::Button("Save data")) {
+			for (int i = 0; i < totalError.size(); i++) {
+				LOG_INFO << totalError.at(i) << "," << totalEnergy.at(i);
+			}
+		}
+
+		ImGui::End();
+
 		ImGui::Begin("Test");
 
 		for (PointLight* light : MainScene->PointLights()) {
@@ -442,7 +582,7 @@ namespace iw {
 				auto [transform, mesh] = entity.Components.Tie<MeshComponents>();
 
 				mesh->Material()->Set("albedo", glm::vec4(
-					glm::ballRand(1.f),
+					glm::ballRand(.5f) + glm::vec3(.5f),
 					1.0f)
 				);
 

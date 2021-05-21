@@ -468,19 +468,19 @@ namespace helpers {
 		return data;
 	}
 
-	MeshData* MakeCylinder(
-		const MeshDescription& description,
-		unsigned latCount,
-		unsigned lonCount,
-		float topRadius,
-		float botRadius)
-	{
-		glm::vec4* circle = helpers::_MakeCircleArray(lonCount);
+	//MeshData* MakeCylinder(
+	//	const MeshDescription& description,
+	//	unsigned latCount,
+	//	unsigned lonCount,
+	//	float topRadius,
+	//	float botRadius)
+	//{
+	//	glm::vec4* circle = helpers::_MakeCircleArray(lonCount);
 
-		assert(false);
+	//	assert(false);
 
-		return nullptr;
-	}
+	//	return nullptr;
+	//}
 
 	MeshData* MakeTetrahedron(
 		const MeshDescription& description,
@@ -717,6 +717,56 @@ namespace helpers {
 		if (description.HasBuffer(bName::NORMAL)) {
 			data->GenNormals();
 		}
+
+		delete[] verts;
+		delete[] uvs;
+		delete[] indices;
+
+		return data;
+	}
+
+	MeshData* MakeLine(
+		const MeshDescription& description,
+		unsigned resolution,
+		std::function<vec3(int n, int r)> func)
+	{
+		if (!description.HasBuffer(bName::POSITION)) {
+			LOG_WARNING << "Cannot generate an Line for a mesh description that does not contain at least a POSITION buffer!";
+			return nullptr;
+		}
+
+		unsigned indexCount = 2 * resolution;
+		unsigned vertCount  = resolution;
+
+		unsigned* indices = new unsigned[indexCount];
+		glm::vec3*  verts = new glm::vec3[vertCount];
+		glm::vec2*  uvs   = nullptr;
+
+		if (description.HasBuffer(bName::UV)) {
+			uvs = new glm::vec2[vertCount];
+		}
+
+		for (unsigned i = 0; i < resolution; i++)
+		{
+			verts[i] = to_glm(func(i, resolution));
+				
+			if (uvs) uvs[i] = glm::vec2(float(i) / resolution, 0);
+		}
+
+		unsigned i = 0, v = 0;
+		while (v < resolution)
+		{
+			indices[i++] = v;
+			indices[i++] = v + 1;
+
+			v++;
+		}
+
+		MeshData* data = new MeshData(description);
+
+		         data->SetIndexData(                  indexCount, indices);
+		         data->SetBufferData(bName::POSITION, vertCount, verts);
+		if (uvs) data->SetBufferData(bName::UV,       vertCount, uvs);
 
 		delete[] verts;
 		delete[] uvs;

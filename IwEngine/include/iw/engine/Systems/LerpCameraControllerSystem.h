@@ -2,18 +2,17 @@
 
 #include "iw/engine/Core.h"
 #include "iw/engine/System.h"
-#include "iw/engine/Components/CameraController.h"
 #include "iw/graphics/Scene.h"
 
 namespace iw {
 namespace Engine {
 	class LerpCameraControllerSystem
-		: public System<Transform, CameraController>
+		: public System<Transform, Camera*>
 	{
 	public:
 		struct Components {
-			Transform*        Transform;
-			CameraController* Controller;
+			Transform* Transform;
+			Camera**    Camera;
 		};
 	private:
 		bool locked;

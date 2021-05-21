@@ -35,7 +35,7 @@ namespace Engine {
 		Input    = REF<InputManager>(Bus);
 		Console  = REF<iw::Console>(make_getback(&Application::HandleCommand, this));
 		Physics  = REF<DynamicsSpace>();
-		Audio    = REF<AudioSpaceStudio>("assets/sounds/");
+		Audio    = REF<AudioSpaceStudio>();
 		Task     = REF<thread_pool>(std::thread::hardware_concurrency());
 	}
 
@@ -46,6 +46,9 @@ namespace Engine {
 	int Application::Initialize(
 		InitOptions& options)
 	{
+		Asset->SetRootPath(options.AssetRootPath);
+		Audio->SetRootDir(Asset->RootPath() + "/audio");
+
 		//bool console = true; // maybe should be in Init?
 		//if (console) {
 			AllocConsole();

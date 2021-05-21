@@ -247,6 +247,7 @@ namespace Graphics {
 		float aspect,
 		float zNear,
 		float zFar)
+		: Camera()
 	{
 		SetProjection(fov, aspect, zNear, zFar);
 	}

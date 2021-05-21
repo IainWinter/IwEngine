@@ -31,13 +31,13 @@ namespace Graphics {
 
 	// Cylinder / pipe
 
-	IWGRAPHICS_API
-	MeshData* MakeCylinder(
-		const MeshDescription& description,
-		unsigned latCount = 5,
-		unsigned lonCount = 5,
-		float topRadius = 1,
-		float botRadius = 1);
+	//IWGRAPHICS_API
+	//MeshData* MakeCylinder(
+	//	const MeshDescription& description,
+	//	unsigned latCount = 5,
+	//	unsigned lonCount = 5,
+	//	float topRadius = 1,
+	//	float botRadius = 1);
 
 	//Tris
 
@@ -60,6 +60,15 @@ namespace Graphics {
 	MeshData* MakeCube(
 		const MeshDescription& description, // can only return a default cube
 		unsigned resolution = 0); // resolution doesnt do anything rn
+
+	// Line segment
+
+	IWGRAPHICS_API
+	MeshData* MakeLine(
+		const MeshDescription& description,
+		unsigned resolution = 2,
+		std::function<vec3(int n, int r)> func
+			= [](int n, int r) { return vec3(-r / 2.0f + n, 0, 0); });
 
 	// Rock
 

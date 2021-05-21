@@ -40,6 +40,9 @@ namespace Physics {
 		IWPHYSICS_API
 		void SetGravity(
 			const glm::vec3& gravity);
+
+		IWPHYSICS_API
+		const std::vector<VelocityConstraint*>& VelocityConstraints() const;
 	private:
 		void TrySetGravity();
 		void TryApplyGravity();

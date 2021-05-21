@@ -1,6 +1,8 @@
-iwengdir  = path.getabsolute("../_export")
-gamedir  = path.getabsolute("IwSandbox") --path.getabsolute("PhysicsProject") --path.getabsolute("SpaceSand")
 
+name = "PixelArt"
+
+iwengdir  = path.getabsolute("../_export")
+gamedir  = path.getabsolute(name)--path.getabsolute("IwSandbox") --path.getabsolute("PhysicsProject") --path.getabsolute("SpaceSand")
 
 cfgname = "%{cfg.buildcfg}.%{cfg.system}.%{cfg.architecture}"
 bindir  = "/bin/" .. cfgname
@@ -9,14 +11,15 @@ blddir  = "/build"
 incdir  = "/include"
 srcdir  = "/src"
 
-workspace "wGames"
+workspace (name)
 	configurations { "Debug", "Release" }
-	platforms { "x32", "x64" }
+	platforms { "x64" }
 	startproject "SandGame"
 	location (gamedir .. blddir)
 
+	project (name)
 	--project "Physics project"
-	project "Iw Sandbox"
+	--project "Iw Sandbox"
 	--project "SpaceSand"
 		--kind "SharedLib"
 		kind "WindowedApp"
@@ -56,7 +59,7 @@ workspace "wGames"
 			"ImGui",
 			"GLEW",
 			"opengl32.lib",
-			"wSand"
+			--"wSand"
 		}
 
 		prebuildcommands {

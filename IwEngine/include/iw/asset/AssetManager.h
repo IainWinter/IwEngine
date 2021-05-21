@@ -16,6 +16,7 @@ namespace Asset {
 	class AssetManager {
 	private:
 		std::unordered_map<size_t, IAssetLoader*> m_loaders;
+		std::string m_rootPath;
 		//iw::blocking_queue<std::pair<size_t, std::string>> m_toLoad;
 		//std::vector<std::thread> m_threads;
 
@@ -28,13 +29,20 @@ namespace Asset {
 		//}
 
 	public:
-		AssetManager() {}
+		AssetManager(
+			std::string rootPath = ""
+		)
+			: m_rootPath(rootPath)
+		{}
 
 		~AssetManager() {
 			for (auto pair : m_loaders) {
 				delete pair.second;
 			}
 		}
+
+		std::string& RootPath() { return m_rootPath; }
+		void SetRootPath(const std::string& rootPath) { m_rootPath = rootPath; }
 
 		template<
 			typename _l,
@@ -64,7 +72,7 @@ namespace Asset {
 			auto itr = m_loaders.find(typeid(_a).hash_code());
 			if (itr != m_loaders.end()) {
 				if (filepath.find_first_of(':') > 3) { // only if not A:\ or AA:\ or AAA:\ 
-					filepath = "assets/" + filepath;
+					filepath = m_rootPath + filepath;
 				}
 
 				return std::static_pointer_cast<_a, void>(itr->second->Load(filepath));

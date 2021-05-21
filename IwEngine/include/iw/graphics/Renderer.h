@@ -136,7 +136,7 @@ namespace Graphics {
 
 		// binds buffers to shader and initializes it. TO BE PRIVATED
 		IWGRAPHICS_API
-		void InitShader(
+		ref<Shader>& InitShader(
 			ref<Shader>& shader,
 			int bindings = 0);
 

@@ -46,8 +46,13 @@ namespace Physics {
 			rVel = bVel - aVel;
 			nSpd = glm::dot(rVel, manifold.Normal);
 
-			glm::vec3 tangent = glm::normalize(rVel - nSpd * manifold.Normal);
-			scalar      fVel = glm::dot(rVel, tangent);
+			glm::vec3 tangent = rVel - nSpd * manifold.Normal;
+
+			if (glm::length(tangent) > 0.0001f) { // safe normalize
+				tangent = glm::normalize(tangent);
+			}
+
+			scalar fVel = glm::dot(rVel, tangent);
 
 			scalar aSF = aBody ? aBody->StaticFriction  : 0.0f;
 			scalar bSF = bBody ? bBody->StaticFriction  : 0.0f;
@@ -63,7 +68,7 @@ namespace Physics {
 			}
 
 			else {
-				mu = glm::vec2(aDF, bDF).length();
+				mu = glm::length(glm::vec2(aDF, bDF));
 				friction = -j * tangent * mu;
 			}
 
