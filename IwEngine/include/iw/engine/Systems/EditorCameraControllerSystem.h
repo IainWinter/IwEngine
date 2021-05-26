@@ -6,6 +6,9 @@
 namespace iw {
 namespace Editor {
 	struct CameraController {
+		bool Active = true;
+		bool MakeOrthoOnInit = false;
+
 		virtual Camera* GetCamera() = 0;
 	};
 
@@ -17,7 +20,6 @@ namespace Editor {
 		glm::vec3 movement;
 		glm::vec2 rotation;
 		float speed;
-		bool active;
 
 		Camera* camera; // Creates but doesnt own? idk if the system should delete this or not
 		iw::Transform* cameraTransform;

@@ -9,16 +9,20 @@ namespace iw {
 		, speed(5.0f)
 		, camera(nullptr)
 		, cameraTransform(nullptr)
-		, active(true)
 		, movement()
 		, rotation()
 	{}
 
 	int EditorCameraControllerSystem::Initialize() {
-		iw::Entity entity = Space->CreateEntity<Transform, PerspectiveCamera>();
 
-		cameraTransform = entity.Set<Transform>(glm::vec3(0, 10, -30));
-		camera          = entity.Set<PerspectiveCamera>(1.7f, 1.777f, 0.01f, 1000.0f);
+		iw::Entity entity = Space->CreateEntity<Transform>();
+
+		float aspect = float(Renderer->Width()) / Renderer->Height();
+
+		if (MakeOrthoOnInit) camera = entity.Add<OrthographicCamera>(32 * aspect, 32, 0, 100);
+		else                 camera = entity.Add<PerspectiveCamera> (1.7f, 1.777f, 0.01f, 1000.0f);
+
+		cameraTransform = entity.Set<Transform>(glm::vec3(0, 10, 10), glm::vec3(1), glm::angleAxis(iw::Pi, glm::vec3(0, 1, 0)));
 
 		camera->SetTrans(cameraTransform);
 
@@ -27,7 +31,7 @@ namespace iw {
 
 	void EditorCameraControllerSystem::Update()
 	{
-		if (!active) return;
+		if (!Active) return;
 
 		if (glm::length(movement) != 0) {
 			glm::vec3 delta = glm::vec3();
@@ -114,7 +118,7 @@ namespace iw {
 		if (e.Device == DeviceType::RAW_MOUSE) {
 			switch (e.Button) {
 				case RMOUSE: speed  = e.State ? 50.0f : 5.0f; break;
-				case MMOUSE: active = e.State;                break;
+				case MMOUSE: Active = e.State;                break;
 			}
 		}
 

@@ -5,6 +5,7 @@
 
 // default includes
 #include "iw/engine/Time.h"
+#include "iw/engine/ComponentHelper.h"
 
 #include <queue>
 #include <string>
@@ -103,9 +104,6 @@ namespace Engine {
 			return m_name;
 		}
 	protected:
-		// Tries to find entities with CollisionObject / Rigidbody components.
-		// Returns true if there were no entities.
-		// if _t2 is specified, checks if that component exists on entity 2
 		template<
 			typename _t1,
 			typename _t2 = void>
@@ -114,44 +112,13 @@ namespace Engine {
 			iw::Entity& e1,
 			iw::Entity& e2)
 		{
-			iw::Entity a = Space->FindEntity(manifold.ObjA);
-			iw::Entity b = Space->FindEntity(manifold.ObjB);
-
-			if (!a) a = Space->FindEntity<iw::Rigidbody>(manifold.ObjA);
-			if (!b) b = Space->FindEntity<iw::Rigidbody>(manifold.ObjB);
-
-			if (!a || !b) return true; // no physics components
-
-			bool a1 = a.Has<_t1>();
-			bool b1 = b.Has<_t1>();
-
-			if (!a1 && !b1) return true; // no t1
-
-			if (b1) { // b has t1
-				iw::Entity t = a;
-				a = b;
-				b = t;
-			}
-
-			if constexpr (std::is_same_v<_t2, void> == false) {
-				if (!b.Has<_t2>()) { // no t2
-					return true;
-				}
-			}
-
-			e1 = a;
-			e2 = b;
-
-			return false;
+			return iw::GetEntitiesFromManifold(Space, manifold, e1, e2);
 		}
 
 		inline CollisionObject* GetPhysicsComponent(
 			iw::EntityHandle e)
 		{
-			CollisionObject* c = Space->FindComponent<CollisionObject>(e);
-			if (!c) c = Space->FindComponent<Rigidbody>(e);
-
-			return c;
+			return iw::GetPhysicsComponent(Space, e);
 		}
 
 		inline EventSequence CreateSequence() {
@@ -207,7 +174,7 @@ namespace Engine {
 			// Execute threads
 			FixedUpdate(eca);
 		}
-	};	
+	};
 }
 
 	using namespace Engine;
