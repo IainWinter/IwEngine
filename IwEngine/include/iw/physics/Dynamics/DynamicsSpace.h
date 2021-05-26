@@ -15,7 +15,7 @@ namespace Physics {
 		glm::vec3 m_gravity;
 
 		//std::vector<Mechanism*> m_mechanisms;
-		std::vector<VelocityConstraint*> m_constraints;
+		std::vector<Constraint*> m_constraints;
 
 	public:
 		IWPHYSICS_API
@@ -28,7 +28,7 @@ namespace Physics {
 
 		IWPHYSICS_API
 		virtual void AddConstraint(
-			VelocityConstraint* constraint);
+			Constraint* constraint);
 
 		IWPHYSICS_API
 		virtual void Step(
@@ -42,7 +42,7 @@ namespace Physics {
 			const glm::vec3& gravity);
 
 		IWPHYSICS_API
-		const std::vector<VelocityConstraint*>& VelocityConstraints() const;
+		const std::vector<Constraint*>& Constraints() const;
 	private:
 		void TrySetGravity();
 		void TryApplyGravity();

@@ -20,7 +20,8 @@ namespace iw {
 			, B(b)
 		{}
 
-		virtual void solve(float dt) = 0;
+		virtual void init (float dt) = 0;
+		virtual bool solve(float dt) = 0; // Returns if constraint is solved
 
 		bool contains(Rigidbody* r) {
 			return r == A
@@ -107,7 +108,7 @@ namespace iw {
 			if (P.height == 1) P = vec<3>();
 		}
 
-		void solve(
+		bool solve(
 			float dt) override
 		{
 			vec<12> v0;
@@ -159,6 +160,8 @@ namespace iw {
 			}
 
 			P = lambda;
+
+			return true; // Always 'solved'
 		}
 	};
 
@@ -208,6 +211,8 @@ namespace iw {
 			VelocityConstraint::init(dt);
 		}
 	};
+
+	// should represent an object with a shared K matrix for all constraints, "global solver" i guesss
 
 	//struct Mechanism {
 

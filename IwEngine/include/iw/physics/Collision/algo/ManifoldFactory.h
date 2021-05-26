@@ -13,13 +13,14 @@ namespace Physics {
 namespace algo {
 	// x = col impl
 	// o = col no impl
-	//   = no col
+	// _ = no col
 
-	// ________| Sphere  | Capsule | Plane  | Mesh
-	// Sphere  |    x    |    x    |    x   |   x
-	// Capsule |    x    |    o    |    o   |   o
-	// Plane   |    x    |    o    |        |   o
-	// Mesh    |    o    |    o    |    o   |   x
+	// ________| Sphere  | Capsule | Plane  | Mesh |  Hull
+	// Sphere  |    x    |    x    |    x   |   x  |   o
+	// Capsule |         |    o    |    o   |   o  |   o
+	// Plane   |         |         |    _   |   o  |   o
+	// Mesh    |         |         |        |   x  |   o
+	// Hull    |         |         |        |      |   _?
 
 	IWPHYSICS_API
 	ManifoldPoints TestCollision(
@@ -86,6 +87,14 @@ inline ManifoldPoints TestCollision(
 		const Collider* a, const Transform* ta,
 		const Collider* b, const Transform* tb)
 	{
+		//bool sort = a->Type() > b->Type();
+
+		//const Collider* A = sort ? b : a; // A is least
+		//const Collider* B = sort ? a : b;
+
+		//const Transform* tA = sort ? tb : ta;
+		//const Transform* tB = sort ? ta : tb;
+
 		if (     (a->Type() == ColliderType::MESH  || b->Type() == ColliderType::MESH)
 			&& !(a->Type() == ColliderType::PLANE || b->Type() == ColliderType::PLANE))
 		{

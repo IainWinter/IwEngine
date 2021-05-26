@@ -30,7 +30,7 @@ namespace Physics {
 	//}
 
 	void DynamicsSpace::AddConstraint(
-		VelocityConstraint* constraint)
+		Constraint* constraint)
 	{
 		m_constraints.push_back(constraint);
 	}
@@ -70,13 +70,13 @@ namespace Physics {
 			}
 		}
 
-		for (VelocityConstraint* c : m_constraints) {
+		for (Constraint* c : m_constraints) {
 			c->init(dt);
 		}
 
-		for(int i = 0; i < 10; i++)
-		for (VelocityConstraint* c : m_constraints) {
-			c->solve(dt); // div by iteration count?
+		for(int i = 0; i < 10; i++) // iterate until all are solved?
+		for (Constraint* c : m_constraints) {
+			c->solve(dt); // div by iteration count? // iterate until 'solved'?
 		}
 
 		//for (Mechanism* mech : m_mechanisms) {
@@ -134,7 +134,7 @@ namespace Physics {
 		TrySetGravity();
 	}
 
-	const std::vector<VelocityConstraint*>& DynamicsSpace::VelocityConstraints() const {
+	const std::vector<Constraint*>& DynamicsSpace::Constraints() const {
 		return m_constraints;
 	}
 

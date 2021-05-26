@@ -16,10 +16,22 @@ namespace impl {
 		std::vector<V> m_points;
 
 	public:
-		MeshCollider(std::vector<V> points = {})
+		MeshCollider(
+			std::vector<V> points = {}
+		)
 			: Collider<V>(ColliderType::MESH)
 			, m_points(points)
 		{}
+
+		void AddPoint(const V& p) {
+			m_points.push_back(p);
+		}
+
+		void RemovePoint(const V& p) {
+			m_points.push_back(
+				std::find(m_points.begin(), m_points.end(), p)
+			);
+		}
 
 		static MeshCollider MakeCube() {
 			MeshCollider collider;
