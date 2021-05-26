@@ -119,7 +119,7 @@ namespace common {
 
 	// true = clockwise, false = counter-clockwise
 	inline bool IsClockwise(glm::vec2 a, glm::vec2 b, glm::vec2 c) {
-		return  cross_length(b - a, c - a) > 0;
+		return cross_length(b - a, c - a) < 0; // this was backwards before idk how that worked?
 	}
 
 	inline bool HasPoint(glm::vec2 a, glm::vec2 b, glm::vec2 c, glm::vec2 p) {
@@ -148,8 +148,16 @@ namespace common {
 			working.emplace_back(polygon.at(i), i);
 		}
 
-		while (working.size() >/*=*/ 3) {
-			for (size_t i = 0; i < working.size(); i++) {
+		while (true)
+		{
+			int workingSize = working.size();
+
+			for (size_t i = 0; i < working.size(); i++)
+			{
+				if (working.size() < 3) { // exit
+					goto exit;
+				}
+
 				size_t ia = (i    );
 				size_t ib = (i + 1) % working.size();
 				size_t ic = (i + 2) % working.size();
@@ -175,8 +183,14 @@ namespace common {
 
 				working.erase(working.begin() + ib);
 			}
+
+			if (workingSize == working.size()) {
+				assert(false);
+				break;
+			}
 		}
 
+	exit:
 		return triangles;
 	}
 }
