@@ -14,7 +14,7 @@ srcdir  = "/src"
 workspace (name)
 	configurations { "Debug", "Release" }
 	platforms { "x64" }
-	startproject "SandGame"
+	startproject (name)
 	location (gamedir .. blddir)
 
 	project (name)

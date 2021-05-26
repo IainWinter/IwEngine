@@ -242,7 +242,7 @@ public:
 		float diff = .1;
 		float dt = iw::DeltaTime();
 
-		//FluidCubeStep(cube);
+		FluidCubeStep(cube);
 
 		for (int i = 0; i < cube->size * cube->size; i++) {
 			cube->density[i] = iw::clamp<float>(cube->density[i] * .99f, 0, 1);

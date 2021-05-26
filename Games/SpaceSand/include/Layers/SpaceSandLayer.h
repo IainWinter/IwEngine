@@ -161,7 +161,7 @@ namespace iw {
 
 		iw::Mesh testMesh;
 		iw::ref<iw::RenderTarget> testOutput;
-		iw::vector2 testOutputOffset;
+		z2 testOutputOffset;
 		iw::Mesh testMeshOutputView;
 
 		iw::ref<iw::Font> m_font;
