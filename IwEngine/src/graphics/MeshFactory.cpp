@@ -728,14 +728,14 @@ namespace helpers {
 	MeshData* MakeLine(
 		const MeshDescription& description,
 		unsigned resolution,
-		std::function<vec3(int n, int r)> func)
+		std::function<glm::vec3(int n, int r)> func)
 	{
 		if (!description.HasBuffer(bName::POSITION)) {
 			LOG_WARNING << "Cannot generate an Line for a mesh description that does not contain at least a POSITION buffer!";
 			return nullptr;
 		}
 
-		unsigned indexCount = 2 * resolution;
+		unsigned indexCount = 2 * (resolution - 1);
 		unsigned vertCount  = resolution;
 
 		unsigned* indices = new unsigned[indexCount];
@@ -748,13 +748,13 @@ namespace helpers {
 
 		for (unsigned i = 0; i < resolution; i++)
 		{
-			verts[i] = to_glm(func(i, resolution));
+			verts[i] = func(i, resolution);
 				
 			if (uvs) uvs[i] = glm::vec2(float(i) / resolution, 0);
 		}
 
 		unsigned i = 0, v = 0;
-		while (v < resolution)
+		while (v < resolution - 1)
 		{
 			indices[i++] = v;
 			indices[i++] = v + 1;
@@ -763,6 +763,8 @@ namespace helpers {
 		}
 
 		MeshData* data = new MeshData(description);
+
+		data->SetTopology(iw::SEGMENTS);
 
 		         data->SetIndexData(                  indexCount, indices);
 		         data->SetBufferData(bName::POSITION, vertCount, verts);

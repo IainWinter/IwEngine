@@ -17,7 +17,10 @@ namespace RenderAPI {
 		POINTS = 1,
 		LINES,
 		TRIANGLES,
-		QUADS
+		QUADS,
+
+		SEGMENTS,
+		LOOP
 	};
 
 	enum TextureType {

@@ -67,8 +67,8 @@ namespace Graphics {
 	MeshData* MakeLine(
 		const MeshDescription& description,
 		unsigned resolution = 2,
-		std::function<vec3(int n, int r)> func
-			= [](int n, int r) { return vec3(-r / 2.0f + n, 0, 0); });
+		std::function<glm::vec3(int n, int r)> func
+			= [](int n, int r) { return glm::vec3(n / r * 2 - 1, 0, 0); });
 
 	// Rock
 

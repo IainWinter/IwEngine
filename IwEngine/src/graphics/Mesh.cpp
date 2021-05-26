@@ -236,6 +236,7 @@ namespace detail {
 	void* MeshData::Get(
 		bName name)
 	{
+		m_outdated = true;
 		return GetBuffer(m_description.GetBufferIndex(name)).Ptr();
 	}
 
@@ -252,6 +253,7 @@ namespace detail {
 	}
 
 	unsigned* MeshData::GetIndex() {
+		m_outdated = true;
 		return GetIndexBuffer().Ptr();
 	}
 

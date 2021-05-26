@@ -26,11 +26,16 @@ namespace RenderAPI {
 		ptrdiff_t offset)
 	{
 		GLenum glTopology = 0;
+
 		switch (topology) {
-			case POINTS:    glTopology = GL_POINTS;	   break;
-			case LINES:     glTopology = GL_LINES;     break;
-			case TRIANGLES: glTopology = GL_TRIANGLES; break;
-			case QUADS:     glTopology = GL_QUADS;	   break;
+			case POINTS:    glTopology = GL_POINTS;	    break;
+			case LINES:     glTopology = GL_LINES;      break;
+			case TRIANGLES: glTopology = GL_TRIANGLES;  break;
+			case QUADS:     glTopology = GL_QUADS;	    break;
+
+			case LOOP:      glTopology = GL_LINE_LOOP;  break;
+			case SEGMENTS:  glTopology = GL_LINE_STRIP; break;
+
 			default: return;
 		}
 
