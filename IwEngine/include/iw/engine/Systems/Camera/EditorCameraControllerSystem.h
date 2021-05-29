@@ -2,16 +2,10 @@
 
 #include "iw/engine/Core.h"
 #include "iw/engine/System.h"
+#include "iw/engine/Systems/Camera/CameraController.h"
 
 namespace iw {
 namespace Editor {
-	struct CameraController {
-		bool Active = true;
-		bool MakeOrthoOnInit = false;
-
-		virtual Camera* GetCamera() = 0;
-	};
-
 	class EditorCameraControllerSystem
 		: public SystemBase
 		, public CameraController

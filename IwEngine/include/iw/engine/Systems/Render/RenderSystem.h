@@ -12,6 +12,7 @@ namespace Engine {
 		Scene* m_scene;
 		ref<RenderTarget> m_target;
 		bool m_clear;
+		Color m_clearColor;
 
 		ref<ComponentQuery> m_models;
 		ref<ComponentQuery> m_meshes;
@@ -21,7 +22,8 @@ namespace Engine {
 		RenderSystem(
 			Scene* scene,
 			ref<RenderTarget> target = nullptr,
-			bool clear = false);
+			bool clear = false,
+			Color clearColor = iw::Color(0));
 
 		IWENGINE_API
 		int Initialize() override;

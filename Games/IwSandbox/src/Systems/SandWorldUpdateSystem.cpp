@@ -135,6 +135,22 @@ void SandWorldUpdateSystem::Update() {
 
 	//timer__ = .05f;
 
+	// Remove tiles
+
+	Space->Query<Tile>().Each([&](
+		auto entity,
+		Tile* tile)
+	{
+		for (auto [x, y] : tile->Positions) {
+			x += ceil(tile->X);
+			y += ceil(tile->Y);
+
+			if (m_world.InBounds(x, y)) {
+				// what happens if the cell is already full?
+				m_world.SetCell(x, y, iw::Cell::GetDefault(iw::CellType::EMPTY));
+			}
+		}		
+	});
 
 	Space->Query<Tile>().Each([&](
 		auto entity,
@@ -294,23 +310,6 @@ void SandWorldUpdateSystem::Update() {
 		std::unique_lock lock(mutex);
 		cond.wait(lock, [&]() { return chunkCount == 0; });
 	}
-		
-	// Remove tiles
-
-	Space->Query<Tile>().Each([&](
-		auto entity,
-		Tile* tile)
-	{
-		for (auto [x, y] : tile->Positions) {
-			x += ceil(tile->X);
-			y += ceil(tile->Y);
-
-			if (m_world.InBounds(x, y)) {
-				// what happens if the cell is already full?
-				m_world.SetCell(x, y, iw::Cell::GetDefault(iw::CellType::EMPTY));
-			}
-		}		
-	});
 
 	//UpdateStats(cellUpdateCount, m_world.m_chunks.size());
 

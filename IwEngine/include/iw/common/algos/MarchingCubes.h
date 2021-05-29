@@ -3,6 +3,7 @@
 #include <vector>
 //#include "iw/math/vector2.h"
 #include "glm/vec2.hpp"
+#include <algorithm>
 
 namespace iw {
 namespace common {
@@ -77,6 +78,8 @@ namespace common {
 			}
 		}
 
+		if (edges.size() == 0) return {};
+
 		std::vector<glm::vec2> chain = {
 			edges[0],
 			edges[1]
@@ -108,10 +111,12 @@ namespace common {
 			}
 		}
 
+		std::reverse(chain.begin(), chain.end());
+
 		return chain;
 	}
 
-	float cross_length(glm::vec2 a, glm::vec2 b) {
+	inline float cross_length(glm::vec2 a, glm::vec2 b) {
 		return a.x * b.y - a.y * b.x;
 	}
 
@@ -141,6 +146,8 @@ namespace common {
 	inline std::vector<unsigned> TriangulatePolygon(
 		const std::vector<glm::vec2>& polygon)
 	{
+		if (polygon.size() == 0) return {};
+
 		std::vector<unsigned> triangles;
 
 		std::vector<std::pair<glm::vec2, size_t>> working; // copy a version with the correct indices

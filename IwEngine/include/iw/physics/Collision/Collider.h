@@ -16,6 +16,8 @@ namespace Physics {
 		CYLINDER,
 		PLANE,
 		//BOX,
+		HULL,
+
 		MESH
 	};
 
@@ -33,32 +35,41 @@ namespace impl {
 	struct PlaneCollider;
 
 	template<typename V>
+	struct HullCollider;
+
+	template<typename V>
 	struct MeshCollider;
 
 	template<
 		typename V>
 	struct Collider {
 	protected:
-		ColliderType m_type; // only used for debug nonsense
+		ColliderType m_type;
 		AABB<V> m_bounds;
 		bool m_outdated;     // if the bounds are outdated
 
 	public:
 		Collider(
-			ColliderType type)
+			ColliderType type
+		)
 			: m_type(type)
 			, m_outdated(true)
 		{}
 
-		ColliderType Type() const {
+		inline ColliderType Type() const {
 			return m_type;
+		}
+
+		inline const AABB<V>& Bounds() const {
+			if (m_outdated) LOG_WARNING << "Got outdated bounds because of const call! (Collider::Bounds)";
+			return m_bounds;
 		}
 
 		IWPHYSICS_API
 		virtual const AABB<V>& Bounds() = 0;
 
 		IWPHYSICS_API
-		virtual Transform Trans() const = 0;
+		virtual Transform Trans() const { return Transform(); };
 
 		IWPHYSICS_API
 		virtual V FindFurthestPoint(
@@ -90,6 +101,10 @@ namespace impl {
 	using PlaneCollider2 = impl::PlaneCollider<glm::vec2>;
 	using PlaneCollider  = impl::PlaneCollider<glm::vec3>;
 	using PlaneCollider4 = impl::PlaneCollider<glm::vec4>;
+
+	using HullCollider2 = impl::HullCollider<glm::vec2>;
+	using HullCollider  = impl::HullCollider<glm::vec3>;
+	using HullCollider4 = impl::HullCollider<glm::vec4>;
 
 	using MeshCollider2 = impl::MeshCollider<glm::vec2>;
 	using MeshCollider  = impl::MeshCollider<glm::vec3>;

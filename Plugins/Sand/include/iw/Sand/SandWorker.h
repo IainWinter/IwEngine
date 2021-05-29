@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SandWorld.h"
+#include "iw/util/memory/ref.h"
 
 IW_PLUGIN_SAND_BEGIN
 
@@ -17,8 +18,7 @@ public:
 	virtual void UpdateCell(int x, int y, Cell& cell) = 0;
 
 	IW_PLUGIN_SAND_API Cell& GetCell(int x, int y);
-
-	IW_PLUGIN_SAND_API void SetCell (int x, int y, const Cell& cell);
+	IW_PLUGIN_SAND_API void  SetCell(int x, int y, const Cell& cell);
 
 	IW_PLUGIN_SAND_API void MoveCell(int x, int y, int xto, int yto);
 	IW_PLUGIN_SAND_API void PushCell(int x, int y, int xto, int yto);
@@ -35,5 +35,12 @@ public:
 		}
 	}
 };
+
+struct SandWorkerBuilderBase {
+	virtual ref<SandWorker> MakeWorker(SandWorld& world, SandChunk* chunk) = 0;
+};
+
+template<typename _t>
+struct SandWorkerBuilder : SandWorkerBuilderBase {};
 
 IW_PLUGIN_SAND_END

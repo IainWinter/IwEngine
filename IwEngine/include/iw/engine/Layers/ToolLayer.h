@@ -2,7 +2,7 @@
 
 #include "iw/engine/Layer.h"
 #include "iw/graphics/Font.h"
-#include "iw/engine/Systems/EditorCameraControllerSystem.h"
+#include "iw/engine/Systems/Camera/EditorCameraControllerSystem.h"
 
 #include "iw/graphics/RenderTarget.h"
 #include "iw/graphics/Scene.h"

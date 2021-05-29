@@ -25,6 +25,10 @@ namespace RenderAPI {
 		void Clear() override;
 
 		IWRENDERER_API
+		void SetClearColor(
+			float r, float g, float b, float a) override;
+
+		IWRENDERER_API
 		void SetViewport(
 			int x,
 			int y) override;

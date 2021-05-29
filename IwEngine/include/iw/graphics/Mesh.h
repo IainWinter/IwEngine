@@ -109,9 +109,9 @@ namespace detail {
 	private:
 		struct BufferData {
 			ref<char[]> Data;
-			void* m_Ptr;
-			unsigned Count;
-			bool Initialized;
+			void* m_Ptr = nullptr;
+			unsigned Count = 0;
+			bool Initialized = false;
 
 			template<typename _t = void*>
 			      _t* Ptr()        { return m_Ptr ? (_t*)m_Ptr : (_t*)Data.get(); } // yak on em
@@ -122,7 +122,7 @@ namespace detail {
 
 		struct IndexData {
 			ref<unsigned[]> Index;
-			unsigned Count;
+			unsigned Count = 0;
 
 			      unsigned* Ptr()       { return Index.get(); }
 			const unsigned* Ptr() const { return Index.get(); }

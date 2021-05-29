@@ -34,6 +34,10 @@ namespace RenderAPI {
 		IWRENDERER_API
 		virtual void Clear() = 0;
 
+		IWRENDERER_API
+		virtual void SetClearColor(
+			float r, float g, float b, float a) = 0;
+
 		// should be in frame buffer?
 		IWRENDERER_API
 		virtual void SetViewport(

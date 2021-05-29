@@ -75,7 +75,7 @@ namespace Engine {
 					Renderer->DrawMesh(object->ColTrans(), planeInstance);
 					break; 
 				}
-				case ColliderType::MESH: {
+				case ColliderType::HULL: {
 					Renderer->DrawMesh(object->Trans(), cubeInstance);
 				}
 			}

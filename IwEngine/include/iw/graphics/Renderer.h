@@ -88,6 +88,8 @@ namespace Graphics {
 		float m_ambiance;
 		float m_time;
 
+		iw::Color m_clearColor;
+
 		int m_debugState = -1;
 
 		ref<RenderTarget> m_defaultTarget;
@@ -155,7 +157,8 @@ namespace Graphics {
 		virtual void BeginScene(
 			Camera* camera = nullptr,
 			const ref<RenderTarget>& target = nullptr,
-			bool clear = false);
+			bool clear = false,
+			Color clearColor = iw::Color(0));
 
 		// calls begin scene
 		// set scene lights if provided, no action if null
@@ -163,7 +166,8 @@ namespace Graphics {
 		virtual void BeginScene(
 			Scene* scene = nullptr,
 			const ref<RenderTarget>& target = nullptr,
-			bool clear = false);
+			bool clear = false,
+			Color clearColor = iw::Color(0));
 
 		// set light camera
 		// set light shader
@@ -218,6 +222,10 @@ namespace Graphics {
 		void SetTarget(
 			const ref<RenderTarget>& target,
 			bool useDefault = true);
+
+		IWGRAPHICS_API
+		void SetClearColor(
+			Color color);
 
 		IWGRAPHICS_API
 		void SetCamera(

@@ -59,7 +59,7 @@ workspace (name)
 			"ImGui",
 			"GLEW",
 			"opengl32.lib",
-			--"wSand"
+			"wSand"
 		}
 
 		prebuildcommands {

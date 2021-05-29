@@ -115,12 +115,14 @@ namespace Graphics {
 	void Renderer::BeginScene(
 		Camera* camera,
 		const ref<RenderTarget>& target,
-		bool clear)
+		bool clear,
+		Color clearColor)
 	{
 		Renderer::SetCamera(camera);
 		Renderer::SetTarget(target);
 
 		if (clear) {
+			Renderer::SetClearColor(clearColor);
 			Device->Clear();
 		}
 
@@ -132,9 +134,10 @@ namespace Graphics {
 	void Renderer::BeginScene(
 		Scene* scene,
 		const ref<RenderTarget>& target,
-		bool clear)
+		bool clear,
+		Color clearColor)
 	{
-		Renderer::BeginScene(scene->MainCamera(), target, clear);
+		Renderer::BeginScene(scene->MainCamera(), target, clear, clearColor);
 
 		Renderer::SetPointLights      (scene->PointLights());
 		Renderer::SetDirectionalLights(scene->DirectionalLights());
@@ -168,7 +171,7 @@ namespace Graphics {
 		light->SetupShadowCast(this, useParticleShader, clear);
 
 		if (clear) {
-			Device->Clear();
+			Device->Clear(); // set clear color?
 		}
 
 		m_state = RenderState::SHADOW_MAP;
@@ -295,6 +298,21 @@ namespace Graphics {
 
 			m_target = target;
 		//}
+	}
+
+	void Renderer::SetClearColor(
+		Color color)
+	{
+		if (m_clearColor.to32() != color.to32()) { // male operator==
+			m_clearColor = color;
+		}
+
+		Device->SetClearColor(
+			m_clearColor.r, 
+			m_clearColor.g, 
+			m_clearColor.b, 
+			m_clearColor.a
+		);
 	}
 
 	void Renderer::SetCamera(

@@ -8,12 +8,14 @@ namespace Engine {
 	RenderSystem::RenderSystem(
 		Scene* scene,
 		ref<RenderTarget> target,
-		bool clear
+		bool clear,
+		Color clearColor
 	)
 		: SystemBase("Render")
 		, m_scene(scene)
 		, m_target(target)
 		, m_clear(clear)
+		, m_clearColor(clearColor)
 	{}
 
 	int RenderSystem::Initialize() {
@@ -32,7 +34,7 @@ namespace Engine {
 
 		auto renderer = Renderer; // this is so stupid why would it think its a type before a variable name only in lambdas???
 
-		renderer->BeginScene(m_scene, m_target, m_clear);
+		renderer->BeginScene(m_scene, m_target, m_clear, m_clearColor);
 
 		models.Each<Transform, Model>([&](
 			EntityHandle entity,

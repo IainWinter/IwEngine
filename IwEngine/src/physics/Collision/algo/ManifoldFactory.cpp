@@ -7,6 +7,23 @@
 namespace iw {
 namespace Physics {
 namespace algo {
+
+	// helpers
+
+	ManifoldPoints SwapPoints(
+		ManifoldPoints& points)
+	{
+		glm::vec3 T = points.A;
+		points.A = points.B;
+		points.B = T;
+
+		points.Normal = -points.Normal;
+
+		return points;
+	}
+
+	// funcs
+
 	ManifoldPoints TestCollision(
 		const SphereCollider* a, const Transform* ta,
 		const SphereCollider* b, const Transform* tb)
@@ -113,8 +130,6 @@ namespace algo {
 			return {};
 		}
 
-
-
 		A += glm::normalize(AtoD) * Ar;
 		D += glm::normalize(DtoA) * Br;
 
@@ -130,13 +145,12 @@ namespace algo {
 
 	ManifoldPoints TestCollision(
 		const PlaneCollider* a, const Transform* ta,
-		const MeshCollider*  b, const Transform* tb)
+		const HullCollider*  b, const Transform* tb)
 	{
 		glm::vec3 N = a->Plane.P * ta->WorldRotation();
 		glm::normalize(N);
 
 		glm::vec3 P = N * a->Plane.D + ta->WorldPosition();
-
 		glm::vec3 B = b->FindFurthestPoint(tb, -N);
 
 		glm::vec3 BtoP = P - B;
@@ -155,30 +169,117 @@ namespace algo {
 		};
 	}
 
+	// this is how all the functions should be refactored
+	ManifoldPoints TestCollision_Mesh_notMesh(
+		const Collider* mesh,  const Transform* tmesh,
+		const Collider* other, const Transform* tother)
+	{
+		assert(mesh ->Type() == ColliderType::MESH
+			&& other->Type() != ColliderType::MESH);
+		
+		std::vector<ManifoldPoints> manifolds;
+
+		for (HullCollider& part : ((MeshCollider*)mesh)->GetHullParts())
+		{
+			if (!part.Bounds().Intersects(tmesh, other->Bounds(), tother)) continue;
+
+			auto [hasCollision, simplex] = GJK(&part, tmesh, other, tother);
+			if (hasCollision) {
+				manifolds.push_back(EPA(simplex, &part, tmesh, other, tother));
+			}
+		}
+
+		if (manifolds.size() == 0) return {}; // exit if no collision
+
+		size_t maxNormalIndex = 0;
+		float  maxNormalDist  = FLT_MIN;
+
+		for (size_t i = 0; i < manifolds.size(); i++) {
+			if (manifolds[i].PenetrationDepth > maxNormalDist) {
+				maxNormalDist = manifolds[i].PenetrationDepth;
+				maxNormalIndex = i;
+			}
+		}
+
+		return manifolds[maxNormalIndex];
+	}
+
 	ManifoldPoints FindGJKMaifoldPoints(
 		const Collider* a, const Transform* ta,
 		const Collider* b, const Transform* tb) // could have bool for if we are only checking triggers, could save compute
 	{
-		auto result = GJK(a, ta, b, tb);
+		bool aMesh = a->Type() == ColliderType::MESH;
+		bool bMesh = b->Type() == ColliderType::MESH;
 
-		if (result.first) {
-			return EPA(result.second, a, ta, b, tb);
+		if (aMesh && bMesh) return {}; // Don't collide mesh v mesh
+
+		auto result = GJK(a, ta, b, tb); // has collision, simplex
+
+		if (result.first)
+		{
+			if (aMesh) {
+				return TestCollision_Mesh_notMesh(a, ta, b, tb);
+			}
+
+			else
+			if (bMesh) {
+				ManifoldPoints p = TestCollision_Mesh_notMesh(b, tb, a, ta);
+				return SwapPoints(p);
+			}
+				
+			else {
+				return EPA(result.second, a, ta, b, tb);
+			}
+
+			//int partUsed = -1;
+
+			//auto testAllParts = [&](
+			//	const Collider* a, const Transform* ta,
+			//	const Collider* b, const Transform* tb)
+			//{
+			//	result.first = false;
+
+			//	MeshCollider* mesh = (MeshCollider*)a;
+
+			//	for (HullCollider& part : mesh->GetHullParts()) {
+			//		result = GJK(&part, ta, b, tb);
+			//		if (result.first) {
+
+			//			break;
+			//		}
+			//	}
+			//};
+			//
+			//if (   a->Type() == ColliderType::MESH
+			//	&& b->Type() != ColliderType::MESH)
+			//{
+			//	testAllParts(a, ta, b, tb);
+			//}
+
+			//else
+			//if (   a->Type() != ColliderType::MESH
+			//	&& b->Type() == ColliderType::MESH)
+			//{
+			//	testAllParts(b, tb, a, ta);
+			//}
+
+			//else
+			//if (   a->Type() == ColliderType::MESH
+			//	&& b->Type() == ColliderType::MESH)
+			//{
+			//	goto exit; // ews, todo: refactor all the TestCollision functions 
+			//}
+
+			//if (result.first) {
+			//	return EPA(result.second, a, ta, b, tb);
+			//}
 		}
 
-		return {glm::vec3(), glm::vec3(), glm::vec3(), 0, result.first};
+		//exit:
+		return {};
 	}
 
 	// Swaps
-
-	void SwapPoints(
-		ManifoldPoints& points)
-	{
-		glm::vec3 T = points.A;
-		points.A = points.B;
-		points.B = T;
-
-		points.Normal = -points.Normal;
-	}
 
 	ManifoldPoints TestCollision(
 		const PlaneCollider*  a, const Transform* ta, 
@@ -191,7 +292,7 @@ namespace algo {
 	}
 
 	ManifoldPoints TestCollision(
-		const MeshCollider*  a, const Transform* ta,
+		const HullCollider*  a, const Transform* ta,
 		const PlaneCollider* b, const Transform* tb)
 	{
 		ManifoldPoints points = TestCollision(b, tb, a, ta);

@@ -42,18 +42,6 @@ public:
 		m_world = new SandWorld(Renderer->Width(), Renderer->Height(), 6, 3, 4);
 		m_world->AddField<HeatField>();
 
-
-		/*struct WindField {
-			float dx, dy;
-		};*/
-
-		//m_world->AddField<WindField>();
-
-		// Cell data
-		// Field data
-		//
-		//
-
 		LOG_INFO << "World chunk size: " << m_world->m_chunkWidth << ", " << m_world->m_chunkHeight;
 
 		Cell _EMPTY = {
@@ -386,7 +374,7 @@ public:
 	iw::Mesh CreateScreenTextureMesh(int width, int height, bool useAlpha) {
 		iw::Mesh mesh = Renderer->ScreenQuad().MakeInstance();
 		
-		iw::ref<iw::Texture> texture = REF<iw::Texture>(width, height, iw::TEX_2D, iw::RGBA);
+		iw::ref<iw::Texture> texture = REF<iw::Texture>(width, height);
 		iw::ref<iw::Shader> shader = Asset->Load<iw::Shader>("shaders/texture.shader");
 		iw::ref<iw::Material> material = REF<iw::Material>(shader);
 

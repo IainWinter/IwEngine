@@ -1,8 +1,6 @@
 #pragma once
 
 #include "Collider.h"
-#include "HullCollider.h"
-
 #include <vector>
 #include <type_traits>
 
@@ -11,68 +9,112 @@ namespace Physics {
 namespace impl {
 	template<
 		typename V>
-	struct MeshCollider
-		: HullCollider<V>
+	struct HullCollider
+		: Collider<V>
 	{
-	private:
-		std::vector<unsigned> m_index;
-
-		std::vector<HullCollider<V>> m_parts;
-		bool m_outdatedParts;
+	protected:
+		std::vector<V> m_points;
 
 	public:
-		MeshCollider(
-			std::vector<V> points = {},
-			std::vector<unsigned> index = {}
+		HullCollider(
+			std::vector<V> points = {}
 		)
-			: HullCollider<V>(points)
-			, m_index(index)
-			, m_outdatedParts(true)
-		{
-			m_type = ColliderType::MESH;
+			: Collider<V>(ColliderType::HULL)
+			, m_points(points)
+		{}
+
+		void SetPoints(std::vector<V> points) {
+			m_points = points;
 		}
 
-		void SetTriangles(std::vector<unsigned> index) {
-			m_index = index;
+		void AddPoint(const V& p) {
+			m_points.push_back(p);
 		}
 
-		void AddTriangle(unsigned a, unsigned b, unsigned c) {
-			m_index.push_back(a);
-			m_index.push_back(b);
-			m_index.push_back(c);
+		void RemovePoint(const V& p) {
+			m_points.push_back(
+				std::find(m_points.begin(), m_points.end(), p)
+			);
 		}
 
-		void RemoveTriangle(unsigned a, unsigned b, unsigned c) {
-			for (auto itr = m_index.begin(); itr != m_index.end(); itr += 3) {
-				if (    *(itr)     == a
-					&& *(itr + 1) == b
-					&& *(itr + 2) == c)
-				{
-					m_index.erase(itr); // ok because we break right after
-					break;
+		const AABB<V>& Bounds() {
+			if (m_outdated)
+			{
+				m_outdated = false;
+
+				m_bounds.Min = V(FLT_MAX);
+				m_bounds.Max = V(FLT_MIN);
+
+				for (const V& v : m_points) {
+					for (size_t i = 0; i < V::length(); i++)
+					{
+						if (v[i] < m_bounds.Min[i]) m_bounds.Min[i] = v[i];
+						if (v[i] > m_bounds.Max[i]) m_bounds.Max[i] = v[i];
+					}
 				}
 			}
+
+			return m_bounds;
 		}
 
-		std::vector<HullCollider<V>>& GetHullParts() { // For now the parts are the triangles, could merge into bigger parts
-			if (!m_outdatedParts) return m_parts;
+		V FindFurthestPoint(
+			const Transform* transform,
+			V direction) const override
+		{
+			//glm::vec4 dir = glm::vec4(direction, 1);
+			//dir *= transform->WorldTransformation().inverted(); // I think we can transform the direction instead of the collider here
 
-			m_outdatedParts = false;
-			m_parts.clear();
+			//direction = dir.xyz();
 
-			for (size_t i = 0; i < m_index.size(); i += 3)
-			{
-				m_parts.push_back(HullCollider<V>({
-					m_points[m_index[i    ]],
-					m_points[m_index[i + 1]],
-					m_points[m_index[i + 2]],
-				}));
+			V     maxPoint = V();
+			float maxDistance = -FLT_MAX;
+
+			for (V point : m_points) {
+				point = V(glm::vec4(point, 1) * glm::transpose(transform->WorldTransformation())); // see ^^
+
+				float distance = glm::dot(point, direction);
+				if (distance > maxDistance) {
+					maxDistance = distance;
+					maxPoint = point;
+				}
 			}
 
-			return m_parts;
+			//glm::vec4 mp = glm::vec4(maxPoint, 1);  // and then transform the final point?
+			//mp *= transform->WorldTransformation();
+
+			return maxPoint;//mp.xyz();
 		}
 	};
 }
+
+	inline HullCollider MakeCubeCollider() {
+		HullCollider collider;
+		collider.AddPoint(glm::vec3(-1, -1, -1)); // 0 
+		collider.AddPoint(glm::vec3(-1,  1, -1)); // 1 
+		collider.AddPoint(glm::vec3( 1,  1, -1)); // 2 
+		collider.AddPoint(glm::vec3( 1, -1, -1)); // 3 
+
+		collider.AddPoint(glm::vec3(-1, -1,  1)); // 7
+		collider.AddPoint(glm::vec3( 1, -1,  1)); // 6
+		collider.AddPoint(glm::vec3( 1,  1,  1)); // 5
+		collider.AddPoint(glm::vec3(-1,  1,  1)); // 4
+
+		collider.Bounds();
+
+		return collider;
+	}
+
+	inline HullCollider MakeTetrahedronCollider() {
+		HullCollider collider;
+		collider.AddPoint(glm::vec3(cos(Pi2 * 0 / 3), -1, sin(Pi2 * 0 / 3)));
+		collider.AddPoint(glm::vec3(cos(Pi2 * 1 / 3), -1, sin(Pi2 * 1 / 3)));
+		collider.AddPoint(glm::vec3(cos(Pi2 * 2 / 3), -1, sin(Pi2 * 2 / 3)));
+		collider.AddPoint(glm::vec3(0, 1, 0));
+
+		collider.Bounds();
+
+		return collider;
+	}
 }
 
 	using namespace Physics;

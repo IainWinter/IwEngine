@@ -17,4 +17,13 @@ private:
 	IW_PLUGIN_SAND_API bool MoveRandom  (int x, int y, const Cell& cell);
 };
 
+template<>
+struct SandWorkerBuilder<SimpleSandWorker>
+	: SandWorkerBuilderBase
+{
+	ref<SandWorker> MakeWorker(SandWorld& world, SandChunk* chunk) {
+		return REF<SimpleSandWorker>(world, chunk);
+	}
+};
+
 IW_PLUGIN_SAND_END

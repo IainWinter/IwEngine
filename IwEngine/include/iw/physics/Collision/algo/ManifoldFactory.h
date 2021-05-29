@@ -5,6 +5,7 @@
 #include "iw/physics/Collision/SphereCollider.h"
 #include "iw/physics/Collision/CapsuleCollider.h"
 #include "iw/physics/Collision/PlaneCollider.h"
+#include "iw/physics/Collision/HullCollider.h"
 #include "iw/physics/Collision/MeshCollider.h"
 #include "iw/physics/Collision/Manifold.h"
 
@@ -15,12 +16,12 @@ namespace algo {
 	// o = col no impl
 	// _ = no col
 
-	// ________| Sphere  | Capsule | Plane  | Mesh |  Hull
-	// Sphere  |    x    |    x    |    x   |   x  |   o
-	// Capsule |         |    o    |    o   |   o  |   o
-	// Plane   |         |         |    _   |   o  |   o
-	// Mesh    |         |         |        |   x  |   o
-	// Hull    |         |         |        |      |   _?
+	//         | Sphere  | Capsule | Plane  | Hull | Mesh
+	// Sphere  |    x    |    x    |    x   |   x  |  o
+	// Capsule |         |    o    |    o   |   o  |  o
+	// Plane   |         |         |    _   |   o  |  o
+	// Hull    |         |         |        |   x  |  o
+	// Mesh    |         |         |        |      |  _?
 
 	IWPHYSICS_API
 	ManifoldPoints TestCollision(
@@ -40,7 +41,7 @@ namespace algo {
 	IWPHYSICS_API
 	ManifoldPoints TestCollision(
 		const PlaneCollider* a, const Transform* ta,
-		const MeshCollider*  b, const Transform* tb);
+		const HullCollider*  b, const Transform* tb);
 
 	IWPHYSICS_API
 	ManifoldPoints FindGJKMaifoldPoints(
@@ -48,8 +49,8 @@ namespace algo {
 		const Collider* b, const Transform* tb);
 
 	inline ManifoldPoints TestCollision(
-		const MeshCollider* a, const Transform* ta,
-		const MeshCollider* b, const Transform* tb)
+		const HullCollider* a, const Transform* ta,
+		const HullCollider* b, const Transform* tb)
 	{
 		return FindGJKMaifoldPoints(a, ta, b, tb);
 	}
@@ -63,7 +64,7 @@ namespace algo {
 
 	IWPHYSICS_API
 	ManifoldPoints TestCollision(
-		const MeshCollider*  a, const Transform* ta,
+		const HullCollider*  a, const Transform* ta,
 		const PlaneCollider* b, const Transform* tb);
 
 	IWPHYSICS_API
@@ -77,10 +78,10 @@ namespace algo {
 	inline ManifoldPoints TestCollision(const CapsuleCollider* a, const Transform* ta, const PlaneCollider*   b, const Transform* tb) {return {};}
 	inline ManifoldPoints TestCollision(const PlaneCollider*   a, const Transform* ta, const PlaneCollider*   b, const Transform* tb) {return {};}
 	inline ManifoldPoints TestCollision(const PlaneCollider*   a, const Transform* ta, const CapsuleCollider* b, const Transform* tb) {return {};}
-	inline ManifoldPoints TestCollision(const SphereCollider*  a, const Transform* ta, const MeshCollider*    b, const Transform* tb) {return {};}
-	inline ManifoldPoints TestCollision(const MeshCollider*    a, const Transform* ta, const SphereCollider*  b, const Transform* tb) { return {}; }
-	inline ManifoldPoints TestCollision(const CapsuleCollider* a, const Transform* ta, const MeshCollider*    b, const Transform* tb) {return {};}
-	inline ManifoldPoints TestCollision(const MeshCollider*    a, const Transform* ta, const CapsuleCollider* b, const Transform* tb) {return {};}
+	inline ManifoldPoints TestCollision(const SphereCollider*  a, const Transform* ta, const HullCollider*    b, const Transform* tb) {return {};}
+	inline ManifoldPoints TestCollision(const HullCollider*    a, const Transform* ta, const SphereCollider*  b, const Transform* tb) { return {}; }
+	inline ManifoldPoints TestCollision(const CapsuleCollider* a, const Transform* ta, const HullCollider*    b, const Transform* tb) {return {};}
+	inline ManifoldPoints TestCollision(const HullCollider*    a, const Transform* ta, const CapsuleCollider* b, const Transform* tb) {return {};}
 }
 
 inline ManifoldPoints TestCollision(
@@ -95,8 +96,14 @@ inline ManifoldPoints TestCollision(
 		//const Transform* tA = sort ? tb : ta;
 		//const Transform* tB = sort ? ta : tb;
 
-		if (     (a->Type() == ColliderType::MESH  || b->Type() == ColliderType::MESH)
-			&& !(a->Type() == ColliderType::PLANE || b->Type() == ColliderType::PLANE))
+		if (    (a->Type() == ColliderType::PLANE && b->Type() == ColliderType::PLANE)
+			|| (a->Type() == ColliderType::MESH  && b->Type() == ColliderType::MESH ))
+		{
+			return {};
+		}
+
+		if (    a->Type() == ColliderType::HULL || b->Type() == ColliderType::HULL
+			|| a->Type() == ColliderType::MESH || b->Type() == ColliderType::MESH)
 		{
 			return algo::FindGJKMaifoldPoints(a, ta, b, tb);
 		}
@@ -115,8 +122,8 @@ inline ManifoldPoints TestCollision(
 				PlaneCollider* X = (PlaneCollider*)x;\
 				E\
 				break;}\
-			case ColliderType::MESH:{\
-				MeshCollider* X = (MeshCollider*)x;\
+			case ColliderType::HULL:{\
+				HullCollider* X = (HullCollider*)x;\
 				E\
 				break;}\
 		}\

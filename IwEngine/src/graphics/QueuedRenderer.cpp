@@ -126,11 +126,11 @@ namespace Graphics {
 					}
 
 					if (scene->Scene) {
-						Renderer::BeginScene(scene->Scene, scene->Target, scene->Clear);
+						Renderer::BeginScene(scene->Scene, scene->Target, scene->Clear, scene->ClearColor);
 					}
 
 					else {
-						Renderer::BeginScene(scene->Camera, scene->Target, scene->Clear);
+						Renderer::BeginScene(scene->Camera, scene->Target, scene->Clear, scene->ClearColor);
 					}
 				
 					break;
@@ -220,7 +220,8 @@ namespace Graphics {
 	void QueuedRenderer::BeginScene(
 		Camera* camera,
 		const ref<RenderTarget>& target,
-		bool clear)
+		bool clear,
+		Color clearColor)
 	{
 		m_shadow  = 1;
 		m_block   = 1;
@@ -231,7 +232,8 @@ namespace Graphics {
 		op->Scene  = nullptr;
 		op->Camera = camera;
 		op->Target = target;
-		op->Clear  = clear;
+		op->Clear      = clear;
+		op->ClearColor = clearColor;
 		op->BeforeScene = m_beforeSceneFunc;
 
 		m_beforeSceneFunc = nullptr; // reset for next call
@@ -242,7 +244,8 @@ namespace Graphics {
 	void QueuedRenderer::BeginScene(
 		Scene* scene,
 		const ref<RenderTarget>& target,
-		bool clear)
+		bool clear,
+		Color clearColor)
 	{
 		m_shadow  = 1;
 		m_block   = 1;
@@ -253,7 +256,8 @@ namespace Graphics {
 		op->Scene  = scene;
 		op->Camera = nullptr;
 		op->Target = target;
-		op->Clear  = clear;
+		op->Clear      = clear;
+		op->ClearColor = clearColor;
 		op->BeforeScene = m_beforeSceneFunc;
 
 		m_beforeSceneFunc = nullptr; // reset for next call

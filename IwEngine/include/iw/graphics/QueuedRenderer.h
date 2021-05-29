@@ -50,6 +50,7 @@ namespace Graphics {
 			Camera* Camera;
 			ref<RenderTarget> Target;
 			bool Clear;
+			Color ClearColor;
 
 			setup_draw_func BeforeScene;
 		};
@@ -169,7 +170,8 @@ namespace Graphics {
 		void BeginScene(
 			Camera* camera = nullptr,
 			const ref<RenderTarget>& target = nullptr,
-			bool clear = false) override;
+			bool clear = false,
+			Color clearColor = Color(0)) override;
 
 		// calls begin scene
 		// set scene lights if provided, no action if null
@@ -177,7 +179,8 @@ namespace Graphics {
 		void BeginScene(
 			Scene* scene /*= nullptr*/,
 			const ref<RenderTarget>& target = nullptr,
-			bool clear = false) override;
+			bool clear = false,
+			Color clearColor = Color(0)) override;
 
 		// set light camera
 		// set light shader

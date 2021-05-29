@@ -17,9 +17,9 @@ private:
 	bool m_sourceNeedsUpdate = true;
 	bool m_initialized = false;
 
-	iw::vector2 m_currentOffset;
+	glm::vec2 m_currentOffset;
 
-	std::vector<iw::vector2> m_polygon;
+	std::vector<glm::vec2> m_polygon;
 	std::vector<unsigned>    m_index;
 
 public:
@@ -45,7 +45,7 @@ public:
 
 		unsigned* colors = (unsigned*)texture->CreateColors();
 
-		for (iw::vector2& v : Locations) {
+		for (glm::vec2& v : Locations) {
 			int x = v.x + 1; // I think this is always safe
 			int y = v.y + 1;
 			int i = x + y * sizeX;
@@ -55,19 +55,19 @@ public:
 		m_polygon = iw::common::MakePolygonFromField(colors, sizeX, sizeY, 1u);
 		m_index   = iw::common::TriangulatePolygon(m_polygon);
 
-		for (iw::vector2& v : m_polygon) v = v / iw::vector2(sizeX, sizeY);
+		for (glm::vec2& v : m_polygon) v = v / glm::vec2(sizeX, sizeY);
 
-		std::vector<iw::vector2> uv = m_polygon;
+		std::vector<glm::vec2> uv = m_polygon;
 
-		for (iw::vector2& v : m_polygon) {
+		for (glm::vec2& v : m_polygon) {
 			v = (v - 0.5) * 2;
-			v *= iw::vector2(sizeX - 3, sizeY - 3) / iw::vector2(sizeX, sizeY);
+			v *= glm::vec2(sizeX - 3, sizeY - 3) / glm::vec2(sizeX, sizeY);
 		}
 
 		//// this may not be needed
-		//iw::vector2 avg;
-		//for (iw::vector2& v : m_polygon) { avg += v; } avg /= m_polygon.size();
-		//for (iw::vector2& v : m_polygon) { v -= avg; }
+		//glm::vec2 avg;
+		//for (glm::vec2& v : m_polygon) { avg += v; } avg /= m_polygon.size();
+		//for (glm::vec2& v : m_polygon) { v -= avg; }
 
 		iw::ref<iw::Material> material = REF<iw::Material>(asset->Load<iw::Shader>("shaders/texture2D.shader"));
 		material->SetTexture("texture", texture);
@@ -86,18 +86,18 @@ public:
 
 		iw::AABB2 bounds = AABB();
 
-		iw::vector2 center = bounds.Center();
-		iw::vector2 minXmaxY(bounds.Min.x, bounds.Max.y);
-		iw::vector2 maxXminY(bounds.Max.x, bounds.Min.y);
+		glm::vec2 center = bounds.Center();
+		glm::vec2 minXmaxY(bounds.Min.x, bounds.Max.y);
+		glm::vec2 maxXminY(bounds.Max.x, bounds.Min.y);
 			
-		iw::vector2 a = TranslatePoint(bounds.Min - center, center, angle);
-		iw::vector2 b = TranslatePoint(bounds.Max - center, center, angle);
-		iw::vector2 c = TranslatePoint(minXmaxY   - center, center, angle);
-		iw::vector2 d = TranslatePoint(maxXminY   - center, center, angle);
+		glm::vec2 a = TranslatePoint(bounds.Min - center, center, angle);
+		glm::vec2 b = TranslatePoint(bounds.Max - center, center, angle);
+		glm::vec2 c = TranslatePoint(minXmaxY   - center, center, angle);
+		glm::vec2 d = TranslatePoint(maxXminY   - center, center, angle);
 
-		iw::vector2 min = FLT_MAX;
-		iw::vector2 max = FLT_MIN;
-		for (iw::vector2 v : {a, b, c, d}) {
+		glm::vec2 min = FLT_MAX;
+		glm::vec2 max = FLT_MIN;
+		for (glm::vec2 v : {a, b, c, d}) {
 			if (v.x < min.x) min.x = v.x;
 			if (v.y < min.y) min.y = v.y;
 			if (v.x > max.x) max.x = v.x;
@@ -108,8 +108,8 @@ public:
 		int sizeY = max.y - min.y;
 
 		iw::ref<iw::Texture> source = Body.Material()->GetTexture("texture");
-		iw::vector2 srcDim = source->Dimensions();
-		iw::vector2 newDim = iw::vector2(sizeX, sizeY);
+		glm::vec2 srcDim = source->Dimensions();
+		glm::vec2 newDim = glm::vec2(sizeX, sizeY);
 
 		if (m_sourceNeedsUpdate) {
 			m_sourceNeedsUpdate = false;
@@ -121,8 +121,8 @@ public:
 		if (scalingNeedsUpdate) {
 			LOG_INFO << "Rescaled";
 
-			std::vector<iw::vector2> polygon = m_polygon;
-			for (iw::vector2& v : polygon) {
+			std::vector<glm::vec2> polygon = m_polygon;
+			for (glm::vec2& v : polygon) {
 				v *= srcDim / newDim; // todo: this eqwuation is wrong, correct one needs to be found
 			}
 
@@ -193,7 +193,7 @@ public:
 	//	Tile tile();
 	//}
 
-	iw::vector2 GetCurrentOffset() {
+	glm::vec2 GetCurrentOffset() {
 		return m_currentOffset;
 	}
 
@@ -213,50 +213,50 @@ public:
 
 // old process
 
-	std::vector<iw::vector2> FullLocations; // copy for healing / frame
-	std::vector<iw::vector2> Locations;
-	const int InitialLocationsSize = 0;
-	int TileId = 0;
+	//std::vector<glm::vec2> FullLocations; // copy for healing / frame
+	//std::vector<glm::vec2> Locations;
+	//const int InitialLocationsSize = 0;
+	//int TileId = 0;
 
-	int Precedence = 10;
+	//int Precedence = 10;
 
-	bool ExplodeOnDeath = true;
+	//bool ExplodeOnDeath = true;
 
-	Tile() = default;
+	//Tile() = default;
 
-	Tile(std::vector<iw::vector2> locations, int scale)
-		: InitialLocationsSize(locations.size() * scale)
-	{
-		for (iw::vector2& v : locations) {
-			for (int y = 0; y <= abs(scale); y++) 
-			for (int x = 0; x <= abs(scale); x++) {
-				Locations.push_back(v * scale + iw::vector2(x, y)/* - scale/2*/);
-			}
-		}
+	//Tile(std::vector<glm::vec2> locations, int scale)
+	//	: InitialLocationsSize(locations.size() * scale)
+	//{
+	//	for (glm::vec2& v : locations) {
+	//		for (int y = 0; y <= abs(scale); y++) 
+	//		for (int x = 0; x <= abs(scale); x++) {
+	//			Locations.push_back(v * scale + glm::vec2(x, y)/* - scale/2*/);
+	//		}
+	//	}
 
-		static int s_tileId = 1;
-		TileId = s_tileId++;
+	//	static int s_tileId = 1;
+	//	TileId = s_tileId++;
 
-		FullLocations = Locations;
-	}
+	//	FullLocations = Locations;
+	//}
 
-	iw::vector2 FurthestPoint(iw::vector2 d) {
-		iw::vector2 furthest;
-		float maxDist = FLT_MIN;
-		for (iw::vector2& v : Locations) {
-			float dist = v.dot(d);
-			if (dist > maxDist) {
-				maxDist = dist;
-				furthest = v;
-			}
-		}
+	//glm::vec2 FurthestPoint(glm::vec2 d) {
+	//	glm::vec2 furthest;
+	//	float maxDist = FLT_MIN;
+	//	for (glm::vec2& v : Locations) {
+	//		float dist = v.dot(d);
+	//		if (dist > maxDist) {
+	//			maxDist = dist;
+	//			furthest = v;
+	//		}
+	//	}
 
-		return furthest;
-	}
+	//	return furthest;
+	//}
 
 	float Radius() {
-		iw::vector2 furthest;
-		for (iw::vector2& v : Locations) {
+		glm::vec2 furthest;
+		for (glm::vec2& v : Locations) {
 			if (v.length_squared() > furthest.length_squared()) {
 				furthest = v;
 			}
@@ -270,7 +270,7 @@ public:
 		m_aabbNeedsUpdate = false;
 
 		iw::AABB2 bounds;
-		for (iw::vector2& v : Locations) {
+		for (glm::vec2& v : Locations) {
 			if (bounds.Min.x > v.x) bounds.Min.x = v.x;
 			if (bounds.Min.y > v.y) bounds.Min.y = v.y;
 

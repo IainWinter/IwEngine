@@ -15,6 +15,8 @@
 
 #include "iw/common/algos/MarchingCubes.h"
 
+#include "plugins/iw/Sand/Engine/SandLayer.h"
+
 enum class PlayerAttack {
 	SLASH,
 	UP_SLASH,
@@ -34,7 +36,9 @@ struct Player {
 
 	bool k_jump, k_up, k_down, k_left, k_right, k_attack1, k_attack2;
 
-	int hitTick = 0; // hack to stop repeat count
+	int hitTick = 0;
+	float hitTime = 0;
+
 	int comboHit = 1;
 	PlayerAttack lastHit = PlayerAttack::LENGTH; // default that isnt another value
 
@@ -50,6 +54,7 @@ struct Player {
 		}
 
 		hitTick = tick;
+		hitTime = iw::TotalTime();
 		
 		if (lastHit == name) {
 			comboHit++;
@@ -152,9 +157,15 @@ struct PixelationLayer
 	: iw::Layer
 {
 	iw::Mesh m_screen;
+	iw::SandLayer* m_sandLayer;
 	iw::Entity playerEnt;
 
-	PixelationLayer() : iw::Layer("Pixelation") {}
+	PixelationLayer(
+		iw::SandLayer* sandLayer
+	)
+		: iw::Layer("Pixelation")
+		, m_sandLayer(sandLayer)
+	{}
 
 	int Initialize() {
 
@@ -183,7 +194,7 @@ struct PixelationLayer
 			playerEnt = Space->CreateEntity<
 				iw::Transform,
 				iw::Mesh,
-				iw::MeshCollider,
+				iw::HullCollider,
 				iw::Rigidbody,
 				iw::Timer,
 				Player>();
@@ -191,9 +202,9 @@ struct PixelationLayer
 			iw::ref<iw::Material> mat = simpleMat->MakeInstance();
 			mat->Set("albedo", iw::Color::From255(240, 100, 100));
 
-			iw::Transform*    t = playerEnt.Set<iw::Transform>(glm::vec3(0, 5, 0), glm::vec3(1));
+			iw::Transform*    t = playerEnt.Set<iw::Transform>(glm::vec3(0, 5, 0), glm::vec3(1, 2, 1));
 			iw::Mesh*         m = playerEnt.Set<iw::Mesh>(cubeMesh);
-			iw::MeshCollider* c = playerEnt.Set<iw::MeshCollider>(iw::MeshCollider::MakeCube());
+			iw::HullCollider* c = playerEnt.Set<iw::HullCollider>(iw::MakeCubeCollider());
 			iw::Rigidbody*    r = playerEnt.Set<iw::Rigidbody>();
 			Player*           p = playerEnt.Set<Player>();
 
@@ -229,7 +240,7 @@ struct PixelationLayer
 			});
 
 			Physics->AddRigidbody(r);
-			Physics->AddConstraint(new GroundConstraint(r));
+			Physics->AddConstraint(new GroundConstraint(r, -6));
 
 			m->SetMaterial(mat);
 		}
@@ -239,13 +250,13 @@ struct PixelationLayer
 			iw::Entity enemy = Space->CreateEntity<
 				iw::Transform, 
 				iw::Mesh,
-				iw::MeshCollider,
+				iw::HullCollider,
 				iw::Rigidbody,
 				Enemy>();
 
 			iw::Transform*    t = enemy.Set<iw::Transform>(glm::vec3(0, 5, 0));
 			iw::Mesh*         m = enemy.Set<iw::Mesh>(cubeMesh);
-			iw::MeshCollider* c = enemy.Set<iw::MeshCollider>(iw::MeshCollider::MakeCube());
+			iw::HullCollider* c = enemy.Set<iw::HullCollider>(iw::MakeCubeCollider());
 			iw::Rigidbody*    r = enemy.Set<iw::Rigidbody>();
 			                      enemy.Set<Enemy>();
 
@@ -259,7 +270,7 @@ struct PixelationLayer
 			m->SetMaterial(mat);
 
 			Physics->AddRigidbody(r);
-			Physics->AddConstraint(new GroundConstraint(r, 1, .15));
+			Physics->AddConstraint(new GroundConstraint(r, -6, .15));
 		}
 
 		// Ground
@@ -270,7 +281,7 @@ struct PixelationLayer
 				iw::MeshCollider,
 				iw::CollisionObject>();
 
-			iw::Transform*       t = ground.Set<iw::Transform>(glm::vec3(0, 5, 0), glm::vec3(5, 1, 1));
+			iw::Transform*       t = ground.Set<iw::Transform>(glm::vec3(0, 0, 0), glm::vec3(1, 1, 1));
 			iw::MeshCollider*    c = ground.Set<iw::MeshCollider>();
 			iw::CollisionObject* o = ground.Set<iw::CollisionObject>();
 
@@ -280,15 +291,27 @@ struct PixelationLayer
 			Physics->AddCollisionObject(o);
 
 			std::vector<glm::vec2> points {
-				glm::vec2(-1,  1),
-				glm::vec2(-2, -2),
-				glm::vec2( 2, -2),
-				glm::vec2( 2,  0.5),
-				glm::vec2( 1,  1.2),
-				glm::vec2( 0,  1.5),
+				glm::vec2(-28, -6),
+				glm::vec2( 28, -6),
+				glm::vec2( 28,  16),
+
+				glm::vec2(24,  2),
+				glm::vec2(18,  1.5),
+				glm::vec2(13,  -1),
+				glm::vec2(4,  -3),
+				glm::vec2(-3,  3),
+				glm::vec2(-12,  3),
+				glm::vec2(-20,  10),
+
+				glm::vec2(-28, 10),
+				//glm::vec2( -.5,  .25),
 			};
 
 			std::vector<unsigned> index = iw::common::TriangulatePolygon(points);
+
+			for (auto itr = index.begin(); itr != index.end(); itr += 3) {
+				c->AddTriangle(*itr, *(itr + 1), *(itr + 2));
+			}
 
 			std::vector<glm::vec3> points3; // Translate for 3d for mesh (a hack), also add points to collider
 			for (glm::vec2& v : points)
@@ -304,15 +327,16 @@ struct PixelationLayer
 			data->SetBufferData(iw::bName::UV, points.size(), points.data());
 			data->SetIndexData(index.size(), index.data());
 
+			iw::Mesh* m = ground.Set<iw::Mesh>(data->MakeInstance());
+
 			iw::ref<iw::Material> mat = simpleMat->MakeInstance();
 			mat->Set("albedo", iw::Color::From255(138, 84, 37));
+			mat->SetWireframe(true);
 
-			iw::Mesh* m = ground.Set<iw::Mesh>(data->MakeInstance());
 			m->SetMaterial(mat);
 
-
 			// Grass
-			{
+			if (false) {
 				for (size_t i = 0; i < points.size(); i++)
 				{
 					size_t j = (i + 1) % points.size();
@@ -327,15 +351,15 @@ struct PixelationLayer
 						continue;
 					}
 
-					float step = glm::length(norm) / 50;
+					size_t count = 20 * glm::length(norm);
 
-					for (int s = 0; s < 50; s++) {
+					for (int s = 0; s < count; s++) {
 						iw::Entity grass = Space->CreateEntity<
 							iw::Transform,
 							iw::Mesh,
 							Grass>();
 
-						glm::vec2 pos = iw::lerp(points[i], points[j], step * s);
+						glm::vec2 pos = iw::lerp(points[i], points[j], float(s) / count);
 
  						iw::Transform* gt = grass.Set<iw::Transform>(glm::vec3(pos.x, pos.y, 0), glm::vec3(.25));
 						iw::Mesh*      gm = grass.Set<iw::Mesh>(simpleMesh.MakeCopy());
@@ -349,21 +373,6 @@ struct PixelationLayer
 						gm->SetMaterial(mat);
 					}
 				}
-
-				//for (int i = 0; i < 50; i++) {
-				//	iw::Entity grass = Space->CreateEntity<
-				//		iw::Transform,
-				//		iw::Mesh,
-				//		Grass>();
-				//
-				//					 grass.Set<iw::Transform>(glm::vec3(i/5.f - 25, 0, -2), glm::vec3(.25));
-				//	iw::Mesh* mesh = grass.Set<iw::Mesh>(simpleMesh.MakeCopy());
-				//
-				//	iw::ref<iw::Material> mat = simpleMat->MakeInstance();
-				//	mat->Set("albedo", iw::Color::From255(78, 186, 84).rgba() * (1 + iw::randf() * .25f));
-				//
-				//	mesh->SetMaterial(mat);
-				//}
 			}
 		}
 
@@ -379,8 +388,8 @@ struct PixelationLayer
 
 		float aspect = float(Renderer->Width()) / Renderer->Height();
 
-		unsigned lowResWidth  = lowRes ? aspect * 256 : Renderer->Width();
-		unsigned lowResHeight = lowRes ?          256 : Renderer->Height();
+		unsigned lowResWidth  = lowRes ? aspect * /*256*/Renderer->Width()  / 4 : Renderer->Width();  // 4 is the sand world scale
+		unsigned lowResHeight = lowRes ?          /*256*/Renderer->Height() / 4 : Renderer->Height();
 
 		iw::ref<iw::RenderTarget> lowResTarget = REF<iw::RenderTarget>();
 		lowResTarget->AddTexture(REF<iw::Texture>(lowResWidth, lowResHeight));
@@ -393,13 +402,15 @@ struct PixelationLayer
 		iw::ref<iw::Material> screenMat = REF<iw::Material>(screenShader);
 		screenMat->SetTexture("texture", lowResTarget->Tex(0));
 
-		m_screen = Renderer->ScreenQuad();
+		m_screen = Renderer->ScreenQuad().MakeInstance();
 		m_screen.SetMaterial(screenMat);
 
 		// Rendering and camera
 
+		iw::Color clearColor = iw::Color::From255(20, 20, 20, 0);
+
 		iw::CameraController* controller = PushSystem<iw::EditorCameraControllerSystem>();
-										   PushSystem<iw::RenderSystem>(MainScene, lowResTarget, true);
+										   PushSystem<iw::RenderSystem>(MainScene, lowResTarget, true, clearColor);
 										   PushSystem<iw::PhysicsSystem>();
 										   PushSystem<iw::EntityCleanupSystem>();
 
@@ -411,12 +422,36 @@ struct PixelationLayer
 
 		MainScene->SetMainCamera(controller->GetCamera());
 
-		//iw::SetFixedTime(.01f);
+		iw::SetFixedTime(.01f);
+
+		// Tile
+
+   		iw::Entity tileEntity = m_sandLayer->MakeTile("none", true, true);
+		iw::Tile*      tile = tileEntity.Find<iw::Tile>();
+		iw::Rigidbody* body = tileEntity.Find<iw::Rigidbody>();
+
+		body->Velocity.y = 2;
+		body->Velocity.x = 25;
+		body->SimGravity = false;
+		body->SetOnCollision([=](auto, auto) {
+			body->Velocity.y += 0.5;
+		});
+
+		Physics->AddRigidbody(body);
+
+		unsigned* colors = (unsigned*)tile->GetSprite()->Colors();
+
+		for (int y = 10; y < 30; y++)
+		for (int x = 10; x < 30; x++)
+		{
+			colors[x + y * tile->GetSprite()->Width()] = 1;
+		}
 
 		return 0;
 	}
 
 	float v[10000];
+	float lastHit = 0;
 
 	void PostUpdate() {
 
@@ -432,16 +467,17 @@ struct PixelationLayer
 
 			int tick = player->CurrentTick;
 
-			if (tick - props->hitTick > 100) {
+			if (iw::TotalTime() - props->hitTime > 1) {
 				props->comboHit = 1;
 				props->hitTick = tick;
+				props->hitTime = iw::TotalTime();
 				props->lastHit = PlayerAttack::LENGTH;
 			}
 
 			float& y = transform.Position.y;
 			float xVel = 0;
 
-			props->onGround |= y == 1;
+			props->onGround |= y == -6;
 			props->inAir    = !props->onGround/*y > 2*/;
 
 			props->k_jump  = iw::Keyboard::KeyDown(iw::SPACE);
@@ -492,19 +528,19 @@ struct PixelationLayer
 
 			// Toggle attack flags
 
-			if (props->k_down) {
-				if (props->inAir
-					&& rigidbody->Velocity.y < .1f) // Start smash attack
-				{
-					rigidbody->Velocity.y -= 20 * 20 * iw::DeltaTime();
-					props->smashAttack = true;
-				}
-			}
+			//if (props->k_down) {
+			//	if (   props->inAir
+			//		&& rigidbody->Velocity.y < .1f) // Start smash attack
+			//	{
+			//		rigidbody->Velocity.y -= 20 * 20 * iw::DeltaTime();
+			//		props->smashAttack = true;
+			//	}
+			//}
 
-			else if (props->smashAttack) // Cancel smash attack
-			{
-				props->smashAttack = false;
-			}
+			//else if (props->smashAttack) // Cancel smash attack
+			//{
+			//	props->smashAttack = false;
+			//}
 
 			// Attacks
 
@@ -514,10 +550,27 @@ struct PixelationLayer
 				{
 					if (props->inAir) // Slash down, pushes enemy down but not you, keeps you in air?
 					{
+						//MakeComboAttack(transform, 
+						//	0, -3.5f,
+						//	1.5f, 0.5f,
+						//	0, -5,
+						//	0, -30,
+						//	props, tick,
+						//	PlayerAttack::DOWN_AIR_SLASH, 2, [=](float xDmg, float yDmg)
+						//{
+						//	if (props->inAir)
+						//	{
+						//		rigidbody->Velocity.x = 0;
+						//		rigidbody->Velocity.y = -yDmg;
+						//	}
+
+						//	return false;
+						//});
+
 						MakeAttack(transform,
 							2.5f * props->facing, - 1,
 							0.5f * props->facing, - 1.5, 
-							0,                    -40, [=]()
+							10 * props->facing,   -20, [=]()
 						{
 							props->AddHit(PlayerAttack::DOWN_AIR_SLASH, tick);
 							return false;
@@ -558,6 +611,15 @@ struct PixelationLayer
 					});
 				}
 
+				//else
+				//if (props->k_left || props->k_right)
+				//{
+				//	MakeAttack(transform,
+				//		2.5f * props->facing, 0,
+				//		0.5f * props->facing, 1.5,
+				//		15 * props->facing, -15);
+				//}
+
 				else // Normal slash forward
 				{
 					MakeComboAttack(transform,
@@ -584,7 +646,10 @@ struct PixelationLayer
 				props->k_charging = true;
 			}
 
-			if (props->k_charging) {
+			if (props->k_charging) {/*
+				rigidbody->Velocity.x *= .9;
+				rigidbody->Velocity.y *= .9;*/
+
 				props->charge = iw::clamp(props->charge + iw::DeltaTime() * 5, 1.f, 5.f);
 				
 				if (!props->k_attack2)
@@ -705,7 +770,8 @@ struct PixelationLayer
 		});
 
 		Renderer->BeginScene();
-		Renderer->	DrawMesh(iw::Transform(), m_screen);
+			Renderer->DrawMesh(iw::Transform(), m_sandLayer->GetSandMesh());
+			Renderer->DrawMesh(iw::Transform(), m_screen);
 		Renderer->EndScene();
 	}
 
@@ -719,15 +785,15 @@ struct PixelationLayer
 		iw::Entity bullet = Space->CreateEntity<
 			iw::Transform, 
 			iw::CollisionObject, 
-			iw::MeshCollider,
+			iw::HullCollider,
 			iw::Mesh, 
 			Bullet>();
 
 		iw::Transform*       t = bullet.Set<iw::Transform>(who);
 		iw::CollisionObject* o = bullet.Set<iw::CollisionObject>();
-		iw::MeshCollider*    c = bullet.Set<iw::MeshCollider>(iw::MeshCollider::MakeCube());
+		iw::HullCollider*    c = bullet.Set<iw::HullCollider>(iw::MakeCubeCollider());
 		iw::Mesh*            m = bullet.Set<iw::Mesh>(playerEnt.Find<iw::Mesh>()->MakeInstance());
-								    bullet.Set<Bullet>();
+								 bullet.Set<Bullet>();
 
 		t->Scale.x = xSize;
 		t->Scale.y = ySize;
@@ -776,9 +842,7 @@ struct PixelationLayer
 struct App
 	: iw::Application
 {
-	App() {
-		PushLayer<PixelationLayer>();
-	}
+	App() {}
 
 	int Initialize(
 		iw::InitOptions& options)
@@ -792,15 +856,23 @@ struct App
 		main->MapButton(iw::T, "toolbox");
 		main->MapButton(iw::I, "imgui");
 
-		return iw::Application::Initialize(options);
+		iw::SandLayer* sandLayer = PushLayer<iw::SandLayer>();
+		
+		int error = iw::Application::Initialize(options);
+		if (error) return error;
+
+		PixelationLayer* gameLayer = PushLayer<PixelationLayer>(sandLayer);
+		gameLayer->Initialize();
+
+		return 0;
 	}
 };
 
 iw::Application* CreateApplication(
 	iw::InitOptions& options)
 {
-	options.WindowOptions.Width  = 1280;
-	options.WindowOptions.Height = 720 + 30;
+	options.WindowOptions.Width = 1280;
+	options.WindowOptions.Height = (720 + 30);
 	return new App();
 }
 

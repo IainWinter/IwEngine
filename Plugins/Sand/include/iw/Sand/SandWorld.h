@@ -7,6 +7,8 @@
 
 IW_PLUGIN_SAND_BEGIN
 
+struct SandWorkerBuilderBase;
+
 class SandWorld {
 public:
 	const size_t m_chunkWidth;
@@ -19,6 +21,8 @@ public:
 	size_t m_frameCount = 0;
 
 	std::vector<std::vector<SandChunk*>> m_batches;
+	std::vector<SandWorkerBuilderBase*> m_workers;
+
 private:
 	Concurrency::concurrent_unordered_map<std::pair<int, int>, SandChunk*, iw::pair_hash> m_chunkLookup;
 	std::mutex m_chunkMutex;
