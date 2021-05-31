@@ -71,6 +71,10 @@ namespace Graphics {
 	{
 	private:
 		glm::mat4 m_projection = glm::mat4();
+		float m_width  =  2;
+		float m_height =  2;
+		float m_zNear  = -1;
+		float m_zFar   =  1;
 
 	public:
 		OrthographicCamera() = default;
@@ -101,6 +105,16 @@ namespace Graphics {
 			float height,
 			float zNear,
 			float zFar);
+
+		inline float Width()    { return m_width; }
+		inline float Height()   { return m_height; }
+		inline float NearClip() { return m_zNear; }
+		inline float FarClip()  { return m_zFar; }
+
+		inline void Width   (float width)  { m_width = width; }
+		inline void Height  (float height) { m_height = height; }
+		inline void NearClip(float zNear)  { m_zNear = zNear; }
+		inline void FarClip (float zFar)   { m_zFar = zFar; }
 
 		inline void SetProjection(
 			const glm::mat4& projection) override

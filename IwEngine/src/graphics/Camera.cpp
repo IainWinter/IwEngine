@@ -239,6 +239,10 @@ namespace Graphics {
 		float zNear, 
 		float zFar)
 	{
+		m_width = width;
+		m_height = height;
+		m_zNear = zNear;
+		m_zFar = zFar;
 		m_projection = glm::ortho(-width / 2, width / 2, -height / 2, height / 2, zNear, zFar);
 	}
 	

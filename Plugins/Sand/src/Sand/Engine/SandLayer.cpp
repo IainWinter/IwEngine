@@ -85,11 +85,11 @@ int SandLayer::Initialize() {
 	Cell::SetDefault(CellType::SMOKE, _SMOKE);
 	Cell::SetDefault(CellType::BELT,  _BELT);
 
-	m_world = new SandWorld(Renderer->Width(), Renderer->Height(), 6, 3, 4);
+	m_world = new SandWorld(256, 256, m_cellScale);
 
 	m_world->m_workers.push_back(new SandWorkerBuilder<SimpleSandWorker>());
 
-	           PushSystem<SandWorldUpdateSystem>(m_world);
+	m_update = PushSystem<SandWorldUpdateSystem>(m_world);
 	m_render = PushSystem<SandWorldRenderSystem>(m_world);
 	
 	if (int error = Layer::Initialize()) {
@@ -105,8 +105,8 @@ void SandLayer::PreUpdate() {
 	int width  = m_render->GetSandTexture()->Width();
 	int height = m_render->GetSandTexture()->Height();
 
-	int fx = 0;//tile->X - width / 2;
-	int fy = 0;//tile->Y - height / 2;
+	int fx = -width  / 2;
+	int fy = -height / 2;
 	int fx2 = fx + width;
 	int fy2 = fy + height;
 
@@ -188,31 +188,23 @@ Entity SandLayer::MakeTile(
 	bool isStatic,
 	bool isSimulated)
 {
-	Entity entity;
+	ref<Archetype> archetype = Space->CreateArchetype<Transform, Mesh, MeshCollider, Tile>(); // Mesh is just temp for debug
 
-	if (isSimulated) {
-		entity = Space->CreateEntity<
-			Transform,
-			MeshCollider,
-			Rigidbody,
-			Tile>();
-	}
+	if (isSimulated) Space->AddComponent<Rigidbody>      (archetype);
+	else             Space->AddComponent<CollisionObject>(archetype);
+	
+	Entity entity = Space->CreateEntity(archetype);
 
-	else {
-		entity = Space->CreateEntity<
-			Transform,
-			MeshCollider,
-			CollisionObject,
-			Tile>();
-	}
+	Tile* tile = entity.Set<Tile>(Asset, "", isStatic);
 
 	Transform*       transform = entity.Set<Transform>();
-	MeshCollider*    collider  = entity.Set<MeshCollider>();
+	Collider*        collider  = entity.Set<MeshCollider>();
 	CollisionObject* object    = isSimulated ? entity.Set<Rigidbody>() : entity.Set<CollisionObject>();
-	Tile*            tile      = entity.Set<Tile>(Asset, "", isStatic);
 
 	object->SetCol(collider);
 	object->SetTrans(transform);
+
+	entity.Set<Mesh>(tile->m_spriteMesh); // tmep debug
 
 	return entity;
 }

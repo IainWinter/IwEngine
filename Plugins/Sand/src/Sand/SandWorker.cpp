@@ -48,8 +48,8 @@ void SandWorker::UpdateChunk() {
 
 		if (cell.Props == CellProperties::NONE) continue;
 
-		int px = xx + m_chunk->m_x;
-		int py = yy + m_chunk->m_y;
+		int px = xx + m_chunk->m_x - m_world.m_offsetX;
+		int py = yy + m_chunk->m_y - m_world.m_offsetY;
 
 		UpdateCell(px, py, cell);
 	}

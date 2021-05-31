@@ -160,6 +160,8 @@ struct PixelationLayer
 	iw::SandLayer* m_sandLayer;
 	iw::Entity playerEnt;
 
+	iw::Entity tileEntity;
+
 	PixelationLayer(
 		iw::SandLayer* sandLayer
 	)
@@ -190,7 +192,7 @@ struct PixelationLayer
 		iw::Mesh cubeMesh   = iw::MakeCube(description)   ->MakeInstance();
 
 		// Player
-		{
+		if (true) {
 			playerEnt = Space->CreateEntity<
 				iw::Transform,
 				iw::Mesh,
@@ -202,7 +204,7 @@ struct PixelationLayer
 			iw::ref<iw::Material> mat = simpleMat->MakeInstance();
 			mat->Set("albedo", iw::Color::From255(240, 100, 100));
 
-			iw::Transform*    t = playerEnt.Set<iw::Transform>(glm::vec3(0, 5, 0), glm::vec3(1, 2, 1));
+			iw::Transform*    t = playerEnt.Set<iw::Transform>(glm::vec3(20, 5, 0), glm::vec3(1, 2, 1));
 			iw::Mesh*         m = playerEnt.Set<iw::Mesh>(cubeMesh);
 			iw::HullCollider* c = playerEnt.Set<iw::HullCollider>(iw::MakeCubeCollider());
 			iw::Rigidbody*    r = playerEnt.Set<iw::Rigidbody>();
@@ -246,7 +248,7 @@ struct PixelationLayer
 		}
 
 		// Enemy
-		{
+		if (false) {
 			iw::Entity enemy = Space->CreateEntity<
 				iw::Transform, 
 				iw::Mesh,
@@ -281,7 +283,7 @@ struct PixelationLayer
 				iw::MeshCollider,
 				iw::CollisionObject>();
 
-			iw::Transform*       t = ground.Set<iw::Transform>(glm::vec3(0, 0, 0), glm::vec3(1, 1, 1));
+			iw::Transform*       t = ground.Set<iw::Transform>(glm::vec3(0, -10, 0), glm::vec3(1, 1, 1));
 			iw::MeshCollider*    c = ground.Set<iw::MeshCollider>();
 			iw::CollisionObject* o = ground.Set<iw::CollisionObject>();
 
@@ -299,7 +301,8 @@ struct PixelationLayer
 				glm::vec2(18,  1.5),
 				glm::vec2(13,  -1),
 				glm::vec2(4,  -3),
-				glm::vec2(-3,  3),
+				glm::vec2(0,  0),
+				glm::vec2(0,  1),
 				glm::vec2(-12,  3),
 				glm::vec2(-20,  10),
 
@@ -384,12 +387,15 @@ struct PixelationLayer
 
 		// Render to low res
 
-		bool lowRes = true;
-
 		float aspect = float(Renderer->Width()) / Renderer->Height();
 
-		unsigned lowResWidth  = lowRes ? aspect * /*256*/Renderer->Width()  / 4 : Renderer->Width();  // 4 is the sand world scale
-		unsigned lowResHeight = lowRes ?          /*256*/Renderer->Height() / 4 : Renderer->Height();
+		bool lowRes = true;
+
+		float pixelSize = m_sandLayer->m_cellScale;   // 4 is the sand world scale
+		unsigned pixelsPerMeter = 6;
+
+		unsigned lowResWidth  = lowRes ? Renderer->Width()  / pixelSize : Renderer->Width();  
+		unsigned lowResHeight = lowRes ?          Renderer->Height() / pixelSize : Renderer->Height();
 
 		iw::ref<iw::RenderTarget> lowResTarget = REF<iw::RenderTarget>();
 		lowResTarget->AddTexture(REF<iw::Texture>(lowResWidth, lowResHeight));
@@ -420,32 +426,61 @@ struct PixelationLayer
 		int error = iw::Layer::Initialize();
 		if (error) return error;
 
+		iw::OrthographicCamera* cam = (iw::OrthographicCamera*)controller->GetCamera();
+
+		cam->SetPosition(glm::vec3(0, 0, 0));
+		cam->SetProjection(
+			lowResWidth / pixelsPerMeter, 
+			lowResHeight / pixelsPerMeter, 
+			-10, 100
+		);
+
 		MainScene->SetMainCamera(controller->GetCamera());
 
 		iw::SetFixedTime(.01f);
 
 		// Tile
 
-   		iw::Entity tileEntity = m_sandLayer->MakeTile("none", true, true);
+   		tileEntity = m_sandLayer->MakeTile("none", true, true);
 		iw::Tile*      tile = tileEntity.Find<iw::Tile>();
+		iw::Mesh*      mesh = tileEntity.Find<iw::Mesh>();
 		iw::Rigidbody* body = tileEntity.Find<iw::Rigidbody>();
 
-		body->Velocity.y = 2;
-		body->Velocity.x = 25;
+		mesh->SetMaterial(simpleMat);
+		mesh->Material()->Set("albedo", iw::Color::From255(255, 0, 0));
+		mesh->Material()->SetWireframe(true);
+
+		body->Trans().Position.x = 15;
+
+		body->Velocity.y = -.2;
+		//body->Velocity.x = .01f;
 		body->SimGravity = false;
-		body->SetOnCollision([=](auto, auto) {
-			body->Velocity.y += 0.5;
-		});
+		body->Trans().Position = glm::vec3(0, 0, 0);
 
 		Physics->AddRigidbody(body);
 
 		unsigned* colors = (unsigned*)tile->GetSprite()->Colors();
 
-		for (int y = 10; y < 30; y++)
-		for (int x = 10; x < 30; x++)
+		for (int y = 1; y < 63; y++)
+		for (int x = 1; x < 63; x++)
 		{
 			colors[x + y * tile->GetSprite()->Width()] = 1;
 		}
+
+		float scaleX = Renderer->Width()  / cam->Width()  / m_sandLayer->m_world->m_scale;
+		float scaleY = Renderer->Height() / cam->Height() / m_sandLayer->m_world->m_scale;
+
+		iw::Cell c;
+
+		c.Type = iw::CellType::ROCK;
+		c.Color = iw::Color(1, 1, 1, 1);
+
+		m_sandLayer->m_world->SetCell(0, 0, c);
+		m_sandLayer->m_world->SetCell(pixelsPerMeter, 0, c);
+		m_sandLayer->m_world->SetCell(0, pixelsPerMeter, c);
+		m_sandLayer->m_world->SetCell(pixelsPerMeter, pixelsPerMeter, c);
+
+		m_sandLayer->SetCamera(0, 0, scaleX, scaleY);
 
 		return 0;
 	}
@@ -454,10 +489,11 @@ struct PixelationLayer
 	float lastHit = 0;
 
 	void PostUpdate() {
+		//LOG_INFO << tileEntity.Find<iw::Transform>()->Position.x;
 
 		// Player
 
-		{
+		if (true) {
 			Player*        props     = playerEnt.Find<Player>();
 			iw::Timer*     player    = playerEnt.Find<iw::Timer>();
 			iw::Rigidbody* rigidbody = playerEnt.Find<iw::Rigidbody>();
@@ -856,7 +892,9 @@ struct App
 		main->MapButton(iw::T, "toolbox");
 		main->MapButton(iw::I, "imgui");
 
-		iw::SandLayer* sandLayer = PushLayer<iw::SandLayer>();
+		int pixelScale = 2;
+
+		iw::SandLayer* sandLayer = PushLayer<iw::SandLayer>(pixelScale);
 		
 		int error = iw::Application::Initialize(options);
 		if (error) return error;
@@ -871,8 +909,8 @@ struct App
 iw::Application* CreateApplication(
 	iw::InitOptions& options)
 {
-	options.WindowOptions.Width = 1280;
-	options.WindowOptions.Height = (720 + 30);
+	options.WindowOptions.Width  = 1280;
+	options.WindowOptions.Height = 640;
 	return new App();
 }
 

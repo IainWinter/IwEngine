@@ -56,7 +56,7 @@ namespace ECS {
 		size_t index)
 	{
 		if (!m_entityManager.IsValidEntityIndex(index)) {
-			LOG_WARNING << "Tried to destroy an entity with an invalid index " << index;
+			LOG_WARNING << "Tried to destroy an entity with invalid index " << index;
 			return false;
 		}
 
@@ -76,7 +76,7 @@ namespace ECS {
 		EntityHandle handle)
 	{
 		if (!m_entityManager.IsValidEntityIndex(handle.Index)) {
-			LOG_WARNING << "Tried to kill an entity with an invalid index " << handle.Index;
+			LOG_WARNING << "Tried to kill an entity with invalid index " << handle.Index;
 			return false;
 		}
 
@@ -90,7 +90,7 @@ namespace ECS {
 		EntityHandle handle)
 	{
 		if (!m_entityManager.IsValidEntityIndex(handle.Index)) {
-			LOG_WARNING << "Tried to revive an entity with an invalid index " << handle.Index;
+			LOG_WARNING << "Tried to revive an entity with invalid index " << handle.Index;
 			return Entity();
 		}
 
@@ -110,13 +110,13 @@ namespace ECS {
 		const ref<Component>& component)
 	{
 		if (!m_entityManager.IsValidEntityIndex(handle.Index)) {
-			LOG_WARNING << "Tried to add a " << component->Name
-				        << " component to an entity with an invalid index " << handle.Index;
+			LOG_WARNING << "Tried to add " << component->Name
+				        << " component to an entity with invalid index " << handle.Index;
 			return;
 		}
 
 		if (!component) {
-			LOG_WARNING << "Tried to add empty component from entity " << handle.Index;
+			LOG_WARNING << "Tried to add empty component to entity " << handle.Index;
 			return;
 		}
 
@@ -131,8 +131,8 @@ namespace ECS {
 		const ref<Component>& component)
 	{
 		if (!m_entityManager.IsValidEntityIndex(handle.Index)) {
-			LOG_WARNING << "Tried to remove a " << component->Name
-				        << " component from an entity with an invalid index " << handle.Index;
+			LOG_WARNING << "Tried to remove a(n) " << component->Name
+				        << " component from an entity with invalid index " << handle.Index;
 			return;
 		}
 
@@ -147,14 +147,48 @@ namespace ECS {
 		MoveComponents(entityData, archetype);
 	}
 
+	void Space::AddComponent(
+		ref<Archetype>& archetype, 
+		const ref<Component>& component)
+	{
+		if (!archetype) {
+			LOG_WARNING << "Tried to add component to empty archetype " << component;
+			return;
+		}
+
+		if (!component) {
+			LOG_WARNING << "Tried to add empty component to archetype " << archetype;
+			return;
+		}
+
+		archetype = m_archetypeManager.AddComponent(archetype, component);
+	}
+
+	void Space::RemoveComponent(
+		ref<Archetype>& archetype,
+		const ref<Component>& component)
+	{
+		if (!archetype) {
+			LOG_WARNING << "Tried to remove component from empty archetype " << component;
+			return;
+		}
+
+		if (!component) {
+			LOG_WARNING << "Tried to remove empty component from archetype " << archetype;
+			return;
+		}
+
+		archetype = m_archetypeManager.RemoveComponent(archetype, component);
+	}
+
 	void* Space::SetComponent(
 		EntityHandle handle,
 		const ref<Component>& component,
 		void* data)
 	{
 		if (!m_entityManager.IsValidEntityIndex(handle.Index)) {
-			LOG_WARNING << "Tried to set a " << component->Name
-				        << " component's data on an entity with an invalid index " << handle.Index;
+			LOG_WARNING << "Tried to set a(n) " << component->Name
+				        << " component's data on an entity with invalid index " << handle.Index;
 			return nullptr;
 		}
 
@@ -177,8 +211,8 @@ namespace ECS {
 		const ref<Component>& component)
 	{
 		if (!m_entityManager.IsValidEntityIndex(handle.Index)) {
-			LOG_WARNING << "Tried to find a " << component->Name
-				        << " component on an entity with an invalid index " << handle.Index;
+			LOG_WARNING << "Tried to find a(n) " << component->Name
+				        << " component on an entity with invalid index " << handle.Index;
 			return nullptr;
 		}
 
@@ -196,8 +230,8 @@ namespace ECS {
 		const ref<Component>& component)
 	{
 		if (!m_entityManager.IsValidEntityIndex(handle.Index)) {
-			LOG_WARNING << "Tried to see if a " << component->Name
-				        << " component exists on an entity with an invalid index " << handle.Index;
+			LOG_WARNING << "Tried to test if a(n) " << component->Name
+				        << " component exists on an entity with invalid index " << handle.Index;
 			return false;
 		}
 
@@ -214,7 +248,7 @@ namespace ECS {
 		EntityHandle handle)
 	{
 		if (!m_entityManager.IsValidEntityIndex(handle.Index)) {
-			LOG_WARNING << "Tried to get the archetype of an entity with an invalid index " << handle.Index;
+			LOG_WARNING << "Tried to get the archetype of an entity with invalid index " << handle.Index;
 			return nullptr;
 		}
 
@@ -239,7 +273,7 @@ namespace ECS {
 		void* instance)
 	{
 		if (!component) {
-			LOG_WARNING << "Tried to find entity with an empty component";
+			LOG_WARNING << "Tried to find an entity with an empty component";
 			return Entity();
 		}
 

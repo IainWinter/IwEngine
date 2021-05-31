@@ -17,6 +17,9 @@ public:
 
 	const int m_batchGridSize = 2;
 
+	int m_offsetX = 0;
+	int m_offsetY = 0;
+
 	bool m_expandWorld;
 	size_t m_frameCount = 0;
 

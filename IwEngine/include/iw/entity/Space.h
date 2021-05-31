@@ -103,6 +103,18 @@ namespace ECS {
 		void RemoveComponent(
 			EntityHandle handle,
 			const ref<Component>& component);
+		
+		// Adds a new component to an archetype
+		IWENTITY_API
+		void AddComponent(
+			ref<Archetype>& archetype,
+			const ref<Component>& component);
+
+		// Removes a component from an archetype
+		IWENTITY_API
+		void RemoveComponent(
+			ref<Archetype>& archetype,
+			const ref<Component>& component);
 
 		// Sets component data with a copy
 		IWENTITY_API
@@ -216,6 +228,24 @@ namespace ECS {
 			EntityHandle handle)
 		{
 			RemoveComponent(handle, GetComponent<_c>());
+		}
+
+		// Adds a component to an entity and constructs it inplace
+		template<
+			typename _c>
+		void AddComponent(
+			ref<Archetype>& archetype)
+		{
+			AddComponent(archetype, RegisterComponent<_c>());
+		}
+
+		// Removes a component from an entity
+		template<
+			typename _c>
+		void RemoveComponent(
+			ref<Archetype>& archetype)
+		{
+			RemoveComponent(archetype, GetComponent<_c>());
 		}
 
 		// Sets component data by constructing it inplace

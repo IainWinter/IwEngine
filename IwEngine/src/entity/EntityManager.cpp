@@ -7,9 +7,9 @@ namespace ECS {
 		: m_pool(1024)
 	{}
 
-	iw::ref<EntityData>& EntityManager::CreateEntity() {
+	ref<EntityData>& EntityManager::CreateEntity() {
 		if (!m_dead.empty()) {
-			iw::ref<EntityData>& dead = m_entities.at(m_dead.top());
+			ref<EntityData>& dead = m_entities.at(m_dead.top());
 			m_dead.pop();
 
 			dead->Entity.Alive = true;
@@ -18,7 +18,7 @@ namespace ECS {
 			return dead;
 		}
 
-		iw::ref<EntityData> entityData = m_pool.alloc_ref<EntityData>();
+		ref<EntityData> entityData = m_pool.alloc_ref<EntityData>();
 
 		entityData->Entity = EntityHandle {
 			m_entities.size(),
@@ -32,7 +32,7 @@ namespace ECS {
 	bool EntityManager::DestroyEntity(
 		size_t index)
 	{
-		iw::ref<EntityData>& dead = m_entities.at(index);
+		ref<EntityData>& dead = m_entities.at(index);
 		if (dead->Entity.Alive) {
 			dead->Entity.Alive = false;
 			//dead->Archetype.reset();
@@ -47,7 +47,7 @@ namespace ECS {
 			//}
 
 			//else {
-			//	iw::ref<Entity2>& back = m_entities.back();
+			//	ref<Entity2>& back = m_entities.back();
 			//	
 			//	back->Index = dead->Index;
 			//	m_entities.at(entityIndex) = back;
@@ -63,7 +63,7 @@ namespace ECS {
 		return false;
 	}
 
-	iw::ref<EntityData>& EntityManager::GetEntityData(
+	ref<EntityData>& EntityManager::GetEntityData(
 		size_t index)
 	{
 		return m_entities.at(index);
@@ -75,7 +75,7 @@ namespace ECS {
 		m_pool.reset();
 	}
 
-	const std::vector<iw::ref<EntityData>>& EntityManager::Entities() const {
+	const std::vector<ref<EntityData>>& EntityManager::Entities() const {
 		return m_entities;
 	}
 

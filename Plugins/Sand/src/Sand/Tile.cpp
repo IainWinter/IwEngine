@@ -40,7 +40,8 @@ Tile::Tile(
 }
 
 void Tile::UpdatePolygon(
-	MeshCollider* collider)
+	MeshCollider* collider,
+	float sx, float sy)
 {
 	unsigned* colors = (unsigned*)GetSprite()->Colors();
 	glm::vec2 size   =            GetSprite()->Dimensions();
@@ -52,7 +53,7 @@ void Tile::UpdatePolygon(
 
 	for (glm::vec2& v : m_polygon)
 	{
-		v = (v / size - glm::vec2(0.5f)) * glm::vec2(2.0f);
+		v = (v / size - glm::vec2(0.5f)) * glm::vec2(2.0f) * glm::vec2(sx, sy);
 	}
 
 	m_spriteMesh.Data()->SetBufferData(bName::POSITION, m_polygon.size(), m_polygon.data());
@@ -90,23 +91,24 @@ void Tile::Draw(
 
 void Tile::ForEachInWorld(
 	iw::Transform* transform,
+	int sx, int sy,
 	std::function<void(int, int, unsigned)> func)
 {
 	ref<Texture> target = GetTarget();
-	unsigned width  = target->Width();
-	unsigned height = target->Height();
+	int width  = target->Width();
+	int height = target->Height();
 
 	unsigned* cells = (unsigned*)target->Colors();
 
-	for (unsigned y = 0; y < height; y++)
-	for (unsigned x = 0; x < width;  x++)
+	for (int y = 0; y < height; y++)
+	for (int x = 0; x < width;  x++)
 	{
 		unsigned color = cells[x + y * width];
 
 		if (color == 0) continue;
 
-		int px = ceil(transform->WorldPosition().x + x);
-		int py = ceil(transform->WorldPosition().y + y);
+		int px = ceil(x - width  / 2 + transform->WorldPosition().x * sx);
+		int py = ceil(y - height / 2 + transform->WorldPosition().y * sy);
 
 		func(px, py, color);
 	}

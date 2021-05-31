@@ -11,9 +11,12 @@ IW_PLUGIN_SAND_BEGIN
 class SandLayer
 	: public Layer
 {
-private:
+public:
 	SandWorld* m_world;
+	const int m_cellScale = 4;
+private:
 	SandWorldRenderSystem* m_render;
+	SandWorldUpdateSystem* m_update;
 
 	bool m_drawMouseGrid;
 
@@ -22,11 +25,14 @@ private:
 
 public:
 	SandLayer(
+		int cellScale,
 		bool drawMouseGrid = false
 	)
 		: Layer("Sand")
 		, m_world (nullptr)
 		, m_render(nullptr)
+		, m_update(nullptr)
+		, m_cellScale(cellScale)
 		, m_drawMouseGrid(drawMouseGrid)
 	{}
 
@@ -43,7 +49,21 @@ public:
 		return m_render->GetSandMesh();
 	}
 
-	IW_PLUGIN_SAND_API Entity MakeTile(const std::string& sprite, bool isStatic = false, bool isSimulated = false);
+	void SetCamera(
+		int x,  int y,
+		int xs, int ys)
+	{
+		float width  = Renderer->Width()  / 2;
+		float height = Renderer->Height() / 2;
+
+		m_render->SetCamera(x + -width, y + -height, x + width, y + height);
+		m_update->SetCameraScale(xs, ys);
+	}
+
+	IW_PLUGIN_SAND_API Entity MakeTile(
+		const std::string& sprite,
+		bool isStatic = false,
+		bool isSimulated = false);
 };
 
 IW_PLUGIN_SAND_END

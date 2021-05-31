@@ -67,25 +67,6 @@ public:
 	}
 
 	void ReloadGame() {
-
-
-		
-		//iw::mat<2, 1> dasd;
-
-
-		//iw::matrix<2, 2, float> mat = { 1, 2, 3, 4 };
-		//iw::matrix<1, 2, float> vec{ 1, 2 };
-
-		//iw::det(mat);
-
-		//iw::vector<2> row = mat.row(0);
-
-
-
-		//iw::matrix<1, 2> m = mat * vec;
-
-		//LOG_INFO << m;
-
 		std::wstringstream buf;
 
 #ifdef IW_DEBUG
@@ -104,7 +85,7 @@ public:
 
 		std::wstring path = buf.str();
 
-		HINSTANCE gameInst;
+		HINSTANCE gameInst = nullptr;
 		Reload(path.c_str(), gameInst);
 		m_gameNew = LoadFunction<GETAPP_FUNC>(gameInst, "GetApplicationForEditor")();
 	}

@@ -11,24 +11,30 @@ void SandWorldUpdateSystem::Update() {
 		Transform* transform,
 		Tile* tile)
 	{
-		if (tile->LastTransform == *transform) {
+		if (tile->LastTransform == *transform) { // Only redraw if moved
 			return;
 		}
 
-		if (tile->NeedsScan) {
+		if (tile->NeedsScan) { // only rescan polygon if source has changed
 			tile->NeedsScan = false;
-			tile->UpdatePolygon(Space->FindEntity(tile).Find<MeshCollider>());
+			tile->UpdatePolygon(
+				Space->FindEntity(tile).Find<MeshCollider>(),
+				m_world->m_scale * m_sy / m_sx,
+				m_world->m_scale
+			);
 
 			if (!tile->IsStatic) {
 				tile->Draw(transform, Renderer->ImmediateMode());
 			}
 		}
 
-		tile->ForEachInWorld(&tile->LastTransform, [&](
+		tile->ForEachInWorld(&tile->LastTransform, m_sx, m_sy, [&](
 			int x, int y,
 			unsigned data)
 		{
-			m_world->SetCell(x, y, Cell::GetDefault(CellType::EMPTY));
+			if (m_world->InBounds(x, y)) {
+				m_world->SetCell(x, y, Cell::GetDefault(CellType::EMPTY));
+			}
 		});
 
 		tile->NeedsDraw = true;
@@ -45,17 +51,19 @@ void SandWorldUpdateSystem::Update() {
 		}
 		
 		tile->NeedsDraw = false;
-		tile->ForEachInWorld(transform, [&](
+		tile->ForEachInWorld(transform, m_sx, m_sy, [&](
 			int x, int y,
 			unsigned data)
 		{
-			m_world->SetCell(x, y, Cell::GetDefault(CellType::ROCK));
+			if (m_world->InBounds(x, y)) {
+				m_world->SetCell(x, y, Cell::GetDefault(CellType::ROCK));
+			}
 		});
 	});
 
 	// Update cells
 
-	//m_world->RemoveEmptyChunks();
+	m_world->RemoveEmptyChunks();
 
 	std::mutex mutex;
 	std::condition_variable cond;

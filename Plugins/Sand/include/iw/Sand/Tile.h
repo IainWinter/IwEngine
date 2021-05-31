@@ -10,7 +10,7 @@
 IW_PLUGIN_SAND_BEGIN
 
 struct Tile {
-private:
+//private:
 	Mesh m_spriteMesh;
 	ref<Texture> m_sprite;
 	ref<RenderTarget> m_target;
@@ -28,7 +28,8 @@ public:
 		bool isStatic = false);
 
 	void UpdatePolygon(
-		MeshCollider* collider);
+		MeshCollider* collider,
+		float sx, float sy);
 
 	void Draw(
 		Transform* transform,
@@ -36,6 +37,7 @@ public:
 
 	void ForEachInWorld(
 		iw::Transform* transform,
+		int sx, int sy,
 		std::function<void(int, int, unsigned)> func);
 
 	// Getters
