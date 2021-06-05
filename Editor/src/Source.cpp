@@ -40,8 +40,8 @@ private:
 	iw::Layer* toolbox = nullptr;
 	iw::Layer* sandbox = nullptr;
 
-	std::wstring projectName          = L"PixelArt";
-	std:: string projectMainLayerName =  "Pixelation";
+	std::wstring projectName          = L"PhysicsProject";
+	std:: string projectMainLayerName =  "Test";
 
 public:
 	iw::Application* m_gameNew = nullptr;

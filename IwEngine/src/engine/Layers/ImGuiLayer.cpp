@@ -41,7 +41,7 @@ namespace Engine {
 		io.ConfigFlags = ImGuiConfigFlags_DockingEnable;
 		//if(m_window) io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
-		ImFont* pFont = io.Fonts->AddFontFromFileTTF("assets/fonts/ttf/verdana.ttf", 15);
+		ImFont* pFont = io.Fonts->AddFontFromFileTTF(Asset->GetPath("fonts/ttf/verdana.ttf").c_str(), 15);
 		//ImGui::PushFont(pFont);
 
 		if (m_window) ImGui_ImplWin32_Init(m_window->Handle(), m_window->Context());

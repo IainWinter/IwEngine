@@ -1,8 +1,7 @@
-
 name = "PixelArt"
 
 iwengdir  = path.getabsolute("../_export")
-gamedir  = path.getabsolute(name)--path.getabsolute("IwSandbox") --path.getabsolute("PhysicsProject") --path.getabsolute("SpaceSand")
+gamedir  = path.getabsolute(name)
 
 cfgname = "%{cfg.buildcfg}.%{cfg.system}.%{cfg.architecture}"
 bindir  = "/bin/" .. cfgname
@@ -18,9 +17,6 @@ workspace (name)
 	location (gamedir .. blddir)
 
 	project (name)
-	--project "Physics project"
-	--project "Iw Sandbox"
-	--project "SpaceSand"
 		--kind "SharedLib"
 		kind "WindowedApp"
 		language "C++"

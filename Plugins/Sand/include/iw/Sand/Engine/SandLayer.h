@@ -50,11 +50,14 @@ public:
 	}
 
 	void SetCamera(
-		int x,  int y,
-		int xs, int ys)
+		float x,  float y,
+		float xs, float ys)
 	{
-		float width  = Renderer->Width()  / 2;
-		float height = Renderer->Height() / 2;
+		int width  = m_render->GetSandTexture()->Width()  / 2;
+		int height = m_render->GetSandTexture()->Height() / 2;
+
+		x = ceil(x * xs);
+		y = ceil(y * ys);
 
 		m_render->SetCamera(x + -width, y + -height, x + width, y + height);
 		m_update->SetCameraScale(xs, ys);

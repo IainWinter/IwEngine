@@ -12,7 +12,7 @@ class SandWorldUpdateSystem
 private:
 	SandWorld* m_world;
 
-	int m_sx, m_sy; // Cells per meter
+	float m_sx, m_sy; // Cells per meter
 
 public:
 	SandWorldUpdateSystem(
@@ -25,7 +25,7 @@ public:
 	}
 
 	void SetCameraScale(
-		int sx, int sy)
+		float sx, float sy)
 	{
 		m_sx = sx; m_sy = sy;
 	}

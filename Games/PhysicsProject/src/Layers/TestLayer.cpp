@@ -6,11 +6,11 @@
 #include "iw/graphics/Camera.h"
 #include "imgui/imgui.h"
 #include "iw/engine/Time.h"
-#include "iw/engine/Components/EditorCameraController.h"
 #include "iw/graphics/PointLight.h"
 #include <iw\physics\Collision\SphereCollider.h>
 #include <iw\physics\Collision\PlaneCollider.h>
 #include <iw\physics\Collision\MeshCollider.h>
+#include <iw\physics\Collision\HullCollider.h>
 #include <iw\physics\Dynamics\SmoothPositionSolver.h>
 #include <iw\physics\Dynamics\ImpulseSolver.h>
 
@@ -57,7 +57,7 @@ namespace iw {
 		Collider* col;
 
 		//if (x > 0) {
-			col = entity.Add<MeshCollider>(MeshCollider::MakeCube());
+			col  = entity.Add<Hull>(MakeCubeCollider());
 			mesh = entity.Set<Mesh>(cube->MakeInstance());
 		//}
 
@@ -98,9 +98,9 @@ namespace iw {
 
 		mesh->Material()->Initialize(Renderer->Device);
 		
-		body->SetTrans(trans);
-		body->SetCol(col);
-		body->SetIsStatic(false);
+		body->SetTransform(trans);
+		body->Collider = col;
+		body->IsStatic = false;
 		body->Restitution = .5;
 		body->DynamicFriction = .2;
 		body->StaticFriction = .3;
@@ -178,11 +178,11 @@ namespace iw {
 		// Floor
 
 		{
-			Ground = Space->CreateEntity<Transform, Mesh, PlaneCollider, CollisionObject>();
+			Ground = Space->CreateEntity<Transform, Mesh, Plane, CollisionObject>();
 
 			Transform*       trans = Ground.Set<Transform>(glm::vec3(0, -2, 0), glm::vec3(22)); // for project idk why if this isnt here the lights break
 			Mesh*            mesh  = Ground.Set<Mesh>(plane->MakeInstance());
-			PlaneCollider*   col   = Ground.Set<PlaneCollider>(glm::vec3(0, 1, 0), 0);
+			Plane*           col   = Ground.Set<Plane>(glm::vec3(0, 1, 0), 0);
 			CollisionObject* obj   = Ground.Set<CollisionObject>();
 
 			mesh->SetMaterial(REF<Material>(shader));
@@ -197,27 +197,27 @@ namespace iw {
 
 			mesh->Material()->Initialize(Renderer->Device);
 
-			obj->SetTrans(trans);
-			obj->SetCol(col);
+			obj->SetTransform(trans);
+			obj->Collider = col;
 
 			Physics->AddCollisionObject(obj);
 		}
 
 		{
-			PlaneCollider*   col1 = new PlaneCollider(glm::vec3( 0, 0,  1), -20);
-			PlaneCollider*   col2 = new PlaneCollider(glm::vec3( 0, 0, -1), -20);
-			PlaneCollider*   col3 = new PlaneCollider(glm::vec3( 1, 0,  0), -20);
-			PlaneCollider*   col4 = new PlaneCollider(glm::vec3(-1, 0,  0), -20);
+			Plane*   col1 = new Plane(glm::vec3( 0, 0,  1), -20);
+			Plane*   col2 = new Plane(glm::vec3( 0, 0, -1), -20);
+			Plane*   col3 = new Plane(glm::vec3( 1, 0,  0), -20);
+			Plane*   col4 = new Plane(glm::vec3(-1, 0,  0), -20);
 
 			CollisionObject* obj1 = new CollisionObject();
 			CollisionObject* obj2 = new CollisionObject();
 			CollisionObject* obj3 = new CollisionObject();
 			CollisionObject* obj4 = new CollisionObject();
 
-			obj1->SetCol(col1);
-			obj2->SetCol(col2);
-			obj3->SetCol(col3);
-			obj4->SetCol(col4);
+			obj1->Collider = col1;
+			obj2->Collider = col2;
+			obj3->Collider = col3;
+			obj4->Collider = col4;
 
 			Physics->AddCollisionObject(obj1);
 			Physics->AddCollisionObject(obj2);
@@ -322,7 +322,7 @@ namespace iw {
 			Physics->AddConstraint(ef);
 			Physics->AddConstraint(fg);
 
-			Ground.Find<iw::CollisionObject>()->Trans().Position.y = -200;
+			Ground.Find<iw::CollisionObject>()->Transform.Position.y = -200;
 
 			Physics->SetGravity(glm::vec3(0, -9.81f, 0));
 		}
@@ -335,7 +335,7 @@ namespace iw {
 			Entity c = SpawnCube(glm::vec3(.5, .5, 5));
 			Entity d = SpawnCube(glm::vec3(2));
 
-			VelocityConstraint* ab = new BallInSocketConstraint(
+			/*VelocityConstraint* ab = new BallInSocketConstraint(
 				a.Find<iw::Rigidbody>(),
 				b.Find<iw::Rigidbody>(),
 				from_glm(glm::vec3( 1, 1, -1)), 
@@ -369,7 +369,7 @@ namespace iw {
 			Physics->AddConstraint(da);
 
 			b.Find<iw::Rigidbody>()->Gravity.y = -10;
-			d.Find<iw::Rigidbody>()->Gravity.y = 5;
+			d.Find<iw::Rigidbody>()->Gravity.y = 5;*/
 
 			Physics->AddSolver(new ImpulseSolver());
 			Physics->AddSolver(new SmoothPositionSolver());
@@ -500,27 +500,27 @@ namespace iw {
 		//	CorrectVelocity(Box4, Box3, glm::vec3(-1, -1, -1));
 		//}
 
-		float linear  = 0;
-		float angular = 0;
+		//float linear  = 0;
+		//float angular = 0;
 
-		float error = 0;
+		//float error = 0;
 
-		Space->Query<iw::Rigidbody>().Each([&](
-			EntityHandle e,
-			iw::Rigidbody* r)
-		{
-			linear  += 1 / 2.0f * r->Mass() * glm::dot(r->Velocity, r->Velocity);
-			angular += 1 / 2.0f * glm::dot(r->Inertia * r->AngularVelocity, r->Inertia * r->AngularVelocity);
-		});
+		//Space->Query<iw::Rigidbody>().Each([&](
+		//	EntityHandle e,
+		//	iw::Rigidbody* r)
+		//{
+		//	linear  += 1 / 2.0f * r->Mass() * glm::dot(r->Velocity, r->Velocity);
+		//	angular += 1 / 2.0f * glm::dot(r->Inertia * r->AngularVelocity, r->Inertia * r->AngularVelocity);
+		//});
 
-		for (iw::VelocityConstraint* constraint : Physics->VelocityConstraints()) {
-			error += iw::length((constraint->E * (iw::FixedTime() / constraint->biasStrength)).col_begin(0));
-		}
+		//for (iw::VelocityConstraint* constraint : Physics->VelocityConstraints()) {
+		//	error += iw::length((constraint->E * (iw::FixedTime() / constraint->biasStrength)).col_begin(0));
+		//}
 
-		linearEnergy.push_back(linear);
-		angularEnergy.push_back(angular);
-		totalEnergy.push_back(linear + angular);
-		totalError.push_back(error);
+		//linearEnergy.push_back(linear);
+		//angularEnergy.push_back(angular);
+		//totalEnergy.push_back(linear + angular);
+		//totalError.push_back(error);
 
 
 		//if (totalError.size() > 333) {

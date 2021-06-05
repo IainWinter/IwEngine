@@ -44,6 +44,12 @@ namespace Asset {
 		std::string& RootPath() { return m_rootPath; }
 		void SetRootPath(const std::string& rootPath) { m_rootPath = rootPath; }
 
+		std::string GetPath(
+			const std::string& path)
+		{
+			return m_rootPath + path;
+		}
+
 		template<
 			typename _l,
 			typename... _args>

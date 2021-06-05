@@ -40,7 +40,7 @@ Tile::Tile(
 }
 
 void Tile::UpdatePolygon(
-	MeshCollider* collider,
+	MeshCollider2* collider,
 	float sx, float sy)
 {
 	unsigned* colors = (unsigned*)GetSprite()->Colors();
@@ -53,7 +53,7 @@ void Tile::UpdatePolygon(
 
 	for (glm::vec2& v : m_polygon)
 	{
-		v = (v / size - glm::vec2(0.5f)) * glm::vec2(2.0f) * glm::vec2(sx, sy);
+		v = (v / size - glm::vec2(0.5f)) * glm::vec2(sx, sy) * 2.f/3.f;
 	}
 
 	m_spriteMesh.Data()->SetBufferData(bName::POSITION, m_polygon.size(), m_polygon.data());
@@ -62,15 +62,8 @@ void Tile::UpdatePolygon(
 	auto [verts, vcount] = GetPolygon();
 	auto [index, icount] = GetIndex();
 
-	for (glm::vec2* v = verts; v != verts + vcount; v++)
-	{
-		collider->AddPoint(glm::vec3(v->x, v->y, 0));
-	}
-
-	for (unsigned* i = index; i != index + icount; i += 3)
-	{
-		collider->AddTriangle(*(i), *(i + 1), *(i + 2));
-	}
+	for (glm::vec2* v = verts; v != verts + vcount; v++)    collider->AddPoint(*v /** glm::vec2(sx, sy) / size*/);
+	for (unsigned*  i = index; i != index + icount; i += 3) collider->AddTriangle(*(i), *(i + 1), *(i + 2));
 }
 
 void Tile::Draw(
@@ -91,7 +84,7 @@ void Tile::Draw(
 
 void Tile::ForEachInWorld(
 	iw::Transform* transform,
-	int sx, int sy,
+	float sx, float sy,
 	std::function<void(int, int, unsigned)> func)
 {
 	ref<Texture> target = GetTarget();

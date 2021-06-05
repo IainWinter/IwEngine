@@ -18,9 +18,8 @@ void SandWorldUpdateSystem::Update() {
 		if (tile->NeedsScan) { // only rescan polygon if source has changed
 			tile->NeedsScan = false;
 			tile->UpdatePolygon(
-				Space->FindEntity(tile).Find<MeshCollider>(),
-				m_world->m_scale * m_sy / m_sx,
-				m_world->m_scale
+				Space->FindEntity(tile).Find<MeshCollider2>(),
+				m_sx, m_sy
 			);
 
 			if (!tile->IsStatic) {

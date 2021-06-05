@@ -110,7 +110,7 @@ void SandLayer::PreUpdate() {
 	int fx2 = fx + width;
 	int fy2 = fy + height;
 
-	m_render->SetCamera(fx, fy, fx2, fy2);
+	//m_render->SetCamera(fx, fy, fx2, fy2);
 
 	sP = Mouse::ClientPos() / m_world->m_scale + vec2(fx, -fy);
 	sP.y() = height - sP.y();
@@ -188,7 +188,7 @@ Entity SandLayer::MakeTile(
 	bool isStatic,
 	bool isSimulated)
 {
-	ref<Archetype> archetype = Space->CreateArchetype<Transform, Mesh, MeshCollider, Tile>(); // Mesh is just temp for debug
+	ref<Archetype> archetype = Space->CreateArchetype<Transform, Mesh, MeshCollider2, Tile>(); // Mesh is just temp for debug
 
 	if (isSimulated) Space->AddComponent<Rigidbody>      (archetype);
 	else             Space->AddComponent<CollisionObject>(archetype);
@@ -198,11 +198,11 @@ Entity SandLayer::MakeTile(
 	Tile* tile = entity.Set<Tile>(Asset, "", isStatic);
 
 	Transform*       transform = entity.Set<Transform>();
-	Collider*        collider  = entity.Set<MeshCollider>();
+	MeshCollider2*   collider  = entity.Set<MeshCollider2>();
 	CollisionObject* object    = isSimulated ? entity.Set<Rigidbody>() : entity.Set<CollisionObject>();
 
-	object->SetCol(collider);
-	object->SetTrans(transform);
+	object->Collider = collider;
+	object->SetTransform(transform);
 
 	entity.Set<Mesh>(tile->m_spriteMesh); // tmep debug
 

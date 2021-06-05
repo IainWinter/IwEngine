@@ -22,12 +22,9 @@ namespace iw {
 			target = Target.Find<Transform>()->Position;
 		}
 
-		target.y += 2;
-		target.x -= 5;
+		glm::quat camrot = glm::angleAxis(iw::Pi, glm::vec3(0, 1, 0));
 
-		glm::quat camrot = glm::angleAxis(glm::pi<float>() * 0.5f, glm::vec3(0, 1, 0));
-
-		camera->SetPosition(iw ::lerp(camera->Position(), target, Time::DeltaTime() * Speed));
-		camera->SetRotation(glm::lerp(camera->Rotation(), camrot, Time::DeltaTime() * Speed));
+		camera->SetPosition(iw :: lerp(camera->Position(), target, Time::DeltaTime() * Speed));
+		camera->SetRotation(glm::slerp(camera->Rotation(), camrot, Time::DeltaTime() * Speed));
 	}
 }

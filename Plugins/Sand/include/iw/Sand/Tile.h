@@ -28,7 +28,7 @@ public:
 		bool isStatic = false);
 
 	void UpdatePolygon(
-		MeshCollider* collider,
+		MeshCollider2* collider,
 		float sx, float sy);
 
 	void Draw(
@@ -37,7 +37,7 @@ public:
 
 	void ForEachInWorld(
 		iw::Transform* transform,
-		int sx, int sy,
+		float sx, float sy,
 		std::function<void(int, int, unsigned)> func);
 
 	// Getters
