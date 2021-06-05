@@ -65,7 +65,7 @@ namespace iw {
 			
 				for (size_t i = 0; i < 4; i++)
 				for (size_t j = 0; j < 4; j++) {
-					glm::mat4 t = r->Trans().WorldTransformation();
+					glm::mat4 t = r->Transform.WorldTransformation();
 
 					transformation.set(i, j, t[j][i]);
 				}
@@ -181,13 +181,13 @@ namespace iw {
 		{}
 
 		vec<3> target(Rigidbody* r) {
-			if (r == A) return from_glm(A->Trans().Rotation * (A->Trans().Scale * to_glm(localAnchorA)));
-			else        return from_glm(B->Trans().Rotation * (B->Trans().Scale * to_glm(localAnchorB)));
+			if (r == A) return from_glm(A->Transform.Rotation * (A->Transform.Scale * to_glm(localAnchorA)));
+			else        return from_glm(B->Transform.Rotation * (B->Transform.Scale * to_glm(localAnchorB)));
 		}
 
 		vec<3> world_target(Rigidbody* r) {
-			if (r == A) return from_glm(A->Trans().Position) + target(A);
-			else        return from_glm(B->Trans().Position) + target(B);
+			if (r == A) return from_glm(A->Transform.Position) + target(A);
+			else        return from_glm(B->Transform.Position) + target(B);
 		}
 
 		void init(

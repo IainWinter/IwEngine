@@ -43,9 +43,10 @@ namespace Editor {
 		void PrintCollisionObject(iw::CollisionObject* object);
 		void PrintRigidbody(iw::Rigidbody* body);
 
-		template<typename _t>
+		template<
+			Dimension _d>
 		void PrintPlaneCollider(
-			iw::Physics::impl::PlaneCollider<_t>* collider)
+			iw::Physics::impl::PlaneCollider<_d>* collider)
 		{
 			if (!collider) return;
 
@@ -53,16 +54,17 @@ namespace Editor {
 				ImGui::TableSetupColumn("", 0, 0.3f);
 				ImGui::TableSetupColumn("", 0, 0.7f);
 
-				PrintCell("Plane");    PrintEditCell(&collider->Plane.P);
-				PrintCell("Distance"); PrintEditCell(&collider->Plane.D);
+				PrintCell("Normal");   PrintEditCell(&collider->Normal);
+				PrintCell("Distance"); PrintEditCell(&collider->Distance);
 
 				ImGui::EndTable();
 			}
 		}
 
-		template<typename _t>
+		template<
+			Dimension _d>
 		void PrintSphereCollider(
-			iw::Physics::impl::SphereCollider<_t>* collider)
+			iw::Physics::impl::SphereCollider<_d>* collider)
 		{
 			if (!collider) return;
 
@@ -77,9 +79,10 @@ namespace Editor {
 			}
 		}
 
-		template<typename _t>
+		template<
+			Dimension _d>
 		void PrintCapsuleCollider(
-			iw::Physics::impl::CapsuleCollider<_t>* collider)
+			iw::Physics::impl::CapsuleCollider<_d>* collider)
 		{
 			if (!collider) return;
 
@@ -87,44 +90,9 @@ namespace Editor {
 				ImGui::TableSetupColumn("", 0, 0.3f);
 				ImGui::TableSetupColumn("", 0, 0.7f);
 
-				glm::vec3 axis     = collider->Direction;
-				glm::vec3 lastAxis = axis;
-
 				PrintCell("Center"); PrintEditCell(&collider->Center);
 				PrintCell("Height"); PrintEditCell(&collider->Height);
 				PrintCell("Radius"); PrintEditCell(&collider->Radius);
-
-				PrintCell("Direction");
-
-				bool x = axis.x;
-				bool y = axis.y;
-				bool z = axis.z;
-
-				ImGui::TableNextCell();
-				ImGui::Checkbox("X", &x); ImGui::SameLine();
-				ImGui::Checkbox("Y", &y); ImGui::SameLine();
-				ImGui::Checkbox("Z", &z);
-
-				if (x || y || z) {
-					axis = glm::vec3(x, y, z);
-
-					if (axis.x != lastAxis.x) {
-						axis.y = 0;
-						axis.z = 0;
-					}
-
-					else if (axis.y != lastAxis.y) {
-						axis.x = 0;
-						axis.z = 0;
-					}
-
-					else if (axis.z != lastAxis.z) {
-						axis.x = 0;
-						axis.y = 0;
-					}
-
-					collider->Direction = axis;
-				}
 
 				ImGui::EndTable();
 			}

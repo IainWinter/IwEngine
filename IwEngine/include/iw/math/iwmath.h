@@ -21,13 +21,13 @@
 
 // From winmindef
 
-#ifndef max
-#define max(a,b)            (((a) > (b)) ? (a) : (b))
-#endif
-
-#ifndef min
-#define min(a,b)            (((a) < (b)) ? (a) : (b))
-#endif
+//#ifndef max
+//#define max(a,b)            (((a) > (b)) ? (a) : (b))
+//#endif
+//
+//#ifndef min
+//#define min(a,b)            (((a) < (b)) ? (a) : (b))
+//#endif
 
 namespace iw {
 namespace math {
@@ -70,6 +70,22 @@ namespace math {
 	* Phi ~ 1.62
 	*/
 	constexpr float Phi = 1.61803398875f;
+
+#undef max
+#undef min
+
+	template<typename _t>
+	const _t& max(const _t& a, const _t& b)
+	{
+		return a >= b ? a : b;
+	}
+
+	template<typename _t>
+	const _t& min(const _t& a, const _t& b)
+	{
+		return a <= b ? a : b;
+	}
+
 
 	/**
 	* Returns a random float -1 - 1

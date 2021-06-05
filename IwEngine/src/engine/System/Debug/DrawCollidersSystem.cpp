@@ -47,38 +47,43 @@ namespace Engine {
 		Renderer->BeginScene(m_camera);
 		
 		for (CollisionObject* object : Physics->CollisionObjects()) {
-			if (!object->Col()) continue;
-			
-			switch (object->Col()->Type()) {
-				case ColliderType::SPHERE: {
-					Renderer->DrawMesh(object->ColTrans(), sphereInstance);
-					break;
-				}
-				case ColliderType::CAPSULE: {
-					CapsuleCollider* col = (CapsuleCollider*)object->Col();
+			if (!object->Collider) continue;
 
-					auto key = std::make_pair(col->Height, col->Radius);
-					auto itr = capsules.find(key);
-					if (itr == capsules.end()) {
-						iw::Mesh mesh = MakeCapsule(description, 5, col->Height, col->Radius)->MakeInstance();
-						mesh.Data()->Initialize(Renderer->Device);
-						mesh.SetMaterial(material);
+			Renderer->DrawMesh(object->Transform, cubeInstance);
 
-						itr = capsules.emplace(key, mesh).first;
-					}
+			//switch (object->Collider->Type) {
+			//	case ColliderType::SPHERE: {
+			//		Renderer->DrawMesh(object->ColTrans(), sphereInstance);
+			//		break;
+			//	}
+			//	case ColliderType::CAPSULE: {
+			//		Capsule* col = (Capsule*)object->Collider;
 
-					Renderer->DrawMesh(object->ColTrans(), itr->second);
+			//		auto key = std::make_pair(col->Height, col->Radius);
+			//		auto itr = capsules.find(key);
+			//		if (itr == capsules.end()) {
+			//			iw::Mesh mesh = MakeCapsule(description, 5, col->Height, col->Radius)->MakeInstance();
+			//			mesh.Data()->Initialize(Renderer->Device);
+			//			mesh.SetMaterial(material);
 
-					break;
-				}
-				case ColliderType::PLANE: {
-					Renderer->DrawMesh(object->ColTrans(), planeInstance);
-					break; 
-				}
-				case ColliderType::HULL: {
-					Renderer->DrawMesh(object->Trans(), cubeInstance);
-				}
-			}
+			//			itr = capsules.emplace(key, mesh).first;
+			//		}
+
+			//		Renderer->DrawMesh(object->ColTrans(), itr->second);
+
+			//		break;
+			//	}
+			//	case ColliderType::PLANE: {
+			//		Renderer->DrawMesh(object->ColTrans(), planeInstance);
+			//		break; 
+			//	}
+			//	case ColliderType::HULL: {
+			//		Renderer->DrawMesh(object->Transform, cubeInstance);
+			//	}
+			//	case ColliderType::MESH: {
+			//		Renderer->DrawMesh(object->Transform, cubeInstance);
+			//	}
+			//}
 		}
 
 		Renderer->EndScene();	

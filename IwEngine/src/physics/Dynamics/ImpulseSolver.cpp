@@ -10,8 +10,8 @@ namespace Physics {
 		for (Manifold& manifold : manifolds) {
 			// Test for is each objects is dynamic or not
 
-			Rigidbody* aBody = manifold.ObjA->IsDynamic() ? (Rigidbody*)manifold.ObjA : nullptr;
-			Rigidbody* bBody = manifold.ObjB->IsDynamic() ? (Rigidbody*)manifold.ObjB : nullptr;
+			Rigidbody* aBody = manifold.ObjA->IsDynamic ? (Rigidbody*)manifold.ObjA : nullptr;
+			Rigidbody* bBody = manifold.ObjB->IsDynamic ? (Rigidbody*)manifold.ObjB : nullptr;
 
 			glm::vec3 aVel = aBody ? aBody->Velocity : glm::vec3(0.0f);
 			glm::vec3 bVel = bBody ? bBody->Velocity : glm::vec3(0.0f);

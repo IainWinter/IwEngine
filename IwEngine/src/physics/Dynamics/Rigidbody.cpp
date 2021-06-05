@@ -4,7 +4,7 @@ namespace iw {
 namespace Physics {
 	Rigidbody::Rigidbody(
 		bool isKinematic)
-		: CollisionObject()
+		: CollisionObject(true)
 		, InvMass(1)
 		, TakesGravity(true)
 		, SimGravity(true)
@@ -12,9 +12,7 @@ namespace Physics {
 		, StaticFriction(.5)
 		, DynamicFriction(.5)
 		, Restitution(.5)
-	{
-		m_isDynamic = true;
-	}
+	{}
 
 	void Rigidbody::ApplyForce(
 		const glm::vec3& force,
@@ -52,22 +50,22 @@ namespace Physics {
 		InvMass = 1.0f / mass;
 	}
 
-	void Rigidbody::SetTrans(
-		Transform* transform)
+	void Rigidbody::SetTransform(
+		iw::Transform* transform)
 	{
 		m_nextTrans = *transform;
 		m_lastTrans = *transform;
-		CollisionObject::SetTrans(transform);
+		CollisionObject::SetTransform(transform);
 	}
 
 	void Rigidbody::SetLastTrans(
-		const Transform& lastTrans)
+		const iw::Transform& lastTrans)
 	{
 		m_lastTrans = lastTrans;
 	}
 	
 	void Rigidbody::SetNextTrans(
-		const Transform& nextTrans)
+		const iw::Transform& nextTrans)
 	{
 		m_nextTrans = nextTrans;
 	}
@@ -75,7 +73,7 @@ namespace Physics {
 	void Rigidbody::Move(
 		const glm::vec3 delta)
 	{		
-		m_transform.Position += delta;
+		Transform.Position += delta;
 		Velocity = delta;
 	}
 }

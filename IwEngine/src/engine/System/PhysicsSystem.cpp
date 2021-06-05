@@ -26,9 +26,9 @@ namespace Engine {
 		for (auto entity : eca) {
 			auto [transform, rigidbody] = entity.Components.Tie<Components>();
 			
-			transform->Position = rigidbody->Trans().Position;
-			transform->Scale    = rigidbody->Trans().Scale;
-			transform->Rotation = rigidbody->Trans().Rotation;
+			transform->Position = rigidbody->Transform.Position;
+			transform->Scale    = rigidbody->Transform.Scale;
+			transform->Rotation = rigidbody->Transform.Rotation;
 
 			//if (rigidbody->IsKinematic()) {
 				//transform->Position = glm::lerp(rigidbody->LastTrans().Position,  rigidbody->Trans().Position, a);
@@ -40,9 +40,9 @@ namespace Engine {
 		for (auto entity : Space->Query<Transform, CollisionObject>()) {
 			auto [transform, object] = entity.Components.Tie<OtherComponents>();
 
-			transform->Position = object->Trans().Position;
-			transform->Scale    = object->Trans().Scale;
-			transform->Rotation = object->Trans().Rotation;
+			transform->Position = object->Transform.Position;
+			transform->Scale    = object->Transform.Scale;
+			transform->Rotation = object->Transform.Rotation;
 
 			//transform->Position = glm::lerp(transform->Position, object->Trans().Position, a);
 			//transform->Scale    = glm::lerp(transform->Scale,    object->Trans().Scale,    a);

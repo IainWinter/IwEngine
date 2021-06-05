@@ -11,65 +11,33 @@ namespace Physics {
 	using func_CollisionCallback = std::function<void(Manifold&, scalar)>;
 
 	class CollisionObject {
-	protected:
-		Transform m_transform;
-		Collider* m_collider;
-		bool m_isTrigger;
-		bool m_isStatic;
-		bool m_isDynamic;
+	public:
+		Transform Transform;
+		Collider* Collider;
 
-		func_CollisionCallback m_onCollision;
+		bool IsTrigger;
+		bool IsStatic;
+		const bool IsDynamic;
+
+		func_CollisionCallback OnCollision;
 
 	public:
-		IWPHYSICS_API
-		CollisionObject();
+		CollisionObject(
+			bool __isDynamic = false
+		)
+			: Collider(nullptr)
+			, IsTrigger(false)
+			, IsStatic(true)
+			, IsDynamic(__isDynamic)
+		{
+			// maybe put check for if dynamic flag matches this ptr
+		}
 
-		IWPHYSICS_API
-		AABB Bounds() const;
-
-		IWPHYSICS_API
-		Transform& Trans();
-
-		IWPHYSICS_API
-		const Transform& Trans() const;
-
-		IWPHYSICS_API
-		Transform ColTrans() const; // not sure about this
-
-		IWPHYSICS_API
-		Collider* Col() const; // should be const probly also these are not needed if they are pointers but Ill try the get set thigs for now as a lil test because ive always dismissed it for the most part
-
-		IWPHYSICS_API
-		bool IsTrigger() const;
-
-		IWPHYSICS_API
-		bool IsStatic() const;
-
-		IWPHYSICS_API
-		bool IsDynamic() const; // if the collision object is a rigidbody
-
-		IWPHYSICS_API
-		func_CollisionCallback& OnCollision();
-
-		IWPHYSICS_API
-		virtual void SetTrans(
-			Transform* transform);
-
-		IWPHYSICS_API
-		void SetCol(
-			Collider* collider);
-
-		IWPHYSICS_API
-		void SetIsTrigger(
-			bool isTrigger);
-
-		IWPHYSICS_API
-		void SetIsStatic(
-			bool isStatic);
-
-		IWPHYSICS_API
-		void SetOnCollision(
-			iw::func_CollisionCallback callback);
+		virtual void SetTransform(
+			iw::Transform* transform)
+		{
+			Transform = *transform;
+		}
 	};
 }
 

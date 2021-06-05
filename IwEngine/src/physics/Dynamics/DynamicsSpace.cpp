@@ -1,5 +1,4 @@
 #include "iw/physics/Dynamics/DynamicsSpace.h"
-#include "iw/physics/Collision/algo/ManifoldFactory.h"
 #include "iw/log/logger.h"
 #include <assert.h>
 #include <vector>
@@ -47,7 +46,7 @@ namespace Physics {
 		ResolveConstrains(dt); // might go after step
 
 		for (CollisionObject* object : m_objects) {
-			if (!object->IsDynamic()) continue;
+			if (!object->IsDynamic) continue;
 
 			Rigidbody* rigidbody = (Rigidbody*)object;
 
@@ -85,15 +84,15 @@ namespace Physics {
 		//}
 
 		for (CollisionObject* object : m_objects) {
-			if (!object->IsDynamic()) continue;
+			if (!object->IsDynamic) continue;
 
 			Rigidbody* rigidbody = (Rigidbody*)object;
 
-			rigidbody->SetLastTrans(rigidbody->Trans());
+			rigidbody->SetLastTrans(rigidbody->Transform);
 
 			if (rigidbody->IsKinematic)
 			{
-				Transform& transform = rigidbody->Trans();
+				Transform& transform = rigidbody->Transform;
 
 				glm::quat rot = glm::angleAxis(
 					glm::length(rigidbody->AngularVelocity) * dt,
@@ -140,7 +139,7 @@ namespace Physics {
 
 	void DynamicsSpace::TrySetGravity() {
 		for (CollisionObject* object : m_objects) {
-			if (!object->IsDynamic()) continue;
+			if (!object->IsDynamic) continue;
 
 			Rigidbody* rigidbody = (Rigidbody*)object;
 			if (rigidbody->TakesGravity && rigidbody->IsKinematic) {
@@ -151,7 +150,7 @@ namespace Physics {
 
 	void DynamicsSpace::TryApplyGravity() {
 		for (CollisionObject* object : m_objects) {
-			if (!object->IsDynamic()) continue;
+			if (!object->IsDynamic) continue;
 
 			Rigidbody* rigidbody = (Rigidbody*)object;
 			if (rigidbody->SimGravity && rigidbody->IsKinematic) {
@@ -164,11 +163,11 @@ namespace Physics {
 		scalar dt)
 	{
 		for (CollisionObject* object : m_objects) {
-			if (!object->IsDynamic()) continue;
+			if (!object->IsDynamic) continue;
 
 			Rigidbody* rigidbody = (Rigidbody*)object;
 			if (rigidbody->IsKinematic) {
-				Transform t = rigidbody->Trans();
+				Transform t = rigidbody->Transform;
 				glm::vec3   v = rigidbody->Velocity;
 
 				if (rigidbody->IsAxisLocked.x) {
@@ -196,7 +195,7 @@ namespace Physics {
 
 	void DynamicsSpace::ClearForces() {
 		for (CollisionObject* object : m_objects) {
-			if (!object->IsDynamic()) continue;
+			if (!object->IsDynamic) continue;
 			Rigidbody* rigidbody = (Rigidbody*)object;
 
 			if (rigidbody->IsKinematic) {

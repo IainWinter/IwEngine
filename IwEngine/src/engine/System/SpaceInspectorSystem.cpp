@@ -69,8 +69,8 @@ namespace Editor {
 				iw::CollisionObject* c = Space->FindComponent<iw::CollisionObject>(m_selectedEntity);
 				iw::Rigidbody*       r = Space->FindComponent<iw::Rigidbody>      (m_selectedEntity);
 
-					 if (c) t = &c->Trans();
-				else if (r) t = &r->Trans();
+					 if (c) t = &c->Transform;
+				else if (r) t = &r->Transform;
 
 				if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
 					PrintTransform(t);
@@ -107,59 +107,41 @@ namespace Editor {
 				}
 			}
 
-			else if (component == Space->GetComponent<iw::PlaneCollider>()) {
+			else if (component == Space->GetComponent<iw::Plane>()) {
 				if (ImGui::CollapsingHeader("Plane Collider", ImGuiTreeNodeFlags_DefaultOpen)) {
-					PrintPlaneCollider(Space->FindComponent<iw::PlaneCollider>(m_selectedEntity));
+					PrintPlaneCollider(Space->FindComponent<iw::Plane>(m_selectedEntity));
 				}
 			}
 
-			//else if (component == Space->GetComponent<iw::PlaneCollider2>()) {
-			//	if (ImGui::CollapsingHeader("Plane Collider 2D")) {
-			//		PrintPlaneCollider(Space->FindComponent<iw::PlaneCollider2>(m_selectedEntity));
-			//	}
-			//}
-			//
-			//else if (component == Space->GetComponent<iw::PlaneCollider4>()) {
-			//	if (ImGui::CollapsingHeader("Plane Collider 4D")) {
-			//		PrintPlaneCollider(Space->FindComponent<iw::PlaneCollider4>(m_selectedEntity));
-			//	}
-			//}
+			else if (component == Space->GetComponent<iw::Line>()) {
+				if (ImGui::CollapsingHeader("Line Collider 2D", ImGuiTreeNodeFlags_DefaultOpen)) {
+					PrintPlaneCollider(Space->FindComponent<iw::Line>(m_selectedEntity));
+				}
+			}
 
-			else if (component == Space->GetComponent<iw::SphereCollider>()) {
+			else if (component == Space->GetComponent<iw::Sphere>()) {
 				if (ImGui::CollapsingHeader("Sphere Collider", ImGuiTreeNodeFlags_DefaultOpen)) {
-					PrintSphereCollider(Space->FindComponent<iw::SphereCollider>(m_selectedEntity));
+					PrintSphereCollider(Space->FindComponent<iw::Sphere>(m_selectedEntity));
 				}
 			}
 
-			//else if (component == Space->GetComponent<iw::SphereCollider2>()) {
-			//	if (ImGui::CollapsingHeader("Sphere Collider 2D")) {
-			//		PrintSphereCollider(Space->FindComponent<iw::SphereCollider2>(m_selectedEntity));
-			//	}
-			//}
+			else if (component == Space->GetComponent<iw::Circle>()) {
+				if (ImGui::CollapsingHeader("Circle Collider 2D", ImGuiTreeNodeFlags_DefaultOpen)) {
+					PrintSphereCollider(Space->FindComponent<iw::Circle>(m_selectedEntity));
+				}
+			}
 
-			//else if (component == Space->GetComponent<iw::SphereCollider4>()) {
-			//	if (ImGui::CollapsingHeader("Sphere Collider 4D")) {
-			//		PrintSphereCollider(Space->FindComponent<iw::SphereCollider4>(m_selectedEntity));
-			//	}
-			//}
-
-			else if (component == Space->GetComponent<iw::CapsuleCollider>()) {
+			else if (component == Space->GetComponent<iw::Capsule>()) {
 				if (ImGui::CollapsingHeader("Capsule Collider", ImGuiTreeNodeFlags_DefaultOpen)) {
-					PrintCapsuleCollider(Space->FindComponent<iw::CapsuleCollider>(m_selectedEntity));
+					PrintCapsuleCollider(Space->FindComponent<iw::Capsule>(m_selectedEntity));
 				}
 			}
 
-			//else if (component == Space->GetComponent<iw::CapsuleCollider2>()) {
-			//	if (ImGui::CollapsingHeader("Capsule Collider 2D")) {
-			//		PrintCapsuleCollider(Space->FindComponent<iw::CapsuleCollider2>(m_selectedEntity));
-			//	}
-			//}
-
-			//else if (component == Space->GetComponent<iw::CapsuleCollider4>()) {
-			//	if (ImGui::CollapsingHeader("Capsule Collider 4D")) {
-			//		PrintCapsuleCollider(Space->FindComponent<iw::CapsuleCollider4>(m_selectedEntity));
-			//	}
-			//}
+			else if (component == Space->GetComponent<iw::Capsule2>()) {
+				if (ImGui::CollapsingHeader("Capsule Collider 2D", ImGuiTreeNodeFlags_DefaultOpen)) {
+					PrintCapsuleCollider(Space->FindComponent<iw::Capsule2>(m_selectedEntity));
+				}
+			}
 
 			else {
 				if (ImGui::CollapsingHeader(component->Name)) {
@@ -483,24 +465,19 @@ namespace Editor {
 
 		ImGui::PushID(object);
 
-		bool isTrigger = object->IsTrigger();
-		bool isStatic  = object->IsStatic();
-		bool isDynamic = object->IsDynamic();
+		bool isDynamic = object->IsDynamic;
 
 		if (ImGui::BeginTable("Collision Object", 2)) {
 			ImGui::TableSetupColumn("", 0, 0.3f);
 			ImGui::TableSetupColumn("", 0, 0.7f);
 
-			PrintCell("Trigger"); PrintEditCell(&isTrigger);
-			PrintCell("Static");  PrintEditCell(&isStatic);
+			PrintCell("Trigger"); PrintEditCell(&object->IsTrigger);
+			PrintCell("Static");  PrintEditCell(&object->IsStatic);
 			PrintCell("Dynamic"); PrintEditCell(&isDynamic);
 
 			ImGui::EndTable();
 		}
 
-		object->SetIsTrigger(isTrigger);
-		object->SetIsStatic (isStatic);
-		
 		ImGui::PopID();
 	}
 

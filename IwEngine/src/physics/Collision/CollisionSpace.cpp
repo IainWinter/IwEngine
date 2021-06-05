@@ -1,5 +1,5 @@
 #include "iw/physics/Collision/CollisionSpace.h"
-#include "iw/physics/Collision/algo/ManifoldFactory.h"
+#include "iw/physics/Collision/TestCollision.h"
 #include "iw/log/logger.h"
 #include <assert.h>
 
@@ -72,24 +72,24 @@ namespace Physics {
 			for (CollisionObject* b : m_objects) {
 				if (a == b) break;
 
-				if (   a->IsTrigger()
-					&& b->IsTrigger()
-					&& !(a->IsDynamic() || b->IsDynamic()))
+				if (   a->IsTrigger
+					&& b->IsTrigger
+					&& !(a->IsDynamic || b->IsDynamic))
 				{
 					continue;
 				}
 
-				if (   !a->Col()
-					|| !b->Col())
+				if (   !a->Collider
+					|| !b->Collider)
 				{
 					continue;
 				}
 
-				ManifoldPoints points = TestCollision(a->Col(), &a->Trans(), b->Col(), &b->Trans()); //;a->Col()->TestCollision(&a->Trans(), b->Col(), &b->Trans());
+				ManifoldPoints points = TestCollision(a->Collider, &a->Transform, b->Collider, &b->Transform);
 				if (points.HasCollision) {
 					// establish more formal rules for what can collide with what
-					if (   a->IsTrigger()
-						|| b->IsTrigger())
+					if (   a->IsTrigger
+						|| b->IsTrigger)
 					{
 						triggers.emplace_back(a, b, points);
 					}
@@ -119,8 +119,8 @@ namespace Physics {
 		const Collider& collider) const
 	{
 		for (CollisionObject* object : m_objects) {
-			if (   object->Col()
-				&& TestCollision(object->Col(), &object->Trans(), &collider, &Transform()).HasCollision)
+			if (   object->Collider
+				&& TestCollision(object->Collider, &object->Transform, &collider, &Transform()).HasCollision)
 			{
 				return true;
 			}
@@ -133,8 +133,8 @@ namespace Physics {
 		const CollisionObject* _object) const
 	{
 		for (const CollisionObject* object : m_objects) {
-			if (   object->Col()
-				&& TestCollision(object->Col(), &object->Trans(), _object->Col(), &_object->Trans()).HasCollision)
+			if (   object->Collider
+				&& TestCollision(object->Collider, &object->Transform, _object->Collider, &_object->Transform).HasCollision)
 			{
 				return true;
 			}
@@ -161,8 +161,8 @@ namespace Physics {
 		for (Manifold& manifold : manifolds) {
 			m_collisionCallback(manifold, dt);
 
-			func_CollisionCallback& a = manifold.ObjA->OnCollision();
-			func_CollisionCallback& b = manifold.ObjB->OnCollision();
+			func_CollisionCallback& a = manifold.ObjA->OnCollision;
+			func_CollisionCallback& b = manifold.ObjB->OnCollision;
 
 			if (a) {
 				a(manifold, dt);

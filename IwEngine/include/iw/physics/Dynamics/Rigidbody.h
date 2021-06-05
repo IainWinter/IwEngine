@@ -1,7 +1,6 @@
 #pragma once
 
 #include "iw/physics/Collision/CollisionObject.h"
-#include "iw/common/Components/Transform.h"
 
 namespace iw {
 namespace Physics {
@@ -29,8 +28,8 @@ namespace Physics {
 		scalar DynamicFriction; // Dynamic friction coefficient
 		scalar Restitution;     // Elasticity of collisions
 	private:
-		Transform m_lastTrans; // Where the rigidbody was last step
-		Transform m_nextTrans; // Where the rigidbody will be next step if there is no interference
+		iw::Transform m_lastTrans; // Where the rigidbody was last step
+		iw::Transform m_nextTrans; // Where the rigidbody will be next step if there is no interference
 
 	public:
 		IWPHYSICS_API Rigidbody(bool isKinematic = true);
@@ -39,15 +38,15 @@ namespace Physics {
 		IWPHYSICS_API void ApplyTorque(const glm::vec3& torque);
 		IWPHYSICS_API void ApplyGravity();
 
-		IWPHYSICS_API const Transform& LastTrans() const;
-		IWPHYSICS_API const Transform& NextTrans() const;
+		IWPHYSICS_API const iw::Transform& LastTrans() const;
+		IWPHYSICS_API const iw::Transform& NextTrans() const;
 
 		IWPHYSICS_API scalar  Mass() const;
 		IWPHYSICS_API void SetMass(scalar mass);
 
-		IWPHYSICS_API void SetTrans(Transform* transform) override;
-		IWPHYSICS_API void SetLastTrans(const Transform& lastTrans);
-		IWPHYSICS_API void SetNextTrans(const Transform& nextTrans);
+		IWPHYSICS_API void SetTransform(iw::Transform* transform) override;
+		IWPHYSICS_API void SetLastTrans(const iw::Transform& lastTrans);
+		IWPHYSICS_API void SetNextTrans(const iw::Transform& nextTrans);
 
 		IWPHYSICS_API void Move(const glm::vec3 delta);
 	};

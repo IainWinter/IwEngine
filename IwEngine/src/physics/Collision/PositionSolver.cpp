@@ -12,8 +12,8 @@ namespace Physics {
 
 			glm::vec3 resolution = manifold.Normal * manifold.PenetrationDepth;
 
-			aBody->Trans().Position -= resolution * float(1 - (int)aBody->IsStatic());
-			bBody->Trans().Position += resolution * float(1 - (int)bBody->IsStatic());
+			aBody->Transform.Position -= resolution * float(1 - (int)aBody->IsStatic);
+			bBody->Transform.Position += resolution * float(1 - (int)bBody->IsStatic);
 		}
 	}
 }

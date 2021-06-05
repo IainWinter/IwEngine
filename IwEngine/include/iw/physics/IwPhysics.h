@@ -22,9 +22,20 @@ namespace Physics {
 	using scalar = float;
 #endif
 
+	enum /*class*/ Dimension {
+		d2 = 2,
+		d3 = 3,
+	};
 }
 
 	using namespace Physics;
+}
+
+namespace iw {
+namespace Physics {
+	template<Dimension _d>
+	using _vec = glm::vec<size_t(_d), scalar>;
+}
 }
 
 // for templates?
@@ -41,7 +52,6 @@ namespace Physics {
 #	undef  IWPHYSICS_API
 #	define IWPHYSICS_API
 #endif
-
 
 inline float major(glm::vec2& v) {
 	float m = v.x;
