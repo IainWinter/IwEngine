@@ -48,9 +48,7 @@ namespace util {
 			std::unique_lock<std::mutex> lock(m_mutex);
 			m_condition.wait(lock, [=] { return !m_queue.empty(); });
 
-			_t item = std::move(m_queue.front());
-			m_queue.pop_front();
-
+			_t item = m_queue.front(); m_queue.pop_front();
 			return item;
 		}
 

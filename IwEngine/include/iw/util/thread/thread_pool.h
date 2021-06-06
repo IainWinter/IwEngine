@@ -4,6 +4,7 @@
 #include <vector>
 #include <thread>
 #include <functional>
+//#include <string>
 
 namespace iw {
 namespace util {
@@ -11,6 +12,7 @@ namespace util {
 	private:
 		struct func_t {
 			std::function<void()> func;
+			//std::string name;
 			bool poison = false;
 		};
 
@@ -33,11 +35,13 @@ namespace util {
 			for (std::thread& thread : m_pool) {
 				thread = std::thread([&]() {
 					while (true) {
-						func_t& func = m_queue.pop();
+						func_t/*&*/ func = m_queue.pop(); // was reference the problem?
 
 						if (func.poison) {
 							break;
 						}
+
+						//LOG_DEBUG << "Called function " << func.name;
 
 						func.func();
 					}
@@ -49,6 +53,7 @@ namespace util {
 			for (std::thread& thread : m_pool) {
 				func_t t {
 					{},
+					//"",
 					true // stop thread
 				};
 
@@ -61,10 +66,12 @@ namespace util {
 		}
 
 		void queue(
-			std::function<void()> func)
+			std::function<void()> func/*,
+			std::string& name*/)
 		{
 			func_t t {
 				func,
+				//name,
 				false
 			};
 
