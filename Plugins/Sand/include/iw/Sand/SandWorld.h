@@ -96,7 +96,7 @@ private:
 		chunk->AddField(
 			field.memory->alloc(FieldSize(field.cellSize)),
 			field.hasLocks
-				? new std::mutex[FieldSize<std::mutex>()]//(std::mutex*)field.memory->alloc(FieldSize<std::mutex>())
+				? new std::mutex[m_chunkWidth * m_chunkHeight /*FieldSize<std::mutex>()*/]//(std::mutex*)field.memory->alloc(FieldSize<std::mutex>())
 				: nullptr
 		);
 	}

@@ -12,7 +12,10 @@ namespace Physics {
 		static impl::Test_Collision_funcs<d2> d2;
 		static impl::Test_Collision_funcs<d3> d3;
 
-		if (a->Dim != b->Dim) return {};
+		if (a->Dim != b->Dim) {
+			LOG_WARNING << "Tried to collide 2d and 3d objects!";
+			return {};
+		}
 
 		Dimension dim = a->Dim;
 

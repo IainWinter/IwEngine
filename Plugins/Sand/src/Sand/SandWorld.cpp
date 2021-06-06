@@ -134,6 +134,10 @@ void SandWorld::RemoveEmptyChunks() {
 					chunk->m_fields[i].cells,
 					FieldSize(field.cellSize)
 				);
+
+				if (field.hasLocks) {
+					delete[] chunk->m_fields[i].locks;
+				}
 			}
 		}
 	}

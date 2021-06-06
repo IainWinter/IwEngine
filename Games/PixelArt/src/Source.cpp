@@ -2,6 +2,9 @@
 
 #include "iw/engine/Systems/Render/RenderSystem.h"
 #include "iw/engine/Systems/Camera/LerpCameraControllerSystem.h"
+#include "iw/engine/Systems/PhysicsSystem.h"
+#include "iw/engine/Systems/EntityCleanupSystem.h"
+#include "iw/engine/Components/Timer.h"
 
 #include "iw/physics/Collision/MeshCollider.h"
 #include "iw/physics/Collision/HullCollider.h"
@@ -9,12 +12,7 @@
 #include "iw/physics/Collision/CapsuleCollider.h"
 #include "iw/physics/Dynamics/SmoothPositionSolver.h"
 #include "iw/physics/Dynamics/ImpulseSolver.h"
-#include "iw/engine/Systems/PhysicsSystem.h"
-#include "iw/engine/Systems/EntityCleanupSystem.h"
-
 #include "iw/physics/Dynamics/Mechanism.h"
-
-#include "iw/engine/Components/Timer.h"
 
 #include "iw/common/algos/MarchingCubes.h"
 
@@ -73,6 +71,27 @@ struct Player {
 struct Bullet { float timer = 0; float time = .1; };
 struct Grass  {};
 struct Enemy  {};
+struct Background { float Distance = 1; glm::vec2 Anchor; };
+
+struct GroundSettings {
+	float left    = 0, right   = 0;
+	float bottom  = 0, top     = 0;
+	float xAnchor = 0, yAnchor = 0;
+	float xScale  = 5, yScale  = 5;
+
+	bool makeCollider = false;
+	bool makeGrass    = false;
+
+	bool isBackground = false;
+	bool isWireframe  = false;
+
+	float distance = 1;
+	float grassPerMeter = 10;
+
+	float zIndex = 0;
+
+	iw::Color color;
+};
 
 struct GroundConstraint : iw::Constraint {
 	
@@ -160,6 +179,8 @@ struct PixelationLayer
 	: iw::Layer
 {
 	iw::Mesh m_screen;
+	iw::Mesh m_square;
+
 	iw::SandLayer* m_sandLayer;
 	iw::Entity playerEnt;
 
@@ -168,6 +189,9 @@ struct PixelationLayer
 	iw::OrthographicCamera* cam;
 	unsigned lowResWidth;
 	unsigned lowResHeight;
+
+	unsigned pixelSize;
+	unsigned pixelsPerMeter = 10;
 
 	PixelationLayer(
 		iw::SandLayer* sandLayer
@@ -194,9 +218,16 @@ struct PixelationLayer
 		iw::MeshDescription description;
 		description.DescribeBuffer(iw::bName::POSITION, iw::MakeLayout<float>(3));
 		description.DescribeBuffer(iw::bName::UV,       iw::MakeLayout<float>(2));
+		
+		m_square = iw::MakePlane(description)->MakeInstance();
+		m_square.SetMaterial(simpleMat->MakeInstance());
 
-		iw::Mesh simpleMesh = iw::MakeLine(description, 3)->MakeInstance();
-		iw::Mesh cubeMesh   = iw::MakeCube(description)   ->MakeInstance();
+		// Rotate plane to be facing camera
+		{
+			iw::Transform rotX;
+			rotX.Rotation = glm::angleAxis(-iw::Pi/2, glm::vec3(1, 0, 0));
+			m_square.Data()->TransformMeshData(rotX);
+		}
 
 		// Player
 		if (true) {
@@ -208,11 +239,9 @@ struct PixelationLayer
 				iw::Timer,
 				Player>();
 
-			iw::ref<iw::Material> mat = simpleMat->MakeInstance();
-			mat->Set("albedo", iw::Color::From255(240, 100, 100));
 
-			iw::Transform*  t = playerEnt.Set<iw::Transform>(glm::vec3(20, 5, 0), glm::vec3(1, 2, 1));
-			iw::Mesh*       m = playerEnt.Set<iw::Mesh>(cubeMesh);
+			iw::Transform*  t = playerEnt.Set<iw::Transform>(glm::vec3(20, 25, 0), glm::vec3(1, 2, 1));
+			iw::Mesh*       m = playerEnt.Set<iw::Mesh>(m_square.MakeInstance());
 			iw::Hull2*      c = playerEnt.Set<iw::Hull2>(iw::MakeSquareCollider());
 			iw::Rigidbody*  r = playerEnt.Set<iw::Rigidbody>();
 			Player*         p = playerEnt.Set<Player>();
@@ -249,9 +278,9 @@ struct PixelationLayer
 			};
 
 			Physics->AddRigidbody(r);
-			Physics->AddConstraint(new GroundConstraint(r, -26));
+			//Physics->AddConstraint(new GroundConstraint(r, -26));
 
-			m->SetMaterial(mat);
+			m->Material()->Set("albedo", iw::Color::From255(240, 100, 100));
 		}
 
 		// Enemy
@@ -263,8 +292,8 @@ struct PixelationLayer
 				iw::Rigidbody,
 				Enemy>();
 
-			iw::Transform* t = enemy.Set<iw::Transform>(glm::vec3(0, 5, 0));
-			iw::Mesh*      m = enemy.Set<iw::Mesh>(cubeMesh);
+			iw::Transform* t = enemy.Set<iw::Transform>(glm::vec3(0, 25, 0));
+			iw::Mesh*      m = enemy.Set<iw::Mesh>(m_square.MakeInstance());
 			iw::Hull2*     c = enemy.Set<iw::Hull2>(iw::MakeSquareCollider());
 			iw::Rigidbody* r = enemy.Set<iw::Rigidbody>();
 			                   enemy.Set<Enemy>();
@@ -273,113 +302,41 @@ struct PixelationLayer
 			r->SetTransform(t);
 			r->IsAxisLocked.z = true;
 
-			iw::ref<iw::Material> mat = simpleMat->MakeInstance();
-			mat->Set("albedo", iw::Color::From255(200, 200, 100));
-
-			m->SetMaterial(mat);
+			m->Material()->Set("albedo", iw::Color::From255(200, 200, 100));
 
 			Physics->AddRigidbody(r);
-			Physics->AddConstraint(new GroundConstraint(r, -26, .15));
+			//Physics->AddConstraint(new GroundConstraint(r, -26, .15));
 		}
 
 		// Ground
 		if (true) {
-			iw::Entity ground = Space->CreateEntity<
-				iw::Transform,
-				iw::Mesh,
-				iw::MeshCollider2,
-				iw::CollisionObject>();
+			GroundSettings mainGround1;
+			mainGround1.left = -100;
+			mainGround1.right = 100;
+			mainGround1.bottom = -10;
+			mainGround1.top = 10;
+			mainGround1.makeCollider = true;
+			//mainGround1.makeGrass = true;
+			//mainGround1.grassPerMeter = 10;
+			mainGround1.color = iw::Color::From255(138, 84, 37);
+			mainGround1.isWireframe = true;
 
-			iw::Transform*       t = ground.Set<iw::Transform>(glm::vec3(0, -10, 0), glm::vec3(1, 1, 1));
-			iw::MeshCollider2*   c = ground.Set<iw::MeshCollider2>();
-			iw::CollisionObject* o = ground.Set<iw::CollisionObject>();
+			MakeGroundPlane(mainGround1);
 
-			o->Collider = c;
-			o->SetTransform(t);
-
-			Physics->AddCollisionObject(o);
-
-			std::vector<glm::vec2> points {
-				glm::vec2(-28, -6),
-				glm::vec2( 28, -6),
-				glm::vec2( 28,  16),
-
-				glm::vec2(24,  2),
-				glm::vec2(18,  1.5),
-				glm::vec2(13,  -1),
-				glm::vec2(4,  -3),
-				glm::vec2(0,  0),
-				glm::vec2(0,  1),
-				glm::vec2(-12,  3),
-				glm::vec2(-20,  10),
-
-				glm::vec2(-28, 10),
-			};
-
-			std::vector<unsigned> index = iw::common::TriangulatePolygon(points);
-
-			for (auto itr = index.begin(); itr != index.end(); itr += 3) {
-				c->AddTriangle(*itr, *(itr + 1), *(itr + 2));
-			}
-
-			std::vector<glm::vec3> points3; // Translate for 3d for mesh (a hack), also add points to collider
-			for (glm::vec2& v : points)
+			for (int i = 1; i < 5; i++)
 			{
-				points3.push_back(glm::vec3(v.x, v.y, 0));
-				c->AddPoint(v);
-			}
+				GroundSettings background;
+				background.left = -100 * ceil(sqrt(i));
+				background.right = 100 * ceil(sqrt(i));
+				background.bottom = -10;
+				background.top = 10;
+				background.isBackground = true;
+				background.distance = i + 1;
+				background.zIndex = -i;
+				background.color = iw::Color::From255(128, 100 + iw::randf() * 80, 50);
+				background.yAnchor = -10;
 
-			iw::MeshData* data = new iw::MeshData(description);
-			data->SetBufferData(iw::bName::POSITION, points3.size(), points3.data());
-			data->SetBufferData(iw::bName::UV, points.size(), points.data());
-			data->SetIndexData(index.size(), index.data());
-
-			iw::Mesh* m = ground.Set<iw::Mesh>(data->MakeInstance());
-
-			iw::ref<iw::Material> mat = simpleMat->MakeInstance();
-			mat->Set("albedo", iw::Color::From255(138, 84, 37));
-			//mat->SetWireframe(true);
-
-			m->SetMaterial(mat);
-
-			// Grass
-			if (true) {
-				for (size_t i = 0; i < points.size(); i++)
-				{
-					size_t j = (i + 1) % points.size();
-
-					glm::vec2 norm = points[j] - points[i];
-
-					float temp = norm.x; // get normal
-					norm.x = -norm.y;
-					norm.y = temp;
-
-					if (glm::dot(norm, glm::vec2(0, 1)) >= 0) {
-						continue;
-					}
-
-					size_t count = 20 * glm::length(norm);
-
-					for (int s = 0; s < count; s++) {
-						iw::Entity grass = Space->CreateEntity<
-							iw::Transform,
-							iw::Mesh,
-							Grass>();
-
-						glm::vec2 pos = iw::lerp(points[i], points[j], float(s) / count);
-
- 						iw::Transform* gt = grass.Set<iw::Transform>(glm::vec3(pos.x, pos.y, 0), glm::vec3(.25));
-						iw::Mesh*      gm = grass.Set<iw::Mesh>(simpleMesh.MakeCopy());
-
-						gt->SetParent(t);
-						gt->Scale = gt->Scale / t->Scale; // cancel scale of t
-
-						iw::ref<iw::Material> mat = simpleMat->MakeInstance();
-						mat->Set("albedo", iw::Color::From255(78, 186, 84).rgba() * (1 + iw::randf() * .25f));
-
-						gm->SetMaterial(mat);
-					}
-				}
+				MakeGroundPlane(background);
 			}
 		}
 
@@ -388,6 +345,7 @@ struct PixelationLayer
 		Physics->SetGravity(glm::vec3(0, -50, 0));
 		Physics->AddSolver(new iw::SmoothPositionSolver());
 		Physics->AddSolver(new iw::ImpulseSolver());
+		iw::SetFixedTime(.01f);
 
 		// Render to low res
 
@@ -395,8 +353,8 @@ struct PixelationLayer
 
 		bool lowRes = true;
 
-		float pixelSize = m_sandLayer->m_cellScale;
-		unsigned pixelsPerMeter = 10;
+		pixelSize = 2;// m_sandLayer->m_cellScale;
+		//pixelsPerMeter = 10;
 
 		lowResWidth  = lowRes ? Renderer->Width()  / pixelSize : Renderer->Width();  
 		lowResHeight = lowRes ? Renderer->Height() / pixelSize : Renderer->Height();
@@ -407,7 +365,7 @@ struct PixelationLayer
 
 		lowResTarget->Tex(0)->SetFilter(iw::NEAREST);
 
-		// Final screen render that texture onto the screen quad
+		// Final screen render - lowres texture onto the screen quad
 
 		iw::ref<iw::Material> screenMat = REF<iw::Material>(screenShader);
 		screenMat->SetTexture("texture", lowResTarget->Tex(0));
@@ -417,12 +375,12 @@ struct PixelationLayer
 
 		// Rendering and camera
 
-		iw::Color clearColor = iw::Color::From255(20, 20, 20, 0);
+		iw::Color clearColor = iw::Color::From255(0, 37, 53);
 
 		cam = new iw::OrthographicCamera(
 			lowResWidth  / pixelsPerMeter,
 			lowResHeight / pixelsPerMeter,
-			-10, 100
+			-1000, 1000
 		);
 
 		iw::CameraController* controller = PushSystem<iw::LerpCameraControllerSystem>(playerEnt, cam);
@@ -436,32 +394,36 @@ struct PixelationLayer
 		int error = iw::Layer::Initialize();
 		if (error) return error;
 
-		MainScene->SetMainCamera(cam);
+		//cam = (iw::OrthographicCamera*)controller->GetCamera();
 
-		iw::SetFixedTime(.01f);
+		MainScene->SetMainCamera(cam);
 
 		// Tile
 
-		tileEntity = m_sandLayer->MakeTile("none", true, true);
+		if (false) {
+			tileEntity = m_sandLayer->MakeTile("none", true, true);
 
-		iw::Tile*      tile = tileEntity.Find<iw::Tile>();
-		iw::Mesh*      mesh = tileEntity.Find<iw::Mesh>();
-		iw::Rigidbody* body = tileEntity.Find<iw::Rigidbody>();
+			iw::Tile*      tile = tileEntity.Find<iw::Tile>();
+			iw::Mesh*      mesh = tileEntity.Find<iw::Mesh>();
+			iw::Rigidbody* body = tileEntity.Find<iw::Rigidbody>();
 
-		mesh->SetMaterial(simpleMat);
-		mesh->Material()->Set("albedo", iw::Color::From255(255, 0, 0));
-		mesh->Material()->SetWireframe(true);
+			unsigned* colors = (unsigned*)tile->GetSprite()->Colors();
 
-		body->TakesGravity = false;
-		body->Gravity.y = -10;
-		Physics->AddRigidbody(body);
+			for (int y = 1; y < 63; y++)
+			for (int x = 48; x < 63; x++)
+			{
+				colors[x + y * tile->GetSprite()->Width()] = 1;
+			}
 
-		unsigned* colors = (unsigned*)tile->GetSprite()->Colors();
+			mesh->SetMaterial(simpleMat);
+			mesh->Material()->Set("albedo", iw::Color::From255(255, 0, 0));
+			mesh->Material()->SetWireframe(true);
 
-		for (int y = 1; y < 63; y++)
-		for (int x = 48; x < 63; x++)
-		{
-			colors[x + y * tile->GetSprite()->Width()] = 1;
+			body->TakesGravity = false;
+			body->Gravity.y = -10;
+			body->SetTransform(&iw::Transform(glm::vec3(-20, 10, 01)));
+
+			Physics->AddRigidbody(body);
 		}
 
 		iw::Cell c;
@@ -469,10 +431,10 @@ struct PixelationLayer
 		c.Type = iw::CellType::ROCK;
 		c.Color = iw::Color(1, 1, 1, 1);
 
-		m_sandLayer->m_world->SetCell(0, 0, c);
-		m_sandLayer->m_world->SetCell(pixelsPerMeter, 0,              c);
-		m_sandLayer->m_world->SetCell(0,              pixelsPerMeter, c);
-		m_sandLayer->m_world->SetCell(pixelsPerMeter, pixelsPerMeter, c);
+		//m_sandLayer->m_world->SetCell(0, 0, c);
+		//m_sandLayer->m_world->SetCell(pixelsPerMeter, 0,              c);
+		//m_sandLayer->m_world->SetCell(0,              pixelsPerMeter, c);
+		//m_sandLayer->m_world->SetCell(pixelsPerMeter, pixelsPerMeter, c);
 
 		return 0;
 	}
@@ -481,9 +443,27 @@ struct PixelationLayer
 	float lastHit = 0;
 
 	void PostUpdate() {
-		m_sandLayer->SetCamera(cam->WorldPosition().x, cam->WorldPosition().y, 10, 10);
+		float camX = cam->WorldPosition().x;
+		float camY = cam->WorldPosition().y;
+		
+		//m_sandLayer->SetCamera(camX, camY, 10, 10);
 
-		//LOG_INFO << tileEntity.Find<iw::Transform>()->Position.x;
+		// Background
+
+		auto P = [](float x) {
+			return 1 / iw::clamp<float>(x, 1, 1000);
+		};
+
+		Space->Query<iw::Transform, Background>().Each([=](
+			auto, 
+			iw::Transform* t, 
+			Background* b) 
+		{
+			float scale = P(b->Distance);
+			
+			t->Position.x = b->Anchor.x + camX * scale;
+			t->Position.y = b->Anchor.y + camY * scale;
+		});
 
 		// Player
 
@@ -581,8 +561,8 @@ struct PixelationLayer
 					if (props->inAir) // Slash down, pushes enemy down but not you, keeps you in air?
 					{
 						//MakeComboAttack(transform, 
-						//	0, -3.5f,
-						//	1.5f, 0.5f,
+						//	0, -3.5,
+						//	1.5, 0.5,
 						//	0, -5,
 						//	0, -30,
 						//	props, tick,
@@ -598,9 +578,8 @@ struct PixelationLayer
 						//});
 
 						MakeAttack(transform,
-							2.5f * props->facing, - 1,
-							0.5f * props->facing, - 1.5, 
-							10 * props->facing,   -20, [=]()
+							2.5f * props->facing, -1, 0.5, -1.5, 
+							10   * props->facing, -20, [=]()
 						{
 							props->AddHit(PlayerAttack::DOWN_AIR_SLASH, tick);
 							return false;
@@ -611,8 +590,7 @@ struct PixelationLayer
 					if (props->onGround) // Slash up, pushes enemy in the air but not you
 					{
 						MakeAttack(transform,
-							2.5f * props->facing,  0,
-							0.5f * props->facing,  1.5,
+							2.5f * props->facing, 0, 0.5, 1.5,
 							2.0f * props->facing, 35, [=]()
 						{
 							props->AddHit(PlayerAttack::DOWN_GROUND_SLASH, tick);
@@ -625,8 +603,7 @@ struct PixelationLayer
 				if (props->k_up) // Sweep above
 				{
 					MakeComboAttack(transform, 
-						0, 2.5f,
-						2.5f, 0.5f,
+						0, 2.5, 2.5, 0.5,
 						0, 5,
 						props->facing * 5, 15,
 						props, tick,
@@ -646,15 +623,14 @@ struct PixelationLayer
 				//{
 				//	MakeAttack(transform,
 				//		2.5f * props->facing, 0,
-				//		0.5f * props->facing, 1.5,
+				//		0.5f, 1.5,
 				//		15 * props->facing, -15);
 				//}
 
 				else // Normal slash forward
 				{
 					MakeComboAttack(transform,
-						2.5f * props->facing, 0,
-						0.5f * props->facing, 1.5,
+						2.5f * props->facing, 0, 0.5, 1.5,
 						1    * props->facing, 5,
 						10   * props->facing, 25,
 						props, tick,
@@ -691,7 +667,7 @@ struct PixelationLayer
 						{
 							//MakeAttack(transform,
 							//	2.5f * props->facing, - 1,
-							//	0.5f * props->facing, - 1.5, 
+							//	0.5f , - 1.5, 
 							//	0,                    -40, [=]()
 							//{
 							//	props->AddHit(PlayerAttack::DOWN_AIR_SLASH, tick);
@@ -704,7 +680,7 @@ struct PixelationLayer
 						{
 							//MakeAttack(transform,
 							//	2.5f * props->facing,  0,
-							//	0.5f * props->facing,  1.5,
+							//	0.5f ,  1.5,
 							//	2.0f * props->facing, 35, [=]()
 							//{
 							//	props->AddHit(PlayerAttack::DOWN_GROUND_SLASH, tick);
@@ -716,8 +692,7 @@ struct PixelationLayer
 					else
 					{
 						MakeAttack(transform,
-							4  * props->facing,                 0,
-							2  * props->facing,                 0.25f,
+							4  * props->facing, 0, 2, 0.25,
 							15 * props->charge * props->facing, 0);
 					}
 
@@ -799,9 +774,13 @@ struct PixelationLayer
 			data->Update(Renderer->Device);
 		});
 
+		// smooth scrolling, doesnt work like this tho?
+		float xd = 0;//(camX - (int)camX) / (pixelSize * pixelsPerMeter);
+		float yd = 0;//(camY - (int)camY) / (pixelSize * pixelsPerMeter);
+
 		Renderer->BeginScene();
-			Renderer->DrawMesh(iw::Transform(), m_sandLayer->GetSandMesh());
-			Renderer->DrawMesh(iw::Transform(), m_screen);
+			//Renderer->DrawMesh(iw::Transform(), m_sandLayer->GetSandMesh());
+			Renderer->DrawMesh(iw::Transform(glm::vec3(xd, yd, 0)), m_screen);
 		Renderer->EndScene();
 	}
 
@@ -815,21 +794,22 @@ struct PixelationLayer
 		iw::Entity bullet = Space->CreateEntity<
 			iw::Transform, 
 			iw::CollisionObject, 
-			iw::Hull,
+			iw::Hull2,
 			iw::Mesh, 
 			Bullet>();
 
-		iw::Transform*       t = bullet.Set<iw::Transform>(who);
+		iw::Transform*       t = bullet.Set<iw::Transform>();
 		iw::CollisionObject* o = bullet.Set<iw::CollisionObject>();
-		iw::Hull*            c = bullet.Set<iw::Hull>(iw::MakeCubeCollider());
-		iw::Mesh*            m = bullet.Set<iw::Mesh>(playerEnt.Find<iw::Mesh>()->MakeInstance());
+		iw::Hull2*           c = bullet.Set<iw::Hull2>(iw::MakeSquareCollider());
+		iw::Mesh*            m = bullet.Set<iw::Mesh>(m_square.MakeInstance());
 								 bullet.Set<Bullet>();
 
 		t->Scale.x = xSize;
 		t->Scale.y = ySize;
 
-		t->Position.x += xOff;
-		t->Position.y += yOff;
+		t->Position.x = who.WorldPosition().x + xOff;
+		t->Position.y = who.WorldPosition().y + yOff;
+		t->Position.z = 1;
 
 		m->Material()->Set("albedo", iw::Color::From255(200, 200, 255));
 
@@ -867,6 +847,137 @@ struct PixelationLayer
 			return func(dmgX, dmgY);
 		});
 	}
+
+	void MakeGroundPlane(
+		const GroundSettings& settings)
+	{
+		glm::vec2 b1(settings.left,  settings.bottom);
+		glm::vec2 b2(settings.right, settings.bottom);
+
+		glm::vec2 t1(settings.left,  settings.top);
+		glm::vec2 t2(settings.right, settings.top);
+
+		std::vector<glm::vec2> points { b1 };
+
+		for (float x = settings.left; x < settings.right; x += 20) {
+			points.emplace_back(x, settings.bottom);
+		}
+
+		points.push_back(b2);
+		points.push_back(t2);
+
+		glm::vec2 point = t2;
+		while (true) {
+			point.x -= (iw::randf() + 1) * settings.xScale;
+			point.y +=  iw::randf()      * settings.yScale;
+
+			point.y = iw::clamp(point.y, settings.bottom, FLT_MAX);
+
+			if (point.x <= t1.x) break;
+
+			points.push_back(point);
+		}
+
+		points.push_back(t1);
+
+		std::vector<glm::vec3> points3; 
+		for (glm::vec2& v : points) points3.push_back(glm::vec3(v.x, v.y, 0));
+		
+		std::vector<unsigned> index = iw::common::TriangulatePolygon(points);
+
+		iw::ref<iw::Material> simpleMat = REF<iw::Material>(Asset->Load<iw::Shader>("shaders/simple.shader"));
+
+		iw::MeshDescription description;
+		description.DescribeBuffer(iw::bName::POSITION, iw::MakeLayout<float>(3));
+		description.DescribeBuffer(iw::bName::UV,       iw::MakeLayout<float>(2));
+
+
+		iw::MeshData* data = new iw::MeshData(description);
+		data->SetBufferData(iw::bName::POSITION, points3.size(), points3.data());
+		data->SetBufferData(iw::bName::UV, points.size(), points.data());
+		data->SetIndexData(index.size(), index.data());
+
+		iw::ref<iw::Material> mat = simpleMat->MakeInstance();
+		mat->Set("albedo", settings.color);
+		mat->SetWireframe(settings.isWireframe);
+
+		iw::ref<iw::Archetype> arch = Space->CreateArchetype<iw::Transform, iw::Mesh>();
+
+		if (settings.makeCollider) {
+			Space->AddComponent<iw::MeshCollider2>  (arch);
+			Space->AddComponent<iw::CollisionObject>(arch);
+		}
+
+		if (settings.isBackground) {
+			Space->AddComponent<Background>(arch);
+		}
+
+		iw::Entity ground = Space->CreateEntity(arch);
+
+		iw::Transform*       t = ground.Set<iw::Transform>(glm::vec3(0, 0, settings.zIndex), glm::vec3(1, 1, 1));
+		iw::Mesh*            m = ground.Set<iw::Mesh>(data->MakeInstance());
+		
+		if (settings.makeCollider) {
+			iw::MeshCollider2*   c = ground.Set<iw::MeshCollider2>();
+			iw::CollisionObject* o = ground.Set<iw::CollisionObject>();
+
+			c->SetPoints(points);
+			c->SetTriangles(index);
+
+			o->Collider = c;
+			o->SetTransform(t);
+			
+			Physics->AddCollisionObject(o);
+		}
+		
+		if (settings.isBackground) {
+			ground.Set<Background>(settings.distance, glm::vec2(settings.xAnchor, settings.yAnchor));
+		}
+
+		m->SetMaterial(mat);
+
+		// Grass
+		if (settings.makeGrass) {
+			for (size_t i = 0; i < points.size(); i++)
+			{
+				size_t j = (i + 1) % points.size();
+
+				glm::vec2 norm = points[j] - points[i];
+
+				float temp = norm.x; // get normal
+				norm.x = -norm.y;
+				norm.y = temp;
+
+				if (glm::dot(norm, glm::vec2(0, 1)) >= 0) {
+					continue;
+				}
+
+				iw::Mesh lineMesh = iw::MakeLine(description, 3)->MakeInstance();
+
+				size_t count = glm::length(norm) * settings.grassPerMeter;
+
+				for (int s = 0; s < count; s++) {
+					iw::Entity grass = Space->CreateEntity<
+						iw::Transform,
+						iw::Mesh,
+						Grass>();
+
+					glm::vec2 pos = iw::lerp(points[i], points[j], float(s) / count);
+
+ 					iw::Transform* gt = grass.Set<iw::Transform>(glm::vec3(pos.x, pos.y, 0), glm::vec3(.25));
+					iw::Mesh*      gm = grass.Set<iw::Mesh>(lineMesh.MakeCopy());
+
+					gt->SetParent(t);
+					gt->Scale = gt->Scale / t->Scale; // cancel scale of t
+
+					iw::ref<iw::Material> mat = simpleMat->MakeInstance();
+					mat->Set("albedo", iw::Color::From255(78, 186, 84).rgba() * (1 + iw::randf() * .25f));
+
+					gm->SetMaterial(mat);
+				}
+			}
+		}
+	}
 };
 
 struct App
@@ -886,9 +997,9 @@ struct App
 		main->MapButton(iw::T, "toolbox");
 		main->MapButton(iw::I, "imgui");
 
-		int pixelScale = 1;
+		int pixelScale = 2;
 
-		iw::SandLayer* sandLayer = PushLayer<iw::SandLayer>(pixelScale);
+		iw::SandLayer* sandLayer = nullptr;// PushLayer<iw::SandLayer>(pixelScale);
 		
 		int error = iw::Application::Initialize(options);
 		if (error) return error;

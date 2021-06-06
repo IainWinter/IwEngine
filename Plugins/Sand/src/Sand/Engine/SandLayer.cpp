@@ -15,7 +15,7 @@ int SandLayer::Initialize() {
 
 	Cell _SAND = {
 		CellType::SAND,
-		CellProperties::MOVE_FORCE | CellProperties::MOVE_DOWN | CellProperties::MOVE_DOWN_SIDE,
+		/*CellProperties::MOVE_FORCE | */CellProperties::MOVE_DOWN | CellProperties::MOVE_DOWN_SIDE,
 		CellStyle::RANDOM_STATIC,
 		Color::From255(235, 200, 175),
 		Color::From255(25, 25, 25, 0)
@@ -23,7 +23,7 @@ int SandLayer::Initialize() {
 
 	Cell _WATER = {
 		CellType::WATER,
-		CellProperties::MOVE_FORCE | CellProperties::MOVE_DOWN | CellProperties::MOVE_SIDE,
+		/*CellProperties::MOVE_FORCE | */CellProperties::MOVE_DOWN | CellProperties::MOVE_SIDE,
 		CellStyle::SHIMMER,
 		Color::From255(175, 200, 235),
 		Color::From255(25, 25, 25, 0)
@@ -54,14 +54,14 @@ int SandLayer::Initialize() {
 
 	Cell _FIRE = {
 		CellType::FIRE,
-		CellProperties::MOVE_FORCE | CellProperties::BURN | CellProperties::MOVE_RANDOM,
+		/*CellProperties::MOVE_FORCE | */CellProperties::BURN | CellProperties::MOVE_RANDOM,
 		CellStyle::NONE,
 		Color::From255(255, 98, 0) // figure out how to blend colors properly, this makes it magenta because red gets overflown??? but still happens with 200
 	};
 
 	Cell _SMOKE = {
 		CellType::SMOKE,
-		CellProperties::MOVE_FORCE | CellProperties::MOVE_RANDOM,
+		/*CellProperties::MOVE_FORCE | */CellProperties::MOVE_RANDOM,
 		CellStyle::RANDOM_STATIC,
 		Color::From255(100, 100, 100),
 		Color::From255(25, 25, 25, 0)
@@ -85,7 +85,7 @@ int SandLayer::Initialize() {
 	Cell::SetDefault(CellType::SMOKE, _SMOKE);
 	Cell::SetDefault(CellType::BELT,  _BELT);
 
-	m_world = new SandWorld(256, 256, m_cellScale);
+	m_world = new SandWorld(64 * m_cellScale, 64 * m_cellScale, m_cellScale);
 
 	m_world->m_workers.push_back(new SandWorkerBuilder<SimpleSandWorker>());
 
@@ -163,7 +163,7 @@ void SandLayer::DrawWithMouse(int fx, int fy, int width, int height) {
 		else if (Keyboard::KeyDown(F)) placeMe = CellType::FIRE;
 		else if (Keyboard::KeyDown(M)) placeMe = CellType::SMOKE;
 		else if (Keyboard::KeyDown(O)) placeMe = CellType::WOOD;
-		else if (Keyboard::KeyDown(C)) placeMe = CellType::BELT;
+		else if (Keyboard::KeyDown(B)) placeMe = CellType::BELT;
 
 		for (int x = gP.x(); x < gP.x() + gridSize; x++)
 		for (int y = gP.y(); y < gP.y() + gridSize; y++) {
