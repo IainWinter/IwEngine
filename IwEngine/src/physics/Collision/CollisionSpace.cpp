@@ -72,15 +72,16 @@ namespace Physics {
 			for (CollisionObject* b : m_objects) {
 				if (a == b) break;
 
-				if (   a->IsTrigger
-					&& b->IsTrigger
-					&& !(a->IsDynamic || b->IsDynamic))
-				{
-					continue;
-				}
+				// dont collide if
+				// 
+				// both are triggers
+				// both arnt dynamic
+				// both are static
+				// either has no collider
 
-				if (   !a->Collider
-					|| !b->Collider)
+				if (    ( a->IsTrigger &&  b->IsTrigger)
+					 || (!a->IsDynamic && !b->IsDynamic)
+					 || (!a->Collider  || !b->Collider))
 				{
 					continue;
 				}

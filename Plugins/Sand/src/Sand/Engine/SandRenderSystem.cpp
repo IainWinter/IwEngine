@@ -30,7 +30,7 @@ int SandWorldRenderSystem::Initialize() {
 }
 
 void SandWorldRenderSystem::Update() {
-	bool _debugShowChunkBounds = iw::Keyboard::KeyDown(iw::C);
+	bool _debugShowChunkBounds = Keyboard::KeyDown(C);
 
 	unsigned int* pixels = (unsigned int*)m_texture->Colors();
 	m_texture->Clear();
@@ -45,31 +45,31 @@ void SandWorldRenderSystem::Update() {
 
 	for (int cx = minCX-1; cx <= maxCX; cx++)
 	for (int cy = minCY-1; cy <= maxCY; cy++) {
-		iw::SandChunk* chunk = m_world->GetChunkDirect({ cx, cy });
+		SandChunk* chunk = m_world->GetChunkDirect({ cx, cy });
 		if (!chunk) continue;
 
 		{ std::unique_lock lock(mutex); chunkCount++; }
 
 		Task->queue([&, cx, cy, chunk]() {
-			int startY = iw::clamp<int>(m_fy  - chunk->m_y, 0, chunk->m_height); // Could use diry rect
-			int startX = iw::clamp<int>(m_fx  - chunk->m_x, 0, chunk->m_width);
-			int endY   = iw::clamp<int>(m_fy2 - chunk->m_y, 0, chunk->m_height);
-			int endX   = iw::clamp<int>(m_fx2 - chunk->m_x, 0, chunk->m_width);
+			int startY = clamp<int>(m_fy  - chunk->m_y, 0, chunk->m_height); // Could use diry rect
+			int startX = clamp<int>(m_fx  - chunk->m_x, 0, chunk->m_width);
+			int endY   = clamp<int>(m_fy2 - chunk->m_y, 0, chunk->m_height);
+			int endX   = clamp<int>(m_fx2 - chunk->m_x, 0, chunk->m_width);
 
-			iw::Cell* cells = chunk->GetField(0).cells;
+			Cell* cells = chunk->GetField(SandField::CELL).GetCells<Cell>();
 
 			// sand texture
 			for (int y = startY; y < endY; y++)
 			for (int x = startX; x < endX; x++) {
 				int texi = (chunk->m_x + x - m_fx) + (chunk->m_y + y - m_fy) * m_texture->Width();
 
-				iw::Cell& cell = cells[x + y * chunk->m_width];
+				Cell& cell = cells[x + y * chunk->m_width];
 
 				if (_debugShowChunkBounds) {
 					if (   (y == chunk->m_minY || y == chunk->m_maxY) && (x >= chunk->m_minX && x <= chunk->m_maxX)
 						|| (x == chunk->m_minX || x == chunk->m_maxX) && (y >= chunk->m_minY && y <= chunk->m_maxY))
 					{
-						pixels[texi] = iw::Color(0, 1, 0).to32();
+						pixels[texi] = Color(0, 1, 0).to32();
 					}
 						
 					else 
@@ -81,39 +81,39 @@ void SandWorldRenderSystem::Update() {
 						int batch = (c + cx % c) % c
 								  + (c + cy % c) % c * c;
 
-						iw::Color color;
+						Color color;
 
 						switch (batch) {
-						case 0: color = iw::Color::From255(255,   0, 255); break;
-						case 1: color = iw::Color::From255(255,   0,   0); break;
-						case 2: color = iw::Color::From255(255, 128,   0); break;
-						case 3: color = iw::Color::From255(255, 255,   0); break;
-						case 4: color = iw::Color::From255(128, 255,   0); break;
-						case 5: color = iw::Color::From255(0,   255,   0); break;
-						case 6: color = iw::Color::From255(0,   255, 128); break;
-						case 7: color = iw::Color::From255(0,   128, 255); break;
-						case 8: color = iw::Color::From255(0,     0, 255); break;
+						case 0: color = Color::From255(255,   0, 255); break;
+						case 1: color = Color::From255(255,   0,   0); break;
+						case 2: color = Color::From255(255, 128,   0); break;
+						case 3: color = Color::From255(255, 255,   0); break;
+						case 4: color = Color::From255(128, 255,   0); break;
+						case 5: color = Color::From255(0,   255,   0); break;
+						case 6: color = Color::From255(0,   255, 128); break;
+						case 7: color = Color::From255(0,   128, 255); break;
+						case 8: color = Color::From255(0,     0, 255); break;
 						}
 
 						pixels[texi] = color.to32();
 					}
 				}
 
-				if (cell.Type != iw::CellType::EMPTY) {
+				if (cell.Type != CellType::EMPTY) {
 					glm::vec4 accent = cell.StyleColor.rgba();
 
 					switch (cell.Style) {
-						case iw::CellStyle::RANDOM_STATIC: {
+						case CellStyle::RANDOM_STATIC: {
 							accent *= cell.StyleOffset;
 							break;
 						}
-						case iw::CellStyle::SHIMMER: {
-							accent *= sin(cell.StyleOffset + cell.StyleOffset * 5 * iw::TotalTime());
+						case CellStyle::SHIMMER: {
+							accent *= sin(cell.StyleOffset + cell.StyleOffset * 5 * TotalTime());
 							break;
 						}
 					}
 
-					pixels[texi] = iw::Color(cell.Color + accent).to32();
+					pixels[texi] = Color(cell.Color + accent).to32();
 				}
 			}
 

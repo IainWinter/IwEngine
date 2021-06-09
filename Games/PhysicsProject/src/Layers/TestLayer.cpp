@@ -21,7 +21,7 @@
 #include "iw/physics/Collision/PositionSolver.h"
 #include "iw/graphics/MeshFactory.h"
 
-#include "iw/engine/Systems/EditorCameraControllerSystem.h"
+#include "iw/engine/Systems/Camera/EditorCameraControllerSystem.h"
 
 #include "iw/engine/Systems/Render/RenderSystem.h"
 #include "iw/engine/Systems/Render/ShadowRenderSystem.h"

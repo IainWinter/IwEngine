@@ -135,10 +135,13 @@ void SandLayer::PostUpdate()
 
 void SandLayer::DrawMouseGrid() {
 	unsigned* sandColor = (unsigned*)m_render->GetSandTexture()->Colors();
-	int width = m_render->GetSandTexture()->Width();
+	int width  = m_render->GetSandTexture()->Width();
+	int height = m_render->GetSandTexture()->Height();
 
-	auto draw = [&](int x, int y) {
-		sandColor[x + y * width] = Color(1).to32();
+	auto draw = [&](size_t x, size_t y) {
+		size_t index = x + y * width;
+		if (index * height) return;
+		sandColor[index] = Color(1).to32();
 	};
 
 	float x = gP.x();

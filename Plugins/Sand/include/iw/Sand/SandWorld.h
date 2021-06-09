@@ -30,19 +30,22 @@ private:
 	Concurrency::concurrent_unordered_map<std::pair<int, int>, SandChunk*, iw::pair_hash> m_chunkLookup;
 	std::mutex m_chunkMutex;
 
-	struct Field {
+	struct FieldConfig {
 		iw::pool_allocator* memory;
 		size_t cellSize;
 		bool hasLocks;
+
+		onSetCell_func onSetCell;
 	};
 
-	std::vector<Field> m_fields;
+	std::vector<FieldConfig> m_fields;
 
 public:
 
 	template<typename _t>
 	void AddField(
-		bool hasLocks = true)
+		bool hasLocks = true,
+		onSetCell_func onSetCell = onSetCell_func())
 	{
 		//size_t cellSize = FieldSize<_t>();
 		//size_t lockSize = hasLocks ? FieldSize<std::mutex>() : 0u;
@@ -50,7 +53,8 @@ public:
 		m_fields.push_back({
 			new iw::pool_allocator(16 * FieldSize<_t>()/*(cellSize + lockSize)*/),
 			sizeof(_t),
-			hasLocks
+			hasLocks,
+			onSetCell
 		});
 
 		for (auto& chunks : m_batches)
@@ -72,12 +76,12 @@ public:
 	IW_PLUGIN_SAND_API SandWorld(size_t chunkWidth, size_t chunkHeight, double scale);
 	IW_PLUGIN_SAND_API SandWorld(size_t screenSizeX, size_t screenSizeY, size_t numberOfChunksX, size_t numberOfChunksY, double scale);
 
-	IW_PLUGIN_SAND_API Cell& GetCell(int x, int y, size_t field = 0u);
+	IW_PLUGIN_SAND_API Cell& GetCell(int x, int y, SandField field = SandField::CELL);
 
-	IW_PLUGIN_SAND_API void SetCell (int x, int y, const Cell& cell);
+	IW_PLUGIN_SAND_API void SetCell(int x, int y, const Cell& cell);
 
 	IW_PLUGIN_SAND_API void MoveCell(int x, int y, int xto, int yto);
-	IW_PLUGIN_SAND_API void PushCell(int x, int y, int xto, int yto);
+	//IW_PLUGIN_SAND_API void PushCell(int x, int y, int xto, int yto);
 
 	IW_PLUGIN_SAND_API bool InBounds (int x, int y);
 	IW_PLUGIN_SAND_API bool IsEmpty  (int x, int y);
@@ -92,12 +96,13 @@ public:
 private:
 	SandChunk* CreateChunk(std::pair<int, int> location);
 
-	inline void AddFieldToChunk(SandChunk* chunk, Field& field) {
+	inline void AddFieldToChunk(SandChunk* chunk, FieldConfig& field) {
 		chunk->AddField(
 			field.memory->alloc(FieldSize(field.cellSize)),
 			field.hasLocks
 				? new std::mutex[m_chunkWidth * m_chunkHeight /*FieldSize<std::mutex>()*/]//(std::mutex*)field.memory->alloc(FieldSize<std::mutex>())
-				: nullptr
+				: nullptr,
+			field.onSetCell
 		);
 	}
 };

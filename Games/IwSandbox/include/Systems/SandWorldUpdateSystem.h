@@ -6,7 +6,7 @@
 #include "plugins/iw/Sand/SandWorker.h"
 
 // should go into sand library
-struct Tile {
+struct myTile {
 	std::vector<std::pair<int, int>> Positions;
 	float  X = 0;
 	float  Y = 0;
@@ -21,7 +21,7 @@ struct HeatField {
 // Handles updating and rendering the sand texture,
 //	rendering should be put into a mesh rendering system using the ecs
 
-class SandWorldUpdateSystem : public iw::SystemBase {
+class mySandWorldUpdateSystem : public iw::SystemBase {
 private:
 	iw::SandWorld& m_world;
 	iw::ref<iw::Texture>& m_texture;
@@ -30,7 +30,7 @@ private:
 	    m_fx2, m_fy2; // Camera frustrum
 
 public:
-	SandWorldUpdateSystem(iw::SandWorld& world, iw::ref<iw::Texture>& texture)
+	mySandWorldUpdateSystem(iw::SandWorld& world, iw::ref<iw::Texture>& texture)
 		: SystemBase("Sand world update")
 		, m_world  (world)
 		, m_texture(texture)

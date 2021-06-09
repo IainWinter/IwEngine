@@ -15,10 +15,8 @@ namespace impl {
 		using vec_t = _vec<_d>;
 		using aabb_t = AABB<_d>;
 
-	protected:
 		std::vector<vec_t> m_points;
 
-	public:
 		HullCollider(
 			const std::vector<vec_t>& points = {},
 			bool isMesh = false // this is bad

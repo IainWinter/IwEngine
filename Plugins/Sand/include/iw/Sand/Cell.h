@@ -76,6 +76,14 @@ struct Cell {
 		cell.StyleOffset = iw::randf();
 		return cell;
 	}
+
+	bool operator==(const Cell& other) const {
+		return Type == other.Type;
+	}
+
+	bool operator!=(const Cell& other) const {
+		return !operator==(other);
+	}
 private:
 	static inline std::unordered_map<CellType, Cell> m_defaults;
 };

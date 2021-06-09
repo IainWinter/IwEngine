@@ -8,13 +8,16 @@
 
 #include "iw/math/matrix.h"
 
+
+#include "plugins/iw/Sand/Engine/SandLayer.h"
+
 // what does this need to do
 // basic sand simulation
 // allow users to add differnt types of cells if they discover a new one
 
 using namespace iw::plugins::Sand;
 
-class SandLayer : public iw::Layer {
+class mySandLayer : public iw::Layer {
 private:
 	SandWorld* m_world;
 
@@ -24,7 +27,7 @@ private:
 	iw::Mesh             m_airScreenMesh;
 	iw::ref<iw::Texture> m_airScreenTexture;
 
-	SandWorldUpdateSystem* m_sandUpdate = nullptr;
+	mySandWorldUpdateSystem* m_sandUpdate = nullptr;
 	iw::Entity player;
 
 	FluidCube* cube;
@@ -34,7 +37,7 @@ private:
 	iw::vec2 sP, wP, gP; // sand pos, wind pos, grid pos
 
 public:
-	SandLayer()
+	mySandLayer()
 		: iw::Layer("Sandbox")
 	{}
 
@@ -123,8 +126,8 @@ public:
 		Cell::SetDefault(CellType::SMOKE, _SMOKE);
 		Cell::SetDefault(CellType::BELT,  _BELT);
 
-		player = Space->CreateEntity<Tile>();
-		player.Set<Tile>(Tile {{
+		player = Space->CreateEntity<myTile>();
+		player.Set<myTile>(myTile {{
 				              {2,0},
 				       {1,1}, {2,1}, 
 				{0,2}, {1,2}, {2,2}, {3,2},
@@ -140,7 +143,7 @@ public:
 
 		cube = FluidCubeCreate(size, 0, 0, 0.16f);
 
-		m_sandUpdate = PushSystem<SandWorldUpdateSystem>(*m_world, m_sandScreenTexture);
+		m_sandUpdate = PushSystem<mySandWorldUpdateSystem>(*m_world, m_sandScreenTexture);
 
 		//iw::ref<iw::Shader> compute = Asset->Load<iw::Shader>("shaders/");
 
@@ -153,7 +156,7 @@ public:
 		__right = false;
 
 	void PreUpdate() {
-		Tile* tile = player.Find<Tile>();
+		myTile* tile = player.Find<myTile>();
 
 		int width  = m_sandScreenTexture->Width();
 		int height = m_sandScreenTexture->Height();
@@ -395,6 +398,22 @@ public:
 	}
 };
 
+struct DrawSandBox : iw::Layer {
+	iw::SandLayer* layer;
+
+	DrawSandBox(iw::SandLayer* layer) : iw::Layer("Draw sand"), layer(layer) {}
+
+	void PostUpdate() override {
+
+		layer->SetCamera(0, 0, 10, 10);
+
+
+		Renderer->BeginScene();
+		Renderer->DrawMesh(iw::Transform(), layer->GetSandMesh());
+		Renderer->EndScene();
+	}
+};
+
 class App : public iw::Application {
 public:
 	int Initialize(iw::InitOptions& options) override {
@@ -402,7 +421,9 @@ public:
 		iw::ref<iw::Context> context = Input->CreateContext("Game");
 		context->AddDevice(Input->CreateDevice<iw::Mouse>());
 
-		PushLayer<SandLayer>();
+		SandLayer* sand = PushLayer<SandLayer>(4);
+		                  PushLayer<DrawSandBox>(sand);
+
 		return iw::Application::Initialize(options);
 	}
 };

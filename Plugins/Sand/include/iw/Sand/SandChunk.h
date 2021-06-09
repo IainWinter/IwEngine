@@ -4,45 +4,32 @@
 #include <vector>
 #include <mutex>
 #include <algorithm>
+#include <functional>
+#include "iw/util/enum/val.h"
 
 IW_PLUGIN_SAND_BEGIN
 
+enum class SandField : unsigned { // Should allow user to add to this, see enum { #include "fields.h" }; idea from valve
+	CELL,
+	COLOR,
+	SOLID
+};
+
+class SandChunk;
+
+using onSetCell_func = std::function<void(SandChunk*, size_t, int, int, void*)>; // would be nice to have type info here
+
 class SandChunk {
 public:
-	// First field is always Cells
-	// Next field can be anything?
-
-	// Type& t =  GetField<Type>(index i, int x, int y)
-
-	// In world could have map of type_id and index
-
-	// m_world.GetField<Type>(int x, int y)
-	//     -> GetChunk(x, y)->GetField<Type>(typeToIndex[typeid], x, y)
-
-	// m_world.AddField<Type>()
-	//     -> 
-
-	//Cell* m_cells;
-
 	struct Field {
 		void* cells;
 		std::mutex* locks;
-		size_t filledCellCount;
-	};
 
-	template<typename _t>
-	struct Field_t {
-		_t* cells;
-		std::mutex* locks;
+		onSetCell_func onSetCell;
 		size_t filledCellCount;
 
-		Field_t(
-			Field& f
-		)
-			: cells((_t*)f.cells)
-			, locks(f.locks)
-			, filledCellCount(filledCellCount)
-		{}
+		template<typename _t> _t* GetCells()            { return (_t*)cells; }
+		template<typename _t> _t& GetCell(size_t index) { return GetCells<_t>()[index]; }
 	};
 
 	std::vector<Field> m_fields;
@@ -68,21 +55,12 @@ private:
 public:
 	IW_PLUGIN_SAND_API SandChunk(int width, int height, int x, int y);
 
-	~SandChunk() {
-		for (Field& field : m_fields) {
-			delete[] field.locks;
-		}
-	}
-
 	// Getting cells
-
-	//IW_PLUGIN_SAND_API Cell& GetCell(int x, int y);
-	//IW_PLUGIN_SAND_API Cell& GetCell(size_t index);
 
 	template<typename _t = Cell>
 	_t& GetCell(
 		int x, int y,
-		size_t field = 0)
+		SandField field = SandField::CELL)
 	{
 		return GetCell<_t>(GetIndex(x, y), field);
 	}
@@ -90,43 +68,43 @@ public:
 	template<typename _t = Cell>
 	_t& GetCell(
 		size_t index,
-		size_t field = 0)
+		SandField field = SandField::CELL)
 	{
-		return GetField<_t>(field).cells[index];
+		return GetField(field).GetCell<_t>(index);
 	}
 
-	template<typename _t = Cell>
-	Field_t<_t> GetField(
-		size_t index = 0)
+	Field& GetField(
+		SandField field = SandField::CELL)
 	{
-		return Field_t<_t>(m_fields[index]); /* { (_t*).cells, };*/
+		return m_fields[val(field)];
 	}
 
 	// Locking cell, field is not required to have locks, maybe put check here or the field is already non compile safe?
 	
 	std::mutex& GetLock(
 		int x, int y,
-		size_t field = 0)
+		SandField field = SandField::CELL)
 	{
 		return GetLock(GetIndex(x, y), field);
 	}
 
 	std::mutex& GetLock(
 		size_t index,
-		size_t field = 0)
+		SandField field = SandField::CELL)
 	{
-		return m_fields[field].locks[index]; // named from &&?
+		return m_fields[val(field)].locks[index]; // named from &&?
 	}
 
-	//void UnlockCell(int x, int y, size_t field = 0) { UnlockCell(GetIndex(x, y), field); }
+	//void UnlockCell(int x, int y, SandField field = SandField::CELL) { UnlockCell(GetIndex(x, y), field); }
 
-	//void UnlockCell(size_t index, size_t field = 0) { m_fields[field].locks[index].unlock(); }
+	//void UnlockCell(size_t index, SandField field = SandField::CELL) { m_fields[field].locks[index].unlock(); }
 
 	void AddField(
 		void* field,
-		std::mutex* locks = nullptr)
+		std::mutex* locks = nullptr,
+		onSetCell_func& func = onSetCell_func())
 	{
-		m_fields.push_back({ field, locks, 0u });
+		m_fields.push_back({ field, locks, func, 0u });
 	}
 
 	// Setting & moving cells
@@ -137,8 +115,8 @@ public:
 	template<typename _t = Cell>
 	void SetCell(
 		int x, int y,
-		const Cell& cell,
-		size_t field = 0)
+		const _t& cell,
+		SandField field = SandField::CELL)
 	{
 		SetCell<_t>(GetIndex(x, y), cell, field);
 	}
@@ -146,49 +124,55 @@ public:
 	template<typename _t = Cell>
 	void SetCell(
 		size_t index,
-		const Cell& cell,
-		size_t field = 0)
+		const _t& cell,
+		SandField fieldid = SandField::CELL)
 	{
 		KeepAlive(index);
 
-		Cell& dest = GetCell(index, field);// m_cells[index];
+		Field& field = GetField(fieldid);
 
-		if (    dest.Type == CellType::EMPTY
-			&& cell.Type != CellType::EMPTY) // Filling a cell
+		//if (field.locks) {
+		//	field.locks[index].lock();
+		//}
+
+		_t& dest = field.GetCell<_t>(index);
+		_t default = _t();
+
+		if (    dest == default
+			&& cell != default) // Filling a cell
 		{
 			std::unique_lock lock(m_filledCellCountMutex);
-			m_fields[field].filledCellCount++;
+			field.filledCellCount++;
 			m_filledCellCount++;
 		}
 
 		else
-		if (    dest.Type != CellType::EMPTY
-			&& cell.Type == CellType::EMPTY) // Removing a filled cell
+		if (    dest != default
+			&& cell == default) // Removing a filled cell
 		{
 			std::unique_lock lock(m_filledCellCountMutex);
-			m_fields[field].filledCellCount--;
+			field.filledCellCount--;
 			m_filledCellCount--;
 		}
 
 		dest = cell;
 
-		// set location if its not set, this is a hack
+		int x = index % m_width;
+		int y = index / m_width;
 
-		if (dest.x == 0 && dest.y == 0) {
-			dest.x = m_x + index % m_width;
-			dest.y = m_y + index / m_width;
+		if (field.onSetCell) {
+			field.onSetCell(this, index, x, y, (void*)&dest);
 		}
 
-		// set location everytime it changed whole number
-
-		dest.x = float(dest.x - int(dest.x)) + index % m_width + m_x;
-		dest.y = float(dest.y - int(dest.y)) + index / m_width + m_y;
+		//if (field.locks) {
+		//	field.locks[index].unlock();
+		//}
 	}
 
 	//IW_PLUGIN_SAND_API void SwapBuffers();
 
 	IW_PLUGIN_SAND_API void MoveCell(SandChunk* source, int x, int y, int xto, int yto);
-	IW_PLUGIN_SAND_API void PushCell(SandChunk* source, int x, int y, int xto, int yto);
+	//IW_PLUGIN_SAND_API void PushCell(SandChunk* source, int x, int y, int xto, int yto);
 
 	IW_PLUGIN_SAND_API void CommitCells();
 

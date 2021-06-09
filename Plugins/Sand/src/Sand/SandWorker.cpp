@@ -13,7 +13,7 @@ SandWorker::SandWorker(
 
 void SandWorker::UpdateChunk() {
 
-	Cell* cells = m_chunk->GetField().cells;
+	Cell* cells = m_chunk->GetField(SandField::CELL).GetCells<Cell>();
 
 	bool forwardX = true;
 	bool forwardY = true;
@@ -109,20 +109,20 @@ void SandWorker::MoveCell(
 	return m_world.MoveCell(x, y, xto, yto);
 }
 
-void SandWorker::PushCell(
-	int x,   int y,
-	int xto, int yto)
-{
-	_KeepAlive(m_world, m_chunk, x, y);
-
-	if (   m_chunk->InBounds(x, y)
-		&& m_chunk->InBounds(xto, yto))
-	{
-		return m_chunk->PushCell(m_chunk, x, y, xto, yto);
-	}
-
-	return m_world.PushCell(x, y, xto, yto);
-}
+//void SandWorker::PushCell(
+//	int x,   int y,
+//	int xto, int yto)
+//{
+//	_KeepAlive(m_world, m_chunk, x, y);
+//
+//	if (   m_chunk->InBounds(x, y)
+//		&& m_chunk->InBounds(xto, yto))
+//	{
+//		return m_chunk->PushCell(m_chunk, x, y, xto, yto);
+//	}
+//
+//	return m_world.PushCell(x, y, xto, yto);
+//}
 
 void SandWorker::KeepAlive(int x, int y) {
 	if (m_chunk->InBounds(x, y)) {

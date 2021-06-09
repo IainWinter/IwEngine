@@ -2,6 +2,27 @@
 
 IW_PLUGIN_SAND_BEGIN
 
+void CorrectCellInfo(SandChunk* chunk, size_t index, int x, int y, void* data) {
+	// set location if its not set, this is a hack
+
+	Cell& cell = *(Cell*)data;
+
+	if (cell.x == 0 && cell.y == 0) {
+		cell.x = chunk->m_x + x;
+		cell.y = chunk->m_y + y;
+	}
+
+	// set location everytime it changed whole number
+
+	cell.x = float(cell.x - int(cell.x)) + x + chunk->m_x;
+	cell.y = float(cell.y - int(cell.y)) + y + chunk->m_y;
+
+	int solid = int(cell.Type != CellType::EMPTY && cell.Props == CellProperties::NONE);
+
+	chunk->SetCell(index, cell.Color, SandField::COLOR);
+	chunk->SetCell(index, solid,      SandField::SOLID);
+}
+
 SandWorld::SandWorld(
 	size_t chunkWidth,
 	size_t chunkHeight,
@@ -13,8 +34,9 @@ SandWorld::SandWorld(
 {
 	m_batches.resize(m_batchGridSize * m_batchGridSize);
 
-	AddField<Cell>();
-	AddField<Cell>();
+	AddField<Cell>(true, CorrectCellInfo);
+	AddField<iw::Color>(false);
+	AddField<int>(false);
 }
 
 SandWorld::SandWorld(
@@ -30,8 +52,9 @@ SandWorld::SandWorld(
 {
 	m_batches.resize(m_batchGridSize * m_batchGridSize);
 
-	AddField<Cell>();
-	AddField<Cell>();
+	AddField<Cell>(true, CorrectCellInfo);
+	AddField<iw::Color>(false);
+	AddField<int>(false);
 
 	for(size_t x = 0; x < numberOfChunksX; x++)
 	for(size_t y = 0; y < numberOfChunksY; y++) {
@@ -45,7 +68,7 @@ SandWorld::SandWorld(
 
 Cell& SandWorld::GetCell(
 	int x, int y,
-	size_t field)
+	SandField field)
 {
 	return GetChunk(x, y)->GetCell(x, y, field);
 }
@@ -71,15 +94,15 @@ void SandWorld::MoveCell(
 	}
 }
 
-void SandWorld::PushCell(
-	int x,   int y,
-	int xto, int yto)
-{
-	if (SandChunk* src  = GetChunk(x, y))
-	if (SandChunk* dest = GetChunk(xto, yto)) {
-		dest->PushCell(src, x, y, xto, yto);
-	}
-}
+//void SandWorld::PushCell(
+//	int x,   int y,
+//	int xto, int yto)
+//{
+//	if (SandChunk* src  = GetChunk(x, y))
+//	if (SandChunk* dest = GetChunk(xto, yto)) {
+//		dest->PushCell(src, x, y, xto, yto);
+//	}
+//}
 
 // Helpers
 
@@ -128,13 +151,14 @@ void SandWorld::RemoveEmptyChunks() {
 			i--;
 
 			for (size_t i = 0; i < m_fields.size(); i++) {
-				Field& field = m_fields[i];
+				FieldConfig& field = m_fields[i];
 				
 				field.memory->free(
 					chunk->m_fields[i].cells,
 					FieldSize(field.cellSize)
 				);
 
+				// temp, should be field.memory->free as well
 				if (field.hasLocks) {
 					delete[] chunk->m_fields[i].locks;
 				}
@@ -182,7 +206,7 @@ SandChunk* SandWorld::CreateChunk(
 
 	SandChunk* chunk = new SandChunk(m_chunkWidth, m_chunkHeight, lx, ly);
 
-	for (Field& field : m_fields) {
+	for (FieldConfig& field : m_fields) {
 		AddFieldToChunk(chunk, field);
 	}
 

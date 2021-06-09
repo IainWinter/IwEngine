@@ -9,111 +9,223 @@ namespace iw {
 namespace common {
 	template<
 		typename _t>
-	std::vector<glm::vec2> MakePolygonFromField(
+	std::vector<std::vector<glm::vec2>> MakePolygonFromField(
 		_t* field,
 		size_t width, size_t height,
-		_t threshhold)
+		const _t& threshhold,
+		std::function<bool(const _t&, const _t&)> test = [](const _t& a,
+												  const _t& b) { return a >= b; })
 	{
-		std::vector<glm::vec2> edges;
-
 		glm::vec2 midPoints[4] = {
-			glm::vec2(0.5, 0),
-			glm::vec2(1,   0.5),
-			glm::vec2(0.5, 1),
-			glm::vec2(0,   0.5),
+			glm::vec2(0.0, -0.5),   //    1
+			glm::vec2(0.5, -1.0),   //  0   3
+			glm::vec2(0.5, -0.0),   //    2
+			glm::vec2(1.0, -0.5), 
 		};
 
 		int _ = -1;
 		int edgeIndices[16][4] = {
 			{ _, _, _, _ },
-			{ 2, 3, _, _ },
-			{ 1, 2, _, _ },
-			{ 1, 3, _, _ },
-			{ 0, 1, _, _ },
-			{ 0, 3, 1, 2 },
-			{ 0, 2, _, _ },
-			{ 0, 3, _, _ },
-			{ 0, 3, _, _ },
-			{ 0, 2, _, _ },
-			{ 0, 1, 2, 3 },
-			{ 0, 1, _, _ },
-			{ 1, 3, _, _ },
-			{ 1, 2, _, _ },
-			{ 2, 3, _, _ },
+			{ 2, 3, _, _ }, // /
+			{ 1, 3, _, _ }, // \ 
+			{ 1, 2, _, _ }, // |
+			{ 0, 2, _, _ }, // \  
+			{ 0, 3, _, _ }, // -- 
+			{ 0, 2, 1, 3 }, // \\ 
+			{ 0, 1, _, _ }, // / 
+			{ 0, 1, _, _ }, // /
+			{ 0, 1, 2, 3 }, // // 
+			{ 0, 3, _, _ }, // --
+			{ 0, 2, _, _ }, // \ 
+			{ 1, 2, _, _ }, // | 
+			{ 1, 3, _, _ }, // \ 
+			{ 2, 3, _, _ }, // /
 			{ _, _, _, _ }
 		};
+
+		size_t iHeight = 2 * height - 1; // size of index (2 stripes)
+
+		//  a-3-c---•---x
+		//  0   7   |   |
+		//  b-4-d---•---x
+		//  1   8   |   |
+		//  •-5-•---•---x
+		//  2   9   |   |
+		//  x-6-x---x---x
+
+		std::unordered_map<size_t, glm::vec2> verts;
+		std::vector<size_t> edges;
 
 		for (size_t i = 0; i < width  - 1; i++)
 		for (size_t j = 0; j < height - 1; j++)
 		{
-			//  a---b---•---x
-			//  |   |   |   |
-			//  d---c---•---x
-			//  |   |   |   |
-			//  •---•---•---x
-			//  |   |   |   |
-			//  x---x---x---x
-
-			size_t a = i + j * width;
-			size_t b = i + j * width + 1;
-			size_t c = i + j * width + 1 + width;
-			size_t d = i + j * width     + width;
+			size_t a =  i      +  j      * width;
+			size_t b =  i      + (j + 1) * width;
+			size_t c = (i + 1) +  j      * width;
+			size_t d = (i + 1) + (j + 1) * width;
 
 			// abcd = 0b0000
 
-			int state = int(field[a] > threshhold) * 8
-					+ int(field[b] > threshhold) * 4
-					+ int(field[c] > threshhold) * 2
-					+ int(field[d] > threshhold);
+			bool left   = i == 0;
+			bool top    = j == 0;
+			bool right  = i == width  - 2; // -2 <-> loop ends at -1
+			bool bottom = j == height - 2;
 
-			for (size_t k = 0; k < 4; k++) {
-				int edgeIndex = edgeIndices[state][k];
-				if (edgeIndex == _) continue;
+			bool lt = left  || top;    // to address edge case on boundary, treat any point on bound as empty
+			bool lb = left  || bottom;
+			bool rt = right || top;
+			bool rb = right || bottom;
 
-				glm::vec2 vert = midPoints[edgeIndex];
-				vert.x += i;
-				vert.y += j;
+			int state = int( (!lt) & test(field[a], threshhold) ) * 8 
+					+ int( (!lb) & test(field[b], threshhold) ) * 4
+					+ int( (!rt) & test(field[c], threshhold) ) * 2
+					+ int( (!rb) & test(field[d], threshhold) );
 
-				edges.push_back(vert);
-			}
-		}
-
-		if (edges.size() == 0) return {};
-
-		std::vector<glm::vec2> chain = {
-			edges[0],
-			edges[1]
-		};
-
-		edges.erase(edges.begin());
-		edges.erase(edges.begin());
-
-		while (edges.size() > 0) {
-			size_t index = std::distance(edges.begin(), std::find(edges.begin(), edges.end(), chain.back()));
-			size_t other = index % 2 == 0 ? index + 1 : index - 1;
-
-			chain.push_back(edges.at(other));
-
-			edges.erase(edges.begin() + (index > other ? index : other)); // erase verts from list, last first to keep index intact
-			edges.erase(edges.begin() + (index > other ? other : index));
-		}
-
-		chain.pop_back();
-
-		for (size_t i = 1; i < chain.size() - 1; i++) {
-			if (   (chain.at(i).x == chain.at(i + 1).x
-				|| chain.at(i).y == chain.at(i + 1).y)
-				&&(chain.at(i).x == chain.at(i - 1).x
-				|| chain.at(i).y == chain.at(i - 1).y))
+			for (size_t k = 0; k < 4; k++)
 			{
-				chain.erase(chain.begin() + i);
-				i--;
+				int edgeIndex = edgeIndices[state][k];
+				if (edgeIndex == _) break; // was contiune
+
+				int index = (2 * height - 1) * i;
+
+				switch (edgeIndex)
+				{
+					case 0: index += j;              break;
+					case 1: index += j + height - 1; break;
+					case 2: index += j + height;     break;
+					case 3: index += j + iHeight;    break;
+				}
+
+				edges.push_back(index);
+
+				if (verts.find(index) == verts.end()) {
+					verts.emplace(index, midPoints[edgeIndex] + glm::vec2(i, j));
+				}
 			}
 		}
 
-		std::reverse(chain.begin(), chain.end());
+#ifdef IW_DEBUG
+		std::unordered_map<size_t, int> map;
+		for (auto i : edges) map[i]++;
+		for (auto [i, c] : map) assert(c == 2);
+#endif 
 
-		return chain;
+		// Find the chains of edges
+
+		std::vector<std::vector<size_t>> chains;
+
+		while (edges.size() > 0)
+		{
+			std::vector<size_t> chain = {
+				edges[0],
+				edges[1]
+			};
+
+			edges.erase(edges.begin()); // yuk
+			edges.erase(edges.begin());
+
+			while (chain.front() != chain.back())
+			{
+				size_t index = std::distance(edges.begin(), std::find(edges.begin(), edges.end(), chain.back()));
+				size_t other = index % 2 == 0 ? index + 1 : index - 1;
+
+				chain.push_back(edges.at(other));
+
+				edges.erase(edges.begin() + (index > other ? index : other)); // erase verts from list, last first to keep index intact
+				edges.erase(edges.begin() + (index > other ? other : index));
+			}
+
+			chains.emplace_back(chain);
+		}
+
+		if (chains.size() == 0) return {};
+
+		// Remove edges on straights
+
+		for (auto& chain : chains)
+		{
+			size_t last = 0;
+			size_t lastDif = 0;
+
+			for (size_t i = 2; i <= chain.size(); i++)
+			{
+				double dif = llabs(chain[i - 2] - chain[i % chain.size()]) / 2.0;
+
+				if (    dif == 1           // |
+					|| dif == iHeight     // --
+					|| dif == height      // \ 
+					|| dif == height - 1) // /    
+				{
+					continue;
+				}
+
+				else if (i - last - 2 > 2)
+				{
+					chain.erase(chain.begin() + last + 1, chain.begin() + i - 1);
+					i = last + 1;
+				}
+
+				last = i - 1;
+			}
+		}
+
+		// Get verts from chains
+
+		std::vector<std::vector<glm::vec2>> polygons;
+
+		for (auto& chain : chains)
+		{
+			chain.pop_back();
+
+			std::vector<glm::vec2> polygon;
+			for (size_t& index : chain) {
+				polygon.push_back(verts.at(index));
+			}
+
+			// Connect squares corners
+
+			for (size_t i = 0; i < polygon.size(); i++) {
+				size_t j = (i + 1) % polygon.size();
+				size_t k = (i + 2) % polygon.size();
+				size_t l = (i + 3) % polygon.size();
+
+				glm::vec2& v1 = polygon[j];
+				glm::vec2& v2 = polygon[k];
+
+				glm::vec2 v12 = v2 - v1;
+
+				if (v12.x == 0 || v12.y == 0) continue;
+
+				glm::vec2 vij = polygon[i] - polygon[j];
+				glm::vec2 vkl = polygon[k] - polygon[l];
+
+				if (glm::dot(vij, vkl) == 0) {
+
+					glm::vec2 v(0.f);
+
+					if (    (v12.x > 0 && v12.y > 0)
+						|| (v12.x < 0 && v12.y < 0))
+					{
+						v = glm::vec2(v2.x, v1.y);
+					}
+
+					if (    (v12.x > 0 && v12.y < 0)
+						|| (v12.x < 0 && v12.y > 0))
+					{
+						v = glm::vec2(v1.x, v2.y);
+					}
+
+					if (v == glm::vec2(0)) continue;
+
+					polygon.erase(polygon.begin() + k);
+					polygon[j] = v;
+				}
+			}
+
+			polygons.emplace_back(polygon);
+		}
+
+		return polygons;
 	}
 
 	inline float cross_length(glm::vec2 a, glm::vec2 b) {
@@ -178,7 +290,7 @@ namespace common {
 				bool hasPoint = false;
 
 				for (size_t j = 0; j < working.size(); j++) {
-					//if (ia == j || ib == j || ic == j) continue;
+					if (ia == j || ib == j || ic == j) continue;
 					if (hasPoint |= HasPoint(a, b, c, working.at(j).first)) break;
 				}
 
@@ -201,4 +313,6 @@ namespace common {
 		return triangles;
 	}
 }
+
+	using namespace common;
 }

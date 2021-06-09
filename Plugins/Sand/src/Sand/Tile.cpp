@@ -46,14 +46,14 @@ void Tile::UpdatePolygon(
 	unsigned* colors = (unsigned*)GetSprite()->Colors();
 	glm::vec2 size   =            GetSprite()->Dimensions();
 
-	std::vector<glm::vec2> m_polygon = iw::common::MakePolygonFromField(colors, size.x, size.y, 0u);
+	std::vector<glm::vec2> m_polygon = iw::common::MakePolygonFromField(colors, size.x, size.y, 0u)[0];
 	std::vector<unsigned>  m_index   = iw::common::TriangulatePolygon(m_polygon);
 
 	if (m_polygon.size() == 0) return;
 
 	for (glm::vec2& v : m_polygon)
 	{
-		v = (v / size - glm::vec2(0.5f)) * glm::vec2(sx, sy) * 2.f/3.f;
+		v = (v / size - glm::vec2(0.5f)) * 2.f * (glm::vec2(sx, sy) / 3.f); // this scaling is only for the drawn mesh, -1 to 1 for rendering rotated version
 	}
 
 	m_spriteMesh.Data()->SetBufferData(bName::POSITION, m_polygon.size(), m_polygon.data());

@@ -18,6 +18,8 @@
 
 #include "plugins/iw/Sand/Engine/SandLayer.h"
 
+#include "Systems/SandColliders.h"
+
 enum class PlayerAttack {
 	SLASH,
 	UP_SLASH,
@@ -320,10 +322,11 @@ struct PixelationLayer
 			//mainGround1.grassPerMeter = 10;
 			mainGround1.color = iw::Color::From255(138, 84, 37);
 			mainGround1.isWireframe = true;
+			mainGround1.yAnchor = -20;
 
 			MakeGroundPlane(mainGround1);
 
-			for (int i = 1; i < 5; i++)
+			for (int i = 1; i < 1; i++)
 			{
 				GroundSettings background;
 				background.left = -100 * ceil(sqrt(i));
@@ -351,9 +354,9 @@ struct PixelationLayer
 
 		float aspect = float(Renderer->Width()) / Renderer->Height();
 
-		bool lowRes = true;
+		bool lowRes = false;
 
-		pixelSize = 2;// m_sandLayer->m_cellScale;
+		pixelSize = m_sandLayer->m_cellScale;
 		//pixelsPerMeter = 10;
 
 		lowResWidth  = lowRes ? Renderer->Width()  / pixelSize : Renderer->Width();  
@@ -387,7 +390,7 @@ struct PixelationLayer
 										   PushSystem<iw::RenderSystem>(MainScene, lowResTarget, true, clearColor);
 										   PushSystem<iw::PhysicsSystem>();
 										   PushSystem<iw::EntityCleanupSystem>();
-
+		
 		controller->MakeOrthoOnInit = true;
 		controller->Active = false;
 
@@ -431,10 +434,33 @@ struct PixelationLayer
 		c.Type = iw::CellType::ROCK;
 		c.Color = iw::Color(1, 1, 1, 1);
 
-		//m_sandLayer->m_world->SetCell(0, 0, c);
-		//m_sandLayer->m_world->SetCell(pixelsPerMeter, 0,              c);
-		//m_sandLayer->m_world->SetCell(0,              pixelsPerMeter, c);
-		//m_sandLayer->m_world->SetCell(pixelsPerMeter, pixelsPerMeter, c);
+		for (int x = 0; x < 16; x++)
+		for (int y = 0; y < 64; y++)
+		{
+			m_sandLayer->m_world->SetCell(x, y, c);
+		}
+
+		// Custom systems
+
+		SandColliderSystem* colliderSystem = PushSystem<SandColliderSystem>(m_sandLayer->m_world, pixelsPerMeter);
+
+		colliderSystem->SetCallback([=](iw::Entity entity)
+		{
+			iw::MeshDescription tileDesc;
+			tileDesc.DescribeBuffer(iw::bName::POSITION, iw::MakeLayout<float>(2));
+
+			iw::Mesh*          mesh     = entity.Set<iw::Mesh>((new iw::MeshData(tileDesc))->MakeInstance());
+			iw::MeshCollider2* collider = entity.Find<iw::MeshCollider2>();
+
+			iw::ref<iw::Material> mat = simpleMat;
+
+			mesh->SetMaterial(mat);
+			mesh->Material()->Set("albedo", iw::Color::From255(255, 0, 0));
+			mesh->Material()->SetWireframe(true);
+
+			mesh->Data()->SetBufferData(iw::bName::POSITION, collider->m_points.size(), collider->m_points.data());
+			mesh->Data()->SetIndexData(                      collider->m_index .size(), collider->m_index .data());
+		});
 
 		return 0;
 	}
@@ -446,7 +472,7 @@ struct PixelationLayer
 		float camX = cam->WorldPosition().x;
 		float camY = cam->WorldPosition().y;
 		
-		//m_sandLayer->SetCamera(camX, camY, 10, 10);
+		m_sandLayer->SetCamera(camX, camY, 10, 10);
 
 		// Background
 
@@ -914,7 +940,7 @@ struct PixelationLayer
 
 		iw::Entity ground = Space->CreateEntity(arch);
 
-		iw::Transform*       t = ground.Set<iw::Transform>(glm::vec3(0, 0, settings.zIndex), glm::vec3(1, 1, 1));
+		iw::Transform*       t = ground.Set<iw::Transform>(glm::vec3(settings.xAnchor, settings.yAnchor, settings.zIndex), glm::vec3(1, 1, 1));
 		iw::Mesh*            m = ground.Set<iw::Mesh>(data->MakeInstance());
 		
 		if (settings.makeCollider) {
@@ -926,7 +952,7 @@ struct PixelationLayer
 
 			o->Collider = c;
 			o->SetTransform(t);
-			
+
 			Physics->AddCollisionObject(o);
 		}
 		
@@ -999,7 +1025,7 @@ struct App
 
 		int pixelScale = 2;
 
-		iw::SandLayer* sandLayer = nullptr;// PushLayer<iw::SandLayer>(pixelScale);
+		iw::SandLayer* sandLayer = PushLayer<iw::SandLayer>(pixelScale, true);
 		
 		int error = iw::Application::Initialize(options);
 		if (error) return error;

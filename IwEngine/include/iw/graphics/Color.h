@@ -40,6 +40,18 @@ namespace Graphics {
 			return Color(r + other.r, g + other.g, b + other.b, a + other.a);
 		}
 
+		bool operator==(
+			const Color& other) const
+		{
+			return r == other.r && g == other.g && b == other.b && a == other.a;
+		}
+
+		bool operator!=(
+			const Color& other) const
+		{
+			return !operator==(other);
+		}
+
 		static Color From255(
 			int r,
 			int g,

@@ -71,7 +71,7 @@ private:
 		else {
 			for(int xx = -1; xx <= 1; xx++)
 			for(int yy = -1; yy <= 1; yy++) {
-				float& temp = m_chunk->GetCell<HeatField>(x, y, 2).Tempeture;
+				float/*&*/ temp = 0;//m_chunk->GetCell<HeatField>(x, y, 2).Tempeture;
 				temp = iw::clamp<float>(temp + iw::DeltaTime() * 100, 0, 1000);
 
 				if (xx == 0 && yy == 0) continue; 
@@ -109,7 +109,7 @@ private:
 			iw::Cell& above = GetCell(x, y + j);
 
 			if (above.Props & iw::CellProperties::MOVE_DOWN) {
-				PushCell(x, y + j, x + 1, y + j);
+				/*PushCell*/MoveCell(x, y + j, x + 1, y + j);
 			}
 
 			else {
@@ -123,7 +123,7 @@ private:
 
 float timer__ = 0.0;
 
-void SandWorldUpdateSystem::Update() {
+void mySandWorldUpdateSystem::Update() {
 	// Paste tiles
 
 	//timer__ -= iw::DeltaTime();
@@ -137,9 +137,9 @@ void SandWorldUpdateSystem::Update() {
 
 	// Remove tiles
 
-	Space->Query<Tile>().Each([&](
+	Space->Query<myTile>().Each([&](
 		auto entity,
-		Tile* tile)
+		myTile* tile)
 	{
 		for (auto [x, y] : tile->Positions) {
 			x += ceil(tile->X);
@@ -152,9 +152,9 @@ void SandWorldUpdateSystem::Update() {
 		}		
 	});
 
-	Space->Query<Tile>().Each([&](
+	Space->Query<myTile>().Each([&](
 		auto entity,
-		Tile* tile)
+		myTile* tile)
 	{
 		for (auto [x, y] : tile->Positions) {
 			x += ceil(tile->X);
@@ -231,8 +231,8 @@ void SandWorldUpdateSystem::Update() {
 			int endY   = iw::clamp<int>(m_fy2 - chunk->m_y, 0, chunk->m_height);
 			int endX   = iw::clamp<int>(m_fx2 - chunk->m_x, 0, chunk->m_width);
 
-			iw::Cell* cells = chunk->GetField(0).cells;
-			HeatField* heat = chunk->GetField<HeatField>(2).cells;
+			iw::Cell* cells = chunk->GetField(iw::SandField::CELL).GetCells<iw::Cell>();
+			//HeatField* heat = chunk->GetField().cells;
 
 			// sand texture
 			for (int y = startY; y < endY; y++)
@@ -240,7 +240,7 @@ void SandWorldUpdateSystem::Update() {
 				int texi = (chunk->m_x + x - m_fx) + (chunk->m_y + y - m_fy) * m_texture->Width();
 
 				iw::Cell& cell = cells[x + y * chunk->m_width];
-				float&    temp = heat [x + y * chunk->m_width].Tempeture;
+				float/*&*/temp = 0;//heat [x + y * chunk->m_width].Tempeture;
 
 				temp *= (1 -iw::DeltaTime());
 

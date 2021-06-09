@@ -14,9 +14,8 @@ namespace impl {
 		using aabb_t = AABB<_d>;
 		using hull_t = HullCollider<_d>;
 
-	private:
 		std::vector<unsigned> m_index;
-
+	private:
 		std::vector<hull_t> m_parts;
 		bool m_partsOutdated;
 

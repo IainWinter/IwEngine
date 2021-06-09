@@ -15,57 +15,7 @@ SandChunk::SandChunk(
 	UpdateRect();
 }
 
-// Getting cells
-
-//Cell& SandChunk::GetCell(int x, int y) { return GetCell(GetIndex(x, y)); }
-//Cell& SandChunk::GetCell(size_t index) { return m_cells[index]; }
-
 // Setting & moving cells
-
-//void SandChunk::SetCell(
-//	int x, int y,
-//	const Cell& cell)
-//{
-//	SetCell(GetIndex(x, y), cell);
-//}
-//
-//void SandChunk::SetCell(
-//	size_t index,
-//	const Cell& cell)
-//{
-//	Cell& dest = GetCell(index);// m_cells[index];
-//
-//	if (   dest.Type == CellType::EMPTY
-//		&& cell.Type != CellType::EMPTY) // Filling a cell
-//	{
-//		std::unique_lock lock(m_filledCellCountMutex);
-//		m_filledCellCount++;
-//	}
-//
-//	else
-//	if (   dest.Type != CellType::EMPTY
-//		&& cell.Type == CellType::EMPTY) // Removing a filled cell
-//	{
-//		std::unique_lock lock(m_filledCellCountMutex);
-//		m_filledCellCount--;
-//	}
-//
-//	dest = cell;
-//
-//	// set location if its not set, this is a hack
-//
-//	if (dest.x == 0 && dest.y == 0) {
-//		dest.x = m_x + index % m_width;
-//		dest.y = m_y + index / m_width;
-//	}
-//
-//	// set location everytime it changed whole number
-//
-//	dest.x = float(dest.x - int(dest.x)) + index % m_width + m_x;
-//	dest.y = float(dest.y - int(dest.y)) + index / m_width + m_y;
-//
-//	KeepAlive(index);
-//}
 
 void SandChunk::MoveCell(
 	SandChunk* source,
@@ -81,20 +31,20 @@ void SandChunk::MoveCell(
 	);
 }
 
-void SandChunk::PushCell(
-	SandChunk* source, 
-	int x, int y, 
-	int xto, int yto)
-{
-	size_t src = source->GetIndex(x,   y);
-	size_t dst =         GetIndex(xto, yto);
-
-	std::unique_lock lock (        GetLock(dst));
-	std::unique_lock lock2(source->GetLock(src));
-
-	        SetCell(dst, source->GetCell(src, 0u), 1u);
-	source->SetCell(src, Cell(), 0u);
-}
+//void SandChunk::PushCell(
+//	SandChunk* source, 
+//	int x, int y, 
+//	int xto, int yto)
+//{
+//	size_t src = source->GetIndex(x,   y);
+//	size_t dst =         GetIndex(xto, yto);
+//
+//	std::unique_lock lock (        GetLock(dst));
+//	std::unique_lock lock2(source->GetLock(src));
+//
+//	        SetCell(dst, source->GetCell(src, 0u), 1u); // there should be some system other than the fields that provide a past state
+//	source->SetCell(src, Cell(), 0u);
+//}
 
 void SandChunk::CommitCells() {
 
@@ -141,17 +91,17 @@ void SandChunk::CommitCells() {
 
 	UpdateRect();
 
-	for (int x = m_minX; x < m_maxX; x++)
-	for (int y = m_minY; y < m_maxY; y++) {
-		size_t i = x + y * m_width;
+	//for (int x = m_minX; x < m_maxX; x++)
+	//for (int y = m_minY; y < m_maxY; y++) {
+	//	size_t i = x + y * m_width;
 
-		Cell& cell = GetCell(i, 1u);
+	//	Cell& cell = GetCell(i, 1u);
 
-		if (cell.Type == CellType::EMPTY) continue;
+	//	if (cell.Type == CellType::EMPTY) continue;
 
-		SetCell(i, cell, 0u);
-		cell = Cell();
-	}
+	//	SetCell(i, cell, SandField::CELL);
+	//	cell = Cell();
+	//}
 }
 
 // Helpers
@@ -168,13 +118,11 @@ bool SandChunk::InBounds(int x, int y) {
 }
 
 bool SandChunk::IsEmpty(int x, int y) {
-	KeepAlive(x, y); // myabe keep all querys alive?
+	//KeepAlive(x, y); // myabe keep all querys alive?
 
-	std::unique_lock lock1(GetLock(x, y, 1));
-	std::unique_lock lock0(GetLock(x, y, 0));
+	std::unique_lock lock(GetLock(x, y, SandField::CELL));
 
-	return GetCell(x, y, 1u).Type == CellType::EMPTY
-		&& GetCell(x, y, 0u).Type == CellType::EMPTY;
+	return GetCell(x, y).Type == CellType::EMPTY;
 }
 
 void SandChunk::KeepAlive(int x, int y) {
