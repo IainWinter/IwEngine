@@ -10,6 +10,7 @@ SandChunk::SandChunk(
 	, m_x(x * width)
 	, m_y(y * height)
 	, m_filledCellCount(0)
+	, m_deleteMe(false)
 {
 	UpdateRect();
 	UpdateRect();

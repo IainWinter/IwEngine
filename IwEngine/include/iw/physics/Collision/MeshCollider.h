@@ -1,6 +1,8 @@
 #pragma once
 
 #include "iw/physics/impl/MeshCollider.h"
+#include "iw/physics/Collision/HullCollider.h"
+
 
 namespace iw {
 	namespace Physics {

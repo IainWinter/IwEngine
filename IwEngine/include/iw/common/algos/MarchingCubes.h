@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-//#include "iw/math/vector2.h"
+#include "iw/common/iwcommon.h"
 #include "glm/vec2.hpp"
 #include <algorithm>
 
@@ -184,10 +184,11 @@ namespace common {
 
 			// Connect squares corners
 
-			for (size_t i = 0; i < polygon.size(); i++) {
-				size_t j = (i + 1) % polygon.size();
-				size_t k = (i + 2) % polygon.size();
-				size_t l = (i + 3) % polygon.size();
+			if (false) // todo: doesnt work in some cases!!!! (triangles are wrong with >>   //______
+			for (size_t i = 0; i < polygon.size(); i++) {							 //|   x|
+				size_t j = (i + 1) % polygon.size();								 //|  xx|
+				size_t k = (i + 2) % polygon.size();								 //| xxx|
+				size_t l = (i + 3) % polygon.size();								 //|____|
 
 				glm::vec2& v1 = polygon[j];
 				glm::vec2& v2 = polygon[k];
@@ -217,8 +218,11 @@ namespace common {
 
 					if (v == glm::vec2(0)) continue;
 
+					assert(j < polygon.size() - 1);
+
 					polygon.erase(polygon.begin() + k);
 					polygon[j] = v;
+
 				}
 			}
 
@@ -226,10 +230,6 @@ namespace common {
 		}
 
 		return polygons;
-	}
-
-	inline float cross_length(glm::vec2 a, glm::vec2 b) {
-		return a.x * b.y - a.y * b.x;
 	}
 
 		// put these in cpp
@@ -304,7 +304,7 @@ namespace common {
 			}
 
 			if (workingSize == working.size()) {
-				assert(false);
+				//assert(false);
 				break;
 			}
 		}

@@ -184,9 +184,6 @@ namespace math {
 
 		return x;
 	}
-
-
-	//}
 }
 
 	using namespace math;

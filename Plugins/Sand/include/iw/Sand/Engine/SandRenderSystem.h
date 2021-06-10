@@ -8,14 +8,14 @@ IW_PLUGIN_SAND_BEGIN
 class SandWorldRenderSystem
 	: public SystemBase
 {
+public:
+	int m_fx,  m_fy,
+	    m_fx2, m_fy2; // Camera frustrum
 private:
 	SandWorld* m_world;
 
 	Mesh         m_mesh;
 	ref<Texture> m_texture;
-
-	int m_fx,  m_fy,
-	    m_fx2, m_fy2; // Camera frustrum
 
 public:
 	SandWorldRenderSystem(

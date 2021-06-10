@@ -66,7 +66,12 @@ namespace impl {
 			m_partsOutdated = true;
 		}
 
-		std::vector<hull_t>& GetHullParts() { // For now the parts are the triangles, could merge into bigger parts
+		const std::vector<hull_t>& GetHullParts() const { // For now the parts are the triangles, could merge into bigger parts
+			if (!m_partsOutdated) LOG_WARNING << "Called const MeshCollider::GetHullParts with outdated parts";
+			return m_parts;
+		}
+
+		std::vector<hull_t>& GetHullParts() {
 			if (!m_partsOutdated) return m_parts;
 
 			m_partsOutdated = false;

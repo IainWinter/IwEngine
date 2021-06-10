@@ -87,6 +87,8 @@ struct GroundSettings {
 	bool isBackground = false;
 	bool isWireframe  = false;
 
+	bool makeInSand = false;
+
 	float distance = 1;
 	float grassPerMeter = 10;
 
@@ -180,26 +182,29 @@ struct Attack {
 struct PixelationLayer
 	: iw::Layer
 {
-	iw::Mesh m_screen;
-	iw::Mesh m_square;
-
 	iw::SandLayer* m_sandLayer;
-	iw::Entity playerEnt;
-
-	iw::Entity tileEntity;
-
+	int m_pixelSize;
+	int m_pixelsPerMeter;
+	
 	iw::OrthographicCamera* cam;
 	unsigned lowResWidth;
 	unsigned lowResHeight;
 
-	unsigned pixelSize;
-	unsigned pixelsPerMeter = 10;
+	iw::Mesh m_screen;
+	iw::Mesh m_square;
+
+	iw::Entity playerEnt;
+	iw::Entity tileEntity;
 
 	PixelationLayer(
-		iw::SandLayer* sandLayer
+		iw::SandLayer* sandLayer,
+		int pixelSize,
+		int pixelsPerMeter
 	)
 		: iw::Layer("Pixelation")
 		, m_sandLayer(sandLayer)
+		, m_pixelSize(pixelSize)
+		, m_pixelsPerMeter(pixelsPerMeter)
 	{}
 
 	int Initialize() {
@@ -313,8 +318,8 @@ struct PixelationLayer
 		// Ground
 		if (true) {
 			GroundSettings mainGround1;
-			mainGround1.left = -100;
-			mainGround1.right = 100;
+			mainGround1.left = -50;
+			mainGround1.right = 50;
 			mainGround1.bottom = -10;
 			mainGround1.top = 10;
 			mainGround1.makeCollider = true;
@@ -323,6 +328,7 @@ struct PixelationLayer
 			mainGround1.color = iw::Color::From255(138, 84, 37);
 			mainGround1.isWireframe = true;
 			mainGround1.yAnchor = -20;
+			mainGround1.makeInSand = true;
 
 			MakeGroundPlane(mainGround1);
 
@@ -354,13 +360,10 @@ struct PixelationLayer
 
 		float aspect = float(Renderer->Width()) / Renderer->Height();
 
-		bool lowRes = false;
+		bool lowRes = true;
 
-		pixelSize = m_sandLayer->m_cellScale;
-		//pixelsPerMeter = 10;
-
-		lowResWidth  = lowRes ? Renderer->Width()  / pixelSize : Renderer->Width();  
-		lowResHeight = lowRes ? Renderer->Height() / pixelSize : Renderer->Height();
+		lowResWidth  = lowRes ? Renderer->Width()  / m_pixelSize : Renderer->Width();  
+		lowResHeight = lowRes ? Renderer->Height() / m_pixelSize : Renderer->Height();
 
 		iw::ref<iw::RenderTarget> lowResTarget = REF<iw::RenderTarget>();
 		lowResTarget->AddTexture(REF<iw::Texture>(lowResWidth, lowResHeight));
@@ -381,8 +384,8 @@ struct PixelationLayer
 		iw::Color clearColor = iw::Color::From255(0, 37, 53);
 
 		cam = new iw::OrthographicCamera(
-			lowResWidth  / pixelsPerMeter,
-			lowResHeight / pixelsPerMeter,
+			lowResWidth  / m_pixelsPerMeter,
+			lowResHeight / m_pixelsPerMeter,
 			-1000, 1000
 		);
 
@@ -429,20 +432,9 @@ struct PixelationLayer
 			Physics->AddRigidbody(body);
 		}
 
-		iw::Cell c;
-
-		c.Type = iw::CellType::ROCK;
-		c.Color = iw::Color(1, 1, 1, 1);
-
-		for (int x = 0; x < 16; x++)
-		for (int y = 0; y < 64; y++)
-		{
-			m_sandLayer->m_world->SetCell(x, y, c);
-		}
-
 		// Custom systems
 
-		SandColliderSystem* colliderSystem = PushSystem<SandColliderSystem>(m_sandLayer->m_world, pixelsPerMeter);
+		SandColliderSystem* colliderSystem = PushSystem<SandColliderSystem>(m_sandLayer->m_world, m_pixelsPerMeter);
 
 		colliderSystem->SetCallback([=](iw::Entity entity)
 		{
@@ -468,7 +460,35 @@ struct PixelationLayer
 	float v[10000];
 	float lastHit = 0;
 
+	//float ptimer = 0;
+	//int pindex = 0;
+
 	void PostUpdate() {
+		//ptimer += iw::DeltaTime();
+		//if (ptimer > .1 && pindex < 8) {
+		//	ptimer = 0;
+		//	pindex += 1;
+
+		//	iw::Cell c;
+
+		//	c.Type = iw::CellType::ROCK;
+		//	c.Color = iw::Color(1, 1, 1, 1);
+
+		//	auto drawSqr = [=](int X, int Y) {
+		//		for (int x = -8; x < 8; x++)
+		//		for (int y = -8; y < 8; y++)
+		//		{
+		//			if (glm::length(glm::vec2(x, y)) < 4) {
+		//				m_sandLayer->m_world->SetCell(x + 16 * X, y + 16 * Y, c);
+		//			}
+		//		}
+		//	};
+
+		//	for (int i = 0; i < 20; i++) {
+		//		drawSqr(pindex, iw::randi(20) - 10);
+		//	}
+		//}
+
 		float camX = cam->WorldPosition().x;
 		float camY = cam->WorldPosition().y;
 		
@@ -801,8 +821,8 @@ struct PixelationLayer
 		});
 
 		// smooth scrolling, doesnt work like this tho?
-		float xd = 0;//(camX - (int)camX) / (pixelSize * pixelsPerMeter);
-		float yd = 0;//(camY - (int)camY) / (pixelSize * pixelsPerMeter);
+		float xd = ((int)camX - camX) / m_pixelSize / m_pixelsPerMeter / m_pixelsPerMeter;
+		float yd = ((int)camY - camY) / m_pixelSize / m_pixelsPerMeter / m_pixelsPerMeter;
 
 		Renderer->BeginScene();
 			//Renderer->DrawMesh(iw::Transform(), m_sandLayer->GetSandMesh());
@@ -906,17 +926,21 @@ struct PixelationLayer
 
 		points.push_back(t1);
 
+		std::vector<unsigned> index = iw::common::TriangulatePolygon(points);
+
+		if (settings.makeInSand) {
+			m_sandLayer->FillPolygon(points, index);
+			return;
+		}
+
 		std::vector<glm::vec3> points3; 
 		for (glm::vec2& v : points) points3.push_back(glm::vec3(v.x, v.y, 0));
 		
-		std::vector<unsigned> index = iw::common::TriangulatePolygon(points);
-
 		iw::ref<iw::Material> simpleMat = REF<iw::Material>(Asset->Load<iw::Shader>("shaders/simple.shader"));
 
 		iw::MeshDescription description;
 		description.DescribeBuffer(iw::bName::POSITION, iw::MakeLayout<float>(3));
 		description.DescribeBuffer(iw::bName::UV,       iw::MakeLayout<float>(2));
-
 
 		iw::MeshData* data = new iw::MeshData(description);
 		data->SetBufferData(iw::bName::POSITION, points3.size(), points3.data());
@@ -955,7 +979,7 @@ struct PixelationLayer
 
 			Physics->AddCollisionObject(o);
 		}
-		
+
 		if (settings.isBackground) {
 			ground.Set<Background>(settings.distance, glm::vec2(settings.xAnchor, settings.yAnchor));
 		}
@@ -1023,14 +1047,15 @@ struct App
 		main->MapButton(iw::T, "toolbox");
 		main->MapButton(iw::I, "imgui");
 
-		int pixelScale = 2;
+		int pixelScale       = 2;
+		int pixelsPerMeter = 10;
 
-		iw::SandLayer* sandLayer = PushLayer<iw::SandLayer>(pixelScale, true);
+		iw::SandLayer* sandLayer = PushLayer<iw::SandLayer>(pixelScale, pixelsPerMeter, true);
 		
 		int error = iw::Application::Initialize(options);
 		if (error) return error;
 
-		PixelationLayer* gameLayer = PushLayer<PixelationLayer>(sandLayer);
+		PixelationLayer* gameLayer = PushLayer<PixelationLayer>(sandLayer, pixelScale, pixelsPerMeter);
 		gameLayer->Initialize();
 
 		return 0;

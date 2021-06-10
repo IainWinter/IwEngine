@@ -24,7 +24,9 @@ namespace iw {
 
 		glm::quat camrot = glm::angleAxis(iw::Pi, glm::vec3(0, 1, 0));
 
-		camera->SetPosition(iw :: lerp(camera->Position(), target, Time::DeltaTime() * Speed));
-		camera->SetRotation(glm::slerp(camera->Rotation(), camrot, Time::DeltaTime() * Speed));
+		float delta = clamp(Time::DeltaTime() * Speed, 0.f, 1.f);
+
+		camera->SetPosition(iw :: lerp(camera->Position(), target, delta));
+		camera->SetRotation(glm::slerp(camera->Rotation(), camrot, delta));
 	}
 }

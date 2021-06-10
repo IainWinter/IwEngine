@@ -13,7 +13,8 @@ class SandLayer
 {
 public:
 	SandWorld* m_world;
-	const int m_cellScale = 4;
+	const int m_cellSize;
+	const int m_cellsPerMeter;
 private:
 	SandWorldRenderSystem* m_render;
 	SandWorldUpdateSystem* m_update;
@@ -25,15 +26,17 @@ private:
 
 public:
 	SandLayer(
-		int cellScale,
+		int cellSize,
+		int cellsPerMeter,
 		bool drawMouseGrid = false
 	)
 		: Layer("Sand")
+		, m_cellSize(cellSize)
+		, m_cellsPerMeter(cellsPerMeter)
+		, m_drawMouseGrid(drawMouseGrid)
 		, m_world (nullptr)
 		, m_render(nullptr)
 		, m_update(nullptr)
-		, m_cellScale(cellScale)
-		, m_drawMouseGrid(drawMouseGrid)
 	{}
 
 	IW_PLUGIN_SAND_API int  Initialize();
@@ -63,10 +66,16 @@ public:
 		m_update->SetCameraScale(xs, ys);
 	}
 
-	IW_PLUGIN_SAND_API Entity MakeTile(
+	IW_PLUGIN_SAND_API
+	Entity MakeTile(
 		const std::string& sprite,
 		bool isStatic = false,
 		bool isSimulated = false);
+
+	IW_PLUGIN_SAND_API
+	void FillPolygon(
+		const std::vector<glm::vec2>& polygon,
+		const std::vector<unsigned>&  index);
 };
 
 IW_PLUGIN_SAND_END

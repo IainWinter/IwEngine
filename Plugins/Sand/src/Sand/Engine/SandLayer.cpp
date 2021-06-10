@@ -85,7 +85,7 @@ int SandLayer::Initialize() {
 	Cell::SetDefault(CellType::SMOKE, _SMOKE);
 	Cell::SetDefault(CellType::BELT,  _BELT);
 
-	m_world = new SandWorld(64 * m_cellScale, 64 * m_cellScale, m_cellScale);
+	m_world = new SandWorld(64 * m_cellSize, 64 * m_cellSize, m_cellSize);
 
 	m_world->m_workers.push_back(new SandWorkerBuilder<SimpleSandWorker>());
 
@@ -102,22 +102,25 @@ int SandLayer::Initialize() {
 }
 
 void SandLayer::PreUpdate() {
-	int width  = m_render->GetSandTexture()->Width();
-	int height = m_render->GetSandTexture()->Height();
+	//int width  = m_render->GetSandTexture()->Width();
+	//int height = m_render->GetSandTexture()->Height();
 
-	int fx = -width  / 2;
-	int fy = -height / 2;
-	int fx2 = fx + width;
-	int fy2 = fy + height;
+	//int fx = -width  / 2;
+	//int fy = -height / 2;
+	//int fx2 = fx + width;
+	//int fy2 = fy + height;
 
-	//m_render->SetCamera(fx, fy, fx2, fy2);
+	////m_render->SetCamera(fx, fy, fx2, fy2);
 
-	sP = Mouse::ClientPos() / m_world->m_scale + vec2(fx, -fy);
+	int width  = m_render->m_fx2 - m_render->m_fx;
+	int height = m_render->m_fy2 - m_render->m_fy;
+
+	sP = Mouse::ClientPos() / m_world->m_scale + vec2(m_render->m_fx, -m_render->m_fy);
 	sP.y() = height - sP.y();
 
 	gP = vec2(int(sP.x() / gridSize), int(sP.y() / gridSize)) * gridSize;
 
-	DrawWithMouse(fx, fy, width, height);
+	DrawWithMouse(m_render->m_fx, -m_render->m_fy, width, height);
 }
 
 void SandLayer::PostUpdate()
@@ -210,6 +213,48 @@ Entity SandLayer::MakeTile(
 	entity.Set<Mesh>(tile->m_spriteMesh); // tmep debug
 
 	return entity;
+}
+
+void SandLayer::FillPolygon(
+	const std::vector<glm::vec2>& polygon, 
+	const std::vector<unsigned>&  index)
+{
+	for (size_t i = 0; i < index.size(); i += 3) {
+		glm::vec2 v0 = polygon[index[i    ]] * float(m_cellsPerMeter);
+		glm::vec2 v1 = polygon[index[i + 1]] * float(m_cellsPerMeter);
+		glm::vec2 v2 = polygon[index[i + 2]] * float(m_cellsPerMeter);
+		
+		glm::vec2 v01 = v1 - v0;
+		glm::vec2 v02 = v2 - v0;
+
+		int maxX = iw::max(v0.x, iw::max(v1.x, v2.x));
+		int minX = iw::min(v0.x, iw::min(v1.x, v2.x));
+		int maxY = iw::max(v0.y, iw::max(v1.y, v2.y));
+		int minY = iw::min(v0.y, iw::min(v1.y, v2.y));
+
+		for (int x = minX; x <= maxX; x++)
+		{
+			for (int y = minY; y <= maxY; y++)
+			{
+				glm::vec2 q(x - v0.x, y - v0.y);
+
+				float s = (float)iw::cross_length(q, v02) / iw::cross_length(v01, v02);
+				float t = (float)iw::cross_length(v01, q) / iw::cross_length(v01, v02);
+
+				if (   s     >= 0 
+					&& t     >= 0 
+					&& s + t <= 1)
+				{
+					iw::Cell c;
+
+					c.Type = iw::CellType::ROCK;
+					c.Color = iw::Color(1, 1, 1, 1);
+
+					m_world->SetCell(x, y, c);
+				}
+			}
+		}
+	}
 }
 
 IW_PLUGIN_SAND_END

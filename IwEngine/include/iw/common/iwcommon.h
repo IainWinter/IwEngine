@@ -24,6 +24,7 @@
 // Put into IwCommon
 
 #include "iw/math/matrix.h" // should go in a translation type file
+#include "glm/vec2.hpp"
 #include "glm/vec3.hpp"
 #include "glm/mat3x3.hpp"
 
@@ -49,6 +50,10 @@ namespace math_translation {
 
 	inline glm::vec3 to_glm(vec<3> vec) {
 		return glm::vec3(vec.get(0), vec.get(1), vec.get(2));
+	}
+
+	inline float cross_length(glm::vec2 a, glm::vec2 b) {
+		return a.x * b.y - a.y * b.x;
 	}
 }
 

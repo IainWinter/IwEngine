@@ -16,7 +16,7 @@ private:
 	iw::SandWorld* m_world;
 	std::unordered_map<
 		std::pair<int, int>,
-		std::pair<iw::Entity, size_t>,
+		std::pair<std::vector<iw::EntityHandle>, size_t>,
 		iw::pair_hash
 	> m_cachedColliders;
 

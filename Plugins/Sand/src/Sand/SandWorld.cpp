@@ -145,7 +145,14 @@ void SandWorld::RemoveEmptyChunks() {
 	for (size_t i = 0; i < chunks.size(); i++) {
 		SandChunk* chunk = chunks.at(i);
 
-		if (chunk->m_filledCellCount == 0) {
+		if (    chunk->m_filledCellCount == 0  // delay by 1 tick
+			&& !chunk->m_deleteMe)
+		{
+			chunk->m_deleteMe = true;
+			continue;
+		}
+
+		if (chunk->m_deleteMe) {
 			m_chunkLookup.unsafe_erase(GetChunkLocation(chunk->m_x, chunk->m_y));
 			chunks[i] = chunks.back(); chunks.pop_back();
 			i--;

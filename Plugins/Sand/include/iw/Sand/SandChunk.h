@@ -42,6 +42,8 @@ public:
 	int m_minX, m_minY,
 	    m_maxX, m_maxY; // Dirty rect
 
+	bool m_deleteMe; // delays deletion for processing chunk with 0 filled cells
+
 private:
 	std::vector<std::tuple<SandChunk*, size_t, size_t>> m_changes; // source chunk, source, destination
 

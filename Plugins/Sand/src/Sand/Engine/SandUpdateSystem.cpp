@@ -77,7 +77,9 @@ void SandWorldUpdateSystem::Update() {
 				Task->queue([&, chunk]() {
 					func(chunk);
 
-					{ std::unique_lock lock(mutex); chunkCount--; }
+					std::unique_lock lock(mutex);
+					
+					chunkCount--;
 					cond.notify_one();
 				});
 			}
