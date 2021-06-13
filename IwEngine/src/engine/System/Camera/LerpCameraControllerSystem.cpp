@@ -3,13 +3,15 @@
 namespace iw {
 	LerpCameraControllerSystem::LerpCameraControllerSystem(
 		Entity target,
-		Camera* camera)
+		Camera* camera,
+		glm::vec3 offset)
 		: SystemBase("Lerp Camera Controller")
 		, Target(target)
+		, camera(camera)
+		, Offset(offset)
 		, Locked(false)
 		, Follow(true)
 		, Speed(20.0)
-		, camera(camera)
 	{}
 
 	void LerpCameraControllerSystem::Update() {
@@ -17,9 +19,9 @@ namespace iw {
 			return;
 		}
 
-		glm::vec3 target;
+		glm::vec3 target = Offset;
 		if (Target != EntityHandle::Empty && Follow) {
-			target = Target.Find<Transform>()->Position;
+			target += Target.Find<Transform>()->Position;
 		}
 
 		glm::quat camrot = glm::angleAxis(iw::Pi, glm::vec3(0, 1, 0));

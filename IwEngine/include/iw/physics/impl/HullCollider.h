@@ -25,6 +25,13 @@ namespace impl {
 			, m_points(points)
 		{}
 
+		HullCollider& operator=(
+			const HullCollider & copy)
+		{
+			SetPoint(copy.m_points);
+			// dont copy isMesh?
+		}
+
 		void SetPoints(
 			const std::vector<vec_t>& points)
 		{

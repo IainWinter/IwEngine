@@ -45,8 +45,8 @@ void SandColliderSystem::Update()
 				iw::Entity entity = Space->CreateEntity<
 					iw::Transform, 
 					iw::MeshCollider2, 
-					iw::CollisionObject, 
-					iw::Mesh>();
+					iw::CollisionObject/*, 
+					iw::Mesh*/>();
 
 				iw::Transform*       t = entity.Set<iw::Transform>(position);
 				iw::MeshCollider2*   c = entity.Set<iw::MeshCollider2>();
@@ -61,7 +61,9 @@ void SandColliderSystem::Update()
 				c->SetPoints(polygon);
 				c->SetTriangles(index);
 
-				m_callback(entity);
+				if (m_callback) {
+					m_callback(entity);
+				}
 
 				entities.push_back(entity.Handle);
 			}

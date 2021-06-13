@@ -14,6 +14,8 @@ namespace Engine {
 	public:
 		Entity Target;
 
+		glm::vec3 Offset;
+
 		bool Locked;
 		bool Follow;
 		float Speed;
@@ -24,7 +26,8 @@ namespace Engine {
 		IWENGINE_API
 		LerpCameraControllerSystem(
 			Entity target,
-			Camera* camera = nullptr);
+			Camera* camera = nullptr,
+			glm::vec3 offset = glm::vec3(0));
 
 		IWENGINE_API
 		void Update() override;

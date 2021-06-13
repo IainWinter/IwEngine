@@ -171,6 +171,12 @@ void SandLayer::DrawWithMouse(int fx, int fy, int width, int height) {
 		else if (Keyboard::KeyDown(O)) placeMe = CellType::WOOD;
 		else if (Keyboard::KeyDown(B)) placeMe = CellType::BELT;
 
+		if (    placeMe == CellType::EMPTY
+			&& !Keyboard::KeyDown(C)) 
+		{
+			return;
+		}
+
 		for (int x = gP.x(); x < gP.x() + gridSize; x++)
 		for (int y = gP.y(); y < gP.y() + gridSize; y++) {
 			if (!m_world->InBounds(x, y))
@@ -247,8 +253,11 @@ void SandLayer::FillPolygon(
 				{
 					iw::Cell c;
 
-					c.Type = iw::CellType::ROCK;
-					c.Color = iw::Color(1, 1, 1, 1);
+					c.Type  = CellType::ROCK;
+					c.Color = Color::From255(100, 100, 100);
+					c.Style = CellStyle::RANDOM_STATIC;
+					c.StyleColor = Color(.05, .05, .05, 0);
+					c.StyleOffset = randf();
 
 					m_world->SetCell(x, y, c);
 				}

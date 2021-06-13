@@ -20,6 +20,8 @@
 
 #include "Systems/SandColliders.h"
 
+#include "iw/graphics/Model.h"
+
 enum class PlayerAttack {
 	SLASH,
 	UP_SLASH,
@@ -95,6 +97,9 @@ struct GroundSettings {
 	float zIndex = 0;
 
 	iw::Color color;
+
+	std::string mesh;
+	bool makeFromMesh = false;
 };
 
 struct GroundConstraint : iw::Constraint {
@@ -208,7 +213,6 @@ struct PixelationLayer
 	{}
 
 	int Initialize() {
-
 		iw::ref<iw::Shader> simpleShader = Renderer->InitShader(
 			Asset->Load<iw::Shader>("shaders/simple.shader"), 
 			iw::CAMERA
@@ -261,20 +265,14 @@ struct PixelationLayer
 			r->Collider = c;
 			r->SetTransform(t);
 			r->IsAxisLocked.z = true;
+			r->DynamicFriction = 0;
+			r->StaticFriction= 0;
 
 			r->OnCollision = [=](
 				iw::Manifold& man, 
 				float dt)
 			{
-				/*iw::Entity e1, e2;
-				if(iw::GetEntitiesFromManifold<Player>(Space, man, e1, e2)) {
-					return;
-				}
-
-				if ()*/
-
-				if (   /*r->Velocity.y == 0
-					&& */glm::dot(man.Normal, glm::vec3(0, 1, 0)) > 0)
+				if (glm::dot(man.Normal, glm::vec3(0, 1, 0)) > 0)
 				{
 					p->onGround = true;
 				}
@@ -285,7 +283,6 @@ struct PixelationLayer
 			};
 
 			Physics->AddRigidbody(r);
-			//Physics->AddConstraint(new GroundConstraint(r, -26));
 
 			m->Material()->Set("albedo", iw::Color::From255(240, 100, 100));
 		}
@@ -318,17 +315,11 @@ struct PixelationLayer
 		// Ground
 		if (true) {
 			GroundSettings mainGround1;
-			mainGround1.left = -50;
-			mainGround1.right = 50;
-			mainGround1.bottom = -10;
-			mainGround1.top = 10;
-			mainGround1.makeCollider = true;
 			//mainGround1.makeGrass = true;
 			//mainGround1.grassPerMeter = 10;
-			mainGround1.color = iw::Color::From255(138, 84, 37);
-			mainGround1.isWireframe = true;
-			mainGround1.yAnchor = -20;
 			mainGround1.makeInSand = true;
+			mainGround1.makeFromMesh = true;
+			mainGround1.mesh = "levels/Sand/levelTest.glb";
 
 			MakeGroundPlane(mainGround1);
 
@@ -351,7 +342,7 @@ struct PixelationLayer
 
 		// Physics
 
-		Physics->SetGravity(glm::vec3(0, -50, 0));
+		Physics->SetGravity(glm::vec3(0, -80, 0));
 		Physics->AddSolver(new iw::SmoothPositionSolver());
 		Physics->AddSolver(new iw::ImpulseSolver());
 		iw::SetFixedTime(.01f);
@@ -436,23 +427,23 @@ struct PixelationLayer
 
 		SandColliderSystem* colliderSystem = PushSystem<SandColliderSystem>(m_sandLayer->m_world, m_pixelsPerMeter);
 
-		colliderSystem->SetCallback([=](iw::Entity entity)
-		{
-			iw::MeshDescription tileDesc;
-			tileDesc.DescribeBuffer(iw::bName::POSITION, iw::MakeLayout<float>(2));
+		//colliderSystem->SetCallback([=](iw::Entity entity)
+		//{
+		//	iw::MeshDescription tileDesc;
+		//	tileDesc.DescribeBuffer(iw::bName::POSITION, iw::MakeLayout<float>(2));
 
-			iw::Mesh*          mesh     = entity.Set<iw::Mesh>((new iw::MeshData(tileDesc))->MakeInstance());
-			iw::MeshCollider2* collider = entity.Find<iw::MeshCollider2>();
+		//	iw::Mesh*          mesh     = entity.Set<iw::Mesh>((new iw::MeshData(tileDesc))->MakeInstance());
+		//	iw::MeshCollider2* collider = entity.Find<iw::MeshCollider2>();
 
-			iw::ref<iw::Material> mat = simpleMat;
+		//	iw::ref<iw::Material> mat = simpleMat;
 
-			mesh->SetMaterial(mat);
-			mesh->Material()->Set("albedo", iw::Color::From255(255, 0, 0));
-			mesh->Material()->SetWireframe(true);
+		//	mesh->SetMaterial(mat);
+		//	mesh->Material()->Set("albedo", iw::Color::From255(255, 0, 0));
+		//	mesh->Material()->SetWireframe(true);
 
-			mesh->Data()->SetBufferData(iw::bName::POSITION, collider->m_points.size(), collider->m_points.data());
-			mesh->Data()->SetIndexData(                      collider->m_index .size(), collider->m_index .data());
-		});
+		//	mesh->Data()->SetBufferData(iw::bName::POSITION, collider->m_points.size(), collider->m_points.data());
+		//	mesh->Data()->SetIndexData(                      collider->m_index .size(), collider->m_index .data());
+		//});
 
 		return 0;
 	}
@@ -543,20 +534,6 @@ struct PixelationLayer
 			props->k_right = iw::Keyboard::KeyDown(iw::D);
 			props->k_attack1 = iw::Mouse::ButtonDown(iw::LMOUSE);
 			props->k_attack2 = iw::Mouse::ButtonDown(iw::RMOUSE);
-
-			if (iw::Keyboard::KeyDown(iw::Y)) {
-				props->k_down = true;
-				props->k_attack1 = true;
-			}
-
-			if (iw::Keyboard::KeyDown(iw::U)) {
-				props->k_up = true;
-				props->k_attack1 = true;
-			}
-
-			if (iw::Keyboard::KeyDown(iw::I)) {
-				props->k_attack1 = true;
-			}
 
 			// Movement
 
@@ -825,8 +802,8 @@ struct PixelationLayer
 		float yd = ((int)camY - camY) / m_pixelSize / m_pixelsPerMeter / m_pixelsPerMeter;
 
 		Renderer->BeginScene();
-			//Renderer->DrawMesh(iw::Transform(), m_sandLayer->GetSandMesh());
-			Renderer->DrawMesh(iw::Transform(glm::vec3(xd, yd, 0)), m_screen);
+			Renderer->DrawMesh(iw::Transform(/*glm::vec3(xd, yd, 0)*/), m_sandLayer->GetSandMesh());
+			Renderer->DrawMesh(iw::Transform(), m_screen);
 		Renderer->EndScene();
 	}
 
@@ -903,30 +880,50 @@ struct PixelationLayer
 		glm::vec2 t1(settings.left,  settings.top);
 		glm::vec2 t2(settings.right, settings.top);
 
-		std::vector<glm::vec2> points { b1 };
+		std::vector<glm::vec2> points;
+		std::vector<unsigned> index;
 
-		for (float x = settings.left; x < settings.right; x += 20) {
-			points.emplace_back(x, settings.bottom);
+		if (settings.makeFromMesh) {
+			iw::ref<iw::MeshData> mesh = Asset->Load<iw::Model>(settings.mesh)->GetMesh(0).Data();
+
+			glm::vec3* pos = (glm::vec3*)mesh->Get(iw::bName::POSITION);
+			unsigned*  idx = mesh->GetIndex();
+
+			for (size_t i = 0; i < mesh->GetCount(iw::bName::POSITION); i++) {
+				points.emplace_back(pos[i].x, pos[i].y);
+			}
+
+			for (size_t i = 0; i < mesh->GetIndexCount(); i++) {
+				index.push_back(idx[i]);
+			}
 		}
 
-		points.push_back(b2);
-		points.push_back(t2);
+		else {
+			points.push_back(b1);
 
-		glm::vec2 point = t2;
-		while (true) {
-			point.x -= (iw::randf() + 1) * settings.xScale;
-			point.y +=  iw::randf()      * settings.yScale;
+			for (float x = settings.left; x < settings.right; x += 20) {
+				points.emplace_back(x, settings.bottom);
+			}
 
-			point.y = iw::clamp(point.y, settings.bottom, FLT_MAX);
+			points.push_back(b2);
+			points.push_back(t2);
 
-			if (point.x <= t1.x) break;
+			glm::vec2 point = t2;
+			while (true) {
+				point.x -= (iw::randf() + 1) * settings.xScale;
+				point.y +=  iw::randf()      * settings.yScale;
 
-			points.push_back(point);
+				point.y = iw::clamp(point.y, settings.bottom, FLT_MAX);
+
+				if (point.x <= t1.x) break;
+
+				points.push_back(point);
+			}
+
+			points.push_back(t1);
+
+			index = iw::TriangulatePolygon(points);
 		}
-
-		points.push_back(t1);
-
-		std::vector<unsigned> index = iw::common::TriangulatePolygon(points);
 
 		if (settings.makeInSand) {
 			m_sandLayer->FillPolygon(points, index);
@@ -1074,3 +1071,18 @@ iw::Application* CreateApplication(
 iw::Application* GetApplicationForEditor() {
 	return new App();
 }
+
+
+
+//
+//collider.AddPoint(glm::vec2(-.9, 1)); // 0
+//collider.AddPoint(glm::vec2(-1, .9)); // 1 
+//
+//collider.AddPoint(glm::vec2(-1, -.9)); // 1 
+//collider.AddPoint(glm::vec2(-.9, -1)); // 2
+//
+//collider.AddPoint(glm::vec2(.9, -1)); // 3
+//collider.AddPoint(glm::vec2(1, -.9)); // 4
+//
+//collider.AddPoint(glm::vec2(1, .9)); // 5 
+//collider.AddPoint(glm::vec2(.9, 1)); // 6 
