@@ -2,24 +2,25 @@
 
 int PlayerSystem::Initialize()
 {
-	iw::Entity player = Space->CreateEntity<
+	PlayerEntity = Space->CreateEntity<
 		iw::Transform,
 		iw::Mesh,
 		iw::Hull2,
 		iw::Rigidbody,
 		iw::Timer,
+		PlayerAttackState,
 		Player>();
 
-	iw::Transform*  t = player.Set<iw::Transform>(glm::vec3(20, 25, 0), glm::vec3(1, 2, 1));
-	iw::Mesh*       m = player.Set<iw::Mesh>(m_playerMesh);
-	iw::Hull2*      c = player.Set<iw::Hull2>(iw::MakeSquareCollider());
-	iw::Rigidbody*  r = player.Set<iw::Rigidbody>();
-	Player*         p = player.Set<Player>();
+	iw::Transform*  t = PlayerEntity.Set<iw::Transform>(glm::vec3(20, 25, 0), glm::vec3(1, 2, 1));
+	iw::Mesh*       m = PlayerEntity.Set<iw::Mesh>(m_playerMesh);
+	iw::Hull2*      c = PlayerEntity.Set<iw::Hull2>(iw::MakeSquareCollider());
+	iw::Rigidbody*  r = PlayerEntity.Set<iw::Rigidbody>();
+	Player*         p = PlayerEntity.Set<Player>();
 
-	iw::Timer* timer = player.Set<iw::Timer>();
-	timer->SetTime("Attack", .25f);
-	timer->SetTime("Attack 2", .5f);
-	timer->SetTime("Attack 2 Charge", 2.f);
+	iw::Timer* timer = PlayerEntity.Set<iw::Timer>();
+	timer->SetTime("Light Attack", .25f);
+	timer->SetTime("Heavy Attack", .5f);
+	timer->SetTime("Heavy Attack Charge", 2.f);
 
 	r->Collider = c;
 	r->SetTransform(t);
@@ -33,23 +34,23 @@ int PlayerSystem::Initialize()
 	{
 		if (glm::dot(man.Normal, glm::vec3(0, 1, 0)) > 0)
 		{
-			p->OnGround = true;
+			p->OnGround |= true;
 		}
 
-		else {
+		/*else {
 			p->OnGround = false;
-		}
+		}*/
 	};
 
 	Physics->AddRigidbody(r);
 
 	m->Material()->Set("albedo", iw::Color::From255(240, 100, 100));
+
+	return 0;
 }
 
 void PlayerSystem::Update()
 {
-	Bus->push<event_Attack>(AttackType::GROUND_LIGHT_FORWARD);
-
 	Space->Query<iw::Transform, iw::Rigidbody, iw::Timer, Player>().Each([&](
 		iw::EntityHandle entity, 
 		iw::Transform* transform,
@@ -57,6 +58,8 @@ void PlayerSystem::Update()
 		iw::Timer* timer,
 		Player* player) 
 	{
+		timer->Tick();
+
 		player->i_jump  = iw::Keyboard::KeyDown(iw::SPACE);
 		player->i_up    = iw::Keyboard::KeyDown(iw::W);
 		player->i_down  = iw::Keyboard::KeyDown(iw::S);
@@ -112,7 +115,7 @@ void PlayerSystem::Update()
 					else                attack = AttackType::GROUND_LIGHT_FORWARD;
 				}
 
-				else if (heavy)
+				else
 				{
 					if (player->i_up)   attack = AttackType::GROUND_HEAVY_UP;
 					if (player->i_down) attack = AttackType::GROUND_HEAVY_DOWN;
@@ -128,7 +131,7 @@ void PlayerSystem::Update()
 					else                attack = AttackType::AIR_LIGHT_FORWARD;
 				}
 
-				else if (heavy)
+				else
 				{
 					if (player->i_up)   attack = AttackType::AIR_HEAVY_UP;
 					if (player->i_down) attack = AttackType::AIR_HEAVY_DOWN;
@@ -136,7 +139,7 @@ void PlayerSystem::Update()
 				}
 			}
 
-			Bus->push<event_Attack>(attack, entity);
+			Bus->push<event_Attack>(attack, entity, player->Facing);
 		}
 	});
 }

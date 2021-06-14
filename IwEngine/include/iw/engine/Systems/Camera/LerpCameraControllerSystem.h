@@ -12,7 +12,7 @@ namespace Engine {
 		, public CameraController
 	{
 	public:
-		Entity Target;
+		Entity& Target;
 
 		glm::vec3 Offset;
 
@@ -25,7 +25,7 @@ namespace Engine {
 	public:
 		IWENGINE_API
 		LerpCameraControllerSystem(
-			Entity target,
+			Entity& target,
 			Camera* camera = nullptr,
 			glm::vec3 offset = glm::vec3(0));
 

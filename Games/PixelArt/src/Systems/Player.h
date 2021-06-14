@@ -3,22 +3,12 @@
 #include "iw/engine/Layer.h"
 #include "iw/engine/Components/Timer.h"
 #include "../Events.h"
-
-struct Player {
-	bool i_jump,
-		i_up,
-		i_down,
-		i_left,
-		i_right,
-		i_light,
-		i_heavy;
-
-	bool OnGround = false;
-	float Facing = 1;
-};
+#include "../Player.h"
 
 class PlayerSystem : public iw::SystemBase
 {
+public:
+	iw::Entity PlayerEntity;
 private:
 	iw::Mesh m_playerMesh;
 

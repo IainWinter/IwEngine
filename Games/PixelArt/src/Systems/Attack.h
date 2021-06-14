@@ -13,6 +13,17 @@
 
 class AttackSystem : public iw::SystemBase
 {
+private:
+	iw::Mesh m_square; // temp for debug, should use draw collider system
 public:
-	bool On(iw::ActionEvent& e);
+	AttackSystem(
+		const iw::Mesh& square
+	)
+		: iw::SystemBase("Attack")
+		, m_square(square)
+	{}
+
+	void Update() override;
+	bool On(iw::ActionEvent& e) override;
+	void MakeAttack(AttackProps& props, float facing, iw::EntityHandle source);
 };

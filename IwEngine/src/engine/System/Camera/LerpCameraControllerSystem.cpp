@@ -2,7 +2,7 @@
 
 namespace iw {
 	LerpCameraControllerSystem::LerpCameraControllerSystem(
-		Entity target,
+		Entity& target,
 		Camera* camera,
 		glm::vec3 offset)
 		: SystemBase("Lerp Camera Controller")

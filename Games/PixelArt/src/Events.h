@@ -28,16 +28,20 @@ struct event_Move : iw::SingleEvent {
 
 struct event_Attack : iw::SingleEvent {
 	AttackType Type;
-	iw::EntityHandle Entity;
+	iw::EntityHandle Entity; // Expected to have transform
+	float Facing;
 
 	// To be assigned through event path
 	AttackProps Props;
 
 	event_Attack(
-		AttackType type, iw::EntityHandle entity
+		AttackType type,
+		iw::EntityHandle entity,
+		float facing
 	)
 		: iw::SingleEvent(iw::val(myActionEvents::ATTACK))
 		, Type(type)
 		, Entity(entity)
+		, Facing(facing)
 	{}
 };

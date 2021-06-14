@@ -28,8 +28,8 @@ namespace impl {
 		HullCollider& operator=(
 			const HullCollider & copy)
 		{
-			SetPoint(copy.m_points);
-			// dont copy isMesh?
+			SetPoints(copy.m_points); // dont copy isMesh?
+			return *this;
 		}
 
 		void SetPoints(

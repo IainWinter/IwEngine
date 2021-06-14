@@ -5,12 +5,16 @@ int PlayerAttackSystem::Initialize()
 	PlayerComboAttack forwardSlash;
 
 	forwardSlash.Normal.Hitbox = iw::MakeSquareCollider();
-	forwardSlash.Normal.Knockback = glm::vec2(2, .5);
-	
+	forwardSlash.Normal.Knockback = glm::vec2(20, 10);
+	forwardSlash.Normal.Transform.Position = glm::vec3(2, 0, 0);
+	forwardSlash.Normal.Transform.Scale = glm::vec3(.6, .8, 1);
+
 	forwardSlash.Combo = forwardSlash.Normal;
 	forwardSlash.Combo.Knockback *= 2;
 
 	m_attacks.emplace(AttackType::GROUND_LIGHT_FORWARD, forwardSlash);
+
+	return 0;
 }
 
 void PlayerAttackSystem::Update()
@@ -37,8 +41,11 @@ bool PlayerAttackSystem::On(
 		PlayerAttackState* state = Space->FindComponent<PlayerAttackState>(e_attack.Entity);
 		if (state) 
 		{
-			PlayerComboAttack attack = m_attacks.at(e_attack.Type);
-			bool combo = IsCombo(state, e_attack.Type, attack .NeededComboCount);
+			auto itr = m_attacks.find(e_attack.Type);
+			if (itr == m_attacks.end()) return true;
+
+			PlayerComboAttack attack = itr->second;
+			bool combo = IsCombo(state, e_attack.Type, attack.NeededComboCount);
 			
 			e_attack.Props = combo ? attack.Combo : attack.Normal;
 		}

@@ -27,8 +27,17 @@ enum class AttackType {
 };
 
 struct AttackProps {
+	iw::Transform Transform;
+
 	iw::Hull2 Hitbox;
 	glm::vec2 Knockback = glm::vec2(0);
 	glm::vec2 Velocity  = glm::vec2(0);
-	std::function<void()> Func;
+
+	float Time = .1f;
+
+	std::function<bool()> func_deleteIf;
+};
+
+struct Attack {
+	iw::EntityHandle Source;
 };
