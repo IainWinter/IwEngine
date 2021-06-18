@@ -248,7 +248,7 @@ struct PixelationLayer
 				iw::Rigidbody,
 				Enemy>();
 
-			iw::Transform* t = enemy.Set<iw::Transform>(glm::vec3(0, 25, 0));
+			iw::Transform* t = enemy.Set<iw::Transform>(glm::vec3(0, 25, 0), glm::vec3(1, 2, 1));
 			iw::Mesh*      m = enemy.Set<iw::Mesh>(m_square.MakeInstance());
 			iw::Hull2*     c = enemy.Set<iw::Hull2>(iw::MakeSquareCollider());
 			iw::Rigidbody* r = enemy.Set<iw::Rigidbody>();
@@ -357,7 +357,7 @@ struct PixelationLayer
 
 		// Tile
 
-		if (false) {
+		if (true) {
 			tileEntity = m_sandLayer->MakeTile("none", true, true);
 
 			iw::Tile*      tile = tileEntity.Find<iw::Tile>();
@@ -382,7 +382,6 @@ struct PixelationLayer
 
 			Physics->AddRigidbody(body);
 		}
-
 
 		//colliderSystem->SetCallback([=](iw::Entity entity)
 		//{
@@ -510,70 +509,6 @@ struct PixelationLayer
 			Renderer->DrawMesh(iw::Transform(), m_screen);
 		Renderer->EndScene();
 	}
-
-	//void MakeAttack(
-	//	iw::Transform& who, 
-	//	float xOff,  float yOff, 
-	//	float xSize, float ySize, 
-	//	float xDmg,  float yDmg,
-	//	std::function<bool()> func = []() { return false; })
-	//{
-	//	iw::Entity bullet = Space->CreateEntity<
-	//		iw::Transform, 
-	//		iw::CollisionObject, 
-	//		iw::Hull2,
-	//		iw::Mesh, 
-	//		Bullet>();
-
-	//	iw::Transform*       t = bullet.Set<iw::Transform>();
-	//	iw::CollisionObject* o = bullet.Set<iw::CollisionObject>();
-	//	iw::Hull2*           c = bullet.Set<iw::Hull2>(iw::MakeSquareCollider());
-	//	iw::Mesh*            m = bullet.Set<iw::Mesh>(m_square.MakeInstance());
-	//							 bullet.Set<Bullet>();
-
-	//	t->Scale.x = xSize;
-	//	t->Scale.y = ySize;
-
-	//	t->Position.x = who.WorldPosition().x + xOff;
-	//	t->Position.y = who.WorldPosition().y + yOff;
-	//	t->Position.z = 1;
-
-	//	m->Material()->Set("albedo", iw::Color::From255(200, 200, 255));
-
-	//	o->Collider = c;
-	//	o->IsTrigger = true;
-	//	o->OnCollision = Attack(Space, xDmg, yDmg, func);
-	//	o->SetTransform(t);
-
-	//	Physics->AddCollisionObject(o);
-	//}
-
-	//void MakeComboAttack(
-	//	iw::Transform& who, 
-	//	float xOff,      float yOff, 
-	//	float xSize,     float ySize, 
-	//	float xDmg,      float yDmg,
-	//	float xDmgCombo, float yDmgCombo,
-	//	Player* props,     int tick,
-	//	PlayerAttack name, int comboHits,
-	//	std::function<bool(float, float)> func = [](float, float) { return false; })
-	//{
-	//	float& dmgX = xDmg;
-	//	float& dmgY = yDmg;
-
-	//	if (   props->lastHit  == name
-	//		&& props->comboHit == comboHits)
-	//	{
-	//		dmgX = xDmgCombo;
-	//		dmgY = yDmgCombo;
-	//	}
-
-	//	MakeAttack(who, xOff, yOff, xSize, ySize, dmgX, dmgY, [=]()
-	//	{
-	//		props->AddHit(name, tick);
-	//		return func(dmgX, dmgY);
-	//	});
-	//}
 
 	void MakeGroundPlane(
 		const GroundSettings& settings)

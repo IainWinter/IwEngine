@@ -30,6 +30,12 @@ namespace Engine {
 			glm::quat rotation = glm::quat(1, 0, 0, 0));
 
 		IWCOMMON_API
+		Transform(
+			glm::vec2 position,
+			glm::vec2 scale = glm::vec2(1),
+			float rotation = 0.0f);
+
+		IWCOMMON_API
 		static Transform FromMatrix(
 			glm::mat4 transformation);
 

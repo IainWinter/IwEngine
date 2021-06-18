@@ -1,5 +1,10 @@
 #pragma once
 
+enum class PlayerLocationState {
+	GROUND,
+	AIR
+};
+
 struct Player {
 	bool i_jump,
 		i_up,
@@ -11,23 +16,14 @@ struct Player {
 
 	bool OnGround = true;
 	float Facing = 1;
-};
 
-enum class PlayerLocationState {
-	GROUND,
-	AIR
-};
-
-struct PlayerAttackState {
 	PlayerLocationState Location = PlayerLocationState::GROUND;
-	std::vector<AttackType> PreviousAttacks;
-
-	float PreviousAttackTime = 0.0;
-	float PreviousAttackDelay = 1.0;
+	std::vector<std::pair<AttackType, size_t>> PreviousAttacks; // type, tick
 };
+
 
 struct PlayerComboAttack {
 	AttackProps Normal;
 	AttackProps Combo;
-	int NeededComboCount;
+	int NeededComboCount = -1;
 };

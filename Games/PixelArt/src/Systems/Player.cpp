@@ -8,7 +8,6 @@ int PlayerSystem::Initialize()
 		iw::Hull2,
 		iw::Rigidbody,
 		iw::Timer,
-		PlayerAttackState,
 		Player>();
 
 	iw::Transform*  t = PlayerEntity.Set<iw::Transform>(glm::vec3(20, 25, 0), glm::vec3(1, 2, 1));
@@ -21,6 +20,7 @@ int PlayerSystem::Initialize()
 	timer->SetTime("Light Attack", .25f);
 	timer->SetTime("Heavy Attack", .5f);
 	timer->SetTime("Heavy Attack Charge", 2.f);
+	timer->SetTime("reset", 1.0f);
 
 	r->Collider = c;
 	r->SetTransform(t);
@@ -34,7 +34,7 @@ int PlayerSystem::Initialize()
 	{
 		if (glm::dot(man.Normal, glm::vec3(0, 1, 0)) > 0)
 		{
-			p->OnGround |= true;
+			p->OnGround |= true; // this dosnt work
 		}
 
 		/*else {
@@ -67,6 +67,16 @@ void PlayerSystem::Update()
 		player->i_right = iw::Keyboard::KeyDown(iw::D);
 		player->i_light = iw::Mouse::ButtonDown(iw::LMOUSE);
 		player->i_heavy = iw::Mouse::ButtonDown(iw::RMOUSE);
+
+		if (iw::Keyboard::KeyDown(iw::Y)) {
+			player->i_light = true;
+			player->i_down  = true;
+		}
+
+		if (iw::Keyboard::KeyDown(iw::U)) {
+			player->i_light = true;
+			player->i_up = true;
+		}
 
 		// Movement
 
@@ -110,32 +120,32 @@ void PlayerSystem::Update()
 			{
 				if (light)
 				{
-					if (player->i_up)   attack = AttackType::GROUND_LIGHT_UP;
-					if (player->i_down) attack = AttackType::GROUND_LIGHT_DOWN;
-					else                attack = AttackType::GROUND_LIGHT_FORWARD;
+					     if (player->i_up)   attack = AttackType::GROUND_LIGHT_UP;
+					else if (player->i_down) attack = AttackType::GROUND_LIGHT_DOWN;
+					else                     attack = AttackType::GROUND_LIGHT_FORWARD;
 				}
 
 				else
 				{
-					if (player->i_up)   attack = AttackType::GROUND_HEAVY_UP;
-					if (player->i_down) attack = AttackType::GROUND_HEAVY_DOWN;
-					else                attack = AttackType::GROUND_HEAVY_FORWARD;
+					     if (player->i_up)   attack = AttackType::GROUND_HEAVY_UP;
+					else if (player->i_down) attack = AttackType::GROUND_HEAVY_DOWN;
+					else                     attack = AttackType::GROUND_HEAVY_FORWARD;
 				}
 			}
 
 			else {
 				if (light)
 				{
-					if (player->i_up)   attack = AttackType::AIR_LIGHT_UP;
-					if (player->i_down) attack = AttackType::AIR_LIGHT_DOWN;
-					else                attack = AttackType::AIR_LIGHT_FORWARD;
+					     if (player->i_up)   attack = AttackType::AIR_LIGHT_UP;
+					else if (player->i_down) attack = AttackType::AIR_LIGHT_DOWN;
+					else                     attack = AttackType::AIR_LIGHT_FORWARD;
 				}
 
 				else
 				{
-					if (player->i_up)   attack = AttackType::AIR_HEAVY_UP;
-					if (player->i_down) attack = AttackType::AIR_HEAVY_DOWN;
-					else                attack = AttackType::AIR_HEAVY_FORWARD;
+					     if (player->i_up)   attack = AttackType::AIR_HEAVY_UP;
+					else if (player->i_down) attack = AttackType::AIR_HEAVY_DOWN;
+					else                     attack = AttackType::AIR_HEAVY_FORWARD;
 				}
 			}
 

@@ -13,10 +13,23 @@ namespace Engine {
 	Transform::Transform(
 		glm::vec3 position,
 		glm::vec3 scale,
-		glm::quat rotation)
+		glm::quat rotation
+	)
 		: Position(position)
 		, Scale(scale)
 		, Rotation(rotation)
+		, m_parent(nullptr)
+	{}
+
+	IWCOMMON_API
+	Transform::Transform(
+		glm::vec2 position,
+		glm::vec2 scale,
+		float rotation
+	)
+		: Position(position, 0.0f)
+		, Scale(scale, 1.0f)
+		, Rotation(glm::angleAxis(rotation, glm::vec3(0.0f, 0.0f, 1.0f)))
 		, m_parent(nullptr)
 	{}
 

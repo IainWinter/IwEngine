@@ -100,7 +100,7 @@ namespace detail {
 		: m_topology(MeshTopology::TRIANGLES)
 		, m_vertexArray(nullptr)
 		, m_indexBuffer(nullptr)
-		, m_outdated(false)
+		, Outdated(false)
 		, m_bound(false)
 		, m_name("unnamed")
 	{
@@ -113,7 +113,7 @@ namespace detail {
 		, m_topology(MeshTopology::TRIANGLES)
 		, m_vertexArray(nullptr)
 		, m_indexBuffer(nullptr)
-		, m_outdated(false)
+		, Outdated(false)
 		, m_bound(false)
 		, m_name("unnamed")
 	{
@@ -218,7 +218,7 @@ namespace detail {
 	}
 
 	bool MeshData::IsOutdated() const {
-		return m_outdated;
+		return Outdated;
 	}
 
 	MeshTopology MeshData::Topology() const {
@@ -236,7 +236,7 @@ namespace detail {
 	void* MeshData::Get(
 		bName name)
 	{
-		m_outdated = true;
+		Outdated = true;
 		return GetBuffer(m_description.GetBufferIndex(name)).Ptr();
 	}
 
@@ -253,7 +253,7 @@ namespace detail {
 	}
 
 	unsigned* MeshData::GetIndex() {
-		m_outdated = true;
+		Outdated = true;
 		return GetIndexBuffer().Ptr();
 	}
 
@@ -288,7 +288,7 @@ namespace detail {
 
 		memcpy(buffer.Ptr(), data, size);
 
-		m_outdated = true;
+		Outdated = true;
 	}
 
 	void MeshData::SetBufferDataPtr(
@@ -309,7 +309,7 @@ namespace detail {
 		buffer.Count = count;
 		buffer.m_Ptr = ptr;
 
-		m_outdated = true;
+		Outdated = true;
 	}
 
 	void MeshData::SetIndexData(
@@ -323,7 +323,7 @@ namespace detail {
 
 		memcpy(m_index.Ptr(), data, count * sizeof(unsigned));
 
-		m_outdated = true;
+		Outdated = true;
 	}
 
 	void MeshData::SetTopology(
@@ -496,7 +496,7 @@ namespace detail {
 				data[i] = v;
 			}
 
-			m_outdated = true;
+			Outdated = true;
 		}
 
 		if (m_description.HasBuffer(bName::NORMAL)) {
@@ -508,7 +508,7 @@ namespace detail {
 				data[i] = v;
 			}
 
-			m_outdated = true;
+			Outdated = true;
 		}
 
 		if (m_description.HasBuffer(bName::TANGENT)) {
@@ -520,7 +520,7 @@ namespace detail {
 				data[i] = v;
 			}
 
-			m_outdated = true;
+			Outdated = true;
 		}
 
 		if (m_description.HasBuffer(bName::BITANGENT)) {
@@ -532,7 +532,7 @@ namespace detail {
 				data[i] = v;
 			}
 
-			m_outdated = true;
+			Outdated = true;
 		}
 
 	}
@@ -558,7 +558,7 @@ namespace detail {
 			TryAddBufferToVertexArray(device, layout, data, i);
 		}
 
-		m_outdated = false;
+		Outdated = false;
 	}
 
 	void MeshData::Update(
@@ -569,7 +569,7 @@ namespace detail {
 			return;
 		}
 
-		if (!m_outdated) {
+		if (!Outdated) {
 			LOG_WARNING << "Mesh data is not out of date!";
 			return;
 		}
@@ -600,7 +600,7 @@ namespace detail {
 			device->UpdateBuffer(m_indexBuffer, index.Ptr(), index.Count * sizeof(unsigned));
 		}
 
-		m_outdated = false;
+		Outdated = false;
 	}
 
 	void MeshData::Destroy(
@@ -638,7 +638,7 @@ namespace detail {
 			LOG_WARNING << "Mesh needs to be bound before drawing!";
 		}
 
-		if (m_outdated) {
+		if (Outdated) {
 			LOG_WARNING << "Mesh is begin drawn out of date!";
 		}
 #endif
@@ -691,19 +691,13 @@ namespace detail {
 
 	Mesh::Mesh(
 		ref<MeshData> data)
-		: m_data(data)
+		: Data(data)
 	{}
-
-	void Mesh::SetMaterial(
-		ref<iw::Material>& material)
-	{
-		m_material = material;
-	}
 
 	Mesh Mesh::MakeInstance() const {
 		Mesh mesh = *this;
-		if (Material()) {
-			mesh.SetMaterial(Material()->MakeInstance());
+		if (Material) {
+			mesh.Material = Material->MakeInstance();
 		}
 
 		return mesh;
@@ -714,49 +708,27 @@ namespace detail {
 		bool linkIndex) const
 	{
 		Mesh mesh = MakeInstance();
-		mesh.SetData(Data()->MakeCopy(links, linkIndex));
+		mesh.Data = Data->MakeCopy(links, linkIndex);
 		
 		return mesh;
-	}
-
-	ref<iw::Material> Mesh::Material() {
-		return m_material;
-	}
-
-	const ref<iw::Material> Mesh::Material() const {
-		return m_material;
-	}
-
-	ref<iw::MeshData> Mesh::Data() {
-		return m_data;
-	}
-
-	const ref<iw::MeshData> Mesh::Data() const {
-		return m_data;
-	}
-
-	void Mesh::SetData(
-		ref<MeshData>& data)
-	{
-		m_data = data;
 	}
 
 	void Mesh::Bind(
 		const ref<IDevice>& device)
 	{
-		m_data->Bind(device);
+		Data->Bind(device);
 	}
 
 	void Mesh::Unbind(
 		const ref<IDevice>& device)
 	{
-		m_data->Unbind(device);
+		Data->Unbind(device);
 	}
 
 	void Mesh::Draw(
 		const ref<IDevice>& device) const
 	{
-		m_data->Draw(device);
+		Data->Draw(device);
 	}
 }
 }

@@ -106,6 +106,8 @@ namespace detail {
 	};
 
 	struct MeshData {
+	public:
+		bool Outdated;
 	private:
 		struct BufferData {
 			ref<char[]> Data;
@@ -137,7 +139,6 @@ namespace detail {
 		IVertexArray* m_vertexArray;
 		IIndexBuffer* m_indexBuffer;
 
-		bool m_outdated;
 		bool m_bound;
 
 		std::mutex m_mutex;
@@ -177,7 +178,7 @@ namespace detail {
 		bool IsInitialized() const;
 
 		IWGRAPHICS_API
-		bool IsOutdated() const;
+		bool IsOutdated() const; // depricated
 
 		IWGRAPHICS_API       MeshTopology     Topology()    const;
 		IWGRAPHICS_API const MeshDescription& Description() const;
@@ -260,10 +261,11 @@ namespace detail {
 	};
 
 	struct Mesh {
-	private:
-		ref<MeshData> m_data;
-		ref<Material> m_material;
+	public:
+		ref<MeshData> Data;
+		ref<Material> Material;
 
+	private:
 		bool m_cullMe = false; // temp
 
 	public:
@@ -282,22 +284,8 @@ namespace detail {
 			const MeshDescription& links = {},
 			bool linkIndex = true) const;
 
-		IWGRAPHICS_API       ref<iw::Material> Material();
-		IWGRAPHICS_API const ref<iw::Material> Material() const;
-
-		IWGRAPHICS_API       ref<iw::MeshData> Data();
-		IWGRAPHICS_API const ref<iw::MeshData> Data() const;
-
-		IWGRAPHICS_API
-		void SetMaterial(
-			ref<iw::Material>& material);
-
-		IWGRAPHICS_API
-		void SetData(
-			ref<MeshData>& data);
-
 		inline bool IsEmpty() const {
-			return !m_data && !m_material;
+			return !Data && !Material;
 		}
 
 		// temp

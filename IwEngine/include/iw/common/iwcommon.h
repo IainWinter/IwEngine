@@ -52,6 +52,11 @@ namespace math_translation {
 		return glm::vec3(vec.get(0), vec.get(1), vec.get(2));
 	}
 
+	inline glm::vec2 to_glm(vec<2> vec) {
+		return glm::vec2(vec.get(0), vec.get(1));
+	}
+
+
 	inline float cross_length(glm::vec2 a, glm::vec2 b) {
 		return a.x * b.y - a.y * b.x;
 	}

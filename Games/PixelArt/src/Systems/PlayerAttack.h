@@ -1,6 +1,7 @@
 #pragma once
 
 #include "iw/engine/Layer.h"
+#include "iw/engine/Components/Timer.h"
 #include "../Events.h"
 #include "../Player.h"
 
@@ -14,5 +15,5 @@ public:
 	int Initialize();
 	void Update();
 	bool On(iw::ActionEvent& e);
-	bool IsCombo(PlayerAttackState* player, AttackType attack, int neededCount);
+	bool IsCombo(Player* player, AttackType attack, int neededCount);
 };

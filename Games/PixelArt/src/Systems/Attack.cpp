@@ -4,16 +4,20 @@
 
 struct func_Attack {
 	iw::ref<iw::Space> Space;
-	glm::vec2 velocity;
-	std::function<bool()> func_deleteIf;
+	iw::EntityHandle Source;
+
+	glm::vec2 Velocity;
+	std::function<bool(iw::EntityHandle)> func_deleteIf;
 
 	func_Attack(
 		iw::ref<iw::Space> space,
+		iw::EntityHandle source,
 		glm::vec2 velocity,
-		std::function<bool()> func_deleteIf = []() { return false; } // prolly add the entities to this
+		std::function<bool(iw::EntityHandle)> func_deleteIf = [](iw::EntityHandle) { return false; }
 	)
 		: Space(space)
-		, velocity(velocity)
+		, Source(source)
+		, Velocity(velocity)
 		, func_deleteIf(func_deleteIf)
 	{}
 
@@ -34,11 +38,11 @@ struct func_Attack {
 		iw::Rigidbody*       e = other .Find<iw::Rigidbody>();
 		iw::CollisionObject* b = hitbox.Find<iw::CollisionObject>();
 
-		e->Velocity.x = velocity.x;
-		e->Velocity.y = velocity.y;
+		e->Velocity.x = Velocity.x;
+		e->Velocity.y = Velocity.y;
 
 		if (   func_deleteIf
-			&& func_deleteIf()) 
+			&& func_deleteIf(Source)) 
 		{
 			Space->QueueEntity(hitbox.Handle, iw::func_Destroy);
 		}
@@ -101,7 +105,12 @@ void AttackSystem::MakeAttack(
 	object->SetTransform(transform);
 	object->Collider = collider;
 	object->IsTrigger = true;
-	object->OnCollision = func_Attack(Space, props.Knockback, props.func_deleteIf);
+	object->OnCollision = func_Attack(
+		Space,
+		source,
+		props.Knockback, 
+		props.func_deleteIf
+	);
 
 	timer->SetTime("remove", props.Time);
 }

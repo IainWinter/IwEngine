@@ -1,6 +1,7 @@
 #pragma once
 
 #include "iw/physics/Collision/HullCollider.h"
+#include "iw/entity/Entity.h"
 
 enum class AttackType {
 	GROUND_LIGHT_FORWARD,
@@ -35,7 +36,7 @@ struct AttackProps {
 
 	float Time = .1f;
 
-	std::function<bool()> func_deleteIf;
+	std::function<bool(iw::EntityHandle)> func_deleteIf;
 };
 
 struct Attack {

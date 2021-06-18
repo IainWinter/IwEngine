@@ -255,9 +255,9 @@ void SandLayer::FillPolygon(
 
 					c.Type  = CellType::ROCK;
 					c.Color = Color::From255(100, 100, 100);
-					c.Style = CellStyle::RANDOM_STATIC;
-					c.StyleColor = Color(.05, .05, .05, 0);
-					c.StyleOffset = randf();
+					//c.Style = CellStyle::RANDOM_STATIC;
+					//c.StyleColor = Color(.05, .05, .05, 0);
+					//c.StyleOffset = randf();
 
 					m_world->SetCell(x, y, c);
 				}
