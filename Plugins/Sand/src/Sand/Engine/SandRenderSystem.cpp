@@ -24,7 +24,7 @@ int SandWorldRenderSystem::Initialize() {
 	material->Set("useAlpha", (int)1);
 	
 	m_mesh = Renderer->ScreenQuad().MakeInstance();
-	m_mesh.SetMaterial(material);
+	m_mesh.Material = (material);
 
 	return 0;
 }

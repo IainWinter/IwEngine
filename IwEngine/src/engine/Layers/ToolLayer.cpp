@@ -63,8 +63,8 @@ namespace iw {
 		textMat->Set("color", glm::vec3(1, .25f, 1));
 		textMat->SetTexture("fontMap", font->GetTexture(0));
 
-		textMesh.SetMaterial(textMat);
-		textMesh.Data()->Initialize(Renderer->Device);
+		textMesh.Material = (textMat);
+		textMesh.Data->Initialize(Renderer->Device);
 
 		// Meshes
 
@@ -91,19 +91,19 @@ namespace iw {
 		dlightMesh = MakeTetrahedron(description, 2)->MakeInstance();
 		cameraMesh = MakeTetrahedron(description, 1)->MakeInstance();
 
-		dlightMesh.Data()->TransformMeshData(Transform(
+		dlightMesh.Data->TransformMeshData(Transform(
 			glm::vec3(), 
 			glm::vec3(1), 
 			glm::quat(glm::vec3(glm::pi<float>() / 2, 0, 0)))
 		);
 
-		plightMesh.Data()->Initialize(Renderer->Device);
-		dlightMesh.Data()->Initialize(Renderer->Device);
-		cameraMesh.Data()->Initialize(Renderer->Device);
+		plightMesh.Data->Initialize(Renderer->Device);
+		dlightMesh.Data->Initialize(Renderer->Device);
+		cameraMesh.Data->Initialize(Renderer->Device);
 		
-		plightMesh.SetMaterial(lightMaterial);
-		dlightMesh.SetMaterial(lightMaterial);
-		cameraMesh.SetMaterial(cameraMaterial);
+		plightMesh.Material = (lightMaterial);
+		dlightMesh.Material = (lightMaterial);
+		cameraMesh.Material = (cameraMaterial);
 
 		cameraSystem = PushSystem<EditorCameraControllerSystem>();
 		

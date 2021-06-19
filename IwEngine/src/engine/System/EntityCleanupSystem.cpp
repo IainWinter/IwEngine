@@ -32,8 +32,8 @@ namespace Engine {
 
 		Mesh* mesh = Space->FindComponent<Mesh>(e.Entity);
 		if (mesh) {
-			mesh->Data()    .reset();
-			mesh->Material().reset();
+			mesh->Data    .reset();
+			mesh->Material.reset();
 		}
 
 		Model* model = Space->FindComponent<Model>(e.Entity);
@@ -45,7 +45,7 @@ namespace Engine {
 		if (sys) {
 			sys->~ParticleSystem();
 			//sys->GetParticleMesh().Data()    .reset();
-			//sys->GetParticleMesh().Material().reset();
+			//sys->GetParticleMesh().Material.reset();
 		}
 
 		iw::Rigidbody* body = Space->FindComponent<iw::Rigidbody>(e.Entity);

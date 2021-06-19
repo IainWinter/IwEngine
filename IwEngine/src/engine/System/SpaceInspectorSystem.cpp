@@ -362,17 +362,17 @@ namespace Editor {
 
 		ImGui::PushID(mesh);
 
-		bool selected = m_selectedMeshData == mesh->Data();
+		bool selected = m_selectedMeshData == mesh->Data;
 		ImGui::Text("Mesh data: ");
 		ImGui::SameLine();
-		ImGui::Selectable(mesh->Data()->Name().c_str(), &selected);
+		ImGui::Selectable(mesh->Data->Name().c_str(), &selected);
 
 		if (selected) {
-			m_selectedMeshData = mesh->Data();
+			m_selectedMeshData = mesh->Data;
 		}
 
 		ImGui::Text("Material");
-		PrintMaterial(mesh->Material().get());
+		PrintMaterial(mesh->Material.get());
 
 		ImGui::PopID();
 	}

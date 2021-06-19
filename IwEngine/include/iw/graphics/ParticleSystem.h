@@ -97,7 +97,7 @@ namespace Graphics {
 			description.DescribeBuffer(bName::UV,       MakeLayout<float>(2)); // just for space game default Renderer->ScreenQuad has no normals
 			description.DescribeBuffer(bName::UV1, instanceM);
 
-			mesh.Data()->ConformMeshData(description);
+			mesh.Data->ConformMeshData(description);
 
 			m_mesh = mesh;
 		}
@@ -163,7 +163,7 @@ namespace Graphics {
 					models[i] = m_particles[i].Transform.WorldTransformation(); // somewhere there is 'World' where it should be local :<
 				}
 
-				m_mesh.Data()->SetBufferDataPtr(bName::UV1, count, models);
+				m_mesh.Data->SetBufferDataPtr(bName::UV1, count, models);
 			}
 		}
 
@@ -210,7 +210,7 @@ namespace Graphics {
 		}
 
 		bool HasParticleMesh() const {
-			return m_mesh.Data() != nullptr;
+			return m_mesh.Data != nullptr;
 		}
 	};
 

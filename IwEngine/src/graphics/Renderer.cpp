@@ -200,23 +200,23 @@ namespace Graphics {
 			return;
 		}
 
-		if (!mesh->Data()) {
+		if (!mesh->Data) {
 			LOG_WARNING << "Tried to draw mesh without data to renderer!";
 			return;
 		}
 
-		if (!mesh->Material()) {
+		if (!mesh->Material) {
 			LOG_WARNING << "Tried to draw mesh without a material to renderer!";
 			//return; this is not critical
 		}
 
-		else if (!mesh->Material()->Shader) {
+		else if (!mesh->Material->Shader) {
 			LOG_WARNING << "Tried to draw mesh with a material that has no shader to renderer!";
 			return;
 		}
 
 		Renderer::SetMesh(mesh);
-		Renderer::SetMaterial(mesh->Material());
+		Renderer::SetMaterial(mesh->Material);
 
 		if (!m_shader) {
 			LOG_WARNING << "Tried to draw mesh without setting an active shader!";
@@ -351,8 +351,8 @@ namespace Graphics {
 		}
 
 		else {
-			if (m_meshData != mesh->Data()) {
-				m_meshData = mesh->Data();
+			if (m_meshData != mesh->Data) {
+				m_meshData = mesh->Data;
 				
 				if (!m_meshData->IsInitialized()) {
 					m_meshData->Initialize(Device);

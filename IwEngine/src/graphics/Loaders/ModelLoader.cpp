@@ -155,7 +155,7 @@ namespace Graphics {
 
 			//for (auto& model : m_loaded) {
 			//	for (const iw::Mesh& mesh : model.second->GetMeshes()) {
-			//		if (mesh.Data()->Name() == ainame) {
+			//		if (mesh.Data->Name() == ainame) {
 			//			meshes.push_back(mesh);
 
 			//			cont = true;
@@ -277,7 +277,7 @@ namespace Graphics {
 			data->SetName(aimesh->mName.C_Str());
 
 			Mesh mesh = data->MakeInstance();
-			mesh.SetMaterial(materials.at(aimesh->mMaterialIndex));
+			mesh.Material = (materials.at(aimesh->mMaterialIndex));
 
 			meshes.push_back(mesh);
 						

@@ -28,7 +28,7 @@ Tile::Tile(
 		ref<Material> tileMat = REF<Material>(asset->Load<Shader>("shaders/texture2d.shader"));
 		tileMat->SetTexture("texture", m_sprite);
 
-		m_spriteMesh.SetMaterial(tileMat);
+		m_spriteMesh.Material = (tileMat);
 
 		ref<Texture> cellTex = REF<Texture>(m_sprite->Width(), m_sprite->Height());
 		cellTex->SetFilter(iw::NEAREST);
@@ -56,8 +56,8 @@ void Tile::UpdatePolygon(
 		v = (v / size - glm::vec2(0.5f)) * 2.f * (glm::vec2(sx, sy) / 3.f); // this scaling is only for the drawn mesh, -1 to 1 for rendering rotated version
 	}
 
-	m_spriteMesh.Data()->SetBufferData(bName::POSITION, m_polygon.size(), m_polygon.data());
-	m_spriteMesh.Data()->SetIndexData(                  m_index  .size(), m_index  .data());
+	m_spriteMesh.Data->SetBufferData(bName::POSITION, m_polygon.size(), m_polygon.data());
+	m_spriteMesh.Data->SetIndexData(                  m_index  .size(), m_index  .data());
 
 	auto [verts, vcount] = GetPolygon();
 	auto [index, icount] = GetIndex();

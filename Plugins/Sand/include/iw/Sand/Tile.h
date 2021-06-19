@@ -52,15 +52,15 @@ public:
 
 	std::pair<glm::vec2*, size_t> GetPolygon() const {
 		return {
-			(glm::vec2*)m_spriteMesh.Data()->Get     (bName::POSITION),
-					  m_spriteMesh.Data()->GetCount(bName::POSITION)
+			(glm::vec2*)m_spriteMesh.Data->Get     (bName::POSITION),
+					  m_spriteMesh.Data->GetCount(bName::POSITION)
 		};
 	}
 
 	std::pair<unsigned*, size_t> GetIndex() const {
 		return {
-			m_spriteMesh.Data()->GetIndex(),
-			m_spriteMesh.Data()->GetIndexCount()
+			m_spriteMesh.Data->GetIndex(),
+			m_spriteMesh.Data->GetIndexCount()
 		};
 	}
 };

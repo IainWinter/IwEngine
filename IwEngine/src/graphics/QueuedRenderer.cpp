@@ -354,8 +354,8 @@ namespace Graphics {
 		}
 		
 		m_block        = 2;
-		m_material     =     mesh->Material() ? mesh->Material()->__GetOrder()   : 0;
-		m_transparency = val(mesh->Material() ? mesh->Material()->Transparency() : Transparency::NONE);
+		m_material     =     mesh->Material ? mesh->Material->__GetOrder()   : 0;
+		m_transparency = val(mesh->Material ? mesh->Material->Transparency() : Transparency::NONE);
 
 		DrawMeshInstanceOP* op = m_pool.alloc<DrawMeshInstanceOP>();
 		op->Transform = transform;
@@ -386,8 +386,8 @@ namespace Graphics {
 		}
 
 		m_block        = 2;
-		m_material     =     mesh.Material() ? mesh.Material()->__GetOrder()   : 0;
-		m_transparency = val(mesh.Material() ? mesh.Material()->Transparency() : Transparency::NONE);
+		m_material     =     mesh.Material ? mesh.Material->__GetOrder()   : 0;
+		m_transparency = val(mesh.Material ? mesh.Material->Transparency() : Transparency::NONE);
 
 		DrawMeshOP* op = m_pool.alloc<DrawMeshOP>();
 		op->Transform = transform;

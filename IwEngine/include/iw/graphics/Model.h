@@ -36,7 +36,7 @@ namespace Graphics {
 			std::string name) const
 		{
 			for (const Mesh& mesh : m_meshes) {
-				if (mesh.Data()->Name() == mesh.Data()->Name()) {
+				if (mesh.Data->Name() == mesh.Data->Name()) {
 					return  mesh;
 				}
 			}

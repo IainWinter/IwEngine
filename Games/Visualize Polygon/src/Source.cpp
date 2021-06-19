@@ -59,8 +59,8 @@ public:
 
 		cutLeftMesh .Material->Set("color", iw::Color::From255(112, 70, 219));
 		cutRightMesh.Material->Set("color", iw::Color::From255(217, 125, 67));
-		cutLeftMesh .Material->SetWireframe(false);
-		cutRightMesh.Material->SetWireframe(false);
+		//cutLeftMesh .Material->SetWireframe(false);
+		//cutRightMesh.Material->SetWireframe(false);
 
 		auto ldata = lineMesh.Data;
 
@@ -148,9 +148,9 @@ public:
 
 		Renderer->BeginScene();
 		Renderer->	DrawMesh(iw::Transform(), lineMesh);
-		Renderer->	DrawMesh(iw::Transform(), polygonMesh);
 		Renderer->	DrawMesh(iw::Transform(), cutLeftMesh);
 		Renderer->	DrawMesh(iw::Transform(), cutRightMesh);
+		Renderer->	DrawMesh(iw::Transform(), polygonMesh);
 		Renderer->EndScene();
 	}
 

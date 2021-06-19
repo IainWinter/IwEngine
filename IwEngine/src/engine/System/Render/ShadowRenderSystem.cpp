@@ -45,7 +45,7 @@ namespace Engine {
 					Mesh& mesh = model->GetMesh(i);
 					Transform tran = model->GetTransform(i);
 
-					if (!mesh.Material()->CastShadows()) {
+					if (!mesh.Material->CastShadows()) {
 						continue;
 					}
 
@@ -60,7 +60,7 @@ namespace Engine {
 				Transform* transform,
 				Mesh* mesh)
 			{
-				if (!mesh->Material()->CastShadows()) {
+				if (!mesh->Material->CastShadows()) {
 					return;
 				}
 

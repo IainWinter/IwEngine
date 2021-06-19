@@ -76,8 +76,8 @@ namespace Graphics {
 		float size,
 		float ratio) const
 	{
-		if (   !mesh.Data()->Description().HasBuffer(bName::POSITION)
-			|| !mesh.Data()->Description().HasBuffer(bName::UV))
+		if (   !mesh.Data->Description().HasBuffer(bName::POSITION)
+			|| !mesh.Data->Description().HasBuffer(bName::UV))
 		{
 			LOG_WARNING << "Cannot update a mesh data with description that does not contain at least a POSITION and UV buffer!";
 			return;
@@ -161,9 +161,9 @@ namespace Graphics {
 			cursor.y -= size * m_size;
 		}
 	
-		mesh.Data()->SetIndexData(indexCount, indices);
-		mesh.Data()->SetBufferData(bName::POSITION, vertCount, verts);
-		mesh.Data()->SetBufferData(bName::UV,       vertCount, uvs);
+		mesh.Data->SetIndexData(indexCount, indices);
+		mesh.Data->SetBufferData(bName::POSITION, vertCount, verts);
+		mesh.Data->SetBufferData(bName::UV,       vertCount, uvs);
 
 		delete[] verts;
 		delete[] uvs;

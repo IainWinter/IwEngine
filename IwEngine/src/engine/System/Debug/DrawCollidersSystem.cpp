@@ -32,13 +32,13 @@ namespace Engine {
 		plane  ->Initialize(Renderer->Device);
 
 		sphereInstance = sphere->MakeInstance();
-		sphereInstance.SetMaterial(material);
+		sphereInstance.Material = material;
 
 		planeInstance = plane->MakeInstance();
-		planeInstance.SetMaterial(material);
+		planeInstance.Material = material;
 
 		cubeInstance = cube->MakeInstance();
-		cubeInstance.SetMaterial(material);
+		cubeInstance.Material = material;
 
 		return 0;
 	}
@@ -63,8 +63,8 @@ namespace Engine {
 			//		auto itr = capsules.find(key);
 			//		if (itr == capsules.end()) {
 			//			iw::Mesh mesh = MakeCapsule(description, 5, col->Height, col->Radius)->MakeInstance();
-			//			mesh.Data()->Initialize(Renderer->Device);
-			//			mesh.SetMaterial(material);
+			//			mesh.Data->Initialize(Renderer->Device);
+			//			meshMaterial = (material);
 
 			//			itr = capsules.emplace(key, mesh).first;
 			//		}

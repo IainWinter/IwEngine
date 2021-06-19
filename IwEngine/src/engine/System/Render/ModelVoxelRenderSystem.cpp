@@ -78,22 +78,22 @@ namespace Engine {
 
 				tran.SetParent(transform, false); // ?
 
-				if (!mesh.Material()->GetTexture("voxelMap")) {
-					mesh.Material()->SetTexture("voxelMap", VoxelWorld());
+				if (!mesh.Material->GetTexture("voxelMap")) {
+					mesh.Material->SetTexture("voxelMap", VoxelWorld());
 				}
 
 				Renderer->BeforeDraw([=]() { // crash with & ? 
-					if (mesh.Material()->IsInitialized()) {
-						mesh.Material()->Initialize(Renderer->Device);
+					if (mesh.Material->IsInitialized()) {
+						mesh.Material->Initialize(Renderer->Device);
 					}
 
-					mesh.Material()->Use(Renderer->Device, m_voxelize->ShadowShader());
+					mesh.Material->Use(Renderer->Device, m_voxelize->ShadowShader());
 
 					IPipelineParam* ambianceParam = m_voxelize->ShadowShader()->Handle()->GetParam("ambiance");
 					if (ambianceParam) ambianceParam->SetAsFloat (m_scene->Ambiance());
 
-					float*       emissive  = mesh.Material()->Get<float>("emissive");
-					ref<Texture> shadowMap = mesh.Material()->GetTexture("shadowMap");
+					float*       emissive  = mesh.Material->Get<float>("emissive");
+					ref<Texture> shadowMap = mesh.Material->GetTexture("shadowMap");
 
 					IPipelineParam* emissiveParam = m_voxelize->ShadowShader()->Handle()->GetParam("mat_emissive"); // to reset the emissive value in the shader :(
 					if (emissiveParam) emissiveParam->SetAsFloat(emissive ? *emissive : 0);
@@ -117,22 +117,22 @@ namespace Engine {
 
 			Mesh& mesh = system->GetParticleMesh();
 
-			if (!mesh.Material()->GetTexture("voxelMap")) {
-				mesh.Material()->SetTexture("voxelMap", VoxelWorld());
+			if (!mesh.Material->GetTexture("voxelMap")) {
+				mesh.Material->SetTexture("voxelMap", VoxelWorld());
 			}
 
 			Renderer->BeforeDraw([&]() {
-				if (mesh.Material()->IsInitialized()) {
-					mesh.Material()->Initialize(Renderer->Device);
+				if (mesh.Material->IsInitialized()) {
+					mesh.Material->Initialize(Renderer->Device);
 				}
 
-				mesh.Material()->Use(Renderer->Device, m_voxelize->ParticleShadowShader());
+				mesh.Material->Use(Renderer->Device, m_voxelize->ParticleShadowShader());
 
 				IPipelineParam* ambianceParam = m_voxelize->ParticleShadowShader()->Handle()->GetParam("ambiance");
 				if (ambianceParam) ambianceParam->SetAsFloat (m_scene->Ambiance());
 
-				float*       emissive  = mesh.Material()->Get<float>("emissive");
-				ref<Texture> shadowMap = mesh.Material()->GetTexture("shadowMap");
+				float*       emissive  = mesh.Material->Get<float>("emissive");
+				ref<Texture> shadowMap = mesh.Material->GetTexture("shadowMap");
 
 				IPipelineParam* emissiveParam = m_voxelize->ParticleShadowShader()->Handle()->GetParam("mat_emissive"); // to reset the emissive value in the shader :(
 				if (emissiveParam) emissiveParam->SetAsFloat(emissive ? *emissive : 0);
@@ -177,9 +177,9 @@ namespace Engine {
 			description.DescribeBuffer(bName::POSITION, MakeLayout<float>(3));
 
 			m_bounds = MakeCube(description)->MakeInstance();			
-			m_bounds.SetMaterial(vmaterial.MakeInstance());
+			m_bounds.Material = vmaterial.MakeInstance();
 
-			m_bounds.Data()->TransformMeshData(Transform(glm::vec3(), voxelBoundsScale));
+			m_bounds.Data->TransformMeshData(Transform(glm::vec3(), voxelBoundsScale));
 
 			// Quad
 
@@ -199,7 +199,7 @@ namespace Engine {
 			qmaterial.Set("level", 0);
 
 			m_quad = Renderer->ScreenQuad();
-			m_quad.SetMaterial(qmaterial.MakeInstance());
+			m_quad.Material = (qmaterial.MakeInstance());
 		}
 
 		if (m_voxelize->VoxelTexture()->Filter() == LINEAR) {
