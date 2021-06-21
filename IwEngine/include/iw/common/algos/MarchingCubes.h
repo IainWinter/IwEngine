@@ -17,11 +17,13 @@ namespace common {
 												  const _t& b) { return a >= b; })
 	{
 		glm::vec2 midPoints[4] = {
-			glm::vec2(0.0, -0.5),   //    1
-			glm::vec2(0.5, -1.0),   //  0   3
-			glm::vec2(0.5, -0.0),   //    2
-			glm::vec2(1.0, -0.5), 
+			glm::vec2(0.0, 0.5),   //    1
+			glm::vec2(0.5, 1.0),   //  0   3
+			glm::vec2(0.5, 0.0),   //    2
+			glm::vec2(1.0, 0.5), 
 		};
+
+		// needs reversed y for correct location? - (solution -> the iteration is backwards on y)
 
 		int _ = -1;
 		int edgeIndices[16][4] = {
@@ -45,13 +47,13 @@ namespace common {
 
 		size_t iHeight = 2 * height - 1; // size of index (2 stripes)
 
-		//  a-3-c---•---x
-		//  0   7   |   |
-		//  b-4-d---•---x
-		//  1   8   |   |
-		//  •-5-•---•---x
-		//  2   9   |   |
 		//  x-6-x---x---x
+		//  2   9   |   |
+		//  •-5-•---•---x
+		//  1   8   |   |
+		//  b-4-c---•---x
+		//  0   7   |   |
+		//  a-3-d---•---x
 
 		std::unordered_map<size_t, glm::vec2> verts;
 		std::vector<size_t> edges;
@@ -59,17 +61,17 @@ namespace common {
 		for (size_t i = 0; i < width  - 1; i++)
 		for (size_t j = 0; j < height - 1; j++)
 		{
-			size_t a =  i      +  j      * width;
-			size_t b =  i      + (j + 1) * width;
-			size_t c = (i + 1) +  j      * width;
-			size_t d = (i + 1) + (j + 1) * width;
+			size_t a =  i      + (j + 1) * width;
+			size_t b =  i      +  j      * width;
+			size_t c = (i + 1) + (j + 1) * width;
+			size_t d = (i + 1) +  j      * width;
 
 			// abcd = 0b0000
 
 			bool left   = i == 0;
-			bool top    = j == 0;
+			bool bottom = j == 0;
 			bool right  = i == width  - 2; // -2 <-> loop ends at -1
-			bool bottom = j == height - 2;
+			bool top    = j == height - 2;
 
 			bool lt = left  || top;    // to address edge case on boundary, treat any point on bound as empty
 			bool lb = left  || bottom;
@@ -91,15 +93,24 @@ namespace common {
 				switch (edgeIndex)
 				{
 					case 0: index += j;              break;
-					case 1: index += j + height - 1; break;
-					case 2: index += j + height;     break;
+					case 1: index += j + height;     break;
+					case 2: index += j + height - 1; break;
 					case 3: index += j + iHeight;    break;
 				}
 
 				edges.push_back(index);
 
-				if (verts.find(index) == verts.end()) {
-					verts.emplace(index, midPoints[edgeIndex] + glm::vec2(i, j));
+				if (verts.find(index) == verts.end())
+				{
+					glm::vec2 v = midPoints[edgeIndex] + glm::vec2(i, j);
+
+					     if (left)   v.x -= 0.5f; // location edge case fix
+					else if (right)  v.x += 0.5f;
+
+						if (top)    v.y += 0.5f;
+					else if (bottom) v.y -= 0.5f;
+
+					verts.emplace(index, v);
 				}
 			}
 		}
@@ -159,7 +170,7 @@ namespace common {
 					continue;
 				}
 
-				else if (i - last - 2 > 2)
+				else if (i - last - 1 > 2) // was '- 2' check which is correct or if there are further edge cases?
 				{
 					chain.erase(chain.begin() + last + 1, chain.begin() + i - 1);
 					i = last + 1;
