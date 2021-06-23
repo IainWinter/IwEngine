@@ -1,20 +1,16 @@
-#pragma once
+#include "iw/common/algos/polygon2.h"
 
 #include <vector>
-#include "iw/common/iwcommon.h"
-#include "glm/vec2.hpp"
 #include <algorithm>
+#include <functional>
+
+// should split and make cpp file
 
 namespace iw {
 namespace common {
-	template<
-		typename _t>
 	std::vector<std::vector<glm::vec2>> MakePolygonFromField(
-		_t* field,
-		size_t width, size_t height,
-		const _t& threshhold,
-		std::function<bool(const _t&, const _t&)> test = [](const _t& a,
-												  const _t& b) { return a >= b; })
+		bool* field,
+		size_t width, size_t height)
 	{
 		glm::vec2 midPoints[4] = {
 			glm::vec2(0.0, 0.5),   //    1
@@ -49,11 +45,11 @@ namespace common {
 
 		//  x-6-x---x---x
 		//  2   9   |   |
-		//  â€¢-5-â€¢---â€¢---x
+		//  •-5-•---•---x
 		//  1   8   |   |
-		//  b-4-c---â€¢---x
+		//  b-4-c---•---x
 		//  0   7   |   |
-		//  a-3-d---â€¢---x
+		//  a-3-d---•---x
 
 		std::unordered_map<size_t, glm::vec2> verts;
 		std::vector<size_t> edges;
@@ -78,10 +74,10 @@ namespace common {
 			bool rt = right || top;
 			bool rb = right || bottom;
 
-			int state = int( (!lt) & test(field[a], threshhold) ) * 8 
-					+ int( (!lb) & test(field[b], threshhold) ) * 4
-					+ int( (!rt) & test(field[c], threshhold) ) * 2
-					+ int( (!rb) & test(field[d], threshhold) );
+			int state = int( (!lt) & field[a] ) * 8 
+					  + int( (!lb) & field[b] ) * 4
+					  + int( (!rt) & field[c] ) * 2
+					  + int( (!rb) & field[d] );
 
 			for (size_t k = 0; k < 4; k++)
 			{
@@ -195,7 +191,7 @@ namespace common {
 
 			// Connect squares corners
 
-			if (false) // todo: doesnt work in some cases!!!! (triangles are wrong with >>   //______
+			if (true) // todo: doesnt work in some cases!!!! (triangles are wrong with >>   //______
 			for (size_t i = 0; i < polygon.size(); i++) {							 //|   x|
 				size_t j = (i + 1) % polygon.size();								 //|  xx|
 				size_t k = (i + 2) % polygon.size();								 //| xxx|
@@ -208,33 +204,37 @@ namespace common {
 
 				if (v12.x == 0 || v12.y == 0) continue;
 
-				glm::vec2 vij = polygon[i] - polygon[j];
-				glm::vec2 vkl = polygon[k] - polygon[l];
+				glm::vec2 vij = polygon[j] - polygon[i];
+				glm::vec2 vkl = polygon[l] - polygon[k];
 
-				if (glm::dot(vij, vkl) == 0) {
+				if (glm::dot(vij, vkl) == 0)
+				{
+					glm::vec2 v;
 
-					glm::vec2 v(0.f);
-
-					if (    (v12.x > 0 && v12.y > 0)
+					if (   (v12.x > 0 && v12.y > 0)
 						|| (v12.x < 0 && v12.y < 0))
 					{
 						v = glm::vec2(v2.x, v1.y);
 					}
 
-					if (    (v12.x > 0 && v12.y < 0)
+					else 
+					if (   (v12.x > 0 && v12.y < 0)
 						|| (v12.x < 0 && v12.y > 0))
 					{
 						v = glm::vec2(v1.x, v2.y);
 					}
 
-					if (v == glm::vec2(0)) continue;
+					else continue;
 
-					assert(j < polygon.size() - 1);
+					assert(j < polygon.size());
 
 					polygon.erase(polygon.begin() + k);
 					polygon[j] = v;
-
 				}
+			}
+
+			for (glm::vec2& vert : polygon) { // round to corect scale
+				vert = glm::round(vert);
 			}
 
 			polygons.emplace_back(polygon);
@@ -243,30 +243,7 @@ namespace common {
 		return polygons;
 	}
 
-		// put these in cpp
-
-	// true = clockwise, false = counter-clockwise
-	inline bool IsClockwise(glm::vec2 a, glm::vec2 b, glm::vec2 c) {
-		return cross_length(b - a, c - a) < 0; // this was backwards before idk how that worked?
-	}
-
-	inline bool HasPoint(glm::vec2 a, glm::vec2 b, glm::vec2 c, glm::vec2 p) {
-		if ((a.x - b.x) / (a.y - b.y) == (a.x - c.x) / (a.y - c.y)) {
-			return true; // points are on a line
-		}
-
-		glm::vec2 v  = p;
-		glm::vec2 v0 = a;
-		glm::vec2 v1 = b - a;
-		glm::vec2 v2 = c - a;
-
-		float ca =  (cross_length(v, v2) - cross_length(v0, v2)) / cross_length(v1, v2);
-		float cb = -(cross_length(v, v1) - cross_length(v0, v1)) / cross_length(v1, v2);
-
-		return ca > 0 && cb > 0 && ca + cb < 1;
-	}
-
-	inline std::vector<unsigned> TriangulatePolygon(
+	std::vector<unsigned> TriangulatePolygon(
 		const std::vector<glm::vec2>& polygon)
 	{
 		if (polygon.size() == 0) return {};
@@ -323,7 +300,114 @@ namespace common {
 	exit:
 		return triangles;
 	}
-}
 
-	using namespace common;
+	polygon_cut CutPolygon(
+		const std::vector<glm::vec2>& verts,
+		const std::vector<unsigned>& index,
+		glm::vec2 lineA, glm::vec2 lineB) 
+	{
+		std::vector<glm::vec2> clVerts;
+		std::vector<glm::vec2> crVerts;
+		std::vector<unsigned> clIndex;
+		std::vector<unsigned> crIndex;
+
+		glm::vec2 line = lineB - lineA;
+		glm::vec2 tangent = glm::vec2(-line.y, line.x);
+
+		float lineLength = glm::length(line);
+
+		for (size_t i = 0; i < index.size(); i += 3)
+		{
+			glm::vec2 a = verts[index[i    ]];
+			glm::vec2 b = verts[index[i + 1]];
+			glm::vec2 c = verts[index[i + 2]];
+
+			bool aRight = glm::dot(a - lineA, tangent) > 0; // could make "SamdDirection" a common function
+			bool bRight = glm::dot(b - lineA, tangent) > 0;
+			bool cRight = glm::dot(c - lineA, tangent) > 0;
+
+			if (aRight && bRight && cRight)
+			{
+				AddPointToPolygon(crVerts, crIndex, a);
+				AddPointToPolygon(crVerts, crIndex, b);
+				AddPointToPolygon(crVerts, crIndex, c);
+			}
+
+			else if (!aRight && !bRight && !cRight)
+			{
+				AddPointToPolygon(clVerts, clIndex, a);
+				AddPointToPolygon(clVerts, clIndex, b);
+				AddPointToPolygon(clVerts, clIndex, c);
+			}
+
+			else 
+			{
+				unsigned singlePoint = 0;
+				if (aRight == cRight) singlePoint = 1;
+				if (aRight == bRight) singlePoint = 2;
+
+				unsigned i0 = i +  singlePoint;
+				unsigned i1 = i + (singlePoint + 1) % 3;
+				unsigned i2 = i + (singlePoint + 2) % 3;
+
+				glm::vec2 v0 = verts[index[i0]];
+				glm::vec2 v1 = verts[index[i1]];
+				glm::vec2 v2 = verts[index[i2]];
+
+				glm::vec2 v01 = LineIntersection(v0, v1, lineA, lineB);
+				glm::vec2 v02 = LineIntersection(v0, v2, lineA, lineB);
+
+				bool singleRight = glm::dot(v0 - lineA, tangent) > 0;
+
+				std::vector<glm::vec2>& singleVerts =  singleRight ? crVerts : clVerts;
+				std::vector<unsigned>&  singleIndex =  singleRight ? crIndex : clIndex;
+				std::vector<glm::vec2>& otherVerts  = !singleRight ? crVerts : clVerts;
+				std::vector<unsigned>&  otherIndex  = !singleRight ? crIndex : clIndex;
+
+				AddPointToPolygon(singleVerts, singleIndex, v0);
+				AddPointToPolygon(singleVerts, singleIndex, v01);
+				AddPointToPolygon(singleVerts, singleIndex, v02);
+
+				AddPointToPolygon(otherVerts, otherIndex, v1);
+				AddPointToPolygon(otherVerts, otherIndex, v02);
+				AddPointToPolygon(otherVerts, otherIndex, v01);
+
+				AddPointToPolygon(otherVerts, otherIndex, v1);
+				AddPointToPolygon(otherVerts, otherIndex, v2);
+				AddPointToPolygon(otherVerts, otherIndex, v02);
+			}
+		}
+
+		return { clVerts, clIndex, crVerts, crIndex };
+	}
+
+	void TransformPolygon(
+		std::vector<glm::vec2>& polygon,
+		const iw::Transform* transform)
+	{
+		for (glm::vec2& vert : polygon) {
+			vert = TransformPoint<Dimension::d2>(vert, transform);
+		}
+	}
+
+	void AddPointToPolygon(
+		std::vector<glm::vec2>& verts,
+		std::vector<unsigned>& indices,
+		glm::vec2 point)
+	{
+		auto itr = std::find(verts.begin(), verts.end(), point);
+
+		if (itr == verts.end())
+		{
+			indices.push_back(verts.size());
+			verts.push_back(point);
+		}
+
+		else {
+			indices.push_back(std::distance(verts.begin(), itr));
+		}
+	}
+
+	
+}
 }

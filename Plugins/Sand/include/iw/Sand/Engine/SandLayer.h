@@ -34,7 +34,7 @@ public:
 		, m_cellSize(cellSize)
 		, m_cellsPerMeter(cellsPerMeter)
 		, m_drawMouseGrid(drawMouseGrid)
-		, m_world (nullptr)
+		, m_world(nullptr)
 		, m_render(nullptr)
 		, m_update(nullptr)
 	{}
@@ -47,6 +47,9 @@ public:
 	IW_PLUGIN_SAND_API void DrawWithMouse(int fx, int fy, int width, int height);
 
 	IW_PLUGIN_SAND_API bool On(MouseWheelEvent& e);
+
+	IW_PLUGIN_SAND_API void PasteTiles();
+	IW_PLUGIN_SAND_API void RemoveTiles();
 
 	Mesh& GetSandMesh() {
 		return m_render->GetSandMesh();
@@ -75,7 +78,8 @@ public:
 	IW_PLUGIN_SAND_API
 	void FillPolygon(
 		const std::vector<glm::vec2>& polygon,
-		const std::vector<unsigned>&  index);
+		const std::vector<unsigned>& index,
+		const iw::Cell& cell);
 };
 
 IW_PLUGIN_SAND_END

@@ -4,61 +4,7 @@
 IW_PLUGIN_SAND_BEGIN
 
 void SandWorldUpdateSystem::Update() {
-	// Tiles
-
-	Space->Query<iw::Transform, Tile>().Each([&](
-		auto entity,
-		Transform* transform,
-		Tile* tile)
-	{
-		if (tile->LastTransform == *transform) { // Only redraw if moved
-			return;
-		}
-
-		if (tile->NeedsScan) { // only rescan polygon if source has changed
-			tile->NeedsScan = false;
-			tile->UpdatePolygon(
-				Space->FindEntity(tile).Find<MeshCollider2>(),
-				m_sx, m_sy
-			);
-
-			if (!tile->IsStatic) {
-				tile->Draw(transform, Renderer->ImmediateMode());
-			}
-		}
-
-		tile->ForEachInWorld(&tile->LastTransform, m_sx, m_sy, [&](
-			int x, int y,
-			unsigned data)
-		{
-			if (m_world->InBounds(x, y)) {
-				m_world->SetCell(x, y, Cell::GetDefault(CellType::EMPTY));
-			}
-		});
-
-		tile->NeedsDraw = true;
-		tile->LastTransform = *transform;
-	});
-
-	Space->Query<iw::Transform, Tile>().Each([&](
-		auto entity,
-		Transform* transform,
-		Tile* tile)
-	{
-		if (!tile->NeedsDraw) {
-			return;
-		}
-		
-		tile->NeedsDraw = false;
-		tile->ForEachInWorld(transform, m_sx, m_sy, [&](
-			int x, int y,
-			unsigned data)
-		{
-			if (m_world->InBounds(x, y)) {
-				m_world->SetCell(x, y, Cell::GetDefault(CellType::ROCK));
-			}
-		});
-	});
+	// Tiles moved into layer
 
 	// Update cells
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Collider.h"
+#include "iw/common/algos/geom2.h"
 #include <vector>
 #include <type_traits>
 
@@ -68,14 +69,9 @@ namespace impl {
 			vec_t maxPoint = vec_t(0);
 			float maxDistance = -FLT_MAX;
 
-			for (const vec_t& point : m_points) {
-
-				glm::vec4 v;
-
-				if constexpr (_d == d2) v = glm::vec4(point, 0, 1);
-				else                    v = glm::vec4(point,    1);
-
-				vec_t p = vec_t(v * glm::transpose(transform->WorldTransformation())); // see ^^
+			for (const vec_t& point : m_points)
+			{
+				vec_t p = TransformPoint<_d>(point, transform);
 
 				float distance = glm::dot(p, direction);
 				if (distance > maxDistance) {

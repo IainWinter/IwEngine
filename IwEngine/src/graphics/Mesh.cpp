@@ -268,9 +268,8 @@ namespace detail {
 	void MeshData::SetBufferData(
 		bName name,
 		unsigned count,
-		void* data)
+		const void* data)
 	{
-
 		if (!m_description.HasBuffer(name)) {
 			return;
 		}
@@ -294,7 +293,7 @@ namespace detail {
 	void MeshData::SetBufferDataPtr(
 		bName name,
 		unsigned count,
-		void* ptr)
+		const void* ptr)
 	{
 		if (!m_description.HasBuffer(name)) {
 			return;
@@ -314,7 +313,7 @@ namespace detail {
 
 	void MeshData::SetIndexData(
 		unsigned count,
-		unsigned* data)
+		const unsigned* data)
 	{
 		std::unique_lock<std::mutex> lock(m_mutex);
 

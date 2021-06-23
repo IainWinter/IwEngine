@@ -11,7 +11,7 @@ class SandWorldUpdateSystem
 {
 private:
 	SandWorld* m_world;
-
+public:
 	float m_sx, m_sy; // Cells per meter
 
 public:

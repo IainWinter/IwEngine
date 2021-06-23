@@ -1,22 +1,20 @@
 #pragma once
 
 #include "iw/graphics/IwGraphics.h"
-#include "iw/graphics/Model.h"
+#include "iw/graphics/Mesh.h"
 #include "iw/asset/AssetLoader.h"
 
 namespace iw {
 namespace Graphics {
-	class ModelLoader
-		: public AssetLoader<Model>
+	class MeshLoader
+		: public AssetLoader<Mesh>
 	{
 	public:
 		IWGRAPHICS_API
-		ModelLoader(
-			AssetManager& asset);
+		MeshLoader(AssetManager& asset) : AssetLoader(asset) {}
 	private:
 		IWGRAPHICS_API
-		Model* LoadAsset(
-			std::string filepath) override;
+		Mesh* LoadAsset(std::string filepath) override;
 	};
 }
 

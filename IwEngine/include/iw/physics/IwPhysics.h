@@ -13,31 +13,6 @@
 #include "glm/vec3.hpp"
 #include "glm/vec4.hpp"
 
-namespace iw {
-namespace Physics {
-
-#ifdef IW_DOUBLE_PRECISION
-	using scalar = long double;
-#else
-	using scalar = float;
-#endif
-
-	enum /*class*/ Dimension {
-		d2 = 2,
-		d3 = 3,
-	};
-}
-
-	using namespace Physics;
-}
-
-namespace iw {
-namespace Physics {
-	template<Dimension _d>
-	using _vec = glm::vec<size_t(_d), scalar>;
-}
-}
-
 // for templates?
 
 #ifdef IW_USE_REFLECTION

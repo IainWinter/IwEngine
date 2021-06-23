@@ -12,7 +12,7 @@
 #include "iw/physics/Dynamics/ImpulseSolver.h"
 #include "iw/physics/Dynamics/Mechanism.h"
 #include "iw/graphics/Model.h"
-#include "iw/common/algos/MarchingCubes.h"
+#include "iw/common/algos/polygon2.h"
 
 #include "plugins/iw/Sand/Engine/SandLayer.h"
 
@@ -190,6 +190,8 @@ struct PixelationLayer
 	int m_pixelSize;
 	int m_pixelsPerMeter;
 	
+	SandColliderSystem* m_colliderSystem;
+
 	iw::OrthographicCamera* cam;
 	unsigned lowResWidth;
 	unsigned lowResHeight;
@@ -230,13 +232,13 @@ struct PixelationLayer
 		description.DescribeBuffer(iw::bName::UV,       iw::MakeLayout<float>(2));
 		
 		m_square = iw::MakePlane(description)->MakeInstance();
-		m_square.SetMaterial(simpleMat->MakeInstance());
+		m_square.Material = simpleMat->MakeInstance();
 
 		// Rotate plane to be facing camera
 		{
 			iw::Transform rotX;
 			rotX.Rotation = glm::angleAxis(-iw::Pi/2, glm::vec3(1, 0, 0));
-			m_square.Data()->TransformMeshData(rotX);
+			m_square.Data->TransformMeshData(rotX);
 		}
 
 		// Enemy
@@ -258,14 +260,14 @@ struct PixelationLayer
 			r->SetTransform(t);
 			r->IsAxisLocked.z = true;
 
-			m->Material()->Set("albedo", iw::Color::From255(200, 200, 100));
+			m->Material->Set("albedo", iw::Color::From255(200, 200, 100));
 
 			Physics->AddRigidbody(r);
 			//Physics->AddConstraint(new GroundConstraint(r, -26, .15));
 		}
 
 		// Ground
-		if (true) {
+		if (false) {
 			GroundSettings mainGround1;
 			//mainGround1.makeGrass = true;
 			//mainGround1.grassPerMeter = 10;
@@ -290,6 +292,16 @@ struct PixelationLayer
 
 				MakeGroundPlane(background);
 			}
+		}
+
+		iw::Cell c;
+		c.Type = iw::CellType::ROCK;
+		c.Color = iw::Color::From255(100, 100, 100);
+
+		for (int y = 0; y < 5; y++)
+		for (int x = -200; x < 500; x++)
+		{
+			m_sandLayer->m_world->SetCell(x, y, c);
 		}
 
 		// Physics
@@ -320,7 +332,7 @@ struct PixelationLayer
 		screenMat->SetTexture("texture", lowResTarget->Tex(0));
 
 		m_screen = Renderer->ScreenQuad().MakeInstance();
-		m_screen.SetMaterial(screenMat);
+		m_screen.Material = screenMat;
 
 		// Custom systems
 	
@@ -328,7 +340,40 @@ struct PixelationLayer
 		                             PushSystem<PlayerAttackSystem>();
 		                             PushSystem<AttackSystem>(m_square);
 
-		SandColliderSystem* colliderSystem = PushSystem<SandColliderSystem>(m_sandLayer->m_world, m_pixelsPerMeter);
+		m_colliderSystem = PushSystem<SandColliderSystem>(m_sandLayer->m_world, m_pixelsPerMeter);
+
+		if (true) // drawing colliders 
+		{
+			m_colliderSystem->MadeColliderCallback = [=](
+				iw::Entity entity) 
+			{
+				iw::MeshDescription tileDesc;
+				tileDesc.DescribeBuffer(iw::bName::POSITION, iw::MakeLayout<float>(2));
+
+				iw::Mesh*          mesh     = entity.Set<iw::Mesh>((new iw::MeshData(tileDesc))->MakeInstance());
+				iw::MeshCollider2* collider = entity.Find<iw::MeshCollider2>();
+
+				iw::ref<iw::Material> mat = simpleMat;
+
+				mesh->Material = mat;
+				mesh->Material->Set("albedo", iw::Color::From255(255, 0, 0));
+				mesh->Material->SetWireframe(true);
+
+				mesh->Data->SetBufferData(iw::bName::POSITION, collider->m_points.size(), collider->m_points.data());
+				mesh->Data->SetIndexData(                      collider->m_index .size(), collider->m_index .data());
+			};
+		}
+
+		if (true)
+		{
+			m_colliderSystem->CutColliderCallback = [=](
+				iw::MeshCollider2* mesh, 
+				iw::polygon_cut& cut) 
+			{
+				auto& [lverts, lindex, rverts, rindex] = cut;
+				m_sandLayer->FillPolygon(rverts, rindex, iw::Cell());
+			};
+		}
 
 		// Rendering and camera
 
@@ -358,48 +403,31 @@ struct PixelationLayer
 		// Tile
 
 		if (true) {
-			tileEntity = m_sandLayer->MakeTile("none", true, true);
+			tileEntity = m_sandLayer->MakeTile("none", false, true);
 
 			iw::Tile*      tile = tileEntity.Find<iw::Tile>();
-			iw::Mesh*      mesh = tileEntity.Find<iw::Mesh>();
 			iw::Rigidbody* body = tileEntity.Find<iw::Rigidbody>();
 
 			unsigned* colors = (unsigned*)tile->GetSprite()->Colors();
 
-			for (int y = 1; y < 63; y++)
-			for (int x = 48; x < 63; x++)
+			for (int y = 0; y < 64; y++)
+			for (int x = 0; x < 16; x++)
 			{
 				colors[x + y * tile->GetSprite()->Width()] = 1;
 			}
 
-			mesh->SetMaterial(simpleMat);
-			mesh->Material()->Set("albedo", iw::Color::From255(255, 0, 0));
-			mesh->Material()->SetWireframe(true);
+			iw::Mesh*  mesh = tileEntity.Find<iw::Mesh>();
+			mesh->Material = simpleMat;
+			mesh->Material->Set("albedo", iw::Color::From255(255, 0, 0));
+			mesh->Material->SetWireframe(true);
 
 			body->TakesGravity = false;
 			body->Gravity.y = -10;
-			body->SetTransform(&iw::Transform(glm::vec3(-20, 10, 01)));
+			body->SetTransform(&iw::Transform(glm::vec2(10, 20)));
+			body->AngularVelocity.z = .1;
 
 			Physics->AddRigidbody(body);
 		}
-
-		//colliderSystem->SetCallback([=](iw::Entity entity)
-		//{
-		//	iw::MeshDescription tileDesc;
-		//	tileDesc.DescribeBuffer(iw::bName::POSITION, iw::MakeLayout<float>(2));
-
-		//	iw::Mesh*          mesh     = entity.Set<iw::Mesh>((new iw::MeshData(tileDesc))->MakeInstance());
-		//	iw::MeshCollider2* collider = entity.Find<iw::MeshCollider2>();
-
-		//	iw::ref<iw::Material> mat = simpleMat;
-
-		//	mesh->SetMaterial(mat);
-		//	mesh->Material()->Set("albedo", iw::Color::From255(255, 0, 0));
-		//	mesh->Material()->SetWireframe(true);
-
-		//	mesh->Data()->SetBufferData(iw::bName::POSITION, collider->m_points.size(), collider->m_points.data());
-		//	mesh->Data()->SetIndexData(                      collider->m_index .size(), collider->m_index .data());
-		//});
 
 		return 0;
 	}
@@ -435,6 +463,10 @@ struct PixelationLayer
 		//		drawSqr(pindex, iw::randi(20) - 10);
 		//	}
 		//}
+
+		if (iw::Keyboard::KeyDown(iw::H)) {
+			m_colliderSystem->CutWorld(glm::vec2(0, 0), glm::vec2(30, 6));
+		}
 
 		float camX = cam->WorldPosition().x;
 		float camY = cam->WorldPosition().y;
@@ -473,7 +505,7 @@ struct PixelationLayer
 			iw::Mesh* mesh,
 			Grass*)
 		{
-			iw::ref<iw::MeshData> data = mesh->Data();
+			iw::ref<iw::MeshData> data = mesh->Data;
 
 			glm::vec3* p = (glm::vec3*)data->Get(iw::bName::POSITION);
 
@@ -523,7 +555,7 @@ struct PixelationLayer
 		std::vector<unsigned> index;
 
 		if (settings.makeFromMesh) {
-			iw::ref<iw::MeshData> mesh = Asset->Load<iw::Model>(settings.mesh)->GetMesh(0).Data();
+			iw::ref<iw::MeshData> mesh = Asset->Load<iw::Model>(settings.mesh)->GetMesh(0).Data;
 
 			glm::vec3* pos = (glm::vec3*)mesh->Get(iw::bName::POSITION);
 			unsigned*  idx = mesh->GetIndex();
@@ -565,7 +597,12 @@ struct PixelationLayer
 		}
 
 		if (settings.makeInSand) {
-			m_sandLayer->FillPolygon(points, index);
+			iw::Cell cell;
+			cell.Color = iw::Color::From255(100, 100, 100);
+			cell.Type = iw::CellType::ROCK;
+
+			m_sandLayer->FillPolygon(points, index, cell);
+
 			return;
 		}
 
@@ -600,8 +637,8 @@ struct PixelationLayer
 
 		iw::Entity ground = Space->CreateEntity(arch);
 
-		iw::Transform*       t = ground.Set<iw::Transform>(glm::vec3(settings.xAnchor, settings.yAnchor, settings.zIndex), glm::vec3(1, 1, 1));
-		iw::Mesh*            m = ground.Set<iw::Mesh>(data->MakeInstance());
+		iw::Transform* t = ground.Set<iw::Transform>(glm::vec3(settings.xAnchor, settings.yAnchor, settings.zIndex), glm::vec3(1, 1, 1));
+		iw::Mesh*      m = ground.Set<iw::Mesh>(data->MakeInstance());
 		
 		if (settings.makeCollider) {
 			iw::MeshCollider2*   c = ground.Set<iw::MeshCollider2>();
@@ -620,7 +657,7 @@ struct PixelationLayer
 			ground.Set<Background>(settings.distance, glm::vec2(settings.xAnchor, settings.yAnchor));
 		}
 
-		m->SetMaterial(mat);
+		m->Material = mat;
 
 		// Grass
 		if (settings.makeGrass) {
@@ -659,7 +696,7 @@ struct PixelationLayer
 					iw::ref<iw::Material> mat = simpleMat->MakeInstance();
 					mat->Set("albedo", iw::Color::From255(78, 186, 84).rgba() * (1 + iw::randf() * .25f));
 
-					gm->SetMaterial(mat);
+					gm->Material = mat;
 				}
 			}
 		}

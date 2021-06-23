@@ -3,6 +3,7 @@
 #include "iw/log/logger.h"
 #include "iw/log/sink/file_sink.h"
 #include "iw/events/callback.h"
+#include "iw/graphics/Loaders/MeshLoader.h"
 #include "iw/graphics/Loaders/ModelLoader.h"
 #include "iw/graphics/Loaders/MaterialLoader.h"
 #include "iw/graphics/Loaders/TextureLoader.h"
@@ -90,12 +91,11 @@ namespace Engine {
 		// Asset Loader
 
 		Asset->SetLoader<MeshLoader>();
+		Asset->SetLoader<ModelLoader>();
 		Asset->SetLoader<MaterialLoader>();
 		Asset->SetLoader<TextureLoader>();
 		Asset->SetLoader<ShaderLoader>();
 		Asset->SetLoader<FontLoader>();
-
-		Asset->SetLoader<AssetLoader<Mesh>>(); // make asset store that asset loader extends loading abilities to
 
 		// Space
 

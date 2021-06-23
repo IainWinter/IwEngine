@@ -1,5 +1,4 @@
 #include "SandColliders.h"
-#include "iw/common/algos/MarchingCubes.h"
 
 void SandColliderSystem::Update()
 {
@@ -45,8 +44,8 @@ void SandColliderSystem::Update()
 				iw::Entity entity = Space->CreateEntity<
 					iw::Transform, 
 					iw::MeshCollider2, 
-					iw::CollisionObject/*, 
-					iw::Mesh*/>();
+					iw::CollisionObject, 
+					iw::Mesh>();
 
 				iw::Transform*       t = entity.Set<iw::Transform>(position);
 				iw::MeshCollider2*   c = entity.Set<iw::MeshCollider2>();
@@ -61,14 +60,85 @@ void SandColliderSystem::Update()
 				c->SetPoints(polygon);
 				c->SetTriangles(index);
 
-				if (m_callback) {
-					m_callback(entity);
+				if (MadeColliderCallback) {
+					MadeColliderCallback(entity);
 				}
 
 				entities.push_back(entity.Handle);
 			}
 
 			filledCellCount = field.filledCellCount;
+		}
+	}
+}
+
+void SandColliderSystem::CutWorld(
+	const glm::vec2& p1, 
+	const glm::vec2& p2) 
+{
+	// Get chunk locations that contain line segment
+	// Get colliders from those chunks
+	// Cut those colliders and create tiles from those
+
+	// sort line by x
+
+	glm::vec2 cp1 = p1 * (float)m_cellsPerMeter;
+	glm::vec2 cp2 = p2 * (float)m_cellsPerMeter;
+
+	auto [min, max] = iw::AABB2(cp1, cp2);
+	auto [cxmin, cymin] = m_world->GetChunkLocation(min.x, min.y);
+	auto [cxmax, cymax] = m_world->GetChunkLocation(max.x, max.y);
+
+	std::vector<std::pair<int, int>> locations;
+
+	for (int x = cxmin; x <= cxmax; x++)
+	for (int y = cymin; y <= cymax; y++)
+	{
+		// b   c
+		// 
+		// a   d
+
+		iw::SandChunk* chunk = m_world->GetChunkDirect({x, y});
+
+		if (!chunk) continue;
+
+		glm::vec2 a = glm::vec2(chunk->m_x,                  chunk->m_y);
+		glm::vec2 b = glm::vec2(chunk->m_x,                  chunk->m_y + chunk->m_height);
+		glm::vec2 c = glm::vec2(chunk->m_x + chunk->m_width, chunk->m_y + chunk->m_height);
+		glm::vec2 d = glm::vec2(chunk->m_x + chunk->m_width, chunk->m_y);
+
+		if (   iw::SegmentIntersection(cp1, cp2, a, b).second
+			|| iw::SegmentIntersection(cp1, cp2, b, c).second
+			|| iw::SegmentIntersection(cp1, cp2, c, d).second
+			|| iw::SegmentIntersection(cp1, cp2, d, a).second)
+		{
+			locations.emplace_back(x, y);
+		}
+	}
+
+	for (std::pair<int, int>& location : locations) 
+	{
+		for (iw::EntityHandle handle : m_cachedColliders.find(location)->second.first) 
+		{
+			glm::vec2 chunkPos = glm::vec2(
+				location.first  * m_world->m_chunkWidth,
+				location.second * m_world->m_chunkHeight
+			);
+
+			//glm::vec2 l1 = (cp1 - chunkPos) / float(m_cellsPerMeter);
+			//glm::vec2 l2 = (cp2 - chunkPos) / float(m_cellsPerMeter);
+
+			iw::MeshCollider2* mesh =  Space->FindComponent<iw::MeshCollider2>(handle);
+			iw::Transform      tran = *Space->FindComponent<iw::Transform>(handle);
+
+			std::vector<glm::vec2> polygon = mesh->m_points;
+			iw::TransformPolygon(polygon, &tran);
+
+			iw::polygon_cut cut = iw::CutPolygon(polygon, mesh->m_index, p1, p2);
+
+			if (CutColliderCallback) {
+				CutColliderCallback(mesh, cut);
+			}
 		}
 	}
 }

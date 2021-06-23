@@ -20,12 +20,17 @@ namespace impl {
 		{}
 
 		AABB(
-			const vec_t& min,
-			const vec_t& max
-		)
-			: Min(min)
-			, Max(max)
-		{}
+			const vec_t& p1,
+			const vec_t& p2)
+		{
+			bool p1x = p1.x < p2.x;
+			bool p1y = p1.y < p2.y;
+
+			Min.x =  p1x ? p1.x : p2.x;
+			Min.y =  p1y ? p1.y : p2.y;
+			Max.x = !p1x ? p1.x : p2.x;
+			Max.y = !p1y ? p1.y : p2.y;
+		}
 
 		AABB(
 			const vec_t& center,

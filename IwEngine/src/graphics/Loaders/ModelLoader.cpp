@@ -29,12 +29,12 @@ namespace Graphics {
 		std::vector<Mesh>& meshes,
 		Model* model);
 
-	MeshLoader::MeshLoader(
+	ModelLoader::ModelLoader(
 		AssetManager& asset)
 		: AssetLoader(asset)
 	{}
 
-	Model* MeshLoader::LoadAsset(
+	Model* ModelLoader::LoadAsset(
 		std::string path)
 	{
 		Assimp::Importer importer;

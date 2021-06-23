@@ -18,18 +18,17 @@ void main() {
 in vec2 FragPos;
 
 uniform sampler2D mat_texture;
-uniform int mat_hasTexture = 0;
+uniform float mat_hasTexture = 0.0f;
 uniform vec4 mat_color = vec4(1, 0, 0, 1);
 
 out vec4 FragColor;
 
 void main() {
-
-	if (mat_hasTexture == 1) {
-		FragColor = texture(mat_texture, FragPos);
+	if (mat_hasTexture == 0) {
+		FragColor = mat_color;		
 	}
 
 	else {
-		FragColor = mat_color;
+		FragColor = texture(mat_texture, FragPos);		
 	}
 }

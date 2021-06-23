@@ -39,7 +39,9 @@ enum class CellProperties {
 	MOVE_FORCE     = 0b0000000000010000,
 
 	BURN     = 0b0000000000100000,
-	CONVEYOR = 0b0000000001000000
+	CONVEYOR = 0b0000000001000000,
+
+	NONE_TILE = 0b1000000000000000
 };
 inline CellProperties operator|(CellProperties a,CellProperties b){return CellProperties(int(a)|int(b));}
 inline auto           operator&(CellProperties a,CellProperties b){return int(a)&int(b);}

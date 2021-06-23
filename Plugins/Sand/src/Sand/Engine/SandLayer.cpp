@@ -92,6 +92,8 @@ int SandLayer::Initialize() {
 	m_update = PushSystem<SandWorldUpdateSystem>(m_world);
 	m_render = PushSystem<SandWorldRenderSystem>(m_world);
 	
+	m_update->SetCameraScale(m_cellsPerMeter, m_cellsPerMeter);
+
 	if (int error = Layer::Initialize()) {
 		return error;
 	}
@@ -121,6 +123,8 @@ void SandLayer::PreUpdate() {
 	gP = vec2(int(sP.x() / gridSize), int(sP.y() / gridSize)) * gridSize;
 
 	DrawWithMouse(m_render->m_fx, -m_render->m_fy, width, height);
+
+	PasteTiles();
 }
 
 void SandLayer::PostUpdate()
@@ -129,11 +133,7 @@ void SandLayer::PostUpdate()
 		DrawMouseGrid();
 	}
 
-	//glm::vec3 aspect = glm::vec3(float(Renderer->Height()) / Renderer->Width(), 1, 1);
-
-	//Renderer->BeginScene(MainScene);
-	//	Renderer->DrawMesh(Transform(glm::vec3(0), aspect), m_render->GetSandMesh());
-	//Renderer->EndScene();
+	RemoveTiles();
 }
 
 void SandLayer::DrawMouseGrid() {
@@ -195,6 +195,70 @@ bool SandLayer::On(MouseWheelEvent& e) {
 	return false;
 }
 
+void SandLayer::PasteTiles()
+{
+	Space->Query<iw::Transform, Tile>().Each([&](
+		auto entity,
+		Transform* transform,
+		Tile* tile)
+	{
+		if (tile->NeedsScan)
+		{
+			tile->NeedsScan = false;
+
+			tile->UpdatePolygon(m_update->m_sx, m_update->m_sy);
+
+			MeshCollider2* collider = Space->FindEntity(tile).Find<MeshCollider2>();
+			collider->SetPoints(tile->m_polygon);
+			collider->SetTriangles(tile->m_index);
+
+			Mesh* mesh = Space->FindEntity(tile).Find<Mesh>(); // tmep debug
+			mesh->Data->SetBufferData(bName::POSITION, tile->m_polygon.size(), tile->m_polygon.data());
+			mesh->Data->SetIndexData(                  tile->m_index  .size(), tile->m_index  .data());
+		}
+
+		// if actually moved
+
+		if (!tile->IsStatic) {
+			tile->Draw(transform, Renderer->ImmediateMode());
+		}
+		
+		Cell cell;
+		cell.Props = CellProperties::NONE_TILE;
+		cell.Color = Color::From255(150, 150, 150);
+		cell.Type = CellType::ROCK;
+
+		tile->ForEachInWorld(transform, m_update->m_sx, m_update->m_sy, [&](
+			int x, int y,
+			unsigned data)
+		{
+			if (m_world->InBounds(x, y)) {
+				m_world->SetCell(x, y, cell);
+			}
+		});
+
+		tile->LastTransform = *transform;
+	});
+}
+
+void SandLayer::RemoveTiles()
+{
+	Space->Query<iw::Transform, Tile>().Each([&](
+		auto entity,
+		Transform* transform,
+		Tile* tile)
+	{
+		tile->ForEachInWorld(&tile->LastTransform, m_update->m_sx, m_update->m_sy, [&](
+			int x, int y,
+			unsigned data)
+		{
+			if (m_world->InBounds(x, y)) {
+				m_world->SetCell(x, y, Cell::GetDefault(CellType::EMPTY));
+			}
+		});
+	});
+}
+
 Entity SandLayer::MakeTile(
 	const std::string& sprite,
 	bool isStatic,
@@ -213,17 +277,18 @@ Entity SandLayer::MakeTile(
 	MeshCollider2*   collider  = entity.Set<MeshCollider2>();
 	CollisionObject* object    = isSimulated ? entity.Set<Rigidbody>() : entity.Set<CollisionObject>();
 
+	entity.Set<Mesh>(tile->m_spriteMesh.MakeCopy()); // temp debug
+
 	object->Collider = collider;
 	object->SetTransform(transform);
-
-	entity.Set<Mesh>(tile->m_spriteMesh); // tmep debug
 
 	return entity;
 }
 
 void SandLayer::FillPolygon(
 	const std::vector<glm::vec2>& polygon, 
-	const std::vector<unsigned>&  index)
+	const std::vector<unsigned>&  index,
+	const iw::Cell& cell)
 {
 	for (size_t i = 0; i < index.size(); i += 3) {
 		glm::vec2 v0 = polygon[index[i    ]] * float(m_cellsPerMeter);
@@ -251,15 +316,15 @@ void SandLayer::FillPolygon(
 					&& t     >= 0 
 					&& s + t <= 1)
 				{
-					iw::Cell c;
+					//iw::Cell c;
 
-					c.Type  = CellType::ROCK;
-					c.Color = Color::From255(100, 100, 100);
+					//c.Type  = CellType::ROCK;
+					//c.Color = Color::From255(100, 100, 100);
 					//c.Style = CellStyle::RANDOM_STATIC;
 					//c.StyleColor = Color(.05, .05, .05, 0);
 					//c.StyleOffset = randf();
 
-					m_world->SetCell(x, y, c);
+					m_world->SetCell(x, y, cell);
 				}
 			}
 		}

@@ -111,7 +111,7 @@ namespace detail {
 	private:
 		struct BufferData {
 			ref<char[]> Data;
-			void* m_Ptr = nullptr;
+			const void* m_Ptr = nullptr;
 			unsigned Count = 0;
 			bool Initialized = false;
 
@@ -204,18 +204,18 @@ namespace detail {
 		void SetBufferData(
 			bName name,
 			unsigned count,
-			void* data);
+			const void* data);
 
 		IWGRAPHICS_API
 		void SetBufferDataPtr(
 			bName name,
 			unsigned count,
-			void* ptr);
+			const void* ptr);
 
 		IWGRAPHICS_API
 		void SetIndexData(
 			unsigned count,
-			unsigned* data);
+			const unsigned* data);
 
 		IWGRAPHICS_API
 		void GenNormals(
@@ -310,6 +310,10 @@ namespace detail {
 		/*size_t Mesh::GetElementCount() {
 			return IndexCount / Topology;
 		}*/
+	};
+
+	struct MeshConfig {
+
 	};
 }
 

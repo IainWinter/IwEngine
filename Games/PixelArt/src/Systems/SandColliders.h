@@ -1,16 +1,21 @@
 #pragma once
 
-#include "iw/engine/Layer.h"
+#include "plugins/iw/Sand/SandWorld.h"
+#include "iw/engine/System.h"
 #include "iw/physics/Collision/MeshCollider.h"
 #include "iw/util/algorithm/pair_hash.h"
-#include "plugins/iw/Sand/SandWorld.h"
+#include "iw/common/algos/polygon2.h"
 #include <unordered_map>
 #include <functional>
 
 class SandColliderSystem : public iw::SystemBase
 {
 public:
-	using updatedCollider_func = std::function<void(iw::Entity)>;
+	using madeCollider_func = std::function<void(iw::Entity)>;
+	using cutCollider_func = std::function<void(iw::MeshCollider2*, iw::polygon_cut&)>;
+
+	madeCollider_func MadeColliderCallback;
+	cutCollider_func  CutColliderCallback;
 
 private:
 	iw::SandWorld* m_world;
@@ -20,7 +25,6 @@ private:
 		iw::pair_hash
 	> m_cachedColliders;
 
-	updatedCollider_func m_callback;
 	int m_cellsPerMeter;
 
 public:
@@ -34,8 +38,5 @@ public:
 	{}
 
 	void Update() override;
-
-	void SetCallback(updatedCollider_func func) {
-		m_callback = func;
-	}
+	void CutWorld(const glm::vec2& a, const glm::vec2& b);
 };

@@ -298,6 +298,11 @@ namespace Graphics {
 
 		CreateColors(true);
 
+		if (!m_handle) {
+			LOG_DEBUG << "Tried to set pixels before initializing texture!";
+			return;
+		}
+
 		m_handle->SetPixels(width, height, m_colors);
 	}
 

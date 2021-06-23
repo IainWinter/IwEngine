@@ -29,6 +29,20 @@
 #include "glm/mat3x3.hpp"
 
 namespace iw {
+#ifdef IW_DOUBLE_PRECISION
+	using scalar = long double;
+#else
+	using scalar = float;
+#endif
+
+	enum /*class*/ Dimension {
+		d2 = 2,
+		d3 = 3,
+	};
+
+	template<Dimension _d>
+	using _vec = glm::vec<size_t(_d), scalar>;
+
 namespace math_translation {
 	inline vec<3> from_glm(glm::vec3 v) {
 		vec<3> result;
@@ -56,8 +70,7 @@ namespace math_translation {
 		return glm::vec2(vec.get(0), vec.get(1));
 	}
 
-
-	inline float cross_length(glm::vec2 a, glm::vec2 b) {
+	inline float cross_length(glm::vec2 a, glm::vec2 b) { // should move to geom 2d
 		return a.x * b.y - a.y * b.x;
 	}
 }

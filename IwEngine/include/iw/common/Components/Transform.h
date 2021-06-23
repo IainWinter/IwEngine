@@ -4,9 +4,10 @@
 #include "glm/vec3.hpp"
 #include "glm/mat4x4.hpp"
 #include "glm/gtx/quaternion.hpp"
-#include <vector>
 
-#include "glm/gtx/matrix_decompose.hpp"
+#include "glm/gtx/matrix_decompose.hpp" // should wrap the glm::decomp into a better signature
+
+#include <vector>
 
 namespace iw {
 namespace Engine {

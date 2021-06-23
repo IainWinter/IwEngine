@@ -44,7 +44,7 @@ int PlayerSystem::Initialize()
 
 	Physics->AddRigidbody(r);
 
-	m->Material()->Set("albedo", iw::Color::From255(240, 100, 100));
+	m->Material->Set("albedo", iw::Color::From255(240, 100, 100));
 
 	return 0;
 }

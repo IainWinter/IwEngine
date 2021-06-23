@@ -14,6 +14,10 @@ struct Tile {
 	Mesh m_spriteMesh;
 	ref<Texture> m_sprite;
 	ref<RenderTarget> m_target;
+
+	std::vector<glm::vec2> m_polygon;
+	std::vector<unsigned>  m_index;
+
 public:
 	Transform LastTransform;
 	bool IsStatic = false;
@@ -28,7 +32,6 @@ public:
 		bool isStatic = false);
 
 	void UpdatePolygon(
-		MeshCollider2* collider,
 		float sx, float sy);
 
 	void Draw(
@@ -40,7 +43,7 @@ public:
 		float sx, float sy,
 		std::function<void(int, int, unsigned)> func);
 
-	// Getters
+	// Getters, remove these
 
 	const ref<Texture>& GetSprite() const {
 		return m_sprite;
@@ -48,20 +51,6 @@ public:
 
 	const ref<Texture>& GetTarget() const {
 		return IsStatic ? GetSprite() : m_target->Tex(0);
-	}
-
-	std::pair<glm::vec2*, size_t> GetPolygon() const {
-		return {
-			(glm::vec2*)m_spriteMesh.Data->Get     (bName::POSITION),
-					  m_spriteMesh.Data->GetCount(bName::POSITION)
-		};
-	}
-
-	std::pair<unsigned*, size_t> GetIndex() const {
-		return {
-			m_spriteMesh.Data->GetIndex(),
-			m_spriteMesh.Data->GetIndexCount()
-		};
 	}
 };
 
