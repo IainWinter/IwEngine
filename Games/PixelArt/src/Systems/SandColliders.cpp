@@ -98,9 +98,11 @@ void SandColliderSystem::CutWorld(
 		// 
 		// a   d
 
-		iw::SandChunk* chunk = m_world->GetChunkDirect({x, y});
+		std::pair<int, int> location = { x, y };
 
-		if (!chunk) continue;
+		iw::SandChunk* chunk = m_world->GetChunkDirect(location);
+
+		if (!chunk || m_cachedColliders.find(location) == m_cachedColliders.end()) continue;
 
 		glm::vec2 a = glm::vec2(chunk->m_x,                  chunk->m_y);
 		glm::vec2 b = glm::vec2(chunk->m_x,                  chunk->m_y + chunk->m_height);
@@ -112,7 +114,7 @@ void SandColliderSystem::CutWorld(
 			|| iw::SegmentIntersection(cp1, cp2, c, d).second
 			|| iw::SegmentIntersection(cp1, cp2, d, a).second)
 		{
-			locations.emplace_back(x, y);
+			locations.push_back(location);
 		}
 	}
 

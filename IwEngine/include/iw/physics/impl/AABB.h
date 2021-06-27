@@ -41,7 +41,7 @@ namespace impl {
 		{}
 
 		vec_t Center() const {
-			return (Min + Max) / 2;
+			return (Min + Max) / scalar(2);
 		}
 
 		bool Intersects(

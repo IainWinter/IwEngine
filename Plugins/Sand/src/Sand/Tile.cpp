@@ -9,8 +9,11 @@ Tile::Tile(
 	ref<Shader> shader)
 {
 	m_sprite = texture;
-	m_sprite->SetFilter(iw::NEAREST);
-	m_sprite->CreateColors();
+
+	if (!m_sprite->m_colors) {
+		m_sprite->SetFilter(iw::NEAREST);
+		m_sprite->CreateColors();
+	}
 
 	ref<Material> material = REF<Material>(shader);
 	//material->SetTexture("texture", m_sprite);
@@ -39,7 +42,7 @@ void Tile::UpdatePolygon()
 	if (m_polygon.size() == 0) return;
 
 	for (glm::vec2& v : m_polygon) {
-		v = (v / glm::compMax(size) - glm::vec2(0.5f)) * 10.0f;
+		v = (v / size - glm::vec2(0.5f)) * size / 10.0f;
 	}
 
 	m_spriteMesh.Data->SetBufferData(bName::POSITION, m_polygon.size(), m_polygon.data());

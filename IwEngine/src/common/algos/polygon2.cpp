@@ -12,6 +12,8 @@ namespace common {
 		bool* field,
 		size_t width, size_t height)
 	{
+		if (width <= 2 || height <= 2) return {}; // to protect width/height - 1 in for loops
+
 		glm::vec2 midPoints[4] = {
 			glm::vec2(0.0, 0.5),   //    1
 			glm::vec2(0.5, 1.0),   //  0   3
@@ -61,7 +63,7 @@ namespace common {
 			size_t b =  i      +  j      * width;
 			size_t c = (i + 1) + (j + 1) * width;
 			size_t d = (i + 1) +  j      * width;
-
+			
 			// abcd = 0b0000
 
 			bool left   = i == 0;

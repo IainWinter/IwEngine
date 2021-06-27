@@ -143,6 +143,9 @@ public:
 	{
 		Renderer->SetClearColor(iw::Color::From255(33, 38, 41));
 
+		iw::MeshDescription desc;
+		desc.DescribeBuffer(iw::bName::POSITION, iw::MakeLayout<float>(2));
+
 		polygonMesh  = create_empty_mesh();
 		lineMesh     = create_empty_mesh();
 		cutRightMesh = create_empty_mesh();

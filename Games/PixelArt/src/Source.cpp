@@ -373,6 +373,8 @@ struct PixelationLayer
 				auto& [lverts, lindex, rverts, rindex] = cut;
 				if (rindex.size() == 0) return;
 
+				//m_sandLayer->FillPolygon(rverts, rindex, iw::Cell());
+
 				iw::AABB2 bounds = iw::GenPolygonBounds(rverts);
 				glm::ivec2 dim = (bounds.Max - bounds.Min) * float(m_pixelsPerMeter);
 
@@ -381,25 +383,37 @@ struct PixelationLayer
 				
 				unsigned* colors = (unsigned*)sprite->CreateColors();
 
+				int numbTested = 0;
+				int numbOutside = 0;
+
 				m_sandLayer->ForEachInPolygon(rverts, rindex, [&](
 					float s, float t, 
 					int   x, int   y)
 				{
-					x -= bounds.Min.x * m_pixelsPerMeter;
-					y -= bounds.Min.y * m_pixelsPerMeter;
+					numbTested++;
 
-					if (size_t(x + y * dim.x) >= dim.x * dim.y) {
-						return;
+					int px = x - bounds.Min.x * m_pixelsPerMeter; // local to sprite
+					int py = y - bounds.Min.y * m_pixelsPerMeter;
+
+					if (!m_sandLayer->m_world->IsEmpty(x, y))
+					{
+						if (size_t(px + py * dim.x) < dim.x * dim.y)
+						{
+							colors[px + py * dim.x] = m_sandLayer->m_world->GetCell(x, y).Color.to32();
+						}
+
+						else {
+							numbOutside++;
+						}
+
+						m_sandLayer->m_world->SetCell(x, y, iw::Cell());
 					}
-
-					if (m_sandLayer->m_world->IsEmpty(x, y)) return;
-					colors[x + y * dim.x] = m_sandLayer->m_world->GetCell(x, y).Color.to32();
-					m_sandLayer->m_world->SetCell(x, y, iw::Cell());
 				});
 
-				iw::Entity entity = m_sandLayer->MakeTile(sprite, true);
+				LOG_INFO << double(numbOutside) / numbTested * 100 << "% of the cells were outside the sprite";
 
-				entity.Find<iw::Rigidbody>()->Transform.Position += glm::vec3(glm::vec2(dim) / float(m_pixelsPerMeter * 2), 0);
+				iw::Entity entity = m_sandLayer->MakeTile(sprite, true);
+				entity.Find<iw::Rigidbody>()->Transform.Position = glm::vec3(bounds.Center(), 0);
 			};
 		}
 
@@ -483,7 +497,7 @@ struct PixelationLayer
 		//}
 
 		if (iw::Keyboard::KeyDown(iw::H)) {
-			m_colliderSystem->CutWorld(glm::vec2(9, -10), glm::vec2(9, 10));
+			m_colliderSystem->CutWorld(glm::vec2(15, -20), glm::vec2(18, 20));
 		}
 
 		float camX = cam->WorldPosition().x;
