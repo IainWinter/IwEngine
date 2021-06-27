@@ -70,16 +70,34 @@ public:
 	}
 
 	IW_PLUGIN_SAND_API
-	Entity MakeTile(
+	inline Entity MakeTile(
 		const std::string& sprite,
-		bool isStatic = false,
+		bool isSimulated = false)
+	{
+		return MakeTile(REF<Texture>(16, 64), isSimulated);
+	}
+
+	IW_PLUGIN_SAND_API
+	Entity MakeTile(
+		ref<Texture>& sprite,
 		bool isSimulated = false);
 
 	IW_PLUGIN_SAND_API
-	void FillPolygon(
+	inline void FillPolygon(
 		const std::vector<glm::vec2>& polygon,
 		const std::vector<unsigned>& index,
-		const iw::Cell& cell);
+		const iw::Cell& cell)
+	{
+		ForEachInPolygon(polygon, index, [&](float s, float t, int x, int y) {
+			m_world->SetCell(x, y, cell);
+		});
+	}
+
+	IW_PLUGIN_SAND_API
+	void ForEachInPolygon(
+		const std::vector<glm::vec2>& polygon,
+		const std::vector<unsigned>& index,
+		std::function<void(float, float, int, int)> func);
 };
 
 IW_PLUGIN_SAND_END

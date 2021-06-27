@@ -2,27 +2,6 @@
 
 IW_PLUGIN_SAND_BEGIN
 
-void CorrectCellInfo(SandChunk* chunk, size_t index, int x, int y, void* data) {
-	// set location if its not set, this is a hack
-
-	Cell& cell = *(Cell*)data;
-
-	if (cell.x == 0 && cell.y == 0) {
-		cell.x = chunk->m_x + x;
-		cell.y = chunk->m_y + y;
-	}
-
-	// set location everytime it changed whole number
-
-	cell.x = float(cell.x - int(cell.x)) + x + chunk->m_x;
-	cell.y = float(cell.y - int(cell.y)) + y + chunk->m_y;
-
-	int solid = int(cell.Type != CellType::EMPTY && cell.Props == CellProperties::NONE);
-
-	chunk->SetCell(index, cell.Color, SandField::COLOR);
-	chunk->SetCell(index, solid,      SandField::SOLID);
-}
-
 SandWorld::SandWorld(
 	size_t chunkWidth,
 	size_t chunkHeight,
@@ -33,10 +12,6 @@ SandWorld::SandWorld(
 	, m_expandWorld(true)
 {
 	m_batches.resize(m_batchGridSize * m_batchGridSize);
-
-	AddField<Cell>(true, CorrectCellInfo);
-	AddField<iw::Color>(false);
-	AddField<int>(false);
 }
 
 SandWorld::SandWorld(
@@ -51,10 +26,6 @@ SandWorld::SandWorld(
 	, m_expandWorld(true)
 {
 	m_batches.resize(m_batchGridSize * m_batchGridSize);
-
-	AddField<Cell>(true, CorrectCellInfo);
-	AddField<iw::Color>(false);
-	AddField<int>(false);
 
 	for(size_t x = 0; x < numberOfChunksX; x++)
 	for(size_t y = 0; y < numberOfChunksY; y++) {

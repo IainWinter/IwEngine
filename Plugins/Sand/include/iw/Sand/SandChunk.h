@@ -11,8 +11,8 @@ IW_PLUGIN_SAND_BEGIN
 
 enum class SandField : unsigned { // Should allow user to add to this, see enum { #include "fields.h" }; idea from valve
 	CELL,
-	COLOR,
-	SOLID
+	SOLID,
+	COLLISION
 };
 
 class SandChunk;

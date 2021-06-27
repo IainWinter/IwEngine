@@ -1,6 +1,7 @@
 #pragma once
 
 #include "iw/common/algos/geom2.h"
+#include "iw/physics/AABB.h"
 
 #include <vector>
 #include <algorithm>
@@ -55,7 +56,11 @@ namespace common {
 	IWCOMMON_API
 	void TransformPolygon(
 		std::vector<glm::vec2>& polygon,
-		const iw::Transform* transform);
+		const Transform* transform);
+
+	IWCOMMON_API
+	AABB2 GenPolygonBounds(
+		std::vector<glm::vec2>& polygon);
 
 	IWCOMMON_API
 	void AddPointToPolygon(

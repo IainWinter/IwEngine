@@ -1,4 +1,4 @@
-name = "Visualize Polygon"
+name = "Render to Grid"
 
 iwengdir  = path.getabsolute("../_export")
 gamedir  = path.getabsolute(name)

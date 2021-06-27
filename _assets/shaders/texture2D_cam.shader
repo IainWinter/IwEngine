@@ -3,16 +3,15 @@
 
 #include shaders/camera.shader
 
+layout(location = 0) in vec2 vert;
+
 uniform mat4 model;
 
-layout (location = 0) in vec3 vert;
-layout (location = 1) in vec2 uv;
-
-out vec2 TexCoords;
+out vec2 FragPos;
 
 void main() {
-	TexCoords = uv;
-	gl_Position = viewProj * model * vec4(vert, 1);
+	FragPos = vert / vec2(2.0f) + vec2(0.5f);
+	gl_Position = viewProj * model * vec4(vert, 0, 1);
 }
 
 #shader Fragment

@@ -11,7 +11,7 @@ namespace Graphics {
 	// needs to be remade 
 
 	struct Texture {
-	protected:
+	//protected:
 		unsigned m_width;
 		unsigned m_height;
 		unsigned m_depth;
@@ -24,14 +24,14 @@ namespace Graphics {
 		TextureFilter       m_filter;
 		TextureMipmapFilter m_mipmapFilter;
 
-		const Texture* m_parent;
+		/*const*/ Texture* m_parent;
 		int m_xOffset;
 		int m_yOffset;
 
 		unsigned char* m_colors;
 		ITexture* m_handle;
 
-	public:
+	//public:
 		IWGRAPHICS_API
 		Texture();
 
@@ -62,7 +62,7 @@ namespace Graphics {
 
 		IWGRAPHICS_API
 		Texture(
-			const Texture* parent,
+			/*const*/ Texture* parent,
 			int xOffset,
 			int yOffset,
 			unsigned width,
@@ -85,7 +85,7 @@ namespace Graphics {
 			int yOffset,
 			unsigned width,
 			unsigned height/*,
-			int mipmap = 0*/) const;
+			int mipmap = 0*/) /*const*/;
 
 		// texture needs to be initialized!
 		IWGRAPHICS_API

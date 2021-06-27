@@ -1,7 +1,7 @@
 #include "iw/engine/EntryPoint.h"
 #include "iw/graphics/Mesh.h"
 #include "iw/engine/Components/Timer.h"
-#include "iw/common/algos/MarchingCubes.h"
+#include "iw/common/algos/polygon2.h"
 #include <array>
 
 class Layer

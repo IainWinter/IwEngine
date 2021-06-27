@@ -2,8 +2,31 @@
 #include "iw/log/logger.h"
 
 #include "iw/physics/Collision/MeshCollider.h"
+#include "iw/common/algos/polygon2.h"
 
 IW_PLUGIN_SAND_BEGIN
+
+void CorrectCellInfo(SandChunk* chunk, size_t index, int x, int y, void* data) {
+	// set location if its not set, this is a hack
+
+	Cell& cell = *(Cell*)data;
+
+	if (cell.x == 0 && cell.y == 0) {
+		cell.x = chunk->m_x + x;
+		cell.y = chunk->m_y + y;
+	}
+
+	// set location everytime it changed whole number
+
+	cell.x = float(cell.x - int(cell.x)) + x + chunk->m_x;
+	cell.y = float(cell.y - int(cell.y)) + y + chunk->m_y;
+
+	bool notEmpty  = cell.Type  != CellType::EMPTY;
+	bool collision = cell.Props == CellProperties::NONE && notEmpty;
+
+	chunk->SetCell<bool>(index, notEmpty,  SandField::SOLID);
+	chunk->SetCell<bool>(index, collision, SandField::COLLISION);
+}
 
 int SandLayer::Initialize() {
 	Cell _EMPTY = {
@@ -85,9 +108,13 @@ int SandLayer::Initialize() {
 	Cell::SetDefault(CellType::SMOKE, _SMOKE);
 	Cell::SetDefault(CellType::BELT,  _BELT);
 
-	m_world = new SandWorld(64 * m_cellSize, 64 * m_cellSize, m_cellSize);
-
+	m_world = new SandWorld(100 * m_cellSize, 100 * m_cellSize, m_cellSize);
+	
 	m_world->m_workers.push_back(new SandWorkerBuilder<SimpleSandWorker>());
+
+	m_world->AddField<Cell>(true, CorrectCellInfo); // cells
+	m_world->AddField<bool>(false); // if solid, for IsEmpty
+	m_world->AddField<bool>(false); // if static, for colliders
 
 	m_update = PushSystem<SandWorldUpdateSystem>(m_world);
 	m_render = PushSystem<SandWorldRenderSystem>(m_world);
@@ -98,7 +125,7 @@ int SandLayer::Initialize() {
 		return error;
 	}
 
-	LOG_INFO << "World chunk size: " << m_world->m_chunkWidth << ", " << m_world->m_chunkHeight;
+	LOG_INFO << "Sand world chunk size: " << m_world->m_chunkWidth << ", " << m_world->m_chunkHeight;
 
 	return 0;
 }
@@ -205,35 +232,26 @@ void SandLayer::PasteTiles()
 		if (tile->NeedsScan)
 		{
 			tile->NeedsScan = false;
-
-			tile->UpdatePolygon(m_update->m_sx, m_update->m_sy);
+			tile->UpdatePolygon();
 
 			MeshCollider2* collider = Space->FindEntity(tile).Find<MeshCollider2>();
 			collider->SetPoints(tile->m_polygon);
 			collider->SetTriangles(tile->m_index);
-
-			Mesh* mesh = Space->FindEntity(tile).Find<Mesh>(); // tmep debug
-			mesh->Data->SetBufferData(bName::POSITION, tile->m_polygon.size(), tile->m_polygon.data());
-			mesh->Data->SetIndexData(                  tile->m_index  .size(), tile->m_index  .data());
 		}
 
-		// if actually moved
+		Cell c;
+		c.Type = CellType::ROCK;
+		c.Color = Color(1, 1, 0);
+		c.Props = CellProperties::NONE_TILE;
 
-		if (!tile->IsStatic) {
-			tile->Draw(transform, Renderer->ImmediateMode());
-		}
-		
-		Cell cell;
-		cell.Props = CellProperties::NONE_TILE;
-		cell.Color = Color::From255(150, 150, 150);
-		cell.Type = CellType::ROCK;
+		std::vector<glm::vec2> polygon = tile->m_polygon;
+		TransformPolygon(polygon, transform);
 
-		tile->ForEachInWorld(transform, m_update->m_sx, m_update->m_sy, [&](
-			int x, int y,
-			unsigned data)
+		ForEachInPolygon(polygon, tile->m_index, [&](float s, float t, int x, int y)
 		{
-			if (m_world->InBounds(x, y)) {
-				m_world->SetCell(x, y, cell);
+			if (SandChunk* chunk = m_world->GetChunk(x, y))
+			{
+				chunk->SetCell(x, y, true, SandField::SOLID);
 			}
 		});
 
@@ -248,47 +266,52 @@ void SandLayer::RemoveTiles()
 		Transform* transform,
 		Tile* tile)
 	{
-		tile->ForEachInWorld(&tile->LastTransform, m_update->m_sx, m_update->m_sy, [&](
-			int x, int y,
-			unsigned data)
+		Cell c;
+
+		std::vector<glm::vec2> polygon = tile->m_polygon;
+		TransformPolygon(polygon, &tile->LastTransform);
+
+		ForEachInPolygon(polygon, tile->m_index, [&](float s, float t, int x, int y)
 		{
-			if (m_world->InBounds(x, y)) {
-				m_world->SetCell(x, y, Cell::GetDefault(CellType::EMPTY));
-			}
+			if (SandChunk* chunk = m_world->GetChunk(x, y))
+			{
+				chunk->SetCell(x, y, false, SandField::SOLID);
+			}		
 		});
 	});
 }
 
 Entity SandLayer::MakeTile(
-	const std::string& sprite,
-	bool isStatic,
+	ref<Texture>& sprite,
 	bool isSimulated)
 {
-	ref<Archetype> archetype = Space->CreateArchetype<Transform, Mesh, MeshCollider2, Tile>(); // Mesh is just temp for debug
+	ref<Archetype> archetype = Space->CreateArchetype<Transform, Mesh, MeshCollider2, Tile>();
 
 	if (isSimulated) Space->AddComponent<Rigidbody>      (archetype);
 	else             Space->AddComponent<CollisionObject>(archetype);
 	
 	Entity entity = Space->CreateEntity(archetype);
 
-	Tile* tile = entity.Set<Tile>(Asset, "", isStatic);
-
+	Tile* tile = entity.Set<Tile>(sprite, Asset->Load<Shader>("shaders/texture2d_cam.shader"));
+	Mesh* mesh = entity.Set<Mesh>(tile->m_spriteMesh);
+	
 	Transform*       transform = entity.Set<Transform>();
 	MeshCollider2*   collider  = entity.Set<MeshCollider2>();
 	CollisionObject* object    = isSimulated ? entity.Set<Rigidbody>() : entity.Set<CollisionObject>();
 
-	entity.Set<Mesh>(tile->m_spriteMesh.MakeCopy()); // temp debug
-
 	object->Collider = collider;
 	object->SetTransform(transform);
+
+	if (isSimulated) Physics->AddRigidbody((Rigidbody*)object);
+	else             Physics->AddCollisionObject(object);
 
 	return entity;
 }
 
-void SandLayer::FillPolygon(
+void SandLayer::ForEachInPolygon(
 	const std::vector<glm::vec2>& polygon, 
 	const std::vector<unsigned>&  index,
-	const iw::Cell& cell)
+	std::function<void(float, float, int, int)> func)
 {
 	for (size_t i = 0; i < index.size(); i += 3) {
 		glm::vec2 v0 = polygon[index[i    ]] * float(m_cellsPerMeter);
@@ -298,7 +321,7 @@ void SandLayer::FillPolygon(
 		glm::vec2 v01 = v1 - v0;
 		glm::vec2 v02 = v2 - v0;
 
-		int maxX = iw::max(v0.x, iw::max(v1.x, v2.x));
+		int maxX = iw::max(v0.x, iw::max(v1.x, v2.x)); // not the most efficient; this test everything in a rectangle around the triangle
 		int minX = iw::min(v0.x, iw::min(v1.x, v2.x));
 		int maxY = iw::max(v0.y, iw::max(v1.y, v2.y));
 		int minY = iw::min(v0.y, iw::min(v1.y, v2.y));
@@ -309,22 +332,14 @@ void SandLayer::FillPolygon(
 			{
 				glm::vec2 q(x - v0.x, y - v0.y);
 
-				float s = (float)iw::cross_length(q, v02) / iw::cross_length(v01, v02);
-				float t = (float)iw::cross_length(v01, q) / iw::cross_length(v01, v02);
+				float s = iw::cross_length(q, v02) / iw::cross_length(v01, v02);
+				float t = iw::cross_length(v01, q) / iw::cross_length(v01, v02);
 
 				if (   s     >= 0 
 					&& t     >= 0 
 					&& s + t <= 1)
 				{
-					//iw::Cell c;
-
-					//c.Type  = CellType::ROCK;
-					//c.Color = Color::From255(100, 100, 100);
-					//c.Style = CellStyle::RANDOM_STATIC;
-					//c.StyleColor = Color(.05, .05, .05, 0);
-					//c.StyleOffset = randf();
-
-					m_world->SetCell(x, y, cell);
+					func(s, t, x, y);
 				}
 			}
 		}

@@ -93,7 +93,7 @@ namespace Graphics {
 
 	// cant handle 3d textures
 	Texture::Texture(
-		const Texture* parent,
+		/*const*/ Texture* parent,
 		int xOffset, 
 		int yOffset, 
 		unsigned width,
@@ -101,6 +101,7 @@ namespace Graphics {
 		unsigned char* colors)
 		: m_width       (width)
 		, m_height      (height)
+		, m_depth       (0)
 		, m_channels    (parent->m_channels)
 		, m_type        (parent->m_type)
 		, m_format      (parent->m_format)
@@ -236,6 +237,10 @@ namespace Graphics {
 		}
 
 		if (IsSubTexture()) {
+			if (!m_parent->m_handle) {
+				m_parent->Initialize(device);
+			}
+
 			m_handle = device->CreateSubTexture(m_parent->Handle(), m_xOffset, m_yOffset, m_width, m_height);
 		}
 
@@ -259,7 +264,7 @@ namespace Graphics {
 		int yOffset, 
 		unsigned width,
 		unsigned height/*,
-		int mipmap = 0*/) const
+		int mipmap = 0*/) /*const*/
 	{
 		return Texture(this, xOffset, yOffset, width, height/*, minmap*/);
 	}

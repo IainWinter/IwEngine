@@ -15,20 +15,23 @@ void main() {
 #shader Fragment
 #version 330
 
-in vec2 FragPos;
-
+uniform vec4 mat_color;
+uniform float mat_hasTexture;
 uniform sampler2D mat_texture;
-uniform float mat_hasTexture = 0.0f;
-uniform vec4 mat_color = vec4(1, 0, 0, 1);
+
+in vec2 TexCoords;
 
 out vec4 FragColor;
 
 void main() {
-	if (mat_hasTexture == 0) {
-		FragColor = mat_color;		
+	vec4 color = mat_color;
+	if (mat_hasTexture == 1.0) {
+		color = texture(mat_texture, TexCoords);
 	}
 
-	else {
-		FragColor = texture(mat_texture, FragPos);		
+	if (color.a < 0.5) {
+		discard;
 	}
+
+	FragColor = color;
 }

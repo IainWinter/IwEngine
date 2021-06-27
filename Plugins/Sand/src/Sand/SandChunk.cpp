@@ -26,8 +26,8 @@ void SandChunk::MoveCell(
 	std::unique_lock lock(m_changesMutex);
 
 	m_changes.emplace_back(
-		source, 
-		source->GetIndex(x, y), 
+		source,
+		source->GetIndex(x, y),
 		GetIndex(xto, yto)
 	);
 }
@@ -80,7 +80,7 @@ void SandChunk::CommitCells() {
 
 			auto [chunk, src, dst] = m_changes[rand];
 
-				    SetCell(dst, chunk->GetCell(src));
+				   SetCell(dst, chunk->GetCell(src));
 			chunk->SetCell(src, Cell());
 
 			iprev = i + 1;
@@ -120,10 +120,8 @@ bool SandChunk::InBounds(int x, int y) {
 
 bool SandChunk::IsEmpty(int x, int y) {
 	//KeepAlive(x, y); // myabe keep all querys alive?
-
-	std::unique_lock lock(GetLock(x, y, SandField::CELL));
-
-	return GetCell(x, y).Type == CellType::EMPTY;
+	std::unique_lock lock(GetLock(x, y)); // use cell lock, no reason for solid to have its own?
+	return !GetCell<bool>(x, y, SandField::SOLID);
 }
 
 void SandChunk::KeepAlive(int x, int y) {

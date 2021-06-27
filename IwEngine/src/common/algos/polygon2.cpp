@@ -383,11 +383,28 @@ namespace common {
 
 	void TransformPolygon(
 		std::vector<glm::vec2>& polygon,
-		const iw::Transform* transform)
+		const Transform* transform)
 	{
 		for (glm::vec2& vert : polygon) {
 			vert = TransformPoint<Dimension::d2>(vert, transform);
 		}
+	}
+
+	AABB2 GenPolygonBounds(
+		std::vector<glm::vec2>& polygon)
+	{
+		glm::vec2 min(FLT_MAX);
+		glm::vec2 max(FLT_MIN);
+
+		for (const glm::vec2& vert : polygon)
+		{
+			if (vert.x > max.x) max.x = vert.x;
+			if (vert.y > max.y) max.y = vert.y;
+			if (vert.x < min.x) min.x = vert.x;
+			if (vert.y < min.y) min.y = vert.y;
+		}
+
+		return AABB2(min, max);
 	}
 
 	void AddPointToPolygon(

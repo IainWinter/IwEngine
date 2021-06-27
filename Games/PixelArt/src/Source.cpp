@@ -224,8 +224,8 @@ struct PixelationLayer
 		);
 
 		iw::ref<iw::Material> simpleMat = REF<iw::Material>(simpleShader);
-		//simpleMat->SetTexture("albedoMap", Asset->Load<iw::Texture>("textures/grass_tuft/baseColor.png"));
-		//simpleMat->Set("albedo", iw::Color::From255(78, 186, 84));
+		//simpleMat->SetTexture("texture", Asset->Load<iw::Texture>("textures/grass_tuft/baseColor.png"));
+		//simpleMat->Set("color", iw::Color::From255(78, 186, 84));
 
 		iw::MeshDescription description;
 		description.DescribeBuffer(iw::bName::POSITION, iw::MakeLayout<float>(3));
@@ -260,7 +260,7 @@ struct PixelationLayer
 			r->SetTransform(t);
 			r->IsAxisLocked.z = true;
 
-			m->Material->Set("albedo", iw::Color::From255(200, 200, 100));
+			m->Material->Set("color", iw::Color::From255(200, 200, 100));
 
 			Physics->AddRigidbody(r);
 			//Physics->AddConstraint(new GroundConstraint(r, -26, .15));
@@ -356,7 +356,7 @@ struct PixelationLayer
 				iw::ref<iw::Material> mat = simpleMat;
 
 				mesh->Material = mat;
-				mesh->Material->Set("albedo", iw::Color::From255(255, 0, 0));
+				mesh->Material->Set("color", iw::Color::From255(255, 0, 0));
 				mesh->Material->SetWireframe(true);
 
 				mesh->Data->SetBufferData(iw::bName::POSITION, collider->m_points.size(), collider->m_points.data());
@@ -371,7 +371,35 @@ struct PixelationLayer
 				iw::polygon_cut& cut) 
 			{
 				auto& [lverts, lindex, rverts, rindex] = cut;
-				m_sandLayer->FillPolygon(rverts, rindex, iw::Cell());
+				if (rindex.size() == 0) return;
+
+				iw::AABB2 bounds = iw::GenPolygonBounds(rverts);
+				glm::ivec2 dim = (bounds.Max - bounds.Min) * float(m_pixelsPerMeter);
+
+				iw::ref<iw::Texture> sprite = REF<iw::Texture>(dim.x, dim.y);
+				sprite->SetFilter(iw::NEAREST);
+				
+				unsigned* colors = (unsigned*)sprite->CreateColors();
+
+				m_sandLayer->ForEachInPolygon(rverts, rindex, [&](
+					float s, float t, 
+					int   x, int   y)
+				{
+					x -= bounds.Min.x * m_pixelsPerMeter;
+					y -= bounds.Min.y * m_pixelsPerMeter;
+
+					if (size_t(x + y * dim.x) >= dim.x * dim.y) {
+						return;
+					}
+
+					if (m_sandLayer->m_world->IsEmpty(x, y)) return;
+					colors[x + y * dim.x] = m_sandLayer->m_world->GetCell(x, y).Color.to32();
+					m_sandLayer->m_world->SetCell(x, y, iw::Cell());
+				});
+
+				iw::Entity entity = m_sandLayer->MakeTile(sprite, true);
+
+				entity.Find<iw::Rigidbody>()->Transform.Position += glm::vec3(glm::vec2(dim) / float(m_pixelsPerMeter * 2), 0);
 			};
 		}
 
@@ -401,32 +429,22 @@ struct PixelationLayer
 		MainScene->SetMainCamera(cam);
 
 		// Tile
+		
+		if (false) 
+		for (int i = 0; i < 3; i++) {
+			tileEntity = m_sandLayer->MakeTile("none", true);
 
-		if (true) {
-			tileEntity = m_sandLayer->MakeTile("none", false, true);
+			iw::Tile* tile = tileEntity.Find<iw::Tile>();
 
-			iw::Tile*      tile = tileEntity.Find<iw::Tile>();
-			iw::Rigidbody* body = tileEntity.Find<iw::Rigidbody>();
-
-			unsigned* colors = (unsigned*)tile->GetSprite()->Colors();
+			unsigned* colors = (unsigned*)tile->m_sprite->Colors();
 
 			for (int y = 0; y < 64; y++)
 			for (int x = 0; x < 16; x++)
 			{
-				colors[x + y * tile->GetSprite()->Width()] = 1;
+				colors[x + y * tile->m_sprite->Width()] = 1;
 			}
 
-			iw::Mesh*  mesh = tileEntity.Find<iw::Mesh>();
-			mesh->Material = simpleMat;
-			mesh->Material->Set("albedo", iw::Color::From255(255, 0, 0));
-			mesh->Material->SetWireframe(true);
-
-			body->TakesGravity = false;
-			body->Gravity.y = -10;
-			body->SetTransform(&iw::Transform(glm::vec2(10, 20)));
-			body->AngularVelocity.z = .1;
-
-			Physics->AddRigidbody(body);
+			tileEntity.Find<iw::Rigidbody>()->Transform.Position = glm::vec3(i*10, 20, 0);
 		}
 
 		return 0;
@@ -465,13 +483,13 @@ struct PixelationLayer
 		//}
 
 		if (iw::Keyboard::KeyDown(iw::H)) {
-			m_colliderSystem->CutWorld(glm::vec2(0, 0), glm::vec2(30, 6));
+			m_colliderSystem->CutWorld(glm::vec2(9, -10), glm::vec2(9, 10));
 		}
 
 		float camX = cam->WorldPosition().x;
 		float camY = cam->WorldPosition().y;
 		
-		m_sandLayer->SetCamera(camX, camY, 10, 10);
+		m_sandLayer->SetCamera(camX, camY, m_pixelsPerMeter, m_pixelsPerMeter); // this is 1 frame behind
 
 		// Background
 
@@ -621,7 +639,7 @@ struct PixelationLayer
 		data->SetIndexData(index.size(), index.data());
 
 		iw::ref<iw::Material> mat = simpleMat->MakeInstance();
-		mat->Set("albedo", settings.color);
+		mat->Set("color", settings.color);
 		mat->SetWireframe(settings.isWireframe);
 
 		iw::ref<iw::Archetype> arch = Space->CreateArchetype<iw::Transform, iw::Mesh>();
@@ -694,7 +712,7 @@ struct PixelationLayer
 					gt->Scale = gt->Scale / t->Scale; // cancel scale of t
 
 					iw::ref<iw::Material> mat = simpleMat->MakeInstance();
-					mat->Set("albedo", iw::Color::From255(78, 186, 84).rgba() * (1 + iw::randf() * .25f));
+					mat->Set("color", iw::Color::From255(78, 186, 84).rgba() * (1 + iw::randf() * .25f));
 
 					gm->Material = mat;
 				}

@@ -5,8 +5,8 @@ void SandColliderSystem::Update()
 	for (auto batch : m_world->m_batches)
 	for (iw::SandChunk* chunk : batch)
 	{
-		iw::SandChunk::Field& field = chunk->GetField(iw::SandField::SOLID);
-		int* cells = field.GetCells<int>();
+		iw::SandChunk::Field& field = chunk->GetField(iw::SandField::COLLISION);
+		bool* cells = field.GetCells<bool>();
 
 		auto location = m_world->GetChunkLocation(chunk->m_x, chunk->m_y);
 			
@@ -29,7 +29,7 @@ void SandColliderSystem::Update()
 			glm::vec3 position = glm::vec3(chunk->m_x, chunk->m_y, 0)
 				               / float(m_cellsPerMeter);
 
-			auto polygons = iw::MakePolygonFromField(cells, chunk->m_width, chunk->m_height, 1);
+			auto polygons = iw::MakePolygonFromField(cells, chunk->m_width, chunk->m_height);
 
 			for (std::vector<glm::vec2>& polygon : polygons)
 			{
