@@ -33,13 +33,15 @@ void SandColliderSystem::Update()
 
 			for (std::vector<glm::vec2>& polygon : polygons)
 			{
-				std::vector<unsigned> index = iw::TriangulatePolygon(polygon);
-				
-				if (index.size() == 0) continue;
+				if (polygon.size() == 0) continue;
 
 				for (glm::vec2& v : polygon) {
 					v /= float(m_cellsPerMeter);
 				}
+
+				std::vector<unsigned> index = iw::TriangulatePolygon(polygon);
+
+				iw::RemoveTinyTriangles(polygon, index);
 
 				iw::Entity entity = Space->CreateEntity<
 					iw::Transform, 

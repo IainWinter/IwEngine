@@ -10,7 +10,7 @@ int PlayerSystem::Initialize()
 		iw::Timer,
 		Player>();
 
-	iw::Transform*  t = PlayerEntity.Set<iw::Transform>(glm::vec3(20, 25, 0), glm::vec3(1, 2, 1));
+	iw::Transform*  t = PlayerEntity.Set<iw::Transform>(glm::vec3(20, 25, 0), glm::vec3(1, .2, 1));
 	iw::Mesh*       m = PlayerEntity.Set<iw::Mesh>(m_playerMesh);
 	iw::Hull2*      c = PlayerEntity.Set<iw::Hull2>(iw::MakeSquareCollider());
 	iw::Rigidbody*  r = PlayerEntity.Set<iw::Rigidbody>();
@@ -67,6 +67,12 @@ void PlayerSystem::Update()
 		player->i_right = iw::Keyboard::KeyDown(iw::D);
 		player->i_light = iw::Mouse::ButtonDown(iw::LMOUSE);
 		player->i_heavy = iw::Mouse::ButtonDown(iw::RMOUSE);
+
+		if (player->i_heavy) {
+			glm::vec2 pos(transform->WorldPosition());
+			glm::vec2 forward = pos + glm::vec2(player->Facing * 5, -5);
+			m_coliderSystem->CutWorld(pos, forward);
+		}
 
 		if (iw::Keyboard::KeyDown(iw::Y)) {
 			player->i_light = true;

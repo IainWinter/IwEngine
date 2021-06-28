@@ -38,6 +38,23 @@ namespace common {
 		return out;
 	}
 
+	inline
+	std::tuple<
+		glm::vec2&,
+		glm::vec2&,
+		glm::vec2&>
+	GetTriangle(
+		std::vector<glm::vec2>& polygon,
+		std::vector<unsigned>& index,
+		size_t triangle)
+	{
+		glm::vec2& a = polygon[index[triangle    ]];
+		glm::vec2& b = polygon[index[triangle + 1]];
+		glm::vec2& c = polygon[index[triangle + 2]];
+
+		return { a, b, c };
+	}
+
 	IWCOMMON_API
 	std::vector<std::vector<glm::vec2>> MakePolygonFromField(
 		bool* field,
@@ -46,6 +63,12 @@ namespace common {
 	IWCOMMON_API
 	std::vector<unsigned> TriangulatePolygon(
 		const std::vector<glm::vec2>& polygon);
+
+	IWCOMMON_API
+	void RemoveTinyTriangles(
+		std::vector<glm::vec2>& polygon,
+		std::vector<unsigned>&  index,
+		float raiotOfAreaToRemove = .001);
 
 	IWCOMMON_API
 	polygon_cut CutPolygon(

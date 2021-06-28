@@ -3,6 +3,7 @@
 #include <vector>
 #include <algorithm>
 #include <functional>
+#include <set>
 
 // should split and make cpp file
 
@@ -300,7 +301,53 @@ namespace common {
 		}
 
 	exit:
+
+		//for ()
+
+
 		return triangles;
+	}
+
+	void RemoveTinyTriangles(
+		std::vector<glm::vec2>& polygon, 
+		std::vector<unsigned>& index, 
+		float raiotOfAreaToRemove)
+	{
+		float totalArea = 0;
+
+		for (size_t i = 0; i < index.size(); i += 3)
+		{
+			auto& [a, b, c] = GetTriangle(polygon, index, i);
+			totalArea += TriangleArea(a, b, c);
+		}
+
+		for (size_t i = 0; i < index.size(); i += 3)
+		{
+			auto& [a, b, c] = GetTriangle(polygon, index, i);
+			float area = TriangleArea(a, b, c);
+
+			if (area / totalArea < 0.01) {
+				index.erase(index.begin() + i + 2);
+				index.erase(index.begin() + i + 1);
+				index.erase(index.begin() + i);
+				i -= 3;
+			}
+		}
+
+		// could remove from polygons too but need to subtract from index after removed
+		
+		//std::set<unsigned> indexBefore(index.begin(), index.end()); // was at the top of function
+
+		//for (auto itr = indexBefore.rbegin(); itr != indexBefore.rend(); itr++)
+		//{
+		//	unsigned find = *itr;
+		//	bool found = std::find(index.begin(), index.end(), find) == index.end();
+
+		//	if (found)
+		//	{
+		//		polygon.erase(polygon.begin() + *itr);
+		//	}
+		//}
 	}
 
 	polygon_cut CutPolygon(

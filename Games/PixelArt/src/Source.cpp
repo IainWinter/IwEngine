@@ -267,7 +267,7 @@ struct PixelationLayer
 		}
 
 		// Ground
-		if (false) {
+		if (true) {
 			GroundSettings mainGround1;
 			//mainGround1.makeGrass = true;
 			//mainGround1.grassPerMeter = 10;
@@ -294,15 +294,15 @@ struct PixelationLayer
 			}
 		}
 
-		iw::Cell c;
-		c.Type = iw::CellType::ROCK;
-		c.Color = iw::Color::From255(100, 100, 100);
+		//iw::Cell c;
+		//c.Type = iw::CellType::ROCK;
+		//c.Color = iw::Color::From255(100, 100, 100);
 
-		for (int y = 0; y < 5; y++)
-		for (int x = -200; x < 500; x++)
-		{
-			m_sandLayer->m_world->SetCell(x, y, c);
-		}
+		//for (int y = 0; y < 5; y++)
+		//for (int x = -200; x < 500; x++)
+		//{
+		//	m_sandLayer->m_world->SetCell(x, y, c);
+		//}
 
 		// Physics
 
@@ -336,11 +336,11 @@ struct PixelationLayer
 
 		// Custom systems
 	
-		PlayerSystem* playerSystem = PushSystem<PlayerSystem>(m_square);
+		m_colliderSystem = PushSystem<SandColliderSystem>(m_sandLayer->m_world, m_pixelsPerMeter);
+
+		PlayerSystem* playerSystem = PushSystem<PlayerSystem>(m_square, m_colliderSystem);
 		                             PushSystem<PlayerAttackSystem>();
 		                             PushSystem<AttackSystem>(m_square);
-
-		m_colliderSystem = PushSystem<SandColliderSystem>(m_sandLayer->m_world, m_pixelsPerMeter);
 
 		if (true) // drawing colliders 
 		{
@@ -377,6 +377,8 @@ struct PixelationLayer
 
 				iw::AABB2 bounds = iw::GenPolygonBounds(rverts);
 				glm::ivec2 dim = (bounds.Max - bounds.Min) * float(m_pixelsPerMeter);
+
+				if (dim.x <= 5 || dim.y <= 5) return;
 
 				iw::ref<iw::Texture> sprite = REF<iw::Texture>(dim.x, dim.y);
 				sprite->SetFilter(iw::NEAREST);
@@ -497,7 +499,7 @@ struct PixelationLayer
 		//}
 
 		if (iw::Keyboard::KeyDown(iw::H)) {
-			m_colliderSystem->CutWorld(glm::vec2(15, -20), glm::vec2(18, 20));
+			m_colliderSystem->CutWorld(glm::vec2(0, 0), glm::vec2(10, 10));
 		}
 
 		float camX = cam->WorldPosition().x;
@@ -569,7 +571,7 @@ struct PixelationLayer
 		float yd = ((int)camY - camY) / m_pixelSize / m_pixelsPerMeter / m_pixelsPerMeter;
 
 		Renderer->BeginScene();
-			Renderer->DrawMesh(iw::Transform(/*glm::vec3(xd, yd, 0)*/), m_sandLayer->GetSandMesh());
+			//Renderer->DrawMesh(iw::Transform(/*glm::vec3(xd, yd, 0)*/), m_sandLayer->GetSandMesh());
 			Renderer->DrawMesh(iw::Transform(), m_screen);
 		Renderer->EndScene();
 	}

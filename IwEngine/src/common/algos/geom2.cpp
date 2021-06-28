@@ -35,8 +35,8 @@ namespace common {
 		glm::vec2 b0_a0 = a0 - b0;
 
 		return a0 + a0_a1
-			* iw::cross_length(b0_b1, b0_a0)
-			/ iw::cross_length(a0_a1, b0_b1);
+			* cross_length(b0_b1, b0_a0)
+			/ cross_length(a0_a1, b0_b1);
 	}
 
 	std::pair<glm::vec2, bool> SegmentIntersection(
@@ -47,10 +47,18 @@ namespace common {
 		glm::vec2 b0_b1 = b1 - b0;
 		glm::vec2 b0_a0 = a0 - b0;
 
-		float x = iw::cross_length(b0_b1, b0_a0)
-			/ iw::cross_length(a0_a1, b0_b1);
+		float x = cross_length(b0_b1, b0_a0)
+			    / cross_length(a0_a1, b0_b1);
 
 		return { a0 + a0_a1 * x, x >= 0 && x <= 1 };
+	}
+
+	float TriangleArea(
+		const glm::vec2& a, 
+		const glm::vec2& b, 
+		const glm::vec2& c)
+	{
+		return cross_length(b - a, c - a) * 0.5f;
 	}
 }
 }

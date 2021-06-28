@@ -24,6 +24,12 @@ namespace common {
 		glm::vec2 a0, glm::vec2 a1,
 		glm::vec2 b0, glm::vec2 b1);
 
+	IWCOMMON_API
+	float TriangleArea(
+		const glm::vec2& a,
+		const glm::vec2& b,
+		const glm::vec2& c);
+
 	template<
 		Dimension _d>
 	_vec<_d> TransformPoint(

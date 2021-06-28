@@ -4,13 +4,14 @@
 #include shaders/camera.shader
 
 layout(location = 0) in vec2 vert;
+layout(location = 1) in vec2 uv;
 
 uniform mat4 model;
 
 out vec2 FragPos;
 
 void main() {
-	FragPos = vert / vec2(2.0f) + vec2(0.5f);
+	FragPos = uv;
 	gl_Position = viewProj * model * vec4(vert, 0, 1);
 }
 
