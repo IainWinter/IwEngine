@@ -81,9 +81,9 @@ namespace common {
 	std::vector<unsigned> TriangulatePolygon(
 		const std::vector<glm::vec2>& polygon);
 
-	IWCOMMON_API
-	std::pair<std::vector<glm::vec2>, std::vector<unsigned>> TriangulateDelaunay(
-		const std::vector<glm::vec2>& verts);
+	//IWCOMMON_API
+	//std::vector<unsigned> TriangulateSweep(
+	//	std::vector<glm::vec2>& verts);
 
 	IWCOMMON_API
 	void RemoveTinyTriangles(

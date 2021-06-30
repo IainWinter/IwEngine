@@ -36,7 +36,7 @@ class Layer
 
 	void update_mesh(
 		iw::Mesh& mesh,
-		const std::vector<glm::vec2>& verts,
+		std::vector<glm::vec2>& verts,
 		std::vector<unsigned>& index = std::vector<unsigned>(),
 		bool triangulate = true)
 	{
@@ -51,7 +51,7 @@ class Layer
 		}
 
 		else if (triangulate) {
-			index = iw::TriangulatePolygon(verts);
+			index = iw::TriangulateSweep(verts);
 			mesh.Data->SetTopology(iw::MeshTopology::TRIANGLES);
 		}
 
@@ -191,11 +191,10 @@ public:
 			}
 		}
 
-		if (iw::Keyboard::KeyDown(iw::P)) {
-			auto& [p, i] = iw::TriangulateDelaunay(pVerts);
-			pVerts = p;
-			update_mesh(polygonMesh, pVerts, i, false);
-		}
+		/*if (iw::Keyboard::KeyDown(iw::P)) {
+			std::vector<unsigned> index = iw::TriangulateSweep(pVerts);
+			update_mesh(polygonMesh, pVerts, index, false);
+		}*/
 
 		if (iw::Keyboard::KeyDown(iw::SPACE)) {
 			pVerts.clear();
