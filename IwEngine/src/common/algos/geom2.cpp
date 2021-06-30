@@ -60,5 +60,37 @@ namespace common {
 	{
 		return cross_length(b - a, c - a) * 0.5f;
 	}
+
+	std::pair<glm::vec2, float> TriangleCircle(
+		const glm::vec2& a,
+		const glm::vec2& b,
+		const glm::vec2& c)
+	{
+		float ab = glm::length2(a);
+		float cd = glm::length2(b);
+		float ef = glm::length2(c);
+
+		float ax = a.x;
+		float ay = a.y;
+		float bx = b.x;
+		float by = b.y;
+		float cx = c.x;
+		float cy = c.y;
+
+		float circum_x = (ab * (cy - by) + cd * (ay - cy) + ef * (by - ay)) / (ax * (cy - by) + bx * (ay - cy) + cx * (by - ay));
+		float circum_y = (ab * (cx - bx) + cd * (ax - cx) + ef * (bx - ax)) / (ay * (cx - bx) + by * (ax - cx) + cy * (bx - ax));
+
+		glm::vec2 p(circum_x / 2, circum_y / 2);
+		float r = glm::distance2(a, p);
+
+		return { p, r };
+	}
+
+	bool CircleHasPoint(
+		const std::pair<glm::vec2, float>& circle, 
+		const glm::vec2& x)
+	{
+		return glm::distance2(x, circle.first) <= circle.second * circle.second;
+	}
 }
 }

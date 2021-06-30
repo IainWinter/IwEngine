@@ -29,6 +29,7 @@ class Layer
 
 		iw::Mesh mesh = (new iw::MeshData(desc))->MakeInstance();
 		mesh.Material = d2_color;
+		mesh.Material->SetWireframe(true);
 
 		return mesh;
 	}
@@ -113,7 +114,9 @@ class Layer
 
 public:
 
-	
+	// if point in polygon on circle place add to field
+	// tringulate that array
+	// those are the points
 
 	iw::Mesh polygonMesh;
 	std::vector<glm::vec2> pVerts;
@@ -186,6 +189,12 @@ public:
 					pVerts.push_back(mpos);
 				}
 			}
+		}
+
+		if (iw::Keyboard::KeyDown(iw::P)) {
+			auto& [p, i] = iw::TriangulateDelaunay(pVerts);
+			pVerts = p;
+			update_mesh(polygonMesh, pVerts, i, false);
 		}
 
 		if (iw::Keyboard::KeyDown(iw::SPACE)) {

@@ -301,11 +301,104 @@ namespace common {
 		}
 
 	exit:
-
-		//for ()
-
-
 		return triangles;
+	}
+
+	std::pair<std::vector<glm::vec2>, std::vector<unsigned>> TriangulateDelaunay(
+		const std::vector<glm::vec2>& verts)
+	{
+		using namespace std; // trying this
+		//using namespace glm;
+
+  //function BowyerWatson (pointList) // https://en.wikipedia.org/wiki/Bowyer%E2%80%93Watson_algorithm
+  //     pointList is a set of coordinates defining the points to be triangulated
+  //    triangulation := empty triangle mesh data structure
+
+		auto [min, max] = GenPolygonBounds(verts);
+
+		glm::vec2 center = (min + max) / 2.0f;
+		glm::vec2 delta  = max - min;
+		
+		float radius = glm::compMax(delta) * 20; // why would this be * 20
+
+		glm::vec2 p1(center.x - radius, center.y - radius);
+		glm::vec2 p2(center.x,          center.y + radius);
+		glm::vec2 p3(center.x + radius, center.y - radius);
+
+		// Create a list of triangles, and add the supertriangle in it
+  //    add super-triangle to triangulation // must be large enough to completely contain all the points in pointList
+		
+		vector<glm::vec2> working = { p1, p2, p3 };
+		vector<unsigned>  index = { 0, 1, 2 };
+
+  //    for each point in pointList do // add all the points one at a time to the triangulation
+  
+		for (const glm::vec2& v : verts)
+		{
+  //       badTriangles := empty set
+			vector<unsigned> badTriangles;
+
+  //       for each triangle in triangulation do // first find all the triangles that are no longer valid due to the insertion
+
+			for (size_t i = 0; i < index.size(); i += 3)
+			{
+				const auto& [a, b, c] = GetTriangle(working, index, i);
+
+  //          if point is inside circumcircle of triangle
+				if (CircleHasPoint(TriangleCircle(a, b, c), v))
+				{
+  //             add triangle to badTriangles
+					badTriangles.push_back(i);
+				}
+			}
+
+  //       polygon := empty set
+			std::set<std::pair<unsigned, unsigned>> edges;
+
+  //       for each triangle in badTriangles do // find the boundary of the polygonal hole
+			for (unsigned triangle : badTriangles)
+			{
+  //          for each edge in triangle do
+				for (size_t e = 0; e < 3; e++)
+				{
+					unsigned e1 = index[triangle +  e];
+					unsigned e2 = index[triangle + (e + 1) % 3];
+					if (e1 > e2) std::swap(e1, e2);
+
+  //             if edge is not shared by any other triangles in badTriangles
+					if (edges.find({ e1, e2 }) == edges.end())
+					{
+  //                add edge to polygon
+						edges.emplace(e1, e2);
+					}
+				}
+			}
+
+  //       for each triangle in badTriangles do // remove them from the data structure
+			for (auto t = badTriangles.rbegin(); t != badTriangles.rend(); t++)
+			{
+  //          remove triangle from triangulation
+				index.erase(index.begin() + *t + 2);
+				index.erase(index.begin() + *t + 1);
+				index.erase(index.begin() + *t);
+			}
+
+  //       for each edge in polygon do // re-triangulate the polygonal hole
+			for (std::pair<unsigned, unsigned> edge : edges) {
+  //          newTri := form a triangle from edge to point
+  //          add newTri to triangulation
+				AddPointToPolygon(working, index, working[edge.first]);
+				AddPointToPolygon(working, index, working[edge.second]);
+				AddPointToPolygon(working, index, v);
+			}
+		}
+
+		return { working, index };
+
+  //    for each triangle in triangulation // done inserting points, now clean up
+  //       if triangle contains a vertex from original super-triangle
+  //          remove triangle from triangulation
+  //    return triangulation
 	}
 
 	void RemoveTinyTriangles(
@@ -440,7 +533,7 @@ namespace common {
 	}
 
 	AABB2 GenPolygonBounds(
-		std::vector<glm::vec2>& polygon)
+		const std::vector<glm::vec2>& polygon)
 	{
 		glm::vec2 min(FLT_MAX);
 		glm::vec2 max(FLT_MIN);

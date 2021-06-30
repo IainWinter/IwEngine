@@ -39,4 +39,5 @@ public:
 
 	void Update() override;
 	void CutWorld(const glm::vec2& a, const glm::vec2& b);
+	void CrackWorld(const glm::vec2& a, const glm::vec2& b);
 };

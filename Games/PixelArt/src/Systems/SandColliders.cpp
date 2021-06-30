@@ -1,4 +1,5 @@
 #include "SandColliders.h"
+#include "glm/gtc/random.hpp"
 
 void SandColliderSystem::Update()
 {
@@ -145,4 +146,15 @@ void SandColliderSystem::CutWorld(
 			}
 		}
 	}
+}
+
+void SandColliderSystem::CrackWorld(
+	const glm::vec2& a,
+	const glm::vec2& b)
+{
+	float radius = glm::length(b - a);
+	glm::vec2 rand = glm::circularRand(radius);
+
+	glm::vec2 point = a + rand;
+	
 }
