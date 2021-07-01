@@ -29,7 +29,6 @@ class Layer
 
 		iw::Mesh mesh = (new iw::MeshData(desc))->MakeInstance();
 		mesh.Material = d2_color;
-		mesh.Material->SetWireframe(true);
 
 		return mesh;
 	}
@@ -51,7 +50,7 @@ class Layer
 		}
 
 		else if (triangulate) {
-			index = iw::TriangulateSweep(verts);
+			index = iw::TriangulatePolygon(verts);
 			mesh.Data->SetTopology(iw::MeshTopology::TRIANGLES);
 		}
 
@@ -114,9 +113,7 @@ class Layer
 
 public:
 
-	// if point in polygon on circle place add to field
-	// tringulate that array
-	// those are the points
+	
 
 	iw::Mesh polygonMesh;
 	std::vector<glm::vec2> pVerts;
@@ -191,10 +188,11 @@ public:
 			}
 		}
 
-		/*if (iw::Keyboard::KeyDown(iw::P)) {
-			std::vector<unsigned> index = iw::TriangulateSweep(pVerts);
-			update_mesh(polygonMesh, pVerts, index, false);
-		}*/
+		if (iw::Keyboard::KeyDown(iw::P)) {
+			auto& [p, i] = iw::TriangulateDelaunay(pVerts);
+			pVerts = p;
+			update_mesh(polygonMesh, pVerts, i, false);
+		}
 
 		if (iw::Keyboard::KeyDown(iw::SPACE)) {
 			pVerts.clear();

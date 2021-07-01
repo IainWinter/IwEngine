@@ -313,7 +313,9 @@ namespace common {
 	//		return a.x == b.x ? a.y < b.y : a.x < b.x; 
 	//	});
 
-	//	std::vector<unsigned> index = { 0, 1, 2 };
+  //function BowyerWatson (pointList) // https://en.wikipedia.org/wiki/Bowyer%E2%80%93Watson_algorithm
+  //     pointList is a set of coordinates defining the points to be triangulated
+  //    triangulation := empty triangle mesh data structure
 
 	//	auto append = [&](unsigned a, unsigned b, unsigned c) {
 	//		index.push_back(a);
@@ -482,7 +484,7 @@ namespace common {
 	}
 
 	AABB2 GenPolygonBounds(
-		const std::vector<glm::vec2>& polygon)
+		std::vector<glm::vec2>& polygon)
 	{
 		glm::vec2 min(FLT_MAX);
 		glm::vec2 max(FLT_MIN);

@@ -571,7 +571,7 @@ struct PixelationLayer
 		float yd = ((int)camY - camY) / m_pixelSize / m_pixelsPerMeter / m_pixelsPerMeter;
 
 		Renderer->BeginScene();
-			Renderer->DrawMesh(iw::Transform(/*glm::vec3(xd, yd, 0)*/), m_sandLayer->GetSandMesh());
+			//Renderer->DrawMesh(iw::Transform(/*glm::vec3(xd, yd, 0)*/), m_sandLayer->GetSandMesh());
 			Renderer->DrawMesh(iw::Transform(), m_screen);
 		Renderer->EndScene();
 	}

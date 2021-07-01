@@ -10,7 +10,7 @@ int PlayerSystem::Initialize()
 		iw::Timer,
 		Player>();
 
-	iw::Transform*  t = PlayerEntity.Set<iw::Transform>(glm::vec3(20, 25, 0), glm::vec3(1, 2, 1));
+	iw::Transform*  t = PlayerEntity.Set<iw::Transform>(glm::vec3(20, 25, 0), glm::vec3(1, .2, 1));
 	iw::Mesh*       m = PlayerEntity.Set<iw::Mesh>(m_playerMesh);
 	iw::Hull2*      c = PlayerEntity.Set<iw::Hull2>(iw::MakeSquareCollider());
 	iw::Rigidbody*  r = PlayerEntity.Set<iw::Rigidbody>();
