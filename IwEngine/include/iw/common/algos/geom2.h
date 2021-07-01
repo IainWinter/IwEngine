@@ -30,17 +30,6 @@ namespace common {
 		const glm::vec2& b,
 		const glm::vec2& c);
 
-	IWCOMMON_API
-	std::pair<glm::vec2, float> TriangleCircle(
-		const glm::vec2& a,
-		const glm::vec2& b,
-		const glm::vec2& c);
-
-	IWCOMMON_API
-	bool CircleHasPoint(
-		const std::pair<glm::vec2, float>& circle,
-		const glm::vec2& x);
-
 	template<
 		Dimension _d>
 	_vec<_d> TransformPoint(

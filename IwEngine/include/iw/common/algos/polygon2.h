@@ -48,28 +48,11 @@ namespace common {
 		std::vector<unsigned>& index,
 		size_t triangle)
 	{
-		return {
-			polygon[index[triangle    ]],
-			polygon[index[triangle + 1]],
-			polygon[index[triangle + 2]]
-		};
-	}
+		glm::vec2& a = polygon[index[triangle    ]];
+		glm::vec2& b = polygon[index[triangle + 1]];
+		glm::vec2& c = polygon[index[triangle + 2]];
 
-	inline
-	std::tuple<
-		const glm::vec2&,
-		const glm::vec2&,
-		const glm::vec2&>
-	GetTriangle(
-		const std::vector<glm::vec2>& polygon,
-		const std::vector<unsigned>& index,
-		size_t triangle)
-	{
-		return {
-			polygon[index[triangle    ]],
-			polygon[index[triangle + 1]],
-			polygon[index[triangle + 2]]
-		};
+		return { a, b, c };
 	}
 
 	IWCOMMON_API
@@ -104,7 +87,7 @@ namespace common {
 
 	IWCOMMON_API
 	AABB2 GenPolygonBounds(
-		const std::vector<glm::vec2>& polygon);
+		std::vector<glm::vec2>& polygon);
 
 	IWCOMMON_API
 	void AddPointToPolygon(

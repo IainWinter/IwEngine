@@ -301,9 +301,8 @@ namespace common {
 		}
 
 	exit:
-		return triangles;
-	}
 
+		//for ()
 	// edge cases fail sometimes (overlapping tris)
 	//std::vector<unsigned> TriangulateSweep(
 	//	std::vector<glm::vec2>& verts)
@@ -314,7 +313,7 @@ namespace common {
 	//	});
 
 	//	std::vector<unsigned> index = { 0, 1, 2 };
-
+  //     pointList is a set of coordinates defining the points to be triangulated
 	//	auto append = [&](unsigned a, unsigned b, unsigned c) {
 	//		index.push_back(a);
 	//		index.push_back(b);
@@ -349,6 +348,60 @@ namespace common {
 
 	//	return index;
 	//}
+
+  //             add triangle to badTriangles
+					badTriangles.push_back(i);
+				}
+			}
+
+  //       polygon := empty set
+			std::set<std::pair<unsigned, unsigned>> edges;
+
+  //       for each triangle in badTriangles do // find the boundary of the polygonal hole
+			for (unsigned triangle : badTriangles)
+			{
+  //          for each edge in triangle do
+				for (size_t e = 0; e < 3; e++)
+				{
+					unsigned e1 = index[triangle +  e];
+					unsigned e2 = index[triangle + (e + 1) % 3];
+					if (e1 > e2) std::swap(e1, e2);
+
+  //             if edge is not shared by any other triangles in badTriangles
+					if (edges.find({ e1, e2 }) == edges.end())
+					{
+  //                add edge to polygon
+						edges.emplace(e1, e2);
+					}
+				}
+			}
+
+  //       for each triangle in badTriangles do // remove them from the data structure
+			for (auto t = badTriangles.rbegin(); t != badTriangles.rend(); t++)
+			{
+  //          remove triangle from triangulation
+				index.erase(index.begin() + *t + 2);
+				index.erase(index.begin() + *t + 1);
+				index.erase(index.begin() + *t);
+			}
+
+  //       for each edge in polygon do // re-triangulate the polygonal hole
+			for (std::pair<unsigned, unsigned> edge : edges) {
+  //          newTri := form a triangle from edge to point
+  //          add newTri to triangulation
+				AddPointToPolygon(working, index, working[edge.first]);
+				AddPointToPolygon(working, index, working[edge.second]);
+				AddPointToPolygon(working, index, v);
+			}
+		}
+
+		return { working, index };
+
+  //    for each triangle in triangulation // done inserting points, now clean up
+  //       if triangle contains a vertex from original super-triangle
+  //          remove triangle from triangulation
+  //    return triangulation
+	}
 
 	void RemoveTinyTriangles(
 		std::vector<glm::vec2>& polygon, 
@@ -482,7 +535,7 @@ namespace common {
 	}
 
 	AABB2 GenPolygonBounds(
-		const std::vector<glm::vec2>& polygon)
+		std::vector<glm::vec2>& polygon)
 	{
 		glm::vec2 min(FLT_MAX);
 		glm::vec2 max(FLT_MIN);
