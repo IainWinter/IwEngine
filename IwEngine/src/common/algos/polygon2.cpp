@@ -1,5 +1,8 @@
 #include "iw/common/algos/polygon2.h"
 
+#define JC_VORONOI_CLIP_IMPLEMENTATION
+#include "voronoi/jc_voronoi_clip.h"
+
 #include <vector>
 #include <algorithm>
 #include <functional>
@@ -268,7 +271,7 @@ namespace common {
 					goto exit;
 				}
 
-				size_t ia = (i    );
+				size_t ia = (i);
 				size_t ib = (i + 1) % working.size();
 				size_t ic = (i + 2) % working.size();
 
@@ -301,7 +304,8 @@ namespace common {
 		}
 
 	exit:
-
+		return triangles;
+	}
 		//for ()
 	// edge cases fail sometimes (overlapping tris)
 	//std::vector<unsigned> TriangulateSweep(
@@ -350,58 +354,58 @@ namespace common {
 	//}
 
   //             add triangle to badTriangles
-					badTriangles.push_back(i);
-				}
-			}
+		//			badTriangles.push_back(i);
+		//		}
+		//	}
 
-  //       polygon := empty set
-			std::set<std::pair<unsigned, unsigned>> edges;
+  ////       polygon := empty set
+		//	std::set<std::pair<unsigned, unsigned>> edges;
 
-  //       for each triangle in badTriangles do // find the boundary of the polygonal hole
-			for (unsigned triangle : badTriangles)
-			{
-  //          for each edge in triangle do
-				for (size_t e = 0; e < 3; e++)
-				{
-					unsigned e1 = index[triangle +  e];
-					unsigned e2 = index[triangle + (e + 1) % 3];
-					if (e1 > e2) std::swap(e1, e2);
+  ////       for each triangle in badTriangles do // find the boundary of the polygonal hole
+		//	for (unsigned triangle : badTriangles)
+		//	{
+  ////          for each edge in triangle do
+		//		for (size_t e = 0; e < 3; e++)
+		//		{
+		//			unsigned e1 = index[triangle +  e];
+		//			unsigned e2 = index[triangle + (e + 1) % 3];
+		//			if (e1 > e2) std::swap(e1, e2);
 
-  //             if edge is not shared by any other triangles in badTriangles
-					if (edges.find({ e1, e2 }) == edges.end())
-					{
-  //                add edge to polygon
-						edges.emplace(e1, e2);
-					}
-				}
-			}
+  ////             if edge is not shared by any other triangles in badTriangles
+		//			if (edges.find({ e1, e2 }) == edges.end())
+		//			{
+  ////                add edge to polygon
+		//				edges.emplace(e1, e2);
+		//			}
+		//		}
+		//	}
 
-  //       for each triangle in badTriangles do // remove them from the data structure
-			for (auto t = badTriangles.rbegin(); t != badTriangles.rend(); t++)
-			{
-  //          remove triangle from triangulation
-				index.erase(index.begin() + *t + 2);
-				index.erase(index.begin() + *t + 1);
-				index.erase(index.begin() + *t);
-			}
+  ////       for each triangle in badTriangles do // remove them from the data structure
+		//	for (auto t = badTriangles.rbegin(); t != badTriangles.rend(); t++)
+		//	{
+  ////          remove triangle from triangulation
+		//		index.erase(index.begin() + *t + 2);
+		//		index.erase(index.begin() + *t + 1);
+		//		index.erase(index.begin() + *t);
+		//	}
 
-  //       for each edge in polygon do // re-triangulate the polygonal hole
-			for (std::pair<unsigned, unsigned> edge : edges) {
-  //          newTri := form a triangle from edge to point
-  //          add newTri to triangulation
-				AddPointToPolygon(working, index, working[edge.first]);
-				AddPointToPolygon(working, index, working[edge.second]);
-				AddPointToPolygon(working, index, v);
-			}
-		}
+  ////       for each edge in polygon do // re-triangulate the polygonal hole
+		//	for (std::pair<unsigned, unsigned> edge : edges) {
+  ////          newTri := form a triangle from edge to point
+  ////          add newTri to triangulation
+		//		AddPointToPolygon(working, index, working[edge.first]);
+		//		AddPointToPolygon(working, index, working[edge.second]);
+		//		AddPointToPolygon(working, index, v);
+		//	}
+		//}
 
-		return { working, index };
+		//return { working, index };
 
   //    for each triangle in triangulation // done inserting points, now clean up
   //       if triangle contains a vertex from original super-triangle
   //          remove triangle from triangulation
   //    return triangulation
-	}
+//	}
 
 	void RemoveTinyTriangles(
 		std::vector<glm::vec2>& polygon, 
@@ -523,6 +527,58 @@ namespace common {
 		}
 
 		return { clVerts, clIndex, crVerts, crIndex };
+	}
+
+	polygon_crack CrackPolygon(
+		const std::vector<glm::vec2> convex,
+		const std::vector<glm::vec2>& seeds)
+	{
+		polygon_crack cracks;
+
+		// keep only seeds that are inside of polygon, maybe generate some on the polygons faces?
+
+		// generate the vorinoi
+		// get triangles ez
+
+		jcv_diagram diagram;
+
+		jcv_clipping_polygon polygon;
+		// Triangle
+		polygon.num_points = convex.size();
+		polygon.points = (jcv_point*)convex.data();
+
+		jcv_clipper clipper;
+		clipper.test_fn = jcv_clip_polygon_test_point;
+		clipper.clip_fn = jcv_clip_polygon_clip_edge;
+		clipper.fill_fn = jcv_clip_polygon_fill_gaps;
+		clipper.ctx = &polygon;
+
+		jcv_diagram_generate(seeds.size(), (jcv_point*)seeds.data(), 0, &clipper, &diagram);
+
+		const jcv_site* sites = jcv_diagram_get_sites(&diagram);
+		for (int i = 0; i < diagram.numsites; ++i)
+		{
+			auto& [polygon, triangles] = cracks.emplace_back();
+
+			jcv_site site = sites[i];
+			jcv_graphedge* e = site.edges;
+			while (e)
+			{
+				glm::vec2 a(site.p  .x, site.p.  y);
+				glm::vec2 b(e->pos[0].x, e->pos[0].y);
+				glm::vec2 c(e->pos[1].x, e->pos[1].y);
+
+				AddPointToPolygon(polygon, triangles, a);
+				AddPointToPolygon(polygon, triangles, b);
+				AddPointToPolygon(polygon, triangles, c);
+
+				e = e->next;
+			}
+		}
+
+		jcv_diagram_free(&diagram);
+
+		return cracks;
 	}
 
 	void TransformPolygon(

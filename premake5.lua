@@ -12,6 +12,7 @@ llvmdir   = iwengdir .. "/extern/llvm"
 jsondir   = iwengdir .. "/extern/json"
 fmoddir   = iwengdir .. "/extern/fmod"
 glmdir    = iwengdir .. "/extern/glm"
+voronoidir= iwengdir .. "/extern/voronoi"
 
 cfgname = "%{cfg.buildcfg}.%{cfg.system}.%{cfg.architecture}"
 bindir  = "/bin/" .. cfgname
@@ -310,7 +311,8 @@ group ""
 		includedirs {
 			iwengdir  .. incdir,
 			iwtoldir .. incdir,
-			glmdir .. incdir
+			glmdir .. incdir,
+			voronoidir .. incdir
 		}
 
 		links {

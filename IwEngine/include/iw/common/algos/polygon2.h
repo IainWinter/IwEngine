@@ -15,6 +15,9 @@ namespace common {
 		std::vector<glm::vec2>, std::vector<unsigned>,
 		std::vector<glm::vec2>, std::vector<unsigned>>;
 
+	using polygon_crack = std::vector<
+		std::pair<std::vector<glm::vec2>, std::vector<unsigned>>>;
+
 	template<
 		typename _t>
 	std::vector<std::vector<glm::vec2>> MakePolygonFromField(
@@ -79,6 +82,12 @@ namespace common {
 		const std::vector<glm::vec2>& verts,
 		const std::vector<unsigned>& index,
 		glm::vec2 lineA, glm::vec2 lineB);
+
+	IWCOMMON_API
+	polygon_crack CrackPolygon(
+		const std::vector<glm::vec2>& verts,
+		const std::vector<unsigned>& index,
+		const std::vector<glm::vec2>& seeds);
 
 	IWCOMMON_API
 	void TransformPolygon(
