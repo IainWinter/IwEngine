@@ -1,8 +1,51 @@
 ﻿#include "App.h"
-#include "Layers/SpaceSandLayer.h"
+#include "plugins/iw/Sand/Engine/SandLayer.h"
 
-App::App() : iw::Application() {
-	PushLayer<iw::SpaceSandLayer>();
+struct GameLayer : iw::Layer
+{
+	iw::SandLayer* sand;
+	iw::Entity player;
+
+	GameLayer(
+		iw::SandLayer* sand
+	) 
+		: iw::Layer("Space game")
+		, sand(sand)
+	{}
+
+	int Initialize() override 
+	{
+		iw::ref<iw::Texture> tex = REF<iw::Texture>(64, 64);
+		tex->CreateColors();
+
+		for (int y = 0; y < tex->Height(); y++)
+		for (int x = 0; x < tex->Width();  x++)
+		{
+			tex->m_colors[x + y * tex->Width()] = iw::Color(1).to32();
+		}
+
+		player = sand->MakeTile(tex, true);
+
+		return Layer::Initialize();
+	}
+
+	void PostUpdate() override
+	{
+		sand->SetCamera(0, 0, 10, 10);
+
+		Renderer->BeginScene();
+		Renderer->DrawMesh(iw::Transform(), sand->GetSandMesh());
+		Renderer->EndScene();
+	}
+};
+
+App::App() : iw::Application() 
+{
+	int cellSize = 4;
+	int cellMeter = 10;
+
+	iw::SandLayer* sand = PushLayer<iw::SandLayer>(cellSize, cellMeter);
+						  PushLayer<GameLayer>(sand);
 }
 
 int App::Initialize(
