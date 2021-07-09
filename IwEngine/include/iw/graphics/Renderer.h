@@ -51,6 +51,23 @@ namespace Graphics {
 		ALL      = 0x11111111
 	};
 
+	inline Mesh ScreenQuad() {
+		static Mesh quad;
+
+		if (!quad.Data) {
+			MeshDescription description;
+			description.DescribeBuffer(bName::POSITION, MakeLayout<float>(3));
+			description.DescribeBuffer(bName::UV,       MakeLayout<float>(2));
+
+			MeshData* data = MakePlane(description, 1, 1);
+			data->TransformMeshData(Transform(glm::vec3(), glm::vec3(1), glm::quat(glm::vec3(-glm::pi<float>() * 0.5f, 0, 0))));
+
+			quad = data->MakeInstance();
+		}
+
+		return quad;
+	}
+
 	class Renderer {
 	public:
 		ref<IDevice> Device;
@@ -60,8 +77,6 @@ namespace Graphics {
 			SHADOW_MAP,
 			INVALID
 		};
-
-		Mesh m_quad;
 
 		int m_width;
 		int m_height;
@@ -151,6 +166,15 @@ namespace Graphics {
 		IWGRAPHICS_API
 		virtual void End();
 
+		IWGRAPHICS_API
+		virtual inline void BeginScene(
+			const ref<RenderTarget>& target,
+			bool clear = false,
+			Color clearColor = iw::Color(0))
+		{
+			BeginScene((iw::Camera*)nullptr, target, clear, clearColor);
+		}
+
 		// set optional camera, identity if null
 		// set optional target, screen if null
 		IWGRAPHICS_API
@@ -211,11 +235,6 @@ namespace Graphics {
 			const ref<RenderTarget>& source,
 			const ref<RenderTarget>& target = nullptr,
 			Camera* camera = nullptr);
-
-		IWGRAPHICS_API
-		/*const*/ Mesh ScreenQuad() const {
-			return m_quad.MakeInstance();
-		}
 
 	//private:
 		IWGRAPHICS_API

@@ -54,11 +54,11 @@ namespace Engine {
 
 	void ImGuiLayer::OnPush() {
 		if(m_context)
-			Renderer->SetDefaultTarget(target);
+			Renderer->Now->SetDefaultTarget(target);
 	}
 
 	void ImGuiLayer::OnPop() {
-		Renderer->SetDefaultTarget(nullptr);
+		Renderer->Now->SetDefaultTarget(nullptr);
 	}
 
 	void ImGuiLayer::Destroy() {

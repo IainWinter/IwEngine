@@ -9,8 +9,11 @@
 namespace iw {
 namespace Graphics {
 	class QueuedRenderer
-		: public Renderer
 	{
+	public:
+		ref<Renderer> Now;
+		ref<IDevice> Device; // = Now->Device
+
 	private:
 		using key = uint64_t;
 		using setup_draw_func  = std::function<void()>;
@@ -139,11 +142,10 @@ namespace Graphics {
 	public:
 		IWGRAPHICS_API
 		QueuedRenderer(
-			const ref<IDevice>& device);
+			ref<Renderer> renderer);
 
-		Renderer* ImmediateMode() {
-			return this;
-		}
+		inline unsigned Width()  { return Now->Width();  }
+		inline unsigned Height() { return Now->Height(); }
 
 		// sets current layer for ordering
 		IWGRAPHICS_API
@@ -158,11 +160,20 @@ namespace Graphics {
 		// Clears screen buffer
 		IWGRAPHICS_API
 		void Begin(
-			float time = 1.0f) override;
+			float time = 1.0f);
 
 		// executes queue
 		IWGRAPHICS_API
-		void End() override;
+		void End();
+
+		IWGRAPHICS_API
+		inline void BeginScene(
+			const ref<RenderTarget>& target,
+			bool clear = false,
+			Color clearColor = Color(0))
+		{
+			BeginScene((Camera*)nullptr, target, clear, clearColor);
+		}
 
 		// set optional camera, identity if null
 		// set optional target, screen if null
@@ -171,7 +182,7 @@ namespace Graphics {
 			Camera* camera = nullptr,
 			const ref<RenderTarget>& target = nullptr,
 			bool clear = false,
-			Color clearColor = Color(0)) override;
+			Color clearColor = Color(0));
 
 		// calls begin scene
 		// set scene lights if provided, no action if null
@@ -180,7 +191,7 @@ namespace Graphics {
 			Scene* scene /*= nullptr*/,
 			const ref<RenderTarget>& target = nullptr,
 			bool clear = false,
-			Color clearColor = Color(0)) override;
+			Color clearColor = Color(0));
 
 		// set light camera
 		// set light shader
@@ -189,15 +200,15 @@ namespace Graphics {
 		void BeginShadowCast(
 			Light* light,
 			bool useParticleShader = false,
-			bool clear = true) override;
+			bool clear = true);
 
 		// marks end of scene, subsequent calls to SubmitMesh will be invalid
 		IWGRAPHICS_API
-		void EndScene() override;
+		void EndScene();
 
 		// marks end of shadow cast, subsequent calls to SubmitMesh will be invalid
 		IWGRAPHICS_API
-		void EndShadowCast() override;
+		void EndShadowCast();
 
 		// Set a function to run before a scene starts,
 		//	this is useful for settings that apply to all the draw calls. ie depth testing
@@ -233,7 +244,7 @@ namespace Graphics {
 		IWGRAPHICS_API
 		void DrawMesh(
 			const Transform* transform,
-			Mesh* mesh) override;
+			Mesh* mesh);
 
 		IWGRAPHICS_API
 		void DrawMesh(
@@ -245,7 +256,7 @@ namespace Graphics {
 			ref<Shader>& filter,
 			const ref<RenderTarget>& source,
 			const ref<RenderTarget>& target = nullptr,
-			Camera* camera = nullptr) override;
+			Camera* camera = nullptr);
 	private:
 		key GenOrder(
 			const Transform* transform = nullptr,

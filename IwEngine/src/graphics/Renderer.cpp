@@ -15,16 +15,7 @@ namespace Graphics {
 		, m_target(nullptr)
 		, m_ambiance(.03f)
 		, m_state(RenderState::INVALID)
-	{
-		MeshDescription description;
-		description.DescribeBuffer(bName::POSITION, MakeLayout<float>(3));
-		description.DescribeBuffer(bName::UV,       MakeLayout<float>(2));
-
-		MeshData* data = MakePlane(description, 1, 1);
-		data->TransformMeshData(Transform(glm::vec3(), glm::vec3(1), glm::quat(glm::vec3(-glm::pi<float>() * 0.5f, 0, 0))));
-
-		m_quad = data->MakeInstance();
-	}
+	{}
 
 	void Renderer::Initialize() {
 		m_cameraUBO = Device->CreateUniformBuffer(&m_cameraData, sizeof(CameraData));
@@ -263,8 +254,8 @@ namespace Graphics {
 			}
 		}
 
-		Renderer::SetMesh(&m_quad);
-		m_quad.Draw(Device);
+		Renderer::SetMesh(&ScreenQuad());
+		ScreenQuad().Draw(Device);
 
 		Renderer::EndScene();
 	}

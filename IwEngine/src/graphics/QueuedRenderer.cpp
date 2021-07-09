@@ -5,8 +5,9 @@
 namespace iw {
 namespace Graphics {
 	QueuedRenderer::QueuedRenderer(
-		const ref<IDevice>& device)
-		: Renderer(device)
+		ref<Renderer> renderer)
+		: Now(renderer)
+		, Device(Now->Device)
 		, m_pool(500 * (sizeof(BeginSceneOP) + sizeof(BeginShadowOP) + sizeof(DrawMeshOP)))
 		, m_layer(0)
 		, m_shadow(0)
@@ -104,18 +105,18 @@ namespace Graphics {
 
 		// execute
 
-		SetTarget(nullptr);
+		Now->SetTarget(nullptr);
 
 		do {
 			RenderItem& item = m_queue.front(); m_queue.pop_front();
 			
 			switch (item.OP) {
 				case RenderOP::BEGIN: {
-					Renderer::Begin(m_time);
+					Now->Begin(m_time);
 					break;
 				}
 				case RenderOP::END: {
-					Renderer::End();
+					Now->End();
 					break;
 				}
 				case RenderOP::BEGIN_SCENE: {
@@ -126,11 +127,11 @@ namespace Graphics {
 					}
 
 					if (scene->Scene) {
-						Renderer::BeginScene(scene->Scene, scene->Target, scene->Clear, scene->ClearColor);
+						Now->BeginScene(scene->Scene, scene->Target, scene->Clear, scene->ClearColor);
 					}
 
 					else {
-						Renderer::BeginScene(scene->Camera, scene->Target, scene->Clear, scene->ClearColor);
+						Now->BeginScene(scene->Camera, scene->Target, scene->Clear, scene->ClearColor);
 					}
 				
 					break;
@@ -138,7 +139,7 @@ namespace Graphics {
 				case RenderOP::END_SCENE: {
 					EndSceneOP* scene = (EndSceneOP*)item.Data;
 
-					Renderer::EndScene();
+					Now->EndScene();
 
 					if (scene->AfterScene) {
 						scene->AfterScene();
@@ -153,14 +154,14 @@ namespace Graphics {
 						shadow->BeforeScene();
 					}
 
-					Renderer::BeginShadowCast(shadow->Light, shadow->UseParticleShader, shadow->Clear);
+					Now->BeginShadowCast(shadow->Light, shadow->UseParticleShader, shadow->Clear);
 
 					break;					 
 				}							 
 				case RenderOP::END_SHADOW: {
 					EndShadowOP* shadow = (EndShadowOP*)item.Data;
 
-					Renderer::EndShadowCast();
+					Now->EndShadowCast();
 
 					if (shadow->AfterScene) {
 						shadow->AfterScene();
@@ -175,7 +176,7 @@ namespace Graphics {
 						draw->BeforeDraw();
 					}
 
-					Renderer::DrawMesh(draw->Transform, draw->Mesh);
+					Now->DrawMesh(draw->Transform, draw->Mesh);
 
 					if (draw->AfterDraw) {
 						draw->AfterDraw();
@@ -191,7 +192,7 @@ namespace Graphics {
 						draw->BeforeDraw();
 					}
 
-					Renderer::DrawMesh(draw->Transform, draw->Mesh);
+					Now->DrawMesh(draw->Transform, draw->Mesh);
 
 					if (draw->AfterDraw) {
 						draw->AfterDraw();
@@ -203,7 +204,7 @@ namespace Graphics {
 				case RenderOP::APPLY_FILTER: {
 					FilterOP* filter = (FilterOP*)item.Data;
 
-					Renderer::ApplyFilter(filter->Filter, filter->Source, filter->Target, filter->Camera);
+					Now->ApplyFilter(filter->Filter, filter->Source, filter->Target, filter->Camera);
 
 					m_pool.free<FilterOP>(filter);
 					break;
@@ -214,7 +215,7 @@ namespace Graphics {
 
 		m_pool.reset();
 
-		SetTarget(nullptr, false);
+		Now->SetTarget(nullptr, false);
 	}
 
 	void QueuedRenderer::BeginScene(

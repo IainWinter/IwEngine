@@ -70,7 +70,7 @@ namespace iw {
 
 		ref<Shader> shader = Asset->Load<Shader>("shaders/debug/wireframe.shader");
 
-		Renderer->InitShader(shader, CAMERA);
+		Renderer->Now->InitShader(shader, CAMERA);
 
 		ref<Material> lightMaterial = REF<Material>(shader);
 		lightMaterial->Set("color", iw::Color(1, 1, 0, 1));

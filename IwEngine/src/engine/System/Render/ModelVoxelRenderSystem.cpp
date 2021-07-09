@@ -26,7 +26,7 @@ namespace Engine {
 	int ModelVoxelRenderSystem::Initialize() {
 		ref<Shader> vct = Asset->Load<Shader>("shaders/vct/vct.shader"); // Gets init from layer
 		
-		Renderer->SetShader(vct);
+		Renderer->Now->SetShader(vct);
 		vct->Handle()->GetParam("voxelBoundsScale")   ->SetAsFloats(&voxelBoundsScale, 3);
 		vct->Handle()->GetParam("voxelBoundsScaleInv")->SetAsFloats(&voxelBoundsScaleInv, 3);
 		vct->Handle()->GetParam("voxelSizeInv")       ->SetAsFloat (voxelSizeInv);
@@ -36,14 +36,14 @@ namespace Engine {
 
 		ref<Shader> voxelize      = Asset->Load<Shader>("shaders/vct/voxelize.shader");
 		ref<Shader> voxelize_inst = Asset->Load<Shader>("shaders/vct/voxelize_instanced.shader");
-		Renderer->InitShader(voxelize,      /*CAMERA | */LIGHTS | SHADOWS);
-		Renderer->InitShader(voxelize_inst, /*CAMERA | */LIGHTS | SHADOWS);
+		Renderer->Now->InitShader(voxelize,      /*CAMERA | */LIGHTS | SHADOWS);
+		Renderer->Now->InitShader(voxelize_inst, /*CAMERA | */LIGHTS | SHADOWS);
 
-		Renderer->SetShader(voxelize);
+		Renderer->Now->SetShader(voxelize);
 		voxelize->Handle()->GetParam("voxelBoundsScale")   ->SetAsFloats(&voxelBoundsScale,    3);
 		voxelize->Handle()->GetParam("voxelBoundsScaleInv")->SetAsFloats(&voxelBoundsScaleInv, 3);
 
-		Renderer->SetShader(voxelize_inst);
+		Renderer->Now->SetShader(voxelize_inst);
 		voxelize_inst->Handle()->GetParam("voxelBoundsScale")   ->SetAsFloats(&voxelBoundsScale,    3);
 		voxelize_inst->Handle()->GetParam("voxelBoundsScaleInv")->SetAsFloats(&voxelBoundsScaleInv, 3);
 
@@ -168,7 +168,7 @@ namespace Engine {
 			// Voxel
 
 			ref<Shader> worldPos = Asset->Load<Shader>("shaders/vct/world_pos.shader");
-			Renderer->InitShader(worldPos, CAMERA);
+			Renderer->Now->InitShader(worldPos, CAMERA);
 
 			Material vmaterial;
 			vmaterial.SetShader(worldPos);
@@ -184,9 +184,9 @@ namespace Engine {
 			// Quad
 
 			ref<Shader> visualize = Asset->Load<Shader>("shaders/vct/visualize.shader");
-			Renderer->InitShader(visualize, CAMERA);
+			Renderer->Now->InitShader(visualize, CAMERA);
 
-			Renderer->SetShader(visualize);
+			Renderer->Now->SetShader(visualize);
 			visualize->Handle()->GetParam("voxelBoundsScale")   ->SetAsFloats(&voxelBoundsScale, 3);
 			visualize->Handle()->GetParam("voxelBoundsScaleInv")->SetAsFloats(&voxelBoundsScaleInv, 3);
 			visualize->Handle()->GetParam("voxelSize")          ->SetAsFloat (voxelSize);
@@ -198,7 +198,7 @@ namespace Engine {
 			qmaterial.SetTexture("world", m_voxelize->VoxelTexture());
 			qmaterial.Set("level", 0);
 
-			m_quad = Renderer->ScreenQuad();
+			m_quad = ScreenQuad();
 			m_quad.Material = (qmaterial.MakeInstance());
 		}
 
