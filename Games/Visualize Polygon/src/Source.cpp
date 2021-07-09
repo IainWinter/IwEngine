@@ -23,6 +23,7 @@ class Layer
 		iw::ref<iw::Material> d2_color = REF<iw::Material>(
 			Asset->Load<iw::Shader>("shaders/texture2d.shader")
 		);
+		d2_color->SetWireframe(true);
 
 		iw::MeshDescription desc;
 		desc.DescribeBuffer(iw::bName::POSITION, iw::MakeLayout<float>(2));
@@ -35,7 +36,7 @@ class Layer
 
 	void update_mesh(
 		iw::Mesh& mesh,
-		std::vector<glm::vec2>& verts,
+		std::vector<glm::vec2> verts,
 		std::vector<unsigned>& index = std::vector<unsigned>(),
 		bool triangulate = true)
 	{
@@ -50,11 +51,24 @@ class Layer
 		}
 
 		else if (triangulate) {
-			index = iw::TriangulateSweep(verts);
+
+			index = iw::TriangulatePolygon(verts);
+
+			/*iw::polygon_crack cracks = iw::CrackPolygon(verts);
+
+			verts = {};
+			index = {};
+				
+			for (auto& [v, i] : cracks)
+			for (unsigned idx : i)
+			{
+				iw::AddPointToPolygon(verts, index, v[idx]);
+			}*/
+
 			mesh.Data->SetTopology(iw::MeshTopology::TRIANGLES);
 		}
 
-		mesh.Data->SetBufferDataPtr(iw::bName::POSITION, verts.size(), verts.data());
+		mesh.Data->SetBufferData(iw::bName::POSITION, verts.size(), verts.data());
 		mesh.Data->SetIndexData(index.size(), index.data());
 	}
 
@@ -192,7 +206,6 @@ public:
 			std::vector<unsigned> index = iw::TriangulateSweep(pVerts);
 			update_mesh(polygonMesh, pVerts, index, false);
 		}*/
-		}
 
 		if (iw::Keyboard::KeyDown(iw::SPACE)) {
 			pVerts.clear();
@@ -215,6 +228,7 @@ public:
 
 				update_mesh(cutLeftMesh,  clVerts, clIndex, false);
 				update_mesh(cutRightMesh, crVerts, crIndex, false);
+				update_mesh(lineMesh, lVerts);
 			}
 
 			lineMesh.Data->Outdated = true;

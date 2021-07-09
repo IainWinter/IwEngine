@@ -124,23 +124,26 @@ void SandWorld::RemoveEmptyChunks() {
 		}
 
 		if (chunk->m_deleteMe) {
-			m_chunkLookup.unsafe_erase(GetChunkLocation(chunk->m_x, chunk->m_y));
-			chunks[i] = chunks.back(); chunks.pop_back();
-			i--;
+			RemovedChunkCallback(chunk);
 
-			for (size_t i = 0; i < m_fields.size(); i++) {
-				FieldConfig& field = m_fields[i];
+			for (size_t f = 0; f < m_fields.size(); f++) {
+				FieldConfig& field = m_fields[f];
 				
 				field.memory->free(
-					chunk->m_fields[i].cells,
+					chunk->m_fields[f].cells,
 					FieldSize(field.cellSize)
 				);
 
 				// temp, should be field.memory->free as well
 				if (field.hasLocks) {
-					delete[] chunk->m_fields[i].locks;
+					delete[] chunk->m_fields[f].locks;
 				}
 			}
+
+			m_chunkLookup.unsafe_erase(GetChunkLocation(chunk->m_x, chunk->m_y));
+			chunks[i] = chunks.back(); chunks.pop_back();
+			delete chunk;
+			i--;
 		}
 	}
 }
@@ -198,6 +201,8 @@ SandChunk* SandWorld::CreateChunk(
 	{
 		std::unique_lock lock(m_chunkMutex);
 		m_batches.at(batch).push_back(chunk);
+
+		CreatedChunkCallback(chunk);
 	}
 
 	return chunk;

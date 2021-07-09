@@ -342,7 +342,7 @@ struct PixelationLayer
 		                             PushSystem<PlayerAttackSystem>();
 		                             PushSystem<AttackSystem>(m_square);
 
-		if (true) // drawing colliders 
+		if (false) // drawing colliders 
 		{
 			m_colliderSystem->MadeColliderCallback = [=](
 				iw::Entity entity) 
@@ -372,8 +372,6 @@ struct PixelationLayer
 			{
 				auto& [lverts, lindex, rverts, rindex] = cut;
 				if (rindex.size() == 0) return;
-
-				//m_sandLayer->FillPolygon(rverts, rindex, iw::Cell());
 
 				iw::AABB2 bounds = iw::GenPolygonBounds(rverts);
 				glm::ivec2 dim = (bounds.Max - bounds.Min) * float(m_pixelsPerMeter);
@@ -571,7 +569,7 @@ struct PixelationLayer
 		float yd = ((int)camY - camY) / m_pixelSize / m_pixelsPerMeter / m_pixelsPerMeter;
 
 		Renderer->BeginScene();
-			//Renderer->DrawMesh(iw::Transform(/*glm::vec3(xd, yd, 0)*/), m_sandLayer->GetSandMesh());
+			Renderer->DrawMesh(iw::Transform(/*glm::vec3(xd, yd, 0)*/), m_sandLayer->GetSandMesh());
 			Renderer->DrawMesh(iw::Transform(), m_screen);
 		Renderer->EndScene();
 	}

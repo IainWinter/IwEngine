@@ -31,7 +31,7 @@ namespace Engine {
 		m_device = ref<IDevice>(IDevice::Create());
 		Bus      = REF<eventbus>();
 		Space    = REF<iw::Space>();
-		Renderer = REF<QueuedRenderer>(m_device);
+		Renderer = REF<QueuedRenderer>(REF<iw::Renderer>(m_device));
 		Asset    = REF<AssetManager>();
 		Input    = REF<InputManager>(Bus);
 		Console  = REF<iw::Console>(make_getback(&Application::HandleCommand, this));
@@ -120,9 +120,9 @@ namespace Engine {
 			//return status;
 		}
 
-		Renderer->SetWidth (options.WindowOptions.Width);
-		Renderer->SetHeight(options.WindowOptions.Height);
-		Renderer->Initialize();
+		Renderer->Now->SetWidth (options.WindowOptions.Width);
+		Renderer->Now->SetHeight(options.WindowOptions.Height);
+		Renderer->Now->Initialize();
 
 		for (Layer* layer : m_layers) {
 			LOG_DEBUG << "Initializing " << layer->Name() << " layer...";
@@ -325,7 +325,7 @@ namespace Engine {
 					}
 					case Resized: {
 						WindowResizedEvent& wre = e.as<WindowResizedEvent>();
-						Renderer->Resize(wre.Width, wre.Height);
+						Renderer->Now->Resize(wre.Width, wre.Height);
 						e.Handled = true;
 						break;
 					}

@@ -23,6 +23,9 @@ public:
 	bool m_expandWorld;
 	size_t m_frameCount = 0;
 
+	std::function<void(SandChunk*)> CreatedChunkCallback;
+	std::function<void(SandChunk*)> RemovedChunkCallback;
+
 	std::vector<std::vector<SandChunk*>> m_batches;
 	std::vector<SandWorkerBuilderBase*>  m_workers;
 private:
@@ -88,13 +91,18 @@ public:
 
 	IW_PLUGIN_SAND_API std::pair<int, int> GetChunkLocation(int x, int y);
 
+	inline std::pair<int, int> GetChunkLocation(SandChunk* chunk)
+	{
+		return GetChunkLocation(chunk->m_x, chunk->m_y);
+	}
+
 	IW_PLUGIN_SAND_API void RemoveEmptyChunks();
 
 	IW_PLUGIN_SAND_API SandChunk* GetChunk(int x, int y);
 	IW_PLUGIN_SAND_API SandChunk* GetChunkDirect(std::pair<int, int> location);
-private:
-	SandChunk* CreateChunk(std::pair<int, int> location);
 
+	IW_PLUGIN_SAND_API SandChunk* CreateChunk(std::pair<int, int> location);
+private:
 	inline void AddFieldToChunk(SandChunk* chunk, FieldConfig& field) {
 		chunk->AddField(
 			field.memory->alloc(FieldSize(field.cellSize)),

@@ -85,9 +85,7 @@ namespace common {
 
 	IWCOMMON_API
 	polygon_crack CrackPolygon(
-		const std::vector<glm::vec2>& verts,
-		const std::vector<unsigned>& index,
-		const std::vector<glm::vec2>& seeds);
+		const std::vector<glm::vec2>& verts);
 
 	IWCOMMON_API
 	void TransformPolygon(

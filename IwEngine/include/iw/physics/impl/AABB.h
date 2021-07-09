@@ -15,8 +15,8 @@ namespace impl {
 		REFLECT vec_t Max;
 
 		AABB() 
-			: Min(FLT_MAX)
-			, Max(FLT_MIN)
+			: Min( FLT_MAX)
+			, Max(-FLT_MAX)
 		{}
 
 		AABB(

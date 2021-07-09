@@ -43,6 +43,9 @@ namespace iw {
 	template<Dimension _d>
 	using _vec = glm::vec<size_t(_d), scalar>;
 
+	template<Dimension _d>
+	using _ivec = glm::vec<size_t(_d), int>;
+
 namespace math_translation {
 	inline vec<3> from_glm(glm::vec3 v) {
 		vec<3> result;

@@ -120,7 +120,7 @@ bool SandChunk::InBounds(int x, int y) {
 
 bool SandChunk::IsEmpty(int x, int y) {
 	//KeepAlive(x, y); // myabe keep all querys alive?
-	std::unique_lock lock(GetLock(x, y)); // use cell lock, no reason for solid to have its own?
+	std::unique_lock lock(GetLock(x, y)); 
 	return !GetCell<bool>(x, y, SandField::SOLID);
 }
 

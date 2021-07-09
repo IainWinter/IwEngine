@@ -16,9 +16,9 @@ Tile::Tile(
 	}
 
 	ref<Material> material = REF<Material>(shader);
-	//material->SetTexture("texture", m_sprite);
+	material->SetTexture("texture", m_sprite);
 	material->Set("color", Color::From255(200, 200, 100));
-	material->SetWireframe(true);
+	//material->SetWireframe(true);
 
 	MeshDescription tileDesc;
 	tileDesc.DescribeBuffer(bName::POSITION, MakeLayout<float>(2));
@@ -37,7 +37,7 @@ void Tile::UpdatePolygon()
 	
 	if (polygons.size() == 0) return;
 
-	m_polygon = polygons[0];
+	m_polygon = polygons[0]; // maybe combine into single polygon?
 	m_index   = iw::TriangulatePolygon(m_polygon);
 
 	for (glm::vec2& v : m_polygon) {
@@ -49,6 +49,8 @@ void Tile::UpdatePolygon()
 	for (glm::vec2& v : m_polygon) {
 		v = (v - glm::vec2(0.5f)) * size / 10.0f;
 	}
+
+	m_bounds = iw::GenPolygonBounds(m_polygon);
 
 	m_spriteMesh.Data->SetBufferData(bName::POSITION, m_polygon.size(), m_polygon.data());
 	m_spriteMesh.Data->SetBufferData(bName::UV,       uv       .size(), uv       .data());

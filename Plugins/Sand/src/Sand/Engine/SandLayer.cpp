@@ -21,11 +21,15 @@ void CorrectCellInfo(SandChunk* chunk, size_t index, int x, int y, void* data) {
 	cell.x = float(cell.x - int(cell.x)) + x + chunk->m_x;
 	cell.y = float(cell.y - int(cell.y)) + y + chunk->m_y;
 
-	bool notEmpty  = cell.Type  != CellType::EMPTY;
-	bool collision = cell.Props == CellProperties::NONE && notEmpty;
+	chunk->SetCell(index, cell.Color, SandField::COLOR);
 
-	chunk->SetCell<bool>(index, notEmpty,  SandField::SOLID);
-	chunk->SetCell<bool>(index, collision, SandField::COLLISION);
+	// was for collision for platformer game
+
+	//bool notEmpty  = cell.Type  != CellType::EMPTY;
+	//bool collision = cell.Props == CellProperties::NONE && notEmpty;
+
+	//chunk->SetCell<bool>(index, notEmpty,  SandField::SOLID);
+	//chunk->SetCell<bool>(index, collision, SandField::COLLISION);
 }
 
 int SandLayer::Initialize() {
@@ -108,7 +112,13 @@ int SandLayer::Initialize() {
 	Cell::SetDefault(CellType::SMOKE, _SMOKE);
 	Cell::SetDefault(CellType::BELT,  _BELT);
 
-	m_world = new SandWorld(100 * m_cellSize, 100 * m_cellSize, m_cellSize);
+	int chunkSize = 100;
+
+	m_world = new SandWorld(
+		m_cellSize * chunkSize,
+		m_cellSize * chunkSize,
+		m_cellSize
+	);
 	
 	m_world->m_workers.push_back(new SandWorkerBuilder<SimpleSandWorker>());
 
@@ -116,10 +126,33 @@ int SandLayer::Initialize() {
 	m_world->AddField<bool>(false); // if solid, for IsEmpty
 	m_world->AddField<bool>(false); // if static, for colliders
 
+	m_world->CreatedChunkCallback = [&](SandChunk* chunk) 
+	{
+		ref<Texture> color = REF<Texture>(chunk->m_width, chunk->m_height);
+		ref<Texture> solid = REF<Texture>(chunk->m_width, chunk->m_height, TEX_2D, ALPHA);
+		color->m_filter = NEAREST;
+		solid->m_filter = NEAREST;
+
+		color->m_colors = (unsigned char*)chunk->GetField(SandField::COLOR).GetCells<iw::Color>();
+		color->m_colors = (unsigned char*)chunk->GetField(SandField::SOLID).GetCells<bool>();
+
+		ref<RenderTarget> target = REF<RenderTarget>();
+		target->AddTexture(color);
+		target->AddTexture(solid);
+
+		m_chunkTextures[m_world->GetChunkLocation(chunk)] = target;
+	};
+
+	m_world->RemovedChunkCallback = [&](SandChunk* chunk) {
+		m_chunkTextures.erase(m_world->GetChunkLocation(chunk));
+	};
+
 	m_update = PushSystem<SandWorldUpdateSystem>(m_world);
 	m_render = PushSystem<SandWorldRenderSystem>(m_world);
 	
 	m_update->SetCameraScale(m_cellsPerMeter, m_cellsPerMeter);
+
+	m_tiles = grid2<Tile*>(chunkSize / m_cellsPerMeter);
 
 	if (int error = Layer::Initialize()) {
 		return error;
@@ -224,8 +257,10 @@ bool SandLayer::On(MouseWheelEvent& e) {
 
 void SandLayer::PasteTiles()
 {
+	m_tiles.clear();
+
 	Space->Query<iw::Transform, Tile>().Each([&](
-		auto entity,
+		EntityHandle entity,
 		Transform* transform,
 		Tile* tile)
 	{
@@ -239,6 +274,51 @@ void SandLayer::PasteTiles()
 			collider->SetTriangles(tile->m_index);
 		}
 
+		m_tiles.emplace(tile, tile->m_bounds);
+	});
+
+	glm::ivec2 scaling = glm::ivec2(m_world->m_chunkWidth, m_world->m_chunkHeight)
+					   / m_cellsPerMeter;
+
+	iw::OrthographicCamera cam = iw::OrthographicCamera(
+		m_render->m_fx2 - m_render->m_fx, 
+		m_render->m_fy2 - m_render->m_fy,
+		-1, 1
+	);
+
+	for (auto& [location, tiles] : m_tiles.m_grid)
+	{
+		ref<RenderTarget>& target = m_chunkTextures[location];
+
+		if (!target) {
+			m_world->CreateChunk(location);
+		}
+
+		Renderer->Now->BeginScene(&cam, target);
+
+		for (Tile* tile : tiles)
+		{
+			iw::Transform transform = tile->LastTransform;
+			transform.Position.x -= location.first  * scaling.x;
+			transform.Position.y -= location.second * scaling.y;
+
+			Renderer->Now->DrawMesh(tile->LastTransform, tile->m_spriteMesh);
+		}
+
+		Renderer->Now->EndScene();
+	}
+
+	// For all chunks with tiles in them
+	//	Begin Scene	
+	//	For all tiles in chunk
+	//		Render tile
+	//	End Scene
+
+	Space->Query<iw::Transform, Tile>().Each([&](
+		auto entity,
+		Transform* transform,
+		Tile* tile)
+	{
 		Cell c;
 		c.Type = CellType::ROCK;
 		c.Color = Color(1, 1, 0);
@@ -276,7 +356,7 @@ void SandLayer::RemoveTiles()
 			if (SandChunk* chunk = m_world->GetChunk(x, y))
 			{
 				chunk->SetCell(x, y, false, SandField::SOLID);
-			}		
+			}
 		});
 	});
 }
@@ -285,15 +365,20 @@ Entity SandLayer::MakeTile(
 	ref<Texture>& sprite,
 	bool isSimulated)
 {
-	ref<Archetype> archetype = Space->CreateArchetype<Transform, Mesh, MeshCollider2, Tile>();
+	ref<Archetype> archetype = Space->CreateArchetype<Transform, /*Mesh,*/ MeshCollider2, Tile>();
 
 	if (isSimulated) Space->AddComponent<Rigidbody>      (archetype);
 	else             Space->AddComponent<CollisionObject>(archetype);
 	
 	Entity entity = Space->CreateEntity(archetype);
 
-	Tile* tile = entity.Set<Tile>(sprite, Asset->Load<Shader>("shaders/texture2d_cam.shader"));
-	Mesh* mesh = entity.Set<Mesh>(tile->m_spriteMesh);
+	ref<Shader> shader = Asset->Load<Shader>("shaders/texture2d_cam.shader");
+	if (!shader->Handle()) {
+		Renderer->Now->InitShader(shader, CAMERA);
+	}
+
+	Tile* tile = entity.Set<Tile>(sprite, shader);
+	//Mesh* mesh = entity.Set<Mesh>(tile->m_spriteMesh);
 	
 	Transform*       transform = entity.Set<Transform>();
 	MeshCollider2*   collider  = entity.Set<MeshCollider2>();
@@ -309,7 +394,7 @@ Entity SandLayer::MakeTile(
 }
 
 void SandLayer::ForEachInPolygon(
-	const std::vector<glm::vec2>& polygon, 
+	const std::vector<glm::vec2>& polygon,
 	const std::vector<unsigned>&  index,
 	std::function<void(float, float, int, int)> func)
 {
@@ -339,7 +424,7 @@ void SandLayer::ForEachInPolygon(
 					&& t     >= 0 
 					&& s + t <= 1)
 				{
-					func(s, t, x, y);
+					func(s, t, x, y); // calc uv here
 				}
 			}
 		}

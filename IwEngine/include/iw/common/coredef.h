@@ -12,6 +12,13 @@
 						  api clas& operator=(const clas& other) = default;     \
 						  api clas& operator=(clas&& other) noexcept = default; \
 
+#define GEN_default6(api, clas) api clas() = default;                                 \
+						  api clas(const clas& other) = default;                \
+						  api clas(clas&& other) noexcept = default;            \
+						  api ~clas() = default;                                \
+						  api clas& operator=(const clas& other) = default;     \
+						  api clas& operator=(clas&& other) noexcept = default; \
+
 #define GEN_copy(api, clas)     api clas(const clas& other);            \
 						  api clas& operator=(const clas& other); \
 

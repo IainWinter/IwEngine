@@ -1,6 +1,7 @@
 #include "iw/common/algos/polygon2.h"
 
 #define JC_VORONOI_CLIP_IMPLEMENTATION
+#define JC_VORONOI_IMPLEMENTATION
 #include "voronoi/jc_voronoi_clip.h"
 
 #include <vector>
@@ -530,20 +531,17 @@ namespace common {
 	}
 
 	polygon_crack CrackPolygon(
-		const std::vector<glm::vec2> convex,
-		const std::vector<glm::vec2>& seeds)
+		const std::vector<glm::vec2>& convex)
 	{
+		std::vector<glm::vec2> seeds = { glm::vec2(0, -.5f), glm::vec2(0, .5f) };
+
 		polygon_crack cracks;
 
 		// keep only seeds that are inside of polygon, maybe generate some on the polygons faces?
 
-		// generate the vorinoi
-		// get triangles ez
-
 		jcv_diagram diagram;
 
 		jcv_clipping_polygon polygon;
-		// Triangle
 		polygon.num_points = convex.size();
 		polygon.points = (jcv_point*)convex.data();
 
@@ -593,8 +591,8 @@ namespace common {
 	AABB2 GenPolygonBounds(
 		std::vector<glm::vec2>& polygon)
 	{
-		glm::vec2 min(FLT_MAX);
-		glm::vec2 max(FLT_MIN);
+		AABB2 bounds;
+		auto& [min, max] = bounds;
 
 		for (const glm::vec2& vert : polygon)
 		{
@@ -604,7 +602,7 @@ namespace common {
 			if (vert.y < min.y) min.y = vert.y;
 		}
 
-		return AABB2(min, max);
+		return bounds;
 	}
 
 	void AddPointToPolygon(
@@ -624,7 +622,5 @@ namespace common {
 			indices.push_back(std::distance(verts.begin(), itr));
 		}
 	}
-
-	
 }
 }

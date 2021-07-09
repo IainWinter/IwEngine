@@ -23,7 +23,7 @@ int SandWorldRenderSystem::Initialize() {
 	material->SetTexture("texture", m_texture);
 	material->Set("useAlpha", (int)1);
 	
-	m_mesh = Renderer->ScreenQuad().MakeInstance();
+	m_mesh = ScreenQuad().MakeInstance();
 	m_mesh.Material = (material);
 
 	return 0;

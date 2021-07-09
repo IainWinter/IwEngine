@@ -5,6 +5,7 @@
 #include "../Workers/SimpleSandWorker.h"
 #include "SandUpdateSystem.h"
 #include "SandRenderSystem.h"
+#include "iw/physics/spacial/grid.h"
 
 IW_PLUGIN_SAND_BEGIN
 
@@ -15,6 +16,10 @@ public:
 	SandWorld* m_world;
 	const int m_cellSize;
 	const int m_cellsPerMeter;
+
+	std::unordered_map<std::pair<int, int>, ref<RenderTarget>, iw::pair_hash> m_chunkTextures; // for rendering tiles into world
+	grid2<Tile*> m_tiles;
+
 private:
 	SandWorldRenderSystem* m_render;
 	SandWorldUpdateSystem* m_update;

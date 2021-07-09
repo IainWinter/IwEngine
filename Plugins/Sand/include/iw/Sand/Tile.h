@@ -3,6 +3,7 @@
 #include "Cell.h"
 #include "iw/asset/AssetManager.h"
 #include "iw/physics/Collision/MeshCollider.h"
+#include "iw/physics/AABB.h"
 #include "iw/graphics/Mesh.h"
 #include <functional>
 #include <utility>
@@ -16,12 +17,16 @@ struct Tile {
 	std::vector<glm::vec2> m_polygon;
 	std::vector<unsigned>  m_index;
 
+	iw::AABB2 m_bounds;
+
 	Transform LastTransform;
 	bool IsStatic = false;
 	bool NeedsDraw = true;
 	bool NeedsScan = true;
 
 	Tile() = default;
+
+	// dont need to use a mesh for no, can just do the rendering on the cpu
 
 	Tile(
 		ref<Texture> texture,
