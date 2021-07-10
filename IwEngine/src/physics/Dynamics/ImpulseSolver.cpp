@@ -8,7 +8,7 @@ namespace Physics {
 		scalar dt)
 	{
 		for (Manifold& manifold : manifolds) {
-			// Test for is each objects is dynamic or not
+			// Replaces non dynamic objects with default values.
 
 			Rigidbody* aBody = manifold.ObjA->IsDynamic ? (Rigidbody*)manifold.ObjA : nullptr;
 			Rigidbody* bBody = manifold.ObjB->IsDynamic ? (Rigidbody*)manifold.ObjB : nullptr;
@@ -23,6 +23,8 @@ namespace Physics {
 
 			// Impluse
 
+			// This is important for convergence
+			// a negitive impulse would drive the objects closer together
 			if (nSpd >= 0)
 				continue;
 
