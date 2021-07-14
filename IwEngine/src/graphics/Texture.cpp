@@ -18,6 +18,7 @@ namespace Graphics {
 		, m_yOffset      (0)
 		, m_colors       (nullptr)
 		, m_handle       (nullptr)
+		, m_ownsColors   (false)
 	{}
 
 	Texture::Texture(
@@ -33,6 +34,7 @@ namespace Graphics {
 		: m_width       (width)
 		, m_height      (height)
 		, m_depth       (1)
+		, m_channels    (0)
 		, m_type        (type)
 		, m_format      (format)
 		, m_formatType  (formatType)
@@ -44,6 +46,7 @@ namespace Graphics {
 		, m_yOffset     (0)
 		, m_colors      (colors)
 		, m_handle      (nullptr)
+		, m_ownsColors  (false)
 	{
 		switch (format) {
 			case ALPHA:   m_channels = 1; break;
@@ -69,6 +72,7 @@ namespace Graphics {
 		: m_width       (width)
 		, m_height      (height)
 		, m_depth       (depth)
+		, m_channels    (0)
 		, m_type        (type)
 		, m_format      (format)
 		, m_formatType  (formatType)
@@ -80,6 +84,7 @@ namespace Graphics {
 		, m_yOffset     (0)
 		, m_colors      (colors)
 		, m_handle      (nullptr)
+		, m_ownsColors  (false)
 	{
 		switch (format) {
 			case ALPHA:   m_channels = 1; break;
@@ -114,6 +119,7 @@ namespace Graphics {
 		, m_yOffset     (yOffset)
 		, m_colors      (colors)
 		, m_handle      (nullptr)
+		, m_ownsColors  (false)
 	{}
 
 	Texture::Texture(
@@ -131,6 +137,7 @@ namespace Graphics {
 		, m_parent      (other.m_parent)
 		, m_xOffset     (other.m_xOffset)
 		, m_yOffset     (other.m_yOffset)
+		, m_ownsColors  (other.m_ownsColors)
 	{
 		if (m_handle) {
 			delete m_handle;
@@ -161,6 +168,7 @@ namespace Graphics {
 		, m_yOffset     (other.m_yOffset)
 		, m_colors      (other.m_colors)
 		, m_handle      (other.m_handle)
+		, m_ownsColors  (other.m_ownsColors)
 	{
 		other.m_colors = nullptr;
 		other.m_handle = nullptr;
@@ -168,7 +176,7 @@ namespace Graphics {
 
 	Texture::~Texture() {
 		delete m_handle;
-		delete[] m_colors;
+		if (m_ownsColors) delete[] m_colors;
 	}
 
 	Texture& Texture::operator=(
@@ -188,6 +196,7 @@ namespace Graphics {
 		m_xOffset      = other.m_yOffset;
 		m_yOffset      = other.m_yOffset;
 		m_handle       = nullptr;
+		m_ownsColors   = other.m_ownsColors;
 
 		if (m_handle) {
 			delete m_handle;
@@ -221,6 +230,7 @@ namespace Graphics {
 		m_yOffset      = other.m_yOffset;
 		m_colors       = other.m_colors;
 		m_handle       = other.m_handle;
+		m_ownsColors   = other.m_ownsColors;
 
 		other.m_colors = nullptr;
 		other.m_handle = nullptr;
@@ -403,6 +413,7 @@ namespace Graphics {
 		if (!m_colors || evenIfNotNull) {
 			delete[] m_colors;
 
+			m_ownsColors = true;
 			m_colors = new unsigned char[ColorCount()];
 			Clear();
 		}

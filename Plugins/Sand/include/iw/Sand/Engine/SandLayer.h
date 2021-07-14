@@ -17,8 +17,8 @@ public:
 	const int m_cellSize;
 	const int m_cellsPerMeter;
 
-	std::unordered_map<std::pair<int, int>, ref<RenderTarget>, iw::pair_hash> m_chunkTextures; // for rendering tiles into world
-	grid2<Tile*> m_tiles;
+	//std::unordered_map<std::pair<int, int>, ref<RenderTarget>, iw::pair_hash> m_chunkTextures; // for rendering tiles into world
+	//grid2<Tile*> m_tiles;
 
 private:
 	SandWorldRenderSystem* m_render;
@@ -93,7 +93,7 @@ public:
 		const std::vector<unsigned>& index,
 		const iw::Cell& cell)
 	{
-		ForEachInPolygon(polygon, index, [&](float s, float t, int x, int y) {
+		ForEachInPolygon(polygon, index, [&](int x, int y, int u, int v) {
 			m_world->SetCell(x, y, cell);
 		});
 	}
@@ -102,7 +102,48 @@ public:
 	void ForEachInPolygon(
 		const std::vector<glm::vec2>& polygon,
 		const std::vector<unsigned>& index,
-		std::function<void(float, float, int, int)> func);
+		std::function<void(float, float, int, int)> func)
+	{
+		ForEachInPolygon(polygon, {}, index, func);
+	}
+
+	IW_PLUGIN_SAND_API
+	void ForEachInPolygon(
+		const std::vector<glm::vec2>& polygon,
+		const std::vector<glm::vec2>& uv,
+		const std::vector<unsigned>& index,
+		std::function<void(int, int, int, int)> func);
+
+// small software renderer, could take out and make its own class
+
+private:
+	struct Edge {
+		float m_x;
+		float m_stepX;
+		int m_minY;
+		int m_maxY;
+
+		Edge(glm::vec2 minY, glm::vec2 maxY)
+		{
+			glm::vec2 dist = maxY - minY;
+
+			m_minY = ceil(minY.y);
+			m_maxY = ceil(maxY.y);
+			m_stepX = dist.x / dist.y;
+			m_x = minY.x + (m_minY - minY.y) * m_stepX;
+		}
+
+		void Step() {
+			m_x += m_stepX;
+		}
+	};
+
+	IW_PLUGIN_SAND_API
+	void ScanTriangle(
+		glm::vec2 v1,
+		glm::vec2 v2,
+		glm::vec2 v3,
+		std::function<void(int, int, int, int)>& func);
 };
 
 IW_PLUGIN_SAND_END

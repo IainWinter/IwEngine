@@ -61,6 +61,15 @@ namespace Graphics {
 			return Color(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f);
 		}
 
+		static Color From32(
+			uint32_t color)
+		{
+			return (( color & (0xfff << 0)  ) >> 0  ) / 255
+				+ (( color & (0xfff << 8)  ) >> 8  ) / 255
+				+ (( color & (0xfff << 16) ) >> 16 ) / 255
+				+ (( color & (0xfff << 24) ) >> 24 ) / 255;
+		}
+
 		//static Color Blend(
 		//	const Color& a,
 		//	const Color& b,

@@ -17,12 +17,7 @@ struct GameLayer : iw::Layer
 	{
 		iw::ref<iw::Texture> tex = REF<iw::Texture>(64, 64);
 		tex->CreateColors();
-
-		for (int y = 0; y < tex->Height(); y++)
-		for (int x = 0; x < tex->Width();  x++)
-		{
-			tex->m_colors[x + y * tex->Width()] = iw::Color(1).to32();
-		}
+		memset(tex->m_colors, 1, 64*64*4);
 
 		player = sand->MakeTile(tex, true);
 
@@ -75,8 +70,8 @@ iw::Application* CreateApplication(
 	iw::InitOptions& options)
 {
 	options.WindowOptions = iw::WindowOptions {
-		1920/**4/3*/,
-		1080/**4/3*/,
+		800/**4/3*/,
+		800/**4/3*/,
 		false,
 		iw::DisplayState::NORMAL
 	};

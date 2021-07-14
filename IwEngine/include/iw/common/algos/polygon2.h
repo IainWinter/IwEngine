@@ -94,7 +94,13 @@ namespace common {
 
 	IWCOMMON_API
 	AABB2 GenPolygonBounds(
-		std::vector<glm::vec2>& polygon);
+		const std::vector<glm::vec2>& polygon);
+
+	IWCOMMON_API
+	AABB2 GenTriangleBounds(
+		const glm::vec2& v1,
+		const glm::vec2& v2,
+		const glm::vec2& v3);
 
 	IWCOMMON_API
 	void AddPointToPolygon(

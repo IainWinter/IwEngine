@@ -248,8 +248,7 @@ namespace RenderAPI {
 		// Frame buffers
 
 		IWRENDERER_API
-		virtual IFrameBuffer* CreateFrameBuffer(
-			bool noColor) = 0;
+		virtual IFrameBuffer* CreateFrameBuffer() = 0;
 
 		IWRENDERER_API
 		virtual void DestroyFrameBuffer(

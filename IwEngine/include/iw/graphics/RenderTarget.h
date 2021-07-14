@@ -8,19 +8,19 @@
 
 namespace iw {
 namespace Graphics {
-	struct RenderTarget {
+	struct RenderTarget { // wGraphics needs to be redone, this has a set length + add thing which sucks
 	private:
 		unsigned m_width;
 		unsigned m_height;
-		bool m_noColor;
 		std::vector<iw::ref<Texture>> m_textures;
-
-		IFrameBuffer* m_handle;
+		IFrameBuffer* m_frameBuffer;
 
 	public:
 		IWGRAPHICS_API
-		RenderTarget(
-			bool noColor = false);
+		RenderTarget();
+
+		IWGRAPHICS_API
+		~RenderTarget();
 
 		IWGRAPHICS_API
 		void Initialize(
@@ -31,8 +31,10 @@ namespace Graphics {
 			const iw::ref<IDevice>& device);
 
 		IWGRAPHICS_API
-		void ReadPixels(
-			const iw::ref<IDevice>& device);
+		void ReadPixels();
+
+		IWGRAPHICS_API
+		void WritePixels();
 
 		IWGRAPHICS_API
 		void AddTexture(

@@ -124,7 +124,9 @@ void SandWorld::RemoveEmptyChunks() {
 		}
 
 		if (chunk->m_deleteMe) {
-			RemovedChunkCallback(chunk);
+			if (RemovedChunkCallback) {
+				RemovedChunkCallback(chunk);
+			}
 
 			for (size_t f = 0; f < m_fields.size(); f++) {
 				FieldConfig& field = m_fields[f];
@@ -202,7 +204,9 @@ SandChunk* SandWorld::CreateChunk(
 		std::unique_lock lock(m_chunkMutex);
 		m_batches.at(batch).push_back(chunk);
 
-		CreatedChunkCallback(chunk);
+		if (CreatedChunkCallback) {
+			CreatedChunkCallback(chunk);
+		}
 	}
 
 	return chunk;

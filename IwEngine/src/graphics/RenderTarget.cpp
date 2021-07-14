@@ -2,34 +2,49 @@
 
 namespace iw {
 namespace Graphics {
-	RenderTarget::RenderTarget(
-		bool noColor)
-		: m_noColor(noColor)
-		, m_handle(nullptr)
+	RenderTarget::RenderTarget()
+		: m_width(0)
+		, m_height(0)
+		, m_frameBuffer(nullptr)
 	{}
+
+	RenderTarget::~RenderTarget()
+	{
+		delete m_frameBuffer;
+	}
 
 	void RenderTarget::Initialize(
 		const iw::ref<IDevice>& device)
 	{
-		m_handle = device->CreateFrameBuffer(m_noColor);
+		m_frameBuffer = device->CreateFrameBuffer();
+
+		std::vector<unsigned> colors;
 
 		for (iw::ref<Texture>& texture : m_textures) {
 			texture->Initialize(device);
-			device->AttachTextureToFrameBuffer(m_handle, texture->Handle());
+			bool isColor = m_frameBuffer->AttachTexture(texture->Handle());
+
+			if (isColor) {
+				colors.push_back(colors.size());
+			}
 		}
+
+		m_frameBuffer->SetDrawable(colors);
 	}
 
 	void RenderTarget::Use(
 		const iw::ref<IDevice>& device)
 	{
-		device->SetFrameBuffer(m_handle);
+		device->SetFrameBuffer(m_frameBuffer);
 		device->SetViewport(m_width, m_height);
 	}
 
-	void RenderTarget::ReadPixels(
-		const iw::ref<IDevice>& device)
-	{
-		device->ReadPixelsFromFrameBuffer(m_handle);
+	void RenderTarget::ReadPixels() {
+		m_frameBuffer->ReadPixels();
+	}
+
+	void RenderTarget::WritePixels() {
+		m_frameBuffer->WritePixels();
 	}
 
 	void RenderTarget::AddTexture(
@@ -77,11 +92,11 @@ namespace Graphics {
 	}
 
 	IFrameBuffer* RenderTarget::Handle() const {
-		return m_handle;
+		return m_frameBuffer;
 	}
 
 	bool RenderTarget::IsInitialized() const {
-		return !!m_handle;
+		return !!m_frameBuffer;
 	}
 }
 }

@@ -21,14 +21,15 @@ void CorrectCellInfo(SandChunk* chunk, size_t index, int x, int y, void* data) {
 	cell.x = float(cell.x - int(cell.x)) + x + chunk->m_x;
 	cell.y = float(cell.y - int(cell.y)) + y + chunk->m_y;
 
-	chunk->SetCell(index, cell.Color, SandField::COLOR);
+	char notEmpty = cell.Type  != CellType::EMPTY;
+	
+	chunk->SetCell(index, cell.Color.to32(), SandField::COLOR);
+	chunk->SetCell(index, notEmpty,          SandField::SOLID);
 
 	// was for collision for platformer game
 
-	//bool notEmpty  = cell.Type  != CellType::EMPTY;
 	//bool collision = cell.Props == CellProperties::NONE && notEmpty;
 
-	//chunk->SetCell<bool>(index, notEmpty,  SandField::SOLID);
 	//chunk->SetCell<bool>(index, collision, SandField::COLLISION);
 }
 
@@ -122,37 +123,41 @@ int SandLayer::Initialize() {
 	
 	m_world->m_workers.push_back(new SandWorkerBuilder<SimpleSandWorker>());
 
+	// this code SUCKS, the order has to be the same as the order in the enum
+
+	//REGISTER_FIELD(Cell, true, CELL); somehow need something like this in an included file
+
 	m_world->AddField<Cell>(true, CorrectCellInfo); // cells
-	m_world->AddField<bool>(false); // if solid, for IsEmpty
-	m_world->AddField<bool>(false); // if static, for colliders
+	m_world->AddField<unsigned char>(false); // if solid, for IsEmpty / tiles
+	m_world->AddField<unsigned int>(false); // color for drawing / tiles
 
-	m_world->CreatedChunkCallback = [&](SandChunk* chunk) 
-	{
-		ref<Texture> color = REF<Texture>(chunk->m_width, chunk->m_height);
-		ref<Texture> solid = REF<Texture>(chunk->m_width, chunk->m_height, TEX_2D, ALPHA);
-		color->m_filter = NEAREST;
-		solid->m_filter = NEAREST;
+	//m_world->CreatedChunkCallback = [&](SandChunk* chunk) 
+	//{
+	//	ref<Texture> color = REF<Texture>(chunk->m_width, chunk->m_height, TEX_2D, RGBA);
+	//	ref<Texture> solid = REF<Texture>(chunk->m_width, chunk->m_height, TEX_2D, ALPHA);
+	//	color->m_filter = NEAREST;
+	//	solid->m_filter = NEAREST;
 
-		color->m_colors = (unsigned char*)chunk->GetField(SandField::COLOR).GetCells<iw::Color>();
-		color->m_colors = (unsigned char*)chunk->GetField(SandField::SOLID).GetCells<bool>();
+	//	color->m_colors = chunk->GetField(SandField::COLOR).GetCells<unsigned char>();
+	//	solid->m_colors = chunk->GetField(SandField::SOLID).GetCells<unsigned char>();
 
-		ref<RenderTarget> target = REF<RenderTarget>();
-		target->AddTexture(color);
-		target->AddTexture(solid);
+	//	ref<RenderTarget> target = REF<RenderTarget>();
+	//	target->AddTexture(color);
+	//	target->AddTexture(solid);
 
-		m_chunkTextures[m_world->GetChunkLocation(chunk)] = target;
-	};
+	//	m_chunkTextures[m_world->GetChunkLocation(chunk)] = target;
+	//};
 
-	m_world->RemovedChunkCallback = [&](SandChunk* chunk) {
-		m_chunkTextures.erase(m_world->GetChunkLocation(chunk));
-	};
+	//m_world->RemovedChunkCallback = [&](SandChunk* chunk) {
+	//	m_chunkTextures.erase(m_world->GetChunkLocation(chunk));
+	//};
+	// 
+	//m_tiles = grid2<Tile*>(chunkSize / m_cellsPerMeter);
 
 	m_update = PushSystem<SandWorldUpdateSystem>(m_world);
 	m_render = PushSystem<SandWorldRenderSystem>(m_world);
 	
 	m_update->SetCameraScale(m_cellsPerMeter, m_cellsPerMeter);
-
-	m_tiles = grid2<Tile*>(chunkSize / m_cellsPerMeter);
 
 	if (int error = Layer::Initialize()) {
 		return error;
@@ -164,16 +169,6 @@ int SandLayer::Initialize() {
 }
 
 void SandLayer::PreUpdate() {
-	//int width  = m_render->GetSandTexture()->Width();
-	//int height = m_render->GetSandTexture()->Height();
-
-	//int fx = -width  / 2;
-	//int fy = -height / 2;
-	//int fx2 = fx + width;
-	//int fy2 = fy + height;
-
-	////m_render->SetCamera(fx, fy, fx2, fy2);
-
 	int width  = m_render->m_fx2 - m_render->m_fx;
 	int height = m_render->m_fy2 - m_render->m_fy;
 
@@ -257,7 +252,6 @@ bool SandLayer::On(MouseWheelEvent& e) {
 
 void SandLayer::PasteTiles()
 {
-	m_tiles.clear();
 
 	Space->Query<iw::Transform, Tile>().Each([&](
 		EntityHandle entity,
@@ -274,45 +268,50 @@ void SandLayer::PasteTiles()
 			collider->SetTriangles(tile->m_index);
 		}
 
-		m_tiles.emplace(tile, tile->m_bounds);
+		//m_tiles.emplace(tile, tile->m_bounds);
 	});
 
-	glm::ivec2 scaling = glm::ivec2(m_world->m_chunkWidth, m_world->m_chunkHeight)
-					   / m_cellsPerMeter;
+	//m_tiles.clear();
+	// 
+	//glm::ivec2 scaling = glm::ivec2(m_world->m_chunkWidth, m_world->m_chunkHeight)
+	//				   / m_cellsPerMeter;
 
-	iw::OrthographicCamera cam = iw::OrthographicCamera(
-		m_render->m_fx2 - m_render->m_fx, 
-		m_render->m_fy2 - m_render->m_fy,
-		-1, 1
-	);
+	//iw::OrthographicCamera cam = iw::OrthographicCamera(scaling.x, scaling.y, -1, 1);
+	//cam.SetRotation(glm::angleAxis(iw::Pi, glm::vec3(0, 1, 0)));
 
-	for (auto& [location, tiles] : m_tiles.m_grid)
-	{
-		ref<RenderTarget>& target = m_chunkTextures[location];
+	//for (auto& [location, tiles] : m_tiles.m_grid)
+	//{
+	//	cam.SetPosition(glm::vec3(
+	//		location.first  * scaling.x + scaling.x / 2,
+	//		location.second * scaling.y + scaling.y / 2,
+	//		0
+	//	));
 
-		if (!target) {
-			m_world->CreateChunk(location);
-		}
+	//	ref<RenderTarget>& target = m_chunkTextures[location];
+	//	if (!target) {
+	//		m_world->CreateChunk(location);
+	//	}
 
-		Renderer->Now->BeginScene(&cam, target);
+	//	else {
+	//		if (!target->IsInitialized()) {
+	//			target->Initialize(Renderer->Device);
+	//		}
 
-		for (Tile* tile : tiles)
-		{
-			iw::Transform transform = tile->LastTransform;
-			transform.Position.x -= location.first  * scaling.x;
-			transform.Position.y -= location.second * scaling.y;
+	//		target->WritePixels();
+	//	}
 
-			Renderer->Now->DrawMesh(tile->LastTransform, tile->m_spriteMesh);
-		}
+	//	Renderer->Now->BeginScene(&cam, target);
+	//	for (Tile* tile : tiles)
+	//	{
+	//		Renderer->Now->DrawMesh(tile->LastTransform, tile->m_spriteMesh);
+	//	}
+	//	Renderer->Now->EndScene();
+	//}
 
-		Renderer->Now->EndScene();
-	}
-
-	// For all chunks with tiles in them
-	//	Begin Scene	
-	//	For all tiles in chunk
-	//		Render tile
-	//	End Scene
+	//for (auto& [location, tiles] : m_tiles.m_grid)
+	//{
+	//	m_chunkTextures[location]->ReadPixels(); // blocks the gpu so this may be faster to do after?
+	//}
 
 	Space->Query<iw::Transform, Tile>().Each([&](
 		auto entity,
@@ -325,8 +324,8 @@ void SandLayer::PasteTiles()
 		c.Props = CellProperties::NONE_TILE;
 
 		std::vector<glm::vec2> polygon = tile->m_polygon;
+		
 		TransformPolygon(polygon, transform);
-
 		ForEachInPolygon(polygon, tile->m_index, [&](float s, float t, int x, int y)
 		{
 			if (SandChunk* chunk = m_world->GetChunk(x, y))
@@ -349,8 +348,8 @@ void SandLayer::RemoveTiles()
 		Cell c;
 
 		std::vector<glm::vec2> polygon = tile->m_polygon;
+		
 		TransformPolygon(polygon, &tile->LastTransform);
-
 		ForEachInPolygon(polygon, tile->m_index, [&](float s, float t, int x, int y)
 		{
 			if (SandChunk* chunk = m_world->GetChunk(x, y))
@@ -365,20 +364,14 @@ Entity SandLayer::MakeTile(
 	ref<Texture>& sprite,
 	bool isSimulated)
 {
-	ref<Archetype> archetype = Space->CreateArchetype<Transform, /*Mesh,*/ MeshCollider2, Tile>();
+	ref<Archetype> archetype = Space->CreateArchetype<Transform, MeshCollider2, Tile>();
 
 	if (isSimulated) Space->AddComponent<Rigidbody>      (archetype);
 	else             Space->AddComponent<CollisionObject>(archetype);
 	
 	Entity entity = Space->CreateEntity(archetype);
 
-	ref<Shader> shader = Asset->Load<Shader>("shaders/texture2d_cam.shader");
-	if (!shader->Handle()) {
-		Renderer->Now->InitShader(shader, CAMERA);
-	}
-
-	Tile* tile = entity.Set<Tile>(sprite, shader);
-	//Mesh* mesh = entity.Set<Mesh>(tile->m_spriteMesh);
+	Tile* tile = entity.Set<Tile>(sprite);
 	
 	Transform*       transform = entity.Set<Transform>();
 	MeshCollider2*   collider  = entity.Set<MeshCollider2>();
@@ -395,40 +388,57 @@ Entity SandLayer::MakeTile(
 
 void SandLayer::ForEachInPolygon(
 	const std::vector<glm::vec2>& polygon,
+	const std::vector<glm::vec2>& uv,
 	const std::vector<unsigned>&  index,
-	std::function<void(float, float, int, int)> func)
+	std::function<void(int, int, int, int)> func)
 {
 	for (size_t i = 0; i < index.size(); i += 3) {
-		glm::vec2 v0 = polygon[index[i    ]] * float(m_cellsPerMeter);
-		glm::vec2 v1 = polygon[index[i + 1]] * float(m_cellsPerMeter);
-		glm::vec2 v2 = polygon[index[i + 2]] * float(m_cellsPerMeter);
+		glm::vec2 v1 = polygon[index[i    ]] * float(m_cellsPerMeter);
+		glm::vec2 v2 = polygon[index[i + 1]] * float(m_cellsPerMeter);
+		glm::vec2 v3 = polygon[index[i + 2]] * float(m_cellsPerMeter);
 		
-		glm::vec2 v01 = v1 - v0;
-		glm::vec2 v02 = v2 - v0;
-
-		int maxX = iw::max(v0.x, iw::max(v1.x, v2.x)); // not the most efficient; this test everything in a rectangle around the triangle
-		int minX = iw::min(v0.x, iw::min(v1.x, v2.x));
-		int maxY = iw::max(v0.y, iw::max(v1.y, v2.y));
-		int minY = iw::min(v0.y, iw::min(v1.y, v2.y));
-
-		for (int x = minX; x <= maxX; x++)
-		{
-			for (int y = minY; y <= maxY; y++)
-			{
-				glm::vec2 q(x - v0.x, y - v0.y);
-
-				float s = iw::cross_length(q, v02) / iw::cross_length(v01, v02);
-				float t = iw::cross_length(v01, q) / iw::cross_length(v01, v02);
-
-				if (   s     >= 0 
-					&& t     >= 0 
-					&& s + t <= 1)
-				{
-					func(s, t, x, y); // calc uv here
-				}
-			}
-		}
+		ScanTriangle(v1, v2, v3, func);
 	}
+}
+
+void SandLayer::ScanTriangle(
+	glm::vec2 v1,
+	glm::vec2 v2,
+	glm::vec2 v3,
+	std::function<void(int, int, int, int)>& func)
+{
+	auto ScanHalf = [&](Edge& topBot, Edge& other, bool clockwise)
+	{
+		Edge* left  = &topBot;
+		Edge* right = &other;
+		if (clockwise) std::swap(left, right);
+
+		for (int y = other.m_minY; y < other.m_maxY; y++)
+		{
+			for (int x = left->m_x; x < right->m_x; x++)
+			{
+				func(x, y, 0, 0);
+			}
+
+			left->Step();
+			right->Step();
+		}
+	};
+
+	if (v2.y > v3.y) std::swap(v2, v3);
+	if (v1.y > v2.y) std::swap(v1, v2);
+	if (v1.y > v3.y) std::swap(v1, v3);
+
+	Edge eTopBot(v3, v1);
+	Edge eTopMid(v3, v2);
+	Edge eMidBot(v2, v1);
+
+	bool clockwise = IsClockwise(v3, v2, v1);
+
+	ScanHalf(eTopBot, eTopMid, clockwise);
+	ScanHalf(eTopBot, eMidBot, clockwise);
+
+
 }
 
 IW_PLUGIN_SAND_END

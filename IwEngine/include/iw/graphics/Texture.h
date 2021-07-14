@@ -30,6 +30,7 @@ namespace Graphics {
 
 		unsigned char* m_colors;
 		ITexture* m_handle;
+		bool m_ownsColors;
 
 	//public:
 		IWGRAPHICS_API

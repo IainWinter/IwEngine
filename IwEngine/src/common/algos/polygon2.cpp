@@ -589,12 +589,31 @@ namespace common {
 	}
 
 	AABB2 GenPolygonBounds(
-		std::vector<glm::vec2>& polygon)
+		const std::vector<glm::vec2>& polygon)
 	{
 		AABB2 bounds;
 		auto& [min, max] = bounds;
 
 		for (const glm::vec2& vert : polygon)
+		{
+			if (vert.x > max.x) max.x = vert.x;
+			if (vert.y > max.y) max.y = vert.y;
+			if (vert.x < min.x) min.x = vert.x;
+			if (vert.y < min.y) min.y = vert.y;
+		}
+
+		return bounds;
+	}
+
+	AABB2 GenTriangleBounds(
+		const glm::vec2& v1, 
+		const glm::vec2& v2, 
+		const glm::vec2& v3)
+	{
+		AABB2 bounds;
+		auto& [min, max] = bounds;
+
+		for (const glm::vec2& vert : {v1, v2, v3})
 		{
 			if (vert.x > max.x) max.x = vert.x;
 			if (vert.y > max.y) max.y = vert.y;

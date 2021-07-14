@@ -56,14 +56,17 @@ void SandWorldRenderSystem::Update() {
 			int endY   = clamp<int>(m_fy2 - chunk->m_y, 0, chunk->m_height);
 			int endX   = clamp<int>(m_fx2 - chunk->m_x, 0, chunk->m_width);
 
-			Cell* cells = chunk->GetField(SandField::CELL).GetCells<Cell>();
+			Cell*     cells  = chunk->GetField(SandField::CELL) .GetCells<Cell>();
+			uint32_t* colors = chunk->GetField(SandField::COLOR).GetCells<uint32_t>();
 
 			// sand texture
 			for (int y = startY; y < endY; y++)
 			for (int x = startX; x < endX; x++) {
 				int texi = (chunk->m_x + x - m_fx) + (chunk->m_y + y - m_fy) * m_texture->Width();
 
-				Cell& cell = cells[x + y * chunk->m_width];
+				// annoying but nessesary for style rn
+				Cell & cell  = cells [x + y * chunk->m_width]; 
+				Color& color = Color::From32(colors[x + y * chunk->m_width]);
 
 				if (_debugShowChunkBounds) {
 					if (   (y == chunk->m_minY || y == chunk->m_maxY) && (x >= chunk->m_minX && x <= chunk->m_maxX)
@@ -113,7 +116,7 @@ void SandWorldRenderSystem::Update() {
 						}
 					}
 
-					pixels[texi] = Color(cell.Color + accent).to32();
+					pixels[texi] = Color(color + accent).to32();
 				}
 			}
 

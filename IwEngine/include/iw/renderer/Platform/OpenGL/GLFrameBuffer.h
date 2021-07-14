@@ -12,32 +12,27 @@ namespace RenderAPI {
 	private:
 		unsigned gl_id;
 		unsigned m_textureCount;
-		bool m_noColor;
 		std::vector<std::pair<int, GLTexture*>> m_attachments;
 
 	public:
 		IWRENDERER_API
-		GLFrameBuffer(
-			bool noColor);
+		GLFrameBuffer();
 
 		IWRENDERER_API
 		~GLFrameBuffer();
 
 		IWRENDERER_API
-		void AttachTexture(
-			GLTexture* texture);
+		bool AttachTexture(
+			ITexture* texture) override;
 
 		IWRENDERER_API
-		void ReadPixels();
+		void SetDrawable(
+			const std::vector<unsigned>& colorAttachments) override;
 
-		IWRENDERER_API
-		void Bind() const;
-
-		IWRENDERER_API
-		void Unbind() const;
-
-		IWRENDERER_API
-		bool NoColor() const;
+		IWRENDERER_API void ReadPixels() override;
+		IWRENDERER_API void WritePixels() override;
+		IWRENDERER_API void Bind()   const override;
+		IWRENDERER_API void Unbind() const override;
 	};
 }
 

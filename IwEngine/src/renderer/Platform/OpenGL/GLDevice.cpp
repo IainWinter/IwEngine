@@ -388,10 +388,8 @@ namespace RenderAPI {
 		}
 	}
 
-	IFrameBuffer* GLDevice::CreateFrameBuffer(
-		bool noColor)
-	{
-		return new GLFrameBuffer(noColor);
+	IFrameBuffer* GLDevice::CreateFrameBuffer() {
+		return new GLFrameBuffer();
 	}
 
 	void GLDevice::DestroyFrameBuffer(

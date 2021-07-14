@@ -11,13 +11,14 @@
 IW_PLUGIN_SAND_BEGIN
 
 struct Tile {
-	Mesh m_spriteMesh;
+	//Mesh m_spriteMesh;
 	ref<Texture> m_sprite;
 
 	std::vector<glm::vec2> m_polygon;
+	std::vector<glm::vec2> m_uv;
 	std::vector<unsigned>  m_index;
 
-	iw::AABB2 m_bounds;
+	//iw::AABB2 m_bounds;
 
 	Transform LastTransform;
 	bool IsStatic = false;
@@ -25,12 +26,7 @@ struct Tile {
 	bool NeedsScan = true;
 
 	Tile() = default;
-
-	// dont need to use a mesh for no, can just do the rendering on the cpu
-
-	Tile(
-		ref<Texture> texture,
-		ref<Shader> shader);
+	Tile(ref<Texture> texture, ref<Shader> shader);
 
 	void UpdatePolygon();
 };

@@ -15,17 +15,17 @@ Tile::Tile(
 		m_sprite->CreateColors();
 	}
 
-	ref<Material> material = REF<Material>(shader);
-	material->SetTexture("texture", m_sprite);
-	material->Set("color", Color::From255(200, 200, 100));
-	//material->SetWireframe(true);
-
-	MeshDescription tileDesc;
-	tileDesc.DescribeBuffer(bName::POSITION, MakeLayout<float>(2));
-	tileDesc.DescribeBuffer(bName::UV,       MakeLayout<float>(2));
-	
-	m_spriteMesh = (new MeshData(tileDesc))->MakeInstance();
-	m_spriteMesh.Material = material;
+	//ref<Material> material = REF<Material>(shader);
+	////material->SetTexture("texture", m_sprite);
+	//material->Set("color", Color::From255(200, 200, 100));
+	////material->SetWireframe(true);
+	//
+	//MeshDescription tileDesc;
+	//tileDesc.DescribeBuffer(bName::POSITION, MakeLayout<float>(2));
+	//tileDesc.DescribeBuffer(bName::UV,       MakeLayout<float>(2));
+	//
+	//m_spriteMesh = (new MeshData(tileDesc))->MakeInstance();
+	//m_spriteMesh.Material = material;
 }
 
 void Tile::UpdatePolygon()
@@ -44,17 +44,17 @@ void Tile::UpdatePolygon()
 		v /= size;
 	}
 
-	std::vector<glm::vec2> uv = m_polygon;
+	m_uv = m_polygon;
 
 	for (glm::vec2& v : m_polygon) {
 		v = (v - glm::vec2(0.5f)) * size / 10.0f;
 	}
 
-	m_bounds = iw::GenPolygonBounds(m_polygon);
+	//m_bounds = iw::GenPolygonBounds(m_polygon);
 
-	m_spriteMesh.Data->SetBufferData(bName::POSITION, m_polygon.size(), m_polygon.data());
-	m_spriteMesh.Data->SetBufferData(bName::UV,       uv       .size(), uv       .data());
-	m_spriteMesh.Data->SetIndexData(                  m_index  .size(), m_index  .data());
+	//m_spriteMesh.Data->SetBufferData(bName::POSITION, m_polygon.size(), m_polygon.data());
+	//m_spriteMesh.Data->SetBufferData(bName::UV,       m_uv     .size(), m_uv     .data());
+	//m_spriteMesh.Data->SetIndexData(                  m_index  .size(), m_index  .data());
 }
 
 IW_PLUGIN_SAND_END

@@ -53,7 +53,7 @@ namespace Graphics {
 			const glm::mat4& view);
 
 		void SetPosition(
-			const glm::vec3& rotation);
+			const glm::vec3& position);
 
 		void SetRotation(
 			const glm::quat& rotation);
