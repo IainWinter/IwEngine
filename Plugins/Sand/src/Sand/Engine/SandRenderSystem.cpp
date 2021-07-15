@@ -102,7 +102,7 @@ void SandWorldRenderSystem::Update() {
 					}
 				}
 
-				if (cell.Type != CellType::EMPTY) {
+				if (color.a > 0) {
 					glm::vec4 accent = cell.StyleColor.rgba();
 
 					switch (cell.Style) {

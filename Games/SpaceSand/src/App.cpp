@@ -1,5 +1,6 @@
 ﻿#include "App.h"
 #include "plugins/iw/Sand/Engine/SandLayer.h"
+#include "iw/engine/Systems/PhysicsSystem.h"
 
 struct GameLayer : iw::Layer
 {
@@ -16,10 +17,24 @@ struct GameLayer : iw::Layer
 	int Initialize() override 
 	{
 		iw::ref<iw::Texture> tex = REF<iw::Texture>(64, 64);
-		tex->CreateColors();
-		memset(tex->m_colors, 1, 64*64*4);
+		unsigned* colors = (unsigned*)tex->CreateColors();
+
+		iw::Color black = iw::Color(0, 0, 0);
+		iw::Color pink  = iw::Color::From255(235, 52, 186);
+
+		bool f = false;
+		for (int x = 0; x < tex->Width() ; x++)
+		for (int y = 0; y < tex->Height(); y++) 
+		{
+			colors[x + y * tex->Width()] = f ? black.to32() : pink.to32();
+			f = !f;
+		}
 
 		player = sand->MakeTile(tex, true);
+
+		player.Find<iw::Rigidbody>()->AngularVelocity.z = 1;
+
+		PushSystem<iw::PhysicsSystem>();
 
 		return Layer::Initialize();
 	}
