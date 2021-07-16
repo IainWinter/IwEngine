@@ -13,6 +13,11 @@ void SandWorldUpdateSystem::Update() {
 	std::mutex mutex;
 	std::condition_variable cond;
 
+
+	// should of been a copy of chunks,
+	// only works because it could only create a chunk outside of
+	// the batch?
+
 	auto doForAllChunks = [&](std::function<void(iw::SandChunk*)> func)
 	{		
 		for (auto& chunks : m_world->m_batches)
@@ -24,7 +29,7 @@ void SandWorldUpdateSystem::Update() {
 					func(chunk);
 
 					std::unique_lock lock(mutex);
-					
+
 					chunkCount--;
 					cond.notify_one();
 				});

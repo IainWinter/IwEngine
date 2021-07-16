@@ -24,17 +24,21 @@ void Tile::UpdatePolygon()
 	
 	if (polygons.size() == 0) return;
 
-	m_polygon = polygons[0]; // maybe combine into single polygon?
-	m_index   = iw::TriangulatePolygon(m_polygon);
+	//for (glm::vec2& p : polygons[0]) // ideally this would just be smushed into 1, making accessor functions for polygon2 would make this possible
+	//{
+	//	m_polygon.emplace_back(
+	//		ceil(p.x - size.x / 2), ceil(p.y - size.y / 2),
+	//		ceil(p.x),              ceil(p.y)
+	//	);
+	//}
 
-	for (glm::vec2& v : m_polygon) {
-		v /= size;
-	}
+	m_polygon = polygons[0]; // maybe combine into single polygon?
+	m_index   = iw::TriangulatePolygon(polygons[0]);
 
 	m_uv = m_polygon;
 
 	for (glm::vec2& v : m_polygon) {
-		v = (v - glm::vec2(0.5f)) * size / 10.0f;
+		v -= size / 2.0f;
 	}
 }
 

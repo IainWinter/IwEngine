@@ -23,16 +23,26 @@ struct GameLayer : iw::Layer
 		iw::Color pink  = iw::Color::From255(235, 52, 186);
 
 		bool f = false;
-		for (int x = 0; x < tex->Width() ; x++)
-		for (int y = 0; y < tex->Height(); y++) 
-		{
-			colors[x + y * tex->Width()] = f ? black.to32() : pink.to32();
-			f = !f;
+		for (int x = 0; x < tex->Width() ; x++){
+			for (int y = 0; y < tex->Height(); y++) 
+			{
+				colors[x + y * tex->Width()] = f ? black.to32() : pink.to32();
+			}
+
+			if (x % 16 == 0)
+			{
+				f = !f;
+			}
 		}
 
-		player = sand->MakeTile(tex, true);
+		for (int i = 0; i < 100; i++) {
+			player = sand->MakeTile(tex, true);
+			player.Find<iw::Rigidbody>()->Transform.Position.x = iw::randf() * 1000;
+			player.Find<iw::Rigidbody>()->Transform.Position.y = iw::randf() * 1000;
+			player.Find<iw::Rigidbody>()->AngularVelocity.z = iw::clamp<float>(iw::randf() * 5, 2, 5);
 
-		player.Find<iw::Rigidbody>()->AngularVelocity.z = 1;
+			player.Find<iw::Rigidbody>()->IsTrigger = true;
+		}
 
 		PushSystem<iw::PhysicsSystem>();
 
@@ -51,10 +61,10 @@ struct GameLayer : iw::Layer
 
 App::App() : iw::Application() 
 {
-	int cellSize = 4;
+	int cellSize = 2;
 	int cellMeter = 10;
 
-	iw::SandLayer* sand = PushLayer<iw::SandLayer>(cellSize, cellMeter);
+	iw::SandLayer* sand = PushLayer<iw::SandLayer>(cellSize, cellMeter, true);
 						  PushLayer<GameLayer>(sand);
 }
 
@@ -87,7 +97,7 @@ iw::Application* CreateApplication(
 	options.WindowOptions = iw::WindowOptions {
 		800/**4/3*/,
 		800/**4/3*/,
-		false,
+		true,
 		iw::DisplayState::NORMAL
 	};
 

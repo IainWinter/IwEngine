@@ -5,7 +5,7 @@
 #include "../Workers/SimpleSandWorker.h"
 #include "SandUpdateSystem.h"
 #include "SandRenderSystem.h"
-#include "iw/physics/spacial/grid.h"
+#include <array>
 
 IW_PLUGIN_SAND_BEGIN
 
@@ -28,6 +28,8 @@ private:
 
 	int gridSize = 16;
 	vec2 sP, gP; // sand pos, grid pos
+
+	std::vector<std::pair<Transform*, Tile*>> m_tilesThisFrame;
 
 public:
 	SandLayer(
@@ -53,8 +55,13 @@ public:
 
 	IW_PLUGIN_SAND_API bool On(MouseWheelEvent& e);
 
-	IW_PLUGIN_SAND_API void PasteTiles();
-	IW_PLUGIN_SAND_API void RemoveTiles();
+	IW_PLUGIN_SAND_API void PasteTiles (const std::vector<std::pair<Transform*, Tile*>>& tiles);
+	IW_PLUGIN_SAND_API void RemoveTiles(const std::vector<std::pair<Transform*, Tile*>>& tiles);
+
+	IW_PLUGIN_SAND_API
+	void ForEachTile(
+		const std::vector<std::pair<Transform*, Tile*>>& tiles,
+		std::function<void(Transform*, Tile*)> func);
 
 	Mesh& GetSandMesh() {
 		return m_render->GetSandMesh();
@@ -105,96 +112,129 @@ public:
 	//	std::function<void(int, int, int, int)> func);
 
 	IW_PLUGIN_SAND_API
-	void ForEachInPolygon(
+	void SandLayer::ForEachInPolygon(
 		const std::vector<glm::vec2>& polygon,
 		const std::vector<glm::vec2>& uv,
-		const std::vector<unsigned>& index,
-		std::function<void(int, int, float, float)> func);
+		const std::vector<unsigned>&  index,
+		std::function<void(int, int, float, float)> func)
+	{
+		for (size_t i = 0; i < index.size(); i += 3) {
+			const glm::vec2& p1 = polygon[index[i]];
+			const glm::vec2& p2 = polygon[index[i + 1]];
+			const glm::vec2& p3 = polygon[index[i + 2]];
+		
+			const glm::vec2& u1 = uv[index[i]];
+			const glm::vec2& u2 = uv[index[i + 1]];
+			const glm::vec2& u3 = uv[index[i + 2]];
 
-// small software renderer, could take out and make its own class
+			using vertex = std::array<int, 4>;
 
-private:
-	struct Vertex {
-		glm::vec2 pos;
-		glm::vec2 uv;
-	};
+			vertex v1 {p1.x, p1.y, u1.x, u1.y};
+			vertex v2 {p2.x, p2.y, u2.x, u2.y};
+			vertex v3 {p3.x, p3.y, u3.x, u3.y};
 
-	struct InterpolationUV { // could template
-		float m_stepUX;
-		float m_stepUY;
-		float m_stepVX;
-		float m_stepVY;
+			RasterPolygon(v1, v2, v3, [&](int x, int y, float u, float v)
+			{
+				func(x, y, u, v);
+			});
+		}
+	}
 
-		InterpolationUV(
-			const Vertex& v1,
-			const Vertex& v2,
-			const Vertex& v3)
+// small software renderer, could take out and make its own class, https://www.youtube.com/watch?v=PahbNFypubE
+
+	template<
+		typename _v,
+		typename _f1, typename _f2, typename _f3>
+	void RasterTriangle(
+		const _v* v0, const _v* v1, const _v* v2,
+		_f1&& GetXY,
+		_f2&& MakeSlope,
+		_f3&& DrawScanline)
+	{
+		auto [x0, y0, x1, y1, x2, y2] = std::tuple_cat(GetXY(*v0), GetXY(*v1), GetXY(*v2));
+
+		if (std::tie(y1, x1) < std::tie(y0, x0)) { std::swap(x0, x1); std::swap(y0, y1); std::swap(v0, v1); }
+		if (std::tie(y2, x2) < std::tie(y0, x0)) { std::swap(x0, x2); std::swap(y0, y2); std::swap(v0, v2); }
+		if (std::tie(y2, x2) < std::tie(y1, x1)) { std::swap(x1, x2); std::swap(y1, y2); std::swap(v1, v2); }
+
+		if (y0 == y2) return; // 0 area
+
+		bool shortside = (y1 - y0) * (x2 - x0) < (x1 - x0) * (y2 - y0);
+
+		std::invoke_result_t<_f2, const _v&, const _v&, int> sides[2];
+		sides[!shortside] = MakeSlope(*v0, *v2, y2 - y0);
+
+		for (auto y = y0, endy = y0; /**/; ++y) // I wonder if this actually helps the inlinning of lambdas
 		{
-			const auto& [p1, u1] = v1; // u is getting interpolated
-			const auto& [p2, u2] = v2;
-			const auto& [p3, u3] = v3;
+			if (y >= endy)
+			{
+				if (y >= y2) break;
+				sides[shortside] = std::apply(MakeSlope, (y < y1) ? std::tuple(*v0, *v1, (endy = y1) - y0)
+														: std::tuple(*v1, *v2, (endy = y2) - y1)); // assignment
+			}
 
-			const float& x1 = p1.x, y1 = p1.y; // for interpolation amount
-			const float& x2 = p2.x, y2 = p2.y;
-			const float& x3 = p3.x, y3 = p3.y;
-
-			float dx = (x2-x3)*(y1-y3) - (x1-x3)*(y2-y3);
-			float dy = -dx;
-
-			glm::vec2 dCdx = ( (u2-u3)*(y1-y3) - (u1-u3)*(y2-y3) ) / dx;
-			glm::vec2 dCdy = ( (u2-u3)*(x1-x3) - (u1-u3)*(x2-x3) ) / dy;
-
-			m_stepUX = dCdx.x; m_stepUY = dCdx.y;
-			m_stepVX = dCdy.x; m_stepVY = dCdy.y;
+			DrawScanline(y, sides[0], sides[1]);
 		}
+	}
+
+	struct Slope {
+		
+		float m_cur, m_step;
+
+		Slope() = default;
+		Slope(float begin, float end, int steps) {
+			float inv_step = 1.0f / steps;
+			m_cur = begin;
+			m_step = (end - begin) * inv_step;
+		}
+
+		float get() { return m_cur; }
+		void step() { m_cur += m_step; }
 	};
 
-	struct Edge {
-		float m_x, m_u, m_v;
-		float m_stepX, m_stepU, m_stepV;
-		int m_minY, m_maxY;
+	using vertex = std::array<int, 4>; // x, y, u, v
 
-		Edge(
-			const Vertex& v1,
-			const Vertex& v2,
-			const InterpolationUV& uvLerp)
-		{
-			const float& minX = v1.pos.x, minY = v1.pos.y;
-			const float& maxX = v2.pos.x, maxY = v2.pos.y;
+	template<
+		typename _f>
+	void RasterPolygon(
+		const vertex& v0, const vertex& v1, const vertex& v2,
+		_f&& PlotPoint)
+	{
+		using SlopeData = std::array<Slope, 3>; // x, u, v
 
-			m_minY = ceil(minY);
-			m_maxY = ceil(maxY);
+		RasterTriangle(&v0, &v1, &v2,
+			[](const vertex& vert)
+			{
+				return std::make_pair(vert[0], vert[1]);
+			},
+			[](const vertex& from, const vertex& to, int steps)
+			{
+				SlopeData slopes;
+				slopes[0] = Slope(from[0], to[0], steps); // x
+				slopes[1] = Slope(from[2], to[2], steps); // u
+				slopes[2] = Slope(from[3], to[3], steps); // v
 
-			float preStepY = m_minY - minX;
+				return slopes;
+			},
+			[&](int y, SlopeData& left, SlopeData& right)
+			{
+				int x = left[0].get(), endx = right[0].get();
 
-			float distX = maxX - minX;
-			float distY = maxY - minY;
+				Slope props[2]; // u, v inter scanline slopes
+				props[0] = Slope(left[1].get(), right[1].get(), endx - x);
+				props[1] = Slope(left[2].get(), right[2].get(), endx - x);
 
-			m_stepX = distX / distY; // divs by 0 but doesnt matter
-			m_x = minX + preStepY * m_stepX;
+				for (; x < endx; ++x)
+				{
+					PlotPoint(x, y, props[0].get(), props[1].get());
+					for (auto& slope : props) slope.step();
+				}
 
-			float preStepX = m_x - minY;
-
-			m_u = v1.uv.x + uvLerp.m_stepUX * preStepX + uvLerp.m_stepUY * preStepY;
-			m_v = v1.uv.y + uvLerp.m_stepVX * preStepX + uvLerp.m_stepVY * preStepY;
-
-			m_stepU = uvLerp.m_stepUY + uvLerp.m_stepUX * m_stepX;
-			m_stepV = uvLerp.m_stepVY + uvLerp.m_stepVX * m_stepX;
-		}
-
-		void Step() {
-			m_x += m_stepX;
-			m_u += m_stepU;
-			m_v += m_stepV;
-		}
-	};
-
-	IW_PLUGIN_SAND_API
-	void ScanTriangle(
-		Vertex v1,
-		Vertex v2,
-		Vertex v3,
-		std::function<void(int, int, float, float)>& func);
+				for (auto& slope : left)  slope.step();
+				for (auto& slope : right) slope.step();
+			}
+		);
+	}
 };
 
 IW_PLUGIN_SAND_END

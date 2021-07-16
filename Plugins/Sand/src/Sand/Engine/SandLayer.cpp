@@ -179,7 +179,16 @@ void SandLayer::PreUpdate() {
 
 	DrawWithMouse(m_render->m_fx, -m_render->m_fy, width, height);
 
-	PasteTiles();
+	m_tilesThisFrame.clear();
+	Space->Query<Transform, Tile>().Each([&](
+		auto entity,
+		Transform* transform,
+		Tile* tile)
+	{
+		m_tilesThisFrame.emplace_back(transform, tile);
+	});
+
+	PasteTiles(m_tilesThisFrame);
 }
 
 void SandLayer::PostUpdate()
@@ -188,7 +197,7 @@ void SandLayer::PostUpdate()
 		DrawMouseGrid();
 	}
 
-	RemoveTiles();
+	RemoveTiles(m_tilesThisFrame);
 }
 
 void SandLayer::DrawMouseGrid() {
@@ -250,12 +259,12 @@ bool SandLayer::On(MouseWheelEvent& e) {
 	return false;
 }
 
-void SandLayer::PasteTiles()
+void SandLayer::PasteTiles(
+	const std::vector<std::pair<Transform*, Tile*>>& tiles)
 {
-	Space->Query<iw::Transform, Tile>().Each([&](
-		auto entity,
-		Transform* transform,
-		Tile* tile)
+	ForEachTile(tiles, [&](
+		Transform* transform, 
+		Tile* tile) 
 	{
 		if (tile->NeedsScan)
 		{
@@ -269,43 +278,73 @@ void SandLayer::PasteTiles()
 
 		tile->LastTransform = *transform;
 
+		unsigned* colors = (unsigned*)tile->m_sprite->Colors();
+
+		// add to buckets that can only get chunk once per chunk
+
 		std::vector<glm::vec2> polygon = tile->m_polygon;
 		TransformPolygon(polygon, &tile->LastTransform);
-		ForEachInPolygon(polygon, tile->m_uv, tile->m_index, [&](int x, int y, float u, float v)
-		{
-			if (SandChunk* chunk = m_world->GetChunk(x, y))
+		ForEachInPolygon(polygon, tile->m_uv, tile->m_index, [&](int x, int y, int u, int v)
 			{
-				glm::ivec2 UV = glm::vec2(u, v) * tile->m_sprite->Dimensions();
-				unsigned* colors = (unsigned*)tile->m_sprite->Colors();
-				unsigned color = colors[UV.x + UV.y * tile->m_sprite->Width()];
+				if (SandChunk* chunk = m_world->GetChunk(x, y))
+				{
+					unsigned color = colors[u + v * tile->m_sprite->Width()];
 
-				chunk->SetCell(x, y, true,  SandField::SOLID);
-				chunk->SetCell(x, y, color, SandField::COLOR);
-			}
-		});
+					chunk->SetCell(x, y, true, SandField::SOLID);
+					chunk->SetCell(x, y, color, SandField::COLOR);
+				}
+			});
 
-		tile->LastTransform = *transform;
+		tile->LastTransform = *transform; 
 	});
 }
 
-void SandLayer::RemoveTiles()
+void SandLayer::RemoveTiles(
+	const std::vector<std::pair<Transform*, Tile*>>& tiles)
 {
-	Space->Query<iw::Transform, Tile>().Each([&](
-		auto entity,
+	ForEachTile(tiles, [&](
 		Transform* transform,
 		Tile* tile)
 	{
 		std::vector<glm::vec2> polygon = tile->m_polygon;
 		TransformPolygon(polygon, &tile->LastTransform);
-		ForEachInPolygon(polygon, tile->m_uv, tile->m_index, [&](int x, int y, float u, float v)
+		ForEachInPolygon(polygon, tile->m_uv, tile->m_index, [&](int x, int y, int u, int v)
 		{
 			if (SandChunk* chunk = m_world->GetChunk(x, y))
 			{
-				chunk->SetCell(x, y, false,          SandField::SOLID);
+				chunk->SetCell(x, y, false, SandField::SOLID);
 				chunk->SetCell(x, y, Color().to32(), SandField::COLOR);
 			}
 		});
 	});
+}
+
+void SandLayer::ForEachTile(
+	const std::vector<std::pair<Transform*, Tile*>>& tiles,
+	std::function<void(Transform*, Tile*)> func)
+{
+	std::mutex mutex;
+	std::condition_variable cond;
+
+	int tileCount = tiles.size();
+
+	for (const auto& niceCapture : tiles) 
+	{
+		Transform* transform = niceCapture.first;
+		Tile*      tile      = niceCapture.second;
+
+		Task->queue([&, transform, tile]() {
+			func(transform, tile);
+			
+			std::unique_lock lock(mutex);
+
+			tileCount--;
+			cond.notify_one();
+		});
+	}
+
+	std::unique_lock lock(mutex);
+	cond.wait(lock, [&]() { return tileCount == 0; });
 }
 
 Entity SandLayer::MakeTile(
@@ -332,86 +371,6 @@ Entity SandLayer::MakeTile(
 	else             Physics->AddCollisionObject(object);
 
 	return entity;
-}
-
-//void SandLayer::ForEachInPolygon(
-//	const std::vector<glm::vec2>& polygon,
-//	const std::vector<unsigned>& index,
-//	std::function<void(int, int, float, float)> func)
-//{
-//	for (size_t i = 0; i < index.size(); i += 3) {
-//		glm::vec2 v1 = polygon[index[i    ]] * float(m_cellsPerMeter);
-//		glm::vec2 v2 = polygon[index[i + 1]] * float(m_cellsPerMeter);
-//		glm::vec2 v3 = polygon[index[i + 2]] * float(m_cellsPerMeter);
-//
-//		ScanTriangle({v1,{}}, {v2,{}}, {v3,{}}, func);
-//	}
-//}
-
-void SandLayer::ForEachInPolygon(
-	const std::vector<glm::vec2>& polygon,
-	const std::vector<glm::vec2>& uv,
-	const std::vector<unsigned>&  index,
-	std::function<void(int, int, float, float)> func)
-{
-	for (size_t i = 0; i < index.size(); i += 3) {
-		glm::vec2 v1 = polygon[index[i    ]] * float(m_cellsPerMeter);
-		glm::vec2 v2 = polygon[index[i + 1]] * float(m_cellsPerMeter);
-		glm::vec2 v3 = polygon[index[i + 2]] * float(m_cellsPerMeter);
-		
-		glm::vec2 u1 = uv[index[i]];
-		glm::vec2 u2 = uv[index[i + 1]];
-		glm::vec2 u3 = uv[index[i + 2]];
-
-		ScanTriangle({v1,u1}, {v2,u2}, {v3,u3}, func);
-	}
-}
-
-void SandLayer::ScanTriangle(
-	Vertex v1,
-	Vertex v2,
-	Vertex v3,
-	std::function<void(int, int, float, float)>& func)
-{
-	auto ScanHalf = [&](Edge topBot, Edge other, InterpolationUV lerp, bool ccw)
-	{
-		Edge* left  = &topBot;
-		Edge* right = &other;
-		if (ccw) std::swap(left, right);
-
-		for (int y = other.m_minY; y < other.m_maxY; y++)
-		{
-			float preStepX = left->m_x - ceil(left->m_x);
-
-			float u = left->m_u + lerp.m_stepUX * preStepX;
-			float v = left->m_v + lerp.m_stepVX * preStepX;
-
-			for (int x = left->m_x; x < right->m_x; x++)
-			{
-				func(x, y, clamp<float>(u, 0, 1), clamp<float>(v, 0, 1));
-				u += lerp.m_stepUX;
-				v += lerp.m_stepVX;
-			}
-
-			left->Step();
-			right->Step();
-		}
-	};
-
-	if (v1.pos.y < v2.pos.y) std::swap(v1, v2);
-	if (v2.pos.y < v3.pos.y) std::swap(v2, v3);
-	if (v1.pos.y < v2.pos.y) std::swap(v1, v2);
-
-	InterpolationUV lerp(v1, v2, v3);
-
-	Edge eBotTop(v3, v1, lerp);
-	Edge eMidTop(v2, v1, lerp);
-	Edge eBotMid(v3, v2, lerp);
-
-	bool ccw = !IsClockwise(v1.pos, v2.pos, v3.pos);
-
-	ScanHalf(eBotTop, eMidTop, lerp, ccw);
-	ScanHalf(eBotTop, eBotMid, lerp, ccw);
 }
 
 IW_PLUGIN_SAND_END
