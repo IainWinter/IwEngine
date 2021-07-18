@@ -107,32 +107,52 @@ void SandChunk::CommitCells() {
 
 // Helpers
 
-size_t SandChunk::GetIndex(int x, int y) {
+size_t SandChunk::GetIndex(
+	int x, int y)
+{
 	x -= m_x;
 	y -= m_y;
 	return x + y * m_width;
 }
 
-bool SandChunk::InBounds(int x, int y) {
+bool SandChunk::InBounds(
+	int x, int y) 
+{
 	return x >= m_x && x < m_x + m_width
 		&& y >= m_y && y < m_y + m_height;
 }
 
-bool SandChunk::IsEmpty(int x, int y) {
-	//KeepAlive(x, y); // myabe keep all querys alive?
+bool SandChunk::IsEmpty(
+	int x, int y) 
+{
 	std::unique_lock lock(GetLock(x, y)); 
 	return !GetCell<bool>(x, y, SandField::SOLID);
 }
 
-void SandChunk::KeepAlive(int x, int y) {
+void SandChunk::KeepAlive(
+	int x, int y) 
+{
 	KeepAlive(GetIndex(x, y));
 }
 
-void SandChunk::KeepAlive(size_t index) {
+void SandChunk::KeepAlive(
+	size_t index) 
+{
+	std::unique_lock lock(m_workingRectMutex);
+	KeepAlive_unsafe(index);
+}
+
+void SandChunk::KeepAlive_unsafe(
+	int x, int y)
+{
+	KeepAlive_unsafe(GetIndex(x, y));
+}
+
+void SandChunk::KeepAlive_unsafe(
+	size_t index) 
+{
 	int x = index % m_width;
 	int y = index / m_width;
-
-	std::unique_lock lock(m_workingRectMutex);
 
 	m_minXw = iw::clamp(min(x - 2, m_minXw), 0, m_width);
 	m_minYw = iw::clamp(min(y - 2, m_minYw), 0, m_height);

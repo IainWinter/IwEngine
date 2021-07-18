@@ -153,8 +153,12 @@ void SandWorld::RemoveEmptyChunks() {
 SandChunk* SandWorld::GetChunk(
 	int x, int y)
 {
-	auto location = GetChunkLocation(x, y);
+	return GetChunkL(GetChunkLocation(x, y));
+}
 
+SandChunk* SandWorld::GetChunkL(
+	std::pair<int, int> location)
+{
 	SandChunk* chunk = GetChunkDirect(location);
 	if (!chunk) {
 		chunk = CreateChunk(location);

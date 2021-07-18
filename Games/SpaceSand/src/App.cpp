@@ -1,6 +1,7 @@
 ﻿#include "App.h"
 #include "plugins/iw/Sand/Engine/SandLayer.h"
 #include "iw/engine/Systems/PhysicsSystem.h"
+#include "iw/math/noise.h"
 
 struct GameLayer : iw::Layer
 {
@@ -19,27 +20,43 @@ struct GameLayer : iw::Layer
 		iw::ref<iw::Texture> tex = REF<iw::Texture>(64, 64);
 		unsigned* colors = (unsigned*)tex->CreateColors();
 
-		iw::Color black = iw::Color(0, 0, 0);
-		iw::Color pink  = iw::Color::From255(235, 52, 186);
+		//iw::Color black = iw::Color(0, 0, 0);
+		//iw::Color pink  = iw::Color::From255(235, 52, 186);
 
-		bool f = false;
-		for (int x = 0; x < tex->Width() ; x++){
-			for (int y = 0; y < tex->Height(); y++) 
-			{
-				colors[x + y * tex->Width()] = f ? black.to32() : pink.to32();
-			}
+		//bool f = false;
+		//for (int x = 0; x < tex->Width() ; x++){
+		//	for (int y = 0; y < tex->Height(); y++) 
+		//	{
+		//		colors[x + y * tex->Width()] = f ? black.to32() : pink.to32();
+		//	}
 
-			if (x % 16 == 0)
+		//	if (x % 16 == 0)
+		//	{
+		//		f = !f;
+		//	}
+		//}
+
+		int width  = tex->Width(),
+			height = tex->Height();
+
+		for (int ix = 0; ix < width;  ix++)
+		for (int iy = 0; iy < height; iy++)
+		{
+			float x = ix - width  / 2;
+			float y = iy - height / 2;
+			float dist = sqrt(x*x + y*y);
+    
+			if (dist < width/2) 
 			{
-				f = !f;
+				colors[ix + iy * width] = iw::Color(1.f).to32();
 			}
 		}
 
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < 1; i++) {
 			player = sand->MakeTile(tex, true);
-			player.Find<iw::Rigidbody>()->Transform.Position.x = iw::randf() * 1000;
-			player.Find<iw::Rigidbody>()->Transform.Position.y = iw::randf() * 1000;
-			player.Find<iw::Rigidbody>()->AngularVelocity.z = iw::clamp<float>(iw::randf() * 5, 2, 5);
+			player.Find<iw::Rigidbody>()->Transform.Position.x = iw::randf() * 150;
+			player.Find<iw::Rigidbody>()->Transform.Position.y = iw::randf() * 150;
+			player.Find<iw::Rigidbody>()->AngularVelocity.z = iw::FixedTime() * 200;
 
 			player.Find<iw::Rigidbody>()->IsTrigger = true;
 		}
@@ -61,7 +78,7 @@ struct GameLayer : iw::Layer
 
 App::App() : iw::Application() 
 {
-	int cellSize = 2;
+	int cellSize = 4;
 	int cellMeter = 10;
 
 	iw::SandLayer* sand = PushLayer<iw::SandLayer>(cellSize, cellMeter, true);
@@ -95,8 +112,8 @@ iw::Application* CreateApplication(
 	iw::InitOptions& options)
 {
 	options.WindowOptions = iw::WindowOptions {
-		800/**4/3*/,
-		800/**4/3*/,
+		1920/**4/3*/,
+		1080/**4/3*/,
 		true,
 		iw::DisplayState::NORMAL
 	};

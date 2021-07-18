@@ -129,6 +129,15 @@ public:
 	}
 
 	template<typename _t = Cell>
+	void SetCell_unsafe(
+		int x, int y,
+		const _t& cell,
+		SandField field = SandField::CELL)
+	{
+		SetCell_unsafe<_t>(GetIndex(x, y), cell, field);
+	}
+
+	template<typename _t = Cell>
 	void SetCell(
 		size_t index,
 		const _t& cell,
@@ -138,15 +147,15 @@ public:
 
 		Field& field = GetField(fieldid);
 
-		//if (field.locks) {
-		//	field.locks[index].lock();
-		//}
+		if (field.locks) {
+			field.locks[index].lock();
+		}
 
 		_t& dest = field.GetCell<_t>(index);
 		_t default = _t();
 
 		if (    dest == default
-			&& cell != default) // Filling a cell
+		     && cell != default) // Filling a cell
 		{
 			std::unique_lock lock(m_filledCellCountMutex);
 			field.filledCellCount++;
@@ -155,7 +164,7 @@ public:
 
 		else
 		if (    dest != default
-			&& cell == default) // Removing a filled cell
+		     && cell == default) // Removing a filled cell
 		{
 			std::unique_lock lock(m_filledCellCountMutex);
 			field.filledCellCount--;
@@ -164,16 +173,52 @@ public:
 
 		dest = cell;
 
-		int x = index % m_width;
-		int y = index / m_width;
-
 		if (field.onSetCell) {
+			int x = index % m_width;
+			int y = index / m_width;
 			field.onSetCell(this, index, x, y, (void*)&dest);
 		}
 
-		//if (field.locks) {
-		//	field.locks[index].unlock();
-		//}
+		if (field.locks) {
+			field.locks[index].unlock();
+		}
+	}
+
+	template<typename _t = Cell>
+	void SetCell_unsafe(
+		size_t index,
+		const _t& cell,
+		SandField fieldid = SandField::CELL)
+	{
+		KeepAlive_unsafe(index);
+
+		Field& field = GetField(fieldid);
+
+		_t& dest = field.GetCell<_t>(index);
+		_t default = _t();
+
+		if (    dest == default
+		     && cell != default) // Filling a cell
+		{
+			field.filledCellCount++;
+			m_filledCellCount++;
+		}
+
+		else
+		if (    dest != default
+		     && cell == default) // Removing a filled cell
+		{
+			field.filledCellCount--;
+			m_filledCellCount--;
+		}
+
+		dest = cell;
+
+		if (field.onSetCell) {
+			int x = index % m_width;
+			int y = index / m_width;
+			field.onSetCell(this, index, x, y, (void*)&dest);
+		}
 	}
 
 	//IW_PLUGIN_SAND_API void SwapBuffers();
@@ -192,6 +237,9 @@ public:
 
 	IW_PLUGIN_SAND_API void KeepAlive(int x, int y);
 	IW_PLUGIN_SAND_API void KeepAlive(size_t index);
+
+	IW_PLUGIN_SAND_API void KeepAlive_unsafe(int x, int y);
+	IW_PLUGIN_SAND_API void KeepAlive_unsafe(size_t index);
 
 	IW_PLUGIN_SAND_API void UpdateRect();
 };

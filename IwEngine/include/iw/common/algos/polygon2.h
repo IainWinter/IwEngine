@@ -93,6 +93,11 @@ namespace common {
 		const Transform* transform);
 
 	IWCOMMON_API
+	AABB2 TransformBounds(
+		const AABB2& bounds,
+		const Transform* transform);
+
+	IWCOMMON_API
 	AABB2 GenPolygonBounds(
 		const std::vector<glm::vec2>& polygon);
 

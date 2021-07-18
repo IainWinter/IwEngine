@@ -17,9 +17,6 @@ public:
 
 	const int m_batchGridSize = 2;
 
-	int m_offsetX = 0;
-	int m_offsetY = 0;
-
 	bool m_expandWorld;
 	size_t m_frameCount = 0;
 
@@ -98,7 +95,8 @@ public:
 
 	IW_PLUGIN_SAND_API void RemoveEmptyChunks();
 
-	IW_PLUGIN_SAND_API SandChunk* GetChunk(int x, int y);
+	IW_PLUGIN_SAND_API SandChunk* GetChunk(int x,  int y);
+	IW_PLUGIN_SAND_API SandChunk* GetChunkL(std::pair<int, int> location);
 	IW_PLUGIN_SAND_API SandChunk* GetChunkDirect(std::pair<int, int> location);
 
 	IW_PLUGIN_SAND_API SandChunk* CreateChunk(std::pair<int, int> location);

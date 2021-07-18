@@ -185,7 +185,19 @@ void SandLayer::PreUpdate() {
 		Transform* transform,
 		Tile* tile)
 	{
-		m_tilesThisFrame.emplace_back(transform, tile);
+		m_tilesThisFrame.push_back(tile);
+
+		if (tile->NeedsScan)
+		{
+			tile->NeedsScan = false;
+			tile->UpdatePolygon();
+
+			MeshCollider2* collider = Space->FindEntity(tile).Find<MeshCollider2>();
+			collider->SetPoints(tile->m_polygon);
+			collider->SetTriangles(tile->m_index);
+		}
+
+		tile->LastTransform = *transform;
 	});
 
 	PasteTiles(m_tilesThisFrame);
@@ -259,92 +271,51 @@ bool SandLayer::On(MouseWheelEvent& e) {
 	return false;
 }
 
+// This works for now but if preformance is a problem could add a bulk submit feature to chunk to eak a little more out
+
 void SandLayer::PasteTiles(
-	const std::vector<std::pair<Transform*, Tile*>>& tiles)
+	const std::vector<Tile*>& tiles)
 {
-	ForEachTile(tiles, [&](
-		Transform* transform, 
-		Tile* tile) 
-	{
-		if (tile->NeedsScan)
+	using SpriteData = std::pair<unsigned*, unsigned>; // color, width
+	using PixelData  = std::tuple<int, int, unsigned>; // x, y, color
+
+	RasterTilesIntoSandWorld(tiles,
+		[](Tile* tile) {
+			auto& sprite = tile->m_sprite;
+			return SpriteData((unsigned*)sprite->Colors(), sprite->Width());
+		},
+		[](SpriteData& sprite, int x, int y, int u, int v) {
+			auto& [colors, width] = sprite;
+			return PixelData(x, y, colors[u + v * width]);
+		},
+		[](SandChunk* chunk, PixelData& data)
 		{
-			tile->NeedsScan = false;
-			tile->UpdatePolygon();
-
-			MeshCollider2* collider = Space->FindEntity(tile).Find<MeshCollider2>();
-			collider->SetPoints(tile->m_polygon);
-			collider->SetTriangles(tile->m_index);
+			auto& [x, y, color] = data;
+			chunk->SetCell_unsafe(x, y, color, SandField::COLOR);
+			chunk->SetCell_unsafe(x, y, true,  SandField::SOLID);
 		}
-
-		tile->LastTransform = *transform;
-
-		unsigned* colors = (unsigned*)tile->m_sprite->Colors();
-
-		// add to buckets that can only get chunk once per chunk
-
-		std::vector<glm::vec2> polygon = tile->m_polygon;
-		TransformPolygon(polygon, &tile->LastTransform);
-		ForEachInPolygon(polygon, tile->m_uv, tile->m_index, [&](int x, int y, int u, int v)
-			{
-				if (SandChunk* chunk = m_world->GetChunk(x, y))
-				{
-					unsigned color = colors[u + v * tile->m_sprite->Width()];
-
-					chunk->SetCell(x, y, true, SandField::SOLID);
-					chunk->SetCell(x, y, color, SandField::COLOR);
-				}
-			});
-
-		tile->LastTransform = *transform; 
-	});
+	);
 }
 
 void SandLayer::RemoveTiles(
-	const std::vector<std::pair<Transform*, Tile*>>& tiles)
+	const std::vector<Tile*>& tiles)
 {
-	ForEachTile(tiles, [&](
-		Transform* transform,
-		Tile* tile)
-	{
-		std::vector<glm::vec2> polygon = tile->m_polygon;
-		TransformPolygon(polygon, &tile->LastTransform);
-		ForEachInPolygon(polygon, tile->m_uv, tile->m_index, [&](int x, int y, int u, int v)
+	using PixelData = std::pair<int, int>; // x, y
+
+	RasterTilesIntoSandWorld(tiles,
+		[](Tile* tile) {
+			return tile; // little funky dont need this but there is no way to not have it lol
+		},
+		[](Tile* tile, int x, int y, int u, int v) {
+			return PixelData(x, y);
+		},
+		[](SandChunk* chunk, PixelData& data)
 		{
-			if (SandChunk* chunk = m_world->GetChunk(x, y))
-			{
-				chunk->SetCell(x, y, false, SandField::SOLID);
-				chunk->SetCell(x, y, Color().to32(), SandField::COLOR);
-			}
-		});
-	});
-}
-
-void SandLayer::ForEachTile(
-	const std::vector<std::pair<Transform*, Tile*>>& tiles,
-	std::function<void(Transform*, Tile*)> func)
-{
-	std::mutex mutex;
-	std::condition_variable cond;
-
-	int tileCount = tiles.size();
-
-	for (const auto& niceCapture : tiles) 
-	{
-		Transform* transform = niceCapture.first;
-		Tile*      tile      = niceCapture.second;
-
-		Task->queue([&, transform, tile]() {
-			func(transform, tile);
-			
-			std::unique_lock lock(mutex);
-
-			tileCount--;
-			cond.notify_one();
-		});
-	}
-
-	std::unique_lock lock(mutex);
-	cond.wait(lock, [&]() { return tileCount == 0; });
+			auto& [x, y] = data;
+			chunk->SetCell_unsafe(x, y, 0u,    SandField::COLOR);
+			chunk->SetCell_unsafe(x, y, false, SandField::SOLID);
+		}
+	);
 }
 
 Entity SandLayer::MakeTile(

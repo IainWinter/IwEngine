@@ -13,10 +13,11 @@ void SandWorldUpdateSystem::Update() {
 	std::mutex mutex;
 	std::condition_variable cond;
 
-
 	// should of been a copy of chunks,
 	// only works because it could only create a chunk outside of
 	// the batch?
+
+	// should replace with Task->foreach
 
 	auto doForAllChunks = [&](std::function<void(iw::SandChunk*)> func)
 	{		

@@ -588,6 +588,21 @@ namespace common {
 		}
 	}
 
+	AABB2 TransformBounds(
+		const AABB2& bounds,
+		const Transform* transform)
+	{
+		std::vector<glm::vec2> corners {
+			bounds.Min,
+			bounds.Max,
+			glm::vec2(bounds.Min.x, bounds.Max.y),
+			glm::vec2(bounds.Max.x, bounds.Min.y),
+		};
+		
+		TransformPolygon(corners, transform);
+		return GenPolygonBounds(corners);
+	}
+
 	AABB2 GenPolygonBounds(
 		const std::vector<glm::vec2>& polygon)
 	{

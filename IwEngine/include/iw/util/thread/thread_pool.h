@@ -4,6 +4,8 @@
 #include <vector>
 #include <thread>
 #include <functional>
+#include <mutex>
+#include <condition_variable>
 //#include <string>
 
 namespace iw {
@@ -43,6 +45,10 @@ namespace util {
 
 						//LOG_DEBUG << "Called function " << func.name;
 
+						if (!func.func) {
+							LOG_ERROR << "Tried to call queued function in thread pool but it was missing!";
+						}
+
 						func.func();
 					}
 				});
@@ -76,6 +82,40 @@ namespace util {
 			};
 
 			m_queue.push(t);
+		}
+
+		template<
+			typename _container,
+			typename _preThreadFunc,
+			typename _func>
+		void foreach(
+			const _container& container,
+			_preThreadFunc&& preThreadFunc,
+			_func&& func)
+		{
+			std::mutex mutex;
+			std::condition_variable cond;
+
+			int remaining = container.size();
+			int index = -1; // adds 1 before call
+
+			for (const auto& element : container)
+			{
+				index += 1;
+				auto preThread = preThreadFunc(element);
+
+				queue([&, func, index, preThread]() // need to copy func?
+				{
+					func(index, preThread);
+
+					std::unique_lock lock(mutex);
+					remaining -= 1;
+					cond.notify_one();
+				});
+			}
+
+			std::unique_lock lock(mutex);
+			cond.wait(lock, [&]() { return remaining == 0; });
 		}
 	};
 }
