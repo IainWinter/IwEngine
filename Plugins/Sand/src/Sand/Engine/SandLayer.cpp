@@ -43,7 +43,7 @@ int SandLayer::Initialize() {
 
 	Cell _SAND = {
 		CellType::SAND,
-		/*CellProperties::MOVE_FORCE | */CellProperties::MOVE_DOWN | CellProperties::MOVE_DOWN_SIDE,
+		CellProperties::MOVE_FORCE | CellProperties::MOVE_DOWN | CellProperties::MOVE_DOWN_SIDE,
 		CellStyle::RANDOM_STATIC,
 		Color::From255(235, 200, 175),
 		Color::From255(25, 25, 25, 0)
@@ -131,6 +131,16 @@ int SandLayer::Initialize() {
 	m_world->AddField<unsigned char>(false); // if solid, for IsEmpty / tiles
 	m_world->AddField<unsigned int>(false); // color for drawing / tiles
 
+	m_world->RemovedChunkCallback = [&](SandChunk* chunk) {
+		for (auto itr = m_cellsThisFrame.begin(); itr != m_cellsThisFrame.end(); ++itr)
+		{
+			if (chunk == itr->first) {
+				m_cellsThisFrame.erase(itr);
+				break;
+			}
+		}
+	};
+
 	//m_world->CreatedChunkCallback = [&](SandChunk* chunk) 
 	//{
 	//	ref<Texture> color = REF<Texture>(chunk->m_width, chunk->m_height, TEX_2D, RGBA);
@@ -179,28 +189,7 @@ void SandLayer::PreUpdate() {
 
 	DrawWithMouse(m_render->m_fx, -m_render->m_fy, width, height);
 
-	m_tilesThisFrame.clear();
-	Space->Query<Transform, Tile>().Each([&](
-		auto entity,
-		Transform* transform,
-		Tile* tile)
-	{
-		m_tilesThisFrame.push_back(tile);
-
-		if (tile->NeedsScan)
-		{
-			tile->NeedsScan = false;
-			tile->UpdatePolygon();
-
-			MeshCollider2* collider = Space->FindEntity(tile).Find<MeshCollider2>();
-			collider->SetPoints(tile->m_polygon);
-			collider->SetTriangles(tile->m_index);
-		}
-
-		tile->LastTransform = *transform;
-	});
-
-	PasteTiles(m_tilesThisFrame);
+	PasteTiles();
 }
 
 void SandLayer::PostUpdate()
@@ -209,7 +198,7 @@ void SandLayer::PostUpdate()
 		DrawMouseGrid();
 	}
 
-	RemoveTiles(m_tilesThisFrame);
+	RemoveTiles();
 }
 
 void SandLayer::DrawMouseGrid() {
@@ -238,7 +227,7 @@ void SandLayer::DrawWithMouse(int fx, int fy, int width, int height) {
 	if (Mouse::ButtonDown(LMOUSE)) {
 		CellType placeMe = CellType::EMPTY;
 
-			 if (Keyboard::KeyDown(S)) placeMe = CellType::SAND;
+		     if (Keyboard::KeyDown(S)) placeMe = CellType::SAND;
 		else if (Keyboard::KeyDown(W)) placeMe = CellType::WATER;
 		else if (Keyboard::KeyDown(R)) placeMe = CellType::ROCK;
 		else if (Keyboard::KeyDown(T)) placeMe = CellType::STONE;
@@ -271,51 +260,72 @@ bool SandLayer::On(MouseWheelEvent& e) {
 	return false;
 }
 
-// This works for now but if preformance is a problem could add a bulk submit feature to chunk to eak a little more out
-
-void SandLayer::PasteTiles(
-	const std::vector<Tile*>& tiles)
+void SandLayer::PasteTiles() 
 {
-	using SpriteData = std::pair<unsigned*, unsigned>; // color, width
-	using PixelData  = std::tuple<int, int, unsigned>; // x, y, color
+	m_tilesThisFrame.clear();
+	m_cellsThisFrame.clear();
 
-	RasterTilesIntoSandWorld(tiles,
+	Space->Query<Transform, Tile>().Each([&](
+		auto entity,
+		Transform* transform,
+		Tile* tile)
+	{
+		m_tilesThisFrame.push_back(tile);
+
+		if (tile->NeedsScan)
+		{
+			tile->NeedsScan = false;
+			tile->UpdatePolygon();
+
+			MeshCollider2* collider = Space->FindEntity(tile).Find<MeshCollider2>();
+			collider->SetPoints   (tile->m_collider);
+			collider->SetTriangles(tile->m_colliderIndex);
+		}
+
+		tile->LastTransform = *transform;
+	});
+
+	m_cellsThisFrame = RasterTilesIntoSandWorld(m_tilesThisFrame,
 		[](Tile* tile) {
 			auto& sprite = tile->m_sprite;
 			return SpriteData((unsigned*)sprite->Colors(), sprite->Width());
 		},
-		[](SpriteData& sprite, int x, int y, int u, int v) {
+		[](SpriteData& sprite, int x, int y, float u, float v, int tri) {
 			auto& [colors, width] = sprite;
-			return PixelData(x, y, colors[u + v * width]);
+			return PixelData(x, y, colors[(size_t)floor(u) + (size_t)floor(v) * width]);
 		},
 		[](SandChunk* chunk, PixelData& data)
 		{
 			auto& [x, y, color] = data;
-			chunk->SetCell_unsafe(x, y, color, SandField::COLOR);
-			chunk->SetCell_unsafe(x, y, true,  SandField::SOLID);
+
+			if (color >> 24 == 0) return; // if alpha is 0 then dont draw, this is NEEDED bc of square raster
+
+			if (!chunk->IsEmpty(x, y)) // this is for debugging, should eject pixel is overlapping
+			{
+				chunk->SetCell_unsafe(x, y, iw::Color(1, 0, 0).to32(), SandField::COLOR);
+			}
+
+			else {
+				chunk->SetCell_unsafe(x, y, color, SandField::COLOR);
+				chunk->SetCell_unsafe(x, y, true,  SandField::SOLID);
+			}
 		}
 	);
 }
 
-void SandLayer::RemoveTiles(
-	const std::vector<Tile*>& tiles)
-{
-	using PixelData = std::pair<int, int>; // x, y
+// i was thinking that if I can get the cells that were drawn, then this doesnt need to be a raster.
+// could return the grid structure
 
-	RasterTilesIntoSandWorld(tiles,
-		[](Tile* tile) {
-			return tile; // little funky dont need this but there is no way to not have it lol
-		},
-		[](Tile* tile, int x, int y, int u, int v) {
-			return PixelData(x, y);
-		},
-		[](SandChunk* chunk, PixelData& data)
+void SandLayer::RemoveTiles()
+{
+	for (auto& [chunk, pixels] : m_cellsThisFrame)
+	{
+		for (auto& [x, y, color] : pixels)
 		{
-			auto& [x, y] = data;
 			chunk->SetCell_unsafe(x, y, 0u,    SandField::COLOR);
 			chunk->SetCell_unsafe(x, y, false, SandField::SOLID);
 		}
-	);
+	}
 }
 
 Entity SandLayer::MakeTile(

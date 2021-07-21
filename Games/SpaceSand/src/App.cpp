@@ -1,12 +1,79 @@
 ﻿#include "App.h"
 #include "plugins/iw/Sand/Engine/SandLayer.h"
 #include "iw/engine/Systems/PhysicsSystem.h"
+#include "iw/physics/Dynamics/ImpulseSolver.h"
+#include "iw/physics/Dynamics/SmoothPositionSolver.h"
 #include "iw/math/noise.h"
+
+struct seed {
+	int x = 0, y = 0;
+	iw::Color c;
+
+	seed(int x, int y, const iw::Color& c) : x(x), y(y), c(c) {}
+
+	float distance(
+		int px, int py) const
+	{
+		int dx = x - px,
+			dy = y - py;
+
+		return sqrt(dx*dx + dy*dy);
+	}
+};
+
+seed& findClosestSeed(
+	std::vector<seed>& seeds,
+	int px, int py)
+{
+	seed* minSeed = nullptr;
+	float minDist = FLT_MAX;
+
+	for (seed& s : seeds)
+	{
+		float dist = s.distance(px, py);
+		if (dist < minDist)
+		{
+			minSeed = &s;
+			minDist = dist;
+		}
+	}
+
+	return *minSeed;
+}
+
+std::vector<seed> genRandomSeeds(
+	int count,
+	int w, int h,
+	int padw, int padh)
+{
+	std::vector<seed> seeds;
+
+	int w2 = w / 2;
+	int h2 = h / 2;
+
+	for (int i = 0; i < count; i++)
+	{
+		seeds.emplace_back(
+			iw::randf() * w2 + w2 + padw,
+			iw::randf() * h2 + h2 + padh,
+			iw::Color(iw::randf(), iw::randf(), iw::randf())
+		);
+	}
+
+	for (int x = 0; x < w; x++) findClosestSeed(seeds, x,     padh).c = 0;
+	for (int x = 0; x < w; x++) findClosestSeed(seeds, x, h - padh).c = 0;
+	for (int y = 0; y < h; y++) findClosestSeed(seeds,     padw, y).c = 0;
+	for (int y = 0; y < h; y++) findClosestSeed(seeds, w - padw, y).c = 0;
+
+	return seeds;
+}
 
 struct GameLayer : iw::Layer
 {
 	iw::SandLayer* sand;
 	iw::Entity player;
+
+	float x = 0, y = 0;
 
 	GameLayer(
 		iw::SandLayer* sand
@@ -17,58 +84,51 @@ struct GameLayer : iw::Layer
 
 	int Initialize() override 
 	{
-		iw::ref<iw::Texture> tex = REF<iw::Texture>(64, 64);
-		unsigned* colors = (unsigned*)tex->CreateColors();
-
-		//iw::Color black = iw::Color(0, 0, 0);
-		//iw::Color pink  = iw::Color::From255(235, 52, 186);
-
-		//bool f = false;
-		//for (int x = 0; x < tex->Width() ; x++){
-		//	for (int y = 0; y < tex->Height(); y++) 
-		//	{
-		//		colors[x + y * tex->Width()] = f ? black.to32() : pink.to32();
-		//	}
-
-		//	if (x % 16 == 0)
-		//	{
-		//		f = !f;
-		//	}
-		//}
-
-		int width  = tex->Width(),
-			height = tex->Height();
-
-		for (int ix = 0; ix < width;  ix++)
-		for (int iy = 0; iy < height; iy++)
+		for (int i = 0; i < 0; i++)
 		{
-			float x = ix - width  / 2;
-			float y = iy - height / 2;
-			float dist = sqrt(x*x + y*y);
-    
-			if (dist < width/2) 
+			int width  = iw::randi(128) + 64, width_pad  = 10, 
+				height = iw::randi(128) + 64, height_pad = 10;
+
+			std::vector<seed> seeds = genRandomSeeds(15, width, height, width_pad, height_pad);
+
+			iw::ref<iw::Texture> tex = REF<iw::Texture>(width, height);
+			unsigned* colors = (unsigned*)tex->CreateColors();
+
+			for (int x = 0; x < width;  x++)
+			for (int y = 0; y < height; y++)
 			{
-				colors[ix + iy * width] = iw::Color(1.f).to32();
+				colors[x + y * width] = findClosestSeed(seeds, x, y).c.to32();
 			}
+
+			iw::Entity e = sand->MakeTile(tex, true);
+			e.Find<iw::Rigidbody>()->Transform.Position.x = iw::randf() * 150;
+			e.Find<iw::Rigidbody>()->Transform.Position.y = iw::randf() * 150;
+			//e.Find<iw::Rigidbody>()->AngularVelocity.z = iw::FixedTime() * 20 * iw::randf();
 		}
 
-		for (int i = 0; i < 1; i++) {
-			player = sand->MakeTile(tex, true);
-			player.Find<iw::Rigidbody>()->Transform.Position.x = iw::randf() * 150;
-			player.Find<iw::Rigidbody>()->Transform.Position.y = iw::randf() * 150;
-			player.Find<iw::Rigidbody>()->AngularVelocity.z = iw::FixedTime() * 200;
-
-			player.Find<iw::Rigidbody>()->IsTrigger = true;
-		}
+		Physics->AddSolver(new iw::SmoothPositionSolver());
+		Physics->AddSolver(new iw::ImpulseSolver());
 
 		PushSystem<iw::PhysicsSystem>();
+
+		player = sand->MakeTile("textures/SpaceGame/space-ship.png", true);
 
 		return Layer::Initialize();
 	}
 
 	void PostUpdate() override
 	{
-		sand->SetCamera(0, 0, 10, 10);
+		iw::Transform& t = player.Find<iw::Rigidbody>()->Transform;
+
+		if (iw::Keyboard::KeyDown(iw::A)) t.Position.x -= 100 * iw::DeltaTime();
+		if (iw::Keyboard::KeyDown(iw::D)) t.Position.x += 100 * iw::DeltaTime();
+		if (iw::Keyboard::KeyDown(iw::W)) t.Position.y += 100 * iw::DeltaTime();
+		if (iw::Keyboard::KeyDown(iw::S)) t.Position.y -= 100 * iw::DeltaTime();
+
+		if (iw::Keyboard::KeyDown(iw::Q)) t.Rotation *= glm::angleAxis( iw::DeltaTime()*5, glm::vec3(0, 0, 1));
+		if (iw::Keyboard::KeyDown(iw::E)) t.Rotation *= glm::angleAxis(-iw::DeltaTime()*5, glm::vec3(0, 0, 1));
+
+		sand->SetCamera(x, y, 10, 10);
 
 		Renderer->BeginScene();
 		Renderer->DrawMesh(iw::Transform(), sand->GetSandMesh());
@@ -78,7 +138,7 @@ struct GameLayer : iw::Layer
 
 App::App() : iw::Application() 
 {
-	int cellSize = 4;
+	int cellSize = 2;
 	int cellMeter = 10;
 
 	iw::SandLayer* sand = PushLayer<iw::SandLayer>(cellSize, cellMeter, true);
@@ -112,8 +172,8 @@ iw::Application* CreateApplication(
 	iw::InitOptions& options)
 {
 	options.WindowOptions = iw::WindowOptions {
-		1920/**4/3*/,
-		1080/**4/3*/,
+		1280/**4/3*/,
+		720/**4/3*/,
 		true,
 		iw::DisplayState::NORMAL
 	};

@@ -23,15 +23,30 @@ namespace common {
 	std::vector<std::vector<glm::vec2>> MakePolygonFromField(
 		_t* field,
 		size_t width, size_t height,
-		const _t& threshhold,
-		std::function<bool(const _t&, const _t&)> test = [](const _t& a,
-												  const _t& b) { return a >= b; })
+		const _t& threshold)
+	{
+		return MakePolygonFromField(
+			field,
+			width, height,
+			[&](const _t& x)
+			{
+				return x >= threshold;
+			}
+		);
+	}
+
+	template<
+		typename _t>
+	std::vector<std::vector<glm::vec2>> MakePolygonFromField(
+		_t* field,
+		size_t width, size_t height,
+		std::function<bool(const _t&)> test)
 	{
 		bool* f = new bool[width * height];
 
 		for (size_t i = 0; i < width * height; i++)
 		{
-			f[i] = test(field[i], threshhold);
+			f[i] = test(field[i]);
 		}
 
 		auto out = MakePolygonFromField(f, width, height);
@@ -75,7 +90,7 @@ namespace common {
 	void RemoveTinyTriangles(
 		std::vector<glm::vec2>& polygon,
 		std::vector<unsigned>&  index,
-		float raiotOfAreaToRemove = .001);
+		float ratioOfAreaToRemove = .001);
 
 	IWCOMMON_API
 	polygon_cut CutPolygon(
@@ -96,6 +111,10 @@ namespace common {
 	AABB2 TransformBounds(
 		const AABB2& bounds,
 		const Transform* transform);
+
+	IWCOMMON_API
+	std::vector<glm::vec2> MakePolygonFromBounds(
+		const AABB2& bounds);
 
 	IWCOMMON_API
 	AABB2 GenPolygonBounds(

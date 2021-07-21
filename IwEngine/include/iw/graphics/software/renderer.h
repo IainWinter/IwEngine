@@ -45,6 +45,27 @@ namespace software_renderer {
 
 			DrawScanline(y, sides[0], sides[1]);
 		}
+
+		/*bool right = (y1 - y0) * (x2 - x0) < (x1 - x0) * (y2 - y0);
+		bool left = !right;
+
+		using Slope = invoke_result_t<_f2, const _v&, const _v&, int>;
+
+		Slope sides[2];
+		sides[right] = MakeSlope(*v0, *v2, y2 - y0);
+		sides[left] = MakeSlope(*v0, *v1, y1 - y0);
+
+		for (int y = y0; y < y1; y++)
+		{
+			DrawScanline(y, sides[0], sides[1]);
+		}
+
+		sides[left] = MakeSlope(*v1, *v2, y2 - y1);
+		for (int y = y1; y < y2; y++)
+		{
+			DrawScanline(y, sides[0], sides[1]);
+		}*/
+
 	}
 
 	struct Slope {
@@ -96,7 +117,7 @@ namespace software_renderer {
 				for (; x < endx; ++x)
 				{
 					PlotPoint(x, y, props[0].get(), props[1].get());
-					for (auto& slope : props) slope.step();
+					for (auto& prop : props) prop.step();
 				}
 
 				for (auto& slope : left)  slope.step();

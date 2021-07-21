@@ -31,7 +31,11 @@ private:
 	int gridSize = 16;
 	vec2 sP, gP; // sand pos, grid pos
 
+	using SpriteData = std::tuple<unsigned*, unsigned>; // color, width
+	using PixelData  = std::tuple<int, int, unsigned>;  // x, y, color
+
 	std::vector<Tile*> m_tilesThisFrame;
+	std::vector<std::pair<SandChunk*, std::vector<PixelData>>> m_cellsThisFrame;
 
 public:
 	SandLayer(
@@ -57,8 +61,8 @@ public:
 
 	IW_PLUGIN_SAND_API bool On(MouseWheelEvent& e);
 
-	IW_PLUGIN_SAND_API void PasteTiles (const std::vector<Tile*>& tiles);
-	IW_PLUGIN_SAND_API void RemoveTiles(const std::vector<Tile*>& tiles);
+	IW_PLUGIN_SAND_API void PasteTiles();
+	IW_PLUGIN_SAND_API void RemoveTiles();
 
 	Mesh& GetSandMesh() {
 		return m_render->GetSandMesh();
@@ -83,7 +87,7 @@ public:
 		const std::string& sprite,
 		bool isSimulated = false)
 	{
-		return MakeTile(REF<Texture>(16, 64), isSimulated);
+		return MakeTile(Asset->Load<iw::Texture>(sprite), isSimulated);
 	}
 
 	IW_PLUGIN_SAND_API
@@ -95,7 +99,7 @@ public:
 		const std::vector<glm::vec2>& polygon,
 		const std::vector<glm::vec2>& uv,
 		const std::vector<unsigned>&  index,
-		std::function<void(int, int, float, float)> func)
+		std::function<void(int, int, float, float, int)> func)
 	{
 		for (size_t i = 0; i < index.size(); i += 3) {
 			const glm::vec2& p1 = polygon[index[i]];
@@ -106,15 +110,15 @@ public:
 			const glm::vec2& u2 = uv[index[i + 1]];
 			const glm::vec2& u3 = uv[index[i + 2]];
 
-			using vertex = std::array<int, 4>;
+			using namespace software_renderer;
 
 			vertex v1 {p1.x, p1.y, u1.x, u1.y};
 			vertex v2 {p2.x, p2.y, u2.x, u2.y};
 			vertex v3 {p3.x, p3.y, u3.x, u3.y};
 
-			software_renderer::RasterPolygon(v1, v2, v3, [&](int x, int y, float u, float v)
+			RasterPolygon(v1, v2, v3, [&](int x, int y, float u, float v)
 			{
-				func(x, y, u, v);
+				func(x, y, u, v, i / 3);
 			});
 		}
 	}
@@ -124,7 +128,7 @@ public:
 private:
 
 	template<typename _f1, typename _f2>
-	using PixelDataf = std::invoke_result_t<_f2, std::invoke_result_t<_f1, Tile*>, int, int, int, int>;
+	using PixelDataf = std::invoke_result_t<_f2, std::invoke_result_t<_f1, Tile*>, int, int, float, float, int>;
 
 	template<typename _f1, typename _f2>
 	using PixelDataGridf = std::vector<std::vector<PixelDataf<_f1, _f2>>>;
@@ -135,7 +139,8 @@ private:
 		typename _f1,
 		typename _f2,
 		typename _f3>
-	void RasterTilesIntoSandWorld(
+	std::vector<std::pair<SandChunk*, std::vector<PixelDataf<_f1, _f2>>>>
+	RasterTilesIntoSandWorld(
 		const std::vector<Tile*>& tiles,
 		_f1&& GetPixelDataPre,
 		_f2&& GetPixelData,
@@ -157,7 +162,7 @@ private:
 
 		using PixelData = PixelDataf<_f1, _f2>;
 
-		unordered_map<pair<int, int>, vector<vector<PixelData>*>, pair_hash> grid;
+		unordered_map<pair<int, int>, vector<vector<PixelData>>, pair_hash> grid;
 
 		for (auto& [location, pixels] : cache)
 		{
@@ -166,13 +171,13 @@ private:
 			for (int x = 0; x < x_size; x++)
 			for (int y = 0; y < y_size; y++)
 			{
-				grid[{x + x_min, y + y_min}].push_back(&pixels[x + y * x_size]);
+				grid[{x + x_min, y + y_min}].emplace_back(move(pixels[x + y * x_size]));
 			}
 		}
 
 		Task->foreach(
 			grid,
-			[&](const auto& element) 
+			[&](auto& element) 
 			{
 				auto& [location, gridPixels] = element;
 				return make_pair(m_world->GetChunkL(location), &gridPixels);
@@ -181,13 +186,26 @@ private:
 			{
 				auto& [chunk, gridPixels] = chunkPixels;
 
-				for (vector<PixelData>* pixels : *gridPixels)
-				for (PixelData& data : *pixels)
+				for (vector<PixelData>& pixels : *gridPixels)
+				for (PixelData& data : pixels)
 				{
 					WritePixelData(chunk, data);
 				}
 			}
 		);
+
+		vector<std::pair<SandChunk*, vector<PixelData>>> outPixels;
+
+		for (auto& [location, gridPixels] : grid)
+		{
+			SandChunk* chunk = m_world->GetChunkL(location);
+			for (vector<PixelData>& pixels : gridPixels)
+			{
+				outPixels.emplace_back(chunk, move(pixels));
+			}
+		}
+
+		return outPixels;
 	}
 
 	template<
@@ -223,7 +241,7 @@ private:
 
 		std::vector<glm::vec2> polygon = tile->m_polygon;
 		TransformPolygon(polygon, &tile->LastTransform);
-		ForEachInPolygon(polygon, tile->m_uv, tile->m_index, [&](int x, int y, int u, int v)
+		ForEachInPolygon(polygon, tile->m_uv, tile->m_index, [&](int x, int y, float u, float v, int tri)
 		{
 			auto [px, py] = m_world->GetChunkLocation(x, y);
 			px -= cx_min;
@@ -237,7 +255,7 @@ private:
 				return;
 			}
 
-			pixels[px + py * x_size].emplace_back(GetPixelData(pre, x, y, u, v));
+			pixels[px + py * x_size].emplace_back(GetPixelData(pre, x, y, u, v, tri));
 		});
 
 		return {

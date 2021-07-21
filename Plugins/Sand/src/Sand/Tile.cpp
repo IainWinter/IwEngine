@@ -20,28 +20,35 @@ void Tile::UpdatePolygon()
 	unsigned* colors = (unsigned*)m_sprite->Colors();
 	glm::vec2 size   =            m_sprite->Dimensions();
 
-	auto polygons = MakePolygonFromField(colors, size.x, size.y, 1u);
+	auto colliders = MakePolygonFromField<unsigned>( // why does this NEED template arg
+		colors, 
+		size.x, size.y,
+		[](const unsigned& color)
+		{
+			return Color::From32(color).a > 0; // i wonder if this optimizes for only the alpha channel?
+		});
 	
-	if (polygons.size() == 0) return;
+	if (colliders.size() == 0) return;
 
-	//for (glm::vec2& p : polygons[0]) // ideally this would just be smushed into 1, making accessor functions for polygon2 would make this possible
-	//{
-	//	m_polygon.emplace_back(
-	//		ceil(p.x - size.x / 2), ceil(p.y - size.y / 2),
-	//		ceil(p.x),              ceil(p.y)
-	//	);
-	//}
+	m_collider      = colliders[0]; // should combine into single polygon?
+	m_colliderIndex = TriangulatePolygon(colliders[0]);
 
-	m_polygon = polygons[0]; // maybe combine into single polygon?
-	m_index   = TriangulatePolygon(polygons[0]);
+	m_bounds = GenPolygonBounds(m_collider);
 
-	m_uv = m_polygon;
+	RemoveTinyTriangles(m_collider, m_colliderIndex, 0.1f); // find best value for this, colliders can be less detailed
 
-	for (glm::vec2& v : m_polygon) {
-		v -= size / 2.0f;
-	}
+	m_polygon = MakePolygonFromBounds(m_bounds);
+	m_index   = TriangulatePolygon(m_polygon);
 
-	m_bounds = GenPolygonBounds(m_polygon);
+	m_uv = m_polygon; // uv origin is 0
+
+	glm::vec2 halfSize = size / 2.0f;
+
+	for (glm::vec2& v : m_collider) v -= halfSize ; // Origins to middle
+	for (glm::vec2& v : m_polygon)  v -= halfSize ;
+
+	m_bounds.Min -= halfSize; // could make better flow
+	m_bounds.Max -= halfSize;
 }
 
 IW_PLUGIN_SAND_END

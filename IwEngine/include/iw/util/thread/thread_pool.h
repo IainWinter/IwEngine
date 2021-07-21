@@ -89,7 +89,7 @@ namespace util {
 			typename _preThreadFunc,
 			typename _func>
 		void foreach(
-			const _container& container,
+			_container& container,
 			_preThreadFunc&& preThreadFunc,
 			_func&& func)
 		{
@@ -99,7 +99,7 @@ namespace util {
 			int remaining = container.size();
 			int index = -1; // adds 1 before call
 
-			for (const auto& element : container)
+			for (auto& element : container)
 			{
 				index += 1;
 				auto preThread = preThreadFunc(element);

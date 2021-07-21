@@ -1,6 +1,7 @@
 #include "iw/common/algos/polygon2.h"
+#include "iw/log/logger.h"
 
-#define JC_VORONOI_CLIP_IMPLEMENTATION
+#define JC_VORONOI_CLIP_IMPLEMENTATION // remove this library
 #define JC_VORONOI_IMPLEMENTATION
 #include "voronoi/jc_voronoi_clip.h"
 
@@ -411,7 +412,7 @@ namespace common {
 	void RemoveTinyTriangles(
 		std::vector<glm::vec2>& polygon, 
 		std::vector<unsigned>& index, 
-		float raiotOfAreaToRemove)
+		float ratioOfAreaToRemove)
 	{
 		float totalArea = 0;
 
@@ -424,9 +425,11 @@ namespace common {
 		for (size_t i = 0; i < index.size(); i += 3)
 		{
 			auto& [a, b, c] = GetTriangle(polygon, index, i);
-			float area = TriangleArea(a, b, c);
+			float ratio = TriangleArea(a, b, c) / totalArea;
 
-			if (area / totalArea < 0.01) {
+			LOG_INFO << "Triangle " << i / 3 << " area ratio: " << ratio;
+
+			if (ratio < ratioOfAreaToRemove) {
 				index.erase(index.begin() + i + 2);
 				index.erase(index.begin() + i + 1);
 				index.erase(index.begin() + i);
@@ -592,15 +595,20 @@ namespace common {
 		const AABB2& bounds,
 		const Transform* transform)
 	{
-		std::vector<glm::vec2> corners {
-			bounds.Min,
-			bounds.Max,
-			glm::vec2(bounds.Min.x, bounds.Max.y),
-			glm::vec2(bounds.Max.x, bounds.Min.y),
-		};
-		
+		std::vector<glm::vec2> corners = MakePolygonFromBounds(bounds);
 		TransformPolygon(corners, transform);
 		return GenPolygonBounds(corners);
+	}
+
+	std::vector<glm::vec2> MakePolygonFromBounds(
+		const AABB2& bounds)
+	{
+		return {
+			bounds.Min,
+			glm::vec2(bounds.Max.x, bounds.Min.y),
+			bounds.Max,
+			glm::vec2(bounds.Min.x, bounds.Max.y)
+		};
 	}
 
 	AABB2 GenPolygonBounds(
