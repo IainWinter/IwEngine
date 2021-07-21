@@ -35,7 +35,7 @@ void Tile::UpdatePolygon()
 
 	m_bounds = GenPolygonBounds(m_collider);
 
-	RemoveTinyTriangles(m_collider, m_colliderIndex, 0.1f); // find best value for this, colliders can be less detailed
+	RemoveTinyTriangles(m_collider, m_colliderIndex, 0.01f); // find best value for this, colliders can be less detailed
 
 	m_polygon = MakePolygonFromBounds(m_bounds);
 	m_index   = TriangulatePolygon(m_polygon);

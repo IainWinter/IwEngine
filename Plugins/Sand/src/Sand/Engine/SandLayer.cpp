@@ -1,7 +1,5 @@
 #include "iw/Sand/Engine/SandLayer.h"
 #include "iw/log/logger.h"
-
-#include "iw/physics/Collision/MeshCollider.h"
 #include "iw/common/algos/polygon2.h"
 
 IW_PLUGIN_SAND_BEGIN
@@ -298,7 +296,7 @@ void SandLayer::PasteTiles()
 		{
 			auto& [x, y, color] = data;
 
-			if (color >> 24 == 0) return; // if alpha is 0 then dont draw, this is NEEDED bc of square raster
+			if (Color::From32(color).a == 0) return; // if alpha is 0 then dont draw, this is NEEDED bc of square raster
 
 			if (!chunk->IsEmpty(x, y)) // this is for debugging, should eject pixel is overlapping
 			{
@@ -313,15 +311,14 @@ void SandLayer::PasteTiles()
 	);
 }
 
-// i was thinking that if I can get the cells that were drawn, then this doesnt need to be a raster.
-// could return the grid structure
-
 void SandLayer::RemoveTiles()
 {
 	for (auto& [chunk, pixels] : m_cellsThisFrame)
 	{
 		for (auto& [x, y, color] : pixels)
 		{
+			if (Color::From32(color).a == 0) continue; // for color, this could prb be culled in the raster instead of both here and in the draw
+
 			chunk->SetCell_unsafe(x, y, 0u,    SandField::COLOR);
 			chunk->SetCell_unsafe(x, y, false, SandField::SOLID);
 		}

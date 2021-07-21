@@ -20,8 +20,8 @@ namespace Graphics {
 
 		Color(float r, float g, float b, float a = 1.0f) : r(r),      g(g),      b(b),      a(a)      {}
 		Color(float rgba)                                : r(rgba),   g(rgba) ,  b(rgba),   a(rgba)   {}
-		Color(glm::vec3 rgb)                               : r(rgb .x), g(rgb .y), b(rgb .z), a(1)      {}
-		Color(glm::vec4 rgba)                              : r(rgba.x), g(rgba.y), b(rgba.z), a(rgba.w) {}
+		Color(glm::vec3 rgb)                             : r(rgb .x), g(rgb .y), b(rgb .z), a(1)      {}
+		Color(glm::vec4 rgba)                            : r(rgba.x), g(rgba.y), b(rgba.z), a(rgba.w) {}
 
 		glm::vec2 rg()   const { return glm::vec2(r, g); }
 		glm::vec3 rgb()  const { return glm::vec3(r, g, b); }

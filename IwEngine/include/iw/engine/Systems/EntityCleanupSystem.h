@@ -6,7 +6,7 @@
 namespace iw {
 namespace Engine {
 	class EntityCleanupSystem
-		: public System<>
+		: public SystemBase
 	{
 	public:
 		IWENGINE_API
@@ -14,6 +14,7 @@ namespace Engine {
 
 		IWENGINE_API bool On(EntityDestroyEvent&   e) override;
 		IWENGINE_API bool On(EntityDestroyedEvent& e) override;
+		IWENGINE_API bool On(EntityMovedEvent&     e) override;
 	};
 }
 

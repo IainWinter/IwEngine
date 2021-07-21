@@ -34,6 +34,10 @@ namespace Physics {
 	public:
 		IWPHYSICS_API Rigidbody(bool isKinematic = true);
 
+		// maybe create a rigidbody 2d
+		//IWPHYSICS_API void ApplyForce2 (const glm::vec2& force, const glm::vec2& position = glm::vec2());
+		//IWPHYSICS_API void ApplyTorque2(float torque);
+
 		IWPHYSICS_API void ApplyForce (const glm::vec3& force, const glm::vec3& position = glm::vec3());
 		IWPHYSICS_API void ApplyTorque(const glm::vec3& torque);
 		IWPHYSICS_API void ApplyGravity();

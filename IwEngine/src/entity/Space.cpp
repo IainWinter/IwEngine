@@ -382,10 +382,16 @@ namespace ECS {
 
 	void Space::MoveComponents(
 		ref<EntityData>& entityData,
-		const ref<Archetype>& archetype)
+		const ref<Archetype>& newArchetype)
 	{
-		entityData->ChunkIndex = m_componentManager.MoveComponentData(entityData, archetype);
-		entityData->Archetype = archetype;
+#ifdef IW_USE_EVENTS
+		if (m_bus) {
+			m_bus->send<EntityMovedEvent>(entityData->Entity, entityData->Archetype, newArchetype);
+		}
+#endif
+
+		entityData->ChunkIndex = m_componentManager.MoveComponentData(entityData, newArchetype);
+		entityData->Archetype = newArchetype;
 	}
 }
 }

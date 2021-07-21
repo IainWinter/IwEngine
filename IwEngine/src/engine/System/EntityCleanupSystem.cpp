@@ -8,8 +8,11 @@
 namespace iw {
 namespace Engine {
 	EntityCleanupSystem::EntityCleanupSystem()
-		: System<>("Entity Cleanup")
+		: SystemBase("Entity Cleanup")
 	{}
+
+	// need to add a event for when component data is moved so the components that use pointers can be
+	// repointed at the correct thing, ie Rigidbody -> Collider*
 
 	bool EntityCleanupSystem::On(
 		EntityDestroyEvent& e)
@@ -23,7 +26,7 @@ namespace Engine {
 	{
 		Transform* transform = Space->FindComponent<Transform>(e.Entity);
 		if (transform) {
-			//for (iw::Transform* child : transform->Children()) {
+			//for (Transform* child : transform->Children()) {
 			//	Space->QueueEntity(Space->FindEntity(child).Handle, func_Destroy);
 			//}
 
@@ -48,15 +51,36 @@ namespace Engine {
 			//sys->GetParticleMesh().Material.reset();
 		}
 
-		iw::Rigidbody* body = Space->FindComponent<iw::Rigidbody>(e.Entity);
+		Rigidbody* body = Space->FindComponent<Rigidbody>(e.Entity);
 		if (body) {
 			Physics->RemoveCollisionObject(body);
 		}
 
-		iw::CollisionObject* obj = Space->FindComponent<iw::CollisionObject>(e.Entity);
+		CollisionObject* obj = Space->FindComponent<CollisionObject>(e.Entity);
 		if (obj) {
 			Physics->RemoveCollisionObject(obj);
 		}
+
+		return false;
+	}
+
+	bool EntityCleanupSystem::On(
+		EntityMovedEvent& e) 
+	{
+		LOG_WARNING << "Entity " << e.Entity.Index << "'s data has moved!";
+		// Physics components
+		//
+		//CollisionObject* obj = Space->FindComponent<Rigidbody>(e.Entity);
+		//if (!obj) {
+		//	obj = Space->FindComponent<CollisionObject>(e.Entity);
+		//}
+
+		//if (obj) {
+		//	Physics->RemoveCollisionObject(obj);
+
+
+
+		//}
 
 		return false;
 	}

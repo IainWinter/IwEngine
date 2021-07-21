@@ -9,7 +9,8 @@ namespace ECS {
 		: short
 	{
 		Destroy,
-		Destroyed // need a component added and removed to clean up references to pointers etc.
+		Destroyed,
+		Moved
 	};
 
 	struct EntityEvent
@@ -19,7 +20,8 @@ namespace ECS {
 
 		EntityEvent(
 			EntityEventType type,
-			EntityHandle entity)
+			EntityHandle entity
+		)
 			: event(val(EventGroup::ENTITY), val(type))
 			, Entity(entity)
 		{}
@@ -29,7 +31,8 @@ namespace ECS {
 		: EntityEvent
 	{
 		EntityDestroyEvent(
-			EntityHandle entity)
+			EntityHandle entity
+		)
 			: EntityEvent(EntityEventType::Destroy, entity)
 		{}
 	};
@@ -38,8 +41,26 @@ namespace ECS {
 		: EntityEvent
 	{
 		EntityDestroyedEvent(
-			EntityHandle entity)
+			EntityHandle entity
+		)
 			: EntityEvent(EntityEventType::Destroyed, entity)
+		{}
+	};
+
+	struct EntityMovedEvent
+		: EntityEvent
+	{
+		ref<Archetype> OldArchetype;
+		ref<Archetype> NewArchetype;
+
+		EntityMovedEvent(
+			EntityHandle entity,
+			ref<Archetype> oldArchetype,
+			ref<Archetype> newArchetype
+		)
+			: EntityEvent(EntityEventType::Moved, entity)
+			, OldArchetype(oldArchetype)
+			, NewArchetype(newArchetype)
 		{}
 	};
 }

@@ -9,6 +9,8 @@
 #include "iw/graphics/software/renderer.h"
 #include <unordered_map>
 
+#include "iw/physics/Collision/MeshCollider.h"
+
 IW_PLUGIN_SAND_BEGIN
 
 class SandLayer

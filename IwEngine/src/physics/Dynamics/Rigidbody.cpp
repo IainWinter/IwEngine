@@ -14,6 +14,20 @@ namespace Physics {
 		, Restitution(.5)
 	{}
 
+	//void Rigidbody::ApplyForce2(
+	//	const glm::vec2& force, 
+	//	const glm::vec2& position)
+	//{
+	//	NetForce += glm::vec3(force, 0);
+	//	ApplyTorque2();
+	//}
+
+	//void Rigidbody::ApplyTorque2(
+	//	float torque)
+	//{
+	//	NetTorque.z += torque;
+	//}
+
 	void Rigidbody::ApplyForce(
 		const glm::vec3& force,
 		const glm::vec3& position)

@@ -388,7 +388,7 @@ namespace ECS {
 		// Moves components from one chunk list to another
 		void MoveComponents(
 			ref<EntityData>& entityData,
-			const ref<Archetype>& archetype);
+			const ref<Archetype>& newArchetype);
 	};
 }
 

@@ -5,6 +5,8 @@
 #include "iw/physics/Dynamics/SmoothPositionSolver.h"
 #include "iw/math/noise.h"
 
+#include "Systems/Player.h"
+
 struct seed {
 	int x = 0, y = 0;
 	iw::Color c;
@@ -71,9 +73,9 @@ std::vector<seed> genRandomSeeds(
 struct GameLayer : iw::Layer
 {
 	iw::SandLayer* sand;
-	iw::Entity player;
-
-	float x = 0, y = 0;
+	
+	iw::PhysicsSystem* player;
+	float cam_x, cam_y;
 
 	GameLayer(
 		iw::SandLayer* sand
@@ -101,8 +103,8 @@ struct GameLayer : iw::Layer
 			}
 
 			iw::Entity e = sand->MakeTile(tex, true);
-			e.Find<iw::Rigidbody>()->Transform.Position.x = iw::randf() * 150;
-			e.Find<iw::Rigidbody>()->Transform.Position.y = iw::randf() * 150;
+			e.Find<iw::Rigidbody>()->Transform.Position.x = iw::randf() * 15;
+			e.Find<iw::Rigidbody>()->Transform.Position.y = iw::randf() * 15;
 			//e.Find<iw::Rigidbody>()->AngularVelocity.z = iw::FixedTime() * 20 * iw::randf();
 		}
 
@@ -111,25 +113,20 @@ struct GameLayer : iw::Layer
 
 		PushSystem<iw::PhysicsSystem>();
 
-		player = sand->MakeTile("textures/SpaceGame/space-ship.png", true);
+		PushSystem<PlayerSystem>(sand);
+		
+		Renderer->Device->SetClearColor(0, 0, 0, 0);
 
 		return Layer::Initialize();
 	}
 
+	void FixedUpdate() override
+	{
+
+	}
+
 	void PostUpdate() override
 	{
-		iw::Transform& t = player.Find<iw::Rigidbody>()->Transform;
-
-		if (iw::Keyboard::KeyDown(iw::A)) t.Position.x -= 100 * iw::DeltaTime();
-		if (iw::Keyboard::KeyDown(iw::D)) t.Position.x += 100 * iw::DeltaTime();
-		if (iw::Keyboard::KeyDown(iw::W)) t.Position.y += 100 * iw::DeltaTime();
-		if (iw::Keyboard::KeyDown(iw::S)) t.Position.y -= 100 * iw::DeltaTime();
-
-		if (iw::Keyboard::KeyDown(iw::Q)) t.Rotation *= glm::angleAxis( iw::DeltaTime()*5, glm::vec3(0, 0, 1));
-		if (iw::Keyboard::KeyDown(iw::E)) t.Rotation *= glm::angleAxis(-iw::DeltaTime()*5, glm::vec3(0, 0, 1));
-
-		sand->SetCamera(x, y, 10, 10);
-
 		Renderer->BeginScene();
 		Renderer->DrawMesh(iw::Transform(), sand->GetSandMesh());
 		Renderer->EndScene();
@@ -138,7 +135,7 @@ struct GameLayer : iw::Layer
 
 App::App() : iw::Application() 
 {
-	int cellSize = 2;
+	int cellSize  = 2;
 	int cellMeter = 10;
 
 	iw::SandLayer* sand = PushLayer<iw::SandLayer>(cellSize, cellMeter, true);

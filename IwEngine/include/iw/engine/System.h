@@ -47,6 +47,7 @@ namespace Engine {
 
 		virtual bool On(EntityDestroyEvent& e) = 0;
 		virtual bool On(EntityDestroyedEvent& e) = 0;
+		virtual bool On(EntityMovedEvent& e) = 0;
 
 		virtual const std::string& Name() const = 0;
 	};
@@ -99,6 +100,7 @@ namespace Engine {
 
 		virtual bool On(EntityDestroyEvent& e) override { return false; }
 		virtual bool On(EntityDestroyedEvent& e) override { return false; }
+		virtual bool On(EntityMovedEvent& e) override { return false; }
 
 		const std::string& Name() const override {
 			return m_name;

@@ -62,7 +62,8 @@ struct Cell {
 
 	float StyleOffset;
 
-	float x, y, dx, dy, time;
+	float x, y, dx, dy;
+	float life = FLT_MAX, time = 0;
 
 	static inline void SetDefault(
 		CellType type,
@@ -87,6 +88,7 @@ struct Cell {
 		return !operator==(other);
 	}
 private:
+	IW_PLUGIN_SAND_API
 	static inline std::unordered_map<CellType, Cell> m_defaults;
 };
 

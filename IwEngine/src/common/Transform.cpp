@@ -50,18 +50,11 @@ namespace Engine {
 		};
 	}
 
-	glm::mat4 Transform::Transformation() const {
-
-		float     angle = glm::angle(Rotation);
-		glm::vec3 axis  = glm::axis (Rotation);
-
-		glm::mat4 mat(1);
-
-		mat = glm::translate(mat, Position);
-		mat = glm::rotate(mat, angle, axis);
-		mat = glm::scale(mat, Scale);
-
-		return mat;
+	glm::mat4 Transform::Transformation() const 
+	{
+		return glm::translate(glm::mat4(1), Position)
+			 * glm::scale(glm::mat4(1), Scale)
+			 * glm::toMat4(Rotation);
 	}
 
 	glm::vec3 Transform::Forward() const {
