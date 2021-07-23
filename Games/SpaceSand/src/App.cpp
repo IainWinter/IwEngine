@@ -6,6 +6,7 @@
 #include "iw/math/noise.h"
 
 #include "Systems/Player.h"
+#include "Systems/EnemyBase.h"
 
 struct seed {
 	int x = 0, y = 0;
@@ -84,7 +85,7 @@ struct GameLayer : iw::Layer
 		, sand(sand)
 	{}
 
-	int Initialize() override 
+	int Initialize() override
 	{
 		for (int i = 0; i < 0; i++)
 		{
@@ -103,8 +104,8 @@ struct GameLayer : iw::Layer
 			}
 
 			iw::Entity e = sand->MakeTile(tex, true);
-			e.Find<iw::Rigidbody>()->Transform.Position.x = iw::randf() * 15;
-			e.Find<iw::Rigidbody>()->Transform.Position.y = iw::randf() * 15;
+			e.Find<iw::Rigidbody>()->Transform.Position.x = iw::randf() * 150;
+			e.Find<iw::Rigidbody>()->Transform.Position.y = iw::randf() * 150;
 			//e.Find<iw::Rigidbody>()->AngularVelocity.z = iw::FixedTime() * 20 * iw::randf();
 		}
 
@@ -114,7 +115,8 @@ struct GameLayer : iw::Layer
 		PushSystem<iw::PhysicsSystem>();
 
 		PushSystem<PlayerSystem>(sand);
-		
+		PushSystem<EnemyCommandSystem>(sand);
+
 		Renderer->Device->SetClearColor(0, 0, 0, 0);
 
 		return Layer::Initialize();

@@ -3,14 +3,9 @@
 int PlayerSystem::Initialize()
 {
 	player = sand->MakeTile("textures/SpaceGame/space-ship.png", true);
-	
-	Physics->RemoveCollisionObject(player.Find<iw::Rigidbody>()); // this can be removed with entity cleanup
-	player.Add<Player>();
+	AddComponentToPhysicsEntity<Player>(player);
 
 	iw::Rigidbody* r = player.Find<iw::Rigidbody>();
-
-	Physics->AddRigidbody(r);                       // this can be removed with entity cleanup
-	r->Collider = player.Find<iw::MeshCollider2>(); // <
 	r->Transform.Scale = glm::vec3(.5);
 	r->SetMass(10);
 
@@ -42,7 +37,7 @@ void PlayerSystem::FixedUpdate()
 
 		glm::vec2 cellPos = t.Position + -up * 32.f + offset * 8.f;
 
-		iw::Cell fire = iw::Cell::GetDefault(iw::CellType::FIRE);
+		iw::Cell fire = iw::Cell::GetDefault(iw::CellType::ROCK);
 
 		sand->m_world->SetCell(cellPos.x, cellPos.y, fire);
 	};
