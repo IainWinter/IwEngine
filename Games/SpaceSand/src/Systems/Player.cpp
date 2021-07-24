@@ -26,6 +26,18 @@ void PlayerSystem::FixedUpdate()
 	bool i_left   = iw::Keyboard::KeyDown(iw::A);
 	bool i_right  = iw::Keyboard::KeyDown(iw::D);
 
+	// debugging
+
+	//r->Velocity.x = 0;
+	//r->Velocity.y = 0;
+
+	//if (i_left)   r->Velocity.x = -150;
+	//if (i_right)  r->Velocity.x =  150;
+	//if (i_thrust) r->Velocity.y = -150;
+	//if (i_boost)  r->Velocity.y =  150;
+
+	//return;
+
 	auto addThrust = [&](glm::vec3 offset, int dir, float newtons) 
 	{
 		glm::vec3 thrustPos = t.Position

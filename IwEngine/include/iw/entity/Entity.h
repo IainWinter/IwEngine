@@ -126,7 +126,7 @@ namespace ECS {
 
 		template<
 			typename _c>
-		_c* Find() {
+		_c* Find() const {
 #ifdef IW_DEBUG
 			if (!Space) {
 				LOG_ERROR << "Entity has no space!";

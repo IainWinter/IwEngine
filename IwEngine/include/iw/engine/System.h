@@ -7,6 +7,8 @@
 #include "iw/engine/Time.h"
 #include "iw/engine/ComponentHelper.h"
 
+#include "iw/physics/Collision/MeshCollider.h" // temo for AddComponentToPhysicsEntity (bad)
+
 #include <queue>
 #include <string>
 
@@ -107,18 +109,43 @@ namespace Engine {
 		}
 	protected:
 		template<
+			typename _c,
+			typename... _args>
+		_c* AddComponentToPhysicsEntity(
+			Entity& entity,
+			_args&&... args)
+		{
+			CollisionObject* obj = Space->FindComponent<CollisionObject>(entity.Handle);
+			if (!obj) obj = Space->FindComponent<Rigidbody>(entity.Handle);
+
+			Physics->RemoveCollisionObject(obj);
+
+			_c* component = Space->AddComponent<_c>(entity.Handle, args...);
+
+			obj = Space->FindComponent<CollisionObject>(entity.Handle);
+			if (!obj) obj = Space->FindComponent<Rigidbody>(entity.Handle);
+
+			obj->Collider = Space->FindComponent<MeshCollider2>(entity.Handle); // pass by template?
+
+			if (obj->IsDynamic) Physics->AddRigidbody((Rigidbody*)obj);
+			else				Physics->AddCollisionObject(obj);
+
+			return component;
+		}
+
+		template<
 			typename _t1,
 			typename _t2 = void>
 		bool GetEntitiesFromManifold(
 			const Manifold& manifold,
-			iw::Entity& e1,
-			iw::Entity& e2)
+			Entity& e1,
+			Entity& e2)
 		{
 			return iw::GetEntitiesFromManifold(Space, manifold, e1, e2);
 		}
 
 		inline CollisionObject* GetPhysicsComponent(
-			iw::EntityHandle e)
+			EntityHandle e)
 		{
 			return iw::GetPhysicsComponent(Space, e);
 		}

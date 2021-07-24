@@ -2,6 +2,7 @@
 
 #include "iw/engine/System.h"
 #include "plugins/iw/Sand/Engine/SandLayer.h"
+#include "Components/Flocker.h"
 
 #include <vector>
 #include <functional>
@@ -10,16 +11,10 @@ struct Ship;
 struct Objective;
 struct Command;
 
-enum class ShipType {
-	FIGHTER,
-	MINER,
-	SUPPLY,
-	TRANSPORT
-};
-
 enum class ReportType {
 	SPOTTED_PLAYER,
-	FINISHED_OBJECTIVE/*,
+	FINISHED_OBJECTIVE,
+	NEW_SHIP_UNDER_COMMAND/*,
 	FINISHED_MINING*/
 };
 
@@ -32,7 +27,11 @@ struct Report {
 		: Type(type)
 	{
 		switch (type) {
-			case ReportType::SPOTTED_PLAYER: {
+			case ReportType::NEW_SHIP_UNDER_COMMAND: {
+				TimeToProcess = .25;
+				break;
+			}
+			default: {
 				TimeToProcess = Timer = (iw::randf()+2) * 2.5f;
 				break;
 			}
@@ -52,7 +51,8 @@ struct PlayerSpottedReport
 	float x, y;
 
 	PlayerSpottedReport(
-		float x, float y
+		float x, float y,
+		bool bubble = true
 	)
 		: Report(ReportType::SPOTTED_PLAYER)
 		, x(x)
@@ -63,13 +63,26 @@ struct PlayerSpottedReport
 struct FinishedObjectiveReport
 	: Report
 {
-	Ship* ship;
+	iw::Entity ShipEntity;
 
 	FinishedObjectiveReport(
-		Ship* ship
+		iw::Entity shipEntity
 	)
 		: Report(ReportType::FINISHED_OBJECTIVE)
-		, ship(ship)
+		, ShipEntity(shipEntity)
+	{}
+};
+
+struct NewShipUnderCommandReport
+	: Report
+{
+	iw::Entity ShipEntity;
+
+	NewShipUnderCommandReport(
+		iw::Entity shipEntity
+	)
+		: Report(ReportType::NEW_SHIP_UNDER_COMMAND)
+		, ShipEntity(shipEntity)
 	{}
 };
 
@@ -80,9 +93,10 @@ struct Objective {
 };
 
 struct Ship {
-	ShipType Type;
 	std::vector<Objective*> Objectives;
 	Command* Commander;
+
+	float Speed = 25.0f;
 
 	Ship()
 		: Commander(nullptr)
@@ -119,7 +133,7 @@ struct Ship {
 };
 
 struct Command {
-	std::vector<Ship*> Ships;
+	std::vector<iw::Entity> Ships;
 	//std::vector<Objective*> Objectives;
 	std::vector<Report*> Reports;
 	int ReporterCount; // how many reports can be handled at once
@@ -158,36 +172,43 @@ Objective* MakeGotoLocationObjective(
 {
 	Objective* obj = new Objective();
 
-	auto delta = [=]() {
-		iw::Transform* transform = entity.Find<iw::Transform>();
-		float dx = x - transform->Position.x;
-		float dy = y - transform->Position.y;
-
-		return std::make_pair(dx, dy);
-	};
-
 	obj->IsMet = [=]()
 	{
-		auto [dx, dy] = delta();
+		glm::vec3 position = entity.Find<iw::Transform>()->Position;
+		float dx = x - position.x;
+		float dy = y - position.y;
+
 		return dx * dx + dy * dy < r * r;
 	};
 
 	obj->Update = [=]()
 	{
-		auto [dx, dy] = delta();
-		entity.Find<iw::Rigidbody>()->Velocity = glm::normalize(glm::vec3(dx, dy, 0)) * 25.0f;
+		entity.Find<Flocker>()->Target = glm::vec3(x, y, 0.f);
 	};
 
 	obj->WhenDone = [=]()
 	{
-		Ship* ship = entity.Find<Ship>();
-		ship->Commander->Report(new FinishedObjectiveReport(ship));
-
-		entity.Find<iw::Rigidbody>()->Velocity = glm::vec3(0);
+		entity.Find<Ship>()->Commander->Report(new FinishedObjectiveReport(entity));
 	};
 
 	return obj;
 }
+
+Objective* MakeAssistShipObjective(
+	iw::Entity entity,
+	iw::Entity shipToAssistEntity)
+{
+	Objective* obj = new Objective();
+
+	obj->Update = [=]()
+	{
+		glm::vec3 target = shipToAssistEntity.Find<iw::Transform>()->Position;
+		entity.Find<Flocker>()->Target = glm::vec2(target.x, target.y);
+	};
+
+	return obj;
+}
+
 
 // helper functions
 template<
@@ -211,39 +232,78 @@ struct EnemyCommandSystem : iw::SystemBase
 
 	int Initialize() override
 	{
-		iw::Entity mb = Space->CreateEntity<Command, Base>();
-		Command* mb_c = mb.Set<Command>();
+		auto makeBase = [&]()
+		{
+			iw::Entity baseEntity = sand->MakeTile("textures/SpaceGame/station.png", true);
 
-		iw::Entity sb1 = Space->CreateEntity<Command, Ship>();
-		Command* sb1_c = sb1.Set<Command>();
-		Ship*    sb1_s = sb1.Set<Ship>(mb_c);
+			AddComponentToPhysicsEntity<Command>(baseEntity);
+			AddComponentToPhysicsEntity<Base>(baseEntity);
 
-		iw::Entity s1 = Space->CreateEntity<Command, Ship, MinerShip>();
-		Command*   s1_c  = s1.Set<Command>();
-		Ship*      s1_s  = s1.Set<Ship>(sb1_c);
-		MinerShip* s1_ms = s1.Set<MinerShip>();
+			iw::Rigidbody* r = baseEntity.Find<iw::Rigidbody>();
 
-		iw::Entity   f1 = Space->CreateEntity<Ship, FighterShip>();
-		Ship*        f1_s  = f1.Set<Ship>(s1_c);
-		FighterShip* f1_fs = f1.Set<FighterShip>();
+			r->AngularVelocity.z = .01;
+			r->SetMass(100000);
+			r->Transform.Position.x = 1000;
+			r->Transform.Scale.x = 3;
+			r->Transform.Scale.y = 3;
 
-		iw::Entity   f2 = Space->CreateEntity<Ship, FighterShip>();
-		Ship*        f2_s  = f2.Set<Ship>(s1_c);
-		FighterShip* f2_fs = f2.Set<FighterShip>();
 
-		iw::Entity   f3 = sand->MakeTile("textures/SpaceGame/circle_temp.png", true);
-		FighterShip* f3_fs = AddComponentToPhysicsEntity<FighterShip>(f3);
-		Ship*        f3_s  = AddComponentToPhysicsEntity<Ship>(f3, s1_c);
+			return baseEntity;
+		};
 
-		mb_c->Ships.push_back(sb1_s);
+		auto makeShip = [&](Command* commander, bool isCommander)
+		{
+			iw::Entity shipEntity = sand->MakeTile("textures/SpaceGame/circle_temp.png", true);
 
-		s1_c->Ships.push_back(f1_s);
-		s1_c->Ships.push_back(f2_s);
-		s1_c->Ships.push_back(f3_s);
+			AddComponentToPhysicsEntity<Ship>(shipEntity, commander);
+			Flocker* flocker = AddComponentToPhysicsEntity<Flocker>(shipEntity);
 
-		f3_s->Commander->Report(new PlayerSpottedReport(100, 100));
+			if (isCommander) {
+				AddComponentToPhysicsEntity<Command>(shipEntity);
+			}
 
-		s1_s->SetObjective(MakeGotoLocationObjective(f3, 50, 50, 20));
+			if (commander) {
+				commander->Report(new NewShipUnderCommandReport(shipEntity));
+				flocker->ForceWeight = .0;
+			}
+
+			return shipEntity;
+		};
+
+		auto makeFighter = [&](Command* commander, bool isCommander = false)
+		{
+			iw::Entity shipEntity = makeShip(commander, isCommander);
+			AddComponentToPhysicsEntity<FighterShip>(shipEntity);
+
+			shipEntity.Find<iw::Rigidbody>()->Transform.Scale = glm::vec3(.2);
+			shipEntity.Find<iw::Rigidbody>()->Transform.Position = glm::vec3(iw::randf() * 200, iw::randf() * 200, 0.f);
+
+			return shipEntity;
+		};
+
+		auto makeMiner = [&](Command* commander, bool isCommander = false)
+		{
+			iw::Entity shipEntity = makeShip(commander, isCommander);
+			AddComponentToPhysicsEntity<MinerShip>(shipEntity);
+
+			shipEntity.Find<iw::Rigidbody>()->Transform.Position = glm::vec3(iw::randf() * 200, iw::randf() * 200, 0.f);
+
+			return shipEntity;
+		};
+
+		iw::Entity mb = makeBase();
+		Command* mb_c = mb.Find<Command>();
+
+		//iw::Entity sb1 = Space->CreateEntity<Command, Base, Ship>();
+		//Command* sb1_c = sb1.Set<Command>();
+		//Ship*    sb1_s = sb1.Set<Ship>(mb_c);
+
+		iw::Entity m1 = makeMiner(mb_c, true);
+		Command* m1_c = m1.Find<Command>();
+
+		makeFighter(m1_c);
+		makeFighter(m1_c);
+		makeFighter(m1_c);
 
 		return 0;
 	}
@@ -260,7 +320,9 @@ struct EnemyCommandSystem : iw::SystemBase
 			if (objective)
 			{
 				objective->Update();
-				if (objective->IsMet())
+
+				if (    objective->IsMet
+					&& objective->IsMet())
 				{
 					LOG_INFO << "Objective completed";
 
@@ -269,6 +331,8 @@ struct EnemyCommandSystem : iw::SystemBase
 					delete objective;
 				}
 			}
+
+
 		});
 
 		// Report takes time for a Commander to process
@@ -280,12 +344,31 @@ struct EnemyCommandSystem : iw::SystemBase
 
 			for (int i = 0; i < command->ReportCount(); i++)
 			{
-				command->Reports.at(i)->Timer -= iw::DeltaTime();
+				Report* r = command->Reports.at(i);
+				r->Timer -= iw::DeltaTime();
+
+				if (r->Timer < 0.0f)
+				{
+					switch (r->Type) {
+						case ReportType::NEW_SHIP_UNDER_COMMAND:
+						{
+							NewShipUnderCommandReport* report = r->as<NewShipUnderCommandReport>();
+							Ship* ship = report->ShipEntity.Find<Ship>();
+
+							if (ship->Commander == command)
+							{
+								command->Ships.push_back(report->ShipEntity);
+							}
+
+							break;
+						}
+					}
+				}
 			}
 		});
 
 		// Handling repots is different for each type of ship
-		Space->Query<Command, Base>().Each([](
+		Space->Query<Command, Base>().Each([&](
 			iw::EntityHandle entity,
 			Command* command,
 			Base* base)
@@ -305,11 +388,73 @@ struct EnemyCommandSystem : iw::SystemBase
 
 							break;
 						}
+						case ReportType::NEW_SHIP_UNDER_COMMAND:
+						{
+							NewShipUnderCommandReport* report = r->as<NewShipUnderCommandReport>();
+
+							if (report->ShipEntity.Find<Ship>()->Commander != command)
+							{
+								break;
+							} // then can continue to finished objective only if no more data gets added to struct
+						}
 						case ReportType::FINISHED_OBJECTIVE:
 						{
 							FinishedObjectiveReport* report = r->as<FinishedObjectiveReport>();
 
 							// logic for what the base should do when a ship complets an objective
+
+							// give random location
+							Ship* ship = report->ShipEntity.Find<Ship>();
+
+							int x = iw::randf() * 500,
+							    y = iw::randf() * 500,
+							    r = 100;
+
+							ship->AddObjective(MakeGotoLocationObjective(report->ShipEntity, x, y, r));
+
+							int numbPointsInCircle = 200;
+
+							// debug
+							sand->m_world->SetCell(x, y, iw::Cell::GetDefault(iw::CellType::ROCK));
+							for (int i = 0; i < numbPointsInCircle; i++) {
+								float a = i * iw::Pi / numbPointsInCircle;
+								float ax = x + cos(a) * r;
+								float ay = y + sin(a) * r;
+
+								sand->m_world->SetCell(ax, ay, iw::Cell::GetDefault(iw::CellType::ROCK));
+							}
+
+							break;
+						}
+					}
+				}
+			}
+		});
+
+		iw::Space* space = Space.get();
+
+		// Handling repots is different for each type of ship
+		Space->Query<Command, Ship>().Each([space](
+			iw::EntityHandle entity,
+			Command* command,
+			Ship* ship)
+		{
+			for (int i = 0; i < command->ReportCount(); i++)
+			{
+				Report* r = command->Reports.at(i);
+				if (r->Timer <= 0.0f)
+				{
+					switch (r->Type)
+					{
+						case ReportType::NEW_SHIP_UNDER_COMMAND:
+						{
+							NewShipUnderCommandReport* report = r->as<NewShipUnderCommandReport>();
+							Ship* ship = report->ShipEntity.Find<Ship>();
+
+							if (ship->Commander == command)
+							{
+								ship->SetObjective(MakeAssistShipObjective(report->ShipEntity, iw::Entity(entity, space)));
+							}
 
 							break;
 						}
@@ -360,18 +505,18 @@ struct EnemyCommandSystem : iw::SystemBase
 				{
 					if (Ship* ship = Space->FindComponent<Ship>(entity))
 					{
-						LOG_INFO << "Report(" << report << ") bubbled up";
+						LOG_INFO << "Report(" << (int)report->Type << ") bubbled up";
 						report->Timer = report->TimeToProcess;
 						ship->Commander->Report(report);
 					}
 
 					else {
-						LOG_INFO << "Report(" << report << ") completed";
+						LOG_INFO << "Report(" << (int)report->Type << ") completed";
 
 						delete report; // terminate report when at top of command
 					}
 
-					remove(command->Reports, i);
+					command->Reports.erase(command->Reports.begin() + i);
 				}
 			}
 		});

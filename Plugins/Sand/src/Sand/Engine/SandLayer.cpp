@@ -130,11 +130,14 @@ int SandLayer::Initialize() {
 	m_world->AddField<unsigned int>(false); // color for drawing / tiles
 
 	m_world->RemovedChunkCallback = [&](SandChunk* chunk) {
-		for (auto itr = m_cellsThisFrame.begin(); itr != m_cellsThisFrame.end(); ++itr)
+		for (int i = 0; i < m_cellsThisFrame.size(); i++)
 		{
-			if (chunk == itr->first) {
-				m_cellsThisFrame.erase(itr);
-				break;
+			if (chunk == m_cellsThisFrame.at(i).first)
+			{
+				LOG_INFO << "Removed chunk " << chunk;
+				m_cellsThisFrame.erase(m_cellsThisFrame.begin() + i);
+				i--;
+				//break;
 			}
 		}
 	};

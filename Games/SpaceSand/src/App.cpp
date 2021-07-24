@@ -7,6 +7,7 @@
 
 #include "Systems/Player.h"
 #include "Systems/EnemyBase.h"
+#include "Systems/Flocking.h"
 
 struct seed {
 	int x = 0, y = 0;
@@ -117,6 +118,8 @@ struct GameLayer : iw::Layer
 		PushSystem<PlayerSystem>(sand);
 		PushSystem<EnemyCommandSystem>(sand);
 
+		PushSystem<FlockingSystem>();
+
 		Renderer->Device->SetClearColor(0, 0, 0, 0);
 
 		return Layer::Initialize();
@@ -137,7 +140,7 @@ struct GameLayer : iw::Layer
 
 App::App() : iw::Application() 
 {
-	int cellSize  = 2;
+	int cellSize  = 1;
 	int cellMeter = 10;
 
 	iw::SandLayer* sand = PushLayer<iw::SandLayer>(cellSize, cellMeter, true);

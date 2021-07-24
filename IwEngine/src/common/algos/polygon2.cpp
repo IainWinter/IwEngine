@@ -199,7 +199,7 @@ namespace common {
 
 			// Connect squares corners
 
-			if (true) // todo: doesnt work in some cases!!!! (triangles are wrong with >>   //______
+			if (false) // todo: doesnt work in some cases!!!! (triangles are wrong with >>   //______
 			for (size_t i = 0; i < polygon.size(); i++) {							 //|   x|
 				size_t j = (i + 1) % polygon.size();								 //|  xx|
 				size_t k = (i + 2) % polygon.size();								 //| xxx|
