@@ -8,7 +8,8 @@ SimpleSandWorker::SimpleSandWorker(
 	: SandWorker(world, chunk)
 {}
 
-void SimpleSandWorker::UpdateCell(int x, int y, Cell& cell) {
+void SimpleSandWorker::UpdateCell(int x, int y, Cell& cell) 
+{
 	     if (cell.Props & CellProp::MOVE_FORCE     && MoveForce   (x, y, cell)) {}
 	else if (cell.Props & CellProp::MOVE_DOWN      && MoveDown    (x, y, cell)) {}
 	else if (cell.Props & CellProp::MOVE_DOWN_SIDE && MoveDownSide(x, y, cell)) {}

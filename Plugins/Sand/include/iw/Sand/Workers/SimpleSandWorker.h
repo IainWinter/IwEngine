@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../SandWorker.h"
+#include "iw/engine/Time.h"
 
 IW_PLUGIN_SAND_BEGIN
 

@@ -24,41 +24,60 @@ namespace Engine {
 	bool EntityCleanupSystem::On(
 		EntityDestroyedEvent& e)
 	{
-		Transform* transform = Space->FindComponent<Transform>(e.Entity);
-		if (transform) {
-			//for (Transform* child : transform->Children()) {
-			//	Space->QueueEntity(Space->FindEntity(child).Handle, func_Destroy);
-			//}
+		if (auto component = Space->GetComponent<Transform>())
+		{
+			Transform* transform = (Transform*)Space->FindComponent(e.Entity, component);
+			if (transform) {
+				//for (Transform* child : transform->Children()) {
+				//	Space->QueueEntity(Space->FindEntity(child).Handle, func_Destroy);
+				//}
 
-			transform->SetParent(nullptr); //causes problems for some reason
+				transform->SetParent(nullptr); //causes problems for some reason
+			}
 		}
 
-		Mesh* mesh = Space->FindComponent<Mesh>(e.Entity);
-		if (mesh) {
-			mesh->Data    .reset();
-			mesh->Material.reset();
+		if (auto component = Space->GetComponent<Mesh>()) 
+		{
+			Mesh* mesh = (Mesh*)Space->FindComponent(e.Entity, component);
+			if (mesh) {
+				mesh->Data    .reset();
+				mesh->Material.reset();
+			}
 		}
 
-		Model* model = Space->FindComponent<Model>(e.Entity);
-		if (model) {
-			model->~Model();
+		if (auto component = Space->GetComponent<Model>())
+		{
+			Model* model = (Model*)Space->FindComponent(e.Entity, component);
+			if (model) {
+				model->~Model();
+			}
 		}
 
-		ParticleSystem<StaticParticle>* sys = Space->FindComponent<ParticleSystem<StaticParticle>>(e.Entity);
-		if (sys) {
-			sys->~ParticleSystem();
-			//sys->GetParticleMesh().Data()    .reset();
-			//sys->GetParticleMesh().Material.reset();
+		if (auto component = Space->GetComponent<ParticleSystem<StaticParticle>>())
+		{
+			ParticleSystem<StaticParticle>* sys = (ParticleSystem<StaticParticle>*)Space->FindComponent(e.Entity, component);
+			if (sys) {
+				sys->~ParticleSystem();
+				//sys->GetParticleMesh().Data()    .reset();
+				//sys->GetParticleMesh().Material.reset();
+			}
 		}
 
-		Rigidbody* body = Space->FindComponent<Rigidbody>(e.Entity);
-		if (body) {
-			Physics->RemoveCollisionObject(body);
+		if (auto component = Space->GetComponent<Rigidbody>())
+		{
+			Rigidbody* body = (Rigidbody*)Space->FindComponent(e.Entity, component);
+			if (body) {
+				Physics->RemoveCollisionObject(body);
+			}
 		}
 
-		CollisionObject* obj = Space->FindComponent<CollisionObject>(e.Entity);
-		if (obj) {
-			Physics->RemoveCollisionObject(obj);
+
+		if (auto component = Space->GetComponent<CollisionObject>())
+		{
+			CollisionObject* obj = (CollisionObject*)Space->FindComponent(e.Entity, component);
+			if (obj) {
+				Physics->RemoveCollisionObject(obj);
+			}
 		}
 
 		return false;

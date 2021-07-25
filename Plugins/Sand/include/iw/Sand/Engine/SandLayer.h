@@ -135,17 +135,37 @@ public:
 			const glm::vec2& u2 = uv[index[i + 1]];
 			const glm::vec2& u3 = uv[index[i + 2]];
 
-			using namespace software_renderer;
+			using vertex = software_renderer::vertex;
 
 			vertex v1 {p1.x, p1.y, u1.x, u1.y};
 			vertex v2 {p2.x, p2.y, u2.x, u2.y};
 			vertex v3 {p3.x, p3.y, u3.x, u3.y};
 
-			RasterPolygon(v1, v2, v3, [&](int x, int y, float u, float v)
+			software_renderer
+			::RasterPolygon(v1, v2, v3, [&](int x, int y, float u, float v)
 			{
 				func(x, y, u, v, i / 3);
 			});
 		}
+	}
+
+	void ForEachInLine(
+		float x,  float y,
+		float x1, float y1,
+		std::function<void(int, int)> func)
+	{
+		using vertex = std::array<int, 2>;
+
+		vertex v0 { x,  y };
+		vertex v1 { x1, y1};
+
+		software_renderer
+		::RasterLine(v0, v1,
+			[&](int x, int y)
+			{
+				func(x, y);
+			}
+		);
 	}
 
 	// Rendering tiles into world

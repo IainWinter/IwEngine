@@ -68,17 +68,79 @@ namespace software_renderer {
 
 	}
 
+	// temp way of doing this, later can add way with slops n props if needed
+	template<
+		typename _v,
+		typename _f1, typename _f2, typename _f3>
+	void RasterLine(
+		const _v* v0, const _v* v1,
+		_f1&& GetXY,
+		_f2&& MakeSlope,
+		_f3&& PlotPixel)
+	{
+		auto [x0, y0, x1, y1] = tuple_cat(GetXY(*v0), GetXY(*v1));
+
+		//if (tie(y1, x1) < tie(y0, x0)) { swap(x0, x1); swap(y0, y1); swap(v0, v1); }
+
+		float dx = x1 - x0;
+		float dy = y1 - y0;
+
+		float distance = sqrt(dx*dx + dy*dy);
+		dx /= distance;
+		dy /= distance;
+
+		float x = x0,
+			 y = y0;
+		for (int i = 0; i < ceil(distance); i++)
+		{
+			PlotPixel(x, y);
+			x += dx;
+			y += dy;
+		}
+
+		//
+
+
+		/*invoke_result_t<_f2, const _v&, const _v&, int, int> slopes
+			= MakeSlope(*v0, *v1, x1 - x0, y1 - y0);
+
+		int done = 0;
+		do
+		{
+			PlotPixel(slopes[0].get(), slopes[1].get());
+
+			done = 0;
+			for (Slope& slope : slopes)
+			{
+				slope.step();
+				done += int(slope.get() >= slope.end());
+			}
+		}
+		while(done != slopes.size());
+
+		*/
+	}
+
 	struct Slope {
-		float m_cur, m_step;
+		float m_cur, m_end, m_step;
 
 		Slope() = default;
 		Slope(float begin, float end, int steps) {
 			float inv_step = 1.0f / steps;
 			m_cur = begin;
-			m_step = (end - begin) * inv_step;
+			m_end = end;
+
+			if (steps == 0) {
+				m_step = 0.f;
+			}
+
+			else {
+				m_step = (end - begin) * inv_step;
+			}
 		}
 
 		float get() { return m_cur; }
+		float end() { return m_end; }
 		void step() { m_cur += m_step; }
 	};
 
@@ -123,6 +185,35 @@ namespace software_renderer {
 				for (auto& slope : left)  slope.step();
 				for (auto& slope : right) slope.step();
 			}
+		);
+	}
+
+	// should try and make polygon like this where props arent hard defs
+	template<
+		typename _v,
+		typename _f>
+	void RasterLine(
+		const _v& v0, const _v& v1,
+		_f&& PlotPixel)
+	{
+		constexpr size_t slopeCount = std::tuple_size_v<_v>;
+
+		using SlopeData = array<Slope, slopeCount>; // x, y, props
+
+		RasterLine(&v0, &v1,
+			[](const _v& vert)
+			{
+				return make_pair(vert[0], vert[1]);
+			},
+			[&](const _v& from, const _v& to, int xsteps, int ysteps)
+			{
+				SlopeData slopes;
+				slopes[0] = Slope(from[0], to[0], xsteps);
+				slopes[1] = Slope(from[1], to[1], ysteps);
+
+				return slopes;
+			},
+			PlotPixel
 		);
 	}
 }

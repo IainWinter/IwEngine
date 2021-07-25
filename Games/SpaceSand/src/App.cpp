@@ -126,7 +126,24 @@ struct GameLayer : iw::Layer
 
 		Renderer->Device->SetClearColor(0, 0, 0, 0);
 
+		MakeTestBes();
+
 		return Layer::Initialize();
+	}
+
+	void MakeTestBes() {
+		auto fillBox = [&](int x, int y, int x1, int y1) {
+			for (int xi = x; xi < x1; xi++)
+			for (int yi = y; yi < y1; yi++)
+			{
+				sand->m_world->SetCell(xi, yi, iw::Cell::GetDefault(iw::CellType::ROCK));
+			}
+		};
+
+		fillBox(-500,  100,  500,  500);
+		fillBox(-500, -500,  500, -100);
+		fillBox(-300, -500, -200, 500);
+		fillBox( 200, -500, 300, 500);
 	}
 
 	void FixedUpdate() override

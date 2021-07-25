@@ -8,6 +8,8 @@ struct ProjectileSystem
 {
 	iw::SandLayer* sand;
 
+	std::vector<std::tuple<int, int, float>> m_cells; // x, y, life
+
 	ProjectileSystem(
 		iw::SandLayer* sand
 	)
@@ -16,11 +18,12 @@ struct ProjectileSystem
 	{}
 
 	int Initialize() override;
+	void Update() override;
 	void FixedUpdate() override;
 
 	// Make functions, not sure where these should go I
 	// guess its up to the caller to deside, could add an action evevnt
 
-	iw::Entity MakeBulletC(float x, float y, float dx, float dy); // in cell space
-	iw::Entity MakeBullet(float x, float y, float dx, float dy);
+	iw::Entity MakeBulletC(float x, float y, float dx, float dy, int depth = 0); // in cell space
+	iw::Entity MakeBullet (float x, float y, float dx, float dy, int depth = 0);
 };

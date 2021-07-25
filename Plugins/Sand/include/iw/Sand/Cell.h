@@ -71,7 +71,6 @@ struct Cell {
 	float StyleOffset;
 
 	float x, y, dx, dy;
-	float life = FLT_MAX, time = 0;
 
 	static inline void SetDefault(
 		CellType type,

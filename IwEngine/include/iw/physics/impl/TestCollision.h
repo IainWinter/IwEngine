@@ -169,7 +169,9 @@ namespace impl {
 
 		scalar distance = length(ab);
 
-		if (distance > aRadius + bRadius) {
+		if (    distance < 0.00001f
+			|| distance > aRadius + bRadius)
+		{
 			return {};
 		}
 
