@@ -209,16 +209,6 @@ Objective* MakeAssistShipObjective(
 	return obj;
 }
 
-
-// helper functions
-template<
-	typename _t,
-	typename _i>
-void remove(std::vector<_t>& v, _i& i)
-{
-	v.at(i) = v.back(); v.pop_back(); i--;
-}					
-
 struct EnemyCommandSystem : iw::SystemBase
 {
 	iw::SandLayer* sand;
@@ -243,10 +233,9 @@ struct EnemyCommandSystem : iw::SystemBase
 
 			r->AngularVelocity.z = .01;
 			r->SetMass(100000);
-			r->Transform.Position.x = 1000;
-			r->Transform.Scale.x = 3;
-			r->Transform.Scale.y = 3;
-
+			r->Transform.Position.x = 100;
+			r->Transform.Scale.x = 1;
+			r->Transform.Scale.y = 1;
 
 			return baseEntity;
 		};
@@ -331,8 +320,6 @@ struct EnemyCommandSystem : iw::SystemBase
 					delete objective;
 				}
 			}
-
-
 		});
 
 		// Report takes time for a Commander to process

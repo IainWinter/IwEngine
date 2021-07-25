@@ -29,10 +29,14 @@ struct Tile {
 	bool NeedsDraw = true;
 	bool NeedsScan = true;
 
+	IW_PLUGIN_SAND_API
 	Tile() = default;
+
+	IW_PLUGIN_SAND_API
 	Tile(ref<Texture> texture);
 
-	void UpdatePolygon();
+	IW_PLUGIN_SAND_API
+	void UpdateColliderPolygon();
 };
 
 IW_PLUGIN_SAND_END

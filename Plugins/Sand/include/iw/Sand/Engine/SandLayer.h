@@ -84,7 +84,6 @@ public:
 		m_update->SetCameraScale(xs, ys);
 	}
 
-	IW_PLUGIN_SAND_API
 	inline Entity MakeTile(
 		const std::string& sprite,
 		bool isSimulated = false)
@@ -92,10 +91,34 @@ public:
 		return MakeTile(Asset->Load<iw::Texture>(sprite), isSimulated);
 	}
 
-	IW_PLUGIN_SAND_API
+	template<
+		typename _collider = MeshCollider,
+		typename... _others>
 	Entity MakeTile(
 		ref<Texture>& sprite,
-		bool isSimulated = false);
+		bool isSimulated)
+	{
+		ref<Archetype> archetype = Space->CreateArchetype<Transform, Tile, _collider, _others...>();
+
+		if (isSimulated) Space->AddComponent<Rigidbody>      (archetype);
+		else             Space->AddComponent<CollisionObject>(archetype);
+	
+		Entity entity = Space->CreateEntity(archetype);
+
+		Tile* tile = entity.Set<Tile>(sprite);
+	
+		Transform*       transform = entity.Set<Transform>();
+		_collider*       collider  = entity.Set<_collider>();
+		CollisionObject* object    = isSimulated ? entity.Set<Rigidbody>() : entity.Set<CollisionObject>();
+
+		object->Collider = collider;
+		object->SetTransform(transform);
+
+		if (isSimulated) Physics->AddRigidbody((Rigidbody*)object);
+		else             Physics->AddCollisionObject(object);
+
+		return entity;
+	}
 
 	void ForEachInPolygon(
 		const std::vector<glm::vec2>& polygon,

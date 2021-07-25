@@ -26,7 +26,7 @@ void CorrectCellInfo(SandChunk* chunk, size_t index, int x, int y, void* data) {
 
 	// was for collision for platformer game
 
-	//bool collision = cell.Props == CellProperties::NONE && notEmpty;
+	//bool collision = cell.Props == CellProp::NONE && notEmpty;
 
 	//chunk->SetCell<bool>(index, collision, SandField::COLLISION);
 }
@@ -34,14 +34,14 @@ void CorrectCellInfo(SandChunk* chunk, size_t index, int x, int y, void* data) {
 int SandLayer::Initialize() {
 	Cell _EMPTY = {
 		CellType::EMPTY,
-		CellProperties::NONE,
+		CellProp::NONE,
 		CellStyle::NONE,
 		Color::From255(0, 0, 0, 0)
 	};
 
 	Cell _SAND = {
 		CellType::SAND,
-		CellProperties::MOVE_FORCE | CellProperties::MOVE_DOWN | CellProperties::MOVE_DOWN_SIDE,
+		CellProp::MOVE_FORCE | CellProp::MOVE_DOWN | CellProp::MOVE_DOWN_SIDE,
 		CellStyle::RANDOM_STATIC,
 		Color::From255(235, 200, 175),
 		Color::From255(25, 25, 25, 0)
@@ -49,7 +49,7 @@ int SandLayer::Initialize() {
 
 	Cell _WATER = {
 		CellType::WATER,
-		/*CellProperties::MOVE_FORCE | */CellProperties::MOVE_DOWN | CellProperties::MOVE_SIDE,
+		/*CellProp::MOVE_FORCE | */CellProp::MOVE_DOWN | CellProp::MOVE_SIDE,
 		CellStyle::SHIMMER,
 		Color::From255(175, 200, 235),
 		Color::From255(25, 25, 25, 0)
@@ -57,14 +57,14 @@ int SandLayer::Initialize() {
 
 	Cell _ROCK = {
 		CellType::ROCK,
-		CellProperties::NONE,
+		CellProp::NONE,
 		CellStyle::NONE,
 		Color::From255(200, 200, 200)
 	};
 
 	Cell _STONE = {
 		CellType::STONE,
-		CellProperties::MOVE_DOWN | CellProperties::MOVE_FORCE,
+		CellProp::MOVE_DOWN | CellProp::MOVE_FORCE,
 		CellStyle::RANDOM_STATIC,
 		Color::From255(200, 200, 200),
 		Color::From255(10, 10, 10, 0),
@@ -72,7 +72,7 @@ int SandLayer::Initialize() {
 
 	Cell _WOOD = {
 		CellType::WOOD,
-		CellProperties::NONE,
+		CellProp::NONE,
 		CellStyle::RANDOM_STATIC,
 		Color::From255(171, 121, 56),
 		Color::From255(15, 10, 10, 0)
@@ -80,14 +80,14 @@ int SandLayer::Initialize() {
 
 	Cell _FIRE = {
 		CellType::FIRE,
-		/*CellProperties::MOVE_FORCE | */CellProperties::BURN | CellProperties::MOVE_RANDOM,
+		/*CellProp::MOVE_FORCE | */CellProp::BURN | CellProp::MOVE_RANDOM,
 		CellStyle::NONE,
 		Color::From255(255, 98, 0) // figure out how to blend colors properly, this makes it magenta because red gets overflown??? but still happens with 200
 	};
 
 	Cell _SMOKE = {
 		CellType::SMOKE,
-		/*CellProperties::MOVE_FORCE | */CellProperties::MOVE_RANDOM,
+		/*CellProp::MOVE_FORCE | */CellProp::MOVE_RANDOM,
 		CellStyle::RANDOM_STATIC,
 		Color::From255(100, 100, 100),
 		Color::From255(25, 25, 25, 0)
@@ -95,7 +95,7 @@ int SandLayer::Initialize() {
 
 	Cell _BELT = {
 		CellType::BELT,
-		CellProperties::CONVEYOR,
+		CellProp::CONVEYOR,
 		CellStyle::SHIMMER,
 		Color::From255(201, 129, 56),
 		Color::From255(25, 25, 25, 0)
@@ -267,7 +267,7 @@ void SandLayer::PasteTiles()
 	m_cellsThisFrame.clear();
 
 	Space->Query<Transform, Tile>().Each([&](
-		auto entity,
+		EntityHandle entity,
 		Transform* transform,
 		Tile* tile)
 	{
@@ -276,11 +276,13 @@ void SandLayer::PasteTiles()
 		if (tile->NeedsScan)
 		{
 			tile->NeedsScan = false;
-			tile->UpdatePolygon();
+			tile->UpdateColliderPolygon();
 
-			MeshCollider2* collider = Space->FindEntity(tile).Find<MeshCollider2>();
-			collider->SetPoints   (tile->m_collider);
-			collider->SetTriangles(tile->m_colliderIndex);
+			MeshCollider2* collider = Space->FindComponent<MeshCollider2>(entity);
+			if (collider) {
+				collider->SetPoints   (tile->m_collider);
+				collider->SetTriangles(tile->m_colliderIndex);
+			}
 		}
 
 		tile->LastTransform = *transform;
@@ -326,32 +328,6 @@ void SandLayer::RemoveTiles()
 			chunk->SetCell_unsafe(x, y, false, SandField::SOLID);
 		}
 	}
-}
-
-Entity SandLayer::MakeTile(
-	ref<Texture>& sprite,
-	bool isSimulated)
-{
-	ref<Archetype> archetype = Space->CreateArchetype<Transform, MeshCollider2, Tile>();
-
-	if (isSimulated) Space->AddComponent<Rigidbody>      (archetype);
-	else             Space->AddComponent<CollisionObject>(archetype);
-	
-	Entity entity = Space->CreateEntity(archetype);
-
-	Tile* tile = entity.Set<Tile>(sprite);
-	
-	Transform*       transform = entity.Set<Transform>();
-	MeshCollider2*   collider  = entity.Set<MeshCollider2>();
-	CollisionObject* object    = isSimulated ? entity.Set<Rigidbody>() : entity.Set<CollisionObject>();
-
-	object->Collider = collider;
-	object->SetTransform(transform);
-
-	if (isSimulated) Physics->AddRigidbody((Rigidbody*)object);
-	else             Physics->AddCollisionObject(object);
-
-	return entity;
 }
 
 IW_PLUGIN_SAND_END

@@ -27,10 +27,20 @@ enum class CellType {
 	ROCK,
 	STONE,
 
-	WOOD, FIRE, SMOKE, BELT
+	WOOD, FIRE, SMOKE, BELT,
+
+	#include "config/CellType.def"
 };
 
-enum class CellProperties {
+enum class CellStyle {
+	NONE,
+	RANDOM_STATIC,
+	SHIMMER,
+
+	#include "config/CellStyle.def"
+};
+
+enum class CellProp {
 	NONE           = 0b0000000000000000,
 	MOVE_DOWN      = 0b0000000000000001,
 	MOVE_DOWN_SIDE = 0b0000000000000010,
@@ -41,21 +51,19 @@ enum class CellProperties {
 	BURN     = 0b0000000000100000,
 	CONVEYOR = 0b0000000001000000,
 
-	NONE_TILE = 0b1000000000000000
-};
-inline CellProperties operator|(CellProperties a,CellProperties b){return CellProperties(int(a)|int(b));}
-inline auto           operator&(CellProperties a,CellProperties b){return int(a)&int(b);}
+	NONE_TILE = 0b1000000000000000,
 
-enum class CellStyle {
-	NONE,
-	RANDOM_STATIC,
-	SHIMMER
+	#include "config/CellProp.def"
 };
+
+inline CellProp operator|(CellProp a,CellProp b){return CellProp(int(a)|int(b));}
+inline auto     operator&(CellProp a,CellProp b){return int(a)&int(b);}
+
 
 struct Cell {
-	CellType       Type  = CellType::EMPTY;
-	CellProperties Props = CellProperties::NONE;
-	CellStyle      Style = CellStyle::NONE;
+	CellType  Type  = CellType::EMPTY;
+	CellProp  Props = CellProp::NONE;
+	CellStyle Style = CellStyle::NONE;
 	
 	iw::Color Color;
 	iw::Color StyleColor;

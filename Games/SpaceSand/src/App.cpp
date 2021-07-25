@@ -1,6 +1,7 @@
 ﻿#include "App.h"
 #include "plugins/iw/Sand/Engine/SandLayer.h"
 #include "iw/engine/Systems/PhysicsSystem.h"
+#include "iw/engine/Systems/EntityCleanupSystem.h"
 #include "iw/physics/Dynamics/ImpulseSolver.h"
 #include "iw/physics/Dynamics/SmoothPositionSolver.h"
 #include "iw/math/noise.h"
@@ -8,6 +9,7 @@
 #include "Systems/Player.h"
 #include "Systems/EnemyBase.h"
 #include "Systems/Flocking.h"
+#include "Systems/Projectile.h"
 
 struct seed {
 	int x = 0, y = 0;
@@ -114,9 +116,11 @@ struct GameLayer : iw::Layer
 		Physics->AddSolver(new iw::ImpulseSolver());
 
 		PushSystem<iw::PhysicsSystem>();
+		PushSystem<iw::EntityCleanupSystem>();
 
 		PushSystem<PlayerSystem>(sand);
-		PushSystem<EnemyCommandSystem>(sand);
+		//PushSystem<EnemyCommandSystem>(sand);
+		PushSystem<ProjectileSystem>(sand);
 
 		PushSystem<FlockingSystem>();
 
@@ -140,7 +144,7 @@ struct GameLayer : iw::Layer
 
 App::App() : iw::Application() 
 {
-	int cellSize  = 1;
+	int cellSize  = 2;
 	int cellMeter = 10;
 
 	iw::SandLayer* sand = PushLayer<iw::SandLayer>(cellSize, cellMeter, true);

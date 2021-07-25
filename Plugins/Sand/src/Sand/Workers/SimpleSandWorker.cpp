@@ -9,11 +9,11 @@ SimpleSandWorker::SimpleSandWorker(
 {}
 
 void SimpleSandWorker::UpdateCell(int x, int y, Cell& cell) {
-	     if (cell.Props & CellProperties::MOVE_FORCE     && MoveForce   (x, y, cell)) {}
-	else if (cell.Props & CellProperties::MOVE_DOWN      && MoveDown    (x, y, cell)) {}
-	else if (cell.Props & CellProperties::MOVE_DOWN_SIDE && MoveDownSide(x, y, cell)) {}
-	else if (cell.Props & CellProperties::MOVE_SIDE      && MoveSide    (x, y, cell)) {}
-	else if (cell.Props & CellProperties::MOVE_RANDOM    && MoveRandom  (x, y, cell)) {}
+	     if (cell.Props & CellProp::MOVE_FORCE     && MoveForce   (x, y, cell)) {}
+	else if (cell.Props & CellProp::MOVE_DOWN      && MoveDown    (x, y, cell)) {}
+	else if (cell.Props & CellProp::MOVE_DOWN_SIDE && MoveDownSide(x, y, cell)) {}
+	else if (cell.Props & CellProp::MOVE_SIDE      && MoveSide    (x, y, cell)) {}
+	else if (cell.Props & CellProp::MOVE_RANDOM    && MoveRandom  (x, y, cell)) {}
 }
 
 bool SimpleSandWorker::MoveForce(
