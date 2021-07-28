@@ -118,15 +118,14 @@ struct GameLayer : iw::Layer
 		PushSystem<iw::PhysicsSystem>();
 		PushSystem<iw::EntityCleanupSystem>();
 
-		PushSystem<PlayerSystem>(sand);
-		//PushSystem<EnemyCommandSystem>(sand);
-		PushSystem<ProjectileSystem>(sand);
-
-		PushSystem<FlockingSystem>();
+		ProjectileSystem* guns = PushSystem<ProjectileSystem>(sand);
+		                         PushSystem<PlayerSystem>(sand, guns);
+		                         PushSystem<EnemyCommandSystem>(sand);
+		                         PushSystem<FlockingSystem>();
 
 		Renderer->Device->SetClearColor(0, 0, 0, 0);
 
-		MakeTestBes();
+		//MakeTestBes();
 
 		return Layer::Initialize();
 	}
@@ -142,17 +141,17 @@ struct GameLayer : iw::Layer
 
 		fillBox(-500,  100,  500,  500);
 		fillBox(-500, -500,  500, -100);
-		fillBox(-300, -500, -200, 500);
-		fillBox( 200, -500, 300, 500);
-	}
-
-	void FixedUpdate() override
-	{
-
+		fillBox(-300, -500, -200,  500);
+		fillBox( 200, -500,  300,  500);
 	}
 
 	void PostUpdate() override
 	{
+		if (iw::Keyboard::KeyDown(iw::H))
+		{
+			MakeTestBes();
+		}
+
 		Renderer->BeginScene();
 		Renderer->DrawMesh(iw::Transform(), sand->GetSandMesh());
 		Renderer->EndScene();

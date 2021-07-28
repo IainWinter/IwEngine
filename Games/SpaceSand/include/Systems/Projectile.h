@@ -24,6 +24,9 @@ struct ProjectileSystem
 	// Make functions, not sure where these should go I
 	// guess its up to the caller to deside, could add an action evevnt
 
-	iw::Entity MakeBulletC(float x, float y, float dx, float dy, int depth = 0); // in cell space
-	iw::Entity MakeBullet (float x, float y, float dx, float dy, int depth = 0);
+	iw::Entity MakeBulletC(float x, float y, float dx, float dy, int maxDepth = 5, int depth = 0); // in cell space
+	iw::Entity MakeBullet (float x, float y, float dx, float dy, int maxDepth = 5, int depth = 0);
+
+
+	void MakeExplosion(int x, int y, int r);
 };

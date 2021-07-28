@@ -14,6 +14,8 @@ Tile::Tile(
 		m_sprite->CreateColors();
 	}
 
+	m_bounds = AABB2(glm::vec2(0.f), m_sprite->Dimensions() - glm::vec2(1.f));
+
 	m_polygon = MakePolygonFromBounds(m_bounds);
 	m_index   = TriangulatePolygon(m_polygon);
 

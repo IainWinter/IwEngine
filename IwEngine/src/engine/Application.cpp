@@ -164,6 +164,14 @@ namespace Engine {
 
 				(*Renderer).Begin(Time::TotalTime());
 
+				int layerNumber = 0;
+				for (Layer* layer : m_layers)
+				{
+					LOG_TIME_SCOPE(layer->Name() + " layer pre update");
+					(*Renderer).SetLayer(layerNumber);
+					layer->PreUpdate();
+				}
+
 				Update();
 
 				if (Time::RawFixedTime() == 0)
@@ -181,6 +189,14 @@ namespace Engine {
 					//accumulatedTime = 0;                       // not sure how to fix that, i think setting it to 0 is wrong tho so idk
 
 					fixedIterations++;
+				}
+
+				layerNumber = 0;
+				for (Layer* layer : m_layers)
+				{
+					LOG_TIME_SCOPE(layer->Name() + " layer post update");
+					(*Renderer).SetLayer(layerNumber);
+					layer->PostUpdate();
 				}
 
 				{
@@ -233,27 +249,16 @@ namespace Engine {
 	}
 
 	void Application::Update() {
-		// Pre Update (Sync)
-		 
-		int layerNumber = 0;
-
-		for (Layer* layer : m_layers) {
-			LOG_TIME_SCOPE(layer->Name() + " layer pre update");
-
-			Renderer->SetLayer(layerNumber);
-			layer->PreUpdate();
-		}
-
 		// Start Work (ASync)
+		
 		//m_updateTask.Run();
 
 		// Update layers (ASync)
 
-		layerNumber = 0;
-
-		for (Layer* layer : m_layers) {
+		int layerNumber = 0;
+		for (Layer* layer : m_layers)
+		{
 			LOG_TIME_SCOPE(layer->Name() + " layer update");
-
 			Renderer->SetLayer(layerNumber);
 			layer->UpdateSystems();
 			layer->Update();
@@ -261,17 +266,6 @@ namespace Engine {
 
 		// Pause until work is finished (ASync)
 		//m_updateTask.Wait();
-
-		// Post Update (Sync)
-
-		layerNumber = 0;
-
-		for (Layer* layer : m_layers) {
-			LOG_TIME_SCOPE(layer->Name() + " layer post update");
-
-			Renderer->SetLayer(layerNumber);
-			layer->PostUpdate();
-		}
 	}
 
 	void Application::FixedUpdate() {

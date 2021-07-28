@@ -125,7 +125,7 @@ namespace software_renderer {
 		float m_cur, m_end, m_step;
 
 		Slope() = default;
-		Slope(float begin, float end, int steps) {
+		Slope(float begin, float end, float steps) {
 			float inv_step = 1.0f / steps;
 			m_cur = begin;
 			m_end = end;
@@ -170,11 +170,15 @@ namespace software_renderer {
 			},
 			[&](int y, SlopeData& left, SlopeData& right)
 			{
-				int x = left[0].get(), endx = right[0].get();
+				float   xf = left[0] .get(),
+					endxf = right[0].get();
+
+				int     x =    xf,
+					endx = endxf;
 
 				Slope props[2]; // u, v inter scanline slopes
-				props[0] = Slope(left[1].get(), right[1].get(), endx - x);
-				props[1] = Slope(left[2].get(), right[2].get(), endx - x);
+				props[0] = Slope(left[1].get(), right[1].get(), endxf - xf); // need to fix fidelity
+				props[1] = Slope(left[2].get(), right[2].get(), endxf - xf);
 
 				for (; x < endx; ++x)
 				{

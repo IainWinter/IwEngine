@@ -407,6 +407,11 @@ namespace Graphics {
 		return m_colors;
 	}
 
+	unsigned* Texture::Colors32() const
+	{
+		return (unsigned*)m_colors;
+	}
+
 	unsigned char* Texture::CreateColors(
 		bool evenIfNotNull)
 	{

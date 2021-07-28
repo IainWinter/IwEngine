@@ -234,8 +234,8 @@ struct EnemyCommandSystem : iw::SystemBase
 			r->AngularVelocity.z = .01;
 			r->SetMass(100000);
 			r->Transform.Position.x = 100;
-			r->Transform.Scale.x = 1;
-			r->Transform.Scale.y = 1;
+			//r->Transform.Scale.x = 2.1;
+			//r->Transform.Scale.y = 2.1;
 
 			return baseEntity;
 		};

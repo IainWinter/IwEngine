@@ -147,6 +147,9 @@ namespace Graphics {
 		unsigned char* Colors() const;
 
 		IWGRAPHICS_API
+		unsigned* Colors32() const;
+
+		IWGRAPHICS_API
 		unsigned char* CreateColors(
 			bool evenIfNotNull = false);
 

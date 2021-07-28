@@ -3,12 +3,20 @@
 #include"glm/vec2.hpp"
 
 struct Player {
-	bool i_up; // inputs - get set in event loop
-	bool i_down;
+
+	// inputs - should set in event loop
+	bool i_thrust;
+	bool i_boost;
 	bool i_left;
 	bool i_right;
 	bool i_fire1;
-	bool i_fire2;
+
+	float fire1_timer = 0;
+	float fire1_time  = .05;
+
+
+
+
 
 	float FireTimeout = 0;
 

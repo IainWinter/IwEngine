@@ -127,7 +127,8 @@ int SandLayer::Initialize() {
 
 	m_world->AddField<Cell>(true, CorrectCellInfo); // cells
 	m_world->AddField<unsigned char>(false); // if solid, for IsEmpty / tiles
-	m_world->AddField<unsigned int>(false); // color for drawing / tiles
+	m_world->AddField<unsigned int>(false);  // color for drawing / tiles
+	m_world->AddField<TileInfo>(false); // Tile* and sprite index for ejecting pixels
 
 	m_world->RemovedChunkCallback = [&](SandChunk* chunk) {
 		for (int i = 0; i < m_cellsThisFrame.size(); i++)
@@ -289,28 +290,36 @@ void SandLayer::PasteTiles()
 	});
 
 	m_cellsThisFrame = RasterTilesIntoSandWorld(m_tilesThisFrame,
-		[](Tile* tile) {
-			auto& sprite = tile->m_sprite;
-			return SpriteData((unsigned*)sprite->Colors(), sprite->Width());
-		},
-		[](SpriteData& sprite, int x, int y, float u, float v, int tri) {
-			auto& [colors, width] = sprite;
-			return PixelData(x, y, colors[(size_t)floor(u) + (size_t)floor(v) * width]);
-		},
-		[](SandChunk* chunk, PixelData& data)
+		[](Tile* tile)
 		{
-			auto& [x, y, color] = data;
+			return SpriteData(tile, tile->m_sprite->Colors32(), tile->m_sprite->Width());
+		},
+		[](SpriteData& sprite, int x, int y, float u, float v, int tri)
+		{
+			auto& [tile, colors, width] = sprite;
+			unsigned index = (size_t)floor(u) + (size_t)floor(v) * width;
 
-			if (Color::From32(color).a == 0) return; // if alpha is 0 then dont draw, this is NEEDED bc of square raster
+			return PixelData(x, y, tile, colors, index);
+		},
+		[&](SandChunk* chunk, PixelData& data)
+		{
+			auto& [x, y, tile, colors, index] = data;
 
-			if (!chunk->IsEmpty(x, y)) // this is for debugging, should eject pixel is overlapping
+			if (index >= tile->m_sprite->m_width * tile->m_sprite->m_height)
 			{
-				chunk->SetCell_unsafe(x, y, iw::Color(1, 0, 0).to32(), SandField::COLOR);
+				return;
 			}
 
-			else {
+			unsigned& color = colors[index];
+
+			// see if this gets optimized to calc only the alpha >> 24
+			if (Color::From32(color).a == 0) return; // if alpha is 0 then dont draw, this is NEEDED bc of square raster
+
+			if (chunk->IsEmpty(x, y)) // maybe only eject if another tile is overlapping?
+			{
 				chunk->SetCell_unsafe(x, y, color, SandField::COLOR);
 				chunk->SetCell_unsafe(x, y, true,  SandField::SOLID);
+				chunk->SetCell_unsafe(x, y, TileInfo(tile, index),  SandField::TILE_INFO);
 			}
 		}
 	);
@@ -320,14 +329,30 @@ void SandLayer::RemoveTiles()
 {
 	for (auto& [chunk, pixels] : m_cellsThisFrame)
 	{
-		for (auto& [x, y, color] : pixels)
+		for (auto& [x, y, tile, colors, index] : pixels)
 		{
-			if (Color::From32(color).a == 0) continue; // for color, this could prb be culled in the raster instead of both here and in the draw
+			if (index >= tile->m_sprite->m_width * tile->m_sprite->m_height)
+			{
+				return;
+			}
+
+			if (Color::From32(colors[index]).a == 0) continue; // for color, this could prb be culled in the raster instead of both here and in the draw
 
 			chunk->SetCell_unsafe(x, y, 0u,    SandField::COLOR);
 			chunk->SetCell_unsafe(x, y, false, SandField::SOLID);
+			chunk->SetCell_unsafe(x, y, TileInfo(nullptr, 0u), SandField::TILE_INFO);
 		}
 	}
+}
+
+void SandLayer::EjectPixel(
+	Tile* tile,
+	unsigned index)
+{
+	// cant scale transform if removing pixels like this
+	// to fix, maybe could remove pixels in a scaled square around index?
+
+	tile->m_sprite->Colors32()[index] = 0;
 }
 
 IW_PLUGIN_SAND_END

@@ -13,6 +13,8 @@
 
 IW_PLUGIN_SAND_BEGIN
 
+using TileInfo = std::pair<Tile*, unsigned>; // tile, index
+
 class SandLayer
 	: public Layer
 {
@@ -21,8 +23,8 @@ public:
 	const int m_cellSize;
 	const int m_cellsPerMeter;
 
-	//std::unordered_map<std::pair<int, int>, ref<RenderTarget>, iw::pair_hash> m_chunkTextures; // for rendering tiles into world
-	//grid2<Tile*> m_tiles;
+	int gridSize = 16;
+	vec2 sP, gP; // sand pos, grid pos
 
 private:
 	SandWorldRenderSystem* m_render;
@@ -30,11 +32,8 @@ private:
 
 	bool m_drawMouseGrid;
 
-	int gridSize = 16;
-	vec2 sP, gP; // sand pos, grid pos
-
-	using SpriteData = std::tuple<unsigned*, unsigned>; // color, width
-	using PixelData  = std::tuple<int, int, unsigned>;  // x, y, color
+	using SpriteData = std::tuple<Tile*, unsigned*, unsigned>; // tile, colors, width
+	using PixelData  = std::tuple<int, int, Tile*, unsigned*, unsigned>;  // x, y, tile, colors, index
 
 	std::vector<Tile*> m_tilesThisFrame;
 	std::vector<std::pair<SandChunk*, std::vector<PixelData>>> m_cellsThisFrame;
@@ -66,6 +65,8 @@ public:
 	IW_PLUGIN_SAND_API void PasteTiles();
 	IW_PLUGIN_SAND_API void RemoveTiles();
 
+	IW_PLUGIN_SAND_API void EjectPixel(Tile* tile, unsigned index);
+
 	Mesh& GetSandMesh() {
 		return m_render->GetSandMesh();
 	}
@@ -92,7 +93,7 @@ public:
 	}
 
 	template<
-		typename _collider = MeshCollider,
+		typename _collider = MeshCollider2,
 		typename... _others>
 	Entity MakeTile(
 		ref<Texture>& sprite,

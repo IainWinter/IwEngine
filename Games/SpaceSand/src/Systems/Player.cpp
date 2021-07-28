@@ -6,7 +6,6 @@ int PlayerSystem::Initialize()
 	AddComponentToPhysicsEntity<Player>(player);
 
 	iw::Rigidbody* r = player.Find<iw::Rigidbody>();
-	r->Transform.Scale = glm::vec3(.5);
 	r->SetMass(10);
 
 	return 0;
@@ -14,6 +13,7 @@ int PlayerSystem::Initialize()
 
 void PlayerSystem::FixedUpdate() 
 {
+	Player*        p = player.Find<Player>();
 	iw::Rigidbody* r = player.Find<iw::Rigidbody>();
 	iw::Transform& t = r->Transform;
 
@@ -21,10 +21,11 @@ void PlayerSystem::FixedUpdate()
 	glm::vec3 right = glm::vec3(-up.y, up.x, 0);
 	glm::vec3 left = -right;
 
-	bool i_thrust = iw::Keyboard::KeyDown(iw::LSHIFT);
-	bool i_boost  = iw::Keyboard::KeyDown(iw::SPACE);
-	bool i_left   = iw::Keyboard::KeyDown(iw::A);
-	bool i_right  = iw::Keyboard::KeyDown(iw::D);
+	p->i_thrust = iw::Keyboard::KeyDown(iw::LSHIFT);
+	p->i_boost  = iw::Keyboard::KeyDown(iw::SPACE);
+	p->i_left   = iw::Keyboard::KeyDown(iw::A);
+	p->i_right  = iw::Keyboard::KeyDown(iw::D);
+	p->i_fire1  = iw::Mouse::ButtonDown(iw::LMOUSE);
 
 	// debugging
 
@@ -54,28 +55,56 @@ void PlayerSystem::FixedUpdate()
 		sand->m_world->SetCell(cellPos.x, cellPos.y, fire);
 	};
 
-	float thrust = i_boost ? 200 : 50;
+	float thrust = p->i_boost ? 200 : 50;
 
-	if (i_thrust)
+	if (p->i_thrust)
 	{
 		addThrust(left, -1, thrust);
 		addThrust(right, 1, thrust);
 	}
 
-	if (i_left)
+	if (p->i_left)
 	{
 		addThrust(left, -1, thrust);
 	}
 
-	if (i_right) {
+	if (p->i_right) {
 		addThrust(right, 1, thrust);
 	}
 }
 
 void PlayerSystem::Update()
 {
+	Player*        p = player.Find<Player>();
 	iw::Rigidbody* r = player.Find<iw::Rigidbody>();
 	iw::Transform& t = r->Transform;
+
+	p->fire1_timer += iw::DeltaTime();
+
+	if (p->i_fire1 && p->fire1_timer > p->fire1_time)
+	{
+		p->fire1_timer = 0;
+
+		// get direction towards mouse
+
+		float x = t.Position.x,
+			  y = t.Position.y;
+
+		float sx = sand->sP.x(),
+			  sy = sand->sP.y();
+
+		float dx = sx - t.Position.x,
+			  dy = sy - t.Position.y;
+
+		float length = sqrt(dx*dx + dy*dy);
+		dx *= 10.f / length;
+		dy *= 10.f / length;
+
+		dx += iw::randf();
+		dy += iw::randf();
+
+		guns->MakeBulletC(x + dx * 4, y + dy * 4, dx, dy, 2);
+	}
 
 	cam_x = iw::lerp(cam_x, t.Position.x, iw::DeltaTime() * 5);
 	cam_y = iw::lerp(cam_y, t.Position.y, iw::DeltaTime() * 5);
