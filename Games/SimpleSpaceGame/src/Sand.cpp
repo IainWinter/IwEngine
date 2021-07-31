@@ -193,7 +193,7 @@ namespace iw {
 			{
 				p->FireTimeout = p->FireButtons.x == 1 ? .1f : .001f;
 
-				float speed      = p->FireButtons.x == 1 ?    1500 :   2500;
+				float speed      = p->FireButtons.x == 1 ?    1 :   2;
 				const Cell& shot = p->FireButtons.x == 1 ? _BULLET : _LASER;
 
 				Fire(t->Position, pos, speed, shot, a->TileId);
@@ -213,7 +213,7 @@ namespace iw {
 
 				glm::vec2 target = player.Find<iw::Transform>()->Position;
 			
-				float speed = 500;
+				float speed = 20;
 				const Cell& shot = _LASER;
 
 				Fire(t->Position, target, speed, shot, a->TileId);
@@ -433,13 +433,13 @@ namespace iw {
 		dx /= distance;
 		dy /= distance;
 
-		for (int i = 0; i < ceil(distance); i++)
-		{
-			positions.emplace_back(x, y);
-
+		int i = 0;
+		do {
 			x += dx;
 			y += dy;
+			positions.emplace_back(x, y);
 		}
+		while (i++ < ceil(distance));
 
 		return positions;
 	}
@@ -594,30 +594,27 @@ std::pair<bool, glm::vec2> SandWorker::MoveForward(
 	const Cell& cell,
 	const Cell& replacement)
 {
-	int px = floor(cell.x);
-	int py = floor(cell.y);
+	auto f = [](float x) { return floor(x); };
 
-	int nx = floor(cell.x + cell.dx * iw::DeltaTime());
-	int ny = floor(cell.y + cell.dy * iw::DeltaTime());
+	float nx = /*floor*/(cell.x + cell.dx/* * iw::DeltaTime()*/);
+	float ny = /*floor*/(cell.y + cell.dy/* * iw::DeltaTime()*/);
 
 	bool hasHit = false;
 	glm::vec2 hitLocation;
 
-	float life = cell.Life - iw::DeltaTime();
-
-	if (life < 0) {
+	if (cell.Life - iw::DeltaTime() < 0) {
 		SetCell(x, y, _EMPTY);
 	}
 
 	// need to get off grid, cant shoot in arbitrary floating direction
 
 	else {
-		std::vector<glm::ivec2> cellpos = iw::FillLineInGrid(px, py, nx, ny);
+		std::vector<glm::/*i*/vec2> cellpos = iw::FillLine/*InGrid*/(cell.x, cell.y, nx, ny);
 		for (int i = 0; i < cellpos.size(); i++) {
 			float destX = cellpos[i].x;
 			float destY = cellpos[i].y;
 
-			bool forward = IsEmpty(destX, destY);
+			bool forward = IsEmpty(f(destX), f(destY));
 
 			if (forward) {
 				bool last = i == (cellpos.size() - 1);
@@ -626,12 +623,14 @@ std::pair<bool, glm::vec2> SandWorker::MoveForward(
 				replace.TileId = cell.TileId;
 				replace.dx = last ? cell.dx : 0;
 				replace.dy = last ? cell.dy : 0;
+				replace.x = destX;
+				replace.y = destY;
 
-				SetCell(destX, destY, replace);
+				SetCell(f(destX), f(destY), replace);
 			}
 
-			else if (!hasHit && InBounds(destX, destY)) {
-				Cell hit = GetCell(destX, destY);
+			else if (!hasHit && InBounds(f(destX), f(destY))) {
+				Cell hit = GetCell(f(destX), f(destY));
 				if (   hit.Type   != cell.Type
 					&& hit.TileId != cell.TileId)
 				{
@@ -645,10 +644,12 @@ std::pair<bool, glm::vec2> SandWorker::MoveForward(
 			}
 		}
 
+		// updates life, this is something that is better in the new version 
+		// this is a little funcky
 		Cell replace = cell;
-		replace.Life = life;
-		
-		SetCell(px, py, replace);
+		replace.Life = cell.Life - iw::DeltaTime();
+
+		SetCell(x, y, replace);
 	}
 
 	return { hasHit, hitLocation };
@@ -659,12 +660,14 @@ void SandWorker::HitLikeBullet(
 	const Cell& bullet)
 {
 	Cell hit = GetCell(x, y);
+	float speed = bullet.Speed();
 
-	hit.Life -= bullet.Speed();
-	if (hit.Life < 0) {
+	hit.Life -= speed;
+	if (hit.Life < 0) 
+	{
 		Cell cell = bullet;
-		cell.dx += iw::randi(600) - 300;
-		cell.dy += iw::randi(600) - 300;
+		cell.dx += iw::randf() * speed / 2;
+		cell.dy += iw::randf() * speed / 2;
 		cell.Life *= .95f;
 
 		SetCell(x, y, cell);
@@ -680,12 +683,14 @@ void SandWorker::HitLikeLaser(
 	const Cell& laser)
 {
 	Cell hit = GetCell(x, y);
+	float speed = laser.Speed();
 
-	hit.Life -= laser.Speed();
-	if (hit.Life <= 0) {
+	hit.Life -= speed;
+	if (hit.Life <= 0)
+	{
 		Cell cell = laser;
-		cell.dx += iw::randi(600) - 300;
-		cell.dy += iw::randi(600) - 300;
+		cell.dx += iw::randf() * speed / 2;
+		cell.dy += iw::randf() * speed / 2;
 		cell.Life /= 2;
 
 		SetCell(x, y, cell);
