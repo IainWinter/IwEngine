@@ -1,0 +1,5 @@
+float Life;
+
+float Speed() {
+	return sqrt(dx*dx + dy*dy);
+}

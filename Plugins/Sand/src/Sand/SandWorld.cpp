@@ -20,8 +20,8 @@ SandWorld::SandWorld(
 	size_t numberOfChunksX,
 	size_t numberOfChunksY,
 	double scale)
-	: m_chunkWidth (screenSizeX / numberOfChunksX / scale)
-	, m_chunkHeight(screenSizeY / numberOfChunksY / scale)
+	: m_chunkWidth (screenSizeX / numberOfChunksX/* / scale*/)
+	, m_chunkHeight(screenSizeY / numberOfChunksY/* / scale*/)
 	, m_scale(scale)
 	, m_expandWorld(true)
 {
@@ -112,6 +112,9 @@ std::pair<int, int> SandWorld::GetChunkLocation(
 }
 
 void SandWorld::RemoveEmptyChunks() {
+
+	if (!m_expandWorld) return;
+
 	for (auto& chunks : m_batches)
 	for (size_t i = 0; i < chunks.size(); i++) {
 		SandChunk* chunk = chunks.at(i);

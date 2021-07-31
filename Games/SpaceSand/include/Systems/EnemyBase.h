@@ -224,7 +224,7 @@ struct EnemyCommandSystem : iw::SystemBase
 	{
 		auto makeBase = [&]()
 		{
-			iw::Entity baseEntity = sand->MakeTile("textures/SpaceGame/station.png", true);
+			iw::Entity baseEntity = sand->MakeTile("textures/SpaceGame/circle_temp.png", true);
 
 			AddComponentToPhysicsEntity<Command>(baseEntity);
 			AddComponentToPhysicsEntity<Base>(baseEntity);

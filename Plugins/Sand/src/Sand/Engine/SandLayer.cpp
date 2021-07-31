@@ -113,12 +113,26 @@ int SandLayer::Initialize() {
 
 	int chunkSize = 100;
 
-	m_world = new SandWorld(
-		m_cellSize * chunkSize,
-		m_cellSize * chunkSize,
-		m_cellSize
-	);
-	
+	if (m_initExpandable)
+	{
+		int width  = Renderer->Width()  / m_cellSize;
+		int height = Renderer->Height() / m_cellSize;
+
+		m_world = new SandWorld(
+			width, height,
+			16, 9,
+			m_cellSize
+		);
+	}
+
+	else {
+		m_world = new SandWorld(
+			m_cellSize * chunkSize,
+			m_cellSize * chunkSize,
+			m_cellSize
+		);
+	}
+
 	m_world->m_workers.push_back(new SandWorkerBuilder<SimpleSandWorker>());
 
 	// this code SUCKS, the order has to be the same as the order in the enum
@@ -184,10 +198,10 @@ void SandLayer::PreUpdate() {
 	int width  = m_render->m_fx2 - m_render->m_fx;
 	int height = m_render->m_fy2 - m_render->m_fy;
 
-	sP = Mouse::ClientPos() / m_world->m_scale + vec2(m_render->m_fx, -m_render->m_fy);
-	sP.y() = height - sP.y();
+	sP = to_glm(Mouse::ClientPos()) / (float)m_world->m_scale + glm::vec2(m_render->m_fx, -m_render->m_fy);
+	sP.y = height - sP.y;
 
-	gP = vec2(int(sP.x() / gridSize), int(sP.y() / gridSize)) * gridSize;
+	gP = glm::vec2(int(sP.x / gridSize), int(sP.y / gridSize)) * (float)gridSize;
 
 	DrawWithMouse(m_render->m_fx, -m_render->m_fy, width, height);
 
@@ -214,8 +228,8 @@ void SandLayer::DrawMouseGrid() {
 		sandColor[index] = Color(1).to32();
 	};
 
-	float x = gP.x();
-	float y = gP.y();
+	float x = gP.x;
+	float y = gP.y;
 
 	for (int i = 1; i < gridSize; i++) draw(x + i,        y); 
 	for (int i = 1; i < gridSize; i++) draw(x + i,        y + gridSize);
@@ -244,8 +258,8 @@ void SandLayer::DrawWithMouse(int fx, int fy, int width, int height) {
 			return;
 		}
 
-		for (int x = gP.x(); x < gP.x() + gridSize; x++)
-		for (int y = gP.y(); y < gP.y() + gridSize; y++) {
+		for (int x = gP.x; x < gP.x + gridSize; x++)
+		for (int y = gP.y; y < gP.y + gridSize; y++) {
 			if (!m_world->InBounds(x, y))
 				continue;
 
@@ -305,7 +319,7 @@ void SandLayer::PasteTiles()
 		{
 			auto& [x, y, tile, colors, index] = data;
 
-			if (index >= tile->m_sprite->m_width * tile->m_sprite->m_height)
+			if (!chunk || index >= tile->m_sprite->m_width * tile->m_sprite->m_height)
 			{
 				return;
 			}
@@ -329,11 +343,16 @@ void SandLayer::RemoveTiles()
 {
 	for (auto& [chunk, pixels] : m_cellsThisFrame)
 	{
+		if (!chunk)
+		{
+			continue;
+		}
+
 		for (auto& [x, y, tile, colors, index] : pixels)
 		{
 			if (index >= tile->m_sprite->m_width * tile->m_sprite->m_height)
 			{
-				return;
+				continue;
 			}
 
 			if (Color::From32(colors[index]).a == 0) continue; // for color, this could prb be culled in the raster instead of both here and in the draw

@@ -120,8 +120,8 @@ struct GameLayer : iw::Layer
 
 		ProjectileSystem* guns = PushSystem<ProjectileSystem>(sand);
 		                         PushSystem<PlayerSystem>(sand, guns);
-		                         PushSystem<EnemyCommandSystem>(sand);
-		                         PushSystem<FlockingSystem>();
+		                         //PushSystem<EnemyCommandSystem>(sand);
+		                        // PushSystem<FlockingSystem>();
 
 		Renderer->Device->SetClearColor(0, 0, 0, 0);
 
@@ -194,8 +194,8 @@ iw::Application* CreateApplication(
 	iw::InitOptions& options)
 {
 	options.WindowOptions = iw::WindowOptions {
-		1280/**4/3*/,
-		720/**4/3*/,
+		1920/**4/3*/,
+		1080/**4/3*/,
 		true,
 		iw::DisplayState::NORMAL
 	};

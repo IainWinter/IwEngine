@@ -192,7 +192,7 @@ iw::Entity ProjectileSystem::MakeBullet(
 
 		if (sand->m_world->InBounds(x, y))
 		{
-			float depthPercent = depth / float(maxDepth) + iw::Pi / 6.f; // needs a lil tuning to get right feel
+			float depthPercent = depth / float(maxDepth) * iw::Pi / 2.f + iw::Pi / 6.f; // needs a lil tuning to get right feel
 			int splitCount = iw::randi(2) + 1;
 
 			for (int i = 0; i < splitCount; i++)
@@ -201,7 +201,7 @@ iw::Entity ProjectileSystem::MakeBullet(
 				MakeBulletC(x, y, rx, ry, maxDepth, depth + 1);
 			}
 
-			MakeExplosion(x, y, 50);
+			//MakeExplosion(x, y, 50);
 		}
 		
 		Space->QueueEntity(entity.Handle, iw::func_Destroy);
@@ -217,9 +217,9 @@ void ProjectileSystem::MakeExplosion(
 	for (int px = x - r; px < x + r; px++)
 	for (int py = y - r; py < y + r; py++)
 	{
-		if (iw::SandChunk* chunk = sand->m_world->GetChunk(x, y))
+		if (iw::SandChunk* chunk = sand->m_world->GetChunk(px, py))
 		{
-			auto[tile, index] = chunk->GetCell<iw::TileInfo>(x, y, iw::SandField::TILE_INFO);
+			auto[tile, index] = chunk->GetCell<iw::TileInfo>(px, py, iw::SandField::TILE_INFO);
 
 			if (tile)
 			{

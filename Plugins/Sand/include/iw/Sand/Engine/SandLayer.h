@@ -24,7 +24,7 @@ public:
 	const int m_cellsPerMeter;
 
 	int gridSize = 16;
-	vec2 sP, gP; // sand pos, grid pos
+	glm::vec2 sP, gP; // sand pos, grid pos
 
 private:
 	SandWorldRenderSystem* m_render;
@@ -38,15 +38,19 @@ private:
 	std::vector<Tile*> m_tilesThisFrame;
 	std::vector<std::pair<SandChunk*, std::vector<PixelData>>> m_cellsThisFrame;
 
+	bool m_initExpandable;
+
 public:
 	SandLayer(
 		int cellSize,
 		int cellsPerMeter,
+		bool expandable = false,
 		bool drawMouseGrid = false
 	)
 		: Layer("Sand")
 		, m_cellSize(cellSize)
 		, m_cellsPerMeter(cellsPerMeter)
+		, m_initExpandable(expandable)
 		, m_drawMouseGrid(drawMouseGrid)
 		, m_world(nullptr)
 		, m_render(nullptr)
@@ -71,15 +75,23 @@ public:
 		return m_render->GetSandMesh();
 	}
 
+	// returns half of the sizw of the same texture
+	std::pair<int, int> GetSandTexSize2()
+	{
+		int width  = m_render->GetSandTexture()->Width() / 2;
+		int height = m_render->GetSandTexture()->Height() / 2;
+
+		return { width, height };
+	}
+
 	void SetCamera(
 		float x,  float y,
 		float xs, float ys)
 	{
-		int width  = m_render->GetSandTexture()->Width()  / 2;
-		int height = m_render->GetSandTexture()->Height() / 2;
+		auto [width, height] = GetSandTexSize2();
 
-		x = ceil(x * xs);
-		y = ceil(y * ys);
+		//x = ceil(x * xs);
+		//y = ceil(y * ys);
 
 		m_render->SetCamera(x + -width, y + -height, x + width, y + height);
 		m_update->SetCameraScale(xs, ys);

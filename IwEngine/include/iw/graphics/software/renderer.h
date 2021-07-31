@@ -80,7 +80,6 @@ namespace software_renderer {
 	{
 		auto [x0, y0, x1, y1] = tuple_cat(GetXY(*v0), GetXY(*v1));
 
-		//if (tie(y1, x1) < tie(y0, x0)) { swap(x0, x1); swap(y0, y1); swap(v0, v1); }
 
 		float dx = x1 - x0;
 		float dy = y1 - y0;
@@ -91,6 +90,7 @@ namespace software_renderer {
 
 		float x = x0,
 			 y = y0;
+
 		for (int i = 0; i < ceil(distance); i++)
 		{
 			PlotPixel(x, y);
@@ -98,8 +98,7 @@ namespace software_renderer {
 			y += dy;
 		}
 
-		//
-
+		//if (tie(y1, x1) < tie(y0, x0)) { swap(x0, x1); swap(y0, y1); swap(v0, v1); }
 
 		/*invoke_result_t<_f2, const _v&, const _v&, int, int> slopes
 			= MakeSlope(*v0, *v1, x1 - x0, y1 - y0);
