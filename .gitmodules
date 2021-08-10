@@ -18,6 +18,3 @@
 	path = IwEngine/extern/imgui
 	url = https://github.com/IainWinter/imgui
 	branch = docking
-[submodule "IwEngine/extern/voronoi"]
-	path = IwEngine/extern/voronoi
-	url = https://github.com/JCash/voronoi
