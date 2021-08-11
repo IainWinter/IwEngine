@@ -6,10 +6,6 @@
 	path = IwEngine/extern/assimp
 	url = https://github.com/IainWinter/assimp
 	ignore = dirty
-[submodule "IwEngine/extern/llvm"]
-	path = IwEngine/extern/llvm
-	url = https://github.com/IainWinter/llvm-project
-	ignore = dirty
 [submodule "IwEngine/extern/json"]
 	path = IwEngine/extern/json
 	url = https://github.com/sheredom/json.h
