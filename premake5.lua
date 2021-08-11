@@ -1,14 +1,12 @@
 iwengdir  = path.getabsolute("IwEngine")
 sndbxdir  = path.getabsolute("Sandbox")
 edtordir  = path.getabsolute("Editor")
-iwtoldir  = path.getabsolute("IwTools")
 plugins_dir = path.getabsolute("Plugins") -- start adding _
 exprtdir  = path.getabsolute("_export")
 glewdir   = iwengdir .. "/extern/glew"
 imguidir  = iwengdir .. "/extern/imgui"
 assimpdir = iwengdir .. "/extern/assimp"
 stbdir    = iwengdir .. "/extern/stb"
-llvmdir   = iwengdir .. "/extern/llvm"
 jsondir   = iwengdir .. "/extern/json"
 fmoddir   = iwengdir .. "/extern/fmod"
 glmdir    = iwengdir .. "/extern/glm"
@@ -24,7 +22,7 @@ srcdir  = "/src"
 
 workspace "wEngine"
 	configurations { "Debug", "Release" }
-	platforms { "x32", "x64" }
+	platforms { "x64" } --"x32", 
 	startproject "a_wEditor"
 	location (iwengdir .. blddir)
 
@@ -34,14 +32,6 @@ group "extern"
 group ""
 
 	os.execute ("cmake -S " .. assimpdir  .. " -B " .. assimpdir .. blddir)
-
-	--filter "platforms:x64" -- doesnt filter
-		--print("---------------------------- 64 ----------------------------")
-		--os.execute ("cmake -S " .. llvmdir .. "/llvm -B " .. llvmdir .. blddir .. " -DLLVM_ENABLE_PROJECTS=clang -A x64 -Thost=x64 -DLLVM_TEMPORARILY_ALLOW_OLD_TOOLCHAIN=ON -DLLVM_TARGETS_TO_BUILD='X86'")
-
-	--filter "platforms:x32"
-	--	print("---------------------------- 32 ----------------------------")
-	--	os.execute ("cmake -S " .. llvmdir .. "/llvm -B " .. llvmdir .. blddir .. " -DLLVM_ENABLE_PROJECTS=clang -A Win32 -Thost=Win32 -DLLVM_TEMPORARILY_ALLOW_OLD_TOOLCHAIN=ON -DLLVM_TARGETS_TO_BUILD='X86'")
 
 	project "wLog"
 		kind "SharedLib"
@@ -57,8 +47,7 @@ group ""
 		}
 
 		includedirs {
-			iwengdir .. incdir,
-			iwtoldir .. incdir
+			iwengdir .. incdir
 		}
 
 		filter "system:windows"
@@ -96,8 +85,7 @@ group ""
 		}
 
 		includedirs {
-			iwengdir  .. incdir,
-			iwtoldir .. incdir
+			iwengdir  .. incdir
 		}
 
 		defines {
@@ -136,8 +124,7 @@ group ""
 		}
 
 		includedirs {
-			iwengdir  .. incdir,
-			iwtoldir .. incdir
+			iwengdir  .. incdir
 		}
 
 		links {
@@ -177,8 +164,7 @@ group ""
 
 		includedirs {
 			iwengdir  .. incdir,
-			fmoddir .. incdir,
-			iwtoldir .. incdir
+			fmoddir .. incdir
 		}
 
 		libdirs {
@@ -228,8 +214,7 @@ group ""
 		}
 
 		includedirs {
-			iwengdir  .. incdir,
-			iwtoldir .. incdir
+			iwengdir  .. incdir
 		}
 
 		links {	
@@ -268,8 +253,7 @@ group ""
 		}
 
 		includedirs {
-			iwengdir  .. incdir,
-			iwtoldir .. incdir
+			iwengdir  .. incdir
 		}
 
 		links {
@@ -310,7 +294,6 @@ group ""
 
 		includedirs {
 			iwengdir  .. incdir,
-			iwtoldir .. incdir,
 			glmdir .. incdir,
 			voronoidir .. incdir
 		}
@@ -355,7 +338,6 @@ group ""
 
 		includedirs {
 			iwengdir  .. incdir,
-			iwtoldir .. incdir,
 			--glmdir .. incdir
 		}
 
@@ -404,7 +386,6 @@ group ""
 		includedirs {
 			iwengdir  .. incdir,
 			glewdir   .. incdir,
-			iwtoldir .. incdir,
 			glmdir .. incdir
 		}
 
@@ -457,7 +438,6 @@ group ""
 			stbdir    .. incdir,
 			assimpdir .. incdir,
 			assimpdir .. blddir .. incdir,
-			iwtoldir .. incdir,
 			glmdir .. incdir
 		}
 
@@ -516,7 +496,6 @@ group ""
 
 		includedirs {
 			iwengdir  .. incdir,
-			iwtoldir .. incdir,
 			glmdir .. incdir
 		}
 
@@ -561,7 +540,6 @@ group ""
 
 		includedirs {
 			iwengdir .. incdir,
-			iwtoldir .. incdir,
 			glmdir .. incdir
 		}
 
@@ -609,7 +587,6 @@ group ""
 			imguidir .. incdir,
 			glewdir  .. incdir,
 			fmoddir  .. incdir,
-			iwtoldir .. incdir,
 			glmdir .. incdir
 		}
 
@@ -634,7 +611,6 @@ group ""
 			"xcopy /y /f \""    .. iwengdir .. bindir .. "/*.dll\" \"" .. exprtdir .. bindir .. "/\"",
 			"xcopy /y /f \""    .. iwengdir .. libdir .. "/*.lib\" \"" .. exprtdir .. libdir .. "/\"",
 			"xcopy /y /f /e \"" .. iwengdir .. incdir .. "/*\" \""     .. exprtdir .. incdir .. "/\"",
-			"xcopy /y /f /e \"" .. iwtoldir .. incdir .. "/*\" \""     .. exprtdir .. incdir .. "/\"",
 			"xcopy /y /f /e \"" .. imguidir .. incdir .. "/*\" \""     .. exprtdir .. incdir .. "/\"",
 			"xcopy /y /f /e \"" .. fmoddir  .. incdir .. "/*\" \""     .. exprtdir .. incdir .. "/\"",
 			"xcopy /y /f    \"" .. jsondir            .. "/*.h\" \""   .. exprtdir .. incdir .. "/json/\"",
@@ -734,7 +710,7 @@ group "Plugins"
 			optimize "On"
 group ""
 
-group "Tools"
+group "Editor" -- might become it's own solution/repo
 	project "wEditor"
 		kind "WindowedApp"
 		language "C++"
@@ -751,8 +727,6 @@ group "Tools"
 		includedirs {
 			edtordir .. incdir,
 			iwengdir .. incdir,
-			iwtoldir .. incdir,
-			iwtoldir .. incdir,
 			imguidir .. incdir,
 			fmoddir  .. incdir,
 			jsondir,
@@ -792,153 +766,6 @@ group "Tools"
 				"IW_PLATFORM_WINDOWS",
 				"IW_IMGUI"  -- not sure if this needs to be here
 			}
-
-		filter "configurations:Debug"
-			defines "IW_DEBUG"
-			runtime "Debug"
-			symbols "On"
-
-		filter "configurations:Release"
-			defines "IW_RELEASE"
-			runtime "Release"
-			optimize "On"
-
-	project "wReflector"
-		kind "ConsoleApp"
-		language "C++"
-		location  (iwtoldir .. blddir .. "/reflection")
-		targetdir (iwtoldir .. bindir .. "/reflection")
-		objdir    (iwtoldir .. blddir .. "/reflection")
-
-		files {
-			iwtoldir .. incdir .. "/iw/reflection/**.h",
-			iwtoldir .. srcdir .. "/reflection/**.h",
-			iwtoldir .. srcdir .. "/reflection/**.cpp"
-		}
-
-		includedirs {
-			iwtoldir .. incdir,
-			llvmdir  .. blddir .. "/tools/clang" .. incdir,
-			llvmdir  .. blddir .. incdir,
-			llvmdir  .. "/llvm"  .. incdir,
-			llvmdir  .. "/clang" .. incdir,
-			jsondir
-		}
-
-		libdirs {
-			llvmdir .. blddir .. "/%{cfg.buildcfg}/lib",
-			llvmdir .. blddir .. "/%{cfg.buildcfg}/bin",
-		}
-
-		links {
-			"version.lib",
-			"libclang.lib",
-			"clangAnalysis.lib",
-			--"clangARCMigrate.lib",
-			"clangAST.lib",
-			"clangASTMatchers.lib",
-			"clangBasic.lib",
-			--"clangCodeGen.lib",
-			--"clangCrossTU.lib",
-			--"clangDependencyScanning.lib",
-			--"clangDirectoryWatcher.lib",
-			"clangDriver.lib",
-			--"clangDynamicASTMatchers.lib",
-			"clangEdit.lib",
-			--"clangFormat.lib",
-			"clangFrontend.lib",
-			--"clangFrontendTool.lib",
-			--"clangHandleCXX.lib",
-			--"clangHandleLLVM.lib",
-			--"clangIndex.lib",
-			"clangLex.lib",
-			"clangParse.lib",
-			--"clangRewrite.lib",
-			--"clangRewriteFrontend.lib",
-			"clangSema.lib",
-			"clangSerialization.lib",
-			--"clangStaticAnalyzerCheckers.lib",
-			--"clangStaticAnalyzerCore.lib",
-			--"clangStaticAnalyzerFrontend.lib",
-			"clangTooling.lib",
-			--"clangToolingASTDiff.lib",
-			--"clangToolingCore.lib",
-			--"clangToolingInclusions.lib",
-			--"clangToolingRefactoring.lib",
-			--"clangToolingSyntax.lib",
-			--"clangTransformer.lib",
-			--"LLVMAggressiveInstCombine.lib",
-			--"LLVMAnalysis.lib",
-			--"LLVMAsmPrinter.lib",
-			"LLVMBinaryFormat.lib",
-			--"LLVMBitReader.lib",
-			"LLVMBitstreamReader.lib",
-			--"LLVMBitWriter.lib",
-			--"LLVMCFGuard.lib",
-			--"LLVMCodeGen.lib",
-			"LLVMCore.lib",
-			--"LLVMDebugInfoCodeView.lib",
-			--"LLVMDebugInfoDWARF.lib",
-			--"LLVMDebugInfoMSF.lib",
-			"LLVMDemangle.lib",
-			"LLVMFrontendOpenMP.lib",
-			--"LLVMGlobalISel.lib",
-			--"LLVMInstCombine.lib",
-			"LLVMMC.lib",
-			--"LLVMMCDisassembler.lib",
-			"LLVMMCParser.lib",
-			--"LLVMObject.lib",
-			"LLVMOption.lib",
-			"LLVMProfileData.lib",
-			"LLVMRemarks.lib",
-			--"LLVMScalarOpts.lib",
-			--"LLVMSelectionDAG.lib",
-			"LLVMSupport.lib",
-			--"LLVMTableGen.lib",
-			--"LLVMTableGenGlobalISel.lib",
-			--"LLVMTarget.lib",
-			--"LLVMTextAPI.lib",
-			--"LLVMTransformUtils.lib",
-			--"LLVMX86AsmParser.lib",
-			--"LLVMX86CodeGen.lib",
-			--"LLVMX86Desc.lib",
-			--"LLVMX86Disassembler.lib",
-			--"LLVMX86Info.lib",
-			--"LLVMX86Utils.lib"
-		}
-
-		postbuildcommands  {
-				"xcopy /y /f \"" .. llvmdir .. blddir .. "/%{cfg.buildcfg}/lib/libclang.lib\" \""            .. iwtoldir .. bindir .. "/reflection\"",
-				"xcopy /y /f \"" .. llvmdir .. blddir .. "/%{cfg.buildcfg}/lib/clangAnalysis.lib\" \""       .. iwtoldir .. bindir .. "/reflection\"",
-				"xcopy /y /f \"" .. llvmdir .. blddir .. "/%{cfg.buildcfg}/lib/clangAST.lib\" \""            .. iwtoldir .. bindir .. "/reflection\"",
-				"xcopy /y /f \"" .. llvmdir .. blddir .. "/%{cfg.buildcfg}/lib/clangASTMatchers.lib\" \""    .. iwtoldir .. bindir .. "/reflection\"",
-				"xcopy /y /f \"" .. llvmdir .. blddir .. "/%{cfg.buildcfg}/lib/clangBasic.lib\" \""          .. iwtoldir .. bindir .. "/reflection\"",
-				"xcopy /y /f \"" .. llvmdir .. blddir .. "/%{cfg.buildcfg}/lib/clangDriver.lib\" \""         .. iwtoldir .. bindir .. "/reflection\"",
-				"xcopy /y /f \"" .. llvmdir .. blddir .. "/%{cfg.buildcfg}/lib/clangEdit.lib\" \""           .. iwtoldir .. bindir .. "/reflection\"",
-				"xcopy /y /f \"" .. llvmdir .. blddir .. "/%{cfg.buildcfg}/lib/clangFrontend.lib\" \""       .. iwtoldir .. bindir .. "/reflection\"",
-				"xcopy /y /f \"" .. llvmdir .. blddir .. "/%{cfg.buildcfg}/lib/clangLex.lib\" \""            .. iwtoldir .. bindir .. "/reflection\"",
-				"xcopy /y /f \"" .. llvmdir .. blddir .. "/%{cfg.buildcfg}/lib/clangParse.lib\" \""          .. iwtoldir .. bindir .. "/reflection\"",
-				"xcopy /y /f \"" .. llvmdir .. blddir .. "/%{cfg.buildcfg}/lib/clangSema.lib\" \""           .. iwtoldir .. bindir .. "/reflection\"",
-				"xcopy /y /f \"" .. llvmdir .. blddir .. "/%{cfg.buildcfg}/lib/clangSerialization.lib\" \""  .. iwtoldir .. bindir .. "/reflection\"",
-				"xcopy /y /f \"" .. llvmdir .. blddir .. "/%{cfg.buildcfg}/lib/clangTooling.lib\" \""        .. iwtoldir .. bindir .. "/reflection\"",
-				"xcopy /y /f \"" .. llvmdir .. blddir .. "/%{cfg.buildcfg}/lib/LLVMBinaryFormat.lib\" \""    .. iwtoldir .. bindir .. "/reflection\"",
-				"xcopy /y /f \"" .. llvmdir .. blddir .. "/%{cfg.buildcfg}/lib/LLVMBitstreamReader.lib\" \"" .. iwtoldir .. bindir .. "/reflection\"",
-				"xcopy /y /f \"" .. llvmdir .. blddir .. "/%{cfg.buildcfg}/lib/LLVMCore.lib\" \""            .. iwtoldir .. bindir .. "/reflection\"",
-				"xcopy /y /f \"" .. llvmdir .. blddir .. "/%{cfg.buildcfg}/lib/LLVMDemangle.lib\" \""        .. iwtoldir .. bindir .. "/reflection\"",
-				"xcopy /y /f \"" .. llvmdir .. blddir .. "/%{cfg.buildcfg}/lib/LLVMFrontendOpenMP.lib\" \""  .. iwtoldir .. bindir .. "/reflection\"",
-				"xcopy /y /f \"" .. llvmdir .. blddir .. "/%{cfg.buildcfg}/lib/LLVMMC.lib\" \""              .. iwtoldir .. bindir .. "/reflection\"",
-				"xcopy /y /f \"" .. llvmdir .. blddir .. "/%{cfg.buildcfg}/lib/LLVMMCParser.lib\" \""        .. iwtoldir .. bindir .. "/reflection\"",
-				"xcopy /y /f \"" .. llvmdir .. blddir .. "/%{cfg.buildcfg}/lib/LLVMOption.lib\" \""          .. iwtoldir .. bindir .. "/reflection\"",
-				"xcopy /y /f \"" .. llvmdir .. blddir .. "/%{cfg.buildcfg}/lib/LLVMProfileData.lib\" \""     .. iwtoldir .. bindir .. "/reflection\"",
-				"xcopy /y /f \"" .. llvmdir .. blddir .. "/%{cfg.buildcfg}/lib/LLVMRemarks.lib\" \""         .. iwtoldir .. bindir .. "/reflection\"",
-				"xcopy /y /f \"" .. llvmdir .. blddir .. "/%{cfg.buildcfg}/lib/LLVMSupport.lib\" \""         .. iwtoldir .. bindir .. "/reflection\"",
-				"xcopy /y /f \"" .. llvmdir .. blddir .. "/%{cfg.buildcfg}/bin/libclang.dll\" \""            .. iwtoldir .. bindir .. "/reflection\"",
-		}
-
-		filter "system:windows"
-			cppdialect "C++17"
-			systemversion "latest"
-			defines "IW_PLATFORM_WINDOWS"
 
 		filter "configurations:Debug"
 			defines "IW_DEBUG"
