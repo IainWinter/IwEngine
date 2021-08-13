@@ -35,7 +35,9 @@ enum class CellType : short {
 	DEBRIS,
 
 	LASER,
-	BULLET
+	BULLET,
+
+	LIFE
 };
 
 struct Cell {
@@ -46,9 +48,6 @@ struct Cell {
 
 	float x = 0,  y =  0,
 		dx = 0, dy = -1;
-
-	//int CanReplicate = true;
-	//bool Gravitised = false;
 
 	int TileId = 0; // 0 = not part of tile
 
@@ -72,20 +71,20 @@ struct LockingCell {
 };
 
 struct Tile {
-	std::vector<glm::vec2> Locations;
-	const int InitialLocationsSize = 0;
+	std::vector<std::pair<glm::vec2, bool>> Locations;
 	int TileId = 0;
+
+	bool Destroy = false;
 
 	Tile() = default;
 
 	Tile(std::vector<glm::vec2> locations)
-		: InitialLocationsSize(locations.size() * 4)
 	{
 		for (glm::vec2& v : locations) {
-			Locations.push_back(v * 2.f + glm::vec2(1, 0) - 4.f);
-			Locations.push_back(v * 2.f + glm::vec2(1, 1) - 4.f);
-			Locations.push_back(v * 2.f + glm::vec2(0, 1) - 4.f);
-			Locations.push_back(v * 2.f + glm::vec2(0, 0) - 4.f);
+			Locations.emplace_back(v * 2.f + glm::vec2(1, 0) - 4.f, true);
+			Locations.emplace_back(v * 2.f + glm::vec2(1, 1) - 4.f, true);
+			Locations.emplace_back(v * 2.f + glm::vec2(0, 1) - 4.f, true);
+			Locations.emplace_back(v * 2.f + glm::vec2(0, 0) - 4.f, true);
 		}
 
 		static int s_tileId = 1;

@@ -93,7 +93,17 @@ namespace software_renderer {
 
 		for (int i = 0; i < ceil(distance); i++)
 		{
-			PlotPixel(x, y);
+			if constexpr (std::is_same_v<invoke_result_t<_f3, int, int>, bool>)
+			{
+				if (PlotPixel(x, y)) {
+					break;
+				}
+			}
+
+			else {
+				PlotPixel(x, y);
+			}
+
 			x += dx;
 			y += dy;
 		}

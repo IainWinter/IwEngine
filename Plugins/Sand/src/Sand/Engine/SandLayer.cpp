@@ -115,20 +115,20 @@ int SandLayer::Initialize() {
 
 	if (m_initExpandable)
 	{
+		m_world = new SandWorld(
+			m_cellSize * chunkSize,
+			m_cellSize * chunkSize,
+			m_cellSize
+		);
+	}
+
+	else {
 		int width  = Renderer->Width()  / m_cellSize;
 		int height = Renderer->Height() / m_cellSize;
 
 		m_world = new SandWorld(
 			width, height,
 			16, 9,
-			m_cellSize
-		);
-	}
-
-	else {
-		m_world = new SandWorld(
-			m_cellSize * chunkSize,
-			m_cellSize * chunkSize,
 			m_cellSize
 		);
 	}
@@ -203,7 +203,10 @@ void SandLayer::PreUpdate() {
 
 	gP = glm::vec2(int(sP.x / gridSize), int(sP.y / gridSize)) * (float)gridSize;
 
-	DrawWithMouse(m_render->m_fx, -m_render->m_fy, width, height);
+	if (m_drawMouseGrid)
+	{
+		DrawWithMouse(m_render->m_fx, -m_render->m_fy, width, height);
+	}
 
 	PasteTiles();
 }

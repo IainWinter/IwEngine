@@ -24,8 +24,8 @@ void PlayerSystem::FixedUpdate()
 	glm::vec3 right = glm::vec3(-up.y, up.x, 0);
 	glm::vec3 left = -right;
 
-	p->i_thrust = iw::Keyboard::KeyDown(iw::LSHIFT);
-	p->i_boost  = iw::Keyboard::KeyDown(iw::SPACE);
+	p->i_thrust = iw::Keyboard::KeyDown(iw::S);
+	p->i_boost  = iw::Keyboard::KeyDown(iw::W);
 	p->i_left   = iw::Keyboard::KeyDown(iw::A);
 	p->i_right  = iw::Keyboard::KeyDown(iw::D);
 	p->i_fire1  = iw::Mouse::ButtonDown(iw::LMOUSE);

@@ -8,7 +8,7 @@ struct App : Application
 	App() {
 		//Audio = REF<AudioSpaceStudio>("assets/sounds/");
 
-		iw::ref<Context> context = Input->CreateContext("Editor");
+		iw::ref<Context> context = Input->CreateContext("Sand Game");
 		iw::ref<Device> m = Input->CreateDevice<Mouse>();
 		iw::ref<Device> k = Input->CreateDevice<RawKeyboard>();
 		
@@ -22,9 +22,11 @@ struct App : Application
 Application* CreateApplication(
 	InitOptions& options)
 {
+	options.AssetRootPath = "C:/dev/wEngine/_assets/";
+
 	options.WindowOptions = WindowOptions {
-		1920,
-		1080,
+		800,
+		800,
 		true,
 		iw::DisplayState::NORMAL
 	};

@@ -163,7 +163,7 @@ App::App() : iw::Application()
 	int cellSize  = 2;
 	int cellMeter = 10;
 
-	iw::SandLayer* sand = PushLayer<iw::SandLayer>(cellSize, cellMeter, true);
+	iw::SandLayer* sand = PushLayer<iw::SandLayer>(cellSize, cellMeter, false, true);
 						  PushLayer<GameLayer>(sand);
 }
 
@@ -193,9 +193,11 @@ int App::Initialize(
 iw::Application* CreateApplication(
 	iw::InitOptions& options)
 {
+	options.AssetRootPath = "C:/dev/wEngine/_assets/";
+
 	options.WindowOptions = iw::WindowOptions {
-		1920/**4/3*/,
-		1080/**4/3*/,
+		800/**4/3*/,
+		800/**4/3*/,
 		true,
 		iw::DisplayState::NORMAL
 	};

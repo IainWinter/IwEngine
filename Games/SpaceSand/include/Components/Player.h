@@ -12,7 +12,7 @@ struct Player {
 	bool i_fire1;
 
 	float fire1_timer = 0;
-	float fire1_time  = .05;
+	float fire1_time  = .15;
 
 
 

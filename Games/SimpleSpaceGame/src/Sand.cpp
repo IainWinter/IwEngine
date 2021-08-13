@@ -11,6 +11,8 @@ const Cell _DEBRIS = { CellType::DEBRIS, iw::Color::From255(150, 150, 150), 1 };
 const Cell _LASER = { CellType::LASER,  iw::Color::From255(255,   0,   0), .06f };
 const Cell _BULLET = { CellType::BULLET, iw::Color::From255(255,   255, 0), .02f };
 
+const Cell _LIFE = { CellType::LIFE, iw::Color::From255(10, 255, 20), 5 };
+
 namespace iw {
 	SandLayer::SandLayer()
 		 : Layer("Ray Marching")
@@ -54,17 +56,17 @@ namespace iw {
 		if (reset) {
 			world.Reset();
 
-			for (int x = -300; x < 300; x++)
-			for (int y = -200; y < -50; y++)
-			{
-				world.SetCell(x, y, _SAND);
-			}
+			//for (int x = -300; x < 300; x++)
+			//for (int y = -200; y < -50; y++)
+			//{
+			//	world.SetCell(x, y, _SAND);
+			//}
 
-			for (int x = -(int)texture->Width() / 2; x < (int)texture->Width() / 2; x++)
-			for (int y = -100; y < -50; y++) 
-			{
-				world.SetCell(x, y, _WATER);
-			}
+			//for (int x = -(int)texture->Width() / 2; x < (int)texture->Width() / 2; x++)
+			//for (int y = -100; y < -50; y++) 
+			//{
+			//	world.SetCell(x, y, _WATER);
+			//}
 
 			Space->Clear();
 
@@ -96,7 +98,7 @@ namespace iw {
 			});
 			enemy.Set<Enemy2>(glm::vec2(texture->Width() * .4f * iw::randf(), (texture->Height() - 200) * .4f * (iw::randf() + 1)));
 
-			spawnEnemy = iw::randf() + 1;
+			spawnEnemy = iw::randf() + 10;
 		}
 
 		 // camera frustrum, mostly used at the bottom, but needed for screen mouse pos to world pos
@@ -145,17 +147,28 @@ namespace iw {
 			auto t,
 			auto a)
 		{
-			if (a->Locations.size() < a->InitialLocationsSize / 3) {
-				if ((*Space).HasComponent<Player>(e)) {
+			bool isPlayer = (*Space).HasComponent<Player>(e);
+
+			int cellCount = 0;
+			for (int i = 0; i < a->Locations.size(); i++) {
+				if (a->Locations[i].second)
+				{
+					cellCount++;
+				}
+			}
+
+			if (cellCount < a->Locations.size() / 3) {
+				if (isPlayer) {
 					reset = true;
 				}
 
+				a->Destroy = true;
+
 				(*Space).QueueEntity(e, iw::func_Destroy);
-				return;
 			}
 
 			for (int i = 0; i < a->Locations.size(); i++) {
-				glm::vec2 v = a->Locations[i];
+				auto [v, enabled] = a->Locations[i];
 				v.x += int(t->Position.x);
 				v.y += int(t->Position.y);
 
@@ -163,19 +176,29 @@ namespace iw {
 				
 				const Cell& cell = world.GetCell(v.x, v.y);
 
-				if (   cell.Type   == CellType::EMPTY
-					|| cell.TileId == a->TileId)
+				if (    enabled
+					&& (cell.Type == CellType::EMPTY || cell.TileId == a->TileId))
 				{
-					Cell me = _METAL;
+					Cell me = a->Destroy ? _LIFE : _METAL;
 					me.TileId = a->TileId;
 					me.Life = 1;
+
+					if (a->Destroy) {
+						me.dx = iw::randf() * 1;
+						me.dy = iw::randf() * 1;
+					}
 
 					world.SetCell(v.x, v.y, me);
 				}
 
+				else if (isPlayer && cell.Type == CellType::LIFE)
+				{
+					a->Locations[i].second = true;
+					world.SetCell(v.x, v.y, _EMPTY);
+				}
+
 				else {
-					a->Locations[i] = a->Locations.back(); a->Locations.pop_back();
-					i--;
+					a->Locations[i].second = false;
 				}
 			}
 		});
@@ -198,7 +221,24 @@ namespace iw {
 
 				Fire(t->Position, pos, speed, shot, a->TileId);
 			}
-		});
+
+			//for (int x = -20; x < 20; x++)
+			//for (int y = -20; y < 20; y++)
+			//{
+			//	int px = t->Position.x + x;
+			//	int py = t->Position.y + y;
+
+			//	Cell cell = world.GetCell(px, py);
+
+			//	if (cell.Type == CellType::LIFE)
+			//	{
+			//		cell.dx = -x * .5;
+			//		cell.dy = -y * .5;
+
+			//		world.SetCell(px, py, cell);
+			//	}
+			//}
+		}); 
 
 		Space->Query<iw::Transform, Tile, Enemy2>().Each([&](
 			auto,
@@ -213,7 +253,7 @@ namespace iw {
 
 				glm::vec2 target = player.Find<iw::Transform>()->Position;
 			
-				float speed = 20;
+				float speed = 5;
 				const Cell& shot = _LASER;
 
 				Fire(t->Position, target, speed, shot, a->TileId);
@@ -292,8 +332,10 @@ namespace iw {
 			auto t,
 			auto a)
 		{
+			if (a->Destroy) return;
+
 			for (int i = 0; i < a->Locations.size(); i++) {
-				glm::vec2 v = a->Locations[i];
+				auto [v, enabled] = a->Locations[i];
 				v.x += int(t->Position.x);
 				v.y += int(t->Position.y);
 
@@ -303,13 +345,16 @@ namespace iw {
 
 				if (cell.Type == CellType::EMPTY) continue;
 
-				if (cell.TileId == a->TileId) {
+				if (enabled && cell.TileId == a->TileId) {
 					world.SetCell(v.x, v.y, _EMPTY);
 				}
 
+				else if (cell.Type == CellType::LIFE) {
+					a->Locations[i].second = true;
+				}
+
 				else {
-					a->Locations[i] = a->Locations.back(); a->Locations.pop_back();
-					i--;
+					a->Locations[i].second = false;
 				}
 			}
 		});
@@ -453,29 +498,6 @@ void SandWorker::UpdateChunk() {
 
 		Cell cell = m_chunk.GetCell(x, y);
 
-		// Would go in grav worker or something
-
-		//if (cell.Gravitised) {
-		//	glm::vec2 dir = gravPos - glm::vec2(x, y);
-
-		//	float div = 2;
-		//	while (abs((dir / div).major()) > 1) {
-		//		dir /= div;
-		//		div = iw::clamp(div - iw::randf(), 1.2f, 2.f);
-		//	}
-
-		//	Cell& scell = chunk.GetCell(x, y, true);
-
-		//	cell.Direction  += dir + iw::DeltaTime();
-		//	scell.Direction += dir + iw::DeltaTime();
-
-		//	cell.Direction  *= .9f;
-		//	scell.Direction *= .9f;
-
-		//	cell.Direction  = iw::clamp<glm::vec2>(cell.Direction, -5, 5);
-		//	scell.Direction = iw::clamp<glm::vec2>(scell.Direction, -5, 5);
-		//}
-
 		switch (cell.Type) {
 			case CellType::SAND: {
 				MoveLikeSand(x, y, cell, cell);
@@ -497,6 +519,15 @@ void SandWorker::UpdateChunk() {
 				if (result.first) {
 					HitLikeLaser(result.second.x, result.second.y, cell);
 				}
+				break;
+			}
+			case CellType::LIFE: {
+				Cell r = cell;
+				r.dx *= .5;
+				r.dy *= .5;
+
+				MoveLikeSand(x, y, cell, r);
+				
 				break;
 			}
 		}
@@ -694,21 +725,6 @@ void SandWorker::HitLikeLaser(
 		cell.Life /= 2;
 
 		SetCell(x, y, cell);
-
-		//for (int i = x - 5; i < x + 5; i++)
-		//for (int j = y - 5; j < y + 5; j++) {
-		//	if (   inBounds(i, j)
-		//		&& getCell(i, j).Type != cell.Type)
-		//	{
-		//		if (iw::randf() > .5) {
-		//			setCell(i, j, _DEBRIS);
-		//		}
-		//
-		//		else {
-		//			setCell(i, j, _EMPTY);
-		//		}
-		//	}
-		//}
 	}
 
 	else {

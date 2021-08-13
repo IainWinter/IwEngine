@@ -19,31 +19,30 @@ void ProjectileSystem::Update()
 			m_cells.at(i) = m_cells.back(); m_cells.pop_back(); i--;
 		}
 	}
+
+	Space->Query<Projectile>().Each([&](iw::EntityHandle, Projectile* p) 
+	{
+		if (p->Update)
+		{
+			auto [hit, hx, hy] = p->Update();
+
+			if (p->OnHit && hit) 
+			{
+				p->OnHit(hx, hy);
+
+				LOG_INFO << "At " << hx << ", " << hy;
+			}
+		}
+	});
 }
 
 float time__ = 0;
 
 void ProjectileSystem::FixedUpdate()
 {
-	Space->Query<Projectile>().Each([&](
-		iw::EntityHandle entity,
-		Projectile* projectile)
+	Space->Query<Projectile>().Each([&](iw::EntityHandle, Projectile* p) 
 	{
-		if (   projectile->TestForHit 
-			&& projectile->TestForHit())
-		{
-			LOG_INFO << "Projectile hit!";
-
-			if (projectile->OnHit)
-			{
-				projectile->OnHit();
-			}
-		}
-
-		if (projectile->Update)
-		{
-			projectile->Update();
-		}
+		if (p->FixedUpdate) p->FixedUpdate();
 	});
 
 	time__ += iw::FixedTime();
@@ -122,6 +121,15 @@ iw::Entity ProjectileSystem::MakeBullet(
 		return std::array<float, 4> { x, y, dx, dy }; // tie would break elements for some reason, was it a tuple of references?
 	};
 
+	auto setpos = [=](float x, float y)
+	{
+		iw::Rigidbody* r = entity.Find<iw::Rigidbody>();
+		iw::Transform& t = r->Transform;
+
+		t.Position.x = x / sand->m_cellsPerMeter;
+		t.Position.y = y / sand->m_cellsPerMeter;
+	};
+
 	auto randvel = [=](float rand, bool setForMe) 
 	{
 		iw::Rigidbody* r = entity.Find<iw::Rigidbody>();
@@ -130,7 +138,7 @@ iw::Entity ProjectileSystem::MakeBullet(
 
 		float length = sqrt(dx * dx + dy * dy);
 		float angle = atan2(dy, dx);
-		angle += iw::randf() * rand + .1 * (signbit(iw::randf()) ? -1 : 1);
+		angle += (iw::randf()+1) * .5f + .1f;
 
 		dx = cos(angle) * length;
 		dy = sin(angle) * length;
@@ -157,36 +165,55 @@ iw::Entity ProjectileSystem::MakeBullet(
 		float speed  = sqrt(dx*dx + dy*dy);
 		float length = .2;
 
+		bool hit = false;
+		int hx, hy;
+
 		sand->ForEachInLine(x, y, x + dx, y + dy, [&](
-			int px, int py) 
+			int px, int py)
 		{
 			iw::SandChunk* chunk = sand->m_world->GetChunk(px, py);
-			if (!chunk) return;
+			
+			if (!chunk)
+			{
+				LOG_INFO << "Hit bounds";
 
-			chunk->SetCell(px, py, cell);
+				hit = true; // collision on no chunk
+				return true;
+			}
 
 			auto& [tile, index] = chunk->GetCell<iw::TileInfo>(px, py, iw::SandField::TILE_INFO);
 			if (tile)
 			{
+				LOG_INFO << "Hit tile " << tile;
+
+				hit = true;
 				sand->EjectPixel(tile, index);
 			}
 
+			else
+			if (  !chunk->IsEmpty(px, py)
+				&& chunk->GetCell(px, py).Type != iw::CellType::PROJECTILE)
+			{
+				LOG_INFO << "Hit cell";
+
+				hit = true;
+			}
+
+			chunk->SetCell(px, py, cell);
 			m_cells.emplace_back(px, py, length / speed);
+
+			if (hit) 
+			{
+				hx = px;
+				hy = py;
+				return true;
+			}
 		});
+
+		return std::tuple(hit, hx, hy);
 	};
 
-	projectile->TestForHit = [=]()
-	{
-		auto [x, y, dx, dy] = getpos();
-
-		if (iw::SandChunk* chunk = sand->m_world->GetChunk(x, y))
-		{
-			return !chunk->IsEmpty(x, y) 
-				&&  chunk->GetCell(x, y).Type != iw::CellType::PROJECTILE;
-		}
-	};
-
-	projectile->OnHit = [=]()
+	projectile->OnHit = [=](int hx, int hy)
 	{
 		auto [x, y, dx, dy] = getpos();
 
@@ -195,15 +222,21 @@ iw::Entity ProjectileSystem::MakeBullet(
 			float depthPercent = depth / float(maxDepth) * iw::Pi / 2.f + iw::Pi / 6.f; // needs a lil tuning to get right feel
 			int splitCount = iw::randi(2) + 1;
 
-			for (int i = 0; i < splitCount; i++)
-			{
-				auto [rx, ry] = randvel(iw::Pi * depthPercent, false);
-				MakeBulletC(x, y, rx, ry, maxDepth, depth + 1);
-			}
+			//auto [vx, vy] = randvel(iw::Pi * depthPercent, true);
+
+			setpos(hx, hy);
+
+			//MakeBullet(hx + vx, hy + vy, vx, vy);
+
+			//for (int i = 0; i < splitCount; i++)
+			//{
+			//	auto [rx, ry] = randvel(iw::Pi * depthPercent, false);
+			//	MakeBulletC(x, y, rx, ry, maxDepth, depth + 1);
+			//}
 
 			//MakeExplosion(x, y, 50);
 		}
-		
+		else
 		Space->QueueEntity(entity.Handle, iw::func_Destroy);
 	};
 
@@ -226,7 +259,7 @@ void ProjectileSystem::MakeExplosion(
 				sand->EjectPixel(tile, index);
 			}
 
-			//schunk->SetCell(px, py, iw::Cell::GetDefault(iw::CellType::EMPTY));
+			chunk->SetCell(px, py, iw::Cell::GetDefault(iw::CellType::EMPTY));
 		}
 	}
 }
