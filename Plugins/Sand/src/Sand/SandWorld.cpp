@@ -3,8 +3,8 @@
 IW_PLUGIN_SAND_BEGIN
 
 SandWorld::SandWorld(
-	size_t chunkWidth,
-	size_t chunkHeight,
+	int chunkWidth,
+	int chunkHeight,
 	double scale)
 	: m_chunkWidth (chunkWidth  / scale)
 	, m_chunkHeight(chunkHeight / scale)
@@ -15,20 +15,20 @@ SandWorld::SandWorld(
 }
 
 SandWorld::SandWorld(
-	size_t screenSizeX,
-	size_t screenSizeY,
-	size_t numberOfChunksX,
-	size_t numberOfChunksY,
+	int screenSizeX,
+	int screenSizeY,
+	int numberOfChunksX,
+	int numberOfChunksY,
 	double scale)
-	: m_chunkWidth (screenSizeX / numberOfChunksX/* / scale*/)
-	, m_chunkHeight(screenSizeY / numberOfChunksY/* / scale*/)
+	: m_chunkWidth (screenSizeX / numberOfChunksX)
+	, m_chunkHeight(screenSizeY / numberOfChunksY)
 	, m_scale(scale)
 	, m_expandWorld(true)
 {
 	m_batches.resize(m_batchGridSize * m_batchGridSize);
 
-	for(size_t x = 0; x < numberOfChunksX; x++)
-	for(size_t y = 0; y < numberOfChunksY; y++) {
+	for(int x = 0; x < numberOfChunksX; x++)
+	for(int y = 0; y < numberOfChunksY; y++) {
 		CreateChunk({ x, y });
 	}
 

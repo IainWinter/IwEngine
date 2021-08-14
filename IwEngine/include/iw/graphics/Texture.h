@@ -157,6 +157,9 @@ namespace Graphics {
 		size_t ColorCount() const;
 
 		IWGRAPHICS_API
+		size_t ColorCount32() const;
+
+		IWGRAPHICS_API
 		ITexture* Handle() const;
 
 		IWGRAPHICS_API

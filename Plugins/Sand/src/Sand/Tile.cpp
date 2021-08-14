@@ -28,12 +28,26 @@ Tile::Tile(
 
 	m_bounds.Min -= halfSize; // could make better flow
 	m_bounds.Max -= halfSize;
+
+	// Set cell counts/health, could maybe do this 
+	// in the UpdateCeooliderPolygon function in the MakeFromField lambda...
+
+	unsigned* colors = m_sprite->Colors32();
+	for (int i = 0; i < texture->ColorCount32(); i++)
+	{
+		if (Color::From32(colors[i]).a > 0)
+		{
+			m_initalCellCount++;
+		}
+	}
+
+	m_currentCellCount = m_initalCellCount;
 }
 
 void Tile::UpdateColliderPolygon()
 {
-	unsigned* colors = (unsigned*)m_sprite->Colors();
-	glm::vec2 size   =            m_sprite->Dimensions();
+	unsigned* colors = m_sprite->Colors32();
+	glm::vec2 size   = m_sprite->Dimensions();
 
 	auto colliders = MakePolygonFromField<unsigned>( // why does this NEED template arg
 		colors, 

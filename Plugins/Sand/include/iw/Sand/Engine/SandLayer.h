@@ -23,7 +23,7 @@ public:
 	const int m_cellSize;
 	const int m_cellsPerMeter;
 
-	int gridSize = 16;
+	int gridSize = 16; // add m_ 
 	glm::vec2 sP, gP; // sand pos, grid pos
 
 private:
@@ -38,7 +38,10 @@ private:
 	std::vector<Tile*> m_tilesThisFrame;
 	std::vector<std::pair<SandChunk*, std::vector<PixelData>>> m_cellsThisFrame;
 
-	bool m_initExpandable;
+	// options for a fixed size
+	bool m_initFixed;
+	int m_worldWidth; // these are invalid if initFixed is false
+	int m_worldHeight;
 
 public:
 	SandLayer(
@@ -48,13 +51,44 @@ public:
 		bool drawMouseGrid = false
 	)
 		: Layer("Sand")
+
 		, m_cellSize(cellSize)
 		, m_cellsPerMeter(cellsPerMeter)
-		, m_initExpandable(expandable)
 		, m_drawMouseGrid(drawMouseGrid)
+
+		, m_initFixed(false)
+		, m_worldWidth (-1)
+		, m_worldHeight(-1)
+
 		, m_world(nullptr)
 		, m_render(nullptr)
 		, m_update(nullptr)
+		, sP(0.f)
+		, gP(0.f)
+	{}
+
+	SandLayer(
+		int cellSize,
+		int cellsPerMeter,
+		int worldWidth,
+		int worldHeight,
+		bool drawMouseGrid = false
+	)
+		: Layer("Sand")
+
+		, m_cellSize(cellSize)
+		, m_cellsPerMeter(cellsPerMeter)
+		, m_drawMouseGrid(drawMouseGrid)
+
+		, m_initFixed(true)
+		, m_worldWidth (worldWidth  / cellSize)
+		, m_worldHeight(worldHeight / cellSize)
+
+		, m_world(nullptr)
+		, m_render(nullptr)
+		, m_update(nullptr)
+		, sP(0.f)
+		, gP(0.f)
 	{}
 
 	IW_PLUGIN_SAND_API int  Initialize();
@@ -165,7 +199,7 @@ public:
 	void ForEachInLine(
 		float x,  float y,
 		float x1, float y1,
-		std::function<void(int, int)> func)
+		std::function<bool(int, int)> func)
 	{
 		using vertex = std::array<int, 2>;
 
@@ -176,7 +210,7 @@ public:
 		::RasterLine(v0, v1,
 			[&](int x, int y)
 			{
-				func(x, y);
+				return func(x, y);
 			}
 		);
 	}

@@ -15,7 +15,7 @@ public:
 	const size_t m_chunkHeight;
 	const double m_scale;
 
-	const int m_batchGridSize = 2;
+	const size_t m_batchGridSize = 2;
 
 	bool m_expandWorld;
 	size_t m_frameCount = 0;
@@ -72,8 +72,8 @@ public:
 		return size * m_chunkWidth * m_chunkHeight;
 	}
 
-	IW_PLUGIN_SAND_API SandWorld(size_t chunkWidth, size_t chunkHeight, double scale);
-	IW_PLUGIN_SAND_API SandWorld(size_t screenSizeX, size_t screenSizeY, size_t numberOfChunksX, size_t numberOfChunksY, double scale);
+	IW_PLUGIN_SAND_API SandWorld(int chunkWidth, int chunkHeight, double scale);
+	IW_PLUGIN_SAND_API SandWorld(int screenSizeX, int screenSizeY, int numberOfChunksX, int numberOfChunksY, double scale);
 
 	IW_PLUGIN_SAND_API Cell& GetCell(int x, int y, SandField field = SandField::CELL);
 

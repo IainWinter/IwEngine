@@ -13,16 +13,22 @@ public:
 	    m_fx2, m_fy2; // Camera frustrum
 private:
 	SandWorld* m_world;
+	int m_worldWidth;
+	int m_worldHeight;
 
 	Mesh         m_mesh;
 	ref<Texture> m_texture;
 
 public:
 	SandWorldRenderSystem(
-		SandWorld* world
+		SandWorld* world,
+		int worldWidth,
+		int worldHeight
 	)
 		: SystemBase("Sand World Render")
 		, m_world(world)
+		, m_worldWidth(worldWidth)
+		, m_worldHeight(worldHeight)
 	{
 		SetCamera(0, 0, 100, 100);
 	}

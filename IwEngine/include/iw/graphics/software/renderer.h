@@ -80,7 +80,6 @@ namespace software_renderer {
 	{
 		auto [x0, y0, x1, y1] = tuple_cat(GetXY(*v0), GetXY(*v1));
 
-
 		float dx = x1 - x0;
 		float dy = y1 - y0;
 
@@ -93,7 +92,7 @@ namespace software_renderer {
 
 		for (int i = 0; i < ceil(distance); i++)
 		{
-			if constexpr (std::is_same_v<invoke_result_t<_f3, int, int>, bool>)
+			if constexpr (std::is_same_v<invoke_result_t<_f3, float, float>, bool>)
 			{
 				if (PlotPixel(x, y)) {
 					break;

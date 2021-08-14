@@ -111,24 +111,24 @@ int SandLayer::Initialize() {
 	Cell::SetDefault(CellType::SMOKE, _SMOKE);
 	Cell::SetDefault(CellType::BELT,  _BELT);
 
-	int chunkSize = 100;
+	size_t chunkSize = 100; // shoudl be in constructor
 
-	if (m_initExpandable)
+	if (m_initFixed)
 	{
+		int numChunksX = m_worldWidth  / chunkSize;
+		int numChunksY = m_worldHeight / chunkSize;
+
 		m_world = new SandWorld(
-			m_cellSize * chunkSize,
-			m_cellSize * chunkSize,
+			m_worldWidth, m_worldHeight,
+			numChunksX, numChunksY,
 			m_cellSize
 		);
 	}
 
 	else {
-		int width  = Renderer->Width()  / m_cellSize;
-		int height = Renderer->Height() / m_cellSize;
-
 		m_world = new SandWorld(
-			width, height,
-			16, 9,
+			m_cellSize * chunkSize,
+			m_cellSize * chunkSize,
 			m_cellSize
 		);
 	}
@@ -181,7 +181,7 @@ int SandLayer::Initialize() {
 	//m_tiles = grid2<Tile*>(chunkSize / m_cellsPerMeter);
 
 	m_update = PushSystem<SandWorldUpdateSystem>(m_world);
-	m_render = PushSystem<SandWorldRenderSystem>(m_world);
+	m_render = PushSystem<SandWorldRenderSystem>(m_world, m_worldWidth, m_worldHeight);
 	
 	m_update->SetCameraScale(m_cellsPerMeter, m_cellsPerMeter);
 
@@ -374,7 +374,13 @@ void SandLayer::EjectPixel(
 	// cant scale transform if removing pixels like this
 	// to fix, maybe could remove pixels in a scaled square around index?
 
-	tile->m_sprite->Colors32()[index] = 0;
+	unsigned& color = tile->m_sprite->Colors32()[index];
+
+	if (Color::From32(color).a != 0)
+	{
+		tile->m_currentCellCount--;
+		color = 0;
+	}
 }
 
 IW_PLUGIN_SAND_END

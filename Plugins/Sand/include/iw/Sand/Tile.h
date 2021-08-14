@@ -29,6 +29,9 @@ struct Tile {
 	bool NeedsDraw = true;
 	bool NeedsScan = true;
 
+	int m_initalCellCount  = -1;
+	int m_currentCellCount = -1;
+
 	IW_PLUGIN_SAND_API
 	Tile() = default;
 

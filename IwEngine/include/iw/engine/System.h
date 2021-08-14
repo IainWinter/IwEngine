@@ -108,6 +108,8 @@ namespace Engine {
 			return m_name;
 		}
 	protected:
+
+		// should find a way to batch this
 		template<
 			typename _c,
 			typename... _args>

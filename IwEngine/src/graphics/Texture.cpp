@@ -430,6 +430,11 @@ namespace Graphics {
 		return m_width * m_height * m_depth * m_channels; // convert everything to size_t 
 	}
 
+	size_t Texture::ColorCount32() const
+	{
+		return ColorCount() / 4;
+	}
+
 	ITexture* Texture::Handle() const {
 		return m_handle;
 	}

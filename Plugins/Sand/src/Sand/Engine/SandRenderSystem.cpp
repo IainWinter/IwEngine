@@ -10,11 +10,21 @@ int SandWorldRenderSystem::Initialize() {
 		return 1;
 	}
 
-	m_texture = REF<Texture>(
-		Renderer->Width()  / m_world->m_scale,
-		Renderer->Height() / m_world->m_scale,
-		TEX_2D, RGBA
-	);
+	int width, height;
+
+	if (m_worldWidth == -1) // -1 is set in SandLayer
+	{
+		width  = Renderer->Width()  / m_world->m_scale;
+		height = Renderer->Height() / m_world->m_scale;
+	}
+
+	else
+	{
+		width  = m_worldWidth;
+		height = m_worldHeight;
+	}
+
+	m_texture = REF<Texture>(width, height, TEX_2D, RGBA);
 	m_texture->SetFilter(NEAREST);
 	m_texture->CreateColors();
 	m_texture->Clear();
