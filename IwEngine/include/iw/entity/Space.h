@@ -283,7 +283,12 @@ namespace ECS {
 		_c* FindComponent(
 			EntityHandle handle)
 		{
-			return (_c*)FindComponent(handle, GetComponent<_c>());
+			if (ref<Component> component = GetComponent<_c>())
+			{
+				return (_c*)FindComponent(handle, component);
+			}
+
+			return nullptr;
 		}
 
 		// Returns true if the entities archetype contains the component
@@ -292,7 +297,12 @@ namespace ECS {
 		bool HasComponent(
 			EntityHandle handle)
 		{
-			return HasComponent(handle, GetComponent<_c>());
+			if (ref<Component> component = GetComponent<_c>())
+			{
+				return (_c*)HasComponent(handle, component);
+			}
+
+			return false;
 		}
 
 		// Makes a component query from a list of registered components
@@ -315,7 +325,12 @@ namespace ECS {
 		Entity FindEntity(
 			void* instance)
 		{
-			return FindEntity(GetComponent<_c>(), instance);
+			if (ref<Component> component = GetComponent<_c>())
+			{
+				return FindEntity(component, instance);
+			}
+
+			return Entity();
 		}
 
 		// Finds an entity from one of its components
@@ -324,7 +339,12 @@ namespace ECS {
 		Entity FindEntity(
 			_c* instance)
 		{
-			return FindEntity(GetComponent<_c>(), (void*)instance);
+			if (ref<Component> component = GetComponent<_c>())
+			{
+				return FindEntity(component, (void*)instance);
+			}
+
+			return Entity();
 		}
 
 // ---------------------------------------------------------
