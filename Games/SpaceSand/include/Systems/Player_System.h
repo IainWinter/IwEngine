@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Components/Player.h"
-#include "Systems/Projectile.h"
+#include "Systems/Projectile_System.h"
 
 struct PlayerSystem : iw::SystemBase
 {
@@ -20,7 +20,9 @@ struct PlayerSystem : iw::SystemBase
 		, guns(guns)
 		, cam_x(0)
 		, cam_y(0)
-	{}
+	{
+		player = sand->MakeTile("textures/SpaceGame/player.png", true);
+	}
 
 	int  Initialize() override;
 	void FixedUpdate() override;

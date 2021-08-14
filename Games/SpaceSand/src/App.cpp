@@ -6,81 +6,18 @@
 #include "iw/physics/Dynamics/SmoothPositionSolver.h"
 #include "iw/math/noise.h"
 
-#include "Systems/Player.h"
-#include "Systems/EnemyBase.h"
-#include "Systems/Flocking.h"
-#include "Systems/Projectile.h"
+#include "Systems/World_System.h"
 
-struct seed {
-	int x = 0, y = 0;
-	iw::Color c;
+#include "Systems/Player_System.h"
+#include "Systems/Enemy_System.h"
 
-	seed(int x, int y, const iw::Color& c) : x(x), y(y), c(c) {}
-
-	float distance(
-		int px, int py) const
-	{
-		int dx = x - px,
-			dy = y - py;
-
-		return sqrt(dx*dx + dy*dy);
-	}
-};
-
-seed& findClosestSeed(
-	std::vector<seed>& seeds,
-	int px, int py)
-{
-	seed* minSeed = nullptr;
-	float minDist = FLT_MAX;
-
-	for (seed& s : seeds)
-	{
-		float dist = s.distance(px, py);
-		if (dist < minDist)
-		{
-			minSeed = &s;
-			minDist = dist;
-		}
-	}
-
-	return *minSeed;
-}
-
-std::vector<seed> genRandomSeeds(
-	int count,
-	int w, int h,
-	int padw, int padh)
-{
-	std::vector<seed> seeds;
-
-	int w2 = w / 2;
-	int h2 = h / 2;
-
-	for (int i = 0; i < count; i++)
-	{
-		seeds.emplace_back(
-			iw::randf() * w2 + w2 + padw,
-			iw::randf() * h2 + h2 + padh,
-			iw::Color(iw::randf(), iw::randf(), iw::randf())
-		);
-	}
-
-	for (int x = 0; x < w; x++) findClosestSeed(seeds, x,     padh).c = 0;
-	for (int x = 0; x < w; x++) findClosestSeed(seeds, x, h - padh).c = 0;
-	for (int y = 0; y < h; y++) findClosestSeed(seeds,     padw, y).c = 0;
-	for (int y = 0; y < h; y++) findClosestSeed(seeds, w - padw, y).c = 0;
-
-	return seeds;
-}
+#include "Systems/Flocking_System.h"
+#include "Systems/Projectile_System.h"
 
 struct GameLayer : iw::Layer
 {
 	iw::SandLayer* sand;
 	
-	iw::PhysicsSystem* player;
-	float cam_x, cam_y;
-
 	GameLayer(
 		iw::SandLayer* sand
 	) 
@@ -90,27 +27,17 @@ struct GameLayer : iw::Layer
 
 	int Initialize() override
 	{
-		for (int i = 0; i < 0; i++)
-		{
-			int width  = iw::randi(128) + 64, width_pad  = 10, 
-				height = iw::randi(128) + 64, height_pad = 10;
+		ProjectileSystem* projectile_s = new ProjectileSystem(sand);
+		PlayerSystem*     player_s     = new PlayerSystem(sand, projectile_s);
 
-			std::vector<seed> seeds = genRandomSeeds(15, width, height, width_pad, height_pad);
+		PushSystem(projectile_s);
+		PushSystem(player_s);
+		PushSystem<EnemySystem>();
+		PushSystem<WorldSystem>(sand, player_s->player);
 
-			iw::ref<iw::Texture> tex = REF<iw::Texture>(width, height);
-			unsigned* colors = (unsigned*)tex->CreateColors();
+		PushSystem<FlockingSystem>();
 
-			for (int x = 0; x < width;  x++)
-			for (int y = 0; y < height; y++)
-			{
-				colors[x + y * width] = findClosestSeed(seeds, x, y).c.to32();
-			}
-
-			iw::Entity e = sand->MakeTile(tex, true);
-			e.Find<iw::Rigidbody>()->Transform.Position.x = iw::randf() * 150;
-			e.Find<iw::Rigidbody>()->Transform.Position.y = iw::randf() * 150;
-			//e.Find<iw::Rigidbody>()->AngularVelocity.z = iw::FixedTime() * 20 * iw::randf();
-		}
+		Renderer->Device->SetClearColor(0, 0, 0, 0);
 
 		Physics->AddSolver(new iw::SmoothPositionSolver());
 		Physics->AddSolver(new iw::ImpulseSolver());
@@ -118,42 +45,26 @@ struct GameLayer : iw::Layer
 		PushSystem<iw::PhysicsSystem>();
 		PushSystem<iw::EntityCleanupSystem>();
 
-		ProjectileSystem* guns = PushSystem<ProjectileSystem>(sand);
-		                         PushSystem<PlayerSystem>(sand, guns);
-		                         //PushSystem<EnemyCommandSystem>(sand);
-		                        // PushSystem<FlockingSystem>();
-
-		Renderer->Device->SetClearColor(0, 0, 0, 0);
-
-		//MakeTestBes();
-
 		return Layer::Initialize();
-	}
-
-	void MakeTestBes() {
-		auto fillBox = [&](int x, int y, int x1, int y1) {
-			for (int xi = x; xi < x1; xi++)
-			for (int yi = y; yi < y1; yi++)
-			{
-				sand->m_world->SetCell(xi, yi, iw::Cell::GetDefault(iw::CellType::ROCK));
-			}
-		};
-
-		fillBox(-500,  100,  500,  500);
-		fillBox(-500, -500,  500, -100);
-		fillBox(-300, -500, -200,  500);
-		fillBox( 200, -500,  300,  500);
 	}
 
 	void PostUpdate() override
 	{
-		if (iw::Keyboard::KeyDown(iw::H))
-		{
-			MakeTestBes();
-		}
+		float height = Renderer->Height();
+
+		float sandSize = sand->GetSandTexSize2().second * sand->m_cellSize * 2;
+		float menuSize = height - sandSize;
+
+
+		float sandPos   = menuSize / height;
+		float sandScale = sandSize / height;
+
+		iw::Transform sandTransform;
+		sandTransform.Position.y = sandPos;
+		sandTransform.Scale   .y = sandScale;
 
 		Renderer->BeginScene();
-		Renderer->DrawMesh(iw::Transform(), sand->GetSandMesh());
+		Renderer->DrawMesh(sandTransform, sand->GetSandMesh());
 		Renderer->EndScene();
 	}
 };
@@ -163,8 +74,10 @@ App::App() : iw::Application()
 	int cellSize  = 2;
 	int cellMeter = 10;
 
-	iw::SandLayer* sand = PushLayer<iw::SandLayer>(cellSize, cellMeter, false, true);
-						  PushLayer<GameLayer>(sand);
+	iw::SandLayer* sand = new iw::SandLayer(cellSize, cellMeter, 800, 800, true);
+
+	PushLayer(sand);
+	PushLayer<GameLayer>(sand);
 }
 
 int App::Initialize(
@@ -193,11 +106,9 @@ int App::Initialize(
 iw::Application* CreateApplication(
 	iw::InitOptions& options)
 {
-	options.AssetRootPath = "C:/dev/wEngine/_assets/";
-
 	options.WindowOptions = iw::WindowOptions {
-		800/**4/3*/,
-		800/**4/3*/,
+		800,
+		950,
 		true,
 		iw::DisplayState::NORMAL
 	};

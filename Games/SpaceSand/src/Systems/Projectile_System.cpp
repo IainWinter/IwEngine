@@ -1,5 +1,4 @@
-#include "Systems/Projectile.h"
-#include "iw/physics/Collision/SphereCollider.h"
+#include "Systems/Projectile_System.h"
 
 int ProjectileSystem::Initialize()
 {
@@ -128,9 +127,11 @@ iw::Entity ProjectileSystem::MakeBullet(
 
 		t.Position.x = x / sand->m_cellsPerMeter;
 		t.Position.y = y / sand->m_cellsPerMeter;
+
+		r->Velocity = glm::normalize(r->Velocity) * float(sand->m_cellsPerMeter);
 	};
 
-	auto randvel = [=](float rand, bool setForMe) 
+	auto randvel = [=](float amount, bool setForMe) 
 	{
 		iw::Rigidbody* r = entity.Find<iw::Rigidbody>();
 		float dx = r->Velocity.x;
@@ -138,7 +139,7 @@ iw::Entity ProjectileSystem::MakeBullet(
 
 		float length = sqrt(dx * dx + dy * dy);
 		float angle = atan2(dy, dx);
-		angle += (iw::randf()+1) * .5f + .1f;
+		angle += ((iw::randf()+1) * .5f) * amount + .1f * amount;
 
 		dx = cos(angle) * length;
 		dy = sin(angle) * length;
@@ -188,6 +189,8 @@ iw::Entity ProjectileSystem::MakeBullet(
 
 				hit = true;
 				sand->EjectPixel(tile, index);
+				tile = nullptr;
+				index = 0;
 			}
 
 			else
@@ -215,16 +218,19 @@ iw::Entity ProjectileSystem::MakeBullet(
 
 	projectile->OnHit = [=](int hx, int hy)
 	{
-		auto [x, y, dx, dy] = getpos();
-
-		if (sand->m_world->InBounds(x, y))
+		if (sand->m_world->InBounds(hx, hy))
 		{
 			float depthPercent = depth / float(maxDepth) * iw::Pi / 2.f + iw::Pi / 6.f; // needs a lil tuning to get right feel
 			int splitCount = iw::randi(2) + 1;
 
-			//auto [vx, vy] = randvel(iw::Pi * depthPercent, true);
+			//auto [vx, vy] = 
 
-			setpos(hx, hy);
+			//auto [x, y, dx, dy] = getpos();
+
+			//LOG_INFO << 
+
+			//randvel(iw::Pi * depthPercent, true);
+			setpos(hx, hy); // set vel also?`
 
 			//MakeBullet(hx + vx, hy + vy, vx, vy);
 
@@ -236,8 +242,10 @@ iw::Entity ProjectileSystem::MakeBullet(
 
 			//MakeExplosion(x, y, 50);
 		}
-		else
-		Space->QueueEntity(entity.Handle, iw::func_Destroy);
+
+		else {
+			Space->QueueEntity(entity.Handle, iw::func_Destroy);
+		}
 	};
 
 	return entity;
