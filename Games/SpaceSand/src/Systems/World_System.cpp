@@ -22,9 +22,10 @@ void WorldSystem::FixedUpdate()
 		Bus->push<SpawnEnemy_Event>(m_player, target_x, target_y);
 	}
 
-	Space->Query<iw::Tile>().Each(
+	Space->Query<iw::Transform, iw::Tile>().Each(
 		[&](
 			iw::EntityHandle entity, 
+			iw::Transform* transform,
 			iw::Tile* tile) 
 		{
 			if (tile->m_currentCellCount < tile->m_initalCellCount / 3)
@@ -32,6 +33,19 @@ void WorldSystem::FixedUpdate()
 				if (Space->HasComponent<Player>(entity))
 				{
 					//reset();
+				}
+
+				iw::Cell c;
+				c.Type = iw::CellType::STONE; // temp
+				c.Color = iw::Color(0, 1, 0);
+
+				for (int y = 0; y < tile->m_sprite.Height(); y++)
+				for (int x = 0; x < tile->m_sprite.Width(); x++)
+				{
+					if (iw::Color::From32(tile->m_sprite.Colors32()[x + y * tile->m_sprite.Width()]).a != 0)
+					{
+						sand->m_world->SetCell(transform->Position.x + x, transform->Position.y + y, c);
+					}
 				}
 
 				Space->QueueEntity(entity, iw::func_Destroy);
