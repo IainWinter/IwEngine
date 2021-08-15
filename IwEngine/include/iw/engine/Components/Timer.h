@@ -1,6 +1,7 @@
 #pragma once
 
 #include "iw/engine/Time.h"
+#include "iw/math/iwmath.h"
 
 #include <unordered_map>
 #include <string>
@@ -11,7 +12,7 @@ namespace Engine {
 		std::unordered_map<std::string, std::pair<float, float>> Times; // name, current, goal
 		size_t CurrentTick = 0;
 
-		Timer() {}
+		Timer() = default;
 
 		void SetTime(
 			const std::string& name,
@@ -27,17 +28,37 @@ namespace Engine {
 		float& GetTime (const std::string& name) { return Times[name].second; }
 		float& GetTimer(const std::string& name) { return Times[name].first; }
 
+		// True when timer has past, then resets it to 0
 		bool Can(
 			const std::string& name)
 		{
-			float& timer = GetTimer(name);
-			bool   past  = GetTime (name) < timer;
+			bool past = PastTime(name);
 
 			if (past) {
-				timer = 0;
+				GetTimer(name) = 0;
 			}
 
 			return past;
+		}
+
+		// True when timer has past, them resets it to (0, -margin)
+		bool Can_random(
+			const std::string& name,
+			float margin)
+		{
+			bool past = PastTime(name);
+
+			if (past) {
+				GetTimer(name) = -iw::randf() * margin;
+			}
+
+			return past;
+		}
+
+		bool PastTime(
+			const std::string& name)
+		{
+			return GetTime(name) < GetTimer(name);
 		}
 
 		void Tick()      { Tick(iw::DeltaTime()); }

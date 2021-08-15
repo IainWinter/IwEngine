@@ -28,11 +28,11 @@ struct GameLayer : iw::Layer
 	int Initialize() override
 	{
 		ProjectileSystem* projectile_s = new ProjectileSystem(sand);
-		PlayerSystem*     player_s     = new PlayerSystem(sand, projectile_s);
+		PlayerSystem*     player_s     = new PlayerSystem(sand);
 
 		PushSystem(projectile_s);
 		PushSystem(player_s);
-		PushSystem<EnemySystem>();
+		PushSystem<EnemySystem>(sand);
 		PushSystem<WorldSystem>(sand, player_s->player);
 
 		PushSystem<FlockingSystem>();
@@ -72,7 +72,7 @@ struct GameLayer : iw::Layer
 App::App() : iw::Application() 
 {
 	int cellSize  = 2;
-	int cellMeter = 10;
+	int cellMeter = 1;
 
 	iw::SandLayer* sand = new iw::SandLayer(cellSize, cellMeter, 800, 800, true);
 

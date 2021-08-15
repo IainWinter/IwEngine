@@ -25,19 +25,29 @@ void PlayerSystem::FixedUpdate()
 	glm::vec3 right = glm::vec3(-up.y, up.x, 0);
 	glm::vec3 left = -right;
 
-	p->i_down  = iw::Keyboard::KeyDown(iw::W);
+	p->i_up    = iw::Keyboard::KeyDown(iw::W);
+	p->i_down  = iw::Keyboard::KeyDown(iw::S);
 	p->i_left  = iw::Keyboard::KeyDown(iw::A);
-	p->i_up    = iw::Keyboard::KeyDown(iw::S);
 	p->i_right = iw::Keyboard::KeyDown(iw::D);
 	p->i_fire1 = iw::Mouse::ButtonDown(iw::RMOUSE);
 
 	r->Velocity.x = 0;
 	r->Velocity.y = 0;
 
-	if (p->i_left)  r->Velocity.x = -150;
-	if (p->i_right) r->Velocity.x =  150;
-	if (p->i_up)    r->Velocity.y = -150;
-	if (p->i_down)  r->Velocity.y =  150;
+	int borderFar = 375;
+	int borderNear = 25;
+
+	bool atTop    = t.Position.y > borderFar;
+	bool atBottom = t.Position.y < borderNear;
+	bool atRight  = t.Position.x > borderFar;
+	bool atLeft   = t.Position.x < borderNear;
+
+	float speed = 150;
+
+	if (p->i_up)    r->Velocity.y = atTop    ? 0 :  speed; // todo: make this slow stop
+	if (p->i_down)  r->Velocity.y = atBottom ? 0 : -speed;
+	if (p->i_right) r->Velocity.x = atRight  ? 0 :  speed;
+	if (p->i_left)  r->Velocity.x = atLeft   ? 0 : -speed;
 }
 
 void PlayerSystem::Update()
@@ -52,29 +62,12 @@ void PlayerSystem::Update()
 	{
 		p->fire1_timer = 0;
 
-		// get direction towards mouse
-
-		float x = t.Position.x,
-			  y = t.Position.y;
-
-		float sx = sand->sP.x,
-			  sy = sand->sP.y;
-
-		float dx = sx - t.Position.x,
-			  dy = sy - t.Position.y;
-
-		float length = sqrt(dx*dx + dy*dy);
-		
-		float nx = dx / length,
-			  ny = dy / length;
-
-		dx *= 20.f / length;
-		dy *= 20.f / length;
+		auto [x, y, dx, dy] = GetShot(t.Position.x, t.Position.y, sand->sP.x, sand->sP.y, 1000, 10);
 
 		//dx += iw::randf();
 		//dy += iw::randf();
-
-		guns->MakeBulletC(x + nx * 10, y + ny * 10, dx, dy, 2);
+		
+		Bus->push<SpawnProjectile_Event>(x, y, dx, dy, SpawnProjectile_Event::BULLET);
 	}
 
 	//cam_x = iw::lerp(cam_x, t.Position.x, iw::DeltaTime() * 5);

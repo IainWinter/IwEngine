@@ -93,6 +93,8 @@ namespace Graphics {
 		void Clear(
 			Color color = Color(0));
 
+		// most of these should be removed, just use public vars, some need to be protected tho
+
 		IWGRAPHICS_API
 		void SetPixels(
 			unsigned width,
@@ -167,6 +169,7 @@ namespace Graphics {
 
 		IWGRAPHICS_API
 		glm::vec2 Dimensions() const;
+
 	};
 }
 

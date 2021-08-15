@@ -8,6 +8,8 @@
 #include "Components/Player.h"
 #include "Components/Flocker.h"
 
+#include "Events.h"
+
 struct WorldSystem : iw::SystemBase
 {
 	iw::SandLayer* sand;

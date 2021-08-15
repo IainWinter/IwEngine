@@ -3,6 +3,7 @@
 #include "plugins/iw/Sand/Engine/SandLayer.h"
 #include "Components/Projectile.h"
 #include "iw/physics/Collision/SphereCollider.h"
+#include "Events.h"
 
 struct ProjectileSystem
 	: iw::SystemBase
@@ -22,12 +23,13 @@ struct ProjectileSystem
 	void Update() override;
 	void FixedUpdate() override;
 
+	bool On(iw::ActionEvent& e) override;
+
 	// Make functions, not sure where these should go I
 	// guess its up to the caller to deside, should add an action evevnt
 
 	iw::Entity MakeBulletC(float x, float y, float dx, float dy, int maxDepth = 5, int depth = 0); // in cell space
 	iw::Entity MakeBullet (float x, float y, float dx, float dy, int maxDepth = 5, int depth = 0);
-
 
 	void MakeExplosion(int x, int y, int r);
 };

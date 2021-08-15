@@ -63,6 +63,27 @@ void ProjectileSystem::FixedUpdate()
 	}
 }
 
+bool ProjectileSystem::On(iw::ActionEvent& e)
+{
+	switch (e.Action) {
+		case SPAWN_PROJECTILE:
+		{
+			SpawnProjectile_Event& event = e.as<SpawnProjectile_Event>();
+			switch (event.Type) {
+				case SpawnProjectile_Event::BULLET: 
+				{
+					MakeBullet(event.X, event.Y, event.dX, event.dY, 2);
+					break;
+				}
+			}
+
+			break;
+		}
+	}
+
+	return false;
+}
+
 iw::Entity ProjectileSystem::MakeBulletC(
 	float start_x, float start_y,
 	float vx, float vy, 
@@ -111,11 +132,11 @@ iw::Entity ProjectileSystem::MakeBullet(
 		iw::Rigidbody* r = entity.Find<iw::Rigidbody>();
 		iw::Transform& t = r->Transform;
 
-		float x = t.Position.x * sand->m_cellsPerMeter;
-		float y = t.Position.y * sand->m_cellsPerMeter;
+		float x = t.Position.x;
+		float y = t.Position.y;
 
-		float dx = r->Velocity.x * sand->m_cellsPerMeter * iw::FixedTime();
-		float dy = r->Velocity.y * sand->m_cellsPerMeter * iw::FixedTime();
+		float dx = r->Velocity.x * iw::FixedTime();
+		float dy = r->Velocity.y * iw::FixedTime();
 
 		return std::array<float, 4> { x, y, dx, dy }; // tie would break elements for some reason, was it a tuple of references?
 	};
@@ -125,10 +146,10 @@ iw::Entity ProjectileSystem::MakeBullet(
 		iw::Rigidbody* r = entity.Find<iw::Rigidbody>();
 		iw::Transform& t = r->Transform;
 
-		t.Position.x = x / sand->m_cellsPerMeter;
-		t.Position.y = y / sand->m_cellsPerMeter;
+		t.Position.x = x;
+		t.Position.y = y;
 
-		r->Velocity = glm::normalize(r->Velocity) * float(sand->m_cellsPerMeter);
+		r->Velocity = glm::normalize(r->Velocity) / iw::FixedTime();
 	};
 
 	auto randvel = [=](float amount, bool setForMe) 
@@ -150,8 +171,8 @@ iw::Entity ProjectileSystem::MakeBullet(
 		}
 
 		return std::array<float, 2> {
-			dx * sand->m_cellsPerMeter * iw::FixedTime(),
-			dy * sand->m_cellsPerMeter * iw::FixedTime()
+			dx * iw::FixedTime(),
+			dy * iw::FixedTime()
 		};
 	};
 
@@ -186,6 +207,8 @@ iw::Entity ProjectileSystem::MakeBullet(
 			if (tile)
 			{
 				LOG_INFO << "Hit tile " << tile;
+
+				// issue might be the jitter in the software renderer
 
 				hit = true;
 				sand->EjectPixel(tile, index);

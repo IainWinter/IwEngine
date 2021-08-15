@@ -109,13 +109,20 @@ public:
 		return m_render->GetSandMesh();
 	}
 
-	// returns half of the sizw of the same texture
-	std::pair<int, int> GetSandTexSize2()
+	// returns the size of the sand texture
+	std::pair<int, int> GetSandTexSize()
 	{
-		int width  = m_render->GetSandTexture()->Width() / 2;
-		int height = m_render->GetSandTexture()->Height() / 2;
+		int width  = m_render->GetSandTexture()->Width();
+		int height = m_render->GetSandTexture()->Height();
 
 		return { width, height };
+	}
+
+	// returns the size of the sand texture
+	std::pair<int, int> GetSandTexSize2()
+	{
+		auto [w, h] = GetSandTexSize();
+		return {w / 2, h / 2};
 	}
 
 	void SetCamera(

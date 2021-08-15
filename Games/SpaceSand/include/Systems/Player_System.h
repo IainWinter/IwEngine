@@ -2,22 +2,21 @@
 
 #include "Components/Player.h"
 #include "Systems/Projectile_System.h"
+#include "Helpers.h"
+#include "Events.h"
 
 struct PlayerSystem : iw::SystemBase
 {
 	iw::SandLayer* sand;
-	ProjectileSystem* guns;
 	iw::Entity player;
 
 	float cam_x, cam_y;
 
 	PlayerSystem(
-		iw::SandLayer* sand,
-		ProjectileSystem* guns
+		iw::SandLayer* sand
 	)
 		: iw::SystemBase("Player")
 		, sand(sand)
-		, guns(guns)
 		, cam_x(0)
 		, cam_y(0)
 	{

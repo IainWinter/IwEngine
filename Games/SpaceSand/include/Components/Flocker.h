@@ -1,5 +1,7 @@
 #pragma once
 
+#include "glm/vec2.hpp"
+
 struct Flocker {
 	bool Active = true;
 	glm::vec2 Target;

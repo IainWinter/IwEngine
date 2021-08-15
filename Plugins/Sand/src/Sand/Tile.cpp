@@ -7,21 +7,21 @@ IW_PLUGIN_SAND_BEGIN
 Tile::Tile(
 	ref<Texture> texture)
 {
-	m_sprite = texture;
+	m_sprite = *texture;
 
-	if (!m_sprite->m_colors) {
-		m_sprite->SetFilter(iw::NEAREST);
-		m_sprite->CreateColors();
+	if (!m_sprite.m_colors) {
+		m_sprite.SetFilter(iw::NEAREST);
+		m_sprite.CreateColors();
 	}
 
-	m_bounds = AABB2(glm::vec2(0.f), m_sprite->Dimensions() /*- glm::vec2(1.f)*/);
+	m_bounds = AABB2(glm::vec2(0.f), m_sprite.Dimensions() /*- glm::vec2(1.f)*/);
 
 	m_polygon = MakePolygonFromBounds(m_bounds);
 	m_index   = TriangulatePolygon(m_polygon);
 
 	m_uv = m_polygon; // uv origin is 0
 
-	glm::vec2 halfSize = m_sprite->Dimensions() / 2.0f;
+	glm::vec2 halfSize = m_sprite.Dimensions() / 2.0f;
 
 	for (glm::vec2& v : m_collider) v -= halfSize ; // Origins to middle
 	for (glm::vec2& v : m_polygon)  v -= halfSize ;
@@ -32,8 +32,8 @@ Tile::Tile(
 	// Set cell counts/health, could maybe do this 
 	// in the UpdateCeooliderPolygon function in the MakeFromField lambda...
 
-	unsigned* colors = m_sprite->Colors32();
-	for (int i = 0; i < texture->ColorCount32(); i++)
+	unsigned* colors = m_sprite.Colors32();
+	for (int i = 0; i < m_sprite.ColorCount32(); i++)
 	{
 		if (Color::From32(colors[i]).a > 0)
 		{
@@ -46,8 +46,8 @@ Tile::Tile(
 
 void Tile::UpdateColliderPolygon()
 {
-	unsigned* colors = m_sprite->Colors32();
-	glm::vec2 size   = m_sprite->Dimensions();
+	unsigned* colors = m_sprite.Colors32();
+	glm::vec2 size   = m_sprite.Dimensions();
 
 	auto colliders = MakePolygonFromField<unsigned>( // why does this NEED template arg
 		colors, 

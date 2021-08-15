@@ -10,7 +10,7 @@
 IW_PLUGIN_SAND_BEGIN
 
 struct Tile {
-	ref<Texture> m_sprite;
+	Texture m_sprite;
 
 	// It seems like the raster fidelity is better if the rendererd geometry is just a square
 	// The physical colliders should still use scanned one obviously, but many more triangles can be removed

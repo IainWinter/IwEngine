@@ -1,7 +1,5 @@
 #pragma once
 
-#include"glm/vec2.hpp"
-
 struct Player
 {
 	bool i_up; // inputs, should use event loop
@@ -10,6 +8,8 @@ struct Player
 	bool i_right;
 	bool i_fire1;
 
+
+	// replace with timer
 	float fire1_timer = 0;
 	float fire1_time  = .15;
 

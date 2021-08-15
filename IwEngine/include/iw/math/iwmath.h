@@ -91,6 +91,12 @@ namespace math {
 	* Returns a random float -1 - 1
 	*/
 	IWMATH_API
+	float randfs();
+
+	/**
+	* Returns a random float 0 - 1
+	*/
+	IWMATH_API
 	float randf();
 
 	/**

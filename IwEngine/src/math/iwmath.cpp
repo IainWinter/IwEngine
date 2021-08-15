@@ -5,7 +5,11 @@
 namespace iw {
 namespace math {
 	float randf() {
-		return ((float)rand() / RAND_MAX - 0.5f) * 2.0f;
+		return (float)rand() / RAND_MAX;
+	}
+
+	float randfs() {
+		return (randf() - 0.5f) * 2.0f;
 	}
 
 	int randi(

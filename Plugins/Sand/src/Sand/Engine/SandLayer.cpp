@@ -309,7 +309,7 @@ void SandLayer::PasteTiles()
 	m_cellsThisFrame = RasterTilesIntoSandWorld(m_tilesThisFrame,
 		[](Tile* tile)
 		{
-			return SpriteData(tile, tile->m_sprite->Colors32(), tile->m_sprite->Width());
+			return SpriteData(tile, tile->m_sprite.Colors32(), tile->m_sprite.Width());
 		},
 		[](SpriteData& sprite, int x, int y, float u, float v, int tri)
 		{
@@ -322,7 +322,7 @@ void SandLayer::PasteTiles()
 		{
 			auto& [x, y, tile, colors, index] = data;
 
-			if (!chunk || index >= tile->m_sprite->m_width * tile->m_sprite->m_height)
+			if (!chunk || index >= tile->m_sprite.m_width * tile->m_sprite.m_height)
 			{
 				return;
 			}
@@ -353,7 +353,7 @@ void SandLayer::RemoveTiles()
 
 		for (auto& [x, y, tile, colors, index] : pixels)
 		{
-			if (index >= tile->m_sprite->m_width * tile->m_sprite->m_height)
+			if (index >= tile->m_sprite.m_width * tile->m_sprite.m_height)
 			{
 				continue;
 			}
@@ -374,7 +374,9 @@ void SandLayer::EjectPixel(
 	// cant scale transform if removing pixels like this
 	// to fix, maybe could remove pixels in a scaled square around index?
 
-	unsigned& color = tile->m_sprite->Colors32()[index];
+	if (tile->m_initalCellCount == 0) return; // TEMP fix, could remove pixel on a dif tile
+
+	unsigned& color = tile->m_sprite.Colors32()[index];
 
 	if (Color::From32(color).a != 0)
 	{

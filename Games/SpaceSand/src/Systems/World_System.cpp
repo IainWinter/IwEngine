@@ -7,32 +7,19 @@ int WorldSystem::Initialize()
 	return 0;
 }
 
-bool once = true;
-
 void WorldSystem::FixedUpdate()
 {
 	m_timer.TickFixed();
 
-	if(once)
 	if (m_timer.Can("spawn_enemy"))
 	{
-		iw::Entity e = sand->MakeTile("textures/SpaceGame/enemy.png", true);
-		AddComponentToPhysicsEntity<EnemyShip>(e);
-		AddComponentToPhysicsEntity<Flocker>(e);
-
-		iw::Transform* t = e.Set<iw::Transform>();
-		iw::Rigidbody* r = e.Set<iw::Rigidbody>();
-
-		EnemyShip* s = e.Set<EnemyShip>();
-		Flocker*   f = e.Set<Flocker>();
-
-		auto [w, h] = sand->GetSandTexSize2();
+		auto [w, h] = sand->GetSandTexSize();
 		float margin = .1f;
 
-		f->Target.x = iw::randi(w - w * margin * 2) + w * margin;
-		f->Target.y = iw::randi(h - h * margin * 2) + h * margin;
+		float target_x = iw::randi(w - w * margin * 2) + w * margin;
+		float target_y = iw::randi(h - h * margin * 2) + h * margin;
 
-		once = false;
+		Bus->push<SpawnEnemy_Event>(m_player, target_x, target_y);
 	}
 
 	Space->Query<iw::Tile>().Each(
@@ -42,10 +29,12 @@ void WorldSystem::FixedUpdate()
 		{
 			if (tile->m_currentCellCount < tile->m_initalCellCount / 3)
 			{
+				if (Space->HasComponent<Player>(entity))
+				{
+					//reset();
+				}
+
 				Space->QueueEntity(entity, iw::func_Destroy);
 			}
-
-			LOG_INFO << tile << " " << tile->m_currentCellCount;
-		}
-	);
+		});
 }
