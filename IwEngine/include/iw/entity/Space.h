@@ -206,6 +206,8 @@ namespace ECS {
 		template<
 			typename... _cs>
 		Entity CreateEntity() {
+			//Entity entity = CreateEntity(CreateArchetype<_cs...>());
+			//std::tuple(SetComponent<_cs>()...);
 			return CreateEntity(CreateArchetype<_cs...>());
 		}
 
