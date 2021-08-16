@@ -15,19 +15,16 @@ void WorldSystem::FixedUpdate()
 {
 	m_timer.TickFixed();
 
-	if (once)
-	if (m_timer.Can("spawn_enemy"))
-	{
-		auto [w, h] = sand->GetSandTexSize();
-		float margin = .1f;
+	//if (m_timer.Can("spawn_enemy"))
+	//{
+	//	auto [w, h] = sand->GetSandTexSize();
+	//	float margin = .1f;
 
-		float target_x = iw::randi(w - w * margin * 2) + w * margin;
-		float target_y = iw::randi(h - h * margin * 2) + h * margin;
+	//	float target_x = iw::randi(w - w * margin * 2) + w * margin;
+	//	float target_y = iw::randi(h - h * margin * 2) + h * margin;
 
-		Bus->push<SpawnEnemy_Event>(m_player, target_x, target_y);
-
-		once = false;
-	}
+	//	Bus->push<SpawnEnemy_Event>(m_player, target_x, target_y);
+	//}
 
 	Space->Query<iw::Transform, iw::Tile>().Each(
 		[&](

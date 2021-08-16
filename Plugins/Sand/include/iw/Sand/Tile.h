@@ -56,10 +56,11 @@ struct Tile {
 		int size = m_removedCells.size();
 		if (size == 0) return;
 
-		int index = m_removedCells.at(iw::randi(size - 1));
+		int randi = iw::randi(size - 1);
+		int index = m_removedCells.at(randi);
 
 		m_currentCellCount++;
-		m_removedCells.erase(m_removedCells.begin() + index);
+		m_removedCells.erase(m_removedCells.begin() + randi);
 		m_currentCells.push_back(index);
 		SetState(index, FILLED);
 	}

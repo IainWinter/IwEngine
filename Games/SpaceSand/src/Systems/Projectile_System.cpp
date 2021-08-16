@@ -28,8 +28,6 @@ void ProjectileSystem::Update()
 			if (p->OnHit && hit) 
 			{
 				p->OnHit(hx, hy);
-
-				LOG_INFO << "At " << hx << ", " << hy;
 			}
 		}
 	});
@@ -53,13 +51,15 @@ void ProjectileSystem::FixedUpdate()
 		float x = iw::Mouse::ScreenPos().x() / Renderer->Width();
 		float y = iw::Mouse::ScreenPos().y() / Renderer->Height();
 
+		auto [w, h] = sand->GetSandTexSize2();
+
 		float offX = iw::randf() * 1;
 		float offY = iw::randf() * 1;
 
 		glm::vec2 vel(x * 2 - 1, y * 2 - 1);
 		vel = glm::normalize(vel) * 44.f;
 		
-		MakeBullet(offX, offY + 10, vel.x + offX, -vel.y + offY, 1);
+		MakeBullet(w, h, vel.x + offX, -vel.y + offY, 1);
 	}
 }
 
@@ -84,48 +84,44 @@ bool ProjectileSystem::On(iw::ActionEvent& e)
 	return false;
 }
 
-iw::Entity ProjectileSystem::MakeBullet(
-	float start_x, float start_y, 
-	float vx, float vy, 
-	int maxDepth, int depth)
+ProjectileSystem::ProjectileInfo ProjectileSystem::MakeProjectile(
+	float  x, float  y,
+	float dx, float dy,
+	std::function<void(iw::SandChunk*, int, int)> placeCell)
 {
-	if (depth > maxDepth)
-	{
-		return {};
-	}
-
 	iw::Entity entity = Space->CreateEntity<
 		iw::Transform, 
 		iw::Rigidbody,
 		iw::Circle,
 		Projectile>();
 
-	iw::Circle*    collider  = entity.Set<iw::Circle>();
-	iw::Rigidbody* rigidbody = entity.Set<iw::Rigidbody>();
+	Projectile*    projectile = entity.Set<Projectile>();
+	iw::Transform* transform  = entity.Set<iw::Transform>();
+	iw::Circle*    collider   = entity.Set<iw::Circle>();
+	iw::Rigidbody* rigidbody  = entity.Set<iw::Rigidbody>();
 
+	transform->Position = glm::vec3(x, y, 0);
+
+	rigidbody->SetTransform(transform);
+	rigidbody->Velocity = glm::vec3(dx, dy, 0);
 	rigidbody->Collider = collider;
-	rigidbody->Transform.Position = glm::vec3(start_x, start_y, 0);
-	rigidbody->Velocity = glm::vec3(vx, vy, 0);
-
 	rigidbody->IsTrigger = true;
 
 	Physics->AddRigidbody(rigidbody);
 
-	Projectile* projectile = entity.Set<Projectile>();
-
 	auto getpos = [=]()
 	{
 		iw::Rigidbody* r = entity.Find<iw::Rigidbody>();
-		iw::Transform& t = r->Transform;
+		iw::Transform* t = entity.Find<iw::Transform>();
 
-		float x = t.Position.x;
-		float y = t.Position.y;
-		int   z = floor(t.Position.z); // Z Index
+		float x = t->Position.x;
+		float y = t->Position.y;
+		int   z = floor(t->Position.z); // Z Index
 
-		float dx = r->Velocity.x * iw::FixedTime();
-		float dy = r->Velocity.y * iw::FixedTime();
+		float dx = r->Velocity.x;
+		float dy = r->Velocity.y;
 
-		return std::tuple(x, y, z, dx, dy); // tie would break elements for some reason, was it a tuple of references?
+		return std::tuple(x, y, z, dx, dy);
 	};
 
 	auto setpos = [=](float x, float y)
@@ -135,8 +131,14 @@ iw::Entity ProjectileSystem::MakeBullet(
 
 		t.Position.x = x;
 		t.Position.y = y;
+	};
 
-		r->Velocity = glm::normalize(r->Velocity) / iw::FixedTime();
+	auto setvel = [=](float x, float y)
+	{
+		iw::Rigidbody* r = entity.Find<iw::Rigidbody>();
+
+		r->Velocity.x = x;
+		r->Velocity.y = y;
 	};
 
 	auto randvel = [=](float amount, bool setForMe) 
@@ -157,34 +159,27 @@ iw::Entity ProjectileSystem::MakeBullet(
 			r->Velocity.y = dy;
 		}
 
-		return std::array<float, 2> {
-			dx * iw::FixedTime(),
-			dy * iw::FixedTime()
-		};
+		return std::tuple(dx * iw::FixedTime(), dy * iw::FixedTime());
 	};
 
 	projectile->Update = [=]() 
 	{
-		auto [x, y, zIndex, dx, dy] = getpos();
-
-		iw::Cell cell;
-		cell.Type = iw::CellType::PROJECTILE;
-		cell.Color = iw::Color::From255(255, 230, 66);
-
-		float speed  = sqrt(dx*dx + dy*dy);
-		float length = .2;
+		auto [x, y, z, dx, dy] = getpos();
+		int zIndex = z; // for packing nonsense
 
 		bool hit = false;
-		int hx, hy;
+		float hx, hy;
 
-		sand->ForEachInLine(x, y, x + dx, y + dy, [&](
-			int px, int py)
+		sand->ForEachInLine(x, y, x + dx * iw::DeltaTime(), y + dy * iw::DeltaTime(), [&](
+			float fpx, float fpy)
 		{
+			int px = floor(fpx);
+			int py = floor(fpy);
+
 			iw::SandChunk* chunk = sand->m_world->GetChunk(px, py);
 			
 			if (!chunk)
 			{
-				LOG_INFO << "Hit bounds";
 				hit = true; // collision on no chunk
 			}
 
@@ -192,8 +187,6 @@ iw::Entity ProjectileSystem::MakeBullet(
 				auto& [tile, index] = chunk->GetCell<iw::TileInfo>(px, py, iw::SandField::TILE_INFO);
 				if (tile)
 				{
-					LOG_INFO << "Hit tile " << tile;
-
 					if (tile->m_zIndex == zIndex)
 					{
 						sand->EjectPixel(tile, index);
@@ -207,18 +200,16 @@ iw::Entity ProjectileSystem::MakeBullet(
 				if (  !chunk->IsEmpty(px, py)
 					&& chunk->GetCell(px, py).Type != iw::CellType::PROJECTILE)
 				{
-					LOG_INFO << "Hit cell";
 					hit = true;
 				}
 
-				chunk->SetCell(px, py, cell);
-				m_cells.emplace_back(px, py, length / speed);
+				placeCell(chunk, px, py);
 			}
 
 			if (hit) 
 			{
-				hx = px;
-				hy = py;
+				hx = fpx;
+				hy = fpy;
 				return true;
 			}
 
@@ -228,36 +219,68 @@ iw::Entity ProjectileSystem::MakeBullet(
 		return std::tuple(hit, hx, hy);
 	};
 
-	projectile->OnHit = [=](int hx, int hy)
+	return { entity, projectile, getpos, setpos, setvel, randvel };
+}
+
+#define UNPACK_INFO                               \
+		iw::Entity entity      = info.entity;     \
+		Projectile* projectile = info.projectile; \
+		auto getpos            = info.getpos;     \
+		auto setpos            = info.setpos;     \
+		auto setvel            = info.setvel;     \
+		auto randvel           = info.randvel;    \
+
+iw::Entity ProjectileSystem::MakeBullet(
+	float start_x, float start_y, 
+	float vx, float vy, 
+	int maxDepth, int depth)
+{
+	if (depth > maxDepth)
 	{
+		return {};
+	}
+	
+	auto placeCell = [=](iw::SandChunk* chunk, int px, int py) {
+
+		iw::Cell cell;
+		cell.Type = iw::CellType::PROJECTILE;
+		cell.Color = iw::Color::From255(255, 230, 66);
+
+		float length = .0002;
+
+		chunk->SetCell(px, py, cell);
+		m_cells.emplace_back(px, py, length);
+	};
+
+	ProjectileInfo info = MakeProjectile(start_x, start_y, vx, vy, placeCell);
+	UNPACK_INFO;
+
+	projectile->OnHit = [=](float fhx, float fhy)
+	{
+		int hx = floor(fhx);
+		int hy = floor(fhy);
+
 		if (sand->m_world->InBounds(hx, hy))
 		{
 			float depthPercent = depth / float(maxDepth) * iw::Pi / 2.f + iw::Pi / 6.f; // needs a lil tuning to get right feel
 			int splitCount = iw::randi(2) + 1;
 
-			//auto [vx, vy] = 
+			auto [x, y, z, dx, dy] = getpos();
 
-			//auto [x, y, dx, dy] = getpos();
+			//MakeBullet(hx, hy, dx, dy);
 
-			//LOG_INFO << 
+			float speed = sqrt(dx*dx + dy*dy);
 
-			//randvel(iw::Pi * depthPercent, true);
-			setpos(hx, hy); // set vel also?`
+			dx += iw::randfs() * speed / 5;
+			dy += iw::randfs() * speed / 5;
 
-			//MakeBullet(hx + vx, hy + vy, vx, vy);
+			Bus->push<SpawnProjectile_Event>(fhx, fhy, dx, dy, SpawnProjectile_Event::BULLET);
 
-			//for (int i = 0; i < splitCount; i++)
-			//{
-			//	auto [rx, ry] = randvel(iw::Pi * depthPercent, false);
-			//	MakeBulletC(x, y, rx, ry, maxDepth, depth + 1);
-			//}
-
-			//MakeExplosion(x, y, 50);
 		}
 
-		else {
+		//else {
 			Space->QueueEntity(entity.Handle, iw::func_Destroy);
-		}
+		//}
 	};
 
 	return entity;

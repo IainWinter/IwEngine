@@ -267,7 +267,7 @@ void SandLayer::DrawWithMouse(int fx, int fy, int width, int height) {
 				continue;
 
 			Cell cell = Cell::GetDefault(placeMe);
-			cell.StyleOffset = randf();
+			cell.StyleOffset = randfs();
 
 			m_world->SetCell(x, y, cell);
 		}
@@ -371,6 +371,8 @@ void SandLayer::EjectPixel(
 	// to fix, maybe could remove pixels in a scaled square around index?
 
 	// place ejected pixel into world
+
+	if (tile->m_initalCellCount == 0) return; // temp hack to fix left behind pixels from tiles
 
 	tile->RemovePixel(index);
 }

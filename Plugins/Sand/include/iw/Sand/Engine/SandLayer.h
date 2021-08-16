@@ -210,9 +210,9 @@ public:
 	void ForEachInLine(
 		float x,  float y,
 		float x1, float y1,
-		std::function<bool(int, int)> func)
+		std::function<bool(float, float)> func)
 	{
-		using vertex = std::array<int, 2>;
+		using vertex = std::array<float, 2>;
 
 		vertex v0 { x,  y };
 		vertex v1 { x1, y1};

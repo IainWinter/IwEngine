@@ -35,7 +35,7 @@ struct GameLayer : iw::Layer
 	{
 		ProjectileSystem* projectile_s = new ProjectileSystem(sand);
 		PlayerSystem*     player_s     = new PlayerSystem(sand);
-
+		
 		PushSystem(projectile_s);
 		PushSystem(player_s);
 		PushSystem<EnemySystem> (sand);
@@ -44,14 +44,14 @@ struct GameLayer : iw::Layer
 
 		PushSystem<FlockingSystem>();
 
+		PushSystem<iw::PhysicsSystem>();
+		PushSystem<iw::EntityCleanupSystem>();
+
 		Renderer->Device->SetClearColor(0, 0, 0, 0);
 
 		Physics->AddSolver(new iw::SmoothPositionSolver());
 		Physics->AddSolver(new iw::ImpulseSolver());
 
-		PushSystem<iw::PhysicsSystem>();
-		PushSystem<iw::EntityCleanupSystem>();
-		
 		// temp ui
 		
 		{ // player

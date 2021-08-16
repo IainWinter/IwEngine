@@ -17,7 +17,7 @@ void HealthSystem::FixedUpdate()
                 // should calcuate an arc so they cannot orbit
 
                 glm::vec3 vel = glm::normalize(playerPos - healthPos) * 200.f;
-                rigidbody->Velocity = iw::lerp(rigidbody->Velocity, vel, iw::FixedTime());
+                rigidbody->Velocity = iw::lerp(rigidbody->Velocity, vel, iw::FixedTime() * 10);
 
                 if (distance < 5)
                 {

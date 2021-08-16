@@ -83,7 +83,7 @@ struct Cell {
 		CellType type)
 	{
 		Cell& cell = m_defaults.at(type);
-		cell.StyleOffset = iw::randf();
+		cell.StyleOffset = iw::randfs();
 		return cell;
 	}
 

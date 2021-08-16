@@ -27,9 +27,23 @@ struct ProjectileSystem
 
 	// Make functions, not sure where these should go I
 	// guess its up to the caller to deside, should add an action evevnt
+private:
+	struct ProjectileInfo {
+		iw::Entity entity;
+		Projectile* projectile;
+		std::function<std::tuple<float, float, int, float, float>()>             getpos;
+		std::function<void                                       (float, float)> setpos;
+		std::function<void                                       (float, float)> setvel;
+		std::function<std::tuple<float, float>                   (float, bool)>  randvel;
+	};
 
-	iw::Entity MakeBulletC(float x, float y, float dx, float dy, int maxDepth = 5, int depth = 0); // in cell space
-	iw::Entity MakeBullet (float x, float y, float dx, float dy, int maxDepth = 5, int depth = 0);
+	ProjectileInfo MakeProjectile(
+		float x,  float  y,
+		float dx, float dy,
+		std::function<void(iw::SandChunk*, int, int)> placeCell);
+
+	iw::Entity MakeBullet(float x, float y, float dx, float dy, int maxDepth = 5, int depth = 0);
+	iw::Entity MakeLaser (float x, float y, float dx, float dy, int maxDepth = 5, int depth = 0);
 
 	void MakeExplosion(int x, int y, int r);
 };

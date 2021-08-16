@@ -30,7 +30,7 @@ public:
 
 	inline void ShuffleIfTrue(bool& a, bool& b) {
 		if (a && b) {
-			a = iw::randf() > 0;
+			a = iw::randfs() > 0;
 			b = !a;
 		}
 	}
