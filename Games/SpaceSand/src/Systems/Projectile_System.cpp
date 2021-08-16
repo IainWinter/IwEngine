@@ -120,11 +120,12 @@ iw::Entity ProjectileSystem::MakeBullet(
 
 		float x = t.Position.x;
 		float y = t.Position.y;
+		int   z = floor(t.Position.z); // Z Index
 
 		float dx = r->Velocity.x * iw::FixedTime();
 		float dy = r->Velocity.y * iw::FixedTime();
 
-		return std::array<float, 4> { x, y, dx, dy }; // tie would break elements for some reason, was it a tuple of references?
+		return std::tuple(x, y, z, dx, dy); // tie would break elements for some reason, was it a tuple of references?
 	};
 
 	auto setpos = [=](float x, float y)
@@ -164,7 +165,7 @@ iw::Entity ProjectileSystem::MakeBullet(
 
 	projectile->Update = [=]() 
 	{
-		auto [x, y, dx, dy] = getpos();
+		auto [x, y, zIndex, dx, dy] = getpos();
 
 		iw::Cell cell;
 		cell.Type = iw::CellType::PROJECTILE;
@@ -184,35 +185,35 @@ iw::Entity ProjectileSystem::MakeBullet(
 			if (!chunk)
 			{
 				LOG_INFO << "Hit bounds";
-
 				hit = true; // collision on no chunk
-				return true;
 			}
 
-			auto& [tile, index] = chunk->GetCell<iw::TileInfo>(px, py, iw::SandField::TILE_INFO);
-			if (tile)
-			{
-				LOG_INFO << "Hit tile " << tile;
+			else {
+				auto& [tile, index] = chunk->GetCell<iw::TileInfo>(px, py, iw::SandField::TILE_INFO);
+				if (tile)
+				{
+					LOG_INFO << "Hit tile " << tile;
 
-				// issue might be the jitter in the software renderer
+					if (tile->m_zIndex == zIndex)
+					{
+						sand->EjectPixel(tile, index);
+						hit = true;
+						tile = nullptr;
+						index = 0;
+					}
+				}
 
-				hit = true;
-				sand->EjectPixel(tile, index);
-				tile = nullptr;
-				index = 0;
+				else
+				if (  !chunk->IsEmpty(px, py)
+					&& chunk->GetCell(px, py).Type != iw::CellType::PROJECTILE)
+				{
+					LOG_INFO << "Hit cell";
+					hit = true;
+				}
+
+				chunk->SetCell(px, py, cell);
+				m_cells.emplace_back(px, py, length / speed);
 			}
-
-			else
-			if (  !chunk->IsEmpty(px, py)
-				&& chunk->GetCell(px, py).Type != iw::CellType::PROJECTILE)
-			{
-				LOG_INFO << "Hit cell";
-
-				hit = true;
-			}
-
-			chunk->SetCell(px, py, cell);
-			m_cells.emplace_back(px, py, length / speed);
 
 			if (hit) 
 			{

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "iw/engine/Components/Timer.h"
+
 struct Player
 {
 	bool i_up; // inputs, should use event loop
@@ -8,9 +10,7 @@ struct Player
 	bool i_right;
 	bool i_fire1;
 
+	iw::Timer timer;
 
-	// replace with timer
-	float fire1_timer = 0;
-	float fire1_time  = .15;
-
+	Player() {}
 };

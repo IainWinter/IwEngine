@@ -32,16 +32,27 @@ Tile::Tile(
 	// Set cell counts/health, could maybe do this 
 	// in the UpdateCeooliderPolygon function in the MakeFromField lambda...
 
-	unsigned* colors = m_sprite.Colors32();
 	for (int i = 0; i < m_sprite.ColorCount32(); i++)
 	{
-		if (Color::From32(colors[i]).a > 0)
+		PixelState state = State(i);
+		
+		if (state == EMPTY) 
 		{
-			m_initalCellCount++;
+			continue;
 		}
-	}
 
-	m_currentCellCount = m_initalCellCount;
+		if (state == REMOVED)
+		{
+			m_removedCells.push_back(i);
+		}
+
+		else {
+			m_currentCells.push_back(i);
+			m_currentCellCount++;
+		}
+
+		m_initalCellCount++;
+	}
 }
 
 void Tile::UpdateColliderPolygon()
@@ -52,9 +63,9 @@ void Tile::UpdateColliderPolygon()
 	auto colliders = MakePolygonFromField<unsigned>( // why does this NEED template arg
 		colors, 
 		size.x, size.y,
-		[](const unsigned& color)
+		[&](const unsigned& color)
 		{
-			return Color::From32(color).a > 0; // i wonder if this optimizes for only the alpha channel?
+			return cState(color) > REMOVED; // i wonder if this optimizes for only the alpha channel?
 		});
 	
 	if (colliders.size() == 0) return;

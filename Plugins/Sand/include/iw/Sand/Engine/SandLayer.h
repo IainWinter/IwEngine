@@ -103,6 +103,7 @@ public:
 	IW_PLUGIN_SAND_API void PasteTiles();
 	IW_PLUGIN_SAND_API void RemoveTiles();
 
+	IW_PLUGIN_SAND_API void RepairPixel(Tile* tile, unsigned index);
 	IW_PLUGIN_SAND_API void EjectPixel(Tile* tile, unsigned index);
 
 	Mesh& GetSandMesh() {
@@ -138,11 +139,14 @@ public:
 		m_update->SetCameraScale(xs, ys);
 	}
 
+	template<
+		typename _collider = MeshCollider2,
+		typename... _others>
 	inline Entity MakeTile(
 		const std::string& sprite,
 		bool isSimulated = false)
 	{
-		return MakeTile(Asset->Load<iw::Texture>(sprite), isSimulated);
+		return MakeTile<_collider, _others...>(Asset->Load<iw::Texture>(sprite), isSimulated);
 	}
 
 	template<

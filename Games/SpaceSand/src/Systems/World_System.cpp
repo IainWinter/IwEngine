@@ -2,8 +2,10 @@
 
 int WorldSystem::Initialize()
 {
-	m_timer.SetTime("spawn_enemy", 2);
+	auto [w, h] = sand->GetSandTexSize2();
+	sand->SetCamera(w, h, 10, 10);
 
+	m_timer.SetTime("spawn_enemy", 2);
 	return 0;
 }
 
@@ -42,28 +44,8 @@ void WorldSystem::FixedUpdate()
 					return;
 				}
 
-				//int amount = iw::randi(6);
-				//for (int i = 0; i < amount; i++)
-				//{
-				//	iw::Entity health = sand->MakeTile("textures/SpaceGame/health.png", true);
-
-				//	health.Find<iw::Rigidbody>()->Transform.Position.x = transform->Position.x + iw::randi(10);
-				//	health.Find<iw::Rigidbody>()->Transform.Position.y = transform->Position.y + iw::randi(10);
-				//}
-
-				iw::Cell c;
-				c.Type = iw::CellType::STONE; // temp
-				c.Color = iw::Color(0, 1, 0);
-				c.Props = iw::CellProp::MOVE_FORCE;
-				
-				for (int y = 0; y < tile->m_sprite.Height(); y++)
-				for (int x = 0; x < tile->m_sprite.Width(); x++)
-				{
-					if (iw::Color::From32(tile->m_sprite.Colors32()[x + y * tile->m_sprite.Width()]).a != 0)
-					{
-						sand->m_world->SetCell(transform->Position.x + x - tile->m_sprite.Width() / 2, transform->Position.y + y - tile->m_sprite.Height() / 2, c);
-					}
-				}
+				int amount = iw::randi(5) + 1;
+				Bus->push<SpawnHealth_Event>(transform->Position.x, transform->Position.y, amount);
 
 				Space->QueueEntity(entity, iw::func_Destroy);
 			}

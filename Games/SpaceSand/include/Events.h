@@ -7,6 +7,7 @@
 enum Actions {
 	SPAWN_ENEMY,
 	SPAWN_PROJECTILE,
+	SPAWN_HEALTH,
 };
 
 struct SpawnEnemy_Event : iw::SingleEvent
@@ -47,5 +48,21 @@ struct SpawnProjectile_Event : iw::SingleEvent
 		, dX(dx)
 		, dY(dy)
 		, Type(type)
+	{}
+};
+
+struct SpawnHealth_Event : iw::SingleEvent
+{
+	float X, Y;
+	int Amount;
+
+	SpawnHealth_Event(
+		float x, float y,
+		int amount
+	)
+		: iw::SingleEvent(SPAWN_HEALTH)
+		, X(x)
+		, Y(y)
+		, Amount(amount)
 	{}
 };

@@ -322,22 +322,18 @@ void SandLayer::PasteTiles()
 		{
 			auto& [x, y, tile, colors, index] = data;
 
-			if (!chunk || index >= tile->m_sprite.m_width * tile->m_sprite.m_height)
+			if (   !chunk 
+				|| !chunk->IsEmpty(x, y)
+				|| index >= tile->m_sprite.m_width * tile->m_sprite.m_height
+				|| tile->State(index) == Tile::EMPTY
+				|| tile->State(index) == Tile::REMOVED)
 			{
 				return;
 			}
 
-			unsigned& color = colors[index];
-
-			// see if this gets optimized to calc only the alpha >> 24
-			if (Color::From32(color).a == 0) return; // if alpha is 0 then dont draw, this is NEEDED bc of square raster
-
-			if (chunk->IsEmpty(x, y)) // maybe only eject if another tile is overlapping?
-			{
-				chunk->SetCell_unsafe(x, y, color, SandField::COLOR);
-				chunk->SetCell_unsafe(x, y, true,  SandField::SOLID);
-				chunk->SetCell_unsafe(x, y, TileInfo(tile, index),  SandField::TILE_INFO);
-			}
+			chunk->SetCell_unsafe(x, y, colors[index],         SandField::COLOR);
+			chunk->SetCell_unsafe(x, y, true,                  SandField::SOLID);
+			chunk->SetCell_unsafe(x, y, TileInfo(tile, index), SandField::TILE_INFO);
 		}
 	);
 }
@@ -353,15 +349,15 @@ void SandLayer::RemoveTiles()
 
 		for (auto& [x, y, tile, colors, index] : pixels)
 		{
-			if (index >= tile->m_sprite.m_width * tile->m_sprite.m_height)
+			if (   index >= tile->m_sprite.m_width * tile->m_sprite.m_height
+				|| tile->State(index) == Tile::EMPTY
+				|| tile->State(index) == Tile::REMOVED)
 			{
 				continue;
 			}
 
-			if (Color::From32(colors[index]).a == 0) continue; // for color, this could prb be culled in the raster instead of both here and in the draw
-
-			chunk->SetCell_unsafe(x, y, 0u,    SandField::COLOR);
-			chunk->SetCell_unsafe(x, y, false, SandField::SOLID);
+			chunk->SetCell_unsafe(x, y, 0u,                    SandField::COLOR);
+			chunk->SetCell_unsafe(x, y, false,                 SandField::SOLID);
 			chunk->SetCell_unsafe(x, y, TileInfo(nullptr, 0u), SandField::TILE_INFO);
 		}
 	}
@@ -374,15 +370,9 @@ void SandLayer::EjectPixel(
 	// cant scale transform if removing pixels like this
 	// to fix, maybe could remove pixels in a scaled square around index?
 
-	if (tile->m_initalCellCount == 0) return; // TEMP fix, could remove pixel on a dif tile
+	// place ejected pixel into world
 
-	unsigned& color = tile->m_sprite.Colors32()[index];
-
-	if (Color::From32(color).a != 0)
-	{
-		tile->m_currentCellCount--;
-		color = 0;
-	}
+	tile->RemovePixel(index);
 }
 
 IW_PLUGIN_SAND_END

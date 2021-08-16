@@ -10,7 +10,59 @@
 IW_PLUGIN_SAND_BEGIN
 
 struct Tile {
+
+	// Texture that gets drawn,
+	// if a pixel has an alpha of 0 it's not draw
+	// if a pixel has an alpha of 0.5 it's disabled / ejected
+
 	Texture m_sprite;
+
+	enum PixelState : unsigned char {
+		EMPTY   = 0x00,
+		REMOVED = 0x80,
+		FILLED  = 0xFF
+	};
+
+	// put these funcs in cpp
+
+	inline static PixelState cState(unsigned color)
+	{
+		return (PixelState)(color >> 24);
+	}
+
+	PixelState State(unsigned index)
+	{
+		return cState(m_sprite.Colors32()[index]);
+	}
+
+	void SetState(unsigned index, PixelState state)
+	{
+		*(&m_sprite.Colors()[index * 4] + 3) = (char)state;
+	}
+
+	void RemovePixel(unsigned index)
+	{
+		if (State(index) == FILLED)
+		{
+			m_currentCellCount--;
+			m_removedCells.push_back(index);
+			m_currentCells.erase(std::find(m_currentCells.begin(), m_currentCells.end(), index));
+			SetState(index, REMOVED);
+		}
+	}
+
+	void ReinstateRandomPixel()
+	{
+		int size = m_removedCells.size();
+		if (size == 0) return;
+
+		int index = m_removedCells.at(iw::randi(size - 1));
+
+		m_currentCellCount++;
+		m_removedCells.erase(m_removedCells.begin() + index);
+		m_currentCells.push_back(index);
+		SetState(index, FILLED);
+	}
 
 	// It seems like the raster fidelity is better if the rendererd geometry is just a square
 	// The physical colliders should still use scanned one obviously, but many more triangles can be removed
@@ -31,6 +83,11 @@ struct Tile {
 
 	int m_initalCellCount  = -1;
 	int m_currentCellCount = -1;
+
+	std::vector<int> m_currentCells;
+	std::vector<int> m_removedCells;
+
+	int m_zIndex = 0;
 
 	IW_PLUGIN_SAND_API
 	Tile() = default;

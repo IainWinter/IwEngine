@@ -1,14 +1,5 @@
 #include "Systems/Enemy_System.h"
 
-//int EnemySystem::Initialize()
-//{
-//	// create enemy ship prefabs
-//
-//	// create 
-//
-//	return 0;
-//}
-
 void EnemySystem::FixedUpdate()
 {
 	Space->Query<iw::Transform, EnemyShip>().Each(
@@ -49,9 +40,7 @@ bool EnemySystem::On(iw::ActionEvent& e)
 
 void EnemySystem::SpawnEnemy(SpawnEnemy_Event& config)
 {
-	iw::Entity e = sand->MakeTile("textures/SpaceGame/enemy.png", true);
-	AddComponentToPhysicsEntity<EnemyShip>(e);
-	AddComponentToPhysicsEntity<Flocker>(e);
+	iw::Entity e = sand->MakeTile<iw::Circle, EnemyShip, Flocker>("textures/SpaceGame/enemy.png", true);
 
 	iw::Transform* t = e.Set<iw::Transform>();
 	iw::Rigidbody* r = e.Set<iw::Rigidbody>();

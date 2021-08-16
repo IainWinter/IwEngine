@@ -7,6 +7,7 @@
 #include "iw/math/noise.h"
 
 #include "Systems/World_System.h"
+#include "Systems/Health_System.h"
 
 #include "Systems/Player_System.h"
 #include "Systems/Enemy_System.h"
@@ -37,8 +38,9 @@ struct GameLayer : iw::Layer
 
 		PushSystem(projectile_s);
 		PushSystem(player_s);
-		PushSystem<EnemySystem>(sand);
-		PushSystem<WorldSystem>(sand, player_s->player);
+		PushSystem<EnemySystem> (sand);
+		PushSystem<WorldSystem> (sand, player_s->player);
+		PushSystem<HealthSystem>(sand, player_s->player);
 
 		PushSystem<FlockingSystem>();
 

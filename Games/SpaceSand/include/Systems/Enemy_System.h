@@ -7,6 +7,7 @@
 #include "Components/Flocker.h"
 #include "Helpers.h"
 #include "Events.h"
+#include "iw/physics/Collision/SphereCollider.h"
 
 struct EnemySystem : iw::SystemBase
 {
@@ -19,10 +20,10 @@ struct EnemySystem : iw::SystemBase
 		, sand(sand)
 	{}
 
-	//int Initialize() override;
 	void FixedUpdate() override;
 
 	bool On(iw::ActionEvent& e) override;
 
+private:
 	void SpawnEnemy(SpawnEnemy_Event& config);
 };

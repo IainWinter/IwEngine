@@ -20,10 +20,22 @@ struct PlayerSystem : iw::SystemBase
 		, cam_x(0)
 		, cam_y(0)
 	{
-		player = sand->MakeTile("textures/SpaceGame/player.png", true);
+		auto [w, h] = sand->GetSandTexSize2();
+
+		player = sand->MakeTile<iw::Circle, Player>("textures/SpaceGame/player.png", true);
+
+		Player*        p = player.Set<Player>();
+		iw::Circle*    c = player.Find<iw::Circle>();
+		iw::Rigidbody* r = player.Find<iw::Rigidbody>();
+
+		p->timer.SetTime("fire1", 0.15f);
+
+		c->Radius = 4;
+
+		r->Transform.Position = glm::vec3(w, h, 0);
+		r->SetMass(10);
 	}
 
-	int  Initialize() override;
 	void FixedUpdate() override;
 	void Update() override;
 };
