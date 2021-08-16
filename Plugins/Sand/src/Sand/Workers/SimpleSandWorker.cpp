@@ -5,7 +5,7 @@ IW_PLUGIN_SAND_BEGIN
 SimpleSandWorker::SimpleSandWorker(
 	SandWorld& world,
 	SandChunk* chunk)
-	: SandWorker(world, chunk)
+	: SandWorker(world, chunk) // give this a dt, would allow for use control of timestep
 {}
 
 void SimpleSandWorker::UpdateCell(int x, int y, Cell& cell) 
@@ -21,25 +21,25 @@ bool SimpleSandWorker::MoveForce(
 	int x, int y,
 	Cell& cell)
 {
-	float xt = cell.x + cell.dx;
-	float yt = cell.y + cell.dy;
+	cell.x += cell.dx * iw::DeltaTime(); // see above dt comment
+	cell.y += cell.dy * iw::DeltaTime();
 
-	bool differnt = int(xt) != x || int(yt) != y;
+	int int_x = floor(cell.x);
+	int int_y = floor(cell.y);
+
+	bool differnt = int_x != x || int_y != y;
 
 	if (differnt) {
-		if (!IsEmpty(xt, yt)) {
+		if (!IsEmpty(int_x, int_y)) {
 			cell.dx *= .5f;
 			cell.dy *= .5f;
 
 			return false;
 		}
 
-		MoveCell(x, y, xt, yt);
+		MoveCell(x, y, int_x, int_y);
 	}
-
-	cell.x = xt;
-	cell.y = yt;
-
+	
 	return differnt;
 
 	//float dx = cell.dx;

@@ -215,7 +215,7 @@ public:
 
 		software_renderer
 		::RasterLine(v0, v1,
-			[&](int x, int y)
+			[&](float x, float y)
 			{
 				return func(x, y);
 			}

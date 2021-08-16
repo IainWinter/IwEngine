@@ -9,47 +9,30 @@
 namespace iw {
 namespace Engine {
 	struct Timer {
-		std::unordered_map<std::string, std::pair<float, float>> Times; // name, current, goal
+		std::unordered_map<std::string, std::tuple<float, float, float>> Times; // name, current, goal, margin
 		size_t CurrentTick = 0;
 
 		Timer() = default;
 
 		void SetTime(
 			const std::string& name,
-			float time)
+			float time,
+			float margin = 0.f)
 		{
-			if (Times.find(name) == Times.end()) {
-				Times[name].first = 0;
-			}
-
-			Times[name].second = time;
+			Times[name] = std::tuple(0.f, time, margin);
 		}
 
-		float& GetTime (const std::string& name) { return Times[name].second; }
-		float& GetTimer(const std::string& name) { return Times[name].first; }
+		float& GetTimer (const std::string& name) { return std::get<0>(Times[name]); }
+		float& GetTime  (const std::string& name) { return std::get<1>(Times[name]); }
+		float& GetMargin(const std::string& name) { return std::get<2>(Times[name]); }
 
-		// True when timer has past, then resets it to 0
 		bool Can(
 			const std::string& name)
 		{
 			bool past = PastTime(name);
 
 			if (past) {
-				GetTimer(name) = 0;
-			}
-
-			return past;
-		}
-
-		// True when timer has past, them resets it to (0, -margin)
-		bool Can_random(
-			const std::string& name,
-			float margin)
-		{
-			bool past = PastTime(name);
-
-			if (past) {
-				GetTimer(name) = -iw::randf() * margin;
+				GetTimer(name) = -iw::randf() * GetMargin(name);
 			}
 
 			return past;
@@ -69,7 +52,7 @@ namespace Engine {
 		{
 			CurrentTick++;
 			for (auto& p : Times) {
-				p.second.first += dt;
+				std::get<0>(p.second) += dt;
 			}
 		}
 	};

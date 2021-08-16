@@ -84,20 +84,6 @@ bool ProjectileSystem::On(iw::ActionEvent& e)
 	return false;
 }
 
-iw::Entity ProjectileSystem::MakeBulletC(
-	float start_x, float start_y,
-	float vx, float vy, 
-	int maxDepth, int depth)
-{
-	return MakeBullet(
-		start_x / sand->m_cellsPerMeter, 
-		start_y / sand->m_cellsPerMeter, 
-		vx / sand->m_cellsPerMeter / iw::FixedTime(), 
-		vy / sand->m_cellsPerMeter / iw::FixedTime(), 
-		maxDepth, depth
-	);
-}
-
 iw::Entity ProjectileSystem::MakeBullet(
 	float start_x, float start_y, 
 	float vx, float vy, 
@@ -234,6 +220,8 @@ iw::Entity ProjectileSystem::MakeBullet(
 				hy = py;
 				return true;
 			}
+
+			return false;
 		});
 
 		return std::tuple(hit, hx, hy);

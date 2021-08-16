@@ -53,8 +53,7 @@ void PlayerSystem::FixedUpdate()
 void PlayerSystem::Update()
 {
 	Player*        p = player.Find<Player>();
-	iw::Rigidbody* r = player.Find<iw::Rigidbody>();
-	iw::Transform& t = r->Transform;
+	iw::Transform* t = player.Find<iw::Transform>();
 
 	p->fire1_timer += iw::DeltaTime();
 
@@ -62,12 +61,44 @@ void PlayerSystem::Update()
 	{
 		p->fire1_timer = 0;
 
-		auto [x, y, dx, dy] = GetShot(t.Position.x, t.Position.y, sand->sP.x, sand->sP.y, 1000, 10);
+		auto [x, y, dx, dy] = GetShot(t->Position.x, t->Position.y, sand->sP.x, sand->sP.y, 1000, 10);
 
 		//dx += iw::randf();
 		//dy += iw::randf();
 		
 		Bus->push<SpawnProjectile_Event>(x, y, dx, dy, SpawnProjectile_Event::BULLET);
+	}
+
+	int checkHealthRad = 50;
+
+	for (int y = -checkHealthRad; y < checkHealthRad; y++)
+	for (int x = -checkHealthRad; x < checkHealthRad; x++)
+	{
+		int px = x + t->Position.x;
+		int py = y + t->Position.y;
+
+		iw::SandChunk* chunk = sand->m_world->GetChunk(px, py);
+		if (!chunk) continue;
+
+		iw::Cell& health = chunk->GetCell(px, py);
+
+		if (health.Type == iw::CellType::STONE) // if health = type health
+		{
+			float dist = sqrt(x*x + y*y);
+
+			if (dist < 8)
+			{
+				chunk->SetCell(px, py, iw::Cell());
+
+				// repair ship, Tile needs two copies of the sprite
+			}
+
+			else {
+				chunk->KeepAlive(px, py);
+				health.dx = -x / dist * 15.f;
+				health.dy = -y / dist * 15.f;
+			}
+		}
 	}
 
 	//cam_x = iw::lerp(cam_x, t.Position.x, iw::DeltaTime() * 5);
