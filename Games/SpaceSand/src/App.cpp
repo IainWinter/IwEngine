@@ -192,6 +192,8 @@ int App::Initialize(
 iw::Application* CreateApplication(
 	iw::InitOptions& options)
 {
+	options.AssetRootPath = "C:/dev/wEngine/_assets/";
+
 	options.WindowOptions = iw::WindowOptions {
 		800,
 		1000,

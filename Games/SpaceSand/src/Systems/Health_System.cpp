@@ -31,7 +31,7 @@ void HealthSystem::FixedUpdate()
                 }
             }
 
-            else if (!health->Pickedup && distance < 100)
+            else if (!health->Pickedup && distance < 50)
             {
                 health->Pickedup = true;
             }
@@ -80,22 +80,24 @@ iw::Entity HealthSystem::MakeHealth(
     float   x, float   y, 
     float ndx, float ndy)
 {
-    iw::Entity health = sand->MakeTile<iw::Circle, Health>("textures/SpaceGame/health_big.png", true);
+    iw::Entity entity = sand->MakeTile<iw::Circle, Health>("textures/SpaceGame/health_big.png", true);
     
-                       health.Set<Health>();
-    iw::Circle*    c = health.Find<iw::Circle>();
-	iw::Rigidbody* r = health.Find<iw::Rigidbody>();
-	iw::Tile*      t = health.Find<iw::Tile>();
+                               entity.Set<Health>();
+    iw::Transform* transform = entity.Find<iw::Transform>();
+	iw::Rigidbody* rigidbody = entity.Find<iw::Rigidbody>();
+    iw::Circle*    collider  = entity.Find<iw::Circle>();
+	iw::Tile*      tile      = entity.Find<iw::Tile>();
 
-    c->Radius = 2;
-
-	t->m_zIndex = 1;
-
-	r->Transform.Position.x = x + iw::randi(10);
-	r->Transform.Position.y = y + iw::randi(10);
-
-    r->Velocity.x = ndx * 75;
-    r->Velocity.y = ndy * 75;
+    collider->Radius = 2.5f;
+	
+    tile->m_zIndex = 1;
+	
+    transform->Position.x = x + iw::randi(10);
+    transform->Position.y = y + iw::randi(10);
+    
+    rigidbody->Velocity.x = ndx * 75;
+    rigidbody->Velocity.y = ndy * 75;
+    rigidbody->SetTransform(transform);
 
     return iw::Entity();
 }

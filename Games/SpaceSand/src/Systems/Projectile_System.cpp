@@ -59,23 +59,147 @@ void ProjectileSystem::FixedUpdate()
 		glm::vec2 vel(x * 2 - 1, y * 2 - 1);
 		vel = glm::normalize(vel) * 44.f;
 		
-		MakeBullet(w, h, vel.x + offX, -vel.y + offY, 1);
+		Bus->push<SpawnProjectile_Event>(w, h, vel.x + offX, -vel.y + offY, SpawnProjectile_Event::BULLET, 15);
 	}
 }
 
+// helpers
+
+auto getproj(iw::Entity entity)
+{
+	return entity.Find<Projectile>();
+}
+auto getpos(iw::Entity entity)
+{
+	iw::Rigidbody* r = entity.Find<iw::Rigidbody>();
+	iw::Transform* t = entity.Find<iw::Transform>();
+
+	float x = t->Position.x;
+	float y = t->Position.y;
+	int   z = floor(t->Position.z); // Z Index
+
+	float dx = r->Velocity.x;
+	float dy = r->Velocity.y;
+
+	return std::tuple(x, y, z, dx, dy);
+};
+auto setpos(iw::Entity entity, float x, float y)
+{
+	iw::Rigidbody* r = entity.Find<iw::Rigidbody>();
+	iw::Transform& t = r->Transform;
+
+	t.Position.x = x;
+	t.Position.y = y;
+};
+auto setvel(iw::Entity entity, float x, float y)
+{
+	iw::Rigidbody* r = entity.Find<iw::Rigidbody>();
+
+	r->Velocity.x = x;
+	r->Velocity.y = y;
+};
+auto randvel(iw::Entity entity, float amount, bool setForMe = false) 
+{
+	iw::Rigidbody* r = entity.Find<iw::Rigidbody>();
+	float dx = r->Velocity.x;
+	float dy = r->Velocity.y;
+
+	float speed = sqrt(dx * dx + dy * dy);
+	float angle = atan2(dy, dx);
+	angle += iw::randfs() * amount;
+
+	dx = cos(angle) * speed;
+	dy = sin(angle) * speed;
+
+	if (setForMe) {
+		setvel(entity, dx, dy);
+	}
+
+	return std::tuple(dx, dy);
+};
+
 bool ProjectileSystem::On(iw::ActionEvent& e)
 {
-	switch (e.Action) {
-		case SPAWN_PROJECTILE:
+	if (e.Action != SPAWN_PROJECTILE) return false;
+
+	SpawnProjectile_Event& event = e.as<SpawnProjectile_Event>();
+
+	if (event.Depth > event.MaxDepth)
+	{
+		return true;
+	}
+
+	iw::Entity entity = MakeProjectile(event.X, event.Y, event.dX, event.dY);
+	Projectile* projectile = entity.Find<Projectile>();
+
+	switch (event.Type) {
+		case SpawnProjectile_Event::BULLET: 
 		{
-			SpawnProjectile_Event& event = e.as<SpawnProjectile_Event>();
-			switch (event.Type) {
-				case SpawnProjectile_Event::BULLET: 
+			projectile->PlaceCell = [=](iw::SandChunk* chunk, int px, int py, float dx, float dy)
+			{
+				iw::Cell cell;
+				cell.Type = iw::CellType::PROJECTILE;
+				cell.Color = iw::Color::From255(255, 230, 66);
+
+				float time = .02; // not sure if this should scale with speed
+
+				chunk->SetCell(px, py, cell);
+				m_cells.emplace_back(px, py, time);
+			};
+
+			projectile->OnHit = [=](float fhx, float fhy)
+			{
+				int hx = floor(fhx);
+				int hy = floor(fhy);
+
+				if (sand->m_world->InBounds(hx, hy))
 				{
-					MakeBullet(event.X, event.Y, event.dX, event.dY, 2);
-					break;
+					auto [x, y, z, dx, dy] = getpos(entity);
+					float speed = sqrt(dx*dx + dy*dy);
+					auto [dx2, dy2] = randvel(entity, iw::Pi/4);
+					Bus->push<SpawnProjectile_Event>(fhx, fhy, dx2, dy2, event.Type, event.MaxDepth, event.Depth + 1);
 				}
-			}
+
+				Space->QueueEntity(entity.Handle, iw::func_Destroy);
+			};
+
+			break;
+		}
+		case SpawnProjectile_Event::LASER:
+		{
+			projectile->PlaceCell = [=](iw::SandChunk* chunk, int px, int py, float dx, float dy)
+			{
+				iw::Cell cell;
+				cell.Type = iw::CellType::PROJECTILE;
+				cell.Color = iw::Color::From255(255, 23, 6);
+
+				float time = .2; // not sure if this should scale with speed
+
+				chunk->SetCell(px, py, cell);
+				m_cells.emplace_back(px, py, time);
+			};
+
+			projectile->OnHit = [=](float fhx, float fhy)
+			{
+				int hx = floor(fhx);
+				int hy = floor(fhy);
+
+				if (sand->m_world->InBounds(hx, hy))
+				{
+					auto [x, y, z, dx, dy] = getpos(entity);
+					float speed = sqrt(dx*dx + dy*dy);
+					auto [dx2, dy2] = randvel(entity, iw::Pi/8);
+					Bus->push<SpawnProjectile_Event>(fhx, fhy, dx2, dy2, event.Type, event.MaxDepth, event.Depth + 1);
+				
+					if (iw::randf() > .66) // is there a way to calc a % to make this not diverge, i.e x % of them double
+					{
+						auto [dx3, dy3] = randvel(entity, iw::Pi / 6);
+						Bus->push<SpawnProjectile_Event>(fhx, fhy, dx3, dy3, event.Type, event.MaxDepth, event.Depth + 1);
+					}
+				}
+
+				Space->QueueEntity(entity.Handle, iw::func_Destroy);
+			};
 
 			break;
 		}
@@ -84,10 +208,9 @@ bool ProjectileSystem::On(iw::ActionEvent& e)
 	return false;
 }
 
-ProjectileSystem::ProjectileInfo ProjectileSystem::MakeProjectile(
+iw::Entity ProjectileSystem::MakeProjectile(
 	float  x, float  y,
-	float dx, float dy,
-	std::function<void(iw::SandChunk*, int, int)> placeCell)
+	float dx, float dy)
 {
 	iw::Entity entity = Space->CreateEntity<
 		iw::Transform, 
@@ -109,63 +232,12 @@ ProjectileSystem::ProjectileInfo ProjectileSystem::MakeProjectile(
 
 	Physics->AddRigidbody(rigidbody);
 
-	auto getpos = [=]()
-	{
-		iw::Rigidbody* r = entity.Find<iw::Rigidbody>();
-		iw::Transform* t = entity.Find<iw::Transform>();
-
-		float x = t->Position.x;
-		float y = t->Position.y;
-		int   z = floor(t->Position.z); // Z Index
-
-		float dx = r->Velocity.x;
-		float dy = r->Velocity.y;
-
-		return std::tuple(x, y, z, dx, dy);
-	};
-
-	auto setpos = [=](float x, float y)
-	{
-		iw::Rigidbody* r = entity.Find<iw::Rigidbody>();
-		iw::Transform& t = r->Transform;
-
-		t.Position.x = x;
-		t.Position.y = y;
-	};
-
-	auto setvel = [=](float x, float y)
-	{
-		iw::Rigidbody* r = entity.Find<iw::Rigidbody>();
-
-		r->Velocity.x = x;
-		r->Velocity.y = y;
-	};
-
-	auto randvel = [=](float amount, bool setForMe) 
-	{
-		iw::Rigidbody* r = entity.Find<iw::Rigidbody>();
-		float dx = r->Velocity.x;
-		float dy = r->Velocity.y;
-
-		float length = sqrt(dx * dx + dy * dy);
-		float angle = atan2(dy, dx);
-		angle += ((iw::randf()+1) * .5f) * amount + .1f * amount;
-
-		dx = cos(angle) * length;
-		dy = sin(angle) * length;
-
-		if (setForMe) {
-			r->Velocity.x = dx;
-			r->Velocity.y = dy;
-		}
-
-		return std::tuple(dx * iw::FixedTime(), dy * iw::FixedTime());
-	};
-
 	projectile->Update = [=]() 
 	{
-		auto [x, y, z, dx, dy] = getpos();
-		int zIndex = z; // for packing nonsense
+		auto [x, y, zIndex_, dx_, dy_] = getpos(entity);
+		int zIndex = zIndex_; // for unpacking nonsense
+		float dx = dx_;
+		float dy = dy_;
 
 		bool hit = false;
 		float hx, hy;
@@ -203,7 +275,7 @@ ProjectileSystem::ProjectileInfo ProjectileSystem::MakeProjectile(
 					hit = true;
 				}
 
-				placeCell(chunk, px, py);
+				getproj(entity)->PlaceCell(chunk, px, py, dx, dy);
 			}
 
 			if (hit) 
@@ -217,70 +289,6 @@ ProjectileSystem::ProjectileInfo ProjectileSystem::MakeProjectile(
 		});
 
 		return std::tuple(hit, hx, hy);
-	};
-
-	return { entity, projectile, getpos, setpos, setvel, randvel };
-}
-
-#define UNPACK_INFO                               \
-		iw::Entity entity      = info.entity;     \
-		Projectile* projectile = info.projectile; \
-		auto getpos            = info.getpos;     \
-		auto setpos            = info.setpos;     \
-		auto setvel            = info.setvel;     \
-		auto randvel           = info.randvel;    \
-
-iw::Entity ProjectileSystem::MakeBullet(
-	float start_x, float start_y, 
-	float vx, float vy, 
-	int maxDepth, int depth)
-{
-	if (depth > maxDepth)
-	{
-		return {};
-	}
-	
-	auto placeCell = [=](iw::SandChunk* chunk, int px, int py) {
-
-		iw::Cell cell;
-		cell.Type = iw::CellType::PROJECTILE;
-		cell.Color = iw::Color::From255(255, 230, 66);
-
-		float length = .0002;
-
-		chunk->SetCell(px, py, cell);
-		m_cells.emplace_back(px, py, length);
-	};
-
-	ProjectileInfo info = MakeProjectile(start_x, start_y, vx, vy, placeCell);
-	UNPACK_INFO;
-
-	projectile->OnHit = [=](float fhx, float fhy)
-	{
-		int hx = floor(fhx);
-		int hy = floor(fhy);
-
-		if (sand->m_world->InBounds(hx, hy))
-		{
-			float depthPercent = depth / float(maxDepth) * iw::Pi / 2.f + iw::Pi / 6.f; // needs a lil tuning to get right feel
-			int splitCount = iw::randi(2) + 1;
-
-			auto [x, y, z, dx, dy] = getpos();
-
-			//MakeBullet(hx, hy, dx, dy);
-
-			float speed = sqrt(dx*dx + dy*dy);
-
-			dx += iw::randfs() * speed / 5;
-			dy += iw::randfs() * speed / 5;
-
-			Bus->push<SpawnProjectile_Event>(fhx, fhy, dx, dy, SpawnProjectile_Event::BULLET);
-
-		}
-
-		//else {
-			Space->QueueEntity(entity.Handle, iw::func_Destroy);
-		//}
 	};
 
 	return entity;

@@ -7,4 +7,6 @@ struct Projectile {
 	std::function<std::tuple<bool, float, float>()> Update; // called in render tick, return true if collision
 
 	std::function<void(float, float)> OnHit; // called on collision
+
+	std::function<void(iw::SandChunk*, int, int, float, float)> PlaceCell; // each cell in line calls this
 };

@@ -37,10 +37,14 @@ struct SpawnProjectile_Event : iw::SingleEvent
 		LASER
 	} Type;
 
+	int MaxDepth, Depth;
+
 	SpawnProjectile_Event(
 		float x,  float y,
 		float dx, float dy,
-		PType type
+		PType type,
+		int maxDepth = 5, // these should be confed from thr type, not the caller
+		int depth = 0
 	)
 		: iw::SingleEvent(SPAWN_PROJECTILE)
 		, X(x)
@@ -48,6 +52,8 @@ struct SpawnProjectile_Event : iw::SingleEvent
 		, dX(dx)
 		, dY(dy)
 		, Type(type)
+		, MaxDepth(maxDepth)
+		, Depth(depth)
 	{}
 };
 

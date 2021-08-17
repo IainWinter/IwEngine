@@ -47,4 +47,10 @@ void WorldSystem::FixedUpdate()
 				Space->QueueEntity(entity, iw::func_Destroy);
 			}
 		});
+
+
+	if (iw::Mouse::ButtonDown(iw::MMOUSE))
+	{
+		Bus->push<SpawnHealth_Event>(sand->sP.x, sand->sP.y, 1);
+	}
 }
