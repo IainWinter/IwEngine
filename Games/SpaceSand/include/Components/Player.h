@@ -9,6 +9,7 @@ struct Player
 	bool i_left;
 	bool i_right;
 	bool i_fire1;
+	bool i_fire2;
 
 	iw::Timer timer;
 

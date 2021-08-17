@@ -26,11 +26,11 @@ public:
 	int gridSize = 16; // add m_ 
 	glm::vec2 sP, gP; // sand pos, grid pos
 
+	bool m_drawMouseGrid;
+
 private:
 	SandWorldRenderSystem* m_render;
 	SandWorldUpdateSystem* m_update;
-
-	bool m_drawMouseGrid;
 
 	using SpriteData = std::tuple<Tile*, unsigned*, unsigned>; // tile, colors, width
 	using PixelData  = std::tuple<int, int, Tile*, unsigned*, unsigned>;  // x, y, tile, colors, index

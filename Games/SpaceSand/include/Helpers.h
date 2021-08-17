@@ -5,7 +5,7 @@
 inline std::tuple<float, float, float, float> GetShot(
 	float x,  float y,
 	float tx, float ty,
-	float speed, float margin)
+	float speed, float margin, float thickness = 0)
 {
 	float dx = tx - x,
 	      dy = ty - y;
@@ -15,11 +15,13 @@ inline std::tuple<float, float, float, float> GetShot(
 	float nx = dx / length,
            ny = dy / length;
 
-	dx *= speed / length;
-	dy *= speed / length;
+	dx = nx * speed;
+	dy = ny * speed;
 
-	x += nx * margin;
-	y += ny * margin;
+	float r = iw::randfs();
+
+	x += nx * margin - ny * thickness * r;
+	y += ny * margin + nx * thickness * r;
 
 	return std::tie(x, y, dx, dy);
 }

@@ -3,17 +3,17 @@
 #include "iw/engine/System.h"
 #include "plugins/iw/Sand/Engine/SandLayer.h"
 
-#include "Components/Health.h"
+#include "Components/Item.h"
 #include "iw/physics/Collision/SphereCollider.h"
 
 #include "Events.h"
 
-struct HealthSystem : iw::SystemBase
+struct ItemSystem : iw::SystemBase
 {
 	iw::SandLayer* sand;
 	iw::Entity m_player;
 
-	HealthSystem(
+	ItemSystem(
 		iw::SandLayer* sand,
 		iw::Entity player
 	)
@@ -27,5 +27,8 @@ struct HealthSystem : iw::SystemBase
 	bool On(iw::ActionEvent& e) override;
 
 private:
-	iw::Entity MakeHealth(float x, float y, float ndx, float dny);
+	iw::Entity MakeItem(float x, float y, float ndx, float dny, std::string spritePath);
+
+	iw::Entity MakeHealth     (float x, float y, float ndx, float ndy);
+	iw::Entity MakeLaserCharge(float x, float y, float ndx, float ndy);
 };

@@ -7,7 +7,7 @@
 enum Actions {
 	SPAWN_ENEMY,
 	SPAWN_PROJECTILE,
-	SPAWN_HEALTH,
+	SPAWN_ITEM,
 };
 
 struct SpawnEnemy_Event : iw::SingleEvent
@@ -37,10 +37,13 @@ struct SpawnProjectile_Event : iw::SingleEvent
 		LASER
 	} Type;
 
+	int Depth;
+
 	SpawnProjectile_Event(
 		float x,  float y,
 		float dx, float dy,
-		PType type
+		PType type,
+		int depth = 0
 	)
 		: iw::SingleEvent(SPAWN_PROJECTILE)
 		, X(x)
@@ -48,21 +51,29 @@ struct SpawnProjectile_Event : iw::SingleEvent
 		, dX(dx)
 		, dY(dy)
 		, Type(type)
+		, Depth(depth)
 	{}
 };
 
-struct SpawnHealth_Event : iw::SingleEvent
+struct SpawnItem_Event : iw::SingleEvent
 {
 	float X, Y;
 	int Amount;
 
-	SpawnHealth_Event(
+	enum IType {
+		HEALTH,
+		LASER_CHARGE
+	} Type;
+
+	SpawnItem_Event(
 		float x, float y,
-		int amount
+		int amount,
+		IType type
 	)
-		: iw::SingleEvent(SPAWN_HEALTH)
+		: iw::SingleEvent(SPAWN_ITEM)
 		, X(x)
 		, Y(y)
 		, Amount(amount)
+		, Type(type)
 	{}
 };

@@ -7,7 +7,7 @@
 #include "iw/math/noise.h"
 
 #include "Systems/World_System.h"
-#include "Systems/Health_System.h"
+#include "Systems/Item_System.h"
 
 #include "Systems/Player_System.h"
 #include "Systems/Enemy_System.h"
@@ -38,9 +38,9 @@ struct GameLayer : iw::Layer
 		
 		PushSystem(projectile_s);
 		PushSystem(player_s);
-		PushSystem<EnemySystem> (sand);
-		PushSystem<WorldSystem> (sand, player_s->player);
-		PushSystem<HealthSystem>(sand, player_s->player);
+		PushSystem<EnemySystem>(sand);
+		PushSystem<WorldSystem>(sand, player_s->player);
+		PushSystem<ItemSystem> (sand, player_s->player);
 
 		PushSystem<FlockingSystem>();
 
@@ -113,6 +113,8 @@ struct GameLayer : iw::Layer
 
 	void PostUpdate() override
 	{
+		sand->m_drawMouseGrid = iw::Keyboard::KeyDown(iw::SHIFT);
+
 		float height = Renderer->Height();
 
 		float sandSize = sand->GetSandTexSize2().second * sand->m_cellSize * 2;
@@ -159,9 +161,10 @@ App::App() : iw::Application()
 {
 	int cellSize  = 2;
 	int cellMeter = 1;
-
-	iw::SandLayer* sand = new iw::SandLayer(cellSize, cellMeter, 800, 800, true);
-
+	bool drawWithMouse = false;
+	
+	iw::SandLayer* sand = new iw::SandLayer(cellSize, cellMeter, 800, 800, drawWithMouse);
+	
 	PushLayer(sand);
 	PushLayer<GameLayer>(sand);
 }
@@ -192,6 +195,8 @@ int App::Initialize(
 iw::Application* CreateApplication(
 	iw::InitOptions& options)
 {
+	options.AssetRootPath = "C:/dev/wEngine/_assets/";
+
 	options.WindowOptions = iw::WindowOptions {
 		800,
 		1000,
