@@ -66,6 +66,6 @@ void FlockingSystem::FixedUpdate()
 		glm::vec3 nDir = safeNorm(targetVel);
 		glm::vec3 delta = (nDir - nVel) * 100.f/** p->Speed * p->TurnRadius*/;
 
-		rigidbody->Velocity = safeNorm(rigidbody->Velocity + delta) * iw::clamp(targetDist, 33.f, 100.f);
+		rigidbody->Velocity = safeNorm(rigidbody->Velocity + delta) * iw::clamp(targetDist, 0.f, 100.f);
 	});
 }

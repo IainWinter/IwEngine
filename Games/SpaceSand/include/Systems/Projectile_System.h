@@ -25,10 +25,11 @@ struct ProjectileSystem
 
 	bool On(iw::ActionEvent& e) override;
 
-	// Make functions, not sure where these should go I
-	// guess its up to the caller to deside, should add an action evevnt
 private:
 	iw::Entity MakeProjectile(float x, float y, float dx, float dy);
+
+	iw::Entity MakeBullet(float x, float y, float dx, float dy, int depth);
+	iw::Entity MakeLaser (float x, float y, float dx, float dy, int depth);
 
 	void MakeExplosion(int x, int y, int r);
 };

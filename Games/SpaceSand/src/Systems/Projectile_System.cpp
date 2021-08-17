@@ -124,85 +124,9 @@ bool ProjectileSystem::On(iw::ActionEvent& e)
 
 	SpawnProjectile_Event& event = e.as<SpawnProjectile_Event>();
 
-	if (event.Depth > event.MaxDepth)
-	{
-		return true;
-	}
-
-	iw::Entity entity = MakeProjectile(event.X, event.Y, event.dX, event.dY);
-	Projectile* projectile = entity.Find<Projectile>();
-
 	switch (event.Type) {
-		case SpawnProjectile_Event::BULLET: 
-		{
-			projectile->PlaceCell = [=](iw::SandChunk* chunk, int px, int py, float dx, float dy)
-			{
-				iw::Cell cell;
-				cell.Type = iw::CellType::PROJECTILE;
-				cell.Color = iw::Color::From255(255, 230, 66);
-
-				float time = .02; // not sure if this should scale with speed
-
-				chunk->SetCell(px, py, cell);
-				m_cells.emplace_back(px, py, time);
-			};
-
-			projectile->OnHit = [=](float fhx, float fhy)
-			{
-				int hx = floor(fhx);
-				int hy = floor(fhy);
-
-				if (sand->m_world->InBounds(hx, hy))
-				{
-					auto [x, y, z, dx, dy] = getpos(entity);
-					float speed = sqrt(dx*dx + dy*dy);
-					auto [dx2, dy2] = randvel(entity, iw::Pi/4);
-					Bus->push<SpawnProjectile_Event>(fhx, fhy, dx2, dy2, event.Type, event.MaxDepth, event.Depth + 1);
-				}
-
-				Space->QueueEntity(entity.Handle, iw::func_Destroy);
-			};
-
-			break;
-		}
-		case SpawnProjectile_Event::LASER:
-		{
-			projectile->PlaceCell = [=](iw::SandChunk* chunk, int px, int py, float dx, float dy)
-			{
-				iw::Cell cell;
-				cell.Type = iw::CellType::PROJECTILE;
-				cell.Color = iw::Color::From255(255, 23, 6);
-
-				float time = .2; // not sure if this should scale with speed
-
-				chunk->SetCell(px, py, cell);
-				m_cells.emplace_back(px, py, time);
-			};
-
-			projectile->OnHit = [=](float fhx, float fhy)
-			{
-				int hx = floor(fhx);
-				int hy = floor(fhy);
-
-				if (sand->m_world->InBounds(hx, hy))
-				{
-					auto [x, y, z, dx, dy] = getpos(entity);
-					float speed = sqrt(dx*dx + dy*dy);
-					auto [dx2, dy2] = randvel(entity, iw::Pi/8);
-					Bus->push<SpawnProjectile_Event>(fhx, fhy, dx2, dy2, event.Type, event.MaxDepth, event.Depth + 1);
-				
-					if (iw::randf() > .66) // is there a way to calc a % to make this not diverge, i.e x % of them double
-					{
-						auto [dx3, dy3] = randvel(entity, iw::Pi / 6);
-						Bus->push<SpawnProjectile_Event>(fhx, fhy, dx3, dy3, event.Type, event.MaxDepth, event.Depth + 1);
-					}
-				}
-
-				Space->QueueEntity(entity.Handle, iw::func_Destroy);
-			};
-
-			break;
-		}
+		case SpawnProjectile_Event::BULLET: MakeBullet(event.X, event.Y, event.dX, event.dY, event.Depth); break;
+		case SpawnProjectile_Event::LASER:  MakeLaser (event.X, event.Y, event.dX, event.dY, event.Depth); break;
 	}
 
 	return false;
@@ -289,6 +213,90 @@ iw::Entity ProjectileSystem::MakeProjectile(
 		});
 
 		return std::tuple(hit, hx, hy);
+	};
+
+	return entity;
+}
+
+iw::Entity ProjectileSystem::MakeBullet(
+	float  x, float  y, 
+	float dx, float dy,
+	int depth)
+{
+	iw::Entity entity = MakeProjectile(x, y, dx, dy);
+	Projectile* projectile = entity.Find<Projectile>();
+
+	projectile->PlaceCell = [=](iw::SandChunk* chunk, int px, int py, float dx, float dy)
+	{
+		iw::Cell cell;
+		cell.Type = iw::CellType::PROJECTILE;
+		cell.Color = iw::Color::From255(255, 230, 66);
+
+		float time = .02; // not sure if this should scale with speed
+
+		chunk->SetCell(px, py, cell);
+		m_cells.emplace_back(px, py, time);
+	};
+
+	projectile->OnHit = [=](float fhx, float fhy)
+	{
+		int hx = floor(fhx);
+		int hy = floor(fhy);
+
+		if (depth < 15 && sand->m_world->InBounds(hx, hy))
+		{
+			auto [x, y, z, dx, dy] = getpos(entity);
+			float speed = sqrt(dx*dx + dy*dy);
+			auto [dx2, dy2] = randvel(entity, iw::Pi/4);
+			Bus->push<SpawnProjectile_Event>(fhx, fhy, dx2, dy2, SpawnProjectile_Event::BULLET, depth + 1);
+		}
+
+		Space->QueueEntity(entity.Handle, iw::func_Destroy);
+	};
+
+	return entity;
+}
+
+iw::Entity ProjectileSystem::MakeLaser(
+	float  x, float  y,
+	float dx, float dy,
+	int depth)
+{
+	iw::Entity entity = MakeProjectile(x, y, dx, dy);
+	Projectile* projectile = entity.Find<Projectile>();
+
+	projectile->PlaceCell = [=](iw::SandChunk* chunk, int px, int py, float dx, float dy)
+	{
+		iw::Cell cell;
+		cell.Type = iw::CellType::PROJECTILE;
+		cell.Color = iw::Color::From255(255, 23, 6);
+
+		float time = .2; // not sure if this should scale with speed
+
+		chunk->SetCell(px, py, cell);
+		m_cells.emplace_back(px, py, time);
+	};
+
+	projectile->OnHit = [=](float fhx, float fhy)
+	{
+		int hx = floor(fhx);
+		int hy = floor(fhy);
+
+		if (depth < 25 && sand->m_world->InBounds(hx, hy))
+		{
+			auto [x, y, z, dx, dy] = getpos(entity);
+			float speed = sqrt(dx*dx + dy*dy);
+			auto [dx2, dy2] = randvel(entity, iw::Pi/8);
+			Bus->push<SpawnProjectile_Event>(fhx, fhy, dx2, dy2, SpawnProjectile_Event::LASER, depth + 1);
+				
+			if (iw::randf() > .9) // is there a way to calc a % to make this not diverge, i.e x % of them double
+			{
+				auto [dx3, dy3] = randvel(entity, iw::Pi / 6);
+				Bus->push<SpawnProjectile_Event>(fhx, fhy, dx3, dy3, SpawnProjectile_Event::LASER, depth + 1);
+			}
+		}
+
+		Space->QueueEntity(entity.Handle, iw::func_Destroy);
 	};
 
 	return entity;

@@ -18,7 +18,7 @@ void EnemySystem::FixedUpdate()
 					transform->Position.x, transform->Position.y, 
 					target->   Position.x, target->   Position.y, 444, 10);
 
-				Bus->send<SpawnProjectile_Event>(x, y, dx, dy, SpawnProjectile_Event::BULLET);
+				Bus->send<SpawnProjectile_Event>(x, y, dx, dy, SpawnProjectile_Event::LASER);
 			}
 		}
 	);
