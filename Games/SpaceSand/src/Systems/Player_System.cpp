@@ -14,7 +14,8 @@ void PlayerSystem::FixedUpdate()
 	p->i_down  = iw::Keyboard::KeyDown(iw::S);
 	p->i_left  = iw::Keyboard::KeyDown(iw::A);
 	p->i_right = iw::Keyboard::KeyDown(iw::D);
-	p->i_fire1 = iw::Mouse::ButtonDown(iw::RMOUSE);
+	p->i_fire1 = iw::Mouse::ButtonDown(iw::LMOUSE);
+	p->i_fire2 = iw::Mouse::ButtonDown(iw::RMOUSE);
 
 	r->Velocity.x = 0;
 	r->Velocity.y = 0;
@@ -45,11 +46,22 @@ void PlayerSystem::Update()
 	if (   p->i_fire1 
 		&& p->timer.Can("fire1"))
 	{
-		auto [x, y, dx, dy] = GetShot(t->Position.x, t->Position.y, sand->sP.x, sand->sP.y, 1000, 10);
+		auto [x, y, dx, dy] = GetShot(t->Position.x, t->Position.y, sand->sP.x, sand->sP.y, 1000, 10, 2);
 
-		//dx += iw::randf();
-		//dy += iw::randf();
+		//dx += iw::randf() * 100;
+		//dy += iw::randf() * 100;
 		
 		Bus->push<SpawnProjectile_Event>(x, y, dx, dy, SpawnProjectile_Event::BULLET);
+	}
+	
+	if (   p->i_fire2 
+		&& p->timer.Can("fire2"))
+	{
+		auto [x, y, dx, dy] = GetShot(t->Position.x, t->Position.y, sand->sP.x, sand->sP.y, 1800 + iw::randf() * 400, 10, 7);
+
+		//dx += iw::randf() * 100;
+		//dy += iw::randf() * 100;
+		
+		Bus->push<SpawnProjectile_Event>(x, y, dx, dy, SpawnProjectile_Event::LASER);
 	}
 }

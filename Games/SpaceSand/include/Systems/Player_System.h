@@ -29,6 +29,7 @@ struct PlayerSystem : iw::SystemBase
 		iw::Rigidbody* r = player.Find<iw::Rigidbody>();
 
 		p->timer.SetTime("fire1", 0.15f);
+		p->timer.SetTime("fire2", 0.0015f);
 
 		c->Radius = 4;
 
