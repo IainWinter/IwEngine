@@ -111,21 +111,19 @@ int SandLayer::Initialize() {
 	Cell::SetDefault(CellType::SMOKE, _SMOKE);
 	Cell::SetDefault(CellType::BELT,  _BELT);
 
-	size_t chunkSize = 100; // shoudl be in constructor
 
 	if (m_initFixed)
 	{
-		int numChunksX = m_worldWidth  / chunkSize;
-		int numChunksY = m_worldHeight / chunkSize;
-
 		m_world = new SandWorld(
-			m_worldWidth, m_worldHeight,
-			numChunksX, numChunksY,
+			m_worldWidth,   m_worldHeight,
+			m_worldChunksX, m_worldChunksY,
 			m_cellSize
 		);
 	}
 
 	else {
+		size_t chunkSize = 100;
+		
 		m_world = new SandWorld(
 			m_cellSize * chunkSize,
 			m_cellSize * chunkSize,
@@ -289,6 +287,8 @@ void SandLayer::PasteTiles()
 		Transform* transform,
 		Tile* tile)
 	{
+		if (tile->m_sandLayerIndex != m_sandLayerIndex) return;
+
 		m_tilesThisFrame.push_back(tile);
 
 		if (tile->NeedsScan)

@@ -14,7 +14,7 @@ int x = 0;
 
 void WorldSystem::FixedUpdate()
 {
-	m_timer.TickFixed();
+	//m_timer.TickFixed();
 
 	if (m_timer.Can("spawn_enemy"))
 	{
@@ -56,13 +56,20 @@ void WorldSystem::FixedUpdate()
 
 	if (iw::Mouse::ButtonDown(iw::MMOUSE))
 	{
-		Bus->push<SpawnItem_Event>(sand->sP.x, sand->sP.y, 1, SpawnItem_Event::HEALTH);
+		if (iw::Keyboard::KeyDown(iw::SHIFT))
+		{
+			Bus->push<SpawnItem_Event>(sand->sP.x, sand->sP.y, 1, SpawnItem_Event::LASER_CHARGE);
+		}
+
+		else {
+			Bus->push<SpawnItem_Event>(sand->sP.x, sand->sP.y, 1, SpawnItem_Event::HEALTH);
+		}
 	}
 
 	if (iw::Keyboard::KeyDown(iw::X))
 	{
 		for (int i = 0; i < 5; i++) {
-			for (int y = 175; y < 225; y++)
+			for (int y = 0; y < 800; y++)
 			{
 				sand->m_world->SetCell(x, y, iw::Cell::GetDefault(iw::CellType::ROCK));
 			}

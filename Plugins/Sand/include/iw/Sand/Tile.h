@@ -88,6 +88,7 @@ struct Tile {
 	std::vector<int> m_currentCells;
 	std::vector<int> m_removedCells;
 
+	int m_sandLayerIndex = 0;
 	int m_zIndex = 0;
 
 	IW_PLUGIN_SAND_API

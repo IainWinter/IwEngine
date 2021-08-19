@@ -11,6 +11,8 @@ struct Player
 	bool i_fire1;
 	bool i_fire2;
 
+	bool can_fire_laser;
+
 	iw::Timer timer;
 
 	Player() {}

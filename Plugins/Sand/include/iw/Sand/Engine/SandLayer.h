@@ -28,6 +28,9 @@ public:
 
 	bool m_drawMouseGrid;
 
+	float m_updateDelay = 0.0f;
+	float m_updateDelayTimer = 0.0f;
+
 private:
 	SandWorldRenderSystem* m_render;
 	SandWorldUpdateSystem* m_update;
@@ -42,6 +45,11 @@ private:
 	bool m_initFixed;
 	int m_worldWidth; // these are invalid if initFixed is false
 	int m_worldHeight;
+	int m_worldChunksX;
+	int m_worldChunksY;
+
+	inline static int s_sandLayerIndex = 0;
+	int m_sandLayerIndex;
 
 public:
 	SandLayer(
@@ -65,13 +73,17 @@ public:
 		, m_update(nullptr)
 		, sP(0.f)
 		, gP(0.f)
-	{}
+	{
+		m_sandLayerIndex = s_sandLayerIndex++;
+	}
 
 	SandLayer(
 		int cellSize,
 		int cellsPerMeter,
 		int worldWidth,
 		int worldHeight,
+		int worldChunksX = 1,
+		int worldChunksY = 1,
 		bool drawMouseGrid = false
 	)
 		: Layer("Sand")
@@ -83,13 +95,27 @@ public:
 		, m_initFixed(true)
 		, m_worldWidth (worldWidth  / cellSize)
 		, m_worldHeight(worldHeight / cellSize)
+		, m_worldChunksX(worldChunksX)
+		, m_worldChunksY(worldChunksY)
 
 		, m_world(nullptr)
 		, m_render(nullptr)
 		, m_update(nullptr)
 		, sP(0.f)
 		, gP(0.f)
-	{}
+	{
+		m_sandLayerIndex = s_sandLayerIndex++;
+	}
+
+	void UpdateSystems() override
+	{
+		m_updateDelayTimer += iw::DeltaTime();
+		if (m_updateDelayTimer > m_updateDelay)
+		{
+			m_updateDelayTimer = 0.0f;
+			Layer::UpdateSystems();
+		}
+	}
 
 	IW_PLUGIN_SAND_API int  Initialize();
 	IW_PLUGIN_SAND_API void PreUpdate();
@@ -174,6 +200,8 @@ public:
 
 		if (isSimulated) Physics->AddRigidbody((Rigidbody*)object);
 		else             Physics->AddCollisionObject(object);
+
+		tile->m_sandLayerIndex = m_sandLayerIndex;
 
 		return entity;
 	}

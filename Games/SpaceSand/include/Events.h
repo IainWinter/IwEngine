@@ -8,6 +8,7 @@ enum Actions {
 	SPAWN_ENEMY,
 	SPAWN_PROJECTILE,
 	SPAWN_ITEM,
+	CHANGE_LASER_FLUID,
 };
 
 struct SpawnEnemy_Event : iw::SingleEvent
@@ -75,5 +76,17 @@ struct SpawnItem_Event : iw::SingleEvent
 		, Y(y)
 		, Amount(amount)
 		, Type(type)
+	{}
+};
+
+struct ChangeLaserFluid_Event : iw::SingleEvent
+{
+	int Amount;
+
+	ChangeLaserFluid_Event(
+		int amount
+	)
+		: iw::SingleEvent(CHANGE_LASER_FLUID)
+		, Amount(amount)
 	{}
 };

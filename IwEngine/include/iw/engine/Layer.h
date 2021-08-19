@@ -76,11 +76,8 @@ namespace Engine {
 
 		// System updates
 
-		IWENGINE_API
-		void UpdateSystems();
-
-		IWENGINE_API
-		void FixedUpdateSystems();
+		IWENGINE_API virtual void UpdateSystems();
+		IWENGINE_API virtual void FixedUpdateSystems();
 
 		const std::string& Name() const {
 			return m_name;

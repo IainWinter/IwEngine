@@ -55,7 +55,8 @@ void PlayerSystem::Update()
 	}
 	
 	if (   p->i_fire2 
-		&& p->timer.Can("fire2"))
+		&& p->timer.Can("fire2")
+		&& p->can_fire_laser)
 	{
 		auto [x, y, dx, dy] = GetShot(t->Position.x, t->Position.y, sand->sP.x, sand->sP.y, 1800 + iw::randf() * 400, 10, 7);
 
@@ -63,5 +64,6 @@ void PlayerSystem::Update()
 		//dy += iw::randf() * 100;
 		
 		Bus->push<SpawnProjectile_Event>(x, y, dx, dy, SpawnProjectile_Event::LASER);
+		Bus->push<ChangeLaserFluid_Event>(-1);
 	}
 }

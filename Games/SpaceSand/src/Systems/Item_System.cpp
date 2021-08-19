@@ -118,7 +118,7 @@ iw::Entity ItemSystem::MakeLaserCharge(float x, float y, float ndx, float ndy)
     iw::Entity entity = MakeItem(x, y, ndx, ndy, "textures/SpaceGame/laser_pickup.png");
     entity.Find<Item>()->OnPickUp = [=]()
     {
-
+        Bus->push<ChangeLaserFluid_Event>(iw::randi(5) + 2);
     };
 
     return entity;
