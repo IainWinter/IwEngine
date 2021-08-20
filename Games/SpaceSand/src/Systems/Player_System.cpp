@@ -46,10 +46,11 @@ void PlayerSystem::Update()
 	if (   p->i_fire1 
 		&& p->timer.Can("fire1"))
 	{
-		auto [x, y, dx, dy] = GetShot(t->Position.x, t->Position.y, sand->sP.x, sand->sP.y, 1250, 10, 2);
+		auto [x, y, dx, dy] = GetShot(t->Position.x, t->Position.y, sand->sP.x, sand->sP.y, 1250/4, 10, 2);
 
-		//dx += iw::randf() * 100;
-		//dy += iw::randf() * 100;
+		float speed = sqrt(dx*dx+dy*dy);
+		dx += iw::randf() * speed * .05;
+		dy += iw::randf() * speed * .05;
 		
 		Bus->push<SpawnProjectile_Event>(x, y, dx, dy, SpawnProjectile_Event::BULLET);
 	}
@@ -66,4 +67,17 @@ void PlayerSystem::Update()
 		Bus->push<SpawnProjectile_Event>(x, y, dx, dy, SpawnProjectile_Event::LASER);
 		Bus->push<ChangeLaserFluid_Event>(-1);
 	}
+}
+
+bool PlayerSystem::On(iw::ActionEvent& e)
+{
+	switch (e.Action) {
+		case HEAL_PLAYER: 
+		{
+			player.Find<iw::Tile>()->ReinstateRandomPixel();
+			break;
+		}
+	}
+
+	return false;
 }

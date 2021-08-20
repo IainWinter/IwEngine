@@ -107,7 +107,7 @@ iw::Entity ItemSystem::MakeHealth(float x, float y, float ndx, float ndy)
     iw::Entity entity = MakeItem(x, y, ndx, ndy, "textures/SpaceGame/health_big.png");
     entity.Find<Item>()->OnPickUp = [=]()
     {
-        m_player.Find<iw::Tile>()->ReinstateRandomPixel();
+        Bus->push<HealPlayer_Event>();
     };
 
     return entity;

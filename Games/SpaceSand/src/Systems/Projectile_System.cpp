@@ -180,21 +180,23 @@ iw::Entity ProjectileSystem::MakeProjectile(
 			}
 
 			else {
-				auto& [tile, index] = chunk->GetCell<iw::TileInfo>(px, py, iw::SandField::TILE_INFO);
-				if (tile)
+				iw::TileInfo& info = chunk->GetCell<iw::TileInfo>(px, py, iw::SandField::TILE_INFO);
+				if (info.tile)
 				{
-					if (tile->m_zIndex == zIndex)
+					if (info.tile->m_zIndex == zIndex)
 					{
-						if (tile->m_initalCellCount != 0) // temp hack to fix left behind pixels from tiles
+						if (info.tile->m_initalCellCount != 0) // temp hack to fix left behind pixels from tiles, todo: find cause of left behind pixels
 						{
-							sand->EjectPixel(tile, index);
-							Space->FindEntity<iw::Tile>(tile).Find<iw::Rigidbody>()->Velocity += glm::vec3(dx, dy, 0);
+							iw::Entity hit = Space->FindEntity<iw::Tile>(info.tile);
+							Bus->push<ProjHitTile_Event>(info, hit, entity); // not sure if push (vs send) breaks anything here...
 						}
 
 						hit = true;
-						tile = nullptr;
-						index = 0;
 					}
+
+					//// reset tileinfo, only needed for but need above hack
+					//info.tile = nullptr;
+					//info.index = 0;
 				}
 
 				else

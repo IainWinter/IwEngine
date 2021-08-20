@@ -13,7 +13,10 @@
 
 IW_PLUGIN_SAND_BEGIN
 
-using TileInfo = std::pair<Tile*, unsigned>; // tile, index
+struct TileInfo {
+	Tile* tile;
+	unsigned index;
+};
 
 class SandLayer
 	: public Layer
@@ -155,7 +158,7 @@ public:
 
 	void SetCamera(
 		float x,  float y,
-		float xs, float ys)
+		float xs = 1.f, float ys = 1.f) // not sure if scale is even needed anymore...?
 	{
 		auto [width, height] = GetSandTexSize2();
 

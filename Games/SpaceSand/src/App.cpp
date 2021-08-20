@@ -15,6 +15,8 @@
 #include "Systems/Flocking_System.h"
 #include "Systems/Projectile_System.h"
 
+#include "iw/graphics/Font.h"
+
 struct GameLayer : iw::Layer
 {
 	iw::SandLayer* sand;
@@ -24,6 +26,9 @@ struct GameLayer : iw::Layer
 	iw::Mesh ui_background;
 	iw::Mesh ui_player;
 	iw::Mesh ui_score;
+	iw::ref<iw::Font> ui_font;
+
+	iw::Entity cursor;
 
 	GameLayer(
 		iw::SandLayer* sand,
@@ -49,6 +54,10 @@ struct GameLayer : iw::Layer
 
 		PushSystem<iw::PhysicsSystem>();
 		PushSystem<iw::EntityCleanupSystem>();
+
+		cursor = sand->MakeTile("textures/SpaceGame/circle_temp.png");
+		cursor.Find<iw::CollisionObject>()->Transform.Scale = glm::vec3(.25f);
+		cursor.Find<iw::Tile>()->m_zIndex = -10;
 
 		Renderer->Device->SetClearColor(0, 0, 0, 0);
 
@@ -96,30 +105,44 @@ struct GameLayer : iw::Layer
 			ui_background.Material = mat;
 		}
 
+		{ // font
+			iw::ref<iw::Material> fontMat = REF<iw::Material>(
+				Asset->Load<iw::Shader>("shaders/font.shader")
+			);
+			Renderer->Now->InitShader(fontMat->Shader, iw::CAMERA);
+
+			ui_font = Asset->Load<iw::Font>("fonts/arial.fnt");
+			ui_score = ui_font->GenerateMesh("123\n123\n123\n123\n123", .001f, 1);
+			ui_score.Material = fontMat;
+		}
+
 		{
 			cam = new iw::OrthographicCamera(2, 2, -10, 10);
 			cam->SetRotation(glm::angleAxis(iw::Pi, glm::vec3(0, 1, 0)));
 		}
-
 
 		if (int e = Layer::Initialize())
 		{
 			return e;
 		}
 
-		auto [w, h] = sand_ui_laserCharge->GetSandTexSize();
-		for (int y = 0; y < h; y++)
-		for (int x = 0; x < w; x++)
-		{
-			iw::Cell c = iw::Cell::GetDefault(iw::CellType::ROCK);
-			sand_ui_laserCharge->m_world->SetCell(x, y, c);
-		}
+		// more temp ui
 
-		for (int y = 0;         y <  h;         y++)
-		for (int x = w / 2 - y; x <= w / 2 + y; x++)
-		{
-			iw::Cell c = iw::Cell::GetDefault(iw::CellType::EMPTY);
-			sand_ui_laserCharge->m_world->SetCell(x, y, c);
+		{ // laser fluid box
+			auto [w, h] = sand_ui_laserCharge->GetSandTexSize();
+			for (int y = 0; y < h; y++)
+			for (int x = 0; x < w; x++)
+			{
+				iw::Cell c = iw::Cell::GetDefault(iw::CellType::ROCK);
+				sand_ui_laserCharge->m_world->SetCell(x, y, c);
+			}
+
+			for (int y = 0;         y <  h;         y++)
+			for (int x = w / 2 - y; x <= w / 2 + y; x++)
+			{
+				iw::Cell c = iw::Cell::GetDefault(iw::CellType::EMPTY);
+				sand_ui_laserCharge->m_world->SetCell(x, y, c);
+			}
 		}
 
 		return 0;
@@ -132,7 +155,13 @@ struct GameLayer : iw::Layer
 	int laserFluidCount = 0;
 	glm::vec3 laserFluidVel = glm::vec3(0.f);
 
+	float uiJitterAmount = 0;
+
 	void Update() override { // this is one frame behind, add a callback to the sand layer that gets called at the right time, right after rendering the world...
+		
+		cursor.Find<iw::Transform>()->Position = glm::vec3(sand->sP, 0.f);
+
+		
 		iw::Texture& playerSprite = player.Find<iw::Tile>()->m_sprite;
 		iw::Texture& uiPlayerTex  = *ui_player.Material->GetTexture("texture");
 
@@ -160,8 +189,6 @@ struct GameLayer : iw::Layer
 
 		laserFluidVel = iw::lerp(laserFluidVel, player.Find<iw::Rigidbody>()->Velocity, iw::DeltaTime() * 5);
 
-		LOG_INFO << laserFluidVel.x << ", " << laserFluidVel.y;
-
 		std::pair<int, int> xy;
 
 		for (int y = 0; y < chunk->m_height; y++)
@@ -173,7 +200,7 @@ struct GameLayer : iw::Layer
 
 			if (x > 12 && x < 20)
 			{
-				chunk->GetCell(x, y).dx = laserFluidVel.x * .5;
+				chunk->GetCell(x, y).dx = 0;
 				chunk->GetCell(x, y).dy = -2;
 			}
 		}
@@ -209,8 +236,6 @@ struct GameLayer : iw::Layer
 			}
 		}
 
-		LOG_INFO << laserFluidToRemove << " " << laserFluidCount;
-
 		if (laserFluidCount == 0)
 		{
 			laserFluidToRemove = 0;
@@ -223,11 +248,27 @@ struct GameLayer : iw::Layer
 	// could put in own system
 	bool On(iw::ActionEvent& e) override
 	{
-		if (e.Action == CHANGE_LASER_FLUID)
+		switch (e.Action)
 		{
-			ChangeLaserFluid_Event& event = e.as<ChangeLaserFluid_Event>();
-			if (event.Amount > 0) laserFluidToCreate +=  event.Amount;
-			if (event.Amount < 0) laserFluidToRemove += -event.Amount;
+			case CHANGE_LASER_FLUID:
+			{
+				ChangeLaserFluid_Event& event = e.as<ChangeLaserFluid_Event>();
+				if (event.Amount > 0) laserFluidToCreate +=  event.Amount;
+				if (event.Amount < 0) laserFluidToRemove += -event.Amount;
+				
+				break;
+			}
+
+			case PROJ_HIT_TILE:
+			{
+				ProjHitTile_Event& event = e.as<ProjHitTile_Event>();
+				if (event.Hit.Has<Player>())
+				{
+					uiJitterAmount = 75;
+				}
+
+				break;
+			}
 		}
 
 		return Layer::On(e);
@@ -256,8 +297,17 @@ struct GameLayer : iw::Layer
 
 		float c_menu_height = height * .2;                    // 200px height
 		float c_menu_position_y = -height + c_menu_height;  // fixed to bottom of screen
+		float c_menu_position_x = 0;
+		
+		// damage jitter
 
-		float c_game_height     = -c_menu_position_y;       // fill rest of screen height
+		c_menu_position_x += iw::randf() * uiJitterAmount;
+		c_menu_position_y += iw::randf() * uiJitterAmount;
+		uiJitterAmount = iw::lerp(uiJitterAmount, 0.f, iw::DeltaTime() * 10);
+
+		// end damage jitter
+
+		float c_game_height     = height - c_menu_height;       // fill rest of screen height
 		float c_game_width      = c_game_height;			// keep width 1:1 ratio
 		float c_game_position_y = c_menu_height;			// centered in rest of space
 		float c_menu_width      = c_game_width;			    // menu width = game width
@@ -267,13 +317,14 @@ struct GameLayer : iw::Layer
 		glm::vec2 health_dim = player.Find<iw::Tile>()->m_sprite.Dimensions();
 		float c_health_aspect = health_dim.x / health_dim.y;
 
-		float c_health_position_y = c_menu_position_y; // health is v-centered in menu
-		float c_health_height = c_menu_height - c_menu_padding * 2;		// center has padding on both sides
-		float c_health_width = c_health_height * c_health_aspect;	// keep width to aspect of texture
+		float c_health_position_x = c_menu_position_x; // health is centered in menu
+		float c_health_position_y = c_menu_position_y;
+		float c_health_height = c_menu_height - c_menu_padding * 2;  // center has padding on both sides
+		float c_health_width  = c_health_height * c_health_aspect;	 // keep width to aspect of texture
 
 		float c_laser_height = c_menu_height - c_menu_padding * 2;
 		float c_laser_width  = c_laser_height;
-		float c_laser_position_x = -c_menu_width + c_laser_width + c_menu_padding * 2;
+		float c_laser_position_x = c_menu_position_x - c_menu_width + c_laser_width + c_menu_padding * 2;
 		float c_laser_position_y = c_menu_position_y;
 
 		// SCALING
@@ -284,10 +335,12 @@ struct GameLayer : iw::Layer
 
 		float menu_scale_x    = c_menu_width      / width;
 		float menu_scale_y    = c_menu_height     / height;
+		float menu_position_x = c_menu_position_x / width;
 		float menu_position_y = c_menu_position_y / height;
 
 		float health_scale_x    = c_health_width      / width;
 		float health_scale_y    = c_health_height     / height;
+		float health_position_x = c_health_position_x / width;
 		float health_position_y = c_health_position_y / height;
 
 		float laser_scale_x    = c_laser_width      / width;
@@ -301,6 +354,7 @@ struct GameLayer : iw::Layer
 		sandTransform.Scale   .y = game_scale_y;
 
 		iw::Transform uiPlayerTransform;
+		uiPlayerTransform.Position.x = health_position_x;
 		uiPlayerTransform.Position.y = health_position_y;
 		uiPlayerTransform.Scale   .x = health_scale_x;
 		uiPlayerTransform.Scale   .y = health_scale_y;
@@ -313,6 +367,7 @@ struct GameLayer : iw::Layer
 
 		iw::Transform uiBackgroundTransform;
 		uiBackgroundTransform.Position.z = -1;
+		uiBackgroundTransform.Position.x = menu_position_x;
 		uiBackgroundTransform.Position.y = menu_position_y;
 		uiBackgroundTransform.Scale   .x = menu_scale_x;
 		uiBackgroundTransform.Scale   .y = menu_scale_y;
@@ -323,6 +378,7 @@ struct GameLayer : iw::Layer
 		Renderer->DrawMesh(uiPlayerTransform, ui_player);
 		Renderer->DrawMesh(uiBackgroundTransform, ui_background);
 		Renderer->DrawMesh(uiLaserChargeTransform, sand_ui_laserCharge->GetSandMesh());
+		Renderer->DrawMesh(iw::Transform(), ui_score);
 		Renderer->EndScene();
 
 		Renderer->BeginScene();
@@ -375,12 +431,12 @@ int App::Initialize(
 iw::Application* CreateApplication(
 	iw::InitOptions& options)
 {
-	//options.AssetRootPath = "assets/";
+	options.AssetRootPath = "C:/dev/wEngine/_assets/";
 
 	options.WindowOptions = iw::WindowOptions {
 		800,
 		1000,
-		true,
+		false,
 		iw::DisplayState::NORMAL
 	};
 

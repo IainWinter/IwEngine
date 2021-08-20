@@ -23,8 +23,7 @@ namespace Physics {
 
 			glm::vec3 correction = manifold.Normal * percent
 				* fmax(manifold.PenetrationDepth - slop, 0.0f)
-				/ (aInvMass + bInvMass)
-				/ 2.f;
+				/ (aInvMass + bInvMass);
 		
 			glm::vec3 deltaA;
 			glm::vec3 deltaB;

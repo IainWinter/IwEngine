@@ -28,8 +28,8 @@ struct PlayerSystem : iw::SystemBase
 		iw::Circle*    c = player.Find<iw::Circle>();
 		iw::Rigidbody* r = player.Find<iw::Rigidbody>();
 
-		p->timer.SetTime("fire1", 0.15f);
-		p->timer.SetTime("fire2", 0.005f);
+		p->timer.SetTime("fire1", 0.15f/3);
+		p->timer.SetTime("fire2", 0.01f);
 
 		c->Radius = 4;
 
@@ -39,4 +39,6 @@ struct PlayerSystem : iw::SystemBase
 
 	void FixedUpdate() override;
 	void Update() override;
+
+	bool On(iw::ActionEvent& e) override;
 };

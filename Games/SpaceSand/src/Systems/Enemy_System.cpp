@@ -45,11 +45,15 @@ void EnemySystem::SpawnEnemy(SpawnEnemy_Event& config)
 	iw::Transform* t = e.Set<iw::Transform>();
 	iw::Rigidbody* r = e.Set<iw::Rigidbody>();
 
+	t->Position.x = config.SpawnLocationX;
+	t->Position.y = config.SpawnLocationY;
+
+	r->SetTransform(t);
+
 	EnemyShip* s = e.Set<EnemyShip>();
 	Flocker*   f = e.Set<Flocker>();
 
 	s->Timer.SetTime("shoot", 1, 1);
-
 	s->ShootAt = config.ShootAt;
 
 	f->Target.x = config.TargetLocationX;
