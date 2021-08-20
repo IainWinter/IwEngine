@@ -49,7 +49,7 @@ int SandLayer::Initialize() {
 
 	Cell _WATER = {
 		CellType::WATER,
-		/*CellProp::MOVE_FORCE | */CellProp::MOVE_DOWN | CellProp::MOVE_SIDE,
+		CellProp::MOVE_FORCE | CellProp::MOVE_DOWN | CellProp::MOVE_SIDE,
 		CellStyle::SHIMMER,
 		Color::From255(175, 200, 235),
 		Color::From255(25, 25, 25, 0)
@@ -371,8 +371,6 @@ void SandLayer::EjectPixel(
 	// to fix, maybe could remove pixels in a scaled square around index?
 
 	// place ejected pixel into world
-
-	if (tile->m_initalCellCount == 0) return; // temp hack to fix left behind pixels from tiles
 
 	tile->RemovePixel(index);
 }

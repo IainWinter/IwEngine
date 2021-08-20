@@ -2,17 +2,10 @@
 
 IW_PLUGIN_SAND_BEGIN
 
-SandWorker::SandWorker(
-	SandWorld& world,
-	SandChunk* chunk)
-	: m_world(world)
-	, m_chunk(chunk)
-{}
-
 // Updating cells
 
-void SandWorker::UpdateChunk() {
-
+void SandWorker::UpdateChunk() 
+{
 	Cell* cells = m_chunk->GetField(SandField::CELL).GetCells<Cell>();
 
 	bool forwardX = true;

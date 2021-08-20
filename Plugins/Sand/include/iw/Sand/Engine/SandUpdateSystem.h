@@ -12,7 +12,8 @@ class SandWorldUpdateSystem
 private:
 	SandWorld* m_world;
 public:
-	float m_sx, m_sy; // Cells per meter
+	float m_sx, m_sy;  // Cells per meter
+	float m_deltaTime; // Gets set in SandLayer::UpdateSystems
 
 public:
 	SandWorldUpdateSystem(
@@ -20,6 +21,7 @@ public:
 	)
 		: SystemBase("Sand World Update")
 		, m_world(world)
+		, m_deltaTime(0.f)
 	{
 		SetCameraScale(1, 1);
 	}

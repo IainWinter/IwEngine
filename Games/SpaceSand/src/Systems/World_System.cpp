@@ -14,7 +14,7 @@ int x = 0;
 
 void WorldSystem::FixedUpdate()
 {
-	//m_timer.TickFixed();
+	m_timer.TickFixed();
 
 	if (m_timer.Can("spawn_enemy"))
 	{

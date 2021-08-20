@@ -46,7 +46,7 @@ void PlayerSystem::Update()
 	if (   p->i_fire1 
 		&& p->timer.Can("fire1"))
 	{
-		auto [x, y, dx, dy] = GetShot(t->Position.x, t->Position.y, sand->sP.x, sand->sP.y, 1000, 10, 2);
+		auto [x, y, dx, dy] = GetShot(t->Position.x, t->Position.y, sand->sP.x, sand->sP.y, 1250, 10, 2);
 
 		//dx += iw::randf() * 100;
 		//dy += iw::randf() * 100;

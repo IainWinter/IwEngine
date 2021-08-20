@@ -45,7 +45,7 @@ void SandWorldUpdateSystem::Update() {
 
 	doForAllChunks([&](iw::SandChunk* chunk) {
 		for (SandWorkerBuilderBase* builder : m_world->m_workers) {
-			builder->MakeWorker(*m_world, chunk)->UpdateChunk();
+			builder->MakeWorker(*m_world, chunk, m_deltaTime)->UpdateChunk();
 		}
 	});
 

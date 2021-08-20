@@ -130,6 +130,7 @@ struct GameLayer : iw::Layer
 	int laserFluidToCreate = 0;
 	int laserFluidToRemove = 0;
 	int laserFluidCount = 0;
+	glm::vec3 laserFluidVel = glm::vec3(0.f);
 
 	void Update() override { // this is one frame behind, add a callback to the sand layer that gets called at the right time, right after rendering the world...
 		iw::Texture& playerSprite = player.Find<iw::Tile>()->m_sprite;
@@ -155,13 +156,35 @@ struct GameLayer : iw::Layer
 
 		uiPlayerTex.Update(Renderer->Device);
 
+		iw::SandChunk* chunk = sand_ui_laserCharge->m_world->GetChunk(0, 0);
+
+		laserFluidVel = iw::lerp(laserFluidVel, player.Find<iw::Rigidbody>()->Velocity, iw::DeltaTime() * 5);
+
+		LOG_INFO << laserFluidVel.x << ", " << laserFluidVel.y;
+
+		std::pair<int, int> xy;
+
+		for (int y = 0; y < chunk->m_height; y++)
+		for (int x = 0; x < chunk->m_width;  x++)
+		{
+			chunk->KeepAlive(x, y);
+			chunk->GetCell(x, y).dx = laserFluidVel.x;
+			chunk->GetCell(x, y).dy = laserFluidVel.y;
+
+			if (x > 12 && x < 20)
+			{
+				chunk->GetCell(x, y).dx = laserFluidVel.x * .5;
+				chunk->GetCell(x, y).dy = -2;
+			}
+		}
+
 		if (laserFluidToCreate > 0)
 		{
 			iw::Cell laserFluid = iw::Cell::GetDefault(iw::CellType::WATER);
 			laserFluid.Color = iw::Color::From255(255, 38, 38);
 
 			auto [w, h] = sand_ui_laserCharge->GetSandTexSize();
-			int x = w / 2;
+			int x = 0/*w / 2*/;
 			int y = h - 1;
 
 			if (sand_ui_laserCharge->m_world->IsEmpty(x, y))
@@ -352,7 +375,7 @@ int App::Initialize(
 iw::Application* CreateApplication(
 	iw::InitOptions& options)
 {
-	//options.AssetRootPath = "C:/dev/wEngine/_assets/";
+	//options.AssetRootPath = "assets/";
 
 	options.WindowOptions = iw::WindowOptions {
 		800,

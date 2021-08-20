@@ -185,7 +185,12 @@ iw::Entity ProjectileSystem::MakeProjectile(
 				{
 					if (tile->m_zIndex == zIndex)
 					{
-						sand->EjectPixel(tile, index);
+						if (tile->m_initalCellCount != 0) // temp hack to fix left behind pixels from tiles
+						{
+							sand->EjectPixel(tile, index);
+							Space->FindEntity<iw::Tile>(tile).Find<iw::Rigidbody>()->Velocity += glm::vec3(dx, dy, 0);
+						}
+
 						hit = true;
 						tile = nullptr;
 						index = 0;

@@ -5,9 +5,16 @@
 
 IW_PLUGIN_SAND_BEGIN
 
-class SimpleSandWorker : public SandWorker {
-public:
-	IW_PLUGIN_SAND_API SimpleSandWorker(SandWorld& world, SandChunk* chunk);
+struct SimpleSandWorker
+	: SandWorker
+{
+	SimpleSandWorker::SimpleSandWorker(
+		SandWorld& world,
+		SandChunk* chunk,
+		float dt
+	)
+		: SandWorker(world, chunk, dt)
+	{}
 
 	IW_PLUGIN_SAND_API void UpdateCell(int x, int y, Cell& cell) override;
 private:
@@ -22,8 +29,8 @@ template<>
 struct SandWorkerBuilder<SimpleSandWorker>
 	: SandWorkerBuilderBase
 {
-	ref<SandWorker> MakeWorker(SandWorld& world, SandChunk* chunk) {
-		return REF<SimpleSandWorker>(world, chunk);
+	ref<SandWorker> MakeWorker(SandWorld& world, SandChunk* chunk, float dt) {
+		return REF<SimpleSandWorker>(world, chunk, dt);
 	}
 };
 

@@ -9,9 +9,18 @@ class SandWorker {
 protected:
 	SandWorld& m_world;
 	SandChunk* m_chunk;
+	float dt;
 
 public:
-	IW_PLUGIN_SAND_API SandWorker(SandWorld& world, SandChunk* chunk);
+	SandWorker::SandWorker(
+		SandWorld& world,
+		SandChunk* chunk,
+		float dt
+	)
+		: m_world(world)
+		, m_chunk(chunk)
+		, dt(dt)
+	{}
 
 	IW_PLUGIN_SAND_API void UpdateChunk();
 
@@ -37,7 +46,7 @@ public:
 };
 
 struct SandWorkerBuilderBase {
-	virtual ref<SandWorker> MakeWorker(SandWorld& world, SandChunk* chunk) = 0;
+	virtual ref<SandWorker> MakeWorker(SandWorld& world, SandChunk* chunk, float dt) = 0;
 };
 
 template<typename _t>

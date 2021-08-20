@@ -112,6 +112,7 @@ public:
 		m_updateDelayTimer += iw::DeltaTime();
 		if (m_updateDelayTimer > m_updateDelay)
 		{
+			m_update->m_deltaTime = m_updateDelayTimer;
 			m_updateDelayTimer = 0.0f;
 			Layer::UpdateSystems();
 		}
