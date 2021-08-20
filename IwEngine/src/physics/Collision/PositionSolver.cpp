@@ -10,10 +10,10 @@ namespace Physics {
 			CollisionObject* aBody = manifold.ObjA;
 			CollisionObject* bBody = manifold.ObjB;
 
-			glm::vec3 resolution = manifold.Normal * manifold.PenetrationDepth;
+			iw::_vec<d3> resolution = manifold.Normal * manifold.PenetrationDepth / scalar(2);
 
-			aBody->Transform.Position -= resolution * float(1 - (int)aBody->IsStatic);
-			bBody->Transform.Position += resolution * float(1 - (int)bBody->IsStatic);
+			aBody->Transform.Position -= resolution * scalar(1 - (int)aBody->IsStatic);
+			bBody->Transform.Position += resolution * scalar(1 - (int)bBody->IsStatic);
 		}
 	}
 }
