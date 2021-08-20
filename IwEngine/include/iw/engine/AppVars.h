@@ -29,6 +29,7 @@
 					Audio    = vars.Audio;	 \
 					Asset    = vars.Asset;	 \
 					Console  = vars.Console;	 \
+					Input    = vars.Input;	 \
 					Physics  = vars.Physics;	 \
 					Renderer = vars.Renderer; \
 					Space    = vars.Space;	 \

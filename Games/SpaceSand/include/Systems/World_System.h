@@ -9,6 +9,7 @@
 #include "Components/Flocker.h"
 
 #include "Events.h"
+#include "Levels.h"
 
 struct WorldSystem : iw::SystemBase
 {
@@ -16,6 +17,8 @@ struct WorldSystem : iw::SystemBase
 	iw::Entity m_player;
 
 	iw::Timer m_timer;
+
+	std::vector<iw::EventSequence> m_levels;
 
 	WorldSystem(
 		iw::SandLayer* sand,
@@ -27,5 +30,6 @@ struct WorldSystem : iw::SystemBase
 	{}
 
 	int Initialize() override;
+	void Update() override;
 	void FixedUpdate() override;
 };

@@ -39,4 +39,6 @@ struct PlayerSystem : iw::SystemBase
 
 	void FixedUpdate() override;
 	void Update() override;
+
+	bool On(iw::ActionEvent& e) override;
 };

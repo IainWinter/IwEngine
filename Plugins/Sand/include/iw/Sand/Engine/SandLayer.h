@@ -155,7 +155,7 @@ public:
 
 	void SetCamera(
 		float x,  float y,
-		float xs, float ys)
+		float xs = 1.f, float ys = 1.f) // not sure if scale is even needed anymore...?
 	{
 		auto [width, height] = GetSandTexSize2();
 

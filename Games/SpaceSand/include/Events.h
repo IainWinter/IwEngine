@@ -9,21 +9,28 @@ enum Actions {
 	SPAWN_PROJECTILE,
 	SPAWN_ITEM,
 	CHANGE_LASER_FLUID,
+	HEAL_PLAYER
 };
 
 struct SpawnEnemy_Event : iw::SingleEvent
 {
 	iw::Entity ShootAt;
+	float SpawnLocationX;
+	float SpawnLocationY;
 	float TargetLocationX;
 	float TargetLocationY;
 
 	SpawnEnemy_Event(
 		iw::Entity shootAt,
+		float spawnLocationX,
+		float spawnLocationY,
 		float targetLocationX,
 		float targetLocationY
 	)
 		: iw::SingleEvent(SPAWN_ENEMY)
 		, ShootAt(shootAt)
+		, SpawnLocationX(spawnLocationX)
+		, SpawnLocationY(spawnLocationY)
 		, TargetLocationX(targetLocationX)
 		, TargetLocationY(targetLocationY)
 	{}
@@ -88,5 +95,12 @@ struct ChangeLaserFluid_Event : iw::SingleEvent
 	)
 		: iw::SingleEvent(CHANGE_LASER_FLUID)
 		, Amount(amount)
+	{}
+};
+
+struct HealPlayer_Event : iw::SingleEvent
+{
+	HealPlayer_Event()
+		: iw::SingleEvent(HEAL_PLAYER)
 	{}
 };

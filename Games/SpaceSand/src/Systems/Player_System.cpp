@@ -67,3 +67,16 @@ void PlayerSystem::Update()
 		Bus->push<ChangeLaserFluid_Event>(-1);
 	}
 }
+
+bool PlayerSystem::On(iw::ActionEvent& e)
+{
+	switch (e.Action) {
+		case HEAL_PLAYER: 
+		{
+			player.Find<iw::Tile>()->ReinstateRandomPixel();
+			break;
+		}
+	}
+
+	return false;
+}
