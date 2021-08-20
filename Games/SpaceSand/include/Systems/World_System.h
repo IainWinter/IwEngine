@@ -32,4 +32,6 @@ struct WorldSystem : iw::SystemBase
 	int Initialize() override;
 	void Update() override;
 	void FixedUpdate() override;
+
+	bool On(iw::ActionEvent& e) override;
 };

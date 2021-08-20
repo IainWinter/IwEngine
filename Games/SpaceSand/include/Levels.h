@@ -28,12 +28,14 @@ struct Spawn : iw::EventTask
 {
 	std::vector<iw::AABB2> Areas;
 	int NumberLeftToSpawn;
+	int RandBatchSpawn;
 	iw::Timer Timer;
 
 	std::function<void(float, float)> func_Spawn;
 
 	Spawn(
 		int numberToSpawn,
+		int randBatchSpawn,
 		float timeBetweenSpawn,
 		float randBetweenSpawn,
 		std::function<void(int, int)> spawn,
@@ -41,6 +43,7 @@ struct Spawn : iw::EventTask
 	)
 		: iw::EventTask()
 		, NumberLeftToSpawn(numberToSpawn)
+		, RandBatchSpawn(randBatchSpawn)
 		, func_Spawn(spawn)
 		, Areas(areas)
 	{
@@ -57,13 +60,16 @@ struct Spawn : iw::EventTask
 		Timer.Tick();
 		if (Timer.Can("spawn") && Areas.size() > 0)
 		{
-			auto [min, max] = Areas.at(iw::randi(Areas.size() - 1));
-			float x = min.x + (max.x - min.x) * iw::randf();
-			float y = min.y + (max.y - min.y) * iw::randf();
+			for (int i = 0; i < iw::min(iw::randi(RandBatchSpawn) + 1, NumberLeftToSpawn); i++)
+			{
+				auto [min, max] = Areas.at(iw::randi(Areas.size() - 1));
+				float x = min.x + (max.x - min.x) * iw::randf();
+				float y = min.y + (max.y - min.y) * iw::randf();
 
-			func_Spawn(x, y);
+				func_Spawn(x, y);
 
-			NumberLeftToSpawn -= 1;
+				NumberLeftToSpawn -= 1;
+			}
 		}
 
 		return NumberLeftToSpawn == 0;

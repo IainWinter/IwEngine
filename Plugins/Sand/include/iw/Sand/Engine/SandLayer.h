@@ -13,7 +13,10 @@
 
 IW_PLUGIN_SAND_BEGIN
 
-using TileInfo = std::pair<Tile*, unsigned>; // tile, index
+struct TileInfo {
+	Tile* tile;
+	unsigned index;
+};
 
 class SandLayer
 	: public Layer

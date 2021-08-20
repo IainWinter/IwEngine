@@ -5,7 +5,7 @@ int WorldSystem::Initialize()
 	auto [w, h] = sand->GetSandTexSize();
 	sand->SetCamera(w / 2, h / 2);
 
-	Spawn spawn(5, 1.f, .2f, [=](float x, float y)
+	Spawn spawn(20, 4, 5.f, 3.f, [=](float x, float y)
 	{
 		auto [w, h] = sand->GetSandTexSize();
 		float margin = .1f;
@@ -18,19 +18,29 @@ int WorldSystem::Initialize()
 	spawn.AddSpawn(0, h + 10, w, h + 20);
 	spawn.AddSpawn(0,   - 10, w,   - 20);
 
-	Fill fill([=](int x, int y) 
-	{
-		sand->m_world->SetCell(x, y, iw::Cell::GetDefault(iw::CellType::ROCK));
-	});
-	fill.AddFill(0, h - 100, w, h - 120, Fill::LEFT_RIGHT);
-	fill.AddFill(0,     100, w,     120, Fill::LEFT_RIGHT);
-	fill.AddFill(w - 100, 0, w - 120, h);
-	fill.AddFill(    100, 0,     120, h);
+	//Fill fillTicTacToe([=](int x, int y) 
+	//{
+	//	sand->m_world->SetCell(x, y, iw::Cell::GetDefault(iw::CellType::ROCK));
+	//});
+	//fillTicTacToe.AddFill(0, h - 100, w, h - 120, Fill::LEFT_RIGHT);
+	//fillTicTacToe.AddFill(0,     100, w,     120, Fill::LEFT_RIGHT);
+	//fillTicTacToe.AddFill(w - 100, 0, w - 120, h);
+	//fillTicTacToe.AddFill(    100, 0,     120, h);
+
+	//Fill fillBoarder([=](int x, int y) 
+	//{
+	//	sand->m_world->SetCell(x, y, iw::Cell::GetDefault(iw::CellType::ROCK));
+	//});
+	//fillBoarder.AddFill(0, h - 10,  w,  h, Fill::LEFT_RIGHT);
+	//fillBoarder.AddFill(0,      0,  w, 10, Fill::LEFT_RIGHT);
+	//fillBoarder.AddFill(w - 10, 0,  w,  h);
+	//fillBoarder.AddFill(0,      0, 10,  h);
 
 	iw::EventSequence& level1 = m_levels.emplace_back(CreateSequence());
 
+	//level1.Add<Fill>(fillBoarder);
 	level1.Add<Spawn>(spawn);
-	level1.Add<Fill>(fill);
+
 	level1.Add([&]() {
 		m_levels.pop_back();
 		return true;
@@ -75,6 +85,18 @@ void WorldSystem::FixedUpdate()
 				int amount = iw::randi(5) + 1;
 				Bus->push<SpawnItem_Event>(transform->Position.x, transform->Position.y, amount, itemType);
 
+				iw::Cell smoke = iw::Cell::GetDefault(iw::CellType::SMOKE);
+
+				for (int y = -5; y < 5; y++)
+				for (int x = -5; x < 5; x++)
+				{
+					int px = x + transform->Position.x;
+					int py = y + transform->Position.y;
+					smoke.life = iw::randf() * 5;
+
+					sand->m_world->SetCell(px, py, smoke);
+				}
+
 				Space->QueueEntity(entity, iw::func_Destroy);
 			}
 		});
@@ -103,4 +125,22 @@ void WorldSystem::FixedUpdate()
 			x++;
 		}
 	}
+}
+
+bool WorldSystem::On(iw::ActionEvent& e)
+{
+	switch (e.Action)
+	{
+		case PROJ_HIT_TILE:
+		{
+			ProjHitTile_Event& event = e.as<ProjHitTile_Event>();
+
+			sand->EjectPixel(event.Info.tile, event.Info.index);
+			event.Hit.Find<iw::Rigidbody>()->Velocity += event.Projectile.Find<iw::Rigidbody>()->Velocity;
+
+			break;
+		}
+	}
+
+	return false;
 }

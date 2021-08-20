@@ -9,7 +9,8 @@ enum Actions {
 	SPAWN_PROJECTILE,
 	SPAWN_ITEM,
 	CHANGE_LASER_FLUID,
-	HEAL_PLAYER
+	HEAL_PLAYER,
+	PROJ_HIT_TILE
 };
 
 struct SpawnEnemy_Event : iw::SingleEvent
@@ -102,5 +103,23 @@ struct HealPlayer_Event : iw::SingleEvent
 {
 	HealPlayer_Event()
 		: iw::SingleEvent(HEAL_PLAYER)
+	{}
+};
+
+struct ProjHitTile_Event : iw::SingleEvent
+{
+	iw::TileInfo Info;
+	iw::Entity Hit;
+	iw::Entity Projectile;
+	
+	ProjHitTile_Event(
+		iw::TileInfo info,
+		iw::Entity hit,
+		iw::Entity proj
+	)
+		: iw::SingleEvent(PROJ_HIT_TILE)
+		, Info(info)
+		, Hit(hit)
+		, Projectile(proj)
 	{}
 };

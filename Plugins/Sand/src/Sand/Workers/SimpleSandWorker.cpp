@@ -4,6 +4,19 @@ IW_PLUGIN_SAND_BEGIN
 
 void SimpleSandWorker::UpdateCell(int x, int y, Cell& cell) 
 {
+	if (cell.life != -1)
+	{
+		cell.life -= dt;
+		if (cell.life < 0.f)
+		{
+			SetCell(x, y, iw::Cell::GetDefault(iw::CellType::EMPTY));
+		}
+
+		else {
+			KeepAlive(x, y);
+		}
+	}
+
 	     if (cell.Props & CellProp::MOVE_FORCE     && MoveForce   (x, y, cell)) {}
 	else if (cell.Props & CellProp::MOVE_DOWN      && MoveDown    (x, y, cell)) {}
 	else if (cell.Props & CellProp::MOVE_DOWN_SIDE && MoveDownSide(x, y, cell)) {}

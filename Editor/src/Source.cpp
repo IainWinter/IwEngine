@@ -40,8 +40,8 @@ private:
 	iw::Layer* toolbox = nullptr;
 	iw::Layer* sandbox = nullptr;
 
-	std::wstring projectName          = L"PhysicsProject";
-	std:: string projectMainLayerName =  "Test";
+	std::wstring projectName          = L"SpaceSand";
+	std:: string projectMainLayerName =  "Space game";
 
 public:
 	iw::Application* m_gameNew = nullptr;
@@ -70,13 +70,13 @@ public:
 		std::wstringstream buf;
 
 #ifdef IW_DEBUG
-		buf << L"C:/dev/IwEngine/Games/";
+		buf << L"C:/dev/wEngine/Games/";
 		buf << projectName;
-		buf << "/bin/Debug.windows.x86_64/";
+		buf << L"/bin/Debug.windows.x86_64/";
 		buf << projectName;
-		buf << ".dll";
+		buf << L".dll";
 #else
-		buf << L"C:/dev/IwEngine/Games/";
+		buf << L"C:/dev/wEngine/Games/";
 		buf << projectName;
 		buf << "/bin/Release.windows.x86_64/";
 		buf << projectName;
