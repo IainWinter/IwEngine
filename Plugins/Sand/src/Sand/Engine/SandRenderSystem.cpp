@@ -25,10 +25,11 @@ int SandWorldRenderSystem::Initialize() {
 	}
 
 	m_texture = REF<Texture>(width, height, TEX_2D, RGBA);
+	m_texture->m_wrap = iw::TextureWrap::EDGE;
 	m_texture->SetFilter(NEAREST);
 	m_texture->CreateColors();
 	m_texture->Clear();
-	
+
 	ref<Material> material = REF<Material>(shader);
 	material->SetTexture("texture", m_texture);
 	material->Set("useAlpha", (int)1);

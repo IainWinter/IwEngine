@@ -16,6 +16,8 @@ IW_PLUGIN_SAND_BEGIN
 struct TileInfo {
 	Tile* tile;
 	unsigned index;
+	bool operator==(const TileInfo& other) const { return tile == other.tile && index == other.index; }
+	bool operator!=(const TileInfo& other) const { return !operator==(other); }
 };
 
 class SandLayer

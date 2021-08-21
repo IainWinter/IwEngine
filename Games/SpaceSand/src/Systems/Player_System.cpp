@@ -49,8 +49,8 @@ void PlayerSystem::Update()
 		auto [x, y, dx, dy] = GetShot(t->Position.x, t->Position.y, sand->sP.x, sand->sP.y, 1250/4, 10, 2);
 
 		float speed = sqrt(dx*dx+dy*dy);
-		dx += iw::randf() * speed * .05;
-		dy += iw::randf() * speed * .05;
+		dx += iw::randf() * speed * .05f;
+		dy += iw::randf() * speed * .05f;
 		
 		Bus->push<SpawnProjectile_Event>(x, y, dx, dy, SpawnProjectile_Event::BULLET);
 	}

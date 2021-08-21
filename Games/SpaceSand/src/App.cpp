@@ -97,6 +97,7 @@ struct GameLayer : iw::Layer
 
 			iw::ref<iw::Texture> tex = Asset->Load<iw::Texture>("textures/SpaceGame/ui_background.png");
 			tex->SetFilter(iw::NEAREST);
+			tex->m_wrap = iw::TextureWrap::EDGE;
 			iw::ref<iw::Material> mat = matp->MakeInstance();
 			mat->SetTexture("texture", tex);
 			Renderer->Now->InitShader(mat->Shader, iw::CAMERA);
@@ -105,7 +106,7 @@ struct GameLayer : iw::Layer
 			ui_background.Material = mat;
 		}
 
-		{ // font
+		if(false){ // font
 			iw::ref<iw::Material> fontMat = REF<iw::Material>(
 				Asset->Load<iw::Shader>("shaders/font.shader")
 			);
@@ -129,19 +130,40 @@ struct GameLayer : iw::Layer
 		// more temp ui
 
 		{ // laser fluid box
+			iw::SandChunk* chunk = sand_ui_laserCharge->m_world->GetChunk(0, 0); // only 1 chunk in this
 			auto [w, h] = sand_ui_laserCharge->GetSandTexSize();
+			
+			std::vector<int> widths = {
+				2, 2, 
+				4, 
+				6, 
+				12, 
+				24, 
+				30, 
+				34, 
+				38, 38, 38,
+				40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40,
+				38, 38, 38,
+				36, 36,
+				34,
+				30,
+				24
+			};
+
 			for (int y = 0; y < h; y++)
 			for (int x = 0; x < w; x++)
 			{
-				iw::Cell c = iw::Cell::GetDefault(iw::CellType::ROCK);
-				sand_ui_laserCharge->m_world->SetCell(x, y, c);
+				chunk->SetCell(x, y, true, iw::SandField::SOLID);
 			}
 
-			for (int y = 0;         y <  h;         y++)
-			for (int x = w / 2 - y; x <= w / 2 + y; x++)
+			for (int y = 0; y < widths.size(); y++)
 			{
-				iw::Cell c = iw::Cell::GetDefault(iw::CellType::EMPTY);
-				sand_ui_laserCharge->m_world->SetCell(x, y, c);
+				int yw = widths[y] / 2;
+
+				for (int x = w/2 - yw; x < w/2 + yw; x++)
+				{
+					chunk->SetCell(x, y, false, iw::SandField::SOLID);
+				}
 			}
 		}
 
@@ -211,8 +233,8 @@ struct GameLayer : iw::Layer
 			laserFluid.Color = iw::Color::From255(255, 38, 38);
 
 			auto [w, h] = sand_ui_laserCharge->GetSandTexSize();
-			int x = 0/*w / 2*/;
-			int y = h - 1;
+			int x = w / 2;
+			int y = h - 5;
 
 			if (sand_ui_laserCharge->m_world->IsEmpty(x, y))
 			{
@@ -265,6 +287,7 @@ struct GameLayer : iw::Layer
 				if (event.Hit.Has<Player>())
 				{
 					uiJitterAmount = 75;
+
 				}
 
 				break;
@@ -295,14 +318,14 @@ struct GameLayer : iw::Layer
 		float width  = Renderer->Width();
 		float height = Renderer->Height();
 
-		float c_menu_height = height * .2;                    // 200px height
+		float c_menu_height = floor(height * .2);                    // 200px height
 		float c_menu_position_y = -height + c_menu_height;  // fixed to bottom of screen
 		float c_menu_position_x = 0;
 		
 		// damage jitter
 
-		c_menu_position_x += iw::randf() * uiJitterAmount;
-		c_menu_position_y += iw::randf() * uiJitterAmount;
+		c_menu_position_x += floor(iw::randf() * uiJitterAmount); // should this be symmetric or only top left?
+		c_menu_position_y += floor(iw::randf() * uiJitterAmount);
 		uiJitterAmount = iw::lerp(uiJitterAmount, 0.f, iw::DeltaTime() * 10);
 
 		// end damage jitter
@@ -312,7 +335,7 @@ struct GameLayer : iw::Layer
 		float c_game_position_y = c_menu_height;			// centered in rest of space
 		float c_menu_width      = c_game_width;			    // menu width = game width
 
-		float c_menu_padding = c_menu_height * .1;
+		float c_menu_padding = floor(c_menu_height * .1);
 
 		glm::vec2 health_dim = player.Find<iw::Tile>()->m_sprite.Dimensions();
 		float c_health_aspect = health_dim.x / health_dim.y;
@@ -326,6 +349,8 @@ struct GameLayer : iw::Layer
 		float c_laser_width  = c_laser_height;
 		float c_laser_position_x = c_menu_position_x - c_menu_width + c_laser_width + c_menu_padding * 2;
 		float c_laser_position_y = c_menu_position_y;
+
+		LOG_INFO << c_laser_position_x << ", " << c_laser_position_y << "  :::  " << c_laser_position_x / 42.f << ", " << c_laser_position_y / 42.f;
 
 		// SCALING
 
@@ -378,7 +403,7 @@ struct GameLayer : iw::Layer
 		Renderer->DrawMesh(uiPlayerTransform, ui_player);
 		Renderer->DrawMesh(uiBackgroundTransform, ui_background);
 		Renderer->DrawMesh(uiLaserChargeTransform, sand_ui_laserCharge->GetSandMesh());
-		Renderer->DrawMesh(iw::Transform(), ui_score);
+		//Renderer->DrawMesh(iw::Transform(), ui_score);
 		Renderer->EndScene();
 
 		Renderer->BeginScene();
@@ -396,7 +421,7 @@ App::App() : iw::Application()
 	iw::SandLayer* sand = new iw::SandLayer(cellSize, cellMeter, 800, 800, 4, 4, drawWithMouse);
 
 	// UI charge as liquid in a tank?
-	iw::SandLayer* sand_ui_laser = new iw::SandLayer(cellSize, cellMeter, 64, 64);
+	iw::SandLayer* sand_ui_laser = new iw::SandLayer(1, 1, 42, 42);
 	
 	sand_ui_laser->m_updateDelay = .016f;
 
@@ -431,12 +456,12 @@ int App::Initialize(
 iw::Application* CreateApplication(
 	iw::InitOptions& options)
 {
-	options.AssetRootPath = "C:/dev/wEngine/_assets/";
+	options.AssetRootPath = "C:/dev/IwEngine/_assets/";
 
 	options.WindowOptions = iw::WindowOptions {
 		800,
 		1000,
-		false,
+		true,
 		iw::DisplayState::NORMAL
 	};
 

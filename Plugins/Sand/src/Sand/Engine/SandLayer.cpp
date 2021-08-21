@@ -331,9 +331,9 @@ void SandLayer::PasteTiles()
 				return;
 			}
 
-			chunk->SetCell_unsafe(x, y, colors[index],         SandField::COLOR);
-			chunk->SetCell_unsafe(x, y, true,                  SandField::SOLID);
-			chunk->SetCell_unsafe(x, y, TileInfo(tile, index), SandField::TILE_INFO);
+			chunk->SetCell_unsafe(x, y, colors[index],            SandField::COLOR);
+			chunk->SetCell_unsafe(x, y, true,                     SandField::SOLID);
+			chunk->SetCell_unsafe(x, y, TileInfo { tile, index }, SandField::TILE_INFO);
 		}
 	);
 }
@@ -356,9 +356,9 @@ void SandLayer::RemoveTiles()
 				continue;
 			}
 
-			chunk->SetCell_unsafe(x, y, 0u,                    SandField::COLOR);
-			chunk->SetCell_unsafe(x, y, false,                 SandField::SOLID);
-			chunk->SetCell_unsafe(x, y, TileInfo(nullptr, 0u), SandField::TILE_INFO);
+			chunk->SetCell_unsafe(x, y, 0u,                       SandField::COLOR);
+			chunk->SetCell_unsafe(x, y, false,                    SandField::SOLID);
+			chunk->SetCell_unsafe(x, y, TileInfo { nullptr, 0u }, SandField::TILE_INFO);
 		}
 	}
 }
