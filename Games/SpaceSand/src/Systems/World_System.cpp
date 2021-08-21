@@ -39,7 +39,7 @@ int WorldSystem::Initialize()
 	iw::EventSequence& level1 = m_levels.emplace_back(CreateSequence());
 
 	//level1.Add<Fill>(fillBoarder);
-	//level1.Add<Spawn>(spawn);
+	level1.Add<Spawn>(spawn);
 
 	level1.Add([&]() {
 		m_levels.pop_back();

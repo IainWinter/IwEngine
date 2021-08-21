@@ -134,10 +134,10 @@ struct GameLayer : iw::Layer
 			auto [w, h] = sand_ui_laserCharge->GetSandTexSize();
 			
 			std::vector<int> widths = {
-				2, 2, 
-				4, 
+				4, 4,
 				6, 
-				12, 
+				8, 
+				14, 
 				24, 
 				30, 
 				34, 
@@ -148,6 +148,58 @@ struct GameLayer : iw::Layer
 				34,
 				30,
 				24
+			};
+
+			std::vector<std::pair<int, int>> fills = { // these are slightly wrong
+				{32, 36},
+				{32, 37},
+
+				{33, 33},
+				{33, 34},
+				{33, 35},
+				{33, 36},
+				
+				{34, 32},
+				{34, 33},
+				{34, 34},
+				{34, 35},
+				{34, 36},
+				
+				{35, 31},
+				{35, 32},
+				{35, 33},
+				{35, 34},
+				{35, 35},
+				{35, 36},
+				{35, 37},
+				
+				{36, 33},
+				{36, 34},
+				{36, 35},
+				{36, 36},
+				{36, 37},
+
+				{37, 33},
+				{37, 34},
+				{37, 35},
+				{37, 36},
+				{37, 37},
+				{37, 38},
+
+				{38, 34},
+				{38, 35},
+				{38, 36},
+				{38, 37},
+				{38, 38},
+				{38, 39},
+
+				{39, 35},
+				{39, 36},
+				{39, 37},
+				{39, 38},
+
+				{40, 35},
+				{40, 36},
 			};
 
 			for (int y = 0; y < h; y++)
@@ -165,6 +217,11 @@ struct GameLayer : iw::Layer
 					chunk->SetCell(x, y, false, iw::SandField::SOLID);
 				}
 			}
+
+			for (const auto& [x, y] : fills)
+			{
+				chunk->SetCell(x-1, y-1, true, iw::SandField::SOLID); // this is slightly wrong
+			}
 		}
 
 		return 0;
@@ -178,6 +235,8 @@ struct GameLayer : iw::Layer
 	glm::vec3 laserFluidVel = glm::vec3(0.f);
 
 	float uiJitterAmount = 0;
+
+	float canFireTimer = 0;
 
 	void Update() override { // this is one frame behind, add a callback to the sand layer that gets called at the right time, right after rendering the world...
 		
@@ -217,14 +276,8 @@ struct GameLayer : iw::Layer
 		for (int x = 0; x < chunk->m_width;  x++)
 		{
 			chunk->KeepAlive(x, y);
-			chunk->GetCell(x, y).dx = laserFluidVel.x;
-			chunk->GetCell(x, y).dy = laserFluidVel.y;
-
-			if (x > 12 && x < 20)
-			{
-				chunk->GetCell(x, y).dx = 0;
-				chunk->GetCell(x, y).dy = -2;
-			}
+			chunk->GetCell(x, y).dx = laserFluidVel.x / 5;
+			chunk->GetCell(x, y).dy = laserFluidVel.y / 5;
 		}
 
 		if (laserFluidToCreate > 0)
@@ -233,8 +286,8 @@ struct GameLayer : iw::Layer
 			laserFluid.Color = iw::Color::From255(255, 38, 38);
 
 			auto [w, h] = sand_ui_laserCharge->GetSandTexSize();
-			int x = w / 2;
-			int y = h - 5;
+			int x = 31;
+			int y = 31;
 
 			if (sand_ui_laserCharge->m_world->IsEmpty(x, y))
 			{
@@ -244,17 +297,21 @@ struct GameLayer : iw::Layer
 			}
 		}
 
-		if (laserFluidToRemove > 0)
+		if (/*laserFluidToRemove > 0*/player.Find<Player>()->i_fire2)
 		{
 			auto [w, h] = sand_ui_laserCharge->GetSandTexSize();
-			int x = w / 2;
-			int y = 0;
-
-			if (!sand_ui_laserCharge->m_world->IsEmpty(x, y))
+			for (int x = 18; x < 22; x++)
 			{
-				sand_ui_laserCharge->m_world->SetCell(x, y, iw::Cell::GetDefault(iw::CellType::EMPTY));
-				laserFluidToRemove--;
-				laserFluidCount--;
+				int y = 0;
+
+				if (!sand_ui_laserCharge->m_world->IsEmpty(x, y))
+				{
+					sand_ui_laserCharge->m_world->SetCell(x, y, iw::Cell::GetDefault(iw::CellType::EMPTY));
+					laserFluidToRemove--;
+					laserFluidCount--;
+
+					canFireTimer += .01f;
+				}
 			}
 		}
 
@@ -263,7 +320,9 @@ struct GameLayer : iw::Layer
 			laserFluidToRemove = 0;
 		}
 
-		player.Find<Player>()->can_fire_laser = laserFluidCount > 0;
+		canFireTimer = iw::max(canFireTimer - iw::DeltaTime(), 0.f);
+
+		player.Find<Player>()->can_fire_laser = canFireTimer > 0.f;
 	}
 	// end temp ui
 
@@ -287,7 +346,8 @@ struct GameLayer : iw::Layer
 				if (event.Hit.Has<Player>())
 				{
 					uiJitterAmount = 75;
-
+					laserFluidVel.y += 200;
+					laserFluidVel.x += 75 * iw::randfs();
 				}
 
 				break;
@@ -349,9 +409,7 @@ struct GameLayer : iw::Layer
 		float c_laser_width  = c_laser_height;
 		float c_laser_position_x = c_menu_position_x - c_menu_width + c_laser_width + c_menu_padding * 2;
 		float c_laser_position_y = c_menu_position_y;
-
-		LOG_INFO << c_laser_position_x << ", " << c_laser_position_y << "  :::  " << c_laser_position_x / 42.f << ", " << c_laser_position_y / 42.f;
-
+		
 		// SCALING
 
 		float game_scale_x    = c_game_width      / width;
@@ -421,7 +479,7 @@ App::App() : iw::Application()
 	iw::SandLayer* sand = new iw::SandLayer(cellSize, cellMeter, 800, 800, 4, 4, drawWithMouse);
 
 	// UI charge as liquid in a tank?
-	iw::SandLayer* sand_ui_laser = new iw::SandLayer(1, 1, 42, 42);
+	iw::SandLayer* sand_ui_laser = new iw::SandLayer(1, 1, 40, 40);
 	
 	sand_ui_laser->m_updateDelay = .016f;
 
