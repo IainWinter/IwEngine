@@ -140,7 +140,7 @@ iw::Entity ItemSystem::MakeWeaponMinigun(float x, float y, float ndx, float ndy)
     item->PickUpRadius = 25;
     item->OnPickUp = [&]()
     {
-        Bus->push<ChangeWeapon_Event>(m_player, WeaponType::MINGUN, 400);
+        Bus->push<ChangeWeapon_Event>(m_player, WeaponType::MINIGUN, 400);
     };
 
     return iw::Entity();

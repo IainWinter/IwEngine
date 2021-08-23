@@ -14,11 +14,10 @@ int PlayerSystem::Initialize()
 	r->Transform.Position = glm::vec3(w, h, 0);
 	r->SetMass(10);
 
-	Armorments* guns = player.Set<Armorments>();
+	Armorments* guns = player.Set<Armorments>(WeaponType::CANNON);
 	guns->Weapons.emplace(WeaponType::CANNON,      MakeCannonInfo());
-	//guns->Weapons.emplace(WeaponType::SUPER_LASER, MakeLaserInfo());
-
-	Bus->push<ChangeWeapon_Event>(player, WeaponType::CANNON, -1);
+	guns->Weapons.emplace(WeaponType::MINIGUN,     MakeMinigunInfo());
+	guns->Weapons.emplace(WeaponType::SUPER_LASER, MakeMinigunInfo());
 
 	return 0;
 }
@@ -37,8 +36,6 @@ void PlayerSystem::FixedUpdate()
 	p->i_down  = iw::Keyboard::KeyDown(iw::S);
 	p->i_left  = iw::Keyboard::KeyDown(iw::A);
 	p->i_right = iw::Keyboard::KeyDown(iw::D);
-	p->i_fire1 = iw::Mouse::ButtonDown(iw::LMOUSE);
-	p->i_fire2 = iw::Mouse::ButtonDown(iw::RMOUSE);
 
 	int borderFar = 375;
 	int borderNear = 25;
@@ -64,17 +61,33 @@ void PlayerSystem::Update()
 	Player*        p = player.Find<Player>();
 	iw::Transform* t = player.Find<iw::Transform>();
 
+	bool was_fire1 = p->i_fire1;
+	bool was_fire2 = p->i_fire2;
+
+	p->i_fire1 = iw::Mouse::ButtonDown(iw::LMOUSE);
+	p->i_fire2 = iw::Mouse::ButtonDown(iw::RMOUSE);
+
 	float aim_x = sand->sP.x;
 	float aim_y = sand->sP.y;
 
 	if (p->i_fire1)
 	{
+		if (!was_fire2)
+		{
+			Bus->push<ChangeWeapon_Event>(player, WeaponType::SUPER_LASER);
+		}
+
 		Bus->push<FireWeapon_Event>(player, aim_x, aim_y);
 	}
 	
-	if (   p->i_fire2 
-		&& p->can_fire_laser)
+	if (   p->i_fire2 /*
+		&& p->can_fire_laser*/)
 	{
+		if (!was_fire2)
+		{
+			Bus->push<ChangeWeapon_Event>(player, WeaponType::SUPER_LASER);
+		}
+
 		Bus->push<FireWeapon_Event>(player, aim_x, aim_y);
 		Bus->push<ChangeLaserFluid_Event>(-1);
 	}

@@ -199,7 +199,7 @@ struct GameLayer : iw::Layer
 
 		player = player_s->player;
 
-		background_s = PushSystem<BackgroundSystem>();
+		//background_s = PushSystem<BackgroundSystem>();
 		
 		PushSystem<WeaponSystem>();
 		PushSystem<ProjectileSystem>(sand);

@@ -9,7 +9,7 @@
 enum WeaponType
 {
 	CANNON,
-	MINGUN,
+	MINIGUN,
 	SUPER_LASER
 };
 
@@ -32,15 +32,21 @@ struct WeaponInfo {
 	float Speed;
 };
 
-struct Armorments {
-	WeaponType CurrentWeapon;
-	int Ammo;                  // -1 = infinite
-
+struct Weapon {
+	WeaponType Type;
+	int Ammo;
 	iw::Timer Timer;
+};
 
+struct Armorments {
+	//WeaponType DefaultWeapon;
+	//WeaponType CurrentWeapon;
+	//int Ammo;                  // -1 = infinite
+
+	std::vector<Weapon> WeaponStack;
 	std::unordered_map<WeaponType, WeaponInfo> Weapons;
 
-	Armorments() {}
+	Armorments() = default;
 
 	WeaponInfo* GetWeapon(
 		WeaponType weapon)
@@ -107,15 +113,22 @@ inline WeaponInfo MakeCannonInfo()
 {
 	WeaponInfo info;
 	info.FireTime       = 0.15f;
-	info.FireTimeMargin = 0.f;
+	info.FireTimeMargin = 0;
 	info.Speed          = 1250;
-	info.Inaccuracy     = 0.05f;
-	info.GetShot    = MakeGetShot_Circular(10, 2, ProjectileType::BULLET);
+	info.Inaccuracy     = 0;
+	info.GetShot = MakeGetShot_Circular(10, 2, ProjectileType::BULLET);
 
 	return info;
 }
 
-inline WeaponInfo MakeLaserInfo()
+inline WeaponInfo MakeMinigunInfo()
 {
+	WeaponInfo info;
+	info.FireTime       = 0.05f;
+	info.FireTimeMargin = 0;
+	info.Speed          = 320;
+	info.Inaccuracy     = 0.05f;
+	info.GetShot = MakeGetShot_Circular(10, 5, ProjectileType::BULLET);
 
+	return info;
 }

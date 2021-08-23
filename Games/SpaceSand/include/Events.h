@@ -125,7 +125,7 @@ struct ChangeWeapon_Event : iw::SingleEvent
 	ChangeWeapon_Event(
 		iw::Entity entity,
 		WeaponType weapon,
-		int weaponAmmo
+		int weaponAmmo = -1 // infinite
 	)
 		: iw::SingleEvent(CHANGE_WEAPON)
 		, Entity(entity)

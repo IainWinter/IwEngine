@@ -2,23 +2,17 @@
 
 void WeaponSystem::Update()
 {
-	Space->Query<Armorments>().Each([](
+	Space->Query<Armorments>().Each([&](
 		iw::EntityHandle entity,
-		Armorments* armorments) 
+		Armorments* gnus)
 		{
-			armorments->Timer.Tick();
+			auto& [type, ammo, timer] = gnus->WeaponStack.back();
 		}
 	);
 }
 
 bool WeaponSystem::On(iw::ActionEvent& e)
 {
-	if (   e.Action != CHANGE_WEAPON
-		&& e.Action != FIRE_WEAPON)
-	{
-		return false;
-	}
-
 	switch (e.Action)
 	{
 		case CHANGE_WEAPON:
@@ -26,11 +20,10 @@ bool WeaponSystem::On(iw::ActionEvent& e)
 			ChangeWeapon_Event& event = e.as<ChangeWeapon_Event>();
 			Armorments* guns = event.Entity.Find<Armorments>();
 
-			if (WeaponInfo* info = guns->GetWeapon(event.Weapon))
+			if (WeaponInfo* gun = guns->GetWeapon(event.Weapon))
 			{
-				guns->CurrentWeapon = event.Weapon;
-				guns->Ammo = event.WeaponAmmo;
-				guns->Timer.SetTime("fire", info->FireTime, info->FireTimeMargin);
+				auto [w, a, timer] = guns->WeaponStack.emplace_back(event.Weapon, event.WeaponAmmo);
+				timer.SetTime("fire", gun->FireTime, gun->FireTimeMargin);
 			}
 
 			break;
@@ -40,16 +33,34 @@ bool WeaponSystem::On(iw::ActionEvent& e)
 		{
 			FireWeapon_Event& event = e.as<FireWeapon_Event>();
 			Armorments* guns = event.Entity.Find<Armorments>();
+	
+			auto& [currentGun, ammo, timer] = guns->WeaponStack.back(); // should always be populated
 
-			if (!guns->Timer.Can("fire")) break;
+			if (   !guns
+				|| !timer.Can("fire"))
+			{
+				break;
+			}
 
-			if      (guns->Ammo  > 0) guns->Ammo -= 1;
-			else if (guns->Ammo == 0) break;
+			WeaponInfo* gun = guns->GetWeapon(currentGun);
+			
+			if (!gun) {
+				break;
+			}
 
-			WeaponInfo* info = guns->GetWeapon(guns->CurrentWeapon);
-			ShotInfo shot = info->GetShot(event.Entity, *info, event.TargetX, event.TargetY);
-		
-			Bus->push<SpawnProjectile_Event>(shot);
+			if (ammo > 0) {
+				ammo -= 1;
+				LOG_INFO << ammo;
+			}
+
+			else if (ammo == 0) {
+				guns->WeaponStack.pop_back();
+				break;
+			}
+
+			Bus->push<SpawnProjectile_Event>(
+				gun->GetShot(event.Entity, *gun, event.TargetX, event.TargetY)
+			);
 
 			break;
 		}
