@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Components/Player.h"
-#include "Components/Weapon.h"
 #include "Systems/Projectile_System.h"
 #include "Events.h"
+
 #include "Assets.h"
 
 struct PlayerSystem : iw::SystemBase
@@ -22,7 +22,6 @@ struct PlayerSystem : iw::SystemBase
 		, cam_y(0)
 	{}
 
-	int Initialize() override;
 	void FixedUpdate() override;
 	void Update() override;
 

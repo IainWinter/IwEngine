@@ -36,6 +36,11 @@ void PlayerSystem::FixedUpdate()
 	p->i_down  = iw::Keyboard::KeyDown(iw::S);
 	p->i_left  = iw::Keyboard::KeyDown(iw::A);
 	p->i_right = iw::Keyboard::KeyDown(iw::D);
+	p->i_fire1 = iw::Mouse::ButtonDown(iw::LMOUSE);
+	p->i_fire2 = iw::Mouse::ButtonDown(iw::RMOUSE);
+
+	r->Velocity.x = 0;
+	r->Velocity.y = 0;
 
 	int borderFar = 375;
 	int borderNear = 25;
@@ -46,9 +51,6 @@ void PlayerSystem::FixedUpdate()
 	bool atLeft   = t.Position.x < borderNear;
 
 	float speed = 150;
-
-	r->Velocity.x = 0;
-	r->Velocity.y = 0;
 
 	if (p->i_up)    r->Velocity.y = atTop    ? 0 :  speed; // todo: make this slow stop
 	if (p->i_down)  r->Velocity.y = atBottom ? 0 : -speed;
@@ -61,34 +63,30 @@ void PlayerSystem::Update()
 	Player*        p = player.Find<Player>();
 	iw::Transform* t = player.Find<iw::Transform>();
 
-	bool was_fire1 = p->i_fire1;
-	bool was_fire2 = p->i_fire2;
+	p->timer.Tick();
 
-	p->i_fire1 = iw::Mouse::ButtonDown(iw::LMOUSE);
-	p->i_fire2 = iw::Mouse::ButtonDown(iw::RMOUSE);
-
-	float aim_x = sand->sP.x;
-	float aim_y = sand->sP.y;
-
-	if (p->i_fire1)
+	if (   p->i_fire1 
+		&& p->timer.Can("fire1"))
 	{
-		if (!was_fire2)
-		{
-			Bus->push<ChangeWeapon_Event>(player, WeaponType::SUPER_LASER);
-		}
+		auto [x, y, dx, dy] = GetShot(t->Position.x, t->Position.y, sand->sP.x, sand->sP.y, 1250/4, 10, 2);
 
-		Bus->push<FireWeapon_Event>(player, aim_x, aim_y);
+		float speed = sqrt(dx*dx+dy*dy);
+		dx += iw::randf() * speed * .05f;
+		dy += iw::randf() * speed * .05f;
+		
+		Bus->push<SpawnProjectile_Event>(x, y, dx, dy, SpawnProjectile_Event::BULLET);
 	}
 	
-	if (   p->i_fire2 /*
-		&& p->can_fire_laser*/)
+	if (   p->i_fire2 
+		&& p->timer.Can("fire2")
+		&& p->can_fire_laser)
 	{
-		if (!was_fire2)
-		{
-			Bus->push<ChangeWeapon_Event>(player, WeaponType::SUPER_LASER);
-		}
+		auto [x, y, dx, dy] = GetShot(t->Position.x, t->Position.y, sand->sP.x, sand->sP.y, 1800 + iw::randf() * 400, 10, 7);
 
-		Bus->push<FireWeapon_Event>(player, aim_x, aim_y);
+		//dx += iw::randf() * 100;
+		//dy += iw::randf() * 100;
+		
+		Bus->push<SpawnProjectile_Event>(x, y, dx, dy, SpawnProjectile_Event::LASER);
 		Bus->push<ChangeLaserFluid_Event>(-1);
 	}
 }

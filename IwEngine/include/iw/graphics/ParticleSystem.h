@@ -2,7 +2,6 @@
 
 #include "Mesh.h"
 #include "MeshFactory.h"
-#include "iw/common/Components/Transform.h"
 #include "iw/util/memory/linear_allocator.h"
 #include <functional>
 #include <vector>

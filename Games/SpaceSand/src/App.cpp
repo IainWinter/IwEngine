@@ -16,8 +16,6 @@
 #include "Systems/Projectile_System.h"
 #include "Systems/Weapon_System.h"
 
-#include "Systems/Background_System.h"
-
 #include "iw/graphics/Font.h"
 
 struct GameLayer : iw::Layer
@@ -25,8 +23,6 @@ struct GameLayer : iw::Layer
 	iw::SandLayer* sand;
 	iw::SandLayer* sand_ui_laserCharge;
 	
-	BackgroundSystem* background_s;
-
 	iw::Entity player;
 	iw::Mesh ui_score;
 	iw::ref<iw::Font> ui_font;
@@ -73,6 +69,11 @@ struct GameLayer : iw::Layer
 		{
 			cam = new iw::OrthographicCamera(2, 2, -10, 10);
 			cam->SetRotation(glm::angleAxis(iw::Pi, glm::vec3(0, 1, 0)));
+		}
+
+		if (int e = Layer::Initialize())
+		{
+			return e;
 		}
 
 		// more temp ui
@@ -170,23 +171,6 @@ struct GameLayer : iw::Layer
 			{
 				chunk->SetCell(x-1, y-1, true, iw::SandField::SOLID); // this is slightly wrong
 			}
-		}
-
-		for (int i = 0; i < 0; i++)
-		{
-			iw::Entity asteroid = sand->MakeTile(A_texture_asteroid, true);
-			iw::Transform* transform = asteroid.Find<iw::Transform>();
-			iw::Rigidbody* rigidbody = asteroid.Find<iw::Rigidbody>();
-
-			transform->Position.y = 400;
-			transform->Position.x = 400 * iw::randf();
-			rigidbody->SetTransform(transform);
-
-			rigidbody->Velocity.y = -10 * iw::randf() - 5;
-			rigidbody->Velocity.x = 10 * iw::randf();
-			rigidbody->AngularVelocity.z = .2;
-
-			rigidbody->SetMass(10000);
 		}
 
 		PlayerSystem* player_s = PushSystem<PlayerSystem>(sand);
@@ -451,11 +435,11 @@ struct GameLayer : iw::Layer
 		// END SCALING
 
 		Renderer->BeginScene(cam);
-		//Renderer->DrawMesh(iw::Transform(glm::vec3(0.f), glm::vec3(1, width/height, 1)), background_s->m_stars.GetParticleMesh());
+		Renderer->DrawMesh(iw::Transform(glm::vec3(0.f), glm::vec3(1, width/height, 1)), background_s->m_stars.GetParticleMesh());
 
 		Renderer->DrawMesh(uiPlayerTransform, A_mesh_ui_playerHealth);
 		Renderer->DrawMesh(uiBackgroundTransform, A_mesh_ui_background);
-		Renderer->DrawMesh(uiLaserChargeTransform, sand_ui_laserCharge->GetSandMesh());
+		//Renderer->DrawMesh(uiLaserChargeTransform, sand_ui_laserCharge->GetSandMesh());
 		//Renderer->DrawMesh(iw::Transform(), ui_score);
 		Renderer->EndScene();
 
@@ -509,12 +493,13 @@ int App::Initialize(
 iw::Application* CreateApplication(
 	iw::InitOptions& options)
 {
-	options.AssetRootPath = "C:/dev/wEngine/_assets/";
+	// C:/dev/IwEngine/_
+	options.AssetRootPath = "C:/dev/IwEngine/_assets/";
 
 	options.WindowOptions = iw::WindowOptions {
 		800,
 		1000,
-		false,
+		true,
 		iw::DisplayState::NORMAL
 	};
 

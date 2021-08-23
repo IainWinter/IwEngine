@@ -8,7 +8,7 @@
 
 namespace iw {
 namespace Graphics {
-	// needs to be remade PLEASE + texture atlas is busted I think
+	// needs to be remade 
 
 	struct Texture {
 	//protected:
@@ -63,11 +63,12 @@ namespace Graphics {
 
 		IWGRAPHICS_API
 		Texture(
-			Texture* parent,
+			/*const*/ Texture* parent,
 			int xOffset,
 			int yOffset,
 			unsigned width,
-			unsigned height);
+			unsigned height,
+			unsigned char* colors = nullptr);
 
 		GEN_5(IWGRAPHICS_API, Texture)
 

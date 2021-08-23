@@ -39,7 +39,7 @@ namespace Graphics {
 
 		int size = width * height * channels;
 
-		unsigned char* colors = new unsigned char[size];
+		unsigned char* colors = (unsigned char*)malloc(size);
 		assert(colors);
 		
 		memcpy(colors, image, size);

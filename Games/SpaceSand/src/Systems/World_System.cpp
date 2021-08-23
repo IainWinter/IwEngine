@@ -148,7 +148,7 @@ bool WorldSystem::On(iw::ActionEvent& e)
 			ProjHitTile_Event& event = e.as<ProjHitTile_Event>();
 
 			sand->EjectPixel(event.Info.tile, event.Info.index);
-			//event.Hit.Find<iw::Rigidbody>()->Velocity += event.Projectile.Find<iw::Rigidbody>()->Velocity;
+			event.Hit.Find<iw::Rigidbody>()->Velocity += event.Projectile.Find<iw::Rigidbody>()->Velocity;
 
 			break;
 		}
