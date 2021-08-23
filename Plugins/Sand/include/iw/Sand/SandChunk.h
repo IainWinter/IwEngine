@@ -1,27 +1,13 @@
 #pragma once
 
 #include "Cell.h"
+#include "iw/util/enum/val.h"
+#include <functional>
+#include <algorithm>
 #include <vector>
 #include <mutex>
-#include <algorithm>
-#include <functional>
-#include "iw/util/enum/val.h"
 
 IW_PLUGIN_SAND_BEGIN
-
-enum class SandField : unsigned { // Should allow user to add to this, see enum { #include "fields.h" }; idea from valve
-	CELL,
-	SOLID, // For tile textures making it so other cells know about tiles
-	COLOR, // For tile textures
-	TILE_INFO, // For Tile* and sprite pixel index
-
-	//FIELD_COUNT
-};
-
-// for platformer other game
-//CELL,
-//SOLID,
-//COLLISION,
 
 class SandChunk;
 

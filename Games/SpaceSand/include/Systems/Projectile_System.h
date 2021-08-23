@@ -26,10 +26,10 @@ struct ProjectileSystem
 	bool On(iw::ActionEvent& e) override;
 
 private:
-	iw::Entity MakeProjectile(float x, float y, float dx, float dy);
+	iw::Entity MakeProjectile(const ShotInfo& shot);
 
-	iw::Entity MakeBullet(float x, float y, float dx, float dy, int depth);
-	iw::Entity MakeLaser (float x, float y, float dx, float dy, int depth);
+	iw::Entity MakeBullet(const ShotInfo& shot, int depth);
+	iw::Entity MakeLaser (const ShotInfo& shot, int depth);
 
 	void MakeExplosion(int x, int y, int r);
 };

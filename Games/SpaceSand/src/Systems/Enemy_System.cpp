@@ -10,20 +10,20 @@ void EnemySystem::FixedUpdate()
 		{
 			enemy->Timer.TickFixed();
 
-			if (enemy->Timer.Can("shoot"))
-			{
-				iw::Transform* target = enemy->ShootAt.Find<iw::Transform>();
+			//if (enemy->Timer.Can("shoot"))
+			//{
+			//	iw::Transform* target = enemy->ShootAt.Find<iw::Transform>();
 
-				auto [x, y, dx, dy] = GetShot(
-					transform->Position.x, transform->Position.y, 
-					target->   Position.x, target->   Position.y, 444, 10);
+			//	auto [x, y, dx, dy] = GetShot(
+			//		transform->Position.x, transform->Position.y, 
+			//		target->   Position.x, target->   Position.y, 444, 10);
 
-				float speed = sqrt(dx*dx + dy*dy);
-				dx += iw::randfs() * speed * .05f;
-				dy += iw::randfs() * speed * .05f;
+			//	float speed = sqrt(dx*dx + dy*dy);
+			//	dx += iw::randfs() * speed * .05f;
+			//	dy += iw::randfs() * speed * .05f;
 
-				Bus->send<SpawnProjectile_Event>(x, y, dx, dy, SpawnProjectile_Event::LASER);
-			}
+			//	Bus->send<SpawnProjectile_Event>(x, y, dx, dy, ProjectileType::LASER);
+			//}
 		}
 	);
 }

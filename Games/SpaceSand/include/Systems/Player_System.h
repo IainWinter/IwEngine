@@ -1,10 +1,9 @@
 #pragma once
 
 #include "Components/Player.h"
+#include "Components/Weapon.h"
 #include "Systems/Projectile_System.h"
-#include "Helpers.h"
 #include "Events.h"
-
 #include "Assets.h"
 
 struct PlayerSystem : iw::SystemBase

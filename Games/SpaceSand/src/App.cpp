@@ -14,6 +14,7 @@
 
 #include "Systems/Flocking_System.h"
 #include "Systems/Projectile_System.h"
+#include "Systems/Weapon_System.h"
 
 #include "Systems/Background_System.h"
 
@@ -188,8 +189,9 @@ struct GameLayer : iw::Layer
 			rigidbody->SetMass(10000);
 		}
 
-		PlayerSystem* player_s = new PlayerSystem(sand);
-
+		PlayerSystem* player_s = PushSystem<PlayerSystem>(sand);
+		PopSystem(player_s); // to assign app vars
+		
 		if (int e = player_s->Initialize())
 		{
 			return e;
@@ -197,8 +199,9 @@ struct GameLayer : iw::Layer
 
 		player = player_s->player;
 
-		background_s = PushSystem<BackgroundSystem>();
+		//background_s = PushSystem<BackgroundSystem>();
 		
+		PushSystem<WeaponSystem>();
 		PushSystem<ProjectileSystem>(sand);
 		PushSystem<EnemySystem>     (sand);
 		PushSystem<WorldSystem>     (sand, player_s->player);
@@ -448,17 +451,17 @@ struct GameLayer : iw::Layer
 		// END SCALING
 
 		Renderer->BeginScene(cam);
-		Renderer->DrawMesh(iw::Transform(glm::vec3(0.f), glm::vec3(1, width/height, 1)), background_s->m_stars.GetParticleMesh());
+		//Renderer->DrawMesh(iw::Transform(glm::vec3(0.f), glm::vec3(1, width/height, 1)), background_s->m_stars.GetParticleMesh());
 
 		Renderer->DrawMesh(uiPlayerTransform, A_mesh_ui_playerHealth);
 		Renderer->DrawMesh(uiBackgroundTransform, A_mesh_ui_background);
-		//Renderer->DrawMesh(uiLaserChargeTransform, sand_ui_laserCharge->GetSandMesh());
+		Renderer->DrawMesh(uiLaserChargeTransform, sand_ui_laserCharge->GetSandMesh());
 		//Renderer->DrawMesh(iw::Transform(), ui_score);
 		Renderer->EndScene();
 
-		//Renderer->BeginScene();
-		//Renderer->DrawMesh(sandTransform, sand->GetSandMesh());
-		//Renderer->EndScene();
+		Renderer->BeginScene();
+		Renderer->DrawMesh(sandTransform, sand->GetSandMesh());
+		Renderer->EndScene();
 	}
 };
 
@@ -506,8 +509,7 @@ int App::Initialize(
 iw::Application* CreateApplication(
 	iw::InitOptions& options)
 {
-	// C:/dev/IwEngine/_
-	options.AssetRootPath = "C:/dev/IwEngine/_assets/";
+	options.AssetRootPath = "C:/dev/wEngine/_assets/";
 
 	options.WindowOptions = iw::WindowOptions {
 		800,
