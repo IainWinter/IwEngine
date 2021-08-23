@@ -5,7 +5,7 @@ void SandColliderSystem::Update()
 	for (auto batch : m_world->m_batches)
 	for (iw::SandChunk* chunk : batch)
 	{
-		iw::SandChunk::Field& field = chunk->GetField(iw::SandField::COLLISION);
+		iw::SandChunk::Field& field = chunk->GetField(iw::SandField::SOLID);
 		bool* cells = field.GetCells<bool>();
 
 		auto location = m_world->GetChunkLocation(chunk->m_x, chunk->m_y);

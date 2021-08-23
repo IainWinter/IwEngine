@@ -98,12 +98,11 @@ namespace Graphics {
 
 	// cant handle 3d textures
 	Texture::Texture(
-		/*const*/ Texture* parent,
+		Texture* parent,
 		int xOffset, 
 		int yOffset, 
 		unsigned width,
-		unsigned height,
-		unsigned char* colors)
+		unsigned height)
 		: m_width       (width)
 		, m_height      (height)
 		, m_depth       (0)
@@ -117,7 +116,7 @@ namespace Graphics {
 		, m_parent      (parent)
 		, m_xOffset     (xOffset)
 		, m_yOffset     (yOffset)
-		, m_colors      (colors)
+		, m_colors      (parent->m_colors)
 		, m_handle      (nullptr)
 		, m_ownsColors  (false)
 	{}
@@ -137,14 +136,10 @@ namespace Graphics {
 		, m_parent      (other.m_parent)
 		, m_xOffset     (other.m_xOffset)
 		, m_yOffset     (other.m_yOffset)
+		, m_colors      (nullptr)
+		, m_handle      (nullptr)
 		, m_ownsColors  (other.m_ownsColors)
 	{
-		if (m_handle) {
-			delete m_handle;
-		}
-
-		m_handle = nullptr;
-
 		CreateColors(other.m_colors != nullptr);
 		if (other.m_colors) {
 			memcpy(m_colors, other.m_colors, ColorCount());
@@ -195,8 +190,8 @@ namespace Graphics {
 		m_parent       = other.m_parent;
 		m_xOffset      = other.m_yOffset;
 		m_yOffset      = other.m_yOffset;
-		m_handle       = nullptr;
 		m_ownsColors   = other.m_ownsColors;
+		m_colors       = nullptr;
 
 		if (m_handle) {
 			delete m_handle;
@@ -206,7 +201,7 @@ namespace Graphics {
 
 		CreateColors(other.m_colors != nullptr);
 		if (other.m_colors) {
-			memcpy(m_colors, other.m_colors, ColorCount());
+			memcpy(m_colors, other.m_colors, ColorCount()); // unsafe
 		}
 
 		return *this;

@@ -98,6 +98,7 @@ iw::Entity ItemSystem::MakeItem(
     rigidbody->Velocity.x = ndx * 75;
     rigidbody->Velocity.y = ndy * 75;
     rigidbody->SetTransform(transform);
+    rigidbody->IsTrigger = true; // so they donmt knock player around, I liked that effect tho but it could move it out of bounds
 
     return entity;
 }

@@ -44,7 +44,7 @@ bool EnemySystem::On(iw::ActionEvent& e)
 
 void EnemySystem::SpawnEnemy(SpawnEnemy_Event& config)
 {
-	iw::Entity e = sand->MakeTile<iw::Circle, EnemyShip, Flocker>("textures/SpaceGame/enemy.png", true);
+	iw::Entity e = sand->MakeTile<iw::Circle, EnemyShip, Flocker>(A_texture_enemy1, true);
 
 	iw::Transform* t = e.Set<iw::Transform>();
 	iw::Rigidbody* r = e.Set<iw::Rigidbody>();

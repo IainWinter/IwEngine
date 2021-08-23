@@ -214,12 +214,12 @@ struct PixelationLayer
 	{}
 
 	int Initialize() {
-		iw::ref<iw::Shader> simpleShader = Renderer->InitShader(
+		iw::ref<iw::Shader> simpleShader = Renderer->Now->InitShader(
 			Asset->Load<iw::Shader>("shaders/simple.shader"), 
 			iw::CAMERA
 		);
 
-		iw::ref<iw::Shader> screenShader = Renderer->InitShader(
+		iw::ref<iw::Shader> screenShader = Renderer->Now->InitShader(
 			Asset->Load<iw::Shader>("shaders/texture.shader")
 		);
 
@@ -331,7 +331,7 @@ struct PixelationLayer
 		iw::ref<iw::Material> screenMat = REF<iw::Material>(screenShader);
 		screenMat->SetTexture("texture", lowResTarget->Tex(0));
 
-		m_screen = Renderer->ScreenQuad().MakeInstance();
+		m_screen = iw::ScreenQuad().MakeInstance();
 		m_screen.Material = screenMat;
 
 		// Custom systems
@@ -386,9 +386,10 @@ struct PixelationLayer
 				int numbTested = 0;
 				int numbOutside = 0;
 
-				m_sandLayer->ForEachInPolygon(rverts, rindex, [&](
-					float s, float t, 
-					int   x, int   y)
+				m_sandLayer->ForEachInPolygon(rverts, rverts, rindex, [&](
+					int   x, int   y,
+					float u, float v,
+					int tri)
 				{
 					numbTested++;
 
@@ -450,12 +451,12 @@ struct PixelationLayer
 
 			iw::Tile* tile = tileEntity.Find<iw::Tile>();
 
-			unsigned* colors = (unsigned*)tile->m_sprite->Colors();
+			unsigned* colors = tile->m_sprite.Colors32();
 
 			for (int y = 0; y < 64; y++)
 			for (int x = 0; x < 16; x++)
 			{
-				colors[x + y * tile->m_sprite->Width()] = 1;
+				colors[x + y * tile->m_sprite.Width()] = 1;
 			}
 
 			tileEntity.Find<iw::Rigidbody>()->Transform.Position = glm::vec3(i*10, 20, 0);
@@ -633,7 +634,10 @@ struct PixelationLayer
 			cell.Color = iw::Color::From255(100, 100, 100);
 			cell.Type = iw::CellType::ROCK;
 
-			m_sandLayer->FillPolygon(points, index, cell);
+			m_sandLayer->ForEachInPolygon(points, points, index, [&](int x, int y, float u, float v, int triangle)
+			{
+				m_sandLayer->m_world->SetCell(x, y, cell);
+			});
 
 			return;
 		}
@@ -755,7 +759,9 @@ struct App
 		int pixelScale       = 2;
 		int pixelsPerMeter = 10;
 
-		iw::SandLayer* sandLayer = PushLayer<iw::SandLayer>(pixelScale, pixelsPerMeter, true);
+		iw::SandLayer* sandLayer = new iw::SandLayer(pixelScale, pixelsPerMeter, true, true);
+
+		PushLayer<iw::SandLayer>(sandLayer);
 		
 		int error = iw::Application::Initialize(options);
 		if (error) return error;

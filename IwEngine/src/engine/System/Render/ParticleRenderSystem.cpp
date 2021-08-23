@@ -26,7 +26,7 @@ namespace Engine {
 			auto [transform, system] = entity.Components.Tie<Components>();
 			auto psystem = system;
 
-			Task->queue([=]() { // put in own system
+			Task->queue([=]() { // put in own system, this is dangerious if system is too big and doesn't finish before render q executes
 				psystem->UpdateParticleMesh();
 			});
 

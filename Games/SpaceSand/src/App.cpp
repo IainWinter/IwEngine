@@ -15,6 +15,8 @@
 #include "Systems/Flocking_System.h"
 #include "Systems/Projectile_System.h"
 
+#include "Systems/Background_System.h"
+
 #include "iw/graphics/Font.h"
 
 struct GameLayer : iw::Layer
@@ -22,9 +24,9 @@ struct GameLayer : iw::Layer
 	iw::SandLayer* sand;
 	iw::SandLayer* sand_ui_laserCharge;
 	
+	BackgroundSystem* background_s;
+
 	iw::Entity player;
-	iw::Mesh ui_background;
-	iw::Mesh ui_player;
 	iw::Mesh ui_score;
 	iw::ref<iw::Font> ui_font;
 
@@ -41,21 +43,13 @@ struct GameLayer : iw::Layer
 
 	int Initialize() override
 	{
-		ProjectileSystem* projectile_s = new ProjectileSystem(sand);
-		PlayerSystem*     player_s     = new PlayerSystem(sand);
-		
-		PushSystem(projectile_s);
-		PushSystem(player_s);
-		PushSystem<EnemySystem>(sand);
-		PushSystem<WorldSystem>(sand, player_s->player);
-		PushSystem<ItemSystem> (sand, player_s->player);
+		// load all assets into global variables
+		if (int e = LoadAssets(Asset.get(), Renderer->Now.get()))
+		{
+			return e;
+		}
 
-		PushSystem<FlockingSystem>();
-
-		PushSystem<iw::PhysicsSystem>();
-		PushSystem<iw::EntityCleanupSystem>();
-
-		cursor = sand->MakeTile("textures/SpaceGame/circle_temp.png");
+		cursor = sand->MakeTile(A_texture_ui_cursor);
 		cursor.Find<iw::CollisionObject>()->Transform.Scale = glm::vec3(.25f);
 		cursor.Find<iw::Tile>()->m_zIndex = -10;
 
@@ -64,67 +58,20 @@ struct GameLayer : iw::Layer
 		Physics->AddSolver(new iw::SmoothPositionSolver());
 		Physics->AddSolver(new iw::ImpulseSolver());
 
-		player = player_s->player;
+		//if(false){ // font
+		//	iw::ref<iw::Material> fontMat = REF<iw::Material>(
+		//		Asset->Load<iw::Shader>("shaders/font.shader")
+		//	);
+		//	Renderer->Now->InitShader(fontMat->Shader, iw::CAMERA);
 
-		// temp ui
-		
-		iw::ref<iw::Material> matp = REF<iw::Material>(
-			Asset->Load<iw::Shader>("shaders/texture_cam.shader")
-		);
-		matp->Set("useAlpha", 1);
-		matp->Set("alphaThresh", .9f);
-
-		{ // player
-			int w = player.Find<iw::Tile>()->m_sprite.Width();
-			int h = player.Find<iw::Tile>()->m_sprite.Height();
-
-			iw::ref<iw::Texture> tex = REF<iw::Texture>(w, h);
-			tex->SetFilter(iw::NEAREST);
-			tex->CreateColors();
-			iw::ref<iw::Material> mat = matp->MakeInstance();
-			mat->SetTexture("texture", tex);
-			Renderer->Now->InitShader(mat->Shader, iw::CAMERA);
-		
-			ui_player = iw::ScreenQuad();
-			ui_player.Material = mat;
-		}
-
-		{ // background
-			//iw::ref<iw::Material> mat = REF<iw::Material>(
-			//	Asset->Load<iw::Shader>("shaders/color_cam.shader")
-			//);
-			//mat->Set("color", iw::Color::From255(49, 49, 49));
-
-			iw::ref<iw::Texture> tex = Asset->Load<iw::Texture>("textures/SpaceGame/ui_background.png");
-			tex->SetFilter(iw::NEAREST);
-			tex->m_wrap = iw::TextureWrap::EDGE;
-			iw::ref<iw::Material> mat = matp->MakeInstance();
-			mat->SetTexture("texture", tex);
-			Renderer->Now->InitShader(mat->Shader, iw::CAMERA);
-
-			ui_background = iw::ScreenQuad();
-			ui_background.Material = mat;
-		}
-
-		if(false){ // font
-			iw::ref<iw::Material> fontMat = REF<iw::Material>(
-				Asset->Load<iw::Shader>("shaders/font.shader")
-			);
-			Renderer->Now->InitShader(fontMat->Shader, iw::CAMERA);
-
-			ui_font = Asset->Load<iw::Font>("fonts/arial.fnt");
-			ui_score = ui_font->GenerateMesh("123\n123\n123\n123\n123", .001f, 1);
-			ui_score.Material = fontMat;
-		}
+		//	ui_font = Asset->Load<iw::Font>("fonts/arial.fnt");
+		//	ui_score = ui_font->GenerateMesh("123\n123\n123\n123\n123", .001f, 1);
+		//	ui_score.Material = fontMat;
+		//}
 
 		{
 			cam = new iw::OrthographicCamera(2, 2, -10, 10);
 			cam->SetRotation(glm::angleAxis(iw::Pi, glm::vec3(0, 1, 0)));
-		}
-
-		if (int e = Layer::Initialize())
-		{
-			return e;
 		}
 
 		// more temp ui
@@ -224,6 +171,51 @@ struct GameLayer : iw::Layer
 			}
 		}
 
+		for (int i = 0; i < 0; i++)
+		{
+			iw::Entity asteroid = sand->MakeTile(A_texture_asteroid, true);
+			iw::Transform* transform = asteroid.Find<iw::Transform>();
+			iw::Rigidbody* rigidbody = asteroid.Find<iw::Rigidbody>();
+
+			transform->Position.y = 400;
+			transform->Position.x = 400 * iw::randf();
+			rigidbody->SetTransform(transform);
+
+			rigidbody->Velocity.y = -10 * iw::randf() - 5;
+			rigidbody->Velocity.x = 10 * iw::randf();
+			rigidbody->AngularVelocity.z = .2;
+
+			rigidbody->SetMass(10000);
+		}
+
+		PlayerSystem* player_s = new PlayerSystem(sand);
+
+		if (int e = player_s->Initialize())
+		{
+			return e;
+		}
+
+		player = player_s->player;
+
+		background_s = PushSystem<BackgroundSystem>();
+		
+		PushSystem<ProjectileSystem>(sand);
+		PushSystem<EnemySystem>     (sand);
+		PushSystem<WorldSystem>     (sand, player_s->player);
+		PushSystem<ItemSystem>      (sand, player_s->player);
+
+		PushSystem<FlockingSystem>();
+
+		PushSystem<iw::PhysicsSystem>();
+		PushSystem<iw::EntityCleanupSystem>();
+
+		if (int e = Layer::Initialize())
+		{
+			return e;
+		}
+
+		PushSystem(player_s);
+
 		return 0;
 	}
 
@@ -233,21 +225,19 @@ struct GameLayer : iw::Layer
 	int laserFluidToRemove = 0;
 	int laserFluidCount = 0;
 	glm::vec3 laserFluidVel = glm::vec3(0.f);
+	float canFireTimer = 0;
 
 	float uiJitterAmount = 0;
-
-	float canFireTimer = 0;
 
 	void Update() override { // this is one frame behind, add a callback to the sand layer that gets called at the right time, right after rendering the world...
 		
 		cursor.Find<iw::Transform>()->Position = glm::vec3(sand->sP, 0.f);
 
-		
 		iw::Texture& playerSprite = player.Find<iw::Tile>()->m_sprite;
-		iw::Texture& uiPlayerTex  = *ui_player.Material->GetTexture("texture");
+		iw::ref<iw::Texture> uiPlayerTex  = A_mesh_ui_playerHealth.Material->GetTexture("texture");
 
 		unsigned* colorsFrom = playerSprite.Colors32();
-		unsigned* colorsTo   = uiPlayerTex.Colors32();
+		unsigned* colorsTo   = uiPlayerTex->Colors32();
 
 		for (int i = 0; i < playerSprite.ColorCount32(); i++)
 		{
@@ -264,7 +254,7 @@ struct GameLayer : iw::Layer
 			}
 		}
 
-		uiPlayerTex.Update(Renderer->Device);
+		uiPlayerTex->Update(Renderer->Device);
 
 		iw::SandChunk* chunk = sand_ui_laserCharge->m_world->GetChunk(0, 0);
 
@@ -276,8 +266,8 @@ struct GameLayer : iw::Layer
 		for (int x = 0; x < chunk->m_width;  x++)
 		{
 			chunk->KeepAlive(x, y);
-			chunk->GetCell(x, y).dx = laserFluidVel.x / 5;
-			chunk->GetCell(x, y).dy = laserFluidVel.y / 5;
+			chunk->GetCell(x, y).dx = -laserFluidVel.x / 5; // this should match 'acceleration' even tho its instant
+			chunk->GetCell(x, y).dy = -laserFluidVel.y / 5;
 		}
 
 		if (laserFluidToCreate > 0)
@@ -346,8 +336,8 @@ struct GameLayer : iw::Layer
 				if (event.Hit.Has<Player>())
 				{
 					uiJitterAmount = 75;
-					laserFluidVel.y += 200;
-					laserFluidVel.x += 75 * iw::randfs();
+					laserFluidVel.y -= 200;
+					laserFluidVel.x -= 75 * iw::randfs();
 				}
 
 				break;
@@ -458,15 +448,17 @@ struct GameLayer : iw::Layer
 		// END SCALING
 
 		Renderer->BeginScene(cam);
-		Renderer->DrawMesh(uiPlayerTransform, ui_player);
-		Renderer->DrawMesh(uiBackgroundTransform, ui_background);
-		Renderer->DrawMesh(uiLaserChargeTransform, sand_ui_laserCharge->GetSandMesh());
+		Renderer->DrawMesh(iw::Transform(glm::vec3(0.f), glm::vec3(1, width/height, 1)), background_s->m_stars.GetParticleMesh());
+
+		Renderer->DrawMesh(uiPlayerTransform, A_mesh_ui_playerHealth);
+		Renderer->DrawMesh(uiBackgroundTransform, A_mesh_ui_background);
+		//Renderer->DrawMesh(uiLaserChargeTransform, sand_ui_laserCharge->GetSandMesh());
 		//Renderer->DrawMesh(iw::Transform(), ui_score);
 		Renderer->EndScene();
 
-		Renderer->BeginScene();
-		Renderer->DrawMesh(sandTransform, sand->GetSandMesh());
-		Renderer->EndScene();
+		//Renderer->BeginScene();
+		//Renderer->DrawMesh(sandTransform, sand->GetSandMesh());
+		//Renderer->EndScene();
 	}
 };
 
@@ -514,12 +506,13 @@ int App::Initialize(
 iw::Application* CreateApplication(
 	iw::InitOptions& options)
 {
+	// C:/dev/IwEngine/_
 	options.AssetRootPath = "C:/dev/IwEngine/_assets/";
 
 	options.WindowOptions = iw::WindowOptions {
 		800,
 		1000,
-		true,
+		false,
 		iw::DisplayState::NORMAL
 	};
 

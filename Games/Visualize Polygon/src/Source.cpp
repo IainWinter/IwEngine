@@ -155,7 +155,7 @@ public:
 
 	int Initialize() override
 	{
-		Renderer->SetClearColor(iw::Color::From255(33, 38, 41));
+		Renderer->Now->SetClearColor(iw::Color::From255(33, 38, 41));
 
 		iw::MeshDescription desc;
 		desc.DescribeBuffer(iw::bName::POSITION, iw::MakeLayout<float>(2));
@@ -265,6 +265,8 @@ struct App : iw::Application
 iw::Application* CreateApplication(
 	iw::InitOptions& options) 
 {
+	options.WindowOptions.State = iw::DisplayState::BORDERLESS;
+
 	return new App();
 }
 

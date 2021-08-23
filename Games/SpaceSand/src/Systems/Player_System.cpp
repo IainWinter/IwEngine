@@ -1,6 +1,26 @@
 #include "Systems/Player_System.h"
 
-void PlayerSystem::FixedUpdate() 
+int PlayerSystem::Initialize()
+{
+	player = sand->MakeTile<iw::Circle, Player>(A_texture_player, true);
+
+	Player*        p = player.Set<Player>();
+	iw::Circle*    c = player.Find<iw::Circle>();
+	iw::Rigidbody* r = player.Find<iw::Rigidbody>();
+
+	p->timer.SetTime("fire1", 0.15f/3);
+	p->timer.SetTime("fire2", 0.01f);
+
+	c->Radius = 4;
+
+	auto [w, h] = sand->GetSandTexSize2();
+	r->Transform.Position = glm::vec3(w, h, 0);
+	r->SetMass(10);
+
+	return 0;
+}
+
+void PlayerSystem::FixedUpdate()
 {
 	Player*        p = player.Find<Player>();
 	iw::Rigidbody* r = player.Find<iw::Rigidbody>();
@@ -17,9 +37,6 @@ void PlayerSystem::FixedUpdate()
 	p->i_fire1 = iw::Mouse::ButtonDown(iw::LMOUSE);
 	p->i_fire2 = iw::Mouse::ButtonDown(iw::RMOUSE);
 
-	r->Velocity.x = 0;
-	r->Velocity.y = 0;
-
 	int borderFar = 375;
 	int borderNear = 25;
 
@@ -29,6 +46,9 @@ void PlayerSystem::FixedUpdate()
 	bool atLeft   = t.Position.x < borderNear;
 
 	float speed = 150;
+
+	r->Velocity.x = 0;
+	r->Velocity.y = 0;
 
 	if (p->i_up)    r->Velocity.y = atTop    ? 0 :  speed; // todo: make this slow stop
 	if (p->i_down)  r->Velocity.y = atBottom ? 0 : -speed;
