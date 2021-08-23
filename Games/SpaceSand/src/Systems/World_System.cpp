@@ -72,19 +72,31 @@ void WorldSystem::FixedUpdate()
 		{
 			if (tile->m_currentCellCount < tile->m_initalCellCount / 3)
 			{
-				if (Space->HasComponent<Player>(entity))
+				if (    Space->HasComponent<Player>   (entity) 
+					|| !Space->HasComponent<EnemyShip>(entity))
 				{
-					//reset();
 					return;
 				}
 
-				SpawnItem_Event::IType itemType;
-				if (iw::randf() > .5) itemType = SpawnItem_Event::LASER_CHARGE;
-				else                  itemType = SpawnItem_Event::HEALTH;
+				std::vector<std::pair<ItemType, float>> item_weights{
+					//{ HEALTH, 50},
+					//{ LASER_CHARGE,  50 },
+					{ WEAPON_MINIGUN, 5 }
+				};
 
-				int amount = iw::randi(5) + 1;
-				Bus->push<SpawnItem_Event>(transform->Position.x, transform->Position.y, amount, itemType);
+				ItemType item = iw::choose(item_weights);
+				int amount = 0;
 
+				switch (item)
+				{
+					case ItemType::HEALTH: 
+					case ItemType::LASER_CHARGE:   amount = iw::randi(5) + 1; break;
+
+					case ItemType::WEAPON_MINIGUN: amount = 1;
+				}
+
+				Bus->push<SpawnItem_Event>(transform->Position.x, transform->Position.y, amount, item);
+				
 				iw::Cell smoke = iw::Cell::GetDefault(iw::CellType::SMOKE);
 
 				for (int y = -5; y < 5; y++)
@@ -107,11 +119,11 @@ void WorldSystem::FixedUpdate()
 	{
 		if (iw::Keyboard::KeyDown(iw::SHIFT))
 		{
-			Bus->push<SpawnItem_Event>(sand->sP.x, sand->sP.y, 1, SpawnItem_Event::LASER_CHARGE);
+			Bus->push<SpawnItem_Event>(sand->sP.x, sand->sP.y, 1, ItemType::LASER_CHARGE);
 		}
 
 		else {
-			Bus->push<SpawnItem_Event>(sand->sP.x, sand->sP.y, 1, SpawnItem_Event::HEALTH);
+			Bus->push<SpawnItem_Event>(sand->sP.x, sand->sP.y, 1, ItemType::HEALTH);
 		}
 	}
 

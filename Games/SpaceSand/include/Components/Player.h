@@ -1,6 +1,8 @@
 #pragma once
 
 #include "iw/engine/Components/Timer.h"
+#include "Components/Projectile.h"
+#include "Components/Weapon.h"
 
 struct Player
 {
@@ -12,8 +14,6 @@ struct Player
 	bool i_fire2;
 
 	bool can_fire_laser;
-
-	iw::Timer timer;
 
 	Player() {}
 };

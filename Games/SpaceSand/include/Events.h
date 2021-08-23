@@ -3,6 +3,11 @@
 #include "iw/engine/Events/ActionEvents.h"
 #include "iw/entity/Entity.h"
 #include "iw/graphics/Color.h"
+#include "plugins/iw/Sand/Defs.h"
+#include "Components/Player.h"
+#include "Components/Item.h"
+#include "Components/Projectile.h"
+#include "Components/Weapon.h"
 
 enum Actions {
 	SPAWN_ENEMY,
@@ -10,7 +15,9 @@ enum Actions {
 	SPAWN_ITEM,
 	CHANGE_LASER_FLUID,
 	HEAL_PLAYER,
-	PROJ_HIT_TILE
+	PROJ_HIT_TILE,
+	CHANGE_WEAPON,
+	FIRE_WEAPON
 };
 
 struct SpawnEnemy_Event : iw::SingleEvent
@@ -39,27 +46,15 @@ struct SpawnEnemy_Event : iw::SingleEvent
 
 struct SpawnProjectile_Event : iw::SingleEvent
 {
-	float X, Y, dX, dY;
-
-	enum PType {
-		BULLET,
-		LASER
-	} Type;
-
+	ShotInfo Shot;
 	int Depth;
 
 	SpawnProjectile_Event(
-		float x,  float y,
-		float dx, float dy,
-		PType type,
+		const ShotInfo& shot,
 		int depth = 0
 	)
 		: iw::SingleEvent(SPAWN_PROJECTILE)
-		, X(x)
-		, Y(y)
-		, dX(dx)
-		, dY(dy)
-		, Type(type)
+		, Shot(shot)
 		, Depth(depth)
 	{}
 };
@@ -69,21 +64,18 @@ struct SpawnItem_Event : iw::SingleEvent
 	float X, Y;
 	int Amount;
 
-	enum IType {
-		HEALTH,
-		LASER_CHARGE
-	} Type;
+	ItemType Item;
 
 	SpawnItem_Event(
 		float x, float y,
 		int amount,
-		IType type
+		ItemType item
 	)
 		: iw::SingleEvent(SPAWN_ITEM)
 		, X(x)
 		, Y(y)
 		, Amount(amount)
-		, Type(type)
+		, Item(item)
 	{}
 };
 
@@ -121,5 +113,41 @@ struct ProjHitTile_Event : iw::SingleEvent
 		, Info(info)
 		, Hit(hit)
 		, Projectile(proj)
+	{}
+};
+
+struct ChangeWeapon_Event : iw::SingleEvent
+{
+	iw::Entity Entity;
+	WeaponType Weapon;
+	int        WeaponAmmo;
+
+	ChangeWeapon_Event(
+		iw::Entity entity,
+		WeaponType weapon,
+		int weaponAmmo
+	)
+		: iw::SingleEvent(CHANGE_WEAPON)
+		, Entity(entity)
+		, Weapon(weapon)
+		, WeaponAmmo(weaponAmmo)
+	{}
+};
+
+struct FireWeapon_Event : iw::SingleEvent
+{
+	iw::Entity Entity;
+	float TargetX;
+	float TargetY;
+
+	FireWeapon_Event(
+		iw::Entity entity,
+		float targetX,
+		float targetY
+	)
+		: iw::SingleEvent(FIRE_WEAPON)
+		, Entity(entity)
+		, TargetX(targetX)
+		, TargetY(targetY)
 	{}
 };

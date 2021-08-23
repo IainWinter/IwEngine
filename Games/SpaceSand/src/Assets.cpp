@@ -12,7 +12,10 @@ int LoadAssets(
 	A_texture_asteroid      = Asset->Load<Texture>("textures/SpaceGame/asteroid.png");
 	A_texture_ui_cursor     = Asset->Load<Texture>("textures/SpaceGame/circle_temp.png");
 	A_texture_ui_background = Asset->Load<Texture>("textures/SpaceGame/ui_background.png");
-	
+	A_texture_item_health   = Asset->Load<Texture>("textures/SpaceGame/item_health.png");
+	A_texture_item_energy   = Asset->Load<Texture>("textures/SpaceGame/item_energy.png");
+	A_texture_item_minigun  = Asset->Load<Texture>("textures/SpaceGame/circle_temp.png");
+
 	A_material_texture_cam          = REF<Material>(Asset->Load<Shader>("shaders/texture_cam.shader"));
 	A_material_texture_cam_particle = REF<Material>(Asset->Load<Shader>("shaders/particle/texture_cam.shader"));
 
@@ -29,16 +32,33 @@ int LoadAssets(
 	CHECK_LOAD(A_texture_asteroid	   )
 	CHECK_LOAD(A_texture_ui_cursor	   )
 	CHECK_LOAD(A_texture_ui_background )
+	CHECK_LOAD(A_texture_item_health   )
+	CHECK_LOAD(A_texture_item_energy   )
+	CHECK_LOAD(A_texture_item_minigun  )
 
 	CHECK_LOAD(A_material_texture_cam         ->Shader)
 	CHECK_LOAD(A_material_texture_cam_particle->Shader)
 
-	A_texture_star->         m_filter = NEAREST;
-	A_texture_asteroid->     m_filter = NEAREST;
-	A_texture_player->       m_filter = NEAREST;
-	A_texture_enemy1->       m_filter = NEAREST;
-	A_texture_ui_cursor->    m_filter = NEAREST;
+	A_texture_star         ->m_filter = NEAREST;
+	A_texture_asteroid     ->m_filter = NEAREST;
+	A_texture_player       ->m_filter = NEAREST;
+	A_texture_enemy1       ->m_filter = NEAREST;
+	A_texture_ui_cursor    ->m_filter = NEAREST;
 	A_texture_ui_background->m_filter = NEAREST;
+	A_texture_item_health  ->m_filter = NEAREST;
+	A_texture_item_energy  ->m_filter = NEAREST;
+	A_texture_item_minigun ->m_filter = NEAREST;
+
+	
+	A_texture_star         ->m_wrap = EDGE;
+	A_texture_asteroid     ->m_wrap = EDGE;
+	A_texture_player       ->m_wrap = EDGE;
+	A_texture_enemy1       ->m_wrap = EDGE;
+	A_texture_ui_cursor    ->m_wrap = EDGE;
+	A_texture_ui_background->m_wrap = EDGE;
+	A_texture_item_health  ->m_wrap = EDGE;
+	A_texture_item_energy  ->m_wrap = EDGE;
+	A_texture_item_minigun ->m_wrap = EDGE;
 
 	{
 		Renderer->InitShader(A_material_texture_cam->Shader, CAMERA);

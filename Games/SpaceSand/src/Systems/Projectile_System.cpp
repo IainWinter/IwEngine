@@ -59,7 +59,14 @@ void ProjectileSystem::FixedUpdate()
 		glm::vec2 vel(x * 2 - 1, y * 2 - 1);
 		vel = glm::normalize(vel) * 44.f;
 		
-		Bus->push<SpawnProjectile_Event>(w, h, vel.x + offX, -vel.y + offY, SpawnProjectile_Event::BULLET, 15);
+		ShotInfo shot;
+		shot.x = w;
+		shot.y = h;
+		shot.dx = vel.x;
+		shot.dy = vel.y;
+		shot.projectile = ProjectileType::BULLET;
+
+		Bus->push<SpawnProjectile_Event>(shot, 15);
 	}
 }
 
@@ -124,17 +131,17 @@ bool ProjectileSystem::On(iw::ActionEvent& e)
 
 	SpawnProjectile_Event& event = e.as<SpawnProjectile_Event>();
 
-	switch (event.Type) {
-		case SpawnProjectile_Event::BULLET: MakeBullet(event.X, event.Y, event.dX, event.dY, event.Depth); break;
-		case SpawnProjectile_Event::LASER:  MakeLaser (event.X, event.Y, event.dX, event.dY, event.Depth); break;
+	switch (event.Shot.projectile) 
+	{
+		case ProjectileType::BULLET: MakeBullet(event.Shot, event.Depth); break;
+		case ProjectileType::LASER:  MakeLaser (event.Shot, event.Depth); break;
 	}
 
 	return false;
 }
 
 iw::Entity ProjectileSystem::MakeProjectile(
-	float  x, float  y,
-	float dx, float dy)
+	const ShotInfo& shot)
 {
 	iw::Entity entity = Space->CreateEntity<
 		iw::Transform, 
@@ -147,10 +154,10 @@ iw::Entity ProjectileSystem::MakeProjectile(
 	iw::Circle*    collider   = entity.Set<iw::Circle>();
 	iw::Rigidbody* rigidbody  = entity.Set<iw::Rigidbody>();
 
-	transform->Position = glm::vec3(x, y, 0);
+	transform->Position = glm::vec3(shot.x, shot.y, 0);
 
 	rigidbody->SetTransform(transform);
-	rigidbody->Velocity = glm::vec3(dx, dy, 0);
+	rigidbody->Velocity = glm::vec3(shot.dx, shot.dy, 0);
 	rigidbody->Collider = collider;
 	rigidbody->IsTrigger = true;
 
@@ -226,11 +233,10 @@ iw::Entity ProjectileSystem::MakeProjectile(
 }
 
 iw::Entity ProjectileSystem::MakeBullet(
-	float  x, float  y, 
-	float dx, float dy,
+	const ShotInfo& shot,
 	int depth)
 {
-	iw::Entity entity = MakeProjectile(x, y, dx, dy);
+	iw::Entity entity = MakeProjectile(shot);
 	Projectile* projectile = entity.Find<Projectile>();
 
 	projectile->PlaceCell = [=](iw::SandChunk* chunk, int px, int py, float dx, float dy)
@@ -255,7 +261,14 @@ iw::Entity ProjectileSystem::MakeBullet(
 			auto [x, y, z, dx, dy] = getpos(entity);
 			float speed = sqrt(dx*dx + dy*dy);
 			auto [dx2, dy2] = randvel(entity, iw::Pi/4);
-			Bus->push<SpawnProjectile_Event>(fhx, fhy, dx2, dy2, SpawnProjectile_Event::BULLET, depth + 1);
+
+			ShotInfo split = shot;
+			split.x = fhx;
+			split.y = fhy;
+			split.dx = dx2;
+			split.dy = dy2;
+
+			Bus->push<SpawnProjectile_Event>(split, depth + 1);
 		}
 
 		Space->QueueEntity(entity.Handle, iw::func_Destroy);
@@ -265,11 +278,10 @@ iw::Entity ProjectileSystem::MakeBullet(
 }
 
 iw::Entity ProjectileSystem::MakeLaser(
-	float  x, float  y,
-	float dx, float dy,
+	const ShotInfo& shot,
 	int depth)
 {
-	iw::Entity entity = MakeProjectile(x, y, dx, dy);
+	iw::Entity entity = MakeProjectile(shot);
 	Projectile* projectile = entity.Find<Projectile>();
 
 	projectile->PlaceCell = [=](iw::SandChunk* chunk, int px, int py, float dx, float dy)
@@ -291,15 +303,24 @@ iw::Entity ProjectileSystem::MakeLaser(
 
 		if (depth < 25 && sand->m_world->InBounds(hx, hy))
 		{
+			ShotInfo split = shot;
+			split.x = fhx;
+			split.y = fhy;
+			
 			auto [x, y, z, dx, dy] = getpos(entity);
 			float speed = sqrt(dx*dx + dy*dy);
 			auto [dx2, dy2] = randvel(entity, iw::Pi/8);
-			Bus->push<SpawnProjectile_Event>(fhx, fhy, dx2, dy2, SpawnProjectile_Event::LASER, depth + 1);
+
+			split.dx = dx2;
+			split.dy = dy2;
+			Bus->push<SpawnProjectile_Event>(split, depth + 1);
 				
 			if (iw::randf() > .9) // is there a way to calc a % to make this not diverge, i.e x % of them double
 			{
 				auto [dx3, dy3] = randvel(entity, iw::Pi / 6);
-				Bus->push<SpawnProjectile_Event>(fhx, fhy, dx3, dy3, SpawnProjectile_Event::LASER, depth + 1);
+				split.dx = dx3;
+				split.dy = dy3;
+				Bus->push<SpawnProjectile_Event>(split, depth + 1);
 			}
 		}
 

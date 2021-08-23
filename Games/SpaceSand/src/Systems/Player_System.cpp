@@ -2,20 +2,23 @@
 
 int PlayerSystem::Initialize()
 {
-	player = sand->MakeTile<iw::Circle, Player>(A_texture_player, true);
+	player = sand->MakeTile<iw::Circle, Player, Armorments>(A_texture_player, true);
 
 	Player*        p = player.Set<Player>();
 	iw::Circle*    c = player.Find<iw::Circle>();
 	iw::Rigidbody* r = player.Find<iw::Rigidbody>();
-
-	p->timer.SetTime("fire1", 0.15f/3);
-	p->timer.SetTime("fire2", 0.01f);
 
 	c->Radius = 4;
 
 	auto [w, h] = sand->GetSandTexSize2();
 	r->Transform.Position = glm::vec3(w, h, 0);
 	r->SetMass(10);
+
+	Armorments* guns = player.Set<Armorments>();
+	guns->Weapons.emplace(WeaponType::CANNON,      MakeCannonInfo());
+	//guns->Weapons.emplace(WeaponType::SUPER_LASER, MakeLaserInfo());
+
+	Bus->push<ChangeWeapon_Event>(player, WeaponType::CANNON, -1);
 
 	return 0;
 }
@@ -61,30 +64,18 @@ void PlayerSystem::Update()
 	Player*        p = player.Find<Player>();
 	iw::Transform* t = player.Find<iw::Transform>();
 
-	p->timer.Tick();
+	float aim_x = sand->sP.x;
+	float aim_y = sand->sP.y;
 
-	if (   p->i_fire1 
-		&& p->timer.Can("fire1"))
+	if (p->i_fire1)
 	{
-		auto [x, y, dx, dy] = GetShot(t->Position.x, t->Position.y, sand->sP.x, sand->sP.y, 1250/4, 10, 2);
-
-		float speed = sqrt(dx*dx+dy*dy);
-		dx += iw::randf() * speed * .05f;
-		dy += iw::randf() * speed * .05f;
-		
-		Bus->push<SpawnProjectile_Event>(x, y, dx, dy, SpawnProjectile_Event::BULLET);
+		Bus->push<FireWeapon_Event>(player, aim_x, aim_y);
 	}
 	
 	if (   p->i_fire2 
-		&& p->timer.Can("fire2")
 		&& p->can_fire_laser)
 	{
-		auto [x, y, dx, dy] = GetShot(t->Position.x, t->Position.y, sand->sP.x, sand->sP.y, 1800 + iw::randf() * 400, 10, 7);
-
-		//dx += iw::randf() * 100;
-		//dy += iw::randf() * 100;
-		
-		Bus->push<SpawnProjectile_Event>(x, y, dx, dy, SpawnProjectile_Event::LASER);
+		Bus->push<FireWeapon_Event>(player, aim_x, aim_y);
 		Bus->push<ChangeLaserFluid_Event>(-1);
 	}
 }

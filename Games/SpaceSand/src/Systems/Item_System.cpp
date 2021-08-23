@@ -5,14 +5,14 @@ void ItemSystem::FixedUpdate()
     Space->Query<iw::Rigidbody, Item>().Each([&](
         iw::EntityHandle entity,
         iw::Rigidbody* rigidbody,
-        Item* health) 
+        Item* item) 
         {
             glm::vec3 playerPos = m_player.Find<iw::Transform>()->Position;
             glm::vec3 healthPos = rigidbody->Transform.Position;
 
             float distance = glm::distance(healthPos, playerPos);
 
-            if (health->PickingUp)
+            if (item->PickingUp)
             {
                 // should calcuate an arc so they cannot orbit
 
@@ -21,7 +21,7 @@ void ItemSystem::FixedUpdate()
 
                 if (distance < 5)
                 {
-                    health->OnPickUp();
+                    item->OnPickUp();
                     Space->QueueEntity(entity, iw::func_Destroy);
                 }
 
@@ -31,19 +31,19 @@ void ItemSystem::FixedUpdate()
                 }
             }
 
-            else if (!health->PickingUp && distance < 50)
+            else if (!item->PickingUp && distance < item->PickUpRadius)
             {
-                health->PickingUp = true;
+                item->PickingUp = true;
             }
 
-            else if (health->MoveTimer > health->MoveTime)
+            else if (item->MoveTimer > item->MoveTime)
             {
                 rigidbody->Velocity = glm::vec3(0.f);
             }
 
             else {
-                rigidbody->Velocity = iw::lerp(rigidbody->Velocity, glm::vec3(0.f), health->MoveTimer / health->MoveTime);
-                health->MoveTimer += iw::FixedTime();
+                rigidbody->Velocity = iw::lerp(rigidbody->Velocity, glm::vec3(0.f), item->MoveTimer / item->MoveTime);
+                item->MoveTimer += iw::FixedTime();
             }
         });
 }
@@ -65,10 +65,11 @@ bool ItemSystem::On(iw::ActionEvent& e)
 
         angle += angleStep;
 
-        switch (event.Type)
+        switch (event.Item)
         {
-            case SpawnItem_Event::HEALTH:       MakeHealth     (event.X, event.Y, dx, dy); break;
-            case SpawnItem_Event::LASER_CHARGE: MakeLaserCharge(event.X, event.Y, dx, dy); break;
+            case ItemType::HEALTH:         MakeHealth       (event.X, event.Y, dx, dy); break;
+            case ItemType::LASER_CHARGE:   MakeLaserCharge  (event.X, event.Y, dx, dy); break;
+            case ItemType::WEAPON_MINIGUN: MakeWeaponMinigun(event.X, event.Y, dx, dy); break;
         }
     }
 
@@ -78,17 +79,17 @@ bool ItemSystem::On(iw::ActionEvent& e)
 iw::Entity ItemSystem::MakeItem(
     float   x, float   y, 
     float ndx, float ndy,
-    std::string spritePath)
+    iw::ref<iw::Texture>& sprite)
 {
-    iw::Entity entity = sand->MakeTile<iw::Circle, Item>(spritePath, true);
+    iw::Entity entity = sand->MakeTile<iw::Circle, Item>(sprite, true);
     
-    Item*          item      = entity.Set<Item>();
+                               entity.Set<Item>();
     iw::Transform* transform = entity.Find<iw::Transform>();
 	iw::Rigidbody* rigidbody = entity.Find<iw::Rigidbody>();
     iw::Circle*    collider  = entity.Find<iw::Circle>();
 	iw::Tile*      tile      = entity.Find<iw::Tile>();
 
-    collider->Radius = 2.5f;
+    collider->Radius = glm::compMax(sprite->Dimensions())/*2.5f*/; // radius from sprite size
 	
     tile->m_zIndex = 1;
 	
@@ -98,15 +99,18 @@ iw::Entity ItemSystem::MakeItem(
     rigidbody->Velocity.x = ndx * 75;
     rigidbody->Velocity.y = ndy * 75;
     rigidbody->SetTransform(transform);
-    rigidbody->IsTrigger = true; // so they donmt knock player around, I liked that effect tho but it could move it out of bounds
+    rigidbody->IsTrigger = true; // so they dont knock player around, I liked that effect tho but it could move player out of bounds
 
     return entity;
 }
 
 iw::Entity ItemSystem::MakeHealth(float x, float y, float ndx, float ndy)
 {
-    iw::Entity entity = MakeItem(x, y, ndx, ndy, "textures/SpaceGame/health_big.png");
-    entity.Find<Item>()->OnPickUp = [=]()
+    iw::Entity entity = MakeItem(x, y, ndx, ndy, A_texture_item_health);
+    
+    Item* item = entity.Find<Item>();
+    item->PickUpRadius = 50;
+    item->OnPickUp = [&]()
     {
         Bus->push<HealPlayer_Event>();
     };
@@ -116,11 +120,28 @@ iw::Entity ItemSystem::MakeHealth(float x, float y, float ndx, float ndy)
 
 iw::Entity ItemSystem::MakeLaserCharge(float x, float y, float ndx, float ndy)
 {
-    iw::Entity entity = MakeItem(x, y, ndx, ndy, "textures/SpaceGame/laser_pickup.png");
-    entity.Find<Item>()->OnPickUp = [=]()
+    iw::Entity entity = MakeItem(x, y, ndx, ndy, A_texture_item_energy);
+    
+    Item* item = entity.Find<Item>();
+    item->PickUpRadius = 50;
+    item->OnPickUp = [&]()
     {
         Bus->push<ChangeLaserFluid_Event>(iw::randi(5) + 2);
     };
 
     return entity;
+}
+
+iw::Entity ItemSystem::MakeWeaponMinigun(float x, float y, float ndx, float ndy)
+{
+    iw::Entity entity = MakeItem(x, y, ndx, ndy, A_texture_item_minigun);
+
+    Item* item = entity.Find<Item>();
+    item->PickUpRadius = 25;
+    item->OnPickUp = [&]()
+    {
+        Bus->push<ChangeWeapon_Event>(m_player, WeaponType::MINGUN, 400);
+    };
+
+    return iw::Entity();
 }

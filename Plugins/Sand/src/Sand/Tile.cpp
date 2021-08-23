@@ -1,6 +1,4 @@
 #include "iw/Sand/Tile.h"
-#include "iw/common/algos/polygon2.h"
-#include "iw/physics/AABB.h"
 
 IW_PLUGIN_SAND_BEGIN
 

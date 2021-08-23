@@ -95,6 +95,9 @@ namespace Engine {
 			return (S*)m_systems.Get(name);
 		}
 
+		// should add a function for making a system that
+		// assigneds app vars but doesnt push it to the layer
+
 		template<
 			typename S,
 			typename... Args>

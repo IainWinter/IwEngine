@@ -1,6 +1,13 @@
 #pragma once
 
+#include "plugins/iw/Sand/SandChunk.h"
+#include <utility>
 #include <functional>
+
+enum ProjectileType {
+	BULLET,
+	LASER
+};
 
 struct Projectile {
 	std::function<void()> FixedUpdate; // called in physics tick

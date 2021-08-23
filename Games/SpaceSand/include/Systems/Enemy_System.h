@@ -7,7 +7,6 @@
 #include "Components/EnemyShip.h"
 #include "Components/Flocker.h"
 
-#include "Helpers.h"
 #include "Events.h"
 #include "Assets.h"
 
