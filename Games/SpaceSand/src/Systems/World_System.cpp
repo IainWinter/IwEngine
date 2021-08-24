@@ -1,4 +1,5 @@
 #include "Systems/World_System.h"
+#include "iw/engine/Events/Seq/Delay.h"
 
 int WorldSystem::Initialize()
 {
@@ -7,13 +8,38 @@ int WorldSystem::Initialize()
 
 	iw::EventSequence& level1 = m_levels.emplace_back(CreateSequence());
 
-	level1./*Add<Spawn>(MakeEnemySpawnner   ({ TOP }))
-		 ->*/Add<Spawn>(MakeAsteroidSpawnner({ TOP }));
+	Spawn spawner(10, 2, .1, .3);
+	spawner.AddSpawn(w / 2 - 50, h + 10, w / 2 + 50, h + 100);
+	spawner.OnSpawn = SpawnEnemy;
 
-	level1.Add([&]() {
-		m_levels.pop_back();
-		return true;
-	});
+	level1.Add([&]()
+		{
+			SpawnAsteroid_Config config;
+			SpawnAsteroid_Config config1;
+		
+			config.SpawnLocationX = 0;
+			config.SpawnLocationY = 550;
+			config.VelocityX =  2;
+			config.VelocityY = -10;
+			config1.AngularVel = -iw::randfs() / 3;
+
+			config1.SpawnLocationX = 400;
+			config1.SpawnLocationY = 550;
+			config1.VelocityX = -2;
+			config1.VelocityY = -10;
+			config1.AngularVel = iw::randfs() / 3;
+
+			Bus->push<SpawnAsteroid_Event>(config);
+			Bus->push<SpawnAsteroid_Event>(config1);
+
+			return true;
+		})
+		->Add<iw::Delay>(15)
+		->Add<Spawn>(spawner)
+		->Add([&]() {
+			m_levels.pop_back();
+			return true;
+		});
 
 	m_levels.back().Start();
 
@@ -116,66 +142,67 @@ iw::Entity WorldSystem::MakeAsteroid(
 	return entity;
 }
 
-Spawn WorldSystem::MakeSpawner(
-	std::initializer_list<WhereToSpawn> where,
-	int numb, int batch,
-	float time, float timeMargin)
-{
-	Spawn spawn(numb, batch, time, timeMargin);
-	
-	auto [w, h] = sand->GetSandTexSize();
-
-	for (WhereToSpawn side : where)
-	{
-		switch (side)
-		{
-			case TOP:    spawn.AddSpawn(  - 100, h + 100, w + 100, h + 200); break;
-			case BOTTOM: spawn.AddSpawn(  - 100,   - 100, w + 100,   - 200); break;
-			case LEFT:   spawn.AddSpawn(w - 100,   - 100, w - 200, h + 200); break;
-			case RIGHT:  spawn.AddSpawn(w + 100,   - 100, w + 200, h + 200); break;
-		}
-	}
-
-	return spawn;
-}
-
-Spawn WorldSystem::MakeEnemySpawnner(
-	std::initializer_list<WhereToSpawn> where)
-{
-	Spawn spawn = MakeSpawner(where, 20, 4, 5, 3);
-	spawn.func_Spawn = [=](float x, float y)
-	{
-		auto [w, h] = sand->GetSandTexSize();
-		float margin = .1f;
-
-		float target_x = iw::randi(w - w * margin * 2) + w * margin;
-		float target_y = iw::randi(h - h * margin * 2) + h * margin;
-
-		Bus->push<SpawnEnemy_Event>(m_player, x, y, target_x, target_y);
-	};
-	
-	return spawn;
-}
-
-Spawn WorldSystem::MakeAsteroidSpawnner(
-	std::initializer_list<WhereToSpawn> where)
-{
-	Spawn spawn = MakeSpawner(where, 3, 1, 2, 1);
-	spawn.func_Spawn = [=](float x, float y)
-	{
-		SpawnAsteroid_Config config;
-		config.SpawnLocationX = x;
-		config.SpawnLocationY = y;
-		config.VelocityX = iw::randfs() * 10;
-		config.VelocityY = -20 - iw::randfs() * 10;
-		config.AngularVel = iw::randfs() / 10;
-		config.Size = iw::randi(10);
-
-		Bus->push<SpawnAsteroid_Event>(config);
-	};
-
-	return spawn;
-}
+//Spawn WorldSystem::MakeSpawner(
+//	int numb, int batch,
+//	float time, float timeMargin,
+//	std::initializer_list<WhereToSpawn> where)
+//{
+//	Spawn spawn(numb, batch, time, timeMargin);
+//	
+//	auto [w, h] = sand->GetSandTexSize();
+//
+//	for (WhereToSpawn side : where)
+//	{
+//		switch (side)
+//		{
+//			case TOP:    spawn.AddSpawn(  - 100, h + 100, w + 100, h + 200); break;
+//			case BOTTOM: spawn.AddSpawn(  - 100,   - 100, w + 100,   - 200); break;
+//			case LEFT:   spawn.AddSpawn(w - 100,   - 100, w - 200, h + 200); break;
+//			case RIGHT:  spawn.AddSpawn(w + 100,   - 100, w + 200, h + 200); break;
+//		}
+//	}
+//
+//	return spawn;
+//}
+//
+//Spawn WorldSystem::MakeEnemySpawnner(
+//	int numb, int batch,
+//	float time, float timeMargin)
+//{
+//	Spawn spawn = MakeSpawner(numb, batch, time, timeMargin, where);
+//	spawn.func_Spawn = [=](float x, float y)
+//	{
+//		auto [w, h] = sand->GetSandTexSize();
+//		float margin = .1f;
+//
+//		float target_x = iw::randi(w - w * margin * 2) + w * margin;
+//		float target_y = iw::randi(h - h * margin * 2) + h * margin;
+//
+//		Bus->push<SpawnEnemy_Event>(m_player, x, y, target_x, target_y);
+//	};
+//	
+//	return spawn;
+//}
+//
+//Spawn WorldSystem::MakeAsteroidSpawnner(
+//	std::initializer_list<WhereToSpawn> where)
+//{
+//	Spawn spawn = MakeSpawner(where, 3, 1, 2, 1);
+//	spawn.func_Spawn = [=](float x, float y)
+//	{
+//		SpawnAsteroid_Config config;
+//		config.SpawnLocationX = x;
+//		config.SpawnLocationY = y;
+//		config.VelocityX = iw::randfs() * 10;
+//		config.VelocityY = -20 - iw::randfs() * 10;
+//		config.AngularVel = iw::randfs() / 10;
+//		config.Size = iw::randi(10);
+//
+//		Bus->push<SpawnAsteroid_Event>(config);
+//	};
+//
+//	return spawn;
+//}
 
 //Spawn WorldSystem::MakeAsteroidSpawnner()
 //{

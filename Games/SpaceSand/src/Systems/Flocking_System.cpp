@@ -64,7 +64,7 @@ void FlockingSystem::FixedUpdate()
 		//// Target force, make own funciton in iwmath, i guess a turn twoards
 		glm::vec3 nVel = safeNorm(rigidbody->Velocity);
 		glm::vec3 nDir = safeNorm(targetVel);
-		glm::vec3 delta = (nDir - nVel) * 100.f/** p->Speed * p->TurnRadius*/;
+		glm::vec3 delta = (nDir - nVel) * 1.f/** p->Speed * p->TurnRadius*/;
 
 		rigidbody->Velocity = safeNorm(rigidbody->Velocity + delta) * iw::clamp(targetDist, 0.f, 100.f);
 	});

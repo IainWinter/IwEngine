@@ -26,12 +26,14 @@ public:
 
 struct Spawn : iw::EventTask
 {
+	using func_Spawn = std::function<void(float, float)>;
+
 	std::vector<iw::AABB2> Areas;
 	int NumberLeftToSpawn;
 	int RandBatchSpawn;
 	iw::Timer Timer;
 
-	std::function<void(float, float)> func_Spawn;
+	func_Spawn OnSpawn;
 
 	Spawn(
 		int numberToSpawn,
@@ -62,7 +64,7 @@ struct Spawn : iw::EventTask
 				float x = min.x + (max.x - min.x) * iw::randf();
 				float y = min.y + (max.y - min.y) * iw::randf();
 
-				func_Spawn(x, y);
+				OnSpawn(x, y);
 
 				NumberLeftToSpawn -= 1;
 			}

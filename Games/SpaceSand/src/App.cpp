@@ -192,8 +192,8 @@ struct GameLayer : iw::Layer
 		return 0;
 	}
 
-	std::unordered_map<iw::EntityHandle, std::pair<iw::Mesh, int>, iw::ehandle_hash> debug_tileColliders;
-	int tick = 0;
+	//std::unordered_map<iw::EntityHandle, std::pair<iw::Mesh, int>, iw::ehandle_hash> debug_tileColliders;
+	//int tick = 0;
 
 	// temp ui
 	iw::Camera* cam;
@@ -207,36 +207,36 @@ struct GameLayer : iw::Layer
 
 	void Update() override { // this is one frame behind, add a callback to the sand layer that gets called at the right time, right after rendering the world...
 		
-		tick++;
+		//tick++;
 
-		Space->Query<iw::Tile>().Each([&](
-			iw::EntityHandle entity, 
-			iw::Tile* tile) 
-		{
-			auto& [mesh, mtick] = debug_tileColliders[entity];
+		//Space->Query<iw::Tile>().Each([&](
+		//	iw::EntityHandle entity, 
+		//	iw::Tile* tile) 
+		//{
+		//	auto& [mesh, mtick] = debug_tileColliders[entity];
 
-			mtick = tick;
+		//	mtick = tick;
 
-			if (!mesh.Data)
-			{
-				iw::MeshDescription desc;
-				desc.DescribeBuffer(iw::bName::POSITION, iw::MakeLayout<float>(2));
+		//	if (!mesh.Data)
+		//	{
+		//		iw::MeshDescription desc;
+		//		desc.DescribeBuffer(iw::bName::POSITION, iw::MakeLayout<float>(2));
 
-				mesh = (new iw::MeshData(desc))->MakeInstance();
-				mesh.Data->SetBufferData(iw::bName::POSITION, tile->m_collider.size(), tile->m_collider.data());
-				mesh.Data->SetIndexData(tile->m_colliderIndex.size(), tile->m_colliderIndex.data());
-				mesh.Material = A_material_debug_wireframe;
-			}
-		});
+		//		mesh = (new iw::MeshData(desc))->MakeInstance();
+		//		mesh.Data->SetBufferData(iw::bName::POSITION, tile->m_collider.size(), tile->m_collider.data());
+		//		mesh.Data->SetIndexData(tile->m_colliderIndex.size(), tile->m_colliderIndex.data());
+		//		mesh.Material = A_material_debug_wireframe;
+		//	}
+		//});
 
-		for (auto& itr = debug_tileColliders.begin(); itr != debug_tileColliders.end(); itr++)
-		{
-			auto [mesh, mtick] = itr->second;
-			if (mtick != tick)
-			{
-				debug_tileColliders.erase(itr); // not sure if this is undefined
-			}
-		}
+		//for (auto& itr = debug_tileColliders.begin(); itr != debug_tileColliders.end(); itr++)
+		//{
+		//	auto [mesh, mtick] = itr->second;
+		//	if (mtick != tick)
+		//	{
+		//		debug_tileColliders.erase(itr); // not sure if this is undefined
+		//	}
+		//}
 
 		cursor.Find<iw::Transform>()->Position = glm::vec3(sand->sP, 0.f);
 
@@ -487,26 +487,26 @@ struct GameLayer : iw::Layer
 		Renderer->BeginScene(cam);
 		//Renderer->DrawMesh(iw::Transform(glm::vec3(0.f), glm::vec3(1, width/height, 1)), background_s->m_stars.GetParticleMesh());
 
-		for (auto& [entity, data] : debug_tileColliders)
-		{
-			iw::Transform transform = *Space->FindComponent<iw::Transform>(entity);
-			transform.Position /= 200.f;
-			transform.Position -= glm::vec3(1, 1, 0);
-			transform.Position.z = 10;
-			transform.Position.y += game_position_y;
-			transform.Scale /= 200.f;
+		//for (auto& [entity, data] : debug_tileColliders)
+		//{
+		//	iw::Transform transform = *Space->FindComponent<iw::Transform>(entity);
+		//	transform.Position /= 200.f;
+		//	transform.Position -= glm::vec3(1, 1, 0);
+		//	transform.Position.z = 10;
+		//	transform.Position.y += game_position_y;
+		//	transform.Scale /= 200.f;
 
-			transform.Scale.x *= c_game_width / width;
-			transform.Scale.y *= c_game_height / height;
+		//	transform.Scale.x *= c_game_width / width;
+		//	transform.Scale.y *= c_game_height / height;
 
-			Renderer->DrawMesh(transform, data.first);
-		}
+		//	Renderer->DrawMesh(transform, data.first);
+		//}
 
 
-		//Renderer->DrawMesh(uiPlayerTransform, A_mesh_ui_playerHealth);
-		//Renderer->DrawMesh(uiBackgroundTransform, A_mesh_ui_background);
-		//Renderer->DrawMesh(uiLaserChargeTransform, sand_ui_laserCharge->GetSandMesh());
-		//Renderer->DrawMesh(uiAmmoTextTransform, A_mesh_ui_text_ammo);
+		Renderer->DrawMesh(uiPlayerTransform, A_mesh_ui_playerHealth);
+		Renderer->DrawMesh(uiBackgroundTransform, A_mesh_ui_background);
+		Renderer->DrawMesh(uiLaserChargeTransform, sand_ui_laserCharge->GetSandMesh());
+		Renderer->DrawMesh(uiAmmoTextTransform, A_mesh_ui_text_ammo);
 		Renderer->EndScene();
 	}
 };

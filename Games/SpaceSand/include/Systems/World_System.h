@@ -39,7 +39,18 @@ struct WorldSystem : iw::SystemBase
 private:
 	iw::Entity MakeAsteroid(SpawnAsteroid_Config& config);
 
-	enum WhereToSpawn {
+	Spawn::func_Spawn SpawnEnemy = [=](float x, float y)
+	{
+		auto [w, h] = sand->GetSandTexSize();
+		float margin = .1f;
+
+		float target_x = iw::randi(w - w * margin * 2) + w * margin;
+		float target_y = iw::randi(h - h * margin * 2) + h * margin;
+
+		Bus->push<SpawnEnemy_Event>(m_player, x, y, target_x, target_y);
+	};
+
+	/*enum WhereToSpawn {
 		TOP,
 		BOTTOM,
 		LEFT,
@@ -51,6 +62,10 @@ private:
 		int numb, int batch,
 		float time, float timeMargin);
 
-	Spawn MakeEnemySpawnner   (std::initializer_list<WhereToSpawn> where);
-	Spawn MakeAsteroidSpawnner(std::initializer_list<WhereToSpawn> where);
+	Spawn MakeEnemySpawnner(
+		int numb, int batch,
+		float time, float timeMargin,
+		std::initializer_list<WhereToSpawn> where);
+
+	Spawn MakeAsteroidSpawnner(std::initializer_list<WhereToSpawn> where);*/
 };
