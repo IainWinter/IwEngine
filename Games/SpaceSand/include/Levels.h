@@ -15,11 +15,11 @@ protected:
 	iw::SandLayer* Sand;
 public:
 	LevelEventTask(
-		iw::Entity player,
+		iw::Entity m_player,
 		iw::SandLayer* sand
 	)
 		: iw::EventTask()
-		, Player(player)
+		, Player(m_player)
 		, Sand(sand)
 	{}
 };

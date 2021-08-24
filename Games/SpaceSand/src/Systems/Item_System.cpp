@@ -99,7 +99,7 @@ iw::Entity ItemSystem::MakeItem(
     rigidbody->Velocity.x = ndx * 75;
     rigidbody->Velocity.y = ndy * 75;
     rigidbody->SetTransform(transform);
-    rigidbody->IsTrigger = true; // so they dont knock player around, I liked that effect tho but it could move player out of bounds
+    rigidbody->IsTrigger = true; // so they dont knock m_player around, I liked that effect tho but it could move m_player out of bounds
 
     return entity;
 }
@@ -140,7 +140,7 @@ iw::Entity ItemSystem::MakeWeaponMinigun(float x, float y, float ndx, float ndy)
     item->PickUpRadius = 25;
     item->OnPickUp = [&]()
     {
-        Bus->push<ChangeWeapon_Event>(m_player, WeaponType::MINIGUN, 400);
+        Bus->push<ChangePlayerWeapon_Event>(WeaponType::SPECIAL_BEAM_CANNON);
     };
 
     return iw::Entity();

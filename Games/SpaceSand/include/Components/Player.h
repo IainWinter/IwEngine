@@ -15,5 +15,8 @@ struct Player
 
 	bool can_fire_laser;
 
+	Weapon* CurrentWeapon;
+	Weapon* SpecialLaser;
+
 	Player() {}
 };

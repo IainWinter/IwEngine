@@ -7,18 +7,6 @@ int ProjectileSystem::Initialize()
 
 void ProjectileSystem::Update()
 {
-	for (int i = 0; i < m_cells.size(); i++)
-	{
-		auto& [x, y, life] = m_cells.at(i);
-
-		life -= iw::DeltaTime();
-		if (life < 0.f)
-		{
-			sand->m_world->SetCell(x, y, iw::Cell::GetDefault(iw::CellType::EMPTY));
-			m_cells.at(i) = m_cells.back(); m_cells.pop_back(); i--;
-		}
-	}
-
 	Space->Query<Projectile>().Each([&](iw::EntityHandle, Projectile* p) 
 	{
 		if (p->Update)
@@ -135,6 +123,7 @@ bool ProjectileSystem::On(iw::ActionEvent& e)
 	{
 		case ProjectileType::BULLET: MakeBullet(event.Shot, event.Depth); break;
 		case ProjectileType::LASER:  MakeLaser (event.Shot, event.Depth); break;
+		case ProjectileType::BEAM:   MakeBeam  (event.Shot, event.Depth); break;
 	}
 
 	return false;
@@ -244,11 +233,9 @@ iw::Entity ProjectileSystem::MakeBullet(
 		iw::Cell cell;
 		cell.Type = iw::CellType::PROJECTILE;
 		cell.Color = iw::Color::From255(255, 230, 66);
-
-		float time = .02; // not sure if this should scale with speed
+		cell.life = .02;
 
 		chunk->SetCell(px, py, cell);
-		m_cells.emplace_back(px, py, time);
 	};
 
 	projectile->OnHit = [=](float fhx, float fhy)
@@ -289,11 +276,9 @@ iw::Entity ProjectileSystem::MakeLaser(
 		iw::Cell cell;
 		cell.Type = iw::CellType::PROJECTILE;
 		cell.Color = iw::Color::From255(255, 23, 6);
-
-		float time = .2; // not sure if this should scale with speed
+		cell.life = .2;
 
 		chunk->SetCell(px, py, cell);
-		m_cells.emplace_back(px, py, time);
 	};
 
 	projectile->OnHit = [=](float fhx, float fhy)
@@ -322,6 +307,58 @@ iw::Entity ProjectileSystem::MakeLaser(
 				split.dy = dy3;
 				Bus->push<SpawnProjectile_Event>(split, depth + 1);
 			}
+		}
+
+		Space->QueueEntity(entity.Handle, iw::func_Destroy);
+	};
+
+	return entity;
+}
+
+iw::Entity ProjectileSystem::MakeBeam(const ShotInfo& shot, int depth)
+{
+	iw::Entity entity = MakeProjectile(shot);
+	Projectile* projectile = entity.Find<Projectile>();
+
+	projectile->PlaceCell = [=](iw::SandChunk* chunk, int px, int py, float dx, float dy)
+	{
+		iw::Color centerColor = iw::Color::From255(252, 239, 91);
+		iw::Color outerColor = iw::Color::From255(255, 66, 255);
+
+		iw::Cell cell;
+		cell.Type = iw::CellType::PROJECTILE;
+		cell.Props = iw::CellProp::MOVE_FORCE;
+
+		for (int x = -3; x < 3; x++)
+		for (int y = -3; y < 3; y++)
+		{
+			float dist = sqrt(x*x + y*y) / sqrt(3*3+3*3);
+
+			cell.Color = iw::lerp(centerColor.rgb(), outerColor.rgb(), dist);
+			cell.dx = iw::randfs() * 10 * (dist * 2 + 1);
+			cell.dy = iw::randfs() * 10 * (dist * 2 + 1);
+			cell.life = iw::randf()*2;
+
+			sand->m_world->SetCell(px, py, cell);
+		}
+	};
+
+	projectile->OnHit = [=](float fhx, float fhy)
+	{
+		int hx = floor(fhx);
+		int hy = floor(fhy);
+
+		if (depth < 25 && sand->m_world->InBounds(hx, hy))
+		{
+			auto [dx2, dy2] = randvel(entity, iw::Pi/80);
+			
+			ShotInfo split = shot;
+			split.x = fhx; // should make faster could fill line
+			split.y = fhy;
+			split.dx = dx2;
+			split.dy = dy2;
+			
+			Bus->push<SpawnProjectile_Event>(split, depth); // bores forever
 		}
 
 		Space->QueueEntity(entity.Handle, iw::func_Destroy);

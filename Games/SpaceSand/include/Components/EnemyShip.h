@@ -1,11 +1,9 @@
 #pragma once
 
 #include "iw/entity/Entity.h"
-#include "iw/engine/Components/Timer.h"
+#include "Components/Weapon.h"
 
 struct EnemyShip {
 	iw::Entity ShootAt;
-	iw::Timer Timer;
-
-	EnemyShip() {}
+	Weapon* Weapon;
 };

@@ -110,11 +110,13 @@ namespace Graphics {
 		glm::vec3* verts   = new glm::vec3[vertCount];
 		glm::vec2* uvs     = new glm::vec2[vertCount];
 
-		glm::vec2 cursor;
+		glm::vec2 cursor = glm::vec2(.0f);
 		unsigned vert = 0;
 		unsigned index = 0;
-		for (std::string line : lines) {
-			for (size_t i = 1; i <= line.length(); i++) {
+		for (std::string line : lines) 
+		{
+			for (size_t i = 1; i <= line.length(); i++) 
+			{
 				unsigned char1 = line[i - 1];
 				unsigned char2 = line[i];
 

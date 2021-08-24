@@ -10,8 +10,6 @@ struct ProjectileSystem
 {
 	iw::SandLayer* sand;
 
-	std::vector<std::tuple<int, int, float>> m_cells; // x, y, life
-
 	ProjectileSystem(
 		iw::SandLayer* sand
 	)
@@ -30,6 +28,7 @@ private:
 
 	iw::Entity MakeBullet(const ShotInfo& shot, int depth);
 	iw::Entity MakeLaser (const ShotInfo& shot, int depth);
+	iw::Entity MakeBeam  (const ShotInfo& shot, int depth);
 
 	void MakeExplosion(int x, int y, int r);
 };

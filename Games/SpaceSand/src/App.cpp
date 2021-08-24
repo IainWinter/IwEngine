@@ -14,7 +14,6 @@
 
 #include "Systems/Flocking_System.h"
 #include "Systems/Projectile_System.h"
-#include "Systems/Weapon_System.h"
 
 #include "iw/graphics/Font.h"
 
@@ -23,9 +22,7 @@ struct GameLayer : iw::Layer
 	iw::SandLayer* sand;
 	iw::SandLayer* sand_ui_laserCharge;
 	
-	iw::Entity player;
-	iw::Mesh ui_score;
-	iw::ref<iw::Font> ui_font;
+	iw::Entity m_player;
 
 	iw::Entity cursor;
 
@@ -50,21 +47,10 @@ struct GameLayer : iw::Layer
 		cursor.Find<iw::CollisionObject>()->Transform.Scale = glm::vec3(.25f);
 		cursor.Find<iw::Tile>()->m_zIndex = -10;
 
-		Renderer->Device->SetClearColor(0, 0, 0, 0);
+		Renderer->Device->SetClearColor(0, 0, 0, 1);
 
 		Physics->AddSolver(new iw::SmoothPositionSolver());
 		Physics->AddSolver(new iw::ImpulseSolver());
-
-		//if(false){ // font
-		//	iw::ref<iw::Material> fontMat = REF<iw::Material>(
-		//		Asset->Load<iw::Shader>("shaders/font.shader")
-		//	);
-		//	Renderer->Now->InitShader(fontMat->Shader, iw::CAMERA);
-
-		//	ui_font = Asset->Load<iw::Font>("fonts/arial.fnt");
-		//	ui_score = ui_font->GenerateMesh("123\n123\n123\n123\n123", .001f, 1);
-		//	ui_score.Material = fontMat;
-		//}
 
 		{
 			cam = new iw::OrthographicCamera(2, 2, -10, 10);
@@ -181,15 +167,14 @@ struct GameLayer : iw::Layer
 			return e;
 		}
 
-		player = player_s->player;
+		m_player = player_s->m_player;
 
 		//background_s = PushSystem<BackgroundSystem>();
 		
-		PushSystem<WeaponSystem>();
 		PushSystem<ProjectileSystem>(sand);
 		PushSystem<EnemySystem>     (sand);
-		PushSystem<WorldSystem>     (sand, player_s->player);
-		PushSystem<ItemSystem>      (sand, player_s->player);
+		PushSystem<WorldSystem>     (sand, player_s->m_player);
+		PushSystem<ItemSystem>      (sand, player_s->m_player);
 
 		PushSystem<FlockingSystem>();
 
@@ -220,7 +205,7 @@ struct GameLayer : iw::Layer
 		
 		cursor.Find<iw::Transform>()->Position = glm::vec3(sand->sP, 0.f);
 
-		iw::Texture& playerSprite = player.Find<iw::Tile>()->m_sprite;
+		iw::Texture& playerSprite = m_player.Find<iw::Tile>()->m_sprite;
 		iw::ref<iw::Texture> uiPlayerTex  = A_mesh_ui_playerHealth.Material->GetTexture("texture");
 
 		unsigned* colorsFrom = playerSprite.Colors32();
@@ -245,7 +230,7 @@ struct GameLayer : iw::Layer
 
 		iw::SandChunk* chunk = sand_ui_laserCharge->m_world->GetChunk(0, 0);
 
-		laserFluidVel = iw::lerp(laserFluidVel, player.Find<iw::Rigidbody>()->Velocity, iw::DeltaTime() * 5);
+		laserFluidVel = iw::lerp(laserFluidVel, m_player.Find<iw::Rigidbody>()->Velocity, iw::DeltaTime() * 5);
 
 		std::pair<int, int> xy;
 
@@ -274,7 +259,7 @@ struct GameLayer : iw::Layer
 			}
 		}
 
-		if (/*laserFluidToRemove > 0*/player.Find<Player>()->i_fire2)
+		if (/*laserFluidToRemove > 0*/m_player.Find<Player>()->i_fire2)
 		{
 			auto [w, h] = sand_ui_laserCharge->GetSandTexSize();
 			for (int x = 18; x < 22; x++)
@@ -299,7 +284,7 @@ struct GameLayer : iw::Layer
 
 		canFireTimer = iw::max(canFireTimer - iw::DeltaTime(), 0.f);
 
-		player.Find<Player>()->can_fire_laser = canFireTimer > 0.f;
+		m_player.Find<Player>()->can_fire_laser = canFireTimer > 0.f;
 	}
 	// end temp ui
 
@@ -338,12 +323,18 @@ struct GameLayer : iw::Layer
 
 	void PostUpdate() override
 	{
+		{
+			std::stringstream buf;
+			buf << m_player.Find<Player>()->CurrentWeapon->Ammo;
+			A_font_arial->UpdateMesh(A_mesh_ui_text_ammo, buf.str(), .001f, 1);
+		}
+
 		sand->m_drawMouseGrid = iw::Keyboard::KeyDown(iw::SHIFT);
 
 		// screen - fills screen
 		//		game board - fills empty space, 1:1 aspect ratio
 		//		menu - y = 200px, x = width of game board
-		//			player ui
+		//			m_player ui
 		//			laser charges
 		//			score
 		//			time
@@ -374,7 +365,7 @@ struct GameLayer : iw::Layer
 
 		float c_menu_padding = floor(c_menu_height * .1);
 
-		glm::vec2 health_dim = player.Find<iw::Tile>()->m_sprite.Dimensions();
+		glm::vec2 health_dim = m_player.Find<iw::Tile>()->m_sprite.Dimensions();
 		float c_health_aspect = health_dim.x / health_dim.y;
 
 		float c_health_position_x = c_menu_position_x; // health is centered in menu
@@ -387,7 +378,10 @@ struct GameLayer : iw::Layer
 		float c_laser_position_x = c_menu_position_x - c_menu_width + c_laser_width + c_menu_padding * 2;
 		float c_laser_position_y = c_menu_position_y;
 		
-		// SCALING
+		float c_ammoCount_position_x = c_menu_position_x + c_menu_width - 200;
+		float c_ammoCount_position_y = c_menu_position_y + 100;
+
+		// SCALING, this should be done by the camera...
 
 		float game_scale_x    = c_game_width      / width;
 		float game_scale_y    = c_game_height     / height;
@@ -407,6 +401,9 @@ struct GameLayer : iw::Layer
 		float laser_scale_y    = c_laser_height     / height;
 		float laser_position_x = c_laser_position_x / width;
 		float laser_position_y = c_laser_position_y / height;
+
+		float ammoCount_position_x = c_ammoCount_position_x / width;
+		float ammoCount_position_y = c_ammoCount_position_y / height;
 
 		iw::Transform sandTransform;
 		sandTransform.Position.y = game_position_y;
@@ -432,15 +429,19 @@ struct GameLayer : iw::Layer
 		uiBackgroundTransform.Scale   .x = menu_scale_x;
 		uiBackgroundTransform.Scale   .y = menu_scale_y;
 
+		iw::Transform uiAmmoTextTransform;
+		uiAmmoTextTransform.Position.x = ammoCount_position_x;
+		uiAmmoTextTransform.Position.y = ammoCount_position_y;
+
 		// END SCALING
 
 		Renderer->BeginScene(cam);
-		Renderer->DrawMesh(iw::Transform(glm::vec3(0.f), glm::vec3(1, width/height, 1)), background_s->m_stars.GetParticleMesh());
+		//Renderer->DrawMesh(iw::Transform(glm::vec3(0.f), glm::vec3(1, width/height, 1)), background_s->m_stars.GetParticleMesh());
 
 		Renderer->DrawMesh(uiPlayerTransform, A_mesh_ui_playerHealth);
 		Renderer->DrawMesh(uiBackgroundTransform, A_mesh_ui_background);
-		//Renderer->DrawMesh(uiLaserChargeTransform, sand_ui_laserCharge->GetSandMesh());
-		//Renderer->DrawMesh(iw::Transform(), ui_score);
+		Renderer->DrawMesh(uiLaserChargeTransform, sand_ui_laserCharge->GetSandMesh());
+		Renderer->DrawMesh(uiAmmoTextTransform, A_mesh_ui_text_ammo);
 		Renderer->EndScene();
 
 		Renderer->BeginScene();

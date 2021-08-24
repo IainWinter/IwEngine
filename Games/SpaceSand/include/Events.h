@@ -7,7 +7,6 @@
 #include "Components/Player.h"
 #include "Components/Item.h"
 #include "Components/Projectile.h"
-#include "Components/Weapon.h"
 
 enum Actions {
 	SPAWN_ENEMY,
@@ -15,9 +14,8 @@ enum Actions {
 	SPAWN_ITEM,
 	CHANGE_LASER_FLUID,
 	HEAL_PLAYER,
+	CHANGE_PLAYER_WEAPON,
 	PROJ_HIT_TILE,
-	CHANGE_WEAPON,
-	FIRE_WEAPON
 };
 
 struct SpawnEnemy_Event : iw::SingleEvent
@@ -98,6 +96,18 @@ struct HealPlayer_Event : iw::SingleEvent
 	{}
 };
 
+struct ChangePlayerWeapon_Event : iw::SingleEvent
+{
+	WeaponType Weapon;
+
+	ChangePlayerWeapon_Event(
+		WeaponType weapon
+	)
+		: iw::SingleEvent(CHANGE_PLAYER_WEAPON)
+		, Weapon(weapon)
+	{}
+};
+
 struct ProjHitTile_Event : iw::SingleEvent
 {
 	iw::TileInfo Info;
@@ -113,41 +123,5 @@ struct ProjHitTile_Event : iw::SingleEvent
 		, Info(info)
 		, Hit(hit)
 		, Projectile(proj)
-	{}
-};
-
-struct ChangeWeapon_Event : iw::SingleEvent
-{
-	iw::Entity Entity;
-	WeaponType Weapon;
-	int        WeaponAmmo;
-
-	ChangeWeapon_Event(
-		iw::Entity entity,
-		WeaponType weapon,
-		int weaponAmmo = -1 // infinite
-	)
-		: iw::SingleEvent(CHANGE_WEAPON)
-		, Entity(entity)
-		, Weapon(weapon)
-		, WeaponAmmo(weaponAmmo)
-	{}
-};
-
-struct FireWeapon_Event : iw::SingleEvent
-{
-	iw::Entity Entity;
-	float TargetX;
-	float TargetY;
-
-	FireWeapon_Event(
-		iw::Entity entity,
-		float targetX,
-		float targetY
-	)
-		: iw::SingleEvent(FIRE_WEAPON)
-		, Entity(entity)
-		, TargetX(targetX)
-		, TargetY(targetY)
 	{}
 };

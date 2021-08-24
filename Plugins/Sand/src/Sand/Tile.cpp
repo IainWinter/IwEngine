@@ -21,8 +21,8 @@ Tile::Tile(
 
 	glm::vec2 halfSize = m_sprite.Dimensions() / 2.0f;
 
-	for (glm::vec2& v : m_collider) v -= halfSize ; // Origins to middle
-	for (glm::vec2& v : m_polygon)  v -= halfSize ;
+	for (glm::vec2& v : m_collider) v -= halfSize; // Origins to middle
+	for (glm::vec2& v : m_polygon)  v -= halfSize;
 
 	m_bounds.Min -= halfSize; // could make better flow
 	m_bounds.Max -= halfSize;
@@ -71,7 +71,10 @@ void Tile::UpdateColliderPolygon()
 	m_collider      = colliders[0]; // should combine into single polygon?
 	m_colliderIndex = TriangulatePolygon(colliders[0]);
 
-	RemoveTinyTriangles(m_collider, m_colliderIndex, 0.01f); // find best value for this, colliders can be less detailed
+	glm::vec2 halfSize = m_sprite.Dimensions() / 2.0f;
+	for (glm::vec2& v : m_collider) v -= halfSize; // Origins to middle ?
+
+	RemoveTinyTriangles(m_collider, m_colliderIndex, 0.001f); // find best value for this, colliders can be less detailed
 }
 
 IW_PLUGIN_SAND_END

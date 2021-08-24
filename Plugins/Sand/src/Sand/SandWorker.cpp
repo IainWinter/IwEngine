@@ -39,8 +39,6 @@ void SandWorker::UpdateChunk()
 
 		Cell& cell = cells[xx + yy * m_chunk->m_width];
 
-		if (cell.Props == CellProp::NONE) continue;
-
 		int px = xx + m_chunk->m_x;
 		int py = yy + m_chunk->m_y;
 

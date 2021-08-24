@@ -179,7 +179,7 @@ public:
 		typename... _others>
 	Entity MakeTile(
 		ref<Texture>& sprite,
-		bool isSimulated)
+		bool isSimulated = false)
 	{
 		ref<Archetype> archetype = Space->CreateArchetype<Transform, Tile, _collider, _others...>();
 

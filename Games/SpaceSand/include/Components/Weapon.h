@@ -1,134 +1,156 @@
 #pragma once
 
+#include "Components/Projectile.h"
+#include "iw/engine/Components/Timer.h"
 #include "iw/entity/Entity.h"
 #include "iw/common/Components/Transform.h"
-#include "Components/Projectile.h"
-#include <unordered_map>
-#include <functional>
 
-enum WeaponType
-{
-	CANNON,
-	MINIGUN,
-	SUPER_LASER
+enum WeaponType {
+	DEFAULT_CANNON,
+	MINIGUN_CANNON,
+	FAT_LASER_CANNON,
+	LASER_CANNON,
+	SPECIAL_BEAM_CANNON,
 };
 
-struct ShotInfo {
-	float x, y, dx, dy;
-	ProjectileType projectile;
-};
+class Weapon {
+private:
+	float m_lastShot = 0.f;
 
-struct WeaponInfo;
-
-using func_getShot = std::function<ShotInfo(iw::Entity, const WeaponInfo&, float, float)>;
-
-struct WeaponInfo {
-	float FireTime;
-	float FireTimeMargin;
-
-	func_getShot GetShot;
-
-	float Inaccuracy;
-	float Speed;
-};
-
-struct Weapon {
+public:
 	WeaponType Type;
-	int Ammo;
-	iw::Timer Timer;
+
+	float FireDelay = 0.f;
+	float FireDelayMargin = 0.f;
+
+	int Ammo = -1; // negitive is infinity
+
+	Weapon(WeaponType type)
+		: Type(type)
+	{}
+
+	bool CanFire()
+	{
+		if (Ammo == 0) return false;
+
+		bool canFire = iw::TotalTime() - m_lastShot > FireDelay;
+		if (canFire) {
+			m_lastShot = iw::TotalTime() + FireDelayMargin * iw::randf();
+		}
+
+		return canFire;
+	}
+
+	virtual ShotInfo GetShot(iw::Entity origin, float targetX, float targetY) = 0;
 };
 
-struct Armorments {
-	//WeaponType DefaultWeapon;
-	//WeaponType CurrentWeapon;
-	//int Ammo;                  // -1 = infinite
+struct Cannon : Weapon
+{
+	float BreadthFromOrigin  = 0.f;
+	float DistanceFromOrigin = 0.f;
+	float Inaccuracy = 0.f;
+	float Speed = 0.f;
+	float SpeedMargin = 0.f;
 
-	std::vector<Weapon> WeaponStack;
-	std::unordered_map<WeaponType, WeaponInfo> Weapons;
+	ProjectileType Projectile;
 
-	Armorments() = default;
+	Cannon(
+		WeaponType weapon,
+		ProjectileType projectile
+	)
+		: Weapon(weapon)
+		, Projectile(projectile)
+	{}
 
-	WeaponInfo* GetWeapon(
-		WeaponType weapon)
+	ShotInfo GetShot(
+		iw::Entity origin,
+		float targetX, float targetY) override
 	{
-		auto itr = Weapons.find(weapon);
-		if (itr == Weapons.end())
-		{
-			LOG_WARNING << "Tried to get a weapon not in armorments!";
-			return nullptr;
-		}
-		return &itr->second;
+		Ammo -= 1;
+
+		glm::vec3& pos = origin.Find<iw::Transform>()->Position;
+
+		ShotInfo shot = GetShot_Circular(
+			pos  .x, pos  .y,
+			targetX, targetY,
+			Speed + SpeedMargin * iw::randf(),
+			DistanceFromOrigin,
+			BreadthFromOrigin
+		);
+
+		float speed = shot.Speed();
+
+		shot.dx += speed * Inaccuracy * iw::randfs();
+		shot.dy += speed * Inaccuracy * iw::randfs();
+		shot.projectile = Projectile;
+
+		return shot;
 	}
 };
 
-inline std::tuple<float, float, float, float> GetShot_Circular(
-	float x,  float y,
-	float tx, float ty,
-	float speed, float margin, float thickness = 0)
+// should put in cpp
+
+inline Weapon* MakeDefault_Cannon()
 {
-	float dx = tx - x,
-	      dy = ty - y;
+	Cannon* cannon = new Cannon(WeaponType::DEFAULT_CANNON, ProjectileType::BULLET);
+	cannon->Speed = 1250;
+	cannon->DistanceFromOrigin = 10;
+	cannon->BreadthFromOrigin = 2;
+	cannon->FireDelay = 0.15;
 
-	float length = sqrt(dx*dx + dy*dy);
-
-	float nx = dx / length,
-           ny = dy / length;
-
-	dx = nx * speed;
-	dy = ny * speed;
-
-	float r = iw::randfs();
-
-	x += nx * margin - ny * thickness * r;
-	y += ny * margin + nx * thickness * r;
-
-	return std::tie(x, y, dx, dy);
+	return cannon;
 }
 
-
-inline func_getShot MakeGetShot_Circular(
-	float distanceFromOrigin,
-	float breadthFromOrigin,
-	ProjectileType projectile)
+inline Weapon* MakeMinigun_Cannon()
 {
-	return [=](iw::Entity e, const WeaponInfo& me, float tx, float ty)
-	{
-		glm::vec3 p = e.Find<iw::Transform>()->Position;
-		auto [x, y, dx, dy] = GetShot_Circular(p.x, p.y, tx, ty,
-			me.Speed,
-			distanceFromOrigin,
-			breadthFromOrigin
-		);
+	Cannon* cannon = new Cannon(WeaponType::MINIGUN_CANNON, ProjectileType::BULLET);
+	cannon->Speed = 1250 / 4.f;
+	cannon->DistanceFromOrigin = 10;
+	cannon->BreadthFromOrigin = 2;
+	cannon->FireDelay = 0.15 / 3.f;
+	cannon->Inaccuracy = .1f;
+	cannon->Ammo = 200;
 
-		dx += me.Speed * me.Inaccuracy * iw::randfs();
-		dx += me.Speed * me.Inaccuracy * iw::randfs();
-
-		return ShotInfo{ x, y, dx, dy, projectile };
-	};
+	return cannon;
 }
 
-// these could load from a file, then in assets have an A_weapon_player_cannon
-
-inline WeaponInfo MakeCannonInfo()
+inline Weapon* MakeFatLaser_Cannon()
 {
-	WeaponInfo info;
-	info.FireTime       = 0.15f;
-	info.FireTimeMargin = 0;
-	info.Speed          = 1250;
-	info.Inaccuracy     = 0;
-	info.GetShot = MakeGetShot_Circular(10, 2, ProjectileType::BULLET);
+	Cannon* cannon = new Cannon(WeaponType::FAT_LASER_CANNON, ProjectileType::LASER);
+	cannon->Speed = 1800;
+	cannon->SpeedMargin = 400;
+	cannon->DistanceFromOrigin = 10;
+	cannon->BreadthFromOrigin = 7;
+	cannon->FireDelay = 0.015;
 
-	return info;
+	return cannon;
 }
 
-inline WeaponInfo MakeMinigunInfo()
-{
-	WeaponInfo info;
-	info.FireTime       = 0.05f;
-	info.FireTimeMargin = 0;
-	info.Speed          = 320;
-	info.Inaccuracy     = 0.05f;
-	info.GetShot = MakeGetShot_Circular(10, 5, ProjectileType::BULLET);
+// enemy guns are slower to make the game fair. not sure how to name those, i want the enemy
+// to be able to use all the same guns as the player
 
-	return info;
+inline Weapon* MakeLaser_Cannon_Enemy()
+{
+	Cannon* cannon = new Cannon(WeaponType::LASER_CANNON, ProjectileType::LASER);
+	cannon->Speed = 444;
+	cannon->SpeedMargin = 40;
+	cannon->DistanceFromOrigin = 10;
+	cannon->BreadthFromOrigin = 4;
+	cannon->FireDelay = 2;
+	cannon->FireDelayMargin = 1;
+	cannon->Inaccuracy = .1f;
+
+	return cannon;
 }
+
+inline Weapon* MakeSpecialBeam_Cannon()
+{
+	Cannon* cannon = new Cannon(WeaponType::SPECIAL_BEAM_CANNON, ProjectileType::BEAM);
+	cannon->Speed = 10000;
+	cannon->DistanceFromOrigin = 10;
+	cannon->FireDelay = .5;
+	cannon->Ammo = 1;
+
+	return cannon;
+}
+

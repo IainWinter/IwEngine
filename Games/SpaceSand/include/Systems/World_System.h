@@ -10,6 +10,7 @@
 
 #include "Events.h"
 #include "Levels.h"
+#include "Assets.h"
 
 struct WorldSystem : iw::SystemBase
 {
@@ -22,11 +23,11 @@ struct WorldSystem : iw::SystemBase
 
 	WorldSystem(
 		iw::SandLayer* sand,
-		iw::Entity player
+		iw::Entity m_player
 	)
 		: iw::SystemBase("World")
 		, sand(sand)
-		, m_player(player)
+		, m_player(m_player)
 	{}
 
 	int Initialize() override;

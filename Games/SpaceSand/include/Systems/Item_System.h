@@ -16,11 +16,11 @@ struct ItemSystem : iw::SystemBase
 
 	ItemSystem(
 		iw::SandLayer* sand,
-		iw::Entity player
+		iw::Entity m_player
 	)
 		: iw::SystemBase("Health")
 		, sand(sand)
-		, m_player(player)
+		, m_player(m_player)
 	{}
 
 	void FixedUpdate() override;

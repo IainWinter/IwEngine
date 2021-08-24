@@ -111,7 +111,6 @@ int SandLayer::Initialize() {
 	Cell::SetDefault(CellType::SMOKE, _SMOKE);
 	Cell::SetDefault(CellType::BELT,  _BELT);
 
-
 	if (m_initFixed)
 	{
 		m_world = new SandWorld(

@@ -48,6 +48,19 @@ int WorldSystem::Initialize()
 
 	m_levels.back().Start();
 
+	for (int i = 0; i < 5; i++)
+	{
+		iw::Entity asteroid = sand->MakeTile(A_texture_asteroid, true);
+		iw::Transform* tran = asteroid.Find<iw::Transform>();
+		iw::Rigidbody* body = asteroid.Find<iw::Rigidbody>();
+
+		tran->Position = glm::vec3(iw::randf() * 600 - 100, iw::randf() * 400 + 300, 0);
+		body->SetTransform(tran);
+		body->Velocity = glm::vec3(iw::randfs() * 10, -iw::randf() * 10 - 5, 0);
+		body->AngularVelocity.z = iw::randfs() / 10;
+		body->SetMass(1000000);
+	}
+
 	return 0;
 }
 
@@ -148,7 +161,7 @@ bool WorldSystem::On(iw::ActionEvent& e)
 			ProjHitTile_Event& event = e.as<ProjHitTile_Event>();
 
 			sand->EjectPixel(event.Info.tile, event.Info.index);
-			event.Hit.Find<iw::Rigidbody>()->Velocity += event.Projectile.Find<iw::Rigidbody>()->Velocity;
+			event.Hit.Find<iw::Rigidbody>()->ApplyForce(event.Projectile.Find<iw::Rigidbody>()->Velocity);
 
 			break;
 		}

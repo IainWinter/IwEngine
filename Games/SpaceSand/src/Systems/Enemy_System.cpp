@@ -4,26 +4,18 @@ void EnemySystem::FixedUpdate()
 {
 	Space->Query<iw::Transform, EnemyShip>().Each(
 		[&](
-			iw::EntityHandle entity,
+			iw::EntityHandle handle,
 			iw::Transform* transform,
 			EnemyShip* enemy)
 		{
-			enemy->Timer.TickFixed();
+			if (enemy->Weapon->CanFire())
+			{
+				iw::Entity ent = iw::Entity(handle, Space.get());
+				glm::vec3 pos = enemy->ShootAt.Find<iw::Transform>()->Position;
 
-			//if (enemy->Timer.Can("shoot"))
-			//{
-			//	iw::Transform* target = enemy->ShootAt.Find<iw::Transform>();
-
-			//	auto [x, y, dx, dy] = GetShot(
-			//		transform->Position.x, transform->Position.y, 
-			//		target->   Position.x, target->   Position.y, 444, 10);
-
-			//	float speed = sqrt(dx*dx + dy*dy);
-			//	dx += iw::randfs() * speed * .05f;
-			//	dy += iw::randfs() * speed * .05f;
-
-			//	Bus->send<SpawnProjectile_Event>(x, y, dx, dy, ProjectileType::LASER);
-			//}
+				ShotInfo shot = enemy->Weapon->GetShot(ent, pos.x, pos.y);
+				Bus->send<SpawnProjectile_Event>(shot);
+			}
 		}
 	);
 }
@@ -48,16 +40,19 @@ void EnemySystem::SpawnEnemy(SpawnEnemy_Event& config)
 
 	iw::Transform* t = e.Set<iw::Transform>();
 	iw::Rigidbody* r = e.Set<iw::Rigidbody>();
+	iw::Circle*    c = e.Set<iw::Circle>();
 
 	t->Position.x = config.SpawnLocationX;
 	t->Position.y = config.SpawnLocationY;
 
 	r->SetTransform(t);
 
+	c->Radius = 6;
+
 	EnemyShip* s = e.Set<EnemyShip>();
 	Flocker*   f = e.Set<Flocker>();
 
-	s->Timer.SetTime("shoot", 1, 1);
+	s->Weapon = MakeLaser_Cannon_Enemy();
 	s->ShootAt = config.ShootAt;
 
 	f->Target.x = config.TargetLocationX;
