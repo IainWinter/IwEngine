@@ -591,8 +591,8 @@ namespace common {
 		}
 	}
 
-	AABB2 TransformBounds(
-		const AABB2& bounds,
+	c_aabb2 TransformBounds(
+		const c_aabb2& bounds,
 		const Transform* transform)
 	{
 		std::vector<glm::vec2> corners = MakePolygonFromBounds(bounds);
@@ -601,39 +601,60 @@ namespace common {
 	}
 
 	std::vector<glm::vec2> MakePolygonFromBounds(
-		const AABB2& bounds)
+		const c_aabb2& bounds)
 	{
+		const auto& [min, max] = bounds;
+
 		return {
-			bounds.Min,
-			glm::vec2(bounds.Max.x, bounds.Min.y),
-			bounds.Max,
-			glm::vec2(bounds.Min.x, bounds.Max.y)
+			min,
+			glm::vec2(max.x, min.y),
+			max,
+			glm::vec2(min.x, max.y)
 		};
 	}
 
-	AABB2 GenPolygonBounds(
+	c_aabb2 GenPolygonBounds(
 		const std::vector<glm::vec2>& polygon)
 	{
-		AABB2 bounds;
+		c_aabb2 bounds;
 		auto& [min, max] = bounds;
 
 		for (const glm::vec2& vert : polygon)
 		{
 			if (vert.x > max.x) max.x = vert.x;
-			if (vert.y > max.y) max.y = vert.y;
 			if (vert.x < min.x) min.x = vert.x;
+			if (vert.y > max.y) max.y = vert.y;
 			if (vert.y < min.y) min.y = vert.y;
 		}
 
 		return bounds;
 	}
+	
+	c_aabb GenPolygonBounds(
+		const std::vector<glm::vec3>& polygon)
+	{
+		c_aabb bounds;
+		auto& [min, max] = bounds;
 
-	AABB2 GenTriangleBounds(
+		for (const glm::vec3& vert : polygon)
+		{
+			if (vert.x > max.x) max.x = vert.x;
+			if (vert.x < min.x) min.x = vert.x;
+			if (vert.y > max.y) max.y = vert.y;
+			if (vert.y < min.y) min.y = vert.y;
+			if (vert.z > max.z) max.z = vert.z;
+			if (vert.z < min.z) min.z = vert.z;
+		}
+
+		return bounds;
+	}
+
+	c_aabb2 GenTriangleBounds(
 		const glm::vec2& v1, 
 		const glm::vec2& v2, 
 		const glm::vec2& v3)
 	{
-		AABB2 bounds;
+		c_aabb2 bounds;
 		auto& [min, max] = bounds;
 
 		for (const glm::vec2& vert : {v1, v2, v3})

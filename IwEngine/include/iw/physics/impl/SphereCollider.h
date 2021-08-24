@@ -40,7 +40,7 @@ namespace impl {
 		}
 	protected:
 		aabb_t GenerateBounds() const override {
-			return aabb_t(Center, sqrt(Radius*Radius));
+			return aabb_t(Center, sqrt(Radius*Radius + Radius*Radius));
 		}
 	};
 }

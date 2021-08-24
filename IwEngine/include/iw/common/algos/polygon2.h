@@ -1,14 +1,10 @@
 #pragma once
 
 #include "iw/common/algos/geom2.h"
-#include "iw/physics/AABB.h"
-
 #include <vector>
 #include <utility>
 #include <algorithm>
 #include <functional>
-
-// should split and make cpp file
 
 namespace iw {
 namespace common {
@@ -18,6 +14,9 @@ namespace common {
 
 	using polygon_crack = std::vector<
 		std::pair<std::vector<glm::vec2>, std::vector<unsigned>>>;
+
+	using c_aabb2 = std::pair<glm::vec2, glm::vec2>;
+	using c_aabb  = std::pair<glm::vec3, glm::vec3>;
 
 	template<
 		typename _t>
@@ -109,20 +108,29 @@ namespace common {
 		const Transform* transform);
 
 	IWCOMMON_API
-	AABB2 TransformBounds(
-		const AABB2& bounds,
+	c_aabb2 TransformBounds(
+		const c_aabb2& bounds,
 		const Transform* transform);
+
+	inline c_aabb TransformBounds(
+		const c_aabb& bounds,
+		const Transform* transform) { return c_aabb(); } // needs impl, should split file into polygon and polygon2 or have impl structure like physics
 
 	IWCOMMON_API
 	std::vector<glm::vec2> MakePolygonFromBounds(
-		const AABB2& bounds);
+		const c_aabb2& bounds);
 
 	IWCOMMON_API
-	AABB2 GenPolygonBounds(
+	c_aabb2 GenPolygonBounds(
 		const std::vector<glm::vec2>& polygon);
 
+	// this should go into a polygon.h file
 	IWCOMMON_API
-	AABB2 GenTriangleBounds(
+	c_aabb GenPolygonBounds(
+		const std::vector<glm::vec3>& polygon);
+
+	IWCOMMON_API
+	c_aabb2 GenTriangleBounds(
 		const glm::vec2& v1,
 		const glm::vec2& v2,
 		const glm::vec2& v3);

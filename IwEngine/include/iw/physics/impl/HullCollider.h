@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Collider.h"
-#include "iw/common/algos/geom2.h"
+#include "iw/common/algos/polygon2.h"
 #include <vector>
 #include <type_traits>
 
@@ -113,21 +113,9 @@ namespace impl {
 			//return vec_t(v * transform->WorldTransformation());
 		}
 	protected:
-		aabb_t GenerateBounds() const override {
-			aabb_t bounds;
-
-			bounds.Min = vec_t(FLT_MAX);
-			bounds.Max = vec_t(FLT_MIN);
-
-			for (const vec_t& v : m_points) {
-				for (size_t i = 0; i < _d; i++)
-				{
-					if (v[i] < bounds.Min[i]) bounds.Min[i] = v[i];
-					if (v[i] > bounds.Max[i]) bounds.Max[i] = v[i];
-				}
-			}
-
-			return bounds;
+		aabb_t GenerateBounds() const override
+		{
+			return GenPolygonBounds(m_points);
 		}
 	};
 }
