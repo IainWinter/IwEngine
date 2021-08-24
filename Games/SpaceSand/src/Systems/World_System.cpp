@@ -39,7 +39,7 @@ int WorldSystem::Initialize()
 	iw::EventSequence& level1 = m_levels.emplace_back(CreateSequence());
 
 	//level1.Add<Fill>(fillBoarder);
-	level1.Add<Spawn>(spawn);
+	//level1.Add<Spawn>(spawn);
 
 	level1.Add([&]() {
 		m_levels.pop_back();
@@ -48,16 +48,16 @@ int WorldSystem::Initialize()
 
 	m_levels.back().Start();
 
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < 1; i++)
 	{
 		iw::Entity asteroid = sand->MakeTile(A_texture_asteroid, true);
 		iw::Transform* tran = asteroid.Find<iw::Transform>();
 		iw::Rigidbody* body = asteroid.Find<iw::Rigidbody>();
 
-		tran->Position = glm::vec3(iw::randf() * 600 - 100, iw::randf() * 400 + 300, 0);
+		tran->Position = glm::vec3(200, 200, 0);
 		body->SetTransform(tran);
-		body->Velocity = glm::vec3(iw::randfs() * 10, -iw::randf() * 10 - 5, 0);
-		body->AngularVelocity.z = iw::randfs() / 10;
+		//body->Velocity = glm::vec3(iw::randfs() * 10, -iw::randf() * 10 - 5, 0);
+		body->AngularVelocity.z = iw::DeltaTime() / 10;
 		body->SetMass(1000000);
 	}
 
@@ -161,7 +161,10 @@ bool WorldSystem::On(iw::ActionEvent& e)
 			ProjHitTile_Event& event = e.as<ProjHitTile_Event>();
 
 			sand->EjectPixel(event.Info.tile, event.Info.index);
-			event.Hit.Find<iw::Rigidbody>()->ApplyForce(event.Projectile.Find<iw::Rigidbody>()->Velocity);
+
+		/*	if (iw::Rigidbody*)
+
+			event.Hit.Find<iw::Rigidbody>()->ApplyForce(event.Projectile.Find<iw::Rigidbody>()->Velocity);*/
 
 			break;
 		}

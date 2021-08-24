@@ -13,11 +13,15 @@ int PlayerSystem::Initialize()
 
 	player->CurrentWeapon->Ammo = -1;
 
-	collider->Radius = 6;
+	//collider->Radius = 4;
 
 	auto [w, h] = sand->GetSandTexSize2();
 	rigidbody->Transform.Position = glm::vec3(w, h, 0);
 	rigidbody->SetMass(10);
+
+	rigidbody->OnCollision = [](auto man, float dt){
+		LOG_INFO << "Player collision";
+	};
 
 	return 0;
 }
