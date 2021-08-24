@@ -7,13 +7,13 @@ int PlayerSystem::Initialize()
 	Player*        player    = m_player.Set<Player>();
 	iw::Circle*    collider  = m_player.Find<iw::Circle>();
 	iw::Rigidbody* rigidbody = m_player.Find<iw::Rigidbody>();
-	
+
 	player->CurrentWeapon = MakeSpecialBeam_Cannon();
 	player->SpecialLaser  = MakeFatLaser_Cannon();
 
 	player->CurrentWeapon->Ammo = -1;
 
-	//collider->Radius = 4;
+	collider->Radius = 4;
 
 	auto [w, h] = sand->GetSandTexSize2();
 	rigidbody->Transform.Position = glm::vec3(w, h, 0);

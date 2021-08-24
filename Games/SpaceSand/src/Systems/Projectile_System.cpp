@@ -283,6 +283,12 @@ iw::Entity ProjectileSystem::MakeLaser(
 
 	projectile->OnHit = [=](float fhx, float fhy)
 	{
+
+		// if return t/f, should just continue with regular path
+
+		//auto [x, y, z, dx, dy] = getpos(entity);
+		//getproj(entity)->PlaceCell(sand->m_world->GetChunk(fhx, fhy), fhx, fhy, dx, dy);
+
 		int hx = floor(fhx);
 		int hy = floor(fhy);
 

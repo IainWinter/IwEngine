@@ -293,10 +293,10 @@ void SandLayer::PasteTiles()
 		if (tile->NeedsScan)
 		{
 			tile->NeedsScan = false;
-			tile->UpdateColliderPolygon();
 
 			MeshCollider2* collider = Space->FindComponent<MeshCollider2>(entity);
 			if (collider) {
+				tile->UpdateColliderPolygon();
 				collider->SetPoints   (tile->m_collider);
 				collider->SetTriangles(tile->m_colliderIndex);
 			}

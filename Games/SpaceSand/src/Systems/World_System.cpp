@@ -5,41 +5,10 @@ int WorldSystem::Initialize()
 	auto [w, h] = sand->GetSandTexSize();
 	sand->SetCamera(w / 2, h / 2);
 
-	Spawn spawn(20, 4, 5.f, 3.f, [=](float x, float y)
-	{
-		auto [w, h] = sand->GetSandTexSize();
-		float margin = .1f;
-
-		float target_x = iw::randi(w - w * margin * 2) + w * margin;
-		float target_y = iw::randi(h - h * margin * 2) + h * margin;
-
-		Bus->push<SpawnEnemy_Event>(m_player, x, y, target_x, target_y);
-	});
-	spawn.AddSpawn(0, h + 10, w, h + 20);
-	spawn.AddSpawn(0,   - 10, w,   - 20);
-
-	//Fill fillTicTacToe([=](int x, int y) 
-	//{
-	//	sand->m_world->SetCell(x, y, iw::Cell::GetDefault(iw::CellType::ROCK));
-	//});
-	//fillTicTacToe.AddFill(0, h - 100, w, h - 120, Fill::LEFT_RIGHT);
-	//fillTicTacToe.AddFill(0,     100, w,     120, Fill::LEFT_RIGHT);
-	//fillTicTacToe.AddFill(w - 100, 0, w - 120, h);
-	//fillTicTacToe.AddFill(    100, 0,     120, h);
-
-	//Fill fillBoarder([=](int x, int y) 
-	//{
-	//	sand->m_world->SetCell(x, y, iw::Cell::GetDefault(iw::CellType::ROCK));
-	//});
-	//fillBoarder.AddFill(0, h - 10,  w,  h, Fill::LEFT_RIGHT);
-	//fillBoarder.AddFill(0,      0,  w, 10, Fill::LEFT_RIGHT);
-	//fillBoarder.AddFill(w - 10, 0,  w,  h);
-	//fillBoarder.AddFill(0,      0, 10,  h);
-
 	iw::EventSequence& level1 = m_levels.emplace_back(CreateSequence());
 
-	//level1.Add<Fill>(fillBoarder);
-	//level1.Add<Spawn>(spawn);
+	level1./*Add<Spawn>(MakeEnemySpawnner   ({ TOP }))
+		 ->*/Add<Spawn>(MakeAsteroidSpawnner({ TOP }));
 
 	level1.Add([&]() {
 		m_levels.pop_back();
@@ -47,19 +16,6 @@ int WorldSystem::Initialize()
 	});
 
 	m_levels.back().Start();
-
-	for (int i = 0; i < 1; i++)
-	{
-		iw::Entity asteroid = sand->MakeTile(A_texture_asteroid, true);
-		iw::Transform* tran = asteroid.Find<iw::Transform>();
-		iw::Rigidbody* body = asteroid.Find<iw::Rigidbody>();
-
-		tran->Position = glm::vec3(200, 200, 0);
-		body->SetTransform(tran);
-		//body->Velocity = glm::vec3(iw::randfs() * 10, -iw::randf() * 10 - 5, 0);
-		body->AngularVelocity.z = iw::DeltaTime() / 10;
-		body->SetMass(1000000);
-	}
 
 	return 0;
 }
@@ -71,9 +27,6 @@ void WorldSystem::Update()
 		m_levels.back().Update();
 	}
 }
-
-bool once = true;
-int x = 0;
 
 void WorldSystem::FixedUpdate()
 {
@@ -125,31 +78,6 @@ void WorldSystem::FixedUpdate()
 				Space->QueueEntity(entity, iw::func_Destroy);
 			}
 		});
-
-	// DEBUG
-
-	if (iw::Mouse::ButtonDown(iw::MMOUSE))
-	{
-		if (iw::Keyboard::KeyDown(iw::SHIFT))
-		{
-			Bus->push<SpawnItem_Event>(sand->sP.x, sand->sP.y, 1, ItemType::LASER_CHARGE);
-		}
-
-		else {
-			Bus->push<SpawnItem_Event>(sand->sP.x, sand->sP.y, 1, ItemType::HEALTH);
-		}
-	}
-
-	if (iw::Keyboard::KeyDown(iw::X))
-	{
-		for (int i = 0; i < 5; i++) {
-			for (int y = 0; y < 800; y++)
-			{
-				sand->m_world->SetCell(x, y, iw::Cell::GetDefault(iw::CellType::ROCK));
-			}
-			x++;
-		}
-	}
 }
 
 bool WorldSystem::On(iw::ActionEvent& e)
@@ -159,16 +87,97 @@ bool WorldSystem::On(iw::ActionEvent& e)
 		case PROJ_HIT_TILE:
 		{
 			ProjHitTile_Event& event = e.as<ProjHitTile_Event>();
-
 			sand->EjectPixel(event.Info.tile, event.Info.index);
-
-		/*	if (iw::Rigidbody*)
-
-			event.Hit.Find<iw::Rigidbody>()->ApplyForce(event.Projectile.Find<iw::Rigidbody>()->Velocity);*/
-
+			break;
+		}
+		case SPAWN_ASTEROID: {
+			MakeAsteroid(e.as<SpawnAsteroid_Event>().Config);
 			break;
 		}
 	}
 
 	return false;
 }
+
+iw::Entity WorldSystem::MakeAsteroid(
+	SpawnAsteroid_Config& config)
+{
+	iw::Entity entity = sand->MakeTile(A_texture_asteroid, true);
+	iw::Transform* t = entity.Find<iw::Transform>();
+	iw::Rigidbody* r = entity.Find<iw::Rigidbody>();
+
+	t->Position = glm::vec3(config.SpawnLocationX, config.SpawnLocationY, 0);
+	r->Velocity = glm::vec3(config.VelocityX, config.VelocityY, 0);
+	r->AngularVelocity.z = config.AngularVel;
+	
+	r->SetTransform(t);
+	r->SetMass(1000000);
+
+	return entity;
+}
+
+Spawn WorldSystem::MakeSpawner(
+	std::initializer_list<WhereToSpawn> where,
+	int numb, int batch,
+	float time, float timeMargin)
+{
+	Spawn spawn(numb, batch, time, timeMargin);
+	
+	auto [w, h] = sand->GetSandTexSize();
+
+	for (WhereToSpawn side : where)
+	{
+		switch (side)
+		{
+			case TOP:    spawn.AddSpawn(  - 100, h + 100, w + 100, h + 200); break;
+			case BOTTOM: spawn.AddSpawn(  - 100,   - 100, w + 100,   - 200); break;
+			case LEFT:   spawn.AddSpawn(w - 100,   - 100, w - 200, h + 200); break;
+			case RIGHT:  spawn.AddSpawn(w + 100,   - 100, w + 200, h + 200); break;
+		}
+	}
+
+	return spawn;
+}
+
+Spawn WorldSystem::MakeEnemySpawnner(
+	std::initializer_list<WhereToSpawn> where)
+{
+	Spawn spawn = MakeSpawner(where, 20, 4, 5, 3);
+	spawn.func_Spawn = [=](float x, float y)
+	{
+		auto [w, h] = sand->GetSandTexSize();
+		float margin = .1f;
+
+		float target_x = iw::randi(w - w * margin * 2) + w * margin;
+		float target_y = iw::randi(h - h * margin * 2) + h * margin;
+
+		Bus->push<SpawnEnemy_Event>(m_player, x, y, target_x, target_y);
+	};
+	
+	return spawn;
+}
+
+Spawn WorldSystem::MakeAsteroidSpawnner(
+	std::initializer_list<WhereToSpawn> where)
+{
+	Spawn spawn = MakeSpawner(where, 3, 1, 2, 1);
+	spawn.func_Spawn = [=](float x, float y)
+	{
+		SpawnAsteroid_Config config;
+		config.SpawnLocationX = x;
+		config.SpawnLocationY = y;
+		config.VelocityX = iw::randfs() * 10;
+		config.VelocityY = -20 - iw::randfs() * 10;
+		config.AngularVel = iw::randfs() / 10;
+		config.Size = iw::randi(10);
+
+		Bus->push<SpawnAsteroid_Event>(config);
+	};
+
+	return spawn;
+}
+
+//Spawn WorldSystem::MakeAsteroidSpawnner()
+//{
+//	return Spawn();
+//}

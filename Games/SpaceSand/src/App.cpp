@@ -43,9 +43,10 @@ struct GameLayer : iw::Layer
 			return e;
 		}
 
-		cursor = sand->MakeTile(A_texture_ui_cursor);
-		cursor.Find<iw::CollisionObject>()->Transform.Scale = glm::vec3(.25f);
+		cursor = sand->MakeTile<iw::Circle>(A_texture_ui_cursor, false);
+		//cursor.Find<iw::Rigidbody>()->Transform.Scale = glm::vec3(.25f);
 		cursor.Find<iw::Tile>()->m_zIndex = -10;
+		cursor.Find<iw::Circle>()->Radius = 4;
 
 		Renderer->Device->SetClearColor(0, 0, 0, 1);
 
@@ -319,6 +320,16 @@ struct GameLayer : iw::Layer
 		canFireTimer = iw::max(canFireTimer - iw::DeltaTime(), 0.f);
 
 		m_player.Find<Player>()->can_fire_laser = canFireTimer > 0.f;
+
+		// DEBUG
+
+		if (iw::Mouse::ButtonDown(iw::MMOUSE)) {
+			if (iw::Keyboard::KeyDown(iw::SHIFT)) {
+				Bus->push<SpawnItem_Event>(sand->sP.x, sand->sP.y, 1, ItemType::LASER_CHARGE);
+			} else {
+				Bus->push<SpawnItem_Event>(sand->sP.x, sand->sP.y, 1, ItemType::HEALTH);
+			}
+		}
 	}
 	// end temp ui
 
