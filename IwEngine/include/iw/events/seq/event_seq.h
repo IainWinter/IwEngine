@@ -11,6 +11,10 @@ namespace events {
 	{
 		std::function<bool(void)> func;
 
+		event_func(std::function<bool(void)> func)
+			: func(func)
+		{}
+
 		bool update() override {
 			return func();
 		}
@@ -29,16 +33,12 @@ namespace events {
 		IWEVENTS_API
 		~event_seq();
 
-		// break design pattern if it looks better xd
-
 		// Takes ownership of task
-		IWEVENTS_API
-		void add(
-			event_task* task);
+		IWEVENTS_API event_seq* add(event_task* task);
+		IWEVENTS_API event_seq* and(event_task* task);
 
-		IWEVENTS_API
-		event_func* add(
-			std::function<bool(void)> func);
+		IWEVENTS_API event_seq* add(std::function<bool(void)> func);
+		IWEVENTS_API event_seq* and(std::function<bool(void)> func);
 
 		// Only removes doesnt delete.
 		// Call this before deleting the sequence to save the task.

@@ -37,15 +37,11 @@ struct Spawn : iw::EventTask
 		int numberToSpawn,
 		int randBatchSpawn,
 		float timeBetweenSpawn,
-		float randBetweenSpawn,
-		std::function<void(int, int)> spawn,
-		const std::vector<iw::AABB2>& areas = {}
+		float randBetweenSpawn
 	)
 		: iw::EventTask()
 		, NumberLeftToSpawn(numberToSpawn)
 		, RandBatchSpawn(randBatchSpawn)
-		, func_Spawn(spawn)
-		, Areas(areas)
 	{
 		Timer.SetTime("spawn", timeBetweenSpawn, randBetweenSpawn);
 	}

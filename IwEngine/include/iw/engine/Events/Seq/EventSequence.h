@@ -19,63 +19,61 @@ namespace Engine {
 		template<
 			typename _t,
 			typename... _args>
-		EventTask* Add(
+		EventSequence* Add(
 			_args&&... args)
 		{
 			static_assert(std::is_base_of_v<EventTask, _t>, "Type needs to have a base of iw::EventTask");
-
-			EventTask* task = new _t(std::forward<_args>(args)...);
-			Add(task);
-
-			return task;
+			return Add(new _t(std::forward<_args>(args)...));
 		}
 
-		void Add(
+		// takes ownership
+		EventSequence* Add(
 			EventTask* task)
 		{
 			task->SetAppVars(MakeAppVars());
-			add(task);
+			event_seq::add(task);
+			return this;
 		}
 
-		event_func* Add(
-			std::function<bool(void)> func)
-		{
-			return add(func);
-		}
-
-		void Once(
-			std::function<bool(void)> func)
-		{
-			clear();
-			add(func);
-			start();
-		}
-
-		void Remove(
+		// takes ownership
+		EventSequence* And(
 			EventTask* task)
 		{
-			remove(task);
+			task->SetAppVars(MakeAppVars());
+			event_seq::and(task);
+			return this;
 		}
 
-		void Reset() {
-			reset();
+		template<
+			typename _t,
+			typename... _args>
+		EventSequence* And(
+			_args&&... args)
+		{
+			static_assert(std::is_base_of_v<EventTask, _t>, "Type needs to have a base of iw::EventTask");
+			return And(new _t(std::forward<_args>(args)...));
 		}
 
-		void Update() {
-			update();
+		EventSequence* Add(
+			std::function<bool(void)> func)
+		{
+			add(new event_func(func));
+			return this;
 		}
 
-		void Start() {
-			start();
+		EventSequence* And(
+			std::function<bool(void)> func)
+		{
+			and(new event_func(func));
+			return this;
 		}
 
-		void Stop() {
-			stop();
-		}
-
-		void Restart() {
-			restart();
-		}
+		void Remove(EventTask* task) { remove(task); }
+		void Reset()                 { reset();      }
+		void Update()                { update();     }
+		void Start()                 { start();      }
+		void Stop()                  { stop();       }
+		void Restart()               { restart();    }
 	private:
 		friend class Application;
 		friend class Layer;

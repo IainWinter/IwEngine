@@ -12,6 +12,7 @@ enum Actions {
 	SPAWN_ENEMY,
 	SPAWN_PROJECTILE,
 	SPAWN_ITEM,
+	SPAWN_ASTEROID,
 	CHANGE_LASER_FLUID,
 	HEAL_PLAYER,
 	CHANGE_PLAYER_WEAPON,
@@ -39,6 +40,28 @@ struct SpawnEnemy_Event : iw::SingleEvent
 		, SpawnLocationY(spawnLocationY)
 		, TargetLocationX(targetLocationX)
 		, TargetLocationY(targetLocationY)
+	{}
+};
+
+struct SpawnAsteroid_Config
+{
+	float SpawnLocationX;
+	float SpawnLocationY;
+	float VelocityX;
+	float VelocityY;
+	float AngularVel;
+	int Size;
+};
+
+struct SpawnAsteroid_Event : iw::SingleEvent
+{
+	SpawnAsteroid_Config Config;
+
+	SpawnAsteroid_Event(
+		SpawnAsteroid_Config& config
+	)
+		: iw::SingleEvent(SPAWN_ASTEROID)
+		, Config(config)
 	{}
 };
 

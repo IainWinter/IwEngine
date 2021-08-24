@@ -35,4 +35,22 @@ struct WorldSystem : iw::SystemBase
 	void FixedUpdate() override;
 
 	bool On(iw::ActionEvent& e) override;
+
+private:
+	iw::Entity MakeAsteroid(SpawnAsteroid_Config& config);
+
+	enum WhereToSpawn {
+		TOP,
+		BOTTOM,
+		LEFT,
+		RIGHT
+	};
+
+	Spawn MakeSpawner(
+		std::initializer_list<WhereToSpawn> where,
+		int numb, int batch,
+		float time, float timeMargin);
+
+	Spawn MakeEnemySpawnner   (std::initializer_list<WhereToSpawn> where);
+	Spawn MakeAsteroidSpawnner(std::initializer_list<WhereToSpawn> where);
 };

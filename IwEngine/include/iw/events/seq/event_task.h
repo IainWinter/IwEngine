@@ -5,13 +5,29 @@
 
 namespace iw {
 namespace events {
-	struct event_task {
-		// reset task for another run
-		virtual void reset() {
-			LOG_WARNING << "event_task reset without override!";
+	struct event_task
+	{
+		event_task* m_child = nullptr;
+
+		virtual ~event_task()
+		{
+			delete m_child;
 		}
 
-		// return true when finished
+		bool update_tree()
+		{
+			return update() & (!m_child || m_child->update_tree());
+		}
+
+		void reset_tree()
+		{
+			reset();
+			if (m_child) m_child->reset_tree();
+		}
+
+		// reset task for another run
+		virtual void reset() {}
+		// returns true when finished
 		virtual bool update() = 0;
 	};
 }

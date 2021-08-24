@@ -12,21 +12,45 @@ namespace events {
 		clear();
 	}
 
-	void event_seq::add(
-		event_task* task) // peep argument(s) on new line(s)
+	event_seq* event_seq::add(
+		event_task* task)
 	{
 		m_tasks.push_back(task);
+		return this;
 	}
 
-	event_func* event_seq::add(
+	event_seq* event_seq::add(
 		std::function<bool(void)> func)
 	{
-		event_func* task = new event_func();
-		task->func = func;
+		add(new event_func(func));
+		return this;
+	}
 
-		m_tasks.push_back(task);
+	event_seq* event_seq::and(
+		std::function<bool(void)> func)
+	{
+		and(new event_func(func));
+		return this;
+	}
 
-		return task;
+	event_seq* event_seq::and(
+		event_task* task)
+	{
+		if (m_tasks.size() == 0)
+		{
+			LOG_WARNING << "Tried to and task to empty sequence! Call add first";
+			return nullptr;
+		}
+
+		event_task* node = m_tasks.back();
+		while (node->m_child)
+		{
+			node = node->m_child;
+		}
+
+		node->m_child = task;
+
+		return this;
 	}
 
 	void event_seq::remove(
@@ -46,7 +70,7 @@ namespace events {
 	void event_seq::reset() {
 		m_current = 0;
 		for (event_task* task : m_tasks) {
-			task->reset();
+			task->reset_tree();
 		}
 	}
 
@@ -62,7 +86,7 @@ namespace events {
 			return;
 		}
 
-		if (m_tasks[m_current]->update()) {
+		if (m_tasks[m_current]->update_tree()) {
 			m_current++;
 
 			if (m_current == m_tasks.size()) {
