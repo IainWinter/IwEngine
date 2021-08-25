@@ -8,7 +8,7 @@ int WorldSystem::Initialize()
 
 	iw::EventSequence& level1 = m_levels.emplace_back(CreateSequence());
 
-	Spawn spawner(10, 2, .1, .3);
+	Spawn spawner(10, 2, .5, .3);
 	spawner.AddSpawn(w / 2 - 50, h + 10, w / 2 + 50, h + 100);
 	spawner.OnSpawn = SpawnEnemy;
 

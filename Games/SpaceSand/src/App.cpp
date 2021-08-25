@@ -24,8 +24,6 @@ struct GameLayer : iw::Layer
 	
 	iw::Entity m_player;
 
-	iw::Entity cursor;
-
 	GameLayer(
 		iw::SandLayer* sand,
 		iw::SandLayer* sand_ui_laserCharge
@@ -42,11 +40,6 @@ struct GameLayer : iw::Layer
 		{
 			return e;
 		}
-
-		cursor = sand->MakeTile<iw::Circle>(A_texture_ui_cursor, false);
-		//cursor.Find<iw::Rigidbody>()->Transform.Scale = glm::vec3(.25f);
-		cursor.Find<iw::Tile>()->m_zIndex = -10;
-		cursor.Find<iw::Circle>()->Radius = 4;
 
 		Renderer->Device->SetClearColor(0, 0, 0, 1);
 
@@ -238,8 +231,6 @@ struct GameLayer : iw::Layer
 		//	}
 		//}
 
-		cursor.Find<iw::Transform>()->Position = glm::vec3(sand->sP, 0.f);
-
 		iw::Texture& playerSprite = m_player.Find<iw::Tile>()->m_sprite;
 		iw::ref<iw::Texture> uiPlayerTex  = A_mesh_ui_playerHealth.Material->GetTexture("texture");
 
@@ -426,6 +417,11 @@ struct GameLayer : iw::Layer
 		float c_ammoCount_position_x = c_menu_position_x + c_menu_width - 200;
 		float c_ammoCount_position_y = c_menu_position_y + 100;
 
+		float c_cursor_position_x = sand->sP.x;
+		float c_cursor_position_y = sand->sP.y;
+		float c_cursor_width      = 20;
+		float c_cursor_height      = c_cursor_width;
+
 		// SCALING, this should be done by the camera...
 
 		float game_scale_x    = c_game_width      / width;
@@ -449,6 +445,11 @@ struct GameLayer : iw::Layer
 
 		float ammoCount_position_x = c_ammoCount_position_x / width;
 		float ammoCount_position_y = c_ammoCount_position_y / height;
+
+		float cursor_position_x = c_cursor_position_x / width;
+		float cursor_position_y = c_cursor_position_y / height;
+		float cursor_width      = c_cursor_width      / width;
+		float cursor_height     = c_cursor_height     / height;
 
 		iw::Transform sandTransform;
 		sandTransform.Position.y = game_position_y;
@@ -477,6 +478,13 @@ struct GameLayer : iw::Layer
 		iw::Transform uiAmmoTextTransform;
 		uiAmmoTextTransform.Position.x = ammoCount_position_x;
 		uiAmmoTextTransform.Position.y = ammoCount_position_y;
+
+		iw::Transform uiCursorTransform;
+		uiCursorTransform.Position.z = 1;
+		uiCursorTransform.Position.x = cursor_position_x;
+		uiCursorTransform.Position.y = cursor_position_y;
+		uiCursorTransform.Scale.x    = cursor_width;
+		uiCursorTransform.Scale.y    = cursor_height;
 
 		// END SCALING
 
@@ -507,6 +515,7 @@ struct GameLayer : iw::Layer
 		Renderer->DrawMesh(uiBackgroundTransform, A_mesh_ui_background);
 		Renderer->DrawMesh(uiLaserChargeTransform, sand_ui_laserCharge->GetSandMesh());
 		Renderer->DrawMesh(uiAmmoTextTransform, A_mesh_ui_text_ammo);
+		Renderer->DrawMesh(uiCursorTransform, A_mesh_ui_cursor);
 		Renderer->EndScene();
 	}
 };

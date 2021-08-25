@@ -24,7 +24,6 @@ inline rTex A_texture_item_health;
 inline rTex A_texture_item_energy;
 inline rTex A_texture_item_minigun;
 
-
 inline rMat A_material_texture_cam;
 inline rMat A_material_texture_cam_particle;
 
@@ -39,6 +38,8 @@ inline iw::Mesh A_mesh_star;
 inline iw::Mesh A_mesh_ui_background;
 inline iw::Mesh A_mesh_ui_playerHealth;
 inline iw::Mesh A_mesh_ui_text_ammo;
+
+inline iw::Mesh A_mesh_ui_cursor;
 
 #undef rTex
 #undef rMat

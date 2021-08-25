@@ -10,11 +10,11 @@ int LoadAssets(
 	A_texture_player        = Asset->Load<Texture>("textures/SpaceGame/player.png");
 	A_texture_star          = Asset->Load<Texture>("textures/SpaceGame/star.png");
 	A_texture_asteroid      = Asset->Load<Texture>("textures/SpaceGame/asteroid.png");
-	A_texture_ui_cursor     = Asset->Load<Texture>("textures/SpaceGame/circle_temp.png");
+	A_texture_ui_cursor     = Asset->Load<Texture>("textures/SpaceGame/cursor.png");
 	A_texture_ui_background = Asset->Load<Texture>("textures/SpaceGame/ui_background.png");
 	A_texture_item_health   = Asset->Load<Texture>("textures/SpaceGame/item_health.png");
 	A_texture_item_energy   = Asset->Load<Texture>("textures/SpaceGame/item_energy.png");
-	A_texture_item_minigun  = Asset->Load<Texture>("textures/SpaceGame/circle_temp.png");
+	A_texture_item_minigun  = Asset->Load<Texture>("textures/SpaceGame/item_minigun.png");
 	A_texture_font_arial    = Asset->Load<Texture>("textures/fonts/arial.png");
 
 	A_material_texture_cam          = REF<Material>(Asset->Load<Shader>("shaders/texture_cam.shader"));
@@ -27,6 +27,7 @@ int LoadAssets(
 	A_mesh_star            = iw::ScreenQuad().MakeCopy();
 	A_mesh_ui_background   = iw::ScreenQuad().MakeInstance();
 	A_mesh_ui_playerHealth = iw::ScreenQuad().MakeInstance();
+	A_mesh_ui_cursor        = iw::ScreenQuad().MakeInstance();
 
 #define CHECK_LOAD(x) if(!x) { LOG_ERROR << "Failed to load " << #x; return 100; }
 	
@@ -105,6 +106,11 @@ int LoadAssets(
 
 		A_mesh_ui_playerHealth.Material = A_material_texture_cam->MakeInstance();
 		A_mesh_ui_playerHealth.Material->SetTexture("texture", ui_player_texture);
+	}
+
+	{
+		A_mesh_ui_cursor.Material = A_material_texture_cam->MakeInstance();
+		A_mesh_ui_cursor.Material->SetTexture("texture", A_texture_ui_cursor);
 	}
 
 	{

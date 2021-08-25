@@ -8,7 +8,7 @@ int PlayerSystem::Initialize()
 	iw::Circle*    collider  = m_player.Find<iw::Circle>();
 	iw::Rigidbody* rigidbody = m_player.Find<iw::Rigidbody>();
 
-	player->CurrentWeapon = MakeSpecialBeam_Cannon();
+	player->CurrentWeapon = MakeDefault_Cannon();
 	player->SpecialLaser  = MakeFatLaser_Cannon();
 
 	player->CurrentWeapon->Ammo = -1;
