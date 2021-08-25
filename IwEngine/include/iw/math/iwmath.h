@@ -193,34 +193,6 @@ namespace math {
 
 		return x;
 	}
-
-	template<
-		typename _t>
-	_t choose(
-		std::vector<std::pair<_t, float>>& item_weights) // need to template list for const/nonconst 
-	{
-		float total_weight = 0.f;
-		for (const auto& [item, weight] : item_weights)
-		{
-			total_weight += weight;
-		}
-
-		float pick = iw::randf() * total_weight;
-				
-		float last_weight = 0.f;
-		for (const auto& [item, weight] : item_weights)
-		{
-			if (pick > last_weight && pick < weight + last_weight)
-			{
-				return item;
-			}
-
-			last_weight = weight;
-		}
-
-		LOG_WARNING << "Choose had invalid weights!";
-		return _t();
-	}
 }
 
 	using namespace math;

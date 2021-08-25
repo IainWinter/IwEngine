@@ -39,7 +39,7 @@ inline iw::Mesh A_mesh_ui_background;
 inline iw::Mesh A_mesh_ui_playerHealth;
 inline iw::Mesh A_mesh_ui_text_ammo;
 
-inline iw::Mesh A_mesh_ui_cursor;
+//inline iw::Mesh A_mesh_ui_cursor;
 
 #undef rTex
 #undef rMat

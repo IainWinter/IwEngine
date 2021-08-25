@@ -12,7 +12,7 @@ int WorldSystem::Initialize()
 	spawner.AddSpawn(w / 2 - 50, h + 10, w / 2 + 50, h + 100);
 	spawner.OnSpawn = SpawnEnemy;
 
-	level1.Add([&]()
+	level1./*Add([&]()
 		{
 			SpawnAsteroid_Config config;
 			SpawnAsteroid_Config config1;
@@ -35,7 +35,7 @@ int WorldSystem::Initialize()
 			return true;
 		})
 		->Add<iw::Delay>(15)
-		->Add<Spawn>(spawner)
+		->*/Add<Spawn>(spawner)
 		->Add([&]() {
 			m_levels.pop_back();
 			return true;
@@ -71,23 +71,24 @@ void WorldSystem::FixedUpdate()
 				}
 
 				std::vector<std::pair<ItemType, float>> item_weights{
-					//{ HEALTH, 50},
-					//{ LASER_CHARGE,  50 },
+					{ HEALTH, 50},
+					{ LASER_CHARGE,  50 },
 					{ WEAPON_MINIGUN, 5 }
 				};
 
-				ItemType item = iw::choose(item_weights);
-				int amount = 0;
+				SpawnItem_Config config;
+				config.X = transform->Position.x;
+				config.Y = transform->Position.y;
+				config.Item = iw::choose(item_weights);
 
-				switch (item)
+				switch (config.Item)
 				{
 					case ItemType::HEALTH: 
-					case ItemType::LASER_CHARGE:   amount = iw::randi(5) + 1; break;
-
-					case ItemType::WEAPON_MINIGUN: amount = 1;
+					case ItemType::LASER_CHARGE:   config.Amount = iw::randi(5) + 1; break;
+					case ItemType::WEAPON_MINIGUN: config.Amount = 1;
 				}
 
-				Bus->push<SpawnItem_Event>(transform->Position.x, transform->Position.y, amount, item);
+				Bus->push<SpawnItem_Event>(config);
 				
 				iw::Cell smoke = iw::Cell::GetDefault(iw::CellType::SMOKE);
 

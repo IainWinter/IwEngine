@@ -45,12 +45,12 @@ struct SpawnEnemy_Event : iw::SingleEvent
 
 struct SpawnAsteroid_Config
 {
-	float SpawnLocationX;
-	float SpawnLocationY;
-	float VelocityX;
-	float VelocityY;
-	float AngularVel;
-	int Size;
+	float SpawnLocationX = 0;
+	float SpawnLocationY = 0;
+	float VelocityX = 0;
+	float VelocityY = 0;
+	float AngularVel = 0;
+	int Size = 1;
 };
 
 struct SpawnAsteroid_Event : iw::SingleEvent
@@ -80,23 +80,27 @@ struct SpawnProjectile_Event : iw::SingleEvent
 	{}
 };
 
-struct SpawnItem_Event : iw::SingleEvent
+struct SpawnItem_Config
 {
-	float X, Y;
-	int Amount;
+	float X = 0, Y = 0;
+	int Amount = 1;
+
+	float ActivateDelay = 0.f;
+	float Speed = 75;
 
 	ItemType Item;
+	std::function<void()> OnPickup;
+};
+
+struct SpawnItem_Event : iw::SingleEvent
+{
+	SpawnItem_Config Config;
 
 	SpawnItem_Event(
-		float x, float y,
-		int amount,
-		ItemType item
+		SpawnItem_Config& config
 	)
 		: iw::SingleEvent(SPAWN_ITEM)
-		, X(x)
-		, Y(y)
-		, Amount(amount)
-		, Item(item)
+		, Config(config)
 	{}
 };
 
@@ -114,8 +118,11 @@ struct ChangeLaserFluid_Event : iw::SingleEvent
 
 struct HealPlayer_Event : iw::SingleEvent
 {
-	HealPlayer_Event()
+	int Index;
+
+	HealPlayer_Event(int index = -1) // -1 is random
 		: iw::SingleEvent(HEAL_PLAYER)
+		, Index(index)
 	{}
 };
 

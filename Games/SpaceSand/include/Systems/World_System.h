@@ -1,9 +1,8 @@
 #pragma once
 
-#include "iw/engine/System.h"
-#include "iw/engine/Components/Timer.h"
 #include "plugins/iw/Sand/Engine/SandLayer.h"
 
+#include "iw/engine/Components/Timer.h"
 #include "Components/EnemyShip.h"
 #include "Components/Player.h"
 #include "Components/Flocker.h"

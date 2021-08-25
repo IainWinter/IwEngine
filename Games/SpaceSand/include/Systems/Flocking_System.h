@@ -1,6 +1,7 @@
 #pragma once
 
 #include "iw/engine/System.h"
+
 #include "Components/Flocker.h"
 
 struct FlockingSystem

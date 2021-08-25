@@ -22,7 +22,9 @@ namespace Physics {
 		size_t aid = a->get_id();
 		size_t bid = b->get_id();
 
-		if (aid > bid) {
+		bool swap = aid > bid;
+
+		if (swap) {
 			size_t tid = aid;
 			aid = bid;
 			bid = tid;
@@ -36,25 +38,31 @@ namespace Physics {
 			bt = tt;
 		}
 
+		ManifoldPoints points;
+
 		if (dim == Dimension::d2)
 		{
-			auto func = d2.tests[aid][bid];
+			auto& func = d2.tests[aid][bid];
 			if (func) {
-				return func(a, at, b, bt);
+				points = func(a, at, b, bt);
 			}
 		}
 
 		else 
 		if (dim == Dimension::d3)
 		{
-			auto func = d3.tests[aid][bid];
+			auto& func = d3.tests[aid][bid];
 			if (func) {
-				return func(a, at, b, bt);
+				points = func(a, at, b, bt);
 			}
 		}
 
-		//assert(false);
-		return ManifoldPoints();
+		if (swap && points.HasCollision)
+		{
+			points.SwapPoints();
+		}
+
+		return points;
 	}
 }
 

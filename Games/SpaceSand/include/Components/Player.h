@@ -13,10 +13,15 @@ struct Player
 	bool i_fire1;
 	bool i_fire2;
 
+	float speed = 150;
+
 	bool can_fire_laser;
 
 	Weapon* CurrentWeapon;
 	Weapon* SpecialLaser;
+
+	float TimeWithoutCore = 10;
+	std::vector<unsigned> CoreIndices;
 
 	Player() {}
 };

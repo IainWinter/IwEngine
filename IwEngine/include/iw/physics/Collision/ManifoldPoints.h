@@ -20,6 +20,46 @@ namespace Physics {
 		{}
 
 		ManifoldPoints(
+			glm::vec2 a,
+			glm::vec2 b
+		)
+			: A(a, 0.f)
+			, B(b, 0.f)
+			, HasCollision(true)
+		{
+			glm::vec2 ba = a - b;
+			PenetrationDepth = glm::length(ba);
+			if (PenetrationDepth > 0.00001f)
+			{
+				Normal = glm::vec3(ba / PenetrationDepth, 0.f);
+			}
+			else {
+				Normal = glm::vec3(0, 1, 0);
+				PenetrationDepth = 1;
+			}
+		}
+
+		ManifoldPoints(
+			glm::vec3 a,
+			glm::vec3 b
+		)
+			: A(a)
+			, B(b)
+			, HasCollision(true)
+		{
+			glm::vec3 ba = a - b;
+			PenetrationDepth = glm::length(ba);
+			if (PenetrationDepth > 0.00001f)
+			{
+				Normal = ba / PenetrationDepth;
+			}
+			else {
+				Normal = glm::vec3(0, 1, 0);
+				PenetrationDepth = 1;
+			}
+		}
+
+		ManifoldPoints(
 			glm::vec3 a,
 			glm::vec3 b,
 			glm::vec3 n,
@@ -44,6 +84,14 @@ namespace Physics {
 			, PenetrationDepth(d)
 			, HasCollision(true)
 		{}
+
+		void SwapPoints()
+		{
+			glm::vec3 t = A;
+			A = B;
+			B = t;
+			Normal = -Normal;
+		}
 	};
 }
 

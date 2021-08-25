@@ -23,7 +23,7 @@ namespace ECS {
 		bool operator==(
 			const EntityHandle& other) const
 		{
-			return Handle == other;
+			return Handle == other; // this was returning true when .Handle == .Handle was false?
 		}
 
 		bool operator!=(

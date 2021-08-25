@@ -78,5 +78,44 @@ namespace math_translation {
 	}
 }
 
+namespace helpers {
+	template<
+		typename _t,
+		typename _container>
+	bool contains(const _container& container, const _t& value)
+	{
+		return std::find(container.begin(), container.end(), value)
+			!= container.end();
+	} // needs specialization for maps
+
+	template<
+		typename _t>
+	_t choose(
+		std::vector<std::pair<_t, float>>& item_weights) // need to template list for const/nonconst 
+	{
+		float total_weight = 0.f;
+		for (const auto& [item, weight] : item_weights)
+		{
+			total_weight += weight;
+		}
+
+		float pick = randf() * total_weight;
+				
+		float last_weight = 0.f;
+		for (const auto& [item, weight] : item_weights)
+		{
+			if (pick > last_weight && pick < weight + last_weight)
+			{
+				return item;
+			}
+
+			last_weight = weight;
+		}
+
+		LOG_WARNING << "Choose had invalid weights!";
+		return _t();
+	}
+}
+	using namespace helpers;
 	using namespace math_translation;
 }

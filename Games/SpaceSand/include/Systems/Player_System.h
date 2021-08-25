@@ -1,7 +1,12 @@
 #pragma once
 
+#include "plugins/iw/Sand/Engine/SandLayer.h"
+
+#include "iw/physics/Collision/SphereCollider.h"
 #include "Components/Player.h"
-#include "Systems/Projectile_System.h"
+#include "Components/KeepInWorld.h"
+#include "Components/Item.h"
+
 #include "Events.h"
 #include "Assets.h"
 

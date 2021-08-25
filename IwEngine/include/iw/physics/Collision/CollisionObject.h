@@ -27,7 +27,7 @@ namespace Physics {
 		)
 			: Collider(nullptr)
 			, IsTrigger(false)
-			, IsStatic(true)
+			, IsStatic(!__isDynamic)
 			, IsDynamic(__isDynamic)
 		{
 			// maybe put check for if dynamic flag matches this ptr

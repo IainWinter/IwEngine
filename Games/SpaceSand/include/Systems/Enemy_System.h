@@ -1,12 +1,14 @@
 #pragma once
 
 #include "iw/engine/System.h"
+#include "iw/physics/Collision/SphereCollider.h"
+
 #include "plugins/iw/Sand/Engine/SandLayer.h"
 
 #include "Components/EnemyShip.h"
 #include "Components/Flocker.h"
+
 #include "Events.h"
-#include "iw/physics/Collision/SphereCollider.h"
 
 struct EnemySystem : iw::SystemBase
 {

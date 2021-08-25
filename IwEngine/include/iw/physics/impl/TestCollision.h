@@ -1,6 +1,6 @@
 #pragma once
 
-#include "..\Collision\ManifoldPoints.h"
+#include "iw/physics/Collision/ManifoldPoints.h"
 #include "PlaneCollider.h"
 #include "SphereCollider.h"
 #include "CapsuleCollider.h"
@@ -77,7 +77,7 @@ namespace impl {
 		scalar distance = dot(aCenter - onPlane, normal); // distance from center of sphere to plane surface
 
 		if (distance > aRadius) {
-			return {};
+			return ManifoldPoints();
 		}
 		
 		vec_t aDeep = aCenter - normal * aRadius;
@@ -103,7 +103,7 @@ namespace impl {
 		Plane*   A = (Plane*)a;
 		Capsule* B = (Capsule*)b;
 
-		return {};
+		return ManifoldPoints();
 	}
 
 	template<
@@ -172,7 +172,7 @@ namespace impl {
 		if (    distance < 0.00001f
 			|| distance > aRadius + bRadius)
 		{
-			return {};
+			return ManifoldPoints();
 		}
 
 		vec_t normal = normalize(ab);
@@ -180,7 +180,7 @@ namespace impl {
 		vec_t aDeep = aCenter + normal * aRadius;
 		vec_t bDeep = bCenter - normal * bRadius;
 
-		return ManifoldPoints(aDeep, bDeep, normal, distance);
+		return ManifoldPoints(aDeep, bDeep);
 	}
 
 	template<
@@ -232,7 +232,7 @@ namespace impl {
 		scalar distance = length(bp);
 
 		if (distance > aRadius + bRadius) {
-			return {};
+			return ManifoldPoints();
 		}
 
 		vec_t normal = normalize(bp);
@@ -240,7 +240,7 @@ namespace impl {
 		vec_t aDeep = aCenter     - normal * aRadius;
 		vec_t bDeep = bCenterProj + normal * bRadius;
 
-		return ManifoldPoints(aDeep, bDeep, normal, distance);
+		return ManifoldPoints(aDeep, bDeep);
 	}
 
 	template<
@@ -259,7 +259,7 @@ namespace impl {
 		Capsule* A = (Capsule*)a;
 		Capsule* B = (Capsule*)b;
 
-		return {};
+		return ManifoldPoints();
 	}
 
 	// For meshes
@@ -267,7 +267,7 @@ namespace impl {
 	ManifoldPoints GetMaxPen(
 		std::vector<ManifoldPoints>& manifolds)
 	{
-		if (manifolds.size() == 0) return {}; // exit if no collision
+		if (manifolds.size() == 0) return ManifoldPoints(); // exit if no collision
 
 		size_t maxNormalIndex = 0;
 		float  maxNormalDist  = FLT_MIN;

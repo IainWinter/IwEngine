@@ -138,7 +138,7 @@ inline Weapon* MakeLaser_Cannon_Enemy()
 	cannon->BreadthFromOrigin = 4;
 	cannon->FireDelay = 2;
 	cannon->FireDelayMargin = 1;
-	cannon->Inaccuracy = .1f;
+	cannon->Inaccuracy = .05f;
 
 	return cannon;
 }

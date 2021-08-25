@@ -1,8 +1,10 @@
 #pragma once
 
 #include "plugins/iw/Sand/Engine/SandLayer.h"
-#include "Components/Projectile.h"
+
 #include "iw/physics/Collision/SphereCollider.h"
+#include "Components/Projectile.h"
+
 #include "Events.h"
 
 struct ProjectileSystem

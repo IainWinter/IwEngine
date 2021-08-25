@@ -27,7 +27,7 @@ int LoadAssets(
 	A_mesh_star            = iw::ScreenQuad().MakeCopy();
 	A_mesh_ui_background   = iw::ScreenQuad().MakeInstance();
 	A_mesh_ui_playerHealth = iw::ScreenQuad().MakeInstance();
-	A_mesh_ui_cursor        = iw::ScreenQuad().MakeInstance();
+	//A_mesh_ui_cursor        = iw::ScreenQuad().MakeInstance();
 
 #define CHECK_LOAD(x) if(!x) { LOG_ERROR << "Failed to load " << #x; return 100; }
 	
@@ -108,10 +108,10 @@ int LoadAssets(
 		A_mesh_ui_playerHealth.Material->SetTexture("texture", ui_player_texture);
 	}
 
-	{
-		A_mesh_ui_cursor.Material = A_material_texture_cam->MakeInstance();
-		A_mesh_ui_cursor.Material->SetTexture("texture", A_texture_ui_cursor);
-	}
+	//{
+	//	A_mesh_ui_cursor.Material = A_material_texture_cam->MakeInstance();
+	//	A_mesh_ui_cursor.Material->SetTexture("texture", A_texture_ui_cursor);
+	//}
 
 	{
 		A_mesh_star.Material = A_material_texture_cam_particle->MakeInstance();

@@ -7,6 +7,7 @@
 #include "iw/math/noise.h"
 
 #include "Systems/World_System.h"
+#include "Systems/KeepInWorld_System.h"
 #include "Systems/Item_System.h"
 
 #include "Systems/Player_System.h"
@@ -131,10 +132,15 @@ struct GameLayer : iw::Layer
 				{40, 36},
 			};
 
+			// for some reason this broke, not sure why
+			// doesnt seem to collide against the solid field, but regular cells work??
+
 			for (int y = 0; y < h; y++)
 			for (int x = 0; x < w; x++)
 			{
-				chunk->SetCell(x, y, true, iw::SandField::SOLID);
+				chunk->SetCell(x, y, iw::Cell::GetDefault(iw::CellType::ROCK));
+
+				//chunk->SetCell(x, y, true, iw::SandField::SOLID);
 			}
 
 			for (int y = 0; y < widths.size(); y++)
@@ -143,13 +149,18 @@ struct GameLayer : iw::Layer
 
 				for (int x = w/2 - yw; x < w/2 + yw; x++)
 				{
-					chunk->SetCell(x, y, false, iw::SandField::SOLID);
+					chunk->SetCell(x, y, iw::Cell::GetDefault(iw::CellType::EMPTY));
+
+					//chunk->SetCell(x, y, false, iw::SandField::SOLID);
 				}
 			}
 
 			for (const auto& [x, y] : fills)
 			{
-				chunk->SetCell(x-1, y-1, true, iw::SandField::SOLID); // this is slightly wrong
+				chunk->SetCell(x-2, y-2, iw::Cell::GetDefault(iw::CellType::ROCK));
+
+
+				//chunk->SetCell(x-1, y-1, true, iw::SandField::SOLID); // this is slightly wrong
 			}
 		}
 
@@ -165,12 +176,12 @@ struct GameLayer : iw::Layer
 
 		//background_s = PushSystem<BackgroundSystem>();
 		
+		PushSystem<FlockingSystem>();
+
 		PushSystem<ProjectileSystem>(sand);
 		PushSystem<EnemySystem>     (sand);
-		PushSystem<WorldSystem>     (sand, player_s->m_player);
 		PushSystem<ItemSystem>      (sand, player_s->m_player);
-
-		PushSystem<FlockingSystem>();
+		PushSystem<WorldSystem>     (sand, player_s->m_player);
 
 		PushSystem<iw::PhysicsSystem>();
 		PushSystem<iw::EntityCleanupSystem>();
@@ -181,6 +192,7 @@ struct GameLayer : iw::Layer
 		}
 
 		PushSystem(player_s);
+		PushSystem<KeepInWorldSystem>();
 
 		return 0;
 	}
@@ -274,7 +286,7 @@ struct GameLayer : iw::Layer
 			laserFluid.Color = iw::Color::From255(255, 38, 38);
 
 			auto [w, h] = sand_ui_laserCharge->GetSandTexSize();
-			int x = 31;
+			int x = 29;
 			int y = 31;
 
 			if (sand_ui_laserCharge->m_world->IsEmpty(x, y))
@@ -314,12 +326,23 @@ struct GameLayer : iw::Layer
 
 		// DEBUG
 
-		if (iw::Mouse::ButtonDown(iw::MMOUSE)) {
-			if (iw::Keyboard::KeyDown(iw::SHIFT)) {
-				Bus->push<SpawnItem_Event>(sand->sP.x, sand->sP.y, 1, ItemType::LASER_CHARGE);
-			} else {
-				Bus->push<SpawnItem_Event>(sand->sP.x, sand->sP.y, 1, ItemType::HEALTH);
+		if (iw::Mouse::ButtonDown(iw::MMOUSE)) 
+		{
+			SpawnItem_Config config;
+			config.X = sand->sP.x;
+			config.Y = sand->sP.y;
+			config.Amount = 1;
+
+			if (iw::Keyboard::KeyDown(iw::SHIFT)) 
+			{
+				config.Item = ItemType::WEAPON_MINIGUN;
+			} 
+			else 
+			{
+				config.Item = ItemType::HEALTH;
 			}
+
+			Bus->push<SpawnItem_Event>(config);
 		}
 	}
 	// end temp ui
@@ -417,10 +440,12 @@ struct GameLayer : iw::Layer
 		float c_ammoCount_position_x = c_menu_position_x + c_menu_width - 200;
 		float c_ammoCount_position_y = c_menu_position_y + 100;
 
-		float c_cursor_position_x = sand->sP.x;
-		float c_cursor_position_y = sand->sP.y;
-		float c_cursor_width      = 20;
-		float c_cursor_height      = c_cursor_width;
+		//sand->m_world->SetCell(sand->sP.x, sand->sP.y, iw::Cell::GetDefault(iw::CellType::ROCK));
+
+		//float c_cursor_position_x =  iw::Mouse::ClientPos().x() * 2 - width;
+		//float c_cursor_position_y = -iw::Mouse::ClientPos().y() * 2 + height;
+		//float c_cursor_width      = 20;
+		//float c_cursor_height      = c_cursor_width;
 
 		// SCALING, this should be done by the camera...
 
@@ -446,10 +471,10 @@ struct GameLayer : iw::Layer
 		float ammoCount_position_x = c_ammoCount_position_x / width;
 		float ammoCount_position_y = c_ammoCount_position_y / height;
 
-		float cursor_position_x = c_cursor_position_x / width;
-		float cursor_position_y = c_cursor_position_y / height;
-		float cursor_width      = c_cursor_width      / width;
-		float cursor_height     = c_cursor_height     / height;
+		//float cursor_position_x = c_cursor_position_x / width;
+		//float cursor_position_y = c_cursor_position_y / height;
+		//float cursor_width      = c_cursor_width      / width;
+		//float cursor_height     = c_cursor_height     / height;
 
 		iw::Transform sandTransform;
 		sandTransform.Position.y = game_position_y;
@@ -479,12 +504,12 @@ struct GameLayer : iw::Layer
 		uiAmmoTextTransform.Position.x = ammoCount_position_x;
 		uiAmmoTextTransform.Position.y = ammoCount_position_y;
 
-		iw::Transform uiCursorTransform;
-		uiCursorTransform.Position.z = 1;
-		uiCursorTransform.Position.x = cursor_position_x;
-		uiCursorTransform.Position.y = cursor_position_y;
-		uiCursorTransform.Scale.x    = cursor_width;
-		uiCursorTransform.Scale.y    = cursor_height;
+		//iw::Transform uiCursorTransform;
+		//uiCursorTransform.Position.z = 1;
+		//uiCursorTransform.Position.x = cursor_position_x;
+		//uiCursorTransform.Position.y = cursor_position_y;
+		//uiCursorTransform.Scale.x    = cursor_width;
+		//uiCursorTransform.Scale.y    = cursor_height;
 
 		// END SCALING
 
@@ -515,7 +540,7 @@ struct GameLayer : iw::Layer
 		Renderer->DrawMesh(uiBackgroundTransform, A_mesh_ui_background);
 		Renderer->DrawMesh(uiLaserChargeTransform, sand_ui_laserCharge->GetSandMesh());
 		Renderer->DrawMesh(uiAmmoTextTransform, A_mesh_ui_text_ammo);
-		Renderer->DrawMesh(uiCursorTransform, A_mesh_ui_cursor);
+		//Renderer->DrawMesh(uiCursorTransform, A_mesh_ui_cursor);
 		Renderer->EndScene();
 	}
 };

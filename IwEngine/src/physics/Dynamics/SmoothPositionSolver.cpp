@@ -29,14 +29,14 @@ namespace Physics {
 			glm::vec3 deltaB;
 
 			if (aBody ? aBody->IsKinematic : false) {
-				deltaA = -aInvMass * correction;
+				deltaA = aInvMass * correction;
 			}
 
 			if (bBody ? bBody->IsKinematic : false) {
 				deltaB = bInvMass * correction;
 			}
 
-			deltas.push_back(std::make_pair(deltaA, deltaB));
+			deltas.emplace_back(deltaA, deltaB);
 		}
 
 		for (unsigned i = 0; i < manifolds.size(); i++) {
@@ -44,7 +44,7 @@ namespace Physics {
 			Rigidbody* bBody = manifolds[i].ObjB->IsDynamic ? (Rigidbody*)manifolds[i].ObjB : nullptr;
 
 			if (aBody ? aBody->IsKinematic : false) {
-				aBody->Transform.Position += deltas[i].first;
+				aBody->Transform.Position -= deltas[i].first;
 			}
 
 			if (bBody ? bBody->IsKinematic : false) {
