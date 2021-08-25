@@ -52,21 +52,29 @@ struct Tile {
 		}
 	}
 
+	void ReinstatePixel(unsigned index)
+	{
+		int size = m_removedCells.size();
+		if (size == 0) return;
+
+		auto itr = std::find(m_removedCells.begin(), m_removedCells.end(), index);
+		if (itr == m_removedCells.end()) return;
+
+		m_currentCellCount++;
+		m_removedCells.erase(itr);
+		m_currentCells.push_back(index);
+		SetState(index, FILLED);
+	}
+
 	void ReinstateRandomPixel()
 	{
 		int size = m_removedCells.size();
 		if (size == 0) return;
 
-		int randi = iw::randi(size - 1);
-		int index = m_removedCells.at(randi);
-
-		m_currentCellCount++;
-		m_removedCells.erase(m_removedCells.begin() + randi);
-		m_currentCells.push_back(index);
-		SetState(index, FILLED);
+		ReinstatePixel(iw::randi(size - 1));
 	}
 
-	// It seems like the raster fidelity is better if the rendererd geometry is just a square
+	// It seems like thm_removedCells.size() etter if the rendererd geometry is just a square
 	// The physical colliders should still use scanned one obviously, but many more triangles can be removed
 
 	std::vector<glm::vec2> m_polygon; // for raster
