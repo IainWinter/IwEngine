@@ -71,16 +71,9 @@ namespace ECS {
 			const ref<Archetype>& archetype);
 
 		// Destroys an entity and its components
-		// Deprecated
 		IWENTITY_API
 		bool DestroyEntity(
-			size_t index); // prob can use handle
-
-		// Destroys an entity and its components
-		// USE THIS
-		//IWENTITY_API
-		bool DestroyEntity(
-			EntityHandle handle) { return DestroyEntity(handle.Index); } // temp
+			EntityHandle handle);
 
 		// Marks an entity as dead, gets skipped by iterator, doesn't touch components
 		IWENTITY_API
@@ -155,6 +148,11 @@ namespace ECS {
 			const ref<Component>& component,
 			void* instance);
 
+		// Gets an entity from a handle's index
+		IWENTITY_API
+		Entity GetEntity(
+			EntityHandle handle);
+
 		IWENTITY_API
 		Entity Instantiate(
 			const Prefab& prefab);
@@ -177,7 +175,8 @@ namespace ECS {
 #endif
 			);
 
-			component->DeepCopyFunc = iw::GetCopyFunc<_c>();
+			component->DeepCopyFunc   = iw::GetCopyFunc<_c>();
+			component->DestructorFunc = iw::GetDestructorFunc<_c>();
 
 			return component;
 		}

@@ -16,9 +16,9 @@ namespace Graphics {
 		, m_parent       (nullptr)
 		, m_xOffset      (0)
 		, m_yOffset      (0)
+		, m_ownsColors   (false)
 		, m_colors       (nullptr)
 		, m_handle       (nullptr)
-		, m_ownsColors   (false)
 	{}
 
 	Texture::Texture(
@@ -44,9 +44,9 @@ namespace Graphics {
 		, m_parent      (nullptr)
 		, m_xOffset     (0)
 		, m_yOffset     (0)
+		, m_ownsColors  (false)
 		, m_colors      (colors)
 		, m_handle      (nullptr)
-		, m_ownsColors  (false)
 	{
 		switch (format) {
 			case ALPHA:   m_channels = 1; break;
@@ -83,8 +83,8 @@ namespace Graphics {
 		, m_xOffset     (0)
 		, m_yOffset     (0)
 		, m_colors      (colors)
-		, m_handle      (nullptr)
 		, m_ownsColors  (false)
+		, m_handle      (nullptr)
 	{
 		switch (format) {
 			case ALPHA:   m_channels = 1; break;
@@ -117,9 +117,9 @@ namespace Graphics {
 		, m_parent      (parent)
 		, m_xOffset     (xOffset)
 		, m_yOffset     (yOffset)
+		, m_ownsColors  (false)
 		, m_colors      (colors)
 		, m_handle      (nullptr)
-		, m_ownsColors  (false)
 	{}
 
 	Texture::Texture(
@@ -138,13 +138,9 @@ namespace Graphics {
 		, m_xOffset     (other.m_xOffset)
 		, m_yOffset     (other.m_yOffset)
 		, m_ownsColors  (other.m_ownsColors)
+		, m_colors      (nullptr)
+		, m_handle      (nullptr)
 	{
-		if (m_handle) {
-			delete m_handle;
-		}
-
-		m_handle = nullptr;
-
 		CreateColors(other.m_colors != nullptr);
 		if (other.m_colors) {
 			memcpy(m_colors, other.m_colors, ColorCount());
@@ -166,9 +162,9 @@ namespace Graphics {
 		, m_parent      (other.m_parent)
 		, m_xOffset     (other.m_xOffset)
 		, m_yOffset     (other.m_yOffset)
+		, m_ownsColors  (other.m_ownsColors)
 		, m_colors      (other.m_colors)
 		, m_handle      (other.m_handle)
-		, m_ownsColors  (other.m_ownsColors)
 	{
 		other.m_colors = nullptr;
 		other.m_handle = nullptr;
@@ -195,8 +191,8 @@ namespace Graphics {
 		m_parent       = other.m_parent;
 		m_xOffset      = other.m_yOffset;
 		m_yOffset      = other.m_yOffset;
-		m_handle       = nullptr;
 		m_ownsColors   = other.m_ownsColors;
+		m_colors       = nullptr;
 
 		if (m_handle) {
 			delete m_handle;
@@ -228,9 +224,9 @@ namespace Graphics {
 		m_parent       = other.m_parent;
 		m_xOffset      = other.m_yOffset;
 		m_yOffset      = other.m_yOffset;
+		m_ownsColors   = other.m_ownsColors;
 		m_colors       = other.m_colors;
 		m_handle       = other.m_handle;
-		m_ownsColors   = other.m_ownsColors;
 
 		other.m_colors = nullptr;
 		other.m_handle = nullptr;

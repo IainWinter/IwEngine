@@ -8,7 +8,8 @@
 
 namespace iw {
 namespace ECS {
-	using func_DeepCopy = std::function<void(void*, void*)>;
+	using func_DeepCopy   = std::function<void(void*, void*)>;
+	using func_Destructor = std::function<void(void*)>;
 
 	struct IWENTITY_API Component {
 #ifdef IW_USE_REFLECTION
@@ -22,6 +23,7 @@ namespace ECS {
 		size_t Id;
 
 		func_DeepCopy DeepCopyFunc;
+		func_Destructor DestructorFunc;
 
 		static inline size_t Hash(
 			std::initializer_list<iw::ref<Component>> components)
@@ -107,6 +109,14 @@ namespace ECS {
 			else {
 				new(p) _t(*d);
 			}
+		};
+	}
+
+	template<
+		typename _t>
+	func_Destructor GetDestructorFunc() {
+		return [](void* ptr) {
+			((_t*)ptr)->~_t();
 		};
 	}
 }

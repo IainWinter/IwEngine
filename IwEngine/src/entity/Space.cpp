@@ -53,14 +53,14 @@ namespace ECS {
 	}
 
 	bool Space::DestroyEntity(
-		size_t index)
+		EntityHandle handle)
 	{
-		if (!m_entityManager.IsValidEntityIndex(index)) {
-			LOG_WARNING << "Tried to destroy an entity with invalid index " << index;
+		if (!m_entityManager.IsValidEntityIndex(handle.Index)) {
+			LOG_WARNING << "Tried to destroy an entity with invalid index " << handle.Index;
 			return false;
 		}
 
-		ref<EntityData>& entityData = m_entityManager.GetEntityData(index);
+		ref<EntityData>& entityData = m_entityManager.GetEntityData(handle.Index);
 
 #ifdef IW_USE_EVENTS
 		if (m_bus) {
@@ -68,7 +68,7 @@ namespace ECS {
 		}
 #endif
 
-		return m_entityManager   .DestroyEntity(index)
+		return m_entityManager   .DestroyEntity(handle.Index)
 			&& m_componentManager.DestroyComponentsData(entityData);
 	}
 
@@ -283,6 +283,12 @@ namespace ECS {
 			instance);
 
 		return Entity(entity, this);
+	}
+
+	Entity Space::GetEntity(
+		EntityHandle handle)
+	{
+		return Entity(m_entityManager.GetEntityData(handle.Index)->Entity, this);
 	}
 
 	Entity Space::Instantiate(

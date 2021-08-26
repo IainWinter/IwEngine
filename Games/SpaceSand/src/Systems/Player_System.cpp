@@ -1,42 +1,56 @@
 #include "Systems/Player_System.h"
 
-int PlayerSystem::Initialize()
+void PlayerSystem::OnPop()
 {
+	m_player.Kill();
+}
+
+void PlayerSystem::OnPush()
+{
+	if (m_player)
+	{
+		m_player.Revive();
+		m_player.Destroy();
+	}
+	
 	m_player = sand->MakeTile<iw::Circle, Player, KeepInWorld>(A_texture_player, true);
 
 	Player*        player    = m_player.Set<Player>();
 	iw::Circle*    collider  = m_player.Find<iw::Circle>();
 	iw::Rigidbody* rigidbody = m_player.Find<iw::Rigidbody>();
-	iw::Tile*      tile      = m_player.Find<iw::Tile>();
+	iw::Transform* transform = m_player.Find<iw::Transform>();
+
+	auto [w, h] = sand->GetSandTexSize2();
+	transform->Position = glm::vec3(w, h, 0);
+	rigidbody->SetTransform(transform);
+	rigidbody->SetMass(10);
 
 	player->CurrentWeapon = MakeDefault_Cannon();
 	player->SpecialLaser  = MakeFatLaser_Cannon();
-
 	player->CurrentWeapon->Ammo = -1;
-
-	collider->Radius = 4;
-
-	auto [w, h] = sand->GetSandTexSize2();
-	rigidbody->Transform.Position = glm::vec3(w, h, 0);
-	rigidbody->SetMass(10);
-
-	rigidbody->OnCollision = [](auto man, float dt){
-		LOG_INFO << "Player collision";
-	};
-
 	player->CoreIndices = {
 		34, 35, 36, 37,
 		42, 43, 44, 45,
-		50, 51,
-		58, 59
+		52, 53,
+		60, 61
 	};
+	player->CoreIndiceCount = player->CoreIndices.size();
 
-	for (unsigned index : player->CoreIndices)
-	{
-		tile->m_sprite.Colors32()[index] = iw::Color::From255(255, 100, 10).to32();
-	}
+	collider->Radius = 4;
 
-	return 0;
+	Bus->push<CreatedPlayer_Event>(m_player);
+
+	// should add to tile or something
+	//iw::Tile*      tile      = m_player.Find<iw::Tile>();
+	//for (unsigned i = 0; i < tile->m_sprite.ColorCount32(); i++)
+	//{
+	//	float alpha = iw::Color::From32(tile->m_sprite.Colors32()[i]).a;
+	//	if (   alpha > .75
+	//		&& alpha < 1)
+	//	{
+	//		player->CoreIndices.push_back(i);
+	//	}
+	//}
 }
 
 void PlayerSystem::FixedUpdate()
@@ -87,6 +101,10 @@ void PlayerSystem::Update()
 		Bus->push<SpawnProjectile_Event>(shot);
 		Bus->push<ChangeLaserFluid_Event>(-1);
 	}
+
+	if (player->CoreIndiceCount < player->CoreIndices.size() / 3) {
+		Bus->push<GameOver_Event>();
+	}
 }
 
 bool PlayerSystem::On(iw::ActionEvent& e)
@@ -96,13 +114,31 @@ bool PlayerSystem::On(iw::ActionEvent& e)
 		{
 			HealPlayer_Event& event = e.as<HealPlayer_Event>();
 
+			Player*   player = m_player.Find<Player>();
+			iw::Tile* tile   = m_player.Find<iw::Tile>();
+
 			if (event.Index == -1)
 			{
-				m_player.Find<iw::Tile>()->ReinstateRandomPixel();
+				std::vector<int> nonCoreIndices;
+				for (int& index : tile->m_removedCells)
+				{
+					if (!iw::contains(player->CoreIndices, index))
+					{
+						nonCoreIndices.push_back(index);
+					}
+				}
+
+				if (nonCoreIndices.size() > 0) 
+				{
+					int index = iw::randi(nonCoreIndices.size() - 1);
+					m_player.Find<iw::Tile>()->ReinstatePixel(nonCoreIndices.at(index));
+				}
 			}
 
-			else {
+			else 
+			{
 				m_player.Find<iw::Tile>()->ReinstatePixel(event.Index);
+				m_player.Find<Player>()->CoreIndiceCount++;
 			}
 
 			break;
@@ -140,15 +176,15 @@ bool PlayerSystem::On(iw::ActionEvent& e)
 					config.Item = PLAYER_CORE;
 					config.ActivateDelay = .33f;
 					config.Speed = 200;
+					config.AngularSpeed = 10;
 					config.OnPickup = [=]()
 					{
 						Bus->push<HealPlayer_Event>(event.Info.index);
-						Bus->push<HealPlayer_Event>(-1);
-						Bus->push<HealPlayer_Event>(-1);
-						Bus->push<HealPlayer_Event>(-1);
 					};
 
 					Bus->push<SpawnItem_Event>(config);
+
+					player->CoreIndiceCount--;
 				}
 			}
 

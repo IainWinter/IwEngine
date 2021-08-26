@@ -41,13 +41,28 @@ namespace ECS {
 		}
 
 		short Version() const {
-			return Handle.Version;
+#ifdef IW_DEBUG
+			if (!Space) {
+				LOG_ERROR << "Entity has no space!";
+				return -1;
+			}
+#endif
+
+			return Space->GetEntity(Handle).Handle.Version;
 		}
 
 		bool Alive() const {
-			return Handle.Alive;
+#ifdef IW_DEBUG
+			if (!Space) {
+				LOG_ERROR << "Entity has no space!";
+				return false;
+			}
+#endif
+
+			return Space->GetEntity(Handle).Handle.Alive;
 		}
 
+		// Invalidates entity index.
 		void Destroy() {
 #ifdef IW_DEBUG
 			if (!Space) {
@@ -55,7 +70,10 @@ namespace ECS {
 				return;
 			}
 #endif
-			Space->DestroyEntity(Index());
+			Space->DestroyEntity(Handle);
+
+			Handle = EntityHandle::Empty;
+			Space = nullptr;
 		}
 
 		void Kill() {

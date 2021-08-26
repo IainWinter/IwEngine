@@ -112,8 +112,7 @@ namespace helpers {
 			last_weight = weight;
 		}
 
-		LOG_WARNING << "Choose had invalid weights!";
-		return _t();
+		return item_weights.back().first;
 	}
 }
 	using namespace helpers;

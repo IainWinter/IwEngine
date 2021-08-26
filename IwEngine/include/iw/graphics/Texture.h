@@ -28,9 +28,10 @@ namespace Graphics {
 		int m_xOffset;
 		int m_yOffset;
 
-		unsigned char* m_colors;
-		ITexture* m_handle;
 		bool m_ownsColors;
+		unsigned char* m_colors;
+
+		ITexture* m_handle;
 
 	//public:
 		IWGRAPHICS_API

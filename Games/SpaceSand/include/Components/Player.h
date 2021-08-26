@@ -22,6 +22,7 @@ struct Player
 
 	float TimeWithoutCore = 10;
 	std::vector<unsigned> CoreIndices;
+	int CoreIndiceCount;
 
 	Player() {}
 };

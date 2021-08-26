@@ -1,7 +1,20 @@
 #include "Systems/Item_System.h"
 
+void ItemSystem::OnPush()
+{
+    Space->Query<Item>().Each([&](iw::EntityHandle handle, Item*) {
+		Space->QueueEntity(handle, iw::func_Destroy);
+	});
+}
+
 void ItemSystem::FixedUpdate()
 {
+    if (!m_player.Alive())
+    {
+        return;
+    }
+    
+
     Space->Query<iw::Rigidbody, Item>().Each([&](
         iw::EntityHandle entity,
         iw::Rigidbody* rigidbody,
@@ -21,7 +34,7 @@ void ItemSystem::FixedUpdate()
             {
                 // should calcuate an arc so they cannot orbit
 
-                glm::vec3 vel = glm::normalize(playerPos - healthPos) * 250.f;
+                glm::vec3 vel = glm::normalize(playerPos - healthPos) * 300.f;
                 rigidbody->Velocity = iw::lerp(rigidbody->Velocity, vel, iw::FixedTime() * 10);
 
                 if (distance < 5)
@@ -53,7 +66,8 @@ void ItemSystem::FixedUpdate()
             }
 
             else {
-                rigidbody->Velocity = iw::lerp(rigidbody->Velocity, glm::vec3(0.f), item->MoveTimer / item->MoveTime);
+                rigidbody->Velocity        = iw::lerp(rigidbody->Velocity,        glm::vec3(0.f), item->MoveTimer / item->MoveTime);
+                rigidbody->AngularVelocity = iw::lerp(rigidbody->AngularVelocity, glm::vec3(0.f), item->MoveTimer / item->MoveTime);
                 item->MoveTimer += iw::FixedTime();
             }
         });
@@ -61,34 +75,47 @@ void ItemSystem::FixedUpdate()
 
 bool ItemSystem::On(iw::ActionEvent& e)
 {
-    if (e.Action != SPAWN_ITEM) return false;
-
-    SpawnItem_Event& event = e.as<SpawnItem_Event>();
-
-    float angle = 0.f;
-    float angleStep = iw::Pi2 / event.Config.Amount;
-    float angleRand = angleStep / 2 * iw::randfs();
-
-    for (int i = 0; i < event.Config.Amount; i++)
+    switch (e.Action)
     {
-        float dx = cos(angle + angleRand);
-        float dy = sin(angle + angleRand);
-
-        angle += angleStep;
-
-        iw::Entity entity;
-
-        switch (event.Config.Item)
+        case SPAWN_ITEM:
         {
-            case ItemType::HEALTH:         entity = MakeHealth       (event.Config); break;
-            case ItemType::LASER_CHARGE:   entity = MakeLaserCharge  (event.Config); break;
-            case ItemType::WEAPON_MINIGUN: entity = MakeWeaponMinigun(event.Config); break;
-            case ItemType::PLAYER_CORE:    entity = MakePlayerCore   (event.Config); break;
-        }
+             SpawnItem_Event& event = e.as<SpawnItem_Event>();
 
-        glm::vec3& vel = entity.Find<iw::Rigidbody>()->Velocity; 
-        vel.x = dx * event.Config.Speed;
-        vel.y = dy * event.Config.Speed;
+            float angle = 0.f;
+            float angleStep = iw::Pi2 / event.Config.Amount;
+            float angleRand = angleStep / 2 * iw::randfs();
+
+            for (int i = 0; i < event.Config.Amount; i++)
+            {
+                float dx = cos(angle + angleRand);
+                float dy = sin(angle + angleRand);
+        
+                angle += angleStep;
+
+                iw::Entity entity;
+
+                switch (event.Config.Item)
+                {
+                    case ItemType::HEALTH:         entity = MakeHealth       (event.Config); break;
+                    case ItemType::LASER_CHARGE:   entity = MakeLaserCharge  (event.Config); break;
+                    case ItemType::WEAPON_MINIGUN: entity = MakeWeaponMinigun(event.Config); break;
+                    case ItemType::PLAYER_CORE:    entity = MakePlayerCore   (event.Config); break;
+                }
+
+                glm::vec3& vel = entity.Find<iw::Rigidbody>()->Velocity; 
+                vel.x = dx * event.Config.Speed;
+                vel.y = dy * event.Config.Speed;
+
+                glm::vec3& avel = entity.Find<iw::Rigidbody>()->AngularVelocity;
+                avel.z = iw::randfs() * event.Config.AngularSpeed;
+            }
+
+            break;
+        }
+        case CREATED_PLAYER: {
+            m_player = e.as<CreatedPlayer_Event>().PlayerEntity;
+            break;
+        }
     }
 
     return false;
@@ -152,7 +179,7 @@ iw::Entity ItemSystem::MakeLaserCharge(const SpawnItem_Config& config)
 
 iw::Entity ItemSystem::MakePlayerCore(const SpawnItem_Config& config)
 {
-    iw::Entity entity = MakeItem(config, A_texture_star);
+    iw::Entity entity = MakeItem(config, A_texture_item_coreShard);
 	iw::Rigidbody* rigidbody = entity.Find<iw::Rigidbody>();
 	Item*          item      = entity.Find<Item>();
     

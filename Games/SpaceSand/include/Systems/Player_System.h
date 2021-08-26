@@ -15,18 +15,16 @@ struct PlayerSystem : iw::SystemBase
 	iw::SandLayer* sand;
 	iw::Entity m_player;
 
-	float cam_x, cam_y;
-
 	PlayerSystem(
 		iw::SandLayer* sand
 	)
 		: iw::SystemBase("Player")
 		, sand(sand)
-		, cam_x(0)
-		, cam_y(0)
 	{}
 
-	int Initialize() override;
+	void OnPush() override;
+	void OnPop() override;
+
 	void FixedUpdate() override;
 	void Update() override;
 

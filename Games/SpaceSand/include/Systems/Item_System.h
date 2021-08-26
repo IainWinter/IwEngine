@@ -15,14 +15,14 @@ struct ItemSystem : iw::SystemBase
 	iw::Entity m_player;
 
 	ItemSystem(
-		iw::SandLayer* sand,
-		iw::Entity m_player
+		iw::SandLayer* sand
 	)
 		: iw::SystemBase("Health")
 		, sand(sand)
 		, m_player(m_player)
 	{}
 
+	void OnPush() override;
 	void FixedUpdate() override;
 
 	bool On(iw::ActionEvent& e) override;

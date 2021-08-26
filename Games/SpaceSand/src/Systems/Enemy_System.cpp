@@ -1,5 +1,12 @@
 #include "Systems/Enemy_System.h"
 
+void EnemySystem::OnPush()
+{
+	Space->Query<EnemyShip>().Each([&](iw::EntityHandle handle, EnemyShip*) {
+		Space->QueueEntity(handle, iw::func_Destroy);
+	});
+}
+
 void EnemySystem::FixedUpdate()
 {
 	Space->Query<iw::Transform, EnemyShip>().Each(
@@ -8,12 +15,11 @@ void EnemySystem::FixedUpdate()
 			iw::Transform* transform,
 			EnemyShip* enemy)
 		{
-			if (enemy->Weapon->CanFire())
+			if (   enemy->Weapon->CanFire()
+				&& enemy->ShootAt.Alive())
 			{
-				iw::Entity ent = iw::Entity(handle, Space.get());
 				glm::vec3 pos = enemy->ShootAt.Find<iw::Transform>()->Position;
-
-				ShotInfo shot = enemy->Weapon->GetShot(ent, pos.x, pos.y);
+				ShotInfo shot = enemy->Weapon->GetShot(Space->GetEntity(handle), pos.x, pos.y);
 				Bus->send<SpawnProjectile_Event>(shot);
 			}
 		}

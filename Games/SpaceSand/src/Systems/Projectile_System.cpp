@@ -1,8 +1,10 @@
 #include "Systems/Projectile_System.h"
 
-int ProjectileSystem::Initialize()
+void ProjectileSystem::OnPush()
 {
-	return 0;
+	Space->Query<Projectile>().Each([&](iw::EntityHandle handle, Projectile*) {
+		Space->QueueEntity(handle, iw::func_Destroy);
+	});
 }
 
 void ProjectileSystem::Update()

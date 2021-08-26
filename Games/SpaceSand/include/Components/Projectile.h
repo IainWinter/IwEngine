@@ -26,6 +26,8 @@ struct ShotInfo {
 	float Speed() {
 		return sqrt(dx*dx + dy*dy);
 	}
+
+	std::vector<ShotInfo> others;
 };
 
 inline ShotInfo GetShot_Circular(

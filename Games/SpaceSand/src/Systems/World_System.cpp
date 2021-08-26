@@ -1,49 +1,9 @@
 #include "Systems/World_System.h"
 #include "iw/engine/Events/Seq/Delay.h"
 
-int WorldSystem::Initialize()
+void WorldSystem::OnPush()
 {
-	auto [w, h] = sand->GetSandTexSize();
-	sand->SetCamera(w / 2, h / 2);
-
-	iw::EventSequence& level1 = m_levels.emplace_back(CreateSequence());
-
-	Spawn spawner(10, 2, .5, .3);
-	spawner.AddSpawn(w / 2 - 50, h + 10, w / 2 + 50, h + 100);
-	spawner.OnSpawn = SpawnEnemy;
-
-	level1./*Add([&]()
-		{
-			SpawnAsteroid_Config config;
-			SpawnAsteroid_Config config1;
-		
-			config.SpawnLocationX = 0;
-			config.SpawnLocationY = 550;
-			config.VelocityX =  2;
-			config.VelocityY = -10;
-			config1.AngularVel = -iw::randfs() / 3;
-
-			config1.SpawnLocationX = 400;
-			config1.SpawnLocationY = 550;
-			config1.VelocityX = -2;
-			config1.VelocityY = -10;
-			config1.AngularVel = iw::randfs() / 3;
-
-			Bus->push<SpawnAsteroid_Event>(config);
-			Bus->push<SpawnAsteroid_Event>(config1);
-
-			return true;
-		})
-		->Add<iw::Delay>(15)
-		->*/Add<Spawn>(spawner)
-		->Add([&]() {
-			m_levels.pop_back();
-			return true;
-		});
-
-	m_levels.back().Start();
-
-	return 0;
+	SetupLevels();
 }
 
 void WorldSystem::Update()
@@ -56,13 +16,30 @@ void WorldSystem::Update()
 
 void WorldSystem::FixedUpdate()
 {
+	Space->Query<iw::Transform, iw::Tile, Asteroid>().Each(
+		[&](
+			iw::EntityHandle handle, 
+			iw::Transform* transform,
+			iw::Tile* tile,
+			Asteroid* asteroid) 
+		{
+			asteroid->Lifetime += iw::FixedTime();
+
+			if (   asteroid->Lifetime > 3
+				&& !iw::AABB2(glm::vec2(200.f), 200).Intersects(&iw::Transform(), tile->m_bounds, transform))
+			{
+				LOG_INFO << "Deleted asteroid";
+				Space->QueueEntity(handle, iw::func_Destroy);
+			}
+		});
+
 	Space->Query<iw::Transform, iw::Tile>().Each(
 		[&](
 			iw::EntityHandle entity, 
 			iw::Transform* transform,
 			iw::Tile* tile) 
 		{
-			if (tile->m_currentCellCount < tile->m_initalCellCount / 3)
+			if (tile->m_currentCellCount < tile->m_initalCellCount / 3) // this handles tiles death, should go into a Tile health system
 			{
 				if (    Space->HasComponent<Player>   (entity) 
 					|| !Space->HasComponent<EnemyShip>(entity))
@@ -73,7 +50,7 @@ void WorldSystem::FixedUpdate()
 				std::vector<std::pair<ItemType, float>> item_weights{
 					{ HEALTH, 50},
 					{ LASER_CHARGE,  50 },
-					{ WEAPON_MINIGUN, 5 }
+					{ WEAPON_MINIGUN, 15 }
 				};
 
 				SpawnItem_Config config;
@@ -121,6 +98,10 @@ bool WorldSystem::On(iw::ActionEvent& e)
 			MakeAsteroid(e.as<SpawnAsteroid_Event>().Config);
 			break;
 		}
+		case CREATED_PLAYER: {
+			m_player = e.as<CreatedPlayer_Event>().PlayerEntity;
+			break;
+		}
 	}
 
 	return false;
@@ -129,7 +110,7 @@ bool WorldSystem::On(iw::ActionEvent& e)
 iw::Entity WorldSystem::MakeAsteroid(
 	SpawnAsteroid_Config& config)
 {
-	iw::Entity entity = sand->MakeTile(A_texture_asteroid, true);
+	iw::Entity entity = sand->MakeTile<iw::MeshCollider2, Asteroid>(A_texture_asteroid, true);
 	iw::Transform* t = entity.Find<iw::Transform>();
 	iw::Rigidbody* r = entity.Find<iw::Rigidbody>();
 
@@ -141,6 +122,53 @@ iw::Entity WorldSystem::MakeAsteroid(
 	r->SetMass(1000000);
 
 	return entity;
+}
+
+void WorldSystem::SetupLevels()
+{
+	m_levels.clear();
+
+	// should load from files
+
+	auto [w, h] = sand->GetSandTexSize();
+	sand->SetCamera(w / 2, h / 2);
+
+	iw::EventSequence& level1 = m_levels.emplace_back(CreateSequence());
+
+	Spawn spawner(10, 2, .5, .3);
+	spawner.AddSpawn(w / 2 - 50, h + 10, w / 2 + 50, h + 100);
+	spawner.OnSpawn = SpawnEnemy;
+
+	level1.Add([&]()
+		{
+			SpawnAsteroid_Config config;
+			SpawnAsteroid_Config config1;
+		
+			config.SpawnLocationX = 0;
+			config.SpawnLocationY = 550;
+			config.VelocityX =  2;
+			config.VelocityY = -10;
+			config1.AngularVel = -iw::randfs() / 3;
+
+			config1.SpawnLocationX = 400;
+			config1.SpawnLocationY = 550;
+			config1.VelocityX = -2;
+			config1.VelocityY = -10;
+			config1.AngularVel = iw::randfs() / 3;
+
+			Bus->push<SpawnAsteroid_Event>(config);
+			Bus->push<SpawnAsteroid_Event>(config1);
+
+			return true;
+		})
+		->Add<iw::Delay>(15)
+		->Add<Spawn>(spawner)
+		->Add([&]() {
+			m_levels.pop_back();
+			return true;
+		});
+
+	m_levels.back().Start();
 }
 
 //Spawn WorldSystem::MakeSpawner(

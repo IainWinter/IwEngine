@@ -19,7 +19,7 @@ struct ProjectileSystem
 		, sand(sand)
 	{}
 
-	int Initialize() override;
+	void OnPush() override;
 	void Update() override;
 	void FixedUpdate() override;
 

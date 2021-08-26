@@ -254,7 +254,7 @@ namespace impl {
 		}
 
 		ManifoldPoints points;
-		points.Normal = -glm::vec3(minNormal, 0);
+		points.Normal = glm::vec3(-minNormal, 0);
 		points.PenetrationDepth = minDistance;
 		points.HasCollision = true;
 	

@@ -6,6 +6,7 @@
 #include "Components/EnemyShip.h"
 #include "Components/Player.h"
 #include "Components/Flocker.h"
+#include "Components/Asteroid.h"
 
 #include "Events.h"
 #include "Levels.h"
@@ -21,15 +22,13 @@ struct WorldSystem : iw::SystemBase
 	std::vector<iw::EventSequence> m_levels;
 
 	WorldSystem(
-		iw::SandLayer* sand,
-		iw::Entity m_player
+		iw::SandLayer* sand
 	)
 		: iw::SystemBase("World")
 		, sand(sand)
-		, m_player(m_player)
 	{}
 
-	int Initialize() override;
+	void OnPush() override;
 	void Update() override;
 	void FixedUpdate() override;
 
@@ -49,22 +48,6 @@ private:
 		Bus->push<SpawnEnemy_Event>(m_player, x, y, target_x, target_y);
 	};
 
-	/*enum WhereToSpawn {
-		TOP,
-		BOTTOM,
-		LEFT,
-		RIGHT
-	};
 
-	Spawn MakeSpawner(
-		std::initializer_list<WhereToSpawn> where,
-		int numb, int batch,
-		float time, float timeMargin);
-
-	Spawn MakeEnemySpawnner(
-		int numb, int batch,
-		float time, float timeMargin,
-		std::initializer_list<WhereToSpawn> where);
-
-	Spawn MakeAsteroidSpawnner(std::initializer_list<WhereToSpawn> where);*/
+	void SetupLevels();
 };

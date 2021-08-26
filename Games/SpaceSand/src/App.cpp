@@ -25,6 +25,14 @@ struct GameLayer : iw::Layer
 	
 	iw::Entity m_player;
 
+	PlayerSystem*     player_s;
+	WorldSystem*      world_s;
+	ProjectileSystem* projectile_s;
+	EnemySystem*      enemy_s;
+	ItemSystem*       item_s;
+
+	bool showGameOver = false;
+
 	GameLayer(
 		iw::SandLayer* sand,
 		iw::SandLayer* sand_ui_laserCharge
@@ -164,37 +172,42 @@ struct GameLayer : iw::Layer
 			}
 		}
 
-		PlayerSystem* player_s = PushSystem<PlayerSystem>(sand);
-		PopSystem(player_s); // to assign app vars
+		projectile_s = new ProjectileSystem(sand);
+		item_s       = new ItemSystem      (sand);
+		world_s      = new WorldSystem     (sand);
+		enemy_s      = new EnemySystem     (sand);
+		player_s     = new PlayerSystem    (sand);
 		
-		if (int e = player_s->Initialize())
-		{
-			return e;
-		}
-
-		m_player = player_s->m_player;
-
-		//background_s = PushSystem<BackgroundSystem>();
-		
+		PushSystem<KeepInWorldSystem>();
 		PushSystem<FlockingSystem>();
-
-		PushSystem<ProjectileSystem>(sand);
-		PushSystem<EnemySystem>     (sand);
-		PushSystem<ItemSystem>      (sand, player_s->m_player);
-		PushSystem<WorldSystem>     (sand, player_s->m_player);
-
 		PushSystem<iw::PhysicsSystem>();
 		PushSystem<iw::EntityCleanupSystem>();
 
-		if (int e = Layer::Initialize())
-		{
-			return e;
-		}
+		StartGame();
 
-		PushSystem(player_s);
-		PushSystem<KeepInWorldSystem>();
+		return Layer::Initialize();
+	}
 
-		return 0;
+	void StartGame() 
+	{
+		showGameOver = false;
+
+		PushSystemFront(projectile_s);
+		PushSystemFront(item_s);
+		PushSystemFront(world_s);
+		PushSystemFront(enemy_s);
+		PushSystemFront(player_s);
+	}
+
+	void StopGame()
+	{
+		showGameOver = true;
+
+		PopSystem(projectile_s);
+		PopSystem(item_s);
+		PopSystem(world_s);
+		PopSystem(enemy_s);
+		PopSystem(player_s);
 	}
 
 	//std::unordered_map<iw::EntityHandle, std::pair<iw::Mesh, int>, iw::ehandle_hash> debug_tileColliders;
@@ -212,6 +225,21 @@ struct GameLayer : iw::Layer
 
 	void Update() override { // this is one frame behind, add a callback to the sand layer that gets called at the right time, right after rendering the world...
 		
+		// state change :o
+
+		if (showGameOver)
+		{
+			if (iw::Keyboard::KeyDown(iw::InputName::SPACE))
+			{
+				// could reset by popping all layers and pushing them again
+				// each systems OnPush / OnPop could clean up and reint
+
+				StartGame();
+			}
+
+			return;
+		}
+
 		//tick++;
 
 		//Space->Query<iw::Tile>().Each([&](
@@ -373,6 +401,15 @@ struct GameLayer : iw::Layer
 
 				break;
 			}
+			case GAME_OVER:
+			{
+				StopGame();
+				break;
+			}
+			case CREATED_PLAYER: {
+				m_player = e.as<CreatedPlayer_Event>().PlayerEntity;
+				break;
+			}
 		}
 
 		return Layer::On(e);
@@ -382,6 +419,7 @@ struct GameLayer : iw::Layer
 
 	void PostUpdate() override
 	{
+		if (m_player.Alive()) 
 		{
 			std::stringstream buf;
 			buf << m_player.Find<Player>()->CurrentWeapon->Ammo;
@@ -541,6 +579,12 @@ struct GameLayer : iw::Layer
 		Renderer->DrawMesh(uiLaserChargeTransform, sand_ui_laserCharge->GetSandMesh());
 		Renderer->DrawMesh(uiAmmoTextTransform, A_mesh_ui_text_ammo);
 		//Renderer->DrawMesh(uiCursorTransform, A_mesh_ui_cursor);
+		
+		if (showGameOver)
+		{
+			Renderer->DrawMesh(iw::Transform(), A_mesh_ui_test_gameOver);
+		}
+
 		Renderer->EndScene();
 	}
 };

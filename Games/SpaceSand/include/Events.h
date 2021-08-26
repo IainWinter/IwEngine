@@ -17,6 +17,8 @@ enum Actions {
 	HEAL_PLAYER,
 	CHANGE_PLAYER_WEAPON,
 	PROJ_HIT_TILE,
+	GAME_OVER,
+	CREATED_PLAYER
 };
 
 struct SpawnEnemy_Event : iw::SingleEvent
@@ -87,6 +89,7 @@ struct SpawnItem_Config
 
 	float ActivateDelay = 0.f;
 	float Speed = 75;
+	float AngularSpeed = 0;
 
 	ItemType Item;
 	std::function<void()> OnPickup;
@@ -153,5 +156,22 @@ struct ProjHitTile_Event : iw::SingleEvent
 		, Info(info)
 		, Hit(hit)
 		, Projectile(proj)
+	{}
+};
+
+struct GameOver_Event : iw::SingleEvent
+{
+	GameOver_Event() : iw::SingleEvent(GAME_OVER) {}
+};
+
+struct CreatedPlayer_Event : iw::SingleEvent
+{
+	iw::Entity PlayerEntity;
+
+	CreatedPlayer_Event(
+		iw::Entity playerEntity
+	)
+		: iw::SingleEvent(CREATED_PLAYER)
+		, PlayerEntity(playerEntity)
 	{}
 };

@@ -160,10 +160,11 @@ namespace ECS {
 		EntityHandle* entityComponent = chunk->GetEntity(entityData->ChunkIndex);
 		entityComponent->Alive = false;
 
-		for (size_t i = 0; i < m_archetype->Count; i++) { // recently added not sure if needed but prob for the best
+		for (size_t i = 0; i < m_archetype->Count; i++) { 
 			ArchetypeLayout& layout = m_archetype->Layout[i];
-
 			void* component = chunk->GetComponentPtr(layout, entityData->ChunkIndex);
+			
+			layout.Component->DestructorFunc(component);
 			memset(component, 0, layout.Component->Size); // could put this in Chunk.h if it sounds better
 		}
 
