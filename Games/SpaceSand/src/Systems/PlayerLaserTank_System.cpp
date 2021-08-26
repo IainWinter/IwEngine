@@ -157,7 +157,7 @@ void PlayerLaserTankSystem::Update()
 				m_fluidToRemove--;
 				m_fluidCount--;
 
-				m_fluidTime += m_perCellTime;
+				m_fluidTime = iw::min(m_fluidTime + m_perCellTime, .5f);
 			}
 		}
 	}

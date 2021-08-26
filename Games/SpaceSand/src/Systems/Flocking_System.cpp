@@ -34,7 +34,7 @@ void FlockingSystem::FixedUpdate()
 			float centerWeight = -distance + 200;
 
 			avgAway    += (transform->Position - transform2->Position) / awayWeight;
-			avgCenter  += transform2->Position / centerWeight;
+			//avgCenter  += transform2->Position / centerWeight;
 			avgForward += rigidbody2->Velocity / distance;
 			count += 1;
 		});
@@ -46,7 +46,7 @@ void FlockingSystem::FixedUpdate()
 
 		if (count > 0) {
 			avgAway    /= count;
-			avgCenter  /= count; avgCenter -= transform->Position; // transform to local space
+			//avgCenter  /= count; avgCenter -= transform->Position; // transform to local space
 			avgForward /= count;
 		}
 

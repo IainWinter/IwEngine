@@ -30,7 +30,7 @@ void WorldSystem::Update()
 		}
 
 		else {
-			//seq.Add<Spawn>(MakeAsteroidSpawner());
+			seq.Add<Spawn>(MakeAsteroidSpawner());
 		}
 
 		seq.Start();
@@ -138,7 +138,7 @@ bool WorldSystem::On(iw::ActionEvent& e)
 		case RUN_GAME: {
 			m_levels.emplace_front(CreateSequence())
 				.Add<Spawn>(MakeEnemySpawner())
-				//.And<Spawn>(MakeAsteroidSpawner())
+				.And<Spawn>(MakeAsteroidSpawner())
 				.And<iw::Delay>(30)
 				.Start();
 			break;
