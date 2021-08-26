@@ -27,11 +27,17 @@ namespace RenderAPI {
 		const char* fname,
 		int line)
 	{
-		GLenum err = glGetError();
-		bool hasError = err != GL_NO_ERROR;
-		if (hasError) {
-			LOG_ERROR << "GL ERROR: " << GetErrorString(err) << " in file " << fname << "[" << line << "] " << stmt;
-		}
+		int finite = 255;
+		bool hasError = false;
+
+		do {
+			GLenum err = glGetError();
+			hasError = err != GL_NO_ERROR;
+			if (hasError) {
+				const char* str = GetErrorString(err);
+				LOG_ERROR << "GL ERROR: " << str << " in file " << fname << "[" << line << "] " << stmt;
+			}
+		} while (hasError && --finite > 0);
 
 		return hasError;
 	}
@@ -41,8 +47,8 @@ namespace RenderAPI {
 }
 
 #ifdef IW_DEBUG
-#	define GL(stmt)  stmt; while(iw::MessageCallback(#stmt, __FILE__, __LINE__)) {}
-#	define GLe(stmt) stmt; while(iw::MessageCallback(#stmt, __FILE__, __LINE__)) { err = true; }
+#	define GL(stmt)  stmt; if (iw::MessageCallback(#stmt, __FILE__, __LINE__)) {}
+#	define GLe(stmt) stmt; if (iw::MessageCallback(#stmt, __FILE__, __LINE__)) { err = true; }
 #else
 #	define GL(stmt)  stmt
 #	define GLe(stmt) stmt

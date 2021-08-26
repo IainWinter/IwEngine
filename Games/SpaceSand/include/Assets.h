@@ -2,7 +2,6 @@
 
 #include "iw/asset/AssetManager.h"
 #include "iw/graphics/Renderer.h"
-#include "iw/graphics/TextureAtlas.h"
 #include "iw/graphics/Material.h"
 #include "iw/graphics/Mesh.h"
 #include "iw/graphics/Font.h"
@@ -14,6 +13,9 @@
 inline rTex A_texture_player;
 inline rTex A_texture_enemy1;
 inline rTex A_texture_asteroid;
+inline rTex A_texture_asteroid_mid_1;
+inline rTex A_texture_asteroid_mid_2;
+inline rTex A_texture_asteroid_mid_3;
 
 inline rTex A_texture_star; // should be a texture atlas, animate star twinkle
 

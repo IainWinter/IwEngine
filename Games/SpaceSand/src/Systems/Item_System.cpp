@@ -1,19 +1,8 @@
 #include "Systems/Item_System.h"
 
-void ItemSystem::OnPush()
-{
-    Space->Query<Item>().Each([&](iw::EntityHandle handle, Item*) {
-		Space->QueueEntity(handle, iw::func_Destroy);
-	});
-}
-
 void ItemSystem::FixedUpdate()
 {
-    if (!m_player.Alive())
-    {
-        return;
-    }
-    
+    if (!m_player.Alive()) return;
 
     Space->Query<iw::Rigidbody, Item>().Each([&](
         iw::EntityHandle entity,
@@ -114,6 +103,12 @@ bool ItemSystem::On(iw::ActionEvent& e)
         }
         case CREATED_PLAYER: {
             m_player = e.as<CreatedPlayer_Event>().PlayerEntity;
+            break;
+        }
+        case RUN_GAME: {
+            Space->Query<Item>().Each([&](iw::EntityHandle handle, Item*) {
+		        Space->QueueEntity(handle, iw::func_Destroy);
+	        });
             break;
         }
     }

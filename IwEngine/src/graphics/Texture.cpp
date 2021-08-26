@@ -171,7 +171,7 @@ namespace Graphics {
 	}
 
 	Texture::~Texture() {
-		delete m_handle;
+		delete m_handle; // somehow this can cause GL_INVALID_OP, seems to have to do with cloning texture?
 		if (m_ownsColors) delete[] m_colors;
 	}
 

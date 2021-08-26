@@ -1,58 +1,5 @@
 #include "Systems/Player_System.h"
 
-void PlayerSystem::OnPop()
-{
-	m_player.Kill();
-}
-
-void PlayerSystem::OnPush()
-{
-	if (m_player)
-	{
-		m_player.Revive();
-		m_player.Destroy();
-	}
-	
-	m_player = sand->MakeTile<iw::Circle, Player, KeepInWorld>(A_texture_player, true);
-
-	Player*        player    = m_player.Set<Player>();
-	iw::Circle*    collider  = m_player.Find<iw::Circle>();
-	iw::Rigidbody* rigidbody = m_player.Find<iw::Rigidbody>();
-	iw::Transform* transform = m_player.Find<iw::Transform>();
-
-	auto [w, h] = sand->GetSandTexSize2();
-	transform->Position = glm::vec3(w, h, 0);
-	rigidbody->SetTransform(transform);
-	rigidbody->SetMass(10);
-
-	player->CurrentWeapon = MakeDefault_Cannon();
-	player->SpecialLaser  = MakeFatLaser_Cannon();
-	player->CurrentWeapon->Ammo = -1;
-	player->CoreIndices = {
-		34, 35, 36, 37,
-		42, 43, 44, 45,
-		52, 53,
-		60, 61
-	};
-	player->CoreIndiceCount = player->CoreIndices.size();
-
-	collider->Radius = 4;
-
-	Bus->push<CreatedPlayer_Event>(m_player);
-
-	// should add to tile or something
-	//iw::Tile*      tile      = m_player.Find<iw::Tile>();
-	//for (unsigned i = 0; i < tile->m_sprite.ColorCount32(); i++)
-	//{
-	//	float alpha = iw::Color::From32(tile->m_sprite.Colors32()[i]).a;
-	//	if (   alpha > .75
-	//		&& alpha < 1)
-	//	{
-	//		player->CoreIndices.push_back(i);
-	//	}
-	//}
-}
-
 void PlayerSystem::FixedUpdate()
 {
 	Player*        player    = m_player.Find<Player>();
@@ -69,6 +16,8 @@ void PlayerSystem::FixedUpdate()
 
 void PlayerSystem::Update()
 {
+	if (!m_player.Alive()) return;
+
 	Player* player = m_player.Find<Player>();
 
 	player->i_up    = iw::Keyboard::KeyDown(iw::W); // should use event loop
@@ -103,7 +52,7 @@ void PlayerSystem::Update()
 	}
 
 	if (player->CoreIndiceCount < player->CoreIndices.size() / 3) {
-		Bus->push<GameOver_Event>();
+		Bus->push<EndGame_Event>();
 	}
 }
 
@@ -187,6 +136,46 @@ bool PlayerSystem::On(iw::ActionEvent& e)
 					player->CoreIndiceCount--;
 				}
 			}
+
+			break;
+		}
+		case END_GAME: {
+			m_player.Kill();
+			break;
+		}
+		case RUN_GAME: {
+			if (m_player)
+			{
+				m_player.Revive();
+				m_player.Destroy();
+			}
+	
+			m_player = sand->MakeTile<iw::Circle, Player, KeepInWorld>(A_texture_player, true);
+
+			Player*        player    = m_player.Set<Player>();
+			iw::Circle*    collider  = m_player.Find<iw::Circle>();
+			iw::Rigidbody* rigidbody = m_player.Find<iw::Rigidbody>();
+			iw::Transform* transform = m_player.Find<iw::Transform>();
+
+			auto [w, h] = sand->GetSandTexSize2();
+			transform->Position = glm::vec3(w, h, 0);
+			rigidbody->SetTransform(transform);
+			rigidbody->SetMass(10);
+
+			player->CurrentWeapon = MakeDefault_Cannon();
+			player->SpecialLaser  = MakeFatLaser_Cannon();
+			player->CurrentWeapon->Ammo = -1;
+			player->CoreIndices = {
+				34, 35, 36, 37,
+				42, 43, 44, 45,
+				52, 53,
+				60, 61
+			};
+			player->CoreIndiceCount = player->CoreIndices.size();
+
+			collider->Radius = 4;
+
+			Bus->push<CreatedPlayer_Event>(m_player);
 
 			break;
 		}

@@ -19,7 +19,7 @@ namespace Engine {
 		template<
 			typename _t,
 			typename... _args>
-		EventSequence* Add(
+		EventSequence& Add(
 			_args&&... args)
 		{
 			static_assert(std::is_base_of_v<EventTask, _t>, "Type needs to have a base of iw::EventTask");
@@ -27,50 +27,51 @@ namespace Engine {
 		}
 
 		// takes ownership
-		EventSequence* Add(
+		EventSequence& Add(
 			EventTask* task)
 		{
 			task->SetAppVars(MakeAppVars());
 			event_seq::add(task);
-			return this;
+			return *this;
 		}
 
 		// takes ownership
-		EventSequence* And(
+		EventSequence& And(
 			EventTask* task)
 		{
 			task->SetAppVars(MakeAppVars());
 			event_seq::and(task);
-			return this;
+			return *this;
 		}
 
 		template<
 			typename _t,
 			typename... _args>
-		EventSequence* And(
+		EventSequence& And(
 			_args&&... args)
 		{
 			static_assert(std::is_base_of_v<EventTask, _t>, "Type needs to have a base of iw::EventTask");
 			return And(new _t(std::forward<_args>(args)...));
 		}
 
-		EventSequence* Add(
+		EventSequence& Add(
 			std::function<bool(void)> func)
 		{
 			add(new event_func(func));
-			return this;
+			return *this;
 		}
 
-		EventSequence* And(
+		EventSequence& And(
 			std::function<bool(void)> func)
 		{
 			and(new event_func(func));
-			return this;
+			return *this;
 		}
+
+		bool Update()                { return update(); }
 
 		void Remove(EventTask* task) { remove(task); }
 		void Reset()                 { reset();      }
-		void Update()                { update();     }
 		void Start()                 { start();      }
 		void Stop()                  { stop();       }
 		void Restart()               { restart();    }

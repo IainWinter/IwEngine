@@ -10,6 +10,9 @@ int LoadAssets(
 	A_texture_player         = Asset->Load<Texture>("textures/SpaceGame/player.png");
 	A_texture_star           = Asset->Load<Texture>("textures/SpaceGame/star.png");
 	A_texture_asteroid       = Asset->Load<Texture>("textures/SpaceGame/asteroid.png");
+	A_texture_asteroid_mid_1 = Asset->Load<Texture>("textures/SpaceGame/asteroid_mid_1.png");
+	A_texture_asteroid_mid_2 = Asset->Load<Texture>("textures/SpaceGame/asteroid_mid_2.png");
+	A_texture_asteroid_mid_3 = Asset->Load<Texture>("textures/SpaceGame/asteroid_mid_3.png");
 	A_texture_ui_cursor      = Asset->Load<Texture>("textures/SpaceGame/cursor.png");
 	A_texture_ui_background  = Asset->Load<Texture>("textures/SpaceGame/ui_background.png");
 	A_texture_item_health    = Asset->Load<Texture>("textures/SpaceGame/item_health.png");
@@ -123,7 +126,7 @@ int LoadAssets(
 	}
 
 	{
-		A_mesh_ui_text_ammo = A_font_arial->GenerateMesh("00000000", .001f, 1);
+		A_mesh_ui_text_ammo = A_font_arial->GenerateMesh("0", .001f, 1);
 		A_mesh_ui_text_ammo.Material = A_material_font_cam->MakeInstance();
 	}
 

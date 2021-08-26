@@ -1,16 +1,39 @@
 #include "Systems/World_System.h"
 #include "iw/engine/Events/Seq/Delay.h"
 
-void WorldSystem::OnPush()
-{
-	SetupLevels();
-}
-
 void WorldSystem::Update()
 {
+	m_timer.Tick();
+
+	bool needsAnotherLevel = false;
+
 	if (m_levels.size() > 0)
 	{
-		m_levels.back().Update();
+		if (m_levels.back().Update())
+		{
+			m_levels.pop_back();
+			needsAnotherLevel = true;
+		}
+	}
+
+	else {
+		needsAnotherLevel = true;
+	}
+
+	if (needsAnotherLevel)
+	{
+		iw::EventSequence& seq = m_levels.emplace_front(CreateSequence());
+		if (iw::randi() == 0)
+		{
+			seq.Add<Spawn>(MakeEnemySpawner())
+			   .Add<iw::Delay>(30);
+		}
+
+		else {
+			//seq.Add<Spawn>(MakeAsteroidSpawner());
+		}
+
+		seq.Start();
 	}
 }
 
@@ -25,13 +48,19 @@ void WorldSystem::FixedUpdate()
 		{
 			asteroid->Lifetime += iw::FixedTime();
 
-			if (   asteroid->Lifetime > 3
+			iw::AABB2 b = iw::TransformBounds(tile->m_bounds, transform);
+
+			LOG_INFO << b.Min.x << ", " << b.Max.x;
+
+			if (   asteroid->Lifetime > 10
 				&& !iw::AABB2(glm::vec2(200.f), 200).Intersects(&iw::Transform(), tile->m_bounds, transform))
 			{
-				LOG_INFO << "Deleted asteroid";
+				LOG_ERROR << "Deleted asteroid";
 				Space->QueueEntity(handle, iw::func_Destroy);
 			}
 		});
+
+	// this handles tiles death, not the best way shoudl use entity events form a tiledeath system
 
 	Space->Query<iw::Transform, iw::Tile>().Each(
 		[&](
@@ -39,7 +68,7 @@ void WorldSystem::FixedUpdate()
 			iw::Transform* transform,
 			iw::Tile* tile) 
 		{
-			if (tile->m_currentCellCount < tile->m_initalCellCount / 3) // this handles tiles death, should go into a Tile health system
+			if (tile->m_currentCellCount < tile->m_initalCellCount / 3) 
 			{
 				if (    Space->HasComponent<Player>   (entity) 
 					|| !Space->HasComponent<EnemyShip>(entity))
@@ -102,6 +131,18 @@ bool WorldSystem::On(iw::ActionEvent& e)
 			m_player = e.as<CreatedPlayer_Event>().PlayerEntity;
 			break;
 		}
+		case END_GAME: {
+			m_levels.clear();
+			break;
+		}
+		case RUN_GAME: {
+			m_levels.emplace_front(CreateSequence())
+				.Add<Spawn>(MakeEnemySpawner())
+				//.And<Spawn>(MakeAsteroidSpawner())
+				.And<iw::Delay>(30)
+				.Start();
+			break;
+		}
 	}
 
 	return false;
@@ -110,7 +151,16 @@ bool WorldSystem::On(iw::ActionEvent& e)
 iw::Entity WorldSystem::MakeAsteroid(
 	SpawnAsteroid_Config& config)
 {
-	iw::Entity entity = sand->MakeTile<iw::MeshCollider2, Asteroid>(A_texture_asteroid, true);
+	iw::ref<iw::Texture> asteroid_tex;
+
+	switch (config.Size)
+	{
+		case 0: asteroid_tex = A_texture_asteroid_mid_1; break;
+		case 1: asteroid_tex = A_texture_asteroid_mid_2; break;
+		case 2: asteroid_tex = A_texture_asteroid_mid_3; break;
+	}
+
+	iw::Entity entity = sand->MakeTile<iw::MeshCollider2, Asteroid>(asteroid_tex, true);
 	iw::Transform* t = entity.Find<iw::Transform>();
 	iw::Rigidbody* r = entity.Find<iw::Rigidbody>();
 
@@ -119,57 +169,58 @@ iw::Entity WorldSystem::MakeAsteroid(
 	r->AngularVelocity.z = config.AngularVel;
 	
 	r->SetTransform(t);
-	r->SetMass(1000000);
+	r->SetMass(1000);
 
 	return entity;
 }
 
-void WorldSystem::SetupLevels()
-{
-	m_levels.clear();
-
-	// should load from files
-
-	auto [w, h] = sand->GetSandTexSize();
-	sand->SetCamera(w / 2, h / 2);
-
-	iw::EventSequence& level1 = m_levels.emplace_back(CreateSequence());
-
-	Spawn spawner(10, 2, .5, .3);
-	spawner.AddSpawn(w / 2 - 50, h + 10, w / 2 + 50, h + 100);
-	spawner.OnSpawn = SpawnEnemy;
-
-	level1.Add([&]()
-		{
-			SpawnAsteroid_Config config;
-			SpawnAsteroid_Config config1;
-		
-			config.SpawnLocationX = 0;
-			config.SpawnLocationY = 550;
-			config.VelocityX =  2;
-			config.VelocityY = -10;
-			config1.AngularVel = -iw::randfs() / 3;
-
-			config1.SpawnLocationX = 400;
-			config1.SpawnLocationY = 550;
-			config1.VelocityX = -2;
-			config1.VelocityY = -10;
-			config1.AngularVel = iw::randfs() / 3;
-
-			Bus->push<SpawnAsteroid_Event>(config);
-			Bus->push<SpawnAsteroid_Event>(config1);
-
-			return true;
-		})
-		->Add<iw::Delay>(15)
-		->Add<Spawn>(spawner)
-		->Add([&]() {
-			m_levels.pop_back();
-			return true;
-		});
-
-	m_levels.back().Start();
-}
+//void WorldSystem::SetupLevels()
+//{
+//	m_runningLevels.clear();
+//	m_levels.clear();
+//
+//	// should load from files
+//
+//	auto [w, h] = sand->GetSandTexSize();
+//	sand->SetCamera(w / 2, h / 2);
+//
+//	iw::EventSequence& level1 = m_levels.emplace_back(CreateSequence());
+//
+//	Spawn spawner(10, 2, .5, .3);
+//	spawner.AddSpawn(w / 2 - 50, h + 10, w / 2 + 50, h + 100);
+//	spawner.OnSpawn = SpawnEnemy;
+//
+//	level1.Add([&]()
+//		{
+//			SpawnAsteroid_Config config;
+//			SpawnAsteroid_Config config1;
+//		
+//			config.SpawnLocationX = 0;
+//			config.SpawnLocationY = 550;
+//			config.VelocityX =  20;
+//			config.VelocityY = -100;
+//			config1.AngularVel = -iw::randfs() / 3;
+//
+//			config1.SpawnLocationX = 400;
+//			config1.SpawnLocationY = 550;
+//			config1.VelocityX = -20;
+//			config1.VelocityY = -100;
+//			config1.AngularVel = iw::randfs() / 3;
+//
+//			Bus->push<SpawnAsteroid_Event>(config);
+//			Bus->push<SpawnAsteroid_Event>(config1);
+//
+//			return true;
+//		})
+//		->Add<iw::Delay>(15)
+//		->Add<Spawn>(spawner)
+//		->Add([&]() {
+//			m_levels.pop_back();
+//			return true;
+//		});
+//
+//	m_levels.back().Start();
+//}
 
 //Spawn WorldSystem::MakeSpawner(
 //	int numb, int batch,

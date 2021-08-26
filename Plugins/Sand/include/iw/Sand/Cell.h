@@ -19,7 +19,7 @@ struct Cell {
 	float StyleOffset = 0;
 
 	float x = 0, y = 0, dx = 0, dy = 0;
-	float life = -1;
+	float life = 0;
 
 	static inline void SetDefault(
 		CellType type,

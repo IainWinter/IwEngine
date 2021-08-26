@@ -58,7 +58,7 @@ struct Spawn : iw::EventTask
 		Timer.Tick();
 		if (Timer.Can("spawn") && Areas.size() > 0)
 		{
-			for (int i = 0; i < iw::min(iw::randi(RandBatchSpawn) + 1, NumberLeftToSpawn); i++)
+			for (int i = 0; i < iw::min(iw::randi(RandBatchSpawn - 1) + 1, NumberLeftToSpawn); i++)
 			{
 				auto [min, max] = Areas.at(iw::randi(Areas.size() - 1));
 				float x = min.x + (max.x - min.x) * iw::randf();

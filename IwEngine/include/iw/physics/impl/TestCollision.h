@@ -305,9 +305,9 @@ namespace impl {
 		{
 			if (!part.Bounds().Intersects(bt, A->Bounds(), at)) continue;
 
-			auto [collision, simplex] = GJK(&part, bt, A, at);
+			auto [collision, simplex] = GJK(A, at , &part, bt);
 			if (collision) {
- 				manifolds.push_back(EPA(simplex, &part, bt, A, at));
+ 				manifolds.push_back(EPA(simplex, A, at, &part, bt));
 			}
 		}
 

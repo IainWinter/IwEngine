@@ -52,7 +52,7 @@ void FlockingSystem::FixedUpdate()
 
 		auto safeNorm = [](glm::vec3 v) 
 		{
-			return glm::length2(v) > 0.001
+			return glm::length2(v) > 0.00001
 				? glm::normalize(v) 
 				: glm::vec3(0);
 		};
@@ -64,8 +64,8 @@ void FlockingSystem::FixedUpdate()
 		//// Target force, make own funciton in iwmath, i guess a turn twoards
 		glm::vec3 nVel = safeNorm(rigidbody->Velocity);
 		glm::vec3 nDir = safeNorm(targetVel);
-		glm::vec3 delta = (nDir - nVel) * 10.f/** p->Speed * p->TurnRadius*/;
+		glm::vec3 delta = (nDir - nVel) * 2.f/** p->Speed * p->TurnRadius*/;
 
-		rigidbody->Velocity = safeNorm(rigidbody->Velocity + delta) * iw::clamp(targetDist, 0.f, 100.f);
+		rigidbody->Velocity = safeNorm(rigidbody->Velocity + delta) * iw::clamp(targetDist, 33.f, 100.f);
 	});
 }

@@ -1,12 +1,5 @@
 #include "Systems/Enemy_System.h"
 
-void EnemySystem::OnPush()
-{
-	Space->Query<EnemyShip>().Each([&](iw::EntityHandle handle, EnemyShip*) {
-		Space->QueueEntity(handle, iw::func_Destroy);
-	});
-}
-
 void EnemySystem::FixedUpdate()
 {
 	Space->Query<iw::Transform, EnemyShip>().Each(
@@ -33,6 +26,12 @@ bool EnemySystem::On(iw::ActionEvent& e)
 		case SPAWN_ENEMY:
 		{
 			SpawnEnemy(e.as<SpawnEnemy_Event>());
+			break;
+		}
+		case RUN_GAME: {
+			Space->Query<EnemyShip>().Each([&](iw::EntityHandle handle, EnemyShip*) {
+				Space->QueueEntity(handle, iw::func_Destroy);
+			});
 			break;
 		}
 	}

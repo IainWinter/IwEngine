@@ -116,10 +116,10 @@ namespace impl {
 			AABB aabb;
 			aabb.Min.x =  p1x ? p1.x : p2.x;
 			aabb.Min.y =  p1y ? p1.y : p2.y;
-			aabb.Min.z =  p1y ? p1.z : p2.z;
+			aabb.Min.z =  p1z ? p1.z : p2.z;
 			aabb.Max.x = !p1x ? p1.x : p2.x;
 			aabb.Max.y = !p1y ? p1.y : p2.y;
-			aabb.Max.z = !p1y ? p1.z : p2.z;
+			aabb.Max.z = !p1z ? p1.z : p2.z;
 
 			return aabb;
 		}

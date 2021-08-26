@@ -21,7 +21,6 @@ struct EnemySystem : iw::SystemBase
 		, sand(sand)
 	{}
 
-	void OnPush() override;
 	void FixedUpdate() override;
 
 	bool On(iw::ActionEvent& e) override;

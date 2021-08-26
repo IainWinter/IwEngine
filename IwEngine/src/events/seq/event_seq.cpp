@@ -12,34 +12,34 @@ namespace events {
 		clear();
 	}
 
-	event_seq* event_seq::add(
+	event_seq& event_seq::add(
 		event_task* task)
 	{
 		m_tasks.push_back(task);
-		return this;
+		return *this;
 	}
 
-	event_seq* event_seq::add(
+	event_seq& event_seq::add(
 		std::function<bool(void)> func)
 	{
 		add(new event_func(func));
-		return this;
+		return *this;
 	}
 
-	event_seq* event_seq::and(
+	event_seq& event_seq::and(
 		std::function<bool(void)> func)
 	{
 		and(new event_func(func));
-		return this;
+		return *this;
 	}
 
-	event_seq* event_seq::and(
+	event_seq& event_seq::and(
 		event_task* task)
 	{
 		if (m_tasks.size() == 0)
 		{
 			LOG_WARNING << "Tried to and task to empty sequence! Call add first";
-			return nullptr;
+			return *this;
 		}
 
 		event_task* node = m_tasks.back();
@@ -50,7 +50,7 @@ namespace events {
 
 		node->m_child = task;
 
-		return this;
+		return *this;
 	}
 
 	void event_seq::remove(
@@ -74,16 +74,16 @@ namespace events {
 		}
 	}
 
-	void event_seq::update() {
+	bool event_seq::update() {
 		if (!m_running) {
-			return;
+			return false;
 		}
 
 		if (m_current >= m_tasks.size()) {
 			stop();
 
 			LOG_WARNING << "Tried to update event sequence that has already finished!";
-			return;
+			return true;
 		}
 
 		if (m_tasks[m_current]->update_tree()) {
@@ -91,8 +91,11 @@ namespace events {
 
 			if (m_current == m_tasks.size()) {
 				stop();
+				return true;
 			}
 		}
+
+		return false;
 	}
 
 	void event_seq::start() {

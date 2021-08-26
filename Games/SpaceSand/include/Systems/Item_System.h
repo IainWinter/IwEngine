@@ -22,7 +22,6 @@ struct ItemSystem : iw::SystemBase
 		, m_player(m_player)
 	{}
 
-	void OnPush() override;
 	void FixedUpdate() override;
 
 	bool On(iw::ActionEvent& e) override;

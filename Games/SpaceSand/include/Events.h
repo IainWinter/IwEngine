@@ -17,7 +17,8 @@ enum Actions {
 	HEAL_PLAYER,
 	CHANGE_PLAYER_WEAPON,
 	PROJ_HIT_TILE,
-	GAME_OVER,
+	END_GAME,
+	RUN_GAME,
 	CREATED_PLAYER
 };
 
@@ -159,9 +160,14 @@ struct ProjHitTile_Event : iw::SingleEvent
 	{}
 };
 
-struct GameOver_Event : iw::SingleEvent
+struct EndGame_Event : iw::SingleEvent
 {
-	GameOver_Event() : iw::SingleEvent(GAME_OVER) {}
+	EndGame_Event() : iw::SingleEvent(END_GAME) {}
+};
+
+struct RunGame_Event : iw::SingleEvent
+{
+	RunGame_Event() : iw::SingleEvent(RUN_GAME) {}
 };
 
 struct CreatedPlayer_Event : iw::SingleEvent

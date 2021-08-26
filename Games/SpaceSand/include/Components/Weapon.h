@@ -94,7 +94,7 @@ inline Weapon* MakeDefault_Cannon()
 {
 	Cannon* cannon = new Cannon(WeaponType::DEFAULT_CANNON, ProjectileType::BULLET);
 	cannon->Speed = 1250;
-	cannon->DistanceFromOrigin = 10;
+	cannon->DistanceFromOrigin = 15;
 	cannon->BreadthFromOrigin = 2;
 	cannon->FireDelay = 0.15;
 
@@ -105,7 +105,7 @@ inline Weapon* MakeMinigun_Cannon()
 {
 	Cannon* cannon = new Cannon(WeaponType::MINIGUN_CANNON, ProjectileType::BULLET);
 	cannon->Speed = 1250 / 4.f;
-	cannon->DistanceFromOrigin = 10;
+	cannon->DistanceFromOrigin = 15;
 	cannon->BreadthFromOrigin = 2;
 	cannon->FireDelay = 0.15 / 3.f;
 	cannon->Inaccuracy = .1f;
@@ -119,7 +119,7 @@ inline Weapon* MakeFatLaser_Cannon()
 	Cannon* cannon = new Cannon(WeaponType::FAT_LASER_CANNON, ProjectileType::LASER);
 	cannon->Speed = 1800;
 	cannon->SpeedMargin = 400;
-	cannon->DistanceFromOrigin = 10;
+	cannon->DistanceFromOrigin = 15;
 	cannon->BreadthFromOrigin = 7;
 	cannon->FireDelay = 0.015;
 
@@ -134,7 +134,7 @@ inline Weapon* MakeLaser_Cannon_Enemy()
 	Cannon* cannon = new Cannon(WeaponType::LASER_CANNON, ProjectileType::LASER);
 	cannon->Speed = 444;
 	cannon->SpeedMargin = 40;
-	cannon->DistanceFromOrigin = 10;
+	cannon->DistanceFromOrigin = 15;
 	cannon->BreadthFromOrigin = 4;
 	cannon->FireDelay = 2;
 	cannon->FireDelayMargin = 1;
@@ -147,7 +147,7 @@ inline Weapon* MakeSpecialBeam_Cannon()
 {
 	Cannon* cannon = new Cannon(WeaponType::SPECIAL_BEAM_CANNON, ProjectileType::BEAM);
 	cannon->Speed = 10000;
-	cannon->DistanceFromOrigin = 10;
+	cannon->DistanceFromOrigin = 15;
 	cannon->FireDelay = .5;
 	cannon->Ammo = 1;
 

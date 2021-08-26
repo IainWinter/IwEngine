@@ -18,6 +18,20 @@ namespace Physics {
 		std::vector<Solver*> m_solvers;
 
 	public:
+		// this is for testing the swapping of manifold points, the order of objects SHOULD NOT matter
+		inline void debug__ScrambleObjects()
+		{
+			std::vector<CollisionObject*> objects;
+			while (m_objects.size() > 0)
+			{
+				auto itr = m_objects.begin() + iw::randi(m_objects.size() - 1);
+				objects.push_back(*itr);
+				m_objects.erase(itr);
+			}
+
+			m_objects = objects;
+		}
+
 		IWPHYSICS_API
 		virtual void AddCollisionObject(
 			CollisionObject* object);

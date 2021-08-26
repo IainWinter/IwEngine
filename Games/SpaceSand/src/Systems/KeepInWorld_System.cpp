@@ -8,10 +8,13 @@ void KeepInWorldSystem::FixedUpdate()
 			KeepInWorld*, 
 			iw::Rigidbody* rigidbody) 
 		{
-			bool atTop    = rigidbody->Transform.Position.y > borderFar;
-			bool atBottom = rigidbody->Transform.Position.y < borderNear;
-			bool atRight  = rigidbody->Transform.Position.x > borderFar;
-			bool atLeft   = rigidbody->Transform.Position.x < borderNear;
+			float x = rigidbody->Transform.Position.x;
+			float y = rigidbody->Transform.Position.y;
+
+			bool atTop    = y > borderFar;
+			bool atBottom = y < borderNear;
+			bool atRight  = x > borderFar;
+			bool atLeft   = x < borderNear;
 
 			float& dx = rigidbody->Velocity.x;
 			float& dy = rigidbody->Velocity.y;
@@ -21,14 +24,14 @@ void KeepInWorldSystem::FixedUpdate()
 			if (atTop    && dy > 0) dy = 0;
 			if (atBottom && dy < 0) dy = 0;
 
-			bool outsideTop    = rigidbody->Transform.Position.y > borderFar  + borderMargin;
-			bool outsideBottom = rigidbody->Transform.Position.y < borderNear - borderMargin;
-			bool outsideRight  = rigidbody->Transform.Position.x > borderFar  + borderMargin;
-			bool outsideLeft   = rigidbody->Transform.Position.x < borderNear - borderMargin;
+			float distOutsideTop    = y - borderFar  - borderMargin;
+			float distOutsideBottom = y - borderNear + borderMargin;
+			float distOutsideRight  = x - borderFar  - borderMargin;
+			float distOutsideLeft   = x - borderNear + borderMargin;
 
-			if (outsideRight)  dx -= borderMargin;
-			if (outsideLeft)   dx += borderMargin;
-			if (outsideTop)    dy -= borderMargin;
-			if (outsideBottom) dy += borderMargin;
+			if (distOutsideTop    > 0)  dy -= 10 * distOutsideTop;
+			if (distOutsideBottom < 0 ) dy -= 10 * distOutsideBottom;
+			if (distOutsideRight  > 0 ) dx -= 10 * distOutsideRight;
+			if (distOutsideLeft   < 0 ) dx -= 10 * distOutsideLeft;
 		});
 }

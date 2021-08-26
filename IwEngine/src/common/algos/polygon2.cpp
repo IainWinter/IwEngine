@@ -427,7 +427,7 @@ namespace common {
 			auto& [a, b, c] = GetTriangle(polygon, index, i);
 			float ratio = TriangleArea(a, b, c) / totalArea;
 
-			LOG_INFO << "Triangle " << i / 3 << " area ratio: " << ratio;
+			//LOG_INFO << "Triangle " << i / 3 << " area ratio: " << ratio;
 
 			if (ratio < ratioOfAreaToRemove) {
 				index.erase(index.begin() + i + 2);
@@ -494,13 +494,13 @@ namespace common {
 
 			else 
 			{
-				unsigned singlePoint = 0;
+				size_t singlePoint = 0;
 				if (aRight == cRight) singlePoint = 1;
 				if (aRight == bRight) singlePoint = 2;
 
-				unsigned i0 = i +  singlePoint;
-				unsigned i1 = i + (singlePoint + 1) % 3;
-				unsigned i2 = i + (singlePoint + 2) % 3;
+				size_t i0 = i +  singlePoint;
+				size_t i1 = i + (singlePoint + 1) % 3;
+				size_t i2 = i + (singlePoint + 2) % 3;
 
 				glm::vec2 v0 = verts[index[i0]];
 				glm::vec2 v1 = verts[index[i1]];
@@ -616,7 +616,7 @@ namespace common {
 	c_aabb2 GenPolygonBounds(
 		const std::vector<glm::vec2>& polygon)
 	{
-		c_aabb2 bounds;
+		c_aabb2 bounds(glm::vec2(FLT_MAX), glm::vec2(-FLT_MAX));
 		auto& [min, max] = bounds;
 
 		for (const glm::vec2& vert : polygon)
@@ -633,7 +633,7 @@ namespace common {
 	c_aabb GenPolygonBounds(
 		const std::vector<glm::vec3>& polygon)
 	{
-		c_aabb bounds;
+		c_aabb bounds(glm::vec3(FLT_MAX), glm::vec3(-FLT_MAX));
 		auto& [min, max] = bounds;
 
 		for (const glm::vec3& vert : polygon)

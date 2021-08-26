@@ -1,12 +1,5 @@
 #include "Systems/Projectile_System.h"
 
-void ProjectileSystem::OnPush()
-{
-	Space->Query<Projectile>().Each([&](iw::EntityHandle handle, Projectile*) {
-		Space->QueueEntity(handle, iw::func_Destroy);
-	});
-}
-
 void ProjectileSystem::Update()
 {
 	Space->Query<Projectile>().Each([&](iw::EntityHandle, Projectile* p) 
@@ -117,15 +110,25 @@ auto randvel(iw::Entity entity, float amount, bool setForMe = false)
 
 bool ProjectileSystem::On(iw::ActionEvent& e)
 {
-	if (e.Action != SPAWN_PROJECTILE) return false;
-
-	SpawnProjectile_Event& event = e.as<SpawnProjectile_Event>();
-
-	switch (event.Shot.projectile) 
+	switch (e.Action)
 	{
-		case ProjectileType::BULLET: MakeBullet(event.Shot, event.Depth); break;
-		case ProjectileType::LASER:  MakeLaser (event.Shot, event.Depth); break;
-		case ProjectileType::BEAM:   MakeBeam  (event.Shot, event.Depth); break;
+		case SPAWN_PROJECTILE: {
+			SpawnProjectile_Event& event = e.as<SpawnProjectile_Event>();
+
+			switch (event.Shot.projectile) 
+			{
+				case ProjectileType::BULLET: MakeBullet(event.Shot, event.Depth); break;
+				case ProjectileType::LASER:  MakeLaser (event.Shot, event.Depth); break;
+				case ProjectileType::BEAM:   MakeBeam  (event.Shot, event.Depth); break;
+			}
+			break;
+		}
+		case RUN_GAME: {
+			Space->Query<Projectile>().Each([&](iw::EntityHandle handle, Projectile*) {
+				Space->QueueEntity(handle, iw::func_Destroy);
+			});
+			break;
+		}
 	}
 
 	return false;

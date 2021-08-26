@@ -22,9 +22,6 @@ struct PlayerSystem : iw::SystemBase
 		, sand(sand)
 	{}
 
-	void OnPush() override;
-	void OnPop() override;
-
 	void FixedUpdate() override;
 	void Update() override;
 

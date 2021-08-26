@@ -4,7 +4,7 @@ IW_PLUGIN_SAND_BEGIN
 
 void SimpleSandWorker::UpdateCell(int x, int y, Cell& cell) 
 {
-	if (cell.life != -1)
+	if (cell.life > 0)
 	{
 		cell.life -= dt;
 		if (cell.life < 0.f)

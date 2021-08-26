@@ -34,11 +34,11 @@ namespace events {
 		~event_seq();
 
 		// Takes ownership of task
-		IWEVENTS_API event_seq* add(event_task* task);
-		IWEVENTS_API event_seq* and(event_task* task);
+		IWEVENTS_API event_seq& add(event_task* task);
+		IWEVENTS_API event_seq& and(event_task* task);
 
-		IWEVENTS_API event_seq* add(std::function<bool(void)> func);
-		IWEVENTS_API event_seq* and(std::function<bool(void)> func);
+		IWEVENTS_API event_seq& add(std::function<bool(void)> func);
+		IWEVENTS_API event_seq& and(std::function<bool(void)> func);
 
 		// Only removes doesnt delete.
 		// Call this before deleting the sequence to save the task.
@@ -55,8 +55,9 @@ namespace events {
 		void reset();
 
 		// Updates current task, moves to next when the current task returns true
+		// returns when moving to the next task or ending
 		IWEVENTS_API
-		void update();
+		bool update();
 
 		// Allows update to run
 		IWEVENTS_API

@@ -11,6 +11,7 @@
 #include "Systems/Item_System.h"
 
 #include "Systems/Player_System.h"
+#include "Systems/PlayerLaserTank_System.h"
 #include "Systems/Enemy_System.h"
 
 #include "Systems/Flocking_System.h"
@@ -25,11 +26,13 @@ struct GameLayer : iw::Layer
 	
 	iw::Entity m_player;
 
-	PlayerSystem*     player_s;
-	WorldSystem*      world_s;
-	ProjectileSystem* projectile_s;
-	EnemySystem*      enemy_s;
-	ItemSystem*       item_s;
+	PlayerSystem*          player_s;
+	PlayerLaserTankSystem* playerTank_s;
+	WorldSystem*           world_s;
+	ProjectileSystem*      projectile_s;
+	EnemySystem*           enemy_s;
+	ItemSystem*            item_s;
+	KeepInWorldSystem*     keepInWorld_s;
 
 	bool showGameOver = false;
 
@@ -44,6 +47,9 @@ struct GameLayer : iw::Layer
 
 	int Initialize() override
 	{
+		auto [sandWidth, sandHeight] = sand->GetSandTexSize2();
+		sand->SetCamera(sandWidth, sandHeight);
+
 		// load all assets into global variables
 		if (int e = LoadAssets(Asset.get(), Renderer->Now.get()))
 		{
@@ -60,154 +66,27 @@ struct GameLayer : iw::Layer
 			cam->SetRotation(glm::angleAxis(iw::Pi, glm::vec3(0, 1, 0)));
 		}
 
-		if (int e = Layer::Initialize())
-		{
-			return e;
-		}
-
-		// more temp ui
-
-		{ // laser fluid box
-			iw::SandChunk* chunk = sand_ui_laserCharge->m_world->GetChunk(0, 0); // only 1 chunk in this
-			auto [w, h] = sand_ui_laserCharge->GetSandTexSize();
-			
-			std::vector<int> widths = {
-				4, 4,
-				6, 
-				8, 
-				14, 
-				24, 
-				30, 
-				34, 
-				38, 38, 38,
-				40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40,
-				38, 38, 38,
-				36, 36,
-				34,
-				30,
-				24
-			};
-
-			std::vector<std::pair<int, int>> fills = { // these are slightly wrong
-				{32, 36},
-				{32, 37},
-
-				{33, 33},
-				{33, 34},
-				{33, 35},
-				{33, 36},
-				
-				{34, 32},
-				{34, 33},
-				{34, 34},
-				{34, 35},
-				{34, 36},
-				
-				{35, 31},
-				{35, 32},
-				{35, 33},
-				{35, 34},
-				{35, 35},
-				{35, 36},
-				{35, 37},
-				
-				{36, 33},
-				{36, 34},
-				{36, 35},
-				{36, 36},
-				{36, 37},
-
-				{37, 33},
-				{37, 34},
-				{37, 35},
-				{37, 36},
-				{37, 37},
-				{37, 38},
-
-				{38, 34},
-				{38, 35},
-				{38, 36},
-				{38, 37},
-				{38, 38},
-				{38, 39},
-
-				{39, 35},
-				{39, 36},
-				{39, 37},
-				{39, 38},
-
-				{40, 35},
-				{40, 36},
-			};
-
-			// for some reason this broke, not sure why
-			// doesnt seem to collide against the solid field, but regular cells work??
-
-			for (int y = 0; y < h; y++)
-			for (int x = 0; x < w; x++)
-			{
-				chunk->SetCell(x, y, iw::Cell::GetDefault(iw::CellType::ROCK));
-
-				//chunk->SetCell(x, y, true, iw::SandField::SOLID);
-			}
-
-			for (int y = 0; y < widths.size(); y++)
-			{
-				int yw = widths[y] / 2;
-
-				for (int x = w/2 - yw; x < w/2 + yw; x++)
-				{
-					chunk->SetCell(x, y, iw::Cell::GetDefault(iw::CellType::EMPTY));
-
-					//chunk->SetCell(x, y, false, iw::SandField::SOLID);
-				}
-			}
-
-			for (const auto& [x, y] : fills)
-			{
-				chunk->SetCell(x-2, y-2, iw::Cell::GetDefault(iw::CellType::ROCK));
-
-
-				//chunk->SetCell(x-1, y-1, true, iw::SandField::SOLID); // this is slightly wrong
-			}
-		}
-
 		projectile_s = new ProjectileSystem(sand);
 		item_s       = new ItemSystem      (sand);
 		world_s      = new WorldSystem     (sand);
 		enemy_s      = new EnemySystem     (sand);
 		player_s     = new PlayerSystem    (sand);
+		playerTank_s = new PlayerLaserTankSystem(sand_ui_laserCharge);
 		
-		PushSystem<KeepInWorldSystem>();
+		keepInWorld_s = new KeepInWorldSystem();
+
+		PushSystemFront(projectile_s);
+		PushSystemFront(item_s);
+		PushSystemFront(enemy_s);
+		PushSystemFront(player_s);
+
 		PushSystem<FlockingSystem>();
 		PushSystem<iw::PhysicsSystem>();
 		PushSystem<iw::EntityCleanupSystem>();
 
-		StartGame();
+		Bus->push<RunGame_Event>();
 
 		return Layer::Initialize();
-	}
-
-	void StartGame() 
-	{
-		showGameOver = false;
-
-		PushSystemFront(projectile_s);
-		PushSystemFront(item_s);
-		PushSystemFront(world_s);
-		PushSystemFront(enemy_s);
-		PushSystemFront(player_s);
-	}
-
-	void StopGame()
-	{
-		showGameOver = true;
-
-		PopSystem(projectile_s);
-		PopSystem(item_s);
-		PopSystem(world_s);
-		PopSystem(enemy_s);
-		PopSystem(player_s);
 	}
 
 	//std::unordered_map<iw::EntityHandle, std::pair<iw::Mesh, int>, iw::ehandle_hash> debug_tileColliders;
@@ -223,8 +102,13 @@ struct GameLayer : iw::Layer
 
 	float uiJitterAmount = 0;
 
+	void FixedUpdate() override
+	{
+		Physics->debug__ScrambleObjects();
+	}
+
 	void Update() override { // this is one frame behind, add a callback to the sand layer that gets called at the right time, right after rendering the world...
-		
+	
 		// state change :o
 
 		if (showGameOver)
@@ -234,7 +118,13 @@ struct GameLayer : iw::Layer
 				// could reset by popping all layers and pushing them again
 				// each systems OnPush / OnPop could clean up and reint
 
-				StartGame();
+				// now doing it with events END_GAME and RUN_GAME
+				// i think that the push/pop was is better but this is simpler
+				// ill have to design it better after this weekend when there are actual menus
+				// there will have to be more state, which will require the systems being push around
+				// maybe layers for menus too actually
+
+				Bus->push<RunGame_Event>();
 			}
 
 			return;
@@ -293,82 +183,13 @@ struct GameLayer : iw::Layer
 		}
 
 		uiPlayerTex->Update(Renderer->Device);
-
-		iw::SandChunk* chunk = sand_ui_laserCharge->m_world->GetChunk(0, 0);
-
-		laserFluidVel = iw::lerp(laserFluidVel, m_player.Find<iw::Rigidbody>()->Velocity, iw::DeltaTime() * 5);
-
-		std::pair<int, int> xy;
-
-		for (int y = 0; y < chunk->m_height; y++)
-		for (int x = 0; x < chunk->m_width;  x++)
-		{
-			chunk->KeepAlive(x, y);
-			chunk->GetCell(x, y).dx = -laserFluidVel.x / 5; // this should match 'acceleration' even tho its instant
-			chunk->GetCell(x, y).dy = -laserFluidVel.y / 5;
-		}
-
-		if (laserFluidToCreate > 0)
-		{
-			iw::Cell laserFluid = iw::Cell::GetDefault(iw::CellType::WATER);
-			laserFluid.Color = iw::Color::From255(255, 38, 38);
-
-			auto [w, h] = sand_ui_laserCharge->GetSandTexSize();
-			int x = 29;
-			int y = 31;
-
-			if (sand_ui_laserCharge->m_world->IsEmpty(x, y))
-			{
-				sand_ui_laserCharge->m_world->SetCell(x, y, laserFluid);
-				laserFluidToCreate--;
-				laserFluidCount++;
-			}
-		}
-
-		if (/*laserFluidToRemove > 0*/m_player.Find<Player>()->i_fire2)
-		{
-			auto [w, h] = sand_ui_laserCharge->GetSandTexSize();
-			for (int x = 18; x < 22; x++)
-			{
-				int y = 0;
-
-				if (!sand_ui_laserCharge->m_world->IsEmpty(x, y))
-				{
-					sand_ui_laserCharge->m_world->SetCell(x, y, iw::Cell::GetDefault(iw::CellType::EMPTY));
-					laserFluidToRemove--;
-					laserFluidCount--;
-
-					canFireTimer += .01f;
-				}
-			}
-		}
-
-		if (laserFluidCount == 0)
-		{
-			laserFluidToRemove = 0;
-		}
-
-		canFireTimer = iw::max(canFireTimer - iw::DeltaTime(), 0.f);
-
-		m_player.Find<Player>()->can_fire_laser = canFireTimer > 0.f;
-
-		// DEBUG
-
-		if (iw::Mouse::ButtonDown(iw::MMOUSE)) 
+	
+		if (iw::Mouse::ButtonDown(iw::MMOUSE))
 		{
 			SpawnItem_Config config;
 			config.X = sand->sP.x;
 			config.Y = sand->sP.y;
-			config.Amount = 1;
-
-			if (iw::Keyboard::KeyDown(iw::SHIFT)) 
-			{
-				config.Item = ItemType::WEAPON_MINIGUN;
-			} 
-			else 
-			{
-				config.Item = ItemType::HEALTH;
-			}
+			config.Item = ItemType::LASER_CHARGE;
 
 			Bus->push<SpawnItem_Event>(config);
 		}
@@ -380,30 +201,37 @@ struct GameLayer : iw::Layer
 	{
 		switch (e.Action)
 		{
-			case CHANGE_LASER_FLUID:
-			{
-				ChangeLaserFluid_Event& event = e.as<ChangeLaserFluid_Event>();
-				if (event.Amount > 0) laserFluidToCreate +=  event.Amount;
-				if (event.Amount < 0) laserFluidToRemove += -event.Amount;
-				
-				break;
-			}
-
 			case PROJ_HIT_TILE:
 			{
 				ProjHitTile_Event& event = e.as<ProjHitTile_Event>();
 				if (event.Hit.Has<Player>())
 				{
 					uiJitterAmount = 75;
-					laserFluidVel.y -= 200;
-					laserFluidVel.x -= 75 * iw::randfs();
 				}
 
 				break;
 			}
-			case GAME_OVER:
+			case END_GAME:
 			{
-				StopGame();
+				showGameOver = true;
+				PopSystem(playerTank_s);
+				PopSystem(world_s);
+				PopSystem(keepInWorld_s);
+
+				break;
+			}
+			case RUN_GAME: {
+				showGameOver = false;
+				PushSystemFront(playerTank_s);
+				PushSystemFront(world_s);
+				PushSystem(keepInWorld_s);
+
+				for (int x = 0; x < 400; x++)
+				for (int y = 0; y < 400; y++)
+				{
+					sand->m_world->SetCell(x, y, iw::Cell::GetDefault(iw::CellType::EMPTY));
+				}
+
 				break;
 			}
 			case CREATED_PLAYER: {
@@ -421,9 +249,12 @@ struct GameLayer : iw::Layer
 	{
 		if (m_player.Alive()) 
 		{
-			std::stringstream buf;
-			buf << m_player.Find<Player>()->CurrentWeapon->Ammo;
-			A_font_arial->UpdateMesh(A_mesh_ui_text_ammo, buf.str(), .001f, 1);
+			int ammo = m_player.Find<Player>()->CurrentWeapon->Ammo;
+
+			if (ammo >= 0) {
+				std::stringstream buf; buf << ammo;
+				A_font_arial->UpdateMesh(A_mesh_ui_text_ammo, buf.str(), .001f, 1);
+			}
 		}
 
 		sand->m_drawMouseGrid = iw::Keyboard::KeyDown(iw::SHIFT);
@@ -586,6 +417,9 @@ struct GameLayer : iw::Layer
 		}
 
 		Renderer->EndScene();
+
+
+		Physics->debug__ScrambleObjects();
 	}
 };
 
@@ -599,7 +433,6 @@ App::App() : iw::Application()
 
 	// UI charge as liquid in a tank?
 	iw::SandLayer* sand_ui_laser = new iw::SandLayer(1, 1, 40, 40);
-	
 	sand_ui_laser->m_updateDelay = .016f;
 
 	PushLayer(sand);
