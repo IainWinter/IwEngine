@@ -383,7 +383,7 @@ struct GameLayer : iw::Layer
 		uiAmmoTextTransform.Position.x = ammoCount_position_x;
 		uiAmmoTextTransform.Position.y = ammoCount_position_y;
 		uiAmmoTextTransform.Scale.x = 1;
-		uiAmmoTextTransform.Scale.y = height / width;
+		uiAmmoTextTransform.Scale.y = width / height;
 
 		//iw::Transform uiCursorTransform;
 		//uiCursorTransform.Position.z = 1;
@@ -425,7 +425,9 @@ struct GameLayer : iw::Layer
 		
 		if (showGameOver)
 		{
-			Renderer->DrawMesh(iw::Transform(), A_mesh_ui_text_gameOver);
+			iw::Transform temp;
+			temp.Scale.y = width / height;
+			Renderer->DrawMesh(temp, A_mesh_ui_text_gameOver);
 		}
 
 		Renderer->EndScene();
