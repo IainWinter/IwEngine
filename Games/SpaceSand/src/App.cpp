@@ -261,7 +261,7 @@ struct GameLayer : iw::Layer
 			if (ammo >= 0) {
 				buf << ammo;
 			} else  {
-				buf << "";
+				buf << " ";
 			}
 
 			A_font_arial->UpdateMesh(A_mesh_ui_text_ammo, buf.str(), .001f, 1);
