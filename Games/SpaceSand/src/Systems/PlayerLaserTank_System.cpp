@@ -8,106 +8,106 @@ void PlayerLaserTankSystem::OnPush()
 	m_fluidCount = 0;
 
 	m_fluidTime = 0.f;
-
-	{ // laser fluid box
-		iw::SandChunk* chunk = m_tankSand->m_world->GetChunk(0, 0); // only 1 chunk in this
-		auto [w, h] = m_tankSand->GetSandTexSize();
+	
+	// laser fluid box
+	
+	iw::SandChunk* chunk = m_tankSand->m_world->GetChunk(0, 0); // only 1 chunk in this
+	auto [w, h] = m_tankSand->GetSandTexSize();
 			
-		std::vector<int> widths = {
-			4, 4,
-			6, 
-			8, 
-			14, 
-			24, 
-			30, 
-			34, 
-			38, 38, 38,
-			40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40,
-			38, 38, 38,
-			36, 36,
-			34,
-			30,
-			24
-		};
+	std::vector<int> widths = {
+		4, 4,
+		6, 
+		8, 
+		14, 
+		24, 
+		30, 
+		34, 
+		38, 38, 38,
+		40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40,
+		38, 38, 38,
+		36, 36,
+		34,
+		30,
+		24
+	};
 
-		std::vector<std::pair<int, int>> fills = { // these are slightly wrong
-			{32, 36},
-			{32, 37},
+	std::vector<std::pair<int, int>> fills = { // these are slightly wrong
+		{32, 36},
+		{32, 37},
 
-			{33, 33},
-			{33, 34},
-			{33, 35},
-			{33, 36},
+		{33, 33},
+		{33, 34},
+		{33, 35},
+		{33, 36},
 				
-			{34, 32},
-			{34, 33},
-			{34, 34},
-			{34, 35},
-			{34, 36},
+		{34, 32},
+		{34, 33},
+		{34, 34},
+		{34, 35},
+		{34, 36},
 				
-			{35, 31},
-			{35, 32},
-			{35, 33},
-			{35, 34},
-			{35, 35},
-			{35, 36},
-			{35, 37},
+		{35, 31},
+		{35, 32},
+		{35, 33},
+		{35, 34},
+		{35, 35},
+		{35, 36},
+		{35, 37},
 				
-			{36, 33},
-			{36, 34},
-			{36, 35},
-			{36, 36},
-			{36, 37},
+		{36, 33},
+		{36, 34},
+		{36, 35},
+		{36, 36},
+		{36, 37},
 
-			{37, 33},
-			{37, 34},
-			{37, 35},
-			{37, 36},
-			{37, 37},
-			{37, 38},
+		{37, 33},
+		{37, 34},
+		{37, 35},
+		{37, 36},
+		{37, 37},
+		{37, 38},
 
-			{38, 34},
-			{38, 35},
-			{38, 36},
-			{38, 37},
-			{38, 38},
-			{38, 39},
+		{38, 34},
+		{38, 35},
+		{38, 36},
+		{38, 37},
+		{38, 38},
+		{38, 39},
 
-			{39, 35},
-			{39, 36},
-			{39, 37},
-			{39, 38},
+		{39, 35},
+		{39, 36},
+		{39, 37},
+		{39, 38},
 
-			{40, 35},
-			{40, 36},
-		};
+		{40, 35},
+		{40, 36},
+	};
 
-		// for some reason this broke, not sure why
-		// doesnt seem to collide against the solid field, but regular cells work??
+	// for some reason this broke, not sure why
+	// doesnt seem to collide against the solid field, but regular cells work??
 
-		for (int y = 0; y < h; y++)
-		for (int x = 0; x < w; x++)
+	for (int y = 0; y < h; y++)
+	for (int x = 0; x < w; x++)
+	{
+		chunk->SetCell(x, y, iw::Cell::GetDefault(iw::CellType::EMPTY));
+		chunk->SetCell(x, y, true, iw::SandField::SOLID);
+	}
+
+	for (int y = 0; y < widths.size(); y++)
+	{
+		int yw = widths[y] / 2;
+
+		for (int x = w/2 - yw; x < w/2 + yw; x++)
 		{
-			//chunk->SetCell(x, y, iw::Cell::GetDefault(iw::CellType::ROCK));
-			chunk->SetCell(x, y, true, iw::SandField::SOLID);
+			//chunk->SetCell(x, y, iw::Cell::GetDefault(iw::CellType::EMPTY));
+			chunk->SetCell(x, y, false, iw::SandField::SOLID);
 		}
+	}
 
-		for (int y = 0; y < widths.size(); y++)
-		{
-			int yw = widths[y] / 2;
-
-			for (int x = w/2 - yw; x < w/2 + yw; x++)
-			{
-				//chunk->SetCell(x, y, iw::Cell::GetDefault(iw::CellType::EMPTY));
-				chunk->SetCell(x, y, false, iw::SandField::SOLID);
-			}
-		}
-
-		for (const auto& [x, y] : fills)
-		{
-			//chunk->SetCell(x-2, y-2, iw::Cell::GetDefault(iw::CellType::ROCK));
-			chunk->SetCell(x-2, y-2, true, iw::SandField::SOLID);
-		}
+	for (const auto& [x, y] : fills)
+	{
+		//chunk->SetCell(x-2, y-2, iw::Cell::GetDefault(iw::CellType::ROCK));
+		chunk->SetCell(x-2, y-2, true, iw::SandField::SOLID);
 	}
 }
 
@@ -189,7 +189,6 @@ bool PlayerLaserTankSystem::On(iw::ActionEvent& e)
 				
 			break;
 		}
-
 		case PROJ_HIT_TILE:
 		{
 			ProjHitTile_Event& event = e.as<ProjHitTile_Event>();

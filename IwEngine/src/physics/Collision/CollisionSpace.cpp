@@ -3,6 +3,9 @@
 #include "iw/log/logger.h"
 #include <assert.h>
 
+#include "iw/physics/Collision/MeshCollider.h" // temp
+#include "iw/physics/Collision/SphereCollider.h" // temp
+
 namespace iw {
 namespace Physics {
 	void CollisionSpace::AddCollisionObject(
@@ -84,6 +87,19 @@ namespace Physics {
 					 || (!a->Collider  || !b->Collider))
 				{
 					continue;
+				}
+
+				// temp broad phase 
+				if (   a->Collider->Dim == d2
+					&& b->Collider->Dim == d2)
+				{
+					auto& abounds = ((impl::Collider<d2>*)a->Collider)->Bounds();
+					auto& bbounds = ((impl::Collider<d2>*)b->Collider)->Bounds();
+
+					if (!abounds.Intersects(&a->Transform, bbounds, &b->Transform))
+					{
+						continue;
+					}
 				}
 
 				ManifoldPoints points = TestCollision(a->Collider, &a->Transform, b->Collider, &b->Transform);

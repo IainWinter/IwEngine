@@ -22,11 +22,17 @@ void WorldSystem::Update()
 
 	if (needsAnotherLevel)
 	{
+		int enemyCount = 0;
+		Space->Query<EnemyShip>().Each([&](iw::EntityHandle handle, EnemyShip*) {
+			enemyCount++;
+		});
+
 		iw::EventSequence& seq = m_levels.emplace_front(CreateSequence());
-		if (iw::randi() == 0)
+		if (enemyCount < 15)
 		{
 			seq.Add<Spawn>(MakeEnemySpawner())
-			   .Add<iw::Delay>(30);
+			   .And<Spawn>(MakeAsteroidSpawner())
+			   .And<iw::Delay>(10);
 		}
 
 		else {
@@ -50,12 +56,9 @@ void WorldSystem::FixedUpdate()
 
 			iw::AABB2 b = iw::TransformBounds(tile->m_bounds, transform);
 
-			LOG_INFO << b.Min.x << ", " << b.Max.x;
-
 			if (   asteroid->Lifetime > 10
 				&& !iw::AABB2(glm::vec2(200.f), 200).Intersects(&iw::Transform(), tile->m_bounds, transform))
 			{
-				LOG_ERROR << "Deleted asteroid";
 				Space->QueueEntity(handle, iw::func_Destroy);
 			}
 		});
@@ -77,9 +80,9 @@ void WorldSystem::FixedUpdate()
 				}
 
 				std::vector<std::pair<ItemType, float>> item_weights{
-					{ HEALTH, 50},
+					{ HEALTH,        50 },
 					{ LASER_CHARGE,  50 },
-					{ WEAPON_MINIGUN, 15 }
+					{ WEAPON_MINIGUN, 5 }
 				};
 
 				SpawnItem_Config config;
@@ -136,6 +139,10 @@ bool WorldSystem::On(iw::ActionEvent& e)
 			break;
 		}
 		case RUN_GAME: {
+			Space->Query<Asteroid>().Each([&](iw::EntityHandle handle, Asteroid*) {
+				Space->QueueEntity(handle, iw::func_Destroy);
+			});
+
 			m_levels.emplace_front(CreateSequence())
 				.Add<Spawn>(MakeEnemySpawner())
 				.And<Spawn>(MakeAsteroidSpawner())

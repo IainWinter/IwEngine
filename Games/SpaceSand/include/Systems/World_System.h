@@ -77,7 +77,7 @@ private:
 
 	Spawn MakeEnemySpawner()
 	{
-		Spawn spawner(iw::randi(20), iw::randi(3), iw::randf() + .6f, iw::randf() + .3f);
+		Spawn spawner(iw::randi(10) + 10, iw::randi(3) + 2, iw::randf() + 1.6f, iw::randf() + .3f);
 		spawner.OnSpawn = SpawnEnemy;
 
 		AddRandomSides(spawner, 10, 100, 50, 400);
@@ -87,7 +87,7 @@ private:
 
 	Spawn MakeAsteroidSpawner()
 	{
-		Spawn spawner(1, iw::randi(2), iw::randf() * 2, iw::randf());
+		Spawn spawner(iw::randi(5) + 3, iw::randi(2), iw::randf()*2+1, iw::randf());
 		spawner.OnSpawn = SpawnAsteroid;
 
 		AddRandomSides(spawner, 100, 200, 200, 500);

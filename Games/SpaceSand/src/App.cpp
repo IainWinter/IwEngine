@@ -25,6 +25,7 @@ struct GameLayer : iw::Layer
 	iw::SandLayer* sand_ui_laserCharge;
 	
 	iw::Entity m_player;
+	iw::Entity m_cursor;
 
 	PlayerSystem*          player_s;
 	PlayerLaserTankSystem* playerTank_s;
@@ -86,6 +87,10 @@ struct GameLayer : iw::Layer
 
 		Bus->push<RunGame_Event>();
 
+		m_cursor = sand->MakeTile(A_texture_ui_cursor);
+		m_cursor.Find<iw::Tile>()->m_zIndex = 1;
+		m_cursor.Find<iw::CollisionObject>()->IsTrigger = true;
+
 		return Layer::Initialize();
 	}
 
@@ -99,7 +104,6 @@ struct GameLayer : iw::Layer
 	int laserFluidCount = 0;
 	glm::vec3 laserFluidVel = glm::vec3(0.f);
 	float canFireTimer = 0;
-
 	float uiJitterAmount = 0;
 
 	void FixedUpdate() override
@@ -109,6 +113,8 @@ struct GameLayer : iw::Layer
 
 	void Update() override { // this is one frame behind, add a callback to the sand layer that gets called at the right time, right after rendering the world...
 	
+		m_cursor.Find<iw::CollisionObject>()->Transform.Position = glm::vec3(sand->sP, 0.f);
+
 		// state change :o
 
 		if (showGameOver)
@@ -184,15 +190,15 @@ struct GameLayer : iw::Layer
 
 		uiPlayerTex->Update(Renderer->Device);
 	
-		if (iw::Mouse::ButtonDown(iw::MMOUSE))
-		{
-			SpawnItem_Config config;
-			config.X = sand->sP.x;
-			config.Y = sand->sP.y;
-			config.Item = ItemType::LASER_CHARGE;
+		//if (iw::Mouse::ButtonDown(iw::MMOUSE))
+		//{
+		//	SpawnItem_Config config;
+		//	config.X = sand->sP.x;
+		//	config.Y = sand->sP.y;
+		//	config.Item = ItemType::LASER_CHARGE;
 
-			Bus->push<SpawnItem_Event>(config);
-		}
+		//	Bus->push<SpawnItem_Event>(config);
+		//}
 	}
 	// end temp ui
 
@@ -251,10 +257,14 @@ struct GameLayer : iw::Layer
 		{
 			int ammo = m_player.Find<Player>()->CurrentWeapon->Ammo;
 
+			std::stringstream buf;
 			if (ammo >= 0) {
-				std::stringstream buf; buf << ammo;
-				A_font_arial->UpdateMesh(A_mesh_ui_text_ammo, buf.str(), .001f, 1);
+				buf << ammo;
+			} else  {
+				buf << "";
 			}
+
+			A_font_arial->UpdateMesh(A_mesh_ui_text_ammo, buf.str(), .001f, 1);
 		}
 
 		sand->m_drawMouseGrid = iw::Keyboard::KeyDown(iw::SHIFT);
@@ -372,6 +382,8 @@ struct GameLayer : iw::Layer
 		iw::Transform uiAmmoTextTransform;
 		uiAmmoTextTransform.Position.x = ammoCount_position_x;
 		uiAmmoTextTransform.Position.y = ammoCount_position_y;
+		uiAmmoTextTransform.Scale.x = 1;
+		uiAmmoTextTransform.Scale.y = height / width;
 
 		//iw::Transform uiCursorTransform;
 		//uiCursorTransform.Position.z = 1;
@@ -413,7 +425,7 @@ struct GameLayer : iw::Layer
 		
 		if (showGameOver)
 		{
-			Renderer->DrawMesh(iw::Transform(), A_mesh_ui_test_gameOver);
+			Renderer->DrawMesh(iw::Transform(), A_mesh_ui_text_gameOver);
 		}
 
 		Renderer->EndScene();
@@ -467,12 +479,14 @@ iw::Application* CreateApplication(
 	iw::InitOptions& options)
 {
 	// C:/dev/IwEngine/_
-	options.AssetRootPath = "C:/dev/IwEngine/_assets/";
+	//options.AssetRootPath = "C:/dev/IwEngine/_assets/";
+
+	options.AssetRootPath = "assets/";
 
 	options.WindowOptions = iw::WindowOptions {
 		800,
 		1000,
-		true,
+		false,
 		iw::DisplayState::NORMAL
 	};
 
