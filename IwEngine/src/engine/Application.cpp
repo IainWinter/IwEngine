@@ -47,16 +47,23 @@ namespace Engine {
 	int Application::Initialize(
 		InitOptions& options)
 	{
-		Asset->SetRootPath(options.AssetRootPath);
-		Audio->SetRootDir(Asset->RootPath() + "/audio");
-
-		//bool console = true; // maybe should be in Init?
+		//bool console = true; // should be in Initoptions, maybe should be creted in window also, this leaks windows.h
 		//if (console) {
 			AllocConsole();
 			FILE* fo, * fe;
 			freopen_s(&fo, "CONOUT$", "w", stdout);
 			freopen_s(&fe, "CONERR$", "w", stderr);
 		//}
+
+		// if in 'export' mode should just use local asset folder...
+
+		if (options.AssetRootPath == "")
+		{
+			options.AssetRootPath = IW_ASSET_ROOT_PATH;
+		}
+
+		Asset->SetRootPath(options.AssetRootPath);
+		Audio->SetRootDir(Asset->RootPath() + "audio/");
 
 		PushOverlay<DebugLayer>();
 

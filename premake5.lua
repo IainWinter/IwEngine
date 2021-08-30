@@ -3,6 +3,7 @@ sndbxdir  = path.getabsolute("Sandbox")
 edtordir  = path.getabsolute("Editor")
 plugins_dir = path.getabsolute("Plugins") -- start adding _
 exprtdir  = path.getabsolute("_export")
+assetdir  = path.getabsolute("_assets")
 glewdir   = iwengdir .. "/extern/glew"
 imguidir  = iwengdir .. "/extern/imgui"
 assimpdir = iwengdir .. "/extern/assimp"
@@ -622,7 +623,8 @@ group ""
 
 		defines {
 			"IMGUI_IMPL_OPENGL_LOADER_GLEW",
-			"IW_USE_EVENTS"
+			"IW_USE_EVENTS",
+			"IW_ASSET_ROOT_PATH=\"" .. assetdir .. "/\""
 		}
 
 		filter "system:windows"

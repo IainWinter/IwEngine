@@ -8,7 +8,7 @@ namespace Engine {
 	struct InitOptions {
 		WindowOptions WindowOptions;
 		void*         ImGuiContext; //ImGuiContext
-		std::string   AssetRootPath = "C:/dev/IwEngine/_assets/";
+		std::string   AssetRootPath; // default if "" gets set in Application.cpp to IW_ASSET_ROOT_PATH set from premake5
 	};
 }
 
