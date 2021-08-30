@@ -480,10 +480,8 @@ int App::Initialize(
 iw::Application* CreateApplication(
 	iw::InitOptions& options)
 {
-	// C:/dev/IwEngine/_
-	//options.AssetRootPath = "C:/dev/IwEngine/_assets/";
-
-	options.AssetRootPath = "assets/";
+	options.AssetRootPath = "C:/dev/IwEngine/_assets/";
+	//options.AssetRootPath = "assets/";
 
 	options.WindowOptions = iw::WindowOptions {
 		800,

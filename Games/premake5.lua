@@ -69,6 +69,7 @@ workspace (name)
 				"IW_PLATFORM_WINDOWS",
 				"IW_IMGUI"  -- not sure if this needs to be here
 			}
+			files { gamedir .. '/resources.rc', gamedir .. '/favicon.ico' }
 
 		filter "configurations:Debug"
 			defines "IW_DEBUG"
