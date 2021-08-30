@@ -12,6 +12,7 @@
 
 inline rTex A_texture_player;
 inline rTex A_texture_enemy1;
+inline rTex A_texture_background;
 inline rTex A_texture_asteroid_mid_1;
 inline rTex A_texture_asteroid_mid_2;
 inline rTex A_texture_asteroid_mid_3;
@@ -27,6 +28,8 @@ inline rFont A_font_arial;
 
 inline rMat A_material_texture_cam;
 inline rMat A_material_font_cam;
+
+inline iw::Mesh A_mesh_background;
 
 inline iw::Mesh A_mesh_ui_background;
 inline iw::Mesh A_mesh_ui_playerHealth;

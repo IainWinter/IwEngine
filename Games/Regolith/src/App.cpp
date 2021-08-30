@@ -360,6 +360,9 @@ struct GameLayer : iw::Layer
 		sandTransform.Scale   .x = game_scale_x;
 		sandTransform.Scale   .y = game_scale_y;
 
+		iw::Transform backgroundTransform = sandTransform;
+		backgroundTransform.Position.z = -1;
+
 		iw::Transform uiPlayerTransform;
 		uiPlayerTransform.Position.x = health_position_x;
 		uiPlayerTransform.Position.y = health_position_y;
@@ -416,6 +419,7 @@ struct GameLayer : iw::Layer
 		//	Renderer->DrawMesh(transform, data.first);
 		//}
 
+		Renderer->DrawMesh(backgroundTransform, A_mesh_background);
 
 		Renderer->DrawMesh(uiPlayerTransform, A_mesh_ui_playerHealth);
 		Renderer->DrawMesh(uiBackgroundTransform, A_mesh_ui_background);
@@ -480,7 +484,7 @@ int App::Initialize(
 iw::Application* CreateApplication(
 	iw::InitOptions& options)
 {
-	options.AssetRootPath = "C:/dev/IwEngine/_assets/";
+	//options.AssetRootPath = "C:/dev/IwEngine/_assets/";
 	//options.AssetRootPath = "assets/";
 
 	options.WindowOptions = iw::WindowOptions {

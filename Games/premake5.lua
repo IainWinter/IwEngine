@@ -1,4 +1,4 @@
-name = "SpaceSand"
+name = "Regolith"
 
 iwengdir  = path.getabsolute("../_export")
 gamedir  = path.getabsolute(name)

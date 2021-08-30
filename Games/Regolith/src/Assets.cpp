@@ -8,6 +8,7 @@ int LoadAssets(
 {
 	A_texture_player         = Asset->Load<Texture>("textures/SpaceGame/player.png");
 	A_texture_enemy1         = Asset->Load<Texture>("textures/SpaceGame/enemy.png");
+	A_texture_background     = Asset->Load<Texture>("textures/SpaceGame/space.png");
 	A_texture_asteroid_mid_1 = Asset->Load<Texture>("textures/SpaceGame/asteroid_mid_1.png");
 	A_texture_asteroid_mid_2 = Asset->Load<Texture>("textures/SpaceGame/asteroid_mid_2.png");
 	A_texture_asteroid_mid_3 = Asset->Load<Texture>("textures/SpaceGame/asteroid_mid_3.png");
@@ -24,6 +25,7 @@ int LoadAssets(
 	A_material_texture_cam = REF<Material>(Asset->Load<Shader>("shaders/texture_cam.shader"));
 	A_material_font_cam    = REF<Material>(Asset->Load<Shader>("shaders/font.shader"));
 
+	A_mesh_background      = iw::ScreenQuad().MakeInstance();
 	A_mesh_ui_background   = iw::ScreenQuad().MakeInstance();
 	A_mesh_ui_playerHealth = iw::ScreenQuad().MakeInstance();
 	
@@ -31,6 +33,7 @@ int LoadAssets(
 	
 	CHECK_LOAD(A_texture_player        );
 	CHECK_LOAD(A_texture_enemy1        );
+	CHECK_LOAD(A_texture_background    );
 	CHECK_LOAD(A_texture_asteroid_mid_1);
 	CHECK_LOAD(A_texture_asteroid_mid_2);
 	CHECK_LOAD(A_texture_asteroid_mid_3);
@@ -49,6 +52,7 @@ int LoadAssets(
 
 	A_texture_player        ->m_filter = NEAREST;
 	A_texture_enemy1        ->m_filter = NEAREST;
+	A_texture_background    ->m_filter = NEAREST;
 	A_texture_asteroid_mid_1->m_filter = NEAREST;
 	A_texture_asteroid_mid_2->m_filter = NEAREST;
 	A_texture_asteroid_mid_3->m_filter = NEAREST;
@@ -62,6 +66,7 @@ int LoadAssets(
 
 	A_texture_player        ->m_wrap = EDGE;
 	A_texture_enemy1        ->m_wrap = EDGE;
+	A_texture_background    ->m_wrap = EDGE;
 	A_texture_asteroid_mid_1->m_wrap = EDGE;
 	A_texture_asteroid_mid_2->m_wrap = EDGE;
 	A_texture_asteroid_mid_3->m_wrap = EDGE;
@@ -84,6 +89,11 @@ int LoadAssets(
 		A_material_font_cam->SetTransparency(Transparency::ADD);
 		A_material_font_cam->SetTexture("fontMap", A_texture_font_arial);
 		A_material_font_cam->Set("color", iw::Color(1));
+	}
+
+	{
+		A_mesh_background.Material = A_material_texture_cam->MakeInstance();
+		A_mesh_background.Material->SetTexture("texture", A_texture_background);
 	}
 
 	{
