@@ -167,10 +167,16 @@ namespace math {
 		const _t& b,
 		float w)
 	{
-		if      (w < 0) w = 0;
-		else if (w > 1) w = 1;
+		// this still has a subtraction, but on a and b so the precision is in a/b hands not w
 
-		return a * (1 - w) + b * w;
+		return a + w * (b - a);
+
+		// this is unstable when w has many decimals and a/b are =
+
+		//if      (w < 0) w = 0;
+		//else if (w > 1) w = 1;
+
+		//return a * (1 - w) + b * w;
 	}
 
 	/**
