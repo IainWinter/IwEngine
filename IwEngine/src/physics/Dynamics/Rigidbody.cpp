@@ -67,8 +67,8 @@ namespace Physics {
 	void Rigidbody::SetTransform(
 		iw::Transform* transform)
 	{
-		m_nextTrans = *transform;
-		m_lastTrans = *transform;
+		SetLastTrans(*transform);
+		SetNextTrans(*transform);
 		CollisionObject::SetTransform(transform);
 	}
 

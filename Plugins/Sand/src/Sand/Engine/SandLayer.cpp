@@ -313,7 +313,7 @@ void SandLayer::PasteTiles()
 		[](SpriteData& sprite, int x, int y, float u, float v, int tri)
 		{
 			auto& [tile, colors, width] = sprite;
-			unsigned index = (size_t)floor(u) + (size_t)floor(v) * width;
+			unsigned index = (int)floor(u) + (int)floor(v) * width;
 
 			return PixelData(x, y, tile, colors, index);
 		},

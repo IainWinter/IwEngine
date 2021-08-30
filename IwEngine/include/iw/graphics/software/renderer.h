@@ -134,16 +134,15 @@ namespace software_renderer {
 
 		Slope() = default;
 		Slope(float begin, float end, float steps) {
-			float inv_step = 1.0f / steps;
 			m_cur = begin;
 			m_end = end;
 
-			if (steps == 0) {
+			if (steps == 0.f) {
 				m_step = 0.f;
 			}
 
 			else {
-				m_step = (end - begin) * inv_step;
+				m_step = (end - begin) / steps;
 			}
 		}
 
@@ -178,11 +177,11 @@ namespace software_renderer {
 			},
 			[&](int y, SlopeData& left, SlopeData& right)
 			{
-				float   xf = left[0] .get(),
+				float   xf = left [0].get(),
 					endxf = right[0].get();
 
-				int     x =    xf,
-					endx = endxf;
+				int     x = floor(   xf), // just added floor, didnt fix issue, it has to be with transformation not being floored or something??? i really have no clue :(
+					endx = floor(endxf);
 
 				Slope props[2]; // u, v inter scanline slopes
 				props[0] = Slope(left[1].get(), right[1].get(), endxf - xf); // need to fix fidelity

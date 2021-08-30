@@ -106,8 +106,10 @@ std::pair<int, int> SandWorld::GetChunkLocation(
 	int x, int y)
 {
 	return {
+		//(x >= 0 ? x : x - m_chunkWidth  - 1) / m_chunkWidth, // credit to Peace Roasted in the yt comments
+		//(y >= 0 ? y : y - m_chunkHeight - 1) / m_chunkHeight // minor change for readability 
 		floor(float(x) / m_chunkWidth),
-		floor(float(y) / m_chunkHeight),
+		floor(float(y) / m_chunkHeight) // this is from minecraft i think
 	};
 }
 

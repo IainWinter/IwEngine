@@ -13,7 +13,7 @@ struct Player
 	bool i_fire1;
 	bool i_fire2;
 
-	float speed = 150;
+	float speed = 15;
 
 	bool can_fire_laser;
 

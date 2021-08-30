@@ -222,9 +222,9 @@ public:
 
 			using vertex = software_renderer::vertex;
 
-			vertex v1 {p1.x, p1.y, u1.x, u1.y};
-			vertex v2 {p2.x, p2.y, u2.x, u2.y};
-			vertex v3 {p3.x, p3.y, u3.x, u3.y};
+			vertex v1 { p1.x, p1.y, u1.x, u1.y }; // this is a source of inconsistant truncation, could be fidelity error?
+			vertex v2 { p2.x, p2.y, u2.x, u2.y };
+			vertex v3 { p3.x, p3.y, u3.x, u3.y };
 
 			software_renderer
 			::RasterPolygon(v1, v2, v3, [&](int x, int y, float u, float v)
@@ -369,6 +369,8 @@ private:
 		PixelDataGridf<_f1, _f2> pixels;
 		pixels.resize(x_size * y_size);
 
+		int minX = 1000, maxX = -1000;
+
 		std::vector<glm::vec2> polygon = tile->m_polygon;
 		TransformPolygon(polygon, &tile->LastTransform);
 		ForEachInPolygon(polygon, tile->m_uv, tile->m_index, [&](int x, int y, float u, float v, int tri)
@@ -385,8 +387,13 @@ private:
 				return;
 			}
 
+			if (x < minX) minX = x;
+			if (x > maxX) maxX = x;
+
 			pixels[px + py * x_size].emplace_back(GetPixelData(pre, x, y, u, v, tri));
 		});
+
+		LOG_INFO << tile->LastTransform.Position.x;
 
 		return {
 			{ cx_min, cy_min, x_size, y_size },
