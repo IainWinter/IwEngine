@@ -124,6 +124,13 @@ bool WorldSystem::On(iw::ActionEvent& e)
 		{
 			ProjHitTile_Event& event = e.as<ProjHitTile_Event>();
 			sand->EjectPixel(event.Info.tile, event.Info.index);
+
+			// todo: if entity is the player or an enemy
+			// eject hot metal particles
+
+			// todo: if entity is an asteroid
+			// eject dirt or something, gravitized to nearest asteroid
+
 			break;
 		}
 		case SPAWN_ASTEROID: {

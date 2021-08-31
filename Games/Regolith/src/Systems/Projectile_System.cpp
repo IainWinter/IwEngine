@@ -16,7 +16,7 @@ void ProjectileSystem::Update()
 	});
 }
 
-float time__ = 0;
+//float time__ = 0;
 
 void ProjectileSystem::FixedUpdate()
 {
@@ -25,32 +25,34 @@ void ProjectileSystem::FixedUpdate()
 		if (p->FixedUpdate) p->FixedUpdate();
 	});
 
-	time__ += iw::FixedTime();
+	//time__ += iw::FixedTime();
 
-	if (iw::Keyboard::KeyDown(iw::G) && time__ > .05)
-	{
-		time__ = 0;
+	//if (iw::Keyboard::KeyDown(iw::G) && time__ > .005)
+	//{
+	//	time__ = 0;
 
-		float x = iw::Mouse::ScreenPos().x() / Renderer->Width();
-		float y = iw::Mouse::ScreenPos().y() / Renderer->Height();
+	//	float x = iw::Mouse::ScreenPos().x() / Renderer->Width();
+	//	float y = iw::Mouse::ScreenPos().y() / Renderer->Height();
 
-		auto [w, h] = sand->GetSandTexSize2();
+	//	auto [w, h] = sand->GetSandTexSize2();
 
-		float offX = iw::randf() * 1;
-		float offY = iw::randf() * 1;
+	//	float offX = iw::randf() * 10;
+	//	float offY = iw::randf() * 10;
 
-		glm::vec2 vel(x * 2 - 1, y * 2 - 1);
-		vel = glm::normalize(vel) * 44.f;
-		
-		ShotInfo shot;
-		shot.x = w;
-		shot.y = h;
-		shot.dx = vel.x;
-		shot.dy = vel.y;
-		shot.projectile = ProjectileType::BULLET;
+	//	glm::vec2 vel(x * 2 - 1, y * 2 - 1);
+	//	vel = glm::normalize(vel) * 44.f;
+	//	vel.x += iw::randfs() * 5;
+	//	vel.y += iw::randfs() * 5;
 
-		Bus->push<SpawnProjectile_Event>(shot, 15);
-	}
+	//	ShotInfo shot;
+	//	shot.x = w;
+	//	shot.y = h;
+	//	shot.dx = vel.x;
+	//	shot.dy = vel.y;
+	//	shot.projectile = ProjectileType::BULLET;
+
+	//	Bus->push<SpawnProjectile_Event>(shot, 15);
+	//}
 }
 
 // helpers
@@ -190,6 +192,7 @@ iw::Entity ProjectileSystem::MakeProjectile(
 						{
 							iw::Entity hit = Space->FindEntity<iw::Tile>(info.tile);
 							Bus->push<ProjHitTile_Event>(info, hit, entity); // not sure if push (vs send) breaks anything here...
+							// todo: include position
 						}
 
 						hit = true;
@@ -334,7 +337,7 @@ iw::Entity ProjectileSystem::MakeBeam(const ShotInfo& shot, int depth)
 	projectile->PlaceCell = [=](iw::SandChunk* chunk, int px, int py, float dx, float dy)
 	{
 		iw::Color centerColor = iw::Color::From255(252, 239, 91);
-		iw::Color outerColor = iw::Color::From255(255, 66, 255);
+		iw::Color outerColor  = iw::Color::From255(255, 66, 255);
 
 		iw::Cell cell;
 		cell.Type = iw::CellType::PROJECTILE;

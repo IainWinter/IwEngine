@@ -393,8 +393,6 @@ private:
 			pixels[px + py * x_size].emplace_back(GetPixelData(pre, x, y, u, v, tri));
 		});
 
-		LOG_INFO << tile->LastTransform.Position.x;
-
 		return {
 			{ cx_min, cy_min, x_size, y_size },
 			pixels

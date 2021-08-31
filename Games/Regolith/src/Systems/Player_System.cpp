@@ -51,6 +51,9 @@ void PlayerSystem::Update()
 		Bus->push<ChangeLaserFluid_Event>(-1);
 	}
 
+	// should warm when half of peices are gone, start a 5 second timer then u die
+	// if you die, shoud explode the player
+
 	if (player->CoreIndiceCount < player->CoreIndices.size() / 3) {
 		Bus->push<EndGame_Event>();
 	}
@@ -80,14 +83,14 @@ bool PlayerSystem::On(iw::ActionEvent& e)
 				if (nonCoreIndices.size() > 0) 
 				{
 					int index = iw::randi(nonCoreIndices.size() - 1);
-					m_player.Find<iw::Tile>()->ReinstatePixel(nonCoreIndices.at(index));
+					tile->ReinstatePixel(nonCoreIndices.at(index));
 				}
 			}
 
 			else 
 			{
-				m_player.Find<iw::Tile>()->ReinstatePixel(event.Index);
-				m_player.Find<Player>()->CoreIndiceCount++;
+				tile->ReinstatePixel(event.Index);
+				player->CoreIndiceCount++;
 			}
 
 			break;
@@ -156,6 +159,7 @@ bool PlayerSystem::On(iw::ActionEvent& e)
 			iw::Circle*    collider  = m_player.Find<iw::Circle>();
 			iw::Rigidbody* rigidbody = m_player.Find<iw::Rigidbody>();
 			iw::Transform* transform = m_player.Find<iw::Transform>();
+			iw::Tile*      tile      = m_player.Find<iw::Tile>();
 
 			auto [w, h] = sand->GetSandTexSize2();
 			transform->Position = glm::vec3(w, h, 0);
@@ -165,12 +169,16 @@ bool PlayerSystem::On(iw::ActionEvent& e)
 			player->CurrentWeapon = MakeDefault_Cannon();
 			player->SpecialLaser  = MakeFatLaser_Cannon();
 			player->CurrentWeapon->Ammo = -1;
-			player->CoreIndices = {
-				34, 35, 36, 37,
-				42, 43, 44, 45,
-				52, 53,
-				60, 61
-			};
+
+			for (unsigned i = 0; i < tile->m_sprite.ColorCount(); i += 4)
+			{
+				unsigned char& alpha = tile->m_sprite.Colors()[i+3];
+				if (alpha < 255	&& alpha > 175)
+				{
+					player->CoreIndices.push_back(i / 4);
+					alpha = 255;
+				}
+			}
 			player->CoreIndiceCount = player->CoreIndices.size();
 
 			collider->Radius = 4;

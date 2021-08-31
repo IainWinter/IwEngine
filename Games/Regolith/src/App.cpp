@@ -87,9 +87,9 @@ struct GameLayer : iw::Layer
 
 		Bus->push<RunGame_Event>();
 
-		//m_cursor = sand->MakeTile(A_texture_ui_cursor);
-		//m_cursor.Find<iw::Tile>()->m_zIndex = 1;
-		//m_cursor.Find<iw::CollisionObject>()->IsTrigger = true;
+		m_cursor = sand->MakeTile(A_texture_ui_cursor);
+		m_cursor.Find<iw::Tile>()->m_zIndex = 1;
+		m_cursor.Find<iw::CollisionObject>()->IsTrigger = true;
 
 		return Layer::Initialize();
 	}
@@ -113,7 +113,7 @@ struct GameLayer : iw::Layer
 
 	void Update() override { // this is one frame behind, add a callback to the sand layer that gets called at the right time, right after rendering the world...
 	
-		//m_cursor.Find<iw::CollisionObject>()->Transform.Position = glm::vec3(sand->sP, 0.f);
+		m_cursor.Find<iw::CollisionObject>()->Transform.Position = glm::vec3(sand->sP, 0.f);
 
 		// state change :o
 
@@ -221,7 +221,7 @@ struct GameLayer : iw::Layer
 			{
 				showGameOver = true;
 				PopSystem(playerTank_s);
-				//PopSystem(world_s);
+				PopSystem(world_s);
 				PopSystem(keepInWorld_s);
 
 				break;
@@ -229,7 +229,7 @@ struct GameLayer : iw::Layer
 			case RUN_GAME: {
 				showGameOver = false;
 				PushSystemFront(playerTank_s);
-				//PushSystemFront(world_s);
+				PushSystemFront(world_s);
 				PushSystem(keepInWorld_s);
 
 				for (int x = 0; x < 400; x++)
@@ -488,8 +488,8 @@ iw::Application* CreateApplication(
 	//options.AssetRootPath = "assets/";
 
 	options.WindowOptions = iw::WindowOptions {
-		800,
-		1000,
+		800 + 38/2,
+		1000 + 38,
 		false,
 		iw::DisplayState::NORMAL
 	};
