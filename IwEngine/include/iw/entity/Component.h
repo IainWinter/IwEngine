@@ -11,16 +11,16 @@ namespace ECS {
 	using func_DeepCopy   = std::function<void(void*, void*)>;
 	using func_Destructor = std::function<void(void*)>;
 
-	struct IWENTITY_API Component {
+	struct Component {
 #ifdef IW_USE_REFLECTION
-		const iw::Type* Type;
+		const iw::Type* Type = nullptr;
 #else
-		size_t Type;
+		size_t Type = 0u;
 #endif
-		size_t Size;
-		const char* Name;
+		size_t Size = 0u;
+		const char* Name = nullptr;
 
-		size_t Id;
+		size_t Id = 0u;
 
 		func_DeepCopy DeepCopyFunc;
 		func_Destructor DestructorFunc;

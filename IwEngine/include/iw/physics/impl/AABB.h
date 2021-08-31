@@ -65,7 +65,7 @@ namespace impl {
 			AABB me   = TransformBounds(*this, transform);
 			AABB them = TransformBounds(other, otherTransform);
 
-			for (size_t i = 0; i < (size_t)_d; i++) {
+			for (int i = 0; i < int(_d); i++) {
 				if (me.Min[i] > them.Max[i] || me.Max[i] < them.Min[i]) return false;
 			}
 
@@ -79,7 +79,7 @@ namespace impl {
 			AABB me   = TransformBounds(*this, transform);
 			AABB them = TransformBounds(other, otherTransform);
 
-			for (size_t i = 0; i < (size_t)_d; i++) {
+			for (int i = 0; i < int(_d); i++) {
 				if (me.Min[i] >= them.Min[i] || me.Max[i] <= them.Max[i]) return false;
 			}
 

@@ -126,8 +126,10 @@ namespace Engine {
 				}
 				case iw::val(EventGroup::ENTITY): {
 					switch (e.Type) {
+						case EntityEventType::Created:   e.Handled = On((EntityCreatedEvent&)  e); break;
 						case EntityEventType::Destroy:   e.Handled = On((EntityDestroyEvent&)  e); break;
 						case EntityEventType::Destroyed: e.Handled = On((EntityDestroyedEvent&)e); break;
+						case EntityEventType::Moved:     e.Handled = On((EntityMovedEvent&)    e); break;
 						default: error = true;
 					}
 					break;

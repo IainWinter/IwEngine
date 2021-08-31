@@ -5,93 +5,58 @@
 
 namespace iw {
 namespace Graphics {
-	struct IWGRAPHICS_API Camera {
-	protected:
-		glm::mat4 m_view;
-	private:
-		Transform* m_transform;
+	struct Camera {
+		glm::mat4 View;
+		glm::mat4 Projection;
+		iw::Transform Transform;
 
-		glm::vec3 m_position;
-		glm::quat m_rotation;
-
-		bool m_outdated;
-
-	public:
+		IWGRAPHICS_API
 		Camera();
 
+		IWGRAPHICS_API
 		Camera(
-			Transform* transform);
+			iw::Transform* transform);
 
+		IWGRAPHICS_API
 		Camera(
 			const glm::vec3& position,
 			const glm::quat& rotation);
 
-		//GEN_copy(, Camera)
-		//GEN_move(, Camera)
+		IWGRAPHICS_API void SetTrans(iw::Transform* transform);
+		IWGRAPHICS_API void SetView(const glm::mat4& view);
 
-		virtual ~Camera() {}
+		IWGRAPHICS_API glm::mat4 ViewProjection();
+		IWGRAPHICS_API glm::mat4 ViewProjection() const;
 
-		bool Outdated() const;
-
-		glm::vec3 Position() const;
-		glm::vec3 WorldPosition() const;
-
-		glm::quat Rotation() const;
-		glm::quat WorldRotation() const;
-
-		glm::mat4 View();
-		glm::mat4 View() const;
-		glm::mat4 ViewProjection();
-		glm::mat4 ViewProjection() const;
-
-		virtual glm::mat4 Projection() const = 0;
-
-		void SetTrans(
-			Transform* transform);
-
-		void SetView(
-			const glm::mat4& view);
-
-		void SetPosition(
-			const glm::vec3& position);
-
-		void SetRotation(
-			const glm::quat& rotation);
-
-		virtual void SetProjection(
-			const glm::mat4& projection) = 0;
-	private:
-		void RecalculateView();
+		IWGRAPHICS_API glm::mat4& RecalculateView();
 	};
 
 	// Could probly do this better with strategy camera but this works for now cus there're are only 2 as far as I know
 
-	struct IWGRAPHICS_API OrthographicCamera
+	struct OrthographicCamera
 		: Camera
 	{
-	private:
-		glm::mat4 m_projection = glm::mat4();
-		float m_width  =  2;
-		float m_height =  2;
-		float m_zNear  = -1;
-		float m_zFar   =  1;
+		float Width;
+		float Height;
+		float NearClip;
+		float FarClip;
 
-	public:
-		OrthographicCamera() = default;
-
+		IWGRAPHICS_API
 		OrthographicCamera(
+			float width  =  2,  // should be identity, I don't think this is
+			float height =  2,
+			float zNear  = -1,
+			float zFar   =  1);
+
+		IWGRAPHICS_API
+		OrthographicCamera(
+			iw::Transform* transform,
 			float width,
 			float height,
 			float zNear,
 			float zFar);
 
-		OrthographicCamera(
-			Transform* transform,
-			float width,
-			float height,
-			float zNear,
-			float zFar);
-
+		IWGRAPHICS_API
 		OrthographicCamera(
 			const glm::vec3& position,
 			const glm::quat& rotation,
@@ -100,58 +65,35 @@ namespace Graphics {
 			float zNear,
 			float zFar);
 
+		IWGRAPHICS_API
 		void SetProjection(
 			float width,
 			float height,
 			float zNear,
 			float zFar);
-
-		inline float Width()    { return m_width; }
-		inline float Height()   { return m_height; }
-		inline float NearClip() { return m_zNear; }
-		inline float FarClip()  { return m_zFar; }
-
-		inline void Width   (float width)  { m_width = width; }
-		inline void Height  (float height) { m_height = height; }
-		inline void NearClip(float zNear)  { m_zNear = zNear; }
-		inline void FarClip (float zFar)   { m_zFar = zFar; }
-
-		inline void SetProjection(
-			const glm::mat4& projection) override
-		{
-			m_projection = projection;
-		}
-
-		inline glm::mat4 Projection() const override {
-			return m_projection;
-		}
 	};
 
-	struct IWGRAPHICS_API PerspectiveCamera
+	struct PerspectiveCamera
 		: Camera
 	{
-	public:
-		/*float Fov; // something like this could be cool
-		float Aspect;*/
-	private:
-		glm::mat4 m_projection = glm::mat4();;
-		//float m_fov;
-		//float m_aspect;
+		float Fov, Aspect, NearClip, FarClip;
 
-	public:
+		IWGRAPHICS_API
 		PerspectiveCamera(
-			float fov    = 100 * glm::pi<float>() / 180,
+			float fov    = glm::radians(90.f),
 			float aspect = 16.0f / 9,
 			float zNear  = 0.01f,
-			float zFar   = 1000.0f);
+			float zFar   = 1000.f);
 
+		IWGRAPHICS_API
 		PerspectiveCamera(
-			Transform* transform,
+			iw::Transform* transform,
 			float fov,
 			float aspect,
 			float zNear,
 			float zFar);
 
+		IWGRAPHICS_API
 		PerspectiveCamera(
 			const glm::vec3& position,
 			const glm::quat& rotation,
@@ -160,21 +102,12 @@ namespace Graphics {
 			float zNear,
 			float zFar);
 
+		IWGRAPHICS_API
 		void SetProjection(
 			float fov,
 			float aspect,
 			float zNear,
 			float zFar);
-
-		inline void SetProjection(
-			const glm::mat4& projection) override
-		{
-			m_projection = projection;
-		}
-
-		inline glm::mat4 Projection() const override {
-			return m_projection;
-		}
 	};
 }
 

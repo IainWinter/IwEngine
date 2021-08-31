@@ -11,7 +11,6 @@ namespace Graphics {
 		ref<Shader>        particleShadowShader)
 		: Light(intensity, shadowTarget, shadowShader, particleShadowShader)
 		, m_radius(radius)
-		, m_outdated(true)
 		, m_shadowCamera()
 	{
 		UpdateCamera();
@@ -28,22 +27,16 @@ namespace Graphics {
 		}
 
 		glm::mat4 cube[6];
-		cube[0] = glm::lookAt(Position(), Position() + glm::vec3(1, 0, 0), -glm::vec3(0, 1, 0)) * m_shadowCamera.Projection();
-		cube[1] = glm::lookAt(Position(), Position() - glm::vec3(1, 0, 0), -glm::vec3(0, 1, 0)) * m_shadowCamera.Projection();
-		cube[2] = glm::lookAt(Position(), Position() + glm::vec3(0, 1, 0),  glm::vec3(0, 0, 1)) * m_shadowCamera.Projection();
-		cube[3] = glm::lookAt(Position(), Position() - glm::vec3(0, 1, 0), -glm::vec3(0, 0, 1)) * m_shadowCamera.Projection();
+		cube[0] = glm::lookAt(Position(), Position() + glm::vec3(1, 0, 0), -glm::vec3(0, 1, 0)) * m_shadowCamera.Projection;
+		cube[1] = glm::lookAt(Position(), Position() - glm::vec3(1, 0, 0), -glm::vec3(0, 1, 0)) * m_shadowCamera.Projection;
+		cube[2] = glm::lookAt(Position(), Position() + glm::vec3(0, 1, 0),  glm::vec3(0, 0, 1)) * m_shadowCamera.Projection;
+		cube[3] = glm::lookAt(Position(), Position() - glm::vec3(0, 1, 0), -glm::vec3(0, 0, 1)) * m_shadowCamera.Projection;
 		cube[4] =                                                                                 m_shadowCamera.ViewProjection();
-		cube[5] = glm::lookAt(Position(), Position() - glm::vec3(0, 0, 1), -glm::vec3(0, 1, 0)) * m_shadowCamera.Projection();
+		cube[5] = glm::lookAt(Position(), Position() - glm::vec3(0, 0, 1), -glm::vec3(0, 1, 0)) * m_shadowCamera.Projection;
 
 		m_shadowShader->Handle()->GetParam("light_mats[0]") ->SetAsMat4s(cube, 6);
 		m_shadowShader->Handle()->GetParam("light_pos")     ->SetAsFloats(&Position(), 3);
 		m_shadowShader->Handle()->GetParam("light_farPlane")->SetAsFloat(Radius());
-
-		m_outdated = false;
-	}
-
-	bool PointLight::Outdated() const {
-		return m_outdated || Light::Outdated();
 	}
 
 	float PointLight::Radius() const {
@@ -87,7 +80,7 @@ namespace Graphics {
 				Position(), 
 				glm::angleAxis(glm::pi<float>(), glm::vec3(0, 0, 1)),
 				glm::pi<float>() * 0.5f,
-				m_shadowTarget->Width() / m_shadowTarget->Height(),
+				float(m_shadowTarget->Width()) / m_shadowTarget->Height(),
 				0.01f,
 				Radius()
 			);
@@ -98,8 +91,6 @@ namespace Graphics {
 		else {
 			m_shadowCamera = PerspectiveCamera();
 		}
-
-		m_outdated = true;
 	}
 }
 }

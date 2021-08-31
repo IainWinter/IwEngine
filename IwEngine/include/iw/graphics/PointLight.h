@@ -9,7 +9,6 @@ namespace Graphics {
 	{
 	private:
 		float m_radius;
-		bool m_outdated;
 		PerspectiveCamera m_shadowCamera;
 
 	public:
@@ -24,9 +23,6 @@ namespace Graphics {
 		IWGRAPHICS_API
 		void SetupShadowCast(
 			Renderer* renderer) override;
-
-		IWGRAPHICS_API
-		bool Outdated() const override;
 
 		IWGRAPHICS_API
 		float Radius() const;

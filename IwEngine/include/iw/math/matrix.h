@@ -420,17 +420,17 @@ namespace math {
 			return ostream << "]";
 		}
 
-		itr row_begin(size_t row) { return   itr(&get(0,         row), height, width); }
-		itr row_end  (size_t row) { return ++itr(&get(width - 1, row), height, width); }
+		itr row_begin(size_t row) { return   itr(&get(0,         row), int(height), int(width)); }
+		itr row_end  (size_t row) { return ++itr(&get(width - 1, row), int(height), int(width)); }
 
-		itr col_begin(size_t col) { return   itr(&get(col,          0), 1, height); }
-		itr col_end  (size_t col) { return ++itr(&get(col, height - 1), 1, height); }
+		itr col_begin(size_t col) { return   itr(&get(col,          0), 1, int(height)); }
+		itr col_end  (size_t col) { return ++itr(&get(col, height - 1), 1, int(height)); }
 
-		itr_const row_begin(size_t row) const { return   itr_const(&get(0,         row), height, width); }
-		itr_const row_end  (size_t row) const { return ++itr_const(&get(width - 1, row), height, width); }
+		itr_const row_begin(size_t row) const { return   itr_const(&get(0,         row), int(height), int(width)); }
+		itr_const row_end  (size_t row) const { return ++itr_const(&get(width - 1, row), int(height), int(width)); }
 
-		itr_const col_begin(size_t col) const { return   itr_const(&get(col,          0), 1, height); }
-		itr_const col_end  (size_t col) const { return ++itr_const(&get(col, height - 1), 1, height); }
+		itr_const col_begin(size_t col) const { return   itr_const(&get(col,          0), 1, int(height)); }
+		itr_const col_end  (size_t col) const { return ++itr_const(&get(col, height - 1), 1, int(height)); }
 	};
 
 	template<

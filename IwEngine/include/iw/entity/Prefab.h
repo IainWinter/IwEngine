@@ -41,14 +41,14 @@ namespace ECS {
 
 		IWENTITY_API
 		const iw::ref<Component>& GetComponent(
-			unsigned index) const;
+			size_t index) const;
 
 		IWENTITY_API
 		void* GetComponentData(
-			unsigned index) const;
+			size_t index) const;
 
 		IWENTITY_API
-		unsigned ComponentCount() const;
+		size_t ComponentCount() const;
 	};
 
 }

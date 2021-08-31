@@ -17,6 +17,8 @@
 #	include <typeindex>
 #endif
 
+#pragma warning(disable : 4200)
+
 namespace iw {
 namespace ECS {
 #ifdef IW_USE_REFLECTION

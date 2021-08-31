@@ -15,6 +15,9 @@ namespace Graphics {
 		, m_block(0)
 		, m_material(0)
 		, m_transparency(0)
+		, m_time(0)
+		, m_position(0.f)
+		, m_cameraClipPlane(0.f)
 	{}
 
 	void QueuedRenderer::SetLayer(
@@ -227,7 +230,7 @@ namespace Graphics {
 		m_shadow  = 1;
 		m_block   = 1;
 		m_camera += 1;
-		m_position = camera ? camera->WorldPosition() : glm::vec3();
+		m_position = camera ? camera->Transform.WorldPosition() : glm::vec3();
 
 		BeginSceneOP* op = m_pool.alloc<BeginSceneOP>();
 		op->Scene  = nullptr;
@@ -251,7 +254,7 @@ namespace Graphics {
 		m_shadow  = 1;
 		m_block   = 1;
 		m_camera += 1;
-		m_position = scene->MainCamera() ? scene->MainCamera()->WorldPosition() : glm::vec3();
+		m_position = scene->MainCamera() ? scene->MainCamera()->Transform.WorldPosition() : glm::vec3();
 
 		BeginSceneOP* op = m_pool.alloc<BeginSceneOP>();
 		op->Scene  = scene;
@@ -436,7 +439,7 @@ namespace Graphics {
 		
 		if (m_camera) {
 			if (transform) {  // should map to clip planes we have 16 mil res which should be more than enough
-				depth = 1000000 * glm::length2(m_position - (transform ? transform->WorldPosition() : glm::vec3())); 
+				depth = key(1000000) * (key)glm::length2(m_position - (transform ? transform->WorldPosition() : glm::vec3())); 
 			}
 		}
 

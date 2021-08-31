@@ -28,7 +28,9 @@ namespace iw {
 
 		float delta = clamp(Time::DeltaTime() * Speed, 0.f, 1.f);
 
-		camera->SetPosition(iw :: lerp(camera->Position(), target, delta));
-		camera->SetRotation(glm::slerp(camera->Rotation(), camrot, delta));
+		// if camera has a Transform* from an entity for example, this needs to work in world coords
+
+		camera->Transform.Position = iw :: lerp(camera->Transform.Position, target, delta);
+		camera->Transform.Rotation = glm::slerp(camera->Transform.Rotation, camrot, delta);
 	}
 }

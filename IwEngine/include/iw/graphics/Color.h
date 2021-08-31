@@ -28,10 +28,10 @@ namespace Graphics {
 		glm::vec4 rgba() const { return glm::vec4(r, g, b, a); }
 
 		uint32_t to32() const {
-			return glm::clamp<unsigned>(r * 255, 0, 255) << 0
-				| glm::clamp<unsigned>(g * 255, 0, 255) << 8
-				| glm::clamp<unsigned>(b * 255, 0, 255) << 16
-				| glm::clamp<unsigned>(a * 255, 0, 255) << 24; // Not sure if this should be clamped or let to explode?
+			return glm::clamp(unsigned(r * 255.f), 0u, 255u) << 0
+				| glm::clamp(unsigned(g * 255.f), 0u, 255u) << 8
+				| glm::clamp(unsigned(b * 255.f), 0u, 255u) << 16
+				| glm::clamp(unsigned(a * 255.f), 0u, 255u) << 24; // Not sure if this should be clamped or let to explode?
 		}
 
 		Color operator+(

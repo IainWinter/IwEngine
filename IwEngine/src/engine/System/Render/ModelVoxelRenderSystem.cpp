@@ -58,7 +58,7 @@ namespace Engine {
 	void ModelVoxelRenderSystem::Update(
 		EntityComponentArray& eca)
 	{
-		glm::vec3 camPos = m_scene->MainCamera()->Position(); // no req plz :(
+		glm::vec3 camPos = m_scene->MainCamera()->Transform.WorldPosition();
 		camPos.y = 0;
 
 		m_voxelize->SetPosition(camPos);

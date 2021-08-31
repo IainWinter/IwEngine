@@ -49,6 +49,12 @@ namespace ECS {
 			entityData->ChunkIndex = m_componentManager.CreateComponentsData(entityData);
 		}
 
+#ifdef IW_USE_EVENTS
+		if (m_bus) {
+			m_bus->push<EntityCreatedEvent>(entityData->Entity);
+		}
+#endif
+
 		return Entity(entityData->Entity, this);
 	}
 
@@ -300,7 +306,7 @@ namespace ECS {
 
 		Entity entity = CreateEntity(archetype);
 
-		for (int i = 0; i < prefab.ComponentCount(); i++) {
+		for (unsigned i = 0; i < prefab.ComponentCount(); i++) {
 			ref<Component> component = prefab.GetComponent(i);
 			void*          data      = prefab.GetComponentData(i);
 
@@ -391,7 +397,8 @@ namespace ECS {
 		const ref<Archetype>& newArchetype)
 	{
 #ifdef IW_USE_EVENTS
-		if (m_bus) {
+		if (m_bus) { // this needs two events maybe to capture all the info from before and after to
+					 // do anything useful with it
 			m_bus->send<EntityMovedEvent>(entityData->Entity, entityData->Archetype, newArchetype);
 		}
 #endif

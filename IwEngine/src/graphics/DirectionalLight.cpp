@@ -25,17 +25,17 @@ namespace Graphics {
 	}
 
 	glm::quat DirectionalLight::Rotation() const {
-		return m_shadowCamera.Rotation();
+		return m_shadowCamera.Transform.Rotation;
 	}
 
 	glm::quat DirectionalLight::WorldRotation() const {
-		return ShadowCamera()->WorldRotation();
+		return ShadowCamera()->Transform.WorldRotation();
 	}
 
 	void DirectionalLight::SetRotation(
 		const glm::quat& rotation)
 	{
-		m_shadowCamera.SetRotation(rotation);
+		m_shadowCamera.Transform.Rotation = rotation;
 	}
 
 	Camera* DirectionalLight::ShadowCamera() const {

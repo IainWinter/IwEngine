@@ -22,68 +22,104 @@ namespace Engine {
 		Scene* MainScene;
 
 	public:
-		IWENGINE_API
 		Layer(
-			std::string name);
+			std::string name)
+			: m_name(name)
+			, MainScene(new Scene())
+		{}
 
-		IWENGINE_API
-		virtual ~Layer();
+		~Layer() {
+			delete MainScene;
+		}
 
-		IWENGINE_API virtual int  Initialize();
-		IWENGINE_API virtual void Destroy();
+		virtual int Initialize()
+		{
+			for (ISystem* s : m_systems) {
+				int e = s->Initialize();
+				if (e != 0) return e;
+			}
+
+			return 0;
+		}
+
+		virtual void Destroy()
+		{
+			for (ISystem* s : m_systems) {
+				s->Destroy();
+			}
+		}
 
 		// Sync Updates
 
-		IWENGINE_API virtual void ImGui();
+		virtual void ImGui()
+		{
+			for (ISystem* s : m_systems) {
+				s->ImGui();
+			}
+		}
 
-		IWENGINE_API virtual void PreUpdate();
-		IWENGINE_API virtual void Update(); // this one should be in thread pool btw 'AsyncUpdate' is maybe a better name
-		IWENGINE_API virtual void PostUpdate();
+		virtual void PreUpdate() {}
+		virtual void Update() {} // this one should be in thread pool btw 'AsyncUpdate' is maybe a better name
+		virtual void PostUpdate() {}
 
-		IWENGINE_API virtual void FixedUpdate();
+		virtual void FixedUpdate() {}
 
-		IWENGINE_API virtual void OnPush();
-		IWENGINE_API virtual void OnPop();
+		virtual void OnPush() {}
+		virtual void OnPop() {}
 
 		// Action events
 
-		IWENGINE_API virtual bool On(ActionEvent& e);
+		virtual bool On(ActionEvent& e) { return m_systems.On(e); }
 
 		// Input events
 
-		IWENGINE_API virtual bool On(MouseWheelEvent& e);
-		IWENGINE_API virtual bool On(MouseMovedEvent& e);
-		IWENGINE_API virtual bool On(MouseButtonEvent& e);
-		IWENGINE_API virtual bool On(KeyEvent& e);
-		IWENGINE_API virtual bool On(KeyTypedEvent& e);
+		virtual bool On(MouseWheelEvent& e)  { return m_systems.On(e); }
+		virtual bool On(MouseMovedEvent& e)  { return m_systems.On(e); }
+		virtual bool On(MouseButtonEvent& e) { return m_systems.On(e); }
+		virtual bool On(KeyEvent& e)         { return m_systems.On(e); }
+		virtual bool On(KeyTypedEvent& e)    { return m_systems.On(e); }
 
 		// Window events
 
-		IWENGINE_API virtual bool On(WindowResizedEvent& e);
+		virtual bool On(WindowResizedEvent& e) { return m_systems.On(e); }
 
 		// Os events
 
-		IWENGINE_API virtual bool On(OsEvent& e);
+		virtual bool On(OsEvent& e) { return m_systems.On(e); }
 
 		// Physics events
 
-		IWENGINE_API virtual bool On(CollisionEvent& e);
+		virtual bool On(CollisionEvent& e) { return m_systems.On(e); }
 
 		// Entity events
 
-		IWENGINE_API virtual bool On(EntityDestroyEvent& e);
-		IWENGINE_API virtual bool On(EntityDestroyedEvent& e);
+		virtual bool On(EntityCreatedEvent& e)   { return m_systems.On(e); }
+		virtual bool On(EntityDestroyEvent& e)   { return m_systems.On(e); }
+		virtual bool On(EntityDestroyedEvent& e) { return m_systems.On(e); }
+		virtual bool On(EntityMovedEvent& e)     { return m_systems.On(e); }
 
 		// System updates
 
-		IWENGINE_API virtual void UpdateSystems();
-		IWENGINE_API virtual void FixedUpdateSystems();
+		virtual void UpdateSystems()
+		{
+			for (ISystem* system : m_systems) {
+				LOG_TIME_SCOPE(system->Name() + " system");
+				system->Update();
+			}
+		}
+
+		virtual void FixedUpdateSystems()
+		{
+			for (ISystem* system : m_systems) {
+				system->FixedUpdate();
+			}
+		}
 
 		const std::string& Name() const {
 			return m_name;
 		}
 
-		EventStack<ISystem*> temp_GetSystems() {
+		EventStack<ISystem*>& temp_GetSystems() {
 			return m_systems;
 		}
 

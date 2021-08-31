@@ -15,6 +15,15 @@ namespace Graphics {
 		, m_target(nullptr)
 		, m_ambiance(.03f)
 		, m_state(RenderState::INVALID)
+		, m_width(0)
+		, m_height(0)
+		, m_time(0.f)
+		, m_cameraUBO(nullptr)
+		, m_shadowUBO(nullptr)
+		, m_lightUBO(nullptr)
+		, m_lightData()
+		, m_shadowData()
+		, m_cameraData()
 	{}
 
 	void Renderer::Initialize() {
@@ -315,10 +324,10 @@ namespace Graphics {
 		glm::vec3 pos = glm::vec3();
 
 		if (camera) {
-			v   = camera->View();
-			p   = camera->Projection();
+			v   = camera->RecalculateView();
+			p   = camera->Projection;
 			vp  = camera->ViewProjection();
-			pos = camera->WorldPosition();
+			pos = camera->Transform.WorldPosition();
 		}
 
 		if (   glm::vec3(m_cameraData.CameraPos) != pos	
@@ -426,7 +435,7 @@ namespace Graphics {
 	void Renderer::SetPointLights(
 		const std::vector<PointLight*>& lights)
 	{
-		m_lightData.LightCounts.x = lights.size();
+		m_lightData.LightCounts.x = float(lights.size());
 		for (size_t i = 0; i < lights.size(); i++) {
 			m_lightData.PointLights[i].Position = glm::vec4(lights[i]->WorldPosition(), lights[i]->Radius());
 			m_lightData.PointLights[i].Color    = glm::vec4(lights[i]->Color(), 1);
@@ -438,13 +447,13 @@ namespace Graphics {
 	void Renderer::SetDirectionalLights(
 		const std::vector<DirectionalLight*>& lights)
 	{
-		m_lightData.LightCounts.y = lights.size();
+		m_lightData.LightCounts.y = float(lights.size());
 		for (size_t i = 0; i < lights.size(); i++) {
 			m_lightData.DirectionalLights[i].InvDirection = glm::vec4(lights[i]->WorldRotation() * glm::vec3(0, 0, -1), 0);
 			m_lightData.DirectionalLights[i].Color        = glm::vec4(lights[i]->Color(), 1);
 		}
 
-		m_shadowData.directionalLightCount.x = lights.size();
+		m_shadowData.directionalLightCount.x = float(lights.size());
 		for (size_t i = 0; i < lights.size(); i++) {
 			m_shadowData.LightViewProj[i] = lights[i]->ViewProjection();
 		}

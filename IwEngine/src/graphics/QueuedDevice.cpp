@@ -1,6 +1,6 @@
 #include "iw/graphics/QueuedDevice.h"
 
-// < Operation > 
+// < Op > 
 
 
 namespace iw {
@@ -37,7 +37,7 @@ namespace Graphics {
 	};
 
 	void QueuedDevice::Push(
-		Operation operation, 
+		Op operation, 
 		void* args)
 	{
 		m_queue.push({ operation, args });
@@ -52,20 +52,20 @@ namespace Graphics {
 	void QueuedDevice::Execute() {
 		while (!m_queue.empty()) {
 			DeviceOperation& op = m_queue.front();
-			switch (op.Operation) {
-				case CREATE_INDEX_BUFFER: {
+			switch (op.Op) {
+				case Op::CREATE_INDEX_BUFFER: {
 					CIB* args = (CIB*)op.Args;
 					args->Buffer.initialize(Device.CreateIndexBuffer(args->Data, args->Size));
 					args->Buffer.release();
 					break;
 				}
-				case CREATE_VERTEX_BUFFER: {
+				case Op::CREATE_VERTEX_BUFFER: {
 					CVB* args = (CVB*)op.Args;
 					args->Buffer.initialize(Device.CreateVertexBuffer(args->Data, args->Size));
 					args->Buffer.release();
 					break;
 				}
-				case CREATE_VERTEX_ARRAY: {
+				case Op::CREATE_VERTEX_ARRAY: {
 					CVA* args = (CVA*)op.Args;
 					
 					IVertexBuffer** buffers = m_scratch.alloc<IVertexBuffer*>(args->Count);
@@ -81,17 +81,17 @@ namespace Graphics {
 
 					break;
 				}
-				case DESTROY_INDEX_BUFFER: {
+				case Op::DESTROY_INDEX_BUFFER: {
 					DIB* args = (DIB*)op.Args;
 					Device.DestroyBuffer(args->Buffer.consume()); //could be uninitalized
 					break;
 				}
-				case DESTROY_VERTEX_BUFFER: {
+				case Op::DESTROY_VERTEX_BUFFER: {
 					CVB* args = (CVB*)op.Args;
 					Device.DestroyBuffer(args->Buffer.consume()); //could be uninitalized
 					break;
 				}
-				case DESTROY_VERTEX_ARRAY: {
+				case Op::DESTROY_VERTEX_ARRAY: {
 					CVA* args = (CVA*)op.Args;
 					Device.DestroyVertexArray(args->Array.consume()); //could be uninitalized
 					break;
@@ -115,7 +115,7 @@ namespace Graphics {
 		cib->Size   = size;
 		cib->Data   = data;
 
-		Push(CREATE_INDEX_BUFFER, cib);
+		Push(Op::CREATE_INDEX_BUFFER, cib);
 
 		return pib;
 	}
@@ -126,7 +126,7 @@ namespace Graphics {
 		DIB* dib = m_scratch.alloc<DIB>();
 		dib->Buffer = indexBuffer;
 
-		Push(DESTROY_INDEX_BUFFER, dib);
+		Push(Op::DESTROY_INDEX_BUFFER, dib);
 	}
 
 	PVB QueuedDevice::CreateVertexBuffer(
@@ -140,7 +140,7 @@ namespace Graphics {
 		cib->Size = size;
 		cib->Data = data;
 
-		Push(CREATE_VERTEX_BUFFER, cib);
+		Push(Op::CREATE_VERTEX_BUFFER, cib);
 
 		return pvb;
 	}
@@ -151,7 +151,7 @@ namespace Graphics {
 		DVB* dvb = m_scratch.alloc<DVB>();
 		dvb->Buffer = vertexBuffer;
 
-		Push(DESTROY_VERTEX_BUFFER, dvb);
+		Push(Op::DESTROY_VERTEX_BUFFER, dvb);
 	}
 
 	PVA QueuedDevice::CreateVertexArray(
@@ -175,7 +175,7 @@ namespace Graphics {
 		cva->Layouts = layouts;
 		cva->Count   = numBuffers;
 
-		Push(CREATE_VERTEX_ARRAY, cva);
+		Push(Op::CREATE_VERTEX_ARRAY, cva);
 
 		return pva;
 	}
@@ -186,7 +186,7 @@ namespace Graphics {
 		DVA* dva = m_scratch.alloc<DVA>();
 		dva->Array = vertexArray;
 
-		Push(DESTROY_VERTEX_ARRAY, dva);
+		Push(Op::DESTROY_VERTEX_ARRAY, dva);
 	}
 
 	iw::potential<IVertexShader*> QueuedDevice::CreateVertexShader(

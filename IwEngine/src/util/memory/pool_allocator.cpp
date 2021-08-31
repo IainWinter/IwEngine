@@ -7,13 +7,19 @@ using namespace std::placeholders;
 namespace iw {
 namespace util {
 	pool_allocator::pool_allocator(
-		size_t pageSize)
+		size_t pageSize
+	)
 		: m_root(new page(nullptr, pageSize))
 		, m_pageSize(pageSize)
 	{}
 
+	pool_allocator::~pool_allocator() {
+		delete m_root;
+	}
+
 	pool_allocator::pool_allocator(
-		pool_allocator&& copy) noexcept
+		pool_allocator&& copy
+	) noexcept
 		: m_root(copy.m_root)
 		, m_pageSize(copy.m_pageSize)
 	{
@@ -21,12 +27,9 @@ namespace util {
 		copy.m_pageSize = 0;
 	}
 
-	pool_allocator::~pool_allocator() {
-		delete m_root;
-	}
-
 	pool_allocator& pool_allocator::operator=(
-		pool_allocator&& copy) noexcept
+		pool_allocator&& copy
+	) noexcept
 	{
 		m_root = copy.m_root;
 		m_pageSize = copy.m_pageSize;
@@ -228,20 +231,8 @@ namespace util {
 		}
 	}
 
-	char* pool_allocator::page::memory() const {
-		return m_memory;
-	}
-
 	size_t pool_allocator::page::size() const {
 		return m_size + (m_next ? m_next->size() : 0);
-	}
-
-	const std::list<pool_allocator::page::freemem>& pool_allocator::page::freelist() const {
-		return m_freelist;
-	}
-
-	pool_allocator::page* pool_allocator::page::next() {
-		return m_next;
 	}
 
 	void* pool_allocator::page::alloc_to_next(

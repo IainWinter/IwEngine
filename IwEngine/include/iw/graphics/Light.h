@@ -49,7 +49,6 @@ namespace Graphics {
 		}
 
 		IWGRAPHICS_API virtual bool CanCastShadows() const;
-		IWGRAPHICS_API virtual bool Outdated()       const;
 
 		IWGRAPHICS_API virtual float             Intensity()            const;
 		IWGRAPHICS_API virtual glm::vec3         Color()                const;

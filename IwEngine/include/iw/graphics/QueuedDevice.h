@@ -15,7 +15,7 @@ namespace Graphics {
 
 	class IWGRAPHICS_API QueuedDevice {
 	private:
-		enum Operation {
+		enum class Op {
 			CREATE_INDEX_BUFFER,
 			CREATE_VERTEX_BUFFER,
 			CREATE_VERTEX_ARRAY,
@@ -25,7 +25,7 @@ namespace Graphics {
 		};
 
 		struct DeviceOperation {
-			Operation Operation;
+			Op Op;
 			void*     Args;
 		};
 
@@ -36,7 +36,7 @@ namespace Graphics {
 
 	private:
 		void Push(
-			Operation operation,
+			Op operation,
 			void* args);
 	public:
 		QueuedDevice(

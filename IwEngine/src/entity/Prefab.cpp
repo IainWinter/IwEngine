@@ -60,7 +60,7 @@ namespace ECS {
 			return false;
 		}
 
-		int index = 0;
+		unsigned index = 0;
 		for (; index < ComponentCount(); index++) {
 			if (m_components[index] = component) {
 				break;
@@ -86,18 +86,18 @@ namespace ECS {
 	}
 
 	const iw::ref<Component>& Prefab::GetComponent(
-		unsigned index) const
+		size_t index) const
 	{
 		return m_components.at(index);
 	}
 
 	void* Prefab::GetComponentData(
-		unsigned index) const
+		size_t index) const
 	{
 		return m_memory.memory() + m_offsets.at(index);
 	}
 
-	unsigned Prefab::ComponentCount() const {
+	size_t Prefab::ComponentCount() const {
 		return m_components.size();
 	}
 }

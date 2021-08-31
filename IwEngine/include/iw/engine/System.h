@@ -41,12 +41,17 @@ namespace Engine {
 
 		virtual bool On(WindowResizedEvent& e) = 0;
 
+		// Os events
+
+		virtual bool On(OsEvent& e) = 0;
+
 		// Physics events
 
 		virtual bool On(CollisionEvent& e) = 0;
 
 		// Entity events
 
+		virtual bool On(EntityCreatedEvent& e) = 0;
 		virtual bool On(EntityDestroyEvent& e) = 0;
 		virtual bool On(EntityDestroyedEvent& e) = 0;
 		virtual bool On(EntityMovedEvent& e) = 0;
@@ -84,15 +89,19 @@ namespace Engine {
 
 		// Input events
 
-		virtual bool On(MouseWheelEvent& e) override { return false; }
-		virtual bool On(MouseMovedEvent& e) override { return false; }
+		virtual bool On(MouseWheelEvent& e)  override { return false; }
+		virtual bool On(MouseMovedEvent& e)  override { return false; }
 		virtual bool On(MouseButtonEvent& e) override { return false; }
-		virtual bool On(KeyEvent& e) override { return false; }
-		virtual bool On(KeyTypedEvent& e) override { return false; }
+		virtual bool On(KeyEvent& e)         override { return false; }
+		virtual bool On(KeyTypedEvent& e)    override { return false; }
 
 		// Window events
 
 		virtual bool On(WindowResizedEvent& e) override { return false; }
+
+		// Os events
+
+		virtual bool On(OsEvent& e) override { return false; }
 
 		// Physics events
 
@@ -100,9 +109,10 @@ namespace Engine {
 
 		// Entity events
 
-		virtual bool On(EntityDestroyEvent& e) override { return false; }
+		virtual bool On(EntityDestroyEvent& e)   override { return false; }
 		virtual bool On(EntityDestroyedEvent& e) override { return false; }
-		virtual bool On(EntityMovedEvent& e) override { return false; }
+		virtual bool On(EntityMovedEvent& e)     override { return false; }
+		virtual bool On(EntityCreatedEvent& e)   override { return false; }
 
 		const std::string& Name() const override {
 			return m_name;

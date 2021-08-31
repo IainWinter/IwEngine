@@ -8,6 +8,7 @@ namespace ECS {
 	enum class EntityEventType
 		: short
 	{
+		Created,
 		Destroy,
 		Destroyed,
 		Moved
@@ -24,6 +25,16 @@ namespace ECS {
 		)
 			: event(val(EventGroup::ENTITY), val(type))
 			, Entity(entity)
+		{}
+	};
+
+	struct EntityCreatedEvent
+		: EntityEvent
+	{
+		EntityCreatedEvent(
+			EntityHandle entity
+		)
+			: EntityEvent(EntityEventType::Created, entity)
 		{}
 	};
 

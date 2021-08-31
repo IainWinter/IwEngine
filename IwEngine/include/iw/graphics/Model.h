@@ -27,7 +27,7 @@ namespace Graphics {
 		}
 
 		const Mesh& GetMesh(
-			unsigned index) const
+			size_t index) const
 		{
 			return m_meshes.at(index);
 		}
@@ -45,19 +45,19 @@ namespace Graphics {
 		}
 
 		const Transform& GetTransform(
-			unsigned index) const
+			size_t index) const
 		{
 			return m_transforms.at(index);
 		}
 
 		void RemoveMesh(
-			unsigned index)
+			size_t index)
 		{
 			m_meshes    .erase(m_meshes    .begin() + index);
 			m_transforms.erase(m_transforms.begin() + index);
 		}
 
-		unsigned MeshCount() const {
+		size_t MeshCount() const {
 			return m_meshes.size();
 		}
 
@@ -66,7 +66,7 @@ namespace Graphics {
 		}
 
 		Mesh& GetMesh(
-			unsigned index)
+			size_t index)
 		{
 			return const_cast<Mesh&>(const_cast<const Model*>(this)->GetMesh(index));
 		}
@@ -78,7 +78,7 @@ namespace Graphics {
 		}
 
 		Transform& GetTransform(
-			unsigned index)
+			size_t index)
 		{
 			return const_cast<Transform&>(const_cast<const Model*>(this)->GetTransform(index));
 		}

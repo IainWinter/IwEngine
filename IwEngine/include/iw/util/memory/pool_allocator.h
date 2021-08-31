@@ -11,9 +11,9 @@
 
 namespace iw {
 namespace util {
-	class IWUTIL_API pool_allocator {
-	public:
-		class IWUTIL_API page {
+	class pool_allocator {
+	private:
+		class page {
 		private:
 			struct freemem {
 				char* mem;
@@ -27,16 +27,16 @@ namespace util {
 				{}
 			};
 
-			char* m_memory;
-			std::list<freemem> m_freelist;
-
 			size_t m_capacity;
 			size_t m_size;
 
 			page* m_previous;
-			page* m_next;
 
 		public:
+			page* m_next;
+			char* m_memory;
+			std::list<freemem> m_freelist;
+
 			page(
 				page* previous,
 				size_t size);
@@ -51,21 +51,11 @@ namespace util {
 				size_t size);
 
 			void reset();
-
-			char* memory() const;
 			size_t size() const;
-			const std::list<freemem>& freelist() const;
-			page* next();
 
 		private:
 			void* alloc_to_next(
 				size_t size);
-
-			//page(
-			//	const page&) = delete;
-
-			//page& operator=(
-			//	const page&) = delete;
 		};
 	private:
 		page*  m_root;
@@ -73,22 +63,13 @@ namespace util {
 		std::mutex m_mutex;
 
 	public:
-		pool_allocator(
-			size_t pageSize);
+		IWUTIL_API pool_allocator(size_t pageSize);
 
-		pool_allocator(
-			pool_allocator&&) noexcept;
-
-		pool_allocator(
-			const pool_allocator&) = delete;
-
-		~pool_allocator();
-
-		pool_allocator& operator=(
-			pool_allocator&&) noexcept;
-
-		pool_allocator& operator=(
-			const pool_allocator&) = delete;
+		IWUTIL_API ~pool_allocator();
+		IWUTIL_API pool_allocator(pool_allocator&&) noexcept;
+		IWUTIL_API pool_allocator(const pool_allocator&) = delete;
+		IWUTIL_API pool_allocator& operator=(pool_allocator&&) noexcept;
+		IWUTIL_API pool_allocator& operator=(const pool_allocator&) = delete;
 
 		template<
 			typename _t>
@@ -116,26 +97,28 @@ namespace util {
 			return free((void*)addr, size);
 		}
 
+		IWUTIL_API
 		void* alloc(
 			size_t size);
 
+		IWUTIL_API
 		ref<void> alloc_ref(
 			size_t size);
 
+		IWUTIL_API
 		bool free(
 			void* addr,
 			size_t size);
 
-		void reset();
-
-		size_t page_size() const;
-		size_t acitive_size() const;
+		IWUTIL_API void reset();
+		IWUTIL_API size_t page_size() const;
+		IWUTIL_API size_t acitive_size() const;
 
 		void log() const {
 			page* page = m_root;
 
-			char* mem = page->memory();
-			auto list = page->freelist();
+			char* mem = page->m_memory;
+			auto list = page->m_freelist;
 
 			int i = 1;
 
@@ -146,19 +129,10 @@ namespace util {
 					LOG_INFO << " - " << f.size << " " << (void*)f.mem;
 				}
 
-				page = page->next();
+				page = page->m_next;
 				i++;
 			}
-			
 		}
-
-		//size_t item_size() const {
-		//	return m_itemSize;
-		//}
-
-		//size_t page_capacity() const {
-		//	return m_pageSize / m_itemSize;
-		//}
 	};
 }
 

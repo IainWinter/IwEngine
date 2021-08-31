@@ -79,10 +79,6 @@ namespace Graphics {
 		return m_shadowShader && m_shadowTarget;
 	}
 
-	bool Light::Outdated() const {
-		return ShadowCamera()->Outdated();
-	}
-
 	float Light::Intensity() const {
 		return m_intensity;
 	}
@@ -92,11 +88,11 @@ namespace Graphics {
 	}
 
 	glm::vec3 Light::Position() const {
-		return ShadowCamera()->Position();
+		return ShadowCamera()->Transform.Position;
 	}
 
 	glm::vec3 Light::WorldPosition() const {
-		return ShadowCamera()->WorldPosition();
+		return ShadowCamera()->Transform.WorldPosition();
 	}
 
 	ref<RenderTarget> Light::ShadowTarget() const {
@@ -126,7 +122,7 @@ namespace Graphics {
 	void Light::SetPosition(
 		const glm::vec3& position)
 	{
-		ShadowCamera()->SetPosition(position);
+		ShadowCamera()->Transform.Position = position;
 	}
 
 	void Light::SetShadowTarget(
