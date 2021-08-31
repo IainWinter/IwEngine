@@ -190,17 +190,22 @@ iw::Entity ProjectileSystem::MakeProjectile(
 					{
 						if (info.tile->m_initalCellCount != 0) // temp hack to fix left behind pixels from tiles, todo: find cause of left behind pixels
 						{
-							iw::Entity hit = Space->FindEntity<iw::Tile>(info.tile);
-							Bus->push<ProjHitTile_Event>(info, hit, entity); // not sure if push (vs send) breaks anything here...
-							// todo: include position
+							ProjHitTile_Config config;
+							config.X = px;
+							config.Y = py;
+							config.Info = info;
+							config.Projectile = entity;
+							config.Hit = Space->FindEntity<iw::Tile>(info.tile);
+
+							Bus->push<ProjHitTile_Event>(config);
 						}
+						
+						// stop multiple events for same index
+						info.tile = nullptr;
+						info.index = 0;
 
 						hit = true;
 					}
-
-					//// reset tileinfo, only needed for but need above hack
-					//info.tile = nullptr;
-					//info.index = 0;
 				}
 
 				else

@@ -80,8 +80,8 @@ int LoadAssets(
 
 	{
 		Renderer->InitShader(A_material_texture_cam->Shader, CAMERA);
-		A_material_texture_cam->Set("useAlpha",    1);
 		A_material_texture_cam->Set("alphaThresh", .6f);
+		A_material_texture_cam->Set("color", iw::Color(1.f));
 	}
 
 	{

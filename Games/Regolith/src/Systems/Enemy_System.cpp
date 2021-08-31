@@ -41,18 +41,21 @@ bool EnemySystem::On(iw::ActionEvent& e)
 
 void EnemySystem::SpawnEnemy(SpawnEnemy_Event& config)
 {
-	iw::Entity e = sand->MakeTile<iw::Circle, EnemyShip, Flocker>("textures/SpaceGame/enemy.png", true);
+	iw::Entity e = sand->MakeTile<iw::Circle, EnemyShip, Flocker, CorePixels>("textures/SpaceGame/enemy.png", true);
 
-	iw::Transform* t = e.Set<iw::Transform>();
-	iw::Rigidbody* r = e.Set<iw::Rigidbody>();
-	iw::Circle*    c = e.Set<iw::Circle>();
+	CorePixels*    core      = e.Set<CorePixels>();
+	iw::Transform* transform = e.Set<iw::Transform>();
+	iw::Rigidbody* rigidbody = e.Set<iw::Rigidbody>();
+	iw::Circle*    collider  = e.Set<iw::Circle>();
 
-	t->Position.x = config.SpawnLocationX;
-	t->Position.y = config.SpawnLocationY;
+	core->TimeWithoutCore = 0.f;
 
-	r->SetTransform(t);
+	transform->Position.x = config.SpawnLocationX;
+	transform->Position.y = config.SpawnLocationY;
 
-	c->Radius = 6;
+	rigidbody->SetTransform(transform);
+
+	collider->Radius = 6;
 
 	EnemyShip* s = e.Set<EnemyShip>();
 	Flocker*   f = e.Set<Flocker>();

@@ -13,6 +13,7 @@
 #include "Systems/Player_System.h"
 #include "Systems/PlayerLaserTank_System.h"
 #include "Systems/Enemy_System.h"
+#include "Systems/CorePixels_System.h"
 
 #include "Systems/Flocking_System.h"
 #include "Systems/Projectile_System.h"
@@ -64,7 +65,7 @@ struct GameLayer : iw::Layer
 
 		{
 			cam = new iw::OrthographicCamera(2, 2, -10, 10);
-			cam->SetRotation(glm::angleAxis(iw::Pi, glm::vec3(0, 1, 0)));
+			cam->Transform.Rotation = glm::angleAxis(iw::Pi, glm::vec3(0, 1, 0));
 		}
 
 		projectile_s = new ProjectileSystem(sand);
@@ -80,6 +81,8 @@ struct GameLayer : iw::Layer
 		PushSystemFront(item_s);
 		PushSystemFront(enemy_s);
 		PushSystemFront(player_s);
+
+		PushSystem<CorePixelsSystem>();
 
 		PushSystem<FlockingSystem>();
 		PushSystem<iw::PhysicsSystem>();
@@ -190,15 +193,15 @@ struct GameLayer : iw::Layer
 
 		uiPlayerTex->Update(Renderer->Device);
 	
-		//if (iw::Mouse::ButtonDown(iw::MMOUSE))
-		//{
-		//	SpawnItem_Config config;
-		//	config.X = sand->sP.x;
-		//	config.Y = sand->sP.y;
-		//	config.Item = ItemType::LASER_CHARGE;
+		if (iw::Mouse::ButtonDown(iw::RMOUSE))
+		{
+			SpawnItem_Config config;
+			config.X = sand->sP.x;
+			config.Y = sand->sP.y;
+			config.Item = ItemType::HEALTH;
 
-		//	Bus->push<SpawnItem_Event>(config);
-		//}
+			Bus->push<SpawnItem_Event>(config);
+		}
 	}
 	// end temp ui
 
@@ -210,7 +213,7 @@ struct GameLayer : iw::Layer
 			case PROJ_HIT_TILE:
 			{
 				ProjHitTile_Event& event = e.as<ProjHitTile_Event>();
-				if (event.Hit.Has<Player>())
+				if (event.Config.Hit.Has<Player>())
 				{
 					uiJitterAmount = 75;
 				}
@@ -258,13 +261,18 @@ struct GameLayer : iw::Layer
 			int ammo = m_player.Find<Player>()->CurrentWeapon->Ammo;
 
 			std::stringstream buf;
-			if (ammo >= 0) {
-				buf << ammo;
-			} else  {
-				buf << " ";
-			}
+			if (ammo >= 0) buf << ammo;
+			else           buf << " ";
 
 			A_font_arial->UpdateMesh(A_mesh_ui_text_ammo, buf.str(), .001f, 1);
+
+			CorePixels* core = m_player.Find<CorePixels>();
+			float death = core->Timer / core->TimeWithoutCore;
+			float red = 1 - death;//(cos(iw::TotalTime() * 1.5f * death) + 1) / 2;
+
+			A_mesh_ui_background  .Material->Set("color", iw::Color(1, red, red));
+			A_mesh_ui_playerHealth.Material->Set("color", iw::Color(1, red, red));
+			uiJitterAmount += death * 10;
 		}
 
 		sand->m_drawMouseGrid = iw::Keyboard::KeyDown(iw::SHIFT);

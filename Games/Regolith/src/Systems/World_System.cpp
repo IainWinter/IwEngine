@@ -122,14 +122,35 @@ bool WorldSystem::On(iw::ActionEvent& e)
 	{
 		case PROJ_HIT_TILE:
 		{
-			ProjHitTile_Event& event = e.as<ProjHitTile_Event>();
-			sand->EjectPixel(event.Info.tile, event.Info.index);
+			auto& [x, y, info, hit, projectile] = e.as<ProjHitTile_Event>().Config;
+			
+			sand->EjectPixel(info.tile, info.index);
+
+			if (   hit.Has<Player>() 
+				|| hit.Has<EnemyShip>())
+			{
+				glm::vec3 vel = projectile.Find<iw::Rigidbody>()->Velocity;
+				float speed = glm::length(vel);
+				vel /= speed;
+
+				iw::Cell metal;
+				metal.life = .05 + iw::randf() * .2;
+				metal.Type = iw::CellType::ROCK;
+				metal.Props = iw::CellProp::MOVE_FORCE;
+				metal.dx = vel.x * 300 + iw::randfs() * 100;
+				metal.dy = vel.y * 300 + iw::randfs() * 100;
+
+				metal.Color = iw::Color::From255(255, 207, 77);
+
+				sand->m_world->SetCell(x + vel.x * 10, y + vel.y * 10, metal);
+			}
 
 			// todo: if entity is the player or an enemy
 			// eject hot metal particles
 
 			// todo: if entity is an asteroid
 			// eject dirt or something, gravitized to nearest asteroid
+
 
 			break;
 		}

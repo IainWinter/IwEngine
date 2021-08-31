@@ -153,6 +153,8 @@ iw::Entity ItemSystem::MakeHealth(const SpawnItem_Config& config)
     item->OnPickUp = [&]()
     {
         Bus->push<HealPlayer_Event>();
+        Bus->push<HealPlayer_Event>();
+        Bus->push<HealPlayer_Event>();
     };
 
     return entity;

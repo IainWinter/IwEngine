@@ -19,6 +19,10 @@ namespace Graphics {
 
 		Shader* shader = nullptr;
 
+		// this loops forever if there is no new line at the end and you
+		// try to include something as the last line!!!!
+		// todo: append newline at end of source for a quick hack or fix algo
+		
 		size_t i = source.find("#shader");
 		while (i < source.size()) {
 			size_t start = source.find('\n', i) + 1;

@@ -6,6 +6,7 @@
 #include "Components/Player.h"
 #include "Components/KeepInWorld.h"
 #include "Components/Item.h"
+#include "Components/CorePixels.h"
 
 #include "Events.h"
 #include "Assets.h"

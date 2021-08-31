@@ -87,7 +87,7 @@ private:
 
 	Spawn MakeAsteroidSpawner()
 	{
-		Spawn spawner(iw::randi(5) + 3, iw::randi(2), iw::randf()*2+1, iw::randf());
+		Spawn spawner(/*iw::randi(5) + 3*/0, iw::randi(2), iw::randf()*2+1, iw::randf());
 		spawner.OnSpawn = SpawnAsteroid;
 
 		AddRandomSides(spawner, 100, 200, 200, 500);

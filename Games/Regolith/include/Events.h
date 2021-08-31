@@ -61,7 +61,7 @@ struct SpawnAsteroid_Event : iw::SingleEvent
 	SpawnAsteroid_Config Config;
 
 	SpawnAsteroid_Event(
-		SpawnAsteroid_Config& config
+		const SpawnAsteroid_Config& config
 	)
 		: iw::SingleEvent(SPAWN_ASTEROID)
 		, Config(config)
@@ -101,7 +101,7 @@ struct SpawnItem_Event : iw::SingleEvent
 	SpawnItem_Config Config;
 
 	SpawnItem_Event(
-		SpawnItem_Config& config
+		const SpawnItem_Config& config
 	)
 		: iw::SingleEvent(SPAWN_ITEM)
 		, Config(config)
@@ -142,21 +142,24 @@ struct ChangePlayerWeapon_Event : iw::SingleEvent
 	{}
 };
 
-struct ProjHitTile_Event : iw::SingleEvent
+struct ProjHitTile_Config
 {
+	int X;
+	int Y;
 	iw::TileInfo Info;
 	iw::Entity Hit;
 	iw::Entity Projectile;
+};
+
+struct ProjHitTile_Event : iw::SingleEvent
+{
+	ProjHitTile_Config Config;
 	
 	ProjHitTile_Event(
-		iw::TileInfo info,
-		iw::Entity hit,
-		iw::Entity proj
+		const ProjHitTile_Config& config
 	)
 		: iw::SingleEvent(PROJ_HIT_TILE)
-		, Info(info)
-		, Hit(hit)
-		, Projectile(proj)
+		, Config(config)
 	{}
 };
 

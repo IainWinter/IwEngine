@@ -192,7 +192,7 @@ bool PlayerLaserTankSystem::On(iw::ActionEvent& e)
 		case PROJ_HIT_TILE:
 		{
 			ProjHitTile_Event& event = e.as<ProjHitTile_Event>();
-			if (event.Hit.Has<Player>())
+			if (event.Config.Hit.Has<Player>())
 			{
 				m_fluidVelocity.y -= 200;
 				m_fluidVelocity.x -= 75 * iw::randfs();

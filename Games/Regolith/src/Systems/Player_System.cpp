@@ -51,12 +51,12 @@ void PlayerSystem::Update()
 		Bus->push<ChangeLaserFluid_Event>(-1);
 	}
 
-	// should warm when half of peices are gone, start a 5 second timer then u die
-	// if you die, shoud explode the player
+	//// should warm when half of peices are gone, start a 5 second timer then u die
+	//// if you die, shoud explode the player
 
-	if (player->CoreIndiceCount < player->CoreIndices.size() / 3) {
-		Bus->push<EndGame_Event>();
-	}
+	//if (player->CoreIndiceCount < player->CoreIndices.size() / 3) {
+	//	Bus->push<EndGame_Event>();
+	//}
 }
 
 bool PlayerSystem::On(iw::ActionEvent& e)
@@ -66,15 +66,15 @@ bool PlayerSystem::On(iw::ActionEvent& e)
 		{
 			HealPlayer_Event& event = e.as<HealPlayer_Event>();
 
-			Player*   player = m_player.Find<Player>();
-			iw::Tile* tile   = m_player.Find<iw::Tile>();
+			CorePixels* core = m_player.Find<CorePixels>();
+			iw::Tile*   tile = m_player.Find<iw::Tile>();
 
 			if (event.Index == -1)
 			{
 				std::vector<int> nonCoreIndices;
-				for (int& index : tile->m_removedCells)
+				for (int index : tile->m_removedCells)
 				{
-					if (!iw::contains(player->CoreIndices, index))
+					if (core->Indices.find(index) == core->Indices.end())
 					{
 						nonCoreIndices.push_back(index);
 					}
@@ -82,15 +82,36 @@ bool PlayerSystem::On(iw::ActionEvent& e)
 
 				if (nonCoreIndices.size() > 0) 
 				{
-					int index = iw::randi(nonCoreIndices.size() - 1);
-					tile->ReinstatePixel(nonCoreIndices.at(index));
+					float minDist = FLT_MAX;
+					int healIndex = 0;
+
+					for (int index : nonCoreIndices)
+					{
+						int x = index % tile->m_sprite.m_width;
+						int y = index / tile->m_sprite.m_width;
+						int dx = core->CenterX - x;
+						int dy = core->CenterY - y;
+						float dist = sqrt(dx*dx+dy*dy);
+						
+						if (dist < minDist)
+						{
+							minDist = dist;
+							healIndex = index;
+						}
+					}
+
+					tile->ReinstatePixel(healIndex);
 				}
 			}
 
 			else 
 			{
 				tile->ReinstatePixel(event.Index);
-				player->CoreIndiceCount++;
+
+				if (core->Indices.find(event.Index) != core->Indices.end())
+				{
+					core->ActiveCount++;
+				}
 			}
 
 			break;
@@ -111,37 +132,6 @@ bool PlayerSystem::On(iw::ActionEvent& e)
 
 			break;
 		}
-		case PROJ_HIT_TILE:
-		{
-			ProjHitTile_Event& event = e.as<ProjHitTile_Event>();
-
-			if (event.Hit.Handle == m_player.Handle) // this doesnt work without .Handle????
-			{
-				Player*        player    = m_player.Find<Player>();
-				iw::Transform* transform = m_player.Find<iw::Transform>();
-
-				if (iw::contains(player->CoreIndices, event.Info.index))
-				{
-					SpawnItem_Config config;
-					config.X = transform->Position.x;
-					config.Y = transform->Position.y;
-					config.Item = PLAYER_CORE;
-					config.ActivateDelay = .33f;
-					config.Speed = 200;
-					config.AngularSpeed = 10;
-					config.OnPickup = [=]()
-					{
-						Bus->push<HealPlayer_Event>(event.Info.index);
-					};
-
-					Bus->push<SpawnItem_Event>(config);
-
-					player->CoreIndiceCount--;
-				}
-			}
-
-			break;
-		}
 		case END_GAME: {
 			m_player.Kill();
 			break;
@@ -153,35 +143,26 @@ bool PlayerSystem::On(iw::ActionEvent& e)
 				m_player.Destroy();
 			}
 	
-			m_player = sand->MakeTile<iw::Circle, Player, KeepInWorld>(A_texture_player, true);
+			m_player = sand->MakeTile<iw::Circle, Player, CorePixels, KeepInWorld>(A_texture_player, true);
 
 			Player*        player    = m_player.Set<Player>();
+			CorePixels*    core      = m_player.Set<CorePixels>();
 			iw::Circle*    collider  = m_player.Find<iw::Circle>();
 			iw::Rigidbody* rigidbody = m_player.Find<iw::Rigidbody>();
 			iw::Transform* transform = m_player.Find<iw::Transform>();
-			iw::Tile*      tile      = m_player.Find<iw::Tile>();
 
 			auto [w, h] = sand->GetSandTexSize2();
 			transform->Position = glm::vec3(w, h, 0);
 			rigidbody->SetTransform(transform);
 			rigidbody->SetMass(10);
 
+			collider->Radius = 4;
+
+			core->TimeWithoutCore = 4.f;
+
 			player->CurrentWeapon = MakeDefault_Cannon();
 			player->SpecialLaser  = MakeFatLaser_Cannon();
 			player->CurrentWeapon->Ammo = -1;
-
-			for (unsigned i = 0; i < tile->m_sprite.ColorCount(); i += 4)
-			{
-				unsigned char& alpha = tile->m_sprite.Colors()[i+3];
-				if (alpha < 255	&& alpha > 175)
-				{
-					player->CoreIndices.push_back(i / 4);
-					alpha = 255;
-				}
-			}
-			player->CoreIndiceCount = player->CoreIndices.size();
-
-			collider->Radius = 4;
 
 			Bus->push<CreatedPlayer_Event>(m_player);
 
