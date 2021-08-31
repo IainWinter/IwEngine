@@ -18,6 +18,11 @@ void SimpleSandWorker::UpdateCell(int x, int y, Cell& cell)
 		}
 	}
 
+	if (cell.OnUpdate)
+	{
+		cell.OnUpdate(cell);
+	}
+
 	if (cell.Props == CellProp::NONE) return;
 
 	     if (cell.Props & CellProp::MOVE_FORCE     && MoveForce   (x, y, cell)) {}

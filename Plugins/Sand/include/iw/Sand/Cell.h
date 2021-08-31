@@ -3,6 +3,7 @@
 #include "iw/graphics/Color.h"
 #include "iw/math/iwmath.h"
 #include <unordered_map>
+#include <functional>
 
 #include "Defs.h"
 
@@ -20,6 +21,8 @@ struct Cell {
 
 	float x = 0, y = 0, dx = 0, dy = 0;
 	float life = 0;
+
+	std::function<void(iw::Cell&)> OnUpdate;
 
 	static inline void SetDefault(
 		CellType type,
