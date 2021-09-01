@@ -69,27 +69,23 @@ namespace Physics {
 	void CollisionSpace::ResolveConstrains(
 		scalar dt)
 	{
-		std::vector<Manifold> manifolds;
+		std::vector<Manifold> collisions;
 		std::vector<Manifold> triggers;
+
+		std::vector<std::pair<CollisionObject*, CollisionObject*>> pairs; // should have a container that keeps track of this
+
 		for (CollisionObject* a : m_objects) {
 			for (CollisionObject* b : m_objects) {
 				if (a == b) break;
 
-				// dont collide if
-				// 
-				// both are triggers
-				// both arnt dynamic
-				// both are static
-				// either has no collider
-
-				if (    ( a->IsTrigger &&  b->IsTrigger)
-					 || (!a->IsDynamic && !b->IsDynamic)
-					 || (!a->Collider  || !b->Collider))
+				if (   ( a->IsTrigger &&  b->IsTrigger)
+					|| (!a->IsDynamic && !b->IsDynamic)
+					|| (!a->Collider  || !b->Collider))
 				{
 					continue;
 				}
 
-				// temp broad phase 
+				// temp 'broad' phase 
 				if (   a->Collider->Dim == d2
 					&& b->Collider->Dim == d2)
 				{
@@ -102,33 +98,71 @@ namespace Physics {
 					}
 				}
 
+				pairs.emplace_back(a, b);
+			}
+		}
+
+		if (m_task)
+		{
+			std::mutex mutexTriggers, mutexCollisions;
+
+			m_task->foreach(pairs, [&](size_t i) 
+			{
+				auto [a, b] = pairs[i];
+			
 				ManifoldPoints points = TestCollision(a->Collider, &a->Transform, b->Collider, &b->Transform);
-				if (points.HasCollision) {
-					// establish more formal rules for what can collide with what
+
+				if (points.HasCollision) 
+				{
 					if (   a->IsTrigger
-						|| b->IsTrigger)
+						|| b->IsTrigger) // establish more formal rules for what can collide with what, see next comments
+					{
+						std::unique_lock lock(mutexTriggers);
+						triggers.emplace_back(a, b, points);
+					}
+
+					else {
+						std::unique_lock lock(mutexCollisions);
+						collisions.emplace_back(a, b, points);
+					}
+				}
+			});
+		}
+
+		else 
+		{
+			for (auto& [a, b] : pairs)
+			{
+				ManifoldPoints points = TestCollision(a->Collider, &a->Transform, b->Collider, &b->Transform);
+
+				if (points.HasCollision) 
+				{
+					if (   a->IsTrigger
+						|| b->IsTrigger) // establish more formal rules for what can collide with what, there should be a fnuction that classifies a collisoin
 					{
 						triggers.emplace_back(a, b, points);
 					}
 
 					else {
-						manifolds.emplace_back(a, b, points);
+						collisions.emplace_back(a, b, points);
 					}
 				}
 			}
 		}
 
-		SendCollisionCallbacks(manifolds, dt);
+		SendCollisionCallbacks(collisions, dt);
 		SendCollisionCallbacks(triggers, dt);
 
-		std::vector<Manifold> actuallyCollideded;
-		for (Manifold& manifold : manifolds) {
-			if (manifold.HasCollision) {
-				actuallyCollideded.push_back(manifold); // big copy for no reason :(
+		for (int i = 0; i < collisions.size(); i++) // in a collision callback they could disable the response
+		{
+			if (!collisions[i].HasCollision)
+			{
+				collisions[i] = collisions.back();
+				collisions.pop_back();
 			}
 		}
 
-		SolveManifolds(actuallyCollideded, dt);
+		SolveManifolds(collisions, dt);
 	}
 
 
@@ -244,6 +278,12 @@ namespace Physics {
 		const func_CollisionCallback& callback)
 	{
 		m_collisionCallback = callback;
+	}
+
+	void CollisionSpace::SetMultithread(
+		iw::ref<iw::thread_pool> task)
+	{
+		m_task = task;
 	}
 
 	const std::vector<CollisionObject*>& CollisionSpace::CollisionObjects() const {

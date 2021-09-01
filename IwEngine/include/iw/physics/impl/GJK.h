@@ -21,7 +21,7 @@ namespace impl {
 		using vec_t = _vec<_d>;
 	private:
 		std::array<vec_t, _d + 1u> m_points;
-		unsigned m_size;
+		size_t m_size;
 
 	public:
 		Simplex()
@@ -54,11 +54,11 @@ namespace impl {
 				m_points = { point, m_points[0], m_points[1] };
 			}
 
-			m_size = min(m_size + 1, _d + 1u);
+			m_size = min<size_t>(m_size + 1, _d + 1);
 		}
 
 		vec_t& operator[](unsigned i) { return m_points[i]; }
-		unsigned size() const { return m_size; }
+		size_t size() const { return m_size; }
 
 		auto begin() const { return m_points.begin(); }
 		auto end()   const { return m_points.end() - (_d + 1u - m_size); }

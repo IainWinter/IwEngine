@@ -60,7 +60,7 @@ namespace Physics {
 			scalar bSF = bBody ? bBody->StaticFriction  : 0.0f;
 			scalar aDF = aBody ? aBody->DynamicFriction : 0.0f;
 			scalar bDF = bBody ? bBody->DynamicFriction : 0.0f;
-			scalar mu  = glm::vec2(aSF, bSF).length();
+			scalar mu  = (scalar)glm::vec2(aSF, bSF).length();
 
 			scalar f  = -fVel / (aInvMass + bInvMass);
 

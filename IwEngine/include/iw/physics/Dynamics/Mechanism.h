@@ -59,15 +59,16 @@ namespace iw {
 			W = matrix(12, 1); W.diagonal = true;
 
 			Rigidbody* r = A;
-			for (size_t i = 0; i < 12; i += 6) {
-																			// prob a way to condence this \/
+			glm::mat4 t = r->Transform.WorldTransformation();
+
+			for (size_t i = 0; i < 12; i += 6)
+			{
 				matrix transformation(4, 4);
 			
 				for (size_t i = 0; i < 4; i++)
-				for (size_t j = 0; j < 4; j++) {
-					glm::mat4 t = r->Transform.WorldTransformation();
-
-					transformation.set(i, j, t[j][i]);
+				for (size_t j = 0; j < 4; j++)
+				{
+					transformation.set(i, j, t[glm::length_t(j)][glm::length_t(i)]);
 				}
 			
 				matrix x(4, 1);
