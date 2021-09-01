@@ -41,37 +41,42 @@ struct Tile {
 		*(&m_sprite.Colors()[index * 4] + 3) = (char)state;
 	}
 
-	void RemovePixel(unsigned index)
+	bool RemovePixel(unsigned index)
 	{
-		if (State(index) == FILLED)
+		bool remove = State(index) == FILLED;
+
+		if (remove)
 		{
 			m_currentCellCount--;
 			m_removedCells.push_back(index);
 			m_currentCells.erase(std::find(m_currentCells.begin(), m_currentCells.end(), index));
 			SetState(index, REMOVED);
 		}
+
+		return remove;
 	}
 
-	void ReinstatePixel(unsigned index)
+	bool ReinstatePixel(unsigned index)
+	{
+		bool reinstate = State(index) == REMOVED;
+
+		if (reinstate)
+		{
+			m_currentCellCount++;
+			m_removedCells.erase(std::find(m_removedCells.begin(), m_removedCells.end(), index));
+			m_currentCells.push_back(index);
+			SetState(index, FILLED);
+		}
+
+		return reinstate;
+	}
+
+	bool ReinstateRandomPixel()
 	{
 		int size = m_removedCells.size();
-		if (size == 0) return;
+		if (size == 0) return false;
 
-		auto itr = std::find(m_removedCells.begin(), m_removedCells.end(), index);
-		if (itr == m_removedCells.end()) return;
-
-		m_currentCellCount++;
-		m_removedCells.erase(itr);
-		m_currentCells.push_back(index);
-		SetState(index, FILLED);
-	}
-
-	void ReinstateRandomPixel()
-	{
-		int size = m_removedCells.size(); // double check
-		if (size == 0) return;
-
-		ReinstatePixel(m_removedCells.at(iw::randi(size - 1)));
+		return ReinstatePixel(m_removedCells.at(iw::randi(size - 1)));
 	}
 
 	// It seems like thm_removedCells.size() etter if the rendererd geometry is just a square

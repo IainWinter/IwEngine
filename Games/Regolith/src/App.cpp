@@ -193,15 +193,15 @@ struct GameLayer : iw::Layer
 
 		uiPlayerTex->Update(Renderer->Device);
 	
-		if (iw::Mouse::ButtonDown(iw::RMOUSE))
-		{
-			SpawnItem_Config config;
-			config.X = sand->sP.x;
-			config.Y = sand->sP.y;
-			config.Item = ItemType::HEALTH;
+		//if (iw::Mouse::ButtonDown(iw::RMOUSE))
+		//{
+		//	SpawnItem_Config config;
+		//	config.X = sand->sP.x;
+		//	config.Y = sand->sP.y;
+		//	config.Item = ItemType::HEALTH;
 
-			Bus->push<SpawnItem_Event>(config);
-		}
+		//	Bus->push<SpawnItem_Event>(config);
+		//}
 	}
 	// end temp ui
 
@@ -456,6 +456,7 @@ App::App() : iw::Application()
 	bool drawWithMouse = false;
 	
 	iw::SandLayer* sand = new iw::SandLayer(cellSize, cellMeter, 800, 800, 4, 4, drawWithMouse);
+	sand->m_updateDelay = 1/144.f;
 
 	// UI charge as liquid in a tank?
 	iw::SandLayer* sand_ui_laser = new iw::SandLayer(1, 1, 40, 40);

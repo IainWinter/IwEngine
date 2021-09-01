@@ -65,55 +65,23 @@ void WorldSystem::FixedUpdate()
 
 	// this handles tiles death, not the best way shoudl use entity events form a tiledeath system
 
-	Space->Query<iw::Transform, iw::Tile>().Each(
-		[&](
-			iw::EntityHandle entity, 
-			iw::Transform* transform,
-			iw::Tile* tile) 
-		{
-			if (tile->m_currentCellCount < tile->m_initalCellCount / 3) 
-			{
-				if (    Space->HasComponent<Player>   (entity) 
-					|| !Space->HasComponent<EnemyShip>(entity))
-				{
-					return;
-				}
+	//Space->Query<iw::Transform, iw::Tile>().Each(
+	//	[&](
+	//		iw::EntityHandle entity, 
+	//		iw::Transform* transform,
+	//		iw::Tile* tile) 
+	//	{
+	//		if ()
+	//		{
+	//		if (tile->m_currentCellCount < tile->m_initalCellCount / 3
+	//			&& (Space->HasComponent<Player>(entity)
+	//			|| !Space->HasComponent<EnemyShip>(entity)))
+	//		{
+	//			return;
+	//		}
 
-				std::vector<std::pair<ItemType, float>> item_weights{
-					{ HEALTH,        50 },
-					{ LASER_CHARGE,  50 },
-					{ WEAPON_MINIGUN, 5 }
-				};
-
-				SpawnItem_Config config;
-				config.X = transform->Position.x;
-				config.Y = transform->Position.y;
-				config.Item = iw::choose(item_weights);
-
-				switch (config.Item)
-				{
-					case ItemType::HEALTH: 
-					case ItemType::LASER_CHARGE:   config.Amount = iw::randi(5) + 1; break;
-					case ItemType::WEAPON_MINIGUN: config.Amount = 1;
-				}
-
-				Bus->push<SpawnItem_Event>(config);
-				
-				iw::Cell smoke = iw::Cell::GetDefault(iw::CellType::SMOKE);
-
-				for (int y = -5; y < 5; y++)
-				for (int x = -5; x < 5; x++)
-				{
-					int px = x + transform->Position.x;
-					int py = y + transform->Position.y;
-					smoke.life = iw::randf() * 5;
-
-					sand->m_world->SetCell(px, py, smoke);
-				}
-
-				Space->QueueEntity(entity, iw::func_Destroy);
-			}
-		});
+	//		}
+	//	});
 }
 
 bool WorldSystem::On(iw::ActionEvent& e)
@@ -124,33 +92,64 @@ bool WorldSystem::On(iw::ActionEvent& e)
 		{
 			auto& [x, y, info, hit, projectile] = e.as<ProjHitTile_Event>().Config;
 			
-			sand->EjectPixel(info.tile, info.index);
-
 			if (   hit.Has<Player>() 
 				|| hit.Has<EnemyShip>())
 			{
-				glm::vec3 vel = projectile.Find<iw::Rigidbody>()->Velocity;
-				float speed = glm::length(vel);
-				vel /= speed;
+				glm::vec3 norm = glm::normalize(projectile.Find<iw::Rigidbody>()->Velocity);
 
 				iw::Cell metal;
-				metal.life = .05 + iw::randf() * .2;
 				metal.Type = iw::CellType::ROCK;
 				metal.Props = iw::CellProp::MOVE_FORCE;
-				metal.dx = vel.x * 300 + iw::randfs() * 100;
-				metal.dy = vel.y * 300 + iw::randfs() * 100;
-
+				
 				metal.Color = iw::Color::From255(255, 207, 77);
+				
+				metal.dx = norm.x * 300 + iw::randfs() * 100;
+				metal.dy = norm.y * 300 + iw::randfs() * 100;
+				metal.life = .05 + iw::randf() * .2;
 
-				sand->m_world->SetCell(x + vel.x * 10, y + vel.y * 10, metal);
+				float margin = 15;
+				float px = x + norm.x * margin;
+				float py = y + norm.y * margin;
+				
+				sand->m_world->SetCell(px, py, metal);
 			}
-
-			// todo: if entity is the player or an enemy
-			// eject hot metal particles
 
 			// todo: if entity is an asteroid
 			// eject dirt or something, gravitized to nearest asteroid
 
+			break;
+		}
+		case REMOVE_CELL_FROM_TILE:
+		{
+			RemoveCellFromTile_Event& event = e.as<RemoveCellFromTile_Event>();
+			sand->EjectPixel(event.Entity.Find<iw::Tile>(), event.Index);
+
+			break;
+		}
+		case CORE_EXPLODED:
+		{
+			glm::vec3 pos = e.as<CoreExploded_Event>().Entity.Find<iw::Transform>()->Position;
+
+			for (int i = 0; i < 200; i++)
+			{
+				glm::vec2 norm = glm::normalize(glm::vec2(iw::randfs(), iw::randfs()));
+
+				iw::Cell metal;
+				metal.Type = iw::CellType::ROCK;
+				metal.Props = iw::CellProp::MOVE_FORCE;
+
+				metal.Color = iw::Color::From255(255, 207, 77);
+				
+				metal.dx = norm.x * 300 * iw::randfs();
+				metal.dy = norm.y * 300 * iw::randfs();
+				metal.life = .15 + iw::randf() * .2;
+
+				float margin = 15;
+				float px = pos.x + norm.x * margin;
+				float py = pos.y + norm.y * margin;
+
+				sand->m_world->SetCell(px, py, metal);
+			}
 
 			break;
 		}

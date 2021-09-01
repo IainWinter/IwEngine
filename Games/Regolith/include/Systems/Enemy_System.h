@@ -28,4 +28,5 @@ struct EnemySystem : iw::SystemBase
 
 private:
 	void SpawnEnemy(SpawnEnemy_Event& config);
+	void DestroyEnemy(iw::Entity enemy);
 };

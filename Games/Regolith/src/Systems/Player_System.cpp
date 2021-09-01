@@ -12,6 +12,11 @@ void PlayerSystem::FixedUpdate()
 	if (player->i_down)  rigidbody->Velocity.y = -player->speed;
 	if (player->i_right) rigidbody->Velocity.x =  player->speed;
 	if (player->i_left)  rigidbody->Velocity.x = -player->speed;
+
+	float angle = ((int)player->i_left - (int)player->i_right) * iw::Pi / 2;
+
+	player->rotation = angle;// iw::lerp(player->rotation, angle, iw::FixedTime() * 5);
+	rigidbody->Transform.Rotation = glm::angleAxis(player->rotation, glm::vec3(0, 0, 1));
 }
 
 void PlayerSystem::Update()
@@ -110,7 +115,7 @@ bool PlayerSystem::On(iw::ActionEvent& e)
 
 				if (core->Indices.find(event.Index) != core->Indices.end())
 				{
-					core->ActiveCount++;
+					core->ActiveIndices.insert(event.Index);
 				}
 			}
 

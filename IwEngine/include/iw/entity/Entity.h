@@ -20,6 +20,13 @@ namespace ECS {
 			, Space(space)
 		{}
 
+		Entity(
+			EntityHandle handle,
+			ref<ECS::Space>& space)
+			: Handle(handle)
+			, Space(space.get())
+		{}
+
 		bool operator==(
 			const EntityHandle& other) const
 		{

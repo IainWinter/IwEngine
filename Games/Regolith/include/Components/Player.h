@@ -15,6 +15,8 @@ struct Player
 
 	float speed = 150;
 
+	float rotation;
+
 	bool can_fire_laser;
 
 	Weapon* CurrentWeapon;

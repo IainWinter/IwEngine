@@ -17,9 +17,11 @@ enum Actions {
 	HEAL_PLAYER,
 	CHANGE_PLAYER_WEAPON,
 	PROJ_HIT_TILE,
+	REMOVE_CELL_FROM_TILE,
 	END_GAME,
 	RUN_GAME,
-	CREATED_PLAYER
+	CREATED_PLAYER,
+	CORE_EXPLODED
 };
 
 struct SpawnEnemy_Event : iw::SingleEvent
@@ -160,6 +162,32 @@ struct ProjHitTile_Event : iw::SingleEvent
 	)
 		: iw::SingleEvent(PROJ_HIT_TILE)
 		, Config(config)
+	{}
+};
+
+struct RemoveCellFromTile_Event : iw::SingleEvent
+{
+	size_t Index;
+	iw::Entity Entity;
+
+	RemoveCellFromTile_Event(
+		size_t index, iw::Entity entity
+	)
+		: iw::SingleEvent(REMOVE_CELL_FROM_TILE)
+		, Index(index)
+		, Entity(entity)
+	{}
+};
+
+struct CoreExploded_Event : iw::SingleEvent
+{
+	iw::Entity Entity;
+
+	CoreExploded_Event(
+		iw::Entity entity
+	)
+		: iw::SingleEvent(CORE_EXPLODED)
+		, Entity(entity)
 	{}
 };
 

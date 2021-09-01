@@ -27,26 +27,23 @@ void ProjectileSystem::FixedUpdate()
 
 	//time__ += iw::FixedTime();
 
-	//if (iw::Keyboard::KeyDown(iw::G) && time__ > .005)
+	//if (/*iw::Keyboard::KeyDown(iw::G) &&*/ time__ > .15)
 	//{
 	//	time__ = 0;
 
-	//	float x = iw::Mouse::ScreenPos().x() / Renderer->Width();
-	//	float y = iw::Mouse::ScreenPos().y() / Renderer->Height();
+	//	float x = 0;// iw::Mouse::ScreenPos().x() / Renderer->Width();
+	//	float y = 1;// iw::Mouse::ScreenPos().y() / Renderer->Height();
 
 	//	auto [w, h] = sand->GetSandTexSize2();
 
-	//	float offX = iw::randf() * 10;
-	//	float offY = iw::randf() * 10;
-
-	//	glm::vec2 vel(x * 2 - 1, y * 2 - 1);
+	//	glm::vec2 vel(x, y);
 	//	vel = glm::normalize(vel) * 44.f;
-	//	vel.x += iw::randfs() * 5;
-	//	vel.y += iw::randfs() * 5;
+	//	//vel.x += iw::randfs() * 5;
+	//	//vel.y += iw::randfs() * 5;
 
 	//	ShotInfo shot;
-	//	shot.x = w;
-	//	shot.y = h;
+	//	shot.x = w-4;
+	//	shot.y = h-20;
 	//	shot.dx = vel.x;
 	//	shot.dy = vel.y;
 	//	shot.projectile = ProjectileType::BULLET;
@@ -197,6 +194,7 @@ iw::Entity ProjectileSystem::MakeProjectile(
 							config.Projectile = entity;
 							config.Hit = Space->FindEntity<iw::Tile>(info.tile);
 
+							Bus->push<RemoveCellFromTile_Event>(info.index, config.Hit);
 							Bus->push<ProjHitTile_Event>(config);
 						}
 						
