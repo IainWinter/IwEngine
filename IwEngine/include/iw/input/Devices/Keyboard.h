@@ -4,58 +4,43 @@
 
 namespace iw {
 namespace Input {
-	class IWINPUT_API KeyboardBase
-		: public Device
+	struct KeyboardBase : Device
 	{
-	protected:
-		static Translation translation; // Should just be in Device
-
-		static Translation CreateTranslation();
-
-	public:
 		KeyboardBase(
-			DeviceType type)
+			DeviceType type
+		)
 			: Device(type)
 		{}
 
-		virtual ~KeyboardBase() = default;
+		IWINPUT_API static unsigned  Translate(InputName key);
+		IWINPUT_API static InputName Translate(unsigned oskey);
+	protected:
+		static Translation translation; // Should just be in Device
 
-		static unsigned int Translate(
-			InputName key);
-
-		static InputName Translate(
-			unsigned int oskey);
+		IWINPUT_API
+		static Translation CreateTranslation();
 	};
 
-	class IWINPUT_API Keyboard
-		: public KeyboardBase
+	struct Keyboard : KeyboardBase
 	{
-	public:
 		Keyboard()
 			: KeyboardBase(DeviceType::KEYBOARD)
 		{}
 
-		virtual ~Keyboard() = default;
+		IWINPUT_API static bool KeyDown(InputName key);
+		IWINPUT_API static bool KeyUp  (InputName key);
 
-		static bool KeyDown(
-			InputName key);
-
-		static bool KeyUp(
-			InputName key);
-
+		IWINPUT_API
 		static Keyboard* Create();
 	};
 
-	class IWINPUT_API RawKeyboard
-		: public KeyboardBase
+	struct RawKeyboard : KeyboardBase
 	{
-	public:
 		RawKeyboard()
 			: KeyboardBase(DeviceType::RAW_KEYBOARD)
 		{}
 
-		virtual ~RawKeyboard() = default;
-
+		IWINPUT_API
 		static RawKeyboard* Create();
 	};
 }

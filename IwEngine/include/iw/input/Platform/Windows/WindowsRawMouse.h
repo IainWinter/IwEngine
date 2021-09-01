@@ -5,18 +5,18 @@
 
 namespace iw {
 namespace Input {
-	class IWINPUT_API WindowsRawMouse
-		: public RawMouse
+	struct WindowsRawMouse : RawMouse
 	{
+		IWINPUT_API
+		WindowsRawMouse();
+
+		IWINPUT_API
+		DeviceInput TranslateOsEvent(
+			const OsEvent& e) override;
 	private:
 		static unsigned int maskdown[5];
 		static unsigned int maskup[5];
 
-	public:
-		WindowsRawMouse();
-
-		DeviceInput TranslateOsEvent(
-			const OsEvent& e) override;
 	};
 }
 

@@ -5,12 +5,12 @@
 
 namespace iw {
 namespace Input {
-	class IWINPUT_API WindowsRawKeyboard
-		: public RawKeyboard
+	struct WindowsRawKeyboard : RawKeyboard
 	{
-	public:
+		IWINPUT_API
 		WindowsRawKeyboard();
 
+		IWINPUT_API
 		DeviceInput TranslateOsEvent(
 			const OsEvent& e) override;
 	};

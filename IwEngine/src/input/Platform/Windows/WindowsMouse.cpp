@@ -28,12 +28,12 @@ namespace Input {
 
 	vec2 Mouse::ScreenPos() {
 		POINT p; GetCursorPos(&p);
-		return vec2(p.x, p.y);
+		return vec2(float(p.x), float(p.y));
 	}
 
 	vec2 Mouse::ClientPos() {
 		POINT p; GetCursorPos(&p); ScreenToClient(WindowFromPoint(p), &p);
-		return vec2(p.x, p.y);
+		return vec2(float(p.x), float(p.y));
 	}
 
 	DeviceInput WindowsMouse::TranslateOsEvent(
@@ -96,10 +96,10 @@ namespace Input {
 			//ScreenToClient(e.Handle, &p);
 
 			input.Name  = MOUSEX;
-			input.State = p.x;
+			input.State = float(p.x);
 
 			input.Name2  = MOUSEY;
-			input.State2 = p.y;
+			input.State2 = float(p.y);
 
 			return input;
 		}

@@ -8,16 +8,16 @@ namespace iw {
 namespace Input {
 	Translation KeyboardBase::translation = CreateTranslation();
 
-	InputName KeyboardBase::Translate(
-		unsigned int oskey)
-	{
-		return translation.to(oskey);
-	}
-
 	unsigned int KeyboardBase::Translate(
 		InputName key)
 	{
 		return translation.from(key);
+	}
+
+	InputName KeyboardBase::Translate(
+		unsigned oskey)
+	{
+		return translation.to(oskey);
 	}
 
 	Translation KeyboardBase::CreateTranslation() {

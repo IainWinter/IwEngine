@@ -5,54 +5,44 @@
 
 namespace iw {
 namespace Input {
-	class IWINPUT_API MouseBase
-		: public Device
+	struct MouseBase : Device
 	{
-	protected:
-		static Translation translation;
-
-		static Translation CreateTranslation();
-
-	public:
 		MouseBase(DeviceType type)
 			: Device(type)
 		{}
 
-		virtual ~MouseBase() = default;
+		IWINPUT_API static unsigned  Translate(InputName key);
+		IWINPUT_API static InputName Translate(unsigned oskey);
+	protected:
+		static Translation translation;
 
-		static unsigned int Translate(InputName key);
-		static InputName    Translate(unsigned int oskey);
+		IWINPUT_API
+		static Translation CreateTranslation();
 	};
 
-	class IWINPUT_API Mouse
-		: public MouseBase
+	struct Mouse : MouseBase
 	{
-	public:
 		Mouse()
 			: MouseBase(DeviceType::MOUSE)
 		{}
 
-		virtual ~Mouse() = default;
+		IWINPUT_API static bool ButtonDown(InputName button);
+		IWINPUT_API static bool ButtonUp  (InputName button);
 
-		static bool ButtonDown(InputName button);
-		static bool ButtonUp  (InputName button);
+		IWINPUT_API static vec2 ScreenPos();
+		IWINPUT_API static vec2 ClientPos();
 
-		static vec2 ScreenPos();
-		static vec2 ClientPos();
-
+		IWINPUT_API
 		static Mouse* Create();
 	};
 
-	class IWINPUT_API RawMouse
-		: public MouseBase
+	struct RawMouse : MouseBase
 	{
-	public:
 		RawMouse()
 			: MouseBase(DeviceType::RAW_MOUSE)
 		{}
 
-		virtual ~RawMouse() = default;
-
+		IWINPUT_API
 		static RawMouse* Create();
 	};
 }

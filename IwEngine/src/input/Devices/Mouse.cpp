@@ -8,16 +8,16 @@ namespace iw {
 namespace Input {
 	Translation MouseBase::translation = CreateTranslation();
 
-	InputName MouseBase::Translate(
-		unsigned int oskey)
-	{
-		return translation.to(oskey);
-	}
-
-	unsigned int MouseBase::Translate(
+	unsigned MouseBase::Translate(
 		InputName key)
 	{
 		return translation.from(key);
+	}
+
+	InputName MouseBase::Translate(
+		unsigned oskey)
+	{
+		return translation.to(oskey);
 	}
 
 	Translation MouseBase::CreateTranslation() {
