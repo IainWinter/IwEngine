@@ -86,6 +86,34 @@ namespace util {
 
 		template<
 			typename _container,
+			typename _func>
+		void foreach(
+			_container& container,
+			_func&& func)
+		{
+			std::mutex mutex;
+			std::condition_variable cond;
+
+			size_t remaining = container.size();
+
+			for (size_t index = 0; index < container.size(); index++)
+			{
+				queue([&, func, index]() // need to copy func?
+				{
+					func(index);
+
+					std::unique_lock lock(mutex);
+					remaining -= 1;
+					cond.notify_one();
+				});
+			}
+
+			std::unique_lock lock(mutex);
+			cond.wait(lock, [&]() { return remaining == 0; });
+		}
+
+		template<
+			typename _container,
 			typename _preThreadFunc,
 			typename _func>
 		void foreach(
@@ -96,12 +124,11 @@ namespace util {
 			std::mutex mutex;
 			std::condition_variable cond;
 
-			int remaining = container.size();
-			int index = -1; // adds 1 before call
+			size_t remaining = container.size();
+			size_t index = 0;
 
 			for (auto& element : container)
 			{
-				index += 1;
 				auto preThread = preThreadFunc(element);
 
 				queue([&, func, index, preThread]() // need to copy func?
@@ -112,6 +139,8 @@ namespace util {
 					remaining -= 1;
 					cond.notify_one();
 				});
+
+				index += 1;
 			}
 
 			std::unique_lock lock(mutex);

@@ -94,6 +94,7 @@ namespace Engine {
 		// Physics
 
 		Physics->SetCollisionCallback(make_callback(&Application::HandleCollision, this));
+		Physics->SetMultithread(Task);
 
 		// Asset Loader
 
