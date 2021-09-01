@@ -3,13 +3,6 @@
 
 namespace iw {
 namespace Engine {
-	Transform::Transform() 
-		: Position(glm::vec3(0))
-		, Scale(glm::vec3(1))
-		, Rotation(glm::quat(1, 0, 0, 0))
-		, m_parent(nullptr)
-	{}
-
 	Transform::Transform(
 		glm::vec3 position,
 		glm::vec3 scale,
@@ -19,9 +12,10 @@ namespace Engine {
 		, Scale(scale)
 		, Rotation(rotation)
 		, m_parent(nullptr)
+		, m_cached(false)
+		, m_transformation(0.f)
 	{}
 
-	IWCOMMON_API
 	Transform::Transform(
 		glm::vec2 position,
 		glm::vec2 scale,
@@ -31,6 +25,8 @@ namespace Engine {
 		, Scale(scale, 1.0f)
 		, Rotation(glm::angleAxis(rotation, glm::vec3(0.0f, 0.0f, 1.0f)))
 		, m_parent(nullptr)
+		, m_cached(false)
+		, m_transformation(0.f)
 	{}
 
 	Transform Transform::FromMatrix(
@@ -50,11 +46,26 @@ namespace Engine {
 		};
 	}
 
-	glm::mat4 Transform::Transformation() const 
+	void Transform::CacheTransformation()
+	{
+		m_cached = true;
+		m_transformation = CalcTransformation();
+	}
+
+	glm::mat4 Transform::CalcTransformation() const
 	{
 		return glm::translate(glm::mat4(1), Position)
-			 * glm::scale(glm::mat4(1), Scale)
+			 * glm::scale    (glm::mat4(1), Scale)
 			 * glm::toMat4(Rotation);
+	}
+
+	glm::mat4 Transform::Transformation() const 
+	{
+		if (m_cached) {
+			return m_transformation;
+		}
+
+		return CalcTransformation();
 	}
 
 	glm::vec3 Transform::Forward() const {

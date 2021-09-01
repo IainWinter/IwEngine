@@ -89,8 +89,8 @@ namespace Physics {
 				if (   a->Collider->Dim == d2
 					&& b->Collider->Dim == d2)
 				{
-					auto& abounds = ((impl::Collider<d2>*)a->Collider)->Bounds();
-					auto& bbounds = ((impl::Collider<d2>*)b->Collider)->Bounds();
+					auto& abounds = ((impl::Collider<d2>*)a->Collider)->m_bounds;
+					auto& bbounds = ((impl::Collider<d2>*)b->Collider)->m_bounds;
 
 					if (!abounds.Intersects(&a->Transform, bbounds, &b->Transform))
 					{
@@ -102,7 +102,7 @@ namespace Physics {
 			}
 		}
 
-		if (m_task)
+		if (false && m_task)
 		{
 			std::mutex mutexTriggers, mutexCollisions;
 

@@ -33,28 +33,22 @@ namespace impl {
 			return *this;
 		}
 
-		void SetPoints(
+		virtual void SetPoints(
 			const std::vector<vec_t>& points)
 		{
 			m_points = points;
-			m_boundsOutdated = true;
 		}
 
-		void AddPoint(
+		virtual void AddPoint(
 			const vec_t& p)
 		{
 			m_points.push_back(p);
-			m_boundsOutdated = true;
 		}
 
-		void RemovePoint(
+		virtual void RemovePoint(
 			const vec_t& p)
 		{
-			m_points.erase(
-				std::find(m_points.begin(), m_points.end(), p)
-			);
-
-			m_boundsOutdated = true;
+			m_points.erase(std::find(m_points.begin(), m_points.end(), p));
 		}
 
 		vec_t FindFurthestPoint(
@@ -132,7 +126,7 @@ namespace impl {
 		collider.AddPoint(glm::vec3( 1,  1,  1)); // 5
 		collider.AddPoint(glm::vec3(-1,  1,  1)); // 4
 
-		collider.Bounds();
+		collider.gen_aabb();
 
 		return collider;
 	}
@@ -144,7 +138,7 @@ namespace impl {
 		collider.AddPoint(glm::vec3(cos(Pi2 * 2 / 3), -1, sin(Pi2 * 2 / 3)));
 		collider.AddPoint(glm::vec3(0, 1, 0));
 
-		collider.Bounds();
+		collider.gen_aabb();
 
 		return collider;
 	}
@@ -156,7 +150,7 @@ namespace impl {
 		collider.AddPoint(glm::vec2( 1, -1)); // 2 
 		collider.AddPoint(glm::vec2( 1,  1)); // 3 
 
-		collider.Bounds();
+		collider.gen_aabb();
 
 		return collider;
 	}
@@ -167,7 +161,7 @@ namespace impl {
 		collider.AddPoint(glm::vec2(cos(Pi2 * 1 / 3), sin(Pi2 * 1 / 3)));
 		collider.AddPoint(glm::vec2(cos(Pi2 * 2 / 3), sin(Pi2 * 2 / 3)));
 
-		collider.Bounds();
+		collider.gen_aabb();
 
 		return collider;
 	}

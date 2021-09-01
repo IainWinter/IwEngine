@@ -65,8 +65,8 @@ namespace impl {
 		using Sphere = SphereCollider<_d>;
 		using vec_t  = _vec<_d>;
 
-		Plane*  A = (Plane*)a;
-		Sphere* B = (Sphere*)b;
+		const Plane*  A = (Plane*)a;
+		const Sphere* B = (Sphere*)b;
 
 		vec_t  aCenter = B->Center + (vec_t)bt->WorldPosition();
 		scalar aRadius = B->Radius * major(bt->WorldScale());
@@ -100,8 +100,8 @@ namespace impl {
 		using Plane  = PlaneCollider<_d>;
 		using Capsule = CapsuleCollider<_d>;
 
-		Plane*   A = (Plane*)a;
-		Capsule* B = (Capsule*)b;
+		const Plane*   A = (Plane*)a;
+		const Capsule* B = (Capsule*)b;
 
 		return ManifoldPoints();
 	}
@@ -121,8 +121,8 @@ namespace impl {
 		using Hull  = HullCollider<_d>;
 		using vec_t = _vec<_d>;
 
-		Plane* A = (Plane*)a;
-		Hull*  B = (Hull*)b;
+		const Plane* A = (Plane*)a;
+		const Hull*  B = (Hull*)b;
 
 		vec_t normal = rot_vec<_d>(normalize(A->Normal), at);
 
@@ -156,8 +156,8 @@ namespace impl {
 		using Sphere = SphereCollider<_d>;
 		using vec_t  = _vec<_d>;
 
-		Sphere* A = (Sphere*)a;
-		Sphere* B = (Sphere*)b;
+		const Sphere* A = (Sphere*)a;
+		const Sphere* B = (Sphere*)b;
 
 		vec_t aCenter = A->Center + (vec_t)at->WorldPosition();
 		vec_t bCenter = B->Center + (vec_t)bt->WorldPosition();
@@ -198,8 +198,8 @@ namespace impl {
 		using Capsule = CapsuleCollider<_d>;
 		using vec_t   = _vec<_d>;
 
-		Sphere*  A = (Sphere*)a;
-		Capsule* B = (Capsule*)b;
+		const Sphere*  A = (Sphere*)a;
+		const Capsule* B = (Capsule*)b;
 
 		vec_t bScale = bt->WorldScale();
 
@@ -256,8 +256,8 @@ namespace impl {
 
 		using Capsule = CapsuleCollider<_d>;
 
-		Capsule* A = (Capsule*)a;
-		Capsule* B = (Capsule*)b;
+		const Capsule* A = (Capsule*)a;
+		const Capsule* B = (Capsule*)b;
 
 		return ManifoldPoints();
 	}
@@ -296,14 +296,14 @@ namespace impl {
 		using Collider = Collider<_d>;
 		using Mesh     = MeshCollider<_d>;
 
-		Collider* A = (Collider*)a;
-		Mesh*     B = (Mesh*)b;
+		const Collider* A = (Collider*)a;
+		const Mesh*     B = (Mesh*)b;
 
 		std::vector<ManifoldPoints> manifolds;
 
-		for (Mesh::hull_t& part : B->GetHullParts())
+		for (const Mesh::hull_t& part : B->m_parts)
 		{
-			if (!part.Bounds().Intersects(bt, A->Bounds(), at)) continue;
+			if (!part.m_bounds.Intersects(bt, A->m_bounds, at)) continue;
 
 			auto [collision, simplex] = GJK(A, at , &part, bt);
 			if (collision) {
@@ -327,15 +327,15 @@ namespace impl {
 
 		using Mesh = MeshCollider<_d>;
 
-		Mesh* A = (Mesh*)a;
-		Mesh* B = (Mesh*)b;
+		const Mesh* A = (Mesh*)a;
+		const Mesh* B = (Mesh*)b;
 
 		std::vector<ManifoldPoints> manifolds;
 
-		for (Mesh::hull_t& aPart : A->GetHullParts())
-		for (Mesh::hull_t& bPart : B->GetHullParts())
+		for (const Mesh::hull_t& aPart : A->m_parts)
+		for (const Mesh::hull_t& bPart : B->m_parts)
 		{
-			if (!aPart.Bounds().Intersects(at, bPart.Bounds(), bt)) continue;
+			if (!aPart.m_bounds.Intersects(at, bPart.m_bounds, bt)) continue;
 
 			auto [collision, simplex] = GJK(&aPart, at, &bPart, bt);
 			if (collision) {
@@ -359,8 +359,8 @@ namespace impl {
 
 		using Collider = Collider<_d>;
 
-		Collider* A = (Collider*)a;
-		Collider* B = (Collider*)b;
+		const Collider* A = (Collider*)a;
+		const Collider* B = (Collider*)b;
 
 		auto [collision, simplex] = GJK(A, at, B, bt);
 

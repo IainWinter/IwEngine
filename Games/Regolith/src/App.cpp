@@ -2,6 +2,7 @@
 #include "plugins/iw/Sand/Engine/SandLayer.h"
 #include "iw/engine/Systems/PhysicsSystem.h"
 #include "iw/engine/Systems/EntityCleanupSystem.h"
+#include "iw/engine/Systems/TransformCacheSystem.h"
 #include "iw/physics/Dynamics/ImpulseSolver.h"
 #include "iw/physics/Dynamics/SmoothPositionSolver.h"
 #include "iw/math/noise.h"
@@ -87,6 +88,7 @@ struct GameLayer : iw::Layer
 		PushSystem<FlockingSystem>();
 		PushSystem<iw::PhysicsSystem>();
 		PushSystem<iw::EntityCleanupSystem>();
+		PushSystem<iw::TransformCacheSystem>();
 
 		Bus->push<RunGame_Event>();
 

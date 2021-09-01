@@ -15,25 +15,38 @@ namespace impl {
 		using hull_t = HullCollider<_d>;
 
 		std::vector<unsigned> m_index;
-	private:
 		std::vector<hull_t> m_parts;
-		bool m_partsOutdated;
 
-	public:
 		MeshCollider(
 			const std::vector<vec_t>&    points = {},
 			const std::vector<unsigned>& index  = {}
 		)
 			: hull_t(points, true)
 			, m_index(index)
-			, m_partsOutdated(true)
 		{}
+
+		void SetPoints(
+			const std::vector<vec_t>& points) override
+		{
+			hull_t::SetPoints(points);
+		}
+
+		void AddPoint(
+			const vec_t& p) override
+		{
+			hull_t::AddPoint(p);
+		}
+
+		void RemovePoint(
+			const vec_t& p) override
+		{
+			hull_t::RemovePoint(p);
+		}
 
 		void SetTriangles(
 			const std::vector<unsigned>& index)
 		{
 			m_index = index;
-			m_partsOutdated = true;
 		}
 
 		void AddTriangle(
@@ -44,7 +57,6 @@ namespace impl {
 			m_index.push_back(a);
 			m_index.push_back(b);
 			m_index.push_back(c);
-			m_partsOutdated = true;
 		}
 
 		void RemoveTriangle(
@@ -62,19 +74,10 @@ namespace impl {
 					break;
 				}
 			}
-
-			m_partsOutdated = true;
 		}
 
-		const std::vector<hull_t>& GetHullParts() const { // For now the parts are the triangles, could merge into bigger parts
-			if (!m_partsOutdated) LOG_WARNING << "Called const MeshCollider::GetHullParts with outdated parts";
-			return m_parts;
-		}
-
-		std::vector<hull_t>& GetHullParts() {
-			if (!m_partsOutdated) return m_parts;
-
-			m_partsOutdated = false;
+		void gen_aabb() override
+		{
 			m_parts.clear();
 
 			for (size_t i = 0; i < m_index.size(); i += 3)
@@ -86,7 +89,7 @@ namespace impl {
 				}));
 			}
 
-			return m_parts;
+			hull_t::gen_aabb();
 		}
 	};
 }

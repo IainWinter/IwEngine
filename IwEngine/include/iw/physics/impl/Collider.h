@@ -35,6 +35,8 @@ namespace impl {
 		size_t get_id() const {
 			return (size_t)Type;
 		}
+
+		virtual void gen_aabb() = 0;
 	};
 
 	template<
@@ -45,37 +47,25 @@ namespace impl {
 		using vec_t  = _vec<_d>;
 		using aabb_t = AABB<_d>;
 
-	protected:
 		aabb_t m_bounds;
-		bool   m_boundsOutdated;
 
-	public:
 		Collider(
 			ColliderType type
 		)
 			: ColliderBase(type, _d)
-			, m_boundsOutdated(true)
 		{
 			static_assert(_d == d2 || _d == d3);
 		}
 
-		const aabb_t& Bounds() const {
-			if (m_boundsOutdated) LOG_WARNING << "const Collider::Bounds returned outdated bounds!";
-			return m_bounds;
-		}
-
-		const aabb_t& Bounds() {
-			if (m_boundsOutdated) {
-				m_boundsOutdated = false;
-				m_bounds = GenerateBounds();
-			}
-
-			return m_bounds;
-		}
-
 		virtual vec_t FindFurthestPoint(
 			const Transform* transform,
-			const vec_t&     direction) const = 0; // For GJK
+			const vec_t&     direction) const = 0;
+
+		virtual void gen_aabb() override
+		{
+			m_bounds = GenerateBounds();
+		}
+
 	protected:
 		virtual aabb_t GenerateBounds() const = 0;
 	};

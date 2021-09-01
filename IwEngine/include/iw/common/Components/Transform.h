@@ -16,19 +16,20 @@ namespace Engine {
 		REFLECT glm::vec3 Position;
 		REFLECT glm::vec3 Scale;
 		REFLECT glm::quat Rotation;
+
 	private:
+		bool m_cached = false;
+		glm::mat4 m_transformation;
+
 		std::vector<Transform*> m_children;
 		Transform* m_parent;
 
 	public:
 		IWCOMMON_API
-		Transform();
-
-		IWCOMMON_API
 		Transform(
-			glm::vec3 position,
-			glm::vec3 scale    = glm::vec3(1),
-			glm::quat rotation = glm::quat(1, 0, 0, 0));
+			glm::vec3 position = glm::vec3(0.f),
+			glm::vec3 scale    = glm::vec3(1.f),
+			glm::quat rotation = glm::quat(1.f, 0.f, 0.f, 0.f));
 
 		IWCOMMON_API
 		Transform(
@@ -39,6 +40,12 @@ namespace Engine {
 		IWCOMMON_API
 		static Transform FromMatrix(
 			glm::mat4 transformation);
+
+		IWCOMMON_API
+		void CacheTransformation();
+
+		IWCOMMON_API
+		glm::mat4 CalcTransformation() const;
 
 		IWCOMMON_API glm::mat4 Transformation() const;
 		IWCOMMON_API glm::vec3 Forward()        const;
