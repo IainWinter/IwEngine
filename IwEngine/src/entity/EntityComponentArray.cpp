@@ -7,12 +7,12 @@ namespace ECS {
 	// I wouldnt be shocked if there wasnt some subtle logic bug somewhere in here
 
 	iterator& iterator::operator++() {
-		++m_itrs[m_index];
+		++m_itrs[Triangles];
 
-		while (m_index < m_itrs.size() 
-			&& m_itrs[m_index] == m_ends[m_index])
+		while (Triangles < m_itrs.size() 
+			&& m_itrs[Triangles] == m_ends[Triangles])
 		{
-			++m_index;
+			++Triangles;
 		}
 
 		return *this;
@@ -21,9 +21,9 @@ namespace ECS {
 	bool iterator::operator==(
 		const iterator& itr)
 	{
-		if (m_index == itr.m_index) {
-			if (m_index < m_itrs.size()) {
-				return m_itrs[m_index] == itr.m_itrs[m_index];
+		if (Triangles == itr.Triangles) {
+			if (Triangles < m_itrs.size()) {
+				return m_itrs[Triangles] == itr.m_itrs[Triangles];
 			}
 
 			return true;
@@ -31,8 +31,8 @@ namespace ECS {
 
 		return false;
 
-		//return m_index == itr.m_index 
-		//	&& (m_itrs.size() == m_index || m_itrs[m_index] == itr.m_itrs[m_index]);
+		//return Triangles == itr.Triangles 
+		//	&& (m_itrs.size() == Triangles || m_itrs[Triangles] == itr.m_itrs[Triangles]);
 	}
 
 	bool iterator::operator!=(
@@ -42,7 +42,7 @@ namespace ECS {
 	}
 
 	EntityComponentData iterator::operator*() {
-		return *m_itrs[m_index];
+		return *m_itrs[Triangles];
 	}
 
 	iterator::iterator(
@@ -51,12 +51,12 @@ namespace ECS {
 		size_t itrIndex)
 		: m_itrs(begins)
 		, m_ends(ends)
-		, m_index(itrIndex)
+		, Triangles(itrIndex)
 	{
-		while (m_index < m_itrs.size()
-			&& m_itrs[m_index] == m_ends[m_index])
+		while (Triangles < m_itrs.size()
+			&& m_itrs[Triangles] == m_ends[Triangles])
 		{
-			++m_index;
+			++Triangles;
 		}
 	}
 

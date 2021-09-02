@@ -482,7 +482,7 @@ namespace detail {
 	}
 
 	void MeshData::TransformMeshData(
-		const Transform& transform)
+		Transform& transform)
 	{
 		std::unique_lock<std::mutex> lock(m_mutex);
 

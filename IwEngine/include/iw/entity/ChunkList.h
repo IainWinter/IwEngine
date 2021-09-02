@@ -18,7 +18,7 @@ namespace ECS {
 		class iterator {
 		private:
 			Chunk* m_chunk;
-			size_t m_index;
+			size_t Triangles;
 			iw::ref<Archetype> m_archetype;
 
 			iw::ref<ComponentDataIndices> m_indices;

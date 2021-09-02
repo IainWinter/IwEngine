@@ -14,49 +14,25 @@ namespace impl {
 		using aabb_t = AABB<_d>;
 		using hull_t = HullCollider<_d>;
 
-		std::vector<unsigned> m_index;
-		std::vector<hull_t> m_parts;
+		std::vector<unsigned> Triangles;
+		std::vector<hull_t> ConvexParts;
 
 		MeshCollider(
-			const std::vector<vec_t>&    points = {},
-			const std::vector<unsigned>& index  = {}
+			const std::vector<vec_t>& points = {},
+			const std::vector<unsigned>& triangles = {}
 		)
 			: hull_t(points, true)
-			, m_index(index)
+			, Triangles(triangles)
 		{}
-
-		void SetPoints(
-			const std::vector<vec_t>& points) override
-		{
-			hull_t::SetPoints(points);
-		}
-
-		void AddPoint(
-			const vec_t& p) override
-		{
-			hull_t::AddPoint(p);
-		}
-
-		void RemovePoint(
-			const vec_t& p) override
-		{
-			hull_t::RemovePoint(p);
-		}
-
-		void SetTriangles(
-			const std::vector<unsigned>& index)
-		{
-			m_index = index;
-		}
 
 		void AddTriangle(
 			unsigned a,
 			unsigned b,
 			unsigned c)
 		{
-			m_index.push_back(a);
-			m_index.push_back(b);
-			m_index.push_back(c);
+			Triangles.push_back(a);
+			Triangles.push_back(b);
+			Triangles.push_back(c);
 		}
 
 		void RemoveTriangle(
@@ -64,33 +40,58 @@ namespace impl {
 			unsigned b,
 			unsigned c)
 		{
-			for (auto itr = m_index.begin(); itr != m_index.end(); itr += 3)
+			for (auto itr = Triangles.begin(); itr != Triangles.end(); itr += 3)
 			{
 				if (    *(itr)     == a
 					&& *(itr + 1) == b
 					&& *(itr + 2) == c)
 				{
-					m_index.erase(itr); // ok because we break right after
+					Triangles.erase(itr); // ok because we break right after
 					break;
 				}
 			}
 		}
 
-		void gen_aabb() override
+		bool CacheIsOld() const override
 		{
-			m_parts.clear();
+			size_t size = Triangles.size();
 
-			for (size_t i = 0; i < m_index.size(); i += 3)
+			// could check point size too, double check but could exit earlier,
+			// not sure if the optimizer is smart enough to do this???
+
+			if (size != t_triangles.size())
 			{
-				m_parts.push_back(hull_t({
-					m_points[m_index[i    ]],
-					m_points[m_index[i + 1]],
-					m_points[m_index[i + 2]],
-				}));
+				return true;
 			}
 
-			hull_t::gen_aabb();
+			for (size_t i = 0; i < size; i++)
+			{
+				if (Triangles.at(i) != t_triangles.at(i))
+				{
+					return true;
+				}
+			}
+
+			return false;
 		}
+
+		void UpdateCache()
+		{
+			t_triangles = Triangles;
+
+			ConvexParts.clear();
+
+			for (size_t i = 0; i < Triangles.size(); i += 3)
+			{
+				ConvexParts.push_back(hull_t({
+					Points[Triangles[i]],
+					Points[Triangles[i + 1]],
+					Points[Triangles[i + 2]],
+				}));
+			}
+		}
+	private:
+		std::vector<unsigned> t_triangles; // expensive but allows public Points
 	};
 }
 }
@@ -113,7 +114,7 @@ namespace impl {
 //	: Collider
 //{
 //private:
-//	std::vector<glm::vec3> m_points;
+//	std::vector<glm::vec3> Points;
 //
 //public:
 //	glm::vec3 FindFurthestPoint(
@@ -122,7 +123,7 @@ namespace impl {
 //		glm::vec3 maxPoint;
 //		float   maxDistance = -FLT_MAX;
 //
-//		for (glm::vec3 point : m_points) {
+//		for (glm::vec3 point : Points) {
 //			float distance = point.dot(direction);
 //			if (distance > maxDistance) {
 //				maxDistance = distance;
@@ -145,18 +146,18 @@ namespace impl {
 //
 //struct Simplex {
 //private:
-//	std::array<glm::vec3, 4> m_points;
+//	std::array<glm::vec3, 4> Points;
 //	unsigned m_size;
 //
 //public:
 //	Simplex()
-//		: m_points({ 0, 0, 0, 0 })
+//		: Points({ 0, 0, 0, 0 })
 //		, m_size(0)
 //	{}
 //
 //	Simplex& operator=(std::initializer_list<glm::vec3> list) {
 //		for (auto* v = list.begin(); v != list.end(); v++) {
-//			m_points[std::distance(list.begin(), v)] = *v;
+//			Points[std::distance(list.begin(), v)] = *v;
 //		}
 //		m_size = list.size();
 //
@@ -164,15 +165,15 @@ namespace impl {
 //	}
 //
 //	void push_front(glm::vec3 point) {
-//		m_points = { point, m_points[0], m_points[1], m_points[2] };
+//		Points = { point, Points[0], Points[1], Points[2] };
 //		m_size = m_size == 4 ? 4 : m_size + 1;
 //	}
 //
-//	glm::vec3& operator[](unsigned i) { return m_points[i]; }
+//	glm::vec3& operator[](unsigned i) { return Points[i]; }
 //	unsigned size() const { return m_size; }
 //
-//	auto begin() const { return m_points.begin(); }
-//	auto end()   const { return m_points.end() - (4 - m_size); }
+//	auto begin() const { return Points.begin(); }
+//	auto end()   const { return Points.end() - (4 - m_size); }
 //};
 //
 //bool Line(

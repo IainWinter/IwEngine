@@ -105,12 +105,12 @@ namespace common {
 	IWCOMMON_API
 	void TransformPolygon(
 		std::vector<glm::vec2>& polygon,
-		const Transform* transform);
+		Transform* transform);
 
 	IWCOMMON_API
 	c_aabb2 TransformBounds(
 		const c_aabb2& bounds,
-		const Transform* transform);
+		Transform* transform);
 
 	inline c_aabb TransformBounds(
 		const c_aabb& bounds,

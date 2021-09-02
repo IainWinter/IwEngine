@@ -59,8 +59,8 @@ namespace impl {
 		}
 
 		bool Intersects(
-			                   const Transform* transform,
-			const AABB& other, const Transform* otherTransform) const
+			                   Transform* transform,
+			const AABB& other, Transform* otherTransform) const
 		{
 			AABB me   = TransformBounds(*this, transform);
 			AABB them = TransformBounds(other, otherTransform);
@@ -73,8 +73,8 @@ namespace impl {
 		}
 
 		bool Fits(
-			                   const Transform* transform,
-			const AABB& other, const Transform* otherTransform) const
+			                   Transform* transform,
+			const AABB& other, Transform* otherTransform) const
 		{
 			AABB me   = TransformBounds(*this, transform);
 			AABB them = TransformBounds(other, otherTransform);

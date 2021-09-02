@@ -31,7 +31,7 @@ namespace Graphics {
 		, m_alloc       (other.m_alloc.capacity())
 		, m_properties  (other.m_properties)
 		, m_textures    (other.m_textures)
-		, m_index       (other.m_index)
+		, Triangles       (other.Triangles)
 		, m_transparency(other.m_transparency)
 		, m_castShadows (other.m_castShadows)
 		, m_wireframe   (other.m_wireframe)
@@ -52,7 +52,7 @@ namespace Graphics {
 		, m_alloc       (std::move(other.m_alloc))
 		, m_properties  (std::move(other.m_properties))
 		, m_textures    (std::move(other.m_textures))
-		, m_index       (std::move(other.m_index))
+		, Triangles       (std::move(other.Triangles))
 		, m_transparency(other.m_transparency)
 		, m_castShadows (other.m_castShadows)
 		, m_wireframe   (other.m_wireframe)
@@ -69,7 +69,7 @@ namespace Graphics {
 		m_alloc        = iw::linear_allocator(other.m_alloc.capacity());
 		m_properties   = other.m_properties;
 		m_textures     = other.m_textures;
-		m_index        = other.m_index;
+		Triangles        = other.Triangles;
 		m_transparency = other.m_transparency;
 		m_castShadows  = other.m_castShadows;
 		m_wireframe    = other.m_wireframe;
@@ -93,7 +93,7 @@ namespace Graphics {
 		m_alloc        = std::move(other.m_alloc);
 		m_properties   = std::move(other.m_properties);
 		m_textures     = std::move(other.m_textures);
-		m_index        = std::move(other.m_index);
+		Triangles        = std::move(other.Triangles);
 		m_transparency = other.m_transparency;
 		m_castShadows  = other.m_castShadows;
 		m_wireframe    = other.m_wireframe;
@@ -287,13 +287,13 @@ namespace Graphics {
 		iw::ref<Texture> texture)
 	{
 		if (Has(name)) {
-			TextureProperty& prop = m_textures.at(m_index.at(name));
+			TextureProperty& prop = m_textures.at(Triangles.at(name));
 			prop.Texture = texture;
 			prop.Active = true;
 		}
 
 		else {
-			auto itr = m_index.emplace(name, m_textures.size());
+			auto itr = Triangles.emplace(name, m_textures.size());
 
 			TextureProperty prop {
 				itr.first->first,
@@ -319,13 +319,13 @@ namespace Graphics {
 			return nullptr;
 		}
 
-		return m_textures.at(m_index.at(name)).Texture;
+		return m_textures.at(Triangles.at(name)).Texture;
 	}
 
 	bool Material::Has(
 		std::string name) const
 	{
-		return m_index.find(name) != m_index.end();
+		return Triangles.find(name) != Triangles.end();
 	}
 
 	iw::Transparency Material::Transparency() const {
@@ -390,7 +390,7 @@ namespace Graphics {
 
 		MaterialProperty* prop;
 		if (Has(name)) {
-			prop = &m_properties.at(m_index.at(name));
+			prop = &m_properties.at(Triangles.at(name));
 			if (prop->Type != type) {
 				LOG_WARNING << "Attempted to set uniform with duplicate name but different type: " << name << "!";
 				return;
@@ -416,7 +416,7 @@ namespace Graphics {
 		}
 
 		else {
-			auto itr = m_index.emplace(name, m_properties.size());
+			auto itr = Triangles.emplace(name, m_properties.size());
 
 			prop = &m_properties.emplace_back(
 				MaterialProperty {
@@ -448,7 +448,7 @@ namespace Graphics {
 	Material::MaterialProperty& Material::GetProperty(
 		std::string name)
 	{
-		return m_properties.at(m_index.at(name));
+		return m_properties.at(Triangles.at(name));
 	}
 }
 }

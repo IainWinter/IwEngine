@@ -57,11 +57,11 @@ namespace Physics {
 
 		IWPHYSICS_API
 		bool TestCollider(
-			const Collider& collider) const;
+			Collider& collider) const;
 
 		IWPHYSICS_API
 		bool TestObject(
-			const CollisionObject* object) const;
+			CollisionObject* object) const;
 
 		//IWPHYSICS_API
 		//bool TestObjects(

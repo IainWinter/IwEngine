@@ -341,7 +341,7 @@ namespace Graphics {
 	}
 
 	void QueuedRenderer::DrawMesh(
-		const Transform* transform,
+		Transform* transform,
 		Mesh* mesh)
 	{
 		if (mesh->CullMe()) { // temp
@@ -374,7 +374,7 @@ namespace Graphics {
 	}
 
 	void QueuedRenderer::DrawMesh(
-		const Transform& transform,
+		Transform& transform,
 		Mesh& mesh)
 	{
 		if (mesh.CullMe()) { // temp same as above ^^
@@ -426,7 +426,7 @@ namespace Graphics {
 	}
 
 	QueuedRenderer::key QueuedRenderer::GenOrder(
-		const Transform* transform,
+		Transform* transform,
 		const Mesh* mesh) const
 	{
 		key layer        = m_layer; 

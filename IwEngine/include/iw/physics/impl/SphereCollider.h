@@ -16,11 +16,14 @@ namespace impl {
 		REFLECT vec_t Center;
 		REFLECT float Radius;
 
+	public:
 		SphereCollider()
 			: Collider<_d>(ColliderType::SPHERE)
 			, Center(0.0f)
 			, Radius(1.0f)
-		{}
+		{
+			Bounds();
+		}
 
 		SphereCollider(
 			vec_t center,
@@ -29,19 +32,37 @@ namespace impl {
 			: Collider<_d>(ColliderType::SPHERE)
 			, Center(center)
 			, Radius(radius)
-		{}
+		{
+			Bounds();
+		}
 
 		vec_t FindFurthestPoint(
-			const Transform* transform,
+			Transform* transform,
 			const vec_t&     direction) const override
 		{
 			return Center + (vec_t)transform->WorldPosition()
 				+ Radius * normalize(direction) * major(transform->WorldScale());
 		}
-	protected:
-		aabb_t GenerateBounds() const override {
+
+		aabb_t CalcBounds() const
+		{
 			return aabb_t(Center, sqrt(Radius*Radius + Radius*Radius));
 		}
+
+		bool CacheIsOld() const override
+		{
+			return  Center != t_center
+				|| Radius != t_radius;
+		}
+
+		void UpdateCache()
+		{
+			t_center = Center;
+			t_radius = Radius;
+		}
+	private:
+		vec_t t_center;
+		float t_radius;
 	};
 }
 }

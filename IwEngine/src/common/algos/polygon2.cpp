@@ -92,21 +92,21 @@ namespace common {
 				int edgeIndex = edgeIndices[state][k];
 				if (edgeIndex == _) break; // was contiune
 
-				int index = (2 * height - 1) * i;
+				int index = int((2 * height - 1) * i);
 
 				switch (edgeIndex)
 				{
-					case 0: index += j;              break;
-					case 1: index += j + height;     break;
-					case 2: index += j + height - 1; break;
-					case 3: index += j + iHeight;    break;
+					case 0: index += int(j);              break;
+					case 1: index += int(j + height);     break;
+					case 2: index += int(j + height - 1); break;
+					case 3: index += int(j + iHeight);    break;
 				}
 
 				edges.push_back(index);
 
 				if (verts.find(index) == verts.end())
 				{
-					glm::vec2 v = midPoints[edgeIndex] + glm::vec2(i, j);
+					glm::vec2 v = midPoints[edgeIndex] + glm::vec2((float)i, (float)j);
 
 					     if (left)   v.x -= 0.5f; // location edge case fix
 					else if (right)  v.x += 0.5f;
@@ -258,18 +258,19 @@ namespace common {
 
 		std::vector<unsigned> triangles;
 
-		std::vector<std::pair<glm::vec2, size_t>> working; // copy a version with the correct indices
-		for (size_t i = 0; i < polygon.size(); i++) {
-			working.emplace_back(polygon.at(i), i);
+		std::vector<std::pair<glm::vec2, unsigned>> working; // copy a version with the correct indices
+		for (size_t i = 0; i < polygon.size(); i++) 
+		{
+			working.emplace_back(polygon.at(i), (unsigned)i);
 		}
 
 		while (true)
 		{
-			int workingSize = working.size();
+			size_t workingSize = working.size();
 
 			for (size_t i = 0; i < working.size(); i++)
 			{
-				if (working.size() < 3) { // exit
+				if (working.size() < 3) { // exit, should make better flow
 					goto exit;
 				}
 
@@ -545,7 +546,7 @@ namespace common {
 		jcv_diagram diagram;
 
 		jcv_clipping_polygon polygon;
-		polygon.num_points = convex.size();
+		polygon.num_points = (int)convex.size();
 		polygon.points = (jcv_point*)convex.data();
 
 		jcv_clipper clipper;
@@ -554,7 +555,7 @@ namespace common {
 		clipper.fill_fn = jcv_clip_polygon_fill_gaps;
 		clipper.ctx = &polygon;
 
-		jcv_diagram_generate(seeds.size(), (jcv_point*)seeds.data(), 0, &clipper, &diagram);
+		jcv_diagram_generate((int)seeds.size(), (jcv_point*)seeds.data(), 0, &clipper, &diagram);
 
 		const jcv_site* sites = jcv_diagram_get_sites(&diagram);
 		for (int i = 0; i < diagram.numsites; ++i)
@@ -584,7 +585,7 @@ namespace common {
 
 	void TransformPolygon(
 		std::vector<glm::vec2>& polygon,
-		const Transform* transform)
+		Transform* transform)
 	{
 		for (glm::vec2& vert : polygon) {
 			vert = TransformPoint<Dimension::d2>(vert, transform);
@@ -593,7 +594,7 @@ namespace common {
 
 	c_aabb2 TransformBounds(
 		const c_aabb2& bounds,
-		const Transform* transform)
+		Transform* transform)
 	{
 		std::vector<glm::vec2> corners = MakePolygonFromBounds(bounds);
 		TransformPolygon(corners, transform);
@@ -677,12 +678,12 @@ namespace common {
 
 		if (itr == verts.end())
 		{
-			indices.push_back(verts.size());
+			indices.push_back((unsigned)verts.size());
 			verts.push_back(point);
 		}
 
 		else {
-			indices.push_back(std::distance(verts.begin(), itr));
+			indices.push_back((unsigned)std::distance(verts.begin(), itr));
 		}
 	}
 }

@@ -12,9 +12,15 @@ namespace Engine {
 		, Scale(scale)
 		, Rotation(rotation)
 		, m_parent(nullptr)
-		, m_cached(false)
-		, m_transformation(0.f)
-	{}
+		, t_position()
+	{
+		t_transformation  = CalcTransformation();
+		t_worldTransformation = t_transformation;
+		t_position = Position;
+		t_rotation = Rotation;
+		t_scale = Scale;
+		t_parent = m_parent;
+	}
 
 	Transform::Transform(
 		glm::vec2 position,
@@ -25,9 +31,14 @@ namespace Engine {
 		, Scale(scale, 1.0f)
 		, Rotation(glm::angleAxis(rotation, glm::vec3(0.0f, 0.0f, 1.0f)))
 		, m_parent(nullptr)
-		, m_cached(false)
-		, m_transformation(0.f)
-	{}
+	{
+		t_transformation = CalcTransformation();
+		t_worldTransformation = t_transformation;
+		t_position = Position;
+		t_rotation = Rotation;
+		t_scale = Scale;
+		t_parent = m_parent;
+	}
 
 	Transform Transform::FromMatrix(
 		glm::mat4 transformation)
@@ -39,17 +50,18 @@ namespace Engine {
 		glm::vec4 perspective;
 		glm::decompose(transformation, scale, rotation, translation, skew, perspective);
 
-		return { 
+		return Transform( 
 			translation, 
 			scale, 
 			rotation
-		};
+		);
 	}
 
-	void Transform::CacheTransformation()
+	bool Transform::TransformationIsOld() const
 	{
-		m_cached = true;
-		m_transformation = CalcTransformation();
+		return Position != t_position
+			|| Rotation != t_rotation
+			|| Scale    != t_scale;
 	}
 
 	glm::mat4 Transform::CalcTransformation() const
@@ -59,13 +71,17 @@ namespace Engine {
 			 * glm::toMat4(Rotation);
 	}
 
-	glm::mat4 Transform::Transformation() const 
+	glm::mat4 Transform::Transformation() 
 	{
-		if (m_cached) {
-			return m_transformation;
+		if (TransformationIsOld())
+		{
+			t_transformation = CalcTransformation();
+			t_position = Position;
+			t_rotation = Rotation;
+			t_scale = Scale;
 		}
 
-		return CalcTransformation();
+		return t_transformation;
 	}
 
 	glm::vec3 Transform::Forward() const {
@@ -80,14 +96,34 @@ namespace Engine {
 		return Rotation * glm::vec3(0, 1, 0);
 	}
 
-	glm::mat4 Transform::WorldTransformation() const {
+	bool Transform::WorldTransformationIsOld() const
+	{
+		return m_parent != t_parent
+			|| TransformationIsOld() 
+			|| (m_parent && m_parent->WorldTransformationIsOld());
+	}
+
+	glm::mat4 Transform::CalcWorldTransformation() const
+	{
 		glm::mat4 parent(1);
 
-		if (m_parent) {
-			parent = m_parent->WorldTransformation();
+		if (m_parent) { // could calc only old transforms in chain
+			parent = m_parent->CalcWorldTransformation();
 		}
 
-		return parent * Transformation();
+		return parent * CalcTransformation();
+	}
+
+	glm::mat4 Transform::WorldTransformation() 
+	{
+		if (WorldTransformationIsOld())
+		{
+			t_worldTransformation = CalcWorldTransformation();
+			t_transformation = Transformation(); // this is stupid, maybe should breakout into Trans/ParentTrans?
+			t_parent = m_parent;
+		}
+
+		return t_worldTransformation;
 	}
 
 	glm::vec3 Transform::WorldForward() const {

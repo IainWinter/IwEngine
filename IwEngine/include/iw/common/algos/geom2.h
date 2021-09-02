@@ -34,14 +34,14 @@ namespace common {
 		Dimension _d>
 	_vec<_d> TransformPoint(
 		const _vec<_d>& point,
-		const Transform* transform)
+		Transform* transform)
 	{
 		glm::vec4 v;
 
 		if constexpr (_d == d2) v = glm::vec4(point, 0, 1);
 		else                    v = glm::vec4(point, 1);
 
-		return _vec<_d>(v * glm::transpose(transform->WorldTransformation()));
+		return _vec<_d>(v * glm::transpose(transform->WorldTransformation())); // why is this transposed?
 	}
 }
 	using namespace common;

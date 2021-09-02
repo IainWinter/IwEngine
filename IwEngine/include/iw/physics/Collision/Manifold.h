@@ -11,7 +11,7 @@ namespace Physics {
 		glm::vec3 A;
 		glm::vec3 B;
 		glm::vec3 Normal;
-		scalar PenetrationDepth;
+		scalar Depth;
 		bool HasCollision;
 
 		Manifold(
@@ -23,7 +23,7 @@ namespace Physics {
 			, A(points.A)
 			, B(points.B)
 			, Normal(points.Normal)
-			, PenetrationDepth(points.PenetrationDepth)
+			, Depth(points.Depth)
 			, HasCollision(points.HasCollision)
 		{}
 	};

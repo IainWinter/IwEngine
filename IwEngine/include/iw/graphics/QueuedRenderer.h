@@ -83,7 +83,7 @@ namespace Graphics {
 		};
 
 		struct DrawMeshInstanceOP {
-			const Transform* Transform;
+			Transform* Transform;
 			Mesh* Mesh;
 
 			setup_draw_func BeforeDraw;
@@ -243,12 +243,12 @@ namespace Graphics {
 		// set mesh verts and indices
 		IWGRAPHICS_API
 		void DrawMesh(
-			const Transform* transform,
+			Transform* transform,
 			Mesh* mesh);
 
 		IWGRAPHICS_API
 		void DrawMesh(
-			const Transform& transform,
+			Transform& transform,
 			Mesh& mesh);
 
 		IWGRAPHICS_API
@@ -259,7 +259,7 @@ namespace Graphics {
 			Camera* camera = nullptr);
 	private:
 		key GenOrder(
-			const Transform* transform = nullptr,
+			Transform* transform = nullptr,
 			const Mesh* mesh = nullptr) const;
 	};
 }

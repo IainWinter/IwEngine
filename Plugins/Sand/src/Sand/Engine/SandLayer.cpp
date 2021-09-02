@@ -297,8 +297,8 @@ void SandLayer::PasteTiles()
 			MeshCollider2* collider = Space->FindComponent<MeshCollider2>(entity);
 			if (collider) {
 				tile->UpdateColliderPolygon();
-				collider->SetPoints   (tile->m_collider);
-				collider->SetTriangles(tile->m_colliderIndex);
+				collider->Points = tile->m_collider;
+				collider->Triangles = tile->m_colliderIndex;
 			}
 		}
 

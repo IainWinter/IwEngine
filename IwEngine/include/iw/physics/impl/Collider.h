@@ -36,7 +36,8 @@ namespace impl {
 			return (size_t)Type;
 		}
 
-		virtual void gen_aabb() = 0;
+		virtual bool CacheIsOld() const = 0;
+		virtual void UpdateCache() = 0;
 	};
 
 	template<
@@ -47,8 +48,6 @@ namespace impl {
 		using vec_t  = _vec<_d>;
 		using aabb_t = AABB<_d>;
 
-		aabb_t m_bounds;
-
 		Collider(
 			ColliderType type
 		)
@@ -58,16 +57,23 @@ namespace impl {
 		}
 
 		virtual vec_t FindFurthestPoint(
-			const Transform* transform,
-			const vec_t&     direction) const = 0;
+			Transform* transform,
+			const vec_t& direction) const = 0;
 
-		virtual void gen_aabb() override
+		virtual aabb_t CalcBounds() const = 0;
+
+		aabb_t Bounds()
 		{
-			m_bounds = GenerateBounds();
-		}
+			if (CacheIsOld())
+			{
+				UpdateCache();
+				m_bounds = CalcBounds();
+			}
 
-	protected:
-		virtual aabb_t GenerateBounds() const = 0;
+			return m_bounds;
+		}
+	private:
+		aabb_t m_bounds;
 	};
 }
 }

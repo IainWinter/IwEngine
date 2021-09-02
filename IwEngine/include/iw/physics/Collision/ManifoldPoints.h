@@ -8,14 +8,14 @@ namespace Physics {
 		glm::vec3 A;
 		glm::vec3 B;
 		glm::vec3 Normal;
-		scalar PenetrationDepth;
+		scalar Depth;
 		bool HasCollision;
 
 		ManifoldPoints()
 			: A(0.0f)
 			, B(0.0f)
 			, Normal(0.0f)
-			, PenetrationDepth(0.0f)
+			, Depth(0.0f)
 			, HasCollision(false)
 		{}
 
@@ -28,14 +28,14 @@ namespace Physics {
 			, HasCollision(true)
 		{
 			glm::vec2 ba = a - b;
-			PenetrationDepth = glm::length(ba);
-			if (PenetrationDepth > 0.00001f)
+			Depth = glm::length(ba);
+			if (Depth > 0.00001f)
 			{
-				Normal = glm::vec3(ba / PenetrationDepth, 0.f);
+				Normal = glm::vec3(ba / Depth, 0.f);
 			}
 			else {
 				Normal = glm::vec3(0, 1, 0);
-				PenetrationDepth = 1;
+				Depth = 1;
 			}
 		}
 
@@ -48,14 +48,14 @@ namespace Physics {
 			, HasCollision(true)
 		{
 			glm::vec3 ba = a - b;
-			PenetrationDepth = glm::length(ba);
-			if (PenetrationDepth > 0.00001f)
+			Depth = glm::length(ba);
+			if (Depth > 0.00001f)
 			{
-				Normal = ba / PenetrationDepth;
+				Normal = ba / Depth;
 			}
 			else {
 				Normal = glm::vec3(0, 1, 0);
-				PenetrationDepth = 1;
+				Depth = 1;
 			}
 		}
 
@@ -68,7 +68,7 @@ namespace Physics {
 			: A(a)
 			, B(b)
 			, Normal(n)
-			, PenetrationDepth(d)
+			, Depth(d)
 			, HasCollision(true)
 		{}
 
@@ -81,7 +81,7 @@ namespace Physics {
 			: A(a, 0)
 			, B(b, 0)
 			, Normal(n, 0.0f)
-			, PenetrationDepth(d)
+			, Depth(d)
 			, HasCollision(true)
 		{}
 

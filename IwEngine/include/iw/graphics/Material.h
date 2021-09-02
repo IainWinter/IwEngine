@@ -58,7 +58,7 @@ namespace Graphics {
 		std::vector<MaterialProperty> m_properties;
 		std::vector<TextureProperty>  m_textures;
 
-		std::unordered_map<std::string, unsigned> m_index; // also done in pipeline seems bad
+		std::unordered_map<std::string, unsigned> Triangles; // also done in pipeline seems bad
 
 		std::string m_name;
 

@@ -22,6 +22,7 @@ namespace impl {
 			, Distance(0)
 		{
 			Normal[1] = 1; // y = 1 as default
+			Bounds();
 		}
 
 		PlaneCollider(
@@ -31,21 +32,40 @@ namespace impl {
 			: Collider<_d>(ColliderType::PLANE)
 			, Normal(normal)
 			, Distance(distance)
-		{}
+		{
+			Bounds();
+		}
 
 		vec_t FindFurthestPoint(
-			const Transform* transform,
+			Transform* transform,
 			const vec_t&     direction) const override
 		{
 			assert(false);
 			return vec_t(0);
 		}
 
-	protected:
-		aabb_t GenerateBounds() const override {
-			assert(false);
-			return aabb_t(); // todo: impl maybe
+		aabb_t CalcBounds() const
+		{
+			// could calc actual bounds but ill wait till
+			// i need a non infinite plane
+
+			return aabb_t();
 		}
+
+		bool CacheIsOld() const override
+		{
+			return  Normal   != t_normal
+				|| Distance != t_distance;
+		}
+
+		void UpdateCache()
+		{
+			t_normal   = Normal;
+			t_distance = Distance;
+		}
+	private:
+		vec_t t_normal;
+		float t_distance;
 	};
 }
 }

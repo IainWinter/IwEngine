@@ -69,18 +69,36 @@ namespace Physics {
 	void CollisionSpace::ResolveConstrains(
 		scalar dt)
 	{
+		if (m_task)
+		{
+			// need to update seperatly before multithreading pairs
+
+			m_task->foreach(m_objects, [&](int index)
+			{
+				Collider* collider = m_objects.at(index)->Collider;
+				if (collider->CacheIsOld()) {
+					collider->UpdateCache();
+				}
+			});
+		}
+
 		std::vector<Manifold> collisions;
 		std::vector<Manifold> triggers;
 
 		std::vector<std::pair<CollisionObject*, CollisionObject*>> pairs; // should have a container that keeps track of this
 
-		for (CollisionObject* a : m_objects) {
+		for (CollisionObject* a : m_objects) 
+		{
+			if (!a->Collider) {
+				continue;
+			}
+
 			for (CollisionObject* b : m_objects) {
 				if (a == b) break;
 
-				if (   ( a->IsTrigger &&  b->IsTrigger)
-					|| (!a->IsDynamic && !b->IsDynamic)
-					|| (!a->Collider  || !b->Collider))
+				if (   (a->IsTrigger && b->IsTrigger)
+					|| (a->IsStatic  && b->IsStatic)
+					|| !b->Collider)
 				{
 					continue;
 				}
@@ -89,8 +107,8 @@ namespace Physics {
 				if (   a->Collider->Dim == d2
 					&& b->Collider->Dim == d2)
 				{
-					auto& abounds = ((impl::Collider<d2>*)a->Collider)->m_bounds;
-					auto& bbounds = ((impl::Collider<d2>*)b->Collider)->m_bounds;
+					auto& abounds = ((impl::Collider<d2>*)a->Collider)->Bounds();
+					auto& bbounds = ((impl::Collider<d2>*)b->Collider)->Bounds();
 
 					if (!abounds.Intersects(&a->Transform, bbounds, &b->Transform))
 					{
@@ -102,7 +120,7 @@ namespace Physics {
 			}
 		}
 
-		if (false && m_task)
+		if (m_task)
 		{
 			std::mutex mutexTriggers, mutexCollisions;
 
@@ -167,11 +185,11 @@ namespace Physics {
 
 
 	bool CollisionSpace::TestCollider(
-		const Collider& collider) const
+		Collider& collider) const
 	{
-		for (CollisionObject* object : m_objects) {
-			if (   object->Collider
-				&& TestCollision(object->Collider, &object->Transform, &collider, &Transform()).HasCollision)
+		for (CollisionObject* other : m_objects) {
+			if (   other->Collider
+				&& TestCollision(other->Collider, &other->Transform, &collider, &Transform()).HasCollision)
 			{
 				return true;
 			}
@@ -181,17 +199,9 @@ namespace Physics {
 	}
 
 	bool CollisionSpace::TestObject(
-		const CollisionObject* _object) const
+		CollisionObject* object) const
 	{
-		for (const CollisionObject* object : m_objects) {
-			if (   object->Collider
-				&& TestCollision(object->Collider, &object->Transform, _object->Collider, &_object->Transform).HasCollision)
-			{
-				return true;
-			}
-		}
-
-		return false;
+		return TestCollider(*object->Collider);
 	}
 
 	void CollisionSpace::SolveManifolds(

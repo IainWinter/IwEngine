@@ -192,7 +192,7 @@ namespace Graphics {
 	}
 
 	void Renderer::DrawMesh(
-		const Transform* transform,
+		Transform* transform,
 		Mesh* mesh)
 	{
 		if (m_state == RenderState::INVALID) {
@@ -232,7 +232,7 @@ namespace Graphics {
 	}
 
 	void Renderer::DrawMesh(
-		const Transform& transform,
+		Transform& transform,
 		Mesh& mesh)
 	{
 		Renderer::DrawMesh(&transform, &mesh);

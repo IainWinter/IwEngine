@@ -6,8 +6,8 @@
 namespace iw {
 namespace Physics {
 	ManifoldPoints TestCollision(
-		const Collider* a, const Transform* at,
-		const Collider* b, const Transform* bt)
+		Collider* a, Transform* at,
+		Collider* b, Transform* bt)
 	{
 		static impl::Test_Collision_funcs<d2> d2;
 		static impl::Test_Collision_funcs<d3> d3;
@@ -29,11 +29,11 @@ namespace Physics {
 			aid = bid;
 			bid = tid;
 
-			const Collider* tc = a;
+			Collider* tc = a;
 			a = b;
 			b = tc;
 
-			const Transform* tt = at;
+			Transform* tt = at;
 			at = bt;
 			bt = tt;
 		}

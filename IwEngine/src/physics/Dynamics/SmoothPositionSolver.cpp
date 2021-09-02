@@ -22,7 +22,7 @@ namespace Physics {
 			const float slop = 0.01f;
 
 			glm::vec3 correction = manifold.Normal * percent
-				* fmax(manifold.PenetrationDepth - slop, 0.0f)
+				* fmax(manifold.Depth - slop, 0.0f)
 				/ (aInvMass + bInvMass);
 		
 			glm::vec3 deltaA;

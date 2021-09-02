@@ -10,14 +10,14 @@ namespace Physics {
 	// _ = no col
 	//
 	//         | Sphere  | Capsule | Plane  | Hull | Mesh
-	// Sphere  |    x    |    x    |    x   |   x  |  o
+	// Sphere  |    x    |    x    |    x   |   x  |  x
 	// Capsule |         |    o    |    o   |   o  |  o
 	// Plane   |         |         |    _   |   o  |  o
-	// Hull    |         |         |        |   x  |  o
-	// Mesh    |         |         |        |      |  _?
+	// Hull    |         |         |        |   x  |  x
+	// Mesh    |         |         |        |      |  x
 	ManifoldPoints TestCollision(
-		const Collider* a, const Transform* at,
-		const Collider* b, const Transform* bt);
+		Collider* a, Transform* at,
+		Collider* b, Transform* bt);
 }
 
 	using namespace Physics;

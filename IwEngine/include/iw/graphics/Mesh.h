@@ -231,7 +231,7 @@ namespace detail {
 
 		IWGRAPHICS_API
 		void TransformMeshData(
-			const Transform& transform);
+			Transform& transform);
 
 		IWGRAPHICS_API void Initialize(const ref<IDevice>& device); // Send the mesh data to video memory
 		IWGRAPHICS_API void Update    (const ref<IDevice>& device); // Updates the video memory copy of the mesh

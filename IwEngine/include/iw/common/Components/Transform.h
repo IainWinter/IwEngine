@@ -18,11 +18,15 @@ namespace Engine {
 		REFLECT glm::quat Rotation;
 
 	private:
-		bool m_cached = false;
-		glm::mat4 m_transformation;
-
 		std::vector<Transform*> m_children;
 		Transform* m_parent;
+
+		glm::mat4 t_transformation;      // state for cache
+		glm::mat4 t_worldTransformation;
+		glm::vec3 t_position; 
+		glm::vec3 t_scale;
+		glm::quat t_rotation;
+		Transform* t_parent;
 
 	public:
 		IWCOMMON_API
@@ -42,17 +46,23 @@ namespace Engine {
 			glm::mat4 transformation);
 
 		IWCOMMON_API
-		void CacheTransformation();
+		bool TransformationIsOld() const;
 
 		IWCOMMON_API
 		glm::mat4 CalcTransformation() const;
 
-		IWCOMMON_API glm::mat4 Transformation() const;
+		IWCOMMON_API glm::mat4 Transformation();
 		IWCOMMON_API glm::vec3 Forward()        const;
 		IWCOMMON_API glm::vec3 Right()          const;
 		IWCOMMON_API glm::vec3 Up()             const;
 
-		IWCOMMON_API glm::mat4 WorldTransformation() const;
+		IWCOMMON_API
+		bool WorldTransformationIsOld() const;
+
+		IWCOMMON_API
+		glm::mat4 CalcWorldTransformation() const;
+
+		IWCOMMON_API glm::mat4 WorldTransformation();
 		IWCOMMON_API glm::vec3 WorldForward()        const;
 		IWCOMMON_API glm::vec3 WorldRight()          const;
 		IWCOMMON_API glm::vec3 WorldUp()             const;

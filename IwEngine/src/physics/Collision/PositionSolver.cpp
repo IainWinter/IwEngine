@@ -14,7 +14,7 @@ namespace Physics {
 			scalar bStatic = (scalar)(int)bBody->IsStatic;
 
 			iw::_vec<d3> resolution = manifold.Normal 
-				* manifold.PenetrationDepth 
+				* manifold.Depth 
 				/ iw::max<scalar>(1, aStatic + bStatic);
 
 			aBody->Transform.Position -= resolution * scalar(1 - aStatic);

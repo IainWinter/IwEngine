@@ -16,7 +16,7 @@ namespace ECS {
 		private:
 			ChunkListVec m_itrs;
 			ChunkListVec m_ends;
-			size_t m_index;
+			size_t Triangles;
 
 		public:
 			IWENTITY_API

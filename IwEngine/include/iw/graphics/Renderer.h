@@ -219,13 +219,13 @@ namespace Graphics {
 		// set mesh verts and indices
 		IWGRAPHICS_API
 		virtual void DrawMesh(
-			const Transform* transform,
+			Transform* transform,
 			Mesh* mesh);
 
 		// Same as DrawMesh
 		IWGRAPHICS_API
 		virtual void DrawMesh(
-			const Transform& transform,
+			Transform& transform,
 			Mesh& mesh);
 
 		// Runs a shader on a fullscreen quad with verts and uvs

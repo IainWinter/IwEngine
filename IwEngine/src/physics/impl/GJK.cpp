@@ -201,8 +201,8 @@ namespace impl {
 	template<>
 	ManifoldPoints EPA(
 		const Simplex <d2>& simplex,
-		const Collider<d2>* colliderA, const Transform* transformA,
-		const Collider<d2>* colliderB, const Transform* transformB)
+		Collider<d2>* colliderA, Transform* transformA,
+		Collider<d2>* colliderB, Transform* transformB)
 	{
 		using vec_t = _vec<d2>;
 
@@ -255,7 +255,7 @@ namespace impl {
 
 		ManifoldPoints points;
 		points.Normal = glm::vec3(minNormal, 0);
-		points.PenetrationDepth = minDistance;
+		points.Depth = minDistance;
 		points.HasCollision = true;
 	
 		return points;
@@ -266,8 +266,8 @@ namespace impl {
 	template<>
 	ManifoldPoints EPA(
 		const Simplex <d3>& simplex,
-		const Collider<d3>* colliderA, const Transform* transformA,
-		const Collider<d3>* colliderB, const Transform* transformB)
+		Collider<d3>* colliderA, Transform* transformA,
+		Collider<d3>* colliderB, Transform* transformB)
 	{
 		using vec_t = _vec<d3>;
 
@@ -359,7 +359,7 @@ namespace impl {
 		ManifoldPoints points;
 
 		points.Normal = minNormal;
-		points.PenetrationDepth = minDistance + 0.001f;
+		points.Depth = minDistance + 0.001f;
 		points.HasCollision = true;
 
 		return points;

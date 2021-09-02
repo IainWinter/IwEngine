@@ -20,12 +20,12 @@ namespace impl {
 	public:
 		using vec_t = _vec<_d>;
 	private:
-		std::array<vec_t, _d + 1u> m_points;
+		std::array<vec_t, _d + 1u> Points;
 		size_t m_size;
 
 	public:
 		Simplex()
-			: m_points()
+			: Points()
 			, m_size(0)
 		{
 			static_assert(_d == 2 || _d == 3);
@@ -35,7 +35,7 @@ namespace impl {
 			std::initializer_list<vec_t> list)
 		{
 			for (auto v = list.begin(); v != list.end(); v++) {
-				m_points[std::distance(list.begin(), v)] = *v;
+				Points[std::distance(list.begin(), v)] = *v;
 			}
 			m_size = list.size();
 
@@ -46,22 +46,22 @@ namespace impl {
 			vec_t point)
 		{
 			if constexpr (_d == 3) {
-				m_points = { point, m_points[0], m_points[1], m_points[2] };
+				Points = { point, Points[0], Points[1], Points[2] };
 			}
 
 			else
 			if constexpr (_d == 2) {
-				m_points = { point, m_points[0], m_points[1] };
+				Points = { point, Points[0], Points[1] };
 			}
 
 			m_size = min<size_t>(m_size + 1, _d + 1);
 		}
 
-		vec_t& operator[](unsigned i) { return m_points[i]; }
+		vec_t& operator[](unsigned i) { return Points[i]; }
 		size_t size() const { return m_size; }
 
-		auto begin() const { return m_points.begin(); }
-		auto end()   const { return m_points.end() - (_d + 1u - m_size); }
+		auto begin() const { return Points.begin(); }
+		auto end()   const { return Points.end() - (_d + 1u - m_size); }
 	};
 
 #ifndef GJK_EPA_MAX_ITER
@@ -71,8 +71,8 @@ namespace impl {
 	template<
 		Dimension _d>
 	std::pair<bool, Simplex<_d>> GJK(
-		const Collider<_d>* colliderA, const Transform* transformA,
-		const Collider<_d>* colliderB, const Transform* transformB)
+		Collider<_d>* colliderA, Transform* transformA,
+		Collider<_d>* colliderB, Transform* transformB)
 	{
 		using vec_t = _vec<_d>;
 
@@ -123,26 +123,26 @@ namespace impl {
 		Dimension _d>
 	ManifoldPoints EPA(
 		const Simplex <_d>& simplex,
-		const Collider<_d>* colliderA, const Transform* transformA,
-		const Collider<_d>* colliderB, const Transform* transformB);
+		Collider<_d>* colliderA, Transform* transformA,
+		Collider<_d>* colliderB, Transform* transformB);
 
 	template<>
 	ManifoldPoints EPA(
 		const Simplex <d2>& simplex,
-		const Collider<d2>* colliderA, const Transform* transformA,
-		const Collider<d2>* colliderB, const Transform* transformB);
+		Collider<d2>* colliderA, Transform* transformA,
+		Collider<d2>* colliderB, Transform* transformB);
 
 	template<>
 	ManifoldPoints EPA(
 		const Simplex <d3>& simplex,
-		const Collider<d3>* colliderA, const Transform* transformA,
-		const Collider<d3>* colliderB, const Transform* transformB);
+		Collider<d3>* colliderA, Transform* transformA,
+		Collider<d3>* colliderB, Transform* transformB);
 
 	template<
 		Dimension _d>
 	_vec<_d> Support(
-		const Collider<_d>* colliderA, const Transform* transformA,
-		const Collider<_d>* colliderB, const Transform* transformB,
+		Collider<_d>* colliderA, Transform* transformA,
+		Collider<_d>* colliderB, Transform* transformB,
 		const _vec    <_d>& direction)
 	{
 		return colliderA->FindFurthestPoint(transformA,  direction)

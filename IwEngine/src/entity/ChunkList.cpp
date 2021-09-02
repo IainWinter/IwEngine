@@ -9,16 +9,16 @@ namespace ECS {
 	// replace with free list like thing but for valid entities 
 	iterator& iterator::operator++() {
 		do {
-			m_index++;
-			if (m_index == m_chunk->EndIndex()) {
+			Triangles++;
+			if (Triangles == m_chunk->EndIndex()) {
 				do {
 					m_chunk = m_chunk->Next;
 					if (m_chunk) {
-						m_index = m_chunk->BeginIndex();
+						Triangles = m_chunk->BeginIndex();
 					}
 				} while (m_chunk && m_chunk->Count == 0);
 			}
-		} while (m_chunk && !m_chunk->GetEntity(m_index)->Alive);
+		} while (m_chunk && !m_chunk->GetEntity(Triangles)->Alive);
 
 		return *this;
 	}
@@ -27,7 +27,7 @@ namespace ECS {
 		const iterator& itr) const
 	{
 		return /*this->m_chunk == itr.m_chunk*/
-			/*&& */this->m_index == itr.m_index;
+			/*&& */this->Triangles == itr.Triangles;
 	}
 
 	bool iterator::operator!=(
@@ -40,11 +40,11 @@ namespace ECS {
 		for (size_t i = 0; i < m_indices->Count; i++) { // use raw pointers?
 			m_data->Components[i] = m_chunk->GetComponentPtr(
 				m_archetype->Layout[m_indices->Indices[i]], 
-				m_index
+				Triangles
 			);
 		}
 
-		EntityHandle* entity = m_chunk->GetEntity(m_index);
+		EntityHandle* entity = m_chunk->GetEntity(Triangles);
 
 		return EntityComponentData { *entity, entity->Index, entity->Version, *m_data };
 	}
@@ -56,7 +56,7 @@ namespace ECS {
 		const std::vector<iw::ref<Component>>& components,
 		iw::pool_allocator& componentPool)
 		: m_chunk(chunk)
-		, m_index(index)
+		, Triangles(index)
 		, m_archetype(archetype)
 	{
 		size_t count = 0;

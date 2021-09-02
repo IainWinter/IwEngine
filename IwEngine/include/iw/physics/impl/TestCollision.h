@@ -17,8 +17,8 @@ namespace impl {
 	using namespace glm;
 
 	using Test_Collision_func = ManifoldPoints(*)(
-		const ColliderBase*, const Transform*,
-		const ColliderBase*, const Transform*);
+		ColliderBase*, Transform*,
+		ColliderBase*, Transform*);
 
 	template<
 		Dimension _d>
@@ -37,7 +37,7 @@ namespace impl {
 		Dimension _d>
 	_vec<_d> rot_vec(
 		_vec<_d> v,
-		const Transform* t)
+		Transform* t)
 	{
 		if constexpr (_d == d3) {
 			v = v * t->WorldRotation();
@@ -53,8 +53,8 @@ namespace impl {
 	template<
 		Dimension _d>
 	ManifoldPoints Test_Plane_Sphere(
-		const ColliderBase* a, const Transform* at,
-		const ColliderBase* b, const Transform* bt)
+		ColliderBase* a, Transform* at,
+		ColliderBase* b, Transform* bt)
 	{
 		assert( a->Type == ColliderType::PLANE
 			&& b->Type == ColliderType::SPHERE
@@ -65,8 +65,8 @@ namespace impl {
 		using Sphere = SphereCollider<_d>;
 		using vec_t  = _vec<_d>;
 
-		const Plane*  A = (Plane*)a;
-		const Sphere* B = (Sphere*)b;
+		Plane*  A = (Plane*)a;
+		Sphere* B = (Sphere*)b;
 
 		vec_t  aCenter = B->Center + (vec_t)bt->WorldPosition();
 		scalar aRadius = B->Radius * major(bt->WorldScale());
@@ -89,8 +89,8 @@ namespace impl {
 	template<
 		Dimension _d>
 	ManifoldPoints Test_Plane_Capsule(
-		const ColliderBase* a, const Transform* at,
-		const ColliderBase* b, const Transform* bt)
+		ColliderBase* a, Transform* at,
+		ColliderBase* b, Transform* bt)
 	{
 		assert( a->Type == ColliderType::PLANE
 			&& b->Type == ColliderType::CAPSULE
@@ -109,8 +109,8 @@ namespace impl {
 	template<
 		Dimension _d>
 	ManifoldPoints Test_Plane_Hull_Mesh(
-		const ColliderBase* a, const Transform* at,
-		const ColliderBase* b, const Transform* bt)
+		ColliderBase* a, Transform* at,
+		ColliderBase* b, Transform* bt)
 	{
 		assert(  a->Type == ColliderType::PLANE
 			&& (b->Type == ColliderType::HULL || b->Type == ColliderType::MESH)
@@ -121,8 +121,8 @@ namespace impl {
 		using Hull  = HullCollider<_d>;
 		using vec_t = _vec<_d>;
 
-		const Plane* A = (Plane*)a;
-		const Hull*  B = (Hull*)b;
+		Plane* A = (Plane*)a;
+		Hull*  B = (Hull*)b;
 
 		vec_t normal = rot_vec<_d>(normalize(A->Normal), at);
 
@@ -145,8 +145,8 @@ namespace impl {
 	template<
 		Dimension _d>
 	ManifoldPoints Test_Sphere_Sphere(
-		const ColliderBase* a, const Transform* at,
-		const ColliderBase* b, const Transform* bt)
+		ColliderBase* a, Transform* at,
+		ColliderBase* b, Transform* bt)
 	{
 		assert( a->Type == ColliderType::SPHERE
 			&& b->Type == ColliderType::SPHERE
@@ -156,8 +156,8 @@ namespace impl {
 		using Sphere = SphereCollider<_d>;
 		using vec_t  = _vec<_d>;
 
-		const Sphere* A = (Sphere*)a;
-		const Sphere* B = (Sphere*)b;
+		Sphere* A = (Sphere*)a;
+		Sphere* B = (Sphere*)b;
 
 		vec_t aCenter = A->Center + (vec_t)at->WorldPosition();
 		vec_t bCenter = B->Center + (vec_t)bt->WorldPosition();
@@ -186,8 +186,8 @@ namespace impl {
 	template<
 		Dimension _d>
 	ManifoldPoints Test_Sphere_Capsule(
-		const ColliderBase* a, const Transform* at,
-		const ColliderBase* b, const Transform* bt)
+		ColliderBase* a, Transform* at,
+		ColliderBase* b, Transform* bt)
 	{
 		assert( a->Type == ColliderType::SPHERE
 			&& b->Type == ColliderType::CAPSULE
@@ -198,8 +198,8 @@ namespace impl {
 		using Capsule = CapsuleCollider<_d>;
 		using vec_t   = _vec<_d>;
 
-		const Sphere*  A = (Sphere*)a;
-		const Capsule* B = (Capsule*)b;
+		Sphere*  A = (Sphere*)a;
+		Capsule* B = (Capsule*)b;
 
 		vec_t bScale = bt->WorldScale();
 
@@ -246,8 +246,8 @@ namespace impl {
 	template<
 		Dimension _d>
 	ManifoldPoints Test_Capsule_Capsule(
-		const ColliderBase* a, const Transform* at,
-		const ColliderBase* b, const Transform* bt)
+		ColliderBase* a, Transform* at,
+		ColliderBase* b, Transform* bt)
 	{
 		assert( a->Type == ColliderType::CAPSULE
 			&& b->Type == ColliderType::CAPSULE
@@ -273,8 +273,8 @@ namespace impl {
 		float  maxNormalDist  = FLT_MIN;
 
 		for (size_t i = 0; i < manifolds.size(); i++) {
-			if (manifolds[i].PenetrationDepth > maxNormalDist) {
-				maxNormalDist = manifolds[i].PenetrationDepth;
+			if (manifolds[i].Depth > maxNormalDist) {
+				maxNormalDist = manifolds[i].Depth;
 				maxNormalIndex = i;
 			}
 		}
@@ -285,8 +285,8 @@ namespace impl {
 	template<
 		Dimension _d>
 	ManifoldPoints Test_X_Mesh(
-		const ColliderBase* a, const Transform* at,
-		const ColliderBase* b, const Transform* bt)
+		ColliderBase* a, Transform* at,
+		ColliderBase* b, Transform* bt)
 	{
 		assert( a->Type != ColliderType::MESH
 			&& b->Type == ColliderType::MESH
@@ -296,14 +296,14 @@ namespace impl {
 		using Collider = Collider<_d>;
 		using Mesh     = MeshCollider<_d>;
 
-		const Collider* A = (Collider*)a;
-		const Mesh*     B = (Mesh*)b;
+		Collider* A = (Collider*)a;
+		Mesh*     B = (Mesh*)b;
 
 		std::vector<ManifoldPoints> manifolds;
 
-		for (const Mesh::hull_t& part : B->m_parts)
+		for (Mesh::hull_t& part : B->ConvexParts)
 		{
-			if (!part.m_bounds.Intersects(bt, A->m_bounds, at)) continue;
+			if (!part.Bounds().Intersects(bt, A->Bounds(), at)) continue;
 
 			auto [collision, simplex] = GJK(A, at , &part, bt);
 			if (collision) {
@@ -317,8 +317,8 @@ namespace impl {
 	template<
 		Dimension _d>
 	ManifoldPoints Test_Mesh_Mesh(
-		const ColliderBase* a, const Transform* at,
-		const ColliderBase* b, const Transform* bt)
+		ColliderBase* a, Transform* at,
+		ColliderBase* b, Transform* bt)
 	{
 		assert( a->Type == ColliderType::MESH
 			&& b->Type == ColliderType::MESH
@@ -327,15 +327,16 @@ namespace impl {
 
 		using Mesh = MeshCollider<_d>;
 
-		const Mesh* A = (Mesh*)a;
-		const Mesh* B = (Mesh*)b;
+		Mesh* A = (Mesh*)a;
+		Mesh* B = (Mesh*)b;
 
 		std::vector<ManifoldPoints> manifolds;
 
-		for (const Mesh::hull_t& aPart : A->m_parts)
-		for (const Mesh::hull_t& bPart : B->m_parts)
+		for (Mesh::hull_t& aPart : A->ConvexParts)
+		for (Mesh::hull_t& bPart : B->ConvexParts)
 		{
-			if (!aPart.m_bounds.Intersects(at, bPart.m_bounds, bt)) continue;
+			// could add each triangle to a broad phase...
+			if (!aPart.Bounds().Intersects(at, bPart.Bounds(), bt)) continue;
 
 			auto [collision, simplex] = GJK(&aPart, at, &bPart, bt);
 			if (collision) {
@@ -349,8 +350,8 @@ namespace impl {
 	template<
 		Dimension _d>
 	ManifoldPoints Test_GJK(
-		const ColliderBase* a, const Transform* at,
-		const ColliderBase* b, const Transform* bt)
+		ColliderBase* a, Transform* at,
+		ColliderBase* b, Transform* bt)
 	{
 		assert( (a->Type == ColliderType::HULL || b->Type == ColliderType::HULL)
 		     && (a->Type != ColliderType::MESH && b->Type != ColliderType::MESH)
@@ -359,8 +360,8 @@ namespace impl {
 
 		using Collider = Collider<_d>;
 
-		const Collider* A = (Collider*)a;
-		const Collider* B = (Collider*)b;
+		Collider* A = (Collider*)a;
+		Collider* B = (Collider*)b;
 
 		auto [collision, simplex] = GJK(A, at, B, bt);
 
