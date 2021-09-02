@@ -2,7 +2,6 @@
 #include "plugins/iw/Sand/Engine/SandLayer.h"
 #include "iw/engine/Systems/PhysicsSystem.h"
 #include "iw/engine/Systems/EntityCleanupSystem.h"
-#include "iw/engine/Systems/TransformCacheSystem.h"
 #include "iw/physics/Dynamics/ImpulseSolver.h"
 #include "iw/physics/Dynamics/SmoothPositionSolver.h"
 #include "iw/math/noise.h"
@@ -15,6 +14,7 @@
 #include "Systems/PlayerLaserTank_System.h"
 #include "Systems/Enemy_System.h"
 #include "Systems/CorePixels_System.h"
+#include "Systems/Score_System.h"
 
 #include "Systems/Flocking_System.h"
 #include "Systems/Projectile_System.h"
@@ -36,6 +36,7 @@ struct GameLayer : iw::Layer
 	EnemySystem*           enemy_s;
 	ItemSystem*            item_s;
 	KeepInWorldSystem*     keepInWorld_s;
+	ScoreSystem*           score_s;
 
 	bool showGameOver = false;
 
@@ -78,23 +79,27 @@ struct GameLayer : iw::Layer
 		
 		keepInWorld_s = new KeepInWorldSystem();
 
+		score_s = new ScoreSystem();
+
 		PushSystemFront(projectile_s);
 		PushSystemFront(item_s);
 		PushSystemFront(enemy_s);
 		PushSystemFront(player_s);
 
+		PushSystem(score_s);
 		PushSystem<CorePixelsSystem>();
 
 		PushSystem<FlockingSystem>();
 		PushSystem<iw::PhysicsSystem>();
 		PushSystem<iw::EntityCleanupSystem>();
-		PushSystem<iw::TransformCacheSystem>();
 
 		Bus->push<RunGame_Event>();
 
 		m_cursor = sand->MakeTile(A_texture_ui_cursor);
 		m_cursor.Find<iw::Tile>()->m_zIndex = 1;
 		m_cursor.Find<iw::CollisionObject>()->IsTrigger = true;
+
+		Physics->RemoveCollisionObject(m_cursor.Find<iw::CollisionObject>());
 
 		return Layer::Initialize();
 	}
@@ -254,7 +259,18 @@ struct GameLayer : iw::Layer
 		return Layer::On(e);
 	}
 
-	// end could put in own system, a fix between ui and functionality
+	// todo: make a ui system!!!!
+
+	int CachedScore = 0;
+
+	std::string itos(int numb)
+	{
+		std::stringstream buf;
+		if (numb >= 0) buf << numb;
+		else           buf << " "; // need space for UpdateMesh
+
+		return buf.str();
+	}
 
 	void PostUpdate() override
 	{
@@ -262,11 +278,7 @@ struct GameLayer : iw::Layer
 		{
 			int ammo = m_player.Find<Player>()->CurrentWeapon->Ammo;
 
-			std::stringstream buf;
-			if (ammo >= 0) buf << ammo;
-			else           buf << " ";
-
-			A_font_arial->UpdateMesh(A_mesh_ui_text_ammo, buf.str(), .001f, 1);
+			A_font_arial->UpdateMesh(A_mesh_ui_text_ammo, itos(ammo), .001f, 1);
 
 			CorePixels* core = m_player.Find<CorePixels>();
 			float death = core->Timer / core->TimeWithoutCore;
@@ -275,6 +287,12 @@ struct GameLayer : iw::Layer
 			A_mesh_ui_background  .Material->Set("color", iw::Color(1, red, red));
 			A_mesh_ui_playerHealth.Material->Set("color", iw::Color(1, red, red));
 			uiJitterAmount += death * 10;
+		}
+
+		if (score_s->Score != CachedScore)
+		{
+			CachedScore = score_s->Score;
+			A_font_arial->UpdateMesh(A_mesh_ui_text_score, itos(CachedScore), .001f, 1);
 		}
 
 		sand->m_drawMouseGrid = iw::Keyboard::KeyDown(iw::SHIFT);
@@ -288,8 +306,6 @@ struct GameLayer : iw::Layer
 		//			time
 
 		// constant constraints
-
-
 
 		float width  = Renderer->Width();
 		float height = Renderer->Height();
@@ -326,8 +342,11 @@ struct GameLayer : iw::Layer
 		float c_laser_position_x = c_menu_position_x - c_menu_width + c_laser_width + c_menu_padding * 2;
 		float c_laser_position_y = c_menu_position_y;
 		
-		float c_ammoCount_position_x = c_menu_position_x + c_menu_width - 200;
-		float c_ammoCount_position_y = c_menu_position_y + 100;
+		float c_ammoCount_position_x = c_menu_position_x + c_menu_width - 100 - c_menu_padding * 2;
+		float c_ammoCount_position_y = c_menu_position_y + 200;
+
+		float c_score_position_x = c_menu_position_x + c_menu_width - 200;
+		float c_score_position_y = c_menu_position_y + 200;
 
 		//sand->m_world->SetCell(sand->sP.x, sand->sP.y, iw::Cell::GetDefault(iw::CellType::ROCK));
 
@@ -359,6 +378,9 @@ struct GameLayer : iw::Layer
 
 		float ammoCount_position_x = c_ammoCount_position_x / width;
 		float ammoCount_position_y = c_ammoCount_position_y / height;
+
+		float score_position_x = c_score_position_x / width;
+		float score_position_y = c_score_position_y / height;
 
 		//float cursor_position_x = c_cursor_position_x / width;
 		//float cursor_position_y = c_cursor_position_y / height;
@@ -398,6 +420,13 @@ struct GameLayer : iw::Layer
 		uiAmmoTextTransform.Scale.x = 1;
 		uiAmmoTextTransform.Scale.y = width / height;
 
+		iw::Transform uiScoreTextTransform;
+		uiAmmoTextTransform.Position.x = score_position_x;
+		uiAmmoTextTransform.Position.y = score_position_y;
+		uiAmmoTextTransform.Scale.x = 1;
+		uiAmmoTextTransform.Scale.y = width / height;
+
+
 		//iw::Transform uiCursorTransform;
 		//uiCursorTransform.Position.z = 1;
 		//uiCursorTransform.Position.x = cursor_position_x;
@@ -435,6 +464,7 @@ struct GameLayer : iw::Layer
 		Renderer->DrawMesh(uiBackgroundTransform, A_mesh_ui_background);
 		Renderer->DrawMesh(uiLaserChargeTransform, sand_ui_laserCharge->GetSandMesh());
 		Renderer->DrawMesh(uiAmmoTextTransform, A_mesh_ui_text_ammo);
+		Renderer->DrawMesh(uiScoreTextTransform, A_mesh_ui_text_score);
 		//Renderer->DrawMesh(uiCursorTransform, A_mesh_ui_cursor);
 		
 		if (showGameOver)

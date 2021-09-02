@@ -158,10 +158,11 @@ bool PlayerSystem::On(iw::ActionEvent& e)
 
 			auto [w, h] = sand->GetSandTexSize2();
 			transform->Position = glm::vec3(w, h, 0);
+
 			rigidbody->SetTransform(transform);
 			rigidbody->SetMass(10);
 
-			collider->Radius = 4;
+			collider->Radius = 6;
 
 			core->TimeWithoutCore = 4.f;
 

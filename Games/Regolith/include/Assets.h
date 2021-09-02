@@ -34,6 +34,7 @@ inline iw::Mesh A_mesh_background;
 inline iw::Mesh A_mesh_ui_background;
 inline iw::Mesh A_mesh_ui_playerHealth;
 inline iw::Mesh A_mesh_ui_text_ammo;
+inline iw::Mesh A_mesh_ui_text_score;
 inline iw::Mesh A_mesh_ui_text_gameOver;
 
 #undef rTex

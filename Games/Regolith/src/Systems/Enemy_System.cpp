@@ -48,9 +48,9 @@ void EnemySystem::SpawnEnemy(SpawnEnemy_Event& config)
 	iw::Entity e = sand->MakeTile<iw::Circle, EnemyShip, Flocker, CorePixels>("textures/SpaceGame/enemy.png", true);
 
 	CorePixels*    core      = e.Set<CorePixels>();
-	iw::Transform* transform = e.Set<iw::Transform>();
-	iw::Rigidbody* rigidbody = e.Set<iw::Rigidbody>();
-	iw::Circle*    collider  = e.Set<iw::Circle>();
+	iw::Transform* transform = e.Find<iw::Transform>();
+	iw::Rigidbody* rigidbody = e.Find<iw::Rigidbody>();
+	iw::Circle*    collider  = e.Find<iw::Circle>();
 
 	core->TimeWithoutCore = 0.f;
 
@@ -58,17 +58,18 @@ void EnemySystem::SpawnEnemy(SpawnEnemy_Event& config)
 	transform->Position.y = config.SpawnLocationY;
 
 	rigidbody->SetTransform(transform);
+	rigidbody->SetMass(10);
 
 	collider->Radius = 6;
 
-	EnemyShip* s = e.Set<EnemyShip>();
-	Flocker*   f = e.Set<Flocker>();
+	EnemyShip* ship    = e.Set<EnemyShip>();
+	Flocker*   flocker = e.Set<Flocker>();
 
-	s->Weapon = MakeLaser_Cannon_Enemy();
-	s->ShootAt = config.ShootAt;
+	ship->Weapon = MakeLaser_Cannon_Enemy();
+	ship->ShootAt = config.ShootAt;
 
-	f->Target.x = config.TargetLocationX;
-	f->Target.y = config.TargetLocationY;
+	flocker->Target.x = config.TargetLocationX;
+	flocker->Target.y = config.TargetLocationY;
 }
 
 void EnemySystem::DestroyEnemy(iw::Entity entity)
