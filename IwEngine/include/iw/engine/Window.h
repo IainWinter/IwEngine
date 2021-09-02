@@ -40,8 +40,10 @@ namespace Engine {
 		virtual bool         Cursor() = 0;
 		virtual DisplayState State()  = 0;
 
-		virtual void* Handle()  const = 0;
-		virtual void* Context() const = 0;
+		virtual void* Handle()   const = 0;
+		virtual void* Context()  const = 0;
+		virtual void* Device()   const = 0;
+		virtual void* Instance() const = 0;
 
 		static IWindow* Create();
 	};

@@ -92,22 +92,19 @@ namespace Graphics {
 		IWGRAPHICS_API
 		Mesh GenerateMesh(
 			const std::string& string,
-			float size,
-			float ratio) const;
+			float size) const;
 
 		IWGRAPHICS_API
 		Mesh GenerateMesh(
 			const MeshDescription& description,
 			const std::string& string,
-			float size,
-			float ratio) const;
+			float size) const;
 
 		IWGRAPHICS_API
 		void UpdateMesh(
 			Mesh& meshData,
 			const std::string& string,
-			float size,
-			float ratio) const;
+			float size) const;
 
 		IWGRAPHICS_API
 		ref<Texture>& GetTexture(
@@ -241,19 +238,6 @@ namespace Graphics {
 
 		IWGRAPHICS_API
 		Font* Build();
-	};
-
-
-	struct Text {
-		ref<Font> Font;
-		Mesh Mesh;
-
-		float m_size = 0.005f;
-		float m_scalar = 1;
-
-		void Update(std::string text) {
-			Font->UpdateMesh(Mesh, text, m_size, m_scalar);
-		}
 	};
 }
 

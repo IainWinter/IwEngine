@@ -34,8 +34,10 @@ namespace Engine {
 		void SetCursor(
 			bool show) override;
 
-		void* Handle()  const  override;
-		void* Context() const  override;
+		void* Handle()   const override { return m_window; }
+		void* Context()  const override { return m_context; }
+		void* Device()   const override { return m_device; }
+		void* Instance() const override { return m_instance; }
 
 		static LRESULT CALLBACK _WndProc(
 			HWND hwnd,

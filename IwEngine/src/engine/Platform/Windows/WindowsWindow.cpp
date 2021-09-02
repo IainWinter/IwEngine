@@ -256,14 +256,6 @@ namespace Engine {
 		Options.Cursor = show;
 	}
 
-	void* WindowsWindow::Handle() const {
-		return m_window;
-	}
-
-	void* WindowsWindow::Context() const {
-		return m_context;
-	}
-
 	LRESULT CALLBACK WindowsWindow::_WndProc(
 		HWND hwnd,
 		UINT msg,

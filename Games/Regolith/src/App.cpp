@@ -261,7 +261,7 @@ struct GameLayer : iw::Layer
 
 	// todo: make a ui system!!!!
 
-	int CachedScore = 0;
+	int CachedScore = -1;
 
 	std::string itos(int numb)
 	{
@@ -272,13 +272,117 @@ struct GameLayer : iw::Layer
 		return buf.str();
 	}
 
+	//struct UIConstraint 
+	//{
+	//	virtual float Get(int parent) const = 0;
+	//	virtual ~UIConstraint() = default;
+	//};
+
+	//struct Fixed : UIConstraint
+	//{
+	//	float value;
+
+	//	Fixed(float value_) {
+	//		value = value_;
+	//	}
+
+	//	float Get(int parent) const override
+	//	{
+	//		return value;
+	//	}
+	//};
+
+	//struct Ratio : UIConstraint
+	//{
+	//	float value;
+
+	//	Ratio(float value) : value(value) {}
+
+	//	float Get(int parent) const override
+	//	{
+	//		return parent * value;
+	//	}
+	//};
+
+	struct UI
+	{
+		float x, y, z, width, height;
+		iw::Mesh mesh;
+
+		UI(const iw::Mesh& mesh_)
+		{
+			mesh = mesh_;
+			x = 0;
+			y = 0;
+			z = 0;
+			width = 0;
+			height = 0;
+		}
+
+		iw::Transform GetTransform(int screenWidth, int screenHeight, int screenDepth)
+		{
+			iw::Transform transform;
+			transform.Position.x = floor(x)      / screenWidth;
+			transform.Position.y = floor(y)      / screenHeight;
+			transform.Position.z = -z / screenDepth;
+			transform.Scale.x    = floor(width)  / screenWidth;
+			transform.Scale.y    = floor(height) / screenHeight;
+
+			return transform;
+		}
+	};
+
+	struct UIScreen
+	{
+		std::vector<UI*> elements;
+		int width, height, depth;
+
+		UIScreen(int width_, int height_, int depth_)
+		{
+			width  = width_;
+			height = height_;
+			depth = depth_;
+		}
+
+		~UIScreen()
+		{
+			for (UI* ui : elements)
+			{
+				delete ui;
+			}
+		}
+
+		UI* CreateElement(const iw::Mesh& mesh)
+		{
+			return elements.emplace_back(new UI(mesh));
+		}
+
+		void AddElement(UI* element)
+		{
+			elements.push_back(element);
+		}
+
+		void Draw(iw::Camera* camera, iw::ref<iw::QueuedRenderer>& renderer)
+		{
+			renderer->BeginScene(camera);
+
+			for (UI* ui : elements)
+			{
+				renderer->DrawMesh(ui->GetTransform(width, height, depth), ui->mesh);
+			}
+
+			renderer->EndScene();
+		}
+	};
+
+
 	void PostUpdate() override
 	{
 		if (m_player.Alive()) 
 		{
 			int ammo = m_player.Find<Player>()->CurrentWeapon->Ammo;
 
-			A_font_arial->UpdateMesh(A_mesh_ui_text_ammo, itos(ammo), .001f, 1);
+			A_font_arial->UpdateMesh(A_mesh_ui_text_ammo, itos(ammo), 12);
 
 			CorePixels* core = m_player.Find<CorePixels>();
 			float death = core->Timer / core->TimeWithoutCore;
@@ -292,10 +396,18 @@ struct GameLayer : iw::Layer
 		if (score_s->Score != CachedScore)
 		{
 			CachedScore = score_s->Score;
-			A_font_arial->UpdateMesh(A_mesh_ui_text_score, itos(CachedScore), .001f, 1);
+			A_font_arial->UpdateMesh(A_mesh_ui_text_score, itos(CachedScore), 9);
 		}
 
 		sand->m_drawMouseGrid = iw::Keyboard::KeyDown(iw::SHIFT);
+
+
+		if (iw::Keyboard::KeyDown(iw::SHIFT))
+		{
+			Bus->push<EndGame_Event>();
+		}
+
+		uiJitterAmount = iw::lerp(uiJitterAmount, 0.f, iw::DeltaTime() * 10);
 
 		// screen - fills screen
 		//		game board - fills empty space, 1:1 aspect ratio
@@ -307,141 +419,60 @@ struct GameLayer : iw::Layer
 
 		// constant constraints
 
-		float width  = Renderer->Width();
-		float height = Renderer->Height();
+		UIScreen screen = UIScreen(Renderer->Width(), Renderer->Height(), 10);
 
-		float c_menu_height = floor(height * .2);                    // 200px height
-		float c_menu_position_y = -height + c_menu_height;  // fixed to bottom of screen
-		float c_menu_position_x = 0;
-		
-		// damage jitter
+		UI* menu = screen.CreateElement(A_mesh_ui_background);
+		UI* game = screen.CreateElement(sand->GetSandMesh());
 
-		c_menu_position_x += floor(iw::randf() * uiJitterAmount); // should this be symmetric or only top left?
-		c_menu_position_y += floor(iw::randf() * uiJitterAmount);
-		uiJitterAmount = iw::lerp(uiJitterAmount, 0.f, iw::DeltaTime() * 10);
+		menu->z = 1;
+		game->z = 0;
 
-		// end damage jitter
+		menu->height = screen.height * .2f;                                    // Ratio(.2f)
+		menu->x = iw::randf() * uiJitterAmount;                                // Random(uiJitterAmount)
+		menu->y = iw::randf() * uiJitterAmount - screen.height + menu->height; //Combine(Anchor(BOTTOM), menu->height, Random(uiJitterAmount))
 
-		float c_game_height     = height - c_menu_height;       // fill rest of screen height
-		float c_game_width      = c_game_height;			// keep width 1:1 ratio
-		float c_game_position_y = c_menu_height;			// centered in rest of space
-		float c_menu_width      = c_game_width;			    // menu width = game width
+		game->y = menu->height;                      // Same(manu->height)
+		game->height = screen.height - menu->height; // fill rest of screen y
+		game->width  = game->height;                 // Same(game->height)
 
-		float c_menu_padding = floor(c_menu_height * .1);
+		menu->width = game->width; // Same(game->width)
 
-		glm::vec2 health_dim = m_player.Find<iw::Tile>()->m_sprite.Dimensions();
-		float c_health_aspect = health_dim.x / health_dim.y;
+		float menu_pad = menu->height * .2f;
 
-		float c_health_position_x = c_menu_position_x; // health is centered in menu
-		float c_health_position_y = c_menu_position_y;
-		float c_health_height = c_menu_height - c_menu_padding * 2;  // center has padding on both sides
-		float c_health_width  = c_health_height * c_health_aspect;	 // keep width to aspect of texture
+		UI* health = screen.CreateElement(A_mesh_ui_playerHealth);
+		UI* laser = screen.CreateElement(sand_ui_laserCharge->GetSandMesh());
 
-		float c_laser_height = c_menu_height - c_menu_padding * 2;
-		float c_laser_width  = c_laser_height;
-		float c_laser_position_x = c_menu_position_x - c_menu_width + c_laser_width + c_menu_padding * 2;
-		float c_laser_position_y = c_menu_position_y;
-		
-		float c_ammoCount_position_x = c_menu_position_x + c_menu_width - 100 - c_menu_padding * 2;
-		float c_ammoCount_position_y = c_menu_position_y + 200;
+		health->z = -2; // ?? why is this negitive
+		laser->z = 2;
 
-		float c_score_position_x = c_menu_position_x + c_menu_width - 200;
-		float c_score_position_y = c_menu_position_y + 200;
+		health->height = menu->height - menu_pad;
+		health->width = health->height; // Ratio(health->height)
+		health->x = menu->x;            // Same(menu->x)
+		health->y = menu->y;            // Same(menu->y)
 
-		//sand->m_world->SetCell(sand->sP.x, sand->sP.y, iw::Cell::GetDefault(iw::CellType::ROCK));
+		laser->height = menu->height - menu_pad;
+		laser->width = laser->height;                               // Same (laser->height)
+		laser->x = menu->x - menu->width + laser->width + menu_pad; // Combine(Anchor(LEFT), laser->width, menu_pads)
+		laser->y = menu->y;
 
-		//float c_cursor_position_x =  iw::Mouse::ClientPos().x() * 2 - width;
-		//float c_cursor_position_y = -iw::Mouse::ClientPos().y() * 2 + height;
-		//float c_cursor_width      = 20;
-		//float c_cursor_height      = c_cursor_width;
+		float score_pad = 30*8;
 
-		// SCALING, this should be done by the camera...
+		UI* score = screen.CreateElement(A_mesh_ui_text_score);
 
-		float game_scale_x    = c_game_width      / width;
-		float game_scale_y    = c_game_height     / height;
-		float game_position_y = c_game_position_y / height;
+		score->width  = screen.height;
+		score->height = screen.height; // Same(score->width)
+		score->x = menu->x + menu->width - score_pad;
+		score->y = menu->y + menu->height - menu_pad;
+		score->z = -3;
 
-		float menu_scale_x    = c_menu_width      / width;
-		float menu_scale_y    = c_menu_height     / height;
-		float menu_position_x = c_menu_position_x / width;
-		float menu_position_y = c_menu_position_y / height;
+		if (showGameOver)
+		{
+			UI* gameover = screen.CreateElement(A_mesh_ui_text_gameOver);
+			gameover->width = screen.width;
+			gameover->height = screen.width;
+		}
 
-		float health_scale_x    = c_health_width      / width;
-		float health_scale_y    = c_health_height     / height;
-		float health_position_x = c_health_position_x / width;
-		float health_position_y = c_health_position_y / height;
-
-		float laser_scale_x    = c_laser_width      / width;
-		float laser_scale_y    = c_laser_height     / height;
-		float laser_position_x = c_laser_position_x / width;
-		float laser_position_y = c_laser_position_y / height;
-
-		float ammoCount_position_x = c_ammoCount_position_x / width;
-		float ammoCount_position_y = c_ammoCount_position_y / height;
-
-		float score_position_x = c_score_position_x / width;
-		float score_position_y = c_score_position_y / height;
-
-		//float cursor_position_x = c_cursor_position_x / width;
-		//float cursor_position_y = c_cursor_position_y / height;
-		//float cursor_width      = c_cursor_width      / width;
-		//float cursor_height     = c_cursor_height     / height;
-
-		iw::Transform sandTransform;
-		sandTransform.Position.y = game_position_y;
-		sandTransform.Scale   .x = game_scale_x;
-		sandTransform.Scale   .y = game_scale_y;
-
-		iw::Transform backgroundTransform = sandTransform;
-		backgroundTransform.Position.z = -5;
-
-		iw::Transform uiPlayerTransform;
-		uiPlayerTransform.Position.x = health_position_x;
-		uiPlayerTransform.Position.y = health_position_y;
-		uiPlayerTransform.Scale   .x = health_scale_x;
-		uiPlayerTransform.Scale   .y = health_scale_y;
-
-		iw::Transform uiLaserChargeTransform;
-		uiLaserChargeTransform.Position.x = laser_position_x;
-		uiLaserChargeTransform.Position.y = laser_position_y;
-		uiLaserChargeTransform.Scale.x    = laser_scale_x;
-		uiLaserChargeTransform.Scale.y    = laser_scale_y;
-
-		iw::Transform uiBackgroundTransform;
-		uiBackgroundTransform.Position.z = -1;
-		uiBackgroundTransform.Position.x = menu_position_x;
-		uiBackgroundTransform.Position.y = menu_position_y;
-		uiBackgroundTransform.Scale   .x = menu_scale_x;
-		uiBackgroundTransform.Scale   .y = menu_scale_y;
-
-		iw::Transform uiAmmoTextTransform;
-		uiAmmoTextTransform.Position.x = ammoCount_position_x;
-		uiAmmoTextTransform.Position.y = ammoCount_position_y;
-		uiAmmoTextTransform.Scale.x = 1;
-		uiAmmoTextTransform.Scale.y = width / height;
-
-		iw::Transform uiScoreTextTransform;
-		uiAmmoTextTransform.Position.x = score_position_x;
-		uiAmmoTextTransform.Position.y = score_position_y;
-		uiAmmoTextTransform.Scale.x = 1;
-		uiAmmoTextTransform.Scale.y = width / height;
-
-
-		//iw::Transform uiCursorTransform;
-		//uiCursorTransform.Position.z = 1;
-		//uiCursorTransform.Position.x = cursor_position_x;
-		//uiCursorTransform.Position.y = cursor_position_y;
-		//uiCursorTransform.Scale.x    = cursor_width;
-		//uiCursorTransform.Scale.y    = cursor_height;
-
-		// END SCALING
-
-		Renderer->BeginScene();
-		Renderer->DrawMesh(sandTransform, sand->GetSandMesh());
-		Renderer->EndScene();
-
-		Renderer->BeginScene(cam);
-		//Renderer->DrawMesh(iw::Transform(glm::vec3(0.f), glm::vec3(1, width/height, 1)), background_s->m_stars.GetParticleMesh());
+		screen.Draw(cam, Renderer);
 
 		//for (auto& [entity, data] : debug_tileColliders)
 		//{
@@ -457,27 +488,6 @@ struct GameLayer : iw::Layer
 
 		//	Renderer->DrawMesh(transform, data.first);
 		//}
-
-		Renderer->DrawMesh(backgroundTransform, A_mesh_background);
-
-		Renderer->DrawMesh(uiPlayerTransform, A_mesh_ui_playerHealth);
-		Renderer->DrawMesh(uiBackgroundTransform, A_mesh_ui_background);
-		Renderer->DrawMesh(uiLaserChargeTransform, sand_ui_laserCharge->GetSandMesh());
-		Renderer->DrawMesh(uiAmmoTextTransform, A_mesh_ui_text_ammo);
-		Renderer->DrawMesh(uiScoreTextTransform, A_mesh_ui_text_score);
-		//Renderer->DrawMesh(uiCursorTransform, A_mesh_ui_cursor);
-		
-		if (showGameOver)
-		{
-			iw::Transform temp;
-			temp.Scale.y = width / height;
-			Renderer->DrawMesh(temp, A_mesh_ui_text_gameOver);
-		}
-
-		Renderer->EndScene();
-
-
-		Physics->debug__ScrambleObjects();
 	}
 };
 
@@ -497,6 +507,9 @@ App::App() : iw::Application()
 	PushLayer(sand);
 	PushLayer(sand_ui_laser);
 	PushLayer<GameLayer>(sand, sand_ui_laser);
+
+	//GetDeviceCaps(Window(),, LOGPIXELSX)
+
 }
 
 int App::Initialize(

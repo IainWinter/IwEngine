@@ -12,7 +12,7 @@ bool ScoreSystem::On(iw::ActionEvent& e)
 		case CORE_EXPLODED:
 		{
 			CoreExploded_Event& event = e.as<CoreExploded_Event>();
-
+			
 			if (event.Entity.Has<EnemyShip>())
 			{
 				Score += 10;

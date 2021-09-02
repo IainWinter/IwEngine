@@ -46,26 +46,24 @@ namespace Graphics {
 
 	Mesh Font::GenerateMesh(
 		const std::string& string,
-		float size,
-		float ratio) const
+		float size) const
 	{
 		iw::MeshDescription description;
 		description.DescribeBuffer(iw::bName::POSITION, iw::MakeLayout<float>(3));
 		description.DescribeBuffer(iw::bName::UV, iw::MakeLayout<float>(2));
 
-		return GenerateMesh(description, string, size, ratio);
+		return GenerateMesh(description, string, size);
 	}
 
 	Mesh Font::GenerateMesh(
 		const MeshDescription& description,
 		const std::string& string,
-		float size,
-		float ratio) const
+		float size) const
 	{
 		MeshData* data = new MeshData(description);
 		Mesh mesh = data->MakeInstance();
 
-		UpdateMesh(mesh, string, size, ratio);
+		UpdateMesh(mesh, string, size);
 
 		return mesh;
 	}
@@ -73,8 +71,7 @@ namespace Graphics {
 	void Font::UpdateMesh(
 		Mesh& mesh,
 		const std::string& string,
-		float size,
-		float ratio) const
+		float size) const
 	{
 		if (   !mesh.Data->Description().HasBuffer(bName::POSITION)
 			|| !mesh.Data->Description().HasBuffer(bName::UV))
@@ -99,8 +96,8 @@ namespace Graphics {
 		int lineHeightPixels = m_lightHeight - padHeight;
 
 		glm::vec2 scale = glm::vec2(
-			size / lineHeightPixels * m_size * ratio,
-			size / lineHeightPixels * m_size
+			size / m_size / lineHeightPixels,
+			size / m_size / lineHeightPixels
 		);
 
 		unsigned indexCount = count * 6;
@@ -160,7 +157,7 @@ namespace Graphics {
 			}
 
 			cursor.x = 0;
-			cursor.y -= size * m_size;
+			cursor.y -= size / m_size;
 		}
 	
 		mesh.Data->SetIndexData(indexCount, indices);

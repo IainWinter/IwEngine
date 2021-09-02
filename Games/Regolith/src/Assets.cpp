@@ -111,17 +111,17 @@ int LoadAssets(
 	}
 
 	{
-		A_mesh_ui_text_ammo = A_font_arial->GenerateMesh("0", .001f, 1);
+		A_mesh_ui_text_ammo = A_font_arial->GenerateMesh("0", .001f);
 		A_mesh_ui_text_ammo.Material = A_material_font_cam->MakeInstance();
 	}
 
 	{
-		A_mesh_ui_text_score = A_font_arial->GenerateMesh("0", .001f, 1);
+		A_mesh_ui_text_score = A_font_arial->GenerateMesh("0", .001f);
 		A_mesh_ui_text_score.Material = A_material_font_cam->MakeInstance();
 	}
 
 	{
-		A_mesh_ui_text_gameOver = A_font_arial->GenerateMesh("GAME OVER\npress space to restart...", .001f, 1);
+		A_mesh_ui_text_gameOver = A_font_arial->GenerateMesh("GAME OVER\npress space to restart...", .001f);
 		A_mesh_ui_text_gameOver.Material = A_material_font_cam->MakeInstance();
 	}
 

@@ -199,13 +199,9 @@ iw::Entity WorldSystem::MakeAsteroid(
 	iw::Rigidbody* r = entity.Find<iw::Rigidbody>();
 
 	t->Position = glm::vec3(config.SpawnLocationX, config.SpawnLocationY, 0);
+
 	r->Velocity = glm::vec3(config.VelocityX, config.VelocityY, 0);
 	r->AngularVelocity.z = config.AngularVel;
-	
-	r->OnCollision = [](auto& man, auto dt) {
-		LOG_DEBUG << "Asteroid collided " << man.Depth;
-	};
-
 	r->SetTransform(t);
 	r->SetMass(1000);
 

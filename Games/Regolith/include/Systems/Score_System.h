@@ -12,5 +12,7 @@ struct ScoreSystem : iw::SystemBase
 		: iw::SystemBase("Score")
 	{}
 
+	//void Update() override;
+
 	bool On(iw::ActionEvent& e) override;
 };
