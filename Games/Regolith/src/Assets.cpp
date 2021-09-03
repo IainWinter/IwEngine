@@ -18,7 +18,8 @@ int LoadAssets(
 	A_texture_item_coreShard = Asset->Load<Texture>("textures/SpaceGame/item_coreShard.png");
 	A_texture_ui_cursor      = Asset->Load<Texture>("textures/SpaceGame/cursor.png");
 	A_texture_ui_background  = Asset->Load<Texture>("textures/SpaceGame/ui_background.png");
-	A_texture_font_cambria     = Asset->Load<Texture>("textures/fonts/cambria.png");
+	A_texture_font_cambria   = Asset->Load<Texture>("textures/fonts/cambria.png");
+	A_texture_menu_pause     = Asset->Load<Texture>("textures/SpaceGame/menu_pause.png");
 
 	A_font_cambria = Asset->Load<iw::Font>("fonts/cambria.fnt");
 
@@ -28,6 +29,7 @@ int LoadAssets(
 	A_mesh_background      = iw::ScreenQuad().MakeInstance();
 	A_mesh_ui_background   = iw::ScreenQuad().MakeInstance();
 	A_mesh_ui_playerHealth = iw::ScreenQuad().MakeInstance();
+	A_mesh_menu_pause      = iw::ScreenQuad().MakeInstance();
 	A_mesh_menu_background = iw::ScreenQuad().MakeInstance();
 
 #define CHECK_LOAD(x) if(!x) { LOG_ERROR << "Failed to load " << #x; return 100; }
@@ -44,7 +46,7 @@ int LoadAssets(
 	CHECK_LOAD(A_texture_item_coreShard);
 	CHECK_LOAD(A_texture_ui_cursor     );
 	CHECK_LOAD(A_texture_ui_background );
-	CHECK_LOAD(A_texture_font_cambria    );
+	CHECK_LOAD(A_texture_font_cambria  );
 
 	CHECK_LOAD(A_font_cambria);
 
@@ -81,6 +83,7 @@ int LoadAssets(
 
 	{
 		Renderer->InitShader(A_material_texture_cam->Shader, CAMERA);
+		A_material_texture_cam->SetTransparency(Transparency::ADD);
 		A_material_texture_cam->Set("alphaThresh", .6f);
 		A_material_texture_cam->Set("color", iw::Color(1.f));
 	}
@@ -103,11 +106,6 @@ int LoadAssets(
 	}
 
 	{
-		A_mesh_menu_background.Material = A_material_texture_cam->MakeInstance();
-		A_mesh_ui_background.Material->SetTexture("texture", A_texture_ui_background);
-	}
-
-	{
 		ref<Texture> ui_player_texture = REF<Texture>(*A_texture_player);
 		ui_player_texture->SetFilter(iw::NEAREST);
 		ui_player_texture->CreateColors();
@@ -118,17 +116,38 @@ int LoadAssets(
 
 	{
 		A_mesh_ui_text_ammo = A_font_cambria->GenerateMesh("0", 9);
-		A_mesh_ui_text_ammo.Material = A_material_font_cam->MakeInstance();
+		A_mesh_ui_text_ammo.Material = A_material_font_cam;
 	}
 
 	{
 		A_mesh_ui_text_score = A_font_cambria->GenerateMesh("0", 9);
-		A_mesh_ui_text_score.Material = A_material_font_cam->MakeInstance();
+		A_mesh_ui_text_score.Material = A_material_font_cam;
 	}
 
 	{
 		A_mesh_ui_text_gameOver = A_font_cambria->GenerateMesh("GAME OVER\npress space to restart...", 9);
-		A_mesh_ui_text_gameOver.Material = A_material_font_cam->MakeInstance();
+		A_mesh_ui_text_gameOver.Material = A_material_font_cam;
+	}
+
+	// Menus
+
+	{
+		A_mesh_menu_background.Material = A_material_texture_cam->MakeInstance();
+		A_mesh_menu_background.Material->Set("alphaThresh", 0.0f);
+		A_mesh_menu_background.Material->Set("color", iw::Color(.16, .16, .16, .5));
+		A_mesh_menu_background.Material->SetTransparency(Transparency::ADD);
+	}
+
+	{
+		A_mesh_menu_pause.Material = A_material_texture_cam->MakeInstance();
+		A_mesh_menu_pause.Material->Set("alphaThresh", 0.0f);
+		A_mesh_menu_pause.Material->Set("color", iw::Color(.5));
+		A_mesh_menu_pause.Material->SetTransparency(Transparency::ADD);
+	}
+
+	{
+		A_mesh_menu_pause_title = A_font_cambria->GenerateMesh("Pause Menu", 11);
+		A_mesh_menu_pause_title.Material = A_material_font_cam;
 	}
 
 	return 0;

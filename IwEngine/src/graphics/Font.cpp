@@ -107,7 +107,7 @@ namespace Graphics {
 		glm::vec3* verts   = new glm::vec3[vertCount];
 		glm::vec2* uvs     = new glm::vec2[vertCount];
 
-		glm::vec2 cursor = glm::vec2(.0f);
+		glm::vec2 cursor = glm::vec2(0.f);
 		unsigned vert = 0;
 		unsigned index = 0;
 		for (std::string line : lines) 

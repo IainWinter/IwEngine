@@ -23,6 +23,7 @@ inline rTex A_texture_item_coreShard;
 inline rTex A_texture_ui_background;
 inline rTex A_texture_ui_cursor;
 inline rTex A_texture_font_cambria;
+inline rTex A_texture_menu_pause;
 
 
 inline rFont A_font_cambria;
@@ -38,6 +39,8 @@ inline iw::Mesh A_mesh_ui_text_ammo;
 inline iw::Mesh A_mesh_ui_text_score;
 inline iw::Mesh A_mesh_ui_text_gameOver;
 
+inline iw::Mesh A_mesh_menu_pause;
+inline iw::Mesh A_mesh_menu_pause_title;
 inline iw::Mesh A_mesh_menu_background;
 
 #undef rTex

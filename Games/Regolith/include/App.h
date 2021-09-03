@@ -53,7 +53,10 @@ struct GameLayer : iw::Layer
 
 	// temp ui
 	bool showGameOver = false;
+
+	int CachedAmmo  = -1;
 	int CachedScore = -1;
+
 	iw::Camera* cam;
 	int laserFluidToCreate = 0;
 	int laserFluidToRemove = 0;
@@ -61,6 +64,9 @@ struct GameLayer : iw::Layer
 	glm::vec3 laserFluidVel = glm::vec3(0.f);
 	float canFireTimer = 0;
 	float uiJitterAmount = 0;
+
+	bool uiHideBar = 0;
+	float uiBarOffset = 0;
 
 	GameLayer(
 		iw::SandLayer* sand,
@@ -161,7 +167,7 @@ struct UI
 		iw::Transform transform;
 		transform.Position.x = floor(x)      / screenWidth;
 		transform.Position.y = floor(y)      / screenHeight;
-		transform.Position.z = -z / screenDepth;
+		transform.Position.z = z / screenDepth;
 		transform.Scale.x    = floor(width)  / screenWidth;
 		transform.Scale.y    = floor(height) / screenHeight;
 

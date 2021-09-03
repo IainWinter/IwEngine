@@ -39,7 +39,6 @@ int GameLayer::Initialize()
 	PushSystem(score_s);
 	PushSystem(corePixels_s);
 	PushSystem(flocking_s);
-	PushSystem(keepInWorld_s);
 	
 	PushSystem<iw::PhysicsSystem>();
 	PushSystem<iw::EntityCleanupSystem>();
@@ -177,7 +176,8 @@ bool GameLayer::On(iw::ActionEvent& e)
 
 					break;
 				}
-				case RUN_STATE: {
+				case RUN_STATE: 
+				{
 					showGameOver = false;
 					PushSystemFront(playerTank_s);
 					PushSystemFront(world_s);
@@ -193,6 +193,8 @@ bool GameLayer::On(iw::ActionEvent& e)
 				}
 				case PAUSE_STATE:
 				{
+					uiHideBar = true;
+
 					PopSystem(player_s);
 					PopSystem(playerTank_s);
 					PopSystem(world_s);
@@ -208,6 +210,8 @@ bool GameLayer::On(iw::ActionEvent& e)
 				}
 				case RESUME_STATE:
 				{
+					uiHideBar = false;
+
 					PushSystem(player_s);
 					PushSystem(playerTank_s);
 					PushSystem(world_s);
@@ -240,15 +244,11 @@ void GameLayer::PostUpdate()
 	{
 		int ammo = m_player.Find<Player>()->CurrentWeapon->Ammo;
 
-		A_font_cambria->UpdateMesh(A_mesh_ui_text_ammo, itos(ammo), 12);
-
-		CorePixels* core = m_player.Find<CorePixels>();
-		float death = core->Timer / core->TimeWithoutCore;
-		float red = 1 - death;//(cos(iw::TotalTime() * 1.5f * death) + 1) / 2;
-
-		A_mesh_ui_background  .Material->Set("color", iw::Color(1, red, red));
-		A_mesh_ui_playerHealth.Material->Set("color", iw::Color(1, red, red));
-		uiJitterAmount += death * 10;
+		if (ammo != CachedAmmo)
+		{
+			CachedAmmo = ammo;
+			A_font_cambria->UpdateMesh(A_mesh_ui_text_ammo, itos(ammo), 12);
+		}
 	}
 
 	if (score_s->Score != CachedScore)
@@ -256,6 +256,14 @@ void GameLayer::PostUpdate()
 		CachedScore = score_s->Score;
 		A_font_cambria->UpdateMesh(A_mesh_ui_text_score, itos(CachedScore), 9);
 	}
+
+	CorePixels* core = m_player.Find<CorePixels>();
+	float death = core->Timer / core->TimeWithoutCore;
+	float red = 1 - death;//(cos(iw::TotalTime() * 1.5f * death) + 1) / 2;
+
+	A_mesh_ui_background  .Material->Set("color", iw::Color(1, red, red));
+	A_mesh_ui_playerHealth.Material->Set("color", iw::Color(1, red, red));
+	uiJitterAmount += death * 10;
 
 	sand->m_drawMouseGrid = iw::Keyboard::KeyDown(iw::SHIFT);
 
@@ -280,8 +288,15 @@ void GameLayer::PostUpdate()
 	game->z = 0;
 
 	menu->height = screen.height * .2f;                                    // Ratio(.2f)
+
+	float uiBarOffsetTarget = 0;
+	if (uiHideBar) uiBarOffsetTarget = -menu->height;
+	else           uiBarOffsetTarget =  menu->height;
+
+	uiBarOffset = iw::lerp(uiBarOffset, uiBarOffsetTarget, iw::DeltaTime() * 12);
+
 	menu->x = iw::randf() * uiJitterAmount;                                // Random(uiJitterAmount)
-	menu->y = iw::randf() * uiJitterAmount - screen.height + menu->height; //Combine(Anchor(BOTTOM), menu->height, Random(uiJitterAmount))
+	menu->y = iw::randf() * uiJitterAmount - screen.height + uiBarOffset; //Combine(Anchor(BOTTOM), menu->height, Random(uiJitterAmount))
 
 	game->y = menu->height;                      // Same(manu->height)
 	game->height = screen.height - menu->height; // fill rest of screen y
@@ -294,8 +309,8 @@ void GameLayer::PostUpdate()
 	UI* health = screen.CreateElement(A_mesh_ui_playerHealth);
 	UI* laser = screen.CreateElement(sand_ui_laserCharge->GetSandMesh());
 
-	health->z = -2; // ?? why is this negitive
-	laser->z = 2;
+	health->z = 2; 
+	laser->z = -2; // ?? why does this have to be negitive
 
 	health->height = menu->height - menu_pad;
 	health->width = health->height; // Ratio(health->height)
@@ -307,16 +322,29 @@ void GameLayer::PostUpdate()
 	laser->x = menu->x - menu->width + laser->width + menu_pad; // Combine(Anchor(LEFT), laser->width, menu_pads)
 	laser->y = menu->y;
 
-	float score_pad = (int(log10(score_s->Score)) * 15 + 30)
-			        * menu->width / A_texture_ui_background->m_width;
+	float menu_pixel_x_scale = menu->width  / A_texture_ui_background->m_width;
+	float menu_pixel_y_scale = menu->height / A_texture_ui_background->m_height;
 
+	float ammo_x_pad  = (int(log10(CachedAmmo))  * 15 + 30) * menu_pixel_x_scale;
+	float score_x_pad = (int(log10(CachedScore)) * 15 + 15) * menu_pixel_x_scale;
+
+	float ammo_y_pad = 9 * menu_pixel_y_scale;
+	float score_y_pad = 48 * menu_pixel_y_scale;
+
+	UI* ammo   = screen.CreateElement(A_mesh_ui_text_ammo);
 	UI* score = screen.CreateElement(A_mesh_ui_text_score);
 
-	score->width  = screen.height;
-	score->height = screen.height; // Same(score->width)
-	score->x = menu->x + menu->width - score_pad;
-	score->y = menu->y + menu->height - menu_pad;
-	score->z = -3;
+	ammo->width  = menu->width;
+	ammo->height = menu->width; // Same(score->width)
+	ammo->x = menu->x + menu->width - ammo_x_pad;
+	ammo->y = menu->y + menu->height - ammo_y_pad;
+	ammo->z = 2;
+
+	score->width  = menu->width;
+	score->height = menu->width; // Same(score->width)
+	score->x = menu->x + menu->width - score_x_pad;
+	score->y = menu->y + menu->height - score_y_pad;
+	score->z = 2;
 
 	if (showGameOver)
 	{
@@ -324,6 +352,11 @@ void GameLayer::PostUpdate()
 		gameover->width = screen.width;
 		gameover->height = screen.width;
 	}
+
+	UI* background = screen.CreateElement(A_mesh_background);
+	background->width  = screen.width;
+	background->height = screen.height;
+	background->z = -1;
 
 	screen.Draw(cam, Renderer);
 
@@ -447,7 +480,7 @@ iw::Application* CreateApplication(
 	options.WindowOptions = iw::WindowOptions {
 		800 + 38/2,
 		1000 + 38,
-		false,
+		true,//false,
 		iw::DisplayState::NORMAL
 	};
 
@@ -460,11 +493,27 @@ iw::Application* GetApplicationForEditor() {
 
 void MenuLayer::PostUpdate()
 {
-	UIScreen screen(Renderer->Width(), Renderer->Height(), 1);
+	UIScreen screen(Renderer->Width(), Renderer->Height(), 10);
 
-	UI* menu = screen.CreateElement(A_mesh_menu_background);
-	menu->height = 400;
-	menu->width = 400;
-	
+	UI* background = screen.CreateElement(A_mesh_menu_background);
+	background->width  = screen.width;
+	background->height = screen.height;
+	background->z = -5;
+
+	UI* pause_menu = screen.CreateElement(A_mesh_menu_pause);
+	pause_menu->height = 600;
+	pause_menu->width  = 600;
+	pause_menu->z = -6;
+
+	float pause_title_margin_x = 15;
+	float pause_title_margin_y = -5;
+
+	UI* pause_title = screen.CreateElement(A_mesh_menu_pause_title);
+	pause_title->width  = pause_menu->width;
+	pause_title->height = pause_menu->width;
+	pause_title->x = pause_menu->x - pause_menu->width  + pause_title_margin_x;
+	pause_title->y = pause_menu->y + pause_menu->height + pause_title_margin_y;
+	pause_title->z = -7;
+
 	screen.Draw(nullptr, Renderer);
 }

@@ -39,5 +39,10 @@ void main() {
 		color.a *= alpha;
 	}
 
+	if (color.a < .2)
+	{
+		discard;
+	}
+
 	PixelColor = color;
 }
