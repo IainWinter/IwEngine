@@ -161,20 +161,32 @@ bool WorldSystem::On(iw::ActionEvent& e)
 			m_player = e.as<CreatedPlayer_Event>().PlayerEntity;
 			break;
 		}
-		case END_GAME: {
-			m_levels.clear();
-			break;
-		}
-		case RUN_GAME: {
-			Space->Query<Asteroid>().Each([&](iw::EntityHandle handle, Asteroid*) {
-				Space->QueueEntity(handle, iw::func_Destroy);
-			});
+		case STATE_CHANGE:
+		{
+			StateChange_Event& event = e.as<StateChange_Event>();
 
-			m_levels.emplace_front(CreateSequence())
-				.Add<Spawn>(MakeEnemySpawner())
-				.And<Spawn>(MakeAsteroidSpawner())
-				.And<iw::Delay>(30)
-				.Start();
+			switch (event.State)
+			{
+				case RUN_STATE:
+				{
+					Space->Query<Asteroid>().Each([&](iw::EntityHandle handle, Asteroid*) {
+						Space->QueueEntity(handle, iw::func_Destroy);
+					});
+
+					m_levels.emplace_front(CreateSequence())
+						.Add<Spawn>(MakeEnemySpawner())
+						.And<Spawn>(MakeAsteroidSpawner())
+						.And<iw::Delay>(30)
+						.Start();
+					break;
+				}
+				case END_STATE:
+				{
+					m_levels.clear();
+					break;
+				}
+			}
+
 			break;
 		}
 	}

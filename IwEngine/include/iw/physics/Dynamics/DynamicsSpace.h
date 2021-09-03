@@ -10,6 +10,9 @@ namespace Physics {
 	class DynamicsSpace
 		: public CollisionSpace
 	{
+	public:
+		bool Paused = false;
+
 	private:
 		//std::vector<Rigidbody*> m_rigidbodies;
 		glm::vec3 m_gravity;

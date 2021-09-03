@@ -4,9 +4,15 @@ bool ScoreSystem::On(iw::ActionEvent& e)
 {
 	switch (e.Action)
 	{
-		case RUN_GAME:
+		case PROJ_HIT_TILE:
 		{
-			Score = 0;
+			ProjHitTile_Event& event = e.as<ProjHitTile_Event>();
+
+			if (event.Config.Hit.Has<EnemyShip>())
+			{
+				Score += 1;
+			}
+
 			break;
 		}
 		case CORE_EXPLODED:
@@ -15,14 +21,24 @@ bool ScoreSystem::On(iw::ActionEvent& e)
 			
 			if (event.Entity.Has<EnemyShip>())
 			{
-				Score += 10;
+				Score += 100; // based on size
 			}
 
 			break;
 		}
-		case END_GAME:
+		case STATE_CHANGE:
 		{
-			LOG_TRACE << "Final score " << Score << "!";
+			StateChange_Event& event = e.as<StateChange_Event>();
+
+			switch (event.State)
+			{
+				case RUN_STATE:
+					Score = 0;
+					break;
+				case END_STATE:
+					LOG_TRACE << "Final score " << Score << "!";
+					break;
+			}
 
 			break;
 		}

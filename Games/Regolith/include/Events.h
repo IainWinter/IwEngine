@@ -18,10 +18,10 @@ enum Actions {
 	CHANGE_PLAYER_WEAPON,
 	PROJ_HIT_TILE,
 	REMOVE_CELL_FROM_TILE,
-	END_GAME,
-	RUN_GAME,
 	CREATED_PLAYER,
-	CORE_EXPLODED
+	CORE_EXPLODED,
+	STATE_CHANGE,
+	OPEN_MENU,
 };
 
 struct SpawnEnemy_Event : iw::SingleEvent
@@ -179,6 +179,19 @@ struct RemoveCellFromTile_Event : iw::SingleEvent
 	{}
 };
 
+struct CreatedPlayer_Event : iw::SingleEvent
+{
+	iw::Entity PlayerEntity;
+
+	CreatedPlayer_Event(
+		iw::Entity playerEntity
+	)
+		: iw::SingleEvent(CREATED_PLAYER)
+		, PlayerEntity(playerEntity)
+	{}
+};
+
+
 struct CoreExploded_Event : iw::SingleEvent
 {
 	iw::Entity Entity;
@@ -191,24 +204,38 @@ struct CoreExploded_Event : iw::SingleEvent
 	{}
 };
 
-struct EndGame_Event : iw::SingleEvent
-{
-	EndGame_Event() : iw::SingleEvent(END_GAME) {}
+enum StateName {
+	END_STATE,
+	RUN_STATE,
+	PAUSE_STATE,
+	RESUME_STATE,
 };
 
-struct RunGame_Event : iw::SingleEvent
+struct StateChange_Event : iw::SingleEvent
 {
-	RunGame_Event() : iw::SingleEvent(RUN_GAME) {}
-};
+	StateName State;
 
-struct CreatedPlayer_Event : iw::SingleEvent
-{
-	iw::Entity PlayerEntity;
-
-	CreatedPlayer_Event(
-		iw::Entity playerEntity
+	StateChange_Event(
+		StateName state
 	)
-		: iw::SingleEvent(CREATED_PLAYER)
-		, PlayerEntity(playerEntity)
+		: iw::SingleEvent(STATE_CHANGE)
+		, State(state)
 	{}
 };
+
+enum MenuName {
+	ECS_MENU
+};
+
+struct OpenMenu_Event : iw::SingleEvent
+{
+	MenuName Menu;
+
+	OpenMenu_Event(
+		MenuName menu
+	)
+		: iw::SingleEvent(OPEN_MENU)
+		, Menu(menu)
+	{}
+};
+

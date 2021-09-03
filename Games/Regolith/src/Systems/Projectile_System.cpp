@@ -122,10 +122,19 @@ bool ProjectileSystem::On(iw::ActionEvent& e)
 			}
 			break;
 		}
-		case RUN_GAME: {
-			Space->Query<Projectile>().Each([&](iw::EntityHandle handle, Projectile*) {
-				Space->QueueEntity(handle, iw::func_Destroy);
-			});
+		case STATE_CHANGE:
+		{
+			StateChange_Event& event = e.as<StateChange_Event>();
+
+			switch (event.State)
+			{
+				case RUN_STATE:
+					Space->Query<Projectile>().Each([&](iw::EntityHandle handle, Projectile*) {
+						Space->QueueEntity(handle, iw::func_Destroy);
+					});
+					break;
+			}
+
 			break;
 		}
 	}

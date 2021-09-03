@@ -137,40 +137,53 @@ bool PlayerSystem::On(iw::ActionEvent& e)
 
 			break;
 		}
-		case END_GAME: {
-			m_player.Kill();
-			break;
-		}
-		case RUN_GAME: {
-			if (m_player)
+		
+		case STATE_CHANGE:
+		{
+			StateChange_Event& event = e.as<StateChange_Event>();
+
+			switch (event.State)
 			{
-				m_player.Revive();
-				m_player.Destroy();
-			}
+				case RUN_STATE:
+				{
+					if (m_player)
+					{
+						m_player.Revive();
+						m_player.Destroy();
+					}
 	
-			m_player = sand->MakeTile<iw::Circle, Player, CorePixels, KeepInWorld>(A_texture_player, true);
+					m_player = sand->MakeTile<iw::Circle, Player, CorePixels, KeepInWorld>(A_texture_player, true);
 
-			Player*        player    = m_player.Set<Player>();
-			CorePixels*    core      = m_player.Set<CorePixels>();
-			iw::Circle*    collider  = m_player.Find<iw::Circle>();
-			iw::Rigidbody* rigidbody = m_player.Find<iw::Rigidbody>();
-			iw::Transform* transform = m_player.Find<iw::Transform>();
+					Player*        player    = m_player.Set<Player>();
+					CorePixels*    core      = m_player.Set<CorePixels>();
+					iw::Circle*    collider  = m_player.Find<iw::Circle>();
+					iw::Rigidbody* rigidbody = m_player.Find<iw::Rigidbody>();
+					iw::Transform* transform = m_player.Find<iw::Transform>();
 
-			auto [w, h] = sand->GetSandTexSize2();
-			transform->Position = glm::vec3(w, h, 0);
+					auto [w, h] = sand->GetSandTexSize2();
+					transform->Position = glm::vec3(w, h, 0);
 
-			rigidbody->SetTransform(transform);
-			rigidbody->SetMass(10);
+					rigidbody->SetTransform(transform);
+					rigidbody->SetMass(10);
 
-			collider->Radius = 6;
+					collider->Radius = 6;
 
-			core->TimeWithoutCore = 4.f;
+					core->TimeWithoutCore = 4.f;
 
-			player->CurrentWeapon = MakeDefault_Cannon();
-			player->SpecialLaser  = MakeFatLaser_Cannon();
-			player->CurrentWeapon->Ammo = -1;
+					player->CurrentWeapon = MakeDefault_Cannon();
+					player->SpecialLaser  = MakeFatLaser_Cannon();
+					player->CurrentWeapon->Ammo = -1;
 
-			Bus->push<CreatedPlayer_Event>(m_player);
+					Bus->push<CreatedPlayer_Event>(m_player);
+
+					break;
+				}
+				case END_STATE:
+				{
+					m_player.Kill();
+					break;
+				}
+			}
 
 			break;
 		}

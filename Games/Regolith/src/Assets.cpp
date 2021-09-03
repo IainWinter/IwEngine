@@ -18,17 +18,18 @@ int LoadAssets(
 	A_texture_item_coreShard = Asset->Load<Texture>("textures/SpaceGame/item_coreShard.png");
 	A_texture_ui_cursor      = Asset->Load<Texture>("textures/SpaceGame/cursor.png");
 	A_texture_ui_background  = Asset->Load<Texture>("textures/SpaceGame/ui_background.png");
-	A_texture_font_arial     = Asset->Load<Texture>("textures/fonts/arial.png");
+	A_texture_font_cambria     = Asset->Load<Texture>("textures/fonts/cambria.png");
 
-	A_font_arial = Asset->Load<iw::Font>("fonts/arial.fnt");
-	
+	A_font_cambria = Asset->Load<iw::Font>("fonts/cambria.fnt");
+
 	A_material_texture_cam = REF<Material>(Asset->Load<Shader>("shaders/texture_cam.shader"));
 	A_material_font_cam    = REF<Material>(Asset->Load<Shader>("shaders/font.shader"));
 
 	A_mesh_background      = iw::ScreenQuad().MakeInstance();
 	A_mesh_ui_background   = iw::ScreenQuad().MakeInstance();
 	A_mesh_ui_playerHealth = iw::ScreenQuad().MakeInstance();
-	
+	A_mesh_menu_background = iw::ScreenQuad().MakeInstance();
+
 #define CHECK_LOAD(x) if(!x) { LOG_ERROR << "Failed to load " << #x; return 100; }
 	
 	CHECK_LOAD(A_texture_player        );
@@ -43,9 +44,9 @@ int LoadAssets(
 	CHECK_LOAD(A_texture_item_coreShard);
 	CHECK_LOAD(A_texture_ui_cursor     );
 	CHECK_LOAD(A_texture_ui_background );
-	CHECK_LOAD(A_texture_font_arial    );
+	CHECK_LOAD(A_texture_font_cambria    );
 
-	CHECK_LOAD(A_font_arial);
+	CHECK_LOAD(A_font_cambria);
 
 	CHECK_LOAD(A_material_texture_cam->Shader);
 	CHECK_LOAD(A_material_font_cam   ->Shader);
@@ -62,7 +63,7 @@ int LoadAssets(
 	A_texture_item_coreShard->m_filter = NEAREST;
 	A_texture_ui_cursor     ->m_filter = NEAREST;
 	A_texture_ui_background ->m_filter = NEAREST;
-	A_texture_font_arial    ->m_filter = NEAREST;
+	A_texture_font_cambria    ->m_filter = NEAREST;
 
 	A_texture_player        ->m_wrap = EDGE;
 	A_texture_enemy1        ->m_wrap = EDGE;
@@ -76,7 +77,7 @@ int LoadAssets(
 	A_texture_item_coreShard->m_wrap = EDGE;
 	A_texture_ui_cursor     ->m_wrap = EDGE;
 	A_texture_ui_background ->m_wrap = EDGE;
-	A_texture_font_arial    ->m_wrap = EDGE;
+	A_texture_font_cambria    ->m_wrap = EDGE;
 
 	{
 		Renderer->InitShader(A_material_texture_cam->Shader, CAMERA);
@@ -87,7 +88,7 @@ int LoadAssets(
 	{
 		Renderer->InitShader(A_material_font_cam->Shader, iw::CAMERA);
 		A_material_font_cam->SetTransparency(Transparency::ADD);
-		A_material_font_cam->SetTexture("fontMap", A_texture_font_arial);
+		A_material_font_cam->SetTexture("fontMap", A_texture_font_cambria);
 		A_material_font_cam->Set("color", iw::Color(1));
 	}
 
@@ -102,6 +103,11 @@ int LoadAssets(
 	}
 
 	{
+		A_mesh_menu_background.Material = A_material_texture_cam->MakeInstance();
+		A_mesh_ui_background.Material->SetTexture("texture", A_texture_ui_background);
+	}
+
+	{
 		ref<Texture> ui_player_texture = REF<Texture>(*A_texture_player);
 		ui_player_texture->SetFilter(iw::NEAREST);
 		ui_player_texture->CreateColors();
@@ -111,17 +117,17 @@ int LoadAssets(
 	}
 
 	{
-		A_mesh_ui_text_ammo = A_font_arial->GenerateMesh("0", .001f);
+		A_mesh_ui_text_ammo = A_font_cambria->GenerateMesh("0", 9);
 		A_mesh_ui_text_ammo.Material = A_material_font_cam->MakeInstance();
 	}
 
 	{
-		A_mesh_ui_text_score = A_font_arial->GenerateMesh("0", .001f);
+		A_mesh_ui_text_score = A_font_cambria->GenerateMesh("0", 9);
 		A_mesh_ui_text_score.Material = A_material_font_cam->MakeInstance();
 	}
 
 	{
-		A_mesh_ui_text_gameOver = A_font_arial->GenerateMesh("GAME OVER\npress space to restart...", .001f);
+		A_mesh_ui_text_gameOver = A_font_cambria->GenerateMesh("GAME OVER\npress space to restart...", 9);
 		A_mesh_ui_text_gameOver.Material = A_material_font_cam->MakeInstance();
 	}
 

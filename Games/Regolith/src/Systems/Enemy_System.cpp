@@ -32,10 +32,19 @@ bool EnemySystem::On(iw::ActionEvent& e)
 			DestroyEnemy(e.as<CoreExploded_Event>().Entity);
 			break;
 		}
-		case RUN_GAME: {
-			Space->Query<EnemyShip>().Each([&](iw::EntityHandle handle, EnemyShip*) {
-				Space->QueueEntity(handle, iw::func_Destroy);
-			});
+		case STATE_CHANGE:
+		{
+			StateChange_Event& event = e.as<StateChange_Event>();
+
+			switch (event.State)
+			{
+				case RUN_STATE:
+					Space->Query<EnemyShip>().Each([&](iw::EntityHandle handle, EnemyShip*) {
+						Space->QueueEntity(handle, iw::func_Destroy);
+					});
+					break;
+			}
+
 			break;
 		}
 	}

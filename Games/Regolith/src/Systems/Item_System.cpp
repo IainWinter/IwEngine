@@ -105,12 +105,21 @@ bool ItemSystem::On(iw::ActionEvent& e)
             m_player = e.as<CreatedPlayer_Event>().PlayerEntity;
             break;
         }
-        case RUN_GAME: {
-            Space->Query<Item>().Each([&](iw::EntityHandle handle, Item*) {
-		        Space->QueueEntity(handle, iw::func_Destroy);
-	        });
-            break;
-        }
+		case STATE_CHANGE:
+		{
+			StateChange_Event& event = e.as<StateChange_Event>();
+
+			switch (event.State)
+			{
+				case RUN_STATE:
+                    Space->Query<Item>().Each([&](iw::EntityHandle handle, Item*) {
+                        Space->QueueEntity(handle, iw::func_Destroy);
+                    });
+					break;
+			}
+
+			break;
+		}
     }
 
     return false;

@@ -17,7 +17,6 @@ namespace Engine {
 		bool m_running;
 	public:
 		APP_VARS
-	//protected:
 
 	public:
 		IWENGINE_API

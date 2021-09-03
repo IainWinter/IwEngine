@@ -22,9 +22,10 @@ inline rTex A_texture_item_minigun;
 inline rTex A_texture_item_coreShard;
 inline rTex A_texture_ui_background;
 inline rTex A_texture_ui_cursor;
-inline rTex A_texture_font_arial;
+inline rTex A_texture_font_cambria;
 
-inline rFont A_font_arial;
+
+inline rFont A_font_cambria;
 
 inline rMat A_material_texture_cam;
 inline rMat A_material_font_cam;
@@ -36,6 +37,8 @@ inline iw::Mesh A_mesh_ui_playerHealth;
 inline iw::Mesh A_mesh_ui_text_ammo;
 inline iw::Mesh A_mesh_ui_text_score;
 inline iw::Mesh A_mesh_ui_text_gameOver;
+
+inline iw::Mesh A_mesh_menu_background;
 
 #undef rTex
 #undef rMat

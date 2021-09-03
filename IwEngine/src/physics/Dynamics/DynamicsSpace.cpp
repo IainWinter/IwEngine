@@ -37,6 +37,11 @@ namespace Physics {
 	void DynamicsSpace::Step(
 		scalar dt)
 	{
+		if (Paused)
+		{
+			return;
+		}
+
 		TryApplyGravity();
 
 		//PredictTransforms(dt);

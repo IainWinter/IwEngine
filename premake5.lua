@@ -150,6 +150,58 @@ group ""
 			runtime "Release"
 			optimize "On"
 
+	project "wUtil"
+		kind "SharedLib"
+		language "C++"
+		location  (iwengdir .. blddir)
+		targetdir (iwengdir .. bindir)
+		implibdir (iwengdir .. libdir)
+		objdir    (iwengdir .. blddir)
+
+		libdirs {
+			curldir .. "/lib/%{cfg.platform}"
+		}
+
+		prebuildcommands {
+			"xcopy /y /f \"" .. fmoddir .. "/bin/%{cfg.platform}/fmod.dll\" \""       .. iwengdir .. bindir .. "\"",
+			"xcopy /y /f \"" .. fmoddir .. "/bin/%{cfg.platform}/fmodstudio.dll\" \"" .. iwengdir .. bindir .. "\"",
+			"xcopy /y /f \"" .. fmoddir .. "/lib/%{cfg.platform}/fmod.lib\" \""       .. iwengdir .. libdir .. "\"",
+			"xcopy /y /f \"" .. fmoddir .. "/lib/%{cfg.platform}/fmodstudio.lib\" \"" .. iwengdir .. libdir .. "\""
+		}
+
+		files {
+			iwengdir .. incdir .. "/iw/util/**.h",
+			iwengdir .. srcdir .. "/util/**.cpp"
+		}
+
+		includedirs {
+			iwengdir  .. incdir,
+			curldir .. incdir
+		}
+
+		links {
+			"wLog",
+			"curl"
+		}
+
+		filter "system:windows"
+			cppdialect "C++17"
+			systemversion "latest"
+			defines {
+				"IW_PLATFORM_WINDOWS",
+				"IWUTIL_DLL"
+			}
+
+		filter "configurations:Debug"
+			defines "IW_DEBUG"
+			runtime "Debug"
+			symbols "On"
+
+		filter "configurations:Release"
+			defines "IW_RELEASE"
+			runtime "Release"
+			optimize "On"
+
 	project "wAudio"
 		kind "SharedLib"
 		language "C++"

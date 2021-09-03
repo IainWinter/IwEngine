@@ -72,7 +72,7 @@ void CorePixelsSystem::Update()
 				Bus->push<CoreExploded_Event>(iw::Entity(handle, Space));
 
 				if (Space->HasComponent<Player>(handle)) {
-					Bus->push<EndGame_Event>();
+					Bus->push<StateChange_Event>(END_STATE);
 				}
 
 				else {
