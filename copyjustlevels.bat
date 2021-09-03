@@ -1,1 +1,0 @@
-@xcopy C:\dev\IwEngine\Editor\assets\levels C:\dev\IwEngine\Editor\build\assets\levels\  /e /y /f /i

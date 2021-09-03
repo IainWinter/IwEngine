@@ -32,7 +32,7 @@ group "extern"
 	include (imguidir)
 group ""
 
-	os.execute ("cmake -S " .. assimpdir  .. " -B " .. assimpdir .. blddir)
+	os.execute (".\\Tools\\cmake.exe -S " .. assimpdir  .. " -B " .. assimpdir .. blddir)
 
 	project "wLog"
 		kind "SharedLib"
@@ -158,16 +158,16 @@ group ""
 		implibdir (iwengdir .. libdir)
 		objdir    (iwengdir .. blddir)
 
-		libdirs {
-			curldir .. "/lib/%{cfg.platform}"
-		}
+		--libdirs {
+		--	curldir .. "/lib/%{cfg.platform}"
+		--}
 
-		prebuildcommands {
-			"xcopy /y /f \"" .. fmoddir .. "/bin/%{cfg.platform}/fmod.dll\" \""       .. iwengdir .. bindir .. "\"",
-			"xcopy /y /f \"" .. fmoddir .. "/bin/%{cfg.platform}/fmodstudio.dll\" \"" .. iwengdir .. bindir .. "\"",
-			"xcopy /y /f \"" .. fmoddir .. "/lib/%{cfg.platform}/fmod.lib\" \""       .. iwengdir .. libdir .. "\"",
-			"xcopy /y /f \"" .. fmoddir .. "/lib/%{cfg.platform}/fmodstudio.lib\" \"" .. iwengdir .. libdir .. "\""
-		}
+		--prebuildcommands {
+		--	"xcopy /y /f \"" .. fmoddir .. "/bin/%{cfg.platform}/fmod.dll\" \""       .. iwengdir .. bindir .. "\"",
+		--	"xcopy /y /f \"" .. fmoddir .. "/bin/%{cfg.platform}/fmodstudio.dll\" \"" .. iwengdir .. bindir .. "\"",
+		--	"xcopy /y /f \"" .. fmoddir .. "/lib/%{cfg.platform}/fmod.lib\" \""       .. iwengdir .. libdir .. "\"",
+		--	"xcopy /y /f \"" .. fmoddir .. "/lib/%{cfg.platform}/fmodstudio.lib\" \"" .. iwengdir .. libdir .. "\""
+		--}
 
 		files {
 			iwengdir .. incdir .. "/iw/util/**.h",
@@ -176,12 +176,12 @@ group ""
 
 		includedirs {
 			iwengdir  .. incdir,
-			curldir .. incdir
+			--curldir .. incdir
 		}
 
 		links {
 			"wLog",
-			"curl"
+		--	"curl"
 		}
 
 		filter "system:windows"
