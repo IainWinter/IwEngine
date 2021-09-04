@@ -32,8 +32,6 @@ group "extern"
 	include (imguidir)
 group ""
 
-	os.execute (".\\Tools\\cmake.exe -S " .. assimpdir  .. " -B " .. assimpdir .. blddir)
-
 	project "wLog"
 		kind "SharedLib"
 		language "C++"
@@ -490,12 +488,12 @@ group ""
 			glewdir   .. incdir,
 			stbdir    .. incdir,
 			assimpdir .. incdir,
-			assimpdir .. blddir .. incdir,
+			--assimpdir .. blddir .. incdir,
 			glmdir .. incdir
 		}
 
 		libdirs {
-			assimpdir .. blddir .. "/code/%{cfg.buildcfg}"
+			assimpdir .. "/lib/%{cfg.platform}"
 		}
 
 		links {
@@ -511,8 +509,7 @@ group ""
 		}
 
 		prebuildcommands  {
-			"xcopy /y /f \"" .. assimpdir .. blddir .. "/code/%{cfg.buildcfg}/assimp-vc140-mt.dll\" \"" .. iwengdir .. bindir .. "\"",
-			"xcopy /y /f \"" .. assimpdir .. blddir .. "/code/%{cfg.buildcfg}/assimp-vc140-mt.lib\" \"" .. iwengdir .. libdir .. "\""
+			"xcopy /y /f \"" .. assimpdir .. "/bin/%{cfg.platform}/assimp-vc140-mt.dll\" \"" .. iwengdir .. bindir .. "\"",
 		}
 
 		filter "system:windows"
