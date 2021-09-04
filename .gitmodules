@@ -1,16 +1,9 @@
 [submodule "vendor/imgui"]
 	path = vendor/imgui
 	url = https://github.com/IainWinter/imgui
-	ignore = dirty
-[submodule "IwEngine/extern/assimp"]
-	path = IwEngine/extern/assimp
-	url = https://github.com/IainWinter/assimp
+	branch = docking
 	ignore = dirty
 [submodule "IwEngine/extern/json"]
 	path = IwEngine/extern/json
 	url = https://github.com/sheredom/json.h
 	ignore = dirty
-[submodule "IwEngine/extern/imgui"]
-	path = IwEngine/extern/imgui
-	url = https://github.com/IainWinter/imgui
-	branch = docking
