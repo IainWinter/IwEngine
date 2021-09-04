@@ -240,6 +240,8 @@ bool GameLayer::On(iw::ActionEvent& e)
 
 void GameLayer::PostUpdate()
 {
+	sand->m_drawMouseGrid = iw::Keyboard::KeyDown(iw::SHIFT);
+
 	if (m_player.Alive()) 
 	{
 		int ammo = m_player.Find<Player>()->CurrentWeapon->Ammo;
@@ -247,27 +249,36 @@ void GameLayer::PostUpdate()
 		if (ammo != CachedAmmo)
 		{
 			CachedAmmo = ammo;
-			A_font_cambria->UpdateMesh(A_mesh_ui_text_ammo, itos(ammo), 12);
+			A_font_cambria->UpdateMesh(A_mesh_ui_text_ammo, itos(CachedAmmo), 5);
 		}
 	}
 
 	if (score_s->Score != CachedScore)
 	{
 		CachedScore = score_s->Score;
-		A_font_cambria->UpdateMesh(A_mesh_ui_text_score, itos(CachedScore), 9);
+		A_font_cambria->UpdateMesh(A_mesh_ui_text_score, itos(CachedScore), 5);
 	}
 
-	CorePixels* core = m_player.Find<CorePixels>();
-	float death = core->Timer / core->TimeWithoutCore;
-	float red = 1 - death;//(cos(iw::TotalTime() * 1.5f * death) + 1) / 2;
+	float red;
+
+	if (showGameOver)
+	{
+		red = 0;
+		uiJitterAmount = 10;
+	}
+
+	else
+	{
+		CorePixels* core = m_player.Find<CorePixels>();
+		float death = core->Timer / core->TimeWithoutCore;
+		red = 1 - death; //(cos(iw::TotalTime() * 1.5f * death) + 1) / 2;
+
+		uiJitterAmount = 75 * death;
+		uiJitterAmount = iw::lerp(uiJitterAmount, 0.f, iw::DeltaTime() * 10);
+	}
 
 	A_mesh_ui_background  .Material->Set("color", iw::Color(1, red, red));
 	A_mesh_ui_playerHealth.Material->Set("color", iw::Color(1, red, red));
-	uiJitterAmount += death * 10;
-
-	sand->m_drawMouseGrid = iw::Keyboard::KeyDown(iw::SHIFT);
-
-	uiJitterAmount = iw::lerp(uiJitterAmount, 0.f, iw::DeltaTime() * 10);
 
 	// screen - fills screen
 	//		game board - fills empty space, 1:1 aspect ratio
@@ -325,23 +336,23 @@ void GameLayer::PostUpdate()
 	float menu_pixel_x_scale = menu->width  / A_texture_ui_background->m_width;
 	float menu_pixel_y_scale = menu->height / A_texture_ui_background->m_height;
 
-	float ammo_x_pad  = (int(log10(CachedAmmo))  * 15 + 30) * menu_pixel_x_scale;
-	float score_x_pad = (int(log10(CachedScore)) * 15 + 15) * menu_pixel_x_scale;
+	float ammo_x_pad  = (floor(log10(CachedAmmo))  * 11 + 30) * menu_pixel_x_scale;
+	float score_x_pad = (floor(log10(CachedScore)) * 11 + 30) * menu_pixel_x_scale;
 
-	float ammo_y_pad = 9 * menu_pixel_y_scale;
+	float ammo_y_pad = 13 * menu_pixel_y_scale;
 	float score_y_pad = 48 * menu_pixel_y_scale;
 
 	UI* ammo   = screen.CreateElement(A_mesh_ui_text_ammo);
 	UI* score = screen.CreateElement(A_mesh_ui_text_score);
 
-	ammo->width  = menu->width;
-	ammo->height = menu->width; // Same(score->width)
+	ammo->width  = menu->height;
+	ammo->height = menu->height; // Same(score->width)
 	ammo->x = menu->x + menu->width - ammo_x_pad;
 	ammo->y = menu->y + menu->height - ammo_y_pad;
 	ammo->z = 2;
 
-	score->width  = menu->width;
-	score->height = menu->width; // Same(score->width)
+	score->width  = menu->height;
+	score->height = menu->height; // Same(score->width)
 	score->x = menu->x + menu->width - score_x_pad;
 	score->y = menu->y + menu->height - score_y_pad;
 	score->z = 2;
@@ -349,13 +360,16 @@ void GameLayer::PostUpdate()
 	if (showGameOver)
 	{
 		UI* gameover = screen.CreateElement(A_mesh_ui_text_gameOver);
+		gameover->x = -screen.width*.8;
+		gameover->y = screen.height * .5;
 		gameover->width = screen.width;
 		gameover->height = screen.width;
 	}
 
 	UI* background = screen.CreateElement(A_mesh_background);
-	background->width  = screen.width;
-	background->height = screen.height;
+	background->y = game->y;
+	background->width  = game->width;
+	background->height = game->height;
 	background->z = -1;
 
 	screen.Draw(cam, Renderer);
@@ -480,7 +494,7 @@ iw::Application* CreateApplication(
 	options.WindowOptions = iw::WindowOptions {
 		800 + 38/2,
 		1000 + 38,
-		true,//false,
+		/*true,*/false,
 		iw::DisplayState::NORMAL
 	};
 

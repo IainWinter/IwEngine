@@ -14,6 +14,20 @@ void ItemSystem::FixedUpdate()
                 return;
             }
 
+            if (item->DieWithTime)
+            {
+                item->LifeTimer -= iw::FixedTime();
+                if (item->LifeTimer <= 0)
+                {
+                    Space->QueueEntity(entity, iw::func_Destroy);
+                }
+             
+                else if (item->LifeTimer < 1)
+                {
+                    rigidbody->Transform.Scale = iw::lerp(rigidbody->Transform.Scale, glm::vec3(0.f), 1 - item->LifeTimer);
+                }
+            }
+
             glm::vec3 playerPos = m_player.Find<iw::Transform>()->Position;
             glm::vec3 healthPos = rigidbody->Transform.Position;
 
@@ -149,6 +163,7 @@ iw::Entity ItemSystem::MakeItem(
 
     item->ActivateTimer = config.ActivateDelay;
     item->OnPickUp = config.OnPickup;
+    item->DieWithTime = config.DieWithTime;
 
     return entity;
 }

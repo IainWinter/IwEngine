@@ -18,10 +18,10 @@ int LoadAssets(
 	A_texture_item_coreShard = Asset->Load<Texture>("textures/SpaceGame/item_coreShard.png");
 	A_texture_ui_cursor      = Asset->Load<Texture>("textures/SpaceGame/cursor.png");
 	A_texture_ui_background  = Asset->Load<Texture>("textures/SpaceGame/ui_background.png");
-	A_texture_font_cambria   = Asset->Load<Texture>("textures/fonts/cambria.png");
+	A_texture_font_cambria   = Asset->Load<Texture>("textures/fonts/cambria_lowres.png");
 	A_texture_menu_pause     = Asset->Load<Texture>("textures/SpaceGame/menu_pause.png");
 
-	A_font_cambria = Asset->Load<iw::Font>("fonts/cambria.fnt");
+	A_font_cambria = Asset->Load<iw::Font>("fonts/cambria_lowres.fnt");
 
 	A_material_texture_cam = REF<Material>(Asset->Load<Shader>("shaders/texture_cam.shader"));
 	A_material_font_cam    = REF<Material>(Asset->Load<Shader>("shaders/font.shader"));
@@ -115,21 +115,26 @@ int LoadAssets(
 	}
 
 	{
-		A_mesh_ui_text_ammo = A_font_cambria->GenerateMesh("0", 9);
+		A_mesh_ui_text_ammo = A_font_cambria->GenerateMesh("0", 4);
 		A_mesh_ui_text_ammo.Material = A_material_font_cam;
 	}
 
 	{
-		A_mesh_ui_text_score = A_font_cambria->GenerateMesh("0", 9);
+		A_mesh_ui_text_score = A_font_cambria->GenerateMesh("0", 4);
 		A_mesh_ui_text_score.Material = A_material_font_cam;
 	}
 
 	{
-		A_mesh_ui_text_gameOver = A_font_cambria->GenerateMesh("GAME OVER\npress space to restart...", 9);
+		A_mesh_ui_text_gameOver = A_font_cambria->GenerateMesh("GAME OVER\npress space to restart...", 2);
 		A_mesh_ui_text_gameOver.Material = A_material_font_cam;
 	}
 
 	// Menus
+
+	{
+		A_mesh_menu_pause_title = A_font_cambria->GenerateMesh("Pause Menu", 2);
+		A_mesh_menu_pause_title.Material = A_material_font_cam;
+	}
 
 	{
 		A_mesh_menu_background.Material = A_material_texture_cam->MakeInstance();
@@ -143,11 +148,6 @@ int LoadAssets(
 		A_mesh_menu_pause.Material->Set("alphaThresh", 0.0f);
 		A_mesh_menu_pause.Material->Set("color", iw::Color(.5));
 		A_mesh_menu_pause.Material->SetTransparency(Transparency::ADD);
-	}
-
-	{
-		A_mesh_menu_pause_title = A_font_cambria->GenerateMesh("Pause Menu", 11);
-		A_mesh_menu_pause_title.Material = A_material_font_cam;
 	}
 
 	return 0;

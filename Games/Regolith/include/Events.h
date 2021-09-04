@@ -94,6 +94,8 @@ struct SpawnItem_Config
 	float Speed = 75;
 	float AngularSpeed = 0;
 
+	bool DieWithTime = true;
+
 	ItemType Item;
 	std::function<void()> OnPickup;
 };
