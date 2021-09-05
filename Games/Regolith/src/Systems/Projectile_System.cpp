@@ -16,41 +16,14 @@ void ProjectileSystem::Update()
 	});
 }
 
-//float time__ = 0;
-
 void ProjectileSystem::FixedUpdate()
 {
 	Space->Query<Projectile>().Each([&](iw::EntityHandle, Projectile* p) 
 	{
 		if (p->FixedUpdate) p->FixedUpdate();
 	});
+}
 
-	//time__ += iw::FixedTime();
-
-	//if (/*iw::Keyboard::KeyDown(iw::G) &&*/ time__ > .15)
-	//{
-	//	time__ = 0;
-
-	//	float x = 0;// iw::Mouse::ScreenPos().x() / Renderer->Width();
-	//	float y = 1;// iw::Mouse::ScreenPos().y() / Renderer->Height();
-
-	//	auto [w, h] = sand->GetSandTexSize2();
-
-	//	glm::vec2 vel(x, y);
-	//	vel = glm::normalize(vel) * 44.f;
-	//	//vel.x += iw::randfs() * 5;
-	//	//vel.y += iw::randfs() * 5;
-
-	//	ShotInfo shot;
-	//	shot.x = w-4;
-	//	shot.y = h-20;
-	//	shot.dx = vel.x;
-	//	shot.dy = vel.y;
-	//	shot.projectile = ProjectileType::BULLET;
-
-	//	Bus->push<SpawnProjectile_Event>(shot, 15);
-	//}
-}
 
 // helpers
 
@@ -114,12 +87,18 @@ bool ProjectileSystem::On(iw::ActionEvent& e)
 		case SPAWN_PROJECTILE: {
 			SpawnProjectile_Event& event = e.as<SpawnProjectile_Event>();
 
-			switch (event.Shot.projectile) 
+			std::vector<ShotInfo> shots = event.Shot.others;
+			shots.push_back(event.Shot);
+
+			for (const ShotInfo& shot : shots)
 			{
-				case ProjectileType::BULLET: MakeBullet(event.Shot, event.Depth); break;
-				case ProjectileType::LASER:  MakeLaser (event.Shot, event.Depth); break;
-				case ProjectileType::BEAM:   MakeBeam  (event.Shot, event.Depth); break;
-			}
+				switch (event.Shot.projectile) 
+				{	
+					case ProjectileType::BULLET: MakeBullet(event.Shot, event.Depth); break;
+					case ProjectileType::LASER:  MakeLaser (event.Shot, event.Depth); break;
+					case ProjectileType::BEAM:   MakeBeam  (event.Shot, event.Depth); break;
+				}
+			}	
 			break;
 		}
 		case STATE_CHANGE:
@@ -134,7 +113,6 @@ bool ProjectileSystem::On(iw::ActionEvent& e)
 					});
 					break;
 			}
-
 			break;
 		}
 	}

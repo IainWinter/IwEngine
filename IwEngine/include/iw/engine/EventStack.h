@@ -100,7 +100,7 @@ namespace Engine {
 						case InputEventType::MouseButton: e.Handled = On((MouseButtonEvent&)e); break;
 						case InputEventType::Key:    	    e.Handled = On((KeyEvent&)        e); break;
 						case InputEventType::KeyTyped:    e.Handled = On((KeyTypedEvent&)   e); break;
-						//case InputEventType::Command:                                           break;
+						case InputEventType::Command:     /* handle command event in layers!*/  break;
 						default: error = true;
 					}
 					break;

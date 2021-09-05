@@ -13,10 +13,9 @@ void PlayerSystem::FixedUpdate()
 	if (player->i_right) rigidbody->Velocity.x =  player->speed;
 	if (player->i_left)  rigidbody->Velocity.x = -player->speed;
 
-	float angle = ((int)player->i_left - (int)player->i_right) * iw::Pi / 2;
-
-	player->rotation = angle;// iw::lerp(player->rotation, angle, iw::FixedTime() * 5);
-	rigidbody->Transform.Rotation = glm::angleAxis(player->rotation, glm::vec3(0, 0, 1));
+	//float angle = ((int)player->i_left - (int)player->i_right) * iw::Pi / 2;
+	//player->rotation = iw::lerp(player->rotation, angle, iw::FixedTime() * 5);
+	//rigidbody->Transform.Rotation = glm::angleAxis(player->rotation, glm::vec3(0, 0, 1));
 }
 
 void PlayerSystem::Update()
@@ -25,7 +24,7 @@ void PlayerSystem::Update()
 
 	Player* player = m_player.Find<Player>();
 
-	player->i_up    = iw::Keyboard::KeyDown(iw::W); // should use event loop
+	player->i_up    = iw::Keyboard::KeyDown(iw::W); // todo: use event loop
 	player->i_down  = iw::Keyboard::KeyDown(iw::S);
 	player->i_left  = iw::Keyboard::KeyDown(iw::A);
 	player->i_right = iw::Keyboard::KeyDown(iw::D);
@@ -64,6 +63,8 @@ void PlayerSystem::Update()
 	//}
 }
 
+//todo: full power move if you have full health
+
 bool PlayerSystem::On(iw::ActionEvent& e)
 {
 	switch (e.Action) {
@@ -74,48 +75,55 @@ bool PlayerSystem::On(iw::ActionEvent& e)
 			CorePixels* core = m_player.Find<CorePixels>();
 			iw::Tile*   tile = m_player.Find<iw::Tile>();
 
-			if (event.Index == -1)
+			std::vector<int> candidates;
+
+			if (event.IsCore)
 			{
-				std::vector<int> nonCoreIndices;
-				for (int index : tile->m_removedCells)
+				for (const int& index : core->Indices)
 				{
-					if (core->Indices.find(index) == core->Indices.end())
+					if (core->ActiveIndices.find(index) == core->ActiveIndices.end())
 					{
-						nonCoreIndices.push_back(index);
+						candidates.push_back(index);
 					}
-				}
-
-				if (nonCoreIndices.size() > 0) 
-				{
-					float minDist = FLT_MAX;
-					int healIndex = 0;
-
-					for (int index : nonCoreIndices)
-					{
-						int x = index % tile->m_sprite.m_width;
-						int y = index / tile->m_sprite.m_width;
-						int dx = core->CenterX - x;
-						int dy = core->CenterY - y;
-						float dist = sqrt(dx*dx+dy*dy);
-						
-						if (dist < minDist)
-						{
-							minDist = dist;
-							healIndex = index;
-						}
-					}
-
-					tile->ReinstatePixel(healIndex);
 				}
 			}
 
 			else 
 			{
-				tile->ReinstatePixel(event.Index);
-
-				if (core->Indices.find(event.Index) != core->Indices.end())
+				for (const int& index : tile->m_removedCells)
 				{
-					core->ActiveIndices.insert(event.Index);
+					if (core->Indices.find(index) == core->Indices.end())
+					{
+						candidates.push_back(index);
+					}
+				}
+			}
+
+			if (candidates.size() > 0)
+			{
+				float minDist = FLT_MAX;
+				int healIndex = 0;
+
+				for (const int& index : candidates)
+				{
+					int x = index % tile->m_sprite.m_width;
+					int y = index / tile->m_sprite.m_width;
+					int dx = core->CenterX - x;
+					int dy = core->CenterY - y;
+					float dist = sqrt(dx*dx+dy*dy);
+						
+					if (dist < minDist)
+					{
+						minDist = dist;
+						healIndex = index;
+					}
+				}
+
+				tile->ReinstatePixel(healIndex);
+
+				if (event.IsCore)
+				{
+					core->ActiveIndices.insert(healIndex);
 				}
 			}
 

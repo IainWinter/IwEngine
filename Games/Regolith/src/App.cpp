@@ -194,6 +194,7 @@ bool GameLayer::On(iw::ActionEvent& e)
 				case PAUSE_STATE:
 				{
 					uiHideBar = true;
+					uiExpandBackground = true;
 
 					PopSystem(player_s);
 					PopSystem(playerTank_s);
@@ -211,6 +212,7 @@ bool GameLayer::On(iw::ActionEvent& e)
 				case RESUME_STATE:
 				{
 					uiHideBar = false;
+					uiExpandBackground = false;
 
 					PushSystem(player_s);
 					PushSystem(playerTank_s);
@@ -303,7 +305,6 @@ void GameLayer::PostUpdate()
 	float uiBarOffsetTarget = 0;
 	if (uiHideBar) uiBarOffsetTarget = -menu->height;
 	else           uiBarOffsetTarget =  menu->height;
-
 	uiBarOffset = iw::lerp(uiBarOffset, uiBarOffsetTarget, iw::DeltaTime() * 12);
 
 	menu->x = iw::randf() * uiJitterAmount;                                // Random(uiJitterAmount)
@@ -366,10 +367,15 @@ void GameLayer::PostUpdate()
 		gameover->height = screen.width;
 	}
 
+	float uiBackgroundScaleTarget = 0;
+	if (uiExpandBackground) uiBackgroundScaleTarget = 3;
+	else                    uiBackgroundScaleTarget = 1;
+	uiBackgroundScale = iw::lerp(uiBackgroundScale, uiBackgroundScaleTarget, iw::DeltaTime() * 12);
+
 	UI* background = screen.CreateElement(A_mesh_background);
 	background->y = game->y;
-	background->width  = game->width;
-	background->height = game->height;
+	background->width  = game->width  * uiBackgroundScale;
+	background->height = game->height * uiBackgroundScale;
 	background->z = -1;
 
 	screen.Draw(cam, Renderer);
@@ -420,15 +426,10 @@ int App::Initialize(
 	iw::ref<iw::Context> context = Input->CreateContext("Game");
 		
 	context->MapButton(iw::SPACE , "action");
-	context->MapButton(iw::SHIFT , "-jump");
 	context->MapButton(iw::D     , "+right");
 	context->MapButton(iw::A     , "-right");
 	context->MapButton(iw::W     , "+forward");
 	context->MapButton(iw::S     , "-forward");
-	context->MapButton(iw::C     , "use");
-	context->MapButton(iw::T     , "toolbox");
-	context->MapButton(iw::I     , "imgui");
-	context->MapButton(iw::R     , "reload");
 	context->MapButton(iw::ESCAPE, "esc-menu");
 
 	context->AddDevice(Input->CreateDevice<iw::Mouse>());

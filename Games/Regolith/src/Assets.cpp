@@ -132,7 +132,7 @@ int LoadAssets(
 	// Menus
 
 	{
-		A_mesh_menu_pause_title = A_font_cambria->GenerateMesh("Pause Menu", 2);
+		A_mesh_menu_pause_title = A_font_cambria->GenerateMesh("Pause Menu\n\ncoming soon...", 2);
 		A_mesh_menu_pause_title.Material = A_material_font_cam;
 	}
 

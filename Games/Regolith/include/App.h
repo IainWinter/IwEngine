@@ -65,8 +65,11 @@ struct GameLayer : iw::Layer
 	float canFireTimer = 0;
 	float uiJitterAmount = 0;
 
-	bool uiHideBar = 0;
+	bool uiHideBar = false;
 	float uiBarOffset = 0;
+
+	bool uiExpandBackground = false;
+	float uiBackgroundScale = 1;
 
 	GameLayer(
 		iw::SandLayer* sand,

@@ -10,6 +10,15 @@ enum ProjectileType {
 	BEAM
 };
 
+//struct Projectile
+//{
+//	void FixedUpdate();
+//	std::tuple<bool, float, float> Update();
+//
+//	void OnHit(float hx, float hy);
+//	void PlaceCell();
+//};
+
 struct Projectile {
 	std::function<void()> FixedUpdate; // called in physics tick
 	std::function<std::tuple<bool, float, float>()> Update; // called in render tick, return true if collision

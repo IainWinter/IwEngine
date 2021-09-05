@@ -10,6 +10,7 @@
 #include "Components/CorePixels.h"
 
 #include "Events.h"
+#include "Assets.h"
 
 struct EnemySystem : iw::SystemBase
 {

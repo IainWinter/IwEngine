@@ -126,11 +126,13 @@ struct ChangeLaserFluid_Event : iw::SingleEvent
 
 struct HealPlayer_Event : iw::SingleEvent
 {
-	int Index;
+	bool IsCore;
 
-	HealPlayer_Event(int index = -1) // -1 is random
+	HealPlayer_Event(
+		int isCore = false
+	)
 		: iw::SingleEvent(HEAL_PLAYER)
-		, Index(index)
+		, IsCore(isCore)
 	{}
 };
 

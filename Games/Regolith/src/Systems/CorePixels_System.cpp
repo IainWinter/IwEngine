@@ -51,8 +51,13 @@ void CorePixelsSystem::Update()
 			CorePixels* core) 
 		{
 			bool dead = false;
+			
+			if (tile->m_currentCells.size() < 30)
+			{
+				dead = true;
+			}
 
-			if (core->ActiveIndices.size() <= 2) {
+			else if (core->ActiveIndices.size() <= 2) {
 				dead = true;
 			}
 
@@ -81,30 +86,41 @@ void CorePixelsSystem::Update()
 			}
 
 			// if a core peice isnt touching a regular peice is dies
-			
-			// if a core peice isnt touching a regular peice is dies
 
-			//for (const int& index : core->ActiveIndices)
+			//if (!Space->HasComponent<Player>(handle))
 			//{
-			//	int top   = index + tile->m_sprite.m_width; // doesnt work if core cells are on edge
-			//	int bot   = index - tile->m_sprite.m_width;
-			//	int right = index + 1;
-			//	int left  = index - 1;
-
-			//	auto isRegularPeice = [&](int i)
+			//	for (const int& index : core->ActiveIndices)
 			//	{
-			//		return core->ActiveIndices.find(i) == core->ActiveIndices.end()
-			//			&& tile->State(i) == iw::Tile::PixelState::FILLED;
-			//	};
+			//		int top   = index + tile->m_sprite.m_width; // doesnt work if core cells are on edge
+			//		int bot   = index - tile->m_sprite.m_width;
+			//		int right = index + 1;
+			//		int left  = index - 1;
 
-			//	int regularPeices = (int)isRegularPeice(top)
-			//	                  + (int)isRegularPeice(bot)
-			//	                  + (int)isRegularPeice(left)
-			//	                  + (int)isRegularPeice(right);
+			//		auto isCorePeice = [&](int i)
+			//		{
+			//			return core->ActiveIndices.find(i) != core->ActiveIndices.end();
+			//		};
 
-			//	if (regularPeices == 0)
-			//	{
-			//		Bus->push<RemoveCellFromTile_Event>(index, iw::Entity(handle, Space));
+			//		auto isRegularPeice = [&](int i)
+			//		{
+			//			return core->ActiveIndices.find(i) == core->ActiveIndices.end()
+			//				&& tile->State(i) == iw::Tile::PixelState::FILLED;
+			//		};
+
+			//		int corePeices = (int)isCorePeice(top)
+			//						  + (int)isCorePeice(bot)
+			//						  + (int)isCorePeice(left)
+			//						  + (int)isCorePeice(right);
+
+			//		int regularPeices = (int)isRegularPeice(top)
+			//						  + (int)isRegularPeice(bot)
+			//						  + (int)isRegularPeice(left)
+			//						  + (int)isRegularPeice(right);
+
+			//		if (regularPeices <= 1 && corePeices < 2)
+			//		{
+			//			Bus->push<RemoveCellFromTile_Event>(index, iw::Entity(handle, Space));
+			//		}
 			//	}
 			//}
 		});
@@ -179,7 +195,7 @@ bool CorePixelsSystem::On(iw::ActionEvent& e)
 					config.DieWithTime = false;
 					config.OnPickup = [=]()
 					{
-						Bus->push<HealPlayer_Event>(index);
+						Bus->push<HealPlayer_Event>(true);
 						core->Timer -= .5f;
 					};
 
