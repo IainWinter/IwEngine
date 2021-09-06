@@ -19,7 +19,6 @@ int LoadAssets(
 	A_texture_ui_cursor      = Asset->Load<Texture>("textures/SpaceGame/cursor.png");
 	A_texture_ui_background  = Asset->Load<Texture>("textures/SpaceGame/ui_background.png");
 	A_texture_font_cambria   = Asset->Load<Texture>("textures/fonts/cambria_lowres.png");
-	A_texture_menu_pause     = Asset->Load<Texture>("textures/SpaceGame/menu_pause.png");
 
 	A_font_cambria = Asset->Load<iw::Font>("fonts/cambria_lowres.fnt");
 

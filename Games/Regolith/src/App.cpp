@@ -490,7 +490,7 @@ iw::Application* CreateApplication(
 	iw::InitOptions& options)
 {
 	//options.AssetRootPath = "C:/dev/IwEngine/_assets/";
-	//options.AssetRootPath = "assets/";
+	options.AssetRootPath = "assets/";
 
 	options.WindowOptions = iw::WindowOptions {
 		800 + 38/2,
