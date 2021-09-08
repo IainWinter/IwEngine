@@ -10,6 +10,8 @@
 
 IW_PLUGIN_SAND_BEGIN
 
+// Scaling transforms is not supported...
+
 struct Tile {
 
 	// Texture that gets drawn,

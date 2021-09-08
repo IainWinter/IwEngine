@@ -67,13 +67,17 @@ namespace impl {
 			if (CacheIsOld())
 			{
 				UpdateCache();
-				m_bounds = CalcBounds();
 			}
 
-			return m_bounds;
+			return t_bounds;
+		}
+
+		void UpdateCache() override
+		{
+			t_bounds = CalcBounds();
 		}
 	private:
-		aabb_t m_bounds;
+		aabb_t t_bounds;
 	};
 }
 }

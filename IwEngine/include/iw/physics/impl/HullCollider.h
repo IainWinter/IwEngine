@@ -126,9 +126,11 @@ namespace impl {
 			return false;
 		}
 
-		void UpdateCache()
+		void UpdateCache() override
 		{
 			t_points = Points;
+
+			Collider<_d>::UpdateCache();
 		}
 	private:
 		std::vector<vec_t> t_points; // expensive but allows public Points

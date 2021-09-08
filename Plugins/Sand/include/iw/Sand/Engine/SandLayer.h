@@ -10,6 +10,7 @@
 #include <unordered_map>
 
 #include "iw/physics/Collision/MeshCollider.h"
+#include "iw/physics/Collision/SphereCollider.h"
 
 IW_PLUGIN_SAND_BEGIN
 
@@ -179,13 +180,22 @@ public:
 		typename... _others>
 	Entity MakeTile(
 		ref<Texture>& sprite,
-		bool isSimulated = false)
+		bool isSimulated = false,
+		const ref<Archetype>& others = nullptr)
 	{
 		ref<Archetype> archetype = Space->CreateArchetype<Transform, Tile, _collider, _others...>();
 
 		if (isSimulated) Space->AddComponent<Rigidbody>      (archetype);
 		else             Space->AddComponent<CollisionObject>(archetype);
-	
+
+		if (others)
+		{
+			for (int i = 0; i < others->Count; i++)
+			{
+				Space->AddComponent(archetype, others->Layout[i].Component);
+			}
+		}
+
 		Entity entity = Space->CreateEntity(archetype);
 
 		Tile* tile = entity.Set<Tile>(sprite);
@@ -193,6 +203,11 @@ public:
 		Transform*       transform = entity.Set<Transform>();
 		_collider*       collider  = entity.Set<_collider>();
 		CollisionObject* object    = isSimulated ? entity.Set<Rigidbody>() : entity.Set<CollisionObject>();
+
+		if constexpr (std::is_same_v<_collider, iw::Circle>)
+		{
+			collider->Radius = glm::compMax(sprite->Dimensions()) / 2.f;
+		}
 
 		object->Collider = collider;
 		object->SetTransform(transform);

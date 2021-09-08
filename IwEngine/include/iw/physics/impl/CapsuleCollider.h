@@ -65,11 +65,13 @@ namespace impl {
 				|| Height != t_height;
 		}
 
-		void UpdateCache()
+		void UpdateCache() override
 		{
 			t_center = Center;
 			t_radius = Radius;
 			t_height = Height;
+
+			Collider<_d>::UpdateCache();
 		}
 	private:
 		vec_t t_center;

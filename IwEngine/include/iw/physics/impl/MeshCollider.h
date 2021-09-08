@@ -75,7 +75,7 @@ namespace impl {
 			return false;
 		}
 
-		void UpdateCache()
+		void UpdateCache() override
 		{
 			t_triangles = Triangles;
 
@@ -89,6 +89,8 @@ namespace impl {
 					Points[Triangles[i + 2]],
 				}));
 			}
+
+			Collider<_d>::UpdateCache();
 		}
 	private:
 		std::vector<unsigned> t_triangles; // expensive but allows public Points

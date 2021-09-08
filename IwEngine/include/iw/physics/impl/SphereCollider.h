@@ -55,10 +55,12 @@ namespace impl {
 				|| Radius != t_radius;
 		}
 
-		void UpdateCache()
+		void UpdateCache() override
 		{
 			t_center = Center;
 			t_radius = Radius;
+
+			Collider<_d>::UpdateCache();
 		}
 	private:
 		vec_t t_center;

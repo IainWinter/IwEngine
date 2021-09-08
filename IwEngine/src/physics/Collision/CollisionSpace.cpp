@@ -69,23 +69,31 @@ namespace Physics {
 	void CollisionSpace::ResolveConstrains(
 		scalar dt)
 	{
-		if (m_task)
-		{
-			// need to update seperatly before multithreading pairs
+		// Update cache
 
-			m_task->foreach(m_objects, [&](int index)
-			{
-				Collider* collider = m_objects.at(index)->Collider;
-				if (collider->CacheIsOld()) {
-					collider->UpdateCache();
-				}
+		auto updateCahce = [](
+			CollisionObject* obj)
+		{
+			Collider* collider = obj->Collider;
+			if (collider->CacheIsOld()) {
+				collider->UpdateCache();
+			}
+		};
+
+		if (m_task) {
+			m_task->foreach(m_objects, [&](int index) {
+				updateCahce(m_objects.at(index));
 			});
 		}
 
-		std::vector<Manifold> collisions;
-		std::vector<Manifold> triggers;
+		else {
+			for (CollisionObject* obj : m_objects) {
+				updateCahce(obj);
+			}
+		}
 
-		std::vector<std::pair<CollisionObject*, CollisionObject*>> pairs; // should have a container that keeps track of this
+		// should have a container that keeps track of this
+		std::vector<std::pair<CollisionObject*, CollisionObject*>> pairs;
 
 		for (CollisionObject* a : m_objects) 
 		{
@@ -120,51 +128,41 @@ namespace Physics {
 			}
 		}
 
-		if (m_task)
+		std::vector<Manifold> triggers;
+		std::vector<Manifold> collisions;
+		std::mutex mutexTriggers, mutexCollisions;
+
+		auto findManifold = [&](
+			CollisionObject* a, 
+			CollisionObject* b) 
 		{
-			std::mutex mutexTriggers, mutexCollisions;
+			ManifoldPoints points = TestCollision(a->Collider, &a->Transform, b->Collider, &b->Transform);
 
-			m_task->foreach(pairs, [&](size_t i) 
+			if (points.HasCollision) 
 			{
-				auto [a, b] = pairs[i];
-			
-				ManifoldPoints points = TestCollision(a->Collider, &a->Transform, b->Collider, &b->Transform);
-
-				if (points.HasCollision) 
+				if (   a->IsTrigger
+					|| b->IsTrigger) // establish more formal rules for what can collide with what, see next comments
 				{
-					if (   a->IsTrigger
-						|| b->IsTrigger) // establish more formal rules for what can collide with what, see next comments
-					{
-						std::unique_lock lock(mutexTriggers);
-						triggers.emplace_back(a, b, points);
-					}
-
-					else {
-						std::unique_lock lock(mutexCollisions);
-						collisions.emplace_back(a, b, points);
-					}
+					std::unique_lock lock(mutexTriggers); // locks on single thread too
+					triggers.emplace_back(a, b, points);
 				}
+
+				else {
+					std::unique_lock lock(mutexCollisions);
+					collisions.emplace_back(a, b, points);
+				}
+			}
+		};
+
+		if (m_task) {
+			m_task->foreach(pairs, [&](size_t i)  {
+				findManifold(pairs[i].first, pairs[i].second);
 			});
 		}
 
-		else 
-		{
-			for (auto& [a, b] : pairs)
-			{
-				ManifoldPoints points = TestCollision(a->Collider, &a->Transform, b->Collider, &b->Transform);
-
-				if (points.HasCollision) 
-				{
-					if (   a->IsTrigger
-						|| b->IsTrigger) // establish more formal rules for what can collide with what, there should be a fnuction that classifies a collisoin
-					{
-						triggers.emplace_back(a, b, points);
-					}
-
-					else {
-						collisions.emplace_back(a, b, points);
-					}
-				}
+		else {
+			for (auto& [a, b] : pairs) {
+				findManifold(a, b);
 			}
 		}
 

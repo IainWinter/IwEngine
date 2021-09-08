@@ -58,10 +58,12 @@ namespace impl {
 				|| Distance != t_distance;
 		}
 
-		void UpdateCache()
+		void UpdateCache() override
 		{
 			t_normal   = Normal;
 			t_distance = Distance;
+
+			Collider<_d>::UpdateCache();
 		}
 	private:
 		vec_t t_normal;
