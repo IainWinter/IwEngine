@@ -2,18 +2,60 @@
 
 void EnemySystem::FixedUpdate()
 {
-	Space->Query<iw::Transform, EnemyShip>().Each(
+	Space->Query<iw::Transform, Enemy, Fighter_Enemy>().Each(
 		[&](
 			iw::EntityHandle handle,
 			iw::Transform* transform,
-			EnemyShip* enemy)
+			Enemy*         ship,
+			Fighter_Enemy* fighter)
 		{
-			if (   enemy->Weapon->CanFire()
-				&& enemy->ShootAt.Alive())
+			if (   fighter->Weapon->CanFire()
+				&& ship->Target.Alive())
 			{
-				glm::vec3 pos = enemy->ShootAt.Find<iw::Transform>()->Position;
-				ShotInfo shot = enemy->Weapon->GetShot(Space->GetEntity(handle), pos.x, pos.y);
-				Bus->send<SpawnProjectile_Event>(shot);
+				glm::vec3 pos = ship->Target.Find<iw::Transform>()->Position;
+				ShotInfo shot = fighter->Weapon->GetShot(Space->GetEntity(handle), pos.x, pos.y);
+				Bus->push<SpawnProjectile_Event>(shot);
+			}
+		}
+	);
+
+	Space->Query<iw::Transform, Flocker, Enemy, Bomb_Enemy>().Each(
+		[&](
+			iw::EntityHandle handle,
+			iw::Transform* transform,
+			Flocker* flocker,
+			Enemy*      ship,
+			Bomb_Enemy* bomb)
+		{
+			// maybe put some timer or something
+
+			glm::vec3 pos = ship->Target.Find<iw::Transform>()->Position;
+			
+			// set flocking target to target
+			flocker->Target = glm::vec2(pos.x, pos.y);
+
+			// start explosion if close to target
+			if (   !bomb->Explode 
+				&& glm::distance(pos, transform->Position) < bomb->RadiusToExplode)
+			{
+				bomb->Explode = true;
+			}
+
+			if (bomb->Explode)
+			{
+				bomb->TimeToExplode -= iw::FixedTime();
+
+				if (bomb->TimeToExplode <= 0.f)
+				{
+					SpawnExplosion_Config config;
+					config.SpawnLocationX = transform->Position.x;
+					config.SpawnLocationY = transform->Position.y;
+					config.ExplosionPower = 200;
+					config.ExplosionRadius = 50;
+
+					Bus->push<SpawnExplosion_Event>(config);
+					Space->QueueEntity(handle, iw::func_Destroy);
+				}
 			}
 		}
 	);
@@ -25,7 +67,7 @@ bool EnemySystem::On(iw::ActionEvent& e)
 	{
 		case SPAWN_ENEMY:
 		{
-			SpawnEnemy(e.as<SpawnEnemy_Event>());
+			SpawnEnemy(e.as<SpawnEnemy_Event>().Config);
 			break;
 		}
 		case CORE_EXPLODED: {
@@ -39,7 +81,7 @@ bool EnemySystem::On(iw::ActionEvent& e)
 			switch (event.State)
 			{
 				case RUN_STATE:
-					Space->Query<EnemyShip>().Each([&](iw::EntityHandle handle, EnemyShip*) {
+					Space->Query<Enemy>().Each([&](iw::EntityHandle handle, Enemy*) {
 						Space->QueueEntity(handle, iw::func_Destroy);
 					});
 					break;
@@ -52,16 +94,45 @@ bool EnemySystem::On(iw::ActionEvent& e)
 	return false;
 }
 
-void EnemySystem::SpawnEnemy(SpawnEnemy_Event& config)
+void EnemySystem::SpawnEnemy(SpawnEnemy_Config& config)
 {
-	iw::Entity e = sand->MakeTile<iw::Circle, EnemyShip, Flocker, CorePixels>(A_texture_enemy1, true);
+	iw::ref<iw::Archetype> archetype = Space->CreateArchetype<Flocker, CorePixels, Enemy>();
+	iw::ref<iw::Texture>   texture;
 
-	CorePixels*    core      = e.Set<CorePixels>();
-	iw::Transform* transform = e.Find<iw::Transform>();
-	iw::Rigidbody* rigidbody = e.Find<iw::Rigidbody>();
-	iw::Circle*    collider  = e.Find<iw::Circle>();
+	switch (config.EnemyType)
+	{
+		case FIGHTER: 
+		{
+			Space->AddComponent<Fighter_Enemy>(archetype);
+			texture = A_texture_enemy_fighter;
+			break;
+		}
+		case BOMB: 
+		{
+			Space->AddComponent<Bomb_Enemy>(archetype);
+			texture = A_texture_enemy_bomb;
+			break;
+		}
+		case STATION:
+		{
+			Space->AddComponent<Station_Enemy>(archetype);
+			texture = A_texture_enemy_station;
+			break;
+		}
+	}
+
+	iw::Entity entity = sand->MakeTile<iw::Circle>(texture, true, archetype);
+
+	iw::Rigidbody* rigidbody = entity.Find<iw::Rigidbody>();
+	iw::Transform* transform = entity.Find<iw::Transform>();
+	Flocker*       flocker   = entity.Set<Flocker>();
+	Enemy*         enemy     = entity.Set<Enemy>();
+	CorePixels*    core      = entity.Set<CorePixels>();
 
 	core->TimeWithoutCore = 0.f;
+	
+	flocker->Target.x = config.TargetLocationX;
+	flocker->Target.y = config.TargetLocationY;
 
 	transform->Position.x = config.SpawnLocationX;
 	transform->Position.y = config.SpawnLocationY;
@@ -69,20 +140,41 @@ void EnemySystem::SpawnEnemy(SpawnEnemy_Event& config)
 	rigidbody->SetTransform(transform);
 	rigidbody->SetMass(10);
 
-	collider->Radius = 6;
+	enemy->Target = config.TargetEntity;
+	
+	switch (config.EnemyType)
+	{
+		case FIGHTER: 
+		{
+			Fighter_Enemy* fighter = entity.Set<Fighter_Enemy>();
+			fighter->Weapon = MakeLaser_Cannon_Enemy();
 
-	EnemyShip* ship    = e.Set<EnemyShip>();
-	Flocker*   flocker = e.Set<Flocker>();
+			break;
+		}
+		case BOMB: 
+		{
+			Bomb_Enemy* bomb = entity.Set<Bomb_Enemy>();
+			bomb->TimeToExplode = .5f;
+			bomb->RadiusToExplode = 30;
 
-	ship->Weapon = MakeLaser_Cannon_Enemy();
-	ship->ShootAt = config.ShootAt;
+			flocker->SpeedNearTarget = 1;
 
-	flocker->Target.x = config.TargetLocationX;
-	flocker->Target.y = config.TargetLocationY;
+			rigidbody->AngularVelocity.z = .9f;
+
+			break;
+		}
+		case STATION:
+		{
+			entity.Set<Station_Enemy>();
+			break;
+		}
+	}
 }
 
 void EnemySystem::DestroyEnemy(iw::Entity entity)
 {
+	if (!entity.Has<Enemy>()) return;
+
 	std::vector<std::pair<ItemType, float>> item_weights {
 		{ HEALTH,         50 },
 		{ LASER_CHARGE,   50 },
@@ -104,18 +196,5 @@ void EnemySystem::DestroyEnemy(iw::Entity entity)
 	}
 
 	Bus->push<SpawnItem_Event>(config);
-				
-	iw::Cell smoke = iw::Cell::GetDefault(iw::CellType::SMOKE);
-
-	for (int y = -5; y < 5; y++)
-	for (int x = -5; x < 5; x++)
-	{
-		int px = x + transform->Position.x;
-		int py = y + transform->Position.y;
-		smoke.life = iw::randf() * 5;
-
-		sand->m_world->SetCell(px, py, smoke);
-	}
-
 	Space->QueueEntity(entity.Handle, iw::func_Destroy);
 }

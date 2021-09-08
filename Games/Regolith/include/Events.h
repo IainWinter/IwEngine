@@ -7,12 +7,14 @@
 #include "Components/Player.h"
 #include "Components/Item.h"
 #include "Components/Projectile.h"
+#include "Components/EnemyShip.h"
 
 enum Actions {
 	SPAWN_ENEMY,
 	SPAWN_PROJECTILE,
 	SPAWN_ITEM,
 	SPAWN_ASTEROID,
+	SPAWN_EXPLOSION,
 	CHANGE_LASER_FLUID,
 	HEAL_PLAYER,
 	CHANGE_PLAYER_WEAPON,
@@ -24,27 +26,46 @@ enum Actions {
 	OPEN_MENU,
 };
 
-struct SpawnEnemy_Event : iw::SingleEvent
+struct SpawnExplosion_Config
 {
-	iw::Entity ShootAt;
+	float SpawnLocationX = 0;
+	float SpawnLocationY = 0;
+	float ExplosionRadius = 10;
+	float ExplosionPower = 10;
+};
+
+struct SpawnExplosion_Event : iw::SingleEvent
+{
+	SpawnExplosion_Config Config;
+
+	SpawnExplosion_Event(
+		SpawnExplosion_Config& config
+	)
+		: iw::SingleEvent(SPAWN_EXPLOSION)
+		, Config(config)
+	{}
+};
+
+struct SpawnEnemy_Config
+{
+	iw::Entity TargetEntity;
 	float SpawnLocationX;
 	float SpawnLocationY;
 	float TargetLocationX;
 	float TargetLocationY;
 
+	EnemyType EnemyType;
+};
+
+struct SpawnEnemy_Event : iw::SingleEvent
+{
+	SpawnEnemy_Config Config;
+
 	SpawnEnemy_Event(
-		iw::Entity shootAt,
-		float spawnLocationX,
-		float spawnLocationY,
-		float targetLocationX,
-		float targetLocationY
+		SpawnEnemy_Config config
 	)
 		: iw::SingleEvent(SPAWN_ENEMY)
-		, ShootAt(shootAt)
-		, SpawnLocationX(spawnLocationX)
-		, SpawnLocationY(spawnLocationY)
-		, TargetLocationX(targetLocationX)
-		, TargetLocationY(targetLocationY)
+		, Config(config)
 	{}
 };
 

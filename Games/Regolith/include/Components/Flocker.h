@@ -6,6 +6,9 @@ struct Flocker {
 	bool Active = true;
 	glm::vec2 Target;
 
+	float Speed = 100;
+	float SpeedNearTarget = 1;
+
 	float ForceWeight = 1; // % of calculated force applied
 
 	float AwayRadius = 1000;

@@ -8,7 +8,7 @@ bool ScoreSystem::On(iw::ActionEvent& e)
 		{
 			ProjHitTile_Event& event = e.as<ProjHitTile_Event>();
 
-			if (event.Config.Hit.Has<EnemyShip>())
+			if (event.Config.Hit.Has<Enemy>())
 			{
 				Score += 1;
 			}
@@ -19,7 +19,7 @@ bool ScoreSystem::On(iw::ActionEvent& e)
 		{
 			CoreExploded_Event& event = e.as<CoreExploded_Event>();
 			
-			if (event.Entity.Has<EnemyShip>())
+			if (event.Entity.Has<Enemy>())
 			{
 				Score += 100; // based on size
 			}

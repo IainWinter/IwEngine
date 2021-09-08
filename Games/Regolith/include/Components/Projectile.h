@@ -19,6 +19,8 @@ enum ProjectileType {
 //	void PlaceCell();
 //};
 
+// replace this with a oo thing like weapons
+
 struct Projectile {
 	std::function<void()> FixedUpdate; // called in physics tick
 	std::function<std::tuple<bool, float, float>()> Update; // called in render tick, return true if collision
@@ -26,10 +28,12 @@ struct Projectile {
 	std::function<void(float, float)> OnHit; // called on collision
 
 	std::function<void(iw::SandChunk*, int, int, float, float)> PlaceCell; // each cell in line calls this
+
+	float Life = 0.f; 
 };
 
 struct ShotInfo {
-	float x, y, dx, dy;
+	float x, y, dx, dy, life;
 	ProjectileType projectile;
 
 	float Speed() {
@@ -60,5 +64,5 @@ inline ShotInfo GetShot_Circular(
 	x += nx * margin - ny * thickness * r;
 	y += ny * margin + nx * thickness * r;
 
-	return ShotInfo { x, y, dx, dy };
+	return ShotInfo { x, y, dx, dy, 0.f };
 }

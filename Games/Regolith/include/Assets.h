@@ -11,7 +11,9 @@
 #define rFont iw::ref<iw::Font>
 
 inline rTex A_texture_player;
-inline rTex A_texture_enemy1;
+inline rTex A_texture_enemy_fighter;
+inline rTex A_texture_enemy_bomb;
+inline rTex A_texture_enemy_station;
 inline rTex A_texture_background;
 inline rTex A_texture_asteroid_mid_1;
 inline rTex A_texture_asteroid_mid_2;
@@ -36,6 +38,7 @@ inline iw::Mesh A_mesh_ui_playerHealth;
 inline iw::Mesh A_mesh_ui_text_ammo;
 inline iw::Mesh A_mesh_ui_text_score;
 inline iw::Mesh A_mesh_ui_text_gameOver;
+inline iw::Mesh A_mesh_ui_text_debug_version;
 
 inline iw::Mesh A_mesh_menu_pause;
 inline iw::Mesh A_mesh_menu_pause_title;

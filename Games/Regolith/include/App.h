@@ -21,6 +21,8 @@
 #include "Systems/Flocking_System.h"
 #include "Systems/Projectile_System.h"
 
+#include "Systems/Explosion_System.h"
+
 #include "iw/graphics/Font.h"
 
 #include "Events.h"
@@ -43,13 +45,14 @@ struct GameLayer : iw::Layer
 	PlayerSystem*          player_s;
 	PlayerLaserTankSystem* playerTank_s;
 	WorldSystem*           world_s;
+	KeepInWorldSystem*     keepInWorld_s;
+	CorePixelsSystem*      corePixels_s;
 	ProjectileSystem*      projectile_s;
 	EnemySystem*           enemy_s;
 	ItemSystem*            item_s;
-	KeepInWorldSystem*     keepInWorld_s;
 	ScoreSystem*           score_s;
-	CorePixelsSystem*      corePixels_s;
 	FlockingSystem*        flocking_s;
+	ExplosionSystem*       explosion_s;
 
 	// temp ui
 	bool showGameOver = false;

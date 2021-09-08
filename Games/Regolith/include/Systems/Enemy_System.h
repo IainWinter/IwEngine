@@ -28,6 +28,6 @@ struct EnemySystem : iw::SystemBase
 	bool On(iw::ActionEvent& e) override;
 
 private:
-	void SpawnEnemy(SpawnEnemy_Event& config);
+	void SpawnEnemy(SpawnEnemy_Config& config);
 	void DestroyEnemy(iw::Entity enemy);
 };

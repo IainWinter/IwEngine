@@ -6,19 +6,26 @@ int LoadAssets(
 	iw::AssetManager* Asset,
 	iw::Renderer* Renderer)
 {
-	A_texture_player         = Asset->Load<Texture>("textures/SpaceGame/player.png");
-	A_texture_enemy1         = Asset->Load<Texture>("textures/SpaceGame/enemy.png");
-	A_texture_background     = Asset->Load<Texture>("textures/SpaceGame/space.png");
-	A_texture_asteroid_mid_1 = Asset->Load<Texture>("textures/SpaceGame/asteroid_mid_1.png");
-	A_texture_asteroid_mid_2 = Asset->Load<Texture>("textures/SpaceGame/asteroid_mid_2.png");
-	A_texture_asteroid_mid_3 = Asset->Load<Texture>("textures/SpaceGame/asteroid_mid_3.png");
-	A_texture_item_health    = Asset->Load<Texture>("textures/SpaceGame/item_health.png");
-	A_texture_item_energy    = Asset->Load<Texture>("textures/SpaceGame/item_energy.png");
-	A_texture_item_minigun   = Asset->Load<Texture>("textures/SpaceGame/item_minigun.png");
-	A_texture_item_coreShard = Asset->Load<Texture>("textures/SpaceGame/item_coreShard.png");
-	A_texture_ui_cursor      = Asset->Load<Texture>("textures/SpaceGame/cursor.png");
-	A_texture_ui_background  = Asset->Load<Texture>("textures/SpaceGame/ui_background.png");
-	A_texture_font_cambria   = Asset->Load<Texture>("textures/fonts/cambria_lowres.png");
+
+	std::vector<ref<Texture>> textures;
+
+#define LOADTEX(x) textures.emplace_back(Asset->Load<Texture>(x))
+
+	A_texture_player         = LOADTEX("textures/SpaceGame/player.png");
+	A_texture_enemy_fighter  = LOADTEX("textures/SpaceGame/enemy_fighter.png");
+	A_texture_enemy_bomb     = LOADTEX("textures/SpaceGame/enemy_bomb.png");
+	A_texture_enemy_station  = LOADTEX("textures/SpaceGame/enemy_station.png");
+	A_texture_background     = LOADTEX("textures/SpaceGame/space.png");
+	A_texture_asteroid_mid_1 = LOADTEX("textures/SpaceGame/asteroid_mid_1.png");
+	A_texture_asteroid_mid_2 = LOADTEX("textures/SpaceGame/asteroid_mid_2.png");
+	A_texture_asteroid_mid_3 = LOADTEX("textures/SpaceGame/asteroid_mid_3.png");
+	A_texture_item_health    = LOADTEX("textures/SpaceGame/item_health.png");
+	A_texture_item_energy    = LOADTEX("textures/SpaceGame/item_energy.png");
+	A_texture_item_minigun   = LOADTEX("textures/SpaceGame/item_minigun.png");
+	A_texture_item_coreShard = LOADTEX("textures/SpaceGame/item_coreShard.png");
+	A_texture_ui_cursor      = LOADTEX("textures/SpaceGame/cursor.png");
+	A_texture_ui_background  = LOADTEX("textures/SpaceGame/ui_background.png");
+	A_texture_font_cambria   = LOADTEX("textures/fonts/cambria_lowres.png");
 
 	A_font_cambria = Asset->Load<iw::Font>("fonts/cambria_lowres.fnt");
 
@@ -33,52 +40,16 @@ int LoadAssets(
 
 #define CHECK_LOAD(x) if(!x) { LOG_ERROR << "Failed to load " << #x; return 100; }
 	
-	CHECK_LOAD(A_texture_player        );
-	CHECK_LOAD(A_texture_enemy1        );
-	CHECK_LOAD(A_texture_background    );
-	CHECK_LOAD(A_texture_asteroid_mid_1);
-	CHECK_LOAD(A_texture_asteroid_mid_2);
-	CHECK_LOAD(A_texture_asteroid_mid_3);
-	CHECK_LOAD(A_texture_item_health   );
-	CHECK_LOAD(A_texture_item_energy   );
-	CHECK_LOAD(A_texture_item_minigun  );
-	CHECK_LOAD(A_texture_item_coreShard);
-	CHECK_LOAD(A_texture_ui_cursor     );
-	CHECK_LOAD(A_texture_ui_background );
-	CHECK_LOAD(A_texture_font_cambria  );
+	for (ref<Texture>& tex : textures)
+	{
+		CHECK_LOAD(tex);
+		tex->m_filter = NEAREST;
+		tex->m_wrap = EDGE;
+	}
 
 	CHECK_LOAD(A_font_cambria);
-
 	CHECK_LOAD(A_material_texture_cam->Shader);
 	CHECK_LOAD(A_material_font_cam   ->Shader);
-
-	A_texture_player        ->m_filter = NEAREST;
-	A_texture_enemy1        ->m_filter = NEAREST;
-	A_texture_background    ->m_filter = NEAREST;
-	A_texture_asteroid_mid_1->m_filter = NEAREST;
-	A_texture_asteroid_mid_2->m_filter = NEAREST;
-	A_texture_asteroid_mid_3->m_filter = NEAREST;
-	A_texture_item_health   ->m_filter = NEAREST;
-	A_texture_item_energy   ->m_filter = NEAREST;
-	A_texture_item_minigun  ->m_filter = NEAREST;
-	A_texture_item_coreShard->m_filter = NEAREST;
-	A_texture_ui_cursor     ->m_filter = NEAREST;
-	A_texture_ui_background ->m_filter = NEAREST;
-	A_texture_font_cambria    ->m_filter = NEAREST;
-
-	A_texture_player        ->m_wrap = EDGE;
-	A_texture_enemy1        ->m_wrap = EDGE;
-	A_texture_background    ->m_wrap = EDGE;
-	A_texture_asteroid_mid_1->m_wrap = EDGE;
-	A_texture_asteroid_mid_2->m_wrap = EDGE;
-	A_texture_asteroid_mid_3->m_wrap = EDGE;
-	A_texture_item_health   ->m_wrap = EDGE;
-	A_texture_item_energy   ->m_wrap = EDGE;
-	A_texture_item_minigun  ->m_wrap = EDGE;
-	A_texture_item_coreShard->m_wrap = EDGE;
-	A_texture_ui_cursor     ->m_wrap = EDGE;
-	A_texture_ui_background ->m_wrap = EDGE;
-	A_texture_font_cambria    ->m_wrap = EDGE;
 
 	{
 		Renderer->InitShader(A_material_texture_cam->Shader, CAMERA);
@@ -106,7 +77,6 @@ int LoadAssets(
 
 	{
 		ref<Texture> ui_player_texture = REF<Texture>(*A_texture_player);
-		ui_player_texture->SetFilter(iw::NEAREST);
 		ui_player_texture->CreateColors();
 
 		A_mesh_ui_playerHealth.Material = A_material_texture_cam->MakeInstance();
@@ -126,6 +96,12 @@ int LoadAssets(
 	{
 		A_mesh_ui_text_gameOver = A_font_cambria->GenerateMesh("GAME OVER\npress space to restart...", 2);
 		A_mesh_ui_text_gameOver.Material = A_material_font_cam;
+	}
+
+	{
+		A_mesh_ui_text_debug_version = A_font_cambria->GenerateMesh("indev v.03", 1);
+		A_mesh_ui_text_debug_version.Material = A_material_font_cam;
+		A_mesh_ui_text_debug_version.Material->Set("color", iw::Color(1, 1, 1, .25));
 	}
 
 	// Menus

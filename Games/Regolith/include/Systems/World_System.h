@@ -49,7 +49,15 @@ private:
 		float target_x = iw::randi(w - w * margin * 2) + w * margin;
 		float target_y = iw::randi(h - h * margin * 2) + h * margin;
 
-		Bus->push<SpawnEnemy_Event>(m_player, x, y, target_x, target_y);
+		SpawnEnemy_Config config;
+		config.SpawnLocationX = x;
+		config.SpawnLocationY = y;
+		config.TargetLocationX = target_x;
+		config.TargetLocationY = target_y;
+		config.TargetEntity = m_player;
+		config.EnemyType = BOMB;
+
+		Bus->push<SpawnEnemy_Event>(config);
 	};
 
 	Spawn::func_Spawn SpawnAsteroid = [=](float x, float y)
@@ -72,7 +80,6 @@ private:
 		float length = sqrt(config.VelocityX*config.VelocityX + config.VelocityY*config.VelocityY);
 		config.VelocityX = config.VelocityX / length * 100;
 		config.VelocityY = config.VelocityY / length * 100;
-
 
 		Bus->push<SpawnAsteroid_Event>(config);
 	};

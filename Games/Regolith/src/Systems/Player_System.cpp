@@ -162,19 +162,16 @@ bool PlayerSystem::On(iw::ActionEvent& e)
 	
 					m_player = sand->MakeTile<iw::Circle, Player, CorePixels, KeepInWorld>(A_texture_player, true);
 
-					Player*        player    = m_player.Set<Player>();
-					CorePixels*    core      = m_player.Set<CorePixels>();
-					iw::Circle*    collider  = m_player.Find<iw::Circle>();
 					iw::Rigidbody* rigidbody = m_player.Find<iw::Rigidbody>();
 					iw::Transform* transform = m_player.Find<iw::Transform>();
+					CorePixels*    core      = m_player.Set<CorePixels>();
+					Player*        player    = m_player.Set<Player>();
 
 					auto [w, h] = sand->GetSandTexSize2();
 					transform->Position = glm::vec3(w, h, 0);
 
 					rigidbody->SetTransform(transform);
 					rigidbody->SetMass(10);
-
-					collider->Radius = 6;
 
 					core->TimeWithoutCore = 4.f;
 

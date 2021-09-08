@@ -2,15 +2,26 @@
 
 void ProjectileSystem::Update()
 {
-	Space->Query<Projectile>().Each([&](iw::EntityHandle, Projectile* p) 
+	Space->Query<Projectile>().Each([&](
+		iw::EntityHandle handle, 
+		Projectile* projectile) 
 	{
-		if (p->Update)
+		if (projectile->Life > 0)
 		{
-			auto [hit, hx, hy] = p->Update();
-
-			if (p->OnHit && hit) 
+			projectile->Life -= iw::DeltaTime();
+			if (projectile->Life <= 0.f)
 			{
-				p->OnHit(hx, hy);
+				Space->QueueEntity(handle, iw::func_Destroy);
+			}
+		}
+
+		if (projectile->Update)
+		{
+			auto [hit, hx, hy] = projectile->Update();
+
+			if (projectile->OnHit && hit)
+			{
+				projectile->OnHit(hx, hy);
 			}
 		}
 	});
@@ -18,12 +29,11 @@ void ProjectileSystem::Update()
 
 void ProjectileSystem::FixedUpdate()
 {
-	Space->Query<Projectile>().Each([&](iw::EntityHandle, Projectile* p) 
+	Space->Query<Projectile>().Each([&](iw::EntityHandle, Projectile* projectile)
 	{
-		if (p->FixedUpdate) p->FixedUpdate();
+		if (projectile->FixedUpdate) projectile->FixedUpdate();
 	});
-}
-
+}
 
 // helpers
 
@@ -142,6 +152,8 @@ iw::Entity ProjectileSystem::MakeProjectile(
 	rigidbody->IsTrigger = true;
 
 	Physics->AddRigidbody(rigidbody);
+
+	projectile->Life = shot.life;
 
 	projectile->Update = [=]() 
 	{

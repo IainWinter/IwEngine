@@ -23,7 +23,7 @@ void WorldSystem::Update()
 	if (needsAnotherLevel)
 	{
 		int enemyCount = 0;
-		Space->Query<EnemyShip>().Each([&](iw::EntityHandle handle, EnemyShip*) {
+		Space->Query<Enemy>().Each([&](iw::EntityHandle handle, Enemy*) {
 			enemyCount++;
 		});
 
@@ -93,7 +93,7 @@ bool WorldSystem::On(iw::ActionEvent& e)
 			auto& [x, y, info, hit, projectile] = e.as<ProjHitTile_Event>().Config;
 			
 			if (   hit.Has<Player>() 
-				|| hit.Has<EnemyShip>())
+				|| hit.Has<Enemy>())
 			{
 				glm::vec3 norm = glm::normalize(projectile.Find<iw::Rigidbody>()->Velocity);
 
@@ -130,26 +130,13 @@ bool WorldSystem::On(iw::ActionEvent& e)
 		{
 			glm::vec3 pos = e.as<CoreExploded_Event>().Entity.Find<iw::Transform>()->Position;
 
-			for (int i = 0; i < 200; i++)
-			{
-				glm::vec2 norm = glm::normalize(glm::vec2(iw::randfs(), iw::randfs()));
+			SpawnExplosion_Config config;
+			config.SpawnLocationX = pos.x;
+			config.SpawnLocationY = pos.y;
+			config.ExplosionPower = 10;
+			config.ExplosionRadius = 20;
 
-				iw::Cell metal;
-				metal.Type = iw::CellType::ROCK;
-				metal.Props = iw::CellProp::MOVE_FORCE;
-
-				metal.Color = iw::Color::From255(255, 207, 77);
-				
-				metal.dx = norm.x * 300 * iw::randfs();
-				metal.dy = norm.y * 300 * iw::randfs();
-				metal.life = .15 + iw::randf() * .2;
-
-				float margin = 15;
-				float px = pos.x + norm.x * margin;
-				float py = pos.y + norm.y * margin;
-
-				sand->m_world->SetCell(px, py, metal);
-			}
+			Bus->push<SpawnExplosion_Event>(config);
 
 			break;
 		}

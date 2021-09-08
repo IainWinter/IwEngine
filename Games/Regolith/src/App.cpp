@@ -26,6 +26,7 @@ int GameLayer::Initialize()
 	world_s       = new WorldSystem     (sand);
 	enemy_s       = new EnemySystem     (sand);
 	player_s      = new PlayerSystem    (sand);
+	explosion_s   = new ExplosionSystem (sand);
 	playerTank_s  = new PlayerLaserTankSystem(sand_ui_laserCharge);
 	score_s       = new ScoreSystem();
 	corePixels_s  = new CorePixelsSystem();
@@ -39,6 +40,7 @@ int GameLayer::Initialize()
 	PushSystem(score_s);
 	PushSystem(corePixels_s);
 	PushSystem(flocking_s);
+	PushSystem(explosion_s);
 	
 	PushSystem<iw::PhysicsSystem>();
 	PushSystem<iw::EntityCleanupSystem>();
@@ -206,6 +208,7 @@ bool GameLayer::On(iw::ActionEvent& e)
 					PopSystem(score_s);
 					PopSystem(corePixels_s);
 					PopSystem(flocking_s);
+					PopSystem(explosion_s);
 
 					break;
 				}
@@ -224,6 +227,7 @@ bool GameLayer::On(iw::ActionEvent& e)
 					PushSystem(score_s);
 					PushSystem(corePixels_s);
 					PushSystem(flocking_s);
+					PushSystem(explosion_s);
 
 					break;
 				}
@@ -365,6 +369,7 @@ void GameLayer::PostUpdate()
 		gameover->y = screen.height * .5;
 		gameover->width = screen.width;
 		gameover->height = screen.width;
+		gameover->z = 5;
 	}
 
 	float uiBackgroundScaleTarget = 0;
@@ -377,6 +382,13 @@ void GameLayer::PostUpdate()
 	background->width  = game->width  * uiBackgroundScale;
 	background->height = game->height * uiBackgroundScale;
 	background->z = -1;
+
+	UI* version = screen.CreateElement(A_mesh_ui_text_debug_version);
+	version->y = screen.height - 12;
+	version->x = -screen.width + 1;
+	version->width  = menu->width;
+	version->height = menu->width;
+	version->z = 5;
 
 	screen.Draw(cam, Renderer);
 
@@ -490,12 +502,12 @@ iw::Application* CreateApplication(
 	iw::InitOptions& options)
 {
 	//options.AssetRootPath = "C:/dev/IwEngine/_assets/";
-	options.AssetRootPath = "assets/";
+	//options.AssetRootPath = "assets/";
 
 	options.WindowOptions = iw::WindowOptions {
 		800 + 38/2,
 		1000 + 38,
-		/*true,*/false,
+		true,/*false,*/
 		iw::DisplayState::NORMAL
 	};
 
