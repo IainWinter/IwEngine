@@ -1,5 +1,5 @@
-[submodule "vendor/imgui"]
-	path = vendor/imgui
+[submodule "IwEngine/extern/imgui"]
+	path = IwEngine/extern/imgui
 	url = https://github.com/IainWinter/imgui
 	branch = docking
 	ignore = dirty
