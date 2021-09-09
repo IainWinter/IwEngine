@@ -103,6 +103,20 @@ namespace ECS {
 			Space->ReviveEntity(Handle);
 		}
 
+		
+		void Queue(
+			const func_EntityChange& func) const
+		{
+#ifdef IW_DEBUG
+			if (!Space) {
+				LOG_ERROR << "Entity has no space!";
+				return;
+			}
+#endif
+
+			return Space->QueueEntity(Handle, func);
+		}
+
 		template<
 			typename _c,
 			typename... _args>

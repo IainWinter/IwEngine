@@ -51,7 +51,7 @@ namespace ECS {
 
 #ifdef IW_USE_EVENTS
 		if (m_bus) {
-			m_bus->push<EntityCreatedEvent>(entityData->Entity);
+			m_bus->send<EntityCreatedEvent>(entityData->Entity);
 		}
 #endif
 
