@@ -45,17 +45,39 @@ void EnemySystem::FixedUpdate()
 			{
 				bomb->TimeToExplode -= iw::FixedTime();
 
-				if (bomb->TimeToExplode <= 0.f)
-				{
-					SpawnExplosion_Config config;
-					config.SpawnLocationX = transform->Position.x;
-					config.SpawnLocationY = transform->Position.y;
-					config.ExplosionPower = 200;
-					config.ExplosionRadius = 50;
+				//if (bomb->TimeToExplode <= 0.f)
+				//{
+				//	SpawnExplosion_Config config;
+				//	config.SpawnLocationX = transform->Position.x;
+				//	config.SpawnLocationY = transform->Position.y;
+				//	config.ExplosionPower = 30;
+				//	config.ExplosionRadius = 30;
 
-					Bus->push<SpawnExplosion_Event>(config);
-					Space->QueueEntity(handle, iw::func_Destroy);
-				}
+				//	Bus->push<SpawnExplosion_Event>(config);
+				//	Space->QueueEntity(handle, iw::func_Destroy);
+				//}
+			}
+		}
+	);
+
+	Space->Query<iw::Transform, Enemy, Station_Enemy>().Each(
+		[&](
+			iw::EntityHandle handle,
+			iw::Transform* transform,
+			Enemy*         ship,
+			Station_Enemy* station)
+		{
+			station->timer.TickFixed();
+			if (station->timer.Can("spawn"))
+			{
+				SpawnEnemy_Config config;
+
+				config.SpawnLocationX = transform->Position.x;
+				config.SpawnLocationX = transform->Position.y;
+				config.EnemyType = BOMB;
+				config.TargetEntity = ship->Target;
+
+				Bus->push<SpawnEnemy_Event>(config);
 			}
 		}
 	);
@@ -158,14 +180,19 @@ void EnemySystem::SpawnEnemy(SpawnEnemy_Config& config)
 			bomb->RadiusToExplode = 30;
 
 			flocker->SpeedNearTarget = 1;
-
 			rigidbody->AngularVelocity.z = .9f;
 
 			break;
 		}
 		case STATION:
 		{
-			entity.Set<Station_Enemy>();
+			Station_Enemy* station = entity.Set<Station_Enemy>();
+			station->timer.SetTime("spawn", .2, .1);
+
+			rigidbody->AngularVelocity.z = .1f;
+			rigidbody->SetMass(100);
+			flocker->Speed = 4;
+
 			break;
 		}
 	}
@@ -196,5 +223,5 @@ void EnemySystem::DestroyEnemy(iw::Entity entity)
 	}
 
 	Bus->push<SpawnItem_Event>(config);
-	Space->QueueEntity(entity.Handle, iw::func_Destroy);
+	//Space->QueueEntity(entity.Handle, iw::func_Destroy);
 }

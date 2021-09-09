@@ -21,7 +21,7 @@ void ExplosionSystem::SpawnExplosion(SpawnExplosion_Config& config)
 	metal.Props = iw::CellProp::MOVE_FORCE;
 	metal.Color = iw::Color::From255(255, 207, 77);
 
-	for (int i = 0; i < 200; i++)
+	for (int i = 0; i < config.ExplosionPower * config.ExplosionRadius; i++)
 	{
 		glm::vec2 norm = glm::normalize(glm::vec2(iw::randfs(), iw::randfs()));
 				
@@ -29,9 +29,8 @@ void ExplosionSystem::SpawnExplosion(SpawnExplosion_Config& config)
 		metal.dy = norm.y * 300 * (iw::randf() * .9f + .1f);
 		metal.life = .15 + iw::randf() * .2;
 		
-		float margin = 15;
-		float px = config.SpawnLocationX + norm.x * margin * (iw::randf() * .9f + .1f);
-		float py = config.SpawnLocationY + norm.y * margin * (iw::randf() * .9f + .1f);
+		float px = config.SpawnLocationX + norm.x * config.ExplosionRadius * (iw::randf() * .9f + .1f);
+		float py = config.SpawnLocationY + norm.y * config.ExplosionRadius * (iw::randf() * .9f + .1f);
 
 		if (iw::randf() > .75f)	{
 			ShotInfo config;

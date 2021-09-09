@@ -31,7 +31,7 @@ struct SpawnExplosion_Config
 	float SpawnLocationX = 0;
 	float SpawnLocationY = 0;
 	float ExplosionRadius = 10;
-	float ExplosionPower = 10;
+	float ExplosionPower = 200;
 };
 
 struct SpawnExplosion_Event : iw::SingleEvent

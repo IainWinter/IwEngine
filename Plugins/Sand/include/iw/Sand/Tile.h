@@ -19,6 +19,7 @@ struct Tile {
 	// if a pixel has an alpha of 0.5 it's disabled / ejected
 
 	Texture m_sprite;
+	iw::Color m_tint = iw::Color(1.f);
 
 	enum PixelState : unsigned char {
 		EMPTY   = 0x00,

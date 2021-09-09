@@ -1,6 +1,7 @@
 #pragma once
 
 #include "iw/entity/Entity.h"
+#include "iw/engine/Components/Timer.h"
 #include "Components/Weapon.h"
 
 enum EnemyType
@@ -28,5 +29,7 @@ struct Bomb_Enemy {
 };
 
 struct Station_Enemy {
+	iw::Timer timer;
 
+	Station_Enemy() {}
 };
