@@ -2,10 +2,14 @@
 
 void ProjectileSystem::Update()
 {
-	Space->Query<Projectile>().Each([&](
+	Space->Query<iw::Transform, iw::Rigidbody, ProjHead>().Each([&](
 		iw::EntityHandle handle, 
-		Projectile* projectile) 
+		iw::Transform* transform,
+		iw::Rigidbody* rigidbody,
+		ProjHead* projhead)
 	{
+		Projectile* projectile = projhead->Proj;
+		
 		if (projectile->Life > 0)
 		{
 			projectile->Life -= iw::DeltaTime();
@@ -15,157 +19,24 @@ void ProjectileSystem::Update()
 			}
 		}
 
-		if (projectile->Update)
-		{
-			auto [hit, hx, hy] = projectile->Update();
+		iw::Entity entity = iw::Entity(handle, Space);
 
-			if (projectile->OnHit && hit)
-			{
-				projectile->OnHit(hx, hy);
-			}
+		if (projectile->OnUpdate(entity))
+		{ 
+			Space->QueueEntity(handle, iw::func_Destroy);
 		}
-	});
-}
 
-void ProjectileSystem::FixedUpdate()
-{
-	Space->Query<Projectile>().Each([&](iw::EntityHandle, Projectile* projectile)
-	{
-		if (projectile->FixedUpdate) projectile->FixedUpdate();
-	});
-}
+		glm::vec3& pos = transform->Position;
+		glm::vec3& vel = rigidbody->Velocity;
 
-// helpers
+		int zIndex = ceil(pos.z);
 
-auto getproj(iw::Entity entity)
-{
-	return entity.Find<Projectile>();
-}
-auto getpos(iw::Entity entity)
-{
-	iw::Rigidbody* r = entity.Find<iw::Rigidbody>();
-	iw::Transform* t = entity.Find<iw::Transform>();
+		HitInfo hitInfo;
 
-	float x = t->Position.x;
-	float y = t->Position.y;
-	int   z = floor(t->Position.z); // Z Index
-
-	float dx = r->Velocity.x;
-	float dy = r->Velocity.y;
-
-	return std::tuple(x, y, z, dx, dy);
-};
-auto setpos(iw::Entity entity, float x, float y)
-{
-	iw::Rigidbody* r = entity.Find<iw::Rigidbody>();
-	iw::Transform& t = r->Transform;
-
-	t.Position.x = x;
-	t.Position.y = y;
-};
-auto setvel(iw::Entity entity, float x, float y)
-{
-	iw::Rigidbody* r = entity.Find<iw::Rigidbody>();
-
-	r->Velocity.x = x;
-	r->Velocity.y = y;
-};
-auto randvel(iw::Entity entity, float amount, bool setForMe = false) 
-{
-	iw::Rigidbody* r = entity.Find<iw::Rigidbody>();
-	float dx = r->Velocity.x;
-	float dy = r->Velocity.y;
-
-	float speed = sqrt(dx * dx + dy * dy);
-	float angle = atan2(dy, dx);
-	angle += iw::randfs() * amount;
-
-	dx = cos(angle) * speed;
-	dy = sin(angle) * speed;
-
-	if (setForMe) {
-		setvel(entity, dx, dy);
-	}
-
-	return std::tuple(dx, dy);
-};
-
-bool ProjectileSystem::On(iw::ActionEvent& e)
-{
-	switch (e.Action)
-	{
-		case SPAWN_PROJECTILE: {
-			SpawnProjectile_Event& event = e.as<SpawnProjectile_Event>();
-
-			std::vector<ShotInfo> shots = event.Shot.others;
-			shots.push_back(event.Shot);
-
-			for (const ShotInfo& shot : shots)
-			{
-				switch (event.Shot.projectile) 
-				{	
-					case ProjectileType::BULLET: MakeBullet(event.Shot, event.Depth); break;
-					case ProjectileType::LASER:  MakeLaser (event.Shot, event.Depth); break;
-					case ProjectileType::BEAM:   MakeBeam  (event.Shot, event.Depth); break;
-				}
-			}	
-			break;
-		}
-		case STATE_CHANGE:
-		{
-			StateChange_Event& event = e.as<StateChange_Event>();
-
-			switch (event.State)
-			{
-				case RUN_STATE:
-					Space->Query<Projectile>().Each([&](iw::EntityHandle handle, Projectile*) {
-						Space->QueueEntity(handle, iw::func_Destroy);
-					});
-					break;
-			}
-			break;
-		}
-	}
-
-	return false;
-}
-
-iw::Entity ProjectileSystem::MakeProjectile(
-	const ShotInfo& shot)
-{
-	iw::Entity entity = Space->CreateEntity<
-		iw::Transform, 
-		iw::Rigidbody,
-		iw::Circle,
-		Projectile>();
-
-	Projectile*    projectile = entity.Set<Projectile>();
-	iw::Transform* transform  = entity.Set<iw::Transform>();
-	iw::Circle*    collider   = entity.Set<iw::Circle>();
-	iw::Rigidbody* rigidbody  = entity.Set<iw::Rigidbody>();
-
-	transform->Position = glm::vec3(shot.x, shot.y, 0);
-
-	rigidbody->SetTransform(transform);
-	rigidbody->Velocity = glm::vec3(shot.dx, shot.dy, 0);
-	rigidbody->Collider = collider;
-	rigidbody->IsTrigger = true;
-
-	Physics->AddRigidbody(rigidbody);
-
-	projectile->Life = shot.life;
-
-	projectile->Update = [=]() 
-	{
-		auto [x, y, zIndex_, dx_, dy_] = getpos(entity);
-		int zIndex = zIndex_; // for unpacking nonsense
-		float dx = dx_;
-		float dy = dy_;
-
-		bool hit = false;
-		float hx, hy;
-
-		sand->ForEachInLine(x, y, x + dx * iw::DeltaTime(), y + dy * iw::DeltaTime(), [&](
+		sand->ForEachInLine(
+			pos.x, pos.y, 
+			pos.x + vel.x * iw::DeltaTime(), pos.y + vel.y * iw::DeltaTime(), 
+		[&](
 			float fpx, float fpy)
 		{
 			int px = floor(fpx);
@@ -175,7 +46,7 @@ iw::Entity ProjectileSystem::MakeProjectile(
 			
 			if (!chunk)
 			{
-				hit = true; // collision on no chunk
+				hitInfo.hit = true; // collision on no chunk
 			}
 
 			else {
@@ -201,7 +72,7 @@ iw::Entity ProjectileSystem::MakeProjectile(
 						info.tile = nullptr;
 						info.index = 0;
 
-						hit = true;
+						hitInfo.hit = true;
 					}
 				}
 
@@ -209,24 +80,94 @@ iw::Entity ProjectileSystem::MakeProjectile(
 				if (  !chunk->IsEmpty(px, py)
 					&& chunk->GetCell(px, py).Type != iw::CellType::PROJECTILE)
 				{
-					hit = true;
+					hitInfo.hit = true;
 				}
 
-				getproj(entity)->PlaceCell(chunk, px, py, dx, dy);
+				projectile->DrawCell(sand, chunk, px, py, vel.x, vel.y);
 			}
 
-			if (hit) 
+			if (hitInfo.hit)
 			{
-				hx = fpx;
-				hy = fpy;
+				hitInfo.x = fpx;
+				hitInfo.y = fpy;
 				return true;
 			}
 
 			return false;
 		});
 
-		return std::tuple(hit, hx, hy);
-	};
+		if (hitInfo.hit)
+		{
+			hitInfo.sand = sand;
+			hitInfo.bus = Bus;
+			hitInfo.entity = entity;
+
+			projectile->OnHit(hitInfo);
+		}
+	});
+}
+
+bool ProjectileSystem::On(iw::ActionEvent& e)
+{
+	switch (e.Action)
+	{
+		case SPAWN_PROJECTILE: {
+			SpawnProjectile_Event& event = e.as<SpawnProjectile_Event>();
+
+			std::vector<ShotInfo> shots = event.Shot.others;
+			shots.push_back(event.Shot);
+
+			for (const ShotInfo& shot : shots)
+			{
+				switch (event.Shot.projectile) 
+				{	
+					case ProjectileType::BULLET: MakeBullet(event.Shot, event.Depth); break;
+					case ProjectileType::LASER:  MakeLaser (event.Shot, event.Depth); break;
+					//case ProjectileType::BEAM:   MakeBeam  (event.Shot, event.Depth); break;
+				}
+			}	
+			break;
+		}
+		case STATE_CHANGE:
+		{
+			StateChange_Event& event = e.as<StateChange_Event>();
+
+			switch (event.State)
+			{
+				case RUN_STATE:
+					Space->Query<ProjHead>().Each([&](iw::EntityHandle handle, ProjHead*) {
+						Space->QueueEntity(handle, iw::func_Destroy);
+					});
+					break;
+			}
+			break;
+		}
+	}
+
+	return false;
+}
+
+iw::Entity ProjectileSystem::MakeProjectile(
+	const ShotInfo& shot)
+{
+	iw::Entity entity = Space->CreateEntity<
+		iw::Transform, 
+		iw::Rigidbody,
+		iw::Circle,
+		ProjHead>();
+
+	iw::Transform* transform = entity.Set<iw::Transform>();
+	iw::Rigidbody* rigidbody = entity.Set<iw::Rigidbody>();
+	iw::Circle*    collider  = entity.Set<iw::Circle>();
+
+	transform->Position = glm::vec3(shot.x, shot.y, 0);
+
+	rigidbody->SetTransform(transform);
+	rigidbody->Collider = collider;
+	rigidbody->Velocity = glm::vec3(shot.dx, shot.dy, 0);
+	rigidbody->IsTrigger = true;
+
+	Physics->AddRigidbody(rigidbody);
 
 	return entity;
 }
@@ -236,40 +177,7 @@ iw::Entity ProjectileSystem::MakeBullet(
 	int depth)
 {
 	iw::Entity entity = MakeProjectile(shot);
-	Projectile* projectile = entity.Find<Projectile>();
-
-	projectile->PlaceCell = [=](iw::SandChunk* chunk, int px, int py, float dx, float dy)
-	{
-		iw::Cell cell;
-		cell.Type = iw::CellType::PROJECTILE;
-		cell.Color = iw::Color::From255(255, 230, 66);
-		cell.life = .02;
-
-		chunk->SetCell(px, py, cell);
-	};
-
-	projectile->OnHit = [=](float fhx, float fhy)
-	{
-		int hx = floor(fhx);
-		int hy = floor(fhy);
-
-		if (depth < 15 && sand->m_world->InBounds(hx, hy))
-		{
-			auto [x, y, z, dx, dy] = getpos(entity);
-			float speed = sqrt(dx*dx + dy*dy);
-			auto [dx2, dy2] = randvel(entity, iw::Pi/4);
-
-			ShotInfo split = shot;
-			split.x = fhx;
-			split.y = fhy;
-			split.dx = dx2;
-			split.dy = dy2;
-
-			Bus->push<SpawnProjectile_Event>(split, depth + 1);
-		}
-
-		Space->QueueEntity(entity.Handle, iw::func_Destroy);
-	};
+	entity.Set<ProjHead>(MakeBullet_Projectile(depth));
 
 	return entity;
 }
@@ -279,127 +187,80 @@ iw::Entity ProjectileSystem::MakeLaser(
 	int depth)
 {
 	iw::Entity entity = MakeProjectile(shot);
-	Projectile* projectile = entity.Find<Projectile>();
-
-	projectile->PlaceCell = [=](iw::SandChunk* chunk, int px, int py, float dx, float dy)
-	{
-		iw::Cell cell;
-		cell.Type = iw::CellType::PROJECTILE;
-		cell.Color = iw::Color::From255(255, 23, 6);
-		cell.life = .2;
-
-		chunk->SetCell(px, py, cell);
-	};
-
-	projectile->OnHit = [=](float fhx, float fhy)
-	{
-
-		// if return t/f, should just continue with regular path
-
-		//auto [x, y, z, dx, dy] = getpos(entity);
-		//getproj(entity)->PlaceCell(sand->m_world->GetChunk(fhx, fhy), fhx, fhy, dx, dy);
-
-		int hx = floor(fhx);
-		int hy = floor(fhy);
-
-		if (depth < 25 && sand->m_world->InBounds(hx, hy))
-		{
-			ShotInfo split = shot;
-			split.x = fhx;
-			split.y = fhy;
-			
-			auto [x, y, z, dx, dy] = getpos(entity);
-			float speed = sqrt(dx*dx + dy*dy);
-			auto [dx2, dy2] = randvel(entity, iw::Pi/8);
-
-			split.dx = dx2;
-			split.dy = dy2;
-			Bus->push<SpawnProjectile_Event>(split, depth + 1);
-				
-			if (iw::randf() > .9) // is there a way to calc a % to make this not diverge, i.e x % of them double
-			{
-				auto [dx3, dy3] = randvel(entity, iw::Pi / 6);
-				split.dx = dx3;
-				split.dy = dy3;
-				Bus->push<SpawnProjectile_Event>(split, depth + 1);
-			}
-		}
-
-		Space->QueueEntity(entity.Handle, iw::func_Destroy);
-	};
+	entity.Set<ProjHead>(MakeLaser_Projectile(depth));
 
 	return entity;
 }
 
-iw::Entity ProjectileSystem::MakeBeam(const ShotInfo& shot, int depth)
-{
-	iw::Entity entity = MakeProjectile(shot);
-	Projectile* projectile = entity.Find<Projectile>();
+//iw::Entity ProjectileSystem::MakeBeam(const ShotInfo& shot, int depth)
+//{
+//	iw::Entity entity = MakeProjectile(shot);
+//	Projectile* projectile = entity.Find<Projectile>();
+//
+//	projectile->PlaceCell = [=](iw::SandChunk* chunk, int px, int py, float dx, float dy)
+//	{
+//		iw::Color centerColor = iw::Color::From255(252, 239, 91);
+//		iw::Color outerColor  = iw::Color::From255(255, 66, 255);
+//
+//		iw::Cell cell;
+//		cell.Type = iw::CellType::PROJECTILE;
+//		cell.Props = iw::CellProp::MOVE_FORCE;
+//
+//		for (int x = -3; x < 3; x++)
+//		for (int y = -3; y < 3; y++)
+//		{
+//			float dist = sqrt(x*x + y*y) / sqrt(3*3+3*3);
+//
+//			cell.Color = iw::lerp(centerColor.rgb(), outerColor.rgb(), dist);
+//			cell.dx = iw::randfs() * 10 * (dist * 2 + 1);
+//			cell.dy = iw::randfs() * 10 * (dist * 2 + 1);
+//			cell.life = iw::randf()*2;
+//
+//			sand->m_world->SetCell(px, py, cell);
+//		}
+//	};
+//
+//	projectile->OnHit = [=](float fhx, float fhy)
+//	{
+//		int hx = floor(fhx);
+//		int hy = floor(fhy);
+//
+//		if (depth < 25 && sand->m_world->InBounds(hx, hy))
+//		{
+//			auto [dx2, dy2] = randvel(entity, iw::Pi/80);
+//			
+//			ShotInfo split = shot;
+//			split.x = fhx; // should make faster could fill line
+//			split.y = fhy;
+//			split.dx = dx2;
+//			split.dy = dy2;
+//			
+//			Bus->push<SpawnProjectile_Event>(split, depth); // bores forever
+//		}
+//
+//		Space->QueueEntity(entity.Handle, iw::func_Destroy);
+//	};
+//
+//	return entity;
+//}
 
-	projectile->PlaceCell = [=](iw::SandChunk* chunk, int px, int py, float dx, float dy)
-	{
-		iw::Color centerColor = iw::Color::From255(252, 239, 91);
-		iw::Color outerColor  = iw::Color::From255(255, 66, 255);
-
-		iw::Cell cell;
-		cell.Type = iw::CellType::PROJECTILE;
-		cell.Props = iw::CellProp::MOVE_FORCE;
-
-		for (int x = -3; x < 3; x++)
-		for (int y = -3; y < 3; y++)
-		{
-			float dist = sqrt(x*x + y*y) / sqrt(3*3+3*3);
-
-			cell.Color = iw::lerp(centerColor.rgb(), outerColor.rgb(), dist);
-			cell.dx = iw::randfs() * 10 * (dist * 2 + 1);
-			cell.dy = iw::randfs() * 10 * (dist * 2 + 1);
-			cell.life = iw::randf()*2;
-
-			sand->m_world->SetCell(px, py, cell);
-		}
-	};
-
-	projectile->OnHit = [=](float fhx, float fhy)
-	{
-		int hx = floor(fhx);
-		int hy = floor(fhy);
-
-		if (depth < 25 && sand->m_world->InBounds(hx, hy))
-		{
-			auto [dx2, dy2] = randvel(entity, iw::Pi/80);
-			
-			ShotInfo split = shot;
-			split.x = fhx; // should make faster could fill line
-			split.y = fhy;
-			split.dx = dx2;
-			split.dy = dy2;
-			
-			Bus->push<SpawnProjectile_Event>(split, depth); // bores forever
-		}
-
-		Space->QueueEntity(entity.Handle, iw::func_Destroy);
-	};
-
-	return entity;
-}
-
-void ProjectileSystem::MakeExplosion(
-	int x, int y,
-	int r)
-{
-	for (int px = x - r; px < x + r; px++)
-	for (int py = y - r; py < y + r; py++)
-	{
-		if (iw::SandChunk* chunk = sand->m_world->GetChunk(px, py))
-		{
-			auto[tile, index] = chunk->GetCell<iw::TileInfo>(px, py, iw::SandField::TILE_INFO);
-
-			if (tile)
-			{
-				sand->EjectPixel(tile, index);
-			}
-
-			chunk->SetCell(px, py, iw::Cell::GetDefault(iw::CellType::EMPTY));
-		}
-	}
-}
+//void ProjectileSystem::MakeExplosion(
+//	int x, int y,
+//	int r)
+//{
+//	for (int px = x - r; px < x + r; px++)
+//	for (int py = y - r; py < y + r; py++)
+//	{
+//		if (iw::SandChunk* chunk = sand->m_world->GetChunk(px, py))
+//		{
+//			auto[tile, index] = chunk->GetCell<iw::TileInfo>(px, py, iw::SandField::TILE_INFO);
+//
+//			if (tile)
+//			{
+//				sand->EjectPixel(tile, index);
+//			}
+//
+//			chunk->SetCell(px, py, iw::Cell::GetDefault(iw::CellType::EMPTY));
+//		}
+//	}
+//}

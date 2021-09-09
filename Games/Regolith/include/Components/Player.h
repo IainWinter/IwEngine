@@ -1,7 +1,6 @@
 #pragma once
 
 #include "iw/engine/Components/Timer.h"
-#include "Components/Projectile.h"
 #include "Components/Weapon.h"
 
 struct Player

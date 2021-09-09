@@ -45,17 +45,17 @@ void EnemySystem::FixedUpdate()
 			{
 				bomb->TimeToExplode -= iw::FixedTime();
 
-				//if (bomb->TimeToExplode <= 0.f)
-				//{
-				//	SpawnExplosion_Config config;
-				//	config.SpawnLocationX = transform->Position.x;
-				//	config.SpawnLocationY = transform->Position.y;
-				//	config.ExplosionPower = 30;
-				//	config.ExplosionRadius = 30;
+				if (bomb->TimeToExplode <= 0.f)
+				{
+					SpawnExplosion_Config config;
+					config.SpawnLocationX = transform->Position.x;
+					config.SpawnLocationY = transform->Position.y;
+					config.ExplosionPower = 30;
+					config.ExplosionRadius = 30;
 
-				//	Bus->push<SpawnExplosion_Event>(config);
-				//	Space->QueueEntity(handle, iw::func_Destroy);
-				//}
+					Bus->push<SpawnExplosion_Event>(config);
+					Space->QueueEntity(handle, iw::func_Destroy);
+				}
 			}
 		}
 	);

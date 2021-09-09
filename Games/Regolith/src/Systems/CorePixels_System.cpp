@@ -165,6 +165,12 @@ bool CorePixelsSystem::On(iw::ActionEvent& e)
 			int        index  = event.Index;
 			iw::Entity entity = event.Entity;
 
+			if (!Space->GetEntity(event.Entity.Handle).Alive())
+			{
+				LOG_ERROR << "Tried to remove cell from dead entity";
+				break;
+			}
+
 			// maybe the health doesnt stop moving and can go outside the screen
 			// then the enemies could drop the shards and you could have to rush
 			// them to get health...

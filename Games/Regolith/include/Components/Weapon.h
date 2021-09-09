@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Components/Projectile.h"
+#include "Components/ProjHead.h"
 #include "iw/engine/Components/Timer.h"
 #include "iw/entity/Entity.h"
 #include "iw/common/Components/Transform.h"

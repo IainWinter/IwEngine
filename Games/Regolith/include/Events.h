@@ -6,7 +6,7 @@
 #include "plugins/iw/Sand/Defs.h"
 #include "Components/Player.h"
 #include "Components/Item.h"
-#include "Components/Projectile.h"
+#include "Components/ProjHead.h"
 #include "Components/EnemyShip.h"
 
 enum Actions {

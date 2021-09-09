@@ -20,7 +20,6 @@ struct ProjectileSystem
 	{}
 
 	void Update() override;
-	void FixedUpdate() override;
 
 	bool On(iw::ActionEvent& e) override;
 
