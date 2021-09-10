@@ -364,7 +364,10 @@ namespace ECS {
 		while (!m_entityQueue.empty()) {
 			EntityChange& change = m_entityQueue.front();
 
-			change.func(Entity(change.handle, this));
+			if (m_entityManager.GetEntityData(change.handle.Index)->Entity.Alive)
+			{
+				change.func(Entity(change.handle, this));
+			}
 
 			m_entityQueue.pop();
 		}
