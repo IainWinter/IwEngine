@@ -180,6 +180,7 @@ bool PlayerSystem::On(iw::ActionEvent& e)
 					player->CurrentWeapon->Ammo = -1;
 
 					Bus->push<CreatedPlayer_Event>(m_player);
+					Bus->push<CreatedCoreTile_Event>(m_player);
 
 					break;
 				}

@@ -14,6 +14,5 @@ struct CorePixelsSystem : iw::SystemBase
 
 	void Update();
 
-	bool On(iw::EntityCreatedEvent& e) override;
-	bool On(iw::ActionEvent& e)        override;
+	bool On(iw::ActionEvent& e) override;
 };

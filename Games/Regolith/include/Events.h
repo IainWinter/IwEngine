@@ -21,6 +21,7 @@ enum Actions {
 	PROJ_HIT_TILE,
 	REMOVE_CELL_FROM_TILE,
 	CREATED_PLAYER,
+	CREATED_CORE_TILE,
 	CORE_EXPLODED,
 	STATE_CHANGE,
 	OPEN_MENU,
@@ -213,6 +214,18 @@ struct CreatedPlayer_Event : iw::SingleEvent
 	)
 		: iw::SingleEvent(CREATED_PLAYER)
 		, PlayerEntity(playerEntity)
+	{}
+};
+
+struct CreatedCoreTile_Event : iw::SingleEvent
+{
+	iw::Entity TileEntity;
+
+	CreatedCoreTile_Event(
+		iw::Entity tileEntity
+	)
+		: iw::SingleEvent(CREATED_CORE_TILE)
+		, TileEntity(tileEntity)
 	{}
 };
 

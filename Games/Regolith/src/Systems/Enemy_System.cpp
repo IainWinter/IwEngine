@@ -187,7 +187,7 @@ void EnemySystem::SpawnEnemy(SpawnEnemy_Config& config)
 		case STATION:
 		{
 			Station_Enemy* station = entity.Set<Station_Enemy>();
-			station->timer.SetTime("spawn", .2, .1);
+			station->timer.SetTime("spawn", .6, .4);
 
 			rigidbody->AngularVelocity.z = .1f;
 			rigidbody->SetMass(100);
@@ -196,6 +196,10 @@ void EnemySystem::SpawnEnemy(SpawnEnemy_Config& config)
 			break;
 		}
 	}
+
+	LOG_INFO << "Created enemy " << entity.Handle.Index;
+
+	Bus->push<CreatedCoreTile_Event>(entity);
 }
 
 void EnemySystem::DestroyEnemy(iw::Entity entity)
@@ -222,6 +226,8 @@ void EnemySystem::DestroyEnemy(iw::Entity entity)
 		case ItemType::WEAPON_MINIGUN: config.Amount = 1;
 	}
 
+	LOG_INFO << "Removed enemy " << entity.Handle.Index;
+
 	Bus->push<SpawnItem_Event>(config);
-	//Space->QueueEntity(entity.Handle, iw::func_Destroy);
+	Space->QueueEntity(entity.Handle, iw::func_Destroy);
 }

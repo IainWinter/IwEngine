@@ -126,39 +126,42 @@ void CorePixelsSystem::Update()
 		});
 }
 
-bool CorePixelsSystem::On(iw::EntityCreatedEvent& e)
-{
-	if (   Space->HasComponent<iw::Tile>  (e.Entity)
-		&& Space->HasComponent<CorePixels>(e.Entity))
-	{
-		iw::Tile*   tile = Space->FindComponent<iw::Tile>  (e.Entity);
-		CorePixels* core = Space->FindComponent<CorePixels>(e.Entity);
-
-		for (int i = 0; i < tile->m_sprite.ColorCount(); i += 4)
-		{
-			unsigned char& alpha = tile->m_sprite.Colors()[i+3];
-			if (   alpha < 255
-				&& alpha > 175)
-			{
-				alpha = 255;
-				
-				int index = i / 4;
-				core->Indices.insert(index);
-				core->CenterX += index % tile->m_sprite.m_width;
-				core->CenterY += index / tile->m_sprite.m_width;
-			}
-		}
-		core->ActiveIndices = core->Indices;
-		core->CenterX /= core->ActiveIndices.size();
-		core->CenterY /= core->ActiveIndices.size();
-	}
-
-	return false;
-}
-
 bool CorePixelsSystem::On(iw::ActionEvent& e)
 {
 	switch (e.Action) {
+		case CREATED_CORE_TILE:
+		{
+			CreatedCoreTile_Event& event = e.as<CreatedCoreTile_Event>();
+
+			iw::Tile*   tile = event.TileEntity.Find<iw::Tile>();
+			CorePixels* core = event.TileEntity.Find<CorePixels>();
+
+			if (!tile || !core)
+			{
+				LOG_ERROR << "Created a null entity? " << event.TileEntity.Handle.Index;
+				break;
+			}
+
+			for (int i = 0; i < tile->m_sprite.ColorCount(); i += 4)
+			{
+				unsigned char& alpha = tile->m_sprite.Colors()[i+3];
+				if (   alpha < 255
+					&& alpha > 175)
+				{
+					alpha = 255;
+				
+					int index = i / 4;
+					core->Indices.insert(index);
+					core->CenterX += index % tile->m_sprite.m_width;
+					core->CenterY += index / tile->m_sprite.m_width;
+				}
+			}
+			core->ActiveIndices = core->Indices;
+			core->CenterX /= core->ActiveIndices.size();
+			core->CenterY /= core->ActiveIndices.size();
+
+			break;
+		}
 		case REMOVE_CELL_FROM_TILE:
 		{
 			RemoveCellFromTile_Event& event = e.as<RemoveCellFromTile_Event>();
