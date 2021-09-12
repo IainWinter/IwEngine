@@ -177,7 +177,7 @@ iw::Entity ProjectileSystem::MakeBullet(
 	int depth)
 {
 	iw::Entity entity = MakeProjectile(shot);
-	entity.Set<ProjHead>(MakeBullet_Projectile(depth));
+	entity.Set<ProjHead>(MakeBullet_Projectile(shot, depth));
 
 	return entity;
 }
@@ -187,7 +187,7 @@ iw::Entity ProjectileSystem::MakeLaser(
 	int depth)
 {
 	iw::Entity entity = MakeProjectile(shot);
-	entity.Set<ProjHead>(MakeLaser_Projectile(depth));
+	entity.Set<ProjHead>(MakeLaser_Projectile(shot, depth));
 
 	return entity;
 }

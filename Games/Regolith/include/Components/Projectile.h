@@ -43,12 +43,17 @@ struct HitInfo {
 
 struct Projectile
 {
-	ShotInfo Shot;
+	const ShotInfo Shot; // this is for copy for splitting projectiles
+	float Life = 0.f; // Life of projectile needs to be seperate state
 
 	iw::Cell Cell;
-	float Life = 0.f;
 
-	Projectile() {
+	Projectile(
+		const ShotInfo& shot
+	)
+		: Shot(shot)
+		, Life(shot.life)
+	{
 		Cell.Type = iw::CellType::PROJECTILE;
 	}
 
@@ -85,10 +90,11 @@ struct Split_Projectile : Projectile
 	float ShrapTurnArc = 0.f;
 
 	Split_Projectile(
-		int split
+		const ShotInfo& shot,
+		int depth
 	)
-		: Projectile()
-		, Split(split)
+		: Projectile(shot)
+		, Split(depth)
 	{}
 
 	void OnHit(HitInfo hit) override
@@ -104,7 +110,7 @@ struct Split_Projectile : Projectile
 
 			for (int i = 0; i < ShrapCount + 1; i++)
 			{
-				if (i == 0 || iw::randf() > ShrapOdds)
+				if (i > 0 && iw::randf() > ShrapOdds)
 				{
 					continue;
 				}
@@ -126,9 +132,9 @@ struct Split_Projectile : Projectile
 	}
 };
 
-inline Split_Projectile* MakeBullet_Projectile(int split)
+inline Split_Projectile* MakeBullet_Projectile(const ShotInfo& shot, int depth)
 {
-	Split_Projectile* proj = new Split_Projectile(split);
+	Split_Projectile* proj = new Split_Projectile(shot, depth);
 	proj->Cell.life = .02;
 	proj->Cell.Color = iw::Color::From255(255, 230, 66);
 	proj->SplitTurnArc = iw::Pi / 4;
@@ -137,9 +143,9 @@ inline Split_Projectile* MakeBullet_Projectile(int split)
 	return proj;
 }
 
-inline Split_Projectile* MakeLaser_Projectile(int split)
+inline Split_Projectile* MakeLaser_Projectile(const ShotInfo& shot, int depth)
 {
-	Split_Projectile* proj = new Split_Projectile(split);
+	Split_Projectile* proj = new Split_Projectile(shot, depth);
 	proj->Cell.life = .2f;
 	proj->Cell.Color = iw::Color::From255(255, 23, 6);
 	proj->MaxSplit = 25;
