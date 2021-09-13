@@ -1,9 +1,17 @@
 #include "iw/events/eventbus.h"
 
 namespace iw {
-	eventbus::eventbus()
+	eventbus::eventbus(
+		bool record
+	)
 		: m_alloc(1024)
-	{}
+		, m_recorder(nullptr)
+	{
+		if (record)
+		{
+			m_recorder = new eventbus_recorder();
+		}
+	}
 
 	void eventbus::subscribe(
 		const callback<event&>& callback)
@@ -43,8 +51,20 @@ namespace iw {
 	void eventbus::publish_event(
 		event* e)
 	{
+		if (m_recorder)
+		{
+			m_recorder->record_published(e);
+		}
+		
 		for (auto& callback : m_callbacks) {
 			callback(*e);
+		}
+
+		// cant log who handled but can record time spent publishing
+
+		if (m_recorder)
+		{
+			m_recorder->record_handled(e, "");
 		}
 	}
 }

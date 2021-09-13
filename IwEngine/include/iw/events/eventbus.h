@@ -7,9 +7,77 @@
 #include "iw/util/memory/pool_allocator.h"
 #include "iw/log/logger.h"
 #include <mutex>
+#include <chrono>
+#include <assert.h>
+
+#include "iw/util/reflection/Reflect.h"
 
 namespace iw {
 namespace events {
+#define TIME std::chrono::system_clock::now().time_since_epoch().count()
+	
+	struct event_record {
+		event* event;
+		std::string who_handled;
+		std::string who_called;
+
+		float time_queued;
+		float time_published;
+		float time_handled;
+	};
+
+	struct eventbus_recorder
+	{
+		std::mutex mutex;
+		std::vector<event_record> records;
+
+		event_record* find_record(event* e)
+		{
+			event_record* record = nullptr;
+			for (event_record& r : records)
+			{
+				if (r.event == e)
+				{
+					record = &r;
+					break;
+				}
+			}
+
+			assert(record);
+
+			return record;
+		}
+
+		void record(event* e, std::string whoCalled)
+		{
+			event_record record;
+			record.event = e;
+			record.who_called = whoCalled;
+			record.time_queued = TIME;
+
+			std::unique_lock lock(mutex);
+
+			records.push_back(record);
+		}
+
+		void record_published(event* e)
+		{
+			std::unique_lock lock(mutex);
+
+			event_record* record = find_record(e);
+			record->time_published = TIME;
+		}
+
+		void record_handled(event* e, std::string whoHandled)
+		{
+			std::unique_lock lock(mutex);
+
+			event_record* record = find_record(e);
+			record->who_handled = whoHandled;
+			record->time_handled = TIME;
+		}
+	};
+
 	class eventbus {
 	private:
 		std::mutex m_mutex;
@@ -17,9 +85,12 @@ namespace events {
 		blocking_queue<event*> m_events;
 		pool_allocator m_alloc;
 
+		eventbus_recorder* m_recorder;
+
 	public:
 		IWEVENTS_API
-		eventbus();
+		eventbus(
+			bool record);
 
 		IWEVENTS_API
 		void subscribe(
@@ -43,6 +114,11 @@ namespace events {
 				new(e) _e(std::forward<_args>(args)...);
 				e->Size = sizeof(_e);
 
+				if (m_recorder)
+				{
+					m_recorder->record(e, "");
+				}
+
 				m_events.push(e);
 			}
 		}
@@ -55,6 +131,11 @@ namespace events {
 		{
 			_e e(std::forward<_args>(args)...);
 			e.Size = sizeof(_e);
+
+			if (m_recorder)
+			{
+				m_recorder->record(&e, "");
+			}
 
 			publish_event(&e);
 		}
@@ -71,3 +152,25 @@ namespace events {
 
 	using namespace events;
 }
+
+#undef TIME
+
+//IW_BEGIN_REFLECT
+//
+//	template<>
+//	inline const Class* GetClass(
+//		ClassTag<event_record>)
+//	{
+//		static Class c = Class("event_record", sizeof(event_record), 6);
+//
+//		//c.fields[0] = ; event pointer, i dont know how to seralize the base class
+//		c.fields[1] = { "who_called",    GetClass(ClassTag<std::string>()), offsetof(event_record, who_called)     };
+//		c.fields[2] = { "who_handled",   GetClass(ClassTag<std::string>()), offsetof(event_record, who_handled)    };
+//		c.fields[3] = { "time_queued",    GetType(TypeTag<float>()),        offsetof(event_record, time_queued)    };
+//		c.fields[4] = { "time_published", GetType(TypeTag<float>()),        offsetof(event_record, time_published) };
+//		c.fields[5] = { "time_handled",   GetType(TypeTag<float>()),        offsetof(event_record, time_handled)   };
+//
+//		return &c;
+//	}
+//	
+//IW_END_REFLECT

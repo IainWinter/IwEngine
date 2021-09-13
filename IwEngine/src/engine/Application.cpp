@@ -29,7 +29,7 @@ namespace Engine {
 		, m_window(IWindow::Create())
 	{
 		m_device = ref<IDevice>(IDevice::Create());
-		Bus      = REF<eventbus>();
+		Bus      = REF<eventbus>(false);
 		Space    = REF<iw::Space>();
 		Renderer = REF<QueuedRenderer>(REF<iw::Renderer>(m_device));
 		Asset    = REF<AssetManager>();

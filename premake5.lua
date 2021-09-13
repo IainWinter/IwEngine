@@ -25,7 +25,6 @@ workspace "wEngine"
 	configurations { "Debug", "Release" }
 	platforms { "x64" } --"x32", 
 	startproject "a_wEditor"
-	location (iwengdir .. blddir)
 
 group "extern"
 	include (glewdir)

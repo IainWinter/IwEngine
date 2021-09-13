@@ -19,6 +19,9 @@
 
 #define REFLECT __attribute__((annotate("reflect")))
 
+#define IW_BEGIN_REFLECT namespace iw { namespace Reflect { namespace detail {
+#define IW_END_REFLECT }}}
+
 namespace iw {
 namespace Reflect {
 namespace detail {
