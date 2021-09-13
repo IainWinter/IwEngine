@@ -9,3 +9,7 @@ _export/
 
 *.aps
 *.sln
+
+/IwEngine/extern/fmod
+/IwEngine/extern/assimp
+/IwTooling/extern/llvm
