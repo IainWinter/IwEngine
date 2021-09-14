@@ -1,6 +1,7 @@
 build/
 bin/
 lib/
+obj/
 .vs/
 
 reflect/
@@ -9,6 +10,7 @@ _export/
 
 *.aps
 *.sln
+*.cache
 
 /IwEngine/extern/fmod
 /IwEngine/extern/assimp

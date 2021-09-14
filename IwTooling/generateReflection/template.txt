@@ -1,0 +1,11 @@
+template\<>
+inline const Class* GetClass(ClassTag\<<type_name>>)
+{
+	static Class c = Class("<type_name>", sizeof(<type_name>), <field_count>);
+
+<fields: { x |
+	c.fields[<i>] = { "<x.name>", GetType(TypeTag\<<x.type_name>>()), offsetof(<type_name>, <x.name>) \};
+}>
+	return &c;
+}
+
