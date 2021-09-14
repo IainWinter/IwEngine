@@ -18,7 +18,7 @@ workspace "wTools"
 		kind "ConsoleApp"
 		language "C++"
 		location  (reflector_dir .. bld_dir)
-		targetdir (reflector_dir .. bld_dir)
+		targetdir (reflector_dir .. bin_dir)
 		implibdir (reflector_dir .. lib_dir)
 		objdir    (reflector_dir .. bld_dir)
 
@@ -37,6 +37,10 @@ workspace "wTools"
 
 		links {
 			"libclang"
+		}
+
+		postbuildcommands {
+			"xcopy /y /f \"" .. llvm_dir  .. "/bin/libclang.dll\" \"" .. reflector_dir .. bin_dir .. "/\""
 		}
 
 		filter "system:windows"
