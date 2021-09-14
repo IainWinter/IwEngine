@@ -1,6 +1,12 @@
 #include "clang-c/Index.h"
+
+#include "iw/util/reflection/serialization/JsonSerializer.h"
+#include "iw/reflected/string.h"
+#include "iw/reflected/vector.h"
+
 #include <iostream>
 #include <unordered_map>
+#include <sstream>
 
 #define DEF_STR_FUNC(func, get_func)                        \
 	std::string iw_##func(CXCursor cursor)                  \
@@ -38,9 +44,58 @@ std::string getName(const std::string& name)
 	return name;
 }
 
+struct record {
+	std::string Name;
+	std::vector<std::string> Bases;
+	std::vector<std::pair<std::string, std::string>> Members;
+
+	std::string GetJson()
+	{
+		iw::JsonSerializer out;
+		out.Write(*this);
+
+		/*
+		
+		
+		{
+		 "name": "test_class",
+		 "fields": [
+			{
+				"name": "x",
+				"type": "int"
+			},
+			{
+				"name": "y",
+				"type": "int"
+			}
+		 ],
+		 "bases": [
+			"base_type"
+		 ]
+		}
+		
+		
+		*/
+
+		buf << "}";
+	}
+};
+
 struct userdata {
-	int TemplateArgsLeft;
+	std::string TemplatedRecord;
+	CXCursorKind Last;
 	int Depth;
+
+	std::vector<record> Records;
+	record* CurrentRecord;
+
+	void NewRecord(std::string name)
+	{
+		record& record = Records.emplace_back();
+		record.Name = name;
+
+		CurrentRecord = &record;
+	}
 };
 
 CXChildVisitResult visitor(
@@ -48,8 +103,6 @@ CXChildVisitResult visitor(
 	CXCursor parent,
 	CXClientData client)
 {
-	userdata& user = *(userdata*)client;
-
 	CXSourceLocation location = clang_getCursorLocation(cursor);
 
 	if (clang_Location_isFromMainFile(location) == 0)
@@ -75,7 +128,18 @@ CXChildVisitResult visitor(
 		return CXChildVisit_Continue;
 	}
 
-	std::cout << std::string(user.Depth * 3, '-');
+	userdata& user = *(userdata*)client;
+
+	if (   !(kind      == CXCursor_TemplateTypeParameter || kind      == CXCursor_NonTypeTemplateParameter)
+		 && (user.Last == CXCursor_TemplateTypeParameter || user.Last == CXCursor_NonTypeTemplateParameter))
+	{
+		user.TemplatedRecord[user.TemplatedRecord.size() - 2] = '>';
+		user.TemplatedRecord.pop_back();
+
+		user.NewRecord(user.TemplatedRecord);
+
+		std::cout << user.CurrentRecord->Name << "\n";
+	}
 
 	switch (kind)
 	{
@@ -84,58 +148,52 @@ CXChildVisitResult visitor(
 		{
 			auto itr = typedefs.emplace(iw_TypeSpelling(cursor), iw_TypedefUnderlyingTypeSpelling(cursor));
 			std::cout << "type rename " << itr.first->second << " to " << itr.first->first << "\n";
-
 			break;
 		}
 		case CXCursor_TemplateTypeParameter:
 		case CXCursor_NonTypeTemplateParameter:
 		{
-			//clang_Cursor_getNumTemplateArguments(cursor);
-			
-			std::cout << getName(iw_CursorSpelling(cursor));
-
-			user.TemplateArgsLeft--;
-			if (user.TemplateArgsLeft == 0)
-			{
-				std::cout << ">";
-			}
-
+			user.TemplatedRecord += getName(iw_CursorSpelling(cursor)) + ", ";
 			break;
 		}
 		case CXCursor_ClassTemplate:
 		{
-			user.TemplateArgsLeft = clang_Cursor_getTemplate (cursor);
-			std::cout << "record: " << getName(iw_CursorSpelling(cursor)) << "<"; 
+			user.TemplatedRecord = getName(iw_CursorSpelling(cursor)) + "<";
 			break;
 		}
 		case CXCursor_ClassDecl:
 		case CXCursor_StructDecl:
 		{
-			std::cout << "record: " << getName(iw_CursorSpelling(cursor));
+			user.NewRecord(getName(iw_CursorSpelling(cursor)));
+
+			std::cout << user.CurrentRecord->Name << "\n";
 			break;
 		}
 
 		case CXCursor_CXXBaseSpecifier:
 		{
-			std::cout << "base: " << getName(iw_TypeSpelling(cursor));
+			user.CurrentRecord->Bases.push_back(getName(iw_TypeSpelling(cursor)));
+
+			std::cout << "`- " << user.CurrentRecord->Bases.back() << "\n";
 			break;
 		}
 		
 		case CXCursor_FieldDecl:
 		{
-			std::cout << "field: " << getName(iw_TypeSpelling(cursor)) << " " << iw_CursorSpelling(cursor);
+			user.CurrentRecord->Members.emplace_back(iw_CursorSpelling(cursor), getName(iw_TypeSpelling(cursor)));
+
+			std::cout << "`- " << user.CurrentRecord->Members.back().second << " " << user.CurrentRecord->Members.back().first << "\n";
 			break;
 		}
 	}
 
-	std::cout << "\n";
-
 	//std::cout
-	//	<< std::string(curLevel, '-')
+	//	<< std::string(user.Depth, '-')
 	//	<< " "
 	//	<< iw_CursorKindSpelling(cursor)
 	//	<< " (" << iw_TypeSpelling(cursor) << " " << iw_CursorSpelling(cursor) << ")\n";
 
+	user.Last = kind;
 	user.Depth += 1;
 	clang_visitChildren(cursor, visitor, &user);
 	user.Depth -= 1;
@@ -179,9 +237,11 @@ int main(int argc, char** argv)
 
 	userdata data;
 	data.Depth = 0;
-	data.TemplateArgsLeft = 0;
+	data.CurrentRecord = 0;
 
 	clang_visitChildren(cursor, visitor, &data);
+
+
 
 	clang_disposeTranslationUnit(tu);
 	clang_disposeIndex(index);

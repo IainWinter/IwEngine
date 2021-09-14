@@ -1,5 +1,6 @@
 reflector_dir = path.getabsolute("reflector")
 extern_dir = path.getabsolute("extern")
+engine_dir = path.getabsolute("../_export");
 llvm_dir = extern_dir .. "/llvm"
 
 cfgname = "%{cfg.buildcfg}.%{cfg.system}.%{cfg.architecture}"
@@ -28,15 +29,18 @@ workspace "wTools"
 		}
 
 		includedirs {
-			llvm_dir .. inc_dir
+			llvm_dir .. inc_dir,
+			engine_dir .. inc_dir
 		}
 
 		libdirs {
-			llvm_dir .. "/lib"
+			llvm_dir .. "/lib",
+			engine_dir .. "/lib"
 		}
 
 		links {
-			"libclang"
+			"libclang",
+			"wUtil"
 		}
 
 		postbuildcommands {

@@ -122,7 +122,8 @@ group ""
 		}
 
 		includedirs {
-			iwengdir  .. incdir
+			iwengdir  .. incdir,
+			jsondir .. incdir
 		}
 
 		links {
@@ -662,7 +663,7 @@ group ""
 			"xcopy /y /f /e \"" .. iwengdir .. incdir .. "/*\" \""     .. exprtdir .. incdir .. "/\"",
 			"xcopy /y /f /e \"" .. imguidir .. incdir .. "/*\" \""     .. exprtdir .. incdir .. "/\"",
 			"xcopy /y /f /e \"" .. fmoddir  .. incdir .. "/*\" \""     .. exprtdir .. incdir .. "/\"",
-			"xcopy /y /f    \"" .. jsondir            .. "/*.h\" \""   .. exprtdir .. incdir .. "/json/\"",
+			"xcopy /y /f    \"" .. jsondir  .. incdir .. "/*\" \""     .. exprtdir .. incdir .. "/\"",
 
 			"xcopy /y /f \"" .. imguidir .. libdir .. "/ImGui.lib\" \"" .. exprtdir .. libdir .. "\"",
 
@@ -779,7 +780,7 @@ group "Editor" -- might become it's own solution/repo
 			iwengdir .. incdir,
 			imguidir .. incdir,
 			fmoddir  .. incdir,
-			jsondir,
+			jsondir  .. incdir,
 			glmdir .. incdir
 		}
 
