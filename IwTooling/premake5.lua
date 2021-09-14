@@ -35,7 +35,7 @@ workspace "wTools"
 
 		libdirs {
 			llvm_dir .. "/lib",
-			engine_dir .. "/lib"
+			engine_dir .. lib_dir
 		}
 
 		links {

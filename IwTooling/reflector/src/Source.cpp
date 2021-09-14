@@ -1,12 +1,47 @@
 #include "clang-c/Index.h"
 
-#include "iw/util/reflection/serialization/JsonSerializer.h"
-#include "iw/reflected/string.h"
-#include "iw/reflected/vector.h"
-
 #include <iostream>
 #include <unordered_map>
 #include <sstream>
+
+
+struct record {
+	std::string Name;
+	std::vector<std::string> Bases;
+	std::vector<std::pair<std::string, std::string>> Members;
+};
+
+#include "iw/util/reflection/Reflect.h"
+
+IW_BEGIN_REFLECT
+
+inline const Class* GetClass(ClassTag<record>)
+{
+	static Class c = Class("record", sizeof(record), 3);
+	c.fields[0] = { "name",   GetType(TypeTag<std::string>()),                                      offsetof(record, Name)    };
+	c.fields[1] = { "bases",  GetType(TypeTag<std::vector<std::string>>()),                         offsetof(record, Bases)   };
+	c.fields[2] = { "fields", GetType(TypeTag<std::vector<std::pair<std::string, std::string>>>()), offsetof(record, Members) };
+
+	return &c;
+}
+
+template<size_t _s>
+inline const Class* GetClass(ClassTag<record[_s]>)
+{
+	static Class c = Class("record[]", sizeof(record[_s]), 3);
+	c.fields[0] = { "name",   GetType(TypeTag<std::string>()),                                      offsetof(record, Name) };
+	c.fields[1] = { "bases",  GetType(TypeTag<std::vector<std::string>>()),                         offsetof(record, Bases) };
+	c.fields[2] = { "fields", GetType(TypeTag<std::vector<std::pair<std::string, std::string>>>()), offsetof(record, Members) };
+
+	return &c;
+}
+
+IW_END_REFLECT
+
+#include "iw/util/reflection/serialization/JsonSerializer.h"
+#include "iw/reflected/string.h"
+#include "iw/reflected/vector.h"
+#include "iw/reflected/pair.h"
 
 #define DEF_STR_FUNC(func, get_func)                        \
 	std::string iw_##func(CXCursor cursor)                  \
@@ -43,43 +78,6 @@ std::string getName(const std::string& name)
 
 	return name;
 }
-
-struct record {
-	std::string Name;
-	std::vector<std::string> Bases;
-	std::vector<std::pair<std::string, std::string>> Members;
-
-	std::string GetJson()
-	{
-		iw::JsonSerializer out;
-		out.Write(*this);
-
-		/*
-		
-		
-		{
-		 "name": "test_class",
-		 "fields": [
-			{
-				"name": "x",
-				"type": "int"
-			},
-			{
-				"name": "y",
-				"type": "int"
-			}
-		 ],
-		 "bases": [
-			"base_type"
-		 ]
-		}
-		
-		
-		*/
-
-		buf << "}";
-	}
-};
 
 struct userdata {
 	std::string TemplatedRecord;
@@ -241,7 +239,10 @@ int main(int argc, char** argv)
 
 	clang_visitChildren(cursor, visitor, &data);
 
-
+	{
+		iw::JsonSerializer out("./test.json");
+		out.Write(data.Records);
+	}
 
 	clang_disposeTranslationUnit(tu);
 	clang_disposeIndex(index);
