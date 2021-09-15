@@ -31,7 +31,7 @@ namespace Reflect {
 		const IntegralType type; // Integral type (NOT_INTEGRAL) for classes
 		const bool isClass;      // If AsClass() is valid
 		const bool isArray;      // If type is an array
-		size_t count;      // Count of elements in supposed array
+		size_t count;            // Count of elements in assumed array
 
 		Type(
 			const char* name,
@@ -57,6 +57,7 @@ namespace Reflect {
 		const char* name;
 		const Type* type;
 		size_t offset;
+		bool isBase; // if Field is actually a base class, could make a Base struct but they work exactly as Fields
 	};
 
 	struct Class

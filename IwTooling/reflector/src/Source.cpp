@@ -1,15 +1,12 @@
 #include "clang-c/Index.h"
 
 #include <iostream>
+#include <fstream>
 #include <unordered_map>
-#include <sstream>
 
 #include "record.h"
 
 #include "iw/util/reflection/serialization/JsonSerializer.h"
-#include "iw/reflected/string.h"
-#include "iw/reflected/vector.h"
-#include "iw/reflected/pair.h"
 
 #define DEF_STR_FUNC(func, get_func)                        \
 	std::string iw_##func(CXCursor cursor)                  \
@@ -49,7 +46,6 @@ std::string getName(const std::string& name)
 
 struct userdata {
 	std::string TemplatedRecord;
-	CXCursorKind Last;
 	int Depth;
 
 	std::vector<record> Records;
@@ -96,70 +92,43 @@ CXChildVisitResult visitor(
 
 	userdata& user = *(userdata*)client;
 
-	if (   !(kind      == CXCursor_TemplateTypeParameter || kind      == CXCursor_NonTypeTemplateParameter)
-		 && (user.Last == CXCursor_TemplateTypeParameter || user.Last == CXCursor_NonTypeTemplateParameter))
-	{
-		user.TemplatedRecord[user.TemplatedRecord.size() - 2] = '>';
-		user.TemplatedRecord.pop_back();
-
-		user.NewRecord(user.TemplatedRecord);
-
-		std::cout << user.CurrentRecord->Name << "\n";
-	}
-
 	switch (kind)
 	{
 		case CXCursor_TypedefDecl:
 		case CXCursor_TypeAliasDecl:
 		{
-			auto itr = typedefs.emplace(iw_TypeSpelling(cursor), iw_TypedefUnderlyingTypeSpelling(cursor));
-			std::cout << "type rename " << itr.first->second << " to " << itr.first->first << "\n";
+			typedefs.emplace(iw_TypeSpelling(cursor), iw_TypedefUnderlyingTypeSpelling(cursor));
 			break;
 		}
 		case CXCursor_TemplateTypeParameter:
+		{
+			user.CurrentRecord->TemplateArgs.emplace_back(iw_CursorSpelling(cursor), "typename");
+			break;
+		}
 		case CXCursor_NonTypeTemplateParameter:
 		{
-			user.TemplatedRecord += getName(iw_CursorSpelling(cursor)) + ", ";
+			user.CurrentRecord->TemplateArgs.emplace_back(iw_CursorSpelling(cursor), iw_TypeSpelling(cursor));
 			break;
 		}
 		case CXCursor_ClassTemplate:
-		{
-			user.TemplatedRecord = getName(iw_CursorSpelling(cursor)) + "<";
-			break;
-		}
 		case CXCursor_ClassDecl:
 		case CXCursor_StructDecl:
 		{
 			user.NewRecord(getName(iw_CursorSpelling(cursor)));
-
-			std::cout << user.CurrentRecord->Name << "\n";
 			break;
 		}
-
 		case CXCursor_CXXBaseSpecifier:
 		{
 			user.CurrentRecord->Bases.push_back(getName(iw_TypeSpelling(cursor)));
-
-			std::cout << "`- " << user.CurrentRecord->Bases.back() << "\n";
 			break;
 		}
-		
 		case CXCursor_FieldDecl:
 		{
-			user.CurrentRecord->Members.emplace_back(iw_CursorSpelling(cursor), getName(iw_TypeSpelling(cursor)));
-
-			std::cout << "`- " << user.CurrentRecord->Members.back().second << " " << user.CurrentRecord->Members.back().first << "\n";
+			user.CurrentRecord->Fields.emplace_back(iw_CursorSpelling(cursor), getName(iw_TypeSpelling(cursor)));
 			break;
 		}
 	}
 
-	//std::cout
-	//	<< std::string(user.Depth, '-')
-	//	<< " "
-	//	<< iw_CursorKindSpelling(cursor)
-	//	<< " (" << iw_TypeSpelling(cursor) << " " << iw_CursorSpelling(cursor) << ")\n";
-
-	user.Last = kind;
 	user.Depth += 1;
 	clang_visitChildren(cursor, visitor, &user);
 	user.Depth -= 1;
@@ -167,19 +136,41 @@ CXChildVisitResult visitor(
 	return CXChildVisit_Continue;
 }
 
+void print_comma(std::ostream& stream, int index, int count)
+{
+	if (index < count - 1)
+	{
+		stream << ",";
+	}
+}
+
 int main(int argc, char** argv)
 {
+
+
+	test_float test;
+
+	test.base_x = 10;
+	test.base_y = 102;
+	test.base_t = 'A';
+	test.x = 1;
+	test.y = 2;
+	test.xy = 2342340.0234234f;
+
+	{
+		iw::JsonSerializer out("./test_out.json", true);
+		out.Write(test);
+	}
+
 	// validate inputs
 
-
-	
-
-	argc = 2;
-	argv = new char* [2];
+	argc = 3;
+	argv = new char* [3];
 	argv[0] = nullptr;
 	argv[1] = "C:/dev/IwEngine/IwTooling/reflector/src/test.ast";
+	argv[2] = "C:/dev/IwEngine/IwTooling/reflector/src/test.json";
 
-	if (argc > 2)
+	if (argc < 3)
 	{
 		return -1;
 	}
@@ -212,11 +203,142 @@ int main(int argc, char** argv)
 
 	clang_visitChildren(cursor, visitor, &data);
 
+	// print json
+
+	std::fstream file;
+	file.open(argv[2], std::fstream::in | std::fstream::out | std::ios::trunc);
+
+	std::ostream& ss =file;
+
+	ss << "{";
+	ss << "\"records\":[";
+
+	int record_count = data.Records.size();
+	for (int i = 0; i < record_count; i++)
 	{
-		iw::JsonSerializer out("./test.json", true);
-		out.Write(data.Records);
+		const record& record = data.Records.at(i);
+
+		ss << "{";
+
+		ss << "\"type_name\":" << "\"" << record.GetNameWithTArgs() << "\",";
+
+		if (record.TemplateArgs.size() > 0)
+		{
+			ss << "\"targs\":[";
+
+			int targ_count = record.TemplateArgs.size();
+			for (int t = 0; t < targ_count; t++)
+			{
+				const auto& [targ_name, targ_type_name] = record.TemplateArgs.at(t);
+
+				ss << "{";
+				
+				ss << "\"name\":"      << "\"" << targ_name      << "\",";
+				ss << "\"type_name\":" << "\"" << targ_type_name << "\"";
+
+				ss << "}";
+				print_comma(ss, t, targ_count);
+			}
+
+			ss << "]";
+
+			if (record.Fields.size() > 0)
+			{
+				ss << ",";
+			}
+		}
+
+		if (record.Fields.size() > 0)
+		{
+			ss << "\"fields\":[";
+
+			int field_count = record.Fields.size();
+			for (int f = 0; f < field_count; f++)
+			{
+				const auto& [field_name, field_type_name] = record.Fields.at(f);
+
+				ss << "{";
+				
+				ss << "\"name\":"      << "\"" << field_name      << "\",";
+				ss << "\"type_name\":" << "\"" << field_type_name << "\"";
+
+				ss << "}";
+				print_comma(ss, f, field_count);
+			}
+
+			ss << "]";
+
+			if (record.Bases.size() > 0)
+			{
+				ss << ",";
+			}
+		}
+
+		if (record.Bases.size() > 0)
+		{
+			ss << "\"bases\":[";
+
+			int base_count = record.Bases.size();
+			for (int b = 0; b < base_count; b++)
+			{
+				const std::string& base_type_name = record.Bases.at(b);
+				ss << "\"" << base_type_name << "\"";
+				print_comma(ss, b, base_count);
+			}
+
+			ss << "]";
+		}
+
+
+		ss << "}";
+		print_comma(ss, i, record_count);
 	}
 
+	ss << "]";
+	ss << "}";
+
+	/*
+	
+	{
+		"records": [
+			{
+				"type_name": "vector2",
+				"fields": [
+					{
+						"name": "x",
+						"type_name": "float"
+					},
+					{
+						"name": "y",
+						"type_name": "float"
+					}
+				],
+				"bases": [
+					"vec<2, float>"
+				]
+			},
+			{
+				"type_name": "vec<2, float>",
+				"fields": [
+					{
+						"name": "x",
+						"type_name": "float"
+					},
+					{
+						"name": "y",
+						"type_name": "float"
+					}
+				],
+				"bases": [
+					"vec<2, float>"
+				]
+			}
+		]
+	}
+	*/
+
+	file.flush();
+	file.close();
 	clang_disposeTranslationUnit(tu);
 	clang_disposeIndex(index);
 

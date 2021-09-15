@@ -72,6 +72,29 @@ namespace detail {
 		assert("No reflection information for type");
 		throw nullptr;
 	}
+
+	const char* get_array_type_name(const char* type_name, size_t _s)
+	{
+		std::stringstream ss;
+		ss << _s;
+
+		int digits = ss.str().size();
+
+		ss = std::stringstream();
+		ss << "[";
+		ss << _s;
+		ss << "]\0";
+
+		size_t size = strlen(type_name);
+		size_t size_with_array = size + 5 + (digits - 1);
+
+		char* type_name_with_array = new char[size_with_array];
+
+		memcpy_s(type_name_with_array, size_with_array, type_name, size);
+		memcpy_s(type_name_with_array + size, size_with_array, ss.str().c_str(), 5);
+
+		return type_name_with_array;
+	}
 }
 
 	template<
