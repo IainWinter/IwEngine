@@ -15,8 +15,8 @@ namespace Engine {
 		m_models = Space->MakeQuery<Transform, Model>();
 		m_meshes = Space->MakeQuery<Transform, Mesh>();
 
-		m_models->SetNone({ Space->RegisterComponent<UiElement>() });
-		m_meshes->SetNone({ Space->RegisterComponent<UiElement>() });
+		m_models.SetNone({ Space->RegisterComponent<UiElement>() });
+		m_meshes.SetNone({ Space->RegisterComponent<UiElement>() });
 
 		return 0;
 	}

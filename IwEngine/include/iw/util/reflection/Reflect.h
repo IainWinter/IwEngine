@@ -7,6 +7,7 @@
 #include "Type.h"
 #include <assert.h>
 #include <cstddef>
+#include <sstream>
 
 #if !defined(__clang__) && !defined(__GNUC__)
 	#ifdef __attribute__ 
@@ -17,7 +18,12 @@
 	#define REFLECTING
 #endif
 
-#define REFLECT __attribute__((annotate("reflect")))
+#ifndef REFLECT
+#	define REFLECT __attribute__((annotate("reflect")))
+#endif
+#ifndef AUTO_REFLECT
+#	define AUTO_REFLECT __attribute__((annotate("auto_reflect")))
+#endif
 
 #define IW_BEGIN_REFLECT namespace iw { namespace Reflect { namespace detail {
 #define IW_END_REFLECT }}}
@@ -73,12 +79,12 @@ namespace detail {
 		throw nullptr;
 	}
 
-	const char* get_array_type_name(const char* type_name, size_t _s)
+	inline const char* get_array_type_name(const char* type_name, size_t _s)
 	{
 		std::stringstream ss;
 		ss << _s;
 
-		int digits = ss.str().size();
+		size_t digits = ss.str().size();
 
 		ss = std::stringstream();
 		ss << "[";
@@ -86,12 +92,12 @@ namespace detail {
 		ss << "]\0";
 
 		size_t size = strlen(type_name);
-		size_t size_with_array = size + 5 + (digits - 1);
+		size_t size_with_array = size + 5u + (digits - 1u);
 
 		char* type_name_with_array = new char[size_with_array];
 
 		memcpy_s(type_name_with_array, size_with_array, type_name, size);
-		memcpy_s(type_name_with_array + size, size_with_array, ss.str().c_str(), 5);
+		memcpy_s(type_name_with_array + size, size_with_array, ss.str().c_str(), 5u);
 
 		return type_name_with_array;
 	}

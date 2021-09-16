@@ -59,7 +59,7 @@ namespace util {
 		};
 	private:
 		page*  m_root;
-		size_t m_pageSize;
+		size_t m_pageSizeHint;
 		std::mutex m_mutex;
 
 	public:
@@ -70,6 +70,32 @@ namespace util {
 		IWUTIL_API pool_allocator(const pool_allocator&) = delete;
 		IWUTIL_API pool_allocator& operator=(pool_allocator&&) noexcept;
 		IWUTIL_API pool_allocator& operator=(const pool_allocator&) = delete;
+
+		template<
+			typename _t>
+		_t* alloc_c(
+			size_t count = 1)
+		{
+			return (_t*)alloc(count * sizeof(_t));
+		}
+
+		template<
+			typename _t>
+		ref<_t[]> alloc_ref_c(
+			size_t count = 1)
+		{
+			return std::static_pointer_cast<_t[], void>(alloc_ref(count * sizeof(_t)));
+		}
+
+		template<
+			typename _t>
+		bool free_c(
+			_t* addr,
+			size_t count = 1)
+		{
+			addr->~_t();
+			return free((void*)addr, count * sizeof(_t));
+		}
 
 		template<
 			typename _t>
@@ -111,7 +137,7 @@ namespace util {
 			size_t size);
 
 		IWUTIL_API void reset();
-		IWUTIL_API size_t page_size() const;
+		IWUTIL_API size_t page_size_hint() const;
 		IWUTIL_API size_t acitive_size() const;
 
 		void log() const {

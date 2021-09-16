@@ -14,16 +14,16 @@
 
 namespace iw {
 namespace events {
-#define TIME std::chrono::system_clock::now().time_since_epoch().count()
+#define TIME (float)std::chrono::system_clock::now().time_since_epoch().count()
 	
 	struct event_record {
-		event* event;
+		event* event = nullptr;
 		std::string who_handled;
 		std::string who_called;
 
-		float time_queued;
-		float time_published;
-		float time_handled;
+		float time_queued = 0.f;
+		float time_published = 0.f;
+		float time_handled = 0.f;
 	};
 
 	struct eventbus_recorder

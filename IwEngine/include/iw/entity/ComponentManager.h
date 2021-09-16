@@ -14,7 +14,7 @@ namespace iw {
 namespace ECS {
 	class ComponentManager {
 	private:
-		const size_t m_chunkSize = 16 * 1024;
+		const size_t m_chunkSize = 16 * 1024; // chunks should double in size
 
 		std::unordered_map<ComponentType, ref<Component>> m_components;
 		std::unordered_map<size_t, ChunkList> m_componentData;
@@ -36,59 +36,59 @@ namespace ECS {
 
 		IWENTITY_API
 		size_t CreateComponentsData(
-			const ref<EntityData>& entityData);
+			const EntityData& entityData);
 
 		IWENTITY_API
 		bool ReinstateComponentData(
-			const ref<EntityData>& entityData);
+			const EntityData& entityData);
 
 		IWENTITY_API
 		bool DestroyComponentsData(
-			const ref<EntityData>& entityData);
+			const EntityData& entityData);
 
 		IWENTITY_API
 		size_t MoveComponentData(
-			const ref<EntityData>& entityData,
-			const ref<Archetype>& archetype);
+			const EntityData& entityData,
+			const Archetype& archetype);
 
 		IWENTITY_API
 		void* GetComponentPtr(
-			const ref<EntityData>& entityData,
+			const EntityData& entityData,
 			const ref<Component>& component);
 
 		IWENTITY_API
 		ref<ComponentData> GetComponentData(
-			const ref<EntityData>& entityData);
+			const EntityData& entityData);
 
 		IWENTITY_API
-		ref<ComponentQuery> MakeQuery(
+		ComponentQuery MakeQuery(
 			std::initializer_list<ref<Component>> all,
 			std::initializer_list<ref<Component>> any = {},
 			std::initializer_list<ref<Component>> none = {});
 
 		IWENTITY_API
 		EntityComponentArray Query(
-			const ref<ComponentQuery>& components,
-			const ref<ArchetypeQuery>& query);
+			const ComponentQuery& components,
+			const ArchetypeQuery& query);
 
 		IWENTITY_API
 		EntityHandle FindEntity(
-			ref<ArchetypeQuery>& query,
+			ArchetypeQuery& query,
 			const ref<Component>& component,
 			void* instance);
 
 		IWENTITY_API
 		bool SetEntityAliveState(
-			const ref<EntityData>& entityData);
+			const EntityData& entityData);
 
 		IWENTITY_API
 		void Clear();
 	private:
 		ChunkList* FindChunkList(
-			const ref<Archetype>& archetype);
+			const Archetype& archetype);
 
 		ChunkList& FindOrCreateChunkList(
-			const ref<Archetype>& archetype);
+			const Archetype& archetype);
 	};
 }
 

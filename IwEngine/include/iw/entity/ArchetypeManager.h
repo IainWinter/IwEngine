@@ -11,8 +11,8 @@ namespace iw {
 namespace ECS {
 	class ArchetypeManager {
 	private:
-		std::unordered_map<size_t, ref<Archetype>> m_hashed;
-		std::vector<ref<Archetype>> m_archetypes;
+		std::unordered_map<size_t, Archetype> m_hashed; // there are two copies stored
+		std::vector<Archetype> m_archetypes;
 		pool_allocator m_pool;
 		
 	public:
@@ -20,33 +20,33 @@ namespace ECS {
 		ArchetypeManager();
 
 		IWENTITY_API
-		ref<Archetype>& CreateArchetype(
+		Archetype CreateArchetype(
 			std::initializer_list<ref<Component>> components);
 
 		IWENTITY_API
-		ref<Archetype>& CreateArchetype(
+		Archetype CreateArchetype(
 			const ref<Component>* begin,
 			const ref<Component>* end);
 
 		IWENTITY_API
-		ref<Archetype>& AddComponent(
-			ref<Archetype> archetype,
+		Archetype AddComponent(
+			const Archetype& archetype,
 			ref<Component> component);
 
 		IWENTITY_API
-		ref<Archetype>& RemoveComponent(
-			ref<Archetype> archetype,
+		Archetype RemoveComponent(
+			const Archetype& archetype,
 			ref<Component> component);
 
 		IWENTITY_API
-		ref<ArchetypeQuery> MakeQuery(
-			const ref<ComponentQuery>& query);
+		ArchetypeQuery MakeQuery(
+			const ComponentQuery& query);
 
 		IWENTITY_API
 		void Clear();
 
 		IWENTITY_API
-		const std::vector<ref<Archetype>>& Archetypes() const;
+		const std::vector<Archetype>& Archetypes() const;
 	};
 }
 

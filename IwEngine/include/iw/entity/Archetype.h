@@ -2,24 +2,23 @@
 
 #include "IwEntity.h"
 #include "Component.h"
-#include <memory>
 
 namespace iw {
 namespace ECS {
 	struct ArchetypeLayout {
-		iw::ref<Component> Component;
-		size_t Offset;
-		size_t Onset;
+		ref<Component> Component;
+		size_t Offset = 0;
+		size_t Onset = 0;
 	};
 
 	struct Archetype {
-		size_t Hash;
-		size_t Size;
-		size_t Count;
-		ArchetypeLayout Layout[];
+		size_t Hash = 0;
+		size_t Size = 0;
+		size_t Count = 0;
+		ref<ArchetypeLayout[]> Layout;
 
-		ArchetypeLayout* GetLayout(
-			const iw::ref<Component>& component)
+		const ArchetypeLayout* GetLayout(
+			const ref<Component>& component) const
 		{
 			for (size_t i = 0; i < Count; i++) {
 				if (component->Type == Layout[i].Component->Type) {
@@ -31,21 +30,21 @@ namespace ECS {
 		}
 
 		ArchetypeLayout* GetLayout(
-			size_t index)
+			size_t index) const
 		{
 			return &Layout[index];
 		}
 
 		bool HasComponent(
-			const iw::ref<Component>& component)
+			const ref<Component>& component) const
 		{
 			return GetLayout(component) != nullptr;
 		}
 	};
 
 	struct ArchetypeQuery {
-		size_t Count;
-		size_t Hashes[];
+		size_t Count = 0;
+		ref<size_t[]> Hashes;
 	};
 }
 

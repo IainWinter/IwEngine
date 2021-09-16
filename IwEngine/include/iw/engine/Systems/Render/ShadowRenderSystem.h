@@ -10,8 +10,8 @@ namespace Engine {
 	{
 	private:
 		Scene* m_scene;
-		ref<ComponentQuery> m_models;
-		ref<ComponentQuery> m_meshes;
+		ComponentQuery m_models;
+		ComponentQuery m_meshes;
 
 	public:
 		IWENGINE_API

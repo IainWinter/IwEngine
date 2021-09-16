@@ -6,4 +6,6 @@
 #else
 #		define IWASSET_API __declspec(dllimport)
 #	endif
+#else
+#	define IWASSET_API
 #endif

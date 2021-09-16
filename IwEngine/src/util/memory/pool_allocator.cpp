@@ -10,7 +10,7 @@ namespace util {
 		size_t pageSize
 	)
 		: m_root(new page(nullptr, pageSize))
-		, m_pageSize(pageSize)
+		, m_pageSizeHint(pageSize)
 	{}
 
 	pool_allocator::~pool_allocator() {
@@ -21,10 +21,10 @@ namespace util {
 		pool_allocator&& copy
 	) noexcept
 		: m_root(copy.m_root)
-		, m_pageSize(copy.m_pageSize)
+		, m_pageSizeHint(copy.m_pageSizeHint)
 	{
 		copy.m_root = nullptr;
-		copy.m_pageSize = 0;
+		copy.m_pageSizeHint = 0;
 	}
 
 	pool_allocator& pool_allocator::operator=(
@@ -32,10 +32,10 @@ namespace util {
 	) noexcept
 	{
 		m_root = copy.m_root;
-		m_pageSize = copy.m_pageSize;
+		m_pageSizeHint = copy.m_pageSizeHint;
 
 		copy.m_root = nullptr;
-		copy.m_pageSize = 0;
+		copy.m_pageSizeHint = 0;
 
 		return *this;
 	}
@@ -44,6 +44,13 @@ namespace util {
 		size_t size)
 	{
 		std::unique_lock<std::mutex> lock(m_mutex);
+
+		// I think this should keep what the hint was, pages can resize on creation
+		//if (size > m_pageSizeHint)
+		//{
+		//	m_pageSize = size;
+		//}
+
 		return m_root->alloc(size);
 	}
 
@@ -66,8 +73,8 @@ namespace util {
 		m_root->reset();
 	}
 
-	size_t pool_allocator::page_size() const {
-		return m_pageSize;
+	size_t pool_allocator::page_size_hint() const {
+		return m_pageSizeHint;
 	}
 
 	size_t pool_allocator::acitive_size() const {
@@ -239,7 +246,14 @@ namespace util {
 		size_t size)
 	{
 		if (m_next == nullptr) {
-			m_next = new page(this, m_capacity);
+
+			size_t capacity = m_capacity;
+			while (size > capacity)
+			{
+				capacity *= 2;
+			}
+
+			m_next = new page(this, capacity);
 		}
 
 		return m_next->alloc(size);

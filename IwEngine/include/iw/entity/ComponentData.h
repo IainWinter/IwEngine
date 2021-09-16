@@ -5,12 +5,12 @@
 namespace iw {
 namespace ECS {
 	struct ComponentData {
-		void* Components[];
+		ref<void*[]> Components;
 
 		template<
 			typename _cs>
 		_cs Tie() {
-			return *reinterpret_cast<_cs*>(Components);
+			return *reinterpret_cast<_cs*>(Components.get());
 		}
 
 		template<
@@ -23,7 +23,7 @@ namespace ECS {
 
 	struct ComponentDataIndices {
 		size_t Count;
-		size_t Indices[];
+		ref<size_t[]> Indices;
 	};
 }
 

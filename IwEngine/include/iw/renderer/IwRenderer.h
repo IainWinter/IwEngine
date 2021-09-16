@@ -6,6 +6,8 @@
 #else
 #		define IWRENDERER_API __declspec(dllimport)
 #	endif
+#else
+#	define IWRENDERER_API
 #endif
 
 // canmt be gl here

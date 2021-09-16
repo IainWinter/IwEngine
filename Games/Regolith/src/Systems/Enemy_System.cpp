@@ -118,8 +118,8 @@ bool EnemySystem::On(iw::ActionEvent& e)
 
 void EnemySystem::SpawnEnemy(SpawnEnemy_Config& config)
 {
-	iw::ref<iw::Archetype> archetype = Space->CreateArchetype<Flocker, CorePixels, Enemy>();
-	iw::ref<iw::Texture>   texture;
+	iw::Archetype archetype = Space->CreateArchetype<Flocker, CorePixels, Enemy>();
+	iw::ref<iw::Texture> texture;
 
 	switch (config.EnemyType)
 	{
@@ -143,7 +143,7 @@ void EnemySystem::SpawnEnemy(SpawnEnemy_Config& config)
 		}
 	}
 
-	iw::Entity entity = sand->MakeTile<iw::Circle>(texture, true, archetype);
+	iw::Entity entity = sand->MakeTile<iw::Circle>(texture, true, &archetype);
 
 	iw::Rigidbody* rigidbody = entity.Find<iw::Rigidbody>();
 	iw::Transform* transform = entity.Find<iw::Transform>();

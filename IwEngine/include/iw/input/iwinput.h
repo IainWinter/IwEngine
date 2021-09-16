@@ -6,6 +6,8 @@
 #else
 #		define IWINPUT_API __declspec(dllimport)
 #	endif
+#else
+#	define IWINPUT_API
 #endif
 
 #define NO_WIDTH  -1.0f

@@ -14,7 +14,7 @@ namespace Engine {
 			ParticleSystem<StaticParticle>* ParticleSystem;
 		};
 
-		iw::ref<ComponentQuery> query;
+		ComponentQuery m_particleSystems;
 
 	public:
 		IWENGINE_API

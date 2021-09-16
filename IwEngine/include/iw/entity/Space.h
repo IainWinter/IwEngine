@@ -62,13 +62,13 @@ namespace ECS {
 
 		// Creates an archetype from a list of registed components
 		IWENTITY_API
-		ref<Archetype>& CreateArchetype(
+		Archetype CreateArchetype(
 			std::initializer_list<ref<Component>> components);
 
 		// Recycles or creates a new entity with components of the specified archetype
 		IWENTITY_API
 		Entity CreateEntity(
-			const ref<Archetype>& archetype);
+			const Archetype& archetype);
 
 		// Destroys an entity and its components
 		IWENTITY_API
@@ -100,13 +100,13 @@ namespace ECS {
 		// Adds a new component to an archetype
 		IWENTITY_API
 		void AddComponent(
-			ref<Archetype>& archetype,
+			Archetype& archetype,
 			const ref<Component>& component);
 
 		// Removes a component from an archetype
 		IWENTITY_API
 		void RemoveComponent(
-			ref<Archetype>& archetype,
+			Archetype& archetype,
 			const ref<Component>& component);
 
 		// Sets component data with a copy
@@ -129,18 +129,18 @@ namespace ECS {
 			const ref<Component>& component);
 
 		IWENTITY_API
-		ref<Archetype> GetArchetype(
+		Archetype GetArchetype(
 			EntityHandle handle);
 
 		// Makes a component query from a list of registered components
 		IWENTITY_API
-		ref<ComponentQuery> MakeQuery(
+		ComponentQuery MakeQuery(
 			std::initializer_list<ref<Component>> components);
 
 		// Query for entities with the specified components
 		IWENTITY_API
 		EntityComponentArray Query(
-			const ref<ComponentQuery>& query);
+			const ComponentQuery& query);
 
 		// Finds an entity from one of its components
 		IWENTITY_API
@@ -175,8 +175,8 @@ namespace ECS {
 #endif
 			);
 
-			component->DeepCopyFunc   = iw::GetCopyFunc<_c>();
-			component->DestructorFunc = iw::GetDestructorFunc<_c>();
+			component->DeepCopyFunc   = GetCopyFunc<_c>();
+			component->DestructorFunc = GetDestructorFunc<_c>();
 
 			return component;
 		}
@@ -197,7 +197,7 @@ namespace ECS {
 		// Creates an archetype from a list of registed components
 		template<
 			typename... _cs>
-		ref<Archetype>& CreateArchetype() {
+		Archetype CreateArchetype() {
 			return CreateArchetype({ RegisterComponent<_cs>()... });
 		}
 
@@ -235,7 +235,7 @@ namespace ECS {
 		template<
 			typename _c>
 		void AddComponent(
-			ref<Archetype>& archetype)
+			Archetype& archetype)
 		{
 			AddComponent(archetype, RegisterComponent<_c>());
 		}
@@ -244,7 +244,7 @@ namespace ECS {
 		template<
 			typename _c>
 		void RemoveComponent(
-			ref<Archetype>& archetype)
+			Archetype& archetype)
 		{
 			RemoveComponent(archetype, GetComponent<_c>());
 		}
@@ -257,7 +257,7 @@ namespace ECS {
 			EntityHandle handle,
 			_args&&... args)
 		{
-			ref<EntityData>& entityData = m_entityManager.GetEntityData(handle.Index);
+			EntityData& entityData = m_entityManager.GetEntityData(handle.Index);
 			ref<Component>   component  = GetComponent<_c>();
 
 			if (component) {
@@ -309,7 +309,7 @@ namespace ECS {
 		// Makes a component query from a list of registered components
 		template<
 			typename... _cs>
-		ref<ComponentQuery> MakeQuery() {
+		ComponentQuery MakeQuery() {
 			return MakeQuery({ RegisterComponent<_cs>()... });
 		}
 
@@ -362,7 +362,7 @@ namespace ECS {
 		std::vector<EntityHandle> Entities() const;
 
 		IWENTITY_API
-		const std::vector<ref<Archetype>>& Archetypes() const;
+		const std::vector<Archetype>& Archetypes() const;
 
 #ifdef IW_USE_EVENTS
 		void SetEventBus(
@@ -408,8 +408,8 @@ namespace ECS {
 
 		// Moves components from one chunk list to another
 		void MoveComponents(
-			ref<EntityData>& entityData,
-			const ref<Archetype>& newArchetype);
+			EntityData& entityData,
+			const Archetype& newArchetype);
 	};
 }
 

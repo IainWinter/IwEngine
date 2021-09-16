@@ -10,7 +10,7 @@ namespace iw {
 namespace ECS {
 	class EntityManager {
 	private:
-		std::vector<ref<EntityData>> m_entities;
+		std::vector<EntityData*> m_entities;
 		std::priority_queue<size_t, std::vector<size_t>, std::greater<size_t>> m_dead;
 		pool_allocator m_pool;
 
@@ -19,21 +19,21 @@ namespace ECS {
 		EntityManager();
 
 		IWENTITY_API
-		ref<EntityData>& CreateEntity();
+		EntityData& CreateEntity();
 
 		IWENTITY_API
 		bool DestroyEntity(
 			size_t index);
 
 		IWENTITY_API
-		ref<EntityData>& GetEntityData(
+		EntityData& GetEntityData(
 			size_t index);
 
 		IWENTITY_API
 		void Clear();
 
 		IWENTITY_API
-		const std::vector<ref<EntityData>>& Entities() const;
+		const std::vector<EntityData*>& Entities() const;
 
 		IWENTITY_API
 		bool IsValidEntityIndex(

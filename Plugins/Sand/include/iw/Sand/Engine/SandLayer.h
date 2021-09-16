@@ -181,9 +181,9 @@ public:
 	Entity MakeTile(
 		ref<Texture>& sprite,
 		bool isSimulated = false,
-		const ref<Archetype>& others = nullptr)
+		const Archetype* others = nullptr)
 	{
-		ref<Archetype> archetype = Space->CreateArchetype<Transform, Tile, _collider, _others...>();
+		Archetype archetype = Space->CreateArchetype<Transform, Tile, _collider, _others...>();
 
 		if (isSimulated) Space->AddComponent<Rigidbody>      (archetype);
 		else             Space->AddComponent<CollisionObject>(archetype);

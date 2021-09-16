@@ -6,6 +6,8 @@
 #else
 #		define IWPHYSICS_API __declspec(dllimport)
 #	endif
+#else
+#	define IWPHYSICS_API
 #endif
 
 #include <type_traits>

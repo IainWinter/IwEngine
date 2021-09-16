@@ -6,4 +6,6 @@
 #else
 #		define IWEVENTS_API __declspec(dllimport)
 #	endif
+#else
+#	define IWEVENTS_API
 #endif

@@ -61,13 +61,13 @@ namespace ECS {
 	struct EntityMovedEvent
 		: EntityEvent
 	{
-		ref<Archetype> OldArchetype;
-		ref<Archetype> NewArchetype;
+		Archetype OldArchetype;
+		Archetype NewArchetype;
 
 		EntityMovedEvent(
 			EntityHandle entity,
-			ref<Archetype> oldArchetype,
-			ref<Archetype> newArchetype
+			Archetype oldArchetype,
+			Archetype newArchetype
 		)
 			: EntityEvent(EntityEventType::Moved, entity)
 			, OldArchetype(oldArchetype)

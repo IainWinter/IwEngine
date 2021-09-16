@@ -1,6 +1,9 @@
 #include "iw/entity/ChunkList.h"
 #include <assert.h>
-#include "iw/log/logger.h"
+
+#ifdef IW_DEBUG
+#	include "iw/log/logger.h"
+#endif
 
 namespace iw {
 namespace ECS {
@@ -8,17 +11,28 @@ namespace ECS {
 
 	// replace with free list like thing but for valid entities 
 	iterator& iterator::operator++() {
+
+		Chunk* c = m_root;
+		while (c) {
+			assert((int)c->Next != 1 || (int)c->Next != 2);
+			c = c->Next;
+		}
+
+
 		do {
-			Triangles++;
-			if (Triangles == m_chunk->EndIndex()) {
+			Index++;
+			if (Index == m_chunk->EndIndex()) {
 				do {
 					m_chunk = m_chunk->Next;
 					if (m_chunk) {
-						Triangles = m_chunk->BeginIndex();
+						Index = m_chunk->BeginIndex();
 					}
 				} while (m_chunk && m_chunk->Count == 0);
 			}
-		} while (m_chunk && !m_chunk->GetEntity(Triangles)->Alive);
+		} while (m_chunk && !m_chunk->GetEntity(Index)->Alive);
+
+		// should calc the number of steps taken and add that * component size to the cdata ptrs
+		// instead of multiplying everytime
 
 		return *this;
 	}
@@ -26,8 +40,7 @@ namespace ECS {
 	bool iterator::operator==(
 		const iterator& itr) const
 	{
-		return /*this->m_chunk == itr.m_chunk*/
-			/*&& */this->Triangles == itr.Triangles;
+		return this->Index == itr.Index;
 	}
 
 	bool iterator::operator!=(
@@ -37,81 +50,73 @@ namespace ECS {
 	}
 
 	EntityComponentData iterator::operator*() {
-		for (size_t i = 0; i < m_indices->Count; i++) { // use raw pointers?
-			m_data->Components[i] = m_chunk->GetComponentPtr(
-				m_archetype->Layout[m_indices->Indices[i]], 
-				Triangles
+		for (size_t i = 0; i < m_indices.Count; i++)  // use raw pointers? // put this in ++
+		{
+			m_data.Components[i] = m_chunk->GetComponentPtr(
+				m_archetype.Layout[m_indices.Indices[i]],
+				Index
 			);
 		}
 
-		EntityHandle* entity = m_chunk->GetEntity(Triangles);
+		EntityHandle* entity = m_chunk->GetEntity(Index);
 
-		return EntityComponentData { *entity, entity->Index, entity->Version, *m_data };
+		return EntityComponentData { *entity, entity->Index, entity->Version, m_data };
 	}
 
 	iterator::iterator(
 		Chunk* chunk,
 		size_t index,
-		const iw::ref<Archetype>& archetype,
-		const std::vector<iw::ref<Component>>& components,
-		iw::pool_allocator& componentPool)
+		const Archetype& archetype,
+		const std::vector<ref<Component>>& components,
+		pool_allocator& componentPool
+	)
 		: m_chunk(chunk)
-		, Triangles(index)
+		, Index(index)
 		, m_archetype(archetype)
 	{
 		size_t count = 0;
-		for (iw::ref<Component> component : components) {
-			if (archetype->HasComponent(component)) {
+		for (ref<Component> component : components) {
+			if (archetype.HasComponent(component)) {
 				count++;
 			}
 		}
 
-		size_t cdSize = sizeof(ComponentData)
-			+ sizeof(size_t)
-			* count;
-
-		m_data = componentPool.alloc_ref<ComponentData>(cdSize);
+		m_indices.Count = count;
+		m_indices.Indices = componentPool.alloc_ref_c<size_t>(count);
+		m_data.Components = componentPool.alloc_ref_c<void*>(count);
 		
-		size_t cdisSize = sizeof(ComponentDataIndices)
-			+ sizeof(size_t)
-			* count;
-
-		m_indices = componentPool.alloc_ref<ComponentDataIndices>(cdisSize);
-
-		m_indices->Count = count;
-		for (size_t i = 0; i < count; i++) {
-			for (size_t j = 0; j < archetype->Count; j++) {
-				if (components[i]->Type == archetype->Layout[j].Component->Type) {
-					m_indices->Indices[i] = j;
-					break;
-				}
+		for (size_t i = 0; i < count;           i++)
+		for (size_t j = 0; j < archetype.Count; j++) 
+		{
+			if (components[i]->Type == archetype.Layout[j].Component->Type) 
+			{
+				m_indices.Indices[i] = j;
+				break;
 			}
 		}
 	}
 
 	ChunkList::ChunkList(
-		const iw::ref<Archetype>& archetype,
-		size_t chunkSize,
-		iw::pool_allocator& componentPool,
-		iw::pool_allocator& chunkPool)
+		const Archetype& archetype,
+		pool_allocator& componentPool,
+		pool_allocator& chunkPool
+	)
 		: m_root(nullptr)
 		, m_count(0)
 		, m_chunkCount(0)
 		, m_archetype(archetype)
-		, m_chunkSize(chunkSize)
-		, m_chunkCapacity(GetChunkCapacity(archetype))
 		, m_componentPool(componentPool)
 		, m_chunkPool(chunkPool)
 	{}
 
 	size_t ChunkList::ReserveComponents(
-		const iw::ref<EntityData>& entityData)
+		const EntityData& entityData)
 	{
 		Chunk& chunk = FindOrCreateChunk();
 		size_t index = chunk.ReserveComponents();
 
 		EntityHandle* entityComponent = chunk.GetEntity(index);
-		*entityComponent = entityData->Entity;
+		*entityComponent = entityData.Entity;
 
 		++m_count;
 
@@ -119,26 +124,26 @@ namespace ECS {
 	}
 
 	bool ChunkList::ReinstateComponents(
-		const iw::ref<EntityData>& entityData)
+		const EntityData& entityData)
 	{
-		Chunk* chunk = FindChunk(entityData->ChunkIndex);
+		Chunk* chunk = FindChunk(entityData.ChunkIndex);
 		if (!chunk) {
 			return false;
 		}
 
-		EntityHandle* entityComponent = chunk->GetEntity(entityData->ChunkIndex);
-		if (entityComponent->Index != entityData->Entity.Index) {
+		EntityHandle* entityComponent = chunk->GetEntity(entityData.ChunkIndex);
+		if (entityComponent->Index != entityData.Entity.Index) {
 			return false;
 		}
 
 		chunk->ReinstateComponents();
 
-		*entityComponent = entityData->Entity;
+		*entityComponent = entityData.Entity;
 
-		for (size_t i = 0; i < m_archetype->Count; i++) {
-			ArchetypeLayout& layout = m_archetype->Layout[i];
+		for (size_t i = 0; i < m_archetype.Count; i++) {
+			ArchetypeLayout& layout = m_archetype.Layout[i];
 
-			void* old = chunk->GetComponentPtr(layout, entityData->ChunkIndex);
+			void* old = chunk->GetComponentPtr(layout, entityData.ChunkIndex);
 			memset(old, 0, layout.Component->Size); // could put this in Chunk.h if it sounds better
 		}
 
@@ -148,21 +153,21 @@ namespace ECS {
 	}
 
 	bool ChunkList::FreeComponents(
-		const iw::ref<EntityData>& entityData)
+		const EntityData& entityData)
 	{
-		Chunk* chunk = FindChunk(entityData->ChunkIndex);
+		Chunk* chunk = FindChunk(entityData.ChunkIndex);
 		if (!chunk) {
 			return false;
 		}
 
 		chunk->FreeComponents();
 
-		EntityHandle* entityComponent = chunk->GetEntity(entityData->ChunkIndex);
+		EntityHandle* entityComponent = chunk->GetEntity(entityData.ChunkIndex);
 		entityComponent->Alive = false;
 
-		for (size_t i = 0; i < m_archetype->Count; i++) { 
-			ArchetypeLayout& layout = m_archetype->Layout[i];
-			void* component = chunk->GetComponentPtr(layout, entityData->ChunkIndex);
+		for (size_t i = 0; i < m_archetype.Count; i++) {
+			ArchetypeLayout& layout = m_archetype.Layout[i];
+			void* component = chunk->GetComponentPtr(layout, entityData.ChunkIndex);
 			
 			layout.Component->DestructorFunc(component);
 			memset(component, 0, layout.Component->Size); // could put this in Chunk.h if it sounds better
@@ -184,13 +189,17 @@ namespace ECS {
 				m_root = m_root->Next;
 			}
 
-			LOG_DEBUG << "Deleting Chunk " << chunk->IndexOffset / chunk->Capacity;
+#ifdef IW_DEBUG
+			LOG_DEBUG << "[ECS] - Chunk (" << m_archetype.Hash << ")" << chunk->IndexOffset / chunk->Capacity
+				<< " (" << chunk->Capacity * m_archetype.Size << " bytes)";
+#endif
 
 			if (!chunk->Next) {
 				--m_chunkCount;
 			}
 
-			m_chunkPool.free(chunk, m_chunkSize);
+			m_chunkPool.free(chunk->Buffer, chunk->Capacity * m_archetype.Size);
+			m_chunkPool.free<Chunk>(chunk);
 		}
 
 		return true;
@@ -206,9 +215,9 @@ namespace ECS {
 			return false;
 		}
 
-		for (size_t i = 0; i < m_archetype->Count; i++) {
-			ArchetypeLayout& layout = m_archetype->Layout[i];
-			iw::ref<Component> component = layout.Component;
+		for (size_t i = 0; i < m_archetype.Count; i++) {
+			ArchetypeLayout& layout = m_archetype.Layout[i];
+			ref<Component> component = layout.Component;
 
 			void* ptr  = to.GetComponentPtr(component, newIndex);
 			if (!ptr) continue;
@@ -223,7 +232,7 @@ namespace ECS {
 	}
 
 	void* ChunkList::GetComponentPtr(
-		const iw::ref<Component>& component,
+		const ref<Component>& component,
 		size_t index)
 	{
 		Chunk* chunk = FindChunk(index);
@@ -232,17 +241,17 @@ namespace ECS {
 		}
 
 		size_t i = 0;
-		for (; i < m_archetype->Count; i++) {
-			if (component->Type == m_archetype->Layout[i].Component->Type) {
+		for (; i < m_archetype.Count; i++) {
+			if (component->Type == m_archetype.Layout[i].Component->Type) {
 				break;
 			}
 		}
 
-		if (i == m_archetype->Count) {
+		if (i == m_archetype.Count) {
 			return nullptr;
 		}
 
-		return chunk->GetComponentPtr(m_archetype->Layout[i], index);
+		return chunk->GetComponentPtr(m_archetype.Layout[i], index);
 	}
 
 	EntityHandle* ChunkList::GetEntity(
@@ -257,14 +266,16 @@ namespace ECS {
 	}
 
 	int ChunkList::IndexOf(
-		const iw::ref<Component>& component,
+		const ref<Component>& component,
 		void* instance)
 	{
 		int index = -1;
 		Chunk* chunk = m_root;
-		ArchetypeLayout& layout = *m_archetype->GetLayout(component);
+		const ArchetypeLayout* layout = m_archetype.GetLayout(component);
+
+		if (layout)
 		while (chunk) {
-			index = chunk->IndexOf(layout, instance);
+			index = chunk->IndexOf(*layout, instance);
 			if (index == -1) {
 				chunk = chunk->Next;
 			}
@@ -278,7 +289,7 @@ namespace ECS {
 	}
 
 	iterator ChunkList::Begin(
-		const iw::ref<ComponentQuery>& query)
+		const ComponentQuery& query)
 	{
 		Chunk* chunk = m_root;
 		size_t index = 0;
@@ -290,11 +301,11 @@ namespace ECS {
 			index = chunk->BeginIndex();
 		}
 
-		return iterator(m_root, index, m_archetype, query->GetComponents(), m_componentPool);
+		return iterator(m_root, index, m_archetype, query.GetComponents(), m_componentPool);
 	}
 
 	iterator ChunkList::End(
-		const iw::ref<ComponentQuery>& query)
+		const ComponentQuery& query)
 	{
 		Chunk* chunk = m_root;
 		size_t index = 0;
@@ -306,7 +317,7 @@ namespace ECS {
 			index = chunk->EndIndex();
 		}
 
-		return iterator(nullptr, index, m_archetype, query->GetComponents(), m_componentPool);
+		return iterator(nullptr, index, m_archetype, query.GetComponents(), m_componentPool);
 	}
 
 	Chunk* ChunkList::FindChunk(
@@ -321,12 +332,21 @@ namespace ECS {
 	}
 
 	Chunk* ChunkList::CreateChunk() {
-		Chunk* chunk = m_chunkPool.alloc<Chunk>(m_chunkSize);
+		size_t capacity = (m_chunkCount + 1) * (m_chunkCount + 1);
 
-		chunk->IndexOffset = m_chunkCapacity * m_chunkCount;
-		chunk->Capacity    = m_chunkCapacity;
+		Chunk* chunk = m_chunkPool.alloc<Chunk>();
+		chunk->Buffer = m_chunkPool.alloc<char>(capacity * m_archetype.Size);
+		chunk->Capacity = capacity;
+		chunk->IndexOffset = 0;
+		for (size_t i = 1; i <= m_chunkCount; i++) // sum of previous squares, is there a rule for this?
+		{
+			chunk->IndexOffset += i * i;
+		}
 
-		LOG_DEBUG << "Creating Chunk " << chunk->IndexOffset / chunk->Capacity;
+#ifdef IW_DEBUG
+		LOG_DEBUG << "[ECS] + Chunk (" << m_archetype.Hash << ")" << chunk->IndexOffset / chunk->Capacity
+			<< " (" << chunk->Capacity * m_archetype.Size << " bytes)";
+#endif
 
 		++m_chunkCount;
 
@@ -349,16 +369,6 @@ namespace ECS {
 		}
 
 		return *chunk;
-	}
-
-	size_t ChunkList::GetChunkCapacity(
-		const iw::ref<Archetype>& archetype)
-	{
-		size_t archetypeSize = archetype->Size + sizeof(EntityHandle);
-		size_t bufSize       = m_chunkSize     - sizeof(Chunk);
-		size_t padSize       = bufSize % archetypeSize;
-
-		return (bufSize - padSize) / archetypeSize;
 	}
 }
 }

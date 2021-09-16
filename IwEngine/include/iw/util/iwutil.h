@@ -6,6 +6,8 @@
 #else
 #		define IWUTIL_API __declspec(dllimport)
 #	endif
+#else
+#	define IWUTIL_API
 #endif
 
 #include "iw/common/coredef.h"

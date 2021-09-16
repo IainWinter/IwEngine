@@ -64,11 +64,10 @@ namespace ECS {
 		void Each(
 			func<_c...> function)
 		{
-			for (auto e : *this) {
+			for (EntityComponentData& data : *this) {
 				callFunction<_c...>(
 					function,
-					e.Handle,
-					e.Components.Components,
+					data,
 					std::make_index_sequence<sizeof...(_c)>{}
 				);
 			}
@@ -82,11 +81,10 @@ namespace ECS {
 			auto itr = begin();
 			if (itr == end()) return;
 
-			auto e = *itr;
+			EntityComponentData& data = *itr;
 			callFunction<_c...>(
 				function,
-				e.Handle,
-				e.Components.Components,
+				data,
 				std::make_index_sequence<sizeof...(_c)>{}
 			);
 		}
@@ -96,11 +94,10 @@ namespace ECS {
 			size_t... _i>
 		void callFunction(
 			func<_c...> func,
-			EntityHandle handle,
-			void** args,
+			EntityComponentData& data,
 			std::index_sequence<_i...>)
 		{
-			func(handle, (_c*)args[_i]...);
+			func(data.Handle, (_c*)data.Components.Components[_i]...);
 		}
 	};
 
@@ -113,7 +110,8 @@ namespace ECS {
 		using func = std::function<void(EntityHandle, _c*...)>;
 
 		ECA(
-			EntityComponentArray&& eca)
+			EntityComponentArray&& eca
+		)
 			: EntityComponentArray(std::forward<EntityComponentArray>(eca))
 		{}
 

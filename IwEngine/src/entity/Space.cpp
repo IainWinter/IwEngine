@@ -23,39 +23,39 @@ namespace ECS {
 		return m_componentManager.GetComponent(type);
 	}
 
-	ref<Archetype>& Space::CreateArchetype(
+	Archetype Space::CreateArchetype(
 		std::initializer_list<ref<Component>> components)
 	{
 		return m_archetypeManager.CreateArchetype(components);
 	}
 
 	Entity Space::CreateEntity(
-		const ref<Archetype>& archetype)
+		const Archetype& archetype)
 	{
-		ref<EntityData>& entityData = m_entityManager.CreateEntity();
+		EntityData& entityData = m_entityManager.CreateEntity();
 
 		bool componentsExist = false;
-		if (   entityData->Archetype
-			&& entityData->Archetype->Hash == archetype->Hash)
+		if (   entityData.Archetype.Layout
+			&& entityData.Archetype.Hash == archetype.Hash)
 		{
 			componentsExist = m_componentManager.ReinstateComponentData(entityData); // combine this logic into cmgr.CreateComponentData
 		}
 
 		else {
-			entityData->Archetype = archetype;
+			entityData.Archetype = archetype;
 		}
 
 		if (!componentsExist) {
-			entityData->ChunkIndex = m_componentManager.CreateComponentsData(entityData);
+			entityData.ChunkIndex = m_componentManager.CreateComponentsData(entityData);
 		}
 
 #ifdef IW_USE_EVENTS
 		if (m_bus) {
-			m_bus->send<EntityCreatedEvent>(entityData->Entity);
+			m_bus->send<EntityCreatedEvent>(entityData.Entity);
 		}
 #endif
 
-		return Entity(entityData->Entity, this);
+		return Entity(entityData.Entity, this);
 	}
 
 	bool Space::DestroyEntity(
@@ -66,11 +66,11 @@ namespace ECS {
 			return false;
 		}
 
-		ref<EntityData>& entityData = m_entityManager.GetEntityData(handle.Index);
+		EntityData& entityData = m_entityManager.GetEntityData(handle.Index);
 
 #ifdef IW_USE_EVENTS
 		if (m_bus) {
-			m_bus->send<EntityDestroyedEvent>(entityData->Entity);
+			m_bus->send<EntityDestroyedEvent>(entityData.Entity);
 		}
 #endif
 
@@ -86,8 +86,8 @@ namespace ECS {
 			return false;
 		}
 
-		ref<EntityData>& entityData = m_entityManager.GetEntityData(handle.Index);
-		entityData->Entity.Alive = false;
+		EntityData& entityData = m_entityManager.GetEntityData(handle.Index);
+		entityData.Entity.Alive = false;
 
 		return m_componentManager.SetEntityAliveState(entityData);
 	}
@@ -100,15 +100,15 @@ namespace ECS {
 			return Entity();
 		}
 
-		ref<EntityData>& entityData = m_entityManager.GetEntityData(handle.Index);
-		entityData->Entity.Alive = true;
+		EntityData& entityData = m_entityManager.GetEntityData(handle.Index);
+		entityData.Entity.Alive = true;
 
 		bool success = m_componentManager.SetEntityAliveState(entityData);
 		if (!success) {
 			return Entity(EntityHandle::Empty, this);
 		}
 
-		return Entity(entityData->Entity, this);
+		return Entity(entityData.Entity, this);
 	}
 
 	void Space::AddComponent(
@@ -126,8 +126,8 @@ namespace ECS {
 			return;
 		}
 
-		ref<EntityData>& entityData = m_entityManager   .GetEntityData(handle.Index);
-		ref<Archetype>   archetype  = m_archetypeManager.AddComponent (entityData->Archetype, component);
+		EntityData& entityData = m_entityManager   .GetEntityData(handle.Index);
+		Archetype   archetype  = m_archetypeManager.AddComponent (entityData.Archetype, component);
 
 		MoveComponents(entityData, archetype);
 	}
@@ -147,23 +147,23 @@ namespace ECS {
 			return;
 		}
 
-		ref<EntityData>& entityData = m_entityManager   .GetEntityData  (handle.Index);
-		ref<Archetype>   archetype  = m_archetypeManager.RemoveComponent(entityData->Archetype, component);
+		EntityData& entityData = m_entityManager   .GetEntityData  (handle.Index);
+		Archetype   archetype  = m_archetypeManager.RemoveComponent(entityData.Archetype, component);
 
 		MoveComponents(entityData, archetype);
 	}
 
-	void Space::AddComponent(
-		ref<Archetype>& archetype, 
+	void  Space::AddComponent(
+		Archetype& archetype, 
 		const ref<Component>& component)
 	{
-		if (!archetype) {
-			LOG_WARNING << "Tried to add component to empty archetype " << component;
+		if (!archetype.Layout) {
+			LOG_WARNING << "Tried to add component to empty archetype " << component->Name;
 			return;
 		}
 
 		if (!component) {
-			LOG_WARNING << "Tried to add empty component to archetype " << archetype;
+			LOG_WARNING << "Tried to add empty component to archetype " << archetype.Hash;
 			return;
 		}
 
@@ -171,16 +171,16 @@ namespace ECS {
 	}
 
 	void Space::RemoveComponent(
-		ref<Archetype>& archetype,
+		Archetype& archetype,
 		const ref<Component>& component)
 	{
-		if (!archetype) {
-			LOG_WARNING << "Tried to remove component from empty archetype " << component;
+		if (!archetype.Layout) {
+			LOG_WARNING << "Tried to remove component from empty archetype " << component->Name;
 			return;
 		}
 
 		if (!component) {
-			LOG_WARNING << "Tried to remove empty component from archetype " << archetype;
+			LOG_WARNING << "Tried to remove empty component from archetype " << archetype.Hash;
 			return;
 		}
 
@@ -227,7 +227,7 @@ namespace ECS {
 			return nullptr;
 		}
 
-		ref<EntityData>& entityData = m_entityManager.GetEntityData(handle.Index);
+		EntityData& entityData = m_entityManager.GetEntityData(handle.Index);
 		return m_componentManager.GetComponentPtr(entityData, component);
 	}
 
@@ -246,30 +246,30 @@ namespace ECS {
 			return false;
 		}
 
-		ref<EntityData>& entityData = m_entityManager.GetEntityData(handle.Index);
-		return entityData->Archetype->HasComponent(component);
+		EntityData& entityData = m_entityManager.GetEntityData(handle.Index);
+		return entityData.Archetype.HasComponent(component);
 	}
 
-	ref<Archetype> Space::GetArchetype(
+	Archetype Space::GetArchetype(
 		EntityHandle handle)
 	{
 		if (!m_entityManager.IsValidEntityIndex(handle.Index)) {
 			LOG_WARNING << "Tried to get the archetype of an entity with invalid index " << handle.Index;
-			return nullptr;
+			return Archetype();
 		}
 
-		ref<EntityData>& entityData = m_entityManager.GetEntityData(handle.Index);
-		return entityData->Archetype;
+		EntityData& entityData = m_entityManager.GetEntityData(handle.Index);
+		return entityData.Archetype;
 	}
 
-	ref<ComponentQuery> Space::MakeQuery(
+	ComponentQuery Space::MakeQuery(
 		std::initializer_list<ref<Component>> components)
 	{
 		return m_componentManager.MakeQuery(components);
 	}
 
 	EntityComponentArray Space::Query(
-		const ref<ComponentQuery>& query)
+		const ComponentQuery& query)
 	{
 		return m_componentManager.Query(query, m_archetypeManager.MakeQuery(query));
 	}
@@ -294,13 +294,13 @@ namespace ECS {
 	Entity Space::GetEntity(
 		EntityHandle handle)
 	{
-		return Entity(m_entityManager.GetEntityData(handle.Index)->Entity, this);
+		return Entity(m_entityManager.GetEntityData(handle.Index).Entity, this);
 	}
 
 	Entity Space::Instantiate(
 		const Prefab& prefab)
 	{
-		ref<Archetype> archetype = m_archetypeManager.CreateArchetype(
+		Archetype archetype = m_archetypeManager.CreateArchetype(
 										&prefab.GetComponent(0),
 										&prefab.GetComponent(prefab.ComponentCount() - 1) + 1);
 
@@ -319,7 +319,7 @@ namespace ECS {
 	void Space::Clear() {
 #ifdef IW_USE_EVENTS
 		if (m_bus) {
-			for (const ref<EntityData>& data : m_entityManager.Entities()) {
+			for (const EntityData* data : m_entityManager.Entities()) {
 				if (data->Entity.Alive) {
 					m_bus->send<EntityDestroyedEvent>(data->Entity);
 				}
@@ -333,12 +333,12 @@ namespace ECS {
 	}
 
 	std::vector<EntityHandle> Space::Entities() const {
-		const std::vector<ref<EntityData>>& data = m_entityManager.Entities();
+		const std::vector<EntityData*>& data = m_entityManager.Entities();
 
 		std::vector<EntityHandle> handles;
 		handles.reserve(data.size());
 
-		for (const ref<EntityData>& ed : data) {
+		for (const EntityData* ed : data) {
 			if (ed->Entity.Alive) {
 				handles.emplace_back(ed->Entity);
 			}
@@ -347,7 +347,7 @@ namespace ECS {
 		return handles;
 	}
 
-	const std::vector<ref<Archetype>>& Space::Archetypes() const {
+	const std::vector<Archetype>& Space::Archetypes() const {
 		return m_archetypeManager.Archetypes();
 	}
 
@@ -364,7 +364,7 @@ namespace ECS {
 		while (!m_entityQueue.empty()) {
 			EntityChange& change = m_entityQueue.front();
 
-			if (m_entityManager.GetEntityData(change.handle.Index)->Entity.Alive)
+			if (m_entityManager.GetEntityData(change.handle.Index).Entity.Alive)
 			{
 				change.func(Entity(change.handle, this));
 			}
@@ -396,18 +396,18 @@ namespace ECS {
 	}
 
 	void Space::MoveComponents(
-		ref<EntityData>& entityData,
-		const ref<Archetype>& newArchetype)
+		EntityData& entityData,
+		const Archetype& newArchetype)
 	{
 #ifdef IW_USE_EVENTS
 		if (m_bus) { // this needs two events maybe to capture all the info from before and after to
 					 // do anything useful with it
-			m_bus->send<EntityMovedEvent>(entityData->Entity, entityData->Archetype, newArchetype);
+			m_bus->send<EntityMovedEvent>(entityData.Entity, entityData.Archetype, newArchetype);
 		}
 #endif
 
-		entityData->ChunkIndex = m_componentManager.MoveComponentData(entityData, newArchetype);
-		entityData->Archetype = newArchetype;
+		entityData.ChunkIndex = m_componentManager.MoveComponentData(entityData, newArchetype);
+		entityData.Archetype = newArchetype;
 	}
 }
 }

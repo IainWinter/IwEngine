@@ -14,8 +14,8 @@ namespace Engine {
 		bool m_clear;
 		Color m_clearColor;
 
-		ref<ComponentQuery> m_models;
-		ref<ComponentQuery> m_meshes;
+		ComponentQuery m_models;
+		ComponentQuery m_meshes;
 
 	public:
 		IWENGINE_API

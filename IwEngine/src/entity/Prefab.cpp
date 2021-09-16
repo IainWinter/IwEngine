@@ -8,7 +8,7 @@ namespace ECS {
 	{}
 
 	void Prefab::Add(
-		iw::ref<Component> component,
+		ref<Component> component,
 		void* data)
 	{
 		if (!component) {
@@ -42,7 +42,7 @@ namespace ECS {
 	}
 
 	bool Prefab::Set(
-		iw::ref<Component> component,
+		ref<Component> component,
 		void* data)
 	{
 		if (!component) {
@@ -73,19 +73,19 @@ namespace ECS {
 	}
 
 	void Prefab::Remove(
-		iw::ref<Component> component)
+		ref<Component> component)
 	{
 		// needs to clear linear alloc and then realloc every component :(
 		LOG_WARNING << "no impl";
 	}
 
 	bool Prefab::Has(
-		iw::ref<Component> component)
+		ref<Component> component)
 	{
 		return std::find(m_components.begin(), m_components.end(), component) != m_components.end();
 	}
 
-	const iw::ref<Component>& Prefab::GetComponent(
+	const ref<Component>& Prefab::GetComponent(
 		size_t index) const
 	{
 		return m_components.at(index);

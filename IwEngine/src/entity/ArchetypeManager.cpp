@@ -10,33 +10,30 @@ namespace ECS {
 		: m_pool(1024)
 	{}
 
-	ref<Archetype>& ArchetypeManager::CreateArchetype(
+	Archetype ArchetypeManager::CreateArchetype(
 		std::initializer_list<ref<Component>> components)
 	{
 		return CreateArchetype(components.begin(), components.end());
 	}
 
-	ref<Archetype>& ArchetypeManager::CreateArchetype(
+	Archetype ArchetypeManager::CreateArchetype(
 		const ref<Component>* begin,
 		const ref<Component>* end)
 	{
 		size_t hash = Component::Hash(begin, end);
-		ref<Archetype>& archetype = m_hashed[hash];
-		if (!archetype) {
-			size_t bufSize = sizeof(Archetype)
-				+ sizeof(ArchetypeLayout)
-				* std::distance(begin, end);
-
-			archetype = m_pool.alloc_ref<Archetype>(bufSize);
-
+		
+		if (m_hashed.find(hash) == m_hashed.end())
+		{
 			size_t totalSize = 0;
 			for (auto itr = begin; itr != end; itr++) {
 				totalSize += (*itr)->Size;
 			}
 
-			archetype->Hash  = hash;
-			archetype->Count = std::distance(begin, end);
-			archetype->Size  = totalSize;
+			Archetype archetype;
+			archetype.Hash = hash;
+			archetype.Size = totalSize;
+			archetype.Count = std::distance(begin, end);
+			archetype.Layout = m_pool.alloc_ref_c<ArchetypeLayout>(archetype.Count);
 
 			std::vector<ref<Component>> components(begin, end);
 
@@ -47,31 +44,29 @@ namespace ECS {
 			for (size_t i = 0, size = 0; i < components.size(); i++) {
 				ref<Component>& component = components[i];
 
-				archetype->Layout[i].Component = component;
-				archetype->Layout[i].Offset    = size;
+				archetype.Layout[i].Component = component;
+				archetype.Layout[i].Offset    = size;
 
 				size += component->Size;
 
-				archetype->Layout[i].Onset = totalSize - size;
+				archetype.Layout[i].Onset = totalSize - size;
 			}
 
-			archetype = m_archetypes.emplace_back(archetype);
+			m_archetypes.emplace_back(archetype);
+
+			return archetype;
 		}
 
-		return archetype;
+		return m_hashed[hash];
 	}
 
-	ref<Archetype>& ArchetypeManager::AddComponent(
-		ref<Archetype> archetype,
+	Archetype ArchetypeManager::AddComponent(
+		const Archetype& archetype,
 		ref<Component> component)
 	{
-		size_t bufSize = sizeof(Archetype)
-			+ sizeof(ArchetypeLayout)
-			* archetype->Count + 1;
-
 		std::vector<ref<Component>> components;
-		for (size_t i = 0; i < archetype->Count; i++) {
-			components.push_back(archetype->Layout[i].Component);
+		for (size_t i = 0; i < archetype.Count; i++) {
+			components.push_back(archetype.Layout[i].Component);
 		}
 
 		components.push_back(component);
@@ -79,17 +74,13 @@ namespace ECS {
 		return CreateArchetype(components.begin()._Ptr, components.end()._Ptr);
 	}
 
-	ref<Archetype>& ArchetypeManager::RemoveComponent(
-		ref<Archetype> archetype,
+	Archetype ArchetypeManager::RemoveComponent(
+		const Archetype& archetype,
 		ref<Component> component)
 	{
-		size_t bufSize = sizeof(Archetype)
-			+ sizeof(ArchetypeLayout)
-			* archetype->Count - 1;
-
 		std::vector<ref<Component>> components;
-		for (size_t i = 0; i < archetype->Count; i++) {
-			ref<Component> c = archetype->Layout[i].Component;
+		for (size_t i = 0; i < archetype.Count; i++) {
+			ref<Component> c = archetype.Layout[i].Component;
 			if(c != component) {
 				components.push_back(c);	
 			}
@@ -98,17 +89,17 @@ namespace ECS {
 		return CreateArchetype(components.begin()._Ptr, components.end()._Ptr);
 	}
 
-	ref<ArchetypeQuery> ArchetypeManager::MakeQuery(
-		const ref<ComponentQuery>& query)
+	ArchetypeQuery ArchetypeManager::MakeQuery(
+		const ComponentQuery& query)
 	{
 		std::vector<size_t> matches;
-		for (const ref<Archetype>& archetype : m_archetypes) { // not sure whats the best search order is...												   
+		for (const Archetype& archetype : m_archetypes) { // not sure whats the best search order is...												   
 			bool match = true;
 
 			// reject if archeptye has component in none list
 
-			for (const ref<Component>& component : query->GetNone()) {
-				if (archetype->HasComponent(component)) {
+			for (const ref<Component>& component : query.GetNone()) {
+				if (archetype.HasComponent(component)) {
 					match = false;
 					break;
 				}
@@ -120,8 +111,8 @@ namespace ECS {
 
 			// reject if archetype doesn't have a component in all list
 
-			for (const ref<Component>& component : query->GetAll()) {
-				if (!archetype->HasComponent(component)) {
+			for (const ref<Component>& component : query.GetAll()) {
+				if (!archetype.HasComponent(component)) {
 					match = false;
 					break;
 				}
@@ -134,8 +125,8 @@ namespace ECS {
 			// reject if archetype doesn't have at lest one component in any list
 
 			bool hasAComponent = false;
-			for (const ref<Component>& component : query->GetAll()) {
-				if (archetype->HasComponent(component)) {				
+			for (const ref<Component>& component : query.GetAll()) {
+				if (archetype.HasComponent(component)) {
 					hasAComponent = true;
 					break;
 				}
@@ -147,21 +138,18 @@ namespace ECS {
 				continue;
 			}
 
-			matches.push_back(archetype->Hash);
+			matches.push_back(archetype.Hash);
 		}
 
-		size_t bufSize = sizeof(ArchetypeQuery)
-			+ sizeof(size_t)
-			* matches.size();
-
-		ref<ArchetypeQuery> q = m_pool.alloc_ref<ArchetypeQuery>(bufSize);
-
-		q->Count = matches.size();
-		for (size_t i = 0; i < q->Count; i++) {
-			q->Hashes[i] = matches[i];
+		ArchetypeQuery aquery;
+		aquery.Count = matches.size();
+		aquery.Hashes = m_pool.alloc_ref_c<size_t>(aquery.Count);
+		
+		for (size_t i = 0; i < aquery.Count; i++) {
+			aquery.Hashes[i] = matches[i];
 		}
 
-		return q;
+		return aquery;
 	}
 
 	void ArchetypeManager::Clear() {
@@ -170,7 +158,7 @@ namespace ECS {
 		m_pool.reset();
 	}
 
-	const std::vector<ref<Archetype>>& ArchetypeManager::Archetypes() const {
+	const std::vector<Archetype>& ArchetypeManager::Archetypes() const {
 		return m_archetypes;
 	}
 }

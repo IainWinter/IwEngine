@@ -35,6 +35,11 @@ namespace ECS {
 
 		return i;
 	}
+
+	bool Chunk::IsFull() const
+	{
+		return Count == Capacity;
+	}
 	
 	int Chunk::IndexOf(
 		const ArchetypeLayout& layout,

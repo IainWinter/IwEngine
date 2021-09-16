@@ -7,18 +7,19 @@ namespace Engine {
 	{}
 
 	int ParticleUpdateSystem::Initialize() {
-		query = Space->MakeQuery<ParticleSystem<StaticParticle>>();
+		m_particleSystems = Space->MakeQuery<ParticleSystem<StaticParticle>>();
 		//query->SetAny({ Space->GetComponent<Transform>() });
 
 		return 0;
 	}
 
-	void ParticleUpdateSystem::Update() {
-		auto entities = Space->Query(query);
+	void ParticleUpdateSystem::Update() 
+	{
+		EntityComponentArray entities = Space->Query(m_particleSystems);
 
-		for (auto entity : entities) {
+		for (EntityComponentData& entity : entities) 
+		{
 			auto [system] = entity.Components.Tie<Components>();
-
 			system->Update();
 		}
 	}

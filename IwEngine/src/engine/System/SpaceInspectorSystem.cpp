@@ -57,9 +57,9 @@ namespace Editor {
 			}
 		}
 
-		ref<Archetype> archetype = Space->GetArchetype(m_selectedEntity);
-		for (unsigned i = 0; i < archetype->Count; i++) {
-			ref<Component> component = archetype->Layout[i].Component;
+		Archetype archetype = Space->GetArchetype(m_selectedEntity);
+		for (unsigned i = 0; i < archetype.Count; i++) {
+			ref<Component> component = archetype.Layout[i].Component;
 
 			// shit sucks should be like
 			// component->PrintEditor(); or something

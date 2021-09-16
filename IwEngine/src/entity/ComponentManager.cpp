@@ -53,23 +53,23 @@ namespace ECS {
 	}
 
 	size_t ComponentManager::CreateComponentsData(
-		const ref<EntityData>& entityData)
+		const EntityData& entityData)
 	{
-		ChunkList& list = FindOrCreateChunkList(entityData->Archetype);
+		ChunkList& list = FindOrCreateChunkList(entityData.Archetype);
 		return list.ReserveComponents(entityData);
 	}
 
 	bool ComponentManager::ReinstateComponentData(
-		const ref<EntityData>& entityData)
+		const EntityData& entityData)
 	{
-		ChunkList& list = FindOrCreateChunkList(entityData->Archetype);
+		ChunkList& list = FindOrCreateChunkList(entityData.Archetype);
 		return list.ReinstateComponents(entityData);
 	}
 
 	bool ComponentManager::DestroyComponentsData( //todo: find way to get archetype to this function
-		const ref<EntityData>& entityData)
+		const EntityData& entityData)
 	{
-		ChunkList* list = FindChunkList(entityData->Archetype);
+		ChunkList* list = FindChunkList(entityData.Archetype);
 		if (!list) {
 			return false;
 		}
@@ -78,10 +78,10 @@ namespace ECS {
 	}
 
 	size_t ComponentManager::MoveComponentData(
-		const ref<EntityData>& entityData,
-		const ref<Archetype>& archetype)
+		const EntityData& entityData,
+		const Archetype& archetype)
 	{
-		ChunkList* from = FindChunkList(entityData->Archetype);
+		ChunkList* from = FindChunkList(entityData.Archetype);
 		if (!from) {
 			return -1;
 		}
@@ -90,69 +90,70 @@ namespace ECS {
 			
 		size_t chunkIndex = to.ReserveComponents(entityData); // check for reinstate??
 
-		from->MoveComponents(to, entityData->ChunkIndex, chunkIndex);
+		from->MoveComponents(to, entityData.ChunkIndex, chunkIndex);
 		from->FreeComponents(entityData);
 
 		return chunkIndex;
 	}
 
 	void* ComponentManager::GetComponentPtr(
-		const ref<EntityData>& entityData,
+		const EntityData& entityData,
 		const ref<Component>& component)
 	{
-		ChunkList* list = FindChunkList(entityData->Archetype);
+		ChunkList* list = FindChunkList(entityData.Archetype);
 		if (!list) {
 			return nullptr;
 		}
 		
-		return list->GetComponentPtr(component, entityData->ChunkIndex);
+		return list->GetComponentPtr(component, entityData.ChunkIndex);
 	}
 
 	ref<ComponentData> ComponentManager::GetComponentData(
-		const ref<EntityData>& entityData)
+		const EntityData& entityData)
 	{
-		ChunkList* list = FindChunkList(entityData->Archetype);
+		ChunkList* list = FindChunkList(entityData.Archetype);
 		if (!list) {
 			return nullptr;
 		}
 
 		size_t cdSize = sizeof(ComponentData)
 					  + sizeof(size_t)
-					  * entityData->Archetype->Count;
+					  * entityData.Archetype.Count;
 
 		ref<ComponentData> data = m_componentPool.alloc_ref<ComponentData>(cdSize);
 
-		for (size_t i = 0; i < entityData->Archetype->Count; i++) {
+		for (size_t i = 0; i < entityData.Archetype.Count; i++) 
+		{
 			data->Components[i] = list->GetComponentPtr(
-				entityData->Archetype->Layout[i].Component, 
-				entityData->ChunkIndex
+				entityData.Archetype.Layout[i].Component, 
+				entityData.ChunkIndex
 			);
 		}
 
 		return data;
 	}
 
-	ref<ComponentQuery> ComponentManager::MakeQuery(
+	ComponentQuery ComponentManager::MakeQuery(
 		std::initializer_list<ref<Component>> all,
 		std::initializer_list<ref<Component>> any,
 		std::initializer_list<ref<Component>> none)
 	{
-		ref<ComponentQuery> query = m_componentPool.alloc_ref<ComponentQuery>();
-
-		query->SetAll(all);
-		query->SetAny(any);
-		query->SetNone(none);
+		ComponentQuery query;
+		query.SetAll(all);
+		query.SetAny(any);
+		query.SetNone(none);
 
  		return query;
 	}
 
 	EntityHandle ComponentManager::FindEntity(
-		ref<ArchetypeQuery>& query,
+		ArchetypeQuery& query,
 		const ref<Component>& component, 
 		void* instance)
 	{
-		for (size_t i = 0; i < query->Count; i++) {
-			auto itr = m_componentData.find(query->Hashes[i]);
+		for (size_t i = 0; i < query.Count; i++) 
+		{
+			auto itr = m_componentData.find(query.Hashes[i]);
 			if (itr == m_componentData.end()) {
 				continue;
 			}
@@ -176,19 +177,19 @@ namespace ECS {
 	}
 
 	bool ComponentManager::SetEntityAliveState(
-		const ref<EntityData>& entityData)
+		const EntityData& entityData)
 	{
-		ChunkList* list = FindChunkList(entityData->Archetype);
+		ChunkList* list = FindChunkList(entityData.Archetype);
 		if (!list) {
 			return false;
 		}
 
-		EntityHandle* handle = list->GetEntity(entityData->ChunkIndex);
+		EntityHandle* handle = list->GetEntity(entityData.ChunkIndex);
 		if (!handle) {
 			return false;
 		}
 
-		handle->Alive = entityData->Entity.Alive;
+		handle->Alive = entityData.Entity.Alive;
 
 		return true;
 	}
@@ -201,14 +202,16 @@ namespace ECS {
 	}
 
 	EntityComponentArray ComponentManager::Query(
-		const ref<ComponentQuery>& components,
-		const ref<ArchetypeQuery>& query)
+		const ComponentQuery& components,
+		const ArchetypeQuery& query)
 	{
 		std::vector<ChunkList::iterator> begins;
 		std::vector<ChunkList::iterator> ends;
-		for (size_t i = 0; i < query->Count; i++) {
-			auto itr = m_componentData.find(query->Hashes[i]);
-			if (itr != m_componentData.end()) {
+		for (size_t i = 0; i < query.Count; i++) 
+		{
+			auto itr = m_componentData.find(query.Hashes[i]);
+			if (itr != m_componentData.end()) 
+			{
 				ChunkList::iterator b = itr->second.Begin(components);
 				ChunkList::iterator e = itr->second.End  (components);
 
@@ -223,10 +226,11 @@ namespace ECS {
 	}
 
 	ChunkList* ComponentManager::FindChunkList(
-		const ref<Archetype>& archetype)
+		const Archetype& archetype)
 	{
-		auto itr = m_componentData.find(archetype->Hash);
-		if (itr == m_componentData.end()) {
+		auto itr = m_componentData.find(archetype.Hash);
+		if (itr == m_componentData.end()) 
+		{
 			return nullptr;
 		}
 
@@ -234,12 +238,15 @@ namespace ECS {
 	}
 
 	ChunkList& ComponentManager::FindOrCreateChunkList(
-		const ref<Archetype>& archetype)
+		const Archetype& archetype)
 	{
-		auto itr = m_componentData.find(archetype->Hash);
-		if (itr == m_componentData.end()) {
+		auto itr = m_componentData.find(archetype.Hash);
+		if (itr == m_componentData.end()) 
+		{
 			itr = m_componentData.emplace(
-				archetype->Hash, ChunkList(archetype, m_chunkSize, m_componentPool, m_chunkPool)).first;
+				archetype.Hash, 
+				ChunkList(archetype, m_componentPool, m_chunkPool)
+			).first;
 		}
 
 		return itr->second;

@@ -3,9 +3,11 @@
 #ifdef IW_PLATFORM_WINDOWS
 #	ifdef IWENTITY_DLL
 #		define IWENTITY_API __declspec(dllexport)
-#else
+#	else
 #		define IWENTITY_API __declspec(dllimport)
 #	endif
+#else
+#	define IWENTITY_API
 #endif
 
 #include "iw/util/memory/ref.h"
@@ -22,7 +24,7 @@
 namespace iw {
 namespace ECS {
 #ifdef IW_USE_REFLECTION
-	using ComponentType = const iw::Type*;
+	using ComponentType = const Type*;
 #else
 	using ComponentType = std::type_index;
 #endif

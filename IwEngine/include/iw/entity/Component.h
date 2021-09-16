@@ -13,7 +13,7 @@ namespace ECS {
 
 	struct Component {
 #ifdef IW_USE_REFLECTION
-		const iw::Type* Type = nullptr;
+		const Type* Type = nullptr;
 #else
 		size_t Type = 0u;
 #endif
@@ -26,7 +26,7 @@ namespace ECS {
 		func_Destructor DestructorFunc;
 
 		static inline size_t Hash(
-			std::initializer_list<iw::ref<Component>> components)
+			std::initializer_list<ref<Component>> components)
 		{
 			return Hash(components.begin(), components.end());
 		}
@@ -48,35 +48,35 @@ namespace ECS {
 
 	struct ComponentQuery {
 	private:
-		std::vector<iw::ref<Component>> m_all;
-		std::vector<iw::ref<Component>> m_any;
-		std::vector<iw::ref<Component>> m_none;
+		std::vector<ref<Component>> m_all;
+		std::vector<ref<Component>> m_any;
+		std::vector<ref<Component>> m_none;
 
 	public:
 		void SetAll(
-			std::initializer_list<iw::ref<Component>> components)
+			std::initializer_list<ref<Component>> components)
 		{
 			m_all = components;
 		}
 
 		void SetAny(
-			std::initializer_list<iw::ref<Component>> components)
+			std::initializer_list<ref<Component>> components)
 		{
 			m_any = components;
 		}
 
 		void SetNone(
-			std::initializer_list<iw::ref<Component>> components)
+			std::initializer_list<ref<Component>> components)
 		{
 			m_none = components;
 		}
 
-		const auto& GetAll()  { return m_all; }
-		const auto& GetAny()  { return m_any; }
-		const auto& GetNone() { return m_none; }
+		const auto& GetAll()  const { return m_all; }
+		const auto& GetAny()  const { return m_any; }
+		const auto& GetNone() const { return m_none; }
 
-		const auto GetComponents() {
-			std::vector<iw::ref<Component>> unique = GetAll();
+		const auto GetComponents() const {
+			std::vector<ref<Component>> unique = GetAll();
 
 			for (const auto& c : GetAny()) {
 				if (std::find(unique.begin(), unique.end(), c) == unique.end()) {
@@ -84,12 +84,12 @@ namespace ECS {
 				}
 			}
 
-			//for (const auto& c : GetNone()) { // would make 'none' more important but costs time for only all + any 
-			//	auto itr = std::find(unique.begin(), unique.end(), c);
-			//	if (itr != unique.end()) {
-			//		unique.erase(itr);
-			//	}
-			//}
+			for (const auto& c : GetNone()) { 
+				auto itr = std::find(unique.begin(), unique.end(), c);
+				if (itr != unique.end()) {
+					unique.erase(itr);
+				}
+			}
 
 			return unique;
 		}

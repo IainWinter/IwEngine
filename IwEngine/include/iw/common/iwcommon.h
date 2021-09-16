@@ -6,6 +6,8 @@
 #else
 #		define IWCOMMON_API __declspec(dllimport)
 #	endif
+#else
+#	define IWCOMMON_API
 #endif
 
 #ifdef IW_USE_REFLECTION
@@ -20,6 +22,9 @@
 #	undef  IWCOMMON_API
 #	define IWCOMMON_API
 #endif
+
+#pragma warning (push)
+#pragma warning (disable: 26812) // non enum classes, they are already namespaced so why does it matter
 
 // Put into IwCommon
 

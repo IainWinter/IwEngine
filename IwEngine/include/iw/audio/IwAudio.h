@@ -6,4 +6,7 @@
 #else
 #		define IWAUDIO_API __declspec(dllimport)
 #	endif
+#else
+#	define IWAUDIO_API
 #endif
+
