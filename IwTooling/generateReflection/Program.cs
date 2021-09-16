@@ -35,13 +35,12 @@ namespace generateReflection
     {
         static void Main(string[] args)
         {
-            string template_string = File.ReadAllText("C:/dev/IwEngine/IwTooling/generateReflection/template.txt");
+            string template_string = File.ReadAllText("template.txt");
 
-            records_json records = JsonConvert.DeserializeObject<records_json>(File.ReadAllText("C:/dev/IwEngine/IwTooling/reflector/src/test.json"));
+            records_json records = JsonConvert.DeserializeObject<records_json>(File.ReadAllText(args[0]));
 
             foreach (record record in records.records)
             {
-
                 if (record.bases != null && record.bases.Count > 0)
                 {
                     for (int i = record.bases.Count - 1; i >= 0; i--)

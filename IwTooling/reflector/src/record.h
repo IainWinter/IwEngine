@@ -10,6 +10,7 @@ struct record {
 	std::vector<std::string> Bases;
 	std::vector<std::pair<std::string, std::string>> Fields;
 	std::vector<std::pair<std::string, std::string>> TemplateArgs;
+	bool IncludeInOutput = false;
 
 	std::string GetNameWithTArgs() const
 	{

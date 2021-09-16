@@ -1,7 +1,6 @@
 #include "clang-c/Index.h"
 
 #include <iostream>
-#include <fstream>
 #include <unordered_map>
 
 #include "record.h"
@@ -50,6 +49,7 @@ struct userdata {
 
 	std::vector<record> Records;
 	record* CurrentRecord;
+	bool IsRecordDecl;
 
 	void NewRecord(std::string name)
 	{
@@ -67,7 +67,7 @@ CXChildVisitResult visitor(
 {
 	CXSourceLocation location = clang_getCursorLocation(cursor);
 
-	if (clang_Location_isFromMainFile(location) == 0)
+	if (clang_Location_isInSystemHeader(location) != 0)
 	{
 		return CXChildVisit_Continue;
 	}
@@ -87,7 +87,7 @@ CXChildVisitResult visitor(
 
 	if (!whitelisted)
 	{
-		return CXChildVisit_Continue;
+		return CXChildVisit_Recurse;
 	}
 
 	userdata& user = *(userdata*)client;
@@ -102,12 +102,18 @@ CXChildVisitResult visitor(
 		}
 		case CXCursor_TemplateTypeParameter:
 		{
-			user.CurrentRecord->TemplateArgs.emplace_back(iw_CursorSpelling(cursor), "typename");
+			if (user.IsRecordDecl)
+			{
+				user.CurrentRecord->TemplateArgs.emplace_back(iw_CursorSpelling(cursor), "typename");
+			}
 			break;
 		}
 		case CXCursor_NonTypeTemplateParameter:
 		{
-			user.CurrentRecord->TemplateArgs.emplace_back(iw_CursorSpelling(cursor), iw_TypeSpelling(cursor));
+			if (user.IsRecordDecl)
+			{
+				user.CurrentRecord->TemplateArgs.emplace_back(iw_CursorSpelling(cursor), iw_TypeSpelling(cursor));
+			}
 			break;
 		}
 		case CXCursor_ClassTemplate:
@@ -115,6 +121,7 @@ CXChildVisitResult visitor(
 		case CXCursor_StructDecl:
 		{
 			user.NewRecord(getName(iw_CursorSpelling(cursor)));
+			user.IsRecordDecl = true;
 			break;
 		}
 		case CXCursor_CXXBaseSpecifier:
@@ -125,6 +132,19 @@ CXChildVisitResult visitor(
 		case CXCursor_FieldDecl:
 		{
 			user.CurrentRecord->Fields.emplace_back(iw_CursorSpelling(cursor), getName(iw_TypeSpelling(cursor)));
+			break;
+		}
+		case CXCursor_FunctionTemplate:
+		case CXCursor_FunctionDecl:
+		{
+			user.IsRecordDecl = false;
+			break;
+		}
+		case CXCursor_AnnotateAttr:
+		{
+			user.CurrentRecord->IncludeInOutput = true;
+
+			std::cout << iw_CursorSpelling(cursor);
 			break;
 		}
 	}
@@ -146,32 +166,14 @@ void print_comma(std::ostream& stream, int index, int count)
 
 int main(int argc, char** argv)
 {
-
-
-	test_float test;
-
-	test.base_x = 10;
-	test.base_y = 102;
-	test.base_t = 'A';
-	test.x = 1;
-	test.y = 2;
-	test.xy = 2342340.0234234f;
-
-	{
-		iw::JsonSerializer out("./test_out.json", true);
-		out.Write(test);
-	}
-
 	// validate inputs
 
-	argc = 3;
-	argv = new char* [3];
-	argv[0] = nullptr;
-	argv[1] = "C:/dev/IwEngine/IwTooling/reflector/src/test.ast";
-	argv[2] = "C:/dev/IwEngine/IwTooling/reflector/src/test.json";
+	argc = 2;
+	argv = new char*[2];
+	argv[1] = "C:/dev/IwEngine/IwTooling/apps/reflector/_reflect_me.ast";
 
-	if (argc < 3)
-	{
+	if (argc != 2) {
+		std::cout << "please specify <source.ast>";
 		return -1;
 	}
 
@@ -184,7 +186,10 @@ int main(int argc, char** argv)
 		CXCursor_CXXBaseSpecifier,
 		CXCursor_FieldDecl,
 		CXCursor_TemplateTypeParameter,
-		CXCursor_NonTypeTemplateParameter
+		CXCursor_NonTypeTemplateParameter,
+		CXCursor_FunctionTemplate,
+		CXCursor_FunctionDecl,
+		CXCursor_AnnotateAttr
 	};
 
 	CXIndex index = clang_createIndex(0, 1);
@@ -192,6 +197,7 @@ int main(int argc, char** argv)
 
 	if (!tu)
 	{
+		std::cout << "failed to load ast";
 		return -2;
 	}
 
@@ -205,10 +211,7 @@ int main(int argc, char** argv)
 
 	// print json
 
-	std::fstream file;
-	file.open(argv[2], std::fstream::in | std::fstream::out | std::ios::trunc);
-
-	std::ostream& ss =file;
+	std::ostream& ss = std::cout;
 
 	ss << "{";
 	ss << "\"records\":[";
@@ -218,13 +221,15 @@ int main(int argc, char** argv)
 	{
 		const record& record = data.Records.at(i);
 
+		if (!record.IncludeInOutput) continue;
+
 		ss << "{";
 
-		ss << "\"type_name\":" << "\"" << record.GetNameWithTArgs() << "\",";
+		ss << "\"type_name\":" << "\"" << record.GetNameWithTArgs() << "\"";
 
 		if (record.TemplateArgs.size() > 0)
 		{
-			ss << "\"targs\":[";
+			ss << ",\"targs\":[";
 
 			int targ_count = record.TemplateArgs.size();
 			for (int t = 0; t < targ_count; t++)
@@ -241,16 +246,11 @@ int main(int argc, char** argv)
 			}
 
 			ss << "]";
-
-			if (record.Fields.size() > 0)
-			{
-				ss << ",";
-			}
 		}
 
 		if (record.Fields.size() > 0)
 		{
-			ss << "\"fields\":[";
+			ss << ",\"fields\":[";
 
 			int field_count = record.Fields.size();
 			for (int f = 0; f < field_count; f++)
@@ -267,16 +267,11 @@ int main(int argc, char** argv)
 			}
 
 			ss << "]";
-
-			if (record.Bases.size() > 0)
-			{
-				ss << ",";
-			}
 		}
 
 		if (record.Bases.size() > 0)
 		{
-			ss << "\"bases\":[";
+			ss << ",\"bases\":[";
 
 			int base_count = record.Bases.size();
 			for (int b = 0; b < base_count; b++)
@@ -337,8 +332,6 @@ int main(int argc, char** argv)
 	}
 	*/
 
-	file.flush();
-	file.close();
 	clang_disposeTranslationUnit(tu);
 	clang_disposeIndex(index);
 
