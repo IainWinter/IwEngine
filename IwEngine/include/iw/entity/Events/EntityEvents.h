@@ -1,7 +1,8 @@
 #pragma once
 
 #include "iw/common/Events/EventGroups.h"
-#include "iw/entity/Entity.h"
+#include "iw/entity/EntityHandle.h"
+#include "iw/entity/Archetype.h"
 
 namespace iw {
 namespace ECS {

@@ -52,12 +52,11 @@ namespace ECS {
 				archetype.Layout[i].Onset = totalSize - size;
 			}
 
+			m_hashed[hash] = m_archetypes.size();
 			m_archetypes.emplace_back(archetype);
-
-			return archetype;
 		}
 
-		return m_hashed[hash];
+		return m_archetypes[m_hashed[hash]];
 	}
 
 	Archetype ArchetypeManager::AddComponent(

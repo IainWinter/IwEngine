@@ -111,6 +111,21 @@ namespace ECS {
 
 		Chunk* CreateChunk();
 		Chunk& FindOrCreateChunk();
+
+		size_t GetChunkBufferSize(
+			const Archetype& archetype,
+			size_t capasity);
+
+		void LogChunkInfo(
+			const Chunk* chunk,
+			const std::string& thing)
+		{
+#ifdef IW_DEBUG
+			LOG_DEBUG << "[ECS] " << thing << " Chunk " << chunk->IndexOffset / chunk->Capacity
+				<< " (" << m_archetype.Hash << ")"
+				<< " (" << chunk->Capacity * m_archetype.Size << " bytes)";
+#endif
+		}
 	};
 }
 

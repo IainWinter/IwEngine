@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Space.h"
+#include "iw/entity/Space.h"
 
 namespace iw {
 namespace ECS {
 	struct Entity {
 		EntityHandle Handle;
-		Space* Space;
+		iw::Space* Space;
 
 		Entity()
 			: Handle(EntityHandle::Empty)
@@ -15,14 +15,14 @@ namespace ECS {
 
 		Entity(
 			EntityHandle handle,
-			ECS::Space* space)
+			iw::Space* space)
 			: Handle(handle)
 			, Space(space)
 		{}
 
 		Entity(
 			EntityHandle handle,
-			ref<ECS::Space>& space)
+			ref<iw::Space>& space)
 			: Handle(handle)
 			, Space(space.get())
 		{}

@@ -1,12 +1,7 @@
 #pragma once
 
 #include "iw/entity/Space.h"
-#include "iw/entity/Entity.h"
 #include <assert.h>
-
-#ifdef IW_USE_EVENTS
-#	include "iw/entity/Events/EntityEvents.h"
-#endif
 
 namespace iw {
 namespace ECS {
@@ -49,11 +44,7 @@ namespace ECS {
 			entityData.ChunkIndex = m_componentManager.CreateComponentsData(entityData);
 		}
 
-#ifdef IW_USE_EVENTS
-		if (m_bus) {
-			m_bus->send<EntityCreatedEvent>(entityData.Entity);
-		}
-#endif
+		TrySendEntityCreatedEvent(entityData.Entity);
 
 		return Entity(entityData.Entity, this);
 	}
@@ -68,11 +59,7 @@ namespace ECS {
 
 		EntityData& entityData = m_entityManager.GetEntityData(handle.Index);
 
-#ifdef IW_USE_EVENTS
-		if (m_bus) {
-			m_bus->send<EntityDestroyedEvent>(entityData.Entity);
-		}
-#endif
+		TrySendEntityDestroiedEvent(entityData.Entity);
 
 		return m_entityManager   .DestroyEntity(handle.Index)
 			&& m_componentManager.DestroyComponentsData(entityData);
@@ -317,15 +304,9 @@ namespace ECS {
 	}
 
 	void Space::Clear() {
-#ifdef IW_USE_EVENTS
-		if (m_bus) {
-			for (const EntityData* data : m_entityManager.Entities()) {
-				if (data->Entity.Alive) {
-					m_bus->send<EntityDestroyedEvent>(data->Entity);
-				}
-			}
+		for (const EntityData* data : m_entityManager.Entities()) {
+			TrySendEntityDestroiedEvent(data->Entity);
 		}
-#endif
 
 		m_entityManager.Clear();
 		m_componentManager.Clear();
@@ -399,12 +380,7 @@ namespace ECS {
 		EntityData& entityData,
 		const Archetype& newArchetype)
 	{
-#ifdef IW_USE_EVENTS
-		if (m_bus) { // this needs two events maybe to capture all the info from before and after to
-					 // do anything useful with it
-			m_bus->send<EntityMovedEvent>(entityData.Entity, entityData.Archetype, newArchetype);
-		}
-#endif
+		TrySendEntityMovedEvent(entityData.Entity, entityData.Archetype, newArchetype);
 
 		entityData.ChunkIndex = m_componentManager.MoveComponentData(entityData, newArchetype);
 		entityData.Archetype = newArchetype;

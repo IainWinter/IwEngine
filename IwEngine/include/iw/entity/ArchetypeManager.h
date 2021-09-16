@@ -11,7 +11,7 @@ namespace iw {
 namespace ECS {
 	class ArchetypeManager {
 	private:
-		std::unordered_map<size_t, Archetype> m_hashed; // there are two copies stored
+		std::unordered_map<size_t, size_t> m_hashed; // hash, index
 		std::vector<Archetype> m_archetypes;
 		pool_allocator m_pool;
 		

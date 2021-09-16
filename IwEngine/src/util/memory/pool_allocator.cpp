@@ -245,12 +245,20 @@ namespace util {
 	void* pool_allocator::page::alloc_to_next(
 		size_t size)
 	{
-		if (m_next == nullptr) {
-
+		if (m_next == nullptr) 
+		{
 			size_t capacity = m_capacity;
-			while (size > capacity)
+
+			if (size > capacity)
 			{
-				capacity *= 2;
+				while (size > capacity)
+				{
+					capacity *= 2;
+				}
+			}
+
+			else {
+				capacity = (size_t)pow(2, (size_t)::log2(capacity) + 1); // double page size
 			}
 
 			m_next = new page(this, capacity);

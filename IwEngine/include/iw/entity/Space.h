@@ -10,9 +10,8 @@
 
 #ifdef IW_USE_EVENTS
 #	include "iw/events/eventbus.h"
+#	include "iw/entity/Events/EntityEvents.h"
 #endif
-
-// !!!! major bug with chunks getting cleared while iterating !!!! solve is to q everything i think
 
 namespace iw {
 namespace ECS {
@@ -410,6 +409,43 @@ namespace ECS {
 		void MoveComponents(
 			EntityData& entityData,
 			const Archetype& newArchetype);
+
+		// sending events allows disabling by user
+
+		// theses dont get disabled if define is undefed?????
+
+		void TrySendEntityCreatedEvent(
+			const EntityHandle& handle)
+		{
+#ifdef IW_USE_EVENTS
+			if (m_bus) {
+				m_bus->send<EntityCreatedEvent>(handle);
+			}
+#endif
+		}
+
+		void TrySendEntityDestroiedEvent(
+			const EntityHandle& handle)
+		{
+#ifdef IW_USE_EVENTS
+			if (m_bus) {
+				m_bus->send<EntityDestroyedEvent>(handle);
+			}
+#endif
+		}
+
+		void TrySendEntityMovedEvent(
+			const EntityHandle& handle,
+			const Archetype& oldArchetype,
+			const Archetype& newArchetype)
+		{
+#ifdef IW_USE_EVENTS
+			if (m_bus) { // this needs two events maybe to capture all the info from before and after to
+						 // do anything useful with it
+				m_bus->send<EntityMovedEvent>(handle, oldArchetype, newArchetype);
+			}
+#endif
+		}
 	};
 }
 

@@ -3,6 +3,7 @@
 
 #ifdef IW_DEBUG
 #	include "iw/log/logger.h"
+#include "..\..\include\iw\entity\ChunkList.h"
 #endif
 
 namespace iw {
@@ -12,7 +13,7 @@ namespace ECS {
 	// replace with free list like thing but for valid entities 
 	iterator& iterator::operator++() {
 
-		Chunk* c = m_root;
+		Chunk* c = m_chunk;
 		while (c) {
 			assert((int)c->Next != 1 || (int)c->Next != 2);
 			c = c->Next;
@@ -176,7 +177,8 @@ namespace ECS {
 		--m_count;
 
 		// If chunk is empty free it
-		if (chunk->Count == 0) {	
+		if (chunk->Count == 0) 
+		{	
 			if (chunk->Previous) {
 				chunk->Previous->Next = chunk->Next;
 			}
@@ -189,16 +191,11 @@ namespace ECS {
 				m_root = m_root->Next;
 			}
 
-#ifdef IW_DEBUG
-			LOG_DEBUG << "[ECS] - Chunk (" << m_archetype.Hash << ")" << chunk->IndexOffset / chunk->Capacity
-				<< " (" << chunk->Capacity * m_archetype.Size << " bytes)";
-#endif
+			LogChunkInfo(chunk, "-");
 
-			if (!chunk->Next) {
-				--m_chunkCount;
-			}
+			--m_chunkCount;
 
-			m_chunkPool.free(chunk->Buffer, chunk->Capacity * m_archetype.Size);
+			m_chunkPool.free(chunk->Buffer, GetChunkBufferSize(m_archetype, chunk->Capacity));
 			m_chunkPool.free<Chunk>(chunk);
 		}
 
@@ -332,21 +329,15 @@ namespace ECS {
 	}
 
 	Chunk* ChunkList::CreateChunk() {
-		size_t capacity = (m_chunkCount + 1) * (m_chunkCount + 1);
+		size_t capacity = pow(2, m_chunkCount);
+		size_t indexOff = m_chunkCount == 0 ? 0 : pow(2, m_chunkCount - 1);
 
 		Chunk* chunk = m_chunkPool.alloc<Chunk>();
-		chunk->Buffer = m_chunkPool.alloc<char>(capacity * m_archetype.Size);
+		chunk->Buffer = m_chunkPool.alloc<char>(GetChunkBufferSize(m_archetype, capacity));
 		chunk->Capacity = capacity;
-		chunk->IndexOffset = 0;
-		for (size_t i = 1; i <= m_chunkCount; i++) // sum of previous squares, is there a rule for this?
-		{
-			chunk->IndexOffset += i * i;
-		}
+		chunk->IndexOffset = indexOff;
 
-#ifdef IW_DEBUG
-		LOG_DEBUG << "[ECS] + Chunk (" << m_archetype.Hash << ")" << chunk->IndexOffset / chunk->Capacity
-			<< " (" << chunk->Capacity * m_archetype.Size << " bytes)";
-#endif
+		LogChunkInfo(chunk, "+");
 
 		++m_chunkCount;
 
@@ -369,6 +360,11 @@ namespace ECS {
 		}
 
 		return *chunk;
+	}
+
+	size_t ChunkList::GetChunkBufferSize(const Archetype& archetype, size_t capasity)
+	{
+		return capasity * (archetype.Size + sizeof(EntityHandle));
 	}
 }
 }
