@@ -73,8 +73,8 @@ void EnemySystem::FixedUpdate()
 				SpawnEnemy_Config config;
 
 				config.SpawnLocationX = transform->Position.x;
-				config.SpawnLocationX = transform->Position.y;
-				config.EnemyType = BOMB;
+				config.SpawnLocationY = transform->Position.y;
+				config.EnemyType = iw::randf() > .4 ? BOMB : FIGHTER;
 				config.TargetEntity = ship->Target;
 
 				Bus->push<SpawnEnemy_Event>(config);
@@ -191,7 +191,7 @@ void EnemySystem::SpawnEnemy(SpawnEnemy_Config& config)
 
 			rigidbody->AngularVelocity.z = .1f;
 			rigidbody->SetMass(100);
-			flocker->Speed = 4;
+			flocker->Speed = 25;
 
 			break;
 		}

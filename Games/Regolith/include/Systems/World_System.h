@@ -56,9 +56,9 @@ private:
 		config.TargetLocationY = target_y;
 		config.TargetEntity = m_player;
 		config.EnemyType = iw::choose(std::vector<std::pair<EnemyType, float>>{
-			{ BOMB,    30 },
+			{ BOMB,    10 },
 			{ FIGHTER, 90 },
-			{ STATION, 10000 }
+			{ STATION, 20 }
 		});
 
 		Bus->push<SpawnEnemy_Event>(config);

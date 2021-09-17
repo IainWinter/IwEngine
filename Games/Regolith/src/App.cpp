@@ -252,22 +252,24 @@ void GameLayer::PostUpdate()
 	{
 		int ammo = m_player.Find<Player>()->CurrentWeapon->Ammo;
 
-		if (ammo != CachedAmmo)
+		if (ammo < 0)
+		{
+			CachedAmmo = ammo;
+			A_font_cambria->UpdateMesh(A_mesh_ui_text_ammo, "inf", 5);
+		}
+
+		else if (ammo != CachedAmmo)
 		{
 			CachedAmmo = ammo;
 			A_font_cambria->UpdateMesh(A_mesh_ui_text_ammo, tos(CachedAmmo), 5);
 		}
 	}
 
-	A_font_cambria->UpdateMesh(A_mesh_ui_text_ammo, tos(iw::DeltaTime() * 1000), 5);
-
 	if (score_s->Score != CachedScore)
 	{
 		CachedScore = score_s->Score;
 		A_font_cambria->UpdateMesh(A_mesh_ui_text_score, tos(CachedScore), 5);
 	}
-
-	A_font_cambria->UpdateMesh(A_mesh_ui_text_score, tos(iw::DeltaTime()*1000), 5);
 
 	float red;
 
@@ -345,8 +347,8 @@ void GameLayer::PostUpdate()
 	float menu_pixel_x_scale = menu->width  / A_texture_ui_background->m_width;
 	float menu_pixel_y_scale = menu->height / A_texture_ui_background->m_height;
 
-	float ammo_x_pad  = (floor(log10(CachedAmmo))  * 11 + 30) * menu_pixel_x_scale;
-	float score_x_pad = (floor(log10(CachedScore)) * 11 + 30) * menu_pixel_x_scale;
+	float ammo_x_pad  = (floor(CachedAmmo  > 0 ? log10(CachedAmmo)  : 1) * 11 + 30) * menu_pixel_x_scale;
+	float score_x_pad = (floor(CachedScore > 0 ? log10(CachedScore) : 1) * 11 + 30) * menu_pixel_x_scale;
 
 	float ammo_y_pad = 13 * menu_pixel_y_scale;
 	float score_y_pad = 48 * menu_pixel_y_scale;
