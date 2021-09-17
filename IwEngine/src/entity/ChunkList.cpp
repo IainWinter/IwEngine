@@ -12,14 +12,6 @@ namespace ECS {
 
 	// replace with free list like thing but for valid entities 
 	iterator& iterator::operator++() {
-
-		Chunk* c = m_chunk;
-		while (c) {
-			assert((int)c->Next != 1 || (int)c->Next != 2);
-			c = c->Next;
-		}
-
-
 		do {
 			Index++;
 			if (Index == m_chunk->EndIndex()) {
@@ -195,8 +187,8 @@ namespace ECS {
 
 			--m_chunkCount;
 
-			m_chunkPool.free(chunk->Buffer, GetChunkBufferSize(m_archetype, chunk->Capacity));
-			m_chunkPool.free<Chunk>(chunk);
+			delete[] chunk->Buffer; // m_chunkPool.free(chunk->Buffer, GetChunkBufferSize(m_archetype, chunk->Capacity));
+			delete chunk; // m_chunkPool.free<Chunk>(chunk);
 		}
 
 		return true;
@@ -328,14 +320,17 @@ namespace ECS {
 		return chunk;
 	}
 
-	Chunk* ChunkList::CreateChunk() {
+	Chunk* ChunkList::CreateChunk(
+		Chunk* previous)
+	{
 		size_t capacity = pow(2, m_chunkCount);
-		size_t indexOff = m_chunkCount == 0 ? 0 : pow(2, m_chunkCount - 1);
+		size_t indexOff = previous ? previous->IndexOffset + previous->Capacity : 0;
 
-		Chunk* chunk = m_chunkPool.alloc<Chunk>();
-		chunk->Buffer = m_chunkPool.alloc<char>(GetChunkBufferSize(m_archetype, capacity));
+		Chunk* chunk = new Chunk(); //m_chunkPool.alloc<Chunk>();
+		chunk->Buffer = new char[GetChunkBufferSize(m_archetype, capacity)];// m_chunkPool.alloc<char>(GetChunkBufferSize(m_archetype, capacity));
 		chunk->Capacity = capacity;
 		chunk->IndexOffset = indexOff;
+		chunk->Previous = previous;
 
 		LogChunkInfo(chunk, "+");
 
@@ -346,14 +341,13 @@ namespace ECS {
 
 	Chunk& ChunkList::FindOrCreateChunk() {
 		if (!m_root) {
-			m_root = CreateChunk();
+			m_root = CreateChunk(nullptr);
 		}
 
 		Chunk* chunk = m_root;
 		while (chunk && chunk->CurrentIndex == chunk->Capacity) {
 			if (chunk->Next == nullptr) {
-				chunk->Next = CreateChunk();
-				chunk->Next->Previous = chunk;
+				chunk->Next = CreateChunk(chunk);
 			}
 
 			chunk = chunk->Next;
@@ -362,7 +356,9 @@ namespace ECS {
 		return *chunk;
 	}
 
-	size_t ChunkList::GetChunkBufferSize(const Archetype& archetype, size_t capasity)
+	size_t ChunkList::GetChunkBufferSize(
+		const Archetype& archetype,
+		size_t capasity)
 	{
 		return capasity * (archetype.Size + sizeof(EntityHandle));
 	}

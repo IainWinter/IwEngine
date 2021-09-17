@@ -22,4 +22,6 @@ struct Item {
 	float PickUpRadius = 100.f;
 	bool PickingUp = false;
 	std::function<void()> OnPickUp;
+
+	Item() {}
 };

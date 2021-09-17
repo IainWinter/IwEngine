@@ -3,8 +3,17 @@
 namespace iw {
 namespace Physics {
 	Rigidbody::Rigidbody(
-		bool isKinematic)
+		bool isKinematic
+	)
 		: CollisionObject(true)
+		, Gravity(0.f)
+		, NetForce(0.f)
+		, Velocity(0.f)
+		, NetTorque(0.f)
+		, AngularVelocity(0.f)
+		, Inertia(1.f)
+		, AxisLock(0.f)
+		, IsAxisLocked(0.f)
 		, InvMass(1)
 		, TakesGravity(true)
 		, SimGravity(true)

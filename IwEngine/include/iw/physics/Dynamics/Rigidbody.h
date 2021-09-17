@@ -14,7 +14,7 @@ namespace Physics {
 
 		glm::vec3 NetTorque;
 		glm::vec3 AngularVelocity;
-		glm::mat3 Inertia = glm::mat3(1); // for testing
+		glm::mat3 Inertia; // for testing
 
 		glm::vec3 AxisLock;     // Lock to axis
 		glm::vec3 IsAxisLocked; // If its locked to each axis casted to bool

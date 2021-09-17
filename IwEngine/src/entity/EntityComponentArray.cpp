@@ -7,12 +7,12 @@ namespace ECS {
 	// I wouldnt be shocked if there wasnt some subtle logic bug somewhere in here
 
 	iterator& iterator::operator++() {
-		++m_itrs[Triangles];
+		++m_itrs[m_index];
 
-		while (Triangles < m_itrs.size() 
-			&& m_itrs[Triangles] == m_ends[Triangles])
+		while (m_index < m_itrs.size()
+			&& m_itrs[m_index] == m_ends[m_index])
 		{
-			++Triangles;
+			++m_index;
 		}
 
 		return *this;
@@ -21,18 +21,15 @@ namespace ECS {
 	bool iterator::operator==(
 		const iterator& itr)
 	{
-		if (Triangles == itr.Triangles) {
-			if (Triangles < m_itrs.size()) {
-				return m_itrs[Triangles] == itr.m_itrs[Triangles];
+		if (m_index == itr.m_index) {
+			if (m_index < m_itrs.size()) {
+				return m_itrs[m_index] == itr.m_itrs[m_index];
 			}
 
 			return true;
 		}
 
 		return false;
-
-		//return Triangles == itr.Triangles 
-		//	&& (m_itrs.size() == Triangles || m_itrs[Triangles] == itr.m_itrs[Triangles]);
 	}
 
 	bool iterator::operator!=(
@@ -42,27 +39,29 @@ namespace ECS {
 	}
 
 	EntityComponentData iterator::operator*() {
-		return *m_itrs[Triangles];
+		return *m_itrs[m_index];
 	}
 
 	iterator::iterator(
 		const ChunkListVec& begins,
 		const ChunkListVec& ends,
-		size_t itrIndex)
+		size_t itrIndex
+	)
 		: m_itrs(begins)
 		, m_ends(ends)
-		, Triangles(itrIndex)
+		, m_index(itrIndex)
 	{
-		while (Triangles < m_itrs.size()
-			&& m_itrs[Triangles] == m_ends[Triangles])
+		while (m_index < m_itrs.size()
+			&& m_itrs[m_index] == m_ends[m_index])
 		{
-			++Triangles;
+			++m_index;
 		}
 	}
 
 	EntityComponentArray::EntityComponentArray(
 		ChunkListVec&& begins,
-		ChunkListVec&& ends)
+		ChunkListVec&& ends
+	)
 		: m_begins(std::forward<ChunkListVec>(begins))
 		, m_ends  (std::forward<ChunkListVec>(ends))
 	{}

@@ -7,18 +7,16 @@
 namespace iw {
 namespace ECS {
 	struct Chunk {
-		size_t debugPadding = 5;
+		Chunk* Next = nullptr;
+		Chunk* Previous = nullptr;
 
-		Chunk* Next;
-		Chunk* Previous;
-
-		size_t Count;
-		size_t Capacity;
-		size_t IndexOffset;
-		size_t CurrentIndex;
+		size_t Count = 0;
+		size_t Capacity = 0;
+		size_t IndexOffset = 0;
+		size_t CurrentIndex = 0;
 
 		// buffer is always contiguous with header (ChunkList::CreateChunk)
-		char* Buffer;
+		char* Buffer = nullptr;
 
 		IWENTITY_API
 		size_t ReserveComponents();

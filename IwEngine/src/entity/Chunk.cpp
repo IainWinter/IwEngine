@@ -5,6 +5,9 @@ namespace iw {
 namespace ECS {
 	size_t Chunk::ReserveComponents() {
 		++Count;
+
+		LOG_INFO << "Reserving " << Count << " of " << Capacity;
+
 		return CurrentIndex++ + IndexOffset;
 	}
 

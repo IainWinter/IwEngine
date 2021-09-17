@@ -255,15 +255,19 @@ void GameLayer::PostUpdate()
 		if (ammo != CachedAmmo)
 		{
 			CachedAmmo = ammo;
-			A_font_cambria->UpdateMesh(A_mesh_ui_text_ammo, itos(CachedAmmo), 5);
+			A_font_cambria->UpdateMesh(A_mesh_ui_text_ammo, tos(CachedAmmo), 5);
 		}
 	}
+
+	A_font_cambria->UpdateMesh(A_mesh_ui_text_ammo, tos(iw::DeltaTime() * 1000), 5);
 
 	if (score_s->Score != CachedScore)
 	{
 		CachedScore = score_s->Score;
-		A_font_cambria->UpdateMesh(A_mesh_ui_text_score, itos(CachedScore), 5);
+		A_font_cambria->UpdateMesh(A_mesh_ui_text_score, tos(CachedScore), 5);
 	}
+
+	A_font_cambria->UpdateMesh(A_mesh_ui_text_score, tos(iw::DeltaTime()*1000), 5);
 
 	float red;
 

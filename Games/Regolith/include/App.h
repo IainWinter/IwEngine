@@ -107,7 +107,8 @@ public:
 
  // Helpers
 
-std::string itos(int numb)
+template<typename _t>
+std::string tos(const _t& numb)
 {
 	std::stringstream buf;
 	if (numb >= 0) buf << numb;

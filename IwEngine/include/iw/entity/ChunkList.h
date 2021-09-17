@@ -109,7 +109,9 @@ namespace ECS {
 		Chunk* FindChunk(
 			size_t index);
 
-		Chunk* CreateChunk();
+		Chunk* CreateChunk(
+			Chunk* previous);
+
 		Chunk& FindOrCreateChunk();
 
 		size_t GetChunkBufferSize(
@@ -120,10 +122,23 @@ namespace ECS {
 			const Chunk* chunk,
 			const std::string& thing)
 		{
+			//std::stringstream ss;
+			//ss << '<';
+			//for (size_t i = 0; i < m_archetype.Count; i++)
+			//{
+			//	ss << m_archetype.Layout[i].Component->Name;
+
+			//	if (i != m_archetype.Count - 1)
+			//	{
+			//		ss << '\n';
+			//	}
+			//}
+			//ss << '>';
+
 #ifdef IW_DEBUG
 			LOG_DEBUG << "[ECS] " << thing << " Chunk " << chunk->IndexOffset / chunk->Capacity
-				<< " (" << m_archetype.Hash << ")"
-				<< " (" << chunk->Capacity * m_archetype.Size << " bytes)";
+				<< " (" << chunk->Capacity * m_archetype.Size << " bytes)"
+				/*<< "\n" << ss.str()*/;
 #endif
 		}
 	};
