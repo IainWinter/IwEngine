@@ -187,8 +187,8 @@ namespace ECS {
 
 			--m_chunkCount;
 
-			delete[] chunk->Buffer; // m_chunkPool.free(chunk->Buffer, GetChunkBufferSize(m_archetype, chunk->Capacity));
-			delete chunk; // m_chunkPool.free<Chunk>(chunk);
+			m_chunkPool.free(chunk->Buffer, GetChunkBufferSize(m_archetype, chunk->Capacity));
+			m_chunkPool.free<Chunk>(chunk);
 		}
 
 		return true;
@@ -326,8 +326,8 @@ namespace ECS {
 		size_t capacity = pow(2, m_chunkCount);
 		size_t indexOff = previous ? previous->IndexOffset + previous->Capacity : 0;
 
-		Chunk* chunk = new Chunk(); //m_chunkPool.alloc<Chunk>();
-		chunk->Buffer = new char[GetChunkBufferSize(m_archetype, capacity)];// m_chunkPool.alloc<char>(GetChunkBufferSize(m_archetype, capacity));
+		Chunk* chunk = m_chunkPool.alloc<Chunk>();
+		chunk->Buffer = m_chunkPool.alloc<char>(GetChunkBufferSize(m_archetype, capacity));
 		chunk->Capacity = capacity;
 		chunk->IndexOffset = indexOff;
 		chunk->Previous = previous;
