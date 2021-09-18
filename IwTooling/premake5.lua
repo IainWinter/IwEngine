@@ -25,7 +25,7 @@ workspace "wTools"
 		objdir    (reflector_dir .. bld_dir)
 
 		files {
-			reflector_dir .. src_dir .. "/record.h",
+			--reflector_dir .. src_dir .. "/record.h",
 			reflector_dir .. src_dir .. "/Source.cpp"
 		}
 

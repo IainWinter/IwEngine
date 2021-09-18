@@ -1,0 +1,59 @@
+template\<<targs>>
+inline const Class* GetClass(ClassTag\<<type_name>>)
+{
+	static Class* c = nullptr;
+
+	if (c == nullptr)
+	{
+		c = new Class("<type_name>", sizeof(<type_name>), <field_count>);
+
+		size_t offset = 0;
+
+<fields: { x |
+		c->fields[<x.index>] = <\\>
+	<if(x.is_base)><\\>
+		{ "<x.type_name>", GetClass(ClassTag\<<x.type_name>>()), offset, true \};<\\>
+	<else><\\>
+		{ "<x.name>", GetType(TypeTag\<<x.type_name>>()), offset, false \};<\\>
+	<endif><\\>
+<\\>
+	<if(!x.is_last)>
+		offset += sizeof(<x.type_name>);
+
+	<endif>
+}>
+	}
+
+	return c;
+}
+
+template\<
+	<targs><if(has_targs)>,<endif>
+	size_t _iw_array_size>
+inline const Class* GetClass(ClassTag\<<type_name>[_iw_array_size]>)
+{
+	static Class* c = nullptr;
+
+	if (c == nullptr)
+	{
+		c = new Class(get_array_type_name("<type_name>", _iw_array_size), sizeof(<type_name>[_iw_array_size]), <field_count>);
+
+		size_t offset = 0;
+
+<fields: { x |
+		c->fields[<x.index>] = <\\>
+	<if(x.is_base)><\\>
+		{ "<x.type_name>", GetClass(ClassTag\<<x.type_name>>()), offset, true \};<\\>
+	<else><\\>
+		{ "<x.name>", GetType(TypeTag\<<x.type_name>>()), offset, false \};<\\>
+	<endif><\\>
+<\\>
+	<if(!x.is_last)>
+		offset += sizeof(<x.type_name>);
+
+	<endif>
+}>
+	}
+
+	return c;
+}

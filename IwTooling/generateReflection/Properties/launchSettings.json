@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "generateReflection": {
+      "commandName": "Project",
+      "commandLineArgs": "_reflect_me.json"
+    }
+  }
+}

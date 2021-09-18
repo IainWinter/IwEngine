@@ -50,6 +50,11 @@ namespace generateReflection
                         f.type_name = record.bases[i];
                         f.is_base = true;
 
+                        if (record.fields == null)
+                        {
+                            record.fields = new List<field>();
+                        }
+
                         record.fields.Insert(0, f);
                     }
                 }
@@ -69,19 +74,17 @@ namespace generateReflection
 
                 string targs = "";
 
-                if (targ_count > 0)
+                for (int i = 0; i < targ_count; i++)
                 {
-                    for (int i = 0; i < targ_count; i++)
-                    {
-                        targ arg = record.targs[i];
+                    targ arg = record.targs[i];
 
-                        targs += arg.type_name + " " + arg.name; 
-                        if (i < targ_count - 1)
-                        {
-                            targs += ", ";
-                        }
+                    targs += arg.type_name + " " + arg.name; 
+                    if (i < targ_count - 1)
+                    {
+                        targs += ", ";
                     }
                 }
+                
 
                 Template template = new Template(template_string);
                 template.Add("type_name",   record.type_name);

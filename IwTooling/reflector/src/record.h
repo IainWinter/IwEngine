@@ -1,45 +1,5 @@
 #pragma once
 
-#include <vector>
-#include <string>
-#include <utility>
-#include <sstream>
-
-struct record {
-	std::string Name;
-	std::vector<std::string> Bases;
-	std::vector<std::pair<std::string, std::string>> Fields;
-	std::vector<std::pair<std::string, std::string>> TemplateArgs;
-	bool IncludeInOutput = false;
-
-	std::string GetNameWithTArgs() const
-	{
-		int targ_count = TemplateArgs.size();
-
-		if (targ_count == 0)
-		{
-			return Name;
-		}
-
-		std::stringstream ss;
-
-		ss << Name << "<";
-		for (int i = 0; i < targ_count; i++)
-		{
-			ss << TemplateArgs.at(i).first;
-
-			if (i < targ_count - 1)
-			{
-				ss << ", ";
-			}
-		}
-
-		ss << ">";
-
-		return ss.str();
-	}
-};
-
 #include "test.h"
 #include "iw/util/reflection/Reflect.h"
 //

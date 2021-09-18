@@ -4,8 +4,45 @@
 #include <unordered_map>
 
 #include "record.h"
+#include <vector>
+#include <string>
+#include <utility>
+#include <sstream>
 
-#include "iw/util/reflection/serialization/JsonSerializer.h"
+struct record {
+	std::string Name;
+	std::vector<std::string> Bases;
+	std::vector<std::pair<std::string, std::string>> Fields;
+	std::vector<std::pair<std::string, std::string>> TemplateArgs;
+	bool IncludeInOutput = false;
+
+	std::string GetNameWithTArgs() const
+	{
+		int targ_count = TemplateArgs.size();
+
+		if (targ_count == 0)
+		{
+			return Name;
+		}
+
+		std::stringstream ss;
+
+		ss << Name << "<";
+		for (int i = 0; i < targ_count; i++)
+		{
+			ss << TemplateArgs.at(i).first;
+
+			if (i < targ_count - 1)
+			{
+				ss << ", ";
+			}
+		}
+
+		ss << ">";
+
+		return ss.str();
+	}
+};
 
 #define DEF_STR_FUNC(func, get_func)                        \
 	std::string iw_##func(CXCursor cursor)                  \
@@ -45,11 +82,13 @@ std::string getName(const std::string& name)
 
 struct userdata {
 	std::string TemplatedRecord;
-	int Depth;
+	int Depth = 0;
 
 	std::vector<record> Records;
-	record* CurrentRecord;
-	bool IsRecordDecl;
+	record* CurrentRecord = nullptr;
+
+	bool IsRecordDecl = false;
+	bool IsFieldDecl  = false;
 
 	void NewRecord(std::string name)
 	{
@@ -65,6 +104,8 @@ CXChildVisitResult visitor(
 	CXCursor parent,
 	CXClientData client)
 {
+	userdata& user = *(userdata*)client;
+
 	CXSourceLocation location = clang_getCursorLocation(cursor);
 
 	if (clang_Location_isInSystemHeader(location) != 0)
@@ -90,13 +131,12 @@ CXChildVisitResult visitor(
 		return CXChildVisit_Recurse;
 	}
 
-	userdata& user = *(userdata*)client;
-
 	switch (kind)
 	{
 		case CXCursor_TypedefDecl:
 		case CXCursor_TypeAliasDecl:
 		{
+			user.IsRecordDecl = false;
 			typedefs.emplace(iw_TypeSpelling(cursor), iw_TypedefUnderlyingTypeSpelling(cursor));
 			break;
 		}
@@ -122,15 +162,18 @@ CXChildVisitResult visitor(
 		{
 			user.NewRecord(getName(iw_CursorSpelling(cursor)));
 			user.IsRecordDecl = true;
+			user.IsFieldDecl  = false;
 			break;
 		}
 		case CXCursor_CXXBaseSpecifier:
 		{
+			user.IsRecordDecl = false;
 			user.CurrentRecord->Bases.push_back(getName(iw_TypeSpelling(cursor)));
 			break;
 		}
 		case CXCursor_FieldDecl:
 		{
+			user.IsFieldDecl = true;
 			user.CurrentRecord->Fields.emplace_back(iw_CursorSpelling(cursor), getName(iw_TypeSpelling(cursor)));
 			break;
 		}
@@ -142,9 +185,20 @@ CXChildVisitResult visitor(
 		}
 		case CXCursor_AnnotateAttr:
 		{
-			user.CurrentRecord->IncludeInOutput = true;
+			std::string annotation = iw_CursorSpelling(cursor);
 
-			std::cout << iw_CursorSpelling(cursor);
+			if (   user.IsRecordDecl 
+				&& annotation == "reflect")
+			{
+				user.CurrentRecord->IncludeInOutput = true;
+			}
+
+			if (   user.IsFieldDecl
+				&& annotation == "no_reflect")
+			{
+				user.CurrentRecord->Fields.pop_back();
+			}
+			
 			break;
 		}
 	}
