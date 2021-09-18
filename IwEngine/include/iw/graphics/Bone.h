@@ -2,7 +2,6 @@
 
 #include "iw/graphics/IwGraphics.h"
 #include "iw/common/Components/Transform.h"
-#include "glm/mat4x4.hpp"
 
 namespace iw {
 namespace Graphics {

@@ -3,13 +3,7 @@
 #include "IwRenderer.h"
 #include "Texture.h"
 #include "PipelineParamType.h"
-//#include "iw/math/matrix2.h"
-//#include "iw/math/matrix3.h"
-//#include "iw/math/matrix4.h"
-
-#include "glm/mat2x2.hpp"
-#include "glm/mat3x3.hpp"
-#include "glm/mat4x4.hpp"
+#include "iw/math/iwmath.h"
 
 #include "iw/log/logger.h"
 

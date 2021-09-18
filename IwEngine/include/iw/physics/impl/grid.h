@@ -2,7 +2,6 @@
 
 #include "iw/physics/impl/AABB.h"
 #include "iw/util/algorithm/pair_hash.h"
-#include "glm/gtx/hash.hpp"
 #include <unordered_map>
 
 namespace iw {

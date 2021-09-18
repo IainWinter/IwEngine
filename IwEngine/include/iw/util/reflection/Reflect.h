@@ -21,8 +21,11 @@
 #ifndef REFLECT
 #	define REFLECT __attribute__((annotate("reflect")))
 #endif
-#ifndef AUTO_REFLECT
-#	define AUTO_REFLECT __attribute__((annotate("auto_reflect")))
+#ifndef NO_REFLECT
+#	define NO_REFLECT __attribute__((annotate("no_reflect")))
+#endif
+#ifndef PASS_REFLECT
+#	define PASS_REFLECT __attribute__((annotate("pass_reflect")))
 #endif
 
 #define IW_BEGIN_REFLECT namespace iw { namespace Reflect { namespace detail {

@@ -1,15 +1,7 @@
 #pragma once
 
 #include "IwGraphics.h"
-//#include "iw/math/vector2.h"
-//#include "iw/math/glm::vec3.h"
-//#include "iw/math/glm::vec4.h"
-
-#include "glm/vec2.hpp"
-#include "glm/vec3.hpp"
-#include "glm/vec4.hpp"
-
-#include "glm/common.hpp"
+#include "iw/math/iwmath.h"
 
 namespace iw {
 namespace Graphics {

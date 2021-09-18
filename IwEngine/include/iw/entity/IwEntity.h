@@ -11,11 +11,9 @@
 #endif
 
 #include "iw/util/memory/ref.h"
+#include "iw/util/reflection/ReflectDef.h"
 
-#ifdef IW_USE_REFLECTION
-#	include "iw\reflection\Reflect.h"
-#else
-#	define REFLECT
+#ifndef IW_USE_REFLECTION
 #	include <typeindex>
 #endif
 

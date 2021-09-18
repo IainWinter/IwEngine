@@ -14,7 +14,7 @@ workspace (name)
 	configurations { "Debug", "Release" }
 	platforms { "x64" }
 	startproject (name)
-	location (gamedir .. blddir)
+	--location (gamedir .. blddir)
 
 	project (name)
 		--kind "SharedLib"
@@ -60,6 +60,10 @@ workspace (name)
 
 		prebuildcommands {
 			"xcopy /y /f \""    .. iwengdir .. bindir .. "/*.dll\" \"" .. gamedir .. bindir .. "/\""
+		}
+
+		defines {
+			"IW_USE_REFLECTION"
 		}
 
 		filter "system:windows"

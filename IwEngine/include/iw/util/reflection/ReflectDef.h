@@ -4,7 +4,10 @@
 #	ifndef REFLECT
 #		define REFLECT
 #	endif
-#	ifndef AUTO_REFLECT
-#		define AUTO_REFLECT
+#	ifndef NO_REFLECT
+#		define NO_REFLECT
+#	endif
+#	ifndef PASS_REFLECT
+#		define PASS_REFLECT
 #	endif
 #endif

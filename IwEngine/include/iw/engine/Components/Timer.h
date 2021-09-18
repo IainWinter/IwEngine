@@ -19,7 +19,7 @@ namespace Engine {
 			float time,
 			float margin = 0.f)
 		{
-			Times[name] = std::tuple(0.f, time, margin);
+			Times[name] = std::tuple<float, float, float>(0.f, time, margin);
 		}
 
 		float& GetTimer (const std::string& name) { return std::get<0>(Times[name]); }

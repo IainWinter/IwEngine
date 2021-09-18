@@ -1,8 +1,10 @@
 #pragma once
 
+#include "iw/util/reflection/ReflectDef.h"
+
 namespace iw {
 namespace events {
-	struct event {
+	struct REFLECT event {
 		short Group;
 		short Type;
 		bool Handled;

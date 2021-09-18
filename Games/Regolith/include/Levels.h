@@ -3,10 +3,12 @@
 #include "iw/engine/Events/Seq/EventTask.h"
 #include "iw/engine/Components/Timer.h"
 #include "iw/physics/AABB.h"
-#include "glm/vec2.hpp"
+#include "iw/math/iwmath.h"
 #include <vector>
 #include <utility>
 #include "Events.h"
+
+#undef min
 
 struct LevelEventTask : iw::EventTask
 {

@@ -10,25 +10,8 @@
 #	define IWPHYSICS_API
 #endif
 
-#include <type_traits>
-#include "glm/vec2.hpp"
-#include "glm/vec3.hpp"
-#include "glm/vec4.hpp"
-
-// for templates?
-
-#ifdef IW_USE_REFLECTION
-#	include "iw\reflection\Reflect.h"
-#else
-#	ifndef REFLECT
-#		define REFLECT
-#	endif
-#endif
-
-#ifdef REFLECTING
-#	undef  IWPHYSICS_API
-#	define IWPHYSICS_API
-#endif
+#include "iw/math/iwmath.h"
+#include "iw/util/reflection/ReflectDef.h"
 
 inline float major(glm::vec2& v) {
 	float m = v.x;

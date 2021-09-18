@@ -12,7 +12,7 @@ namespace Engine {
 		SINGLE
 	};
 
-	struct ActionEvent
+	struct REFLECT ActionEvent
 		: iw::event
 	{
 		int Action;
@@ -25,7 +25,7 @@ namespace Engine {
 		{}
 	};
 
-	struct ToggleEvent
+	struct REFLECT ToggleEvent
 		: ActionEvent
 	{
 		bool Active;
@@ -38,7 +38,7 @@ namespace Engine {
 		{}
 	};
 
-	struct SingleEvent
+	struct REFLECT SingleEvent
 		: ActionEvent
 	{
 		SingleEvent(

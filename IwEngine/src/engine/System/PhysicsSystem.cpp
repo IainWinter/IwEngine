@@ -1,8 +1,6 @@
 #include "iw/engine/Systems/PhysicsSystem.h"
 #include "iw/engine/Time.h"
 
-#include "glm/gtx/compatibility.hpp"
-
 namespace iw {
 namespace Engine {
 	PhysicsSystem::PhysicsSystem()

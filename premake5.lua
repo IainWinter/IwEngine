@@ -83,7 +83,8 @@ group ""
 		}
 
 		includedirs {
-			iwengdir  .. incdir
+			iwengdir .. incdir,
+			glmdir   .. incdir
 		}
 
 		defines {
@@ -400,7 +401,8 @@ group ""
 		}
 
 		defines {
-			"IW_USE_EVENTS"
+			"IW_USE_EVENTS",
+			"IW_USE_REFLECTION"
 		}
 
 		filter "system:windows"

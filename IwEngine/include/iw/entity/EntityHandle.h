@@ -4,7 +4,7 @@
 
 namespace iw {
 namespace ECS {
-	struct EntityHandle {
+	struct REFLECT EntityHandle {
 		IWENTITY_API
 		static const EntityHandle Empty;
 

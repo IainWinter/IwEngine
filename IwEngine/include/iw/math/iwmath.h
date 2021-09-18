@@ -1,14 +1,5 @@
 #pragma once
 
-// cant use reflrection folder because its not a reference, this works just as well but needs to be repeated
-#ifdef IW_USE_REFLECTION
-#	include "iw\reflection\Reflect.h"
-#else
-#	ifndef REFLECT
-#		define REFLECT
-#	endif
-#endif
-
 #ifdef IW_PLATFORM_WINDOWS
 #	ifdef IWMATH_DLL
 #		define IWMATH_API __declspec(dllexport)
@@ -19,18 +10,13 @@
 #	define IWMATH_API 
 #endif
 
-#include <vector> // I dont like needing this, could template better in iw::choose
-#include "iw/log/logger.h"
+#define NOMINMAX
 
-// From winmindef
-
-//#ifndef max
-//#define max(a,b)            (((a) > (b)) ? (a) : (b))
-//#endif
-//
-//#ifndef min
-//#define min(a,b)            (((a) < (b)) ? (a) : (b))
-//#endif
+#define GLM_CONFIG_XYZW_ONLY
+#include "glm/glm.hpp"
+#include "glm/gtc/quaternion.hpp"
+#include "glm/gtx/matrix_decompose.hpp"
+#include "glm/gtx/norm.hpp"
 
 namespace iw {
 namespace math {
@@ -73,9 +59,6 @@ namespace math {
 	* Phi ~ 1.62
 	*/
 	constexpr float Phi = 1.61803398875f;
-
-#undef max
-#undef min
 
 	template<typename _t>
 	const _t& max(const _t& a, const _t& b)

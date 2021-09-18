@@ -4,8 +4,8 @@
 
 namespace iw {
 namespace ECS {
-	struct Entity {
-		EntityHandle Handle;
+	struct REFLECT Entity {
+		PASS_REFLECT EntityHandle Handle;
 		iw::Space* Space;
 
 		Entity()

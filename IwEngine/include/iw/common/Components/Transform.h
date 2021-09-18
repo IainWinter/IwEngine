@@ -1,32 +1,25 @@
 #pragma once
 
 #include "iw/common/iwcommon.h"
-#include "glm/vec3.hpp"
-#include "glm/mat4x4.hpp"
-#include "glm/gtx/quaternion.hpp"
-
-#include "glm/gtx/matrix_decompose.hpp" // should wrap the glm::decomp into a better signature
-
-#include <vector>
 
 namespace iw {
 namespace Engine {
 	struct REFLECT Transform {
 	public:
-		REFLECT glm::vec3 Position;
-		REFLECT glm::vec3 Scale;
-		REFLECT glm::quat Rotation;
+		glm::vec3 Position;
+		glm::vec3 Scale;
+		glm::quat Rotation;
 
 	private:
-		std::vector<Transform*> m_children;
-		Transform* m_parent;
+		NO_REFLECT std::vector<Transform*> m_children;
+		NO_REFLECT Transform* m_parent;
 
-		glm::mat4 t_transformation;      // state for cache
-		glm::mat4 t_worldTransformation;
-		glm::vec3 t_position; 
-		glm::vec3 t_scale;
-		glm::quat t_rotation;
-		Transform* t_parent;
+		NO_REFLECT glm::mat4 t_transformation;      // state for cache
+		NO_REFLECT glm::mat4 t_worldTransformation;
+		NO_REFLECT glm::vec3 t_position; 
+		NO_REFLECT glm::vec3 t_scale;
+		NO_REFLECT glm::quat t_rotation;
+		NO_REFLECT Transform* t_parent;
 
 	public:
 		IWCOMMON_API

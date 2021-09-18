@@ -5,11 +5,7 @@
 #include "Windows/imgui_impl_win32.h"
 #include "iw/engine/Time.h"
 
-#include "../extern/imgui/src/imgui_demo.cpp"
-
-#include "glm/gtx/compatibility.hpp"
-
-//extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+#include "iw/math/iwmath.h"
 
 namespace iw {
 namespace Engine {
@@ -95,7 +91,7 @@ namespace Engine {
 	void PrintTimes(
 		iw::log_time& times)
 	{
-		m_smooth[times.name] = glm::lerp(m_smooth[times.name], times.time * 1000, glm::min(1 - smoothing + .01f, 1.f));
+		m_smooth[times.name] = iw::lerp(m_smooth[times.name], times.time * 1000, iw::min(1 - smoothing + .01f, 1.f));
 		float time = m_smooth[times.name];
 
 		if (times.children.size() == 0) {

@@ -8,6 +8,7 @@
 #include "Components/Item.h"
 #include "Components/ProjHead.h"
 #include "Components/EnemyShip.h"
+#include "iw/util/reflection/ReflectDef.h"
 
 enum Actions {
 	SPAWN_ENEMY,
@@ -27,7 +28,7 @@ enum Actions {
 	OPEN_MENU,
 };
 
-struct SpawnExplosion_Config
+struct REFLECT SpawnExplosion_Config
 {
 	float SpawnLocationX = 0;
 	float SpawnLocationY = 0;
@@ -35,7 +36,7 @@ struct SpawnExplosion_Config
 	float ExplosionPower = 200;
 };
 
-struct SpawnExplosion_Event : iw::SingleEvent
+struct REFLECT SpawnExplosion_Event : iw::SingleEvent
 {
 	SpawnExplosion_Config Config;
 
@@ -47,7 +48,7 @@ struct SpawnExplosion_Event : iw::SingleEvent
 	{}
 };
 
-struct SpawnEnemy_Config
+struct REFLECT SpawnEnemy_Config
 {
 	iw::Entity TargetEntity;
 	float SpawnLocationX;
@@ -58,7 +59,7 @@ struct SpawnEnemy_Config
 	EnemyType EnemyType;
 };
 
-struct SpawnEnemy_Event : iw::SingleEvent
+struct REFLECT SpawnEnemy_Event : iw::SingleEvent
 {
 	SpawnEnemy_Config Config;
 
@@ -70,7 +71,7 @@ struct SpawnEnemy_Event : iw::SingleEvent
 	{}
 };
 
-struct SpawnAsteroid_Config
+struct REFLECT SpawnAsteroid_Config
 {
 	float SpawnLocationX = 0;
 	float SpawnLocationY = 0;
@@ -80,7 +81,7 @@ struct SpawnAsteroid_Config
 	int Size = 1;
 };
 
-struct SpawnAsteroid_Event : iw::SingleEvent
+struct REFLECT SpawnAsteroid_Event : iw::SingleEvent
 {
 	SpawnAsteroid_Config Config;
 
@@ -92,7 +93,7 @@ struct SpawnAsteroid_Event : iw::SingleEvent
 	{}
 };
 
-struct SpawnProjectile_Event : iw::SingleEvent
+struct REFLECT SpawnProjectile_Event : iw::SingleEvent
 {
 	ShotInfo Shot;
 	int Depth;
@@ -107,7 +108,7 @@ struct SpawnProjectile_Event : iw::SingleEvent
 	{}
 };
 
-struct SpawnItem_Config
+struct REFLECT SpawnItem_Config
 {
 	float X = 0, Y = 0;
 	int Amount = 1;
@@ -122,7 +123,7 @@ struct SpawnItem_Config
 	std::function<void()> OnPickup;
 };
 
-struct SpawnItem_Event : iw::SingleEvent
+struct REFLECT SpawnItem_Event : iw::SingleEvent
 {
 	SpawnItem_Config Config;
 
@@ -134,7 +135,7 @@ struct SpawnItem_Event : iw::SingleEvent
 	{}
 };
 
-struct ChangeLaserFluid_Event : iw::SingleEvent
+struct REFLECT ChangeLaserFluid_Event : iw::SingleEvent
 {
 	int Amount;
 
@@ -146,7 +147,7 @@ struct ChangeLaserFluid_Event : iw::SingleEvent
 	{}
 };
 
-struct HealPlayer_Event : iw::SingleEvent
+struct REFLECT HealPlayer_Event : iw::SingleEvent
 {
 	bool IsCore;
 
@@ -158,7 +159,7 @@ struct HealPlayer_Event : iw::SingleEvent
 	{}
 };
 
-struct ChangePlayerWeapon_Event : iw::SingleEvent
+struct REFLECT ChangePlayerWeapon_Event : iw::SingleEvent
 {
 	WeaponType Weapon;
 
@@ -170,7 +171,7 @@ struct ChangePlayerWeapon_Event : iw::SingleEvent
 	{}
 };
 
-struct ProjHitTile_Config
+struct REFLECT ProjHitTile_Config
 {
 	int X;
 	int Y;
@@ -179,7 +180,7 @@ struct ProjHitTile_Config
 	iw::Entity Projectile;
 };
 
-struct ProjHitTile_Event : iw::SingleEvent
+struct REFLECT ProjHitTile_Event : iw::SingleEvent
 {
 	ProjHitTile_Config Config;
 	
@@ -191,7 +192,7 @@ struct ProjHitTile_Event : iw::SingleEvent
 	{}
 };
 
-struct RemoveCellFromTile_Event : iw::SingleEvent
+struct REFLECT RemoveCellFromTile_Event : iw::SingleEvent
 {
 	size_t Index;
 	iw::Entity Entity;
@@ -205,7 +206,7 @@ struct RemoveCellFromTile_Event : iw::SingleEvent
 	{}
 };
 
-struct CreatedPlayer_Event : iw::SingleEvent
+struct REFLECT CreatedPlayer_Event : iw::SingleEvent
 {
 	iw::Entity PlayerEntity;
 
@@ -217,7 +218,7 @@ struct CreatedPlayer_Event : iw::SingleEvent
 	{}
 };
 
-struct CreatedCoreTile_Event : iw::SingleEvent
+struct REFLECT CreatedCoreTile_Event : iw::SingleEvent
 {
 	iw::Entity TileEntity;
 
@@ -230,7 +231,7 @@ struct CreatedCoreTile_Event : iw::SingleEvent
 };
 
 
-struct CoreExploded_Event : iw::SingleEvent
+struct REFLECT CoreExploded_Event : iw::SingleEvent
 {
 	iw::Entity Entity;
 
@@ -249,7 +250,7 @@ enum StateName {
 	RESUME_STATE,
 };
 
-struct StateChange_Event : iw::SingleEvent
+struct REFLECT StateChange_Event : iw::SingleEvent
 {
 	StateName State;
 
@@ -265,7 +266,7 @@ enum MenuName {
 	ECS_MENU
 };
 
-struct OpenMenu_Event : iw::SingleEvent
+struct REFLECT OpenMenu_Event : iw::SingleEvent
 {
 	MenuName Menu;
 

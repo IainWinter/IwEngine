@@ -10,28 +10,13 @@
 #	define IWCOMMON_API
 #endif
 
-#ifdef IW_USE_REFLECTION
-#	include "iw\reflection\Reflect.h"
-#else
-#	ifndef REFLECT
-#		define REFLECT
-#	endif
-#endif
-
-#ifdef REFLECTING
-#	undef  IWCOMMON_API
-#	define IWCOMMON_API
-#endif
+#include "iw/util/reflection/ReflectDef.h"
 
 #pragma warning (push)
 #pragma warning (disable: 26812) // non enum classes, they are already namespaced so why does it matter
 
-// Put into IwCommon
-
-#include "iw/math/matrix.h" // should go in a translation type file
-#include "glm/vec2.hpp"
-#include "glm/vec3.hpp"
-#include "glm/mat3x3.hpp"
+#include "iw/math/matrix.h"
+#include <vector>
 
 namespace iw {
 #ifdef IW_DOUBLE_PRECISION

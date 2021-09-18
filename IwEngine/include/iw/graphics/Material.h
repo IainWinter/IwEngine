@@ -9,13 +9,7 @@
 #include "iw/util/memory/ref.h"
 #include "iw/util/tuple/foreach.h"
 #include "iw/util/memory/linear_allocator.h"
-//#include "iw/math/vector2.h"
-//#include "iw/math/vector3.h"
-//#include "iw/math/vector4.h"
-
-#include "glm/vec2.hpp"
-#include "glm/vec3.hpp"
-#include "glm/vec4.hpp"
+#include "iw/math/iwmath.h"
 
 #include <vector>
 #include <unordered_map>

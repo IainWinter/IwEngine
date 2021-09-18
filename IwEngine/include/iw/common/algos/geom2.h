@@ -1,7 +1,6 @@
 #pragma once
 
 #include "iw/common/Components/Transform.h"
-#include "glm/vec2.hpp"
 
 namespace iw {
 namespace common {
