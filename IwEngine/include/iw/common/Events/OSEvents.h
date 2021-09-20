@@ -1,8 +1,8 @@
 #pragma once
 
-#include "iw/common/iwcommon.h"
 #include "iw/events/event.h"
-#include "EventGroups.h"
+#include "iw/common/iwcommon.h"
+#include "iw/common/Events/EventGroups.h"
 
 #include "iw/common/Platform.h"
 
@@ -15,12 +15,14 @@ namespace Engine {
 		INPUT
 	};
 
-	struct OsEvent
+	struct REFLECT OsEvent
 		: event
 	{
 #ifdef IW_PLATFORM_WINDOWS
+
+		NO_REFLECT HWND Handle;
+
 		unsigned WindowId;
-		HWND Handle;
 		unsigned Message;
 		WPARAM WParam;
 		LPARAM LParam;
@@ -30,8 +32,9 @@ namespace Engine {
 			HWND handle,
 			unsigned message,
 			WPARAM wparam,
-			LPARAM lparam)
-			: iw::event(iw::val(EventGroup::OS), iw::val(OsEventType::GENERIC))
+			LPARAM lparam
+		)
+			: event(val(EventGroup::OS), val(OsEventType::GENERIC))
 			, WindowId(windowId)
 			, Handle(handle)
 			, Message(message)

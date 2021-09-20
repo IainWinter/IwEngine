@@ -1,5 +1,6 @@
 #pragma once
 
+#include "iw/events/event.h"
 #include "iw/common/Events/EventGroups.h"
 #include "iw/entity/EntityHandle.h"
 #include "iw/entity/Archetype.h"
@@ -15,7 +16,7 @@ namespace ECS {
 		Moved
 	};
 
-	struct EntityEvent
+	struct REFLECT EntityEvent
 		: event
 	{
 		EntityHandle Entity;
@@ -29,7 +30,7 @@ namespace ECS {
 		{}
 	};
 
-	struct EntityCreatedEvent
+	struct REFLECT EntityCreatedEvent
 		: EntityEvent
 	{
 		EntityCreatedEvent(
@@ -39,7 +40,7 @@ namespace ECS {
 		{}
 	};
 
-	struct EntityDestroyEvent
+	struct REFLECT EntityDestroyEvent
 		: EntityEvent
 	{
 		EntityDestroyEvent(
@@ -49,7 +50,7 @@ namespace ECS {
 		{}
 	};
 
-	struct EntityDestroyedEvent
+	struct REFLECT EntityDestroyedEvent
 		: EntityEvent
 	{
 		EntityDestroyedEvent(
@@ -59,11 +60,11 @@ namespace ECS {
 		{}
 	};
 
-	struct EntityMovedEvent
+	struct REFLECT EntityMovedEvent
 		: EntityEvent
 	{
-		Archetype OldArchetype;
-		Archetype NewArchetype;
+		NO_REFLECT Archetype OldArchetype;
+		NO_REFLECT Archetype NewArchetype;
 
 		EntityMovedEvent(
 			EntityHandle entity,

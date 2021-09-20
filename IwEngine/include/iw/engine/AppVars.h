@@ -9,7 +9,7 @@
 #include "iw/input/InputManager.h"
 #include "iw/physics/Dynamics/DynamicsSpace.h"
 #include "iw/graphics/QueuedRenderer.h"
-#include "iw/entity/Space.h"
+#include "iw/entity/Entity.h"
 
 #define APP_VARS ref<eventbus>       Bus;      \
 			  ref<thread_pool>    Task;     \

@@ -402,7 +402,7 @@ group ""
 
 		defines {
 			"IW_USE_EVENTS",
-			"IW_USE_REFLECTION"
+			--"IW_USE_REFLECTION" -- this causes linker errors, i think every component needs to have reflection info for this to work
 		}
 
 		filter "system:windows"
@@ -599,6 +599,10 @@ group ""
 			"wLog",
 			--"wMath",
 			"wCommon"
+		}
+
+		defines {
+			"IW_USE_REFLECTION"
 		}
 
 		filter "system:windows"

@@ -176,10 +176,20 @@ bool GameLayer::On(iw::ActionEvent& e)
 					PopSystem(world_s);
 					PopSystem(keepInWorld_s);
 
+					std::vector<iw::event_record*> events = Bus->end_record();
+
+					for (iw::event_record* record : events)
+					{
+						LOG_DEBUG << "[Event] " << record->type->name;
+					}
+
 					break;
 				}
 				case RUN_STATE: 
 				{
+					Bus->start_record();
+
+
 					showGameOver = false;
 					PushSystemFront(playerTank_s);
 					PushSystemFront(world_s);

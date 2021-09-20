@@ -1,7 +1,7 @@
 #pragma once
 
-#include "iw/common/Events/EventGroups.h"
 #include "iw/events/event.h"
+#include "iw/common/Events/EventGroups.h"
 
 namespace iw {
 namespace Engine {
@@ -9,20 +9,21 @@ namespace Engine {
 		Closed, Destroyed, Resized, Moved
 	};
 
-	struct WindowEvent
-		: iw::event
+	struct REFLECT WindowEvent
+		: event
 	{
 		unsigned int WindowId;
 
 		WindowEvent(
 			WindowEventType type,
-			unsigned int windowId)
-			: iw::event(iw::val(EventGroup::WINDOW), iw::val(type))
+			unsigned int windowId
+		)
+			: event(val(EventGroup::WINDOW), val(type))
 			, WindowId(windowId)
 		{}
 	};
 
-	struct WindowResizedEvent
+	struct REFLECT WindowResizedEvent
 		: WindowEvent
 	{
 		int Width;
@@ -31,7 +32,8 @@ namespace Engine {
 		WindowResizedEvent(
 			unsigned int windowId,
 			int width,
-			int height)
+			int height
+		)
 			: WindowEvent(Resized, windowId)
 			, Width(width)
 			, Height(height)

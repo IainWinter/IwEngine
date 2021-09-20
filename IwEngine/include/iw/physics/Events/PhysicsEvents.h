@@ -1,8 +1,8 @@
 #pragma once
 
+#include "iw/events/event.h"
 #include "iw/common/Events/EventGroups.h"
 #include "iw/physics/Collision/Manifold.h"
-#include "iw/events/event.h"
 
 namespace iw {
 namespace Engine {
@@ -12,27 +12,29 @@ namespace Engine {
 		Collision
 	};
 
-	struct PhysicsEvent
-		: iw::event
+	struct REFLECT PhysicsEvent
+		: event
 	{
 		scalar DeltaTime;
 
 		PhysicsEvent(
 			PhysicsEventType type,
-			scalar deltaTime)
-			: iw::event(iw::val(EventGroup::PHYSICS), iw::val(type))
+			scalar deltaTime
+		)
+			: event(val(EventGroup::PHYSICS), val(type))
 			, DeltaTime(deltaTime)
 		{}
 	};
 
-	struct CollisionEvent
+	struct REFLECT CollisionEvent
 		: PhysicsEvent
 	{
 		Manifold Manifold;
 
 		CollisionEvent(
 			iw::Manifold& manifold,
-			scalar dt)
+			scalar dt
+)
 			: PhysicsEvent(PhysicsEventType::Collision, dt)
 			, Manifold(manifold)
 		{}

@@ -777,10 +777,11 @@ namespace detail
 ///////////////////////////////////////////////////////////////////////////////////
 // Only use x, y, z, w as vector type components
 
-#ifdef GLM_FORCE_XYZW_ONLY
+// was ifdef
+#ifndef GLM_FORCE_XYZW_ONLY
 #	define GLM_CONFIG_XYZW_ONLY GLM_ENABLE
-#else
-#	define GLM_CONFIG_XYZW_ONLY GLM_DISABLE
+//#else
+//#	define GLM_CONFIG_XYZW_ONLY GLM_DISABLE
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////////

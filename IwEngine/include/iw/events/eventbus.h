@@ -10,69 +10,94 @@
 #include <chrono>
 #include <assert.h>
 
+#ifdef IW_USER_REFLECTION
+//#	include "iw/_config/engine_reflection.h"
+//#	include "iw/_config/user_reflection.h"
+#endif
+
 #include "iw/util/reflection/Reflect.h"
 
 namespace iw {
 namespace events {
-#define TIME (float)std::chrono::system_clock::now().time_since_epoch().count()
+#define TIME std::chrono::system_clock::now().time_since_epoch().count()
 	
 	struct event_record {
 		event* event = nullptr;
+		const iw::Type* type = nullptr;
+
 		std::string who_handled;
 		std::string who_called;
 
-		float time_queued = 0.f;
-		float time_published = 0.f;
-		float time_handled = 0.f;
+		size_t time_queued = 0.f;
+		size_t time_published = 0.f;
+		size_t time_handled = 0.f;
+
+		~event_record()
+		{
+			delete event;
+		}
 	};
 
 	struct eventbus_recorder
 	{
 		std::mutex mutex;
-		std::vector<event_record> records;
+		std::vector<event_record*> records;
 
-		event_record* find_record(event* e)
+		event_record* find_record(size_t id)
 		{
 			event_record* record = nullptr;
-			for (event_record& r : records)
+			for (event_record* r : records)
 			{
-				if (r.event == e)
+				if (r->event->Id == id)
 				{
-					record = &r;
+					record = r;
 					break;
 				}
 			}
 
-			assert(record);
-
 			return record;
 		}
 
-		void record(event* e, std::string whoCalled)
+		template<
+			typename _t>
+		void record(_t* e, std::string whoCalled)
 		{
-			event_record record;
-			record.event = e;
-			record.who_called = whoCalled;
-			record.time_queued = TIME;
+			event_record* record = new event_record();
+			record->event = new _t(*e);
+			record->who_called = whoCalled;
+			record->time_queued = TIME;
+			record->type = iw::GetType<_t>();
 
 			std::unique_lock lock(mutex);
 
 			records.push_back(record);
 		}
 
-		void record_published(event* e)
+		void record_published(size_t id)
 		{
 			std::unique_lock lock(mutex);
+			
+			event_record* record = find_record(id);
+			if (!record)
+			{
+				LOG_ERROR << "Event doesnt exist";
+				return;
+			}
 
-			event_record* record = find_record(e);
 			record->time_published = TIME;
 		}
 
-		void record_handled(event* e, std::string whoHandled)
+		void record_handled(size_t id, std::string whoHandled)
 		{
 			std::unique_lock lock(mutex);
 
-			event_record* record = find_record(e);
+			event_record* record = find_record(id);
+			if (!record)
+			{
+				LOG_ERROR << "Event doesnt exist";
+				return;
+			}
+
 			record->who_handled = whoHandled;
 			record->time_handled = TIME;
 		}
@@ -87,10 +112,34 @@ namespace events {
 
 		eventbus_recorder* m_recorder;
 
+		std::mutex m_idmutex;
+		size_t m_next_id;
+
 	public:
 		IWEVENTS_API
-		eventbus(
-			bool record);
+		eventbus();
+
+		// put in cpp
+
+		void start_record()
+		{
+			if (m_recorder)
+			{
+				delete m_recorder;
+			}
+
+			m_recorder = new eventbus_recorder();
+		}
+
+		std::vector<event_record*> end_record()
+		{
+			std::vector<event_record*> record = m_recorder->records; // dont delete event*s
+
+			delete m_recorder;
+			m_recorder = nullptr;
+
+			return record;
+		}
 
 		IWEVENTS_API
 		void subscribe(
@@ -114,9 +163,14 @@ namespace events {
 				new(e) _e(std::forward<_args>(args)...);
 				e->Size = sizeof(_e);
 
+				{
+					std::unique_lock lock(m_idmutex);
+					e->Id = m_next_id++;
+				}
+
 				if (m_recorder)
 				{
-					m_recorder->record(e, "");
+					m_recorder->record<_e>(e, "");
 				}
 
 				m_events.push(e);
@@ -132,9 +186,14 @@ namespace events {
 			_e e(std::forward<_args>(args)...);
 			e.Size = sizeof(_e);
 
+			{
+				std::unique_lock lock(m_idmutex);
+				e.Id = m_next_id++;
+			}
+
 			if (m_recorder)
 			{
-				m_recorder->record(&e, "");
+				m_recorder->record<_e>(&e, "");
 			}
 
 			publish_event(&e);

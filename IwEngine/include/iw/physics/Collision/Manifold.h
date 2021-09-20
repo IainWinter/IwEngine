@@ -5,9 +5,9 @@
 
 namespace iw {
 namespace Physics {
-	struct Manifold {
-		CollisionObject* ObjA;
-		CollisionObject* ObjB;
+	struct REFLECT Manifold {
+		NO_REFLECT CollisionObject* ObjA;
+		NO_REFLECT CollisionObject* ObjB;
 		glm::vec3 A;
 		glm::vec3 B;
 		glm::vec3 Normal;
@@ -17,7 +17,8 @@ namespace Physics {
 		Manifold(
 			CollisionObject* a,
 			CollisionObject* b,
-			const ManifoldPoints& points)
+			const ManifoldPoints& points
+		)
 			: ObjA(a)
 			, ObjB(b)
 			, A(points.A)

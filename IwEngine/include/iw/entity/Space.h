@@ -15,7 +15,7 @@
 
 namespace iw {
 namespace ECS {
-	struct Entity;
+	struct REFLECT Entity;
 	using func_EntityChange = std::function<void(Entity)>;
 
 	class Space {
@@ -451,5 +451,3 @@ namespace ECS {
 
 	using namespace ECS;
 }
-
-#include "Entity.h" // ew but how do you avoid this

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "iw/entity/Space.h"
+#include "iw/entity/Entity.h"
 #include <assert.h>
 
 namespace iw {

@@ -1,8 +1,8 @@
 #pragma once
 
+#include "iw/events/event.h"
 #include "iw/common/Events/EventGroups.h"
 #include "iw/input/InputState.h"
-#include "iw/events/event.h"
 #include <string>
 
 namespace iw {
@@ -13,8 +13,8 @@ namespace Input {
 		MouseWheel, MouseMoved, MouseButton, Key, KeyTyped, Command
 	};
 
-	struct InputEvent
-		: iw::event
+	struct REFLECT InputEvent
+		: event
 	{
 		DeviceType Device;
 		InputState& InputStates; // this cant be a pointer or needs a function for getting states instead of operator
@@ -22,26 +22,28 @@ namespace Input {
 		InputEvent(
 			InputEventType type,
 			DeviceType device,
-			InputState& inputState)
-			: iw::event(iw::val(EventGroup::INPUT), iw::val(type))
+			InputState& inputState
+		)
+			: event(val(EventGroup::INPUT), val(type))
 			, Device(device)
 			, InputStates(inputState)
 		{}
 	};
 
-	struct InputCommandEvent
-		: iw::event
+	struct REFLECT InputCommandEvent
+		: event
 	{
 		std::string Command;
 
 		InputCommandEvent(
-			std::string command)
-			: iw::event(iw::val(EventGroup::INPUT), iw::val(InputEventType::Command))
+			std::string command
+		)
+			: event(val(EventGroup::INPUT), val(InputEventType::Command))
 			, Command(command)
 		{}
 	};
 
-	struct MouseWheelEvent
+	struct REFLECT MouseWheelEvent
 		: InputEvent
 	{
 		float Delta;
@@ -49,13 +51,14 @@ namespace Input {
 		MouseWheelEvent(
 			DeviceType device,
 			InputState& inputState,
-			float delta)
+			float delta
+		)
 			: InputEvent(InputEventType::MouseWheel, device, inputState)
 			, Delta(delta)
 		{}
 	};
 
-	struct MouseMovedEvent
+	struct REFLECT MouseMovedEvent
 		: InputEvent
 	{
 		float X;
@@ -69,7 +72,8 @@ namespace Input {
 			float x,
 			float y,
 			float deltaX,
-			float deltaY)
+			float deltaY
+		)
 			: InputEvent(InputEventType::MouseMoved, device, inputState)
 			, X(x)
 			, Y(y)
@@ -78,7 +82,7 @@ namespace Input {
 		{}
 	};
 
-	struct MouseButtonEvent
+	struct REFLECT MouseButtonEvent
 		: InputEvent
 	{
 		InputName Button;
@@ -88,14 +92,15 @@ namespace Input {
 			DeviceType device,
 			InputState& inputState,
 			InputName button,
-			bool state)
+			bool state
+		)
 			: InputEvent(InputEventType::MouseButton, device, inputState)
 			, Button(button)
 			, State(state)
 		{}
 	};
 
-	struct KeyEvent
+	struct REFLECT KeyEvent
 		: InputEvent
 	{
 		InputName Button;
@@ -105,14 +110,15 @@ namespace Input {
 			DeviceType device,
 			InputState& inputState,
 			InputName button,
-			bool state)
+			bool state
+		)
 			: InputEvent(InputEventType::Key, device, inputState)
 			, Button(button)
 			, State(state)
 		{}
 	};
 
-	struct KeyTypedEvent
+	struct REFLECT KeyTypedEvent
 		: InputEvent
 	{
 		InputName Button;
@@ -122,7 +128,8 @@ namespace Input {
 			DeviceType device,
 			InputState& inputState,
 			InputName button,
-			char character)
+			char character
+		)
 			: InputEvent(InputEventType::KeyTyped, device, inputState)
 			, Button(button)
 			, Character(character)

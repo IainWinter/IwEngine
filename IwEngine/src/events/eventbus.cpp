@@ -1,17 +1,10 @@
 #include "iw/events/eventbus.h"
 
 namespace iw {
-	eventbus::eventbus(
-		bool record
-	)
+	eventbus::eventbus()
 		: m_alloc(1024)
 		, m_recorder(nullptr)
-	{
-		if (record)
-		{
-			m_recorder = new eventbus_recorder();
-		}
-	}
+	{}
 
 	void eventbus::subscribe(
 		const callback<event&>& callback)
@@ -53,7 +46,7 @@ namespace iw {
 	{
 		if (m_recorder)
 		{
-			m_recorder->record_published(e);
+			m_recorder->record_published(e->Id);
 		}
 		
 		for (auto& callback : m_callbacks) {
@@ -64,7 +57,7 @@ namespace iw {
 
 		if (m_recorder)
 		{
-			m_recorder->record_handled(e, "");
+			m_recorder->record_handled(e->Id, "");
 		}
 	}
 }

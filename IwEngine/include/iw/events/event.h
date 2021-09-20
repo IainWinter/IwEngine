@@ -10,20 +10,25 @@ namespace events {
 		bool Handled;
 		int Size; // might get removed
 
+		size_t Id;
+
 		event()
 			: Group(0)
 			, Type(0)
 			, Handled(false)
 			, Size(0)
+			, Id(0)
 		{}
 
 		event(
 			short category,
-			short type)
+			short type
+		)
 			: Group(category)
 			, Type(type)
 			, Handled(false)
 			, Size(0)
+			, Id(0)
 		{}
 
 		template<

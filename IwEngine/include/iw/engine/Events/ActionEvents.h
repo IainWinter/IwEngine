@@ -13,14 +13,15 @@ namespace Engine {
 	};
 
 	struct REFLECT ActionEvent
-		: iw::event
+		: event
 	{
 		int Action;
 
 		ActionEvent(
 			ActionEventType type,
-			int action)
-			: iw::event(iw::val(EventGroup::ACTION), iw::val(type))
+			int action
+		)
+			: event(val(EventGroup::ACTION), val(type))
 			, Action(action)
 		{}
 	};
@@ -32,7 +33,8 @@ namespace Engine {
 
 		ToggleEvent(
 			int action,
-			bool active)
+			bool active
+		)
 			: ActionEvent(ActionEventType::TOGGLE, action)
 			, Active(active)
 		{}
@@ -42,7 +44,8 @@ namespace Engine {
 		: ActionEvent
 	{
 		SingleEvent(
-			int action)
+			int action
+		)
 			: ActionEvent(ActionEventType::SINGLE, action)
 		{}
 	};
