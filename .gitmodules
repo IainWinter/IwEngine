@@ -3,3 +3,7 @@
 	url = https://github.com/IainWinter/imgui
 	branch = docking
 	ignore = dirty
+[submodule "IwEngine/extern/json"]
+	path = IwEngine/extern/json
+	url = https://github.com/sheredom/json.h
+	ignore = dirty
