@@ -18,6 +18,8 @@ int Game_UI_Layer::Initialize()
 
 void Game_UI_Layer::PostUpdate()
 {
+	// could harden this update to not crash if something is null...
+
 	m_screen->width  = Renderer->Width();
 	m_screen->height = Renderer->Height();
 
@@ -83,9 +85,7 @@ void Game_UI_Layer::PostUpdate()
 
 	m_menu->height = m_screen->height * .2f;                                    // Ratio(.2f)
 
-	float uiBarOffsetTarget = 0;
-	if (m_game_paused) uiBarOffsetTarget = -m_menu->height;
-	else               uiBarOffsetTarget =  m_menu->height;
+	float uiBarOffsetTarget = m_menu->height * (m_game_paused ? -1 : 1);
 	m_offset = iw::lerp(m_offset, uiBarOffsetTarget, iw::DeltaTime() * 12);
 
 	m_menu->x = iw::randf() * m_jitter;                               // Random(uiJitterAmount)
@@ -144,9 +144,7 @@ void Game_UI_Layer::PostUpdate()
 		gameover->z = 5;
 	}
 
-	float uiBackgroundScaleTarget = 0;
-	if (m_game_paused) uiBackgroundScaleTarget = 3;
-	else               uiBackgroundScaleTarget = 1;
+	float uiBackgroundScaleTarget = m_game_paused ? 3 : 1;
 	m_bg_scale = iw::lerp(m_bg_scale, uiBackgroundScaleTarget, iw::DeltaTime() * 12);
 
 	m_background->y = m_game->y;
@@ -161,7 +159,6 @@ void Game_UI_Layer::PostUpdate()
 	m_version->z = 5;
 
 	m_screen->Draw(m_camera, Renderer);
-
 }
 
 bool Game_UI_Layer::On(iw::ActionEvent& e)
@@ -178,14 +175,42 @@ bool Game_UI_Layer::On(iw::ActionEvent& e)
 
 			break;
 		}
-		case END_STATE:
+		case CREATED_CORE_TILE:
 		{
-			m_game_over = true;
+			CreatedCoreTile_Event& event = e.as<CreatedCoreTile_Event>();
+			if (event.TileEntity.Has<Player>())
+			{
+				m_player_core = event.TileEntity.Find<CorePixels>();
+			}
+
 			break;
 		}
-		case RUN_STATE: 
+		case STATE_CHANGE:
 		{
-			m_game_over = false;
+			switch (e.as<StateChange_Event>().State)
+			{
+				case END_STATE:
+				{
+					m_game_over = true;
+					break;
+				}
+				case RUN_STATE: 
+				{
+					m_game_over = false;
+					break;
+				}
+				case PAUSE_STATE:
+				{
+					m_game_paused = true;
+					break;
+				}
+				case RESUME_STATE: 
+				{
+					m_game_paused = false;
+					break;
+				}	
+			}
+
 			break;
 		}
 	}

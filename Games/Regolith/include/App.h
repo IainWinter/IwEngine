@@ -1,5 +1,6 @@
 #pragma once 
 
+// for event recording
 #include "Events.h"
 //#include "iw/util/reflection/serialization/Serializer.h"
 //#include "iw/reflected/reflected.h"
@@ -13,6 +14,7 @@
 #include "iw/math/noise.h"
 
 #include "Layers/Game_Layer.h"
+#include "Layers/Game_UI_Layer.h"
 
 struct MenuLayer : iw::Layer
 {
@@ -27,7 +29,10 @@ private:
 
 	iw::SandLayer* sand;
 	iw::SandLayer* sand_ui_laser;
-	Game_Layer* game;
+
+	Game_Layer*    game;
+	Game_UI_Layer* game_ui;
+
 	MenuLayer* menu;
 
 public:

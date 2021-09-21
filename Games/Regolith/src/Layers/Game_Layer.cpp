@@ -2,6 +2,13 @@
 
 int Game_Layer::Initialize()
 {
+	// this shouldnt really be here
+	// load all assets into global variables
+	if (int e = LoadAssets(Asset.get(), Renderer->Now.get()))
+	{
+		return e;
+	}
+
 	auto [sandWidth, sandHeight] = sand->GetSandTexSize2();
 	sand->SetCamera(sandWidth, sandHeight);
 
@@ -9,11 +16,6 @@ int Game_Layer::Initialize()
 
 	Physics->AddSolver(new iw::SmoothPositionSolver());
 	Physics->AddSolver(new iw::ImpulseSolver());
-
-	{
-		cam = new iw::OrthographicCamera(2, 2, -10, 10);
-		cam->Transform.Rotation = glm::angleAxis(iw::Pi, glm::vec3(0, 1, 0));
-	}
 
 	projectile_s  = new ProjectileSystem(sand);
 	item_s        = new ItemSystem      (sand);
@@ -181,44 +183,6 @@ bool Game_Layer::On(iw::ActionEvent& e)
 					{
 						sand->m_world->SetCell(x, y, iw::Cell::GetDefault(iw::CellType::EMPTY));
 					}
-
-					break;
-				}
-				case PAUSE_STATE:
-				{
-					uiHideBar = true;
-					uiExpandBackground = true;
-
-					PopSystem(corePixels_s);
-					PopSystem(enemy_s);
-					PopSystem(explosion_s);
-					PopSystem(flocking_s);
-					PopSystem(item_s);
-					PopSystem(keepInWorld_s);
-					PopSystem(playerTank_s);
-					PopSystem(player_s);
-					PopSystem(projectile_s);
-					PopSystem(score_s);
-					PopSystem(world_s);
-
-					break;
-				}
-				case RESUME_STATE:
-				{
-					uiHideBar = false;
-					uiExpandBackground = false;
-
-					PushSystem(corePixels_s);
-					PushSystem(enemy_s);
-					PushSystem(explosion_s);
-					PushSystem(flocking_s);
-					PushSystem(item_s);
-					PushSystem(keepInWorld_s);
-					PushSystem(playerTank_s);
-					PushSystem(player_s);
-					PushSystem(projectile_s);
-					PushSystem(score_s);
-					PushSystem(world_s);
 
 					break;
 				}

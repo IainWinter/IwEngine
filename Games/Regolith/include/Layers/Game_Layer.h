@@ -46,24 +46,12 @@ struct Game_Layer : iw::Layer
 	ExplosionSystem*       explosion_s;
 
 	// temp ui
-	bool showGameOver = false;
 
-	int CachedAmmo  = -1;
-	int CachedScore = -1;
-
-	iw::Camera* cam;
 	int laserFluidToCreate = 0;
 	int laserFluidToRemove = 0;
 	int laserFluidCount = 0;
 	glm::vec3 laserFluidVel = glm::vec3(0.f);
 	float canFireTimer = 0;
-	float uiJitterAmount = 0;
-
-	bool uiHideBar = false;
-	float uiBarOffset = 0;
-
-	bool uiExpandBackground = false;
-	float uiBackgroundScale = 1;
 
 	Game_Layer(
 		iw::SandLayer* sand,

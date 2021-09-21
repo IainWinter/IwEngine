@@ -37,21 +37,21 @@ App::App() : iw::Application()
 	sand_ui_laser->m_updateDelay = .016f;
 
 	game = new Game_Layer(sand, sand_ui_laser);
+	game_ui = new Game_UI_Layer(sand, sand_ui_laser);
 
 	PushLayer(sand);
 	PushLayer(sand_ui_laser);
 	PushLayer(game);
+	PushLayer(game_ui);
 }
+
+// console commands
+
+// 
 
 int App::Initialize(
 	iw::InitOptions& options)
 {
-	// load all assets into global variables
-	if (int e = LoadAssets(Asset.get(), Renderer->Now.get()))
-	{
-		return e;
-	}
-
 	iw::ref<iw::Context> context = Input->CreateContext("Game");
 		
 	context->MapButton(iw::SPACE , "action");
@@ -68,7 +68,7 @@ int App::Initialize(
 	Console->AddHandler([&](
 		const iw::Command& command)
 	{
-		if (command.Verb == "esc-menu" && !game->showGameOver)
+		if (command.Verb == "esc-menu")
 		{
 			switch (state)
 			{
@@ -76,6 +76,7 @@ int App::Initialize(
 				{
 					PopLayer(sand);
 					PopLayer(sand_ui_laser);
+					PopLayer(game);
 
 					if (!menu) menu = new MenuLayer();
 					PushLayer(menu);
@@ -91,6 +92,7 @@ int App::Initialize(
 				{
 					PushLayer(sand);
 					PushLayer(sand_ui_laser);
+					PushLayer(game);
 
 					if (menu) PopLayer(menu);
 
@@ -104,10 +106,10 @@ int App::Initialize(
 			}
 		}
 
-		else if (command.Verb == "action" && game->showGameOver)
-		{
-			Bus->push<StateChange_Event>(RUN_STATE);
-		}
+		//else if (command.Verb == "action")
+		//{
+		//	Bus->push<StateChange_Event>(RUN_STATE);
+		//}
 
 		return false;
 	});
@@ -118,7 +120,7 @@ int App::Initialize(
 iw::Application* CreateApplication(
 	iw::InitOptions& options)
 {
-	//options.AssetRootPath = "C:/dev/IwEngine/_assets/";
+	options.AssetRootPath = "C:/dev/wEngine/_assets/";
 	//options.AssetRootPath = "assets/";
 
 	options.WindowOptions = iw::WindowOptions {

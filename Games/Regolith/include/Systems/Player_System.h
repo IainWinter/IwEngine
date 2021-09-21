@@ -23,9 +23,9 @@ struct PlayerSystem : iw::SystemBase
 		, sand(sand)
 	{}
 
+	int Initialize() override;
 	void FixedUpdate() override;
 	void Update() override;
 
-	//bool On(iw::KeyEvent& e) override;
 	bool On(iw::ActionEvent& e) override;
 };

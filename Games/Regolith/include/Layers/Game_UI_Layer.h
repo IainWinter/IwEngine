@@ -47,6 +47,7 @@ struct Game_UI_Layer : iw::Layer
 		, m_sand_game     (sand)
 		, m_sand_ui_laser (sand_ui_laserCharge)
 
+		, m_player_core   (nullptr)
 		, m_player_weapon (nullptr)
 		, m_cached_ammo   (0)
 		, m_cached_score  (0)
@@ -56,6 +57,7 @@ struct Game_UI_Layer : iw::Layer
 		, m_offset        (0.f)
 		, m_bg_scale      (0.f)
 		, m_game_over     (false)
+		, m_game_paused   (false)
 
 		, m_screen        (nullptr)
 		, m_menu          (nullptr)
