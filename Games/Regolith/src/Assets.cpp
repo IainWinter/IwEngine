@@ -99,7 +99,7 @@ int LoadAssets(
 	}
 
 	{
-		A_mesh_ui_text_debug_version = A_font_cambria->GenerateMesh("indev v.03", 1);
+		A_mesh_ui_text_debug_version = A_font_cambria->GenerateMesh("indev v.04", 1);
 		A_mesh_ui_text_debug_version.Material = A_material_font_cam->MakeInstance();
 		A_mesh_ui_text_debug_version.Material->Set("color", iw::Color(1, 1, 1, .25));
 	}

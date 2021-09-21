@@ -286,11 +286,6 @@ void SandLayer::PasteTiles()
 		Transform* transform,
 		Tile* tile)
 	{
-		LOG_INFO << "Tile: " << entity.Index 
-			<< " pos " << transform->WorldPosition().x
-			<< ", "    << transform->WorldPosition().y
-			<< ", "    << transform->WorldPosition().z;
-
 		if (tile->m_sandLayerIndex != m_sandLayerIndex) return;
 
 		m_tilesThisFrame.push_back(tile);
