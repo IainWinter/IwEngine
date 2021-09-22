@@ -17,9 +17,9 @@ enum Actions {
 	SPAWN_ASTEROID,
 	SPAWN_EXPLOSION,
 	CHANGE_LASER_FLUID,
-	HEAL_PLAYER,
 	CHANGE_PLAYER_WEAPON,
-	// CHANGE_PLAYER_SCORE 
+	CHANGE_PLAYER_SCORE,
+	HEAL_PLAYER,
 	PROJ_HIT_TILE,
 	REMOVE_CELL_FROM_TILE,
 	CREATED_PLAYER,
@@ -148,6 +148,32 @@ struct REFLECT ChangeLaserFluid_Event : iw::SingleEvent
 	{}
 };
 
+struct REFLECT ChangePlayerWeapon_Event : iw::SingleEvent
+{
+	WeaponType Type;
+	Weapon* CurrentWeapon;
+
+	ChangePlayerWeapon_Event(
+		WeaponType weapon
+	)
+		: iw::SingleEvent(CHANGE_PLAYER_WEAPON)
+		, Type(weapon)
+		, CurrentWeapon(nullptr)
+	{}
+};
+
+struct REFLECT ChangePlayerScore_Event : iw::SingleEvent
+{
+	int Score;
+
+	ChangePlayerScore_Event(
+		int score
+	)
+		: iw::SingleEvent(CHANGE_PLAYER_SCORE)
+		, Score(score)
+	{}
+};
+
 struct REFLECT HealPlayer_Event : iw::SingleEvent
 {
 	bool IsCore;
@@ -157,18 +183,6 @@ struct REFLECT HealPlayer_Event : iw::SingleEvent
 	)
 		: iw::SingleEvent(HEAL_PLAYER)
 		, IsCore(isCore)
-	{}
-};
-
-struct REFLECT ChangePlayerWeapon_Event : iw::SingleEvent
-{
-	WeaponType Weapon;
-
-	ChangePlayerWeapon_Event(
-		WeaponType weapon
-	)
-		: iw::SingleEvent(CHANGE_PLAYER_WEAPON)
-		, Weapon(weapon)
 	{}
 };
 

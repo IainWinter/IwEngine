@@ -10,7 +10,7 @@ bool ScoreSystem::On(iw::ActionEvent& e)
 
 			if (event.Config.Hit.Has<Enemy>())
 			{
-				Score += 1;
+				Bus->push<ChangePlayerScore_Event>(Score + 1);
 			}
 
 			break;
@@ -21,9 +21,14 @@ bool ScoreSystem::On(iw::ActionEvent& e)
 			
 			if (event.Entity.Has<Enemy>())
 			{
-				Score += 100; // based on size
+				Bus->push<ChangePlayerScore_Event>(Score + 100);
 			}
 
+			break;
+		}
+		case CHANGE_PLAYER_SCORE:
+		{
+			Score = e.as<ChangePlayerScore_Event>().Score;
 			break;
 		}
 		case STATE_CHANGE:

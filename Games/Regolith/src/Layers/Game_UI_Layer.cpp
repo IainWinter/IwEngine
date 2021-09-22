@@ -12,6 +12,7 @@ int Game_UI_Layer::Initialize()
 	m_score      = m_screen->CreateElement(A_mesh_ui_text_score);
 	m_background = m_screen->CreateElement(A_mesh_background);
 	m_version    = m_screen->CreateElement(A_mesh_ui_text_debug_version);
+	m_gameover   = m_screen->CreateElement(A_mesh_ui_text_gameOver);
 
 	return 0;
 }
@@ -30,7 +31,7 @@ void Game_UI_Layer::PostUpdate()
 		if (m_cached_ammo != ammo)
 		{
 			m_cached_ammo = ammo;
-			A_font_cambria->UpdateMesh(A_mesh_ui_text_ammo, ammo > 0 ? tos(ammo) : "inf", 5);
+			A_font_cambria->UpdateMesh(A_mesh_ui_text_ammo, tos(ammo)/*ammo > 0 ? tos(ammo) : "0"*/, 5);
 		}
 	}
 
@@ -114,13 +115,12 @@ void Game_UI_Layer::PostUpdate()
 
 	float menu_pixel_x_scale = m_menu->width  / A_texture_ui_background->m_width;
 	float menu_pixel_y_scale = m_menu->height / A_texture_ui_background->m_height;
+	
+	float ammo_x_pad  = (floor(m_cached_ammo  > 0 ? log10(m_cached_ammo)  : 0) * 11 + 30) * menu_pixel_x_scale;
+	float score_x_pad = (floor(m_cached_score > 0 ? log10(m_cached_score) : 0) * 11 + 30) * menu_pixel_x_scale;
 
-	float ammo_x_pad  = (floor(m_cached_ammo  > 0 ? log10(m_cached_ammo)  : 1) * 11 + 30) * menu_pixel_x_scale;
-	float score_x_pad = (floor(m_cached_score > 0 ? log10(m_cached_score) : 1) * 11 + 30) * menu_pixel_x_scale;
-
-	float ammo_y_pad = 13 * menu_pixel_y_scale;
+	float ammo_y_pad  = 13 * menu_pixel_y_scale;
 	float score_y_pad = 48 * menu_pixel_y_scale;
-
 
 	m_ammo->width  = m_menu->height;
 	m_ammo->height = m_menu->height; // Same(score->width)
@@ -136,12 +136,11 @@ void Game_UI_Layer::PostUpdate()
 
 	if (m_game_over)
 	{
-		UI* gameover = m_screen->CreateElement(A_mesh_ui_text_gameOver);
-		gameover->x = -m_screen->width*.8;
-		gameover->y = m_screen->height * .5;
-		gameover->width = m_screen->width;
-		gameover->height = m_screen->width;
-		gameover->z = 5;
+		m_gameover->x = -m_screen->width*.8;
+		m_gameover->y = m_screen->height * .5;
+		m_gameover->width = m_screen->width;
+		m_gameover->height = m_screen->width;
+		m_gameover->z = 5;
 	}
 
 	float uiBackgroundScaleTarget = m_game_paused ? 3 : 1;
@@ -208,9 +207,19 @@ bool Game_UI_Layer::On(iw::ActionEvent& e)
 				{
 					m_game_paused = false;
 					break;
-				}	
+				}
 			}
 
+			break;
+		}
+		case CHANGE_PLAYER_WEAPON:
+		{
+			m_player_weapon = e.as<ChangePlayerWeapon_Event>().CurrentWeapon;
+			break;
+		}
+		case CHANGE_PLAYER_SCORE:
+		{
+			m_player_score = e.as<ChangePlayerScore_Event>().Score;
 			break;
 		}
 	}

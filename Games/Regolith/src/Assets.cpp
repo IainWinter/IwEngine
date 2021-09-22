@@ -84,12 +84,12 @@ int LoadAssets(
 	}
 
 	{
-		A_mesh_ui_text_ammo = A_font_cambria->GenerateMesh("0", 4);
+		A_mesh_ui_text_ammo = A_font_cambria->GenerateMesh("0", 5);
 		A_mesh_ui_text_ammo.Material = A_material_font_cam;
 	}
 
 	{
-		A_mesh_ui_text_score = A_font_cambria->GenerateMesh("0", 4);
+		A_mesh_ui_text_score = A_font_cambria->GenerateMesh("0", 5);
 		A_mesh_ui_text_score.Material = A_material_font_cam;
 	}
 

@@ -9,7 +9,7 @@ int PlayerSystem::Initialize()
 		{
 			if (command.Active)
 			{
-				m_player.Find<Player>()->i_right
+				//m_player.Find<Player>()->i_right
 			}
 		}
 
@@ -155,12 +155,14 @@ bool PlayerSystem::On(iw::ActionEvent& e)
 			
 			delete player->CurrentWeapon;
 			
-			switch (event.Weapon)
+			switch (event.Type)
 			{
 				case WeaponType::DEFAULT_CANNON:      player->CurrentWeapon = MakeDefault_Cannon();     break;
 				case WeaponType::MINIGUN_CANNON:      player->CurrentWeapon = MakeMinigun_Cannon();     break;
 				case WeaponType::SPECIAL_BEAM_CANNON: player->CurrentWeapon = MakeSpecialBeam_Cannon(); break;
 			}
+
+			event.CurrentWeapon = player->CurrentWeapon; // pass onto Game_UI_Layer
 
 			break;
 		}
@@ -193,11 +195,10 @@ bool PlayerSystem::On(iw::ActionEvent& e)
 					rigidbody->SetMass(10);
 
 					core->TimeWithoutCore = 4.f;
-
-					player->CurrentWeapon = MakeDefault_Cannon();
-					player->SpecialLaser  = MakeFatLaser_Cannon();
-					player->CurrentWeapon->Ammo = -1;
-
+					
+					player->SpecialLaser = MakeFatLaser_Cannon();
+					
+					Bus->push<ChangePlayerWeapon_Event>(WeaponType::DEFAULT_CANNON);
 					Bus->push<CreatedPlayer_Event>(m_player);
 					Bus->push<CreatedCoreTile_Event>(m_player);
 

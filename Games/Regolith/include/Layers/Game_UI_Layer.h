@@ -35,6 +35,7 @@ struct Game_UI_Layer : iw::Layer
 	UI* m_score;
 	UI* m_background;
 	UI* m_version;
+	UI* m_gameover;
 
 	iw::Camera* m_camera;
 
