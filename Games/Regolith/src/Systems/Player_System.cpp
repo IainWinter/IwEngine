@@ -1,5 +1,24 @@
 #include "Systems/Player_System.h"
 
+int PlayerSystem::Initialize()
+{
+	Console->AddHandler([&](
+		const iw::Command& command)
+	{
+		if (command.Verb == "right")
+		{
+			if (command.Active)
+			{
+				m_player.Find<Player>()->i_right
+			}
+		}
+
+		return true;
+	});
+
+	return 0;
+}
+
 void PlayerSystem::FixedUpdate()
 {
 	Player*        player    = m_player.Find<Player>();

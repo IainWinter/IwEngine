@@ -10,7 +10,8 @@ struct CorePixels
 	std::unordered_set<int> Indices;
 	std::unordered_set<int> ActiveIndices;
 
-	int CenterX, CenterY;
+	int CenterX = 0;
+	int CenterY = 0;
 
 	bool ScannedTile = false;
 
