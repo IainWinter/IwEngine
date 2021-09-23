@@ -117,6 +117,7 @@ App::App() : iw::Application()
 	game_post->Layers.push_back(menu_postGame);
 
 	Console->QueueCommand("game-start");
+	Console->QueueCommand("escape");
 }
 
 int App::Initialize(
@@ -187,7 +188,7 @@ int App::Initialize(
 			sand_ui_laser->m_updateDelay = 1 / 60.f;
 
 			Game_Layer*    game    = new Game_Layer   (sand, sand_ui_laser);
-			Game_UI_Layer* game_ui = new Game_UI_Layer(sand, sand_ui_laser);
+			//Game_UI_Layer* game_ui = new Game_UI_Layer(sand, sand_ui_laser);
 	
 			Menu_Pause_Layer* menu_pause = new Menu_Pause_Layer();
 
@@ -195,7 +196,7 @@ int App::Initialize(
 			game_play->Layers.push_back(sand);
 			game_play->Layers.push_back(sand_ui_laser);
 			game_play->Layers.push_back(game);
-			game_play->Layers.push_back(game_ui);
+			//game_play->Layers.push_back(game_ui);
 
 			game_pause = new GameState("Pause menu", GAME_PAUSE_STATE);
 			game_pause->Layers.push_back(menu_pause);

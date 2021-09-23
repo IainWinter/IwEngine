@@ -40,8 +40,8 @@ private:
 	iw::Layer* toolbox = nullptr;
 	iw::Layer* sandbox = nullptr;
 
-	std::wstring projectName          = L"SpaceSand";
-	std:: string projectMainLayerName =  "Space game";
+	std::wstring projectName          = L"Regolith";
+	std:: string projectMainLayerName =  "Game_Layer";
 
 public:
 	iw::Application* m_gameNew = nullptr;

@@ -27,10 +27,11 @@ int LoadAssets(
 	A_texture_ui_background  = LOADTEX("textures/SpaceGame/ui_background.png");
 	A_texture_font_cambria   = LOADTEX("textures/fonts/cambria_lowres.png");
 
-	A_font_cambria = Asset->Load<iw::Font>("fonts/cambria_lowres.fnt");
-
 	A_material_texture_cam = REF<Material>(Asset->Load<Shader>("shaders/texture_cam.shader"));
 	A_material_font_cam    = REF<Material>(Asset->Load<Shader>("shaders/font.shader"));
+
+	A_font_cambria = Asset->Load<iw::Font>("fonts/cambria_lowres.fnt");
+	A_font_cambria->m_material = A_material_font_cam;
 
 	A_mesh_background      = iw::ScreenQuad().MakeInstance();
 	A_mesh_ui_background   = iw::ScreenQuad().MakeInstance();
@@ -85,17 +86,14 @@ int LoadAssets(
 
 	{
 		A_mesh_ui_text_ammo = A_font_cambria->GenerateMesh("0", 5);
-		A_mesh_ui_text_ammo.Material = A_material_font_cam;
 	}
 
 	{
 		A_mesh_ui_text_score = A_font_cambria->GenerateMesh("0", 5);
-		A_mesh_ui_text_score.Material = A_material_font_cam;
 	}
 
 	{
 		A_mesh_ui_text_gameOver = A_font_cambria->GenerateMesh("GAME OVER\npress space to restart...", 2);
-		A_mesh_ui_text_gameOver.Material = A_material_font_cam;
 	}
 
 	{
@@ -108,7 +106,6 @@ int LoadAssets(
 
 	{
 		A_mesh_menu_pause_title = A_font_cambria->GenerateMesh("Pause Menu\n\ncoming soon...", 2);
-		A_mesh_menu_pause_title.Material = A_material_font_cam;
 	}
 
 	{

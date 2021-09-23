@@ -32,7 +32,7 @@ namespace Input {
 	}
 
 	vec2 Mouse::ClientPos() {
-		POINT p; GetCursorPos(&p); ScreenToClient(WindowFromPoint(p), &p);
+		POINT p; GetCursorPos(&p); ScreenToClient(WindowFromPoint(p), &p); // should return 0 if window isnt engine
 		return vec2(float(p.x), float(p.y));
 	}
 

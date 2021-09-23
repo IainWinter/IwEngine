@@ -7,6 +7,8 @@ int PlayerSystem::Initialize()
 	{
 		Player* player = m_player.Find<Player>();
 
+		if (!player) return false;
+
 		int active = command.Active ? 1 : -1;
 
 		     if (command.Verb == "right")    player->i_moveX += active;

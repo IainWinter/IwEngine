@@ -89,8 +89,8 @@ void Game_UI_Layer::PostUpdate()
 	// ammo count
 	// score count
 	
-	m_menu->z = 1;
-	m_game->z = 0;
+	m_menu->zIndex = 1;
+	m_game->zIndex = 0;
 
 	m_menu->height = m_screen->height * .2f;                                    // Ratio(.2f)
 
@@ -108,8 +108,8 @@ void Game_UI_Layer::PostUpdate()
 
 	float menu_pad = m_menu->height * .2f;
 
-	m_health->z = 2; 
-	m_laser->z = -2; // ?? why does this have to be negitive
+	m_health->zIndex = 2; 
+	m_laser->zIndex = -2; // ?? why does this have to be negitive
 
 	m_health->height = m_menu->height - menu_pad;
 	m_health->width = m_health->height; // Ratio(health->height)
@@ -134,13 +134,13 @@ void Game_UI_Layer::PostUpdate()
 	m_ammo->height = m_menu->height; // Same(score->width)
 	m_ammo->x = m_menu->x + m_menu->width - ammo_x_pad;
 	m_ammo->y = m_menu->y + m_menu->height - ammo_y_pad;
-	m_ammo->z = 2;
+	m_ammo->zIndex = 2;
 
 	m_score->width  = m_menu->height;
 	m_score->height = m_menu->height; // Same(score->width)
 	m_score->x = m_menu->x + m_menu->width - score_x_pad;
 	m_score->y = m_menu->y + m_menu->height - score_y_pad;
-	m_score->z = 2;
+	m_score->zIndex = 2;
 
 	if (m_game_over)
 	{
@@ -148,7 +148,7 @@ void Game_UI_Layer::PostUpdate()
 		m_gameover->y = m_screen->height * .5;
 		m_gameover->width = m_screen->width;
 		m_gameover->height = m_screen->width;
-		m_gameover->z = 5;
+		m_gameover->zIndex = 5;
 	}
 
 	float uiBackgroundScaleTarget = m_game_paused ? 3 : 1;
@@ -157,13 +157,13 @@ void Game_UI_Layer::PostUpdate()
 	m_background->y = m_game->y;
 	m_background->width  = m_game->width  * m_bg_scale;
 	m_background->height = m_game->height * m_bg_scale;
-	m_background->z = -1;
+	m_background->zIndex = -1;
 
 	m_version->y = m_screen->height - 12;
 	m_version->x = -m_screen->width + 1;
 	m_version->width  = m_menu->width;
 	m_version->height = m_menu->width;
-	m_version->z = 5;
+	m_version->zIndex = 5;
 }
 
 bool Game_UI_Layer::On(iw::ActionEvent& e)

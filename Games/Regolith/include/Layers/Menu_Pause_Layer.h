@@ -14,13 +14,26 @@ struct Menu_Pause_Layer : iw::Layer
 	UI* m_pause_menu;
 	UI* m_pause_title;
 
-	Menu_Pause_Layer()
-		: iw::Layer     ("Menu pause")
+	UI_Button* m_button_test1;
+	UI_Button* m_button_test2;
+	UI_Button* m_button_test3;
+	UI_Button* m_button_test4;
 
-		, m_screen      (nullptr)
-		, m_background  (nullptr)
-		, m_pause_menu  (nullptr)
-		, m_pause_title (nullptr)
+	float m_buttonOffset;
+
+	Menu_Pause_Layer()
+		: iw::Layer      ("Menu pause")
+
+		, m_screen       (nullptr)
+		, m_background   (nullptr)
+		, m_pause_menu   (nullptr)
+		, m_pause_title  (nullptr)
+		, m_button_test1 (nullptr)
+        , m_button_test2 (nullptr)
+        , m_button_test3 (nullptr)
+        , m_button_test4 (nullptr)
+
+		, m_buttonOffset (0.f)
 	{}
 
 	int Initialize() override;

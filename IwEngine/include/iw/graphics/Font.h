@@ -61,6 +61,9 @@ namespace Graphics {
 
 		friend class FontBuilder;
 
+	public:
+		ref<Material> m_material;
+
 	private:
 		std::unordered_map<unsigned, ref<Texture>> m_textures;
 		std::unordered_map<unsigned, Character> m_characters;

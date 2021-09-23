@@ -1,79 +1,179 @@
 #pragma once
 
 #include "iw/graphics/QueuedRenderer.h"
+#include "iw/input/Devices/Mouse.h"
 
-struct UI
+using render = iw::ref<iw::QueuedRenderer>;
+
+struct UI_Base
 {
-	float x, y, z, width, height;
-	iw::Mesh mesh;
+	float x, y, zIndex, width, height;
+	iw::Transform transform;
+	std::vector<UI_Base*> children;
 
-	UI(const iw::Mesh& mesh_)
-	{
-		mesh = mesh_;
-		x = 0;
-		y = 0;
-		z = 0;
-		width = 0;
-		height = 0;
-	}
-
-	iw::Transform GetTransform(int screenWidth, int screenHeight, int screenDepth)
-	{
-		iw::Transform transform;
-		transform.Position.x = floor(x) / screenWidth;
-		transform.Position.y = floor(y) / screenHeight;
-		transform.Position.z = z / screenDepth;
-		transform.Scale.x = floor(width) / screenWidth;
-		transform.Scale.y = floor(height) / screenHeight;
-
-		return transform;
-	}
-};
-
-struct UIScreen
-{
-	std::vector<UI*> elements;
-	int width, height, depth;
-	iw::Camera* camera;
-
-	UIScreen(
-		int width = 0, int height = 0,
-		int depth = 10
-	)
-		: width  (width)
-		, height (height)
-		, depth  (depth)
-		, camera (nullptr)
+	UI_Base()
+		: x      (0.f)
+		, y      (0.f)
+		, zIndex (0.f)
+		, width  (0.f)
+		, height (0.f)
 	{}
 
-	~UIScreen()
+	virtual ~UI_Base()
 	{
-		for (UI* ui : elements)
+		for (UI_Base* ui : children)
 		{
 			delete ui;
 		}
 	}
 
-	UI* CreateElement(const iw::Mesh& mesh)
+	template<
+		typename _ui = UI,
+		typename... _args>
+	_ui* CreateElement(
+		const _args&... args)
 	{
-		return elements.emplace_back(new UI(mesh));
+		_ui* ui = new _ui(args...);
+		children.push_back(ui);
+		return ui;
 	}
 
-	void AddElement(UI* element)
+	void AddElement(
+		UI_Base* element)
 	{
-		elements.push_back(element);
+		children.push_back(element);
 	}
 
-	void Draw(/*iw::Camera* camera, */iw::ref<iw::QueuedRenderer>& renderer)
+	virtual void UpdateTransform(
+		UI_Base* parent) 
 	{
-		renderer->BeginScene(camera);
+		float x_ = x / parent->width;
+		float y_ = y / parent->height;
+		float w = width  == 0 ? 1 : width  / parent->width;
+		float h = height == 0 ? 1 : height / parent->height;
 
-		for (UI* ui : elements)
+		transform = iw::Transform();
+		transform.Position = glm::vec3(x_, y_, -zIndex);
+		transform.Scale    = glm::vec3(w, h, 1);
+
+		transform.SetParent(parent ? &parent->transform : nullptr);
+	}
+
+	virtual void Draw(
+		render& r,
+		UI_Base* parent)
+	{
+		UpdateTransform(parent);
+
+		for (UI_Base* child : children)
 		{
-			renderer->DrawMesh(ui->GetTransform(width, height, depth), ui->mesh);
+			child->Draw(r, this);
+		}
+	}
+};
+
+struct UI : UI_Base
+{
+	iw::Mesh mesh;
+
+	UI(
+		const iw::Mesh& mesh
+	)
+		: UI_Base ()
+		, mesh    (mesh)
+	{}
+
+	void Draw(
+		render& r,
+		UI_Base* parent) override
+	{
+		UI_Base::Draw(r, parent);
+		r->DrawMesh(transform, mesh);
+	}
+	
+	bool IsPointOver(/*const*/ iw::vec2& v) { return IsPointOver(v.x(), v.y()); }
+	bool IsPointOver(float tx, float ty)
+	{
+		return tx > x - width  && tx < x + width
+			&& ty > y - height && ty < y + height;
+	}
+};
+
+struct UI_Button : UI
+{
+	float offset;
+
+	UI_Button(
+		const iw::Mesh& button,
+		const iw::Mesh& label
+	)
+		: UI     (button)
+		, offset (0.f)
+	{
+		CreateElement(label);
+	}
+
+	void UpdateTransform(
+		UI_Base* parent)
+	{
+		UI_Base* label = children.at(0);
+		if (label)
+		{
+			label->x = -width  + 15;    // left anchor + padding
+			label->y =  height - 5;     // top  anchor + padding
+			label->width  = height;
+			label->height = height;      // keep 1 : 1
+			label->zIndex = zIndex + 1; // ontop of button
+		}
+		else
+		{
+			LOG_WARNING << "Button has no label!";
 		}
 
-		renderer->EndScene();
+		UI_Base::UpdateTransform(parent);
+	}
+};
+
+struct UIScreen : UI_Base
+{
+	int depth;
+	iw::Camera* camera;
+
+	UIScreen()
+		: UI_Base ()
+		, depth   (10.f)
+		, camera  (nullptr)
+	{}
+
+	void UpdateTransform(
+		UI_Base* parent) override
+	{
+		transform = iw::Transform();
+		//transform.Scale.x = width;
+		//transform.Scale.y = height;
+		transform.Scale.z = depth  == 0 ? 1 : 1.f / depth;
+		transform.SetParent(parent ? &parent->transform : nullptr);
+	}
+
+	void Draw(
+		render& r,
+		UI_Base* parent = nullptr) override
+	{
+		r->BeginScene(camera);
+
+		UI_Base::Draw(r, parent);
+
+		r->EndScene();
+	}
+
+	iw::vec2 LocalMouse()
+	{
+		iw::vec2 mouse = iw::Mouse::ClientPos();
+
+		return iw::vec2(
+			  mouse.x() * 2 - width,
+			-(mouse.y() * 2 - height)
+		);
 	}
 };
 

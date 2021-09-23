@@ -62,6 +62,7 @@ namespace Graphics {
 	{
 		MeshData* data = new MeshData(description);
 		Mesh mesh = data->MakeInstance();
+		mesh.Material = m_material;
 
 		UpdateMesh(mesh, string, size);
 

@@ -35,15 +35,15 @@ void Menu_PostGame_Layer::PostUpdate()
 
 	m_background->width  = m_screen->width;
 	m_background->height = m_screen->height;
-	m_background->z = -5;
+	m_background->zIndex = -5;
 
 	m_pause_menu->height = 600;
 	m_pause_menu->width  = 600;
-	m_pause_menu->z = -6;
+	m_pause_menu->zIndex = -6;
 
 	m_pause_title->width  = m_pause_menu->width;
 	m_pause_title->height = m_pause_menu->width;
 	m_pause_title->x = m_pause_menu->x - m_pause_menu->width  + 15;
 	m_pause_title->y = m_pause_menu->y + m_pause_menu->height - 5;
-	m_pause_title->z = -7;
+	m_pause_title->zIndex = -7;
 }

@@ -12,6 +12,6 @@ _export/
 *.sln
 *.cache
 
-/IwEngine/extern/fmod
-/IwEngine/extern/assimp
-/IwTooling/extern/llvm
+IwEngine/extern/fmod/
+IwEngine/extern/assimp/
+IwTooling/extern/llvm/
