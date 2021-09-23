@@ -22,6 +22,7 @@ namespace Engine {
 		HandlerFunc* handler)
 	{
 		m_handlers.erase(std::find(m_handlers.begin(), m_handlers.end(), handler));
+		delete handler;
 	}
 
 	void Console::ExecuteCommand(

@@ -20,6 +20,11 @@ int Menu_Pause_Layer::Initialize()
 	m_button_test3 = m_screen->CreateElement<UI_Button>(buttonbg, A_font_cambria->GenerateMesh("Gameplay", 16));
 	m_button_test4 = m_screen->CreateElement<UI_Button>(buttonbg, A_font_cambria->GenerateMesh("Resume",   16));
 
+	m_button_test4->onClick = [&]()
+	{
+		Console->QueueCommand("escape");
+	};
+
 	return 0;
 }
 
@@ -31,11 +36,23 @@ void Menu_Pause_Layer::Destroy()
 void Menu_Pause_Layer::OnPush()
 {
 	m_entity_screen.Revive();
+
+	m_handle = Console->AddHandler([&](
+		const iw::Command& command) 
+	{
+		if (command.Verb == "execute")
+		{
+			m_execute = true;
+		}
+
+		return false;
+	});
 }
 
 void Menu_Pause_Layer::OnPop()
 {
 	m_entity_screen.Kill();
+	Console->RemoveHandler(m_handle);
 }
 
 void Menu_Pause_Layer::PostUpdate()
@@ -70,12 +87,23 @@ void Menu_Pause_Layer::PostUpdate()
 		if (button->IsPointOver(m_screen->LocalMouse()))
 		{
 			buttonOffsetTarget = 30;
+
+			if (m_execute)
+			{
+				buttonOffsetTarget = 0;
+
+				if (button->onClick)
+				{
+					button->onClick();
+				}
+			}
 		}
 
 		button->offset = iw::lerp(button->offset, buttonOffsetTarget, iw::DeltaTime() * 10);
-		button->x += button->offset;
+		button->x += floor(button->offset);
 		
 		i += 1;
 	}
 
+	m_execute = false;
 }

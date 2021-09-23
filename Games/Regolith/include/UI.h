@@ -102,6 +102,7 @@ struct UI : UI_Base
 struct UI_Button : UI
 {
 	float offset;
+	std::function<void()> onClick;
 
 	UI_Button(
 		const iw::Mesh& button,

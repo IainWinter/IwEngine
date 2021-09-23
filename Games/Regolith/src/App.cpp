@@ -117,22 +117,36 @@ App::App() : iw::Application()
 	game_post->Layers.push_back(menu_postGame);
 
 	Console->QueueCommand("game-start");
-	Console->QueueCommand("escape");
+	//Console->QueueCommand("escape");
 }
 
 int App::Initialize(
 	iw::InitOptions& options)
 {
-	iw::ref<iw::Context> context = Input->CreateContext("Game");
-		
-	context->MapButton(iw::D     , "+right");
-	context->MapButton(iw::A     , "-right");
-	context->MapButton(iw::W     , "+up");
-	context->MapButton(iw::S     , "-up");
-	context->MapButton(iw::LMOUSE, "+fire");
-	context->MapButton(iw::RMOUSE, "+alt-fire");
-	context->MapButton(iw::SPACE , "action");
-	context->MapButton(iw::ESCAPE, "escape");
+	iw::ref<iw::Context> context_game = Input->CreateContext("Game");
+	context_game->MapButton(iw::D     , "+right");
+	context_game->MapButton(iw::A     , "-right");
+	context_game->MapButton(iw::W     , "+up");
+	context_game->MapButton(iw::S     , "-up");
+	context_game->MapButton(iw::LMOUSE, "+fire");
+	context_game->MapButton(iw::RMOUSE, "+alt-fire");
+	context_game->MapButton(iw::ESCAPE, "escape");
+
+	iw::ref<iw::Context> context_menu = Input->CreateContext("Menu");
+	context_menu->MapButton(iw::EXECUTE, "execute");
+	context_menu->MapButton(iw::LMOUSE,  "execute");
+	context_menu->MapButton(iw::ESCAPE,  "escape");
+
+	iw::ref<iw::Device> mouse        = Input->CreateDevice<iw::Mouse>();
+	iw::ref<iw::Device> keyboard     = Input->CreateDevice<iw::Keyboard>();
+	iw::ref<iw::Device> mouse_raw    = Input->CreateDevice<iw::RawMouse>();
+	iw::ref<iw::Device> keyboard_raw = Input->CreateDevice<iw::RawKeyboard>();
+
+	context_game->AddDevice(mouse_raw);
+	context_game->AddDevice(keyboard_raw);
+
+	context_menu->AddDevice(mouse);
+	context_menu->AddDevice(keyboard);
 
 	// menu states could be switched to through commands
 
@@ -141,10 +155,6 @@ int App::Initialize(
 	// game-exit   -- exits game to main menu
 	// game-exit d -- exits game to desktop
 	// game-pause  -- opens escape menu
-
-	context->AddDevice(Input->CreateDevice<iw::Mouse>());
-	context->AddDevice(Input->CreateDevice<iw::RawKeyboard>());
-	context->AddDevice(Input->CreateDevice<iw::RawMouse>());
 
 	Console->AddHandler([&](
 		const iw::Command& command)
@@ -188,7 +198,7 @@ int App::Initialize(
 			sand_ui_laser->m_updateDelay = 1 / 60.f;
 
 			Game_Layer*    game    = new Game_Layer   (sand, sand_ui_laser);
-			//Game_UI_Layer* game_ui = new Game_UI_Layer(sand, sand_ui_laser);
+			Game_UI_Layer* game_ui = new Game_UI_Layer(sand, sand_ui_laser);
 	
 			Menu_Pause_Layer* menu_pause = new Menu_Pause_Layer();
 
@@ -196,17 +206,19 @@ int App::Initialize(
 			game_play->Layers.push_back(sand);
 			game_play->Layers.push_back(sand_ui_laser);
 			game_play->Layers.push_back(game);
-			//game_play->Layers.push_back(game_ui);
+			game_play->Layers.push_back(game_ui);
 
 			game_pause = new GameState("Pause menu", GAME_PAUSE_STATE);
 			game_pause->Layers.push_back(menu_pause);
 			
 			game_play->OnChange = [&]() {
 				Physics->Paused = false;
+				Input->SetContext("Game");
 			};
 
 			game_pause->OnChange = [&]() {
 				Physics->Paused = true;
+				Input->SetContext("Menu");
 			};
 
 			SetState(game_play);

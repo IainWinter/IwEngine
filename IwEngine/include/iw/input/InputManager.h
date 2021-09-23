@@ -30,6 +30,14 @@ namespace Input {
 			float width  = NO_WIDTH,
 			float height = NO_HEIGHT);
 
+		IWINPUT_API
+		ref<Context> SetContext(
+			std::string name);
+
+		IWINPUT_API
+		void SetContext(
+			ref<Context>& context);
+
 		template<
 			typename D>
 		ref<Device> CreateDevice() {

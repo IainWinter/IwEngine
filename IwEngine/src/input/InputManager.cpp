@@ -11,7 +11,8 @@ namespace Input {
 		OsEvent& e);
 
 	InputManager::InputManager(
-		iw::ref<iw::eventbus>& bus)
+		iw::ref<iw::eventbus>& bus
+	)
 		: m_bus(bus)
 	{}
 
@@ -171,7 +172,39 @@ namespace Input {
 			m_active = m_contexts.emplace_back(context);
 		}
 
+		else {
+			LOG_DEBUG << "Already created context " << context->Name;
+		}
+
 		return context;
+	}
+
+	ref<Context> InputManager::SetContext(
+		std::string name)
+	{
+		iw::ref<Context> context;
+		for (iw::ref<Context>& c : m_contexts) {
+			if (c->Name == name) {
+				context = c;
+				break;
+			}
+		}
+
+		if (!context)
+		{
+			LOG_WARNING << "Tried to set an input managers context with one that it doesn't own " << context->Name;
+			return nullptr;
+		}
+
+		m_active = context;
+
+		return m_active;
+	}
+
+	void InputManager::SetContext(
+		ref<Context>& context)
+	{
+		SetContext(context->Name);
 	}
 
 	template<>

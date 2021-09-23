@@ -19,7 +19,12 @@ struct Menu_Pause_Layer : iw::Layer
 	UI_Button* m_button_test3;
 	UI_Button* m_button_test4;
 
+	iw::HandlerFunc* m_handle;
+
 	float m_buttonOffset;
+	bool m_execute;
+	//bool m_keyTyped;
+	//char m_keyTypedChar;
 
 	Menu_Pause_Layer()
 		: iw::Layer      ("Menu pause")
@@ -33,7 +38,10 @@ struct Menu_Pause_Layer : iw::Layer
         , m_button_test3 (nullptr)
         , m_button_test4 (nullptr)
 
+		, m_handle       (nullptr)
+
 		, m_buttonOffset (0.f)
+		, m_execute      (false)
 	{}
 
 	int Initialize() override;

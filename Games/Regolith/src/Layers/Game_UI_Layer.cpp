@@ -89,8 +89,8 @@ void Game_UI_Layer::PostUpdate()
 	// ammo count
 	// score count
 	
-	m_menu->zIndex = 1;
-	m_game->zIndex = 0;
+	m_menu->zIndex = 2;
+	m_game->zIndex = 1;
 
 	m_menu->height = m_screen->height * .2f;                                    // Ratio(.2f)
 
