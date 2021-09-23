@@ -102,7 +102,7 @@ bool EnemySystem::On(iw::ActionEvent& e)
 
 			switch (event.State)
 			{
-				case RUN_STATE:
+				case GAME_START_STATE:
 					Space->Query<Enemy>().Each([&](iw::EntityHandle handle, Enemy*) {
 						Space->QueueEntity(handle, iw::func_Destroy);
 					});

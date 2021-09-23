@@ -123,15 +123,18 @@ namespace ECS {
 
 			// reject if archetype doesn't have at lest one component in any list
 
-			bool hasAComponent = false;
-			for (const ref<Component>& component : query.GetAll()) {
-				if (archetype.HasComponent(component)) {
-					hasAComponent = true;
-					break;
+			if (query.GetAny().size() > 0)
+			{
+				bool hasAComponent = false;
+				for (const ref<Component>& component : query.GetAny()) {
+					if (archetype.HasComponent(component)) {
+						hasAComponent = true;
+						break;
+					}
 				}
-			}
 
-			match = hasAComponent;
+				match = hasAComponent;
+			}
 
 			if (!match) {
 				continue;

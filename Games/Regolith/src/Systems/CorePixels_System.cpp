@@ -77,12 +77,10 @@ void CorePixelsSystem::Update()
 				Bus->push<CoreExploded_Event>(iw::Entity(handle, Space));
 
 				if (Space->HasComponent<Player>(handle)) {
-					Bus->push<StateChange_Event>(END_STATE);
+					Console->QueueCommand("game-over");
 				}
 
-				else {
-					Space->QueueEntity(handle, iw::func_Destroy);
-				}
+				Space->QueueEntity(handle, iw::func_Destroy);
 			}
 
 			// if a core peice isnt touching a regular peice is dies

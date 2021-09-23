@@ -4,17 +4,24 @@
 namespace iw {
 namespace Engine {
 	Console::Console(
-		const HandlerFunc& handler)
+		const HandlerFunc& handler
+	)
 		: m_alloc(1024)
 		, m_strbuf(1024)
 	{
 		AddHandler(handler);
 	}
 
-	void Console::AddHandler(
+	HandlerFunc* Console::AddHandler(
 		HandlerFunc handler)
 	{
-		m_handlers.push_back(handler);
+		return m_handlers.emplace_back(new HandlerFunc(handler));
+	}
+
+	void Console::RemoveHandler(
+		HandlerFunc* handler)
+	{
+		m_handlers.erase(std::find(m_handlers.begin(), m_handlers.end(), handler));
 	}
 
 	void Console::ExecuteCommand(
@@ -74,7 +81,7 @@ namespace Engine {
 		size_t tsize  = sizeof(Token);
 		size_t tcount = tokens.size();
 		for (size_t i = 1; i < tcount; i++) {
-			Token* t = (Token*)m_alloc.alloc(tsize);
+			Token* t = (Token*)m_alloc.alloc(tsize); // also could resize
 			bool error = false;
 
 			size_t itr;
@@ -143,8 +150,8 @@ namespace Engine {
 		Command& c)
 	{
 		bool handled = false;
-		for (auto itr = m_handlers.begin(); itr != m_handlers.end() && !handled; itr++) {
-			handled = (*itr)(c);
+		for (int i = 0; i < m_handlers.size(); i++) {
+			handled = (*m_handlers.at(i))(c);
 		}
 	}
 }

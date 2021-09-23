@@ -10,11 +10,14 @@
 
 #include "Events.h"
 #include "Assets.h"
+#include "Helpers.h"
 
 struct PlayerSystem : iw::SystemBase
 {
 	iw::SandLayer* sand;
 	iw::Entity m_player;
+
+	iw::HandlerFunc* m_handle;
 
 	PlayerSystem(
 		iw::SandLayer* sand
@@ -24,6 +27,7 @@ struct PlayerSystem : iw::SystemBase
 	{}
 
 	int Initialize() override;
+	void Destroy() override;
 	void FixedUpdate() override;
 	void Update() override;
 

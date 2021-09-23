@@ -96,9 +96,6 @@ namespace Engine {
 
 		//if (obj) {
 		//	Physics->RemoveCollisionObject(obj);
-
-
-
 		//}
 
 		return false;

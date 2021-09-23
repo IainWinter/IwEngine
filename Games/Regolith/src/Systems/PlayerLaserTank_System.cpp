@@ -114,8 +114,15 @@ void PlayerLaserTankSystem::OnPush()
 void PlayerLaserTankSystem::Update()
 {
 	iw::SandChunk* chunk = m_tankSand->m_world->GetChunk(0, 0);
+	iw::Rigidbody* body = m_player.Find<iw::Rigidbody>();
 
-	m_fluidVelocity = iw::lerp(m_fluidVelocity, m_player.Find<iw::Rigidbody>()->Velocity, iw::DeltaTime() * 5);
+	if (!body)
+	{
+		LOG_WARNING << "No player for tank ui";
+		return;
+	}
+
+	m_fluidVelocity = iw::lerp(m_fluidVelocity, body->Velocity, iw::DeltaTime() * 5);
 
 	std::pair<int, int> xy;
 

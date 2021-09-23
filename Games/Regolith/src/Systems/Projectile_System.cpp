@@ -134,7 +134,7 @@ bool ProjectileSystem::On(iw::ActionEvent& e)
 
 			switch (event.State)
 			{
-				case RUN_STATE:
+				case GAME_START_STATE:
 					Space->Query<ProjHead>().Each([&](iw::EntityHandle handle, ProjHead*) {
 						Space->QueueEntity(handle, iw::func_Destroy);
 					});

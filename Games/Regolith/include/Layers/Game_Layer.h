@@ -33,10 +33,12 @@ struct Game_Layer : iw::Layer
 	iw::Entity m_player;
 	iw::Entity m_cursor;
 
-	PlayerSystem*          player_s;
+	KeepInWorldSystem*     keepInWorld_s;
 	PlayerLaserTankSystem* playerTank_s;
 	WorldSystem*           world_s;
-	KeepInWorldSystem*     keepInWorld_s;
+
+
+	PlayerSystem*          player_s;
 	CorePixelsSystem*      corePixels_s;
 	ProjectileSystem*      projectile_s;
 	EnemySystem*           enemy_s;
@@ -63,6 +65,7 @@ struct Game_Layer : iw::Layer
 	{}
 
 	int Initialize() override;
+	void Destroy() override;
 
 	void Update() override;
 	void PostUpdate() override;

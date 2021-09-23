@@ -19,7 +19,6 @@ struct ItemSystem : iw::SystemBase
 	)
 		: iw::SystemBase("Health")
 		, sand(sand)
-		, m_player(m_player)
 	{}
 
 	void FixedUpdate() override;

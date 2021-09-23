@@ -2,13 +2,6 @@
 
 int Game_Layer::Initialize()
 {
-	// this shouldnt really be here
-	// load all assets into global variables
-	if (int e = LoadAssets(Asset.get(), Renderer->Now.get()))
-	{
-		return e;
-	}
-
 	auto [sandWidth, sandHeight] = sand->GetSandTexSize2();
 	sand->SetCamera(sandWidth, sandHeight);
 
@@ -38,10 +31,7 @@ int Game_Layer::Initialize()
 	PushSystem(flocking_s);
 	PushSystem(explosion_s);
 	
-	PushSystem<iw::PhysicsSystem>();
-	PushSystem<iw::EntityCleanupSystem>();
-
-	Bus->push<StateChange_Event>(RUN_STATE);
+	//Bus->push<StateChange_Event>(RUN_STATE);
 
 	m_cursor = sand->MakeTile(A_texture_ui_cursor);
 	m_cursor.Find<iw::Tile>()->m_zIndex = 1;
@@ -50,6 +40,25 @@ int Game_Layer::Initialize()
 	Physics->RemoveCollisionObject(m_cursor.Find<iw::CollisionObject>());
 
 	return Layer::Initialize();
+}
+
+void Game_Layer::Destroy()
+{
+	iw::ComponentQuery query = Space->MakeQuery();
+
+	query.SetAny({
+		Space->GetComponent<Player>(),
+		Space->GetComponent<Enemy>(),
+		Space->GetComponent<Asteroid>(),
+		Space->GetComponent<ProjHead>(),
+		Space->GetComponent<Item>()
+	});
+
+	Space->Query(query).Each([&](iw::EntityHandle handle) {
+		Space->QueueEntity(handle, iw::func_Destroy);
+	});
+
+	Layer::Destroy();
 }
 
 void Game_Layer::Update() 
@@ -110,7 +119,7 @@ void Game_Layer::Update()
 	//}
 
 	iw::Texture& playerSprite = m_player.Find<iw::Tile>()->m_sprite;
-	iw::ref<iw::Texture> uiPlayerTex  = A_mesh_ui_playerHealth.Material->GetTexture("texture");
+	iw::ref<iw::Texture> uiPlayerTex = A_mesh_ui_playerHealth.Material->GetTexture("texture");
 
 	unsigned* colorsFrom = playerSprite.Colors32();
 	unsigned* colorsTo   = uiPlayerTex->Colors32();
@@ -131,16 +140,18 @@ void Game_Layer::Update()
 	}
 
 	uiPlayerTex->Update(Renderer->Device);
-	
-	//if (iw::Mouse::ButtonDown(iw::RMOUSE))
-	//{
-	//	SpawnItem_Config config;
-	//	config.X = sand->sP.x;
-	//	config.Y = sand->sP.y;
-	//	config.Item = ItemType::HEALTH;
 
-	//	Bus->push<SpawnItem_Event>(config);
-	//}
+	if (iw::Mouse::ButtonDown(iw::RMOUSE))
+	{
+		//SpawnItem_Config config;
+		//config.X = sand->sP.x;
+		//config.Y = sand->sP.y;
+		//config.Item = ItemType::HEALTH;
+
+		//Bus->push<SpawnItem_Event>(config);
+
+		Console->QueueCommand("game-over");
+	}
 }
 // end temp ui
 
@@ -155,7 +166,7 @@ bool Game_Layer::On(iw::ActionEvent& e)
 
 			switch (event.State)
 			{
-				case END_STATE:
+				case GAME_OVER_STATE:
 				{
 					PopSystem(keepInWorld_s);
 					PopSystem(playerTank_s);
@@ -170,11 +181,11 @@ bool Game_Layer::On(iw::ActionEvent& e)
 
 					break;
 				}
-				case RUN_STATE: 
+				case GAME_START_STATE: 
 				{
 					//Bus->start_record();
 
-					PushSystem(keepInWorld_s);
+					PushSystem     (keepInWorld_s);
 					PushSystemFront(playerTank_s);
 					PushSystemFront(world_s);
 

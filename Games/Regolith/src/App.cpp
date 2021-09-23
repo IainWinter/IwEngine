@@ -21,45 +21,125 @@
 
 // If ui layer is differnt thatl work i think bc it holds every thing drawn by the game
 
-App::App() : iw::Application() 
+void App::ApplyState(GameState* state)
 {
-	state = RUN_STATE;
-	menu = nullptr;
+	LOG_INFO << "Set game state " << state->Name;
 
-	int cellSize  = 2;
-	int cellMeter = 1;
-	bool drawWithMouse = false;
-	
-	sand = new iw::SandLayer(cellSize, cellMeter, 800, 800, 4, 4, drawWithMouse);
-	sand->m_updateDelay = 1/144.f;
+	if (CurrentState)
+	for (iw::Layer* layer : CurrentState->Layers)
+	{
+		PopLayer(layer);
+	}
 
-	sand_ui_laser = new iw::SandLayer(1, 1, 40, 40);
-	sand_ui_laser->m_updateDelay = .016f;
+	for (iw::Layer* layer : state->Layers)
+	{
+		PushLayer(layer);
+	}
 
-	game = new Game_Layer(sand, sand_ui_laser);
-	game_ui = new Game_UI_Layer(sand, sand_ui_laser);
+	if (state->OnChange) 
+	{
+		state->OnChange();
+	}
 
-	PushLayer(sand);
-	PushLayer(sand_ui_laser);
-	PushLayer(game);
-	PushLayer(game_ui);
+	Bus->push<StateChange_Event>(state->State);
+	CurrentState = state;
 }
 
-// console commands
+void App::SetState(
+	GameState* state)
+{
+	if (StateStack.size() > 0)
+	{
+		StateStack.pop();
+	}
 
-// 
+	PushState(state);
+}
+
+void App::PushState(
+	GameState* state)
+{
+	ApplyState(state);
+	StateStack.push(state);
+}
+
+void App::PopState() 
+{
+	if (StateStack.size() > 0)
+	{
+		StateStack.pop();
+		if (StateStack.size() > 0)
+		{
+			ApplyState(StateStack.top());
+		}
+	}
+}
+
+void App::DestroyStates(
+	std::vector<GameState*> states)
+{
+	std::set<iw::Layer*> layers;
+
+	for (GameState* state : states) 
+	{
+		for (iw::Layer* layer : state->Layers)
+		{
+			layers.insert(layer);
+		}
+
+		if (state == CurrentState)
+		{
+			CurrentState = nullptr;
+		}
+		
+		delete state;
+	}
+
+	for (iw::Layer* layer : layers)
+	{
+		DestroyLayer(layer);
+	}
+}
+
+App::App() : iw::Application()
+{
+	CurrentState = nullptr;
+	game_play = nullptr;
+	game_pause = nullptr;
+	game_post = nullptr;
+
+	PushLayer<StaticLayer>();
+	PushLayer<UI_Layer>();
+
+	Menu_PostGame_Layer* menu_postGame = new Menu_PostGame_Layer();
+
+	game_post = new GameState("Post game menu");
+	game_post->Layers.push_back(menu_postGame);
+
+	Console->QueueCommand("game-start");
+}
 
 int App::Initialize(
 	iw::InitOptions& options)
 {
 	iw::ref<iw::Context> context = Input->CreateContext("Game");
 		
-	context->MapButton(iw::SPACE , "action");
 	context->MapButton(iw::D     , "+right");
 	context->MapButton(iw::A     , "-right");
-	context->MapButton(iw::W     , "+forward");
-	context->MapButton(iw::S     , "-forward");
-	context->MapButton(iw::ESCAPE, "esc-menu");
+	context->MapButton(iw::W     , "+up");
+	context->MapButton(iw::S     , "-up");
+	context->MapButton(iw::LMOUSE, "+fire");
+	context->MapButton(iw::RMOUSE, "+alt-fire");
+	context->MapButton(iw::SPACE , "action");
+	context->MapButton(iw::ESCAPE, "escape");
+
+	// menu states could be switched to through commands
+
+	// game-play   -- starts game
+	// game-end    -- ends game, brings you to post game menus
+	// game-exit   -- exits game to main menu
+	// game-exit d -- exits game to desktop
+	// game-pause  -- opens escape menu
 
 	context->AddDevice(Input->CreateDevice<iw::Mouse>());
 	context->AddDevice(Input->CreateDevice<iw::RawKeyboard>());
@@ -68,48 +148,69 @@ int App::Initialize(
 	Console->AddHandler([&](
 		const iw::Command& command)
 	{
-		if (command.Verb == "esc-menu")
+		LOG_INFO << command.Original;
+
+		if (command.Verb == "escape")
 		{
-			switch (state)
+			switch (CurrentState->State)
 			{
-				case RUN_STATE:
-				{
-					PopLayer(sand);
-					PopLayer(sand_ui_laser);
-					PopLayer(game);
-
-					if (!menu) menu = new MenuLayer();
-					PushLayer(menu);
-
-					state = PAUSE_STATE;
-					Bus->push<StateChange_Event>(PAUSE_STATE);
-
-					Physics->Paused = true;
-
+				case GAME_PAUSE_STATE:
+					PopState();
 					break;
-				}
-				case PAUSE_STATE:
-				{
-					PushLayer(sand);
-					PushLayer(sand_ui_laser);
-					PushLayer(game);
-
-					if (menu) PopLayer(menu);
-
-					state = RUN_STATE;
-					Bus->push<StateChange_Event>(RESUME_STATE);
-
-					Physics->Paused = false;
-
+				default:
+					PushState(game_pause);
 					break;
-				}
 			}
 		}
 
-		//else if (command.Verb == "action")
-		//{
-		//	Bus->push<StateChange_Event>(RUN_STATE);
-		//}
+		else
+		if (command.Verb == "game-over")
+		{
+			DestroyStates({ game_play });
+			game_play = nullptr;
+
+			SetState(game_post);
+		}
+
+		else
+		if (command.Verb == "game-start")
+		{
+			if (game_play || game_pause)
+			{
+				LOG_WARNING << "Game already started";
+				return true;
+			}
+
+			iw::SandLayer* sand          = new iw::SandLayer(2, 1, 800, 800, 4, 4, false);
+			iw::SandLayer* sand_ui_laser = new iw::SandLayer(1, 1, 40, 40);
+			sand         ->m_updateDelay = 1 / 144.f;
+			sand_ui_laser->m_updateDelay = 1 / 60.f;
+
+			Game_Layer*    game    = new Game_Layer   (sand, sand_ui_laser);
+			Game_UI_Layer* game_ui = new Game_UI_Layer(sand, sand_ui_laser);
+	
+			Menu_Pause_Layer* menu_pause = new Menu_Pause_Layer();
+
+			game_play = new GameState("Game play", GAME_RESUME_STATE);
+			game_play->Layers.push_back(sand);
+			game_play->Layers.push_back(sand_ui_laser);
+			game_play->Layers.push_back(game);
+			game_play->Layers.push_back(game_ui);
+
+			game_pause = new GameState("Pause menu", GAME_PAUSE_STATE);
+			game_pause->Layers.push_back(menu_pause);
+			
+			game_play->OnChange = [&]() {
+				Physics->Paused = false;
+			};
+
+			game_pause->OnChange = [&]() {
+				Physics->Paused = true;
+			};
+
+			SetState(game_play);
+			Bus->push<StateChange_Event>(GAME_START_STATE);
+		}
 
 		return false;
 	});
@@ -135,31 +236,4 @@ iw::Application* CreateApplication(
 
 iw::Application* GetApplicationForEditor() {
 	return new App();
-}
-
-void MenuLayer::PostUpdate()
-{
-	UIScreen screen(Renderer->Width(), Renderer->Height(), 10);
-
-	UI* background = screen.CreateElement(A_mesh_menu_background);
-	background->width  = screen.width;
-	background->height = screen.height;
-	background->z = -5;
-
-	UI* pause_menu = screen.CreateElement(A_mesh_menu_pause);
-	pause_menu->height = 600;
-	pause_menu->width  = 600;
-	pause_menu->z = -6;
-
-	float pause_title_margin_x = 15;
-	float pause_title_margin_y = -5;
-
-	UI* pause_title = screen.CreateElement(A_mesh_menu_pause_title);
-	pause_title->width  = pause_menu->width;
-	pause_title->height = pause_menu->width;
-	pause_title->x = pause_menu->x - pause_menu->width  + pause_title_margin_x;
-	pause_title->y = pause_menu->y + pause_menu->height + pause_title_margin_y;
-	pause_title->z = -7;
-
-	screen.Draw(nullptr, Renderer);
 }

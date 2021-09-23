@@ -154,7 +154,7 @@ bool WorldSystem::On(iw::ActionEvent& e)
 
 			switch (event.State)
 			{
-				case RUN_STATE:
+				case GAME_START_STATE:
 				{
 					Space->Query<Asteroid>().Each([&](iw::EntityHandle handle, Asteroid*) {
 						Space->QueueEntity(handle, iw::func_Destroy);
@@ -167,7 +167,7 @@ bool WorldSystem::On(iw::ActionEvent& e)
 						.Start();
 					break;
 				}
-				case END_STATE:
+				case GAME_OVER_STATE:
 				{
 					m_levels.clear();
 					break;

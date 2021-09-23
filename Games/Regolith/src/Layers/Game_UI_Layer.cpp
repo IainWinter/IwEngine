@@ -2,7 +2,10 @@
 
 int Game_UI_Layer::Initialize()
 {
-	m_screen = new UIScreen();
+	m_screen = Space->CreateEntity<UIScreen>().Set<UIScreen>();
+
+	m_screen->camera = new iw::OrthographicCamera(2, 2, -10, 10);
+	m_screen->camera->Transform.Rotation = glm::angleAxis(iw::Pi, glm::vec3(0, 1, 0));
 
 	m_menu       = m_screen->CreateElement(A_mesh_ui_background);
 	m_game       = m_screen->CreateElement(m_sand_game->GetSandMesh());
@@ -15,6 +18,11 @@ int Game_UI_Layer::Initialize()
 	m_gameover   = m_screen->CreateElement(A_mesh_ui_text_gameOver);
 
 	return 0;
+}
+
+void Game_UI_Layer::Destroy()
+{
+	Space->FindEntity(m_screen).Destroy();
 }
 
 void Game_UI_Layer::PostUpdate()
@@ -49,7 +57,7 @@ void Game_UI_Layer::PostUpdate()
 		m_jitter = 10;
 	}
 
-	else
+	else if (m_player_core)
 	{
 		float death = m_player_core->Timer / m_player_core->TimeWithoutCore;
 		
@@ -86,8 +94,8 @@ void Game_UI_Layer::PostUpdate()
 
 	m_menu->height = m_screen->height * .2f;                                    // Ratio(.2f)
 
-	float uiBarOffsetTarget = m_menu->height * (m_game_paused ? -1 : 1);
-	m_offset = iw::lerp(m_offset, uiBarOffsetTarget, iw::DeltaTime() * 12);
+	//float uiBarOffsetTarget = m_menu->height * (m_game_paused ? -1 : 1);
+	m_offset = m_menu->height;//iw::lerp(m_offset, uiBarOffsetTarget, iw::DeltaTime() * 12);
 
 	m_menu->x = iw::randf() * m_jitter;                               // Random(uiJitterAmount)
 	m_menu->y = iw::randf() * m_jitter - m_screen->height + m_offset; //Combine(Anchor(BOTTOM), menu->height, Random(uiJitterAmount))
@@ -156,8 +164,6 @@ void Game_UI_Layer::PostUpdate()
 	m_version->width  = m_menu->width;
 	m_version->height = m_menu->width;
 	m_version->z = 5;
-
-	m_screen->Draw(m_camera, Renderer);
 }
 
 bool Game_UI_Layer::On(iw::ActionEvent& e)
@@ -188,22 +194,22 @@ bool Game_UI_Layer::On(iw::ActionEvent& e)
 		{
 			switch (e.as<StateChange_Event>().State)
 			{
-				case END_STATE:
+				case GAME_OVER_STATE:
 				{
 					m_game_over = true;
 					break;
 				}
-				case RUN_STATE: 
+				case GAME_START_STATE: 
 				{
 					m_game_over = false;
 					break;
 				}
-				case PAUSE_STATE:
+				case GAME_PAUSE_STATE:
 				{
 					m_game_paused = true;
 					break;
 				}
-				case RESUME_STATE: 
+				case GAME_RESUME_STATE: 
 				{
 					m_game_paused = false;
 					break;

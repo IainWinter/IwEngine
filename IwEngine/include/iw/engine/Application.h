@@ -15,6 +15,7 @@ namespace Engine {
 
 		std::thread m_renderThread;
 		bool m_running;
+		bool m_isInitialized;
 	public:
 		APP_VARS
 
@@ -74,7 +75,6 @@ namespace Engine {
 		{
 			L* layer = new L(std::forward<Args>(args)...);
 			layer->SetAppVars(MakeAppVars());
-
 			PushLayer(layer);
 			return layer;
 		}
@@ -82,13 +82,12 @@ namespace Engine {
 		template<
 			typename L,
 			typename... Args>
-		L* PushOverlay(
+		L* PushLayerFront(
 			Args&& ... args)
 		{
 			L* layer = new L(std::forward<Args>(args)...);
 			layer->SetAppVars(MakeAppVars());
-
-			PushOverlay(layer);
+			PushLayerFront(layer);
 			return layer;
 		}
 
@@ -98,21 +97,39 @@ namespace Engine {
 			L* layer)
 		{
 			LOG_INFO << "Pushed " << layer->Name() << " layer";
-			layer->SetAppVars(MakeAppVars());
-			m_layers.PushBack(layer);
 
+			layer->SetAppVars(MakeAppVars());
+
+			if (     m_isInitialized
+				&& !layer->IsInitialized)
+			{
+				if (int err = InitializeLayer(layer)) {
+					return;
+				}
+			}
+
+			m_layers.PushBack(layer);
 			layer->OnPush();
 		}
 
 		template<
 			typename L>
-		void PushOverlay(
+		void PushLayerFront(
 			L* layer)
 		{
 			LOG_INFO << "Pushed " << layer->Name() << " overlay";
-			layer->SetAppVars(MakeAppVars());
-			m_layers.PushFront(layer);
 
+			layer->SetAppVars(MakeAppVars());
+
+			if (     m_isInitialized
+				&& !layer->IsInitialized)
+			{
+				if (int err = InitializeLayer(layer)) {
+					return;
+				}
+			}
+
+			m_layers.PushFront(layer);
 			layer->OnPush();
 		}
 
@@ -123,8 +140,19 @@ namespace Engine {
 		{
 			LOG_INFO << "Popped " << layer->Name() << " layer";
 			m_layers.Pop(layer);
-
 			layer->OnPop();
+		}
+
+		template<
+			typename L>
+		void DestroyLayer(
+			L* layer)
+		{
+			LOG_INFO << "Destroyed " << layer->Name() << " layer";
+			m_layers.Pop(layer);
+			layer->OnPop();
+			layer->Destroy();
+			delete layer;
 		}
 	protected:
 		inline EventSequence CreateSequence() {
@@ -134,6 +162,10 @@ namespace Engine {
 			return seq;
 		}
 	private:
+		IWENGINE_API
+		int InitializeLayer(
+			Layer* layer);
+
 		MAKE_APP_VARS
 	};
 }

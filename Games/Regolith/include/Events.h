@@ -9,6 +9,7 @@
 #include "Components/ProjHead.h"
 #include "Components/EnemyShip.h"
 #include "iw/util/reflection/ReflectDef.h"
+#include "State.h"
 
 enum Actions {
 	SPAWN_ENEMY,
@@ -256,13 +257,6 @@ struct REFLECT CoreExploded_Event : iw::SingleEvent
 		: iw::SingleEvent(CORE_EXPLODED)
 		, Entity(entity)
 	{}
-};
-
-enum StateName {
-	END_STATE,
-	RUN_STATE,
-	PAUSE_STATE,
-	RESUME_STATE,
 };
 
 struct REFLECT StateChange_Event : iw::SingleEvent

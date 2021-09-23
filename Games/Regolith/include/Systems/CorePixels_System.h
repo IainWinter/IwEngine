@@ -12,7 +12,7 @@ struct CorePixelsSystem : iw::SystemBase
 		: iw::SystemBase("Core pixels")
 	{}
 
-	void Update();
+	void Update() override;
 
 	bool On(iw::ActionEvent& e) override;
 };

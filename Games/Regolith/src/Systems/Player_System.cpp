@@ -2,21 +2,27 @@
 
 int PlayerSystem::Initialize()
 {
-	Console->AddHandler([&](
+	m_handle = Console->AddHandler([&](
 		const iw::Command& command)
 	{
-		if (command.Verb == "right")
-		{
-			if (command.Active)
-			{
-				//m_player.Find<Player>()->i_right
-			}
-		}
+		Player* player = m_player.Find<Player>();
 
-		return true;
+		int active = command.Active ? 1 : -1;
+
+		     if (command.Verb == "right")    player->i_moveX += active;
+		else if (command.Verb == "up")       player->i_moveY += active;
+		else if (command.Verb == "fire")     player->i_fire1  = command.Active;
+		else if (command.Verb == "alt-fire") player->i_fire2  = command.Active;
+
+		return false;
 	});
 
 	return 0;
+}
+
+void PlayerSystem::Destroy()
+{
+	Console->RemoveHandler(m_handle);
 }
 
 void PlayerSystem::FixedUpdate()
@@ -24,13 +30,8 @@ void PlayerSystem::FixedUpdate()
 	Player*        player    = m_player.Find<Player>();
 	iw::Rigidbody* rigidbody = m_player.Find<iw::Rigidbody>();
 
-	rigidbody->Velocity.x = 0;
-	rigidbody->Velocity.y = 0;
-
-	if (player->i_up)    rigidbody->Velocity.y =  player->speed;
-	if (player->i_down)  rigidbody->Velocity.y = -player->speed;
-	if (player->i_right) rigidbody->Velocity.x =  player->speed;
-	if (player->i_left)  rigidbody->Velocity.x = -player->speed;
+	rigidbody->Velocity.x = player->speed * player->i_moveX;
+	rigidbody->Velocity.y = player->speed * player->i_moveY;
 
 	//float angle = ((int)player->i_left - (int)player->i_right) * iw::Pi / 2;
 	//player->rotation = iw::lerp(player->rotation, angle, iw::FixedTime() * 5);
@@ -39,16 +40,7 @@ void PlayerSystem::FixedUpdate()
 
 void PlayerSystem::Update()
 {
-	if (!m_player.Alive()) return;
-
 	Player* player = m_player.Find<Player>();
-
-	player->i_up    = iw::Keyboard::KeyDown(iw::W); // todo: use event loop
-	player->i_down  = iw::Keyboard::KeyDown(iw::S);
-	player->i_left  = iw::Keyboard::KeyDown(iw::A);
-	player->i_right = iw::Keyboard::KeyDown(iw::D);
-	player->i_fire1 = iw::Mouse::ButtonDown(iw::LMOUSE);
-	player->i_fire2 = iw::Mouse::ButtonDown(iw::RMOUSE);
 
 	float aim_x = sand->sP.x;
 	float aim_y = sand->sP.y;
@@ -173,11 +165,10 @@ bool PlayerSystem::On(iw::ActionEvent& e)
 
 			switch (event.State)
 			{
-				case RUN_STATE:
+				case GAME_START_STATE:
 				{
 					if (m_player)
 					{
-						m_player.Revive();
 						m_player.Destroy();
 					}
 	
@@ -202,11 +193,6 @@ bool PlayerSystem::On(iw::ActionEvent& e)
 					Bus->push<CreatedPlayer_Event>(m_player);
 					Bus->push<CreatedCoreTile_Event>(m_player);
 
-					break;
-				}
-				case END_STATE:
-				{
-					m_player.Kill();
 					break;
 				}
 			}

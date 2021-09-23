@@ -14,13 +14,11 @@ namespace ECS {
 	iterator& iterator::operator++() {
 		do {
 			Index++;
-			if (Index == m_chunk->EndIndex()) {
-				do {
-					m_chunk = m_chunk->Next;
-					if (m_chunk) {
-						Index = m_chunk->BeginIndex();
-					}
-				} while (m_chunk && m_chunk->Count == 0);
+			while (m_chunk && Index == m_chunk->EndIndex()) {
+				m_chunk = m_chunk->Next;
+				if (m_chunk) {
+					Index = m_chunk->BeginIndex();
+				}
 			}
 		} while (m_chunk && !m_chunk->GetEntity(Index)->Alive);
 

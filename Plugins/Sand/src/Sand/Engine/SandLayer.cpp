@@ -182,13 +182,9 @@ int SandLayer::Initialize() {
 	
 	m_update->SetCameraScale(m_cellsPerMeter, m_cellsPerMeter);
 
-	if (int error = Layer::Initialize()) {
-		return error;
-	}
-
 	LOG_INFO << "Sand world chunk size: " << m_world->m_chunkWidth << ", " << m_world->m_chunkHeight;
 
-	return 0;
+	return Layer::Initialize();
 }
 
 void SandLayer::PreUpdate() {

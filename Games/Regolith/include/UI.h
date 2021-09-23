@@ -34,13 +34,17 @@ struct UIScreen
 {
 	std::vector<UI*> elements;
 	int width, height, depth;
+	iw::Camera* camera;
 
-	UIScreen(int width_ = 0, int height_ = 0, int depth_ = 10)
-	{
-		width = width_;
-		height = height_;
-		depth = depth_;
-	}
+	UIScreen(
+		int width = 0, int height = 0,
+		int depth = 10
+	)
+		: width  (width)
+		, height (height)
+		, depth  (depth)
+		, camera (nullptr)
+	{}
 
 	~UIScreen()
 	{
@@ -60,7 +64,7 @@ struct UIScreen
 		elements.push_back(element);
 	}
 
-	void Draw(iw::Camera* camera, iw::ref<iw::QueuedRenderer>& renderer)
+	void Draw(/*iw::Camera* camera, */iw::ref<iw::QueuedRenderer>& renderer)
 	{
 		renderer->BeginScene(camera);
 

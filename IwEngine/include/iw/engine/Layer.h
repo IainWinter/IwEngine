@@ -22,10 +22,14 @@ namespace Engine {
 		Scene* MainScene;
 
 	public:
+		bool IsInitialized;
+
 		Layer(
-			std::string name)
+			std::string name
+		)
 			: m_name(name)
 			, MainScene(new Scene())
+			, IsInitialized(false)
 		{}
 
 		~Layer() {
@@ -38,6 +42,8 @@ namespace Engine {
 				int e = s->Initialize();
 				if (e != 0) return e;
 			}
+
+			IsInitialized = true;
 
 			return 0;
 		}

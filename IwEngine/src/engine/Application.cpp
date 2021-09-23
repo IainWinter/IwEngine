@@ -26,6 +26,7 @@ namespace iw {
 namespace Engine {
 	Application::Application()
 		: m_running(false)
+		, m_isInitialized(false)
 		, m_window(IWindow::Create())
 	{
 		m_device = ref<IDevice>(IDevice::Create());
@@ -65,7 +66,7 @@ namespace Engine {
 		Asset->SetRootPath(options.AssetRootPath);
 		Audio->SetRootDir(Asset->RootPath() + "audio/");
 
-		PushOverlay<DebugLayer>();
+		PushLayerFront<DebugLayer>();
 
 		// Time
 
@@ -133,9 +134,7 @@ namespace Engine {
 		Renderer->Now->Initialize();
 
 		for (Layer* layer : m_layers) {
-			LOG_DEBUG << "Initializing " << layer->Name() << " layer...";
-			if (status = layer->Initialize()) {
-				LOG_ERROR << layer->Name() << " layer initialization failed with error code " << status;
+			if (status = InitializeLayer(layer)) {
 				return status;
 			}
 		}
@@ -152,6 +151,8 @@ namespace Engine {
 		Task->init();
 
 		LOG_INFO << "Application initialized";
+
+		m_isInitialized = true;
 
 		return 0;
 	}
@@ -171,6 +172,19 @@ namespace Engine {
 				Time::UpdateTime();
 
 				(*Renderer).Begin(Time::TotalTime());
+
+#ifdef IW_IMGUI
+				ImGuiLayer* imgui = GetLayer<ImGuiLayer>("ImGui");
+				if (imgui) {
+					LOG_TIME_SCOPE("ImGui");
+
+					imgui->Begin();
+					for (Layer* layer : m_layers) {
+						layer->ImGui();
+					}
+					imgui->End();
+				}
+#endif
 
 				int layerNumber = 0;
 				for (Layer* layer : m_layers)
@@ -213,30 +227,17 @@ namespace Engine {
 				}
 
 				{
+					LOG_TIME_SCOPE("Audio");
+					(*Audio).Update();
+				}
+
+				{
 					LOG_TIME_SCOPE("Console & bus");
 					(*Console).ExecuteQueue();
 					(*Bus).publish();
 				}
 
 				(*Space).ExecuteQueue();
-
-				{
-					LOG_TIME_SCOPE("Audio");
-					(*Audio).Update();
-				}
-
-#ifdef IW_IMGUI
-				ImGuiLayer* imgui = GetLayer<ImGuiLayer>("ImGui");
-				if (imgui) {
-					LOG_TIME_SCOPE("ImGui");
-
-					imgui->Begin();
-					for (Layer* layer : m_layers) {
-						layer->ImGui();
-					}
-					imgui->End();
-				}
-#endif
 
 				m_window->SwapBuffers();
 
@@ -370,6 +371,21 @@ namespace Engine {
 		scalar dt)
 	{
 		Bus->push<CollisionEvent>(manifold, dt);
+	}
+
+	int Application::InitializeLayer(
+		Layer* layer)
+	{
+		LOG_DEBUG << "Initializing " << layer->Name() << " layer...";
+		if (int status = layer->Initialize()) {
+			LOG_ERROR << layer->Name() << " layer initialization failed with error code " << status;
+			return status;
+		}
+
+		layer->IsInitialized = true; // this gets set in Layer::Init but sometimes a layer wont call this
+									 // techincally a bug but there is no warning so this is a quick hack
+
+		return 0;
 	}
 }
 }

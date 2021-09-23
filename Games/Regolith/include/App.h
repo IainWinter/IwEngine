@@ -15,26 +15,68 @@
 
 #include "Layers/Game_Layer.h"
 #include "Layers/Game_UI_Layer.h"
+#include "Layers/Menu_Pause_Layer.h"
+#include "Layers/Menu_PostGame_Layer.h"
 
-struct MenuLayer : iw::Layer
+#include "State.h"
+#include <stack>
+
+struct StaticLayer : iw::Layer
 {
-	MenuLayer() : iw::Layer("Menu layer") {}
+	StaticLayer()
+		: iw::Layer("Static")
+	{}
+
+	int Initialize() override
+	{
+		PushSystem<iw::PhysicsSystem>();
+		PushSystem<iw::EntityCleanupSystem>();
+
+		// this shouldnt really be here
+		// load all assets into global variables
+		if (int e = LoadAssets(Asset.get(), Renderer->Now.get()))
+		{
+			return e;
+		}
+
+		return Layer::Initialize();
+	}
+};
+
+struct PostGameLayer : iw::Layer
+{
+	PostGameLayer() : iw::Layer("Post game") {}
 
 	void PostUpdate();
 };
 
+struct UI_Layer : iw::Layer
+{
+	UI_Layer() : iw::Layer("UI") {}
+
+	void PostUpdate()
+	{
+		Space->Query<UIScreen>().Each([&](iw::EntityHandle handle, UIScreen* ui)
+		{
+			ui->Draw(Renderer);
+		});
+	}
+};
+
 class App : public iw::Application {
 private:
-	StateName state;
+	GameState* game_play;
+	GameState* game_pause;
+	GameState* game_post;
 
-	iw::SandLayer* sand;
-	iw::SandLayer* sand_ui_laser;
+	std::stack<GameState*> StateStack;
+	GameState* CurrentState;
 
-	Game_Layer*    game;
-	Game_UI_Layer* game_ui;
-
-	MenuLayer* menu;
-
+	void ApplyState(GameState* state);
+	void SetState  (GameState* state);
+	void PushState (GameState* state);
+	void PopState  ();
+	void DestroyStates(std::vector<GameState*> states);
 public:
 	App();
 	int Initialize(iw::InitOptions& options) override;

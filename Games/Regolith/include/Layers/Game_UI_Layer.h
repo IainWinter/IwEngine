@@ -37,8 +37,6 @@ struct Game_UI_Layer : iw::Layer
 	UI* m_version;
 	UI* m_gameover;
 
-	iw::Camera* m_camera;
-
 	Game_UI_Layer(
 		iw::SandLayer* sand,
 		iw::SandLayer* sand_ui_laserCharge
@@ -69,12 +67,12 @@ struct Game_UI_Layer : iw::Layer
 		, m_score         (nullptr)
 		, m_background    (nullptr)
 		, m_version       (nullptr)
-	{
-		m_camera = new iw::OrthographicCamera(2, 2, -10, 10);
-		m_camera->Transform.Rotation = glm::angleAxis(iw::Pi, glm::vec3(0, 1, 0));
-	}
+	{}
+
 
 	int Initialize() override;
+	void Destroy() override;
+
 	void PostUpdate() override;
 
 	bool On(iw::ActionEvent& e) override;

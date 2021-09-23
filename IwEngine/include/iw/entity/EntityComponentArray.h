@@ -42,7 +42,9 @@ namespace ECS {
 		};
 
 		template<typename... _c>
-		using func = std::function<void(EntityHandle, _c*...)>;
+		using func_c = std::function<void(EntityHandle, _c*...)>;
+
+		using func = std::function<void(EntityHandle)>;
 	private:
 		ChunkListVec m_begins;
 		ChunkListVec m_ends;
@@ -59,10 +61,29 @@ namespace ECS {
 		IWENTITY_API
 		iterator end();
 
+		void Each(
+			func function)
+		{
+			for (EntityComponentData& data : *this)
+			{
+				function(data.Handle);
+			}
+		}
+
+		void First(
+			func function)
+		{
+			auto itr = begin();
+			if (itr == end()) return;
+
+			EntityComponentData& data = *itr;
+			function(data.Handle);
+		}
+
 		template<
 			typename... _c>
 		void Each(
-			func<_c...> function)
+			func_c<_c...> function)
 		{
 			for (EntityComponentData& data : *this) {
 				callFunction<_c...>(
@@ -76,7 +97,7 @@ namespace ECS {
 		template<
 			typename... _c>
 		void First(
-			func<_c...> function)
+			func_c<_c...> function)
 		{
 			auto itr = begin();
 			if (itr == end()) return;
@@ -93,7 +114,7 @@ namespace ECS {
 			typename... _c,
 			size_t... _i>
 		void callFunction(
-			func<_c...> func,
+			func_c<_c...> func,
 			EntityComponentData& data,
 			std::index_sequence<_i...>)
 		{

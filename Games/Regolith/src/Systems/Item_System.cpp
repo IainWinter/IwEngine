@@ -2,7 +2,7 @@
 
 void ItemSystem::FixedUpdate()
 {
-    if (!m_player.Alive()) return;
+    if (!m_player) return;
 
     Space->Query<iw::Rigidbody, Item>().Each([&](
         iw::EntityHandle entity,
@@ -125,7 +125,7 @@ bool ItemSystem::On(iw::ActionEvent& e)
 
 			switch (event.State)
 			{
-				case RUN_STATE:
+				case GAME_START_STATE:
                     Space->Query<Item>().Each([&](iw::EntityHandle handle, Item*) {
                         Space->QueueEntity(handle, iw::func_Destroy);
                     });

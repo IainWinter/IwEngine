@@ -28,17 +28,16 @@ namespace Engine {
 		Token* Tokens; // size is token count
 	};
 
-	class Console {
-	public:
-		using HandlerFunc = std::function<bool(const Command&)>;
+	using HandlerFunc = std::function<bool(const Command&)>;
 
+	class Console {
 	private:
 		std::mutex m_mutex;
 		iw::linear_allocator m_alloc;
 		iw::linear_allocator m_strbuf;
 		iw::blocking_queue<Command> m_commands;
 
-		std::vector<HandlerFunc> m_handlers;
+		std::vector<HandlerFunc*> m_handlers;
 
 	public:
 		IWENGINE_API
@@ -46,8 +45,12 @@ namespace Engine {
 			const HandlerFunc& handler);
 
 		IWENGINE_API
-		void AddHandler(
+		HandlerFunc* AddHandler(
 			HandlerFunc handler);
+
+		IWENGINE_API
+		void RemoveHandler(
+			HandlerFunc* handler);
 
 		IWENGINE_API
 		void ExecuteCommand(

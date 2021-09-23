@@ -306,7 +306,7 @@ namespace ECS {
 
 	void Space::Clear() {
 		for (const EntityData* data : m_entityManager.Entities()) {
-			TrySendEntityDestroiedEvent(data->Entity);
+			DestroyEntity(data->Entity);
 		}
 
 		m_entityManager.Clear();

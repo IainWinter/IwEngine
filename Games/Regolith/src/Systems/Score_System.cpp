@@ -37,10 +37,10 @@ bool ScoreSystem::On(iw::ActionEvent& e)
 
 			switch (event.State)
 			{
-				case RUN_STATE:
+				case GAME_START_STATE:
 					Score = 0;
 					break;
-				case END_STATE:
+				case GAME_OVER_STATE:
 					LOG_TRACE << "Final score " << Score << "!";
 					break;
 			}
