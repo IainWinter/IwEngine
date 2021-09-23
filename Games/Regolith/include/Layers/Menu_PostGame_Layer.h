@@ -6,7 +6,7 @@
 
 struct Menu_PostGame_Layer : iw::Layer
 {
-	UIScreen* m_screen;
+	UI_Screen* m_screen;
 
 	UI* m_background;
 	UI* m_pause_menu;

@@ -134,12 +134,12 @@ struct UI_Button : UI
 	}
 };
 
-struct UIScreen : UI_Base
+struct UI_Screen : UI_Base
 {
 	int depth;
 	iw::Camera* camera;
 
-	UIScreen()
+	UI_Screen()
 		: UI_Base ()
 		, depth   (10.f)
 		, camera  (nullptr)

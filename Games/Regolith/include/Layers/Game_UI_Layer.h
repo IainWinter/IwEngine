@@ -26,7 +26,7 @@ struct Game_UI_Layer : iw::Layer
 	bool m_game_over;
 	bool m_game_paused;
 
-	UIScreen* m_screen;
+	UI_Screen* m_screen;
 	UI* m_menu;
 	UI* m_game;
 	UI* m_health;

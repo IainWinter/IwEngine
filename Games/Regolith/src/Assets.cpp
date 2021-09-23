@@ -105,10 +105,6 @@ int LoadAssets(
 	// Menus
 
 	{
-		A_mesh_menu_pause_title = A_font_cambria->GenerateMesh("Pause Menu\n\ncoming soon...", 2);
-	}
-
-	{
 		A_mesh_menu_background.Material = A_material_texture_cam->MakeInstance();
 		A_mesh_menu_background.Material->Set("alphaThresh", 0.0f);
 		A_mesh_menu_background.Material->Set("color", iw::Color(.16, .16, .16, .5));

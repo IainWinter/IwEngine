@@ -3,12 +3,10 @@
 int Menu_Pause_Layer::Initialize()
 {
 	iw::Mesh title  = A_font_cambria->GenerateMesh("Pause Menu", 2);
-	iw::Mesh button = A_font_cambria->GenerateMesh("Button", 8);
 
+	m_entity_screen = Space->CreateEntity<UI_Screen>();
 
-	m_entity_screen = Space->CreateEntity<UIScreen>();
-
-	m_screen = m_entity_screen.Set<UIScreen>();
+	m_screen = m_entity_screen.Set<UI_Screen>();
 
 	m_background = m_screen->CreateElement(A_mesh_menu_background);
 	m_pause_menu  = m_screen->CreateElement(A_mesh_menu_pause);
@@ -17,10 +15,10 @@ int Menu_Pause_Layer::Initialize()
 	iw::Mesh buttonbg = A_mesh_menu_background.MakeInstance();
 	buttonbg.Material->Set("color", iw::Color(.7, .2, .2));
 
-	m_button_test1 = m_screen->CreateElement<UI_Button>(buttonbg, A_font_cambria->GenerateMesh("Button",         12));
-	m_button_test2 = m_screen->CreateElement<UI_Button>(buttonbg, A_font_cambria->GenerateMesh("Button 20",      12));
-	m_button_test3 = m_screen->CreateElement<UI_Button>(buttonbg, A_font_cambria->GenerateMesh("Button 300",     12));
-	m_button_test4 = m_screen->CreateElement<UI_Button>(buttonbg, A_font_cambria->GenerateMesh("Button 400 abc", 12));
+	m_button_test1 = m_screen->CreateElement<UI_Button>(buttonbg, A_font_cambria->GenerateMesh("Audio",    16));
+	m_button_test2 = m_screen->CreateElement<UI_Button>(buttonbg, A_font_cambria->GenerateMesh("Video",    16));
+	m_button_test3 = m_screen->CreateElement<UI_Button>(buttonbg, A_font_cambria->GenerateMesh("Gameplay", 16));
+	m_button_test4 = m_screen->CreateElement<UI_Button>(buttonbg, A_font_cambria->GenerateMesh("Resume",   16));
 
 	return 0;
 }
@@ -63,9 +61,9 @@ void Menu_Pause_Layer::PostUpdate()
 	for (UI_Button* button : { m_button_test1, m_button_test2, m_button_test3, m_button_test4 })
 	{
 		button->width = 150;
-		button->height = 50;
-		button->x = m_pause_menu->x + m_pause_menu->width  - button->width - 15;
-		button->y = m_pause_menu->y - m_pause_menu->height + (button->height + 15) * i * 2;
+		button->height = 40;
+		button->x = m_pause_menu->x - m_pause_menu->width  + button->width + 15;
+		button->y = m_pause_menu->y + m_pause_menu->height - (button->height + 15) * i * 2 - 200;
 		button->zIndex = 0;
 
 		float buttonOffsetTarget = 0.f;

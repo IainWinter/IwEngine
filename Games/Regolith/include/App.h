@@ -56,7 +56,7 @@ struct UI_Layer : iw::Layer
 
 	void PostUpdate()
 	{
-		Space->Query<UIScreen>().Each([&](iw::EntityHandle handle, UIScreen* ui)
+		Space->Query<UI_Screen>().Each([&](iw::EntityHandle handle, UIScreen* ui)
 		{
 			ui->Draw(Renderer);
 		});

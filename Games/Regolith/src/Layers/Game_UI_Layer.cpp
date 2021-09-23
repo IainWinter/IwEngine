@@ -2,7 +2,7 @@
 
 int Game_UI_Layer::Initialize()
 {
-	m_screen = Space->CreateEntity<UIScreen>().Set<UIScreen>();
+	m_screen = Space->CreateEntity<UI_Screen>().Set<UI_Screen>();
 
 	m_screen->camera = new iw::OrthographicCamera(2, 2, -10, 10);
 	m_screen->camera->Transform.Rotation = glm::angleAxis(iw::Pi, glm::vec3(0, 1, 0));

@@ -15,10 +15,10 @@
 
 int Menu_PostGame_Layer::Initialize()
 {
-	m_screen = Space->CreateEntity<UIScreen>().Set<UIScreen>();
+	m_screen = Space->CreateEntity<UI_Screen>().Set<UI_Screen>();
 	m_background  = m_screen->CreateElement(A_mesh_menu_background);
 	m_pause_menu  = m_screen->CreateElement(A_mesh_menu_pause);
-	m_pause_title = m_screen->CreateElement(A_mesh_menu_pause_title);
+	m_pause_title = m_screen->CreateElement(A_mesh_menu_pause);
 
 	return 0;
 }

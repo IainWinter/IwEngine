@@ -3,6 +3,7 @@
 #include "IwGraphics.h"
 #include "Material.h"
 #include "iw/common/Components/Transform.h"
+#include "iw/common/algos/polygon2.h"
 #include "iw/renderer/VertexArray.h"
 #include "iw/renderer/IndexBuffer.h"
 #include "iw/renderer/Device.h"
@@ -303,6 +304,22 @@ namespace detail {
 		IWGRAPHICS_API void Bind  (const ref<IDevice>& device);       // Binds the mesh for use
 		IWGRAPHICS_API void Unbind(const ref<IDevice>& device);       // Marks mesh as unbound (doesn't change renderer state [for now])
 		IWGRAPHICS_API void Draw  (const ref<IDevice>& device) const; // Draws the mesh once used
+
+		template<
+			Dimension _d>
+		std::pair<iw::_vec<_d>, iw::_vec<_d>> GetBounds()
+		{
+			std::vector<iw::_vec<_d>> verts;
+			iw::_vec<_d>* vdata  = (iw::_vec<_d>*)Data->Get     (iw::bName::POSITION);
+			unsigned      vcount =                Data->GetCount(iw::bName::POSITION);
+
+			for (unsigned i = 0; i < vcount; i++)
+			{
+				verts.push_back(vdata[i]);
+			}
+
+			return iw::GenPolygonBounds(verts);
+		}
 
 		//IWGRAPHICS_API const ref<MeshData> Data() const;
 		//IWGRAPHICS_API       ref<MeshData> Data();

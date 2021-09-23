@@ -41,7 +41,6 @@ inline iw::Mesh A_mesh_ui_text_gameOver;
 inline iw::Mesh A_mesh_ui_text_debug_version;
 
 inline iw::Mesh A_mesh_menu_pause;
-inline iw::Mesh A_mesh_menu_pause_title;
 inline iw::Mesh A_mesh_menu_background;
 
 inline iw::Mesh A_mesh_extern_sand_game_layer;
