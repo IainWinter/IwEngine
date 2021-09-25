@@ -28,9 +28,9 @@ namespace events {
 		std::string who_handled;
 		std::string who_called;
 
-		size_t time_queued = 0.f;
-		size_t time_published = 0.f;
-		size_t time_handled = 0.f;
+		size_t time_queued = 0;
+		size_t time_published = 0;
+		size_t time_handled = 0;
 
 		~event_record()
 		{

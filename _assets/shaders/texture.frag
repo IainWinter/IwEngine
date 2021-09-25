@@ -1,7 +1,7 @@
 #version 330
 
-uniform vec4 mat_color;
-uniform float mat_alphaThresh = 0.0;
+uniform vec4 mat_color = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+uniform float mat_alphaThresh = 0.0f;
 
 uniform float mat_hasTexture;
 uniform sampler2D mat_texture;

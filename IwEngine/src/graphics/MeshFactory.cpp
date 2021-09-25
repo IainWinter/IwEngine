@@ -581,7 +581,7 @@ namespace helpers {
 			verts[i] = offset + glm::vec3(x * stepX, 0, z * stepZ);
 				
 			if (uvs) {
-				uvs[i] = glm::vec2(x * stepU, (zCount - z) * stepV);
+				uvs[i] = glm::vec2(x * stepU, z * stepV);
 			}
 		}
 

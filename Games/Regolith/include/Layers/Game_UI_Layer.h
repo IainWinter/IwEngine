@@ -54,7 +54,7 @@ struct Game_UI_Layer : iw::Layer
 
 		, m_jitter        (0.f)
 		, m_offset        (0.f)
-		, m_bg_scale      (0.f)
+		, m_bg_scale      (1.f)
 		, m_game_over     (false)
 		, m_game_paused   (false)
 

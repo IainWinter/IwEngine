@@ -32,10 +32,10 @@ enum Actions {
 
 struct REFLECT SpawnExplosion_Config
 {
-	float SpawnLocationX = 0;
-	float SpawnLocationY = 0;
-	float ExplosionRadius = 10;
-	float ExplosionPower = 200;
+	float SpawnLocationX  =   0.f;
+	float SpawnLocationY  =   0.f;
+	float ExplosionRadius =  10.f;
+	float ExplosionPower  = 200.f;
 };
 
 struct REFLECT SpawnExplosion_Event : iw::SingleEvent
@@ -53,12 +53,12 @@ struct REFLECT SpawnExplosion_Event : iw::SingleEvent
 struct REFLECT SpawnEnemy_Config
 {
 	iw::Entity TargetEntity;
-	float SpawnLocationX;
-	float SpawnLocationY;
-	float TargetLocationX;
-	float TargetLocationY;
+	float SpawnLocationX  = 0.f;
+	float SpawnLocationY  = 0.f;
+	float TargetLocationX = 0.f;
+	float TargetLocationY = 0.f;
 
-	EnemyType EnemyType;
+	EnemyType EnemyType = EnemyType::FIGHTER;
 };
 
 struct REFLECT SpawnEnemy_Event : iw::SingleEvent
@@ -75,11 +75,11 @@ struct REFLECT SpawnEnemy_Event : iw::SingleEvent
 
 struct REFLECT SpawnAsteroid_Config
 {
-	float SpawnLocationX = 0;
-	float SpawnLocationY = 0;
-	float VelocityX = 0;
-	float VelocityY = 0;
-	float AngularVel = 0;
+	float SpawnLocationX = 0.f;
+	float SpawnLocationY = 0.f;
+	float VelocityX      = 0.f;
+	float VelocityY      = 0.f;
+	float AngularVel     = 0.f;
 	int Size = 1;
 };
 
@@ -112,14 +112,14 @@ struct REFLECT SpawnProjectile_Event : iw::SingleEvent
 
 struct REFLECT SpawnItem_Config
 {
-	float X = 0, Y = 0;
-	int Amount = 1;
+	float X             =  0.f; // should be named SpawnLocationX
+	float Y             =  0.f;
+	float ActivateDelay =  0.f;
+	float AngularSpeed  =  0.f;
+	float Speed         = 75.f;
 
-	float ActivateDelay = 0.f;
-	float Speed = 75;
-	float AngularSpeed = 0;
-
-	bool DieWithTime = true;
+	int Amount          = 1;
+	bool DieWithTime    = true;
 
 	ItemType Item;
 	std::function<void()> OnPickup;
@@ -189,8 +189,8 @@ struct REFLECT HealPlayer_Event : iw::SingleEvent
 
 struct REFLECT ProjHitTile_Config
 {
-	int X;
-	int Y;
+	int X = 0;
+	int Y = 0;
 	iw::TileInfo Info;
 	iw::Entity Hit;
 	iw::Entity Projectile;

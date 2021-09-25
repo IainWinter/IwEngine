@@ -28,7 +28,11 @@ namespace Graphics {
 		IWGRAPHICS_API glm::mat4 ViewProjection();
 		IWGRAPHICS_API glm::mat4 ViewProjection() const;
 
-		IWGRAPHICS_API glm::mat4& RecalculateView();
+		IWGRAPHICS_API
+		glm::mat4& RecalculateView();
+
+		IWGRAPHICS_API
+		virtual glm::mat4& RecalculateProjection() = 0;
 	};
 
 	// Could probly do this better with strategy camera but this works for now cus there're are only 2 as far as I know
@@ -71,6 +75,9 @@ namespace Graphics {
 			float height,
 			float zNear,
 			float zFar);
+
+		IWGRAPHICS_API
+		glm::mat4& RecalculateProjection() override;
 	};
 
 	struct PerspectiveCamera
@@ -108,6 +115,9 @@ namespace Graphics {
 			float aspect,
 			float zNear,
 			float zFar);
+
+		IWGRAPHICS_API
+		glm::mat4& RecalculateProjection() override;
 	};
 }
 

@@ -58,14 +58,16 @@ namespace Graphics {
 	// its not too bad
 
 	glm::mat4& Camera::RecalculateView() {
-		glm::vec3 wp = Transform.WorldPosition();
-		glm::quat wr = Transform.WorldRotation();
+		//glm::vec3 wp = Transform.WorldPosition();
+		//glm::quat wr = Transform.WorldRotation();
 
-		glm::vec3 forward = wp + wr * glm::vec3(0, 0, 1);
-		glm::vec3 up      =      wr * glm::vec3(0, 1, 0);
+		//glm::vec3 forward = wp + wr * glm::vec3(0, 0, 1);
+		//glm::vec3 up      =      wr * glm::vec3(0, 1, 0);
 
-		View = glm::lookAt(wp, forward, up);
-		
+		//View = glm::lookAt(wp, forward, up);
+
+		View = glm::inverse(Transform.WorldTransformation());
+
 		return View;
 	}
 
@@ -115,7 +117,19 @@ namespace Graphics {
 		Height = height;
 		NearClip = zNear;
 		FarClip = zFar;
-		Projection = glm::ortho(-width / 2, width / 2, -height / 2, height / 2, zNear, zFar);
+		RecalculateProjection();
+	}
+
+	glm::mat4& OrthographicCamera::RecalculateProjection()
+	{
+		// glm divs and mults by 2, this undos that
+		float w  = Width    / 2.f;
+		float h  = Height   / 2.f;
+		float nc = NearClip * 2.f;
+		float fc = FarClip  * 2.f;
+
+		Projection = glm::ortho(-w, w, -h, h, nc, fc);
+		return Projection;
 	}
 	
 	PerspectiveCamera::PerspectiveCamera(
@@ -164,7 +178,14 @@ namespace Graphics {
 		Aspect = aspect;
 		NearClip = zNear;
 		FarClip = zFar;
-		Projection = glm::perspective(fov, aspect, zNear, zFar);
+		RecalculateProjection();
 	}
+
+	glm::mat4& PerspectiveCamera::RecalculateProjection()
+	{
+		Projection = glm::perspective(Fov, Aspect, NearClip, FarClip);
+		return Projection;
+	}
+	
 }
 }

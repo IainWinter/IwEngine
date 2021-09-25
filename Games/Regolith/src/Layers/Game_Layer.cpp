@@ -124,34 +124,38 @@ void Game_Layer::Update()
 	unsigned* colorsFrom = playerSprite.Colors32();
 	unsigned* colorsTo   = uiPlayerTex->Colors32();
 
-	for (int i = 0; i < playerSprite.ColorCount32(); i++)
+	for (int y = 0; y < playerSprite.m_height; y++)
+	for (int x = 0; x < playerSprite.m_width;  x++)
 	{
-		unsigned color = colorsFrom[i];
+		int ti = x + (playerSprite.m_height - 1 - y) * playerSprite.m_width;
+		int fi = x + y * playerSprite.m_width;
+
+		unsigned color = colorsFrom[fi];
 		iw::Tile::PixelState state = iw::Tile::cState(color);
 
 		if (state == iw::Tile::PixelState::FILLED)
 		{
-			colorsTo[i] = color;
+			colorsTo[ti] = color;
 		}
 
 		else {
-			colorsTo[i] = 0;
+			colorsTo[ti] = 0;
 		}
 	}
 
 	uiPlayerTex->Update(Renderer->Device);
 
-	if (iw::Mouse::ButtonDown(iw::RMOUSE))
-	{
-		//SpawnItem_Config config;
-		//config.X = sand->sP.x;
-		//config.Y = sand->sP.y;
-		//config.Item = ItemType::HEALTH;
+	//if (iw::Mouse::ButtonDown(iw::RMOUSE))
+	//{
+	//	//SpawnItem_Config config;
+	//	//config.X = sand->sP.x;
+	//	//config.Y = sand->sP.y;
+	//	//config.Item = ItemType::HEALTH;
 
-		//Bus->push<SpawnItem_Event>(config);
+	//	//Bus->push<SpawnItem_Event>(config);
 
-		Console->QueueCommand("game-over");
-	}
+	//	Console->QueueCommand("game-over");
+	//}
 }
 // end temp ui
 

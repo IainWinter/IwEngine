@@ -4,11 +4,6 @@
 IW_PLUGIN_SAND_BEGIN
 
 int SandWorldRenderSystem::Initialize() {
-	ref<Shader> shader = Asset->Load<Shader>("shaders/texture.shader");
-
-	if (!shader) {
-		return 1;
-	}
 
 	int width, height;
 
@@ -25,17 +20,22 @@ int SandWorldRenderSystem::Initialize() {
 	}
 
 	m_texture = REF<Texture>(width, height, TEX_2D, RGBA);
-	m_texture->m_wrap = iw::TextureWrap::EDGE;
+	m_texture->m_wrap = TextureWrap::EDGE;
 	m_texture->SetFilter(NEAREST);
 	m_texture->CreateColors();
 	m_texture->Clear();
 
-	ref<Material> material = REF<Material>(shader);
-	material->SetTexture("texture", m_texture);
-	material->Set("useAlpha", (int)1);
+	ref<Material> material = REF<Material>(Asset->Load<Shader>("shaders/texture_cam.shader"));
 	
+	Renderer->Now->InitShader(material->Shader, CAMERA);
+
+	material->SetTransparency(Transparency::ADD);
+	material->SetTexture("texture", m_texture);
+	material->Set("alphaThresh", 0.9f);
+	material->Set("color", iw::Color(1));
+
 	m_mesh = ScreenQuad().MakeInstance();
-	m_mesh.Material = (material);
+	m_mesh.Material = material;
 
 	return 0;
 }
@@ -54,8 +54,9 @@ void SandWorldRenderSystem::Update() {
 	std::mutex mutex;
 	std::condition_variable cond;
 
-	for (int cx = minCX-1; cx <= maxCX; cx++)
-	for (int cy = minCY-1; cy <= maxCY; cy++) {
+	for (int cx = minCX - 1; cx <= maxCX; cx++)
+	for (int cy = minCY - 1; cy <= maxCY; cy++) 
+	{
 		SandChunk* chunk = m_world->GetChunkDirect({ cx, cy });
 		if (!chunk) continue;
 
@@ -72,8 +73,12 @@ void SandWorldRenderSystem::Update() {
 
 			// sand texture
 			for (int y = startY; y < endY; y++)
-			for (int x = startX; x < endX; x++) {
-				int texi = (chunk->m_x + x - m_fx) + (chunk->m_y + y - m_fy) * m_texture->Width();
+			for (int x = startX; x < endX; x++) 
+			{
+				int px = chunk->m_x + x - m_fx;
+				int py = chunk->m_y + y - m_fy;
+
+				int texi = px + (m_texture->Height() - py - 1) * m_texture->Width();
 
 				// annoying but nessesary for style rn
 				Cell & cell  = cells [x + y * chunk->m_width]; 

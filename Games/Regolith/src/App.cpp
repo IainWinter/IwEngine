@@ -133,12 +133,11 @@ int App::Initialize(
 	context_game->MapButton(iw::ESCAPE, "escape");
 
 	iw::ref<iw::Context> context_menu = Input->CreateContext("Menu");
-	context_menu->MapButton(iw::EXECUTE, "execute");
-	context_menu->MapButton(iw::LMOUSE,  "execute");
+	context_menu->MapButton(iw::LMOUSE,  "+execute");
 	context_menu->MapButton(iw::ESCAPE,  "escape");
 
 	iw::ref<iw::Device> mouse        = Input->CreateDevice<iw::Mouse>();
-	iw::ref<iw::Device> keyboard     = Input->CreateDevice<iw::Keyboard>();
+	//iw::ref<iw::Device> keyboard     = Input->CreateDevice<iw::Keyboard>();
 	iw::ref<iw::Device> mouse_raw    = Input->CreateDevice<iw::RawMouse>();
 	iw::ref<iw::Device> keyboard_raw = Input->CreateDevice<iw::RawKeyboard>();
 
@@ -146,7 +145,7 @@ int App::Initialize(
 	context_game->AddDevice(keyboard_raw);
 
 	context_menu->AddDevice(mouse);
-	context_menu->AddDevice(keyboard);
+	context_menu->AddDevice(keyboard_raw);
 
 	// menu states could be switched to through commands
 
@@ -177,10 +176,17 @@ int App::Initialize(
 		else
 		if (command.Verb == "game-over")
 		{
-			DestroyStates({ game_play });
-			game_play = nullptr;
+			/*float time = iw::TotalTime();
+			Task->queue([&, time]() 
+			{
+				if (iw::TotalTime() - time > 2)
+				{*/
+					DestroyStates({ game_play });
+					game_play = nullptr;
 
-			SetState(game_post);
+					SetState(game_post);
+			//	}
+			//});
 		}
 
 		else

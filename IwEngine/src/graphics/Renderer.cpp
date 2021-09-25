@@ -325,13 +325,13 @@ namespace Graphics {
 
 		if (camera) {
 			v   = camera->RecalculateView();
-			p   = camera->Projection;
+			p   = camera->RecalculateProjection();
 			vp  = camera->ViewProjection();
 			pos = camera->Transform.WorldPosition();
 		}
 
 		if (   glm::vec3(m_cameraData.CameraPos) != pos	
-			|| m_cameraData.ViewProj  != vp)
+			||           m_cameraData.ViewProj   != vp)
 		{
 			m_cameraData.View      = v;
 			m_cameraData.Proj      = p;
