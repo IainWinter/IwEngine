@@ -101,7 +101,7 @@ private:
 		Spawn spawner(iw::randi(10) + 10, iw::randi(3) + 2, iw::randf() + 1.6f, iw::randf() + .3f);
 		spawner.OnSpawn = SpawnEnemy;
 
-		AddRandomSides(spawner, 10, 100, 50, 400);
+		AddRandomSides(spawner, 40, 100, 50, 400);
 
 		return spawner;
 	}

@@ -99,7 +99,7 @@ namespace helpers {
 				return item;
 			}
 
-			last_weight = weight;
+			last_weight += weight;
 		}
 
 		return item_weights.back().first;
