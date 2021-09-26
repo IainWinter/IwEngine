@@ -88,18 +88,6 @@ int LoadAssets(
 	}
 
 	{
-		A_mesh_ui_text_ammo = A_font_cambria->GenerateMesh("0", 5);
-	}
-
-	{
-		A_mesh_ui_text_score = A_font_cambria->GenerateMesh("0", 5);
-	}
-
-	{
-		A_mesh_ui_text_gameOver = A_font_cambria->GenerateMesh("YOU HAVE BEEN\n   DESTROYED", 2);
-	}
-
-	{
 		A_mesh_ui_text_debug_version = A_font_cambria->GenerateMesh("indev v.04", 1);
 		A_mesh_ui_text_debug_version.Material = A_material_font_cam->MakeInstance();
 		A_mesh_ui_text_debug_version.Material->Set("color", iw::Color(1, 1, 1, .25));

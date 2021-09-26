@@ -1,6 +1,8 @@
 #include "Systems/World_System.h"
 #include "iw/engine/Events/Seq/Delay.h"
 
+#include "iw/physics/impl/GJK.h"
+
 void WorldSystem::Update()
 {
 	m_timer.Tick();
@@ -63,14 +65,28 @@ void WorldSystem::FixedUpdate()
 			}
 		});
 
-	//Space->Query<Throwable, Flocker>().Each(
-	//	[&](
-	//		iw::EntityHandle handle, 
-	//		Throwable* throwable, 
-	//		Flocker* flocker) 
-	//	{
-	//		flocker->Active = !throwable->Held;
-	//	});
+	Space->Query<Throwable, Flocker>().Each(
+		[&](
+			iw::EntityHandle handle, 
+			Throwable* throwable, 
+			Flocker* flocker) 
+		{
+			if (throwable->Held)
+			{
+				flocker->Active = false;
+			}
+
+			if (   !flocker->Active 
+				&& !throwable->Held)
+			{
+				throwable->Timer += iw::FixedTime();
+
+				if (throwable->Timer > throwable->Time + .5)
+				{
+					flocker->Active = true;
+				}
+			}
+		});
 
 	Space->Query<iw::Rigidbody, Throwable>().Each(
 		[&](
@@ -106,23 +122,13 @@ void WorldSystem::FixedUpdate()
 				float radius = glm::length(max - min) / 2.f;
 				*/
 
-				for (int i = 0; i < 4; i++)
-				{
-					//float a = iw::Pi2 * iw::randf();
-
-					float rx = 0.f;//sin(a) * 20.f;
-					float ry = 0.f;//cos(a) * 20.f;
-
-					DrawLightning(
-						pos.x  + rx, pos.y  + ry, 
-						rpos.x + ry, rpos.y + rx);
-				}
+				DrawLightning(throwable->ThrowRequestor, Space->GetEntity(handle));
 
 				glm::vec3 vel = tpos - pos;
 				vel = glm::normalize(vel);
 
 				float currentSpeed = glm::length(rigidbody->Velocity);
-				float speed = iw::max(currentSpeed, 100.f * throwable->Timer / throwable->Time);
+				float speed = iw::max(currentSpeed, 200.f * throwable->Timer / throwable->Time);
 
 				rigidbody->Velocity = iw::lerp(rigidbody->Velocity, vel * speed, iw::FixedTime() * 25);
 			}
@@ -257,10 +263,79 @@ bool WorldSystem::On(iw::ActionEvent& e)
 	return false;
 }
 
-void WorldSystem::DrawLightning(
-	float x, float y, 
-	float tx, float ty)
+std::vector<std::pair<int, int>> WorldSystem::FindClosestCellPositionsMathcingTile(iw::Tile* tile, int x, int y)
 {
+	if (!tile)
+	{
+		return {};
+	}
+
+	std::vector<std::pair<int, int>> cells;
+	int searchSize = 5;
+
+	while (cells.size() == 0 && searchSize < tile->m_sprite.m_width)
+	{
+		for (int sy = -searchSize; sy < searchSize; sy++)
+		for (int sx = -searchSize; sx < searchSize; sx++)
+		{
+			int px = sx + x;
+			int py = sy + y;
+
+			iw::SandChunk* chunk = sand->m_world->GetChunk(px, py);
+
+			if (chunk)
+			{
+				iw::TileInfo& info = chunk->GetCell<iw::TileInfo>(px, py, iw::SandField::TILE_INFO);
+				if (info.tile == tile)
+				{
+					cells.emplace_back(px, py);
+				}
+			}
+		}
+
+		searchSize *= 2;
+	}
+
+	return cells;
+}
+
+void WorldSystem::DrawLightning(
+	iw::Entity originEntity,
+	iw::Entity targetEntity)
+{
+	// pick points that are on surface
+
+	iw::CollisionObject* originObj = GetPhysicsComponent(originEntity.Handle);
+	iw::CollisionObject* targetObj = GetPhysicsComponent(targetEntity.Handle);
+
+	glm::vec2 origin = originObj->Transform.Position;
+	glm::vec2 target = targetObj->Transform.Position;
+
+	glm::vec2 delta = target - origin;
+
+	glm::vec2 a = originObj->Collider->as_dim<iw::d2>()->FindFurthestPoint(&originObj->Transform,  delta);
+	glm::vec2 b = targetObj->Collider->as_dim<iw::d2>()->FindFurthestPoint(&targetObj->Transform, -delta);
+
+	iw::Tile* originTile = originEntity.Find<iw::Tile>();
+	iw::Tile* targetTile = targetEntity.Find<iw::Tile>();
+
+	std::vector<std::pair<int, int>> origins = FindClosestCellPositionsMathcingTile(originTile, a.x, a.y);
+	std::vector<std::pair<int, int>> targets = FindClosestCellPositionsMathcingTile(targetTile, b.x, b.y);
+
+	if (   origins.size() == 0 
+		|| targets.size() == 0)
+	{
+		return;
+	}
+
+	std::pair<int, int> o = origins.at(iw::randi(origins.size() - 1));
+	std::pair<int, int> t = targets.at(iw::randi(targets.size() - 1));
+
+	float x  = o.first;
+	float y  = o.second;
+	float tx = t.first;
+	float ty = t.second;
+
 	float dx = tx - x;
 	float dy = ty - y;
 	float td = sqrt(dx*dx + dy*dy);
@@ -290,10 +365,8 @@ void WorldSystem::DrawLightning(
 		float x1 = x + dx + left * iw::randfs() * arc;
 		float y1 = y + dy + left * iw::randfs() * arc;
       
-		//stroke(255 * left, 255 * left, 255);
-      
 		iw::Cell c = iw::Cell::GetDefault(iw::CellType::ROCK);
-		c.life = .04;
+		c.life = .04 + iw::randfs() * 0.02;
 
 		c.Color = iw::Color::From255(212, 194, 252);
 		c.StyleColor = iw::Color(.1);
@@ -304,6 +377,8 @@ void WorldSystem::DrawLightning(
 			[&](
 				float x, float y)
 			{
+				c.life += 0.005;
+
 				sand->m_world->SetCell(x, y, c);
 				return false;
 			});

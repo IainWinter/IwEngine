@@ -4,6 +4,11 @@ int Game_UI_Layer::Initialize()
 {
 	m_screen = Space->CreateEntity<UI_Screen>().Set<UI_Screen>();
 
+	// move out of assets
+	A_mesh_ui_text_ammo     = A_font_cambria->GenerateMesh("0", 5);
+	A_mesh_ui_text_score    = A_font_cambria->GenerateMesh("0", 5);
+	A_mesh_ui_text_gameOver = A_font_cambria->GenerateMesh("YOU HAVE BEEN\n   DESTROYED", 2);
+
 	m_gameover   = m_screen->CreateElement(A_mesh_ui_text_gameOver);
 	m_game       = m_screen->CreateElement(m_sand_game->GetSandMesh());
 	m_menu       = m_screen->CreateElement(A_mesh_ui_background);

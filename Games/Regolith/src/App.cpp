@@ -112,13 +112,15 @@ App::App() : iw::Application()
 	PushLayer<StaticLayer>();
 	PushLayer<UI_Layer>();
 
-	Menu_PostGame_Layer* menu_postGame = new Menu_PostGame_Layer();
-
-	m_gamePost = new GameState("Post game menu");
-	m_gamePost->Layers.push_back(menu_postGame);
+	m_gamePause = new GameState("Pause menu", GAME_PAUSE_STATE);
+	m_gamePause->Layers.push_back(new Menu_Pause_Layer());
+	m_gamePause->OnChange = [&]()
+	{
+		Physics->Paused = true;
+		Input->SetContext("Menu");
+	};
 
 	Console->QueueCommand("game-start");
-	//Console->QueueCommand("escape");
 }
 
 int App::Initialize(
@@ -188,6 +190,14 @@ int App::Initialize(
 
 				if (done)
 				{
+					m_gamePost = new GameState("Post game menu");
+					m_gamePost->Layers.push_back(new Menu_PostGame_Layer());
+					m_gamePost->OnChange = [&]()
+					{
+						Physics->Paused = true;
+						Input->SetContext("Menu");
+					};
+
 					DestroyState(m_gamePlay);
 					SetState(m_gamePost);
 				}
@@ -199,7 +209,7 @@ int App::Initialize(
 		else
 		if (command.Verb == "game-start")
 		{
-			if (m_gamePlay || m_gamePause)
+			if (m_gamePlay)
 			{
 				LOG_WARNING << "Game already started";
 				return true;
@@ -212,8 +222,6 @@ int App::Initialize(
 
 			Game_Layer*    game    = new Game_Layer   (sand, sand_ui_laser);
 			Game_UI_Layer* game_ui = new Game_UI_Layer(sand, sand_ui_laser);
-	
-			Menu_Pause_Layer* menu_pause = new Menu_Pause_Layer();
 
 			m_gamePlay = new GameState("Game play", GAME_RESUME_STATE);
 			m_gamePlay->Layers.push_back(sand);
@@ -221,20 +229,16 @@ int App::Initialize(
 			m_gamePlay->Layers.push_back(game);
 			m_gamePlay->Layers.push_back(game_ui);
 
-			m_gamePause = new GameState("Pause menu", GAME_PAUSE_STATE);
-			m_gamePause->Layers.push_back(menu_pause);
-			
 			m_gamePlay->OnChange = [&]()
 			{
 				Physics->Paused = false;
 				Input->SetContext("Game");
 			};
 
-			m_gamePause->OnChange = [&]()
+			if (m_gamePost)
 			{
-				Physics->Paused = true;
-				Input->SetContext("Menu");
-			};
+				DestroyState(m_gamePost);
+			}
 
 			SetState(m_gamePlay);
 			Bus->push<StateChange_Event>(GAME_START_STATE);

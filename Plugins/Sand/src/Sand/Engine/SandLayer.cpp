@@ -370,4 +370,38 @@ void SandLayer::EjectPixel(
 	tile->RemovePixel(index);
 }
 
+Tile* SandLayer::SplitFromTile(
+	Tile* tile, 
+	std::vector<unsigned> indices)
+{
+	size_t minX =  INT_MAX;
+	size_t minY =  INT_MAX;
+	size_t maxX = -INT_MAX;
+	size_t maxY = -INT_MAX;
+
+	for (unsigned& i : indices)
+	{
+		unsigned x = i / tile->m_sprite.m_width;
+		unsigned y = i % tile->m_sprite.m_width;
+
+		if (x < minX) minX = x;
+		if (y < minY) minY = y;
+		if (x > maxX) maxX = x;
+		if (y > maxY) maxY = y;
+	}
+
+	ref<Texture> texture = REF<Texture>(maxX - minX, maxY - minY);
+	
+	for (unsigned& i : indices)
+	{
+		auto [x, y] = iw::xy(i, tile->m_sprite.m_width);
+
+		texture->Colors32()[(x - minX) + (y - minY) * texture->m_width] = tile->m_sprite.Colors32()[i];
+	}
+
+	//MakeTile();
+
+	return nullptr;
+}
+
 IW_PLUGIN_SAND_END

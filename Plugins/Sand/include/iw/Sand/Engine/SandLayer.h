@@ -129,8 +129,9 @@ public:
 	IW_PLUGIN_SAND_API void PasteTiles();
 	IW_PLUGIN_SAND_API void RemoveTiles();
 
-	IW_PLUGIN_SAND_API void RepairPixel(Tile* tile, unsigned index);
-	IW_PLUGIN_SAND_API void EjectPixel(Tile* tile, unsigned index);
+	IW_PLUGIN_SAND_API void  RepairPixel  (Tile* tile, unsigned index);
+	IW_PLUGIN_SAND_API void  EjectPixel   (Tile* tile, unsigned index);
+	IW_PLUGIN_SAND_API Tile* SplitFromTile(Tile* tile, std::vector<unsigned> indices);
 
 	Mesh& GetSandMesh() {
 		return m_render->GetSandMesh();

@@ -18,11 +18,17 @@ int Menu_Pause_Layer::Initialize()
 	//AddButton(buttonbg, A_font_cambria->GenerateMesh("Video", 16));
 	//AddButton(buttonbg, A_font_cambria->GenerateMesh("Gameplay", 16));
 	AddButton(buttonbg, A_font_cambria->GenerateMesh("Resume", 16));
+	//AddButton(buttonbg, A_font_cambria->GenerateMesh("Kill player", 16));
 	
 	m_buttons.at(0)->onClick = [&]()
 	{
 		Console->QueueCommand("escape");
 	};
+
+	//m_buttons.at(1)->onClick = [&]()
+	//{
+	//	Console->QueueCommand("game-over");
+	//};
 
 	return 0;
 }
@@ -98,7 +104,7 @@ void Menu_Pause_Layer::PostUpdate()
 			}
 		}
 
-		button->offset = iw::lerp(button->offset, buttonOffsetTarget, iw::DeltaTime() * 10);
+		button->offset = iw::lerp(button->offset, buttonOffsetTarget, iw::DeltaTime() * 20);
 		button->x += floor(button->offset);
 		
 		i += 1;
