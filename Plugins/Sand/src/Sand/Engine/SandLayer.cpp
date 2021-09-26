@@ -187,6 +187,12 @@ int SandLayer::Initialize() {
 	return Layer::Initialize();
 }
 
+void SandLayer::Destroy()
+{
+	delete m_world;
+	Layer::Destroy();
+}
+
 void SandLayer::PreUpdate() {
 	int width  = m_render->m_fx2 - m_render->m_fx;
 	int height = m_render->m_fy2 - m_render->m_fy;

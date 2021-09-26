@@ -122,12 +122,15 @@ bool Game_Layer::On(iw::ActionEvent& e)
 			{
 				case GAME_OVER_STATE:
 				{
-					PopSystem(keepInWorld_s);
-					PopSystem(playerTank_s);
-					PopSystem(world_s);
-					PopSystem(player_s);
-					//PopSystem(item_s);   // needed for event queue of state change before 
-					PopSystem(enemy_s);    // spawning item for player death spawning core peices
+					DestroySystem(keepInWorld_s);
+					DestroySystem(playerTank_s);
+					DestroySystem(world_s);
+					DestroySystem(player_s);
+					DestroySystem(enemy_s);    
+
+					// needed for event queue of state change before 
+					// spawning item for player death spawning core peices
+					//PopSystem(item_s); 
 
 					//std::vector<iw::event_record*> events = Bus->end_record();
 

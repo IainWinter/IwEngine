@@ -146,13 +146,14 @@ namespace Engine {
 		template<
 			typename L>
 		void DestroyLayer(
-			L* layer)
+			L*& layer)
 		{
 			LOG_INFO << "Destroyed " << layer->Name() << " layer";
 			m_layers.Pop(layer);
 			layer->OnPop();
 			layer->Destroy();
 			delete layer;
+			layer = nullptr;
 		}
 	protected:
 		inline EventSequence CreateSequence() {

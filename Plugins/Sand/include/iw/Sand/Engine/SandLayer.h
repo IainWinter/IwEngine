@@ -118,6 +118,7 @@ public:
 	}
 
 	IW_PLUGIN_SAND_API int  Initialize();
+	IW_PLUGIN_SAND_API void Destroy();
 	IW_PLUGIN_SAND_API void PreUpdate();
 	IW_PLUGIN_SAND_API void PostUpdate();
 
