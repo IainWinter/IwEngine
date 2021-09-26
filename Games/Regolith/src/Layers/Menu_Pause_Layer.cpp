@@ -70,6 +70,7 @@ void Menu_Pause_Layer::PostUpdate()
 
 	m_pause_menu->height = 600;
 	m_pause_menu->width  = 600;
+	m_pause_menu->y = m_screen->height * .2;
 
 	m_pause_title->height = 600;
 	m_pause_title->width  = 600;
