@@ -17,6 +17,7 @@
 #include "Layers/Game_UI_Layer.h"
 #include "Layers/Menu_Pause_Layer.h"
 #include "Layers/Menu_PostGame_Layer.h"
+#include "Layers/Menu_Fadeout_Layer.h"
 
 #include "State.h"
 #include <stack>
@@ -67,18 +68,19 @@ struct UI_Layer : iw::Layer
 
 class App : public iw::Application {
 private:
-	GameState* game_play;
-	GameState* game_pause;
-	GameState* game_post;
+	GameState* m_gamePlay;
+	GameState* m_gamePause;
+	GameState* m_gamePost;
+	GameState* m_fadeout;
 
-	std::stack<GameState*> StateStack;
-	GameState* CurrentState;
+	std::stack<GameState*> m_stateStack;
+	GameState* m_currentState;
 
-	void ApplyState(GameState* state);
-	void SetState  (GameState* state);
-	void PushState (GameState* state);
-	void PopState  ();
-	void DestroyStates(std::vector<GameState*> states);
+	void ApplyState  (GameState* state);
+	void SetState    (GameState* state);
+	void PushState   (GameState* state);
+	void PopState    ();
+	void DestroyState(GameState*& states);
 public:
 	App();
 	int Initialize(iw::InitOptions& options) override;

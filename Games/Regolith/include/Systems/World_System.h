@@ -7,6 +7,8 @@
 #include "Components/Player.h"
 #include "Components/Flocker.h"
 #include "Components/Asteroid.h"
+#include "Components/CorePixels.h"
+#include "Components/Throwable.h"
 
 #include "Events.h"
 #include "Levels.h"
@@ -36,6 +38,10 @@ struct WorldSystem : iw::SystemBase
 
 	bool On(iw::ActionEvent& e) override;
 
+	void DrawLightning(
+		float x,  float y,
+		float tx, float ty);
+
 private:
 	iw::Entity MakeAsteroid(SpawnAsteroid_Config& config);
 
@@ -56,9 +62,10 @@ private:
 		config.TargetLocationY = target_y;
 		config.TargetEntity = m_player;
 		config.EnemyType = iw::choose(std::vector<std::pair<EnemyType, float>>{
-			{ BOMB,    10 },
-			{ FIGHTER, 90 },
-			{ STATION, 20 }
+			{ FIGHTER, 100 },
+			{ BOMB,     30 },
+			{ STATION,  10 },
+			{ BASE,      5 }
 		});
 
 		Bus->push<SpawnEnemy_Event>(config);

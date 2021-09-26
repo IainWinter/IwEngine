@@ -21,6 +21,9 @@ namespace util {
 		std::vector<std::thread> m_pool;
 		iw::blocking_queue<func_t> m_queue;
 
+		std::mutex m_mutex_coroutine;
+		std::vector<std::function<bool()>> m_coroutines; // main thread tasks
+
 	public:
 		thread_pool(
 			unsigned threads)
@@ -82,6 +85,26 @@ namespace util {
 			};
 
 			m_queue.push(t);
+		}
+
+		void step_coroutines()
+		{
+			std::unique_lock lock(m_mutex_coroutine);
+
+			for (size_t i = 0; i < m_coroutines.size(); i++)
+			{
+				std::function<bool()>& func = m_coroutines.at(i);
+				if (func()) {
+					m_coroutines.erase(m_coroutines.begin() + i);
+				}
+			}
+		}
+
+		void coroutine(
+			std::function<bool()> func)
+		{
+			std::unique_lock lock(m_mutex_coroutine);
+			m_coroutines.push_back(func);
 		}
 
 		template<

@@ -90,11 +90,11 @@ void Game_UI_Layer::PostUpdate()
 	m_game      ->zIndex = -1;
 	m_menu      ->zIndex = -2;
 	m_gameover  ->zIndex = 3;
-	m_version   ->zIndex = 3;
-	m_health    ->zIndex = 3; 
-	m_laser     ->zIndex = 3;
-	m_ammo      ->zIndex = 3;
-	m_score     ->zIndex = 3;
+	m_version   ->zIndex = 1;
+	m_health    ->zIndex = 1; 
+	m_laser     ->zIndex = 1;
+	m_ammo      ->zIndex = 1;
+	m_score     ->zIndex = 1;
 
 	m_menu->height = m_screen->height * .2f;                                    // Ratio(.2f)
 
@@ -143,10 +143,14 @@ void Game_UI_Layer::PostUpdate()
 
 	if (m_game_over)
 	{
-		m_gameover->x = -m_screen->width*.8;
-		m_gameover->y = m_screen->height * .5;
-		m_gameover->width = m_screen->width;
-		m_gameover->height = m_screen->width;
+		auto [min, max] = m_gameover->mesh.GetBounds<iw::d2>();
+		float x = max.x - min.x;
+		float y = max.y - min.y;
+
+		m_gameover->x = -x / 2 * m_game->width  + iw::randf() * m_jitter;
+		m_gameover->y =  y / 2 * m_game->height + iw::randf() * m_jitter;
+		m_gameover->width  = m_game->width;
+		m_gameover->height = m_game->width;
 	}
 	m_gameover->active = m_game_over;
 

@@ -25,8 +25,8 @@ void App::ApplyState(GameState* state)
 {
 	LOG_INFO << "Set game state " << state->Name;
 
-	if (CurrentState)
-	for (iw::Layer* layer : CurrentState->Layers)
+	if (m_currentState)
+	for (iw::Layer* layer : m_currentState->Layers)
 	{
 		PopLayer(layer);
 	}
@@ -42,15 +42,15 @@ void App::ApplyState(GameState* state)
 	}
 
 	Bus->push<StateChange_Event>(state->State);
-	CurrentState = state;
+	m_currentState = state;
 }
 
 void App::SetState(
 	GameState* state)
 {
-	if (StateStack.size() > 0)
+	if (m_stateStack.size() > 0)
 	{
-		StateStack.pop();
+		m_stateStack.pop();
 	}
 
 	PushState(state);
@@ -60,39 +60,40 @@ void App::PushState(
 	GameState* state)
 {
 	ApplyState(state);
-	StateStack.push(state);
+	m_stateStack.push(state);
 }
 
 void App::PopState() 
 {
-	if (StateStack.size() > 0)
+	if (m_stateStack.size() > 0)
 	{
-		StateStack.pop();
-		if (StateStack.size() > 0)
+		m_stateStack.pop();
+		if (m_stateStack.size() > 0)
 		{
-			ApplyState(StateStack.top());
+			ApplyState(m_stateStack.top());
 		}
 	}
 }
 
-void App::DestroyStates(
-	std::vector<GameState*> states)
+void App::DestroyState(
+	GameState*& state)
 {
 	std::set<iw::Layer*> layers;
 
-	for (GameState* state : states) 
+	if (state)
 	{
 		for (iw::Layer* layer : state->Layers)
 		{
 			layers.insert(layer);
 		}
 
-		if (state == CurrentState)
+		if (state == m_currentState)
 		{
-			CurrentState = nullptr;
+			m_currentState = nullptr;
 		}
 		
 		delete state;
+		state = nullptr;
 	}
 
 	for (iw::Layer* layer : layers)
@@ -103,18 +104,18 @@ void App::DestroyStates(
 
 App::App() : iw::Application()
 {
-	CurrentState = nullptr;
-	game_play = nullptr;
-	game_pause = nullptr;
-	game_post = nullptr;
+	m_currentState = nullptr;
+	m_gamePlay = nullptr;
+	m_gamePause = nullptr;
+	m_gamePost = nullptr;
 
 	PushLayer<StaticLayer>();
 	PushLayer<UI_Layer>();
 
 	Menu_PostGame_Layer* menu_postGame = new Menu_PostGame_Layer();
 
-	game_post = new GameState("Post game menu");
-	game_post->Layers.push_back(menu_postGame);
+	m_gamePost = new GameState("Post game menu");
+	m_gamePost->Layers.push_back(menu_postGame);
 
 	Console->QueueCommand("game-start");
 	//Console->QueueCommand("escape");
@@ -162,13 +163,13 @@ int App::Initialize(
 
 		if (command.Verb == "escape")
 		{
-			switch (CurrentState->State)
+			switch (m_currentState->State)
 			{
 				case GAME_PAUSE_STATE:
 					PopState();
 					break;
 				default:
-					PushState(game_pause);
+					PushState(m_gamePause);
 					break;
 			}
 		}
@@ -176,23 +177,29 @@ int App::Initialize(
 		else
 		if (command.Verb == "game-over")
 		{
-			/*float time = iw::TotalTime();
-			Task->queue([&, time]() 
-			{
-				if (iw::TotalTime() - time > 2)
-				{*/
-					DestroyStates({ game_play });
-					game_play = nullptr;
+			Bus->push<StateChange_Event>(GAME_OVER_STATE);
 
-					SetState(game_post);
-			//	}
-			//});
+			m_gamePlay->Layers.push_back(PushLayer<Menu_Fadeout_Layer>(4.f));
+
+			float time = iw::TotalTime();
+			Task->coroutine([&, time]()
+			{
+				bool done = iw::TotalTime() - time > 4;
+
+				if (done)
+				{
+					DestroyState(m_gamePlay);
+					SetState(m_gamePost);
+				}
+
+				return done;
+			});
 		}
 
 		else
 		if (command.Verb == "game-start")
 		{
-			if (game_play || game_pause)
+			if (m_gamePlay || m_gamePause)
 			{
 				LOG_WARNING << "Game already started";
 				return true;
@@ -208,26 +215,28 @@ int App::Initialize(
 	
 			Menu_Pause_Layer* menu_pause = new Menu_Pause_Layer();
 
-			game_play = new GameState("Game play", GAME_RESUME_STATE);
-			game_play->Layers.push_back(sand);
-			game_play->Layers.push_back(sand_ui_laser);
-			game_play->Layers.push_back(game);
-			game_play->Layers.push_back(game_ui);
+			m_gamePlay = new GameState("Game play", GAME_RESUME_STATE);
+			m_gamePlay->Layers.push_back(sand);
+			m_gamePlay->Layers.push_back(sand_ui_laser);
+			m_gamePlay->Layers.push_back(game);
+			m_gamePlay->Layers.push_back(game_ui);
 
-			game_pause = new GameState("Pause menu", GAME_PAUSE_STATE);
-			game_pause->Layers.push_back(menu_pause);
+			m_gamePause = new GameState("Pause menu", GAME_PAUSE_STATE);
+			m_gamePause->Layers.push_back(menu_pause);
 			
-			game_play->OnChange = [&]() {
+			m_gamePlay->OnChange = [&]()
+			{
 				Physics->Paused = false;
 				Input->SetContext("Game");
 			};
 
-			game_pause->OnChange = [&]() {
+			m_gamePause->OnChange = [&]()
+			{
 				Physics->Paused = true;
 				Input->SetContext("Menu");
 			};
 
-			SetState(game_play);
+			SetState(m_gamePlay);
 			Bus->push<StateChange_Event>(GAME_START_STATE);
 		}
 

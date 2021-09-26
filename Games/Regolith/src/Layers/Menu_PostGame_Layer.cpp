@@ -30,12 +30,12 @@ void Menu_PostGame_Layer::Destroy()
 
 void Menu_PostGame_Layer::PostUpdate()
 {
-	m_screen->width  = Renderer->Width()/4;
-	m_screen->height = Renderer->Height()/4;
+	m_screen->width  = Renderer->Width();
+	m_screen->height = Renderer->Height();
 
-	m_background ->zIndex = 5;
-	m_pause_menu ->zIndex = 6;
-	m_pause_title->zIndex = 7;
+	m_background ->zIndex = 0;
+	m_pause_menu ->zIndex = 1;
+	m_pause_title->zIndex = 2;
 
 	m_background->width  = m_screen->width;
 	m_background->height = m_screen->height;

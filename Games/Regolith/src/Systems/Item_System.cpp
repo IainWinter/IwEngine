@@ -2,7 +2,7 @@
 
 void ItemSystem::FixedUpdate()
 {
-    if (!m_player) return;
+    if (m_player && !m_player.Alive()) return;
 
     Space->Query<iw::Rigidbody, Item>().Each([&](
         iw::EntityHandle entity,

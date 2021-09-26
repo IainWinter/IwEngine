@@ -8,12 +8,14 @@ enum EnemyType
 {
 	FIGHTER,
 	BOMB,
-	STATION
+	STATION,
+	BASE
 };
 
 struct Enemy
 {
 	iw::Entity Target;
+	float ExplosionPower;
 };
 
 struct Fighter_Enemy {
@@ -23,8 +25,6 @@ struct Fighter_Enemy {
 struct Bomb_Enemy {
 	float TimeToExplode;
 	float RadiusToExplode;
-	float ExplosionPower;
-
 	bool Explode;
 };
 
@@ -32,4 +32,8 @@ struct Station_Enemy {
 	iw::Timer timer;
 
 	Station_Enemy() {}
+};
+
+struct Base_Enemy {
+
 };

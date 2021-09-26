@@ -14,12 +14,12 @@ int Menu_Pause_Layer::Initialize()
 	iw::Mesh buttonbg = A_mesh_menu_background.MakeInstance();
 	buttonbg.Material->Set("color", iw::Color(.7, .2, .2));
 
-	m_button_test1 = m_screen->CreateElement<UI_Button>(buttonbg, A_font_cambria->GenerateMesh("Audio",    16));
-	m_button_test2 = m_screen->CreateElement<UI_Button>(buttonbg, A_font_cambria->GenerateMesh("Video",    16));
-	m_button_test3 = m_screen->CreateElement<UI_Button>(buttonbg, A_font_cambria->GenerateMesh("Gameplay", 16));
-	m_button_test4 = m_screen->CreateElement<UI_Button>(buttonbg, A_font_cambria->GenerateMesh("Resume",   16));
-
-	m_button_test4->onClick = [&]()
+	//AddButton(buttonbg, A_font_cambria->GenerateMesh("Audio", 16));
+	//AddButton(buttonbg, A_font_cambria->GenerateMesh("Video", 16));
+	//AddButton(buttonbg, A_font_cambria->GenerateMesh("Gameplay", 16));
+	AddButton(buttonbg, A_font_cambria->GenerateMesh("Resume", 16));
+	
+	m_buttons.at(0)->onClick = [&]()
 	{
 		Console->QueueCommand("escape");
 	};
@@ -71,7 +71,7 @@ void Menu_Pause_Layer::PostUpdate()
 	m_pause_title->y = m_pause_menu->y + m_pause_menu->height - 5;
 
 	int i = 0;
-	for (UI_Button* button : { m_button_test1, m_button_test2, m_button_test3, m_button_test4 })
+	for (UI_Button* button : m_buttons)
 	{
 		button->zIndex = 1;
 

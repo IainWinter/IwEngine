@@ -12,9 +12,12 @@ int LoadAssets(
 #define LOADTEX(x) textures.emplace_back(Asset->Load<Texture>(x))
 
 	A_texture_player         = LOADTEX("textures/SpaceGame/player.png");
+	
 	A_texture_enemy_fighter  = LOADTEX("textures/SpaceGame/enemy_fighter.png");
 	A_texture_enemy_bomb     = LOADTEX("textures/SpaceGame/enemy_bomb.png");
 	A_texture_enemy_station  = LOADTEX("textures/SpaceGame/enemy_station.png");
+	A_texture_enemy_base     = LOADTEX("textures/SpaceGame/enemy_base.png");
+
 	A_texture_background     = LOADTEX("textures/SpaceGame/space.png");
 	A_texture_asteroid_mid_1 = LOADTEX("textures/SpaceGame/asteroid_mid_1.png");
 	A_texture_asteroid_mid_2 = LOADTEX("textures/SpaceGame/asteroid_mid_2.png");
@@ -93,7 +96,7 @@ int LoadAssets(
 	}
 
 	{
-		A_mesh_ui_text_gameOver = A_font_cambria->GenerateMesh("GAME OVER\npress space to restart...", 2);
+		A_mesh_ui_text_gameOver = A_font_cambria->GenerateMesh("YOU HAVE BEEN\n   DESTROYED", 2);
 	}
 
 	{

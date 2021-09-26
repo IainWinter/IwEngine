@@ -113,6 +113,33 @@ void PlayerLaserTankSystem::OnPush()
 
 void PlayerLaserTankSystem::Update()
 {
+	iw::Texture& playerSprite = m_player.Find<iw::Tile>()->m_sprite;
+	iw::ref<iw::Texture> uiPlayerTex = A_mesh_ui_playerHealth.Material->GetTexture("texture");
+
+	unsigned* colorsFrom = playerSprite.Colors32();
+	unsigned* colorsTo   = uiPlayerTex->Colors32();
+
+	for (int y = 0; y < playerSprite.m_height; y++)
+	for (int x = 0; x < playerSprite.m_width;  x++)
+	{
+		int ti = x + (playerSprite.m_height - 1 - y) * playerSprite.m_width;
+		int fi = x + y * playerSprite.m_width;
+
+		unsigned color = colorsFrom[fi];
+		iw::Tile::PixelState state = iw::Tile::cState(color);
+
+		if (state == iw::Tile::PixelState::FILLED)
+		{
+			colorsTo[ti] = color;
+		}
+
+		else {
+			colorsTo[ti] = 0;
+		}
+	}
+
+	uiPlayerTex->Update(Renderer->Device);
+
 	iw::SandChunk* chunk = m_tankSand->m_world->GetChunk(0, 0);
 	iw::Rigidbody* body = m_player.Find<iw::Rigidbody>();
 

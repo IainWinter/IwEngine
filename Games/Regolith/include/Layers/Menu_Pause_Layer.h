@@ -11,10 +11,8 @@ struct Menu_Pause_Layer : iw::Layer
 	UI_Screen* m_screen;
 	UI* m_pause_menu;
 	UI* m_pause_title;
-	UI_Button* m_button_test1;
-	UI_Button* m_button_test2;
-	UI_Button* m_button_test3;
-	UI_Button* m_button_test4;
+
+	std::vector<UI_Button*> m_buttons;
 
 	iw::HandlerFunc* m_handle;
 
@@ -24,16 +22,17 @@ struct Menu_Pause_Layer : iw::Layer
 	//bool m_keyTyped;
 	//char m_keyTypedChar;
 
+	void AddButton(const iw::Mesh& bg, const iw::Mesh& label)
+	{
+		m_buttons.push_back(m_screen->CreateElement<UI_Button>(bg, label));
+	}
+
 	Menu_Pause_Layer()
 		: iw::Layer      ("Menu pause")
 
 		, m_screen       (nullptr)
 		, m_pause_menu   (nullptr)
 		, m_pause_title  (nullptr)
-		, m_button_test1 (nullptr)
-		, m_button_test2 (nullptr)
-		, m_button_test3 (nullptr)
-		, m_button_test4 (nullptr)
 
 		, m_handle       (nullptr)
 
