@@ -73,6 +73,7 @@ struct Game_UI_Layer : iw::Layer
 	int Initialize() override;
 	void Destroy() override;
 
+	void PreUpdate() override;
 	void PostUpdate() override;
 
 	bool On(iw::ActionEvent& e) override;

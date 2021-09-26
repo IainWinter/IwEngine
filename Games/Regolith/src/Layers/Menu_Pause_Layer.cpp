@@ -10,7 +10,7 @@ int Menu_Pause_Layer::Initialize()
 
 	m_pause_menu  = m_screen->CreateElement(A_mesh_menu_pause);
 	m_pause_title = m_screen->CreateElement(title);
-	
+
 	iw::Mesh buttonbg = A_mesh_menu_background.MakeInstance();
 	buttonbg.Material->Set("color", iw::Color(.7, .2, .2));
 

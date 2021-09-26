@@ -36,11 +36,11 @@ int Game_Layer::Initialize()
 
 	//Bus->push<StateChange_Event>(RUN_STATE);
 
-	m_cursor = sand->MakeTile(A_texture_ui_cursor);
-	m_cursor.Find<iw::Tile>()->m_zIndex = 1;
-	m_cursor.Find<iw::CollisionObject>()->IsTrigger = true;
+	//m_cursor = sand->MakeTile(A_texture_ui_cursor);
+	//m_cursor.Find<iw::Tile>()->m_zIndex = 1;
+	//m_cursor.Find<iw::CollisionObject>()->IsTrigger = true;
 
-	Physics->RemoveCollisionObject(m_cursor.Find<iw::CollisionObject>());
+	//Physics->RemoveCollisionObject(m_cursor.Find<iw::CollisionObject>());
 
 	return Layer::Initialize();
 }
@@ -66,8 +66,6 @@ void Game_Layer::Destroy()
 
 void Game_Layer::Update() 
 {
-	m_cursor.Find<iw::CollisionObject>()->Transform.Position = glm::vec3(sand->sP, 0.f);
-
 	//tick++;
 
 	//Space->Query<iw::Tile>().Each([&](
@@ -155,6 +153,8 @@ bool Game_Layer::On(iw::ActionEvent& e)
 
 void Game_Layer::PostUpdate()
 {
+	//m_cursor.Find<iw::CollisionObject>()->Transform.Position = glm::vec3(sand->sP, 0.f);
+
 	sand->m_drawMouseGrid = iw::Keyboard::KeyDown(iw::SHIFT);
 
 	//for (auto& [entity, data] : debug_tileColliders)

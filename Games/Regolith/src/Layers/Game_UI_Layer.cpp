@@ -27,6 +27,14 @@ void Game_UI_Layer::Destroy()
 	Space->FindEntity(m_screen).Destroy();
 }
 
+void Game_UI_Layer::PreUpdate()
+{
+	m_sand_game->sP.x -= (m_screen->width - m_game->width) / 2.f / m_sand_game->m_cellSize;
+	m_sand_game->sP.x *= (800.f / m_game->width);
+	
+	m_sand_game->sP.y = (m_sand_game->sP.y - 400) * (800.f / m_game->height) + 400;
+}
+
 void Game_UI_Layer::PostUpdate()
 {
 	// could harden this update to not crash if something is null...

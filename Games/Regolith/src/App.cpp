@@ -117,6 +117,7 @@ App::App() : iw::Application()
 	m_gamePause->OnChange = [&]()
 	{
 		Physics->Paused = true;
+		//Window()->SetCursor(true);
 		Input->SetContext("Menu");
 	};
 
@@ -141,10 +142,10 @@ int App::Initialize(
 
 	iw::ref<iw::Device> mouse        = Input->CreateDevice<iw::Mouse>();
 	//iw::ref<iw::Device> keyboard     = Input->CreateDevice<iw::Keyboard>();
-	iw::ref<iw::Device> mouse_raw    = Input->CreateDevice<iw::RawMouse>();
+	//iw::ref<iw::Device> mouse_raw    = Input->CreateDevice<iw::RawMouse>();
 	iw::ref<iw::Device> keyboard_raw = Input->CreateDevice<iw::RawKeyboard>();
 
-	context_game->AddDevice(mouse_raw);
+	context_game->AddDevice(mouse);
 	context_game->AddDevice(keyboard_raw);
 
 	context_menu->AddDevice(mouse);
@@ -195,6 +196,7 @@ int App::Initialize(
 					m_gamePost->OnChange = [&]()
 					{
 						Physics->Paused = true;
+						//Window()->SetCursor(true);
 						Input->SetContext("Menu");
 					};
 
@@ -232,6 +234,7 @@ int App::Initialize(
 			m_gamePlay->OnChange = [&]()
 			{
 				Physics->Paused = false;
+				//Window()->SetCursor(false);
 				Input->SetContext("Game");
 			};
 
@@ -259,7 +262,7 @@ iw::Application* CreateApplication(
 	options.WindowOptions = iw::WindowOptions {
 		800 + 38/2,
 		1000 + 38,
-		true,/*false,*/
+		true,
 		iw::DisplayState::NORMAL
 	};
 
