@@ -232,6 +232,11 @@ namespace Engine {
 				}
 
 				{
+					LOG_TIME_SCOPE("Coroutines");
+					(*Task).step_coroutines();
+				}
+
+				{
 					LOG_TIME_SCOPE("Console & bus");
 					(*Console).ExecuteQueue();
 					(*Bus).publish();

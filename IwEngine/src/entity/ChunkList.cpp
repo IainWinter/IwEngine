@@ -279,16 +279,22 @@ namespace ECS {
 		const ComponentQuery& query)
 	{
 		Chunk* chunk = m_root;
-		size_t index = 0;
-		while (chunk && chunk->Count == 0) {
+		size_t index = m_root ? m_root->BeginIndex() : 0;
+
+		while (chunk && (chunk->Count == 0 || index == chunk->EndIndex())) 
+		{
 			chunk = chunk->Next;
-		}
-		
-		if (chunk) {
-			index = chunk->BeginIndex();
+			if (chunk)
+			{
+				index = chunk->BeginIndex();
+			}
 		}
 
-		return iterator(m_root, index, m_archetype, query.GetComponents(), m_componentPool);
+		// this had to change because the root chunk could be filled with only dead entities
+		// this never caused issues but now that the first chunk only has a single entity
+		// it was a more potent bug
+
+		return iterator(chunk, index, m_archetype, query.GetComponents(), m_componentPool);
 	}
 
 	iterator ChunkList::End(

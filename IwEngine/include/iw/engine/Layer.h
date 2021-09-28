@@ -51,7 +51,7 @@ namespace Engine {
 		virtual void Destroy()
 		{
 			for (ISystem* s : m_systems) {
-				s->Destroy();
+				DestroySystem(s);
 			}
 		}
 
@@ -202,6 +202,19 @@ namespace Engine {
 			m_systems.Pop(system);
 
 			system->OnPop();
+		}
+
+		template<
+			typename S>
+		void DestroySystem(
+			S*& system)
+		{
+			LOG_INFO << "Destroyed " << system->Name() << " system from " << Name() << " layer";
+			m_systems.Pop(system);
+			system->OnPop();
+			system->Destroy();
+			delete system;
+			system = nullptr;
 		}
 
 		iw::Scene* GetMainScene() {

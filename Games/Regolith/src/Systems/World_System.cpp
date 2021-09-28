@@ -1,6 +1,8 @@
 #include "Systems/World_System.h"
 #include "iw/engine/Events/Seq/Delay.h"
 
+#include "iw/physics/impl/GJK.h"
+
 void WorldSystem::Update()
 {
 	m_timer.Tick();
@@ -63,25 +65,74 @@ void WorldSystem::FixedUpdate()
 			}
 		});
 
-	// this handles tiles death, not the best way shoudl use entity events form a tiledeath system
+	Space->Query<Throwable, Flocker>().Each(
+		[&](
+			iw::EntityHandle handle, 
+			Throwable* throwable, 
+			Flocker* flocker) 
+		{
+			if (throwable->Held)
+			{
+				flocker->Active = false;
+			}
 
-	//Space->Query<iw::Transform, iw::Tile>().Each(
-	//	[&](
-	//		iw::EntityHandle entity, 
-	//		iw::Transform* transform,
-	//		iw::Tile* tile) 
-	//	{
-	//		if ()
-	//		{
-	//		if (tile->m_currentCellCount < tile->m_initalCellCount / 3
-	//			&& (Space->HasComponent<Player>(entity)
-	//			|| !Space->HasComponent<EnemyShip>(entity)))
-	//		{
-	//			return;
-	//		}
+			if (   !flocker->Active 
+				&& !throwable->Held)
+			{
+				throwable->Timer += iw::FixedTime();
 
-	//		}
-	//	});
+				if (throwable->Timer > throwable->Time + .5)
+				{
+					flocker->Active = true;
+				}
+			}
+		});
+
+	Space->Query<iw::Rigidbody, Throwable>().Each(
+		[&](
+			iw::EntityHandle handle, 
+			iw::Rigidbody* rigidbody,
+			Throwable* throwable) 
+		{
+			if (throwable->Held)
+			{
+				if (!throwable->ThrowRequestor.Alive())
+				{
+					return;
+				}
+
+				throwable->Timer += iw::FixedTime();
+
+				float distFromThrower = glm::distance(
+					rigidbody->Transform.Position, 
+					throwable->ThrowRequestor.Find<iw::Transform>()->Position);
+
+				if (   throwable->Timer > throwable->Time
+					|| distFromThrower  > 150)
+				{
+					throwable->Held = false;
+				}
+
+				glm::vec3 pos  = rigidbody->Transform.Position;
+				glm::vec3 tpos = throwable->ThrowTarget   .Find<iw::Transform>()->Position;
+				glm::vec3 rpos = throwable->ThrowRequestor.Find<iw::Transform>()->Position;
+
+				/*
+				auto [min, max] = rigidbody->Collider->as<iw::Physics::impl::Collider<iw::d2>>()->Bounds();
+				float radius = glm::length(max - min) / 2.f;
+				*/
+
+				DrawLightning(throwable->ThrowRequestor, Space->GetEntity(handle));
+
+				glm::vec3 vel = tpos - pos;
+				vel = glm::normalize(vel);
+
+				float currentSpeed = glm::length(rigidbody->Velocity);
+				float speed = iw::max(currentSpeed, 200.f * throwable->Timer / throwable->Time);
+
+				rigidbody->Velocity = iw::lerp(rigidbody->Velocity, vel * speed, iw::FixedTime() * 25);
+			}
+		});
 }
 
 bool WorldSystem::On(iw::ActionEvent& e)
@@ -128,13 +179,30 @@ bool WorldSystem::On(iw::ActionEvent& e)
 		}
 		case CORE_EXPLODED:
 		{
-			glm::vec3 pos = e.as<CoreExploded_Event>().Entity.Find<iw::Transform>()->Position;
+			iw::Entity& entity = e.as<CoreExploded_Event>().Entity;
+
+			glm::vec3 pos = entity.Find<iw::Transform>()->Position;
 
 			SpawnExplosion_Config config;
 			config.SpawnLocationX = pos.x;
 			config.SpawnLocationY = pos.y;
-			config.ExplosionPower = 10;
 			config.ExplosionRadius = 20;
+
+			if (entity.Has<Enemy>())
+			{
+				config.ExplosionPower = entity.Find<Enemy>()->ExplosionPower;
+			}
+
+			else 
+			{
+				CorePixels* core = entity.Find<CorePixels>();
+				for (int i : core->ActiveIndices)
+				{
+					Bus->push<RemoveCellFromTile_Event>(i, entity);
+				}
+
+				config.ExplosionPower = 50; // player explosion
+			}
 
 			Bus->push<SpawnExplosion_Event>(config);
 
@@ -146,6 +214,24 @@ bool WorldSystem::On(iw::ActionEvent& e)
 		}
 		case CREATED_PLAYER: {
 			m_player = e.as<CreatedPlayer_Event>().PlayerEntity;
+
+			//SpawnAsteroid_Config c;
+			//c.SpawnLocationX = 100;
+			//c.SpawnLocationY = 100;
+			//c.Size = 1;
+
+			//Bus->push<SpawnAsteroid_Event>(c);
+
+			//SpawnEnemy_Config cc;
+			//cc.SpawnLocationX = 300;
+			//cc.SpawnLocationY = 100;
+			//cc.TargetLocationX = 200;
+			//cc.TargetLocationY = 200;
+			//cc.EnemyType = BASE;
+			//cc.TargetEntity = m_player;
+
+			//Bus->push<SpawnEnemy_Event>(cc);
+
 			break;
 		}
 		case STATE_CHANGE:
@@ -156,10 +242,6 @@ bool WorldSystem::On(iw::ActionEvent& e)
 			{
 				case GAME_START_STATE:
 				{
-					Space->Query<Asteroid>().Each([&](iw::EntityHandle handle, Asteroid*) {
-						Space->QueueEntity(handle, iw::func_Destroy);
-					});
-
 					m_levels.emplace_front(CreateSequence())
 						.Add<Spawn>(MakeEnemySpawner())
 						.And<Spawn>(MakeAsteroidSpawner())
@@ -181,6 +263,131 @@ bool WorldSystem::On(iw::ActionEvent& e)
 	return false;
 }
 
+std::vector<std::pair<int, int>> WorldSystem::FindClosestCellPositionsMathcingTile(iw::Tile* tile, int x, int y)
+{
+	if (!tile)
+	{
+		return {};
+	}
+
+	std::vector<std::pair<int, int>> cells;
+	int searchSize = 5;
+
+	while (cells.size() == 0 && searchSize < tile->m_sprite.m_width)
+	{
+		for (int sy = -searchSize; sy < searchSize; sy++)
+		for (int sx = -searchSize; sx < searchSize; sx++)
+		{
+			int px = sx + x;
+			int py = sy + y;
+
+			iw::SandChunk* chunk = sand->m_world->GetChunk(px, py);
+
+			if (chunk)
+			{
+				iw::TileInfo& info = chunk->GetCell<iw::TileInfo>(px, py, iw::SandField::TILE_INFO);
+				if (info.tile == tile)
+				{
+					cells.emplace_back(px, py);
+				}
+			}
+		}
+
+		searchSize *= 2;
+	}
+
+	return cells;
+}
+
+void WorldSystem::DrawLightning(
+	iw::Entity originEntity,
+	iw::Entity targetEntity)
+{
+	// pick points that are on surface
+
+	iw::CollisionObject* originObj = GetPhysicsComponent(originEntity.Handle);
+	iw::CollisionObject* targetObj = GetPhysicsComponent(targetEntity.Handle);
+
+	glm::vec2 origin = originObj->Transform.Position;
+	glm::vec2 target = targetObj->Transform.Position;
+
+	glm::vec2 delta = target - origin;
+
+	glm::vec2 a = originObj->Collider->as_dim<iw::d2>()->FindFurthestPoint(&originObj->Transform,  delta);
+	glm::vec2 b = targetObj->Collider->as_dim<iw::d2>()->FindFurthestPoint(&targetObj->Transform, -delta);
+
+	iw::Tile* originTile = originEntity.Find<iw::Tile>();
+	iw::Tile* targetTile = targetEntity.Find<iw::Tile>();
+
+	std::vector<std::pair<int, int>> origins = FindClosestCellPositionsMathcingTile(originTile, a.x, a.y);
+	std::vector<std::pair<int, int>> targets = FindClosestCellPositionsMathcingTile(targetTile, b.x, b.y);
+
+	if (   origins.size() == 0 
+		|| targets.size() == 0)
+	{
+		return;
+	}
+
+	std::pair<int, int> o = origins.at(iw::randi(origins.size() - 1));
+	std::pair<int, int> t = targets.at(iw::randi(targets.size() - 1));
+
+	float x  = o.first;
+	float y  = o.second;
+	float tx = t.first;
+	float ty = t.second;
+
+	float dx = tx - x;
+	float dy = ty - y;
+	float td = sqrt(dx*dx + dy*dy);
+	float  d = td;
+
+	float arc = 10;
+	float stepSize = 5;
+
+	LOG_INFO << d;
+	while (d > 10)
+	{
+		dx = tx - x;
+		dy = ty - y;
+      
+		d = iw::max(1.f, sqrt(dx*dx + dy*dy));
+
+		dx = dx / d * stepSize;
+		dy = dy / d * stepSize;
+      
+		float left = d / td;
+      
+		if (left > 1)
+		{
+			left = .1;
+		}
+
+		float x1 = x + dx + left * iw::randfs() * arc;
+		float y1 = y + dy + left * iw::randfs() * arc;
+      
+		iw::Cell c = iw::Cell::GetDefault(iw::CellType::ROCK);
+		c.life = .04 + iw::randfs() * 0.02;
+
+		c.Color = iw::Color::From255(212, 194, 252);
+		c.StyleColor = iw::Color(.1);
+		c.StyleOffset = iw::randfs();
+		c.Style = iw::CellStyle::SHIMMER;
+
+		sand->ForEachInLine(x, y, x1, y1,
+			[&](
+				float x, float y)
+			{
+				c.life += 0.005;
+
+				sand->m_world->SetCell(x, y, c);
+				return false;
+			});
+      
+		x = x1;
+		y = y1;
+	}
+}
+
 iw::Entity WorldSystem::MakeAsteroid(
 	SpawnAsteroid_Config& config)
 {
@@ -193,7 +400,7 @@ iw::Entity WorldSystem::MakeAsteroid(
 		case 2: asteroid_tex = A_texture_asteroid_mid_3; break;
 	}
 
-	iw::Entity entity = sand->MakeTile<iw::MeshCollider2, Asteroid>(asteroid_tex, true);
+	iw::Entity entity = sand->MakeTile<iw::MeshCollider2, Asteroid, Throwable>(asteroid_tex, true);
 	iw::Transform* t = entity.Find<iw::Transform>();
 	iw::Rigidbody* r = entity.Find<iw::Rigidbody>();
 

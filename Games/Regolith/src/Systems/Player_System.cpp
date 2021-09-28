@@ -32,6 +32,8 @@ void PlayerSystem::FixedUpdate()
 	Player*        player    = m_player.Find<Player>();
 	iw::Rigidbody* rigidbody = m_player.Find<iw::Rigidbody>();
 
+	if (!player) return;
+
 	rigidbody->Velocity.x = player->speed * player->i_moveX;
 	rigidbody->Velocity.y = player->speed * player->i_moveY;
 
@@ -43,6 +45,8 @@ void PlayerSystem::FixedUpdate()
 void PlayerSystem::Update()
 {
 	Player* player = m_player.Find<Player>();
+
+	if (!player) return;
 
 	float aim_x = sand->sP.x;
 	float aim_y = sand->sP.y;

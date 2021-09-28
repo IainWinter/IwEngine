@@ -19,12 +19,13 @@ void EnemySystem::FixedUpdate()
 		}
 	);
 
-	Space->Query<iw::Transform, Flocker, Enemy, Bomb_Enemy>().Each(
+	Space->Query<iw::Transform, iw::Tile, Flocker, Enemy, Bomb_Enemy>().Each(
 		[&](
 			iw::EntityHandle handle,
 			iw::Transform* transform,
+			iw::Tile* tile,
 			Flocker* flocker,
-			Enemy*      ship,
+			Enemy* ship,
 			Bomb_Enemy* bomb)
 		{
 			// maybe put some timer or something
@@ -44,6 +45,8 @@ void EnemySystem::FixedUpdate()
 			if (bomb->Explode)
 			{
 				bomb->TimeToExplode -= iw::FixedTime();
+				
+				tile->m_tint = iw::Color(1, .1, .1);
 
 				if (bomb->TimeToExplode <= 0.f)
 				{
@@ -81,6 +84,42 @@ void EnemySystem::FixedUpdate()
 			}
 		}
 	);
+
+	Space->Query<iw::Transform, Enemy, Base_Enemy>().Each(
+		[&](
+			iw::EntityHandle handle,
+			iw::Transform* transform,
+			Enemy*         ship,
+			Base_Enemy*    base)
+		{
+			Throwable* closestThrowable = nullptr;
+			float closestDist = FLT_MAX;
+			Space->Query<iw::Transform, Throwable>().Each([&](
+				iw::EntityHandle handleThrowable,
+				iw::Transform* transformThrowable,
+				Throwable* throwable)
+			{
+				float dist = glm::distance(transform->Position, transformThrowable->Position);
+
+				if (   dist < 150 
+					&& dist < closestDist)
+				{
+					closestDist = dist;
+					closestThrowable = throwable;
+				}
+			});
+
+			if (    closestThrowable 
+				&& !closestThrowable->Held)
+			{
+				closestThrowable->Held = true;
+				closestThrowable->Time  = 1.f;
+				closestThrowable->Timer = 0.f;
+				closestThrowable->ThrowRequestor = Space->GetEntity(handle);
+				closestThrowable->ThrowTarget = ship->Target;
+			}
+		}
+	);
 }
 
 bool EnemySystem::On(iw::ActionEvent& e)
@@ -92,21 +131,13 @@ bool EnemySystem::On(iw::ActionEvent& e)
 			SpawnEnemy(e.as<SpawnEnemy_Event>().Config);
 			break;
 		}
-		case CORE_EXPLODED: {
-			DestroyEnemy(e.as<CoreExploded_Event>().Entity);
-			break;
-		}
-		case STATE_CHANGE:
+		case CORE_EXPLODED: 
 		{
-			StateChange_Event& event = e.as<StateChange_Event>();
+			iw::Entity& entity = e.as<CoreExploded_Event>().Entity;
 
-			switch (event.State)
+			if (entity.Has<Enemy>())
 			{
-				case GAME_START_STATE:
-					Space->Query<Enemy>().Each([&](iw::EntityHandle handle, Enemy*) {
-						Space->QueueEntity(handle, iw::func_Destroy);
-					});
-					break;
+				DestroyEnemy(e.as<CoreExploded_Event>().Entity);
 			}
 
 			break;
@@ -132,6 +163,8 @@ void EnemySystem::SpawnEnemy(SpawnEnemy_Config& config)
 		case BOMB: 
 		{
 			Space->AddComponent<Bomb_Enemy>(archetype);
+			Space->AddComponent<Throwable>(archetype);
+
 			texture = A_texture_enemy_bomb;
 			break;
 		}
@@ -139,6 +172,12 @@ void EnemySystem::SpawnEnemy(SpawnEnemy_Config& config)
 		{
 			Space->AddComponent<Station_Enemy>(archetype);
 			texture = A_texture_enemy_station;
+			break;
+		}
+		case BASE:
+		{
+			Space->AddComponent<Base_Enemy>(archetype);
+			texture = A_texture_enemy_base;
 			break;
 		}
 	}
@@ -163,7 +202,8 @@ void EnemySystem::SpawnEnemy(SpawnEnemy_Config& config)
 	rigidbody->SetMass(10);
 
 	enemy->Target = config.TargetEntity;
-	
+	enemy->ExplosionPower = 10;
+
 	switch (config.EnemyType)
 	{
 		case FIGHTER: 
@@ -189,9 +229,23 @@ void EnemySystem::SpawnEnemy(SpawnEnemy_Config& config)
 			Station_Enemy* station = entity.Set<Station_Enemy>();
 			station->timer.SetTime("spawn", 2, .5);
 
-			rigidbody->AngularVelocity.z = .1f;
 			rigidbody->SetMass(100);
+			rigidbody->AngularVelocity.z = .1f;
 			flocker->Speed = 25;
+
+			enemy->ExplosionPower = 30;
+
+			break;
+		}
+		case BASE:
+		{
+			Base_Enemy* station = entity.Set<Base_Enemy>();
+
+			rigidbody->SetMass(1000);
+			rigidbody->AngularVelocity.z = .1f;
+			flocker->Speed = 25;
+
+			enemy->ExplosionPower = 60;
 
 			break;
 		}

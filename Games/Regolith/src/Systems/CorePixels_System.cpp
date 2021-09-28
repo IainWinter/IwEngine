@@ -61,7 +61,7 @@ void CorePixelsSystem::Update()
 				dead = true;
 			}
 
-			else if (core->ActiveIndices .size() < core->Indices.size() / 2)
+			else if (core->ActiveIndices .size() < core->Indices.size() / 3 * 2)
 			{
 				core->Timer += iw::DeltaTime();
 				if (core->Timer > core->TimeWithoutCore) {

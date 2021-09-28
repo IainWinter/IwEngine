@@ -22,22 +22,25 @@ int Game_Layer::Initialize()
 	flocking_s    = new FlockingSystem();
 	keepInWorld_s = new KeepInWorldSystem();
 
+	PushSystem(playerTank_s);
+	PushSystem(world_s);
 	PushSystem(projectile_s);
-	PushSystem(item_s);
 	PushSystem(enemy_s);
 	PushSystem(player_s);
 	PushSystem(score_s);
 	PushSystem(corePixels_s);
 	PushSystem(flocking_s);
+	PushSystem(item_s);
 	PushSystem(explosion_s);
-	
+	PushSystem(keepInWorld_s);
+
 	//Bus->push<StateChange_Event>(RUN_STATE);
 
-	m_cursor = sand->MakeTile(A_texture_ui_cursor);
-	m_cursor.Find<iw::Tile>()->m_zIndex = 1;
-	m_cursor.Find<iw::CollisionObject>()->IsTrigger = true;
+	//m_cursor = sand->MakeTile(A_texture_ui_cursor);
+	//m_cursor.Find<iw::Tile>()->m_zIndex = 1;
+	//m_cursor.Find<iw::CollisionObject>()->IsTrigger = true;
 
-	Physics->RemoveCollisionObject(m_cursor.Find<iw::CollisionObject>());
+	//Physics->RemoveCollisionObject(m_cursor.Find<iw::CollisionObject>());
 
 	return Layer::Initialize();
 }
@@ -62,31 +65,7 @@ void Game_Layer::Destroy()
 }
 
 void Game_Layer::Update() 
-{ // this is one frame behind, add a callback to the sand layer that gets called at the right time, right after rendering the world...
-	
-	m_cursor.Find<iw::CollisionObject>()->Transform.Position = glm::vec3(sand->sP, 0.f);
-
-	// state change :o
-
-	//if (showGameOver)
-	//{
-	//	if (iw::Keyboard::KeyDown(iw::InputName::SPACE))
-	//	{
-	//		// could reset by popping all layers and pushing them again
-	//		// each systems OnPush / OnPop could clean up and reint
-
-	//		// now doing it with events END_GAME and RUN_GAME
-	//		// i think that the push/pop was is better but this is simpler
-	//		// ill have to design it better after this weekend when there are actual menus
-	//		// there will have to be more state, which will require the systems being push around
-	//		// maybe layers for menus too actually
-
-	//		Bus->push<StateChange_Event>(RUN_STATE);
-	//	}
-
-	//	return;
-	//}
-
+{
 	//tick++;
 
 	//Space->Query<iw::Tile>().Each([&](
@@ -118,44 +97,19 @@ void Game_Layer::Update()
 	//	}
 	//}
 
-	iw::Texture& playerSprite = m_player.Find<iw::Tile>()->m_sprite;
-	iw::ref<iw::Texture> uiPlayerTex = A_mesh_ui_playerHealth.Material->GetTexture("texture");
+	//if (iw::Mouse::ButtonDown(iw::RMOUSE))
+	//{
+	//	//SpawnItem_Config config;
+	//	//config.X = sand->sP.x;
+	//	//config.Y = sand->sP.y;
+	//	//config.Item = ItemType::HEALTH;
 
-	unsigned* colorsFrom = playerSprite.Colors32();
-	unsigned* colorsTo   = uiPlayerTex->Colors32();
+	//	//Bus->push<SpawnItem_Event>(config);
 
-	for (int i = 0; i < playerSprite.ColorCount32(); i++)
-	{
-		unsigned color = colorsFrom[i];
-		iw::Tile::PixelState state = iw::Tile::cState(color);
-
-		if (state == iw::Tile::PixelState::FILLED)
-		{
-			colorsTo[i] = color;
-		}
-
-		else {
-			colorsTo[i] = 0;
-		}
-	}
-
-	uiPlayerTex->Update(Renderer->Device);
-
-	if (iw::Mouse::ButtonDown(iw::RMOUSE))
-	{
-		//SpawnItem_Config config;
-		//config.X = sand->sP.x;
-		//config.Y = sand->sP.y;
-		//config.Item = ItemType::HEALTH;
-
-		//Bus->push<SpawnItem_Event>(config);
-
-		Console->QueueCommand("game-over");
-	}
+	//	Console->QueueCommand("game-over");
+	//}
 }
-// end temp ui
 
-// could put in own system
 bool Game_Layer::On(iw::ActionEvent& e)
 {
 	switch(e.Action) 
@@ -168,9 +122,15 @@ bool Game_Layer::On(iw::ActionEvent& e)
 			{
 				case GAME_OVER_STATE:
 				{
-					PopSystem(keepInWorld_s);
-					PopSystem(playerTank_s);
-					PopSystem(world_s);
+					DestroySystem(keepInWorld_s);
+					DestroySystem(playerTank_s);
+					DestroySystem(world_s);
+					DestroySystem(player_s);
+					DestroySystem(enemy_s);    
+
+					// needed for event queue of state change before 
+					// spawning item for player death spawning core peices
+					//PopSystem(item_s); 
 
 					//std::vector<iw::event_record*> events = Bus->end_record();
 
@@ -178,22 +138,6 @@ bool Game_Layer::On(iw::ActionEvent& e)
 					{
 						LOG_DEBUG << "[Event] " << record->type->name;
 					}*/
-
-					break;
-				}
-				case GAME_START_STATE: 
-				{
-					//Bus->start_record();
-
-					PushSystem     (keepInWorld_s);
-					PushSystemFront(playerTank_s);
-					PushSystemFront(world_s);
-
-					for (int x = 0; x < 400; x++)
-					for (int y = 0; y < 400; y++)
-					{
-						sand->m_world->SetCell(x, y, iw::Cell::GetDefault(iw::CellType::EMPTY));
-					}
 
 					break;
 				}
@@ -212,6 +156,8 @@ bool Game_Layer::On(iw::ActionEvent& e)
 
 void Game_Layer::PostUpdate()
 {
+	//m_cursor.Find<iw::CollisionObject>()->Transform.Position = glm::vec3(sand->sP, 0.f);
+
 	sand->m_drawMouseGrid = iw::Keyboard::KeyDown(iw::SHIFT);
 
 	//for (auto& [entity, data] : debug_tileColliders)

@@ -12,9 +12,12 @@ int LoadAssets(
 #define LOADTEX(x) textures.emplace_back(Asset->Load<Texture>(x))
 
 	A_texture_player         = LOADTEX("textures/SpaceGame/player.png");
+	
 	A_texture_enemy_fighter  = LOADTEX("textures/SpaceGame/enemy_fighter.png");
 	A_texture_enemy_bomb     = LOADTEX("textures/SpaceGame/enemy_bomb.png");
 	A_texture_enemy_station  = LOADTEX("textures/SpaceGame/enemy_station.png");
+	A_texture_enemy_base     = LOADTEX("textures/SpaceGame/enemy_base.png");
+
 	A_texture_background     = LOADTEX("textures/SpaceGame/space.png");
 	A_texture_asteroid_mid_1 = LOADTEX("textures/SpaceGame/asteroid_mid_1.png");
 	A_texture_asteroid_mid_2 = LOADTEX("textures/SpaceGame/asteroid_mid_2.png");
@@ -82,18 +85,6 @@ int LoadAssets(
 
 		A_mesh_ui_playerHealth.Material = A_material_texture_cam->MakeInstance();
 		A_mesh_ui_playerHealth.Material->SetTexture("texture", ui_player_texture);
-	}
-
-	{
-		A_mesh_ui_text_ammo = A_font_cambria->GenerateMesh("0", 5);
-	}
-
-	{
-		A_mesh_ui_text_score = A_font_cambria->GenerateMesh("0", 5);
-	}
-
-	{
-		A_mesh_ui_text_gameOver = A_font_cambria->GenerateMesh("GAME OVER\npress space to restart...", 2);
 	}
 
 	{

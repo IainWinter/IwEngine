@@ -8,6 +8,7 @@
 #include "Components/EnemyShip.h"
 #include "Components/Flocker.h"
 #include "Components/CorePixels.h"
+#include "Components/Throwable.h"
 
 #include "Events.h"
 #include "Assets.h"

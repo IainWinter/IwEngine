@@ -59,9 +59,22 @@ struct Game_Layer : iw::Layer
 		iw::SandLayer* sand,
 		iw::SandLayer* sand_ui_laserCharge
 	) 
-		: iw::Layer("Space game")
-		, sand(sand)
-		, sand_ui_laserCharge(sand_ui_laserCharge)
+		: iw::Layer           ("Space game")
+
+		, sand                (sand)
+		, sand_ui_laserCharge (sand_ui_laserCharge)
+
+		, keepInWorld_s       (nullptr)
+		, playerTank_s        (nullptr)
+		, world_s             (nullptr)
+		, player_s            (nullptr)
+		, corePixels_s        (nullptr)
+		, projectile_s        (nullptr)
+		, enemy_s             (nullptr)
+		, item_s              (nullptr)
+		, score_s             (nullptr)
+		, flocking_s          (nullptr)
+		, explosion_s         (nullptr)
 	{}
 
 	int Initialize() override;

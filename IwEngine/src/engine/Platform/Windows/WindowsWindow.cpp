@@ -252,7 +252,15 @@ namespace Engine {
 	void WindowsWindow::SetCursor(
 		bool show)
 	{
-		ShowCursor(show);
+		if (show) // this still doesnt work
+		{
+			while (ShowCursor(TRUE) < 0) {}
+		}
+
+		else {
+			while (ShowCursor(FALSE) >= 0) {}
+		}
+
 		Options.Cursor = show;
 	}
 

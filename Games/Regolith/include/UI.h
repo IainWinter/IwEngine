@@ -11,12 +11,15 @@ struct UI_Base
 	iw::Transform transform;
 	std::vector<UI_Base*> children;
 
+	bool active;
+
 	UI_Base()
 		: x      (0.f)
 		, y      (0.f)
 		, zIndex (0.f)
 		, width  (0.f)
 		, height (0.f)
+		, active (true)
 	{}
 
 	virtual ~UI_Base()
@@ -38,6 +41,23 @@ struct UI_Base
 		return ui;
 	}
 
+	template<
+		typename _f>
+	void WalkTree(
+		_f&& functor)
+	{
+		if (!active)
+		{
+			return;
+		}
+
+		functor(this);
+		for (UI_Base* child : children)
+		{
+			child->WalkTree(functor);
+		}
+	}
+
 	void AddElement(
 		UI_Base* element)
 	{
@@ -47,13 +67,16 @@ struct UI_Base
 	virtual void UpdateTransform(
 		UI_Base* parent) 
 	{
-		float x_ = x / parent->width;
-		float y_ = y / parent->height;
-		float w = width  == 0 ? 1 : width  / parent->width;
-		float h = height == 0 ? 1 : height / parent->height;
+		float pw = parent->width  == 0 ? 1 : parent->width;
+		float ph = parent->height == 0 ? 1 : parent->height;
+
+		float x_ = x     / pw;
+		float y_ = y     / ph;
+		float w = width  / pw;
+		float h = height / ph;
 
 		transform = iw::Transform();
-		transform.Position = glm::vec3(x_, y_, -zIndex);
+		transform.Position = glm::vec3(x_, y_, zIndex);
 		transform.Scale    = glm::vec3(w, h, 1);
 
 		transform.SetParent(parent ? &parent->transform : nullptr);
@@ -63,6 +86,11 @@ struct UI_Base
 		render& r,
 		UI_Base* parent)
 	{
+		if (!active)
+		{
+			return;
+		}
+
 		UpdateTransform(parent);
 
 		for (UI_Base* child : children)
@@ -138,21 +166,18 @@ struct UI_Button : UI
 struct UI_Screen : UI_Base
 {
 	int depth;
-	iw::Camera* camera;
+	iw::OrthographicCamera camera;
 
 	UI_Screen()
 		: UI_Base ()
-		, depth   (10.f)
-		, camera  (nullptr)
+		, depth   (0)
 	{}
 
 	void UpdateTransform(
 		UI_Base* parent) override
 	{
 		transform = iw::Transform();
-		//transform.Scale.x = width;
-		//transform.Scale.y = height;
-		transform.Scale.z = depth  == 0 ? 1 : 1.f / depth;
+		transform.Position.z = depth;
 		transform.SetParent(parent ? &parent->transform : nullptr);
 	}
 
@@ -160,7 +185,20 @@ struct UI_Screen : UI_Base
 		render& r,
 		UI_Base* parent = nullptr) override
 	{
-		r->BeginScene(camera);
+		float minZ =  FLT_MAX;
+		float maxZ = -FLT_MAX;
+		UI_Base::WalkTree([&](UI_Base* ui)
+		{
+			if (ui->zIndex < minZ) minZ = ui->zIndex;
+			if (ui->zIndex > maxZ) maxZ = ui->zIndex;
+		});
+
+		// normalize Z
+
+		camera.NearClip = minZ - 1; // this doesnt work for some reason????
+		camera.FarClip  = maxZ + 1;
+
+		r->BeginScene(&camera);
 
 		UI_Base::Draw(r, parent);
 

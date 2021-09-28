@@ -75,6 +75,7 @@ public:
 
 	IW_PLUGIN_SAND_API SandWorld(int chunkWidth, int chunkHeight, double scale);
 	IW_PLUGIN_SAND_API SandWorld(int screenSizeX, int screenSizeY, int numberOfChunksX, int numberOfChunksY, double scale);
+	IW_PLUGIN_SAND_API ~SandWorld();
 
 	IW_PLUGIN_SAND_API Cell& GetCell(int x, int y, SandField field = SandField::CELL);
 

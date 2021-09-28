@@ -4,18 +4,20 @@ int Game_UI_Layer::Initialize()
 {
 	m_screen = Space->CreateEntity<UI_Screen>().Set<UI_Screen>();
 
-	m_screen->camera = new iw::OrthographicCamera(2, 2, -10, 10);
-	m_screen->camera->Transform.Rotation = glm::angleAxis(iw::Pi, glm::vec3(0, 1, 0));
+	// move out of assets
+	A_mesh_ui_text_ammo     = A_font_cambria->GenerateMesh("0", 5);
+	A_mesh_ui_text_score    = A_font_cambria->GenerateMesh("0", 5);
+	A_mesh_ui_text_gameOver = A_font_cambria->GenerateMesh("YOU HAVE BEEN\n   DESTROYED", 2);
 
-	m_menu       = m_screen->CreateElement(A_mesh_ui_background);
+	m_gameover   = m_screen->CreateElement(A_mesh_ui_text_gameOver);
 	m_game       = m_screen->CreateElement(m_sand_game->GetSandMesh());
+	m_menu       = m_screen->CreateElement(A_mesh_ui_background);
 	m_health     = m_screen->CreateElement(A_mesh_ui_playerHealth);
 	m_laser      = m_screen->CreateElement(m_sand_ui_laser->GetSandMesh());
 	m_ammo       = m_screen->CreateElement(A_mesh_ui_text_ammo);
 	m_score      = m_screen->CreateElement(A_mesh_ui_text_score);
 	m_background = m_screen->CreateElement(A_mesh_background);
 	m_version    = m_screen->CreateElement(A_mesh_ui_text_debug_version);
-	m_gameover   = m_screen->CreateElement(A_mesh_ui_text_gameOver);
 
 	return 0;
 }
@@ -25,12 +27,17 @@ void Game_UI_Layer::Destroy()
 	Space->FindEntity(m_screen).Destroy();
 }
 
+void Game_UI_Layer::PreUpdate()
+{
+	m_sand_game->sP.x -= (m_screen->width - m_game->width) / 2.f / m_sand_game->m_cellSize;
+	m_sand_game->sP.x *= (800.f / m_game->width);
+	
+	m_sand_game->sP.y = (m_sand_game->sP.y - 400) * (800.f / m_game->height) + 400;
+}
+
 void Game_UI_Layer::PostUpdate()
 {
 	// could harden this update to not crash if something is null...
-
-	m_screen->width  = Renderer->Width();
-	m_screen->height = Renderer->Height();
 
 	if (m_player_weapon)
 	{
@@ -88,13 +95,23 @@ void Game_UI_Layer::PostUpdate()
 	// uiBarOffset
 	// ammo count
 	// score count
-	
-	m_menu->zIndex = 2;
-	m_game->zIndex = 1;
+
+	m_screen->width  = Renderer->Width();
+	m_screen->height = Renderer->Height();
+
+	m_background->zIndex = -3;
+	m_game      ->zIndex = -1;
+	m_menu      ->zIndex = -2;
+	m_gameover  ->zIndex = 3;
+	m_version   ->zIndex = 1;
+	m_health    ->zIndex = 1; 
+	m_laser     ->zIndex = 1;
+	m_ammo      ->zIndex = 1;
+	m_score     ->zIndex = 1;
 
 	m_menu->height = m_screen->height * .2f;                                    // Ratio(.2f)
 
-	//float uiBarOffsetTarget = m_menu->height * (m_game_paused ? -1 : 1);
+	float uiBarOffsetTarget = m_menu->height * (m_game_paused ? -1 : 1);
 	m_offset = m_menu->height;//iw::lerp(m_offset, uiBarOffsetTarget, iw::DeltaTime() * 12);
 
 	m_menu->x = iw::randf() * m_jitter;                               // Random(uiJitterAmount)
@@ -107,9 +124,6 @@ void Game_UI_Layer::PostUpdate()
 	m_menu->width = m_game->width; // Same(game->width)
 
 	float menu_pad = m_menu->height * .2f;
-
-	m_health->zIndex = 2; 
-	m_laser->zIndex = -2; // ?? why does this have to be negitive
 
 	m_health->height = m_menu->height - menu_pad;
 	m_health->width = m_health->height; // Ratio(health->height)
@@ -134,22 +148,24 @@ void Game_UI_Layer::PostUpdate()
 	m_ammo->height = m_menu->height; // Same(score->width)
 	m_ammo->x = m_menu->x + m_menu->width - ammo_x_pad;
 	m_ammo->y = m_menu->y + m_menu->height - ammo_y_pad;
-	m_ammo->zIndex = 2;
 
 	m_score->width  = m_menu->height;
 	m_score->height = m_menu->height; // Same(score->width)
 	m_score->x = m_menu->x + m_menu->width - score_x_pad;
 	m_score->y = m_menu->y + m_menu->height - score_y_pad;
-	m_score->zIndex = 2;
 
 	if (m_game_over)
 	{
-		m_gameover->x = -m_screen->width*.8;
-		m_gameover->y = m_screen->height * .5;
-		m_gameover->width = m_screen->width;
-		m_gameover->height = m_screen->width;
-		m_gameover->zIndex = 5;
+		auto [min, max] = m_gameover->mesh.GetBounds<iw::d2>();
+		float x = max.x - min.x;
+		float y = max.y - min.y;
+
+		m_gameover->x = -x / 2 * m_game->width  + iw::randf() * m_jitter;
+		m_gameover->y =  y / 2 * m_game->height + iw::randf() * m_jitter;
+		m_gameover->width  = m_game->width;
+		m_gameover->height = m_game->width;
 	}
+	m_gameover->active = m_game_over;
 
 	float uiBackgroundScaleTarget = m_game_paused ? 3 : 1;
 	m_bg_scale = iw::lerp(m_bg_scale, uiBackgroundScaleTarget, iw::DeltaTime() * 12);
@@ -157,13 +173,11 @@ void Game_UI_Layer::PostUpdate()
 	m_background->y = m_game->y;
 	m_background->width  = m_game->width  * m_bg_scale;
 	m_background->height = m_game->height * m_bg_scale;
-	m_background->zIndex = -1;
 
 	m_version->y = m_screen->height - 12;
 	m_version->x = -m_screen->width + 1;
 	m_version->width  = m_menu->width;
 	m_version->height = m_menu->width;
-	m_version->zIndex = 5;
 }
 
 bool Game_UI_Layer::On(iw::ActionEvent& e)

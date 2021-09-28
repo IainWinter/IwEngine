@@ -14,6 +14,11 @@ namespace Physics {
 	};
 
 namespace impl {
+	struct ColliderBase;
+
+	template<Dimension _d>
+	struct Collider;
+
 	struct ColliderBase {
 		const ColliderType Type;
 		const Dimension Dim;
@@ -30,6 +35,12 @@ namespace impl {
 		_t* as() {
 			assert(_t().get_id() == get_id());
 			return (_t*)this;
+		}
+
+		template<Dimension _d>
+		Collider<_d>* as_dim() {
+			assert(_d == Dim);
+			return (Collider<_d>*)this;
 		}
 
 		size_t get_id() const {

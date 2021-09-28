@@ -99,10 +99,21 @@ namespace helpers {
 				return item;
 			}
 
-			last_weight = weight;
+			last_weight += weight;
 		}
 
 		return item_weights.back().first;
+	}
+
+
+	template<
+		typename _t>
+	std::pair<_t, _t> xy(const _t& index, const _t& width)
+	{
+		return {
+			index % width,
+			index / width
+		};
 	}
 }
 	using namespace helpers;

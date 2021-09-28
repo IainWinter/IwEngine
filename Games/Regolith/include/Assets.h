@@ -11,9 +11,12 @@
 #define rFont iw::ref<iw::Font>
 
 inline rTex A_texture_player;
+
 inline rTex A_texture_enemy_fighter;
 inline rTex A_texture_enemy_bomb;
 inline rTex A_texture_enemy_station;
+inline rTex A_texture_enemy_base;
+
 inline rTex A_texture_background;
 inline rTex A_texture_asteroid_mid_1;
 inline rTex A_texture_asteroid_mid_2;
@@ -25,6 +28,7 @@ inline rTex A_texture_item_coreShard;
 inline rTex A_texture_ui_background;
 inline rTex A_texture_ui_cursor;
 inline rTex A_texture_font_cambria;
+inline rTex A_texture_post_game_background;
 
 inline rFont A_font_cambria;
 

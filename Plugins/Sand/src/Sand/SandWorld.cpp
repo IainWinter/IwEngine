@@ -37,6 +37,33 @@ SandWorld::SandWorld(
 	m_expandWorld = false;
 }
 
+SandWorld::~SandWorld()
+{
+	for (auto& batch : m_batches)
+	for (SandChunk* chunk : batch)
+	{
+		for (size_t f = 0; f < m_fields.size(); f++) {
+			FieldConfig& field = m_fields[f];
+				
+			// temp, should be field.memory->free as well
+			if (field.hasLocks) {
+				delete[] chunk->m_fields[f].locks;
+			}
+		}
+
+		delete chunk;
+	}
+
+	for (FieldConfig& field : m_fields) {
+		delete field.memory;
+	}
+
+	for (SandWorkerBuilderBase* worker : m_workers)
+	{
+		delete worker;
+	}
+}
+
 // Getting cells
 
 Cell& SandWorld::GetCell(

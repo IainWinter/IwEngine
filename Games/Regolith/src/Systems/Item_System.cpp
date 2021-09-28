@@ -2,7 +2,9 @@
 
 void ItemSystem::FixedUpdate()
 {
-    if (!m_player) return;
+    iw::Transform* playerTrans = m_player.Find<iw::Transform>();
+    
+    if (!playerTrans) return;
 
     Space->Query<iw::Rigidbody, Item>().Each([&](
         iw::EntityHandle entity,
@@ -28,7 +30,7 @@ void ItemSystem::FixedUpdate()
                 }
             }
 
-            glm::vec3 playerPos = m_player.Find<iw::Transform>()->Position;
+            glm::vec3 playerPos = playerTrans->Position;
             glm::vec3 healthPos = rigidbody->Transform.Position;
 
             float distance = glm::distance(healthPos, playerPos);

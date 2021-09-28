@@ -7,6 +7,8 @@
 #include "Components/Player.h"
 #include "Components/Flocker.h"
 #include "Components/Asteroid.h"
+#include "Components/CorePixels.h"
+#include "Components/Throwable.h"
 
 #include "Events.h"
 #include "Levels.h"
@@ -36,6 +38,11 @@ struct WorldSystem : iw::SystemBase
 
 	bool On(iw::ActionEvent& e) override;
 
+	std::vector<std::pair<int, int>> WorldSystem::FindClosestCellPositionsMathcingTile(iw::Tile* tile, int x, int y);
+	void DrawLightning(
+		iw::Entity originEntity,
+		iw::Entity targetEntit);
+
 private:
 	iw::Entity MakeAsteroid(SpawnAsteroid_Config& config);
 
@@ -56,9 +63,10 @@ private:
 		config.TargetLocationY = target_y;
 		config.TargetEntity = m_player;
 		config.EnemyType = iw::choose(std::vector<std::pair<EnemyType, float>>{
-			{ BOMB,    10 },
-			{ FIGHTER, 90 },
-			{ STATION, 20 }
+			{ FIGHTER, 100 },
+			{ BOMB,     30 },
+			{ STATION,  10 },
+			{ BASE,      5 }
 		});
 
 		Bus->push<SpawnEnemy_Event>(config);
@@ -93,7 +101,7 @@ private:
 		Spawn spawner(iw::randi(10) + 10, iw::randi(3) + 2, iw::randf() + 1.6f, iw::randf() + .3f);
 		spawner.OnSpawn = SpawnEnemy;
 
-		AddRandomSides(spawner, 10, 100, 50, 400);
+		AddRandomSides(spawner, 40, 100, 50, 400);
 
 		return spawner;
 	}

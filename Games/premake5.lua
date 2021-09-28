@@ -63,7 +63,8 @@ workspace (name)
 		}
 
 		defines {
-			--"IW_USE_REFLECTION"
+			--"IW_USE_REFLECTION",
+			"IW_DEBUG"
 		}
 
 		filter "system:windows"
