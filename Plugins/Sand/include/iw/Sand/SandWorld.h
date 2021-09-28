@@ -11,11 +11,11 @@ struct SandWorkerBuilderBase;
 
 class SandWorld {
 public:
-	const size_t m_chunkWidth;
-	const size_t m_chunkHeight;
+	const int m_chunkWidth;
+	const int m_chunkHeight;
 	const double m_scale;
 
-	const size_t m_batchGridSize = 2;
+	const int m_batchGridSize = 2;
 
 	bool m_expandWorld;
 	size_t m_frameCount = 0;
@@ -40,7 +40,6 @@ private:
 	std::vector<FieldConfig> m_fields;
 
 public:
-
 	template<typename _t>
 	void AddField(
 		bool hasLocks = true,
@@ -68,8 +67,10 @@ public:
 		return FieldSize(sizeof(_t));
 	}
 
-	inline size_t FieldSize(size_t size) {
-		return size * m_chunkWidth * m_chunkHeight;
+	inline size_t FieldSize(
+		size_t size)
+	{
+		return size * (size_t)m_chunkWidth * (size_t)m_chunkHeight;
 	}
 
 	IW_PLUGIN_SAND_API SandWorld(int chunkWidth, int chunkHeight, double scale);

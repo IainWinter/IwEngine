@@ -30,8 +30,7 @@ namespace Graphics {
 		{}
 	};
 
-	template<
-		typename _p = StaticParticle>
+	template<typename _p>
 	struct ParticleSystem;
 
 	template<
@@ -140,7 +139,7 @@ namespace Graphics {
 					}
 				}
 
-				unsigned count = m_particles.size();
+				size_t count = m_particles.size();
 
 				if (    /*m_delete.size() != 0
 					|| */m_spawn .size() != 0)

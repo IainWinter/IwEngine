@@ -5,11 +5,12 @@ IW_PLUGIN_SAND_BEGIN
 SandWorld::SandWorld(
 	int chunkWidth,
 	int chunkHeight,
-	double scale)
-	: m_chunkWidth (chunkWidth  / scale)
-	, m_chunkHeight(chunkHeight / scale)
-	, m_scale(scale)
-	, m_expandWorld(true)
+	double scale
+)
+	: m_chunkWidth  (chunkWidth  / scale)
+	, m_chunkHeight (chunkHeight / scale)
+	, m_scale       (scale)
+	, m_expandWorld (true)
 {
 	m_batches.resize(m_batchGridSize * m_batchGridSize);
 }
@@ -19,11 +20,12 @@ SandWorld::SandWorld(
 	int screenSizeY,
 	int numberOfChunksX,
 	int numberOfChunksY,
-	double scale)
-	: m_chunkWidth (screenSizeX / numberOfChunksX)
-	, m_chunkHeight(screenSizeY / numberOfChunksY)
-	, m_scale(scale)
-	, m_expandWorld(true)
+	double scale
+)
+	: m_chunkWidth  (screenSizeX / numberOfChunksX)
+	, m_chunkHeight (screenSizeY / numberOfChunksY)
+	, m_scale       (scale)
+	, m_expandWorld (true)
 {
 	m_batches.resize(m_batchGridSize * m_batchGridSize);
 

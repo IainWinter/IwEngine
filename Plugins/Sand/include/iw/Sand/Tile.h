@@ -76,10 +76,10 @@ struct Tile {
 
 	bool ReinstateRandomPixel()
 	{
-		int size = m_removedCells.size();
+		size_t size = m_removedCells.size();
 		if (size == 0) return false;
 
-		return ReinstatePixel(m_removedCells.at(iw::randi(size - 1)));
+		return ReinstatePixel(m_removedCells.at(iw::randi(size - 1u)));
 	}
 
 	// It seems like thm_removedCells.size() etter if the rendererd geometry is just a square

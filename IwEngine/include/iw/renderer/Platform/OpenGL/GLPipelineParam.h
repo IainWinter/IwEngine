@@ -121,7 +121,7 @@ namespace RenderAPI {
 
 			ss << "(";
 
-			for (int i = 0; i < count; i++) {
+			for (unsigned i = 0; i < count; i++) {
 				ss << t[i];
 				if (i != count - 1) {
 					ss << ", ";

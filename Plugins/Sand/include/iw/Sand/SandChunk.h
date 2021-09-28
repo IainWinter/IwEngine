@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Cell.h"
-#include "iw/util/enum/val.h"
 #include <functional>
 #include <algorithm>
 #include <vector>
@@ -72,7 +71,7 @@ public:
 	Field& GetField(
 		SandField field = SandField::CELL)
 	{
-		return m_fields[val(field)];
+		return m_fields[(size_t)field];
 	}
 
 	// Locking cell, field is not required to have locks, maybe put check here or the field is already non compile safe?
@@ -88,7 +87,7 @@ public:
 		size_t index,
 		SandField field = SandField::CELL)
 	{
-		return m_fields[val(field)].locks[index]; // named from &&?
+		return m_fields[(size_t)field].locks[index]; // named from &&?
 	}
 
 	//void UnlockCell(int x, int y, SandField field = SandField::CELL) { UnlockCell(GetIndex(x, y), field); }
@@ -163,8 +162,8 @@ public:
 		dest = cell;
 
 		if (field.onSetCell) {
-			int x = index % m_width;
-			int y = index / m_width;
+			int x = (int)index % m_width;
+			int y = (int)index / m_width;
 			field.onSetCell(this, index, x, y, (void*)&dest);
 		}
 
@@ -204,8 +203,8 @@ public:
 		dest = cell;
 
 		if (field.onSetCell) {
-			int x = index % m_width;
-			int y = index / m_width;
+			int x = (int)index % m_width;
+			int y = (int)index / m_width;
 			field.onSetCell(this, index, x, y, (void*)&dest);
 		}
 	}

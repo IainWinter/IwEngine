@@ -57,21 +57,23 @@ public:
 		bool expandable = false,
 		bool drawMouseGrid = false
 	)
-		: Layer("Sand")
+		: Layer           ("Sand")
 
-		, m_cellSize(cellSize)
-		, m_cellsPerMeter(cellsPerMeter)
-		, m_drawMouseGrid(drawMouseGrid)
+		, m_cellSize      (cellSize)
+		, m_cellsPerMeter (cellsPerMeter)
+		, m_drawMouseGrid (drawMouseGrid)
 
-		, m_initFixed(false)
-		, m_worldWidth (-1)
-		, m_worldHeight(-1)
+		, m_initFixed     (false)
+		, m_worldWidth    (-1)
+		, m_worldHeight   (-1)
+		, m_worldChunksX  (0)
+		, m_worldChunksY  (0)
 
-		, m_world(nullptr)
-		, m_render(nullptr)
-		, m_update(nullptr)
-		, sP(0.f)
-		, gP(0.f)
+		, m_world         (nullptr)
+		, m_render        (nullptr)
+		, m_update        (nullptr)
+		, sP              (0.f)
+		, gP              (0.f)
 	{
 		m_sandLayerIndex = s_sandLayerIndex++;
 	}
@@ -85,23 +87,23 @@ public:
 		int worldChunksY = 1,
 		bool drawMouseGrid = false
 	)
-		: Layer("Sand")
+		: Layer           ("Sand")
 
-		, m_cellSize(cellSize)
-		, m_cellsPerMeter(cellsPerMeter)
-		, m_drawMouseGrid(drawMouseGrid)
+		, m_cellSize      (cellSize)
+		, m_cellsPerMeter (cellsPerMeter)
+		, m_drawMouseGrid (drawMouseGrid)
 
-		, m_initFixed(true)
-		, m_worldWidth (worldWidth  / cellSize)
-		, m_worldHeight(worldHeight / cellSize)
-		, m_worldChunksX(worldChunksX)
-		, m_worldChunksY(worldChunksY)
+		, m_initFixed     (true)
+		, m_worldWidth    (worldWidth  / cellSize)
+		, m_worldHeight   (worldHeight / cellSize)
+		, m_worldChunksX  (worldChunksX)
+		, m_worldChunksY  (worldChunksY)
 
-		, m_world(nullptr)
-		, m_render(nullptr)
-		, m_update(nullptr)
-		, sP(0.f)
-		, gP(0.f)
+		, m_world         (nullptr)
+		, m_render        (nullptr)
+		, m_update        (nullptr)
+		, sP              (0.f)
+		, gP              (0.f)
 	{
 		m_sandLayerIndex = s_sandLayerIndex++;
 	}
@@ -363,10 +365,10 @@ private:
 	{
 		auto [min, max] = TransformBounds(tile->m_bounds, &tile->LastTransform);
 
-		int x_min = floor(min.x),
-		    y_min = floor(min.y),
-		    x_max = ceil (max.x), 
-		    y_max = ceil (max.y);
+		int x_min = (int)floor(min.x),
+		    y_min = (int)floor(min.y),
+		    x_max = (int)ceil (max.x), 
+		    y_max = (int)ceil (max.y);
 
 		auto c_min = m_world->GetChunkLocation(x_min, y_min);
 		auto c_max = m_world->GetChunkLocation(x_max, y_max);
