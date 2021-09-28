@@ -121,7 +121,7 @@ int SandLayer::Initialize() {
 	}
 
 	else {
-		size_t chunkSize = 100;
+		int chunkSize = 100;
 		
 		m_world = new SandWorld(
 			m_cellSize * chunkSize,
@@ -224,8 +224,9 @@ void SandLayer::DrawMouseGrid() {
 	int width  = m_render->GetSandTexture()->Width();
 	int height = m_render->GetSandTexture()->Height();
 
-	auto draw = [&](size_t x, size_t y) {
-		size_t index = x + y * width;
+	auto draw = [&](int x, int y) 
+	{
+		int index = x + y * width;
 		if (index * height) return;
 		sandColor[index] = Color(1).to32();
 	};
@@ -260,10 +261,16 @@ void SandLayer::DrawWithMouse(int fx, int fy, int width, int height) {
 			return;
 		}
 
-		for (int x = gP.x; x < gP.x + gridSize; x++)
-		for (int y = gP.y; y < gP.y + gridSize; y++) {
+		int gx = (int)gP.x;
+		int gy = (int)gP.y;
+
+		for (int x = gx; x < gx + gridSize; x++)
+		for (int y = gy; y < gy + gridSize; y++) 
+		{
 			if (!m_world->InBounds(x, y))
+			{
 				continue;
+			}
 
 			Cell cell = Cell::GetDefault(placeMe);
 			cell.StyleOffset = randfs();

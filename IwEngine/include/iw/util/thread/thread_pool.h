@@ -119,7 +119,7 @@ namespace util {
 
 			size_t remaining = container.size();
 
-			for (size_t index = 0; index < container.size(); index++)
+			for (auto index = 0; index < container.size(); index++)
 			{
 				queue([&, func, index]() // need to copy func?
 				{
@@ -148,7 +148,7 @@ namespace util {
 			std::condition_variable cond;
 
 			size_t remaining = container.size();
-			size_t index = 0;
+			auto index = 0;
 
 			for (auto& element : container)
 			{

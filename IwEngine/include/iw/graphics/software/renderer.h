@@ -29,7 +29,7 @@ namespace software_renderer {
 		bool shortside = (y1 - y0) * (x2 - x0) < (x1 - x0) * (y2 - y0);
 
 		invoke_result_t<_f2, const _v&, const _v&, int> sides[2];
-		sides[!shortside] = MakeSlope(*v0, *v2, y2 - y0);
+		sides[!shortside] = MakeSlope(*v0, *v2, (int)floor(y2) - (int)floor(y0));
 
 		for (auto y = y0, endy = y0; /**/; ++y) // I wonder if this actually helps the inlinning of lambdas
 		{
@@ -39,11 +39,12 @@ namespace software_renderer {
 
 				// has assignment! i dont like this
 
-				sides[shortside] = apply(MakeSlope, (y < y1) ? tuple(*v0, *v1, (endy = y1) - y0)
+				sides[shortside] = apply(MakeSlope, (y < y1)
+													? tuple(*v0, *v1, (endy = y1) - y0)
 													: tuple(*v1, *v2, (endy = y2) - y1));
 			}
 
-			DrawScanline(y, sides[0], sides[1]);
+			DrawScanline((int)floor(y), sides[0], sides[1]);
 		}
 
 		/*bool right = (y1 - y0) * (x2 - x0) < (x1 - x0) * (y2 - y0);
@@ -151,7 +152,7 @@ namespace software_renderer {
 		void step() { m_cur += m_step; }
 	};
 
-	using vertex = array<int, 4>; // x, y, u, v
+	using vertex = array<float/*int*/, 4>; // x, y, u, v
 
 	template<
 		typename _f>
@@ -177,11 +178,11 @@ namespace software_renderer {
 			},
 			[&](int y, SlopeData& left, SlopeData& right)
 			{
-				float   xf = left [0].get(),
+				float  xf = left [0].get(),
 					endxf = right[0].get();
 
-				int     x = floor(   xf), // just added floor, didnt fix issue, it has to be with transformation not being floored or something??? i really have no clue :(
-					endx = floor(endxf);
+				int    x = (int)floor(   xf), // just added floor, didnt fix issue, it has to be with transformation not being floored or something??? i really have no clue :(
+					endx = (int)floor(endxf);
 
 				Slope props[2]; // u, v inter scanline slopes
 				props[0] = Slope(left[1].get(), right[1].get(), endxf - xf); // need to fix fidelity
