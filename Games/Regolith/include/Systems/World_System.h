@@ -39,9 +39,14 @@ struct WorldSystem : iw::SystemBase
 	bool On(iw::ActionEvent& e) override;
 
 	std::vector<std::pair<int, int>> WorldSystem::FindClosestCellPositionsMathcingTile(iw::Tile* tile, int x, int y);
+
 	void DrawLightning(
 		iw::Entity originEntity,
 		iw::Entity targetEntit);
+
+	void DrawLightning(
+		float x,  float y,
+		float x1, float y1);
 
 private:
 	iw::Entity MakeAsteroid(SpawnAsteroid_Config& config);

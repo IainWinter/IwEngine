@@ -5,6 +5,7 @@
 
 void WorldSystem::Update()
 {
+	return;
 	m_timer.Tick();
 
 	bool needsAnotherLevel = false;
@@ -227,7 +228,7 @@ bool WorldSystem::On(iw::ActionEvent& e)
 			//cc.SpawnLocationY = 100;
 			//cc.TargetLocationX = 200;
 			//cc.TargetLocationY = 200;
-			//cc.EnemyType = BASE;
+			//cc.EnemyType = BOMB;
 			//cc.TargetEntity = m_player;
 
 			//Bus->push<SpawnEnemy_Event>(cc);
@@ -242,11 +243,11 @@ bool WorldSystem::On(iw::ActionEvent& e)
 			{
 				case GAME_START_STATE:
 				{
-					m_levels.emplace_front(CreateSequence())
-						.Add<Spawn>(MakeEnemySpawner())
-						.And<Spawn>(MakeAsteroidSpawner())
-						.And<iw::Delay>(30)
-						.Start();
+					//m_levels.emplace_front(CreateSequence())
+					//	.Add<Spawn>(MakeEnemySpawner())
+					//	.And<Spawn>(MakeAsteroidSpawner())
+					//	.And<iw::Delay>(30)
+					//	.Start();
 					break;
 				}
 				case GAME_OVER_STATE:
@@ -331,11 +332,13 @@ void WorldSystem::DrawLightning(
 	std::pair<int, int> o = origins.at(iw::randi(origins.size() - 1));
 	std::pair<int, int> t = targets.at(iw::randi(targets.size() - 1));
 
-	float x  = o.first;
-	float y  = o.second;
-	float tx = t.first;
-	float ty = t.second;
+	DrawLightning(o.first, o.second, t.first, t.second);
+}
 
+void WorldSystem::DrawLightning(
+	float  x, float  y, 
+	float tx, float ty)
+{
 	float dx = tx - x;
 	float dy = ty - y;
 	float td = sqrt(dx*dx + dy*dy);
@@ -344,7 +347,6 @@ void WorldSystem::DrawLightning(
 	float arc = 10;
 	float stepSize = 5;
 
-	LOG_INFO << d;
 	while (d > 10)
 	{
 		dx = tx - x;
@@ -369,8 +371,8 @@ void WorldSystem::DrawLightning(
 		c.life = .04 + iw::randfs() * 0.02;
 
 		c.Color = iw::Color::From255(212, 194, 252);
-		c.StyleColor = iw::Color(.1);
-		c.StyleOffset = iw::randfs();
+		c.StyleColor = iw::Color(.1, .1, .1, 0);
+		c.StyleOffset = iw::randfs() * .5;
 		c.Style = iw::CellStyle::SHIMMER;
 
 		sand->ForEachInLine(x, y, x1, y1,

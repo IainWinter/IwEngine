@@ -14,21 +14,11 @@ int Menu_Pause_Layer::Initialize()
 	iw::Mesh buttonbg = A_mesh_menu_background.MakeInstance();
 	buttonbg.Material->Set("color", iw::Color(.7, .2, .2));
 
-	//AddButton(buttonbg, A_font_cambria->GenerateMesh("Audio", 16));
-	//AddButton(buttonbg, A_font_cambria->GenerateMesh("Video", 16));
-	//AddButton(buttonbg, A_font_cambria->GenerateMesh("Gameplay", 16));
 	AddButton(buttonbg, A_font_cambria->GenerateMesh("Resume", 16));
-	//AddButton(buttonbg, A_font_cambria->GenerateMesh("Kill player", 16));
-	
 	m_buttons.at(0)->onClick = [&]()
 	{
 		Console->QueueCommand("escape");
 	};
-
-	//m_buttons.at(1)->onClick = [&]()
-	//{
-	//	Console->QueueCommand("game-over");
-	//};
 
 	return 0;
 }

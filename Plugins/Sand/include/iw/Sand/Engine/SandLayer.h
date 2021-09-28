@@ -130,9 +130,13 @@ public:
 	IW_PLUGIN_SAND_API void PasteTiles();
 	IW_PLUGIN_SAND_API void RemoveTiles();
 
-	IW_PLUGIN_SAND_API void  RepairPixel  (Tile* tile, unsigned index);
-	IW_PLUGIN_SAND_API void  EjectPixel   (Tile* tile, unsigned index);
-	IW_PLUGIN_SAND_API Tile* SplitFromTile(Tile* tile, std::vector<unsigned> indices);
+	IW_PLUGIN_SAND_API void RepairPixel  (Tile* tile, unsigned index);
+	IW_PLUGIN_SAND_API void EjectPixel   (Tile* tile, unsigned index);
+
+	IW_PLUGIN_SAND_API
+	Entity SplitTile(
+		Entity& entity,
+		std::vector<int> indices);
 
 	Mesh& GetSandMesh() {
 		return m_render->GetSandMesh();
@@ -194,7 +198,10 @@ public:
 		{
 			for (int i = 0; i < others->Count; i++)
 			{
-				Space->AddComponent(archetype, others->Layout[i].Component);
+				if (!archetype.HasComponent(others->Layout[i].Component))
+				{
+					Space->AddComponent(archetype, others->Layout[i].Component);
+				}
 			}
 		}
 

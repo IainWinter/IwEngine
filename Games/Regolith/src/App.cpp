@@ -256,14 +256,14 @@ int App::Initialize(
 iw::Application* CreateApplication(
 	iw::InitOptions& options)
 {
-	//options.AssetRootPath = "C:/dev/wEngine/_assets/";
+	options.AssetRootPath = "C:/dev/IwEngine/_assets/";
 	//options.AssetRootPath = "assets/";
 
 	options.WindowOptions = iw::WindowOptions {
 		1280,
 		1000 + 39,
 		true,
-		iw::DisplayState::NORMAL
+		iw::DisplayState::BORDERLESS
 	};
 
 	return new App();
