@@ -5,6 +5,8 @@
 
 using render = iw::ref<iw::QueuedRenderer>;
 
+struct UI;
+
 struct UI_Base
 {
 	float x, y, zIndex, width, height;
