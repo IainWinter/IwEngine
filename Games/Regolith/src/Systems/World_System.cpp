@@ -123,6 +123,14 @@ void WorldSystem::FixedUpdate()
 				float radius = glm::length(max - min) / 2.f;
 				*/
 
+				glm::vec3 vel = tpos - pos + (pos - rpos) / 2.f;
+				vel = glm::normalize(vel);
+
+				float currentSpeed = glm::length(rigidbody->Velocity);
+				float speed = iw::max(currentSpeed, 200.f * throwable->Timer / throwable->Time);
+
+				rigidbody->Velocity = iw::lerp(rigidbody->Velocity, vel * speed, iw::FixedTime() * 25);
+
 				LightningConfig config;
 				config.A = throwable->ThrowRequestor;
 				config.B = Space->GetEntity(handle);
@@ -130,14 +138,6 @@ void WorldSystem::FixedUpdate()
 				config.LifeTime = .01f;
 
 				DrawLightning(sand, Space, config);
-
-				glm::vec3 vel = tpos - pos;
-				vel = glm::normalize(vel);
-
-				float currentSpeed = glm::length(rigidbody->Velocity);
-				float speed = iw::max(currentSpeed, 200.f * throwable->Timer / throwable->Time);
-
-				rigidbody->Velocity = iw::lerp(rigidbody->Velocity, vel * speed, iw::FixedTime() * 25);
 			}
 		});
 }

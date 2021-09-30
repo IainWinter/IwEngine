@@ -184,11 +184,9 @@ void ProjectileSystem::Update()
 			}
 		});
 
-	Space->Query<iw::Transform, iw::Rigidbody, Projectile, LightBolt_Projectile>().Each(
+	Space->Query<Projectile, LightBolt_Projectile>().Each(
 		[&](
 			iw::EntityHandle handle,
-			iw::Transform* transform,
-			iw::Rigidbody* rigidbody,
 			Projectile* proj,
 			LightBolt_Projectile* bolt)
 		{	
@@ -197,8 +195,9 @@ void ProjectileSystem::Update()
 			float tx = shot.x + shot.dx;
 			float ty = shot.y + shot.dy;
 
-			iw::CollisionObject* object = Physics->QueryDistance(
-				glm::vec3(tx, ty, .0f), 100).Closest();
+			iw::CollisionObject* object = Physics->QueryVector(
+				glm::vec3(shot.x,  shot.y,  .0f), 
+				glm::vec3(shot.dx, shot.dy, .0f), shot.Speed()).Closest();
 
 			LightningConfig config;
 			config.ArcSize = 10;
@@ -214,10 +213,16 @@ void ProjectileSystem::Update()
 
 			else
 			{
-				config.X       = (int)floor(shot.x);
-				config.Y       = (int)floor(shot.y);
-				config.TargetX = (int)floor(shot.x + shot.dx);
-				config.TargetY = (int)floor(shot.y + shot.dy);
+				CellInfo info = iw::choose_e(
+					FindClosestCellPositionsMatchingTile(
+						sand, shot.origin.Find<iw::Tile>(), 
+						(int)floor(shot.x), (int)floor(shot.y)
+					));
+				
+				config.X = info.x;
+				config.Y = info.y;
+				config.TargetX = tx;
+				config.TargetY = ty;
 			}
 
 			bolts.push_back(config);
@@ -238,10 +243,11 @@ void ProjectileSystem::Update()
 		else {
 			hit = DrawLightning(sand, bolt);
 		}
-
+		
 		if (hit.HasContact)
 		{
-			if (hit.TileInfo.tile)
+			if (   hit.TileInfo.tile
+				&& bolt.A && bolt.A.Find<iw::Tile>() != hit.TileInfo.tile)
 			{
 				sand->EjectPixel(hit.TileInfo.tile, hit.TileInfo.index);
 			}
@@ -350,7 +356,7 @@ iw::Entity ProjectileSystem::MakeBoltz(
 	const ShotInfo& shot,
 	int depth)
 {
-	iw::Entity entity = MakeProjectile<LightBolt_Projectile>(shot);
+	iw::Entity entity = MakeProjectile_raw<LightBolt_Projectile>(shot);
 	LightBolt_Projectile* bolt = entity.Set<LightBolt_Projectile>();
 
 	bolt->Shot = shot;

@@ -50,6 +50,16 @@ private:
 		return entity;
 	}
 
+	template<
+		typename... _cs>
+	iw::Entity MakeProjectile_raw(
+		const ShotInfo& shot)
+	{
+		iw::Entity entity = Space->CreateEntity<Projectile,_cs...>();
+		Projectile* projectile = entity.Set<Projectile>(shot);
+		return entity;
+	}
+
 	iw::Entity MakeBullet(const ShotInfo& shot, int depth);
 	iw::Entity MakeLaser (const ShotInfo& shot, int depth);
 	iw::Entity MakeWattz (const ShotInfo& shot, int depth);

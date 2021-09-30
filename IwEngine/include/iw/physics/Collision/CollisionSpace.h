@@ -5,6 +5,8 @@
 #include "iw/util/memory/ref.h"
 #include "iw/util/thread/thread_pool.h"
 
+#include <set>
+
 // https://www.youtube.com/watch?v=1RphLzpQiJY  Debugging like this could be really cool
 // https://www.youtube.com/watch?v=SHinxAhv1ZE  I now understand the goal of this is to have basically a bunch of these constraint rules be applied on contact points
 // https://www.youtube.com/watch?v=7_nKOET6zwI  Continuous Collisions      49:00 for the $
@@ -13,7 +15,7 @@ namespace iw {
 namespace Physics {
 	struct DistanceQueryResult
 	{
-		std::vector<std::pair<iw::CollisionObject*, scalar>> Objects;
+		std::set<std::pair<scalar, iw::CollisionObject*>> Objects;
 
 		iw::CollisionObject* Closest()
 		{
@@ -22,7 +24,7 @@ namespace Physics {
 				return nullptr;
 			}
 
-			return Objects[0].first;
+			return Objects.begin()->second;
 		}
 
 		float MinDistance()
@@ -32,7 +34,7 @@ namespace Physics {
 				return -FLT_MAX;
 			}
 
-			return Objects[0].second;
+			return Objects.begin()->first;
 		}
 
 		// add furthst etc
@@ -91,9 +93,16 @@ namespace Physics {
 			CollisionObject* object) const;
 
 		IWPHYSICS_API
-		DistanceQueryResult QueryDistance(
+		DistanceQueryResult QueryPoint(
 			const glm::vec3& position,
 			scalar maxDistance) const;
+
+		IWPHYSICS_API
+		DistanceQueryResult QueryVector(
+			const glm::vec3& position,
+			const glm::vec3& vector,
+			scalar maxDistance) const;
+
 
 		//IWPHYSICS_API
 		//bool TestObjects(

@@ -105,6 +105,18 @@ namespace helpers {
 		return item_weights.back().first;
 	}
 
+	template<
+		typename _t>
+	_t& choose_e(
+		std::vector<_t>& items) // need to template list for const/nonconst 
+	{
+		if (items.size() == 0)
+		{
+			throw std::invalid_argument("");
+		}
+
+		return items.at(iw::randi(items.size() - 1));
+	}
 
 	template<
 		typename _t>

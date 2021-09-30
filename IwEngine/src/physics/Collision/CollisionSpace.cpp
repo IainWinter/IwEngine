@@ -204,29 +204,52 @@ namespace Physics {
 		return TestCollider(*object->Collider);
 	}
 
-	DistanceQueryResult CollisionSpace::QueryDistance(
+	DistanceQueryResult CollisionSpace::QueryPoint(
 		const glm::vec3& position,
 		scalar maxDistance) const
 	{
-		std::vector<std::pair<iw::CollisionObject*, scalar>> objects;
+		DistanceQueryResult result;
 
-		for (iw::CollisionObject* object : m_objects)
+		for (CollisionObject* object : m_objects)
 		{
+			// this doesnt take into account collider, should use FindClosestPoint, but even with mesh colliders only returns verts
+			// needs ture analyitical closest point type function to be super correct
+			// solving this would mean that the exact point from gjk/epa could be found which opens rotational physics finally
+
 			scalar distance = glm::distance2(object->Transform.WorldPosition(), position);
 			if (distance < maxDistance * maxDistance)
 			{
-				objects.emplace_back(object, distance);
+				result.Objects.emplace(distance, object);
+			}
+		}
+		
+		return result;
+	}
+
+	DistanceQueryResult CollisionSpace::QueryVector(
+		const glm::vec3& position,
+		const glm::vec3& vector,
+		scalar maxDistance) const
+	{
+		DistanceQueryResult result;
+
+		glm::vec3 vectorNorm = glm::normalize(vector);
+
+		for (CollisionObject* object : m_objects)
+		{
+			glm::vec3 dif = object->Transform.WorldPosition() - position;
+
+			if (glm::length2(dif) < maxDistance * maxDistance)
+			{
+				float distance = glm::dot(vectorNorm, dif);
+				if (distance > 0)
+				{
+					result.Objects.emplace(distance, object);
+				}
 			}
 		}
 
-		std::sort(objects.begin(), objects.end(), [](auto a, auto b) {
-			
-			return a.second > b.second;
-		});
-
-		return DistanceQueryResult {
-			objects
-		};
+		return result;
 	}
 
 	void CollisionSpace::SolveManifolds(
