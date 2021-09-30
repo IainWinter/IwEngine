@@ -5,7 +5,7 @@
 
 void WorldSystem::Update()
 {
-	//return;
+	return;
 	m_timer.Tick();
 
 	bool needsAnotherLevel = false;
@@ -123,7 +123,13 @@ void WorldSystem::FixedUpdate()
 				float radius = glm::length(max - min) / 2.f;
 				*/
 
-				DrawLightning(sand, Space, throwable->ThrowRequestor, Space->GetEntity(handle));
+				LightningConfig config;
+				config.A = throwable->ThrowRequestor;
+				config.B = Space->GetEntity(handle);
+				config.ArcSize = 10;
+				config.LifeTime = .01f;
+
+				DrawLightning(sand, Space, config);
 
 				glm::vec3 vel = tpos - pos;
 				vel = glm::normalize(vel);
@@ -216,22 +222,22 @@ bool WorldSystem::On(iw::ActionEvent& e)
 		case CREATED_PLAYER: {
 			m_player = e.as<CreatedPlayer_Event>().PlayerEntity;
 
-			//SpawnAsteroid_Config c;
-			//c.SpawnLocationX = 100;
-			//c.SpawnLocationY = 100;
-			//c.Size = 1;
+			SpawnAsteroid_Config c;
+			c.SpawnLocationX = 100;
+			c.SpawnLocationY = 100;
+			c.Size = 1;
 
-			//Bus->push<SpawnAsteroid_Event>(c);
+			Bus->push<SpawnAsteroid_Event>(c);
 
-			//SpawnEnemy_Config cc;
-			//cc.SpawnLocationX = 300;
-			//cc.SpawnLocationY = 100;
-			//cc.TargetLocationX = 200;
-			//cc.TargetLocationY = 200;
-			//cc.EnemyType = BOMB;
-			//cc.TargetEntity = m_player;
+			SpawnEnemy_Config cc;
+			cc.SpawnLocationX = 300;
+			cc.SpawnLocationY = 100;
+			cc.TargetLocationX = 200;
+			cc.TargetLocationY = 200;
+			cc.EnemyType = BASE;
+			cc.TargetEntity = m_player;
 
-			//Bus->push<SpawnEnemy_Event>(cc);
+			Bus->push<SpawnEnemy_Event>(cc);
 
 			break;
 		}

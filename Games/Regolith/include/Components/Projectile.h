@@ -61,15 +61,16 @@ struct Split_Projectile
 	{}
 };
 
-struct Effect_Projectile
-{
-	std::function<void(iw::Entity&)> DrawEffect;
-};
-
-struct Lightning_Projectile
+struct LightBall_Projectile
 {
 	std::vector<std::pair<float, float>> Points;
 	iw::Timer Timer;
 
-	Lightning_Projectile() {}
+	LightBall_Projectile() {}
+};
+
+// tag
+struct LightBolt_Projectile
+{
+	ShotInfo Shot;
 };

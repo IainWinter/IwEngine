@@ -74,6 +74,7 @@ inline std::vector<CellInfo> FindClosestCellPositionsMatchingTile(
 			if (chunk)
 			{
 				iw::TileInfo& info = chunk->GetCell<iw::TileInfo>(px, py, iw::SandField::TILE_INFO);
+
 				if (info.tile == tile)
 				{
 					CellInfo ci;
@@ -99,15 +100,36 @@ struct LightningHitInfo
 	bool HasContact = false;
 };
 
+enum class LightningType
+{
+	POINT,
+	ENTITY
+};
+
+struct LightningConfig
+{
+	LightningType Type = LightningType::POINT; // only for outside logic
+
+	iw::Entity A; // only used if Type = ENTITY
+	iw::Entity B;
+
+	int X = 0;
+	int Y = 0;
+	int TargetX = 0;
+	int TargetY = 0;
+	float ArcSize = 0;
+	float LifeTime = 0;
+	bool StopOnHit = false;
+};
+
 inline LightningHitInfo DrawLightning(
 	iw::SandLayer* sand,
-	float  x, float  y, 
-	float tx, float ty,
-	float arc,
-	float life)
+	LightningConfig config)
 {
-	float dx = tx - x;
-	float dy = ty - y;
+	float x = config.X;
+	float y = config.Y;
+	float dx = config.TargetX - x;
+	float dy = config.TargetX - y;
 	float td = sqrt(dx*dx + dy*dy);
 	float  d = td;
 
@@ -119,7 +141,7 @@ inline LightningHitInfo DrawLightning(
 	c.Type = iw::CellType::LIGHTNING;
 
 	c.Props = iw::CellProp::NONE/*MOVE_FORCE*/;
-	c.life = life /*+ iw::randfs() * life / 2.f*/;
+	c.life = config.LifeTime /*+ iw::randfs() * life / 2.f*/;
 	//c.dx = 20 * (iw::randi() ? -1 : 1);
 	//c.dy = 20 * (iw::randi() ? -1 : 1);
 
@@ -128,10 +150,10 @@ inline LightningHitInfo DrawLightning(
 	c.StyleColor = iw::Color(.1, .1, .1, 0);
 	c.StyleOffset = iw::randfs() * .5;
 
-	while (d > 10 && !hit.HasContact)
+	while (d > 10 && (!hit.HasContact || !config.StopOnHit))
 	{
-		dx = tx - x;
-		dy = ty - y;
+		dx = config.TargetX - x;
+		dy = config.TargetY - y;
       
 		d = iw::max(1.f, sqrt(dx*dx + dy*dy));
 
@@ -145,8 +167,8 @@ inline LightningHitInfo DrawLightning(
 			left = .1;
 		}
 
-		float x1 = x + dx + left * iw::randfs() * arc;
-		float y1 = y + dy + left * iw::randfs() * arc;
+		float x1 = x + dx + left * iw::randfs() * config.ArcSize;
+		float y1 = y + dy + left * iw::randfs() * config.ArcSize;
       
 		sand->ForEachInLine(x, y, x1, y1,
 			[&](
@@ -164,7 +186,7 @@ inline LightningHitInfo DrawLightning(
 				iw::Cell&     cell = sand->m_world->GetCell(px, py);
 				iw::TileInfo& info = sand->m_world->GetChunk(px, py)->GetCell<iw::TileInfo>(px, py, iw::SandField::TILE_INFO);
 
-				if (    cell.Type != iw::CellType::EMPTY
+				if (   cell.Type != iw::CellType::EMPTY
 					&& cell.Type != iw::CellType::LIGHTNING
 					|| info.tile)
 				{
@@ -173,7 +195,7 @@ inline LightningHitInfo DrawLightning(
 					hit.TileInfo = info;
 					hit.HasContact = true;
 
-					return true;
+					return config.StopOnHit;
 				}
 
 				sand->m_world->SetCell(px, py, c);
@@ -191,13 +213,12 @@ inline LightningHitInfo DrawLightning(
 inline LightningHitInfo DrawLightning(
 	iw::SandLayer* sand,
 	iw::ref<iw::Space>& space,
-	iw::Entity originEntity,
-	iw::Entity targetEntity)
+	LightningConfig config)
 {
 	// pick points that are on surface
 
-	iw::CollisionObject* originObj = iw::GetPhysicsComponent(space, originEntity.Handle);
-	iw::CollisionObject* targetObj = iw::GetPhysicsComponent(space, targetEntity.Handle);
+	iw::CollisionObject* originObj = iw::GetPhysicsComponent(space, config.A.Handle);
+	iw::CollisionObject* targetObj = iw::GetPhysicsComponent(space, config.B.Handle);
 
 	glm::vec2 origin = originObj->Transform.Position;
 	glm::vec2 target = targetObj->Transform.Position;
@@ -207,13 +228,13 @@ inline LightningHitInfo DrawLightning(
 	glm::vec2 a = originObj->Collider->as_dim<iw::d2>()->FindFurthestPoint(&originObj->Transform,  delta);
 	glm::vec2 b = targetObj->Collider->as_dim<iw::d2>()->FindFurthestPoint(&targetObj->Transform, -delta);
 
-	iw::Tile* originTile = originEntity.Find<iw::Tile>();
-	iw::Tile* targetTile = targetEntity.Find<iw::Tile>();
+	iw::Tile* originTile = config.A.Find<iw::Tile>();
+	iw::Tile* targetTile = config.B.Find<iw::Tile>();
 
 	std::vector<CellInfo> origins = FindClosestCellPositionsMatchingTile(sand, originTile, a.x, a.y);
 	std::vector<CellInfo> targets = FindClosestCellPositionsMatchingTile(sand, targetTile, b.x, b.y);
 
-	if (    origins.size() == 0 
+	if (   origins.size() == 0 
 		|| targets.size() == 0)
 	{
 		return {};
@@ -222,5 +243,10 @@ inline LightningHitInfo DrawLightning(
 	CellInfo o = origins.at(iw::randi(origins.size() - 1));
 	CellInfo t = targets.at(iw::randi(targets.size() - 1));
 
-	return DrawLightning(sand, o.x, o.y, t.x, t.y, 10, .04);
+	config.X = o.x;
+	config.Y = o.y;
+	config.TargetX = t.x;
+	config.TargetY = t.y;
+
+	return DrawLightning(sand, config);
 }

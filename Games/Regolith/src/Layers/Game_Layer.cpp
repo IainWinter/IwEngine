@@ -1,7 +1,7 @@
 #include "Layers/Game_Layer.h"
 
-float lastf = 0.f, x = 200.f, y = 200.f;
-std::vector<std::pair<float, float>> points;
+//float lastf = 0.f, x = 200.f, y = 200.f;
+//std::vector<std::pair<float, float>> points;
 
 int Game_Layer::Initialize()
 {
@@ -45,12 +45,12 @@ int Game_Layer::Initialize()
 
 	//Physics->RemoveCollisionObject(m_cursor.Find<iw::CollisionObject>());
 
-	for (int i = 0; i < 10; i++)
+	/*for (int i = 0; i < 10; i++)
 	{
 		points.emplace_back(
 			iw::randfs() * iw::Pi2, 
 			iw::randfs() * iw::Pi);
-	}
+	}*/
 
 	return Layer::Initialize();
 }
@@ -76,12 +76,12 @@ void Game_Layer::Destroy()
 
 void Game_Layer::Update() 
 {
-	lastf += iw::DeltaTime();
-	if (iw::Mouse::ButtonDown(iw::MMOUSE))
-	{
-		lastf = 0;
-		DrawLightning(sand, 200, 200, sand->sP.x, sand->sP.y, 10, .04);
-	}
+	//lastf += iw::DeltaTime();
+	//if (iw::Mouse::ButtonDown(iw::MMOUSE))
+	//{
+	//	lastf = 0;
+	//	//DrawLightning(sand, 200, 200, sand->sP.x, sand->sP.y, 10, .04);
+	//}
 
 	//	//SpawnEnemy_Config cc;
 	//	//cc.SpawnLocationX = sand->sP.x;

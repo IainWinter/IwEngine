@@ -23,16 +23,6 @@ void ProjectileSystem::Update()
 			}
 		});
 
-	Space->Query<iw::Transform, iw::Rigidbody, Projectile, Effect_Projectile>().Each(
-		[&](
-			iw::EntityHandle handle,
-			iw::Transform* transform,
-			iw::Rigidbody* rigidbody,
-			Projectile* proj,
-			Effect_Projectile* effect)
-		{
-			effect->DrawEffect(Space->GetEntity(handle));
-		});
 
 	Space->Query<iw::Transform, iw::Rigidbody, Projectile, Linear_Projectile>().Each(
 		[&](
@@ -154,6 +144,111 @@ void ProjectileSystem::Update()
 
 			Space->QueueEntity(handle, iw::func_Destroy);
 		});
+
+	// Projectiles that draw lightning
+
+	std::vector<LightningConfig> bolts;
+
+	Space->Query<iw::Transform, iw::Rigidbody, Projectile, LightBall_Projectile>().Each(
+		[&](
+			iw::EntityHandle handle,
+			iw::Transform* transform,
+			iw::Rigidbody* rigidbody,
+			Projectile* proj,
+			LightBall_Projectile* ball)
+		{	
+			ball->Timer.Tick();
+			if (ball->Timer.Can("draw"))
+			{
+				glm::vec3& pos = transform->Position;
+
+				for (auto& [angle, dangle] : ball->Points)
+				{
+					angle += .01 * dangle;
+
+					float al = 15;
+					float ax = cos(angle) * al;
+					float ay = sin(angle) * al;
+
+					LightningConfig config;
+					config.Type = LightningType::POINT;
+					config.X       = (int)floor(pos.x);
+					config.Y       = (int)floor(pos.y);
+					config.TargetX = (int)floor(pos.x + ax);
+					config.TargetX = (int)floor(pos.y + ay);
+					config.ArcSize = 5;
+					config.LifeTime = .01f;
+
+					bolts.push_back(config);
+				}
+			}
+		});
+
+	Space->Query<iw::Transform, iw::Rigidbody, Projectile, LightBolt_Projectile>().Each(
+		[&](
+			iw::EntityHandle handle,
+			iw::Transform* transform,
+			iw::Rigidbody* rigidbody,
+			Projectile* proj,
+			LightBolt_Projectile* bolt)
+		{	
+			ShotInfo& shot = bolt->Shot;
+
+			float tx = shot.x + shot.dx;
+			float ty = shot.y + shot.dy;
+
+			iw::CollisionObject* object = Physics->QueryDistance(
+				glm::vec3(tx, ty, .0f), 100).Closest();
+
+			LightningConfig config;
+			config.ArcSize = 10;
+			config.LifeTime = .0001f;
+			config.StopOnHit = false;
+
+			if (object)
+			{
+				config.Type = LightningType::ENTITY;
+				config.A = shot.origin;
+				config.B = iw::GetPhysicsEntity(Space, object);
+			}
+
+			else
+			{
+				config.X       = (int)floor(shot.x);
+				config.Y       = (int)floor(shot.y);
+				config.TargetX = (int)floor(shot.x + shot.dx);
+				config.TargetY = (int)floor(shot.y + shot.dy);
+			}
+
+			bolts.push_back(config);
+
+			Space->QueueEntity(handle, iw::func_Destroy);
+		});
+
+
+	for (LightningConfig& bolt : bolts)
+	{
+		LightningHitInfo hit;
+
+		if (bolt.Type == LightningType::ENTITY)
+		{
+			hit = DrawLightning(sand, Space, bolt);
+		}
+
+		else {
+			hit = DrawLightning(sand, bolt);
+		}
+
+		if (hit.HasContact)
+		{
+			if (hit.TileInfo.tile)
+			{
+				sand->EjectPixel(hit.TileInfo.tile, hit.TileInfo.index);
+			}
+
+			sand->m_world->SetCell(hit.X, hit.Y, iw::Cell());
+		}
+	}
 }
 
 bool ProjectileSystem::On(iw::ActionEvent& e)
@@ -236,98 +331,31 @@ iw::Entity ProjectileSystem::MakeWattz(
 	const ShotInfo& shot,
 	int depth)
 {
-	iw::Entity entity = MakeProjectile<Lightning_Projectile, Effect_Projectile>(shot);
-	Lightning_Projectile* light  = entity.Set<Lightning_Projectile>();
-	Effect_Projectile*    effect = entity.Set<Effect_Projectile>();
+	iw::Entity entity = MakeProjectile<LightBall_Projectile>(shot);
+	LightBall_Projectile* ball = entity.Set<LightBall_Projectile>();
 
 	for (int i = 0; i < 10; i++)
 	{
-		light->Points.emplace_back(
+		ball->Points.emplace_back(
 			iw::randfs() * iw::Pi2, 
 			iw::randfs() * iw::Pi);
 	}
 
-	light->Timer.SetTime("draw", 0.01f);
-
-	effect->DrawEffect = [&](iw::Entity& e)
-	{
-		Lightning_Projectile* light = e.Find<Lightning_Projectile>();
-		
-		light->Timer.Tick();
-		if (light->Timer.Can("draw"))
-		{
-			glm::vec3& pos = e.Find<iw::Transform>()->Position;
-
-			for (auto& [angle, dangle] : light->Points)
-			{
-				angle += .01 * dangle;
-
-				float al = 15;
-				float ax = cos(angle) * al;
-				float ay = sin(angle) * al;
-
-				LightningHitInfo hit = DrawLightning(
-					sand,
-					floor(pos.x),      floor(pos.y),
-					floor(pos.x + ax), floor(pos.y + ay),
-					5, 
-					.01f
-				);
-
-				if (hit.HasContact)
-				{
-					if (hit.TileInfo.tile)
-					{
-						sand->EjectPixel(hit.TileInfo.tile, hit.TileInfo.index);
-					}
-
-					sand->m_world->SetCell(hit.X, hit.Y, iw::Cell());
-				}
-			}
-		}
-	};
+	ball->Timer.SetTime("draw", 0.01f);
 
 	return entity;
 }
 
-void ProjectileSystem::MakeBoltz(
+iw::Entity ProjectileSystem::MakeBoltz(
 	const ShotInfo& shot,
 	int depth)
 {
-	float tx = shot.x + shot.dx;
-	float ty = shot.y + shot.dy;
+	iw::Entity entity = MakeProjectile<LightBolt_Projectile>(shot);
+	LightBolt_Projectile* bolt = entity.Set<LightBolt_Projectile>();
 
-	iw::CollisionObject* object = Physics->QueryDistance(
-		glm::vec3(tx, ty, .0f), 15).Closest();
+	bolt->Shot = shot;
 
-	LightningHitInfo hit;
-
-	if (object)
-	{
-		hit = DrawLightning(
-			sand, Space, 
-			shot.origin, 
-			iw::GetPhysicsEntity(Space, object));
-	}
-
-	else
-	{
-		hit = DrawLightning(
-			sand, 
-			shot.x, shot.y, 
-			shot.x + shot.dx, shot.y + shot.dy, 
-			10, .0001);
-	}
-
-	if (hit.HasContact)
-	{
-		if (hit.TileInfo.tile)
-		{
-			sand->EjectPixel(hit.TileInfo.tile, hit.TileInfo.index);
-		}
-
-		sand->m_world->SetCell(hit.X, hit.Y, iw::Cell());
-	}
+	return entity;
 }
 
 //iw::Entity ProjectileSystem::MakeBeam(const ShotInfo& shot, int depth)

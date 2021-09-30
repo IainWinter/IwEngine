@@ -53,7 +53,7 @@ private:
 	iw::Entity MakeBullet(const ShotInfo& shot, int depth);
 	iw::Entity MakeLaser (const ShotInfo& shot, int depth);
 	iw::Entity MakeWattz (const ShotInfo& shot, int depth);
-	void       MakeBoltz (const ShotInfo& shot, int depth);
+	iw::Entity MakeBoltz (const ShotInfo& shot, int depth);
 
 	iw::Entity MakeBeam  (const ShotInfo& shot, int depth);
 
