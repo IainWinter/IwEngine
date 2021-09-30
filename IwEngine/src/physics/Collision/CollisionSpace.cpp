@@ -75,7 +75,9 @@ namespace Physics {
 			CollisionObject* obj)
 		{
 			Collider* collider = obj->Collider;
-			if (collider->CacheIsOld()) {
+			if (   collider 
+				&& collider->CacheIsOld()) 
+			{
 				collider->UpdateCache();
 			}
 		};
@@ -104,9 +106,9 @@ namespace Physics {
 			for (CollisionObject* b : m_objects) {
 				if (a == b) break;
 
-				if (   (a->IsTrigger && b->IsTrigger)
-					|| (a->IsStatic  && b->IsStatic)
-					|| !b->Collider)
+				if (   !b->Collider
+					|| (a->IsTrigger && b->IsTrigger)
+					|| (a->IsStatic  && b->IsStatic))
 				{
 					continue;
 				}
@@ -200,6 +202,31 @@ namespace Physics {
 		CollisionObject* object) const
 	{
 		return TestCollider(*object->Collider);
+	}
+
+	DistanceQueryResult CollisionSpace::QueryDistance(
+		const glm::vec3& position,
+		scalar maxDistance) const
+	{
+		std::vector<std::pair<iw::CollisionObject*, scalar>> objects;
+
+		for (iw::CollisionObject* object : m_objects)
+		{
+			scalar distance = glm::distance2(object->Transform.WorldPosition(), position);
+			if (distance < maxDistance * maxDistance)
+			{
+				objects.emplace_back(object, distance);
+			}
+		}
+
+		std::sort(objects.begin(), objects.end(), [](auto a, auto b) {
+			
+			return a.second > b.second;
+		});
+
+		return DistanceQueryResult {
+			objects
+		};
 	}
 
 	void CollisionSpace::SolveManifolds(

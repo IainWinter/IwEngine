@@ -10,7 +10,7 @@ void ItemSystem::FixedUpdate()
         iw::EntityHandle entity,
         iw::Rigidbody* rigidbody,
         Item* item) 
-        {
+    {
             if (item->ActivateTimer > 0.f) {
                 item->ActivateTimer -= iw::FixedTime();
                 return;

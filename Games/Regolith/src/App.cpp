@@ -263,7 +263,7 @@ iw::Application* CreateApplication(
 		1280,
 		1000 + 39,
 		true,
-		iw::DisplayState::BORDERLESS
+		iw::DisplayState::NORMAL
 	};
 
 	return new App();

@@ -1,5 +1,8 @@
 #include "Layers/Game_Layer.h"
 
+float lastf = 0.f, x = 200.f, y = 200.f;
+std::vector<std::pair<float, float>> points;
+
 int Game_Layer::Initialize()
 {
 	auto [sandWidth, sandHeight] = sand->GetSandTexSize2();
@@ -42,6 +45,13 @@ int Game_Layer::Initialize()
 
 	//Physics->RemoveCollisionObject(m_cursor.Find<iw::CollisionObject>());
 
+	for (int i = 0; i < 10; i++)
+	{
+		points.emplace_back(
+			iw::randfs() * iw::Pi2, 
+			iw::randfs() * iw::Pi);
+	}
+
 	return Layer::Initialize();
 }
 
@@ -64,9 +74,26 @@ void Game_Layer::Destroy()
 	Layer::Destroy();
 }
 
-float lastf = 0.f;
 void Game_Layer::Update() 
 {
+	lastf += iw::DeltaTime();
+	if (iw::Mouse::ButtonDown(iw::MMOUSE))
+	{
+		lastf = 0;
+		DrawLightning(sand, 200, 200, sand->sP.x, sand->sP.y, 10, .04);
+	}
+
+	//	//SpawnEnemy_Config cc;
+	//	//cc.SpawnLocationX = sand->sP.x;
+	//	//cc.SpawnLocationY = sand->sP.y;
+	//	//cc.TargetLocationX = 200;
+	//	//cc.TargetLocationY = 200;
+	//	//cc.EnemyType = BASE;
+	//	//cc.TargetEntity = m_player;
+
+	//	//Bus->push<SpawnEnemy_Event>(cc);
+	//}
+
 	//tick++;
 
 	//Space->Query<iw::Tile>().Each([&](
@@ -109,25 +136,6 @@ void Game_Layer::Update()
 
 	//	Console->QueueCommand("game-over");
 	//}
-
-
-	lastf += iw::DeltaTime();
-	if (lastf > .01 && /*last && */iw::Mouse::ButtonDown(iw::MMOUSE))
-	{
-		lastf = 0;
-
-		world_s->DrawLightning(200, 200, sand->sP.x, sand->sP.y);
-
-		//SpawnEnemy_Config cc;
-		//cc.SpawnLocationX = sand->sP.x;
-		//cc.SpawnLocationY = sand->sP.y;
-		//cc.TargetLocationX = 200;
-		//cc.TargetLocationY = 200;
-		//cc.EnemyType = BASE;
-		//cc.TargetEntity = m_player;
-
-		//Bus->push<SpawnEnemy_Event>(cc);
-	}
 }
 
 bool Game_Layer::On(iw::ActionEvent& e)
@@ -174,41 +182,11 @@ bool Game_Layer::On(iw::ActionEvent& e)
 	return Layer::On(e);
 }
 
-bool last = false;
-bool last1 = false;
-
 void Game_Layer::PostUpdate()
 {
 	//m_cursor.Find<iw::CollisionObject>()->Transform.Position = glm::vec3(sand->sP, 0.f);
 
 	sand->m_drawMouseGrid = iw::Keyboard::KeyDown(iw::SHIFT);
-
-
-	if (last1 && iw::Mouse::ButtonUp(iw::RMOUSE))
-	{
-		if (iw::Keyboard::KeyDown(iw::SHIFT))
-		{
-			SpawnEnemy_Config cc;
-			cc.SpawnLocationX = sand->sP.x;
-			cc.SpawnLocationY = sand->sP.y;
-			cc.TargetLocationX = 200;
-			cc.TargetLocationY = 200;
-			cc.EnemyType = BOMB;
-			cc.TargetEntity = m_player;
-
-			Bus->push<SpawnEnemy_Event>(cc);
-		}
-
-		SpawnAsteroid_Config c;
-		c.SpawnLocationX = sand->sP.x;
-		c.SpawnLocationY = sand->sP.y;
-		c.Size = 1;
-
-		Bus->push<SpawnAsteroid_Event>(c);
-	}
-
-	last  = iw::Mouse::ButtonDown(iw::MMOUSE);
-	last1 = iw::Mouse::ButtonDown(iw::RMOUSE);
 
 	//for (auto& [entity, data] : debug_tileColliders)
 	//{

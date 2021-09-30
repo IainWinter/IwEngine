@@ -71,6 +71,10 @@ void SandWorldRenderSystem::Update() {
 			Cell*     cells  = chunk->GetField(SandField::CELL) .GetCells<Cell>();
 			uint32_t* colors = chunk->GetField(SandField::COLOR).GetCells<uint32_t>();
 
+			// debug
+			//char*         solid = chunk->GetField(SandField::SOLID)    .GetCells<char>();
+			//iw::TileInfo* tiles = chunk->GetField(SandField::TILE_INFO).GetCells<iw::TileInfo>();
+
 			// sand texture
 			for (int y = startY; y < endY; y++)
 			for (int x = startX; x < endX; x++) 
@@ -115,6 +119,7 @@ void SandWorldRenderSystem::Update() {
 						}
 
 						pixels[texi] = color.to32();
+
 					}
 				}
 
@@ -134,6 +139,16 @@ void SandWorldRenderSystem::Update() {
 
 					pixels[texi] = Color(color + accent).to32();
 				}
+
+				//if (solid[x + y * chunk->m_width])
+				//{
+				//	pixels[texi] += iw::Color(.5, 0, 0, 1 - color.a).to32();
+				//}
+
+				//if (tiles[x + y * chunk->m_width].tile)
+				//{
+				//	pixels[texi] += iw::Color(0, .5, 0, 1 - color.a).to32();
+				//}
 			}
 
 			std::unique_lock lock(mutex); 

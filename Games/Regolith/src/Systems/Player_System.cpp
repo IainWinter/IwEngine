@@ -158,6 +158,8 @@ bool PlayerSystem::On(iw::ActionEvent& e)
 				case WeaponType::DEFAULT_CANNON:      player->CurrentWeapon = MakeDefault_Cannon();     break;
 				case WeaponType::MINIGUN_CANNON:      player->CurrentWeapon = MakeMinigun_Cannon();     break;
 				case WeaponType::SPECIAL_BEAM_CANNON: player->CurrentWeapon = MakeSpecialBeam_Cannon(); break;
+				case WeaponType::WATTZ_CANNON:        player->CurrentWeapon = MakeWattz_Cannon();       break;
+				case WeaponType::BOLTZ_CANNON:        player->CurrentWeapon = MakeBoltz_Cannon();       break;
 			}
 
 			event.CurrentWeapon = player->CurrentWeapon; // pass onto Game_UI_Layer
@@ -195,7 +197,7 @@ bool PlayerSystem::On(iw::ActionEvent& e)
 					
 					player->SpecialLaser = MakeFatLaser_Cannon();
 					
-					Bus->push<ChangePlayerWeapon_Event>(WeaponType::DEFAULT_CANNON);
+					Bus->push<ChangePlayerWeapon_Event>(WeaponType::BOLTZ_CANNON/*DEFAULT_CANNON*/);
 					Bus->push<CreatedPlayer_Event>(m_player);
 					Bus->push<CreatedCoreTile_Event>(m_player);
 

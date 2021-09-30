@@ -16,7 +16,9 @@ void flood_fill(
 {
 	//size_t index = x + y * size_y;
 
-	if (index >= size_x * size_y) {
+	if (   index < 0 
+		|| index >= size_x * size_y) 
+	{
 		return;
 	}
 
@@ -178,6 +180,10 @@ bool CorePixelsSystem::On(iw::ActionEvent& e)
 			// if not this should go in the player system as it only effects them
 			
 			// Remove core peice
+
+			// crash where this returns incorrect components
+			// not sure what root cause it prob event delay...
+			// or it could be in the entity system
 
 			CorePixels* core = entity.Find<CorePixels>();
 			iw::Tile*   tile = entity.Find<iw::Tile>();

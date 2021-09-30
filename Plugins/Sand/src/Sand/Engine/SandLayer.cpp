@@ -177,8 +177,8 @@ int SandLayer::Initialize() {
 	// 
 	//m_tiles = grid2<Tile*>(chunkSize / m_cellsPerMeter);
 
+	m_render = PushSystem<SandWorldRenderSystem>(m_world, m_worldWidth, m_worldHeight); // trying to render before update for cells with lifes under deltatime
 	m_update = PushSystem<SandWorldUpdateSystem>(m_world);
-	m_render = PushSystem<SandWorldRenderSystem>(m_world, m_worldWidth, m_worldHeight);
 	
 	m_update->SetCameraScale(m_cellsPerMeter, m_cellsPerMeter);
 
@@ -329,7 +329,7 @@ void SandLayer::PasteTiles()
 		[&](SandChunk* chunk, PixelData& data)
 		{
 			auto& [x, y, tile, colors, index] = data;
-
+			
 			if (   !chunk 
 				|| !chunk->IsEmpty(x, y)
 				|| index >= tile->m_sprite.m_width * tile->m_sprite.m_height
@@ -338,7 +338,7 @@ void SandLayer::PasteTiles()
 			{
 				return;
 			}
-
+				
 			chunk->SetCell_unsafe(x, y, colors[index],            SandField::COLOR);
 			chunk->SetCell_unsafe(x, y, true,                     SandField::SOLID);
 			chunk->SetCell_unsafe(x, y, TileInfo { tile, index }, SandField::TILE_INFO);
@@ -357,17 +357,27 @@ void SandLayer::RemoveTiles()
 
 		for (auto& [x, y, tile, colors, index] : pixels)
 		{
-			if (   index >= tile->m_sprite.m_width * tile->m_sprite.m_height
-				|| tile->State(index) == Tile::EMPTY
-				|| tile->State(index) == Tile::REMOVED)
+			const auto& removed = tile->m_justRemovedCells;
+			
+			if (std::find(removed.begin(), removed.end(), index) == removed.end())
 			{
-				continue;
+				if (   index >= tile->m_sprite.m_width * tile->m_sprite.m_height
+					|| tile->State(index) == Tile::EMPTY
+					|| tile->State(index) == Tile::REMOVED)
+				{
+					continue;
+				}
 			}
 
 			chunk->SetCell_unsafe(x, y, 0u,                       SandField::COLOR);
 			chunk->SetCell_unsafe(x, y, false,                    SandField::SOLID);
 			chunk->SetCell_unsafe(x, y, TileInfo { nullptr, 0u }, SandField::TILE_INFO);
 		}
+	}
+
+	for (iw::Tile* tile : m_tilesThisFrame)
+	{
+		tile->m_justRemovedCells.clear();
 	}
 }
 
