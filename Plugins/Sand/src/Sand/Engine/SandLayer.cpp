@@ -177,8 +177,8 @@ int SandLayer::Initialize() {
 	// 
 	//m_tiles = grid2<Tile*>(chunkSize / m_cellsPerMeter);
 
+	m_render = PushSystem<SandWorldRenderSystem>(m_world, m_worldWidth, m_worldHeight); // trying to render before update for cells with lifes under deltatime
 	m_update = PushSystem<SandWorldUpdateSystem>(m_world);
-	m_render = PushSystem<SandWorldRenderSystem>(m_world, m_worldWidth, m_worldHeight);
 	
 	m_update->SetCameraScale(m_cellsPerMeter, m_cellsPerMeter);
 
@@ -329,7 +329,7 @@ void SandLayer::PasteTiles()
 		[&](SandChunk* chunk, PixelData& data)
 		{
 			auto& [x, y, tile, colors, index] = data;
-
+			
 			if (   !chunk 
 				|| !chunk->IsEmpty(x, y)
 				|| index >= tile->m_sprite.m_width * tile->m_sprite.m_height
@@ -338,7 +338,7 @@ void SandLayer::PasteTiles()
 			{
 				return;
 			}
-
+				
 			chunk->SetCell_unsafe(x, y, colors[index],            SandField::COLOR);
 			chunk->SetCell_unsafe(x, y, true,                     SandField::SOLID);
 			chunk->SetCell_unsafe(x, y, TileInfo { tile, index }, SandField::TILE_INFO);
@@ -357,17 +357,27 @@ void SandLayer::RemoveTiles()
 
 		for (auto& [x, y, tile, colors, index] : pixels)
 		{
-			if (   index >= tile->m_sprite.m_width * tile->m_sprite.m_height
-				|| tile->State(index) == Tile::EMPTY
-				|| tile->State(index) == Tile::REMOVED)
+			const auto& removed = tile->m_justRemovedCells;
+			
+			if (std::find(removed.begin(), removed.end(), index) == removed.end())
 			{
-				continue;
+				if (   index >= tile->m_sprite.m_width * tile->m_sprite.m_height
+					|| tile->State(index) == Tile::EMPTY
+					|| tile->State(index) == Tile::REMOVED)
+				{
+					continue;
+				}
 			}
 
 			chunk->SetCell_unsafe(x, y, 0u,                       SandField::COLOR);
 			chunk->SetCell_unsafe(x, y, false,                    SandField::SOLID);
 			chunk->SetCell_unsafe(x, y, TileInfo { nullptr, 0u }, SandField::TILE_INFO);
 		}
+	}
+
+	for (iw::Tile* tile : m_tilesThisFrame)
+	{
+		tile->m_justRemovedCells.clear();
 	}
 }
 
@@ -383,19 +393,26 @@ void SandLayer::EjectPixel(
 	tile->RemovePixel(index);
 }
 
-Tile* SandLayer::SplitFromTile(
-	Tile* tile, 
-	std::vector<unsigned> indices)
+Entity SandLayer::SplitTile(
+	Entity& entity, 
+	std::vector<int> indices)
 {
-	size_t minX =  INT_MAX;
-	size_t minY =  INT_MAX;
-	size_t maxX = -INT_MAX;
-	size_t maxY = -INT_MAX;
-
-	for (unsigned& i : indices)
+	if (indices.size() <= 2)
 	{
-		unsigned x = i / tile->m_sprite.m_width;
-		unsigned y = i % tile->m_sprite.m_width;
+		return Entity();
+	}
+
+	int minX =  INT_MAX;
+	int minY =  INT_MAX;
+	int maxX = -INT_MAX;
+	int maxY = -INT_MAX;
+
+	iw::Tile* tile = entity.Find<iw::Tile>();
+	iw::Transform* transform = entity.Find<iw::Transform>();
+
+	for (int& i : indices)
+	{
+		auto [x, y] = iw::xy(i, (int)tile->m_sprite.m_width);
 
 		if (x < minX) minX = x;
 		if (y < minY) minY = y;
@@ -403,18 +420,35 @@ Tile* SandLayer::SplitFromTile(
 		if (y > maxY) maxY = y;
 	}
 
-	ref<Texture> texture = REF<Texture>(maxX - minX, maxY - minY);
-	
-	for (unsigned& i : indices)
-	{
-		auto [x, y] = iw::xy(i, tile->m_sprite.m_width);
+	ref<Texture> texture = REF<Texture>(maxX - minX + 1, maxY - minY + 1);
+	texture->CreateColors();
 
-		texture->Colors32()[(x - minX) + (y - minY) * texture->m_width] = tile->m_sprite.Colors32()[i];
+	for (int& i : indices)
+	{
+		auto [x, y] = iw::xy(i, (int)tile->m_sprite.m_width);
+		
+		int it = (x - minX) + (y - minY) * texture->m_width;
+
+		LOG_INFO << "Copying from " << i << " to " << it;
+
+		if (it > texture->ColorCount())
+		{
+			continue;
+		}
+
+		texture->Colors32()[it] = tile->m_sprite.Colors32()[i];
 	}
 
-	//MakeTile();
+	Entity split = MakeTile<iw::Circle>(texture, true);
 
-	return nullptr;
+	iw::Transform* tran = split.Find<iw::Transform>();
+	iw::Rigidbody* body = split.Find<iw::Rigidbody>();
+
+	tran->Position = transform->Position + glm::vec3(minX, minY, 0.f) / 2.f;
+	body->SetTransform(transform);
+	body->IsTrigger = true;
+
+	return split;
 }
 
 IW_PLUGIN_SAND_END

@@ -186,16 +186,6 @@ namespace Engine {
 				}
 #endif
 
-				int layerNumber = 0;
-				for (Layer* layer : m_layers)
-				{
-					LOG_TIME_SCOPE(layer->Name() + " layer pre update");
-					(*Renderer).SetLayer(layerNumber);
-					layer->PreUpdate();
-				}
-
-				Update();
-
 				if (Time::RawFixedTime() == 0)
 					continue;
 
@@ -212,6 +202,16 @@ namespace Engine {
 
 					fixedIterations++;
 				}
+
+				int layerNumber = 0;
+				for (Layer* layer : m_layers)
+				{
+					LOG_TIME_SCOPE(layer->Name() + " layer pre update");
+					(*Renderer).SetLayer(layerNumber);
+					layer->PreUpdate();
+				}
+
+				Update();
 
 				layerNumber = 0;
 				for (Layer* layer : m_layers)
@@ -293,8 +293,8 @@ namespace Engine {
 	}
 
 	void Application::Destroy() {
-		for (Layer* layer : m_layers) {
-			layer->Destroy();
+		while (m_layers.size() > 0) {
+			DestroyLayer(*m_layers.begin());
 		}
 
 		m_window->Destroy();

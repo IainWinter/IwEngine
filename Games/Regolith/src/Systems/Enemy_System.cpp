@@ -2,6 +2,23 @@
 
 void EnemySystem::FixedUpdate()
 {
+	Space->Query<iw::Rigidbody, Enemy>().Each(
+		[](
+			iw::EntityHandle handle, 
+			iw::Rigidbody* body, 
+			Enemy* ship) 
+		{
+			if (body->IsTrigger)
+			{
+				ship->ActiveTimer += iw::FixedTime();
+
+				if (ship->ActiveTimer > ship->ActiveTime)
+				{
+					body->IsTrigger = false;
+				}
+			}
+		});
+
 	Space->Query<iw::Transform, Enemy, Fighter_Enemy>().Each(
 		[&](
 			iw::EntityHandle handle,
@@ -75,8 +92,19 @@ void EnemySystem::FixedUpdate()
 			{
 				SpawnEnemy_Config config;
 
-				config.SpawnLocationX = transform->Position.x;
-				config.SpawnLocationY = transform->Position.y;
+				glm::vec3 right = transform->Right();
+				switch (iw::randi(2))
+				{
+					case 0: right = -right;                             break;
+					case 1: right = glm::vec3(-right.y,  right.x, 0.f); break;
+					case 2: right = glm::vec3( right.y, -right.y, 0.f); break;
+					default:                                            break;
+				}
+
+				right *= 25.f;
+
+				config.SpawnLocationX = transform->Position.x + right.x;
+				config.SpawnLocationY = transform->Position.y + right.y;
 				config.EnemyType = iw::randf() > .4 ? BOMB : FIGHTER;
 				config.TargetEntity = ship->Target;
 
@@ -200,6 +228,7 @@ void EnemySystem::SpawnEnemy(SpawnEnemy_Config& config)
 
 	rigidbody->SetTransform(transform);
 	rigidbody->SetMass(10);
+	rigidbody->IsTrigger = true;
 
 	enemy->Target = config.TargetEntity;
 	enemy->ExplosionPower = 10;

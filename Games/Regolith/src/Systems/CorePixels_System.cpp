@@ -9,14 +9,16 @@ enum cell_state : char
 };
 
 void flood_fill(
-	size_t index,
-	size_t size_x, size_t size_y,
+	int index,
+	int size_x, int size_y,
 	std::vector<cell_state>& cells,
-	std::unordered_set<size_t>& out_indices)
+	std::unordered_set<int>& out_indices)
 {
 	//size_t index = x + y * size_y;
 
-	if (index >= size_x * size_y) {
+	if (   index < 0 
+		|| index >= size_x * size_y) 
+	{
 		return;
 	}
 
@@ -179,6 +181,10 @@ bool CorePixelsSystem::On(iw::ActionEvent& e)
 			
 			// Remove core peice
 
+			// crash where this returns incorrect components
+			// not sure what root cause it prob event delay...
+			// or it could be in the entity system
+
 			CorePixels* core = entity.Find<CorePixels>();
 			iw::Tile*   tile = entity.Find<iw::Tile>();
 			
@@ -225,7 +231,7 @@ bool CorePixelsSystem::On(iw::ActionEvent& e)
 					: cell_state::EMPTY;
 			}
 
-			std::unordered_set<size_t> indices;
+			std::unordered_set<int> indices;
 			for (const int& seed : core->ActiveIndices)
 			{
 				flood_fill(seed, width, height, states, indices);
@@ -233,6 +239,7 @@ bool CorePixelsSystem::On(iw::ActionEvent& e)
 
 			// remove cells active in tile not in indices
 
+			std::vector<int> toSplit;
 			for (int i = 0; i < tile->m_currentCells.size(); i++)
 			{
 				int index = tile->m_currentCells.at(i);
@@ -240,11 +247,18 @@ bool CorePixelsSystem::On(iw::ActionEvent& e)
 				if (   indices            .find(index) == indices            .end()
 					&& core->ActiveIndices.find(index) == core->ActiveIndices.end())
 				{
-					if (tile->RemovePixel(index))
-					{
-						i--;
-					}
+					toSplit.push_back(index);
 				}
+			}
+			
+			//if (toSplit.size() > 20)
+			//{
+ 			//	m_sand->SplitTile(entity, toSplit);
+			//}
+
+			for (const int& i : toSplit)
+			{
+				tile->SetState(i, iw::Tile::PixelState::REMOVED);
 			}
 
 			break;

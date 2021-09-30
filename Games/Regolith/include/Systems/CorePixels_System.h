@@ -2,14 +2,19 @@
 
 #include "iw/engine/System.h"
 #include "Components/CorePixels.h"
-#include "plugins/iw/Sand/Tile.h"
+#include "plugins/iw/Sand/Engine/SandLayer.h"
 
 #include "Events.h"
 
 struct CorePixelsSystem : iw::SystemBase
 {
-	CorePixelsSystem()
-		: iw::SystemBase("Core pixels")
+	iw::SandLayer* m_sand;
+
+	CorePixelsSystem(
+		iw::SandLayer* sand
+	)
+		: iw::SystemBase ("Core pixels")
+		, m_sand         (sand)
 	{}
 
 	void Update() override;

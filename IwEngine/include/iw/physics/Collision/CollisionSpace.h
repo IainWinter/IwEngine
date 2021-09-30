@@ -11,6 +11,33 @@
 
 namespace iw {
 namespace Physics {
+	struct DistanceQueryResult
+	{
+		std::vector<std::pair<iw::CollisionObject*, scalar>> Objects;
+
+		iw::CollisionObject* Closest()
+		{
+			if (Objects.size() == 0)
+			{
+				return nullptr;
+			}
+
+			return Objects[0].first;
+		}
+
+		float MinDistance()
+		{
+			if (Objects.size() == 0)
+			{
+				return -FLT_MAX;
+			}
+
+			return Objects[0].second;
+		}
+
+		// add furthst etc
+	};
+
 	class CollisionSpace {
 	protected:
 		func_CollisionCallback m_collisionCallback;
@@ -62,6 +89,11 @@ namespace Physics {
 		IWPHYSICS_API
 		bool TestObject(
 			CollisionObject* object) const;
+
+		IWPHYSICS_API
+		DistanceQueryResult QueryDistance(
+			const glm::vec3& position,
+			scalar maxDistance) const;
 
 		//IWPHYSICS_API
 		//bool TestObjects(

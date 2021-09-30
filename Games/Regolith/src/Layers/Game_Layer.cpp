@@ -1,5 +1,8 @@
 #include "Layers/Game_Layer.h"
 
+float lastf = 0.f, x = 200.f, y = 200.f;
+std::vector<std::pair<float, float>> points;
+
 int Game_Layer::Initialize()
 {
 	auto [sandWidth, sandHeight] = sand->GetSandTexSize2();
@@ -18,7 +21,7 @@ int Game_Layer::Initialize()
 	explosion_s   = new ExplosionSystem (sand);
 	playerTank_s  = new PlayerLaserTankSystem(sand_ui_laserCharge);
 	score_s       = new ScoreSystem();
-	corePixels_s  = new CorePixelsSystem();
+	corePixels_s  = new CorePixelsSystem(sand);
 	flocking_s    = new FlockingSystem();
 	keepInWorld_s = new KeepInWorldSystem();
 
@@ -41,6 +44,13 @@ int Game_Layer::Initialize()
 	//m_cursor.Find<iw::CollisionObject>()->IsTrigger = true;
 
 	//Physics->RemoveCollisionObject(m_cursor.Find<iw::CollisionObject>());
+
+	for (int i = 0; i < 10; i++)
+	{
+		points.emplace_back(
+			iw::randfs() * iw::Pi2, 
+			iw::randfs() * iw::Pi);
+	}
 
 	return Layer::Initialize();
 }
@@ -66,6 +76,24 @@ void Game_Layer::Destroy()
 
 void Game_Layer::Update() 
 {
+	lastf += iw::DeltaTime();
+	if (iw::Mouse::ButtonDown(iw::MMOUSE))
+	{
+		lastf = 0;
+		DrawLightning(sand, 200, 200, sand->sP.x, sand->sP.y, 10, .04);
+	}
+
+	//	//SpawnEnemy_Config cc;
+	//	//cc.SpawnLocationX = sand->sP.x;
+	//	//cc.SpawnLocationY = sand->sP.y;
+	//	//cc.TargetLocationX = 200;
+	//	//cc.TargetLocationY = 200;
+	//	//cc.EnemyType = BASE;
+	//	//cc.TargetEntity = m_player;
+
+	//	//Bus->push<SpawnEnemy_Event>(cc);
+	//}
+
 	//tick++;
 
 	//Space->Query<iw::Tile>().Each([&](

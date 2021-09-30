@@ -37,6 +37,10 @@ void Game_UI_Layer::PreUpdate()
 
 void Game_UI_Layer::PostUpdate()
 {
+	iw::ref<iw::Texture> texture = m_game->mesh.Material->GetTexture("texture");
+
+	// copy last 
+
 	// could harden this update to not crash if something is null...
 
 	if (m_player_weapon)

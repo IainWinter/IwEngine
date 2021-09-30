@@ -5,6 +5,7 @@
 
 void WorldSystem::Update()
 {
+	//return;
 	m_timer.Tick();
 
 	bool needsAnotherLevel = false;
@@ -122,7 +123,7 @@ void WorldSystem::FixedUpdate()
 				float radius = glm::length(max - min) / 2.f;
 				*/
 
-				DrawLightning(throwable->ThrowRequestor, Space->GetEntity(handle));
+				DrawLightning(sand, Space, throwable->ThrowRequestor, Space->GetEntity(handle));
 
 				glm::vec3 vel = tpos - pos;
 				vel = glm::normalize(vel);
@@ -227,7 +228,7 @@ bool WorldSystem::On(iw::ActionEvent& e)
 			//cc.SpawnLocationY = 100;
 			//cc.TargetLocationX = 200;
 			//cc.TargetLocationY = 200;
-			//cc.EnemyType = BASE;
+			//cc.EnemyType = BOMB;
 			//cc.TargetEntity = m_player;
 
 			//Bus->push<SpawnEnemy_Event>(cc);
@@ -261,131 +262,6 @@ bool WorldSystem::On(iw::ActionEvent& e)
 	}
 
 	return false;
-}
-
-std::vector<std::pair<int, int>> WorldSystem::FindClosestCellPositionsMathcingTile(iw::Tile* tile, int x, int y)
-{
-	if (!tile)
-	{
-		return {};
-	}
-
-	std::vector<std::pair<int, int>> cells;
-	int searchSize = 5;
-
-	while (cells.size() == 0 && searchSize < tile->m_sprite.m_width)
-	{
-		for (int sy = -searchSize; sy < searchSize; sy++)
-		for (int sx = -searchSize; sx < searchSize; sx++)
-		{
-			int px = sx + x;
-			int py = sy + y;
-
-			iw::SandChunk* chunk = sand->m_world->GetChunk(px, py);
-
-			if (chunk)
-			{
-				iw::TileInfo& info = chunk->GetCell<iw::TileInfo>(px, py, iw::SandField::TILE_INFO);
-				if (info.tile == tile)
-				{
-					cells.emplace_back(px, py);
-				}
-			}
-		}
-
-		searchSize *= 2;
-	}
-
-	return cells;
-}
-
-void WorldSystem::DrawLightning(
-	iw::Entity originEntity,
-	iw::Entity targetEntity)
-{
-	// pick points that are on surface
-
-	iw::CollisionObject* originObj = GetPhysicsComponent(originEntity.Handle);
-	iw::CollisionObject* targetObj = GetPhysicsComponent(targetEntity.Handle);
-
-	glm::vec2 origin = originObj->Transform.Position;
-	glm::vec2 target = targetObj->Transform.Position;
-
-	glm::vec2 delta = target - origin;
-
-	glm::vec2 a = originObj->Collider->as_dim<iw::d2>()->FindFurthestPoint(&originObj->Transform,  delta);
-	glm::vec2 b = targetObj->Collider->as_dim<iw::d2>()->FindFurthestPoint(&targetObj->Transform, -delta);
-
-	iw::Tile* originTile = originEntity.Find<iw::Tile>();
-	iw::Tile* targetTile = targetEntity.Find<iw::Tile>();
-
-	std::vector<std::pair<int, int>> origins = FindClosestCellPositionsMathcingTile(originTile, a.x, a.y);
-	std::vector<std::pair<int, int>> targets = FindClosestCellPositionsMathcingTile(targetTile, b.x, b.y);
-
-	if (   origins.size() == 0 
-		|| targets.size() == 0)
-	{
-		return;
-	}
-
-	std::pair<int, int> o = origins.at(iw::randi(origins.size() - 1));
-	std::pair<int, int> t = targets.at(iw::randi(targets.size() - 1));
-
-	float x  = o.first;
-	float y  = o.second;
-	float tx = t.first;
-	float ty = t.second;
-
-	float dx = tx - x;
-	float dy = ty - y;
-	float td = sqrt(dx*dx + dy*dy);
-	float  d = td;
-
-	float arc = 10;
-	float stepSize = 5;
-
-	LOG_INFO << d;
-	while (d > 10)
-	{
-		dx = tx - x;
-		dy = ty - y;
-      
-		d = iw::max(1.f, sqrt(dx*dx + dy*dy));
-
-		dx = dx / d * stepSize;
-		dy = dy / d * stepSize;
-      
-		float left = d / td;
-      
-		if (left > 1)
-		{
-			left = .1;
-		}
-
-		float x1 = x + dx + left * iw::randfs() * arc;
-		float y1 = y + dy + left * iw::randfs() * arc;
-      
-		iw::Cell c = iw::Cell::GetDefault(iw::CellType::ROCK);
-		c.life = .04 + iw::randfs() * 0.02;
-
-		c.Color = iw::Color::From255(212, 194, 252);
-		c.StyleColor = iw::Color(.1);
-		c.StyleOffset = iw::randfs();
-		c.Style = iw::CellStyle::SHIMMER;
-
-		sand->ForEachInLine(x, y, x1, y1,
-			[&](
-				float x, float y)
-			{
-				c.life += 0.005;
-
-				sand->m_world->SetCell(x, y, c);
-				return false;
-			});
-      
-		x = x1;
-		y = y1;
-	}
 }
 
 iw::Entity WorldSystem::MakeAsteroid(

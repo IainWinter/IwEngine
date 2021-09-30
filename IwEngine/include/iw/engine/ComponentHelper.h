@@ -49,15 +49,25 @@ namespace Engine {
 	}
 
 	inline CollisionObject* GetPhysicsComponent(
-		iw::ref<iw::Space>& space,
-		iw::EntityHandle e)
+		ref<Space>& space,
+		EntityHandle e)
 	{
 		CollisionObject* c = space->FindComponent<CollisionObject>(e);
 		if (!c)          c = space->FindComponent<Rigidbody>      (e);
 
 		return c;
 	}
+
+	inline Entity GetPhysicsEntity(
+		ref<Space>& space,
+		CollisionObject* object)
+	{
+		Entity       entity = space->FindEntity<CollisionObject>(object);
+		if (!entity) entity = space->FindEntity<Rigidbody>(object);
+
+		return entity;
 	}
+}
 
 	using namespace Engine;
 }

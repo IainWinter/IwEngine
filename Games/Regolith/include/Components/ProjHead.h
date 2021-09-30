@@ -30,12 +30,15 @@ struct ProjHead {
 enum ProjectileType {
 	BULLET, // these are the same actually
 	LASER,
-	BEAM
+	BEAM,
+	WATTZ,
+	BOLTZ
 };
 
 struct ShotInfo {
 	float x, y, dx, dy, life;
 	ProjectileType projectile;
+	iw::Entity origin;
 
 	float Speed() {
 		return sqrt(dx * dx + dy * dy);

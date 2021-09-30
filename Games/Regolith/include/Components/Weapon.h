@@ -11,6 +11,8 @@ enum WeaponType {
 	FAT_LASER_CANNON,
 	LASER_CANNON,
 	SPECIAL_BEAM_CANNON,
+	WATTZ_CANNON,
+	BOLTZ_CANNON
 };
 
 class Weapon {
@@ -78,6 +80,8 @@ struct Cannon : Weapon
 			BreadthFromOrigin
 		);
 
+		shot.origin = origin;
+
 		float speed = shot.Speed();
 
 		shot.dx += speed * Inaccuracy * iw::randfs();
@@ -97,6 +101,28 @@ inline Weapon* MakeDefault_Cannon()
 	cannon->DistanceFromOrigin = 15;
 	cannon->BreadthFromOrigin = 2;
 	cannon->FireDelay = 0.15;
+
+	return cannon;
+}
+
+inline Weapon* MakeWattz_Cannon()
+{
+	Cannon* cannon = new Cannon(WeaponType::WATTZ_CANNON, ProjectileType::WATTZ);
+	cannon->Speed = 200;
+	cannon->DistanceFromOrigin = 15;
+	cannon->BreadthFromOrigin = 2;
+	cannon->FireDelay = 0.25;
+
+	return cannon;
+}
+
+inline Weapon* MakeBoltz_Cannon()
+{
+	Cannon* cannon = new Cannon(WeaponType::BOLTZ_CANNON, ProjectileType::BOLTZ);
+	cannon->Speed = 150;
+	cannon->DistanceFromOrigin = 15;
+	cannon->BreadthFromOrigin = 2;
+	cannon->FireDelay = 0.005;
 
 	return cannon;
 }

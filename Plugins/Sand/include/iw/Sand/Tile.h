@@ -52,6 +52,7 @@ struct Tile {
 		{
 			m_currentCellCount--;
 			m_removedCells.push_back(index);
+			m_justRemovedCells.push_back(index);
 			m_currentCells.erase(std::find(m_currentCells.begin(), m_currentCells.end(), index));
 			SetState(index, REMOVED);
 		}
@@ -69,6 +70,13 @@ struct Tile {
 			m_removedCells.erase(std::find(m_removedCells.begin(), m_removedCells.end(), index));
 			m_currentCells.push_back(index);
 			SetState(index, FILLED);
+
+			// remove from just removed if needed, this gets cleared in RemoveTiles btw
+			auto itr = std::find(m_justRemovedCells.begin(), m_justRemovedCells.end(), index);
+			if (itr != m_justRemovedCells.end())
+			{
+				m_removedCells.erase(itr);
+			}
 		}
 
 		return reinstate;
@@ -104,6 +112,7 @@ struct Tile {
 
 	std::vector<int> m_currentCells;
 	std::vector<int> m_removedCells;
+	std::vector<int> m_justRemovedCells; // removed this frame to get rid of tile info, clearend in RemoveTiles
 
 	int m_sandLayerIndex = 0;
 	int m_zIndex = 0;
