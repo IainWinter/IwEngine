@@ -101,7 +101,8 @@ namespace Physics {
 		DistanceQueryResult QueryVector(
 			const glm::vec3& position,
 			const glm::vec3& vector,
-			scalar maxDistance) const;
+			scalar maxDistance,
+			scalar maxDistanceNorm) const;
 
 
 		//IWPHYSICS_API

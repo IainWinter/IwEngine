@@ -5,7 +5,7 @@
 
 void WorldSystem::Update()
 {
-	return;
+	//return;
 	m_timer.Tick();
 
 	bool needsAnotherLevel = false;
@@ -153,7 +153,16 @@ bool WorldSystem::On(iw::ActionEvent& e)
 			if (   hit.Has<Player>() 
 				|| hit.Has<Enemy>())
 			{
-				glm::vec3 norm = glm::normalize(projectile.Find<iw::Rigidbody>()->Velocity);
+				glm::vec3 norm;
+
+				if (iw::Rigidbody* pbody = projectile.Find<iw::Rigidbody>())
+				{
+					norm = glm::normalize(pbody->Velocity);
+				}
+
+				else {
+					norm = glm::normalize(glm::vec3(iw::randfs(), iw::randfs(), 0.f));
+				}
 
 				iw::Cell metal;
 				metal.Type = iw::CellType::ROCK;
@@ -222,22 +231,22 @@ bool WorldSystem::On(iw::ActionEvent& e)
 		case CREATED_PLAYER: {
 			m_player = e.as<CreatedPlayer_Event>().PlayerEntity;
 
-			SpawnAsteroid_Config c;
-			c.SpawnLocationX = 100;
-			c.SpawnLocationY = 100;
-			c.Size = 1;
+			//SpawnAsteroid_Config c;
+			//c.SpawnLocationX = 100;
+			//c.SpawnLocationY = 100;
+			//c.Size = 1;
 
-			Bus->push<SpawnAsteroid_Event>(c);
+			//Bus->push<SpawnAsteroid_Event>(c);
 
-			SpawnEnemy_Config cc;
-			cc.SpawnLocationX = 300;
-			cc.SpawnLocationY = 100;
-			cc.TargetLocationX = 200;
-			cc.TargetLocationY = 200;
-			cc.EnemyType = BASE;
-			cc.TargetEntity = m_player;
+			//SpawnEnemy_Config cc;
+			//cc.SpawnLocationX = 300;
+			//cc.SpawnLocationY = 300;
+			//cc.TargetLocationX = 300;
+			//cc.TargetLocationY = 300;
+			//cc.EnemyType = STATION;
+			//cc.TargetEntity = m_player;
 
-			Bus->push<SpawnEnemy_Event>(cc);
+			//Bus->push<SpawnEnemy_Event>(cc);
 
 			break;
 		}

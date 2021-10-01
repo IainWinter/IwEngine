@@ -157,31 +157,45 @@ void ProjectileSystem::Update()
 			Projectile* proj,
 			LightBall_Projectile* ball)
 		{	
-			ball->Timer.Tick();
-			if (ball->Timer.Can("draw"))
+			glm::vec3& pos = transform->Position;
+
+			auto& [angle, dangle] = iw::choose_e(ball->Points);
+
+			angle += .01 * dangle;
+			
+			float length = 15;
+			float dx = cos(angle);
+			float dy = sin(angle);
+
+			iw::CollisionObject* object = Physics->QueryVector(
+				pos, glm::vec3(dx, dy, 0.f), 75, 35).Closest();
+
+			LightningConfig config;
+
+			if (   object 
+				&& object != rigidbody
+				&& proj->Shot.origin != iw::GetPhysicsEntity(Space, object))
 			{
-				glm::vec3& pos = transform->Position;
-
-				for (auto& [angle, dangle] : ball->Points)
-				{
-					angle += .01 * dangle;
-
-					float al = 15;
-					float ax = cos(angle) * al;
-					float ay = sin(angle) * al;
-
-					LightningConfig config;
-					config.Type = LightningType::POINT;
-					config.X       = (int)floor(pos.x);
-					config.Y       = (int)floor(pos.y);
-					config.TargetX = (int)floor(pos.x + ax);
-					config.TargetX = (int)floor(pos.y + ay);
-					config.ArcSize = 5;
-					config.LifeTime = .01f;
-
-					bolts.push_back(config);
-				}
+				config.Type = LightningType::ENTITY;
+				config.A = Space->GetEntity(handle);
+				config.B = iw::GetPhysicsEntity(Space, object);
 			}
+
+			else
+			{
+				config.Type = LightningType::POINT;
+				config.X       = (int)floor(pos.x);
+				config.Y       = (int)floor(pos.y);
+				config.TargetX = (int)floor(pos.x + dx * length);
+				config.TargetY = (int)floor(pos.y + dy * length);
+				config.A = proj->Shot.origin;
+			}
+
+			config.ArcSize = 5;
+			config.LifeTime = .001f;
+			config.StopOnHit = true;
+
+			bolts.push_back(config);
 		});
 
 	Space->Query<Projectile, LightBolt_Projectile>().Each(
@@ -190,42 +204,50 @@ void ProjectileSystem::Update()
 			Projectile* proj,
 			LightBolt_Projectile* bolt)
 		{	
-			ShotInfo& shot = bolt->Shot;
+			const ShotInfo& shot = proj->Shot;
 
 			float tx = shot.x + shot.dx;
 			float ty = shot.y + shot.dy;
 
-			iw::CollisionObject* object = Physics->QueryVector(
+			iw::DistanceQueryResult query = Physics->QueryVector(
 				glm::vec3(shot.x,  shot.y,  .0f), 
-				glm::vec3(shot.dx, shot.dy, .0f), shot.Speed()).Closest();
+				glm::vec3(shot.dx, shot.dy, .0f), shot.Speed(), 64);
 
 			LightningConfig config;
-			config.ArcSize = 10;
-			config.LifeTime = .0001f;
-			config.StopOnHit = false;
+			config.LifeTime = .01f + iw::randf() * .05f;
+			config.StopOnHit = true;
+			config.A = shot.origin;
+			config.Entity = Space->GetEntity(handle);
+			config.ArcSize = 10 + iw::randi(6) - 3;
 
-			if (object)
+			if (query.Objects.size() > 0)
 			{
+				auto [dist, obj] = iw::choose_e(query.Objects);
+
 				config.Type = LightningType::ENTITY;
-				config.A = shot.origin;
-				config.B = iw::GetPhysicsEntity(Space, object);
+				config.B = iw::GetPhysicsEntity(Space, obj);
+
+				bolts.push_back(config);
 			}
 
 			else
 			{
-				CellInfo info = iw::choose_e(
-					FindClosestCellPositionsMatchingTile(
-						sand, shot.origin.Find<iw::Tile>(), 
-						(int)floor(shot.x), (int)floor(shot.y)
-					));
-				
-				config.X = info.x;
-				config.Y = info.y;
-				config.TargetX = tx;
-				config.TargetY = ty;
-			}
+				auto cells = FindClosestCellPositionsMatchingTile(
+					sand, shot.origin.Find<iw::Tile>(),
+					(int)floor(shot.x), (int)floor(shot.y));
 
-			bolts.push_back(config);
+				if (cells.size() > 0)
+				{
+					CellInfo info = iw::choose_e(cells);
+				
+					config.X = info.x;
+					config.Y = info.y;
+					config.TargetX = tx + iw::randi(20) - 10;
+					config.TargetY = ty + iw::randi(20) - 10;
+
+					bolts.push_back(config);
+				}
+			}
 
 			Space->QueueEntity(handle, iw::func_Destroy);
 		});
@@ -246,10 +268,30 @@ void ProjectileSystem::Update()
 		
 		if (hit.HasContact)
 		{
-			if (   hit.TileInfo.tile
-				&& bolt.A && bolt.A.Find<iw::Tile>() != hit.TileInfo.tile)
+			if (bolt.B)
 			{
-				sand->EjectPixel(hit.TileInfo.tile, hit.TileInfo.index);
+				if (!iw::GetPhysicsComponent(Space, bolt.B.Handle)->Collider)
+				{
+					bolt.B.Queue(iw::func_Destroy);
+				}
+			}
+
+			if (hit.TileInfo.tile)
+			{
+				iw::Entity entity = Space->FindEntity(hit.TileInfo.tile);
+
+				if (entity.Has<Player>() || entity.Has<Enemy>())
+				{
+					ProjHitTile_Config config;
+					config.X = hit.X;
+					config.Y = hit.Y;
+					config.Info = hit.TileInfo;
+					config.Projectile = bolt.Entity;
+					config.Hit = entity;
+
+					Bus->push<RemoveCellFromTile_Event>(hit.TileInfo.index, config.Hit);
+					Bus->push<ProjHitTile_Event>(config);
+				}
 			}
 
 			sand->m_world->SetCell(hit.X, hit.Y, iw::Cell());
@@ -340,14 +382,11 @@ iw::Entity ProjectileSystem::MakeWattz(
 	iw::Entity entity = MakeProjectile<LightBall_Projectile>(shot);
 	LightBall_Projectile* ball = entity.Set<LightBall_Projectile>();
 
+	float da = iw::randfs() * iw::Pi;
 	for (int i = 0; i < 10; i++)
 	{
-		ball->Points.emplace_back(
-			iw::randfs() * iw::Pi2, 
-			iw::randfs() * iw::Pi);
+		ball->Points.emplace_back(iw::Pi2 / 10.f * i, da);
 	}
-
-	ball->Timer.SetTime("draw", 0.01f);
 
 	return entity;
 }
@@ -357,10 +396,6 @@ iw::Entity ProjectileSystem::MakeBoltz(
 	int depth)
 {
 	iw::Entity entity = MakeProjectile_raw<LightBolt_Projectile>(shot);
-	LightBolt_Projectile* bolt = entity.Set<LightBolt_Projectile>();
-
-	bolt->Shot = shot;
-
 	return entity;
 }
 

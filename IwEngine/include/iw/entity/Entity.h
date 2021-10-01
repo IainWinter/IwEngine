@@ -15,17 +15,31 @@ namespace ECS {
 
 		Entity(
 			EntityHandle handle,
-			iw::Space* space)
+			iw::Space* space
+		)
 			: Handle(handle)
 			, Space(space)
 		{}
 
 		Entity(
 			EntityHandle handle,
-			ref<iw::Space>& space)
+			ref<iw::Space>& space
+		)
 			: Handle(handle)
 			, Space(space.get())
 		{}
+
+		bool operator==(
+			const Entity& other) const
+		{
+			return Handle == other.Handle; // this was returning true when .Handle == .Handle was false?
+		}
+
+		bool operator!=(
+			const Entity& other) const
+		{
+			return !operator==(other);
+		}
 
 		bool operator==(
 			const EntityHandle& other) const

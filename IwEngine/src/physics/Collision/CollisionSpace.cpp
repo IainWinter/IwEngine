@@ -229,7 +229,8 @@ namespace Physics {
 	DistanceQueryResult CollisionSpace::QueryVector(
 		const glm::vec3& position,
 		const glm::vec3& vector,
-		scalar maxDistance) const
+		scalar maxDistance,
+		scalar maxDistanceNorm) const
 	{
 		DistanceQueryResult result;
 
@@ -237,15 +238,18 @@ namespace Physics {
 
 		for (CollisionObject* object : m_objects)
 		{
-			glm::vec3 dif = object->Transform.WorldPosition() - position;
+			glm::vec3 objPos   = object->Transform.WorldPosition();
+			glm::vec3 objDelta = objPos - position;
+			glm::vec3 projPos  = position + vectorNorm * glm::dot(vectorNorm, objDelta);
 
-			if (glm::length2(dif) < maxDistance * maxDistance)
+			float  objDistance = glm::dot(vectorNorm, objDelta);
+			float projDistance = glm::length2(projPos - objPos);
+
+			if (    objDistance > 0
+				&&  objDistance < maxDistance
+				&& projDistance < maxDistanceNorm * maxDistanceNorm)
 			{
-				float distance = glm::dot(vectorNorm, dif);
-				if (distance > 0)
-				{
-					result.Objects.emplace(distance, object);
-				}
+				result.Objects.emplace(objDistance, object);
 			}
 		}
 

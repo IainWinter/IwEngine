@@ -197,7 +197,7 @@ bool PlayerSystem::On(iw::ActionEvent& e)
 					
 					player->SpecialLaser = MakeFatLaser_Cannon();
 					
-					Bus->push<ChangePlayerWeapon_Event>(WeaponType::BOLTZ_CANNON/*DEFAULT_CANNON*/);
+					Bus->push<ChangePlayerWeapon_Event>(WeaponType::DEFAULT_CANNON);
 					Bus->push<CreatedPlayer_Event>(m_player);
 					Bus->push<CreatedCoreTile_Event>(m_player);
 

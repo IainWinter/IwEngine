@@ -40,7 +40,7 @@ struct ShotInfo {
 	ProjectileType projectile;
 	iw::Entity origin;
 
-	float Speed() {
+	float Speed() const {
 		return sqrt(dx * dx + dy * dy);
 	}
 

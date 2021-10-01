@@ -271,7 +271,7 @@ void EnemySystem::SpawnEnemy(SpawnEnemy_Config& config)
 			Base_Enemy* station = entity.Set<Base_Enemy>();
 
 			rigidbody->SetMass(1000);
-			rigidbody->AngularVelocity.z = .1f;
+			//rigidbody->AngularVelocity.z = .1f;
 			flocker->Speed = 25;
 
 			enemy->ExplosionPower = 60;
@@ -290,7 +290,9 @@ void EnemySystem::DestroyEnemy(iw::Entity entity)
 	std::vector<std::pair<ItemType, float>> item_weights {
 		{ HEALTH,         50 },
 		{ LASER_CHARGE,   50 },
-		{ WEAPON_MINIGUN, 10 }
+		{ WEAPON_MINIGUN, 3 },
+		{ WEAPON_BOLTZ,   2 },
+		{ WEAPON_WATTZ,   2 },
 	};
 
 	iw::Transform* transform = entity.Find<iw::Transform>();
@@ -299,11 +301,15 @@ void EnemySystem::DestroyEnemy(iw::Entity entity)
 	config.Item = iw::choose(item_weights);
 	config.X = transform->Position.x;
 	config.Y = transform->Position.y;
+	config.AngularSpeed = iw::randf() * 25 + 10;
 
 	switch (config.Item)
 	{
 		case ItemType::HEALTH: 
 		case ItemType::LASER_CHARGE:   config.Amount = iw::randi(5) + 1; break;
+		
+		case ItemType::WEAPON_WATTZ:
+		case ItemType::WEAPON_BOLTZ:
 		case ItemType::WEAPON_MINIGUN: config.Amount = 1;
 	}
 

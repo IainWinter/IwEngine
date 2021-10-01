@@ -111,7 +111,8 @@ inline Weapon* MakeWattz_Cannon()
 	cannon->Speed = 200;
 	cannon->DistanceFromOrigin = 15;
 	cannon->BreadthFromOrigin = 2;
-	cannon->FireDelay = 0.25;
+	cannon->FireDelay = 0.5;
+	cannon->Ammo = 10;
 
 	return cannon;
 }
@@ -123,6 +124,7 @@ inline Weapon* MakeBoltz_Cannon()
 	cannon->DistanceFromOrigin = 15;
 	cannon->BreadthFromOrigin = 2;
 	cannon->FireDelay = 0.005;
+	cannon->Ammo = 1000;
 
 	return cannon;
 }

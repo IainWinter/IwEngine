@@ -38,4 +38,6 @@ private:
 	// super laser - instance, charge up for seconds - cuts colliders & tiles in 
 
 	iw::Entity MakeWeaponMinigun(const SpawnItem_Config& config);
+	iw::Entity MakeWeaponWattz  (const SpawnItem_Config& config);
+	iw::Entity MakeWeaponBoltz  (const SpawnItem_Config& config);
 };

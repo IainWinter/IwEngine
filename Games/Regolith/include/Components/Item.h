@@ -5,8 +5,10 @@
 enum ItemType {
 	HEALTH,
 	LASER_CHARGE,
+	PLAYER_CORE,
 	WEAPON_MINIGUN,
-	PLAYER_CORE
+	WEAPON_BOLTZ,
+	WEAPON_WATTZ,
 };
 
 struct Item {

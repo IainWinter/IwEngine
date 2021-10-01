@@ -103,8 +103,11 @@ bool ItemSystem::On(iw::ActionEvent& e)
                 {
                     case ItemType::HEALTH:         entity = MakeHealth       (event.Config); break;
                     case ItemType::LASER_CHARGE:   entity = MakeLaserCharge  (event.Config); break;
-                    case ItemType::WEAPON_MINIGUN: entity = MakeWeaponMinigun(event.Config); break;
                     case ItemType::PLAYER_CORE:    entity = MakePlayerCore   (event.Config); break;
+
+                    case ItemType::WEAPON_BOLTZ:   entity = MakeWeaponBoltz  (event.Config); break;
+                    case ItemType::WEAPON_WATTZ:   entity = MakeWeaponWattz  (event.Config); break;
+                    case ItemType::WEAPON_MINIGUN: entity = MakeWeaponMinigun(event.Config); break;
                 }
 
                 glm::vec3& vel = entity.Find<iw::Rigidbody>()->Velocity; 
@@ -206,10 +209,36 @@ iw::Entity ItemSystem::MakePlayerCore(const SpawnItem_Config& config)
 	iw::Rigidbody* rigidbody = entity.Find<iw::Rigidbody>();
 	Item*          item      = entity.Find<Item>();
     
-    rigidbody->Velocity += glm::vec3(iw::randfs(), iw::randfs(), 0) * 100.f;
-
     item->MoveTime = 5.f;
     item->PickUpRadius = 30;
+
+    return entity;
+}
+
+iw::Entity ItemSystem::MakeWeaponWattz(const SpawnItem_Config& config)
+{
+    iw::Entity entity = MakeItem(config, A_texture_item_wattz);
+
+    Item* item = entity.Find<Item>();
+    item->PickUpRadius = 25;
+    item->OnPickUp = [&]()
+    {
+        Bus->push<ChangePlayerWeapon_Event>(WeaponType::WATTZ_CANNON);
+    };
+
+    return entity;
+}
+
+iw::Entity ItemSystem::MakeWeaponBoltz(const SpawnItem_Config& config)
+{
+    iw::Entity entity = MakeItem(config, A_texture_item_boltz);
+
+    Item* item = entity.Find<Item>();
+    item->PickUpRadius = 25;
+    item->OnPickUp = [&]()
+    {
+        Bus->push<ChangePlayerWeapon_Event>(WeaponType::BOLTZ_CANNON);
+    };
 
     return entity;
 }

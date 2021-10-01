@@ -106,16 +106,24 @@ namespace helpers {
 	}
 
 	template<
-		typename _t>
-	_t& choose_e(
-		std::vector<_t>& items) // need to template list for const/nonconst 
+		typename _c>
+	typename _c::iterator::reference choose_e(
+		_c& items)
 	{
 		if (items.size() == 0)
 		{
-			throw std::invalid_argument("");
+			throw std::invalid_argument("Tried to choose value from empty list!");
 		}
 
-		return items.at(iw::randi(items.size() - 1));
+		int index = iw::randi(items.size() - 1);
+		auto itr = items.begin();
+
+		for (int i = 0; i < index; i++)
+		{
+			++itr;
+		}
+
+		return *itr;
 	}
 
 	template<

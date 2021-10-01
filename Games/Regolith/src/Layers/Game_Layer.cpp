@@ -1,6 +1,6 @@
 #include "Layers/Game_Layer.h"
 
-//float lastf = 0.f, x = 200.f, y = 200.f;
+float lastf = 0.f, x = 200.f, y = 200.f;
 //std::vector<std::pair<float, float>> points;
 
 int Game_Layer::Initialize()
@@ -76,12 +76,20 @@ void Game_Layer::Destroy()
 
 void Game_Layer::Update() 
 {
-	//lastf += iw::DeltaTime();
-	//if (iw::Mouse::ButtonDown(iw::MMOUSE))
-	//{
-	//	lastf = 0;
-	//	//DrawLightning(sand, 200, 200, sand->sP.x, sand->sP.y, 10, .04);
-	//}
+	lastf += iw::DeltaTime();
+	if (lastf > .1 && iw::Mouse::ButtonDown(iw::MMOUSE))
+	{
+		lastf = 0;
+
+		SpawnItem_Config item;
+		item.Amount = 1;
+		item.Item = ItemType::WEAPON_BOLTZ;
+		item.X = 100;
+		item.Y = 100;
+		item.AngularSpeed = 30;
+
+		Bus->send<SpawnItem_Event>(item);
+	}
 
 	//	//SpawnEnemy_Config cc;
 	//	//cc.SpawnLocationX = sand->sP.x;

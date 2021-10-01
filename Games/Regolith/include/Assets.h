@@ -24,6 +24,8 @@ inline rTex A_texture_asteroid_mid_3;
 inline rTex A_texture_item_health;
 inline rTex A_texture_item_energy;
 inline rTex A_texture_item_minigun;
+inline rTex A_texture_item_boltz;
+inline rTex A_texture_item_wattz;
 inline rTex A_texture_item_coreShard;
 inline rTex A_texture_ui_background;
 inline rTex A_texture_ui_cursor;

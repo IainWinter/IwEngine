@@ -109,9 +109,9 @@ enum class LightningType
 struct LightningConfig
 {
 	LightningType Type = LightningType::POINT; // only for outside logic
-
 	iw::Entity A; // only used if Type = ENTITY
 	iw::Entity B;
+	iw::Entity Entity; // the entity who owns this lightning
 
 	int X = 0;
 	int Y = 0;
@@ -129,7 +129,7 @@ inline LightningHitInfo DrawLightning(
 	float x = config.X;
 	float y = config.Y;
 	float dx = config.TargetX - x;
-	float dy = config.TargetX - y;
+	float dy = config.TargetY - y;
 	float td = sqrt(dx*dx + dy*dy);
 	float  d = td;
 
@@ -150,7 +150,7 @@ inline LightningHitInfo DrawLightning(
 	c.StyleColor = iw::Color(.1, .1, .1, 0);
 	c.StyleOffset = iw::randfs() * .5;
 
-	while (d > 10 && (!hit.HasContact || !config.StopOnHit))
+	while (d > 2 && (!hit.HasContact || !config.StopOnHit))
 	{
 		dx = config.TargetX - x;
 		dy = config.TargetY - y;
@@ -169,7 +169,7 @@ inline LightningHitInfo DrawLightning(
 
 		float x1 = x + dx + left * iw::randfs() * config.ArcSize;
 		float y1 = y + dy + left * iw::randfs() * config.ArcSize;
-      
+
 		sand->ForEachInLine(x, y, x1, y1,
 			[&](
 				float px, float py)
@@ -186,9 +186,10 @@ inline LightningHitInfo DrawLightning(
 				iw::Cell&     cell = sand->m_world->GetCell(px, py);
 				iw::TileInfo& info = sand->m_world->GetChunk(px, py)->GetCell<iw::TileInfo>(px, py, iw::SandField::TILE_INFO);
 
-				if (   cell.Type != iw::CellType::EMPTY
+				if (    cell.Type != iw::CellType::EMPTY
 					&& cell.Type != iw::CellType::LIGHTNING
-					|| info.tile)
+					|| (    info.tile
+						&& info.tile != config.A.Find<iw::Tile>()))
 				{
 					hit.X = px;
 					hit.Y = py;
@@ -225,17 +226,38 @@ inline LightningHitInfo DrawLightning(
 
 	glm::vec2 delta = target - origin;
 
-	glm::vec2 a = originObj->Collider->as_dim<iw::d2>()->FindFurthestPoint(&originObj->Transform,  delta);
-	glm::vec2 b = targetObj->Collider->as_dim<iw::d2>()->FindFurthestPoint(&targetObj->Transform, -delta);
+	glm::vec2 a = originObj->Collider
+	            ? originObj->Collider->as_dim<iw::d2>()->FindFurthestPoint(&originObj->Transform, delta)
+	            : originObj->Transform.WorldPosition();
+
+	glm::vec2 b = targetObj->Collider
+	            ? targetObj->Collider->as_dim<iw::d2>()->FindFurthestPoint(&targetObj->Transform, -delta)
+	            : targetObj->Transform.WorldPosition();
 
 	iw::Tile* originTile = config.A.Find<iw::Tile>();
 	iw::Tile* targetTile = config.B.Find<iw::Tile>();
 
-	std::vector<CellInfo> origins = FindClosestCellPositionsMatchingTile(sand, originTile, a.x, a.y);
-	std::vector<CellInfo> targets = FindClosestCellPositionsMatchingTile(sand, targetTile, b.x, b.y);
+	std::vector<CellInfo> origins;
+	std::vector<CellInfo> targets;
 
-	if (   origins.size() == 0 
-		|| targets.size() == 0)
+	if (originTile) {
+		origins = FindClosestCellPositionsMatchingTile(sand, originTile, a.x, a.y);
+	} else {
+		CellInfo& info = origins.emplace_back();
+		info.x = (int)floor(a.x);
+		info.y = (int)floor(a.y);
+	}
+
+	if (targetTile) {
+		targets = FindClosestCellPositionsMatchingTile(sand, targetTile, b.x, b.y);
+	} else {
+		CellInfo& info = targets.emplace_back();
+		info.x = (int)floor(b.x);
+		info.y = (int)floor(b.y);
+	}
+
+	if (    origins.size() == 0 
+	     || targets.size() == 0)
 	{
 		return {};
 	}

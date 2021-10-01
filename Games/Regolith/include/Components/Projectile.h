@@ -72,5 +72,4 @@ struct LightBall_Projectile
 // tag
 struct LightBolt_Projectile
 {
-	ShotInfo Shot;
 };
