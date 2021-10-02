@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Components/ProjHead.h"
 #include "iw/engine/Components/Timer.h"
-#include "iw/entity/Entity.h"
 #include "iw/common/Components/Transform.h"
+#include "iw/entity/Entity.h"
+#include "Components/ProjHead.h"
 
 enum WeaponType {
 	DEFAULT_CANNON,

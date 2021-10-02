@@ -221,6 +221,11 @@ inline LightningHitInfo DrawLightning(
 	iw::CollisionObject* originObj = iw::GetPhysicsComponent(space, config.A.Handle);
 	iw::CollisionObject* targetObj = iw::GetPhysicsComponent(space, config.B.Handle);
 
+	if (!originObj || !targetObj)
+	{
+		return {};
+	}
+
 	glm::vec2 origin = originObj->Transform.Position;
 	glm::vec2 target = targetObj->Transform.Position;
 

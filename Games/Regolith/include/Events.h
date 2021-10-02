@@ -6,7 +6,7 @@
 #include "plugins/iw/Sand/Defs.h"
 #include "Components/Player.h"
 #include "Components/Item.h"
-#include "Components/ProjHead.h"
+#include "Components/Projectile.h"
 #include "Components/EnemyShip.h"
 #include "iw/util/reflection/ReflectDef.h"
 #include "State.h"

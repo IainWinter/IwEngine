@@ -8,25 +8,6 @@ struct Projectile;
 
 // component wrapper for oo
 
-struct ProjHead {
-
-	Projectile* Proj;
-
-	ProjHead() : Proj(nullptr) {}
-
-	// takes ownership
-	ProjHead(
-		Projectile* proj
-	)
-		: Proj(proj)
-	{}
-
-	~ProjHead()
-	{
-		delete Proj;
-	}
-};
-
 enum ProjectileType {
 	BULLET, // these are the same actually
 	LASER,
@@ -48,17 +29,17 @@ struct ShotInfo {
 };
 
 inline ShotInfo GetShot_Circular(
-	float x,  float y,
+	float x, float y,
 	float tx, float ty,
 	float speed, float margin, float thickness = 0)
 {
 	float dx = tx - x,
-	      dy = ty - y;
+		dy = ty - y;
 
-	float length = sqrt(dx*dx + dy*dy);
+	float length = sqrt(dx * dx + dy * dy);
 
 	float nx = dx / length,
-           ny = dy / length;
+		ny = dy / length;
 
 	dx = nx * speed;
 	dy = ny * speed;
@@ -68,5 +49,5 @@ inline ShotInfo GetShot_Circular(
 	x += nx * margin - ny * thickness * r;
 	y += ny * margin + nx * thickness * r;
 
-	return ShotInfo { x, y, dx, dy, 0.f };
+	return ShotInfo{ x, y, dx, dy, 0.f };
 }

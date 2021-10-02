@@ -1,14 +1,13 @@
 #pragma once
 
 #include "plugins/iw/Sand/Engine/SandLayer.h"
+#include "Components/ProjHead.h"
 
 #include "Events.h"
 #include "Helpers.h"
 
 #include <utility>
 #include <functional>
-
-// end helpers
 
 struct HitInfo {
 	bool HasContact = false;

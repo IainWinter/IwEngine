@@ -63,7 +63,7 @@ void Game_Layer::Destroy()
 		Space->GetComponent<Player>(),
 		Space->GetComponent<Enemy>(),
 		Space->GetComponent<Asteroid>(),
-		Space->GetComponent<ProjHead>(),
+		Space->GetComponent<Projectile>(),
 		Space->GetComponent<Item>()
 	});
 

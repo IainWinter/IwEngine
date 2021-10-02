@@ -322,20 +322,6 @@ bool ProjectileSystem::On(iw::ActionEvent& e)
 			}	
 			break;
 		}
-		case STATE_CHANGE:
-		{
-			StateChange_Event& event = e.as<StateChange_Event>();
-
-			switch (event.State)
-			{
-				case GAME_START_STATE:
-					Space->Query<ProjHead>().Each([&](iw::EntityHandle handle, ProjHead*) {
-						Space->QueueEntity(handle, iw::func_Destroy);
-					});
-					break;
-			}
-			break;
-		}
 	}
 
 	return false;
