@@ -66,7 +66,7 @@ namespace Engine {
 		Asset->SetRootPath(options.AssetRootPath);
 		Audio->SetRootDir(Asset->RootPath() + "audio/");
 
-		PushLayerFront<DebugLayer>();
+		//PushLayerFront<DebugLayer>();
 
 		// Time
 

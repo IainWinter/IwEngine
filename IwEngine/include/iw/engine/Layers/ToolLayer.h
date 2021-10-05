@@ -22,7 +22,7 @@ namespace iw {
 		ref<Shader> fontShader;
 		ref<Font> font;
 
-		Scene* m_mainScene;
+		//Scene* m_mainScene;
 
 		Camera* oldcamera;
 
@@ -30,7 +30,7 @@ namespace iw {
 
 	public:
 		IWENGINE_API
-		ToolLayer(Scene* scene);
+		ToolLayer(/*Scene* scene*/);
 
 		IWENGINE_API int  Initialize() override;
 		IWENGINE_API void PostUpdate() override;

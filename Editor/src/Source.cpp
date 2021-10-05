@@ -14,7 +14,8 @@ void Reload(std::wstring dll, HINSTANCE& hInst) {
 		FreeLibrary(hInst);
 	}
 
-	hInst = LoadLibrary(dll.c_str());
+	hInst = LoadLibrary(L"C:\\dev\\IwEngine\\Games\\Regolith\\bin\\Debug.windows.x86_64\\Regolith.dll");
+	// need all dlls that are linked in library to be in bin folder for editor...
 
 	if (!hInst) {
 		LOG_ERROR << "Failed to load library " << dll.c_str();
@@ -70,13 +71,13 @@ public:
 		std::wstringstream buf;
 
 #ifdef IW_DEBUG
-		buf << L"C:/dev/wEngine/Games/";
+		buf << L"C:/dev/IwEngine/Games/";
 		buf << projectName;
 		buf << L"/bin/Debug.windows.x86_64/";
 		buf << projectName;
 		buf << L".dll";
 #else
-		buf << L"C:/dev/wEngine/Games/";
+		buf << L"C:/dev/IwEngine/Games/";
 		buf << projectName;
 		buf << "/bin/Release.windows.x86_64/";
 		buf << projectName;
@@ -109,7 +110,7 @@ public:
 		int err = m_game->Initialize(options);
 
 		if (toolbox)           m_game->PushLayer(toolbox);
-		else         toolbox = m_game->PushLayer<iw::ToolLayer>(sandbox->GetMainScene());
+		else         toolbox = m_game->PushLayer<iw::ToolLayer>(/*sandbox->GetMainScene()*/);
 
 		err = toolbox->Initialize();
 		m_game->PopLayer(toolbox);

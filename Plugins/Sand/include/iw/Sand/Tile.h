@@ -75,7 +75,7 @@ struct Tile {
 			auto itr = std::find(m_justRemovedCells.begin(), m_justRemovedCells.end(), index);
 			if (itr != m_justRemovedCells.end())
 			{
-				m_removedCells.erase(itr);
+				m_justRemovedCells.erase(itr);
 			}
 		}
 

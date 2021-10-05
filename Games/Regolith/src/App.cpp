@@ -135,6 +135,7 @@ int App::Initialize(
 	context_game->MapButton(iw::LMOUSE, "+fire");
 	context_game->MapButton(iw::RMOUSE, "+alt-fire");
 	context_game->MapButton(iw::ESCAPE, "escape");
+	context_game->MapButton(iw::X, "toolbox");
 
 	iw::ref<iw::Context> context_menu = Input->CreateContext("Menu");
 	context_menu->MapButton(iw::LMOUSE,  "+execute");

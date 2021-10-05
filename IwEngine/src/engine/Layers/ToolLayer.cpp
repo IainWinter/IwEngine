@@ -36,8 +36,8 @@ namespace iw {
 		Camera* Controller;
 	};
 
-	ToolLayer::ToolLayer(Scene* scene) : Layer("Toolbox")
-		, m_mainScene(scene)
+	ToolLayer::ToolLayer(/*Scene* scene*/) : Layer("Toolbox")
+		//, m_mainScene(scene)
 		, cameraSystem(nullptr)
 	{}
 
@@ -114,70 +114,70 @@ namespace iw {
 	}
 
 	void ToolLayer::PostUpdate() {
-		Renderer->BeginScene(m_mainScene->MainCamera());
+		//Renderer->BeginScene(m_mainScene->MainCamera());
 
-		for (DirectionalLight* dlight : m_mainScene->DirectionalLights()) {
-			Transform transform;
-			transform.Position = dlight->WorldPosition();
-			transform.Rotation = dlight->WorldRotation();
+		//for (DirectionalLight* dlight : m_mainScene->DirectionalLights()) {
+		//	Transform transform;
+		//	transform.Position = dlight->WorldPosition();
+		//	transform.Rotation = dlight->WorldRotation();
 
-			Renderer->DrawMesh(transform, dlightMesh);
-		}
+		//	Renderer->DrawMesh(transform, dlightMesh);
+		//}
 
-		Renderer->EndScene();
+		//Renderer->EndScene();
 	}
 
 	void ToolLayer::OnPush() {
-		oldcamera = m_mainScene->MainCamera();
-		m_mainScene->SetMainCamera(cameraSystem ? cameraSystem->GetCamera() : nullptr);
+		//oldcamera = m_mainScene->MainCamera();
+		//m_mainScene->SetMainCamera(cameraSystem ? cameraSystem->GetCamera() : nullptr);
 	}
 
 	void ToolLayer::OnPop() {
-		m_mainScene->SetMainCamera(oldcamera);
+		//m_mainScene->SetMainCamera(oldcamera);
 	}
 
 	void ToolLayer::ImGui() {
-		ImGui::Begin("Toolbox");
-		
-		float amb = m_mainScene->Ambiance();
-		ImGui::SliderFloat("Ambiance", &amb, 0, 1);
-		m_mainScene->SetAmbiance(amb);
-		
-		char name = 'A';
-		
-		for (PointLight* light : m_mainScene->PointLights()) {
-			std::stringstream ss;
-			ss << name << " Light pos";
-		
-			glm::vec3 pos = light->Position();
-			ImGui::SliderFloat3(ss.str().c_str(), (float*)&pos, 0, 10);
-			light->SetPosition(pos);
-		
-			ss = std::stringstream();
-			ss << name++ << " Light rad";
-		
-			float rad = light->Radius();
-			ImGui::SliderFloat(ss.str().c_str(), &rad, 0, 100);
-			light->SetRadius(rad);
-		}
-		
-		for (DirectionalLight* light : m_mainScene->DirectionalLights()) {
-			std::stringstream ss;
-			ss << name << " Light col";
-		
-			glm::vec3 col = light->Color();
-			ImGui::SliderFloat3(ss.str().c_str(), (float*)&col, 0, 1);
-			light->SetColor(col);
-		
-			ss = std::stringstream();
-			ss << name++ << " Light rot";
-		
-			glm::vec3 rot = glm::eulerAngles(light->Rotation());
-			ImGui::SliderFloat3(ss.str().c_str(), (float*)&rot, -glm::pi<float>(), glm::pi<float>());
-			light->SetRotation(glm::quat(rot));
-		}
-		
-		ImGui::End();
+		//ImGui::Begin("Toolbox");
+		//
+		//float amb = m_mainScene->Ambiance();
+		//ImGui::SliderFloat("Ambiance", &amb, 0, 1);
+		//m_mainScene->SetAmbiance(amb);
+		//
+		//char name = 'A';
+		//
+		//for (PointLight* light : m_mainScene->PointLights()) {
+		//	std::stringstream ss;
+		//	ss << name << " Light pos";
+		//
+		//	glm::vec3 pos = light->Position();
+		//	ImGui::SliderFloat3(ss.str().c_str(), (float*)&pos, 0, 10);
+		//	light->SetPosition(pos);
+		//
+		//	ss = std::stringstream();
+		//	ss << name++ << " Light rad";
+		//
+		//	float rad = light->Radius();
+		//	ImGui::SliderFloat(ss.str().c_str(), &rad, 0, 100);
+		//	light->SetRadius(rad);
+		//}
+		//
+		//for (DirectionalLight* light : m_mainScene->DirectionalLights()) {
+		//	std::stringstream ss;
+		//	ss << name << " Light col";
+		//
+		//	glm::vec3 col = light->Color();
+		//	ImGui::SliderFloat3(ss.str().c_str(), (float*)&col, 0, 1);
+		//	light->SetColor(col);
+		//
+		//	ss = std::stringstream();
+		//	ss << name++ << " Light rot";
+		//
+		//	glm::vec3 rot = glm::eulerAngles(light->Rotation());
+		//	ImGui::SliderFloat3(ss.str().c_str(), (float*)&rot, -glm::pi<float>(), glm::pi<float>());
+		//	light->SetRotation(glm::quat(rot));
+		//}
+		//
+		//ImGui::End();
 
 		return Layer::ImGui();
 	}
