@@ -114,6 +114,8 @@ namespace ECS {
 		return index;
 	}
 
+	// returns false if chunklist cant reinstate components
+
 	bool ChunkList::ReinstateComponents(
 		const EntityData& entityData)
 	{
@@ -128,15 +130,8 @@ namespace ECS {
 		}
 
 		chunk->ReinstateComponents();
-
+		chunk->ZeroComponentData(m_archetype, entityData.ChunkIndex);
 		*entityComponent = entityData.Entity;
-
-		for (size_t i = 0; i < m_archetype.Count; i++) {
-			ArchetypeLayout& layout = m_archetype.Layout[i];
-
-			void* old = chunk->GetComponentPtr(layout, entityData.ChunkIndex);
-			memset(old, 0, layout.Component->Size); // could put this in Chunk.h if it sounds better
-		}
 
 		++m_count;
 
@@ -152,17 +147,7 @@ namespace ECS {
 		}
 
 		chunk->FreeComponents();
-
-		EntityHandle* entityComponent = chunk->GetEntity(entityData.ChunkIndex);
-		entityComponent->Alive = false;
-
-		for (size_t i = 0; i < m_archetype.Count; i++) {
-			ArchetypeLayout& layout = m_archetype.Layout[i];
-			void* component = chunk->GetComponentPtr(layout, entityData.ChunkIndex);
-			
-			layout.Component->DestructorFunc(component);
-			memset(component, 0, layout.Component->Size); // could put this in Chunk.h if it sounds better
-		}
+		chunk->DestroyEntityComponentData(m_archetype, entityData.ChunkIndex);
 
 		--m_count;
 

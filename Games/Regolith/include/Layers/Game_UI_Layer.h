@@ -1,8 +1,8 @@
 #pragma once
 
 #include "plugins/iw/Sand/Engine/SandLayer.h"
-#include "UI.h"
-#include "Assets.h"
+#include "iw/engine/UI.h"
+#include "iw/engine/Assets.h"
 #include "Events.h"
 #include "Helpers.h"
 
@@ -71,8 +71,6 @@ struct Game_UI_Layer : iw::Layer
 
 
 	int Initialize() override;
-	void Destroy() override;
-
 	void PreUpdate() override;
 	void PostUpdate() override;
 

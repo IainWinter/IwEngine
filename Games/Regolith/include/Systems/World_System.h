@@ -12,7 +12,7 @@
 
 #include "Events.h"
 #include "Levels.h"
-#include "Assets.h"
+#include "iw/engine/Assets.h"
 #include "Helpers.h"
 
 #include <deque>

@@ -1,5 +1,9 @@
 #pragma once
 
+// this should be a system that can load assets from a file
+// right now this is hardcoded to Regolith but I needed some assets
+// for the console and was lazy so moves this file into the engine !temp!
+
 #include "iw/asset/AssetManager.h"
 #include "iw/graphics/Renderer.h"
 #include "iw/graphics/Material.h"

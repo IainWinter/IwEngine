@@ -1,13 +1,10 @@
 #pragma once
 
-#include "iw/engine/Layer.h"
-#include "Assets.h"
-#include "UI.h"
+#include "Layers/Menu_Layer.h"
 
-struct Menu_Fadeout_Layer : iw::Layer
+struct Menu_Fadeout_Layer : Menu_Layer
 {
-	UI_Screen* m_screen;
-	UI*        m_background;
+	UI* m_background;
 
 	float m_time;
 	float m_timer;
@@ -15,9 +12,8 @@ struct Menu_Fadeout_Layer : iw::Layer
 	Menu_Fadeout_Layer(
 		float time
 	)
-		: iw::Layer     ("Menu fadeout game")
+		: Menu_Layer    ("Menu fadeout game")
 
-		, m_screen      (nullptr)
 		, m_background  (nullptr)
 
 		, m_time        (time)
@@ -25,6 +21,5 @@ struct Menu_Fadeout_Layer : iw::Layer
 	{}
 
 	int Initialize() override;
-	void Destroy() override;
 	void PostUpdate() override;
 };

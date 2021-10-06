@@ -150,9 +150,9 @@ namespace Engine {
 
 		Task->init();
 
-		LOG_INFO << "Application initialized";
-
 		m_isInitialized = true;
+
+		LOG_INFO << "Application initialized";
 
 		return 0;
 	}
@@ -382,7 +382,15 @@ namespace Engine {
 		Layer* layer)
 	{
 		LOG_DEBUG << "Initializing " << layer->Name() << " layer...";
-		if (int status = layer->Initialize()) {
+
+		if (layer->IsInitialized)
+		{
+			LOG_WARNING << "\t" << layer->Name() << " layer already initialized!";
+			return 0; // special case dont init
+		}
+		
+		if (int status = layer->Initialize()) 
+		{
 			LOG_ERROR << layer->Name() << " layer initialization failed with error code " << status;
 			return status;
 		}

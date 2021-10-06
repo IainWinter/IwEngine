@@ -65,6 +65,16 @@ namespace ECS {
 		char* GetComponentPtr(
 			const ArchetypeLayout& layout,
 			size_t index);
+
+		IWENTITY_API
+		void ZeroComponentData(
+			const Archetype& archetype,
+			size_t index);
+		
+		IWENTITY_API
+		void DestroyEntityComponentData(
+			const Archetype& archetype,
+			size_t index);
 	};
 }
 

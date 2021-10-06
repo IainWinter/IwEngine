@@ -16,6 +16,12 @@ int Menu_Pause_Layer::Initialize()
 		Console->QueueCommand("escape");
 	};
 
+	AddButton(buttonbg, A_font_cambria->GenerateMesh("Gameover", 16));
+	m_buttons.at(1)->onClick = [&]()
+	{
+		Console->QueueCommand("game-over");
+	};
+
 	return 0;
 }
 

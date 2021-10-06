@@ -197,6 +197,8 @@ bool WorldSystem::On(iw::ActionEvent& e)
 		{
 			iw::Entity& entity = e.as<CoreExploded_Event>().Entity;
 
+			if (!entity) return false;
+
 			glm::vec3 pos = entity.Find<iw::Transform>()->Position;
 
 			SpawnExplosion_Config config;

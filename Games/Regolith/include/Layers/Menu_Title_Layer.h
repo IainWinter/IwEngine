@@ -34,6 +34,5 @@ struct Menu_Title_Layer : iw::Layer
 	{}
 
 	int Initialize() override;
-	void Destroy() override;
 	void PostUpdate() override;
 };

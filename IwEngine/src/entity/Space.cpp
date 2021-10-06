@@ -63,7 +63,7 @@ namespace ECS {
 		TrySendEntityDestroiedEvent(entityData.Entity);
 
 		return m_entityManager   .DestroyEntity(handle.Index)
-			&& m_componentManager.DestroyComponentsData(entityData);
+			&& m_componentManager.DestroyComponentData(entityData);
 	}
 
 	bool Space::KillEntity(
@@ -346,9 +346,15 @@ namespace ECS {
 		while (!m_entityQueue.empty()) {
 			EntityChange& change = m_entityQueue.front();
 
-			if (m_entityManager.GetEntityData(change.handle.Index).Entity.Alive)
+			if (change.handle != EntityHandle::Empty)
 			{
-				change.func(Entity(change.handle, this));
+				EntityData& entity = m_entityManager.GetEntityData(change.handle.Index);
+
+				if (   entity.Entity != EntityHandle::Empty
+					&& entity.Entity.Alive)
+				{
+					change.func(Entity(change.handle, this));
+				}
 			}
 
 			m_entityQueue.pop();

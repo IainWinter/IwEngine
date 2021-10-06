@@ -11,7 +11,7 @@
 #include "Components/Throwable.h"
 
 #include "Events.h"
-#include "Assets.h"
+#include "iw/engine/Assets.h"
 
 struct EnemySystem : iw::SystemBase
 {

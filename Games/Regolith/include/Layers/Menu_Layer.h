@@ -1,8 +1,8 @@
 #pragma once
 
 #include "iw/engine/Layer.h"
-#include "Assets.h"
-#include "UI.h"
+#include "iw/engine/Assets.h"
+#include "iw/engine/UI.h"
 
 struct Menu_Layer : iw::Layer
 {
@@ -26,7 +26,14 @@ struct Menu_Layer : iw::Layer
 
 	virtual void OnPush() override
 	{
-		m_screen = Space->CreateEntity<UI_Screen>().Set<UI_Screen>();
+		if (m_screen)
+		{
+			Space->FindEntity(m_screen).Revive();
+		}
+
+		else {
+			m_screen = Space->CreateEntity<UI_Screen>().Set<UI_Screen>();
+		}
 
 		m_handle = Console->AddHandler([&](
 			const iw::Command& command) 
@@ -42,9 +49,20 @@ struct Menu_Layer : iw::Layer
 		Layer::OnPush();
 	}
 
+	virtual void Destroy() override
+	{
+		Space->FindEntity(m_screen).Revive();
+		Space->FindEntity(m_screen).Destroy();
+		m_screen = nullptr;
+	}
+
 	virtual void OnPop() override
 	{
-		Space->FindEntity(m_screen).Destroy();
+		Space->FindEntity(m_screen).Kill();
 		Console->RemoveHandler(m_handle);
+
+		m_handle = nullptr;
+		m_execute = false;
+		m_last_execute = false;
 	}
 };

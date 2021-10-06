@@ -53,9 +53,9 @@ namespace ECS {
 			&& stream + layout.Component->Size * CurrentIndex > instance)
 		{
 			size_t index = ((char*)instance - stream) / layout.Component->Size + IndexOffset;
-			if (GetEntity(index)->Alive) {
+			//if (GetEntity(index)->Alive) { // I dont think an entity should have to be alive for this to return, only if its destroied, which clears the mem
 				return (int)index;
-			}
+			//}
 		}
 
 		return -1;
@@ -92,6 +92,40 @@ namespace ECS {
 		return GetComponentStream(layout)
 			+ layout.Component->Size
 			* (index - IndexOffset);
+	}
+
+	void Chunk::ZeroComponentData(
+		const Archetype& archetype, 
+		size_t index)
+	{
+		for (size_t i = 0; i < archetype.Count; i++) 
+		{
+			const ArchetypeLayout& layout = archetype.Layout[i];
+
+			void* component = GetComponentPtr(layout, index);
+			memset(component, 0, layout.Component->Size);
+		}
+	}
+
+	void Chunk::DestroyEntityComponentData(
+		const Archetype& archetype, 
+		size_t index)
+	{
+		EntityHandle* entityComponent = GetEntity(index);
+		*entityComponent = EntityHandle::Empty;
+
+		for (size_t i = 0; i < archetype.Count; i++) 
+		{
+			ArchetypeLayout& layout = archetype.Layout[i];
+			void* component = GetComponentPtr(layout, index);;
+			
+			layout.Component->DestructorFunc(component);
+//#ifdef IW_DEBUG
+			memset(component, 0/*0xef*/, layout.Component->Size); // debug mem 0xef (engine free)
+//#endif
+
+			// bugs without zeroing this... means issue with game !!@!
+		}
 	}
 }
 }

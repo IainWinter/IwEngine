@@ -82,7 +82,6 @@ namespace Engine {
 			Args&&... args)
 		{
 			L* layer = new L(std::forward<Args>(args)...);
-			layer->SetAppVars(MakeAppVars());
 			PushLayer(layer);
 			return layer;
 		}
@@ -94,7 +93,6 @@ namespace Engine {
 			Args&& ... args)
 		{
 			L* layer = new L(std::forward<Args>(args)...);
-			layer->SetAppVars(MakeAppVars());
 			PushLayerFront(layer);
 			return layer;
 		}
@@ -107,17 +105,14 @@ namespace Engine {
 			LOG_INFO << "Pushed " << layer->Name() << " layer";
 
 			layer->SetAppVars(MakeAppVars());
+			layer->OnPush();
 
-			if (     m_isInitialized
-				&& !layer->IsInitialized)
+			if (m_isInitialized)
 			{
-				if (int err = InitializeLayer(layer)) {
-					return;
-				}
+				InitializeLayer(layer);
 			}
 
 			m_layers.PushBack(layer);
-			layer->OnPush();
 		}
 
 		template<
@@ -125,20 +120,17 @@ namespace Engine {
 		void PushLayerFront(
 			L* layer)
 		{
-			LOG_INFO << "Pushed " << layer->Name() << " overlay";
+			LOG_INFO << "Pushed " << layer->Name() << " layer to front";
 
 			layer->SetAppVars(MakeAppVars());
+			layer->OnPush();
 
-			if (     m_isInitialized
-				&& !layer->IsInitialized)
+			if (m_isInitialized)
 			{
-				if (int err = InitializeLayer(layer)) {
-					return;
-				}
+				InitializeLayer(layer);
 			}
 
 			m_layers.PushFront(layer);
-			layer->OnPush();
 		}
 
 		template<

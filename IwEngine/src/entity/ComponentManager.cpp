@@ -66,7 +66,7 @@ namespace ECS {
 		return list.ReinstateComponents(entityData);
 	}
 
-	bool ComponentManager::DestroyComponentsData( //todo: find way to get archetype to this function
+	bool ComponentManager::DestroyComponentData( //todo: find way to get archetype to this function
 		const EntityData& entityData)
 	{
 		ChunkList* list = FindChunkList(entityData.Archetype);

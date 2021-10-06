@@ -22,11 +22,6 @@ int Game_UI_Layer::Initialize()
 	return 0;
 }
 
-void Game_UI_Layer::Destroy()
-{
-	Space->FindEntity(m_screen).Destroy();
-}
-
 void Game_UI_Layer::PreUpdate()
 {
 	m_sand_game->sP.x -= (m_screen->width - m_game->width) / 2.f / m_sand_game->m_cellSize;

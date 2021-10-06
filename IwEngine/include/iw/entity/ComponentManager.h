@@ -43,7 +43,7 @@ namespace ECS {
 			const EntityData& entityData);
 
 		IWENTITY_API
-		bool DestroyComponentsData(
+		bool DestroyComponentData(
 			const EntityData& entityData);
 
 		IWENTITY_API

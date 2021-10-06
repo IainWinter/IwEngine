@@ -2,15 +2,9 @@
 
 int Menu_Fadeout_Layer::Initialize()
 {
-	m_screen = Space->CreateEntity<UI_Screen>().Set<UI_Screen>();
 	m_background = m_screen->CreateElement(A_mesh_menu_background.MakeInstance());
 
 	return 0;
-}
-
-void Menu_Fadeout_Layer::Destroy()
-{
-	Space->FindEntity(m_screen).Destroy();
 }
 
 void Menu_Fadeout_Layer::PostUpdate()
