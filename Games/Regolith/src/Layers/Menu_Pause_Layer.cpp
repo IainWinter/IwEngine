@@ -4,10 +4,6 @@ int Menu_Pause_Layer::Initialize()
 {
 	iw::Mesh title  = A_font_cambria->GenerateMesh("Pause Menu", 2);
 
-	m_entity_screen = Space->CreateEntity<UI_Screen>();
-
-	m_screen = m_entity_screen.Set<UI_Screen>();
-
 	m_pause_menu  = m_screen->CreateElement(A_mesh_menu_pause);
 	m_pause_title = m_screen->CreateElement(title);
 
@@ -21,33 +17,6 @@ int Menu_Pause_Layer::Initialize()
 	};
 
 	return 0;
-}
-
-void Menu_Pause_Layer::Destroy()
-{
-	m_entity_screen.Destroy();
-}
-
-void Menu_Pause_Layer::OnPush()
-{
-	m_entity_screen.Revive();
-
-	m_handle = Console->AddHandler([&](
-		const iw::Command& command) 
-	{
-		if (command.Verb == "execute")
-		{
-			m_execute = command.Active;
-		}
-
-		return false;
-	});
-}
-
-void Menu_Pause_Layer::OnPop()
-{
-	m_entity_screen.Kill();
-	Console->RemoveHandler(m_handle);
 }
 
 void Menu_Pause_Layer::PostUpdate()

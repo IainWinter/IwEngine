@@ -28,7 +28,9 @@ bool ScoreSystem::On(iw::ActionEvent& e)
 		}
 		case CHANGE_PLAYER_SCORE:
 		{
-			Score = e.as<ChangePlayerScore_Event>().Score;
+			int newScore = e.as<ChangePlayerScore_Event>().Score; // validation of highscores could be done
+			LOG_INFO << newScore;                                 // by comparing fesability based on all past games
+			Score = newScore;
 			break;
 		}
 		case STATE_CHANGE:

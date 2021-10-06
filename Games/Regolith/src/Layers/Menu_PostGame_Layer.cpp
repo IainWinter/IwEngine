@@ -11,8 +11,6 @@ int Menu_PostGame_Layer::Initialize()
 
 	A_mesh_ui_playerHealth.Material->Set("color", iw::Color(1));
 
-	m_screen = Space->CreateEntity<UI_Screen>().Set<UI_Screen>();
-
 	m_background  = m_screen->CreateElement(A_mesh_menu_background);
 	m_title       = m_screen->CreateElement(title);
 	m_score_title = m_screen->CreateElement(final_score);
@@ -25,25 +23,7 @@ int Menu_PostGame_Layer::Initialize()
 		Console->QueueCommand("game-start");
 	};
 
-	m_handle = Console->AddHandler([&](
-		const iw::Command& command) 
-	{
-		if (command.Verb == "execute")
-		{
-			m_execute = command.Active;
-		}
-
-		return false;
-	});
-
 	return 0;
-}
-
-void Menu_PostGame_Layer::Destroy()
-{
-	Space->FindEntity(m_screen).Destroy();
-	Console->RemoveHandler(m_handle);
-
 }
 
 void Menu_PostGame_Layer::PostUpdate()

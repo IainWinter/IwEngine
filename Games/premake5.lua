@@ -17,8 +17,8 @@ workspace (name)
 	--location (gamedir .. blddir)
 
 	project (name)
-		kind "SharedLib"
-		--kind "WindowedApp"
+		--kind "SharedLib"
+		kind "WindowedApp"
 		language "C++"
 		location  (gamedir .. blddir)
 		targetdir (gamedir .. bindir)

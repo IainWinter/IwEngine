@@ -4,6 +4,10 @@
 #include "iw/engine/InitOptions.h"
 #include "iw/engine/Layer.h"
 
+#ifdef IW_REMOTE_EDITOR
+#	include "iw/editor/remote.h"
+#endif
+
 namespace iw {
 namespace Engine {
 	class Application {
@@ -12,6 +16,10 @@ namespace Engine {
 		ref<IDevice> m_device;
 
 		EventStack<Layer*> m_layers;
+
+#ifdef IW_REMOTE_EDITOR
+		RemoteSession m_remote;
+#endif
 
 		std::thread m_renderThread;
 		bool m_running;
