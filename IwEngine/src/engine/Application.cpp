@@ -385,7 +385,7 @@ namespace Engine {
 
 		if (layer->IsInitialized)
 		{
-			LOG_WARNING << "\t" << layer->Name() << " layer already initialized!";
+			LOG_INFO << "\tDidn't initialize " << layer->Name() << " layer. Already initialized";
 			return 0; // special case dont init
 		}
 		

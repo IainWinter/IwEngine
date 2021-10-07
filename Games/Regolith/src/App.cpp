@@ -110,7 +110,7 @@ App::App() : iw::Application()
 	m_gamePost = nullptr;
 
 	PushLayer<StaticLayer>();
-	PushLayer<UI_Layer>();
+	PushLayer<UI_Render_Layer>();
 
 	m_gamePause = new GameState("Pause menu", GAME_PAUSE_STATE);
 	m_gamePause->Layers.push_back(new Menu_Pause_Layer());
@@ -257,7 +257,7 @@ int App::Initialize(
 iw::Application* CreateApplication(
 	iw::InitOptions& options)
 {
-	options.AssetRootPath = "C:/dev/IwEngine/_assets/";
+	options.AssetRootPath = "C:/dev/wEngine/_assets/";
 	//options.AssetRootPath = "assets/";
 
 	options.WindowOptions = iw::WindowOptions {

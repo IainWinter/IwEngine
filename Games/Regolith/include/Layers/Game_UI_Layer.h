@@ -1,15 +1,15 @@
 #pragma once
 
-#include "plugins/iw/Sand/Engine/SandLayer.h"
-#include "iw/engine/UI.h"
-#include "iw/engine/Assets.h"
+#include "Layers/Menu_Layer.h"
 #include "Events.h"
 #include "Helpers.h"
 
 #include "Components/Weapon.h"
 #include "Components/CorePixels.h"
 
-struct Game_UI_Layer : iw::Layer
+#include "plugins/iw/Sand/Engine/SandLayer.h"
+
+struct Game_UI_Layer : UI_Layer
 {
 	iw::SandLayer* m_sand_game;
 	iw::SandLayer* m_sand_ui_laser;
@@ -26,7 +26,6 @@ struct Game_UI_Layer : iw::Layer
 	bool m_game_over;
 	bool m_game_paused;
 
-	UI_Screen* m_screen;
 	UI* m_menu;
 	UI* m_game;
 	UI* m_health;
@@ -41,7 +40,7 @@ struct Game_UI_Layer : iw::Layer
 		iw::SandLayer* sand,
 		iw::SandLayer* sand_ui_laserCharge
 	)
-		: iw::Layer       ("Game UI")
+		: UI_Layer      ("Game UI")
 
 		, m_sand_game     (sand)
 		, m_sand_ui_laser (sand_ui_laserCharge)
@@ -58,7 +57,6 @@ struct Game_UI_Layer : iw::Layer
 		, m_game_over     (false)
 		, m_game_paused   (false)
 
-		, m_screen        (nullptr)
 		, m_menu          (nullptr)
 		, m_game          (nullptr)
 		, m_health        (nullptr)

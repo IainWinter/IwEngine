@@ -161,7 +161,7 @@ namespace Engine {
 			std::string sname = system->Name();
 			std::string lname = Name();
 
-			LOG_INFO << "Pushed " << sname << " system onto " << lname << " layer";
+			LOG_INFO << "\tPushing " << sname << " system onto " << lname << " layer";
 			system->SetAppVars(MakeAppVars());
 			m_systems.PushBack(system);
 
@@ -186,7 +186,7 @@ namespace Engine {
 		void PushSystemFront(
 			S* system)
 		{
-			LOG_INFO << "Pushed " << system->Name() << " system onto " << Name() << " layer";
+			LOG_INFO << "\tPushing " << system->Name() << " system onto " << Name() << " layer";
 			system->SetAppVars(MakeAppVars());
 			m_systems.PushFront(system);
 
@@ -198,7 +198,7 @@ namespace Engine {
 		void PopSystem(
 			S* system)
 		{
-			LOG_INFO << "Popped " << system->Name() << " system from " << Name() << " layer";
+			LOG_INFO << "\tPopping " << system->Name() << " system from " << Name() << " layer";
 			m_systems.Pop(system);
 
 			system->OnPop();
@@ -209,7 +209,7 @@ namespace Engine {
 		void DestroySystem(
 			S*/*&*/ system)
 		{
-			LOG_INFO << "Destroyed " << system->Name() << " system from " << Name() << " layer";
+			LOG_INFO << "\tDestroying " << system->Name() << " system from " << Name() << " layer";
 			m_systems.Pop(system);
 			system->OnPop();
 			system->Destroy();

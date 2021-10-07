@@ -91,6 +91,7 @@ namespace ECS {
 				return;
 			}
 #endif
+			Space->ReviveEntity(Handle); // I think this needs to be alive to destroy, not sure how I feel about that
 			Space->DestroyEntity(Handle);
 
 			Handle = EntityHandle::Empty;

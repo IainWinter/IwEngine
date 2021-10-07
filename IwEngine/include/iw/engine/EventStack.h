@@ -18,21 +18,9 @@ namespace Engine {
 
 	public:
 		void PushBack(
-			T&& item)
-		{
-			m_items.emplace_back(std::forward<T>(item));
-		}
-
-		void PushBack(
 			const T& item)
 		{
 			m_items.push_back(item);
-		}
-
-		void PushFront(
-			T&& item)
-		{
-			m_items.emplace(begin(), std::forward<T>(item));
 		}
 
 		void PushFront(
@@ -57,11 +45,11 @@ namespace Engine {
 		}
 
 		void Pop(
-			const T& layer)
+			const T& item)
 		{
 			auto itr = m_items.begin();
 			for (; itr != m_items.end(); itr++) {
-				if (*itr == layer) {
+				if (*itr == item) {
 					break;
 				}
 			}
@@ -69,6 +57,12 @@ namespace Engine {
 			if (itr != m_items.end()) {
 				m_items.erase(itr);
 			}
+		}
+
+		bool Contains(
+			const T& item) const
+		{
+			return std::find(m_items.begin(), m_items.end(), item) != m_items.end();
 		}
 
 		T Get(
@@ -98,7 +92,7 @@ namespace Engine {
 						case InputEventType::MouseWheel:  e.Handled = On((MouseWheelEvent&) e); break;
 						case InputEventType::MouseMoved:  e.Handled = On((MouseMovedEvent&) e); break;
 						case InputEventType::MouseButton: e.Handled = On((MouseButtonEvent&)e); break;
-						case InputEventType::Key:    	    e.Handled = On((KeyEvent&)        e); break;
+						case InputEventType::Key:    	  e.Handled = On((KeyEvent&)        e); break;
 						case InputEventType::KeyTyped:    e.Handled = On((KeyTypedEvent&)   e); break;
 						case InputEventType::Command:     /* handle command event in layers!*/  break;
 						default: error = true;
