@@ -10,9 +10,6 @@ int Game_Layer::Initialize()
 
 	Renderer->Device->SetClearColor(0, 0, 0, 1);
 
-	Physics->AddSolver(new iw::SmoothPositionSolver());
-	Physics->AddSolver(new iw::ImpulseSolver());
-
 	projectile_s  = new ProjectileSystem(sand);
 	item_s        = new ItemSystem      (sand);
 	world_s       = new WorldSystem     (sand);

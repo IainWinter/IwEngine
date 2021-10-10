@@ -3,8 +3,29 @@
 
 #include "iw/physics/impl/GJK.h"
 
+//float tt;
+
 void WorldSystem::Update()
 {
+	//tt += iw::DeltaTime();
+
+	//if (tt > .01)
+	//{
+	//	tt = 0;
+
+	//	LightningConfig l;
+	//	l.X = 100;
+	//	l.Y = 200;
+	//	l.TargetX = 300;
+	//	l.TargetY = 200;
+	//	l.LifeTime = .01;
+	//	l.ArcSize = 10;
+	//	l.Type = LightningType::POINT;
+
+	//	DrawLightning(sand, l);
+	//}
+
+
 	//return;
 	m_timer.Tick();
 

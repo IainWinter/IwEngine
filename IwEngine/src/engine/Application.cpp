@@ -27,7 +27,7 @@ namespace Engine {
 	Application::Application()
 		: m_running(false)
 		, m_isInitialized(false)
-		, m_window(IWindow::Create())
+		, Window(IWindow::Create())
 	{
 		m_device = ref<IDevice>(IDevice::Create());
 		Bus      = REF<eventbus>();
@@ -42,12 +42,14 @@ namespace Engine {
 	}
 
 	Application::~Application() {
-		delete m_window;
+		delete Window;
 	}
 
 	int Application::Initialize(
 		InitOptions& options)
 	{
+		m_isInitialized = true; // techincally could fail and then this would be true, but needed for InitLayer
+
 		//bool console = true; // should be in Initoptions, maybe should be creted in window also, this leaks windows.h
 		//if (console) {
 			AllocConsole();
@@ -113,11 +115,11 @@ namespace Engine {
 #endif
 		// Window
 
-		m_window->SetEventbus(Bus);
+		Window->SetEventbus(Bus);
 
 		int status;
 		LOG_DEBUG << "Initializing window...";
-		if (status = m_window->Initialize(options.WindowOptions)) {
+		if (status = Window->Initialize(options.WindowOptions)) {
 			LOG_ERROR << "Window failed to initialize with error code " << status;
 			return status;
 		}
@@ -134,13 +136,13 @@ namespace Engine {
 		Renderer->Now->Initialize();
 
 		for (Layer* layer : m_layers) {
-			if (status = InitializeLayer(layer)) {
+			if (status = InitLayer(layer)) {
 				return status;
 			}
 		}
 
 		//Need to set after so window doesn't send events before imgui gets initialized
-		m_window->SetState(options.WindowOptions.State);
+		Window->SetState(options.WindowOptions.State);
 
 		// Time again!
 
@@ -152,39 +154,24 @@ namespace Engine {
 
 		LOG_INFO << "Application initialized";
 
-		m_isInitialized = true;
-
 		return 0;
 	}
 
 	void Application::Run() {
 		Bus->publish();
-		m_window->ReleaseOwnership();
+		Window->ReleaseOwnership();
 
 		m_running = true;
 
 		// Rendering thread is the 'main' thread for the application (owns rendering context)
 		m_renderThread = std::thread([&]() {
-			m_window->TakeOwnership();
+			(*Window).TakeOwnership();
 			
 			float accumulatedTime = 0;
 			while (m_running) {
 				Time::UpdateTime();
 
 				(*Renderer).Begin(Time::TotalTime());
-
-#ifdef IW_IMGUI
-				ImGuiLayer* imgui = GetLayer<ImGuiLayer>("ImGui");
-				if (imgui) {
-					LOG_TIME_SCOPE("ImGui");
-
-					imgui->Begin();
-					for (Layer* layer : m_layers) {
-						layer->ImGui();
-					}
-					imgui->End();
-				}
-#endif
 
 				int layerNumber = 0;
 				for (Layer* layer : m_layers)
@@ -226,6 +213,18 @@ namespace Engine {
 					(*Renderer).End();
 				}
 
+#ifdef IW_IMGUI
+				ImGuiLayer* imgui = GetLayer<ImGuiLayer>("ImGui");
+				if (imgui) {
+					LOG_TIME_SCOPE("ImGui");
+
+					imgui->Begin();
+					for (Layer* layer : m_layers) {
+						layer->ImGui();
+					}
+					imgui->End();
+				}
+#endif
 				{
 					LOG_TIME_SCOPE("Audio");
 					(*Audio).Update();
@@ -244,7 +243,7 @@ namespace Engine {
 
 				(*Space).ExecuteQueue();
 
-				m_window->SwapBuffers();
+				(*Window).SwapBuffers();
 
 				LOG_CLEAR_TIMES();
 			}
@@ -254,7 +253,7 @@ namespace Engine {
 
 		// Main loop gets events from os
 		while (m_running) {
-			m_window->Update();
+			Window->Update();
 		}
 
 		m_renderThread.join();
@@ -297,7 +296,7 @@ namespace Engine {
 			DestroyLayer(*m_layers.begin());
 		}
 
-		m_window->Destroy();
+		Window->Destroy();
 
 		LOG_FLUSH();
 		LOG_RESET();
@@ -359,13 +358,13 @@ namespace Engine {
 	{
 		if (command.Verb == "resize_window") {
 			Bus->push<WindowResizedEvent>(
-				m_window->Id(),
+				Window->Id(),
 				(int)command.Tokens[0].Int,
 				(int)command.Tokens[1].Int);
 		}
 
 		else if (command.Verb == "quit") {
-			Bus->push<WindowEvent>(Closed, m_window->Id());
+			Bus->push<WindowEvent>(Closed, Window->Id());
 		}
 
 		return false;
@@ -376,21 +375,6 @@ namespace Engine {
 		scalar dt)
 	{
 		Bus->push<CollisionEvent>(manifold, dt);
-	}
-
-	int Application::InitializeLayer(
-		Layer* layer)
-	{
-		LOG_DEBUG << "Initializing " << layer->Name() << " layer...";
-		if (int status = layer->Initialize()) {
-			LOG_ERROR << layer->Name() << " layer initialization failed with error code " << status;
-			return status;
-		}
-
-		layer->IsInitialized = true; // this gets set in Layer::Init but sometimes a layer wont call this
-									 // techincally a bug but there is no warning so this is a quick hack
-
-		return 0;
 	}
 }
 }

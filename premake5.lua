@@ -769,7 +769,7 @@ group ""
 
 group "Editor" -- might become it's own solution/repo
 	project "wEditor"
-		kind "WindowedApp"
+		kind "ConsoleApp"
 		language "C++"
 		location  (edtordir .. blddir)
 		targetdir (edtordir .. bindir)

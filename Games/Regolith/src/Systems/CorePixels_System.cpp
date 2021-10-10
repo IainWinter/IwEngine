@@ -54,7 +54,6 @@ void CorePixelsSystem::Update()
 		{
 			bool dead = false;
 			
-			LOG_INFO << tile->m_currentCells.size();
 			if (tile->m_currentCells.size() < 30)
 			{
 				dead = true;
@@ -259,7 +258,7 @@ bool CorePixelsSystem::On(iw::ActionEvent& e)
 
 			for (const int& i : toSplit)
 			{
-				tile->SetState(i, iw::Tile::PixelState::REMOVED);
+				tile->RemovePixel(i);
 			}
 
 			break;

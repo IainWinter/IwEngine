@@ -10,16 +10,15 @@
 namespace iw {
 namespace Engine {
 	ImGuiLayer::ImGuiLayer(
-		IWindow* window)
+		IWindow* window
+	)
 		: Layer("ImGui")
 		, m_window(window)
 		, m_context(nullptr)
 	{
-		target = REF<RenderTarget>();
-		target->AddTexture(REF<Texture>(1280, 720));
-		target->AddTexture(REF<Texture>(1280, 720, TEX_2D, DEPTH, FLOAT));
-
-		aspect = (float)target->Height() / target->Width();
+		viewportRT = REF<RenderTarget>();
+		viewportRT->AddTexture(REF<Texture>(1280, 720));
+		viewportRT->AddTexture(REF<Texture>(1280, 720, TEX_2D, DEPTH));
 	}
 
 	ImGuiLayer::~ImGuiLayer() {}
@@ -49,8 +48,7 @@ namespace Engine {
 	}
 
 	void ImGuiLayer::OnPush() {
-		if(m_context)
-			Renderer->Now->SetDefaultTarget(target);
+		Renderer->Now->SetDefaultTarget(viewportRT);
 	}
 
 	void ImGuiLayer::OnPop() {
@@ -67,22 +65,11 @@ namespace Engine {
 		ImGui::GetIO().DeltaTime = Time::DeltaTime();
 
 		if (m_window) {
-			iw::vec2 pos = Mouse::ScreenPos();
+			iw::vec2 pos = Mouse::ClientPos();
 
 			ImGui::GetIO().MousePos.x = pos.x();
 			ImGui::GetIO().MousePos.y = pos.y();
 		}
-
-		//ImGui::Begin("ImGui Layer");
-
-		//ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
-		//	1000.0f / ImGui::GetIO().Framerate,
-		//	ImGui::GetIO().Framerate);
-
-		//ImGui::PlotLines("Fps", iw::Time::Times().first, iw::Time::Times().second);
-
-		//ImGui::End();
-
 	}
 	
 	std::unordered_map<std::string, float> m_smooth;
@@ -173,23 +160,30 @@ namespace Engine {
 
 		// temp Viewspace
 
-		ImGui::Begin("Viewspace");
-
 		//target->Resize(size.x, size.y);
 
 		//ImVec2 size;
 		//size.x = target->Tex(0)->Width();
 		//size.y = target->Tex(0)->Height();
 
-		if (target->Tex(0)->Handle()) {
+		if (viewportRT->Tex(0)->Handle()) {
 			ImVec2 size = ImGui::GetWindowSize();
-			size.y = size.x * aspect;
 
-			unsigned id = target->Tex(0)->Handle()->Id();
+			if (   (unsigned)size.x != viewportRT->Width()
+				|| (unsigned)size.y != viewportRT->Height())
+			{
+				viewportRT->Resize((unsigned)size.x, (unsigned)size.y);
+			}
+
+			ImGui::PushClipRect(ImVec2(0,0), ImVec2(size.x, size.y), false);
+			ImGui::Begin("Viewspace");
+
+			unsigned id = viewportRT->Tex(0)->Handle()->Id();
 			ImGui::Image((void*)id, size, ImVec2(0, 1), ImVec2(1, 0));
+			
+			ImGui::End();
+			ImGui::PopClipRect();
 		}
-
-		ImGui::End();
 	}
 
 	void ImGuiLayer::End() {

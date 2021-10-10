@@ -26,7 +26,7 @@ namespace iw {
 
 		camera->SetTrans(cameraTransform);
 
-		return 0;
+		return SystemBase::Initialize();
 	}
 
 	void EditorCameraControllerSystem::Update()
@@ -118,7 +118,12 @@ namespace iw {
 		if (e.Device == DeviceType::RAW_MOUSE) {
 			switch (e.Button) {
 				case RMOUSE: speed  = e.State ? 50.0f : 5.0f; break;
-				case MMOUSE: Active = e.State;                break;
+				case MMOUSE: 
+				{
+					Active = e.State;
+					LOG_INFO << "Editor camera controller is now " << (Active ? "non active" : "active");
+					break;
+				}
 			}
 		}
 

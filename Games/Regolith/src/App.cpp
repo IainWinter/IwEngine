@@ -260,7 +260,7 @@ iw::Application* CreateApplication(
 	//options.AssetRootPath = "assets/";
 
 	options.WindowOptions = iw::WindowOptions {
-		1280,
+		800,
 		1000 + 39,
 		true,
 		iw::DisplayState::NORMAL

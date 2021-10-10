@@ -25,7 +25,7 @@ public:
 			context->AddDevice(Input->CreateDevice<iw::RawMouse>());
 		}
 
-		iw::ImGuiLayer* imgui = GetLayer<iw::ImGuiLayer>("ImGui"); // need this because layer is created in a different dll
+		iw::ImGuiLayer* imgui = PushLayer<iw::ImGuiLayer>(); // need this because layer is created in a different dll
 
 		if (imgui) {
 			imgui->BindContext();

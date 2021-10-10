@@ -8,7 +8,6 @@ namespace iw {
 namespace Engine {
 	class Application {
 	private:
-		IWindow* m_window;
 		ref<IDevice> m_device;
 
 		EventStack<Layer*> m_layers;
@@ -17,6 +16,8 @@ namespace Engine {
 		bool m_running;
 		bool m_isInitialized;
 	public:
+		IWindow* Window;
+
 		APP_VARS
 
 	public:
@@ -56,9 +57,6 @@ namespace Engine {
 			Manifold& manifold,
 			scalar dt);
 
-		IWENGINE_API inline const IWindow* Window() const { return m_window; }
-		IWENGINE_API inline       IWindow* Window()       { return m_window; }
-
 		template<
 			typename L = Layer>
 		L* GetLayer(
@@ -74,7 +72,6 @@ namespace Engine {
 			Args&&... args)
 		{
 			L* layer = new L(std::forward<Args>(args)...);
-			layer->SetAppVars(MakeAppVars());
 			PushLayer(layer);
 			return layer;
 		}
@@ -86,7 +83,6 @@ namespace Engine {
 			Args&& ... args)
 		{
 			L* layer = new L(std::forward<Args>(args)...);
-			layer->SetAppVars(MakeAppVars());
 			PushLayerFront(layer);
 			return layer;
 		}
@@ -98,14 +94,9 @@ namespace Engine {
 		{
 			LOG_INFO << "Pushed " << layer->Name() << " layer";
 
-			layer->SetAppVars(MakeAppVars());
-
-			if (     m_isInitialized
-				&& !layer->IsInitialized)
+			if (InitLayer(layer))
 			{
-				if (int err = InitializeLayer(layer)) {
-					return;
-				}
+				return;
 			}
 
 			m_layers.PushBack(layer);
@@ -119,14 +110,9 @@ namespace Engine {
 		{
 			LOG_INFO << "Pushed " << layer->Name() << " overlay";
 
-			layer->SetAppVars(MakeAppVars());
-
-			if (     m_isInitialized
-				&& !layer->IsInitialized)
+			if (InitLayer(layer))
 			{
-				if (int err = InitializeLayer(layer)) {
-					return;
-				}
+				return;
 			}
 
 			m_layers.PushFront(layer);
@@ -163,9 +149,32 @@ namespace Engine {
 			return seq;
 		}
 	private:
-		IWENGINE_API
-		int InitializeLayer(
-			Layer* layer);
+		bool InitLayer(
+			Layer* layer)
+		{
+			LOG_DEBUG << "Initializing " << layer->Name() << " layer...";
+
+			layer->SetAppVars(MakeAppVars());
+
+			if (     m_isInitialized
+				&& !layer->IsInitialized)
+			{
+				if (int err = layer->Initialize())
+				{
+					LOG_ERROR
+						<< "Failed to init "
+						<< layer->Name()
+						<< " layer with error code "
+						<< err;
+
+					layer->IsInitialized = true;
+
+					return true;
+				}
+			}
+
+			return false;
+		}
 
 		MAKE_APP_VARS
 	};
@@ -174,5 +183,6 @@ namespace Engine {
 	using namespace Engine;
 }
 
+extern "C" __declspec(dllexport)
 iw::Application* CreateApplication(
 	iw::InitOptions& options);

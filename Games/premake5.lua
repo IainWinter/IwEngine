@@ -1,4 +1,6 @@
-name = "Regolith"
+name       = "PhysicsProject"   -- this is the name of the folder
+--type_name = "SharedLib"   -- this is an exe for final export and dll for the editor
+type_name = "WindowedApp"
 
 iwengdir  = path.getabsolute("../_export")
 gamedir  = path.getabsolute(name)
@@ -17,8 +19,7 @@ workspace (name)
 	--location (gamedir .. blddir)
 
 	project (name)
-		--kind "SharedLib"
-		kind "WindowedApp"
+		kind (type_name)
 		language "C++"
 		location  (gamedir .. blddir)
 		targetdir (gamedir .. bindir)
@@ -55,7 +56,7 @@ workspace (name)
 			"ImGui",
 			"GLEW",
 			"opengl32.lib",
-			"wSand"
+			--"wSand"
 		}
 
 		prebuildcommands {
@@ -74,7 +75,7 @@ workspace (name)
 				"IW_PLATFORM_WINDOWS",
 				"IW_IMGUI"  -- not sure if this needs to be here
 			}
-			files { gamedir .. '/resources.rc', gamedir .. '/favicon.ico' }
+			--files { gamedir .. '/resources.rc', gamedir .. '/favicon.ico' }
 
 		filter "configurations:Debug"
 			defines "IW_DEBUG"

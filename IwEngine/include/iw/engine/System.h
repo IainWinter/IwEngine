@@ -16,6 +16,8 @@ namespace iw {
 namespace Engine {
 	class ISystem {
 	public:
+		bool IsInitialized = false;
+
 		virtual int  Initialize() = 0;
 		virtual void Destroy() = 0;
 		virtual void Update() = 0;
@@ -74,8 +76,8 @@ namespace Engine {
 			: m_name(name)
 		{}
 
-		virtual int  Initialize() { return 0; }
-		virtual void Destroy() {}
+		virtual int  Initialize() { IsInitialized = true; return 0; }
+		virtual void Destroy() { IsInitialized = false; }
 		virtual void Update() {}
 		virtual void FixedUpdate() {}
 		virtual void ImGui() {}

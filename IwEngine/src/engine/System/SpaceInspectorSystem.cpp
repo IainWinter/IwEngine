@@ -247,7 +247,10 @@ namespace Editor {
 				e = Space->FindEntity<iw::Rigidbody>(o);
 			}
 
-			ImGui::Text("Entity id: %i v: %i", e.Index(), e.Version());
+			if (e)
+			{
+				ImGui::Text("Entity id: %i v: %i", e.Index(), e.Version());
+			}
 		}
 
 		ImGui::End();
@@ -435,6 +438,8 @@ namespace Editor {
 
 			ImGui::EndTable();
 		}
+
+		ImGui::PopID();
 	}
 
 	void SpaceInspectorSystem::PrintParticleSystem(
