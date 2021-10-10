@@ -33,8 +33,6 @@ struct StaticLayer : iw::Layer
 		PushSystem<iw::PhysicsSystem>();
 		PushSystem<iw::EntityCleanupSystem>();
 
-		// this shouldnt really be here
-		// load all assets into global variables
 		if (int e = LoadAssets(Asset.get(), Renderer->Now.get()))
 		{
 			return e;
@@ -47,18 +45,11 @@ struct StaticLayer : iw::Layer
 	}
 };
 
-struct PostGameLayer : iw::Layer
+struct UI_Render_Layer : iw::Layer
 {
-	PostGameLayer() : iw::Layer("Post game") {}
+	UI_Render_Layer() : iw::Layer("UI render") {}
 
-	void PostUpdate();
-};
-
-struct UI_Layer : iw::Layer
-{
-	UI_Layer() : iw::Layer("UI") {}
-
-	void PostUpdate()
+	void PostUpdate() override
 	{
 		int i = 0;
 		Space->Query<UI_Screen>().Each([&](iw::EntityHandle handle, UI_Screen* ui)

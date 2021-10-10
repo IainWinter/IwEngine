@@ -100,7 +100,13 @@ namespace Engine {
 		void PushLayer(
 			L* layer)
 		{
-			LOG_INFO << "Pushed " << layer->Name() << " layer";
+			LOG_INFO << "Pushing " << layer->Name() << " layer";
+
+			if (m_layers.Contains(layer))
+			{
+				LOG_WARNING << "\tFailed to push " << layer->Name() << " layer. Already on stack";
+				return;
+			}
 
 			if (InitLayer(layer))
 			{
@@ -115,7 +121,13 @@ namespace Engine {
 		void PushLayerFront(
 			L* layer)
 		{
-			LOG_INFO << "Pushed " << layer->Name() << " layer to front";
+			LOG_INFO << "Pushing " << layer->Name() << " layer to front";
+
+			if (m_layers.Contains(layer))
+			{
+				LOG_WARNING << "\tFailed to push " << layer->Name() << " layer to front. Already on stack";
+				return;
+			}
 
 			if (InitLayer(layer))
 			{
@@ -130,7 +142,7 @@ namespace Engine {
 		void PopLayer(
 			L* layer)
 		{
-			LOG_INFO << "Popped " << layer->Name() << " layer";
+			LOG_INFO << "Popping " << layer->Name() << " layer";
 			m_layers.Pop(layer);
 			layer->OnPop();
 		}
@@ -140,7 +152,7 @@ namespace Engine {
 		void DestroyLayer(
 			L*/*&*/ layer)
 		{
-			LOG_INFO << "Destroyed " << layer->Name() << " layer";
+			LOG_INFO << "Destroying " << layer->Name() << " layer";
 			m_layers.Pop(layer);
 			layer->OnPop();
 			layer->Destroy();

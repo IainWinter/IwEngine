@@ -205,7 +205,7 @@ namespace Engine {
 		void PopSystem(
 			S* system)
 		{
-			LOG_INFO << "Popped " << system->Name() << " system from " << Name() << " layer";
+			LOG_INFO << "\tPopping " << system->Name() << " system from " << Name() << " layer";
 			m_systems.Pop(system);
 			system->OnPop();
 		}
@@ -215,7 +215,7 @@ namespace Engine {
 		void DestroySystem(
 			S*/*&*/ system)
 		{
-			LOG_INFO << "Destroyed " << system->Name() << " system from " << Name() << " layer";
+			LOG_INFO << "\tDestroying " << system->Name() << " system from " << Name() << " layer";
 			m_systems.Pop(system);
 			system->OnPop();
 			system->Destroy();
