@@ -32,11 +32,23 @@ namespace Graphics {
 		m_lightUBO  = Device->CreateUniformBuffer(&m_lightData,  sizeof(LightData));
 	}
 
-	int Renderer::Width() const {
+	int Renderer::Width() const 
+	{
+		if (m_defaultTarget)
+		{
+			return m_defaultTarget->Width();
+		}
+
 		return m_width;
 	}
 
-	int Renderer::Height() const {
+	int Renderer::Height() const 
+	{
+		if (m_defaultTarget)
+		{
+			return m_defaultTarget->Height();
+		}
+		
 		return m_height;
 	}
 
@@ -288,6 +300,7 @@ namespace Graphics {
 					&& m_defaultTarget)
 				{
 					SetTarget(m_defaultTarget);
+					return; // early exit todo: fix this annoying flow, blocks setting m_target back to nullptr
 				}
 
 				else {

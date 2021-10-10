@@ -13,8 +13,7 @@ namespace Engine {
 		IWindow* m_window;
 		void* m_context;
 
-		ref<RenderTarget> target;
-		float aspect;
+		ref<RenderTarget> viewportRT;
 
 	public:
 		IWENGINE_API ImGuiLayer(

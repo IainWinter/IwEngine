@@ -258,7 +258,7 @@ bool CorePixelsSystem::On(iw::ActionEvent& e)
 
 			for (const int& i : toSplit)
 			{
-				tile->SetState(i, iw::Tile::PixelState::REMOVED);
+				tile->RemovePixel(i);
 			}
 
 			break;

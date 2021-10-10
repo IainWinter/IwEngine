@@ -15,7 +15,7 @@ namespace Engine {
 	class Layer {
 	private:
 		std::string m_name;
-		EventStack<ISystem*> m_systems; // layer doesnt own systems but prolly should
+		EventStack<ISystem*> m_systems;
 	protected:
 		APP_VARS
 
@@ -38,9 +38,13 @@ namespace Engine {
 
 		virtual int Initialize()
 		{
-			for (ISystem* s : m_systems) {
-				int e = s->Initialize();
-				if (e != 0) return e;
+			for (ISystem* s : m_systems)
+			{
+				if (!s->IsInitialized)
+				{
+					int e = s->Initialize();
+					if (e != 0) return e;
+				}
 			}
 
 			IsInitialized = true;
@@ -53,6 +57,8 @@ namespace Engine {
 			while (m_systems.size() > 0) {
 				DestroySystem(*m_systems.begin());
 			}
+
+			IsInitialized = false;
 		}
 
 		// Sync Updates
@@ -147,25 +153,8 @@ namespace Engine {
 			Args&&... args)
 		{
 			S* system = new S(std::forward<Args>(args)...);
-			system->SetAppVars(MakeAppVars());
-
 			PushSystem(system);
 			return system;
-		}
-
-		template<
-			typename S>
-		void PushSystem(
-			S* system)
-		{
-			std::string sname = system->Name();
-			std::string lname = Name();
-
-			LOG_INFO << "Pushed " << sname << " system onto " << lname << " layer";
-			system->SetAppVars(MakeAppVars());
-			m_systems.PushBack(system);
-
-			system->OnPush();
 		}
 
 		template<
@@ -175,10 +164,24 @@ namespace Engine {
 			Args&&... args)
 		{
 			S* system = new S(std::forward<Args>(args)...);
-			system->SetAppVars(MakeAppVars());
-
 			PushSystemFront(system);
 			return system;
+		}
+
+		template<
+			typename S>
+		void PushSystem(
+			S* system)
+		{
+			LOG_INFO << "Pushed " << system->Name() << " system onto " << Name() << " layer";
+
+			if (InitSystem(system))
+			{
+				return;
+			}
+
+			m_systems.PushBack(system);
+			system->OnPush();
 		}
 
 		template<
@@ -187,9 +190,13 @@ namespace Engine {
 			S* system)
 		{
 			LOG_INFO << "Pushed " << system->Name() << " system onto " << Name() << " layer";
-			system->SetAppVars(MakeAppVars());
-			m_systems.PushFront(system);
 
+			if (InitSystem(system))
+			{
+				return;
+			}
+
+			m_systems.PushFront(system);
 			system->OnPush();
 		}
 
@@ -200,7 +207,6 @@ namespace Engine {
 		{
 			LOG_INFO << "Popped " << system->Name() << " system from " << Name() << " layer";
 			m_systems.Pop(system);
-
 			system->OnPop();
 		}
 
@@ -228,6 +234,33 @@ namespace Engine {
 			return seq;
 		}
 	private:
+		bool InitSystem(
+			SystemBase* system)
+		{
+			LOG_DEBUG << "Initializing " << system->Name() << " system...";
+
+			system->SetAppVars(MakeAppVars());
+
+			if (    IsInitialized
+				&& !system->IsInitialized)
+			{
+				if (int err = system->Initialize())
+				{
+					LOG_ERROR
+						<< "Failed to init "
+						<< system->Name()
+						<< " system with error code "
+						<< err;
+
+					system->IsInitialized = true;
+
+					return true;
+				}
+			}
+
+			return false;
+		}
+
 		friend class Application;
 
 		SET_APP_VARS

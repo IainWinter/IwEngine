@@ -40,6 +40,9 @@ struct StaticLayer : iw::Layer
 			return e;
 		}
 
+		Physics->AddSolver(new iw::SmoothPositionSolver());
+		Physics->AddSolver(new iw::ImpulseSolver());
+
 		return Layer::Initialize();
 	}
 };

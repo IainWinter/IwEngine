@@ -307,7 +307,16 @@ namespace Graphics {
 		m_width  = width;
 		m_height = height;
 
-		CreateColors(true);
+		if (m_colors)
+		{
+			CreateColors(true); // realloc with dif sized colors array
+		}
+
+		if (data)
+		{
+			assert("no impl");
+			// set from data
+		}
 
 		if (!m_handle) {
 			LOG_DEBUG << "Tried to set pixels before initializing texture!";

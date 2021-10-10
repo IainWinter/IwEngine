@@ -82,21 +82,21 @@ namespace iw {
 		//trans->Rotation = quaternion::from_euler_angles(iw::randf() * iw::Pi2, iw::randf() * iw::Pi2, iw::randf() * iw::Pi2);
 		trans->Position = glm::ballRand(10.f);
 
-		mesh->SetMaterial(REF<Material>(shader));
+		mesh->Material = REF<Material>(shader);
 
-		mesh->Material()->Set("albedo", glm::vec4(
+		mesh->Material->Set("albedo", glm::vec4(
 			glm::ballRand(.5f) + glm::vec3(.5f),
 			1.0f)
 		);
 
-		mesh->Material()->Set("reflectance", .5f * glm::linearRand(0.f, 1.f));
-		mesh->Material()->Set("roughness",   .5f * glm::linearRand(0.f, 1.f));
-		mesh->Material()->Set("metallic",    .5f * glm::linearRand(0.f, 1.f));
+		mesh->Material->Set("reflectance", .5f * glm::linearRand(0.f, 1.f));
+		mesh->Material->Set("roughness",   .5f * glm::linearRand(0.f, 1.f));
+		mesh->Material->Set("metallic",    .5f * glm::linearRand(0.f, 1.f));
 
-		mesh->Material()->SetTexture("shadowMap", pointShadowTarget->Tex(0));
+		mesh->Material->SetTexture("shadowMap", pointShadowTarget->Tex(0));
 		//mesh->Material()->SetTexture("ww", pointShadowTarget->Tex(0));
 
-		mesh->Material()->Initialize(Renderer->Device);
+		mesh->Material->Initialize(Renderer->Device);
 		
 		body->SetTransform(trans);
 		body->Collider = col;
@@ -135,10 +135,10 @@ namespace iw {
 		            dirShadowShader   = Asset->Load<Shader>("shaders/lights/directional_transparent.shader");
 		ref<Shader> pointShadowShader = Asset->Load<Shader>("shaders/lights/point.shader");
 
-		Renderer->InitShader(shader,          CAMERA | SHADOWS | LIGHTS);
-		Renderer->InitShader(phong,           CAMERA | SHADOWS | LIGHTS);
-		Renderer->InitShader(dirShadowShader, CAMERA);
-		Renderer->InitShader(pointShadowShader);
+		Renderer->Now->InitShader(shader,          CAMERA | SHADOWS | LIGHTS);
+		Renderer->Now->InitShader(phong,           CAMERA | SHADOWS | LIGHTS);
+		Renderer->Now->InitShader(dirShadowShader, CAMERA);
+		Renderer->Now->InitShader(pointShadowShader);
 
 		// Models
 
@@ -170,7 +170,7 @@ namespace iw {
 
 		ref<Texture> pointShadowDepth = ref<Texture>(new Texture(1024, 1024, TEX_CUBE, DEPTH, FLOAT, EDGE));
 		
-		pointShadowTarget = REF<RenderTarget>(true);
+		pointShadowTarget = REF<RenderTarget>();
 		pointShadowTarget->AddTexture(pointShadowDepth);
 
 		pointShadowTarget->Initialize(Renderer->Device);
@@ -185,17 +185,13 @@ namespace iw {
 			Plane*           col   = Ground.Set<Plane>(glm::vec3(0, 1, 0), 0);
 			CollisionObject* obj   = Ground.Set<CollisionObject>();
 
-			mesh->SetMaterial(REF<Material>(shader));
-
-			mesh->Material()->Set("albedo", iw::Color(0.002f, 0.144f, 0.253f));
-
-			mesh->Material()->Set("reflectance", 0.06f);
-			mesh->Material()->Set("roughness",   0.8f);
-			mesh->Material()->Set("metallic",    0.8f);
-			
-			mesh->Material()->SetTexture("shadowMap",  dirShadowTarget->Tex(0));
-
-			mesh->Material()->Initialize(Renderer->Device);
+			mesh->Material = REF<Material>(shader);
+			mesh->Material->Set("albedo", iw::Color(0.002f, 0.144f, 0.253f));
+			mesh->Material->Set("reflectance", 0.06f);
+			mesh->Material->Set("roughness",   0.8f);
+			mesh->Material->Set("metallic",    0.8f);
+			mesh->Material->SetTexture("shadowMap",  dirShadowTarget->Tex(0));
+			mesh->Material->Initialize(Renderer->Device);
 
 			obj->SetTransform(trans);
 			obj->Collider = col;
@@ -244,6 +240,7 @@ namespace iw {
 		//Time::SetTimeScale(0.01f);
 
 		EditorCameraControllerSystem* system = PushSystem<EditorCameraControllerSystem>();
+		system->Initialize();
 
 		MainScene->SetMainCamera(system->GetCamera());
 		
@@ -581,14 +578,14 @@ namespace iw {
 			for (auto entity : Space->Query<Transform, Mesh>()) {
 				auto [transform, mesh] = entity.Components.Tie<MeshComponents>();
 
-				mesh->Material()->Set("albedo", glm::vec4(
+				mesh->Material->Set("albedo", glm::vec4(
 					glm::ballRand(.5f) + glm::vec3(.5f),
 					1.0f)
 				);
 
-				mesh->Material()->Set("reflectance", rand() / (float)RAND_MAX);
-				mesh->Material()->Set("roughness",   rand() / (float)RAND_MAX);
-				mesh->Material()->Set("metallic",    rand() / (float)RAND_MAX);
+				mesh->Material->Set("reflectance", rand() / (float)RAND_MAX);
+				mesh->Material->Set("roughness",   rand() / (float)RAND_MAX);
+				mesh->Material->Set("metallic",    rand() / (float)RAND_MAX);
 			}
 		}
 

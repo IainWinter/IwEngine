@@ -3,9 +3,6 @@
 #include "Application.h"
 #include "iw/log/logger.h"
 
-extern iw::Application* CreateApplication(
-	iw::InitOptions& options);
-
 #ifdef IW_PLATFORM_WINDOWS
 
 #include <Windows.h>
@@ -34,11 +31,6 @@ int WINAPI WinMain(
 }
 
 #endif
-
-// If in editor with macro
-
-extern "C" __declspec(dllexport)
-iw::Application* GetApplicationForEditor();
 
 // Application Life Cycle
 //
