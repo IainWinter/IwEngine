@@ -4,10 +4,12 @@ int Game_UI_Layer::Initialize()
 {
 	m_screen = Space->CreateEntity<UI_Screen>().Set<UI_Screen>();
 
+
+
 	// move out of assets
-	A_mesh_ui_text_ammo     = A_font_cambria->GenerateMesh("0", 5);
-	A_mesh_ui_text_score    = A_font_cambria->GenerateMesh("0", 5);
-	A_mesh_ui_text_gameOver = A_font_cambria->GenerateMesh("YOU HAVE BEEN\n   DESTROYED", 2);
+	A_mesh_ui_text_ammo     = A_font_cambria->GenerateMesh("0", {5});
+	A_mesh_ui_text_score    = A_font_cambria->GenerateMesh("0", {5});
+	A_mesh_ui_text_gameOver = A_font_cambria->GenerateMesh("YOU HAVE BEEN\n   DESTROYED", { 2, iw::FontAnchor::CENTER });
 
 	m_gameover   = m_screen->CreateElement(A_mesh_ui_text_gameOver);
 	m_game       = m_screen->CreateElement(m_sand_game->GetSandMesh());
@@ -45,14 +47,14 @@ void Game_UI_Layer::PostUpdate()
 		if (m_cached_ammo != ammo)
 		{
 			m_cached_ammo = ammo;
-			A_font_cambria->UpdateMesh(A_mesh_ui_text_ammo, tos(ammo)/*ammo > 0 ? tos(ammo) : "0"*/, 5);
+			A_font_cambria->UpdateMesh(A_mesh_ui_text_ammo, tos(ammo)/*ammo > 0 ? tos(ammo) : "0"*/, {5});
 		}
 	}
 
 	if (m_cached_score != m_player_score)
 	{
 		m_cached_score = m_player_score;
-		A_font_cambria->UpdateMesh(A_mesh_ui_text_score, tos(m_player_score), 5);
+		A_font_cambria->UpdateMesh(A_mesh_ui_text_score, tos(m_player_score), {5});
 	}
 
 	float red;
@@ -159,8 +161,8 @@ void Game_UI_Layer::PostUpdate()
 		float x = max.x - min.x;
 		float y = max.y - min.y;
 
-		m_gameover->x = -x / 2 * m_game->width  + iw::randf() * m_jitter;
-		m_gameover->y =  y / 2 * m_game->height + iw::randf() * m_jitter;
+		m_gameover->x = 0;//-x / 2 * m_game->width  + iw::randf() * m_jitter;
+		m_gameover->y = 0;// y / 2 * m_game->height + iw::randf() * m_jitter;
 		m_gameover->width  = m_game->width;
 		m_gameover->height = m_game->width;
 	}

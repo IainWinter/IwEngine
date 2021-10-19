@@ -65,6 +65,11 @@ namespace Engine {
 			Manifold& manifold,
 			scalar dt);
 
+		void Stop()
+		{
+			m_running = false;
+		}
+
 		template<
 			typename L = Layer>
 		L* GetLayer(
@@ -108,6 +113,9 @@ namespace Engine {
 				return;
 			}
 
+			layer->SetAppVars(MakeAppVars());
+			layer->OnPush();
+
 			if (InitLayer(layer))
 			{
 				return;
@@ -128,6 +136,9 @@ namespace Engine {
 				LOG_WARNING << "\tFailed to push " << layer->Name() << " layer to front. Already on stack";
 				return;
 			}
+
+			layer->SetAppVars(MakeAppVars());
+			layer->OnPush();
 
 			if (InitLayer(layer))
 			{
@@ -172,8 +183,6 @@ namespace Engine {
 		{
 			LOG_DEBUG << "Initializing " << layer->Name() << " layer...";
 
-			layer->SetAppVars(MakeAppVars());
-
 			if (     m_isInitialized
 				&& !layer->IsInitialized)
 			{
@@ -185,10 +194,10 @@ namespace Engine {
 						<< " layer with error code "
 						<< err;
 
-					layer->IsInitialized = true;
-
 					return true;
 				}
+
+				layer->IsInitialized = true;
 			}
 
 			return false;

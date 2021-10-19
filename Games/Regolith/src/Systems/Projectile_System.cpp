@@ -354,7 +354,7 @@ iw::Entity ProjectileSystem::MakeLaser(
 	linear->Cell.life = .2f;
 	linear->Cell.Color = iw::Color::From255(255, 23, 6);
 	split->MaxSplit = 25;
-	split->ShrapCount = 1;
+	split->ShrapCount = 2;
 	split->ShrapOdds = .1f;
 	split->ShrapTurnArc = iw::Pi / 6;
 

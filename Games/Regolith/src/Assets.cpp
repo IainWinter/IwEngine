@@ -6,31 +6,31 @@ int LoadAssets(
 	iw::AssetManager* Asset,
 	iw::Renderer* Renderer)
 {
-
 	std::vector<ref<Texture>> textures;
 
 #define LOADTEX(x) textures.emplace_back(Asset->Load<Texture>(x))
 
-	A_texture_player         = LOADTEX("textures/SpaceGame/player.png");
-	
-	A_texture_enemy_fighter  = LOADTEX("textures/SpaceGame/enemy_fighter.png");
-	A_texture_enemy_bomb     = LOADTEX("textures/SpaceGame/enemy_bomb.png");
-	A_texture_enemy_station  = LOADTEX("textures/SpaceGame/enemy_station.png");
-	A_texture_enemy_base     = LOADTEX("textures/SpaceGame/enemy_base.png");
-
-	A_texture_background     = LOADTEX("textures/SpaceGame/space.png");
-	A_texture_asteroid_mid_1 = LOADTEX("textures/SpaceGame/asteroid_mid_1.png");
-	A_texture_asteroid_mid_2 = LOADTEX("textures/SpaceGame/asteroid_mid_2.png");
-	A_texture_asteroid_mid_3 = LOADTEX("textures/SpaceGame/asteroid_mid_3.png");
-	A_texture_item_health    = LOADTEX("textures/SpaceGame/item_health.png");
-	A_texture_item_energy    = LOADTEX("textures/SpaceGame/item_energy.png");
-	A_texture_item_minigun   = LOADTEX("textures/SpaceGame/item_minigun.png");
-	A_texture_item_wattz     = LOADTEX("textures/SpaceGame/item_wattz.png");
-	A_texture_item_boltz     = LOADTEX("textures/SpaceGame/item_boltz.png");
-	A_texture_item_coreShard = LOADTEX("textures/SpaceGame/item_coreShard.png");
-	A_texture_ui_cursor      = LOADTEX("textures/SpaceGame/cursor.png");
-	A_texture_ui_background  = LOADTEX("textures/SpaceGame/ui_background.png");
-	A_texture_font_cambria   = LOADTEX("textures/fonts/cambria_lowres.png");
+	A_texture_player          = LOADTEX("textures/SpaceGame/player.png");
+							  
+	A_texture_enemy_fighter   = LOADTEX("textures/SpaceGame/enemy_fighter.png");
+	A_texture_enemy_bomb      = LOADTEX("textures/SpaceGame/enemy_bomb.png");
+	A_texture_enemy_station   = LOADTEX("textures/SpaceGame/enemy_station.png");
+	A_texture_enemy_base      = LOADTEX("textures/SpaceGame/enemy_base.png");
+							  
+	A_texture_background      = LOADTEX("textures/SpaceGame/space.png");
+	A_texture_asteroid_mid_1  = LOADTEX("textures/SpaceGame/asteroid_mid_1.png");
+	A_texture_asteroid_mid_2  = LOADTEX("textures/SpaceGame/asteroid_mid_2.png");
+	A_texture_asteroid_mid_3  = LOADTEX("textures/SpaceGame/asteroid_mid_3.png");
+	A_texture_item_health     = LOADTEX("textures/SpaceGame/item_health.png");
+	A_texture_item_energy     = LOADTEX("textures/SpaceGame/item_energy.png");
+	A_texture_item_minigun    = LOADTEX("textures/SpaceGame/item_minigun.png");
+	A_texture_item_wattz      = LOADTEX("textures/SpaceGame/item_wattz.png");
+	A_texture_item_boltz      = LOADTEX("textures/SpaceGame/item_boltz.png");
+	A_texture_item_coreShard  = LOADTEX("textures/SpaceGame/item_coreShard.png");
+	A_texture_ui_cursor       = LOADTEX("textures/SpaceGame/cursor.png");
+	A_texture_ui_background   = LOADTEX("textures/SpaceGame/ui_background.png");
+	A_texture_ui_playerBorder = LOADTEX("textures/SpaceGame/ui_player_border.png");
+	A_texture_font_cambria    = LOADTEX("textures/fonts/cambria_lowres.png");
 
 	A_material_texture_cam = REF<Material>(Asset->Load<Shader>("shaders/texture_cam.shader"));
 	A_material_font_cam    = REF<Material>(Asset->Load<Shader>("shaders/font.shader"));
@@ -41,6 +41,7 @@ int LoadAssets(
 	A_mesh_background      = iw::ScreenQuad().MakeInstance();
 	A_mesh_ui_background   = iw::ScreenQuad().MakeInstance();
 	A_mesh_ui_playerHealth = iw::ScreenQuad().MakeInstance();
+	A_mesh_ui_playerBorder = iw::ScreenQuad().MakeInstance();
 	A_mesh_menu_pause      = iw::ScreenQuad().MakeInstance();
 	A_mesh_menu_background = iw::ScreenQuad().MakeInstance();
 
@@ -82,6 +83,11 @@ int LoadAssets(
 	}
 
 	{
+		A_mesh_ui_playerBorder.Material = A_material_texture_cam->MakeInstance();
+		A_mesh_ui_playerBorder.Material->SetTexture("texture", A_texture_ui_playerBorder);
+	}
+
+	{
 		ref<Texture> ui_player_texture = REF<Texture>(*A_texture_player);
 		ui_player_texture->CreateColors();
 
@@ -90,7 +96,11 @@ int LoadAssets(
 	}
 
 	{
-		A_mesh_ui_text_debug_version = A_font_cambria->GenerateMesh("indev v.04", 1);
+		FontMeshConfig config;
+		config.Size = 1;
+		config.Anchor = FontAnchor::TOP_LEFT;
+
+		A_mesh_ui_text_debug_version = A_font_cambria->GenerateMesh("indev v.04", config);
 		A_mesh_ui_text_debug_version.Material = A_material_font_cam->MakeInstance();
 		A_mesh_ui_text_debug_version.Material->Set("color", iw::Color(1, 1, 1, .25));
 	}

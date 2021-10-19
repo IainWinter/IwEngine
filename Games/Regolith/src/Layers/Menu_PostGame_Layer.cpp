@@ -2,25 +2,34 @@
 
 int Menu_PostGame_Layer::Initialize()
 {
-	iw::Mesh title = A_font_cambria->GenerateMesh("You have been destroyed", 2);
-	iw::Mesh final_score = A_font_cambria->GenerateMesh("Final score", 1);
-	iw::Mesh restart_label = A_font_cambria->GenerateMesh("Restart", 16);
+	iw::Mesh finalScore = A_font_cambria->GenerateMesh("FINAL SCORE", {2, iw::FontAnchor::TOP_LEFT}); // should be centered
+	//iw::Mesh final_score = A_font_cambria->GenerateMesh("Final score", 1);
+	iw::Mesh label_restart = A_font_cambria->GenerateMesh("REFORM", { 16 });
+	iw::Mesh label_quit    = A_font_cambria->GenerateMesh("QUIT", { 16 });
 
 	iw::Mesh buttonbg = A_mesh_menu_background.MakeInstance();
 	buttonbg.Material->Set("color", iw::Color(.2, .2, .2));
 
-	A_mesh_ui_playerHealth.Material->Set("color", iw::Color(1));
+	//A_mesh_ui_playerHealth.Material->Set("color", iw::Color(1)); // maybe this should be the full player
 
-	m_background  = m_screen->CreateElement(A_mesh_menu_background);
-	m_title       = m_screen->CreateElement(title);
-	m_score_title = m_screen->CreateElement(final_score);
-	m_score       = m_screen->CreateElement(A_mesh_ui_text_score);
-	m_player      = m_screen->CreateElement(A_mesh_ui_playerHealth);
-	m_restart     = m_screen->CreateElement<UI_Button>(buttonbg, restart_label);
+	auto [min, max] = finalScore.GetBounds<iw::d2>();
+	m_title_FinalScoreWidth = max.x - min.x;
 
-	m_restart->onClick = [&]()
+	m_background   = m_screen->CreateElement(A_mesh_menu_background);
+	m_playerBorder = m_screen->CreateElement(A_mesh_ui_playerBorder);
+
+	m_title_finalScore = m_screen->CreateElement(finalScore);
+
+	m_button_reform = m_screen->CreateElement<UI_Button>(buttonbg, label_restart);
+	m_button_reform->onClick = [&]()
 	{
 		Console->QueueCommand("game-start");
+	};
+
+	m_button_quit   = m_screen->CreateElement<UI_Button>(buttonbg, label_quit);
+	m_button_quit->onClick = [&]()
+	{
+		Console->QueueCommand("quit");
 	};
 
 	return 0;
@@ -32,10 +41,17 @@ void Menu_PostGame_Layer::PostUpdate()
 	m_screen->height = Renderer->Height();
 
 	m_background ->zIndex = -1;
-
-	m_background->width  = (m_screen->height * .8);
+	m_background->width  = m_screen->height * .8;
 	m_background->height = m_screen->height;
+	
+	m_playerBorder->height = m_background->height * .3f;
+	m_playerBorder->width  = m_playerBorder->height; // 1:1 ratio
+	m_playerBorder->y = m_background->height * .5;
 
+	m_title_finalScore->height = m_background->width;
+	m_title_finalScore->width  = m_background->width;
+
+	/*
 	m_title->width  =  m_background->width;
 	m_title->height =  m_background->width;
 	m_title->x      = -m_background->width  + 35;
@@ -55,9 +71,11 @@ void Menu_PostGame_Layer::PostUpdate()
 	m_player->height = m_player->width;
 	m_player->x = m_background->x + m_background->width  * .25;
 	m_player->y = m_background->y + m_background->height * .25;
+		
+		*/
 
 	float buttonOffsetTarget = 0;
-	if (m_restart->IsPointOver(m_screen->LocalMouse()))
+	if (m_button_reform->IsPointOver(m_screen->LocalMouse()))
 	{
 		buttonOffsetTarget = 10;
 
@@ -68,18 +86,17 @@ void Menu_PostGame_Layer::PostUpdate()
 
 		else
 		if (   m_last_execute
-			&& m_restart->onClick)
+			&& m_button_reform->onClick)
 		{
-			m_restart->onClick();
+			m_button_reform->onClick();
 		}
 	}
 
-	m_restart->offset = iw::lerp(m_restart->offset, buttonOffsetTarget, iw::DeltaTime() * 20);
 
-	m_restart->width = m_background->width * .18f;
-	m_restart->height = m_restart->width / 3;
-	m_restart->x = m_background->x - m_background->width * .25;;
-	m_restart->y = m_background->y + floor(m_restart->offset);
+	m_button_reform->offset = iw::lerp(m_button_reform->offset, buttonOffsetTarget, iw::DeltaTime() * 20);
 
-	m_last_execute = m_execute;
+	m_button_reform->width = m_background->width * .18f;
+	m_button_reform->height = m_button_reform->width / 3;
+	m_button_reform->x = m_background->x - m_background->width * .25;;
+	m_button_reform->y = m_background->y + floor(m_button_reform->offset);
 }

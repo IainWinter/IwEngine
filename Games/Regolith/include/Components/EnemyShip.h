@@ -18,7 +18,7 @@ struct Enemy
 	float ExplosionPower;
 
 	float ActiveTimer = 0.f;
-	float ActiveTime  = 1.f;
+	float ActiveTime  = .1f;
 };
 
 struct Fighter_Enemy {

@@ -53,7 +53,7 @@ struct InspectorLayer : iw::Layer
 
 int main()
 {
-	std::wstring projectName = L"PhysicsProject";
+	std::wstring projectName = L"Regolith";
 
 	std::wstringstream buf;
 	

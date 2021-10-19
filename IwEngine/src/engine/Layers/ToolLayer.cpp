@@ -54,7 +54,11 @@ namespace iw {
 		font = Asset->Load<Font>("fonts/arial.fnt");
 		font->Initialize(Renderer->Device);
 
-		textMesh = font->GenerateMesh("", .01f);
+		FontMeshConfig config;
+		config.Size = .01f;
+		config.Anchor = FontAnchor::TOP_LEFT;
+
+		textMesh = font->GenerateMesh("", config);
 
 		fontShader = Asset->Load<Shader>("shaders/font_simple.shader");
 

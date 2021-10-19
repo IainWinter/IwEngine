@@ -1,4 +1,4 @@
-name       = "PhysicsProject"   -- this is the name of the folder
+name       = "Regolith"   -- this is the name of the folder
 --type_name = "SharedLib"   -- this is an exe for final export and dll for the editor
 type_name = "WindowedApp"
 
@@ -56,7 +56,7 @@ workspace (name)
 			"ImGui",
 			"GLEW",
 			"opengl32.lib",
-			--"wSand"
+			"wSand"
 		}
 
 		prebuildcommands {

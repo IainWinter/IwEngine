@@ -5,6 +5,8 @@
 //#include "iw/util/reflection/serialization/Serializer.h"
 //#include "iw/reflected/reflected.h"
 
+#include "iw/engine/Assets.h"
+
 #include "iw/engine/EntryPoint.h"
 #include "plugins/iw/Sand/Engine/SandLayer.h"
 #include "iw/engine/Systems/PhysicsSystem.h"

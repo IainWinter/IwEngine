@@ -4,6 +4,7 @@
 // right now this is hardcoded to Regolith but I needed some assets
 // for the console and was lazy so moves this file into the engine !temp!
 
+#include "iw/engine/Core.h"
 #include "iw/asset/AssetManager.h"
 #include "iw/graphics/Renderer.h"
 #include "iw/graphics/Material.h"
@@ -32,6 +33,7 @@ inline rTex A_texture_item_boltz;
 inline rTex A_texture_item_wattz;
 inline rTex A_texture_item_coreShard;
 inline rTex A_texture_ui_background;
+inline rTex A_texture_ui_playerBorder;
 inline rTex A_texture_ui_cursor;
 inline rTex A_texture_font_cambria;
 inline rTex A_texture_post_game_background;
@@ -45,6 +47,7 @@ inline iw::Mesh A_mesh_background;
 
 inline iw::Mesh A_mesh_ui_background;
 inline iw::Mesh A_mesh_ui_playerHealth;
+inline iw::Mesh A_mesh_ui_playerBorder;
 inline iw::Mesh A_mesh_ui_text_ammo;
 inline iw::Mesh A_mesh_ui_text_score;
 inline iw::Mesh A_mesh_ui_text_gameOver;
@@ -59,6 +62,7 @@ inline iw::Mesh A_mesh_extern_ui_sand_tank_layer;
 #undef rTex
 #undef rMat
 
+IWENGINE_API
 int LoadAssets(
 	iw::AssetManager* Asset,
 	iw::Renderer* Renderer);

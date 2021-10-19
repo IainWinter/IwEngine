@@ -37,6 +37,18 @@ namespace Graphics {
 		int Amount;
 	};
 
+	enum class FontAnchor
+	{
+		TOP_LEFT,
+		CENTER,
+	};
+
+	struct FontMeshConfig
+	{
+		float Size;
+		FontAnchor Anchor = FontAnchor::TOP_LEFT;
+	};
+
 	class FontBuilder;
 
 	struct Font {
@@ -95,19 +107,19 @@ namespace Graphics {
 		IWGRAPHICS_API
 		Mesh GenerateMesh(
 			const std::string& string,
-			float size) const;
+			const FontMeshConfig& config) const;
 
 		IWGRAPHICS_API
 		Mesh GenerateMesh(
 			const MeshDescription& description,
 			const std::string& string,
-			float size) const;
+			const FontMeshConfig& config) const;
 
 		IWGRAPHICS_API
 		void UpdateMesh(
 			Mesh& meshData,
 			const std::string& string,
-			float size) const;
+			const FontMeshConfig& config) const;
 
 		IWGRAPHICS_API
 		ref<Texture>& GetTexture(

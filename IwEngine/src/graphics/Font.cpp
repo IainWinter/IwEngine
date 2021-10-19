@@ -46,25 +46,25 @@ namespace Graphics {
 
 	Mesh Font::GenerateMesh(
 		const std::string& string,
-		float size) const
+		const FontMeshConfig& config) const
 	{
 		iw::MeshDescription description;
 		description.DescribeBuffer(iw::bName::POSITION, iw::MakeLayout<float>(3));
 		description.DescribeBuffer(iw::bName::UV, iw::MakeLayout<float>(2));
 
-		return GenerateMesh(description, string, size);
+		return GenerateMesh(description, string, config);
 	}
 
 	Mesh Font::GenerateMesh(
 		const MeshDescription& description,
 		const std::string& string,
-		float size) const
+		const FontMeshConfig& config) const
 	{
 		MeshData* data = new MeshData(description);
 		Mesh mesh = data->MakeInstance();
 		mesh.Material = m_material;
 
-		UpdateMesh(mesh, string, size);
+		UpdateMesh(mesh, string, config);
 
 		return mesh;
 	}
@@ -72,7 +72,7 @@ namespace Graphics {
 	void Font::UpdateMesh(
 		Mesh& mesh,
 		const std::string& string,
-		float size) const
+		const FontMeshConfig& config) const
 	{
 		if (   !mesh.Data->Description().HasBuffer(bName::POSITION)
 			|| !mesh.Data->Description().HasBuffer(bName::UV))
@@ -97,8 +97,8 @@ namespace Graphics {
 		int lineHeightPixels = m_lightHeight - padHeight;
 
 		glm::vec2 scale = glm::vec2(
-			size / m_size / lineHeightPixels,
-			size / m_size / lineHeightPixels
+			config.Size / m_size / lineHeightPixels,
+			config.Size / m_size / lineHeightPixels
 		);
 
 		unsigned indexCount = count * 6;
@@ -158,15 +158,41 @@ namespace Graphics {
 			}
 
 			cursor.x = 0;
-			cursor.y -= size / m_size;
+			cursor.y -= config.Size / m_size;
 		}
 	
 		mesh.Data->SetIndexData(indexCount, indices);
-		mesh.Data->SetBufferData(bName::POSITION, vertCount, verts);
-		mesh.Data->SetBufferData(bName::UV,       vertCount, uvs);
+		mesh.Data->SetBufferDataPtr(bName::POSITION, vertCount, verts);
+		mesh.Data->SetBufferDataPtr(bName::UV,       vertCount, uvs);
 
-		delete[] verts;
-		delete[] uvs;
+		// Font by default is anchored in top left
+
+		auto [min, max] = mesh.GetBounds<iw::d2>();
+
+		float offsetX = 0;
+		float offsetY = 0;
+
+		switch (config.Anchor)
+		{
+			case FontAnchor::CENTER:
+			{
+				offsetX = (max.x - min.x) / 4; // is this not top left anchored by 0,0 -> max x, - max y
+				offsetY = (max.y - min.y) / 4;
+				break;
+			}
+			case FontAnchor::TOP_LEFT: // default do nothing
+			default:
+				break;
+		}
+
+		for (unsigned i = 0; i < vertCount; i++) // id why this doesnt work im so lost??????????????
+		{
+			verts[i].x -= offsetX;
+			verts[i].y += offsetY;
+		}
+
+		// only need to delete indices because the mesh gets the pointers
+
 		delete[] indices;
 	}
 

@@ -121,7 +121,7 @@ App::App() : iw::Application()
 		Input->SetContext("Menu");
 	};
 
-	Console->QueueCommand("game-start");
+	Console->QueueCommand("game-over");
 }
 
 int App::Initialize(
@@ -183,12 +183,15 @@ int App::Initialize(
 		{
 			Bus->push<StateChange_Event>(GAME_OVER_STATE);
 
-			m_gamePlay->Layers.push_back(PushLayer<Menu_Fadeout_Layer>(4.f));
+			if (m_gamePlay)
+			{
+				m_gamePlay->Layers.push_back(PushLayer<Menu_Fadeout_Layer>(4.f));
+			}
 
 			float time = iw::TotalTime();
 			Task->coroutine([&, time]()
 			{
-				bool done = iw::TotalTime() - time > 4;
+				bool done = iw::TotalTime() - time > 0;
 
 				if (done)
 				{
@@ -201,7 +204,12 @@ int App::Initialize(
 						Input->SetContext("Menu");
 					};
 
-					DestroyState(m_gamePlay);
+
+					if (m_gamePlay)
+					{
+						DestroyState(m_gamePlay);
+					}
+
 					SetState(m_gamePost);
 				}
 
@@ -248,6 +256,12 @@ int App::Initialize(
 			Bus->push<StateChange_Event>(GAME_START_STATE);
 		}
 
+		else
+		if (command.Verb == "quit")
+		{
+			Stop();
+		}
+
 		return false;
 	});
 
@@ -257,9 +271,6 @@ int App::Initialize(
 iw::Application* CreateApplication(
 	iw::InitOptions& options)
 {
-	options.AssetRootPath = "C:/dev/wEngine/_assets/";
-	//options.AssetRootPath = "assets/";
-
 	options.WindowOptions = iw::WindowOptions {
 		800,
 		1000 + 39,

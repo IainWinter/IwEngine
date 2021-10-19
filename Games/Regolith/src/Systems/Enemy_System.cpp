@@ -271,7 +271,7 @@ void EnemySystem::SpawnEnemy(SpawnEnemy_Config& config)
 			Base_Enemy* station = entity.Set<Base_Enemy>();
 
 			rigidbody->SetMass(1000);
-			//rigidbody->AngularVelocity.z = .1f;
+			rigidbody->AngularVelocity.z = .1f;
 			flocker->Speed = 25;
 
 			enemy->ExplosionPower = 60;

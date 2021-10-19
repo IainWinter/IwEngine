@@ -307,7 +307,7 @@ namespace detail {
 
 		template<
 			Dimension _d>
-		std::pair<iw::_vec<_d>, iw::_vec<_d>> GetBounds()
+		std::pair<iw::_vec<_d>, iw::_vec<_d>> GetBounds() // this doesnt need to make a copy lol
 		{
 			std::vector<iw::_vec<_d>> verts;
 			iw::_vec<_d>* vdata  = (iw::_vec<_d>*)Data->Get     (iw::bName::POSITION);

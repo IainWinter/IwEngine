@@ -2,7 +2,7 @@
 
 int Menu_Pause_Layer::Initialize()
 {
-	iw::Mesh title  = A_font_cambria->GenerateMesh("Pause Menu", 2);
+	iw::Mesh title = A_font_cambria->GenerateMesh("Pause Menu", {2});
 
 	m_pause_menu  = m_screen->CreateElement(A_mesh_menu_pause);
 	m_pause_title = m_screen->CreateElement(title);
@@ -10,17 +10,17 @@ int Menu_Pause_Layer::Initialize()
 	iw::Mesh buttonbg = A_mesh_menu_background.MakeInstance();
 	buttonbg.Material->Set("color", iw::Color(.7, .2, .2));
 
-	AddButton(buttonbg, A_font_cambria->GenerateMesh("Resume", 16));
+	AddButton(buttonbg, A_font_cambria->GenerateMesh("Resume", {16}));
 	m_buttons.at(0)->onClick = [&]()
 	{
 		Console->QueueCommand("escape");
 	};
 
-	AddButton(buttonbg, A_font_cambria->GenerateMesh("Gameover", 16));
-	m_buttons.at(1)->onClick = [&]()
-	{
-		Console->QueueCommand("game-over");
-	};
+	//AddButton(buttonbg, A_font_cambria->GenerateMesh("Gameover", 16));
+	//m_buttons.at(1)->onClick = [&]()
+	//{
+	//	Console->QueueCommand("game-over");
+	//};
 
 	return 0;
 }
