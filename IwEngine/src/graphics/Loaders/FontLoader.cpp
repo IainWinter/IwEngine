@@ -573,7 +573,6 @@ namespace Graphics {
 					}
 				}
 			}
-
 		}
 
 		return builder.Build();

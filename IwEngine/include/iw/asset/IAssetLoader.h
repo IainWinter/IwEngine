@@ -12,6 +12,9 @@ namespace Asset {
 		virtual ref<void> Load(
 			std::string filepath) = 0;
 
+		virtual std::string Release(
+			const ref<void>& loaded) = 0;
+
 		virtual ref<void> Give(
 			std::string filename,
 			void* asset) = 0;

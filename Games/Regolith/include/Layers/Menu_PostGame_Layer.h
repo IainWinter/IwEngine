@@ -7,23 +7,25 @@ struct Menu_PostGame_Layer : Menu_Layer
 	UI* m_background;
 	UI* m_playerBorder;
 	UI* m_playerAnimate;
-	UI* m_title_finalScore;
+	UI* m_title_score;
+
+	UI_Table* m_table_highScore;
 
 	UI_Button* m_button_reform;
 	UI_Button* m_button_quit;
 
-	float m_title_FinalScoreWidth;
-
 	Menu_PostGame_Layer()
-		: Menu_Layer              ("Menu post game")
+		: Menu_Layer       ("Menu post game")
 					  
-		, m_background            (nullptr)
-		, m_playerAnimate         (nullptr)
-		, m_title_finalScore      (nullptr)
-		, m_button_reform         (nullptr)
-		, m_button_quit           (nullptr)
+		, m_background     (nullptr)
+		, m_playerBorder   (nullptr)
+		, m_playerAnimate  (nullptr)
+		, m_title_score    (nullptr)
 
-		, m_title_FinalScoreWidth (0.f)
+		, m_table_highScore (nullptr)
+
+		, m_button_reform  (nullptr)
+		, m_button_quit    (nullptr)
 	{}
 
 	int Initialize() override;

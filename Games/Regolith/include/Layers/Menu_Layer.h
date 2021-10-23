@@ -61,6 +61,45 @@ struct Menu_Layer : UI_Layer
 		, m_last_execute (false)
 	{}
 
+	void ButtonUpdate()
+	{
+		// find all buttons
+
+		std::vector<UI_Button*> buttons;
+
+		m_screen->WalkTree([&](UI_Base* ui)
+		{
+			UI_Button* button = dynamic_cast<UI_Button*>(ui);
+			if (button) buttons.push_back(button);
+		});
+
+		for (UI_Button* button : buttons)
+		{
+			float buttonOffsetTarget = 0;
+			if (button->IsPointOver(m_screen->LocalMouse()))
+			{
+				buttonOffsetTarget = 10;
+
+				if (m_execute)
+				{
+					buttonOffsetTarget = 0;
+				}
+
+				else
+				if (   m_last_execute
+					&& button->onClick)
+				{
+					button->onClick();
+				}
+			}
+			button->offset = iw::lerp(button->offset, buttonOffsetTarget, iw::DeltaTime() * 20);
+
+			// should have enum for effect
+
+			button->y += floor(button->offset);
+		}
+	}
+	
 	virtual void OnPush() override
 	{
 		m_handle = Console->AddHandler([&](

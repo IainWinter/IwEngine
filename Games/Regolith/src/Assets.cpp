@@ -30,7 +30,6 @@ int LoadAssets(
 	A_texture_ui_cursor       = LOADTEX("textures/SpaceGame/cursor.png");
 	A_texture_ui_background   = LOADTEX("textures/SpaceGame/ui_background.png");
 	A_texture_ui_playerBorder = LOADTEX("textures/SpaceGame/ui_player_border.png");
-	A_texture_font_cambria    = LOADTEX("textures/fonts/cambria_lowres.png");
 
 	A_material_texture_cam = REF<Material>(Asset->Load<Shader>("shaders/texture_cam.shader"));
 	A_material_font_cam    = REF<Material>(Asset->Load<Shader>("shaders/font.shader"));
@@ -68,8 +67,9 @@ int LoadAssets(
 	{
 		Renderer->InitShader(A_material_font_cam->Shader, iw::CAMERA);
 		A_material_font_cam->SetTransparency(Transparency::ADD);
-		A_material_font_cam->SetTexture("fontMap", A_texture_font_cambria);
+		A_material_font_cam->SetTexture("fontMap", A_font_cambria->GetTexture(0));
 		A_material_font_cam->Set("color", iw::Color(1));
+		A_font_cambria->GetTexture(0)->m_filter = iw::TextureFilter::NEAREST;
 	}
 
 	{

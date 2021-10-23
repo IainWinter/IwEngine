@@ -21,16 +21,12 @@ namespace Asset {
 
 	private:
 		virtual _a* LoadAsset(
-			std::string filepath)
-		{
-			return nullptr;
-		}
+			std::string filepath) = 0;
 
 		virtual void FreeAsset(
 			_a* asset)
-		{
-			// find and remove from m_loaded
-		}
+		{}
+
 	public:
 		AssetLoader(
 			AssetManager& asset)
@@ -47,22 +43,47 @@ namespace Asset {
 			std::string filepath) override
 		{
 			_a* asset;
-			if (m_loaded.find(filepath) == m_loaded.end()) {
+			if (m_loaded.find(filepath) == m_loaded.end())
+			{
 				LOG_INFO << "Loading asset from " << filepath << "...";
 				asset = LoadAsset(filepath);
-				if (asset == nullptr) {
-					LOG_ERROR << "Failed to load asset from " << filepath << "!";
+				if (asset == nullptr)
+				{
+					LOG_ERROR << "\tFailed to load asset from " << filepath << "!";
 					return nullptr;
 				}
 
-				else {
-					LOG_INFO << "Done";
+				else
+				{
+					LOG_INFO << "\tDone";
 				}
 
 				m_loaded.emplace(filepath, asset);
 			}
 
 			return m_loaded.at(filepath);
+		}
+
+		std::string Release(
+			const ref<void>& loaded) override
+		{
+			for (auto& [path, asset] : m_loaded)
+			{
+				if (asset == loaded)
+				{
+					LOG_INFO << "Unloading asset " << path << "...";
+					std::string ret = path;
+
+					FreeAsset(asset.get());
+					m_loaded.erase(path);
+
+					return ret;
+				}
+			}
+
+			LOG_WARNING << "Tried to release asset that doesnt exist! " << (char*)loaded.get();
+
+			return "";
 		}
 
 		iw::ref<void> Give(
@@ -90,36 +111,6 @@ namespace Asset {
 			const std::string& name)
 		{
 			return m_loaded.find(name) != m_loaded.end();
-		}
-
-		virtual void Release(
-			iw::ref<_a> resource)
-		{
-			for (auto it = m_loaded.begin(); it != m_loaded.end(); it++) {
-				if (it->second == resource) {
-					FreeAsset(it->second.get());
-					m_loaded.erase(it);
-					LOG_INFO << "Releasing " << it->first;
-					return;
-				}
-			}
-
-			LOG_WARNING << "Trying to release invalid resource at " << resource;
-		}
-
-		virtual void Release(
-			std::string name)
-		{
-			auto it = m_loaded.find(name);
-			if (it != m_loaded.end()) {
-				FreeAsset(it->second.get());
-				m_loaded.erase(it);
-				LOG_INFO << "Releasing " << name;
-			}
-
-			else {
-				LOG_WARNING << "Trying to release non loaded resource " << name;
-			}
 		}
 
 		static size_t GetType() {

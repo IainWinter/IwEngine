@@ -94,12 +94,13 @@ namespace Graphics {
 		int padWidth  = m_padding.Left + m_padding.Right;
 		int padHeight = m_padding.Top + m_padding.Bottom;
 
-		int lineHeightPixels = m_lightHeight - padHeight;
 
-		glm::vec2 scale = glm::vec2(
-			config.Size / m_size / lineHeightPixels,
-			config.Size / m_size / lineHeightPixels
-		);
+		// line height and size are something else
+		// I think the scale is actually the same for x and y, but when incrementing the cursor
+		// at the bottom of the loop, we need to use the lineheight not the scale!~!
+
+		float scale = config.Size / 2834.6456692913f; // https://www.convertunits.com/from/pt/to/meter
+		float lineHeightScale = (m_lightHeight - padHeight) / 2834.6456692913f;
 
 		unsigned indexCount = count * 6;
 		unsigned vertCount  = count * 4;
@@ -107,6 +108,8 @@ namespace Graphics {
 		unsigned*  indices = new unsigned [indexCount];
 		glm::vec3* verts   = new glm::vec3[vertCount];
 		glm::vec2* uvs     = new glm::vec2[vertCount];
+
+		// Center should center the actual text too 
 
 		glm::vec2 cursor = glm::vec2(0.f);
 		unsigned vert = 0;
@@ -125,14 +128,14 @@ namespace Graphics {
 				glm::vec2 tex(GetTexture(c.Page)->Width(), GetTexture(c.Page)->Height());
 
 				float u = (c.X + m_padding.Left) / tex.x;
-				float v = (c.Y + m_padding.Top) / tex.y;
+				float v = (c.Y + m_padding.Top)  / tex.y;
 				float maxU = u + dim.x / tex.x;
 				float maxV = v + dim.y / tex.y;
 
-				float x = cursor.x + (c.Xoffset + m_padding.Left) * scale.x;
-				float y = cursor.y - (c.Yoffset + m_padding.Top) * scale.y;
-				float maxX = x + dim.x * scale.x;
-				float minY = y - dim.y * scale.y;
+				float x = cursor.x + (c.Xoffset + m_padding.Left) * scale;
+				float y = cursor.y - (c.Yoffset + m_padding.Top)  * scale;
+				float maxX = x + dim.x * scale; // makes font size determined on file size
+				float minY = y - dim.y * scale;
 
 				verts[vert + 0] = glm::vec3(   x,    y, 0);
 				verts[vert + 1] = glm::vec3(   x, minY, 0);
@@ -154,11 +157,11 @@ namespace Graphics {
 				vert += 4;
 				index += 6;
 
-				cursor.x += (c.Xadvance + kerning) * scale.x;
+				cursor.x += (c.Xadvance + kerning) * scale; // makes font size determined on file size
 			}
 
 			cursor.x = 0;
-			cursor.y -= config.Size / m_size;
+			cursor.y -= config.Size * lineHeightScale;
 		}
 	
 		mesh.Data->SetIndexData(indexCount, indices);
@@ -166,7 +169,8 @@ namespace Graphics {
 		mesh.Data->SetBufferDataPtr(bName::UV,       vertCount, uvs);
 
 		// Font by default is anchored in top left
-
+		// Font not behind monospaced makes this not work so well
+		
 		auto [min, max] = mesh.GetBounds<iw::d2>();
 
 		float offsetX = 0;
@@ -176,8 +180,18 @@ namespace Graphics {
 		{
 			case FontAnchor::CENTER:
 			{
-				offsetX = (max.x - min.x) / 4; // is this not top left anchored by 0,0 -> max x, - max y
-				offsetY = (max.y - min.y) / 4;
+				offsetX = (max.x - min.x) / 2;
+				offsetY = (max.y - min.y) / 2;
+				break;
+			}
+			case FontAnchor::TOP_CENTER:
+			{
+				offsetX = (max.x - min.x) / 2;
+				break;
+			}
+			case FontAnchor::TOP_RIGHT:
+			{
+				offsetX = max.x - min.x;
 				break;
 			}
 			case FontAnchor::TOP_LEFT: // default do nothing
@@ -185,10 +199,10 @@ namespace Graphics {
 				break;
 		}
 
-		for (unsigned i = 0; i < vertCount; i++) // id why this doesnt work im so lost??????????????
+		for (unsigned i = 0; i < vertCount; i++)
 		{
-			verts[i].x -= offsetX;
-			verts[i].y += offsetY;
+			verts[i].x = verts[i].x - offsetX;
+			verts[i].y = verts[i].y + offsetY; // maybe this needs to take into account the padding around the text?
 		}
 
 		// only need to delete indices because the mesh gets the pointers
@@ -197,15 +211,15 @@ namespace Graphics {
 	}
 
 	iw::ref<Texture>& Font::GetTexture(
-		unsigned id)
+		unsigned page)
 	{
-		return m_textures.at(id);
+		return m_textures.at(page);
 	}
 
 	const iw::ref<Texture>& Font::GetTexture(
-		unsigned id) const
+		unsigned page) const
 	{
-		return m_textures.at(id);
+		return m_textures.at(page);
 	}
 
 	Character& Font::GetCharacter(
@@ -246,10 +260,10 @@ namespace Graphics {
 	}
 
 	void Font::SetTexture(
-		unsigned id, 
+		unsigned page, 
 		iw::ref<Texture> texture)
 	{
-		m_textures[id] = texture;
+		m_textures[page] = texture;
 	}
 
 	FontBuilder::FontBuilder()
@@ -366,10 +380,10 @@ namespace Graphics {
 	}
 
 	void FontBuilder::SetTexture(
-		unsigned id, 
+		unsigned page,
 		iw::ref<Texture> texture)
 	{
-		m_font.SetTexture(id, texture);
+		m_font.SetTexture(page, texture);
 	}
 
 	void FontBuilder::SetCharacter(

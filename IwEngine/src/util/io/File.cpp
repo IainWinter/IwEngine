@@ -97,11 +97,14 @@ namespace util {
 
 				lines.push_back(line);
 			}
+
+			fclose(file);
 		}
 
 		else {
 			ReportError(errorCode, filePath);
 		}
+
 
 		return lines;
 	}

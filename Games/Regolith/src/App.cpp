@@ -272,8 +272,8 @@ iw::Application* CreateApplication(
 	iw::InitOptions& options)
 {
 	options.WindowOptions = iw::WindowOptions {
-		800,
-		1000 + 39,
+		900,
+		900,
 		true,
 		iw::DisplayState::NORMAL
 	};

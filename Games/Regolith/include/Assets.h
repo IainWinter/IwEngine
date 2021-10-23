@@ -35,7 +35,6 @@ inline rTex A_texture_item_coreShard;
 inline rTex A_texture_ui_background;
 inline rTex A_texture_ui_playerBorder;
 inline rTex A_texture_ui_cursor;
-inline rTex A_texture_font_cambria;
 inline rTex A_texture_post_game_background;
 
 inline rFont A_font_cambria;

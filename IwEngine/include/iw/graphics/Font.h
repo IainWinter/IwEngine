@@ -40,6 +40,8 @@ namespace Graphics {
 	enum class FontAnchor
 	{
 		TOP_LEFT,
+		TOP_RIGHT,
+		TOP_CENTER,
 		CENTER,
 	};
 
@@ -123,11 +125,11 @@ namespace Graphics {
 
 		IWGRAPHICS_API
 		ref<Texture>& GetTexture(
-			unsigned id);
+			unsigned page);
 
 		IWGRAPHICS_API
 		const ref<Texture>& GetTexture(
-			unsigned id) const;
+			unsigned page) const;
 
 		IWGRAPHICS_API
 		Character& GetCharacter(
@@ -144,7 +146,7 @@ namespace Graphics {
 
 		IWGRAPHICS_API
 		void SetTexture(
-			unsigned id,
+			unsigned page,
 			ref<Texture> texture);
 
 		IWGRAPHICS_API
@@ -239,7 +241,7 @@ namespace Graphics {
 
 		IWGRAPHICS_API
 		void SetTexture(
-			unsigned id,
+			unsigned page,
 			ref<Texture> texture);
 
 		IWGRAPHICS_API

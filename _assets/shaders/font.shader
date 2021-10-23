@@ -41,7 +41,8 @@ void main() {
 
 	if (color.a < .2)
 	{
-		discard;
+		color.a = .2f;
+		//discard;
 	}
 
 	PixelColor = color;

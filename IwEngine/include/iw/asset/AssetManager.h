@@ -2,6 +2,7 @@
 
 #include "IwAsset.h"
 #include "IAssetLoader.h"
+#include "iw/log/logger.h"
 #include "iw/util/queue/blocking_queue.h"
 #include <unordered_map>
 #include <string>
@@ -72,19 +73,54 @@ namespace Asset {
 
 		template<
 			typename _a>
-		iw::ref<_a> Load(
+		ref<_a> Load(
 			std::string filepath)
 		{
 			auto itr = m_loaders.find(typeid(_a).hash_code());
-			if (itr != m_loaders.end()) {
-				if (filepath.find_first_of(':') > 3) { // only if not A:\ or AA:\ or AAA:\ 
+			if (itr != m_loaders.end())
+			{
+				if (filepath.find_first_of(':') > 3) // only if not A:\ or AA:\ or AAA:\ 
+				{ 
 					filepath = m_rootPath + filepath;
 				}
 
 				return std::static_pointer_cast<_a, void>(itr->second->Load(filepath));
 			}
 
+			LOG_ERROR << "Loader doesn't exists for type " << typeid(_a).name();
+
 			return nullptr;
+		}
+
+		template<
+			typename _a>
+		std::string Release(
+			const ref<_a>& loaded)
+		{
+			auto itr = m_loaders.find(typeid(_a).hash_code());
+			if (itr != m_loaders.end())
+			{
+				return itr->second->Release(loaded);
+			}
+
+			LOG_ERROR << "Loader doesn't exists for type " << typeid(_a).name();
+
+			return "";
+		}
+
+		// this should pass to a function in asset loaded so it
+		// can keep the pointer the same
+
+		template<
+			typename _a>
+		void Reload(
+			ref<_a>& loaded)
+		{
+			std::string path = Release(loaded);
+			if (path.size() > 0)
+			{
+				loaded = Load<_a>(path);
+			}
 		}
 
 		template<

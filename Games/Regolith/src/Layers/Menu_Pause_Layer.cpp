@@ -2,7 +2,7 @@
 
 int Menu_Pause_Layer::Initialize()
 {
-	iw::Mesh title = A_font_cambria->GenerateMesh("Pause Menu", {2});
+	iw::Mesh title = A_font_cambria->GenerateMesh("Pause Menu", { 48 });
 
 	m_pause_menu  = m_screen->CreateElement(A_mesh_menu_pause);
 	m_pause_title = m_screen->CreateElement(title);
@@ -10,7 +10,7 @@ int Menu_Pause_Layer::Initialize()
 	iw::Mesh buttonbg = A_mesh_menu_background.MakeInstance();
 	buttonbg.Material->Set("color", iw::Color(.7, .2, .2));
 
-	AddButton(buttonbg, A_font_cambria->GenerateMesh("Resume", {16}));
+	AddButton(buttonbg, A_font_cambria->GenerateMesh("Resume", { 360 }));
 	m_buttons.at(0)->onClick = [&]()
 	{
 		Console->QueueCommand("escape");
@@ -41,6 +41,8 @@ void Menu_Pause_Layer::PostUpdate()
 	m_pause_title->width  = 600;
 	m_pause_title->x = m_pause_menu->x - m_pause_menu->width  + 15;
 	m_pause_title->y = m_pause_menu->y + m_pause_menu->height - 5;
+
+	// use ButtonUpdate
 
 	int i = 0;
 	for (UI_Button* button : m_buttons)

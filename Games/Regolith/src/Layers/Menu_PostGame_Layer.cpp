@@ -2,23 +2,43 @@
 
 int Menu_PostGame_Layer::Initialize()
 {
-	iw::Mesh finalScore = A_font_cambria->GenerateMesh("FINAL SCORE", {2, iw::FontAnchor::TOP_LEFT}); // should be centered
-	//iw::Mesh final_score = A_font_cambria->GenerateMesh("Final score", 1);
-	iw::Mesh label_restart = A_font_cambria->GenerateMesh("REFORM", { 16 });
-	iw::Mesh label_quit    = A_font_cambria->GenerateMesh("QUIT", { 16 });
+	// font seems to change height based on what letters there are I is bigger than others,
+	// font should be monospaced though???
+
+	iw::Mesh title_score   = A_font_cambria->GenerateMesh("SCORE",  { 36, iw::FontAnchor::TOP_CENTER });
+	iw::Mesh label_restart = A_font_cambria->GenerateMesh("REFORM", { 300 });
+	iw::Mesh label_quit    = A_font_cambria->GenerateMesh("QUIT",   { 300 });
 
 	iw::Mesh buttonbg = A_mesh_menu_background.MakeInstance();
 	buttonbg.Material->Set("color", iw::Color(.2, .2, .2));
 
-	//A_mesh_ui_playerHealth.Material->Set("color", iw::Color(1)); // maybe this should be the full player
+	iw::Mesh tablebg = A_mesh_menu_background.MakeInstance();
+	buttonbg.Material->Set("color", iw::Color(.5, .5, .5));
 
-	auto [min, max] = finalScore.GetBounds<iw::d2>();
-	m_title_FinalScoreWidth = max.x - min.x;
+	iw::Mesh tableitembg = A_mesh_menu_background.MakeInstance();
+	tableitembg.Material->Set("color", iw::Color(.3, .3, .3));
+
+	// if font is monospace, this should be able to just be one element
+	// problly going to need to have each be seperate though for scrolling
+
+	m_table_highScore = m_screen->CreateElement<UI_Table>(tablebg, tableitembg, A_font_cambria);
+	
+	m_table_highScore->rowHeight = 50.f;
+	m_table_highScore->rowPadding = 10.f;
+	m_table_highScore->colPadding = { 10.f, 10.f, 0.f };
+
+	m_table_highScore->AddRow({ "Test Name",   "1233",    "3" });
+	m_table_highScore->AddRow({ "Name 2",      "1232343", "4" });
+	m_table_highScore->AddRow({ "Jimmy",       "12343",   "5" });
+	m_table_highScore->AddRow({ "abcdefgjkik", "13",      "6" });
+
+	////A_mesh_ui_playerHealth.Material->Set("color", iw::Color(1)); // maybe this should be the full player
 
 	m_background   = m_screen->CreateElement(A_mesh_menu_background);
 	m_playerBorder = m_screen->CreateElement(A_mesh_ui_playerBorder);
 
-	m_title_finalScore = m_screen->CreateElement(finalScore);
+	m_title_score     = m_screen->CreateElement(title_score);
+	//m_table_highScore = m_screen->CreateElement(highscoreTable);
 
 	m_button_reform = m_screen->CreateElement<UI_Button>(buttonbg, label_restart);
 	m_button_reform->onClick = [&]()
@@ -32,6 +52,9 @@ int Menu_PostGame_Layer::Initialize()
 		Console->QueueCommand("quit");
 	};
 
+	m_background    ->zIndex  = -2;
+	m_table_highScore->zIndex = 0;
+
 	return 0;
 }
 
@@ -40,63 +63,48 @@ void Menu_PostGame_Layer::PostUpdate()
 	m_screen->width  = Renderer->Width();
 	m_screen->height = Renderer->Height();
 
-	m_background ->zIndex = -1;
 	m_background->width  = m_screen->height * .8;
 	m_background->height = m_screen->height;
 	
+	float paddingX = .05 * m_background->width;
+	float paddingY = paddingX;
+
 	m_playerBorder->height = m_background->height * .3f;
 	m_playerBorder->width  = m_playerBorder->height; // 1:1 ratio
 	m_playerBorder->y = m_background->height * .5;
 
-	m_title_finalScore->height = m_background->width;
-	m_title_finalScore->width  = m_background->width;
+	m_title_score->width  = m_background->width;
+	m_title_score->height = m_background->width;
+	m_title_score->y = m_playerBorder->y - m_playerBorder->height - paddingY;
 
-	/*
-	m_title->width  =  m_background->width;
-	m_title->height =  m_background->width;
-	m_title->x      = -m_background->width  + 35;
-	m_title->y      =  m_background->height - 35;
+	m_table_highScore->height = m_background->height * .4f;
+	m_table_highScore->width  = m_background->width  * .8f;
+	m_table_highScore->y      = -m_table_highScore->height;
 
-	m_score_title->width  =  m_background->width;
-	m_score_title->height =  m_background->width;
-	m_score_title->x      =  m_title->x;
-	m_score_title->y      =  m_title->y - m_background->height * .15;
+	m_table_highScore->colWidth[0] = (m_table_highScore->width - 75.f - 55.f) * .5;
+	m_table_highScore->colWidth[1] = (m_table_highScore->width - 75.f - 55.f) * .5;
+	m_table_highScore->colWidth[2] = 75.f;
+	
+	m_table_highScore->colPadding[2] = m_table_highScore->width
+		- 75.f
+		- 20.f
+		- m_table_highScore->colWidth[0]
+		- m_table_highScore->colWidth[1];
 
-	m_score->width  = m_background->width;
-	m_score->height = m_background->width;
-	m_score->x      = m_title->x;
-	m_score->y      = m_score_title->y - m_background->height * .05;
+	// Button button menu (reform / quit)
 
-	m_player->width  = m_background->width * .25;
-	m_player->height = m_player->width;
-	m_player->x = m_background->x + m_background->width  * .25;
-	m_player->y = m_background->y + m_background->height * .25;
-		
-		*/
+	float button_x = m_background->width;
 
-	float buttonOffsetTarget = 0;
-	if (m_button_reform->IsPointOver(m_screen->LocalMouse()))
+	for (UI_Button* button : { m_button_quit, m_button_reform })
 	{
-		buttonOffsetTarget = 10;
+		button->width  = m_background->width * .18f;
+		button->height = button->width / 3;
+		button->y = -m_background->height + button->height + paddingY;
 
-		if (m_execute)
-		{
-			buttonOffsetTarget = 0;
-		}
+		button->x = button_x - button->width - paddingX;
 
-		else
-		if (   m_last_execute
-			&& m_button_reform->onClick)
-		{
-			m_button_reform->onClick();
-		}
+		button_x -= button->width * 2 + paddingX / 4;
 	}
 
-
-	m_button_reform->offset = iw::lerp(m_button_reform->offset, buttonOffsetTarget, iw::DeltaTime() * 20);
-
-	m_button_reform->width = m_background->width * .18f;
-	m_button_reform->height = m_button_reform->width / 3;
-	m_button_reform->x = m_background->x - m_background->width * .25;;
-	m_button_reform->y = m_background->y + floor(m_button_reform->offset);
+	ButtonUpdate();
 }
