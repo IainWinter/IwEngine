@@ -1,7 +1,5 @@
 #ifdef IW_PLATFORM_WINDOWS
 #include "iw/input/Platform/Windows/WindowsRawMouse.h"
-#include "iw/log/logger.h"
-#include <Windows.h>
 
 namespace iw {
 namespace Input {
@@ -84,5 +82,5 @@ namespace Input {
 		return input;
 	}
 }
-#endif
 }
+#endif

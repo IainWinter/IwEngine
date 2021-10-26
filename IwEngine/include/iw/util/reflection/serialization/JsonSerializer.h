@@ -9,6 +9,10 @@
 namespace iw {
 namespace Reflect {
 	// WIP
+	// should make a converted from normal json
+	// to the string / array json classes that
+	// this reads
+
 	class JsonSerializer
 		: public Serializer
 	{
@@ -18,33 +22,35 @@ namespace Reflect {
 
 	public:
 		JsonSerializer()
-			: Serializer()
-			, m_json(nullptr)
+			: Serializer ()
+			, m_json     (nullptr)
 		{}
 
 		JsonSerializer(
-			std::string filePath,
-			bool overwrite = false)
-			: Serializer(filePath, overwrite)
-			, m_json(nullptr)
+			std::string source
+		)
+			: Serializer (source)
 		{
-			std::string source = (std::stringstream() << m_stream->rdbuf()).str();
-			if (source == "") {
+			m_json = json_parse(source.c_str(), source.size());
+			m_current.push(m_json);
+		}
+
+		JsonSerializer(
+			std::string filePath,
+			bool overwrite
+		)
+			: Serializer (filePath, overwrite)
+			, m_json     (nullptr)
+		{
+			std::string source = Str();
+
+			if (source == "")
+			{
 				return; // No json to parse
 			}
 
 			m_json = json_parse(source.c_str(), source.size());
 			m_current.push(m_json);
-
-			// object
-			//  name | object
-			//   string | number
-			//   name | array
-			//    object
-			//     name | number
-			//      ...
-			//      ...
-			//   name | object
 		}
 
 		~JsonSerializer() {

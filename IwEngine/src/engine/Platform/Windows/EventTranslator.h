@@ -2,7 +2,6 @@
 
 #include "iw/engine/Events/Events.h"
 #include "iw/log/logger.h"
-#include "iw/common/Platform.h"
 
 namespace iw {
 namespace Engine {

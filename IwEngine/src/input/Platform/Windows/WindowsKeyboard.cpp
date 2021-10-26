@@ -1,7 +1,5 @@
-#include "iw/input/Platform/Windows/WindowKeyboard.h"
-
 #ifdef IW_PLATFORM_WINDOWS
-#include <Windows.h>
+#include "iw/input/Platform/Windows/WindowKeyboard.h"
 
 namespace iw {
 namespace Input {
@@ -31,5 +29,5 @@ namespace Input {
 		return !KeyDown(key);
 	}
 }
-#endif
 }
+#endif

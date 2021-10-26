@@ -201,8 +201,8 @@ struct UI_Table_Item : UI
 		UI_Base* label = children.at(0);
 		if (label)
 		{
-			label->x =  width  - 15;    // left anchor + padding
-			label->y =  height - 5;     // top  anchor + padding
+			label->x =  width;    // left anchor + padding
+			label->y =  height;     // top  anchor + padding
 			label->width  = height;
 			label->height = height;     // keep 1 : 1
 			label->zIndex = zIndex + 1; // ontop of element
@@ -250,9 +250,9 @@ struct UI_Table : UI
 	{
 		std::array<UI_Table_Item*, 3> row
 		{
-			new UI_Table_Item(background, font->GenerateMesh(rowAsStrings[0], { 16, iw::FontAnchor::TOP_RIGHT })),
-			new UI_Table_Item(background, font->GenerateMesh(rowAsStrings[1], { 16, iw::FontAnchor::TOP_RIGHT })),
-			new UI_Table_Item(background, font->GenerateMesh(rowAsStrings[2], { 16, iw::FontAnchor::TOP_RIGHT }))
+			new UI_Table_Item(background, font->GenerateMesh(rowAsStrings[0], { 360, iw::FontAnchor::TOP_RIGHT })),
+			new UI_Table_Item(background, font->GenerateMesh(rowAsStrings[1], { 360, iw::FontAnchor::TOP_RIGHT })),
+			new UI_Table_Item(background, font->GenerateMesh(rowAsStrings[2], { 360, iw::FontAnchor::TOP_RIGHT }))
 		};
 
 		AddRow(row);

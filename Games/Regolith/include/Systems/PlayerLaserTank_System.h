@@ -3,7 +3,7 @@
 #include "iw/engine/System.h"
 #include "plugins/iw/Sand/Engine/SandLayer.h"
 #include "Events.h"
-#include "iw/engine/Assets.h"
+#include "Assets.h"
 
 struct PlayerLaserTankSystem : iw::SystemBase
 {

@@ -3,9 +3,9 @@
 #include "Application.h"
 #include "iw/log/logger.h"
 
-#ifdef IW_PLATFORM_WINDOWS
+#include "iw/common/Platform.h"
 
-#include <Windows.h>
+#ifdef IW_PLATFORM_WINDOWS
 
 int WINAPI WinMain(
 	HINSTANCE handle,

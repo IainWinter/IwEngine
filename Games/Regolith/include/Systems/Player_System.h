@@ -9,7 +9,7 @@
 #include "Components/CorePixels.h"
 
 #include "Events.h"
-#include "iw/engine/Assets.h"
+#include "Assets.h"
 #include "Helpers.h"
 
 struct PlayerSystem : iw::SystemBase

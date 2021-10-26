@@ -2,7 +2,6 @@
 
 #include "iw/engine/Window.h"
 #include "iw/input/InputState.h"
-#include <Windows.h>
 
 namespace iw {
 namespace Engine {

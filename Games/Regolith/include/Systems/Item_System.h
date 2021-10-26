@@ -7,7 +7,7 @@
 #include "Components/KeepInWorld.h"
 
 #include "Events.h"
-#include "iw/engine/Assets.h"
+#include "Assets.h"
 
 struct ItemSystem : iw::SystemBase
 {

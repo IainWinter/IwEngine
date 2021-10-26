@@ -179,7 +179,7 @@ namespace Engine {
 			ImGui::Begin("Viewspace");
 
 			unsigned id = viewportRT->Tex(0)->Handle()->Id();
-			ImGui::Image((void*)id, size, ImVec2(0, 1), ImVec2(1, 0));
+			ImGui::Image((void*)(size_t)id, size, ImVec2(0, 1), ImVec2(1, 0));
 			
 			ImGui::End();
 			ImGui::PopClipRect();

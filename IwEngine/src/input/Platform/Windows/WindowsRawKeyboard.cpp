@@ -1,8 +1,5 @@
-#include "iw/input/Platform/Windows/WindowsRawKeyboard.h"
-#include "iw/log/logger.h"
-
 #ifdef IW_PLATFORM_WINDOWS
-#include <Windows.h>
+#include "iw/input/Platform/Windows/WindowsRawKeyboard.h"
 
 namespace iw {
 namespace Input {
@@ -51,5 +48,5 @@ namespace Input {
 		return input;
 	}
 }
-#endif
 }
+#endif

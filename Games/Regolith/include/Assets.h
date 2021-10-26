@@ -61,7 +61,6 @@ inline iw::Mesh A_mesh_extern_ui_sand_tank_layer;
 #undef rTex
 #undef rMat
 
-IWENGINE_API
 int LoadAssets(
 	iw::AssetManager* Asset,
 	iw::Renderer* Renderer);

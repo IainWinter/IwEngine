@@ -4,10 +4,9 @@
 // Supports all classes generated from IwReflection.exe and their respected fixed arrays
 // Doesn't support pointers
 
-#include "Type.h"
+#include "iw/util/reflection/serialization/Serializer.h"
 #include <assert.h>
 #include <cstddef>
-#include <sstream>
 
 #if !defined(__clang__) && !defined(__GNUC__)
 	#ifdef __attribute__ 

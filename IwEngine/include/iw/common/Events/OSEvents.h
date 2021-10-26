@@ -1,10 +1,10 @@
 #pragma once
 
+#include "iw/common/Platform.h"
+
 #include "iw/events/event.h"
 #include "iw/common/iwcommon.h"
 #include "iw/common/Events/EventGroups.h"
-
-#include "iw/common/Platform.h"
 
 namespace iw {
 namespace Engine {

@@ -1,5 +1,86 @@
 #include "Layers/Menu_PostGame_Layer.h"
 
+#define ASIO_STANDALONE
+
+#include "asio/asio.hpp"
+#include "asio/ts/buffer.hpp"
+#include "asio/ts/internet.hpp"
+
+#include <future>
+
+template<
+	typename _serializer, 
+	typename _t,
+	typename _after>
+void ReadHighscoresFromWeb(
+	_after&& func)
+{
+	_t records;
+
+	using namespace asio;
+
+	asio::error_code e;
+
+	io_context context;
+	ip::tcp::endpoint endpoint = ip::tcp::endpoint(ip::make_address("71.233.150.182", e), 80);
+
+	if (e)
+	{
+		LOG_ERROR << "Failed to make endpoint " << e.message();
+		return;
+	}
+
+	// Start thread blocked by idle work
+
+	io_context::work idle(context);
+	ip::tcp::socket socket = ip::tcp::socket(context);
+
+	socket.connect(endpoint, e);
+
+	if (e)
+	{
+		LOG_ERROR << "Failed to connect to socket " << e.message();
+		return;
+	}
+
+	if (socket.is_open())
+	{
+		std::string request =
+			"GET /regolith/php/get_highscores.php HTTP/1.1\n"
+			"Host: data.winter.dev\n"
+			"Connection: close\r\n\r\n";
+
+		socket.write_some(asio::buffer(request.data(), request.size()));
+		socket.wait(socket.wait_read);
+
+		size_t bytes = socket.available();
+
+		if (bytes > 0)
+		{
+			std::string text(bytes, '\0');
+			socket.read_some(asio::buffer(text.data(), text.size()));
+			text = text.substr(text.find("\r\n\r\n") + 4);
+
+			iw::JsonSerializer(text).Read(records);
+		}
+
+		socket.close(e);
+
+		if (e)
+		{
+			LOG_ERROR << "Error while closing socket: " << e.message();
+			return;
+		}
+	}
+
+	context.stop();
+
+	if (records.size() > 0)
+	{
+		func(records);
+	}
+}
+
 int Menu_PostGame_Layer::Initialize()
 {
 	// font seems to change height based on what letters there are I is bigger than others,
@@ -13,10 +94,10 @@ int Menu_PostGame_Layer::Initialize()
 	buttonbg.Material->Set("color", iw::Color(.2, .2, .2));
 
 	iw::Mesh tablebg = A_mesh_menu_background.MakeInstance();
-	buttonbg.Material->Set("color", iw::Color(.5, .5, .5));
+	tablebg.Material->Set("color", iw::Color(.4, .4, .4));
 
 	iw::Mesh tableitembg = A_mesh_menu_background.MakeInstance();
-	tableitembg.Material->Set("color", iw::Color(.3, .3, .3));
+	tableitembg.Material->Set("color", iw::Color(.1, .1, .1));
 
 	// if font is monospace, this should be able to just be one element
 	// problly going to need to have each be seperate though for scrolling
@@ -26,11 +107,6 @@ int Menu_PostGame_Layer::Initialize()
 	m_table_highScore->rowHeight = 50.f;
 	m_table_highScore->rowPadding = 10.f;
 	m_table_highScore->colPadding = { 10.f, 10.f, 0.f };
-
-	m_table_highScore->AddRow({ "Test Name",   "1233",    "3" });
-	m_table_highScore->AddRow({ "Name 2",      "1232343", "4" });
-	m_table_highScore->AddRow({ "Jimmy",       "12343",   "5" });
-	m_table_highScore->AddRow({ "abcdefgjkik", "13",      "6" });
 
 	////A_mesh_ui_playerHealth.Material->Set("color", iw::Color(1)); // maybe this should be the full player
 
@@ -52,8 +128,29 @@ int Menu_PostGame_Layer::Initialize()
 		Console->QueueCommand("quit");
 	};
 
-	m_background    ->zIndex  = -2;
+	m_background     ->zIndex = -2;
 	m_table_highScore->zIndex = 0;
+
+	// load highscores
+
+	UI_Table* table = m_table_highScore;
+	Task->queue([table]()
+	{
+		ReadHighscoresFromWeb<iw::JsonSerializer, std::vector<HighscoreRecord>>(
+			[table](
+				std::vector<HighscoreRecord>& scores)
+			{
+				for (HighscoreRecord& record : scores)
+				{
+					std::stringstream score; score << record.Score;
+					std::stringstream order; order << record.Order;
+					table->AddRow({ record.Name, score.str(), order.str() });
+				}
+			}
+		);
+
+		return true;
+	});
 
 	return 0;
 }
@@ -81,15 +178,11 @@ void Menu_PostGame_Layer::PostUpdate()
 	m_table_highScore->width  = m_background->width  * .8f;
 	m_table_highScore->y      = -m_table_highScore->height;
 
-	m_table_highScore->colWidth[0] = (m_table_highScore->width - 75.f - 55.f) * .5;
-	m_table_highScore->colWidth[1] = (m_table_highScore->width - 75.f - 55.f) * .5;
-	m_table_highScore->colWidth[2] = 75.f;
+	m_table_highScore->colWidth[0] = (m_table_highScore->width - 130.f) * .5;
+	m_table_highScore->colWidth[1] = (m_table_highScore->width - 130.f) * .5;
+	m_table_highScore->colWidth[2] = 75.f; // should calc based on size remaining
 	
-	m_table_highScore->colPadding[2] = m_table_highScore->width
-		- 75.f
-		- 20.f
-		- m_table_highScore->colWidth[0]
-		- m_table_highScore->colWidth[1];
+	m_table_highScore->colPadding[2] = 80.f;
 
 	// Button button menu (reform / quit)
 

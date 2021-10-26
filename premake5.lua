@@ -11,6 +11,7 @@ stbdir    = iwengdir .. "/extern/stb"
 jsondir   = iwengdir .. "/extern/json"
 fmoddir   = iwengdir .. "/extern/fmod"
 glmdir    = iwengdir .. "/extern/glm"
+asio_dir  = iwengdir .. "/extern/asio"
 voronoidir= iwengdir .. "/extern/voronoi"
 
 cfgname = "%{cfg.buildcfg}.%{cfg.system}.%{cfg.architecture}"
@@ -669,11 +670,12 @@ group ""
 			"xcopy /y /f /e \"" .. iwengdir .. incdir .. "/*\" \""     .. exprtdir .. incdir .. "/\"",
 			"xcopy /y /f /e \"" .. imguidir .. incdir .. "/*\" \""     .. exprtdir .. incdir .. "/\"",
 			"xcopy /y /f /e \"" .. fmoddir  .. incdir .. "/*\" \""     .. exprtdir .. incdir .. "/\"",
-			"xcopy /y /f    \"" .. jsondir  .. incdir .. "/*\" \""     .. exprtdir .. incdir .. "/\"",
+			"xcopy /y /f /e \"" .. jsondir  .. incdir .. "/*\" \""     .. exprtdir .. incdir .. "/\"",
 
-			"xcopy /y /f \"" .. imguidir .. libdir .. "/ImGui.lib\" \"" .. exprtdir .. libdir .. "\"",
+			"xcopy /y /f \"" .. imguidir    .. libdir .. "/ImGui.lib\" \"" .. exprtdir .. libdir .. "\"",
 
-			"xcopy /y /f /e \"" .. glmdir .. incdir .. "/*\" \""     .. exprtdir .. incdir .. "/\"",
+			"xcopy /y /f /e \"" .. glmdir   .. incdir .. "/*\" \""   .. exprtdir .. incdir .. "/\"",
+			"xcopy /y /f /e \"" .. asio_dir .. incdir .. "/*\" \""   .. exprtdir .. incdir .. "/\"",
 		}
 
 		defines {

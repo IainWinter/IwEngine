@@ -1,8 +1,5 @@
 #ifdef IW_PLATFORM_WINDOWS
 #include "iw/input/Platform/Windows/WindowsMouse.h"
-#include <Windows.h>
-
-#include "iw/log/logger.h"
 
 namespace iw {
 namespace Input {
@@ -107,5 +104,5 @@ namespace Input {
 		return input;
 	}
 }
-#endif
 }
+#endif

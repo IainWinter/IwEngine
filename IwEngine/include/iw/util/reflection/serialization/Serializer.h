@@ -17,8 +17,16 @@ namespace Reflect {
 		{}
 
 		Serializer(
+			std::string source
+		)
+			: m_stream(new std::stringstream())
+		{
+			*m_stream << source;
+		}
+
+		Serializer(
 			std::string filePath,
-			bool overwrite = false)
+			bool overwrite)
 		{
 			std::fstream* fstream = new std::fstream();
 

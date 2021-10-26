@@ -1,9 +1,5 @@
 #include "iw/input/Devices/Mouse.h"
 
-#ifdef IW_PLATFORM_WINDOWS
-#include <Windows.h>
-#endif
-
 namespace iw {
 namespace Input {
 	Translation MouseBase::translation = CreateTranslation();

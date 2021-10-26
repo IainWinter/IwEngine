@@ -1,8 +1,8 @@
 #pragma once
 
 #include "iw/engine/Layer.h"
-#include "iw/engine/Assets.h"
 #include "iw/engine/UI.h"
+#include "Assets.h"
 
 struct UI_Layer : iw::Layer
 {
@@ -98,6 +98,8 @@ struct Menu_Layer : UI_Layer
 
 			button->y += floor(button->offset);
 		}
+
+		m_last_execute = m_execute;
 	}
 	
 	virtual void OnPush() override

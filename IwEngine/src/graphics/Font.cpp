@@ -171,7 +171,13 @@ namespace Graphics {
 		// Font by default is anchored in top left
 		// Font not behind monospaced makes this not work so well
 		
-		auto [min, max] = mesh.GetBounds<iw::d2>();
+		auto [min, max] = mesh.GetBounds<iw::d3>();
+
+		//for (unsigned i = 0; i < vertCount; i++) // make sure that the first char is anchored at (0, 0)
+		//{
+		//	verts[i].x -= min.x;
+		//	verts[i].y += min.y;
+		//}
 
 		float offsetX = 0;
 		float offsetY = 0;
@@ -201,8 +207,8 @@ namespace Graphics {
 
 		for (unsigned i = 0; i < vertCount; i++)
 		{
-			verts[i].x = verts[i].x - offsetX;
-			verts[i].y = verts[i].y + offsetY; // maybe this needs to take into account the padding around the text?
+			verts[i].x -= offsetX;
+			verts[i].y += offsetY; // maybe this needs to take into account the padding around the text?
 		}
 
 		// only need to delete indices because the mesh gets the pointers

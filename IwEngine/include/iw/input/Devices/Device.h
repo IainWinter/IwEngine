@@ -3,6 +3,7 @@
 #include "iw/input/DeviceInput.h"
 #include "iw/common/Events/OSEvents.h"
 #include "iw/util/set/tofrom_set.h"
+#include "iw/log/logger.h"
 
 namespace iw {
 namespace Input {

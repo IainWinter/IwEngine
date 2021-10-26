@@ -2,6 +2,11 @@
 
 #include "Layers/Menu_Layer.h"
 
+#include "iw/reflected/vector.h"
+#include "reflected/HighscoreRecord_reflected.h"
+
+#include "iw/util/reflection/serialization/JsonSerializer.h"
+
 struct Menu_PostGame_Layer : Menu_Layer
 {
 	UI* m_background;
@@ -30,4 +35,6 @@ struct Menu_PostGame_Layer : Menu_Layer
 
 	int Initialize() override;
 	void PostUpdate() override;
+
+	void LoadHighscores();
 };

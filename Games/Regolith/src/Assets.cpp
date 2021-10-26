@@ -1,4 +1,4 @@
-#include "iw/engine/Assets.h"
+#include "Assets.h"
 
 using namespace iw;
 
