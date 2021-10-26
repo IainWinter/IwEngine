@@ -1,86 +1,5 @@
 #include "Layers/Menu_PostGame_Layer.h"
 
-#define ASIO_STANDALONE
-
-#include "asio/asio.hpp"
-#include "asio/ts/buffer.hpp"
-#include "asio/ts/internet.hpp"
-
-#include <future>
-
-template<
-	typename _serializer, 
-	typename _t,
-	typename _after>
-void ReadHighscoresFromWeb(
-	_after&& func)
-{
-	_t records;
-
-	using namespace asio;
-
-	asio::error_code e;
-
-	io_context context;
-	ip::tcp::endpoint endpoint = ip::tcp::endpoint(ip::make_address("71.233.150.182", e), 80);
-
-	if (e)
-	{
-		LOG_ERROR << "Failed to make endpoint " << e.message();
-		return;
-	}
-
-	// Start thread blocked by idle work
-
-	io_context::work idle(context);
-	ip::tcp::socket socket = ip::tcp::socket(context);
-
-	socket.connect(endpoint, e);
-
-	if (e)
-	{
-		LOG_ERROR << "Failed to connect to socket " << e.message();
-		return;
-	}
-
-	if (socket.is_open())
-	{
-		std::string request =
-			"GET /regolith/php/get_highscores.php HTTP/1.1\n"
-			"Host: data.winter.dev\n"
-			"Connection: close\r\n\r\n";
-
-		socket.write_some(asio::buffer(request.data(), request.size()));
-		socket.wait(socket.wait_read);
-
-		size_t bytes = socket.available();
-
-		if (bytes > 0)
-		{
-			std::string text(bytes, '\0');
-			socket.read_some(asio::buffer(text.data(), text.size()));
-			text = text.substr(text.find("\r\n\r\n") + 4);
-
-			iw::JsonSerializer(text).Read(records);
-		}
-
-		socket.close(e);
-
-		if (e)
-		{
-			LOG_ERROR << "Error while closing socket: " << e.message();
-			return;
-		}
-	}
-
-	context.stop();
-
-	if (records.size() > 0)
-	{
-		func(records);
-	}
-}
-
 int Menu_PostGame_Layer::Initialize()
 {
 	// font seems to change height based on what letters there are I is bigger than others,
@@ -133,30 +52,25 @@ int Menu_PostGame_Layer::Initialize()
 
 	// load highscores
 
-	UI_Table* table = m_table_highScore;
-	Task->queue([table]()
-	{
-		ReadHighscoresFromWeb<iw::JsonSerializer, std::vector<HighscoreRecord>>(
-			[table](
-				std::vector<HighscoreRecord>& scores)
-			{
-				for (HighscoreRecord& record : scores)
-				{
-					std::stringstream score; score << record.Score;
-					std::stringstream order; order << record.Order;
-					table->AddRow({ record.Name, score.str(), order.str() });
-				}
-			}
-		);
-
-		return true;
-	});
+	m_scores = m_connection.AsyncRequest<std::vector<HighscoreRecord>, iw::JsonSerializer>();
 
 	return 0;
 }
 
 void Menu_PostGame_Layer::PostUpdate()
 {
+	if (m_scores.HasValue())
+	{
+		for (HighscoreRecord& record : m_scores.Value())
+		{
+			std::stringstream score; score << record.Score;
+			std::stringstream order; order << record.Order;
+			m_table_highScore->AddRow({ record.Name, score.str(), order.str() });
+		}
+
+		m_scores.DoneWithValue();
+	}
+
 	m_screen->width  = Renderer->Width();
 	m_screen->height = Renderer->Height();
 

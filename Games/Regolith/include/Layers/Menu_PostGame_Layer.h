@@ -5,6 +5,7 @@
 #include "iw/reflected/vector.h"
 #include "reflected/HighscoreRecord_reflected.h"
 
+#include "iw/util/io/Network.h"
 #include "iw/util/reflection/serialization/JsonSerializer.h"
 
 struct Menu_PostGame_Layer : Menu_Layer
@@ -18,6 +19,9 @@ struct Menu_PostGame_Layer : Menu_Layer
 
 	UI_Button* m_button_reform;
 	UI_Button* m_button_quit;
+
+	iw::NetworkConnection m_connection;
+	iw::NetworkResult<std::vector<HighscoreRecord>> m_scores;
 
 	Menu_PostGame_Layer()
 		: Menu_Layer       ("Menu post game")
