@@ -404,9 +404,10 @@ struct UI_Table : UI
 			{
 				UI_Table_Item* item = std::get<2>(rows[i])[j];
 
-				float nextTop = -cursorY + rowHeight * 2 + rowPadding - scrollOffset;
+				float nextTop = -cursorY + rowPadding - scrollOffset;
+				float nextBot = -cursorY - rowPadding - scrollOffset + rowHeight * 2;
 
-				item->active = nextTop < height && nextTop > 0;
+				item->active = nextTop < height && nextBot > -height;
 
 				if (!item->active)
 				{
