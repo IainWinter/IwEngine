@@ -50,6 +50,7 @@ namespace Graphics {
 	{
 		float Size;
 		FontAnchor Anchor = FontAnchor::TOP_LEFT;
+		iw::ref<iw::Material> Material = nullptr;
 	};
 
 	class FontBuilder;

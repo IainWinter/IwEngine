@@ -130,7 +130,7 @@ namespace Graphics {
 		int m_material;
 		int m_transparency;
 		glm::vec3 m_position;
-		glm::vec2 m_cameraClipPlane;
+		Camera* m_cCamera;
 
 		//bool m_reverse;
 		setup_draw_func m_beforeDrawFunc; // gets set by 'BeforeDraw' and consumed by 'DrawMesh'
@@ -140,9 +140,22 @@ namespace Graphics {
 		setup_scene_func m_afterSceneFunc;  // gets set by 'AfterScene'  and consumed by 'EndScene'   or 'EndShadowCast'
 
 	public:
-		IWGRAPHICS_API
-		QueuedRenderer(
-			ref<Renderer> renderer);
+		QueuedRenderer::QueuedRenderer(
+			ref<Renderer> renderer
+		)
+			: Now            (renderer)
+			, Device         (Now->Device)
+			, m_pool         (16 * 1024)
+			, m_layer        (0)
+			, m_shadow       (0)
+			, m_camera       (0)
+			, m_block        (0)
+			, m_material     (0)
+			, m_transparency (0)
+			, m_time         (0)
+			, m_position     (0.f)
+			, m_cCamera      (nullptr)
+		{}
 
 		inline unsigned Width()  { return Now->Width();  }
 		inline unsigned Height() { return Now->Height(); }

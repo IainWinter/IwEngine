@@ -240,6 +240,7 @@ struct UI_Table : UI
 	// special for font table just for AddRow ease of use
 	iw::Mesh background;
 	iw::ref<iw::Font> font;
+	iw::FontMeshConfig fontConfig;
 	// maybe make a seperate class
 
 	using row_t  = std::array<UI_Table_Item*, sizeof...(_cols)>;
@@ -287,6 +288,9 @@ struct UI_Table : UI
 			colWidth  [i] = 0;
 			colPadding[i] = 0;
 		}
+
+		fontConfig.Size = 360;
+		fontConfig.Anchor = iw::FontAnchor::TOP_RIGHT;
 	}
 
 	float WidthRemaining(
@@ -324,7 +328,7 @@ struct UI_Table : UI
 				mesh,
 				font->GenerateMesh(
 					to_string(rowData),
-					{ 360, iw::FontAnchor::TOP_RIGHT }
+					fontConfig
 				)
 			)...
 		};
@@ -467,8 +471,8 @@ struct UI_Screen : UI_Base
 
 		// normalize Z
 
-		camera.NearClip = minZ - 1; // this doesnt work for some reason????
-		camera.FarClip  = maxZ + 1;
+		camera.NearClip = minZ * 1.1f; // this doesnt work for some reason???? seems to clip some things if they are far form 0
+		camera.FarClip  = maxZ * 1.1f;
 
 		r->BeginScene(&camera);
 

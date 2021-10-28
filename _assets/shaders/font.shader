@@ -18,6 +18,10 @@ void main() {
 #shader Fragment
 #version 330
 
+in vec2 UV;
+
+out vec4 PixelColor;
+
 uniform vec4 mat_color;
 uniform float mat_hasFontMap;
 uniform sampler2D mat_fontMap;
@@ -25,9 +29,7 @@ uniform sampler2D mat_fontMap;
 uniform float width = 0.1f;
 uniform float edge  = 0.2f;
 
-in vec2 UV;
-
-out vec4 PixelColor;
+#include shaders/boxfade.shader
 
 void main() {
 	vec4 color = mat_color;
@@ -39,9 +41,13 @@ void main() {
 		color.a *= alpha;
 	}
 
+	if (mat_useBoxFade == 1) // form box fade
+	{
+		color.a *= getBoxFade();
+	}
+
 	if (color.a < .2)
 	{
-		//color.a = .2f;
 		discard;
 	}
 

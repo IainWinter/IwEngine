@@ -308,7 +308,7 @@ namespace Graphics {
 		n[0] = toupper(n[0]);
 		n = "has" + n;
 
-		Set(n, texture != nullptr ? 1.0f : 0.0f);
+		Set(n, texture != nullptr ? 1.0f : 0.0f); // why does this need to be floats??
 	}
 
 	iw::ref<Texture> Material::GetTexture(

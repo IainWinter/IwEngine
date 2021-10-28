@@ -15,14 +15,24 @@ int Menu_PostGame_Layer::Initialize()
 	iw::Mesh tablebg = A_mesh_menu_background.MakeInstance();
 	tablebg.Material->Set("color", iw::Color(.4, .4, .4));
 
+	mat_tableItem = A_mesh_menu_background.Material->MakeInstance();
+	mat_tableItem ->Set("useBoxFade", 1.0f);
+	mat_tableItem ->Set("fade", 100.f);
+	mat_tableItem->Set("color", iw::Color(1, 0, 0));
+
+	mat_tableText = A_font_cambria->m_material->MakeInstance();
+	mat_tableText->Set("useBoxFade", 1.0f);
+	mat_tableText->Set("fade", 100.f);
+
 	iw::Mesh tableitembg = A_mesh_menu_background.MakeInstance();
-	tableitembg.Material->Set("color", iw::Color(.1, .1, .1));
+	tableitembg.Material = mat_tableItem;
 
 	// if font is monospace, this should be able to just be one element
 	// problly going to need to have each be seperate though for scrolling
 
 	m_table_highScore = m_screen->CreateElement<Score_Table>(tablebg, tableitembg, A_font_cambria);
-	
+	m_table_highScore->fontConfig.Material = mat_tableText;
+
 	m_table_highScore->sort = [](
 		const Score_Table::data_t& a,
 		const Score_Table::data_t& b)
@@ -56,14 +66,16 @@ int Menu_PostGame_Layer::Initialize()
 
 	m_background     ->zIndex = -2;
 	m_table_highScore->zIndex = 0;
+	m_playerBorder->zIndex = -1;
+	m_title_score->zIndex = -1;
+	m_button_reform->zIndex = -1;
+	m_button_quit->zIndex = -1;
 
 	// add final score to highscore table and set selected 
 
 	HighscoreRecord playerRecord;
 	playerRecord.Name = "Anon"; // could return a number of players ie Anon10902
 	playerRecord.Score = m_finalScore;
-
-
 	playerRecord.Order = 0; // need to find from web
 
 	m_playerRowId = AddHighscoreToTable(playerRecord, true);
@@ -143,6 +155,13 @@ void Menu_PostGame_Layer::PostUpdate()
 	}
 
 	ButtonUpdate();
+
+	float minX = (m_table_highScore->x - m_table_highScore->width)                                  / m_screen->width; // min/max x
+	float maxX = (m_table_highScore->x + m_table_highScore->width)                                  / m_screen->width;
+	float minY = (m_table_highScore->y - m_table_highScore->height + m_table_highScore->rowPadding) / m_screen->height; // min/max y
+	float maxY = (m_table_highScore->y + m_table_highScore->height - m_table_highScore->rowPadding) / m_screen->height;
+
+	SetTableBoxFade(minX, minY, maxX, maxY);
 }
 
 bool Menu_PostGame_Layer::On(
@@ -224,4 +243,13 @@ void Menu_PostGame_Layer::SubmitScoreAndExit(
 	{
 		LOG_INFO << str;
 	});
+}
+
+void Menu_PostGame_Layer::SetTableBoxFade(
+	float minX, float minY, 
+	float maxX, float maxY)
+{
+	glm::vec4 box = glm::vec4(minX, minY, maxX, maxY);
+	mat_tableItem->Set("box", box);
+	mat_tableText->Set("box", box);
 }

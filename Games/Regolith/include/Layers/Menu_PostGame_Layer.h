@@ -15,6 +15,10 @@ struct Menu_PostGame_Layer : Menu_Layer
 	UI* m_playerAnimate;
 	UI* m_title_score;
 
+	// for fade
+	iw::ref<iw::Material> mat_tableItem;
+	iw::ref<iw::Material> mat_tableText;
+
 	using Score_Table = UI_Table<int, int, std::string>;
 
 	Score_Table* m_table_highScore;
@@ -43,6 +47,8 @@ struct Menu_PostGame_Layer : Menu_Layer
 		, m_title_score     (nullptr)
 
 		, m_table_highScore (nullptr)
+		, mat_tableItem     (nullptr)
+		, mat_tableText     (nullptr)
 
 		, m_button_reform   (nullptr)
 		, m_button_quit     (nullptr)
@@ -60,4 +66,8 @@ struct Menu_PostGame_Layer : Menu_Layer
 
 	void SubmitScoreAndExit(
 		const std::string& whereTo);
+
+	void SetTableBoxFade(
+		float minX, float minY,
+		float maxX, float maxY);
 };

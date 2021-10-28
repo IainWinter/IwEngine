@@ -4,22 +4,6 @@
 
 namespace iw {
 namespace Graphics {
-	QueuedRenderer::QueuedRenderer(
-		ref<Renderer> renderer)
-		: Now(renderer)
-		, Device(Now->Device)
-		, m_pool(500 * (sizeof(BeginSceneOP) + sizeof(BeginShadowOP) + sizeof(DrawMeshOP)))
-		, m_layer(0)
-		, m_shadow(0)
-		, m_camera(0)
-		, m_block(0)
-		, m_material(0)
-		, m_transparency(0)
-		, m_time(0)
-		, m_position(0.f)
-		, m_cameraClipPlane(0.f)
-	{}
-
 	void QueuedRenderer::SetLayer(
 		int layer)
 	{
@@ -230,7 +214,7 @@ namespace Graphics {
 		m_shadow  = 1;
 		m_block   = 1;
 		m_camera += 1;
-		m_position = camera ? camera->Transform.WorldPosition() : glm::vec3();
+		m_cCamera = camera;
 
 		BeginSceneOP* op = m_pool.alloc<BeginSceneOP>();
 		op->Scene  = nullptr;
@@ -254,7 +238,7 @@ namespace Graphics {
 		m_shadow  = 1;
 		m_block   = 1;
 		m_camera += 1;
-		m_position = scene->MainCamera() ? scene->MainCamera()->Transform.WorldPosition() : glm::vec3();
+		m_cCamera = scene->MainCamera();
 
 		BeginSceneOP* op = m_pool.alloc<BeginSceneOP>();
 		op->Scene  = scene;
@@ -277,6 +261,7 @@ namespace Graphics {
 		m_shadow  = 0;
 		m_block   = 1;
 		m_camera += 1;
+		m_cCamera = nullptr;
 		m_position = light->WorldPosition();
 
 		BeginShadowOP* op = m_pool.alloc<BeginShadowOP>();
@@ -429,7 +414,7 @@ namespace Graphics {
 		Transform* transform,
 		const Mesh* mesh) const
 	{
-		key layer        = m_layer; 
+		key layer        = m_layer;
 		key shadow       = m_shadow;
 		key camera       = m_camera;
 		key block        = m_block;
@@ -439,11 +424,32 @@ namespace Graphics {
 		
 		if (m_camera) {
 			if (transform) {  // should map to clip planes we have 16 mil res which should be more than enough
-				depth = key(1000000) * (key)glm::length2(m_position - (transform ? transform->WorldPosition() : glm::vec3())); 
+							  // could use center of mesh bounds if it doesnt have a transform!
+							  // camForward from https://stackoverflow.com/questions/53608944
+
+				glm::vec3 objPosition = transform 
+									  ? transform->WorldPosition()
+									  : glm::vec3(0.f);
+
+				glm::vec3 camPosition = m_cCamera
+									  ? m_cCamera->Transform.WorldPosition()
+									  : m_position;
+
+				glm::vec3 camForward  = m_cCamera
+									  ? glm::vec3(m_cCamera->View[2]) * glm::vec3(1, 1, -1)
+									  : glm::vec3(0.f);
+
+				glm::vec3 camToObj = objPosition - camPosition;
+				float distAlongForward = glm::clamp(glm::dot(camForward, camToObj), 0.f, FLT_MAX);
+
+				depth = key(1000000.f * distAlongForward); // convert into ull 
 			}
 		}
 
-		if (transparency == val(Transparency::NONE)) {
+		// should check for overflow here like how depth does
+
+		if (transparency == val(Transparency::NONE)) 
+		{
 			layer        <<= val(Bits::LAYER);
 			shadow       <<= val(Bits::SHADOW);
 			camera       <<= val(Bits::CAMERA);
@@ -451,10 +457,11 @@ namespace Graphics {
 			transparency <<= val(Bits::TRANSPARENCY);
 			material     <<= val(Bits::MATERIAL);
 
-			depth          = (((key)1 << val(Bits::DEPTH)) - 1) & ((key)-1 - depth);
+			depth = (((key)1 << val(Bits::DEPTH)) - 1) & (key(-1) - depth);
 		}
 
-		else {
+		else
+		{
 			layer        <<= val(TransparencyBits::LAYER);
 			shadow       <<= val(TransparencyBits::SHADOW);
 			camera       <<= val(TransparencyBits::CAMERA);
@@ -462,7 +469,7 @@ namespace Graphics {
 			transparency <<= val(TransparencyBits::TRANSPARENCY);
 			material     <<= val(TransparencyBits::MATERIAL);
 
-			depth         = (((key)1 << val(TransparencyBits::DEPTH)) - 1) & ((key)-1 - depth);
+			depth = (((key)1 << val(TransparencyBits::DEPTH)) - 1) & (key(-1) - depth);
 
 		}
 

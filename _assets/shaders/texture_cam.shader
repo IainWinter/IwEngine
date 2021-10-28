@@ -9,10 +9,14 @@ layout(location = 1) in vec2 uv;
 uniform mat4 model;
 
 out vec2 TexCoords;
+out vec3 FragPos;
 
 void main() {
+	vec4 worldPos = model * vec4(vert, 1.f);
+
 	TexCoords = uv;
-	gl_Position = viewProj * model * vec4(vert, 1);
+	FragPos = worldPos.xyz;
+	gl_Position = viewProj * worldPos;
 }
 
 #shader Fragment shaders/texture.frag

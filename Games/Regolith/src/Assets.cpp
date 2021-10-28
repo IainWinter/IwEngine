@@ -32,10 +32,10 @@ int LoadAssets(
 	A_texture_ui_playerBorder = LOADTEX("textures/SpaceGame/ui_player_border.png");
 
 	A_material_texture_cam = REF<Material>(Asset->Load<Shader>("shaders/texture_cam.shader"));
-	A_material_font_cam    = REF<Material>(Asset->Load<Shader>("shaders/font.shader"));
+	//A_material_font_cam    = REF<Material>(Asset->Load<Shader>("shaders/font.shader"));
+	//A_material_table_fade  = REF<Material>(Asset->Load<Shader>("shaders/ui/table_fade.shader"));
 
 	A_font_cambria = Asset->Load<iw::Font>("fonts/cambria_lowres.fnt");
-	A_font_cambria->m_material = A_material_font_cam;
 
 	A_mesh_background      = iw::ScreenQuad().MakeInstance();
 	A_mesh_ui_background   = iw::ScreenQuad().MakeInstance();
@@ -55,21 +55,24 @@ int LoadAssets(
 
 	CHECK_LOAD(A_font_cambria);
 	CHECK_LOAD(A_material_texture_cam->Shader);
-	CHECK_LOAD(A_material_font_cam   ->Shader);
+	//CHECK_LOAD(A_material_font_cam   ->Shader);
+	//CHECK_LOAD(A_material_table_fade ->Shader);
 
 	{
 		Renderer->InitShader(A_material_texture_cam->Shader, CAMERA);
 		A_material_texture_cam->SetTransparency(Transparency::ADD);
+		A_material_texture_cam->Set("useTransparency", 1.0f);
 		A_material_texture_cam->Set("alphaThresh", .6f);
 		A_material_texture_cam->Set("color", iw::Color(1.f));
 	}
 
 	{
-		Renderer->InitShader(A_material_font_cam->Shader, iw::CAMERA);
-		A_material_font_cam->SetTransparency(Transparency::ADD);
-		A_material_font_cam->SetTexture("fontMap", A_font_cambria->GetTexture(0));
-		A_material_font_cam->Set("color", iw::Color(1));
+		A_material_font_cam = A_material_texture_cam->MakeInstance();
+		A_material_font_cam->Set("isFont", 1.0f);
+		A_material_font_cam->SetTexture("texture", A_font_cambria->GetTexture(0));
 		A_font_cambria->GetTexture(0)->m_filter = iw::TextureFilter::NEAREST;
+
+		A_font_cambria->m_material = A_material_font_cam;
 	}
 
 	{

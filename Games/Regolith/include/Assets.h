@@ -39,6 +39,8 @@ inline rTex A_texture_post_game_background;
 
 inline rFont A_font_cambria;
 
+//inline rMat A_material_table_fade;
+
 inline rMat A_material_texture_cam;
 inline rMat A_material_font_cam;
 

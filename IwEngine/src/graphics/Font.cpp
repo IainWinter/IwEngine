@@ -62,7 +62,7 @@ namespace Graphics {
 	{
 		MeshData* data = new MeshData(description);
 		Mesh mesh = data->MakeInstance();
-		mesh.Material = m_material;
+		mesh.Material = m_material; // can get overriden in UpdateMesh by config.Material
 
 		UpdateMesh(mesh, string, config);
 
@@ -79,6 +79,11 @@ namespace Graphics {
 		{
 			LOG_WARNING << "Cannot update a mesh data with description that does not contain at least a POSITION and UV buffer!";
 			return;
+		}
+
+		if (config.Material)
+		{
+			mesh.Material = config.Material;
 		}
 
 		std::vector<std::string> lines;
