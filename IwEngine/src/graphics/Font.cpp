@@ -200,6 +200,12 @@ namespace Graphics {
 				offsetX = max.x - min.x;
 				break;
 			}
+			case FontAnchor::CENTER_RIGHT:
+			{
+				offsetX = max.x - min.x;
+				offsetY = (max.y - min.y) / 2;
+				break;
+			}
 			case FontAnchor::TOP_LEFT: // default do nothing
 			default:
 				break;

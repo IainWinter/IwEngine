@@ -59,7 +59,7 @@ struct Game_Layer : iw::Layer
 		iw::SandLayer* sand,
 		iw::SandLayer* sand_ui_laserCharge
 	) 
-		: iw::Layer           ("Space game")
+		: iw::Layer           ("Game")
 
 		, sand                (sand)
 		, sand_ui_laserCharge (sand_ui_laserCharge)

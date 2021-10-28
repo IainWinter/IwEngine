@@ -41,6 +41,7 @@ namespace Graphics {
 	{
 		TOP_LEFT,
 		TOP_RIGHT,
+		CENTER_RIGHT,
 		TOP_CENTER,
 		CENTER,
 	};

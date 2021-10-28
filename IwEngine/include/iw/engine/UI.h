@@ -4,6 +4,17 @@
 #include "iw/graphics/Font.h"
 #include "iw/input/Devices/Mouse.h"
 #include <array>
+#include <tuple>
+#include <functional>
+
+template<
+	typename _t>
+std::string to_string(const _t& t) // this should go into util.h or something
+{
+	std::stringstream ss;
+	ss << t;
+	return ss.str();
+}
 
 using render = iw::ref<iw::QueuedRenderer>;
 
@@ -119,6 +130,11 @@ struct UI : UI_Base
 		render& r,
 		UI_Base* parent) override
 	{
+		if (!active)
+		{
+			return;
+		}
+
 		UI_Base::Draw(r, parent);
 		r->DrawMesh(transform, mesh);
 	}
@@ -195,10 +211,15 @@ struct UI_Table_Item : UI
 		CreateElement(element);
 	}
 
+	UI* GetElement()
+	{
+		return (UI*)children.at(0);
+	}
+
 	void UpdateTransform(
 		UI_Base* parent)
 	{
-		UI_Base* label = children.at(0);
+		UI* label = GetElement();
 		if (label)
 		{
 			label->x =  width;    // left anchor + padding
@@ -212,6 +233,8 @@ struct UI_Table_Item : UI
 	}
 };
 
+template<
+	typename... _cols>
 struct UI_Table : UI
 {
 	// special for font table just for AddRow ease of use
@@ -219,54 +242,153 @@ struct UI_Table : UI
 	iw::ref<iw::Font> font;
 	// maybe make a seperate class
 
-	std::vector<std::array<UI_Table_Item*, 3>> rows;
+	using row_t  = std::array<UI_Table_Item*, sizeof...(_cols)>;
+	using data_t = std::tuple<_cols...>;
+
+	//using sort_func = std::function<>
+
+	std::vector<
+		std::tuple<
+			int,    // id
+			data_t,
+			row_t>> rows;
 
 	// table width  is uibase width
 	// table height is uibase height
 
+	float scrollOffset;
+
 	float rowHeight;
 	float rowPadding;
 
-	std::array<float, 3> colWidth;
-	std::array<float, 3> colPadding;
+	std::array<float, sizeof...(_cols)> colWidth;
+	std::array<float, sizeof...(_cols)> colPadding;
+
+	std::function<bool(const data_t&, const data_t&)> sort; // return true if 'b' is larger
 
 	UI_Table(
 		const iw::Mesh& background1,
 		const iw::Mesh& background2,
 		iw::ref<iw::Font> font
 	)
-		: UI          (background1)
-		, background  (background2)
-		, font        (font)
+		: UI           (background1)
+		, background   (background2)
+		, font         (font)
 
-		, rowHeight  (0.f)
-		, rowPadding (0.f)
-		, colWidth   ({0.f, 0.f, 0.f})
-		, colPadding ({0.f, 0.f, 0.f})
-	{}
+		, rowHeight    (0.f)
+		, rowPadding   (0.f)
+		, colWidth     ()
+		, colPadding   ()
 
-	void AddRow(
-		const std::array<std::string, 3>& rowAsStrings)
+		, scrollOffset (0.f)
 	{
-		std::array<UI_Table_Item*, 3> row
+		for (int i = 0; i < sizeof...(_cols); i++)
 		{
-			new UI_Table_Item(background, font->GenerateMesh(rowAsStrings[0], { 360, iw::FontAnchor::TOP_RIGHT })),
-			new UI_Table_Item(background, font->GenerateMesh(rowAsStrings[1], { 360, iw::FontAnchor::TOP_RIGHT })),
-			new UI_Table_Item(background, font->GenerateMesh(rowAsStrings[2], { 360, iw::FontAnchor::TOP_RIGHT }))
-		};
-
-		AddRow(row);
+			colWidth  [i] = 0;
+			colPadding[i] = 0;
+		}
 	}
 
-	void AddRow(
-		const std::array<UI_Table_Item*, 3>& row)
+	float WidthRemaining(
+		size_t colToNotConsider)
 	{
-		rows.push_back(row);
+		float widthRemaining = width;
+
+		for (size_t i = 0; i < sizeof...(_cols); i++)
+		{
+			if (i == colToNotConsider) continue;
+			widthRemaining -= colPadding[i] + colWidth[i];
+		}
+
+		return widthRemaining;
+	}
+
+	int AddRow(
+		const _cols&... rowData,
+		bool makeInstanceOfBackgroundMesh = false)
+	{
+		iw::Mesh mesh;
+		if (makeInstanceOfBackgroundMesh)
+		{
+			mesh = background.MakeInstance();
+		}
+
+		else
+		{
+			mesh = background;
+		}
+
+		row_t row
+		{
+			new UI_Table_Item(
+				mesh,
+				font->GenerateMesh(
+					to_string(rowData),
+					{ 360, iw::FontAnchor::TOP_RIGHT }
+				)
+			)...
+		};
+
+		return AddRow(std::make_tuple(rowData...), row);
+	}
+
+	int AddRow(
+		const data_t& data,
+		const row_t& row)
+	{
+		int id = rows.size();
 
 		for (UI_Table_Item* item : row)
 		{
 			children.push_back(item);
 		}
+
+		// custom upper bound that just uses data
+
+		if (sort)
+		{
+			int i = 0;
+			for (; i < (int)rows.size(); i++)
+			{
+				if (sort(std::get<1>(rows.at(i)), data))
+				{
+					break;
+				}
+			}
+
+			rows.emplace(rows.begin() + i, id, data, row);
+		}
+
+		return id;
+	}
+
+	row_t* GetRow(
+		int id)
+	{
+		row_t* row = nullptr;
+
+		for (auto& [rid, rdata, rarray] : rows)
+		{
+			if (id == rid)
+			{
+				row = &rarray;
+				break;
+			}
+		}
+
+		return row;
+	}
+
+	void UpdateRow(
+		int id,
+		int col,
+		std::string str)
+	{
+		font->UpdateMesh(
+			GetRow(id)->at(col)->GetElement()->mesh,
+			str,
+			{ 360, iw::FontAnchor::TOP_RIGHT }
+		);
 	}
 
 	void UpdateTransform(
@@ -278,19 +400,28 @@ struct UI_Table : UI
 		{
 			float cursorX = -width + colPadding[0];
 
-			for (size_t j = 0; j < 3u; j++)
+			for (size_t j = 0; j < sizeof...(_cols); j++)
 			{
-				UI_Table_Item* item = rows[i][j];
+				UI_Table_Item* item = std::get<2>(rows[i])[j];
+
+				float nextTop = -cursorY + rowHeight * 2 + rowPadding - scrollOffset;
+
+				item->active = nextTop < height && nextTop > 0;
+
+				if (!item->active)
+				{
+					continue;
+				}
 
 				item->zIndex = zIndex + 1;
 
 				item->x = cursorX + colWidth[j];
-				item->y = cursorY - rowHeight;
+				item->y = cursorY - rowHeight + scrollOffset;
 
 				item->width  = colWidth[j];
 				item->height = rowHeight;
 
-				if (j + 1u < 3u) // annoying flow
+				if (j + 1u < sizeof...(_cols)) // annoying flow
 				{
 					cursorX += item->width * 2 + colPadding[j + 1u];
 				}

@@ -10,6 +10,7 @@
 #include "asio/ts/internet.hpp"
 
 #include <sstream>
+#include <unordered_map>
 
 namespace iw
 {
@@ -115,40 +116,130 @@ namespace util
 		}
 	};
 
-	// represents a connection to a file on a network through http
+	// placeholder for no serializtion
+	// causes NetworkConnection::Result to return string
 
+	struct None
+	{};
+
+	template<
+		typename _s>
 	struct NetworkRequest
 	{
+		using _serializer = _s;
+
 		std::string Ip;
 		std::string Host;
 		std::string Resource;
 		unsigned short Port;
 
+		_serializer* Serializer;
+
+		NetworkRequest()
+			: Port       (0)
+			, Serializer (nullptr)
+		{}
+
 		virtual std::string GetRequestString() const = 0;
+
+		// lil weird to have this here but
+		// returns if done receiving
+		// when done buffer should be ready for deserialization
+		virtual bool ProcessBuffer(std::string& buffer)= 0;
 	};
 
-	struct HttpRequest : NetworkRequest
+	template<
+		typename _s>
+	struct HttpRequest : NetworkRequest<_s>
 	{
 		std::string Ask = "GET";
 		std::string Protocall = "HTTP/1.1";
 		std::string Connection = "close";
+		std::unordered_map<std::string, std::string> Arguments;
+
+	private:
+		bool foundContentLength = false; // little weird to have state here
+		bool foundHeader = false;        // but this struct gets copied in the Request function so it doesnt matter
+		size_t contentLength = 0; 
+
+	public:
+		HttpRequest()
+			: NetworkRequest<_s>()
+		{
+			Port = 80;
+		}
 
 		std::string GetRequestString() const override
 		{
 			std::stringstream buf;
 			buf << Ask
-				<< " "  << Resource
-				<< " "  << Protocall
-				<< "\nHost: " << Host
-				<< "\nConnection: " << Connection
-				<< "\r\n\r\n";
+			    << " " << Resource;
+
+			bool first = true;
+			for (auto& [name, arg] : Arguments)
+			{
+				buf << (first ? "?" : "&")
+				    << name << "=" << arg;
+				first = false;
+			}
+
+			buf << " "              << Protocall
+			    << "\nHost: "       << Host
+			    << "\nConnection: " << Connection
+			    << "\r\n\r\n";
 
 			return buf.str();
+		}
 
-			//std::string request =
-			//	"GET /regolith/php/get_highscores.php HTTP/1.1\n"
-			//	"Host: data.winter.dev\n"
-			//	"Connection: close\r\n\r\n";
+		bool ProcessBuffer(
+			std::string& buffer) override
+		{
+			if (!foundContentLength)
+			{
+				const char* clName = "Content-Length:";
+				size_t clIndex = buffer.find(clName);
+
+				if (clIndex != size_t(-1))
+				{
+					clIndex += strlen(clName) + 1;
+					size_t clIndexEnd = buffer.find("\r\n", clIndex);
+
+					foundContentLength = clIndexEnd != size_t(-1);
+
+					if (foundContentLength)
+					{
+						contentLength = std::stoull(buffer.substr(clIndex, clIndexEnd - clIndex));
+					}
+				}
+			}
+
+			if (!foundHeader)
+			{
+				size_t endIndex = buffer.find("\r\n\r\n");
+
+				foundHeader = endIndex != size_t(-1);
+
+				if (foundHeader)
+				{
+					buffer = buffer.substr(endIndex + 4);
+					buffer.reserve(contentLength);
+				}
+			}
+
+			return buffer.size() == contentLength;
+		}
+
+		void SetArgument(
+			const std::string& name,
+			const std::string& value)
+		{
+			Arguments[name] = value;
+		}
+
+		void RemoveArgument(
+			const std::string& name)
+		{
+			Arguments.erase(name);
 		}
 	};
 
@@ -156,33 +247,40 @@ namespace util
 	{
 	private:
 		iw::thread_pool m_pool;
-		NetworkRequest* m_request;
 
 	public:
 		NetworkConnection(
-			NetworkRequest* request,
 			size_t numberOfThreads = 1
 		)
-			: m_pool    (numberOfThreads)
-			, m_request (request)
+			: m_pool (numberOfThreads)
 		{
 			m_pool.init();
 		}
 
 		template<
 			typename _t,
-			typename _s,
+			typename _r,
 			typename _f>
 		void Request(
-			//const std::string& address,
+			_r networkRequest,
 			_f&& onGetValue)
 		{
+			std::string request = networkRequest.GetRequestString();
+
+			if (request.size() == 0)
+			{
+				LOG_WARNING << "Invalude request based on fields!";
+				return;
+			}
+
 			using namespace asio;
 
 			asio::error_code e;
 
 			io_context context;
-			ip::tcp::endpoint endpoint = ip::tcp::endpoint(ip::make_address(m_request->Ip, e), m_request->Port);
+			ip::tcp::endpoint endpoint = ip::tcp::endpoint(
+				ip::make_address(networkRequest.Ip, e),
+				networkRequest.Port);
 
 			if (e)
 			{
@@ -205,53 +303,40 @@ namespace util
 
 			if (socket.is_open())
 			{
-				std::string request = m_request->GetRequestString();
-
 				socket.write_some(asio::buffer(request.data(), request.size()));
-				socket.wait(socket.wait_read);
-
+				
 				// end once last character is met, I'll put two newlines characters in php script
 
 				std::string buffer; // this could be better
 
-				bool removeHeader = true;
-				int attemptsWith0Bytes = 0;
-
-				while (attemptsWith0Bytes < 100)
+				while (true)
 				{
+					socket.wait(socket.wait_read);
 					size_t bytes = socket.available();
 
-					if (bytes > 0)
+					std::string text(bytes, '\0');
+					socket.read_some(asio::buffer(text.data(), text.size()));
+					buffer += text; // lot of copying here for no reason, maybe should have header with bytes
+
+					bool done = networkRequest.ProcessBuffer(buffer);
+
+					if (done)
 					{
-						std::string text(bytes, '\0');
-						socket.read_some(asio::buffer(text.data(), text.size()));
-
-						if (removeHeader)
-						{
-							removeHeader = false;
-							text = text.substr(text.find("\r\n\r\n") + 4);
-
-
-							// just use content length for header!! screw the end of transmission thing
-						}
-
-						buffer += text; // lot of copying here for no reason, maybe should have header with bytes
-
-						if (text[text.size() - 1] == 4 /* End of Transmission*/)
-						{
-							break;
-						}
-					}
-
-					else {
-						attemptsWith0Bytes++;
-						LOG_WARNING << "Read 0 bytes from network! attempt " << attemptsWith0Bytes << "/100";
+						break;
 					}
 				}
 
-				_t record;
-				_s(buffer).Read(record);
-				onGetValue(record);
+				if constexpr (std::is_same_v<_r::_serializer, None>)
+				{
+					onGetValue(buffer);
+				}
+
+				else
+				{
+					_t record;
+					_r::_serializer(buffer).Read(record);
+					onGetValue(record);
+				}
 
 				socket.close(e);
 
@@ -265,17 +350,18 @@ namespace util
 			context.stop();
 		}
 
+		// request is copied and is free to edit values immediately after call
 		template<
 			typename _t,
-			typename _s>
+			typename _r>
 		NetworkResult<_t> AsyncRequest(
-			/*const std::string& address*/)
+			const _r& netRequest)
 		{
 			NetworkResult<_t> result;
 
-			m_pool.queue([&, result]() mutable
+			m_pool.queue([&, netRequest, result]() mutable
 			{
-				Request<_t, _s>(/*address, */[result](_t& value) mutable
+				Request<_t>(netRequest, [result](_t& value) mutable
 				{
 					result.SetValue(value);
 				});

@@ -148,7 +148,7 @@ namespace Reflect {
 		{
 			if (type->type == IntegralType::CHAR) {
 				Write((char*)value, count);
-				m_stream->put('\0');
+				//m_stream->put('\0');
 			}
 
 			else {
@@ -226,7 +226,7 @@ namespace Reflect {
 		{
 			if (type->type == IntegralType::CHAR) {
 				Read((char*)value, count);
-				m_stream->get(); // remove null char
+				//m_stream->get(); // remove null char
 			}
 
 			else {

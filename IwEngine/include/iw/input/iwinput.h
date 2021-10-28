@@ -355,12 +355,21 @@ namespace Input {
 		bool caps = false)
 	{
 		bool shifted = shift;
-		if (name >= A && name <= Z) {
+		if (    name >= A
+			&& name <= Z)
+		{
 			shifted ^= caps;
 		}
 
 		if (name <= SPACE) {
 			return KeyTranslation[shifted ? name * 2 + 1 : name * 2];
+		}
+
+		switch (name)
+		{
+			case BACK:   return '\b';
+			case RETURN: return '\n';
+			case TAB:    return '\t';
 		}
 
 		return '\0';

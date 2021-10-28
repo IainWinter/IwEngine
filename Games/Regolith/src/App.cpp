@@ -135,11 +135,11 @@ int App::Initialize(
 	context_game->MapButton(iw::LMOUSE, "+fire");
 	context_game->MapButton(iw::RMOUSE, "+alt-fire");
 	context_game->MapButton(iw::ESCAPE, "escape");
-	context_game->MapButton(iw::X, "toolbox");
+	context_game->MapButton(iw::X     , "toolbox");
 
 	iw::ref<iw::Context> context_menu = Input->CreateContext("Menu");
-	context_menu->MapButton(iw::LMOUSE,  "+execute");
-	context_menu->MapButton(iw::ESCAPE,  "escape");
+	context_menu->MapButton(iw::LMOUSE, "+execute");
+	context_menu->MapButton(iw::ESCAPE, "escape");
 
 	iw::ref<iw::Device> mouse        = Input->CreateDevice<iw::Mouse>();
 	//iw::ref<iw::Device> keyboard     = Input->CreateDevice<iw::Keyboard>();
@@ -195,8 +195,17 @@ int App::Initialize(
 
 				if (done)
 				{
+					Game_Layer* game = GetLayer<Game_Layer>("Game");
+					ScoreSystem* score_s = nullptr;
+					if (game) score_s = game->GetSystem<ScoreSystem>("Score");
+
+					int finalScore = 100;
+					if (score_s) finalScore = score_s->Score;
+
+					Menu_PostGame_Layer* menu = new Menu_PostGame_Layer(finalScore);
+
 					m_gamePost = new GameState("Post game menu");
-					m_gamePost->Layers.push_back(new Menu_PostGame_Layer());
+					m_gamePost->Layers.push_back(menu);
 					m_gamePost->OnChange = [&]()
 					{
 						Physics->Paused = true;
@@ -204,13 +213,14 @@ int App::Initialize(
 						Input->SetContext("Menu");
 					};
 
-
 					if (m_gamePlay)
 					{
 						DestroyState(m_gamePlay);
 					}
 
 					SetState(m_gamePost);
+
+
 				}
 
 				return done;
@@ -278,9 +288,5 @@ iw::Application* CreateApplication(
 		iw::DisplayState::NORMAL
 	};
 
-	return new App();
-}
-
-iw::Application* GetApplicationForEditor() {
 	return new App();
 }
