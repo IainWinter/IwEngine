@@ -59,17 +59,18 @@ struct UI_Base
 	template<
 		typename _f>
 	void WalkTree(
-		_f&& functor)
+		_f&& functor,
+		UI_Base* parent = nullptr)
 	{
 		if (!active)
 		{
 			return;
 		}
 
-		functor(this);
+		functor(this, parent);
 		for (UI_Base* child : children)
 		{
-			child->WalkTree(functor);
+			child->WalkTree(functor, this);
 		}
 	}
 
@@ -398,6 +399,8 @@ struct UI_Table : UI
 	void UpdateTransform(
 		UI_Base* parent)
 	{
+		scrollOffset = iw::clamp(scrollOffset, 0.f, rows.size() * (rowHeight * 2.f + rowPadding) - height * 2.f);
+
 		float cursorY = height - rowPadding;
 
 		for (size_t i = 0; i < rows.size(); i++)
@@ -463,16 +466,19 @@ struct UI_Screen : UI_Base
 	{
 		float minZ =  FLT_MAX;
 		float maxZ = -FLT_MAX;
-		UI_Base::WalkTree([&](UI_Base* ui)
+		UI_Base::WalkTree([&](UI_Base* ui, UI_Base* parent)
 		{
-			if (ui->zIndex < minZ) minZ = ui->zIndex;
-			if (ui->zIndex > maxZ) maxZ = ui->zIndex;
+			float z = ui->transform.WorldPosition().z;
+			if (z < minZ) minZ = z;
+			if (z > maxZ) maxZ = z;
 		});
 
 		// normalize Z
 
-		camera.NearClip = minZ * 1.1f; // this doesnt work for some reason???? seems to clip some things if they are far form 0
-		camera.FarClip  = maxZ * 1.1f;
+		camera.NearClip = -10; // this doesnt work for some reason???? seems to clip some things if they are far form 0
+		camera.FarClip  =  10;
+
+		camera.Transform.Position.z = maxZ;
 
 		r->BeginScene(&camera);
 

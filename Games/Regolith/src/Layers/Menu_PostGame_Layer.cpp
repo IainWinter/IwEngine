@@ -17,12 +17,11 @@ int Menu_PostGame_Layer::Initialize()
 
 	mat_tableItem = A_mesh_menu_background.Material->MakeInstance();
 	mat_tableItem ->Set("useBoxFade", 1.0f);
-	mat_tableItem ->Set("fade", 100.f);
-	mat_tableItem->Set("color", iw::Color(1, 0, 0));
+	mat_tableItem ->Set("fade", 10000.f);
 
 	mat_tableText = A_font_cambria->m_material->MakeInstance();
 	mat_tableText->Set("useBoxFade", 1.0f);
-	mat_tableText->Set("fade", 100.f);
+	mat_tableText->Set("fade", 10000.f);
 
 	iw::Mesh tableitembg = A_mesh_menu_background.MakeInstance();
 	tableitembg.Material = mat_tableItem;
@@ -64,12 +63,12 @@ int Menu_PostGame_Layer::Initialize()
 		SubmitScoreAndExit("quit");
 	};
 
-	m_background     ->zIndex = -2;
-	m_table_highScore->zIndex = 0;
-	m_playerBorder->zIndex = -1;
-	m_title_score->zIndex = -1;
-	m_button_reform->zIndex = -1;
-	m_button_quit->zIndex = -1;
+	m_background     ->zIndex = 0;
+	m_table_highScore->zIndex = 3;
+	m_playerBorder   ->zIndex = 1;
+	m_title_score    ->zIndex = 1;
+	m_button_reform  ->zIndex = 1;
+	m_button_quit    ->zIndex = 1;
 
 	// add final score to highscore table and set selected 
 
@@ -79,6 +78,7 @@ int Menu_PostGame_Layer::Initialize()
 	playerRecord.Order = 0; // need to find from web
 
 	m_playerRowId = AddHighscoreToTable(playerRecord, true);
+	mat_tablePlayerRow = m_table_highScore->GetRow(m_playerRowId)->at(0)->mesh.Material;
 
 	// load highscores
 
@@ -130,14 +130,8 @@ void Menu_PostGame_Layer::PostUpdate()
 	m_table_highScore->colWidth[0] = m_table_highScore->WidthRemaining(0);
 
 	// highlight player row
-	
-	if (Score_Table::row_t* row = m_table_highScore->GetRow(m_playerRowId))
-	{
-		// sin wave from 0 to .5
-		// all have same instance of material so only need to edit first
-		float rgb = (sin(iw::TotalTime() * 2.f) + 1.1) / 4.f;
-		row->at(0)->mesh.Material->Set("color", iw::Color(rgb, rgb, rgb, 1.f));
-	}
+	float rgb = (sin(iw::TotalTime() * 2.f) + 1.1) / 4.f; // sin wave from 0 to .5
+	mat_tablePlayerRow->Set("color", iw::Color(rgb, rgb, rgb, 1.f));
 
 	// Button button menu (reform / quit)
 
@@ -156,10 +150,14 @@ void Menu_PostGame_Layer::PostUpdate()
 
 	ButtonUpdate();
 
+	// box size in screen space
+
 	float minX = (m_table_highScore->x - m_table_highScore->width)                                  / m_screen->width; // min/max x
 	float maxX = (m_table_highScore->x + m_table_highScore->width)                                  / m_screen->width;
 	float minY = (m_table_highScore->y - m_table_highScore->height + m_table_highScore->rowPadding) / m_screen->height; // min/max y
 	float maxY = (m_table_highScore->y + m_table_highScore->height - m_table_highScore->rowPadding) / m_screen->height;
+
+	// I dont think this paddin should be *2 but it works
 
 	SetTableBoxFade(minX, minY, maxX, maxY);
 }
@@ -252,4 +250,5 @@ void Menu_PostGame_Layer::SetTableBoxFade(
 	glm::vec4 box = glm::vec4(minX, minY, maxX, maxY);
 	mat_tableItem->Set("box", box);
 	mat_tableText->Set("box", box);
+	mat_tablePlayerRow->Set("box", box);
 }

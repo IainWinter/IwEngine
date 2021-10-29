@@ -67,7 +67,7 @@ struct Menu_Layer : UI_Layer
 
 		std::vector<UI_Button*> buttons;
 
-		m_screen->WalkTree([&](UI_Base* ui)
+		m_screen->WalkTree([&](UI_Base* ui, UI_Base* parent)
 		{
 			UI_Button* button = dynamic_cast<UI_Button*>(ui);
 			if (button) buttons.push_back(button);

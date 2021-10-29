@@ -442,7 +442,7 @@ namespace Graphics {
 				glm::vec3 camToObj = objPosition - camPosition;
 				float distAlongForward = glm::clamp(glm::dot(camForward, camToObj), 0.f, FLT_MAX);
 
-				depth = key(1000000.f * distAlongForward); // convert into ull 
+				depth = key(/*1000000.f * */distAlongForward); // convert into ull 
 			}
 		}
 

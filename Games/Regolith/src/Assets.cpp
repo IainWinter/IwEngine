@@ -69,6 +69,9 @@ int LoadAssets(
 	{
 		A_material_font_cam = A_material_texture_cam->MakeInstance();
 		A_material_font_cam->Set("isFont", 1.0f);
+		A_material_font_cam->Set("font_width", 0.1f);
+		A_material_font_cam->Set("font_edge",  0.2f);
+
 		A_material_font_cam->SetTexture("texture", A_font_cambria->GetTexture(0));
 		A_font_cambria->GetTexture(0)->m_filter = iw::TextureFilter::NEAREST;
 

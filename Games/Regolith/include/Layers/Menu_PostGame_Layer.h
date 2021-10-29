@@ -18,6 +18,7 @@ struct Menu_PostGame_Layer : Menu_Layer
 	// for fade
 	iw::ref<iw::Material> mat_tableItem;
 	iw::ref<iw::Material> mat_tableText;
+	iw::ref<iw::Material> mat_tablePlayerRow;
 
 	using Score_Table = UI_Table<int, int, std::string>;
 
