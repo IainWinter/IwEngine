@@ -78,7 +78,7 @@ int Menu_PostGame_Layer::Initialize()
 	playerRecord.Order = 0; // need to find from web
 
 	m_playerRowId = AddHighscoreToTable(playerRecord, true);
-	mat_tablePlayerRow = m_table_highScore->GetRow(m_playerRowId)->at(0)->mesh.Material;
+	mat_tablePlayerRow = m_table_highScore->GetRow(m_playerRowId).first->at(0)->mesh.Material;
 
 	// load highscores
 
@@ -86,6 +86,8 @@ int Menu_PostGame_Layer::Initialize()
 	request.Ip       = "71.233.150.182";
 	request.Host     = "data.winter.dev";
 	request.Resource = "/regolith/php/get_highscores.php";
+
+	request.SetArgument("score", m_finalScore);
 
 	m_scores = m_connection.AsyncRequest<std::vector<HighscoreRecord>>(request);
 
@@ -102,6 +104,13 @@ void Menu_PostGame_Layer::PostUpdate()
 		}
 
 		m_scores.DoneWithValue();
+
+		m_table_highScore->UpdateTransform(m_screen);
+
+		auto [row, idx] = m_table_highScore->GetRow(m_playerRowId);
+
+
+		m_table_highScore->scrollOffset = idx * (m_table_highScore->rowHeight * 2.f + m_table_highScore->rowPadding) - m_table_highScore->height + m_table_highScore->rowHeight;
 	}
 
 	m_screen->width  = Renderer->Width();
@@ -226,7 +235,7 @@ int Menu_PostGame_Layer::AddHighscoreToTable(
 void Menu_PostGame_Layer::SubmitScoreAndExit(
 	const std::string& whereTo)
 {
-	//Console->QueueCommand(whereTo);
+	Console->QueueCommand(whereTo);
 
 	iw::HttpRequest<iw::None> request;
 	request.Ip       = "71.233.150.182";

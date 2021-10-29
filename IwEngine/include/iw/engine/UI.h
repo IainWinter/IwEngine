@@ -367,10 +367,11 @@ struct UI_Table : UI
 		return id;
 	}
 
-	row_t* GetRow(
+	std::pair<row_t* , int> GetRow(
 		int id)
 	{
 		row_t* row = nullptr;
+		int i = 0;
 
 		for (auto& [rid, rdata, rarray] : rows)
 		{
@@ -379,9 +380,11 @@ struct UI_Table : UI
 				row = &rarray;
 				break;
 			}
+
+			i++;
 		}
 
-		return row;
+		return { row, i };
 	}
 
 	void UpdateRow(
@@ -390,7 +393,7 @@ struct UI_Table : UI
 		std::string str)
 	{
 		font->UpdateMesh(
-			GetRow(id)->at(col)->GetElement()->mesh,
+			GetRow(id).first->at(col)->GetElement()->mesh,
 			str,
 			{ 360, iw::FontAnchor::TOP_RIGHT }
 		);
