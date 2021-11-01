@@ -1,10 +1,3 @@
-#pragma once
-
-#include "HighscoreRecord.h"
-#include "iw/reflected/string.h"
-
-IW_BEGIN_REFLECT
-
 template<>
 inline const Class* GetClass(ClassTag<HighscoreRecord>)
 {
@@ -58,4 +51,3 @@ inline const Class* GetClass(ClassTag<HighscoreRecord[_iw_array_size]>)
 	return c;
 }
 
-IW_END_REFLECT

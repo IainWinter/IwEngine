@@ -47,9 +47,7 @@ int Menu_PostGame_Layer::Initialize()
 
 	m_background   = m_screen->CreateElement(A_mesh_menu_background);
 	m_playerBorder = m_screen->CreateElement(A_mesh_ui_playerBorder);
-
-	m_title_score     = m_screen->CreateElement(title_score);
-	//m_table_highScore = m_screen->CreateElement(highscoreTable);
+	m_title_score  = m_screen->CreateElement(title_score);
 
 	m_button_reform = m_screen->CreateElement<UI_Button>(buttonbg, label_restart);
 	m_button_reform->onClick = [&]()
@@ -70,48 +68,14 @@ int Menu_PostGame_Layer::Initialize()
 	m_button_reform  ->zIndex = 1;
 	m_button_quit    ->zIndex = 1;
 
-	// add final score to highscore table and set selected 
-
-	HighscoreRecord playerRecord;
-	playerRecord.Name = "Anon"; // could return a number of players ie Anon10902
-	playerRecord.Score = m_finalScore;
-	playerRecord.Order = 0; // need to find from web
-
-	m_playerRowId = AddHighscoreToTable(playerRecord, true);
-	mat_tablePlayerRow = m_table_highScore->GetRow(m_playerRowId).first->at(0)->mesh.Material;
-
-	// load highscores
-
-	iw::HttpRequest<iw::JsonSerializer> request;
-	request.Ip       = "71.233.150.182";
-	request.Host     = "data.winter.dev";
-	request.Resource = "/regolith/php/get_highscores.php";
-
-	request.SetArgument("score", m_finalScore);
-
-	m_scores = m_connection.AsyncRequest<std::vector<HighscoreRecord>>(request);
+	SubmitTempScoreAndGetId();
 
 	return 0;
 }
 
 void Menu_PostGame_Layer::PostUpdate()
 {
-	if (m_scores.HasValue())
-	{
-		for (HighscoreRecord& record : m_scores.Value())
-		{
-			AddHighscoreToTable(record);
-		}
-
-		m_scores.DoneWithValue();
-
-		m_table_highScore->UpdateTransform(m_screen);
-
-		auto [row, idx] = m_table_highScore->GetRow(m_playerRowId);
-
-
-		m_table_highScore->scrollOffset = idx * (m_table_highScore->rowHeight * 2.f + m_table_highScore->rowPadding) - m_table_highScore->height + m_table_highScore->rowHeight;
-	}
+	m_connection.StepResults();
 
 	m_screen->width  = Renderer->Width();
 	m_screen->height = Renderer->Height();
@@ -138,9 +102,12 @@ void Menu_PostGame_Layer::PostUpdate()
 	m_table_highScore->colWidth[1] = (m_table_highScore->width - 260.f) * .5;
 	m_table_highScore->colWidth[0] = m_table_highScore->WidthRemaining(0);
 
-	// highlight player row
-	float rgb = (sin(iw::TotalTime() * 2.f) + 1.1) / 4.f; // sin wave from 0 to .5
-	mat_tablePlayerRow->Set("color", iw::Color(rgb, rgb, rgb, 1.f));
+	if (mat_tablePlayerRow)
+	{
+		// highlight player row
+		float rgb = (sin(iw::TotalTime() * 2.f) + 1.1) / 4.f; // sin wave from 0 to .5
+		mat_tablePlayerRow->Set("color", iw::Color(rgb, rgb, rgb, 1.f));
+	}
 
 	// Button button menu (reform / quit)
 
@@ -197,9 +164,9 @@ bool Menu_PostGame_Layer::On(
 			|| (e.Character >= 'a' && e.Character <= 'z')
 			|| (e.Character >= '0' && e.Character <= '9')
 			|| (e.Character == ' ' && m_playerName.size() > 0 && m_playerName[m_playerName.size() - 1] != ' ')
-/*			|| (e.Character == '-')
+			|| (e.Character == '-')
 			|| (e.Character == '_')
-			|| (e.Character == '=')
+/*			|| (e.Character == '=')
 			|| (e.Character == '+')
 			|| (e.Character == '*')*/)
 		{
@@ -232,24 +199,74 @@ int Menu_PostGame_Layer::AddHighscoreToTable(
 	);
 }
 
+iw::NetworkResult<std::string> Menu_PostGame_Layer::SubmitTempScoreAndGetId()
+{
+	iw::HttpRequest<std::string, iw::JsonSerializer> request;
+	request.Ip       = "71.233.150.182";
+	request.Host     = "data.niceyam.com";
+	request.Resource = "/regolith/php/submit_highscore.php";
+	request.SetArgument("name",  "Anon");
+	request.SetArgument("score", m_finalScore);
+	
+	request.OnResult = [this](
+		std::string& uuid)
+	{
+		m_gameId = uuid;
+
+		iw::HttpRequest<std::vector<HighscoreRecord>, iw::JsonSerializer> request;
+		request.Ip       = "71.233.150.182";
+		request.Host     = "data.niceyam.com";
+		request.Resource = "/regolith/php/get_highscores_around.php";
+		request.SetArgument("game_id", uuid);
+
+		request.OnResult = [this](
+			std::vector<HighscoreRecord>& scores)
+		{
+			for (HighscoreRecord& record : scores)
+			{
+				if (record.GameId == m_gameId)
+				{
+					m_playerRowId = AddHighscoreToTable(record, true);
+					mat_tablePlayerRow = m_table_highScore->GetRow(m_playerRowId)
+						.first->at(0)->mesh.Material;
+				}
+
+				else
+				{
+					AddHighscoreToTable(record);
+				}
+			}
+
+			m_table_highScore->UpdateTransform(m_screen);
+
+			auto [row, idx] = m_table_highScore->GetRow(m_playerRowId);
+			m_table_highScore->scrollOffset = idx * (m_table_highScore->rowHeight * 2.f + m_table_highScore->rowPadding) - m_table_highScore->height + m_table_highScore->rowHeight;
+		};
+
+		m_connection.AsyncRequest(request);
+	};
+
+	return m_connection.AsyncRequest(request);
+}
+
 void Menu_PostGame_Layer::SubmitScoreAndExit(
 	const std::string& whereTo)
 {
 	Console->QueueCommand(whereTo);
 
-	iw::HttpRequest<iw::None> request;
-	request.Ip       = "71.233.150.182";
-	request.Host     = "data.winter.dev";
-	request.Resource = "/regolith/php/submit_highscore.php";
+	//iw::HttpRequest<iw::None> request;
+	//request.Ip       = "71.233.150.182";
+	//request.Host     = "data.winter.dev";
+	//request.Resource = "/regolith/php/submit_highscore.php";
 
-	request.SetArgument("name", m_playerName);
-	request.SetArgument("score", to_string(m_finalScore));
+	//request.SetArgument("name", m_playerName);
+	//request.SetArgument("score", to_string(m_finalScore));
 
-	m_connection.Request<std::string>(request, [](
-		std::string& str) 
-	{
-		LOG_INFO << str;
-	});
+	//m_connection.Request<std::string>(request, [](
+	//	std::string& str) 
+	//{
+	//	LOG_INFO << str;
+	//});
 }
 
 void Menu_PostGame_Layer::SetTableBoxFade(
@@ -259,5 +276,9 @@ void Menu_PostGame_Layer::SetTableBoxFade(
 	glm::vec4 box = glm::vec4(minX, minY, maxX, maxY);
 	mat_tableItem->Set("box", box);
 	mat_tableText->Set("box", box);
-	mat_tablePlayerRow->Set("box", box);
+
+	if (mat_tablePlayerRow)
+	{
+		mat_tablePlayerRow->Set("box", box);
+	}
 }

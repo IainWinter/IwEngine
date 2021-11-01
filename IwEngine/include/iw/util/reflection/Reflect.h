@@ -91,7 +91,7 @@ namespace detail {
 		ss = std::stringstream();
 		ss << "[";
 		ss << _s;
-		ss << "]\0";
+		ss << "]\0"; // todo: this isnt needed bc c_str appends a \0 i guess
 
 		size_t size = strlen(type_name);
 		size_t size_with_array = size + 5u + (digits - 1u);

@@ -8,6 +8,8 @@
 #include "iw/util/io/Network.h"
 #include "iw/util/reflection/serialization/JsonSerializer.h"
 
+#include "iw/util/algorithm/guid.h"
+
 struct Menu_PostGame_Layer : Menu_Layer
 {
 	UI* m_background;
@@ -28,7 +30,7 @@ struct Menu_PostGame_Layer : Menu_Layer
 	UI_Button* m_button_quit;
 
 	iw::NetworkConnection m_connection;
-	iw::NetworkResult<std::vector<HighscoreRecord>> m_scores;
+	std::string m_gameId;
 
 	int m_finalScore;
 	int m_playerRowId;
@@ -64,6 +66,8 @@ struct Menu_PostGame_Layer : Menu_Layer
 	int AddHighscoreToTable(
 		const HighscoreRecord& record,
 		bool makeInstanceOfBackgroundMesh = false);
+
+	iw::NetworkResult<std::string> SubmitTempScoreAndGetId();
 
 	void SubmitScoreAndExit(
 		const std::string& whereTo);

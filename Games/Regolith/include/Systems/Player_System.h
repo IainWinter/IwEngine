@@ -22,8 +22,9 @@ struct PlayerSystem : iw::SystemBase
 	PlayerSystem(
 		iw::SandLayer* sand
 	)
-		: iw::SystemBase("Player")
-		, sand(sand)
+		: iw::SystemBase ("Player")
+		, sand           (sand)
+		, m_handle       (nullptr)
 	{}
 
 	int Initialize() override;

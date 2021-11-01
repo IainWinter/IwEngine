@@ -20,6 +20,8 @@ namespace util
 		typename _t>
 	struct NetworkResult
 	{
+		using _value_t = _t;
+
 	private:
 		ref<_t> m_value;
 		ref<bool> m_hasValue;
@@ -118,22 +120,30 @@ namespace util
 
 	// placeholder for no serializtion
 	// causes NetworkConnection::Result to return string
-
-	struct None
+	struct NoSerializer
 	{};
 
 	template<
-		typename _s>
+		typename _t,
+		typename _s = NoSerializer>
 	struct NetworkRequest
 	{
-		using _serializer = _s;
+		using _serializer_t = _s;
+
+		using _result_t = std::conditional_t<
+			std::is_same_v<_s, NoSerializer>,
+				std::string,
+				_t>;
+
+		using _onResult_t = std::function<void(_result_t&)>;
 
 		std::string Ip;
 		std::string Host;
 		std::string Resource;
 		unsigned short Port;
 
-		_serializer* Serializer;
+		_serializer_t* Serializer;
+		_onResult_t OnResult;
 
 		NetworkRequest()
 			: Port       (0)
@@ -144,13 +154,31 @@ namespace util
 
 		// lil weird to have this here but
 		// returns if done receiving
-		// when done buffer should be ready for deserialization
+		// when done, buffer should be ready for deserialization
 		virtual bool ProcessBuffer(std::string& buffer)= 0;
+
+		static _result_t Respond(
+			const std::string& str)
+		{
+			if constexpr (std::is_same_v<_s, NoSerializer>)
+			{
+				return str;
+			}
+
+			else
+			{
+				_t record;
+				_serializer_t(str).Read(record);
+				return record;
+			}
+		}
 	};
 
 	template<
-		typename _s>
-	struct HttpRequest : NetworkRequest<_s>
+		typename _t,
+		typename _s = NoSerializer>
+	struct HttpRequest
+		: NetworkRequest<_t, _s>
 	{
 		std::string Ask = "GET";
 		std::string Protocall = "HTTP/1.1";
@@ -164,7 +192,7 @@ namespace util
 
 	public:
 		HttpRequest()
-			: NetworkRequest<_s>()
+			: NetworkRequest<_t, _s>()
 		{
 			Port = 80;
 		}
@@ -229,11 +257,15 @@ namespace util
 			return buffer.size() == contentLength;
 		}
 
+		template<
+			typename _t>
 		void SetArgument(
 			const std::string& name,
-			const std::string& value)
+			const _t& value)
 		{
-			Arguments[name] = value;
+			std::stringstream ss;
+			ss << value;
+			Arguments[name] = ss.str();
 		}
 
 		void RemoveArgument(
@@ -257,20 +289,23 @@ namespace util
 			m_pool.init();
 		}
 
+		void StepResults()
+		{
+			m_pool.step_coroutines();
+		}
+
+		// makes a copy of network request because it has internal state
 		template<
-			typename _t,
-			typename _r,
-			typename _f>
-		void Request(
-			_r networkRequest,
-			_f&& onGetValue)
+			typename _r>
+		typename _r::_result_t Request(
+			_r networkRequest)
 		{
 			std::string request = networkRequest.GetRequestString();
 
 			if (request.size() == 0)
 			{
 				LOG_WARNING << "Invalude request based on fields!";
-				return;
+				return {};
 			}
 
 			using namespace asio;
@@ -285,7 +320,7 @@ namespace util
 			if (e)
 			{
 				LOG_ERROR << "Failed to make endpoint " << e.message();
-				return;
+				return {};
 			}
 
 			// Start thread blocked by idle work
@@ -298,7 +333,7 @@ namespace util
 			if (e)
 			{
 				LOG_ERROR << "Failed to connect to socket " << e.message();
-				return;
+				return {};
 			}
 
 			if (socket.is_open())
@@ -326,48 +361,58 @@ namespace util
 					}
 				}
 
-				if constexpr (std::is_same_v<_r::_serializer, None>)
-				{
-					onGetValue(buffer);
-				}
-
-				else
-				{
-					_t record;
-					_r::_serializer(buffer).Read(record);
-					onGetValue(record);
-				}
-
 				socket.close(e);
 
 				if (e)
 				{
 					LOG_ERROR << "Error while closing socket: " << e.message();
-					return;
+					return {};
 				}
+
+				return _r::Respond(buffer);
 			}
 
 			context.stop();
+
+			return {};
 		}
 
-		// request is copied and is free to edit values immediately after call
+		// request is copied and is free to edit immediately after call
 		template<
-			typename _t,
 			typename _r>
-		NetworkResult<_t> AsyncRequest(
+		NetworkResult<typename _r::_result_t> AsyncRequest(
 			const _r& netRequest)
 		{
-			NetworkResult<_t> result;
+			NetworkResult<_r::_result_t> result;
 
-			m_pool.queue([&, netRequest, result]() mutable
-			{
-				Request<_t>(netRequest, [result](_t& value) mutable
+			// run the request on a seperate thread
+			m_pool.queue(
+				[this, netRequest, result]() mutable
 				{
-					result.SetValue(value);
-				});
+					result.SetValue(Request<_r>(netRequest));
+					return true;
+				}
+			);
 
-				return true;
-			});
+			if (netRequest.OnResult)
+			{
+				_r::_onResult_t onResult = netRequest.OnResult;
+
+				// poll for the result on the main thread
+				m_pool.coroutine(
+					[result, onResult]() mutable
+					{
+						if (result.HasValue())
+						{
+							onResult(result.Value());
+							result.DoneWithValue();
+							return true;
+						}
+
+						return false;
+					}
+				);
+			}
 
 			return result;
 		}

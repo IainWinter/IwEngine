@@ -4,7 +4,7 @@
 
 struct Flocker {
 	bool Active = true;
-	glm::vec2 Target;
+	glm::vec2 Target = glm::vec2(0.f);
 
 	float Speed = 100;
 	float SpeedNearTarget = 1;

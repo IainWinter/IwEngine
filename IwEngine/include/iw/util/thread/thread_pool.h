@@ -89,12 +89,17 @@ namespace util {
 
 		void step_coroutines()
 		{
-			std::unique_lock lock(m_mutex_coroutine);
-
-			for (size_t i = 0; i < m_coroutines.size(); i++)
+			std::vector<std::function<bool()>> copy;
 			{
-				std::function<bool()>& func = m_coroutines.at(i);
-				if (func()) {
+				std::unique_lock lock(m_mutex_coroutine);
+				copy = m_coroutines;
+			}
+
+			for (size_t i = 0; i < copy.size(); i++)
+			{
+				if (copy.at(i)())
+				{
+					std::unique_lock lock(m_mutex_coroutine);
 					m_coroutines.erase(m_coroutines.begin() + i);
 				}
 			}

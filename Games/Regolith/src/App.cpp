@@ -1,5 +1,7 @@
 ﻿#include "App.h"
 
+#include <combaseapi.h>
+
 // State ideas
 
 // There are some different states that the progra cna be in, idealy these would only be differnt layers being in the app at a time
@@ -121,12 +123,41 @@ App::App() : iw::Application()
 		Input->SetContext("Menu");
 	};
 
-	Console->QueueCommand("game-over");
+	Console->QueueCommand("game-start");
 }
 
 int App::Initialize(
 	iw::InitOptions& options)
 {
+	// create a guid for the installation of this app
+
+	//GUID install_id;
+
+	//if (iw::FileExists("install_id.txt"))
+	//{
+	//	std::string str = iw::ReadFile("install_id.txt");
+	//	std::wstring s;
+	//	s.assign(str.begin(), str.end());
+
+	//	install_id = s;
+	//}
+
+	//else
+	//{
+	//	GUID& id = install_id;
+	//	char szGuid[40] = { 0 };
+	//	CoCreateGuid(&id);
+
+	//	sprintf(szGuid, "{%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X}", 
+	//		id.Data1,    id.Data2,    id.Data3, 
+	//		id.Data4[0], id.Data4[1], id.Data4[2], id.Data4[3],
+	//		id.Data4[4], id.Data4[5], id.Data4[6], id.Data4[7]);
+
+	//	iw::WriteFile("install_id.txt", szGuid);
+	//}
+
+
+
 	iw::ref<iw::Context> context_game = Input->CreateContext("Game");
 	context_game->MapButton(iw::D     , "+right");
 	context_game->MapButton(iw::A     , "-right");
@@ -199,7 +230,7 @@ int App::Initialize(
 					ScoreSystem* score_s = nullptr;
 					if (game) score_s = game->GetSystem<ScoreSystem>("Score");
 
-					int finalScore = 100;
+					int finalScore = iw::randi(10000);
 					if (score_s) finalScore = score_s->Score;
 
 					Menu_PostGame_Layer* menu = new Menu_PostGame_Layer(finalScore);

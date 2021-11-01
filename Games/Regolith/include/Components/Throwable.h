@@ -5,9 +5,9 @@ struct Throwable
 	iw::Entity ThrowTarget;
 	iw::Entity ThrowRequestor;
 
-	bool Held;
-	float Time;
-	float Timer;
+	bool Held = false;
+	float Time = 0.f;
+	float Timer = 0.f;
 
 	Throwable()
 		: Held  (false)

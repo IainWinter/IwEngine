@@ -22,6 +22,8 @@
 #include "State.h"
 #include <stack>
 
+#include "iw/util/io/File.h"
+
 struct StaticLayer : iw::Layer
 {
 	StaticLayer()

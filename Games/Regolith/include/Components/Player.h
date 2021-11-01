@@ -5,17 +5,17 @@
 
 struct Player
 {
-	float i_moveX;
-	float i_moveY;
-	bool  i_fire1;
-	bool  i_fire2;
+	float i_moveX = 0.f;
+	float i_moveY = 0.f;
+	bool  i_fire1 = false;
+	bool  i_fire2 = false;
 
 	float speed = 150;
 
-	float rotation;
+	float rotation = 0.f;
 
-	bool can_fire_laser;
+	bool can_fire_laser = false;
 
-	Weapon* CurrentWeapon;
-	Weapon* SpecialLaser;
+	Weapon* CurrentWeapon = nullptr;
+	Weapon* SpecialLaser = nullptr;
 };

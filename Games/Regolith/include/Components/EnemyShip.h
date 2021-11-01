@@ -15,20 +15,20 @@ enum EnemyType
 struct Enemy
 {
 	iw::Entity Target;
-	float ExplosionPower;
+	float ExplosionPower = 10.f;
 
 	float ActiveTimer = 0.f;
 	float ActiveTime  = .1f;
 };
 
 struct Fighter_Enemy {
-	Weapon* Weapon;
+	Weapon* Weapon = nullptr;
 };
 
 struct Bomb_Enemy {
-	float TimeToExplode;
-	float RadiusToExplode;
-	bool Explode;
+	float TimeToExplode = 1.f;
+	float RadiusToExplode = 10.f;
+	bool Explode = false;
 };
 
 struct Station_Enemy {
