@@ -15,7 +15,7 @@ public:
 	Audio_Layer()
 		: iw::Layer ("Audio")
 		, m_console (nullptr)
-		, m_song    (-2)
+		, m_song    (-1)
 	{}
 
 	void OnPush() override;

@@ -8,12 +8,21 @@ void Audio_Layer::OnPush()
 			if (command.Verb == "game-start")
 			{
 				// play game music
-				m_song = Audio->CreateInstance("music_bg");
 
+				if (m_song == -1)
+				{
+					m_song = Audio->CreateInstance("music_bg", false);
+				}
+
+				else
+				{
+					Audio->StartInstance(m_song);
+				}
 			}
 
 			else if (command.Verb == "game-over")
 			{
+				Audio->StopInstance(m_song);
 				// play game over music
 			}
 
