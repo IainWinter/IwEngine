@@ -2,25 +2,15 @@
 
 namespace iw {
 namespace Graphics {
-	Camera::Camera()
-	{
-		RecalculateView();
-	}
-
 	Camera::Camera(
-		iw::Transform* transform)
+		float nearClip,
+		float farClip
+	)
+		: NearClip (nearClip)
+		, FarClip  ( farClip)
+		, View       (1.f)
+		, Projection (1.f)
 	{
-		Transform.SetParent(transform);
-		RecalculateView();
-	}
-
-	Camera::Camera(
-		const glm::vec3& position,
-		const glm::quat& rotation)
-	{
-		Transform.Position = position;
-		Transform.Rotation = rotation;
-
 		RecalculateView();
 	}
 
@@ -77,32 +67,7 @@ namespace Graphics {
 		float zNear, 
 		float zFar
 	)
-		: Camera()
-	{
-		SetProjection(width, height, zNear, zFar);
-	}
-
-	OrthographicCamera::OrthographicCamera(
-		iw::Transform* transform,
-		float width, 
-		float height, 
-		float zNear, 
-		float zFar
-	)
-		: Camera(transform)
-	{
-		SetProjection(width, height, zNear, zFar);
-	}
-
-	OrthographicCamera::OrthographicCamera(
-		const glm::vec3& position,
-		const glm::quat& rotation,
-		float width,
-		float height,
-		float zNear,
-		float zFar
-	)
-		: Camera(position, rotation)
+		: Camera(zNear, zFar)
 	{
 		SetProjection(width, height, zNear, zFar);
 	}
@@ -138,32 +103,7 @@ namespace Graphics {
 		float zNear,
 		float zFar
 	)
-		: Camera()
-	{
-		SetProjection(fov, aspect, zNear, zFar);
-	}
-
-	PerspectiveCamera::PerspectiveCamera(
-		iw::Transform* transform,
-		float fov,
-		float aspect,
-		float zNear,
-		float zFar
-	)
-		: Camera(transform)
-	{
-		SetProjection(fov, aspect, zNear, zFar);
-	}
-
-	PerspectiveCamera::PerspectiveCamera(
-		const glm::vec3& position,
-		const glm::quat& rotation,
-		float fov,
-		float aspect,
-		float zNear,
-		float zFar
-	)
-		: Camera(position, rotation)
+		: Camera(zNear, zFar)
 	{
 		SetProjection(fov, aspect, zNear, zFar);
 	}
@@ -174,10 +114,10 @@ namespace Graphics {
 		float zNear, 
 		float zFar)
 	{
-		Fov = fov;
-		Aspect = aspect;
+		Fov      = fov;
+		Aspect   = aspect;
 		NearClip = zNear;
-		FarClip = zFar;
+		FarClip  = zFar;
 		RecalculateProjection();
 	}
 
@@ -186,6 +126,5 @@ namespace Graphics {
 		Projection = glm::perspective(Fov, Aspect, NearClip, FarClip);
 		return Projection;
 	}
-	
 }
 }

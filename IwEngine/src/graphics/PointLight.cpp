@@ -77,13 +77,14 @@ namespace Graphics {
 //			}
 //#endif
 			PerspectiveCamera camera(
-				Position(), 
-				glm::angleAxis(glm::pi<float>(), glm::vec3(0, 0, 1)),
 				glm::pi<float>() * 0.5f,
 				float(m_shadowTarget->Width()) / m_shadowTarget->Height(),
 				0.01f,
 				Radius()
 			);
+
+			camera.Transform.Position = Position();
+			camera.Transform.Rotation = glm::angleAxis(glm::pi<float>(), glm::vec3(0, 0, 1));
 
 			m_shadowCamera = camera;
 		}

@@ -9,18 +9,13 @@ namespace Graphics {
 		glm::mat4 View;
 		glm::mat4 Projection;
 		iw::Transform Transform;
-
-		IWGRAPHICS_API
-		Camera();
-
-		IWGRAPHICS_API
-		Camera(
-			iw::Transform* transform);
+		float NearClip;
+		float FarClip;
 
 		IWGRAPHICS_API
 		Camera(
-			const glm::vec3& position,
-			const glm::quat& rotation);
+			float nearClip,
+			float farClip);
 
 		IWGRAPHICS_API void SetTrans(iw::Transform* transform);
 		IWGRAPHICS_API void SetView(const glm::mat4& view);
@@ -42,8 +37,6 @@ namespace Graphics {
 	{
 		float Width;
 		float Height;
-		float NearClip;
-		float FarClip;
 
 		IWGRAPHICS_API
 		OrthographicCamera(
@@ -51,23 +44,6 @@ namespace Graphics {
 			float height =  2,
 			float zNear  = -1,
 			float zFar   =  1);
-
-		IWGRAPHICS_API
-		OrthographicCamera(
-			iw::Transform* transform,
-			float width,
-			float height,
-			float zNear,
-			float zFar);
-
-		IWGRAPHICS_API
-		OrthographicCamera(
-			const glm::vec3& position,
-			const glm::quat& rotation,
-			float width,
-			float height,
-			float zNear,
-			float zFar);
 
 		IWGRAPHICS_API
 		void SetProjection(
@@ -83,7 +59,7 @@ namespace Graphics {
 	struct PerspectiveCamera
 		: Camera
 	{
-		float Fov, Aspect, NearClip, FarClip;
+		float Fov, Aspect;
 
 		IWGRAPHICS_API
 		PerspectiveCamera(
@@ -91,23 +67,6 @@ namespace Graphics {
 			float aspect = 16.0f / 9,
 			float zNear  = 0.01f,
 			float zFar   = 1000.f);
-
-		IWGRAPHICS_API
-		PerspectiveCamera(
-			iw::Transform* transform,
-			float fov,
-			float aspect,
-			float zNear,
-			float zFar);
-
-		IWGRAPHICS_API
-		PerspectiveCamera(
-			const glm::vec3& position,
-			const glm::quat& rotation,
-			float fov,
-			float aspect,
-			float zNear,
-			float zFar);
 
 		IWGRAPHICS_API
 		void SetProjection(

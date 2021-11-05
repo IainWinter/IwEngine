@@ -19,24 +19,64 @@ namespace Graphics {
 		using setup_draw_func  = std::function<void()>;
 		using setup_scene_func = setup_draw_func; // the same rn might be different but probs not
 
-		enum class Bits {
-			DEPTH        = 8 * sizeof(key) - 64, // 0000000000000000000000000000000000000000xxxxxxxxxxxxxxxxxxxxxxxx
-			MATERIAL     = 8 * sizeof(key) - 40, // 000000000000000000000000xxxxxxxxxxxxxxxx000000000000000000000000
-			TRANSPARENCY = 8 * sizeof(key) - 24, // 0000000000000000000000xx0000000000000000000000000000000000000000
-			BLOCK        = 8 * sizeof(key) - 22, // 00000000000000000000xx000000000000000000000000000000000000000000
-			CAMERA       = 8 * sizeof(key) - 20, // 00000000xxxxxxxxxxxx00000000000000000000000000000000000000000000
-			SHADOW       = 8 * sizeof(key) - 8,  // 0000000x00000000000000000000000000000000000000000000000000000000
-			LAYER        = 8 * sizeof(key) - 7,  // xxxxxxx000000000000000000000000000000000000000000000000000000000
+		enum class Bit : key {
+			DEPTH        = 8 * sizeof(key) - 64, // 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 xxxx xxxx xxxx xxxx xxxx xxxx
+			MATERIAL     = 8 * sizeof(key) - 40, // 0000 0000 0000 0000 0000 0000 xxxx xxxx xxxx xxxx 0000 0000 0000 0000 0000 0000
+			TRANSPARENCY = 8 * sizeof(key) - 24, // 0000 0000 0000 0000 0000 00xx 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000
+			BLOCK        = 8 * sizeof(key) - 22, // 0000 0000 0000 0000 0000 xx00 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000
+			CAMERA       = 8 * sizeof(key) - 20, // 0000 0000 xxxx xxxx xxxx 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000
+			SHADOW       = 8 * sizeof(key) - 8,  // 0000 000x 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000
+			LAYER        = 8 * sizeof(key) - 7,  // xxxx xxx0 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000
 		};
 
-		enum class TransparencyBits {
-			MATERIAL     = 8 * sizeof(key) - 64, // 000000000000000000000000000000000000000000000000xxxxxxxxxxxxxxxx
-			DEPTH        = 8 * sizeof(key) - 48, // 000000000000000000000000xxxxxxxxxxxxxxxxxxxxxxxx0000000000000000
-			TRANSPARENCY = 8 * sizeof(key) - 24, // 0000000000000000000000xx0000000000000000000000000000000000000000
-			BLOCK        = 8 * sizeof(key) - 22, // 00000000000000000000xx000000000000000000000000000000000000000000
-			CAMERA       = 8 * sizeof(key) - 20, // 00000000xxxxxxxxxxxx00000000000000000000000000000000000000000000
-			SHADOW       = 8 * sizeof(key) - 8,  // 0000000x00000000000000000000000000000000000000000000000000000000
-			LAYER        = 8 * sizeof(key) - 7,  // xxxxxxx000000000000000000000000000000000000000000000000000000000
+		enum class TBit : key {
+			MATERIAL     = 8 * sizeof(key) - 64, // 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 xxxx xxxx xxxx xxxx
+			DEPTH        = 8 * sizeof(key) - 48, // 0000 0000 0000 0000 0000 0000 xxxx xxxx xxxx xxxx xxxx xxxx 0000 0000 0000 0000
+			TRANSPARENCY = 8 * sizeof(key) - 24, // 0000 0000 0000 0000 0000 00xx 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000
+			BLOCK        = 8 * sizeof(key) - 22, // 0000 0000 0000 0000 0000 xx00 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000
+			CAMERA       = 8 * sizeof(key) - 20, // 0000 0000 xxxx xxxx xxxx 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000
+			SHADOW       = 8 * sizeof(key) - 8,  // 0000 000x 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000
+			LAYER        = 8 * sizeof(key) - 7,  // xxxx xxx0 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000
+		};
+
+		enum class BitSize : key {
+			DEPTH        = val(Bit::MATERIAL)     - val(Bit::DEPTH),
+			MATERIAL     = val(Bit::TRANSPARENCY) - val(Bit::MATERIAL),
+			TRANSPARENCY = val(Bit::BLOCK)        - val(Bit::TRANSPARENCY),
+			BLOCK        = val(Bit::CAMERA)       - val(Bit::BLOCK),
+			CAMERA       = val(Bit::SHADOW)       - val(Bit::CAMERA),
+			SHADOW       = val(Bit::LAYER)        - val(Bit::SHADOW),
+			LAYER        = 8 * sizeof(key)        - val(Bit::LAYER)
+		};
+
+		enum class TBitSize : key {
+			MATERIAL     = val(TBit::DEPTH)        - val(TBit::MATERIAL),
+			DEPTH        = val(TBit::TRANSPARENCY) - val(TBit::DEPTH),
+			TRANSPARENCY = val(TBit::BLOCK)        - val(TBit::TRANSPARENCY),
+			BLOCK        = val(TBit::CAMERA)       - val(TBit::BLOCK),
+			CAMERA       = val(TBit::SHADOW)       - val(TBit::CAMERA),
+			SHADOW       = val(TBit::LAYER)        - val(TBit::SHADOW),
+			LAYER        = 8 * sizeof(key)         - val(TBit::LAYER)
+		};
+
+		enum class BitMask : key {
+			DEPTH        = ((key(1) << val(BitSize::DEPTH       )) - 1) << 0,
+			MATERIAL     = ((key(1) << val(BitSize::MATERIAL    )) - 1) << val(Bit::MATERIAL),
+			TRANSPARENCY = ((key(1) << val(BitSize::TRANSPARENCY)) - 1) << val(Bit::TRANSPARENCY),
+			BLOCK        = ((key(1) << val(BitSize::BLOCK       )) - 1) << val(Bit::BLOCK),
+			CAMERA       = ((key(1) << val(BitSize::CAMERA      )) - 1) << val(Bit::CAMERA),
+			SHADOW       = ((key(1) << val(BitSize::SHADOW      )) - 1) << val(Bit::SHADOW),
+			LAYER        = ((key(1) << val(BitSize::LAYER       )) - 1) << val(Bit::LAYER),
+		};
+
+		enum class TBitMask : key {
+			MATERIAL     = ((key(1) << val(TBitSize::MATERIAL    )) - 1) << 0,
+			DEPTH        = ((key(1) << val(TBitSize::DEPTH       )) - 1) << val(TBit::DEPTH),
+			TRANSPARENCY = ((key(1) << val(TBitSize::TRANSPARENCY)) - 1) << val(TBit::TRANSPARENCY),
+			BLOCK        = ((key(1) << val(TBitSize::BLOCK       )) - 1) << val(TBit::BLOCK),
+			CAMERA       = ((key(1) << val(TBitSize::CAMERA      )) - 1) << val(TBit::CAMERA),
+			SHADOW       = ((key(1) << val(TBitSize::SHADOW      )) - 1) << val(TBit::SHADOW),
+			LAYER        = ((key(1) << val(TBitSize::LAYER       )) - 1) << val(TBit::LAYER),
 		};
 
 		enum class RenderOP {

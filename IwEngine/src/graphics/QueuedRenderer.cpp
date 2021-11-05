@@ -439,38 +439,54 @@ namespace Graphics {
 									  ? glm::vec3(m_cCamera->View[2]) * glm::vec3(1, 1, -1)
 									  : glm::vec3(0.f);
 
-				glm::vec3 camToObj = objPosition - camPosition;
-				float distAlongForward = glm::clamp(glm::dot(camForward, camToObj), 0.f, FLT_MAX);
+				float frustrumLength = m_cCamera
+									 ? m_cCamera->FarClip - m_cCamera->NearClip
+									 : 2.f;
 
-				depth = key(/*1000000.f * */distAlongForward); // convert into ull 
+				glm::vec3 camToObj = objPosition - camPosition;
+				float distAlongForward = sqrtf(iw::max(0.f, glm::dot(camForward, camToObj)));
+
+				long double distInFrustrum = distAlongForward / frustrumLength;
+
+				// reverse depth
+				key maxDepth;
+				
+				if (transparency == val(Transparency::NONE))
+				{
+				 	maxDepth = (key(1) << val(BitSize::DEPTH)) - key(1);
+				}
+
+				else
+				{
+					maxDepth = (key(1) << val(TBitSize::DEPTH)) - key(1);
+				}
+
+				depth = maxDepth - key(maxDepth * distInFrustrum);
 			}
 		}
 
-		// should check for overflow here like how depth does
+		// could make template function for these two bit types
 
 		if (transparency == val(Transparency::NONE)) 
 		{
-			layer        <<= val(Bits::LAYER);
-			shadow       <<= val(Bits::SHADOW);
-			camera       <<= val(Bits::CAMERA);
-			block        <<= val(Bits::BLOCK);
-			transparency <<= val(Bits::TRANSPARENCY);
-			material     <<= val(Bits::MATERIAL);
-
-			depth = (((key)1 << val(Bits::DEPTH)) - 1) & (key(-1) - depth);
+			layer        = (layer        << val(Bit::LAYER       )) & val(BitMask::LAYER);
+			shadow       = (shadow       << val(Bit::SHADOW      )) & val(BitMask::SHADOW);
+			camera       = (camera       << val(Bit::CAMERA      )) & val(BitMask::CAMERA);
+			block        = (block        << val(Bit::BLOCK       )) & val(BitMask::BLOCK);
+			transparency = (transparency << val(Bit::TRANSPARENCY)) & val(BitMask::TRANSPARENCY);
+			material     = (material     << val(Bit::MATERIAL    )) & val(BitMask::MATERIAL);
+			depth        = (depth        << val(Bit::DEPTH       )) & val(BitMask::DEPTH);
 		}
 
 		else
 		{
-			layer        <<= val(TransparencyBits::LAYER);
-			shadow       <<= val(TransparencyBits::SHADOW);
-			camera       <<= val(TransparencyBits::CAMERA);
-			block        <<= val(TransparencyBits::BLOCK);
-			transparency <<= val(TransparencyBits::TRANSPARENCY);
-			material     <<= val(TransparencyBits::MATERIAL);
-
-			depth = (((key)1 << val(TransparencyBits::DEPTH)) - 1) & (key(-1) - depth);
-
+			layer        = (layer        << val(TBit::LAYER       )) & val(TBitMask::LAYER);
+			shadow       = (shadow       << val(TBit::SHADOW      )) & val(TBitMask::SHADOW);
+			camera       = (camera       << val(TBit::CAMERA      )) & val(TBitMask::CAMERA);
+			block        = (block        << val(TBit::BLOCK       )) & val(TBitMask::BLOCK);
+			transparency = (transparency << val(TBit::TRANSPARENCY)) & val(TBitMask::TRANSPARENCY);
+			material     = (material     << val(TBit::MATERIAL    )) & val(TBitMask::MATERIAL);
+			depth        = (depth        << val(TBit::DEPTH       )) & val(TBitMask::DEPTH);
 		}
 
 		return layer | shadow | camera | block | transparency | material | depth;

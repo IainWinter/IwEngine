@@ -42,7 +42,7 @@ namespace log {
 		IWLOG_API
 		virtual ~async_sink() {
 			m_messages.push({loglevel::INFO, "", true});
-			m_thread.join();
+			m_thread.join(); // why does this error?
 		}
 
 		IWLOG_API

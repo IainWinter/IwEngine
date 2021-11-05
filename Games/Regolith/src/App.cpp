@@ -120,6 +120,7 @@ App::App() : iw::Application()
 	{
 		Physics->Paused = true;
 		//Window()->SetCursor(true);
+		//Renderer->Device->SetVSync();
 		Input->SetContext("Menu");
 	};
 
