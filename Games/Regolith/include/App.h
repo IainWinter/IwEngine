@@ -18,6 +18,7 @@
 #include "Layers/Menu_Pause_Layer.h"
 #include "Layers/Menu_PostGame_Layer.h"
 #include "Layers/Menu_Fadeout_Layer.h"
+#include "Layers/Audio_Layer.h"
 
 #include "State.h"
 #include <stack>
@@ -35,7 +36,7 @@ struct StaticLayer : iw::Layer
 		PushSystem<iw::PhysicsSystem>();
 		PushSystem<iw::EntityCleanupSystem>();
 
-		if (int e = LoadAssets(Asset.get(), Renderer->Now.get()))
+		if (int e = LoadAssets(Asset.get(), Audio.get(), Renderer->Now.get()))
 		{
 			return e;
 		}

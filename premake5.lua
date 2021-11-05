@@ -724,7 +724,8 @@ group "Plugins"
 		includedirs {
 			sand_dir .. incdir,
 			iwengdir .. incdir,
-			glmdir .. incdir
+			glmdir .. incdir,
+			fmoddir  .. incdir
 		}
 
 		links {
@@ -737,8 +738,8 @@ group "Plugins"
 			"wEngine",
 			"wCommon",
 			"wRenderer",
-			"wPhysics"
-			
+			"wPhysics",
+			"wAudio"
 		}
 
 		postbuildcommands {

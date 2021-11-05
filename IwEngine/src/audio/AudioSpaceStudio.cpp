@@ -1,6 +1,6 @@
 #include "iw/audio/AudioSpaceStudio.h"
 #include "iw/log/logger.h"
-#include "CHECK_ERROR.h"
+//#include "CheckError.h"
 #include "fmod/fmod_studio.hpp"
 
 namespace iw {
@@ -25,22 +25,25 @@ namespace Audio {
 		m_system->release();
 	}
 
-	int AudioSpaceStudio::Initialize() {
-		CHECK_ERROR(
+	int AudioSpaceStudio::Initialize()
+	{
+		LOG_INFO << "Initializing audio space";
+
+		CheckError(
 			FMOD::Studio::System::create(&m_system),
-			"Audio space did not get created!", 1
+			"Audio space did not get created!"/*, 1*/
 		);
 
-		CHECK_ERROR(
+		CheckError(
 			m_system->initialize(GetChannels(), FMOD_STUDIO_INIT_NORMAL, FMOD_INIT_NORMAL, nullptr),
-			"Audio space did not get initliaze!", 2
+			"Audio space did not get initliaze!"/*, 2*/
 		);
 
 		return 0;
 	}
 
 	void AudioSpaceStudio::Update() {
-		CHECK_ERROR(
+		CheckError(
 			m_system->update(),
 			"Audio space could failed to update!"
 		);
@@ -51,12 +54,14 @@ namespace Audio {
 	{
 		std::string path = GetRootDir() + name;
 
+		LOG_INFO << "Loading master bank from " << path;
+
 		auto itr = m_banks.find(name);
 		if (itr != m_banks.end()) {
 			itr->second->unload();
 		}
 
-		CHECK_ERROR(
+		CheckError(
 			m_system->loadBankFile(path.c_str(), FMOD_STUDIO_LOAD_BANK_NORMAL, &m_banks[name]),
 			"Master bank did not get loaded!"
 		);
@@ -67,6 +72,8 @@ namespace Audio {
 	{
 		std::string path = "event:/" + name;
 
+		LOG_INFO << "Loading event from " << path;
+
 		auto itr = m_events.find(name);
 #ifdef IW_DEBUG
 		if (itr != m_events.end()) {
@@ -74,7 +81,7 @@ namespace Audio {
 			return;
 		}
 #endif
-		CHECK_ERROR(
+		CheckError(
 			m_system->getEvent(path.c_str(), &m_events[name]),
 			"Event " + name + " could not be found!"
 		);
@@ -85,6 +92,8 @@ namespace Audio {
 		bool realeaseAtEnd)
 	{
 		std::string path = "event:/" + name;
+		
+		LOG_INFO << "Creating audio instance of " << path;
 
 		auto itr = m_events.find(name);
 #ifdef IW_DEBUG
@@ -95,9 +104,9 @@ namespace Audio {
 #endif
 		FMOD::Studio::EventInstance*& instance = m_instances.emplace_back(nullptr);
 
-		CHECK_ERROR(
+		CheckError(
 			itr->second->createInstance(&instance),
-			"Event " + name + " could not be instanced!", -1
+			"Event " + name + " could not be instanced!"/*, -1*/
 		);
 
 		instance->start();
@@ -120,12 +129,16 @@ namespace Audio {
 			return;
 		}
 
+		LOG_INFO << "Set audio instance parameter " << name << " to " << value;
+
 		m_instances.at(instance)->setParameterByName(name.c_str(), value);
 	}
 
 	void AudioSpaceStudio::StartInstance(
 		int index) // make unsigned
 	{
+		LOG_INFO << "Starting audio instance " << index;
+
 		if (0 > index || index >= m_instances.size()) {
 			LOG_WARNING << "Cannot start instance " << index << "; index out of range!";
 			return;
@@ -137,6 +150,8 @@ namespace Audio {
 	void AudioSpaceStudio::StopInstance(
 		int index)
 	{
+		LOG_INFO << "Stopping audio instance " << index;
+
 #ifdef IW_DEBUG
 		if (0 > index || index >= m_instances.size()) {
 			LOG_WARNING << "Cannot stop instance " << index << "; index out of range!";
@@ -149,6 +164,8 @@ namespace Audio {
 	void AudioSpaceStudio::RemoveInstance( // removeing breaks other index
 		int index)
 	{
+		LOG_INFO << "Removing audio instance " << index;
+
 #ifdef IW_DEBUG
 		if (0 > index || index >= m_instances.size()) {
 			LOG_WARNING << "Cannot remove instance " << index << "; index out of range!";
@@ -178,11 +195,13 @@ namespace Audio {
 		FMOD_STUDIO_EVENTINSTANCE* event,
 		void* parameters)
 	{
+		LOG_INFO << "Freeing audio instance " << (void*)event;
+
 		FMOD::Studio::EventInstance* instance = ((FMOD::Studio::EventInstance*)event);
 
 		AudioSpaceStudio* me = nullptr;
 		instance->getUserData((void**)&me);
-
+		
 		if (me) {
 			me->RemoveInstance(instance);
 		}

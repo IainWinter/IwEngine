@@ -1,6 +1,6 @@
 /* ======================================================================================== */
 /* FMOD Core API - Common C/C++ header file.                                                */
-/* Copyright (c), Firelight Technologies Pty, Ltd. 2004-2020.                               */
+/* Copyright (c), Firelight Technologies Pty, Ltd. 2004-2021.                               */
 /*                                                                                          */
 /* This header is included by fmod.hpp (C++ interface) and fmod.h (C interface)             */
 /*                                                                                          */
@@ -52,13 +52,12 @@ typedef struct FMOD_POLYGON        FMOD_POLYGON;
 typedef struct FMOD_GEOMETRY       FMOD_GEOMETRY;
 typedef struct FMOD_SYNCPOINT      FMOD_SYNCPOINT;
 typedef struct FMOD_ASYNCREADINFO  FMOD_ASYNCREADINFO;
-typedef unsigned int               FMOD_PORT_TYPE;
 typedef unsigned long long         FMOD_PORT_INDEX;
 
 /*
     FMOD constants
 */
-#define FMOD_VERSION    0x00020101                     /* 0xaaaabbcc -> aaaa = product version, bb = major version, cc = minor version.*/
+#define FMOD_VERSION    0x00020203                     /* 0xaaaabbcc -> aaaa = product version, bb = major version, cc = minor version.*/
 
 typedef unsigned int FMOD_DEBUG_FLAGS;
 #define FMOD_DEBUG_LEVEL_NONE                       0x00000000
@@ -126,6 +125,9 @@ typedef unsigned int FMOD_SYSTEM_CALLBACK_TYPE;
 #define FMOD_SYSTEM_CALLBACK_PREUPDATE              0x00000400
 #define FMOD_SYSTEM_CALLBACK_POSTUPDATE             0x00000800
 #define FMOD_SYSTEM_CALLBACK_RECORDLISTCHANGED      0x00001000
+#define FMOD_SYSTEM_CALLBACK_BUFFEREDNOMIX          0x00002000
+#define FMOD_SYSTEM_CALLBACK_DEVICEREINITIALIZE     0x00004000
+#define FMOD_SYSTEM_CALLBACK_OUTPUTUNDERRUN         0x00008000
 #define FMOD_SYSTEM_CALLBACK_ALL                    0xFFFFFFFF
 
 typedef unsigned int FMOD_MODE;
@@ -203,13 +205,15 @@ typedef int FMOD_THREAD_PRIORITY;
 #define FMOD_THREAD_PRIORITY_STUDIO_UPDATE          FMOD_THREAD_PRIORITY_MEDIUM
 #define FMOD_THREAD_PRIORITY_STUDIO_LOAD_BANK       FMOD_THREAD_PRIORITY_MEDIUM
 #define FMOD_THREAD_PRIORITY_STUDIO_LOAD_SAMPLE     FMOD_THREAD_PRIORITY_MEDIUM
+#define FMOD_THREAD_PRIORITY_CONVOLUTION1           FMOD_THREAD_PRIORITY_VERY_HIGH
+#define FMOD_THREAD_PRIORITY_CONVOLUTION2           FMOD_THREAD_PRIORITY_VERY_HIGH
 
 typedef unsigned int FMOD_THREAD_STACK_SIZE;
 #define FMOD_THREAD_STACK_SIZE_DEFAULT              0
 #define FMOD_THREAD_STACK_SIZE_MIXER                (80  * 1024)
 #define FMOD_THREAD_STACK_SIZE_FEEDER               (16  * 1024)
 #define FMOD_THREAD_STACK_SIZE_STREAM               (96  * 1024)
-#define FMOD_THREAD_STACK_SIZE_FILE                 (48  * 1024)
+#define FMOD_THREAD_STACK_SIZE_FILE                 (64  * 1024)
 #define FMOD_THREAD_STACK_SIZE_NONBLOCKING          (112 * 1024)
 #define FMOD_THREAD_STACK_SIZE_RECORD               (16  * 1024)
 #define FMOD_THREAD_STACK_SIZE_GEOMETRY             (48  * 1024)
@@ -217,13 +221,15 @@ typedef unsigned int FMOD_THREAD_STACK_SIZE;
 #define FMOD_THREAD_STACK_SIZE_STUDIO_UPDATE        (96  * 1024)
 #define FMOD_THREAD_STACK_SIZE_STUDIO_LOAD_BANK     (96  * 1024)
 #define FMOD_THREAD_STACK_SIZE_STUDIO_LOAD_SAMPLE   (96  * 1024)
+#define FMOD_THREAD_STACK_SIZE_CONVOLUTION1         (16  * 1024)
+#define FMOD_THREAD_STACK_SIZE_CONVOLUTION2         (16  * 1024)
 
-typedef unsigned long long FMOD_THREAD_AFFINITY;
+typedef long long FMOD_THREAD_AFFINITY;
 /* Platform agnostic thread groupings */
-#define FMOD_THREAD_AFFINITY_GROUP_DEFAULT          0x8000000000000000
-#define FMOD_THREAD_AFFINITY_GROUP_A                0x8000000000000001
-#define FMOD_THREAD_AFFINITY_GROUP_B                0x8000000000000002
-#define FMOD_THREAD_AFFINITY_GROUP_C                0x8000000000000003
+#define FMOD_THREAD_AFFINITY_GROUP_DEFAULT          0x4000000000000000
+#define FMOD_THREAD_AFFINITY_GROUP_A                0x4000000000000001
+#define FMOD_THREAD_AFFINITY_GROUP_B                0x4000000000000002
+#define FMOD_THREAD_AFFINITY_GROUP_C                0x4000000000000003
 /* Thread defaults */
 #define FMOD_THREAD_AFFINITY_MIXER                  FMOD_THREAD_AFFINITY_GROUP_A
 #define FMOD_THREAD_AFFINITY_FEEDER                 FMOD_THREAD_AFFINITY_GROUP_C
@@ -236,6 +242,9 @@ typedef unsigned long long FMOD_THREAD_AFFINITY;
 #define FMOD_THREAD_AFFINITY_STUDIO_UPDATE          FMOD_THREAD_AFFINITY_GROUP_B
 #define FMOD_THREAD_AFFINITY_STUDIO_LOAD_BANK       FMOD_THREAD_AFFINITY_GROUP_C
 #define FMOD_THREAD_AFFINITY_STUDIO_LOAD_SAMPLE     FMOD_THREAD_AFFINITY_GROUP_C
+#define FMOD_THREAD_AFFINITY_CONVOLUTION1           FMOD_THREAD_AFFINITY_GROUP_C
+#define FMOD_THREAD_AFFINITY_CONVOLUTION2           FMOD_THREAD_AFFINITY_GROUP_C
+
 /* Core mask, valid up to 1 << 62 */
 #define FMOD_THREAD_AFFINITY_CORE_ALL               0
 #define FMOD_THREAD_AFFINITY_CORE_0                 (1 << 0)
@@ -300,6 +309,8 @@ typedef enum FMOD_THREAD_TYPE
     FMOD_THREAD_TYPE_STUDIO_UPDATE,
     FMOD_THREAD_TYPE_STUDIO_LOAD_BANK,
     FMOD_THREAD_TYPE_STUDIO_LOAD_SAMPLE,
+    FMOD_THREAD_TYPE_CONVOLUTION1,
+    FMOD_THREAD_TYPE_CONVOLUTION2,
 
     FMOD_THREAD_TYPE_MAX,
     FMOD_THREAD_TYPE_FORCEINT = 65536
@@ -667,6 +678,20 @@ typedef enum FMOD_TAGDATATYPE
     FMOD_TAGDATATYPE_FORCEINT = 65536
 } FMOD_TAGDATATYPE;
 
+typedef enum FMOD_PORT_TYPE
+{
+    FMOD_PORT_TYPE_MUSIC,
+    FMOD_PORT_TYPE_COPYRIGHT_MUSIC,
+    FMOD_PORT_TYPE_VOICE,
+    FMOD_PORT_TYPE_CONTROLLER,
+    FMOD_PORT_TYPE_PERSONAL,
+    FMOD_PORT_TYPE_VIBRATION,
+    FMOD_PORT_TYPE_AUX,
+
+    FMOD_PORT_TYPE_MAX,
+    FMOD_PORT_TYPE_FORCEINT = 65536
+} FMOD_PORT_TYPE;
+
 /*
     FMOD callbacks
 */
@@ -754,6 +779,8 @@ typedef struct FMOD_ADVANCEDSETTINGS
     int                 DSPBufferPoolSize;
     FMOD_DSP_RESAMPLER  resamplerMethod;
     unsigned int        randomSeed;
+    int                 maxConvolutionThreads;
+    int                 maxOpusCodecs;
 } FMOD_ADVANCEDSETTINGS;
 
 typedef struct FMOD_TAG
@@ -830,6 +857,17 @@ typedef struct FMOD_ERRORCALLBACK_INFO
     const char                      *functionname;
     const char                      *functionparams;
 } FMOD_ERRORCALLBACK_INFO;
+
+typedef struct FMOD_CPU_USAGE
+{
+    float           dsp;
+    float           stream;
+    float           geometry;
+    float           update;
+    float           convolution1;
+    float           convolution2;
+} FMOD_CPU_USAGE;
+
 
 /*
     FMOD optional headers for plugin development
