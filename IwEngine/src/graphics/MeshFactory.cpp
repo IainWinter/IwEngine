@@ -15,7 +15,7 @@ namespace helpers {
 		float calcH = 0.0f;
 		float calcV = 0.0f;
 
-		for (int i = 0; i < pointCount; i++) { // this code is duplicated in MakeCylinder, todo: consolidate
+		for (unsigned i = 0; i < pointCount; i++) { // this code is duplicated in MakeCylinder, todo: consolidate
 			points[i].x = sin(calcH);
 			points[i].z = cos(calcH);
 			points[i].y = cos(calcV);
@@ -435,16 +435,16 @@ namespace helpers {
 		// Index, connects top and bottom
 
 		unsigned i = 0;
-		for (int y = 0; y < resolution + 1; y++) {
-			for (int x = 0; x < resolution; x++) {
-				indices[i++] = (y + 0) * points + x + 0;
-				indices[i++] = (y + 1) * points + x + 0;
-				indices[i++] = (y + 1) * points + x + 1;
+		for (unsigned y = 0; y < resolution + 1; y++)
+		for (unsigned x = 0; x < resolution;     x++)
+		{
+			indices[i++] = (y + 0) * points + x + 0;
+			indices[i++] = (y + 1) * points + x + 0;
+			indices[i++] = (y + 1) * points + x + 1;
 
-				indices[i++] = (y + 0) * points + x + 1;
-				indices[i++] = (y + 0) * points + x + 0;
-				indices[i++] = (y + 1) * points + x + 1;
-			}
+			indices[i++] = (y + 0) * points + x + 1;
+			indices[i++] = (y + 0) * points + x + 0;
+			indices[i++] = (y + 1) * points + x + 1;
 		}
 
 		MeshData* data = new MeshData(description);
@@ -1068,9 +1068,9 @@ namespace helpers {
 			{3, 7}
 		};
 
-		size_t X = (size_t)(max.x - min.x) / dX;
-		size_t Y = (size_t)(max.y - min.y) / dY;
-		size_t Z = (size_t)(max.z - min.z) / dZ;
+		unsigned X = unsigned((max.x - min.x) / dX);
+		unsigned Y = unsigned((max.y - min.y) / dY);
+		unsigned Z = unsigned((max.z - min.z) / dZ);
 
 		float*** weights = detail::new3D<float>(X, Y, Z);
 
@@ -1153,8 +1153,8 @@ namespace helpers {
 		detail::delete3D(weights);
 
 		MeshData* data = new MeshData(description);
-		data->SetBufferData(bName::POSITION, verts.size(), verts.data());
-		data->SetIndexData(index.size(), index.data());
+		data->SetBufferData(bName::POSITION, (unsigned)verts.size(), verts.data());
+		data->SetIndexData((unsigned)index.size(), index.data());
 		
 		data->GenNormals();
 

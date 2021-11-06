@@ -39,7 +39,7 @@ namespace Audio {
 	void AudioSpaceRaw::Update() {
 		CHECK_ERROR(
 			m_system->update(),
-			"Audio space could failed to update!"
+			"Audio space could failed to update!",
 		);
 	}
 
@@ -55,7 +55,7 @@ namespace Audio {
 
 		CHECK_ERROR(
 			m_system->createSound(path.c_str(), FMOD_DEFAULT, 0, &m_sounds[name]),
-			"Sound did not get created!"
+			"Sound did not get created!",
 		);
 	}
 
@@ -73,12 +73,12 @@ namespace Audio {
 #endif
 		CHECK_ERROR(
 			m_system->playSound(itr->second, 0, false, &m_channel),
-			"Sound " + name + "did not get played!"
+			"Sound " + name + "did not get played!",
 		);
 
 		CHECK_ERROR(
 			m_channel->setVolume(GetVolume()),
-			"Volume could not be set!"
+			"Volume could not be set!",
 		);
 	}
 }

@@ -216,7 +216,7 @@ namespace Graphics {
 				data->SetBufferData(bName::BITANGENT, aimesh->mNumVertices, aimesh->mBitangents);
 			}
 
-			for (int c = 0; c < aimesh->GetNumColorChannels(); c++) {
+			for (unsigned c = 0; c < aimesh->GetNumColorChannels(); c++) {
 				bName channel = (bName)((int)bName::COLOR + c);
 				if (description.HasBuffer(channel)) {
 					data->SetBufferData(channel, aimesh->mNumVertices, aimesh->mColors[c]);
@@ -231,7 +231,7 @@ namespace Graphics {
 
 					float* buffer = new float[count];
 
-					for (int i = 0, j = 0; j < count; i++) {
+					for (unsigned i = 0, j = 0; j < count; i++) {
 						switch (uvComponents) {
 							case 1: {
 								buffer[j++] = aimesh->mTextureCoords[c][i].x;

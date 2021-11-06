@@ -490,7 +490,7 @@ namespace detail {
 			BufferData buffer = GetBuffer(m_description.GetBufferIndex(bName::POSITION));
 			glm::vec3* data     = buffer.Ptr<glm::vec3>();
 
-			for (int i = 0; i < buffer.Count; i++) {
+			for (unsigned i = 0; i < buffer.Count; i++) {
 				glm::vec4 v = glm::vec4(data[i], 1) * transform.WorldTransformation();
 				data[i] = v;
 			}
@@ -502,7 +502,7 @@ namespace detail {
 			BufferData buffer = GetBuffer(m_description.GetBufferIndex(bName::NORMAL));
 			glm::vec3*   data   = buffer.Ptr<glm::vec3>();
 
-			for (int i = 0; i < buffer.Count; i++) {
+			for (unsigned i = 0; i < buffer.Count; i++) {
 				glm::vec4 v = glm::vec4(data[i], 1) * transform.WorldTransformation();
 				data[i] = v;
 			}
@@ -514,7 +514,7 @@ namespace detail {
 			BufferData buffer = GetBuffer(m_description.GetBufferIndex(bName::TANGENT));
 			glm::vec3* data = buffer.Ptr<glm::vec3>();
 
-			for (int i = 0; i < buffer.Count; i++) {
+			for (unsigned i = 0; i < buffer.Count; i++) {
 				glm::vec4 v = glm::vec4(data[i], 1) * transform.WorldTransformation();
 				data[i] = v;
 			}
@@ -526,7 +526,7 @@ namespace detail {
 			BufferData buffer = GetBuffer(m_description.GetBufferIndex(bName::BITANGENT));
 			glm::vec3* data = buffer.Ptr<glm::vec3>();
 
-			for (int i = 0; i < buffer.Count; i++) {
+			for (unsigned i = 0; i < buffer.Count; i++) {
 				glm::vec4 v = glm::vec4(data[i], 1) * transform.WorldTransformation();
 				data[i] = v;
 			}
@@ -661,7 +661,7 @@ namespace detail {
 			return;
 		}
 
-		IVertexBuffer* buffer = device->CreateVertexBuffer(data.Ptr(), data.Count * layout.GetStride());
+		IVertexBuffer* buffer = device->CreateVertexBuffer(data.Ptr(), size_t(data.Count * layout.GetStride()));
 		device->AddBufferToVertexArray(m_vertexArray, buffer, layout, index);
 		data.Initialized = true;
 	}

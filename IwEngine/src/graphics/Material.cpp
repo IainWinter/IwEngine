@@ -270,11 +270,11 @@ namespace Graphics {
 			SetProperty(name, mp(data), ut, ts, stride, count); \
 		}                                                       \
 
-		MAT_SET(bool*,       UniformType::BOOL,   sizeof(int)) // ^ see above ^
-		MAT_SET(int*,        UniformType::INT,    sizeof(int))
-		MAT_SET(unsigned*,   UniformType::UINT,   sizeof(unsigned))
-		MAT_SET(float*,      UniformType::FLOAT,  sizeof(float))
-		MAT_SET(double*,     UniformType::DOUBLE, sizeof(double))
+		MAT_SET(bool*,       UniformType::BOOL,   sizeof(int),) // ^ see above ^
+		MAT_SET(int*,        UniformType::INT,    sizeof(int),)
+		MAT_SET(unsigned*,   UniformType::UINT,   sizeof(unsigned),)
+		MAT_SET(float*,      UniformType::FLOAT,  sizeof(float),)
+		MAT_SET(double*,     UniformType::DOUBLE, sizeof(double),)
 		MAT_SET(glm::vec2,   UniformType::FLOAT,  sizeof(float), &)
 		MAT_SET(glm::vec3,   UniformType::FLOAT,  sizeof(float), &)
 		MAT_SET(glm::vec4,   UniformType::FLOAT,  sizeof(float), &)
