@@ -2,10 +2,6 @@
 
 #include "AudioSpace.h"
 #include "fmod/fmod_studio.hpp"
-#include "iw/log/logger.h"
-#include <string>
-#include <vector>
-#include <unordered_map>
 
 #undef CreateEvent
 
@@ -15,34 +11,33 @@
 #	define CHECK_ERROR(stmt, n) stmt
 #endif
 
+#define H_BANK 1
+#define H_EVENT 2
+#define H_INSTANCE 3
+#define H_BUS 4
+#define H_VCA 5
+
+#define CHECK_HANDLE(h) if (!IsLoaded(h)) return log(ENGINE_FAILED_HANDLE_NOT_LOADED);
+
 namespace iw
 {
 namespace Audio
 {
-	FMOD_RESULT __dontlookatme__RemoveInstanceFromList(
-		FMOD_STUDIO_EVENT_CALLBACK_TYPE type,
-		FMOD_STUDIO_EVENTINSTANCE* event,
-		void* parameters);
-
 	class FMODAudioSpace
 		: public IAudioSpace
 	{
 	private:
 		FMOD::Studio::System* m_system;
 
-		std::unordered_map<std::string, int> m_loaded; // name, handle - hashed paths of loaded objects
-
-		std::unordered_map<int, FMOD::Studio::Bank*> m_banks;
+		std::unordered_map<int, FMOD::Studio::Bank*>             m_banks;
+		std::unordered_map<int, FMOD::Studio::Bus*>              m_buses;
+		std::unordered_map<int, FMOD::Studio::VCA*>              m_vcas;
 		std::unordered_map<int, FMOD::Studio::EventDescription*> m_events;
-		std::vector<FMOD::Studio::EventInstance*> m_instances;
+		std::unordered_map<int, FMOD::Studio::EventInstance*>    m_instances;
 
-		friend FMOD_RESULT iw::Audio::__dontlookatme__RemoveInstanceFromList(
-			FMOD_STUDIO_EVENT_CALLBACK_TYPE,
-			FMOD_STUDIO_EVENTINSTANCE*,
-			void*);
+		using InstanceUserData = std::pair<int, FMODAudioSpace*>;
 
 	public:
-
 		IWAUDIO_API
 		int Initialize() override
 		{
@@ -82,6 +77,7 @@ namespace Audio
 			return ENGINE_OK;
 		}
 
+		// Loads a bank and it's event descriptions
 		IWAUDIO_API
 		int Load(
 			const std::string& path) override
@@ -93,7 +89,7 @@ namespace Audio
 
 			if (IsLoaded(path))
 			{
-				return ENGINE_ALREADY_LOADED;
+				return log(ENGINE_ALREADY_LOADED);
 			}
 
 			FMOD::Studio::Bank* bank;
@@ -103,92 +99,350 @@ namespace Audio
 				ENGINE_FAILED_LOAD_BANK
 			);
 
-			PutBank(path, bank);
+			int handle = Put(path, bank);
 
-			// enumerate all events
+			// enumerate all items in bank
+			// not sure if this is needed?
 
+			using namespace FMOD::Studio;
+
+			LoadFromBank<EventDescription>(
+				bank,
+				[](Bank* bank, int& count) {
+					return bank->getEventCount(&count);
+				},
+				[](Bank* bank, EventDescription** items, int count) {
+					int _;
+					return bank->getEventList(items, count, &_);
+				}
+			),
+
+			LoadFromBank<Bus>(
+				bank,
+				[](Bank* bank, int& count) {
+					return bank->getBusCount(&count);
+				},
+				[](Bank* bank, Bus** items, int count) {
+					int _;
+					return bank->getBusList(items, count, &_);
+				}
+			),
+			
+			LoadFromBank<VCA>(
+				bank,
+				[](Bank* bank, int& count) {
+					return bank->getVCACount(&count);
+				},
+				[](Bank* bank, VCA** items, int count) {
+					int _;
+					return bank->getVCAList(items, count, &_);
+				}
+			);
+
+			return handle;
+		}
+
+		// if path has event:/ then play an event from a bank, else treat like a url and call playSound
+		// return the instance handle
+		IWAUDIO_API
+		int Play(
+			const std::string& path,
+			bool loop,
+			bool stream) override
+		{
+			if (path.find("event:/") == 0)
+			{
+				int eventHandle = GetHandle(path);
+
+				if (eventHandle == 0)
+				{
+					return log(ENGINE_FAILED_LOAD_INSTANCE);
+				}
+
+				FMOD::Studio::EventInstance* instance;
+				CHECK_ERROR(
+					m_events.at(eventHandle)->createInstance(&instance),
+					ENGINE_FAILED_MAKE_INSTANCE
+				);
+
+				FMOD_STUDIO_EVENT_CALLBACK callback = [](
+					FMOD_STUDIO_EVENT_CALLBACK_TYPE type,
+					FMOD_STUDIO_EVENTINSTANCE* event,
+					void* parameters)
+				{
+					auto [inst, me] = *(InstanceUserData*)parameters;
+					me->m_instances.erase(inst);
+					return FMOD_OK;
+				};
+
+				int instanceHandle = Put(path, instance);
+
+				CHECK_ERROR(
+					instance->setUserData(new InstanceUserData(instanceHandle, this)),
+					ENGINE_FAILED_MAKE_INSTANCE
+				);
+
+				CHECK_ERROR(
+					instance->setCallback(
+						callback,
+						FMOD_STUDIO_EVENT_CALLBACK_STOPPED
+					),
+					ENGINE_FAILED_MAKE_INSTANCE
+				);
+
+				Start(instanceHandle);
+
+				return instanceHandle;
+			}
+
+
+			return ENGINE_OK;
+		}
+
+		// get and set parameters by string
+		// fmod has volume and pitch as special functions
+		// but for simplicity, I'll just pipe everything through these strings
+
+		IWAUDIO_API
+		int Set(
+			int handle,
+			const std::string& parameter,
+			float value) override
+		{
+			CHECK_HANDLE(handle);
+
+			if (GetType(handle) == H_INSTANCE)
+			{
+				CHECK_ERROR(
+					m_instances[handle]->setParameterByName(parameter.c_str(), value),
+					ENGINE_FAILED_SET_PARAM
+				);
+			}
+
+			return ENGINE_OK;
+		}
+
+		IWAUDIO_API
+		int Get(
+			int handle,
+			const std::string& parameter,
+			float& value) override
+		{
+			CHECK_HANDLE(handle);
+
+			if (GetType(handle) == H_INSTANCE)
+			{
+				CHECK_ERROR(
+					m_instances[handle]->getParameterByName(parameter.c_str(), &value),
+					ENGINE_FAILED_GET_PARAM
+				);
+			}
+
+			return ENGINE_OK;
+		}
+
+		IWAUDIO_API
+		int Start(
+			int handle) override
+		{
+			CHECK_HANDLE(handle);
+
+			if (GetType(handle) == H_INSTANCE)
+			{
+				m_instances[handle]->start();
+				return ENGINE_OK;
+			}
+
+			return log(ENGINE_FAILED_INVALID_HANDLE); // dif flow than other with !!bottom should return ENGINE_OK!!
+		}
+
+		IWAUDIO_API
+		int Stop(
+			int handle) override
+		{
+			CHECK_HANDLE(handle);
+
+			if (GetType(handle) == H_INSTANCE)
+			{
+				m_instances[handle]->stop(FMOD_STUDIO_STOP_ALLOWFADEOUT);
+				return ENGINE_OK;
+			}
+
+			return log(ENGINE_FAILED_INVALID_HANDLE);
+		}
+
+		IWAUDIO_API
+		int Free(
+			int handle) override
+		{
+			CHECK_HANDLE(handle);
+
+			if (GetType (handle) == H_INSTANCE)
+			{
+				m_instances[handle]->release();
+				return ENGINE_OK;
+			}
+
+			return log(ENGINE_FAILED_INVALID_HANDLE);
+		}
+
+		IWAUDIO_API
+		int SetVolume(
+			int handle,
+			float volume) override
+		{
+			CHECK_HANDLE(handle);
+
+			int type = GetType(handle);
+
+			switch (type)
+			{
+				case H_INSTANCE: m_instances[handle]->setVolume(volume); break;
+				case H_BUS:      m_buses    [handle]->setVolume(volume); break;
+				case H_VCA:      m_vcas     [handle]->setVolume(volume); break;
+				default:
+				{
+					return log(ENGINE_FAILED_INVALID_HANDLE);
+				}
+			}
+
+			return ENGINE_OK;
+		}
+
+		IWAUDIO_API
+		int GetVolume(
+			int handle,
+			float& volume) override
+		{
+			CHECK_HANDLE(handle);
+
+			int type = GetType(handle);
+
+			switch (type)
+			{
+				case H_INSTANCE: m_instances[handle]->getVolume(&volume); break;
+				case H_BUS:      m_buses    [handle]->getVolume(&volume); break;
+				case H_VCA:      m_vcas     [handle]->getVolume(&volume); break;
+				default:
+				{
+					return log(ENGINE_FAILED_INVALID_HANDLE);
+				}
+			}
+
+			return ENGINE_OK;
+		}
+
+		IWAUDIO_API
+		bool IsLoaded(
+			int handle) const override
+		{
+			switch (GetType(handle))
+			{
+				case H_BANK:     return m_banks    .find(handle) != m_banks    .end();
+				case H_EVENT:    return m_events   .find(handle) != m_events   .end();
+				case H_INSTANCE: return m_instances.find(handle) != m_instances.end();
+				case H_BUS:      return m_buses    .find(handle) != m_buses    .end();
+				case H_VCA:      return m_vcas     .find(handle) != m_vcas     .end();
+			}
+
+			return 0;
+		}
+
+	private:
+		int Put(
+			const std::string& path,
+			FMOD::Studio::Bank* bank)
+		{
+			int handle = MakeHandle(H_BANK);
+			PutLoaded(path, handle);
+			m_banks[handle] = bank;
+			return handle;
+		}
+
+		int Put(
+			const std::string& path,
+			FMOD::Studio::EventDescription* event)
+		{
+			int handle = MakeHandle(H_EVENT);
+			PutLoaded(path, handle);
+			m_events[handle] = event;
+			return handle;
+		}
+
+		int Put(
+			const std::string& path,
+			FMOD::Studio::EventInstance* instance)
+		{
+			int handle = MakeHandle(H_INSTANCE);
+			PutLoaded(path, handle);
+			m_instances[handle] = instance;
+			return handle;
+		}
+
+		int Put(
+			const std::string& path,
+			FMOD::Studio::Bus* bus)
+		{
+			int handle = MakeHandle(H_BUS);
+			PutLoaded(path, handle);
+			m_buses[handle] = bus;
+			return handle;
+		}
+
+		int Put(
+			const std::string& path,
+			FMOD::Studio::VCA* vca)
+		{
+			int handle = MakeHandle(H_VCA);
+			PutLoaded(path, handle);
+			m_vcas[handle] = vca;
+			return handle;
+		}
+
+		template<
+			typename _t,
+			typename _f1,
+			typename _f2>
+		int LoadFromBank(
+			FMOD::Studio::Bank* bank,
+			_f1&& getCount,
+			_f2&& getItems)
+		{
 			int count;
 			CHECK_ERROR(
-				bank->getEventCount(&count),
+				getCount(bank, count),
 				ENGINE_FAILED_LOAD_BANK
 			);
 
 			if (count > 0)
 			{
-				FMOD::Studio::EventDescription** events = new FMOD::Studio::EventDescription*[count];
-				int _;
+				_t** items = new _t *[count];
 
 				CHECK_ERROR(
-					bank->getEventList(events, count, &_),
+					getItems(bank, items, count),
 					ENGINE_FAILED_LOAD_BANK
 				);
 
 				for (int i = 0; i < count; i++)
 				{
-					std::string eventName(1024, '\0');
+					std::string name(1024, '\0');
+					int size;
 
 					CHECK_ERROR(
-						events[0]->getPath(eventName.data(), 1024, &_),
+						items[0]->getPath(name.data(), 1024, &size),
 						ENGINE_FAILED_LOAD_BANK
 					);
 
-					PutEvent(eventName, events[i]);
+					name.resize(size - 1);
+
+					Put(name, items[i]);
 				}
 
-				delete[] events;
+				delete[] items;
 			}
+
+			return ENGINE_OK;
 		}
-
-		IWAUDIO_API int Play(const std::string& path, bool loop, bool stream)  override { return ENGINE_OK; }
-		IWAUDIO_API int Set(int handle, const std::string& parameter, float  value)  override { return ENGINE_OK; }
-		IWAUDIO_API int Get(int handle, const std::string& parameter, float& value) override { return ENGINE_OK; }
-
-		IWAUDIO_API int Start(int handle)  override { return ENGINE_OK; }
-		IWAUDIO_API int Stop (int handle)  override { return ENGINE_OK; }
-		IWAUDIO_API int Free (int handle)  override { return ENGINE_OK; }
-
-		int SetVolume(float  volume)  override { return ENGINE_OK; }
-		int GetVolume(float& volume)  override { return ENGINE_OK; }
-
-		bool IsLoaded(
-			const std::string& path)
-		{
-			return m_loaded.find(path) != m_loaded.end();
-		}
-
-	private:
-		int MakeHandle(
-			int type)
-		{
-			return SetHigh(m_loaded.size() + 1, type);
-		}
-
-		void PutLoaded(
-			const std::string& path,
-			int handle)
-		{
-			m_loaded.emplace(path, handle);
-		}
-
-		void PutBank(
-			const std::string& path,
-			FMOD::Studio::Bank* bank)
-		{
-			int handle = MakeHandle(1);
-			PutLoaded(path, handle);
-			m_banks[handle] = bank;
-		}
-
-		void PutEvent(
-			const std::string& path,
-			FMOD::Studio::EventDescription* event)
-		{
-			int handle = MakeHandle(2);
-			PutLoaded(path, handle);
-			m_events[handle] = event;
-		}
-
-		void PutInstance(const std::string& path) { PutLoaded(path, MakeHandle(3)); }
 
 		bool CheckError(
 			int result,
@@ -281,21 +535,10 @@ namespace Audio
 				FMODtranslation.emplace(FMOD_ERR_TOOMANYSAMPLES,            "FMOD_ERR_TOOMANYSAMPLES");
 			}
 
-			static std::unordered_map<int, std::string> translation;
-			if (translation.size() == 0)
+			if (result != FMOD_OK)
 			{
-				translation.emplace(ENGINE_OK,                "Engine is ok");
-				translation.emplace(ENGINE_FAILED_CREATE,     "Engine failed to create fmod system");
-				translation.emplace(ENGINE_FAILED_INIT,       "Engine failed to init fmod system");
-				translation.emplace(ENGINE_FAILED_UPDATE,     "Engine failed to update fmod system");
-				translation.emplace(ENGINE_FAILED_LOAD_BANK,  "Engine failed to load a bank");
-				translation.emplace(ENGINE_ALREADY_LOADED,    "Engine tried to load a bank that was already loaded");
-			}
-
-			if (result != FMOD_OK) {
-				LOG_ERROR << "Fmod error code: " << FMODtranslation.at(result) << "(" << result << "). "
-						<< "\n\tEngine message: " << translation.at(code);
-		
+				LOG_ERROR << "Fmod error code: " << FMODtranslation.at(result) << "(" << result << ").";
+				log(code);
 				return true;
 			}
 

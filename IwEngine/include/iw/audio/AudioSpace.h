@@ -1,6 +1,9 @@
 #pragma once
 
 #include "IwAudio.h"
+#include "iw/log/logger.h"
+#include <unordered_map>
+#include <vector>
 #include <string>
 
 #undef PlaySound
@@ -31,13 +34,21 @@ namespace Audio {
 		ENGINE_FAILED_INIT      = -2,
 		ENGINE_FAILED_UPDATE    = -3,
 		ENGINE_FAILED_LOAD_BANK = -4,
-		ENGINE_ALREADY_LOADED   = -5
+		ENGINE_ALREADY_LOADED   = -5,
+
+		ENGINE_FAILED_MAKE_INSTANCE = -6,
+		ENGINE_FAILED_LOAD_INSTANCE = -7,
+		ENGINE_FAILED_INVALID_HANDLE = -8,
+		ENGINE_FAILED_HANDLE_NOT_LOADED = -9,
+		ENGINE_FAILED_SET_PARAM = -10,
+		ENGINE_FAILED_GET_PARAM = -11
 
 	};
 
 	class IAudioSpace {
 	public:
 		std::string RootDirectory;
+		std::unordered_map<std::string, int> Loaded; // name, handle - hashed paths of loaded objects
 
 		IWAUDIO_API
 		static IAudioSpace* Create();
@@ -58,18 +69,47 @@ namespace Audio {
 		virtual int Stop (int handle) = 0;
 		virtual int Free (int handle) = 0;
 
-		virtual int SetVolume(float  volume) = 0;
-		virtual int GetVolume(float& volume) = 0;
+		virtual int SetVolume(int handle, float  volume) = 0;
+		virtual int GetVolume(int handle, float& volume) = 0;
+
+		virtual bool IsLoaded(int handle) const = 0;
+
+		bool IsLoaded (const std::string& path) const;
+		int  GetHandle(const std::string& path) const;
 
 	protected:
-		int SetHigh(int low, int high) const
+		virtual bool CheckError(
+			int result,
+			AudioErrorCode code) = 0;
+
+		int log(
+			AudioErrorCode code) const;
+
+		// helper functions
+
+		int SetType(int high, int low) const
 		{
 			return low + (high << sizeof(int) * 8 / 2);
 		}
 
-		virtual bool CheckError(
-			int result,
-			AudioErrorCode code) = 0;
+		int GetType(int handle) const
+		{
+			return handle >> (sizeof(int) * 8 / 2);
+		}
+
+		int MakeHandle(
+			int type) const
+		{
+			return SetType(type, (int)Loaded.size() + 1);
+		}
+
+		void PutLoaded(
+			const std::string& path,
+			int handle)
+		{
+			Loaded.emplace(path, handle);
+			LOG_INFO << "Audio Engine loaded: " << path;
+		}
 	};
 }
 

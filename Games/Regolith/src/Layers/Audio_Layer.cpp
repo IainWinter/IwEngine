@@ -4,6 +4,7 @@ int Audio_Layer::Initialize()
 {
 	Audio->Load("Regolith/Master.strings.bank");
 	Audio->Load("Regolith/Master.bank");
+	Audio->Load("Regolith/Music.bank");
 	Audio->Play("event:/music_bg", false, true);
 
 	return 0;
@@ -52,7 +53,7 @@ void Audio_Layer::OnPush()
 
 void Audio_Layer::OnPop()
 {
-	Console->RemoveHandler(m_console);
+	//Console->RemoveHandler(m_console);
 }
 
 bool Audio_Layer::On(iw::ActionEvent& e)
