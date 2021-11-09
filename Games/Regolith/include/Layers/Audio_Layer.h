@@ -18,6 +18,8 @@ public:
 		, m_song    (-1)
 	{}
 
+	int Initialize() override;
+
 	void OnPush() override;
 	void OnPop()  override;
 

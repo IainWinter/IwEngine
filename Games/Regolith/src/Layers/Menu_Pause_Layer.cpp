@@ -3,24 +3,30 @@
 int Menu_Pause_Layer::Initialize()
 {
 	iw::Mesh title = A_font_cambria->GenerateMesh("Pause Menu", { 48 });
+	iw::Mesh label_resume = A_font_cambria->GenerateMesh("Resume", { 360 });
 
 	m_pause_menu  = m_screen->CreateElement(A_mesh_menu_pause);
 	m_pause_title = m_screen->CreateElement(title);
 
-	iw::Mesh buttonbg = A_mesh_menu_background.MakeInstance();
-	buttonbg.Material->Set("color", iw::Color(.7, .2, .2));
+	/*m_button_resume = m_screen->CreateElement<UI_Button>(
+		m(.7, .2, .2), label_resume);
 
-	AddButton(buttonbg, A_font_cambria->GenerateMesh("Resume", { 360 }));
-	m_buttons.at(0)->onClick = [&]()
+	m_button_resume->onClick = [&]()
 	{
 		Console->QueueCommand("escape");
+	};*/
+
+	m_slider_volume = m_screen->CreateElement<UI_Slider>(
+		m(.5, .5, .5), ma(.1, .1, 1, .75), "Volume", A_font_cambria);
+
+	m_slider_volume->onChangeValue = [this](
+		float value)
+	{
+		Audio->SetVolume(value);
 	};
 
-	//AddButton(buttonbg, A_font_cambria->GenerateMesh("Gameover", 16));
-	//m_buttons.at(1)->onClick = [&]()
-	//{
-	//	Console->QueueCommand("game-over");
-	//};
+	//m_items.push_back(m_button_resume);
+	m_items.push_back(m_slider_volume);
 
 	return 0;
 }
@@ -42,41 +48,23 @@ void Menu_Pause_Layer::PostUpdate()
 	m_pause_title->x = m_pause_menu->x - m_pause_menu->width  + 15;
 	m_pause_title->y = m_pause_menu->y + m_pause_menu->height - 5;
 
-	// use ButtonUpdate
+	m_slider_volume->width  = 300;
+	m_slider_volume->height = 40;
+	m_slider_volume->zIndex = 1;
+
+	//m_button_resume->width  = 150;
+	//m_button_resume->height = 40;
 
 	int i = 0;
-	for (UI_Button* button : m_buttons)
+	for (UI* item : m_items)
 	{
-		button->zIndex = 1;
+		item->zIndex = 1;
 
-		button->width = 150;
-		button->height = 40;
-		button->x = m_pause_menu->x - m_pause_menu->width  +  button->width  + 15;
-		button->y = m_pause_menu->y + m_pause_menu->height - (button->height + 15) * i * 2 - 200;
-
-		float buttonOffsetTarget = 0.f;
-		if (button->IsPointOver(m_screen->LocalMouse()))
-		{
-			buttonOffsetTarget = 30;
-
-			if (m_execute)
-			{
-				buttonOffsetTarget = 0;
-			}
-
-			else 
-			if (   m_last_execute
-				&& button->onClick)
-			{
-				button->onClick();
-			}
-		}
-
-		button->offset = iw::lerp(button->offset, buttonOffsetTarget, iw::DeltaTime() * 20);
-		button->x += floor(button->offset);
+		item->x = m_pause_menu->x - m_pause_menu->width  +  item->width  + 15;
+		item->y = m_pause_menu->y + m_pause_menu->height - (item->height + 15) * i * 2 - 200;
 		
 		i += 1;
 	}
 
-	m_last_execute = m_execute;
+	ButtonUpdate();
 }

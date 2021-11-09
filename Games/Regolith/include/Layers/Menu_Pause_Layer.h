@@ -7,24 +7,17 @@ struct Menu_Pause_Layer : Menu_Layer
 	UI* m_pause_menu;
 	UI* m_pause_title;
 
-	std::vector<UI_Button*> m_buttons;
+	UI_Button* m_button_resume;
+	UI_Slider* m_slider_volume;
 
-	float m_buttonOffset;
-	//bool m_keyTyped;
-	//char m_keyTypedChar;
-
-	void AddButton(const iw::Mesh& bg, const iw::Mesh& label)
-	{
-		m_buttons.push_back(m_screen->CreateElement<UI_Button>(bg, label));
-	}
+	std::vector<UI*> m_items;
 
 	Menu_Pause_Layer()
-		: Menu_Layer    ("Menu pause")
+		: Menu_Layer      ("Menu pause")
 
-		, m_pause_menu   (nullptr)
-		, m_pause_title  (nullptr)
-
-		, m_buttonOffset (0.f)
+		, m_pause_menu    (nullptr)
+		, m_pause_title   (nullptr)
+		, m_slider_volume (nullptr)
 	{}
 
 	int Initialize() override;

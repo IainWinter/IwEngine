@@ -198,6 +198,8 @@ namespace Input {
 
 		m_active = context;
 
+		m_active->State.Reset(); // reset inputs for held buttons on context change
+
 		return m_active;
 	}
 

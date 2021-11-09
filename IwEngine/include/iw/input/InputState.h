@@ -8,41 +8,47 @@ namespace Input {
 	class InputState {
 	private:
 		float states[INPUT_COUNT];
-		bool  locks[3];
+		bool  locks[3]; // caps, numb, scroll
 
 	public:
-		InputState() {
-			memset(states, (int)0.0f, sizeof(states));
-			memset(locks,  (int)false, sizeof(locks));
+		InputState()
+		{
+			Reset();
 		}
 
-		inline const float* States() {
+		const float* States() {
 			return states;
 		}
 
-		inline float& operator[](
+		float& operator[](
 			int input)
 		{
 			return GetState(input);
 		}
 
-		inline float& GetState(
+		float& GetState(
 			int input)
 		{
 			return states[input];
 		}
 
-		inline bool& GetLock(
+		bool& GetLock(
 			InputName lock)
 		{
 			return locks[lock - CAPS_LOCK];
 		}
 
-		inline void ToggleLock(
+		void ToggleLock(
 			InputName lock)
 		{
 			bool& l = GetLock(lock);
 			l = !l;
+		}
+
+		void Reset()
+		{
+			for (float& state : states) state = 0.f;
+			for (bool&  state : locks)  state = false;
 		}
 	};
 }

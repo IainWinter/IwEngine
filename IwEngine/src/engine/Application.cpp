@@ -24,10 +24,12 @@
 namespace iw {
 namespace Engine {
 	Application::Application()
-		: m_running(false)
-		, m_isInitialized(false)
-		, Window(IWindow::Create())
+		: m_running       (false)
+		, m_isInitialized (false)
 	{
+
+		Window = IWindow::Create();
+
 		m_device = ref<IDevice>(IDevice::Create());
 		Bus      = REF<eventbus>();
 		Space    = REF<iw::Space>();
@@ -36,7 +38,7 @@ namespace Engine {
 		Input    = REF<InputManager>(Bus);
 		Console  = REF<iw::Console>(make_getback(&Application::HandleCommand, this));
 		Physics  = REF<DynamicsSpace>();
-		Audio    = REF<AudioSpaceStudio>();
+		Audio    = ref<IAudioSpace>(IAudioSpace::Create());
 		Task     = REF<thread_pool>(std::thread::hardware_concurrency());
 	}
 
@@ -65,7 +67,7 @@ namespace Engine {
 		}
 
 		Asset->SetRootPath(options.AssetRootPath);
-		Audio->SetRootDir(Asset->RootPath() + "audio/");
+		Audio->RootDirectory = Asset->RootPath() + "audio/";
 
 		//PushLayerFront<DebugLayer>();
 

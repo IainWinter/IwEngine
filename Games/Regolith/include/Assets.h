@@ -10,7 +10,6 @@
 #include "iw/graphics/Material.h"
 #include "iw/graphics/Mesh.h"
 #include "iw/graphics/Font.h"
-#include "iw/audio/AudioSpaceStudio.h"
 
 #define rTex iw::ref<iw::Texture>
 #define rMat iw::ref<iw::Material>
@@ -66,7 +65,6 @@ inline iw::Mesh A_mesh_extern_ui_sand_tank_layer;
 
 int LoadAssets(
 	iw::AssetManager* Asset,
-	iw::AudioSpaceStudio* Audio,
 	iw::Renderer* Renderer);
 
 //inline rTex A_texture_asteroid;

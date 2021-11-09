@@ -1,44 +1,53 @@
 #include "Layers/Audio_Layer.h"
 
+int Audio_Layer::Initialize()
+{
+	Audio->Load("Regolith/Master.strings.bank");
+	Audio->Load("Regolith/Master.bank");
+	Audio->Play("event:/music_bg", false, true);
+
+	return 0;
+}
+
 void Audio_Layer::OnPush()
 {
-	m_console = Console->AddHandler(
-		[this](const iw::Command& command)
-		{
-			if (command.Verb == "game-start")
-			{
-				// play game music
+	//m_console = Console->AddHandler(
+	//	[this](const iw::Command& command)
+	//	{
+	//		if (command.Verb == "game-start")
+	//		{
+	//			// play game music
 
-				if (m_song == -1)
-				{
-					m_song = Audio->CreateInstance("music_bg", false);
-				}
+	//			if (m_song == -1)
+	//			{
+	//				m_song = Audio->CreateInstance("music_bg", false);
+	//			}
 
-				else
-				{
-					Audio->StartInstance(m_song);
-				}
-			}
+	//			else
+	//			{
+	//				Audio->StartInstance(m_song);
+	//			}
+	//		}
 
-			else if (command.Verb == "game-over")
-			{
-				Audio->StopInstance(m_song);
-				// play game over music
-			}
+	//		else if (command.Verb == "game-over")
+	//		{
+	//			Audio->StopInstance(m_song);
+	//			// play game over music
+	//		}
 
-			else if (command.Verb == "game-reform")
-			{ 
-				// play reforming music
-			}
+	//		else if (command.Verb == "game-reform")
+	//		{ 
+	//			// play reforming music
+	//		}
 
-			else if (command.Verb == "quit")
-			{
-				// play quit game music
-			}
+	//		else if (command.Verb == "quit")
+	//		{
+	//			// play quit game music
+	//		}
 
-			return false;
-		}
-	);
+	//		return false;
+	//	}
+	//);
 }
 
 void Audio_Layer::OnPop()

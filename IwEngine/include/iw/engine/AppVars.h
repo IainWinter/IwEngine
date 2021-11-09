@@ -3,7 +3,7 @@
 #include "iw/events/eventbus.h"
 #include "iw/util/thread/thread_pool.h"
 
-#include "iw/audio/AudioSpaceStudio.h"
+#include "iw/audio/AudioSpace.h"
 #include "iw/asset/AssetManager.h"
 #include "iw/engine/Console.h"
 #include "iw/input/InputManager.h"
@@ -11,15 +11,15 @@
 #include "iw/graphics/QueuedRenderer.h"
 #include "iw/entity/Entity.h"
 
-#define APP_VARS ref<eventbus>      Bus;      \
-			  ref<thread_pool>      Task;     \
-			  ref<AudioSpaceStudio> Audio;    \
-			  ref<AssetManager>     Asset;    \
-			  ref<Console>          Console;  \
-			  ref<InputManager>     Input;    \
-			  ref<DynamicsSpace>    Physics;  \
-			  ref<QueuedRenderer>   Renderer; \
-			  ref<Space>            Space;    \
+#define APP_VARS ref<eventbus>       Bus;      \
+			  ref<thread_pool>    Task;     \
+			  ref<IAudioSpace>    Audio;    \
+			  ref<AssetManager>   Asset;    \
+			  ref<Console>        Console;  \
+			  ref<InputManager>   Input;    \
+			  ref<DynamicsSpace>  Physics;  \
+			  ref<QueuedRenderer> Renderer; \
+			  ref<Space>          Space;    \
 
 #define SET_APP_VARS void SetAppVars(         \
 					AppVars& vars)			  \

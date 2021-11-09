@@ -36,7 +36,7 @@ struct StaticLayer : iw::Layer
 		PushSystem<iw::PhysicsSystem>();
 		PushSystem<iw::EntityCleanupSystem>();
 
-		if (int e = LoadAssets(Asset.get(), Audio.get(), Renderer->Now.get()))
+		if (int e = LoadAssets(Asset.get(), Renderer->Now.get()))
 		{
 			return e;
 		}

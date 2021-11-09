@@ -31,7 +31,8 @@ struct UI_Layer : iw::Layer
 		}
 
 		else {
-			m_screen = Space->CreateEntity<UI_Screen>().Set<UI_Screen>();
+			m_screen = Space->CreateEntity<UI_Screen>()
+				.Set<UI_Screen>(A_mesh_menu_background);
 		}
 
 		Layer::OnPush();
@@ -54,7 +55,7 @@ struct Menu_Layer : UI_Layer
 	Menu_Layer(
 		const std::string& name
 	)
-		: UI_Layer      (name)
+		: UI_Layer       (name)
 					  
 		, m_handle       (nullptr)
 		, m_execute      (false)
@@ -65,38 +66,41 @@ struct Menu_Layer : UI_Layer
 	{
 		// find all buttons
 
-		std::vector<UI_Button*> buttons;
+		std::vector<UI_Base*> clickables;
 
 		m_screen->WalkTree([&](UI_Base* ui, UI_Base* parent)
 		{
-			UI_Button* button = dynamic_cast<UI_Button*>(ui);
-			if (button) buttons.push_back(button);
+			if (dynamic_cast<UI_Clickable*>(ui))
+			{
+				clickables.push_back(ui);
+			}
 		});
 
-		for (UI_Button* button : buttons)
+		for (UI_Base* ui : clickables)
 		{
-			float buttonOffsetTarget = 0;
-			if (button->IsPointOver(m_screen->LocalMouse()))
-			{
-				buttonOffsetTarget = 10;
+			UI_Clickable* clickable = dynamic_cast<UI_Clickable*>(ui);
 
-				if (m_execute)
+			float buttonOffsetTarget = 0;
+			if (ui->IsPointOver(m_screen->LocalMouse()))
+			{
+				if (clickable->whileMouseHover)
 				{
-					buttonOffsetTarget = 0;
+					clickable->whileMouseHover();
+				}
+
+				if (    m_execute
+					&& clickable->whileMouseDown)
+				{
+					clickable->whileMouseDown();
 				}
 
 				else
-				if (   m_last_execute
-					&& button->onClick)
+				if (    m_last_execute
+					&& clickable->onClick)
 				{
-					button->onClick();
+					clickable->onClick();
 				}
 			}
-			button->offset = iw::lerp(button->offset, buttonOffsetTarget, iw::DeltaTime() * 20);
-
-			// should have enum for effect
-
-			button->y += floor(button->offset);
 		}
 
 		m_last_execute = m_execute;

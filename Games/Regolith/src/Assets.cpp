@@ -4,13 +4,8 @@ using namespace iw;
 
 int LoadAssets(
 	iw::AssetManager* Asset,
-	iw::AudioSpaceStudio* Audio,
 	iw::Renderer* Renderer)
 {
-	Audio->LoadMasterBank("Regolith/Master.bank");
-	Audio->LoadMasterBank("Regolith/Master.strings.bank");
-	Audio->CreateEvent("music_bg");
-
 	std::vector<ref<Texture>> textures;
 
 #define LOADTEX(x) textures.emplace_back(Asset->Load<Texture>(x))

@@ -13,7 +13,7 @@ int PlayerSystem::Initialize()
 
 		     if (command.Verb == "right")    player->i_moveX += active;
 		else if (command.Verb == "up")       player->i_moveY += active;
-		else if (command.Verb == "fire")     player->i_fire1  = command.Active;
+		else if (command.Verb == "fire")     player->i_fire1 = command.Active;
 		else if (command.Verb == "alt-fire") player->i_fire2 = command.Active;
 
 		return false;
