@@ -33,6 +33,7 @@ int Game_Layer::Initialize()
 	PushSystem(item_s);
 	PushSystem(explosion_s);
 	PushSystem(keepInWorld_s);
+	PushSystem<TileSplitSystem>(sand);
 
 	//Bus->push<StateChange_Event>(RUN_STATE);
 
@@ -80,7 +81,7 @@ void Game_Layer::Update()
 
 		SpawnItem_Config item;
 		item.Amount = 1;
-		item.Item = ItemType::WEAPON_BOLTZ;
+		item.Item = ItemType::LASER_CHARGE;
 		item.X = 100;
 		item.Y = 100;
 		item.AngularSpeed = 30;

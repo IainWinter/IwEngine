@@ -26,13 +26,27 @@ void EnemySystem::FixedUpdate()
 			Enemy*         ship,
 			Fighter_Enemy* fighter)
 		{
-			if (   fighter->Weapon->CanFire()
-				&& ship->Target.Alive())
+			if (!ship->Target || !ship->Target.Alive())
 			{
-				glm::vec3 pos = ship->Target.Find<iw::Transform>()->Position;
-				ShotInfo shot = fighter->Weapon->GetShot(Space->GetEntity(handle), pos.x, pos.y);
-				Bus->push<SpawnProjectile_Event>(shot);
+				return;
 			}
+			
+			if (   abs(transform->Position.x - 200) > 200
+				|| abs(transform->Position.y - 200) > 200)
+			{
+				return;
+			}
+
+			if (!fighter->Weapon->CanFire())
+			{
+				return;
+			}
+
+			glm::vec3 pos = ship->Target.Find<iw::Transform>()->Position;
+			ShotInfo shot = fighter->Weapon->GetShot(Space->GetEntity(handle), pos.x, pos.y);
+			Bus->push<SpawnProjectile_Event>(shot);
+
+			Audio->Play("event:/weapons/fire_laser");
 		}
 	);
 
@@ -46,6 +60,11 @@ void EnemySystem::FixedUpdate()
 			Bomb_Enemy* bomb)
 		{
 			// maybe put some timer or something
+
+			if (!ship->Target || !ship->Target.Alive())
+			{
+				return;
+			}
 
 			glm::vec3 pos = ship->Target.Find<iw::Transform>()->Position;
 			
@@ -87,6 +106,11 @@ void EnemySystem::FixedUpdate()
 			Enemy*         ship,
 			Station_Enemy* station)
 		{
+			if (!ship->Target || !ship->Target.Alive())
+			{
+				return;
+			}
+
 			station->timer.TickFixed();
 			if (station->timer.Can("spawn"))
 			{
@@ -120,6 +144,11 @@ void EnemySystem::FixedUpdate()
 			Enemy*         ship,
 			Base_Enemy*    base)
 		{
+			if (!ship->Target.Alive())
+			{
+				return;
+			}
+
 			Throwable* closestThrowable = nullptr;
 			float closestDist = FLT_MAX;
 			Space->Query<iw::Transform, Throwable>().Each([&](
@@ -178,14 +207,14 @@ bool EnemySystem::On(iw::ActionEvent& e)
 void EnemySystem::SpawnEnemy(SpawnEnemy_Config& config)
 {
 	iw::Archetype archetype = Space->CreateArchetype<Flocker, CorePixels, Enemy>();
-	iw::ref<iw::Texture> texture;
+	iw::Entity entity;
 
 	switch (config.EnemyType)
 	{
 		case FIGHTER: 
 		{
 			Space->AddComponent<Fighter_Enemy>(archetype);
-			texture = A_texture_enemy_fighter;
+			entity = sand->MakeTile<iw::Circle>(A_texture_enemy_fighter, true, &archetype);
 			break;
 		}
 		case BOMB: 
@@ -193,24 +222,25 @@ void EnemySystem::SpawnEnemy(SpawnEnemy_Config& config)
 			Space->AddComponent<Bomb_Enemy>(archetype);
 			Space->AddComponent<Throwable>(archetype);
 
-			texture = A_texture_enemy_bomb;
+			entity = sand->MakeTile<iw::Circle>(A_texture_enemy_bomb, true, &archetype);
 			break;
 		}
 		case STATION:
 		{
 			Space->AddComponent<Station_Enemy>(archetype);
-			texture = A_texture_enemy_station;
+			entity = sand->MakeTile<iw::MeshCollider2>(A_texture_enemy_station, true, &archetype);
 			break;
 		}
 		case BASE:
 		{
 			Space->AddComponent<Base_Enemy>(archetype);
-			texture = A_texture_enemy_base;
+			entity = sand->MakeTile<iw::MeshCollider2>(A_texture_enemy_base, true, &archetype);
+
 			break;
 		}
 	}
 
-	iw::Entity entity = sand->MakeTile<iw::Circle>(texture, true, &archetype);
+	
 
 	iw::Rigidbody* rigidbody = entity.Find<iw::Rigidbody>();
 	iw::Transform* transform = entity.Find<iw::Transform>();
@@ -259,7 +289,8 @@ void EnemySystem::SpawnEnemy(SpawnEnemy_Config& config)
 			station->timer.SetTime("spawn", 2, .5);
 
 			rigidbody->SetMass(100);
-			rigidbody->AngularVelocity.z = .1f;
+			//rigidbody->AngularVelocity.z = .1f;
+			//rigidbody->Transform.Rotation.z = .4;
 			flocker->Speed = 25;
 
 			enemy->ExplosionPower = 30;

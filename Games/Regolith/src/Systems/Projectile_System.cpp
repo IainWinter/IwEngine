@@ -23,7 +23,6 @@ void ProjectileSystem::Update()
 			}
 		});
 
-
 	Space->Query<iw::Transform, iw::Rigidbody, Projectile, Linear_Projectile>().Each(
 		[&](
 			iw::EntityHandle handle, 
@@ -103,8 +102,8 @@ void ProjectileSystem::Update()
 	Space->Query<iw::Transform, iw::Rigidbody, Projectile, Split_Projectile>().Each(
 		[&](
 			iw::EntityHandle  handle,
-			iw::Transform* transform,
-			iw::Rigidbody* rigidbody,
+			iw::Transform*    transform,
+			iw::Rigidbody*    rigidbody,
 			Projectile*       proj, 
 			Split_Projectile* split)
 		{
@@ -144,6 +143,20 @@ void ProjectileSystem::Update()
 
 			Space->QueueEntity(handle, iw::func_Destroy);
 		});
+
+	// Projectiles that are made out of a sprite
+
+	//Space->Query<iw::Transform, iw::Rigidbody, Projectile, Tile_Projectile>().Each(
+	//	[&](
+	//		iw::EntityHandle handle,
+	//		iw::Transform*   transform,
+	//		iw::Rigidbody*   rigidbody,
+	//		Projectile*      projectile,
+	//		Tile_Projectile* tileP)
+	//	{
+	//		
+	//	}
+	//);
 
 	// Projectiles that draw lightning
 
@@ -251,7 +264,6 @@ void ProjectileSystem::Update()
 
 			Space->QueueEntity(handle, iw::func_Destroy);
 		});
-
 
 	for (LightningConfig& bolt : bolts)
 	{

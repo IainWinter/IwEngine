@@ -333,6 +333,7 @@ private:
 struct UI_Slider : UI, UI_Clickable
 {
 	float value; // from 0 - 1
+	float lastValue;
 	std::function<void(float)> onChangeValue;
 
 	UI* slider;
@@ -376,13 +377,24 @@ struct UI_Slider : UI, UI_Clickable
 	void UpdateValue(
 		float newValue)
 	{
-		value = iw::clamp(newValue, -1.f, 1.f);
-		font_value->UpdateMesh(
-			label_value->mesh, to_string(value), font_config);
+		// add option for rounding
+		value = iw::clamp(
+			round(newValue * 100) / 100,
+			-1.f,
+			 1.f
+		);
 
-		if (onChangeValue)
+		if (value != lastValue)
 		{
-			onChangeValue(newValue);
+			lastValue = value;
+
+			font_value->UpdateMesh(
+				label_value->mesh, to_string(value), font_config);
+
+			if (onChangeValue)
+			{
+				onChangeValue(newValue);
+			}
 		}
 	}
 

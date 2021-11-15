@@ -61,6 +61,11 @@ void PlayerSystem::Update()
 		{
 			Bus->push<ChangePlayerWeapon_Event>(WeaponType::DEFAULT_CANNON);
 		}
+
+		if (player->CurrentWeapon->Audio.size())
+		{
+			Audio->Play(player->CurrentWeapon->Audio);
+		}
 	}
 	
 	if (   player->i_fire2 

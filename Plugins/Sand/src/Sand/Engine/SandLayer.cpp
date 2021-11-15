@@ -439,14 +439,14 @@ Entity SandLayer::SplitTile(
 		texture->Colors32()[it] = tile->m_sprite.Colors32()[i];
 	}
 
-	Entity split = MakeTile<iw::Circle>(texture, true);
+	Entity split = MakeTile</*iw::Circle*/>(texture, true);
 
 	iw::Transform* tran = split.Find<iw::Transform>();
 	iw::Rigidbody* body = split.Find<iw::Rigidbody>();
 
 	tran->Position = transform->Position + glm::vec3(minX, minY, 0.f) / 2.f;
 	body->SetTransform(transform);
-	body->IsTrigger = true;
+	//body->IsTrigger = true;
 
 	return split;
 }

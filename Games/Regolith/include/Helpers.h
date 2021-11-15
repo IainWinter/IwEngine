@@ -2,10 +2,12 @@
 
 #include "iw/engine/ComponentHelper.h"
 #include "iw/physics/Dynamics/Rigidbody.h"
+#include "plugins/iw/Sand/Tile.h"
 #include <string>
 #include <sstream>
 #include <utility>
 #include <vector>
+#include <unordered_set>
 
 template<typename _t>
 std::string tos(const _t& numb)
@@ -276,4 +278,77 @@ inline LightningHitInfo DrawLightning(
 	config.TargetY = t.y;
 
 	return DrawLightning(sand, config);
+}
+
+
+enum cell_state : char
+{
+	EMPTY,
+	FILLED = 100,
+	VISITED = 10
+};
+
+inline std::vector<cell_state> GetTileStates(
+	iw::Tile* tile)
+{
+	size_t width  = tile->m_sprite.m_width;
+	size_t height = tile->m_sprite.m_height;
+
+	std::vector<cell_state> states;
+	states.resize(width * height);
+
+	for (const int& index : tile->m_currentCells)
+	{
+		states.at(index) = tile->State(index) == iw::Tile::FILLED 
+			? cell_state::FILLED 
+			: cell_state::EMPTY;
+	}
+
+	return states;
+}
+
+inline void flood_fill(
+	int seed,
+	int size_x, int size_y,
+	std::vector<cell_state>& cells,
+	std::function<void(int)> onSet)
+{
+	std::vector<int> queue;
+	queue.push_back(seed);
+
+	while (queue.size() > 0)
+	{
+		int index = queue.back(); queue.pop_back();
+
+		if (    index < 0 
+			|| index >= size_x * size_y) 
+		{
+			continue;
+		}
+
+		if (cells[index] == FILLED)
+		{
+			cells[index] = VISITED;
+
+			if (onSet)
+			{
+				onSet(index);
+			}
+
+			bool natLeft  = index % size_x != 0;
+			bool natRight = index % size_x != size_x - 1;
+
+			if (natRight) queue.push_back(index + 1);
+			if (natLeft)  queue.push_back(index - 1);
+					    queue.push_back(index + size_x);
+					    queue.push_back(index - size_x);
+		
+			// diags
+
+			if (natRight) queue.push_back(index + 1 + size_x);
+			if (natRight) queue.push_back(index + 1 - size_x);
+			if (natLeft)  queue.push_back(index - 1 + size_x);
+			if (natLeft)  queue.push_back(index - 1 - size_x);
+		}
+	}
 }

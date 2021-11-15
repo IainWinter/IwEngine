@@ -45,6 +45,8 @@ namespace Audio {
 
 	};
 
+	// 0 is a special handle representing global actions
+
 	class IAudioSpace {
 	public:
 		std::string RootDirectory;
@@ -60,7 +62,7 @@ namespace Audio {
 		virtual int Destroy()   = 0;
 
 		virtual int Load(const std::string& path) = 0;
-		virtual int Play(const std::string& path, bool loop, bool stream) = 0;
+		virtual int Play(const std::string& path) = 0;
 
 		virtual int Set(int handle, const std::string& parameter, float  value) = 0;
 		virtual int Get(int handle, const std::string& parameter, float& value) = 0;
@@ -73,14 +75,16 @@ namespace Audio {
 		virtual int GetVolume(int handle, float& volume) = 0;
 
 		virtual bool IsLoaded(int handle) const = 0;
+		// only virtual so IsLoaded doesnt need
+		// to iterate the loaded map's values
 
-		bool IsLoaded (const std::string& path) const;
-		int  GetHandle(const std::string& path) const;
+		IWAUDIO_API bool IsLoaded (const std::string& path) const;
+		IWAUDIO_API int  GetHandle(const std::string& path) const;
 
 	protected:
 		virtual bool CheckError(
 			int result,
-			AudioErrorCode code) = 0;
+			AudioErrorCode code) const = 0;
 
 		int log(
 			AudioErrorCode code) const;

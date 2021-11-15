@@ -27,6 +27,8 @@ public:
 
 	int Ammo = -1; // negitive is infinity
 
+	std::string Audio;
+
 	Weapon(WeaponType type)
 		: Type(type)
 	{}
@@ -101,6 +103,7 @@ inline Weapon* MakeDefault_Cannon()
 	cannon->DistanceFromOrigin = 15;
 	cannon->BreadthFromOrigin = 2;
 	cannon->FireDelay = 0.15;
+	cannon->Audio = "event:/weapons/fire_cannon";
 
 	return cannon;
 }

@@ -5,7 +5,11 @@ int Audio_Layer::Initialize()
 	Audio->Load("Regolith/Master.strings.bank");
 	Audio->Load("Regolith/Master.bank");
 	Audio->Load("Regolith/Music.bank");
-	Audio->Play("event:/music_bg", false, true);
+	Audio->Load("Regolith/Weapons.bank");
+	Audio->Play("event:/music/background");
+
+	Audio->SetVolume(Audio->GetHandle("vca:/music"), .1-.1);
+	Audio->SetVolume(Audio->GetHandle("vca:/effects"), .9);
 
 	return 0;
 }

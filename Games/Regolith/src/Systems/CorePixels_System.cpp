@@ -1,48 +1,4 @@
 #include "Systems/CorePixels_System.h"
-#include <array>
-
-enum cell_state : char
-{
-	EMPTY,
-	FILLED = 100,
-	VISITED = 10
-};
-
-void flood_fill(
-	int index,
-	int size_x, int size_y,
-	std::vector<cell_state>& cells,
-	std::unordered_set<int>& out_indices)
-{
-	//size_t index = x + y * size_y;
-
-	if (   index < 0 
-		|| index >= size_x * size_y) 
-	{
-		return;
-	}
-
-	if (cells[index] == FILLED)
-	{
-		cells[index] = VISITED;
-		out_indices.insert(index);
-
-		bool natLeft  = index % size_x != 0;
-		bool natRight = index % size_x != size_x - 1;
-
-		if (natRight) flood_fill(index + 1,      size_x, size_y, cells, out_indices);
-		if (natLeft)  flood_fill(index - 1,      size_x, size_y, cells, out_indices);
-					  flood_fill(index + size_x, size_x, size_y, cells, out_indices);
-					  flood_fill(index - size_x, size_x, size_y, cells, out_indices);
-		
-		// diags
-
-		if (natRight) flood_fill(index + 1 + size_x, size_x, size_y, cells, out_indices);
-		if (natRight) flood_fill(index + 1 - size_x, size_x, size_y, cells, out_indices);
-		if (natLeft)  flood_fill(index - 1 + size_x, size_x, size_y, cells, out_indices);
-		if (natLeft)  flood_fill(index - 1 - size_x, size_x, size_y, cells, out_indices);
-	}
-}
 
 void CorePixelsSystem::Update()
 {
@@ -214,51 +170,6 @@ bool CorePixelsSystem::On(iw::ActionEvent& e)
 
 					Bus->push<SpawnItem_Event>(config);
 				}
-			}
-
-			// Remove cells that are no longer connected to core
-
-			size_t width  = tile->m_sprite.m_width;
-			size_t height = tile->m_sprite.m_height;
-
-			std::vector<cell_state> states;
-			states.resize(width * height);
-
-			for (const int& index : tile->m_currentCells)
-			{
-				states.at(index) = tile->State(index) == iw::Tile::FILLED 
-					? cell_state::FILLED 
-					: cell_state::EMPTY;
-			}
-
-			std::unordered_set<int> indices;
-			for (const int& seed : core->ActiveIndices)
-			{
-				flood_fill(seed, width, height, states, indices);
-			}
-
-			// remove cells active in tile not in indices
-
-			std::vector<int> toSplit;
-			for (int i = 0; i < tile->m_currentCells.size(); i++)
-			{
-				int index = tile->m_currentCells.at(i);
-
-				if (   indices            .find(index) == indices            .end()
-					&& core->ActiveIndices.find(index) == core->ActiveIndices.end())
-				{
-					toSplit.push_back(index);
-				}
-			}
-			
-			//if (toSplit.size() > 20)
-			//{
- 			//	m_sand->SplitTile(entity, toSplit);
-			//}
-
-			for (const int& i : toSplit)
-			{
-				tile->RemovePixel(i);
 			}
 
 			break;

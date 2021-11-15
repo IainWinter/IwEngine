@@ -185,21 +185,21 @@ bool WorldSystem::On(iw::ActionEvent& e)
 					norm = glm::normalize(glm::vec3(iw::randfs(), iw::randfs(), 0.f));
 				}
 
-				iw::Cell metal;
-				metal.Type = iw::CellType::ROCK;
-				metal.Props = iw::CellProp::MOVE_FORCE;
+				iw::Cell spark;
+				spark.Type  = iw::CellType::ROCK;
+				spark.Props = iw::CellProp::MOVE_FORCE;
 				
-				metal.Color = iw::Color::From255(255, 207, 77);
+				spark.Color = iw::Color::From255(255, 207, 77);
 				
-				metal.dx = norm.x * 300 + iw::randfs() * 100;
-				metal.dy = norm.y * 300 + iw::randfs() * 100;
-				metal.life = .05 + iw::randf() * .2;
+				spark.dx = norm.x * 300 + iw::randfs() * 100;
+				spark.dy = norm.y * 300 + iw::randfs() * 100;
+				spark.life = .05 + iw::randf() * .2;
 
 				float margin = 15;
 				float px = x + norm.x * margin;
 				float py = y + norm.y * margin;
 				
-				sand->m_world->SetCell(px, py, metal);
+				sand->m_world->SetCell(px, py, spark);
 			}
 
 			// todo: if entity is an asteroid
@@ -254,23 +254,6 @@ bool WorldSystem::On(iw::ActionEvent& e)
 		case CREATED_PLAYER: {
 			m_player = e.as<CreatedPlayer_Event>().PlayerEntity;
 
-			//SpawnAsteroid_Config c;
-			//c.SpawnLocationX = 100;
-			//c.SpawnLocationY = 100;
-			//c.Size = 1;
-
-			//Bus->push<SpawnAsteroid_Event>(c);
-
-			//SpawnEnemy_Config cc;
-			//cc.SpawnLocationX = 300;
-			//cc.SpawnLocationY = 300;
-			//cc.TargetLocationX = 300;
-			//cc.TargetLocationY = 300;
-			//cc.EnemyType = STATION;
-			//cc.TargetEntity = m_player;
-
-			//Bus->push<SpawnEnemy_Event>(cc);
-
 			break;
 		}
 		case STATE_CHANGE:
@@ -281,6 +264,22 @@ bool WorldSystem::On(iw::ActionEvent& e)
 			{
 				case GAME_START_STATE:
 				{
+					//SpawnAsteroid_Config c;
+					//c.SpawnLocationX = 100;
+					//c.SpawnLocationY = 100;
+					//c.Size = 0;
+
+					//Bus->push<SpawnAsteroid_Event>(c);
+
+					//SpawnEnemy_Config cc;
+					//cc.SpawnLocationX = 300;
+					//cc.SpawnLocationY = 300;
+					//cc.TargetLocationX = 300;
+					//cc.TargetLocationY = 300;
+					//cc.EnemyType = STATION;
+
+					//Bus->push<SpawnEnemy_Event>(cc);
+
 					m_levels.emplace_front(CreateSequence())
 						.Add<Spawn>(MakeEnemySpawner())
 						.And<Spawn>(MakeAsteroidSpawner())

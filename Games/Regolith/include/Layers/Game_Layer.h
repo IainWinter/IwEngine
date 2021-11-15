@@ -18,6 +18,8 @@
 
 #include "Systems/Explosion_System.h"
 
+#include "Systems/TileSplit_System.h"
+
 #include "iw/physics/Dynamics/SmoothPositionSolver.h"
 #include "iw/physics/Dynamics/ImpulseSolver.h"
 #include "iw/engine/Systems/PhysicsSystem.h"

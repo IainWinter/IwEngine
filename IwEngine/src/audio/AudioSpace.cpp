@@ -37,7 +37,7 @@ namespace Audio
 			translation.emplace(ENGINE_FAILED_MAKE_INSTANCE, "Engine failed to create an instance");
 			translation.emplace(ENGINE_FAILED_LOAD_INSTANCE, "Engine failed to load an instance");
 			translation.emplace(ENGINE_FAILED_INVALID_HANDLE, "Engine was passed a handle was invalid");
-			translation.emplace(ENGINE_FAILED_HANDLE_NOT_LOADED, "Engine was passed a handle that was valid but doesnt point to anything");
+			translation.emplace(ENGINE_FAILED_HANDLE_NOT_LOADED, "Engine was passed a handle that hasn't been loaded");
 			translation.emplace(ENGINE_FAILED_SET_PARAM, "Engine failed to set an instance parameter");
 			translation.emplace(ENGINE_FAILED_GET_PARAM, "Engine failed to get an instance parameter");
 		}

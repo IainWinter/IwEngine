@@ -60,6 +60,13 @@ struct Split_Projectile
 	{}
 };
 
+struct Tile_Projectile
+{
+	iw::Tile Tile;
+
+	Tile_Projectile() {}
+};
+
 struct LightBall_Projectile
 {
 	std::vector<std::pair<float, float>> Points;

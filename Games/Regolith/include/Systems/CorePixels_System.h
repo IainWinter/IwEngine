@@ -5,6 +5,9 @@
 #include "plugins/iw/Sand/Engine/SandLayer.h"
 
 #include "Events.h"
+#include "Helpers.h"
+
+#include <array>
 
 struct CorePixelsSystem : iw::SystemBase
 {

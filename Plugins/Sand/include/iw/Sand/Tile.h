@@ -41,7 +41,9 @@ struct Tile {
 
 	void SetState(unsigned index, PixelState state)
 	{
-		*(&m_sprite.Colors()[index * 4] + 3) = (char)state;
+		char& current = *(char*)(&m_sprite.Colors()[index * 4] + 3);
+		NeedsScan = current != (char)state;
+		current = (char)state;
 	}
 
 	bool RemovePixel(unsigned index)
