@@ -180,14 +180,14 @@ public:
 		const std::string& sprite,
 		bool isSimulated = false)
 	{
-		return MakeTile<_collider, _others...>(Asset->Load<iw::Texture>(sprite), isSimulated);
+		return MakeTile<_collider, _others...>(*Asset->Load<iw::Texture>(sprite), isSimulated);
 	}
 
 	template<
 		typename _collider = MeshCollider2,
 		typename... _others>
 	Entity MakeTile(
-		ref<Texture>& sprite,
+		const Texture& sprite,
 		bool isSimulated = false,
 		const Archetype* others = nullptr)
 	{
@@ -217,7 +217,7 @@ public:
 
 		if constexpr (std::is_same_v<_collider, iw::Circle>)
 		{
-			collider->Radius = glm::compMax(sprite->Dimensions()) / 2.f;
+			collider->Radius = glm::compMax(sprite.Dimensions()) / 2.f;
 		}
 
 		object->Collider = collider;
@@ -395,8 +395,6 @@ private:
 		PixelDataGridf<_f1, _f2> pixels;
 		pixels.resize(x_size * y_size);
 
-		int minX = 1000, maxX = -1000;
-
 		std::vector<glm::vec2> polygon = tile->m_polygon;
 		TransformPolygon(polygon, &tile->LastTransform);
 		ForEachInPolygon(polygon, tile->m_uv, tile->m_index, [&](int x, int y, float u, float v, int tri)
@@ -412,9 +410,6 @@ private:
 			{
 				return;
 			}
-
-			if (x < minX) minX = x;
-			if (x > maxX) maxX = x;
 
 			pixels[px + py * x_size].emplace_back(GetPixelData(pre, x, y, u, v, tri));
 		});

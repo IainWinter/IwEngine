@@ -88,60 +88,6 @@ void Game_Layer::Update()
 
 		Bus->send<SpawnItem_Event>(item);
 	}
-
-	//	//SpawnEnemy_Config cc;
-	//	//cc.SpawnLocationX = sand->sP.x;
-	//	//cc.SpawnLocationY = sand->sP.y;
-	//	//cc.TargetLocationX = 200;
-	//	//cc.TargetLocationY = 200;
-	//	//cc.EnemyType = BASE;
-	//	//cc.TargetEntity = m_player;
-
-	//	//Bus->push<SpawnEnemy_Event>(cc);
-	//}
-
-	//tick++;
-
-	//Space->Query<iw::Tile>().Each([&](
-	//	iw::EntityHandle entity, 
-	//	iw::Tile* tile) 
-	//{
-	//	auto& [mesh, mtick] = debug_tileColliders[entity];
-
-	//	mtick = tick;
-
-	//	if (!mesh.Data)
-	//	{
-	//		iw::MeshDescription desc;
-	//		desc.DescribeBuffer(iw::bName::POSITION, iw::MakeLayout<float>(2));
-
-	//		mesh = (new iw::MeshData(desc))->MakeInstance();
-	//		mesh.Data->SetBufferData(iw::bName::POSITION, tile->m_collider.size(), tile->m_collider.data());
-	//		mesh.Data->SetIndexData(tile->m_colliderIndex.size(), tile->m_colliderIndex.data());
-	//		mesh.Material = A_material_debug_wireframe;
-	//	}
-	//});
-
-	//for (auto& itr = debug_tileColliders.begin(); itr != debug_tileColliders.end(); itr++)
-	//{
-	//	auto [mesh, mtick] = itr->second;
-	//	if (mtick != tick)
-	//	{
-	//		debug_tileColliders.erase(itr); // not sure if this is undefined
-	//	}
-	//}
-
-	//if (iw::Mouse::ButtonDown(iw::RMOUSE))
-	//{
-	//	//SpawnItem_Config config;
-	//	//config.X = sand->sP.x;
-	//	//config.Y = sand->sP.y;
-	//	//config.Item = ItemType::HEALTH;
-
-	//	//Bus->push<SpawnItem_Event>(config);
-
-	//	Console->QueueCommand("game-over");
-	//}
 }
 
 bool Game_Layer::On(iw::ActionEvent& e)
@@ -193,19 +139,4 @@ void Game_Layer::PostUpdate()
 	//m_cursor.Find<iw::CollisionObject>()->Transform.Position = glm::vec3(sand->sP, 0.f);
 
 	sand->m_drawMouseGrid = iw::Keyboard::KeyDown(iw::SHIFT);
-
-	//for (auto& [entity, data] : debug_tileColliders)
-	//{
-	//	iw::Transform transform = *Space->FindComponent<iw::Transform>(entity);
-	//	transform.Position /= 200.f;
-	//	transform.Position -= glm::vec3(1, 1, 0);
-	//	transform.Position.z = 10;
-	//	transform.Position.y += game_position_y;
-	//	transform.Scale /= 200.f;
-
-	//	transform.Scale.x *= c_game_width / width;
-	//	transform.Scale.y *= c_game_height / height;
-
-	//	Renderer->DrawMesh(transform, data.first);
-	//}
 }

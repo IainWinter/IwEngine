@@ -47,7 +47,7 @@ struct Split_Projectile
 
 	// shrap is other shots spawned with the split
 	int ShrapCount = 0;
-	int ShrapOdds = .1f;
+	float ShrapOdds = .1f;
 	//float ShrapSpeedRatio = 1.f;
 	float ShrapTurnArc = 0.f;
 

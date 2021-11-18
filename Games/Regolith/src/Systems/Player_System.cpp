@@ -185,7 +185,7 @@ bool PlayerSystem::On(iw::ActionEvent& e)
 						m_player.Destroy();
 					}
 	
-					m_player = sand->MakeTile<iw::Circle, Player, CorePixels, KeepInWorld>(A_texture_player, true);
+					m_player = sand->MakeTile<iw::Circle, Player, CorePixels, KeepInWorld>(*A_texture_player, true);
 
 					iw::Rigidbody* rigidbody = m_player.Find<iw::Rigidbody>();
 					iw::Transform* transform = m_player.Find<iw::Transform>();

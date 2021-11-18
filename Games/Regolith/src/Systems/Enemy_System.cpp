@@ -89,8 +89,8 @@ void EnemySystem::FixedUpdate()
 					SpawnExplosion_Config config;
 					config.SpawnLocationX = transform->Position.x;
 					config.SpawnLocationY = transform->Position.y;
-					config.ExplosionPower = 30;
-					config.ExplosionRadius = 30;
+					config.ExplosionPower = 900;
+					config.ExplosionRadius = 10;
 
 					Bus->push<SpawnExplosion_Event>(config);
 					Space->QueueEntity(handle, iw::func_Destroy);
@@ -214,7 +214,7 @@ void EnemySystem::SpawnEnemy(SpawnEnemy_Config& config)
 		case FIGHTER: 
 		{
 			Space->AddComponent<Fighter_Enemy>(archetype);
-			entity = sand->MakeTile<iw::Circle>(A_texture_enemy_fighter, true, &archetype);
+			entity = sand->MakeTile<iw::Circle>(*A_texture_enemy_fighter, true, &archetype);
 			break;
 		}
 		case BOMB: 
@@ -222,26 +222,24 @@ void EnemySystem::SpawnEnemy(SpawnEnemy_Config& config)
 			Space->AddComponent<Bomb_Enemy>(archetype);
 			Space->AddComponent<Throwable>(archetype);
 
-			entity = sand->MakeTile<iw::Circle>(A_texture_enemy_bomb, true, &archetype);
+			entity = sand->MakeTile<iw::Circle>(*A_texture_enemy_bomb, true, &archetype);
 			break;
 		}
 		case STATION:
 		{
 			Space->AddComponent<Station_Enemy>(archetype);
-			entity = sand->MakeTile<iw::MeshCollider2>(A_texture_enemy_station, true, &archetype);
+			entity = sand->MakeTile<iw::MeshCollider2>(*A_texture_enemy_station, true, &archetype);
 			break;
 		}
 		case BASE:
 		{
 			Space->AddComponent<Base_Enemy>(archetype);
-			entity = sand->MakeTile<iw::MeshCollider2>(A_texture_enemy_base, true, &archetype);
+			entity = sand->MakeTile<iw::MeshCollider2>(*A_texture_enemy_base, true, &archetype);
 
 			break;
 		}
 	}
-
 	
-
 	iw::Rigidbody* rigidbody = entity.Find<iw::Rigidbody>();
 	iw::Transform* transform = entity.Find<iw::Transform>();
 	Flocker*       flocker   = entity.Set<Flocker>();
@@ -261,7 +259,6 @@ void EnemySystem::SpawnEnemy(SpawnEnemy_Config& config)
 	rigidbody->IsTrigger = true;
 
 	enemy->Target = config.TargetEntity;
-	enemy->ExplosionPower = 10;
 
 	switch (config.EnemyType)
 	{
@@ -269,6 +266,8 @@ void EnemySystem::SpawnEnemy(SpawnEnemy_Config& config)
 		{
 			Fighter_Enemy* fighter = entity.Set<Fighter_Enemy>();
 			fighter->Weapon = MakeLaser_Cannon_Enemy();
+
+			enemy->ExplosionPower = 200;
 
 			break;
 		}
@@ -280,6 +279,8 @@ void EnemySystem::SpawnEnemy(SpawnEnemy_Config& config)
 
 			flocker->SpeedNearTarget = 1;
 			rigidbody->AngularVelocity.z = .9f;
+
+			enemy->ExplosionPower = 200;
 
 			break;
 		}
@@ -293,7 +294,7 @@ void EnemySystem::SpawnEnemy(SpawnEnemy_Config& config)
 			//rigidbody->Transform.Rotation.z = .4;
 			flocker->Speed = 25;
 
-			enemy->ExplosionPower = 30;
+			enemy->ExplosionPower = 300;
 
 			break;
 		}
@@ -305,7 +306,7 @@ void EnemySystem::SpawnEnemy(SpawnEnemy_Config& config)
 			rigidbody->AngularVelocity.z = .1f;
 			flocker->Speed = 25;
 
-			enemy->ExplosionPower = 60;
+			enemy->ExplosionPower = 1200;
 
 			break;
 		}
@@ -345,5 +346,16 @@ void EnemySystem::DestroyEnemy(iw::Entity entity)
 	}
 
 	Bus->push<SpawnItem_Event>(config);
+
+	// spawn copy of just display
+	iw::Entity tileCopy = sand->MakeTile(
+		entity.Find<iw::Tile>()->m_sprite,
+		true
+	);
+	tileCopy.Set<iw::Transform>(*transform);
+	tileCopy.Find<iw::Rigidbody>()->SetTransform(transform);
+
+
+
 	Space->QueueEntity(entity.Handle, iw::func_Destroy);
 }

@@ -133,7 +133,7 @@ iw::Entity ItemSystem::MakeItem(
     const SpawnItem_Config& config,
     iw::ref<iw::Texture>& sprite)
 {
-    iw::Entity entity = sand->MakeTile<iw::Circle, Item, KeepInWorld>(sprite, true);
+    iw::Entity entity = sand->MakeTile<iw::Circle, Item, KeepInWorld>(*sprite, true);
     
     Item*          item      = entity.Set<Item>();
     iw::Transform* transform = entity.Find<iw::Transform>();

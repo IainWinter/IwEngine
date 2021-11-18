@@ -3,9 +3,9 @@
 IW_PLUGIN_SAND_BEGIN
 
 Tile::Tile(
-	ref<Texture> texture)
+	const Texture& texture)
 {
-	m_sprite = *texture;
+	m_sprite = texture;
 
 	if (!m_sprite.m_colors) {
 		m_sprite.SetFilter(iw::NEAREST);

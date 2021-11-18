@@ -44,6 +44,8 @@ inline rFont A_font_cambria;
 inline rMat A_material_texture_cam;
 inline rMat A_material_font_cam;
 
+inline rMat A_material_debug_wireframe;
+
 inline iw::Mesh A_mesh_background;
 
 inline iw::Mesh A_mesh_ui_background;

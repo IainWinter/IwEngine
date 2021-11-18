@@ -330,11 +330,15 @@ void SandLayer::PasteTiles()
 		{
 			auto& [x, y, tile, colors, index] = data;
 			
+			if (index >= tile->m_sprite.ColorCount32()) // shouldn't need this! see what opengl does?
+			{
+				//LOG_TRACE << "UV outside of tile sprite on paste!";
+				return;
+			}
+
 			if (   !chunk 
 				|| !chunk->IsEmpty(x, y)
-				|| index >= tile->m_sprite.m_width * tile->m_sprite.m_height
-				|| tile->State(index) == Tile::EMPTY
-				|| tile->State(index) == Tile::REMOVED)
+				|| tile->State(index) != Tile::FILLED)
 			{
 				return;
 			}
@@ -357,21 +361,26 @@ void SandLayer::RemoveTiles()
 
 		for (auto& [x, y, tile, colors, index] : pixels)
 		{
-			const auto& removed = tile->m_justRemovedCells;
-			
-			if (std::find(removed.begin(), removed.end(), index) == removed.end())
+			if (index >= tile->m_sprite.ColorCount32()) // shouldn't need this! see what opengl does?
 			{
-				if (   index >= tile->m_sprite.m_width * tile->m_sprite.m_height
-					|| tile->State(index) == Tile::EMPTY
-					|| tile->State(index) == Tile::REMOVED)
-				{
-					continue;
-				}
+				//LOG_TRACE << "UV outside of tile sprite on remove!";
+				continue;
 			}
 
-			chunk->SetCell_unsafe(x, y, 0u,                       SandField::COLOR);
-			chunk->SetCell_unsafe(x, y, false,                    SandField::SOLID);
-			chunk->SetCell_unsafe(x, y, TileInfo { nullptr, 0u }, SandField::TILE_INFO);
+			size_t cindex = chunk->GetIndex(x, y);
+			TileInfo& info = chunk->GetCell<TileInfo>(cindex, SandField::TILE_INFO);
+
+			if (   tile != info.tile
+				|| tile->State(index) != Tile::FILLED)
+			{
+				continue;
+			}
+
+			info.tile = nullptr;
+			info.index = 0u;
+
+			chunk->SetCell_unsafe(cindex, 0u,    SandField::COLOR);
+			chunk->SetCell_unsafe(cindex, false, SandField::SOLID);
 		}
 	}
 
@@ -408,7 +417,6 @@ Entity SandLayer::SplitTile(
 	int maxY = -INT_MAX;
 
 	iw::Tile* tile = entity.Find<iw::Tile>();
-	iw::Transform* transform = entity.Find<iw::Transform>();
 
 	for (int& i : indices)
 	{
@@ -439,14 +447,46 @@ Entity SandLayer::SplitTile(
 		texture->Colors32()[it] = tile->m_sprite.Colors32()[i];
 	}
 
-	Entity split = MakeTile</*iw::Circle*/>(texture, true);
+	Entity split = MakeTile(*texture, true);
 
-	iw::Transform* tran = split.Find<iw::Transform>();
-	iw::Rigidbody* body = split.Find<iw::Rigidbody>();
+	// give split the pos and rot of the orignal peice
 
-	tran->Position = transform->Position + glm::vec3(minX, minY, 0.f) / 2.f;
-	body->SetTransform(transform);
-	//body->IsTrigger = true;
+	iw::Transform* transform = entity.Find<iw::Transform>();
+	iw::Rigidbody* rigidbody = entity.Find<iw::Rigidbody>();
+
+	glm::vec2 midOld = entity.Find<iw::Tile>()->m_sprite.Dimensions() / 2.f;
+	glm::vec2 midNew = split .Find<iw::Tile>()->m_sprite.Dimensions() / 2.f;
+	glm::vec2 offset = iw::TransformPoint<iw::d2>(
+			glm::vec2(
+				maxX - floor(midOld.x) - floor(midNew.x),
+				maxY - floor(midOld.y) - floor(midNew.y)
+			),
+			&transform->ScaleAndRotation()
+		);
+
+	iw::Transform* splitTran = split.Find<iw::Transform>();
+	iw::Rigidbody* splitBody = split.Find<iw::Rigidbody>();
+
+	glm::vec3 o3 = glm::vec3(offset, 0.f);
+
+	*splitTran = *transform;
+	splitTran->Position += o3;
+	splitBody->SetTransform(splitTran);
+
+	// adjust masses to ratio of pixels
+
+	float mass = rigidbody->Mass();
+	float massRatio = indices.size() / (float)tile->m_currentCells.size();
+
+	float splitMass = mass * massRatio;
+
+	rigidbody->SetMass(mass - splitMass);
+	splitBody->SetMass(splitMass);
+
+	// not required for position
+
+	splitBody->Velocity = o3; // could add vel of projectile
+	splitBody->AngularVelocity.z = iw::randf();
 
 	return split;
 }

@@ -53,6 +53,15 @@ int LoadAssets(
 		tex->m_wrap = EDGE;
 	}
 
+	//debug
+	A_material_debug_wireframe = REF<Material>(Asset->Load<Shader>("shaders/debug/wireframe2_cam.shader"));
+	CHECK_LOAD(A_material_debug_wireframe->Shader);
+	{
+		Renderer->InitShader(A_material_debug_wireframe->Shader, CAMERA);
+		A_material_debug_wireframe->Set("color", iw::Color(1, 0, 0));
+		A_material_debug_wireframe->SetWireframe(true);
+	}
+
 	CHECK_LOAD(A_font_cambria);
 	CHECK_LOAD(A_material_texture_cam->Shader);
 	//CHECK_LOAD(A_material_font_cam   ->Shader);
@@ -135,7 +144,7 @@ int LoadAssets(
 //A_texture_star           = Asset->Load<Texture>("textures/SpaceGame/star.png");
 //A_texture_asteroid       = Asset->Load<Texture>("textures/SpaceGame/asteroid.png");
 //A_material_texture_cam_particle = REF<Material>(Asset->Load<Shader>("shaders/particle/texture_cam.shader"));
-//A_material_debug_wireframe      = REF<Material>(Asset->Load<Shader>("shaders/debug/wireframe2_cam.shader"));
+
 //A_mesh_star            = iw::ScreenQuad().MakeCopy();
 //A_mesh_ui_cursor        = iw::ScreenQuad().MakeInstance();
 
@@ -152,11 +161,6 @@ int LoadAssets(
 //	Renderer->InitShader(A_material_texture_cam_particle->Shader, CAMERA);
 //}
 
-//{
-//	Renderer->InitShader(A_material_debug_wireframe->Shader, CAMERA);
-//	A_material_debug_wireframe->Set("color", iw::Color(1, 0, 0));
-//	A_material_debug_wireframe->SetWireframe(true);
-//}
 
 //{
 //	A_mesh_ui_cursor.Material = A_material_texture_cam->MakeInstance();

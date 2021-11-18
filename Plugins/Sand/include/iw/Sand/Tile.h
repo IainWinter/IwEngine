@@ -123,7 +123,7 @@ struct Tile {
 	Tile() = default;
 
 	IW_PLUGIN_SAND_API
-	Tile(ref<Texture> texture);
+	Tile(const Texture& texture);
 
 	IW_PLUGIN_SAND_API
 	void UpdateColliderPolygon();

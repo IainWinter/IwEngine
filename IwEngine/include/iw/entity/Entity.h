@@ -141,7 +141,7 @@ namespace ECS {
 #ifdef IW_DEBUG
 			if (!Space) {
 				LOG_ERROR << "Entity has no space!";
-				return false;
+				return nullptr;
 			}
 #endif
 			if (Space->FindComponent<_c>(Handle)) {
@@ -157,7 +157,7 @@ namespace ECS {
 #ifdef IW_DEBUG
 			if (!Space) {
 				LOG_ERROR << "Entity has no space!";
-				return false;
+				return;
 			}
 #endif
 			Space->RemoveComponent<_c>(Handle);
@@ -172,7 +172,7 @@ namespace ECS {
 #ifdef IW_DEBUG
 			if (!Space) {
 				LOG_ERROR << "Entity has no space!";
-				return false;
+				return nullptr;
 			}
 #endif
 			return Space->SetComponent<_c>(Handle, std::forward<_args>(args)...);
@@ -184,7 +184,7 @@ namespace ECS {
 #ifdef IW_DEBUG
 			if (!Space) {
 				LOG_ERROR << "Entity has no space!";
-				return false;
+				return nullptr;
 			}
 #endif
 			return Space->FindComponent<_c>(Handle);

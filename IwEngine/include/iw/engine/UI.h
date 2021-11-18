@@ -62,6 +62,12 @@ struct UI_Base
 		return ui;
 	}
 
+	void RemoveElement(
+		UI_Base* ui)
+	{
+		children.erase(std::find(children.begin(), children.end(), ui));
+	}
+
 	template<
 		typename _f>
 	void WalkTree(
@@ -121,7 +127,6 @@ struct UI_Base
 		float w = width  / pw;
 		float h = height / ph;
 
-		transform = iw::Transform();
 		transform.Position = glm::vec3(x_, y_, zIndex);
 		transform.Scale    = glm::vec3(w, h, 1);
 

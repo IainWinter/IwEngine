@@ -160,43 +160,7 @@ void TileSplitSystem::SplitTileOff(
 
 	if (toSplit.size() > 10)
 	{
-		// min index of split (bottom left corner in tile)
-
-		int x = 0, y = 0; // might be min x max y?
-		int min = INT_MAX, max = 0;
-		for (int index : toSplit)
-		{
-			auto [px, py] = iw::xy<int>(index, tile->m_sprite.m_width);
-			if (x < px) x = px;
-			if (y < py) y = py;
-
-			if (index > max) max = index;
-			if (index < min) min = index;
-		}
-
- 		iw::Entity split = sand->SplitTile(entity, toSplit);
-
-		// min of new - mid of old - mid of new
-		// then rotate point into correct reference frame
-
-		glm::vec2 midNew = split .Find<iw::Tile>()->m_sprite.Dimensions() / 2.f;
-		glm::vec2 offset = glm::vec2(
-			x - floor(midOld.x) - floor(midNew.x),
-			y - floor(midOld.y) - floor(midNew.y));
-
-		iw::Rigidbody* r = split.Find<iw::Rigidbody>();
-
-		iw::Transform rotationNScale;
-		rotationNScale.Rotation = r->Transform.WorldRotation();
-		rotationNScale.Scale    = r->Transform.WorldScale();
-
-		offset = iw::TransformPoint<iw::d2>(glm::vec2(offset), &rotationNScale);
-
-		glm::vec3 o3 = glm::vec3(offset, 0.f);
-
-		r->Transform.Position += o3;
-		r->Velocity = o3; // could add vel of projectile
-		r->AngularVelocity.z = iw::randf();
+		sand->SplitTile(entity, toSplit);
 
 		// debug
 		//for (unsigned i = 0; i < split.Find<iw::Tile>()->m_sprite.ColorCount32(); i++)

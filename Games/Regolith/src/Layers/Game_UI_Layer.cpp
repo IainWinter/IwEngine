@@ -40,6 +40,9 @@ void Game_UI_Layer::PreUpdate()
 	m_sand_game->sP.y = (m_sand_game->sP.y - 400) * (800.f / m_game->height) + 400;
 }
 
+int tick = 0;
+std::unordered_map<iw::EntityHandle, std::pair<UI*, int>, iw::ehandle_hash> debug_tileColliders;
+
 void Game_UI_Layer::PostUpdate()
 {
 	iw::ref<iw::Texture> texture = m_game->mesh.Material->GetTexture("texture");
@@ -177,6 +180,69 @@ void Game_UI_Layer::PostUpdate()
 	m_version->x = -m_screen->width + 1;
 	m_version->width  = m_menu->width;
 	m_version->height = m_menu->width;
+
+
+	tick++;
+
+	Space->Query<iw::Tile>().Each([&](
+		iw::EntityHandle entity, 
+		iw::Tile* tile) 
+	{
+		if (!tile->m_collider.size() > 0)
+		{
+			return;
+		}
+				
+		auto& [ui, mtick] = debug_tileColliders[entity];
+
+		mtick = tick;
+
+		if (ui)
+		{
+			// slow but works
+			ui->mesh.Data->SetBufferData(iw::bName::POSITION, tile->m_collider.size(), tile->m_collider.data());
+			ui->mesh.Data->SetIndexData(tile->m_colliderIndex.size(), tile->m_colliderIndex.data());
+
+		}
+
+		else
+		{
+			iw::MeshDescription desc;
+			desc.DescribeBuffer(iw::bName::POSITION, iw::MakeLayout<float>(2));
+
+			iw::Mesh mesh;
+			mesh = (new iw::MeshData(desc))->MakeInstance();
+			mesh.Data->SetBufferData(iw::bName::POSITION, tile->m_collider.size(), tile->m_collider.data());
+			mesh.Data->SetIndexData(tile->m_colliderIndex.size(), tile->m_colliderIndex.data());
+			mesh.Material = A_material_debug_wireframe;
+
+			ui = m_screen->CreateElement(mesh);
+		}
+	});
+
+	for (auto& itr = debug_tileColliders.begin(); itr != debug_tileColliders.end(); itr++)
+	{
+		auto [mesh, mtick] = itr->second;
+		if (mtick != tick)
+		{
+			m_screen->RemoveElement(itr->second.first);
+			debug_tileColliders.erase(itr); // not sure if this is undefined
+		}
+	}
+
+	for (auto& [entity, data] : debug_tileColliders)
+	{
+		iw::Transform* transform = Space->FindComponent<iw::Transform>(entity);
+		UI* ui = data.first;
+
+		ui->x = transform->Position.x;
+		ui->y = transform->Position.y;
+		ui->width = 4;
+		ui->height = 4;
+		ui->zIndex = 2;
+
+		ui->transform.Rotation = transform->Rotation;
+	}
 }
 
 bool Game_UI_Layer::On(iw::ActionEvent& e)

@@ -26,7 +26,7 @@ void WorldSystem::Update()
 	//}
 
 
-	//return;
+	return;
 	m_timer.Tick();
 
 	bool needsAnotherLevel = false;
@@ -225,7 +225,7 @@ bool WorldSystem::On(iw::ActionEvent& e)
 			SpawnExplosion_Config config;
 			config.SpawnLocationX = pos.x;
 			config.SpawnLocationY = pos.y;
-			config.ExplosionRadius = 20;
+			config.ExplosionRadius = 1;
 
 			if (entity.Has<Enemy>())
 			{
@@ -264,27 +264,27 @@ bool WorldSystem::On(iw::ActionEvent& e)
 			{
 				case GAME_START_STATE:
 				{
-					//SpawnAsteroid_Config c;
-					//c.SpawnLocationX = 100;
-					//c.SpawnLocationY = 100;
-					//c.Size = 0;
+					SpawnAsteroid_Config c;
+					c.SpawnLocationX = 100;
+					c.SpawnLocationY = 100;
+					c.Size = 0;
 
-					//Bus->push<SpawnAsteroid_Event>(c);
+					Bus->push<SpawnAsteroid_Event>(c);
 
-					//SpawnEnemy_Config cc;
-					//cc.SpawnLocationX = 300;
-					//cc.SpawnLocationY = 300;
-					//cc.TargetLocationX = 300;
-					//cc.TargetLocationY = 300;
-					//cc.EnemyType = STATION;
+					SpawnEnemy_Config cc;
+					cc.SpawnLocationX = 300;
+					cc.SpawnLocationY = 300;
+					cc.TargetLocationX = 300;
+					cc.TargetLocationY = 300;
+					cc.EnemyType = STATION;
 
-					//Bus->push<SpawnEnemy_Event>(cc);
+					Bus->push<SpawnEnemy_Event>(cc);
 
-					m_levels.emplace_front(CreateSequence())
-						.Add<Spawn>(MakeEnemySpawner())
-						.And<Spawn>(MakeAsteroidSpawner())
-						.And<iw::Delay>(30)
-						.Start();
+					//m_levels.emplace_front(CreateSequence())
+					//	.Add<Spawn>(MakeEnemySpawner())
+					//	.And<Spawn>(MakeAsteroidSpawner())
+					//	.And<iw::Delay>(30)
+					//	.Start();
 					break;
 				}
 				case GAME_OVER_STATE:
@@ -313,7 +313,7 @@ iw::Entity WorldSystem::MakeAsteroid(
 		case 2: asteroid_tex = A_texture_asteroid_mid_3; break;
 	}
 
-	iw::Entity entity = sand->MakeTile<iw::MeshCollider2, Asteroid, Throwable>(asteroid_tex, true);
+	iw::Entity entity = sand->MakeTile<iw::MeshCollider2, Asteroid, Throwable>(*asteroid_tex, true);
 	iw::Transform* t = entity.Find<iw::Transform>();
 	iw::Rigidbody* r = entity.Find<iw::Rigidbody>();
 

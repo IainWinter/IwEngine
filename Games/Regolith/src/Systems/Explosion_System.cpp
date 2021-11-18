@@ -21,7 +21,7 @@ void ExplosionSystem::SpawnExplosion(SpawnExplosion_Config& config)
 	metal.Props = iw::CellProp::MOVE_FORCE;
 	metal.Color = iw::Color::From255(255, 207, 77);
 
-	for (int i = 0; i < config.ExplosionPower * config.ExplosionRadius; i++)
+	for (int i = 0; i < config.ExplosionPower/* * config.ExplosionRadius*/; i++)
 	{
 		glm::vec2 norm = glm::normalize(glm::vec2(iw::randfs(), iw::randfs()));
 				

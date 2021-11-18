@@ -1,5 +1,7 @@
 #include "Systems/Projectile_System.h"
 
+// add the tile velocity to the projectile velocity
+
 void ProjectileSystem::Update()
 {
 	Space->Query<iw::Transform, Projectile>().Each(
@@ -37,7 +39,7 @@ void ProjectileSystem::Update()
 
 			sand->ForEachInLine(
 				pos.x, pos.y, 
-				pos.x + vel.x * iw::DeltaTime(), pos.y + vel.y * iw::DeltaTime(), 
+				pos.x + vel.x * iw::DeltaTime(), pos.y + vel.y * iw::DeltaTime(),
 			[&](
 				float fpx, float fpy)
 			{
@@ -129,13 +131,13 @@ void ProjectileSystem::Update()
 					}
 
 					float speed = glm::length(vel);
-					auto [dx2, dy2] = randvel(rigidbody, i == 0 ? split->SplitTurnArc : split->ShrapTurnArc);
+					auto [dx, dy] = randvel(rigidbody, i == 0 ? split->SplitTurnArc : split->ShrapTurnArc);
 
 					ShotInfo shot = proj->Shot;
 					shot.x = proj->Hit.x;
 					shot.y = proj->Hit.y;
-					shot.dx = dx2;
-					shot.dy = dy2;
+					shot.dx = dx;
+					shot.dy = dy;
 
 					Bus->push<SpawnProjectile_Event>(shot, split->Split + 1);
 				}
@@ -369,6 +371,7 @@ iw::Entity ProjectileSystem::MakeLaser(
 	split->ShrapCount = 2;
 	split->ShrapOdds = .1f;
 	split->ShrapTurnArc = iw::Pi / 6;
+	split->SplitTurnArc = iw::Pi / 18;
 
 	return entity;
 }

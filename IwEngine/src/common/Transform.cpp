@@ -186,6 +186,15 @@ namespace Engine {
 		return Rotation * parent;
 	}
 
+	Transform Transform::ScaleAndRotation() const
+	{
+		Transform copy;
+		copy.Scale = WorldScale();
+		copy.Rotation = WorldRotation();
+
+		return copy;
+	}
+
 	void Transform::Apply(
 		iw::Transform& transform)
 	{

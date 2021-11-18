@@ -63,7 +63,12 @@ namespace Engine {
 		IWCOMMON_API glm::vec3 WorldScale()          const;
 		IWCOMMON_API glm::quat WorldRotation()       const;
 
-		IWCOMMON_API void Apply(
+		// returns a transform with the Scale = WorldScale and Rotation = WorldRotation
+		// new transform has no parent
+		IWCOMMON_API Transform ScaleAndRotation() const;
+
+		IWCOMMON_API
+		void Apply(
 			Transform& transform);
 
 		IWCOMMON_API
