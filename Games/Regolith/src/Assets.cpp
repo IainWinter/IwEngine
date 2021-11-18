@@ -110,17 +110,6 @@ int LoadAssets(
 		A_mesh_ui_playerHealth.Material->SetTexture("texture", ui_player_texture);
 	}
 
-	{
-		FontMeshConfig config;
-		config.Size = 15;
-		config.Anchor = FontAnchor::TOP_LEFT;
-
-		A_mesh_ui_text_debug_version = A_font_cambria->GenerateMesh("indev v.04", config);
-		A_mesh_ui_text_debug_version.Material = A_material_font_cam->MakeInstance();
-		A_mesh_ui_text_debug_version.Material->Set("color", iw::Color(1, 1, 1, .25f));
-		A_mesh_ui_text_debug_version.Material->Set("alphaThresh", .1f);
-	}
-
 	// Menus
 
 	{

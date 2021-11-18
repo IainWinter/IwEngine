@@ -9,6 +9,13 @@ int Game_UI_Layer::Initialize()
 	A_mesh_ui_text_score    = A_font_cambria->GenerateMesh("0", { 100 });
 	A_mesh_ui_text_gameOver = A_font_cambria->GenerateMesh("YOU HAVE BEEN\n   DESTROYED", { 2, iw::FontAnchor::CENTER });
 
+	{
+		A_mesh_ui_text_debug_version = A_font_cambria->GenerateMesh("indev v.04", { 15, iw::FontAnchor::TOP_LEFT});
+		A_mesh_ui_text_debug_version.Material = A_material_font_cam->MakeInstance();
+		A_mesh_ui_text_debug_version.Material->Set("color", iw::Color(1, 1, 1, .25f));
+		A_mesh_ui_text_debug_version.Material->Set("alphaThresh", .1f);
+	}
+
 	m_gameover   = m_screen->CreateElement(A_mesh_ui_text_gameOver);
 	m_game       = m_screen->CreateElement(m_sand_game->GetSandMesh());
 	m_menu       = m_screen->CreateElement(A_mesh_ui_background);
@@ -43,8 +50,18 @@ void Game_UI_Layer::PreUpdate()
 int tick = 0;
 std::unordered_map<iw::EntityHandle, std::pair<UI*, int>, iw::ehandle_hash> debug_tileColliders;
 
+float fps = 0;
+
 void Game_UI_Layer::PostUpdate()
 {
+	fps = iw::lerp(fps, iw::DeltaTime(), .01);
+
+	std::stringstream ss;
+	ss << "indev v.04 ms: ";
+	ss << to_string(fps * 1000);
+
+	A_font_cambria->UpdateMesh(A_mesh_ui_text_debug_version, ss.str(), {15, iw::FontAnchor::TOP_LEFT});
+
 	iw::ref<iw::Texture> texture = m_game->mesh.Material->GetTexture("texture");
 
 	// copy last 
