@@ -104,6 +104,8 @@ void Tile::UpdateColliderPolygon()
 	glm::vec2 halfSize = m_sprite.Dimensions() / 2.0f;
 	for (glm::vec2& v : m_collider) v -= halfSize; // Origins to middle ?
 
+	// should combine same verts
+	// should also simplying too many tris!!
 	RemoveTinyTriangles(m_collider, m_colliderIndex, 0.001f); // find best value for this, colliders can be less detailed
 }
 
