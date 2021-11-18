@@ -68,8 +68,38 @@ void Tile::UpdateColliderPolygon()
 	
 	if (colliders.size() == 0) return;
 
-	m_collider      = colliders[0]; // should combine into single polygon?
-	m_colliderIndex = TriangulatePolygon(colliders[0]);
+	size_t vertCount = 0;
+	size_t idnxCount = 0;
+
+	for (auto& chain : colliders)
+	{
+		vertCount += chain.size();
+	}
+
+	m_collider     .clear();
+	m_colliderIndex.clear();
+
+	m_collider     .reserve(    vertCount);
+	m_colliderIndex.reserve(3 * vertCount); // approx, find avg number of tris from math
+
+	unsigned lastSize = 0;
+
+	for (auto& chain : colliders)
+	{
+		std::vector<unsigned> tris = TriangulatePolygon(chain);
+		for (unsigned& index : tris)
+		{
+			index += lastSize;
+		}
+
+		m_collider     .insert(m_collider     .end(), chain.begin(), chain.end());
+		m_colliderIndex.insert(m_colliderIndex.end(), tris .begin(), tris .end());
+
+		lastSize = (unsigned)m_collider.size();
+	}
+
+	//m_collider      = colliders[0]; // should combine into single polygon?
+	//m_colliderIndex = TriangulatePolygon(colliders[0]);
 
 	glm::vec2 halfSize = m_sprite.Dimensions() / 2.0f;
 	for (glm::vec2& v : m_collider) v -= halfSize; // Origins to middle ?
