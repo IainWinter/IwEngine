@@ -16,6 +16,15 @@ namespace Audio {
 			ENGINE_FAILED_CREATE
 		);
 
+		// set random seed to system time
+
+		FMOD_ADVANCEDSETTINGS settings;
+		settings.randomSeed = time(nullptr);
+
+		FMOD::System* core;
+		m_system->getCoreSystem(&core);
+		core->setAdvancedSettings(&settings);
+
 		// can channels be expanded past 32?
 
 		CHECK_ERROR(

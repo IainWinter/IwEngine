@@ -404,7 +404,8 @@ void SandLayer::EjectPixel(
 
 Entity SandLayer::SplitTile(
 	Entity& entity, 
-	std::vector<int> indices)
+	std::vector<int> indices,
+	const Archetype* others)
 {
 	if (indices.size() <= 2)
 	{
@@ -447,7 +448,7 @@ Entity SandLayer::SplitTile(
 		texture->Colors32()[it] = tile->m_sprite.Colors32()[i];
 	}
 
-	Entity split = MakeTile(*texture, true);
+	Entity split = MakeTile(*texture, true, others);
 
 	// give split the pos and rot of the orignal peice
 

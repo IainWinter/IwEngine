@@ -113,7 +113,11 @@ void PlayerLaserTankSystem::OnPush()
 
 void PlayerLaserTankSystem::Update()
 {
-	iw::Texture& playerSprite = m_player.Find<iw::Tile>()->m_sprite;
+	iw::Tile* tile = m_player.Find<iw::Tile>();
+
+	if (!tile) return;
+
+	iw::Texture& playerSprite = tile->m_sprite;
 	iw::ref<iw::Texture> uiPlayerTex = A_mesh_ui_playerHealth.Material->GetTexture("texture");
 
 	unsigned* colorsFrom = playerSprite.Colors32();

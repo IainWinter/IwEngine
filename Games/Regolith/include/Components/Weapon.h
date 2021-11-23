@@ -141,6 +141,7 @@ inline Weapon* MakeMinigun_Cannon()
 	cannon->FireDelay = 0.15 / 3.f;
 	cannon->Inaccuracy = .1f;
 	cannon->Ammo = 200;
+	cannon->Audio = "event:/weapons/fire_minigun";
 
 	return cannon;
 }

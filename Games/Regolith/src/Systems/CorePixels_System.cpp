@@ -34,9 +34,9 @@ void CorePixelsSystem::Update()
 			if (dead) {
 				Bus->push<CoreExploded_Event>(iw::Entity(handle, Space));
 
-				//if (Space->HasComponent<Player>(handle)) {
-				//	Console->QueueCommand("game-over");
-				//}
+				if (Space->HasComponent<Player>(handle)) {
+					Console->QueueCommand("game-over");
+				}
 
 				//Space->QueueEntity(handle, iw::func_Destroy);
 			}

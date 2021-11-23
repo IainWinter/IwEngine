@@ -6,9 +6,16 @@ int Audio_Layer::Initialize()
 	Audio->Load("Regolith/Master.bank");
 	Audio->Load("Regolith/Music.bank");
 	Audio->Load("Regolith/Weapons.bank");
-	Audio->Play("event:/music/background");
 
-	Audio->SetVolume(Audio->GetHandle("vca:/music"), .1-.1);
+	srand(time(nullptr));
+
+	int i = iw::randi(7) + 1;
+	std::stringstream ss;
+	ss << "event:/music/bg" << i;
+
+	Audio->Play(ss.str());
+
+	Audio->SetVolume(Audio->GetHandle("vca:/music"), .1);
 	Audio->SetVolume(Audio->GetHandle("vca:/effects"), .9);
 
 	return 0;

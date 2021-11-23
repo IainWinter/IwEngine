@@ -416,7 +416,7 @@ namespace Graphics {
 	{
 		return (unsigned*)m_colors;
 	}
-
+	
 	unsigned char* Texture::CreateColors(
 		bool evenIfNotNull)
 	{

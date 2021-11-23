@@ -26,7 +26,7 @@ void WorldSystem::Update()
 	//}
 
 
-	return;
+	//return;
 	m_timer.Tick();
 
 	bool needsAnotherLevel = false;
@@ -65,28 +65,28 @@ void WorldSystem::Update()
 
 		seq.Start();
 	}
+
+	Space->Query<iw::Transform, iw::Tile, Asteroid>().Each(
+	[&](
+		iw::EntityHandle handle, 
+		iw::Transform* transform,
+		iw::Tile* tile,
+		Asteroid* asteroid) 
+	{
+		asteroid->Lifetime -= iw::DeltaTime();
+
+		iw::AABB2 b = iw::TransformBounds(tile->m_bounds, transform);
+
+		if (   asteroid->Lifetime < 0.f
+			&& !iw::AABB2(glm::vec2(200.f), 200).Intersects(&iw::Transform(), tile->m_bounds, transform))
+		{
+			Space->QueueEntity(handle, iw::func_Destroy);
+		}
+	});
 }
 
 void WorldSystem::FixedUpdate()
 {
-	Space->Query<iw::Transform, iw::Tile, Asteroid>().Each(
-		[&](
-			iw::EntityHandle handle, 
-			iw::Transform* transform,
-			iw::Tile* tile,
-			Asteroid* asteroid) 
-		{
-			asteroid->Lifetime += iw::FixedTime();
-
-			iw::AABB2 b = iw::TransformBounds(tile->m_bounds, transform);
-
-			if (   asteroid->Lifetime > 10
-				&& !iw::AABB2(glm::vec2(200.f), 200).Intersects(&iw::Transform(), tile->m_bounds, transform))
-			{
-				Space->QueueEntity(handle, iw::func_Destroy);
-			}
-		});
-
 	Space->Query<Throwable, Flocker>().Each(
 		[&](
 			iw::EntityHandle handle, 
@@ -264,27 +264,27 @@ bool WorldSystem::On(iw::ActionEvent& e)
 			{
 				case GAME_START_STATE:
 				{
-					SpawnAsteroid_Config c;
-					c.SpawnLocationX = 100;
-					c.SpawnLocationY = 100;
-					c.Size = 0;
+					//SpawnAsteroid_Config c;
+					//c.SpawnLocationX = 100;
+					//c.SpawnLocationY = 100;
+					//c.Size = 0;
 
-					Bus->push<SpawnAsteroid_Event>(c);
+					//Bus->push<SpawnAsteroid_Event>(c);
 
-					SpawnEnemy_Config cc;
-					cc.SpawnLocationX = 300;
-					cc.SpawnLocationY = 300;
-					cc.TargetLocationX = 300;
-					cc.TargetLocationY = 300;
-					cc.EnemyType = STATION;
+					//SpawnEnemy_Config cc;
+					//cc.SpawnLocationX = 300;
+					//cc.SpawnLocationY = 300;
+					//cc.TargetLocationX = 300;
+					//cc.TargetLocationY = 300;
+					//cc.EnemyType = STATION;
 
-					Bus->push<SpawnEnemy_Event>(cc);
+					//Bus->push<SpawnEnemy_Event>(cc);
 
-					//m_levels.emplace_front(CreateSequence())
-					//	.Add<Spawn>(MakeEnemySpawner())
-					//	.And<Spawn>(MakeAsteroidSpawner())
-					//	.And<iw::Delay>(30)
-					//	.Start();
+					m_levels.emplace_front(CreateSequence())
+						.Add<Spawn>(MakeEnemySpawner())
+						.And<Spawn>(MakeAsteroidSpawner())
+						.And<iw::Delay>(30)
+						.Start();
 					break;
 				}
 				case GAME_OVER_STATE:
@@ -323,6 +323,8 @@ iw::Entity WorldSystem::MakeAsteroid(
 	r->AngularVelocity.z = config.AngularVel;
 	r->SetTransform(t);
 	r->SetMass(1000);
+
+	entity.Find<Asteroid>()->Lifetime = 10;
 
 	return entity;
 }

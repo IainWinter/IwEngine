@@ -138,7 +138,8 @@ public:
 	IW_PLUGIN_SAND_API
 	Entity SplitTile(
 		Entity& entity,
-		std::vector<int> indices);
+		std::vector<int> indices,
+		const Archetype* others = nullptr);
 
 	Mesh& GetSandMesh() {
 		return m_render->GetSandMesh();

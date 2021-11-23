@@ -1,5 +1,24 @@
 #include "Systems/TileSplit_System.h"
 
+void TileSplitSystem::Update()
+{
+	Space->Query<iw::Tile, Asteroid>().Each(
+	[&](
+		iw::EntityHandle handle,
+		iw::Tile* tile, 
+		Asteroid* asteroid)
+	{
+		if (tile->m_currentCells.size() < 50) 
+		{
+			asteroid->Lifetime -= iw::DeltaTime();
+			if (asteroid->Lifetime < 0.f)
+			{
+				ExplodeTile(Space->GetEntity(handle), tile->m_currentCells);
+			}
+		}
+	});
+}
+
 bool TileSplitSystem::On(iw::ActionEvent& e)
 {
 	switch (e.Action)
@@ -140,7 +159,7 @@ bool TileSplitSystem::On(iw::ActionEvent& e)
 
 			if (tile->m_currentCells.size() < 10)
 			{
-				SplitTileOff(event.Entity, tile->m_currentCells);
+				ExplodeTile(event.Entity, tile->m_currentCells);
 				event.Entity.Queue(iw::func_Destroy);
 			}
 
@@ -157,63 +176,75 @@ void TileSplitSystem::SplitTileOff(
 {
 	iw::Tile* tile = entity.Find<iw::Tile>();
 	glm::vec2 midOld = entity.Find<iw::Tile>()->m_sprite.Dimensions() / 2.f;
-
 	if (toSplit.size() > 10)
 	{
-		sand->SplitTile(entity, toSplit);
-
-		// debug
-		//for (unsigned i = 0; i < split.Find<iw::Tile>()->m_sprite.ColorCount32(); i++)
-		//{
-		//	unsigned& c = split.Find<iw::Tile>()->m_sprite.Colors32()[i];
-		//	if (c == 0)
-		//	{
-		//		c = iw::Color(1, 1, 1, .5).to32();
-		//	}
-		//}
-		//event.Entity.Find<iw::Tile>()->m_sprite.Colors32()[max] =
-		//	iw::Color(1, 0, 0, 1).to32();
-		//event.Entity.Find<iw::Tile>()->m_sprite.Colors32()[min] =
-		//	iw::Color(0, 1, 0, 1).to32();
-		//event.Entity.Find<iw::Tile>()->m_sprite.Colors32()[event.Entity.Find<iw::Tile>()->m_sprite.ColorCount32() - 1] =
-		//	iw::Color(1, 0, 0, 1).to32();
-		//event.Entity.Find<iw::Tile>()->m_sprite.Colors32()[0] =
-		//	iw::Color(0, 1, 0, 1).to32();
-		//split.Find<iw::Tile>()->m_sprite.Colors32()[split.Find<iw::Tile>()->m_sprite.ColorCount32() - 1] = 
-		//	iw::Color(1, 0, 0, 1).to32();
-		//split.Find<iw::Tile>()->m_sprite.Colors32()[0] =
-		//	iw::Color(0, 1, 0, 1).to32();
+		iw::Entity split = sand->SplitTile(entity, toSplit, &Space->CreateArchetype<Asteroid>());
+		Asteroid* ast = split.Find<Asteroid>();
+		ast->Lifetime = toSplit.size() / 2.f;
 	}
 
 	else
 	{
-		// make sparks the color of the cells
-		for (int index : toSplit)
-		{
-			auto [x, y] = iw::xy<int>(index, tile->m_sprite.m_width);
-
-			glm::vec2 offset = glm::vec2(
-				x - floor(midOld.x),
-				y - floor(midOld.y));
-
-			glm::vec2 pos = iw::TransformPoint<iw::d2>(
-				offset,
-				entity.Find<iw::Transform>());
-
-			iw::Cell spark;
-			spark.Type  = iw::CellType::ROCK;
-			spark.Props = iw::CellProp::MOVE_FORCE;
-				
-			spark.Color = iw::Color::From32(tile->m_sprite.Colors32()[index]);
-				
-			spark.dx = offset.x + iw::randfs() * 50;
-			spark.dy = offset.y + iw::randfs() * 50;
-			spark.life = .2 + iw::randf() * .2;
-
-			float px = pos.x;
-			float py = pos.y;
-				
-			sand->m_world->SetCell(px, py, spark);
-		}
+		ExplodeTile(entity, toSplit);
 	}
 }
+
+void TileSplitSystem::ExplodeTile(
+	iw::Entity entity,
+	std::vector<int> toSplit)
+{
+	iw::Rigidbody* body = entity.Find<iw::Rigidbody>();
+	iw::Tile* tile = entity.Find<iw::Tile>();
+	glm::vec2 mid = entity.Find<iw::Tile>()->m_sprite.Dimensions() / 2.f;
+	
+	// make sparks the color of the cells
+	for (int index : toSplit)
+	{
+		auto [x, y] = iw::xy<int>(index, tile->m_sprite.m_width);
+
+		glm::vec2 offset = glm::vec2(
+			x - floor(mid.x),
+			y - floor(mid.y));
+
+		glm::vec2 pos = iw::TransformPoint<iw::d2>(
+			offset,
+			entity.Find<iw::Transform>());
+
+		iw::Cell spark;
+		spark.Type  = iw::CellType::ROCK;
+		spark.Props = iw::CellProp::MOVE_FORCE;
+				
+		spark.Color = iw::Color::From32(tile->m_sprite.Colors32()[index]);
+				
+		spark.dx = offset.x + iw::randfs() * 20 + (body ? body->Velocity.x * 2.f : 0.f);
+		spark.dy = offset.y + iw::randfs() * 20 + (body ? body->Velocity.y * 2.f : 0.f);
+		spark.life = .2 + iw::randf() * .2;
+
+		float px = pos.x;
+		float py = pos.y;
+				
+		sand->m_world->SetCell(px, py, spark);
+	}
+}
+
+// debug
+//for (unsigned i = 0; i < split.Find<iw::Tile>()->m_sprite.ColorCount32(); i++)
+//{
+//	unsigned& c = split.Find<iw::Tile>()->m_sprite.Colors32()[i];
+//	if (c == 0)
+//	{
+//		c = iw::Color(1, 1, 1, .5).to32();
+//	}
+//}
+//event.Entity.Find<iw::Tile>()->m_sprite.Colors32()[max] =
+//	iw::Color(1, 0, 0, 1).to32();
+//event.Entity.Find<iw::Tile>()->m_sprite.Colors32()[min] =
+//	iw::Color(0, 1, 0, 1).to32();
+//event.Entity.Find<iw::Tile>()->m_sprite.Colors32()[event.Entity.Find<iw::Tile>()->m_sprite.ColorCount32() - 1] =
+//	iw::Color(1, 0, 0, 1).to32();
+//event.Entity.Find<iw::Tile>()->m_sprite.Colors32()[0] =
+//	iw::Color(0, 1, 0, 1).to32();
+//split.Find<iw::Tile>()->m_sprite.Colors32()[split.Find<iw::Tile>()->m_sprite.ColorCount32() - 1] = 
+//	iw::Color(1, 0, 0, 1).to32();
+//split.Find<iw::Tile>()->m_sprite.Colors32()[0] =
+//	iw::Color(0, 1, 0, 1).to32();
