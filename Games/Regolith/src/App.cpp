@@ -104,13 +104,9 @@ void App::DestroyState(
 	}
 }
 
-App::App() : iw::Application()
+int App::Initialize(
+	iw::InitOptions& options)
 {
-	m_currentState = nullptr;
-	m_gamePlay = nullptr;
-	m_gamePause = nullptr;
-	m_gamePost = nullptr;
-
 	PushLayer<StaticLayer>();
 	PushLayer<UI_Render_Layer>();
 	PushLayer<Audio_Layer>();
@@ -125,12 +121,8 @@ App::App() : iw::Application()
 		Input->SetContext("Menu");
 	};
 
-	Console->QueueCommand("game-start");
-}
+	Console->QueueCommand("game-upgrade");
 
-int App::Initialize(
-	iw::InitOptions& options)
-{
 	// create a guid for the installation of this app
 
 	//GUID install_id;
@@ -228,21 +220,19 @@ int App::Initialize(
 
 				if (done)
 				{
+					// ew
 					Game_Layer* game = GetLayer<Game_Layer>("Game");
 					ScoreSystem* score_s = nullptr;
 					if (game) score_s = game->GetSystem<ScoreSystem>("Score");
+					if (score_s) m_finalScore = score_s->Score;
 
-					int finalScore = iw::randi(10000);
-					if (score_s) finalScore = score_s->Score;
+					Menu_PostGame_Layer* menu = new Menu_PostGame_Layer(m_finalScore);
 
-					Menu_PostGame_Layer* menu = new Menu_PostGame_Layer(finalScore);
-
-					m_gamePost = new GameState("Post game menu");
-					m_gamePost->Layers.push_back(menu);
-					m_gamePost->OnChange = [&]()
+					m_gameHighscore = new GameState("Post game menu");
+					m_gameHighscore->Layers.push_back(menu);
+					m_gameHighscore->OnChange = [&]()
 					{
 						Physics->Paused = true;
-						//Window()->SetCursor(true);
 						Input->SetContext("Menu");
 					};
 
@@ -251,13 +241,30 @@ int App::Initialize(
 						DestroyState(m_gamePlay);
 					}
 
-					SetState(m_gamePost);
-
-
+					SetState(m_gameHighscore);
 				}
 
 				return done;
 			});
+		}
+
+		else 
+		if (command.Verb == "game-upgrade")
+		{
+			m_gameUpgrade = new GameState("Upgrade menu");
+			m_gameUpgrade->Layers.push_back(new Menu_Upgrade_Layer(m_finalScore));
+			m_gameUpgrade->OnChange = [&]()
+			{
+				Physics->Paused = true;
+				Input->SetContext("Menu");
+			};
+
+			if (m_gameHighscore)
+			{
+				DestroyState(m_gameHighscore);
+			}
+
+			SetState(m_gameUpgrade);
 		}
 
 		else
@@ -286,13 +293,12 @@ int App::Initialize(
 			m_gamePlay->OnChange = [&]()
 			{
 				Physics->Paused = false;
-				//Window()->SetCursor(false);
 				Input->SetContext("Game");
 			};
 
-			if (m_gamePost)
+			if (m_gameHighscore)
 			{
-				DestroyState(m_gamePost);
+				DestroyState(m_gameHighscore);
 			}
 
 			SetState(m_gamePlay);
@@ -314,11 +320,11 @@ int App::Initialize(
 iw::Application* CreateApplication(
 	iw::InitOptions& options)
 {
-	options.AssetRootPath = "_assets/";
+	//options.AssetRootPath = "_assets/";
 
 	options.WindowOptions = iw::WindowOptions {
-		900,
-		900,
+		816,
+		1039,
 		true,
 		iw::DisplayState::NORMAL
 	};

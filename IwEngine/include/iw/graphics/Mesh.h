@@ -328,10 +328,6 @@ namespace detail {
 			return IndexCount / Topology;
 		}*/
 	};
-
-	struct MeshConfig {
-
-	};
 }
 
 	using namespace Graphics;

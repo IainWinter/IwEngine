@@ -81,7 +81,7 @@ void Game_Layer::Update()
 
 		SpawnItem_Config item;
 		item.Amount = 1;
-		item.Item = ItemType::LASER_CHARGE;
+		item.Item = ItemType::WEAPON_MINIGUN;
 		item.X = 100;
 		item.Y = 100;
 		item.AngularSpeed = 30;

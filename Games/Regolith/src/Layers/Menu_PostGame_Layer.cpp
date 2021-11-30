@@ -45,17 +45,17 @@ int Menu_PostGame_Layer::Initialize()
 
 	////A_mesh_ui_playerHealth.Material->Set("color", iw::Color(1)); // maybe this should be the full player
 
-	m_background   = m_screen->CreateElement(A_mesh_menu_background);
+	m_background   = m_screen->CreateElement(A_mesh_highscore_menu_background);
 	m_playerBorder = m_screen->CreateElement(A_mesh_ui_playerBorder);
 	m_title_score  = m_screen->CreateElement(title_score);
 
 	m_button_reform = m_screen->CreateElement<UI_Button>(buttonbg, label_restart);
 	m_button_reform->onClick = [&]()
 	{
-		SubmitScoreAndExit("game-start");
+		SubmitScoreAndExit("game-upgrade");
 	};
 
-	m_button_quit   = m_screen->CreateElement<UI_Button>(buttonbg, label_quit);
+	m_button_quit = m_screen->CreateElement<UI_Button>(buttonbg, label_quit);
 	m_button_quit->onClick = [&]()
 	{
 		SubmitScoreAndExit("quit");
@@ -227,8 +227,7 @@ iw::NetworkResult<std::string> Menu_PostGame_Layer::SubmitTempScoreAndGetId()
 				if (record.GameId == m_gameId)
 				{
 					m_playerRowId = AddHighscoreToTable(record, true);
-					mat_tablePlayerRow = m_table_highScore->GetRow(m_playerRowId)
-						.first->at(0)->mesh.Material;
+					mat_tablePlayerRow = m_table_highScore->GetRow(m_playerRowId)[0]->mesh.Material;
 				}
 
 				else

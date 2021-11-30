@@ -18,6 +18,11 @@ int Audio_Layer::Initialize()
 	Audio->SetVolume(Audio->GetHandle("vca:/music"), .1);
 	Audio->SetVolume(Audio->GetHandle("vca:/effects"), .9);
 
+#ifdef IW_DEBUG
+	Audio->SetVolume(Audio->GetHandle("vca:/music"), .0);
+	Audio->SetVolume(Audio->GetHandle("vca:/effects"), .01);
+#endif
+
 	return 0;
 }
 

@@ -14,6 +14,7 @@ void TileSplitSystem::Update()
 			if (asteroid->Lifetime < 0.f)
 			{
 				ExplodeTile(Space->GetEntity(handle), tile->m_currentCells);
+				Space->QueueEntity(handle, iw::func_Destroy);
 			}
 		}
 	});
@@ -180,7 +181,7 @@ void TileSplitSystem::SplitTileOff(
 	{
 		iw::Entity split = sand->SplitTile(entity, toSplit, &Space->CreateArchetype<Asteroid>());
 		Asteroid* ast = split.Find<Asteroid>();
-		ast->Lifetime = toSplit.size() / 2.f;
+		ast->Lifetime = toSplit.size() / 5.f;
 	}
 
 	else

@@ -30,6 +30,7 @@ int LoadAssets(
 	A_texture_ui_cursor       = LOADTEX("textures/SpaceGame/cursor.png");
 	A_texture_ui_background   = LOADTEX("textures/SpaceGame/ui_background.png");
 	A_texture_ui_playerBorder = LOADTEX("textures/SpaceGame/ui_player_border.png");
+	A_texture_post_game_background = LOADTEX("textures/SpaceGame/highscore_background.png");
 
 	A_material_texture_cam = REF<Material>(Asset->Load<Shader>("shaders/texture_cam.shader"));
 	//A_material_font_cam    = REF<Material>(Asset->Load<Shader>("shaders/font.shader"));
@@ -43,6 +44,7 @@ int LoadAssets(
 	A_mesh_ui_playerBorder = iw::ScreenQuad().MakeInstance();
 	A_mesh_menu_pause      = iw::ScreenQuad().MakeInstance();
 	A_mesh_menu_background = iw::ScreenQuad().MakeInstance();
+	A_mesh_highscore_menu_background = iw::ScreenQuad().MakeInstance();
 
 #define CHECK_LOAD(x) if(!x) { LOG_ERROR << "Failed to load " << #x; return 100; }
 	
@@ -95,6 +97,11 @@ int LoadAssets(
 	{
 		A_mesh_ui_background.Material = A_material_texture_cam->MakeInstance();
 		A_mesh_ui_background.Material->SetTexture("texture", A_texture_ui_background);
+	}
+
+	{
+		A_mesh_highscore_menu_background.Material = A_material_texture_cam->MakeInstance();
+		A_mesh_highscore_menu_background.Material->SetTexture("texture", A_texture_post_game_background);
 	}
 
 	{

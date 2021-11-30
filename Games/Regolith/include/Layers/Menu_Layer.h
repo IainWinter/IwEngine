@@ -31,8 +31,9 @@ struct UI_Layer : iw::Layer
 		}
 
 		else {
-			m_screen = Space->CreateEntity<UI_Screen>()
-				.Set<UI_Screen>(A_mesh_menu_background);
+			iw::Mesh default = iw::ScreenQuad().MakeInstance();
+			default.Material = A_material_texture_cam->MakeInstance();
+			m_screen = Space->CreateEntity<UI_Screen>().Set<UI_Screen>(default);
 		}
 
 		Layer::OnPush();
@@ -80,7 +81,6 @@ struct Menu_Layer : UI_Layer
 		{
 			UI_Clickable* clickable = dynamic_cast<UI_Clickable*>(ui);
 
-			float buttonOffsetTarget = 0;
 			if (ui->IsPointOver(m_screen->LocalMouse()))
 			{
 				if (clickable->whileMouseHover)
@@ -101,6 +101,9 @@ struct Menu_Layer : UI_Layer
 					clickable->onClick();
 				}
 			}
+
+			ui->x = 0;
+			ui->y = 0;
 		}
 
 		m_last_execute = m_execute;
