@@ -107,13 +107,30 @@ void Menu_Upgrade_Layer::PostUpdate()
 	if (m_tooltip->active)
 	{
 		iw::vec2 mouse = m_screen->LocalMouse();
-		m_tooltip->width = 200;
-		m_tooltip->height = 100;
-		m_tooltip->x = mouse.x() + m_tooltip->width;
-		m_tooltip->y = mouse.y() - m_tooltip->height;
+		m_tooltip->width  = m_background->width / 2.f;
+		m_tooltip->height = m_background->height / 4.f;
+		m_tooltip->x = mouse.x() + m_tooltip->width + 10;
+		m_tooltip->y = mouse.y() - m_tooltip->height - 10;
 
-		m_tooltip->GetElement(0)->width  = 200;
-		m_tooltip->GetElement(0)->height = 200;
+		UI_Text* text = m_tooltip->GetElement<UI_Text>(0);
+
+		float padding = .02;
+
+		text->x = -m_tooltip->width  + m_tooltip->width * padding;
+		text->y =  m_tooltip->height - m_tooltip->width * padding;
+		text->width  = m_tooltip->width;
+		text->height = m_tooltip->width;
+
+
+		//     o-----------------------------o
+		//     |	+10% larger engine		 |
+		//     |	impulse				     |
+		//     |							 |
+		//     |	This effects the initial |
+		//     |	ac/deleration of the     |
+		//     |	ship				     |
+		//     |				   10,200 Rh |
+		//     o-----------------------------o
 
 	}
 
