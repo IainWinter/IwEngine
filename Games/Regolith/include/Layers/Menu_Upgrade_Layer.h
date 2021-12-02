@@ -18,7 +18,11 @@ struct Menu_Upgrade_Layer : Menu_Layer
 	{
 		std::string texturePath;
 		std::string tooltip;
-		int cost;
+		std::string description;
+		std::string stat;
+		std::string cost;
+		iw::Color statColor;
+		iw::Color costColor;
 	};
 
 	Menu_Upgrade_Layer(

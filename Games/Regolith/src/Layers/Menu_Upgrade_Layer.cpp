@@ -1,21 +1,25 @@
 #include "Layers/Menu_Upgrade_Layer.h"
 
-#define LoadTexture Asset->Load<iw::Texture>
+#define LoadTexture(x) Asset->Load<iw::Texture>(std::string("textures/SpaceGame/") + x)
+#define LoadFont(x) Asset->Load<iw::Font>(std::string("fonts/") + x)
 
 UI_Base* Menu_Upgrade_Layer::MakeUpgrade(
 	const UpgradeDescription& upgrade)
 {
-	auto texture = LoadTexture(upgrade.texturePath);
-	texture->SetFilter(iw::NEAREST);
-
 	UI_Button* button = m_upgrades->GetRow(0)[0]->CreateElement<UI_Button>();
-	button->CreateElement<UI_Image>(texture);
+	button->CreateElement<UI_Image>(LoadTexture(upgrade.texturePath));
 
 	button->whileMouseHover = [this, button, upgrade]()
 	{
 		button->offsetTarget = 8;
 		m_tooltip->active = true;
-		m_tooltip->GetElement<UI_Text>(0)->SetString(upgrade.texturePath);
+		m_tooltip->GetElement<UI_Text>(0)->SetString(upgrade.tooltip);
+		m_tooltip->GetElement<UI_Text>(1)->SetString(upgrade.description);
+		m_tooltip->GetElement<UI_Text>(2)->SetString(upgrade.stat);
+		m_tooltip->GetElement<UI_Text>(3)->SetString(upgrade.cost);
+
+		m_tooltip->GetElement<UI_Text>(2)->mesh.Material->Set("color", upgrade.statColor);
+		m_tooltip->GetElement<UI_Text>(3)->mesh.Material->Set("color", upgrade.costColor);
 	};
 
 	return button;
@@ -47,11 +51,18 @@ int Menu_Upgrade_Layer::Initialize()
 	UpgradeDescription upgrade3;
 	UpgradeDescription upgrade4;
 	UpgradeDescription upgrade5;
-	upgrade1.texturePath = "textures/SpaceGame/upgrade_thrusterimpulse.png";
-	upgrade2.texturePath = "textures/SpaceGame/upgrade_thrusteracceleration.png";
-	upgrade3.texturePath = "textures/SpaceGame/upgrade_thrustermaxspeed.png";
-	upgrade4.texturePath = "textures/SpaceGame/upgrade_healthefficiency.png";
-	upgrade5.texturePath = "textures/SpaceGame/upgrade_laserefficiency.png";
+	upgrade1.texturePath = "upgrade_thrusterimpulse.png";
+	upgrade2.texturePath = "upgrade_thrusteracceleration.png";
+	upgrade3.texturePath = "upgrade_thrustermaxspeed.png";
+	upgrade4.texturePath = "upgrade_healthefficiency.png";
+	upgrade5.texturePath = "upgrade_laserefficiency.png";
+
+	upgrade1.tooltip = "Thruster\nAcceleration";
+	upgrade1.description = "Improves stop start time";
+	upgrade1.stat = "+10%";
+	upgrade1.cost = "10,000 Rh";
+	upgrade1.statColor = iw::Color::From255( 85, 255, 0);
+	upgrade1.costColor = iw::Color::From255(255, 210, 0);
 
 	m_upgrades->GetRow(0)[0]->AddElement(MakeUpgrade(upgrade1));
 	m_upgrades->GetRow(1)[0]->AddElement(MakeUpgrade(upgrade2));
@@ -59,16 +70,25 @@ int Menu_Upgrade_Layer::Initialize()
 	m_upgrades->GetRow(2)[1]->AddElement(MakeUpgrade(upgrade4));
 	m_upgrades->GetRow(2)[2]->AddElement(MakeUpgrade(upgrade5));
 
-	m_tooltip = m_screen->CreateElement(itembg);
-	UI_Text* text = m_tooltip->CreateElement<UI_Text>(
-		A_font_cambria, 
-		iw::FontMeshConfig { 30, iw::FontAnchor::TOP_LEFT }
-	);
+	auto font = LoadFont("basic.fnt");
+	font->m_material = A_material_font_cam->MakeInstance();
+	font->m_material->SetTexture("texture", font->GetTexture(0));
+	font->GetTexture(0)->SetFilter(iw::NEAREST);
 
-	m_background->zIndex = 0;
+	m_tooltip = m_screen->CreateElement<UI_Image>(LoadTexture("ui_upgrade_tooltip_background.png"));
+	UI_Text* ttip = m_tooltip->CreateElement<UI_Text>(font, iw::FontMeshConfig { 15, iw::FontAnchor::TOP_LEFT });
+	UI_Text* desc = m_tooltip->CreateElement<UI_Text>(font, iw::FontMeshConfig { 12, iw::FontAnchor::TOP_LEFT });
+	UI_Text* stat = m_tooltip->CreateElement<UI_Text>(font, iw::FontMeshConfig { 15, iw::FontAnchor::BOT_LEFT });
+	UI_Text* cost = m_tooltip->CreateElement<UI_Text>(font, iw::FontMeshConfig { 15, iw::FontAnchor::BOT_RIGHT });
+
+	ttip->zIndex = 4;
+	desc->zIndex = 4;
+	stat->zIndex = 4;
+	cost->zIndex = 4;
+
+	m_background->zIndex =  0;
 	m_upgrades  ->zIndex = -1;
-	m_tooltip   ->zIndex = 3;
-	text        ->zIndex = 4;
+	m_tooltip   ->zIndex =  3;
 
 	return 0;
 }
@@ -107,20 +127,35 @@ void Menu_Upgrade_Layer::PostUpdate()
 	if (m_tooltip->active)
 	{
 		iw::vec2 mouse = m_screen->LocalMouse();
-		m_tooltip->width  = m_background->width / 2.f;
-		m_tooltip->height = m_background->height / 4.f;
+		m_tooltip->width  = m_background->width * 0.5f;
+		m_tooltip->height = m_background->height * .26f;
 		m_tooltip->x = mouse.x() + m_tooltip->width + 10;
 		m_tooltip->y = mouse.y() - m_tooltip->height - 10;
 
-		UI_Text* text = m_tooltip->GetElement<UI_Text>(0);
+		UI_Text* ttip = m_tooltip->GetElement<UI_Text>(0);
+		UI_Text* desc = m_tooltip->GetElement<UI_Text>(1);
+		UI_Text* stat = m_tooltip->GetElement<UI_Text>(2);
+		UI_Text* cost = m_tooltip->GetElement<UI_Text>(3);
 
-		float padding = .02;
+		for (UI_Text* text : { ttip, desc, stat, cost })
+		{
+			text->width  = m_tooltip->width;
+			text->height = m_tooltip->width;
+		}
 
-		text->x = -m_tooltip->width  + m_tooltip->width * padding;
-		text->y =  m_tooltip->height - m_tooltip->width * padding;
-		text->width  = m_tooltip->width;
-		text->height = m_tooltip->width;
+		float padding = .06;
 
+		for (UI_Text* text : { ttip, desc, stat })
+		{
+			text->x = -m_tooltip->width + m_tooltip->width * padding;
+		}
+
+		cost->x = m_tooltip->width - m_tooltip->width * padding;
+
+		ttip->y = m_tooltip->height - m_tooltip->width * padding * 2;
+		desc->y = 0;
+		stat->y = -m_tooltip->height + m_tooltip->width * padding / 2;
+		cost->y = -m_tooltip->height + m_tooltip->width * padding / 2;
 
 		//     o-----------------------------o
 		//     |	+10% larger engine		 |
@@ -131,7 +166,6 @@ void Menu_Upgrade_Layer::PostUpdate()
 		//     |	ship				     |
 		//     |				   10,200 Rh |
 		//     o-----------------------------o
-
 	}
 
 	m_tooltip->active = false;

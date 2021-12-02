@@ -312,12 +312,12 @@ struct UI_Image : UI
 
 	void init() override
 	{
+		texture->SetFilter(iw::NEAREST);
 		mesh = GetScreen()->default.MakeInstance();
 		mesh.Material->SetTexture("texture", texture);
 		mesh.Material->Set("color", iw::Color(1.f));
 	}
 };
-
 
 struct UI_Text : UI
 {
@@ -340,7 +340,9 @@ struct UI_Text : UI
 
 	void init() override
 	{
+		font->GetTexture(0)->SetFilter(iw::NEAREST);
 		mesh = font->GenerateMesh("", config);
+		mesh.Material = mesh.Material->MakeInstance();
 		mesh.Material->Set("color", iw::Color(1.f));
 	}
 };
@@ -354,7 +356,7 @@ struct UI_Button : UI, UI_Clickable
 	std::function<void(UI_Button*)> effect;
 
 	UI_Button()
-		: UI()
+		: UI ()
 	{
 		_reset();
 	}
@@ -362,7 +364,7 @@ struct UI_Button : UI, UI_Clickable
 	UI_Button(
 		const iw::Mesh& button
 	)
-		: UI              (button)
+		: UI (button)
 	{
 		_reset();
 	}
@@ -371,7 +373,7 @@ struct UI_Button : UI, UI_Clickable
 		const iw::Mesh& button,
 		const iw::Mesh& label
 	)
-		: UI              (button)
+		: UI (button)
 	{
 		CreateElement(label);
 		_reset();

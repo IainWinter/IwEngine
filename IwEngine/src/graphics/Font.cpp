@@ -189,10 +189,9 @@ namespace Graphics {
 
 		switch (config.Anchor)
 		{
-			case FontAnchor::CENTER:
+			case FontAnchor::TOP_RIGHT:
 			{
-				offsetX = (max.x - min.x) / 2;
-				offsetY = (max.y - min.y) / 2;
+				offsetX = max.x - min.x;
 				break;
 			}
 			case FontAnchor::TOP_CENTER:
@@ -200,15 +199,38 @@ namespace Graphics {
 				offsetX = (max.x - min.x) / 2;
 				break;
 			}
-			case FontAnchor::TOP_RIGHT:
+			case FontAnchor::BOT_LEFT:
 			{
+				offsetY = max.y - min.y;
+				break;
+			}
+			case FontAnchor::BOT_RIGHT:
+			{
+				offsetY = max.y - min.y;
 				offsetX = max.x - min.x;
+				break;
+			}
+			case FontAnchor::BOT_CENTER:
+			{
+				offsetY = max.y - min.y;
+				offsetX = (max.x - min.x) / 2;
+				break;
+			}
+			case FontAnchor::CENTER_LEFT:
+			{
+				offsetY = (max.y - min.y) / 2;
 				break;
 			}
 			case FontAnchor::CENTER_RIGHT:
 			{
-				offsetX = max.x - min.x;
 				offsetY = (max.y - min.y) / 2;
+				offsetX = max.x - min.x;
+				break;
+			}
+			case FontAnchor::CENTER:
+			{
+				offsetY = (max.y - min.y) / 2;
+				offsetX = (max.x - min.x) / 2;
 				break;
 			}
 			case FontAnchor::TOP_LEFT: // default do nothing
