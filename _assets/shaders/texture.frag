@@ -10,6 +10,7 @@ out vec4 FragColor;
 uniform float mat_useBoxFade      = 0.f;
 uniform float mat_useTransparency = 0.f;
 uniform float mat_isFont          = 0.f;
+//uniform float mat_isDistanceField = 1.f;
 
 uniform float mat_hasTexture = 0.f;
 
