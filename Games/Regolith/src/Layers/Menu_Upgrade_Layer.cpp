@@ -22,6 +22,11 @@ UI_Base* Menu_Upgrade_Layer::MakeUpgrade(
 		m_tooltip->GetElement<UI_Text>(3)->mesh.Material->Set("color", upgrade.costColor);
 	};
 
+	button->onClick = [button]()
+	{
+		button->active = false;
+	};
+
 	return button;
 }
 
@@ -46,23 +51,41 @@ int Menu_Upgrade_Layer::Initialize()
 	m_upgrades->AddRow(1, 2, 3, 4, 5, { o o o o o });
 	m_upgrades->AddRow(1, 2, 3, 4, 5, { o _ _ _ _ });
 
-	UpgradeDescription upgrade1;
-	UpgradeDescription upgrade2;
-	UpgradeDescription upgrade3;
-	UpgradeDescription upgrade4;
-	UpgradeDescription upgrade5;
+	UpgradeDescription upgrade1(true);
+	UpgradeDescription upgrade2(true);
+	UpgradeDescription upgrade3(true);
+	UpgradeDescription upgrade4(true);
+	UpgradeDescription upgrade5(true);
 	upgrade1.texturePath = "upgrade_thrusterimpulse.png";
 	upgrade2.texturePath = "upgrade_thrusteracceleration.png";
 	upgrade3.texturePath = "upgrade_thrustermaxspeed.png";
 	upgrade4.texturePath = "upgrade_healthefficiency.png";
 	upgrade5.texturePath = "upgrade_laserefficiency.png";
 
-	upgrade1.tooltip = "Thruster\nAcceleration";
-	upgrade1.description = "Improves stop start time";
+	upgrade1.tooltip = "Thruster\nImpulse";
+	upgrade1.description = "Effects the immediate stop \nand start time of \nthe ship";
 	upgrade1.stat = "+10%";
-	upgrade1.cost = "10,000 Rh";
-	upgrade1.statColor = iw::Color::From255( 85, 255, 0);
-	upgrade1.costColor = iw::Color::From255(255, 210, 0);
+	upgrade1.cost = "200 R";
+
+	upgrade2.tooltip = "Thruster\nAcceleration";
+	upgrade2.description = "Effects the time to\nreach max speed";
+	upgrade2.stat = "+10%";
+	upgrade2.cost = "1,000 R";
+
+	upgrade3.tooltip = "Thruster\nMax Velocity";
+	upgrade3.description = "Effects how fast the\nship can move";
+	upgrade3.stat = "+10%";
+	upgrade3.cost = "2,000 R";
+
+	upgrade4.tooltip = "Health Pickup\nEfficiency";
+	upgrade4.description = "Effects how many cells get\nrestored per green pickup";
+	upgrade4.stat = "+2 cells";
+	upgrade4.cost = "2,000 R";
+
+	upgrade5.tooltip = "Laser Pickup\nEfficiency";
+	upgrade5.description = "Effects how much liquid get\nconverted per green pickup";
+	upgrade5.stat = "+2 charges";
+	upgrade5.cost = "3,000 R";
 
 	m_upgrades->GetRow(0)[0]->AddElement(MakeUpgrade(upgrade1));
 	m_upgrades->GetRow(1)[0]->AddElement(MakeUpgrade(upgrade2));
@@ -73,11 +96,14 @@ int Menu_Upgrade_Layer::Initialize()
 	auto font = LoadFont("basic.fnt");
 	font->m_material = A_material_font_cam->MakeInstance();
 	font->m_material->SetTexture("texture", font->GetTexture(0));
+	font->m_material->Set       ("isFont",     1.0f);
+	font->m_material->Set       ("font_edge",  0.5f);
+	font->m_material->Set       ("font_width", 0.25f);
 	font->GetTexture(0)->SetFilter(iw::NEAREST);
 
 	m_tooltip = m_screen->CreateElement<UI_Image>(LoadTexture("ui_upgrade_tooltip_background.png"));
 	UI_Text* ttip = m_tooltip->CreateElement<UI_Text>(font, iw::FontMeshConfig { 15, iw::FontAnchor::TOP_LEFT });
-	UI_Text* desc = m_tooltip->CreateElement<UI_Text>(font, iw::FontMeshConfig { 12, iw::FontAnchor::TOP_LEFT });
+	UI_Text* desc = m_tooltip->CreateElement<UI_Text>(font, iw::FontMeshConfig { 10, iw::FontAnchor::TOP_LEFT });
 	UI_Text* stat = m_tooltip->CreateElement<UI_Text>(font, iw::FontMeshConfig { 15, iw::FontAnchor::BOT_LEFT });
 	UI_Text* cost = m_tooltip->CreateElement<UI_Text>(font, iw::FontMeshConfig { 15, iw::FontAnchor::BOT_RIGHT });
 
@@ -89,6 +115,19 @@ int Menu_Upgrade_Layer::Initialize()
 	m_background->zIndex =  0;
 	m_upgrades  ->zIndex = -1;
 	m_tooltip   ->zIndex =  3;
+
+	// test for font rendering
+	//for (int i = 1; i < 10; i++)
+	//{
+	//	UI_Text* text = m_screen->CreateElement<UI_Text>(font, iw::FontMeshConfig { i * 10.f });
+	//	text->x = -100;
+	//	text->y = -400 + i * 100;
+	//	text->width  = 100;
+	//	text->height = 100;
+	//	text->zIndex = 4;
+
+	//	text->SetString("ABCDEFGHIJKabcdef");
+	//}
 
 	return 0;
 }
@@ -150,10 +189,10 @@ void Menu_Upgrade_Layer::PostUpdate()
 			text->x = -m_tooltip->width + m_tooltip->width * padding;
 		}
 
-		cost->x = m_tooltip->width - m_tooltip->width * padding;
+		cost->x = m_tooltip->width - m_tooltip->width * padding * 2;
 
 		ttip->y = m_tooltip->height - m_tooltip->width * padding * 2;
-		desc->y = 0;
+		desc->y = m_tooltip->width * padding * 2;
 		stat->y = -m_tooltip->height + m_tooltip->width * padding / 2;
 		cost->y = -m_tooltip->height + m_tooltip->width * padding / 2;
 
