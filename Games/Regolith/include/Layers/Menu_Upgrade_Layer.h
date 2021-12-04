@@ -23,6 +23,22 @@ struct Menu_Upgrade_Layer : Menu_Layer
 		std::string cost;
 		iw::Color statColor;
 		iw::Color costColor;
+
+		UpgradeDescription(
+			bool posOrNegStat)
+		{
+			if (posOrNegStat)
+			{
+				statColor = iw::Color::From255(85, 255, 0);
+			}
+
+			else
+			{
+				statColor = iw::Color::From255(255, 85, 0);
+			}
+
+			costColor = iw::Color::From255(255, 210, 0);
+		}
 	};
 
 	Menu_Upgrade_Layer(
