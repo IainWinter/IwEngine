@@ -10,6 +10,7 @@
 #include "Components/EnemyShip.h"
 #include "iw/util/reflection/ReflectDef.h"
 #include "State.h"
+#include "Upgrade.h"
 
 enum Actions {
 	SPAWN_ENEMY,
@@ -28,6 +29,8 @@ enum Actions {
 	CORE_EXPLODED,
 	STATE_CHANGE,
 	OPEN_MENU,
+
+	APPLY_UPGRADE_SET
 };
 
 struct REFLECT SpawnExplosion_Config
@@ -287,3 +290,14 @@ struct REFLECT OpenMenu_Event : iw::SingleEvent
 	{}
 };
 
+struct /*REFLECT*/ ApplyUpgradeSet_Event : iw::SingleEvent
+{
+	UpgradeSet Set;
+
+	ApplyUpgradeSet_Event(
+		const UpgradeSet& set
+	)
+		: iw::SingleEvent (APPLY_UPGRADE_SET)
+		, Set             (set)
+	{}
+};

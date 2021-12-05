@@ -11,18 +11,28 @@
 #include "iw/graphics/QueuedRenderer.h"
 #include "iw/entity/Entity.h"
 
-#define APP_VARS ref<eventbus>       Bus;      \
-			  ref<thread_pool>    Task;     \
-			  ref<IAudioSpace>    Audio;    \
-			  ref<AssetManager>   Asset;    \
-			  ref<Console>        Console;  \
-			  ref<InputManager>   Input;    \
-			  ref<DynamicsSpace>  Physics;  \
-			  ref<QueuedRenderer> Renderer; \
-			  ref<Space>          Space;    \
+#define APP_VARS iw::ref<iw::eventbus>       Bus;      \
+			  iw::ref<iw::thread_pool>    Task;     \
+			  iw::ref<iw::IAudioSpace>    Audio;    \
+			  iw::ref<iw::AssetManager>   Asset;    \
+			  iw::ref<iw::Console>        Console;  \
+			  iw::ref<iw::InputManager>   Input;    \
+			  iw::ref<iw::DynamicsSpace>  Physics;  \
+			  iw::ref<iw::QueuedRenderer> Renderer; \
+			  iw::ref<iw::Space>          Space;    \
+
+#define APP_VARS_LIST iw::AppVars { Bus,      \
+						  Task,     \
+						  Audio,    \
+						  Asset,    \
+						  Console,  \
+						  Input,    \
+						  Physics,  \
+						  Renderer, \
+						  Space }   \
 
 #define SET_APP_VARS void SetAppVars(         \
-					AppVars& vars)			  \
+					iw::AppVars& vars)			  \
 				{						      \
 					Bus      = vars.Bus;	  \
 					Task     = vars.Task;	  \
@@ -35,8 +45,8 @@
 					Space    = vars.Space;	  \
 				}                             \
 
-#define MAKE_APP_VARS AppVars MakeAppVars() { \
-					AppVars vars;			  \
+#define MAKE_APP_VARS iw::AppVars MakeAppVars() { \
+					iw::AppVars vars;			  \
 					vars.Bus      = Bus;	  \
 					vars.Task     = Task;	  \
 					vars.Audio    = Audio;	  \
