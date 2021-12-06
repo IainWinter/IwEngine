@@ -81,7 +81,9 @@ struct Menu_Layer : UI_Layer
 		{
 			UI_Clickable* clickable = dynamic_cast<UI_Clickable*>(ui);
 
-			if (ui->IsPointOver(m_screen->LocalMouse()))
+			if (    ui->active
+				&& clickable->clickActive
+				&& ui->IsPointOver(m_screen->LocalMouse()))
 			{
 				if (clickable->whileMouseHover)
 				{

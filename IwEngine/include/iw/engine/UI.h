@@ -46,6 +46,7 @@ struct UI_Base
 	{
 		for (UI_Base* ui : children)
 		{
+			ui->transform.SetParent(nullptr);
 			delete ui;
 		}
 	}
@@ -53,8 +54,13 @@ struct UI_Base
 	template<
 		typename _ui = UI>
 	_ui* GetElement(
-		int index)
+		int index = 0)
 	{
+		if (children.size() == 0)
+		{
+			return nullptr;
+		}
+
 		return dynamic_cast<_ui*>(children.at(index));
 	}
 
@@ -64,6 +70,19 @@ struct UI_Base
 	_ui* CreateElement(
 		const _args&... args)
 	{
+		_ui* ui = new _ui(args...);
+		AddElement(ui);
+		return ui;
+	}
+
+	template<
+		typename _ui = UI,
+		typename... _args>
+	_ui* SetElement(
+		const _args&... args)
+	{
+		RemoveElement(GetElement(0));
+
 		_ui* ui = new _ui(args...);
 		AddElement(ui);
 		return ui;
@@ -167,6 +186,8 @@ struct UI_Clickable
 	std::function<void()> onClick;
 	std::function<void()> whileMouseDown;
 	std::function<void()> whileMouseHover;
+
+	bool clickActive = true;
 };
 
 #define ma(r, g, b, a) m_screen->MakeMesh(iw::Color(r, g, b, a))
@@ -557,17 +578,6 @@ struct UI_Table_Item : UI
 		CreateElement(element);
 	}
 
-	// returns first child
-	UI* GetElement()
-	{
-		if (children.size() == 0)
-		{
-			return nullptr;
-		}
-
-		return (UI*)children.at(0);
-	}
-
 	void UpdateTransform(
 		UI_Base* parent)
 	{
@@ -596,26 +606,64 @@ struct UI_Table : UI
 	// maybe make a seperate class
 
 	using row_t  = std::array<UI_Table_Item*, sizeof...(_cols)>;
+	using dataptr_t = std::array<void*, sizeof...(_cols)>;
 	using data_t = std::tuple<_cols...>;
+
+	const int count = sizeof...(_cols);
 
 	struct UI_Row
 	{
-		row_t* row;
 		int index;
+		row_t elements;
+		data_t data;
 
-		UI_Table_Item* operator[](size_t i)
+		UI_Row(
+			int index,
+			const row_t& elems,
+			const data_t& data
+		)
+			: index    (index)
+			, elements (elems)
+			, data     (data)
+		{}
+
+		template<
+			typename _t = UI_Table_Item*>
+		_t Elem(
+			size_t i)
 		{
-			return row->at(i);
+			return (_t)elements.at(i);
 		}
+
+		template<
+			size_t _i>
+		std::tuple_element_t<_i, data_t>& Data()
+		{
+			return std::get<_i>(data);
+		}
+
+		template<
+			typename _t>
+		_t& Data(
+			size_t i)
+		{
+			// shouldnt need to do this everytime :(
+			dataptr_t ptrs = iw::geteach<__get_ptrs, data_t, dataptr_t, sizeof...(_cols)>(data);
+			return *(_t*)ptrs.at(i);
+		}
+
+		struct __get_ptrs
+		{
+			template<
+				typename _t>
+			void* operator()(_t& t)
+			{
+				return (void*)&t;
+			}
+		};
 	};
 
-	//using sort_func = std::function<>
-
-	std::vector<
-		std::tuple<
-			int,    // id
-			data_t,
-			row_t>> rows;
+	std::vector<UI_Row> rows;
 
 	// table width  is uibase width
 	// table height is uibase height
@@ -758,50 +806,57 @@ public:
 
 		if (sort)
 		{
-			int i = 0;
-			for (; i < (int)rows.size(); i++)
+			size_t i = 0;
+			for (; i < rows.size(); i++)
 			{
-				if (sort(std::get<1>(rows.at(i)), data))
+				if (sort(rows.at(i).data, data))
 				{
 					break;
 				}
 			}
 
-			rows.emplace(rows.begin() + i, id, data, row);
+			rows.emplace(rows.begin() + i, id, row, data);
 		}
 
 		else
 		{
-			rows.emplace_back(id, data, row);
+			rows.emplace_back(id, row, data);
 		}
 
 		return id;
 	}
 
-	UI_Row operator[](size_t id)
-	{
-		return GetRow(id);
-	}
-
-	UI_Row GetRow(
+	void RemoveRow(
 		int id)
 	{
-		UI_Row result;
-		result.row = nullptr;
-		result.index = 0;
-
-		for (auto& [rid, rdata, rarray] : rows)
+		for (auto itr = rows.begin(); itr != rows.end(); ++itr)
 		{
-			if (id == rid)
+			if (id == itr->index)
 			{
-				result.row = &rarray;
+				for (UI_Base* ui : itr->elements)
+				{
+					RemoveElement(ui);
+					delete ui;
+				}
+
+				rows.erase(itr);
 				break;
 			}
+		}
+	}
 
-			result.index++;
+	UI_Row* Row(
+		int id)
+	{
+		for (UI_Row& row : rows)
+		{
+			if (id == row.index)
+			{
+				return &row;
+			}
 		}
 
-		return result;
+		return nullptr;
 	}
 
 	void UpdateRow(
@@ -809,12 +864,8 @@ public:
 		int col,
 		std::string str)
 	{
-		//updateData(
-		//	GetRow(id).first->at(col)->GetElement()->mesh,
-		//	str
-		//);
 		font->UpdateMesh(
-			GetRow(id)[col]->GetElement()->mesh,
+			Row(id)->Elem(col)->GetElement()->mesh,
 			str,
 			{ 360, iw::FontAnchor::TOP_RIGHT }
 		);
@@ -840,7 +891,7 @@ public:
 
 			for (size_t j = 0; j < sizeof...(_cols); j++)
 			{
-				UI_Base* item = std::get<2>(rows[i])[j];
+				UI_Table_Item* item = rows.at(i).Elem(j);
 				if (!item) continue;
 
 				float nextTop = -cursorY + rowPadding - scrollOffset;

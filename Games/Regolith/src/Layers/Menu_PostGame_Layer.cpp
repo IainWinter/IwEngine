@@ -222,12 +222,14 @@ iw::NetworkResult<std::string> Menu_PostGame_Layer::SubmitTempScoreAndGetId()
 		request.OnResult = [this](
 			std::vector<HighscoreRecord>& scores)
 		{
+			Score_Table::UI_Row* row = m_table_highScore->Row(m_playerRowId);
+
 			for (HighscoreRecord& record : scores)
 			{
 				if (record.GameId == m_gameId)
 				{
 					m_playerRowId = AddHighscoreToTable(record, true);
-					mat_tablePlayerRow = m_table_highScore->GetRow(m_playerRowId)[0]->mesh.Material;
+					mat_tablePlayerRow = row->Elem(0)->mesh.Material;
 				}
 
 				else
@@ -238,8 +240,11 @@ iw::NetworkResult<std::string> Menu_PostGame_Layer::SubmitTempScoreAndGetId()
 
 			m_table_highScore->UpdateTransform(m_screen);
 
-			auto [row, idx] = m_table_highScore->GetRow(m_playerRowId);
-			m_table_highScore->scrollOffset = idx * (m_table_highScore->rowHeight * 2.f + m_table_highScore->rowPadding) - m_table_highScore->height + m_table_highScore->rowHeight;
+			m_table_highScore->scrollOffset 
+				= row->index 
+				* (m_table_highScore->rowHeight * 2.f + m_table_highScore->rowPadding) 
+				- m_table_highScore->height 
+				+ m_table_highScore->rowHeight;
 		};
 
 		m_connection.AsyncRequest(request);

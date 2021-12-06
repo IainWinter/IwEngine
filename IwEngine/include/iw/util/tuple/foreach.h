@@ -13,7 +13,7 @@ namespace util {
 			size_t... _i>
 		void foreach_na_indexed(
 			_functor&& functor,
-			_tuple tuple,
+			_tuple& tuple,
 			std::index_sequence<_i...>)
 		{
 			(functor(std::get<_i>(tuple)), ...);
@@ -28,9 +28,9 @@ namespace util {
 			size_t... _i>
 		void foreach_ta_indexed(
 			_functor&& functor,
-			_tuple tuple,
+			_tuple& tuple,
 			std::index_sequence<_i...>,
-			_tuple_args tuple_args)
+			const _tuple_args& tuple_args)
 		{
 			(functor(
 				std::get<_i>(tuple),
@@ -46,9 +46,9 @@ namespace util {
 			size_t... _i>
 		void foreach_fa_indexed(
 			_functor&& functor,
-			_tuple tuple,
+			_tuple& tuple,
 			std::index_sequence<_i...>,
-			_fixed_args... fixed_args)
+			const _fixed_args&... fixed_args)
 		{
 			(functor(
 				std::get<_i>(tuple),
@@ -65,10 +65,10 @@ namespace util {
 			size_t... _i>
 		void foreach_ta_fa_indexed(
 			_functor&& functor,
-			_tuple tuple,
+			_tuple& tuple,
 			std::index_sequence<_i...>,
-			_tuple_args tuple_arg,
-			_fixed_args... fixed_args)
+			const _tuple_args& tuple_arg,
+			const _fixed_args&... fixed_args)
 		{
 			(functor(
 				std::get<_i>(tuple),
@@ -86,10 +86,10 @@ namespace util {
 			size_t... _i>
 		void foreach_ta_sfa_indexed(
 			_functor&& functor,
-			_tuple tuple,
+			_tuple& tuple,
 			std::index_sequence<_i...>,
-			_fixed_arg fixed_arg,
-			_tuple_args... tuple_args)
+			const _fixed_arg& fixed_arg,
+			const _tuple_args&... tuple_args)
 		{
 			(call_ta_sfa<
 				_functor,
@@ -114,9 +114,9 @@ namespace util {
 			typename... _tuple_args>
 		void call_ta_sfa(
 			_functor&& functor,
-			_tuple tuple,
-			_fixed_arg fixed_arg,
-			_tuple_args... tuple_args)
+			_tuple& tuple,
+			const _fixed_arg& fixed_arg,
+			const _tuple_args&... tuple_args)
 		{
 			functor(
 				std::get<_i>(tuple),
@@ -136,7 +136,7 @@ namespace util {
 			size_t... _i>
 		_tuple_return geteach_na_indexed(
 			_functor&& functor,
-			_tuple tuple,
+			_tuple& tuple,
 			std::index_sequence<_i...>)
 		{
 			return {
@@ -156,9 +156,9 @@ namespace util {
 			size_t... _i>
 		_tuple_return geteach_ta_indexed(
 			_functor&& functor,
-			_tuple tuple,
+			_tuple& tuple,
 			std::index_sequence<_i...>,
-			_tuple_args tuple_args)
+			const _tuple_args& tuple_args)
 		{
 			return {
 				functor(
@@ -178,9 +178,9 @@ namespace util {
 			size_t... _i>
 		_tuple_return geteach_fa_indexed(
 			_functor&& functor,
-			_tuple tuple,
+			_tuple& tuple,
 			std::index_sequence<_i...>,
-			_fixed_args... fixed_args)
+			const _fixed_args&... fixed_args)
 		{
 			return {
 				functor(
@@ -201,10 +201,10 @@ namespace util {
 			size_t... _i>
 		_tuple_return geteach_ta_fa_indexed(
 			_functor&& functor,
-			_tuple tuple,
+			_tuple& tuple,
 			std::index_sequence<_i...>,
-			_tuple_args tuple_args,
-			_fixed_args... fixed_args)
+			const _tuple_args& tuple_args,
+			const _fixed_args&... fixed_args)
 		{
 			return {
 				functor(
@@ -226,10 +226,10 @@ namespace util {
 			size_t... _i>
 		void geteach_ta_sfa_indexed(
 			_functor&& functor,
-			_tuple tuple,
+			_tuple& tuple,
 			std::index_sequence<_i...>,
-			_fixed_arg fixed_arg,
-			_tuple_args... tuple_args)
+			const _fixed_arg& fixed_arg,
+			const _tuple_args&... tuple_args)
 		{
 			return {
 				call_ta_sfa<_i>(
@@ -251,9 +251,9 @@ namespace util {
 			typename... _tuple_args>
 		_tuple_return get_ta_sfa(
 			_functor&& functor,
-			_tuple tuple,
-			_fixed_arg fixed_arg,
-			_tuple_args... tuple_args)
+			_tuple& tuple,
+			const _fixed_arg& fixed_arg,
+			const _tuple_args&... tuple_args)
 		{
 			return functor(
 				std::get<_i>(tuple),
@@ -272,7 +272,7 @@ namespace util {
 		size_t _size,
 		typename _tuple>
 	void foreach(
-		_tuple tuple)
+		_tuple& tuple)
 	{
 		detail::foreach_na_indexed<
 			_functor,
@@ -292,8 +292,8 @@ namespace util {
 		typename _tuple,
 		typename _tuple_args>
 	void foreach(
-		_tuple tuple,
-		_tuple_args tuple_args)
+		_tuple& tuple,
+		const _tuple_args& tuple_args)
 	{
 		detail::foreach_ta_indexed<
 			_functor,
@@ -315,8 +315,8 @@ namespace util {
 		typename _tuple,
 		typename... _fixed_args>
 	void foreach(
-		_tuple tuple,
-		_fixed_args... fixed_args)
+		_tuple& tuple,
+		const _fixed_args&... fixed_args)
 	{
 		detail::foreach_fa_indexed<
 			_functor,
@@ -339,9 +339,9 @@ namespace util {
 		typename _tuple_args,
 		typename... _fixed_args>
 	void foreach(
-		_tuple tuple,
-		_tuple_args tuple_args,
-		_fixed_args... fixed_args)
+		_tuple& tuple,
+		const _tuple_args& tuple_args,
+		const _fixed_args&... fixed_args)
 	{
 		detail::foreach_ta_fa_indexed<
 			_functor,
@@ -366,9 +366,9 @@ namespace util {
 		typename _fixed_arg,
 		typename... _tuple_args>
 	void formatrix(
-		_tuple tuple,
-		_fixed_arg fixed_args,
-		_tuple_args ... tuple_args)
+		_tuple& tuple,
+		const _fixed_arg& fixed_args,
+		const _tuple_args&... tuple_args)
 	{
 		detail::foreach_ta_sfa_indexed<
 			_functor,
@@ -392,7 +392,7 @@ namespace util {
 		typename _tuple_return,
 		size_t _size>
 	_tuple_return geteach(
-		_tuple tuple)
+		_tuple& tuple)
 	{
 		return detail::geteach_na_indexed<
 			_functor,
@@ -414,8 +414,8 @@ namespace util {
 		typename _tuple_args,
 		size_t _size>
 	_tuple_return geteach(
-		_tuple tuple,
-		_tuple_args tuple_args)
+		_tuple& tuple,
+		const _tuple_args& tuple_args)
 	{
 		return detail::geteach_ta_indexed<
 			_functor,
@@ -439,8 +439,8 @@ namespace util {
 		typename _tuple_return,
 		typename... _fixed_args>
 	_tuple_return geteach(
-		_tuple tuple,
-		_fixed_args... fixed_args)
+		_tuple& tuple,
+		const _fixed_args&... fixed_args)
 	{
 		return detail::geteach_fa_indexed<
 			_functor,
@@ -465,9 +465,9 @@ namespace util {
 		typename _tuple_args,
 		typename... _fixed_args>
 	_tuple_return geteach(
-		_tuple tuple,
-		_tuple_args tuple_args,
-		_fixed_args... fixed_args)
+		_tuple& tuple,
+		const _tuple_args& tuple_args,
+		const _fixed_args&... fixed_args)
 	{
 		return detail::geteach_ta_fa_indexed<
 			_functor,
@@ -494,9 +494,9 @@ namespace util {
 		typename _fixed_arg,
 		typename... _tuple_args>
 	_tuple_return getmatrix(
-		_tuple tuple,
-		_fixed_arg fixed_args,
-		_tuple_args... tuple_args)
+		_tuple& tuple,
+		const _fixed_arg& fixed_args,
+		const _tuple_args&... tuple_args)
 	{
 		return detail::geteach_ta_sfa_indexed<
 			_functor,
@@ -521,7 +521,7 @@ namespace functors {
 		template<
 			typename _t>
 		void operator()(
-			_t t)
+			_t& t)
 		{
 			t++;
 		}
@@ -532,7 +532,7 @@ namespace functors {
 		template<
 			typename _t>
 		void operator()(
-			_t t)
+			_t& t)
 		{
 			t--;
 		}
@@ -542,9 +542,10 @@ namespace functors {
 	struct erase {
 		template<typename _t>
 		void operator()(
-			_t t)
+			_t& t)
 		{
 			delete t;
+			t = nullptr;
 		}
 	};
 
@@ -553,9 +554,10 @@ namespace functors {
 		template<
 			typename _t>
 		void operator()(
-			_t t)
+			_t& t)
 		{
 			delete[] t;
+			t = nullptr;
 		}
 	};
 
@@ -564,7 +566,7 @@ namespace functors {
 		template<
 			typename _t>
 		void operator()(
-			_t t,
+			_t& t,
 			const _t& d)
 		{
 			t = d;
@@ -576,7 +578,7 @@ namespace functors {
 		template<
 			typename _t>
 		typename _t::value_type& operator()(
-			_t t)
+			_t& t)
 		{
 			return *std::forward<_t>(t);
 		}
@@ -587,8 +589,8 @@ namespace functors {
 			typename _t,
 			typename _o>
 		void operator()(
-			_t t,
-			_o o,
+			_t& t,
+			_o& o,
 			bool& equals)
 		{
 			equals = t == o;

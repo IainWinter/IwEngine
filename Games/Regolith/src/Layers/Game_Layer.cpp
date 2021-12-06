@@ -34,6 +34,7 @@ int Game_Layer::Initialize()
 	PushSystem(explosion_s);
 	PushSystem(keepInWorld_s);
 	PushSystem<TileSplitSystem>(sand);
+	PushSystem<Upgrade_System>();
 
 	//Bus->push<StateChange_Event>(RUN_STATE);
 

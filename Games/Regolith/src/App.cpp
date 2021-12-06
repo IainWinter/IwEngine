@@ -35,7 +35,7 @@ void App::ApplyState(GameState* state)
 
 	for (iw::Layer* layer : state->Layers)
 	{
-		PushLayer(layer);
+		PushLayerFront(layer);
 	}
 
 	if (state->OnChange) 
@@ -108,8 +108,8 @@ int App::Initialize(
 	iw::InitOptions& options)
 {
 	PushLayer<StaticLayer>();
-	PushLayer<UI_Render_Layer>();
 	PushLayer<Audio_Layer>();
+	PushLayer<UI_Render_Layer>();
 
 	m_gamePause = new GameState("Pause menu", GAME_PAUSE_STATE);
 	m_gamePause->Layers.push_back(new Menu_Pause_Layer());
