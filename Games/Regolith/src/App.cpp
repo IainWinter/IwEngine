@@ -304,9 +304,9 @@ int App::Initialize(
 				Input->SetContext("Game");
 			};
 
-			if (m_gameHighscore)
+			if (m_currentState)
 			{
-				DestroyState(m_gameHighscore);
+				DestroyState(m_currentState);
 			}
 
 			SetState(m_gamePlay);

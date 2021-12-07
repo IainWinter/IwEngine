@@ -16,9 +16,9 @@ namespace Engine {
 		, m_window(window)
 		, m_context(nullptr)
 	{
-		viewportRT = REF<RenderTarget>();
-		viewportRT->AddTexture(REF<Texture>(1280, 720));
-		viewportRT->AddTexture(REF<Texture>(1280, 720, TEX_2D, DEPTH));
+		//viewportRT = REF<RenderTarget>();
+		//viewportRT->AddTexture(REF<Texture>(1280, 720));
+		//viewportRT->AddTexture(REF<Texture>(1280, 720, TEX_2D, DEPTH));
 	}
 
 	ImGuiLayer::~ImGuiLayer() {}
@@ -48,11 +48,11 @@ namespace Engine {
 	}
 
 	void ImGuiLayer::OnPush() {
-		Renderer->Now->SetDefaultTarget(viewportRT);
+		//Renderer->Now->SetDefaultTarget(viewportRT);
 	}
 
 	void ImGuiLayer::OnPop() {
-		Renderer->Now->SetDefaultTarget(nullptr);
+		//Renderer->Now->SetDefaultTarget(nullptr);
 	}
 
 	void ImGuiLayer::Destroy() {

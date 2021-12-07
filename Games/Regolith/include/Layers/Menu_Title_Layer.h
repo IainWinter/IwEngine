@@ -2,6 +2,7 @@
 
 #include "iw/engine/Layers/ImGuiLayer.h"
 #include "Upgrade.h"
+#include "Events.h"
 #include <unordered_map>
 #include <array>
 
@@ -22,8 +23,14 @@ struct Menu_Title_Layer : iw::Layer
 
 	ImGuiWindowFlags commonFlags;
 
+	UpgradeDescription* tooltip;
+
+	int money;
+
 	Menu_Title_Layer()
-		: iw::Layer  ("Main title menu")
+		: iw::Layer ("Main title menu")
+		, money     (3000)
+		, tooltip   (nullptr)
 	{}
 
 	int Initialize() override;;
@@ -32,6 +39,9 @@ struct Menu_Title_Layer : iw::Layer
 	void Background();
 	void UpgradeTable();
 	void ActiveTable();
+	void Tooltip();
+
+	void Buttons();
 
 	void RegisterImage(const std::string& str);
 };
