@@ -5,9 +5,7 @@ int Menu_PostGame_Layer::Initialize()
 	// font seems to change height based on what letters there are I is bigger than others,
 	// font should be monospaced though???
 
-	iw::Mesh title_score   = A_font_cambria->GenerateMesh("SCORE",  { 36, iw::FontAnchor::TOP_CENTER });
-	iw::Mesh label_restart = A_font_cambria->GenerateMesh("REFORM", { 300 });
-	iw::Mesh label_quit    = A_font_cambria->GenerateMesh("QUIT",   { 300 });
+	iw::Mesh title_score = A_font_cambria->GenerateMesh("SCORE", { 36, iw::FontAnchor::TOP_CENTER });
 
 	iw::Mesh buttonbg = A_mesh_menu_background.MakeInstance();
 	buttonbg.Material->Set("color", iw::Color(.2, .2, .2));
@@ -29,8 +27,10 @@ int Menu_PostGame_Layer::Initialize()
 	// if font is monospace, this should be able to just be one element
 	// problly going to need to have each be seperate though for scrolling
 
-	m_table_highScore = m_screen->CreateElement<Score_Table>(tablebg, tableitembg, A_font_cambria);
+	m_table_highScore = m_screen->CreateElement<Score_Table>(tablebg);
+	m_table_highScore->background = tableitembg;
 	m_table_highScore->fontConfig.Material = mat_tableText;
+	m_table_highScore->font = m_screen->defaultFont;
 
 	m_table_highScore->sort = [](
 		const Score_Table::data_t& a,
@@ -49,13 +49,15 @@ int Menu_PostGame_Layer::Initialize()
 	m_playerBorder = m_screen->CreateElement(A_mesh_ui_playerBorder);
 	m_title_score  = m_screen->CreateElement(title_score);
 
-	m_button_reform = m_screen->CreateElement<UI_Button>(buttonbg, label_restart);
+	m_button_reform = m_screen->CreateElement<UI_Button>(buttonbg);
+	m_button_reform->CreateElement<UI_Text>("Reform", iw::FontMeshConfig{ 300 });
 	m_button_reform->onClick = [&]()
 	{
 		SubmitScoreAndExit("game-upgrade");
 	};
 
-	m_button_quit = m_screen->CreateElement<UI_Button>(buttonbg, label_quit);
+	m_button_quit = m_screen->CreateElement<UI_Button>(buttonbg);
+	m_button_quit->CreateElement<UI_Text>("Quit", iw::FontMeshConfig { 300 });
 	m_button_quit->onClick = [&]()
 	{
 		SubmitScoreAndExit("quit");
@@ -222,14 +224,12 @@ iw::NetworkResult<std::string> Menu_PostGame_Layer::SubmitTempScoreAndGetId()
 		request.OnResult = [this](
 			std::vector<HighscoreRecord>& scores)
 		{
-			Score_Table::UI_Row* row = m_table_highScore->Row(m_playerRowId);
-
 			for (HighscoreRecord& record : scores)
 			{
 				if (record.GameId == m_gameId)
 				{
 					m_playerRowId = AddHighscoreToTable(record, true);
-					mat_tablePlayerRow = row->Elem(0)->mesh.Material;
+					mat_tablePlayerRow = m_table_highScore->Row(m_playerRowId)->Elem(0)->mesh.Material;
 				}
 
 				else
@@ -241,7 +241,7 @@ iw::NetworkResult<std::string> Menu_PostGame_Layer::SubmitTempScoreAndGetId()
 			m_table_highScore->UpdateTransform(m_screen);
 
 			m_table_highScore->scrollOffset 
-				= row->index 
+				= m_table_highScore->Row(m_playerRowId)->index
 				* (m_table_highScore->rowHeight * 2.f + m_table_highScore->rowPadding) 
 				- m_table_highScore->height 
 				+ m_table_highScore->rowHeight;

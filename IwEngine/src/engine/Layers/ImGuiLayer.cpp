@@ -107,89 +107,89 @@ namespace Engine {
 
 		// temp Dockspace
 
-		ImGuiWindowFlags window_flags =
-			  ImGuiWindowFlags_MenuBar
-			| ImGuiWindowFlags_NoDocking
-			| ImGuiWindowFlags_NoTitleBar
-			| ImGuiWindowFlags_NoCollapse
-			| ImGuiWindowFlags_NoResize
-			| ImGuiWindowFlags_NoMove
-			| ImGuiWindowFlags_NoBringToFrontOnFocus
-			| ImGuiWindowFlags_NoNavFocus;
+		//ImGuiWindowFlags window_flags =
+		//	  ImGuiWindowFlags_MenuBar
+		//	| ImGuiWindowFlags_NoDocking
+		//	| ImGuiWindowFlags_NoTitleBar
+		//	| ImGuiWindowFlags_NoCollapse
+		//	| ImGuiWindowFlags_NoResize
+		//	| ImGuiWindowFlags_NoMove
+		//	| ImGuiWindowFlags_NoBringToFrontOnFocus
+		//	| ImGuiWindowFlags_NoNavFocus;
 
-		ImGuiViewport* viewport = ImGui::GetMainViewport();
-		ImGui::SetNextWindowPos(viewport->Pos);
-		ImGui::SetNextWindowSize(viewport->Size);
-		ImGui::SetNextWindowViewport(viewport->ID);
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+		//ImGuiViewport* viewport = ImGui::GetMainViewport();
+		//ImGui::SetNextWindowPos(viewport->Pos);
+		//ImGui::SetNextWindowSize(viewport->Size);
+		//ImGui::SetNextWindowViewport(viewport->ID);
+		//ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+		//ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+		//ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 
-		ImGui::Begin("Dockspace", nullptr, window_flags);
+		//ImGui::Begin("Dockspace", nullptr, window_flags);
 
-		ImGui::PopStyleVar();
-		ImGui::PopStyleVar(2);
+		//ImGui::PopStyleVar();
+		//ImGui::PopStyleVar(2);
 
-		// Dockspace
-		ImGuiIO& io = ImGui::GetIO();
-		ImGuiID dockspace_id = ImGui::GetID("Dockspace");
+		//// Dockspace
+		//ImGuiIO& io = ImGui::GetIO();
+		//ImGuiID dockspace_id = ImGui::GetID("Dockspace");
 
-		ImGui::DockSpace(dockspace_id);
+		//ImGui::DockSpace(dockspace_id);
 
-		if (ImGui::BeginMenuBar()) {
-			if (ImGui::BeginMenu("File")) {
-				ImGui::Separator();
-				if (ImGui::MenuItem("Exit", NULL, false)) {
-					Console->QueueCommand("quit");
-				}
+		//if (ImGui::BeginMenuBar()) {
+		//	if (ImGui::BeginMenu("File")) {
+		//		ImGui::Separator();
+		//		if (ImGui::MenuItem("Exit", NULL, false)) {
+		//			Console->QueueCommand("quit");
+		//		}
 
-				ImGui::EndMenu();
-			}
+		//		ImGui::EndMenu();
+		//	}
 
-			ImGui::EndMenuBar();
-		}
+		//	ImGui::EndMenuBar();
+		//}
 
-		// temp times
+		//// temp times
 
-		ImGui::Begin("Times");
+		//ImGui::Begin("Times");
 
-		ImGui::SliderFloat("Smooth", &smoothing, 0, 1, "%1.2f", .5);
-		PrintTimes(LOG_GET_TIMES());
+		//ImGui::SliderFloat("Smooth", &smoothing, 0, 1, "%1.2f", .5);
+		//PrintTimes(LOG_GET_TIMES());
 
-		ImGui::End();
+		//ImGui::End();
 
-		// temp Viewspace
+		//// temp Viewspace
 
-		//target->Resize(size.x, size.y);
+		////target->Resize(size.x, size.y);
 
-		//ImVec2 size;
-		//size.x = target->Tex(0)->Width();
-		//size.y = target->Tex(0)->Height();
+		////ImVec2 size;
+		////size.x = target->Tex(0)->Width();
+		////size.y = target->Tex(0)->Height();
 
-		if (viewportRT->Tex(0)->Handle()) {
-			ImVec2 size = ImGui::GetWindowSize();
+		//if (viewportRT->Tex(0)->Handle()) {
+		//	ImVec2 size = ImGui::GetWindowSize();
 
-			if (   (unsigned)size.x != viewportRT->Width()
-				|| (unsigned)size.y != viewportRT->Height())
-			{
-				viewportRT->Resize((unsigned)size.x, (unsigned)size.y);
-			}
+		//	if (   (unsigned)size.x != viewportRT->Width()
+		//		|| (unsigned)size.y != viewportRT->Height())
+		//	{
+		//		viewportRT->Resize((unsigned)size.x, (unsigned)size.y);
+		//	}
 
-			ImGui::PushClipRect(ImVec2(0,0), ImVec2(size.x, size.y), false);
-			ImGui::Begin("Viewspace");
+		//	ImGui::PushClipRect(ImVec2(0,0), ImVec2(size.x, size.y), false);
+		//	ImGui::Begin("Viewspace");
 
-			unsigned id = viewportRT->Tex(0)->Handle()->Id();
-			ImGui::Image((void*)(size_t)id, size, ImVec2(0, 1), ImVec2(1, 0));
-			
-			ImGui::End();
-			ImGui::PopClipRect();
-		}
+		//	unsigned id = viewportRT->Tex(0)->Handle()->Id();
+		//	ImGui::Image((void*)(size_t)id, size, ImVec2(0, 1), ImVec2(1, 0));
+		//	
+		//	ImGui::End();
+		//	ImGui::PopClipRect();
+		//}
 	}
 
 	void ImGuiLayer::End() {
 		// Dockspace
 
-		ImGui::End();
+		//ImGui::End();
 
 		// Frame
 

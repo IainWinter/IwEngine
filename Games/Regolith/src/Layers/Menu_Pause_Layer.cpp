@@ -4,13 +4,13 @@ int Menu_Pause_Layer::Initialize()
 {
 	iw::Mesh title = A_font_cambria->GenerateMesh("Pause Menu", { 48 });
 	iw::Mesh volume_title = A_font_cambria->GenerateMesh("Volume", { 360 });
-	iw::Mesh label_resume = A_font_cambria->GenerateMesh("Resume", { 360 });
 
 	m_pause_menu   = m_screen->CreateElement(A_mesh_menu_pause);
 	m_pause_title  = m_screen->CreateElement(title);
 	m_volume_title = m_screen->CreateElement(volume_title);
 
-	m_button_resume = m_screen->CreateElement<UI_Button>(m(.7, .2, .2), label_resume);
+	m_button_resume = m_screen->CreateElement<UI_Button>(m(.7, .2, .2));
+	m_button_resume->CreateElement<UI_Text>("Resume", iw::FontMeshConfig{ 120 });
 	m_button_resume->onClick = [&]()
 	{
 		Console->QueueCommand("escape");

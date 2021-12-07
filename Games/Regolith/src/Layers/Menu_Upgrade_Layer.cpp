@@ -1,8 +1,5 @@
 #include "Layers/Menu_Upgrade_Layer.h"
 
-#define LoadTexture(x) Asset->Load<iw::Texture>(std::string("textures/SpaceGame/") + x)
-#define LoadFont(x) Asset->Load<iw::Font>(std::string("fonts/") + x)
-
 UI_Base* Menu_Upgrade_Layer::AddUpgrade(
 	int x, int y,
 	UpgradeDescription* upgrade)
@@ -70,24 +67,15 @@ int Menu_Upgrade_Layer::Initialize()
 	iw::Mesh itembg = A_mesh_menu_background.MakeInstance();
 	itembg.Material->Set("color", iw::Color(.4, .4, .4));
 
-	auto font = LoadFont("basic.fnt");
-	font->m_material = A_material_font_cam->MakeInstance();
-	font->m_material->SetTexture("texture", font->GetTexture(0));
-	font->m_material->Set       ("isFont",     1.0f);
-	font->m_material->Set       ("font_edge",  0.5f);
-	font->m_material->Set       ("font_width", 0.25f);
-	font->GetTexture(0)->SetFilter(iw::NEAREST);
-
 	// if font is monospace, this should be able to just be one element
 	// problly going to need to have each be seperate though for scrolling
 
-	m_bought = m_screen->CreateElement<Bought_Table>(itembg, font);
+	m_bought = m_screen->CreateElement<Bought_Table>();
+	m_bought->background = itembg;
+	m_bought->font = m_screen->defaultFont;
 	m_bought->fontConfig.Size = 100;
-	m_bought->fontConfig.Anchor = iw::FontAnchor::TOP_CENTER;
-
 
 	m_upgrades = m_screen->CreateElement<Upgrade_Table>();
-	m_upgrades->fontConfig.Anchor = iw::FontAnchor::TOP_LEFT;
 
 #define _ true,
 #define o false,
@@ -104,24 +92,35 @@ int Menu_Upgrade_Layer::Initialize()
 	AddUpgrade(2, 2, MakeLaserPickupEfficiency());
 
 	m_tooltip = m_screen->CreateElement<UI_Image>(LoadTexture("ui_upgrade_tooltip_background.png"));
-	UI_Text* ttip = m_tooltip->CreateElement<UI_Text>(font, iw::FontMeshConfig { 15, iw::FontAnchor::TOP_LEFT });
-	UI_Text* desc = m_tooltip->CreateElement<UI_Text>(font, iw::FontMeshConfig { 10, iw::FontAnchor::TOP_LEFT });
-	UI_Text* stat = m_tooltip->CreateElement<UI_Text>(font, iw::FontMeshConfig { 15, iw::FontAnchor::BOT_LEFT });
-	UI_Text* cost = m_tooltip->CreateElement<UI_Text>(font, iw::FontMeshConfig { 15, iw::FontAnchor::BOT_RIGHT });
+	UI_Text* ttip = m_tooltip->CreateElement<UI_Text>("", iw::FontMeshConfig { 15, iw::TOP_LEFT  });
+	UI_Text* desc = m_tooltip->CreateElement<UI_Text>("", iw::FontMeshConfig { 10, iw::TOP_LEFT  });
+	UI_Text* stat = m_tooltip->CreateElement<UI_Text>("", iw::FontMeshConfig { 15, iw::BOT_LEFT  });
+	UI_Text* cost = m_tooltip->CreateElement<UI_Text>("", iw::FontMeshConfig { 15, iw::BOT_RIGHT });
 
 	ttip->zIndex = 4;
 	desc->zIndex = 4;
 	stat->zIndex = 4;
 	cost->zIndex = 4;
 
-	m_text_money = m_screen->CreateElement<UI_Text>(font, iw::FontMeshConfig{ 10 });
+	m_text_money = m_screen->CreateElement<UI_Text>("", iw::FontMeshConfig{10});
 	UpdateMoneyText(0);
 
-	m_background->zIndex =  0;
-	m_tooltip   ->zIndex =  3;
-	m_upgrades  ->zIndex = -1;
-	m_bought    ->zIndex = 0;
-	m_text_money->zIndex = 1;
+	m_button_reform = m_screen->CreateElement<UI_Button>(itembg);
+	m_button_reform->CreateElement<UI_Text>("Reform", iw::FontMeshConfig { 100 });
+	m_button_reform->onClick = [this]()
+	{
+		Console->QueueCommand("game-start");
+
+		UpgradeSet set;
+		Bus->push<ApplyUpgradeSet_Event>(set);
+	};
+
+	m_background   ->zIndex =  0;
+	m_tooltip      ->zIndex =  3;
+	m_upgrades     ->zIndex = -1;
+	m_bought       ->zIndex =  0;
+	m_text_money   ->zIndex =  1;
+	m_button_reform->zIndex =  1;
 
 	// test for font rendering
 	//for (int i = 1; i < 10; i++)
@@ -228,7 +227,7 @@ void Menu_Upgrade_Layer::PostUpdate()
 		//     |	This effects the initial |
 		//     |	ac/deleration of the     |
 		//     |	ship				     |
-		//     |				   10,200 Rh |
+		//     |				   10,200 R  |
 		//     o-----------------------------o
 	}
 
@@ -251,9 +250,20 @@ void Menu_Upgrade_Layer::PostUpdate()
 			iw::Color* color = label->mesh.Material->Get<iw::Color>("color");
 
 			button->clickActive = upgrade->Cost <= m_money;
-			color->a = button->clickActive ? 1 : .7;
+
+			*color = button->clickActive 
+				? iw::Color(1.f)
+				: iw::Color(1.f, .5f, .5f, 1.f);
+
 		}
 	}
+
+	float padding = 50;
+
+	m_button_reform->x =  m_background->width  - 200 - padding;
+	m_button_reform->y = -m_background->height + 50  + padding;
+	m_button_reform->width  = 200;
+	m_button_reform->height = 50;
 
 	ButtonUpdate();
 }

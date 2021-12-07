@@ -15,6 +15,7 @@
 
 #include "Layers/Game_Layer.h"
 #include "Layers/Game_UI_Layer.h"
+#include "Layers/Menu_Title_Layer.h"
 #include "Layers/Menu_Pause_Layer.h"
 #include "Layers/Menu_PostGame_Layer.h"
 #include "Layers/Menu_Fadeout_Layer.h"

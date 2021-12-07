@@ -111,6 +111,13 @@ int App::Initialize(
 	PushLayer<Audio_Layer>();
 	PushLayer<UI_Render_Layer>();
 
+	int err = Application::Initialize(options);
+	if (err) return err;
+
+	PushLayer<iw::ImGuiLayer>()->BindContext();
+
+	//ImGui::SetCurrentContext((ImGuiContext*)options.ImGuiContext);
+
 	m_gamePause = new GameState("Pause menu", GAME_PAUSE_STATE);
 	m_gamePause->Layers.push_back(new Menu_Pause_Layer());
 	m_gamePause->OnChange = [&]()
@@ -252,7 +259,8 @@ int App::Initialize(
 		if (command.Verb == "game-upgrade")
 		{
 			m_gameUpgrade = new GameState("Upgrade menu");
-			m_gameUpgrade->Layers.push_back(new Menu_Upgrade_Layer(m_finalScore));
+			//m_gameUpgrade->Layers.push_back(new Menu_Upgrade_Layer(m_finalScore));
+			m_gameUpgrade->Layers.push_back(new Menu_Title_Layer());
 			m_gameUpgrade->OnChange = [&]()
 			{
 				Physics->Paused = true;
@@ -314,7 +322,7 @@ int App::Initialize(
 		return false;
 	});
 
-	return Application::Initialize(options);
+	return 0;
 }
 
 iw::Application* CreateApplication(
