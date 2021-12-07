@@ -259,8 +259,7 @@ int App::Initialize(
 		if (command.Verb == "game-upgrade")
 		{
 			m_gameUpgrade = new GameState("Upgrade menu");
-			//m_gameUpgrade->Layers.push_back(new Menu_Upgrade_Layer(m_finalScore));
-			m_gameUpgrade->Layers.push_back(new Menu_Title_Layer());
+			m_gameUpgrade->Layers.push_back(new Menu_Upgrade_Layer(m_finalScore));
 			m_gameUpgrade->OnChange = [&]()
 			{
 				Physics->Paused = true;
