@@ -4,17 +4,17 @@
 
 void Upgrade_System::Update()
 {
-	for (int index : currentSet.Active)
+	for (int i = 0; i < currentSet.Active.size(); i++)
 	{
-		Upgrade& upgrade = currentSet.Upgrades[index];
+		Upgrade& upgrade = currentSet.Upgrades[currentSet.Active[i]];
 
 		if (  !upgrade.Action 
 			|| upgrade.Action(APP_VARS_LIST))
 		{
-			LOG_INFO << "Applying upgrade " << upgrade.Name;
+			LOG_INFO << "Applied upgrade " << upgrade.Description->Name;
 
-			currentSet.Upgrades.erase(
-				currentSet.Upgrades.begin() + index
+			currentSet.Active.erase(
+				currentSet.Active.begin() + i
 			);
 		}
 	}

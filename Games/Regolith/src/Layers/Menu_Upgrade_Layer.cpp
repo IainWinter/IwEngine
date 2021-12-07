@@ -1,33 +1,63 @@
 #include "Layers/Menu_Upgrade_Layer.h"
 
-#define LoadTexture(x) Asset->Load<iw::Texture>(std::string("textures/SpaceGame/") + x)
-#define LoadFont(x) Asset->Load<iw::Font>(std::string("fonts/") + x)
-
-UI_Base* Menu_Upgrade_Layer::MakeUpgrade(
-	const UpgradeDescription& upgrade)
+UI_Base* Menu_Upgrade_Layer::AddUpgrade(
+	int x, int y,
+	UpgradeDescription* upgrade)
 {
-	UI_Button* button = m_upgrades->GetRow(0)[0]->CreateElement<UI_Button>();
-	button->CreateElement<UI_Image>(LoadTexture(upgrade.texturePath));
+	m_upgrades->Row(x)->Data<UpgradeDescription*>(y) = upgrade;
+
+	UI_Button* button = m_upgrades->Row(x)->Elem(y)->CreateElement<UI_Button>();
+	button->CreateElement<UI_Image>(LoadTexture(upgrade->TexturePath));
 
 	button->whileMouseHover = [this, button, upgrade]()
 	{
 		button->offsetTarget = 8;
 		m_tooltip->active = true;
-		m_tooltip->GetElement<UI_Text>(0)->SetString(upgrade.tooltip);
-		m_tooltip->GetElement<UI_Text>(1)->SetString(upgrade.description);
-		m_tooltip->GetElement<UI_Text>(2)->SetString(upgrade.stat);
-		m_tooltip->GetElement<UI_Text>(3)->SetString(upgrade.cost);
+		m_tooltip->GetElement<UI_Text>(0)->SetString(upgrade->DispName);
+		m_tooltip->GetElement<UI_Text>(1)->SetString(upgrade->Description);
+		m_tooltip->GetElement<UI_Text>(2)->SetString(upgrade->Stat);
+		m_tooltip->GetElement<UI_Text>(3)->SetString(to_string(upgrade->Cost) + "R");
 
-		m_tooltip->GetElement<UI_Text>(2)->mesh.Material->Set("color", upgrade.statColor);
-		m_tooltip->GetElement<UI_Text>(3)->mesh.Material->Set("color", upgrade.costColor);
+		m_tooltip->GetElement<UI_Text>(2)->mesh.Material->Set("color", upgrade->StatColor);
+		m_tooltip->GetElement<UI_Text>(3)->mesh.Material->Set("color", upgrade->CostColor);
 	};
 
-	button->onClick = [button]()
+	button->onClick = [this, button, upgrade]()
 	{
 		button->active = false;
+
+		int row = m_bought->AddRow(upgrade, upgrade->Name);
+		UI_Button* xb = m_bought->Row(row)->Elem(0)->SetElement<UI_Button>();
+		xb->CreateElement<UI_Image>(LoadTexture("x.png"));
+
+		xb->onClick = [this, button, row, upgrade]()
+		{
+			button->active = true;
+
+			toActivate.erase(
+				std::find(
+					toActivate.begin(),
+					toActivate.end(),
+					m_bought->Row(row)->Data<0>()
+				)
+			);
+
+			UpdateMoneyText(+upgrade->Cost);
+			m_bought->RemoveRow(row);
+		};
+
+		UpdateMoneyText(-upgrade->Cost);
+		toActivate.push_back(upgrade);
 	};
 
 	return button;
+}
+
+void Menu_Upgrade_Layer::UpdateMoneyText(
+	int diff)
+{
+	m_money += diff;
+	m_text_money->SetString(to_string(m_money) + "R");
 }
 
 int Menu_Upgrade_Layer::Initialize()
@@ -40,81 +70,57 @@ int Menu_Upgrade_Layer::Initialize()
 	// if font is monospace, this should be able to just be one element
 	// problly going to need to have each be seperate though for scrolling
 
-	m_upgrades = m_screen->CreateElement<Upgrade_Table>(/*itembg*/);
-	m_upgrades->fontConfig.Anchor = iw::FontAnchor::TOP_LEFT;
+	m_bought = m_screen->CreateElement<Bought_Table>();
+	m_bought->background = itembg;
+	m_bought->font = m_screen->defaultFont;
+	m_bought->fontConfig.Size = 100;
+
+	m_upgrades = m_screen->CreateElement<Upgrade_Table>();
 
 #define _ true,
 #define o false,
 
-	m_upgrades->AddRow(1, 2, 3, 4, 5, { o o o _ _ });
-	m_upgrades->AddRow(1, 2, 3, 4, 5, { o o o o _ });
-	m_upgrades->AddRow(1, 2, 3, 4, 5, { o o o o o });
-	m_upgrades->AddRow(1, 2, 3, 4, 5, { o _ _ _ _ });
+	m_upgrades->AddRow(0, 0, 0, 0, 0, { o o o _ _ });
+	m_upgrades->AddRow(0, 0, 0, 0, 0, { o o o o _ });
+	m_upgrades->AddRow(0, 0, 0, 0, 0, { o o o o o });
+	m_upgrades->AddRow(0, 0, 0, 0, 0, { o _ _ _ _ });
 
-	UpgradeDescription upgrade1(true);
-	UpgradeDescription upgrade2(true);
-	UpgradeDescription upgrade3(true);
-	UpgradeDescription upgrade4(true);
-	UpgradeDescription upgrade5(true);
-	upgrade1.texturePath = "upgrade_thrusterimpulse.png";
-	upgrade2.texturePath = "upgrade_thrusteracceleration.png";
-	upgrade3.texturePath = "upgrade_thrustermaxspeed.png";
-	upgrade4.texturePath = "upgrade_healthefficiency.png";
-	upgrade5.texturePath = "upgrade_laserefficiency.png";
-
-	upgrade1.tooltip = "Thruster\nImpulse";
-	upgrade1.description = "Effects the immediate stop \nand start time of \nthe ship";
-	upgrade1.stat = "+10%";
-	upgrade1.cost = "200 R";
-
-	upgrade2.tooltip = "Thruster\nAcceleration";
-	upgrade2.description = "Effects the time to\nreach max speed";
-	upgrade2.stat = "+10%";
-	upgrade2.cost = "1,000 R";
-
-	upgrade3.tooltip = "Thruster\nMax Velocity";
-	upgrade3.description = "Effects how fast the\nship can move";
-	upgrade3.stat = "+10%";
-	upgrade3.cost = "2,000 R";
-
-	upgrade4.tooltip = "Health Pickup\nEfficiency";
-	upgrade4.description = "Effects how many cells get\nrestored per green pickup";
-	upgrade4.stat = "+2 cells";
-	upgrade4.cost = "2,000 R";
-
-	upgrade5.tooltip = "Laser Pickup\nEfficiency";
-	upgrade5.description = "Effects how much liquid get\nconverted per green pickup";
-	upgrade5.stat = "+2 charges";
-	upgrade5.cost = "3,000 R";
-
-	m_upgrades->GetRow(0)[0]->AddElement(MakeUpgrade(upgrade1));
-	m_upgrades->GetRow(1)[0]->AddElement(MakeUpgrade(upgrade2));
-	m_upgrades->GetRow(2)[0]->AddElement(MakeUpgrade(upgrade3));
-	m_upgrades->GetRow(2)[1]->AddElement(MakeUpgrade(upgrade4));
-	m_upgrades->GetRow(2)[2]->AddElement(MakeUpgrade(upgrade5));
-
-	auto font = LoadFont("basic.fnt");
-	font->m_material = A_material_font_cam->MakeInstance();
-	font->m_material->SetTexture("texture", font->GetTexture(0));
-	font->m_material->Set       ("isFont",     1.0f);
-	font->m_material->Set       ("font_edge",  0.5f);
-	font->m_material->Set       ("font_width", 0.25f);
-	font->GetTexture(0)->SetFilter(iw::NEAREST);
+	AddUpgrade(0, 0, MakeThrusterImpulse());
+	AddUpgrade(1, 0, MakeThrusterAcceleration());
+	AddUpgrade(2, 0, MakeThrusterMaxSpeed());
+	AddUpgrade(2, 1, MakeHealthPickupEfficiency());
+	AddUpgrade(2, 2, MakeLaserPickupEfficiency());
 
 	m_tooltip = m_screen->CreateElement<UI_Image>(LoadTexture("ui_upgrade_tooltip_background.png"));
-	UI_Text* ttip = m_tooltip->CreateElement<UI_Text>(font, iw::FontMeshConfig { 15, iw::FontAnchor::TOP_LEFT });
-	UI_Text* desc = m_tooltip->CreateElement<UI_Text>(font, iw::FontMeshConfig { 10, iw::FontAnchor::TOP_LEFT });
-	UI_Text* stat = m_tooltip->CreateElement<UI_Text>(font, iw::FontMeshConfig { 15, iw::FontAnchor::BOT_LEFT });
-	UI_Text* cost = m_tooltip->CreateElement<UI_Text>(font, iw::FontMeshConfig { 15, iw::FontAnchor::BOT_RIGHT });
+	UI_Text* ttip = m_tooltip->CreateElement<UI_Text>("", iw::FontMeshConfig { 15, iw::TOP_LEFT  });
+	UI_Text* desc = m_tooltip->CreateElement<UI_Text>("", iw::FontMeshConfig { 10, iw::TOP_LEFT  });
+	UI_Text* stat = m_tooltip->CreateElement<UI_Text>("", iw::FontMeshConfig { 15, iw::BOT_LEFT  });
+	UI_Text* cost = m_tooltip->CreateElement<UI_Text>("", iw::FontMeshConfig { 15, iw::BOT_RIGHT });
 
 	ttip->zIndex = 4;
 	desc->zIndex = 4;
 	stat->zIndex = 4;
 	cost->zIndex = 4;
 
-	m_background->zIndex =  0;
-	m_upgrades  ->zIndex = -1;
-	m_tooltip   ->zIndex =  3;
+	m_text_money = m_screen->CreateElement<UI_Text>("", iw::FontMeshConfig{10});
+	UpdateMoneyText(0);
+
+	m_button_reform = m_screen->CreateElement<UI_Button>(itembg);
+	m_button_reform->CreateElement<UI_Text>("Reform", iw::FontMeshConfig { 100 });
+	m_button_reform->onClick = [this]()
+	{
+		Console->QueueCommand("game-start");
+
+		UpgradeSet set;
+		Bus->push<ApplyUpgradeSet_Event>(set);
+	};
+
+	m_background   ->zIndex =  0;
+	m_tooltip      ->zIndex =  3;
+	m_upgrades     ->zIndex = -1;
+	m_bought       ->zIndex =  0;
+	m_text_money   ->zIndex =  1;
+	m_button_reform->zIndex =  1;
 
 	// test for font rendering
 	//for (int i = 1; i < 10; i++)
@@ -145,6 +151,11 @@ void Menu_Upgrade_Layer::PostUpdate()
 	m_background->width  = m_screen->height * .8;
 	m_background->height = m_screen->height;
 
+	m_text_money->width  = m_background->width;
+	m_text_money->height = m_background->width;
+	m_text_money->y = -300;
+	m_text_money->x =  300;
+
 	// could round table size to pixel grid;
 
 	m_upgrades->height =  m_background->height * .64f;
@@ -152,7 +163,7 @@ void Menu_Upgrade_Layer::PostUpdate()
 	m_upgrades->y      = -m_background->height * .2f - 4;
 	m_upgrades->x      = 8;
 
-	m_upgrades->rowHeight = m_upgrades->height / 5.f;
+	m_upgrades->rowHeight = m_upgrades->height / 8.f;
 	for (float& width : m_upgrades->colWidth)
 	{
 		width = m_upgrades->rowHeight;
@@ -162,6 +173,19 @@ void Menu_Upgrade_Layer::PostUpdate()
 
 	m_upgrades->rowPadding = p;
 	m_upgrades->colPadding = { p, p, p, p, p };
+
+	// bought
+
+	m_bought->height =  m_background->height * .5f;
+	m_bought->width  =  m_background->width  * .7f;
+	m_bought->y      = 0;
+	m_bought->x      = m_bought->width;
+
+	m_bought->rowHeight = 50;
+	m_bought->colWidth = { 50, 500 };
+
+	m_bought->rowPadding = 5;
+	m_bought->colPadding = { 5, 5 };
 
 	if (m_tooltip->active)
 	{
@@ -203,11 +227,43 @@ void Menu_Upgrade_Layer::PostUpdate()
 		//     |	This effects the initial |
 		//     |	ac/deleration of the     |
 		//     |	ship				     |
-		//     |				   10,200 Rh |
+		//     |				   10,200 R  |
 		//     o-----------------------------o
 	}
 
 	m_tooltip->active = false;
+
+	for (Upgrade_Table::UI_Row& row : m_upgrades->rows)
+	{
+		for (size_t i = 0; i < m_upgrades->count; i++)
+		{
+			UpgradeDescription* upgrade = row.Data<UpgradeDescription*>(i);
+
+			if (!upgrade)
+			{
+				continue;
+			}
+
+			UI_Button* button = row.Elem(i)->GetElement<UI_Button>();
+			UI_Image* label = button->GetElement<UI_Image>();
+
+			iw::Color* color = label->mesh.Material->Get<iw::Color>("color");
+
+			button->clickActive = upgrade->Cost <= m_money;
+
+			*color = button->clickActive 
+				? iw::Color(1.f)
+				: iw::Color(1.f, .5f, .5f, 1.f);
+
+		}
+	}
+
+	float padding = 50;
+
+	m_button_reform->x =  m_background->width  - 200 - padding;
+	m_button_reform->y = -m_background->height + 50  + padding;
+	m_button_reform->width  = 200;
+	m_button_reform->height = 50;
 
 	ButtonUpdate();
 }

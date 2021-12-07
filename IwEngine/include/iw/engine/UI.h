@@ -46,6 +46,7 @@ struct UI_Base
 	{
 		for (UI_Base* ui : children)
 		{
+			ui->transform.SetParent(nullptr);
 			delete ui;
 		}
 	}
@@ -53,8 +54,13 @@ struct UI_Base
 	template<
 		typename _ui = UI>
 	_ui* GetElement(
-		int index)
+		int index = 0)
 	{
+		if (children.size() == 0)
+		{
+			return nullptr;
+		}
+
 		return dynamic_cast<_ui*>(children.at(index));
 	}
 
@@ -69,9 +75,27 @@ struct UI_Base
 		return ui;
 	}
 
+	template<
+		typename _ui = UI,
+		typename... _args>
+	_ui* SetElement(
+		const _args&... args)
+	{
+		RemoveElement(GetElement(0));
+
+		_ui* ui = new _ui(args...);
+		AddElement(ui);
+		return ui;
+	}
+
 	void RemoveElement(
 		UI_Base* ui)
 	{
+		if (children.size() == 0)
+		{
+			return;
+		}
+
 		children.erase(std::find(children.begin(), children.end(), ui));
 	}
 
@@ -167,6 +191,8 @@ struct UI_Clickable
 	std::function<void()> onClick;
 	std::function<void()> whileMouseDown;
 	std::function<void()> whileMouseHover;
+
+	bool clickActive = true;
 };
 
 #define ma(r, g, b, a) m_screen->MakeMesh(iw::Color(r, g, b, a))
@@ -177,25 +203,18 @@ struct UI_Screen : UI_Base
 	int depth;
 	iw::OrthographicCamera camera;
 
-	iw::Mesh default;
+	iw::Mesh          defaultMesh;
+	iw::ref<iw::Font> defaultFont;
 
 	UI_Screen()
 		: UI_Base ()
 		, depth   (0)
 	{}
 
-	UI_Screen(
-		iw::Mesh& mesh
-	)
-		: UI_Base ()
-		, depth   (0)
-		, default (mesh)
-	{}
-
 	iw::Mesh MakeMesh(
 		iw::Color& color)
 	{
-		iw::Mesh mesh = default.MakeInstance();
+		iw::Mesh mesh = defaultMesh.MakeInstance();
 		mesh.Material->Set("color", color);
 
 		return mesh;
@@ -313,7 +332,7 @@ struct UI_Image : UI
 	void init() override
 	{
 		texture->SetFilter(iw::NEAREST);
-		mesh = GetScreen()->default.MakeInstance();
+		mesh = GetScreen()->defaultMesh.MakeInstance();
 		mesh.Material->SetTexture("texture", texture);
 		mesh.Material->Set("color", iw::Color(1.f));
 	}
@@ -323,30 +342,70 @@ struct UI_Text : UI
 {
 	iw::ref<iw::Font> font;
 	iw::FontMeshConfig config;
+	std::string str;
 
 	UI_Text(
-		const iw::ref<iw::Font>& font,
-		iw::FontMeshConfig config = {}
+		const std::string& string = "",
+		iw::FontMeshConfig config = {},
+		const iw::ref<iw::Font>& font = nullptr
 	)
 		: UI     ()
 		, font   (font)
 		, config (config)
+		, str    (string)
 	{}
 
 	void SetString(const std::string& str)
 	{
+		this->str = str;
 		font->UpdateMesh(mesh, str, config);
 	}
 
 	void init() override
 	{
-		font->GetTexture(0)->SetFilter(iw::NEAREST);
+		if (!font)
+		{
+			font = GetScreen()->defaultFont;
+		}
+
 		mesh = font->GenerateMesh("", config);
 		mesh.Material = mesh.Material->MakeInstance();
 		mesh.Material->Set("color", iw::Color(1.f));
+
+		SetString(str);
 	}
 };
 
+inline void position_label(UI_Base* me)
+{
+	if (me->children.size() > 0)
+	{
+		UI_Base* label = me->children.at(0);
+		if (!label) return;
+
+		UI_Text* text = dynamic_cast<UI_Text*>(label);
+
+		if (text)
+		{
+			text->x = -me->width + 15; // left anchor + padding
+			text->y = me->height - 15;  // top  anchor + padding
+			text->width  = me->height;
+			text->height = me->height; // keep 1 : 1, only for text rendering this will screw up everything else
+		}
+
+		else
+		{
+			label->x = 0;           // center
+			label->y = 0;           // center
+			label->width  = me->width;
+			label->height = me->height; // keep 1 : 1, only for text rendering this will screw up everything else
+		}
+
+		label->zIndex = me->zIndex + 1; // ontop of button
+	}
+}
+
+// this is very close to the UI_Table_Item struct...
 struct UI_Button : UI, UI_Clickable
 {
 	float offset;
@@ -355,45 +414,19 @@ struct UI_Button : UI, UI_Clickable
 
 	std::function<void(UI_Button*)> effect;
 
-	UI_Button()
-		: UI ()
-	{
-		_reset();
-	}
-
 	UI_Button(
-		const iw::Mesh& button
+		const iw::Mesh& bg = iw::Mesh()
 	)
-		: UI (button)
+		: UI (bg)
 	{
-		_reset();
-	}
-
-	UI_Button(
-		const iw::Mesh& button,
-		const iw::Mesh& label
-	)
-		: UI (button)
-	{
-		CreateElement(label);
 		_reset();
 	}
 
 	void UpdateTransform(
 		UI_Base* parent)
 	{
-		if (children.size() > 0)
-		{
-			UI_Base* label = children.at(0);
-			//label->x = -width  + 15;    // left anchor + padding
-			//label->y =  height - 5;     // top  anchor + padding
-			label->width  = height;
-			label->height = height;     // keep 1 : 1
-			label->zIndex = zIndex + 1; // ontop of button
-		}
-
 		effect(this);
-
+		position_label(this);
 		UI_Base::UpdateTransform(parent);
 	}
 
@@ -523,23 +556,6 @@ struct UI_Slider : UI, UI_Clickable
 	}
 };
 
-//struct UI_Table_Row_Base
-//{
-//	int Id;
-//};
-//
-//template<
-//	typename... _t>
-//struct UI_Table_Row : UI_Table_Row_Base
-//{
-//	std::tuple<_t...> data;
-//
-//
-//};
-
-// test hard coding for 3 elements
-// 
-
 struct UI_Table_Item : UI
 {
 	UI_Table_Item(
@@ -548,39 +564,22 @@ struct UI_Table_Item : UI
 		: UI (background)
 	{}
 
+	// can remove if using std::any in table data storage
 	UI_Table_Item(
 		const iw::Mesh& background,
-		const iw::Mesh& element
+		const iw::ref<iw::Font>& font,
+		const iw::FontMeshConfig& fontConfig,
+		const std::string& string
 	)
 		: UI (background)
 	{
-		CreateElement(element);
-	}
-
-	// returns first child
-	UI* GetElement()
-	{
-		if (children.size() == 0)
-		{
-			return nullptr;
-		}
-
-		return (UI*)children.at(0);
+		CreateElement<UI_Text>(string, fontConfig, font);
 	}
 
 	void UpdateTransform(
 		UI_Base* parent)
 	{
-		UI* label = GetElement();
-		if (label)
-		{
-			//label->x =  width;          // left anchor + padding
-			//label->y =  height;         // top  anchor + padding
-			label->width  = height;
-			label->height = height;     // keep 1 : 1
-			label->zIndex = zIndex + 1; // ontop of element
-		}
-
+		position_label(this);
 		UI_Base::UpdateTransform(parent);
 	}
 };
@@ -596,26 +595,66 @@ struct UI_Table : UI
 	// maybe make a seperate class
 
 	using row_t  = std::array<UI_Table_Item*, sizeof...(_cols)>;
+	using dataptr_t = std::array<void*, sizeof...(_cols)>;
 	using data_t = std::tuple<_cols...>;
+
+	//using data_T = std::array<std::any, sizeof...(_cols)>;
+
+	const int count = sizeof...(_cols);
 
 	struct UI_Row
 	{
-		row_t* row;
 		int index;
+		row_t elements;
+		data_t data;
 
-		UI_Table_Item* operator[](size_t i)
+		UI_Row(
+			int index,
+			const row_t& elems,
+			const data_t& data
+		)
+			: index    (index)
+			, elements (elems)
+			, data     (data)
+		{}
+
+		template<
+			typename _t = UI_Table_Item*>
+		_t Elem(
+			size_t i)
 		{
-			return row->at(i);
+			return (_t)elements.at(i);
 		}
+
+		template<
+			size_t _i>
+		std::tuple_element_t<_i, data_t>& Data()
+		{
+			return std::get<_i>(data);
+		}
+
+		template<
+			typename _t>
+		_t& Data(
+			size_t i)
+		{
+			// shouldnt need to do this everytime :(
+			dataptr_t ptrs = iw::geteach<__get_ptrs, data_t, dataptr_t, sizeof...(_cols)>(data);
+			return *(_t*)ptrs.at(i);
+		}
+
+		struct __get_ptrs
+		{
+			template<
+				typename _t>
+			void* operator()(_t& t)
+			{
+				return (void*)&t;
+			}
+		};
 	};
 
-	//using sort_func = std::function<>
-
-	std::vector<
-		std::tuple<
-			int,    // id
-			data_t,
-			row_t>> rows;
+	std::vector<UI_Row> rows;
 
 	// table width  is uibase width
 	// table height is uibase height
@@ -631,24 +670,9 @@ struct UI_Table : UI
 	std::function<bool(const data_t&, const data_t&)> sort; // return true if 'b' is larger
 
 	UI_Table(
-		const iw::Mesh& itemBg = iw::Mesh(),
-		iw::ref<iw::Font> font = nullptr
+		const iw::Mesh& tableBg = iw::Mesh()
 	)
-		: UI         ()
-		, background (itemBg)
-		, font       (font)
-	{
-		_reset();
-	}
-
-	UI_Table(
-		const iw::Mesh& tableBg,
-		const iw::Mesh& itemBg,
-		iw::ref<iw::Font> font = nullptr
-	)
-		: UI         (tableBg)
-		, background (itemBg)
-		, font       (font)
+		: UI (tableBg)
 	{
 		_reset();
 	}
@@ -669,7 +693,7 @@ private:
 		}
 
 		fontConfig.Size = 360;
-		fontConfig.Anchor = iw::FontAnchor::TOP_RIGHT;
+		fontConfig.Anchor = iw::FontAnchor::TOP_LEFT;
 	}
 
 public:
@@ -721,7 +745,7 @@ public:
 			row = {
 				new UI_Table_Item(
 					mesh,
-					font->GenerateMesh(to_string(rowData), fontConfig)
+					font, fontConfig, to_string(rowData)
 				)...
 			};
 		}
@@ -758,50 +782,57 @@ public:
 
 		if (sort)
 		{
-			int i = 0;
-			for (; i < (int)rows.size(); i++)
+			size_t i = 0;
+			for (; i < rows.size(); i++)
 			{
-				if (sort(std::get<1>(rows.at(i)), data))
+				if (sort(rows.at(i).data, data))
 				{
 					break;
 				}
 			}
 
-			rows.emplace(rows.begin() + i, id, data, row);
+			rows.emplace(rows.begin() + i, id, row, data);
 		}
 
 		else
 		{
-			rows.emplace_back(id, data, row);
+			rows.emplace_back(id, row, data);
 		}
 
 		return id;
 	}
 
-	UI_Row operator[](size_t id)
-	{
-		return GetRow(id);
-	}
-
-	UI_Row GetRow(
+	void RemoveRow(
 		int id)
 	{
-		UI_Row result;
-		result.row = nullptr;
-		result.index = 0;
-
-		for (auto& [rid, rdata, rarray] : rows)
+		for (auto itr = rows.begin(); itr != rows.end(); ++itr)
 		{
-			if (id == rid)
+			if (id == itr->index)
 			{
-				result.row = &rarray;
+				for (UI_Base* ui : itr->elements)
+				{
+					RemoveElement(ui);
+					delete ui;
+				}
+
+				rows.erase(itr);
 				break;
 			}
+		}
+	}
 
-			result.index++;
+	UI_Row* Row(
+		int id)
+	{
+		for (UI_Row& row : rows)
+		{
+			if (id == row.index)
+			{
+				return &row;
+			}
 		}
 
-		return result;
+		return nullptr;
 	}
 
 	void UpdateRow(
@@ -809,12 +840,8 @@ public:
 		int col,
 		std::string str)
 	{
-		//updateData(
-		//	GetRow(id).first->at(col)->GetElement()->mesh,
-		//	str
-		//);
 		font->UpdateMesh(
-			GetRow(id)[col]->GetElement()->mesh,
+			Row(id)->Elem(col)->GetElement()->mesh,
 			str,
 			{ 360, iw::FontAnchor::TOP_RIGHT }
 		);
@@ -840,7 +867,7 @@ public:
 
 			for (size_t j = 0; j < sizeof...(_cols); j++)
 			{
-				UI_Base* item = std::get<2>(rows[i])[j];
+				UI_Table_Item* item = rows.at(i).Elem(j);
 				if (!item) continue;
 
 				float nextTop = -cursorY + rowPadding - scrollOffset;

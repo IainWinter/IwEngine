@@ -37,7 +37,7 @@ namespace Graphics {
 		int Amount;
 	};
 
-	enum class FontAnchor
+	enum /*class*/ FontAnchor
 	{
 		TOP_LEFT,
 		TOP_RIGHT,

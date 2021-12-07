@@ -4,6 +4,9 @@
 #include "iw/engine/UI.h"
 #include "Assets.h"
 
+#define LoadTexture(x) Asset->Load<iw::Texture>(std::string("textures/SpaceGame/") + x)
+#define LoadFont(x) Asset->Load<iw::Font>(std::string("fonts/") + x)
+
 struct UI_Layer : iw::Layer
 {
 	UI_Screen* m_screen;
@@ -31,9 +34,17 @@ struct UI_Layer : iw::Layer
 		}
 
 		else {
-			iw::Mesh default = iw::ScreenQuad().MakeInstance();
-			default.Material = A_material_texture_cam->MakeInstance();
-			m_screen = Space->CreateEntity<UI_Screen>().Set<UI_Screen>(default);
+			m_screen = Space->CreateEntity<UI_Screen>().Set<UI_Screen>();
+			m_screen->defaultMesh = iw::ScreenQuad().MakeInstance();
+			m_screen->defaultMesh.Material = A_material_texture_cam->MakeInstance();
+
+			m_screen->defaultFont = LoadFont("basic.fnt");
+			m_screen->defaultFont->m_material = A_material_font_cam->MakeInstance();
+			m_screen->defaultFont->m_material->SetTexture("texture", m_screen->defaultFont->GetTexture(0));
+			m_screen->defaultFont->m_material->Set       ("isFont",     1.0f);
+			m_screen->defaultFont->m_material->Set       ("font_edge",  0.5f);
+			m_screen->defaultFont->m_material->Set       ("font_width", 0.25f);
+			m_screen->defaultFont->GetTexture(0)->SetFilter(iw::NEAREST);
 		}
 
 		Layer::OnPush();
@@ -81,7 +92,9 @@ struct Menu_Layer : UI_Layer
 		{
 			UI_Clickable* clickable = dynamic_cast<UI_Clickable*>(ui);
 
-			if (ui->IsPointOver(m_screen->LocalMouse()))
+			if (    ui->active
+				&& clickable->clickActive
+				&& ui->IsPointOver(m_screen->LocalMouse()))
 			{
 				if (clickable->whileMouseHover)
 				{
@@ -101,9 +114,12 @@ struct Menu_Layer : UI_Layer
 					clickable->onClick();
 				}
 			}
-
-			ui->x = 0;
-			ui->y = 0;
+			// top reset buttons but this isnt needed if they are positioned
+			//else
+			//{
+			//	ui->x = 0;
+			//	ui->y = 0;
+			//}
 		}
 
 		m_last_execute = m_execute;
