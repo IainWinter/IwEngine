@@ -35,6 +35,7 @@ namespace Engine {
 		IWENGINE_API bool On(MouseButtonEvent&   e) override;
 
 		IWENGINE_API bool On(KeyEvent& e) override;
+		IWENGINE_API bool On(KeyTypedEvent& e) override;
 
 		IWENGINE_API bool On(OsEvent& e) override;
 

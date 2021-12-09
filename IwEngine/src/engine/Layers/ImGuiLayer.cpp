@@ -31,18 +31,40 @@ namespace Engine {
 
 		ImGui::StyleColorsDark();
 
-
 		auto& io = ImGui::GetIO();
-		io.ConfigFlags = ImGuiConfigFlags_DockingEnable;
+		//io.ConfigFlags = ImGuiConfigFlags_DockingEnable;
 		//if(m_window) io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
-		ImFont* pFont = io.Fonts->AddFontFromFileTTF(Asset->GetPath("fonts/ttf/verdana.ttf").c_str(), 15);
+		ImFont* pFont = io.Fonts->AddFontFromFileTTF(Asset->GetPath("fonts/ttf/verdana.ttf").c_str(), 35);
 		//ImGui::PushFont(pFont);
 
 		if (m_window) ImGui_ImplWin32_Init(m_window->Handle(), m_window->Context());
 		ImGui_ImplOpenGL3_Init("#version 450");
 
 		//Renderer->SetDefaultTarget(target);
+
+		io.KeyMap[ImGuiKey_Tab        ] = InputName::TAB;
+		io.KeyMap[ImGuiKey_LeftArrow  ] = InputName::LEFT;
+		io.KeyMap[ImGuiKey_RightArrow ] = InputName::RIGHT;
+		io.KeyMap[ImGuiKey_UpArrow    ] = InputName::UP;
+		io.KeyMap[ImGuiKey_DownArrow  ] = InputName::DOWN;
+		io.KeyMap[ImGuiKey_PageUp     ] = InputName::PRIOR;
+		io.KeyMap[ImGuiKey_PageDown   ] = InputName::NEXT;
+		io.KeyMap[ImGuiKey_Home       ] = InputName::HOME;
+		io.KeyMap[ImGuiKey_End        ] = InputName::END;
+		io.KeyMap[ImGuiKey_Insert     ] = InputName::INSERT;
+		io.KeyMap[ImGuiKey_Delete     ] = InputName::DEL;
+		io.KeyMap[ImGuiKey_Backspace  ] = InputName::BACK;
+		io.KeyMap[ImGuiKey_Space      ] = InputName::SPACE;
+		io.KeyMap[ImGuiKey_Enter      ] = InputName::EXECUTE;
+		io.KeyMap[ImGuiKey_Escape     ] = InputName::ESCAPE;
+		io.KeyMap[ImGuiKey_KeyPadEnter] = InputName::EXECUTE; // the same?
+		io.KeyMap[ImGuiKey_A          ] = InputName::A;        // for text edit CTRL+A: select all
+		io.KeyMap[ImGuiKey_C          ] = InputName::C;        // for text edit CTRL+C: copy
+		io.KeyMap[ImGuiKey_V          ] = InputName::V;        // for text edit CTRL+V: paste
+		io.KeyMap[ImGuiKey_X          ] = InputName::X;        // for text edit CTRL+X: cut
+		io.KeyMap[ImGuiKey_Y          ] = InputName::Y;        // for text edit CTRL+Y: redo
+		io.KeyMap[ImGuiKey_Z          ] = InputName::Z;        // for text edit CTRL+Z: undo
 
 		return 0;
 	}
@@ -213,6 +235,7 @@ namespace Engine {
 		WindowResizedEvent& e)
 	{
 		auto& io = ImGui::GetIO();
+
 		io.DisplaySize.x = (float)e.Width;
 		io.DisplaySize.y = (float)e.Height;
 
@@ -222,57 +245,71 @@ namespace Engine {
 	bool ImGuiLayer::On(
 		MouseMovedEvent& e)
 	{
-		if (m_window) return false;
-
-		if (e.Device == DeviceType::MOUSE) {
-			auto& io = ImGui::GetIO();
-
+		auto& io = ImGui::GetIO();
+		
+		if (e.Device == DeviceType::MOUSE)
+		{
 			glm::vec2 screenPos = glm::vec2(e.X, e.Y)/*iw::Mouse::ScreenPos()*/;
 
 			io.MousePos.x = (float)screenPos.x;
 			io.MousePos.y = (float)screenPos.y;
 		}
 
-		return ImGui::GetIO().WantCaptureMouse;
+		return io.WantCaptureMouse;
 	}
 
 	bool ImGuiLayer::On(
 		MouseWheelEvent& e)
 	{
-		if (e.Device == DeviceType::MOUSE) {
-			auto& io = ImGui::GetIO();
+		auto& io = ImGui::GetIO();
+		
+		if (e.Device == DeviceType::MOUSE)
+		{
 			if (io.WantCaptureMouse) {
 				io.MouseWheel += e.Delta;
 			}
 		}
 
-		return ImGui::GetIO().WantCaptureMouse;
+		return io.WantCaptureMouse;
 	}
 
 	bool ImGuiLayer::On(
 		MouseButtonEvent& e)
 	{
-		if (e.Device == DeviceType::MOUSE) {
-			auto& io = ImGui::GetIO();
+		auto& io = ImGui::GetIO();
+		
+		if (e.Device == DeviceType::MOUSE)
+		{
 			if (io.WantCaptureMouse) {
 				io.MouseDown[e.Button - LMOUSE] = e.State;
 			}
 		}
 
-		return ImGui::GetIO().WantCaptureMouse;
+		return io.WantCaptureMouse;
 	}
 
 	bool ImGuiLayer::On(
 		KeyEvent& e)
 	{
-		if (e.Device == DeviceType::KEYBOARD) {
-			auto& io = ImGui::GetIO();
-			if (io.WantCaptureKeyboard) {
-				io.KeysDown[e.Button] = e.State;
-			}
+		auto& io = ImGui::GetIO();
+
+		if (io.WantCaptureKeyboard) {
+			io.KeysDown[e.Button] = e.State;
 		}
 
-		return ImGui::GetIO().WantCaptureKeyboard;
+		return io.WantCaptureKeyboard;
+	}
+
+	bool ImGuiLayer::On(
+		KeyTypedEvent& e)
+	{
+		auto& io = ImGui::GetIO();
+
+		if (io.WantCaptureKeyboard) {
+			io.AddInputCharacter(e.Character);
+		}
+
+		return io.WantCaptureKeyboard;
 	}
 	
 	bool ImGuiLayer::On(

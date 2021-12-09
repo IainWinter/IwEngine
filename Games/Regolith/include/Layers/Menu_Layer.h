@@ -1,5 +1,84 @@
 #pragma once
 
+#include "iw/engine/Layers/ImGuiLayer.h"
+#include <unordered_map>
+
+#define LoadTexture(x) Asset->Load<iw::Texture>(std::string("textures/SpaceGame/") + x)
+
+struct Menu_Layer2 : iw::Layer
+{
+	std::unordered_map<std::string, void*> imgs;
+	float window_w;
+	float window_h;
+
+	float bg_h;
+	float bg_w;
+	float bg_x;
+	float bg_y;
+
+	float padding_1;
+	float padding_01;
+
+	ImGuiWindowFlags commonFlags;
+
+	Menu_Layer2(
+		const std::string& name
+	)
+		: iw::Layer  (name)
+		, window_w   (0.f) 
+		, window_h   (0.f)
+		, bg_h       (0.f)
+		, bg_w       (0.f)
+		, bg_x       (0.f)
+		, bg_y       (0.f)
+		, padding_1  (0.f)
+		, padding_01 (0.f)
+	{
+		commonFlags = 
+			  ImGuiWindowFlags_NoDecoration 
+			| ImGuiWindowFlags_NoResize 
+			| ImGuiWindowFlags_NoMove
+			| ImGuiWindowFlags_NoBringToFrontOnFocus;
+	}
+
+	void ImGui()
+	{
+		window_w = ImGui::GetIO().DisplaySize.x;
+		window_h = ImGui::GetIO().DisplaySize.y;
+
+		bg_h = window_h;
+		bg_w = bg_h * .8f;
+		bg_x = (window_w - bg_w) * .5f;
+		bg_y = 0.f;
+
+		padding_1  = bg_w * .1f;
+		padding_01 = bg_w * .01f;
+
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+	
+		//ImGui::PushFont(font);
+		//ImGui::PopFont();
+
+		UI();
+
+		ImGui::PopStyleVar(1);
+	}
+
+	virtual void UI() = 0;
+
+	void RegisterImage(const std::string& str)
+	{
+		auto img = LoadTexture(str);
+		img->SetFilter(iw::NEAREST);
+		img->Initialize(Renderer->Now->Device);
+
+		imgs[str] = (void*)img->Handle()->Id();
+	}
+};
+
+#undef LoadTexture
+
+
 #include "iw/engine/Layer.h"
 #include "iw/engine/UI.h"
 #include "Assets.h"

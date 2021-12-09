@@ -114,7 +114,7 @@ int App::Initialize(
 	int err = Application::Initialize(options);
 	if (err) return err;
 
-	PushLayer<iw::ImGuiLayer>()->BindContext();
+	PushLayer<iw::ImGuiLayer>(Window)->BindContext();
 
 	//ImGui::SetCurrentContext((ImGuiContext*)options.ImGuiContext);
 
@@ -128,7 +128,7 @@ int App::Initialize(
 		Input->SetContext("Menu");
 	};
 
-	Console->QueueCommand("game-upgrade");
+	Console->QueueCommand("game-over");
 
 	// create a guid for the installation of this app
 
@@ -211,6 +211,15 @@ int App::Initialize(
 		}
 
 		else
+		if (command.Verb == "final-score")
+		{
+			if (command.TokenCount == 1)
+			{
+				m_finalScore = command.Tokens[0].Int;
+			}
+		}
+
+		else
 		if (command.Verb == "game-over")
 		{
 			Bus->push<StateChange_Event>(GAME_OVER_STATE);
@@ -227,13 +236,8 @@ int App::Initialize(
 
 				if (done)
 				{
-					// ew
-					Game_Layer* game = GetLayer<Game_Layer>("Game");
-					ScoreSystem* score_s = nullptr;
-					if (game) score_s = game->GetSystem<ScoreSystem>("Score");
-					if (score_s) m_finalScore = score_s->Score;
-
-					Menu_PostGame_Layer* menu = new Menu_PostGame_Layer(m_finalScore);
+					//Menu_PostGame_Layer* menu = new Menu_PostGame_Layer(m_finalScore);
+					Menu_Title_Layer* menu = new Menu_Title_Layer();
 
 					m_gameHighscore = new GameState("Post game menu");
 					m_gameHighscore->Layers.push_back(menu);

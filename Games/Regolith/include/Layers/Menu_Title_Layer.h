@@ -1,47 +1,38 @@
 #pragma once
 
-#include "iw/engine/Layers/ImGuiLayer.h"
+#include "Layers/Menu_Layer.h"
+#include "iw/util/io/Network.h"
+#include "iw/util/reflection/serialization/JsonSerializer.h"
+
 #include "Upgrade.h"
 #include "Events.h"
-#include <unordered_map>
+#include "HighscoreRecord.h"
+
 #include <array>
 
-struct Menu_Title_Layer : iw::Layer
+struct Menu_Title_Layer : Menu_Layer2
 {
-	std::unordered_map<std::string, void*> imgs;
-	std::array<UpgradeDescription*, 8 * 8> upgrades;
+	iw::NetworkConnection connection;
+	std::vector<HighscoreRecord> scores;
+	int score;
 
-	std::vector<std::pair<int, UpgradeDescription*>> active;
+	std::string gameId;
 
-	float window_w;
-	float window_h;
-	
-	float bg_h;
-	float bg_w;
-	float bg_x;
-	float bg_y;
-
-	ImGuiWindowFlags commonFlags;
-
-	UpgradeDescription* tooltip;
-
-	int money;
-
-	Menu_Title_Layer()
-		: iw::Layer ("Main title menu")
-		, money     (3000)
-		, tooltip   (nullptr)
+	Menu_Title_Layer(
+		int score = 1009
+	)
+		: Menu_Layer2 ("Main title menu")
+		, score       (score)
 	{}
 
-	int Initialize() override;;
-	void ImGui() override;
+	int Initialize() override;
 
-	void Background();
-	void UpgradeTable();
-	void ActiveTable();
-	void Tooltip();
+	void UI() override;
 
+	void PlayerImage();
+	void Title();
+	void ScoreTable();
 	void Buttons();
 
-	void RegisterImage(const std::string& str);
+	void SubmitTempScoreAndGetId();
 };

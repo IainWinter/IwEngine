@@ -1,28 +1,20 @@
 #pragma once
 
-#include "iw/engine/Layers/ImGuiLayer.h"
-#include "Upgrade.h"
-#include "Events.h"
-#include <unordered_map>
-#include <array>
+#include "Layers/Menu_Layer.h"
 #include "iw/util/to_string.h"
 
-struct Menu_Upgrade_Layer : iw::Layer
-{
-	std::unordered_map<std::string, void*> imgs;
-	std::array<UpgradeDescription*, 8 * 8> upgrades;
 
+#include "Upgrade.h"
+#include "Events.h"
+
+#include <array>
+
+struct Menu_Upgrade_Layer : Menu_Layer2
+{
+	std::array<UpgradeDescription*, 8 * 8> upgrades;
 	std::vector<std::pair<int, UpgradeDescription*>> active;
 
-	float window_w;
-	float window_h;
-	
-	float bg_h;
-	float bg_w;
-	float bg_x;
-	float bg_y;
-
-	ImGuiWindowFlags commonFlags;
+	ImFont* font;
 
 	UpgradeDescription* tooltip;
 	int money;
@@ -30,22 +22,39 @@ struct Menu_Upgrade_Layer : iw::Layer
 	Menu_Upgrade_Layer(
 		int totalMoney
 	)
-		: iw::Layer ("Upgrade menu")
-		, money     (totalMoney)
-		, tooltip   (nullptr)
+		: Menu_Layer2 ("Upgrade menu")
+		, money       (totalMoney)
+		, tooltip     (nullptr)
 	{}
 
 	int Initialize() override;;
-	void ImGui() override;
 
-	void Background();
+	void UI() override;
+
 	void UpgradeTable();
 	void ActiveTable();
 	void Tooltip();
-
 	void Buttons();
 
-	void RegisterImage(const std::string& str);
+//void Menu_PostGame_Layer::SubmitScoreAndExit(
+//	const std::string& whereTo)
+//{
+//	Console->QueueCommand(whereTo);
+//
+//	//iw::HttpRequest<iw::None> request;
+//	//request.Ip       = "71.233.150.182";
+//	//request.Host     = "data.winter.dev";
+//	//request.Resource = "/regolith/php/submit_highscore.php";
+//
+//	//request.SetArgument("name", m_playerName);
+//	//request.SetArgument("score", to_string(m_finalScore));
+//
+//	//m_connection.Request<std::string>(request, [](
+//	//	std::string& str) 
+//	//{
+//	//	LOG_INFO << str;
+//	//});
+//}
 };
 
 

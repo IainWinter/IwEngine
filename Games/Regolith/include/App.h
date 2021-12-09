@@ -98,7 +98,7 @@ public:
 		, m_fadeout       (nullptr)
 	{
 		// for debug, if game starts on game-over
-		m_finalScore = iw::randi(10000);
+		m_finalScore = 30000;
 	}
 
 	int Initialize(iw::InitOptions& options) override;

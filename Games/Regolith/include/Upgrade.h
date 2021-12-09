@@ -94,7 +94,7 @@ inline UpgradeDescription* MakeThrusterMaxSpeed()
 
 	upgrade.Action = [](iw::AppVars app)
 	{
-		GetPlayer(app)->speed += 1;
+		GetPlayer(app)->speed += 100;
 		return true;
 	};
 

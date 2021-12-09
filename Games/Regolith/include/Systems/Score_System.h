@@ -9,7 +9,8 @@ struct ScoreSystem : iw::SystemBase
 	int Score;
 
 	ScoreSystem()
-		: iw::SystemBase("Score")
+		: iw::SystemBase ("Score")
+		, Score          (0)
 	{}
 
 	//void Update() override;

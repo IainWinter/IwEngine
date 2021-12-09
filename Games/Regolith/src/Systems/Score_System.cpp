@@ -24,6 +24,16 @@ bool ScoreSystem::On(iw::ActionEvent& e)
 				Bus->push<ChangePlayerScore_Event>(Score + 100);
 			}
 
+
+			if (event.Entity.Has<Player>())
+			{
+				std::stringstream ss;
+				ss << "final-score";
+				ss << Score;
+				Console->QueueCommand(ss.str());
+				Console->QueueCommand("game-over");
+			}
+
 			break;
 		}
 		case CHANGE_PLAYER_SCORE:
@@ -33,22 +43,23 @@ bool ScoreSystem::On(iw::ActionEvent& e)
 			Score = newScore;
 			break;
 		}
-		case STATE_CHANGE:
-		{
-			StateChange_Event& event = e.as<StateChange_Event>();
+		//case STATE_CHANGE:
+		//{
+		//	StateChange_Event& event = e.as<StateChange_Event>();
 
-			switch (event.State)
-			{
-				case GAME_START_STATE:
-					Score = 0;
-					break;
-				case GAME_OVER_STATE:
-					LOG_TRACE << "Final score " << Score << "!";
-					break;
-			}
+		//	switch (event.State)
+		//	{
+		//		case GAME_START_STATE:
+		//			Score = 0;
+		//			break;
+		//		case GAME_OVER_STATE:
+		//			Console->QueueCommand();
+		//			LOG_TRACE << "Final score " << Score << "!";
+		//			break;
+		//	}
 
-			break;
-		}
+		//	break;
+		//}
 	}
 
 	return false;
