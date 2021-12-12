@@ -10,7 +10,9 @@ struct Player
 	bool  i_fire1 = false;
 	bool  i_fire2 = false;
 
-	float speed = 150;
+	float u_speed = 200;
+	float u_acceleration = 300;
+	float u_breaking = 150;
 
 	float rotation = 0.f;
 
@@ -18,4 +20,24 @@ struct Player
 
 	Weapon* CurrentWeapon = nullptr;
 	Weapon* SpecialLaser = nullptr;
+
+	float CalcVel(float vel, float nvel, float move, float dt)
+	{
+		if (move != 0.f)
+		{
+			vel += move * u_acceleration * dt;
+		}
+
+		else 
+		{
+			int sign = signbit(vel);
+			vel -= nvel * u_breaking * iw::FixedTime();
+			if (sign != signbit(vel))
+			{
+				vel = 0;
+			}
+		}
+
+		return vel;
+	}
 };

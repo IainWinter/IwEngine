@@ -1,10 +1,26 @@
 #include "Layers/Menu_Title_Layer.h"
 
+#include "gl/glew.h"
+#include "iw/renderer/Platform/OpenGL/GLErrorCatch.h"
+
 int Menu_Title_Layer::Initialize()
 {
 	RegisterImage("ui_player_border.png");
 
 	SubmitTempScoreAndGetId();
+
+	font_regular = iwFont("verdana_36");
+	font_title   = iwFont("verdana_92");
+
+	//font_regular->DisplayOffset.y = font_regular->FontSize / 3.f;
+	//font_title  ->DisplayOffset.y = font_title  ->FontSize / 3.f;
+
+	//GL(glBindTexture  (GL_TEXTURE_2D, (GLuint)ImGui::GetIO().Fonts->TexID));
+	//GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+	////GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST));
+	//GL(glBindTexture  (GL_TEXTURE_2D, 0));
+
+	//font_regular->G((ImWchar)'1')->AdvanceX = font_regular->FindGlyph((ImWchar)'4')->AdvanceX;
 
 	return 0;
 }
@@ -13,19 +29,31 @@ void Menu_Title_Layer::UI()
 {
 	connection.StepResults();
 
+	ImGui::GetIO().FontGlobalScale = bg_w / 800;
+
 	ImGui::SetNextWindowPos (ImVec2(bg_x, bg_y));
 	ImGui::SetNextWindowSize(ImVec2(bg_w, bg_h));
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 
 	ImGui::Begin("Main Menu", nullptr, commonFlags);
 	{
-		PlayerImage();
-		Title();
-		ScoreTable();
-		Buttons();
+		ImGui::PushFont(font_regular);
+		{
+			PlayerImage();
+			ScoreTable();
+			Buttons();
+		}
+	
+		ImGui::PushFont(font_title);
+		{
+			Title();
+		}
+
+		ImGui::PopFont();
+		ImGui::PopFont();
 	}
 	ImGui::End();
-	
+
 	ImGui::PopStyleVar(1);
 }
 
@@ -90,55 +118,50 @@ void Menu_Title_Layer::ScoreTable()
 	{
 		ImGui::BeginTable("Upgrades", 3);
 		{
-			ImGui::TableSetupColumn("0", ImGuiTableColumnFlags_WidthStretch);
-			ImGui::TableSetupColumn("1", ImGuiTableColumnFlags_WidthStretch);
-			ImGui::TableSetupColumn("2", ImGuiTableColumnFlags_WidthStretch);
+			ImGui::TableSetupColumn("Order", ImGuiTableColumnFlags_WidthStretch, .25);
+			ImGui::TableSetupColumn("Score", ImGuiTableColumnFlags_WidthStretch, .5);
+			ImGui::TableSetupColumn("Name",  ImGuiTableColumnFlags_WidthStretch);
 
 			for (int i = 0; i < scores.size(); i++)
 			{
-				ImGui::TableNextRow();
-
 				HighscoreRecord& record = scores.at(i);
-
-				if (gameId == record.GameId)
+				
+				ImGui::TableNextRow();
+				
+				if (gameId != record.GameId)
 				{
-					float r = sin(iw::TotalTime() * 2) * .5 + 1;
-					float g = sin(iw::TotalTime() * 3) * .5 + 1;
-					float b = sin(iw::TotalTime() * 4) * .5 + 1;
-
-					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(r, g, b, 1));
-
-					ImGuiInputTextCallback callback = [](ImGuiInputTextCallbackData* data)
-					{
-						return 0;
-					};
-
-					ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0, 0, 0, 0.1));
-
-					ImGui::InputText("Input Name", 
-						record.Name.data(), 
-						record.Name.capacity(),
-						ImGuiInputTextFlags_None, callback);
-
-					ImGui::PopStyleColor(1);
-				}
-
-				else
-				{
+					ImGui::Text("%d", record.Order);
+					ImGui::TableNextCell();
+					ImGui::Text("%d", record.Score);
+					ImGui::TableNextCell();
 					ImGui::Text(record.Name.c_str());
 				}
-				
-				ImGui::TableNextCell();
 
-				ImGui::Text("%d", record.Order);
-				ImGui::TableNextCell();
-
-				ImGui::Text("%d", record.Score);
-				ImGui::TableNextCell();
-
-				if (gameId == record.GameId)
+				else 
 				{
-					ImGui::PopStyleColor(1);
+					ImVec2 min, max;
+					float r = sin(iw::TotalTime() * 10)              * .5 + 1;
+					float g = sin(iw::TotalTime() * 11 + 2/3*iw::Pi) * .5 + 1;
+					float b = sin(iw::TotalTime() * 12 + 4/3*iw::Pi) * .5 + 1;
+
+					ImGui::PushStyleColor(ImGuiCol_Text,    ImVec4(r, g, b, 1));
+					ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0, 0, 0, 0));
+					ImGui::PushStyleVar  (ImGuiStyleVar_FramePadding, ImVec2(0, 0));
+
+					ImGui::Text("%d", record.Order);
+					ImGui::TableNextCell();
+					ImGui::Text("%d", record.Score);
+					ImGui::TableNextCell();
+					ImGui::InputText("Input Name", record.Name.data(), record.Name.capacity(), ImGuiInputTextFlags_None);
+
+					ImGui::PopStyleColor(2);
+					ImGui::PopStyleVar  (1);
+
+					if (scroll_table)
+					{
+						scroll_table = false;
+						ImGui::SetScrollHereY();
+					}
 				}
 			}
 		}
@@ -165,14 +188,14 @@ void Menu_Title_Layer::Buttons()
 
 		if (ImGui::Button("Quit", size)) // set the size of this button
 		{
-			Console->QueueCommand("quit");
+			SubmitScoreAndExit("quit");
 		}
 
 		ImGui::SameLine();
 
 		if (ImGui::Button("Upgrade", size)) // set the size of this button
 		{
-			Console->QueueCommand("game-upgrade");
+			SubmitScoreAndExit("game-upgrade");
 		}
 	}
 	ImGui::EndChild();
@@ -222,4 +245,27 @@ void Menu_Title_Layer::SubmitTempScoreAndGetId()
 	};
 
 	connection.AsyncRequest(request);
+}
+
+void Menu_Title_Layer::SubmitScoreAndExit(
+	const std::string& command)
+{
+	Console->QueueCommand(command);
+
+	// this needs to update the database at game_id with the name
+
+	//iw::HttpRequest<std::string, iw::NoSerializer> request;
+	//request.Ip       = "71.233.150.182";
+	//request.Host     = "data.niceyam.com";
+	//request.Resource = "/regolith/php/submit_highscore.php";
+
+	//request.OnResult = [](std::string& str)
+	//{
+	//	LOG_INFO << str;
+	//};
+
+	//request.SetArgument("name", *name);
+	//request.SetArgument("score", to_string(score));
+
+	//connection.AsyncRequest(request);
 }

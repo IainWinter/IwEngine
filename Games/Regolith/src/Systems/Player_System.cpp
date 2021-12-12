@@ -10,7 +10,7 @@ int PlayerSystem::Initialize()
 		if (!player) return false;
 
 		int active = command.Active ? 1 : -1;
-
+			
 		     if (command.Verb == "right")    player->i_moveX += active;
 		else if (command.Verb == "up")       player->i_moveY += active;
 		else if (command.Verb == "fire")     player->i_fire1 = command.Active;
@@ -34,12 +34,129 @@ void PlayerSystem::FixedUpdate()
 
 	if (!player) return;
 
-	rigidbody->Velocity.x = player->speed * player->i_moveX;
-	rigidbody->Velocity.y = player->speed * player->i_moveY;
+	glm::vec3& vel = rigidbody->Velocity;
+	glm::vec3 nvel = iw::norm(vel);
+	glm::vec3 move = iw::norm(glm::vec3(player->i_moveX, player->i_moveY, 0.f));
+	
+	vel.x = player->CalcVel(vel.x, nvel.x, move.x, iw::FixedTime());
+	vel.y = player->CalcVel(vel.y, nvel.y, move.y, iw::FixedTime());
 
-	//float angle = ((int)player->i_left - (int)player->i_right) * iw::Pi / 2;
-	//player->rotation = iw::lerp(player->rotation, angle, iw::FixedTime() * 5);
-	//rigidbody->Transform.Rotation = glm::angleAxis(player->rotation, glm::vec3(0, 0, 1));
+	float speed = glm::length(vel);
+	vel = iw::norm(vel) * glm::clamp(speed, 0.f, player->u_speed);
+
+	//// if move is     0, subtract breaking acceleration
+	//// if move is not 0, add acceleration
+
+	//glm::vec2 acc = glm::vec2(
+	//	move.x != 0.f ? player->u_acceleration : -player->m_breaking,
+	//	move.y != 0.f ? player->u_acceleration : -player->m_breaking
+	//);
+
+	//vel += glm::vec3(acc, 0.f);
+
+
+
+	//glm::vec3 target(0.f);
+	//target.x = player->i_moveX;
+	//target.y = player->i_moveY;
+	//
+	//if (target != glm::vec3(0.f))
+	//{
+	//	target = glm::normalize(target) * player->u_speed;
+	//}
+
+	//glm::vec2 accel(0.f);
+	//accel.x = target.x == 0.f ? -player->m_breaking : player->u_acceleration;
+	//accel.y = target.y == 0.f ? -player->m_breaking : player->u_acceleration;
+
+	//float speed1 = glm::length2(vel);
+
+	//vel.x = iw::lerp(vel.x, target.x, accel.x * iw::FixedTime());
+	//vel.y = iw::lerp(vel.y, target.y, accel.y * iw::FixedTime());
+
+	//float speed2 = glm::length2(vel);
+
+	//if (speed2 - speed1 < 0.f)
+	//{
+	//	if (abs(rigidbody->Velocity.x) < 4.0f) rigidbody->Velocity.x = 0.f;
+	//	if (abs(rigidbody->Velocity.y) < 4.0f) rigidbody->Velocity.y = 0.f;
+	//}
+
+	//if (player->i_moveX == 0.f && player->i_moveY == 0.f)
+	//{
+	//	rigidbody->Velocity *= .95f;
+	//}
+
+	//else
+	//{
+	//	glm::vec2 dir = glm::normalize(glm::vec2(player->i_moveX, player->i_moveY));
+
+	//	if (dir.x != 0.f) rigidbody->Velocity.x = player->speed * dir.x;
+	//	if (dir.y != 0.f) rigidbody->Velocity.y = player->speed * dir.y;
+	//}
+
+	//auto safeNorm = [](glm::vec3 v) 
+	//{
+	//	return glm::length2(v) > 0.00001
+	//		? glm::normalize(v) 
+	//		: glm::vec3(0);
+	//};
+
+	//glm::vec2 dir = glm::normalize(glm::vec2(player->i_moveX, player->i_moveY));
+
+	//rigidbody->Velocity.x = player->speed * dir.x;
+	//rigidbody->Velocity.y = player->speed * dir.y;
+
+	//// Target force, make own funciton in iwmath, i guess a turn twoards
+	//glm::vec2 nVel = safeNorm(rigidbody->Velocity);
+	//glm::vec2 delta = (dir - nVel) * 20.f;
+
+	//rigidbody->Velocity = safeNorm(rigidbody->Velocity + glm::vec3(delta, 0.f)) * player->speed;
+
+	//glm::vec2 vel = glm::vec2(rigidbody->Velocity.x, rigidbody->Velocity.y);
+	//glm::vec2 dir = glm::vec2(player->i_moveX, player->i_moveY);
+
+	//if (player->i_moveX == 0.f && player->i_moveY == 0.f)
+	//{
+	//	rigidbody->Velocity *= .99;
+	//}
+
+	//else
+	//{
+	//	dir = glm::normalize(dir);
+
+	//	if (glm::length2(vel) < .001 || glm::dot(vel, dir) <= 0)
+	//	{
+	//		rigidbody->Velocity.x += player->speed / 2 * player->i_moveX;
+	//		rigidbody->Velocity.y += player->speed / 2 * player->i_moveY;
+
+	//		for (int i = 0; i < 25; i++)
+	//		{
+	//			glm::vec2 pos = glm::vec2(rigidbody->Transform.Position.x, rigidbody->Transform.Position.y);
+	//			pos -= dir * 15.f + glm::vec2(iw::randf(), iw::randf()) * 5.f; // 30 = radius
+
+	//			iw::Cell c = iw::Cell::GetDefault(iw::CellType::ROCK);
+
+	//			c.Props = iw::CellProp::MOVE_FORCE;
+
+	//			c.x = pos.x;
+	//			c.y = pos.y;
+	//			c.dx = -dir.x * 40 - iw::randfs() * 20;
+	//			c.dy = -dir.y * 40 - iw::randfs() * 20;
+	//			c.life = 1 + iw::randf();
+
+	//			sand->m_world->SetCell(c.x, c.y, c);
+	//		}
+	//	}
+
+	//	else
+	//	{
+	//		rigidbody->Velocity = glm::vec3(iw::lerp(vel, dir * player->speed, iw::FixedTime() * 10), 0.f);
+
+	//		//rigidbody->Velocity.x += player->speed / 10 * player->i_moveX;
+	//		//rigidbody->Velocity.y += player->speed / 10 * player->i_moveY;
+	//	}
+	//}
 }
 
 void PlayerSystem::Update()

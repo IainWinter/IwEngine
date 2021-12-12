@@ -17,12 +17,18 @@ struct Menu_Title_Layer : Menu_Layer2
 	int score;
 
 	std::string gameId;
+	std::string* name;
+
+	ImFont* font_regular;
+	ImFont* font_title;
+	bool scroll_table;
 
 	Menu_Title_Layer(
 		int score = 1009
 	)
-		: Menu_Layer2 ("Main title menu")
-		, score       (score)
+		: Menu_Layer2  ("Main title menu")
+		, score        (score)
+		, scroll_table (true)
 	{}
 
 	int Initialize() override;
@@ -35,4 +41,5 @@ struct Menu_Title_Layer : Menu_Layer2
 	void Buttons();
 
 	void SubmitTempScoreAndGetId();
+	void SubmitScoreAndExit(const std::string& command);
 };

@@ -35,7 +35,7 @@ void App::ApplyState(GameState* state)
 
 	for (iw::Layer* layer : state->Layers)
 	{
-		PushLayerFront(layer);
+		PushLayer(layer);
 	}
 
 	if (state->OnChange) 
@@ -114,7 +114,12 @@ int App::Initialize(
 	int err = Application::Initialize(options);
 	if (err) return err;
 
-	PushLayer<iw::ImGuiLayer>(Window)->BindContext();
+	m_fonts = new iw::FontMap();
+	m_fonts->Load("verdana", 18, "fonts/ttf/verdana.ttf");
+	m_fonts->Load("verdana", 36, "fonts/ttf/verdana.ttf");
+	m_fonts->Load("verdana", 92, "fonts/ttf/verdana.ttf");
+
+	PushLayer<iw::ImGuiLayer>(Window, m_fonts)->BindContext();
 
 	//ImGui::SetCurrentContext((ImGuiContext*)options.ImGuiContext);
 
@@ -174,8 +179,6 @@ int App::Initialize(
 	context_menu->MapButton(iw::ESCAPE, "escape");
 
 	iw::ref<iw::Device> mouse        = Input->CreateDevice<iw::Mouse>();
-	//iw::ref<iw::Device> keyboard     = Input->CreateDevice<iw::Keyboard>();
-	//iw::ref<iw::Device> mouse_raw    = Input->CreateDevice<iw::RawMouse>();
 	iw::ref<iw::Device> keyboard_raw = Input->CreateDevice<iw::RawKeyboard>();
 
 	context_game->AddDevice(mouse);

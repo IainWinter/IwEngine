@@ -8,8 +8,7 @@ void Upgrade_System::Update()
 	{
 		Upgrade& upgrade = currentSet.Upgrades[currentSet.Active[i]];
 
-		if (  !upgrade.Action 
-			|| upgrade.Action(APP_VARS_LIST))
+		if (upgrade.CallAction(APP_VARS_LIST))
 		{
 			LOG_INFO << "Applied upgrade " << upgrade.Description->Name;
 

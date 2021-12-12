@@ -69,6 +69,8 @@ class App
 	: public iw::Application
 {
 private:
+	iw::FontMap* m_fonts;
+
 	GameState* m_gamePlay;
 	GameState* m_gamePause;
 	GameState* m_gameHighscore;
@@ -98,7 +100,7 @@ public:
 		, m_fadeout       (nullptr)
 	{
 		// for debug, if game starts on game-over
-		m_finalScore = 30000;
+		m_finalScore = 300000;
 	}
 
 	int Initialize(iw::InitOptions& options) override;

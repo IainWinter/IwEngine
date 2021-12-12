@@ -26,7 +26,7 @@ void WorldSystem::Update()
 	//}
 
 
-	//return;
+	return;
 	m_timer.Tick();
 
 	bool needsAnotherLevel = false;

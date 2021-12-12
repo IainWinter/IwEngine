@@ -10,11 +10,13 @@
 namespace iw {
 namespace Engine {
 	ImGuiLayer::ImGuiLayer(
-		IWindow* window
+		IWindow* window,
+		FontMap* fonts
 	)
-		: Layer("ImGui")
-		, m_window(window)
-		, m_context(nullptr)
+		: Layer     ("ImGui")
+		, m_window  (window)
+		, m_fonts   (fonts)
+		, m_context (nullptr)
 	{
 		//viewportRT = REF<RenderTarget>();
 		//viewportRT->AddTexture(REF<Texture>(1280, 720));
@@ -35,8 +37,25 @@ namespace Engine {
 		//io.ConfigFlags = ImGuiConfigFlags_DockingEnable;
 		//if(m_window) io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
-		ImFont* pFont = io.Fonts->AddFontFromFileTTF(Asset->GetPath("fonts/ttf/verdana.ttf").c_str(), 35);
-		//ImGui::PushFont(pFont);
+		// loading fonts is done before init because everything turns black if I don't
+		// do this here and I dont care to debug further...
+
+		m_fonts->Fonts.emplace("default", io.Fonts->AddFontDefault());
+
+		for (auto& [name, file, size] : m_fonts->ToLoad)
+		{
+			std::stringstream ss;
+			ss << name;
+			ss << "_";
+			ss << (int)size;
+
+			ImFont* font = io.Fonts->AddFontFromFileTTF(Asset->GetPath(file).c_str(), size);
+			m_fonts->Fonts.emplace(ss.str(), font);
+		}
+
+		m_fonts->ToLoad.clear();
+
+		io.UserData = m_fonts;
 
 		if (m_window) ImGui_ImplWin32_Init(m_window->Handle(), m_window->Context());
 		ImGui_ImplOpenGL3_Init("#version 450");

@@ -4,50 +4,43 @@
 #include "Components/Player.h"
 #include <functional>
 #include <string>
+#include <vector>
 
 struct UpgradeDescription;
 
 struct Upgrade
 {
 	UpgradeDescription* Description;
+	std::function<bool(iw::AppVars, float)> Action;
 
-	std::function<bool        (iw::AppVars)> Action;
-	std::function<std::string (iw::AppVars)> GetInfo;
+	inline bool CallAction(iw::AppVars app);
 };
 
 struct UpgradeDescription
 {
 	std::string Name;
-	std::string DispName;
 	std::string Description;
-
 	std::string TexturePath;
 
-	std::string Stat;
-	int Cost;
+	// cost and stat # for each number bought
+	// this is required to move up and down non linear increases
+	std::vector<std::pair<int, int>> CostStatTable;
 
-	iw::Color StatColor;
-	iw::Color CostColor;
+	int NumberBought = 0;
 
-	std::function<Upgrade()> Create;
+	Upgrade Upgrade;
 
-	UpgradeDescription(
-		bool posOrNegStat)
+	UpgradeDescription()
 	{
-		if (posOrNegStat)
-		{
-			StatColor = iw::Color::From255(85, 255, 0);
-		}
-
-		else
-		{
-			StatColor = iw::Color::From255(255, 85, 0);
-		}
-
-		CostColor = iw::Color::From255(255, 210, 0);
+		Upgrade.Description = this;
 	}
 };
 
+inline bool Upgrade::CallAction(iw::AppVars app)
+{
+	if (!Action) return false;
+	return Action(app, Description->CostStatTable[Description->NumberBought - 1].second);
+}
 
 struct UpgradeSet
 {
@@ -80,69 +73,53 @@ inline Player* GetPlayer(iw::AppVars& app)
 
 inline UpgradeDescription* MakeThrusterMaxSpeed()
 {
-	UpgradeDescription* description = new UpgradeDescription(true);
+	UpgradeDescription* description = new UpgradeDescription();
 
 	description->Name        = "Thruster Velocity";
-	description->DispName    = "Thruster\nVelocity";
 	description->Description = "Effects how fast the\nship can move";
 	description->TexturePath = "upgrade_thrustermaxspeed.png";
-	description->Stat        = "+10%";
-	description->Cost        = 2000;
 
-	Upgrade upgrade;
-	upgrade.Description = description;
+	int cost = 2000;
+	int stat = 10;
 
-	upgrade.Action = [](iw::AppVars app)
+	for (int i = 0; i < 10; i++)
 	{
-		GetPlayer(app)->speed += 100;
+		description->CostStatTable.emplace_back(cost, stat);
+		cost *= 1.1;
+		stat *= 1.5;
+	}
+
+	description->Upgrade.Action = [](iw::AppVars app, float stat)
+	{
+		GetPlayer(app)->u_speed += stat;
 		return true;
-	};
-
-	upgrade.GetInfo = [](iw::AppVars app)
-	{
-		std::stringstream ss;
-		ss << "Player Speed " << GetPlayer(app)->speed;
-		return ss.str();
-	};
-
-	description->Create = [upgrade]()
-	{
-		return upgrade;
 	};
 
 	return description;
 }
 
-inline UpgradeDescription* MakeThrusterImpulse()
+inline UpgradeDescription* MakeThrusterBreaking()
 {
-	UpgradeDescription* description = new UpgradeDescription(true);
+	UpgradeDescription* description = new UpgradeDescription();
 
-	description->Name        = "Thruster Impulse";
-	description->DispName    = "Thruster\nImpulse";
-	description->Description = "Effects the immediate stop\nand start time of\nthe ship";
-	description->TexturePath = "upgrade_thrusterimpulse.png";
-	description->Stat        = "+10%";
-	description->Cost        = 1000;
+	description->Name        = "Thruster Breaking";
+	description->Description = "Decrease the breaking force by <c>10 m/s/s</>";
+	description->TexturePath = "upgrade_thrusterbreaking.png";
 
-	Upgrade upgrade;
-	upgrade.Description = description;
+	int cost = 3000;
+	int stat = 50;
 
-	upgrade.Action = [](iw::AppVars app)
+	for (int i = 0; i < 10; i++)
 	{
-		GetPlayer(app)->speed += 1;
+		description->CostStatTable.emplace_back(cost, stat);
+		cost *= 1.1;
+		stat *= 1.5;
+	}
+
+	description->Upgrade.Action = [](iw::AppVars app, float stat)
+	{
+		GetPlayer(app)->u_breaking += stat;
 		return true;
-	};
-
-	upgrade.GetInfo = [](iw::AppVars app)
-	{
-		std::stringstream ss;
-		ss << "Player Speed " << GetPlayer(app)->speed;
-		return ss.str();
-	};
-
-	description->Create = [upgrade]()
-	{
-		return upgrade;
 	};
 
 	return description;
@@ -150,34 +127,26 @@ inline UpgradeDescription* MakeThrusterImpulse()
 
 inline UpgradeDescription* MakeThrusterAcceleration()
 {
-	UpgradeDescription* description = new UpgradeDescription(true);
+	UpgradeDescription* description = new UpgradeDescription();
 
 	description->Name        = "Thruster Acceleration";
-	description->DispName    = "Thruster\nAcceleration";
-	description->Description = "Effects the time to\nreach max speed";
+	description->Description = "Increase the thruster force.";
 	description->TexturePath = "upgrade_thrusteracceleration.png";
-	description->Stat        = "+10%";
-	description->Cost        = 1200;
 
-	Upgrade upgrade;
-	upgrade.Description = description;
+	int cost = 3000;
+	int stat = 50;
 
-	upgrade.Action = [](iw::AppVars app)
+	for (int i = 0; i < 10; i++)
 	{
-		GetPlayer(app)->speed += 1;
+		description->CostStatTable.emplace_back(cost, stat);
+		cost *= 1.1;
+		stat *= 1.5;
+	}
+
+	description->Upgrade.Action = [](iw::AppVars app, float stat)
+	{
+		GetPlayer(app)->u_acceleration += stat;
 		return true;
-	};
-
-	upgrade.GetInfo = [](iw::AppVars app)
-	{
-		std::stringstream ss;
-		ss << "Player Speed " << GetPlayer(app)->speed;
-		return ss.str();
-	};
-
-	description->Create = [upgrade]()
-	{
-		return upgrade;
 	};
 
 	return description;
@@ -185,34 +154,17 @@ inline UpgradeDescription* MakeThrusterAcceleration()
 
 inline UpgradeDescription* MakeHealthPickupEfficiency()
 {
-	UpgradeDescription* description = new UpgradeDescription(true);
+	UpgradeDescription* description = new UpgradeDescription();
 
 	description->Name        = "Health Pickup Efficiency";
-	description->DispName    = "Health Pickup\nEfficiency";
-	description->Description = "Effects how many cells get\nrestored per green pickup";
+	description->Description = "Regenerate an additional <c>2 cells</> per health pickup.";
 	description->TexturePath = "upgrade_healthefficiency.png";
-	description->Stat        = "+2 cells";
-	description->Cost        = 2000;
+	description->CostStatTable.emplace_back(2000, 10);
 
-	Upgrade upgrade;
-	upgrade.Description = description;
-
-	upgrade.Action = [](iw::AppVars app)
+	description->Upgrade.Action = [](iw::AppVars app, float stat)
 	{
-		GetPlayer(app)->speed += 1;
+		GetPlayer(app)->u_speed += 100;
 		return true;
-	};
-
-	upgrade.GetInfo = [](iw::AppVars app)
-	{
-		std::stringstream ss;
-		ss << "Player Speed " << GetPlayer(app)->speed;
-		return ss.str();
-	};
-
-	description->Create = [upgrade]()
-	{
-		return upgrade;
 	};
 
 	return description;
@@ -220,34 +172,17 @@ inline UpgradeDescription* MakeHealthPickupEfficiency()
 
 inline UpgradeDescription* MakeLaserPickupEfficiency()
 {
-	UpgradeDescription* description = new UpgradeDescription(true);
+	UpgradeDescription* description = new UpgradeDescription();
 
 	description->Name        = "Laser Pickup Efficiency";
-	description->DispName    = "Laser Pickup\nEfficiency";
 	description->Description = "Effects how much liquid get\nconverted per red pickup";
 	description->TexturePath = "upgrade_laserefficiency.png";
-	description->Stat        = "+2 laser cells";
-	description->Cost        = 3000;
+	description->CostStatTable.emplace_back(3000, 10);
 
-	Upgrade upgrade;
-	upgrade.Description = description;
-
-	upgrade.Action = [](iw::AppVars app)
+	description->Upgrade.Action = [](iw::AppVars app, float stat)
 	{
-		GetPlayer(app)->speed += 1;
+		GetPlayer(app)->u_speed += 100;
 		return true;
-	};
-
-	upgrade.GetInfo = [](iw::AppVars app)
-	{
-		std::stringstream ss;
-		ss << "Player Speed " << GetPlayer(app)->speed;
-		return ss.str();
-	};
-
-	description->Create = [upgrade]()
-	{
-		return upgrade;
 	};
 
 	return description;

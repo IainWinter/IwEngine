@@ -183,6 +183,20 @@ namespace math {
 
 		return x;
 	}
+
+
+	template<
+		typename _t>
+	_t norm(
+		const _t& vec)
+	{
+		if (vec == _t(0.f))
+		{
+			return vec;
+		}
+
+		return glm::normalize(vec);
+	}
 }
 
 	using namespace math;

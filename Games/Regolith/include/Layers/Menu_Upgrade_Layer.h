@@ -7,6 +7,7 @@
 #include "Upgrade.h"
 #include "Events.h"
 
+#include <vector>
 #include <array>
 
 struct Menu_Upgrade_Layer : Menu_Layer2
@@ -19,12 +20,18 @@ struct Menu_Upgrade_Layer : Menu_Layer2
 	UpgradeDescription* tooltip;
 	int money;
 
+	ImFont* font_regular;
+	ImFont* font_paragraph;
+
+
 	Menu_Upgrade_Layer(
 		int totalMoney
 	)
-		: Menu_Layer2 ("Upgrade menu")
-		, money       (totalMoney)
-		, tooltip     (nullptr)
+		: Menu_Layer2    ("Upgrade menu")
+		, money          (totalMoney)
+		, tooltip        (nullptr)
+		, font_regular   (nullptr)
+		, font_paragraph (nullptr)
 	{}
 
 	int Initialize() override;;
@@ -35,85 +42,10 @@ struct Menu_Upgrade_Layer : Menu_Layer2
 	void ActiveTable();
 	void Tooltip();
 	void Buttons();
+	void UpgradePreview();
 
-//void Menu_PostGame_Layer::SubmitScoreAndExit(
-//	const std::string& whereTo)
-//{
-//	Console->QueueCommand(whereTo);
-//
-//	//iw::HttpRequest<iw::None> request;
-//	//request.Ip       = "71.233.150.182";
-//	//request.Host     = "data.winter.dev";
-//	//request.Resource = "/regolith/php/submit_highscore.php";
-//
-//	//request.SetArgument("name", m_playerName);
-//	//request.SetArgument("score", to_string(m_finalScore));
-//
-//	//m_connection.Request<std::string>(request, [](
-//	//	std::string& str) 
-//	//{
-//	//	LOG_INFO << str;
-//	//});
-//}
+	// speed upgrade preview
+	std::vector<float> vals;
+	Player player;
+	void UpdateSpeedGraph();
 };
-
-
-//#pragma once
-//
-//#include "Layers/Menu_Layer.h"
-//#include "Assets.h"
-//#include "Upgrade.h"
-//#include "Events.h"
-//
-//struct Menu_Upgrade_Layer : Menu_Layer
-//{
-//	using Upgrade_Table = UI_Table<
-//		UpgradeDescription*,
-//		UpgradeDescription*,
-//		UpgradeDescription*,
-//		UpgradeDescription*,
-//		UpgradeDescription*
-//	>;
-//
-//	using Bought_Table  = UI_Table<
-//		UpgradeDescription*,
-//		std::string
-//	>;
-//
-//	UI* m_background;
-//	UI* m_tooltip;
-//
-//	Upgrade_Table* m_upgrades;
-//	Bought_Table*  m_bought;
-//
-//	UI_Text* m_text_money;
-//	int m_money;
-//
-//	UI_Button* m_button_reform;
-//
-//	std::vector<UpgradeDescription*> toActivate;
-//
-//	Menu_Upgrade_Layer(
-//		int finalScore
-//	)
-//		: Menu_Layer      ("Upgrade menu")
-//					   
-//		, m_money         (4000/*finalScore*/)
-//		, m_background    (nullptr)
-//		, m_tooltip       (nullptr)
-//		, m_upgrades      (nullptr)
-//		, m_bought        (nullptr)
-//		, m_text_money    (nullptr)
-//		, m_button_reform (nullptr)
-//	{}
-//
-//	UI_Base* AddUpgrade(
-//		int x, int y,
-//		UpgradeDescription* upgrade);
-//
-//	void UpdateMoneyText(
-//		int diff);
-//
-//	int Initialize() override;
-//	void PostUpdate() override;
-//};
