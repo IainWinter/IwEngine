@@ -3,8 +3,8 @@
 #include "Layers/Menu_Layer.h"
 #include "Events.h"
 #include "Helpers.h"
+#include "Weapons.h"
 
-#include "Components/Weapon.h"
 #include "Components/CorePixels.h"
 
 #include "plugins/iw/Sand/Engine/SandLayer.h"

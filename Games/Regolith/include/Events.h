@@ -30,6 +30,8 @@ enum Actions {
 	STATE_CHANGE,
 	OPEN_MENU,
 
+	SET_CELL,
+
 	APPLY_UPGRADE_SET
 };
 
@@ -299,5 +301,17 @@ struct /*REFLECT*/ ApplyUpgradeSet_Event : iw::SingleEvent
 	)
 		: iw::SingleEvent (APPLY_UPGRADE_SET)
 		, Set             (set)
+	{}
+};
+
+struct /*REFLECT*/ SetCell_Event : iw::SingleEvent
+{
+	iw::Cell cell;
+
+	SetCell_Event(
+		const iw::Cell& c
+	)
+		: iw::SingleEvent (SET_CELL)
+		, cell(c)
 	{}
 };

@@ -7,11 +7,13 @@
 
 #include "iw/engine/EntryPoint.h"
 #include "plugins/iw/Sand/Engine/SandLayer.h"
-#include "iw/engine/Systems/PhysicsSystem.h"
-#include "iw/engine/Systems/EntityCleanupSystem.h"
 #include "iw/physics/Dynamics/ImpulseSolver.h"
 #include "iw/physics/Dynamics/SmoothPositionSolver.h"
 #include "iw/math/noise.h"
+
+#include "iw/engine/Layers/DebugLayer.h"
+#include "iw/engine/Systems/PhysicsSystem.h"
+#include "iw/engine/Systems/EntityCleanupSystem.h"
 
 #include "Layers/Game_Layer.h"
 #include "Layers/Game_UI_Layer.h"
@@ -21,6 +23,7 @@
 #include "Layers/Menu_Fadeout_Layer.h"
 #include "Layers/Menu_Upgrade_Layer.h"
 #include "Layers/Audio_Layer.h"
+
 
 #include "State.h"
 #include <stack>

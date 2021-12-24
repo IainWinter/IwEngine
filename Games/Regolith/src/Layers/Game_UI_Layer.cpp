@@ -54,7 +54,8 @@ float fps = 0;
 
 void Game_UI_Layer::PostUpdate()
 {
-	fps = iw::lerp(fps, iw::DeltaTime(), .01);
+	//fps = iw::lerp(fps, iw::DeltaTime(), .01);
+	fps = iw::DeltaTime();
 
 	std::stringstream ss;
 	ss << "indev v.04 ms: ";

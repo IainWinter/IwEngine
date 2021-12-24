@@ -11,6 +11,9 @@
 #include "Events.h"
 #include "Assets.h"
 #include "Helpers.h"
+#include "Moves.h"
+
+#include "iw/engine/Layers/ImGuiLayer.h"
 
 struct PlayerSystem : iw::SystemBase
 {
@@ -18,6 +21,8 @@ struct PlayerSystem : iw::SystemBase
 	iw::Entity m_player;
 
 	iw::HandlerFunc* m_handle;
+
+	std::vector<float> speeds;
 
 	PlayerSystem(
 		iw::SandLayer* sand
@@ -32,5 +37,21 @@ struct PlayerSystem : iw::SystemBase
 	void FixedUpdate() override;
 	void Update() override;
 
+	void ImGui() override;
+
 	bool On(iw::ActionEvent& e) override;
+
+
+
+	// player moves0
+
+	void FireWeaponMain();
+	void FireWeaponAlt();
+
+
+
+	void UseA();
+	void UseB();
+	void UseX();
+	void UseY();
 };

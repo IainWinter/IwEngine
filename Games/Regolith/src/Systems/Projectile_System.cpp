@@ -37,6 +37,15 @@ void ProjectileSystem::Update()
 			glm::vec3& vel = rigidbody->Velocity;
 			int zIndex = ceil(pos.z);
 
+			LOG_VALUE("pos_x", pos.x);
+			LOG_VALUE("pos_y", pos.y);
+
+			// idea:
+			//	issue is that the projectiles move in the physics time step, but that doesnt check for cells in the way
+			// solves:
+			//	removed physics object from movement sim
+			//	now this is more frame dependent. Maybe this is when they should split, hit detection in fixed step and draw here
+
 			sand->ForEachInLine(
 				pos.x, pos.y, 
 				pos.x + vel.x * iw::DeltaTime(), pos.y + vel.y * iw::DeltaTime(),
@@ -48,12 +57,8 @@ void ProjectileSystem::Update()
 
 				iw::SandChunk* chunk = sand->m_world->GetChunk(px, py);
 			
-				if (!chunk)
+				if (chunk)
 				{
-					proj->Hit.HasContact = true; // collision on no chunk
-				}
-
-				else {
 					iw::TileInfo& info = chunk->GetCell<iw::TileInfo>(px, py, iw::SandField::TILE_INFO);
 					if (info.tile)
 					{
@@ -67,6 +72,12 @@ void ProjectileSystem::Update()
 								config.Info = info;
 								config.Projectile = Space->GetEntity(handle);
 								config.Hit = Space->FindEntity<iw::Tile>(info.tile);
+
+								// exit if no damage on player
+								if (config.Hit.Has<Player>() && config.Hit.Find<Player>()->NoDamage)
+								{
+									return false;
+								}
 
 								Bus->push<RemoveCellFromTile_Event>(info.index, config.Hit);
 								Bus->push<ProjHitTile_Event>(config);
@@ -87,18 +98,35 @@ void ProjectileSystem::Update()
 						proj->Hit.HasContact = true;
 					}
 
-					chunk->SetCell(px, py, linear->Cell);
+					//if (!proj->Hit.HasContact)
+					//{
+						// overwrites the cell, maybe we want this to only happen if no contact?
+						chunk->SetCell(px, py, linear->Cell);
+					//}
 				}
 
 				if (proj->Hit.HasContact)
 				{
 					proj->Hit.x = fpx;
 					proj->Hit.y = fpy;
+					
 					return true;
 				}
 
 				return false;
 			});
+
+			if (proj->Hit.HasContact)
+			{
+				rigidbody->Transform.Position.x = proj->Hit.x;
+				rigidbody->Transform.Position.y = proj->Hit.y;
+			}
+
+			else
+			{
+				rigidbody->Transform.Position.x = pos.x + vel.x * iw::DeltaTime();
+				rigidbody->Transform.Position.y = pos.y + vel.y * iw::DeltaTime();
+			}
 		});
 
 	Space->Query<iw::Transform, iw::Rigidbody, Projectile, Split_Projectile>().Each(
@@ -138,6 +166,12 @@ void ProjectileSystem::Update()
 					shot.y = proj->Hit.y;
 					shot.dx = dx;
 					shot.dy = dy;
+
+					// the time scale effects this greatly,
+					// I think there is an event loop I think a physics update
+					// happens in the middle causing issues?
+
+					LOG_INFO << shot.x << ", " << shot.y;
 
 					Bus->push<SpawnProjectile_Event>(shot, split->Split + 1);
 				}
@@ -313,6 +347,85 @@ void ProjectileSystem::Update()
 	}
 }
 
+//void ProjectileSystem::FixedUpdate()
+//{
+//	Space->Query<iw::Transform, iw::Rigidbody, Projectile, Linear_Projectile>().Each(
+//		[&](
+//			iw::EntityHandle handle, 
+//			iw::Transform* transform,
+//			iw::Rigidbody* rigidbody,
+//			Projectile* proj,
+//			Linear_Projectile* linear)
+//		{
+//			glm::vec3& pos = transform->Position;
+//			glm::vec3& vel = rigidbody->Velocity;
+//			int zIndex = ceil(pos.z);
+//
+//			sand->ForEachInLine(
+//				pos.x, pos.y, 
+//				pos.x + vel.x * iw::DeltaTime(), pos.y + vel.y * iw::DeltaTime(),
+//			[&](
+//				float fpx, float fpy)
+//			{
+//				int px = floor(fpx);
+//				int py = floor(fpy);
+//
+//				iw::SandChunk* chunk = sand->m_world->GetChunk(px, py);
+//			
+//				if (chunk)
+//				{
+//					iw::TileInfo& info = chunk->GetCell<iw::TileInfo>(px, py, iw::SandField::TILE_INFO);
+//					if (info.tile)
+//					{
+//						if (info.tile->m_zIndex == zIndex)
+//						{
+//							if (info.tile->m_initalCellCount != 0) // temp hack to fix left behind pixels from tiles, todo: find cause of left behind pixels
+//							{
+//								ProjHitTile_Config config;
+//								config.X = px;
+//								config.Y = py;
+//								config.Info = info;
+//								config.Projectile = Space->GetEntity(handle);
+//								config.Hit = Space->FindEntity<iw::Tile>(info.tile);
+//
+//								// exit if no damage on player
+//								if (config.Hit.Has<Player>() && config.Hit.Find<Player>()->NoDamage)
+//								{
+//									return false;
+//								}
+//
+//								Bus->push<RemoveCellFromTile_Event>(info.index, config.Hit);
+//								Bus->push<ProjHitTile_Event>(config);
+//							}
+//						
+//							// stop multiple events for same index
+//							info.tile = nullptr;
+//							info.index = 0;
+//
+//							proj->Hit.HasContact = true;
+//						}
+//					}
+//
+//					else
+//					if (  !chunk->IsEmpty(px, py)
+//						&& chunk->GetCell(px, py).Type != iw::CellType::PROJECTILE)
+//					{
+//						proj->Hit.HasContact = true;
+//					}
+//				}
+//
+//				if (proj->Hit.HasContact)
+//				{
+//					proj->Hit.x = fpx;
+//					proj->Hit.y = fpy;
+//					return true;
+//				}
+//
+//				return false;
+//			});
+//		});
+//}
+
 bool ProjectileSystem::On(iw::ActionEvent& e)
 {
 	switch (e.Action)
@@ -398,6 +511,19 @@ iw::Entity ProjectileSystem::MakeBoltz(
 {
 	iw::Entity entity = MakeProjectile_raw<LightBolt_Projectile>(shot);
 	return entity;
+}
+
+void ProjectileSystem::ImGui()
+{
+	const auto& posx = iw::logger::instance().get_values("pos_x");
+	const auto& posy = iw::logger::instance().get_values("pos_y");
+	ImGui::PlotLines("pos x", posx.data(), posx.size());
+	ImGui::PlotLines("pos y", posy.data(), posy.size());
+
+	if (ImGui::Button("clear"))
+	{
+		iw::logger::instance().clear_values();
+	}
 }
 
 //iw::Entity ProjectileSystem::MakeBeam(const ShotInfo& shot, int depth)

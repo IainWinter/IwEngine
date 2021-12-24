@@ -121,6 +121,20 @@ int App::Initialize(
 
 	PushLayer<iw::ImGuiLayer>(Window, m_fonts)->BindContext();
 
+	PushLayer<iw::DebugLayer>();
+
+	// add default cells
+
+	iw::Cell c;
+	c.Type        = iw::CellType::LIGHTNING;
+	c.Props       = iw::CellProp::NONE;
+	c.Style       = iw::CellStyle::SHIMMER;
+	c.StyleColor  = iw::Color(.1, .1, .1, 0);
+	c.Color       = iw::Color::From255(212, 194, 252);
+	c.life        = .1;
+	
+	iw::Cell::SetDefault(iw::CellType::LIGHTNING, c);
+
 	//ImGui::SetCurrentContext((ImGuiContext*)options.ImGuiContext);
 
 	m_gamePause = new GameState("Pause menu", GAME_PAUSE_STATE);
@@ -173,6 +187,11 @@ int App::Initialize(
 	context_game->MapButton(iw::RMOUSE, "+alt-fire");
 	context_game->MapButton(iw::ESCAPE, "escape");
 	context_game->MapButton(iw::X     , "toolbox");
+
+	context_game->MapButton(iw::E , "+a"); // buttons for upgrades
+	context_game->MapButton(iw::Q , "+b");
+	context_game->MapButton(iw::F , "+x");
+	context_game->MapButton(iw::C , "+y");
 
 	iw::ref<iw::Context> context_menu = Input->CreateContext("Menu");
 	context_menu->MapButton(iw::LMOUSE, "+execute");
@@ -335,6 +354,8 @@ iw::Application* CreateApplication(
 	iw::InitOptions& options)
 {
 	//options.AssetRootPath = "_assets/";
+
+	//tions.FrameDelay = 0.05f;
 
 	options.WindowOptions = iw::WindowOptions {
 		816,

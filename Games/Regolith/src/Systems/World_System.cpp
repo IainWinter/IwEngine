@@ -25,8 +25,7 @@ void WorldSystem::Update()
 	//	DrawLightning(sand, l);
 	//}
 
-
-	return;
+	//return; // comment this line to stop all spawning
 	m_timer.Tick();
 
 	bool needsAnotherLevel = false;
@@ -170,7 +169,7 @@ bool WorldSystem::On(iw::ActionEvent& e)
 		case PROJ_HIT_TILE:
 		{
 			auto& [x, y, info, hit, projectile] = e.as<ProjHitTile_Event>().Config;
-			
+
 			if (   hit.Has<Player>() 
 				|| hit.Has<Enemy>())
 			{
@@ -267,6 +266,7 @@ bool WorldSystem::On(iw::ActionEvent& e)
 					//SpawnAsteroid_Config c;
 					//c.SpawnLocationX = 100;
 					//c.SpawnLocationY = 100;
+					//c.AngularVel = 10;
 					//c.Size = 0;
 
 					//Bus->push<SpawnAsteroid_Event>(c);
@@ -293,6 +293,16 @@ bool WorldSystem::On(iw::ActionEvent& e)
 					break;
 				}
 			}
+
+			break;
+		}
+		case SET_CELL:
+		{
+			SetCell_Event& event = e.as<SetCell_Event>();
+			int x = floor(event.cell.x);
+			int y = floor(event.cell.y);
+
+			sand->m_world->SetCell(x, y, event.cell);
 
 			break;
 		}

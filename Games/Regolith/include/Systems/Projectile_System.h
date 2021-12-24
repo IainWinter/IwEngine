@@ -1,7 +1,8 @@
 #pragma once
 
-#include "plugins/iw/Sand/Engine/SandLayer.h"
+#include "iw/engine/Layers/ImGuiLayer.h"
 #include "iw/physics/Collision/SphereCollider.h"
+#include "plugins/iw/Sand/Engine/SandLayer.h"
 
 #include "Components/Projectile.h"
 
@@ -20,6 +21,7 @@ struct ProjectileSystem
 	{}
 
 	void Update() override;
+	//void FixedUpdate() override;
 
 	bool On(iw::ActionEvent& e) override;
 
@@ -44,6 +46,7 @@ private:
 
 		rigidbody->SetTransform(transform);
 		rigidbody->Velocity = glm::vec3(shot.dx, shot.dy, 0);
+		rigidbody->IsKinematic = false;
 
 		Physics->AddRigidbody(rigidbody);
 
@@ -68,4 +71,6 @@ private:
 	iw::Entity MakeBeam  (const ShotInfo& shot, int depth);
 
 	void MakeExplosion(int x, int y, int r);
+
+	void ImGui();
 };

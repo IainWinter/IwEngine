@@ -139,17 +139,8 @@ inline LightningHitInfo DrawLightning(
 
 	LightningHitInfo hit;
 
-	iw::Cell c;
-	c.Type = iw::CellType::LIGHTNING;
-
-	c.Props = iw::CellProp::NONE/*MOVE_FORCE*/;
-	c.life = config.LifeTime /*+ iw::randfs() * life / 2.f*/;
-	//c.dx = 20 * (iw::randi() ? -1 : 1);
-	//c.dy = 20 * (iw::randi() ? -1 : 1);
-
-	c.Style = iw::CellStyle::SHIMMER;
-	c.Color = iw::Color::From255(212, 194, 252);
-	c.StyleColor = iw::Color(.1, .1, .1, 0);
+	iw::Cell c = iw::Cell::GetDefault(iw::CellType::LIGHTNING);
+	c.life = config.LifeTime;
 	c.StyleOffset = iw::randfs() * .5;
 
 	while (d > 2 && (!hit.HasContact || !config.StopOnHit))

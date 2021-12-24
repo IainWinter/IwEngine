@@ -1,8 +1,8 @@
 #pragma once
 
-#include "iw/engine/Components/Timer.h"
-#include "iw/common/Components/Transform.h"
 #include "iw/entity/Entity.h"
+#include "iw/engine/Time.h"
+#include "iw/common/Components/Transform.h"
 #include "Components/ProjHead.h"
 
 enum WeaponType {
@@ -99,10 +99,10 @@ struct Cannon : Weapon
 inline Weapon* MakeDefault_Cannon()
 {
 	Cannon* cannon = new Cannon(WeaponType::DEFAULT_CANNON, ProjectileType::BULLET);
-	cannon->Speed = 1250;
-	cannon->DistanceFromOrigin = 15;
-	cannon->BreadthFromOrigin = 2;
-	cannon->FireDelay = 0.15;
+	cannon->Speed = 1250.f;
+	cannon->DistanceFromOrigin = 15.f;
+	cannon->BreadthFromOrigin = 2.f;
+	cannon->FireDelay = 0.15f;
 	cannon->Audio = "event:/weapons/fire_cannon";
 
 	return cannon;
@@ -111,10 +111,10 @@ inline Weapon* MakeDefault_Cannon()
 inline Weapon* MakeWattz_Cannon()
 {
 	Cannon* cannon = new Cannon(WeaponType::WATTZ_CANNON, ProjectileType::WATTZ);
-	cannon->Speed = 200;
-	cannon->DistanceFromOrigin = 15;
-	cannon->BreadthFromOrigin = 2;
-	cannon->FireDelay = 0.5;
+	cannon->Speed = 200.f;
+	cannon->DistanceFromOrigin = 15.f;
+	cannon->BreadthFromOrigin = 2.f;
+	cannon->FireDelay = 0.5f;
 	cannon->Ammo = 10;
 
 	return cannon;
@@ -123,10 +123,10 @@ inline Weapon* MakeWattz_Cannon()
 inline Weapon* MakeBoltz_Cannon()
 {
 	Cannon* cannon = new Cannon(WeaponType::BOLTZ_CANNON, ProjectileType::BOLTZ);
-	cannon->Speed = 150;
-	cannon->DistanceFromOrigin = 15;
-	cannon->BreadthFromOrigin = 2;
-	cannon->FireDelay = 0.005;
+	cannon->Speed = 150.f;
+	cannon->DistanceFromOrigin = 15.f;
+	cannon->BreadthFromOrigin = 2.f;
+	cannon->FireDelay = 0.005f;
 	cannon->Ammo = 1000;
 
 	return cannon;
@@ -135,10 +135,10 @@ inline Weapon* MakeBoltz_Cannon()
 inline Weapon* MakeMinigun_Cannon()
 {
 	Cannon* cannon = new Cannon(WeaponType::MINIGUN_CANNON, ProjectileType::BULLET);
-	cannon->Speed = 1250 / 4.f;
-	cannon->DistanceFromOrigin = 15;
-	cannon->BreadthFromOrigin = 2;
-	cannon->FireDelay = 0.15 / 3.f;
+	cannon->Speed = 1250.f / 4.f;
+	cannon->DistanceFromOrigin = 15.f;
+	cannon->BreadthFromOrigin = 2.f;
+	cannon->FireDelay = 0.15f / 3.f;
 	cannon->Inaccuracy = .1f;
 	cannon->Ammo = 200;
 	cannon->Audio = "event:/weapons/fire_minigun";
@@ -149,11 +149,11 @@ inline Weapon* MakeMinigun_Cannon()
 inline Weapon* MakeFatLaser_Cannon()
 {
 	Cannon* cannon = new Cannon(WeaponType::FAT_LASER_CANNON, ProjectileType::LASER);
-	cannon->Speed = 1800;
-	cannon->SpeedMargin = 400;
-	cannon->DistanceFromOrigin = 15;
-	cannon->BreadthFromOrigin = 7;
-	cannon->FireDelay = 0.015;
+	cannon->Speed = 1800.f;
+	cannon->SpeedMargin = 400.f;
+	cannon->DistanceFromOrigin = 15.f;
+	cannon->BreadthFromOrigin = 7.f;
+	cannon->FireDelay = 0.015f;
 
 	return cannon;
 }
@@ -164,12 +164,12 @@ inline Weapon* MakeFatLaser_Cannon()
 inline Weapon* MakeLaser_Cannon_Enemy()
 {
 	Cannon* cannon = new Cannon(WeaponType::LASER_CANNON, ProjectileType::LASER);
-	cannon->Speed = 444;
-	cannon->SpeedMargin = 40;
-	cannon->DistanceFromOrigin = 15;
-	cannon->BreadthFromOrigin = 4;
-	cannon->FireDelay = 2;
-	cannon->FireDelayMargin = 1;
+	cannon->Speed = 444.f;
+	cannon->SpeedMargin = 40.f;
+	cannon->DistanceFromOrigin = 15.f;
+	cannon->BreadthFromOrigin = 4.f;
+	cannon->FireDelay = 2.f;
+	cannon->FireDelayMargin = 1.f;
 	cannon->Inaccuracy = .05f;
 
 	return cannon;
@@ -178,9 +178,9 @@ inline Weapon* MakeLaser_Cannon_Enemy()
 inline Weapon* MakeSpecialBeam_Cannon()
 {
 	Cannon* cannon = new Cannon(WeaponType::SPECIAL_BEAM_CANNON, ProjectileType::BEAM);
-	cannon->Speed = 10000;
-	cannon->DistanceFromOrigin = 15;
-	cannon->FireDelay = .5;
+	cannon->Speed = 10000.f;
+	cannon->DistanceFromOrigin = 15.f;
+	cannon->FireDelay = .5f;
 	cannon->Ammo = 1;
 
 	return cannon;

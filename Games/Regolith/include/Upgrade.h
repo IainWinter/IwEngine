@@ -86,7 +86,7 @@ inline UpgradeDescription* MakeThrusterMaxSpeed()
 	{
 		description->CostStatTable.emplace_back(cost, stat);
 		cost *= 1.1;
-		stat *= 1.5;
+		stat *= 2;
 	}
 
 	description->Upgrade.Action = [](iw::AppVars app, float stat)
@@ -98,32 +98,32 @@ inline UpgradeDescription* MakeThrusterMaxSpeed()
 	return description;
 }
 
-inline UpgradeDescription* MakeThrusterBreaking()
-{
-	UpgradeDescription* description = new UpgradeDescription();
-
-	description->Name        = "Thruster Breaking";
-	description->Description = "Decrease the breaking force by <c>10 m/s/s</>";
-	description->TexturePath = "upgrade_thrusterbreaking.png";
-
-	int cost = 3000;
-	int stat = 50;
-
-	for (int i = 0; i < 10; i++)
-	{
-		description->CostStatTable.emplace_back(cost, stat);
-		cost *= 1.1;
-		stat *= 1.5;
-	}
-
-	description->Upgrade.Action = [](iw::AppVars app, float stat)
-	{
-		GetPlayer(app)->u_breaking += stat;
-		return true;
-	};
-
-	return description;
-}
+//inline UpgradeDescription* MakeThrusterBreaking()
+//{
+//	UpgradeDescription* description = new UpgradeDescription();
+//
+//	description->Name        = "Thruster Breaking";
+//	description->Description = "Decrease the breaking force by <c>10 m/s/s</>";
+//	description->TexturePath = "upgrade_thrusterbreaking.png";
+//
+//	int cost = 3000;
+//	int stat = 50;
+//
+//	for (int i = 0; i < 10; i++)
+//	{
+//		description->CostStatTable.emplace_back(cost, stat);
+//		cost *= 1.1;
+//		stat *= 2;
+//	}
+//
+//	description->Upgrade.Action = [](iw::AppVars app, float stat)
+//	{
+//		GetPlayer(app)->u_breaking += stat;
+//		return true;
+//	};
+//
+//	return description;
+//}
 
 inline UpgradeDescription* MakeThrusterAcceleration()
 {
@@ -140,12 +140,12 @@ inline UpgradeDescription* MakeThrusterAcceleration()
 	{
 		description->CostStatTable.emplace_back(cost, stat);
 		cost *= 1.1;
-		stat *= 1.5;
+		stat *= 2;
 	}
 
 	description->Upgrade.Action = [](iw::AppVars app, float stat)
 	{
-		GetPlayer(app)->u_acceleration += stat;
+		//GetPlayer(app)->u_acceleration += stat;
 		return true;
 	};
 
@@ -163,7 +163,7 @@ inline UpgradeDescription* MakeHealthPickupEfficiency()
 
 	description->Upgrade.Action = [](iw::AppVars app, float stat)
 	{
-		GetPlayer(app)->u_speed += 100;
+		//GetPlayer(app)->u_speed += 100;
 		return true;
 	};
 
@@ -181,7 +181,7 @@ inline UpgradeDescription* MakeLaserPickupEfficiency()
 
 	description->Upgrade.Action = [](iw::AppVars app, float stat)
 	{
-		GetPlayer(app)->u_speed += 100;
+		//GetPlayer(app)->u_speed += 100;
 		return true;
 	};
 

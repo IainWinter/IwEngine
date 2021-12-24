@@ -5,9 +5,10 @@ int Menu_Upgrade_Layer::Initialize()
 	RegisterImage("x.png");
 
 	upgrades = {
-		MakeThrusterBreaking(),     nullptr,                      nullptr,                     nullptr, nullptr, nullptr, nullptr, nullptr,
+		///*MakeThrusterBreaking()*/,     nullptr,                      nullptr,                     nullptr, nullptr, nullptr, nullptr, nullptr,
 		MakeThrusterAcceleration(), nullptr,                      nullptr,                     nullptr, nullptr, nullptr, nullptr, nullptr,
 		MakeThrusterMaxSpeed(),     MakeHealthPickupEfficiency(), MakeLaserPickupEfficiency(), nullptr, nullptr, nullptr, nullptr, nullptr,
+		nullptr,                    nullptr,                      nullptr,                     nullptr, nullptr, nullptr, nullptr, nullptr,
 		nullptr,                    nullptr,                      nullptr,                     nullptr, nullptr, nullptr, nullptr, nullptr,
 		nullptr,                    nullptr,                      nullptr,                     nullptr, nullptr, nullptr, nullptr, nullptr,
 		nullptr,                    nullptr,                      nullptr,                     nullptr, nullptr, nullptr, nullptr, nullptr,
@@ -290,26 +291,26 @@ void Menu_Upgrade_Layer::UpgradePreview()
 
 void Menu_Upgrade_Layer::UpdateSpeedGraph()
 {
-	player = {};
-	float dt = iw::FixedTime();
-	float v = 0;
+	//player = {};
+	//float dt = iw::FixedTime();
+	//float v = 0;
 
-	while (v < player.u_speed)
-	{
-		vals.push_back(v);
-		v = player.CalcVel(v, 1, 1, dt);
-	}
+	//while (v < player.u_speed)
+	//{
+	//	vals.push_back(v);
+	//	v = player.CalcVel(v, 1, 1, dt);
+	//}
 
-	for (int i = vals.size(); i >= 0; i--) // make max speed be a third of the plot
-	{
-		vals.push_back(v);
-	}
+	//for (int i = vals.size(); i >= 0; i--) // make max speed be a third of the plot
+	//{
+	//	vals.push_back(v);
+	//}
 
-	while (v > 0)
-	{
-		vals.push_back(v);
-		v = player.CalcVel(v, 1, 0, dt);
-	}
+	//while (v > 0)
+	//{
+	//	vals.push_back(v);
+	//	v = player.CalcVel(v, 1, 0, dt);
+	//}
 
-	vals.push_back(0);
+	//vals.push_back(0);
 }

@@ -2,7 +2,7 @@
 
 #include "iw/entity/Entity.h"
 #include "iw/engine/Components/Timer.h"
-#include "Components/Weapon.h"
+#include "Weapons.h"
 
 enum EnemyType
 {

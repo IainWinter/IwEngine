@@ -37,10 +37,9 @@ void ItemSystem::FixedUpdate()
 
             if (item->PickingUp)
             {
-                // should calcuate an arc so they cannot orbit
-
-                glm::vec3 vel = glm::normalize(playerPos - healthPos) * 300.f;
-                rigidbody->Velocity = iw::lerp(rigidbody->Velocity, vel, iw::FixedTime() * 10);
+                glm::vec3 vel = glm::normalize(playerPos - healthPos) * (300.f + 100 * item->PickupTimer);
+                rigidbody->Velocity = iw::lerp(rigidbody->Velocity, vel, iw::FixedTime() * (10 + item->PickupTimer));
+                item->PickupTimer += iw::FixedTime();
 
                 if (distance < 5)
                 {
