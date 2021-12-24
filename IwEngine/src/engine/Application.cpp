@@ -27,7 +27,6 @@ namespace Engine {
 		: m_running       (false)
 		, m_isInitialized (false)
 	{
-
 		Window = IWindow::Create();
 
 		m_device = ref<IDevice>(IDevice::Create());
@@ -50,6 +49,7 @@ namespace Engine {
 		InitOptions& options)
 	{
 		m_isInitialized = true; // techincally could fail and then this would be true, but needed for InitLayer
+		m_frameDelay = options.FrameDelay;
 
 		//bool console = true; // should be in Initoptions, maybe should be creted in window also, this leaks windows.h
 		//if (console) {
@@ -165,48 +165,85 @@ namespace Engine {
 		m_running = true;
 
 		// Rendering thread is the 'main' thread for the application (owns rendering context)
-		m_renderThread = std::thread([&]() {
+		m_renderThread = std::thread([&]()
+		{
 			(*Window).TakeOwnership();
-			
+		
+			float frameTime = 0;
+
 			float accumulatedTime = 0;
-			while (m_running) {
+			while (m_running)
+			{
 				Time::UpdateTime();
+
+				if (m_frameDelay > 0.f)
+				{
+					frameTime -= iw::DeltaTime();
+					if (frameTime <= 0.f)
+					{
+						frameTime = m_frameDelay;
+						Time::SetDeltaTime(m_frameDelay);
+						LOG_INFO << "Frame";
+					}
+					else
+					{
+						continue;
+					}
+				}
 
 				(*Renderer).Begin(Time::TotalTime());
 
 				int layerNumber = 0;
-				for (Layer* layer : m_layers)
+				
+				// pre update
 				{
-					LOG_TIME_SCOPE(layer->Name() + " layer pre update");
-					(*Renderer).SetLayer(layerNumber);
-					layer->PreUpdate();
-				}
+					LOG_TIME_SCOPE("Pre update");
 
-				if (Time::RawFixedTime() != 0.f)
-				{
-					int fixedIterations = 0;
-
-					accumulatedTime += Time::DeltaTime();
-					while (m_running
-						&& accumulatedTime >= Time::RawFixedTime()
-						&& fixedIterations < 10)
+					for (Layer* layer : m_layers)
 					{
-						FixedUpdate();
-						accumulatedTime -= Time::RawFixedTime(); // causes a runaway slowdown when physics update takes too long
-						//accumulatedTime = 0;                       // not sure how to fix that, i think setting it to 0 is wrong tho so idk
-
-						fixedIterations++;
+						LOG_TIME_SCOPE(layer->Name() + " layer pre update");
+						(*Renderer).SetLayer(layerNumber);
+						layer->PreUpdate();
+						layerNumber++;
 					}
 				}
 
-				Update();
-
-				layerNumber = 0;
-				for (Layer* layer : m_layers)
+				// physics update
+				if (Time::RawFixedTime() != 0.f)
 				{
-					LOG_TIME_SCOPE(layer->Name() + " layer post update");
-					(*Renderer).SetLayer(layerNumber);
-					layer->PostUpdate();
+					LOG_TIME_SCOPE("Physics");
+
+					int fixedIterations = 0;
+					accumulatedTime += Time::DeltaTime();
+					while (m_running
+						&& accumulatedTime >= Time::RawFixedTime() // not really sure if this should be scaled or not, if so PhysicsSystem.cpp needs to use the same time
+						&& fixedIterations < 10)
+					{
+						accumulatedTime -= Time::RawFixedTime();
+						fixedIterations++;
+
+						FixedUpdate();
+					}
+				}
+
+				// systems update
+				{
+					LOG_TIME_SCOPE("Update");
+					Update();
+				}
+
+				// post update
+				{
+					LOG_TIME_SCOPE("Post update");
+
+					layerNumber = 0;
+					for (Layer* layer : m_layers)
+					{
+						LOG_TIME_SCOPE(layer->Name() + " layer post update");
+						(*Renderer).SetLayer(layerNumber);
+						layer->PostUpdate();
+						layerNumber++;
+					}
 				}
 
 				{
@@ -214,18 +251,6 @@ namespace Engine {
 					(*Renderer).End();
 				}
 
-#ifdef IW_IMGUI
-				ImGuiLayer* imgui = GetLayer<ImGuiLayer>("ImGui");
-				if (imgui) {
-					LOG_TIME_SCOPE("ImGui");
-
-					imgui->Begin();
-					for (Layer* layer : m_layers) {
-						layer->ImGui();
-					}
-					imgui->End();
-				}
-#endif
 				{
 					LOG_TIME_SCOPE("Audio");
 					(*Audio).Update();
@@ -237,12 +262,35 @@ namespace Engine {
 				}
 
 				{
-					LOG_TIME_SCOPE("Console & bus");
+					LOG_TIME_SCOPE("Console");
 					(*Console).ExecuteQueue();
+				}
+
+				{
+					LOG_TIME_SCOPE("Event Bus");
 					(*Bus).publish();
 				}
 
-				(*Space).ExecuteQueue();
+				{
+					LOG_TIME_SCOPE("Entity queue");
+					(*Space).ExecuteQueue();
+				}
+
+				LOG_FINISH_TIMES();
+
+				// imgui isnt timed
+#ifdef IW_IMGUI
+				ImGuiLayer* imgui = GetLayer<ImGuiLayer>("ImGui");
+				if (imgui) {
+					//LOG_TIME_SCOPE("ImGui");
+
+					imgui->Begin();
+					for (Layer* layer : m_layers) {
+						layer->ImGui();
+					}
+					imgui->End();
+				}
+#endif
 
 				(*Window).SwapBuffers();
 
@@ -263,32 +311,25 @@ namespace Engine {
 	}
 
 	void Application::Update() {
-		// Start Work (ASync)
-		
-		//m_updateTask.Run();
-
-		// Update layers (ASync)
-
 		int layerNumber = 0;
 		for (Layer* layer : m_layers)
 		{
 			LOG_TIME_SCOPE(layer->Name() + " layer update");
-			Renderer->SetLayer(layerNumber);
+			Renderer->SetLayer(layerNumber++);
 			layer->UpdateSystems();
 			layer->Update();
 		}
-
-		// Pause until work is finished (ASync)
-		//m_updateTask.Wait();
 	}
 
 	void Application::FixedUpdate() {
-		for (Layer* layer : m_layers) {
+		for (Layer* layer : m_layers)
+		{
+			LOG_TIME_SCOPE(layer->Name() + " layer fixed update");
 			layer->FixedUpdateSystems();
 			layer->FixedUpdate();
 		}
 
-		LOG_TIME_SCOPE("Physics"); // this is going to have to be made an option, or another function that you can override to stop it so you can call it in a custon loop later
+		// if physics auto step, should be in InitOptions
 		Physics->Step(Time::FixedTime());
 	}
 

@@ -23,6 +23,7 @@ namespace Engine {
 		std::thread m_renderThread;
 		bool m_running;
 		bool m_isInitialized;
+		float m_frameDelay;
 	public:
 		IWindow* Window;
 

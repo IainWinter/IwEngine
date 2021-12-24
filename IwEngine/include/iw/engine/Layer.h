@@ -115,7 +115,7 @@ namespace Engine {
 		virtual void UpdateSystems()
 		{
 			for (ISystem* system : m_systems) {
-				LOG_TIME_SCOPE(system->Name() + " system");
+				LOG_TIME_SCOPE(system->Name() + " system update");
 				system->Update();
 			}
 		}
@@ -123,6 +123,7 @@ namespace Engine {
 		virtual void FixedUpdateSystems()
 		{
 			for (ISystem* system : m_systems) {
+				LOG_TIME_SCOPE(system->Name() + " system fixed update");
 				system->FixedUpdate();
 			}
 		}

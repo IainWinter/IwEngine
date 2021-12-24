@@ -35,9 +35,10 @@ namespace iw {
 
 			m_alloc.free(e, e->Size);
 
-			if (++count > 500) {
-				break;
-			}
+			//if (++count > 500) {
+			//	LOG_VALUE("event_count", count);
+			//	break;
+			//}
 		}
 	}
 

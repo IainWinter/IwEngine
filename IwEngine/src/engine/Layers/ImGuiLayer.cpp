@@ -112,32 +112,6 @@ namespace Engine {
 			ImGui::GetIO().MousePos.y = pos.y();
 		}
 	}
-	
-	std::unordered_map<std::string, float> m_smooth;
-	float smoothing;
-
-	void PrintTimes(
-		iw::log_time& times)
-	{
-		m_smooth[times.name] = iw::lerp(m_smooth[times.name], times.time * 1000, iw::min(1 - smoothing + .01f, 1.f));
-		float time = m_smooth[times.name];
-
-		if (times.children.size() == 0) {
-			ImGui::Text("%s - %4.4fms", times.name.c_str(), m_smooth[times.name]);
-		}
-
-		else {
-			int id = (times.my_level << sizeof(int) / 2) | times.my_index;
-
-			if (ImGui::TreeNode(&id, "%s - %4.4fms", times.name.c_str(), m_smooth[times.name])) {
-				for (iw::log_time& child : times.children) {
-					PrintTimes(child);
-				}
-
-				ImGui::TreePop();
-			}
-		}
-	}
 
 	void ImGuiLayer::Begin() {
 		// Frame

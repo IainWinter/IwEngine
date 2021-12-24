@@ -18,16 +18,16 @@ namespace Engine {
 	{
 		accumulator += Time::DeltaTime();
 
-		float a = glm::clamp(accumulator / iw::FixedTime(), 0.f, 1.f);
+		float a = glm::clamp(accumulator / iw::RawFixedTime(), 0.f, 1.f);
 
 		for (auto entity : eca) {
 			auto [transform, rigidbody] = entity.Components.Tie<Components>();
 			
-			if (rigidbody->IsKinematic) {
+			//if (rigidbody->IsKinematic) {
 				transform->Position = iw :: lerp(rigidbody->LastTrans().Position, rigidbody->Transform.Position, a);
 				transform->Scale    = iw :: lerp(rigidbody->LastTrans().Scale,    rigidbody->Transform.Scale,    a);
 				transform->Rotation = glm::slerp(rigidbody->LastTrans().Rotation, rigidbody->Transform.Rotation, a);
-			}
+			//}
 		}
 
 		for (auto entity : Space->Query<Transform, CollisionObject>()) {

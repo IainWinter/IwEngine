@@ -14,6 +14,13 @@ namespace Time {
 	static std::vector<float> pastDt;
 	float smoothDeltaTime;
 
+	void SetDeltaTime(
+		float dt)
+	{
+		deltaTime = std::chrono::duration_cast<std::chrono::nanoseconds>(
+				std::chrono::duration<float, std::ratio<1, 1>>(dt));
+	}
+
 	void SetFixedTime(
 		float duration) 
 	{
@@ -57,17 +64,17 @@ namespace Time {
 		return time;
 	}
 
-	float DeltaTime() {
+	float RawDeltaTime() {
 		return deltaTime.count() / 1000000000.0f;
+	}
+
+	float DeltaTime() {
+		return RawDeltaTime() * TimeScale();
 	}
 
 	float SmoothDeltaTime()
 	{
 		return smoothDeltaTime;
-	}
-
-	float DeltaTimeScaled() {
-		return DeltaTime() * TimeScale();
 	}
 
 	// Idk why this is like 1000 times slower
