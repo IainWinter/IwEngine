@@ -27,7 +27,7 @@ namespace iw {
 	}
 
 	void logger::push_time(
-		std::string name)
+		const std::string& name)
 	{
 		m_root.push_time(name, m_get_time(), m_current_level);
 		m_current_level++;
@@ -35,7 +35,11 @@ namespace iw {
 
 	void logger::pop_time() {
 		m_root.pop_time(m_get_time(), m_current_level);
-		m_current_level--;
+
+		if (m_current_level > 0) // final pop is at level 0, ends a frame, lil funcky
+		{
+			m_current_level--;
+		}
 	}
 
 	log_time logger::get_times() {
@@ -46,6 +50,26 @@ namespace iw {
 		m_root = {};
 	}
 #endif
+#ifdef IW_LOG_VALUE
+
+	void log::logger::push_value(
+		const std::string& name, 
+		float value)
+	{
+		m_values[name].push_back(value);
+	}
+
+	const std::vector<float>& log::logger::get_values(
+		const std::string& name)
+	{
+		return m_values[name];
+	}
+
+	void log::logger::clear_values()
+	{
+		m_values.clear();
+	}
+#endif
 	void logger::reset() {
 		for (sink* sink : m_sinks) {
 			delete sink;
@@ -54,6 +78,10 @@ namespace iw {
 
 #ifdef IW_LOG_TIME
 		clear_times();
+#endif
+
+#ifdef IW_LOG_VALUE
+		clear_values();
 #endif
 	}
 
@@ -77,7 +105,7 @@ namespace iw {
 	}
 #ifdef IW_LOG_TIME
 	log_time_view::log_time_view(
-		std::string name)
+		const std::string& name)
 	{
 		logger::instance().push_time(name);
 	}
@@ -87,31 +115,31 @@ namespace iw {
 	}
 
 	void log_time::push_time(
-		std::string& name,
+		const std::string& name,
 		float begin,
-		unsigned current_level)
+		unsigned level)
 	{
-		if (my_level == current_level) {
-			my_index++;
-			time = begin;
-			children.push_back({ name, begin, current_level + 1 });
-		}
+		if (level == 0) {
+			if (children.size() == 0) {
+				time = begin;
+			}
 
+			children.push_back({ name, begin });
+		}
 		else {
-			children.at(my_index - 1).push_time(name, begin, current_level);
+			children.back().push_time(name, begin, level - 1);
 		}
 	}
 
 	void log_time::pop_time(
 		float end,
-		unsigned current_level)
+		unsigned level)
 	{
-		if (my_level == current_level) {
+		if (level == 0) {
 			time = end - time;
-		}
-
+		} 
 		else {
-			children.at(my_index - 1).pop_time(end, current_level);
+			children.back().pop_time(end, level - 1);
 		}
 	}
 #endif

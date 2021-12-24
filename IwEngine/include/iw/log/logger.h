@@ -5,6 +5,11 @@
 #include <sstream>
 
 #define IW_LOG_TIME
+#define IW_LOG_VALUE
+
+#ifdef IW_LOG_VALUE
+#	include <unordered_map>
+#endif
 
 namespace iw {
 namespace log {
@@ -13,18 +18,18 @@ namespace log {
 		std::string name = "Frame";
 		float time = 0;
 
-		unsigned my_level = 0;
-		unsigned my_index = 0;
+		//unsigned my_level = 0;
+		//unsigned my_index = 0;
 		std::vector<log_time> children;
 
 		void push_time(
-			std::string& name,
+			const std::string& name,
 			float begin,
 			unsigned level);
 
 		void pop_time(
 			float end,
-			unsigned current_level);
+			unsigned level);
 	};
 #endif
 	class logger {
@@ -35,6 +40,9 @@ namespace log {
 		float(*m_get_time)()     = nullptr;
 		log_time m_root          = {};
 		unsigned m_current_level = 0;
+#endif
+#ifdef IW_LOG_VALUE
+		std::unordered_map<std::string, std::vector<float>> m_values;
 #endif
 	public:
 		template<
@@ -78,7 +86,7 @@ namespace log {
 
 		IWLOG_API
 		void push_time(
-			std::string name);
+			const std::string& name);
 
 		IWLOG_API
 		void pop_time();
@@ -88,9 +96,20 @@ namespace log {
 
 		IWLOG_API
 		void clear_times();
+#endif
 
-		//IWLOG_API
-		//void reset_times();
+#ifdef IW_LOG_TIME
+		IWLOG_API
+		void push_value(
+			const std::string& name,
+			float value);
+
+		IWLOG_API
+		const std::vector<float>& get_values(
+			const std::string& name);
+
+		IWLOG_API
+		void clear_values();
 #endif
 		IWLOG_API
 		void reset();
@@ -133,7 +152,7 @@ namespace log {
 	class IWLOG_API log_time_view {
 	public:
 		log_time_view(
-			std::string name);
+			const std::string& name);
 
 		~log_time_view();
 	};
@@ -143,23 +162,28 @@ namespace log {
 	using namespace log;
 }
 
+// todo: define when not IW_LOG / IW_LOG_TIME / IW_LOG_VALUE are undefed
+
 #define LOG_RESET iw::logger::instance().reset
+#define LOG_FLUSH iw::logger::instance().flush
 
 #define LOG_SINK(_type_, _level_, ...)                              \
 	iw::logger::instance().make_sink<_type_>(_level_, __VA_ARGS__)
 
-#define LOG_FLUSH   iw::logger::instance().flush
-
-#define LOG_INFO     iw::log_view(iw::loglevel::INFO)
-#define LOG_DEBUG    iw::log_view(iw::loglevel::DEBUG)
-#define LOG_WARNING  iw::log_view(iw::loglevel::WARN)
-#define LOG_ERROR    iw::log_view(iw::loglevel::ERR)
-#define LOG_TRACE    iw::log_view(iw::loglevel::TRACE)
+#define LOG_INFO    iw::log_view(iw::loglevel::INFO)
+#define LOG_DEBUG   iw::log_view(iw::loglevel::DEBUG)
+#define LOG_WARNING iw::log_view(iw::loglevel::WARN)
+#define LOG_ERROR   iw::log_view(iw::loglevel::ERR)
+#define LOG_TRACE   iw::log_view(iw::loglevel::TRACE)
 
 #ifdef IW_LOG_TIME
-#	define LOG_SET_GET_TIME(func) logger::instance().set_get_time(func);
-#	define LOG_TIME_SCOPE(time) iw::log_time_view __keep_alive = iw::log_time_view(time)
-#	define LOG_GET_TIMES() logger::instance().get_times()
-#	define LOG_CLEAR_TIMES() logger::instance().clear_times()
-#	define LOG_RESET_TIMES() logger::instance().reset_times()
+#	define LOG_GET_TIMES()        iw::logger::instance().get_times()
+#	define LOG_CLEAR_TIMES()      iw::logger::instance().clear_times()
+#	define LOG_FINISH_TIMES()     iw::logger::instance().pop_time()
+#	define LOG_SET_GET_TIME(func) iw::logger::instance().set_get_time(func);
+#	define LOG_TIME_SCOPE(name)   iw::log_time_view __keep_alive = iw::log_time_view(name)
+#endif
+
+#ifdef IW_LOG_VALUE
+#	define LOG_VALUE(name, value) iw::logger::instance().push_value(name, value)
 #endif
