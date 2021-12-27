@@ -2,7 +2,9 @@
 
 #include <functional>
 
-enum ItemType {
+enum class ItemType {
+	NONE,
+
 	HEALTH,
 	LASER_CHARGE,
 	PLAYER_CORE,
@@ -12,6 +14,8 @@ enum ItemType {
 };
 
 struct Item {
+	ItemType Type = ItemType::NONE;
+
 	float MoveTime = 2.f;
 	float MoveTimer = 0.f;
 

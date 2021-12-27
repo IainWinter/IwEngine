@@ -31,16 +31,25 @@ void CorePixelsSystem::Update()
 				core->Timer = iw::lerp(core->Timer, 0.f, iw::DeltaTime() * 10);
 			}
 
-			if (dead) {
-				Bus->push<CoreExploded_Event>(iw::Entity(handle, Space));
+			if (dead)
+			{
+				iw::Entity entity = Space->GetEntity(handle);
+
+				if (entity.Has<Player>())
+				{
+					for (int index : core->ActiveIndices)
+					{
+						RemoveCorePixel(entity, index);
+					}
+				}
+
+				Bus->push<CoreExploded_Event>(entity);
 
 				// this needs to remove the behaviour components from the entity?
-
 				//Space->QueueEntity(handle, iw::func_Destroy);
 			}
 
 			// if a core peice isnt touching a regular peice is dies
-
 			//if (!Space->HasComponent<Player>(handle))
 			//{
 			//	for (const int& index : core->ActiveIndices)
@@ -119,60 +128,60 @@ bool CorePixelsSystem::On(iw::ActionEvent& e)
 		case REMOVE_CELL_FROM_TILE:
 		{
 			RemoveCellFromTile_Event& event = e.as<RemoveCellFromTile_Event>();
-			int        index  = event.Index;
-			iw::Entity entity = event.Entity;
-
+			
 			if (!Space->GetEntity(event.Entity.Handle).Alive())
 			{
 				LOG_ERROR << "Tried to remove cell from dead entity";
 				break;
 			}
 
-			// maybe the health doesnt stop moving and can go outside the screen
-			// then the enemies could drop the shards and you could have to rush
-			// them to get health...
-			// if not this should go in the player system as it only effects them
-			
-			// Remove core peice
-
-			// crash where this returns incorrect components
-			// not sure what root cause it prob event delay...
-			// or it could be in the entity system
-
-			CorePixels* core = entity.Find<CorePixels>();
-			iw::Tile*   tile = entity.Find<iw::Tile>();
-			
-			if (!core || !tile) break;
-
-			if (core->ActiveIndices.find(index) != core->ActiveIndices.end())
-			{
-				core->ActiveIndices.erase(index);
-
-				if (entity.Has<Player>())
-				{
-					iw::Transform* transform = entity.Find<iw::Transform>();
-
-					SpawnItem_Config config;
-					config.X = transform->Position.x;
-					config.Y = transform->Position.y;
-					config.Item = PLAYER_CORE;
-					config.ActivateDelay = .33f;
-					config.Speed = 225;
-					config.AngularSpeed = 10;
-					config.DieWithTime = false;
-					config.OnPickup = [=]()
-					{
-						Bus->push<HealPlayer_Event>(true);
-						core->Timer -= .5f;
-					};
-
-					Bus->push<SpawnItem_Event>(config);
-				}
-			}
+			RemoveCorePixel(event.Entity, event.Index);
 
 			break;
 		}
 	}
 
 	return false;
+}
+
+void CorePixelsSystem::RemoveCorePixel(
+	iw::Entity entity,
+	int index)
+{
+	// maybe the health doesnt stop moving and can go outside the screen
+	// then the enemies could drop the shards and you could have to rush
+	// them to get health...
+	// if not this should go in the player system as it only effects them
+			
+	CorePixels* core = entity.Find<CorePixels>();
+	iw::Tile*   tile = entity.Find<iw::Tile>();
+			
+	if (!core || !tile) return;
+
+	if (core->ActiveIndices.find(index) != core->ActiveIndices.end())
+	{
+		core->ActiveIndices.erase(index);
+
+		// see above comment
+		if (entity.Has<Player>())
+		{
+			iw::Transform* transform = entity.Find<iw::Transform>();
+
+			SpawnItem_Config config;
+			config.X = transform->Position.x;
+			config.Y = transform->Position.y;
+			config.Item = ItemType::PLAYER_CORE;
+			config.ActivateDelay = .33f;
+			config.Speed = 225;
+			config.AngularSpeed = 10;
+			config.DieWithTime = false;
+			config.OnPickup = [=]()
+			{
+				Bus->push<HealPlayer_Event>(true);
+				core->Timer -= .5f;
+			};
+
+			Bus->push<SpawnItem_Event>(config);
+		}
+	}
 }

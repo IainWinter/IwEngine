@@ -150,9 +150,10 @@ iw::Entity ItemSystem::MakeItem(
 
     tile->m_zIndex = 1;
 
+    item->Type          = config.Item;
     item->ActivateTimer = config.ActivateDelay;
-    item->OnPickUp = config.OnPickup;
-    item->DieWithTime = config.DieWithTime;
+    item->OnPickUp      = config.OnPickup;
+    item->DieWithTime   = config.DieWithTime;
 
     return entity;
 }

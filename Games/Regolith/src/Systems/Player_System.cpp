@@ -51,7 +51,11 @@ int PlayerSystem::Initialize()
 
 void PlayerSystem::Destroy()
 {
-	m_player.Destroy();
+	if (m_player.Alive())
+	{
+		m_player.Destroy();
+	}
+
 	Console->RemoveHandler(m_handle);
 }
 
@@ -239,6 +243,16 @@ bool PlayerSystem::On(iw::ActionEvent& e)
 			}
 
 			event.CurrentWeapon = player->CurrentWeapon; // pass onto Game_UI_Layer
+
+			break;
+		}
+		case CORE_EXPLODED:
+		{
+			CoreExploded_Event& event = e.as<CoreExploded_Event>();
+			if (event.Entity.Has<Player>())
+			{
+				Bus->push<iw::ActionEvent>(iw::ActionEventType::SINGLE, DESTROIED_PLAYER);
+			}
 
 			break;
 		}

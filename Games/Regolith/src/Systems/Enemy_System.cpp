@@ -320,11 +320,11 @@ void EnemySystem::DestroyEnemy(iw::Entity entity)
 	if (!entity.Has<Enemy>()) return;
 
 	std::vector<std::pair<ItemType, float>> item_weights {
-		{ HEALTH,         50 },
-		{ LASER_CHARGE,   50 },
-		{ WEAPON_MINIGUN, 3 },
-		{ WEAPON_BOLTZ,   2 },
-		{ WEAPON_WATTZ,   2 },
+		{ ItemType::HEALTH,         50 },
+		{ ItemType::LASER_CHARGE,   50 },
+		{ ItemType::WEAPON_MINIGUN, 3 },
+		{ ItemType::WEAPON_BOLTZ,   2 },
+		{ ItemType::WEAPON_WATTZ,   2 },
 	};
 
 	iw::Transform* transform = entity.Find<iw::Transform>();

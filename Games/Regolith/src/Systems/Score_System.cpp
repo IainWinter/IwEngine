@@ -24,14 +24,12 @@ bool ScoreSystem::On(iw::ActionEvent& e)
 				Bus->push<ChangePlayerScore_Event>(Score + 100);
 			}
 
-
 			if (event.Entity.Has<Player>())
 			{
 				std::stringstream ss;
-				ss << "final-score";
+				ss << "final-score ";
 				ss << Score;
 				Console->QueueCommand(ss.str());
-				Console->QueueCommand("game-over");
 			}
 
 			break;

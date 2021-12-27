@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 
-enum StateName {
+enum class StateName {
 	NONE,
 
 	//GAME_PLAYING,
@@ -33,7 +33,7 @@ struct GameState {
 
 	GameState(
 		std::string name,
-		StateName state = NONE
+		StateName state = StateName::NONE
 	)
 		: Name(name)
 		, State(state)

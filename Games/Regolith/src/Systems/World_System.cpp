@@ -115,50 +115,49 @@ void WorldSystem::FixedUpdate()
 			iw::Rigidbody* rigidbody,
 			Throwable* throwable) 
 		{
-			if (throwable->Held)
+			if (   !throwable->Held
+				|| !throwable->ThrowTarget   .Alive()
+				|| !throwable->ThrowRequestor.Alive())
 			{
-				if (!throwable->ThrowRequestor.Alive())
-				{
-					return;
-				}
-
-				throwable->Timer += iw::FixedTime();
-
-				float distFromThrower = glm::distance(
-					rigidbody->Transform.Position, 
-					throwable->ThrowRequestor.Find<iw::Transform>()->Position);
-
-				if (   throwable->Timer > throwable->Time
-					|| distFromThrower  > 150)
-				{
-					throwable->Held = false;
-				}
-
-				glm::vec3 pos  = rigidbody->Transform.Position;
-				glm::vec3 tpos = throwable->ThrowTarget   .Find<iw::Transform>()->Position;
-				glm::vec3 rpos = throwable->ThrowRequestor.Find<iw::Transform>()->Position;
-
-				/*
-				auto [min, max] = rigidbody->Collider->as<iw::Physics::impl::Collider<iw::d2>>()->Bounds();
-				float radius = glm::length(max - min) / 2.f;
-				*/
-
-				glm::vec3 vel = tpos - pos + (pos - rpos) / 2.f;
-				vel = glm::normalize(vel);
-
-				float currentSpeed = glm::length(rigidbody->Velocity);
-				float speed = iw::max(currentSpeed, 200.f * throwable->Timer / throwable->Time);
-
-				rigidbody->Velocity = iw::lerp(rigidbody->Velocity, vel * speed, iw::FixedTime() * 25);
-
-				LightningConfig config;
-				config.A = throwable->ThrowRequestor;
-				config.B = Space->GetEntity(handle);
-				config.ArcSize = 10;
-				config.LifeTime = .01f;
-
-				DrawLightning(sand, Space, config);
+				return;
 			}
+
+			throwable->Timer += iw::FixedTime();
+
+			float distFromThrower = glm::distance(
+				rigidbody->Transform.Position, 
+				throwable->ThrowRequestor.Find<iw::Transform>()->Position);
+
+			if (   throwable->Timer > throwable->Time
+				|| distFromThrower  > 150)
+			{
+				throwable->Held = false;
+			}
+
+			glm::vec3 pos  = rigidbody->Transform.Position;
+			glm::vec3 tpos = throwable->ThrowTarget   .Find<iw::Transform>()->Position;
+			glm::vec3 rpos = throwable->ThrowRequestor.Find<iw::Transform>()->Position;
+
+			/*
+			auto [min, max] = rigidbody->Collider->as<iw::Physics::impl::Collider<iw::d2>>()->Bounds();
+			float radius = glm::length(max - min) / 2.f;
+			*/
+
+			glm::vec3 vel = tpos - pos + (pos - rpos) / 2.f;
+			vel = glm::normalize(vel);
+
+			float currentSpeed = glm::length(rigidbody->Velocity);
+			float speed = iw::max(currentSpeed, 200.f * throwable->Timer / throwable->Time);
+
+			rigidbody->Velocity = iw::lerp(rigidbody->Velocity, vel * speed, iw::FixedTime() * 25);
+
+			LightningConfig config;
+			config.A = throwable->ThrowRequestor;
+			config.B = Space->GetEntity(handle);
+			config.ArcSize = 10;
+			config.LifeTime = .01f;
+
+			DrawLightning(sand, Space, config);
 		});
 }
 
@@ -261,7 +260,7 @@ bool WorldSystem::On(iw::ActionEvent& e)
 
 			switch (event.State)
 			{
-				case GAME_START_STATE:
+				case StateName::GAME_START_STATE:
 				{
 					//SpawnAsteroid_Config c;
 					//c.SpawnLocationX = 100;
@@ -287,7 +286,7 @@ bool WorldSystem::On(iw::ActionEvent& e)
 						.Start();
 					break;
 				}
-				case GAME_OVER_STATE:
+				case StateName::GAME_OVER_STATE:
 				{
 					m_levels.clear();
 					break;

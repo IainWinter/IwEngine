@@ -47,36 +47,6 @@ void App::ApplyState(GameState* state)
 	m_currentState = state;
 }
 
-void App::SetState(
-	GameState* state)
-{
-	if (m_stateStack.size() > 0)
-	{
-		m_stateStack.pop();
-	}
-
-	PushState(state);
-}
-
-void App::PushState(
-	GameState* state)
-{
-	ApplyState(state);
-	m_stateStack.push(state);
-}
-
-void App::PopState() 
-{
-	if (m_stateStack.size() > 0)
-	{
-		m_stateStack.pop();
-		if (m_stateStack.size() > 0)
-		{
-			ApplyState(m_stateStack.top());
-		}
-	}
-}
-
 void App::DestroyState(
 	GameState*& state)
 {
@@ -102,6 +72,154 @@ void App::DestroyState(
 	{
 		DestroyLayer(layer);
 	}
+}
+
+void App::SetState(
+	GameState* state)
+{
+	while (m_stateStack.size() > 0)
+	{
+		DestroyState(m_stateStack.top());
+		m_stateStack.pop();
+	}
+
+	PushState(state);
+}
+
+void App::PushState(
+	GameState* state)
+{
+	ApplyState(state);
+	m_stateStack.push(state);
+}
+
+void App::PopState() 
+{
+	if (m_stateStack.size() > 0)
+	{
+		m_stateStack.pop();
+		if (m_stateStack.size() > 0)
+		{
+			ApplyState(m_stateStack.top());
+		}
+	}
+}
+
+GameState* App::MakeState_Title()
+{
+	GameState* state = new GameState("Title Menu", StateName::NONE);
+	state->OnChange = [&]()
+	{
+		Physics->Paused = true;
+		Input->SetContext("Menu");
+	};
+	state->Layers = { 
+		//new Menu_Title_Layer()
+	};
+
+	return state;
+}
+
+GameState* App::MakeState_Main()
+{
+	GameState* state = new GameState("Main Menu", StateName::NONE);
+	state->OnChange = [&]()
+	{
+		Physics->Paused = true;
+		Input->SetContext("Menu");
+	};
+	state->Layers = {
+		//new Menu_Main_Layer()
+	};
+
+	return state;
+}
+
+GameState* App::MakeState_Play()
+{
+	GameState* state = new GameState("Game Play", StateName::GAME_RESUME_STATE);
+	state->OnChange = [&]()
+	{
+		Physics->Paused = false;
+		Input->SetContext("Game");
+	};
+
+	iw::SandLayer* sand          = new iw::SandLayer(2, 1, 800, 800, 4, 4, false);
+	iw::SandLayer* sand_ui_laser = new iw::SandLayer(1, 1, 40,  40);
+	sand         ->m_updateDelay = 1 / 144.f;
+	sand_ui_laser->m_updateDelay = 1 / 60.f;
+	
+	Game_Layer*    game    = new Game_Layer   (sand, sand_ui_laser);
+	Game_UI_Layer* game_ui = new Game_UI_Layer(sand, sand_ui_laser);
+	
+	state->Layers = {
+		sand, 
+		sand_ui_laser, 
+		game, 
+		game_ui
+	};
+	
+	return state;
+}
+
+GameState* App::MakeState_Highscores()
+{
+	GameState* state = new GameState("Menu Highscores", StateName::NONE);
+	state->OnChange = [&]()
+	{
+		Physics->Paused = true;
+		Input->SetContext("Menu");
+	};
+	state->Layers = {
+		new Menu_Highscores_Layer(m_finalScore)
+	};
+
+	return state;
+}
+
+GameState* App::MakeState_Settings()
+{
+	GameState* state = new GameState("Menu Settings", StateName::GAME_PAUSE_STATE);
+	state->OnChange = [&]()
+	{
+		Physics->Paused = true;
+		Input->SetContext("Menu");
+	};
+	state->Layers = {
+		new Menu_Pause_Layer()
+	};
+
+	return state;
+}
+
+GameState* App::MakeState_Credits()
+{
+	GameState* state = new GameState("Menu Credits", StateName::NONE);
+	state->OnChange = [&]()
+	{
+		Physics->Paused = true;
+		Input->SetContext("Menu");
+	};
+	state->Layers = {
+		//new Menu_Credits_Layer()
+	};
+
+	return state;
+}
+
+GameState* App::MakeState_Upgrade()
+{
+	GameState* state = new GameState("Menu Upgrade", StateName::NONE);
+	state->OnChange = [&]()
+	{
+		Physics->Paused = true;
+		Input->SetContext("Menu");
+	};
+	state->Layers = {
+		new Menu_Upgrade_Layer(m_finalScore)
+	};
+
+	return state;
 }
 
 int App::Initialize(
@@ -137,7 +255,7 @@ int App::Initialize(
 
 	//ImGui::SetCurrentContext((ImGuiContext*)options.ImGuiContext);
 
-	m_gamePause = new GameState("Pause menu", GAME_PAUSE_STATE);
+	m_gamePause = new GameState("Pause menu", StateName::GAME_PAUSE_STATE);
 	m_gamePause->Layers.push_back(new Menu_Pause_Layer());
 	m_gamePause->OnChange = [&]()
 	{
@@ -147,7 +265,7 @@ int App::Initialize(
 		Input->SetContext("Menu");
 	};
 
-	Console->QueueCommand("game-over");
+	Console->QueueCommand("set-state highscores");
 
 	// create a guid for the installation of this app
 
@@ -223,7 +341,7 @@ int App::Initialize(
 		{
 			switch (m_currentState->State)
 			{
-				case GAME_PAUSE_STATE:
+				case StateName::GAME_PAUSE_STATE:
 					PopState();
 					break;
 				default:
@@ -233,109 +351,66 @@ int App::Initialize(
 		}
 
 		else
-		if (command.Verb == "final-score")
+		if (command.Verb == "fade")
 		{
-			if (command.TokenCount == 1)
+			float fadeTime  = command.TokenCount > 0 ? command.Tokens[0].Float : 1.f;
+			float fadeDelay = command.TokenCount > 1 ? command.Tokens[1].Float : 0.f;
+			float fadeTotalTime = fadeTime + fadeDelay;
+
+			iw::Layer* fadeLayer = PushLayer<Menu_Fadeout_Layer>(fadeTime, fadeDelay);
+
+			float time = iw::RawTotalTime();
+			Task->coroutine(
+				[this, time, fadeTotalTime, fadeLayer]()
 			{
-				m_finalScore = command.Tokens[0].Int;
-			}
-		}
-
-		else
-		if (command.Verb == "game-over")
-		{
-			Bus->push<StateChange_Event>(GAME_OVER_STATE);
-
-			if (m_gamePlay)
-			{
-				m_gamePlay->Layers.push_back(PushLayer<Menu_Fadeout_Layer>(4.f));
-			}
-
-			float time = iw::TotalTime();
-			Task->coroutine([&, time]()
-			{
-				bool done = iw::TotalTime() - time > 0;
-
-				if (done)
-				{
-					//Menu_PostGame_Layer* menu = new Menu_PostGame_Layer(m_finalScore);
-					Menu_Title_Layer* menu = new Menu_Title_Layer();
-
-					m_gameHighscore = new GameState("Post game menu");
-					m_gameHighscore->Layers.push_back(menu);
-					m_gameHighscore->OnChange = [&]()
-					{
-						Physics->Paused = true;
-						Input->SetContext("Menu");
-					};
-
-					if (m_gamePlay)
-					{
-						DestroyState(m_gamePlay);
-					}
-
-					SetState(m_gameHighscore);
-				}
-
+				bool done = iw::RawTotalTime() - time > fadeTotalTime;
+				if (done) PopLayer(fadeLayer);
 				return done;
 			});
 		}
 
-		else 
-		if (command.Verb == "game-upgrade")
+		else
+		if (command.Verb == "set-state")
 		{
-			m_gameUpgrade = new GameState("Upgrade menu");
-			m_gameUpgrade->Layers.push_back(new Menu_Upgrade_Layer(m_finalScore));
-			m_gameUpgrade->OnChange = [&]()
-			{
-				Physics->Paused = true;
-				Input->SetContext("Menu");
-			};
+			std::string stateName = command.Tokens[0].String;
 
-			if (m_gameHighscore)
+			     if (stateName == "title")      SetState(MakeState_Title());
+			else if (stateName == "main")       SetState(MakeState_Main());
+			else if (stateName == "play")       SetState(MakeState_Play());
+			else if (stateName == "highscores") SetState(MakeState_Highscores());
+			else if (stateName == "settings")   SetState(MakeState_Settings());
+			else if (stateName == "credits")    SetState(MakeState_Credits());
+			else if (stateName == "upgrade")    SetState(MakeState_Upgrade());
+
+			else
 			{
-				DestroyState(m_gameHighscore);
+				LOG_ERROR << "[set-state] invalid state";
 			}
-
-			SetState(m_gameUpgrade);
 		}
 
 		else
-		if (command.Verb == "game-start")
+		if (command.Verb == "push-state")
 		{
-			if (m_gamePlay)
+			std::string stateName = command.Tokens[0].String;
+
+			if (stateName == "settings")   PushState(MakeState_Settings());
+
+			else
 			{
-				LOG_WARNING << "Game already started";
-				return true;
+				LOG_ERROR << "[push-state] invalid state";
 			}
+		}
 
-			iw::SandLayer* sand          = new iw::SandLayer(2, 1, 800, 800, 4, 4, false);
-			iw::SandLayer* sand_ui_laser = new iw::SandLayer(1, 1, 40, 40);
-			sand         ->m_updateDelay = 1 / 144.f;
-			sand_ui_laser->m_updateDelay = 1 / 60.f;
+		else
+		if (command.Verb == "push-state")
+		{
+			PopState();
+		}
 
-			Game_Layer*    game    = new Game_Layer   (sand, sand_ui_laser);
-			Game_UI_Layer* game_ui = new Game_UI_Layer(sand, sand_ui_laser);
-
-			m_gamePlay = new GameState("Game play", GAME_RESUME_STATE);
-			m_gamePlay->Layers.push_back(sand);
-			m_gamePlay->Layers.push_back(sand_ui_laser);
-			m_gamePlay->Layers.push_back(game);
-			m_gamePlay->Layers.push_back(game_ui);
-
-			m_gamePlay->OnChange = [&]()
-			{
-				Physics->Paused = false;
-				Input->SetContext("Game");
-			};
-
-			if (m_currentState)
-			{
-				DestroyState(m_currentState);
-			}
-
-			SetState(m_gamePlay);
-			Bus->push<StateChange_Event>(GAME_START_STATE);
+		else
+		if (command.Verb == "final-score")
+		{
+			m_finalScore = command.Tokens[0].Int;
 		}
 
 		else

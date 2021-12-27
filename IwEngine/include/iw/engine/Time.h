@@ -16,6 +16,7 @@ namespace Time {
 
 	IWENGINE_API size_t Ticks();      //Probaly should use unsigned long long
 	IWENGINE_API float  TotalTime();
+	IWENGINE_API float  RawTotalTime();
 
 	IWENGINE_API float RawDeltaTime();
 	IWENGINE_API float DeltaTime();

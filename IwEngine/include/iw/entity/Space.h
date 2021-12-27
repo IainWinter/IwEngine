@@ -152,6 +152,11 @@ namespace ECS {
 		Entity GetEntity(
 			EntityHandle handle);
 
+		// Gets an entity from an index
+		IWENTITY_API
+		Entity GetEntity(
+			size_t index);
+
 		IWENTITY_API
 		Entity Instantiate(
 			const Prefab& prefab);

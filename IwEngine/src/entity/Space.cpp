@@ -58,6 +58,9 @@ namespace ECS {
 			return false;
 		}
 
+		// todo: possible to queue a func_destroy and then call .Destroy !!!
+		// this causes a hard to debug bugs
+
 		EntityData& entityData = m_entityManager.GetEntityData(handle.Index);
 
 		TrySendEntityDestroiedEvent(entityData.Entity);
@@ -282,7 +285,13 @@ namespace ECS {
 	Entity Space::GetEntity(
 		EntityHandle handle)
 	{
-		return Entity(m_entityManager.GetEntityData(handle.Index).Entity, this);
+		return GetEntity(handle.Index);
+	}
+
+	Entity Space::GetEntity(
+		size_t index)
+	{
+		return Entity(m_entityManager.GetEntityData(index).Entity, this);
 	}
 
 	Entity Space::Instantiate(

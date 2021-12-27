@@ -269,7 +269,7 @@ void Menu_Upgrade_Layer::Buttons()
 			}
 
 			Bus->push<ApplyUpgradeSet_Event>(set);
-			Console->QueueCommand("game-start");
+			Console->QueueCommand("set-state play");
 		}
 	}
 	ImGui::EndChild();

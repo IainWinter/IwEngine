@@ -3,7 +3,6 @@
 #include "Layers/Menu_Layer.h"
 #include "iw/util/to_string.h"
 
-
 #include "Upgrade.h"
 #include "Events.h"
 
@@ -15,14 +14,12 @@ struct Menu_Upgrade_Layer : Menu_Layer2
 	std::array<UpgradeDescription*, 8 * 8> upgrades;
 	std::vector<std::pair<int, UpgradeDescription*>> active;
 
-	ImFont* font;
-
-	UpgradeDescription* tooltip;
 	int money;
 
+	UpgradeDescription* tooltip;
+	ImFont* font;
 	ImFont* font_regular;
 	ImFont* font_paragraph;
-
 
 	Menu_Upgrade_Layer(
 		int totalMoney
@@ -30,11 +27,12 @@ struct Menu_Upgrade_Layer : Menu_Layer2
 		: Menu_Layer2    ("Upgrade menu")
 		, money          (totalMoney)
 		, tooltip        (nullptr)
+		, font           (nullptr)
 		, font_regular   (nullptr)
 		, font_paragraph (nullptr)
 	{}
 
-	int Initialize() override;;
+	int Initialize() override;
 
 	void UI() override;
 

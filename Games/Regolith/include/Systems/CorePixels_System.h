@@ -23,4 +23,8 @@ struct CorePixelsSystem : iw::SystemBase
 	void Update() override;
 
 	bool On(iw::ActionEvent& e) override;
+
+	void RemoveCorePixel(
+		iw::Entity entity,
+		int index);
 };

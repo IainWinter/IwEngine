@@ -132,7 +132,7 @@ namespace Engine {
 			return m_name;
 		}
 
-		EventStack<ISystem*>& temp_GetSystems() {
+		EventStack<ISystem*>/*&*/ temp_GetSystems() {
 			return m_systems;
 		}
 

@@ -1,12 +1,24 @@
 #pragma once
 
 #include "iw/util/queue/blocking_queue.h"
+#include "iw/log/logger.h"
 #include <vector>
 #include <thread>
 #include <functional>
 #include <mutex>
 #include <condition_variable>
 //#include <string>
+
+//#define TASK_IN(t, f)							\
+//	float time = iw::TotalTime();					\
+//	float delay = t;							\
+//	Task->coroutine(							\
+//		[=]()								\
+//	{										\
+//		bool done = iw::TotalTime() - time > delay;	\
+//		if (done)	f;	                              \
+//		return done;							\
+//	});										\
 
 namespace iw {
 namespace util {

@@ -290,22 +290,22 @@ bool Game_UI_Layer::On(iw::ActionEvent& e)
 		{
 			switch (e.as<StateChange_Event>().State)
 			{
-				case GAME_OVER_STATE:
+				case StateName::GAME_OVER_STATE:
 				{
 					m_game_over = true;
 					break;
 				}
-				case GAME_START_STATE: 
+				case StateName::GAME_START_STATE:
 				{
 					m_game_over = false;
 					break;
 				}
-				case GAME_PAUSE_STATE:
+				case StateName::GAME_PAUSE_STATE:
 				{
 					m_game_paused = true;
 					break;
 				}
-				case GAME_RESUME_STATE: 
+				case StateName::GAME_RESUME_STATE:
 				{
 					m_game_paused = false;
 					break;

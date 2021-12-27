@@ -17,6 +17,8 @@
 #include "Systems/TileSplit_System.h"
 #include "Systems/Upgrade_System.h"
 
+#include "Systems/DeathTransition_System.h"
+
 #include "iw/physics/Dynamics/SmoothPositionSolver.h"
 #include "iw/physics/Dynamics/ImpulseSolver.h"
 #include "iw/engine/Systems/PhysicsSystem.h"
@@ -28,59 +30,23 @@ struct Game_Layer : iw::Layer
 {
 	iw::SandLayer* sand;
 	iw::SandLayer* sand_ui_laserCharge;
-	
-	iw::Entity m_player;
-	iw::Entity m_cursor;
 
-	KeepInWorldSystem*     keepInWorld_s;
-	PlayerLaserTankSystem* playerTank_s;
-	WorldSystem*           world_s;
-
-
-	PlayerSystem*          player_s;
-	CorePixelsSystem*      corePixels_s;
-	ProjectileSystem*      projectile_s;
-	EnemySystem*           enemy_s;
-	ItemSystem*            item_s;
-	ScoreSystem*           score_s;
-	FlockingSystem*        flocking_s;
-	ExplosionSystem*       explosion_s;
-
-	// temp ui
-
-	int laserFluidToCreate = 0;
-	int laserFluidToRemove = 0;
-	int laserFluidCount = 0;
-	glm::vec3 laserFluidVel = glm::vec3(0.f);
-	float canFireTimer = 0;
+	ProjectileSystem* proj_s;
+	ItemSystem*       item_s;
 
 	Game_Layer(
 		iw::SandLayer* sand,
 		iw::SandLayer* sand_ui_laserCharge
 	) 
 		: iw::Layer           ("Game")
-
 		, sand                (sand)
 		, sand_ui_laserCharge (sand_ui_laserCharge)
-
-		, keepInWorld_s       (nullptr)
-		, playerTank_s        (nullptr)
-		, world_s             (nullptr)
-		, player_s            (nullptr)
-		, corePixels_s        (nullptr)
-		, projectile_s        (nullptr)
-		, enemy_s             (nullptr)
+		, proj_s              (nullptr)
 		, item_s              (nullptr)
-		, score_s             (nullptr)
-		, flocking_s          (nullptr)
-		, explosion_s         (nullptr)
 	{}
 
 	int Initialize() override;
 	void Destroy() override;
-
-	void Update() override;
-	void PostUpdate() override;
 
 	bool On(iw::ActionEvent& e) override;
 };

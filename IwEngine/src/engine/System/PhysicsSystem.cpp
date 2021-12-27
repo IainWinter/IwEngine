@@ -33,9 +33,9 @@ namespace Engine {
 		for (auto entity : Space->Query<Transform, CollisionObject>()) {
 			auto [transform, object] = entity.Components.Tie<OtherComponents>();
 
-			transform->Position = object->Transform.Position;
-			transform->Scale    = object->Transform.Scale;
-			transform->Rotation = object->Transform.Rotation;
+			//transform->Position = object->Transform.Position;
+			//transform->Scale    = object->Transform.Scale;
+			//transform->Rotation = object->Transform.Rotation;
 
 			transform->Position = iw :: lerp(transform->Position, object->Transform.Position, a);
 			transform->Scale    = iw :: lerp(transform->Scale,    object->Transform.Scale,    a);

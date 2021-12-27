@@ -8,6 +8,7 @@ namespace Time {
 	static Duration  deltaTime = Duration::zero();
 	static size_t    ticks     = 0;
 	static float     time      = 0.0f;
+	static float     rawtime   = 0.0f;
 	static float     fixedTime = 0.2f;
 	static float     timeScale = 1.0f;
 
@@ -38,6 +39,7 @@ namespace Time {
 	void UpdateTime() {
 		ticks++;
 		time += DeltaTime();
+		rawtime += RawDeltaTime();
 		deltaTime = std::chrono::high_resolution_clock::now() - now;
 		now = std::chrono::high_resolution_clock::now();
 
@@ -62,6 +64,10 @@ namespace Time {
 
 	float TotalTime() {
 		return time;
+	}
+
+	float RawTotalTime() {
+		return rawtime;
 	}
 
 	float RawDeltaTime() {

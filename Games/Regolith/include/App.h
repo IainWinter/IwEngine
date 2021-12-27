@@ -17,13 +17,12 @@
 
 #include "Layers/Game_Layer.h"
 #include "Layers/Game_UI_Layer.h"
-#include "Layers/Menu_Title_Layer.h"
+#include "Layers/Menu_Highscores_Layer.h"
 #include "Layers/Menu_Pause_Layer.h"
 #include "Layers/Menu_PostGame_Layer.h"
 #include "Layers/Menu_Fadeout_Layer.h"
 #include "Layers/Menu_Upgrade_Layer.h"
 #include "Layers/Audio_Layer.h"
-
 
 #include "State.h"
 #include <stack>
@@ -86,11 +85,24 @@ private:
 	int m_finalScore; // this is needed to pass to the game-over/game-upgrade layers
 				   // little messy to have here...
 
-	void ApplyState  (GameState* state);
-	void SetState    (GameState* state);
-	void PushState   (GameState* state);
-	void PopState    ();
-	void DestroyState(GameState*& states);
+	void ApplyState  (GameState* state);  // enable state
+	void DestroyState(GameState*& state); // delete a state
+
+
+
+	void SetState    (GameState* state); // destory all states and push
+	void PushState   (GameState* state); // push state ontop
+	void PopState    ();                 // pop  state ontop
+
+	GameState* MakeState_Title();
+	GameState* MakeState_Main();
+
+	GameState* MakeState_Play();
+	GameState* MakeState_Highscores();
+	GameState* MakeState_Settings();
+	GameState* MakeState_Credits();
+
+	GameState* MakeState_Upgrade();
 
 public:
 	App()

@@ -2,24 +2,22 @@
 
 #include "Layers/Menu_Layer.h"
 
-struct Menu_Fadeout_Layer : Menu_Layer
+struct Menu_Fadeout_Layer : Menu_Layer2
 {
-	UI* m_background;
-
 	float m_time;
 	float m_timer;
+	float m_delay;
 
 	Menu_Fadeout_Layer(
-		float time
+		float time,
+		float delay
 	)
-		: Menu_Layer    ("Menu fadeout game")
-
-		, m_background  (nullptr)
+		: Menu_Layer2   ("Menu fadeout game")
 
 		, m_time        (time)
+		, m_delay       (delay)
 		, m_timer       (0.f)
 	{}
 
-	int Initialize() override;
-	void PostUpdate() override;
+	void UI() override;
 };

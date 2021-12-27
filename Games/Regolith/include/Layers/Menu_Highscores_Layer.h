@@ -2,15 +2,17 @@
 
 #include "Layers/Menu_Layer.h"
 #include "iw/util/io/Network.h"
+
 #include "iw/util/reflection/serialization/JsonSerializer.h"
 
 #include "Upgrade.h"
 #include "Events.h"
-#include "HighscoreRecord.h"
+#include "reflected/HighscoreRecord_reflected.h"
+#include "iw/reflected/vector.h"
 
 #include <array>
 
-struct Menu_Title_Layer : Menu_Layer2
+struct Menu_Highscores_Layer : Menu_Layer2
 {
 	iw::NetworkConnection connection;
 	std::vector<HighscoreRecord> scores;
@@ -23,8 +25,8 @@ struct Menu_Title_Layer : Menu_Layer2
 	ImFont* font_title;
 	bool scroll_table;
 
-	Menu_Title_Layer(
-		int score = 1009
+	Menu_Highscores_Layer(
+		int score
 	)
 		: Menu_Layer2  ("Main title menu")
 		, score        (score)

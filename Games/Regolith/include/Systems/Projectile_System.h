@@ -21,8 +21,6 @@ struct ProjectileSystem
 	{}
 
 	void Update() override;
-	//void FixedUpdate() override;
-
 	bool On(iw::ActionEvent& e) override;
 
 private:
@@ -71,6 +69,4 @@ private:
 	iw::Entity MakeBeam  (const ShotInfo& shot, int depth);
 
 	void MakeExplosion(int x, int y, int r);
-
-	void ImGui();
 };

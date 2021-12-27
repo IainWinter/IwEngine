@@ -30,10 +30,10 @@ public:
 	float m_updateDelay = 0.0f;
 	float m_updateDelayTimer = 0.0f;
 
-private:
 	SandWorldRenderSystem* m_render;
 	SandWorldUpdateSystem* m_update;
 
+private:
 	using SpriteData = std::tuple<Tile*, unsigned*, unsigned>; // tile, colors, width
 	using PixelData  = std::tuple<int, int, Tile*, unsigned*, unsigned>;  // x, y, tile, colors, index
 
