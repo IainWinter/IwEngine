@@ -114,7 +114,7 @@ GameState* App::MakeState_Title()
 		Input->SetContext("Menu");
 	};
 	state->Layers = { 
-		//new Menu_Title_Layer()
+		new Menu_Title_Layer()
 	};
 
 	return state;
@@ -238,8 +238,7 @@ int App::Initialize(
 	m_fonts->Load("verdana", 92, "fonts/ttf/verdana.ttf");
 
 	PushLayer<iw::ImGuiLayer>(Window, m_fonts)->BindContext();
-
-	PushLayer<iw::DebugLayer>();
+	//PushLayer<iw::DebugLayer>();
 
 	// add default cells
 
@@ -265,7 +264,7 @@ int App::Initialize(
 		Input->SetContext("Menu");
 	};
 
-	Console->QueueCommand("set-state highscores");
+	Console->QueueCommand("set-state title");
 
 	// create a guid for the installation of this app
 

@@ -9,6 +9,9 @@
 #include "iw/util/memory/ref.h"
 #include <unordered_map>
 #include <vector>
+//#include "iw/graphics/QueuedRenderer.h"
+//#include "iw/util/io/File.h"
+//#include <assert.h>
 
 #define MAX_POINT_LIGHTS 16
 #define MAX_DIRECTIONAL_LIGHTS 4
@@ -27,7 +30,6 @@ namespace Graphics {
 		glm::mat4 LightViewProj[MAX_DIRECTIONAL_LIGHTS];
 	};
 
-	// might needs pad
 	struct LightData {
 		glm::vec4 LightCounts; // point .x, direct .y
 

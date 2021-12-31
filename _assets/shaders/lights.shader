@@ -11,7 +11,7 @@ struct DirectionalLight {
 	vec4 Color;
 };
 
-layout(std140) uniform Lights{
+layout(std140) uniform Lights {
 	vec4 lightCounts; // x = point y = direct
 	PointLight       pointLights[MAX_POINT_LIGHTS];
 	DirectionalLight directionalLights[MAX_DIRECTIONAL_LIGHTS];

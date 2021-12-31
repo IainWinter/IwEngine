@@ -51,6 +51,8 @@ bool Game_Layer::On(iw::ActionEvent& e)
 	{
 		case DESTROIED_PLAYER:
 		{
+			LOG_TRACE << "DESTROIED_PLAYER";
+
 			for(iw::ISystem* s : temp_GetSystems())
 			{
 				if (   s == proj_s
@@ -63,13 +65,13 @@ bool Game_Layer::On(iw::ActionEvent& e)
 			}
 
 			PushSystem<DeathTransition_System>(sand, 3);
-			Console->QueueCommand("fade 2. 3.5");
+			Console->QueueCommand("fade 3. 4.");
 
 			float time = iw::RawTotalTime();
 			Task->coroutine(
 				[this, time]()
 			{
-				bool done = iw::RawTotalTime() - time > 5.5f;
+				bool done = iw::RawTotalTime() - time > 7.f;
 				if (done) Console->QueueCommand("set-state highscores");
 				return done;
 			});

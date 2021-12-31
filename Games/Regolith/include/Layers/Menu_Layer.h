@@ -62,6 +62,8 @@ struct Menu_Layer2 : iw::Layer
 		UI();
 
 		ImGui::PopStyleVar(1);
+
+		Layer::ImGui();
 	}
 
 	virtual void UI() = 0;

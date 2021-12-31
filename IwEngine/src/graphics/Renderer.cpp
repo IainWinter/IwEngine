@@ -1,6 +1,5 @@
-#include "iw/graphics/QueuedRenderer.h"
-#include "iw/util/io/File.h"
-#include <assert.h>
+#include "iw/graphics/Renderer.h"
+#include "gl/glew.h"
 
 namespace iw {
 namespace Graphics {
@@ -26,7 +25,12 @@ namespace Graphics {
 		, m_cameraData()
 	{}
 
-	void Renderer::Initialize() {
+	void Renderer::Initialize()
+	{
+		memset(&m_cameraData, 0, sizeof(CameraData));
+		memset(&m_shadowData, 0, sizeof(ShadowData));
+		memset(&m_lightData,  0, sizeof(LightData));
+
 		m_cameraUBO = Device->CreateUniformBuffer(&m_cameraData, sizeof(CameraData));
 		m_shadowUBO = Device->CreateUniformBuffer(&m_shadowData, sizeof(ShadowData));
 		m_lightUBO  = Device->CreateUniformBuffer(&m_lightData,  sizeof(LightData));
@@ -153,6 +157,9 @@ namespace Graphics {
 
 		Renderer::SetPointLights      (scene->PointLights());
 		Renderer::SetDirectionalLights(scene->DirectionalLights());
+
+		Device->UpdateBuffer(m_lightUBO,  &m_lightData);
+		Device->UpdateBuffer(m_shadowUBO, &m_shadowData);
 
 		m_ambiance = scene->Ambiance();
 	}
@@ -445,6 +452,8 @@ namespace Graphics {
 		m_material = material;
 	}
 
+	// these need to set lights past lights.size() to 0
+
 	void Renderer::SetPointLights(
 		const std::vector<PointLight*>& lights)
 	{
@@ -453,8 +462,6 @@ namespace Graphics {
 			m_lightData.PointLights[i].Position = glm::vec4(lights[i]->WorldPosition(), lights[i]->Radius());
 			m_lightData.PointLights[i].Color    = glm::vec4(lights[i]->Color(), 1);
 		}
-
-		Device->UpdateBuffer(m_lightUBO, &m_lightData);
 	}
 
 	void Renderer::SetDirectionalLights(
@@ -470,9 +477,6 @@ namespace Graphics {
 		for (size_t i = 0; i < lights.size(); i++) {
 			m_shadowData.LightViewProj[i] = lights[i]->ViewProjection();
 		}
-
-		Device->UpdateBuffer(m_lightUBO,  &m_lightData);
-		Device->UpdateBuffer(m_shadowUBO, &m_shadowData);
 	}
 }
 }
