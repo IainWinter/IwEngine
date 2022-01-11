@@ -340,8 +340,6 @@ namespace util
 			{
 				socket.write_some(asio::buffer(request.data(), request.size()));
 				
-				// end once last character is met, I'll put two newlines characters in php script
-
 				std::string buffer; // this could be better
 
 				while (true)

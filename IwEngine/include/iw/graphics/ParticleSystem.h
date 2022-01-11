@@ -83,7 +83,7 @@ namespace Graphics {
 		void SetParticleMesh(
 			const Mesh& mesh)
 		{
-			MeshDescription description;
+			MeshDescription description = mesh.Data->Description();
 
 			VertexBufferLayout instanceM(1);
 			instanceM.Push<float>(4);
@@ -91,9 +91,6 @@ namespace Graphics {
 			instanceM.Push<float>(4);
 			instanceM.Push<float>(4);
 
-			description.DescribeBuffer(bName::POSITION, MakeLayout<float>(3));
-			//description.DescribeBuffer(bName::NORMAL,   MakeLayout<float>(3));
-			description.DescribeBuffer(bName::UV,       MakeLayout<float>(2)); // just for space game default Renderer->ScreenQuad has no normals
 			description.DescribeBuffer(bName::UV1, instanceM);
 
 			mesh.Data->ConformMeshData(description);

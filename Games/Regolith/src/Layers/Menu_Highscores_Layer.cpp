@@ -7,10 +7,7 @@ int Menu_Highscores_Layer::Initialize()
 {
 	RegisterImage("ui_player_border.png");
 
-	SubmitTempScoreAndGetId();
-
-	font_regular = iwFont("verdana_36");
-	font_title   = iwFont("verdana_92");
+	highscoreParts.SubmitTempNameAndGetGameId(score);
 
 	//font_regular->DisplayOffset.y = font_regular->FontSize / 3.f;
 	//font_title  ->DisplayOffset.y = font_title  ->FontSize / 3.f;
@@ -27,33 +24,29 @@ int Menu_Highscores_Layer::Initialize()
 
 void Menu_Highscores_Layer::UI()
 {
-	connection.StepResults();
-
 	ImGui::GetIO().FontGlobalScale = bg_w / 800;
 
-	ImGui::SetNextWindowPos (ImVec2(bg_x, bg_y));
-	ImGui::SetNextWindowSize(ImVec2(bg_w, bg_h));
+	//ImGui::SetNextWindowPos (ImVec2(bg_x, bg_y));
+	//ImGui::SetNextWindowSize(ImVec2(bg_w, bg_h));
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-
-	ImGui::Begin("Main Menu", nullptr, commonFlags);
+	//ImGui::Begin("Main Menu", nullptr, commonFlags);
 	{
-		ImGui::PushFont(font_regular);
-		{
-			PlayerImage();
-			ScoreTable();
-			Buttons();
-		}
-	
-		ImGui::PushFont(font_title);
-		{
-			Title();
-		}
+		ImGui::PushFont(highscoreParts.font_regular);
+		PlayerImage();
 
+		float w = bg_w * .8f;
+		float h = bg_h * .4f;
+		float x = bg_x + padding_1;
+		float y = bg_h - h - padding_1;
+		highscoreParts.ScoreTable(x, y, w, h);
+
+		Buttons();
 		ImGui::PopFont();
+		ImGui::PushFont(highscoreParts.font_title);
+		Title();
 		ImGui::PopFont();
 	}
-	ImGui::End();
-
+	//ImGui::End();
 	ImGui::PopStyleVar(1);
 }
 
@@ -65,9 +58,10 @@ void Menu_Highscores_Layer::PlayerImage()
 	float x = bg_x + (bg_w - w) * .5;
 	float y = bg_y + (bg_h - h) * .1;
 	
-	ImGui::SetNextWindowPos(ImVec2(x, y));
+	ImGui::SetNextWindowPos (ImVec2(x, y));
+	ImGui::SetNextWindowSize(ImVec2(w, h));
 
-	ImGui::BeginChild("PlayerImage", ImVec2(w, h), true, commonFlags);
+	ImGui::Begin("PlayerImage", nullptr, commonFlags);
 	{
 		ImVec2 size = ImGui::GetWindowSize();
 		size.x -= ImGui::GetStyle().WindowPadding.x * 2;
@@ -75,7 +69,7 @@ void Menu_Highscores_Layer::PlayerImage()
 
 		ImGui::Image(imgs["ui_player_border.png"], size);
 	}
-	ImGui::EndChild();
+	ImGui::End();
 }
 
 void Menu_Highscores_Layer::Title()
@@ -90,33 +84,65 @@ void Menu_Highscores_Layer::Title()
 
 	ImVec2 textSize = ImGui::CalcTextSize(title);
 	
-	ImGui::SetNextWindowPos(ImVec2(x, y));
+	ImGui::SetNextWindowPos (ImVec2(x, y));
+	ImGui::SetNextWindowSize(ImVec2(w, h));
 
-	ImGui::BeginChild("Scores", ImVec2(w, h), true, commonFlags);
+	ImGui::Begin("Scores", nullptr, commonFlags);
 	{
 		ImGui::SetCursorPosX((w - textSize.x) * 0.5f);
 		ImGui::SetCursorPosY((h - textSize.y) * 0.5f);
 		ImGui::Text(title);
 	}
+	ImGui::End();
+}
+
+void Menu_Highscores_Layer::Buttons()
+{
+	float w = bg_w * .45      - padding_01 * 2;
+	float h = bg_w * .1f      - padding_01 * 2;
+	float x = bg_x + bg_w - w - padding_01;
+	float y = bg_h        - h - padding_01;
+
+	ImGui::SetNextWindowPos(ImVec2(x, y));
+
+	ImGui::BeginChild("Buttons", ImVec2(w, h), true, commonFlags);
+	{
+		ImVec2 size = ImGui::GetWindowSize();
+		size.x -= ImGui::GetStyle().WindowPadding.x * 3;
+		size.y -= ImGui::GetStyle().WindowPadding.y * 2;
+		size.x /= 2;
+
+		if (ImGui::Button("Quit", size)) 
+		{
+			//SubmitScoreAndExit();
+			Console->QueueCommand("quit");
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Upgrade", size))
+		{
+			//SubmitScoreAndExit();
+			Console->QueueCommand("set-state upgrade");
+		}
+	}
 	ImGui::EndChild();
 }
 
-void Menu_Highscores_Layer::ScoreTable()
+// menu parts moving to a seperate file
+
+void Highscores_MenuParts::ScoreTable(
+	float x,
+	float y,
+	float w,
+	float h)
 {
-	float w = bg_w * .8f;
-	float h = bg_h * .4f;
+	connection.StepResults();
 
-	float x = bg_x     + padding_1;
-	float y = bg_h - h - padding_1;
+	ImGui::SetNextWindowPos (ImVec2(x, y));
+	ImGui::SetNextWindowSize(ImVec2(w, h));
 
-	float upgradeSize = w / 8;
-
-	ImGui::SetNextWindowPos(ImVec2(x, y));
-	ImGui::SetNextWindowFocus();
-
-	ImGui::BeginChild("Upgrades", ImVec2(w, h), true, commonFlags);
+	ImGui::Begin("Upgrades", nullptr, commonFlagsFocus);
 	{
-		ImGui::BeginTable("Upgrades", 3);
+		if (ImGui::BeginTable("Upgrades", 3))
 		{
 			ImGui::TableSetupColumn("Order", ImGuiTableColumnFlags_WidthStretch, .25);
 			ImGui::TableSetupColumn("Score", ImGuiTableColumnFlags_WidthStretch, .5);
@@ -164,36 +190,14 @@ void Menu_Highscores_Layer::ScoreTable()
 					}
 				}
 			}
+			ImGui::EndTable();
 		}
-		ImGui::EndTable();
 	}
-	ImGui::EndChild();
+	ImGui::End();
 }
 
-void Menu_Highscores_Layer::Buttons()
-{
-	float w = bg_w * .45      - padding_01 * 2;
-	float h = bg_w * .1f      - padding_01 * 2;
-	float x = bg_x + bg_w - w - padding_01;
-	float y = bg_h        - h - padding_01;
-
-	ImGui::SetNextWindowPos(ImVec2(x, y));
-
-	ImGui::BeginChild("Buttons", ImVec2(w, h), true, commonFlags);
-	{
-		ImVec2 size = ImGui::GetWindowSize();
-		size.x -= ImGui::GetStyle().WindowPadding.x * 3;
-		size.y -= ImGui::GetStyle().WindowPadding.y * 2;
-		size.x /= 2;
-
-		if (ImGui::Button("Quit",    size)) SubmitScoreAndExit("quit");
-		ImGui::SameLine();
-		if (ImGui::Button("Upgrade", size)) SubmitScoreAndExit("set-state upgrade");
-	}
-	ImGui::EndChild();
-}
-
-void Menu_Highscores_Layer::SubmitTempScoreAndGetId()
+void Highscores_MenuParts::SubmitTempNameAndGetGameId(
+	int score)
 {
 	iw::HttpRequest<std::string, iw::JsonSerializer> request;
 	request.Ip       = "71.233.150.182";
@@ -225,12 +229,6 @@ void Menu_Highscores_Layer::SubmitTempScoreAndGetId()
 					record.Name.reserve(33);
 				}
 			}
-
-			//m_table_highScore->scrollOffset 
-			//	= m_table_highScore->Row(m_playerRowId)->index
-			//	* (m_table_highScore->rowHeight * 2.f + m_table_highScore->rowPadding) 
-			//	- m_table_highScore->height 
-			//	+ m_table_highScore->rowHeight;
 		};
 
 		connection.AsyncRequest(request);
@@ -239,11 +237,8 @@ void Menu_Highscores_Layer::SubmitTempScoreAndGetId()
 	connection.AsyncRequest(request);
 }
 
-void Menu_Highscores_Layer::SubmitScoreAndExit(
-	const std::string& command)
+void Highscores_MenuParts::UpdateTempNameWithRealName()
 {
-	Console->QueueCommand(command);
-
 	// this needs to update the database at game_id with the name
 
 	//iw::HttpRequest<std::string, iw::NoSerializer> request;
@@ -260,4 +255,67 @@ void Menu_Highscores_Layer::SubmitScoreAndExit(
 	//request.SetArgument("score", to_string(score));
 
 	//connection.AsyncRequest(request);
+}
+
+void Highscores_MenuParts::LoadTopScore(
+	std::function<void()> then)
+{
+	iw::HttpRequest<HighscoreRecord, iw::JsonSerializer> request;
+	request.Ip       = "71.233.150.182";
+	request.Host     = "data.niceyam.com";
+	request.Resource = "/regolith/php/get_highscore_top.php";
+
+	request.OnResult = [this, then](
+		HighscoreRecord& record)
+	{
+		scores.emplace(scores.begin(), record);
+		then();
+	};
+
+	connection.AsyncRequest(request);
+}
+
+void Highscores_MenuParts::LoadMoreScoresAbove()
+{
+	std::string gameId = scores.front().GameId;
+
+	iw::HttpRequest<std::vector<HighscoreRecord>, iw::JsonSerializer> request;
+	request.Ip       = "71.233.150.182";
+	request.Host     = "data.niceyam.com";
+	request.Resource = "/regolith/php/get_highscore_above.php";
+	request.SetArgument("game_id", gameId);
+
+	request.OnResult = [this](
+		std::vector<HighscoreRecord>& records)
+	{
+		for (HighscoreRecord& record : records)
+		{
+			scores.emplace(scores.begin(), record);
+		}
+	};
+
+	connection.AsyncRequest(request);
+}
+
+void Highscores_MenuParts::LoadMoreScoresBelow()
+{
+	std::string gameId = scores.back().GameId;
+
+	iw::HttpRequest<std::vector<HighscoreRecord>, iw::JsonSerializer> request;
+	request.Ip       = "71.233.150.182";
+	request.Host     = "data.niceyam.com";
+	request.Resource = "/regolith/php/get_highscores_page.php";
+	request.SetArgument("game_id", gameId);
+	request.SetArgument("direction", "d");
+
+	request.OnResult = [this](
+		std::vector<HighscoreRecord>& records)
+	{
+		for (HighscoreRecord& record : records)
+		{
+			scores.emplace_back(record);
+		}
+	};
+
+	connection.AsyncRequest(request);
 }

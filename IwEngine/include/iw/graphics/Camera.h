@@ -32,6 +32,23 @@ namespace Graphics {
 
 	// Could probly do this better with strategy camera but this works for now cus there're are only 2 as far as I know
 
+	// this is a camera that doesnt reset it's projection matrix every time it gets rendererd
+	struct CustomCamera
+		: Camera
+	{
+		CustomCamera(
+			float zNear = -1,
+			float zFar  =  1
+		)
+			: Camera(zNear, zFar)
+		{}
+
+		glm::mat4& RecalculateProjection()
+		{
+			return Projection;
+		}
+	};
+
 	struct OrthographicCamera
 		: Camera
 	{

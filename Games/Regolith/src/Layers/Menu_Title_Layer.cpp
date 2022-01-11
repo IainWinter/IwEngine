@@ -3,6 +3,8 @@
 #include "iw/engine/Systems/SpaceInspectorSystem.h"
 #include "gl/glew.h"
 #include "gl/wglew.h"
+#include "glm/gtc/random.hpp"
+#include <cmath>
 
 int Menu_Title_Layer::Initialize()
 {
@@ -33,18 +35,17 @@ int Menu_Title_Layer::Initialize()
 	MainScene->PointLights().at(0)->SetPosition(glm::vec3(.77, .52, .8));
 	
 	iw::EditorCameraControllerSystem* camController = PushSystem<iw::EditorCameraControllerSystem>();
-	camController->MakeOrthoOnInit = true;
 	camController->Initialize();
-	iw::OrthographicCamera* cam = (iw::OrthographicCamera*)camController->GetCamera();
-	cam->Width  = 4;
-	cam->Height = 5;
-	cam->Transform.Parent()->Rotation = glm::quat(0, 0, 0, 0);
-	cam->Transform.Parent()->Position = glm::vec3(0, 0, 10);
-	cam->RecalculateView();
 
+	iw::Camera* cam = new iw::CustomCamera();
+	cam->Transform.Rotation = target_rot;
+	cam->Transform.Position = target_pos;
+
+	MainScene->SetMainCamera(cam);
 	Renderer->Now->Device->SetClearColor(0, 0, 0, 1);
 
-	MainScene->SetMainCamera(camController->GetCamera());
+	ortho = iw::OrthographicCamera(4, 5, 0, 20);
+	persp = iw::PerspectiveCamera(.67, 4/5.f);
 
 	//iw::ISystem* sis = PushSystem<iw::SpaceInspectorSystem>();
 	//sis->Initialize();
@@ -93,8 +94,19 @@ int Menu_Title_Layer::Initialize()
 	Renderer->Now->InitShader(title_mesh.Material->Shader, iw::CAMERA);
 
 	title = Space->CreateEntity<iw::Transform, iw::Mesh>();
-	title.Set<iw::Transform>(glm::vec3(-1.88, 1.446, 0), glm::vec3(1.5f));
+	title.Set<iw::Transform>(glm::vec3(-1.88, 1.446, -5), glm::vec3(1.5f));
 	title.Set<iw::Mesh>(title_mesh);
+	
+	// title
+
+	iw::Mesh title_hs_mesh = Asset->Load<iw::Model>("models/SpaceGame/title_highscores.glb")->GetMesh(0);
+	title_hs_mesh.Material = REF<iw::Material>(Asset->Load<iw::Shader>("shaders/texture_cam.shader"));
+	title_hs_mesh.Material->Set("color", iw::Color(1));
+	Renderer->Now->InitShader(title_hs_mesh.Material->Shader, iw::CAMERA);
+
+	title_hs = Space->CreateEntity<iw::Transform, iw::Mesh>();
+	title_hs.Set<iw::Transform>(glm::vec3(-10, 1.85, 1.88), glm::vec3(.8f), glm::quat(sqrt(2) / 2, 0, sqrt(2) / 2, 0));
+	title_hs.Set<iw::Mesh>(title_hs_mesh);
 
 	//stars
 
@@ -121,10 +133,10 @@ int Menu_Title_Layer::Initialize()
 	iw::StaticPS ps;
 	ps.SetParticleMesh(star_mesh);
 
-	for (int i = 0; i < 100; i++)
+	for (int i = 0; i < 10000; i++)
 	{
 		ps.SpawnParticle(iw::Transform(
-			glm::vec3(iw::randfs() * 2, iw::randfs() * 2.5, 0),
+			glm::sphericalRand(15.f),
 			glm::vec3(.01f)
 		));
 	}
@@ -142,49 +154,170 @@ int Menu_Title_Layer::Initialize()
 
 	//wglSwapIntervalEXT(1);
 
+	highscoreParts.LoadTopScore(
+		[this]()
+		{
+			highscoreParts.LoadMoreScoresBelow();
+		}
+	);
+
 	return 0;
+}
+
+float easeInOut(float x)
+{
+	return x < 0.5 ? 8 * x * x * x * x : 1 - pow(-2 * x + 2, 4) / 2;
+}
+
+float easeIn(float x)
+{
+	return x * x * x * x;
 }
 
 void Menu_Title_Layer::UI()
 {
-	ImGui::GetIO().FontGlobalScale = bg_w / 400;
+	iw::Camera* cam = MainScene->MainCamera();
 
-	ImGui::SetNextWindowPos (ImVec2(bg_x + bg_w / 6, bg_h / 2));
-	ImGui::SetNextWindowSize(ImVec2(-1, -1));
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0, 0, 0, 0));
-	ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0, 0, 0, 0));
-	ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0, 0, 0, 0));
-	ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0, 0, 0, 0));
-	ImGui::Begin("Main Title Buttons", nullptr, commonFlags);
+	glm::vec3 pos = cam->Transform.Position;
+	glm::quat rot = cam->Transform.Rotation;
+
+	if (target_menu != last_menu)
 	{
-		if (ImGui::Button("Play")) Console->QueueCommand("set-state play");
-		ImGui::Button("Highscores");
-		ImGui::Button("Settings");
-		ImGui::Button("Credits");
+		last_menu = target_menu;
+		last_pos = pos;
+		last_rot = rot;
+
+		t = 0;
+		t1 = 0;
 	}
-	ImGui::End();
-	ImGui::PopStyleVar(1);
-	ImGui::PopStyleColor(4);
+
+	if (t >= 1) t = 1;
+	else        t += iw::DeltaTime();
+
+	if (t1 >= 1) t1 = 1;
+	else         t1 += iw::DeltaTime() * 3;
+
+	float x = iw::lerp(0.f, 1.f, easeInOut(t));
+
+	float menuOffset  = iw::lerp(1.f, 0.f, easeInOut(t1)) * 50;
+	float menuOpacity = iw::lerp(0.f, 1.f, easeIn(t1));
+
+	//// temp
+	//ImGui::GetIO().FontGlobalScale = 1;
+	//ImGui::Begin("asdasd");
+	//ImGui::SliderFloat("mix", &x, 0, 1);
+	//ImGui::SliderFloat3("pos", (float*)&cam->Transform.Position, -10, 10);
+	//ImGui::SliderFloat4("rot", (float*)&cam->Transform.Rotation, -1, 1);
+	//ImGui::SliderFloat("fov", (float*)&persp.Fov, 0, iw::Pi2);
+	//ImGui::End();
+	persp.RecalculateProjection();
+	cam->Projection = iw::lerp(ortho.Projection, persp.Projection, 0/*sin(iw::Pi * x)*/);
+
+	cam->Transform.Position = iw ::lerp(last_pos, target_pos, x);
+	cam->Transform.Position = glm::normalize(cam->Transform.Position) * 10.f;
+	cam->Transform.Rotation = glm::slerp(last_rot, target_rot, x);
+	
+	// end temp
+	
+	// render bg frame
+	// this is one frame behind so when resizing you get a stroke
+	
+	bg->Resize(bg_w, bg_h);
+	Renderer->BeginScene(MainScene, bg, true);
+	{
+		Renderer->DrawMesh(stars   .Find<iw::Transform>(), &stars  .Find<iw::StaticPS>()->GetParticleMesh());
+		Renderer->DrawMesh(ball    .Find<iw::Transform>(), ball    .Find<iw::Mesh>());
+		Renderer->DrawMesh(title   .Find<iw::Transform>(), title   .Find<iw::Mesh>());
+		Renderer->DrawMesh(title_hs.Find<iw::Transform>(), title_hs.Find<iw::Mesh>());
+		//Renderer->DrawMesh(axis .Find<iw::Transform>(), axis  .Find<iw::Mesh>());
+	}
+	Renderer->EndScene();
+
+	// draw bg
+
+	ImGui::GetIO().FontGlobalScale = bg_w / 800;
+
+	ImGui::PushFont(iwFont("verdana_36"));
+
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+
+	ImGui::PushStyleColor(ImGuiCol_WindowBg,      ImVec4(0, 0, 0, 0));
+	ImGui::PushStyleColor(ImGuiCol_Border,        ImVec4(0, 0, 0, 0));
+	ImGui::PushStyleColor(ImGuiCol_FrameBg,       ImVec4(0, 0, 0, 1));
+	ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0, 0, 0, 1));
+
+	ImGui::PushStyleColor(ImGuiCol_Text,          ImVec4(1, 1, 1, menuOpacity));
+	ImGui::PushStyleColor(ImGuiCol_Button,        ImVec4(0, 0, 0, 0));
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0, 0, 0, 0));
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive,  ImVec4(0, 0, 0, 0));
 
 	iw::ITexture* tex = bg->Tex(0)->Handle();
 	if (tex)
 	{
 		ImGui::SetNextWindowPos (ImVec2(bg_x, bg_y));
 		ImGui::SetNextWindowSize(ImVec2(bg_w, bg_h));
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 		ImGui::Begin("Main Title Background", nullptr, commonFlags);
 		{
-			ImGui::Image((void*)tex->Id(), ImVec2(100, 100));
+			ImGui::Image((void*)tex->Id(), ImVec2(bg_w, bg_h), ImVec2(0, 1), ImVec2(1, 0));
 		}
 		ImGui::End();
-		ImGui::PopStyleVar();
 	}
 
-	Renderer->BeginScene(MainScene/*, bg, true*/);
-	Renderer->	DrawMesh(ball .Find<iw::Transform>(), ball  .Find<iw::Mesh>());
-	//Renderer->	DrawMesh(axis .Find<iw::Transform>(), axis  .Find<iw::Mesh>());
-	Renderer->	DrawMesh(title.Find<iw::Transform>(), title .Find<iw::Mesh>());
-	Renderer->	DrawMesh(stars.Find<iw::Transform>(), &stars.Find<iw::StaticPS>()->GetParticleMesh());
-	Renderer->EndScene();
+	// draw buttons
+
+	float paddingx = bg_w / 6;
+
+	if (target_menu == 0)
+	{
+		ImGui::SetNextWindowPos (ImVec2(bg_x + paddingx - menuOffset, bg_h / 2));
+		ImGui::SetNextWindowSize(ImVec2(-1, -1));
+		ImGui::Begin("Main Title Buttons", nullptr, commonFlagsFocus);
+		{
+			if (ImGui::Button("Play"))
+			{
+				SetViewDefault();
+			}
+
+			if (ImGui::Button("Highscores"))
+			{
+				SetViewHighscores();
+			}
+
+			//if (ImGui::Button("Settings"))
+			//{
+			//	xt1 = 1;
+			//	xt2 = 0;
+			//	target_menu = 2;
+			//}
+
+			ImGui::Button("Credits");
+		}
+		ImGui::End();
+	}
+	else if (target_menu == 1)
+	{
+		ImGui::SetNextWindowPos (ImVec2(bg_x + paddingx - menuOffset, bg_h - padding_1));
+		ImGui::SetNextWindowSize(ImVec2(-1, -1));
+		ImGui::Begin("Highscores", nullptr, commonFlagsFocus);
+		{
+			if (ImGui::Button("Back"))
+			{
+				SetViewDefault();
+			}
+		}
+		ImGui::End();
+
+		highscoreParts.ScoreTable(
+			bg_x + paddingx - menuOffset, 
+			bg_y + bg_h / 3, 
+			bg_w - paddingx * 2, 
+			bg_h / 2
+		);
+	}
+
+
+	ImGui::PopStyleVar(2);
+	ImGui::PopStyleColor(8);
+	ImGui::PopFont();
 }

@@ -20,6 +20,7 @@ struct Menu_Layer2 : iw::Layer
 	float padding_01;
 
 	ImGuiWindowFlags commonFlags;
+	ImGuiWindowFlags commonFlagsFocus;
 
 	Menu_Layer2(
 		const std::string& name
@@ -39,6 +40,11 @@ struct Menu_Layer2 : iw::Layer
 			| ImGuiWindowFlags_NoResize 
 			| ImGuiWindowFlags_NoMove
 			| ImGuiWindowFlags_NoBringToFrontOnFocus;
+
+		commonFlagsFocus =
+			  ImGuiWindowFlags_NoDecoration
+			| ImGuiWindowFlags_NoResize
+			| ImGuiWindowFlags_NoMove;
 	}
 
 	void ImGui()
@@ -79,7 +85,6 @@ struct Menu_Layer2 : iw::Layer
 };
 
 #undef LoadTexture
-
 
 #include "iw/engine/Layer.h"
 #include "iw/engine/UI.h"

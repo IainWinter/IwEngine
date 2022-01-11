@@ -208,7 +208,7 @@ void TileSplitSystem::SplitTileOff(
 	glm::vec2 midOld = entity.Find<iw::Tile>()->m_sprite.Dimensions() / 2.f;
 	if (toSplit.size() > 10)
 	{
-		iw::Entity split = sand->SplitTile(entity, toSplit, &Space->CreateArchetype<Asteroid>());
+		iw::Entity split = sand->SplitTile(entity, toSplit, &Space->CreateArchetype<Asteroid, Throwable>());
 		Asteroid* ast = split.Find<Asteroid>();
 		ast->Lifetime = toSplit.size() / 5.f;
 	}

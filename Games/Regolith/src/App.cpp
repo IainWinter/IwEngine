@@ -392,7 +392,9 @@ int App::Initialize(
 		{
 			std::string stateName = command.Tokens[0].String;
 
-			if (stateName == "settings")   PushState(MakeState_Settings());
+			     if (stateName == "settings")   PushState(MakeState_Settings());
+			else if (stateName == "highscores") PushState(MakeState_Highscores());
+			//else if (stateName == "settings") PushState(MakeState_Settings());
 
 			else
 			{

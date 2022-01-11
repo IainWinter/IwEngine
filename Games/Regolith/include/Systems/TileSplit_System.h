@@ -3,6 +3,7 @@
 #include "plugins/iw/Sand/Engine/SandLayer.h"
 #include "Components/CorePixels.h"
 #include "Components/Asteroid.h"
+#include "Components/Throwable.h"
 #include "Events.h"
 
 struct TileSplitSystem : iw::SystemBase
