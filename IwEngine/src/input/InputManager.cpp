@@ -192,7 +192,7 @@ namespace Input {
 
 		if (!context)
 		{
-			LOG_WARNING << "Tried to set an input managers context with one that it doesn't own " << context->Name;
+			LOG_WARNING << "Tried to set an input managers context with one that it doesn't own " << name;
 			return nullptr;
 		}
 
