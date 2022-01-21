@@ -11,7 +11,7 @@ namespace Input {
 		OsEvent& e);
 
 	InputManager::InputManager(
-		iw::ref<iw::eventbus>& bus
+		const iw::ref<iw::eventbus>& bus
 	)
 		: m_bus(bus)
 	{}
@@ -155,7 +155,7 @@ namespace Input {
 	}
 
 	iw::ref<Context> InputManager::CreateContext(
-		std::string name,
+		const std::string& name,
 		float width,
 		float height)
 	{
@@ -180,7 +180,7 @@ namespace Input {
 	}
 
 	ref<Context> InputManager::SetContext(
-		std::string name)
+		const std::string& name)
 	{
 		iw::ref<Context> context;
 		for (iw::ref<Context>& c : m_contexts) {
@@ -204,7 +204,7 @@ namespace Input {
 	}
 
 	void InputManager::SetContext(
-		ref<Context>& context)
+		const ref<Context>& context)
 	{
 		SetContext(context->Name);
 	}

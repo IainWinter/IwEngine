@@ -18,7 +18,7 @@ namespace Input {
 	public:
 		IWINPUT_API
 		InputManager(
-			ref<eventbus>& bus);
+			const ref<eventbus>& bus);
 
 		IWINPUT_API
 		void HandleEvent(
@@ -26,17 +26,17 @@ namespace Input {
 
 		IWINPUT_API
 		ref<Context> CreateContext(
-			std::string name,
+			const std::string& name,
 			float width  = NO_WIDTH,
 			float height = NO_HEIGHT);
 
 		IWINPUT_API
 		ref<Context> SetContext(
-			std::string name);
+			const std::string& name);
 
 		IWINPUT_API
 		void SetContext(
-			ref<Context>& context);
+			const ref<Context>& context);
 
 		template<
 			typename D>
