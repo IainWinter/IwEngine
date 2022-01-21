@@ -19,6 +19,12 @@ enum class StateName {
 /*
 	NONE,
 */
+
+	IN_MENU,
+	IN_GAME,
+	IN_GAME_THEN_MENU,
+
+
 	GAME_OVER_STATE,
 	GAME_START_STATE,
 	GAME_PAUSE_STATE,

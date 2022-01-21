@@ -49,9 +49,9 @@ bool Game_Layer::On(iw::ActionEvent& e)
 {
 	switch (e.Action)
 	{
-		case DESTROIED_PLAYER:
+		case DESTROYED_PLAYER:
 		{
-			LOG_TRACE << "DESTROIED_PLAYER";
+			LOG_TRACE << "DESTROYED_PLAYER";
 
 			for(iw::ISystem* s : temp_GetSystems())
 			{
@@ -64,17 +64,23 @@ bool Game_Layer::On(iw::ActionEvent& e)
 				DestroySystem(s);
 			}
 
-			PushSystem<DeathTransition_System>(sand, 3);
-			Console->QueueCommand("fade 3. 4.");
+			Console->QueueCommand("set-state post");
 
-			float time = iw::RawTotalTime();
-			Task->coroutine(
-				[this, time]()
-			{
-				bool done = iw::RawTotalTime() - time > 7.f;
-				if (done) Console->QueueCommand("set-state highscores");
-				return done;
-			});
+			// I think that the animation will look better in UI land instead of the sand
+			// ahh do need to keep the sand alive for a little for the projectiles tho
+			// for testing this simple verson, forget animations!!
+
+			//PushSystem<DeathTransition_System>(sand, 3);
+			//Console->QueueCommand("fade 3. 4.");
+
+			//float time = iw::RawTotalTime();
+			//Task->coroutine(
+			//	[this, time]()
+			//{
+			//	bool done = iw::RawTotalTime() - time > 7.f;
+			//	if (done) Console->QueueCommand("set-state post");
+			//	return done;
+			//});
 
 			break;
 		}

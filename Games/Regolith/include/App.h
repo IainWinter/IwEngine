@@ -74,6 +74,14 @@ class App
 private:
 	iw::FontMap* m_fonts;
 
+	// this is all I need
+
+	Menu_Title_Layer* m_menus;
+	Game_Layer*       m_game;
+	Game_UI_Layer*    m_gameUI;
+
+	// fuck all this it's too over done and doesnt fit the problem
+
 	GameState* m_gamePlay;
 	GameState* m_gamePause;
 	GameState* m_gameHighscore;

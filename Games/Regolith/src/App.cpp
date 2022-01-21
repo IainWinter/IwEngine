@@ -238,7 +238,10 @@ int App::Initialize(
 	m_fonts->Load("verdana", 92, "fonts/ttf/verdana.ttf");
 
 	PushLayer<iw::ImGuiLayer>(Window, m_fonts)->BindContext();
-	//PushLayer<iw::DebugLayer>();
+
+	m_menus = new Menu_Title_Layer();
+
+	Console->QueueCommand("set-state menus");
 
 	// add default cells
 
@@ -252,19 +255,17 @@ int App::Initialize(
 	
 	iw::Cell::SetDefault(iw::CellType::LIGHTNING, c);
 
-	//ImGui::SetCurrentContext((ImGuiContext*)options.ImGuiContext);
+	//m_gamePause = new GameState("Pause menu", StateName::GAME_PAUSE_STATE);
+	//m_gamePause->Layers.push_back(new Menu_Pause_Layer());
+	//m_gamePause->OnChange = [&]()
+	//{
+	//	Physics->Paused = true;
+	//	//Window()->SetCursor(true);
+	//	//Renderer->Device->SetVSync();
+	//	Input->SetContext("Menu");
+	//};
 
-	m_gamePause = new GameState("Pause menu", StateName::GAME_PAUSE_STATE);
-	m_gamePause->Layers.push_back(new Menu_Pause_Layer());
-	m_gamePause->OnChange = [&]()
-	{
-		Physics->Paused = true;
-		//Window()->SetCursor(true);
-		//Renderer->Device->SetVSync();
-		Input->SetContext("Menu");
-	};
-
-	Console->QueueCommand("set-state title");
+	//Console->QueueCommand("set-state title");
 
 	// create a guid for the installation of this app
 
@@ -293,9 +294,7 @@ int App::Initialize(
 	//	iw::WriteFile("install_id.txt", szGuid);
 	//}
 
-
-
-	iw::ref<iw::Context> context_game = Input->CreateContext("Game");
+	iw::ref<iw::Context> context_game = Input->CreateContext("game");
 	context_game->MapButton(iw::D     , "+right");
 	context_game->MapButton(iw::A     , "-right");
 	context_game->MapButton(iw::W     , "+up");
@@ -310,7 +309,7 @@ int App::Initialize(
 	context_game->MapButton(iw::F , "+x");
 	context_game->MapButton(iw::C , "+y");
 
-	iw::ref<iw::Context> context_menu = Input->CreateContext("Menu");
+	iw::ref<iw::Context> context_menu = Input->CreateContext("menu");
 	context_menu->MapButton(iw::LMOUSE, "+execute");
 	context_menu->MapButton(iw::ESCAPE, "escape");
 
@@ -331,6 +330,9 @@ int App::Initialize(
 	// game-exit d -- exits game to desktop
 	// game-pause  -- opens escape menu
 
+	// todo: all the m_menus-> calls should be handled by the manu layer itself
+	//		 all the Input-> calls should be handled in a event listener for state changes
+
 	Console->AddHandler([&](
 		const iw::Command& command)
 	{
@@ -340,46 +342,98 @@ int App::Initialize(
 		{
 			switch (m_currentState->State)
 			{
-				case StateName::GAME_PAUSE_STATE:
-					PopState();
+				case StateName::IN_GAME:
+					m_menus->SetViewSettings();
+					PopLayer(m_game);
+					PopLayer(m_gameUI);
+					Input->SetContext("menu");
+					break;
+				case StateName::IN_GAME_THEN_MENU:
+					//m_menus->SetViewGame(); // some random place with stars
+					PushLayer(m_game);
+					PushLayer(m_gameUI);
+					Input->SetContext("game");
 					break;
 				default:
-					PushState(m_gamePause);
 					break;
+				//case StateName::GAME_PAUSE_STATE:
+				//	PopState();
+				//	break;
+				//default:
+				//	PushState(m_gamePause);
+				//	break;
 			}
 		}
 
-		else
-		if (command.Verb == "fade")
-		{
-			float fadeTime  = command.TokenCount > 0 ? command.Tokens[0].Float : 1.f;
-			float fadeDelay = command.TokenCount > 1 ? command.Tokens[1].Float : 0.f;
-			float fadeTotalTime = fadeTime + fadeDelay;
+		//else
+		//if (command.Verb == "fade")
+		//{
+		//	float fadeTime  = command.TokenCount > 0 ? command.Tokens[0].Float : 1.f;
+		//	float fadeDelay = command.TokenCount > 1 ? command.Tokens[1].Float : 0.f;
+		//	float fadeTotalTime = fadeTime + fadeDelay;
 
-			iw::Layer* fadeLayer = PushLayer<Menu_Fadeout_Layer>(fadeTime, fadeDelay);
+		//	iw::Layer* fadeLayer = PushLayer<Menu_Fadeout_Layer>(fadeTime, fadeDelay);
 
-			float time = iw::RawTotalTime();
-			Task->coroutine(
-				[this, time, fadeTotalTime, fadeLayer]()
-			{
-				bool done = iw::RawTotalTime() - time > fadeTotalTime;
-				if (done) PopLayer(fadeLayer);
-				return done;
-			});
-		}
+		//	float time = iw::RawTotalTime();
+		//	Task->coroutine(
+		//		[this, time, fadeTotalTime, fadeLayer]()
+		//	{
+		//		bool done = iw::RawTotalTime() - time > fadeTotalTime;
+		//		if (done) PopLayer(fadeLayer);
+		//		return done;
+		//	});
+		//}
 
 		else
 		if (command.Verb == "set-state")
 		{
 			std::string stateName = command.Tokens[0].String;
 
-			     if (stateName == "title")      SetState(MakeState_Title());
-			else if (stateName == "main")       SetState(MakeState_Main());
-			else if (stateName == "play")       SetState(MakeState_Play());
-			else if (stateName == "highscores") SetState(MakeState_Highscores());
-			else if (stateName == "settings")   SetState(MakeState_Settings());
-			else if (stateName == "credits")    SetState(MakeState_Credits());
-			else if (stateName == "upgrade")    SetState(MakeState_Upgrade());
+			if (stateName == "menus")
+			{
+				PushLayer(m_menus);
+				Input->SetContext("menu");
+			}
+
+			else
+			if (stateName == "game")
+			{
+				iw::SandLayer* sand          = new iw::SandLayer(2, 1, 800, 800, 4, 4, false);
+				iw::SandLayer* sand_ui_laser = new iw::SandLayer(1, 1, 40,  40);
+				sand         ->m_updateDelay = 1 / 144.f;
+				sand_ui_laser->m_updateDelay = 1 / 60.f;
+	
+				m_game   = new Game_Layer   (sand, sand_ui_laser);
+				m_gameUI = new Game_UI_Layer(sand, sand_ui_laser);
+
+				PushLayer(sand);
+				PushLayer(sand_ui_laser);
+				PushLayer(m_game);
+				PushLayer(m_gameUI);
+
+				m_menus->SetViewGame();
+				Input->SetContext("game");
+			}
+
+			else
+			if (stateName == "post")
+			{
+				DestroyLayer(m_game->sand);
+				DestroyLayer(m_game->sand_ui_laserCharge);
+				DestroyLayer(m_gameUI);
+				DestroyLayer(m_game);
+
+				Input->SetContext("menu");
+				m_menus->SetViewHighscores(/* here should be a flag for if it's post game or from main menu */);
+			}
+
+			//     if (stateName == "title")      SetState(MakeState_Title());
+			//else if (stateName == "main")       SetState(MakeState_Main());
+			//else if (stateName == "play")       SetState(MakeState_Play());
+			//else if (stateName == "highscores") SetState(MakeState_Highscores());
+			//else if (stateName == "settings")   SetState(MakeState_Settings());
+			//else if (stateName == "credits")    SetState(MakeState_Credits());
+			//else if (stateName == "upgrade")    SetState(MakeState_Upgrade());
 
 			else
 			{
@@ -387,26 +441,26 @@ int App::Initialize(
 			}
 		}
 
-		else
-		if (command.Verb == "push-state")
-		{
-			std::string stateName = command.Tokens[0].String;
+		//else
+		//if (command.Verb == "push-state")
+		//{
+		//	std::string stateName = command.Tokens[0].String;
 
-			     if (stateName == "settings")   PushState(MakeState_Settings());
-			else if (stateName == "highscores") PushState(MakeState_Highscores());
-			//else if (stateName == "settings") PushState(MakeState_Settings());
+		//	     if (stateName == "settings")   PushState(MakeState_Settings());
+		//	else if (stateName == "highscores") PushState(MakeState_Highscores());
+		//	//else if (stateName == "settings") PushState(MakeState_Settings());
 
-			else
-			{
-				LOG_ERROR << "[push-state] invalid state";
-			}
-		}
+		//	else
+		//	{
+		//		LOG_ERROR << "[push-state] invalid state";
+		//	}
+		//}
 
-		else
-		if (command.Verb == "push-state")
-		{
-			PopState();
-		}
+		//else
+		//if (command.Verb == "push-state")
+		//{
+		//	PopState();
+		//}
 
 		else
 		if (command.Verb == "final-score")

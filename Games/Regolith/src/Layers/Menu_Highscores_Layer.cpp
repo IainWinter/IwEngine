@@ -137,6 +137,51 @@ void Highscores_MenuParts::ScoreTable(
 {
 	connection.StepResults();
 
+	int height = ImGui::CalcTextSize("O").y + 5;
+
+	ImGui::SetNextWindowPos (ImVec2(x,  y - height));
+	ImGui::SetNextWindowSize(ImVec2(w, h));
+
+	ImGui::Begin("Upgrade title", nullptr, commonFlagsFocus);
+	{
+		if (ImGui::BeginTable("Upgrades", 3))
+		{
+			ImGui::TableSetupColumn("Order", ImGuiTableColumnFlags_WidthStretch, .5);
+			ImGui::TableSetupColumn("Score", ImGuiTableColumnFlags_WidthStretch, .5);
+			ImGui::TableSetupColumn("Name",  ImGuiTableColumnFlags_WidthStretch);
+
+			ImGui::TableNextCell();
+			ImGui::Text("Order");
+			ImGui::TableNextCell();
+			ImGui::Text("Score");
+			ImGui::TableNextCell();
+			ImGui::Text("Name");
+
+			//ImGui::GetForegroundDrawList()->AddLine(
+			//	ImVec2(
+			//		ImGui::GetWindowPos().x,
+			//		ImGui::GetWindowPos().y + ImGui::GetCursorPos().y - 5),
+			//	ImVec2(
+			//		ImGui::GetWindowPos().x + ImGui::GetWindowWidth() - 15,
+			//		ImGui::GetWindowPos().y + ImGui::GetCursorPos().y - 5),
+			//	iw::Color(1).to32()
+			//);
+
+			//ImGui::GetForegroundDrawList()->AddLine(
+			//	ImVec2(
+			//		ImGui::GetWindowPos().x - 5,
+			//		ImGui::GetWindowPos().y),
+			//	ImVec2(
+			//		ImGui::GetWindowPos().x - 5,
+			//		ImGui::GetWindowPos().y + ImGui::GetWindowHeight()),
+			//	iw::Color(1).to32()
+			//);
+
+			ImGui::EndTable();
+		}
+	}
+	ImGui::End();
+
 	ImGui::SetNextWindowPos (ImVec2(x, y));
 	ImGui::SetNextWindowSize(ImVec2(w, h));
 
@@ -144,7 +189,7 @@ void Highscores_MenuParts::ScoreTable(
 	{
 		if (ImGui::BeginTable("Upgrades", 3))
 		{
-			ImGui::TableSetupColumn("Order", ImGuiTableColumnFlags_WidthStretch, .25);
+			ImGui::TableSetupColumn("Order", ImGuiTableColumnFlags_WidthStretch, .5);
 			ImGui::TableSetupColumn("Score", ImGuiTableColumnFlags_WidthStretch, .5);
 			ImGui::TableSetupColumn("Name",  ImGuiTableColumnFlags_WidthStretch);
 
@@ -152,6 +197,7 @@ void Highscores_MenuParts::ScoreTable(
 			{
 				HighscoreRecord& record = scores.at(i);
 				
+				ImGui::PushStyleColor(ImGuiCol_TableRowBg, ImVec4(.1, .1, .1, 1));
 				ImGui::TableNextRow();
 				
 				if (gameId != record.GameId)
@@ -160,7 +206,20 @@ void Highscores_MenuParts::ScoreTable(
 					ImGui::TableNextCell();
 					ImGui::Text("%d", record.Score);
 					ImGui::TableNextCell();
+
+					ImGui::SetCursorPosX(
+						  ImGui::GetCursorPosX()
+						+ ImGui::GetColumnWidth()
+						- ImGui::CalcTextSize(record.Name.c_str()).x
+						- ImGui::GetScrollX()
+						- ImGui::GetStyle().ItemSpacing.x * 2);
+
 					ImGui::Text(record.Name.c_str());
+
+					if (i == scores.size() - 1 && ImGui::IsItemVisible())
+					{
+						LoadMoreScoresBelow();
+					}
 				}
 
 				else 
@@ -189,6 +248,8 @@ void Highscores_MenuParts::ScoreTable(
 						ImGui::SetScrollHereY();
 					}
 				}
+
+				ImGui::PopStyleColor();
 			}
 			ImGui::EndTable();
 		}
@@ -257,19 +318,21 @@ void Highscores_MenuParts::UpdateTempNameWithRealName()
 	//connection.AsyncRequest(request);
 }
 
-void Highscores_MenuParts::LoadTopScore(
-	std::function<void()> then)
+void Highscores_MenuParts::LoadTopScore()
 {
+	if (loading) return;
+	loading = true;
+
 	iw::HttpRequest<HighscoreRecord, iw::JsonSerializer> request;
 	request.Ip       = "71.233.150.182";
 	request.Host     = "data.niceyam.com";
 	request.Resource = "/regolith/php/get_highscore_top.php";
 
-	request.OnResult = [this, then](
+	request.OnResult = [this](
 		HighscoreRecord& record)
 	{
 		scores.emplace(scores.begin(), record);
-		then();
+		loading = false;
 	};
 
 	connection.AsyncRequest(request);
@@ -277,6 +340,9 @@ void Highscores_MenuParts::LoadTopScore(
 
 void Highscores_MenuParts::LoadMoreScoresAbove()
 {
+	if (loading) return;
+	loading = true;
+
 	std::string gameId = scores.front().GameId;
 
 	iw::HttpRequest<std::vector<HighscoreRecord>, iw::JsonSerializer> request;
@@ -292,6 +358,7 @@ void Highscores_MenuParts::LoadMoreScoresAbove()
 		{
 			scores.emplace(scores.begin(), record);
 		}
+		loading = false;
 	};
 
 	connection.AsyncRequest(request);
@@ -299,6 +366,9 @@ void Highscores_MenuParts::LoadMoreScoresAbove()
 
 void Highscores_MenuParts::LoadMoreScoresBelow()
 {
+	if (loading) return;
+	loading = true;
+
 	std::string gameId = scores.back().GameId;
 
 	iw::HttpRequest<std::vector<HighscoreRecord>, iw::JsonSerializer> request;
@@ -315,6 +385,7 @@ void Highscores_MenuParts::LoadMoreScoresBelow()
 		{
 			scores.emplace_back(record);
 		}
+		loading = false;
 	};
 
 	connection.AsyncRequest(request);

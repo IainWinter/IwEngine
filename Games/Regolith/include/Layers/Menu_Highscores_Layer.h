@@ -45,7 +45,9 @@ struct MenuParts
 			| ImGuiWindowFlags_NoBringToFrontOnFocus;
 
 		commonFlagsFocus =
-			  ImGuiWindowFlags_NoDecoration
+			/*  ImGuiWindowFlags_NoDecoration
+			|*/
+			  ImGuiWindowFlags_NoTitleBar
 			| ImGuiWindowFlags_NoResize
 			| ImGuiWindowFlags_NoMove;
 	}
@@ -63,11 +65,14 @@ struct Highscores_MenuParts : MenuParts
 	ImFont* font_title;
 	bool scroll_table;
 
+	bool loading;
+
 	Highscores_MenuParts()
 		: name         (nullptr)
 		, font_regular (iwFont("verdana_36"))
 		, font_title   (iwFont("verdana_92"))
 		, scroll_table (true)
+		, loading      (false)
 	{}
 
 	void ScoreTable(float x, float y, float w, float h);
@@ -75,8 +80,7 @@ struct Highscores_MenuParts : MenuParts
 	void SubmitTempNameAndGetGameId(int score);
 	void UpdateTempNameWithRealName();
 
-	void LoadTopScore(
-		std::function<void()> then);
+	void LoadTopScore();
 	void LoadMoreScoresAbove();
 	void LoadMoreScoresBelow();
 };

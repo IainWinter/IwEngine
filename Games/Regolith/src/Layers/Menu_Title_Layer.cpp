@@ -1,8 +1,6 @@
 #include "Layers/Menu_Title_Layer.h"
 #include "iw/engine/Systems/Camera/EditorCameraControllerSystem.h"
 #include "iw/engine/Systems/SpaceInspectorSystem.h"
-#include "gl/glew.h"
-#include "gl/wglew.h"
 #include "glm/gtc/random.hpp"
 #include <cmath>
 
@@ -97,7 +95,7 @@ int Menu_Title_Layer::Initialize()
 	title.Set<iw::Transform>(glm::vec3(-1.88, 1.446, -5), glm::vec3(1.5f));
 	title.Set<iw::Mesh>(title_mesh);
 	
-	// title
+	// title highscores
 
 	iw::Mesh title_hs_mesh = Asset->Load<iw::Model>("models/SpaceGame/title_highscores.glb")->GetMesh(0);
 	title_hs_mesh.Material = REF<iw::Material>(Asset->Load<iw::Shader>("shaders/texture_cam.shader"));
@@ -107,6 +105,17 @@ int Menu_Title_Layer::Initialize()
 	title_hs = Space->CreateEntity<iw::Transform, iw::Mesh>();
 	title_hs.Set<iw::Transform>(glm::vec3(-10, 1.85, 1.88), glm::vec3(.8f), glm::quat(sqrt(2) / 2, 0, sqrt(2) / 2, 0));
 	title_hs.Set<iw::Mesh>(title_hs_mesh);
+
+	// title settings
+
+	iw::Mesh title_st_mesh = Asset->Load<iw::Model>("models/SpaceGame/title_settings.glb")->GetMesh(0);
+	title_st_mesh.Material = REF<iw::Material>(Asset->Load<iw::Shader>("shaders/texture_cam.shader"));
+	title_st_mesh.Material->Set("color", iw::Color(1));
+	Renderer->Now->InitShader(title_st_mesh.Material->Shader, iw::CAMERA);
+
+	title_st = Space->CreateEntity<iw::Transform, iw::Mesh>();
+	title_st.Set<iw::Transform>(glm::vec3(5.15, -4.8, 2), glm::vec3(.8f), glm::quat(.98, 0, .2, 0));
+	title_st.Set<iw::Mesh>(title_st_mesh);
 
 	//stars
 
@@ -152,14 +161,7 @@ int Menu_Title_Layer::Initialize()
 	bg->AddTexture(REF<iw::Texture>(Renderer->Width(), Renderer->Height()));
 	bg->AddTexture(REF<iw::Texture>(Renderer->Width(), Renderer->Height(), iw::TEX_2D, iw::DEPTH));
 
-	//wglSwapIntervalEXT(1);
-
-	highscoreParts.LoadTopScore(
-		[this]()
-		{
-			highscoreParts.LoadMoreScoresBelow();
-		}
-	);
+	highscoreParts.LoadTopScore();
 
 	return 0;
 }
@@ -212,10 +214,9 @@ void Menu_Title_Layer::UI()
 	//ImGui::End();
 	persp.RecalculateProjection();
 	cam->Projection = iw::lerp(ortho.Projection, persp.Projection, 0/*sin(iw::Pi * x)*/);
-
+	cam->Transform.Rotation = glm::slerp(last_rot, target_rot, x);
 	cam->Transform.Position = iw ::lerp(last_pos, target_pos, x);
 	cam->Transform.Position = glm::normalize(cam->Transform.Position) * 10.f;
-	cam->Transform.Rotation = glm::slerp(last_rot, target_rot, x);
 	
 	// end temp
 	
@@ -227,8 +228,10 @@ void Menu_Title_Layer::UI()
 	{
 		Renderer->DrawMesh(stars   .Find<iw::Transform>(), &stars  .Find<iw::StaticPS>()->GetParticleMesh());
 		Renderer->DrawMesh(ball    .Find<iw::Transform>(), ball    .Find<iw::Mesh>());
+		
 		Renderer->DrawMesh(title   .Find<iw::Transform>(), title   .Find<iw::Mesh>());
 		Renderer->DrawMesh(title_hs.Find<iw::Transform>(), title_hs.Find<iw::Mesh>());
+		Renderer->DrawMesh(title_st.Find<iw::Transform>(), title_st.Find<iw::Mesh>());
 		//Renderer->DrawMesh(axis .Find<iw::Transform>(), axis  .Find<iw::Mesh>());
 	}
 	Renderer->EndScene();
@@ -244,12 +247,14 @@ void Menu_Title_Layer::UI()
 
 	ImGui::PushStyleColor(ImGuiCol_WindowBg,      ImVec4(0, 0, 0, 0));
 	ImGui::PushStyleColor(ImGuiCol_Border,        ImVec4(0, 0, 0, 0));
-	ImGui::PushStyleColor(ImGuiCol_FrameBg,       ImVec4(0, 0, 0, 1));
+	ImGui::PushStyleColor(ImGuiCol_FrameBg,       ImVec4(1, 1, 1, .5));
 	ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0, 0, 0, 1));
+
+	ImGui::PushStyleColor(ImGuiCol_CheckMark, ImVec4(.2, .2, .2, 1));
 
 	ImGui::PushStyleColor(ImGuiCol_Text,          ImVec4(1, 1, 1, menuOpacity));
 	ImGui::PushStyleColor(ImGuiCol_Button,        ImVec4(0, 0, 0, 0));
-	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0, 0, 0, 0));
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(.2, .2, .2, 1));
 	ImGui::PushStyleColor(ImGuiCol_ButtonActive,  ImVec4(0, 0, 0, 0));
 
 	iw::ITexture* tex = bg->Tex(0)->Handle();
@@ -276,7 +281,7 @@ void Menu_Title_Layer::UI()
 		{
 			if (ImGui::Button("Play"))
 			{
-				SetViewDefault();
+				Console->QueueCommand("set-state game");
 			}
 
 			if (ImGui::Button("Highscores"))
@@ -284,30 +289,15 @@ void Menu_Title_Layer::UI()
 				SetViewHighscores();
 			}
 
-			//if (ImGui::Button("Settings"))
-			//{
-			//	xt1 = 1;
-			//	xt2 = 0;
-			//	target_menu = 2;
-			//}
-
-			ImGui::Button("Credits");
+			if (ImGui::Button("Settings"))
+			{
+				SetViewSettings();
+			}
 		}
 		ImGui::End();
 	}
 	else if (target_menu == 1)
 	{
-		ImGui::SetNextWindowPos (ImVec2(bg_x + paddingx - menuOffset, bg_h - padding_1));
-		ImGui::SetNextWindowSize(ImVec2(-1, -1));
-		ImGui::Begin("Highscores", nullptr, commonFlagsFocus);
-		{
-			if (ImGui::Button("Back"))
-			{
-				SetViewDefault();
-			}
-		}
-		ImGui::End();
-
 		highscoreParts.ScoreTable(
 			bg_x + paddingx - menuOffset, 
 			bg_y + bg_h / 3, 
@@ -316,6 +306,42 @@ void Menu_Title_Layer::UI()
 		);
 	}
 
+	else if (target_menu == 2)
+	{
+		ImGui::SetNextWindowPos(ImVec2(bg_x + paddingx - menuOffset, bg_h / 2));
+		ImGui::SetNextWindowSize(ImVec2(-1, -1));
+		ImGui::Begin("Settings Menu Buttons", nullptr, commonFlagsFocus);
+		{
+			GameSettings.Draw();
+		}
+		ImGui::End();
+	}
+
+	if (target_menu == 1 || target_menu == 2)
+	{
+		ImGui::SetNextWindowPos(ImVec2(bg_x + paddingx - menuOffset, bg_h - padding_1));
+		ImGui::SetNextWindowSize(ImVec2(-1, -1));
+		ImGui::Begin("Back button", nullptr, commonFlagsFocus);
+		{
+			bool hasChanged = GameSettings.HasChanged;
+
+			if (ImGui::Button(hasChanged ? "Reset" : "Back"))
+			{
+				GameSettings.Reset();
+				SetViewDefault();
+			}
+
+			if (hasChanged)
+			{
+				ImGui::SameLine();
+				if (ImGui::Button("Apply"))
+				{
+					GameSettings.Apply();
+				}
+			}
+		}
+		ImGui::End();
+	}
 
 	ImGui::PopStyleVar(2);
 	ImGui::PopStyleColor(8);

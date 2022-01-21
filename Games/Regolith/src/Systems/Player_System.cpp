@@ -251,7 +251,7 @@ bool PlayerSystem::On(iw::ActionEvent& e)
 			CoreExploded_Event& event = e.as<CoreExploded_Event>();
 			if (event.Entity.Has<Player>())
 			{
-				Bus->push<iw::ActionEvent>(iw::ActionEventType::SINGLE, DESTROIED_PLAYER);
+				Bus->push<iw::ActionEvent>(iw::ActionEventType::SINGLE, DESTROYED_PLAYER);
 			}
 
 			break;
