@@ -325,18 +325,25 @@ void Menu_Title_Layer::UI()
 		{
 			bool hasChanged = GameSettings.HasChanged;
 
-			if (ImGui::Button(hasChanged ? "Reset" : "Back"))
-			{
-				GameSettings.Reset();
-				SetViewDefault();
-			}
-
 			if (hasChanged)
 			{
+				if (ImGui::Button("Reset"))
+				{
+					GameSettings.Reset();
+				}
+
 				ImGui::SameLine();
 				if (ImGui::Button("Apply"))
 				{
 					GameSettings.Apply();
+				}
+			}
+
+			else
+			{
+				if (ImGui::Button("Back"))
+				{
+					GoBack();
 				}
 			}
 		}

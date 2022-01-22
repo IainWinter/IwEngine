@@ -74,57 +74,54 @@ class App
 private:
 	iw::FontMap* m_fonts;
 
-	// this is all I need
-
 	Menu_Title_Layer* m_menus;
 	Game_Layer*       m_game;
 	Game_UI_Layer*    m_gameUI;
 
-	// fuck all this it's too over done and doesnt fit the problem
+	StateName m_state;
 
-	GameState* m_gamePlay;
-	GameState* m_gamePause;
-	GameState* m_gameHighscore;
-	GameState* m_gameUpgrade;
-	GameState* m_fadeout;
-
-	std::stack<GameState*> m_stateStack;
-	GameState* m_currentState;
-
-	int m_finalScore; // this is needed to pass to the game-over/game-upgrade layers
-				   // little messy to have here...
-
-	void ApplyState  (GameState* state);  // enable state
-	void DestroyState(GameState*& state); // delete a state
-
-
-
-	void SetState    (GameState* state); // destory all states and push
-	void PushState   (GameState* state); // push state ontop
-	void PopState    ();                 // pop  state ontop
-
-	GameState* MakeState_Title();
-	GameState* MakeState_Main();
-
-	GameState* MakeState_Play();
-	GameState* MakeState_Highscores();
-	GameState* MakeState_Settings();
-	GameState* MakeState_Credits();
-
-	GameState* MakeState_Upgrade();
+	void ChangeState(StateName state)
+	{
+		m_state = state;
+		Bus->push<StateChange_Event>(state);
+	}
 
 public:
 	App()
 		: iw::Application ()
-		, m_currentState  (nullptr)
-		, m_gamePlay      (nullptr)
-		, m_gamePause     (nullptr)
-		, m_gameHighscore (nullptr)
-		, m_gameUpgrade   (nullptr)
-		, m_fadeout       (nullptr)
+		, m_fonts  (nullptr)
+		, m_menus  (nullptr)
+		, m_game   (nullptr)
+		, m_gameUI (nullptr)
+		, m_state  (StateName::IN_MENU)
+	{}
+
+	void ChangeToPauseMenu()
 	{
-		// for debug, if game starts on game-over
-		m_finalScore = 300000;
+		m_menus->BackButtonFunc = [this]() { ChangeBackToGame(); };
+		m_menus->BackButtonTarget = MenuTarget::GAME;
+		m_menus->SetViewSettings();
+		PopLayer(m_game->sand);
+		PopLayer(m_game->sand_ui_laserCharge);
+		PopLayer(m_game);
+		//PopLayer(m_gameUI);
+		Input->SetContext("menu");
+		Physics->Paused = true;
+		ChangeState(StateName::IN_GAME_THEN_MENU);
+	}
+
+	void ChangeBackToGame()
+	{
+		m_menus->BackButtonFunc = {};
+		m_menus->BackButtonTarget = MenuTarget::DEFAULT;
+		m_menus->SetViewGame(); // some random place with stars
+		PushLayer(m_game->sand);
+		PushLayer(m_game->sand_ui_laserCharge);
+		PushLayer(m_game);
+		//PushLayer(m_gameUI);
+		Input->SetContext("game");
+		Physics->Paused = false;
+		ChangeState(StateName::IN_GAME);
 	}
 
 	int Initialize(iw::InitOptions& options) override;

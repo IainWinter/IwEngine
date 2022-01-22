@@ -4,6 +4,8 @@
 #include "gl/glew.h"
 #include "gl/wglew.h"
 
+#include <functional>
+
 struct GameSetting
 {
 	union {
@@ -91,6 +93,14 @@ struct GameSettings
 	void Reset() { for (auto& [_, setting] : Settings) setting->Reset(); }
 };
 
+enum class MenuTarget
+{
+	DEFAULT,
+	HIGHSCORES,
+	SETTINGS,
+	GAME
+};
+
 struct Menu_Title_Layer : Menu_Layer2
 {
 	iw::Entity ball;
@@ -116,6 +126,8 @@ struct Menu_Title_Layer : Menu_Layer2
 	Highscores_MenuParts highscoreParts;
 
 	GameSettings GameSettings;
+	MenuTarget BackButtonTarget = MenuTarget::DEFAULT; // config for buttons
+	std::function<void()> BackButtonFunc;
 
 	Menu_Title_Layer()
 		: Menu_Layer2 ("Menu Title")
@@ -154,6 +166,22 @@ struct Menu_Title_Layer : Menu_Layer2
 		target_menu = -1; // no menu
 		target_pos = glm::vec3(10, 10, 10);
 		target_rot = glm::quat(1, 0, 0, 0);
+	}
+
+	void GoBack()
+	{
+		switch (BackButtonTarget)
+		{
+			case MenuTarget::DEFAULT:     SetViewDefault();    break;
+			case	MenuTarget::HIGHSCORES:  SetViewHighscores(); break;
+			case	MenuTarget::SETTINGS:    SetViewSettings();   break;
+			case	MenuTarget::GAME:        SetViewGame();       break;
+		}
+
+		if (BackButtonFunc)
+		{
+			BackButtonFunc();
+		}
 	}
 
 	int Initialize() override;

@@ -23,10 +23,10 @@ int Game_UI_Layer::Initialize()
 	m_laser      = m_screen->CreateElement(m_sand_ui_laser->GetSandMesh());
 	m_ammo       = m_screen->CreateElement(A_mesh_ui_text_ammo);
 	m_score      = m_screen->CreateElement(A_mesh_ui_text_score);
-	m_background = m_screen->CreateElement(A_mesh_background);
+	//m_background = m_screen->CreateElement(A_mesh_background);
 	m_version    = m_screen->CreateElement(A_mesh_ui_text_debug_version);
 
-	m_background->zIndex = 0;
+	//m_background->zIndex = 0;
 	m_game      ->zIndex = 1;
 	m_menu      ->zIndex = 2;
 	m_gameover  ->zIndex = 4;
@@ -190,9 +190,9 @@ void Game_UI_Layer::PostUpdate()
 	float uiBackgroundScaleTarget = m_game_paused ? 3 : 1;
 	m_bg_scale = iw::lerp(m_bg_scale, uiBackgroundScaleTarget, iw::DeltaTime() * 12);
 
-	m_background->y = m_game->y;
-	m_background->width  = m_game->width  * m_bg_scale;
-	m_background->height = m_game->height * m_bg_scale;
+	//m_background->y = m_game->y;
+	//m_background->width  = m_game->width  * m_bg_scale;
+	//m_background->height = m_game->height * m_bg_scale;
 
 	m_version->y = m_screen->height - 12;
 	m_version->x = -m_screen->width + 1;

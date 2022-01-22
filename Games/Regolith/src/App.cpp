@@ -1,226 +1,5 @@
 ﻿#include "App.h"
-
 #include <combaseapi.h>
-
-// State ideas
-
-// There are some different states that the progra cna be in, idealy these would only be differnt layers being in the app at a time
-
-
-
-// So the game running state is, the two sand layers and the game layer
-// There is a menu upgrade state which is only the post game menus layer
-// A pause state, the game state in the background (paused), and the pause menu layer
-// A main menu state, menu layer
-
-// So list of Layers
-
-// Sand Layer
-// Game Layer
-// Pause Menu Layer
-// Main Menu Layer
-// Post game Menu Layer
-
-// If ui layer is differnt thatl work i think bc it holds every thing drawn by the game
-
-void App::ApplyState(GameState* state)
-{
-	LOG_INFO << "Set game state " << state->Name;
-
-	if (m_currentState)
-	for (iw::Layer* layer : m_currentState->Layers)
-	{
-		PopLayer(layer);
-	}
-
-	for (iw::Layer* layer : state->Layers)
-	{
-		PushLayer(layer);
-	}
-
-	if (state->OnChange) 
-	{
-		state->OnChange();
-	}
-
-	Bus->push<StateChange_Event>(state->State);
-	m_currentState = state;
-}
-
-void App::DestroyState(
-	GameState*& state)
-{
-	std::set<iw::Layer*> layers;
-
-	if (state)
-	{
-		for (iw::Layer* layer : state->Layers)
-		{
-			layers.insert(layer);
-		}
-
-		if (state == m_currentState)
-		{
-			m_currentState = nullptr;
-		}
-		
-		delete state;
-		state = nullptr;
-	}
-
-	for (iw::Layer* layer : layers)
-	{
-		DestroyLayer(layer);
-	}
-}
-
-void App::SetState(
-	GameState* state)
-{
-	while (m_stateStack.size() > 0)
-	{
-		DestroyState(m_stateStack.top());
-		m_stateStack.pop();
-	}
-
-	PushState(state);
-}
-
-void App::PushState(
-	GameState* state)
-{
-	ApplyState(state);
-	m_stateStack.push(state);
-}
-
-void App::PopState() 
-{
-	if (m_stateStack.size() > 0)
-	{
-		m_stateStack.pop();
-		if (m_stateStack.size() > 0)
-		{
-			ApplyState(m_stateStack.top());
-		}
-	}
-}
-
-GameState* App::MakeState_Title()
-{
-	GameState* state = new GameState("Title Menu", StateName::NONE);
-	state->OnChange = [&]()
-	{
-		Physics->Paused = true;
-		Input->SetContext("Menu");
-	};
-	state->Layers = { 
-		new Menu_Title_Layer()
-	};
-
-	return state;
-}
-
-GameState* App::MakeState_Main()
-{
-	GameState* state = new GameState("Main Menu", StateName::NONE);
-	state->OnChange = [&]()
-	{
-		Physics->Paused = true;
-		Input->SetContext("Menu");
-	};
-	state->Layers = {
-		//new Menu_Main_Layer()
-	};
-
-	return state;
-}
-
-GameState* App::MakeState_Play()
-{
-	GameState* state = new GameState("Game Play", StateName::GAME_RESUME_STATE);
-	state->OnChange = [&]()
-	{
-		Physics->Paused = false;
-		Input->SetContext("Game");
-	};
-
-	iw::SandLayer* sand          = new iw::SandLayer(2, 1, 800, 800, 4, 4, false);
-	iw::SandLayer* sand_ui_laser = new iw::SandLayer(1, 1, 40,  40);
-	sand         ->m_updateDelay = 1 / 144.f;
-	sand_ui_laser->m_updateDelay = 1 / 60.f;
-	
-	Game_Layer*    game    = new Game_Layer   (sand, sand_ui_laser);
-	Game_UI_Layer* game_ui = new Game_UI_Layer(sand, sand_ui_laser);
-	
-	state->Layers = {
-		sand, 
-		sand_ui_laser, 
-		game, 
-		game_ui
-	};
-	
-	return state;
-}
-
-GameState* App::MakeState_Highscores()
-{
-	GameState* state = new GameState("Menu Highscores", StateName::NONE);
-	state->OnChange = [&]()
-	{
-		Physics->Paused = true;
-		Input->SetContext("Menu");
-	};
-	state->Layers = {
-		new Menu_Highscores_Layer(m_finalScore)
-	};
-
-	return state;
-}
-
-GameState* App::MakeState_Settings()
-{
-	GameState* state = new GameState("Menu Settings", StateName::GAME_PAUSE_STATE);
-	state->OnChange = [&]()
-	{
-		Physics->Paused = true;
-		Input->SetContext("Menu");
-	};
-	state->Layers = {
-		new Menu_Pause_Layer()
-	};
-
-	return state;
-}
-
-GameState* App::MakeState_Credits()
-{
-	GameState* state = new GameState("Menu Credits", StateName::NONE);
-	state->OnChange = [&]()
-	{
-		Physics->Paused = true;
-		Input->SetContext("Menu");
-	};
-	state->Layers = {
-		//new Menu_Credits_Layer()
-	};
-
-	return state;
-}
-
-GameState* App::MakeState_Upgrade()
-{
-	GameState* state = new GameState("Menu Upgrade", StateName::NONE);
-	state->OnChange = [&]()
-	{
-		Physics->Paused = true;
-		Input->SetContext("Menu");
-	};
-	state->Layers = {
-		new Menu_Upgrade_Layer(m_finalScore)
-	};
-
-	return state;
-}
 
 int App::Initialize(
 	iw::InitOptions& options)
@@ -340,28 +119,16 @@ int App::Initialize(
 
 		if (command.Verb == "escape")
 		{
-			switch (m_currentState->State)
+			switch (m_state)
 			{
 				case StateName::IN_GAME:
-					m_menus->SetViewSettings();
-					PopLayer(m_game);
-					PopLayer(m_gameUI);
-					Input->SetContext("menu");
+					ChangeToPauseMenu();
 					break;
 				case StateName::IN_GAME_THEN_MENU:
-					//m_menus->SetViewGame(); // some random place with stars
-					PushLayer(m_game);
-					PushLayer(m_gameUI);
-					Input->SetContext("game");
+					ChangeBackToGame();
 					break;
 				default:
 					break;
-				//case StateName::GAME_PAUSE_STATE:
-				//	PopState();
-				//	break;
-				//default:
-				//	PushState(m_gamePause);
-				//	break;
 			}
 		}
 
@@ -393,6 +160,8 @@ int App::Initialize(
 			{
 				PushLayer(m_menus);
 				Input->SetContext("menu");
+
+				m_state = StateName::IN_MENU;
 			}
 
 			else
@@ -413,6 +182,8 @@ int App::Initialize(
 
 				m_menus->SetViewGame();
 				Input->SetContext("game");
+
+				m_state = StateName::IN_GAME;
 			}
 
 			else
@@ -425,15 +196,9 @@ int App::Initialize(
 
 				Input->SetContext("menu");
 				m_menus->SetViewHighscores(/* here should be a flag for if it's post game or from main menu */);
-			}
 
-			//     if (stateName == "title")      SetState(MakeState_Title());
-			//else if (stateName == "main")       SetState(MakeState_Main());
-			//else if (stateName == "play")       SetState(MakeState_Play());
-			//else if (stateName == "highscores") SetState(MakeState_Highscores());
-			//else if (stateName == "settings")   SetState(MakeState_Settings());
-			//else if (stateName == "credits")    SetState(MakeState_Credits());
-			//else if (stateName == "upgrade")    SetState(MakeState_Upgrade());
+				m_state = StateName::IN_MENU;
+			}
 
 			else
 			{
@@ -465,7 +230,7 @@ int App::Initialize(
 		else
 		if (command.Verb == "final-score")
 		{
-			m_finalScore = command.Tokens[0].Int;
+			//m_finalScore = command.Tokens[0].Int;
 		}
 
 		else
