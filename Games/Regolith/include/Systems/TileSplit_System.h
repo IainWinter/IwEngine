@@ -9,7 +9,7 @@
 struct TileSplitSystem : iw::SystemBase
 {
 	iw::SandLayer* sand;
-	//iw::blocking_queue<size_t> splits;
+	iw::blocking_queue<size_t> splits;
 	//std::thread splitThread;
 	//bool splitThreadRunning;
 
