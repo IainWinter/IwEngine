@@ -14,8 +14,8 @@ namespace Engine {
 		size_t Count;
 
 		union {
-			float Float;
-			long long Int;
+			float Number;
+			//long long Int; // bits of float vs int make this annoying, just cast to int
 			char* String;
 		};
 	};
@@ -25,7 +25,19 @@ namespace Engine {
 		std::string Verb;
 		bool Active;
 		size_t TokenCount;
-		Token* Tokens; // size is token count
+		Token* Tokens;
+
+		float Num(int i) const {
+			if (i < TokenCount)
+				return Tokens[i].Number;
+			return 0;
+		}
+
+		char* Str(int i) const {
+			if (i < TokenCount)
+				return Tokens[i].String;
+			return 0;
+		}
 	};
 
 	using HandlerFunc = std::function<bool(const Command&)>;

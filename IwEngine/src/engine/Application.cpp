@@ -401,8 +401,8 @@ namespace Engine {
 		if (command.Verb == "resize_window") {
 			Bus->push<WindowResizedEvent>(
 				Window->Id(),
-				(int)command.Tokens[0].Int,
-				(int)command.Tokens[1].Int);
+				(int)command.Tokens[0].Number,
+				(int)command.Tokens[1].Number);
 		}
 
 		else if (command.Verb == "quit") {

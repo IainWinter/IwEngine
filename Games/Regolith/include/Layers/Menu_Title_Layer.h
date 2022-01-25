@@ -109,6 +109,7 @@ struct Menu_Title_Layer : Menu_Layer2
 	iw::Entity title_hs;
 	iw::Entity title_st;
 	iw::Entity stars;
+	iw::Entity smoke;
 	iw::ref<iw::RenderTarget> bg;
 	iw::PerspectiveCamera persp;
 	iw::OrthographicCamera ortho;

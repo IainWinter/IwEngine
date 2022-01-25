@@ -97,7 +97,7 @@ namespace Engine {
 			catch (std::out_of_range e) { error = true; }
 
 			if (!error && itr == tend) {
-				t->Int = ll;
+				t->Number = (float)ll;
 				t->Count = 1;
 			}
 
@@ -112,7 +112,7 @@ namespace Engine {
 				catch (std::out_of_range e) { error = true; }
 
 				if (!error && itr == tend) {
-					t->Float = f;
+					t->Number = f;
 					t->Count = 1;
 				}
 
