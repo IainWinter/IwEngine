@@ -2,6 +2,7 @@
 #include "iw/engine/Systems/Camera/EditorCameraControllerSystem.h"
 #include "iw/engine/Systems/SpaceInspectorSystem.h"
 #include "glm/gtc/random.hpp"
+#include "iw/math/spline.h"
 #include <cmath>
 
 int Menu_Title_Layer::Initialize()
@@ -139,12 +140,12 @@ int Menu_Title_Layer::Initialize()
 	star_mesh.Material->Set("color", iw::Color(1));
 	Renderer->Now->InitShader(star_mesh.Material->Shader, iw::CAMERA);
 
-	iw::StaticPS ps;
-	ps.SetParticleMesh(star_mesh);
+	iw::StaticPS star_ps;
+	star_ps.SetParticleMesh(star_mesh);
 
 	for (int i = 0; i < 10000; i++)
 	{
-		ps.SpawnParticle(iw::Transform(
+		star_ps.SpawnParticle(iw::Transform(
 			glm::sphericalRand(15.f),
 			glm::vec3(.01f)
 		));
@@ -152,10 +153,55 @@ int Menu_Title_Layer::Initialize()
 
 	stars = Space->CreateEntity<iw::Transform, iw::StaticPS>();
 	stars.Set<iw::Transform>();
-	iw::StaticPS* p = stars.Set<iw::StaticPS>(ps);
+	iw::StaticPS* star_p = stars.Set<iw::StaticPS>(star_ps);
 
-	p->Update();
-	p->UpdateParticleMesh();
+	star_p->Update();
+	star_p->UpdateParticleMesh();
+
+	// smoke
+
+	glm::vec3 smoke_pos[4] =
+	{
+		glm::vec3(0, 0, 0),
+		glm::vec3(1, 0, 0),
+		glm::vec3(1, 1, 0),
+		glm::vec3(0, 1, 0)
+	};
+	glm::vec2 smoke_uv[4] =
+	{
+		glm::vec2(0, 0),
+		glm::vec2(1, 0),
+		glm::vec2(1, 1),
+		glm::vec2(0, 1)
+	};
+	unsigned smoke_idx[6] =
+	{
+		0, 1, 2,
+		0, 2, 3
+
+	};
+	iw::MeshDescription smoke_desc;
+	smoke_desc.DescribeBuffer(iw::bName::POSITION, iw::MakeLayout<float>(3));
+	smoke_desc.DescribeBuffer(iw::bName::UV,       iw::MakeLayout<float>(2));
+	iw::MeshData* smoke_data = new iw::MeshData(smoke_desc);
+	smoke_data->SetBufferData(iw::bName::POSITION, 4, smoke_pos);
+	smoke_data->SetBufferData(iw::bName::UV,       4, smoke_uv);
+	smoke_data->SetIndexData(6, smoke_idx);
+	smoke_data->SetTopology(iw::MeshTopology::TRIANGLES);
+
+	iw::Mesh smoke_mesh = smoke_data->MakeInstance();
+	smoke_mesh.Material = REF<iw::Material>(Asset->Load<iw::Shader>("shaders/particle/texture_cam.shader"));
+	smoke_mesh.Material->SetTexture("texture", LoadTexture("circle_temp.png"));
+	Renderer->Now->InitShader(smoke_mesh.Material->Shader, iw::CAMERA);
+
+	iw::StaticPS smoke_ps;
+	smoke_ps.SetParticleMesh(smoke_mesh);
+
+	smoke = Space->CreateEntity<iw::Transform, iw::StaticPS>();
+	smoke.Set<iw::Transform>();
+	smoke.Set<iw::StaticPS>(smoke_ps);
+
+	// render target to put the scene into imgui
 
 	bg = REF<iw::RenderTarget>();
 	bg->AddTexture(REF<iw::Texture>(Renderer->Width(), Renderer->Height()));
@@ -178,6 +224,33 @@ float easeIn(float x)
 
 void Menu_Title_Layer::UI()
 {
+	//iw::StaticPS* smoke_p = smoke.Find<iw::StaticPS>();
+
+	//glm::vec3 p1 = glm::vec3(1.15, -3.75, .7) + glm::normalize(glm::vec3(-.5, 1, 1)) * 3.f;
+
+	//iw::spline3 spline1;
+	//spline1.A = p1;
+	//spline1.B = glm::vec3(p1.x,     .2, p1.z);
+	//spline1.C = glm::vec3(p1.x - 1, .4, p1.z);
+
+	//iw::spline3 spline2;
+	//spline2.A = spline1.C;
+	//spline2.B = glm::vec3(-3, spline1.C.y, p1.z);
+	//spline2.C = glm::vec3( 3,  1.2, p1.z);
+
+	//float time = iw::TotalTime() * .9 - 1;
+
+	//if (time >= 0 && time < 2)
+	//{
+	//	iw::Transform tr;
+	//	tr.Scale = glm::vec3(.01);
+	//	tr.Position = time < 1 ? spline1.F(time) : spline2.F(time - 1);
+
+	//	smoke_p->SpawnParticle(tr);
+	//	smoke_p->Update();
+	//	smoke_p->UpdateParticleMesh();
+	//}
+
 	iw::Camera* cam = MainScene->MainCamera();
 
 	glm::vec3 pos = cam->Transform.Position;
@@ -226,6 +299,7 @@ void Menu_Title_Layer::UI()
 	bg->Resize(bg_w, bg_h);
 	Renderer->BeginScene(MainScene, bg, true);
 	{
+		Renderer->DrawMesh(smoke   .Find<iw::Transform>(), &smoke  .Find<iw::StaticPS>()->GetParticleMesh());
 		Renderer->DrawMesh(stars   .Find<iw::Transform>(), &stars  .Find<iw::StaticPS>()->GetParticleMesh());
 		Renderer->DrawMesh(ball    .Find<iw::Transform>(), ball    .Find<iw::Mesh>());
 		
@@ -281,7 +355,9 @@ void Menu_Title_Layer::UI()
 		{
 			if (ImGui::Button("Play"))
 			{
-				Console->QueueCommand("set-state game");
+				// do little play animation
+				SetViewGame();
+				Console->QueueCommand("set-state game 1");
 			}
 
 			if (ImGui::Button("Highscores"))
@@ -351,6 +427,6 @@ void Menu_Title_Layer::UI()
 	}
 
 	ImGui::PopStyleVar(2);
-	ImGui::PopStyleColor(8);
+	ImGui::PopStyleColor(9);
 	ImGui::PopFont();
 }

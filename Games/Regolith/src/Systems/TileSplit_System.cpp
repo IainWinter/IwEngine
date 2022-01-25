@@ -24,6 +24,15 @@
 
 void TileSplitSystem::Update()
 {
+	Task->defer([=]()
+	{
+		for (int index : splits)
+		{
+			SplitTile(Space->GetEntity(index));
+		}
+		splits.clear();
+	});
+
 	Space->Query<iw::Tile, Asteroid>().Each(
 	[&](
 		iw::EntityHandle handle,
@@ -49,9 +58,12 @@ bool TileSplitSystem::On(iw::ActionEvent& e)
 		case REMOVE_CELL_FROM_TILE:
 		{
 			RemoveCellFromTile_Event& event = e.as<RemoveCellFromTile_Event>();
-			//splits.push(event.Entity.Handle.Index);
+			int index = event.Entity.Handle.Index;
 
-			SplitTile(event.Entity);
+			if (std::find(splits.begin(), splits.end(), index) == splits.end())
+			{
+				splits.push(index);
+			}
 
 			break;
 		}
@@ -63,6 +75,8 @@ bool TileSplitSystem::On(iw::ActionEvent& e)
 void TileSplitSystem::SplitTile(
 	iw::Entity entity)
 {
+	if (!entity.Alive()) return;
+
 	iw::Tile* tile = entity.Find<iw::Tile>();
 
 	// Remove cells that are no longer connected to core

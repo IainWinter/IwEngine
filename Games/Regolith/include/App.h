@@ -124,5 +124,58 @@ public:
 		ChangeState(StateName::IN_GAME);
 	}
 
+	void ChangeToTitleScreen()
+	{
+		PushLayer(m_menus);
+		Input->SetContext("menu");
+
+		m_state = StateName::IN_MENU;
+	}
+
+	void ChangeToGame()
+	{
+		iw::SandLayer* sand          = new iw::SandLayer(2, 1, 800, 800, 4, 4, false);
+		iw::SandLayer* sand_ui_laser = new iw::SandLayer(1, 1, 40,  40);
+		sand         ->m_updateDelay = 1 / 144.f;
+		sand_ui_laser->m_updateDelay = 1 / 60.f;
+	
+		m_game   = new Game_Layer   (sand, sand_ui_laser);
+		m_gameUI = new Game_UI_Layer(sand, sand_ui_laser);
+
+		PushLayer(sand);
+		PushLayer(sand_ui_laser);
+		PushLayer(m_game);
+		PushLayer(m_gameUI);
+
+		Input->SetContext("game");
+
+		m_state = StateName::IN_GAME;
+	}
+
+	void CHangeToPost()
+	{
+		DestroyLayer(m_game->sand);
+		DestroyLayer(m_game->sand_ui_laserCharge);
+		DestroyLayer(m_gameUI);
+		DestroyLayer(m_game);
+
+		Input->SetContext("menu");
+		m_menus->SetViewHighscores(/* here should be a flag for if it's post game or from main menu */);
+
+		m_state = StateName::IN_MENU;
+	}
+
+	void SetState(
+		const std::string& stateName)
+	{
+		     if (stateName == "menus") ChangeToTitleScreen();
+		else if (stateName == "game")  ChangeToGame();
+		else if (stateName == "post")  CHangeToPost();
+		else
+		{
+			LOG_ERROR << "[set-state] invalid state";
+		}
+	}
+
 	int Initialize(iw::InitOptions& options) override;
 };

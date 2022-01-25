@@ -35,6 +35,7 @@ namespace util {
 
 		std::mutex m_mutex_coroutine;
 		std::vector<std::function<bool()>> m_coroutines; // main thread tasks
+		std::vector<std::function<void()>> m_defered;    // ^
 
 	public:
 		thread_pool(
@@ -102,9 +103,11 @@ namespace util {
 		void step_coroutines()
 		{
 			std::vector<std::function<bool()>> copy;
+			std::vector<std::function<void()>> copy2;
 			{
 				std::unique_lock lock(m_mutex_coroutine);
-				copy = m_coroutines;
+				copy  = m_coroutines;
+				copy2 = m_defered;
 			}
 
 			for (size_t i = 0; i < copy.size(); i++)
@@ -115,6 +118,16 @@ namespace util {
 					m_coroutines.erase(m_coroutines.begin() + i);
 				}
 			}
+
+			for (size_t i = 0; i < copy2.size(); i++)
+			{
+				copy2.at(i)();
+			}
+
+			{
+				std::unique_lock lock(m_mutex_coroutine);
+				m_defered.clear();
+			}
 		}
 
 		void coroutine(
@@ -122,6 +135,13 @@ namespace util {
 		{
 			std::unique_lock lock(m_mutex_coroutine);
 			m_coroutines.push_back(func);
+		}
+
+		void defer(
+			std::function<void()> func)
+		{
+			std::unique_lock lock(m_mutex_coroutine);
+			m_defered.push_back(func);
 		}
 
 		template<
