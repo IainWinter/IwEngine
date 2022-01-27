@@ -121,8 +121,8 @@ void ProjectileSystem::Update()
 
 			else
 			{
-				rigidbody->Transform.Position.x = pos.x + vel.x * iw::DeltaTime();
-				rigidbody->Transform.Position.y = pos.y + vel.y * iw::DeltaTime();
+				pos.x = pos.x + vel.x * iw::DeltaTime();
+				pos.y = pos.y + vel.y * iw::DeltaTime();
 			}
 		});
 
@@ -238,7 +238,7 @@ void ProjectileSystem::Update()
 			}
 
 			config.ArcSize = 5;
-			config.LifeTime = .001f;
+			config.LifeTime = iw::DeltaTime();
 			config.StopOnHit = true;
 
 			bolts.push_back(config);
@@ -413,6 +413,8 @@ iw::Entity ProjectileSystem::MakeWattz(
 {
 	iw::Entity entity = MakeProjectile<LightBall_Projectile>(shot);
 	LightBall_Projectile* ball = entity.Set<LightBall_Projectile>();
+
+	entity.Find<iw::Rigidbody>()->IsKinematic = false;
 
 	float da = iw::randfs() * iw::Pi;
 	for (int i = 0; i < 10; i++)

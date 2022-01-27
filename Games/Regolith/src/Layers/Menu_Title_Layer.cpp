@@ -7,6 +7,9 @@
 
 int Menu_Title_Layer::Initialize()
 {
+	GameSettings.Settings["Music"] = new AudioSetting(Audio, Audio->GetHandle("vca:/music"));
+	GameSettings.Settings["Game"]  = new AudioSetting(Audio, Audio->GetHandle("vca:/effects"));
+
 	iw::MeshDescription desc;
 	desc.DescribeBuffer(iw::bName::POSITION,  iw::MakeLayout<float>(3));
 	desc.DescribeBuffer(iw::bName::NORMAL,    iw::MakeLayout<float>(3));

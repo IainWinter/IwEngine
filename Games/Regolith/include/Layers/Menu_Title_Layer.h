@@ -50,20 +50,27 @@ struct GameSetting
 
 struct VSyncSetting : GameSetting
 {
-	VSyncSetting()
-		: GameSetting(false)
+	VSyncSetting() : GameSetting(false) {}
+	void ApplySetting()                override { wglSwapIntervalEXT((int)IsEnabled); }
+	void DrawSetting(const char* name) override { ImGui::Checkbox(name, &Working_IsEnabled); }
+};
+
+struct AudioSetting : GameSetting
+{
+	iw::ref<iw::IAudioSpace> Audio;
+	int AudioHandle;
+
+	AudioSetting(
+		iw::ref<iw::IAudioSpace> audio,
+		int audioHandle
+	)
+		: GameSetting (0.f)
+		, Audio       (audio)
+		, AudioHandle (audioHandle)
 	{}
 
-	void ApplySetting() override
-	{
-		wglSwapIntervalEXT((int)IsEnabled);
-	}
-
-	void DrawSetting(
-		const char* name) override
-	{
-		ImGui::Checkbox(name, &Working_IsEnabled);
-	}
+	void ApplySetting()                override { Audio->SetVolume(AudioHandle, Value / 100.f); }
+	void DrawSetting(const char* name) override { ImGui::SliderFloat(name, &Working_Value, 0.f, 100.f, "%.0f"); }
 };
 
 struct GameSettings
