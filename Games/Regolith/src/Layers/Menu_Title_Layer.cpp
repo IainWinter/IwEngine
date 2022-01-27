@@ -7,6 +7,10 @@
 
 int Menu_Title_Layer::Initialize()
 {
+	GameSettings.Add("VSync", new VSyncSetting());
+	GameSettings.Add("Game", new VSyncSetting());
+	GameSettings.Add("Music", new VSyncSetting());
+
 	iw::MeshDescription desc;
 	desc.DescribeBuffer(iw::bName::POSITION,  iw::MakeLayout<float>(3));
 	desc.DescribeBuffer(iw::bName::NORMAL,    iw::MakeLayout<float>(3));

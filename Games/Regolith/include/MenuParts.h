@@ -84,25 +84,3 @@ struct Highscores_MenuParts : MenuParts
 	void LoadMoreScoresAbove();
 	void LoadMoreScoresBelow();
 };
-
-struct Menu_Highscores_Layer : Menu_Layer2
-{
-	int score;
-
-	Highscores_MenuParts highscoreParts;
-
-	Menu_Highscores_Layer(
-		int score
-	)
-		: Menu_Layer2 ("Main title menu")
-		, score       (score)
-	{}
-
-	int Initialize() override;
-
-	void UI() override;
-
-	void PlayerImage();
-	void Title();
-	void Buttons();
-};
