@@ -24,6 +24,7 @@ int SandWorldRenderSystem::Initialize() {
 	m_texture->SetFilter(NEAREST);
 	m_texture->CreateColors();
 	m_texture->Clear();
+	m_texture->Initialize(Renderer->Device);
 
 	ref<Material> material = REF<Material>(Asset->Load<Shader>("shaders/texture_cam.shader"));
 	

@@ -1,5 +1,56 @@
 #include "Layers/Game_UI_Layer.h"
 
+int Menu_GameUI_Layer::Initialize()
+{
+	RegisterImage("ui_background.png");
+	imgs["game"] = (void*)m_sand_game    ->GetSandTextureId();
+	imgs["tank"] = (void*)m_sand_ui_laser->GetSandTextureId();
+	return 0;
+}
+
+void Menu_GameUI_Layer::UI()
+{
+	int img_h = bg_h * .2f;
+	int img_y = bg_h - img_h;
+	int gme_h = bg_w;
+
+	//ImGui::GetIO().FontGlobalScale = bg_w / 800;
+
+	ImGui::PushFont(iwFont("verdana_36"));
+
+	ImGui::PushStyleVar  (ImGuiStyleVar_WindowRounding, 0.0f);
+	ImGui::PushStyleVar  (ImGuiStyleVar_WindowPadding,  ImVec2(0, 0));
+	ImGui::PushStyleColor(ImGuiCol_WindowBg,            ImVec4(0, 0, 0, 0));
+	ImGui::PushStyleColor(ImGuiCol_Border,              ImVec4(0, 0, 0, 0));
+
+	ImGui::SetNextWindowPos (ImVec2(bg_x, img_y));
+	ImGui::SetNextWindowSize(ImVec2(bg_w, img_h));
+	ImGui::Begin("Main Game UI", nullptr, commonFlags);
+	{
+
+		ImGui::SetCursorPos(ImVec2(0, 0));
+		ImGui::Image(imgs["ui_background.png"], ImVec2(bg_w, img_h));
+		
+		ImGui::SetCursorPos(ImVec2(bg_w, img_y));
+
+		ImGui::Text("test %d", m_ammo);
+		ImGui::Text("test %d", m_score);
+	}
+	ImGui::End();
+
+	ImGui::SetNextWindowPos (ImVec2(bg_x, bg_y));
+	ImGui::SetNextWindowSize(ImVec2(bg_w, gme_h));
+	ImGui::Begin("Main Game Board", nullptr, commonFlags);
+	{
+		ImGui::Image(imgs["game"], ImVec2(bg_w, gme_h));
+	}
+	ImGui::End();
+
+	ImGui::PopStyleVar  (2);
+	ImGui::PopStyleColor(2);
+	ImGui::PopFont();
+}
+
 int Game_UI_Layer::Initialize()
 {
 	m_screen = Space->CreateEntity<UI_Screen>().Set<UI_Screen>();
@@ -336,3 +387,4 @@ bool Game_UI_Layer::On(iw::ActionEvent& e)
 
 	return false;
 }
+

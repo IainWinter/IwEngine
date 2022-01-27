@@ -9,6 +9,29 @@
 
 #include "plugins/iw/Sand/Engine/SandLayer.h"
 
+struct Menu_GameUI_Layer : Menu_Layer2
+{
+	iw::SandLayer* m_sand_game;
+	iw::SandLayer* m_sand_ui_laser;
+
+	int m_score;
+	int m_ammo;
+
+	Menu_GameUI_Layer(
+		iw::SandLayer* sand,
+		iw::SandLayer* sand_ui_laserCharge
+	)
+		: Menu_Layer2     ("Game UI")
+		, m_sand_game     (sand)
+		, m_sand_ui_laser (sand_ui_laserCharge)
+		, m_score         (0)
+		, m_ammo          (0)
+	{}
+
+	int Initialize() override;
+	void UI() override;
+};
+
 struct Game_UI_Layer : UI_Layer
 {
 	iw::SandLayer* m_sand_game;

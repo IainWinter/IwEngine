@@ -32,13 +32,13 @@ struct Player
 
 	bool NoDamage = false;
 
-	~Player()
-	{
-		for (Move* move : Moves)
-		{
-			delete move;
-		}
-	}
+	//~Player()
+	//{
+	//	for (Move* move : Moves)
+	//	{
+	//		delete move;
+	//	}
+	//}
 
 	//glm::vec3 imp;
 	//glm::vec3 vel;

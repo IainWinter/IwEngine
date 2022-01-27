@@ -18,9 +18,6 @@
 #include "Layers/Game_Layer.h"
 #include "Layers/Game_UI_Layer.h"
 #include "Layers/Menu_Title_Layer.h"
-#include "Layers/Menu_Highscores_Layer.h"
-#include "Layers/Menu_Pause_Layer.h"
-#include "Layers/Menu_PostGame_Layer.h"
 #include "Layers/Menu_Fadeout_Layer.h"
 #include "Layers/Menu_Upgrade_Layer.h"
 #include "Layers/Audio_Layer.h"
@@ -74,9 +71,9 @@ class App
 private:
 	iw::FontMap* m_fonts;
 
-	Menu_Title_Layer* m_menus;
-	Game_Layer*       m_game;
-	Game_UI_Layer*    m_gameUI;
+	Menu_Title_Layer*  m_menus;
+	Game_Layer*        m_game;
+	Menu_GameUI_Layer* m_gameUI;
 
 	StateName m_state;
 
@@ -139,8 +136,8 @@ public:
 		sand         ->m_updateDelay = 1 / 144.f;
 		sand_ui_laser->m_updateDelay = 1 / 60.f;
 	
-		m_game   = new Game_Layer   (sand, sand_ui_laser);
-		m_gameUI = new Game_UI_Layer(sand, sand_ui_laser);
+		m_game   = new Game_Layer       (sand, sand_ui_laser);
+		m_gameUI = new Menu_GameUI_Layer(sand, sand_ui_laser);
 
 		PushLayer(sand);
 		PushLayer(sand_ui_laser);

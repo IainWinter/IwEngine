@@ -80,7 +80,7 @@ struct Menu_Layer2 : iw::Layer
 		img->SetFilter(iw::NEAREST);
 		img->Initialize(Renderer->Now->Device);
 
-		imgs[str] = (void*)img->Handle()->Id();
+		imgs[str] = (void*)(size_t)img->Handle()->Id();
 	}
 };
 

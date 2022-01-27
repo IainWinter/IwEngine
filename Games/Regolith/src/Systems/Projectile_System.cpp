@@ -115,8 +115,8 @@ void ProjectileSystem::Update()
 
 			if (proj->Hit.HasContact)
 			{
-				rigidbody->Transform.Position.x = proj->Hit.x;
-				rigidbody->Transform.Position.y = proj->Hit.y;
+				pos.x = proj->Hit.x;
+				pos.y = proj->Hit.y;
 			}
 
 			else
@@ -168,7 +168,7 @@ void ProjectileSystem::Update()
 					// I think there is an event loop I think a physics update
 					// happens in the middle causing issues?
 
-					LOG_INFO << shot.x << ", " << shot.y;
+					//LOG_INFO << shot.x << ", " << shot.y;
 
 					Bus->push<SpawnProjectile_Event>(shot, split->Split + 1);
 				}

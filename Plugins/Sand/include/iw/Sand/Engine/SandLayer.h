@@ -145,6 +145,10 @@ public:
 		return m_render->GetSandMesh();
 	}
 
+	void* GetSandTextureId() const {
+		return (void*)m_render->GetSandTexture()->Handle()->Id();
+	}
+
 	// returns the size of the sand texture
 	std::pair<int, int> GetSandTexSize()
 	{
