@@ -6,6 +6,7 @@ int Audio_Layer::Initialize()
 	Audio->Load("Regolith/Master.bank");
 	Audio->Load("Regolith/Music.bank");
 	Audio->Load("Regolith/Weapons.bank");
+	Audio->Load("Regolith/Impacts.bank");
 
 	srand(time(nullptr));
 

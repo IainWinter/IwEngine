@@ -131,8 +131,8 @@ void PlayerSystem::Update()
 	}
 	
 	if (   player->i_fire2 
-		/*&& player->SpecialLaser->CanFire()*/
-		/*&& player->can_fire_laser*/)
+		&& player->SpecialLaser->CanFire()
+		&& player->can_fire_laser)
 	{
 		ShotInfo shot = player->SpecialLaser->GetShot(m_player, aim_x, aim_y);
 		Bus->push<SpawnProjectile_Event>(shot);
