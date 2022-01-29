@@ -17,6 +17,7 @@ int App::Initialize(
 	m_fonts->Load("verdana", 18, "fonts/ttf/verdana.ttf");
 	m_fonts->Load("verdana", 36, "fonts/ttf/verdana.ttf");
 	m_fonts->Load("verdana", 92, "fonts/ttf/verdana.ttf");
+	m_fonts->Load("Baskic",  40, "fonts/ttf/Baskic8.ttf");
 
 	PushLayer<iw::ImGuiLayer>(Window, m_fonts)->BindContext();
 

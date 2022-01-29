@@ -14,9 +14,11 @@ void Menu_GameUI_Layer::UI()
 	int img_y = bg_h - img_h;
 	int gme_h = bg_w;
 
-	//ImGui::GetIO().FontGlobalScale = bg_w / 800;
+	float scale = bg_w / 200.f;
 
-	ImGui::PushFont(iwFont("verdana_36"));
+	ImGui::GetIO().FontGlobalScale = bg_w / 800;
+
+	ImGui::PushFont(iwFont("Baskic_40"));
 
 	ImGui::PushStyleVar  (ImGuiStyleVar_WindowRounding, 0.0f);
 	ImGui::PushStyleVar  (ImGuiStyleVar_WindowPadding,  ImVec2(0, 0));
@@ -27,14 +29,15 @@ void Menu_GameUI_Layer::UI()
 	ImGui::SetNextWindowSize(ImVec2(bg_w, img_h));
 	ImGui::Begin("Main Game UI", nullptr, commonFlags);
 	{
-
 		ImGui::SetCursorPos(ImVec2(0, 0));
 		ImGui::Image(imgs["ui_background.png"], ImVec2(bg_w, img_h));
 		
-		ImGui::SetCursorPos(ImVec2(bg_w, img_y));
-
-		ImGui::Text("test %d", m_ammo);
-		ImGui::Text("test %d", m_score);
+		ImGui::SetCursorPos(ImVec2(146 * scale, 10 * scale));
+		ImGui::Text("%d", m_ammo);
+		
+		ImGui::SetCursorPos(ImVec2(146 * scale, 28 * scale));
+		ImGui::Text("%d", m_score);
+		
 	}
 	ImGui::End();
 
