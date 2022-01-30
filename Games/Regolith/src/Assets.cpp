@@ -112,6 +112,7 @@ int LoadAssets(
 	{
 		ref<Texture> ui_player_texture = REF<Texture>(*A_texture_player);
 		ui_player_texture->CreateColors();
+		ui_player_texture->Initialize(Renderer->Device);
 
 		A_mesh_ui_playerHealth.Material = A_material_texture_cam->MakeInstance();
 		A_mesh_ui_playerHealth.Material->SetTexture("texture", ui_player_texture);

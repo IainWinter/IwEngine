@@ -60,14 +60,19 @@ struct Menu_Layer2 : iw::Layer
 		padding_1  = bg_w * .1f;
 		padding_01 = bg_w * .01f;
 
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-	
-		//ImGui::PushFont(font);
-		//ImGui::PopFont();
+		ImGui::GetIO().FontGlobalScale = bg_w / 800;
+
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding,   0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding,    ImVec2(0, 0));
+
+		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0, 0, 0, 0));
+		ImGui::PushStyleColor(ImGuiCol_Border,   ImVec4(0, 0, 0, 0));
 
 		UI();
 
-		ImGui::PopStyleVar(1);
+		ImGui::PopStyleVar  (3);
+		ImGui::PopStyleColor(2);
 
 		Layer::ImGui();
 	}

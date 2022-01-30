@@ -5,100 +5,135 @@ int Menu_GameUI_Layer::Initialize()
 	RegisterImage("ui_background.png");
 	imgs["game"] = (void*)m_sand_game    ->GetSandTextureId();
 	imgs["tank"] = (void*)m_sand_ui_laser->GetSandTextureId();
+	imgs["player"] = (void*)A_mesh_ui_playerHealth.Material->GetTexture("texture")->Handle()->Id();
+
+	m_playerImgWidth = A_mesh_ui_playerHealth.Material->GetTexture("texture")->Width();
+
 	return 0;
 }
 
 void Menu_GameUI_Layer::UI()
 {
-	int img_h = bg_h * .2f;
-	int img_y = bg_h - img_h;
-	int gme_h = bg_w;
+	float ui_h = bg_h * .2f;
+	float ui_y = bg_h - ui_h;
 
 	float scale = bg_w / 200.f;
 
-	ImGui::GetIO().FontGlobalScale = bg_w / 800;
+	//float red;
 
-	ImGui::PushFont(iwFont("Baskic_40"));
+	//if (m_game_over)
+	//{
+	//	red = 0;
+	//	m_jitter = 10;
+	//}
 
-	ImGui::PushStyleVar  (ImGuiStyleVar_WindowRounding, 0.0f);
-	ImGui::PushStyleVar  (ImGuiStyleVar_WindowPadding,  ImVec2(0, 0));
-	ImGui::PushStyleColor(ImGuiCol_WindowBg,            ImVec4(0, 0, 0, 0));
-	ImGui::PushStyleColor(ImGuiCol_Border,              ImVec4(0, 0, 0, 0));
+	//else if (m_player_core)
+	//{
+	//	float death = m_player_core->Timer / m_player_core->TimeWithoutCore;
 
-	ImGui::SetNextWindowPos (ImVec2(bg_x, img_y));
-	ImGui::SetNextWindowSize(ImVec2(bg_w, img_h));
+	//	red = 1 - death;
+	//	m_jitter = 75 * death;
+		m_jitter = iw::lerp(m_jitter, 0.f, iw::DeltaTime() * 10);
+	//}
+
+	// Draw the main ui
+
+	ImGui::PushFont(iwFont("Quicksand_50"));
+	ImGui::SetNextWindowPos (ImVec2(bg_x + iw::randf() * m_jitter, ui_y - iw::randf() * m_jitter));
+	ImGui::SetNextWindowSize(ImVec2(bg_w, ui_h));
 	ImGui::Begin("Main Game UI", nullptr, commonFlags);
 	{
+		// background
+
 		ImGui::SetCursorPos(ImVec2(0, 0));
-		ImGui::Image(imgs["ui_background.png"], ImVec2(bg_w, img_h));
+		ImGui::Image(imgs["ui_background.png"], ImVec2(bg_w, ui_h));
 		
-		ImGui::SetCursorPos(ImVec2(146 * scale, 10 * scale));
-		ImGui::Text("%d", m_ammo);
+		// player
+
+		float player_wh = 40 * scale;
+		float player_x  = 80 * scale;
+		float player_y  = 5 * scale;
+
+		ImGui::SetCursorPos(ImVec2(player_x, player_y));
+		ImGui::Image(imgs["player"], ImVec2(player_wh, player_wh));
+
+		// ammo and score text
+		// could make this on exact center with a ImGui::TextSize calculation
+
+		float text_x  = 146  * scale;
+		float ammo_y  = 4.5f * scale;
+		float score_y = 22.f * scale;
+
+		if (m_player_weapon && m_player_weapon->Ammo > 0)
+		{
+			ImGui::SetCursorPos(ImVec2(text_x, ammo_y));
+			ImGui::Text("%d", m_player_weapon->Ammo);
+		}
 		
-		ImGui::SetCursorPos(ImVec2(146 * scale, 28 * scale));
-		ImGui::Text("%d", m_score);
-		
+		ImGui::SetCursorPos(ImVec2(text_x, score_y));
+		ImGui::Text("%d", m_player_score);
+
+		// particles for hit animation
+
+		for (int i = 0; i < m_hitParticles.size(); i++)
+		{
+			HitParticle& hit = m_hitParticles.at(i);
+
+			std::vector<glm::vec2> pos =
+			{
+				glm::vec2(-1, -1),
+				glm::vec2( 1, -1),
+				glm::vec2( 1,  1),
+				glm::vec2(-1,  1)
+			};
+
+			float pixelScale = player_wh / m_playerImgWidth;
+
+			iw::Transform trans;
+			trans.Position = glm::vec3(bg_x + player_x, ui_y + player_y, 0.f) + (hit.Pos + glm::vec3(.5, -.5, 0)) * pixelScale;
+			trans.Rotation = glm::quat(glm::vec3(0, 0, hit.Life * hit.AngleScale));
+			trans.Scale = glm::vec3(pixelScale / 2.f);
+
+			iw::TransformPolygon(pos, &trans);
+
+			ImGui::GetForegroundDrawList()->AddQuadFilled(
+				ImVec2(pos[0].x, pos[0].y), 
+				ImVec2(pos[1].x, pos[1].y),
+				ImVec2(pos[2].x, pos[2].y),
+				ImVec2(pos[3].x, pos[3].y), hit.Color.to32());
+
+			if (!m_paused)
+			{
+				hit.Pos += hit.Vel;
+				hit.Color.a = (hit.Lifetime - hit.Life) / hit.Lifetime;
+				hit.Life += iw::DeltaTime();
+				if (hit.Life > hit.Lifetime)
+				{
+					hit = m_hitParticles.back();
+					m_hitParticles.pop_back();
+					i--;
+				}
+			}
+		}
 	}
 	ImGui::End();
 
 	ImGui::SetNextWindowPos (ImVec2(bg_x, bg_y));
-	ImGui::SetNextWindowSize(ImVec2(bg_w, gme_h));
+	ImGui::SetNextWindowSize(ImVec2(bg_w, bg_h - ui_h));
 	ImGui::Begin("Main Game Board", nullptr, commonFlags);
 	{
-		ImGui::Image(imgs["game"], ImVec2(bg_w, gme_h));
+		ImGui::Image(imgs["game"], ImVec2(bg_w, bg_h - ui_h));
 	}
 	ImGui::End();
-
-	ImGui::PopStyleVar  (2);
-	ImGui::PopStyleColor(2);
 	ImGui::PopFont();
 }
 
-int Game_UI_Layer::Initialize()
+void Menu_GameUI_Layer::PreUpdate()
 {
-	m_screen = Space->CreateEntity<UI_Screen>().Set<UI_Screen>();
-
-	// move out of assets
-	A_mesh_ui_text_ammo     = A_font_cambria->GenerateMesh("0", { 100 });
-	A_mesh_ui_text_score    = A_font_cambria->GenerateMesh("0", { 100 });
-	A_mesh_ui_text_gameOver = A_font_cambria->GenerateMesh("YOU HAVE BEEN\n   DESTROYED", { 2, iw::FontAnchor::CENTER });
-
-	{
-		A_mesh_ui_text_debug_version = A_font_cambria->GenerateMesh("indev v.04", { 15, iw::FontAnchor::TOP_LEFT});
-		A_mesh_ui_text_debug_version.Material = A_material_font_cam->MakeInstance();
-		A_mesh_ui_text_debug_version.Material->Set("color", iw::Color(1, 1, 1, .25f));
-		A_mesh_ui_text_debug_version.Material->Set("alphaThresh", .1f);
-	}
-
-	m_gameover   = m_screen->CreateElement(A_mesh_ui_text_gameOver);
-	m_game       = m_screen->CreateElement(m_sand_game->GetSandMesh());
-	m_menu       = m_screen->CreateElement(A_mesh_ui_background);
-	m_health     = m_screen->CreateElement(A_mesh_ui_playerHealth);
-	m_laser      = m_screen->CreateElement(m_sand_ui_laser->GetSandMesh());
-	m_ammo       = m_screen->CreateElement(A_mesh_ui_text_ammo);
-	m_score      = m_screen->CreateElement(A_mesh_ui_text_score);
-	//m_background = m_screen->CreateElement(A_mesh_background);
-	m_version    = m_screen->CreateElement(A_mesh_ui_text_debug_version);
-
-	//m_background->zIndex = 0;
-	m_game      ->zIndex = 1;
-	m_menu      ->zIndex = 2;
-	m_gameover  ->zIndex = 4;
-	m_version   ->zIndex = 3;
-	m_health    ->zIndex = 3; 
-	m_laser     ->zIndex = 3;
-	m_ammo      ->zIndex = 3;
-	m_score     ->zIndex = 3;
-
-	return 0;
-}
-
-void Game_UI_Layer::PreUpdate()
-{
-	m_sand_game->sP.x -= (m_screen->width - m_game->width) / 2.f / m_sand_game->m_cellSize;
-	m_sand_game->sP.x *= (800.f / m_game->width);
+	m_sand_game->sP.x -= (window_w - bg_w) / 2.f / m_sand_game->m_cellSize;
+	m_sand_game->sP.x *= (800.f / bg_w);
 	
-	m_sand_game->sP.y = (m_sand_game->sP.y - 400) * (800.f / m_game->height) + 400;
+	m_sand_game->sP.y = (m_sand_game->sP.y - 400) * (800.f / bg_w) + 400; // should be game_h but its a square based on bg_w
 }
 
 int tick = 0;
@@ -316,7 +351,7 @@ void Game_UI_Layer::PostUpdate()
 	//}
 }
 
-bool Game_UI_Layer::On(iw::ActionEvent& e)
+bool Menu_GameUI_Layer::On(iw::ActionEvent& e)
 {
 	switch (e.Action)
 	{
@@ -325,17 +360,28 @@ bool Game_UI_Layer::On(iw::ActionEvent& e)
 			ProjHitTile_Event& event = e.as<ProjHitTile_Event>();
 			if (event.Config.Hit.Has<Player>())
 			{
-				m_jitter = 75;
-			}
+				int index  = event.Config.Info.index;
+				int width  = event.Config.Info.tile->m_sprite.m_width;
+				int height = event.Config.Info.tile->m_sprite.m_height;
 
-			break;
-		}
-		case CREATED_CORE_TILE:
-		{
-			CreatedCoreTile_Event& event = e.as<CreatedCoreTile_Event>();
-			if (event.TileEntity.Has<Player>())
-			{
-				m_player_core = event.TileEntity.Find<CorePixels>();
+				auto [x, y] = iw::xy(index, width);
+				iw::Color color = iw::Color::From32(event.Config.Info.tile->m_sprite.Colors32()[index]);
+				glm::vec3 vel = event.Config.Projectile.Find<iw::Rigidbody>()->Velocity;
+
+				color.a = 1.f;
+				vel.y *= -1;
+
+				HitParticle particle;
+				particle.Life = 0.f;
+				particle.Lifetime = 1.f;
+				particle.AngleScale = iw::randfs() * 10;
+				particle.Color = color;
+				particle.Pos = glm::vec3(x, height - y, 0.f);
+				particle.Vel = glm::normalize(vel) * .05f * (iw::randf() + 1);
+
+				m_hitParticles.push_back(particle);
+
+				m_jitter = 45;
 			}
 
 			break;
@@ -344,28 +390,17 @@ bool Game_UI_Layer::On(iw::ActionEvent& e)
 		{
 			switch (e.as<StateChange_Event>().State)
 			{
-				case StateName::GAME_OVER_STATE:
+				case StateName::IN_GAME:
 				{
-					m_game_over = true;
+					m_paused = false;
 					break;
 				}
-				case StateName::GAME_START_STATE:
+				case StateName::IN_GAME_THEN_MENU:
 				{
-					m_game_over = false;
-					break;
-				}
-				case StateName::GAME_PAUSE_STATE:
-				{
-					m_game_paused = true;
-					break;
-				}
-				case StateName::GAME_RESUME_STATE:
-				{
-					m_game_paused = false;
+					m_paused = true;
 					break;
 				}
 			}
-
 			break;
 		}
 		case CHANGE_PLAYER_WEAPON:
@@ -380,14 +415,5 @@ bool Game_UI_Layer::On(iw::ActionEvent& e)
 		}
 	}
 
-	// listen for 
-	// player switched weapon
-	// changed score
-	// game over
-	// player hit
-	// player healed
-	// player creted core
-
 	return false;
 }
-

@@ -19,7 +19,7 @@ namespace Audio {
 		// set random seed to system time
 
 		FMOD_ADVANCEDSETTINGS settings;
-		settings.randomSeed = time(nullptr);
+		settings.randomSeed = (unsigned int)time(nullptr);
 
 		FMOD::System* core;
 		m_system->getCoreSystem(&core);

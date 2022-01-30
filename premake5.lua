@@ -451,8 +451,9 @@ group ""
 		}
 
 		prebuildcommands {
-			"xcopy /y /f \"" .. glewdir .. bindir .. "/GLEW.dll\" \"" .. iwengdir .. bindir .. "\"",
-			"xcopy /y /f \"" .. glewdir .. libdir .. "/GLEW.lib\" \"" .. iwengdir .. libdir .. "\""
+			"xcopy /y /f \""    .. glewdir .. bindir .. "/GLEW.dll\" \"" .. iwengdir .. bindir .. "\"",
+			"xcopy /y /f \""    .. glewdir .. libdir .. "/GLEW.lib\" \"" .. iwengdir .. libdir .. "\"",
+			"xcopy /y /f /e \"" .. glewdir .. incdir .. "/*\" \""        .. exprtdir .. incdir .. "/\""
 		}
 
 		filter "system:windows"

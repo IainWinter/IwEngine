@@ -414,7 +414,7 @@ iw::Entity ProjectileSystem::MakeWattz(
 	iw::Entity entity = MakeProjectile<LightBall_Projectile>(shot);
 	LightBall_Projectile* ball = entity.Set<LightBall_Projectile>();
 
-	entity.Find<iw::Rigidbody>()->IsKinematic = false;
+	entity.Find<iw::Rigidbody>()->IsKinematic = true;
 
 	float da = iw::randfs() * iw::Pi;
 	for (int i = 0; i < 10; i++)

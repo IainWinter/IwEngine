@@ -8,16 +8,17 @@ int App::Initialize(
 	PushLayer<Audio_Layer>();
 	PushLayer<UI_Render_Layer>();
 
-	PushLayer<iw::DebugLayer>();
+	//PushLayer<iw::DebugLayer>();
 
 	int err = Application::Initialize(options);
 	if (err) return err;
 
 	m_fonts = new iw::FontMap();
-	m_fonts->Load("verdana", 18, "fonts/ttf/verdana.ttf");
-	m_fonts->Load("verdana", 36, "fonts/ttf/verdana.ttf");
-	m_fonts->Load("verdana", 92, "fonts/ttf/verdana.ttf");
-	m_fonts->Load("Baskic",  40, "fonts/ttf/Baskic8.ttf");
+	m_fonts->Load("verdana",   18, "fonts/ttf/verdana.ttf");
+	m_fonts->Load("verdana",   36, "fonts/ttf/verdana.ttf");
+	m_fonts->Load("verdana",   92, "fonts/ttf/verdana.ttf");
+	m_fonts->Load("Quicksand", 50, "fonts/ttf/Quicksand-Regular.ttf");
+	m_fonts->Load("Quicksand", 24, "fonts/ttf/Quicksand-Regular.ttf");
 
 	PushLayer<iw::ImGuiLayer>(Window, m_fonts)->BindContext();
 

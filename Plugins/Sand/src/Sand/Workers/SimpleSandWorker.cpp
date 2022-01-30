@@ -39,8 +39,8 @@ bool SimpleSandWorker::MoveForce(
 	cell.x += cell.dx * dt; // see above dt comment
 	cell.y += cell.dy * dt;
 
-	int int_x = floor(cell.x);
-	int int_y = floor(cell.y);
+	int int_x = (int)floor(cell.x);
+	int int_y = (int)floor(cell.y);
 
 	bool differnt = int_x != x || int_y != y;
 
@@ -145,8 +145,8 @@ bool SimpleSandWorker::MoveRandom(
 	//cell.y += cell.dy * iw::randf();
 
 
-	int xx = x + (iw::randi(2) - 1) * (cell.dx + 1);
-	int yy = y + (iw::randi(2) - 1) * (cell.dy + 1);
+	int xx = x + (int)((iw::randi(2) - 1) * (cell.dx + 1));
+	int yy = y + (int)((iw::randi(2) - 1) * (cell.dy + 1));
 
 	bool r = IsEmpty(xx, yy);
 

@@ -32,11 +32,8 @@ int Menu_Upgrade_Layer::Initialize()
 
 void Menu_Upgrade_Layer::UI()
 {
-	ImGui::GetIO().FontGlobalScale = bg_w / 800;
-
 	ImGui::SetNextWindowPos (ImVec2(bg_x, bg_y));
 	ImGui::SetNextWindowSize(ImVec2(bg_w, bg_h));
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 
 	ImGui::Begin("Main Menu", nullptr, commonFlags);
 	{
@@ -53,8 +50,6 @@ void Menu_Upgrade_Layer::UI()
 		ImGui::PopFont();
 	}
 	ImGui::End();
-
-	ImGui::PopStyleVar(1);
 }
 
 void Menu_Upgrade_Layer::UpgradeTable()

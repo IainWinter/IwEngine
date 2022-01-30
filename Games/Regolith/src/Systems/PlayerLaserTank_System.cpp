@@ -149,7 +149,7 @@ void PlayerLaserTankSystem::Update()
 
 	if (!body)
 	{
-		LOG_WARNING << "No player for tank ui";
+		LOG_TRACE << "No player for tank ui";
 		return;
 	}
 
@@ -182,7 +182,12 @@ void PlayerLaserTankSystem::Update()
 	}
 
 	Player* player = m_player.Find<Player>(); // this is bad to need should be event based
-	
+	if (!player)
+	{
+		LOG_TRACE << "No player for tank ui";
+		return;
+	}
+
 	if (player->i_fire2)
 	{
 		for (int x = 18; x < 22; x++)

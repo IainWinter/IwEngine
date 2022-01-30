@@ -227,8 +227,26 @@ float easeIn(float x)
 	return x * x * x * x;
 }
 
+float __fps;
+
 void Menu_Title_Layer::UI()
 {
+	// tag + fps
+
+	__fps = iw::lerp(__fps, 1.f/iw::DeltaTime(), iw::DeltaTime());
+
+	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 1, 1, .5));
+	ImGui::PushFont(iwFont("Quicksand_24"));
+	ImGui::SetNextWindowPos(ImVec2(0, 0));
+	ImGui::Begin("indev mark", nullptr, commonFlags);
+	{
+		ImGui::Text("indev v.05 fps: %.0f", __fps);
+	}
+	ImGui::End();
+	ImGui::PopFont();
+	ImGui::PopStyleColor();
+
+
 	//iw::StaticPS* smoke_p = smoke.Find<iw::StaticPS>();
 
 	//glm::vec3 p1 = glm::vec3(1.15, -3.75, .7) + glm::normalize(glm::vec3(-.5, 1, 1)) * 3.f;
@@ -317,15 +335,8 @@ void Menu_Title_Layer::UI()
 
 	// draw bg
 
-	ImGui::GetIO().FontGlobalScale = bg_w / 800;
-
 	ImGui::PushFont(iwFont("verdana_36"));
 
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-
-	ImGui::PushStyleColor(ImGuiCol_WindowBg,      ImVec4(0, 0, 0, 0));
-	ImGui::PushStyleColor(ImGuiCol_Border,        ImVec4(0, 0, 0, 0));
 	ImGui::PushStyleColor(ImGuiCol_FrameBg,       ImVec4(1, 1, 1, .5));
 	ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0, 0, 0, 1));
 
@@ -431,7 +442,6 @@ void Menu_Title_Layer::UI()
 		ImGui::End();
 	}
 
-	ImGui::PopStyleVar(2);
-	ImGui::PopStyleColor(9);
+	ImGui::PopStyleColor(7);
 	ImGui::PopFont();
 }
