@@ -226,6 +226,16 @@ bool PlayerSystem::On(iw::ActionEvent& e)
 
 			break;
 		}
+		case PROJ_HIT_TILE:
+		{
+			ProjHitTile_Event& event = e.as<ProjHitTile_Event>();
+			if (event.Config.Hit.Has<Player>())
+			{
+				int handle = Audio->Play("event:/impacts/player_hit");
+				Audio->Set(handle, "Impulse", .5f);
+			}
+			break;
+		}
 		case CHANGE_PLAYER_WEAPON:
 		{
 			ChangePlayerWeapon_Event& event = e.as<ChangePlayerWeapon_Event>();
