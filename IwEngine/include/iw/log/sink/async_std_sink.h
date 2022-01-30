@@ -1,41 +1,60 @@
 #pragma once
 
 #include "async_sink.h"
+#include <iostream>
 
 namespace iw {
 namespace log {
-	class async_stdout_sink
-		: public async_sink
+	struct async_stdout_sink
+		: async_sink
 	{
 	public:
-		IWLOG_API
 		async_stdout_sink(
-			loglevel level);
+			loglevel level
+		)
+			: async_sink (level)
+		{}
 
-		IWLOG_API
+		virtual ~async_stdout_sink() {}
+
 		void async_log(
 			loglevel level,
-			std::string& msg) override;
+			const std::string& msg) override
+		{
+			set_color(level);
+			std::cout << msg;
+		}
 
-		IWLOG_API
-		void flush() override;
+		void flush() override
+		{
+			std::cout.flush();
+		}
 	};
 
-	class async_stderr_sink final
-		: public async_sink
+	struct async_stderr_sink
+		: async_sink
 	{
 	public:
-		IWLOG_API
 		async_stderr_sink(
-			loglevel level);
+			loglevel level
+		)
+			: async_sink (level)
+		{}
 
-		IWLOG_API
+		virtual ~async_stderr_sink() {}
+
 		void async_log(
 			loglevel level,
-			std::string& msg) override;
+			const std::string& msg) override
+		{
+			set_color(level);
+			std::cerr << msg;
+		}
 
-		IWLOG_API
-		void flush() override;
+		void flush() override
+		{
+			std::cerr.flush();
+		}
 	};
 }
 

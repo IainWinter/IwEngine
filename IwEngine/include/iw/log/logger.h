@@ -18,20 +18,41 @@ namespace log {
 		std::string name = "Frame";
 		float time = 0;
 
-		//unsigned my_level = 0;
-		//unsigned my_index = 0;
 		std::vector<log_time> children;
 
 		void push_time(
 			const std::string& name,
 			float begin,
-			unsigned level);
+			unsigned level)
+		{
+			if (level > 0) // recurse
+			{
+				children.back().push_time(name, begin, level - 1);
+				return;
+			}
+
+			if (children.size() == 0) {
+				time = begin;
+			}
+
+			children.push_back({ name, begin });
+		}
 
 		void pop_time(
 			float end,
-			unsigned level);
+			unsigned level)
+		{
+			if (level > 0) // recurse
+			{
+				children.back().pop_time(end, level - 1);
+				return;
+			}
+
+			time = end - time;
+		}
 	};
 #endif
+
 	class logger {
 	private:
 		std::vector<sink*> m_sinks;
@@ -45,16 +66,41 @@ namespace log {
 		std::unordered_map<std::string, std::vector<float>> m_values;
 #endif
 	public:
+		// only reason for cpp file and this library not being header only is to have
+		// the same logger instance for every dll, would like to not need this
+		IWLOG_API static std::string log_tags[5];
+		IWLOG_API static logger& instance();
+
+		void reset()
+		{
+			for (sink* sink : m_sinks)
+			{
+				delete sink;
+			}
+			m_sinks.clear();
+
+#ifdef IW_LOG_TIME
+			clear_times();
+#endif
+		}
+
+		void flush()
+		{
+			for (sink* sink : m_sinks)
+			{
+				sink->flush();
+			}
+		}
+
 		template<
 			typename _sink_t,
-			typename... _Args_T>
+			typename... _args_t>
 		void make_sink(
 			loglevel level,
-			_Args_T&& ... args)
+			_args_t&&... args)
 		{
-			_sink_t* sink = new _sink_t(level, std::forward<_Args_T>(args)...);
+			_sink_t* sink = new _sink_t(level, std::forward<_args_t>(args)...);
 			m_sinks.push_back(sink);
-
 			sink->log(level, preamble);
 		}
 
@@ -64,15 +110,17 @@ namespace log {
 			loglevel level,
 			const _t& obj)
 		{
-			std::stringstream string;
-			string << obj;
-
+			std::stringstream string; string << obj;
 			std::string str = string.str();
+
+			// insert tabs for multi-line messages to match [tags ]
+
 			if (    str.length() > 1
 				&& std::count(str.begin(), str.end(), '\n') > 1)
 			{
 				size_t i = 0;
-				while ((i = str.find_first_of('\n', i + 1)) != std::string::npos) {
+				while ((i = str.find_first_of('\n', i + 1)) != std::string::npos)
+				{
 					str.insert(i + 1, "        ", 0, 8);
 				}
 			}
@@ -80,64 +128,75 @@ namespace log {
 			sink_msg(level, str);
 		}
 #ifdef IW_LOG_TIME
-		IWLOG_API
 		void set_get_time(
-			float(*func)());
+			float(*func)())
+		{
+			m_get_time = func;
+		}
 
-		IWLOG_API
 		void push_time(
-			const std::string& name);
+			const std::string& name)
+		{
+			m_root.push_time(name, m_get_time(), m_current_level);
+			m_current_level++;
+		}
 
-		IWLOG_API
-		void pop_time();
+		void pop_time()
+		{
+			m_root.pop_time(m_get_time(), m_current_level);
+			if (m_current_level > 0) // final pop is at level 0, ends a frame, lil funcky
+			{
+				m_current_level--;
+			}
+		}
 
-		IWLOG_API
-		log_time get_times();
-
-		IWLOG_API
-		void clear_times();
+		log_time&   get_times() { return m_root; }
+		void      clear_times() { m_root = {}; }
 #endif
-
-#ifdef IW_LOG_TIME
-		IWLOG_API
+#ifdef IW_LOG_VALUE
 		void push_value(
 			const std::string& name,
-			float value);
+			float value)
+		{
+			m_values[name].push_back(value);
+		}
 
-		IWLOG_API
-		const std::vector<float>& get_values(
-			const std::string& name);
-
-		IWLOG_API
-		void clear_values();
+		std::vector<float>&   get_values(const std::string& name) { return m_values[name]; }
+		void                clear_values()                        { m_values = {}; }
 #endif
-		IWLOG_API
-		void reset();
 
-		IWLOG_API
-		void flush();
-
-		IWLOG_API
-		static logger& instance();
 	private:
 		logger() = default;
-		logger(logger const&) = delete;
-		logger(logger&&) = delete;
+		logger(const logger&)  = delete;
+		logger(      logger&&) = delete;
+		logger& operator=(const logger&)  = delete;
+		logger& operator=(      logger&&) = delete;
 
-		IWLOG_API
 		void sink_msg(
 			loglevel level,
-			std::string& string);
+			const std::string& string)
+		{
+			for (sink* sink : m_sinks)
+			{
+				if (sink->should_log(level))
+				{
+					sink->log(level, string);
+				}
+			}
+		}
 	};
 
-	class log_view {
-	private:
+	struct log_view {
 		loglevel m_level;
 
-	public:
-		IWLOG_API
 		log_view(
-			loglevel level);
+			loglevel level
+		)
+			: m_level(level)
+		{
+			logger::instance().log(m_level, "\n");
+			logger::instance().log(m_level, logger::instance().log_tags[(int)level]);
+		}
 
 		template<
 			typename _t>
@@ -149,12 +208,17 @@ namespace log {
 		}
 	};
 #ifdef IW_LOG_TIME
-	class IWLOG_API log_time_view {
-	public:
+	struct log_time_view {
 		log_time_view(
-			const std::string& name);
+			const std::string& name)
+		{
+			logger::instance().push_time(name);
+		}
 
-		~log_time_view();
+		~log_time_view()
+		{
+			logger::instance().pop_time();
+		}
 	};
 #endif
 }
@@ -162,7 +226,8 @@ namespace log {
 	using namespace log;
 }
 
-// todo: define when not IW_LOG / IW_LOG_TIME / IW_LOG_VALUE are undefed
+// todo: define when IW_LOG / IW_LOG_TIME / IW_LOG_VALUE are undefed
+// all the << ones are kinda broken lol
 
 #define LOG_RESET iw::logger::instance().reset
 #define LOG_FLUSH iw::logger::instance().flush

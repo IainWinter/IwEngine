@@ -1,35 +1,58 @@
 #pragma once
 
 #include "sink.h"
+#include <iostream>
 
 namespace iw {
 namespace log {
-	class IWLOG_API stdout_sink final
-		: public sink
+	struct stdout_sink
+		: sink
 	{
-	public:
 		stdout_sink(
-			loglevel level);
+			loglevel level
+		)
+			: sink (level)
+		{}
+
+		virtual ~stdout_sink() {}
 
 		void log(
 			loglevel level,
-			std::string& msg);
+			const std::string& msg) override
+		{
+			set_color(level);
+			std::cout << msg;
+		}
 
-		void flush();
+		void flush() override
+		{
+			std::cout.flush();
+		}
 	};
 
-	class IWLOG_API stderr_sink final
-		: public sink
+	struct stderr_sink 
+		: sink
 	{
-	public:
 		stderr_sink(
-			loglevel level);
+			loglevel level
+		)
+			: sink(level)
+		{}
+
+		virtual ~stderr_sink() {}
 
 		void log(
 			loglevel level,
-			std::string& msg);
+			const std::string& msg) override
+		{
+			set_color(level);
+			std::cerr << msg;
+		}
 
-		void flush();
+		void flush() override
+		{
+			std::cerr.flush();
+		}
 	};
 }
 

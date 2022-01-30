@@ -5,25 +5,35 @@
 
 namespace iw {
 namespace log {
-	class file_sink
-		: public sink
+	struct file_sink
+		: sink
 	{
-	private:
 		std::ofstream file;
 
-	public:
-		IWLOG_API
 		file_sink(
 			loglevel level,
-			const char* file);
+			const char* file
+		)
+			: sink (level)
+			, file (std::ofstream(file))
+		{}
 
-		IWLOG_API
+		virtual ~file_sink()
+		{
+			file.close();
+		}
+
 		void log(
 			loglevel level,
-			std::string& msg);
+			const std::string& msg) override
+		{
+			file << msg;
+		}
 
-		IWLOG_API
-		void flush();
+		void flush() override
+		{
+			file.flush();
+		}
 	};
 }
 

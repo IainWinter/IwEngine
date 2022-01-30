@@ -5,28 +5,32 @@
 
 namespace iw {
 namespace log {
-	class IWLOG_API sink {
-	protected:
+	struct sink
+	{
 		loglevel min_level;
 
-	public:
 		sink(
-			loglevel level)
-			: min_level(level) {}
+			loglevel level
+		)
+			: min_level (level)
+		{}
 
-		virtual ~sink() = default;
+		virtual ~sink()
+		{
+			//flush();
+		}
 
-		virtual void log(
-			loglevel level,
-			std::string& msg) = 0;
-
-		virtual void flush() = 0;
-
-		inline bool should_log(
+		bool should_log(
 			loglevel canidate)
 		{
 			return canidate >= min_level;
 		}
+
+		virtual void log(
+			loglevel level,
+			const std::string& msg) = 0;
+
+		virtual void flush() = 0;
 	};
 }
 
