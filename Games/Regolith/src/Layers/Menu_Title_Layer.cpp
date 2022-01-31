@@ -336,17 +336,20 @@ void Menu_Title_Layer::UI()
 
 	// draw bg
 
-	ImGui::PushFont(iwFont("verdana_36"));
+	ImGui::PushFont(iwFont("Quicksand_40"));
 
-	ImGui::PushStyleColor(ImGuiCol_FrameBg,       ImVec4(1, 1, 1, .5));
-	ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0, 0, 0, 1));
+	ImGui::PushStyleColor(ImGuiCol_FrameBg,        ImVec4(1, 1, 1, .2));
+	ImGui::PushStyleColor(ImGuiCol_FrameBgActive,  ImVec4(1, 1, 1, .1));
+	ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(1, 1, 1, .2));
 
-	ImGui::PushStyleColor(ImGuiCol_CheckMark, ImVec4(.2, .2, .2, 1));
+	ImGui::PushStyleColor(ImGuiCol_CheckMark,        ImVec4(1, 1, 1, 1 ));
+	ImGui::PushStyleColor(ImGuiCol_SliderGrab,       ImVec4(1, 1, 1, .2));
+	ImGui::PushStyleColor(ImGuiCol_SliderGrabActive, ImVec4(1, 1, 1, .4));
 
 	ImGui::PushStyleColor(ImGuiCol_Text,          ImVec4(1, 1, 1, menuOpacity));
 	ImGui::PushStyleColor(ImGuiCol_Button,        ImVec4(0, 0, 0, 0));
-	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(.2, .2, .2, 1));
-	ImGui::PushStyleColor(ImGuiCol_ButtonActive,  ImVec4(0, 0, 0, 0));
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1, 1, 1, .2));
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive,  ImVec4(1, 1, 1, .1));
 
 	iw::ITexture* tex = bg->Tex(0)->Handle();
 	if (tex)
@@ -401,13 +404,15 @@ void Menu_Title_Layer::UI()
 
 	else if (target_menu == 2)
 	{
+		ImGui::PushFont(iwFont("Quicksand_30"));
 		ImGui::SetNextWindowPos(ImVec2(bg_x + paddingx - menuOffset, bg_h / 2));
-		ImGui::SetNextWindowSize(ImVec2(-1, -1));
+		ImGui::SetNextWindowSize(ImVec2(bg_w / 1.5, -1));
 		ImGui::Begin("Settings Menu Buttons", nullptr, commonFlagsFocus);
 		{
 			GameSettings.Draw();
 		}
 		ImGui::End();
+		ImGui::PopFont();
 	}
 
 	if (target_menu == 1 || target_menu == 2)
@@ -443,6 +448,6 @@ void Menu_Title_Layer::UI()
 		ImGui::End();
 	}
 
-	ImGui::PopStyleColor(7);
+	ImGui::PopStyleColor(9);
 	ImGui::PopFont();
 }

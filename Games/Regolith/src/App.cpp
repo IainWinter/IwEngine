@@ -19,6 +19,8 @@ int App::Initialize(
 	m_fonts->Load("verdana",   92, "fonts/ttf/verdana.ttf");
 	m_fonts->Load("Quicksand", 50, "fonts/ttf/Quicksand-Regular.ttf");
 	m_fonts->Load("Quicksand", 24, "fonts/ttf/Quicksand-Regular.ttf");
+	m_fonts->Load("Quicksand", 30, "fonts/ttf/Quicksand-Medium.ttf");
+	m_fonts->Load("Quicksand", 40, "fonts/ttf/Quicksand-Medium.ttf");
 
 	PushLayer<iw::ImGuiLayer>(Window, m_fonts)->BindContext();
 
