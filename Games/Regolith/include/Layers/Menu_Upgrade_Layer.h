@@ -10,7 +10,7 @@
 #include <vector>
 #include <array>
 
-struct Menu_Upgrade_Layer : Menu_Layer2
+struct Menu_Upgrade_Layer : Menu_Layer
 {
 	std::array<UpgradeDescription*, 8 * 8> upgrades;
 	std::vector<std::pair<int, UpgradeDescription*>> active;
@@ -25,7 +25,7 @@ struct Menu_Upgrade_Layer : Menu_Layer2
 	Menu_Upgrade_Layer(
 		int totalMoney
 	)
-		: Menu_Layer2    ("Upgrade menu")
+		: Menu_Layer    ("Upgrade menu")
 		, money          (totalMoney)
 		, tooltip        (nullptr)
 		, font           (nullptr)

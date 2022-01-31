@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Layers/Menu_Layer.h"
 
 #include "gl/glew.h"
@@ -16,7 +18,7 @@ enum class MenuTarget
 	GAME
 };
 
-struct Menu_Title_Layer : Menu_Layer2
+struct Menu_Title_Layer : Menu_Layer
 {
 	iw::Entity ball;
 	iw::Entity axis;
@@ -46,7 +48,7 @@ struct Menu_Title_Layer : Menu_Layer2
 	std::function<void()> BackButtonFunc;
 
 	Menu_Title_Layer()
-		: Menu_Layer2 ("Menu Title")
+		: Menu_Layer ("Menu Title")
 		, t  (1)
 		, t1 (1)
 	{

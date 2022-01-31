@@ -8,7 +8,6 @@ int App::Initialize(
 
 	PushLayer<StaticLayer>();
 	PushLayer<Audio_Layer>();
-	PushLayer<UI_Render_Layer>();
 
 	//PushLayer<iw::DebugLayer>();
 

@@ -338,18 +338,18 @@ void Menu_Title_Layer::UI()
 
 	ImGui::PushFont(iwFont("Quicksand_40"));
 
-	ImGui::PushStyleColor(ImGuiCol_FrameBg,        ImVec4(1, 1, 1, .2));
-	ImGui::PushStyleColor(ImGuiCol_FrameBgActive,  ImVec4(1, 1, 1, .1));
-	ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(1, 1, 1, .3));
+	ImGui::PushStyleColor(ImGuiCol_FrameBg,        ImVec4(1, 1, 1, 0.2 * menuOpacity));
+	ImGui::PushStyleColor(ImGuiCol_FrameBgActive,  ImVec4(1, 1, 1, 0.1 * menuOpacity));
+	ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(1, 1, 1, 0.3 * menuOpacity));
 
-	ImGui::PushStyleColor(ImGuiCol_CheckMark,        ImVec4(1, 1, 1, 1 ));
-	ImGui::PushStyleColor(ImGuiCol_SliderGrab,       ImVec4(1, 1, 1, .2));
-	ImGui::PushStyleColor(ImGuiCol_SliderGrabActive, ImVec4(1, 1, 1, .4));
+	ImGui::PushStyleColor(ImGuiCol_CheckMark,        ImVec4(1, 1, 1, 1.0 * menuOpacity));
+	ImGui::PushStyleColor(ImGuiCol_SliderGrab,       ImVec4(1, 1, 1, 0.2 * menuOpacity));
+	ImGui::PushStyleColor(ImGuiCol_SliderGrabActive, ImVec4(1, 1, 1, 0.4 * menuOpacity));
 
-	ImGui::PushStyleColor(ImGuiCol_Text,          ImVec4(1, 1, 1, menuOpacity));
-	ImGui::PushStyleColor(ImGuiCol_Button,        ImVec4(0, 0, 0, 0));
-	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1, 1, 1, .2));
-	ImGui::PushStyleColor(ImGuiCol_ButtonActive,  ImVec4(1, 1, 1, .1));
+	ImGui::PushStyleColor(ImGuiCol_Text,          ImVec4(1, 1, 1, 1.0 * menuOpacity));
+	ImGui::PushStyleColor(ImGuiCol_Button,        ImVec4(0, 0, 0, 0.0));
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1, 1, 1, 0.2 * menuOpacity));
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive,  ImVec4(1, 1, 1, 0.1 * menuOpacity));
 
 	iw::ITexture* tex = bg->Tex(0)->Handle();
 	if (tex)

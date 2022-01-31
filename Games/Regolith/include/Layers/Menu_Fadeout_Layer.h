@@ -2,7 +2,7 @@
 
 #include "Layers/Menu_Layer.h"
 
-struct Menu_Fadeout_Layer : Menu_Layer2
+struct Menu_Fadeout_Layer : Menu_Layer 
 {
 	float m_time;
 	float m_timer;
@@ -12,7 +12,7 @@ struct Menu_Fadeout_Layer : Menu_Layer2
 		float time,
 		float delay
 	)
-		: Menu_Layer2   ("Menu fadeout game")
+		: Menu_Layer    ("Menu fadeout game")
 
 		, m_time        (time)
 		, m_delay       (delay)

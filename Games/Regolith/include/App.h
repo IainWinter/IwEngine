@@ -51,21 +51,6 @@ struct StaticLayer : iw::Layer
 	}
 };
 
-struct UI_Render_Layer : iw::Layer
-{
-	UI_Render_Layer() : iw::Layer("UI render") {}
-
-	void PostUpdate() override
-	{
-		int i = 0;
-		Space->Query<UI_Screen>().Each([&](iw::EntityHandle handle, UI_Screen* ui)
-		{
-			Renderer->SetLayer(i++);
-			ui->Draw(Renderer);
-		});
-	}
-};
-
 class App
 	: public iw::Application
 {
