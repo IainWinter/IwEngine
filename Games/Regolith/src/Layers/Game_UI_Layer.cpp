@@ -358,7 +358,8 @@ bool Menu_GameUI_Layer::On(iw::ActionEvent& e)
 		case PROJ_HIT_TILE:
 		{
 			ProjHitTile_Event& event = e.as<ProjHitTile_Event>();
-			if (event.Config.Hit.Has<Player>())
+			if (   event.Config.Hit.Has<Player>()
+				&& event.Config.Projectile.Alive()) // for crash ?
 			{
 				int index  = event.Config.Info.index;
 				int width  = event.Config.Info.tile->m_sprite.m_width;

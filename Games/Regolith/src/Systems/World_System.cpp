@@ -310,6 +310,28 @@ bool WorldSystem::On(iw::ActionEvent& e)
 	return false;
 }
 
+bool WorldSystem::On(iw::CollisionEvent& e)
+{
+	iw::Entity asteroid, other;
+	if (GetEntitiesFromManifold<Asteroid>(e.Manifold, asteroid, other))
+	{
+		return false;
+	}
+
+	iw::Rigidbody* ar = asteroid.Find<iw::Rigidbody>();
+	iw::Rigidbody* or = other.Find<iw::Rigidbody>();
+
+	glm::vec3 av = asteroid.Find<iw::Rigidbody>()->Velocity;
+	glm::vec3 ov = or ? or ->Velocity : glm::vec3(0.f);
+
+	float relSpeed = glm::length(av - ov);
+	float impulse = glm::clamp(relSpeed / 100.f, 0.f, 1.f);
+
+	Bus->push<PlaySound_Event>("event:/impacts/asteroid", impulse);
+	
+	return false;
+}
+
 iw::Entity WorldSystem::MakeAsteroid(
 	SpawnAsteroid_Config& config)
 {

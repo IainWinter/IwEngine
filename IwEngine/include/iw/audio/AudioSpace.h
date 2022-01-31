@@ -112,7 +112,7 @@ namespace Audio {
 			int handle)
 		{
 			Loaded.emplace(path, handle);
-			LOG_INFO << "Audio Engine loaded: " << path;
+			LOG_INFO << "[Audio] Engine loaded: " << path << ". Handle: " << handle;
 		}
 	};
 }

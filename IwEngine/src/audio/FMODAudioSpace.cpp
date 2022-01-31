@@ -138,7 +138,6 @@ namespace Audio {
 				FMOD_STUDIO_EVENTINSTANCE* einstance,
 				void* parameters)
 			{
-				// wtf is this api
 				FMOD::Studio::EventInstance* instance = 
 					(FMOD::Studio::EventInstance*)einstance;
 				
@@ -189,6 +188,9 @@ namespace Audio {
 				m_instances[handle]->setParameterByName(parameter.c_str(), value),
 				ENGINE_FAILED_SET_PARAM
 			);
+
+			LOG_INFO << "[Audio] Setting instance parameter '"
+				<< parameter << "' on '" << handle << "' to '" << value << "'";
 		}
 
 		return ENGINE_OK;

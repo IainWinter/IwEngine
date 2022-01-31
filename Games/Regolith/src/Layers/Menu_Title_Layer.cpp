@@ -10,6 +10,7 @@ int Menu_Title_Layer::Initialize()
 	GameSettings.Add("VSync", new VSyncSetting());
 	GameSettings.Add("Music", new AudioSetting(Audio, Audio->GetHandle("vca:/music")));
 	GameSettings.Add("Game",  new AudioSetting(Audio, Audio->GetHandle("vca:/effects")));
+
 	GameSettings.Init();
 
 	iw::MeshDescription desc;
@@ -369,19 +370,19 @@ void Menu_Title_Layer::UI()
 		ImGui::SetNextWindowSize(ImVec2(-1, -1));
 		ImGui::Begin("Main Title Buttons", nullptr, commonFlagsFocus);
 		{
-			if (ImGui::Button("Play"))
+			if (Button("Play"))
 			{
 				// do little play animation
 				SetViewGame();
 				Console->QueueCommand("set-state game 1");
 			}
 
-			if (ImGui::Button("Highscores"))
+			if (Button("Highscores"))
 			{
 				SetViewHighscores();
 			}
 
-			if (ImGui::Button("Settings"))
+			if (Button("Settings"))
 			{
 				SetViewSettings();
 			}
@@ -419,13 +420,13 @@ void Menu_Title_Layer::UI()
 
 			if (hasChanged)
 			{
-				if (ImGui::Button("Reset"))
+				if (Button("Reset"))
 				{
 					GameSettings.Reset();
 				}
 
 				ImGui::SameLine();
-				if (ImGui::Button("Apply"))
+				if (Button("Apply"))
 				{
 					GameSettings.Apply();
 				}
@@ -433,7 +434,7 @@ void Menu_Title_Layer::UI()
 
 			else
 			{
-				if (ImGui::Button("Back"))
+				if (Button("Back"))
 				{
 					GoBack();
 				}

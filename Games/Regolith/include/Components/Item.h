@@ -29,5 +29,7 @@ struct Item {
 	bool PickingUp = false;
 	std::function<void()> OnPickUp;
 
+	std::string PickupAudio;
+
 	Item() {}
 };

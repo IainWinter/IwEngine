@@ -45,9 +45,22 @@ void ItemSystem::FixedUpdate()
                 {
                     if (item->OnPickUp) {
                         item->OnPickUp();
+
+                        auto& [count, lasttime] = m_sequential[item->PickupAudio];
+                        if (iw::TotalTime() - lasttime < .4f) count += 1;
+                        else                                  count  = 0;
+                        lasttime = iw::TotalTime();
+
+                        float sequential = iw::clamp(count / 10.f, 0.f, 1.f);
+
+                        PlaySound_Event event(item->PickupAudio);
+                        event.Parameters["Sequential"] = sequential;
+                        Bus->push<PlaySound_Event>(event);
                     }
-                    else {
-                        LOG_WARNING << "Pickedup item with no action!";
+
+                    else
+                    {
+                        LOG_WARNING << "Picked up item with no action!";
                     }
 
                     Space->QueueEntity(entity, iw::func_Destroy);
@@ -170,6 +183,8 @@ iw::Entity ItemSystem::MakeHealth(const SpawnItem_Config& config)
         Bus->push<HealPlayer_Event>();
         Bus->push<HealPlayer_Event>();
     };
+
+    item->PickupAudio = "event:/pickups/health";
 
     return entity;
 }

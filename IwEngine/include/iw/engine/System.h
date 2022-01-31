@@ -155,7 +155,7 @@ namespace Engine {
 			Entity& e1,
 			Entity& e2)
 		{
-			return iw::GetEntitiesFromManifold(Space, manifold, e1, e2);
+			return iw::GetEntitiesFromManifold<_t1, _t2>(Space, manifold, e1, e2);
 		}
 
 		inline CollisionObject* GetPhysicsComponent(

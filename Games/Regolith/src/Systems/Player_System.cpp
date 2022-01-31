@@ -88,6 +88,8 @@ void PlayerSystem::FixedUpdate()
 
 void PlayerSystem::Update()
 {
+	timer.Tick();
+
 	Player*        player    = m_player.Find<Player>();
 	iw::Rigidbody* rigidbody = m_player.Find<iw::Rigidbody>();
 
@@ -118,15 +120,11 @@ void PlayerSystem::Update()
 	{
 		ShotInfo shot = player->CurrentWeapon->GetShot(m_player, aim_x, aim_y);
 		Bus->push<SpawnProjectile_Event>(shot);
+		Bus->push<PlaySound_Event>(player->CurrentWeapon->Audio);
 
 		if (player->CurrentWeapon->Ammo == 0)
 		{
 			Bus->push<ChangePlayerWeapon_Event>(WeaponType::DEFAULT_CANNON);
-		}
-
-		if (player->CurrentWeapon->Audio.size())
-		{
-			Audio->Play(player->CurrentWeapon->Audio);
 		}
 	}
 	
@@ -229,10 +227,15 @@ bool PlayerSystem::On(iw::ActionEvent& e)
 		case PROJ_HIT_TILE:
 		{
 			ProjHitTile_Event& event = e.as<ProjHitTile_Event>();
-			if (event.Config.Hit.Has<Player>())
+			if (   timer.Can("damage sound")
+				&& event.Config.Hit.Has<Player>()
+				&& event.Config.Projectile.Alive())
 			{
-				int handle = Audio->Play("event:/impacts/player_hit");
-				Audio->Set(handle, "Impulse", .5f);
+				// this should be the max speed of any bullet
+				float impulse = glm::length(event.Config.Projectile.Find<iw::Rigidbody>()->Velocity);
+				impulse = iw::clamp(impulse / 700, 0.f, 1.f);
+
+				Bus->push<PlaySound_Event>("event:/impacts/player_hit", impulse);
 			}
 			break;
 		}

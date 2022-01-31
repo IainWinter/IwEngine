@@ -45,6 +45,7 @@ void EnemySystem::FixedUpdate()
 			glm::vec3 pos = ship->Target.Find<iw::Transform>()->Position;
 			ShotInfo shot = fighter->Weapon->GetShot(Space->GetEntity(handle), pos.x, pos.y);
 			Bus->push<SpawnProjectile_Event>(shot);
+			Bus->push<PlaySound_Event>(fighter->Weapon->Audio);
 
 			Audio->Play("event:/weapons/fire_laser");
 		}

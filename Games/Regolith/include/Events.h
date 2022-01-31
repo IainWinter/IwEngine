@@ -34,7 +34,9 @@ enum Actions {
 	CREATED_PLAYER,
 	DESTROYED_PLAYER,
 
-	APPLY_UPGRADE_SET
+	APPLY_UPGRADE_SET,
+
+	PLAY_SOUND,
 };
 
 struct REFLECT SpawnExplosion_Config
@@ -316,4 +318,27 @@ struct /*REFLECT*/ SetCell_Event : iw::SingleEvent
 		: iw::SingleEvent (SET_CELL)
 		, cell(c)
 	{}
+};
+
+struct /*REFLECT*/ PlaySound_Event : iw::SingleEvent
+{
+	std::string Name;
+	std::unordered_map<std::string, float> Parameters;
+
+	PlaySound_Event(
+		const std::string& name
+	)
+		: iw::SingleEvent (PLAY_SOUND)
+		, Name            (name)
+	{}
+
+	PlaySound_Event(
+		const std::string& name,
+		float impulse
+	)
+		: iw::SingleEvent (PLAY_SOUND)
+		, Name            (name)
+	{
+		Parameters["Impulse"] = impulse;
+	}
 };

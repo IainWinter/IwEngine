@@ -19,10 +19,9 @@ struct PlayerSystem : iw::SystemBase
 {
 	iw::SandLayer* sand;
 	iw::Entity m_player;
-
 	iw::HandlerFunc* m_handle;
-
 	std::vector<float> speeds;
+	iw::Timer timer;
 
 	PlayerSystem(
 		iw::SandLayer* sand
@@ -30,7 +29,9 @@ struct PlayerSystem : iw::SystemBase
 		: iw::SystemBase ("Player")
 		, sand           (sand)
 		, m_handle       (nullptr)
-	{}
+	{
+		timer.SetTime("damage sound", .1f, .25f);
+	}
 
 	int Initialize() override;
 	void Destroy() override;
@@ -41,14 +42,10 @@ struct PlayerSystem : iw::SystemBase
 
 	bool On(iw::ActionEvent& e) override;
 
-
-
 	// player moves0
 
 	void FireWeaponMain();
 	void FireWeaponAlt();
-
-
 
 	void UseA();
 	void UseB();

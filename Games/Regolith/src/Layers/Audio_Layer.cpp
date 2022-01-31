@@ -7,8 +7,25 @@ int Audio_Layer::Initialize()
 	Audio->Load("Regolith/Music.bank");
 	Audio->Load("Regolith/Weapons.bank");
 	Audio->Load("Regolith/Impacts.bank");
+	Audio->Load("Regolith/Pickups.bank");
+	Audio->Load("Regolith/UI.bank");
 
-	srand(time(nullptr));
+	m_timer.SetTime("event:/impacts/player_hit", 0.1f, .25f);
+	m_timer.SetTime("event:/impacts/asteroid",   0.1f, .25f);
+
+	m_timer.SetTime("event:/weapons/fire_cannon",  0.01f); // give these a little time for insurance against event spam
+	m_timer.SetTime("event:/weapons/fire_laser",   0.01f);
+	m_timer.SetTime("event:/weapons/fire_minigun", 0.01f);
+
+	m_timer.SetTime("event:/ui/click", 0.01f);
+	m_timer.SetTime("event:/ui/hover", 0.01f);
+
+	m_timer.SetTime("event:/pickups/health", 0.01f);
+
+
+	//m_timer.SetTime("metal hit",  0.1f, .25f);
+
+	/*srand(time(nullptr));
 
 	int i = iw::randi(7) + 1;
 	std::stringstream ss;
@@ -21,62 +38,35 @@ int Audio_Layer::Initialize()
 
 #ifdef IW_DEBUG
 	Audio->SetVolume(Audio->GetHandle("vca:/music"), .0);
-	Audio->SetVolume(Audio->GetHandle("vca:/effects"), .01);
-#endif
+	Audio->SetVolume(Audio->GetHandle("vca:/effects"), .5);
+#endif*/
 
 	return 0;
-}
-
-void Audio_Layer::OnPush()
-{
-	//m_console = Console->AddHandler(
-	//	[this](const iw::Command& command)
-	//	{
-	//		if (command.Verb == "game-start")
-	//		{
-	//			// play game music
-
-	//			if (m_song == -1)
-	//			{
-	//				m_song = Audio->CreateInstance("music_bg", false);
-	//			}
-
-	//			else
-	//			{
-	//				Audio->StartInstance(m_song);
-	//			}
-	//		}
-
-	//		else if (command.Verb == "game-over")
-	//		{
-	//			Audio->StopInstance(m_song);
-	//			// play game over music
-	//		}
-
-	//		else if (command.Verb == "game-reform")
-	//		{ 
-	//			// play reforming music
-	//		}
-
-	//		else if (command.Verb == "quit")
-	//		{
-	//			// play quit game music
-	//		}
-
-	//		return false;
-	//	}
-	//);
-}
-
-void Audio_Layer::OnPop()
-{
-	//Console->RemoveHandler(m_console);
 }
 
 bool Audio_Layer::On(iw::ActionEvent& e)
 {
 	switch (e.Action)
 	{
+		case Actions::PLAY_SOUND:
+		{
+			PlaySound_Event& event = e.as<PlaySound_Event>();
+
+			if (m_timer.Can(event.Name))
+			{
+				int handle = Audio->Play(event.Name);
+				if (handle > 0)
+				{
+					for (const auto& [name, arg] : event.Parameters)
+					{
+						Audio->Set(handle, name, arg);
+					}
+				}
+			}
+
+			break;
+		}
+
 		// shoot
 		//	main gun
 		//  mini gun

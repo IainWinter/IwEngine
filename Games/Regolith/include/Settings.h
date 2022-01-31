@@ -61,7 +61,7 @@ struct AudioSetting : GameSetting
 		iw::ref<iw::IAudioSpace> audio,
 		int audioHandle
 	)
-		: GameSetting (0.f)
+		: GameSetting (50.f)
 		, Audio       (audio)
 		, AudioHandle (audioHandle)
 	{}

@@ -32,12 +32,15 @@ struct WorldSystem : iw::SystemBase
 	)
 		: iw::SystemBase("World")
 		, sand(sand)
-	{}
+	{
+		m_timer.SetTime("asteroid impact", .1f, .25f);
+	}
 
 	void Update() override;
 	void FixedUpdate() override;
 
 	bool On(iw::ActionEvent& e) override;
+	bool On(iw::CollisionEvent& e) override;
 private:
 	iw::Entity MakeAsteroid(SpawnAsteroid_Config& config);
 

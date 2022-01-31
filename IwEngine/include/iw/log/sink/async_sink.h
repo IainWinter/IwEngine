@@ -26,7 +26,7 @@ namespace log {
 			, m_thread ([this] { async_logger(); })
 		{}
 
-		virtual ~async_sink()
+		virtual ~async_sink() // this stil crashes :( really not sure why
 		{
 			m_messages.push({loglevel::INFO, "", true});
 			m_thread.join();

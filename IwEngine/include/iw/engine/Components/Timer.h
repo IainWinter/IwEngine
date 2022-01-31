@@ -22,10 +22,12 @@ namespace Engine {
 			Times[name] = std::tuple<float, float, float>(0.f, time, margin);
 		}
 
-		float& GetTimer (const std::string& name) { return std::get<0>(Times[name]); }
-		float& GetTime  (const std::string& name) { return std::get<1>(Times[name]); }
-		float& GetMargin(const std::string& name) { return std::get<2>(Times[name]); }
+		// will throw if name isnt a timer
+		float& GetTimer (const std::string& name) { return std::get<0>(Times.at(name)); }
+		float& GetTime  (const std::string& name) { return std::get<1>(Times.at(name)); }
+		float& GetMargin(const std::string& name) { return std::get<2>(Times.at(name)); }
 
+		// will return false if name isnt a timer
 		bool Can(
 			const std::string& name)
 		{
@@ -38,9 +40,14 @@ namespace Engine {
 			return past;
 		}
 
+		// will return false if name isnt a timer
 		bool PastTime(
 			const std::string& name)
 		{
+			if (Times.find(name) == Times.end()) {
+				return false;
+			}
+
 			return GetTime(name) < GetTimer(name);
 		}
 
