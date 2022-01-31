@@ -340,7 +340,7 @@ void Menu_Title_Layer::UI()
 
 	ImGui::PushStyleColor(ImGuiCol_FrameBg,        ImVec4(1, 1, 1, .2));
 	ImGui::PushStyleColor(ImGuiCol_FrameBgActive,  ImVec4(1, 1, 1, .1));
-	ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(1, 1, 1, .2));
+	ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(1, 1, 1, .3));
 
 	ImGui::PushStyleColor(ImGuiCol_CheckMark,        ImVec4(1, 1, 1, 1 ));
 	ImGui::PushStyleColor(ImGuiCol_SliderGrab,       ImVec4(1, 1, 1, .2));

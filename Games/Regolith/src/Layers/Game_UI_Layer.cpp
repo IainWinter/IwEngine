@@ -3,9 +3,9 @@
 int Menu_GameUI_Layer::Initialize()
 {
 	RegisterImage("ui_background.png");
-	imgs["game"] = (void*)m_sand_game    ->GetSandTextureId();
-	imgs["tank"] = (void*)m_sand_ui_laser->GetSandTextureId();
-	imgs["player"] = (void*)A_mesh_ui_playerHealth.Material->GetTexture("texture")->Handle()->Id();
+	RegisterImage("game", m_sand_game    ->GetSandTextureId());
+	RegisterImage("tank", m_sand_ui_laser->GetSandTextureId());
+	RegisterImage("player", (void*)A_mesh_ui_playerHealth.Material->GetTexture("texture")->Handle()->Id());
 
 	m_playerImgWidth = A_mesh_ui_playerHealth.Material->GetTexture("texture")->Width();
 
@@ -46,7 +46,7 @@ void Menu_GameUI_Layer::UI()
 		// background
 
 		ImGui::SetCursorPos(ImVec2(0, 0));
-		ImGui::Image(imgs["ui_background.png"], ImVec2(bg_w, ui_h));
+		ImGui::Image(Image("ui_background.png"), ImVec2(bg_w, ui_h));
 		
 		// player
 
@@ -55,7 +55,7 @@ void Menu_GameUI_Layer::UI()
 		float player_y  = 5 * scale;
 
 		ImGui::SetCursorPos(ImVec2(player_x, player_y));
-		ImGui::Image(imgs["player"], ImVec2(player_wh, player_wh));
+		ImGui::Image(Image("player"), ImVec2(player_wh, player_wh));
 
 		// ammo and score text
 		// could make this on exact center with a ImGui::TextSize calculation
@@ -122,7 +122,7 @@ void Menu_GameUI_Layer::UI()
 	ImGui::SetNextWindowSize(ImVec2(bg_w, bg_h - ui_h));
 	ImGui::Begin("Main Game Board", nullptr, commonFlags);
 	{
-		ImGui::Image(imgs["game"], ImVec2(bg_w, bg_h - ui_h));
+		ImGui::Image(Image("game"), ImVec2(bg_w, bg_h - ui_h));
 	}
 	ImGui::End();
 	ImGui::PopFont();

@@ -4,6 +4,8 @@
 int App::Initialize(
 	iw::InitOptions& options)
 {
+	SetMenuStateAppVars(APP_VARS_LIST);
+
 	PushLayer<StaticLayer>();
 	PushLayer<Audio_Layer>();
 	PushLayer<UI_Render_Layer>();

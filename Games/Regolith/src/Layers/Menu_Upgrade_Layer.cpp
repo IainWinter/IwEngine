@@ -100,7 +100,7 @@ void Menu_Upgrade_Layer::UpgradeTable()
 									   ? ImVec4(1, 1, 1, 1)
 									   : ImVec4(1, .5, .5, 1);
 
-				if (   ImGui::ImageButton(imgs[upgrade->TexturePath], size, uv0, uv1, frame, bg, tint)
+				if (   ImGui::ImageButton(Image(upgrade->TexturePath), size, uv0, uv1, frame, bg, tint)
 					&& afford)
 				{
 					money -= upgrade->CostStatTable[upgrade->NumberBought].first;
@@ -169,7 +169,7 @@ void Menu_Upgrade_Layer::ActiveTable()
 				auto [index, upgrade] = active.at(i);
 
 				ImGui::TableNextCell();
-				if (ImGui::ImageButton(imgs[upgrade->TexturePath], ImVec2(upgradeSize, upgradeSize)))
+				if (ImGui::ImageButton(Image(upgrade->TexturePath), ImVec2(upgradeSize, upgradeSize)))
 				{
 					upgrades[index] = upgrade;
 					active.erase(active.begin() + i);

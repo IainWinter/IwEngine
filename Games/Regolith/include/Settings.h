@@ -1,5 +1,7 @@
 #pragma once
 
+#include "MenuState.h"
+
 #include <string>
 #include <unordered_map>
 
@@ -49,7 +51,7 @@ struct VSyncSetting : GameSetting
 {
 	VSyncSetting() : GameSetting(false) {}
 	void ApplySetting()                override { wglSwapIntervalEXT((int)IsEnabled); }
-	void DrawSetting(const char* name) override { ImGui::Checkbox(name, &Working_IsEnabled); }
+	void DrawSetting(const char* name) override { Checkbox(name, Working_IsEnabled); }
 };
 
 struct AudioSetting : GameSetting
@@ -67,7 +69,7 @@ struct AudioSetting : GameSetting
 	{}
 
 	void ApplySetting()                override { Audio->SetVolume(AudioHandle, Value / 100.f); }
-	void DrawSetting(const char* name) override { ImGui::SliderFloat(name, &Working_Value, 0.f, 100.f, "%.0f"); }
+	void DrawSetting(const char* name) override { SliderFloat(name, Working_Value, 0.f, 100.f, "%.0f"); }
 };
 
 struct GameSettings

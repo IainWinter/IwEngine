@@ -5,6 +5,7 @@
 
 #include "Upgrade.h"
 #include "Events.h"
+#include "MenuState.h"
 
 #include <vector>
 #include <array>

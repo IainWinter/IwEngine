@@ -4,6 +4,7 @@
 #include "Events.h"
 #include "Helpers.h"
 #include "Weapons.h"
+#include "MenuState.h"
 
 #include "Components/CorePixels.h"
 #include "plugins/iw/Sand/Engine/SandLayer.h"

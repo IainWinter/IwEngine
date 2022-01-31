@@ -7,13 +7,8 @@
 #include <string>
 #include <unordered_map>
 
-#define LoadTexture(x) Asset->Load<iw::Texture>(std::string("textures/SpaceGame/") + x)
-
 struct Menu_Layer2 : iw::Layer
 {
-	std::unordered_map<std::string, void*> imgs;
-	std::unordered_map<std::string, bool>  hovered;
-
 	float window_w;
 	float window_h;
 
@@ -84,50 +79,6 @@ struct Menu_Layer2 : iw::Layer
 	}
 
 	virtual void UI() = 0;
-
-	void RegisterImage(const std::string& str)
-	{
-		auto img = LoadTexture(str);
-		img->SetFilter(iw::NEAREST);
-		img->Initialize(Renderer->Now->Device);
-
-		imgs[str] = (void*)(size_t)img->Handle()->Id();
-	}
-
-	bool Button(const std::string& name)
-	{
-		bool isClicked = ImGui::Button(name.c_str());
-		PlayHoverOrClickSound(name, isClicked);
-		return isClicked;
-	}
-
-	bool Checkbox(const std::string& name, bool& active)
-	{
-		bool isClicked = ImGui::Checkbox(name.c_str(), &active);
-		PlayHoverOrClickSound(name, isClicked);
-		return isClicked;
-	}
-
-	void PlayHoverOrClickSound(const std::string& name, bool isClicked)
-	{
-		bool isHovered = ImGui::IsItemHovered();
-
-		if (isHovered) {
-			if (!hovered[name]) {
-				Bus->push<PlaySound_Event>("event:/ui/hover");
-			}
-
-			hovered[name] = true;
-		}
-
-		else {
-			hovered[name] = false;
-		}
-
-		if (isClicked) {
-			Bus->push<PlaySound_Event>("event:/ui/click");
-		}
-	}
 };
 
 #undef LoadTexture
