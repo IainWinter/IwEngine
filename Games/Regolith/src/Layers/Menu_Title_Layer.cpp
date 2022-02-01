@@ -51,7 +51,7 @@ int Menu_Title_Layer::Initialize()
 
 	ortho = iw::OrthographicCamera(4, 5, 0, 20);
 	persp = iw::PerspectiveCamera(.67, 4/5.f);
-
+	//persp.RecalculateProjection();
 	//iw::ISystem* sis = PushSystem<iw::SpaceInspectorSystem>();
 	//sis->Initialize();
 
@@ -123,6 +123,17 @@ int Menu_Title_Layer::Initialize()
 	title_st = Space->CreateEntity<iw::Transform, iw::Mesh>();
 	title_st.Set<iw::Transform>(glm::vec3(5.15, -4.8, 2), glm::vec3(.8f), glm::quat(.98, 0, .2, 0));
 	title_st.Set<iw::Mesh>(title_st_mesh);
+
+	// title pause
+
+	//iw::Mesh title_ps_mesh = Asset->Load<iw::Model>("models/SpaceGame/title_pause.glb")->GetMesh(0);
+	//title_ps_mesh.Material = REF<iw::Material>(Asset->Load<iw::Shader>("shaders/texture_cam.shader"));
+	//title_ps_mesh.Material->Set("color", iw::Color(1));
+	//Renderer->Now->InitShader(title_ps_mesh.Material->Shader, iw::CAMERA);
+
+	//title_ps = Space->CreateEntity<iw::Transform, iw::Mesh>();
+	//title_ps.Set<iw::Transform>(glm::vec3(0, 10, 3), glm::vec3(.8f), glm::quat(1, 0, 0, 0));
+	//title_ps.Set<iw::Mesh>(title_ps_mesh);
 
 	//stars
 
@@ -277,17 +288,19 @@ void Menu_Title_Layer::UI()
 
 	iw::Camera* cam = MainScene->MainCamera();
 
-	glm::vec3 pos = cam->Transform.Position;
-	glm::quat rot = cam->Transform.Rotation;
+	glm::vec3& pos = cam->Transform.Position;
+	glm::quat& rot = cam->Transform.Rotation;
 
 	if (target_menu != last_menu)
 	{
 		last_menu = target_menu;
 		last_pos = pos;
 		last_rot = rot;
+		last_pers = pers;
 
-		t = 0;
+		t  = 0;
 		t1 = 0;
+		t2 = 0;
 	}
 
 	if (t >= 1) t = 1;
@@ -296,25 +309,19 @@ void Menu_Title_Layer::UI()
 	if (t1 >= 1) t1 = 1;
 	else         t1 += iw::DeltaTime() * 3;
 
-	float x = iw::lerp(0.f, 1.f, easeInOut(t));
+	if (t2 >= 1) t2 = 1;
+	else         t2 += iw::DeltaTime() * 5;
+
+	pos = glm::normalize(iw::lerp(last_pos, target_pos, easeInOut(t))) * 10.f;
+	rot = glm::slerp(last_rot, target_rot, easeInOut(t));
+
+	pers = iw::lerp(last_pers, target_pers, easeInOut(t2));
+	cam->Projection = iw::lerp(ortho.Projection, persp.Projection, pers);
+	//title_ps.Find<iw::Transform>()->Position = iw::lerp(glm::vec3(0, 10, 2), glm::vec3(3.7, 7.7, -3), pers);
 
 	float menuOffset  = iw::lerp(1.f, 0.f, easeInOut(t1)) * 50;
-	float menuOpacity = iw::lerp(0.f, 1.f, easeIn(t1));
+	float menuOpacity = iw::lerp(0.f, 1.f, easeIn   (t1));
 
-	//// temp
-	//ImGui::GetIO().FontGlobalScale = 1;
-	//ImGui::Begin("asdasd");
-	//ImGui::SliderFloat("mix", &x, 0, 1);
-	//ImGui::SliderFloat3("pos", (float*)&cam->Transform.Position, -10, 10);
-	//ImGui::SliderFloat4("rot", (float*)&cam->Transform.Rotation, -1, 1);
-	//ImGui::SliderFloat("fov", (float*)&persp.Fov, 0, iw::Pi2);
-	//ImGui::End();
-	persp.RecalculateProjection();
-	cam->Projection = iw::lerp(ortho.Projection, persp.Projection, 0/*sin(iw::Pi * x)*/);
-	cam->Transform.Rotation = glm::slerp(last_rot, target_rot, x);
-	cam->Transform.Position = iw ::lerp(last_pos, target_pos, x);
-	cam->Transform.Position = glm::normalize(cam->Transform.Position) * 10.f;
-	
 	// end temp
 	
 	// render bg frame
@@ -330,6 +337,7 @@ void Menu_Title_Layer::UI()
 		Renderer->DrawMesh(title   .Find<iw::Transform>(), title   .Find<iw::Mesh>());
 		Renderer->DrawMesh(title_hs.Find<iw::Transform>(), title_hs.Find<iw::Mesh>());
 		Renderer->DrawMesh(title_st.Find<iw::Transform>(), title_st.Find<iw::Mesh>());
+		//Renderer->DrawMesh(title_ps.Find<iw::Transform>(), title_ps.Find<iw::Mesh>());
 		//Renderer->DrawMesh(axis .Find<iw::Transform>(), axis  .Find<iw::Mesh>());
 	}
 	Renderer->EndScene();
@@ -392,7 +400,8 @@ void Menu_Title_Layer::UI()
 		}
 		ImGui::End();
 	}
-	else if (target_menu == 1)
+
+	if (target_menu == 1)
 	{
 		highscoreParts.ScoreTable(
 			bg_x + paddingx - menuOffset, 
@@ -402,7 +411,7 @@ void Menu_Title_Layer::UI()
 		);
 	}
 
-	else if (target_menu == 2)
+	if (target_menu == 2 || target_menu == 4)
 	{
 		ImGui::PushFont(iwFont("Quicksand_30"));
 		ImGui::SetNextWindowPos(ImVec2(bg_x + paddingx - menuOffset, bg_h / 2));
@@ -415,7 +424,44 @@ void Menu_Title_Layer::UI()
 		ImGui::PopFont();
 	}
 
-	if (target_menu == 1 || target_menu == 2)
+	if (target_menu == 3 || target_menu == 4)
+	{
+		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0, 0, 0, menuOpacity * .5f));
+
+		ImGui::SetNextWindowPos (ImVec2(bg_x, bg_y));
+		ImGui::SetNextWindowSize(ImVec2(bg_w, bg_h));
+		ImGui::Begin("Fade Background", nullptr, commonFlags);
+		ImGui::End();
+
+		ImGui::PopStyleColor();
+	}
+
+	if (target_menu == 3)
+	{
+		ImGui::SetNextWindowPos (ImVec2(bg_x + paddingx - menuOffset, bg_h / 2));
+		ImGui::SetNextWindowSize(ImVec2(bg_w / 1.5, -1));
+		ImGui::Begin("Pause Menu Buttons", nullptr, commonFlagsFocus);
+		{
+			//ImGui::PushFont(iwFont("Quicksand_60"));
+			//ImGui::Text("Pause");
+			//ImGui::PopFont();
+
+			if (Button("Settings"))
+			{
+				target_menu = 4;
+				BackButtonTarget = MenuTarget::PAUSE;
+				BackButtonFunc = {};
+			}
+
+			if (Button("Resume"))
+			{
+				Console->QueueCommand("escape");
+			}
+		}
+		ImGui::End();
+	}
+
+	if (target_menu == 1 || target_menu == 2 || target_menu == 4)
 	{
 		ImGui::SetNextWindowPos(ImVec2(bg_x + paddingx - menuOffset, bg_h - padding_1));
 		ImGui::SetNextWindowSize(ImVec2(-1, -1));

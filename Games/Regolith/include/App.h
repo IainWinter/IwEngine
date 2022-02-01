@@ -83,7 +83,7 @@ public:
 	{
 		m_menus->BackButtonFunc = [this]() { ChangeBackToGame(); };
 		m_menus->BackButtonTarget = MenuTarget::GAME;
-		m_menus->SetViewSettings();
+		m_menus->SetViewPause();
 		PopLayer(m_game->sand);
 		PopLayer(m_game->sand_ui_laserCharge);
 		PopLayer(m_game);

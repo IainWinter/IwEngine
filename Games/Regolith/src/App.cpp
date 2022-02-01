@@ -22,6 +22,7 @@ int App::Initialize(
 	m_fonts->Load("Quicksand", 24, "fonts/ttf/Quicksand-Regular.ttf");
 	m_fonts->Load("Quicksand", 30, "fonts/ttf/Quicksand-Medium.ttf");
 	m_fonts->Load("Quicksand", 40, "fonts/ttf/Quicksand-Medium.ttf");
+	m_fonts->Load("Quicksand", 60, "fonts/ttf/Quicksand-Medium.ttf");
 
 	PushLayer<iw::ImGuiLayer>(Window, m_fonts)->BindContext();
 
@@ -128,11 +129,17 @@ int App::Initialize(
 		{
 			switch (m_state)
 			{
+				case StateName::IN_MENU:
+					m_menus->Escape();
+					break;
 				case StateName::IN_GAME:
 					ChangeToPauseMenu();
 					break;
 				case StateName::IN_GAME_THEN_MENU:
-					ChangeBackToGame();
+					if (m_menus->target_menu != 3)
+						m_menus->Escape();
+					else
+						ChangeBackToGame();
 					break;
 				default:
 					break;
