@@ -62,6 +62,11 @@ struct Menu_Layer : iw::Layer
 		bg_x = (window_w - bg_w) * .5f;
 		bg_y = 0.f;
 
+		bg_h = floor(bg_h);
+		bg_w = floor(bg_w);
+		bg_x = floor(bg_x);
+		bg_y = floor(bg_y);
+
 		padding_1  = bg_w * .1f;
 		padding_01 = bg_w * .01f;
 

@@ -82,11 +82,14 @@ struct GameSettings
 		HasChanged = false;
 	}
 
-	void Draw()
+	void Draw(int x, int y, int width)
 	{
 		HasChanged = false;
+		ImGui::SetCursorPosY(y);
 		for (auto& [name, setting] : Settings)
 		{
+			ImGui::SetCursorPosX(x);
+			ImGui::SetNextItemWidth(width);
 			setting->DrawSetting(name.c_str());
 			HasChanged |= setting->HasChanged();
 		}

@@ -34,7 +34,6 @@ struct Menu_Title_Layer : Menu_Layer
 	iw::OrthographicCamera ortho;
 	float t;
 	float t1;
-	float t2;
 
 	glm::vec3 target_pos;
 	glm::quat target_rot;
@@ -48,6 +47,9 @@ struct Menu_Title_Layer : Menu_Layer
 	int target_menu;
 	int last_menu;
 
+	float fade;
+	float target_fade;
+
 	Highscores_MenuParts highscoreParts;
 
 	GameSettings GameSettings;
@@ -55,11 +57,12 @@ struct Menu_Title_Layer : Menu_Layer
 	std::function<void()> BackButtonFunc;
 
 	Menu_Title_Layer()
-		: Menu_Layer ("Menu Title")
-		, t          (1.f)
-		, t1         (1.f)
-		, t2         (1.f)
-		, pers       (0.f)
+		: Menu_Layer  ("Menu Title")
+		, t           (1.f)
+		, t1          (1.f)
+		, pers        (0.f)
+		, fade        (0.f)
+		, target_fade (0.f)
 	{
 		SetViewDefault();
 		last_menu = target_menu;
@@ -74,6 +77,7 @@ struct Menu_Title_Layer : Menu_Layer
 		target_pers = 0.f;
 		target_pos = glm::vec3(0, 0, 10);
 		target_rot = glm::quat(1, 0, 0, 0);
+		target_fade = 0.f;
 	}
 
 	void SetViewHighscores()
@@ -82,6 +86,7 @@ struct Menu_Title_Layer : Menu_Layer
 		target_pers = 0.f;
 		target_pos = glm::vec3(10, 0, 0);
 		target_rot = glm::quat(sqrt(2) / 2, 0, sqrt(2) / 2, 0);
+		target_fade = 0.f;
 	}
 
 	void SetViewSettings()
@@ -90,12 +95,14 @@ struct Menu_Title_Layer : Menu_Layer
 		target_pers = 0.f;
 		target_pos = glm::vec3(7.4, -8, 5);
 		target_rot = glm::quat(.98, 0, .2, 0);
+		target_fade = 0.f;
 	}
 
 	void SetViewPause()
 	{
 		target_menu = 3;
-		target_pers = 1.f;
+		//target_pers = 1.f;
+		target_fade = 0.6f;
 	}
 
 	void SetViewGame()
@@ -104,6 +111,7 @@ struct Menu_Title_Layer : Menu_Layer
 		target_pers = 0.f;
 		target_pos = glm::vec3(10, 10, 10);
 		target_rot = glm::quat(1, 0, 0, 0);
+		target_fade = 0.f;
 	}
 
 	void GoBack()

@@ -98,9 +98,9 @@ public:
 		m_menus->BackButtonFunc = {};
 		m_menus->BackButtonTarget = MenuTarget::DEFAULT;
 		m_menus->SetViewGame(); // some random place with stars
-		PushLayer(m_game->sand);
-		PushLayer(m_game->sand_ui_laserCharge);
-		PushLayer(m_game);
+		PushLayerFront(m_game->sand);
+		PushLayerFront(m_game->sand_ui_laserCharge);
+		PushLayerFront(m_game);
 		//PushLayer(m_gameUI);
 		Input->SetContext("game");
 		Physics->Paused = false;

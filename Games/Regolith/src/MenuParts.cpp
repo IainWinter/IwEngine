@@ -16,7 +16,7 @@ void Highscores_MenuParts::ScoreTable(
 	ImGui::SetNextWindowPos (ImVec2(x,  y - height));
 	ImGui::SetNextWindowSize(ImVec2(w, h));
 
-	ImGui::Begin("Upgrade title", nullptr, commonFlagsFocus);
+	ImGui::Begin("Highscores title", nullptr, commonFlagsFocus);
 	{
 		if (ImGui::BeginTable("Upgrades", 3))
 		{
@@ -59,7 +59,7 @@ void Highscores_MenuParts::ScoreTable(
 	ImGui::SetNextWindowPos (ImVec2(x, y));
 	ImGui::SetNextWindowSize(ImVec2(w, h));
 
-	ImGui::Begin("Upgrades", nullptr, commonFlagsFocus);
+	ImGui::Begin("Highscores", nullptr, commonFlagsFocus);
 	{
 		if (ImGui::BeginTable("Upgrades", 3))
 		{

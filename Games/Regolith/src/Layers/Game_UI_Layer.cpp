@@ -14,8 +14,8 @@ int Menu_GameUI_Layer::Initialize()
 
 void Menu_GameUI_Layer::UI()
 {
-	float ui_h = bg_h * .2f;
-	float ui_y = bg_h - ui_h;
+	float ui_h = floor(bg_h * .2f);
+	float ui_y = bg_h - ui_h - iw::randf() * m_jitter;
 
 	float scale = bg_w / 200.f;
 
@@ -39,11 +39,16 @@ void Menu_GameUI_Layer::UI()
 	// Draw the main ui
 
 	ImGui::PushFont(iwFont("Quicksand_50"));
-	ImGui::SetNextWindowPos (ImVec2(bg_x + iw::randf() * m_jitter, ui_y - iw::randf() * m_jitter));
+	ImGui::SetNextWindowPos (ImVec2(bg_x, ui_y));
 	ImGui::SetNextWindowSize(ImVec2(bg_w, ui_h));
-	ImGui::Begin("Main Game UI", nullptr, commonFlags);
+	ImGui::Begin("Main Game UI", nullptr, commonFlagsFocus);
 	{
-		// background
+		// game
+
+		//ImGui::SetCursorPos(ImVec2(0, 0));
+		//ImGui::Image(Image("game"), ImVec2(bg_w, bg_h - ui_h));
+
+		// ui 
 
 		ImGui::SetCursorPos(ImVec2(0, 0));
 		ImGui::Image(Image("ui_background.png"), ImVec2(bg_w, ui_h));
@@ -52,7 +57,7 @@ void Menu_GameUI_Layer::UI()
 
 		float player_wh = 40 * scale;
 		float player_x  = 80 * scale;
-		float player_y  = 5 * scale;
+		float player_y  =  5 * scale;
 
 		ImGui::SetCursorPos(ImVec2(player_x, player_y));
 		ImGui::Image(Image("player"), ImVec2(player_wh, player_wh));

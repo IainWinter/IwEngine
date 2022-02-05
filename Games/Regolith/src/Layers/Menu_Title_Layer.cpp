@@ -247,6 +247,8 @@ void Menu_Title_Layer::UI()
 
 	__fps = iw::lerp(__fps, 1.f/iw::DeltaTime(), iw::DeltaTime());
 
+	ImGui::ShowMetricsWindow();
+
 	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 1, 1, .5));
 	ImGui::PushFont(iwFont("Quicksand_24"));
 	ImGui::SetNextWindowPos(ImVec2(0, 0));
@@ -257,7 +259,6 @@ void Menu_Title_Layer::UI()
 	ImGui::End();
 	ImGui::PopFont();
 	ImGui::PopStyleColor();
-
 
 	//iw::StaticPS* smoke_p = smoke.Find<iw::StaticPS>();
 
@@ -300,7 +301,6 @@ void Menu_Title_Layer::UI()
 
 		t  = 0;
 		t1 = 0;
-		t2 = 0;
 	}
 
 	if (t >= 1) t = 1;
@@ -309,13 +309,10 @@ void Menu_Title_Layer::UI()
 	if (t1 >= 1) t1 = 1;
 	else         t1 += iw::DeltaTime() * 3;
 
-	if (t2 >= 1) t2 = 1;
-	else         t2 += iw::DeltaTime() * 5;
-
 	pos = glm::normalize(iw::lerp(last_pos, target_pos, easeInOut(t))) * 10.f;
 	rot = glm::slerp(last_rot, target_rot, easeInOut(t));
 
-	pers = iw::lerp(last_pers, target_pers, easeInOut(t2));
+	pers = iw::lerp(last_pers, target_pers, easeInOut(t1));
 	cam->Projection = iw::lerp(ortho.Projection, persp.Projection, pers);
 	//title_ps.Find<iw::Transform>()->Position = iw::lerp(glm::vec3(0, 10, 2), glm::vec3(3.7, 7.7, -3), pers);
 
@@ -359,16 +356,25 @@ void Menu_Title_Layer::UI()
 	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1, 1, 1, 0.2 * menuOpacity));
 	ImGui::PushStyleColor(ImGuiCol_ButtonActive,  ImVec4(1, 1, 1, 0.1 * menuOpacity));
 
+	ImGui::SetNextWindowPos (ImVec2(bg_x, bg_y));
+	ImGui::SetNextWindowSize(ImVec2(bg_w, bg_h));
+	ImGui::Begin("Main Menu Layer", nullptr, commonFlags);
+
+	fade = iw::lerp(fade, target_fade, iw::DeltaTime() * 20.f);
+
+	if (fade > 0.001f)
+	{
+		ImGui::GetWindowDrawList()->AddRectFilled(
+			ImVec2(bg_x, bg_y),
+			ImVec2(bg_x + bg_w, bg_y + bg_h), iw::Color::From255(31, 32, 38, 255 * fade).to32()
+		);
+	}
+	
 	iw::ITexture* tex = bg->Tex(0)->Handle();
 	if (tex)
 	{
-		ImGui::SetNextWindowPos (ImVec2(bg_x, bg_y));
-		ImGui::SetNextWindowSize(ImVec2(bg_w, bg_h));
-		ImGui::Begin("Main Title Background", nullptr, commonFlags);
-		{
-			ImGui::Image((void*)tex->Id(), ImVec2(bg_w, bg_h), ImVec2(0, 1), ImVec2(1, 0));
-		}
-		ImGui::End();
+		ImGui::SetCursorPos(ImVec2(0, 0));
+		ImGui::Image((void*)tex->Id(), ImVec2(bg_w, bg_h), ImVec2(0, 1), ImVec2(1, 0));
 	}
 
 	// draw buttons
@@ -377,29 +383,22 @@ void Menu_Title_Layer::UI()
 
 	if (target_menu == 0)
 	{
-		ImGui::SetNextWindowPos (ImVec2(bg_x + paddingx - menuOffset, bg_h / 2));
-		ImGui::SetNextWindowSize(ImVec2(-1, -1));
-		ImGui::Begin("Main Title Buttons", nullptr, commonFlagsFocus);
+		float x = paddingx - menuOffset;
+
+		ImGui::SetCursorPos(ImVec2(x, bg_h / 2));
+		if (Button("Play"))
 		{
-			if (Button("Play"))
-			{
-				// do little play animation
-				SetViewGame();
-				Console->QueueCommand("set-state game 1");
-			}
-
-			if (Button("Highscores"))
-			{
-				SetViewHighscores();
-			}
-
-			if (Button("Settings"))
-			{
-				SetViewSettings();
-			}
+			SetViewGame(); // do little play animation
+			Console->QueueCommand("set-state game 1");
 		}
-		ImGui::End();
+
+		ImGui::SetCursorPosX(x);
+		if (Button("Highscores")) SetViewHighscores();
+
+		ImGui::SetCursorPosX(x);
+		if (Button("Settings")) SetViewSettings();
 	}
+
 
 	if (target_menu == 1)
 	{
@@ -413,87 +412,58 @@ void Menu_Title_Layer::UI()
 
 	if (target_menu == 2 || target_menu == 4)
 	{
+		int y = bg_h / 2;
+
+		if (target_menu == 4)
+		{
+			y = bg_h / 3;
+		}
+
 		ImGui::PushFont(iwFont("Quicksand_30"));
-		ImGui::SetNextWindowPos(ImVec2(bg_x + paddingx - menuOffset, bg_h / 2));
-		ImGui::SetNextWindowSize(ImVec2(bg_w / 1.5, -1));
-		ImGui::Begin("Settings Menu Buttons", nullptr, commonFlagsFocus);
-		{
-			GameSettings.Draw();
-		}
-		ImGui::End();
+		GameSettings.Draw(paddingx - menuOffset, y, bg_w / 2);
 		ImGui::PopFont();
-	}
-
-	if (target_menu == 3 || target_menu == 4)
-	{
-		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0, 0, 0, menuOpacity * .5f));
-
-		ImGui::SetNextWindowPos (ImVec2(bg_x, bg_y));
-		ImGui::SetNextWindowSize(ImVec2(bg_w, bg_h));
-		ImGui::Begin("Fade Background", nullptr, commonFlags);
-		ImGui::End();
-
-		ImGui::PopStyleColor();
-	}
-
-	if (target_menu == 3)
-	{
-		ImGui::SetNextWindowPos (ImVec2(bg_x + paddingx - menuOffset, bg_h / 2));
-		ImGui::SetNextWindowSize(ImVec2(bg_w / 1.5, -1));
-		ImGui::Begin("Pause Menu Buttons", nullptr, commonFlagsFocus);
-		{
-			//ImGui::PushFont(iwFont("Quicksand_60"));
-			//ImGui::Text("Pause");
-			//ImGui::PopFont();
-
-			if (Button("Settings"))
-			{
-				target_menu = 4;
-				BackButtonTarget = MenuTarget::PAUSE;
-				BackButtonFunc = {};
-			}
-
-			if (Button("Resume"))
-			{
-				Console->QueueCommand("escape");
-			}
-		}
-		ImGui::End();
 	}
 
 	if (target_menu == 1 || target_menu == 2 || target_menu == 4)
 	{
-		ImGui::SetNextWindowPos(ImVec2(bg_x + paddingx - menuOffset, bg_h - padding_1));
-		ImGui::SetNextWindowSize(ImVec2(-1, -1));
-		ImGui::Begin("Back button", nullptr, commonFlagsFocus);
+		int y = bg_h - padding_1;
+
+		if (target_menu == 4) // if in game, bottom is the ui
 		{
-			bool hasChanged = GameSettings.HasChanged;
-
-			if (hasChanged)
-			{
-				if (Button("Reset"))
-				{
-					GameSettings.Reset();
-				}
-
-				ImGui::SameLine();
-				if (Button("Apply"))
-				{
-					GameSettings.Apply();
-				}
-			}
-
-			else
-			{
-				if (Button("Back"))
-				{
-					GoBack();
-				}
-			}
+			y = bg_h * .8 - padding_1;
 		}
-		ImGui::End();
+
+		ImGui::SetCursorPos(ImVec2(paddingx - menuOffset, y));
+
+		if (GameSettings.HasChanged)
+		{
+			if (Button("Reset")) GameSettings.Reset();
+			ImGui::SameLine();
+			if (Button("Apply")) GameSettings.Apply();
+		}
+
+		else if (Button("Back")) GoBack();
+	}
+
+	if (target_menu == 3)
+	{
+		float x = paddingx - menuOffset;
+
+		ImGui::SetCursorPosY(bg_h / 3);
+		ImGui::SetCursorPosX(x);
+		if (Button("Settings"))
+		{
+			target_menu = 4;
+			BackButtonTarget = MenuTarget::PAUSE;
+			BackButtonFunc = {};
+		}
+
+		ImGui::SetCursorPosX(x);
+		if (Button("Resume")) Console->QueueCommand("escape");
 	}
 
 	ImGui::PopStyleColor(9);
 	ImGui::PopFont();
+
+	ImGui::End();
 }
