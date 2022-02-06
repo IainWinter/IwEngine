@@ -30,7 +30,8 @@ namespace Input {
 		rid[0].dwFlags = 0;		  // No special flags
 		rid[0].hwndTarget = NULL; // For current window // Seems risky
 
-		if (!RegisterRawInputDevices(rid, 1, sizeof(rid[0]))) {
+		if (!RegisterRawInputDevices(rid, 1, sizeof(rid[0])))
+		{
 			LOG_WARNING << "Mouse failed to be created -- RAWINPUTDEVICE " << rid;
 		}
 	}
@@ -45,35 +46,42 @@ namespace Input {
 		}
 
 		RAWINPUT* raw = (RAWINPUT*)e.LParam;
-		if (raw && raw->header.dwType == RIM_TYPEMOUSE) {
+		if (   raw
+			&& raw->header.dwType == RIM_TYPEMOUSE)
+		{
 			RAWMOUSE mouse = raw->data.mouse;
 
-			input.Name = LMOUSE;
-			for (int i = 0; i < 5; i++) {
-				if (maskdown[i] & mouse.usButtonFlags) {
+			input.Name = InputName::LMOUSE;
+			for (int i = 0; i < 5; i++)
+			{
+				if (maskdown[i] & mouse.usButtonFlags)
+				{
 					input.State = 1;
 					return input;
 				}
 
-				else if (maskup[i] & mouse.usButtonFlags) {
+				else if (maskup[i] & mouse.usButtonFlags)
+				{
 					input.State = 0;
 					return input;
 				}
 
-				input.Name = (InputName)(input.Name + 1);
+				input.Name = (InputName)((int)input.Name + 1);
 			}
 
-			if (mouse.usButtonFlags == RI_MOUSE_WHEEL) {
-				input.Name  = WHEEL;
+			if (mouse.usButtonFlags == RI_MOUSE_WHEEL)
+			{
+				input.Name  = InputName::WHEEL;
 				input.State = (short)LOWORD(mouse.usButtonData) / (float)WHEEL_DELTA;
 				return input;
 			}
 
-			if (mouse.usFlags == MOUSE_MOVE_RELATIVE) {
-				input.Name  = MOUSEdX;
+			if (mouse.usFlags == MOUSE_MOVE_RELATIVE)
+			{
+				input.Name  = InputName::MOUSEdX;
 				input.State = (float)mouse.lLastX;
 
-				input.Name2  = MOUSEdY;
+				input.Name2  = InputName::MOUSEdY;
 				input.State2 = (float)mouse.lLastY; // xd
 				return input;
 			}

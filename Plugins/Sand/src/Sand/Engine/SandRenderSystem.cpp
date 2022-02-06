@@ -9,8 +9,8 @@ int SandWorldRenderSystem::Initialize() {
 
 	if (m_worldWidth == -1) // -1 is set in SandLayer
 	{
-		width  = Renderer->Width()  / m_world->m_scale;
-		height = Renderer->Height() / m_world->m_scale;
+		width  = (int)floor((double)Renderer->Width()  / m_world->m_scale);
+		height = (int)floor((double)Renderer->Height() / m_world->m_scale);
 	}
 
 	else
@@ -41,8 +41,9 @@ int SandWorldRenderSystem::Initialize() {
 	return 0;
 }
 
-void SandWorldRenderSystem::Update() {
-	bool _debugShowChunkBounds = Keyboard::KeyDown(C);
+void SandWorldRenderSystem::Update()
+{
+	bool _debugShowChunkBounds = Keyboard::KeyDown(InputName::C);
 
 	unsigned int* pixels = (unsigned int*)m_texture->Colors();
 	m_texture->Clear();

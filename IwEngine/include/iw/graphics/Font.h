@@ -52,7 +52,7 @@ namespace Graphics {
 
 	struct FontMeshConfig
 	{
-		float Size;
+		float Size = 0.f;
 		FontAnchor Anchor = FontAnchor::TOP_LEFT;
 		iw::ref<iw::Material> Material = nullptr;
 	};

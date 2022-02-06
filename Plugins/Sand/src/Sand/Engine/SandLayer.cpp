@@ -9,9 +9,11 @@ void CorrectCellInfo(SandChunk* chunk, size_t index, int x, int y, void* data) {
 
 	Cell& cell = *(Cell*)data;
 
-	if (cell.x == 0 && cell.y == 0) {
-		cell.x = chunk->m_x + x;
-		cell.y = chunk->m_y + y;
+	if (   cell.x == 0
+		&& cell.y == 0)
+	{
+		cell.x = (float)(chunk->m_x + x);
+		cell.y = (float)(chunk->m_y + y);
 	}
 
 	// set location everytime it changed whole number
@@ -242,21 +244,25 @@ void SandLayer::DrawMouseGrid() {
 	m_render->GetSandTexture()->Update(Renderer->Device);
 }
 
-void SandLayer::DrawWithMouse(int fx, int fy, int width, int height) {
-	if (Mouse::ButtonDown(LMOUSE)) {
+void SandLayer::DrawWithMouse(
+	int fx, int fy, 
+	int width, int height)
+{
+	if (Mouse::ButtonDown(InputName::LMOUSE)) 
+	{
 		CellType placeMe = CellType::EMPTY;
 
-		     if (Keyboard::KeyDown(S)) placeMe = CellType::SAND;
-		else if (Keyboard::KeyDown(W)) placeMe = CellType::WATER;
-		else if (Keyboard::KeyDown(R)) placeMe = CellType::ROCK;
-		else if (Keyboard::KeyDown(T)) placeMe = CellType::STONE;
-		else if (Keyboard::KeyDown(F)) placeMe = CellType::FIRE;
-		else if (Keyboard::KeyDown(M)) placeMe = CellType::SMOKE;
-		else if (Keyboard::KeyDown(O)) placeMe = CellType::WOOD;
-		else if (Keyboard::KeyDown(B)) placeMe = CellType::BELT;
+		     if (Keyboard::KeyDown(InputName::S)) placeMe = CellType::SAND;
+		else if (Keyboard::KeyDown(InputName::W)) placeMe = CellType::WATER;
+		else if (Keyboard::KeyDown(InputName::R)) placeMe = CellType::ROCK;
+		else if (Keyboard::KeyDown(InputName::T)) placeMe = CellType::STONE;
+		else if (Keyboard::KeyDown(InputName::F)) placeMe = CellType::FIRE;
+		else if (Keyboard::KeyDown(InputName::M)) placeMe = CellType::SMOKE;
+		else if (Keyboard::KeyDown(InputName::O)) placeMe = CellType::WOOD;
+		else if (Keyboard::KeyDown(InputName::B)) placeMe = CellType::BELT;
 
 		if (    placeMe == CellType::EMPTY
-			&& !Keyboard::KeyDown(C)) 
+			&& !Keyboard::KeyDown(InputName::C))
 		{
 			return;
 		}

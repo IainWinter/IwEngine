@@ -47,9 +47,9 @@ namespace Engine {
 			std::stringstream ss;
 			ss << name;
 			ss << "_";
-			ss << (int)size;
+			ss << size;
 
-			ImFont* font = io.Fonts->AddFontFromFileTTF(Asset->GetPath(file).c_str(), size);
+			ImFont* font = io.Fonts->AddFontFromFileTTF(Asset->GetPath(file).c_str(), (float)size);
 			m_fonts->Fonts.emplace(ss.str(), font);
 		}
 
@@ -62,28 +62,28 @@ namespace Engine {
 
 		//Renderer->SetDefaultTarget(target);
 
-		io.KeyMap[ImGuiKey_Tab        ] = InputName::TAB;
-		io.KeyMap[ImGuiKey_LeftArrow  ] = InputName::LEFT;
-		io.KeyMap[ImGuiKey_RightArrow ] = InputName::RIGHT;
-		io.KeyMap[ImGuiKey_UpArrow    ] = InputName::UP;
-		io.KeyMap[ImGuiKey_DownArrow  ] = InputName::DOWN;
-		io.KeyMap[ImGuiKey_PageUp     ] = InputName::PRIOR;
-		io.KeyMap[ImGuiKey_PageDown   ] = InputName::NEXT;
-		io.KeyMap[ImGuiKey_Home       ] = InputName::HOME;
-		io.KeyMap[ImGuiKey_End        ] = InputName::END;
-		io.KeyMap[ImGuiKey_Insert     ] = InputName::INSERT;
-		io.KeyMap[ImGuiKey_Delete     ] = InputName::DEL;
-		io.KeyMap[ImGuiKey_Backspace  ] = InputName::BACK;
-		io.KeyMap[ImGuiKey_Space      ] = InputName::SPACE;
-		io.KeyMap[ImGuiKey_Enter      ] = InputName::EXECUTE;
-		io.KeyMap[ImGuiKey_Escape     ] = InputName::ESCAPE;
-		io.KeyMap[ImGuiKey_KeyPadEnter] = InputName::EXECUTE; // the same?
-		io.KeyMap[ImGuiKey_A          ] = InputName::A;        // for text edit CTRL+A: select all
-		io.KeyMap[ImGuiKey_C          ] = InputName::C;        // for text edit CTRL+C: copy
-		io.KeyMap[ImGuiKey_V          ] = InputName::V;        // for text edit CTRL+V: paste
-		io.KeyMap[ImGuiKey_X          ] = InputName::X;        // for text edit CTRL+X: cut
-		io.KeyMap[ImGuiKey_Y          ] = InputName::Y;        // for text edit CTRL+Y: redo
-		io.KeyMap[ImGuiKey_Z          ] = InputName::Z;        // for text edit CTRL+Z: undo
+		io.KeyMap[ImGuiKey_Tab        ] = (int)InputName::TAB;
+		io.KeyMap[ImGuiKey_LeftArrow  ] = (int)InputName::LEFT;
+		io.KeyMap[ImGuiKey_RightArrow ] = (int)InputName::RIGHT;
+		io.KeyMap[ImGuiKey_UpArrow    ] = (int)InputName::UP;
+		io.KeyMap[ImGuiKey_DownArrow  ] = (int)InputName::DOWN;
+		io.KeyMap[ImGuiKey_PageUp     ] = (int)InputName::PRIOR;
+		io.KeyMap[ImGuiKey_PageDown   ] = (int)InputName::NEXT;
+		io.KeyMap[ImGuiKey_Home       ] = (int)InputName::HOME;
+		io.KeyMap[ImGuiKey_End        ] = (int)InputName::END;
+		io.KeyMap[ImGuiKey_Insert     ] = (int)InputName::INSERT;
+		io.KeyMap[ImGuiKey_Delete     ] = (int)InputName::DEL;
+		io.KeyMap[ImGuiKey_Backspace  ] = (int)InputName::BACK;
+		io.KeyMap[ImGuiKey_Space      ] = (int)InputName::SPACE;
+		io.KeyMap[ImGuiKey_Enter      ] = (int)InputName::EXECUTE;
+		io.KeyMap[ImGuiKey_Escape     ] = (int)InputName::ESCAPE;
+		io.KeyMap[ImGuiKey_KeyPadEnter] = (int)InputName::EXECUTE; // the same?
+		io.KeyMap[ImGuiKey_A          ] = (int)InputName::A;        // for text edit CTRL+A: select all
+		io.KeyMap[ImGuiKey_C          ] = (int)InputName::C;        // for text edit CTRL+C: copy
+		io.KeyMap[ImGuiKey_V          ] = (int)InputName::V;        // for text edit CTRL+V: paste
+		io.KeyMap[ImGuiKey_X          ] = (int)InputName::X;        // for text edit CTRL+X: cut
+		io.KeyMap[ImGuiKey_Y          ] = (int)InputName::Y;        // for text edit CTRL+Y: redo
+		io.KeyMap[ImGuiKey_Z          ] = (int)InputName::Z;        // for text edit CTRL+Z: undo
 
 		return 0;
 	}
@@ -271,11 +271,10 @@ namespace Engine {
 	{
 		auto& io = ImGui::GetIO();
 		
-		if (e.Device == DeviceType::MOUSE)
+		if (   e.Device == DeviceType::MOUSE
+			&& io.WantCaptureMouse)
 		{
-			if (io.WantCaptureMouse) {
-				io.MouseDown[e.Button - LMOUSE] = e.State;
-			}
+			io.MouseDown[(int)e.Button - (int)InputName::LMOUSE] = e.State;
 		}
 
 		return io.WantCaptureMouse;
@@ -286,8 +285,9 @@ namespace Engine {
 	{
 		auto& io = ImGui::GetIO();
 
-		if (io.WantCaptureKeyboard) {
-			io.KeysDown[e.Button] = e.State;
+		if (io.WantCaptureKeyboard)
+		{
+			io.KeysDown[(int)e.Button] = e.State;
 		}
 
 		return io.WantCaptureKeyboard;
@@ -298,7 +298,8 @@ namespace Engine {
 	{
 		auto& io = ImGui::GetIO();
 
-		if (io.WantCaptureKeyboard) {
+		if (io.WantCaptureKeyboard)
+		{
 			io.AddInputCharacter(e.Character);
 		}
 

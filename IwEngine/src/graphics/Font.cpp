@@ -107,8 +107,8 @@ namespace Graphics {
 		float scale = config.Size / 2834.6456692913f; // https://www.convertunits.com/from/pt/to/meter
 		float lineHeightScale = (m_lightHeight - padHeight) / 2834.6456692913f;
 
-		unsigned indexCount = count * 6;
-		unsigned vertCount  = count * 4;
+		unsigned indexCount = (int)count * 6;
+		unsigned vertCount  = (int)count * 4;
 
 		unsigned*  indices = new unsigned [indexCount];
 		glm::vec3* verts   = new glm::vec3[vertCount];

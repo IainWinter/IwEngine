@@ -22,11 +22,9 @@ namespace iw {
 		ref<Shader> fontShader;
 		ref<Font> font;
 
-		//Scene* m_mainScene;
-
 		Camera* oldcamera;
-
 		EditorCameraControllerSystem* cameraSystem;
+		//Scene* m_mainScene;
 
 	public:
 		IWENGINE_API

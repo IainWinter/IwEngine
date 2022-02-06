@@ -69,15 +69,16 @@ namespace iw {
 		rotation = glm::vec3(); // reset rotation
 	}
 
-	void EditorCameraControllerSystem::OnPush() {
-		movement.y += Keyboard::KeyDown(SHIFT) ? -1 : 0;
-		movement.y += Keyboard::KeyDown(SPACE) ?  1 : 0;
+	void EditorCameraControllerSystem::OnPush()
+	{
+		movement.y += Keyboard::KeyDown(InputName::SHIFT) ? -1 : 0;
+		movement.y += Keyboard::KeyDown(InputName::SPACE) ?  1 : 0;
 		
-		movement.x += Keyboard::KeyDown(A) ? -1 : 0;
-		movement.x += Keyboard::KeyDown(D) ?  1 : 0;
+		movement.x += Keyboard::KeyDown(InputName::A) ? -1 : 0;
+		movement.x += Keyboard::KeyDown(InputName::D) ?  1 : 0;
 		
-		movement.z += Keyboard::KeyDown(W) ?  1 : 0;
-		movement.z += Keyboard::KeyDown(S) ? -1 : 0;
+		movement.z += Keyboard::KeyDown(InputName::W) ?  1 : 0;
+		movement.z += Keyboard::KeyDown(InputName::S) ? -1 : 0;
 	}
 
 	void EditorCameraControllerSystem::OnPop() {
@@ -87,15 +88,16 @@ namespace iw {
 	bool EditorCameraControllerSystem::On(
 		KeyEvent& e)
 	{
-		switch (e.Button) {
-			case iw::val(SHIFT): movement.y -= e.State ? 1 : -1; break;
-			case iw::val(SPACE): movement.y += e.State ? 1 : -1; break;
+		switch (e.Button)
+		{
+			case InputName::SHIFT: movement.y -= e.State ? 1 : -1; break;
+			case InputName::SPACE: movement.y += e.State ? 1 : -1; break;
 
-			case iw::val(A):     movement.x -= e.State ? 1 : -1; break;
-			case iw::val(D):     movement.x += e.State ? 1 : -1; break;
+			case InputName::A:     movement.x -= e.State ? 1 : -1; break;
+			case InputName::D:     movement.x += e.State ? 1 : -1; break;
 
-			case iw::val(W):     movement.z += e.State ? 1 : -1; break;
-			case iw::val(S):     movement.z -= e.State ? 1 : -1; break;
+			case InputName::W:     movement.z += e.State ? 1 : -1; break;
+			case InputName::S:     movement.z -= e.State ? 1 : -1; break;
 		}
 
 		return false;
@@ -104,7 +106,8 @@ namespace iw {
 	bool EditorCameraControllerSystem::On(
 		MouseMovedEvent& e)
 	{
-		if (e.Device == DeviceType::RAW_MOUSE) {
+		if (e.Device == DeviceType::RAW_MOUSE)
+		{
 			rotation.x = e.DeltaX * Time::DeltaTime();
 			rotation.y = e.DeltaY * Time::DeltaTime();
 		}
@@ -115,10 +118,16 @@ namespace iw {
 	bool EditorCameraControllerSystem::On(
 		MouseButtonEvent& e)
 	{
-		if (e.Device == DeviceType::RAW_MOUSE) {
-			switch (e.Button) {
-				case RMOUSE: speed  = e.State ? 50.0f : 5.0f; break;
-				case MMOUSE: 
+		if (e.Device == DeviceType::RAW_MOUSE) 
+		{
+			switch (e.Button)
+			{
+				case InputName::RMOUSE:
+				{
+					speed = e.State ? 50.0f : 5.0f;
+					break;
+				}
+				case InputName::MMOUSE:
 				{
 					Active = e.State;
 					LOG_INFO << "Editor camera controller is now " << (Active ? "non active" : "active");
@@ -133,7 +142,8 @@ namespace iw {
 	bool EditorCameraControllerSystem::On(
 		MouseWheelEvent& e)
 	{
-		if (e.Device == DeviceType::MOUSE) {
+		if (e.Device == DeviceType::MOUSE)
+		{
 			cameraTransform->Position += e.Delta * cameraTransform->Forward() * speed;
 		}
 

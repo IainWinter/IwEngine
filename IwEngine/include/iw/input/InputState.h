@@ -7,7 +7,7 @@ namespace iw {
 namespace Input {
 	class InputState {
 	private:
-		float states[INPUT_COUNT];
+		float states[(int)InputName::INPUT_COUNT];
 		bool  locks[3]; // caps, numb, scroll
 
 	public:
@@ -35,7 +35,7 @@ namespace Input {
 		bool& GetLock(
 			InputName lock)
 		{
-			return locks[lock - CAPS_LOCK];
+			return locks[(int)lock - (int)InputName::CAPS_LOCK];
 		}
 
 		void ToggleLock(

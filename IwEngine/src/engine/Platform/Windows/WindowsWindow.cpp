@@ -7,9 +7,55 @@
 #include <Tchar.h>
 #include <thread>
 
+// helpers
+
 ATOM RegClass(
 	HINSTANCE instance,
-	WNDPROC wndproc);
+	WNDPROC wndproc)
+{
+	WNDCLASSEX wcex;
+	ZeroMemory(&wcex, sizeof(wcex));
+	wcex.cbSize = sizeof(wcex);
+	wcex.style = CS_HREDRAW | CS_OWNDC;
+	wcex.lpfnWndProc = wndproc;
+	wcex.hInstance = instance;
+	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
+	wcex.lpszClassName = _T("Core");
+
+	return RegisterClassEx(&wcex);
+}
+
+std::tuple<bool, MONITORINFO, WINDOWPLACEMENT> GetMonitorAndWindowInfo(
+	HWND window)
+{
+	MONITORINFO monitor = { sizeof(monitor) };
+	if (!GetMonitorInfo(MonitorFromWindow(window, MONITOR_DEFAULTTONEAREST), &monitor))
+	{
+		LOG_WARNING << "GetMonitorInfo() failed!";
+		return { true, {}, {} };
+	}
+
+	WINDOWPLACEMENT placement = { sizeof(placement) };
+	if (!GetWindowPlacement(window, &placement))
+	{
+		LOG_WARNING << "GetWindowPlacement failed!";
+		return { true, {}, {} };
+	}
+
+	return { false, monitor, placement };
+}
+
+void EnableWindowFrame(HWND window)
+{
+	DWORD style = GetWindowLongPtr(window, GWL_STYLE);
+	SetWindowLongPtr(window, GWL_STYLE, (style & ~WS_POPUP) | WS_OVERLAPPEDWINDOW);
+}
+
+void DisableWindowFrame(HWND window)
+{
+	DWORD style = GetWindowLongPtr(window, GWL_STYLE);
+	SetWindowLongPtr(window, GWL_STYLE, (style & ~WS_OVERLAPPEDWINDOW) | WS_POPUP);
+}
 
 void GLAPIENTRY MessageCallback(
 	GLenum source,
@@ -33,6 +79,22 @@ void GLAPIENTRY MessageCallback(
 			<< " SEVERITY 0x" << severity;
 	}
 }
+
+LRESULT _WndProc(
+	HWND hwnd,
+	UINT msg,
+	WPARAM wParam,
+	LPARAM lParam)
+{
+	iw::WindowsWindow* me = reinterpret_cast<iw::WindowsWindow*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
+	if (me) {
+		return me->HandleEvent(hwnd, msg, wParam, lParam);
+	}
+
+	return DefWindowProc(hwnd, msg, wParam, lParam);
+}
+
+// end helpers
 
 namespace iw {
 namespace Engine {
@@ -224,58 +286,134 @@ namespace Engine {
 	void WindowsWindow::SetState(
 		DisplayState state)
 	{
-		int wstate = -1;
-		switch (state) {
-			case DisplayState::HIDDEN:     wstate = SW_HIDE;       break;
-			case DisplayState::MINIMIZED:  wstate = SW_MINIMIZE;   break;
-			case DisplayState::MAXIMIZED:  wstate = SW_MAXIMIZE;   break;
-			case DisplayState::NORMAL:     wstate = SW_SHOWNORMAL; break;
-			case DisplayState::BORDERLESS: {
-				int width  = GetSystemMetrics(SM_CXSCREEN);
-				int height = GetSystemMetrics(SM_CYSCREEN);
+		if (m_actualState == state)
+		{
+			LOG_WARNING << "Window already in state";
+			return;
+		}
 
-				SetWindowLongPtr(m_window, GWL_STYLE, WS_VISIBLE | WS_POPUP);
-				SetWindowPos(m_window, HWND_TOP, 0, 0, width, height, SWP_FRAMECHANGED);
+		int wstate = -1;
+		switch (state)
+		{
+			case DisplayState::HIDDEN:
+			{
+				ShowWindow(m_window, SW_HIDE);
+				EnableWindowFrame(m_window);
+
+				break;
+			}
+			case DisplayState::MINIMIZED:
+			{
+				ShowWindow(m_window, SW_MINIMIZE);
+				EnableWindowFrame(m_window);
+
+				break;
+			}
+			case DisplayState::MAXIMIZED:  
+			{
+				ShowWindow(m_window, SW_MAXIMIZE);
+				EnableWindowFrame(m_window);
+				break;
+			}
+			case DisplayState::NORMAL:
+			{
+				ShowWindow(m_window, SW_SHOWNORMAL);
+				EnableWindowFrame(m_window);
+
+				if (m_placementPrevious.length > 0)
+				{
+					SetWindowPlacement(m_window, &m_placementPrevious);
+				}
+
+				break;
+			}
+			case DisplayState::BORDERLESS:
+			{
+				ShowWindow(m_window, SW_SHOWNORMAL);
+				DisableWindowFrame(m_window);
+
+				auto [error, monitor, placement] = GetMonitorAndWindowInfo(m_window);
+				if (error)
+				{
+					SetState(DisplayState::NORMAL);
+					return;
+				}
+				m_placementPrevious = placement;
+
+				SetWindowPos(m_window, HWND_TOP,
+					monitor.rcMonitor.left,
+					monitor.rcMonitor.top,
+					monitor.rcMonitor.right  - monitor.rcMonitor.left,
+					monitor.rcMonitor.bottom - monitor.rcMonitor.top,
+					SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+
+				break;
+			}
+			case DisplayState::FULLSCREEN:
+			{
+				//ShowWindow(m_window, SW_SHOW);
+				//DisableWindowFrame(m_window);
+
+				//auto [error, monitor, placement] = GetMonitorAndWindowInfo(m_window);
+				//if (error)
+				//{
+				//	SetState(DisplayState::NORMAL);
+				//	return;
+				//}
+				//m_placementPrevious = placement;
+
+				//// https://github.com/gametutorials/tutorials/blob/master/Win32/Full%20Screen/FullScreen.cpp
+				//DEVMODE dmSettings;
+				//memset(&dmSettings,0,sizeof(dmSettings));
+
+				//if(!EnumDisplaySettings(NULL,ENUM_CURRENT_SETTINGS,&dmSettings))
+				//{
+				//	LOG_WARNING << "EnumDisplaySettings() failed!";
+				//	return;
+				//}
+
+				//dmSettings.dmPelsWidth	= 100;					// Set the desired Screen Width
+				//dmSettings.dmPelsHeight	= 100;					// Set the desired Screen Height
+				//dmSettings.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT;	// Set the flags saying we're changing the Screen Width and Height
+	
+				//// This function actually changes the screen to full screen
+				//// CDS_FULLSCREEN Gets Rid Of Start Bar.
+				//// We always want to get a result from this function to check if we failed
+				//if (!ChangeDisplaySettings(&dmSettings, CDS_FULLSCREEN))
+				//{
+				//	LOG_WARNING << "ChangeDisplaySettings() failed!";
+				//}
+
+				///*SetWindowLongPtr(m_window, GWL_STYLE, GetWindowLongPtr(m_window, GWL_STYLE) & ~WS_OVERLAPPEDWINDOW);*/
+				////SetWindowLongPtr(m_window, GWL_STYLE, WS_VISIBLE | WS_POPUP);
+				////SetWindowPos(m_window, HWND_TOP,
+				////	monitor.rcMonitor.left,
+				////	monitor.rcMonitor.top,
+				////	monitor.rcMonitor.right  - monitor.rcMonitor.left,
+				////	monitor.rcMonitor.bottom - monitor.rcMonitor.top,
+				////	SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+
+				LOG_WARNING << "True fullscreen not supported yet, sswitching to borderless";
+				SetState(DisplayState::BORDERLESS);
 
 				break;
 			}
 		}
 
-		if (wstate != -1) {
-			ShowWindow(m_window, wstate);
-		}
-
 		Options.State = state;
+		m_actualState = state;
 	}
 
 
 	void WindowsWindow::SetCursor(
 		bool show)
 	{
-		if (show) // this still doesnt work
-		{
-			while (ShowCursor(TRUE) < 0) {}
-		}
+		// this still doesnt work
 
-		else {
-			while (ShowCursor(FALSE) >= 0) {}
-		}
+		if (show) while (ShowCursor(TRUE)  <  0) {}
+		else      while (ShowCursor(FALSE) >= 0) {}
 
 		Options.Cursor = show;
-	}
-
-	LRESULT CALLBACK WindowsWindow::_WndProc(
-		HWND hwnd,
-		UINT msg,
-		WPARAM wParam,
-		LPARAM lParam)
-	{
-		WindowsWindow* me = reinterpret_cast<WindowsWindow*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
-		if (me) {
-			return me->HandleEvent(hwnd, msg, wParam, lParam);
-		}
-
-		return DefWindowProc(hwnd, msg, wParam, lParam);
 	}
 
 	LRESULT CALLBACK WindowsWindow::HandleEvent(
@@ -312,20 +450,4 @@ namespace Engine {
 		return 0;
 	}
 }
-}
-
-ATOM RegClass(
-	HINSTANCE instance,
-	WNDPROC wndproc)
-{
-	WNDCLASSEX wcex;
-	ZeroMemory(&wcex, sizeof(wcex));
-	wcex.cbSize = sizeof(wcex);
-	wcex.style = CS_HREDRAW | CS_OWNDC;
-	wcex.lpfnWndProc = wndproc;
-	wcex.hInstance = instance;
-	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wcex.lpszClassName = _T("Core");
-
-	return RegisterClassEx(&wcex);
 }

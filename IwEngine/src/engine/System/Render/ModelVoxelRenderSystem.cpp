@@ -121,7 +121,8 @@ namespace Engine {
 				mesh.Material->SetTexture("voxelMap", VoxelWorld());
 			}
 
-			Renderer->BeforeDraw([&]() {
+			Renderer->BeforeDraw([&]()
+			{
 				if (mesh.Material->IsInitialized()) {
 					mesh.Material->Initialize(Renderer->Device);
 				}
@@ -146,7 +147,9 @@ namespace Engine {
 
 		Renderer->EndShadowCast();
 
-		if (!m_visualize && !Keyboard::KeyDown(V)) {
+		if (   !m_visualize
+			&& !Keyboard::KeyDown(InputName::V))
+		{
 			if (m_voxelize->VoxelTexture()->Filter() == NEAREST) {
 				m_voxelize->VoxelTexture()->SetFilter(LINEAR);
 				m_voxelize->VoxelTexture()->SetMipmapFilter(LINEAR_LINEAR);
@@ -155,7 +158,8 @@ namespace Engine {
 			return;
 		}
 
-		else if (!m_front) {
+		else if (!m_front)
+		{
 			ref<Texture> backTex = REF<Texture>(Renderer->Width(), Renderer->Height(), TEX_2D, RGBA, FLOAT);
 			ref<Texture> frntTex = REF<Texture>(Renderer->Width(), Renderer->Height(), TEX_2D, RGBA, FLOAT);
 

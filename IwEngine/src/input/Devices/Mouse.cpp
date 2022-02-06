@@ -20,11 +20,11 @@ namespace Input {
 		Translation translation;
 
 #ifdef IW_PLATFORM_WINDOWS
-		translation.insert(VK_LBUTTON,  LMOUSE);
-		translation.insert(VK_RBUTTON,  RMOUSE);
-		translation.insert(VK_MBUTTON,  MMOUSE);
-		translation.insert(VK_XBUTTON1, XMOUSE1);
-		translation.insert(VK_XBUTTON2, XMOUSE2);
+		translation.insert(VK_LBUTTON,  InputName::LMOUSE);
+		translation.insert(VK_RBUTTON,  InputName::RMOUSE);
+		translation.insert(VK_MBUTTON,  InputName::MMOUSE);
+		translation.insert(VK_XBUTTON1, InputName::XMOUSE1);
+		translation.insert(VK_XBUTTON2, InputName::XMOUSE2);
 #endif
 
 		return translation;

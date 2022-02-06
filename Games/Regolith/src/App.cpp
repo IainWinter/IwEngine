@@ -82,23 +82,23 @@ int App::Initialize(
 	//}
 
 	iw::ref<iw::Context> context_game = Input->CreateContext("game");
-	context_game->MapButton(iw::D     , "+right");
-	context_game->MapButton(iw::A     , "-right");
-	context_game->MapButton(iw::W     , "+up");
-	context_game->MapButton(iw::S     , "-up");
-	context_game->MapButton(iw::LMOUSE, "+fire");
-	context_game->MapButton(iw::RMOUSE, "+alt-fire");
-	context_game->MapButton(iw::ESCAPE, "escape");
-	context_game->MapButton(iw::X     , "toolbox");
+	context_game->MapButton(iw::InputName::D     , "+right");
+	context_game->MapButton(iw::InputName::A     , "-right");
+	context_game->MapButton(iw::InputName::W     , "+up");
+	context_game->MapButton(iw::InputName::S     , "-up");
+	context_game->MapButton(iw::InputName::LMOUSE, "+fire");
+	context_game->MapButton(iw::InputName::RMOUSE, "+alt-fire");
+	context_game->MapButton(iw::InputName::ESCAPE, "escape");
+	context_game->MapButton(iw::InputName::X     , "toolbox");
 
-	context_game->MapButton(iw::E , "+a"); // buttons for upgrades
-	context_game->MapButton(iw::Q , "+b");
-	context_game->MapButton(iw::F , "+x");
-	context_game->MapButton(iw::C , "+y");
+	context_game->MapButton(iw::InputName::E , "+a"); // buttons for upgrades
+	context_game->MapButton(iw::InputName::Q , "+b");
+	context_game->MapButton(iw::InputName::F , "+x");
+	context_game->MapButton(iw::InputName::C , "+y");
 
 	iw::ref<iw::Context> context_menu = Input->CreateContext("menu");
-	context_menu->MapButton(iw::LMOUSE, "+execute");
-	context_menu->MapButton(iw::ESCAPE, "escape");
+	context_menu->MapButton(iw::InputName::LMOUSE, "+execute");
+	context_menu->MapButton(iw::InputName::ESCAPE, "escape");
 
 	iw::ref<iw::Device> mouse        = Input->CreateDevice<iw::Mouse>();
 	iw::ref<iw::Device> keyboard_raw = Input->CreateDevice<iw::RawKeyboard>();
@@ -213,7 +213,7 @@ int App::Initialize(
 		}
 
 		else
-		if (command.Verb == "quit")
+		if (command.Verb == "exit")
 		{
 			Stop();
 		}

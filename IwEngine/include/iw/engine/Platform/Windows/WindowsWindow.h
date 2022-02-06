@@ -14,7 +14,21 @@ namespace Engine {
 		HDC       m_device;
 		HGLRC     m_context;
 
+		// For fullscreen
+		WINDOWPLACEMENT m_placementPrevious;
+		DisplayState m_actualState;
+
 	public:
+		WindowsWindow()
+			: Window              ()
+			, m_instance          (nullptr)
+			, m_window            (nullptr)
+			, m_device            (nullptr)
+			, m_context           (nullptr)
+			, m_placementPrevious ()
+			, m_actualState       (DisplayState::HIDDEN)
+		{}
+
 		int Initialize(
 			const WindowOptions& options) override;
 
@@ -38,12 +52,6 @@ namespace Engine {
 		void* Device()   const override { return m_device; }
 		void* Instance() const override { return m_instance; }
 
-		static LRESULT CALLBACK _WndProc(
-			HWND hwnd,
-			UINT msg,
-			WPARAM wparam,
-			LPARAM lparam);
-	private:
 		LRESULT CALLBACK HandleEvent(
 			HWND hwnd,
 			UINT msg,

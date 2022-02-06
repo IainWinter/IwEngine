@@ -13,12 +13,13 @@ namespace Input {
 		float      State2;
 
 		DeviceInput(
-			DeviceType deviceType)
-			: Device(deviceType)
-			, Name (INPUT_NONE)
-			, Name2(INPUT_NONE)
-			, State (0.0f)
-			, State2(0.0f)
+			DeviceType deviceType
+		)
+			: Device (deviceType)
+			, Name   (InputName::INPUT_NONE)
+			, Name2  (InputName::INPUT_NONE)
+			, State  (0.f)
+			, State2 (0.f)
 		{}
 	};
 }

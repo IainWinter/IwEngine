@@ -25,8 +25,6 @@ namespace Engine {
 		bool m_isInitialized;
 		float m_frameDelay;
 	public:
-		IWindow* Window;
-
 		APP_VARS
 
 	public:

@@ -7,9 +7,10 @@
 
 int Menu_Title_Layer::Initialize()
 {
-	GameSettings.Add("VSync", new VSyncSetting());
-	GameSettings.Add("Music", new AudioSetting(Audio, Audio->GetHandle("vca:/music")));
-	GameSettings.Add("Game",  new AudioSetting(Audio, Audio->GetHandle("vca:/effects")));
+	GameSettings.Add("VSync",      new VSyncSetting());
+	GameSettings.Add("Fullscreen", new DisplaySetting(Window));
+	GameSettings.Add("Music",      new AudioSetting(Audio, Audio->GetHandle("vca:/music")));
+	GameSettings.Add("Game",       new AudioSetting(Audio, Audio->GetHandle("vca:/effects")));
 
 	GameSettings.Init();
 
@@ -245,9 +246,7 @@ void Menu_Title_Layer::UI()
 {
 	// tag + fps
 
-	__fps = iw::lerp(__fps, 1.f/iw::DeltaTime(), iw::DeltaTime());
-
-	ImGui::ShowMetricsWindow();
+	__fps = iw::lerp(__fps, 1.f / iw::RawDeltaTime(), iw::RawDeltaTime());
 
 	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 1, 1, .5));
 	ImGui::PushFont(iwFont("Quicksand_24"));
@@ -397,6 +396,9 @@ void Menu_Title_Layer::UI()
 
 		ImGui::SetCursorPosX(x);
 		if (Button("Settings")) SetViewSettings();
+
+		ImGui::SetCursorPosX(x);
+		if (Button("Exit")) Console->QueueCommand("exit");
 	}
 
 
@@ -462,7 +464,7 @@ void Menu_Title_Layer::UI()
 		if (Button("Resume")) Console->QueueCommand("escape");
 	}
 
-	ImGui::PopStyleColor(9);
+	ImGui::PopStyleColor(10);
 	ImGui::PopFont();
 
 	ImGui::End();

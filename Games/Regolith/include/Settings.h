@@ -72,6 +72,52 @@ struct AudioSetting : GameSetting
 	void DrawSetting(const char* name) override { SliderFloat(name, Working_Value, 0.f, 100.f, "%.0f"); }
 };
 
+struct DisplaySetting : GameSetting
+{
+	iw::IWindow* Window;
+	const char* Options[3] = {"Windowed", "Borderless", "Fullscreen"};
+
+	DisplaySetting(
+		iw::IWindow* window
+	)
+		: GameSetting (false)
+		, Window      (window)
+	{}
+
+	void ApplySetting() override
+	{
+		int selected = IsEnabled ? 1 : 0;
+		iw::DisplayState state;
+
+		switch (selected)
+		{
+			case 0: state = iw::DisplayState::NORMAL;     break;
+			case 1: state = iw::DisplayState::BORDERLESS; break;
+			//case 2: state = iw::DisplayState::FULLSCREEN; break;
+		}
+
+		Window->SetState(state);
+	}
+
+	void DrawSetting(const char* name) override
+	{
+		Checkbox(name, Working_IsEnabled);
+
+		//int selected = (int)Working_Value;
+		//if (ImGui::BeginCombo(name, Options[selected]))
+		//{
+		//	for (int i = 0; i < 3; i++)
+		//	{
+		//		if (ImGui::Selectable(Options[i]))
+		//		{
+		//			Working_Value = (float)i;
+		//		}
+		//	}
+		//	ImGui::EndCombo();
+		//}
+	}
+};
+
 struct GameSettings
 {
 	std::unordered_map<std::string, GameSetting*> Settings;

@@ -159,7 +159,7 @@ namespace Graphics {
 					models[i] = m_particles[i].Transform.WorldTransformation(); // somewhere there is 'World' where it should be local :<
 				}
 
-				m_mesh.Data->SetBufferDataPtr(bName::UV1, count, models);
+				m_mesh.Data->SetBufferDataPtr(bName::UV1, (int)count, models);
 			}
 		}
 

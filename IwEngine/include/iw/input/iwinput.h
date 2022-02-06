@@ -23,8 +23,8 @@ namespace Input {
 		DEVICE_NONE
 	};
 
-	enum InputName
-		: unsigned int
+	enum class InputName
+		: int
 	{
 		// Nice numbers and letters
 
@@ -272,7 +272,7 @@ namespace Input {
 
 	//Order of InputNames is important
 
-	constexpr char KeyTranslation[SPACE * 2 + 2] = {
+	constexpr char KeyTranslation[(int)InputName::SPACE * 2 + 2] = {
 		// Numbers and letters
 
 		'0', ')',
@@ -355,21 +355,22 @@ namespace Input {
 		bool caps = false)
 	{
 		bool shifted = shift;
-		if (    name >= A
-			&& name <= Z)
+		if (    name >= InputName::A
+			&& name <= InputName::Z)
 		{
 			shifted ^= caps;
 		}
 
-		if (name <= SPACE) {
-			return KeyTranslation[shifted ? name * 2 + 1 : name * 2];
+		if (name <= InputName::SPACE)
+		{
+			return KeyTranslation[shifted ? (int)name * 2 + 1 : (int)name * 2];
 		}
 
 		switch (name)
 		{
-			case BACK:   return '\b';
-			case RETURN: return '\n';
-			case TAB:    return '\t';
+			case InputName::BACK:   return '\b';
+			case InputName::RETURN: return '\n';
+			case InputName::TAB:    return '\t';
 		}
 
 		return '\0';

@@ -78,7 +78,7 @@ namespace Engine {
 					remove.push_back(name);
 				}
 
-				ImGui::PlotLines("", list.data(), list.size());
+				ImGui::PlotLines("", list.data(), (int)list.size());
 				ImGui::SameLine();
 				ImGui::Text("%4.4fms - %s", time, name.c_str());
 			}
@@ -129,14 +129,14 @@ namespace Engine {
 	void DebugLayer::ImGui() {
 		ImGui::Begin("Debug layer");
 		{
-			m_eventCount = iw::max<int>(m_eventCount, logger::instance().get_values("event_count").size());
+			m_eventCount = iw::max<int>(m_eventCount, (int)logger::instance().get_values("event_count").size());
 			
 			ImGui::Text("Number of events in queue: %d", m_eventCount);
 
 			ImGui::PlotLines(
 				"", 
-				logger::instance().get_values("event_count").data(), 
-				logger::instance().get_values("event_count").size());
+				     logger::instance().get_values("event_count").data(), 
+				(int)logger::instance().get_values("event_count").size());
 
 			float time = Time::RawFixedTime();
 			ImGui::SliderFloat("Fixed timestep", &time, 0.001f, 1);
@@ -198,7 +198,7 @@ namespace Engine {
 		MouseButtonEvent& e)
 	{
 		std::stringstream log;
-		log << "Mouse button ... Button: " << e.Button << " State: " << e.State << " Name: " << iw::val(e.Device);
+		log << "Mouse button ... Button: " << (int)e.Button << " State: " << e.State << " Name: " << iw::val(e.Device);
 		m_logs.push_back(log.str());
 		return false;
 	}
@@ -207,7 +207,7 @@ namespace Engine {
 		KeyEvent& e)
 	{
 		std::stringstream log;
-		log << "Key button ..... Button: " << e.Button << " State: " << e.State << " Name: " << iw::val(e.Device);
+		log << "Key button ..... Button: " << (int)e.Button << " State: " << e.State << " Name: " << iw::val(e.Device);
 		m_logs.push_back(log.str());
 		return false;
 	}
@@ -216,7 +216,7 @@ namespace Engine {
 		KeyTypedEvent& e)
 	{
 		std::stringstream log;
-		log << "Key types ...... Button: " << e.Button << " Char: " << e.Character << " Name: " << iw::val(e.Device);
+		log << "Key types ...... Button: " << (int)e.Button << " Char: " << e.Character << " Name: " << iw::val(e.Device);
 		m_logs.push_back(log.str());
 		return false;
 	}

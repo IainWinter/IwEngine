@@ -36,9 +36,13 @@ namespace iw {
 		Camera* Controller;
 	};
 
-	ToolLayer::ToolLayer(/*Scene* scene*/) : Layer("Toolbox")
+	ToolLayer::ToolLayer(
+		/*Scene* scene*/
+	)
+		: Layer        ("Toolbox")
+		, cameraSystem (nullptr)
+		, oldcamera    (nullptr)
 		//, m_mainScene(scene)
-		, cameraSystem(nullptr)
 	{}
 
 	int ToolLayer::Initialize() {
@@ -190,7 +194,7 @@ namespace iw {
 		MouseButtonEvent& e)
 	{
 		if (   e.State
-			&& e.Button == iw::LMOUSE
+			&& e.Button == InputName::LMOUSE
 			&& e.Device == DeviceType::MOUSE)
 		{
 			// this works ezpz but not if yor looking in thr direction of the x axis :/
@@ -210,12 +214,7 @@ namespace iw {
 
 			//for (auto entity : Space->Query<Transform>()) {
 			//	Transform* transform = entity.Components.Tie<Transform*>();
-
-
-			//	
-
 			//}
-
 		}
 
 		//if (   e.Button == LMOUSE
