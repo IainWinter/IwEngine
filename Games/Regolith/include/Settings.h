@@ -8,20 +8,20 @@
 struct GameSetting
 {
 	union {
-		bool  IsEnabled;
 		float Value;
+		bool  IsEnabled;
 	};
 
 	union {
-		bool  Working_IsEnabled;
 		float Working_Value;
+		bool  Working_IsEnabled;
 	};
 
 	GameSetting(
 		bool enabled
 	)
-		: Value(0.f)
-		, Working_Value(0.f)
+		: Value             (0.f)
+		, Working_Value     (0.f)
 		, IsEnabled         (enabled)
 		, Working_IsEnabled (enabled)
 	{}
@@ -49,7 +49,7 @@ struct GameSetting
 
 struct VSyncSetting : GameSetting
 {
-	VSyncSetting() : GameSetting(false) {}
+	VSyncSetting() : GameSetting(true) {}
 	void ApplySetting()                override { wglSwapIntervalEXT((int)IsEnabled); }
 	void DrawSetting(const char* name) override { Checkbox(name, Working_IsEnabled); }
 };

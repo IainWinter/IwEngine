@@ -259,6 +259,8 @@ void Menu_Title_Layer::UI()
 	ImGui::PopFont();
 	ImGui::PopStyleColor();
 
+	ImGui::ShowMetricsWindow();
+
 	//iw::StaticPS* smoke_p = smoke.Find<iw::StaticPS>();
 
 	//glm::vec3 p1 = glm::vec3(1.15, -3.75, .7) + glm::normalize(glm::vec3(-.5, 1, 1)) * 3.f;
@@ -368,6 +370,14 @@ void Menu_Title_Layer::UI()
 			ImVec2(bg_x + bg_w, bg_y + bg_h), iw::Color::From255(31, 32, 38, 255 * fade).to32()
 		);
 	}
+
+	if (fade_exit > 0.001f)
+	{
+		ImGui::GetForegroundDrawList()->AddRectFilled(
+			ImVec2(bg_x, bg_y),
+			ImVec2(bg_x + bg_w, bg_y + bg_h), iw::Color(0, 0, 0, fade_exit).to32()
+		);
+	}
 	
 	iw::ITexture* tex = bg->Tex(0)->Handle();
 	if (tex)
@@ -380,7 +390,7 @@ void Menu_Title_Layer::UI()
 
 	float paddingx = bg_w / 6;
 
-	if (target_menu == 0)
+	if (last_menu == 0)
 	{
 		float x = paddingx - menuOffset;
 
@@ -398,11 +408,10 @@ void Menu_Title_Layer::UI()
 		if (Button("Settings")) SetViewSettings();
 
 		ImGui::SetCursorPosX(x);
-		if (Button("Exit")) Console->QueueCommand("exit");
+		ExitButton();
 	}
 
-
-	if (target_menu == 1)
+	if (last_menu == 1)
 	{
 		highscoreParts.ScoreTable(
 			bg_x + paddingx - menuOffset, 
@@ -412,11 +421,11 @@ void Menu_Title_Layer::UI()
 		);
 	}
 
-	if (target_menu == 2 || target_menu == 4)
+	if (last_menu == 2 || last_menu == 4)
 	{
 		int y = bg_h / 2;
 
-		if (target_menu == 4)
+		if (last_menu == 4)
 		{
 			y = bg_h / 3;
 		}
@@ -426,11 +435,11 @@ void Menu_Title_Layer::UI()
 		ImGui::PopFont();
 	}
 
-	if (target_menu == 1 || target_menu == 2 || target_menu == 4)
+	if (last_menu == 1 || last_menu == 2 || last_menu == 4)
 	{
 		int y = bg_h - padding_1;
 
-		if (target_menu == 4) // if in game, bottom is the ui
+		if (last_menu == 4) // if in game, bottom is the ui
 		{
 			y = bg_h * .8 - padding_1;
 		}
@@ -447,7 +456,7 @@ void Menu_Title_Layer::UI()
 		else if (Button("Back")) GoBack();
 	}
 
-	if (target_menu == 3)
+	if (last_menu == 3)
 	{
 		float x = paddingx - menuOffset;
 
@@ -459,13 +468,36 @@ void Menu_Title_Layer::UI()
 			BackButtonTarget = MenuTarget::PAUSE;
 			BackButtonFunc = {};
 		}
+		ImGui::SetCursorPosX(x);
+		ExitButton();
 
+		ImGui::SetCursorPosY(bg_h * .8 - padding_1);
 		ImGui::SetCursorPosX(x);
 		if (Button("Resume")) Console->QueueCommand("escape");
+		
 	}
 
 	ImGui::PopStyleColor(10);
 	ImGui::PopFont();
 
 	ImGui::End();
+}
+
+void Menu_Title_Layer::ExitButton()
+{
+	Button("Exit");
+
+	if (ImGui::IsItemActive())
+	{
+		fade_exit = iw::clamp(fade_exit + iw::DeltaTime() * 2, 0.f, 1.f);
+		if (fade_exit == 1.f)
+		{
+			Console->QueueCommand("exit");
+		}
+	}
+
+	else
+	{
+		fade_exit = iw::lerp(fade_exit, 0.f, iw::DeltaTime() * 10.f);
+	}
 }

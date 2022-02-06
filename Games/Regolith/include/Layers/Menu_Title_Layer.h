@@ -50,6 +50,8 @@ struct Menu_Title_Layer : Menu_Layer
 	float fade;
 	float target_fade;
 
+	float fade_exit;
+
 	Highscores_MenuParts highscoreParts;
 
 	GameSettings GameSettings;
@@ -63,6 +65,7 @@ struct Menu_Title_Layer : Menu_Layer
 		, pers        (0.f)
 		, fade        (0.f)
 		, target_fade (0.f)
+		, fade_exit   (0.f)
 	{
 		SetViewDefault();
 		last_menu = target_menu;
@@ -143,5 +146,7 @@ struct Menu_Title_Layer : Menu_Layer
 
 	int Initialize() override;
 	void UI() override;
+
+	void ExitButton();
 };
 //https://github.com/blender/blender/blob/master/source/blender/gpu/shaders/material/gpu_shader_material_tex_noise.glsl
