@@ -583,71 +583,15 @@ namespace common {
 		return cracks;
 	}
 
-	void TransformPolygon(
-		std::vector<glm::vec2>& polygon,
-		Transform* transform)
-	{
-		for (glm::vec2& vert : polygon) {
-			vert = TransformPoint<Dimension::d2>(vert, transform);
-		}
-	}
-
 	c_aabb2 TransformBounds(
 		const c_aabb2& bounds,
 		Transform* transform)
 	{
-		std::vector<glm::vec2> corners = MakePolygonFromBounds(bounds);
+		using polygon_t = std::array<glm::vec2, 4>;
+
+		polygon_t corners = MakePolygonFromBounds<polygon_t>(bounds);
 		TransformPolygon(corners, transform);
 		return GenPolygonBounds(corners);
-	}
-
-	std::vector<glm::vec2> MakePolygonFromBounds(
-		const c_aabb2& bounds)
-	{
-		const auto& [min, max] = bounds;
-
-		return {
-			min,
-			glm::vec2(max.x, min.y),
-			max,
-			glm::vec2(min.x, max.y)
-		};
-	}
-
-	c_aabb2 GenPolygonBounds(
-		const std::vector<glm::vec2>& polygon)
-	{
-		c_aabb2 bounds(glm::vec2(FLT_MAX), glm::vec2(-FLT_MAX));
-		auto& [min, max] = bounds;
-
-		for (const glm::vec2& vert : polygon)
-		{
-			if (vert.x > max.x) max.x = vert.x;
-			if (vert.x < min.x) min.x = vert.x;
-			if (vert.y > max.y) max.y = vert.y;
-			if (vert.y < min.y) min.y = vert.y;
-		}
-
-		return bounds;
-	}
-	
-	c_aabb GenPolygonBounds(
-		const std::vector<glm::vec3>& polygon)
-	{
-		c_aabb bounds(glm::vec3(FLT_MAX), glm::vec3(-FLT_MAX));
-		auto& [min, max] = bounds;
-
-		for (const glm::vec3& vert : polygon)
-		{
-			if (vert.x > max.x) max.x = vert.x;
-			if (vert.x < min.x) min.x = vert.x;
-			if (vert.y > max.y) max.y = vert.y;
-			if (vert.y < min.y) min.y = vert.y;
-			if (vert.z > max.z) max.z = vert.z;
-			if (vert.z < min.z) min.z = vert.z;
-		}
-
-		return bounds;
 	}
 
 	c_aabb2 GenTriangleBounds(
