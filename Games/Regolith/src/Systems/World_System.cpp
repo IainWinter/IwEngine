@@ -25,7 +25,7 @@ void WorldSystem::Update()
 	//	DrawLightning(sand, l);
 	//}
 
-	//return; // comment this line to stop all spawning
+	return; // comment this line to stop all spawning
 	m_timer.Tick();
 
 	bool needsAnotherLevel = false;

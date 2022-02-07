@@ -253,7 +253,7 @@ void Menu_Title_Layer::UI()
 	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 1, 1, .5));
 	ImGui::PushFont(iwFont("Quicksand_24"));
 	ImGui::SetNextWindowPos(ImVec2(0, 0));
-	ImGui::Begin("indev mark", nullptr, commonFlags);
+	ImGui::Begin("indev mark", nullptr, commonFlagsFocus);
 	{
 		ImGui::Text("indev v.05 fps: %.0f", __fps);
 	}

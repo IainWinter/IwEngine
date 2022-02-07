@@ -24,6 +24,23 @@ int Game_Layer::Initialize()
 	PushSystem<Upgrade_System>       ();
 	PushSystem<ScoreSystem>          ();
 
+	Console->AddHandler(
+		[=](const iw::Command& command)
+		{
+			if (command.Verb == "toolbox")
+			{
+				SpawnAsteroid_Config config;
+				config.Size = 1;
+				config.SpawnLocationX = sand->sP.x;
+				config.SpawnLocationY = sand->sP.y;
+
+				Bus->push<SpawnAsteroid_Event>(config);
+			}
+
+			return false;
+		}
+	);
+
 	return Layer::Initialize();
 }
 

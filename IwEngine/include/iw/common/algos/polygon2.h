@@ -1,6 +1,7 @@
 #pragma once
 
 #include "iw/common/algos/geom2.h"
+#include <array>
 #include <vector>
 #include <utility>
 #include <algorithm>
@@ -73,6 +74,72 @@ namespace common {
 		return { a, b, c };
 	}
 
+	// calls __container {vec2, vec2, vec2, vec2};
+	template<typename C, typename T = std::decay_t<decltype(*begin(std::declval<C>()))>, typename = std::enable_if_t<std::is_same_v<T, glm::vec2>>>
+	C MakePolygonFromBounds(
+		const c_aabb2& bounds)
+	{
+		const auto& [min, max] = bounds;
+
+		return C {
+			min,
+			glm::vec2(max.x, min.y),
+			max,
+			glm::vec2(min.x, max.y)
+		};
+	}
+
+	template<typename C, typename T = std::decay_t<decltype(*begin(std::declval<C>()))>>
+	void TransformPolygon(
+		C& polygon,
+		Transform* transform)
+	{
+		auto begin = polygon.begin();
+		auto end   = polygon.end();
+		for (T& vert : polygon)
+		{
+			vert = TransformPoint<Dimension::d2>(vert, transform);
+		}
+	}
+
+	template<typename C, typename T = std::decay_t<decltype(*begin(std::declval<C>()))>, typename = std::enable_if_t<std::is_same_v<T, glm::vec2>>>
+	c_aabb2 GenPolygonBounds(
+		const C& polygon)
+	{
+		c_aabb2 bounds(glm::vec2(FLT_MAX), glm::vec2(-FLT_MAX));
+		auto& [min, max] = bounds;
+
+		for (const glm::vec2& v : polygon)
+		{
+			if (v.x > max.x) max.x = v.x;
+			if (v.x < min.x) min.x = v.x;
+			if (v.y > max.y) max.y = v.y;
+			if (v.y < min.y) min.y = v.y;
+		}
+
+		return bounds;
+	}
+
+	template<typename C, typename T = std::decay_t<decltype(*begin(std::declval<C>()))>, typename = std::enable_if_t<std::is_same_v<T, glm::vec3>>>
+	c_aabb GenPolygonBounds(
+		const C& polygon)
+	{
+		c_aabb bounds(glm::vec3(FLT_MAX), glm::vec3(-FLT_MAX));
+		auto& [min, max] = bounds;
+
+		for (const glm::vec3& v : polygon)
+		{
+			if (v.x > max.x) max.x = v.x;
+			if (v.x < min.x) min.x = v.x;
+			if (v.y > max.y) max.y = v.y;
+			if (v.y < min.y) min.y = v.y;
+			if (v.z > max.z) max.z = v.z;
+			if (v.z < min.z) min.z = v.z;
+		}
+
+		return bounds;
+	}
+
 	IWCOMMON_API
 	std::vector<std::vector<glm::vec2>> MakePolygonFromField(
 		bool* field,
@@ -103,31 +170,23 @@ namespace common {
 		const std::vector<glm::vec2>& verts);
 
 	IWCOMMON_API
-	void TransformPolygon(
-		std::vector<glm::vec2>& polygon,
-		Transform* transform);
-
-	IWCOMMON_API
 	c_aabb2 TransformBounds(
 		const c_aabb2& bounds,
 		Transform* transform);
 
+	//IWCOMMON_API
 	inline c_aabb TransformBounds(
 		const c_aabb& bounds,
 		const Transform* transform) { return c_aabb(); } // needs impl, should split file into polygon and polygon2 or have impl structure like physics
 
-	IWCOMMON_API
-	std::vector<glm::vec2> MakePolygonFromBounds(
-		const c_aabb2& bounds);
+	//IWCOMMON_API
+	//c_aabb2 GenPolygonBounds(
+	//	const std::vector<glm::vec2>& polygon);
 
-	IWCOMMON_API
-	c_aabb2 GenPolygonBounds(
-		const std::vector<glm::vec2>& polygon);
-
-	// this should go into a polygon.h file
-	IWCOMMON_API
-	c_aabb GenPolygonBounds(
-		const std::vector<glm::vec3>& polygon);
+	//// this should go into a polygon.h file
+	//IWCOMMON_API
+	//c_aabb GenPolygonBounds(
+	//	const std::vector<glm::vec3>& polygon);
 
 	IWCOMMON_API
 	c_aabb2 GenTriangleBounds(
