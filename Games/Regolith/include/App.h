@@ -123,7 +123,7 @@ public:
 		sand_ui_laser->m_updateDelay = 1 / 60.f;
 	
 		m_game   = new Game_Layer       (sand, sand_ui_laser);
-		m_gameUI = new Menu_GameUI_Layer(sand, sand_ui_laser);
+		m_gameUI = new Menu_GameUI_Layer(sand, sand_ui_laser, m_menus->bg);
 
 		PushLayer(sand);
 		PushLayer(sand_ui_laser);

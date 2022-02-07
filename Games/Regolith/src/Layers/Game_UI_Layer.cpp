@@ -43,6 +43,13 @@ void Menu_GameUI_Layer::UI()
 	ImGui::SetNextWindowSize(ImVec2(bg_w, ui_h));
 	ImGui::Begin("Main Game UI", nullptr, commonFlagsFocus);
 	{
+		// bg
+
+		ImGui::SetCursorPos(ImVec2(0, 0));
+		ImGui::Image(Image("bg"), ImVec2(bg_w, bg_h), ImVec2(0, 1), ImVec2(1, 0));
+
+		ImGui::End();
+
 		// game
 
 		//ImGui::SetCursorPos(ImVec2(0, 0));

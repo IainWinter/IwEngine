@@ -224,6 +224,7 @@ int Menu_Title_Layer::Initialize()
 	bg = REF<iw::RenderTarget>();
 	bg->AddTexture(REF<iw::Texture>(Renderer->Width(), Renderer->Height()));
 	bg->AddTexture(REF<iw::Texture>(Renderer->Width(), Renderer->Height(), iw::TEX_2D, iw::DEPTH));
+	bg->Initialize(Renderer->Device);
 
 	highscoreParts.LoadTopScore();
 
@@ -321,26 +322,6 @@ void Menu_Title_Layer::UI()
 	float menuOpacity = iw::lerp(0.f, 1.f, easeIn   (t1));
 
 	// end temp
-	
-	// render bg frame
-	// this is one frame behind so when resizing you get a stroke
-	
-	bg->Resize(bg_w, bg_h);
-	Renderer->BeginScene(MainScene, bg, true);
-	{
-		Renderer->DrawMesh(smoke   .Find<iw::Transform>(), &smoke  .Find<iw::StaticPS>()->GetParticleMesh());
-		Renderer->DrawMesh(stars   .Find<iw::Transform>(), &stars  .Find<iw::StaticPS>()->GetParticleMesh());
-		Renderer->DrawMesh(ball    .Find<iw::Transform>(), ball    .Find<iw::Mesh>());
-		
-		Renderer->DrawMesh(title   .Find<iw::Transform>(), title   .Find<iw::Mesh>());
-		Renderer->DrawMesh(title_hs.Find<iw::Transform>(), title_hs.Find<iw::Mesh>());
-		Renderer->DrawMesh(title_st.Find<iw::Transform>(), title_st.Find<iw::Mesh>());
-		//Renderer->DrawMesh(title_ps.Find<iw::Transform>(), title_ps.Find<iw::Mesh>());
-		//Renderer->DrawMesh(axis .Find<iw::Transform>(), axis  .Find<iw::Mesh>());
-	}
-	Renderer->EndScene();
-
-	// draw bg
 
 	ImGui::PushFont(iwFont("Quicksand_40"));
 
@@ -377,13 +358,6 @@ void Menu_Title_Layer::UI()
 			ImVec2(bg_x, bg_y),
 			ImVec2(bg_x + bg_w, bg_y + bg_h), iw::Color(0, 0, 0, fade_exit).to32()
 		);
-	}
-	
-	iw::ITexture* tex = bg->Tex(0)->Handle();
-	if (tex)
-	{
-		ImGui::SetCursorPos(ImVec2(0, 0));
-		ImGui::Image((void*)tex->Id(), ImVec2(bg_w, bg_h), ImVec2(0, 1), ImVec2(1, 0));
 	}
 
 	// draw buttons
@@ -480,7 +454,20 @@ void Menu_Title_Layer::UI()
 	ImGui::PopStyleColor(10);
 	ImGui::PopFont();
 
-	ImGui::End();
+	bg->Resize(bg_w, bg_h);
+	Renderer->BeginScene(MainScene, bg, true);
+	{
+		Renderer->DrawMesh(smoke   .Find<iw::Transform>(), &smoke  .Find<iw::StaticPS>()->GetParticleMesh());
+		Renderer->DrawMesh(stars   .Find<iw::Transform>(), &stars  .Find<iw::StaticPS>()->GetParticleMesh());
+		Renderer->DrawMesh(ball    .Find<iw::Transform>(), ball    .Find<iw::Mesh>());
+		
+		Renderer->DrawMesh(title   .Find<iw::Transform>(), title   .Find<iw::Mesh>());
+		Renderer->DrawMesh(title_hs.Find<iw::Transform>(), title_hs.Find<iw::Mesh>());
+		Renderer->DrawMesh(title_st.Find<iw::Transform>(), title_st.Find<iw::Mesh>());
+		//Renderer->DrawMesh(title_ps.Find<iw::Transform>(), title_ps.Find<iw::Mesh>());
+		//Renderer->DrawMesh(axis .Find<iw::Transform>(), axis  .Find<iw::Mesh>());
+	}
+	Renderer->EndScene();
 }
 
 void Menu_Title_Layer::ExitButton()
@@ -500,4 +487,9 @@ void Menu_Title_Layer::ExitButton()
 	{
 		fade_exit = iw::lerp(fade_exit, 0.f, iw::DeltaTime() * 10.f);
 	}
+}
+
+void Menu_Title_Layer::PostUpdate()
+{
+
 }

@@ -147,6 +147,8 @@ struct Menu_Title_Layer : Menu_Layer
 	int Initialize() override;
 	void UI() override;
 
+	void PostUpdate() override;
+
 	void ExitButton();
 };
 //https://github.com/blender/blender/blob/master/source/blender/gpu/shaders/material/gpu_shader_material_tex_noise.glsl

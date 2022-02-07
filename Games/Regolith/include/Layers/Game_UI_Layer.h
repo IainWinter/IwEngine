@@ -39,7 +39,8 @@ struct Menu_GameUI_Layer : Menu_Layer
 
 	Menu_GameUI_Layer(
 		iw::SandLayer* sand,
-		iw::SandLayer* sand_ui_laserCharge
+		iw::SandLayer* sand_ui_laserCharge,
+		iw::ref<iw::RenderTarget> bg
 	)
 		: Menu_Layer     ("Game UI")
 		, m_sand_game     (sand)
@@ -48,7 +49,9 @@ struct Menu_GameUI_Layer : Menu_Layer
 		, m_player_weapon (nullptr)
 		, m_paused        (false)
 		, m_jitter        (0.f)
-	{}
+	{
+		RegisterImage("bg", (void*)bg->Tex(0)->Handle()->Id());
+	}
 
 	int Initialize() override;
 	void PreUpdate() override;
