@@ -21,6 +21,7 @@
 #include "Layers/Menu_Fadeout_Layer.h"
 #include "Layers/Menu_Upgrade_Layer.h"
 #include "Layers/Audio_Layer.h"
+#include "Layers/Menu_Bg_Render_Layer.h"
 
 #include "State.h"
 #include "MenuState.h"
@@ -101,7 +102,6 @@ public:
 		PushLayerFront(m_game->sand);
 		PushLayerFront(m_game->sand_ui_laserCharge);
 		PushLayerFront(m_game);
-		//PushLayer(m_gameUI);
 		Input->SetContext("game");
 		Physics->Paused = false;
 		ChangeState(StateName::IN_GAME);
@@ -109,7 +109,8 @@ public:
 
 	void ChangeToTitleScreen()
 	{
-		PushLayer(m_menus);
+		m_menus = PushLayer<Menu_Title_Layer>();
+		PushLayer<Menu_Bg_Render_Layer>();
 		Input->SetContext("menu");
 
 		m_state = StateName::IN_MENU;

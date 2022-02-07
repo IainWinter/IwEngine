@@ -26,8 +26,6 @@ int App::Initialize(
 
 	PushLayer<iw::ImGuiLayer>(Window, m_fonts)->BindContext();
 
-	m_menus = new Menu_Title_Layer();
-
 	Console->QueueCommand("set-state menus");
 
 	// add default cells

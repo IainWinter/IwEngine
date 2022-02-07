@@ -225,6 +225,7 @@ int Menu_Title_Layer::Initialize()
 	bg->AddTexture(REF<iw::Texture>(Renderer->Width(), Renderer->Height()));
 	bg->AddTexture(REF<iw::Texture>(Renderer->Width(), Renderer->Height(), iw::TEX_2D, iw::DEPTH));
 	bg->Initialize(Renderer->Device);
+	RegisterImage("bg", (void*)bg->Tex(0)->Handle()->Id());
 
 	highscoreParts.LoadTopScore();
 
@@ -259,8 +260,6 @@ void Menu_Title_Layer::UI()
 	ImGui::End();
 	ImGui::PopFont();
 	ImGui::PopStyleColor();
-
-	ImGui::ShowMetricsWindow();
 
 	//iw::StaticPS* smoke_p = smoke.Find<iw::StaticPS>();
 
@@ -338,9 +337,10 @@ void Menu_Title_Layer::UI()
 	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1, 1, 1, 0.2 * menuOpacity));
 	ImGui::PushStyleColor(ImGuiCol_ButtonActive,  ImVec4(1, 1, 1, 0.1 * menuOpacity));
 
+	ImGui::SetNextWindowFocus();
 	ImGui::SetNextWindowPos (ImVec2(bg_x, bg_y));
 	ImGui::SetNextWindowSize(ImVec2(bg_w, bg_h));
-	ImGui::Begin("Main Menu Layer", nullptr, commonFlags);
+	ImGui::Begin("Main Menu Layer", nullptr, commonFlagsFocus);
 
 	fade = iw::lerp(fade, target_fade, iw::DeltaTime() * 20.f);
 
@@ -487,9 +487,4 @@ void Menu_Title_Layer::ExitButton()
 	{
 		fade_exit = iw::lerp(fade_exit, 0.f, iw::DeltaTime() * 10.f);
 	}
-}
-
-void Menu_Title_Layer::PostUpdate()
-{
-
 }

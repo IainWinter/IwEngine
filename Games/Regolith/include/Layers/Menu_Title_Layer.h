@@ -32,13 +32,13 @@ struct Menu_Title_Layer : Menu_Layer
 	iw::ref<iw::RenderTarget> bg;
 	iw::PerspectiveCamera persp;
 	iw::OrthographicCamera ortho;
-	float t;
-	float t1;
-
 	glm::vec3 target_pos;
 	glm::quat target_rot;
 	glm::vec3 last_pos;
 	glm::quat last_rot;
+
+	float t;
+	float t1;
 
 	float pers;
 	float target_pers;
@@ -146,8 +146,6 @@ struct Menu_Title_Layer : Menu_Layer
 
 	int Initialize() override;
 	void UI() override;
-
-	void PostUpdate() override;
 
 	void ExitButton();
 };

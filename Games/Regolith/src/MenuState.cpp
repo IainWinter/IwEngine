@@ -81,5 +81,11 @@ void RegisterImage(const std::string& str, void* img)
 
 void* Image(const std::string& str)
 {
-	return g_imgs.at(str);
+	auto itr = g_imgs.find(str);
+	if (itr != g_imgs.end())
+	{
+		return itr->second;
+	}
+
+	return nullptr;
 }

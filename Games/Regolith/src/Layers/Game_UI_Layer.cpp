@@ -39,32 +39,26 @@ void Menu_GameUI_Layer::UI()
 	// Draw the main ui
 
 	ImGui::PushFont(iwFont("Quicksand_50"));
-	ImGui::SetNextWindowPos (ImVec2(bg_x, ui_y));
-	ImGui::SetNextWindowSize(ImVec2(bg_w, ui_h));
+	ImGui::SetNextWindowPos (ImVec2(bg_x, bg_y));
+	ImGui::SetNextWindowSize(ImVec2(bg_w, bg_h));
+
 	ImGui::Begin("Main Game UI", nullptr, commonFlagsFocus);
 	{
-		// bg
-
-		ImGui::SetCursorPos(ImVec2(0, 0));
-		ImGui::Image(Image("bg"), ImVec2(bg_w, bg_h), ImVec2(0, 1), ImVec2(1, 0));
-
-		ImGui::End();
-
 		// game
 
-		//ImGui::SetCursorPos(ImVec2(0, 0));
-		//ImGui::Image(Image("game"), ImVec2(bg_w, bg_h - ui_h));
+		ImGui::SetCursorPos(ImVec2(0, 0));
+		ImGui::Image(Image("game"), ImVec2(bg_w, bg_h - ui_h));
 
 		// ui 
 
-		ImGui::SetCursorPos(ImVec2(0, 0));
+		ImGui::SetCursorPos(ImVec2(0, ui_y));
 		ImGui::Image(Image("ui_background.png"), ImVec2(bg_w, ui_h));
 		
 		// player
 
 		float player_wh = 40 * scale;
 		float player_x  = 80 * scale;
-		float player_y  =  5 * scale;
+		float player_y  =  5 * scale + ui_y;
 
 		ImGui::SetCursorPos(ImVec2(player_x, player_y));
 		ImGui::Image(Image("player"), ImVec2(player_wh, player_wh));
@@ -73,8 +67,8 @@ void Menu_GameUI_Layer::UI()
 		// could make this on exact center with a ImGui::TextSize calculation
 
 		float text_x  = 146  * scale;
-		float ammo_y  = 4.5f * scale;
-		float score_y = 22.f * scale;
+		float ammo_y  = 4.5f * scale + ui_y;
+		float score_y = 22.f * scale + ui_y;
 
 		if (m_player_weapon && m_player_weapon->Ammo > 0)
 		{
@@ -130,13 +124,13 @@ void Menu_GameUI_Layer::UI()
 	}
 	ImGui::End();
 
-	ImGui::SetNextWindowPos (ImVec2(bg_x, bg_y));
-	ImGui::SetNextWindowSize(ImVec2(bg_w, bg_h - ui_h));
-	ImGui::Begin("Main Game Board", nullptr, commonFlags);
-	{
-		ImGui::Image(Image("game"), ImVec2(bg_w, bg_h - ui_h));
-	}
-	ImGui::End();
+	//ImGui::SetNextWindowPos (ImVec2(bg_x, bg_y));
+	//ImGui::SetNextWindowSize(ImVec2(bg_w, bg_h - ui_h));
+	//ImGui::Begin("Main Game Board", nullptr, commonFlags);
+	//{
+	//	ImGui::Image(Image("game"), ImVec2(bg_w, bg_h - ui_h));
+	//}
+	//ImGui::End();
 	ImGui::PopFont();
 }
 
