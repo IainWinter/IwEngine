@@ -242,25 +242,8 @@ float easeIn(float x)
 	return x * x * x * x;
 }
 
-float __fps;
-
 void Menu_Title_Layer::UI()
 {
-	// tag + fps
-
-	__fps = iw::lerp(__fps, 1.f / iw::RawDeltaTime(), iw::RawDeltaTime());
-
-	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 1, 1, .5));
-	ImGui::PushFont(iwFont("Quicksand_24"));
-	ImGui::SetNextWindowPos(ImVec2(0, 0));
-	ImGui::Begin("indev mark", nullptr, commonFlagsFocus);
-	{
-		ImGui::Text("indev v.05 fps: %.0f", __fps);
-	}
-	ImGui::End();
-	ImGui::PopFont();
-	ImGui::PopStyleColor();
-
 	//iw::StaticPS* smoke_p = smoke.Find<iw::StaticPS>();
 
 	//glm::vec3 p1 = glm::vec3(1.15, -3.75, .7) + glm::normalize(glm::vec3(-.5, 1, 1)) * 3.f;
@@ -360,11 +343,21 @@ void Menu_Title_Layer::UI()
 		);
 	}
 
+	// tag + fps
+
+	__fps = iw::clamp(iw::lerp(__fps, 1.f / iw::RawDeltaTime(), iw::RawDeltaTime()), 0.f, 10000.f);
+	ImGui::PushFont(iwFont("Quicksand_24"));
+	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 1, 1, .5));
+	ImGui::SetCursorPos(ImVec2(0, 0));
+	ImGui::Text("indev v.05 fps: %.0f", __fps);
+	ImGui::PopStyleColor();
+	ImGui::PopFont();
+
 	// draw buttons
 
 	float paddingx = bg_w / 6;
 
-	if (last_menu == 0)
+	if (last_menu == MenuTarget::DEFAULT)
 	{
 		float x = paddingx - menuOffset;
 
@@ -385,7 +378,7 @@ void Menu_Title_Layer::UI()
 		ExitButton();
 	}
 
-	if (last_menu == 1)
+	if (last_menu == MenuTarget::HIGHSCORES)
 	{
 		highscoreParts.ScoreTable(
 			bg_x + paddingx - menuOffset, 
@@ -395,11 +388,12 @@ void Menu_Title_Layer::UI()
 		);
 	}
 
-	if (last_menu == 2 || last_menu == 4)
+	if (   last_menu == MenuTarget::SETTINGS
+		|| last_menu == MenuTarget::SETTINGS_FROM_PAUSE)
 	{
 		int y = bg_h / 2;
 
-		if (last_menu == 4)
+		if (last_menu == MenuTarget::SETTINGS_FROM_PAUSE)
 		{
 			y = bg_h / 3;
 		}
@@ -409,11 +403,13 @@ void Menu_Title_Layer::UI()
 		ImGui::PopFont();
 	}
 
-	if (last_menu == 1 || last_menu == 2 || last_menu == 4)
+	if (   last_menu == MenuTarget::HIGHSCORES
+		|| last_menu == MenuTarget::SETTINGS
+		|| last_menu == MenuTarget::SETTINGS_FROM_PAUSE)
 	{
 		int y = bg_h - padding_1;
 
-		if (last_menu == 4) // if in game, bottom is the ui
+		if (last_menu == MenuTarget::SETTINGS_FROM_PAUSE) // if in game, bottom is the ui
 		{
 			y = bg_h * .8 - padding_1;
 		}
@@ -430,7 +426,7 @@ void Menu_Title_Layer::UI()
 		else if (Button("Back")) GoBack();
 	}
 
-	if (last_menu == 3)
+	if (last_menu == MenuTarget::PAUSE)
 	{
 		float x = paddingx - menuOffset;
 
@@ -438,7 +434,7 @@ void Menu_Title_Layer::UI()
 		ImGui::SetCursorPosX(x);
 		if (Button("Settings"))
 		{
-			target_menu = 4;
+			target_menu = MenuTarget::SETTINGS_FROM_PAUSE;
 			BackButtonTarget = MenuTarget::PAUSE;
 			BackButtonFunc = {};
 		}
@@ -448,9 +444,9 @@ void Menu_Title_Layer::UI()
 		ImGui::SetCursorPosY(bg_h * .8 - padding_1);
 		ImGui::SetCursorPosX(x);
 		if (Button("Resume")) Console->QueueCommand("escape");
-		
 	}
 
+	ImGui::End();
 	ImGui::PopStyleColor(10);
 	ImGui::PopFont();
 
@@ -472,7 +468,9 @@ void Menu_Title_Layer::UI()
 
 void Menu_Title_Layer::ExitButton()
 {
+	//ImGui::PushFont(iwFont("Quicksand_30"));
 	Button("Exit");
+	//ImGui::PopFont();
 
 	if (ImGui::IsItemActive())
 	{

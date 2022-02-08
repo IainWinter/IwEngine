@@ -134,7 +134,7 @@ int App::Initialize(
 					ChangeToPauseMenu();
 					break;
 				case StateName::IN_GAME_THEN_MENU:
-					if (m_menus->target_menu != 3)
+					if (m_menus->target_menu != MenuTarget::PAUSE)
 						m_menus->Escape();
 					else
 						ChangeBackToGame();

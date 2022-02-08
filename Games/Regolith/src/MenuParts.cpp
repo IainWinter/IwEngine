@@ -13,10 +13,8 @@ void Highscores_MenuParts::ScoreTable(
 
 	int height = ImGui::CalcTextSize("O").y + 5;
 
-	ImGui::SetNextWindowPos (ImVec2(x,  y - height));
-	ImGui::SetNextWindowSize(ImVec2(w, h));
-
-	ImGui::Begin("Highscores title", nullptr, commonFlagsFocus);
+	ImGui::SetNextWindowPos(ImVec2(x,  y - height));
+	ImGui::BeginChild("Highscores title", ImVec2(w, ImGui::CalcTextSize("A").y));
 	{
 		if (ImGui::BeginTable("Upgrades", 3))
 		{
@@ -54,12 +52,10 @@ void Highscores_MenuParts::ScoreTable(
 			ImGui::EndTable();
 		}
 	}
-	ImGui::End();
+	ImGui::EndChild();
 
-	ImGui::SetNextWindowPos (ImVec2(x, y));
-	ImGui::SetNextWindowSize(ImVec2(w, h));
-
-	ImGui::Begin("Highscores", nullptr, commonFlagsFocus);
+	ImGui::SetNextWindowPos(ImVec2(x, y));
+	ImGui::BeginChild("Highscores", ImVec2(w, h));
 	{
 		if (ImGui::BeginTable("Upgrades", 3))
 		{
@@ -128,7 +124,7 @@ void Highscores_MenuParts::ScoreTable(
 			ImGui::EndTable();
 		}
 	}
-	ImGui::End();
+	ImGui::EndChild();
 }
 
 void Highscores_MenuParts::SubmitTempNameAndGetGameId(

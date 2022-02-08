@@ -54,6 +54,15 @@ void Menu_GameUI_Layer::UI()
 		ImGui::SetCursorPos(ImVec2(0, ui_y));
 		ImGui::Image(Image("ui_background.png"), ImVec2(bg_w, ui_h));
 		
+		// tank
+
+		float tank_wh = 40 * scale;
+		float tank_x  =  5 * scale;
+		float tank_y  =  5 * scale + ui_y;
+
+		ImGui::SetCursorPos(ImVec2(tank_x, tank_y));
+		ImGui::Image(Image("tank"), ImVec2(tank_wh, tank_wh));
+
 		// player
 
 		float player_wh = 40 * scale;
