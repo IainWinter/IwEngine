@@ -40,8 +40,8 @@ int Menu_Title_Layer::Initialize()
 	MainScene->AddLight(new iw::PointLight());
 	MainScene->PointLights().at(0)->SetPosition(glm::vec3(.77, .52, .8));
 	
-	iw::EditorCameraControllerSystem* camController = PushSystem<iw::EditorCameraControllerSystem>();
-	camController->Initialize();
+	//iw::EditorCameraControllerSystem* camController = PushSystem<iw::EditorCameraControllerSystem>();
+	//camController->Initialize();
 
 	iw::Camera* cam = new iw::CustomCamera();
 	cam->Transform.Rotation = target_rot;
@@ -50,7 +50,7 @@ int Menu_Title_Layer::Initialize()
 	MainScene->SetMainCamera(cam);
 	Renderer->Now->Device->SetClearColor(0, 0, 0, 1);
 
-	ortho = iw::OrthographicCamera(4, 5, 0, 20);
+	ortho = iw::OrthographicCamera(4, 5, 0, 50);
 	persp = iw::PerspectiveCamera(.67, 4/5.f);
 	//persp.RecalculateProjection();
 	//iw::ISystem* sis = PushSystem<iw::SpaceInspectorSystem>();
@@ -229,6 +229,8 @@ int Menu_Title_Layer::Initialize()
 
 	highscoreParts.LoadTopScore();
 
+	drawMenubg = true;
+
 	return 0;
 }
 
@@ -325,6 +327,14 @@ void Menu_Title_Layer::UI()
 	ImGui::SetNextWindowSize(ImVec2(bg_w, bg_h));
 	ImGui::Begin("Main Menu Layer", nullptr, commonFlagsFocus);
 
+	ImGui::SetCursorPos(ImVec2(100, 100));
+	ImGui::SliderFloat("fov", &persp.Fov, 0, iw::Pi);
+	ImGui::SetCursorPosX(100);
+	ImGui::SliderFloat("prs", &target_pers, 0, 1);
+	ImGui::SetCursorPosX(100);
+	ImGui::SliderFloat3("pos", (float*)&target_pos, -100, 100);
+	persp.RecalculateProjection();
+
 	fade = iw::lerp(fade, target_fade, iw::DeltaTime() * 20.f);
 
 	if (fade > 0.001f)
@@ -366,6 +376,11 @@ void Menu_Title_Layer::UI()
 		{
 			SetViewGame(); // do little play animation
 			Console->QueueCommand("set-state game 1");
+
+			Task->delay(1.f, [&]()
+			{
+				drawMenubg = false;
+			});
 		}
 
 		ImGui::SetCursorPosX(x);
@@ -450,18 +465,24 @@ void Menu_Title_Layer::UI()
 	ImGui::PopStyleColor(10);
 	ImGui::PopFont();
 
+	iw::Transform* strans = stars.Find<iw::Transform>();
+	strans->Position = cam->Transform.Position;
+
 	bg->Resize(bg_w, bg_h);
 	Renderer->BeginScene(MainScene, bg, true);
 	{
-		Renderer->DrawMesh(smoke   .Find<iw::Transform>(), &smoke  .Find<iw::StaticPS>()->GetParticleMesh());
 		Renderer->DrawMesh(stars   .Find<iw::Transform>(), &stars  .Find<iw::StaticPS>()->GetParticleMesh());
-		Renderer->DrawMesh(ball    .Find<iw::Transform>(), ball    .Find<iw::Mesh>());
 		
-		Renderer->DrawMesh(title   .Find<iw::Transform>(), title   .Find<iw::Mesh>());
-		Renderer->DrawMesh(title_hs.Find<iw::Transform>(), title_hs.Find<iw::Mesh>());
-		Renderer->DrawMesh(title_st.Find<iw::Transform>(), title_st.Find<iw::Mesh>());
-		//Renderer->DrawMesh(title_ps.Find<iw::Transform>(), title_ps.Find<iw::Mesh>());
-		//Renderer->DrawMesh(axis .Find<iw::Transform>(), axis  .Find<iw::Mesh>());
+		if (drawMenubg)
+		{
+			Renderer->DrawMesh(ball    .Find<iw::Transform>(), ball    .Find<iw::Mesh>());
+			Renderer->DrawMesh(smoke   .Find<iw::Transform>(), &smoke  .Find<iw::StaticPS>()->GetParticleMesh());
+			Renderer->DrawMesh(title   .Find<iw::Transform>(), title   .Find<iw::Mesh>());
+			Renderer->DrawMesh(title_hs.Find<iw::Transform>(), title_hs.Find<iw::Mesh>());
+			Renderer->DrawMesh(title_st.Find<iw::Transform>(), title_st.Find<iw::Mesh>());
+			//Renderer->DrawMesh(title_ps.Find<iw::Transform>(), title_ps.Find<iw::Mesh>());
+			//Renderer->DrawMesh(axis .Find<iw::Transform>(), axis  .Find<iw::Mesh>());
+		}
 	}
 	Renderer->EndScene();
 }

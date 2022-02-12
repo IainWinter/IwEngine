@@ -7,7 +7,8 @@
 #include <functional>
 #include <mutex>
 #include <condition_variable>
-//#include <string>
+
+#include <chrono>
 
 //#define TASK_IN(t, f)							\
 //	float time = iw::TotalTime();					\
@@ -30,12 +31,19 @@ namespace util {
 			bool poison = false;
 		};
 
+		using my_time = long long;
+
+		my_time get_time() {
+			using namespace std::chrono;
+			return duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+		}
+
 		std::vector<std::thread> m_pool;
 		iw::blocking_queue<func_t> m_queue;
 
 		std::mutex m_mutex_coroutine;
-		std::vector<std::function<bool()>> m_coroutines; // main thread tasks
-		std::vector<std::function<void()>> m_defered;    // ^
+		std::vector<                           std::function<bool()>>  m_coroutines; // main thread tasks
+		std::vector<std::tuple<my_time, float, std::function<void()>>> m_defered;    // ^
 
 	public:
 		thread_pool(
@@ -102,31 +110,40 @@ namespace util {
 
 		void step_coroutines()
 		{
-			std::vector<std::function<bool()>> copy;
-			std::vector<std::function<void()>> copy2;
+			// copy to local because tasks could add more
+
+			std::vector<                           std::function<bool()>>  copy_coroutines;
+			std::vector<std::tuple<my_time, float, std::function<void()>>> copy_defered;
 			{
 				std::unique_lock lock(m_mutex_coroutine);
-				copy  = m_coroutines;
-				copy2 = m_defered;
+				copy_coroutines = m_coroutines;
+				copy_defered    = m_defered;
 			}
 
-			for (size_t i = 0; i < copy.size(); i++)
+			for (size_t i = 0; i < copy_coroutines.size(); i++)
 			{
-				if (copy.at(i)())
+				if (copy_coroutines.at(i)())
 				{
-					std::unique_lock lock(m_mutex_coroutine);
-					m_coroutines.erase(m_coroutines.begin() + i);
+					copy_coroutines.erase(copy_coroutines.begin() + i); // sucks, lots of moves
 				}
 			}
 
-			for (size_t i = 0; i < copy2.size(); i++)
+			for (size_t i = 0; i < copy_defered.size(); i++)
 			{
-				copy2.at(i)();
+				auto& [begin, delay, func] = copy_defered.at(i);
+
+				if (get_time() - begin > (my_time)(delay * 1000.f))
+				{
+					func();
+					copy_defered.erase(copy_defered.begin() + i);
+				}
 			}
 
+			// move back
 			{
 				std::unique_lock lock(m_mutex_coroutine);
-				m_defered.clear();
+				m_coroutines = std::move(copy_coroutines);
+				m_defered    = std::move(copy_defered);
 			}
 		}
 
@@ -140,8 +157,15 @@ namespace util {
 		void defer(
 			std::function<void()> func)
 		{
+			delay(-1.f, func);
+		}
+
+		void delay(
+			float howLong,
+			std::function<void()> func)
+		{
 			std::unique_lock lock(m_mutex_coroutine);
-			m_defered.push_back(func);
+			m_defered.emplace_back(get_time(), howLong, func);
 		}
 
 		template<
