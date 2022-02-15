@@ -4,6 +4,7 @@
 
 std::unordered_map<std::string, void*> g_imgs;
 std::unordered_map<std::string, bool>  g_hovered;
+std::unordered_map<std::string, std::pair<bool, float>>  g_confirmed;
 iw::AppVars g_app;
 
 void SetMenuStateAppVars(iw::AppVars& app)
@@ -31,6 +32,33 @@ bool SliderFloat(const std::string& name, float& value, float min, float max, co
 	value = iw::clamp(value, min, max);
 	PlayClickSound(name);
 	return isClicked;
+}
+
+bool ConfirmButton(const std::string& name)
+{
+	bool isConfirmed = false;
+	auto& [needsConfirm, lastClickedTime] = g_confirmed[name];
+
+	if (needsConfirm)
+	{
+		if (Button("Are you sure?"))
+		{
+			isConfirmed = true;
+		}
+
+		if (iw::TotalTime() - lastClickedTime > 1.5f)
+		{
+			needsConfirm = false;
+		}
+	}
+
+	else if (Button(name.c_str()))
+	{
+		needsConfirm = true;
+		lastClickedTime = iw::TotalTime();
+	}
+
+	return isConfirmed;
 }
 
 void PlayHoverOrClickSound(const std::string& name)

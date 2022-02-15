@@ -35,12 +35,15 @@ namespace Input {
 			return;
 		}
 
-		for (iw::ref<Device>& device : context.m_devices) {
+		for (iw::ref<Device>& device : context.m_devices) 
+		{
 			DeviceInput input = device->TranslateOsEvent(osevent);
 
 			if (input.Name == InputName::INPUT_NONE) {
 				continue;
 			}
+
+			context.LastInput = input.Name;
 
 			bool active  = !!input.State;
 			bool active2 = !!input.State2;
@@ -188,7 +191,7 @@ namespace Input {
 		}
 
 		else {
-			LOG_DEBUG << "Already created context " << context->Name;
+			LOG_DEBUG << "[Input]" << " Already created context " << context->Name;
 		}
 
 		return context;
@@ -197,22 +200,14 @@ namespace Input {
 	ref<Context> InputManager::SetContext(
 		const std::string& name)
 	{
-		iw::ref<Context> context;
-		for (iw::ref<Context>& c : m_contexts) {
-			if (c->Name == name) {
-				context = c;
-				break;
-			}
-		}
-
+		iw::ref<Context> context = GetContext(name);
 		if (!context)
 		{
-			LOG_WARNING << "Tried to set an input managers context with one that it doesn't own " << name;
+			LOG_WARNING << "[Input]" << " \t-> from SetContext";
 			return nullptr;
 		}
 
 		m_active = context;
-
 		m_active->State.Reset(); // reset inputs for held buttons on context change
 
 		return m_active;
@@ -221,7 +216,40 @@ namespace Input {
 	void InputManager::SetContext(
 		const ref<Context>& context)
 	{
+		if (!context)
+		{
+			LOG_WARNING << "[Input]" << " Tried to set null context";
+			return;
+		}
+
 		SetContext(context->Name);
+	}
+
+	ref<Context> InputManager::GetContext(
+		const std::string& name)
+	{
+		if (name == "")
+		{
+			return m_active;
+		}
+
+		ref<Context> out = nullptr;
+
+		// should use map?
+		for (iw::ref<Context>& c : m_contexts) {
+			if (c->Name == name) {
+				out = c;
+				break;
+			}
+		}
+
+		if (!out)
+		{
+			LOG_WARNING << "[Input]" << " Tried to get an input managers context that doesn't exist. Name = " << name;
+			return nullptr;
+		}
+
+		return out;
 	}
 
 	template<>
@@ -279,7 +307,7 @@ namespace Input {
 		GetRawInputData(rptr, RID_INPUT, NULL, &dwSize, rihSize);
 
 		if (dwSize == 0) {
-			LOG_WARNING << "Invalid raw input device! HRAWINPUT " << e.LParam;
+			LOG_WARNING << "[Input]" << " Invalid raw input device! HRAWINPUT " << e.LParam;
 			e.LParam = 0;
 			return old;
 		}
@@ -289,7 +317,7 @@ namespace Input {
 		if (GetRawInputData(rptr, RID_INPUT, lpb, &dwSize, rihSize) != dwSize) {
 			delete[] lpb;
 			lpb = nullptr;
-			LOG_WARNING << "GetRawInputData does not return correct size!";
+			LOG_WARNING << "[Input]" << " GetRawInputData does not return correct size!";
 		}
 
 		e.LParam = (LPARAM)lpb;

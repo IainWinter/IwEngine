@@ -13,6 +13,8 @@ bool Button(const std::string& name);
 bool Checkbox(const std::string& name, bool& active);
 bool SliderFloat(const std::string& name, float& value, float min, float max, const char* fmt);
 
+bool ConfirmButton(const std::string& name);
+
 void PlayHoverOrClickSound(const std::string& name);
 void PlayHoverSound(const std::string& name);
 void PlayClickSound(const std::string& name);

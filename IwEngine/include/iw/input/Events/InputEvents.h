@@ -24,9 +24,9 @@ namespace Input {
 			DeviceType device,
 			InputState& inputState
 		)
-			: event(val(EventGroup::INPUT), val(type))
-			, Device(device)
-			, InputStates(inputState)
+			: event       (val(EventGroup::INPUT), val(type))
+			, Device      (device)
+			, InputStates (inputState)
 		{}
 	};
 
