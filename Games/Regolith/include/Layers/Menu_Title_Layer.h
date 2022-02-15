@@ -22,14 +22,19 @@ enum class MenuTarget
 
 struct Menu_Title_Layer : Menu_Layer
 {
-	iw::Entity ball;
 	iw::Entity axis;
+
+	iw::Entity stars;
+
+	bool drawMenubg;
+	iw::Entity ball;
 	iw::Entity title;
 	iw::Entity title_hs;
 	iw::Entity title_st;
 	iw::Entity title_ps;
-	iw::Entity stars;
 	iw::Entity smoke;
+
+
 	iw::ref<iw::RenderTarget> bg;
 	iw::PerspectiveCamera persp;
 	iw::OrthographicCamera ortho;
@@ -80,7 +85,7 @@ struct Menu_Title_Layer : Menu_Layer
 	void SetViewDefault()
 	{
 		target_menu = MenuTarget::DEFAULT;
-		target_pers = 1.f;
+		target_pers = 0.f;
 		target_pos = glm::vec3(0, 0, 10);
 		target_rot = glm::quat(1, 0, 0, 0);
 		target_fade = 0.f;
@@ -89,7 +94,7 @@ struct Menu_Title_Layer : Menu_Layer
 	void SetViewHighscores()
 	{
 		target_menu = MenuTarget::HIGHSCORES;
-		target_pers = 1.f;
+		target_pers = 0.f;
 		target_pos = glm::vec3(10, 0, 0);
 		target_rot = glm::quat(sqrt(2) / 2, 0, sqrt(2) / 2, 0);
 		target_fade = 0.f;
@@ -98,7 +103,7 @@ struct Menu_Title_Layer : Menu_Layer
 	void SetViewSettings()
 	{
 		target_menu = MenuTarget::SETTINGS;
-		target_pers = 1.f;
+		target_pers = 0.f;
 		target_pos = glm::vec3(7.4, -8, 5);
 		target_rot = glm::quat(.98, 0, .2, 0);
 		target_fade = 0.f;
