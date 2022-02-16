@@ -21,6 +21,7 @@ namespace Input {
 		float Height;
 
 		InputState State;
+		InputName LastInput; // last named input to be processed
 
 		IWINPUT_API
 		Context(

@@ -23,6 +23,7 @@ int Game_Layer::Initialize()
 	PushSystem<KeepInWorldSystem>    ();
 	PushSystem<Upgrade_System>       ();
 	PushSystem<ScoreSystem>          ();
+	PushSystem<Recording_System>     ();
 
 	Console->AddHandler(
 		[=](const iw::Command& command)

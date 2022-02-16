@@ -12,8 +12,8 @@ namespace Input {
 	private:
 		std::vector<ref<Context>> m_contexts;
 		std::vector<ref<Device>>  m_devices;
-		ref<Context> m_active;
 		ref<eventbus> m_bus;
+		ref<Context> m_active;
 
 	public:
 		IWINPUT_API
@@ -37,6 +37,10 @@ namespace Input {
 		IWINPUT_API
 		void SetContext(
 			const ref<Context>& context);
+
+		IWINPUT_API
+		ref<Context> GetContext(
+			const std::string& name = "");
 
 		template<
 			typename D>

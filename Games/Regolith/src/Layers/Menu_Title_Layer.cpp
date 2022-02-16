@@ -7,12 +7,13 @@
 
 int Menu_Title_Layer::Initialize()
 {
-	GameSettings.Add("VSync",      new VSyncSetting());
-	GameSettings.Add("Fullscreen", new DisplaySetting(Window));
-	GameSettings.Add("Music",      new AudioSetting(Audio, Audio->GetHandle("vca:/music")));
-	GameSettings.Add("Game",       new AudioSetting(Audio, Audio->GetHandle("vca:/effects")));
+	gameSettings.Add("VSync",      new VSyncSetting());
+	gameSettings.Add("Fullscreen", new DisplaySetting(Window));
+	gameSettings.Add("Music",      new AudioSetting(Audio, Audio->GetHandle("vca:/music")));
+	gameSettings.Add("Game",       new AudioSetting(Audio, Audio->GetHandle("vca:/effects")));
+	gameSettings.Init();
 
-	GameSettings.Init();
+	//gameSettings.Add("Move Up", new ButtonMapSetting(Input, Input->GetContext("game"), "+up", iw::InputName::W));
 
 	iw::MeshDescription desc;
 	desc.DescribeBuffer(iw::bName::POSITION,  iw::MakeLayout<float>(3));
@@ -250,6 +251,17 @@ float easeIn(float x)
 
 void Menu_Title_Layer::UI()
 {
+	// testing camera moves, these dont really matter and it seems like if I can get a cool skybox and render the sun, then these will
+	// fall into place
+
+	//ImGui::SetCursorPos(ImVec2(100, 100));
+	//ImGui::SliderFloat("fov", &persp.Fov, 0, iw::Pi);
+	//ImGui::SetCursorPosX(100);
+	//ImGui::SliderFloat("prs", &target_pers, 0, 1);
+	//ImGui::SetCursorPosX(100);
+	//ImGui::SliderFloat3("pos", (float*)&target_pos, -100, 100);
+	//persp.RecalculateProjection();
+
 	//iw::StaticPS* smoke_p = smoke.Find<iw::StaticPS>();
 
 	//glm::vec3 p1 = glm::vec3(1.15, -3.75, .7) + glm::normalize(glm::vec3(-.5, 1, 1)) * 3.f;
@@ -336,14 +348,6 @@ void Menu_Title_Layer::UI()
 	ImGui::SetNextWindowSize(ImVec2(bg_w, bg_h));
 	ImGui::Begin("Main Menu Layer", nullptr, commonFlagsFocus);
 
-	//ImGui::SetCursorPos(ImVec2(100, 100));
-	//ImGui::SliderFloat("fov", &persp.Fov, 0, iw::Pi);
-	//ImGui::SetCursorPosX(100);
-	//ImGui::SliderFloat("prs", &target_pers, 0, 1);
-	//ImGui::SetCursorPosX(100);
-	//ImGui::SliderFloat3("pos", (float*)&target_pos, -100, 100);
-	//persp.RecalculateProjection();
-
 	fade = iw::lerp(fade, target_fade, iw::DeltaTime() * 20.f);
 
 	if (fade > 0.001f)
@@ -374,12 +378,11 @@ void Menu_Title_Layer::UI()
 
 	// draw buttons
 
-	float paddingx = bg_w / 6;
+	float x_padding = bg_w / 6;
+	float x = x_padding - menuOffset;
 
 	if (last_menu == MenuTarget::DEFAULT)
 	{
-		float x = paddingx - menuOffset;
-
 		ImGui::SetCursorPos(ImVec2(x, bg_h / 2));
 		if (Button("Play"))
 		{
@@ -388,81 +391,128 @@ void Menu_Title_Layer::UI()
 		}
 
 		ImGui::SetCursorPosX(x);
-		if (Button("Highscores")) SetViewHighscores();
+		if (Button("Highscores"))
+		{
+			SetViewHighscores();
+			PushBackState(MenuTarget::DEFAULT);
+		}
 
 		ImGui::SetCursorPosX(x);
-		if (Button("Settings")) SetViewSettings();
-
-		ImGui::SetCursorPosX(x);
-		ExitButton();
+		if (Button("Settings"))  // should rename to 'System'
+		{
+			SetViewSettings();
+			PushBackState(MenuTarget::DEFAULT);
+		}
 	}
 
 	if (last_menu == MenuTarget::HIGHSCORES)
 	{
 		highscoreParts.ScoreTable(
-			bg_x + paddingx - menuOffset, 
+			bg_x + x,
 			bg_y + bg_h / 3, 
-			bg_w - paddingx * 2, 
+			bg_w - x_padding * 2,
 			bg_h / 2
 		);
 	}
 
-	if (   last_menu == MenuTarget::SETTINGS
-		|| last_menu == MenuTarget::SETTINGS_FROM_PAUSE)
+	if (last_menu == MenuTarget::SETTINGS)
 	{
-		int y = bg_h / 2;
-
-		if (last_menu == MenuTarget::SETTINGS_FROM_PAUSE)
-		{
-			y = bg_h / 3;
-		}
+		float y = IsFromPause()
+				? bg_h / 3 
+				: bg_h / 2;
 
 		ImGui::PushFont(iwFont("Quicksand_30"));
-		GameSettings.Draw(paddingx - menuOffset, y, bg_w / 2);
+		{
+			gameSettings.Draw(x, y, bg_w / 2);
+			
+			if (!IsFromPause()) // this seems sloppy
+			{
+				ImGui::SetCursorPosX(x);
+				if (Button("Controls"))
+				{
+					target_menu = MenuTarget::SETTINGS_CONTROLS;
+					PushBackState(MenuTarget::SETTINGS);
+				}
+			}
+
+			ImGui::SetCursorPosX(x);
+			if (ConfirmButton("Force Exit"))
+			{
+				Console->QueueCommand("exit");
+			}
+		}
 		ImGui::PopFont();
 	}
 
-	if (   last_menu == MenuTarget::HIGHSCORES
-		|| last_menu == MenuTarget::SETTINGS
-		|| last_menu == MenuTarget::SETTINGS_FROM_PAUSE)
+	if (last_menu == MenuTarget::SETTINGS_CONTROLS)
 	{
-		int y = bg_h - padding_1;
+		ImGui::SetCursorPosY(bg_h / 3);
+		ImGui::SetCursorPosX(x);
+		ImGui::Text("Button remapping is wip");
 
-		if (last_menu == MenuTarget::SETTINGS_FROM_PAUSE) // if in game, bottom is the ui
+		ImGui::SetCursorPosX(x);
+		ImGui::Text("W, A, S, D: Movement");
+
+		ImGui::SetCursorPosX(x);
+		ImGui::Text("L/R Mouse: Fire / Special Fire");
+
+		//ImGui::SetCursorPosX(x);
+		//ImGui::Text("E/F: Ability 1/ Ability 2");
+	}
+
+	if (last_menu == MenuTarget::PAUSE)
+	{
+		ImGui::SetCursorPosY(bg_h / 3);
+		ImGui::SetCursorPosX(x);
+		if (Button("Settings"))
 		{
-			y = bg_h * .8 - padding_1;
+			target_menu = MenuTarget::SETTINGS;
+			PushBackState(MenuTarget::PAUSE);
 		}
 
-		ImGui::SetCursorPos(ImVec2(paddingx - menuOffset, y));
-
-		if (GameSettings.HasChanged)
+		ImGui::SetCursorPosX(x);
+		if (Button("Controls"))
 		{
-			if (Button("Reset")) GameSettings.Reset();
+			target_menu = MenuTarget::SETTINGS_CONTROLS;
+			PushBackState(MenuTarget::PAUSE);
+		}
+
+		ImGui::SetCursorPosX(x);
+		if (ConfirmButton("Save and Quit"))
+		{
+			// impl, testing quit button
+		}
+
+		ImGui::SetCursorPosY(bg_h * .8 - padding_1);
+		ImGui::SetCursorPosX(x);
+		if (Button("Resume")) Console->QueueCommand("escape");
+	}
+
+	// back buttons for sub menus
+
+	if (   last_menu == MenuTarget::HIGHSCORES
+		|| last_menu == MenuTarget::SETTINGS
+		|| last_menu == MenuTarget::SETTINGS_CONTROLS)
+	{
+		float y = IsFromPause()
+				? bg_h * .8 - padding_1
+				: bg_h      - padding_1;
+
+		ImGui::SetCursorPos(ImVec2(x, y));
+
+		if (gameSettings.HasChanged)
+		{
+			if (Button("Reset")) gameSettings.Reset();
 			ImGui::SameLine();
-			if (Button("Apply")) GameSettings.Apply();
+			if (Button("Apply")) gameSettings.Apply();
 		}
 
 		else if (Button("Back")) GoBack();
 	}
 
-	if (last_menu == MenuTarget::PAUSE)
+	if (last_menu == MenuTarget::POST_GAME)
 	{
-		float x = paddingx - menuOffset;
 
-		ImGui::SetCursorPosY(bg_h / 3);
-		ImGui::SetCursorPosX(x);
-		if (Button("Settings"))
-		{
-			target_menu = MenuTarget::SETTINGS_FROM_PAUSE;
-			BackButtonTarget = MenuTarget::PAUSE;
-			BackButtonFunc = {};
-		}
-		ImGui::SetCursorPosX(x);
-		ExitButton();
-
-		ImGui::SetCursorPosY(bg_h * .8 - padding_1);
-		ImGui::SetCursorPosX(x);
-		if (Button("Resume")) Console->QueueCommand("escape");
 	}
 
 	ImGui::End();
@@ -473,6 +523,8 @@ void Menu_Title_Layer::UI()
 	strans->Position = cam->Transform.Position / 10.f;
 
 	float roll = glm::length(cam->Transform.Position);
+
+	// could save some frames by only redrawing when moving once game has started
 
 	bg->Resize(bg_w, bg_h);
 	Renderer->BeginScene(MainScene, bg, true);
@@ -491,25 +543,4 @@ void Menu_Title_Layer::UI()
 		}
 	}
 	Renderer->EndScene();
-}
-
-void Menu_Title_Layer::ExitButton()
-{
-	//ImGui::PushFont(iwFont("Quicksand_30"));
-	Button("Exit");
-	//ImGui::PopFont();
-
-	if (ImGui::IsItemActive())
-	{
-		fade_exit = iw::clamp(fade_exit + iw::DeltaTime() * 2, 0.f, 1.f);
-		if (fade_exit == 1.f)
-		{
-			Console->QueueCommand("exit");
-		}
-	}
-
-	else
-	{
-		fade_exit = iw::lerp(fade_exit, 0.f, iw::DeltaTime() * 10.f);
-	}
 }

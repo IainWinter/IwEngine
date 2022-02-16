@@ -16,6 +16,7 @@
 #include "Systems/Explosion_System.h"
 #include "Systems/TileSplit_System.h"
 #include "Systems/Upgrade_System.h"
+#include "Systems/Recording_System.h"
 
 #include "Systems/DeathTransition_System.h"
 

@@ -118,6 +118,79 @@ struct DisplaySetting : GameSetting
 	}
 };
 
+// dosnt work, I think that this might need to be in a layer
+// as it needs the last inputed buton. getting this through an event would be much more simple
+// could still have a setting, maybe it reads from a shared array
+struct ButtonMapSetting : GameSetting
+{
+	std::string Command;
+	iw::ref<iw::Context> Context;
+	iw::ref<iw::Context> LastContext;
+	iw::ref<iw::InputManager> Input;
+
+	bool Edit;
+
+	ButtonMapSetting(
+		iw::ref<iw::InputManager> input,
+		iw::ref<iw::Context> context,
+		const std::string& command,
+		iw::InputName name
+	)
+		: GameSetting ((float)name)
+		, Input       (input)
+		, Context     (context)
+		, LastContext (nullptr)
+		, Command     (command)
+		, Edit        (false)
+	{}
+
+	void ApplySetting() override
+	{
+		Context->MapButton((iw::InputName)Value, Command);
+	}
+
+	void DrawSetting(const char* name) override
+	{
+		//if (Edit && !LastContext)
+		//{
+		//	LastContext = Input->GetContext();
+		//	Input->SetContext(Context);
+		//	Context->LastInput = iw::InputName::INPUT_NONE;
+		//}
+
+		//if (Context->LastInput != iw::InputName::INPUT_NONE)
+		//{
+		//	//Input->SetContext(LastContext);
+		//	//LastContext = nullptr;
+			Working_Value = (float)Context->LastInput;
+		//}
+
+		iw::InputName inputName = (iw::InputName)Working_Value;
+		char c = iw::GetCharacter(inputName);
+
+		if (c == '\0')
+		{
+			Reset();
+			return;
+		}
+
+		const char* bname = nullptr;
+
+		switch (c)
+		{
+			case ' ': bname = "SPACE"; break;
+			default:  bname = &c;      break;
+		}
+
+		ImGui::Text(name);
+		ImGui::SameLine();
+		if (ImGui::Button(bname))
+		{
+			Edit = true;
+		}
+	}
+};
+
 struct GameSettings
 {
 	std::unordered_map<std::string, GameSetting*> Settings;

@@ -15,9 +15,10 @@ enum class MenuTarget
 	DEFAULT,
 	HIGHSCORES,
 	SETTINGS,
-	SETTINGS_FROM_PAUSE,
+	SETTINGS_CONTROLS,
 	PAUSE,
-	GAME
+	GAME,
+	POST_GAME // input name for highscore - and replay of death
 };
 
 struct Menu_Title_Layer : Menu_Layer
@@ -33,7 +34,6 @@ struct Menu_Title_Layer : Menu_Layer
 	iw::Entity title_st;
 	iw::Entity title_ps;
 	iw::Entity smoke;
-
 
 	iw::ref<iw::RenderTarget> bg;
 	iw::PerspectiveCamera persp;
@@ -63,9 +63,10 @@ struct Menu_Title_Layer : Menu_Layer
 
 	Highscores_MenuParts highscoreParts;
 
-	GameSettings GameSettings;
-	MenuTarget BackButtonTarget = MenuTarget::DEFAULT; // config for buttons
-	std::function<void()> BackButtonFunc;
+	GameSettings gameSettings; // for audio/video
+	GameSettings gameControls; // for button mappings
+
+	std::stack<std::pair<MenuTarget, std::function<void()>>> BackState; // GoBack pops these
 
 	Menu_Title_Layer()
 		: Menu_Layer  ("Menu Title")
@@ -140,20 +141,38 @@ struct Menu_Title_Layer : Menu_Layer
 		});
 	}
 
+	bool IsFromPause() const
+	{
+		return BackState.size() == 0
+			|| BackState.top().first == MenuTarget::PAUSE;
+	}
+
+	void PushBackState(MenuTarget target, std::function<void()> func = {})
+	{
+		BackState.emplace(target, func);
+	}
+
 	void GoBack()
 	{
-		switch (BackButtonTarget)
+		if (BackState.size() == 0)
 		{
-			case MenuTarget::DEFAULT:     SetViewDefault();    break;
-			case	MenuTarget::HIGHSCORES:  SetViewHighscores(); break;
-			case	MenuTarget::SETTINGS:    SetViewSettings();   break;
-			case	MenuTarget::PAUSE:       SetViewPause();      break;
-			case	MenuTarget::GAME:        SetViewGame();       break;
+			return;
 		}
 
-		if (BackButtonFunc)
+		auto [target, func] = BackState.top(); BackState.pop();
+
+		switch (target)
 		{
-			BackButtonFunc();
+			case MenuTarget::DEFAULT:     SetViewDefault();    break;
+			case MenuTarget::HIGHSCORES:  SetViewHighscores(); break;
+			case MenuTarget::SETTINGS:    SetViewSettings();   break;
+			case MenuTarget::PAUSE:       SetViewPause();      break;
+			case MenuTarget::GAME:        SetViewGame();       break;
+		}
+
+		if (func)
+		{
+			func();
 		}
 	}
 
@@ -169,7 +188,5 @@ struct Menu_Title_Layer : Menu_Layer
 
 	int Initialize() override;
 	void UI() override;
-
-	void ExitButton();
 };
 //https://github.com/blender/blender/blob/master/source/blender/gpu/shaders/material/gpu_shader_material_tex_noise.glsl

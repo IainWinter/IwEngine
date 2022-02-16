@@ -130,7 +130,7 @@ void TileSplitSystem::SplitTile(
 
 		for (const int& seed : tile->m_currentCells)
 		{
-			std::vector<int>& island = islands.emplace_back();
+			std::vector<int> island;
 
 			flood_fill(seed, width, height, states, 
 				[&island](int index) {
@@ -138,10 +138,9 @@ void TileSplitSystem::SplitTile(
 				}
 			);
 
-			// remove empty islands
-			if (island.size() == 0)
+			if (island.size() > 0)
 			{
-				islands.pop_back();
+				islands.emplace_back(std::move(island));
 			}
 		}
 

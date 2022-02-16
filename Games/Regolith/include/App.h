@@ -82,8 +82,7 @@ public:
 
 	void ChangeToPauseMenu()
 	{
-		m_menus->BackButtonFunc = [this]() { ChangeBackToGame(); };
-		m_menus->BackButtonTarget = MenuTarget::GAME;
+		m_menus->PushBackState(MenuTarget::GAME, [this]() { ChangeBackToGame(); });
 		m_menus->SetViewPause();
 		PopLayer(m_game->sand);
 		PopLayer(m_game->sand_ui_laserCharge);
@@ -96,8 +95,7 @@ public:
 
 	void ChangeBackToGame()
 	{
-		m_menus->BackButtonFunc = {};
-		m_menus->BackButtonTarget = MenuTarget::DEFAULT;
+		m_menus->PushBackState(MenuTarget::DEFAULT);
 		m_menus->SetViewGame(); // some random place with stars
 		PushLayerFront(m_game->sand);
 		PushLayerFront(m_game->sand_ui_laserCharge);
@@ -136,12 +134,14 @@ public:
 		m_state = StateName::IN_GAME;
 	}
 
-	void CHangeToPost()
+	void ChangeToPost()
 	{
 		DestroyLayer(m_game->sand);
 		DestroyLayer(m_game->sand_ui_laserCharge);
 		DestroyLayer(m_gameUI);
 		DestroyLayer(m_game);
+
+		PushLayer(m_post);
 
 		Input->SetContext("menu");
 		m_menus->SetViewHighscores(/* here should be a flag for if it's post game or from main menu */);
@@ -154,7 +154,7 @@ public:
 	{
 		     if (stateName == "menus") ChangeToTitleScreen();
 		else if (stateName == "game")  ChangeToGame();
-		else if (stateName == "post")  CHangeToPost();
+		else if (stateName == "post")  ChangeToPost();
 		else
 		{
 			LOG_ERROR << "[set-state] invalid state";
