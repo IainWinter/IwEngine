@@ -24,6 +24,10 @@ uniform sampler2D mat_texture;
 uniform float mat_font_width = 0.1f;
 uniform float mat_font_edge  = 0.2f;
 
+// for cube map
+
+
+
 vec4 getColor()
 {
 	vec4 color = mat_color;

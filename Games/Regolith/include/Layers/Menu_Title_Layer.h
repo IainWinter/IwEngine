@@ -57,8 +57,9 @@ struct Menu_Title_Layer : Menu_Layer
 	float target_fade;
 
 	float fade_exit;
-
 	float __fps;
+
+	bool normalize;
 
 	Highscores_MenuParts highscoreParts;
 
@@ -74,6 +75,7 @@ struct Menu_Title_Layer : Menu_Layer
 		, fade        (0.f)
 		, target_fade (0.f)
 		, fade_exit   (0.f)
+		, normalize   (true)
 	{
 		SetViewDefault();
 		last_menu = target_menu;
@@ -89,6 +91,8 @@ struct Menu_Title_Layer : Menu_Layer
 		target_pos = glm::vec3(0, 0, 10);
 		target_rot = glm::quat(1, 0, 0, 0);
 		target_fade = 0.f;
+		drawMenubg = true;
+		normalize = true;
 	}
 
 	void SetViewHighscores()
@@ -98,6 +102,8 @@ struct Menu_Title_Layer : Menu_Layer
 		target_pos = glm::vec3(10, 0, 0);
 		target_rot = glm::quat(sqrt(2) / 2, 0, sqrt(2) / 2, 0);
 		target_fade = 0.f;
+		drawMenubg = true;
+		normalize = true;
 	}
 
 	void SetViewSettings()
@@ -107,6 +113,8 @@ struct Menu_Title_Layer : Menu_Layer
 		target_pos = glm::vec3(7.4, -8, 5);
 		target_rot = glm::quat(.98, 0, .2, 0);
 		target_fade = 0.f;
+		drawMenubg = true;
+		normalize = true;
 	}
 
 	void SetViewPause()
@@ -114,15 +122,22 @@ struct Menu_Title_Layer : Menu_Layer
 		target_menu = MenuTarget::PAUSE;
 		//target_pers = 1.f;
 		target_fade = 0.6f;
+		normalize = true;
 	}
 
 	void SetViewGame()
 	{
 		target_menu = MenuTarget::GAME; // no menu
 		target_pers = 1.f;
-		target_pos = glm::vec3(10, 10, 10);
+		target_pos = glm::vec3(100, 100, 100);
 		target_rot = glm::quat(1, 0, 0, 0);
 		target_fade = 0.f;
+		normalize = false;
+
+		Task->delay(1.f, [&]()
+		{
+			drawMenubg = false;
+		});
 	}
 
 	void GoBack()

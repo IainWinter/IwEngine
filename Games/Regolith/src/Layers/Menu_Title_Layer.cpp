@@ -176,6 +176,10 @@ int Menu_Title_Layer::Initialize()
 	star_p->Update();
 	star_p->UpdateParticleMesh();
 
+	// stars as a cubemap
+
+
+
 	// smoke
 
 	glm::vec3 smoke_pos[4] =
@@ -295,8 +299,13 @@ void Menu_Title_Layer::UI()
 	if (t1 >= 1) t1 = 1;
 	else         t1 += iw::DeltaTime() * 3;
 
-	pos = glm::normalize(iw::lerp(last_pos, target_pos, easeInOut(t))) * 10.f;
+	pos = iw::  lerp(last_pos, target_pos, easeInOut(t));
 	rot = glm::slerp(last_rot, target_rot, easeInOut(t));
+
+	if (normalize)
+	{
+		pos = glm::normalize(pos) * 10.f;
+	}
 
 	pers = iw::lerp(last_pers, target_pers, easeInOut(t1));
 	cam->Projection = iw::lerp(ortho.Projection, persp.Projection, pers);
@@ -327,13 +336,13 @@ void Menu_Title_Layer::UI()
 	ImGui::SetNextWindowSize(ImVec2(bg_w, bg_h));
 	ImGui::Begin("Main Menu Layer", nullptr, commonFlagsFocus);
 
-	ImGui::SetCursorPos(ImVec2(100, 100));
-	ImGui::SliderFloat("fov", &persp.Fov, 0, iw::Pi);
-	ImGui::SetCursorPosX(100);
-	ImGui::SliderFloat("prs", &target_pers, 0, 1);
-	ImGui::SetCursorPosX(100);
-	ImGui::SliderFloat3("pos", (float*)&target_pos, -100, 100);
-	persp.RecalculateProjection();
+	//ImGui::SetCursorPos(ImVec2(100, 100));
+	//ImGui::SliderFloat("fov", &persp.Fov, 0, iw::Pi);
+	//ImGui::SetCursorPosX(100);
+	//ImGui::SliderFloat("prs", &target_pers, 0, 1);
+	//ImGui::SetCursorPosX(100);
+	//ImGui::SliderFloat3("pos", (float*)&target_pos, -100, 100);
+	//persp.RecalculateProjection();
 
 	fade = iw::lerp(fade, target_fade, iw::DeltaTime() * 20.f);
 
@@ -376,11 +385,6 @@ void Menu_Title_Layer::UI()
 		{
 			SetViewGame(); // do little play animation
 			Console->QueueCommand("set-state game 1");
-
-			Task->delay(1.f, [&]()
-			{
-				drawMenubg = false;
-			});
 		}
 
 		ImGui::SetCursorPosX(x);
@@ -466,7 +470,9 @@ void Menu_Title_Layer::UI()
 	ImGui::PopFont();
 
 	iw::Transform* strans = stars.Find<iw::Transform>();
-	strans->Position = cam->Transform.Position;
+	strans->Position = cam->Transform.Position / 10.f;
+
+	float roll = glm::length(cam->Transform.Position);
 
 	bg->Resize(bg_w, bg_h);
 	Renderer->BeginScene(MainScene, bg, true);
