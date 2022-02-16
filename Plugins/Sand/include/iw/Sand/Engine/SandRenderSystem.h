@@ -11,6 +11,9 @@ class SandWorldRenderSystem
 public:
 	int m_fx,  m_fy,
 	    m_fx2, m_fy2; // Camera frustrum
+
+	std::function<void(const ref<Texture>&)> m_afterRender; // for recording
+
 private:
 	SandWorld* m_world;
 	int m_worldWidth;

@@ -43,7 +43,11 @@ namespace Graphics {
 	iw::ref<Texture> TextureAtlas::GetSubTexture(
 		int tile)
 	{
-		// check if algreay gotten
+		if (m_bounds.size() == 0) // this is kinda bad GenTexBounds is a weird name for an init function, should pass in constructor maybe
+		{
+			LOG_WARNING << "[Graphics] Error in GetSubTexture, GenTexBounds has not been called!";
+			return nullptr;
+		}
 
 		TexBounds bounds = m_bounds.at(tile);
 		Texture tex = CreateSubTexture(

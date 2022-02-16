@@ -67,9 +67,6 @@ struct Menu_Title_Layer : Menu_Layer
 
 	std::stack<std::pair<MenuTarget, std::function<void()>>> BackState; // GoBack pops these
 
-	//MenuTarget BackButtonTarget = MenuTarget::DEFAULT; // config for buttons
-	//std::function<void()> BackButtonFunc;
-
 	Menu_Title_Layer()
 		: Menu_Layer  ("Menu Title")
 		, t           (1.f)
