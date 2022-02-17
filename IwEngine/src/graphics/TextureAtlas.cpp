@@ -2,103 +2,64 @@
 
 namespace iw {
 namespace Graphics {
+	
 	TextureAtlas::TextureAtlas()
-		: Texture()
-	{}
+		: m_tileCountX (1)
+		, m_tileCountY (1)
+		, m_texture    (nullptr)
+	{
+		UpdateTileScale();
+	}
 
 	TextureAtlas::TextureAtlas(
-		int width,
-		int height,
-		TextureFormat format,
-		TextureFormatType type,
-		TextureWrap wrap,
-		TextureFilter filter,
-		TextureMipmapFilter mipmapFilter,
-		unsigned char* colors)
-		: Texture(width, height, TEX_2D, format, type, wrap, filter, mipmapFilter, colors)
-	{}
-
-	TextureAtlas::TextureAtlas(
-		const Texture& texture)
-		: Texture(texture)
-	{}
-
-	TextureAtlas::TextureAtlas(
-		Texture&& texture) noexcept
-		: Texture(std::forward<Texture>(texture))
-	{}
-
-	glm::vec2 TextureAtlas::MapCoords(
-		int tile,
-		glm::vec2 coords) const
+		int tileCountX,
+		int tileCountY,
+		ref<Texture> texture
+	)
+		: m_tileCountX (tileCountX)
+		, m_tileCountY (tileCountY)
+		, m_texture    (texture)
 	{
-		const TexBounds& bounds = m_bounds.at(tile);
-
-		int x = bounds.X + bounds.Width  - bounds.X;
-		int y = bounds.Y + bounds.Height - bounds.Y;
-
-		return glm::vec2(x, y) * coords;
+		UpdateTileScale();
 	}
 
-	iw::ref<Texture> TextureAtlas::GetSubTexture(
-		int tile)
+	void TextureAtlas::UpdateTileScale()
 	{
-		if (m_bounds.size() == 0) // this is kinda bad GenTexBounds is a weird name for an init function, should pass in constructor maybe
-		{
-			LOG_WARNING << "[Graphics] Error in GetSubTexture, GenTexBounds has not been called!";
-			return nullptr;
-		}
-
-		TexBounds bounds = m_bounds.at(tile);
-		Texture tex = CreateSubTexture(
-			bounds.X,     bounds.Y,
-			bounds.Width, bounds.Height);
-
-		iw::ref<Texture> tref = std::make_shared<Texture>(std::forward<Texture>(tex));
-
-		return m_textures.emplace_back(tref);
+		m_tileScale.x = 1.f / m_tileCountX;
+		m_tileScale.y = 1.f / m_tileCountY;
 	}
 
-	TexBounds TextureAtlas::GetTexBounds(
-		int tile) const
+	int TextureAtlas::TileCount() const
 	{
-		return m_bounds.at(tile);
+		return m_tileCountX * m_tileCountY;
 	}
 
-	//void TextureAtlas::GenTexBounds(
-	//	iw::glm::vec4 backgroundColor)
-	//{
-	//	// algo for finding texture bounds
-	//}
-
-	void TextureAtlas::GenTexBounds(
-		int cols,
-		int rows)
+	// column major
+	int TextureAtlas::TileX(
+		int tileIndex) const
 	{
-		m_bounds.clear();
-
-		int xstep = m_width  / cols;
-		int ystep = m_height / rows;
-		for (int r = 0; r < rows; r++) {
-			for (int c = 0; c < cols; c++) {
-				int x = c * xstep;
-				int y = r * xstep;
-
-				m_bounds.emplace_back(
-					x, y,
-					(c + 1) * xstep - x, 
-					(r + 1) * ystep - y
-				);
-			}
-		}
+		return tileIndex % m_tileCountX;
 	}
 
-	//const std::vector<TexBounds>& TextureAtlas::Textures() const {
-	//	return m_textures;
-	//}
+	int TextureAtlas::TileY(
+		int tileIndex) const
+	{
+		return tileIndex / m_tileCountX;
+	}
 
-	int TextureAtlas::TileCount() const {
-		return m_bounds.size();
+	glm::vec2 TextureAtlas::MapUv(
+		int tileIndex,
+		glm::vec2 uv) const
+	{
+		return MapUv(TileX(tileIndex), TileY(tileIndex), uv);
+	}
+
+	glm::vec2 TextureAtlas::MapUv(
+		int tileX,
+		int tileY,
+		glm::vec2 uv) const
+	{
+		return (glm::vec2(tileX, tileY) + uv) * m_tileScale;
 	}
 }
 }

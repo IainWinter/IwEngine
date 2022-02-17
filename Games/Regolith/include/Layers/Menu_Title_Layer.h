@@ -10,6 +10,8 @@
 #include "MenuParts.h"
 #include "Settings.h"
 
+#include "iw/graphics/TextureAtlas.h"
+
 enum class MenuTarget
 {
 	DEFAULT,
@@ -68,21 +70,28 @@ struct Menu_Title_Layer : Menu_Layer
 
 	std::stack<std::pair<MenuTarget, std::function<void()>>> BackState; // GoBack pops these
 
+	int deathMovieFrame; // put in movie class
+	iw::TextureAtlas deathMovie;
+	iw::Timer deathMovieFrameTimer;
+
 	Menu_Title_Layer()
-		: Menu_Layer  ("Menu Title")
-		, t           (1.f)
-		, t1          (1.f)
-		, pers        (0.f)
-		, fade        (0.f)
-		, target_fade (0.f)
-		, fade_exit   (0.f)
-		, normalize   (true)
+		: Menu_Layer      ("Menu Title")
+		, t               (1.f)
+		, t1              (1.f)
+		, pers            (0.f)
+		, fade            (0.f)
+		, target_fade     (0.f)
+		, fade_exit       (0.f)
+		, normalize       (true)
+		, deathMovieFrame (0)
 	{
 		SetViewDefault();
 		last_menu = target_menu;
 		last_pers = target_pers;
 		last_pos = target_pos;
 		last_rot = target_rot;
+
+		deathMovieFrameTimer.SetTime("step", .1);
 	}
 
 	void SetViewDefault()
@@ -128,7 +137,7 @@ struct Menu_Title_Layer : Menu_Layer
 
 	void SetViewGame()
 	{
-		target_menu = MenuTarget::GAME; // no menu
+		target_menu = MenuTarget::GAME;
 		target_pers = 1.f;
 		target_pos = glm::vec3(100, 100, 100);
 		target_rot = glm::quat(1, 0, 0, 0);
@@ -139,6 +148,15 @@ struct Menu_Title_Layer : Menu_Layer
 		{
 			drawMenubg = false;
 		});
+	}
+
+	void SetViewPost(const iw::TextureAtlas& movie)
+	{
+		deathMovie = movie;
+		deathMovie.m_texture->Initialize(Renderer->Device);
+		RegisterImage("deathMovie", (void*)movie.m_texture->Handle()->Id());
+		target_menu = MenuTarget::POST_GAME;
+		target_fade = 0.6f;
 	}
 
 	bool IsFromPause() const

@@ -15,26 +15,37 @@ struct Recording_System : iw::SystemBase
 	iw::SandLayer* m_sand;
 	iw::Entity m_player;
 
+	float m_last_x;
+	float m_last_y;
+
 	Recording_System(
 		iw::SandLayer* sand
 	)
 		: iw::SystemBase ("Recording system test")
 		, m_sand         (sand)
-		, m_frameCount   (10)
+		, m_frameCount   (100)
 		, m_frameSize    (50)
 		, m_frameToDraw  (0)
+		, m_last_x       (0.f)
+		, m_last_y       (0.f)
 	{
-		// 50x50x10
+		m_recording = iw::TextureAtlas(1, m_frameCount, REF<iw::Texture>(m_frameSize, m_frameSize * m_frameCount));
+		m_recording.m_texture->m_filter = iw::NEAREST;
+		m_recording.m_texture->CreateColors();
+	}
 
-		m_recording = iw::TextureAtlas(m_frameSize * m_frameCount, m_frameSize * m_frameCount);
-		m_recording.m_filter = iw::NEAREST;
-		m_recording.GenTexBounds(m_frameCount, m_frameCount);
-
+	void OnPush() override
+	{
 		m_sand->m_render->m_afterRender = [=](
 			const iw::ref<iw::Texture>& frame)
 		{
 			RecordFrame(frame);
 		};
+	}
+
+	void OnPop() override
+	{
+		m_sand->m_render->m_afterRender = {};
 	}
 
 	bool On(iw::ActionEvent& e)
@@ -43,6 +54,8 @@ struct Recording_System : iw::SystemBase
 		{
 			m_player = e.as<CreatedPlayer_Event>().PlayerEntity;
 		}
+
+		return false;
 	}
 
 	void RecordFrame(const iw::ref<iw::Texture>& frame);
