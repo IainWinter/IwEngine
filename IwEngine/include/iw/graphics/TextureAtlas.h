@@ -6,92 +6,28 @@
 
 namespace iw {
 namespace Graphics {
-	struct TexBounds {
-		int X;
-		int Y;
-		int Width;
-		int Height;
 
-		TexBounds(
-			int x,
-			int y,
-			int width,
-			int height)
-			: X(x)
-			, Y(y)
-			, Width(width)
-			, Height(height)
-		{}
-	};
-
+	// simple way to wrap a texture and generate UVs for smaller equal sized tiles
+	//
 	struct TextureAtlas
-		: Texture
 	{
-	private:
-		std::vector<TexBounds> m_bounds;
-		std::vector<iw::ref<Texture>> m_textures;
+		glm::vec2 m_tileScale; // if you resize the texture, you probally want to keep the same size tiles. Call UpdateTileScale if not.
+		int m_tileCountX;
+		int m_tileCountY;
 
-	public:
-		IWGRAPHICS_API
-		TextureAtlas();
+		ref<Texture> m_texture; // dont really need this in here
 
-		IWGRAPHICS_API
-		TextureAtlas(
-			int width,
-			int height,
-			TextureFormat format             = RGBA,
-			TextureFormatType type           = UBYTE,
-			TextureWrap wrap                 = BORDER,
-			TextureFilter filter             = NEAREST,
-			TextureMipmapFilter mipmapFilter = NEAREST_NEAREST,
-			unsigned char* colors            = nullptr);
+		IWGRAPHICS_API TextureAtlas();
+		IWGRAPHICS_API TextureAtlas(int tileCountX, int tileCountY, ref<Texture> texture);
 
-		IWGRAPHICS_API
-		TextureAtlas(
-			const Texture& texture);
+		IWGRAPHICS_API void UpdateTileScale();
+		IWGRAPHICS_API  int TileCount()        const;
 
-		IWGRAPHICS_API
-		TextureAtlas(
-			Texture&& texture) noexcept;
+		IWGRAPHICS_API int TileX(int tileIndex) const;
+		IWGRAPHICS_API int TileY(int tileIndex) const;
 
-		GEN_default5(IWGRAPHICS_API, TextureAtlas)
-
-		IWGRAPHICS_API
-		glm::vec2 MapCoords(
-			int tile,
-			glm::vec2 coords) const;
-
-		IWGRAPHICS_API
-		iw::ref<Texture> GetSubTexture(
-			int tile);
-
-		IWGRAPHICS_API
-		TexBounds GetTexBounds(
-			int tile) const;
-
-		//// Generate bounds based on largest areas without the 'backgroundColor' surrounding
-		//IWGRAPHICS_API
-		//void GenTexBounds(
-		//	iw::glm::vec4 backgroundColor);
-
-		// Split texture into equal rectangles
-		IWGRAPHICS_API
-		void GenTexBounds(
-			int cols,
-			int rows);
-
-		//// Split a tile into subtiles
-		//IWGRAPHICS_API
-		//void GenSubTexBounds(
-		//	int tile,
-		//	int cols,
-		//	int rows);
-
-		//IWGRAPHICS_API
-		//const std::vector<TexBounds>& TextureBounds() const;
-
-		IWGRAPHICS_API
-		int TileCount() const;
+		IWGRAPHICS_API glm::vec2 MapUv(int tileIndex,        glm::vec2 uv) const;
+		IWGRAPHICS_API glm::vec2 MapUv(int tileX, int tileY, glm::vec2 uv) const;
 	};
 }
 }

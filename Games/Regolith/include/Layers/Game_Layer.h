@@ -32,9 +32,12 @@ struct Game_Layer : iw::Layer
 	iw::SandLayer* sand;
 	iw::SandLayer* sand_ui_laserCharge;
 
-	ProjectileSystem* proj_s;
+private:
+	ProjectileSystem* projectile_s;
 	ItemSystem*       item_s;
+	Recording_System* recorder_s;
 
+public:
 	Game_Layer(
 		iw::SandLayer* sand,
 		iw::SandLayer* sand_ui_laserCharge
@@ -42,9 +45,15 @@ struct Game_Layer : iw::Layer
 		: iw::Layer           ("Game")
 		, sand                (sand)
 		, sand_ui_laserCharge (sand_ui_laserCharge)
-		, proj_s              (nullptr)
+		, projectile_s        (nullptr)
 		, item_s              (nullptr)
+		, recorder_s          (nullptr)
 	{}
+
+	iw::TextureAtlas& GetDeathMovie()
+	{
+		return recorder_s->m_recording;
+	}
 
 	int Initialize() override;
 	void Destroy() override;

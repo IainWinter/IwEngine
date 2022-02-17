@@ -167,7 +167,11 @@ void SandWorldRenderSystem::Update()
 	}
 
 	m_texture->Update(Renderer->Device);
-	m_afterRender(m_texture);
+	
+	if (m_afterRender)
+	{
+		m_afterRender(m_texture);
+	}
 }
 
 

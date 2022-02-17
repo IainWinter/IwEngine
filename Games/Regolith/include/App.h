@@ -88,8 +88,9 @@ public:
 		PopLayer(m_game->sand_ui_laserCharge);
 		PopLayer(m_game);
 		//PopLayer(m_gameUI);
-		Input->SetContext("menu");
 		Physics->Paused = true;
+
+		Input->SetContext("menu");
 		ChangeState(StateName::IN_GAME_THEN_MENU);
 	}
 
@@ -100,8 +101,9 @@ public:
 		PushLayerFront(m_game->sand);
 		PushLayerFront(m_game->sand_ui_laserCharge);
 		PushLayerFront(m_game);
-		Input->SetContext("game");
 		Physics->Paused = false;
+
+		Input->SetContext("game");
 		ChangeState(StateName::IN_GAME);
 	}
 
@@ -109,8 +111,8 @@ public:
 	{
 		m_menus = PushLayer<Menu_Title_Layer>();
 		PushLayer<Menu_Bg_Render_Layer>();
-		Input->SetContext("menu");
 
+		Input->SetContext("menu");
 		m_state = StateName::IN_MENU;
 	}
 
@@ -130,22 +132,20 @@ public:
 		PushLayer(m_gameUI);
 
 		Input->SetContext("game");
-
 		m_state = StateName::IN_GAME;
 	}
 
 	void ChangeToPost()
 	{
-		DestroyLayer(m_game->sand);
-		DestroyLayer(m_game->sand_ui_laserCharge);
+		iw::TextureAtlas movie = m_game->GetDeathMovie();
+		m_menus->SetViewPost(movie/* here should be a flag for if it's post game or from main menu */);
+
 		DestroyLayer(m_gameUI);
 		DestroyLayer(m_game);
-
-		//PushLayer(m_post);
+		DestroyLayer(m_game->sand);
+		DestroyLayer(m_game->sand_ui_laserCharge);
 
 		Input->SetContext("menu");
-		m_menus->SetViewHighscores(/* here should be a flag for if it's post game or from main menu */);
-
 		m_state = StateName::IN_MENU;
 	}
 
