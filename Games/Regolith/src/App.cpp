@@ -222,9 +222,55 @@ int App::Initialize(
 	return 0;
 }
 
+// new simple ecs testing
+
+
+
+#include "iw/util/set/sparse_set.h"
+
+struct list
+{
+	iw::sparse_set<int>* m_indices;
+
+	list(iw::sparse_set<int>* indices) : m_indices(indices) { }
+};
+
+template<typename... _t>
+struct list_with_types : list
+{
+	iw::sparse_set<int, std::tuple<_t...>> m_items;
+
+	list_with_types()
+		: list(&m_items)
+	{
+	}
+};
+
+
+
+
+
+
 iw::Application* CreateApplication(
 	iw::InitOptions& options)
 {
+
+	list_with_types<int, float, double, long> test;
+
+	list* test_no_type = &test;
+
+
+
+
+
+
+
+
+
+
+
+
+
 	//options.AssetRootPath = "_assets/";
 
 	//tions.FrameDelay = 0.05f;

@@ -141,7 +141,7 @@ public:
 		DestroyLayer(m_gameUI);
 		DestroyLayer(m_game);
 
-		PushLayer(m_post);
+		//PushLayer(m_post);
 
 		Input->SetContext("menu");
 		m_menus->SetViewHighscores(/* here should be a flag for if it's post game or from main menu */);
