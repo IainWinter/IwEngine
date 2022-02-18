@@ -194,7 +194,7 @@ namespace util {
 				return m_direct->at(m_index);
 			}
 		};
-	protected:
+	//protected:
 		std::vector<_t> m_sparse;
 		std::vector<_t> m_direct;
 
@@ -539,7 +539,7 @@ namespace util {
 
 		using iterator       = iterator_<false>;
 		using const_iterator = iterator_<true>;
-	private:
+	//private:
 		using base_t = sparse_set<_index_t>;
 
 		std::vector<_item_t> m_items;
