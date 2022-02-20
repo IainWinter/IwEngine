@@ -49,7 +49,7 @@ public:
 		//size_t lockSize = hasLocks ? FieldSize<std::mutex>() : 0u;
 
 		m_fields.push_back({
-			new iw::pool_allocator(16 * FieldSize<_t>()/*(cellSize + lockSize)*/),
+			new iw::pool_allocator(16 * FieldSize<_t>()/*(cellSize + lockSize)*/, 2),
 			sizeof(_t),
 			hasLocks,
 			onSetCell

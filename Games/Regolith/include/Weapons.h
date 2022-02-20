@@ -4,6 +4,7 @@
 #include "iw/engine/Time.h"
 #include "iw/common/Components/Transform.h"
 #include "Components/ProjHead.h"
+#include "ECS.h"
 
 enum WeaponType {
 	DEFAULT_CANNON,
@@ -45,7 +46,7 @@ public:
 		return canFire;
 	}
 
-	virtual ShotInfo GetShot(iw::Entity origin, float targetX, float targetY) = 0;
+	virtual ShotInfo GetShot(entity origin, float targetX, float targetY) = 0;
 };
 
 struct Cannon : Weapon
@@ -62,17 +63,17 @@ struct Cannon : Weapon
 		WeaponType weapon,
 		ProjectileType projectile
 	)
-		: Weapon(weapon)
-		, Projectile(projectile)
+		: Weapon     (weapon)
+		, Projectile (projectile)
 	{}
 
 	ShotInfo GetShot(
-		iw::Entity origin,
+		entity origin,
 		float targetX, float targetY) override
 	{
 		Ammo -= 1;
 
-		glm::vec3& pos = origin.Find<iw::Transform>()->Position;
+		glm::vec3& pos = origin.get<iw::Transform>().Position;
 
 		ShotInfo shot = GetShot_Circular(
 			pos  .x, pos  .y,

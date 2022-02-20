@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ECS.h"
 #include <vector>
 
 // forward declare Projectile for Events.h
@@ -19,7 +20,8 @@ enum ProjectileType {
 struct ShotInfo {
 	float x, y, dx, dy, life;
 	ProjectileType projectile;
-	iw::Entity origin;
+	//iw::Entity origin;
+	entity origin;
 
 	float Speed() const {
 		return sqrt(dx * dx + dy * dy);

@@ -4,6 +4,8 @@
 
 #include "Components/Item.h"
 
+#include "ECS.h"
+
 struct DeathTransition_System : iw::SystemBase
 {
 	iw::SandLayer* sand;

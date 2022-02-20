@@ -10,8 +10,8 @@
 namespace iw {
 namespace ECS {
 	ComponentManager::ComponentManager()
-		: m_chunkPool(m_chunkSize)
-		, m_componentPool(1024)
+		: m_chunkPool(m_chunkSize, 2)
+		, m_componentPool(1024, 2)
 	{}
 
 	ref<Component>& ComponentManager::RegisterComponent(

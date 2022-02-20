@@ -4,7 +4,7 @@
 namespace iw {
 namespace ECS {
 	EntityManager::EntityManager()
-		: m_pool(1024)
+		: m_pool(1024, 2)
 	{}
 
 	EntityData& EntityManager::CreateEntity() {

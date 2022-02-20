@@ -185,7 +185,7 @@ namespace Graphics {
 		)
 			: Now            (renderer)
 			, Device         (Now->Device)
-			, m_pool         (16 * 1024)
+			, m_pool         (16 * 1024, 2)
 			, m_layer        (0)
 			, m_shadow       (0)
 			, m_camera       (0)

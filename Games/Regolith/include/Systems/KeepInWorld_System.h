@@ -5,6 +5,8 @@
 #include "iw/physics/Dynamics/Rigidbody.h"
 #include "Components/KeepInWorld.h"
 
+#include "ECS.h"
+
 struct KeepInWorldSystem : iw::SystemBase
 {
 	int borderFar = 375;

@@ -1,16 +1,12 @@
 #include "iw/util/memory/pool_allocator.h"
-#include "iw/log/logger.h"
-#include <functional>
-
-using namespace std::placeholders;
 
 namespace iw {
 namespace util {
 	pool_allocator::pool_allocator(
-		size_t pageSize
+		size_t pageSize,
+		size_t pageSizeScale
 	)
-		: m_root(new page(nullptr, pageSize))
-		, m_pageSizeHint(pageSize)
+		: m_root (new page(nullptr, pageSize, pageSizeScale))
 	{}
 
 	pool_allocator::~pool_allocator() {
@@ -18,86 +14,41 @@ namespace util {
 	}
 
 	pool_allocator::pool_allocator(
-		pool_allocator&& copy
+		pool_allocator&& move
 	) noexcept
-		: m_root(copy.m_root)
-		, m_pageSizeHint(copy.m_pageSizeHint)
+		: m_root (move.m_root)
 	{
-		copy.m_root = nullptr;
-		copy.m_pageSizeHint = 0;
+		move.m_root = nullptr;
 	}
 
 	pool_allocator& pool_allocator::operator=(
-		pool_allocator&& copy
+		pool_allocator&& move
 	) noexcept
 	{
-		m_root = copy.m_root;
-		m_pageSizeHint = copy.m_pageSizeHint;
-
-		copy.m_root = nullptr;
-		copy.m_pageSizeHint = 0;
-
+		m_root = move.m_root;
+		move.m_root = nullptr;
 		return *this;
-	}
-
-	void* pool_allocator::alloc(
-		size_t size)
-	{
-		std::unique_lock<std::mutex> lock(m_mutex);
-
-		// I think this should keep what the hint was, pages can resize on creation
-		//if (size > m_pageSizeHint)
-		//{
-		//	m_pageSize = size;
-		//}
-
-		return m_root->alloc(size);
-	}
-
-	ref<void> pool_allocator::alloc_ref(
-		size_t size)
-	{
-		return ref<void>(alloc<void>(size), std::bind(&pool_allocator::free<void>, this, _1, size));
-	}
-
-	bool pool_allocator::free(
-		void* addr,
-		size_t size)
-	{
-		std::unique_lock<std::mutex> lock(m_mutex);
-		return m_root->free(addr, size);
-	}
-
-	void pool_allocator::reset() {
-		std::unique_lock<std::mutex> lock(m_mutex);
-		m_root->reset();
-	}
-
-	size_t pool_allocator::page_size_hint() const {
-		return m_pageSizeHint;
-	}
-
-	size_t pool_allocator::acitive_size() const {
-		return m_root->size();
 	}
 
 	// Page 
 
 	pool_allocator::page::page(
 		page* previous,
-		size_t size)
-		: m_memory((char*)malloc(size))
-		, m_capacity(size)
-		, m_size(0)
-		, m_previous(previous)
-		, m_next(nullptr)
+		size_t capacity,
+		size_t expansion
+	)
+		: m_memory    ((char*)malloc(capacity))
+		, m_capacity  (capacity)
+		, m_expansion (expansion)
+		, m_size      (0)
+		, m_previous  (previous)
+		, m_next      (nullptr)
 	{
 		reset();
-
-		//LOG_INFO << "Appended " << m_capacity << " byte page to   pool allocator";
 	}
 
-	pool_allocator::page::~page() {
+	pool_allocator::page::~page()
+	{
 		delete m_next;
 
 		::free(m_memory);
@@ -106,8 +57,6 @@ namespace util {
 		m_next     = nullptr;
 		m_previous = nullptr;
 		m_freelist.clear();
-
-		//LOG_INFO << "Removed  " << m_capacity << " byte page from pool allocator";
 	}
 
 	void* pool_allocator::page::alloc(
@@ -247,21 +196,9 @@ namespace util {
 	{
 		if (m_next == nullptr) 
 		{
-			size_t capacity = m_capacity;
-
-			if (size > capacity)
-			{
-				while (size > capacity)
-				{
-					capacity *= 2;
-				}
-			}
-
-			else {
-				capacity = (size_t)pow(2, (size_t)::log2(capacity) + 1); // double page size
-			}
-
-			m_next = new page(this, capacity);
+			size_t capacity = m_capacity * m_expansion;
+			while (size > capacity) capacity *= m_expansion;
+			m_next = new page(this, capacity, m_expansion);
 		}
 
 		return m_next->alloc(size);

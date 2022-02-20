@@ -7,7 +7,7 @@
 
 struct Move
 {
-	virtual void Update(iw::AppVars app, Player* player, bool use) = 0;
+	virtual void Update(iw::AppVars app, entity player, bool use) = 0;
 };
 
 struct Dash_Move : Move
@@ -18,21 +18,23 @@ struct Dash_Move : Move
 	float Cooldown = 1.f;
 	glm::vec3 Move;
 
-	void Update(iw::AppVars app, Player* player, bool use) override
+	void Update(iw::AppVars app, entity player, bool use) override
 	{
 		Timer -= iw::DeltaTime();
 
+		glm::vec3 move = player.get<Player>().move;
+
 		if (    use
 			&& Timer < -Cooldown
-			&& glm::length2(player->move) > 0.f)
+			&& glm::length2(move) > 0.f)
 		{
-			Move = player->move;
+			Move = move;
 			Timer = Time;
 		}
 
 		if (Timer >= 0.f)
 		{
-			app.Space->FindEntity(player).Find<iw::Rigidbody>()->Velocity += Speed * Move * Timer / Time;
+			player.get<iw::Rigidbody>().Velocity += Speed * Move * Timer / Time;
 		}
 	}
 };
@@ -43,7 +45,7 @@ struct SmokeScreen_Move : Move
 	float Timer    = 0.f;
 	float Cooldown = 5.f;
 
-	void Update(iw::AppVars app, Player* player, bool use) override
+	void Update(iw::AppVars app, entity player, bool use) override
 	{
 		Timer -= iw::DeltaTime();
 
@@ -55,8 +57,8 @@ struct SmokeScreen_Move : Move
 
 		if (Timer >= 0.f)
 		{
-			float x = app.Space->FindEntity(player).Find<iw::Transform>()->Position.x;
-			float y = app.Space->FindEntity(player).Find<iw::Transform>()->Position.y;
+			float x = player.get<iw::Transform>().Position.x;
+			float y = player.get<iw::Transform>().Position.y;
 			float life = 4;
 
 			iw::Cell smoke = iw::Cell::GetDefault(iw::CellType::SMOKE);
@@ -106,7 +108,7 @@ struct EnergyShield_Move : Move
 		}
 	}
 
-	void Update(iw::AppVars app, Player* player, bool use) override
+	void Update(iw::AppVars app, entity player, bool use) override
 	{
 		Timer -= iw::DeltaTime();
 
@@ -116,47 +118,47 @@ struct EnergyShield_Move : Move
 			Timer = Time;
 		}
 
-		player->NoDamage = Timer >= 0.f;
+		bool& nodmg = player.get<Player>().NoDamage;
 
-		if (!player->NoDamage && LastFrame)
+		nodmg = Timer >= 0.f;
+
+		if (!nodmg && LastFrame)
 		{
-			iw::Entity p = app.Space->FindEntity(player);
-			iw::Rigidbody* playerBody = p.Find<iw::Rigidbody>();
+			iw::Rigidbody& playerBody = player.get<iw::Rigidbody>();
 
-			float x = p.Find<iw::Transform>()->Position.x;
-			float y = p.Find<iw::Transform>()->Position.y;
+			float x = player.get<iw::Transform>().Position.x;
+			float y = player.get<iw::Transform>().Position.y;
 			float life = 1.5f;
 
 			DrawShield(app, x, y, life, iw::Color::From255(255, 10, 75), 1.f);
 		}
 
-		LastFrame = player->NoDamage;
+		LastFrame = nodmg;
 
-		if (player->NoDamage)
+		if (nodmg)
 		{
-			iw::Entity p = app.Space->FindEntity(player);
-			iw::Rigidbody* playerBody = p.Find<iw::Rigidbody>();
+			iw::Rigidbody& playerBody = player.get<iw::Rigidbody>();
 
-			float x = p.Find<iw::Transform>()->Position.x;
-			float y = p.Find<iw::Transform>()->Position.y;
+			float x = player.get<iw::Transform>().Position.x;
+			float y = player.get<iw::Transform>().Position.y;
 			float life = .02;
 
 			DrawShield(app, x, y, life, iw::Color::From255(255, 10, 75), 1.0f - Timer / Time);
 
 			float shieldRadius = 30.f;
-			float playerRadius = playerBody->Collider->as<iw::Circle>()->Radius;
+			float playerRadius = playerBody.Collider->as<iw::Circle>()->Radius;
 
 			iw::DistanceQueryResult result = app.Physics->QueryPoint(glm::vec3(x, y, 0.f), shieldRadius);
 
 			for (auto& [dist, obj] : result.Objects)
 			{
-				if (!obj->IsDynamic || playerBody == obj)
+				if (!obj->IsDynamic || &playerBody == obj)
 					continue;
 
 				iw::Rigidbody* body = (iw::Rigidbody*)obj;
 
-				if (app.Space->FindEntity(body).Has<Item>())
-					continue;
+				//if (app.Space->FindEntity(body).Has<Item>())
+				//	continue;
 
 				// not sure if this should affect your own bullets, might disable
 				// and only enable with dust shield

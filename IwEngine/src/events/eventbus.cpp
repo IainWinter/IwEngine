@@ -2,7 +2,7 @@
 
 namespace iw {
 	eventbus::eventbus()
-		: m_alloc(1024)
+		: m_alloc(1024, 2)
 		, m_recorder(nullptr)
 	{}
 

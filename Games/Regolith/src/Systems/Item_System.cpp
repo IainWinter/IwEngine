@@ -6,7 +6,7 @@ void ItemSystem::FixedUpdate()
     
     if (!playerTrans) return;
 
-    Space->Query<iw::Rigidbody, Item>().Each([&](
+    /*Space->Query<iw::Rigidbody, Item>().Each([&](
         iw::EntityHandle entity,
         iw::Rigidbody* rigidbody,
         Item* item) 
@@ -87,7 +87,87 @@ void ItemSystem::FixedUpdate()
                 rigidbody->AngularVelocity = iw::lerp(rigidbody->AngularVelocity, glm::vec3(0.f), item->MoveTimer / item->MoveTime);
                 item->MoveTimer += iw::FixedTime();
             }
-        });
+        });*/
+
+    for (auto [entity, rigidbody, item] : entities().query<iw::Rigidbody, Item>().with_entity())
+    {
+        if (item.ActivateTimer > 0.f) {
+            item.ActivateTimer -= iw::FixedTime();
+            return;
+        }
+        
+        if (item.DieWithTime)
+        {
+            item.LifeTimer -= iw::FixedTime();
+            if (item.LifeTimer <= 0)
+            {
+                entity.destroy();
+            }
+         
+            else if (item.LifeTimer < 1)
+            {
+                rigidbody.Transform.Scale = iw::lerp(rigidbody.Transform.Scale, glm::vec3(0.f), 1 - item.LifeTimer);
+            }
+        }
+        
+        glm::vec3 playerPos = playerTrans->Position;
+        glm::vec3 healthPos = rigidbody.Transform.Position;
+        
+        float distance = glm::distance(healthPos, playerPos);
+        
+        if (item.PickingUp)
+        {
+            glm::vec3 vel = glm::normalize(playerPos - healthPos) * (300.f + 100 * item.PickupTimer);
+            rigidbody.Velocity = iw::lerp(rigidbody.Velocity, vel, iw::FixedTime() * (10 + item.PickupTimer));
+            item.PickupTimer += iw::FixedTime();
+        
+            if (distance < 5)
+            {
+                if (item.OnPickUp) {
+                    item.OnPickUp();
+        
+                    auto& [count, lasttime] = m_sequential[item.PickupAudio];
+                    if (iw::TotalTime() - lasttime < .4f) count += 1;
+                    else                                  count  = 0;
+                    lasttime = iw::TotalTime();
+        
+                    float sequential = iw::clamp(count / 10.f, 0.f, 1.f);
+        
+                    PlaySound_Event event(item.PickupAudio);
+                    event.Parameters["Sequential"] = sequential;
+                    Bus->push<PlaySound_Event>(event);
+                }
+        
+                else
+                {
+                    LOG_WARNING << "Picked up item with no action!";
+                }
+        
+                entity.destroy();
+            }
+        
+            else if (distance < 12)
+            {
+                rigidbody.Transform.Scale = iw::lerp(rigidbody.Transform.Scale, glm::vec3(1/3.f), 1 - distance / 12);
+            }
+        }
+        
+        else if (!item.PickingUp && distance < item.PickUpRadius)
+        {
+            item.PickingUp = true;
+        }
+        
+        else if (item.MoveTimer > item.MoveTime)
+        {
+            rigidbody.Velocity = glm::vec3(0.f);
+        }
+        
+        else {
+            rigidbody.Velocity        = iw::lerp(rigidbody.Velocity,        glm::vec3(0.f), item.MoveTimer / item.MoveTime);
+            rigidbody.AngularVelocity = iw::lerp(rigidbody.AngularVelocity, glm::vec3(0.f), item.MoveTimer / item.MoveTime);
+            item.MoveTimer += iw::FixedTime();
+        }
+    }
 }
 
 bool ItemSystem::On(iw::ActionEvent& e)
@@ -109,7 +189,7 @@ bool ItemSystem::On(iw::ActionEvent& e)
         
                 angle += angleStep;
 
-                iw::Entity entity;
+                entity entity;
 
                 switch (event.Config.Item)
                 {
@@ -122,11 +202,11 @@ bool ItemSystem::On(iw::ActionEvent& e)
                     case ItemType::WEAPON_MINIGUN: entity = MakeWeaponMinigun(event.Config); break;
                 }
 
-                glm::vec3& vel = entity.Find<iw::Rigidbody>()->Velocity; 
+                glm::vec3& vel = entity.get<iw::Rigidbody>().Velocity; 
                 vel.x = dx * event.Config.Speed;
                 vel.y = dy * event.Config.Speed;
 
-                glm::vec3& avel = entity.Find<iw::Rigidbody>()->AngularVelocity;
+                glm::vec3& avel = entity.get<iw::Rigidbody>().AngularVelocity;
                 avel.z = iw::randfs() * event.Config.AngularSpeed;
             }
 
@@ -141,61 +221,63 @@ bool ItemSystem::On(iw::ActionEvent& e)
     return false;
 }
 
-iw::Entity ItemSystem::MakeItem(
+entity ItemSystem::MakeItem(
     const SpawnItem_Config& config,
     iw::ref<iw::Texture>& sprite)
 {
-    iw::Entity entity = sand->MakeTile<iw::Circle, Item, KeepInWorld>(*sprite, true);
+    //iw::Entity entity = sand->MakeTile<iw::Circle, Item, KeepInWorld>(*sprite, true);
     
-    Item*          item      = entity.Set<Item>();
-    iw::Transform* transform = entity.Find<iw::Transform>();
-	iw::Rigidbody* rigidbody = entity.Find<iw::Rigidbody>();
-    iw::Circle*    collider  = entity.Find<iw::Circle>();
-	iw::Tile*      tile      = entity.Find<iw::Tile>();
+    entity entity = entities().create<Item, iw::Transform, iw::Rigidbody, iw::Circle, iw::Tile>();
+    
+    Item&          item      = entity.get<Item>();
+    iw::Transform& transform = entity.get<iw::Transform>();
+	iw::Rigidbody& rigidbody = entity.get<iw::Rigidbody>();
+    iw::Circle&    collider  = entity.get<iw::Circle>();
+	iw::Tile&      tile      = entity.get<iw::Tile>();
 
-    collider->Radius = glm::compMax(sprite->Dimensions())/*2.5f*/; // radius from sprite size
+    collider.Radius = glm::compMax(sprite->Dimensions())/*2.5f*/; // radius from sprite size
 	
-    transform->Position.x = config.X + iw::randi(10);
-    transform->Position.y = config.Y + iw::randi(10);
+    transform.Position.x = config.X + iw::randi(10);
+    transform.Position.y = config.Y + iw::randi(10);
     
-    rigidbody->SetTransform(transform);
-    rigidbody->IsTrigger = true; // so they dont knock m_player around, I liked that effect tho but it could move m_player out of bounds
+    rigidbody.SetTransform(&transform);
+    rigidbody.IsTrigger = true; // so they dont knock m_player around, I liked that effect tho but it could move m_player out of bounds
 
-    tile->m_zIndex = 1;
+    tile.m_zIndex = 1;
 
-    item->Type          = config.Item;
-    item->ActivateTimer = config.ActivateDelay;
-    item->OnPickUp      = config.OnPickup;
-    item->DieWithTime   = config.DieWithTime;
+    item.Type          = config.Item;
+    item.ActivateTimer = config.ActivateDelay;
+    item.OnPickUp      = config.OnPickup;
+    item.DieWithTime   = config.DieWithTime;
 
     return entity;
 }
 
-iw::Entity ItemSystem::MakeHealth(const SpawnItem_Config& config)
+entity ItemSystem::MakeHealth(const SpawnItem_Config& config)
 {
-    iw::Entity entity = MakeItem(config, A_texture_item_health);
+    entity entity = MakeItem(config, A_texture_item_health);
     
-    Item* item = entity.Find<Item>();
-    item->PickUpRadius = 50;
-    item->OnPickUp = [&]()
+    Item& item = entity.get<Item>();
+    item.PickUpRadius = 50;
+    item.OnPickUp = [&]()
     {
         Bus->push<HealPlayer_Event>();
         Bus->push<HealPlayer_Event>();
         Bus->push<HealPlayer_Event>();
     };
 
-    item->PickupAudio = "event:/pickups/health";
+    item.PickupAudio = "event:/pickups/health";
 
     return entity;
 }
 
-iw::Entity ItemSystem::MakeLaserCharge(const SpawnItem_Config& config)
+entity ItemSystem::MakeLaserCharge(const SpawnItem_Config& config)
 {
-    iw::Entity entity = MakeItem(config, A_texture_item_energy);
+    entity entity = MakeItem(config, A_texture_item_energy);
     
-    Item* item = entity.Find<Item>();
-    item->PickUpRadius = 50;
-    item->OnPickUp = [&]()
+    Item& item = entity.get<Item>();
+    item.PickUpRadius = 50;
+    item.OnPickUp = [&]()
     {
         Bus->push<ChangeLaserFluid_Event>(iw::randi(5) + 2);
     };
@@ -203,25 +285,25 @@ iw::Entity ItemSystem::MakeLaserCharge(const SpawnItem_Config& config)
     return entity;
 }
 
-iw::Entity ItemSystem::MakePlayerCore(const SpawnItem_Config& config)
+entity ItemSystem::MakePlayerCore(const SpawnItem_Config& config)
 {
-    iw::Entity entity = MakeItem(config, A_texture_item_coreShard);
-	iw::Rigidbody* rigidbody = entity.Find<iw::Rigidbody>();
-	Item*          item      = entity.Find<Item>();
+    entity entity = MakeItem(config, A_texture_item_coreShard);
+	iw::Rigidbody& rigidbody = entity.get<iw::Rigidbody>();
+	Item&          item      = entity.get<Item>();
     
-    item->MoveTime = 5.f;
-    item->PickUpRadius = 30;
+    item.MoveTime = 5.f;
+    item.PickUpRadius = 30;
 
     return entity;
 }
 
-iw::Entity ItemSystem::MakeWeaponWattz(const SpawnItem_Config& config)
+entity ItemSystem::MakeWeaponWattz(const SpawnItem_Config& config)
 {
-    iw::Entity entity = MakeItem(config, A_texture_item_wattz);
+    entity entity = MakeItem(config, A_texture_item_wattz);
 
-    Item* item = entity.Find<Item>();
-    item->PickUpRadius = 25;
-    item->OnPickUp = [&]()
+    Item& item = entity.get<Item>();
+    item.PickUpRadius = 25;
+    item.OnPickUp = [&]()
     {
         Bus->push<ChangePlayerWeapon_Event>(WeaponType::WATTZ_CANNON);
     };
@@ -229,13 +311,13 @@ iw::Entity ItemSystem::MakeWeaponWattz(const SpawnItem_Config& config)
     return entity;
 }
 
-iw::Entity ItemSystem::MakeWeaponBoltz(const SpawnItem_Config& config)
+entity ItemSystem::MakeWeaponBoltz(const SpawnItem_Config& config)
 {
-    iw::Entity entity = MakeItem(config, A_texture_item_boltz);
+    entity entity = MakeItem(config, A_texture_item_boltz);
 
-    Item* item = entity.Find<Item>();
-    item->PickUpRadius = 25;
-    item->OnPickUp = [&]()
+    Item& item = entity.get<Item>();
+    item.PickUpRadius = 25;
+    item.OnPickUp = [&]()
     {
         Bus->push<ChangePlayerWeapon_Event>(WeaponType::BOLTZ_CANNON);
     };
@@ -243,13 +325,13 @@ iw::Entity ItemSystem::MakeWeaponBoltz(const SpawnItem_Config& config)
     return entity;
 }
 
-iw::Entity ItemSystem::MakeWeaponMinigun(const SpawnItem_Config& config)
+entity ItemSystem::MakeWeaponMinigun(const SpawnItem_Config& config)
 {
-    iw::Entity entity = MakeItem(config, A_texture_item_minigun);
+    entity entity = MakeItem(config, A_texture_item_minigun);
 
-    Item* item = entity.Find<Item>();
-    item->PickUpRadius = 25;
-    item->OnPickUp = [&]()
+    Item& item = entity.get<Item>();
+    item.PickUpRadius = 25;
+    item.OnPickUp = [&]()
     {
         Bus->push<ChangePlayerWeapon_Event>(WeaponType::MINIGUN_CANNON);
     };

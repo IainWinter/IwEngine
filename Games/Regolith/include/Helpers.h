@@ -8,6 +8,7 @@
 #include <utility>
 #include <vector>
 #include <unordered_set>
+#include "ECS.h"
 
 template<typename _t>
 std::string tos(const _t& numb)
@@ -111,9 +112,9 @@ enum class LightningType
 struct LightningConfig
 {
 	LightningType Type = LightningType::POINT; // only for outside logic
-	iw::Entity A; // only used if Type = ENTITY
-	iw::Entity B;
-	iw::Entity Entity; // the entity who owns this lightning
+	entity A; // only used if Type = ENTITY
+	entity B;
+	entity Entity; // the entity who owns this lightning
 
 	int X = 0;
 	int Y = 0;
@@ -182,7 +183,7 @@ inline LightningHitInfo DrawLightning(
 				if (    cell.Type != iw::CellType::EMPTY
 					&& cell.Type != iw::CellType::LIGHTNING
 					|| (    info.tile
-						&& info.tile != config.A.Find<iw::Tile>()))
+						&& info.tile != &config.A.get<iw::Tile>()))
 				{
 					hit.X = px;
 					hit.Y = py;
@@ -232,8 +233,8 @@ inline LightningHitInfo DrawLightning(
 	            ? targetObj->Collider->as_dim<iw::d2>()->FindFurthestPoint(&targetObj->Transform, -delta)
 	            : targetObj->Transform.WorldPosition();
 
-	iw::Tile* originTile = config.A.Find<iw::Tile>();
-	iw::Tile* targetTile = config.B.Find<iw::Tile>();
+	iw::Tile& originTile = config.A.get<iw::Tile>();
+	iw::Tile& targetTile = config.B.get<iw::Tile>();
 
 	std::vector<CellInfo> origins;
 	std::vector<CellInfo> targets;
@@ -342,4 +343,63 @@ inline void flood_fill(
 			if (natLeft)  queue.push_back(index - 1 - size_x);
 		}
 	}
+}
+
+
+
+// move this for ECS test, should move back to sand, but not in any class
+
+#include "iw/physics/Collision/MeshCollider.h"
+#include "iw/graphics/Texture.h"
+
+template<
+	typename _collider = iw::MeshCollider2,
+	typename... _others>
+inline entity MakeTile(
+	const std::string& sprite,
+	iw::ref<iw::DynamicsSpace>& physics,
+	bool isSimulated = false)
+{
+	return MakeTile<_collider, _others...>(*Asset->Load<iw::Texture>(sprite), isSimulated);
+}
+
+template<
+	typename _collider = iw::MeshCollider2,
+	typename... _others>
+entity MakeTile(
+	const iw::Texture& sprite,
+	iw::ref<iw::DynamicsSpace>& physics, // oh this is why its in class
+	bool isSimulated = false,
+	std::vector<component> others = {})
+{
+	archetype arch = make_archetype<Transform, Tile, _collider, _others...>();
+
+	if (isSimulated) others.push_back(make_component<iw::Rigidbody>());
+	else             others.push_back(make_component<iw::CollisionObject>());
+
+	for (const component& other : others)
+	{
+		add_to_archetype(arch, other);
+	}
+
+	entity entity = entities().create(arch).set<iw::Tile>(sprite);
+	
+	iw::Transform&       transform = entity.get<iw::Transform>();
+	_collider&           collider  = entity.get<_collider>();
+	iw::CollisionObject* object    = isSimulated ? &entity.get<iw::Rigidbody>() : &entity.get<iw::CollisionObject>();
+
+	if constexpr (std::is_same_v<_collider, iw::Circle>)
+	{
+		collider->Radius = glm::compMax(sprite.Dimensions()) / 2.f;
+	}
+
+	object->Collider = collider;
+	object->SetTransform(transform);
+
+	if (isSimulated) physics->AddRigidbody((iw::Rigidbody*)object);
+	else             physics->AddCollisionObject(object);
+
+	tile->m_sandLayerIndex = m_sandLayerIndex;
+
+	return entity;
 }

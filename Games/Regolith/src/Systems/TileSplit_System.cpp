@@ -33,22 +33,35 @@ void TileSplitSystem::Update()
 		splits.clear();
 	});
 
-	Space->Query<iw::Tile, Asteroid>().Each(
-	[&](
-		iw::EntityHandle handle,
-		iw::Tile* tile, 
-		Asteroid* asteroid)
+	//Space->Query<iw::Tile, Asteroid>().Each(
+	//[&](
+	//	iw::EntityHandle handle,
+	//	iw::Tile* tile, 
+	//	Asteroid* asteroid)
+	//{
+	//	if (tile->m_currentCells.size() < 50) 
+	//	{
+	//		asteroid->Lifetime -= iw::DeltaTime();
+	//		if (asteroid->Lifetime < 0.f)
+	//		{
+	//			ExplodeTile(Space->GetEntity(handle), tile->m_currentCells);
+	//			Space->QueueEntity(handle, iw::func_Destroy);
+	//		}
+	//	}
+	//});
+
+	for (auto [entity, tile, asteroid] : entities().query<iw::Tile, Asteroid>().with_entity())
 	{
-		if (tile->m_currentCells.size() < 50) 
+		if (tile.m_currentCells.size() < 50) 
 		{
-			asteroid->Lifetime -= iw::DeltaTime();
-			if (asteroid->Lifetime < 0.f)
+			asteroid.Lifetime -= iw::DeltaTime();
+			if (asteroid.Lifetime < 0.f)
 			{
-				ExplodeTile(Space->GetEntity(handle), tile->m_currentCells);
-				Space->QueueEntity(handle, iw::func_Destroy);
+				//ExplodeTile(entity, tile.m_currentCells);
+				entity.destroy();
 			}
 		}
-	});
+	}
 }
 
 bool TileSplitSystem::On(iw::ActionEvent& e)

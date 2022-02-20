@@ -5,6 +5,7 @@
 #include "Components/Asteroid.h"
 #include "Components/Throwable.h"
 #include "Events.h"
+#include "ECS.h"
 
 struct TileSplitSystem : iw::SystemBase
 {

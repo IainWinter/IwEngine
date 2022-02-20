@@ -12,6 +12,7 @@
 
 #include "Events.h"
 #include "Assets.h"
+#include "ECS.h"
 
 struct EnemySystem : iw::SystemBase
 {
@@ -20,8 +21,8 @@ struct EnemySystem : iw::SystemBase
 	EnemySystem(
 		iw::SandLayer* sand
 	)
-		: iw::SystemBase("Enemy")
-		, sand(sand)
+		: iw::SystemBase ("Enemy")
+		, sand           (sand)
 	{}
 
 	void FixedUpdate() override;
@@ -30,5 +31,5 @@ struct EnemySystem : iw::SystemBase
 
 private:
 	void SpawnEnemy(SpawnEnemy_Config& config);
-	void DestroyEnemy(iw::Entity enemy);
+	void DestroyEnemy(entity enemy);
 };

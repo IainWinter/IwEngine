@@ -46,9 +46,11 @@ void WorldSystem::Update()
 	if (needsAnotherLevel)
 	{
 		int enemyCount = 0;
-		Space->Query<Enemy>().Each([&](iw::EntityHandle handle, Enemy*) {
-			enemyCount++;
-		});
+		//Space->Query<Enemy>().Each([&](iw::EntityHandle handle, Enemy*) {
+		//	enemyCount++;
+		//});
+
+		enemyCount = entities().query<Enemy>().count();
 
 		iw::EventSequence& seq = m_levels.emplace_front(CreateSequence());
 		if (enemyCount < 15)
@@ -65,100 +67,175 @@ void WorldSystem::Update()
 		seq.Start();
 	}
 
-	Space->Query<iw::Transform, iw::Tile, Asteroid>().Each(
-	[&](
-		iw::EntityHandle handle, 
-		iw::Transform* transform,
-		iw::Tile* tile,
-		Asteroid* asteroid) 
+	//Space->Query<iw::Transform, iw::Tile, Asteroid>().Each(
+	//[&](
+	//	iw::EntityHandle handle, 
+	//	iw::Transform* transform,
+	//	iw::Tile* tile,
+	//	Asteroid* asteroid) 
+	//{
+	//	asteroid->Lifetime -= iw::DeltaTime();
+
+	//	iw::AABB2 b = iw::TransformBounds(tile->m_bounds, transform);
+
+	//	if (   asteroid->Lifetime < 0.f
+	//		&& !iw::AABB2(glm::vec2(200.f), 200).Intersects(&iw::Transform(), tile->m_bounds, transform))
+	//	{
+	//		Space->QueueEntity(handle, iw::func_Destroy);
+	//	}
+	//});
+
+	for (auto [entity, transform, tile, asteroid] : entities().query<iw::Transform, iw::Tile, Asteroid>().with_entity())
 	{
-		asteroid->Lifetime -= iw::DeltaTime();
+		asteroid.Lifetime -= iw::DeltaTime();
 
-		iw::AABB2 b = iw::TransformBounds(tile->m_bounds, transform);
+		iw::AABB2 b = iw::TransformBounds(tile.m_bounds, &transform);
 
-		if (   asteroid->Lifetime < 0.f
-			&& !iw::AABB2(glm::vec2(200.f), 200).Intersects(&iw::Transform(), tile->m_bounds, transform))
+		if (   asteroid.Lifetime < 0.f
+			&& !iw::AABB2(glm::vec2(200.f), 200).Intersects(&iw::Transform(), tile.m_bounds, &transform))
 		{
-			Space->QueueEntity(handle, iw::func_Destroy);
+			entity.destroy();
+			//Task->defer([=]() { entity.destroy(); });
 		}
-	});
+	}
 }
 
 void WorldSystem::FixedUpdate()
 {
-	Space->Query<Throwable, Flocker>().Each(
-		[&](
-			iw::EntityHandle handle, 
-			Throwable* throwable, 
-			Flocker* flocker) 
+	//Space->Query<Throwable, Flocker>().Each(
+	//	[&](
+	//		iw::EntityHandle handle, 
+	//		Throwable* throwable, 
+	//		Flocker* flocker) 
+	//	{
+	//		if (throwable->Held)
+	//		{
+	//			flocker->Active = false;
+	//		}
+
+	//		if (   !flocker->Active 
+	//			&& !throwable->Held)
+	//		{
+	//			throwable->Timer += iw::FixedTime();
+
+	//			if (throwable->Timer > throwable->Time + .5)
+	//			{
+	//				flocker->Active = true;
+	//			}
+	//		}
+	//	});
+
+	for (auto [throwable, flocker] : entities().query<Throwable, Flocker>())
+	{
+		if (throwable.Held)
 		{
-			if (throwable->Held)
-			{
-				flocker->Active = false;
-			}
-
-			if (   !flocker->Active 
-				&& !throwable->Held)
-			{
-				throwable->Timer += iw::FixedTime();
-
-				if (throwable->Timer > throwable->Time + .5)
-				{
-					flocker->Active = true;
-				}
-			}
-		});
-
-	Space->Query<iw::Rigidbody, Throwable>().Each(
-		[&](
-			iw::EntityHandle handle, 
-			iw::Rigidbody* rigidbody,
-			Throwable* throwable) 
+			flocker.Active = false;
+		}
+		
+		if (   !flocker.Active
+			&& !throwable.Held)
 		{
-			if (   !throwable->Held
-				|| !throwable->ThrowTarget   .Alive()
-				|| !throwable->ThrowRequestor.Alive())
+			throwable.Timer += iw::FixedTime();
+			if (throwable.Timer > throwable.Time + .5)
 			{
-				return;
+				flocker.Active = true;
 			}
+		}
+	}
 
-			throwable->Timer += iw::FixedTime();
+	//Space->Query<iw::Rigidbody, Throwable>().Each(
+	//	[&](
+	//		iw::EntityHandle handle, 
+	//		iw::Rigidbody* rigidbody,
+	//		Throwable* throwable) 
+	//	{
+	//		if (   !throwable->Held
+	//			|| !throwable->ThrowTarget   .Alive()
+	//			|| !throwable->ThrowRequestor.Alive())
+	//		{
+	//			return;
+	//		}
 
-			float distFromThrower = glm::distance(
-				rigidbody->Transform.Position, 
-				throwable->ThrowRequestor.Find<iw::Transform>()->Position);
+	//		throwable->Timer += iw::FixedTime();
 
-			if (   throwable->Timer > throwable->Time
-				|| distFromThrower  > 150)
-			{
-				throwable->Held = false;
-			}
+	//		float distFromThrower = glm::distance(
+	//			rigidbody->Transform.Position, 
+	//			throwable->ThrowRequestor.Find<iw::Transform>()->Position);
 
-			glm::vec3 pos  = rigidbody->Transform.Position;
-			glm::vec3 tpos = throwable->ThrowTarget   .Find<iw::Transform>()->Position;
-			glm::vec3 rpos = throwable->ThrowRequestor.Find<iw::Transform>()->Position;
+	//		if (   throwable->Timer > throwable->Time
+	//			|| distFromThrower  > 150)
+	//		{
+	//			throwable->Held = false;
+	//		}
 
-			/*
-			auto [min, max] = rigidbody->Collider->as<iw::Physics::impl::Collider<iw::d2>>()->Bounds();
-			float radius = glm::length(max - min) / 2.f;
-			*/
+	//		glm::vec3 pos  = rigidbody->Transform.Position;
+	//		glm::vec3 tpos = throwable->ThrowTarget   .Find<iw::Transform>()->Position;
+	//		glm::vec3 rpos = throwable->ThrowRequestor.Find<iw::Transform>()->Position;
 
-			glm::vec3 vel = tpos - pos + (pos - rpos) / 2.f;
-			vel = glm::normalize(vel);
+	//		/*
+	//		auto [min, max] = rigidbody->Collider->as<iw::Physics::impl::Collider<iw::d2>>()->Bounds();
+	//		float radius = glm::length(max - min) / 2.f;
+	//		*/
 
-			float currentSpeed = glm::length(rigidbody->Velocity);
-			float speed = iw::max(currentSpeed, 200.f * throwable->Timer / throwable->Time);
+	//		glm::vec3 vel = tpos - pos + (pos - rpos) / 2.f;
+	//		vel = glm::normalize(vel);
 
-			rigidbody->Velocity = iw::lerp(rigidbody->Velocity, vel * speed, iw::FixedTime() * 25);
+	//		float currentSpeed = glm::length(rigidbody->Velocity);
+	//		float speed = iw::max(currentSpeed, 200.f * throwable->Timer / throwable->Time);
 
-			LightningConfig config;
-			config.A = throwable->ThrowRequestor;
-			config.B = Space->GetEntity(handle);
-			config.ArcSize = 10;
-			config.LifeTime = .01f;
+	//		rigidbody->Velocity = iw::lerp(rigidbody->Velocity, vel * speed, iw::FixedTime() * 25);
 
-			DrawLightning(sand, Space, config);
-		});
+	//		LightningConfig config;
+	//		config.A = throwable->ThrowRequestor;
+	//		config.B = Space->GetEntity(handle);
+	//		config.ArcSize = 10;
+	//		config.LifeTime = .01f;
+
+	//		DrawLightning(sand, Space, config);
+	//	});
+
+	for (auto [entity, throwable, rigidbody] : entities().query<Throwable, iw::Rigidbody>().with_entity())
+	{
+
+		if (   !throwable.Held
+			|| !throwable.ThrowTarget   .is_alive()
+			|| !throwable.ThrowRequestor.is_alive())
+		{
+			return;
+		}
+		
+		throwable.Timer += iw::FixedTime();
+		
+		float distFromThrower = glm::distance(
+			rigidbody.Transform.Position, 
+			throwable.ThrowRequestor.get<iw::Transform>().Position);
+		
+		if (   throwable.Timer > throwable.Time
+			|| distFromThrower  > 150)
+		{
+			throwable.Held = false;
+		}
+		
+		glm::vec3 pos  = rigidbody.Transform.Position;
+		glm::vec3 tpos = throwable.ThrowTarget   .get<iw::Transform>().Position;
+		glm::vec3 rpos = throwable.ThrowRequestor.get<iw::Transform>().Position;
+		
+		glm::vec3 vel = tpos - pos + (pos - rpos) / 2.f;
+		vel = glm::normalize(vel);
+		
+		float currentSpeed = glm::length(rigidbody.Velocity);
+		float speed = iw::max(currentSpeed, 200.f * throwable.Timer / throwable.Time);
+		
+		rigidbody.Velocity = iw::lerp(rigidbody.Velocity, vel * speed, iw::FixedTime() * 25);
+		
+		LightningConfig config;
+		config.A = throwable.ThrowRequestor;
+		//config.B = entity;// Space.GetEntity(handle);
+		config.ArcSize = 10;
+		config.LifeTime = .01f;
+		
+		DrawLightning(sand, Space, config);
+	}
 }
 
 bool WorldSystem::On(iw::ActionEvent& e)
@@ -169,14 +246,14 @@ bool WorldSystem::On(iw::ActionEvent& e)
 		{
 			auto& [x, y, info, hit, projectile] = e.as<ProjHitTile_Event>().Config;
 
-			if (   hit.Has<Player>() 
-				|| hit.Has<Enemy>())
+			if (   hit.has<Player>()
+				|| hit.has<Enemy>())
 			{
 				glm::vec3 norm;
 
-				if (iw::Rigidbody* pbody = projectile.Find<iw::Rigidbody>())
+				if (projectile.has<iw::Rigidbody>())
 				{
-					norm = glm::normalize(pbody->Velocity);
+					norm = glm::normalize(projectile.get<iw::Rigidbody>().Velocity);
 				}
 
 				else {
@@ -208,32 +285,31 @@ bool WorldSystem::On(iw::ActionEvent& e)
 		case REMOVE_CELL_FROM_TILE:
 		{
 			RemoveCellFromTile_Event& event = e.as<RemoveCellFromTile_Event>();
-			sand->EjectPixel(event.Entity.Find<iw::Tile>(), event.Index);
+			sand->EjectPixel(&event.Entity.get<iw::Tile>(), event.Index);
 
 			break;
 		}
 		case CORE_EXPLODED:
 		{
-			iw::Entity& entity = e.as<CoreExploded_Event>().Entity;
+			entity& entity = e.as<CoreExploded_Event>().Entity;
 
-			if (!entity) return false;
+			if (!entity.is_alive()) return false;
 
-			glm::vec3 pos = entity.Find<iw::Transform>()->Position;
+			glm::vec3 pos = entity.get<iw::Transform>().Position;
 
 			SpawnExplosion_Config config;
 			config.SpawnLocationX = pos.x;
 			config.SpawnLocationY = pos.y;
 			config.ExplosionRadius = 1;
 
-			if (entity.Has<Enemy>())
+			if (entity.has<Enemy>())
 			{
-				config.ExplosionPower = entity.Find<Enemy>()->ExplosionPower;
+				config.ExplosionPower = entity.get<Enemy>().ExplosionPower;
 			}
 
 			else 
 			{
-				CorePixels* core = entity.Find<CorePixels>();
-				for (int i : core->ActiveIndices)
+				for (int i : entity.get<CorePixels>().ActiveIndices)
 				{
 					Bus->push<RemoveCellFromTile_Event>(i, entity);
 				}
@@ -332,7 +408,7 @@ bool WorldSystem::On(iw::CollisionEvent& e)
 	return false;
 }
 
-iw::Entity WorldSystem::MakeAsteroid(
+entity WorldSystem::MakeAsteroid(
 	SpawnAsteroid_Config& config)
 {
 	iw::ref<iw::Texture> asteroid_tex;
@@ -344,18 +420,18 @@ iw::Entity WorldSystem::MakeAsteroid(
 		case 2: asteroid_tex = A_texture_asteroid_mid_3; break;
 	}
 
-	iw::Entity entity = sand->MakeTile<iw::MeshCollider2, Asteroid, Throwable>(*asteroid_tex, true);
-	iw::Transform* t = entity.Find<iw::Transform>();
-	iw::Rigidbody* r = entity.Find<iw::Rigidbody>();
+	entity entity = MakeTile<iw::MeshCollider2, Asteroid, Throwable>(*asteroid_tex, Physics, true);
+	iw::Transform& t = entity.get<iw::Transform>();
+	iw::Rigidbody& r = entity.get<iw::Rigidbody>();
 
-	t->Position = glm::vec3(config.SpawnLocationX, config.SpawnLocationY, 0);
+	t.Position = glm::vec3(config.SpawnLocationX, config.SpawnLocationY, 0);
 
-	r->Velocity = glm::vec3(config.VelocityX, config.VelocityY, 0);
-	r->AngularVelocity.z = config.AngularVel;
-	r->SetTransform(t);
-	r->SetMass(1000);
+	r.Velocity = glm::vec3(config.VelocityX, config.VelocityY, 0);
+	r.AngularVelocity.z = config.AngularVel;
+	r.SetTransform(&t);
+	r.SetMass(1000);
 
-	entity.Find<Asteroid>()->Lifetime = 10;
+	entity.get<Asteroid>().Lifetime = 10;
 
 	return entity;
 }

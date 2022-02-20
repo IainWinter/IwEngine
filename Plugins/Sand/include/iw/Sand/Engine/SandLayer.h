@@ -178,64 +178,6 @@ public:
 		m_update->SetCameraScale(xs, ys);
 	}
 
-	template<
-		typename _collider = MeshCollider2,
-		typename... _others>
-	inline Entity MakeTile(
-		const std::string& sprite,
-		bool isSimulated = false)
-	{
-		return MakeTile<_collider, _others...>(*Asset->Load<iw::Texture>(sprite), isSimulated);
-	}
-
-	template<
-		typename _collider = MeshCollider2,
-		typename... _others>
-	Entity MakeTile(
-		const Texture& sprite,
-		bool isSimulated = false,
-		const Archetype* others = nullptr)
-	{
-		Archetype archetype = Space->CreateArchetype<Transform, Tile, _collider, _others...>();
-
-		if (isSimulated) Space->AddComponent<Rigidbody>      (archetype);
-		else             Space->AddComponent<CollisionObject>(archetype);
-
-		if (others)
-		{
-			for (int i = 0; i < others->Count; i++)
-			{
-				if (!archetype.HasComponent(others->Layout[i].Component))
-				{
-					Space->AddComponent(archetype, others->Layout[i].Component);
-				}
-			}
-		}
-
-		Entity entity = Space->CreateEntity(archetype);
-
-		Tile* tile = entity.Set<Tile>(sprite);
-	
-		Transform*       transform = entity.Set<Transform>();
-		_collider*       collider  = entity.Set<_collider>();
-		CollisionObject* object    = isSimulated ? entity.Set<Rigidbody>() : entity.Set<CollisionObject>();
-
-		if constexpr (std::is_same_v<_collider, iw::Circle>)
-		{
-			collider->Radius = glm::compMax(sprite.Dimensions()) / 2.f;
-		}
-
-		object->Collider = collider;
-		object->SetTransform(transform);
-
-		if (isSimulated) Physics->AddRigidbody((Rigidbody*)object);
-		else             Physics->AddCollisionObject(object);
-
-		tile->m_sandLayerIndex = m_sandLayerIndex;
-
-		return entity;
-	}
-
 	void ForEachInPolygon(
 		const std::vector<glm::vec2>& polygon,
 		const std::vector<glm::vec2>& uv,

@@ -2,8 +2,11 @@
 
 struct Throwable
 {
-	iw::Entity ThrowTarget;
-	iw::Entity ThrowRequestor;
+	/*iw::Entity ThrowTarget;
+	iw::Entity ThrowRequestor;*/
+
+	entity ThrowTarget;
+	entity ThrowRequestor;
 
 	bool Held = false;
 	float Time = 1.f;

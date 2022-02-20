@@ -12,13 +12,14 @@
 #include "Assets.h"
 #include "Helpers.h"
 #include "Moves.h"
+#include "ECS.h"
 
 #include "iw/engine/Layers/ImGuiLayer.h"
 
 struct PlayerSystem : iw::SystemBase
 {
 	iw::SandLayer* sand;
-	iw::Entity m_player;
+	entity m_player;
 	iw::HandlerFunc* m_handle;
 	std::vector<float> speeds;
 	iw::Timer timer;

@@ -7,7 +7,7 @@
 namespace iw {
 namespace ECS {
 	ArchetypeManager::ArchetypeManager()
-		: m_pool(1024)
+		: m_pool(1024, 2)
 	{}
 
 	Archetype ArchetypeManager::CreateArchetype(

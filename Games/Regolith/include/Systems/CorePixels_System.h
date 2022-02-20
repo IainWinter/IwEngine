@@ -6,6 +6,7 @@
 
 #include "Events.h"
 #include "Helpers.h"
+#include "ECS.h"
 
 #include <array>
 
@@ -25,6 +26,6 @@ struct CorePixelsSystem : iw::SystemBase
 	bool On(iw::ActionEvent& e) override;
 
 	void RemoveCorePixel(
-		iw::Entity entity,
+		entity entity,
 		int index);
 };

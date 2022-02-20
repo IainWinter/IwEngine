@@ -2,22 +2,22 @@
 
 int PlayerSystem::Initialize()
 {
-	m_player = sand->MakeTile<iw::Circle, Player, CorePixels, KeepInWorld>(*A_texture_player, true);
+	m_player = MakeTile<iw::Circle, Player, CorePixels, KeepInWorld>(*A_texture_player, Physics, true);
 
-	iw::Rigidbody* rigidbody = m_player.Find<iw::Rigidbody>();
-	iw::Transform* transform = m_player.Find<iw::Transform>();
-	CorePixels*    core      = m_player.Set<CorePixels>();
-	Player*        player    = m_player.Set<Player>();
+	iw::Rigidbody& rigidbody = m_player.get<iw::Rigidbody>();
+	iw::Transform& transform = m_player.get<iw::Transform>();
+	CorePixels&    core      = m_player.get<CorePixels>();
+	Player&        player    = m_player.get<Player>();
 	auto [w, h] = sand->GetSandTexSize2();
-	transform->Position = glm::vec3(w, h, 0);
-	rigidbody->SetTransform(transform);
-	rigidbody->SetMass(10);
-	core->TimeWithoutCore = 4.f;
-	player->SpecialLaser = MakeFatLaser_Cannon();
+	transform.Position = glm::vec3(w, h, 0);
+	rigidbody.SetTransform(&transform);
+	rigidbody.SetMass(10);
+	core.TimeWithoutCore = 4.f;
+	player.SpecialLaser = MakeFatLaser_Cannon();
 	
-	player->Moves[0] = new Dash_Move();
-	player->Moves[1] = new SmokeScreen_Move();
-	player->Moves[2] = new EnergyShield_Move();
+	player.Moves[0] = new Dash_Move();
+	player.Moves[1] = new SmokeScreen_Move();
+	player.Moves[2] = new EnergyShield_Move();
 
 	Bus->push<ChangePlayerWeapon_Event>(WeaponType::DEFAULT_CANNON);
 	Bus->push<CreatedPlayer_Event>(m_player);
@@ -26,22 +26,20 @@ int PlayerSystem::Initialize()
 	m_handle = Console->AddHandler([&](
 		const iw::Command& command)
 	{
-		Player* player = m_player.Find<Player>();
-
-		if (!player) return false;
+		Player& player = m_player.get<Player>();
 
 		int active = command.Active ? 1 : -1;
 			
-		     if (command.Verb == "right")    player->i_moveX += active;
-		else if (command.Verb == "up")       player->i_moveY += active;
+		     if (command.Verb == "right")    player.i_moveX += active;
+		else if (command.Verb == "up")       player.i_moveY += active;
 
-		else if (command.Verb == "fire")     player->i_fire1 = command.Active;
-		else if (command.Verb == "alt-fire") player->i_fire2 = command.Active;
+		else if (command.Verb == "fire")     player.i_fire1 = command.Active;
+		else if (command.Verb == "alt-fire") player.i_fire2 = command.Active;
 
-		else if (command.Verb == "a")        player->Use[0] = command.Active;
-		else if (command.Verb == "b")        player->Use[1] = command.Active;
-		else if (command.Verb == "x")        player->Use[2] = command.Active;
-		else if (command.Verb == "y")        player->Use[3] = command.Active;
+		else if (command.Verb == "a")        player.Use[0] = command.Active;
+		else if (command.Verb == "b")        player.Use[1] = command.Active;
+		else if (command.Verb == "x")        player.Use[2] = command.Active;
+		else if (command.Verb == "y")        player.Use[3] = command.Active;
 
 		return false;
 	});
@@ -51,9 +49,9 @@ int PlayerSystem::Initialize()
 
 void PlayerSystem::Destroy()
 {
-	if (m_player.Alive())
+	if (m_player.is_alive())
 	{
-		m_player.Destroy();
+		m_player.destroy();
 	}
 
 	Console->RemoveHandler(m_handle);
@@ -90,23 +88,21 @@ void PlayerSystem::Update()
 {
 	timer.Tick();
 
-	Player*        player    = m_player.Find<Player>();
-	iw::Rigidbody* rigidbody = m_player.Find<iw::Rigidbody>();
-
-	if (!player) return;
+	Player&        player    = m_player.get<Player>();
+	iw::Rigidbody& rigidbody = m_player.get<iw::Rigidbody>();
 
 	// movement
 
-	player->move = glm::vec3(iw::norm(glm::vec2(player->i_moveX, player->i_moveY)), 0.f);
-	rigidbody->Velocity = player->move * player->u_speed;
+	player.move = glm::vec3(iw::norm(glm::vec2(player.i_moveX, player.i_moveY)), 0.f);
+	rigidbody.Velocity = player.move * player.u_speed;
 
 	// special actions
 
 	for (int i = 0; i < 4; i++)
 	{
-		if (player->Moves[i])
+		if (player.Moves[i])
 		{
-			player->Moves[i]->Update(APP_VARS_LIST, player, player->Use[i]);
+			player.Moves[i]->Update(APP_VARS_LIST, player, player.Use[i]);
 		}
 	}
 
@@ -115,24 +111,24 @@ void PlayerSystem::Update()
 	float aim_x = sand->sP.x;
 	float aim_y = sand->sP.y;
 
-	if (   player->i_fire1
-		&& player->CurrentWeapon->CanFire())
+	if (   player.i_fire1
+		&& player.CurrentWeapon->CanFire())
 	{
-		ShotInfo shot = player->CurrentWeapon->GetShot(m_player, aim_x, aim_y);
+		ShotInfo shot = player.CurrentWeapon->GetShot(m_player, aim_x, aim_y);
 		Bus->push<SpawnProjectile_Event>(shot);
-		Bus->push<PlaySound_Event>(player->CurrentWeapon->Audio);
+		Bus->push<PlaySound_Event>(player.CurrentWeapon->Audio);
 
-		if (player->CurrentWeapon->Ammo == 0)
+		if (player.CurrentWeapon->Ammo == 0)
 		{
 			Bus->push<ChangePlayerWeapon_Event>(WeaponType::DEFAULT_CANNON);
 		}
 	}
 	
-	if (   player->i_fire2 
-		&& player->SpecialLaser->CanFire()
-		&& player->can_fire_laser)
+	if (   player.i_fire2 
+		&& player.SpecialLaser->CanFire()
+		&& player.can_fire_laser)
 	{
-		ShotInfo shot = player->SpecialLaser->GetShot(m_player, aim_x, aim_y);
+		ShotInfo shot = player.SpecialLaser->GetShot(m_player, aim_x, aim_y);
 		Bus->push<SpawnProjectile_Event>(shot);
 		Bus->push<ChangeLaserFluid_Event>(-1);
 	}

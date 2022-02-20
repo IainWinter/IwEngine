@@ -7,6 +7,7 @@
 #include "Components/Projectile.h"
 
 #include "Events.h"
+#include "ECS.h"
 
 struct ProjectileSystem
 	: iw::SystemBase

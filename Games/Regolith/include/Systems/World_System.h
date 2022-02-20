@@ -14,13 +14,14 @@
 #include "Levels.h"
 #include "Assets.h"
 #include "Helpers.h"
+#include "ECS.h"
 
 #include <deque>
 
 struct WorldSystem : iw::SystemBase
 {
 	iw::SandLayer* sand;
-	iw::Entity m_player;
+	entity m_player;
 
 	iw::Timer m_timer;
 
@@ -42,7 +43,7 @@ struct WorldSystem : iw::SystemBase
 	bool On(iw::ActionEvent& e) override;
 	bool On(iw::CollisionEvent& e) override;
 private:
-	iw::Entity MakeAsteroid(SpawnAsteroid_Config& config);
+	entity MakeAsteroid(SpawnAsteroid_Config& config);
 
 	// put all this in cpp
 

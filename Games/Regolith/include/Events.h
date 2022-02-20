@@ -11,6 +11,7 @@
 #include "iw/util/reflection/ReflectDef.h"
 #include "State.h"
 #include "Upgrade.h"
+#include "ECS.h"
 
 enum Actions {
 	SPAWN_ENEMY,
@@ -61,7 +62,8 @@ struct REFLECT SpawnExplosion_Event : iw::SingleEvent
 
 struct REFLECT SpawnEnemy_Config
 {
-	iw::Entity TargetEntity;
+	//iw::Entity TargetEntity;
+	entity TargetEntity;
 	float SpawnLocationX  = 0.f;
 	float SpawnLocationY  = 0.f;
 	float TargetLocationX = 0.f;
@@ -201,8 +203,8 @@ struct REFLECT ProjHitTile_Config
 	int X = 0;
 	int Y = 0;
 	iw::TileInfo Info;
-	iw::Entity Hit;
-	iw::Entity Projectile;
+	entity Hit;
+	entity Projectile;
 };
 
 struct REFLECT ProjHitTile_Event : iw::SingleEvent
@@ -220,51 +222,51 @@ struct REFLECT ProjHitTile_Event : iw::SingleEvent
 struct REFLECT RemoveCellFromTile_Event : iw::SingleEvent
 {
 	size_t Index;
-	iw::Entity Entity;
+	entity Entity;
 
 	RemoveCellFromTile_Event(
-		size_t index, iw::Entity entity
+		size_t index, entity entity
 	)
-		: iw::SingleEvent(REMOVE_CELL_FROM_TILE)
-		, Index(index)
-		, Entity(entity)
+		: iw::SingleEvent (REMOVE_CELL_FROM_TILE)
+		, Index           (index)
+		, Entity          (entity)
 	{}
 };
 
 struct REFLECT CreatedPlayer_Event : iw::SingleEvent
 {
-	iw::Entity PlayerEntity;
+	entity PlayerEntity;
 
 	CreatedPlayer_Event(
-		iw::Entity playerEntity
+		entity playerEntity
 	)
-		: iw::SingleEvent(CREATED_PLAYER)
-		, PlayerEntity(playerEntity)
+		: iw::SingleEvent (CREATED_PLAYER)
+		, PlayerEntity    (playerEntity)
 	{}
 };
 
 struct REFLECT CreatedCoreTile_Event : iw::SingleEvent
 {
-	iw::Entity TileEntity;
+	entity TileEntity;
 
 	CreatedCoreTile_Event(
-		iw::Entity tileEntity
+		entity tileEntity
 	)
-		: iw::SingleEvent(CREATED_CORE_TILE)
-		, TileEntity(tileEntity)
+		: iw::SingleEvent (CREATED_CORE_TILE)
+		, TileEntity      (tileEntity)
 	{}
 };
 
 
 struct REFLECT CoreExploded_Event : iw::SingleEvent
 {
-	iw::Entity Entity;
+	entity Entity;
 
 	CoreExploded_Event(
-		iw::Entity entity
+		entity entity
 	)
-		: iw::SingleEvent(CORE_EXPLODED)
-		, Entity(entity)
+		: iw::SingleEvent (CORE_EXPLODED)
+		, Entity          (entity)
 	{}
 };
 
@@ -275,8 +277,8 @@ struct REFLECT StateChange_Event : iw::SingleEvent
 	StateChange_Event(
 		StateName state
 	)
-		: iw::SingleEvent(STATE_CHANGE)
-		, State(state)
+		: iw::SingleEvent (STATE_CHANGE)
+		, State           (state)
 	{}
 };
 
@@ -291,8 +293,8 @@ struct REFLECT OpenMenu_Event : iw::SingleEvent
 	OpenMenu_Event(
 		MenuName menu
 	)
-		: iw::SingleEvent(OPEN_MENU)
-		, Menu(menu)
+		: iw::SingleEvent (OPEN_MENU)
+		, Menu            (menu)
 	{}
 };
 

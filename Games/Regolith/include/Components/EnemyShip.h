@@ -3,6 +3,7 @@
 #include "iw/entity/Entity.h"
 #include "iw/engine/Components/Timer.h"
 #include "Weapons.h"
+#include "ECS.h"
 
 enum EnemyType
 {
@@ -14,7 +15,8 @@ enum EnemyType
 
 struct Enemy
 {
-	iw::Entity Target;
+	//iw::Entity Target;
+	entity Target;
 	float ExplosionPower = 10.f;
 
 	float ActiveTimer = 0.f;

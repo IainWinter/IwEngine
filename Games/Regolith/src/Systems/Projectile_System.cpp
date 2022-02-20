@@ -4,26 +4,45 @@
 
 void ProjectileSystem::Update()
 {
-	Space->Query<iw::Transform, Projectile>().Each(
-		[&](
-			iw::EntityHandle handle,
-			iw::Transform* transform,
-			Projectile* proj)
-		{
-			if (proj->Life > 0)
-			{
-				proj->Life -= iw::DeltaTime();
-				if (proj->Life <= 0.f)
-				{
-					Space->QueueEntity(handle, iw::func_Destroy);
-				}
-			}
+	//Space->Query<iw::Transform, Projectile>().Each(
+	//	[&](
+	//		iw::EntityHandle handle,
+	//		iw::Transform* transform,
+	//		Projectile* proj)
+	//	{
+	//		if (proj->Life > 0)
+	//		{
+	//			proj->Life -= iw::DeltaTime();
+	//			if (proj->Life <= 0.f)
+	//			{
+	//				Space->QueueEntity(handle, iw::func_Destroy);
+	//			}
+	//		}
 
-			if (glm::distance2(transform->Position, glm::vec3(200.f, 200.f, 0.f)) > 400 * 400)
+	//		if (glm::distance2(transform->Position, glm::vec3(200.f, 200.f, 0.f)) > 400 * 400)
+	//		{
+	//			Space->QueueEntity(handle, iw::func_Destroy);
+	//		}
+	//	});
+
+	for (auto [entity, transform, projectile] : entities().query<iw::Transform, Projectile>().with_entity())
+	{
+		if (projectile.Life > 0)
+		{
+			projectile.Life -= iw::DeltaTime();
+			if (projectile.Life <= 0.f)
 			{
-				Space->QueueEntity(handle, iw::func_Destroy);
+				entity.destroy();
 			}
-		});
+		}
+		
+		if (glm::distance2(transform.Position, glm::vec3(200.f, 200.f, 0.f)) > 400 * 400)
+		{
+			entity.destroy();
+		}
+	}
+
+
 
 	Space->Query<iw::Transform, iw::Rigidbody, Projectile, Linear_Projectile>().Each(
 		[&](
@@ -125,6 +144,8 @@ void ProjectileSystem::Update()
 				pos.y = pos.y + vel.y * iw::DeltaTime();
 			}
 		});
+
+
 
 	Space->Query<iw::Transform, iw::Rigidbody, Projectile, Split_Projectile>().Each(
 		[&](
