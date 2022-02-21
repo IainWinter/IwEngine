@@ -8,7 +8,7 @@ bool ScoreSystem::On(iw::ActionEvent& e)
 		{
 			ProjHitTile_Event& event = e.as<ProjHitTile_Event>();
 
-			if (event.Config.Hit.Has<Enemy>())
+			if (event.Config.Hit.has<Enemy>())
 			{
 				Bus->push<ChangePlayerScore_Event>(Score + 1);
 			}
@@ -19,12 +19,12 @@ bool ScoreSystem::On(iw::ActionEvent& e)
 		{
 			CoreExploded_Event& event = e.as<CoreExploded_Event>();
 			
-			if (event.Entity.Has<Enemy>())
+			if (event.Entity.has<Enemy>())
 			{
 				Bus->push<ChangePlayerScore_Event>(Score + 100);
 			}
 
-			if (event.Entity.Has<Player>())
+			if (event.Entity.has<Player>())
 			{
 				std::stringstream ss;
 				ss << "final-score ";

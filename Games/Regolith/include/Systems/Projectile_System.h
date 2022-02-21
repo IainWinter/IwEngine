@@ -27,47 +27,41 @@ struct ProjectileSystem
 private:
 	template<
 		typename... _cs>
-	iw::Entity MakeProjectile(
+		entity MakeProjectile(
 		const ShotInfo& shot)
 	{
-		iw::Entity entity = Space->CreateEntity<
-			iw::Transform, 
-			iw::Rigidbody,
-			Projectile,
-			_cs...>();
+		entity entity = entities().create<iw::Transform, iw::Rigidbody, Projectile, _cs...>();
 
-		Projectile* projectile = entity.Set<Projectile>(shot);
+		entity.set<Projectile>(shot);
 
-		iw::Transform* transform = entity.Set<iw::Transform>();
-		iw::Rigidbody* rigidbody = entity.Set<iw::Rigidbody>();
+		iw::Transform& transform = entity.get<iw::Transform>();
+		iw::Rigidbody& rigidbody = entity.get<iw::Rigidbody>();
 
-		transform->Position = glm::vec3(shot.x, shot.y, 0);
+		transform.Position = glm::vec3(shot.x, shot.y, 0);
 
-		rigidbody->SetTransform(transform);
-		rigidbody->Velocity = glm::vec3(shot.dx, shot.dy, 0);
-		rigidbody->IsKinematic = false;
+		rigidbody.SetTransform(&transform);
+		rigidbody.Velocity = glm::vec3(shot.dx, shot.dy, 0);
+		rigidbody.IsKinematic = false;
 
-		Physics->AddRigidbody(rigidbody);
+		AddEntityToPhysics(entity, Physics);
 
 		return entity;
 	}
 
 	template<
 		typename... _cs>
-	iw::Entity MakeProjectile_raw(
+	entity MakeProjectile_raw(
 		const ShotInfo& shot)
 	{
-		iw::Entity entity = Space->CreateEntity<Projectile,_cs...>();
-		Projectile* projectile = entity.Set<Projectile>(shot);
-		return entity;
+		return entities().create<Projectile, _cs...>()
+					  .set<Projectile>(shot);
 	}
 
-	iw::Entity MakeBullet(const ShotInfo& shot, int depth);
-	iw::Entity MakeLaser (const ShotInfo& shot, int depth);
-	iw::Entity MakeWattz (const ShotInfo& shot, int depth);
-	iw::Entity MakeBoltz (const ShotInfo& shot, int depth);
+	entity MakeBullet(const ShotInfo& shot, int depth);
+	entity MakeLaser (const ShotInfo& shot, int depth);
+	entity MakeWattz (const ShotInfo& shot, int depth);
+	entity MakeBoltz (const ShotInfo& shot, int depth);
 
-	iw::Entity MakeBeam  (const ShotInfo& shot, int depth);
-
-	void MakeExplosion(int x, int y, int r);
+	//entity MakeBeam  (const ShotInfo& shot, int depth);
+	//void MakeExplosion(int x, int y, int r);
 };

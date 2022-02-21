@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ECS.h"
+
 struct Throwable
 {
 	/*iw::Entity ThrowTarget;

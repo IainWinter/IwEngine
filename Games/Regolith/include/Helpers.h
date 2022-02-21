@@ -21,12 +21,12 @@ std::string tos(const _t& numb)
 }
 
 inline std::tuple<float, float> randvel(
-	iw::Rigidbody* rigidbody,
+	iw::Rigidbody& rigidbody,
 	float amount,
 	bool setForMe = false) 
 {
-	float dx = rigidbody->Velocity.x;
-	float dy = rigidbody->Velocity.y;
+	float dx = rigidbody.Velocity.x;
+	float dy = rigidbody.Velocity.y;
 
 	float speed = sqrt(dx * dx + dy * dy);
 	float angle = atan2(dy, dx);
@@ -36,10 +36,115 @@ inline std::tuple<float, float> randvel(
 	dy = sin(angle) * speed;
 
 	if (setForMe) {
-		rigidbody->Velocity = glm::vec3(dx, dy, 0);
+		rigidbody.Velocity = glm::vec3(dx, dy, 0);
 	}
 
 	return std::tuple(dx, dy);
+}
+
+// more from engine just for new entities
+
+#include "iw/entity/Space.h"
+#include "iw/physics/Collision/Manifold.h"
+
+
+// Tries to find entities with CollisionObject / Rigidbody components.
+// Returns true if there were no entities.
+// if _t2 is specified, checks if that component exists on entity 2
+template<
+	typename _t1,
+	typename _t2 = void>
+bool GetEntitiesFromManifold(
+	const iw::Manifold& manifold,
+	entity& e1,
+	entity& e2)
+{
+	auto a = GetPhysicsEntity(manifold.ObjA);
+	auto b = GetPhysicsEntity(manifold.ObjB);
+
+	if (!a.first || !b.first) return true; // no physics components
+
+	bool a1 = a.second.has<_t1>();
+	bool b1 = b.second.has<_t1>();
+
+	if (!a1 && !b1) return true; // no t1
+
+	if (b1) { // b has t1
+		entity t = a;
+		a = b;
+		b = t;
+	}
+
+	if constexpr (std::is_same_v<_t2, void> == false)
+	{
+		if (!b.second.has<_t2>()) { // no t2
+			return true;
+		}
+	}
+
+	e1 = a;
+	e2 = b;
+
+	return false;
+}
+
+inline
+iw::CollisionObject* GetPhysicsComponent(
+	entity e)
+{
+	if (e.has<iw::Rigidbody>())
+	{
+		return &e.get<iw::Rigidbody>();
+	}
+
+	if (e.has<iw::CollisionObject>())
+	{
+		return &e.get<iw::CollisionObject>();
+	}
+
+	return nullptr;
+}
+
+inline
+std::pair<bool, entity> GetPhysicsEntity(
+	iw::CollisionObject* object)
+{
+	auto a = entities().find(object);
+	if (!a.first) a = entities().find((iw::Rigidbody*)object);
+	return a;
+}
+
+inline
+void AddEntityToPhysics(
+	entity e,
+	iw::ref<iw::DynamicsSpace>& physics)
+{
+	if (e.has<iw::Rigidbody>())
+	{
+		iw::Rigidbody* ptr = &e.get<iw::Rigidbody>();
+		physics->AddRigidbody(&e.get<iw::Rigidbody>());
+
+		e.on_add([=](entity entity, const component& component) {
+			physics->RemoveCollisionObject(ptr);
+			physics->AddRigidbody(&entity.get<iw::Rigidbody>());
+		});
+	}
+
+	else
+	if (e.has<iw::CollisionObject>())
+	{
+		iw::CollisionObject* ptr = &e.get<iw::CollisionObject>();
+		physics->AddCollisionObject(ptr);
+
+		e.on_add([=](entity entity, const component& component) {
+			physics->RemoveCollisionObject(ptr);
+			physics->AddCollisionObject(&entity.get<iw::CollisionObject>());
+		});
+	}
+
+	e.on_destroy([=](entity entity) {
+		physics->RemoveCollisionObject(GetPhysicsComponent(entity));
+	});
 }
 
 // lightning should prob but in seperate file
@@ -51,20 +156,16 @@ struct CellInfo
 	iw::TileInfo tile;
 };
 
-inline std::vector<CellInfo> FindClosestCellPositionsMatchingTile(
+inline
+std::vector<CellInfo> FindClosestCellPositionsMatchingTile(
 	iw::SandLayer* sand,
-	iw::Tile* tile,
+	iw::Tile& tile,
 	int x, int y)
 {
-	if (!tile)
-	{
-		return {};
-	}
-
 	std::vector<CellInfo> cells;
 	int searchSize = 5;
 
-	while (cells.size() == 0 && searchSize < tile->m_sprite.m_width) // should max with height
+	while (cells.size() == 0 && searchSize < tile.m_sprite.m_width) // should max with height
 	{
 		for (int sy = -searchSize; sy < searchSize; sy++) // could be more efficient
 		for (int sx = -searchSize; sx < searchSize; sx++)
@@ -78,7 +179,7 @@ inline std::vector<CellInfo> FindClosestCellPositionsMatchingTile(
 			{
 				iw::TileInfo& info = chunk->GetCell<iw::TileInfo>(px, py, iw::SandField::TILE_INFO);
 
-				if (info.tile == tile)
+				if (info.tile == &tile)
 				{
 					CellInfo ci;
 					ci.x = px;
@@ -125,7 +226,8 @@ struct LightningConfig
 	bool StopOnHit = false;
 };
 
-inline LightningHitInfo DrawLightning(
+inline
+LightningHitInfo DrawLightning(
 	iw::SandLayer* sand,
 	LightningConfig config)
 {
@@ -205,15 +307,16 @@ inline LightningHitInfo DrawLightning(
 	return hit;
 }
 
-inline LightningHitInfo DrawLightning(
+inline
+LightningHitInfo DrawLightning(
 	iw::SandLayer* sand,
 	iw::ref<iw::Space>& space,
 	LightningConfig config)
 {
 	// pick points that are on surface
 
-	iw::CollisionObject* originObj = iw::GetPhysicsComponent(space, config.A.Handle);
-	iw::CollisionObject* targetObj = iw::GetPhysicsComponent(space, config.B.Handle);
+	iw::CollisionObject* originObj = GetPhysicsComponent(config.A);
+	iw::CollisionObject* targetObj = GetPhysicsComponent(config.B);
 
 	if (!originObj || !targetObj)
 	{
@@ -233,23 +336,26 @@ inline LightningHitInfo DrawLightning(
 	            ? targetObj->Collider->as_dim<iw::d2>()->FindFurthestPoint(&targetObj->Transform, -delta)
 	            : targetObj->Transform.WorldPosition();
 
-	iw::Tile& originTile = config.A.get<iw::Tile>();
-	iw::Tile& targetTile = config.B.get<iw::Tile>();
-
 	std::vector<CellInfo> origins;
 	std::vector<CellInfo> targets;
 
-	if (originTile) {
-		origins = FindClosestCellPositionsMatchingTile(sand, originTile, a.x, a.y);
-	} else {
+	if (config.A.has<iw::Tile>())
+	{
+		origins = FindClosestCellPositionsMatchingTile(sand, config.A.get<iw::Tile>(), a.x, a.y);
+	}
+	else
+	{
 		CellInfo& info = origins.emplace_back();
 		info.x = (int)floor(a.x);
 		info.y = (int)floor(a.y);
 	}
 
-	if (targetTile) {
-		targets = FindClosestCellPositionsMatchingTile(sand, targetTile, b.x, b.y);
-	} else {
+	if (config.B.has<iw::Tile>())
+	{
+		targets = FindClosestCellPositionsMatchingTile(sand, config.B.get<iw::Tile>(), b.x, b.y);
+	}
+	else
+	{
 		CellInfo& info = targets.emplace_back();
 		info.x = (int)floor(b.x);
 		info.y = (int)floor(b.y);
@@ -272,7 +378,6 @@ inline LightningHitInfo DrawLightning(
 	return DrawLightning(sand, config);
 }
 
-
 enum cell_state : char
 {
 	EMPTY,
@@ -280,18 +385,19 @@ enum cell_state : char
 	VISITED = 10
 };
 
-inline std::vector<cell_state> GetTileStates(
-	iw::Tile* tile)
+inline
+std::vector<cell_state> GetTileStates(
+	iw::Tile& tile)
 {
-	size_t width  = tile->m_sprite.m_width;
-	size_t height = tile->m_sprite.m_height;
+	size_t width  = tile.m_sprite.m_width;
+	size_t height = tile.m_sprite.m_height;
 
 	std::vector<cell_state> states;
 	states.resize(width * height);
 
-	for (const int& index : tile->m_currentCells)
+	for (const int& index : tile.m_currentCells)
 	{
-		states.at(index) = tile->State(index) == iw::Tile::FILLED 
+		states.at(index) = tile.State(index) == iw::Tile::FILLED 
 			? cell_state::FILLED 
 			: cell_state::EMPTY;
 	}
@@ -299,7 +405,8 @@ inline std::vector<cell_state> GetTileStates(
 	return states;
 }
 
-inline void flood_fill(
+inline
+void flood_fill(
 	int seed,
 	int size_x, int size_y,
 	std::vector<cell_state>& cells,
@@ -352,54 +459,116 @@ inline void flood_fill(
 #include "iw/physics/Collision/MeshCollider.h"
 #include "iw/graphics/Texture.h"
 
-template<
-	typename _collider = iw::MeshCollider2,
-	typename... _others>
-inline entity MakeTile(
-	const std::string& sprite,
-	iw::ref<iw::DynamicsSpace>& physics,
-	bool isSimulated = false)
-{
-	return MakeTile<_collider, _others...>(*Asset->Load<iw::Texture>(sprite), isSimulated);
-}
-
-template<
-	typename _collider = iw::MeshCollider2,
-	typename... _others>
+inline
 entity MakeTile(
 	const iw::Texture& sprite,
-	iw::ref<iw::DynamicsSpace>& physics, // oh this is why its in class
-	bool isSimulated = false,
 	std::vector<component> others = {})
 {
-	archetype arch = make_archetype<Transform, Tile, _collider, _others...>();
+	archetype arch = make_archetype<iw::Transform, iw::Tile, iw::Rigidbody>();
+	arch = add_to_archetype(arch, others);
 
-	if (isSimulated) others.push_back(make_component<iw::Rigidbody>());
-	else             others.push_back(make_component<iw::CollisionObject>());
-
-	for (const component& other : others)
-	{
-		add_to_archetype(arch, other);
-	}
-
-	entity entity = entities().create(arch).set<iw::Tile>(sprite);
+	::entity entity = entities().create(arch).set<iw::Tile>(sprite);
 	
-	iw::Transform&       transform = entity.get<iw::Transform>();
-	_collider&           collider  = entity.get<_collider>();
-	iw::CollisionObject* object    = isSimulated ? &entity.get<iw::Rigidbody>() : &entity.get<iw::CollisionObject>();
+	iw::Transform& transform = entity.get<iw::Transform>();
+	iw::Rigidbody& body      = entity.get<iw::Rigidbody>();
 
-	if constexpr (std::is_same_v<_collider, iw::Circle>)
+	if (    others.size() > 0
+		&& others.back().m_hash == make_component<iw::Circle>().m_hash)
 	{
-		collider->Radius = glm::compMax(sprite.Dimensions()) / 2.f;
+		iw::Circle& circle = entity.get<iw::Circle>();
+		circle.Radius = glm::compMax(sprite.Dimensions()) / 2.f;
 	}
 
-	object->Collider = collider;
-	object->SetTransform(transform);
+	entities().get(entity.m_handle, others.back(), (void**)&body.Collider);
+	body.SetTransform(&transform);
 
-	if (isSimulated) physics->AddRigidbody((iw::Rigidbody*)object);
-	else             physics->AddCollisionObject(object);
-
-	tile->m_sandLayerIndex = m_sandLayerIndex;
+	//tile.m_sandLayerIndex = 0;
 
 	return entity;
+}
+
+inline
+entity SplitTile(
+	entity& entity,
+	std::vector<int> indices,
+	const std::vector<component>& others)
+{
+	int minX =  INT_MAX;
+	int minY =  INT_MAX;
+	int maxX = -INT_MAX;
+	int maxY = -INT_MAX;
+
+	iw::Tile& tile = entity.get<iw::Tile>();
+
+	for (int& i : indices)
+	{
+		auto [x, y] = iw::xy(i, (int)tile.m_sprite.m_width);
+
+		if (x < minX) minX = x;
+		if (y < minY) minY = y;
+		if (x > maxX) maxX = x;
+		if (y > maxY) maxY = y;
+	}
+
+	iw::ref<iw::Texture> texture = REF<iw::Texture>(maxX - minX + 1, maxY - minY + 1);
+	texture->CreateColors();
+
+	for (int& i : indices)
+	{
+		auto [x, y] = iw::xy(i, (int)tile.m_sprite.m_width);
+		
+		int it = (x - minX) + (y - minY) * texture->m_width;
+
+		LOG_INFO << "Copying from " << i << " to " << it;
+
+		if (it > texture->ColorCount())
+		{
+			continue;
+		}
+
+		texture->Colors32()[it] = tile.m_sprite.Colors32()[i];
+	}
+
+	::entity split = MakeTile(*texture, others);
+
+	// give split the pos and rot of the orignal peice
+
+	iw::Transform& transform = entity.get<iw::Transform>();
+	iw::Rigidbody& rigidbody = entity.get<iw::Rigidbody>();
+
+	glm::vec2 midOld = entity.get<iw::Tile>().m_sprite.Dimensions() / 2.f;
+	glm::vec2 midNew = split .get<iw::Tile>().m_sprite.Dimensions() / 2.f;
+	glm::vec2 offset = iw::TransformPoint<iw::d2>(
+			glm::vec2(
+				maxX - floor(midOld.x) - floor(midNew.x),
+				maxY - floor(midOld.y) - floor(midNew.y)
+			),
+			&transform.ScaleAndRotation()
+		);
+
+	iw::Transform& splitTran = split.get<iw::Transform>();
+	iw::Rigidbody& splitBody = split.get<iw::Rigidbody>();
+
+	glm::vec3 o3 = glm::vec3(offset, 0.f);
+
+	splitTran = transform;
+	splitTran.Position += o3;
+	splitBody.SetTransform(&splitTran);
+
+	// adjust masses to ratio of pixels
+
+	float mass = rigidbody.Mass();
+	float massRatio = indices.size() / (float)tile.m_currentCells.size();
+
+	float splitMass = mass * massRatio;
+
+	rigidbody.SetMass(mass - splitMass);
+	splitBody.SetMass(splitMass);
+
+	// not required for position
+
+	splitBody.Velocity = o3; // could add vel of projectile
+	splitBody.AngularVelocity.z = iw::randf();
+
+	return split;
 }

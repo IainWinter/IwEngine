@@ -129,17 +129,8 @@ public:
 
 	IW_PLUGIN_SAND_API bool On(MouseWheelEvent& e);
 
-	IW_PLUGIN_SAND_API void PasteTiles();
+	IW_PLUGIN_SAND_API void PasteTiles(const std::vector<std::tuple<iw::Transform*, iw::Tile*, iw::MeshCollider2*>>& tiles);
 	IW_PLUGIN_SAND_API void RemoveTiles();
-
-	IW_PLUGIN_SAND_API void RepairPixel  (Tile* tile, unsigned index);
-	IW_PLUGIN_SAND_API void EjectPixel   (Tile* tile, unsigned index);
-
-	IW_PLUGIN_SAND_API
-	Entity SplitTile(
-		Entity& entity,
-		std::vector<int> indices,
-		const Archetype* others = nullptr);
 
 	Mesh& GetSandMesh() {
 		return m_render->GetSandMesh();

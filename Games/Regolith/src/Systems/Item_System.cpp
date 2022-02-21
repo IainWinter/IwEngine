@@ -2,10 +2,8 @@
 
 void ItemSystem::FixedUpdate()
 {
-    iw::Transform* playerTrans = m_player.Find<iw::Transform>();
+    iw::Transform& playerTrans = m_player.get<iw::Transform>();
     
-    if (!playerTrans) return;
-
     /*Space->Query<iw::Rigidbody, Item>().Each([&](
         iw::EntityHandle entity,
         iw::Rigidbody* rigidbody,
@@ -110,7 +108,7 @@ void ItemSystem::FixedUpdate()
             }
         }
         
-        glm::vec3 playerPos = playerTrans->Position;
+        glm::vec3 playerPos = playerTrans.Position;
         glm::vec3 healthPos = rigidbody.Transform.Position;
         
         float distance = glm::distance(healthPos, playerPos);
@@ -225,10 +223,9 @@ entity ItemSystem::MakeItem(
     const SpawnItem_Config& config,
     iw::ref<iw::Texture>& sprite)
 {
-    //iw::Entity entity = sand->MakeTile<iw::Circle, Item, KeepInWorld>(*sprite, true);
-    
-    entity entity = entities().create<Item, iw::Transform, iw::Rigidbody, iw::Circle, iw::Tile>();
-    
+    entity entity = MakeTile(*sprite, component_list<Item, KeepInWorld, iw::Circle>());
+    AddEntityToPhysics(entity, Physics);
+
     Item&          item      = entity.get<Item>();
     iw::Transform& transform = entity.get<iw::Transform>();
 	iw::Rigidbody& rigidbody = entity.get<iw::Rigidbody>();

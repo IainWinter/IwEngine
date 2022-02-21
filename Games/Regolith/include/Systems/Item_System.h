@@ -13,10 +13,9 @@
 struct ItemSystem : iw::SystemBase
 {
 	iw::SandLayer* sand;
-	iw::Entity m_player;
+	entity m_player;
 
 	std::unordered_map<std::string, std::pair<int, float>> m_sequential; // name, count, last totaltime
-
 
 	ItemSystem(
 		iw::SandLayer* sand

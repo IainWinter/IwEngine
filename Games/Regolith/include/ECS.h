@@ -46,12 +46,12 @@ constexpr inline _t min(_t a, _t b)
 
 struct component
 {
-	hash_t m_hash; // low 16 bits are the repeat count
-	int m_size;
+	hash_t m_hash = 0; // low 16 bits are the repeat count
+	int m_size    = 0;
 	std::function<void(void*)>        m_destructor;
+	std::function<void(void*)>        m_default;
 	std::function<void(void*, void*)> m_move;
 };
-
 
 template<typename _t>       // this should be the only place that templates are necessary for storage
 component make_component()  //	everyother template function is short-hand back to this
@@ -62,16 +62,17 @@ component make_component()  //	everyother template function is short-hand back t
 	{
 		c.m_hash = just_hash(typeid(_t).hash_code());
 		c.m_size = sizeof(_t);
-		c.m_destructor = [](void* ptr) { ((_t*)ptr)->~_t(); };
-		c.m_move = [](void* ptr, void* data) { new (ptr) _t(std::move(*(_t*)data)); };
+		c.m_destructor = [](void* ptr)             { ((_t*)ptr)->~_t(); };
+		c.m_default    = [](void* ptr)             { new (ptr) _t(); };
+		c.m_move       = [](void* ptr, void* data) { new (ptr) _t(std::move(*(_t*)data)); };
 	}
 	return c;
 }
 
 struct archetype
 {
-	hash_t m_hash;
-	int m_size;
+	hash_t m_hash = 0;
+	int m_size    = 0;
 	std::vector<component> m_components;
 	std::vector<int> m_offsets;
 };
@@ -89,18 +90,22 @@ archetype make_archetype(
 		a.m_components.end(),
 		[](const auto& a, const auto& b)
 		{ 
-			return a.m_hash < b.m_hash;
+			return a.m_hash > b.m_hash;
 		}
 	);
 
-	std::unordered_map<hash_t, rep_t> counts;
-	for (component& c : a.m_components)
+	for (auto c = a.m_components.begin(); c != a.m_components.end(); ++c)
 	{
-		set_repeats(c.m_hash, counts[just_hash(c.m_hash)]++);
-
 		a.m_offsets.push_back(a.m_size);
-		a.m_size += c.m_size;
-		a.m_hash ^= (c.m_hash + 0x9e3779b9) + (a.m_hash << 6);
+		a.m_size += c->m_size;
+	}
+
+	// count backwards for repeats
+	std::unordered_map<hash_t, rep_t> counts;
+	for (auto c = a.m_components.rbegin(); c != a.m_components.rend(); ++c)
+	{
+		set_repeats(c->m_hash, counts[just_hash(c->m_hash)]++);
+		a.m_hash ^= (c->m_hash + 0x9e3779b9) + (a.m_hash << 6);
 	}
 
 	return a;
@@ -141,9 +146,14 @@ int offset_of_component(
 	{
 		const ::component& c = archetype.m_components.at(i);
 
-		if (just_hash(c.m_hash) == component.m_hash)
+		if (just_hash(c.m_hash) == just_hash(component.m_hash))
 		{
-			return archetype.m_offsets.at(i) + c.m_size * get_repeats(c.m_hash);
+			return archetype.m_offsets.at(i) + c.m_size * get_repeats(component.m_hash);
+		}
+
+		else
+		{
+			i += get_repeats(c.m_hash);
 		}
 	}
 
@@ -162,6 +172,12 @@ archetype add_to_archetype(
 	const archetype& archetype)
 {
 	return add_to_archetype(archetype, { make_component<_t>()... });
+}
+
+template<typename... _t>
+std::vector<component> component_list()
+{
+	return { make_component<_t>()... };
 }
 
 // querying archetypes for components
@@ -201,7 +217,7 @@ bool is_query_match(
 	const archetype& archetype,
 	const std::array<uint64_t, _s>& hashes)
 {
-	bool matches = true;
+	bool contains_all = true;
 	for (hash_t hash : hashes)
 	{
 		bool contains = false;
@@ -216,12 +232,12 @@ bool is_query_match(
 
 		if (!contains)
 		{
-			matches = false;
+			contains_all = false;
 			break;
 		}
 	}
 
-	return matches;
+	return contains_all;
 }
 
 // mapping raw pointers to references to query results
@@ -246,19 +262,14 @@ std::tuple<_t&...> tie_from_offsets(
 
 struct entity_handle
 {
-	int    m_index;
-	int    m_version;
-	hash_t m_archetype;
+	int    m_index     = 0;
+	int    m_version   = 0;
+	hash_t m_archetype = 0;
 
-	operator hash_t() // for ==
-	{
-		hash();
-	}
-
-	hash_t hash() const
-	{
-		return m_index ^ 17 * m_version ^ 31 * m_archetype;
-	}
+	operator bool() { return hash() == 0; }
+	bool operator==(const entity_handle& other) const { return hash() == other.hash(); }
+	bool operator!=(const entity_handle& other) const { return !operator==(other); }
+	hash_t hash() const { return (hash_t)m_index * m_version * m_archetype; }
 };
 
 struct entity_storage
@@ -292,33 +303,31 @@ struct entity_storage
 	entity_handle create_entity(
 		int version = 0)
 	{
-		entity_handle handle;
-		handle.m_archetype = m_archetype.m_hash;
-
 		entity_data* data;
 
 		if (m_recycle != -1)
 		{
-			handle.m_index = m_recycle;
-			data = &m_entities.at(handle.m_index);
-
+			data = &m_entities.at(m_recycle);
 			m_recycle = (int)data->m_addr;
 		}
 
 		else
 		{
-			handle.m_index = m_entities.size();
 			data = &m_entities.emplace_back();
+			data->m_index = m_entities.size() - 1;
 			data->m_version = version;
 		}
 
-		handle.m_version = data->m_version;
 		data->m_addr = m_pool.alloc(m_archetype.m_size);
-		data->m_index = handle.m_index;
+
+		for (const component& component : m_archetype.m_components)
+		{
+			component.m_default(offset_raw_pointer(data->m_addr, component));
+		}
 
 		m_count += 1;
 
-		return handle;
+		return wrap(*data);
 	}
 
 	void destroy_entity(
@@ -351,6 +360,23 @@ struct entity_storage
 		entity_handle handle)
 	{
 		return handle.m_version == m_entities.at(handle.m_index).m_version;
+	}
+
+	std::pair<bool, entity_handle> find_from_component(
+		const component& component,
+		void* component_addr)
+	{
+		void* addr = (char*)component_addr - offset_of_component(m_archetype, component);
+
+		for (const entity_data& data : m_entities)
+		{
+			if (data.m_addr == addr)
+			{
+				return std::make_pair(true, wrap(data));
+			}
+		}
+
+		return std::make_pair(false, entity_handle {});
 	}
 
 	entity_handle move_entity(
@@ -411,26 +437,38 @@ struct entity_storage
 
 	itr begin() { return m_entities.begin(); }
 	itr end()   { return m_entities.end();   }
+
+private:
+	entity_handle wrap(const entity_data& data)
+	{
+		return { data.m_index, data.m_version, m_archetype.m_hash };
+	}
 };
 
-struct entity_manager; // needed for destroy, add
+struct entity_manager; // needed for destroy / add. Breaks flow a little bit :(
+				   // could just reutrn entity_handles, but that was annoying in previous versions
 
 struct entity
 {
 	entity_handle   m_handle;
-	entity_storage* m_store;
-	entity_manager* m_manager;
+	entity_storage* m_store   = nullptr;
+	entity_manager* m_manager = nullptr;
+
+	operator bool() { return m_handle.operator bool(); }
+	bool operator==(const entity& other) const { return m_handle.operator==(other.m_handle); }
+	bool operator!=(const entity& other) const { return m_handle.operator!=(other.m_handle); }
+	hash_t hash() const { return m_handle.hash(); }
 
 	void destroy(); // defined under entity_manager
 
-	bool is_alive()
+	bool is_alive() const
 	{
-		return m_store->is_entity_alive(m_handle);
-	}
+		if (m_handle.hash() == 0)
+		{
+			return false;
+		}
 
-	operator hash_t()
-	{
-		return m_handle.hash();
+		return m_store->is_entity_alive(m_handle);
 	}
 
 	template<typename _t, typename... _args>
@@ -448,21 +486,25 @@ struct entity
 	}
 
 	template<typename _t>
-	_t& get()
+	_t& get() const
 	{
-		_t* ptr;
-		m_store->set_component(m_handle, make_component<_t>(), (void**)&ptr);
-		return *ptr;
+		return *(_t*)m_store->get_raw_pointer(m_handle, make_component<_t>());
 	}
 
 	template<typename _t>
-	bool has()
+	bool has() const
 	{
 		return is_in_archetype(m_store->m_archetype, make_component<_t>());
 	}
+
+	// listen
+
+	entity& on_set    (std::function<void(entity, const component&)> func); // defined under entity_manager
+	entity& on_add    (std::function<void(entity, const component&)> func); // defined under entity_manager
+	entity& on_destroy(std::function<void(entity)>                   func); // defined under entity_manager
 };
 
-// should make q need an entity in there
+// should make a version that returns void* and then this just encapsulates that and casts
 
 template<bool _with_entity, typename... _q>
 struct entity_query
@@ -476,12 +518,16 @@ struct entity_query
 
 		int m_current; // current item
 
+		entity_manager* m_manager; // ref to manager, ONLY for returning entity instead of entity_handle
+
 		itr(
 			std::vector<entity_storage*> matches,
+			entity_manager* manager,
 			bool end
 		)
 			: m_current (end ? matches.size() : 0)
 			, m_stores  (matches)
+			, m_manager (manager)
 		{
 			for (entity_storage* storage : matches)
 			{
@@ -520,7 +566,7 @@ struct entity_query
 				entity_handle handle = { cur.m_index, cur.m_version, store->m_archetype.m_hash };
 
 				return std::tuple_cat(
-					std::make_tuple<entity>({ handle, store }),
+					std::make_tuple<entity>({ handle, store, m_manager }),
 					just_components()
 				);
 			}
@@ -572,6 +618,15 @@ struct entity_query
 	};
 
 	std::vector<entity_storage*> m_matches;
+	entity_manager* m_manager;
+
+	// only move
+	entity_query(entity_manager* manager) : m_manager(manager) {}
+	entity_query(const entity_query& copy) = delete;
+	entity_query& operator=(const entity_query& copy) = delete;
+
+	entity_query(entity_query&& move) = default;
+	entity_query& operator=(entity_query&& move) = default;
 
 	int count() const
 	{
@@ -580,14 +635,16 @@ struct entity_query
 		return c;
 	}
 
-	itr begin() { return itr(m_matches, false); }
-	itr end()   { return itr(m_matches, true);  }
+	itr begin() { return itr(m_matches, m_manager, false); }
+	itr end()   { return itr(m_matches, m_manager, true);  }
 
-	entity_query<true>&        only_entity() { return *(entity_query<true       >*)this; }
-	entity_query<true, _q...>& with_entity() { return *(entity_query<true, _q...>*)this; }
+	// these cant be referemces cus the thing pops off the stack, might need std::move bc I think these are copying the vector
+
+	entity_query<true>        only_entity() { return std::move(*(entity_query<true       >*)this); }
+	entity_query<true, _q...> with_entity() { return std::move(*(entity_query<true, _q...>*)this); }
 
 	template<typename... _o>
-	entity_query<_with_entity, _o...>& only() { return *(entity_query<_with_entity, _o...>*)this; }
+	entity_query<_with_entity, _o...> only() { return std::move(*(entity_query<_with_entity, _o...>*)this); }
 
 	void for_each(const std::function<void(entity, _q&...)>& func)
 	{
@@ -609,7 +666,6 @@ struct entity_query
 struct entity_manager
 {
 	std::unordered_map<hash_t, entity_storage> m_storage;
-	std::unordered_map<hash_t, entity_handle*> m_listen_for_move;
 
 	entity create(const archetype& archetype)
 	{
@@ -619,9 +675,10 @@ struct entity_manager
 
 	void destroy(entity_handle handle)
 	{
+		call_listen(handle);
 		entity_storage& store = m_storage.at(handle.m_archetype);
 		store.destroy_entity(handle);
-		clean_storage(store);
+		//clean_storage(store); // breaks itr
 	}
 
 	bool is_alive(entity_handle handle)
@@ -629,9 +686,38 @@ struct entity_manager
 		m_storage.at(handle.m_archetype).is_entity_alive(handle);
 	}
 
+	std::pair<bool, entity> find(const component& component, void* ptr_to_component)
+	{
+		// could use query if it didnt require types
+
+		//for (auto [entity, ptr] : query({ component }).with_entity())
+		//{
+		//	if (ptr == ptr_to_component)
+		//	{
+		//		return entity;
+		//	}
+		//}
+
+		for (auto& [_, store] : m_storage) // this is exactly what query does...
+		{
+			if (is_in_archetype(store.m_archetype, component))
+			{
+				auto [found, handle] = store.find_from_component(component, ptr_to_component);
+
+				if (found)
+				{
+					return std::make_pair(true, wrap(handle));
+				}
+			}
+		}
+
+		return std::make_pair(false, entity{});
+	}
+
 	void set(entity_handle handle, const component& component, void* data)
 	{
 		m_storage.at(handle.m_archetype).set_component(handle, component, data);
+		call_listen(handle, component);
 	}
 
 	entity add(entity_handle handle, const component& component, void* data = nullptr)
@@ -646,15 +732,8 @@ struct entity_manager
 			new_store.set_component(new_handle, component, data);
 		}
 
-		auto itr = m_listen_for_move.find(handle.hash());
-		if (itr != m_listen_for_move.end())
-		{
-			*itr->second = new_handle;
-			m_listen_for_move.emplace(new_handle.hash(), itr->second);
-			m_listen_for_move.erase(itr);
-		}
-
-		clean_storage(old_store);
+		call_listen(handle, component);
+		//clean_storage(old_store); // breaks itr
 
 		return wrap(new_handle);
 	}
@@ -669,6 +748,8 @@ struct entity_manager
 		return is_in_archetype(m_storage.at(handle.m_archetype).m_archetype, component);
 	}
 
+	// helpers
+
 	entity_storage& get_storage(const archetype& archetype)
 	{
 		auto itr = m_storage.find(archetype.m_hash);
@@ -678,22 +759,6 @@ struct entity_manager
 		}
 
 		return itr->second;
-	}
-
-	// helpers
-
-	void listen_for_move(entity_handle* entity_location)
-	{
-		m_listen_for_move.emplace(entity_location->hash(), entity_location);
-	}
-
-	void stop_listen_for_move(entity_handle handle)
-	{
-		auto itr = m_listen_for_move.find(handle.hash());
-		if (itr != m_listen_for_move.end())
-		{
-			m_listen_for_move.erase(itr);
-		}
 	}
 
 	entity wrap(entity_handle handle)
@@ -707,6 +772,12 @@ struct entity_manager
 	entity create()
 	{
 		return create(make_archetype<_t...>());
+	}
+
+	template<typename _t>
+	std::pair<bool, entity> find(_t* ptr_to_component)
+	{
+		return find(make_component<_t>(), ptr_to_component);
 	}
 
 	template<typename _t, typename... _args>
@@ -741,10 +812,10 @@ struct entity_manager
 	template<typename... _q>
 	entity_query<false, _q...> query()
 	{
-		entity_query<false, _q...> result;
+		entity_query<false, _q...> result(this);
 
 		std::array<hash_t, sizeof...(_q)> query = make_query<_q...>();
-		for (auto& [hash, storage] : m_storage)
+		for (auto& [_, storage] : m_storage)
 		{
 			if (is_query_match(storage.m_archetype, query))
 			{
@@ -763,15 +834,47 @@ private:
 			m_storage.erase(storage.m_archetype.m_hash);
 		}
 	}
+
+	// helpers to listen for events
+public:
+	void on_set    (entity_handle handle, std::function<void(entity, const component&)> func) { m_listeners_comp[handle.hash()] = func; }
+	void on_add    (entity_handle handle, std::function<void(entity, const component&)> func) { m_listeners_comp[handle.hash()] = func; }
+	void on_destroy(entity_handle handle, std::function<void(entity)>                   func) { m_listeners     [handle.hash()] = func; }
+
+private:
+	std::unordered_map<hash_t, std::function<void(entity, const component&)>> m_listeners_comp;
+	std::unordered_map<hash_t, std::function<void(entity)>>                   m_listeners;
+
+	void call_listen(entity_handle handle, const component& component)
+	{
+		auto itr = m_listeners_comp.find(handle.hash());
+		if (itr != m_listeners_comp.end())
+		{
+			itr->second(wrap(handle), component);
+		}
+	}
+
+	void call_listen(entity_handle handle)
+	{
+		auto itr = m_listeners.find(handle.hash());
+		if (itr != m_listeners.end())
+		{
+			itr->second(wrap(handle));
+		}
+	}
 };
 
-
-entity_manager& entities();
-
-inline void entity::destroy()
+inline
+void entity::destroy()
 {
 	m_manager->destroy(m_handle);
 	m_handle = {};
 	m_store = nullptr;
 	m_manager = nullptr;
 }
+
+inline entity& entity::on_set    (std::function<void(entity, const component&)> func) { m_manager->on_set    (m_handle, func); return *this; }
+inline entity& entity::on_add    (std::function<void(entity, const component&)> func) { m_manager->on_add    (m_handle, func); return *this; }
+inline entity& entity::on_destroy(std::function<void(entity)>                   func) { m_manager->on_destroy(m_handle, func); return *this; }
+
+entity_manager& entities();

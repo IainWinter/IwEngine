@@ -3,10 +3,10 @@
 void Recording_System::RecordFrame(
 	const iw::ref<iw::Texture>& frame)
 {
-	if (m_player.Alive())
+	if (m_player.is_alive())
 	{
-		m_last_x = m_player.Find<iw::Transform>()->Position.x;
-		m_last_y = m_player.Find<iw::Transform>()->Position.y;
+		m_last_x = m_player.get<iw::Transform>().Position.x;
+		m_last_y = m_player.get<iw::Transform>().Position.y;
 	}
 
 	int x_cur = floor(      m_last_x);

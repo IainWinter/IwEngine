@@ -29,6 +29,46 @@
 
 #include "iw/util/io/File.h"
 
+struct temp_PhysicsSystem
+	: iw::SystemBase
+{
+	float accumulator;
+	
+	temp_PhysicsSystem()
+		: iw::SystemBase("temp Physics")
+		, accumulator(0.0f)
+	{}
+
+	void Update()
+	{
+		accumulator += iw::DeltaTime();
+
+		float a = glm::clamp(accumulator / iw::RawFixedTime(), 0.f, 1.f);
+
+		for (auto [transform, rigidbody] : entities().query<iw::Transform, iw::Rigidbody>())
+		{
+			if (rigidbody.IsKinematic)
+			{
+				transform.Position = iw :: lerp(rigidbody.LastTrans().Position, rigidbody.Transform.Position, a);
+				transform.Scale    = iw :: lerp(rigidbody.LastTrans().Scale,    rigidbody.Transform.Scale,    a);
+				transform.Rotation = glm::slerp(rigidbody.LastTrans().Rotation, rigidbody.Transform.Rotation, a);
+			}
+		}
+
+		for (auto [transform, object] : entities().query<iw::Transform, iw::CollisionObject>())
+		{
+			transform.Position = iw :: lerp(transform.Position, object.Transform.Position, a);
+			transform.Scale    = iw :: lerp(transform.Scale,    object.Transform.Scale,    a);
+			transform.Rotation = glm::slerp(transform.Rotation, object.Transform.Rotation, a);
+		}
+	}
+
+	void FixedUpdate()
+	{
+		accumulator = 0;
+	}
+};
+
 struct StaticLayer : iw::Layer
 {
 	StaticLayer()
@@ -37,7 +77,8 @@ struct StaticLayer : iw::Layer
 
 	int Initialize() override
 	{
-		PushSystem<iw::PhysicsSystem>();
+		//PushSystem<iw::PhysicsSystem>();
+		PushSystem<temp_PhysicsSystem>();
 		PushSystem<iw::EntityCleanupSystem>();
 
 		if (int e = LoadAssets(Asset.get(), Renderer->Now.get()))
@@ -52,6 +93,39 @@ struct StaticLayer : iw::Layer
 	}
 };
 
+struct TileRender_Layer : iw::Layer
+{
+	iw::SandLayer* m_sand;
+
+	TileRender_Layer(
+		iw::SandLayer* sand
+	)
+		: iw::Layer ("Tile Render")
+		, m_sand    (sand)
+	{}
+
+	void PreUpdate() override
+	{
+		std::vector<std::tuple<iw::Transform*, iw::Tile*, iw::MeshCollider2*>> tiles;
+
+		for (auto [entity, transform, tile] : entities().query<iw::Transform, iw::Tile>().with_entity())
+		{
+			iw::MeshCollider2* collider = entity.has<iw::MeshCollider2>()
+				? &entity.get<iw::MeshCollider2>()
+				: nullptr;
+
+			tiles.emplace_back(&transform, &tile, collider);
+		}
+
+		m_sand->PasteTiles(tiles);
+	}
+
+	void PostUpdate() override
+	{
+		m_sand->RemoveTiles();
+	}
+};
+
 class App
 	: public iw::Application
 {
@@ -61,6 +135,7 @@ private:
 	Menu_Title_Layer*  m_menus;
 	Game_Layer*        m_game;
 	Menu_GameUI_Layer* m_gameUI;
+	TileRender_Layer*  m_tileRender;
 
 	StateName m_state;
 
@@ -73,11 +148,12 @@ private:
 public:
 	App()
 		: iw::Application ()
-		, m_fonts  (nullptr)
-		, m_menus  (nullptr)
-		, m_game   (nullptr)
-		, m_gameUI (nullptr)
-		, m_state  (StateName::IN_MENU)
+		, m_fonts         (nullptr)
+		, m_menus         (nullptr)
+		, m_game          (nullptr)
+		, m_gameUI        (nullptr)
+		, m_tileRender    (nullptr)
+		, m_state         (StateName::IN_MENU)
 	{}
 
 	void ChangeToPauseMenu()
@@ -107,7 +183,7 @@ public:
 		ChangeState(StateName::IN_GAME);
 	}
 
-	void ChangeToTitleScreen()
+	void ChangeToTitleScreen() // never from game
 	{
 		m_menus = PushLayer<Menu_Title_Layer>();
 		PushLayer<Menu_Bg_Render_Layer>();
@@ -126,10 +202,13 @@ public:
 		m_game   = new Game_Layer       (sand, sand_ui_laser);
 		m_gameUI = new Menu_GameUI_Layer(sand, sand_ui_laser, m_menus->bg);
 
+		m_tileRender = new TileRender_Layer(sand);
+
 		PushLayer(sand);
 		PushLayer(sand_ui_laser);
 		PushLayer(m_game);
 		PushLayer(m_gameUI);
+		PushLayer(m_tileRender);
 
 		Input->SetContext("game");
 		m_state = StateName::IN_GAME;
@@ -144,6 +223,7 @@ public:
 		DestroyLayer(m_game);
 		DestroyLayer(m_game->sand);
 		DestroyLayer(m_game->sand_ui_laserCharge);
+		DestroyLayer(m_tileRender);
 
 		Input->SetContext("menu");
 		m_state = StateName::IN_MENU;

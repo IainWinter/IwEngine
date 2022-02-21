@@ -10,7 +10,7 @@
 struct TileSplitSystem : iw::SystemBase
 {
 	iw::SandLayer* sand;
-	iw::blocking_queue<size_t> splits;
+	iw::blocking_queue<entity_handle> splits;
 	//std::thread splitThread;
 	//bool splitThreadRunning;
 
@@ -29,13 +29,13 @@ struct TileSplitSystem : iw::SystemBase
 	bool On(iw::ActionEvent& e) override;
 
 	void SplitTile(
-		iw::Entity entity);
+		entity entity);
 
 	void SplitTileOff(
-		iw::Entity entity,
+		entity entity,
 		std::vector<int> toSplit);
 
 	void ExplodeTile(
-		iw::Entity entity,
+		entity entity,
 		std::vector<int> toSplit);
 };

@@ -13,7 +13,7 @@ struct Recording_System : iw::SystemBase
 	iw::TextureAtlas m_recording;
 
 	iw::SandLayer* m_sand;
-	iw::Entity m_player;
+	entity m_player;
 
 	float m_last_x;
 	float m_last_y;

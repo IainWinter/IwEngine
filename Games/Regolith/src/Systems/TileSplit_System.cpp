@@ -26,9 +26,9 @@ void TileSplitSystem::Update()
 {
 	Task->defer([=]()
 	{
-		for (int index : splits)
+		for (entity_handle handle : splits)
 		{
-			SplitTile(Space->GetEntity(index));
+			SplitTile(entities().wrap(handle));
 		}
 		splits.clear();
 	});
@@ -71,11 +71,11 @@ bool TileSplitSystem::On(iw::ActionEvent& e)
 		case REMOVE_CELL_FROM_TILE:
 		{
 			RemoveCellFromTile_Event& event = e.as<RemoveCellFromTile_Event>();
-			int index = event.Entity.Handle.Index;
+			entity_handle handle = event.Entity.m_handle;
 
-			if (std::find(splits.begin(), splits.end(), index) == splits.end())
+			if (std::find(splits.begin(), splits.end(), handle) == splits.end())
 			{
-				splits.push(index);
+				splits.push(handle);
 			}
 
 			break;
@@ -86,24 +86,24 @@ bool TileSplitSystem::On(iw::ActionEvent& e)
 }
 
 void TileSplitSystem::SplitTile(
-	iw::Entity entity)
+	entity entity)
 {
-	if (!entity.Alive()) return;
+	if (!entity.is_alive()) return;
 
-	iw::Tile* tile = entity.Find<iw::Tile>();
+	iw::Tile& tile = entity.get<iw::Tile>();
 
 	// Remove cells that are no longer connected to core
 
-	size_t width  = tile->m_sprite.m_width;
-	size_t height = tile->m_sprite.m_height;
+	size_t width  = tile.m_sprite.m_width;
+	size_t height = tile.m_sprite.m_height;
 	std::vector<cell_state> states = GetTileStates(tile);
 
 	std::unordered_set<int> indices;
-	if (entity.Has<CorePixels>())
+	if (entity.has<CorePixels>())
 	{
-		CorePixels* core = entity.Find<CorePixels>();
+		CorePixels& core = entity.get<CorePixels>();
 			
-		for (const int& seed : core->ActiveIndices)
+		for (const int& seed : core.ActiveIndices)
 		{
 			flood_fill(seed, width, height, states, 
 				[&indices](int index) {
@@ -115,12 +115,12 @@ void TileSplitSystem::SplitTile(
 		// remove cells active in tile not in indices
 
 		std::vector<int> toSplit;
-		for (int i = 0; i < tile->m_currentCells.size(); i++)
+		for (int i = 0; i < tile.m_currentCells.size(); i++)
 		{
-			int index = tile->m_currentCells.at(i);
+			int index = tile.m_currentCells.at(i);
 
-			if (   indices            .find(index) == indices            .end()
-				&& core->ActiveIndices.find(index) == core->ActiveIndices.end())
+			if (   indices           .find(index) == indices           .end()
+				&& core.ActiveIndices.find(index) == core.ActiveIndices.end())
 			{
 				toSplit.push_back(index);
 			}
@@ -132,7 +132,7 @@ void TileSplitSystem::SplitTile(
 
 			for (int i : toSplit)
 			{
-				tile->RemovePixel(i);
+				tile.RemovePixel(i);
 			}
 		}
 	}
@@ -141,7 +141,7 @@ void TileSplitSystem::SplitTile(
 	{
 		std::vector<std::vector<int>> islands;
 
-		for (const int& seed : tile->m_currentCells)
+		for (const int& seed : tile.m_currentCells)
 		{
 			std::vector<int> island;
 
@@ -176,7 +176,7 @@ void TileSplitSystem::SplitTile(
 			// true if should just split,
 			// false if should delete old entity and spawn new ones
 
-			bool justCut = maxSize * 2 > tile->m_currentCells.size();
+			bool justCut = maxSize * 2 > tile.m_currentCells.size();
 
 			// remove spawn of main island
 			if (justCut)
@@ -190,7 +190,7 @@ void TileSplitSystem::SplitTile(
 			else
 			{
 				LOG_INFO << " ----- Split tile ---";
-				entity.Queue(iw::func_Destroy);
+				entity.destroy();
 			}
 
 			for (const std::vector<int>& island : islands)
@@ -202,7 +202,7 @@ void TileSplitSystem::SplitTile(
 				{
 					for (int i : island)
 					{
-						tile->RemovePixel(i);
+						tile.RemovePixel(i);
 					}
 				}
 			}
@@ -219,24 +219,25 @@ void TileSplitSystem::SplitTile(
 		// would only fracture small peices off
 	}
 
-	if (tile->m_currentCells.size() < 10)
+	if (tile.m_currentCells.size() < 10)
 	{
-		ExplodeTile(entity, tile->m_currentCells);
-		entity.Queue(iw::func_Destroy);
+		ExplodeTile(entity, tile.m_currentCells);
+		entity.destroy();
 	}
 }
 
 void TileSplitSystem::SplitTileOff(
-	iw::Entity entity, 
+	entity entity, 
 	std::vector<int> toSplit)
 {
-	iw::Tile* tile = entity.Find<iw::Tile>();
-	glm::vec2 midOld = entity.Find<iw::Tile>()->m_sprite.Dimensions() / 2.f;
+	iw::Tile& tile = entity.get<iw::Tile>();
+	glm::vec2 midOld = tile.m_sprite.Dimensions() / 2.f;
 	if (toSplit.size() > 10)
 	{
-		iw::Entity split = sand->SplitTile(entity, toSplit, &Space->CreateArchetype<Asteroid, Throwable>());
-		Asteroid* ast = split.Find<Asteroid>();
-		ast->Lifetime = toSplit.size() / 5.f;
+		::entity split = ::SplitTile(entity, toSplit, component_list<Asteroid, Throwable, iw::MeshCollider2>());
+		AddEntityToPhysics(split, Physics);
+
+		split.get<Asteroid>().Lifetime = toSplit.size() / 5.f;
 	}
 
 	else
@@ -246,17 +247,17 @@ void TileSplitSystem::SplitTileOff(
 }
 
 void TileSplitSystem::ExplodeTile(
-	iw::Entity entity,
+	entity entity,
 	std::vector<int> toSplit)
 {
-	iw::Rigidbody* body = entity.Find<iw::Rigidbody>();
-	iw::Tile* tile = entity.Find<iw::Tile>();
-	glm::vec2 mid = entity.Find<iw::Tile>()->m_sprite.Dimensions() / 2.f;
+	iw::Rigidbody& body = entity.get<iw::Rigidbody>();
+	iw::Tile& tile = entity.get<iw::Tile>();
+	glm::vec2 mid = entity.get<iw::Tile>().m_sprite.Dimensions() / 2.f;
 	
 	// make sparks the color of the cells
 	for (int index : toSplit)
 	{
-		auto [x, y] = iw::xy<int>(index, tile->m_sprite.m_width);
+		auto [x, y] = iw::xy<int>(index, tile.m_sprite.m_width);
 
 		glm::vec2 offset = glm::vec2(
 			x - floor(mid.x),
@@ -264,16 +265,16 @@ void TileSplitSystem::ExplodeTile(
 
 		glm::vec2 pos = iw::TransformPoint<iw::d2>(
 			offset,
-			entity.Find<iw::Transform>());
+			&entity.get<iw::Transform>());
 
 		iw::Cell spark;
 		spark.Type  = iw::CellType::ROCK;
 		spark.Props = iw::CellProp::MOVE_FORCE;
 				
-		spark.Color = iw::Color::From32(tile->m_sprite.Colors32()[index]);
+		spark.Color = iw::Color::From32(tile.m_sprite.Colors32()[index]);
 				
-		spark.dx = offset.x + iw::randfs() * 20 + (body ? body->Velocity.x * 2.f : 0.f);
-		spark.dy = offset.y + iw::randfs() * 20 + (body ? body->Velocity.y * 2.f : 0.f);
+		spark.dx = offset.x + iw::randfs() * 20 + body.Velocity.x * 2.f;
+		spark.dy = offset.y + iw::randfs() * 20 + body.Velocity.y * 2.f;
 		spark.life = .2 + iw::randf() * .2;
 
 		float px = pos.x;

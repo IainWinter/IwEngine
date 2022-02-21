@@ -2,7 +2,8 @@
 
 int PlayerSystem::Initialize()
 {
-	m_player = MakeTile<iw::Circle, Player, CorePixels, KeepInWorld>(*A_texture_player, Physics, true);
+	m_player = MakeTile(*A_texture_player, component_list<Player, CorePixels, KeepInWorld, iw::Circle>());
+	AddEntityToPhysics(m_player, Physics);
 
 	iw::Rigidbody& rigidbody = m_player.get<iw::Rigidbody>();
 	iw::Transform& transform = m_player.get<iw::Transform>();
@@ -102,7 +103,7 @@ void PlayerSystem::Update()
 	{
 		if (player.Moves[i])
 		{
-			player.Moves[i]->Update(APP_VARS_LIST, player, player.Use[i]);
+			player.Moves[i]->Update(APP_VARS_LIST, m_player, player.Use[i]);
 		}
 	}
 
@@ -163,16 +164,16 @@ bool PlayerSystem::On(iw::ActionEvent& e)
 		{
 			HealPlayer_Event& event = e.as<HealPlayer_Event>();
 
-			CorePixels* core = m_player.Find<CorePixels>();
-			iw::Tile*   tile = m_player.Find<iw::Tile>();
+			CorePixels& core = m_player.get<CorePixels>();
+			iw::Tile&   tile = m_player.get<iw::Tile>();
 
 			std::vector<int> candidates;
 
 			if (event.IsCore)
 			{
-				for (const int& index : core->Indices)
+				for (const int& index : core.Indices)
 				{
-					if (core->ActiveIndices.find(index) == core->ActiveIndices.end())
+					if (core.ActiveIndices.find(index) == core.ActiveIndices.end())
 					{
 						candidates.push_back(index);
 					}
@@ -181,9 +182,9 @@ bool PlayerSystem::On(iw::ActionEvent& e)
 
 			else 
 			{
-				for (const int& index : tile->m_removedCells)
+				for (const int& index : tile.m_removedCells)
 				{
-					if (core->Indices.find(index) == core->Indices.end())
+					if (core.Indices.find(index) == core.Indices.end())
 					{
 						candidates.push_back(index);
 					}
@@ -197,10 +198,10 @@ bool PlayerSystem::On(iw::ActionEvent& e)
 
 				for (const int& index : candidates)
 				{
-					int x = index % tile->m_sprite.m_width;
-					int y = index / tile->m_sprite.m_width;
-					int dx = core->CenterX - x;
-					int dy = core->CenterY - y;
+					int x = index % tile.m_sprite.m_width;
+					int y = index / tile.m_sprite.m_width;
+					int dx = core.CenterX - x;
+					int dy = core.CenterY - y;
 					float dist = sqrt(dx*dx+dy*dy);
 						
 					if (dist < minDist)
@@ -210,11 +211,11 @@ bool PlayerSystem::On(iw::ActionEvent& e)
 					}
 				}
 
-				tile->ReinstatePixel(healIndex);
+				tile.ReinstatePixel(healIndex);
 
 				if (event.IsCore)
 				{
-					core->ActiveIndices.insert(healIndex);
+					core.ActiveIndices.insert(healIndex);
 				}
 			}
 
@@ -224,11 +225,11 @@ bool PlayerSystem::On(iw::ActionEvent& e)
 		{
 			ProjHitTile_Event& event = e.as<ProjHitTile_Event>();
 			if (   timer.Can("damage sound")
-				&& event.Config.Hit.Has<Player>()
-				&& event.Config.Projectile.Alive())
+				&& event.Config.Hit.has<Player>()
+				&& event.Config.Projectile.is_alive())
 			{
 				// this should be the max speed of any bullet
-				float impulse = glm::length(event.Config.Projectile.Find<iw::Rigidbody>()->Velocity);
+				float impulse = glm::length(event.Config.Projectile.get<iw::Rigidbody>().Velocity);
 				impulse = iw::clamp(impulse / 700, 0.f, 1.f);
 
 				Bus->push<PlaySound_Event>("event:/impacts/player_hit", impulse);
@@ -238,30 +239,30 @@ bool PlayerSystem::On(iw::ActionEvent& e)
 		case CHANGE_PLAYER_WEAPON:
 		{
 			ChangePlayerWeapon_Event& event = e.as<ChangePlayerWeapon_Event>();
-			Player* player = m_player.Find<Player>();
+			Player& player = m_player.get<Player>();
 			
-			delete player->CurrentWeapon;
+			delete player.CurrentWeapon;
 			
 			switch (event.Type)
 			{
-				case WeaponType::DEFAULT_CANNON:      player->CurrentWeapon = MakeDefault_Cannon();     break;
-				case WeaponType::MINIGUN_CANNON:      player->CurrentWeapon = MakeMinigun_Cannon();     break;
-				case WeaponType::SPECIAL_BEAM_CANNON: player->CurrentWeapon = MakeSpecialBeam_Cannon(); break;
-				case WeaponType::WATTZ_CANNON:        player->CurrentWeapon = MakeWattz_Cannon();       break;
-				case WeaponType::BOLTZ_CANNON:        player->CurrentWeapon = MakeBoltz_Cannon();       break;
+				case WeaponType::DEFAULT_CANNON:      player.CurrentWeapon = MakeDefault_Cannon();     break;
+				case WeaponType::MINIGUN_CANNON:      player.CurrentWeapon = MakeMinigun_Cannon();     break;
+				case WeaponType::SPECIAL_BEAM_CANNON: player.CurrentWeapon = MakeSpecialBeam_Cannon(); break;
+				case WeaponType::WATTZ_CANNON:        player.CurrentWeapon = MakeWattz_Cannon();       break;
+				case WeaponType::BOLTZ_CANNON:        player.CurrentWeapon = MakeBoltz_Cannon();       break;
 			}
 
-			event.CurrentWeapon = player->CurrentWeapon; // pass onto Game_UI_Layer
+			event.CurrentWeapon = player.CurrentWeapon; // pass onto Game_UI_Layer
 
 			break;
 		}
 		case CORE_EXPLODED:
 		{
 			CoreExploded_Event& event = e.as<CoreExploded_Event>();
-			if (event.Entity.Has<Player>())
+			if (event.Entity.has<Player>())
 			{
 				Task->delay(.2f, [=]() { Bus->push<iw::ActionEvent>(iw::ActionEventType::SINGLE, DESTROYED_PLAYER); });
-				event.Entity.Queue(iw::func_Destroy);
+				event.Entity.destroy(); // prob defer this
 			}
 
 			break;

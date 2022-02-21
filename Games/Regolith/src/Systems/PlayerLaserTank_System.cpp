@@ -113,11 +113,9 @@ void PlayerLaserTankSystem::OnPush()
 
 void PlayerLaserTankSystem::Update()
 {
-	iw::Tile* tile = m_player.Find<iw::Tile>();
+	iw::Tile& tile = m_player.get<iw::Tile>();
 
-	if (!tile) return;
-
-	iw::Texture& playerSprite = tile->m_sprite;
+	iw::Texture& playerSprite = tile.m_sprite;
 	iw::ref<iw::Texture> uiPlayerTex = A_mesh_ui_playerHealth.Material->GetTexture("texture");
 
 	unsigned* colorsFrom = playerSprite.Colors32();
@@ -145,15 +143,9 @@ void PlayerLaserTankSystem::Update()
 	uiPlayerTex->Update(Renderer->Device);
 
 	iw::SandChunk* chunk = m_tankSand->m_world->GetChunk(0, 0);
-	iw::Rigidbody* body = m_player.Find<iw::Rigidbody>();
+	iw::Rigidbody& body = m_player.get<iw::Rigidbody>();
 
-	if (!body)
-	{
-		LOG_TRACE << "No player for tank ui";
-		return;
-	}
-
-	m_fluidVelocity = iw::lerp(m_fluidVelocity, body->Velocity, iw::DeltaTime() * 5);
+	m_fluidVelocity = iw::lerp(m_fluidVelocity, body.Velocity, iw::DeltaTime() * 5);
 
 	std::pair<int, int> xy;
 
@@ -181,14 +173,9 @@ void PlayerLaserTankSystem::Update()
 		}
 	}
 
-	Player* player = m_player.Find<Player>(); // this is bad to need should be event based
-	if (!player)
-	{
-		LOG_TRACE << "No player for tank ui";
-		return;
-	}
-
-	if (player->i_fire2)
+	Player& player = m_player.get<Player>(); // this is bad to need should be event based
+	
+	if (player.i_fire2)
 	{
 		for (int x = 18; x < 22; x++)
 		{
@@ -212,7 +199,7 @@ void PlayerLaserTankSystem::Update()
 
 	m_fluidTime = iw::max(m_fluidTime - iw::DeltaTime(), 0.f);
 
-	player->can_fire_laser = m_fluidTime > 0.f;
+	player.can_fire_laser = m_fluidTime > 0.f;
 }
 
 bool PlayerLaserTankSystem::On(iw::ActionEvent& e)
@@ -235,7 +222,7 @@ bool PlayerLaserTankSystem::On(iw::ActionEvent& e)
 		case PROJ_HIT_TILE:
 		{
 			ProjHitTile_Event& event = e.as<ProjHitTile_Event>();
-			if (event.Config.Hit.Has<Player>())
+			if (event.Config.Hit.has<Player>())
 			{
 				m_fluidVelocity.y -= 200;
 				m_fluidVelocity.x -= 75 * iw::randfs();

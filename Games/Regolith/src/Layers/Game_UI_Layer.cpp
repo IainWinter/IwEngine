@@ -158,8 +158,8 @@ bool Menu_GameUI_Layer::On(iw::ActionEvent& e)
 		case PROJ_HIT_TILE:
 		{
 			ProjHitTile_Event& event = e.as<ProjHitTile_Event>();
-			if (   event.Config.Hit.Has<Player>()
-				&& event.Config.Projectile.Alive()) // for crash ?
+			if (   event.Config.Hit.has<Player>()
+				&& event.Config.Projectile.is_alive()) // for crash ?
 			{
 				int index  = event.Config.Info.index;
 				int width  = event.Config.Info.tile->m_sprite.m_width;
@@ -167,7 +167,7 @@ bool Menu_GameUI_Layer::On(iw::ActionEvent& e)
 
 				auto [x, y] = iw::xy(index, width);
 				iw::Color color = iw::Color::From32(event.Config.Info.tile->m_sprite.Colors32()[index]);
-				glm::vec3 vel = event.Config.Projectile.Find<iw::Rigidbody>()->Velocity;
+				glm::vec3 vel = event.Config.Projectile.get<iw::Rigidbody>().Velocity;
 
 				color.a = 1.f;
 				vel.y *= -1;

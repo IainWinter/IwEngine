@@ -4,10 +4,11 @@
 #include "plugins/iw/Sand/Engine/SandLayer.h"
 #include "Events.h"
 #include "Assets.h"
+#include "ECS.h"
 
 struct PlayerLaserTankSystem : iw::SystemBase
 {
-	iw::Entity m_player;
+	entity m_player;
 	iw::SandLayer* m_tankSand;
 
 	glm::vec3 m_fluidVelocity;

@@ -343,107 +343,118 @@ bool EnemySystem::On(iw::ActionEvent& e)
 
 void EnemySystem::SpawnEnemy(SpawnEnemy_Config& config)
 {
-	iw::Archetype archetype = Space->CreateArchetype<Flocker, CorePixels, Enemy>();
-	iw::Entity entity;
+	archetype archetype = make_archetype<Flocker, CorePixels, Enemy>();
+	entity entity;
+
+	std::vector<component> components = {
+		make_component<Flocker>(),
+		make_component<CorePixels>(),
+		make_component<Enemy>() };
+
+	iw::ref<iw::Texture> tex;
 
 	switch (config.EnemyType)
 	{
 		case FIGHTER: 
 		{
-			Space->AddComponent<Fighter_Enemy>(archetype);
-			entity = sand->MakeTile<iw::Circle>(*A_texture_enemy_fighter, true, &archetype);
+			components.push_back(make_component<Fighter_Enemy>());
+			components.push_back(make_component<iw::Circle>());
+			tex = A_texture_enemy_fighter;
 			break;
 		}
 		case BOMB: 
 		{
-			Space->AddComponent<Bomb_Enemy>(archetype);
-			Space->AddComponent<Throwable>(archetype);
-
-			entity = sand->MakeTile<iw::Circle>(*A_texture_enemy_bomb, true, &archetype);
+			components.push_back(make_component<Bomb_Enemy>());
+			components.push_back(make_component<Throwable>());
+			components.push_back(make_component<iw::Circle>());
+			tex = A_texture_enemy_bomb;
 			break;
 		}
 		case STATION:
 		{
-			Space->AddComponent<Station_Enemy>(archetype);
-			entity = sand->MakeTile<iw::MeshCollider2>(*A_texture_enemy_station, true, &archetype);
+			components.push_back(make_component<Station_Enemy>());
+			components.push_back(make_component<iw::MeshCollider2>());
+			tex = A_texture_enemy_station;
 			break;
 		}
 		case BASE:
 		{
-			Space->AddComponent<Base_Enemy>(archetype);
-			entity = sand->MakeTile<iw::MeshCollider2>(*A_texture_enemy_base, true, &archetype);
-
+			components.push_back(make_component<Base_Enemy>());
+			components.push_back(make_component<iw::MeshCollider2>());
+			tex = A_texture_enemy_base;
 			break;
 		}
 	}
+
+	entity = MakeTile(*tex, components);
+	AddEntityToPhysics(entity, Physics);
+
+	iw::Rigidbody& rigidbody = entity.get<iw::Rigidbody>();
+	iw::Transform& transform = entity.get<iw::Transform>();
+	Flocker&       flocker   = entity.get<Flocker>();
+	Enemy&         enemy     = entity.get<Enemy>();
+	CorePixels&    core      = entity.get<CorePixels>();
+
+	core.TimeWithoutCore = 0.f;
 	
-	iw::Rigidbody* rigidbody = entity.Find<iw::Rigidbody>();
-	iw::Transform* transform = entity.Find<iw::Transform>();
-	Flocker*       flocker   = entity.Set<Flocker>();
-	Enemy*         enemy     = entity.Set<Enemy>();
-	CorePixels*    core      = entity.Set<CorePixels>();
+	flocker.Target.x = config.TargetLocationX;
+	flocker.Target.y = config.TargetLocationY;
 
-	core->TimeWithoutCore = 0.f;
-	
-	flocker->Target.x = config.TargetLocationX;
-	flocker->Target.y = config.TargetLocationY;
+	transform.Position.x = config.SpawnLocationX;
+	transform.Position.y = config.SpawnLocationY;
 
-	transform->Position.x = config.SpawnLocationX;
-	transform->Position.y = config.SpawnLocationY;
+	rigidbody.SetTransform(&transform);
+	rigidbody.SetMass(10);
+	rigidbody.IsTrigger = true;
 
-	rigidbody->SetTransform(transform);
-	rigidbody->SetMass(10);
-	rigidbody->IsTrigger = true;
-
-	enemy->Target = config.TargetEntity;
+	enemy.Target = config.TargetEntity;
 
 	switch (config.EnemyType)
 	{
 		case FIGHTER: 
 		{
-			Fighter_Enemy* fighter = entity.Set<Fighter_Enemy>();
-			fighter->Weapon = MakeLaser_Cannon_Enemy();
-
-			enemy->ExplosionPower = 200;
+			Fighter_Enemy& fighter = entity.get<Fighter_Enemy>();
+			fighter.Weapon = MakeLaser_Cannon_Enemy();
+			enemy.ExplosionPower = 200;
 
 			break;
 		}
 		case BOMB: 
 		{
-			Bomb_Enemy* bomb = entity.Set<Bomb_Enemy>();
-			bomb->TimeToExplode = .5f;
-			bomb->RadiusToExplode = 30;
+			Bomb_Enemy& bomb = entity.get<Bomb_Enemy>();
+			bomb.TimeToExplode = .5f;
+			bomb.RadiusToExplode = 30;
 
-			flocker->SpeedNearTarget = 1;
-			rigidbody->AngularVelocity.z = .9f;
+			flocker.SpeedNearTarget = 1;
+			rigidbody.AngularVelocity.z = .9f;
 
-			enemy->ExplosionPower = 200;
+			enemy.ExplosionPower = 200;
 
 			break;
 		}
 		case STATION:
 		{
-			Station_Enemy* station = entity.Set<Station_Enemy>();
-			station->timer.SetTime("spawn", 2, .5);
+			Station_Enemy& station = entity.get<Station_Enemy>();
+			station.timer.SetTime("spawn", 2, .5);
 
-			rigidbody->SetMass(100);
+			rigidbody.SetMass(100);
 			//rigidbody->AngularVelocity.z = .1f;
 			//rigidbody->Transform.Rotation.z = .4;
-			flocker->Speed = 25;
+			flocker.Speed = 25;
 
-			enemy->ExplosionPower = 300;
+			enemy.ExplosionPower = 300;
 
 			break;
 		}
 		case BASE:
 		{
-			Base_Enemy* station = entity.Set<Base_Enemy>();
+			Base_Enemy& station = entity.get<Base_Enemy>();
 
-			rigidbody->SetMass(1000);
-			rigidbody->AngularVelocity.z = .1f;
-			flocker->Speed = 25;
+			rigidbody.SetMass(1000);
+			rigidbody.AngularVelocity.z = .1f;
+			flocker.Speed = 25;
 
-			enemy->ExplosionPower = 1200;
+			enemy.ExplosionPower = 1200;
 
 			break;
 		}

@@ -210,7 +210,10 @@ bool CorePixelsSystem::On(iw::ActionEvent& e)
 				break;
 			}
 
-			RemoveCorePixel(event.Entity, event.Index);
+			if (event.Entity.has<CorePixels>())
+			{
+				RemoveCorePixel(event.Entity, event.Index);
+			}
 
 			break;
 		}

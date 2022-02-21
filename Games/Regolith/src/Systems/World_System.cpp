@@ -246,6 +246,11 @@ bool WorldSystem::On(iw::ActionEvent& e)
 		{
 			auto& [x, y, info, hit, projectile] = e.as<ProjHitTile_Event>().Config;
 
+			if (!hit.is_alive() || !projectile.is_alive())
+			{
+				break;
+			}
+
 			if (   hit.has<Player>()
 				|| hit.has<Enemy>())
 			{
@@ -285,7 +290,7 @@ bool WorldSystem::On(iw::ActionEvent& e)
 		case REMOVE_CELL_FROM_TILE:
 		{
 			RemoveCellFromTile_Event& event = e.as<RemoveCellFromTile_Event>();
-			sand->EjectPixel(&event.Entity.get<iw::Tile>(), event.Index);
+			event.Entity.get<iw::Tile>().RemovePixel(event.Index);
 
 			break;
 		}
@@ -420,7 +425,9 @@ entity WorldSystem::MakeAsteroid(
 		case 2: asteroid_tex = A_texture_asteroid_mid_3; break;
 	}
 
-	entity entity = MakeTile<iw::MeshCollider2, Asteroid, Throwable>(*asteroid_tex, Physics, true);
+	entity entity = MakeTile(*asteroid_tex, component_list<Asteroid, Throwable, iw::MeshCollider2>());
+	AddEntityToPhysics(entity, Physics);
+
 	iw::Transform& t = entity.get<iw::Transform>();
 	iw::Rigidbody& r = entity.get<iw::Rigidbody>();
 

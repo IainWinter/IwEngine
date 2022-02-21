@@ -208,8 +208,6 @@ void SandLayer::PreUpdate() {
 	{
 		DrawWithMouse(m_render->m_fx, -m_render->m_fy, width, height);
 	}
-
-	PasteTiles();
 }
 
 void SandLayer::PostUpdate()
@@ -217,8 +215,6 @@ void SandLayer::PostUpdate()
 	if (m_drawMouseGrid) {
 		DrawMouseGrid();
 	}
-
-	RemoveTiles();
 }
 
 void SandLayer::DrawMouseGrid() {
@@ -291,15 +287,12 @@ bool SandLayer::On(MouseWheelEvent& e) {
 	return false;
 }
 
-void SandLayer::PasteTiles() 
+void SandLayer::PasteTiles(const std::vector<std::tuple<iw::Transform*, iw::Tile*, iw::MeshCollider2*>>& tiles)
 {
 	m_tilesThisFrame.clear();
 	m_cellsThisFrame.clear();
 
-	Space->Query<Transform, Tile>().Each([&](
-		EntityHandle entity,
-		Transform* transform,
-		Tile* tile)
+	for (const auto& [transform, tile, meshCollider] : tiles)
 	{
 		if (tile->m_sandLayerIndex != m_sandLayerIndex) return;
 
@@ -309,16 +302,16 @@ void SandLayer::PasteTiles()
 		{
 			tile->NeedsScan = false;
 
-			MeshCollider2* collider = Space->FindComponent<MeshCollider2>(entity);
-			if (collider) {
+			if (meshCollider)
+			{
 				tile->UpdateColliderPolygon();
-				collider->Points = tile->m_collider;
-				collider->Triangles = tile->m_colliderIndex;
+				meshCollider->Points = tile->m_collider;
+				meshCollider->Triangles = tile->m_colliderIndex;
 			}
 		}
 
 		tile->LastTransform = *transform;
-	});
+	}
 
 	m_cellsThisFrame = RasterTilesIntoSandWorld(m_tilesThisFrame,
 		[](Tile* tile)
@@ -394,108 +387,6 @@ void SandLayer::RemoveTiles()
 	{
 		tile->m_justRemovedCells.clear();
 	}
-}
-
-void SandLayer::EjectPixel(
-	Tile* tile,
-	unsigned index)
-{
-	// cant scale transform if removing pixels like this
-	// to fix, maybe could remove pixels in a scaled square around index?
-
-	// place ejected pixel into world
-
-	tile->RemovePixel(index);
-}
-
-Entity SandLayer::SplitTile(
-	Entity& entity, 
-	std::vector<int> indices,
-	const Archetype* others)
-{
-	if (indices.size() <= 2)
-	{
-		return Entity();
-	}
-
-	int minX =  INT_MAX;
-	int minY =  INT_MAX;
-	int maxX = -INT_MAX;
-	int maxY = -INT_MAX;
-
-	iw::Tile* tile = entity.Find<iw::Tile>();
-
-	for (int& i : indices)
-	{
-		auto [x, y] = iw::xy(i, (int)tile->m_sprite.m_width);
-
-		if (x < minX) minX = x;
-		if (y < minY) minY = y;
-		if (x > maxX) maxX = x;
-		if (y > maxY) maxY = y;
-	}
-
-	ref<Texture> texture = REF<Texture>(maxX - minX + 1, maxY - minY + 1);
-	texture->CreateColors();
-
-	for (int& i : indices)
-	{
-		auto [x, y] = iw::xy(i, (int)tile->m_sprite.m_width);
-		
-		int it = (x - minX) + (y - minY) * texture->m_width;
-
-		LOG_INFO << "Copying from " << i << " to " << it;
-
-		if (it > texture->ColorCount())
-		{
-			continue;
-		}
-
-		texture->Colors32()[it] = tile->m_sprite.Colors32()[i];
-	}
-
-	Entity split = MakeTile(*texture, true, others);
-
-	// give split the pos and rot of the orignal peice
-
-	iw::Transform* transform = entity.Find<iw::Transform>();
-	iw::Rigidbody* rigidbody = entity.Find<iw::Rigidbody>();
-
-	glm::vec2 midOld = entity.Find<iw::Tile>()->m_sprite.Dimensions() / 2.f;
-	glm::vec2 midNew = split .Find<iw::Tile>()->m_sprite.Dimensions() / 2.f;
-	glm::vec2 offset = iw::TransformPoint<iw::d2>(
-			glm::vec2(
-				maxX - floor(midOld.x) - floor(midNew.x),
-				maxY - floor(midOld.y) - floor(midNew.y)
-			),
-			&transform->ScaleAndRotation()
-		);
-
-	iw::Transform* splitTran = split.Find<iw::Transform>();
-	iw::Rigidbody* splitBody = split.Find<iw::Rigidbody>();
-
-	glm::vec3 o3 = glm::vec3(offset, 0.f);
-
-	*splitTran = *transform;
-	splitTran->Position += o3;
-	splitBody->SetTransform(splitTran);
-
-	// adjust masses to ratio of pixels
-
-	float mass = rigidbody->Mass();
-	float massRatio = indices.size() / (float)tile->m_currentCells.size();
-
-	float splitMass = mass * massRatio;
-
-	rigidbody->SetMass(mass - splitMass);
-	splitBody->SetMass(splitMass);
-
-	// not required for position
-
-	splitBody->Velocity = o3; // could add vel of projectile
-	splitBody->AngularVelocity.z = iw::randf();
-
-	return split;
 }
 
 IW_PLUGIN_SAND_END
