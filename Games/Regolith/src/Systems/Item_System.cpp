@@ -4,89 +4,6 @@ void ItemSystem::FixedUpdate()
 {
     iw::Transform& playerTrans = m_player.get<iw::Transform>();
     
-    /*Space->Query<iw::Rigidbody, Item>().Each([&](
-        iw::EntityHandle entity,
-        iw::Rigidbody* rigidbody,
-        Item* item) 
-    {
-            if (item->ActivateTimer > 0.f) {
-                item->ActivateTimer -= iw::FixedTime();
-                return;
-            }
-
-            if (item->DieWithTime)
-            {
-                item->LifeTimer -= iw::FixedTime();
-                if (item->LifeTimer <= 0)
-                {
-                    Space->QueueEntity(entity, iw::func_Destroy);
-                }
-             
-                else if (item->LifeTimer < 1)
-                {
-                    rigidbody->Transform.Scale = iw::lerp(rigidbody->Transform.Scale, glm::vec3(0.f), 1 - item->LifeTimer);
-                }
-            }
-
-            glm::vec3 playerPos = playerTrans->Position;
-            glm::vec3 healthPos = rigidbody->Transform.Position;
-
-            float distance = glm::distance(healthPos, playerPos);
-
-            if (item->PickingUp)
-            {
-                glm::vec3 vel = glm::normalize(playerPos - healthPos) * (300.f + 100 * item->PickupTimer);
-                rigidbody->Velocity = iw::lerp(rigidbody->Velocity, vel, iw::FixedTime() * (10 + item->PickupTimer));
-                item->PickupTimer += iw::FixedTime();
-
-                if (distance < 5)
-                {
-                    if (item->OnPickUp) {
-                        item->OnPickUp();
-
-                        auto& [count, lasttime] = m_sequential[item->PickupAudio];
-                        if (iw::TotalTime() - lasttime < .4f) count += 1;
-                        else                                  count  = 0;
-                        lasttime = iw::TotalTime();
-
-                        float sequential = iw::clamp(count / 10.f, 0.f, 1.f);
-
-                        PlaySound_Event event(item->PickupAudio);
-                        event.Parameters["Sequential"] = sequential;
-                        Bus->push<PlaySound_Event>(event);
-                    }
-
-                    else
-                    {
-                        LOG_WARNING << "Picked up item with no action!";
-                    }
-
-                    Space->QueueEntity(entity, iw::func_Destroy);
-                }
-
-                else if (distance < 12)
-                {
-                    rigidbody->Transform.Scale = iw::lerp(rigidbody->Transform.Scale, glm::vec3(1/3.f), 1 - distance / 12);
-                }
-            }
-
-            else if (!item->PickingUp && distance < item->PickUpRadius)
-            {
-                item->PickingUp = true;
-            }
-
-            else if (item->MoveTimer > item->MoveTime)
-            {
-                rigidbody->Velocity = glm::vec3(0.f);
-            }
-
-            else {
-                rigidbody->Velocity        = iw::lerp(rigidbody->Velocity,        glm::vec3(0.f), item->MoveTimer / item->MoveTime);
-                rigidbody->AngularVelocity = iw::lerp(rigidbody->AngularVelocity, glm::vec3(0.f), item->MoveTimer / item->MoveTime);
-                item->MoveTimer += iw::FixedTime();
-            }
-        });*/
-
     for (auto [entity, rigidbody, item] : entities().query<iw::Rigidbody, Item>().with_entity())
     {
         if (item.ActivateTimer > 0.f) {
@@ -99,7 +16,7 @@ void ItemSystem::FixedUpdate()
             item.LifeTimer -= iw::FixedTime();
             if (item.LifeTimer <= 0)
             {
-                entity.destroy();
+                defer().destroy(entity);
             }
          
             else if (item.LifeTimer < 1)
@@ -140,8 +57,8 @@ void ItemSystem::FixedUpdate()
                 {
                     LOG_WARNING << "Picked up item with no action!";
                 }
-        
-                entity.destroy();
+
+                defer().destroy(entity);
             }
         
             else if (distance < 12)

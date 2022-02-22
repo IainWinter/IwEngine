@@ -62,7 +62,6 @@ struct REFLECT SpawnExplosion_Event : iw::SingleEvent
 
 struct REFLECT SpawnEnemy_Config
 {
-	//iw::Entity TargetEntity;
 	entity TargetEntity;
 	float SpawnLocationX  = 0.f;
 	float SpawnLocationY  = 0.f;
@@ -79,8 +78,8 @@ struct REFLECT SpawnEnemy_Event : iw::SingleEvent
 	SpawnEnemy_Event(
 		SpawnEnemy_Config config
 	)
-		: iw::SingleEvent(SPAWN_ENEMY)
-		, Config(config)
+		: iw::SingleEvent (SPAWN_ENEMY)
+		, Config          (config)
 	{}
 };
 

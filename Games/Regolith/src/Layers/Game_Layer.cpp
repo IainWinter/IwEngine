@@ -17,7 +17,6 @@ int Game_Layer::Initialize()
 	PushSystem<TileSplitSystem>      (sand);
 	PushSystem<ExplosionSystem>      (sand);
 	PushSystem<WorldSystem>          (sand);
-	PushSystem<PlayerSystem>         (sand);
 	PushSystem(item_s);
 	PushSystem(projectile_s);
 	PushSystem(recorder_s);
@@ -25,6 +24,7 @@ int Game_Layer::Initialize()
 	PushSystem<KeepInWorldSystem>    ();
 	PushSystem<Upgrade_System>       ();
 	PushSystem<ScoreSystem>          ();
+	PushSystem<PlayerSystem>         (sand);
 
 	Console->AddHandler(
 		[=](const iw::Command& command)
@@ -48,18 +48,18 @@ int Game_Layer::Initialize()
 
 void Game_Layer::Destroy()
 {
-	iw::ComponentQuery query = Space->MakeQuery();
-	query.SetAny({
-		Space->GetComponent<Player>(),
-		Space->GetComponent<Enemy>(),
-		Space->GetComponent<Asteroid>(),
-		Space->GetComponent<Projectile>(),
-		Space->GetComponent<Item>()
-	});
+	//iw::ComponentQuery query = Space->MakeQuery();
+	//query.SetAny({
+	//	Space->GetComponent<Player>(),
+	//	Space->GetComponent<Enemy>(),
+	//	Space->GetComponent<Asteroid>(),
+	//	Space->GetComponent<Projectile>(),
+	//	Space->GetComponent<Item>()
+	//});
 
-	Space->Query(query).Each([&](iw::EntityHandle handle) {
-		Space->QueueEntity(handle, iw::func_Destroy);
-	});
+	//Space->Query(query).Each([&](iw::EntityHandle handle) {
+	//	Space->QueueEntity(handle, iw::func_Destroy);
+	//});
 
 	Layer::Destroy();
 }

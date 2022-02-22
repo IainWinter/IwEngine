@@ -2,23 +2,6 @@
 
 void EnemySystem::FixedUpdate()
 {
-	//Space->Query<iw::Rigidbody, Enemy>().Each(
-	//	[](
-	//		iw::EntityHandle handle, 
-	//		iw::Rigidbody* body, 
-	//		Enemy* ship) 
-	//	{
-	//		if (body->IsTrigger)
-	//		{
-	//			ship->ActiveTimer += iw::FixedTime();
-
-	//			if (ship->ActiveTimer > ship->ActiveTime)
-	//			{
-	//				body->IsTrigger = false;
-	//			}
-	//		}
-	//	});
-
 	for (auto [rigidbody, ship] : entities().query<iw::Rigidbody, Enemy>())
 	{
 		if (rigidbody.IsTrigger)
@@ -31,38 +14,6 @@ void EnemySystem::FixedUpdate()
 			}
 		}
 	}
-
-	//Space->Query<iw::Transform, Enemy, Fighter_Enemy>().Each(
-	//	[&](
-	//		iw::EntityHandle handle,
-	//		iw::Transform* transform,
-	//		Enemy*         ship,
-	//		Fighter_Enemy* fighter)
-	//	{
-	//		if (!ship->Target || !ship->Target.Alive())
-	//		{
-	//			return;
-	//		}
-	//		
-	//		if (   abs(transform->Position.x - 200) > 200
-	//			|| abs(transform->Position.y - 200) > 200)
-	//		{
-	//			return;
-	//		}
-
-	//		if (!fighter->Weapon->CanFire())
-	//		{
-	//			return;
-	//		}
-
-	//		glm::vec3 pos = ship->Target.Find<iw::Transform>()->Position;
-	//		ShotInfo shot = fighter->Weapon->GetShot(Space->GetEntity(handle), pos.x, pos.y);
-	//		Bus->push<SpawnProjectile_Event>(shot);
-	//		Bus->push<PlaySound_Event>(fighter->Weapon->Audio);
-
-	//		Audio->Play("event:/weapons/fire_laser");
-	//	}
-	//);
 
 	for (auto [entity, transform, ship, fighter] : entities().query<iw::Transform, Enemy, Fighter_Enemy>().with_entity())
 	{
@@ -81,55 +32,6 @@ void EnemySystem::FixedUpdate()
 
 		Audio->Play("event:/weapons/fire_laser");
 	}
-
-	//Space->Query<iw::Transform, iw::Tile, Flocker, Enemy, Bomb_Enemy>().Each(
-	//	[&](
-	//		iw::EntityHandle handle,
-	//		iw::Transform* transform,
-	//		iw::Tile* tile,
-	//		Flocker* flocker,
-	//		Enemy* ship,
-	//		Bomb_Enemy* bomb)
-	//	{
-	//		// maybe put some timer or something
-
-	//		if (!ship->Target || !ship->Target.Alive())
-	//		{
-	//			return;
-	//		}
-
-	//		glm::vec3 pos = ship->Target.Find<iw::Transform>()->Position;
-	//		
-	//		// set flocking target to target
-	//		flocker->Target = glm::vec2(pos.x, pos.y);
-
-	//		// start explosion if close to target
-	//		if (   !bomb->Explode 
-	//			&& glm::distance(pos, transform->Position) < bomb->RadiusToExplode)
-	//		{
-	//			bomb->Explode = true;
-	//		}
-
-	//		if (bomb->Explode)
-	//		{
-	//			bomb->TimeToExplode -= iw::FixedTime();
-	//			
-	//			tile->m_tint = iw::Color(1, .1, .1);
-
-	//			if (bomb->TimeToExplode <= 0.f)
-	//			{
-	//				SpawnExplosion_Config config;
-	//				config.SpawnLocationX = transform->Position.x;
-	//				config.SpawnLocationY = transform->Position.y;
-	//				config.ExplosionPower = 900;
-	//				config.ExplosionRadius = 10;
-
-	//				Bus->push<SpawnExplosion_Event>(config);
-	//				Space->QueueEntity(handle, iw::func_Destroy);
-	//			}
-	//		}
-	//	}
-	//);
 
 	for (auto [entity, transform, tile, flocker, ship, bomb] : entities().query<iw::Transform, iw::Tile, Flocker, Enemy, Bomb_Enemy>().with_entity())
 	{
@@ -167,48 +69,10 @@ void EnemySystem::FixedUpdate()
 				config.ExplosionRadius = 10;
 		
 				Bus->push<SpawnExplosion_Event>(config);
-				entity.destroy();
+				defer().destroy(entity);
 			}
 		}
 	}
-
-	//Space->Query<iw::Transform, Enemy, Station_Enemy>().Each(
-	//	[&](
-	//		iw::EntityHandle handle,
-	//		iw::Transform* transform,
-	//		Enemy*         ship,
-	//		Station_Enemy* station)
-	//	{
-	//		if (!ship->Target || !ship->Target.Alive())
-	//		{
-	//			return;
-	//		}
-
-	//		station->timer.TickFixed();
-	//		if (station->timer.Can("spawn"))
-	//		{
-	//			SpawnEnemy_Config config;
-
-	//			glm::vec3 right = transform->Right();
-	//			switch (iw::randi(2))
-	//			{
-	//				case 0: right = -right;                             break;
-	//				case 1: right = glm::vec3(-right.y,  right.x, 0.f); break;
-	//				case 2: right = glm::vec3( right.y, -right.y, 0.f); break;
-	//				default:                                            break;
-	//			}
-
-	//			right *= 25.f;
-
-	//			config.SpawnLocationX = transform->Position.x + right.x;
-	//			config.SpawnLocationY = transform->Position.y + right.y;
-	//			config.EnemyType = iw::randf() > .4 ? BOMB : FIGHTER;
-	//			config.TargetEntity = ship->Target;
-
-	//			Bus->push<SpawnEnemy_Event>(config);
-	//		}
-	//	}
-	//);
 
 	for (auto [entity, transform, ship, station] : entities().query<iw::Transform, Enemy, Station_Enemy>().with_entity())
 	{
@@ -241,47 +105,6 @@ void EnemySystem::FixedUpdate()
 			Bus->push<SpawnEnemy_Event>(config);
 		}
 	}
-
-	//Space->Query<iw::Transform, Enemy, Base_Enemy>().Each(
-	//	[&](
-	//		iw::EntityHandle handle,
-	//		iw::Transform* transform,
-	//		Enemy*         ship,
-	//		Base_Enemy*    base)
-	//	{
-	//		if (!ship->Target.Alive())
-	//		{
-	//			return;
-	//		}
-
-	//		Throwable* closestThrowable = nullptr;
-	//		float closestDist = FLT_MAX;
-	//		Space->Query<iw::Transform, Throwable>().Each([&](
-	//			iw::EntityHandle handleThrowable,
-	//			iw::Transform* transformThrowable,
-	//			Throwable* throwable)
-	//		{
-	//			float dist = glm::distance(transform->Position, transformThrowable->Position);
-
-	//			if (   dist < 150 
-	//				&& dist < closestDist)
-	//			{
-	//				closestDist = dist;
-	//				closestThrowable = throwable;
-	//			}
-	//		});
-
-	//		if (    closestThrowable 
-	//			&& !closestThrowable->Held)
-	//		{
-	//			closestThrowable->Held = true;
-	//			closestThrowable->Time  = 1.f;
-	//			closestThrowable->Timer = 0.f;
-	//			closestThrowable->ThrowRequestor = Space->GetEntity(handle);
-	//			closestThrowable->ThrowTarget = ship->Target;
-	//		}
-	//	}
-	//);
 
 	for (auto [entity, transform, ship, base] : entities().query<iw::Transform, Enemy, Base_Enemy>().with_entity())
 	{
@@ -465,8 +288,6 @@ void EnemySystem::SpawnEnemy(SpawnEnemy_Config& config)
 
 void EnemySystem::DestroyEnemy(entity entity)
 {
-	if (!entity.has<Enemy>()) return;
-
 	std::vector<std::pair<ItemType, float>> item_weights {
 		{ ItemType::HEALTH,         50 },
 		{ ItemType::LASER_CHARGE,   50 },
@@ -503,5 +324,5 @@ void EnemySystem::DestroyEnemy(entity entity)
 	//tileCopy.set<iw::Transform>(transform);
 	//tileCopy.get<iw::Rigidbody>().SetTransform(&transform);
 
-	entity.destroy();
+	defer().destroy(entity);
 }

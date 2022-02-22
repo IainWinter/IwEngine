@@ -33,32 +33,14 @@ void TileSplitSystem::Update()
 		splits.clear();
 	});
 
-	//Space->Query<iw::Tile, Asteroid>().Each(
-	//[&](
-	//	iw::EntityHandle handle,
-	//	iw::Tile* tile, 
-	//	Asteroid* asteroid)
-	//{
-	//	if (tile->m_currentCells.size() < 50) 
-	//	{
-	//		asteroid->Lifetime -= iw::DeltaTime();
-	//		if (asteroid->Lifetime < 0.f)
-	//		{
-	//			ExplodeTile(Space->GetEntity(handle), tile->m_currentCells);
-	//			Space->QueueEntity(handle, iw::func_Destroy);
-	//		}
-	//	}
-	//});
-
 	for (auto [entity, tile, asteroid] : entities().query<iw::Tile, Asteroid>().with_entity())
 	{
 		if (tile.m_currentCells.size() < 50) 
 		{
-			asteroid.Lifetime -= iw::DeltaTime();
 			if (asteroid.Lifetime < 0.f)
 			{
-				//ExplodeTile(entity, tile.m_currentCells);
-				entity.destroy();
+				ExplodeTile(entity, tile.m_currentCells);
+				defer().destroy(entity);
 			}
 		}
 	}
@@ -190,7 +172,7 @@ void TileSplitSystem::SplitTile(
 			else
 			{
 				LOG_INFO << " ----- Split tile ---";
-				entity.destroy();
+				defer().destroy(entity);
 			}
 
 			for (const std::vector<int>& island : islands)
@@ -222,7 +204,7 @@ void TileSplitSystem::SplitTile(
 	if (tile.m_currentCells.size() < 10)
 	{
 		ExplodeTile(entity, tile.m_currentCells);
-		entity.destroy();
+		defer().destroy(entity);
 	}
 }
 

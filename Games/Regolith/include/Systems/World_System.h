@@ -60,7 +60,9 @@ private:
 		config.SpawnLocationY = y;
 		config.TargetLocationX = target_x;
 		config.TargetLocationY = target_y;
-		config.TargetEntity = m_player;
+
+		std::tie(config.TargetEntity) = entities().query<Player>().only_entity().first();
+
 		config.EnemyType = iw::choose(std::vector<std::pair<EnemyType, float>>{
 			{ FIGHTER, 100 },
 			{ BOMB,     30 },

@@ -5,19 +5,6 @@ void DeathTransition_System::OnPush()
 	iw::SetTimeScale(1.f);
 	sand->m_world->m_expandWorld = true;
 
-	//Space->Query<Item, iw::Transform, iw::Rigidbody>().Each([this](
-	//	iw::EntityHandle handle, 
-	//	Item* item,
-	//	iw::Transform* tran,
-	//	iw::Rigidbody* body)
-	//{
-	//	if (item->Type == ItemType::PLAYER_CORE)
-	//	{
-	//		m_coreTransform = tran; // this gets the last one, just assigns over and over...
-	//		m_coreRigidbody = body;
-	//	}
-	//});
-
 	for (auto [item, transform, rigidbody] : entities().query<Item, iw::Transform, iw::Rigidbody>())
 	{
 		if (item.Type == ItemType::PLAYER_CORE)

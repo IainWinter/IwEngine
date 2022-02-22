@@ -112,15 +112,12 @@ namespace Engine {
 				return;
 			}
 
-			layer->SetAppVars(MakeAppVars());
-			layer->OnPush();
-
+			m_layers.PushBack(layer);
 			if (InitLayer(layer))
 			{
 				return;
 			}
-
-			m_layers.PushBack(layer);
+			layer->OnPush();
 		}
 
 		template<
@@ -136,15 +133,12 @@ namespace Engine {
 				return;
 			}
 
-			layer->SetAppVars(MakeAppVars());
-			layer->OnPush();
-
+			m_layers.PushFront(layer);
 			if (InitLayer(layer))
 			{
 				return;
 			}
-
-			m_layers.PushFront(layer);
+			layer->OnPush();
 		}
 
 		template<
@@ -153,8 +147,8 @@ namespace Engine {
 			L* layer)
 		{
 			LOG_INFO << "Popping " << layer->Name() << " layer";
-			m_layers.Pop(layer);
 			layer->OnPop();
+			m_layers.Pop(layer);
 		}
 
 		template<
@@ -163,9 +157,9 @@ namespace Engine {
 			L*/*&*/ layer)
 		{
 			LOG_INFO << "Destroying " << layer->Name() << " layer";
-			m_layers.Pop(layer);
 			layer->OnPop();
 			layer->Destroy();
+			m_layers.Pop(layer);
 			delete layer;
 			//layer = nullptr;
 		}
@@ -181,6 +175,8 @@ namespace Engine {
 			Layer* layer)
 		{
 			LOG_DEBUG << "Initializing " << layer->Name() << " layer...";
+
+			layer->SetAppVars(MakeAppVars());
 
 			if (     m_isInitialized
 				&& !layer->IsInitialized)

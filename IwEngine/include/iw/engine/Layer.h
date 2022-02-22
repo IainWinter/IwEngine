@@ -146,6 +146,7 @@ namespace Engine {
 
 		// should add a function for making a system that
 		// assigneds app vars but doesnt push it to the layer
+		// this is also identical to the app, should think about that design
 
 		template<
 			typename S,
@@ -176,12 +177,11 @@ namespace Engine {
 		{
 			LOG_INFO << "Pushed " << system->Name() << " system onto " << Name() << " layer";
 
+			m_systems.PushBack(system);
 			if (InitSystem(system))
 			{
 				return;
 			}
-
-			m_systems.PushBack(system);
 			system->OnPush();
 		}
 
@@ -192,12 +192,11 @@ namespace Engine {
 		{
 			LOG_INFO << "Pushed " << system->Name() << " system onto " << Name() << " layer";
 
+			m_systems.PushFront(system);
 			if (InitSystem(system))
 			{
 				return;
 			}
-
-			m_systems.PushFront(system);
 			system->OnPush();
 		}
 
@@ -207,8 +206,8 @@ namespace Engine {
 			S* system)
 		{
 			LOG_INFO << "\tPopping " << system->Name() << " system from " << Name() << " layer";
-			m_systems.Pop(system);
 			system->OnPop();
+			m_systems.Pop(system);
 		}
 
 		template<
@@ -217,9 +216,9 @@ namespace Engine {
 			S*/*&*/ system)
 		{
 			LOG_INFO << "\tDestroying " << system->Name() << " system from " << Name() << " layer";
-			m_systems.Pop(system);
 			system->OnPop();
 			system->Destroy();
+			m_systems.Pop(system);
 			delete system;
 			//system = nullptr;
 		}

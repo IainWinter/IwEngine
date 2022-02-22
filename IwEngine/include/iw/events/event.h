@@ -31,6 +31,8 @@ namespace events {
 			, Id(0)
 		{}
 
+		virtual ~event() = default;
+
 		template<
 			typename _t>
 		_t& as() {

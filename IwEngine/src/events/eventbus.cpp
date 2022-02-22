@@ -2,8 +2,9 @@
 
 namespace iw {
 	eventbus::eventbus()
-		: m_alloc(1024, 2)
-		, m_recorder(nullptr)
+		: m_alloc    (1024, 2)
+		, m_recorder (nullptr)
+		, m_next_id  (0)
 	{}
 
 	void eventbus::subscribe(
@@ -23,22 +24,11 @@ namespace iw {
 	void eventbus::publish() {
 		std::unique_lock<std::mutex> lock(m_mutex);
 
-		int count = 0;
-
-		while (!m_events.empty()) {
+		while (!m_events.empty())
+		{
 			event* e = m_events.pop();
 			publish_event(e);
-			if (e->Group == -1) {
-				LOG_INFO << "Mysterious -1 event";
-				continue;
-			}
-
 			m_alloc.free(e, e->Size);
-
-			//if (++count > 500) {
-			//	LOG_VALUE("event_count", count);
-			//	break;
-			//}
 		}
 	}
 

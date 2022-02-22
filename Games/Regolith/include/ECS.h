@@ -44,6 +44,16 @@ constexpr inline _t min(_t a, _t b)
 
 #endif
 
+// needed for event_manager::callbacks
+
+struct pair_hash
+{
+    template <class T1, class T2>
+    std::size_t operator() (const std::pair<T1, T2> &pair) const {
+        return std::hash<T1>()(pair.first) ^ std::hash<T2>()(pair.second) * 31;
+    }
+};
+
 struct component
 {
 	hash_t m_hash = 0; // low 16 bits are the repeat count
@@ -112,12 +122,34 @@ archetype make_archetype(
 }
 
 inline
-archetype add_to_archetype(
+archetype archetype_add(
 	const archetype& archetype,
-	const std::vector<component>& new_components)
+	const std::vector<component>& to_add)
 {
 	std::vector<component> components = archetype.m_components;
-	components.insert(components.end(), new_components.begin(), new_components.end());
+	components.insert(components.end(), to_add.begin(), to_add.end());
+	return make_archetype(components);
+}
+
+inline
+archetype archetype_remove(
+	const archetype& archetype,
+	const std::vector<component>& to_remove)
+{
+	std::vector<component> components = archetype.m_components;
+
+	for (int i = 0; i < components.size(); i++)
+	{
+		for (const component& c : to_remove)
+		{
+			if (components.at(i).m_hash == c.m_hash)
+			{
+				components.at(i) = components.back(); components.pop_back();
+				i--;
+			}
+		}
+	}
+
 	return make_archetype(components);
 }
 
@@ -269,7 +301,7 @@ struct entity_handle
 	operator bool() { return hash() == 0; }
 	bool operator==(const entity_handle& other) const { return hash() == other.hash(); }
 	bool operator!=(const entity_handle& other) const { return !operator==(other); }
-	hash_t hash() const { return (hash_t)m_index * m_version * m_archetype; }
+	hash_t hash() const { return (hash_t)m_index ^ (hash_t)m_version * 17 ^ m_archetype * 31; }
 };
 
 struct entity_storage
@@ -418,7 +450,10 @@ struct entity_storage
 		const component& component,
 		void* data)
 	{
-		component.m_move(get_raw_pointer(handle, component), data);
+		if (data)
+		{
+			component.m_move(get_raw_pointer(handle, component), data);
+		}
 	}
 
 	void* get_raw_pointer(
@@ -468,40 +503,59 @@ struct entity
 			return false;
 		}
 
+		assert(m_store && "entity::is_alive failed, no store");
 		return m_store->is_entity_alive(m_handle);
 	}
 
 	template<typename _t, typename... _args>
 	entity& set(_args&&... args)
 	{
-		m_store->set_component(m_handle, make_component<_t>(), &_t(args...));
+		// cant use store because of events
+
+		assert(m_store && "entity::set failed, no manager");
+		m_manager->set<_t>(m_handle, std::forward<_args>(args)...);
 		return *this;
 	}
 
 	template<typename _t, typename... _args>
 	entity& add(_args&&... args)
 	{
-		*this = m_manager->add(m_handle, make_component<_t>(), &_t(args...));
+		assert(m_manager && "entity::add failed, no manager");
+		*this = m_manager->add<_t>(m_handle, std::forward<_args>(args)...);
+		return *this;
+	}
+
+	template<typename _t>
+	entity& remove(entity_handle handle)
+	{
+		assert(m_manager && "entity::remove failed, no manager");
+		*this = m_manager->remove<_t>(m_handle);
 		return *this;
 	}
 
 	template<typename _t>
 	_t& get() const
 	{
+		assert(m_store && "entity::get failed, no store");
 		return *(_t*)m_store->get_raw_pointer(m_handle, make_component<_t>());
 	}
 
 	template<typename _t>
 	bool has() const
 	{
+		assert(m_store && "entity::has failed, no store");
 		return is_in_archetype(m_store->m_archetype, make_component<_t>());
 	}
 
 	// listen
 
-	entity& on_set    (std::function<void(entity, const component&)> func); // defined under entity_manager
-	entity& on_add    (std::function<void(entity, const component&)> func); // defined under entity_manager
-	entity& on_destroy(std::function<void(entity)>                   func); // defined under entity_manager
+	entity& on_destroy(const std::function<void(entity)>                  & func); // defined under entity_manager
+	entity& on_set    (const std::function<void(entity)>                  & func);
+	entity& on_set    (const std::function<void(entity, const component&)>& func);
+	entity& on_add    (const std::function<void(entity)>                  & func);
+	entity& on_add    (const std::function<void(entity, const component&)>& func);
+	entity& on_remove (const std::function<void(entity)>                  & func);
+	entity& on_remove (const std::function<void(entity, const component&)>& func);
 };
 
 // should make a version that returns void* and then this just encapsulates that and casts
@@ -509,6 +563,10 @@ struct entity
 template<bool _with_entity, typename... _q>
 struct entity_query
 {
+	using result_t = typename std::conditional<_with_entity,
+		std::tuple<entity, _q&...>,
+		std::tuple<        _q&...>>::type;
+
 	struct itr
 	{
 		std::vector<entity_storage::itr>            m_curs;
@@ -554,9 +612,7 @@ struct entity_query
 			return tie_from_offsets<_q...>(m_curs.at(m_current)->m_addr, m_offsets.at(m_current));
 		}
 
-		typename std::conditional<_with_entity,
-			std::tuple<entity, _q&...>,
-			std::tuple<        _q&...>>::type operator*() const
+		result_t operator*() const
 		{
 			if constexpr (_with_entity)
 			{
@@ -661,6 +717,22 @@ struct entity_query
 			std::apply(func, tuple);
 		}
 	}
+
+	result_t first()
+	{
+		return *begin();
+	}
+};
+
+// for events and command_buffer
+
+enum class entity_command
+{
+	CREATE,
+	DESTROY,
+	SET,
+	ADD,
+	REMOVE,
 };
 
 struct entity_manager
@@ -675,10 +747,11 @@ struct entity_manager
 
 	void destroy(entity_handle handle)
 	{
-		call_listen(handle);
+		call_listener(entity_command::DESTROY, handle, nullptr);
+		remove_listeners(handle);
 		entity_storage& store = m_storage.at(handle.m_archetype);
 		store.destroy_entity(handle);
-		//clean_storage(store); // breaks itr
+		clean_storage(store); // breaks itr
 	}
 
 	bool is_alive(entity_handle handle)
@@ -688,17 +761,7 @@ struct entity_manager
 
 	std::pair<bool, entity> find(const component& component, void* ptr_to_component)
 	{
-		// could use query if it didnt require types
-
-		//for (auto [entity, ptr] : query({ component }).with_entity())
-		//{
-		//	if (ptr == ptr_to_component)
-		//	{
-		//		return entity;
-		//	}
-		//}
-
-		for (auto& [_, store] : m_storage) // this is exactly what query does...
+		for (auto& [_, store] : m_storage) // could use query if it didnt need types... (ezish fix)
 		{
 			if (is_in_archetype(store.m_archetype, component))
 			{
@@ -717,24 +780,33 @@ struct entity_manager
 	void set(entity_handle handle, const component& component, void* data)
 	{
 		m_storage.at(handle.m_archetype).set_component(handle, component, data);
-		call_listen(handle, component);
+		call_listener(entity_command::SET, handle, &component);
 	}
 
 	entity add(entity_handle handle, const component& component, void* data = nullptr)
 	{
 		entity_storage& old_store = m_storage.at(handle.m_archetype);
-		entity_storage& new_store = get_storage(add_to_archetype(old_store.m_archetype, { component }));
+		entity_storage& new_store = get_storage(archetype_add(old_store.m_archetype, { component }));
+
+		entity_handle new_handle = old_store.move_entity(handle, new_store);
+		new_store.set_component(new_handle, component, data);
+
+		call_listener(entity_command::ADD, handle, &component);
+
+		clean_storage(old_store); // breaks itr
+		return wrap(new_handle);
+	}
+
+	entity remove(entity_handle handle, const component& component)
+	{
+		entity_storage& old_store = m_storage.at(handle.m_archetype);
+		entity_storage& new_store = get_storage(archetype_remove(old_store.m_archetype, { component }));
+
+		call_listener(entity_command::REMOVE, handle, &component);
 
 		entity_handle new_handle = old_store.move_entity(handle, new_store);
 
-		if (data)
-		{
-			new_store.set_component(new_handle, component, data);
-		}
-
-		call_listen(handle, component);
-		//clean_storage(old_store); // breaks itr
-
+		clean_storage(old_store); // breaks itr
 		return wrap(new_handle);
 	}
 
@@ -796,6 +868,12 @@ struct entity_manager
 	}
 
 	template<typename _t>
+	entity remove(entity_handle handle)
+	{
+		return remove(handle, make_component<_t>());
+	}
+
+	template<typename _t>
 	_t& get(entity_handle handle)
 	{
 		_t* ptr;
@@ -829,6 +907,9 @@ struct entity_manager
 private:
 	void clean_storage(const entity_storage& storage)
 	{
+		// this breaks entity bc storage pointer is invalid
+		// should think more about it, for now just keep empty storages
+		return;
 		if (storage.m_count == 0)
 		{
 			m_storage.erase(storage.m_archetype.m_hash);
@@ -836,45 +917,242 @@ private:
 	}
 
 	// helpers to listen for events
+	// can only remove all at once, but I think that's fine
 public:
-	void on_set    (entity_handle handle, std::function<void(entity, const component&)> func) { m_listeners_comp[handle.hash()] = func; }
-	void on_add    (entity_handle handle, std::function<void(entity, const component&)> func) { m_listeners_comp[handle.hash()] = func; }
-	void on_destroy(entity_handle handle, std::function<void(entity)>                   func) { m_listeners     [handle.hash()] = func; }
+	void on_destroy(entity_handle handle, const std::function<void(entity)>                  & func) { add_listener<false>(handle, entity_command::DESTROY, func); }
+	void on_set    (entity_handle handle, const std::function<void(entity)>                  & func) { add_listener<false>(handle, entity_command::SET,     func); }
+	void on_set    (entity_handle handle, const std::function<void(entity, const component&)>& func) { add_listener<true> (handle, entity_command::SET,     func); }
+	void on_add    (entity_handle handle, const std::function<void(entity)>                  & func) { add_listener<false>(handle, entity_command::ADD,     func); }
+	void on_add    (entity_handle handle, const std::function<void(entity, const component&)>& func) { add_listener<true> (handle, entity_command::ADD,     func); }
+	void on_remove (entity_handle handle, const std::function<void(entity)>                  & func) { add_listener<false>(handle, entity_command::REMOVE,  func); }
+	void on_remove (entity_handle handle, const std::function<void(entity, const component&)>& func) { add_listener<true> (handle, entity_command::REMOVE,  func); }
 
 private:
-	std::unordered_map<hash_t, std::function<void(entity, const component&)>> m_listeners_comp;
-	std::unordered_map<hash_t, std::function<void(entity)>>                   m_listeners;
+	template<bool _include_component>
+	using callback_func = typename std::conditional<
+		_include_component,
+		std::function<void(entity, const component&)>,
+		std::function<void(entity)>>::type;
 
-	void call_listen(entity_handle handle, const component& component)
+	struct callback_base
 	{
-		auto itr = m_listeners_comp.find(handle.hash());
-		if (itr != m_listeners_comp.end())
+		entity_command m_command;
+		virtual ~callback_base() = default;
+		virtual void call(entity entity, const component* component) = 0;
+	};
+
+	template<bool _include_component>
+	struct callback : callback_base
+	{
+		callback_func<_include_component> m_callback;
+		void call(entity entity, const component* component) override
 		{
-			itr->second(wrap(handle), component);
+			if constexpr (_include_component) m_callback(entity, *component);
+			else						    m_callback(entity);
+		}
+	};
+
+	std::unordered_map<hash_t, std::vector<callback_base*>> m_callbacks;
+
+	void call_listener(entity_command command, entity_handle handle, const component* component)
+	{
+		auto itr = m_callbacks.find(handle.hash());
+		if (itr != m_callbacks.end())
+		{
+			for (callback_base* callback : itr->second)
+			{
+				if (callback->m_command == command)
+				{
+					callback->call(wrap(handle), component);
+				}
+			}
 		}
 	}
 
-	void call_listen(entity_handle handle)
+	template<bool _include_component>
+	void add_listener(entity_handle handle, entity_command command, const callback_func<_include_component>& func)
 	{
-		auto itr = m_listeners.find(handle.hash());
-		if (itr != m_listeners.end())
+		callback<_include_component>* c = new callback<_include_component>(); // see below //
+		c->m_command = command;
+		c->m_callback = func;
+
+		m_callbacks[handle.hash()].push_back(c);
+	}
+
+	void remove_listeners(entity_handle handle)
+	{
+		auto itr = m_callbacks.find(handle);
+		if (itr != m_callbacks.end())
 		{
-			itr->second(wrap(handle));
+			for (callback_base* callback : itr->second)
+			{
+				delete callback;										  // see above //
+			}
+
+			m_callbacks.erase(itr);
 		}
+	}
+};
+
+// defer actions until a point when they can all be executed at once
+// for example deleting entities inside a query loop
+
+struct command_buffer
+{
+	struct command
+	{
+		virtual ~command() = default;
+		virtual void execute(entity_manager* manager) = 0;
+	};
+
+	// could this get replaced with std::bind?
+
+	struct command_create : command
+	{
+		archetype m_archetype;
+		void execute(entity_manager* manager) { manager->create(m_archetype); }
+	};
+
+	struct command_destroy : command
+	{
+		entity_handle m_handle;
+		void execute(entity_manager* manager) { manager->destroy(m_handle); }
+	};
+
+	template<typename _t>
+	struct command_set : command
+	{
+		entity_handle m_handle;
+		component m_component;
+		_t m_data;
+		void execute(entity_manager* manager) { manager->set(m_handle, m_component, &m_data); }
+	};
+
+	template<typename _t>
+	struct command_add : command
+	{
+		entity_handle m_handle;
+		component m_component;
+		_t m_data;
+		void execute(entity_manager* manager) { manager->add(m_handle, m_component, &m_data); }
+	};
+
+	struct command_remove : command
+	{
+		entity_handle m_handle;
+		component m_component;
+		void execute(entity_manager* manager) { manager->remove(m_handle, m_component); }
+	};
+
+	std::vector<command*> m_queue;
+	entity_manager* m_manager;
+
+	command_buffer(
+		entity_manager* manager
+	)
+		: m_manager(manager)
+	{}
+
+	void create(const archetype& archetype)
+	{
+		command_create* command = queue<command_create>();
+		command->m_archetype = archetype;
+	}
+
+	void destroy(entity entity)
+	{
+		command_destroy* command = queue<command_destroy>();
+		command->m_handle = entity.m_handle;
+	}
+
+	void set(entity entity, const component& component) // no data
+	{
+		command_set<void*>* command = queue<command_set<void*>>();
+		command->m_handle = entity.m_handle;
+		command->m_component = component;
+		command->m_data = nullptr;
+	}
+
+	void add(entity entity, const component& component)  // no data
+	{
+		command_add<void*>* command = queue<command_add<void*>>();
+		command->m_handle = entity.m_handle;
+		command->m_component = component;
+		command->m_data = nullptr;
+	}
+
+	void remove(entity entity, const component& component)
+	{
+		command_remove* command = queue<command_remove>();
+		command->m_handle = entity.m_handle;
+		command->m_component = component;
+	}
+
+	// template helpers
+
+	template<typename _t, typename... _args>
+	void set(entity entity, _args&&... args)
+	{
+		command_set<_t>* command = queue<command_set<_t>>();
+		command->m_handle = entity.m_handle;
+		command->m_component = make_component<_t>();
+		command->m_data = _t(args...);
+	}
+
+	template<typename _t, typename... _args>
+	void add(entity entity, _args&&... args)
+	{
+		command_add<_t>* command = queue<command_add<_t>>();
+		command->m_handle = entity.m_handle;
+		command->m_component = make_component<_t>();
+		command->m_data = _t(args...);
+	}
+
+	template<typename _t>
+	void remove(entity entity)
+	{
+		command_remove* command = queue<command_remove>();
+		command->m_handle = entity.m_handle;
+		command->m_component = make_component<_t>();
+	}
+
+	void execute()
+	{
+		for (command* command : m_queue)
+		{
+			command->execute(m_manager);
+			delete command;
+		}
+
+		m_queue.clear();
+	}
+private:
+	template<typename _t>
+	_t* queue()
+	{
+		_t* t = new _t();
+		m_queue.emplace_back(t);
+		return t;
 	}
 };
 
 inline
 void entity::destroy()
 {
+	assert(m_manager && "entity::destroy failed, no manager");
 	m_manager->destroy(m_handle);
 	m_handle = {};
 	m_store = nullptr;
 	m_manager = nullptr;
 }
 
-inline entity& entity::on_set    (std::function<void(entity, const component&)> func) { m_manager->on_set    (m_handle, func); return *this; }
-inline entity& entity::on_add    (std::function<void(entity, const component&)> func) { m_manager->on_add    (m_handle, func); return *this; }
-inline entity& entity::on_destroy(std::function<void(entity)>                   func) { m_manager->on_destroy(m_handle, func); return *this; }
+inline entity& entity::on_destroy(const std::function<void(entity)>                  & func) { assert(m_manager && "entity::on_destroy failed, no manager"); m_manager->on_destroy(m_handle, func); return *this; }
+inline entity& entity::on_set    (const std::function<void(entity)>                  & func) { assert(m_manager && "entity::on_add failed, no manager");     m_manager->on_set    (m_handle, func); return *this; }
+inline entity& entity::on_set    (const std::function<void(entity, const component&)>& func) { assert(m_manager && "entity::on_add failed, no manager");     m_manager->on_set    (m_handle, func); return *this; }
+inline entity& entity::on_add    (const std::function<void(entity)>                  & func) { assert(m_manager && "entity::on_set failed, no manager");     m_manager->on_add    (m_handle, func); return *this; }
+inline entity& entity::on_add    (const std::function<void(entity, const component&)>& func) { assert(m_manager && "entity::on_set failed, no manager");     m_manager->on_add    (m_handle, func); return *this; }
+inline entity& entity::on_remove (const std::function<void(entity)>                  & func) { assert(m_manager && "entity::on_remove failed, no manager");  m_manager->on_remove (m_handle, func); return *this; }
+inline entity& entity::on_remove (const std::function<void(entity, const component&)>& func) { assert(m_manager && "entity::on_remove failed, no manager");  m_manager->on_remove (m_handle, func); return *this; }
 
 entity_manager& entities();
+command_buffer& defer();

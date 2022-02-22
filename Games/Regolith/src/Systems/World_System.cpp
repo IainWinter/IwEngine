@@ -25,7 +25,7 @@ void WorldSystem::Update()
 	//	DrawLightning(sand, l);
 	//}
 
-	//return; // comment this line to stop all spawning
+	return; // comment this line to stop all spawning
 	m_timer.Tick();
 
 	bool needsAnotherLevel = false;
@@ -94,37 +94,13 @@ void WorldSystem::Update()
 		if (   asteroid.Lifetime < 0.f
 			&& !iw::AABB2(glm::vec2(200.f), 200).Intersects(&iw::Transform(), tile.m_bounds, &transform))
 		{
-			entity.destroy();
-			//Task->defer([=]() { entity.destroy(); });
+			defer().destroy(entity);
 		}
 	}
 }
 
 void WorldSystem::FixedUpdate()
 {
-	//Space->Query<Throwable, Flocker>().Each(
-	//	[&](
-	//		iw::EntityHandle handle, 
-	//		Throwable* throwable, 
-	//		Flocker* flocker) 
-	//	{
-	//		if (throwable->Held)
-	//		{
-	//			flocker->Active = false;
-	//		}
-
-	//		if (   !flocker->Active 
-	//			&& !throwable->Held)
-	//		{
-	//			throwable->Timer += iw::FixedTime();
-
-	//			if (throwable->Timer > throwable->Time + .5)
-	//			{
-	//				flocker->Active = true;
-	//			}
-	//		}
-	//	});
-
 	for (auto [throwable, flocker] : entities().query<Throwable, Flocker>())
 	{
 		if (throwable.Held)
@@ -142,57 +118,6 @@ void WorldSystem::FixedUpdate()
 			}
 		}
 	}
-
-	//Space->Query<iw::Rigidbody, Throwable>().Each(
-	//	[&](
-	//		iw::EntityHandle handle, 
-	//		iw::Rigidbody* rigidbody,
-	//		Throwable* throwable) 
-	//	{
-	//		if (   !throwable->Held
-	//			|| !throwable->ThrowTarget   .Alive()
-	//			|| !throwable->ThrowRequestor.Alive())
-	//		{
-	//			return;
-	//		}
-
-	//		throwable->Timer += iw::FixedTime();
-
-	//		float distFromThrower = glm::distance(
-	//			rigidbody->Transform.Position, 
-	//			throwable->ThrowRequestor.Find<iw::Transform>()->Position);
-
-	//		if (   throwable->Timer > throwable->Time
-	//			|| distFromThrower  > 150)
-	//		{
-	//			throwable->Held = false;
-	//		}
-
-	//		glm::vec3 pos  = rigidbody->Transform.Position;
-	//		glm::vec3 tpos = throwable->ThrowTarget   .Find<iw::Transform>()->Position;
-	//		glm::vec3 rpos = throwable->ThrowRequestor.Find<iw::Transform>()->Position;
-
-	//		/*
-	//		auto [min, max] = rigidbody->Collider->as<iw::Physics::impl::Collider<iw::d2>>()->Bounds();
-	//		float radius = glm::length(max - min) / 2.f;
-	//		*/
-
-	//		glm::vec3 vel = tpos - pos + (pos - rpos) / 2.f;
-	//		vel = glm::normalize(vel);
-
-	//		float currentSpeed = glm::length(rigidbody->Velocity);
-	//		float speed = iw::max(currentSpeed, 200.f * throwable->Timer / throwable->Time);
-
-	//		rigidbody->Velocity = iw::lerp(rigidbody->Velocity, vel * speed, iw::FixedTime() * 25);
-
-	//		LightningConfig config;
-	//		config.A = throwable->ThrowRequestor;
-	//		config.B = Space->GetEntity(handle);
-	//		config.ArcSize = 10;
-	//		config.LifeTime = .01f;
-
-	//		DrawLightning(sand, Space, config);
-	//	});
 
 	for (auto [entity, throwable, rigidbody] : entities().query<Throwable, iw::Rigidbody>().with_entity())
 	{
@@ -290,7 +215,12 @@ bool WorldSystem::On(iw::ActionEvent& e)
 		case REMOVE_CELL_FROM_TILE:
 		{
 			RemoveCellFromTile_Event& event = e.as<RemoveCellFromTile_Event>();
-			event.Entity.get<iw::Tile>().RemovePixel(event.Index);
+			
+			if (   event.Entity.is_alive()
+				&& event.Entity.has<iw::Tile>())
+			{
+				event.Entity.get<iw::Tile>().RemovePixel(event.Index);
+			}
 
 			break;
 		}
@@ -333,46 +263,22 @@ bool WorldSystem::On(iw::ActionEvent& e)
 		case CREATED_PLAYER: {
 			m_player = e.as<CreatedPlayer_Event>().PlayerEntity;
 
-			break;
-		}
-		case STATE_CHANGE:
-		{
-			StateChange_Event& event = e.as<StateChange_Event>();
+			SpawnAsteroid_Config c;
+			c.SpawnLocationX = 100;
+			c.SpawnLocationY = 100;
+			c.AngularVel = 0;
+			c.Size = 0;
 
-			switch (event.State)
-			{
-				case StateName::GAME_START_STATE:
-				{
-					//SpawnAsteroid_Config c;
-					//c.SpawnLocationX = 100;
-					//c.SpawnLocationY = 100;
-					//c.AngularVel = 10;
-					//c.Size = 0;
+			Bus->push<SpawnAsteroid_Event>(c);
 
-					//Bus->push<SpawnAsteroid_Event>(c);
+			SpawnEnemy_Config cc = {};
+			cc.SpawnLocationX = 300;
+			cc.SpawnLocationY = 300;
+			cc.TargetLocationX = 300;
+			cc.TargetLocationY = 300;
+			cc.EnemyType = STATION;
 
-					//SpawnEnemy_Config cc;
-					//cc.SpawnLocationX = 300;
-					//cc.SpawnLocationY = 300;
-					//cc.TargetLocationX = 300;
-					//cc.TargetLocationY = 300;
-					//cc.EnemyType = STATION;
-
-					//Bus->push<SpawnEnemy_Event>(cc);
-
-					m_levels.emplace_front(CreateSequence())
-						.Add<Spawn>(MakeEnemySpawner())
-						.And<Spawn>(MakeAsteroidSpawner())
-						.And<iw::Delay>(30)
-						.Start();
-					break;
-				}
-				case StateName::GAME_OVER_STATE:
-				{
-					m_levels.clear();
-					break;
-				}
-			}
+			Bus->push<SpawnEnemy_Event>(cc);
 
 			break;
 		}

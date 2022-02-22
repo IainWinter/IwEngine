@@ -6,6 +6,12 @@ entity_manager& entities()
 	return manager;
 }
 
+command_buffer& defer()
+{
+	static command_buffer buffer(&entities());
+	return buffer;
+}
+
 #include <chrono>
 
 struct Timer
@@ -53,84 +59,62 @@ int App::Initialize(
 	int err = Application::Initialize(options);
 	if (err) return err;
 
-	// test
-
-	entities().create<iw::Transform, iw::Rigidbody>()
-		.set<iw::Transform>();
-
-	entities().create<int, double>()
-		.set<int>(21)
-		.set<double>(1.);
-
-	entities().query<int>().for_each([](int i) {
-		printf("%d ", i); 
-	});
-
-	for (auto [i] : entities().query<int>())
-	{
-		printf("%d ", i);
-	}
-
-	archetype a = make_archetype<int, double, int, int>();
-
-	entity_manager manager;
-
-	{
-		Timer timer("create 1 mil");
-
-		entity_storage& store = manager.get_storage(a);
-		component int_comp = make_component<int>();
-		component dbl_comp = make_component<double>();
-
-		double d = 1.;
-		for (int i = 1e6; i > 0; i--)
-		{
-			entity_handle e = store.create_entity();
-			store.set_component(e, int_comp, &i);
-			store.set_component(e, dbl_comp, &d);
-		}
-	}
-
-	entity_query<false, int> ints = manager.query<int>();
-	int sum = 0;
-	{
-		Timer timer("iterate 1 mil");
-
-		for (auto& [entity, i] : ints.with_entity())
-		{
-			sum += i;
-		}
-	}
-
-	printf("\n\n%d\n\n", sum);
-
-	std::vector<int> benchmark;
-	{
-		Timer timer("create 1 mil in vector");
-
-		for (int i = 1e6; i > 0; i--)
-		{
-			benchmark.push_back(i);
-		}
-	}
-
-	sum = 0;
-	{
-		Timer timer("iterate 1 mil vector");
-
-		for (auto& i : benchmark)
-		{
-			sum += i;
-		}
-	}
-
-
-
-	// test
-
-
-	printf("\n\n%d\n\n", sum);
-
+	//// test
+	//entities().create<iw::Transform, iw::Rigidbody>()
+	//	.set<iw::Transform>();
+	//entities().create<int, double>()
+	//	.set<int>(21)
+	//	.set<double>(1.);
+	//entities().query<int>().for_each([](int i) {
+	//	printf("%d ", i); 
+	//});
+	//for (auto [i] : entities().query<int>())
+	//{
+	//	printf("%d ", i);
+	//}
+	//archetype a = make_archetype<int, double, int, int>();
+	//entity_manager manager;
+	//{
+	//	Timer timer("create 1 mil");
+	//	entity_storage& store = manager.get_storage(a);
+	//	component int_comp = make_component<int>();
+	//	component dbl_comp = make_component<double>();
+	//	double d = 1.;
+	//	for (int i = 1e6; i > 0; i--)
+	//	{
+	//		entity_handle e = store.create_entity();
+	//		store.set_component(e, int_comp, &i);
+	//		store.set_component(e, dbl_comp, &d);
+	//	}
+	//}
+	//entity_query<false, int> ints = manager.query<int>();
+	//int sum = 0;
+	//{
+	//	Timer timer("iterate 1 mil");
+	//	for (auto& [entity, i] : ints.with_entity())
+	//	{
+	//		sum += i;
+	//	}
+	//}
+	//printf("\n\n%d\n\n", sum);
+	//std::vector<int> benchmark;
+	//{
+	//	Timer timer("create 1 mil in vector");
+	//	for (int i = 1e6; i > 0; i--)
+	//	{
+	//		benchmark.push_back(i);
+	//	}
+	//}
+	//sum = 0;
+	//{
+	//	Timer timer("iterate 1 mil vector");
+	//	for (auto& i : benchmark)
+	//	{
+	//		sum += i;
+	//	}
+	//}
+	//// test
+	//printf("\n\n%d\n\n", sum);
 
 	m_fonts = new iw::FontMap();
 	m_fonts->Load("verdana",   18, "fonts/ttf/verdana.ttf");
@@ -336,6 +320,8 @@ int App::Initialize(
 
 		return false;
 	});
+
+	Task->coroutine([]() { defer().execute(); return false; });
 
 	return 0;
 }

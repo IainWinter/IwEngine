@@ -124,7 +124,7 @@ void AddEntityToPhysics(
 		iw::Rigidbody* ptr = &e.get<iw::Rigidbody>();
 		physics->AddRigidbody(&e.get<iw::Rigidbody>());
 
-		e.on_add([=](entity entity, const component& component) {
+		e.on_add([=](entity entity) {
 			physics->RemoveCollisionObject(ptr);
 			physics->AddRigidbody(&entity.get<iw::Rigidbody>());
 		});
@@ -136,7 +136,7 @@ void AddEntityToPhysics(
 		iw::CollisionObject* ptr = &e.get<iw::CollisionObject>();
 		physics->AddCollisionObject(ptr);
 
-		e.on_add([=](entity entity, const component& component) {
+		e.on_add([=](entity entity) {
 			physics->RemoveCollisionObject(ptr);
 			physics->AddCollisionObject(&entity.get<iw::CollisionObject>());
 		});
@@ -465,7 +465,7 @@ entity MakeTile(
 	std::vector<component> others = {})
 {
 	archetype arch = make_archetype<iw::Transform, iw::Tile, iw::Rigidbody>();
-	arch = add_to_archetype(arch, others);
+	arch = archetype_add(arch, others);
 
 	::entity entity = entities().create(arch).set<iw::Tile>(sprite);
 	

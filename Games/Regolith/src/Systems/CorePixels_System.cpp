@@ -81,93 +81,6 @@ void CorePixelsSystem::Update()
 		//	}
 		//}
 	}
-
-
-	//Space->Query<iw::Tile, CorePixels>().Each(
-	//	[&](
-	//		iw::EntityHandle handle,
-	//		iw::Tile* tile,
-	//		CorePixels* core) 
-	//	{
-	//		bool dead = false;
-	//		
-	//		if (tile->m_currentCells.size() < 30)
-	//		{
-	//			dead = true;
-	//		}
-
-	//		else if (core->ActiveIndices.size() <= 2) {
-	//			dead = true;
-	//		}
-
-	//		else if (core->ActiveIndices .size() < core->Indices.size() / 3 * 2)
-	//		{
-	//			core->Timer += iw::DeltaTime();
-	//			if (core->Timer > core->TimeWithoutCore) {
-	//				dead = true;
-	//			}
-	//		}
-
-	//		else {
-	//			core->Timer = iw::lerp(core->Timer, 0.f, iw::DeltaTime() * 10);
-	//		}
-
-	//		if (dead)
-	//		{
-	//			iw::Entity entity = Space->GetEntity(handle);
-
-	//			if (entity.Has<Player>())
-	//			{
-	//				for (int index : core->ActiveIndices)
-	//				{
-	//					RemoveCorePixel(entity, index);
-	//				}
-	//			}
-
-	//			Bus->push<CoreExploded_Event>(entity);
-
-	//			// this needs to remove the behaviour components from the entity?
-	//			//Space->QueueEntity(handle, iw::func_Destroy);
-	//		}
-
-	//		// if a core peice isnt touching a regular peice is dies
-	//		//if (!Space->HasComponent<Player>(handle))
-	//		//{
-	//		//	for (const int& index : core->ActiveIndices)
-	//		//	{
-	//		//		int top   = index + tile->m_sprite.m_width; // doesnt work if core cells are on edge
-	//		//		int bot   = index - tile->m_sprite.m_width;
-	//		//		int right = index + 1;
-	//		//		int left  = index - 1;
-
-	//		//		auto isCorePeice = [&](int i)
-	//		//		{
-	//		//			return core->ActiveIndices.find(i) != core->ActiveIndices.end();
-	//		//		};
-
-	//		//		auto isRegularPeice = [&](int i)
-	//		//		{
-	//		//			return core->ActiveIndices.find(i) == core->ActiveIndices.end()
-	//		//				&& tile->State(i) == iw::Tile::PixelState::FILLED;
-	//		//		};
-
-	//		//		int corePeices = (int)isCorePeice(top)
-	//		//						  + (int)isCorePeice(bot)
-	//		//						  + (int)isCorePeice(left)
-	//		//						  + (int)isCorePeice(right);
-
-	//		//		int regularPeices = (int)isRegularPeice(top)
-	//		//						  + (int)isRegularPeice(bot)
-	//		//						  + (int)isRegularPeice(left)
-	//		//						  + (int)isRegularPeice(right);
-
-	//		//		if (regularPeices <= 1 && corePeices < 2)
-	//		//		{
-	//		//			Bus->push<RemoveCellFromTile_Event>(index, iw::Entity(handle, Space));
-	//		//		}
-	//		//	}
-	//		//}
-	//	});
 }
 
 bool CorePixelsSystem::On(iw::ActionEvent& e)
@@ -204,12 +117,6 @@ bool CorePixelsSystem::On(iw::ActionEvent& e)
 		{
 			RemoveCellFromTile_Event& event = e.as<RemoveCellFromTile_Event>();
 			
-			if (!event.Entity.is_alive())
-			{
-				LOG_ERROR << "Tried to remove cell from dead entity";
-				break;
-			}
-
 			if (event.Entity.has<CorePixels>())
 			{
 				RemoveCorePixel(event.Entity, event.Index);
