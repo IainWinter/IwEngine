@@ -1,10 +1,8 @@
 #include "Systems/Item_System.h"
 
-void ItemSystem::FixedUpdate()
+void ItemSystem::Update()
 {
-    iw::Transform& playerTrans = m_player.get<iw::Transform>();
-    
-    for (auto [entity, rigidbody, item] : entities().query<iw::Rigidbody, Item>().with_entity())
+     for (auto [entity, rigidbody, item] : entities().query<iw::Rigidbody, Item>().with_entity())
     {
         if (item.ActivateTimer > 0.f) {
             item.ActivateTimer -= iw::FixedTime();
@@ -16,7 +14,7 @@ void ItemSystem::FixedUpdate()
             item.LifeTimer -= iw::FixedTime();
             if (item.LifeTimer <= 0)
             {
-                defer().destroy(entity);
+                entities_defer().destroy(entity);
             }
          
             else if (item.LifeTimer < 1)
@@ -58,10 +56,39 @@ void ItemSystem::FixedUpdate()
                     LOG_WARNING << "Picked up item with no action!";
                 }
 
-                defer().destroy(entity);
+                entities_defer().destroy(entity);
             }
         
             else if (distance < 12)
+            {
+                rigidbody.Transform.Scale = iw::lerp(rigidbody.Transform.Scale, glm::vec3(1/3.f), 1 - distance / 12);
+            }
+        }
+    }
+}
+
+void ItemSystem::FixedUpdate()
+{
+    glm::vec3 playerPos = m_player.get<iw::Transform>().Position;
+    
+    for (auto [entity, rigidbody, item] : entities().query<iw::Rigidbody, Item>().with_entity())
+    {
+        if (item.ActivateTimer > 0.f) {
+            item.ActivateTimer -= iw::FixedTime();
+            return;
+        }
+        
+        glm::vec3 healthPos = rigidbody.Transform.Position;
+        
+        float distance = glm::distance(healthPos, playerPos);
+        
+        if (item.PickingUp)
+        {
+            glm::vec3 vel = glm::normalize(playerPos - healthPos) * (300.f + 100 * item.PickupTimer);
+            rigidbody.Velocity = iw::lerp(rigidbody.Velocity, vel, iw::FixedTime() * (10 + item.PickupTimer));
+            item.PickupTimer += iw::FixedTime();
+        
+            if (distance < 12)
             {
                 rigidbody.Transform.Scale = iw::lerp(rigidbody.Transform.Scale, glm::vec3(1/3.f), 1 - distance / 12);
             }

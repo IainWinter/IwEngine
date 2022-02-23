@@ -69,7 +69,7 @@ void EnemySystem::FixedUpdate()
 				config.ExplosionRadius = 10;
 		
 				Bus->push<SpawnExplosion_Event>(config);
-				defer().destroy(entity);
+				entities_defer().destroy(entity);
 			}
 		}
 	}
@@ -317,12 +317,11 @@ void EnemySystem::DestroyEnemy(entity entity)
 	Bus->push<SpawnItem_Event>(config);
 
 	// spawn copy of just display
-	//entity tileCopy = sand->MakeTile(
-	//	entity.get<iw::Tile>().m_sprite,
-	//	true
-	//);
-	//tileCopy.set<iw::Transform>(transform);
-	//tileCopy.get<iw::Rigidbody>().SetTransform(&transform);
+	::entity tileCopy = MakeTile(entity.get<iw::Tile>().m_sprite, { make_component<iw::MeshCollider2>() });
+	AddEntityToPhysics(tileCopy, Physics);
 
-	defer().destroy(entity);
+	tileCopy.set<iw::Transform>(transform);
+	tileCopy.get<iw::Rigidbody>().SetTransform(&transform);
+
+	entities_defer().destroy(entity);
 }

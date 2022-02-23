@@ -94,7 +94,7 @@ void WorldSystem::Update()
 		if (   asteroid.Lifetime < 0.f
 			&& !iw::AABB2(glm::vec2(200.f), 200).Intersects(&iw::Transform(), tile.m_bounds, &transform))
 		{
-			defer().destroy(entity);
+			entities_defer().destroy(entity);
 		}
 	}
 }
@@ -227,8 +227,6 @@ bool WorldSystem::On(iw::ActionEvent& e)
 		case CORE_EXPLODED:
 		{
 			entity& entity = e.as<CoreExploded_Event>().Entity;
-
-			if (!entity.is_alive()) return false;
 
 			glm::vec3 pos = entity.get<iw::Transform>().Position;
 

@@ -21,8 +21,8 @@ int PlayerSystem::Initialize()
 	player.Moves[2] = new EnergyShield_Move();
 
 	Bus->push<ChangePlayerWeapon_Event>(WeaponType::DEFAULT_CANNON);
-	Bus->push<CreatedCoreTile_Event>(m_player);
 	Bus->send<CreatedPlayer_Event>(m_player); // set immediately in other systems before System Update
+	Bus->send<CreatedCoreTile_Event>(m_player);
 
 	m_handle = Console->AddHandler([&](
 		const iw::Command& command)
@@ -262,7 +262,7 @@ bool PlayerSystem::On(iw::ActionEvent& e)
 			if (event.Entity.has<Player>())
 			{
 				Task->delay(.2f, [=]() { Bus->push<iw::ActionEvent>(iw::ActionEventType::SINGLE, DESTROYED_PLAYER); });
-				defer().destroy(event.Entity);
+				entities_defer().destroy(event.Entity);
 			}
 
 			break;

@@ -40,7 +40,7 @@ void TileSplitSystem::Update()
 			if (asteroid.Lifetime < 0.f)
 			{
 				ExplodeTile(entity, tile.m_currentCells);
-				defer().destroy(entity);
+				entities_defer().destroy(entity);
 			}
 		}
 	}
@@ -172,7 +172,7 @@ void TileSplitSystem::SplitTile(
 			else
 			{
 				LOG_INFO << " ----- Split tile ---";
-				defer().destroy(entity);
+				entities_defer().destroy(entity);
 			}
 
 			for (const std::vector<int>& island : islands)
@@ -204,7 +204,7 @@ void TileSplitSystem::SplitTile(
 	if (tile.m_currentCells.size() < 10)
 	{
 		ExplodeTile(entity, tile.m_currentCells);
-		defer().destroy(entity);
+		entities_defer().destroy(entity);
 	}
 }
 

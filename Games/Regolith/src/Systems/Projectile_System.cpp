@@ -8,7 +8,7 @@ void ProjectileSystem::Update()
 	{
 		if (glm::distance2(transform.Position, glm::vec3(200.f, 200.f, 0.f)) > 400 * 400)
 		{
-			defer().destroy(entity);
+			entities_defer().destroy(entity);
 		}
 
 		else
@@ -17,7 +17,7 @@ void ProjectileSystem::Update()
 			projectile.Life -= iw::DeltaTime();
 			if (projectile.Life <= 0.f)
 			{
-				defer().destroy(entity);
+				//entities_defer().destroy(entity);
 			}
 		}
 	}
@@ -172,7 +172,7 @@ void ProjectileSystem::Update()
 			}
 		}
 
-		defer().destroy(entity);
+		entities_defer().destroy(entity);
 	}
 
 	// Projectiles that are made out of a sprite
@@ -283,7 +283,7 @@ void ProjectileSystem::Update()
 			}
 		}
 
-		defer().destroy(entity);
+		entities_defer().destroy(entity);
 	}
 
 	for (LightningConfig& bolt : bolts)

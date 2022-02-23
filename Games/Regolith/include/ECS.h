@@ -996,11 +996,13 @@ private:
 
 // defer actions until a point when they can all be executed at once
 // for example deleting entities inside a query loop
+// not thread safe, but should be
 
 struct command_buffer
 {
 	struct command
 	{
+		const char* m_where;
 		virtual ~command() = default;
 		virtual void execute(entity_manager* manager) = 0;
 	};
@@ -1046,11 +1048,13 @@ struct command_buffer
 
 	std::vector<command*> m_queue;
 	entity_manager* m_manager;
+	const char* m_where_current; // name of current location, useful for debugging
 
 	command_buffer(
 		entity_manager* manager
 	)
-		: m_manager(manager)
+		: m_manager       (manager)
+		, m_where_current (nullptr)
 	{}
 
 	void create(const archetype& archetype)
@@ -1130,8 +1134,11 @@ private:
 	template<typename _t>
 	_t* queue()
 	{
+		static_assert(std::is_base_of<command, _t>::value);
+
 		_t* t = new _t();
 		m_queue.emplace_back(t);
+		t->m_where = m_where_current;
 		return t;
 	}
 };
@@ -1155,4 +1162,10 @@ inline entity& entity::on_remove (const std::function<void(entity)>             
 inline entity& entity::on_remove (const std::function<void(entity, const component&)>& func) { assert(m_manager && "entity::on_remove failed, no manager");  m_manager->on_remove (m_handle, func); return *this; }
 
 entity_manager& entities();
-command_buffer& defer();
+command_buffer& entities_defer(const char* where_from = nullptr);
+
+#define LOG_DEFER
+
+#ifdef LOG_DEFER
+#	define entities_defer() entities_defer(__FUNCTION__)
+#endif

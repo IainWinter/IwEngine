@@ -1,17 +1,4 @@
 ﻿#include "ECS.h"
-
-entity_manager& entities()
-{
-	static entity_manager manager;
-	return manager;
-}
-
-command_buffer& defer()
-{
-	static command_buffer buffer(&entities());
-	return buffer;
-}
-
 #include <chrono>
 
 struct Timer
@@ -321,7 +308,7 @@ int App::Initialize(
 		return false;
 	});
 
-	Task->coroutine([]() { defer().execute(); return false; });
+	Task->coroutine([]() { entities_defer().execute(); return false; });
 
 	return 0;
 }

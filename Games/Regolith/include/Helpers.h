@@ -140,6 +140,9 @@ void AddEntityToPhysics(
 			physics->RemoveCollisionObject(ptr);
 			physics->AddCollisionObject(&entity.get<iw::CollisionObject>());
 		});
+
+
+		//e.on_add([](int) {});
 	}
 
 	e.on_destroy([=](entity entity) {
@@ -459,30 +462,38 @@ void flood_fill(
 #include "iw/physics/Collision/MeshCollider.h"
 #include "iw/graphics/Texture.h"
 
+// this assumes that if others is provided, then the last component is a valid physics collider type
 inline
 entity MakeTile(
 	const iw::Texture& sprite,
 	std::vector<component> others = {})
 {
-	archetype arch = make_archetype<iw::Transform, iw::Tile, iw::Rigidbody>();
+	if (others.size() > 0)
+	{
+		// insert at from to keep collider at the back
+		others.insert(others.begin(), make_component<iw::Rigidbody>());
+	}
+
+	archetype arch = make_archetype<iw::Transform, iw::Tile>();
 	arch = archetype_add(arch, others);
 
 	::entity entity = entities().create(arch).set<iw::Tile>(sprite);
 	
 	iw::Transform& transform = entity.get<iw::Transform>();
-	iw::Rigidbody& body      = entity.get<iw::Rigidbody>();
 
-	if (    others.size() > 0
-		&& others.back().m_hash == make_component<iw::Circle>().m_hash)
+	if (others.size() > 0)
 	{
-		iw::Circle& circle = entity.get<iw::Circle>();
-		circle.Radius = glm::compMax(sprite.Dimensions()) / 2.f;
+		iw::Rigidbody& body = entity.get<iw::Rigidbody>();
+		body.SetTransform(&transform);
+
+		if (others.back().m_hash == make_component<iw::Circle>().m_hash)
+		{
+			iw::Circle& circle = entity.get<iw::Circle>();
+			circle.Radius = glm::compMax(sprite.Dimensions()) / 2.f;
+		}
+
+		entities().get(entity.m_handle, others.back(), (void**)&body.Collider);
 	}
-
-	entities().get(entity.m_handle, others.back(), (void**)&body.Collider);
-	body.SetTransform(&transform);
-
-	//tile.m_sandLayerIndex = 0;
 
 	return entity;
 }
