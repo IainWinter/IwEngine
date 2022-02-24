@@ -308,59 +308,67 @@ int App::Initialize(
 		return false;
 	});
 
+	bool log = false;
+
 	Task->coroutine(
-		[]()
+		[log]()
 		{
-			const auto& queue = entities_defer().m_queue;
-
-			if (queue.size() > 0)
+			if (log)
 			{
-				printf("\nEntity Command Buffer:");
-			}
+				const auto& queue = entities_defer().m_queue;
 
-			for (command_buffer::command* command : queue)
-			{
-				switch (command->m_type)
+				if (queue.size() > 0)
 				{
-				case entity_command::DESTROY:
-				{
-					command_buffer::command_destroy* c = (command_buffer::command_destroy*)command;
-					printf("\n\t[DESTROY] %d, %d - %s", c->m_handle.m_index, c->m_handle.m_version, c->m_where);
-					break;
+					printf("\nEntity Command Buffer:");
 				}
-				default:
+
+				for (command_buffer::command* command : queue)
 				{
-					printf("\n\t[none   ] %s", command->m_where);
-					break;
-				}
+					switch (command->m_type)
+					{
+					case entity_command::DESTROY:
+					{
+						command_buffer::command_destroy* c = (command_buffer::command_destroy*)command;
+						printf("\n\t[DESTROY] %d, %d - %s", c->m_handle.m_index, c->m_handle.m_version, c->m_where);
+						break;
+					}
+					default:
+					{
+						printf("\n\t[none   ] %s", command->m_where);
+						break;
+					}
+					}
 				}
 			}
 
 			entities_defer().execute();
 
-			printf("\nEntity System:");
-
-			for (auto& [hash, storage] : entities().m_storage)
+			if (log)
 			{
-				printf("\n\t Storage [Components: ", storage.m_archetype.m_hash);
+				printf("\nEntity System:");
 
-				const auto& components = storage.m_archetype.m_components;
-
-				for (int i = 0; i < components.size(); i++)
+				for (auto& [hash, storage] : entities().m_storage)
 				{
-					printf("%s ", components.at(i).m_name);
-					if (i < components.size() - 1)
+					printf("\n\t Storage [Components: ", storage.m_archetype.m_hash);
+
+					const auto& components = storage.m_archetype.m_components;
+
+					for (int i = 0; i < components.size(); i++)
 					{
-						printf(" ");
+						printf("%s ", components.at(i).m_name);
+						if (i < components.size() - 1)
+						{
+							printf(" ");
+						}
 					}
-				}
 
-				printf("]");
+					printf("]");
 
-				for (int i = 0; i < storage.m_entities.size(); i++)
-				{
-					const entity_storage::entity_data& e = storage.m_entities.at(i);
-					printf("\n\t\t [Index: %4d Version %4d Addresss %p]", e.m_index, e.m_version, e.m_addr);
+					for (int i = 0; i < storage.m_entities.size(); i++)
+					{
+						const entity_storage::entity_data& e = storage.m_entities.at(i);
+						printf("\n\t\t [Index: %4d Version %4d Addresss %p]", e.m_index, e.m_version, e.m_addr);
+					}
 				}
 			}
 

@@ -32,19 +32,19 @@ void ExplosionSystem::SpawnExplosion(SpawnExplosion_Config& config)
 		float px = config.SpawnLocationX + norm.x * config.ExplosionRadius * (iw::randf() * .9f + .1f);
 		float py = config.SpawnLocationY + norm.y * config.ExplosionRadius * (iw::randf() * .9f + .1f);
 
-		//if (iw::randf() > .75f)	{
+		if (iw::randf() > .75f)	{
 			ShotInfo shot;
 			shot.projectile = ProjectileType::BULLET;
 			shot.life = spark.life;
-			shot.dx = 300;// spark.dx * 1.2f;
-			shot.dy = 300;// spark.dy * 1.2f;
-			shot.x = 200;// px;
-			shot.y = 200;// py;
+			shot.dx = spark.dx * 1.2f;
+			shot.dy = spark.dy * 1.2f;
+			shot.x = px;
+			shot.y = py;
 			Bus->push<SpawnProjectile_Event>(shot);
-		//}
-		//else {
-		//	sand->m_world->SetCell(px, py, spark);
-		//}
+		}
+		else {
+			sand->m_world->SetCell(px, py, spark);
+		}
 	}
 
 	//iw::Cell smoke = iw::Cell::GetDefault(iw::CellType::SMOKE);
