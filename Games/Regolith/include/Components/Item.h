@@ -20,7 +20,6 @@ struct Item {
 	float MoveTimer = 0.f;
 
 	float LifeTimer = 5.f;
-	bool DieWithTime = true;
 
 	float ActivateTimer = 0.f;
 

@@ -58,6 +58,7 @@ struct component
 {
 	hash_t m_hash = 0; // low 16 bits are the repeat count
 	int m_size    = 0;
+	const char* m_name = nullptr;
 	std::function<void(void*)>        m_destructor;
 	std::function<void(void*)>        m_default;
 	std::function<void(void*, void*)> m_move;
@@ -72,6 +73,7 @@ component make_component()  //	everyother template function is short-hand back t
 	{
 		c.m_hash = just_hash(typeid(_t).hash_code());
 		c.m_size = sizeof(_t);
+		c.m_name = typeid(_t).name();
 		c.m_destructor = [](void* ptr)             { ((_t*)ptr)->~_t(); };
 		c.m_default    = [](void* ptr)             { new (ptr) _t(); };
 		c.m_move       = [](void* ptr, void* data) { new (ptr) _t(std::move(*(_t*)data)); };
@@ -292,16 +294,28 @@ std::tuple<_t&...> tie_from_offsets(
 	return tie_from_offsets_i<_t...>(raw, offsets, std::make_index_sequence<sizeof...(_t)>{});
 }
 
+constexpr hash_t hash_int3(int x, int y, hash_t z)
+{
+	hash_t hash = 0x9e3779b9;
+	hash = (hash ^ (hash_t)x) * 0x56a34beefff;
+	hash = (hash ^ (hash_t)y) * 0x56ff3eea4;
+	hash = (hash ^         z) * 0xfabcdef1;
+	return hash;
+}
+
 struct entity_handle
 {
 	int    m_index     = 0;
 	int    m_version   = 0;
 	hash_t m_archetype = 0;
 
-	operator bool() { return hash() == 0; }
 	bool operator==(const entity_handle& other) const { return hash() == other.hash(); }
 	bool operator!=(const entity_handle& other) const { return !operator==(other); }
-	hash_t hash() const { return (hash_t)m_index ^ (hash_t)m_version * 17 ^ m_archetype * 31; }
+
+	hash_t hash() const
+	{
+		return hash_int3(m_index, m_version, m_archetype);
+	}
 };
 
 struct entity_storage
@@ -489,7 +503,6 @@ struct entity
 	entity_storage* m_store   = nullptr;
 	entity_manager* m_manager = nullptr;
 
-	operator bool() { return m_handle.operator bool(); }
 	bool operator==(const entity& other) const { return m_handle.operator==(other.m_handle); }
 	bool operator!=(const entity& other) const { return m_handle.operator!=(other.m_handle); }
 	hash_t hash() const { return m_handle.hash(); }
@@ -498,12 +511,12 @@ struct entity
 
 	bool is_alive() const
 	{
-		if (m_handle.hash() == 0)
+		if (hash() == hash_int3(0, 0, 0))
 		{
 			return false;
 		}
 
-		assert(m_store && "entity::is_alive failed, no store");
+		assert(m_store && "entity::is_alive failed, no store"); // not needed because above
 		return m_store->is_entity_alive(m_handle);
 	}
 
@@ -981,7 +994,7 @@ private:
 
 	void remove_listeners(entity_handle handle)
 	{
-		auto itr = m_callbacks.find(handle);
+		auto itr = m_callbacks.find(handle.hash());
 		if (itr != m_callbacks.end())
 		{
 			for (callback_base* callback : itr->second)
@@ -1002,6 +1015,7 @@ struct command_buffer
 {
 	struct command
 	{
+		entity_command m_type;
 		const char* m_where;
 		virtual ~command() = default;
 		virtual void execute(entity_manager* manager) = 0;
@@ -1060,18 +1074,34 @@ struct command_buffer
 	void create(const archetype& archetype)
 	{
 		command_create* command = queue<command_create>();
+		command->m_type = entity_command::CREATE;
 		command->m_archetype = archetype;
 	}
 
 	void destroy(entity entity)
 	{
+		for (command_buffer::command* c : m_queue)
+		{
+			if (c->m_type == entity_command::DESTROY)
+			{
+				if (((command_destroy*)c)->m_handle == entity.m_handle)
+				{
+					__debugbreak();
+					return;
+				}
+			}
+		}
+
 		command_destroy* command = queue<command_destroy>();
+		command->m_type = entity_command::DESTROY;
 		command->m_handle = entity.m_handle;
+
 	}
 
 	void set(entity entity, const component& component) // no data
 	{
 		command_set<void*>* command = queue<command_set<void*>>();
+		command->m_type = entity_command::SET;
 		command->m_handle = entity.m_handle;
 		command->m_component = component;
 		command->m_data = nullptr;
@@ -1080,6 +1110,7 @@ struct command_buffer
 	void add(entity entity, const component& component)  // no data
 	{
 		command_add<void*>* command = queue<command_add<void*>>();
+		command->m_type = entity_command::ADD;
 		command->m_handle = entity.m_handle;
 		command->m_component = component;
 		command->m_data = nullptr;
@@ -1088,6 +1119,7 @@ struct command_buffer
 	void remove(entity entity, const component& component)
 	{
 		command_remove* command = queue<command_remove>();
+		command->m_type = entity_command::REMOVE;
 		command->m_handle = entity.m_handle;
 		command->m_component = component;
 	}
@@ -1098,6 +1130,7 @@ struct command_buffer
 	void set(entity entity, _args&&... args)
 	{
 		command_set<_t>* command = queue<command_set<_t>>();
+		command->m_type = entity_command::SET;
 		command->m_handle = entity.m_handle;
 		command->m_component = make_component<_t>();
 		command->m_data = _t(args...);
@@ -1107,6 +1140,7 @@ struct command_buffer
 	void add(entity entity, _args&&... args)
 	{
 		command_add<_t>* command = queue<command_add<_t>>();
+		command->m_type = entity_command::ADD;
 		command->m_handle = entity.m_handle;
 		command->m_component = make_component<_t>();
 		command->m_data = _t(args...);
@@ -1116,6 +1150,7 @@ struct command_buffer
 	void remove(entity entity)
 	{
 		command_remove* command = queue<command_remove>();
+		command->m_type = entity_command::REMOVE;
 		command->m_handle = entity.m_handle;
 		command->m_component = make_component<_t>();
 	}
@@ -1167,5 +1202,8 @@ command_buffer& entities_defer(const char* where_from = nullptr);
 #define LOG_DEFER
 
 #ifdef LOG_DEFER
-#	define entities_defer() entities_defer(__FUNCTION__)
+#	define iw_line_as_string(x) iw_as_string(x)
+#	define iw_as_string(x) #x
+
+#	define entities_defer() entities_defer(__FUNCTION__ " " iw_line_as_string(__LINE__))
 #endif

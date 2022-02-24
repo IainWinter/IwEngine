@@ -530,7 +530,7 @@ entity SplitTile(
 		
 		int it = (x - minX) + (y - minY) * texture->m_width;
 
-		LOG_INFO << "Copying from " << i << " to " << it;
+		//LOG_INFO << "Copying from " << i << " to " << it;
 
 		if (it > texture->ColorCount())
 		{

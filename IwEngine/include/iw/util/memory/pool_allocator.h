@@ -96,15 +96,13 @@ namespace util {
 			return free((void*)addr, size);
 		}
 
-		void* pool_allocator::alloc(
-			size_t size)
+		void* alloc(size_t size)
 		{
 			std::unique_lock<std::mutex> lock(m_mutex);
 			return m_root->alloc(size);
 		}
 
-		ref<void> pool_allocator::alloc_ref(
-			size_t size)
+		ref<void> alloc_ref(size_t size)
 		{
 			return ref<void>(
 				alloc<void>(size),
@@ -112,15 +110,14 @@ namespace util {
 			);
 		}
 
-		bool pool_allocator::free(
-			void* addr,
-			size_t size)
+		bool free(void* addr, size_t size)
 		{
 			std::unique_lock<std::mutex> lock(m_mutex);
 			return m_root->free(addr, size);
 		}
 
-		void pool_allocator::reset() {
+		void reset()
+		{
 			std::unique_lock<std::mutex> lock(m_mutex);
 			m_root->reset();
 		}

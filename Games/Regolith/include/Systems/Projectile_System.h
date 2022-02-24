@@ -33,6 +33,7 @@ private:
 		entity entity = entities().create<iw::Transform, iw::Rigidbody, Projectile, _cs...>();
 
 		entity.set<Projectile>(shot);
+		entity.get<Projectile>().Shot.origin = ::entity(); // for testing
 
 		iw::Transform& transform = entity.get<iw::Transform>();
 		iw::Rigidbody& rigidbody = entity.get<iw::Rigidbody>();

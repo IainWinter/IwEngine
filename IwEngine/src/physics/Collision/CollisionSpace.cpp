@@ -83,9 +83,15 @@ namespace Physics {
 		};
 
 		if (m_task) {
-			m_task->foreach(m_objects, [&](int index) {
-				updateCahce(m_objects.at(index));
-			});
+			for (iw::CollisionObject* obj : m_objects)
+			{
+				updateCahce(obj);
+			}
+
+
+			//m_task->foreach(m_objects, [&](int index) {
+			//	updateCahce(m_objects.at(index));
+			//});
 		}
 
 		else {

@@ -308,7 +308,65 @@ int App::Initialize(
 		return false;
 	});
 
-	Task->coroutine([]() { entities_defer().execute(); return false; });
+	Task->coroutine(
+		[]()
+		{
+			const auto& queue = entities_defer().m_queue;
+
+			if (queue.size() > 0)
+			{
+				printf("\nEntity Command Buffer:");
+			}
+
+			for (command_buffer::command* command : queue)
+			{
+				switch (command->m_type)
+				{
+				case entity_command::DESTROY:
+				{
+					command_buffer::command_destroy* c = (command_buffer::command_destroy*)command;
+					printf("\n\t[DESTROY] %d, %d - %s", c->m_handle.m_index, c->m_handle.m_version, c->m_where);
+					break;
+				}
+				default:
+				{
+					printf("\n\t[none   ] %s", command->m_where);
+					break;
+				}
+				}
+			}
+
+			entities_defer().execute();
+
+			printf("\nEntity System:");
+
+			for (auto& [hash, storage] : entities().m_storage)
+			{
+				printf("\n\t Storage [Components: ", storage.m_archetype.m_hash);
+
+				const auto& components = storage.m_archetype.m_components;
+
+				for (int i = 0; i < components.size(); i++)
+				{
+					printf("%s ", components.at(i).m_name);
+					if (i < components.size() - 1)
+					{
+						printf(" ");
+					}
+				}
+
+				printf("]");
+
+				for (int i = 0; i < storage.m_entities.size(); i++)
+				{
+					const entity_storage::entity_data& e = storage.m_entities.at(i);
+					printf("\n\t\t [Index: %4d Version %4d Addresss %p]", e.m_index, e.m_version, e.m_addr);
+				}
+			}
+
+			return false;
+		}
+	);
 
 	return 0;
 }

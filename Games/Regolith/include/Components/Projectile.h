@@ -18,7 +18,7 @@ struct HitInfo {
 
 struct Projectile
 {
-	const ShotInfo Shot;
+	ShotInfo Shot;
 	HitInfo Hit;
 
 	float Life = 0.f;

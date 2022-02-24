@@ -157,7 +157,6 @@ void CorePixelsSystem::RemoveCorePixel(
 			config.ActivateDelay = .33f;
 			config.Speed = 225;
 			config.AngularSpeed = 10;
-			config.DieWithTime = false;
 			config.OnPickup = [&]()
 			{
 				Bus->push<HealPlayer_Event>(true);

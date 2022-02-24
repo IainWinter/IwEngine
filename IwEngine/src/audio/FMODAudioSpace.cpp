@@ -133,7 +133,7 @@ namespace Audio {
 				ENGINE_FAILED_MAKE_INSTANCE
 			);
 
-			FMOD_STUDIO_EVENT_CALLBACK callback = [](
+			FMOD_STUDIO_EVENT_CALLBACK callback_stopped = [](
 				FMOD_STUDIO_EVENT_CALLBACK_TYPE type,
 				FMOD_STUDIO_EVENTINSTANCE* einstance,
 				void* parameters)
@@ -145,6 +145,8 @@ namespace Audio {
 				instance->getUserData((void**)&data);
 				auto [inst, me] = *data;
 				me->m_instances.erase(inst);
+				instance->release();
+				delete data;
 				return FMOD_OK;
 			};
 
@@ -160,7 +162,7 @@ namespace Audio {
 
 			CHECK_ERROR(
 				instance->setCallback(
-					callback,
+					callback_stopped,
 					FMOD_STUDIO_EVENT_CALLBACK_STOPPED
 				),
 				ENGINE_FAILED_MAKE_INSTANCE

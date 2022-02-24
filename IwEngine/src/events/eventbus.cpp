@@ -28,7 +28,7 @@ namespace iw {
 		{
 			event* e = m_events.pop();
 			publish_event(e);
-			m_alloc.free(e, e->Size);
+			m_alloc.free<event>(e, e->Size);
 		}
 	}
 

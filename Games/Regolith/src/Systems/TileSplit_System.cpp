@@ -119,6 +119,12 @@ void TileSplitSystem::SplitTile(
 		}
 	}
 
+	else if (tile.m_currentCells.size() < 10)
+	{
+		ExplodeTile(entity, tile.m_currentCells);
+		entities_defer().destroy(entity);
+	}
+
 	else
 	{
 		std::vector<std::vector<int>> islands;
@@ -199,12 +205,6 @@ void TileSplitSystem::SplitTile(
 		// and doing a random walk throug a cone that gets narrower the faster the
 		// projectile goes, so for the sniper that would cut in half while an explosion
 		// would only fracture small peices off
-	}
-
-	if (tile.m_currentCells.size() < 10)
-	{
-		ExplodeTile(entity, tile.m_currentCells);
-		entities_defer().destroy(entity);
 	}
 }
 

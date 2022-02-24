@@ -3,27 +3,33 @@
 
 #include "iw/physics/impl/GJK.h"
 
-//float tt;
+float tt;
 
 void WorldSystem::Update()
 {
-	//tt += iw::DeltaTime();
+	tt += iw::DeltaTime();
 
-	//if (tt > .01)
-	//{
-	//	tt = 0;
+	if (tt > .1 && iw::Keyboard::KeyDown(iw::InputName::SPACE))
+	{
+		SpawnExplosion_Config config;
+		config.SpawnLocationX = 200;
+		config.SpawnLocationY = 200;
+		config.ExplosionRadius = 1;
+		Bus->push<SpawnExplosion_Event>(config);
 
-	//	LightningConfig l;
-	//	l.X = 100;
-	//	l.Y = 200;
-	//	l.TargetX = 300;
-	//	l.TargetY = 200;
-	//	l.LifeTime = .01;
-	//	l.ArcSize = 10;
-	//	l.Type = LightningType::POINT;
+		tt = 0;
 
-	//	DrawLightning(sand, l);
-	//}
+		//LightningConfig l;
+		//l.X = 100;
+		//l.Y = 200;
+		//l.TargetX = 300;
+		//l.TargetY = 200;
+		//l.LifeTime = .01;
+		//l.ArcSize = 10;
+		//l.Type = LightningType::POINT;
+
+		//DrawLightning(sand, l);
+	}
 
 	return; // comment this line to stop all spawning
 	m_timer.Tick();

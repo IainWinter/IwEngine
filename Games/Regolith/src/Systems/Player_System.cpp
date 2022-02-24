@@ -15,12 +15,13 @@ int PlayerSystem::Initialize()
 	rigidbody.SetMass(10);
 	core.TimeWithoutCore = 4.f;
 	player.SpecialLaser = MakeFatLaser_Cannon();
-	
+	player.CurrentWeapon = MakeFatLaser_Cannon();
+
 	player.Moves[0] = new Dash_Move();
 	player.Moves[1] = new SmokeScreen_Move();
 	player.Moves[2] = new EnergyShield_Move();
 
-	Bus->push<ChangePlayerWeapon_Event>(WeaponType::DEFAULT_CANNON);
+	//Bus->push<ChangePlayerWeapon_Event>(WeaponType::DEFAULT_CANNON);
 	Bus->send<CreatedPlayer_Event>(m_player); // set immediately in other systems before System Update
 	Bus->send<CreatedCoreTile_Event>(m_player);
 

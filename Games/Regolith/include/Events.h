@@ -129,7 +129,6 @@ struct REFLECT SpawnItem_Config
 	float Speed         = 75.f;
 
 	int Amount          = 1;
-	bool DieWithTime    = true;
 
 	ItemType Item;
 	std::function<void()> OnPickup;

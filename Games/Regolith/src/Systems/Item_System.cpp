@@ -2,39 +2,29 @@
 
 void ItemSystem::Update()
 {
-     for (auto [entity, rigidbody, item] : entities().query<iw::Rigidbody, Item>().with_entity())
+    glm::vec3 playerPos = m_player.get<iw::Transform>().Position;
+
+    for (auto [entity, rigidbody, item] : entities().query<iw::Rigidbody, Item>().with_entity())
     {
-        if (item.ActivateTimer > 0.f) {
-            item.ActivateTimer -= iw::FixedTime();
-            return;
+        if (item.ActivateTimer > 0.f) // dont allow pickup for a moment after spawn
+        {
+            item.ActivateTimer -= iw::DeltaTime();
+            continue;
         }
         
-        if (item.DieWithTime)
+        if (item.LifeTimer >= 0.f) // if the item has a life, items with a negitive life last forever
         {
-            item.LifeTimer -= iw::FixedTime();
-            if (item.LifeTimer <= 0)
+            item.LifeTimer -= iw::DeltaTime();
+            if (item.LifeTimer <= 0.f)
             {
                 entities_defer().destroy(entity);
-            }
-         
-            else if (item.LifeTimer < 1)
-            {
-                rigidbody.Transform.Scale = iw::lerp(rigidbody.Transform.Scale, glm::vec3(0.f), 1 - item.LifeTimer);
+                continue;
             }
         }
-        
-        glm::vec3 playerPos = playerTrans.Position;
-        glm::vec3 healthPos = rigidbody.Transform.Position;
-        
-        float distance = glm::distance(healthPos, playerPos);
-        
+
         if (item.PickingUp)
-        {
-            glm::vec3 vel = glm::normalize(playerPos - healthPos) * (300.f + 100 * item.PickupTimer);
-            rigidbody.Velocity = iw::lerp(rigidbody.Velocity, vel, iw::FixedTime() * (10 + item.PickupTimer));
-            item.PickupTimer += iw::FixedTime();
-        
-            if (distance < 5)
+        {        
+            if (glm::distance(playerPos, rigidbody.Transform.Position) < 5)
             {
                 if (item.OnPickUp) {
                     item.OnPickUp();
@@ -50,18 +40,8 @@ void ItemSystem::Update()
                     event.Parameters["Sequential"] = sequential;
                     Bus->push<PlaySound_Event>(event);
                 }
-        
-                else
-                {
-                    LOG_WARNING << "Picked up item with no action!";
-                }
 
                 entities_defer().destroy(entity);
-            }
-        
-            else if (distance < 12)
-            {
-                rigidbody.Transform.Scale = iw::lerp(rigidbody.Transform.Scale, glm::vec3(1/3.f), 1 - distance / 12);
             }
         }
     }
@@ -69,45 +49,46 @@ void ItemSystem::Update()
 
 void ItemSystem::FixedUpdate()
 {
-    glm::vec3 playerPos = m_player.get<iw::Transform>().Position;
-    
     for (auto [entity, rigidbody, item] : entities().query<iw::Rigidbody, Item>().with_entity())
     {
-        if (item.ActivateTimer > 0.f) {
-            item.ActivateTimer -= iw::FixedTime();
-            return;
+        if (   item.LifeTimer > 0.f
+            && item.LifeTimer < 1.f)
+        {
+            rigidbody.Transform.Scale = iw::lerp(rigidbody.Transform.Scale, glm::vec3(0.f), 1 - item.LifeTimer);
         }
-        
-        glm::vec3 healthPos = rigidbody.Transform.Position;
-        
-        float distance = glm::distance(healthPos, playerPos);
-        
+
+        glm::vec3 dif = m_player.get<iw::Transform>().Position - rigidbody.Transform.Position;
+        float distance = glm::length(dif);
+
         if (item.PickingUp)
         {
-            glm::vec3 vel = glm::normalize(playerPos - healthPos) * (300.f + 100 * item.PickupTimer);
-            rigidbody.Velocity = iw::lerp(rigidbody.Velocity, vel, iw::FixedTime() * (10 + item.PickupTimer));
             item.PickupTimer += iw::FixedTime();
-        
+
+
+            glm::vec3 vel = glm::normalize(dif) * (300.f + 100 * item.PickupTimer);
+            rigidbody.Velocity = iw::lerp(rigidbody.Velocity, vel, iw::FixedTime() * (10 + item.PickupTimer));
+
             if (distance < 12)
             {
-                rigidbody.Transform.Scale = iw::lerp(rigidbody.Transform.Scale, glm::vec3(1/3.f), 1 - distance / 12);
+                rigidbody.Transform.Scale = iw::lerp(rigidbody.Transform.Scale, glm::vec3(1 / 3.f), 1 - distance / 12);
             }
         }
-        
-        else if (!item.PickingUp && distance < item.PickUpRadius)
+
+        else if (distance < item.PickUpRadius)
         {
             item.PickingUp = true;
         }
-        
+
         else if (item.MoveTimer > item.MoveTime)
         {
             rigidbody.Velocity = glm::vec3(0.f);
         }
         
         else {
+            item.MoveTimer += iw::DeltaTime();
+
             rigidbody.Velocity        = iw::lerp(rigidbody.Velocity,        glm::vec3(0.f), item.MoveTimer / item.MoveTime);
             rigidbody.AngularVelocity = iw::lerp(rigidbody.AngularVelocity, glm::vec3(0.f), item.MoveTimer / item.MoveTime);
-            item.MoveTimer += iw::FixedTime();
         }
     }
 }
@@ -189,7 +170,6 @@ entity ItemSystem::MakeItem(
     item.Type          = config.Item;
     item.ActivateTimer = config.ActivateDelay;
     item.OnPickUp      = config.OnPickup;
-    item.DieWithTime   = config.DieWithTime;
 
     return entity;
 }
@@ -234,6 +214,7 @@ entity ItemSystem::MakePlayerCore(const SpawnItem_Config& config)
     
     item.MoveTime = 5.f;
     item.PickUpRadius = 30;
+    item.LifeTimer = -1; // never die
 
     return entity;
 }

@@ -4,11 +4,13 @@
 
 void ProjectileSystem::Update()
 {
+	command_buffer to_delete(&entities());
+
 	for (auto [entity, transform, projectile] : entities().query<iw::Transform, Projectile>().with_entity())
 	{
 		if (glm::distance2(transform.Position, glm::vec3(200.f, 200.f, 0.f)) > 400 * 400)
 		{
-			entities_defer().destroy(entity);
+			to_delete.destroy(entity);
 		}
 
 		else
@@ -17,10 +19,12 @@ void ProjectileSystem::Update()
 			projectile.Life -= iw::DeltaTime();
 			if (projectile.Life <= 0.f)
 			{
-				//entities_defer().destroy(entity);
+				to_delete.destroy(entity);
 			}
 		}
 	}
+
+	to_delete.execute();
 
 	for (auto components : entities().query<iw::Transform, iw::Rigidbody, Projectile, Linear_Projectile>().with_entity())
 	{
@@ -168,7 +172,8 @@ void ProjectileSystem::Update()
 
 				//LOG_INFO << shot.x << ", " << shot.y;
 
-				Bus->push<SpawnProjectile_Event>(shot, split.Split + 1);
+				int depth = split.Split + 1;
+				Bus->push<SpawnProjectile_Event>(shot, depth);
 			}
 		}
 
@@ -301,7 +306,7 @@ void ProjectileSystem::Update()
 		
 		if (hit.HasContact)
 		{
-			if (bolt.B)
+			if (bolt.B.is_alive())
 			{
 				if (!::GetPhysicsComponent(bolt.B)->Collider)
 				{
