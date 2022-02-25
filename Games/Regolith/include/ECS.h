@@ -380,8 +380,8 @@ struct entity_storage
 		entity_handle handle,
 		bool destroy_components = true)
 	{
-		assert(handle.m_archetype == m_archetype.m_hash);
-		assert(handle.m_version   == m_entities.at(handle.m_index).m_version);
+		assert(handle.m_archetype == m_archetype.m_hash                    && "entity_storage::destroy_entity failed, archetype mismatch");
+		assert(handle.m_version == m_entities.at(handle.m_index).m_version && "entity_storage::destroy_entity failed, version mismatch");
 
 		entity_data& data = m_entities.at(handle.m_index);
 		
@@ -405,6 +405,7 @@ struct entity_storage
 	bool is_entity_alive(
 		entity_handle handle)
 	{
+		assert(handle.m_archetype == m_archetype.m_hash                    && "entity_storage::is_entity_alive failed, archetype mismatch");
 		return handle.m_version == m_entities.at(handle.m_index).m_version;
 	}
 
@@ -426,13 +427,16 @@ struct entity_storage
 	}
 
 	entity_handle move_entity(
-		entity_handle old_entity,
+		entity_handle handle,
 		entity_storage& new_store)
 	{
-		entity_handle new_entity = new_store.create_entity(old_entity.m_version + 1);
+		assert(handle.m_archetype == m_archetype.m_hash                    && "entity_storage::move_entity failed, archetype mismatch");
+		assert(handle.m_version == m_entities.at(handle.m_index).m_version && "entity_storage::move_entity failed, version mismatch");
 
-		void* old_data =           m_entities.at(old_entity.m_index).m_addr;
-		void* new_data = new_store.m_entities.at(new_entity.m_index).m_addr;
+		entity_handle new_handle = new_store.create_entity(handle.m_version + 1);
+
+		void* old_data =           m_entities.at(    handle.m_index).m_addr;
+		void* new_data = new_store.m_entities.at(new_handle.m_index).m_addr;
 
 		int old_length =           m_archetype.m_components.size();
 		int new_length = new_store.m_archetype.m_components.size();
@@ -449,14 +453,14 @@ struct entity_storage
 			if (old_component.m_hash == new_component.m_hash)
 			{
 				old_component.m_move(
-					offset_raw_pointer(old_data, old_component),
-					offset_raw_pointer(new_data, new_component)
+					offset_raw_pointer(new_data, new_component),
+					offset_raw_pointer(old_data, old_component)
 				);
 			}
 		}
 
-		destroy_entity(old_entity, false);
-		return new_entity;
+		destroy_entity(handle, false);
+		return new_handle;
 	}
 
 	void set_component(
@@ -464,6 +468,9 @@ struct entity_storage
 		const component& component,
 		void* data)
 	{
+		assert(handle.m_archetype == m_archetype.m_hash                    && "entity_storage::set_component failed, archetype mismatch");
+		assert(handle.m_version == m_entities.at(handle.m_index).m_version && "entity_storage::set_component failed, version mismatch");
+
 		if (data)
 		{
 			component.m_move(get_raw_pointer(handle, component), data);
@@ -474,6 +481,9 @@ struct entity_storage
 		entity_handle handle,
 		const component& component)
 	{
+		assert(handle.m_archetype == m_archetype.m_hash                    && "entity_storage::get_raw_pointer failed, archetype mismatch");
+		assert(handle.m_version == m_entities.at(handle.m_index).m_version && "entity_storage::get_raw_pointer failed, version mismatch");
+
 		return offset_raw_pointer(m_entities.at(handle.m_index).m_addr, component);
 	}
 
@@ -539,7 +549,7 @@ struct entity
 	}
 
 	template<typename _t>
-	entity& remove(entity_handle handle)
+	entity& remove()
 	{
 		assert(m_manager && "entity::remove failed, no manager");
 		*this = m_manager->remove<_t>(m_handle);

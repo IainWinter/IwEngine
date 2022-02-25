@@ -29,18 +29,15 @@ void CorePixelsSystem::Update()
 
 		if (dead)
 		{
-			if (entity.has<Player>())
+ 			if (entity.has<Player>())
 			{
-				for (int index : core.ActiveIndices)
+				while (core.ActiveIndices.size() > 0)
 				{
-					RemoveCorePixel(entity, index);
+					RemoveCorePixel(entity, *core.ActiveIndices.begin());
 				}
 			}
 
 			Bus->push<CoreExploded_Event>(entity);
-
-			// this needs to remove the behaviour components from the entity?
-			//Space.QueueEntity(handle, iw::func_Destroy);
 		}
 
 		// if a core peice isnt touching a regular peice is dies

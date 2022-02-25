@@ -12,6 +12,7 @@ int Game_Layer::Initialize()
 	recorder_s   = new Recording_System (sand);
 
 	PushSystem<PlayerLaserTankSystem>(sand_ui_laserCharge);
+	PushSystem<PlayerSystem>         (sand);
 	PushSystem<EnemySystem>          (sand);
 	PushSystem<CorePixelsSystem>     (sand);
 	PushSystem<TileSplitSystem>      (sand);
@@ -24,7 +25,6 @@ int Game_Layer::Initialize()
 	PushSystem<KeepInWorldSystem>    ();
 	PushSystem<Upgrade_System>       ();
 	PushSystem<ScoreSystem>          ();
-	PushSystem<PlayerSystem>         (sand);
 
 	Console->AddHandler(
 		[=](const iw::Command& command)
@@ -72,7 +72,7 @@ bool Game_Layer::On(iw::ActionEvent& e)
 		{
 			LOG_TRACE << "DESTROYED_PLAYER";
 
-			for(iw::ISystem* s : temp_GetSystems())
+			for (iw::ISystem* s : temp_GetSystems())
 			{
 				if (   s == projectile_s // to keep projs moving for a second after death
 					|| s == recorder_s)  // to grab from layer in App
@@ -83,7 +83,9 @@ bool Game_Layer::On(iw::ActionEvent& e)
 				DestroySystem(s);
 			}
 
-			Console->QueueCommand("set-state post");
+			Task->delay(.5f, [=]() {
+				Console->QueueCommand("set-state post");
+			});
 
 			// I think that the animation will look better in UI land instead of the sand
 			// ahh do need to keep the sand alive for a little for the projectiles tho

@@ -61,7 +61,7 @@ private:
 		config.TargetLocationX = target_x;
 		config.TargetLocationY = target_y;
 
-		std::tie(config.TargetEntity) = entities().query<Player>().only_entity().first();
+       		std::tie(config.TargetEntity) = entities().query<Player>().only_entity().first();
 
 		config.EnemyType = iw::choose(std::vector<std::pair<EnemyType, float>>{
 			{ FIGHTER, 100 },

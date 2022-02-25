@@ -262,8 +262,16 @@ bool PlayerSystem::On(iw::ActionEvent& e)
 			CoreExploded_Event& event = e.as<CoreExploded_Event>();
 			if (event.Entity.has<Player>())
 			{
-				Task->delay(.2f, [=]() { Bus->push<iw::ActionEvent>(iw::ActionEventType::SINGLE, DESTROYED_PLAYER); });
-				entities_defer().destroy(event.Entity);
+				Bus->push<iw::ActionEvent>(iw::ActionEventType::SINGLE, DESTROYED_PLAYER);
+				//entities_defer().destroy(event.Entity);
+  				
+				/*Task->defer([=]() {
+				});*/
+
+				//entities_defer().destroy(event.Entity);
+
+				//entities_defer().remove<CorePixels>(event.Entity);
+				//entities_defer().remove<Player>(event.Entity);
 			}
 
 			break;
