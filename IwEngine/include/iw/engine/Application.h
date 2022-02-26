@@ -64,6 +64,8 @@ namespace Engine {
 			Manifold& manifold,
 			scalar dt);
 
+		virtual void AfterFrame() {};
+
 		void Stop()
 		{
 			m_running = false;

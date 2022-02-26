@@ -36,8 +36,8 @@ void ExplosionSystem::SpawnExplosion(SpawnExplosion_Config& config)
 			ShotInfo shot;
 			shot.projectile = ProjectileType::BULLET;
 			shot.life = spark.life;
-			shot.dx = spark.dx * 1.2f;
-			shot.dy = spark.dy * 1.2f;
+			shot.dx = spark.dx;
+			shot.dy = spark.dy;
 			shot.x = px;
 			shot.y = py;
 			Bus->push<SpawnProjectile_Event>(shot);

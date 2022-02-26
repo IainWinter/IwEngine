@@ -245,4 +245,9 @@ public:
 	}
 
 	int Initialize(iw::InitOptions& options) override;
+
+	void AfterFrame() override
+	{
+		entities_defer().execute();
+	}
 };

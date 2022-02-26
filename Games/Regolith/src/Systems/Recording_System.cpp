@@ -19,6 +19,13 @@ void Recording_System::RecordFrame(
 
 	int i_offset = m_frameSize*m_frameSize * m_frameToDraw;
 
+	if (   x_min < 0 || x_max >= 400
+		|| y_min < 0 || y_max >= 400)
+	{
+		// if the recording is out of bounds of the texture
+		return;
+	}
+
 	for (int y = 0, yf = y_min; yf < y_max; y++, yf++)
 	for (int x = 0, xf = x_min; xf < x_max; x++, xf++)
 	{

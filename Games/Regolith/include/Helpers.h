@@ -318,8 +318,8 @@ LightningHitInfo DrawLightning(
 {
 	// pick points that are on surface
 
-	iw::CollisionObject* originObj = GetPhysicsComponent(config.A);
-	iw::CollisionObject* targetObj = GetPhysicsComponent(config.B);
+	iw::CollisionObject* originObj = config.A.is_alive() ? GetPhysicsComponent(config.A) : nullptr;
+	iw::CollisionObject* targetObj = config.B.is_alive() ? GetPhysicsComponent(config.B) : nullptr;
 
 	if (!originObj || !targetObj)
 	{

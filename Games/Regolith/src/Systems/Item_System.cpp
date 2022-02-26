@@ -22,9 +22,11 @@ void ItemSystem::Update()
             }
         }
 
+        float distance = glm::distance(playerPos, rigidbody.Transform.Position);
+
         if (item.PickingUp)
         {        
-            if (glm::distance(playerPos, rigidbody.Transform.Position) < 5)
+            if (distance < 5)
             {
                 if (item.OnPickUp) {
                     item.OnPickUp();
@@ -43,6 +45,12 @@ void ItemSystem::Update()
 
                 entities_defer().destroy(entity);
             }
+        }
+
+        else
+        if (distance < item.PickUpRadius)
+        {
+            item.PickingUp = true;
         }
     }
 }
@@ -72,11 +80,6 @@ void ItemSystem::FixedUpdate()
             {
                 rigidbody.Transform.Scale = iw::lerp(rigidbody.Transform.Scale, glm::vec3(1 / 3.f), 1 - distance / 12);
             }
-        }
-
-        else if (distance < item.PickUpRadius)
-        {
-            item.PickingUp = true;
         }
 
         else if (item.MoveTimer > item.MoveTime)

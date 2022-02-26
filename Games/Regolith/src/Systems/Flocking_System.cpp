@@ -4,7 +4,7 @@ void FlockingSystem::FixedUpdate()
 {
 	for (auto [e1, transform, rigidbody, flocker] : entities().query<iw::Transform, iw::Rigidbody, Flocker>().with_entity())
 	{
-		if (!flocker.Active) return;
+		if (!flocker.Active) continue;
 		
 		glm::vec3 avgAway(0.f);
 		glm::vec3 avgCenter(0.f);
@@ -13,12 +13,12 @@ void FlockingSystem::FixedUpdate()
 		
 		for (auto [e2, transform2, rigidbody2] : entities().query<iw::Transform, iw::Rigidbody, Flocker>().only<iw::Transform, iw::Rigidbody>().with_entity())
 		{
-			if (e1 == e2) return;
+			if (e1 == e2) continue;
 		
 			glm::vec3 dif = transform.Position - transform2.Position;
 			float distance = glm::length(dif);
 		
-			if (distance > 200) return;
+			if (distance > 200) continue;
 		
 			// need two scaling functions that allows center to have more effect at long rage and away more close
 		

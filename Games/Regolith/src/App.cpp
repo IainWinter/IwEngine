@@ -33,6 +33,23 @@ struct Timer
 #include "App.h"
 #include <combaseapi.h>
 
+struct test_handler
+{
+	const char* m_name;
+
+	test_handler(const char* name) : m_name(name) {}
+
+	void on(int event)
+	{
+		printf("\n%s -> %d", m_name, event);
+	}
+
+	void on(float event)
+	{
+		printf("\n%s -> %f", m_name, event);
+	}
+};
+
 int App::Initialize(
 	iw::InitOptions& options)
 {
@@ -46,6 +63,27 @@ int App::Initialize(
 	int err = Application::Initialize(options);
 	if (err) return err;
 
+	test_handler handler1("test1");
+	test_handler handler2("test2");
+	test_handler handler3("test3");
+
+	events().handle<int>(&handler1).only_if([](int i) {return i > 10; });
+	events().handle<int>(&handler2).only_if([](int i) {return i > 9; });
+	events().handle<int>(&handler3).only_if([](int i) {return i > 15; });
+	events().send(10);
+	events().send(20);
+	events().send(30);
+
+	events().handle<float>(&handler1);
+	events().send(1.4f);
+
+	events_defer().queue(50);
+	events_defer().queue(1.2f);
+
+	events_defer().execute();
+
+	events().unhandle(&handler1);
+	
 	//// test
 	//entities().create<iw::Transform, iw::Rigidbody>()
 	//	.set<iw::Transform>();
@@ -308,7 +346,7 @@ int App::Initialize(
 		return false;
 	});
 
-	bool log = false;
+	/*bool log = false;
 
 	Task->coroutine(
 		[log]()
@@ -374,7 +412,7 @@ int App::Initialize(
 
 			return false;
 		}
-	);
+	);*/
 
 	return 0;
 }

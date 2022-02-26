@@ -36,6 +36,7 @@ private:
 	ProjectileSystem* projectile_s;
 	ItemSystem*       item_s;
 	Recording_System* recorder_s;
+	TileSplitSystem*  tile_s;
 
 public:
 	Game_Layer(
@@ -48,6 +49,7 @@ public:
 		, projectile_s        (nullptr)
 		, item_s              (nullptr)
 		, recorder_s          (nullptr)
+		, tile_s              (nullptr)
 	{}
 
 	iw::TextureAtlas& GetDeathMovie()

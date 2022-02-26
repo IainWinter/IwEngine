@@ -31,5 +31,4 @@ struct EnemySystem : iw::SystemBase
 
 private:
 	void SpawnEnemy(SpawnEnemy_Config& config);
-	void DestroyEnemy(entity enemy);
 };

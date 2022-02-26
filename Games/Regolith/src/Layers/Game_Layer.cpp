@@ -10,14 +10,15 @@ int Game_Layer::Initialize()
 	projectile_s = new ProjectileSystem (sand);
 	item_s       = new ItemSystem       (sand);
 	recorder_s   = new Recording_System (sand);
+	tile_s       = new TileSplitSystem  (sand);
 
 	PushSystem<PlayerLaserTankSystem>(sand_ui_laserCharge);
 	PushSystem<PlayerSystem>         (sand);
 	PushSystem<EnemySystem>          (sand);
 	PushSystem<CorePixelsSystem>     (sand);
-	PushSystem<TileSplitSystem>      (sand);
 	PushSystem<ExplosionSystem>      (sand);
 	PushSystem<WorldSystem>          (sand);
+	PushSystem(tile_s);
 	PushSystem(item_s);
 	PushSystem(projectile_s);
 	PushSystem(recorder_s);
@@ -75,13 +76,16 @@ bool Game_Layer::On(iw::ActionEvent& e)
 			for (iw::ISystem* s : temp_GetSystems())
 			{
 				if (   s == projectile_s // to keep projs moving for a second after death
-					|| s == recorder_s)  // to grab from layer in App
+					|| s == recorder_s
+					|| s == tile_s)  // to grab from layer in App
 				{
 					continue;
 				}
 
 				DestroySystem(s);
 			}
+
+			PopSystem(tile_s);
 
 			Task->delay(.5f, [=]() {
 				Console->QueueCommand("set-state post");

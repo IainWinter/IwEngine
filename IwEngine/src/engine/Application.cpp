@@ -257,11 +257,6 @@ namespace Engine {
 				}
 
 				{
-					LOG_TIME_SCOPE("Coroutines");
-					(*Task).step_coroutines();
-				}
-
-				{
 					LOG_TIME_SCOPE("Event Bus");
 					(*Bus).publish();
 				}
@@ -270,6 +265,15 @@ namespace Engine {
 					LOG_TIME_SCOPE("Console");
 					(*Console).ExecuteQueue();
 				}
+
+				{
+					LOG_TIME_SCOPE("Coroutines");
+					(*Task).step_coroutines();
+				}
+
+				// replace with entities_defer().execute();
+
+				AfterFrame();
 
 				{
 					LOG_TIME_SCOPE("Entity queue");

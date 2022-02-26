@@ -38,6 +38,7 @@ void CorePixelsSystem::Update()
 			}
 
 			Bus->push<CoreExploded_Event>(entity);
+			entities_defer().destroy(entity);
 		}
 
 		// if a core peice isnt touching a regular peice is dies

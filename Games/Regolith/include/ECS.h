@@ -1094,9 +1094,14 @@ struct command_buffer
 		{
 			if (c->m_type == entity_command::DESTROY)
 			{
-				if (((command_destroy*)c)->m_handle == entity.m_handle)
+				command_destroy* cd = (command_destroy*)c;
+
+				if (cd->m_handle == entity.m_handle)
 				{
-					__debugbreak();
+					printf("\n[Entity] Tried to double queue a delete");
+					printf("\n[Entity]\t 1. Index: %d from %s", cd->   m_handle.m_index, cd->m_where);
+					printf("\n[Entity]\t 2. Index: %d from %s", entity.m_handle.m_index, m_where_current);
+					//__debugbreak();
 					return;
 				}
 			}
@@ -1206,14 +1211,37 @@ inline entity& entity::on_add    (const std::function<void(entity, const compone
 inline entity& entity::on_remove (const std::function<void(entity)>                  & func) { assert(m_manager && "entity::on_remove failed, no manager");  m_manager->on_remove (m_handle, func); return *this; }
 inline entity& entity::on_remove (const std::function<void(entity, const component&)>& func) { assert(m_manager && "entity::on_remove failed, no manager");  m_manager->on_remove (m_handle, func); return *this; }
 
-entity_manager& entities();
-command_buffer& entities_defer(const char* where_from = nullptr);
+/*
+	If you want to use singletons, note dll bounds
+*/
+#define USE_SINGLETONS
 
-#define LOG_DEFER
+#ifdef USE_SINGLETONS
+	inline
+	entity_manager& entities()
+	{
+		static entity_manager manager;
+		return manager;
+	}
 
-#ifdef LOG_DEFER
-#	define iw_line_as_string(x) iw_as_string(x)
-#	define iw_as_string(x) #x
+	inline
+	command_buffer& entities_defer(const char* where_from)
+	{
+		static command_buffer buffer(&entities());
+		buffer.m_where_current = where_from;
+		return buffer;
+	}
 
-#	define entities_defer() entities_defer(__FUNCTION__ " " iw_line_as_string(__LINE__))
+	/*
+		If you want to log the location of the dispatcher
+	*/
+#	define LOG_DEFER
+
+#	ifdef LOG_DEFER
+#		ifndef iw_as_string
+#			define iw_line_as_string(x) iw_as_string(x)
+#			define iw_as_string(x) #x
+#		endif
+#		define entities_defer() entities_defer(__FUNCTION__ " " iw_line_as_string(__LINE__))
+#	endif
 #endif

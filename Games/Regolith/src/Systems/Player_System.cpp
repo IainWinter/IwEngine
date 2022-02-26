@@ -51,11 +51,6 @@ int PlayerSystem::Initialize()
 
 void PlayerSystem::Destroy()
 {
-	if (m_player.is_alive())
-	{
-		m_player.destroy();
-	}
-
 	Console->RemoveHandler(m_handle);
 }
 
@@ -262,11 +257,9 @@ bool PlayerSystem::On(iw::ActionEvent& e)
 			CoreExploded_Event& event = e.as<CoreExploded_Event>();
 			if (event.Entity.has<Player>())
 			{
-				Bus->push<iw::ActionEvent>(iw::ActionEventType::SINGLE, DESTROYED_PLAYER);
 				//entities_defer().destroy(event.Entity);
   				
-				/*Task->defer([=]() {
-				});*/
+				Bus->push<iw::ActionEvent>(iw::ActionEventType::SINGLE, DESTROYED_PLAYER);
 
 				//entities_defer().destroy(event.Entity);
 

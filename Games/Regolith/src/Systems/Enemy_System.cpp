@@ -69,7 +69,7 @@ void EnemySystem::FixedUpdate()
 				config.ExplosionRadius = 10;
 		
 				Bus->push<SpawnExplosion_Event>(config);
-				entities_defer().destroy(entity);
+				//entities_defer().destroy(entity);
 			}
 		}
 	}
@@ -147,16 +147,6 @@ bool EnemySystem::On(iw::ActionEvent& e)
 		case SPAWN_ENEMY:
 		{
 			SpawnEnemy(e.as<SpawnEnemy_Event>().Config);
-			break;
-		}
-		case CORE_EXPLODED: 
-		{
-			entity entity = e.as<CoreExploded_Event>().Entity;
-			if (entity.has<Enemy>())
-			{
-				DestroyEnemy(entity);
-			}
-
 			break;
 		}
 	}
@@ -283,45 +273,45 @@ void EnemySystem::SpawnEnemy(SpawnEnemy_Config& config)
 		}
 	}
 
-	Bus->push<CreatedCoreTile_Event>(entity);
-}
+	entity.on_destroy(
+		[=](::entity entity)
+		{
+			std::vector<std::pair<ItemType, float>> item_weights {
+				{ ItemType::HEALTH,         50 },
+				{ ItemType::LASER_CHARGE,   50 },
+				{ ItemType::WEAPON_MINIGUN, 3 },
+				{ ItemType::WEAPON_BOLTZ,   2 },
+				{ ItemType::WEAPON_WATTZ,   2 },
+			};
 
-void EnemySystem::DestroyEnemy(entity entity)
-{
-	std::vector<std::pair<ItemType, float>> item_weights {
-		{ ItemType::HEALTH,         50 },
-		{ ItemType::LASER_CHARGE,   50 },
-		{ ItemType::WEAPON_MINIGUN, 3 },
-		{ ItemType::WEAPON_BOLTZ,   2 },
-		{ ItemType::WEAPON_WATTZ,   2 },
-	};
+			iw::Transform& transform = entity.get<iw::Transform>();
 
-	iw::Transform& transform = entity.get<iw::Transform>();
+			SpawnItem_Config config;
+			config.Item = iw::choose(item_weights);
+			config.X = transform.Position.x;
+			config.Y = transform.Position.y;
+			config.AngularSpeed = iw::randf() * 25 + 10;
 
-	SpawnItem_Config config;
-	config.Item = iw::choose(item_weights);
-	config.X = transform.Position.x;
-	config.Y = transform.Position.y;
-	config.AngularSpeed = iw::randf() * 25 + 10;
-
-	switch (config.Item)
-	{
-		case ItemType::HEALTH: 
-		case ItemType::LASER_CHARGE:   config.Amount = iw::randi(5) + 1; break;
+			switch (config.Item)
+			{
+				case ItemType::HEALTH: 
+				case ItemType::LASER_CHARGE:   config.Amount = iw::randi(5) + 1; break;
 		
-		case ItemType::WEAPON_WATTZ:
-		case ItemType::WEAPON_BOLTZ:
-		case ItemType::WEAPON_MINIGUN: config.Amount = 1;
-	}
+				case ItemType::WEAPON_WATTZ:
+				case ItemType::WEAPON_BOLTZ:
+				case ItemType::WEAPON_MINIGUN: config.Amount = 1;
+			}
 
-	Bus->push<SpawnItem_Event>(config);
+			Bus->push<SpawnItem_Event>(config);
 
-	// spawn copy of just display
-	::entity tileCopy = MakeTile(entity.get<iw::Tile>().m_sprite, { make_component<iw::MeshCollider2>() });
-	AddEntityToPhysics(tileCopy, Physics);
+			// spawn copy of just display
+			::entity tileCopy = MakeTile(entity.get<iw::Tile>().m_sprite, { make_component<iw::MeshCollider2>() });
+			AddEntityToPhysics(tileCopy, Physics);
 
-	tileCopy.set<iw::Transform>(transform);
-	tileCopy.get<iw::Rigidbody>().SetTransform(&transform);
+			tileCopy.set<iw::Transform>(transform);
+			tileCopy.get<iw::Rigidbody>().SetTransform(&transform);
+		}
+	);
 
-	entities_defer().destroy(entity);
+	Bus->push<CreatedCoreTile_Event>(entity);
 }
